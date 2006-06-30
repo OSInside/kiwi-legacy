@@ -1,0 +1,42 @@
+\chapter{Server Structure}
+\label{server}
+\minitoc
+
+The retail project is designed to implement a complete operating system
+and management structure for administering Linux-based cash registers (CR).
+The CRs are implemented in a variety of hardware forms, with the main difference
+being whether they are equipped with hard drives (diskless or diskful).
+Both options must be supported.
+This section describes the required infrastructure --- server, server services,
+and management programs.
+
+\subsection{TFTP}
+\label{tftp}
+The TFTP service on the branch server is structured as described above with boot,
+image, CR, and upload directories. There is a PXE default configuration with which all
+the CRs first load the same initial initrd and the same kernel.
+
+\subsubsection{TFTP Server Structure}
+The TFTP server directory structure is divided into the following main areas under
+the \textbf{tftp\_root}\footnote{~SLRS uses the directory \textit{/tftpboot} as \textit{<tftp\_root>} path
+on the branch server.}~ directory:
+
+\begin{itemize}
+\item \textbf{Image configurations}\\
+      The \textit{/tftpboot/CR/}~ directory contains the various \textit{config.$<$MAC Address$>$}
+      image configuration files.
+\item \textbf{Configuration files}\\
+      The \textit{/tftpboot/CR/$<$MAC Address$>$/}~ directory contains the various system configuration
+      files, such as XF86config.
+\item \textbf{Boot files}\\
+      The \textit{/tftpboot/boot/}~ directory is where the initrd.gz, the kernel to boot, and the
+      PXE loader pxelinux.0 are kept.
+\item \textbf{PXE configuration file}\\
+      The \textit{/tftpboot/boot/pxelinux.cfg}~ directory is where the PXE configuration file is kept.
+\item \textbf{Image files and checksums}\\
+      The \textit{/tftpboot/image/}~ directory is where all the image files and their checksums are kept.
+\item \textbf{Upload area}\\
+      The directory \textit{/tftpboot/upload/}~ is the directory into which the
+      \textit{hwtype.$<$MAC Address$>$}
+      files for registering new cash registers are uploaded.
+\end{itemize}

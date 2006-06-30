@@ -1,0 +1,72 @@
+\chapter{Introduction}
+
+The OpenSuSE KIWI Image System provides a complete operating system
+image solution for Linux supported hardware platforms as well as
+for virtualisation systems like Xen. The KIWI architecture was designed
+as a two level system. The first stage, based on a valid
+\textbf{software package source}, creates a so called \textbf{physical extend}
+according to the provided image description. The second stage creates from
+a required physical extend an operating system image. The result of the
+second stage is called a \textbf{logical extend} or short an image.
+
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.5]{pictures/intro.eps}
+\caption{Image Serving Architecture}
+\label{fig:architecture}
+\end{figure}
+
+Because this document contains conceptual information about an image system,
+it is important to understand what an operating system image is all about.
+A normal installation process is starting from a given installation source
+and installs single pieces of software until the system is complete. During
+this process there may be manual user intervention required. However an
+operating system image represents an already completed \textit{installation}
+encapsulated as a file and optionally includes the configuration for a
+specific task. Such an operating system starts working as soon as the
+image has been brought to a system storage device no matter if this is a
+volatile or non volatile storage. The process of creating an image takes
+place without user interaction.
+This means all requirements of the encapsulated system has to be fulfilled
+before the image is created. According to this the so called
+\textbf{image description tree} stores all the information needed to
+create an image.
+
+%\newpage
+
+\section{What is KIWI good for}
+The solution introduced in this document covers an implementation
+for the following two major topics:
+
+\begin{itemize}
+	\item How to create physical and logical extends
+	\item How to serve/activate a logical extend, an image
+\end{itemize}
+
+As already said a physical extend requires a valid software package
+source. This is the location where KIWI can access the software to
+build up a system. Software exists as packages and packages exists
+in different formats. The amount of all packages are organized in
+a package tree including some meta data, this is called a repository.
+With the KIWI project I want to be free of choice what kind of
+package repository should be used. To achieve this goal this project
+will make use of the \textbf{smart} package manager which is very
+fast and can handle the most important repository structures.
+Information on smart can be found here:
+
+\begin{itemize}
+	\item http://labix.org/smart
+\end{itemize}
+
+\subsection{Supported image types}
+To create a logical extend it is necessary to create a filesystem
+the operating system data can be stored in. The image type corresponds
+to the selected filesystem. Supported image types are:
+
+\begin{itemize}
+	\item CRAMFS
+	\item EXT2 / EXT3
+	\item ReiserFS
+	\item Special Boot image for image installation via network
+	\item Special Xen image based on ReiserFS and Xen kernel
+\end{itemize}

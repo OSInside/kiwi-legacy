@@ -1,0 +1,69 @@
+<directory>
+	<!-- The image tag is used for setting up the image -->
+	<image name="initrd-netboot"/>
+	<image type="cramfs"/>
+	<image size="55M"/>
+	<image compressed="yes"/>
+	<image netdrivers="pcnet32.ko,mii.ko,tulip/tulip.ko,eepro100.ko,e100.ko,8139too.ko"/>
+	<image drivers="drivers/ide/*,net/packet/*,fs/ext3/*,fs/jbd/*,fs/fat/*,fs/vfat/*,fs/reiserfs/*,net/ipv6/*,drivers/scsi/sd_mod.ko,drivers/scsi/scsi_mod.ko"/>
+	<!-- The type tag defines the smart channel type -->
+    <entry type="yast2"/>
+	<!-- The source tag defines the smart channel -->
+    <!-- <entry source="/image/CDs/full-i386"/> -->
+	<entry source="/mounts/dist/install/SLP/SUSE-10.1-DVD9-RC5/i386/DVD1"/>
+	<!-- <entry source="http://download.opensuse.org/distribution/SL-10.1/inst-source"/>-->
+	<!-- The following list builds the image package set -->
+    <entry name="filesystem"/>
+	<entry name="reiserfs"/>
+    <entry name="info"/>
+	<entry name="sysconfig"/>
+	<entry name="libzio"/>
+	<entry name="iproute2"/>
+	<entry name="gdbm"/>
+	<entry name="gawk"/>
+	<entry name="sysfsutils"/>
+    <entry name="devs"/>
+    <entry name="dhcpcd"/>
+    <entry name="glibc"/>
+    <entry name="mktemp"/>
+    <entry name="libgcc"/>
+    <entry name="coreutils"/>
+    <entry name="module-init-tools"/>
+	<entry name="bind-utils"/>
+	<entry name="libcom_err"/>
+    <entry name="e2fsprogs"/>
+    <entry name="ncurses"/>
+    <entry name="readline"/>
+    <entry name="zlib"/>
+	<entry name="bzip2"/>
+    <entry name="bash"/>
+    <entry name="pciutils"/>
+    <entry name="libattr"/>
+    <entry name="libacl"/>
+	<entry name="tcpd"/>
+    <entry name="pam"/>
+    <entry name="db"/>
+    <entry name="cracklib"/>
+    <entry name="libstdc++"/>
+    <entry name="file"/>
+    <entry name="atftp"/>
+    <entry name="fillup"/>
+	<entry name="insserv"/>
+	<entry name="net-tools"/>
+	<entry name="sed"/>
+	<entry name="findutils"/>
+	<entry name="grep"/>
+    <entry name="gzip"/>
+	<entry name="permissions"/>
+	<entry name="bind-libs"/>
+	<entry name="openssl"/>
+	<entry name="util-linux"/>
+	<entry name="hwinfo"/>
+	<entry name="netcfg"/>
+	<!-- The following list builds the initial base package set -->
+	<cpios name="filesystem"/>
+	<cpios name="glibc"/>
+	<cpios name="devs"/>
+    <cpios name="rpm"/>
+    <cpios name="smart"/>
+</directory>

@@ -1,0 +1,182 @@
+\index{KIWI images!creating|(}
+\chapter{Creating Operating System Images}
+\label{chapter:cropsysimg}
+\minitoc
+
+The creation of operating system images is based on image description
+trees. An image description contains all the files in a directory that
+are required to generate an image using the Perl-based image builder
+\textbf{kiwi.pl}. The directory to which the description files are
+written must contain a VERSION file with a three-part version number of
+the format:
+
+\begin{Command}{9cm}
+\textbf{Major}.\textbf{Minor}.\textbf{Release}
+\end{Command}
+
+\index{KIWI images!version numbers}
+\begin{itemize}
+\item For smaller image modifications that do not add or remove any
+      new packages, only the release number is incremented.
+      The \textbf{config.xml} file remains unchanged.
+\item For image changes that involve the addition or removal of packages
+      the minor number is incremented and the release number is reset.
+\item For image changes that change the size of the image file
+      the major number is incremented.
+\end{itemize}
+
+\section{Structure of the Image Description Tree}
+\index{KIWI images!tree structure}
+\label{imagetree}
+\begin{itemize}
+
+\item \textbf{\underline{VERSION}}\\
+      This file contains the version number of the image description tree,
+      for example, 1.1.2.
+\item \textbf{\underline{root}}\\
+      Subdirectory that contains special files, directories, and scripts for
+      adapting the image environment \textbf{after} the installation of all the
+      image packages. The entire directory is copied into the root of the
+      image tree using \textit{cp -a}.
+\item \textbf{\underline{config}}\\
+      Optional Subdirectory that contains Bash scripts that are called
+      after the installation of all the image packages, primarily in order
+      to remove the parts of a package that are not needed for the operating
+      system. The name of the Bash script must resemble the package name
+      listed in the config.xml
+\item \textbf{\underline{config.sh}}\\
+      Optional configuration script while creating the physical extend. This
+      script is called at the end of the installation but \textbf{before}
+      the package scripts have run. It is designed to configure the image
+      system, such as the activation or deactivation of certain services
+      (insserv). The call is not made until after the switch to the image
+      has been made with \textbf{chroot}.
+\item \textbf{\underline{image.sh}}\\
+      Optional configuration script while creating the logical extend.
+      This script is called at the beginning of the image creation process.
+      It is designed to clean-up the image system. Affected are all the
+      programs and files only needed while the physical extend exists.
+\item \textbf{\underline{config.xml}}\\
+      Configuration file that indicates the image type, base name,
+      options, and which packages make up the image. The structure of the
+	  file corresponds to the format
+
+      \begin{Command}{9cm}
+      <directory>\\
+      \hspace*{1cm}<\textbf{image} \textit{Key="Value"}/>\\
+      \hspace*{1cm}<\textbf{entry} type=\textit{"image-type"}/>\\
+      \hspace*{1cm}<entry source=\textit{"image-source"}/>\\
+      \hspace*{1cm}<entry name=\textit{"package-name"}/>\\
+      \hspace*{1cm}<\textbf{xenvm} name=\textit{"package-name"}/>\\
+      \hspace*{1cm}<\textbf{cpios} name=\textit{"package-name"}/>\\
+      </directory>
+	  \end{Command}
+
+      The config.xml file contains four major parts embedded into a
+      XML directory tag:
+
+      \begin{enumerate}
+          \item The \textbf{image} tag contains information needed to
+          create the logical extend. For this tag the following \textit{Keys}
+          are defined:
+          \begin{itemize}
+              \item \textbf{size}\\
+                    Image size as a number followed by  \textbf{M} or \textbf{G}
+                    standing for Megabyte or Gigabyte. \underline{Note:}
+                    \textit{kiwi} supports the feature extending the image size
+                    automatically to a calculated size, if the specified
+                    config size value is to small. If the config size value
+                    plus the additional size needed to build the image is more
+                    than 100MB, \textit{kiwi} will abort with an error message.
+                    Furthermore \textit{kiwi} will not reduce the image size
+                    automatically by design, because it must be possible to
+                    configure additional space, for example, if custom scripts
+                    are run.
+              \item \textbf{name}\\
+                    The image name indicates the base name of the image. It
+                    is automatically expanded using the version number and the
+                    date. The version number is extracted from the directory
+                    in which the description files for this image are located.
+              \item \textbf{type}\\
+                    The image type of the logical extend: \textbf{ext2},
+                    \textbf{ext3}, \textbf{cramfs}, \textbf{reiserfs}.
+                    Different formats are possible, if necessary.
+              \item \textbf{timezone}\\
+                    The time zone. The possible time zones are located in the
+                    directory \textit{/usr/share/zoneinfo}. For the image
+                    itself, only one time zone each is required. For this
+                    reason, the relative path to the time zone to use in the
+                    image is indicated after the \textbf{timezone} key, for
+                    example, \textbf{Europe/Berlin}. kiwi uses this information
+                    to extract the corresponding time zone from the timezone
+                    package and to store it as \textit{/etc/localtime} in the
+                    image.
+              \item \textbf{usbdrivers}\\
+                    Contains a comma-separated list of file names.
+                    The file names are interpreted as USB driver names and
+                    correspondingly captured if they are contained in the
+                    kernel tree.
+              \item \textbf{netdrivers}\\
+                    Contains a comma-separated list of file names. Every file is
+                    indicated relative to the directory
+                    \textit{/lib/modules/$<$Version$>$/kernel/drivers/net}.
+                    The names are interpreted as network drivers and captured if
+                    they are contained in the kernel tree.
+              \item \textbf{drivers}\\
+                    Contains a comma-separated list of file names. Every file is
+                    indicated relative to the directory
+                    \textit{/lib/modules/$<$Version$>$/kernel}
+                    The names are interpreted as general driver name and
+                    captured if they are contained in the kernel tree.
+              \item \textbf{keytable}\\
+                    Contains the name of the console keymap to use. The name
+                    corresponds to a map file stored below the path
+                    \textit{/usr/share/kbd/keymaps}. Furthermore, the variable
+                    \textit{KEYTABLE} within the file
+                    \textit{/etc/sysconfig/keyboard} will be set according
+                    to the keyboard mapping.
+          \end{itemize}
+          \item The \textbf{entry} tag contains at first the smart type of the
+                source repository, for example, \textbf{type=''yast2''} and next
+                the smart location of the source repository, for example,
+                \textbf{source=''/image/CDs/full-i386''}. Multiple source
+                statements are allowed. For information on
+                how to setup a smart source refer to
+                \textit{http://labix.org/smart}
+
+%\newpage
+		  \item The \textbf{xenvm} tag contains a list of package names
+                needed when this image is used in a Xen virtual machine.
+                The xenvm tag is only evaluated if the \textbf{--virtual xen}
+                option is specified while building the physical extend.
+          \item The \textbf{cpios} tag contains a list of package names
+                which have to be extracted first to build up the basic
+                image chroot system to allow applications like the package
+                manager to work within that logical extend.
+      \end{enumerate}
+
+\end{itemize}
+
+In addition all values entered as \textbf{image} tag of the config.xml
+file are stored in a file called \textbf{.profile}. The file is created
+before the execution of an image script like \textit{config.sh, image.sh}
+or a \textit{package script} and can then be sourced. The parameters
+of the config file are then available as variables in the
+script and can be processed appropriately. The script itself is called
+within the image environment, which means it
+is not possible to damage the host system with your script even if you
+are using absolute paths. Such a script should look like the following
+template:
+
+\begin{Command}{9cm}
+\textbf{\#!/bin/sh}\\
+\textbf{echo -n "}Image [$<$name$>$]...\textbf{"}\\
+\textbf{test -f /.profile \&\& . /.profile}\\
+\\
+... script code\\
+\\
+\textbf{echo done}
+\end{Command}
+
+The parameter \textbf{name} should be the name of the image to which this
+script belongs.

@@ -1,0 +1,73 @@
+\index{boot images|(}
+\index{CRs!booting|(}
+\chapter{The Boot Process of a Cash Register System}
+\label{CRbootprocess}
+To understand how to use the operating system images, a short
+description of the cash register system is useful. The
+following diagram shows the simplified boot process of a
+cash register system.
+
+\begin{figure}[h]
+\centering
+%\includegraphics[width=10cm]{pictures/crboot}
+\caption{Simplified Flow Chart of the Boot System}
+\end{figure}
+
+The most important point is to understand the cooperation between
+the initial boot image \textbf{initrd.gz} and the intrinsic cash register
+image. If the system is able to boot via a network, it will load the kernel
+and the compressed boot image from the network. The \textit{brain} of the
+boot image is the \textbf{linuxrc} script, which does all the
+stuff controlled by an image configuration file also obtained from the
+network. The major task is to download and activate the cash register
+image. The boot image is exchanged for the cash register image to be
+activated.
+
+Normally, only work with the cash register images and leave
+the boot image as it is delivered from SUSE.
+
+
+%\section{Short Overview}
+The following short overview describes the steps that take place when the cash register
+is booted to the image determined by its product ID:
+
+\begin{itemize}
+\item Via PXE network boot or boot manager (GRUB), the cash register boots the
+      initrd (initrd.gz) that it receives from the branch server. If no PXE
+      boot is possible, the cash register tries to boot from the hard
+      disk, if accessible.  
+\item Running \textbf{linuxrc} starts the process described below.
+      For a more detailed information, refer to Chapter \ref{section:bootcr}
+      on page \pageref{section:bootcr}.
+\end{itemize}
+
+\begin{enumerate}
+      \item The required file systems to receive system data are mounted.
+      \item The cash register hardware type is detected.
+      \item The cash register bios version is detected.
+      \item Network support is activated
+                        corresponding to the hardware type of the cash register.
+      \item The network interface is set up via DHCP.
+      \item The TFTP server address is acquired.
+      \item The configuration file \textbf{config.$<$MAC Address$>$}
+                        is loaded from the server directory
+            \textit{/tftpboot/CR} via TFTP or a new cash register
+                        is immediately registered.
+      \item The PART: line in the configuration file is analyzed.
+      \item The SYNC: line in the configuration file is evaluated.
+      \item Indicated images are downloaded with multicast TFTP.
+      \item Checksums are checked and download is repeated if necessary.
+      \item The CONF: line of the configuration file is evaluated.
+      \item All the user-land processes based on the boot image are terminated.
+      \item The cash register image is mounted.
+      \item The configuration files are copied
+            into the mounted cash register image.
+      \item The system switches to the mounted cash register image.
+      \item The boot image is unmounted.
+      \item The kernel initiates
+            the \textbf{init} process that starts processing the boot
+            scripts.
+\end{enumerate}
+
+\index{boot images|)}
+\index{CRs!booting|)}

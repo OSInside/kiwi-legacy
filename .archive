@@ -1,0 +1,19 @@
+#!/bin/sh
+# Copyright (c) 1996 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+#
+# Author: Marcus Schaefer <sax@suse.de>, 2000
+# archiving script to create build required files
+#
+# CVS ID:
+# --------
+# Status: Up-to-date
+#
+#===========================================
+# make tarball from the current source tree
+#-------------------------------------------
+rm -rf `find -type d | grep .svn`
+rm -rf rpm/
+
+cd ..
+tar -cjf kiwi.tar.bz2 kiwi/
+mv kiwi.tar.bz2 kiwi/
