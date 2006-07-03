@@ -16,7 +16,7 @@ for i in \
 	boot.cleanup boot.localnet haldaemon network syslog \
 	portmap kbd sshd boot.clock nscd cron
 do
-	insserv /etc/init.d/$i
+	/sbin/insserv /etc/init.d/$i
 done
 
 #==========================================
@@ -24,7 +24,7 @@ done
 #------------------------------------------
 for i in irq_balancer
 do
-	insserv -r /etc/init.d/irq_balancer
+	/sbin/insserv -r /etc/init.d/irq_balancer
 done
 
 #==========================================

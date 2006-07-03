@@ -16,7 +16,7 @@ for i in \
 	boot.cleanup boot.localnet haldaemon network syslog boot.apparmor \
 	portmap kbd powersaved sshd boot.clock nscd cron
 do
-	insserv /etc/init.d/$i
+	/sbin/insserv /etc/init.d/$i
 done
 
 #==========================================
