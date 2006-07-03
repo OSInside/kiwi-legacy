@@ -198,6 +198,7 @@ sub init {
 		"-y"
 	);
 	$kiwi -> info ("Initializing image system on: $root...");
+	$data = qx ( smart update @channelList 2>&1 );
 	$data = qx ( smart install @initPacs @installOpts 2>&1 );
 	$code = $? >> 8;
 	if ($code != 0) {
@@ -222,6 +223,7 @@ sub init {
 	qx ( mkdir -p $root/etc/sysconfig );
 	qx ( touch $root/etc/mtab );
 	qx ( touch $root/etc/sysconfig/bootloader ); 
+	qx ( cp /etc/resolv.conf $root/etc );
 	qx ( cp /etc/fstab  $root/etc );
 	qx ( cp /etc/group  $root/etc );
 	qx ( cp /etc/passwd $root/etc );
@@ -319,6 +321,7 @@ sub install {
 		$kiwi -> done ();
 	}
 	$kiwi -> info ("Installing image packages...");
+	my $data = qx ( chroot $root smart update 2>&1 );
 	my $data = qx ( chroot $root smart install @packList -y 2>&1 );
 	my $code = $? >> 8;
 	if ($code != 0) {
