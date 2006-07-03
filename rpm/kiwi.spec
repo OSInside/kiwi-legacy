@@ -4,7 +4,7 @@
 # Please submit bugfixes or comments via http://bugs.opensuse.org
 # ---
 Name:         kiwi
-Requires:     perl smart
+Requires:     perl smart perl-XML-LibXML
 PreReq:       /bin/rm /bin/mkdir /usr/bin/chroot %fillup_prereq %insserv_prereq
 Summary:      OpenSuSE - KIWI Image System
 Version:      1.2
