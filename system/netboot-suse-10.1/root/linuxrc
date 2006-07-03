@@ -203,8 +203,7 @@ updateNeeded () {
 		imageMD5s="image/$imageName-$imageVersion.md5"
 		[ -z "$imageServer" ]  && imageServer=$TSERVER
 		[ -z "$imageBlkSize" ] && imageBlkSize=8192
-		atftp -b 1024 -g \
-			-r $imageMD5s -l /etc/image.md5 $imageServer >/dev/null 2>&1
+		atftp -g -r $imageMD5s -l /etc/image.md5 $imageServer >/dev/null 2>&1
 		read sum1 blocks blocksize < /etc/image.md5
 		if [ ! -z "$sum1" ];then
 			SYSTEM_MD5STATUS="$SYSTEM_MD5STATUS:$sum1"
@@ -399,8 +398,12 @@ validateBlockSize () {
 	fi
 }
 loadOK () {
-	data=`echo $1 | tr -d "\n" | cut -f2 -d \< | cut -f1 -d \>`
-	if [ "$data" = "File not found" ];then
+	echo $1 | grep -q "File not found"
+	if [ $? = 0 ];then
+		return 1
+	fi
+	echo $1 | grep -q "aborting"
+	if [ $? = 0 ];then
 		return 1
 	fi
 	return 0
@@ -486,6 +489,9 @@ TSERVER=tftp.$DOMAIN
 
 # FAKED ADDRESS !!!
 TSERVER=baker.$DOMAIN
+TSERVER=d7.$DOMAIN
+Echo "FAKED server: $TSERVER"
+Echo "FIX THIS FOR FINAL RELEASE !"
 
 Echo "Checking TFTP Server name: $TSERVER"
 ip=`host $TSERVER | cut -f4 -d' '`
@@ -530,7 +536,7 @@ if test $? != 0 -o ! -s $CONFIG;then
 	fi
 	fi
 	echo "NCNAME=$SYSALIAS" >> hwtype.$DHCPCHADDR
-	atftp -b 1024 -p -l hwtype.$DHCPCHADDR \
+	atftp -p -l hwtype.$DHCPCHADDR \
 		-r upload/hwtype.$DHCPCHADDR $TSERVER >/dev/null 2>&1
 	echo
 	Echo "Registered as: $DHCPCHADDR"
@@ -543,8 +549,7 @@ if test $? != 0 -o ! -s $CONFIG;then
 	while test ! -s $CONFIG;do
 		Echo "Lookup network client config file again..."
 		dhcpcd -n
-		atftp -b 1024 -g \
-			-r KIWI/config.$DHCPCHADDR -l $CONFIG $TSERVER >/dev/null 2>&1
+		atftp -g -r KIWI/config.$DHCPCHADDR -l $CONFIG $TSERVER >/dev/null 2>&1
 		test -s $CONFIG || {
 			Echo "Couldn't get image configuration"
 			Echo "sleeping [60 sec]..."
@@ -562,6 +567,7 @@ if test ! -z $PART;then
 	#======================================
 	# Load IDE modules
 	#--------------------------------------
+	Echo "Including required kernel modules..."
 	probeIDEDevices
 
 	#======================================
@@ -653,7 +659,7 @@ IFS="," ; for i in $IMAGE;do
 		# get image md5sum to be able to check for the size
 		# requirements if we are loading into RAM
 		# ---
-		loadStatus=`atftp -b 1024 -g \
+		loadStatus=`atftp -g \
 			-r $imageMD5s -l /etc/image.md5 $imageServer 2>&1`
 		if ! loadOK "$loadStatus";then
 			systemException \
@@ -685,11 +691,11 @@ IFS="," ; for i in $IMAGE;do
 			imageName="$imageName.gz"
 		fi
 		Echo "Loading $imageName [$imageDevice BS:$imageBlkSize Byte]..."
-		loadStatus=`atftp $multicast -b $imageBlkSize -g \
+		loadStatus=`atftp $multicast --option "blksize $imageBlkSize" -g \
 			-r $imageName -l $imageDevice $imageServer 2>&1`
 		if ! loadOK "$loadStatus";then
 			systemException \
-			"Failed to load image: $imageName -> no such image" \
+				"Failed to load image: $imageName -> no such image" \
 			"reboot"
 		fi
 		if test "$imageZipped" = "compressed"; then
@@ -795,7 +801,7 @@ IFS="," ; for i in $CONF;do
 	Echo "Import configuration file: $configDest"
 	dirs=`dirname  $configDest`
 	mkdir -p /config/$dirs
-	atftp -b $configBlkSize -g \
+	atftp --option "blksize $configBlkSize" -g \
 		-r $configSource -l /config/$configDest $configServer \
 	>/dev/null 2>&1
 done

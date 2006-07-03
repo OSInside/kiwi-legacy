@@ -90,7 +90,7 @@ sub createImageEXT2 {
 	} else {
 		$fsopts = "-q -F -N $nodeCount";
 	}
-	my $data = qx (mke2fs $fsopts $imageDest/$name >/dev/null);
+	my $data = qx (/sbin/mke2fs $fsopts $imageDest/$name >/dev/null);
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> error  ("Couldn't create filesystem");
@@ -135,7 +135,7 @@ sub createImageReiserFS {
 	#==========================================
 	# Create filesystem on extend
 	#------------------------------------------
-	my $data = qx (mkreiserfs -b 4096 -q $imageDest/$name 2>&1);
+	my $data = qx (/sbin/mkreiserfs -q -f -b 4096 $imageDest/$name 2>&1);
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> error  ("Couldn't create filesystem");

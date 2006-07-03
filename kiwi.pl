@@ -191,8 +191,10 @@ sub init {
 		$kiwi -> failed ();
 		kiwiExit (1);
 	}
-	if (! defined $Destination) {
-		$Destination = ".";
+	if ((defined $Create) && (! defined $Destination)) {
+		$kiwi -> info ("No destination directory specified");
+		$kiwi -> failed ();
+		kiwiExit (1);
 	}
 }
 

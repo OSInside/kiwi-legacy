@@ -373,6 +373,7 @@
 	<!-- The following list builds the initial base package set -->
 	<cpios name="filesystem"/>
     <cpios name="glibc"/>
+	<cpios name="glibc-locale"/>
 	<cpios name="devs"/>
     <cpios name="rpm"/>
     <cpios name="smart"/>

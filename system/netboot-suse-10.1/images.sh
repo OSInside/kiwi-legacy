@@ -4,25 +4,30 @@ echo "Configure image: [netboot-suse-10.1]..."
 test -f /.profile && . /.profile
 
 #==========================================
-# remove unneeded packages and files
+# remove unneeded packages
 #------------------------------------------
-rpm -e perl --nodeps
-rpm -e rpm  --nodeps
+for i in \
+	perl glibc-locale man info smart python \
+	python-xml python-elementtree perl-gettext \
+	perl-Bootloader pam-modules gawk gnome-filesystem \
+	openslp rpm-python suse-build-key permissions \
+	fillup pam expat suse-release libxml2 openldap2-client \
+	logrotate diffutils cpio bzip2 insserv ash gdbm rpm
+do
+	rpm -e $i --nodeps
+done
 
+#==========================================
+# remove unneeded files
+#------------------------------------------
 rm -rf /usr/share/misc
 rm -rf /usr/share/info
 rm -rf /usr/share/man
 rm -rf /usr/share/cracklib
-rm -rf /etc/smart
-rm -rf /usr/lib/smart*
-rm -rf /var/lib/smart
-rm -rf /usr/bin/smart
-rm -rf /usr/sbin/smart*
 rm -rf /usr/lib/python*
-rm -rf /usr/share/doc/packages
+rm -rf /usr/lib/perl*
 rm -rf /usr/share/locale
-
-rm -rf /boot/*
-rm -rf /opt/*
+rm -rf /usr/share/doc/packages
+rm -rf /boot/* /opt/*
 
 exit 0

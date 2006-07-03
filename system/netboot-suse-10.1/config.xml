@@ -2,7 +2,7 @@
 	<!-- The image tag is used for setting up the image -->
 	<image name="initrd-netboot"/>
 	<image type="cramfs"/>
-	<image size="55M"/>
+	<image size="60M"/>
 	<image compressed="yes"/>
 	<image netdrivers="pcnet32.ko,mii.ko,tulip/tulip.ko,eepro100.ko,e100.ko,8139too.ko"/>
 	<image drivers="drivers/ide/*,net/packet/*,fs/ext3/*,fs/jbd/*,fs/fat/*,fs/vfat/*,fs/reiserfs/*,net/ipv6/*,drivers/scsi/sd_mod.ko,drivers/scsi/scsi_mod.ko"/>
