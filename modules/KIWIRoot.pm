@@ -511,6 +511,9 @@ sub setupMount {
 		push (@mountList,"$root/dev/pts");
 	}
 	while (<FD>) {
+		if ($_ =~ /^#/) {
+			next;
+		}
 		if ($_ =~ /(^\/.*)/) {
 			my @list = split (/ +/,$1);
 			my $device = shift @list;
