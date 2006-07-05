@@ -27,6 +27,7 @@ export PART_FILE="/etc/partition.table"
 export PART_MOUNT
 export PART_DEV
 export INITRD_MODULES
+export KERNEL_LIST
 
 export PART_COUNT=0
 export PART_NUMBER=0
@@ -390,6 +391,40 @@ fileSystem () {
 		;;
 	esac
 }
+kernelList () {
+	prefix=$1
+	KERNEL_LIST=""
+	kcount=0
+	for i in $prefix/lib/modules/*;do
+		if [ ! -d $i ];then
+			continue
+		fi
+		name=${i##*/}
+		if [ ! -f $prefix/boot/vmlinux-$name.gz ];then
+			continue
+		fi
+		KERNEL_PAIR=""
+		for n in $prefix/boot/*;do
+			if [ ! -L $n ];then
+				continue
+			fi
+			real=`readlink $n`
+			if [ $real = vmlinuz-$name ];then
+				kernel=${n##*/}
+				kcount=$((kcount+1))
+			fi
+			if [ $real = initrd-$name ];then
+				initrd=${n##*/}
+			fi
+			KERNEL_PAIR=$kernel:$initrd
+		done
+		if [ $kcount = 1 ];then
+			KERNEL_LIST=$KERNEL_PAIR
+		elif [ $kcount -gt 1 ];then
+			KERNEL_LIST=$KERNEL_LIST,$KERNEL_PAIR
+		fi
+	done
+}
 validateBlockSize () {
 	isize=`expr $blocks \* $blocksize` 
 	isize=`expr $isize / 32768`
@@ -489,7 +524,7 @@ TSERVER=tftp.$DOMAIN
 
 # FAKED ADDRESS !!!
 TSERVER=baker.$DOMAIN
-TSERVER=d7.$DOMAIN
+#TSERVER=d7.$DOMAIN
 Echo "FAKED server: $TSERVER"
 Echo "FIX THIS FOR FINAL RELEASE !"
 
@@ -807,11 +842,24 @@ IFS="," ; for i in $CONF;do
 done
 
 #======================================
-# 12) Create system dependant files
+# 12) send DHCP_RELEASE, reset cache
+#--------------------------------------
+dhcpcd -k
+
+#======================================
+# 13) Mount OS image to /mnt
 #--------------------------------------
 mount $imageRootDevice /mnt
+
+#======================================
+# 14) check filesystem and kernels
+#--------------------------------------
 fileSystem /mnt/image/config.xml
-umount /mnt
+kernelList /mnt
+
+#======================================
+# 15) Create system dependant files
+#--------------------------------------
 mkdir -p /config/etc
 echo "$imageRootDevice / $FSTYPE defaults 0 0"        > /config/etc/fstab
 echo "devpts  /dev/pts   devpts mode=0620,gid=5 0 0" >> /config/etc/fstab
@@ -821,7 +869,7 @@ echo "tmpfs   /dev/shm tmpfs  defaults 0 0"          >> /config/etc/fstab
 if test ! -z $DISK;then
 	# a) /etc/fstab...
 	# ----------------
-	echo "${DISK}1 swap swap pri=42 0 0"    >> /config/etc/fstab
+	echo "${DISK}1 swap swap pri=42 0 0" >> /config/etc/fstab
 	index=0
 	IFS=":" ; for i in $PART_MOUNT;do
 	if test ! -z "$i";then
@@ -844,10 +892,25 @@ if test ! -z $DISK;then
 	# -------------------------
 	console=""
 	mkdir -p /config/boot/grub
-	echo -e "timeout 0\ntitle linux"         > /config/boot/grub/menu.lst
-	echo -n "kernel (hd0,1)/boot/vmlinuz"   >> /config/boot/grub/menu.lst
-	echo " root=${DISK}2 $console"          >> /config/boot/grub/menu.lst
-	echo " initrd (hd0,1)/boot/initrd"      >> /config/boot/grub/menu.lst
+	echo "timeout 10" > /config/boot/grub/menu.lst
+	IFS="," ; for i in $KERNEL_LIST;do
+	if test ! -z "$i";then
+		kernel=`echo $i | cut -f1 -d:`
+		initrd=`echo $i | cut -f2 -d:`
+		echo "title $kernel" >> /config/boot/grub/menu.lst
+		if [ $kernel = "vmlinuz-xen" ];then
+			echo " root (hd0,1)"                   >> /config/boot/grub/menu.lst
+			echo " kernel /boot/xen.gz"            >> /config/boot/grub/menu.lst
+			echo -n " module /boot/$kernel"        >> /config/boot/grub/menu.lst
+			echo " root=${DISK}2 $console"         >> /config/boot/grub/menu.lst
+			echo " module /boot/$initrd"           >> /config/boot/grub/menu.lst
+		else
+			echo -n " kernel (hd0,1)/boot/$kernel" >> /config/boot/grub/menu.lst
+			echo " root=${DISK}2 $console"         >> /config/boot/grub/menu.lst
+			echo " initrd (hd0,1)/boot/$initrd"    >> /config/boot/grub/menu.lst
+		fi
+	fi
+	done
 	# c) /etc/grub.conf...
 	# -------------------------
 	mkdir -p /config/etc
@@ -865,10 +928,8 @@ fi
 fi
 
 #======================================
-# 13) Mount network client image as /
+# 16) copy system dependant files
 #--------------------------------------
-dhcpcd -k
-mount $imageRootDevice /mnt
 if test $systemIntegrity = "clean";then
 	cd /config
 	find . -type d | while read d ; do  mkdir -p /mnt/$d ; done
@@ -879,14 +940,14 @@ fi
 echo 256 > /proc/sys/kernel/real-root-dev
 
 #======================================
-# 13.1) umount system filesystems
+# 17) umount system filesystems
 #--------------------------------------
 umount /dev/pts
 umount /sys
 umount /proc
 
 #======================================
-# 13.2) Activate new root
+# 18) Activate new root
 #--------------------------------------
 Echo "Activating Image: [$imageRootName]"
 cp /preinit /mnt
@@ -901,7 +962,14 @@ else
 	./preinit
 fi
 #======================================
-# 19) Unmount initrd / system init
+# 19) reboot system if specified
+#--------------------------------------
+if test ! -z $REBOOT_IMAGE;then
+	Echo "Rebooting System to activate new kernel..."
+	/sbin/restart >/dev/null 2>&1
+fi
+#======================================
+# 20) Unmount initrd / system init
 #--------------------------------------
 echo " "
 echo "Booting into final System..."

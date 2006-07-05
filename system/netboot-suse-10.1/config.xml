@@ -10,8 +10,8 @@
     <entry type="yast2"/>
 	<!-- The source tag defines the smart channel -->
     <!-- <entry source="/image/CDs/full-i386"/> -->
-	<entry source="/mounts/dist/install/SLP/SUSE-10.1-DVD9-RC5/i386/DVD1"/>
-	<!-- <entry source="http://download.opensuse.org/distribution/SL-10.1/inst-source"/>-->
+	<!-- <entry source="/mounts/dist/install/SLP/SUSE-10.1-DVD9-RC5/i386/DVD1"/> -->
+	<entry source="http://download.opensuse.org/distribution/SL-10.1/inst-source"/>
 	<!-- The following list builds the image package set -->
     <entry name="filesystem"/>
 	<entry name="reiserfs"/>

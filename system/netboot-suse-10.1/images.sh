@@ -20,6 +20,7 @@ done
 #==========================================
 # remove unneeded files
 #------------------------------------------
+rm -rf `find -type d | grep .svn`
 rm -rf /usr/share/misc
 rm -rf /usr/share/info
 rm -rf /usr/share/man
@@ -28,6 +29,9 @@ rm -rf /usr/lib/python*
 rm -rf /usr/lib/perl*
 rm -rf /usr/share/locale
 rm -rf /usr/share/doc/packages
+rm -rf /var/lib/rpm
+rm -rf /usr/lib/rpm
+rm -rf /var/lib/smart
 rm -rf /boot/* /opt/*
 
 exit 0
