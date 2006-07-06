@@ -271,11 +271,20 @@ cleanSweep () {
 }
 createFileSystem () {
 	diskPartition=$1
-	mke2fs $diskPartition >/dev/null 2>&1
-	if test $? != 0;then
-		systemException \
-			"Failed to create filesystem on: $diskPartition !" \
-		"reboot"
+	diskID=`echo $diskPartition | sed -e s@[^0-9]@@g`
+	diskPD=`echo $diskPartition | sed -e s@[0-9]@@g`
+	diskPartitionType=`sfdisk -c $diskPD $diskID 2>/dev/null`
+	if test "$diskPartitionType" = "8e";then
+		Echo "Creating Volume group [systemvg]"
+		pvcreate $diskPartition >/dev/null 2>&1
+		vgcreate systemvg $diskPartition >/dev/null 2>&1
+	else
+		mke2fs $diskPartition >/dev/null 2>&1
+		if test $? != 0;then
+			systemException \
+				"Failed to create filesystem on: $diskPartition !" \
+			"reboot"
+		fi
 	fi
 }
 partitionCount () {
@@ -947,29 +956,36 @@ umount /sys
 umount /proc
 
 #======================================
-# 18) Activate new root
+# 18) copy initrd files to image
+#--------------------------------------
+cp /etc/resolv.conf /mnt/etc
+cp /preinit /mnt
+
+#======================================
+# 19) Activate new root
 #--------------------------------------
 Echo "Activating Image: [$imageRootName]"
-cp /preinit /mnt
 cd /mnt && exec < dev/console >dev/console 2>&1
 Echo "Calling preinit phase..."
 /mnt/sbin/pivot_root . mnt >/dev/null 2>&1
 if test $? != 0;then
 	PIVOT=false
 	mount --move . / && chroot . ./preinit
+	chroot . rm ./preinit
 else
 	PIVOT=true
 	./preinit
+	rm ./preinit
 fi
 #======================================
-# 19) reboot system if specified
+# 20) reboot system if specified
 #--------------------------------------
 if test ! -z $REBOOT_IMAGE;then
 	Echo "Rebooting System to activate new kernel..."
 	/sbin/restart >/dev/null 2>&1
 fi
 #======================================
-# 20) Unmount initrd / system init
+# 21) Unmount initrd / system init
 #--------------------------------------
 echo " "
 echo "Booting into final System..."

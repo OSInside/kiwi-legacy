@@ -14,7 +14,8 @@ smart install kernel-default -y >/dev/null 2>&1
 for i in \
 	acpid dbus boot.loadmodules boot.localfs fbset random resmgr \
 	boot.cleanup boot.localnet haldaemon network syslog boot.apparmor \
-	portmap kbd powersaved sshd boot.clock nscd cron
+	portmap kbd powersaved sshd boot.clock nscd cron boot.rootfsck \
+	boot.device-mapper boot.lvm
 do
 	/sbin/insserv /etc/init.d/$i
 done

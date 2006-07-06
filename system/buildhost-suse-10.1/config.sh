@@ -4,7 +4,7 @@ echo "Configure image: [buildhost-suse-10.1]..."
 test -f /.profile && . /.profile
 
 #==========================================
-# Install SMP kernel
+# Install default kernel
 #------------------------------------------
 smart install kernel-default -y >/dev/null 2>&1
 
@@ -14,7 +14,8 @@ smart install kernel-default -y >/dev/null 2>&1
 for i in \
 	acpid dbus boot.loadmodules boot.localfs random resmgr \
 	boot.cleanup boot.localnet haldaemon network syslog \
-	portmap kbd sshd boot.clock nscd cron
+	portmap kbd sshd boot.clock nscd cron boot.rootfsck \
+	boot.device-mapper boot.lvm
 do
 	/sbin/insserv /etc/init.d/$i
 done

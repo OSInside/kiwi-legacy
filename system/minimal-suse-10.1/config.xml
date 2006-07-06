@@ -1,15 +1,16 @@
 <directory>
 	<!-- The image tag is used for setting up the image -->
     <image name="minimal-10.1"/>
-    <image type="ext2"/>
+    <image type="reiserfs"/>
 	<image size="1000M"/>
 	<image compressed="yes"/>
 	<!-- The type tag defines the smart channel type -->
     <entry type="yast2"/>
 	<!-- The source tag defines the smart channel -->
-    <entry source="/image/CDs/full-i386"/>
+	<entry source="http://download.opensuse.org/distribution/SL-10.1/inst-source"/>
 	<!-- The following list builds the image package set -->
 	<entry name="3ddiag"/>
+	<entry name="lvm2"/>
 	<entry name="855resolution"/>
 	<entry name="CheckHardware"/>
 	<entry name="Crystalcursors"/>
