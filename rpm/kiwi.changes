@@ -1,0 +1,12 @@
+-------------------------------------------------------------------
+Thu Jul  6 15:40:18 CEST 2006 - ms@suse.de
+
+- added support for LVM in initrd
+- added opensuse installation source in image descriptions
+- added lvm services to be started if installed
+- added lvm2 package to package set for suse images
+
+-------------------------------------------------------------------
+Thu Jul  6 15:40:54 CEST 2006 - ms@suse.de
+
+- First Version of KIWI - Image system
