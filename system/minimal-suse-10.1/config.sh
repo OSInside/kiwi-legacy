@@ -12,10 +12,10 @@ smart install kernel-default -y >/dev/null 2>&1
 # Activate Services
 #------------------------------------------
 for i in \
-	acpid dbus boot.loadmodules boot.localfs fbset random resmgr \
-	boot.cleanup boot.localnet haldaemon network syslog boot.apparmor \
-	portmap kbd powersaved sshd boot.clock nscd cron boot.rootfsck \
-	boot.device-mapper boot.lvm
+	acpid dbus boot.loadmodules boot.localfs boot.xen fbset random \
+	resmgr boot.cleanup boot.localnet haldaemon network syslog \
+	boot.apparmor portmap kbd powersaved sshd boot.clock nscd cron \
+	boot.rootfsck boot.device-mapper boot.lvm
 do
 	/sbin/insserv /etc/init.d/$i
 done

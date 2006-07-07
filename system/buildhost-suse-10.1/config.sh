@@ -12,8 +12,8 @@ smart install kernel-default -y >/dev/null 2>&1
 # Activate Services
 #------------------------------------------
 for i in \
-	acpid dbus boot.loadmodules boot.localfs random resmgr \
-	boot.cleanup boot.localnet haldaemon network syslog \
+	acpid dbus boot.loadmodules boot.localfs boot.xen random \
+	resmgr boot.cleanup boot.localnet haldaemon network syslog \
 	portmap kbd sshd boot.clock nscd cron boot.rootfsck \
 	boot.device-mapper boot.lvm
 do

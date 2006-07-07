@@ -280,6 +280,7 @@ sub install {
 			# Xen based Virtual Machine
 			#------------------------------------------
 			/^xen$/  && do {
+				$kiwi -> info ("Creating Xen package list");
 				my @xenList = $xml -> getXenList();
 				if (! @xenList) {
 					$kiwi -> error ("Couldn't create xen package list");
@@ -287,6 +288,7 @@ sub install {
 					return undef;
 				}
 				@packList = (@packList,@xenList);
+				$kiwi -> done ();
 				last SWITCH;
 			};
 			#==========================================
