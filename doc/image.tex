@@ -51,7 +51,7 @@ the format:
       system, such as the activation or deactivation of certain services
       (insserv). The call is not made until after the switch to the image
       has been made with \textbf{chroot}.
-\item \textbf{\underline{image.sh}}\\
+\item \textbf{\underline{images.sh}}\\
       Optional configuration script while creating the logical extend.
       This script is called at the beginning of the image creation process.
       It is designed to clean-up the image system. Affected are all the
@@ -159,7 +159,7 @@ the format:
 
 In addition all values entered as \textbf{image} tag of the config.xml
 file are stored in a file called \textbf{.profile}. The file is created
-before the execution of an image script like \textit{config.sh, image.sh}
+before the execution of an image script like \textit{config.sh, images.sh}
 or a \textit{package script} and can then be sourced. The parameters
 of the config file are then available as variables in the
 script and can be processed appropriately. The script itself is called
