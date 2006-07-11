@@ -933,8 +933,8 @@ if test ! -z $DISK;then
 	# d) /etc/sysconfig/kernel...
 	# ---------------------------
 	mkdir -p /config/etc/sysconfig
-	echo "INITRD_MODULES=\"$INITRD_MODULES\"" > /config/etc/sysconfig/kernel
-	echo "DOMURD_MODULES=\"$DOMURD_MODULES\"">> /config/etc/sysconfig/kernel
+	echo "INITRD_MODULES=\"$INITRD_MODULES\""      >/config/etc/sysconfig/kernel
+	echo "DOMU_INITRD_MODULES=\"$DOMURD_MODULES\"">>/config/etc/sysconfig/kernel
 fi
 fi
 
