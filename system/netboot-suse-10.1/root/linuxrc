@@ -806,11 +806,11 @@ IFS="," ; for i in $IMAGE;do
 		if test "$FSTYPE" = "ext2";then
 			resize2fs -F -p $imageDevice
 		fi
-		if test ! -z $JOURNAL;then
 		if test "$FSTYPE" = "ext3";then
-			Echo "Adding journal to the filesystem..."
+			e2fsck -y -f $imageDevice
+			resize2fs -F -p $imageDevice
 			tune2fs -j $imageDevice
-		fi
+			INITRD_MODULES="$INITRD_MODULES ext3"
 		fi
 	fi
 	if test ! -z $DISK && test $haveDataInRam = 0;then
