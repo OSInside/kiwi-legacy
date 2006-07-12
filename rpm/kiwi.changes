@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Wed Jul 12 15:58:20 CEST 2006 - ms@suse.de
+
+- added helper script to generate grub boot disk and CD
+- fixed linuxrc to mount the image os if needed
+- added checkTFTP() function to check for the tftp server
+  1) at the kernel cmdline
+  2) as host tftp.$DOMAIN
+  3) as the same host as the DHCP server is
+
+-------------------------------------------------------------------
 Thu Jul  6 15:40:18 CEST 2006 - ms@suse.de
 
 - added support for LVM in initrd

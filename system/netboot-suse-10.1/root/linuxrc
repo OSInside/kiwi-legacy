@@ -464,6 +464,18 @@ enoughRAM () {
 	fi
 	return 1
 }
+checkTFTP () {
+	IFS=$IFS_ORIG
+	for i in `cat /proc/cmdline`;do
+		echo $i | grep -q kiwitftp
+		if [ $? = 0 ];then
+			TSERVER=`echo $i | cut -f2 -d=`
+			if [ ! -z $TSERVER ];then
+				Echo "Found TFTP server in kernel cmdline"
+			fi
+		fi
+	done
+}
 
 #======================================
 # Beautify Startup
@@ -530,14 +542,10 @@ setupNetwork
 #======================================
 # 5) get TFTP Server IP/name
 #--------------------------------------
-TSERVER=tftp.$DOMAIN
-
-# FAKED ADDRESS !!!
-TSERVER=baker.$DOMAIN
-#TSERVER=d7.$DOMAIN
-Echo "FAKED server: $TSERVER"
-Echo "FIX THIS FOR FINAL RELEASE !"
-
+checkTFTP
+if [ -z $TSERVER ];then
+	TSERVER=tftp.$DOMAIN
+fi
 Echo "Checking TFTP Server name: $TSERVER"
 ip=`host $TSERVER | cut -f4 -d' '`
 if test $ip = "found:" -o $ip = "out;";then
@@ -832,29 +840,32 @@ fi
 # 11) Import fixed configuration files
 #--------------------------------------
 if test $systemIntegrity = "clean";then
-mkdir -p /config
-IFS="," ; for i in $CONF;do
-	field=0
-	IFS=";" ; for n in $i;do
-	case $field in
-		0) configSource=$n ; field=1 ;;
-		1) configDest=$n   ; field=2 ;;
-		2) configServer=$n ; field=3 ;;
-		3) configBlkSize=$n;
-	esac
+	mkdir -p /config
+	IFS="," ; for i in $CONF;do
+		field=0
+		IFS=";" ; for n in $i;do
+		case $field in
+			0) configSource=$n ; field=1 ;;
+			1) configDest=$n   ; field=2 ;;
+			2) configServer=$n ; field=3 ;;
+			3) configBlkSize=$n;
+		esac
+		done
+		Echo "Import configuration file: $configDest"
+		dirs=`dirname  $configDest`
+		mkdir -p /config/$dirs
+		atftp --option "blksize $configBlkSize" -g \
+			-r $configSource -l /config/$configDest $configServer \
+		>/dev/null 2>&1
 	done
-	Echo "Import configuration file: $configDest"
-	dirs=`dirname  $configDest`
-	mkdir -p /config/$dirs
-	atftp --option "blksize $configBlkSize" -g \
-		-r $configSource -l /config/$configDest $configServer \
-	>/dev/null 2>&1
-done
+fi
 
 #======================================
 # 12) send DHCP_RELEASE, reset cache
 #--------------------------------------
-dhcpcd -k
+if test $systemIntegrity = "clean";then
+	dhcpcd -k
+fi
 
 #======================================
 # 13) Mount OS image to /mnt
@@ -864,78 +875,84 @@ mount $imageRootDevice /mnt
 #======================================
 # 14) check filesystem and kernels
 #--------------------------------------
-fileSystem /mnt/image/config.xml
-kernelList /mnt
+if test $systemIntegrity = "clean";then
+	fileSystem /mnt/image/config.xml
+	kernelList /mnt
+fi
 
 #======================================
 # 15) Create system dependant files
 #--------------------------------------
-mkdir -p /config/etc
-echo "$imageRootDevice / $FSTYPE defaults 0 0"        > /config/etc/fstab
-echo "devpts  /dev/pts   devpts mode=0620,gid=5 0 0" >> /config/etc/fstab
-echo "proc    /proc   proc    defaults 0 0"          >> /config/etc/fstab
-echo "sysfs   /sys    sysfs   noauto 0 0"            >> /config/etc/fstab
-echo "tmpfs   /dev/shm tmpfs  defaults 0 0"          >> /config/etc/fstab
-if test ! -z $DISK;then
-	# a) /etc/fstab...
-	# ----------------
-	echo "${DISK}1 swap swap pri=42 0 0" >> /config/etc/fstab
-	index=0
-	IFS=":" ; for i in $PART_MOUNT;do
-	if test ! -z "$i";then
-		count=0
-		IFS=":" ; for n in $PART_DEV;do
-			device=$n
-			if test $count -eq $index;then
-				break
-			fi
-			count=`expr $count + 1`
-		done
-		index=`expr $index + 1`
-		if test ! $i = "/";then
-			fileSystem $device
-			echo "$device $i $FSTYPE defaults 1 1" >> /config/etc/fstab
-		fi
-	fi
-	done
-	# b) /boot/grub/menu.lst...
-	# -------------------------
-	console=""
-	mkdir -p /config/boot/grub
-	echo "timeout 10" > /config/boot/grub/menu.lst
-	IFS="," ; for i in $KERNEL_LIST;do
-	if test ! -z "$i";then
-		kernel=`echo $i | cut -f1 -d:`
-		initrd=`echo $i | cut -f2 -d:`
-		echo "title $kernel" >> /config/boot/grub/menu.lst
-		if [ $kernel = "vmlinuz-xen" ];then
-			echo " root (hd0,1)"                   >> /config/boot/grub/menu.lst
-			echo " kernel /boot/xen.gz"            >> /config/boot/grub/menu.lst
-			echo -n " module /boot/$kernel"        >> /config/boot/grub/menu.lst
-			echo " root=${DISK}2 $console"         >> /config/boot/grub/menu.lst
-			echo " module /boot/$initrd"           >> /config/boot/grub/menu.lst
-		else
-			echo -n " kernel (hd0,1)/boot/$kernel" >> /config/boot/grub/menu.lst
-			echo " root=${DISK}2 $console"         >> /config/boot/grub/menu.lst
-			echo " initrd (hd0,1)/boot/$initrd"    >> /config/boot/grub/menu.lst
-		fi
-	fi
-	done
-	# c) /etc/grub.conf...
-	# -------------------------
+if test $systemIntegrity = "clean";then
 	mkdir -p /config/etc
-	echo -en "root (hd0,1)\ninstall"         > /config/etc/grub.conf
-	echo -n " --stage2=/boot/grub/stage2"   >> /config/etc/grub.conf
-	echo -n " /boot/grub/stage1 d (hd0)"    >> /config/etc/grub.conf
-	echo -n " /boot/grub/stage2 0x8000"     >> /config/etc/grub.conf
-	echo " (hd0,1)/boot/grub/menu.lst"      >> /config/etc/grub.conf
-	echo "quit"                             >> /config/etc/grub.conf
-	# d) /etc/sysconfig/kernel...
-	# ---------------------------
-	mkdir -p /config/etc/sysconfig
-	echo "INITRD_MODULES=\"$INITRD_MODULES\""      >/config/etc/sysconfig/kernel
-	echo "DOMU_INITRD_MODULES=\"$DOMURD_MODULES\"">>/config/etc/sysconfig/kernel
-fi
+	echo "$imageRootDevice / $FSTYPE defaults 0 0"        > /config/etc/fstab
+	echo "devpts  /dev/pts   devpts mode=0620,gid=5 0 0" >> /config/etc/fstab
+	echo "proc    /proc   proc    defaults 0 0"          >> /config/etc/fstab
+	echo "sysfs   /sys    sysfs   noauto 0 0"            >> /config/etc/fstab
+	echo "tmpfs   /dev/shm tmpfs  defaults 0 0"          >> /config/etc/fstab
+	if test ! -z $DISK;then
+		# a) /etc/fstab...
+		# ----------------
+		echo "${DISK}1 swap swap pri=42 0 0" >> /config/etc/fstab
+		index=0
+		IFS=":" ; for i in $PART_MOUNT;do
+		if test ! -z "$i";then
+			count=0
+			IFS=":" ; for n in $PART_DEV;do
+				device=$n
+				if test $count -eq $index;then
+					break
+				fi
+				count=`expr $count + 1`
+			done
+			index=`expr $index + 1`
+			if test ! $i = "/";then
+				fileSystem $device
+				echo "$device $i $FSTYPE defaults 1 1" >> /config/etc/fstab
+			fi
+		fi
+		done
+		# b) /boot/grub/menu.lst...
+		# -------------------------
+		console=""
+		mkdir -p /config/boot/grub
+		echo "timeout 10" > /config/boot/grub/menu.lst
+		IFS="," ; for i in $KERNEL_LIST;do
+		if test ! -z "$i";then
+			kernel=`echo $i | cut -f1 -d:`
+			initrd=`echo $i | cut -f2 -d:`
+			menu=/config/boot/grub/menu.lst
+			echo "title $kernel" >> $menu
+			if [ $kernel = "vmlinuz-xen" ];then
+				echo " root (hd0,1)"                   >> $menu
+				echo " kernel /boot/xen.gz"            >> $menu
+				echo -n " module /boot/$kernel"        >> $menu
+				echo " root=${DISK}2 $console"         >> $menu
+				echo " module /boot/$initrd"           >> $menu
+			else
+				echo -n " kernel (hd0,1)/boot/$kernel" >> $menu
+				echo " root=${DISK}2 $console"         >> $menu
+				echo " initrd (hd0,1)/boot/$initrd"    >> $menu
+			fi
+		fi
+		done
+		# c) /etc/grub.conf...
+		# -------------------------
+		mkdir -p /config/etc
+		gconf=/config/etc/grub.conf
+		echo -en "root (hd0,1)\ninstall"         > $gconf
+		echo -n " --stage2=/boot/grub/stage2"   >> $gconf
+		echo -n " /boot/grub/stage1 d (hd0)"    >> $gconf
+		echo -n " /boot/grub/stage2 0x8000"     >> $gconf
+		echo " (hd0,1)/boot/grub/menu.lst"      >> $gconf
+		echo "quit"                             >> $gconf
+		# d) /etc/sysconfig/kernel...
+		# ---------------------------
+		mkdir -p /config/etc/sysconfig
+		syskernel=/config/etc/sysconfig/kernel
+		echo "INITRD_MODULES=\"$INITRD_MODULES\""       > $syskernel
+		echo "DOMU_INITRD_MODULES=\"$DOMURD_MODULES\"" >> $syskernel
+	fi
 fi
 
 #======================================
