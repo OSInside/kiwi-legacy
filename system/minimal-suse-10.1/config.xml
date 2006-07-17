@@ -365,6 +365,7 @@
 	<entry name="yast2-vm"/>
 	<entry name="yast2-x11"/>
 	<entry name="yast2-xml"/>
+	<entry name="kernel-default"/>
 	<entry name="zlib"/>
 	<entry name="zmd"/>
 	<entry name="zsh"/>

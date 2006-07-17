@@ -4,11 +4,6 @@ echo "Configure image: [buildhost-suse-10.1]..."
 test -f /.profile && . /.profile
 
 #==========================================
-# Install default kernel
-#------------------------------------------
-smart install kernel-default -y >/dev/null 2>&1
-
-#==========================================
 # Activate Services
 #------------------------------------------
 for i in \

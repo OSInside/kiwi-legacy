@@ -53,6 +53,7 @@
     <entry name="iputils"/>
     <entry name="kbd"/>
     <entry name="kernel-xen"/>
+    <entry name="kernel-default"/>
     <entry name="klogd"/>
     <entry name="ksymoops"/>
     <entry name="less"/>
