@@ -43,5 +43,5 @@ pdf: pdfimages $(TEX)
 	pdflatex kiwi
 
 clean:
-	rm -f *.dvi *.idx *.toc *.log *.ps *.pdf *.mtc[0-9]*
+	rm -f *.dvi *.idx *.toc *.log *.ps *.mtc[0-9]*
 	rm -f *.aux *.mtc* *.out *.bmt  *.ind *.ilg
