@@ -1,0 +1,113 @@
+#================
+# FILE          : KIWIURL.pm
+#----------------
+# PROJECT       : OpenSUSE Build-Service
+# COPYRIGHT     : (c) 2006 SUSE LINUX Products GmbH, Germany
+#               :
+# AUTHOR        : Marcus Schaefer <ms@suse.de>
+#               :
+# BELONGS TO    : Operating System images
+#               :
+# DESCRIPTION   : This module is used to support the high level
+#               : source locations like opensuse://
+#               :
+# STATUS        : Development
+#----------------
+package KIWIURL;
+#==========================================
+# Modules
+#------------------------------------------
+use strict;
+use KIWILog;
+use LWP;
+
+#==========================================
+# Private
+#------------------------------------------
+my $kiwi;
+
+#==========================================
+# Constructor
+#------------------------------------------
+sub new { 
+	# ...
+	# Create a new KIWIURL object which is used to solve
+	# the high level location information into a low level
+	# distribution independent network url
+	# ---
+	my $this  = {};
+	my $class = shift;
+	bless $this,$class;
+	$kiwi   = shift;
+	if (! defined $kiwi) {
+		$kiwi = new KIWILog();
+	}
+	return $this;
+}
+
+#==========================================
+# openSUSEpath
+#------------------------------------------
+sub openSUSEpath {
+	# ...
+	# This method builds a valid URL path to be used as
+	# source location for an openSUSE installation source.
+	# The method needs the basic openSUSE distribution or
+	# module repository name information to be able to
+	# complete this data into a valid path
+	# ---
+	my $this     = shift;
+	my $module   = shift;
+	my $browser  = LWP::UserAgent->new;
+	my $location = qw (http://ftp.opensuse.org/pub/opensuse);
+	my @types    = qw (distribution repositories);
+	my @dists    = qw (inst-source media.1);
+	my @urllist  = ();
+	#==========================================
+	# normalize URL data
+	#------------------------------------------
+	$module =~ s/opensuse:\/\///;
+	if ((! defined $module) || ($module eq "/")) {
+		return ( undef,undef );
+	}
+	#==========================================
+	# Create urllist for later testing
+	#------------------------------------------
+	foreach my $type (@types) {
+		my $url = $location."/".$type."/".$module;
+		if ($type eq $types[1]) {
+			push @urllist,$url;
+			next;
+		}
+		foreach my $dist (@dists) {
+			$url = $url."/".$dist;
+			push @urllist,$url;
+		}
+	}
+	#==========================================
+	# Check url entries in urllist
+	#------------------------------------------
+	foreach my $url (@urllist) {
+		my $request = HTTP::Request->new (GET => $url);
+		my $response = $browser -> request  ( $request );
+		my $title = $response -> title ();
+		if ((defined $title) && ($title !~ /not found/i)) {
+			$url =~ s/([^:])\/+/\1\//g;
+			if ($url =~ /repositories/) {
+				my @repospath = split (/\//,$url); pop @repospath;
+				my $repourl = join ("/",@repospath);
+				my $request = HTTP::Request->new (GET => $repourl."/repodata");
+				my $answer  = $browser -> request  ( $request );
+				my $title = $answer -> title ();
+				if ((defined $title) && ($title !~ /not found/i)) {
+					return ( $response,$url );
+				}
+			} else {
+				return ( $response,$url );
+			}
+		}
+	}
+	return undef;
+}
+
+1;
