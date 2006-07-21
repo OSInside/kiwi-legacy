@@ -34,7 +34,6 @@ my $Prepare;     # control XML file for building chroot extend
 my $Create;      # image description for building image extend
 my $Destination; # destination directory for logical extends
 my $LogFile;     # optional file name for logging
-my $Source;      # optional source location
 my $Virtual;     # optional virtualisation setup
 my $RootTree;    # optional root tree destination
 
@@ -51,7 +50,7 @@ my $image;      # KIWIImage object for logical extends
 sub main {
 	# ...
 	# This is the KIWI project to prepare and build operating
-	# system images from a give installation source. The system
+	# system images from a given installation source. The system
 	# will create a chroot environment representing the needs
 	# of a XML control file. Once prepared KIWI can create several
 	# OS image types.
@@ -73,7 +72,7 @@ sub main {
 	#----------------------------------------
 	if (defined $Prepare) {
 		$kiwi -> info ("Reading image description...");
-		my $xml = new KIWIXML ( $kiwi,$Source,$Prepare );
+		my $xml = new KIWIXML ( $kiwi,$Prepare );
 		if (! defined $xml) {
 			kiwiExit (1);
 		}
@@ -119,7 +118,7 @@ sub main {
 	#------------------------------------------
 	if (defined $Create) {
 		$kiwi -> info ("Reading image description...");
-		my $xml = new KIWIXML ( $kiwi,undef,"$Create/image" );
+		my $xml = new KIWIXML ( $kiwi,"$Create/image" );
 		if (! defined $xml) {
 			kiwiExit (1);
 		}
@@ -171,7 +170,6 @@ sub init {
 		"prepare|p=s"         => \$Prepare,
 		"create|c=s"          => \$Create,
 		"destdir|d=s"         => \$Destination,
-		"source|s=s"          => \$Source,
 		"virtual|v=s"         => \$Virtual,
 		"root|r=s"            => \$RootTree,
 		"help|h"              => \&usage,
@@ -214,9 +212,6 @@ sub usage {
 	print "  kiwi -p | --prepare <image-path>\n";
 	print "  kiwi -c | --create  <image-root>\n";
 	print "--\n";
-	print "  [ -s | --source <source-path> ]\n";
-	print "    Specify an alternative source location.\n";
-	print "\n";
 	print "  [ -d | --destdir <destination-path> ]\n";
 	print "    Specify an alternative destination directory for\n";
 	print "    storing the logical extends. By default the current\n";

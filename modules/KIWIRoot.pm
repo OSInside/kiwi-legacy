@@ -19,6 +19,7 @@ package KIWIRoot;
 # Modules
 #------------------------------------------
 use strict;
+use KIWIURL;
 use KIWILog;
 
 #==========================================
@@ -75,52 +76,35 @@ sub new {
 		$kiwi -> failed ();
 		return undef;
 	}
-	my $type = $xml -> getType();
-	if (! defined $type) {
-		$kiwi -> error ("No type specified in XML tree");
+	my %repository = $xml -> getRepository();
+	if (! %repository) {
+		$kiwi -> error ("No repository specified in XML tree");
 		$kiwi -> failed ();
 		return undef; 
 	}
-	my $baseurl = $xml -> getSource();
-	if (! defined $baseurl) {
-		$kiwi -> error ("No source specified in XML tree");
-		$kiwi -> failed ();
-		return undef;
-	}
+	my $count = 1;
 	#==========================================
 	# Create smartChannel hash
 	#------------------------------------------
-	my @baseurlList = split ("\\|",$baseurl);
-	my @baseurlNew  = ();
-	my $count = 1;
-	foreach my $item (@baseurlList) {
-		my $url = $item;
-		if ($url =~ /^\//) {
-			$url = $baseSystem."/".$url;
+	foreach my $type (keys %repository) {
+		my $urlHandler  = new KIWIURL ($kiwi);
+		my $publics_url = $repository{$type};
+		if (defined $urlHandler -> openSUSEpath ($publics_url)) {
+			$publics_url = $urlHandler -> openSUSEpath ($publics_url);
 		}
-		push (@baseurlNew,$url);
-	}
-	foreach my $url (@baseurlNew) {
+		my $private_url = $publics_url;
+		if ($private_url =~ /^\//) {
+			$private_url = $baseSystem."/".$private_url;
+		}
 		my $channel = "kiwi".$count."-".$$;
-		my @options = (
-			"type=$type",
-			"name=$channel",
-			"baseurl=$url",
-			"-y"
+		my @private_options = ("type=$type","name=$channel",
+			"baseurl=$private_url","-y"
 		);
-		$smartChannel{private}{$channel}=\@options;
-		$count++;
-	}
-	$count = 1;
-	foreach my $url (@baseurlList) {
-		my $channel = "kiwi".$count."-".$$;
-		my @options = (
-			"type=$type",
-			"name=$channel",
-			"baseurl=$url",
-			"-y"
+		my @public_options  = ("type=$type","name=$channel",
+			"baseurl=$publics_url","-y"
 		);
-		$smartChannel{public}{$channel}=\@options;
+		$smartChannel{private}{$channel} = \@private_options;
+		$smartChannel{public}{$channel}  = \@public_options;
 		$count++;
 	}
 	#==========================================

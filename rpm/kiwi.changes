@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Jul 21 16:09:42 CEST 2006 - ms@suse.de
+
+- added support for high level urls like opensuse://
+- added new XML format
+
+-------------------------------------------------------------------
 Wed Jul 12 15:58:20 CEST 2006 - ms@suse.de
 
 - added helper script to generate grub boot disk and CD

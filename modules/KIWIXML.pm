@@ -25,12 +25,12 @@ use KIWILog;
 # Private
 #------------------------------------------
 my $kiwi;
-my $source;
 my @sourceFileList;
-my @entryList;
-my @imageList;
-my @cpiosList;
-my @xenvmList;
+my $optionsNodeList;
+my $driversNodeList;
+my $repositNodeList;
+my $packageNodeList;
+my $imgnameNodeList;
 
 #==========================================
 # Constructor
@@ -47,7 +47,6 @@ sub new {
 	my $class = shift;
 	bless $this,$class;
 	$kiwi   = shift;
-	$source = shift;
 	if (! defined $kiwi) {
 		$kiwi = new KIWILog();
 	}
@@ -69,12 +68,13 @@ sub new {
 	eval {
 		my $systemTree = $systemXML
 			-> parse_file ( $controlFile );
-		@entryList = $systemTree -> getElementsByTagName ("entry");
-		@imageList = $systemTree -> getElementsByTagName ("image");
-		@cpiosList = $systemTree -> getElementsByTagName ("cpios");
-		@xenvmList = $systemTree -> getElementsByTagName ("xenvm");
+		$optionsNodeList = $systemTree -> getElementsByTagName ("preferences");
+		$driversNodeList = $systemTree -> getElementsByTagName ("drivers");
+		$repositNodeList = $systemTree -> getElementsByTagName ("repository");
+		$packageNodeList = $systemTree -> getElementsByTagName ("packages");
+		$imgnameNodeList = $systemTree -> getElementsByTagName ("image");
 	};
-	if ((! @entryList) || (! @imageList) || (! @cpiosList)) {
+	if ((! $optionsNodeList) || (! $repositNodeList) || (! $packageNodeList)) {
 		$kiwi -> failed ();
 		$kiwi -> error ("Problem reading control file");
 		$kiwi -> failed ();
@@ -89,11 +89,12 @@ sub new {
 #------------------------------------------
 sub getImageName {
 	# ...
-	# Get the name of the logial extend
+	# Get the name of the logical extend
 	# ---
-	my $this   = shift;
-	my %config = getImageConfig ($this);
-	return $config{name};
+	my $this = shift;
+	my $node = $imgnameNodeList -> get_node(1);
+	my $name = $node -> getAttribute ("name");
+	return $name;
 }
 
 #==========================================
@@ -103,9 +104,12 @@ sub getImageSize {
 	# ...
 	# Get the predefined size of the logical extend
 	# ---
-	my $this   = shift;
-	my %config = getImageConfig ($this);
-	return $config{size};
+	my $this = shift;
+	my $node = $optionsNodeList -> get_node(1);
+	my $size = $node -> getElementsByTagName ("size");
+	my $unit = $node -> getElementsByTagName ("size")
+		-> get_node(1) ->getAttribute("unit");
+	return $size.$unit;
 }
 
 #==========================================
@@ -115,9 +119,10 @@ sub getImageType {
 	# ...
 	# Get the filesystem type of the logical extend
 	# ---
-	my $this   = shift;
-	my %config = getImageConfig ($this);
-	return $config{type};
+	my $this = shift;
+	my $node = $optionsNodeList -> get_node(1);
+	my $type = $node -> getElementsByTagName ("type");
+	return $type;
 }
 
 #==========================================
@@ -129,51 +134,34 @@ sub getCompressed {
 	# method returns true if the image should be compressed
 	# otherwise false. 
 	# ---
-	my $this   = shift;
-	my %config = getImageConfig ($this);
-	my $zipped = $config{compressed};
-	if ((defined $zipped) && ($zipped eq "yes")) {
+	my $this = shift;
+	my $node = $optionsNodeList -> get_node(1);
+	my $gzip = $node -> getElementsByTagName ("compressed");
+	if ((defined $gzip) && ("$gzip" eq "yes")) {
 		return 1;
 	}
 	return 0;
 }
 
 #==========================================
-# getType
+# getRepository
 #------------------------------------------
-sub getType {
+sub getRepository {
 	# ...
 	# Get the smart package manager type used for building
 	# up the physical extend. For information on the available
 	# types refer to the smart documentation
 	# ---
 	my $this = shift;
-	return $entryList[0] -> getAttribute("type");
-}
-
-#==========================================
-# getSource
-#------------------------------------------
-sub getSource {
-	# ...
-	# Get the smart package manager source used for building
-	# up the physical extend. For information on the available
-	# source formats refer to the smart documentation
-	# ---
-	my $this = shift;
-	my $path = $source;
-
-	if (defined $path) {
-		return $path;
+	my @node = $repositNodeList -> get_nodelist();
+	my %result;
+	foreach my $element (@node) {
+		my $type = $element -> getAttribute("type");
+		my $stag = $element -> getElementsByTagName ("source") -> get_node(1);
+		my $source =  $stag -> getAttribute ("path");
+		$result{$type} = $source;
 	}
-	foreach my $item (@entryList) {
-		if (defined $item->getAttribute("source")) {
-			my $d = $item->getAttribute("source");
-			$path=$path."|".$d;
-		}
-	}
-	$path =~ s/^\|//;
-	return $path;
+	return %result;
 }
 
 #==========================================
@@ -181,33 +169,46 @@ sub getSource {
 #------------------------------------------
 sub getImageConfig {
 	# ...
-	# Evaluate the attributes of the image tag and build
-	# up a hash containing all the image parameters. This
-	# information is used to create the .profile environment
+	# Evaluate the attributes of the drivers and preferences tags and
+	# build a hash containing all the image parameters. This information
+	# is used to create the .profile environment
 	# ---
 	my $this = shift;
-	my %config;
-	foreach my $item (@imageList) {
-		if (defined $item->getAttribute("name")) {
-			$config{name} = $item->getAttribute("name");
-		}
-		if (defined $item->getAttribute("type")) {
-			$config{type} = $item->getAttribute("type");
-		}
-		if (defined $item->getAttribute("netdrivers")) {
-			$config{netdrivers} = $item->getAttribute("netdrivers");
-		}
-		if (defined $item->getAttribute("drivers")) {
-			$config{drivers} = $item->getAttribute("drivers");
-		}
-		if (defined $item->getAttribute("compressed")) {
-			$config{compressed} = $item->getAttribute("compressed");
-		}
-		if (defined $item->getAttribute("size")) {
-			$config{size} = $item->getAttribute("size");
-		}
+	my %result;
+	#==========================================
+	# preferences
+	#------------------------------------------
+	if (getCompressed ($this)) {
+		$result{compressed} = "yes";
 	}
-	return %config;
+	my $type = getImageType ($this);
+	my $size = getImageSize ($this);
+	my $name = getImageName ($this);
+	if ($type) {
+		$result{type} = $type;
+	}
+	if ($size) {
+		$result{size} = $size;
+	}
+	if ($name) {
+		$result{name} = $name;
+	}
+	#==========================================
+	# drivers
+	#------------------------------------------
+	my @node = $driversNodeList -> get_nodelist();
+	foreach my $element (@node) {
+		my $type = $element -> getAttribute("type");
+		my @ntag = $element -> getElementsByTagName ("file") -> get_nodelist();
+		my $data = "";
+		foreach my $element (@ntag) {
+			my $name =  $element -> getAttribute ("name");
+			$data = $data.",".$name
+		}
+		$data =~ s/^,+//;
+		$result{$type} = $data;
+	}
+	return %result;
 }
 
 #==========================================
@@ -221,15 +222,22 @@ sub getList {
 	# Each entry must be found on the smart source medium
 	# ---
 	my $this = shift;
-	my $lref = shift;
-	my @list = @{$lref};
+	my $what = shift;
 	my @result;
-	foreach my $item (@list) {
-		my $name = $item->getAttribute("name");
-		if (! defined $name) {
+	for (my $i=1;$i<= $packageNodeList->size();$i++) {
+		my $node = $packageNodeList -> get_node($i);
+		my $type = $node -> getAttribute ("type");
+		if ($type ne $what) {
 			next;
 		}
-		push @result,$name;
+		my @plist = $node -> getElementsByTagName ("package");
+		foreach my $element (@plist) {
+			my $package = $element -> getAttribute ("name");
+			if (! defined $package) {
+				next;
+			}
+			push @result,$package;
+		}
 	}
 	return @result;
 }
@@ -244,7 +252,7 @@ sub getBaseList {
 	# installed manually
 	# ---
 	my $this = shift;
-	return getList ($this,\@cpiosList);
+	return getList ($this,"boot");
 }
 
 #==========================================
@@ -256,7 +264,7 @@ sub getInstallList {
 	# physical extend to what the image was designed for
 	# ---
 	my $this = shift;
-	return getList ($this,\@entryList);
+	return getList ($this,"image");
 }
 
 #==========================================
@@ -268,7 +276,7 @@ sub getXenList {
 	# image within a Xen virtualized system
 	# ---
 	my $this = shift;
-	return getList ($this,\@xenvmList);
+	return getList ($this,"xen");
 }
 
 1;
