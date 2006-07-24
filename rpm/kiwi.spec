@@ -3,15 +3,16 @@
 # Copyright (c) 2006 SUSE LINUX Products GmbH, Nuernberg, Germany.
 # Please submit bugfixes or comments via http://bugs.opensuse.org
 # ---
-Name:         kiwi
-Requires:     perl smart perl-XML-LibXML
-Summary:      OpenSuSE - KIWI Image System
-Version:      1.2
-Release:      1
-Group:        System
-License:      GPL
-Source:       kiwi.tar.bz2
-BuildRoot:    %{_tmppath}/%{name}-%{version}-build
+Name:          kiwi
+BuildRequires: syslinux
+Requires:      perl smart perl-XML-LibXML syslinux
+Summary:       OpenSuSE - KIWI Image System
+Version:       1.2
+Release:       1
+Group:         System
+License:       GPL
+Source:        kiwi.tar.bz2
+BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 
 %description
 This package contains the OpenSuSE - KIWI Image System
@@ -70,6 +71,7 @@ make buildroot=$RPM_BUILD_ROOT \
 # KIWI files...      
 #-------------------------------------------------
 %files
+%defattr(-, root, root)
 %dir %{_datadir}/kiwi
 %{_datadir}/kiwi/modules
 %{_datadir}/kiwi/tools
@@ -79,6 +81,7 @@ make buildroot=$RPM_BUILD_ROOT \
 # KIWI-netboot files...  
 # ------------------------------------------------
 %files -n kiwi-pxeboot
+%defattr(-, root, root)
 /etc/permissions.d/kiwi
 %dir %{_var}/lib/tftpboot
 %dir %{_var}/lib/tftpboot/KIWI
@@ -93,4 +96,5 @@ make buildroot=$RPM_BUILD_ROOT \
 # KIWI-images...
 # ------------------------------------------------
 %files -n kiwi-images
+%defattr(-, root, root)
 %{_datadir}/kiwi/image

@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Jul 24 15:09:12 CEST 2006 - ms@suse.de
+
+- added syslinux requirement instead of using a packed pxelinux.0
+- added %defattr(-, root, root) to %files section. Thanks to
+  Christoph Thiel <cthiel@suse.de>
+
+-------------------------------------------------------------------
 Fri Jul 21 16:09:42 CEST 2006 - ms@suse.de
 
 - added support for high level urls like opensuse://
