@@ -346,7 +346,7 @@ sub setup {
 	#----------------------------------------
 	if (-d "$imageDesc/root") {
 		$kiwi -> info ("Copying user defined files to image tree");
-		qx ( cp -a --remove-destination $imageDesc/root/* $root 2>&1 );
+		qx ( cp -LR --remove-destination $imageDesc/root/* $root 2>&1 );
 		$kiwi -> done();
 	}
 	#========================================

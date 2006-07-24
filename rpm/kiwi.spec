@@ -36,6 +36,7 @@ Authors:
 
 
 %package -n kiwi-images
+Requires:     kiwi
 Version:      1.2
 Release:      1
 Summary:      OpenSuSE - KIWI image descriptions
