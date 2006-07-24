@@ -61,28 +61,42 @@ the format:
       options, and which packages make up the image. The structure of the
 	  file corresponds to the format
 
-      \begin{Command}{9cm}
-      <directory>\\
-      \hspace*{1cm}<\textbf{image} \textit{Key="Value"}/>\\
-      \hspace*{1cm}<\textbf{entry} type=\textit{"image-type"}/>\\
-      \hspace*{1cm}<entry source=\textit{"image-source"}/>\\
-      \hspace*{1cm}<entry name=\textit{"package-name"}/>\\
-      \hspace*{1cm}<\textbf{xenvm} name=\textit{"package-name"}/>\\
-      \hspace*{1cm}<\textbf{cpios} name=\textit{"package-name"}/>\\
-      </directory>
+      \begin{Command}{12cm}
+      <image name="Name">\\
+      \hspace*{1cm}<preferences>\\
+      \hspace*{2cm}<type>Type</type>\\
+      \hspace*{2cm}<size unit="Unit">Size</size>\\
+      \hspace*{2cm}<compressed>Yes/No</compressed>\\
+      \hspace*{1cm}</preferences>\\
+      \hspace*{1cm}<drivers type="Type">\\
+      \hspace*{2cm}<file name="Filename"/>\\
+      \hspace*{1cm}</drivers>\\
+      \hspace*{1cm}<repository type="Type">\\
+      \hspace*{2cm}<source path="URL"/>\\
+      \hspace*{1cm}</repository>\\
+      \hspace*{1cm}<packages type="Type">\\
+      \hspace*{2cm}<package name="Packagename"/>\\
+      \hspace*{1cm}</packages>\\
+      </image>
 	  \end{Command}
 
       The config.xml file contains four major parts embedded into a
-      XML directory tag:
+      XML image tag. The image tag contains the attrubute \textbf{name}
+      to indicate the base name of the image. It is automatically expanded
+      using the version number and the date. The version number is
+      extracted from the directory in which the description files for
+      this image are located.
 
       \begin{enumerate}
-          \item The \textbf{image} tag contains information needed to
-          create the logical extend. For this tag the following \textit{Keys}
+          \item The \textbf{preferences} tag contains information needed to
+          create the logical extend. For this tag the following subtags
           are defined:
           \begin{itemize}
               \item \textbf{size}\\
-                    Image size as a number followed by  \textbf{M} or \textbf{G}
-                    standing for Megabyte or Gigabyte. \underline{Note:}
+                    Image size as a number whereas the attribute
+                    \textbf{unit} defines the scale unit \textbf{M} or
+                    \textbf{G} standing for Megabyte or Gigabyte.
+                    \underline{Note:}
                     \textit{kiwi} supports the feature extending the image size
                     automatically to a calculated size, if the specified
                     config size value is to small. If the config size value
@@ -92,11 +106,6 @@ the format:
                     automatically by design, because it must be possible to
                     configure additional space, for example, if custom scripts
                     are run.
-              \item \textbf{name}\\
-                    The image name indicates the base name of the image. It
-                    is automatically expanded using the version number and the
-                    date. The version number is extracted from the directory
-                    in which the description files for this image are located.
               \item \textbf{type}\\
                     The image type of the logical extend: \textbf{ext2},
                     \textbf{ext3}, \textbf{cramfs}, \textbf{reiserfs}.
@@ -111,23 +120,6 @@ the format:
                     to extract the corresponding time zone from the timezone
                     package and to store it as \textit{/etc/localtime} in the
                     image.
-              \item \textbf{usbdrivers}\\
-                    Contains a comma-separated list of file names.
-                    The file names are interpreted as USB driver names and
-                    correspondingly captured if they are contained in the
-                    kernel tree.
-              \item \textbf{netdrivers}\\
-                    Contains a comma-separated list of file names. Every file is
-                    indicated relative to the directory
-                    \textit{/lib/modules/$<$Version$>$/kernel/drivers/net}.
-                    The names are interpreted as network drivers and captured if
-                    they are contained in the kernel tree.
-              \item \textbf{drivers}\\
-                    Contains a comma-separated list of file names. Every file is
-                    indicated relative to the directory
-                    \textit{/lib/modules/$<$Version$>$/kernel}
-                    The names are interpreted as general driver name and
-                    captured if they are contained in the kernel tree.
               \item \textbf{keytable}\\
                     Contains the name of the console keymap to use. The name
                     corresponds to a map file stored below the path
@@ -136,25 +128,51 @@ the format:
                     \textit{/etc/sysconfig/keyboard} will be set according
                     to the keyboard mapping.
           \end{itemize}
-          \item The \textbf{entry} tag contains at first the smart type of the
-                source repository, for example, \textbf{type=''yast2''} and next
-                the smart location of the source repository, for example,
-                \textbf{source=''/image/CDs/full-i386''}. Multiple source
-                statements are allowed. For information on
-                how to setup a smart source refer to
-                \textit{http://labix.org/smart}
-
-%\newpage
-		  \item The \textbf{xenvm} tag contains a list of package names
-                needed when this image is used in a Xen virtual machine.
-                The xenvm tag is only evaluated if the \textbf{--virtual xen}
-                option is specified while building the physical extend.
-          \item The \textbf{cpios} tag contains a list of package names
-                which have to be extracted first to build up the basic
-                image chroot system to allow applications like the package
-                manager to work within that logical extend.
+          \item The optional \textbf{drivers} tag contains driver file names.
+                The names are interpreted as general driver name and captured
+                if they are contained in the kernel tree. The attribute
+                \textbf{type} specifies one of the following driver types:
+                \begin{itemize}
+                \item \textbf{\underline{netdrivers}}\\
+                      Every file is indicated relative to the directory\\
+                      \textit{/lib/modules/$<$Version$>$/kernel/drivers/net}
+                \item \textbf{\underline{drivers}}\\
+                      Every file is indicated relative to the directory\\
+                      \textit{/lib/modules/$<$Version$>$/kernel}
+                \end{itemize}
+          \item The \textbf{repository} tag defines the source path and
+                type used by smart. The attribute \textbf{type} setup the
+                the smart type of the repository, for example,
+                \textbf{type=''yast2''} and the subtag \textbf{source}
+                contains the attribute \textbf{path} to setup the
+                the smart location of the repository, for example,
+                \textbf{source=''/image/CDs/full-i386''}. The path
+                specifaction can be done as:
+                \begin{itemize}
+                \item local path starting with /
+                \item \textbf{html://} or \textbf{ftp://} Network-Location
+                \item opensuse://Project-Name
+                \end{itemize}
+                Multiple repository
+                tags are allowed. For information on how to setup a smart
+                source refer to \textit{http://labix.org/smart}
+		  \item The \textbf{packages} tag contains a list of package names
+                whereas the attribute \textbf{type} specifies under which
+                cirumstances this package set needs to be used. There are
+                three different types of package sets:
+                \begin{itemize}
+                \item \textbf{\underline{image}}\\
+                      used to finish the image installation. All packages
+                      which makes up the image are listed there.
+                \item \textbf{\underline{boot}}\\
+                      used to start buildig the image. Basic components
+                      like libc or the smart package manager are listed
+                      here.
+                \item \textbf{\underline{xen}}\\
+                      used when the image needs support for Xen based
+                      virtualisation. Option \textbf{--virtual xen}
+                \end{itemize} 
       \end{enumerate}
-
 \end{itemize}
 
 In addition all values entered as \textbf{image} tag of the config.xml

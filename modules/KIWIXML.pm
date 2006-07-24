@@ -39,9 +39,10 @@ sub new {
 	# ...
 	# Create a new KIWIXML object which is used to access the
 	# configuration XML data saved as config.xml. The xml data
-	# is splitted into four major tags: entry, image, cpios and
-	# xenvm. While constructing an object of this type there
-	# will be a list created for each of the major tags.
+	# is splitted into four major tags: preferences, drivers,
+	# repository and packages. While constructing an object of this
+	# type there will be a node list created for each of the
+	# major tags.
 	# ---
 	my $this  = {};
 	my $class = shift;
