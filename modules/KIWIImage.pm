@@ -340,6 +340,24 @@ sub createImageLiveCD {
 		}
 	}
 	#==========================================
+	# Restoring physical extend
+	#------------------------------------------
+	$kiwi -> info ("Restoring physical extend...");
+	my @rodirs = qw (bin boot lib opt sbin usr);
+	foreach my $dir (@rodirs) {
+		my $data = qx (mv $imageTreeReadOnly/$dir $imageTree 2>&1);
+		my $code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> failed (); 
+			$kiwi -> error  ("Couldn't restore physical extend: $data");
+			$kiwi -> failed ();
+			return undef;
+		}
+	}
+	rmdir $imageTreeReadOnly;
+	$kiwi -> done();
+
+	#==========================================
 	# Prepare and Create ISO boot image
 	#------------------------------------------
 	$main::Survive  = "yes";
