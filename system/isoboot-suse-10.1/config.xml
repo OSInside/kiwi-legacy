@@ -1,6 +1,6 @@
-<image name="initrd-netboot">
+<image name="initrd-isoboot">
 	<preferences>
-		<type>cpio</type>
+		<type>ext2</type>
 		<size unit="M">60</size>
 		<compressed>yes</compressed>
 	</preferences>

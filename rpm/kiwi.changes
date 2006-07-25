@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Jul 25 17:25:37 CEST 2006 - ms@suse.de
+
+- added support for Live CD file systems (CD ISO)
+  The bootstrap code for the live CD is not yet ready
+
+-------------------------------------------------------------------
 Mon Jul 24 15:09:12 CEST 2006 - ms@suse.de
 
 - added syslinux requirement instead of using a packed pxelinux.0

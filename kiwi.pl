@@ -26,16 +26,18 @@ use KIWIXML;
 use KIWILog;
 use KIWIImage;
 
-my $Version = "1.2";
+our $Version = "1.2";
+our $System  = "/usr/share/kiwi/image";
 #============================================
 # Globals
 #--------------------------------------------
-my $Prepare;     # control XML file for building chroot extend
-my $Create;      # image description for building image extend
-my $Destination; # destination directory for logical extends
-my $LogFile;     # optional file name for logging
-my $Virtual;     # optional virtualisation setup
-my $RootTree;    # optional root tree destination
+our $Prepare;     # control XML file for building chroot extend
+our $Create;      # image description for building image extend
+our $Destination; # destination directory for logical extends
+our $LogFile;     # optional file name for logging
+our $Virtual;     # optional virtualisation setup
+our $RootTree;    # optional root tree destination
+our $Survive;     # if set to "yes" don't exit kiwi
 
 #============================================
 # Globals
@@ -141,14 +143,21 @@ sub main {
 				$image -> createImageReiserFS ();
 				last SWITCH;
 			};
-			/cramfs/   && do {
-				$image -> createImageCramFS ();
+			/cpio/     && do {
+				$image -> createImageCPIO ();
+				last SWITCH;
+			};
+			/iso:(.*)/ && do {
+				$image -> createImageLiveCD ( $1 );
 				last SWITCH;
 			};
 			$kiwi -> error  ("Unsupported type: $type");
 			$kiwi -> failed ();
+			kiwiExit (1);
 		}
+		kiwiExit (0);
 	}
+	return 1;
 }
 
 #==========================================
@@ -241,6 +250,9 @@ sub kiwiExit {
 	# private Exit function, exit safely
 	# ---
 	my $code = $_[0];
+	if ($Survive eq "yes") {
+		return;
+	}
 	if ($code != 0) {
 		$kiwi -> error  ("KIWI exited with error(s)");
 		$kiwi -> done ();
