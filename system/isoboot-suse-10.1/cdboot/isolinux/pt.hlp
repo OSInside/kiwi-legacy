@@ -1,0 +1,166 @@
+mainAjuda da Rotina de ArranqueBem-vido ao SUSE Linux 10.1
+
+Utilize este menu para escolher a função desejada. Se tem problemas com a navegação neste sistema de ajuda, prima F1 para entrar na helpdescrição do sistema de ajuda. As principais funções deste menu são:
+
+harddiskIniciardeDiscoRígido: Esta selecção não fará nada ao sistema. Apenas inicia um sistema operativo previamente instalado.
+
+linuxInstalação: Este modo de instalação funciona com a maioria das máquinas. Se experimentar um congelamento do sistema durante o arranque, ou problemas com a detecção dos seus componentes de hardware, como controladores de discos ou placas de rede, tente uma das seguintes opções de instalação.
+
+noacpiInstalação--ACPIDesactivado: Muitos dos computadores actualmente comercializados têm implementações de ACPI incompletas ou avariadas. Esta selecção desactiva o suporte ACPI no kernel, mas ainda assim activa muitas funcionalidades de desempenho, como o DMA para discos rígidos IDE.
+
+failsafeInstalação--DefiniçõesSeguras: Se não teve sucesso com a Instalação, esta selecção poderá resolver o seu problema.
+
+rescueSistemadeRecuperação: Esta imagem de arranque inicia um pequeno sistema Linux em memória RAM. Isto é útil se o sistema não arranca de forma apropriada. Depois de arrancar o sistema, inicie a sua sessão como root.
+
+memtestTestedeMemória: O teste de memória é útil para além da simples verificação da instalação de novos módulos de memória. Trata-se de um teste de stress para uma grande parte do seu sistema de computador, e pode-lhe indicar problemas de hardware.
+
+optOpçõesdeArranque: As opções de arranque podem alterar completamente o comportamento do seu sistema. São definições para o kernel.
+
+helpF1Ajuda: Esta é sensível ao contexto. Mostra-lhe ecrãs diferentes dependendo do elemento activo no ecrã de arranque. Existe também disponível uma descrição deste sistema de ajuda.
+
+videomodeF3MododeVídeo: Escolha aqui entre diferentes resoluções de ecrã a utilizar durante a instalação. Se econtrar problemas com a instalação gráfica, o modo texto pode ser uma forma de contrornar o problema.
+
+install_srcF4OrigemdeInstalação: Escolha a origem de instalação.
+
+keytableF2Idioma: Defina o idioma e o mapeamento de teclado utilizado pela rotina de arranque.
+
+driverupdateF5DriverdeActualização: Para computadores muito novos, pode ser necessário um driver de actualização para instalar o sistema.helpUtilizando o Sistema de AjudaA ajuda online da rotina de arranque é sensível ao contexto. Fornece informação acerca do item de menu seleccionado ou, se está a editar as opções de arranque, tenta procurar informação acerca da opção na qual o cursor está posicionado.
+
+Teclas de Navegação
+
+  Seta para Cima: ilumina o link anterior
+  Seta para Baixo: ilumina o link seguinte
+  Seta para a Esquerda, Backspace: volta ao tópico anterior
+  Seta para a Direita, Enter, Barra de Espaços: Entra no link
+  Page Up: rola uma página para cima
+  Page Down: rola uma página para baixo
+  Home: vai para o início da página
+  End: vai para o fim da página
+  Esc: sair da ajuda
+
+
+Voltar à mainPáginadeIníciodriverupdateDriver de ActualizaçãoSe necessita de utilizar uma disquete ou CD-ROM com um driver de actualização, prima F5. A rotina de arranque pedir-lhe-á para introduzir o suporte com o driver de actualização depois de carregar o kernel de Linux.
+
+Uma actualização de driver é tipicamente uma disquete com novas versões de drivers de hardware ou correcções de erros, necessários durante a instalação.
+
+Voltar à mainPáginadeIníciovideomodeSelecção de Modo de VídeoPrima F3 para obter uma lista dos modos de vídeo que a sua placa gráfica suporta. É previamente seleccionado, o modo mais alto de resolução que o seu monitor pode suportar.
+
+É possível que o seu monitor não possa ser automaticamente detectado. Nesse caso, escolha manualmente o modo preferido de visualização.
+
+Se o seu sistema tem problemas com a placa gráfica durante a instalação, o modo texto pode ser uma forma de contornar o problema.
+
+Voltar à mainPáginadeIníciokeytableSelecção de Teclado e IdiomaPrima F2 para alterar o idioma e a disposição de teclado que a rotina de arranque utiliza.
+
+Voltar à mainPáginadeInícioinstall_srcOrigem de InstalaçãoPrima F4 para escolher uma origem de instalação.
+
+Isto é o mesmo que utilizar a opção de arranque o_installinstall.
+
+Voltar à mainPáginadeIníciolinuxInstalaçãoEscolha a Instalação para iniciar a instalação pré-definida. As optopçõesdearranque introduzidas são utilizadas no arranque. Este item activa várias funcionalidades existentes no hardware mais comum.
+
+
+
+Voltar à mainPáginadeInícioharddiskIniciar de Disco RígidoEscolha Iniciar de Disco Rígido para iniciar o sistema instalado no seu disco rígido local. Este sistema deve estar correctamente instalado, porque apenas o MBR (Registo Mestre de Arranque) do primeiro disco rígido é iniciado. O ID do dispositivo do primeiro disco rígido é fornecido pela BIOS do computador.
+
+Utilize esta selecção se se esqueceu de remover o CD ou DVD da unidade, e pretende iniciar o computador a partir de disco rígido.
+
+
+
+Voltar à mainPáginadeInícionoacpiInstalação -- ACPI DesactivadoO hardware muito recente, por vezes necessita que o ACPI afectue o controlo do manuseamento de interrupções. O ACPI substitui completamente o sistema APM mais antigo.
+
+Escolha Instalação -- ACPI Desactivado se encontrar problemas durante o arranque do kernel. Problemas conhecidos com máquinas que têm difculdades com ACPI são:
+
+   * o kernel congela durante o arranque
+   * As placas PCI não são detectadas ou inicializadas correctamente
+
+
+
+Voltar à mainPáginadeIníciofailsafeInstalação -- Definições SegurasEscolha Instalação -- Definições Seguras se o computado encravar durante a instalação, ou surgiram erros irreprodutíveis. Esta opção desactiva o DMA para unidades IDE, assim como todas as funcionalidades de gestão de energia. Veja também as opções de kernel para o_apmapm, o_acpiacpi e o_ideide.
+
+Voltar à mainPáginadeIníciorescueSistema de RecuperaçãoO Sistema de Recuperação é um pequeno sistema em memória RAM. A partir daí, é possível realizar todo o tipo de alterações a um sistema instalado. Em virtude de apenas existirem ferramentas de baixo nível disponíveis neste sistema, ele é orientado para utilizadores avançados.
+
+
+
+Voltar à mainPáginadeIníciomemtestTeste de MemóriaO Teste de Memória incluído, fornece boas possibilidades para realizar um teste de stress ao hardware de um sistema. O seu principal objectivo é detectar memória RAM avariada, mas também testa e utiliza muitas outras partes do sistema.
+Não existem garantias de que a memória se encontre em bom estado, mesmo que nenhum erro tenha sido encontrado, apesar de que a maioria dos defeitos serão encontrados.
+
+
+Voltar à mainPáginadeIníciooptOpções de ArranqueExistem dois tipos de opções de arranque disponíveis. Primeiro, existem opções que afectam o instalador. Segundo, existem opções de kernel. Algumas das opções mais comuns são:
+
+a) opções de instalador
+
+  o_installinstall -- escolher uma origem de instalação
+  networknetworkoptions -- as opções de rede
+  o_vncvncoptions -- opções para instalação através de VNC
+
+b) opções de kernel
+
+  o_splashsplash influencia o comportamento do ecrã de splash
+  o_apmapm -- comuta a gestão de consumo de energia
+  o_acpiacpi -- configuração avançada e interface de energia
+  o_ideide -- controla o subsistema IDE
+
+
+Voltar à mainPáginadeInícioo_installOpções de Instalador: installPor definição, os CDROMs locais são procurados para serem a origem da instalação. Para uma instalação de rede, escolha install opção. Os protocolos possíveis de instalação são
+  * FTP
+  * NFS
+  * HTTP
+A sintaxe a utilizar é simplesmente como as URLs standard. Por exemplo, se o seu servidor se encontra em 192.168.0.1 e pretende realizar uma instalação baseada em NFS, mais concretamente a partir do directório /install neste servidor, especifique a origem da seguinte forma:
+
+  install=nfs://192.168.0.1/install
+
+A placa de rede será configurada por dhcp, ou terá de especificar os parâmetros conforme descrito na secção networkopçõesderede.
+
+
+Voltar às optOpçõesdeArranqueo_splashOpções de Kernel: splashO ecrã de splash é a imagem apresentada durante o arranque do sistema.
+
+splash=0
+O ecrã de splash é desliga. Esta opção é útil com monitores muito antigos, ou se ocorre um erro.
+
+splash=verbose
+Activa o splash, e as mensagens de kernel e de arranque são ainda assim apresentadas.
+
+splash=silent
+Activa o splash, mas sem mensagens. Em vez das mensagens, é desenhada uma barra de progresso.
+
+Voltar às optOpçõesdeArranquenetworkOpções de Instalador: Opções de RedeÉ possível configurar a interface de rede agora mesmo. O hardware será detectado mais tarde pelo YaST2. O conjunto mínimo de opções para configurar a sua placa de rede consiste num endereço IP e uma máscara de rede. Por exemplo:
+
+  hostip=192.168.0.10 netmask=255.255.255.0
+
+ou numa forma mais abreviada:
+
+  hostip=192.168.0.10/24
+
+Se especificou uma o_installinstalaçãobaseadaemrede e não especificar ambas as opções, o instalador tenta configurar a interface de rede com dhcp. Se necessitar de uma gateway pré-definida, especifique-a com a opção gateway. Por exemplo:
+
+  gateway=192.168.0.8
+
+
+Voltar às optOpçõesdeArranqueo_vncOpções de Instalador: vncPara activar a instalação por VNC, especifique os parâmetros vnc e vncpassword:
+
+  vnc=1 vncpassword=exemplo
+
+O servidor VNC será iniciado, e poderá controlar o YaST2 a partir de qualquer cliente VNC a partir de um sistema remoto.
+
+
+Voltar às optOpçõesdeArranque.o_apmOpções de Kernel: apmO APM é uma de duas das estratégias de gestão de consumo de energia utilizadas nos computadores actuais. É principalmente utilizada nos computadores portáteis para funções como suspender para disco, mas pode também ser responsável por desligar o computador depois de ser dado o comando de encerramento. O APM sustenta-se numa BIOS funcional. Se a BIOS se encontra avariada, o APM pode ter uma utilização limitada, ou chegar a não permitir um correcto funcionamento do computador. Assim sendo, pode ser desligado com o parâmetro
+
+  apm=off -- desligar completamente o APM
+
+Alguns computadores muito novos podem beneficiar mais do novo o_acpiACPI.
+
+Voltar às optOpçõesdeArranqueo_acpiOpções de Kernel: acpiO ACPI (Advanced Configuration and Power Interface) é uma norma que define uma interface de gestão e configuração de consumo de energia entre o sistema operativo e a BIOS. Por pré-definição, o acpi é ligado quando é detectada uma BIOS mais recente que o ano 2000. Existem vários parâmetros frequentemente utilizados para controlar o comportamento do ACPI:
+
+  pci=noacpi -- não utilizar o ACPI para encaminhar as interrupções de PCI   acpi=oldboot -- manter activadas apenas as partes do ACPI que são relevantes
+  acpi=off -- desligar completamente o ACPI
+  acpi=force -- ligar o ACPI mesmo que a sua BIOS seja anterior ao ano 2000
+
+especialmente em computadores recentes, substitui o velho sistema o_apmapm.
+
+Voltar às optOpçõesdeArranqueo_ideOpções de Kernel: ideO IDE é habitual na maioria dos computadores de secretária (ao contrário do SCSI). Para contornar alguns problemas que ocorrem com os sistemas IDE, utilize o parâmetro de kernel:
+
+  ide=nodma -- desligar o dma para unidades IDE
+
+
+Voltar às optOpçõesdeArranque.bitsSelecção do Tipo de SoftwareTem a opção de instalar a versão 32-bit ou 64-bit do SUSE Linux.
+
+Voltar à mainPáginadeInício 

@@ -3,53 +3,25 @@
 #=======================================
 # Globals
 #---------------------------------------
-CD_PREPARER="CD-Team, http://kiwi.berlios.de"
+CD_PREPARER="KIWI-Team - http://kiwi.berlios.de"
 CD_PUBLISHER="SUSE LINUX Products GmbH, suse@suse.de"
-PARAMS="-r -J -pad"
-XPARAMS=
-SOURCE=$1
-DEST=$2
-SOURCE2=`mktemp -d /var/tmp/m_cd-XXXXXX`
-SORTFILE=`mktemp /var/tmp/m_cd-XXXXXX`
-ROOT_ON_CD=suse
-DESCRDIR=suse/setup/descr
-BOOT_BASE_DIR=suse/images
-BOOT_IMAGE=$BOOT_BASE_DIR/boot
-BOOT_ISOLINUX=$BOOT_BASE_DIR/boot
 
 #=======================================
-# Check content
+# Globals
 #---------------------------------------
-if [ -f $SOURCE/content ] ; then
-	BOOT_BASE_DIR=boot
-	BOOT_IMAGE=$BOOT_BASE_DIR/image
-	BOOT_ISOLINUX=$BOOT_BASE_DIR/loader
-	while read KEY VALUE ; do
-	case $KEY in
-		DATADIR)
-			ROOT_ON_CD=$VALUE
-		;;
-		DESCRDIR)
-			DESCRDIR=$VALUE
-		;;
-		DISTPRODUCT)
-			DISTPRODUCT=$VALUE
-		;;
-		DISTVERSION)
-			DISTVERSION=$VALUE
-		;;
-	esac
-	done < $SOURCE/content
-	DISTVERSION=`echo $DISTVERSION | tr '-' '#'`
-	DISTIDENT="$DISTPRODUCT-$DISTVERSION"
-	for i in $SOURCE/media.? ; do
-		test -d $i || continue
-		{
-			read VENDOR
-			read CREATIONDATE
-		} < $i/media
-	done
-fi
+PARAMS="-r -J -pad"
+SORTFILE=`mktemp /var/tmp/m_cd-XXXXXX`
+SOURCE2=`mktemp -d /var/tmp/m_cd-XXXXXX`
+ROOT_ON_CD=suse
+BOOT_BASE_DIR=boot
+BOOT_IMAGE=$BOOT_BASE_DIR/image
+BOOT_ISOLINUX=$BOOT_BASE_DIR/loader
+
+#=======================================
+# Parameters
+#---------------------------------------
+SOURCE=$1  # source tree
+DEST=$2    # output file
 
 #=======================================
 # Create ISO
@@ -127,93 +99,84 @@ then
 	if test -f $SOURCE/content -a -z "$TMP_LS" ; then
 		# we already collected this above
 		APPID=$DISTIDENT
-		elif test -f $SOURCE/$DESCRDIR/info ; then
-			set -- `fgrep DIST_IDENT $SOURCE/$DESCRDIR/info`
-			APPID=$2
+	elif test -f $SOURCE/$DESCRDIR/info ; then
+		set -- `fgrep DIST_IDENT $SOURCE/$DESCRDIR/info`
+		APPID=$2
+	else
+		# If we have directory "update" in the second level, we assume
+		# this is a Patch-CD
+		if test ! -z "$TMP_LS" ; then
+		if test -f $SOURCE/media.1/patches ; then
+			APPID="`cat $SOURCE/media.1/patches|sed -e"s|/ ||g" | tr " " _`"
 		else
-			# If we have directory "update" in the second level, we assume
-			# this is a Patch-CD
-			if test ! -z "$TMP_LS" ; then
-			if test -f $SOURCE/media.1/patches ; then
-				APPID="`cat $SOURCE/media.1/patches|sed -e"s|/ ||g" | tr " " _`"
-			else
-				APPID="`cat $SOURCE/.S.u.S.E-disk-* | tr " " _`"
-			fi
-			fi
+			APPID="`cat $SOURCE/.S.u.S.E-disk-* | tr " " _`"
 		fi
-		if test -z "$APPID" \
-			-a -f $SOURCE/$ROOT_ON_CD/MD5SUMS \
-			-a -f $SOURCE/.S.u.S.E-disk-*
-		then
-			APPID=`cat $SOURCE/.S.u.S.E-disk-*|tr " " - |sed -e"s@-Version-@-@"`
-			APPID="$APPID.0#0"
-		fi
-		APPID=`echo $APPID | tr " " -`
-		test -n "$APPID" && PARAMS="$PARAMS -A $APPID"
-
-		if test -f $SOURCE/content ; then
-			MEDIANUMBER=1
-			for i in $SOURCE/media.? ; do
-				test -d $i || continue
-				MEDIADIR=`ls -d $SOURCE/media.?`
-				MEDIANUMBER=${MEDIADIR##$SOURCE/media.}
-			done
-			VOL="0$MEDIANUMBER"
-		elif test -f $SOURCE/.S.u.S.E-disk-* ; then
-			BASE=`basename $SOURCE/.S.u.S.E-disk-*`
-			VOL=`echo $BASE | cut -c 16-17`
-		fi
-		if test -n "$VOL" ; then
-			DIS=`echo $APPID | sed -e "s/.*-//" | tr -d \.\#`
-			VOL_PREFIX="SU"
-			case "$APPID" in
-				*Basic*)
-					KND="B"
-				;;
-				*Evaluation*)
-					KND="E"
-				;;
-				*FTP*)
-					KND="F"
-				;;
-				*full*)
-					KND="Z"
-				;;
-				*ITP*)
-					KND="I"
-				;;
-				*Runtime*)
-					KND="R"
-				;;
-				*Patch-CD*)
-					DIS="PATCH"
-					KND="P"
-				;;
-				*)
-					KND="0"
-				;;
-			esac
-			VOL="$VOL_PREFIX$DIS.$KND$VOL"
-			if test -n "$VOL" ; then
-				PARAMS="$PARAMS -V $VOL"
-			fi
 		fi
 	fi
-	mkisofs \
-		-p "$CD_PREPARER" \
-		-P "$CD_PUBLISHER" \
-		$PARAMS -o $DEST $XPARAMS $SOURCE
+	if test -z "$APPID" \
+		-a -f $SOURCE/$ROOT_ON_CD/MD5SUMS \
+		-a -f $SOURCE/.S.u.S.E-disk-*
+	then
+		APPID=`cat $SOURCE/.S.u.S.E-disk-*|tr " " - |sed -e"s@-Version-@-@"`
+		APPID="$APPID.0#0"
+	fi
+	APPID=`echo $APPID | tr " " -`
+	test -n "$APPID" && PARAMS="$PARAMS -A $APPID"
 
-	ISOMARKBOOT=isomarkboot-pc
-	test -f /sbin/isomarkboot && ISOMARKBOOT=/sbin/isomarkboot
-
-	if test -f $SOURCE/etc/bootlx ; then
-		$ISOMARKBOOT $DEST etc/bootlx
-	else
-	if test -f $SOURCE/boot/bootlx ; then
-		$ISOMARKBOOT $DEST boot/bootlx
+	if test -f $SOURCE/content ; then
+		MEDIANUMBER=1
+		for i in $SOURCE/media.? ; do
+			test -d $i || continue
+			MEDIADIR=`ls -d $SOURCE/media.?`
+			MEDIANUMBER=${MEDIADIR##$SOURCE/media.}
+		done
+		VOL="0$MEDIANUMBER"
+	elif test -f $SOURCE/.S.u.S.E-disk-* ; then
+		BASE=`basename $SOURCE/.S.u.S.E-disk-*`
+		VOL=`echo $BASE | cut -c 16-17`
+	fi
+	if test -n "$VOL" ; then
+		DIS=`echo $APPID | sed -e "s/.*-//" | tr -d \.\#`
+		VOL_PREFIX="SU"
+		case "$APPID" in
+			*Basic*)
+				KND="B"
+			;;
+			*Evaluation*)
+				KND="E"
+			;;
+			*FTP*)
+				KND="F"
+			;;
+			*full*)
+				KND="Z"
+			;;
+			*ITP*)
+				KND="I"
+			;;
+			*Runtime*)
+				KND="R"
+			;;
+			*Patch-CD*)
+				DIS="PATCH"
+				KND="P"
+			;;
+			*)
+				KND="0"
+			;;
+		esac
+		VOL="$VOL_PREFIX$DIS.$KND$VOL"
+		if test -n "$VOL" ; then
+			PARAMS="$PARAMS -V $VOL"
+		fi
 	fi
 fi
+
+isolinux-config --base $BOOT_ISOLINUX $SOURCE/$BOOT_ISOLINUX/isolinux.bin
+mkisofs \
+	-p "$CD_PREPARER" \
+	-publisher "$CD_PUBLISHER" \
+	$PARAMS -o $DEST $XPARAMS $SOURCE
 
 #=======================================
 # Clean up

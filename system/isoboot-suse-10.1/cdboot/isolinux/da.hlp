@@ -1,0 +1,170 @@
+mainOpstartsindlæser hjælpVelkommen til SUSE Linux 10.1
+
+Brug denne menu til at vælge den ønskede funktion. Hvis du har problemer med at nagivere i hjælpesystemet så tryk F1 for at få helpinformation om hvordan hjælpesystemet fungerer. Hovedfunktionerne i denne menu er:
+
+harddiskIndlæsfraHarddisk: Dette valg ændrer ikke på noget som helst i systemet. Det starter bare det allerede installerede operativsystem.
+
+linuxBegyndinstallation: Denne installationstilstand virker på de fleste maskiner. Hvis du oplever at systemet fryser under opstart eller har problemer med at finde dine hardware komponenter, såsom diskcontrollere eller netkort, bør du prøve en af følgende installationsmuligheder.
+
+noacpiInstallationudenACPIunderstøttelse: Mange af de computere der sælges for tiden har ukomplette eller fejlbehæftede ACPI implementationer. Dette valg slår APCI understøttelse fra i kernen men lader stadig mange performance funktioner som DMA for IDE harddiske være slået til.
+
+failsafeFejlsikretinstallation: Hvis du ikke havde heldet med dig med Begynd installation er det ret sandsynligt at dette valg løser problemet.
+
+rescueRedningssystem: Vælges dette bliver et lille Linux system indlæst i hukommelsen. Dette er nyttigt hvis systemet ikke starter korrekt op. Efter systemet er indlæst logger du ind som root. Der er ikke nogen adgangskode.
+
+memtestHukommelsestest: Hukommelsestest kan bruges til mere end blot at tjekke hukommelsen for fejl. Det er også en stress test for store dele af din computer or kan give ledetråde hvis der er hardware problemer.
+
+optOpstartsmuligheder: Opstartsmulighederne kan ændre måde dit system opfører sig på fuldstændig. Det er instillinger for kernen.
+
+helpF1Hjælp: Denne hjælp følger dine valg. Den vil vise dig forskelligt indhold afhængig at det aktive element på opstartsskærmen. Der er også en beskrivelse af hjælpesystem tilgængelig.
+
+keytableF3Sprog: Sæt sprog og tastaturlayout der skal bruges under installationen.
+
+videomodeF4Skærmopløsning: Her vælger du imellem de forskellige skærmopløsninger dit system understøtter til brug under installationen. Hvis du løber ind i problemer med den grafiske installation så prøv Text Mode hvor det hele er tekstbaseret.
+
+install_srcF2Installationskilde: Vælg installationskilden.
+
+driverupdateF5Driveropdatering: For helt nye maskiner er det nogen gange nødvendigt med driveropdateringer for at man kan installere systemet.helpSådan bruges hjælpesystemetOpstartsindlæserens indbyggede hjælp følger dine valg. Den vil give dig oplysinger om det valgte menupunkt eller, hvis du er ved at indtaste opstarts- muligheder, prøver den at finde information om det pågældende valg der er ud for markøren.
+
+Navigationstaster
+
+  Pil op: Fremhæv forrige link
+  Pil ned: Fremhæv næste link
+  Pil til venstre, Backspace: Vend tilbage til forrige emne
+  Pil til højre, Enter, Space: Følg link
+  Page Up: Gå en side op
+  Page Down: Gå en side ned
+  Home: Gå til starten af siden
+  End: Gå til slutningen af siden
+  Esc: Forlad hjælp igen
+
+Vend tilbage til mainStartsidendriverupdateDriveropdateringHvis du har en driveropdaterings diskette eller CD-ROM du skal bruge, så tryk F5. Opstartsindlæsere vil bede dig om at indsætte dette medie efter Linuxkernen er blevet indlæst.
+
+Normalt vil en driveropdatering være en diskette med nye versioner af hardware drivere eller fejlrettelser der er påkræver for at kunne lave installationen.
+
+Vend tilbage til mainStartsidenvideomodeSkærmopløsningTryk F4 for at se listen over skærmopløsninger som dit grafikkort understøtter. Den højeste opløsning din skærm understøtter vil som regel være forvalgt.
+
+Det er muligt at din skærm ikke kan genkendes korrekt. I så fald kan du angive den ønskede tilstand manuelt.
+
+Hvis dit system har problemer med grafikkortet under installationen kan Text Mode valget være en brugbar løsning i stedet.
+
+Vend tilbage til mainStartsidenkeytableSprog og tastaturlayoutTryk F3 for at vælge sprog og tastaturlayout for installationen.
+
+Vend tilbage til mainStartsideninstall_srcInstallationskildeTryk F2 for at vælge installationskilden.
+
+Dette svarer til at angive o_installinstall opstartsvalget.
+
+Vend tilbage til mainStartsidenlinuxBegynd installationVælg Begynd installation for at lave en normal installation. optopstartsmulighederne der indtastes bruges under opstarten. Denne installationstype tilvælger mange af de funktioner som plejer at være tilgængelige på nyere hardware.
+
+
+
+Vend tilbage til mainStartsidenharddiskIndlæs fra harddiskVælg Indlæs fra harddisk for at starte det allerede installerede operativsystem på din harddisk. Dette system skal være installeret korrekt for dette valg tjekker kun MBR (Master Boot Record) på den første harddisk der bliver fundet. Det er BIOSen der afgør hvilken disk det er.
+
+Vælg denne mulighed hvis du har glemt at tage CD'en eller DVD'en ud af drevet og vil starte computere op fra harddisken.
+
+
+
+Vend tilbage til mainStartsidennoacpiInstallation uden ACPI understøttelseMeget ny hardware kræver nogen gange at ACPI styrer interrupthåndteringen. ACPI erstattter fuldstændig det gamle APM system.
+
+Vælg Installation uden ACPI understøttelse hvis du oplever problemer under opstart af kernen. Kendte problemer med maskiner der har problemer med ACPI er:
+
+   * Kernen fryser under opstart
+   * PCI kort bliver ikke fundet eller initialiseret korrekt
+
+
+
+Vend tilbage til mainStartsidenfailsafe-Fejlsikret installationVælg Fejlsikret installtion hvis du oplever at systemet hænger eller giver fejl der ikke kan reproduceres. Denne installationstype fravælger DMA for IDE drev og alle strømstyringsfunktioner. Se også kernetilvalgene o_apmapm, o_acpiacpi og o_ideide.
+
+Vend tilbage til mainStartsidenrescueRedningssystemRedningssystemet er et lille basis system der holdes helt i hukommelsen. Herfra er det muligt at lave alle mulige ændringer i det installerede system Da kun de mest basale værktøjer er tilgængelige i dette system er det kun beregnet for eksperter.
+
+
+
+Vend tilbage til mainStartsidenmemtestHukommelsestestDen medleverede Hukommelsestest giver gode muligheder for at stressteste hardwaren i systemet. Det primære formål er at finde dårlig RAM, men den stresser mange andre dele af systemet ved samme lejlighed.
+Der er ingen garanti for at hukommelsen er i orden hvis der ikke findes nogen fejl, men langt de fleste hukommelsesproblemer vil blive fundet.
+
+
+Vend tilbage til mainStartsidenoptOpstartsmulighederDer er 2 typer af opstartsmuligheder tilgængelig. Først er der de muligheder der påvirker installationsprogrammet. Dernæst er der kerne tilvalgene. Nogle af de mere almindelige muligheder er:
+
+a) installationsmuligheder
+
+  o_installinstall -- vælg installationskilden
+  networknetværksmuligheder -- netværksopsætning
+  o_vncvnctilvalg -- muliggør installation via VNC
+
+b) kerne tilvalg
+
+  o_splashsplash -- bestemmer hvordan opstarten ser ud
+  o_apmapm -- vælg eler fravælg strømstyring
+  o_acpiacpi -- avanceret opsætning af strømstyring
+  o_ideide -- IDE subsystem indstillinger
+
+
+Vend tilbage til mainStartsideno_installInstaller Options: installSom standard vil CD-ROM/DVD drevet blive gennemsøgt for en installationskilde. Hvis du vil lave en netværksinstallation så vælg install muligheden. Du kan vælge imellem følgende protokoller:
+  * FTP
+  * NFS
+  * HTTP
+Syntaksen er den samme som almindelige URL'er. Hvis du for eksempel har en server på IP 192.168.0.1 og du vil lave en NFS-baseret installation fra kataloget /install på denne server så angiv kilden som følger:
+
+  install=nfs://192.168.0.1/install
+
+netkortet skal enten være opsat med DHCP eller også skal du angive netværksparametrene selv som beskrevet i afsnittet networknetværksmuligheder.
+
+
+Vend tilbage til optOpstartsmulighedero_splashKerne tilvalg: splashsplash billedet vises mens maskinen indlæser operativsystemet.
+
+splash=0
+splash billedet vises ikke. Dette kan være nyttigt på meget gamle skærme eller hvis der opstår fejl under opstart.
+
+splash=verbose
+Aktiverer splash billedet, men viser stadig kerne og opstartsbeskeder.
+
+splash=silent
+Aktiverer splash billedet, men ingen beskeder vises. I stedet vises en grafisk fremgangsbar.
+
+Vend tilbage til optOpstartsmulighedernetworkInstallationmuligheder: NetværkDet er muligt at opsætte netkoret med det samme. Hardwaren vil blive fundet senere af YaST2. Minimaltopsætningen af netkortet består af en IP adresse og en netmaske. For eksempel:
+
+  hostip=192.168.0.10 netmask=255.255.255.0
+
+eller endnu kortere:
+
+  hostip=192.168.0.10/24
+
+Hvis du har valgt en o_installnetværksbaseretinstallation og du ikke angiver nogen af disse linier vil installationsprogrammet forsøge at sætte netkortet op med DHCP. Hvis du har brug for en standard rute/gateway så angiv denne med gateway tilvalget. For eksempel:
+
+  gateway=192.168.0.8
+
+Det er muligt at angive proxy instillinger for FTP og HTTP installationer med følgende valg:
+
+  proxy=ProxyIP proxyport=port
+
+Eksempel: proxy=192.168.0.250 proxyport=3128
+
+Vend tilbage til optOpstartsmulighedero_vncInstallationsmuligheder: vncFor at slå VNC installation til skal du angive parametrene vnc og vncpassword:
+
+  vnc=1 vncpassword=example
+
+Hvis du ikke angiver vncpassword vil du blive promptet for adgangskode senere. VNC serveren vil herefter blive startet og du kan styre YaST2 delen af installationen med et hvilket som helst VNC program fra et fjernsystem.
+
+
+Vend tilbage til optOpstartsmuligheder.o_apmKerne tilvalg: apmAPM er en af de to strømstyrings strategier der bruges på moderne computere. Den bruges hovedsagelig på bærbare til ting som suspendering til disk, men kan bl.a. også bruges til at slukke maskinen. For at APM skal virke godt er en korrekt opsat BIOS en nødvendighed. Hvis BIOSen er dårlig vil APM kun være af begrænset nytte eller måske endda forhindre computeren i at fungere korrekt. Det er derfor muligt at slå APM fra med parametren
+
+  apm=off -- Deaktiverer APM fuldstændig
+
+Visse nye computere kan have glæde af den nyere o_acpiACPI.
+
+Vend tilbage til optOpstartsmulighedero_acpiKerne tilvalg: acpiACPI (Advanced Configuration and Power Interface) er en standard der angiver opsætning af strømstyring og anden hardware opsætning mellem operativsystemet og BIOSen. Som standard bliver acpi slået til når en BIOS bliver fundet der er nyere end år 2000. Der er en række ofte brugte parametre der styrer hvordan ACPI fungerer:
+
+  pci=noacpi -- Brug ikke ACPI til at rute PCI interrupts   acpi=oldboot -- Nøjes med at bruge de dele af ACPI der bruges til at boote systemet
+  acpi=off -- Slår ACPI helt fra
+  acpi=force -- Aktivér ACPI selvom BIOSen er fra før 2000
+
+Især på nyere computere erstatter denne det ældre o_apmapm system.
+
+Vend tilbage til optOpstartsmulighedero_ideKerne tilvalg: ideIDE er almindeligvis anvendt i desktopcomputere, i modsætning til SCSI. For at omgå visse hardware problemer der kan opstå med IDE systemer kan du bruge kerneparametren:
+
+  ide=nodma -- Deaktiverer DMA for IDE drev
+
+
+Vend tilbage til optOpstartsmuligheder.bitsSoftwaretype valgDu kan vælge imellem at installere 32-bit eller 64-bit versionen af SUSE Linux.
+
+Vend tilbage til mainStartsiden 

@@ -1,0 +1,182 @@
+mainRendszertöltő súgóÜdvözli a SUSE Linux 10.1
+
+Kérem válassza ki a kívánt funkciót a menüből. Ha gondot okoz a súgórendszerben való navigáció, az F1 megnyomásával elolvashatja a súgórendszer helpleírását. A menü legfontosabb funkciói:
+
+harddiskRendszerindításmerevlemezről: Elindítja a már korábban telepített rendszert a merevlemezről. Ebben az esetben semmilyen módosítás nem történik a rendszeren.
+
+linuxTelepítés: Ez a telepítési mód a legtöbb gépen működik. Ha rendszerindítás közben lefagyást észlel, vagy problémák jelentkeznek a hardverkomponensek (például lemezvezérlők vagy hálózati kárták) felismerése során, akkor próbálkozzon meg az alábbi telepítési lehetőségekkel.
+
+noacpiTelepítés-ACPItámogatásnélkül: Nagyon sok mai számítógépen nem teljes vagy hibás az ACPI megvalósítása. Ez a menüpont letiltja a kernel ACPI-támogatását, ugyanakkor megtart számos további teljesítménynövelő funkciót, például az IDE-merevlemezek DMA-támogatását.
+
+failsafeTelepítés-Biztonságosbeállításokkal: Ha a Telepítés mód nem bizonyult megfelelőnek, ez a mód lehet, hogy megoldja a problémát.
+
+rescueMentőrendszer: Ez a rendszerkép egy kisméretű rendszert indít el RAM-ból. Akkor hasznos, ha a rendszer nem megfelelően indul. A rendszer betöltése után jelentkezzen be root felhasználóként.
+
+memtestMemóriateszt: A memóriatesztelés nemcsak az újonnan behelyezett memóriamodulok ellenőrzésére jó, hanem a rendszer nagy részét leterheli és alkalmas lehet hardverproblémák kimutatására.
+
+optRendszerindításiparaméterek: A rendszerindítási paraméterek teljesen megváltoztathatják a rendszer viselkedését. Ezek a kernel beállításai.
+
+helpF1Segítség: Környezetérzékeny súgó. A rendszerindítási képernyő aktív elemétől függően más és más képernyőket jelenít meg és magáról a súgórendszerről is található leírás.
+
+videomodeF3Videomód: Itt választhatja ki a telepítés során használt képernyőfelbontást. Ha probléma van a grafikus telepítéssel, kérem próbálja meg a szöveges módot.
+
+install_srcF4Telepítésforrása: Válassza ki a telepítés forrását.
+
+keytableF2Nyelv: Adja meg a rendszertöltő által használt nyelvi és billentyűzetbeállításokat.
+
+driverupdateF5Meghajtóprogram-frissítés: Nagyon új gépek esetében szükséglehet valamely meghajtóprogram frissítésére a rendszer telepítéséhez.helpA súgórendszer használataA rendszertöltő online súgója környezetérzékeny. Információt nyújt a kiválasztott menüelemről, vagy ha a rendszerindítási paramétereket módosítja, akkor megpróbál információt adni arról a paraméterről, amelyen a kurzor éppen áll.
+
+Navigációs billentyűk
+
+  Felfelé nyíl: az előző hivatkozás kiemelése
+  Lefelé nyíl: a következő hivatkozás kiemelése
+  Bal nyíl, Backspace: visszatérés az előző témakörre
+  Jobb nyíl, Enter, szóköz: következő hivatkozás
+  Page Up: egy oldallal feljebb ugrás
+  Page Down: egy oldallal lejjebb ugrás
+  Home: oldal elejére ugrás
+  End: oldal végére ugrás
+  Esc: kilépés a súgóból
+
+
+Visszatérés a mainKezdőoldalradriverupdateMeghajtóprogram frissítéseHa egy meghajtóprogram-frissítő hajlékonylemezt vagy CD-t kíván használni, nyomja meg az F5 billentyűt. A rendszertöltő a Linux kernel betöltése után felszólítja a meghajtóprogram-frissítő adathordozó behelyezésére.
+
+A meghajtóprogram-frissítő általában egy hajlékonylemez, amelyen a telepítés során szükséges hardver-meghajtóprogram legújabb változata vagy hibajavítása található.
+
+Visszatérés a mainKezdőoldalravideomodeVideomód kiválasztásaNyomja meg az F3 gombot a grafikus kártya által támogatott videomódok listájának lekéréséhez. A monitor által támogatott legnagyobb felbontás alapértelmezésként kerül kiválasztásra.
+
+Előfordulhat, hogy a monitor automatikus felismerése sikertelen, ebben az esetben válassza ki a használni kívánt felbontást.
+
+Ha gondok vannak a grafikus kártyával a telepítés során, a szöveges mód nyújthat kerülő megoldást.
+
+Visszatérés a mainKezdőoldalrakeytableNyelv és billentyűzetkiosztás kiválasztásaAz F2 gombbal módosíthatja a rendszertöltő által használt nyelvet és billentyűzetkiosztást.
+
+Visszatérés a mainKezdőoldalrainstall_srcTelepítés forrásaAz F4 megnyomásával választható ki a telepítés forrása.
+
+Ez ugyanaz, mint az o_installinstall paraméter használata.
+
+Visszatérés a mainKezdőoldalralinuxTelepítésA Telepítés lehetőség kiválasztásával indul az alapértelmezett telepítés. A megadott optrendszerindításiparaméterek alkalmazásra kerülnek. Ez a lehetőség a szokásosan elérhető hardvereszközök számos funkcióját aktiválja.
+
+
+
+
+
+Visszatérés a mainKezdőoldalraharddiskRendszerindítás merevlemezrőlA Rendszerindítás merevlemezről lehetőséggel indítható el a helyi merevlemezen telepített rendszer. A rendszert helyesen kell telepíteni, mert csak az első merevlemez mester rendszerindító rekordja (MBR) kerül indításra. Az első merevlemez eszközazonosítóját a számítógép BIOS-a biztosítja.
+
+Ez akkor hasznos, ha bentfelejtett a CD-t vagy DVD-t a meghajtóban, és feltétlenül a merevlemezről kívánja elindítani a rendszert.
+
+
+
+
+
+Visszatérés a mainKezdőoldalranoacpiTelepítés - ACPI támogatás nélkülA SUSE Linuxban a 2.6-os kernel ACPI támogatása elérhető a stabil 2.4-es kernelhez is. A nagyon friss hardvereszközök néha igénylik az ACPI meglétét a megszakítások kezeléséhez. Az ACPI teljesen felváltja a régi APM rendszert..
+
+Ha problémákba ütközik a kernel indítása során, válassza a Telepítés - ACPI támogatás nélkül lehetőséget. Ismert problémák hibás ACPI-vel rendelkező gépek esetén:
+
+* a kernel lefagy rendszerindítás közben
+* a PCI kártyák nem kerülnek felismerésre, vagy nem sikerül tökéletesen inicializálni őket.
+
+
+
+
+
+Visszatérés a mainKezdőoldalrafailsafeTelepítés - Biztonságos beállításokkalHa telepítés közben lefagyásokat vagy nem megismételhető hibákat észlel, válassza a Telepítés - Biztonságos beállításokkal lehetőséget. Ez a beállítás letiltja az IDE-meghajtók DMA-támogatását és az összes tápellátás-felügyeleti funkciót. Tekintse meg továbbá az o_apmapm, az o_acpiacpi és az o_ideide paramétereket is.
+
+Visszatérés a mainKezdőoldalrarescueMentőrendszerA Mentőrendszer egy kisméretű, RAM-lemez alapú rendszer, így lehetséges egy már telepített rendszer módosítása. Mivel ebben a rendszerben csak alacsonyszintű eszközök érhetők el, használatát kizárólag szakembereknek javasoljuk
+
+
+
+
+
+Visszatérés a mainKezdőoldalramemtestMemóriatesztA mellékelt Memóriateszt remek lehetőséget nyújt egy rendszer hardvereszközeinek tesztelésére. Elsődleges célja természetesen a hibás RAM-modulok azonosítása, de a rendszer egyéb részeit is terheli.
+Az, hogy a rendszer nem talál hibát, még nem garancia a memória tökéletességére, bár a legtöbb hiba előjön a vizsgálat során.
+
+
+
+Visszatérés a mainKezdőoldalraoptRendszerindítási paraméterekKétféle rendszerindítási paraméter használható. Egyes paraméterek a telepítőprogram működését befolyásolják. Mások pedig a kernel működését. Néhány a leggyakoribb paraméterek közül:
+
+a) telepítési beállítások
+
+  o_installinstall -- telepítési forrás megadása
+  networkhálózatibeállítások -- a hálózati beállítások
+  o_vncvncbeállítások -- beállítások VNC-n keresztüli telepítéshez
+
+b) kernelbeállítások
+
+  o_splashsplash -- a rendszerindító képernyő viselkedésének beállítása
+  o_apmapm -- tápellátás-felügyelet átkapcsolása
+  o_acpiacpi -- Speciális beállítási és tápellátási felület (Advanced Configuration and Power Interface)
+  o_ideide -- az IDE-alrendszer szabályozása
+
+
+
+Visszatérés a mainKezdőoldalrao_installTelepítési beállítások: installAlapértelmezés szerint telepítési forrásként a helyi CD-olvasókat keresi végig a rendszer. Hálózati telepítéshez az install paramétert kell használni. A telepítéshez használható protokollok:
+* FTP
+* NFS
+* HTTP
+A szintaxis pontosan olyan, mint a szokásos URL-eké. Ha például a szerver a 192.168.0.1 címen található és a szerver /install könyvtárából kíván NFS alapú telepítést végrehajtani, akkor így kell megadni a forrást:
+
+  install=nfs://192.168.0.1/install
+
+A hálózati kártya beállítása történhet dhcp segítségével, vagy a networkhálózatibeállítások között bemutatott módon megadhatók kézzel a paraméterek.
+
+
+Visszatérés a optRendszerindításibeállításokhozo_splashKernelbeállítások: splashA rendszerindító képernyő az a kép, amelyet a rendszer indulás közben megjelenít.
+
+splash=0
+
+Nem látható rendszerindító képernyő Ez nagyon régi monitorok esetén lehet hasznos, vagy egyes hibák előfordulása esetén.
+
+splash=verbose
+
+A rendszerindító képernyő, valamint a kernel- és rendszerindítási üzenetek egyaránt látszanak.
+
+splash=silent
+
+Megjelenik a rendszerindító képernyő, de üzenetek nem láthatók. Ehelyett egy folyamatjelző jelenik meg a képernyőn.
+
+
+Visszatérés a optRendszerindításibeállításokhoznetworkTelepítési beállítások: Hálózati beállításokItt közvetlenül be lehet állítani a hálózati csatolót. A YaST2 a hardvert majd később felismeri. A hálózat beállításának minimális szintje a gép IP-címének és alhálózati maszkjának megadása. Például:
+
+  hostip=192.168.0.10 netmask=255.255.255.0
+
+vagy rövidebb formában:
+
+  hostip=192.168.0.10/24
+
+Ha o_installhálózatialapútelepítést ír elő, de nem adja meg ezeket a paramétereket, akkor a telepítőprogram dhcp segítségével próbálja meg beállítani a hálózati csatolót. Ha szükséges, az alapértelmezett átjáró a gateway paraméterrel adható meg. Például:
+
+  gateway=192.168.0.8
+
+
+
+Visszatérés a optRendszerindításibeállításokhozo_vncTelepítési beállítások: vncA VNC-telepítés bekapcsolásához a vnc és vncpassword paramétereket kell megadni:
+
+  vnc=1 vncpassword=mintajelszó
+
+Elindul a VNC szerver és a YaST2 távolról, VNC-kliensen keresztül vezérelhető
+
+
+
+Visszatérés a optRendszerindításibeállításokhozo_apmKernelbeállítások: apmAz APM a mai gépeken használt kétféle tápellátás-felügyeleti rendszer egyike. Általában noteszgépeken használatos olyan funkciókra, mint a rendszer felfüggesztése a memória lemezre írásával, de ez felelős a kikapcsolás után a számítógép lekapcsolásáért is. Az APM használhatához egy helyesen működő BIOS-ra van szükség. Ha a BIOS sérült, akkor előfordulhat, hogy az APM csak korlátozott mértékben használható, sőt, az is, hogy miatta nem működik a számítógép. Éppen ezért kikapcsolható az alábbi paraméterrel:
+
+  apm=off -- az APM teljes kikapcsolása
+
+Néhány újabb számítógép a modernebb o_acpiACPI rendszert használja.
+
+Visszatérés a optRendszerindításibeállításokhozo_acpiKernelbeállítások: acpiAz ACPI (Advanced Configuration and Power Interface) nevű szabvány az operációs rendszer és a BIOS közötti tápellátási és konfiguráció-felügyeleti illesztőket definiálja. Alapértelmezés szerint az acpi paraméter bekapcsolásra kerül, ha 2000-nél frissebb BIOS-t észlel a telepítőprogram. Az ACPI működése többféle módon is szabályozható:
+
+  pci=noacpi -- ne az ACPI irányítsa át a PCI-megszakításokat acpi=oldboot -- az ACPI-nek csak a rendszerindításhoz kapcsolódó részei kerülnek aktiválásra
+
+  acpi=off -- az ACPI teljes kikapcsolása
+  acpi=force -- az ACPI bekapcsolása még akkor is, ha a BIOS 2000-nél régebbi
+
+Különösen új számítógépeken az ACPI teljesen felváltja a régebbi o_apmapm rendszert.
+
+Visszatérés a optRendszerindításibeállításokhozo_ideKernelbeállítások: ideSzemben az SCSI illesztővel, az IDE-felület szinte minden asztali munkaállomásban megtalálható. Az IDE-rendszerekkel kapcsolatban előforduló esetleges hardverproblémák elkerüléséhez használható a következő paraméter:
+
+  ide=nodma -- a DMA-kezelés kikapcsolása az IDE-meghajtók számárabitsSzoftvertípus kiválasztásaTelepítheti a SUSE Linux akár 32, akár 64 bites változatát.
+
+Visszatérés a mainKezdőoldalra
+
+Visszatérés a optRendszerindításibeállításokhoz. 

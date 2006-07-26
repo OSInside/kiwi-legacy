@@ -364,6 +364,7 @@ sub createImageLiveCD {
 	$main::RootTree = "/tmp/kiwi-cdboot-$$";
 	$main::Prepare  = $main::System."/".$boot;
 	$main::Create   = $main::RootTree;
+	$kiwi -> info ("Creating ISO boot image: $boot...\n");
 	if (! main::main()) {
 		$main::Survive = "default";
 		return undef;
@@ -411,8 +412,7 @@ sub createImageLiveCD {
 		$kiwi -> failed ();
 		return undef;
 	}
-	qx (cp $CD/bootlogo $main::RootTree/CD/boot/loader);
-	qx (cp $CD/message  $main::RootTree/CD/boot/loader);
+	qx (cp $CD/isolinux/* $main::RootTree/CD/boot/loader);
 	qx (cp $CD/isolinux.cfg $main::RootTree/CD/boot/loader);
 	qx (cp $IL $main::RootTree/CD/boot/loader);
 	$kiwi -> done ();

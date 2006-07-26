@@ -1,0 +1,169 @@
+mainAjuda do Boot LoaderBem-vindo ao SUSE Linux 10.1
+
+Use este menu para selecionar a função desejada. Se tiver problemas ao navegar neste sistema de ajuda, pressione F1 para exibir a helpdescrição do sistema de ajuda. As funções principais deste menu são:
+
+harddiskInicializardoDiscoRígido: Essa seleção não afetará o sistema. Ela apenas iniciará um sistema operacional instalado previamente.
+
+linuxInstalação: O modo de instalação funciona na maioria das máquinas. Se o sistema congelar durante o boot ou se houver problemas na detecção dos componentes do hardware, como controladoras de disco ou placas de rede, tente uma das opções de instalação a seguir.
+
+noacpiInstalação--ACPIDesabilitada: Muitos dos computadores atualmente vendidos possuem implementações incompletas ou com falhas da ACPI. Essa seleção desabilita o suporte a ACPI no kernel, mas mantém muitos recursos de desempenho habilitados, como DMA para discos rígidos IDE.
+
+failsafeInstalação-ConfiguraçõesSeguras: Caso não tenha obtido êxito com Instalação, esta seleção poderá solucionar o problema.
+
+rescueSistemadeRecuperação: Essa imagem de boot inicia um pequeno sistema Linux na RAM. Isso é útil caso o sistema não inicialize normalmente. Após inicializar o sistema, efetue login como root.
+
+memtestTestedeMemória: O teste de memória é útil não apenas para verificar a instalação de novos módulos de memória. É um teste de tensão que abrange uma grande parte do sistema do computador e pode indicar problemas de hardware.
+
+optOpçõesdeBoot: As opções de boot podem mudar completamente o comportamento do sistema. Trata-se de configurações para o kernel.
+
+helpF1Ajuda: Esse recurso é sensível ao contexto. Ele mostrará telas diferentes, dependendo do elemento ativo da tela de boot. Também há uma descrição disponível desse sistema de ajuda.
+
+videomodeF3MododeVídeo: Escolha aqui entre resoluções de tela diferentes durante a instalação. Se tiver problemas com a instalação gráfica, o modo de texto pode ser uma boa alternativa para você.
+
+install_srcF4FontedeInstalação: Escolha a fonte de instalação.
+
+keytableF2Idioma: Configure o mapeamento de idioma e teclado usado pelo boot loader.
+
+driverupdateF5AtualizaçãodeDriver: Para máquinas muito novas, uma atualização de driver talvez seja necessária para instalar o sistema.helpUsando o Sistema de AjudaA ajuda online do boot loader é sensível ao contexto. Ela oferece informações sobre o item de menu selecionado ou, se você estiver editando opções de boot, ela tenta procurar informações sobre a opção na qual o cursor está posicionado.
+
+Teclas de Navegação
+
+  Seta para Cima: destacar link anterior
+Seta para Baixo: destacar próximo link
+Seta para a Esquerda, Backspace: retornar ao tópico anterior
+Seta para a Direita, Enter, Espaço: seguir link
+Page Up: rolar uma página para cima
+Page Down: rolar uma página para baixo
+Home: ir para o início da página
+End: ir para o fim da página
+Esc: sair da ajuda
+
+
+Retornar à mainPáginaInicialdriverupdateAtualização de DriverSe precisar de um disquete ou CD-ROM de atualização de driver, pressione F5. O boot loader pede que você insira uma mídia de atualização de driver depois de carregar o kernel do Linux.
+
+Uma atualização de driver vem, normalmente, em um disquete com novas versões de drivers de hardware ou correções de erros necessários durante a instalação.
+
+Retornar à mainPáginaInicialvideomodeSeleção do Modo de VídeoPressione F3 para obter a lista de modos de vídeo suportados pela sua placa de vídeo. O modo mais alto que o monitor pode exibir está pré-selecionado.
+
+É possível que seu monitor não possar ser detectado automaticamente. Neste caso, selecione manualmente seu modo de preferência.
+
+Se o sistema tiver problemas com a placa de vídeo durante a instalação, o modo de texto poderá ser uma alternativa útil.
+
+Retornar à mainPáginaInicialkeytableSeleção de Layout de Idioma e TecladoPressione F2 para mudar o layout do idioma e do teclado usado pelo boot loader.
+
+Retornar à mainPáginaInicialinstall_srcFonte de InstalaçãoPressione F4 para escolher uma fonte de instalação.
+
+É o mesmo que usar a opção de boot o_installinstalar.
+
+Retornar à mainPáginaIniciallinuxInstalaçãoSelecione Instalação para iniciar a instalação padrão. As optopçõesdeboot digitadas são usadas na inicialização. Esse item ativa muitos recursos de hardware comumente disponíveis.
+
+
+
+Retornar à mainPáginaInicialharddiskInicializar do Disco RígidoSelecione Inicializar SO Instalado para iniciar o sistema instalado no disco rígido local. Esse sistema deve ser instalado corretamente, pois somente o registro mestre de inicialização (MBR) do primeiro disco rígido é inicializado. O ID do dispositivo do primeiro disco rígido é fornecido pelo BIOS do computador.
+
+Use-o caso tenha esquecido de remover o CD ou DVD da unidade e deseje iniciar o computador a partir do disco rígido.
+
+
+
+Retornar à mainPáginaInicialnoacpiInstalação -- ACPI DesabilitadaAlgumas vezes, hardwares muito novos exigem que a ACPI controle o tratamento de interrupções. A ACPI substitui completamente o antigo sistema APM.
+
+Selecione Instalação -- ACPI Desabilitada se tiver problemas durante o boot do kernel. As dificuldades conhecidas em máquinas que possuem problemas com ACPI são:
+
+   * kernel congela durante o boot
+* Placas PCI não são detectadas nem inicializadas corretamente
+
+
+
+Retornar à mainPáginaInicialfailsafeInstalação -- Configurações SegurasSelecione Instalação -- Configurações Seguras se tiver ocorrerem congelamentos durante a instalação ou erros irreproduzíveis. Essa opção desabilita o DMA para unidades IDE e todos os recursos de gerenciamento de energia. Consulte também as opções de kernel para o_apmapm, o_acpiacpi e o_ideide.
+
+Retornar à mainPáginaInicialrescueSistema de RecuperaçãoO Sistema de Recuperação é um sistema de base de disco RAM pequeno. A partir daqui, é possível fazer todos os tipos de mudanças em um sistema instalado. Por esse sistema possuir apenas ferramentas de nível baixo, ele é destinado a usuários avançados.
+
+
+
+Retornar à mainPáginaInicialmemtestTeste de MemóriaO Teste de Memória incluído oferece boas possibilidades de testar a tensão do hardware de um sistema. Seu principal objetivo é detectar uma RAM danificada, mas ele também analisa muitas outras partes do sistema.
+Não há garantia de que a memória seja boa se nenhum erro for encontrado, apesar de que a maioria dos defeitos de memória serão localizados.
+
+
+Retornar à mainPáginaInicialoptOpções de BootHá dois tipos de opções de boot disponíveis. Primeiro, há opções que afetam o instalador. Segundo, há opções de kernel. Algumas das opções mais comuns são:
+
+a) opções do instalador
+
+o_installinstalar -- selecionar uma fonte de instalação
+networkopçõesderede -- as opções de rede
+o_vncopçõesvnc -- opções para instalação através de VNC
+
+b) opções de kernel
+
+o_splashsplash -- influenciar o comportamento da splash screen
+o_apmapm -- alternar o gerenciamento de energia
+o_acpiacpi -- advanced configuration and power interface (interface de energia e configuração avançada)
+o_ideide -- controlar o subsistema IDE
+
+
+Retornar à mainPáginaInicialo_installOpções do Instalador: instalarPor padrão, a fonte de instalação é procurada nos CD-ROMs locais. Para uma instalação de rede, selecione a opção instalar. Os protocolos de instalação possíveis são
+* FTP
+* NFS
+* HTTP
+A sintaxe a ser usada é igual à dos URLs padrão. Por exemplo, se o servidor é encontrado em 192.168.0.1 e você deseja executar uma instalação baseada em NFS a partir do diretório /install nesse servidor, especifique a fonte da seguinte forma:
+
+  install=nfs://192.168.0.1/install
+
+A placa de rede será configurada com dhcp ou você precisará especificar os parâmetros, conforme descrito nas networkopçõesderede.
+
+
+Retornar às optOpçõesdeBooto_splashOpções de Kernel: splashA splash screen é uma imagem mostrada durante a inicialização do sistema.
+
+splash=0
+
+A splash screen é desligada. Isso pode ser útil com monitores muito antigos ou se ocorrerem alguns erros.
+
+splash=verbose
+
+Ativa splash, kernel e mensagens de boot ainda são mostradas.
+
+splash=silent
+
+Ativa splash, mas não ativa mensagens. Em vez disso, uma barra de progresso é exibida.
+
+Retornar às optOpçõesdeBootnetworkOpções do Instalador: Opções de RedeÉ possível configurar a interface da rede neste exato momento. O hardware será detectado posteriormente pelo YaST2. O conjunto mínimo de opções para configurar a placa de rede consiste em IP do host e máscara de rede. Por exemplo:
+
+  hostip=192.168.0.10 netmask=255.255.255.0
+
+ou de forma abreviada:
+
+  hostip=192.168.0.10/24
+
+Se você tiver especificado uma o_installinstalaçãobaseadaemrede e não tiver especificado essas duas opções, o instalador tentará configurar a interface de rede com dhcp. Se precisar de um gateway padrão, especifique isso com a opção gateway. Por exemplo:
+
+  gateway=192.168.0.8
+
+
+Retornar às optOpçõesdeBooto_vncOpções do Instalador: vncPara habilitar a instalação VNC, especifique os parâmetros vnc e vncpassword:
+
+  vnc=1 vncpassword=exemplo
+
+O servidor VNC será iniciado e você poderá controlar o YaST2 em qualquer cliente VNC a partir de um sistema remoto.
+
+
+Retornar às optOpçõesdeBoot.o_apmOpções de Kernel: apmAPM é uma das duas estratégias de gerenciamento de energia usada em computadores atuais. É usada, principalmente, em laptops para funções como suspender para disco, mas também pode ser responsável por encerrar o computador após o desligamento. APM depende de um BIOS com funcionamento correto. Se o BIOS estiver danificado, o APM poderá fica com uso limitado ou até mesmo impedir que o computador funcione. Portanto, ele pode ser desligado com o parâmetro
+
+  apm=off -- desligar completamente o APM
+
+Alguns computadores muito novos tiram mais proveito da o_acpiACPI mais recente.
+
+Retornar às optOpçõesdeBooto_acpiOpções de Kernel: acpiACPI (Advanced Configuration and Power Interface) é um padrão que define interfaces de gerenciamento de configuração e energia entre um sistema operacional e o BIOS. Por padrão, a acpi é ligada quando um BIOS detectado é mais novo do que os do ano 2000. Há vários parâmetros normalmente usados para controlar o comportamento da ACPI:
+
+pci=noacpi -- não usar ACPI para rotear interrupções de PCI acpi=oldboot -- somente as partes da ACPI relevantes para a inicialização permanecem ativadas
+acpi=off -- desligar completamente a ACPI
+acpi=force -- ligar a ACPI, mesmo se o BIOS for anterior ao ano 2000
+
+Especialmente em computadores novos, ele substitui o sistema o_apmapm antigo.
+
+Retornar às optOpçõesdeBooto_ideOpções de Kernel: ideIDE, diferente do SCSI, é usado normalmente na maioria das estações de trabalho. Para contornar alguns problemas de hardware que ocorrem com sistemas IDE, use o parâmetro kernel:
+
+  ide=nodma -- desligar o DMA para unidades IDE
+
+
+Retornar às optOpçõesdeBoot.bitsSeleção de Tipo de SoftwareVocê pode instalar a versão de 32 bits ou de 64 bits do SUSE Linux.
+
+Retornar à mainPáginaInicial 

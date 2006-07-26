@@ -22,6 +22,8 @@
 #--------------------------------------
 export PATH="/sbin:/bin:/usr/sbin:/usr/bin"
 export CONFIG="/cdrom/config.isoclient"
+export LIVESYSTEM="livesystem"
+export LIVECD="livecd"
 export IFS_ORIG=$IFS
 
 DEBUG=0
@@ -125,6 +127,9 @@ CDMount () {
 	mkdir -p /cdrom
 	mount $cddev /cdrom 2>/dev/null
 }
+CDUmount () {
+	umount $cddev
+}
 #======================================
 # Beautify Startup
 #--------------------------------------
@@ -173,6 +178,7 @@ IFS="," ; for i in $IMAGE;do
 		2) imageVersion=$n
 	esac
 	done
+	imageBase=$imageName
 	imageName="/cdrom/$imageName-$imageVersion"
 	imageMD5s="$imageName.md5"
 	while true;do
@@ -206,17 +212,24 @@ IFS="," ; for i in $IMAGE;do
 	done
 	rm -f /etc/ireal.md5
 done
+CDUmount
 
 #======================================
 # 6) Mount OS image to /mnt
 #--------------------------------------
 mount $imageDevice /mnt
+mkdir -p /mnt/$LIVECD && mount $cddev /mnt/$LIVECD
+mkdir -p /mnt/$LIVESYSTEM && \
+	mount -o loop /mnt/$LIVECD/$imageBase-read-only /mnt/$LIVESYSTEM
 
 #======================================
 # 7) Create RO Link list
 #--------------------------------------
-# TODO
-
+cd /mnt
+for dir in bin boot lib opt sbin usr;do
+	ln -s $LIVESYSTEM/$dir $dir
+done
+cd /
 
 #======================================
 # 8) Create system dependant files
@@ -236,7 +249,6 @@ find . -type d | while read d ; do  mkdir -p /mnt/$d ; done
 find . -type f | while read f ; do  cp $f /mnt/$f ; done
 cd /
 rm -rf /config
-
 
 #======================================
 # 10) setup real root device
@@ -258,7 +270,7 @@ cp /etc/resolv.conf /mnt/etc
 #======================================
 # 13) Activate new root
 #--------------------------------------
-Echo "Activating Image: [$imageName]"
+Echo "Activating Image: [$imageBase]"
 cd /mnt && exec < dev/console >dev/console 2>&1
 /mnt/sbin/pivot_root . mnt >/dev/null 2>&1
 if test $? != 0;then
