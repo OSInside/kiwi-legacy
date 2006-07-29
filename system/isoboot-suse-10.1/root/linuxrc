@@ -195,12 +195,12 @@ fi
 setupNetwork
 
 #======================================
-# 3) Mount the CD device
+# 5) Mount the CD device
 #--------------------------------------
 CDMount
 
 #======================================
-# 4) Load configuration
+# 6) Load configuration
 #--------------------------------------
 if [ ! -f $CONFIG ];then
 	systemException \
@@ -210,7 +210,7 @@ fi
 importFile < $CONFIG
 
 #======================================
-# 5) Download RW part of the CD image
+# 7) Download RW part of the CD image
 #--------------------------------------
 IFS="," ; for i in $IMAGE;do
 	field=0
@@ -258,7 +258,7 @@ done
 CDUmount
 
 #======================================
-# 6) Mount OS image to /mnt
+# 8) Mount OS image to /mnt
 #--------------------------------------
 mount $imageDevice /mnt
 mkdir -p /mnt/$LIVECD && mount $cddev /mnt/$LIVECD
@@ -266,7 +266,7 @@ mkdir -p /mnt/$LIVESYSTEM && mount -o loop \
 	/mnt/$LIVECD/$imageBase-$imageVersion-read-only /mnt/$LIVESYSTEM
 
 #======================================
-# 7) Create RO Link list
+# 9) Create RO Link list
 #--------------------------------------
 cd /mnt
 for dir in bin boot lib opt sbin usr;do
@@ -275,7 +275,7 @@ done
 cd /
 
 #======================================
-# 8) Create system dependant files
+# 10) Create system dependant files
 #--------------------------------------
 mkdir -p /config/etc
 echo "$imageDevice / $FSTYPE   defaults 0 0"         > /config/etc/fstab
@@ -285,7 +285,7 @@ echo "sysfs   /sys     sysfs   noauto 0 0"          >> /config/etc/fstab
 echo "tmpfs   /dev/shm tmpfs   defaults 0 0"        >> /config/etc/fstab
 
 #======================================
-# 9) copy system dependant files
+# 11) copy system dependant files
 #--------------------------------------
 cd /config
 find . -type d | while read d ; do  mkdir -p /mnt/$d ; done
@@ -294,24 +294,24 @@ cd /
 rm -rf /config
 
 #======================================
-# 10) setup real root device
+# 12) setup real root device
 #--------------------------------------
 echo 256 > /proc/sys/kernel/real-root-dev
 
 #======================================
-# 11) umount system filesystems
+# 13) umount system filesystems
 #--------------------------------------
 umount /dev/pts
 umount /sys
 umount /proc
 
 #======================================
-# 12) copy initrd files to image
+# 14) copy initrd files to image
 #--------------------------------------
 cp /etc/resolv.conf /mnt/etc
 
 #======================================
-# 13) Activate new root
+# 15) Activate new root
 #--------------------------------------
 Echo "Activating Image: [$imageBase]"
 cd /mnt && exec < dev/console >dev/console 2>&1
@@ -323,7 +323,7 @@ else
 	PIVOT=true
 fi
 #======================================
-# 14) Unmount initrd / system init
+# 16) Unmount initrd / system init
 #--------------------------------------
 echo " "
 echo "Booting into Live CD System..."
