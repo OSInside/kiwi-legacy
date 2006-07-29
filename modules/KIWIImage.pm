@@ -425,7 +425,7 @@ sub createImageLiveCD {
 		$kiwi -> failed ();
 		return undef;
 	}
-	print FD "/dev/ram1;$namecd\n";
+	print FD "IMAGE=/dev/ram1;$namecd\n";
 	close FD;
 
 	#==========================================

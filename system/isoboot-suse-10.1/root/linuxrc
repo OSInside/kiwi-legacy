@@ -97,6 +97,32 @@ systemException () {
 	;;
 	esac
 }
+probeNetworkCard () {
+	hwnet=/usr/sbin/hwinfo
+	hwstr="Driver Activation Cmd:"
+	hwcmd=`$hwnet --netcard | grep "$hwstr" | head -n 1`
+	hwcmd=`echo $hwcmd | cut -f2 -d:`
+	hwcmd=`echo $hwcmd | tr -d \" | cut -f2 -d " "`
+	if [ ! -z "$hwcmd" ];then
+		networkModule=$hwcmd
+	fi
+}
+setupNetwork () {
+	dhcpcd eth0 >/dev/null 2>&1
+	if test $? != 0;then
+		return
+	fi
+	ifconfig lo 127.0.0.1 netmask 255.0.0.0 up
+	for i in 1 2 3 4 5 6 7 8 9 0;do
+		[ -s /var/lib/dhcpcd/dhcpcd-eth0.info ] && break
+		sleep 5
+	done
+	importFile < /var/lib/dhcpcd/dhcpcd-eth0.info
+	echo "search $DOMAIN" > /etc/resolv.conf
+	IFS="," ; for i in $DNS;do
+		echo "nameserver $i" >> /etc/resolv.conf
+	done
+}
 enoughRAM () {
 	needRAM=`expr $blocks \* $blocksize`
 	needRAM=`expr $needRAM / 1024`
@@ -109,8 +135,9 @@ enoughRAM () {
 	return 1
 }
 CDDevice () {
-	/sbin/modprobe usb-storage
-	/sbin/modprobe sr_mod
+	for module in usb-storage sr_mod cdrom ide-generic ide-cd;do
+		/sbin/modprobe $module
+	done
 	info="/proc/sys/dev/cdrom/info"
 	cddev=`cat $info | grep "drive name:" | cut -f2 -d: | tr "\t" ":"`
 	cddev=`echo $cddev | cut -f3 -d:`
@@ -150,6 +177,22 @@ closeKernelConsole
 #--------------------------------------
 touch /etc/modules.conf
 touch /lib/modules/*/modules.dep
+
+#======================================
+# 3) Obtain/load network module
+#--------------------------------------
+probeNetworkCard
+if test ! -z "$networkModule";then
+	#=============================================
+	# network module found, try to load
+	#---------------------------------------------
+	modprobe $networkModule 2>/dev/null
+fi  
+
+#======================================
+# 4) Setup network interface and DNS
+#--------------------------------------
+setupNetwork
 
 #======================================
 # 3) Mount the CD device
@@ -219,8 +262,8 @@ CDUmount
 #--------------------------------------
 mount $imageDevice /mnt
 mkdir -p /mnt/$LIVECD && mount $cddev /mnt/$LIVECD
-mkdir -p /mnt/$LIVESYSTEM && \
-	mount -o loop /mnt/$LIVECD/$imageBase-read-only /mnt/$LIVESYSTEM
+mkdir -p /mnt/$LIVESYSTEM && mount -o loop \
+	/mnt/$LIVECD/$imageBase-$imageVersion-read-only /mnt/$LIVESYSTEM
 
 #======================================
 # 7) Create RO Link list
