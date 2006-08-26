@@ -22,8 +22,8 @@ KIWIMODVZ   = ${kiwi_prefix}/modules
 TOOLSVZ     = ${kiwi_prefix}/tools
 KIWIIMAGE   = ${kiwi_prefix}/image
 TFTPKIWI    = ${tftp_prefix}/KIWI
-TFTPBOOT    = ${tftp_prefix}/boot
-TFTPBOOTCONF= ${tftp_prefix}/boot/pxelinux.cfg
+TFTPBOOT    = ${tftp_prefix}/
+TFTPBOOTCONF= ${tftp_prefix}/pxelinux.cfg
 TFTPUPLOAD  = ${tftp_prefix}/upload
 TFTPIMAGE   = ${tftp_prefix}/image
 

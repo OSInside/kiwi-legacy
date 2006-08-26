@@ -87,11 +87,11 @@ make buildroot=$RPM_BUILD_ROOT \
 %dir %{_var}/lib/tftpboot
 %dir %{_var}/lib/tftpboot/KIWI
 %dir %{_var}/lib/tftpboot/boot
-%dir %{_var}/lib/tftpboot/boot/pxelinux.cfg
+%dir %{_var}/lib/tftpboot/pxelinux.cfg
 %dir %{_var}/lib/tftpboot/image
 %dir %{_var}/lib/tftpboot/upload
-%{_var}/lib/tftpboot/boot/pxelinux.cfg/default
-%{_var}/lib/tftpboot/boot/pxelinux.0
+%{_var}/lib/tftpboot/pxelinux.cfg/default
+%{_var}/lib/tftpboot/pxelinux.0
 
 #=================================================
 # KIWI-images...

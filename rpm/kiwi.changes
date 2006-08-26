@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Wed Aug  9 10:01:55 CEST 2006 - ms@suse.de
+
+- fixed pxe config file initrd=... statement
+- added 3com tg3 and bcm5700 network drivers to suse netboot
+- changed location of pxelinux.0 and pxelinux.cfg
+- added support for SATA und SCSI storage devices
+
+-------------------------------------------------------------------
 Tue Jul 25 17:25:37 CEST 2006 - ms@suse.de
 
 - added support for Live CD file systems (CD ISO)

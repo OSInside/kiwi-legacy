@@ -92,7 +92,7 @@ importFile () {
 	done
 	done
 }
-probeIDEAlias () {
+probeDeviceAlias () {
 	modalias=/tmp/modalias
 	cat > $modalias < /dev/null
 	for i in `find /sys -name modalias 2>/dev/null`;do
@@ -104,10 +104,10 @@ probeIDEAlias () {
 	cat $modalias | sort | uniq > $modalias.new
 	mv $modalias.new $modalias
 }
-probeIDEInfo () {
+probeDeviceInfo () {
 	modinfo=/tmp/modinfo
 	cat > $modinfo < /dev/null
-	for file in /lib/modules/*/kernel/drivers/ide/pci/*;do
+	for file in `find /lib/modules/*/kernel/drivers -type f`;do
 	for info in `/sbin/modinfo -F alias $file`;do
 		echo "$info%$file" >> $modinfo
 	done
@@ -117,10 +117,10 @@ probeIDEInfo () {
 	> $modinfo.new
 	mv $modinfo.new $modinfo
 }
-probeIDEDevices () {
+probeDevices () {
 	IFS=$IFS_ORIG
-	probeIDEInfo
-	probeIDEAlias
+	probeDeviceInfo
+	probeDeviceAlias
 	for i in `cat $modinfo`;do
 		info=`echo $i | cut -f1 -d%`
 		file=`echo $i | cut -f2 -d%`
@@ -618,10 +618,10 @@ export systemIntegrity="clean"
 #--------------------------------------
 if test ! -z $PART;then
 	#======================================
-	# Load IDE modules
+	# Load Device modules
 	#--------------------------------------
 	Echo "Including required kernel modules..."
-	probeIDEDevices
+	probeDevices
 
 	#======================================
 	# Check for installed system
