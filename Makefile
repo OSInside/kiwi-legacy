@@ -23,6 +23,7 @@ TOOLSVZ     = ${kiwi_prefix}/tools
 KIWIIMAGE   = ${kiwi_prefix}/image
 TFTPKIWI    = ${tftp_prefix}/KIWI
 TFTPBOOT    = ${tftp_prefix}/
+TFTPBOOTBOOT= ${tftp_prefix}/boot
 TFTPBOOTCONF= ${tftp_prefix}/pxelinux.cfg
 TFTPUPLOAD  = ${tftp_prefix}/upload
 TFTPIMAGE   = ${tftp_prefix}/image
@@ -39,7 +40,7 @@ install:
 	#--------------------------------------------
 	install -d -m 755 ${KIWIBINVZ} ${KIWIMODVZ} ${TOOLSVZ} ${KIWIIMAGE}
 	install -d -m 755 ${TFTPKIWI} ${TFTPBOOT} ${TFTPBOOTCONF} ${TFTPIMAGE}
-	install -d -m 777 ${TFTPUPLOAD}
+	install -d -m 777 ${TFTPUPLOAD} ${TFTPBOOTBOOT}
 
 	#============================================
 	# Install kiwi tools
