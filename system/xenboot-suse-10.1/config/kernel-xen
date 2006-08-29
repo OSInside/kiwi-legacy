@@ -1,10 +1,10 @@
 #!/bin/sh
-echo "kernel-default: Image [netboot-suse-10.1]..."
+echo "kernel-xen: Image [xenboot-suse-10.1]..."
 
 #==========================================
 # setup kernel version to deal with
 #------------------------------------------
-VERSION=`rpm -q --qf %{VERSION}-%{RELEASE}-default kernel-default`
+VERSION=`rpm -q --qf %{VERSION}-%{RELEASE}-xen kernel-xen`
 test -f /.profile && . /.profile
 
 #==========================================
@@ -119,8 +119,8 @@ rm -rf /tmp/*
 #==========================================
 # create common kernel files...
 #------------------------------------------
-cd /boot 
-mv vmlinux-$VERSION.gz vmlinux.gz
+cd /boot
+mv vmlinux-$VERSION.gz xen.gz
 mv vmlinuz-$VERSION vmlinuz
 
 exit 0

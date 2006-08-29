@@ -1,5 +1,5 @@
 #!/bin/sh
-echo "kernel-default: Image [netboot-suse-10.1]..."
+echo "kernel-default: Image [isoboot-suse-10.1]..."
 
 #==========================================
 # setup kernel version to deal with
@@ -10,8 +10,8 @@ test -f /.profile && . /.profile
 #==========================================
 # move interesting stuff to /tmp
 #------------------------------------------
-mv lib/modules/$VERSION/kernel/*      /tmp
-mv lib/modules/$VERSION/modules.dep   /tmp
+mv lib/modules/$VERSION/kernel/*    /tmp
+mv lib/modules/$VERSION/modules.*   /tmp
 
 #==========================================
 # remove unneeded stuff
@@ -19,10 +19,9 @@ mv lib/modules/$VERSION/modules.dep   /tmp
 rm -r lib/modules/$VERSION/*
 
 #==========================================
-# patch modules.conf / modules.dep
+# insert modules.* files
 #------------------------------------------
-mv /tmp/modules.dep /lib/modules/$VERSION/
-touch lib/modules/$VERSION/modules.dep
+mv /tmp/modules.* /lib/modules/$VERSION/
 
 #==========================================
 # create driver-used dirs with .o's to use
@@ -123,7 +122,5 @@ rm -rf /tmp/*
 cd /boot 
 mv vmlinux-$VERSION.gz vmlinux.gz
 mv vmlinuz-$VERSION vmlinuz
-rm -f config-$VERSION
-rm -f symvers*
 
 exit 0

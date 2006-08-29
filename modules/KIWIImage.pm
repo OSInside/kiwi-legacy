@@ -758,11 +758,11 @@ sub extractKernel {
 	# extract kernel from physical extend
 	#------------------------------------------
 	# This is done for boot images only. Which means
-	# we will check for a file named vmlinux.gz. This file
-	# is created from the default-kernel package script which
-	# exists for boot images only
+	# we will check for files named vmlinuz,vmlinux.gz.
+	# These files are created from the kernel package
+	# script which exists for boot images only
 	# ---
-	if (-f "$imageTree/boot/vmlinux.gz") {
+	if (-f "$imageTree/boot/vmlinuz") {
 		$kiwi -> info ("Extracting kernel...");
 		my $file = "$imageDest/$name.kernel";
 		my $lx = '"^Linux version"';
@@ -775,10 +775,25 @@ sub extractKernel {
 			$kiwi -> failed ();
 			return undef;
 		}
-		my $gzfile = "$imageTree/boot/vmlinux.gz";
+		my $gzfile;
+		if (-f "$imageTree/boot/vmlinux.gz") {
+			$gzfile = "$imageTree/boot/vmlinux.gz";
+		} elsif (-f "$imageTree/boot/xen.gz") {
+			$gzfile = "$imageTree/boot/xen.gz";
+		} else {
+			$kiwi -> failed ();
+			$kiwi -> info   ("Couldn't find compressed kernel");
+			$kiwi -> failed ();
+			return undef;
+		}
 		my $kernel = qx (gzip -dc $gzfile | strings | grep $lx | cut $sp);
 		chomp $kernel;
 		qx (mv $file $file.$kernel);
+		if (-f "$imageTree/boot/xen.gz") {
+			$file = "$imageDest/$name.kernel-xen";
+			qx (cp $imageTree/boot/xen.gz $file);
+			qx (mv $file $file.$kernel."gz");
+		}
 		$kiwi -> done();
 	}
 	return $name;

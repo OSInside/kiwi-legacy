@@ -1,0 +1,10 @@
+DEFAULT KIWI-Boot
+
+LABEL KIWI-Boot
+	kernel mboot.c32
+	append boot/xen.gz --- boot/vmlinuz vga=normal ramdisk_size=256000 kiwitftp=192.168.100.7 --- boot/initrd
+	IPAPPEND 1 
+
+LABEL Local-Boot
+	localboot 0
+
