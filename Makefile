@@ -40,7 +40,8 @@ install:
 	#--------------------------------------------
 	install -d -m 755 ${KIWIBINVZ} ${KIWIMODVZ} ${TOOLSVZ} ${KIWIIMAGE}
 	install -d -m 755 ${TFTPKIWI} ${TFTPBOOT} ${TFTPBOOTCONF} ${TFTPIMAGE}
-	install -d -m 777 ${TFTPUPLOAD} ${TFTPBOOTBOOT}
+	install -d -m 755 ${TFTPBOOTBOOT}
+	install -d -m 777 ${TFTPUPLOAD}
 
 	#============================================
 	# Install kiwi tools
