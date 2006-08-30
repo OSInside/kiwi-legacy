@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Wed Aug 30 08:44:21 CEST 2006 - ms@suse.de
+
+- fixed filesystem type detection in linuxrc
+- fixed xenboot image to install the xen base package.
+  This is needed to extract the xen.gz kernel to be able
+  to multiboot the xen kernel with an initrd (mboot.c32)
+
+-------------------------------------------------------------------
 Tue Aug 29 10:50:29 CEST 2006 - ms@suse.de
 
 - fixed missing kernel module.* alias,info files

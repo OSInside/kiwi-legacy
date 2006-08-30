@@ -120,7 +120,7 @@ rm -rf /tmp/*
 # create common kernel files...
 #------------------------------------------
 cd /boot
-mv vmlinux-$VERSION.gz xen.gz
+mv vmlinux-$VERSION.gz vmlinux.gz
 mv vmlinuz-$VERSION vmlinuz
 
 exit 0

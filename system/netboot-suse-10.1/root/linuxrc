@@ -391,7 +391,7 @@ fileSystem () {
 		FSTYPE=auto
 		return
 	fi
-	data=`cat $imageConfig | grep "image type=" | cut -f2 -d = | cut -f2 -d\"`
+	data=`cat $imageConfig | grep "<type>" | cut -f2 -d ">" | cut -f1 -d "<"`
 	case $data in
 		*ext3*)     FSTYPE=ext3 ;;
 		*ext2*)     FSTYPE=ext2 ;;

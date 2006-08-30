@@ -68,6 +68,7 @@
 		<package name="util-linux"/>
 		<package name="hwinfo"/>
 		<package name="netcfg"/>
+		<package name="xen"/>
 	</packages>
 	<packages type="boot">
 		<package name="filesystem"/>
