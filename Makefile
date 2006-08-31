@@ -59,6 +59,7 @@ install:
 	# Install TFTP netboot structure and loader
 	#--------------------------------------------
 	ln -s /usr/share/syslinux/pxelinux.0     ${TFTPBOOT}/pxelinux.0
+	ln -s /usr/share/syslinux/mboot.c32      ${TFTPBOOT}/mboot.c32
 	install -m 755 pxeboot/pxelinux.0.config ${TFTPBOOTCONF}/default
 
 	#============================================

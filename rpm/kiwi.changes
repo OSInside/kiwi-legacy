@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Aug 31 16:19:52 CEST 2006 - ms@suse.de
+
+- fixed buildhost image: added hosts, fixed bsworker
+- fixed kernel extracting, extract for boot images only
+
+-------------------------------------------------------------------
 Wed Aug 30 08:44:21 CEST 2006 - ms@suse.de
 
 - fixed filesystem type detection in linuxrc

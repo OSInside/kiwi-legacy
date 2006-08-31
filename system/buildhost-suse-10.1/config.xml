@@ -21,6 +21,7 @@
 		<package name="bind-libs"/>
 		<package name="binutils"/>
 		<package name="bootcycle"/>
+		<package name="screen"/>
 		<package name="bridge-utils"/>
 		<package name="build"/>
 		<package name="bzip2"/>

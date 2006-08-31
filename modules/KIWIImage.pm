@@ -762,6 +762,27 @@ sub extractKernel {
 	# These files are created from the kernel package
 	# script which exists for boot images only
 	# ---
+	my $type = $xml->getImageType();
+	SWITCH: for ($type) {
+		/ext3/i     && do {
+			return;
+			last SWITCH;
+		};
+		/reiserfs/i && do {
+			return;
+			last SWITCH;
+		};
+		/iso:(.*)/i && do {
+			return;
+			last SWITCH;
+		};
+		/ext2/i && do {
+			if ($name !~ /boot/) {
+				return;
+			}
+			last SWITCH;
+		};
+	}
 	if (-f "$imageTree/boot/vmlinuz") {
 		$kiwi -> info ("Extracting kernel...");
 		my $file = "$imageDest/$name.kernel";

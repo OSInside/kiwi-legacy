@@ -21,15 +21,15 @@
 # Determine the base and follow a runlevel link name.
 base=${0##*/}
 link=${base#*[SK][0-9][0-9]}
-hostip=buildservice
+hostip=storage
 
 rc_reset
 case "$1" in
     start)
 	# sync latest code state from server
-	rsync -avHL $hostip::opensuse-bsworker /usr/bsworker
+	rsync -avHL $hostip::opensuse-bsworker /root/bs
 	
-	cd /usr/bsworker
+	cd /root/bs
         rpm -Uvh build.rpm
         NUM=`grep ^processor /proc/cpuinfo  | wc -l`
         I=0
@@ -38,7 +38,7 @@ case "$1" in
         echo "Run $NUM bsworker using $ROOT"
         while test "$NUM" -gt "$I"; do
           I=$(( $I + 1 ))
-          ./bs_worker --root $ROOT/root_$I &
+          screen -d -m ./bs_worker --root $ROOT/root_$I
         done 
 	;;
     stop)
