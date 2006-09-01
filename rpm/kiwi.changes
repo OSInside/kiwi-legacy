@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Sep  1 16:37:24 CEST 2006 - ms@suse.de
+
+- added support for in-place subversion repository. This
+  can be used to create an update dif before reloading an image
+
+-------------------------------------------------------------------
 Fri Sep  1 11:21:28 CEST 2006 - ms@suse.de
 
 - added authorized_keys for root of buildhost image

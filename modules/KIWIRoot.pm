@@ -347,6 +347,7 @@ sub setup {
 	if (-d "$imageDesc/root") {
 		$kiwi -> info ("Copying user defined files to image tree");
 		qx ( cp -LR --remove-destination $imageDesc/root/* $root 2>&1 );
+		qx ( find / -type d | grep .svn$ | xargs rm -rf 2>&1 );
 		$kiwi -> done();
 	}
 	#========================================
@@ -427,6 +428,48 @@ sub setup {
 	qx ( cp $imageDesc/config.xml $root/image );
 	qx ( cp $imageDesc/images.sh $root/image );
 	qx ( cp $imageDesc/VERSION $root/image );
+
+	#========================================
+	# Create in place SVN repos from /etc
+	#----------------------------------------
+	if (-f "$root/usr/bin/svn") {
+		$kiwi -> info ("Creating in-place SVN repository for /etc/...");
+		my $repo = "/var/adm/etc-repos";
+		qx ( chroot $root svnadmin create $repo 2>&1 );
+		qx ( chroot $root chmod 700 $repo 2>&1 );
+		my $exit = $? >> 8;
+		if ($exit != 0) {
+			$kiwi -> failed ();
+			return undef;
+		}
+		qx ( chroot $root svn mkdir -m created file:///$repo/trunk 2>&1 );
+		qx ( chroot $root svn mkdir -m created file:///$repo/trunk/etc 2>&1 );
+		$exit = $? >> 8;
+		if ($exit != 0) {
+			$kiwi -> failed ();
+			return undef;
+		}
+		qx ( chroot $root cd / ; svn co file:///$repo/trunk/etc etc 2>&1);
+		qx ( chroot $root chmod 700 /etc/.svn 2>&1 );
+		$exit = $? >> 8;
+		if ($exit != 0) {
+			$kiwi -> failed ();
+			return undef;
+		}
+		qx ( chroot $root cd /etc/ ; svn add * 2>&1 );
+		qx ( chroot $root find /etc/ -name .svn | xargs chmod 700 2>&1 );
+		$exit = $? >> 8;
+		if ($exit != 0) {
+			$kiwi -> failed ();
+			return undef;
+		}
+		qx ( chroot $root svn ci -m initial 2>&1 );
+		$exit = $? >> 8;
+		if ($exit != 0) {
+			$kiwi -> failed ();
+			return undef;
+		}
+	}
 	return $this;
 }
 

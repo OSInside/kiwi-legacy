@@ -13,6 +13,7 @@
 		<package name="SuSEfirewall2"/>
 		<package name="aaa_base"/>
 		<package name="aaa_skel"/>
+		<package name="subversion"/>
 		<package name="acl"/>
 		<package name="acpid"/>
 		<package name="attr"/>
