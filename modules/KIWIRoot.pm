@@ -347,7 +347,7 @@ sub setup {
 	if (-d "$imageDesc/root") {
 		$kiwi -> info ("Copying user defined files to image tree");
 		qx ( cp -LR --remove-destination $imageDesc/root/* $root 2>&1 );
-		qx ( find / -type d | grep .svn$ | xargs rm -rf 2>&1 );
+		qx ( find $root/ -type d | grep .svn$ | xargs rm -rf 2>&1 );
 		$kiwi -> done();
 	}
 	#========================================
@@ -463,7 +463,7 @@ sub setup {
 			$kiwi -> failed ();
 			return undef;
 		}
-		qx ( chroot $root svn ci -m initial 2>&1 );
+		qx ( chroot $root svn ci -m initial /etc/ 2>&1 );
 		$exit = $? >> 8;
 		if ($exit != 0) {
 			$kiwi -> failed ();
