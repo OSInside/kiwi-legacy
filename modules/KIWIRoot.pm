@@ -457,7 +457,7 @@ sub setup {
 			return undef;
 		}
 		qx ( chroot $root svn add /etc/* 2>&1 );
-		qx ( chroot $root find /etc/ -name .svn | xargs chmod 700 2>&1 );
+		qx ( find $root/etc/ -name .svn | xargs chmod 700 2>&1 );
 		$exit = $? >> 8;
 		if ($exit != 0) {
 			$kiwi -> failed ();
