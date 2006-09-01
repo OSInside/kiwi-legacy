@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Fri Sep  1 11:21:28 CEST 2006 - ms@suse.de
+
+- added authorized_keys for root of buildhost image
+- fixed boot images not to create the resolv.conf file
+  this should be done automatically by the network setup
+- added ntp service for buildhost image
+- added dhcp config information to sysconfig/network
+  This will set the hostname and resolv.conf
+- added ssh host keys to the buildhost image
+
+-------------------------------------------------------------------
 Thu Aug 31 16:19:52 CEST 2006 - ms@suse.de
 
 - fixed buildhost image: added hosts, fixed bsworker

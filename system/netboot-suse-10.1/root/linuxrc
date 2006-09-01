@@ -982,7 +982,6 @@ umount /proc
 #======================================
 # 18) copy initrd files to image
 #--------------------------------------
-cp /etc/resolv.conf /mnt/etc
 cp /preinit /mnt
 
 #======================================

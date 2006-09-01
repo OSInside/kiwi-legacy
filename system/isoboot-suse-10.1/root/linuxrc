@@ -306,12 +306,7 @@ umount /sys
 umount /proc
 
 #======================================
-# 14) copy initrd files to image
-#--------------------------------------
-cp /etc/resolv.conf /mnt/etc
-
-#======================================
-# 15) Activate new root
+# 14) Activate new root
 #--------------------------------------
 Echo "Activating Image: [$imageBase]"
 cd /mnt && exec < dev/console >dev/console 2>&1
@@ -323,7 +318,7 @@ else
 	PIVOT=true
 fi
 #======================================
-# 16) Unmount initrd / system init
+# 15) Unmount initrd / system init
 #--------------------------------------
 echo " "
 echo "Booting into Live CD System..."
