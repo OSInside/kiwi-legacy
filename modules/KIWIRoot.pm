@@ -346,8 +346,11 @@ sub setup {
 	#----------------------------------------
 	if (-d "$imageDesc/root") {
 		$kiwi -> info ("Copying user defined files to image tree");
-		qx ( cp -LR --remove-destination $imageDesc/root/* $root 2>&1 );
-		qx ( find $root/ -type d | grep .svn$ | xargs rm -rf 2>&1 );
+		qx ( mkdir $root/tmproot );
+		qx ( cp -LR --remove-destination $imageDesc/root/* $root/tmproot 2>&1 );
+		qx ( find $root/tmproot -type d | grep .svn\$ | xargs rm -rf 2>&1 );
+		qx ( cp -LR --remove-destination $root/tmproot/* $root );
+		qx ( rm -rf $root/tmproot );
 		$kiwi -> done();
 	}
 	#========================================
@@ -469,6 +472,7 @@ sub setup {
 			$kiwi -> failed ();
 			return undef;
 		}
+		$kiwi -> done();
 	}
 	return $this;
 }
