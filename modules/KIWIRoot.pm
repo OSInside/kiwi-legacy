@@ -449,14 +449,14 @@ sub setup {
 			$kiwi -> failed ();
 			return undef;
 		}
-		qx ( chroot $root cd / ; svn co file:///$repo/trunk/etc etc 2>&1);
+		qx ( chroot $root svn co file:///$repo/trunk/etc /etc/ 2>&1);
 		qx ( chroot $root chmod 700 /etc/.svn 2>&1 );
 		$exit = $? >> 8;
 		if ($exit != 0) {
 			$kiwi -> failed ();
 			return undef;
 		}
-		qx ( chroot $root cd /etc/ ; svn add * 2>&1 );
+		qx ( chroot $root svn add /etc/* 2>&1 );
 		qx ( chroot $root find /etc/ -name .svn | xargs chmod 700 2>&1 );
 		$exit = $? >> 8;
 		if ($exit != 0) {
