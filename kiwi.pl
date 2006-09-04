@@ -274,6 +274,7 @@ sub quit {
 	$kiwi -> done ();
 	if (defined $root) {
 		$root  -> cleanMount ();
+		$root  -> cleanSmart ();
 	}
 	if (defined $image) {
 		$image -> cleanMount ();

@@ -438,40 +438,33 @@ sub setup {
 	if (-f "$root/usr/bin/svn") {
 		$kiwi -> info ("Creating in-place SVN repository for /etc/...");
 		my $repo = "/var/adm/etc-repos";
-		qx ( chroot $root svnadmin create $repo 2>&1 );
-		qx ( chroot $root chmod 700 $repo 2>&1 );
+		my $file = "/etc-repos.sh";
+		if ( ! open (FD,">$root/$file")) {
+			$kiwi -> error ("Failed to create SVN script: $!");
+			$kiwi -> failed ();
+			return undef;
+		}
+		print FD "#!/bin/bash\n";
+		print FD "svnadmin create $repo\n";
+		print FD "chmod 700 $repo\n";
+		print FD "svn mkdir -m created file:///$repo/trunk\n";
+		print FD "svn mkdir -m created file:///$repo/trunk/etc\n";
+		print FD "svn co file:///$repo/trunk/etc /etc\n";
+		print FD "chmod 700 /etc/.svn\n";
+		print FD "svn add /etc/*\n";
+		print FD "find /etc -name .svn | xargs chmod 700\n";
+		print FD "svn ci -m initial /etc\n";
+		close FD;
+		qx ( chmod 755 $root/$file 2>&1 );
+		my $data = qx ( chroot $root $file 2>&1 );
 		my $exit = $? >> 8;
 		if ($exit != 0) {
 			$kiwi -> failed ();
-			return undef;
-		}
-		qx ( chroot $root svn mkdir -m created file:///$repo/trunk 2>&1 );
-		qx ( chroot $root svn mkdir -m created file:///$repo/trunk/etc 2>&1 );
-		$exit = $? >> 8;
-		if ($exit != 0) {
+			$kiwi -> info ("Failed to create SVN repository: $data");
 			$kiwi -> failed ();
 			return undef;
 		}
-		qx ( chroot $root svn co file:///$repo/trunk/etc /etc/ 2>&1);
-		qx ( chroot $root chmod 700 /etc/.svn 2>&1 );
-		$exit = $? >> 8;
-		if ($exit != 0) {
-			$kiwi -> failed ();
-			return undef;
-		}
-		qx ( chroot $root svn add /etc/* 2>&1 );
-		qx ( find $root/etc/ -name .svn | xargs chmod 700 2>&1 );
-		$exit = $? >> 8;
-		if ($exit != 0) {
-			$kiwi -> failed ();
-			return undef;
-		}
-		qx ( chroot $root svn ci -m initial /etc/ 2>&1 );
-		$exit = $? >> 8;
-		if ($exit != 0) {
-			$kiwi -> failed ();
-			return undef;
-		}
+		unlink ("$root/$file");
 		$kiwi -> done();
 	}
 	return $this;
@@ -587,6 +580,21 @@ sub cleanMount {
 		if ($item =~ /^$prefix/) {
 			rmdir $item;
 		}
+	}
+	return $this;
+}
+
+#==========================================
+# cleanSmart
+#------------------------------------------
+sub cleanSmart {
+	# ...
+	# remove all smart channels created by kiwi
+	# ---
+	my $this = shift;
+	foreach my $channel (keys %{$smartChannel{public}}) {
+		#$kiwi -> info ("Removing smart channel: $channel\n");
+		qx ( smart channel --remove $channel -y 2>&1 );
 	}
 	return $this;
 }
