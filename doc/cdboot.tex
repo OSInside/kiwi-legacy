@@ -44,15 +44,26 @@ description. A good starting point for this is to use an existing
 boot image and adapt it to your needs.
 
 \section{How does the boot image work}
+The boot process from a CD works in five steps:
 
- ...
-     Create a live filesystem on CD using the iso boot image
-     1 split physical extend into two parts:
-        part1 -> writable
-        part2 -> readonly
-     2 Create two ext2 based images from the part extends
-     3 Prepare and Create the given iso boot boot image
-     4 Setup the CD structure and copy all files
-        including the syslinux isolinux data
-     5 Create the iso image using isolinux.sh
-
+\begin{enumerate}
+\item After the image has been prepared which means a physical extend
+      exists the process of building the logical extend will split
+      the physical part into two physical extends:
+      \begin{itemize}
+      \item read/write extend which is loaded into RAM
+      \item read-only extend consisting of the data stored
+            in the \textit{/bin, /boot, /lib, /opt, /sbin and /usr}
+            directories
+      \end{itemize}
+\item From the two physical extends kiwi will create two ext2
+      based logical images.
+\item Next kiwi prepares and creates in one step the boot image given 
+      as the type of the image configuration file config.xml.
+\item Next kiwi will setup the CD directory structure and copy all
+      image and kernel files as well as the isolinux data into this
+      directory tree.
+\item At last kiwi calls the \textbf{isolinux.sh} script provided
+      by the ISO boot image to create an .iso file from the CD
+      directory tree.
+\end{enumerate}

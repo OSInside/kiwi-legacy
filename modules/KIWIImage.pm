@@ -30,6 +30,7 @@ my $imageTree;
 my $imageDest;
 my $kiwi;
 my $xml;
+my $arch;
 
 #==========================================
 # Constructor
@@ -60,6 +61,8 @@ sub new {
 		$kiwi -> failed ();
 		return undef;
 	}
+	$arch = qx ( arch ); chomp ( $arch );
+	$arch = ".$arch";
 	return $this;
 }
 
@@ -636,7 +639,7 @@ sub buildImageName {
 	}
 	my $iver = <FD>; close FD; chomp ($iver);
 	my $name = $xml -> getImageName();
-	$name = $name.$separator.$iver;
+	$name = $name.$separator.$iver.$arch;
 	chomp  $name;
 	return $name;
 }
@@ -765,20 +768,20 @@ sub extractKernel {
 	my $type = $xml->getImageType();
 	SWITCH: for ($type) {
 		/ext3/i     && do {
-			return;
+			return $name;
 			last SWITCH;
 		};
 		/reiserfs/i && do {
-			return;
+			return $name;
 			last SWITCH;
 		};
 		/iso:(.*)/i && do {
-			return;
+			return $name;
 			last SWITCH;
 		};
 		/ext2/i && do {
 			if ($name !~ /boot/) {
-				return;
+				return $name;
 			}
 			last SWITCH;
 		};

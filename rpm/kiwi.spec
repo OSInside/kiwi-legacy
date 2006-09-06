@@ -5,7 +5,7 @@
 # ---
 Name:          kiwi
 BuildRequires: syslinux
-Requires:      perl smart perl-XML-LibXML syslinux
+Requires:      perl smart perl-XML-LibXML syslinux perl-libwww-perl
 Summary:       OpenSuSE - KIWI Image System
 Version:       1.2
 Release:       1

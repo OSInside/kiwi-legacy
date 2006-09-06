@@ -5,8 +5,7 @@
 		<compressed>yes</compressed>
 	</preferences>
 	<repository type="yast2">
-		<!-- <source path="opensuse://SL-10.1"/> -->
-		<source path="/image/CDs/full-i386"/>
+		<source path="opensuse://SL-10.1"/>
 	</repository>
 	<packages type="image">
 	    <package name="OpenIPMI"/>
@@ -41,7 +40,6 @@
 		<package name="fillup"/>
 		<package name="findutils"/>
 		<package name="gawk"/>
-		<package name="glibc"/>
 		<package name="gpg"/>
 		<package name="grep"/>
 		<package name="grub"/>
@@ -164,7 +162,6 @@
 	</packages>
 	<packages type="boot">
 		<package name="filesystem"/>
-		<package name="glibc"/>
 		<package name="glibc-locale"/>
 		<package name="devs"/>
 		<package name="rpm"/>

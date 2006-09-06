@@ -32,7 +32,6 @@
 		<package name="sysfsutils"/>
 		<package name="devs"/>
 		<package name="dhcpcd"/>
-		<package name="glibc"/>
 		<package name="mktemp"/>
 		<package name="libgcc"/>
 		<package name="coreutils"/>
@@ -71,7 +70,6 @@
 	</packages>
 	<packages type="boot">
 		<package name="filesystem"/>
-		<package name="glibc"/>
 		<package name="glibc-locale"/>
 		<package name="devs"/>
 		<package name="rpm"/>
