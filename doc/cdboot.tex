@@ -1,0 +1,58 @@
+\index{KIWI images!cdboot|(}
+\chapter{Creating a LiveCD from an image}
+\label{chapter:cdboot}
+\minitoc
+
+\section{What is a live CD}
+Normally an image will be installed on a disk or into the
+main memory of a computer. This is done by a deployment
+architecture which transfers the image via a boot image
+into its final destination. such a boot image can also
+exist on a CD. The task of the CD-Boot image is to setup
+a system which is divided into two parts:
+
+\begin{itemize}
+	\item Read-Only part which is obtained from the CD
+	\item Read/Write part which is pushed into main memory
+\end{itemize}
+
+An image which works partially on disk and partially on RAM
+is called a live CD system. The CD-Boot structure of KIWI will
+put the directories \textit{/bin, /boot, /lib, /opt, /sbin and /usr}
+on the CD and the rest into the main memory of the system.
+
+\subsection{How do you setup an image as live CD}
+To create an .iso image which can be burned on CD you only need
+to specify the boot image which should handle your live system.
+This is done by setting the \textbf{type} of the image in the
+\textbf{config.xml} file as follows:
+
+\begin{Command}{9cm}
+<preferences>\\
+\hspace*{1cm}<type>iso:name</type>\\
+\hspace*{1cm}...\\
+</preferences>
+\end{Command}
+
+The parameter \textbf{name} refers to the CD boot image which
+must exist in \textit{/usr/share/kiwi/image}. Like for all boot
+images the most important point is that the boot image has to
+match the operating system image. This means the kernel of the boot-
+and operating system image must be the same. If there is no
+boot image which matches you need to create your own boot image
+description. A good starting point for this is to use an existing
+boot image and adapt it to your needs.
+
+\section{How does the boot image work}
+
+ ...
+     Create a live filesystem on CD using the iso boot image
+     1 split physical extend into two parts:
+        part1 -> writable
+        part2 -> readonly
+     2 Create two ext2 based images from the part extends
+     3 Prepare and Create the given iso boot boot image
+     4 Setup the CD structure and copy all files
+        including the syslinux isolinux data
+     5 Create the iso image using isolinux.sh
+

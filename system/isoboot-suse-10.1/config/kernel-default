@@ -117,7 +117,7 @@ done
 rm -rf /tmp/*
 
 #==========================================
-# create links...
+# create common kernel files...
 #------------------------------------------
 cd /boot 
 mv vmlinux-$VERSION.gz vmlinux.gz

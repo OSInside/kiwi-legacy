@@ -5,7 +5,8 @@
 		<compressed>yes</compressed>
 	</preferences>
 	<repository type="yast2">
-		<source path="opensuse://SL-10.1"/>
+		<!-- <source path="opensuse://SL-10.1"/> -->
+		<source path="/image/CDs/full-i386"/>
 	</repository>
 	<packages type="image">
 	    <package name="OpenIPMI"/>

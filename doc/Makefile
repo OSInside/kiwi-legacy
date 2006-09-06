@@ -8,7 +8,8 @@
 TEX=kiwi.tex           \
 	intro.tex          \
 	image.tex  		   \
-    activate.tex
+    activate.tex       \
+	cdboot.tex
 
 all: ps
 

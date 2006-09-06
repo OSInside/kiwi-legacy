@@ -173,6 +173,16 @@ the format:
                       virtualisation. Option \textbf{--virtual xen}
                 \end{itemize} 
       \end{enumerate}
+\item \textbf{\underline{cdboot}}\\
+A directory containing all information required for the isolinux
+boot loader. This includes the \textbf{isolinux.cfg} configuration
+file, the \textbf{isolinux} directory which contains pictures, messages and
+translation files for the first boot screen while booting from a CD.
+In addition the \textbf{isolinux.sh} build script needs to be provided
+which creates an ISO image from a prebuild CD tree requiring the mentioned
+isolinux specification. According to this, the cdboot directory
+only makes sense for a CD boot image. For more infomation about creating
+a bootable CD, refer to chapter \ref{chapter:cdboot}.
 \end{itemize}
 
 In addition all values entered as \textbf{image} tag of the config.xml

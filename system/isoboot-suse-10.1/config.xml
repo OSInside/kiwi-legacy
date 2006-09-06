@@ -11,14 +11,6 @@
 		<file name="usb/core/usbcore.ko"/>
 		<file name="usb/storage/usb-storage.ko"/>
 	</drivers>
-	<drivers type="netdrivers">
-		<file name="pcnet32.ko"/>
-		<file name="mii.ko"/>
-		<file name="tulip/tulip.ko"/>
-		<file name="eepro100.ko"/>
-		<file name="e100.ko"/>
-		<file name="8139too.ko"/>
-	</drivers>
 	<drivers type="drivers">
 		<file name="drivers/ide/*"/>
 		<file name="drivers/block/loop.ko"/>
@@ -31,11 +23,8 @@
 		<file name="fs/nls/nls_utf8.ko"/>
 		<file name="net/ipv6/*"/>
 		<file name="drivers/cdrom/*"/>
-		<file name="drivers/scsi/sd_mod.ko"/>
-		<file name="drivers/scsi/sr_mod.ko"/>
-		<file name="drivers/scsi/st.ko"/>
-		<file name="drivers/scsi/scsi_mod.ko"/>
-		<file name="drivers/scsi/sg.ko"/>
+		<file name="drivers/scsi/*"/>
+		<file name="drivers/net/*"/>
 	</drivers>
 	<repository type="yast2">
 		<source path="opensuse://SL-10.1"/>
