@@ -17,6 +17,7 @@
 		<package name="acl"/>
 		<package name="acpid"/>
 		<package name="attr"/>
+		<package name="linux32"/>
 		<package name="bash"/>
 		<package name="bc"/>
 		<package name="bind-libs"/>

@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Sep  8 10:46:17 CEST 2006 - ms@suse.de
+
+- added linux32 to buildhost image
+
+-------------------------------------------------------------------
 Wed Sep  6 15:23:33 CEST 2006 - ms@suse.de
 
 - added arch information to image name
