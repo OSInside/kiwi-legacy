@@ -28,6 +28,12 @@ done
 #------------------------------------------
 /sbin/SuSEconfig
 
+#==========================================
+# Setup ssh permissions
+#------------------------------------------
+cd /etc/ssh
+chmod og-r *_key
+
 umount /proc
 umount /dev/pts
 umount /sys

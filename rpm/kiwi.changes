@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Sep 12 18:38:05 CEST 2006 - ms@suse.de
+
+- fixed permissions for ssh keys in buildhost
+- fixed hosts entries in buildhost
+
+-------------------------------------------------------------------
 Tue Sep 12 16:31:53 CEST 2006 - ms@suse.de
 
 - added support for split images. These are images which

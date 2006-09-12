@@ -22,7 +22,4 @@ ff00::0         ipv6-mcastprefix
 ff02::1         ipv6-allnodes
 ff02::2         ipv6-allrouters
 ff02::3         ipv6-allhosts
-149.44.161.7    storage.build.opensuse.org
 192.168.1.1     storage.build.opensuse.org storage
-192.168.2.1     storage.build.opensuse.org
-192.168.3.1     storage.build.opensuse.org
