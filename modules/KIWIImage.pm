@@ -308,7 +308,7 @@ sub createImageLiveCD {
 		#==========================================
 		# Checking file system
 		#------------------------------------------
-		qx (e2fsck -f -y $imageDest/$name 2>&1);
+		qx (/sbin/e2fsck -f -y $imageDest/$name 2>&1);
 
 		#==========================================
 		# Create image md5sum
@@ -583,19 +583,27 @@ sub createImageSplit {
 		#==========================================
 		# Checking file system
 		#------------------------------------------
+		$kiwi -> info ("Checking file system: $type...");
 		SWITCH: for ($type) {
 			/ext2/       && do {
-				qx (e2fsck -f -y $imageDest/$name 2>&1);
+				qx (/sbin/e2fsck -f -y $imageDest/$name 2>&1);
+				$kiwi -> done();
 				last SWITCH;
 			};
 			/ext3/       && do {
-				qx (fsck.ext3 -f -y $imageDest/$name 2>&1);
+				qx (/sbin/fsck.ext3 -f -y $imageDest/$name 2>&1);
+				$kiwi -> done();
 				last SWITCH;
 			};
 			/reiserfs/   && do {
-				qx (reiserfsck -y $imageDest/$name 2>&1);
+				qx (/sbin/reiserfsck -y $imageDest/$name 2>&1);
+				$kiwi -> done();
 				last SWITCH;
 			};
+			$kiwi -> error  ("Unsupported type: $type");
+			$kiwi -> failed ();
+			restoreSplitExtend ($imageTreeReadOnly);
+			return undef;
 		}
 		#==========================================
 		# Create image md5sum
@@ -745,7 +753,7 @@ sub postImage {
 		# Check EXT3 file system
 		#------------------------------------------
 		/ext3/i && do {
-			qx (fsck.ext3 -f -y $imageDest/$name 2>&1);
+			qx (/sbin/fsck.ext3 -f -y $imageDest/$name 2>&1);
 			$kiwi -> done();
 			last SWITCH;
 		};
@@ -753,7 +761,7 @@ sub postImage {
 		# Check EXT2 file system
 		#------------------------------------------
 		/ext2/i && do {
-			qx (e2fsck -f -y $imageDest/$name 2>&1);
+			qx (/sbin/e2fsck -f -y $imageDest/$name 2>&1);
 			$kiwi -> done();
 			last SWITCH;
 		};
@@ -761,7 +769,7 @@ sub postImage {
 		# Check ReiserFS file system
 		#------------------------------------------
 		/reiserfs/i && do {
-			qx (reiserfsck -y $imageDest/$name 2>&1);
+			qx (/sbin/reiserfsck -y $imageDest/$name 2>&1);
 			$kiwi -> done();
 			last SWITCH;
 		};
