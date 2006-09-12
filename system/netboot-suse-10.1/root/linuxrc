@@ -281,14 +281,14 @@ createFileSystem () {
 		vgcreate systemvg $diskPartition >/dev/null 2>&1
 	else
 		# .../
-        # There is no need to create a filesystem on the partition
-        # because the image itself contains the filesystem
-        # ----
+		# There is no need to create a filesystem on the partition
+		# because the image itself contains the filesystem
+		# ----
 		# mke2fs $diskPartition >/dev/null 2>&1
 		# if test $? != 0;then
-		#	systemException \
-		#		"Failed to create filesystem on: $diskPartition !" \
-		#	"reboot"
+		# 	systemException \
+		# 		"Failed to create filesystem on: $diskPartition !" \
+		# 	"reboot"
 		# fi
 		:
 	fi
