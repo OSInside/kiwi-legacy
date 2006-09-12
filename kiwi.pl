@@ -130,32 +130,41 @@ sub main {
 		#------------------------------------------
 		$image = new KIWIImage ( $kiwi,$xml,$Create,$Destination );
 		my $type = $xml->getImageType();
+		my $ok;
 		SWITCH: for ($type) {
-			/ext2/     && do {
-				$image -> createImageEXT2 ();
+			/^ext2/       && do {
+				$ok = $image -> createImageEXT2 ();
 				last SWITCH;
 			};
-			/ext3/     && do {
-				$image -> createImageEXT3 ();
+			/^ext3/       && do {
+				$ok = $image -> createImageEXT3 ();
 				last SWITCH;
 			};
-			/reiserfs/ && do {
-				$image -> createImageReiserFS ();
+			/^reiserfs/   && do {
+				$ok = $image -> createImageReiserFS ();
 				last SWITCH;
 			};
-			/cpio/     && do {
-				$image -> createImageCPIO ();
+			/^cpio/       && do {
+				$ok = $image -> createImageCPIO ();
 				last SWITCH;
 			};
-			/iso:(.*)/ && do {
-				$image -> createImageLiveCD ( $1 );
+			/^iso:(.*)/   && do {
+				$ok = $image -> createImageLiveCD ( $1 );
+				last SWITCH;
+			};
+			/^split:(.*)/ && do {
+				$ok = $image -> createImageSplit ( $1 );
 				last SWITCH;
 			};
 			$kiwi -> error  ("Unsupported type: $type");
 			$kiwi -> failed ();
 			kiwiExit (1);
 		}
-		kiwiExit (0);
+		if ($ok) {
+			kiwiExit (0);
+		} else {
+			kiwiExit (1);
+		}
 	}
 	return 1;
 }

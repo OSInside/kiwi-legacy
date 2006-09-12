@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Tue Sep 12 16:31:53 CEST 2006 - ms@suse.de
+
+- added support for split images. These are images which
+  consist of two portions. The first one contains the Read/Write
+  data and the second contains the ReadOnly data according to
+  current FHS. Each image can have its own filesystem which
+  means you can put the ReadOnly part into a compressed filesystem
+  as well. Disadvantage of such an image is that it requires a
+  boot infrastructure to become activated.
+
+-------------------------------------------------------------------
 Fri Sep  8 10:46:17 CEST 2006 - ms@suse.de
 
 - added linux32 to buildhost image

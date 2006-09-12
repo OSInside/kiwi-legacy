@@ -85,20 +85,7 @@ sub createImageEXT2 {
 	#==========================================
 	# Create filesystem on extend
 	#------------------------------------------
-	my $fsopts;
-	my $fileCount = int (qx (find $imageTree | wc -l));
-	my $nodeCount = $fileCount * 2;
-	if (defined $journal) {
-		$fsopts = "-b 4096 -j -J size=4 -q -F -N $nodeCount";
-	} else {
-		$fsopts = "-q -F -N $nodeCount";
-	}
-	my $data = qx (/sbin/mke2fs $fsopts $imageDest/$name 2>&1);
-	my $code = $? >> 8;
-	if ($code != 0) {
-		$kiwi -> error  ("Couldn't create filesystem");
-		$kiwi -> failed ();
-		$kiwi -> error  ($data);
+	if (! setupEXT2 ( $name,$imageTree,$journal )) {
 		return undef;
 	}
 	#==========================================
@@ -138,12 +125,7 @@ sub createImageReiserFS {
 	#==========================================
 	# Create filesystem on extend
 	#------------------------------------------
-	my $data = qx (/sbin/mkreiserfs -q -f -b 4096 $imageDest/$name 2>&1);
-	my $code = $? >> 8;
-	if ($code != 0) {
-		$kiwi -> error  ("Couldn't create filesystem");
-		$kiwi -> failed ();
-		$kiwi -> error  ($data);
+	if (! setupReiser ( $name )) {
 		return undef;
 	}
 	#==========================================
@@ -218,7 +200,7 @@ sub createImageLiveCD {
 	#------------------------------------------
 	my $namecd = buildImageName (";");
 	my $namerw = buildImageName ();
-	my $namero = $namerw."-read-only";
+	my $namero = buildImageName ("-","-read-only");
 	if (! defined $namerw) {
 		return undef;
 	}
@@ -267,40 +249,31 @@ sub createImageLiveCD {
 	#------------------------------------------
 	$kiwi -> info ("Image RW part requires $mbytesrw MB of disk space");
 	if (! buildLogicalExtend ($namerw,$mbytesrw."M")) {
+		restoreSplitExtend ($imageTreeReadOnly);
 		return undef;
 	}
 	$kiwi -> done();
 	#==========================================
 	# Create EXT2 filesystem on RW extend
 	#------------------------------------------
-	my $fileCount = int (qx (find $imageTree | wc -l));
-	my $nodeCount = $fileCount * 2;
-	my $fsopts = "-q -F -N $nodeCount";
-	my $data = qx (/sbin/mke2fs $fsopts $imageDest/$namerw 2>&1);
-	my $code = $? >> 8;
-	if ($code != 0) {
-		$kiwi -> error  ("Couldn't create RW filesystem");
-		$kiwi -> failed ();
-		$kiwi -> error  ($data);
+	if (! setupEXT2 ( $namerw,$imageTree )) {
+		restoreSplitExtend ($imageTreeReadOnly);
 		return undef;
 	}
+	#==========================================
+	# Create RO logical extend
+	#------------------------------------------
 	$kiwi -> info ("Image RO part requires $mbytesro MB of disk space");
 	if (! buildLogicalExtend ($namero,$mbytesro."M")) {
+		restoreSplitExtend ($imageTreeReadOnly);
 		return undef;
 	}
 	$kiwi -> done();
 	#==========================================
-	# Create filesystem on RO extend
+	# Create EXT2 filesystem on RO extend
 	#------------------------------------------
-	$fileCount = int (qx (find $imageTreeReadOnly | wc -l));
-	$nodeCount = $fileCount * 2;
-	$fsopts = "-q -F -N $nodeCount";
-	$data = qx (/sbin/mke2fs $fsopts $imageDest/$namero 2>&1);
-	$code = $? >> 8;
-	if ($code != 0) {
-		$kiwi -> error  ("Couldn't create RO filesystem");
-		$kiwi -> failed ();
-		$kiwi -> error  ($data);
+	if (! setupEXT2 ( $namero,$imageTreeReadOnly )) {
+		restoreSplitExtend ($imageTreeReadOnly);
 		return undef;
 	}
 	#==========================================
@@ -321,12 +294,14 @@ sub createImageLiveCD {
 		#------------------------------------------
 		my $extend = mountLogicalExtend ($name);
 		if (! defined $extend) {
+			restoreSplitExtend ($imageTreeReadOnly);
 			return undef;
 		}
 		#==========================================
 		# copy physical to logical
 		#------------------------------------------
 		if (! installLogicalExtend ($extend,$source)) {
+			restoreSplitExtend ($imageTreeReadOnly);
 			return undef;
 		}
 		cleanMount();
@@ -339,27 +314,16 @@ sub createImageLiveCD {
 		# Create image md5sum
 		#------------------------------------------
 		if (! buildMD5Sum ($name)) {
+			restoreSplitExtend ($imageTreeReadOnly);
 			return undef;
 		}
 	}
 	#==========================================
 	# Restoring physical extend
 	#------------------------------------------
-	$kiwi -> info ("Restoring physical extend...");
-	my @rodirs = qw (bin boot lib opt sbin usr);
-	foreach my $dir (@rodirs) {
-		my $data = qx (mv $imageTreeReadOnly/$dir $imageTree 2>&1);
-		my $code = $? >> 8;
-		if ($code != 0) {
-			$kiwi -> failed (); 
-			$kiwi -> error  ("Couldn't restore physical extend: $data");
-			$kiwi -> failed ();
-			return undef;
-		}
+	if (! restoreSplitExtend ($imageTreeReadOnly)) {
+		return undef;
 	}
-	rmdir $imageTreeReadOnly;
-	$kiwi -> done();
-
 	#==========================================
 	# Prepare and Create ISO boot image
 	#------------------------------------------
@@ -446,6 +410,207 @@ sub createImageLiveCD {
 	}
 	qx (rm -rf $main::RootTree);
 	$kiwi -> done();
+	return $this;
+}
+
+#==========================================
+# createImageSplit
+#------------------------------------------
+sub createImageSplit {
+	my $this = shift;
+	my $type = shift;
+	my $FSTypeRW;
+	my $FSTypeRO;
+	my $error;
+	my $ok;
+	#==========================================
+	# Get filesystem info for split image
+	#------------------------------------------
+	if ($type =~ /(.*),(.*)/) {
+		$FSTypeRW = $1;
+		$FSTypeRO = $2;
+	} else {
+		return undef;
+	}
+	#==========================================
+	# Get image creation date and name
+	#------------------------------------------
+	my $namerw = buildImageName ();
+	my $namero = buildImageName ("-","-read-only");
+	if (! defined $namerw) {
+		return undef;
+	}
+	#==========================================
+	# Call images.sh script
+	#------------------------------------------
+	if (! setupLogicalExtend ("quiet")) {
+		return undef;
+	}
+	#==========================================
+	# split physical extend into RW / RO part
+	#------------------------------------------
+	my $imageTreeReadOnly = $imageTree;
+	$imageTreeReadOnly =~ s/\/+$//;
+	$imageTreeReadOnly.= "-read-only/";
+	if (! -d $imageTreeReadOnly) {
+		$kiwi -> info ("Creating read only image part");
+		if (! mkdir $imageTreeReadOnly) {
+			$error = $!;
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create ro directory: $error");
+			$kiwi -> failed ();
+			return undef;
+		} 
+		my @rodirs = qw (bin boot lib opt sbin usr);
+		foreach my $dir (@rodirs) {
+			my $data = qx (mv $imageTree/$dir $imageTreeReadOnly 2>&1);
+			my $code = $? >> 8;
+			if ($code != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Couldn't setup ro directory: $data");
+				$kiwi -> failed ();
+				return undef;
+			}
+		}
+		$kiwi -> done();
+	}
+	#==========================================
+	# Count disk space for extends
+	#------------------------------------------
+	my $mbytesrw = getSize ($imageTree);
+	my $mbytesro = getSize ($imageTreeReadOnly);
+
+	#==========================================
+	# Create RW logical extend
+	#------------------------------------------
+	$kiwi -> info ("Image RW part requires $mbytesrw MB of disk space");
+	if (! buildLogicalExtend ($namerw,$mbytesrw."M")) {
+		restoreSplitExtend ($imageTreeReadOnly);
+		return undef;
+	}
+	$kiwi -> done();
+	#==========================================
+	# Create filesystem on RW extend
+	#------------------------------------------
+	SWITCH: for ($FSTypeRW) {
+		/ext2/       && do {
+			$ok = setupEXT2 ( $namerw,$imageTree );
+			last SWITCH;
+		};
+		/ext3/       && do {
+			$ok = setupEXT2 ( $namerw,$imageTree,"journaled" );
+			last SWITCH;
+		};
+		/reiserfs/   && do {
+			$ok = setupReiser ( $namerw );
+			last SWITCH;
+		};
+		$kiwi -> error  ("Unsupported type: $FSTypeRW");
+		$kiwi -> failed ();
+		restoreSplitExtend ($imageTreeReadOnly);
+		return undef;
+	}
+	if (! $ok) {
+		restoreSplitExtend ($imageTreeReadOnly);
+		return undef;
+	}
+	#==========================================
+	# Create RO logical extend
+	#------------------------------------------
+	$kiwi -> info ("Image RO part requires $mbytesro MB of disk space");
+	if (! buildLogicalExtend ($namero,$mbytesro."M")) {
+		restoreSplitExtend ($imageTreeReadOnly);
+		return undef;
+	}
+	$kiwi -> done();
+	#==========================================
+	# Create filesystem on RO extend
+	#------------------------------------------
+	SWITCH: for ($FSTypeRO) {
+		/ext2/       && do {
+			$ok = setupEXT2 ( $namero,$imageTreeReadOnly );
+			last SWITCH;
+		};
+		/ext3/       && do {
+			$ok = setupEXT2 ( $namero,$imageTreeReadOnly,"journaled" );
+			last SWITCH;
+		};
+		/reiserfs/   && do {
+			$ok = setupReiser ( $namero );
+			last SWITCH;
+		};
+		$kiwi -> error  ("Unsupported type: $FSTypeRO");
+		$kiwi -> failed ();
+		restoreSplitExtend ($imageTreeReadOnly);
+		return undef;
+	}
+	if (! $ok) {
+		restoreSplitExtend ($imageTreeReadOnly);
+		return undef;
+	}
+	#==========================================
+	# Install logical extends
+	#------------------------------------------
+	foreach my $name ($namerw,$namero) {
+		#==========================================
+		# select physical extend
+		#------------------------------------------
+		my $source;
+		my $type;
+		if ($name eq $namerw) {
+			$source = $imageTree;
+			$type = $FSTypeRW;
+		} else {
+			$source = $imageTreeReadOnly;
+			$type = $FSTypeRO;
+		}
+		#==========================================
+		# mount logical extend for data transfer
+		#------------------------------------------
+		my $extend = mountLogicalExtend ($name);
+		if (! defined $extend) {
+			restoreSplitExtend ($imageTreeReadOnly);
+			return undef;
+		}
+		#==========================================
+		# copy physical to logical
+		#------------------------------------------
+		if (! installLogicalExtend ($extend,$source)) {
+			restoreSplitExtend ($imageTreeReadOnly);
+			return undef;
+		}
+		cleanMount();
+		#==========================================
+		# Checking file system
+		#------------------------------------------
+		SWITCH: for ($type) {
+			/ext2/       && do {
+				qx (e2fsck -f -y $imageDest/$name 2>&1);
+				last SWITCH;
+			};
+			/ext3/       && do {
+				qx (fsck.ext3 -f -y $imageDest/$name 2>&1);
+				last SWITCH;
+			};
+			/reiserfs/   && do {
+				qx (reiserfsck -y $imageDest/$name 2>&1);
+				last SWITCH;
+			};
+		}
+		#==========================================
+		# Create image md5sum
+		#------------------------------------------
+		if (! buildMD5Sum ($name)) {
+			restoreSplitExtend ($imageTreeReadOnly);
+			return undef;
+		}
+	}
+	#==========================================
+	# Restoring physical extend
+	#------------------------------------------
+	if (! restoreSplitExtend ($imageTreeReadOnly)) {
+		return undef;
+	}
 	return $this;
 }
 
@@ -629,6 +794,7 @@ sub postImage {
 #------------------------------------------
 sub buildImageName {
 	my $separator = shift;
+	my $extension = shift;
 	if (! defined $separator) {
 		$separator = "-";
 	}
@@ -639,7 +805,11 @@ sub buildImageName {
 	}
 	my $iver = <FD>; close FD; chomp ($iver);
 	my $name = $xml -> getImageName();
-	$name = $name.$separator.$iver.$arch;
+	if (defined $extension) {
+		$name = $name.$extension.$arch.$separator.$iver;
+	} else {
+		$name = $name.$arch.$separator.$iver;
+	}
 	chomp  $name;
 	return $name;
 }
@@ -824,6 +994,51 @@ sub extractKernel {
 }
 
 #==========================================
+# setupEXT2
+#------------------------------------------
+sub setupEXT2 {
+	my $name    = shift;
+	my $tree    = shift;
+	my $journal = shift;
+	if (! defined $tree) {
+		$tree = $imageTree;
+	}
+	my $fsopts;
+	my $fileCount = int (qx (find $tree | wc -l));
+	my $nodeCount = $fileCount * 2;
+	if (defined $journal) {
+		$fsopts = "-b 4096 -j -J size=4 -q -F -N $nodeCount";
+	} else {  
+		$fsopts = "-q -F -N $nodeCount";
+	}
+	my $data = qx (/sbin/mke2fs $fsopts $imageDest/$name 2>&1);
+	my $code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> error  ("Couldn't create EXT2 filesystem");
+		$kiwi -> failed ();
+		$kiwi -> error  ($data);
+		return undef;
+	}
+	return $name;
+}
+
+#==========================================
+# setupReiser
+#------------------------------------------
+sub setupReiser {
+	my $name = shift;
+	my $data = qx (/sbin/mkreiserfs -q -f -b 4096 $imageDest/$name 2>&1);
+	my $code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> error  ("Couldn't create Reiser filesystem");
+		$kiwi -> failed ();
+		$kiwi -> error  ($data);
+		return undef;
+	}
+	return $name;
+}
+
+#==========================================
 # buildMD5Sum
 #------------------------------------------
 sub buildMD5Sum {
@@ -848,6 +1063,28 @@ sub buildMD5Sum {
 	qx (echo "$sum $blocks $blocksize" > $imageDest/$name.md5);
 	$kiwi -> done();
 	return $name;
+}
+
+#==========================================
+# restoreSplitExtend
+#------------------------------------------
+sub restoreSplitExtend {
+	my $imageTreeReadOnly = shift;
+	$kiwi -> info ("Restoring physical extend...");
+	my @rodirs = qw (bin boot lib opt sbin usr);
+	foreach my $dir (@rodirs) {
+		my $data = qx (mv $imageTreeReadOnly/$dir $imageTree 2>&1);
+		my $code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't restore physical extend: $data");
+			$kiwi -> failed ();
+			return undef;
+		}
+	}
+	$kiwi -> done();
+	rmdir  $imageTreeReadOnly;
+	return $imageTreeReadOnly;
 }
 
 #==========================================
@@ -886,6 +1123,9 @@ sub getSize {
 	# Add 10% more space for later filesystem
 	#------------------------------------------
 	my $spare = 0.1 * $size;
+	if ($spare <= 8192) {
+		$spare = 8192;
+	}
 	$size += $spare;
 	$size /= 1024;
 	$size = int ($size);
