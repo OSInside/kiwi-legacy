@@ -795,6 +795,7 @@ sub postImage {
 		return undef;
 	}
 	}
+	return $name;
 }
 
 #==========================================
