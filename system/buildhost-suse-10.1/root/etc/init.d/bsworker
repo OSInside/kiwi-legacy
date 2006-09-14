@@ -22,55 +22,83 @@
 base=${0##*/}
 link=${base#*[SK][0-9][0-9]}
 hostip=storage
+screenrc=/etc/screenrc.worker
+bsopt=""
+
+if [ -f /etc/buildhost.config ];then
+	. /etc/buildhost.config
+	bsopt=--xen
+fi
 
 rc_reset
 case "$1" in
     start)
-	# sync latest code state from server
-	rsync -avHL $hostip::opensuse-bsworker /root/bs
+		# create /etc/screenrc.worker
+		echo "zombie on"       > $screenrc
+		echo "caption always" >> $screenrc
+
+		# sync latest code state from server
+		rsync -avHL $hostip::opensuse-bsworker /root/bs
 	
-	cd /root/bs
-        rpm -Uvh build.rpm
-        NUM=`grep ^processor /proc/cpuinfo  | wc -l`
-        I=0
-        ROOT="/tmp"
-        [ -d /BUILD ] && ROOT="/BUILD"
-        echo "Run $NUM bsworker using $ROOT"
-        while test "$NUM" -gt "$I"; do
-          I=$(( $I + 1 ))
-          screen -d -m ./bs_worker --root $ROOT/root_$I
-        done 
+		cd /root/bs
+		rpm -Uvh build.rpm
+		NUM=`grep ^processor /proc/cpuinfo  | wc -l`
+		I=0
+		ROOT="/tmp"
+		[ -d /BUILD ] && ROOT="/BUILD"
+		echo "Run $NUM bsworker using $ROOT"
+		while test "$NUM" -gt "$I"; do
+			I=$(( $I + 1 ))
+			title="$HOSTNAME/$I"
+			# prepare bsworker startup in screen...
+			echo "screen -t $title ./bs_worker $bsopt --root $ROOT/root_$I" \
+				>> $screenrc
+			# prepare xen build setup...
+			# requires the file /etc/buildhost.config which contains
+			# the following variables:
+			# ---
+			# XEN_ROOT=[n]
+			# XEN_SWAP=[n]
+			# XEN_MEMX=[n]
+			# ---
+			if [ ! -z $bsopt ];then
+				dd if=/dev/zero of=$ROOT/root_$I/root bs=1M count=$XEN_ROOT
+				dd if=/dev/zero of=$ROOT/root_$I/swap bs=1M count=$XEN_SWAP
+				echo $XEN_MEMX > $ROOT/root_$I/memory
+			fi
+		done
+		screen -m -d -c $screenrc
 	;;
-    stop)
-	echo -n "NOT IMPLEMENTED "
+	stop)
+		echo -n "NOT IMPLEMENTED "
 	rc_status -v
 	;;
-    restart)
-	echo -n "NOT IMPLEMENTED "
-	## If first returns OK call the second, if first or
-	## second command fails, set echo return value.
-	#$0 stop &&  $0 start
-	rc_status
+	restart)
+		echo -n "NOT IMPLEMENTED "
+		## If first returns OK call the second, if first or
+		## second command fails, set echo return value.
+		#$0 stop &&  $0 start
+		rc_status
 	;;
-    try-restart)
-        $0 status
-        if test $? = 0; then
-                $0 restart
-        else
-                rc_reset        # Not running is not a failure.
-        fi
-        # Remember status and be quiet
-        rc_status
-        ;;
-    reload)
+	try-restart)
+		$0 status
+		if test $? = 0; then
+			$0 restart
+		else
+			rc_reset        # Not running is not a failure.
+		fi
+		# Remember status and be quiet
+		rc_status
 	;;
-    status)
-	echo  "NOT IMPLEMENTED"
-	#rc_status -v
+	reload)
 	;;
-    *)
-	echo "Usage: $0 {start|stop|status|try-restart|restart|reload}"
-	exit 1
+	status)
+		echo  "NOT IMPLEMENTED"
+		#rc_status -v
+	;;
+	*)
+		echo "Usage: $0 {start|stop|status|try-restart|restart|reload}"
+		exit 1
 	;;
 esac
 rc_exit

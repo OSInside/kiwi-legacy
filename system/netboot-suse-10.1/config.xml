@@ -14,6 +14,7 @@
 		<file name="fs/reiserfs/*"/>
 		<file name="net/ipv6/*"/>
 		<file name="drivers/scsi/*"/>
+		<file name="drivers/message/fusion/*"/>
 		<file name="drivers/net/*"/>
 	</drivers>
 	<repository type="yast2">

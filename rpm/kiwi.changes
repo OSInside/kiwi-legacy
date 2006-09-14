@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Sep 13 15:26:43 CEST 2006 - ms@suse.de
+
+- added drivers/message/fusion to xenboot image
+- fixed bsworker init script to setup xen build
+
+-------------------------------------------------------------------
 Tue Sep 12 18:38:05 CEST 2006 - ms@suse.de
 
 - fixed permissions for ssh keys in buildhost
