@@ -549,9 +549,21 @@ sub setupMount {
 			my $mount  = shift @list;
 			$mount = $prefix.$mount;
 			push (@mountList,$mount);
-			#$kiwi -> info ("Mounting local device: $device $mount\n");
-			qx (mkdir -p $mount);
-			qx (mount $device $mount);
+			if ($device =~ /loop/) {
+				#$kiwi -> info ("Mounting local loop: $device $mount\n");
+				my $loop = qx (/sbin/losetup $device); chomp ($loop);
+				if ($loop =~ /\((.*)\)/) {
+					my $lobase = $1;
+					my $mtab   = "/etc/mtab";
+					my $lofile = qx (cat $mtab | grep $lobase | cut -f1 -d' ');
+					chomp $lofile;
+					qx (mount -o loop $lofile $mount);
+				}
+			} else {			
+				#$kiwi -> info ("Mounting local device: $device $mount\n");
+				qx (mkdir -p $mount);
+				qx (mount $device $mount);
+			}
 		}
 		if ($_ =~ /(.*:\/.*) (.*) nfs/) {
 			my $device = $1;
