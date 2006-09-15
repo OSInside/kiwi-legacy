@@ -55,6 +55,7 @@ sub new {
 	$imageVirt  = shift;
 	$selfRoot   = shift;
 	$baseSystem = shift;
+	my $code;
 	#==========================================
 	# Check parameters
 	#------------------------------------------
@@ -86,9 +87,10 @@ sub new {
 	#==========================================
 	# Create smartChannel hash
 	#------------------------------------------
-	foreach my $type (keys %repository) {
+	foreach my $source (keys %repository) {
+		my $type = $repository{$source};
 		my $urlHandler  = new KIWIURL ($kiwi);
-		my $publics_url = $repository{$type};
+		my $publics_url = $source;
 		if (defined $urlHandler -> openSUSEpath ($publics_url)) {
 			$publics_url = $urlHandler -> openSUSEpath ($publics_url);
 		}
@@ -113,7 +115,8 @@ sub new {
 	my $rootError = 1;
 	if (! defined $selfRoot) {
 		$root = qx ( mktemp -q -d /tmp/kiwi.XXXXXX );
-		if ($? == 0) {
+		$code = $? >> 8;
+		if ($code == 0) {
 			$rootError = 0;
 		}
 		chomp $root;

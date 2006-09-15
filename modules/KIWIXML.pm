@@ -160,7 +160,7 @@ sub getRepository {
 		my $type = $element -> getAttribute("type");
 		my $stag = $element -> getElementsByTagName ("source") -> get_node(1);
 		my $source =  $stag -> getAttribute ("path");
-		$result{$type} = $source;
+		$result{$source} = $type;
 	}
 	return %result;
 }
