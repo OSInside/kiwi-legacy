@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Sep 18 15:55:53 CEST 2006 - ms@suse.de
+
+- fixed build for distributions without mboot.c32
+  loader packaged in syslinux package
+
+-------------------------------------------------------------------
 Mon Sep 18 12:17:39 CEST 2006 - ms@suse.de
 
 - added support for image deployment via USB stick and CD

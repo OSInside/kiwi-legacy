@@ -67,6 +67,10 @@ make buildroot=$RPM_BUILD_ROOT \
      doc_prefix=$RPM_BUILD_ROOT/%{_defaultdocdir} \
      man_prefix=$RPM_BUILD_ROOT/%{_mandir} \
      install
+test -f $RPM_BUILD_ROOT/%{_var}/lib/tftpboot/pxelinux.0 && \
+	echo %{_var}/lib/tftpboot/pxelinux.0 > kiwi.loader
+test -f $RPM_BUILD_ROOT/%{_var}/lib/tftpboot/mboot.c32 && \
+	echo %{_var}/lib/tftpboot/mboot.c32 >> kiwi.loader
 
 #=================================================
 # KIWI files...      
@@ -81,7 +85,7 @@ make buildroot=$RPM_BUILD_ROOT \
 #=================================================
 # KIWI-netboot files...  
 # ------------------------------------------------
-%files -n kiwi-pxeboot
+%files -n kiwi-pxeboot -f kiwi.loader
 %defattr(-, root, root)
 /etc/permissions.d/kiwi
 %dir %{_var}/lib/tftpboot
@@ -91,8 +95,6 @@ make buildroot=$RPM_BUILD_ROOT \
 %dir %{_var}/lib/tftpboot/image
 %dir %{_var}/lib/tftpboot/upload
 %{_var}/lib/tftpboot/pxelinux.cfg/default
-%{_var}/lib/tftpboot/pxelinux.0
-%{_var}/lib/tftpboot/mboot.c32
 
 #=================================================
 # KIWI-images...
