@@ -25,6 +25,7 @@ use KIWIRoot;
 use KIWIXML;
 use KIWILog;
 use KIWIImage;
+use KIWIBoot;
 
 our $Version = "1.2";
 our $System  = "/usr/share/kiwi/image";
@@ -38,6 +39,8 @@ our $LogFile;     # optional file name for logging
 our $Virtual;     # optional virtualisation setup
 our $RootTree;    # optional root tree destination
 our $Survive;     # if set to "yes" don't exit kiwi
+our $BootStick;   # deploy initrd booting from USB stick
+our $BootCD;      # deploy initrd booting from CD
 
 #============================================
 # Globals
@@ -61,13 +64,21 @@ sub main {
 	# Create logger object
 	#------------------------------------------
 	$kiwi = new KIWILog();
-	if (defined $LogFile) {
-		# TODO
-	}
+
 	#==========================================
 	# Initialize and check options
 	#------------------------------------------
 	init();
+
+	#==========================================
+	# Setup logging location
+	#------------------------------------------
+	if (defined $LogFile) {
+		$kiwi -> info ("Setting log file to: $LogFile\n");
+		if (! $kiwi -> setLogFile ( $LogFile )) {
+			kiwiExit (1);
+		}
+	}
 
 	#========================================
 	# Prepare image and build chroot system
@@ -173,6 +184,36 @@ sub main {
 			kiwiExit (1);
 		}
 	}
+
+	#==========================================
+	# Write an initrd image to a boot USB stick
+	#------------------------------------------
+	if (defined $BootStick) {
+		$kiwi -> info ("Creating boot USB stick from: $BootStick...\n");
+		my $boot = new KIWIBoot ($kiwi,$BootStick);
+		if (! defined $boot) {
+			kiwiExit (1);
+		}
+		if (! $boot -> setupBootStick()) {
+			kiwiExit (1);
+		}
+		kiwiExit (0);
+	}
+
+	#==========================================
+	# Create an initrd .iso for CD boot
+	#------------------------------------------
+	if (defined $BootCD) {
+		$kiwi -> info ("Creating boot ISO from: $BootCD...\n");
+		my $boot = new KIWIBoot ($kiwi,$BootCD);
+		if (! defined $boot) {
+			kiwiExit (1);
+		}
+		if (! $boot -> setupBootCD()) {
+			kiwiExit (1);
+		}
+		kiwiExit (0);
+	}
 	return 1;
 }
 
@@ -197,6 +238,8 @@ sub init {
 		"destdir|d=s"         => \$Destination,
 		"virtual|v=s"         => \$Virtual,
 		"root|r=s"            => \$RootTree,
+		"bootstick=s"         => \$BootStick,
+		"bootcd=s"            => \$BootCD,
 		"help|h"              => \&usage,
 		"<>"                  => \&usage
 	);
@@ -209,7 +252,10 @@ sub init {
 	if ( $result != 1 ) {
 		usage();
 	}
-	if ((! defined $Prepare) && (! defined $Create)) {
+	if (
+		(! defined $Prepare) && (! defined $Create) &&
+		(! defined $BootStick) && (! defined $BootCD)
+	) {
 		$kiwi -> info ("No operation specified");
 		$kiwi -> failed ();
 		kiwiExit (1);
@@ -236,6 +282,8 @@ sub usage {
 	print "Usage:\n";
 	print "  kiwi -p | --prepare <image-path>\n";
 	print "  kiwi -c | --create  <image-root>\n";
+	print "  kiwi --bootstick <initrd>\n";
+	print "  kiwi --bootcd <initrd>\n";
 	print "--\n";
 	print "  [ -d | --destdir <destination-path> ]\n";
 	print "    Specify an alternative destination directory for\n";

@@ -65,8 +65,10 @@ sub doStat {
 	# Initialize cursor position counting from the
 	# end of the line
 	# ---
+	setOutputChannel();
 	my $cols = getColumns();
 	printf ("\015\033[%sC\033[10D",$cols);
+	resetOutputChannel();
 }
 
 #==========================================
@@ -76,7 +78,9 @@ sub doNorm {
 	# ...
 	# Reset cursor position to standard value
 	# ---
-    print "\033[m\017";
+	setOutputChannel();
+	print "\033[m\017";
+	resetOutputChannel();
 }
 
 #==========================================
@@ -87,7 +91,9 @@ sub done {
 	# This is the green "done" flag
 	# ---
     doStat();
+	setOutputChannel();
     print "\033[1;32mdone\n";
+	resetOutputChannel();
     doNorm();
 }
 
@@ -99,8 +105,43 @@ sub failed {
 	# This is the red "failed" flag
 	# ---
     doStat();
+	setOutputChannel();
     print "\033[1;31mfailed\n";
+	resetOutputChannel();
     doNorm();
+}
+
+#==========================================
+# setOutputChannel
+#------------------------------------------
+sub setOutputChannel {
+	open ( OLDERR, ">&STDERR" );
+	open ( OLDSTD, ">&STDOUT" );
+	open ( STDERR,">&$$channel" );
+	open ( STDOUT,">&$$channel" );
+}
+
+#==========================================
+# resetOutputChannel
+#------------------------------------------
+sub resetOutputChannel {
+	close ( STDERR );
+	open  ( STDERR, ">&OLDERR" );
+	close ( STDOUT );
+	open  ( STDOUT, ">&OLDSTD" );
+}
+
+#==========================================
+# getPrefix
+#------------------------------------------
+sub getPrefix {
+	my $this  = shift;
+	my $level = shift;
+	my $date;
+	$date = qx ( LANG=POSIX /bin/date "+%h-%d %H:%M");
+	$date =~ s/\n$//;
+	$date .= " <$level> : ";
+	return $date;
 }
 
 #==========================================
@@ -116,7 +157,6 @@ sub printLog {
 	my $lglevel = $_[0];
 	my $logdata = $_[1];
 
-	my $date;
 	if (! defined $channel) {
 		$channel = \*STDOUT;
 	}
@@ -124,16 +164,10 @@ sub printLog {
 		$logdata = $lglevel;
 		$lglevel = 1;
 	}
-	$date = qx ( LANG=POSIX /bin/date "+%h-%d %H:%M");
-	$date =~ s/\n$//;
-	$date .= " <$lglevel> : ";
-
+	my $date = getPrefix ( $this,$lglevel );
 	foreach my $level (@showLevel) {
 	if ($level == $lglevel) {
-		open ( OLDERR, ">&STDERR" );
-		open ( OLDSTD, ">&STDOUT" );
-		open ( STDERR,">&$$channel" );
-		open ( STDOUT,">&$$channel" );
+		setOutputChannel();
 		if (($lglevel == 1) || ($lglevel == 3)) {
 			print $date,$logdata;
 		} elsif ($lglevel == 5) {
@@ -141,8 +175,7 @@ sub printLog {
 		} else {
 			cluck $date,$logdata;
 		}
-		close ( STDERR ); open ( STDERR, ">&OLDERR" );
-		close ( STDOUT ); open ( STDOUT, ">&OLDSTD" );
+		resetOutputChannel();
 		return $lglevel;
 	}
 	}
@@ -210,11 +243,11 @@ sub setLogFile {
 	my $file = $_[0];
 	if (! (open FD,">$file")) {
 		warning ( $this,"Couldn't open log channel: $!\n" );
-		return 0;
+		return undef;
 	}
 	$logfile = \*FD;
 	$channel = \*FD;
-	return 1;
+	return $this;
 }
 
 1;
