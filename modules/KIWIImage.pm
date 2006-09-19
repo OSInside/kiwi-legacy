@@ -28,6 +28,7 @@ use Math::BigFloat;
 #------------------------------------------
 my $imageTree;
 my $imageDest;
+my $imageStrip;
 my $kiwi;
 my $xml;
 my $arch;
@@ -41,8 +42,9 @@ sub new {
 	bless $this,$class;
 	$kiwi = shift;
 	$xml  = shift;
-	$imageTree = shift;
-	$imageDest = shift;
+	$imageTree  = shift;
+	$imageDest  = shift;
+	$imageStrip = shift;
 	if (! defined $kiwi) {
 		$kiwi = new KIWILog();
 	}
@@ -63,6 +65,34 @@ sub new {
 	}
 	$arch = qx ( arch ); chomp ( $arch );
 	$arch = ".$arch";
+	return $this;
+}
+
+#==========================================
+# stripImage
+#------------------------------------------
+sub stripImage {
+	# ...
+	# remove symbols from shared objects and binaries
+	# using strip -p
+	# ---
+	my $this = shift;
+	$kiwi -> info ("Stripping shared objects/executables...");
+	my @list = qx (find $imageTree -type f -perm -755);
+	foreach my $file (@list) {
+		chomp $file;
+		my $data = qx (file "$file");
+		chomp $data;
+		if ($data =~ /not stripped/) {
+		if ($data =~ /shared object/) {
+			qx ( strip -p $file 2>&1 );
+		}
+		if ($data =~ /executable/) {
+			qx ( strip -p $file 2>&1 );
+		}
+		}
+	}
+	$kiwi -> done ();
 	return $this;
 }
 
@@ -899,6 +929,12 @@ sub setupLogicalExtend {
 		}
 		qx ( rm -f $imageTree/image/images.sh );
 		$kiwi -> done ();
+	}
+	#==========================================
+	# Strip if specified
+	#------------------------------------------
+	if (defined $imageStrip) {
+		stripImage();
 	}
 	#==========================================
 	# Calculate needed space

@@ -41,6 +41,7 @@ our $RootTree;    # optional root tree destination
 our $Survive;     # if set to "yes" don't exit kiwi
 our $BootStick;   # deploy initrd booting from USB stick
 our $BootCD;      # deploy initrd booting from CD
+our $StripImage;  # strip shared objects and binaries
 
 #============================================
 # Globals
@@ -146,7 +147,7 @@ sub main {
 		#==========================================
 		# Initialize logical image extend
 		#------------------------------------------
-		$image = new KIWIImage ( $kiwi,$xml,$Create,$Destination );
+		$image = new KIWIImage ( $kiwi,$xml,$Create,$Destination,$StripImage );
 		my $type = $xml->getImageType();
 		my $ok;
 		SWITCH: for ($type) {
@@ -240,6 +241,7 @@ sub init {
 		"root|r=s"            => \$RootTree,
 		"bootstick=s"         => \$BootStick,
 		"bootcd=s"            => \$BootCD,
+		"strip|s"             => \$StripImage,
 		"help|h"              => \&usage,
 		"<>"                  => \&usage
 	);
@@ -298,6 +300,10 @@ sub usage {
 	print "    Setup the physical extend, chroot system below the\n";
 	print "    given root-path path. By default a mktmp directory\n";
 	print "    will be used\n";
+	print "\n";
+	print "  [ -s | --strip ]\n";
+	print "    Strip shared objects and executables\n";
+	print "    makes only sense in combination with --create\n";
 	print "\n";
 	print "  [ --logfile <filename> ]\n";
 	print "    Write to the log file \`<filename>' instead of\n";
