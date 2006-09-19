@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Sep 19 11:40:00 CEST 2006 - ms@suse.de
+
+- run smart update/install actions in screen session(s)
+
+-------------------------------------------------------------------
 Mon Sep 18 15:55:53 CEST 2006 - ms@suse.de
 
 - fixed build for distributions without mboot.c32

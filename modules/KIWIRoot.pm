@@ -189,13 +189,54 @@ sub init {
 		"-y"
 	);
 	$kiwi -> info ("Initializing image system on: $root...");
-	$data = qx ( smart update @channelList 2>&1 );
-	$data = qx ( smart install @initPacs @installOpts 2>&1 );
+	#==========================================
+	# Create screen call file
+	#------------------------------------------
+	my $smartCall = $root."/screenrc.smart";
+	if (! open (FD,">$smartCall")) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't create call file: $!");
+		$kiwi -> failed ();
+		$kiwi -> info ("Removing smart channels: @channelList...");
+		$data = qx ( smart channel --remove @channelList -y 2>&1 );
+		$code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ($data);
+			$kiwi -> failed ();
+		} else {
+			$kiwi -> done();
+		}
+		return undef;
+	}
+	print FD "smart update @channelList\n";
+	print FD "test \$? = 0 && smart install @initPacs @installOpts\n";
+	print FD "echo \$? > $smartCall.exit\n";
+	close FD;
+
+	#==========================================
+	# run smart update and install in screen
+	#------------------------------------------
+	$data = qx ( chmod 755 $smartCall );
+	$data = qx ( screen -D -m $smartCall );
 	$code = $? >> 8;
+	if ($code == 0) {
+		if (! open (FD,"$smartCall.exit")) {
+			$code = 1;
+		} else {
+			$code = <FD>; chomp $code;
+			close FD;
+		}
+	}
+	qx (rm -f $smartCall* );
+
+	#==========================================
+	# check exit code from screen session
+	#------------------------------------------
 	if ($code != 0) {
 		$kiwi -> failed ();
 		$kiwi -> error  ($data);
-		$kiwi -> info ("Removing channels: @channelList...");
+		$kiwi -> info ("Removing smart channels: @channelList...");
 		$data = qx ( smart channel --remove @channelList -y 2>&1 );
 		$code = $? >> 8;
 		if ($code != 0) {
@@ -321,9 +362,40 @@ sub install {
 		$kiwi -> done ();
 	}
 	$kiwi -> info ("Installing image packages...");
-	my $data = qx ( chroot $root smart update 2>&1 );
-	my $data = qx ( chroot $root smart install @packList -y 2>&1 );
+	#==========================================
+	# Create screen call file
+	#------------------------------------------
+	my $smartCall = $root."/screenrc.smart";
+	if (! open (FD,">$smartCall")) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't create call file: $!");
+		$kiwi -> failed ();
+		return undef;
+	}
+	print FD "chroot $root smart update\n";
+	print FD "test \$? = 0 && chroot $root smart install @packList -y\n";
+	print FD "echo \$? > $smartCall.exit\n";
+	close FD;
+
+	#==========================================
+	# run smart update and install in screen
+	#------------------------------------------
+	qx ( chmod 755 $smartCall );
+	my $data = qx ( screen -D -m $smartCall );
 	my $code = $? >> 8;
+	if ($code == 0) {
+		if (! open (FD,"$smartCall.exit")) {
+			$code = 1;
+		} else {
+			$code = <FD>; chomp $code;
+			close FD;
+		}
+	}
+	qx (rm -f $smartCall* );
+
+	#==========================================
+	# check exit code from screen session
+	#------------------------------------------
 	if ($code != 0) {
 		$kiwi -> failed ();
 		$kiwi -> error  ($data);
