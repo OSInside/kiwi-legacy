@@ -99,11 +99,15 @@ sub new {
 			$private_url = $baseSystem."/".$private_url;
 		}
 		my $channel = "kiwi".$count."-".$$;
+		my $srckey  = "baseurl";
+		if ($type eq "rpm-dir") {
+			$srckey = "path";
+		}
 		my @private_options = ("type=$type","name=$channel",
-			"baseurl=$private_url","-y"
+			"$srckey=$private_url","-y"
 		);
 		my @public_options  = ("type=$type","name=$channel",
-			"baseurl=$publics_url","-y"
+			"$srckey=$publics_url","-y"
 		);
 		$smartChannel{private}{$channel} = \@private_options;
 		$smartChannel{public}{$channel}  = \@public_options;
@@ -189,9 +193,16 @@ sub init {
 	$data = qx ( smart install @initPacs @installOpts 2>&1 );
 	$code = $? >> 8;
 	if ($code != 0) {
-		qx ( smart channel --remove @channelList -y 2>&1 );
 		$kiwi -> failed ();
 		$kiwi -> error  ($data);
+		$kiwi -> info ("Removing channels: @channelList...");
+		$data = qx ( smart channel --remove @channelList -y 2>&1 );
+		$code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ($data);
+		}
+		$kiwi -> done();
 		return undef;
 	}
 	$kiwi -> done ();
