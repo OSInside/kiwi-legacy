@@ -193,7 +193,9 @@ sub init {
 	# Create screen call file
 	#------------------------------------------
 	my $smartCall = $root."/screenrc.smart";
-	if (! open (FD,">$smartCall")) {
+	my $smartCtrl = $root."/screenrc.ctrls";
+	my $smartLogs = $root."/screenrc.log";
+	if ((! open (FD,">$smartCall")) || (! open (CD,">$smartCtrl"))) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't create call file: $!");
 		$kiwi -> failed ();
@@ -209,6 +211,8 @@ sub init {
 		}
 		return undef;
 	}
+	print CD "logfile $smartLogs\n";
+	close CD;
 	print FD "smart update @channelList\n";
 	print FD "test \$? = 0 && smart install @initPacs @installOpts\n";
 	print FD "echo \$? > $smartCall.exit\n";
@@ -218,8 +222,11 @@ sub init {
 	# run smart update and install in screen
 	#------------------------------------------
 	$data = qx ( chmod 755 $smartCall );
-	$data = qx ( screen -D -m $smartCall );
+	$data = qx ( screen -L -D -m -c $smartCtrl $smartCall );
 	$code = $? >> 8;
+	if (open (FD,$smartLogs)) {
+		local $/; $data = <FD>; close FD;
+	}
 	if ($code == 0) {
 		if (! open (FD,"$smartCall.exit")) {
 			$code = 1;
@@ -228,7 +235,9 @@ sub init {
 			close FD;
 		}
 	}
-	qx (rm -f $smartCall* );
+	qx ( rm -f $smartCall* );
+	qx ( rm -f $smartCtrl );
+	qx ( rm -f $smartLogs );
 
 	#==========================================
 	# check exit code from screen session
@@ -366,12 +375,16 @@ sub install {
 	# Create screen call file
 	#------------------------------------------
 	my $smartCall = $root."/screenrc.smart";
-	if (! open (FD,">$smartCall")) {
+	my $smartCtrl = $root."/screenrc.ctrls";
+	my $smartLogs = $root."/screenrc.log";
+	if ((! open (FD,">$smartCall")) || (! open (CD,">$smartCtrl"))) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't create call file: $!");
 		$kiwi -> failed ();
 		return undef;
 	}
+	print CD "logfile $smartLogs\n";
+	close CD;
 	print FD "chroot $root smart update\n";
 	print FD "test \$? = 0 && chroot $root smart install @packList -y\n";
 	print FD "echo \$? > $smartCall.exit\n";
@@ -381,8 +394,11 @@ sub install {
 	# run smart update and install in screen
 	#------------------------------------------
 	qx ( chmod 755 $smartCall );
-	my $data = qx ( screen -D -m $smartCall );
+	my $data = qx ( screen -L -D -m -c $smartCtrl $smartCall );
 	my $code = $? >> 8;
+	if (open (FD,$smartLogs)) {
+		local $/; $data = <FD>; close FD;
+	}
 	if ($code == 0) {
 		if (! open (FD,"$smartCall.exit")) {
 			$code = 1;
@@ -392,6 +408,8 @@ sub install {
 		}
 	}
 	qx (rm -f $smartCall* );
+	qx (rm -f $smartCtrl );
+	qx (rm -f $smartLogs );
 
 	#==========================================
 	# check exit code from screen session
