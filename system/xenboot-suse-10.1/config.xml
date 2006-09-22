@@ -3,6 +3,7 @@
 		<type>cpio</type>
 		<size unit="M">60</size>
 		<compressed>yes</compressed>
+		<rpm-check-signatures>False</rpm-check-signatures>
 	</preferences>
 	<drivers type="drivers">
 		<file name="drivers/ide/*"/>

@@ -145,6 +145,20 @@ sub getCompressed {
 }
 
 #==========================================
+# getRPMCheckSignatures
+#------------------------------------------
+sub getRPMCheckSignatures {
+	# ...
+	# Check if the smart package manager should check for
+	# RPM signatures or not
+	# ---
+	my $this = shift;
+	my $node = $optionsNodeList -> get_node(1);
+	my $sigs = $node -> getElementsByTagName ("rpm-check-signatures");
+	return $sigs;
+}
+
+#==========================================
 # getRepository
 #------------------------------------------
 sub getRepository {

@@ -163,6 +163,22 @@ sub init {
 		return undef;
 	}
 	#==========================================
+	# Setup signature check
+	#------------------------------------------
+	my $curCheckSig = qx (smart config --show rpm-check-signatures|tr -d '\n');
+	my $imgCheckSig = $xml->getRPMCheckSignatures();
+	if (defined $imgCheckSig) {
+		$kiwi -> info ("Setting RPM signature check to: $imgCheckSig");
+		$data = qx (smart config --set rpm-check-signatures=$imgCheckSig 2>&1);
+		$code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ($data);
+			return undef;
+		}
+		$kiwi -> done ();
+	}
+	#==========================================
 	# Add channel, install and remove channel
 	#------------------------------------------
 	foreach my $channel (keys %{$smartChannel{public}}) {
@@ -265,6 +281,20 @@ sub init {
 		return undef;
 	}
 	$kiwi -> done ();
+	#==========================================
+	# Reset signature check
+	#------------------------------------------
+	if (defined $imgCheckSig) {
+		$kiwi -> info ("Resetting RPM signature check to: $curCheckSig");
+		$data = qx (smart config --set rpm-check-signatures=$curCheckSig 2>&1);
+		$code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ($data);
+			return undef;
+		}
+		$kiwi -> done ();
+	}
 	#==================================
 	# Copy/touch some defaults files
 	#----------------------------------
@@ -354,6 +384,22 @@ sub install {
 		$kiwi -> error ("Couldn't mount base system");
 		$kiwi -> failed ();
 		return undef;
+	}
+	#==========================================
+	# Setup signature check
+	#------------------------------------------
+	my $imgCheckSig = $xml->getRPMCheckSignatures();
+	if (defined $imgCheckSig) {
+		$kiwi -> info ("Setting RPM signature check to: $imgCheckSig");
+		my $option = "rpm-check-signatures=$imgCheckSig";
+		my $data = qx ( chroot $root smart config --set $option 2>&1);
+		my $code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ($data);
+			return undef;
+		}
+		$kiwi -> done ();
 	}
 	#==========================================
 	# Add smart channel(s) and install

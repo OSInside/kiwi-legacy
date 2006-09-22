@@ -3,6 +3,7 @@
 		<type>reiserfs</type>
 		<size unit="M">570</size>
 		<compressed>yes</compressed>
+		<rpm-check-signatures>False</rpm-check-signatures>
 	</preferences>
 	<repository type="yast2">
 		<source path="opensuse://SL-10.1"/>

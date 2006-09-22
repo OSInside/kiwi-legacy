@@ -92,13 +92,6 @@ sub main {
 		}
 		$kiwi -> done();
 		#==========================================
-		# Disable rpm signature check
-		#------------------------------------------
-		# to be removed if smart -y is fixed not to ask
-		# for gpg fingerprint confirmation
-		qx (smart config --set rpm-check-signatures=False 2>&1);
-
-		#==========================================
 		# Initialize root system
 		#------------------------------------------
 		$root = new KIWIRoot (

@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Sep 22 10:02:05 CEST 2006 - ms@suse.de
+
+- add setup of rpm-check-signatures option in xml description
+
+-------------------------------------------------------------------
 Tue Sep 19 11:40:00 CEST 2006 - ms@suse.de
 
 - run smart update/install actions in screen session(s)
