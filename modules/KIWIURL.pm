@@ -67,6 +67,7 @@ sub openSUSEpath {
 	# normalize URL data
 	#------------------------------------------
 	$module =~ s/opensuse:\/\///;
+	$module =~ s/:/:\//g;
 	if ((! defined $module) || ($module eq "/")) {
 		return ( undef,undef );
 	}
@@ -94,8 +95,7 @@ sub openSUSEpath {
 		if ((defined $title) && ($title !~ /not found/i)) {
 			$url =~ s/([^:])\/+/\1\//g;
 			if ($url =~ /repositories/) {
-				my @repospath = split (/\//,$url); pop @repospath;
-				my $repourl = join ("/",@repospath);
+				my $repourl = $url;
 				my $request = HTTP::Request->new (GET => $repourl."/repodata");
 				my $answer  = $browser -> request  ( $request );
 				my $title = $answer -> title ();
