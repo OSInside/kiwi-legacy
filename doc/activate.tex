@@ -159,9 +159,12 @@ The TFTP server directory structure is divided into the following main areas
       contains the various system configuration files, such as xorg.conf.
 \item \textbf{Boot files}\\
       The \textit{/var/lib/tftpboot/boot/}~ directory is where the initrd.gz,
-      the kernel to boot, and the PXE loader pxelinux.0 are kept.
+      and the kernel to boot are kept.
+\item \textbf{PXE second stage boot loader(s)}\\
+      The \textit{/var/lib/tftpboot/}~ directory is where the boot loaders
+      for PXE are kept (pxelinux.0,mboot.c32)
 \item \textbf{PXE configuration file}\\
-      The \textit{/var/lib/tftpboot/boot/pxelinux.cfg}~ directory is where
+      The \textit{/var/lib/tftpboot/pxelinux.cfg}~ directory is where
       the PXE configuration file is kept.
 \item \textbf{Image files and checksums}\\
       The \textit{/var/lib/tftpboot/image/}~ directory is where all the image
@@ -281,6 +284,11 @@ The following format is used:
 		to be loaded from the server. Used mainly for debugging
 		purposes, this option only makes sense on diskful
 		systems.
+	\item \textbf{COMBINED\_IMAGE}\\
+        If set to an non-empty string, indicates that the both
+        image specified needs to be combined into one bootable
+        image, whereas the first image defines the read-write
+        part and the second image defines the read-only part.
 \end{itemize}
 
 %\newpage

@@ -64,12 +64,25 @@ the operating system data can be stored in. The image type corresponds
 to the selected filesystem. Supported image types are:
 
 \begin{itemize}
-	\item CPIO
-	\item EXT2 / EXT3
-	\item ReiserFS
-	\item Special cpio/ext2 Boot image for image installation via network
-	\item Special cpio/ext2 XEN-Boot image based on Xen kernel
+	\item \textbf{\underline{CPIO}}
+	\item \textbf{\underline{EXT2 / EXT3}}
+	\item \textbf{\underline{ReiserFS}}
+	\item \textbf{\underline{Special cpio/ext2 Boot image}}\\
+          for image installation via network
+	\item \textbf{\underline{Special cpio/ext2 XEN-Boot image}}\\
+          based on Xen kernel
           and mboot.c32 for multiboot xen and initrd
-	\item Special cpio/ext2 ISO-Boot image to create a live CD from
-          an image 
+	\item \textbf{\underline{Special cpio/ext2 ISO-Boot image}}\\
+          to create a live CD from
+          an image. Used within the iso:<name> image type 
+	\item \textbf{\underline{iso:<name> image support}}\\
+          Which means the image gets
+          splitted into two ext2 based sub-images whereas one represents
+          the loop read-only part on CD and the other represents the
+          read-write data in RAM
+	\item \textbf{\underline{split:<fstypeRW,fstypeRO> image support}}\\
+          Which means the image is splitted into a read-only and a
+          read-write part whereas each part can have a different
+          filesystem. To be able to boot such an image the config.<MAC>
+          file must contain a \textit{COMBINED\_IMAGE=yes} statement.
 \end{itemize}
