@@ -155,6 +155,9 @@ sub getRPMCheckSignatures {
 	my $this = shift;
 	my $node = $optionsNodeList -> get_node(1);
 	my $sigs = $node -> getElementsByTagName ("rpm-check-signatures");
+	if ((! defined $sigs) || ("$sigs" eq "")) {
+		return undef;
+	}
 	return $sigs;
 }
 
