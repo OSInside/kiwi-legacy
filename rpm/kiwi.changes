@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Sep 29 15:59:58 CEST 2006 - ms@suse.de
+
+- added cramfs support for read-only images
+
+-------------------------------------------------------------------
 Fri Sep 22 10:02:05 CEST 2006 - ms@suse.de
 
 - add setup of rpm-check-signatures option in xml description

@@ -569,6 +569,10 @@ sub createImageSplit {
 			$ok = setupReiser ( $namero );
 			last SWITCH;
 		};
+		/cramfs/     && do {
+			$ok = setupCramFS ( $namero,$imageTreeReadOnly );
+			last SWITCH;
+		};
 		$kiwi -> error  ("Unsupported type: $FSTypeRO");
 		$kiwi -> failed ();
 		restoreSplitExtend ($imageTreeReadOnly);
@@ -594,22 +598,24 @@ sub createImageSplit {
 			$source = $imageTreeReadOnly;
 			$type = $FSTypeRO;
 		}
-		#==========================================
-		# mount logical extend for data transfer
-		#------------------------------------------
-		my $extend = mountLogicalExtend ($name);
-		if (! defined $extend) {
-			restoreSplitExtend ($imageTreeReadOnly);
-			return undef;
+		if ($type ne "cramfs") {
+			#==========================================
+			# mount logical extend for data transfer
+			#------------------------------------------
+			my $extend = mountLogicalExtend ($name);
+			if (! defined $extend) {
+				restoreSplitExtend ($imageTreeReadOnly);
+				return undef;
+			}
+			#==========================================
+			# copy physical to logical
+			#------------------------------------------
+			if (! installLogicalExtend ($extend,$source)) {
+				restoreSplitExtend ($imageTreeReadOnly);
+				return undef;
+			}
+			cleanMount();
 		}
-		#==========================================
-		# copy physical to logical
-		#------------------------------------------
-		if (! installLogicalExtend ($extend,$source)) {
-			restoreSplitExtend ($imageTreeReadOnly);
-			return undef;
-		}
-		cleanMount();
 		#==========================================
 		# Checking file system
 		#------------------------------------------
@@ -627,6 +633,11 @@ sub createImageSplit {
 			};
 			/reiserfs/   && do {
 				qx (/sbin/reiserfsck -y $imageDest/$name 2>&1);
+				$kiwi -> done();
+				last SWITCH;
+			};
+			/cramfs/     && do {
+				qx (/sbin/fsck.cramfs -v $imageDest/$name 2>&1);
 				$kiwi -> done();
 				last SWITCH;
 			};
@@ -1076,6 +1087,26 @@ sub setupReiser {
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> error  ("Couldn't create Reiser filesystem");
+		$kiwi -> failed ();
+		$kiwi -> error  ($data);
+		return undef;
+	}
+	return $name;
+}
+
+#==========================================
+# setupCramFS
+#------------------------------------------
+sub setupCramFS {
+	my $name = shift;
+	my $tree = shift;
+	if (! defined $tree) {
+		$tree = $imageTree;
+	}
+	my $data = qx (/sbin/mkfs.cramfs -v $tree $imageDest/$name 2>&1);
+	my $code = $? >> 8; 
+	if ($code != 0) {
+		$kiwi -> error  ("Couldn't create CRam filesystem");
 		$kiwi -> failed ();
 		$kiwi -> error  ($data);
 		return undef;
