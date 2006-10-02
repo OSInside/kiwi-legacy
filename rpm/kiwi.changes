@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Oct  2 14:06:01 CEST 2006 - ms@suse.de
+
+- added support for <users> section. This allows the config.xml
+  to specifiy users/groups to be added to the image. Update
+  documentation concerning this feature
+
+-------------------------------------------------------------------
 Fri Sep 29 15:59:58 CEST 2006 - ms@suse.de
 
 - added cramfs support for read-only images

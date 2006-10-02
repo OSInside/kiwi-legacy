@@ -566,6 +566,7 @@ sub setup {
 				if ($code != 0) {
 					$kiwi -> failed ();
 					$kiwi -> info   ($data);
+					$kiwi -> failed ();
 				}
 				qx (rm -f $root/image/config/$script);
 				$kiwi -> done ();
@@ -582,6 +583,52 @@ sub setup {
 	qx ( cp $imageDesc/images.sh $root/image );
 	qx ( cp $imageDesc/VERSION $root/image );
 
+	#========================================
+	# check <users> tag, create users/groups
+	#----------------------------------------
+	my %users = $xml -> getUsers();
+	if (defined %users) {
+		my $adduser  = "/usr/sbin/useradd";
+		my $addgroup = "/usr/sbin/groupadd";
+		foreach my $user (keys %users) {
+			my $group = $users{$user}{group};
+			my $pwd   = $users{$user}{pwd};
+			my $home  = $users{$user}{home};
+			if (defined $pwd) {
+				$adduser .= " -p '$pwd'";
+			}
+			if (defined $home) {
+				$adduser .= " -m -d $home";
+			}
+			if (defined $group) {
+				my $data = qx ( chroot $root grep -q $group /etc/group 2>&1 );
+				my $code = $? >> 8;
+				if ($code != 0) {
+					$kiwi -> info ("Adding group: $group");
+					my $data = qx ( chroot $root $addgroup $group );
+					my $code = $? >> 8;
+					if ($code != 0) {
+						$kiwi -> failed ();
+						$kiwi -> info   ($data);
+						$kiwi -> failed ();
+						return undef;
+					}
+					$kiwi -> done();
+				}
+				$adduser .= " -G $group";
+			}
+			$kiwi -> info ("Adding user: $user [$group]");
+			my $data = qx ( chroot $root $adduser $user 2>&1 );
+			my $code = $? >> 8;
+			if ($code != 0) {
+				$kiwi -> failed ();
+				$kiwi -> info   ($data);
+				$kiwi -> failed ();
+				return undef;
+			}
+			$kiwi -> done ();
+		}
+	}
 	#========================================
 	# Create in place SVN repos from /etc
 	#----------------------------------------

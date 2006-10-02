@@ -28,6 +28,7 @@ my $kiwi;
 my @sourceFileList;
 my $optionsNodeList;
 my $driversNodeList;
+my $usrdataNodeList;
 my $repositNodeList;
 my $packageNodeList;
 my $imgnameNodeList;
@@ -71,6 +72,7 @@ sub new {
 			-> parse_file ( $controlFile );
 		$optionsNodeList = $systemTree -> getElementsByTagName ("preferences");
 		$driversNodeList = $systemTree -> getElementsByTagName ("drivers");
+		$usrdataNodeList = $systemTree -> getElementsByTagName ("users");
 		$repositNodeList = $systemTree -> getElementsByTagName ("repository");
 		$packageNodeList = $systemTree -> getElementsByTagName ("packages");
 		$imgnameNodeList = $systemTree -> getElementsByTagName ("image");
@@ -159,6 +161,34 @@ sub getRPMCheckSignatures {
 		return undef;
 	}
 	return $sigs;
+}
+
+#==========================================
+# getUsers
+#------------------------------------------
+sub getUsers {
+	# ...
+	# Receive a list of users to be added into the image
+	# the user specification contains an optional password
+	# and group. If the group doesn't exist it will be created
+	# ---
+	my %result = ();
+	my @node = $usrdataNodeList -> get_nodelist();
+	foreach my $element (@node) {
+		my $group = $element -> getAttribute("group");
+		my @ntag  = $element -> getElementsByTagName ("user") -> get_nodelist();
+		foreach my $element (@ntag) {
+			my $name = $element -> getAttribute ("name");
+			my $pwd  = $element -> getAttribute ("pwd");
+			my $home = $element -> getAttribute ("home");
+			if (defined $name) {
+				$result{$name}{group} = $group;
+				$result{$name}{home}  = $home;
+				$result{$name}{pwd}   = $pwd;
+			}
+		}
+	}
+	return %result;
 }
 
 #==========================================

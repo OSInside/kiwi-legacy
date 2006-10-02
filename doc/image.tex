@@ -61,13 +61,16 @@ the format:
       options, and which packages make up the image. The structure of the
 	  file corresponds to the format
 
-      \begin{Command}{12cm}
+      \begin{Command}{13cm}
       <image name="Name">\\
       \hspace*{1cm}<preferences>\\
       \hspace*{2cm}<type>Type</type>\\
       \hspace*{2cm}<size unit="Unit">Size</size>\\
       \hspace*{2cm}<compressed>Yes/No</compressed>\\
       \hspace*{1cm}</preferences>\\
+      \hspace*{1cm}<users group="groupname">\\
+      \hspace*{2cm}<user name="user" pwd="word" home="dir"/>\\
+      \hspace*{1cm}</users>\\
       \hspace*{1cm}<drivers type="Type">\\
       \hspace*{2cm}<file name="Filename"/>\\
       \hspace*{1cm}</drivers>\\
@@ -128,6 +131,13 @@ the format:
                     \textit{/etc/sysconfig/keyboard} will be set according
                     to the keyboard mapping.
           \end{itemize}
+          \item The optional \textbf{users} tag contains user information
+                used to add users to the image. The attribute \textbf{group}
+                specifies the group the user(s) belongs to. If this group
+                doesn't exist it will be created. Within \textit{users}
+                each user is described in one \textbf{user} tag including the
+                attributes \textbf{name, pwd and home} which describes the
+                name of the user it password and its home directory.
           \item The optional \textbf{drivers} tag contains driver file names.
                 The names are interpreted as general driver name and captured
                 if they are contained in the kernel tree. The attribute
