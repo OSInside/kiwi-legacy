@@ -61,6 +61,9 @@ case "$1" in
 			# XEN_SWAP=[n]
 			# XEN_MEMX=[n]
 			# ---
+			if [ ! -d $ROOT/root_$I ];then
+				mkdir -p $ROOT/root_$I
+			fi
 			if [ ! -z $bsopt ];then
 				dd if=/dev/zero of=$ROOT/root_$I/root bs=1M count=$XEN_ROOT
 				dd if=/dev/zero of=$ROOT/root_$I/swap bs=1M count=$XEN_SWAP
