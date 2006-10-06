@@ -579,9 +579,9 @@ sub setup {
 	# copy image description to image tree
 	#----------------------------------------
 	qx ( mkdir -p $root/image );
-	qx ( cp $imageDesc/config.xml $root/image );
-	qx ( cp $imageDesc/images.sh $root/image );
-	qx ( cp $imageDesc/VERSION $root/image );
+	qx ( cp $imageDesc/config.xml $root/image 2>&1 );
+	qx ( cp $imageDesc/images.sh $root/image 2>&1 );
+	qx ( cp $imageDesc/VERSION $root/image 2>&1 );
 
 	#========================================
 	# check <users> tag, create users/groups
