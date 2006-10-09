@@ -310,6 +310,7 @@ sub usage {
 	print "  kiwi -c | --create  <image-root>\n";
 	print "  kiwi --bootstick <initrd>\n";
 	print "  kiwi --bootcd <initrd>\n";
+	print "  kiwi --createpassword\n";
 	print "--\n";
 	print "  [ -d | --destdir <destination-path> ]\n";
 	print "    Specify an alternative destination directory for\n";
