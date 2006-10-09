@@ -2,6 +2,7 @@
 Mon Oct  9 11:02:08 CEST 2006 - ms@suse.de
 
 - cleanup boot package list
+- added option --createpassword to create cryp codes
 
 -------------------------------------------------------------------
 Thu Oct  5 09:42:19 CEST 2006 - ms@suse.de

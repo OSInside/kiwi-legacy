@@ -32,16 +32,17 @@ our $System  = "/usr/share/kiwi/image";
 #============================================
 # Globals
 #--------------------------------------------
-our $Prepare;     # control XML file for building chroot extend
-our $Create;      # image description for building image extend
-our $Destination; # destination directory for logical extends
-our $LogFile;     # optional file name for logging
-our $Virtual;     # optional virtualisation setup
-our $RootTree;    # optional root tree destination
-our $Survive;     # if set to "yes" don't exit kiwi
-our $BootStick;   # deploy initrd booting from USB stick
-our $BootCD;      # deploy initrd booting from CD
-our $StripImage;  # strip shared objects and binaries
+our $Prepare;        # control XML file for building chroot extend
+our $Create;         # image description for building image extend
+our $Destination;    # destination directory for logical extends
+our $LogFile;        # optional file name for logging
+our $Virtual;        # optional virtualisation setup
+our $RootTree;       # optional root tree destination
+our $Survive;        # if set to "yes" don't exit kiwi
+our $BootStick;      # deploy initrd booting from USB stick
+our $BootCD;         # deploy initrd booting from CD
+our $StripImage;     # strip shared objects and binaries
+our $CreatePassword; # create crypt password string
 
 #============================================
 # Globals
@@ -180,6 +181,34 @@ sub main {
 	}
 
 	#==========================================
+	# Create a crypted password and print it
+	#------------------------------------------
+	if (defined $CreatePassword) {
+		my $word2 = 2;
+		my $word1 = 1;
+		my $salt  = (getpwuid ($<))[1];
+		while ($word1 ne $word2) {
+			$kiwi -> info ("Enter Password: ");
+			system "stty -echo";
+			chomp ($word1 = <STDIN>);
+			system "stty echo";
+			$kiwi -> done ();
+			$kiwi -> info ("Reenter Password: ");
+			system "stty -echo";
+			chomp ($word2 = <STDIN>);
+			system "stty echo";
+			if ( $word1 ne $word2 ) {
+				$kiwi -> failed ();
+				$kiwi -> info ("*** Passwords differ, please try again ***");
+				$kiwi -> failed ();
+			}
+		}
+		$kiwi -> done ();
+		my $pwd = crypt ($word1, $salt);
+		$kiwi -> info ("Your password:\n\t$pwd\n");
+	}
+
+	#==========================================
 	# Write an initrd image to a boot USB stick
 	#------------------------------------------
 	if (defined $BootStick) {
@@ -235,6 +264,7 @@ sub init {
 		"bootstick=s"         => \$BootStick,
 		"bootcd=s"            => \$BootCD,
 		"strip|s"             => \$StripImage,
+		"createpassword"      => \$CreatePassword,
 		"help|h"              => \&usage,
 		"<>"                  => \&usage
 	);
@@ -249,7 +279,8 @@ sub init {
 	}
 	if (
 		(! defined $Prepare) && (! defined $Create) &&
-		(! defined $BootStick) && (! defined $BootCD)
+		(! defined $BootStick) && (! defined $BootCD) &&
+		(! defined $CreatePassword)
 	) {
 		$kiwi -> info ("No operation specified");
 		$kiwi -> failed ();
