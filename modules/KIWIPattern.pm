@@ -165,7 +165,7 @@ sub getRequiredPatterns {
 		if ($rpattern eq "basesystem") {
 			$rpattern = "base";
 		}
-		$kiwi -> info ("Pattern $pattern requires: $rpattern");
+		$kiwi -> info ("--> Pattern $pattern requires: $rpattern");
 		my @patdata = getPatternContents ($rpattern);
 		if (! @patdata) {
 			$kiwi -> failed ();
@@ -177,7 +177,7 @@ sub getRequiredPatterns {
 		push ( @data,@patdata );
 		getRequiredPatterns ($rpattern);
 	}
-	return $pattern;
+	return @reqs;
 }
 
 #==========================================
@@ -185,9 +185,12 @@ sub getRequiredPatterns {
 #------------------------------------------
 sub getPackages {
 	my $this = shift;
-	getRequiredPatterns ($pattern);
+	my %result;
+	my @reqs = getRequiredPatterns ($pattern);
 	my @pacs = getSection ('^\+Pr[qc]:','^\-Pr[qc]:');
-	return @pacs;
+	$result{required} = \@reqs;
+	$result{packages} = \@pacs;
+	return %result;
 }
 
 1;
