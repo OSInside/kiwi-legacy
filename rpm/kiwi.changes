@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Thu Oct 12 14:35:32 CEST 2006 - ms@suse.de
+
+- added /srv/* and /var/log/* to the in-place repository
+- added support for SuSE patterns. Patterns have been
+  added with openSuSE 10.2 and can be used to describe a
+  package set with one statement. To use this system the
+  XML description provides the tag:
+
+		<opensusePattern name="..."/>
+
+-------------------------------------------------------------------
 Mon Oct  9 11:02:08 CEST 2006 - ms@suse.de
 
 - cleanup boot package list

@@ -633,7 +633,7 @@ sub setup {
 	# Create in place SVN repos from /etc
 	#----------------------------------------
 	if (-f "$root/usr/bin/svn") {
-		$kiwi -> info ("Creating in-place SVN repository for /etc/...");
+		$kiwi -> info ("Creating in-place SVN repository...");
 		my $repo = "/var/adm/etc-repos";
 		my $file = "/etc-repos.sh";
 		if ( ! open (FD,">$root/$file")) {
@@ -646,11 +646,24 @@ sub setup {
 		print FD "chmod 700 $repo\n";
 		print FD "svn mkdir -m created file:///$repo/trunk\n";
 		print FD "svn mkdir -m created file:///$repo/trunk/etc\n";
+		print FD "svn mkdir -m created file:///$repo/trunk/srv\n";
+		print FD "svn mkdir -m created file:///$repo/trunk/var\n";
+		print FD "svn mkdir -m created file:///$repo/trunk/var/log\n";
 		print FD "svn co file:///$repo/trunk/etc /etc\n";
+		print FD "svn co file:///$repo/trunk/srv /srv\n";
+		print FD "svn co file:///$repo/trunk/var/log /var/log\n";
 		print FD "chmod 700 /etc/.svn\n";
+		print FD "chmod 700 /srv/.svn\n";
+		print FD "chmod 700 /var/log/.svn\n";
 		print FD "svn add /etc/*\n";
 		print FD "find /etc -name .svn | xargs chmod 700\n";
 		print FD "svn ci -m initial /etc\n";
+		print FD "svn add /srv/*\n";
+		print FD "find /srv -name .svn | xargs chmod 700\n";
+		print FD "svn ci -m initial /srv\n";
+		print FD "svn add /var/log/*\n";
+		print FD "find /var/log -name .svn | xargs chmod 700\n";
+		print FD "svn ci -m initial /var/log\n";
 		close FD;
 		qx ( chmod 755 $root/$file 2>&1 );
 		my $data = qx ( chroot $root $file 2>&1 );

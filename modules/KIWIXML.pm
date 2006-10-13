@@ -20,6 +20,7 @@ package KIWIXML;
 use strict;
 use XML::LibXML;
 use KIWILog;
+use KIWIPattern;
 
 #==========================================
 # Private
@@ -32,6 +33,7 @@ my $usrdataNodeList;
 my $repositNodeList;
 my $packageNodeList;
 my $imgnameNodeList;
+my @urllist;
 
 #==========================================
 # Constructor
@@ -83,6 +85,15 @@ sub new {
 		$kiwi -> failed ();
 		$kiwi -> error ("$@\n");
 		return undef;
+	}
+	my %repository = getRepository ($this);
+	foreach my $source (keys %repository) {
+		my $urlHandler  = new KIWIURL ($kiwi);
+		my $publics_url = $source;
+		if (defined $urlHandler -> openSUSEpath ($publics_url)) {
+			$publics_url = $urlHandler -> openSUSEpath ($publics_url);
+		}
+		push (@urllist,$publics_url);
 	}
 	return $this;
 }
@@ -273,6 +284,9 @@ sub getList {
 	my $what = shift;
 	my @result;
 	for (my $i=1;$i<= $packageNodeList->size();$i++) {
+		#==========================================
+		# Get type and packages
+		#------------------------------------------
 		my $node = $packageNodeList -> get_node($i);
 		my $type = $node -> getAttribute ("type");
 		if ($type ne $what) {
@@ -285,6 +299,22 @@ sub getList {
 				next;
 			}
 			push @result,$package;
+		}
+		#==========================================
+		# Check for pattern descriptions
+		#------------------------------------------
+		my @slist = $node -> getElementsByTagName ("opensusePattern");
+		foreach my $element (@slist) {
+			my $pattern = $element -> getAttribute ("name");
+			if (! defined $pattern) {
+				next;
+			}
+			my $psolve = new KIWIPattern ($kiwi,$pattern,\@urllist);
+			if (! defined $psolve) {
+				return ();
+			}
+			my @paclst = $psolve -> getPackages();
+			push @result,@paclst;
 		}
 	}
 	return @result;

@@ -79,6 +79,7 @@ the format:
       \hspace*{1cm}</repository>\\
       \hspace*{1cm}<packages type="Type">\\
       \hspace*{2cm}<package name="Packagename"/>\\
+      \hspace*{2cm}<opensusePattern name="Patternname"/>\\
       \hspace*{1cm}</packages>\\
       </image>
 	  \end{Command}
@@ -166,10 +167,10 @@ the format:
                 Multiple repository
                 tags are allowed. For information on how to setup a smart
                 source refer to \textit{http://labix.org/smart}
-		  \item The \textbf{packages} tag contains a list of package names
-                whereas the attribute \textbf{type} specifies under which
-                cirumstances this package set needs to be used. There are
-                three different types of package sets:
+		  \item The \textbf{packages} tag contains a list of package and/or
+				pattern names whereas the attribute \textbf{type} specifies
+				under which cirumstances this package set needs to be used.
+				There are three different types of package sets:
                 \begin{itemize}
                 \item \textbf{\underline{image}}\\
                       used to finish the image installation. All packages
@@ -181,7 +182,11 @@ the format:
                 \item \textbf{\underline{xen}}\\
                       used when the image needs support for Xen based
                       virtualisation. Option \textbf{--virtual xen}
-                \end{itemize} 
+                \end{itemize}
+				Using a pattern name will enhance the package list to
+				a number of additional packages belonging to this pattern.
+				Support for patterns is SuSE specific and available with
+				openSuSE v10.2 or higher.
       \end{enumerate}
 \item \textbf{\underline{cdboot}}\\
 A directory containing all information required for the isolinux
