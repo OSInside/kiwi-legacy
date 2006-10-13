@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Oct 13 16:07:41 CEST 2006 - ms@suse.de
+
+- added grub and hwinfo to boot images
+
+-------------------------------------------------------------------
 Thu Oct 12 14:35:32 CEST 2006 - ms@suse.de
 
 - added /srv/* and /var/log/* to the in-place repository

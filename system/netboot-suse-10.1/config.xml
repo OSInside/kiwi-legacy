@@ -43,6 +43,8 @@
 		<package name="sysfsutils"/>
 		<package name="tcpd"/>
 		<package name="util-linux"/>
+		<package name="grub"/>
+		<package name="hwinfo"/>
 	</packages>
 	<packages type="boot">
 		<package name="filesystem"/>
