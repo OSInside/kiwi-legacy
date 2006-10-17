@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Oct 17 13:04:39 CEST 2006 - ms@suse.de
+
+- improved recursive pattern check, setup pattern cache
+
+-------------------------------------------------------------------
 Fri Oct 13 16:07:41 CEST 2006 - ms@suse.de
 
 - added grub and hwinfo to boot images

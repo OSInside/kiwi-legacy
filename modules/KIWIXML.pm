@@ -304,30 +304,20 @@ sub getList {
 		# Check for pattern descriptions
 		#------------------------------------------
 		my @slist = $node -> getElementsByTagName ("opensusePattern");
-		my %pdone = ();
+		my @pattlist = ();
 		foreach my $element (@slist) {
 			my $pattern = $element -> getAttribute ("name");
-			if ((! defined $pattern) || (defined $pdone{$pattern})) {
+			if (! defined $pattern) {
 				next;
 			}
-			$kiwi -> info ("Including pattern: $pattern");
-			my $psolve = new KIWIPattern ($kiwi,$pattern,\@urllist);
-			if (! defined $psolve) {
-				$kiwi -> failed();
-				return ();
-			}
-			$kiwi -> done();
-			my %patternStatus = $psolve -> getPackages();
-			my @packageList = @{$patternStatus{packages}};
-			push @result,@packageList;
-			if (! defined $patternStatus{requires}) {
-				next;
-			}
-			my @requireList = @{$patternStatus{requires}};
-			foreach my $done (@requireList) {
-				$pdone{$done} = $done;
-			}
+			push @pattlist,$pattern;
 		}
+		my $psolve = new KIWIPattern ($kiwi,\@pattlist,\@urllist);
+		if (! defined $psolve) {
+			next;
+		}
+		my @packageList = $psolve -> getPackages();
+		push @result,@packageList;
 	}
 	return @result;
 }

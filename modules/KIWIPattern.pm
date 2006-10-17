@@ -24,10 +24,18 @@ use File::Glob ':glob';
 #==========================================
 # Private
 #------------------------------------------
+my $infodefault = "Including pattern";
+my $infomessage = $infodefault;
+
+#==========================================
+# Private
+#------------------------------------------
 my $kiwi;
 my @data;
 my @urllist;
-my $pattern;
+my @pattern;
+my %cache;
+my %patdone;
 
 #==========================================
 # Constructor
@@ -45,12 +53,13 @@ sub new {
 	if (! defined $kiwi) {
 		$kiwi = new KIWILog();
 	}
-	$pattern = shift;
-	if (! defined $pattern) {
+	my $pattref = shift;
+	if (! defined $pattref) {
 		$kiwi -> error ("Invalid pattern name");
 		$kiwi -> failed ();
 		return undef;
 	}
+	@pattern = @{$pattref};
 	my $urlref = shift;
 	if (! defined $urlref) {
 		$kiwi -> error ("No URL list for pattern search");
@@ -58,10 +67,8 @@ sub new {
 		return undef;
 	}
 	@urllist = @{$urlref};
-	my @patdata = getPatternContents ($pattern);
+	my @patdata = getPatternContents (\@pattern);
 	if (! @patdata) {
-		$kiwi -> error  ("Couldn't find pattern: $pattern");
-		$kiwi -> failed ();
 		return undef;
 	}
 	push ( @data,@patdata );
@@ -72,13 +79,18 @@ sub new {
 # getPatternContents
 #------------------------------------------
 sub getPatternContents {
-	my $pattern = shift;
+	my $pattref = shift;
+	my @pattern = @{$pattref};
 	my $content;
-	foreach my $url (@urllist) {
-		$content .= downloadPattern ( $url,$pattern );
-	}
-	if (! $content) {
-		return ();
+	foreach my $pat (@pattern) {
+		my $result;
+		foreach my $url (@urllist) {
+			$result .= downloadPattern ( $url,$pat );
+		}
+		if (! $result) {
+			return ();
+		}
+		$content .= $result;
 	}
 	my @patdata = split (/\n/,$content);
 	return @patdata;
@@ -91,9 +103,14 @@ sub downloadPattern {
 	my $url     = shift;
 	my $pattern = shift;
 	my $content;
+	if (defined $cache{$pattern}) {
+		return $cache{$pattern};
+	}
+	$kiwi -> info ("$infomessage: $pattern");
 	if ($url =~ /^\//) {
 		my $file = bsd_glob ("$url//suse/setup/descr/$pattern-*.pat");
 		if (! open (FD,$file)) {
+			$kiwi -> failed ();
 			return undef;
 		}
 		local $/; $content = <FD>; close FD;
@@ -105,9 +122,11 @@ sub downloadPattern {
 		my $title    = $response -> title ();
 		my $content  = $response -> content ();
 		if ((! defined $title) || ($title =~ /not found/i)) {
+			$kiwi -> failed ();
 			return undef;
 		}
 		if ($content !~ /\"($pattern-.*\.pat)\"/) {
+			$kiwi -> failed ();
 			return undef;
 		}
 		$location = $location."/".$1;
@@ -115,6 +134,8 @@ sub downloadPattern {
 		$response = $browser  -> request ( $request );
 		$content  = $response -> content ();
 	}
+	$kiwi -> done();
+	$cache{$pattern} = $content;
 	return $content;
 }
 
@@ -153,11 +174,9 @@ sub getSection {
 # getRequiredPatterns
 #------------------------------------------
 sub getRequiredPatterns {
-	my $pattern = shift;
-	my @patdata = getPatternContents ($pattern);
-	if (! @patdata) {
-		return undef;
-	}
+	my $pattref = shift;
+	my @pattern = @{$pattref};
+	my @patdata = getPatternContents (\@pattern);
 	my @reqs = getSection (
 		'^\+Req:','^\-Req:',\@patdata
 	);
@@ -165,17 +184,20 @@ sub getRequiredPatterns {
 		if ($rpattern eq "basesystem") {
 			$rpattern = "base";
 		}
-		$kiwi -> info ("--> Pattern $pattern requires: $rpattern");
-		my @patdata = getPatternContents ($rpattern);
+		if (defined $patdone{$rpattern}) {
+			next;
+		}
+		$infomessage = "--> Including required pattern";
+		my @patdata = getPatternContents ([$rpattern]);
+		$infomessage = $infodefault;
 		if (! @patdata) {
-			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't find required pattern: $rpattern");
 			$kiwi -> failed ();
 			return undef;
 		}
-		$kiwi -> done ();
 		push ( @data,@patdata );
-		getRequiredPatterns ($rpattern);
+		$patdone{$rpattern} = $rpattern;
+		getRequiredPatterns ([$rpattern]);
 	}
 	return @reqs;
 }
@@ -186,11 +208,9 @@ sub getRequiredPatterns {
 sub getPackages {
 	my $this = shift;
 	my %result;
-	my @reqs = getRequiredPatterns ($pattern);
+	my @reqs = getRequiredPatterns (\@pattern);
 	my @pacs = getSection ('^\+Pr[qc]:','^\-Pr[qc]:');
-	$result{required} = \@reqs;
-	$result{packages} = \@pacs;
-	return %result;
+	return @pacs;
 }
 
 1;
