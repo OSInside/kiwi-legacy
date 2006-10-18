@@ -346,7 +346,11 @@ sub kiwiExit {
 	# ---
 	my $code = $_[0];
 	if ($Survive eq "yes") {
-		return;
+		if ($code == 0) {
+			return $code;
+		} else {
+			return undef;
+		}
 	}
 	if ($code != 0) {
 		$kiwi -> error  ("KIWI exited with error(s)");
