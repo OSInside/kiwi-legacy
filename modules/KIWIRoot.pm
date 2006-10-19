@@ -658,6 +658,7 @@ sub setup {
 			return undef;
 		}
 		close FD;
+		$kiwi -> done ();
 	}
 	#========================================
 	# Create in place SVN repos from /etc
