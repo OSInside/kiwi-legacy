@@ -630,6 +630,36 @@ sub setup {
 		}
 	}
 	#========================================
+	# setup yast if config-yast.xml exists
+	#----------------------------------------
+	if (-f "$imageDesc/config-yast.xml") {
+		$kiwi -> info ("Setting up AutoYaST...");
+		my $autodir = "var/lib/autoinstall/autoconf";
+		my $autocnf = "autoconf.xml";
+		if (! -d "$root/$autodir") {
+			$kiwi -> failed ();
+			$kiwi -> error  ("AutoYaST seems not be installed");
+			$kiwi -> failed ();
+			return undef;
+		}
+		qx ( cp $imageDesc/config-yast.xml $root/$autodir/$autocnf 2>&1 );
+		if ( ! open (FD,">$root/etc/install.inf")) {
+			$kiwi -> failed ();
+			$kiwi -> error ("Failed to create install.inf: $!");
+			$kiwi -> failed ();
+			return undef;
+		}
+		print FD "AutoYaST: http://192.168.100.99/part2.xml\n";
+		close FD;
+		if ( ! open (FD,">$root/var/lib/YaST2/runme_at_boot")) {
+			$kiwi -> failed ();
+			$kiwi -> error ("Failed to create runme_at_boot: $!");
+			$kiwi -> failed ();
+			return undef;
+		}
+		close FD;
+	}
+	#========================================
 	# Create in place SVN repos from /etc
 	#----------------------------------------
 	if (-f "$root/usr/bin/svn") {
@@ -637,6 +667,7 @@ sub setup {
 		my $repo = "/var/adm/etc-repos";
 		my $file = "/etc-repos.sh";
 		if ( ! open (FD,">$root/$file")) {
+			$kiwi -> failed ();
 			$kiwi -> error ("Failed to create SVN script: $!");
 			$kiwi -> failed ();
 			return undef;

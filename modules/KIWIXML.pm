@@ -318,8 +318,36 @@ sub getList {
 		}
 		my @packageList = $psolve -> getPackages();
 		push @result,@packageList;
+		#==========================================
+		# Check for ignore list
+		#------------------------------------------
+		my @ilist = $node -> getElementsByTagName ("ignore");
+		my @ignorelist = ();
+		foreach my $element (@ilist) {
+			my $ignore = $element -> getAttribute ("name");
+			if (! defined $ignore) {
+				next;
+			}
+			push @ignorelist,$ignore;
+		}
+		if (@ignorelist) {
+			my %keylist = ();
+			foreach my $element (@result) {
+				my $pass = 1;
+				foreach my $ignore (@ignorelist) {
+					if ($element eq $ignore) {
+						$pass = 0; last;
+					}
+				}
+				if (! $pass) {
+					next;
+				}
+				$keylist{$element} = $element;
+			}
+			@result = keys %keylist;
+		}
 	}
-	return @result;
+	return sort @result;
 }
 
 #==========================================

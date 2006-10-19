@@ -209,7 +209,7 @@ sub getPackages {
 	my $this = shift;
 	my %result;
 	my @reqs = getRequiredPatterns (\@pattern);
-	my @pacs = getSection ('^\+Pr[qc]:','^\-Pr[qc]:');
+	my @pacs = getSection ('^\+Prq:','^\-Prq:');
 	return @pacs;
 }
 

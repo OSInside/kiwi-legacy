@@ -56,6 +56,27 @@ the format:
       This script is called at the beginning of the image creation process.
       It is designed to clean-up the image system. Affected are all the
       programs and files only needed while the physical extend exists.
+\item \textbf{\underline{config-yast.xml}}\\
+      Optional configuration file which has been created by autoyast.
+      To be able to create such an autoyast profile you should first
+      call:
+
+      \begin{Command}{8cm}
+      yast2 autoyast
+      \end{Command}
+
+      Once you have saved the information from the autoyast UI as
+      config-yast.xml file in your image description directory kiwi
+      will process on the file and setup your image as follows:
+      \begin{enumerate}
+      \item While booting the image YaST is started in autoyast mode
+            automatically
+      \item The autoyast description is parsed and the instructions are
+            handled by YaST. In other words the \textbf{system configuration}
+            is performed
+      \item If the process finished successfully the environment is
+            cleaned and autoyast won't be called at next reboot.
+      \end{enumerate}
 \item \textbf{\underline{config.xml}}\\
       Configuration file that indicates the image type, base name,
       options, and which packages make up the image. The structure of the
@@ -80,6 +101,7 @@ the format:
       \hspace*{1cm}<packages type="Type">\\
       \hspace*{2cm}<package name="Packagename"/>\\
       \hspace*{2cm}<opensusePattern name="Patternname"/>\\
+      \hspace*{2cm}<ignore name="Packagename"/>\\
       \hspace*{1cm}</packages>\\
       </image>
 	  \end{Command}
@@ -186,7 +208,10 @@ the format:
 				Using a pattern name will enhance the package list to
 				a number of additional packages belonging to this pattern.
 				Support for patterns is SuSE specific and available with
-				openSuSE v10.2 or higher.
+				openSuSE v10.2 or higher. If a pattern adds something you
+                don't want to have in your image it is possible to specify
+                an \textbf{ignore} tag together with the \textbf{name} of the
+                package or package alias as tag attribute.
       \end{enumerate}
 \item \textbf{\underline{cdboot}}\\
 A directory containing all information required for the isolinux
