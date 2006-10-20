@@ -132,6 +132,14 @@ probeDevices () {
 			modprobe $module >/dev/null 2>&1
 		fi
 	done
+	# bad fix for ata probe, load order is required
+	Echo "Waiting for devices to become ready..."
+	lsmod | grep -q ata_piix
+	if [ $? = 0 ];then
+		rmmod ata_piix
+		sleep 5
+		modprobe ata_piix
+	fi
 }
 probeNetworkCard () {
 	hwnet=/usr/sbin/hwinfo
@@ -705,6 +713,9 @@ IFS="," ; for i in $IMAGE;do
 		imageRootDevice=$imageDevice
 		imageRootName=$imageName
 	fi
+	if [ $count = 2 ];then
+		imageNextRootDevice=$imageDevice
+	fi
 	if test `getSystemIntegrity $count` = "fine";then
 		continue
 	fi
@@ -879,7 +890,21 @@ fi
 mount $imageRootDevice /mnt
 
 #======================================
-# 14) check filesystem and kernels
+# 14) Check if this is a split image
+#--------------------------------------
+if test ! -z $COMBINED_IMAGE; then
+	READ_ONLY_SYSTEM=system
+	mkdir -p /mnt/$READ_ONLY_SYSTEM && \
+		mount $imageNextRootDevice /mnt/$READ_ONLY_SYSTEM
+	cd /mnt
+	for dir in bin boot lib opt sbin usr;do
+		ln -s $READ_ONLY_SYSTEM/$dir $dir
+	done
+	cd /
+fi
+
+#======================================
+# 15) check filesystem and kernels
 #--------------------------------------
 if test $systemIntegrity = "clean";then
 	fileSystem /mnt/image/config.xml
@@ -887,7 +912,7 @@ if test $systemIntegrity = "clean";then
 fi
 
 #======================================
-# 15) Create system dependant files
+# 16) Create system dependant files
 #--------------------------------------
 if test $systemIntegrity = "clean";then
 	mkdir -p /config/etc
@@ -962,7 +987,7 @@ if test $systemIntegrity = "clean";then
 fi
 
 #======================================
-# 16) copy system dependant files
+# 17) copy system dependant files
 #--------------------------------------
 if test $systemIntegrity = "clean";then
 	cd /config
@@ -974,19 +999,19 @@ fi
 echo 256 > /proc/sys/kernel/real-root-dev
 
 #======================================
-# 17) umount system filesystems
+# 18) umount system filesystems
 #--------------------------------------
 umount /dev/pts
 umount /sys
 umount /proc
 
 #======================================
-# 18) copy initrd files to image
+# 19) copy initrd files to image
 #--------------------------------------
 cp /preinit /mnt
 
 #======================================
-# 19) Activate new root
+# 20) Activate new root
 #--------------------------------------
 Echo "Activating Image: [$imageRootName]"
 cd /mnt && exec < dev/console >dev/console 2>&1
@@ -1002,14 +1027,14 @@ else
 	rm ./preinit
 fi
 #======================================
-# 20) reboot system if specified
+# 21) reboot system if specified
 #--------------------------------------
 if test ! -z $REBOOT_IMAGE;then
 	Echo "Rebooting System to activate new kernel..."
 	/sbin/restart >/dev/null 2>&1
 fi
 #======================================
-# 21) Unmount initrd / system init
+# 22) Unmount initrd / system init
 #--------------------------------------
 echo " "
 echo "Booting into final System..."

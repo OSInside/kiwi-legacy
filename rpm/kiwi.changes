@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Oct 20 11:47:24 CEST 2006 - ms@suse.de
+
+- fix for linuxrc sata detection. The order to load the
+  modules piix and ata_piix is important to detect the disk
+
+-------------------------------------------------------------------
 Thu Oct 19 09:59:02 CEST 2006 - ms@suse.de
 
 - added support for autoyast profiles

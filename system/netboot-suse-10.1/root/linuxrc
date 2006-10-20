@@ -132,6 +132,14 @@ probeDevices () {
 			modprobe $module >/dev/null 2>&1
 		fi
 	done
+	# bad fix for ata probe, load order is required
+	Echo "Waiting for devices to become ready..."
+	lsmod | grep -q ata_piix
+	if [ $? = 0 ];then
+		rmmod ata_piix
+		sleep 5
+		modprobe ata_piix
+	fi
 }
 probeNetworkCard () {
 	hwnet=/usr/sbin/hwinfo
