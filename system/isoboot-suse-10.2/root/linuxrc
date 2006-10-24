@@ -192,7 +192,7 @@ fi
 #======================================
 # 4) Setup network interface and DNS
 #--------------------------------------
-setupNetwork
+# setupNetwork
 
 #======================================
 # 5) Mount the CD device

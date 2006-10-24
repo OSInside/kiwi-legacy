@@ -278,6 +278,8 @@ sub createImageLiveCD {
 	# Create RW logical extend
 	#------------------------------------------
 	$kiwi -> info ("Image RW part requires $mbytesrw MB of disk space");
+	$kiwi -> info ("Adding 100MB of free space to RW extend");
+	$mbytesrw += 100;
 	if (! buildLogicalExtend ($namerw,$mbytesrw."M")) {
 		restoreSplitExtend ($imageTreeReadOnly);
 		return undef;
@@ -446,10 +448,7 @@ sub createImageLiveCD {
 		$kiwi -> failed ();
 		return undef;
 	}
-
-	# TODO: remove if fixed
-	# qx (rm -rf $main::RootTree);
-
+	qx (rm -rf $main::RootTree);
 	$kiwi -> done();
 	return $this;
 }
