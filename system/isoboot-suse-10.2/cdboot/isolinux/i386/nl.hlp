@@ -1,0 +1,155 @@
+mainBootloader HelpWelkom bij openSUSE 10.2
+
+Gebruik dit menu voor het selecteren van de gewenste functie. Als u bij dit helpsysteem problemen heeft met de navigatie, druk dan op F1 om de helpbeschrijving van dit helpsysteem weer te geven. De hoofdfuncties in dit menu zijn:
+
+harddiskVanhardeschijfopstarten: Deze selectie zal verder niets met het systeem doen. Het zal slechts een eerder geïnstalleerd operating systeem vanaf de harde schijf opstarten.
+
+linuxInstallatie: Deze installatiemodus werkt bij de meeste computers. Als uw systeem tijdens het opstarten vastloopt of er problemen bij de detectie van uw hardware componenten optreden (zoals diskcontrollers of netwerkkaarten), probeert u dan ëën van de volgende installatieopties.
+
+noacpiInstallatie--ACPIuitgeschakeld: Veel van de momenteel verkochte computers hebben incomplete of gebrekkige ACPI-implementaties. Deze selectie schakelt de ACPI-ondersteuning in de kernel uit, maar activeert wel de vele prestatie verhogende opties zoals bijvoorbeeld DMA voor IDE harddisks.
+
+failsafeInstallatie--Veiligeinstellingen: Als de gewone Installatie mislukt is, dan kan deze selectie het probleem misschien oplossen.
+
+rescueReddingssysteem: Deze bootimage start een klein Linuxsysteem in het RAM-geheugen op. Dit is handig in het geval het systeem niet goed wil opstarten. Nadat het systeem is opgestart kunt u als root inloggen.
+
+memtestGeheugentest: Een geheugentest is handig voor meer dan alleen het testen van nieuw geïnstalleerde geheugenmodules. Het is voor een groot deel van uw computersysteem een goede belastingstest en kan mogelijke hardwareproblemen naar boven halen.
+
+optOpstartopties: De bootopties kunnen het gedrag van het systeem compleet veranderen. Het zijn kernelinstellingen.
+
+helpF1Help: Dit is contextgevoelig. Het zal verschillende schermen laten zien afhankelijk van het actieve gedeelte van het opstartscherm. Er is tevens een beschrijving van het helpsysteem beschikbaar.
+
+videomodeF3Videomodus: Hier kunt u tijdens het installeren kiezen tussen de verschillende schermresoluties. Als u problemen tijdens de grafische installatie ondervindt, dan is de tekstmodus waarschijnlijk een goede oplossing voor u.
+
+install_srcF4Installatiebron: Kies de installatiebron.
+
+keytableF2Taal: Instelling van de door de bootloader gebruikte taal en toetsenbordindeling.
+
+driverupdateF5Driverupdate: Bij zeer nieuwe computers kan een driver update nodig zijn om het systeem te kunnen installeren.helpInformatie over het gebruik van het HelpsysteemDe online help van de bootloader is contextgevoelig. Het geeft informatie over het geselecteerde menu-item of, indien u de bootopties aan het wijzigen bent, probeert informatie te vinden over de optie waar de cursor zich bij bevindt.
+
+Navigatie toetsen
+
+ Pijl omhoog: vorige koppeling benadrukken
+ Pijl omlaag: volgende koppeling benadrukken
+ Pijl naar links, Backspace: terug naar vorige onderwerp
+ Pijl naar rechts, Enter, Spatiebalk: koppeling volgen
+ Page Up: een pagina omhoog schuiven
+ Page Down: een pagina omlaag schuiven
+ Home: ga naar het begin van de pagina
+ End: ga naar het einde van de pagina
+ Esc: help verlaten
+
+Terug naar mainBeginpaginadriverupdateDriverupdateAls u een driver-update-diskette of -CD-ROM nodig heeft, druk dan op F5. De bootloader zal u, nadat de Linuxkernel geladen is, vragen om de driver-update-diskette of -CD-ROM te plaatsen.
+
+Een driverupdate is meestal een diskette met daarop de nieuwe versies van de hardware drivers die tijdens de installatie nodig zijn.
+
+Terug naar mainBeginpaginavideomodeVideomodus selecterenDruk op F3 om een lijst te krijgen van de videomodi die uw grafische kaart ondersteunt. De hoogste modus die uw monitor aan kan, is voorgeselecteerd.
+
+Het is mogelijk dat uw monitor niet automatisch gedetecteerd kan worden. In dat geval dient u de door uw gewenste modus handmatig te selecteren.
+
+Als uw systeem tijdens de installatie problemen met uw grafische kaart heeft, dan is het gebruik van de tekstmodus een mogelijke oplossing.
+
+Terug naar mainBeginpaginakeytableTaal en toetsenbordindelingDruk op F2 om de taal en toetsenbordindeling die de bootloader gebruikt aan te passen.
+
+Terug naar mainBeginpaginainstall_srcInstallatiebronDruk op F4 om een installatiebron te kiezen.
+
+Dit is hetzelfde als de bootoptie o_installinstallatie.
+
+Terug naar mainBeginpaginalinuxInstallatieSelecteer Installatie om de standaardinstallatie te starten. De opgegeven optbootopties worden bij het opstarten gebruikt. Dit item activeert vele opties van de algemene beschikbare hardware.
+
+Terug naar mainBeginpaginaharddiskVan de hardeschijf opstartenSelecteer Geïnstalleerd besturingssysteem opstarten om het op uw hardeschijf geïnstalleerde systeem op te starten. Dit systeem dient correct geïnstalleerd te zijn omdat alleen het MBR (Master Boot Record) op de eerste hardeschijf wordt opgestart. De apparaat-ID van de eerste hardeschijf wordt door de BIOS van de computer opgegeven.
+
+Gebruik dit in het geval u vergeten bent om de CD of DVD uit de drive te halen en u uw computer vanaf de hardeschijf wilt gaan opstarten.
+
+Terug naar mainBeginpaginanoacpiInstallatie -- ACPI uitgeschakeldBepaalde nieuwe hardware zal soms ACPI nodig hebben om de interruptafhandeling uit te kunnen voeren. ACPI vervangt het oude APM-systeem dan ook volledig.
+
+Selecteer Installatie -- ACPI uitgeschakeld als u tijdens het opstarten van de kernel problemen ondervindt. Bekende gevallen van computers die problemen met ACPI hebben zijn:
+
+   * kernel loopt tijdens het opstarten vast
+   * PCI-kaarten worden niet gedetecteerd of initialiseren niet correct
+
+Terug naar mainBeginpaginafailsafeInstallatie -- Veilige instellingenSelecteer Installatie -- Veilige instellingen als uw computer tijdens het installeren vastloopt of als er vreemde fouten optreden. Deze optie schakelt de DMA-optie van alle IDE-stations uit als ook alle energiebeheeropties. Zie ook de kernelopties voor o_apmapm, o_acpiacpi en o_ideide.
+
+Terug naar mainBeginpaginarescueReddingssysteemHet Reddingssysteem is een klein, in het geheugen geïnstalleerd (RAM disk), systeem. Vanaf hier is het mogelijk om allerlei soorten wijzigingen aan de op de harde schijf geïnstalleerde systeem aan te brengen. Aangezien er alleen low-level tools in dit systeem beschikbaar zijn, is dit meer iets voor experts.
+
+Terug naar mainBeginpaginamemtestGeheugentestDe inbegrepen Geheugentest biedt goede mogelijkheden om de hardware van het systeem goed te testen. Het hoofddoel is natuurlijk om een defecte geheugenbank (RAM) op te sporen, maar het test ook vele andere delen van het systeem.
+Als er geen fouten gevonden zijn is dat nog geen garantie dat het geheugen helemaal in orde is, alhoewel de meeste geheugendefecten zeker gevonden zullen worden.
+
+Terug naar mainBeginpaginaoptOpstartoptiesEr zijn twee verschillende type opstartopties: opties die het installatieprogramma beïnvloeden en  specifieke kernelopties. Enkele van de meer algemene opties zijn:
+
+a) installatieprogramma-opties
+
+  o_installinstallatie -- selecteert een installatie bron
+  networknetwerkopties -- de netwerk opties
+  o_vncvnc-opties -- opties voor een installatie via VNC
+
+b) kernelopties
+
+  o_splashsplash -- beïnvloedt het gedrag van het opstartscherm
+  o_apmapm -- energiebeheer aan of uit
+  o_acpiacpi -- geavanceerde configuratie- en energie-interface
+  o_ideide -- IDE-subsysteembesturing
+
+Terug naar mainBeginpaginao_installInstallatieprogramma-opties: installatieStandaard worden de lokale CD-ROM's onderzocht op een installatiebron. Selecteer de installatie-optie voor een netwerkinstallatie. De mogelijkheden zijn:
+  * FTP
+  * NFS
+  * HTTP
+De te gebruiken syntaxis is gelijk aan de standaard URL's. Als bijvoorbeeld uw server op 192.168.0.1 gevonden kan worden en u een op NFS-gebaseerde installatie van de directory /install op deze server wilt uitvoeren, specificeer de bron dan als volgt:
+
+  install=nfs://192.168.0.1/install
+
+De netwerkkaart zal of geconfigureerd worden met behulp van dhcp of u moet zelf de parameters specificeren zoals die worden beschreven bij de networknetwerkopties.
+
+Terug naar optOpstartoptieso_splashKernelopties: splashHet opstartscherm is de afbeelding die tijdens het opstarten van het systeem zal worden weergegeven.
+
+splash=0
+
+Het opstartscherm is uitgezet. Soms zinvol bij erg oude monitoren of bij een opgetreden fout.
+
+splash=verbose
+
+Activeert het opstartscherm, kernel- en boot-berichten blijven zichtbaar.
+
+splash=silent
+
+Activeert het opstartscherm zonder berichten. In plaats daarvan wordt een voortgangsbalk zichtbaar.
+
+Terug naar optOpstartoptiesnetworkInstallatieprogramma-opties: NetwerkoptiesHet is mogelijk om de netwerkinterface nu direct te configureren. De hardware zal later door YaST2 worden gedetecteerd. Het minimum aan opties om uw netwerkkaart te configureren bestaat uit een host-IP en een netmasker. Een voorbeeld:
+
+  hostip=192.168.0.10 netmask=255.255.255.0
+
+of in verkorte vorm:
+
+  hostip=192.168.0.10/24
+
+Als u een o_installnetwerk-gebaseerdeinstallatie opgegeven heeft en geen van beide opties heeft opgegeven, dan zal het installatieprogramma proberen om de netwerkinterface te configureren met behulp van dhcp. Als u een standaardgateway nodig heeft, specificeer deze dan met de optie gateway. Een voorbeeld:
+
+  gateway=192.168.0.8
+
+Terug naar optOpstartoptieso_vncInstallatieprogramma-opties: vncOm de VNC-installatie te activeren dient u de parameters vnc en vncpassword te specificeren:
+
+  vnc=1 vncpassword=voorbeeld
+
+De VNC-server zal worden opgestart en u kunt vervolgens met een VNC-client op een externe computer van YaST2 gebruik maken.
+
+Terug naar optOpstartopties.o_apmKernelopties: apmAPM is de oudste van de twee energiebeheerstrategieën die bij moderne computers gebruikt kan worden. Voornamelijk bij laptops ten behoeve van functies zoals de slaapstand. Ook kan APM verantwoordelijk zijn voor het uitschakelen van de computer bij een wegvallende netspanning. APM heeft een correct werkende BIOS nodig. Bij een defecte BIOS zal APM slechts gedeeltelijk werken of zelfs de computer zo beïnvloeden dat deze niet meer werkt. Met de volgende parameter is het eventueel uit te schakelen:
+
+  apm=off -- APM geheel uitschakelen
+
+Moderne computers hebben meer voordeel bij het nieuwere o_acpiACPI.
+
+Terug naar optOpstartoptieso_acpiKernelopties: acpiACPI (Advanced Configuration and Power Interface) is een standaard dat de energie- en configuratiebeheerinterfaces definieert tussen het besturingssysteem en de BIOS. Standaard wordt acpi geactiveerd als er een BIOS is gedetecteerd dat na het jaar 2000 gemaakt is. Er zijn diverse algemeen te gebruiken parameters die het gedrag van ACPI beïnvloeden:
+
+  pci=noacpi -- ACPI niet gebruiken om PCI-interrupts af te handelen
+  acpi=oldboot -- alleen die ACPI-onderdelen gebruiken die voor het opstarten relevant zijn
+  acpi=off -- ACPI geheel uitschakelen
+  acpi=force -- ACPI inschakelen, zelfs als uw BIOS van voor 2000 gedateerd is
+
+Vooral bij nieuwe computers zal dit het oude o_apmapm-systeem prima vervangen.
+
+Terug naar optOpstartoptieso_ideKernelopties: ideGewoonlijk wordt IDE, in tegenstelling tot SCSI, bij de meeste desktopcomputers gebruikt. Gebruik de volgende kernelparameter om enkele hardwareproblemen die bij IDE systemen zouden kunnen optreden te voorkomen:
+
+  ide=nodma -- DMA voor IDE-stationss uitschakelen
+
+Terug naar optOpstartopties.bitsType software selecterenU kunt kiezen uit het installeren van de 32-bit of 64-bit versie van openSUSE.
+
+Terug naar mainBeginpagina 

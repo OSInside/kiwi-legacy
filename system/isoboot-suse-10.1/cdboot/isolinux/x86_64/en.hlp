@@ -1,0 +1,169 @@
+mainBoot Loader HelpWelcome to SUSE Linux 10.1
+
+Use this menu to select the desired function. If you have problems navigating in this help system, press F1 to enter the helpdescription of the help system. The main functions in this menu are:
+
+harddiskBootfromHardDisk: This selection will not do anything to the system. It only starts a previously installed operating system.
+
+linuxInstallation: This installation mode works on most machines. If you experience a system freeze during boot or problems with detection of your hardware components, such as disk controllers or network cards, try one of the following installation options.
+
+noacpiInstallation--ACPIDisabled: Many of the currently-sold computers have incomplete or faulty ACPI implementations. This selection disables ACPI support in the kernel, but still enables many performance features, like DMA for IDE hard disks.
+
+failsafeInstallation--SafeSettings: If you were not successful with Installation, this selection might solve the issue.
+
+rescueRescueSystem: This boot image starts a small Linux system in RAM. This is useful if the system does not start properly. After booting this system, log in as root.
+
+memtestMemoryTest: Memory testing is useful for more than checking installation of new memory modules. It is a stress test for a big part of your computer system and may indicate hardware problems.
+
+optBootOptions: The boot options may change the behavior of your system completely. They are settings for the kernel.
+
+helpF1Help: This is context sensitive. It will show different screens depending on the active element of the boot screen. There is also a description of this help system available.
+
+videomodeF3VideoMode: Here, choose between different screen resolutions while installing. If you encounter problems with the graphical installation, the text mode may be a work-around for you.
+
+install_srcF4InstallationSource: Choose the installation source.
+
+keytableF2Language: Set language and keyboard mapping used by the boot loader.
+
+driverupdateF5DriverUpdate: For very new machines, a driver update may be needed to install the system.helpUsing the Help SystemThe boot loader online help is context sensitive. It gives information about the selected menu item or, if you are editing boot options, it tries to look up information about the option in which the cursor is positioned.
+
+Navigation Keys
+
+  Up Arrow: highlight previous link
+  Down Arrow: highlight next link
+  Left Arrow, Backspace: return to previous topic
+  Right Arrow, Enter, Space: follow link
+  Page Up: scroll up one page
+  Page Down: scroll down one page
+  Home: go to page start
+  End: go to page end
+  Esc: leave help
+
+
+Return to mainStartPagedriverupdateDriver UpdateIf you need a driver update floppy or CD-ROM, press F5. The boot loader asks you to insert the driver update medium after loading the Linux kernel.
+
+A driver update is typically a floppy with new versions of hardware drivers or bug fixes needed during installation.
+
+Return to mainStartPagevideomodeVideo Mode SelectionPress F3 to get the list of video modes your graphics card supports. The highest mode your monitor can display is preselected.
+
+It is possible that your monitor cannot be detected automatically. In that case, select your preferred mode manually.
+
+If your system has problems with the graphics card during the installation, the text mode may be a usable work-around.
+
+Return to mainStartPagekeytableLanguage and Keyboard Layout SelectionPress F2 to change language and keyboard layout the boot loader uses.
+
+Return to mainStartPageinstall_srcInstallation SourcePress F4 to choose an installation source.
+
+This is the same as using the o_installinstall boot option.
+
+Return to mainStartPagelinuxInstallationSelect Installation to start the default installation. The optbootoptions entered are used in the start-up. This item activates many features of commonly available hardware.
+
+
+
+Return to mainStartPageharddiskBoot from Hard DiskSelect Boot Installed OS to start the system installed on your local hard disk. This system must be installed properly, because only the MBR (Master Boot Record) on the first hard disk is started. The device ID of the first hard disk is provided by the BIOS of the computer.
+
+Use this if you forgot to remove the CD or DVD from your drive and want to start the computer from the hard disk.
+
+
+
+Return to mainStartPagenoacpiInstallation -- ACPI DisabledVery new hardware sometimes requires ACPI to control the interrupt handling. ACPI completely replaces the old APM system.
+
+Select Installation -- ACPI Disabled if you encounter problems during boot of the kernel. Known problems with machines that have problems with ACPI are:
+
+   * kernel freezes when booting
+   * PCI Cards are not detected or initialized properly
+
+
+
+Return to mainStartPagefailsafeInstallation -- Safe SettingsSelect Installation -- Safe Settings if you encounter hangs while installing or irreproducible errors. This option disables DMA for IDE drives and all power management features. See also the kernel options for o_apmapm, o_acpiacpi and o_ideide.
+
+Return to mainStartPagerescueRescue SystemThe Rescue System is a small RAM disk base system. From there, it is possible to make all kinds of changes to an installed system. Because only low-level tools are available in this system, it is intended for experts.
+
+
+
+Return to mainStartPagememtestMemory TestThe included Memory Test provides good possibilities to stress test the hardware of a system. Its main purpose is to detect broken RAM, but it also stresses many other parts of the system.
+There is no guarantee that the memory is good if no errors are found, although most of memory defects will be found.
+
+
+Return to mainStartPageoptBoot OptionsThere are two types of boot options available. First, there are options that affect the installer. Second, there are kernel options. Some of the more common options are:
+
+a) installer options
+
+  o_installinstall -- select an installation source
+  networknetworkoptions -- the network options
+  o_vncvncoptions -- options for installation via VNC
+
+b) kernel options
+
+  o_splashsplash -- influence the behavior of the splash screen
+  o_apmapm -- toggle power management
+  o_acpiacpi -- advanced configuration and power interface
+  o_ideide -- control the IDE subsystem
+
+
+Return to mainStartPageo_installInstaller Options: installBy default, the local CD-ROMs are searched for the installation source. For a network install, select the install option. Possible installation protocols are
+  * FTP
+  * NFS
+  * HTTP
+The syntax to use is just like standard URLs. For example, if your server is found at 192.168.0.1 and you want to do an NFS-based install from the directory /install on this server, specify the source as follows:
+
+  install=nfs://192.168.0.1/install
+
+The network card will either be configured with dhcp or you must specify the parameters yourself as described in the networknetworkoptions.
+
+
+Return to optBootOptionso_splashKernel Options: splashThe splash screen is the picture shown during system start-up.
+
+splash=0
+
+The splash screen is switched off. This may be useful with very old monitors or if some error occurs.
+
+splash=verbose
+
+Activates splash, kernel and boot messages are still shown.
+
+splash=silent
+
+Activates splash, but no messages. Instead a progress bar is drawn.
+
+Return to optBootOptionsnetworkInstaller Options: Network OptionsIt is possible to configure the network interface right now. The hardware will be detected later by YaST2. The minimum set of options to configure your network card consists of host IP and netmask. For example:
+
+  hostip=192.168.0.10 netmask=255.255.255.0
+
+or in a shorter form:
+
+  hostip=192.168.0.10/24
+
+If you specified a o_installnetwork-basedinstall and do not specify both of these options, the installer tries to configure the network interface with dhcp. If you need a default gateway, specify this with the option gateway. For example:
+
+  gateway=192.168.0.8
+
+
+Return to optBootOptionso_vncInstaller Options: vncTo enable the VNC installation, specify the parameters vnc and vncpassword:
+
+  vnc=1 vncpassword=example
+
+The VNC server will be started and you may control YaST2 over any VNC client from a remote system.
+
+
+Return to optBootOptions.o_apmKernel Options: apmAPM is one of the two power management strategies used on current computers. It is mainly used with laptops for functions like suspend to disk, but it may also be responsible for switching off the computer after power down. APM relies on a correct working BIOS. If the BIOS is broken, APM may have only limited use or even prevent the computer from working. Therefore, it may be switched off with the parameter
+
+  apm=off -- switch off APM completely
+
+Some very new computers may take more advantage from the newer o_acpiACPI.
+
+Return to optBootOptionso_acpiKernel Options: acpiACPI (Advanced Configuration and Power Interface) is a standard that defines power and configuration management interfaces between an operating system and the BIOS. By default, acpi is switched on when a BIOS is detected that is newer than from year 2000. There are several commonly used parameters to control the behavior of ACPI:
+
+  pci=noacpi -- do not use ACPI to route PCI interrupts   acpi=oldboot -- only the parts of ACPI that are relevant for booting remain activated
+  acpi=off -- switch off ACPI completely
+  acpi=force -- switch on ACPI even if your BIOS is dated before 2000
+
+Especially on new computers, it replaces the old o_apmapm system.
+
+Return to optBootOptionso_ideKernel Options: ideIDE is, unlike SCSI, commonly used in most desktop workstations. To circumvent some hardware problems that occur with IDE systems, use the kernel parameter:
+
+  ide=nodma -- switch off DMA for IDE drives
+
+
+Return to optBootOptions.bitsSoftware Type SelectionYou have the choice to install the 32-bit or 64-bit version of SUSE Linux.
+
+Return to mainStartPage 

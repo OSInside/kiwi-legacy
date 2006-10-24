@@ -373,7 +373,6 @@ sub createImageLiveCD {
 	$kiwi -> info ("Creating CD filesystem");
 	qx (rm -rf $main::RootTree/*);
 	qx (mkdir -p $main::RootTree/CD/boot/loader);
-	qx (touch $main::RootTree/CD/content);
 	$kiwi -> done ();
 
 	#==========================================
@@ -398,20 +397,29 @@ sub createImageLiveCD {
 	$kiwi -> done ();
 
 	#==========================================
+	# Checking architecture
+	#------------------------------------------
+	$kiwi -> info ("Checking for architecture specific boot loader");
+	my $arch = qx (/bin/arch); chomp ($arch);
+	if ($arch =~ /i.86/) {
+		$arch = "i386";
+	}
+	if (! -f "$main::Prepare/cdboot/isolinux/$arch/isolinux.bin") {
+		$kiwi -> failed ();
+		$kiwi -> error ("isoboot description doesn't provide $arch loader");
+		$kiwi -> failed ();
+		return undef;
+	}
+	$kiwi -> done ();
+
+	#==========================================
 	# copy base CD files
 	#------------------------------------------
 	$kiwi -> info ("Setting up isolinux boot CD"); 
 	my $CD = "$main::Prepare/cdboot";
-	my $IL = "/usr/share/syslinux/isolinux.bin";
-	if (! -f $IL) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't find isolinux.bin");
-		$kiwi -> failed ();
-		return undef;
-	}
-	qx (cp $CD/isolinux/* $main::RootTree/CD/boot/loader);
+	qx (cp $CD/isolinux/$arch/* $main::RootTree/CD/boot/loader);
 	qx (cp $CD/isolinux.cfg $main::RootTree/CD/boot/loader);
-	qx (cp $IL $main::RootTree/CD/boot/loader);
+	qx (cp $CD/isolinux.msg $main::RootTree/CD/boot/loader);
 	$kiwi -> done ();
 
 	#==========================================
@@ -438,7 +446,10 @@ sub createImageLiveCD {
 		$kiwi -> failed ();
 		return undef;
 	}
-	qx (rm -rf $main::RootTree);
+
+	# TODO: remove if fixed
+	# qx (rm -rf $main::RootTree);
+
 	$kiwi -> done();
 	return $this;
 }

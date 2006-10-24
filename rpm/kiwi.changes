@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Mon Oct 23 20:33:38 CEST 2006 - ms@suse.de
+
+- changed isolinux description files in cdboot/
+- added isoboot-suse-10.2 image for 10.2 live CD setup
+- include ext2 into boot images because the kernel exports
+  the filesystem as module now
+
+-------------------------------------------------------------------
 Fri Oct 20 11:47:24 CEST 2006 - ms@suse.de
 
 - fix for linuxrc sata detection. The order to load the

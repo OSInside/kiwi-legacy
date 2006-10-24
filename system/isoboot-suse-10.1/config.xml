@@ -1,6 +1,6 @@
 <image name="initrd-isoboot">
 	<preferences>
-		<type>ext2</type>
+		<type>cpio</type>
 		<size unit="M">60</size>
 		<compressed>yes</compressed>
 		<rpm-check-signatures>False</rpm-check-signatures>
@@ -17,6 +17,12 @@
 		<file name="drivers/block/loop.ko"/>
 		<file name="net/packet/*"/>
 		<file name="fs/ext3/*"/>
+		<file name="fs/ext2/*"/>
+		<file name="fs/binfmt_aout.ko"/>
+		<file name="fs/binfmt_misc.ko"/>
+		<file name="fs/mbcache.ko"/>
+		<file name="fs/quota_v1.ko"/>
+		<file name="fs/quota_v2.ko"/>
 		<file name="fs/jbd/*"/>
 		<file name="fs/fat/*"/>
 		<file name="fs/vfat/*"/>

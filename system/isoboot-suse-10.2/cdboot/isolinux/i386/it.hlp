@@ -1,0 +1,170 @@
+mainBoot Loader HelpBenvenuti a openSUSE 10.2
+
+Tramite questo menu potete selezionare la funzione desiderata. Se doveste incontrare delle difficoltà navigando attraverso questo sistema di aiuto, premete F1 per avere la helpdescrizione del sistema di aiuto. Le funzioni principali del menu sono:
+
+harddiskBootdaldiscorigido: Questa selezione non va ad incidere sul vostro sistema, avvia solamente un sistema operativo installato in precedenza.
+
+linuxInstallazione: Questa modalità di installazione funziona sulla maggior parte delle macchine. Se il sistema si blocca durante il processo di boot o si verificano delle difficoltà in relazione al rilevamento delle vostre componenti hardware, come ad esempio controller di dischi o schede di rete, provate con una delle seguenti opzioni di installazione.
+
+noacpiInstallazione--ACPIdisabilitato: Molti dei computer attualmente in commercio hanno delle implementazioni ACPI incomplete o errate. Questa selezione disabilita il supporto ACPI nel kernel, ma rimangono comunque abilitate tante caratteristiche interessanti da un punto di vista della performance, come ad esempio DMA per dischi rigidi IDE.
+
+failsafeInstallazione--SafeSettings: Se la voce Installazione non ha portato al risultato sperato, questa voce potrebbe risolvere il problema.
+
+rescueSistemadisalvataggio: Questa immagine di boot avvia un piccolo sistema Linux nella RAM. Ciò è utile se il sistema non si avvia correttamente. Dopo il boot del sistema, eseguite il log in come root.  
+
+memtestVerificadellamemoria: Questa verifica è utile non solo per controllare l'installazione di nuovi moduli di memoria. Si tratta di una dura prova per la maggior parte del vostro sistema e potrebbe rilevare dei problemi dovuti all'hardware.
+
+optOpzionidiboot: Le opzioni di boot possono cambiare completamente il comportamento del vostro sistema. Si tratta di settaggi per il kernel.
+
+helpF1Aiuto: Si tratta di un tasto che risponde in base al contesto in cui viene utilizzato. Mostrerà differenti schermate in base all'elemento attivo della schermata di avvio. Vi è inoltre una descrizione del sistema di aiuto.
+
+videomodeF3Modovideo: Qui potete scegliere tra differenti risoluzioni dello schermo durante il processo di installazione. Se incontrate delle difficoltà con l'installazione grafica, il modo testo potrebbe essere un modo per aggirare le difficoltà.
+
+install_srcF4Originediinstallazione: Selezionate l'origine di installazione.
+
+keytableF2Lingua: Impostate la lingua e la mappatura della tastiera utilizzate dal boot loader.
+
+driverupdateF5Aggiornamentodriver: Per pochissime macchine recenti potrebbe essere necessario un aggiornamento dei driver per poter installare il sistema.helpUtilizzare il sistema di aiutoL'aiuto in linea del boot loader dipende dal contesto; fornisce delle informazioni sulla voce di menu selezionata, se state modificando delle opzioni di boot, cercherà di reperire dell'informazioni relative all' opzione su cui è posizionato il cursore.
+
+Tasti di navigazione
+
+  Freccia su: evidenzia link precedente
+  Freccia giù: evidenzia prossimo link
+  Freccia sinistra, Backspace: ritorna al topic precedente
+  Freccia destra, Invio, Spazio: segui il link
+  Pag Su: scorri su di una pagina
+  Pag Giù: scrorri giù di una pagina
+  Home: vai alla pagina iniziale
+  Fine: vai alla fine della pagina
+  Esc: esci
+
+
+Ritorna alla mainPaginainizialedriverupdateAggiornamento driverSe vi serve un dischetto o CD-Rom con aggiornamenti di driver, premete F5. Il boot loader vi chiederà di inserire il dispositivo dopo aver caricato il kernel di Linux.
+
+Di solito si tratta di un dischetto con le nuove versioni dei driver di hardware o bug fix richiesto durante l'installazione.
+
+Ritorna alla mainPaginainizialevideomodeSelezione modo videoPremendo F3 ottenete un elenco dei modi video supportati dalla vostra scheda grafica. E' preselezionato il modo più elevato supportato dal vostro schermo.
+
+A volte succede che il monitor non venga rilevato automaticamente. In questi casi, selezionate il vostro modo preferito manualmente.
+
+Se il vostro sistema incontra delle difficoltà con la scheda grafica durante il processo di installazione, il modo testo potrebbe essere un modo utile per aggirare il problema.
+
+Ritorna alla mainPaginainizialekeytableSelezione lingua e mappatura della tastieraPremete F2 per cambiare la lingua e mappatura della tastiera utilizzate dal boot loader.
+
+Ritorna alla mainPaginainizialeinstall_srcOrigine di installazionePremete F4 per selezionare un origine di installazione.
+
+Corrisponde alla opzione di boot o_installinstall.
+
+Ritorna alla mainPaginainizialelinuxInstallazioneSelezionate Installazione per avviare l'installazione di default. Le optopzionidiboot immesse vengono utilizzate in fase di avvio. Questa voce abilita una serie di feature di hardware largamente diffuso.
+
+
+
+Ritorna alla mainPaginainizialeharddiskBoot dal disco rigidoSelezionate Boot SO installato per avviare il sistema installato sul vostro disco rigido locale. Il sistema deve essere installato correttamente, perché viene lanciato solo l'MBR (Master Boot Record) sul primo disco rigido. L'ID di dispositivo del primo disco rigido viene fornito dal BIOS del computer.
+
+Utilizzate questa opzione se avete dimenticato di estrarre il CD o DVD dal lettore e volete avviare il computer dal disco rigido.
+
+
+
+Ritorna alla mainPaginainizialenoacpiInstallazione -- ACPI disabilitataHardware molto recente richiede a volte l'ACPI per amministrare gli interrupt. L'ACPI prende il posto del più datato sistema APM.
+
+Selezionate Installazione -- ACPI disabilitata se doveste incontrare delle difficoltà durante il processo di boot del kernel. Le difficoltà risapute con macchine che non si sposano bene con ACPI sono:
+
+   * blocco del kernel in fase di boot
+   * le schede PCI non vengono rilevate o non vengono inzializzate      correttamente
+
+
+
+Ritorna alla mainPaginainizialefailsafeInstallation -- Safe SettingsSelezionate Installazione -- Safe Settings nei casi in cui il sistema si blocchi durante il processo di installazione o si verificano degli errori per certi versi inspiegabili. Questa opzione disabilita il DMA per drive IDE e tutte le feature in tema di risparmio energetico. Si vedano anche le opzioni del kernel per o_apmapm, o_acpiacpi e o_ideide.
+
+Ritorna alla mainPaginainizialerescueSistema di salvataggioIl Sistema di salvataggio è un piccolo sistema di base nella RAM disk. Da lì è possibile apportare tutta una serie di modifiche al sistema installato. Dato che in questo sistema sono a disposizione solamente tool low-level, questa opzione è indicata solo per utenti esperti.
+
+
+
+Ritorna alla mainPaginainizialememtestVerifica della memoriaLa Verifica della memoria dà l'opportunità di mettere a dura prova l'hardware del sistema. Scopo principale della verifica è quello di rilevare disfunzioni della RAM, ma sottopone a dura prova anche altre componenti del sistema.
+Se non vengono rilevati degli errori nella memoria questo non è una garanzia per il fatto che tutto sia a posto, comunque verranno rilevati la maggior parte degli errori.
+
+
+Ritorna alla mainPaginainizialeoptOpzioni di bootSono disponibili due tipi di opzioni. Le prime interessano l'installer. Le seconde sono opzioni che interessano il kernel. Tra le opzioni più comuni vi sono:
+
+a) opzioni per l'installer
+
+  o_installinstall -- seleziona una origine di installazione
+  networknetworkoptions -- le opzioni di rete
+  o_vncvncoptions -- opzioni per l'installazione via VNC
+
+b) opzioni per il kernel
+
+  o_splashsplash -- influisce sul comportamento dello splash screen
+  o_apmapm -- interessa le funzioni di risparmio energetico del sistema
+  o_acpiacpi -- advanced configuration and power interface
+  o_ideide -- controlla il sottosistema IDE
+
+
+Ritorna alla mainPaginainizialeo_installOpzioni dell'installer: installDi default, si cercano i CD-Rom locali quale origine di installazione. Se eseguite l'installazione via rete, selezionate l'opzione install. Protocolli di installazione possibili sono
+  * FTP
+  * NFS
+  * HTTP
+La sintassi da utilizzare corrisponde a quella delle URL standard. Ad esempio, se il vostro server ha l'indirizzo 192.168.0.1 e volete installare tramite NFS dalla directory /install che risiede su questo server, specificate l'origine di installazione nel modo seguente:
+
+  install=nfs://192.168.0.1/install
+
+La scheda di rete viene configurata tramite dhcp oppure potete specificate i parametri voi stessi come descritto nelle networkopzionidirete.
+
+
+Ritorna alle optOpzionidibooto_splashOpzioni per il kernel: splashLo splash screen è la grafica visualizzata durante l'avvio del sistema.
+
+splash=0
+
+Lo splash screen è disattivato, opzione utile con monitor davvero datati o se si verificano delle difficoltà.
+
+splash=verbose
+
+Attiva lo splash screen, e mostra messaggi del kernel e di boot.
+
+splash=silent
+
+Attiva lo splash screen, senza visualizzare dei messaggi. Viene mostrata invece una barra di avanzamento.
+
+Ritorna alle optOpzionidibootnetworkOpzioni per l'installer: opzioni di retePotete configurare l'interfaccia di rete adesso. L'hardware verrà rilevato in un secondo momento da YaST2. Per configurare la scheda di rete dovrete almeno impostare l'indirizzo IP dell'host e la maschera di rete. Per esempio:
+
+  hostip=192.168.0.10 netmask=255.255.255.0
+
+o in forma più breve:
+
+  hostip=192.168.0.10/24
+
+Se avete specificato o_installinstallazioneviarete senza specificare questi due valori, l'installer tenderà di configurare l'interfaccia di rete tramite dhcp. Se vi serve un gateway di default, specificatelo tramite l'opzione gateway. Ad esempio:
+
+  gateway=192.168.0.8
+
+
+Ritorna alle optOpzionidibooto_vncOpzioni per l'installer: vncPer abilitare una installazione VNC, specificate i parametri  vnc e la vncpassword:
+
+  vnc=1 vncpassword=esempio
+
+Il server VNC si avvierà e potrete gestire YaST2 tramite un client VNC qualsiasi da remoto.
+
+
+Ritorna alle optOpzionidibooto_apmOpzioni per il kernel: apmAPM è una delle due strategie da poter applicare in tema di risparmio energetico su computer comunemente diffusi. Si usa soprattutto con portatili per funzioni del tipo suspend to disk, ma può essere anche preposto allo spegnimento del computer dopo lo shutdown. APM si basa sul corretto funzionamento del BIOS. Se il BIOS non funziona a dovere, l'utilità dell'APM si riduce notevolmente o può addirittura compromettere il funzionamento del computer. Per tale ragione avete la possibilità di disabilitarlo tramite questo parametro:
+
+  apm=off -- disattiva completamente APM
+
+Su alcuni computer recentissimi si potrà trarre beneficio da o_acpiACPI più recenti.
+
+Ritorna alle optOpzionidibooto_acpiOpzioni per il kernel: acpiACPI (Advanced Configuration and Power Interface) è uno standard di interfaccia posta tra sistema operativo e BIOS. Di default, acpi è attivata se è stato rilevato un BIOS del dopo 2000. Vi sono una serie d parametri per intervenire sul comportamento dell' ACPI:
+
+  pci=noacpi -- non utilizzare ACPI per gestire gli interrupt PCI
+  acpi=oldboot -- solo le parti dell'ACPI che sono rilevanti per il processo di boot rimangono attivate
+  acpi=off -- spegni completamente l'ACPI
+  acpi=force -- attiva ACPI anche se il BIOS è di un anno precedente al 2000
+
+Soprattutto su computer recenti, ACPI si sostituisce al vecchio sistema o_apmapm.
+
+Ritorna alle optOpzionidibooto_ideOpzioni per il kernel: ideIDE - a differenza di SCSI- viene utilizzato di solito su postazioni di lavoro desktop. Per aggirare degli eventuali problemi dovuti all' hardware che si possono verificare con sistemi IDE, utilizzate il parametro del kernel:
+
+  ide=nodma -- spengi DMA per drive IDE
+
+
+Ritorna alle optOpzionidibootbitsSelezione tipo di softwareÈ possibile installare la versione di openSUSE a 32 o 64 bit.
+
+Ritorna alle mainPaginainiziale 
