@@ -1,4 +1,4 @@
-<image name="initrd-xenboot">
+<image name="initrd-netboot">
 	<preferences>
 		<type>cpio</type>
 		<size unit="M">60</size>
@@ -49,7 +49,6 @@
 		<package name="sysfsutils"/>
 		<package name="tcpd"/>
 		<package name="util-linux"/>
-		<package name="xen"/>
 		<package name="grub"/>
 	</packages>
 	<packages type="boot">

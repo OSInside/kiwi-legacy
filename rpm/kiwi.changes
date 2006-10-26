@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Wed Oct 25 16:11:42 CEST 2006 - ms@suse.de
 
+- added netboot descriptions for 10.1[-smp]/10.2[-smp]
 - remove loop device usage from liveCD setup
 - added high level URL: this:// which points to the
   description directory itself. This is usefull if you want

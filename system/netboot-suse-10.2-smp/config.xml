@@ -1,4 +1,4 @@
-<image name="initrd-xenboot">
+<image name="initrd-netboot">
 	<preferences>
 		<type>cpio</type>
 		<size unit="M">60</size>
@@ -25,8 +25,7 @@
 		<file name="drivers/net/*"/>
 	</drivers>
 	<repository type="yast2">
-		<!-- <source path="opensuse://SL-10.1"/> -->
-		<source path="/image/dist/full-10.1-i386"/>
+		<source path="/image/CDs/full-i386"/>
 	</repository>
 	<packages type="image">
 		<package name="atftp"/>
@@ -49,7 +48,6 @@
 		<package name="sysfsutils"/>
 		<package name="tcpd"/>
 		<package name="util-linux"/>
-		<package name="xen"/>
 		<package name="grub"/>
 	</packages>
 	<packages type="boot">
