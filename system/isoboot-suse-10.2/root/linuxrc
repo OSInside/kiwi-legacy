@@ -22,7 +22,6 @@
 #--------------------------------------
 export PATH="/sbin:/bin:/usr/sbin:/usr/bin"
 export CONFIG="/cdrom/config.isoclient"
-export LIVESYSTEM="livesystem"
 export LIVECD="livecd"
 export IFS_ORIG=$IFS
 
@@ -221,8 +220,6 @@ IFS="," ; for i in $IMAGE;do
 		2) imageVersion=$n
 	esac
 	done
-	imageArch=`/bin/arch`
-	imageBase=`echo $imageName | sed -e s@.$imageArch@@`
 	imageName="/cdrom/$imageName-$imageVersion"
 	imageMD5s="$imageName.md5"
 	while true;do
@@ -263,16 +260,13 @@ CDUmount
 #--------------------------------------
 mount $imageDevice /mnt &>/dev/null
 mkdir -p /mnt/$LIVECD && mount $cddev /mnt/$LIVECD &>/dev/null
-mkdir -p /mnt/$LIVESYSTEM && mount -o loop \
-	/mnt/$LIVECD/$imageBase-read-only.$imageArch-$imageVersion \
-	/mnt/$LIVESYSTEM &>/dev/null
 
 #======================================
 # 9) Create RO Link list
 #--------------------------------------
 cd /mnt
 for dir in bin boot lib opt sbin usr;do
-	ln -s $LIVESYSTEM/$dir $dir
+	ln -s $LIVECD/read-only-system/$dir $dir
 done
 cd /
 
@@ -315,7 +309,7 @@ cp /preinit /mnt
 #======================================
 # 15) Activate new root
 #--------------------------------------
-Echo "Activating Image: [$imageBase.$imageArch]"
+Echo "Activating Image: [$imageName]"
 cd /mnt && exec < dev/console >dev/console 2>&1
 Echo "Calling preinit phase..."
 /mnt/sbin/pivot_root . mnt >/dev/null 2>&1

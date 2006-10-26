@@ -9,7 +9,7 @@ CD_PUBLISHER="SUSE LINUX Products GmbH, suse@suse.de"
 #=======================================
 # Globals
 #---------------------------------------
-PARAMS="-r -J -pad"
+PARAMS="-r -J -pad -joliet-long"
 SORTFILE=`mktemp /var/tmp/m_cd-XXXXXX`
 SOURCE2=`mktemp -d /var/tmp/m_cd-XXXXXX`
 ROOT_ON_CD=suse

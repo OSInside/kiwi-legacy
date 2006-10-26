@@ -45,6 +45,31 @@ sub new {
 	return $this;
 }
 
+#========================================== 
+# thisPath
+#------------------------------------------
+sub thisPath {
+	# ...
+	# This method builds a valid path from a this://..
+	# description. The this path is the same as where the
+	# image description tree resides
+	# ---
+	my $this   = shift;
+	my $module = shift;
+	#==========================================
+	# normalize URL data
+	#------------------------------------------
+	if ($module !~ /^this:\/\//) {
+		return undef;
+	}
+	$module =~ s/this:\/\///;
+	$module =~ s/:/:\//g;
+	if ((! defined $module) || ($module eq "/")) {
+		return undef;
+	}
+	return "$main::Prepare/$module";
+}
+
 #==========================================
 # openSUSEpath
 #------------------------------------------

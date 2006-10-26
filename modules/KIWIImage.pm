@@ -269,10 +269,9 @@ sub createImageLiveCD {
 		$kiwi -> done();
 	}
 	#==========================================
-	# Count disk space for extends
+	# Count disk space for RW extend
 	#------------------------------------------
 	my $mbytesrw = getSize ($imageTree);
-	my $mbytesro = getSize ($imageTreeReadOnly);
 
 	#==========================================
 	# Create RW logical extend
@@ -286,7 +285,6 @@ sub createImageLiveCD {
 		restoreSplitExtend ($imageTreeReadOnly);
 		return undef;
 	}
-	$kiwi -> done();
 	#==========================================
 	# Create EXT2 filesystem on RW extend
 	#------------------------------------------
@@ -295,68 +293,63 @@ sub createImageLiveCD {
 		return undef;
 	}
 	#==========================================
-	# Create RO logical extend
+	# mount logical extend for data transfer
 	#------------------------------------------
-	$kiwi -> info ("Image RO part requires $mbytesro MB of disk space");
-	if (! buildLogicalExtend ($namero,$mbytesro."M")) {
-		restoreSplitExtend ($imageTreeReadOnly);
-		return undef;
-	}
-	$kiwi -> done();
-	#==========================================
-	# Create EXT2 filesystem on RO extend
-	#------------------------------------------
-	if (! setupEXT2 ( $namero,$imageTreeReadOnly )) {
+	my $extend = mountLogicalExtend ($namerw);
+	if (! defined $extend) {
 		restoreSplitExtend ($imageTreeReadOnly);
 		return undef;
 	}
 	#==========================================
-	# Install logical extends
+	# copy physical to logical
 	#------------------------------------------
-	foreach my $name ($namerw,$namero) {
-		#==========================================
-		# select physical extend
-		#------------------------------------------
-		my $source;
-		if ($name eq $namerw) {
-			$source = $imageTree;
-		} else {
-			$source = $imageTreeReadOnly;
-		}
-		#==========================================
-		# mount logical extend for data transfer
-		#------------------------------------------
-		my $extend = mountLogicalExtend ($name);
-		if (! defined $extend) {
-			restoreSplitExtend ($imageTreeReadOnly);
-			return undef;
-		}
-		#==========================================
-		# copy physical to logical
-		#------------------------------------------
-		if (! installLogicalExtend ($extend,$source)) {
-			restoreSplitExtend ($imageTreeReadOnly);
-			return undef;
-		}
-		cleanMount();
-		#==========================================
-		# Checking file system
-		#------------------------------------------
-		qx (/sbin/e2fsck -f -y $imageDest/$name 2>&1);
+	if (! installLogicalExtend ($extend,$imageTree)) {
+		restoreSplitExtend ($imageTreeReadOnly);
+		return undef;
+	}
+	cleanMount();
+	#==========================================
+	# Checking file system
+	#------------------------------------------
+	qx (/sbin/e2fsck -f -y $imageDest/$namerw 2>&1);
 
-		#==========================================
-		# Create image md5sum
-		#------------------------------------------
-		if (! buildMD5Sum ($name)) {
-			restoreSplitExtend ($imageTreeReadOnly);
-			return undef;
-		}
+	#==========================================
+	# Create image md5sum
+	#------------------------------------------
+	if (! buildMD5Sum ($namerw)) {
+		restoreSplitExtend ($imageTreeReadOnly);
+		return undef;
 	}
 	#==========================================
 	# Restoring physical extend
 	#------------------------------------------
 	if (! restoreSplitExtend ($imageTreeReadOnly)) {
 		return undef;
+	}
+	#==========================================
+	# recreate a copy of the read-only data
+	#------------------------------------------	
+	if (! -d $imageTreeReadOnly) {
+		$kiwi -> info ("Creating read only reference...");
+		if (! mkdir $imageTreeReadOnly) {
+			$error = $!;
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create ro directory: $error");
+			$kiwi -> failed ();
+			return undef;
+		}
+		my @rodirs = qw (bin boot lib opt sbin usr);
+		foreach my $dir (@rodirs) {
+			my $data = qx (cp -a $imageTree/$dir $imageTreeReadOnly 2>&1);
+			my $code = $? >> 8;
+			if ($code != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Couldn't setup ro directory: $data");
+				$kiwi -> failed ();
+				return undef;
+			}
+		}
+		$kiwi -> done();
 	}
 	#==========================================
 	# Prepare and Create ISO boot image
@@ -377,16 +370,17 @@ sub createImageLiveCD {
 	$kiwi -> info ("Creating CD filesystem");
 	qx (rm -rf $main::RootTree/*);
 	qx (mkdir -p $main::RootTree/CD/boot/loader);
+	qx (mkdir -p $main::RootTree/CD/read-only-system);
 	$kiwi -> done ();
 
 	#==========================================
 	# Installing second stage images
 	#------------------------------------------
-	$kiwi -> info ("Moving CD images into CD boot structure");
-	foreach my $name ($namerw,$namero) {
-		qx (mv $imageDest/$name.md5 $main::RootTree/CD);
-		qx (mv $imageDest/$name $main::RootTree/CD);
-	}
+	$kiwi -> info ("Moving CD image data into boot structure");
+	qx (mv $imageDest/$namerw.md5 $main::RootTree/CD);
+	qx (mv $imageDest/$namerw $main::RootTree/CD);
+	qx (mv $imageTreeReadOnly/* $main::RootTree/CD/read-only-system);
+	rmdir $imageTreeReadOnly;
 	$kiwi -> done ();
 
 	#==========================================

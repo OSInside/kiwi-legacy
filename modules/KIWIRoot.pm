@@ -91,8 +91,13 @@ sub new {
 		my $type = $repository{$source};
 		my $urlHandler  = new KIWIURL ($kiwi);
 		my $publics_url = $source;
-		if (defined $urlHandler -> openSUSEpath ($publics_url)) {
-			$publics_url = $urlHandler -> openSUSEpath ($publics_url);
+		my $hilevel_url = $urlHandler -> openSUSEpath ($publics_url);
+		if (defined $hilevel_url) {
+			$publics_url = $hilevel_url;
+		}
+		$hilevel_url = $urlHandler -> thisPath ($publics_url);
+		if (defined $hilevel_url) {
+			$publics_url = $hilevel_url;
 		}
 		my $private_url = $publics_url;
 		if ($private_url =~ /^\//) {
