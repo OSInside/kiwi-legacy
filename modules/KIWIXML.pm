@@ -26,7 +26,7 @@ use KIWIPattern;
 # Private
 #------------------------------------------
 my $kiwi;
-my @sourceFileList;
+my $imageDesc;
 my $optionsNodeList;
 my $driversNodeList;
 my $usrdataNodeList;
@@ -50,12 +50,18 @@ sub new {
 	my $this  = {};
 	my $class = shift;
 	bless $this,$class;
-	$kiwi   = shift;
+	$kiwi = shift;
+	$imageDesc = shift;
+	my $otherRepo = shift;
+	my %foreignRepo;
+	if (defined $otherRepo) {
+		 %foreignRepo = %{$otherRepo};
+	}
 	if (! defined $kiwi) {
 		$kiwi = new KIWILog();
 	}
-	my $controlFile = $_[0]."/config.xml";
-	my $versionFile = $_[0]."/VERSION";
+	my $controlFile = $imageDesc."/config.xml";
+	my $versionFile = $imageDesc."/VERSION";
 	my $systemXML   = new XML::LibXML;
 	if (! -f $controlFile) {
 		$kiwi -> failed ();
@@ -86,12 +92,28 @@ sub new {
 		$kiwi -> error ("$@\n");
 		return undef;
 	}
+	if ( defined $foreignRepo{xmlnode} ) {
+		$kiwi -> done ();
+		$kiwi -> info ("Including foreign repository node(s)");
+		$repositNodeList = $foreignRepo{xmlnode};
+	}
+	@urllist = ();
 	my %repository = getRepository ($this);
 	foreach my $source (keys %repository) {
-		my $urlHandler  = new KIWIURL ($kiwi);
+		my $urlHandler;
+		if ( defined $foreignRepo{prepare} ) {
+			$urlHandler = new KIWIURL ($kiwi,$foreignRepo{prepare});
+		} else {
+			$urlHandler = new KIWIURL ($kiwi,$imageDesc);
+		}
 		my $publics_url = $source;
-		if (defined $urlHandler -> openSUSEpath ($publics_url)) {
-			$publics_url = $urlHandler -> openSUSEpath ($publics_url);
+		my $highlvl_url = $urlHandler -> openSUSEpath ($publics_url);
+		if (defined $highlvl_url) {
+			$publics_url = $highlvl_url;
+		}		
+		$highlvl_url = $urlHandler -> thisPath ($publics_url);
+		if (defined $highlvl_url) {
+			$publics_url = $highlvl_url;
 		}
 		push (@urllist,$publics_url);
 	}
@@ -385,6 +407,17 @@ sub getXenList {
 	# ---
 	my $this = shift;
 	return getList ($this,"xen");
+}
+
+#==========================================
+# getForeignNodeList
+#------------------------------------------
+sub getForeignNodeList {
+	# ...
+	# Return the current <repository> list which consists
+	# of XML::LibXML::Element object pointers
+	# ---
+	return $repositNodeList;
 }
 
 1;

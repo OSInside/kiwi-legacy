@@ -354,18 +354,27 @@ sub createImageLiveCD {
 	#==========================================
 	# Prepare and Create ISO boot image
 	#------------------------------------------
+	if (open (FD,"$imageTree/image/main::Prepare")) {
+		my $Prepare = <FD>; close FD; chomp $Prepare;
+		my $xml = new KIWIXML ( $kiwi,$Prepare );
+		$main::ForeignRepo{xmlnode} = $xml -> getForeignNodeList();
+		$main::ForeignRepo{prepare} = $Prepare;
+	}
 	$main::Survive  = "yes";
 	$main::RootTree = "/tmp/kiwi-cdboot-$$";
 	$main::Prepare  = $main::System."/".$boot;
 	$main::Create   = $main::RootTree;
 	$kiwi -> info ("Creating ISO boot image: $boot...\n");
-	if (! main::main()) {
+	if (! defined main::main()) {
 		$main::Survive = "default";
+		qx (rm -rf $main::RootTree);
+		qx (rm -rf $imageTreeReadOnly);
 		return undef;
 	}
 	#==========================================
 	# Create CD ISO image
 	#------------------------------------------
+	undef %main::ForeignRepo;
 	$main::Survive = "default";
 	$kiwi -> info ("Creating CD filesystem");
 	qx (rm -rf $main::RootTree/*);

@@ -1,4 +1,16 @@
 -------------------------------------------------------------------
+Fri Oct 28 17:07:26 CEST 2006 - ms@suse.de
+
+- creating an ISO image requires kiwi to implicitly create a boot
+  image which is copied on the CD. It is very important that the
+  kernel of the image and the boot image is the same. According to
+  this I changed the code to use the same <repository> information
+  for the boot image as it was used during prepare of the main image.
+  The additional meta information is stored in
+
+	image-root/image/main::Prepare
+
+-------------------------------------------------------------------
 Wed Oct 25 16:11:42 CEST 2006 - ms@suse.de
 
 - added netboot descriptions for 10.1[-smp]/10.2[-smp]

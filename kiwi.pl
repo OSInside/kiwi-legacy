@@ -43,6 +43,7 @@ our $BootStick;      # deploy initrd booting from USB stick
 our $BootCD;         # deploy initrd booting from CD
 our $StripImage;     # strip shared objects and binaries
 our $CreatePassword; # create crypt password string
+our %ForeignRepo;    # may contain XML::LibXML::Element objects
 
 #============================================
 # Globals
@@ -78,7 +79,7 @@ sub main {
 	if (defined $LogFile) {
 		$kiwi -> info ("Setting log file to: $LogFile\n");
 		if (! $kiwi -> setLogFile ( $LogFile )) {
-			kiwiExit (1);
+			my $code = kiwiExit (1); return $code;
 		}
 	}
 
@@ -87,9 +88,9 @@ sub main {
 	#----------------------------------------
 	if (defined $Prepare) {
 		$kiwi -> info ("Reading image description...");
-		my $xml = new KIWIXML ( $kiwi,$Prepare );
+		my $xml = new KIWIXML ( $kiwi,$Prepare,\%ForeignRepo );
 		if (! defined $xml) {
-			kiwiExit (1);
+			my $code = kiwiExit (1); return $code;
 		}
 		$kiwi -> done();
 		#==========================================
@@ -102,12 +103,12 @@ sub main {
 		if (! defined $root) {
 			$kiwi -> error ("Couldn't create root object");
 			$kiwi -> failed ();
-			kiwiExit (1);
+			my $code = kiwiExit (1); return $code;
 		}
 		if (! defined $root -> init ()) {
 			$kiwi -> error ("Base initialization failed");
 			$kiwi -> failed ();
-			kiwiExit (1);
+			my $code = kiwiExit (1); return $code;
 		}
 		#==========================================
 		# Install root system
@@ -116,13 +117,13 @@ sub main {
 			$kiwi -> error ("Image installation failed");
 			$kiwi -> failed ();
 			$root -> cleanMount ();
-			kiwiExit (1);
+			my $code = kiwiExit (1); return $code;
 		}
 		if (! $root -> setup ()) {
 			$kiwi -> error ("Couldn't setup image system");
 			$kiwi -> failed ();
 			$root -> cleanMount ();
-			kiwiExit (1);
+			my $code = kiwiExit (1); return $code;
 		}
 		$root -> cleanMount ();
 		kiwiExit (0);
@@ -135,7 +136,7 @@ sub main {
 		$kiwi -> info ("Reading image description...");
 		my $xml = new KIWIXML ( $kiwi,"$Create/image" );
 		if (! defined $xml) {
-			kiwiExit (1);
+			my $code = kiwiExit (1); return $code;
 		}
 		$kiwi -> done();
 		#==========================================
@@ -171,12 +172,12 @@ sub main {
 			};
 			$kiwi -> error  ("Unsupported type: $type");
 			$kiwi -> failed ();
-			kiwiExit (1);
+			my $code = kiwiExit (1); return $code;
 		}
 		if ($ok) {
-			kiwiExit (0);
+			my $code = kiwiExit (0); return $code;
 		} else {
-			kiwiExit (1);
+			my $code = kiwiExit (1); return $code;
 		}
 	}
 
@@ -215,12 +216,12 @@ sub main {
 		$kiwi -> info ("Creating boot USB stick from: $BootStick...\n");
 		my $boot = new KIWIBoot ($kiwi,$BootStick);
 		if (! defined $boot) {
-			kiwiExit (1);
+			my $code = kiwiExit (1); return $code;
 		}
 		if (! $boot -> setupBootStick()) {
-			kiwiExit (1);
+			my $code = kiwiExit (1); return $code;
 		}
-		kiwiExit (0);
+		my $code = kiwiExit (0); return $code;
 	}
 
 	#==========================================
@@ -230,12 +231,12 @@ sub main {
 		$kiwi -> info ("Creating boot ISO from: $BootCD...\n");
 		my $boot = new KIWIBoot ($kiwi,$BootCD);
 		if (! defined $boot) {
-			kiwiExit (1);
+			my $code = kiwiExit (1); return $code;
 		}
 		if (! $boot -> setupBootCD()) {
-			kiwiExit (1);
+			my $code = kiwiExit (1); return $code;
 		}
-		kiwiExit (0);
+		my $code = kiwiExit (0); return $code;
 	}
 	return 1;
 }
@@ -284,12 +285,12 @@ sub init {
 	) {
 		$kiwi -> info ("No operation specified");
 		$kiwi -> failed ();
-		kiwiExit (1);
+		my $code = kiwiExit (1); return $code;
 	}
 	if ((defined $Create) && (! defined $Destination)) {
 		$kiwi -> info ("No destination directory specified");
 		$kiwi -> failed ();
-		kiwiExit (1);
+		my $code = kiwiExit (1); return $code;
 	}
 }
 
@@ -346,11 +347,10 @@ sub kiwiExit {
 	# ---
 	my $code = $_[0];
 	if ($Survive eq "yes") {
-		if ($code == 0) {
-			return $code;
-		} else {
+		if ($code != 0) {
 			return undef;
 		}
+		return $code;
 	}
 	if ($code != 0) {
 		$kiwi -> error  ("KIWI exited with error(s)");

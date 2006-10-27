@@ -67,7 +67,11 @@ sub thisPath {
 	if ((! defined $module) || ($module eq "/")) {
 		return undef;
 	}
-	return "$main::Prepare/$module";
+	if (defined $main::ForeignRepo{prepare}) {
+		return "$main::ForeignRepo{prepare}/$module";
+	} else {
+		return "$main::Prepare/$module";
+	}
 }
 
 #==========================================
