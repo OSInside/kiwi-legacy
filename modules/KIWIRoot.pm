@@ -91,13 +91,13 @@ sub new {
 		my $type = $repository{$source};
 		my $urlHandler  = new KIWIURL ($kiwi);
 		my $publics_url = $source;
-		my $hilevel_url = $urlHandler -> openSUSEpath ($publics_url);
-		if (defined $hilevel_url) {
-			$publics_url = $hilevel_url;
+		my $highlvl_url = $urlHandler -> openSUSEpath ($publics_url);
+		if (defined $highlvl_url) {
+			$publics_url = $highlvl_url;
 		}
-		$hilevel_url = $urlHandler -> thisPath ($publics_url);
-		if (defined $hilevel_url) {
-			$publics_url = $hilevel_url;
+		$highlvl_url = $urlHandler -> thisPath ($publics_url);
+		if (defined $highlvl_url) {
+			$publics_url = $highlvl_url;
 		}
 		my $private_url = $publics_url;
 		if ($private_url =~ /^\//) {
@@ -587,7 +587,9 @@ sub setup {
 	qx ( cp $imageDesc/config.xml $root/image 2>&1 );
 	qx ( cp $imageDesc/images.sh $root/image 2>&1 );
 	qx ( cp $imageDesc/VERSION $root/image 2>&1 );
-
+	if (open (FD,">$root/image/main::Prepare")) {
+		print FD $imageDesc; close FD;
+	}
 	#========================================
 	# check <users> tag, create users/groups
 	#----------------------------------------
