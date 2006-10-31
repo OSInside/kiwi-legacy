@@ -72,6 +72,22 @@ sub main {
 		$tagsID,$treeID,$SourceList,$LocalSource
 	);
 	#==============================================
+	# Add %changelog
+	#----------------------------------------------
+	my $bin = "/suse/ms/bin/convert_changes_to_rpm_changelog";
+	if (open (FD,">>$pacdir/kiwi.spec")) {
+		print FD "\n";
+		print FD '%changelog -n kiwi';
+		print FD "\n";
+		if (open (LG,"$bin $pacdir/kiwi.changes|")) {
+			while (<LG>) {
+				print FD $_;
+			}
+		}
+		close FD;
+		close LG;
+	}
+	#==============================================
 	# Cleanup
 	#----------------------------------------------
 	my $host = qx (hostname);
