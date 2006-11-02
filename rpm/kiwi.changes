@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Thu Nov  2 13:17:25 CET 2006 - ms@suse.de
+
+- added fidelity description to source repository
+- added image size check to initrd. The needed space is now
+  displayed while downloading the image. If there is not enough
+  space the download will not start
+
+-------------------------------------------------------------------
 Fri Oct 28 17:07:26 CEST 2006 - ms@suse.de
 
 - creating an ISO image requires kiwi to implicitly create a boot

@@ -448,6 +448,19 @@ kernelList () {
 		fi
 	done
 }
+validateSize () {
+	haveBytes=`sfdisk -s $imageDevice`
+	haveBytes=`expr $haveBytes \* 1024`
+	haveMByte=`expr $haveBytes / 1048576`
+	needBytes=`expr $blocks \* $blocksize`
+	needMByte=`expr $needBytes / 1048576`
+	Echo "Have size: $imageDevice -> $haveBytes Bytes [ $haveMByte MB ]"
+	Echo "Need size: $needBytes Bytes [ $needMByte MB ]"
+	if test $haveBytes -gt $needBytes;then
+		return 0
+	fi
+	return 1
+}
 validateBlockSize () {
 	isize=`expr $blocks \* $blocksize` 
 	isize=`expr $isize / 32768`
@@ -466,7 +479,7 @@ loadOK () {
 	fi
 	return 0
 }
-enoughRAM () {
+validateRAM () {
 	needRAM=`expr $blocks \* $blocksize`
 	needRAM=`expr $needRAM / 1024`
 	needRAM=`expr $needRAM + 128`
@@ -738,11 +751,17 @@ IFS="," ; for i in $IMAGE;do
 		IFS=" "
 		read sum1 blocks blocksize < /etc/image.md5
 		if test -z $DISK;then
-		if ! enoughRAM;then
-			systemException \
-			"Not enough RAM available for this image" \
-			"reboot"
-		fi
+			if ! validateRAM;then
+				systemException \
+					"Not enough RAM available for this image" \
+				"reboot"
+			fi
+		else
+			if ! validateSize;then
+				systemException \
+					"Not enough space available for this image" \
+				"reboot"
+			fi
 		fi
 		validateBlockSize
 		# /.../
