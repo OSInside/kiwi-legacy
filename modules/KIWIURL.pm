@@ -67,11 +67,17 @@ sub thisPath {
 	if ((! defined $module) || ($module eq "/")) {
 		return undef;
 	}
+	my $thisPath;
 	if (defined $main::ForeignRepo{prepare}) {
-		return "$main::ForeignRepo{prepare}/$module";
+		$thisPath = "$main::ForeignRepo{prepare}/$module";
 	} else {
-		return "$main::Prepare/$module";
+		$thisPath = "$main::Prepare/$module";
 	}
+	if ($thisPath !~ /^\//) {
+		my $pwd = qx (pwd); chomp $pwd;
+		$thisPath = $pwd."/".$thisPath;
+	}
+	return $thisPath;
 }
 
 #==========================================

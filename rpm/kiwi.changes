@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Nov  3 16:42:55 CET 2006 - ms@suse.de
+
+- fixed this:// path if non absolut path specifications are used
+  as paramter to the --prepare option
+
+-------------------------------------------------------------------
 Thu Nov  2 13:17:25 CET 2006 - ms@suse.de
 
 - added fidelity description to source repository
