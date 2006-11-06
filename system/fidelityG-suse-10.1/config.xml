@@ -42,6 +42,8 @@
 		<package name="resmgr"/>
 		<package name="hal"/>
 		<package name="grub"/>
+		<!-- PLUS: Samba -->
+		<package name="samba"/>
 		<!-- PLUS: X11 -->
 		<package name="xorg-x11"/>
         <package name="xorg-x11-server"/>

@@ -15,9 +15,11 @@ for i in \
 	info smart python-xml python-elementtree \
 	perl-gettext perl-Bootloader openslp rpm-python \
 	suse-build-key python perl perl-XML-Parser \
-	xscreensaver yast2-theme-NLD yast2-xml yast2-ncurses \
-	yast2 yast2-core yast2-pkg-bindings yast2-hardware-detection \
-	yast2-power-management rpm
+	xscreensaver yast2-theme-NLD yast2-theme-SuSELinux \
+	yast2-hardware-detection yast2-power-management \
+	yast2-xml samba-client yast2-pkg-bindings \
+	yast2 yast2-core \
+	rpm
 do
 	rpm -e $i --nodeps
 done
@@ -31,8 +33,6 @@ rm -rf /usr/share/man
 rm -rf /usr/share/locale
 rm -rf /usr/lib/locale
 rm -rf /usr/share/doc/packages
-rm -rf /var/lib/rpm
-rm -rf /usr/lib/rpm
 rm -rf /var/lib/smart
 rm -rf /usr/share/wallpapers
 rm -rf /usr/lib/python*
@@ -46,15 +46,23 @@ rm -rf /lib/modules/*/kernel/drivers/scsi
 rm -rf /lib/modules/*/kernel/sound
 rm -rf /usr/X11R6/bin/Xdmx
 rm -rf /usr/X11R6/bin/Xnest
-
 rm -rf /usr/X11R6/lib/modules/extensions
-rm -rf /usr/share/YaST2
 rm -rf /usr/share/icons
 rm -rf /usr/share/libtool
 rm -rf /usr/share/alsa
 rm -rf /etc/X11/xserver/C/print/models
+rm -rf /usr/share/YaST2
 
-#rm -rf /boot/*
+#==========================================
+# remove local kernel and boot data
+#------------------------------------------
+# rm -rf /boot/*
+
+#==========================================
+# remove RPM database
+#------------------------------------------
+rm -rf /var/lib/rpm
+rm -rf /usr/lib/rpm
 
 #==========================================
 # remove unneeded X drivers
