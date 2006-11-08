@@ -84,13 +84,26 @@ sub getPatternContents {
 	my $content;
 	foreach my $pat (@pattern) {
 		my $result;
+		my $printinfo = 0;
+		if (! defined $cache{$pat}) {
+			$printinfo = 1;
+		}
+		if ($printinfo) {
+			$kiwi -> info ("$infomessage: $pat");
+		}
 		foreach my $url (@urllist) {
 			$result .= downloadPattern ( $url,$pat );
 		}
 		if (! $result) {
+			if ($printinfo) {
+				$kiwi -> failed ();
+			}
 			return ();
 		}
 		$content .= $result;
+		if ($printinfo) {
+			$kiwi -> done ();
+		}
 	}
 	my @patdata = split (/\n/,$content);
 	return @patdata;
@@ -106,11 +119,9 @@ sub downloadPattern {
 	if (defined $cache{$pattern}) {
 		return $cache{$pattern};
 	}
-	$kiwi -> info ("$infomessage: $pattern");
 	if ($url =~ /^\//) {
 		my $file = bsd_glob ("$url//suse/setup/descr/$pattern-*.pat");
 		if (! open (FD,$file)) {
-			$kiwi -> failed ();
 			return undef;
 		}
 		local $/; $content = <FD>; close FD;
@@ -122,11 +133,9 @@ sub downloadPattern {
 		my $title    = $response -> title ();
 		my $content  = $response -> content ();
 		if ((! defined $title) || ($title =~ /not found/i)) {
-			$kiwi -> failed ();
 			return undef;
 		}
 		if ($content !~ /\"($pattern-.*\.pat)\"/) {
-			$kiwi -> failed ();
 			return undef;
 		}
 		$location = $location."/".$1;
@@ -134,7 +143,6 @@ sub downloadPattern {
 		$response = $browser  -> request ( $request );
 		$content  = $response -> content ();
 	}
-	$kiwi -> done();
 	$cache{$pattern} = $content;
 	return $content;
 }
@@ -178,12 +186,11 @@ sub getRequiredPatterns {
 	my @pattern = @{$pattref};
 	my @patdata = getPatternContents (\@pattern);
 	my @reqs = getSection (
-		'^\+Req:','^\-Req:',\@patdata
+		'^\+Re[qc]:','^\-Re[qc]:',\@patdata
 	);
+	push (@reqs,"base");
+	push (@reqs,"desktop-base");
 	foreach my $rpattern (@reqs) {
-		if ($rpattern eq "basesystem") {
-			$rpattern = "base";
-		}
 		if (defined $patdone{$rpattern}) {
 			next;
 		}
@@ -191,9 +198,10 @@ sub getRequiredPatterns {
 		my @patdata = getPatternContents ([$rpattern]);
 		$infomessage = $infodefault;
 		if (! @patdata) {
-			$kiwi -> error  ("Couldn't find required pattern: $rpattern");
-			$kiwi -> failed ();
-			return undef;
+			$kiwi -> warning ("Couldn't find required pattern: $rpattern");
+			$kiwi -> skipped ();
+			$patdone{$rpattern} = $rpattern;
+			next;
 		}
 		push ( @data,@patdata );
 		$patdone{$rpattern} = $rpattern;

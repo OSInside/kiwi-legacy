@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Nov  8 18:21:12 CET 2006 - ms@suse.de
+
+- fixed pattern support
+
+-------------------------------------------------------------------
 Mon Nov  6 11:27:16 CET 2006 - ms@suse.de
 
 - added samba to the fidelity image, only samba no client for now

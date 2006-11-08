@@ -112,6 +112,20 @@ sub failed {
 }
 
 #==========================================
+# skipped
+#------------------------------------------
+sub skipped {
+	# ...
+	# This is the yellow "skipped" flag
+	# ---
+	doStat();
+	setOutputChannel();
+	print "\033[1;33mskipped\n";
+	resetOutputChannel();
+	doNorm();
+}
+
+#==========================================
 # setOutputChannel
 #------------------------------------------
 sub setOutputChannel {
@@ -168,7 +182,7 @@ sub printLog {
 	foreach my $level (@showLevel) {
 	if ($level == $lglevel) {
 		setOutputChannel();
-		if (($lglevel == 1) || ($lglevel == 3)) {
+		if (($lglevel == 1) || ($lglevel == 2) || ($lglevel == 3)) {
 			print $date,$logdata;
 		} elsif ($lglevel == 5) {
 			print $logdata;
