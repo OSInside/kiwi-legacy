@@ -67,6 +67,7 @@ make buildroot=$RPM_BUILD_ROOT \
      doc_prefix=$RPM_BUILD_ROOT/%{_defaultdocdir} \
      man_prefix=$RPM_BUILD_ROOT/%{_mandir} \
      install
+touch kiwi.loader
 test -f $RPM_BUILD_ROOT/%{_var}/lib/tftpboot/pxelinux.0 && \
 	echo %{_var}/lib/tftpboot/pxelinux.0 > kiwi.loader
 test -f $RPM_BUILD_ROOT/%{_var}/lib/tftpboot/mboot.c32 && \
