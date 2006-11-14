@@ -32,18 +32,19 @@ our $System  = "/usr/share/kiwi/image";
 #============================================
 # Globals
 #--------------------------------------------
-our $Prepare;        # control XML file for building chroot extend
-our $Create;         # image description for building image extend
-our $Destination;    # destination directory for logical extends
-our $LogFile;        # optional file name for logging
-our $Virtual;        # optional virtualisation setup
-our $RootTree;       # optional root tree destination
-our $Survive;        # if set to "yes" don't exit kiwi
-our $BootStick;      # deploy initrd booting from USB stick
-our $BootCD;         # deploy initrd booting from CD
-our $StripImage;     # strip shared objects and binaries
-our $CreatePassword; # create crypt password string
-our %ForeignRepo;    # may contain XML::LibXML::Element objects
+our $Prepare;         # control XML file for building chroot extend
+our $Create;          # image description for building image extend
+our $Destination;     # destination directory for logical extends
+our $LogFile;         # optional file name for logging
+our $Virtual;         # optional virtualisation setup
+our $RootTree;        # optional root tree destination
+our $Survive;         # if set to "yes" don't exit kiwi
+our $BootStick;       # deploy initrd booting from USB stick
+our $BootStickSystem; # sytem image to be copied on an USB stick
+our $BootCD;          # deploy initrd booting from CD
+our $StripImage;      # strip shared objects and binaries
+our $CreatePassword;  # create crypt password string
+our %ForeignRepo;     # may contain XML::LibXML::Element objects
 
 #============================================
 # Globals
@@ -214,7 +215,7 @@ sub main {
 	#------------------------------------------
 	if (defined $BootStick) {
 		$kiwi -> info ("Creating boot USB stick from: $BootStick...\n");
-		my $boot = new KIWIBoot ($kiwi,$BootStick);
+		my $boot = new KIWIBoot ($kiwi,$BootStick,$BootStickSystem);
 		if (! defined $boot) {
 			my $code = kiwiExit (1); return $code;
 		}
@@ -263,6 +264,7 @@ sub init {
 		"virtual|v=s"         => \$Virtual,
 		"root|r=s"            => \$RootTree,
 		"bootstick=s"         => \$BootStick,
+		"bootstick-system=s"  => \$BootStickSystem,
 		"bootcd=s"            => \$BootCD,
 		"strip|s"             => \$StripImage,
 		"createpassword"      => \$CreatePassword,
@@ -309,7 +311,7 @@ sub usage {
 	print "Usage:\n";
 	print "  kiwi -p | --prepare <image-path>\n";
 	print "  kiwi -c | --create  <image-root>\n";
-	print "  kiwi --bootstick <initrd>\n";
+	print "  kiwi --bootstick <initrd> [ --bootstick-system <systemImage> ]\n";
 	print "  kiwi --bootcd <initrd>\n";
 	print "  kiwi --createpassword\n";
 	print "--\n";

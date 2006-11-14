@@ -1,6 +1,6 @@
 #!/bin/sh
 
-echo "Configure image: [isoboot-suse-10.2]..."
+echo "Configure image: [usbboot-suse-10.2]..."
 test -f /.profile && . /.profile
 
 #==========================================

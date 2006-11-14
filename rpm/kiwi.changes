@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Tue Nov 14 13:24:31 CET 2006 - ms@suse.de
+
+- added support for system image on stick. One need to use
+  option --bootstick in combination with --bootstick-system.
+  The parameter to --bootstick must be an usbboot initrd
+  provided by kiwi. The parameter to --bootstick-system is
+  a kiwi generated system image
+
+-------------------------------------------------------------------
 Thu Nov  9 09:49:57 CET 2006 - ms@suse.de
 
 - fixed build for non SUSE distributions

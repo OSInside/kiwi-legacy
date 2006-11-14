@@ -1,5 +1,5 @@
 #!/bin/sh
-echo "kernel-default: Image [isoboot-suse-10.2]..."
+echo "kernel-default: Image [usbboot-suse-10.2]..."
 
 #==========================================
 # setup kernel version to deal with

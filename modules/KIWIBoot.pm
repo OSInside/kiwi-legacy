@@ -27,6 +27,7 @@ use KIWILog;
 #------------------------------------------
 my $kiwi;    # log handler
 my $initrd;  # initrd file name
+my $system;  # sytem image file name
 my $kernel;  # kernel for initrd
 my $tmpdir;  # temporary directory
 my $result;  # result of external calls
@@ -41,6 +42,7 @@ sub new {
 	bless $this,$class;
 	$kiwi   = shift;
 	$initrd = shift;
+	$system = shift;
 	if (! defined $kiwi) {
 		$kiwi = new KIWILog();
 	}
@@ -48,6 +50,13 @@ sub new {
 		$kiwi -> error  ("Couldn't find initrd file: $initrd");
 		$kiwi -> failed ();
 		return undef;
+	}
+	if (defined $system) {
+	if (! -f $system) {
+		$kiwi -> error  ("Couldn't find system image file: $system");
+		$kiwi -> failed ();
+		return undef;
+	}
 	}
 	if (! -d "/usr/lib/grub") {
 		$kiwi -> error  ("Couldn't find the grub");
@@ -242,11 +251,6 @@ sub setupBootStick {
 	$kiwi -> done();
 
 	#==========================================
-	# Clean tmp
-	#------------------------------------------
-	rmdir  $tmpdir;
-
-	#==========================================
 	# Find USB stick devices
 	#------------------------------------------
 	my %storage = getRemovableUSBStorageDevices();
@@ -283,7 +287,24 @@ sub setupBootStick {
 	# Create new partition table on stick
 	#------------------------------------------
 	$kiwi -> info ("Creating partition table on: $stick");
-	$status = qx ( echo ",,L,*" | /sbin/sfdisk --force $stick 2>&1 );
+	my $pinfo = "$tmpdir/sfdisk.input";
+	if (! open (FD,">$pinfo")) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't create temporary partition data: $!");
+		$kiwi -> failed ();
+		return undef;
+	}
+	#==========================================
+	# Prepare sfdisk input file
+	#------------------------------------------
+	if (defined $system) {
+		print FD ",80,L,*\n";
+		print FD ",,L\n";
+	} else {
+		print FD ",,L,*\n";
+	}
+	close FD;
+	$status = qx ( /sbin/sfdisk -uM --force $stick < $pinfo 2>&1 );
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -292,11 +313,17 @@ sub setupBootStick {
 		return undef;
 	}
 	$kiwi -> done();
+
+	#==========================================
+	# Clean tmp
+	#------------------------------------------
+	unlink $pinfo;
+	rmdir  $tmpdir;
 	
 	#==========================================
-	# Dump image on stick
+	# Dump initrd image on stick
 	#------------------------------------------
-	$kiwi -> info ("Dumping image to stick");
+	$kiwi -> info ("Dumping initrd image to stick");
 	$status = qx ( umount $stick"1" 2>&1 );
 	$status = qx (dd if=$name of=$stick"1" bs=1k 2>&1);
 	$result = $? >> 8;
@@ -308,6 +335,22 @@ sub setupBootStick {
 	}
 	$kiwi -> done();
 
+	#==========================================
+	# Dump system image on stick
+	#------------------------------------------
+	if (defined $system) {
+		$kiwi -> info ("Dumping system image to stick");
+		$status = qx ( umount $stick"2" 2>&1 );
+		$status = qx (dd if=$system of=$stick"2" bs=1k 2>&1);
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't dump image to stick: $status");
+			$kiwi -> failed ();
+			return undef;
+		}
+		$kiwi -> done();
+	}
 	#==========================================
 	# Install grub on stick
 	#------------------------------------------

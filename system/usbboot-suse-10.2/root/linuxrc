@@ -1,0 +1,248 @@
+#!/bin/bash
+#================
+# FILE          : linuxrc
+#----------------
+# PROJECT       : OpenSuSE KIWI Image System
+# COPYRIGHT     : (c) 2006 SUSE LINUX Products GmbH. All rights reserved
+#               :
+# AUTHOR        : Marcus Schaefer <ms@suse.de>
+#               :
+# BELONGS TO    : Operating System images
+#               :
+# DESCRIPTION   : This file is changed to become the real
+#               : linuxrc script which is used to prepare the
+#               : operating system for the main image
+#               :
+#               :
+# STATUS        : BETA
+#----------------
+#
+#======================================
+# Exports...
+#--------------------------------------
+export PATH="/sbin:/bin:/usr/sbin:/usr/bin"
+
+DEBUG=0
+#======================================
+# Functions...
+#--------------------------------------
+Debug () {
+	if test "$DEBUG" = 1;then
+		echo "+++++> $1"
+	fi
+}
+Echo () {
+	if test "$1" = "-n";then
+		echo $1 "-----> $2"
+	elif test "$1" = "-b";then
+		echo "       $2"
+	else
+		echo "-----> $1"
+	fi
+}
+WaitKey () {
+	if test "$DEBUG" = 1;then
+		Echo -n "Press any key to continue..."
+		read
+	fi
+}
+closeKernelConsole () {
+	if test "$DEBUG" = 0;then
+		/usr/sbin/klogconsole -l 1
+	fi
+}
+reopenKernelConsole () {
+	/usr/sbin/klogconsole -l 7
+}
+importFile () {
+	IFS="
+	"
+	while read line;do
+	IFS="="
+	count=0
+	for item in $line;do
+		if test $count = 0 ; then
+			key=$item ; count=1 ; continue
+		fi
+		if test $count = 1 ; then
+			item=`echo $item | tr -d \'`
+			Debug "$key=$item"
+			eval export $key\=\"$item\"
+			count=0
+		fi
+	done
+	done
+}
+systemException () {
+	Echo "$1"
+	case "$2" in
+	"reboot")
+		Echo "rebootException: reboot in 60 sec..."; sleep 60
+		/sbin/restart >/dev/null 2>&1
+	;;
+	"wait")
+		Echo "waitException: waiting for ever..."
+		while true;do sleep 100;done
+	;;
+	"shell")
+		Echo "shellException: providing shell..."
+		/bin/sh
+	;;
+	*)
+		Echo "unknownException..."
+	;;
+	esac
+}
+USBStickDevice () {
+	for device in /sys/bus/usb/drivers/usb-storage/*;do
+		if [ -L $device ];then
+			description=$device/host*/target*/*/block*
+			isremovable=$device/host*/target*/*/block*/removable
+			if [ ! -d $description ];then
+				continue
+			fi
+			storageID=`echo $description | cut -f1 -d: | xargs basename`
+			devicebID=`basename $description | cut -f2 -d:`
+			serial="/sys/bus/usb/devices/$storageID/serial"
+			device="/dev/$devicebID"
+			if [ ! -f $serial ];then
+				continue;
+			fi
+			if [ ! -b $device ];then
+				continue;
+			fi
+			if [ ! -f $isremovable ];then
+				continue;
+			fi
+			serial=`cat $serial`
+			removable=`cat $isremovable`
+			if [ $removable -eq 1 ];then
+				stickDevice="$device"2
+				stickSerial=$serial
+			fi
+		fi
+	done
+}
+fileSystem () {
+	imageConfig=$1
+	if [ ! -f $imageConfig ];then
+		FSTYPE=auto
+		return
+	fi
+	data=`cat $imageConfig | grep "<type>" | cut -f2 -d ">" | cut -f1 -d "<"`
+	case $data in
+		*ext3*)     FSTYPE=ext3 ;;
+		*ext2*)     FSTYPE=ext2 ;;
+		*reiserfs*) FSTYPE=reiserfs ;;
+		*)
+			FSTYPE=auto
+		;;
+	esac
+}
+stickMount () {
+	USBStickDevice
+	mount $stickDevice /mnt &>/dev/null
+}
+stickUmount () {
+	umount $stickDevice
+}
+#======================================
+# Beautify Startup
+#--------------------------------------
+clear
+echo "Loading KIWI USB-Stick Boot-System..."
+echo "-------------------------------------"
+
+#======================================
+# 1) Mounting local file systems
+#--------------------------------------
+mount -t proc  proc    /proc
+mount -t sysfs sysfs   /sys
+mount -t devpts devpts /dev/pts
+closeKernelConsole
+
+#======================================
+# 2) Prepare module load support 
+#--------------------------------------
+touch /etc/modules.conf
+touch /lib/modules/*/modules.dep
+
+#======================================
+# 3) Mount the stick device
+#--------------------------------------
+stickMount
+
+#======================================
+# 4) Get filesystem type
+#--------------------------------------
+fileSystem /mnt/image/config.xml
+stickUMount
+
+#======================================
+# 5) Resize filesystem to full space
+#--------------------------------------
+Echo "Resize filesystem to full partition space..."
+if test "$FSTYPE" = "reiserfs";then
+	resize_reiserfs $stickDevice
+fi
+if test "$FSTYPE" = "ext2";then
+	e2fsck -y -f $stickDevice
+	resize2fs -F -p $stickDevice
+fi
+if test "$FSTYPE" = "ext3";then
+	e2fsck -y -f $stickDevice
+	resize2fs -F -p $stickDevice
+	tune2fs -j $stickDevice
+fi
+
+#======================================
+# 6) Mount the stick device
+#--------------------------------------
+stickMount
+
+#======================================
+# 7) setup real root device
+#--------------------------------------
+echo 256 > /proc/sys/kernel/real-root-dev
+
+#======================================
+# 8) umount system filesystems
+#--------------------------------------
+umount /dev/pts
+umount /sys
+umount /proc
+
+#======================================
+# 9) copy initrd files to image
+#--------------------------------------
+cp /preinit /mnt
+
+#======================================
+# 10) Activate new root
+#--------------------------------------
+Echo "Activating Image: [$imageName]"
+cd /mnt && exec < dev/console >dev/console 2>&1
+Echo "Calling preinit phase..."
+/mnt/sbin/pivot_root . mnt >/dev/null 2>&1
+if test $? != 0;then
+	PIVOT=false
+	mount --move . / && chroot . ./preinit
+	chroot . rm ./preinit
+else
+	PIVOT=true
+	./preinit
+	rm ./preinit
+fi
+#======================================
+# 11) Unmount initrd / system init
+#--------------------------------------
+echo " "
+echo "Booting into Live CD System..."
+echo "------------------------------"
+reopenKernelConsole
+mount -n -o remount,rw / &>/dev/null
+if [ $PIVOT = "true" ];then
+	exec umount -n -l /mnt
+else
+	exec chroot . /sbin/init
+fi
