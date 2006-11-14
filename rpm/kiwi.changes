@@ -5,7 +5,7 @@ Tue Nov 14 13:24:31 CET 2006 - ms@suse.de
   option --bootstick in combination with --bootstick-system.
   The parameter to --bootstick must be an usbboot initrd
   provided by kiwi. The parameter to --bootstick-system is
-  a kiwi generated system image
+  a kiwi generated system image. Support for this is <alpha>
 
 -------------------------------------------------------------------
 Thu Nov  9 09:49:57 CET 2006 - ms@suse.de
@@ -20,7 +20,7 @@ Wed Nov  8 18:21:12 CET 2006 - ms@suse.de
 -------------------------------------------------------------------
 Mon Nov  6 11:27:16 CET 2006 - ms@suse.de
 
-- added samba to the fidelity image, only samba no client for now
+- added samba to the wyse image, only samba no client for now
 
 -------------------------------------------------------------------
 Fri Nov  3 16:42:55 CET 2006 - ms@suse.de
@@ -31,7 +31,7 @@ Fri Nov  3 16:42:55 CET 2006 - ms@suse.de
 -------------------------------------------------------------------
 Thu Nov  2 13:17:25 CET 2006 - ms@suse.de
 
-- added fidelity description to source repository
+- added wyse description to source repository
 - added image size check to initrd. The needed space is now
   displayed while downloading the image. If there is not enough
   space the download will not start
