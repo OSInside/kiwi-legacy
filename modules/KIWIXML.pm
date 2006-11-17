@@ -334,12 +334,14 @@ sub getList {
 			}
 			push @pattlist,$pattern;
 		}
-		my $psolve = new KIWIPattern ($kiwi,\@pattlist,\@urllist);
-		if (! defined $psolve) {
-			next;
+		if (@pattlist) {
+			my $psolve = new KIWIPattern ($kiwi,\@pattlist,\@urllist);
+			if (! defined $psolve) {
+				return ();
+			}
+			my @packageList = $psolve -> getPackages();
+			push @result,@packageList;
 		}
-		my @packageList = $psolve -> getPackages();
-		push @result,@packageList;
 		#==========================================
 		# Check for ignore list
 		#------------------------------------------

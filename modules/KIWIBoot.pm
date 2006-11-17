@@ -124,30 +124,32 @@ sub getRemovableUSBStorageDevices {
 	my @storage = glob ("/sys/bus/usb/drivers/usb-storage/*");
 	foreach my $device (@storage) {
 		if (-l $device) {
-			my $description = glob ("$device/host*/target*/*/block*");
-			my $isremovable = glob ("$device/host*/target*/*/block*/removable");
-			if (! -d $description) {
-				next;
-			}
-			my $serial;
-			if ($description =~ /usb-storage\/(.*?):.*/) {
-				$serial = "/sys/bus/usb/devices/$1/serial";
-				if (! open (FD,$serial)) {
+			my @descriptions = glob ("$device/host*/target*/*/block*");
+			foreach my $description (@descriptions) {
+				if (! -d $description) {
 					next;
 				}
-				$serial = <FD>;
-				chomp $serial;
-				close FD;
-			}
-			if ($description =~ /block:(.*)/) {
-				$description = "/dev/".$1;
-				if (! open (FD,$isremovable)) {
-					next;
+				my $isremovable = glob ("$description/removable");
+				my $serial;
+				if ($description =~ /usb-storage\/(.*?):.*/) {
+					$serial = "/sys/bus/usb/devices/$1/serial";
+					if (! open (FD,$serial)) {
+						next;
+					}
+					$serial = <FD>;
+					chomp $serial;
+					close FD;
 				}
-				$isremovable = <FD>;
-				close FD;
-				if ($isremovable == 1) {
-					$devices{$description} = $serial;
+				if ($description =~ /block:(.*)/) {
+					$description = "/dev/".$1;
+					if (! open (FD,$isremovable)) {
+						next;
+					}
+					$isremovable = <FD>;
+					close FD;
+					if ($isremovable == 1) {
+						$devices{$description} = $serial;
+					}
 				}
 			}
 		}
