@@ -1,4 +1,4 @@
-<image name="initrd-isoboot">
+<image name="initrd-usbboot">
 	<preferences>
 		<type>cpio</type>
 		<size unit="M">60</size>

@@ -21,6 +21,7 @@
 # Exports...
 #--------------------------------------
 export PATH="/sbin:/bin:/usr/sbin:/usr/bin"
+export IFS_ORIG=$IFS
 
 DEBUG=0
 #======================================
@@ -93,33 +94,83 @@ systemException () {
 	;;
 	esac
 }
+probeDeviceAlias () {
+	modalias=/tmp/modalias
+	cat > $modalias < /dev/null
+	for i in `find /sys -name modalias 2>/dev/null`;do
+		alias=`cat $i | grep pci:`
+		if [ ! -z "$alias" ];then
+			echo $alias >> $modalias
+		fi
+	done
+	cat $modalias | sort | uniq > $modalias.new
+	mv $modalias.new $modalias
+}
+probeDeviceInfo () {
+	modinfo=/tmp/modinfo
+	cat > $modinfo < /dev/null
+	for file in `find /lib/modules/*/kernel/drivers -type f`;do
+	for info in `/sbin/modinfo -F alias $file`;do
+		echo "$info%$file" >> $modinfo
+	done
+	done
+	cat $modinfo | sort | uniq |\
+		sed -e s@*@.*@g \
+	> $modinfo.new
+	mv $modinfo.new $modinfo
+}
+probeDevices () {
+	IFS=$IFS_ORIG
+	probeDeviceInfo
+	probeDeviceAlias
+	for i in `cat $modinfo`;do
+		info=`echo $i | cut -f1 -d%`
+		file=`echo $i | cut -f2 -d%`
+		grep -q $info $modalias >/dev/null 2>&1
+		if [ $? = 0 ];then
+			module=`basename $file`
+			module=`echo $module | sed -e s@.ko@@`
+			modprobe $module >/dev/null 2>&1
+		fi
+	done
+	# bad fix for ata probe, load order is required
+	Echo "Waiting for devices to become ready..."
+	lsmod | grep -q ata_piix
+	if [ $? = 0 ];then
+		rmmod ata_piix
+		sleep 5
+		modprobe ata_piix
+	fi
+}
 USBStickDevice () {
 	for device in /sys/bus/usb/drivers/usb-storage/*;do
 		if [ -L $device ];then
-			description=$device/host*/target*/*/block*
-			isremovable=$device/host*/target*/*/block*/removable
-			if [ ! -d $description ];then
-				continue
-			fi
-			storageID=`echo $description | cut -f1 -d: | xargs basename`
-			devicebID=`basename $description | cut -f2 -d:`
-			serial="/sys/bus/usb/devices/$storageID/serial"
-			device="/dev/$devicebID"
-			if [ ! -f $serial ];then
-				continue;
-			fi
-			if [ ! -b $device ];then
-				continue;
-			fi
-			if [ ! -f $isremovable ];then
-				continue;
-			fi
-			serial=`cat $serial`
-			removable=`cat $isremovable`
-			if [ $removable -eq 1 ];then
-				stickDevice="$device"2
-				stickSerial=$serial
-			fi
+			descriptions=$device/host*/target*/*/block*
+			for description in $descriptions;do
+				if [ ! -d $description ];then
+					continue
+				fi
+				isremovable=$description/removable
+				storageID=`echo $description | cut -f1 -d: | xargs basename`
+				devicebID=`basename $description | cut -f2 -d:`
+				serial="/sys/bus/usb/devices/$storageID/serial"
+				device="/dev/$devicebID"
+				if [ ! -f $serial ];then
+					continue;
+				fi
+				if [ ! -b $device ];then
+					continue;
+				fi
+				if [ ! -f $isremovable ];then
+					continue;
+				fi
+				serial=`cat $serial`
+				removable=`cat $isremovable`
+				if [ $removable -eq 1 ];then
+					stickDevice="$device"2
+					stickSerial=$serial
+				fi
+			done
 		fi
 	done
 }
@@ -139,12 +190,11 @@ fileSystem () {
 		;;
 	esac
 }
-stickMount () {
-	USBStickDevice
+stickMountSystem () {
 	mount $stickDevice /mnt &>/dev/null
 }
-stickUmount () {
-	umount $stickDevice
+stickUmountSystem () {
+	umount /mnt
 }
 #======================================
 # Beautify Startup
@@ -168,18 +218,37 @@ touch /etc/modules.conf
 touch /lib/modules/*/modules.dep
 
 #======================================
-# 3) Mount the stick device
+# 3) Including required kernel modules
 #--------------------------------------
-stickMount
+Echo "Including required kernel modules..."
+probeDevices
 
 #======================================
-# 4) Get filesystem type
+# 4) Load USB storage modules
+#--------------------------------------
+for module in usb_storage sg sd_mod;do
+	modprobe $module
+done
+sleep 5
+
+#======================================
+# 5) Search USB stick device
+#--------------------------------------
+USBStickDevice
+
+#======================================
+# 6) Mount USB stick (boot)
+#--------------------------------------
+stickMountSystem
+
+#======================================
+# 6) Get filesystem type
 #--------------------------------------
 fileSystem /mnt/image/config.xml
-stickUMount
+stickUmountSystem
 
 #======================================
-# 5) Resize filesystem to full space
+# 7) Resize filesystem to full space
 #--------------------------------------
 Echo "Resize filesystem to full partition space..."
 if test "$FSTYPE" = "reiserfs";then
@@ -196,31 +265,31 @@ if test "$FSTYPE" = "ext3";then
 fi
 
 #======================================
-# 6) Mount the stick device
+# 8) Mount USB stick (system)
 #--------------------------------------
-stickMount
+stickMountSystem
 
 #======================================
-# 7) setup real root device
+# 9) setup real root device
 #--------------------------------------
 echo 256 > /proc/sys/kernel/real-root-dev
 
 #======================================
-# 8) umount system filesystems
+# 10) umount system filesystems
 #--------------------------------------
 umount /dev/pts
 umount /sys
 umount /proc
 
 #======================================
-# 9) copy initrd files to image
+# 11) copy initrd files to image
 #--------------------------------------
 cp /preinit /mnt
 
 #======================================
-# 10) Activate new root
+# 12) Activate new root
 #--------------------------------------
-Echo "Activating Image: [$imageName]"
+Echo "Activating Image: [$stickSerial on -> $stickDevice]"
 cd /mnt && exec < dev/console >dev/console 2>&1
 Echo "Calling preinit phase..."
 /mnt/sbin/pivot_root . mnt >/dev/null 2>&1
@@ -234,11 +303,11 @@ else
 	rm ./preinit
 fi
 #======================================
-# 11) Unmount initrd / system init
+# 13) Unmount initrd / system init
 #--------------------------------------
 echo " "
-echo "Booting into Live CD System..."
-echo "------------------------------"
+echo "Booting into USB-Stick System..."
+echo "--------------------------------"
 reopenKernelConsole
 mount -n -o remount,rw / &>/dev/null
 if [ $PIVOT = "true" ];then

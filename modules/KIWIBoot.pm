@@ -340,8 +340,9 @@ sub setupBootStick {
 	#------------------------------------------
 	if (defined $system) {
 		$kiwi -> info ("Dumping system image to stick");
+		$status = qx ( umount $stick"1" 2>&1 );
 		$status = qx ( umount $stick"2" 2>&1 );
-		$status = qx (dd if=$system of=$stick"2" bs=1k 2>&1);
+		$status = qx (dd if=$system of=$stick"2" bs=8k 2>&1);
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();

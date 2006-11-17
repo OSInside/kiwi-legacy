@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Nov 17 16:37:28 CET 2006 - ms@suse.de
+
+- added ata/ tree to boot images for 10.2 and 10.2-smp
+- fixed on-stick image support. Tested default 10.2 from USB
+  stick, works great :-)
+
+-------------------------------------------------------------------
 Tue Nov 14 13:24:31 CET 2006 - ms@suse.de
 
 - added support for system image on stick. One need to use

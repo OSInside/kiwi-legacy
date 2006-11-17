@@ -20,6 +20,7 @@
 		<file name="fs/vfat/*"/>
 		<file name="fs/reiserfs/*"/>
 		<file name="net/ipv6/*"/>
+		<file name="drivers/ata/*"/>
 		<file name="drivers/scsi/*"/>
 		<file name="drivers/message/fusion/*"/>
 		<file name="drivers/net/*"/>
