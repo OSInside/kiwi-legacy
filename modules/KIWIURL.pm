@@ -101,6 +101,9 @@ sub openSUSEpath {
 	#==========================================
 	# normalize URL data
 	#------------------------------------------
+	if ((! defined $module) || ($module !~ /^opensuse:\/\//)) {
+		return ( undef,undef );
+	}
 	$module =~ s/opensuse:\/\///;
 	$module =~ s/:/:\//g;
 	if ((! defined $module) || ($module eq "/")) {

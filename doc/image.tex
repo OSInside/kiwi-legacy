@@ -83,7 +83,7 @@ the format:
 	  file corresponds to the format
 
       \begin{Command}{13cm}
-      <image name="Name">\\
+      <image name="Name" inherit="optional-path">\\
       \hspace*{1cm}<preferences>\\
       \hspace*{2cm}<type>Type</type>\\
       \hspace*{2cm}<size unit="Unit">Size</size>\\
@@ -107,11 +107,14 @@ the format:
 	  \end{Command}
 
       The config.xml file contains four major parts embedded into a
-      XML image tag. The image tag contains the attrubute \textbf{name}
+      XML image tag. The image tag contains the attribute \textbf{name}
       to indicate the base name of the image. It is automatically expanded
       using the version number and the date. The version number is
       extracted from the directory in which the description files for
-      this image are located.
+      this image are located. Additionally one can add the attribute
+      \textbf{inherit} followed by a path to another kiwi description.
+      The system will then inherit the package information and prepend
+      it to the current description.
 
       \begin{enumerate}
           \item The \textbf{preferences} tag contains information needed to

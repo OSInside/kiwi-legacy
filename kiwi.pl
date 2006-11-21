@@ -95,6 +95,12 @@ sub main {
 		}
 		$kiwi -> done();
 		#==========================================
+		# Check for inheritance
+		#------------------------------------------
+		if (! $xml -> setupImageInheritance()) {
+			my $code = kiwiExit (1); return $code;
+		}
+		#==========================================
 		# Initialize root system
 		#------------------------------------------
 		$root = new KIWIRoot (

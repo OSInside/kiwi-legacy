@@ -134,6 +134,16 @@ sub getImageName {
 }
 
 #==========================================
+# getImageInherit
+#------------------------------------------
+sub getImageInherit {
+	my $this = shift;
+	my $node = $imgnameNodeList -> get_node(1);
+	my $path = $node -> getAttribute ("inherit");
+	return $path;
+}
+
+#==========================================
 # getImageSize
 #------------------------------------------
 sub getImageSize {
@@ -371,7 +381,14 @@ sub getList {
 			@result = keys %keylist;
 		}
 	}
-	return sort @result;
+	#==========================================
+	# Create unique list
+	#------------------------------------------
+	my %packHash = ();
+	foreach my $package (@result) {
+		$packHash{$package} = $package;
+	}
+	return sort keys %packHash;
 }
 
 #==========================================
@@ -420,6 +437,43 @@ sub getForeignNodeList {
 	# of XML::LibXML::Element object pointers
 	# ---
 	return $repositNodeList;
+}
+
+#==========================================
+# getImageInheritance
+#------------------------------------------
+sub setupImageInheritance {
+	# ...
+	# check if there is a configuration specified to inherit
+	# data from. The method will read the inherited description
+	# and prepend the data to this object. Currently only the
+	# <packages> nodes are used from the base description
+	# ---
+	my $this = shift;
+	my $path = $this -> getImageInherit();
+	if (! defined $path) {
+		return $this;
+	}
+	$kiwi -> info ("--> Inherit: $path ");
+	my $ixml = new KIWIXML ( $kiwi,$path );
+	if (! defined $ixml) {
+		return undef;
+	}
+	my $name = $ixml -> getImageName();
+	$kiwi -> note ("[$name]");
+	$packageNodeList -> prepend (
+		$ixml -> getPackageNodeList()
+	);
+	$kiwi -> done();
+	$ixml -> setupImageInheritance();
+#	return $this;    
+}
+
+#==========================================
+# getPackageNodeList
+#------------------------------------------
+sub getPackageNodeList {
+	return $packageNodeList;
 }
 
 1;
