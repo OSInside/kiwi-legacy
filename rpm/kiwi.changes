@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Mon Nov 20 15:40:16 CET 2006 - ms@suse.de
 
+- reduced boot image size of usbboot-suse-10.2 image
 - added basic system to inherit data from one config
   description to another. Update documentation concerning the
   inherit attribute

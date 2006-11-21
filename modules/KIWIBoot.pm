@@ -197,7 +197,7 @@ sub setupBootStick {
 	print FD "framebuffer 1\n";
 	print FD "title KIWI Stick boot\n";
 	print FD " root (hd0,0)\n";
-	print FD " kernel /boot/linux vga=normal ramdisk_size=256000\n";
+	print FD " kernel /boot/linux vga=normal\n";
 	print FD " initrd /boot/initrd\n"; 
 	close FD;
 	if (! open (FD,">$tmpdir/boot/grub/device.map")) {
@@ -300,7 +300,7 @@ sub setupBootStick {
 	# Prepare sfdisk input file
 	#------------------------------------------
 	if (defined $system) {
-		print FD ",80,L,*\n";
+		print FD ",20,L,*\n";
 		print FD ",,L\n";
 	} else {
 		print FD ",,L,*\n";
