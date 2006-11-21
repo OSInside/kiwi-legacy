@@ -51,7 +51,7 @@ case "$1" in
 			I=$(( $I + 1 ))
 			title="$HOSTNAME/$I"
 			# prepare bsworker startup in screen...
-			echo "screen -t $title ./bs_worker $bsopt --root $ROOT/root_$I" \
+			echo "screen -t $title ./bs_worker $bsopt --root $ROOT/root_$I" --statedir /var/run/bsworker_$I --id "$HOSTNAME/$I" \
 				>> $screenrc
 			# prepare xen build setup...
 			# requires the file /etc/buildhost.config which contains
@@ -69,6 +69,7 @@ case "$1" in
 				dd if=/dev/zero of=$ROOT/root_$I/swap bs=1M count=$XEN_SWAP
 				echo $XEN_MEMX > $ROOT/root_$I/memory
 			fi
+			mkdir -p /var/run/bsworker_$I
 		done
 		screen -m -d -c $screenrc
 	;;

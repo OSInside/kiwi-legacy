@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Nov 21 17:45:05 CET 2006 - ms@suse.de
+
+- update bsworker init skript in buildhost image
+
+-------------------------------------------------------------------
 Mon Nov 20 15:40:16 CET 2006 - ms@suse.de
 
 - reduced boot image size of usbboot-suse-10.2 image
