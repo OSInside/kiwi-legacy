@@ -35,11 +35,8 @@
 		<package name="dhcpcd"/>
 		<package name="e2fsprogs"/>
 		<package name="file"/>
-		<package name="gawk"/>
 		<package name="hwinfo"/>
-		<package name="iproute2"/>
 		<package name="libcom_err"/>
-		<package name="lvm2"/>
 		<package name="module-init-tools"/>
 		<package name="net-tools"/>
 		<package name="netcfg"/>
@@ -47,7 +44,6 @@
 		<package name="reiserfs"/>
 		<package name="sysconfig"/>
 		<package name="sysfsutils"/>
-		<package name="tcpd"/>
 		<package name="util-linux"/>
 		<package name="grub"/>
 	</packages>

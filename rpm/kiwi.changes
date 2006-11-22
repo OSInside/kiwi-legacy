@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Nov 22 16:50:47 CET 2006 - ms@suse.de
+
+- reduced boot image size of netboot-suse-10.2 image
+
+-------------------------------------------------------------------
 Tue Nov 21 17:45:05 CET 2006 - ms@suse.de
 
 - update bsworker init skript in buildhost image

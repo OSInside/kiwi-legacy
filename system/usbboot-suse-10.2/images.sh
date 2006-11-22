@@ -7,17 +7,14 @@ test -f /.profile && . /.profile
 # remove unneeded packages
 #------------------------------------------
 for i in \
-	PolicyKit atftp audit-libs bind-libs bind-utils blocxx \
-	cpio cyrus-sasl db dbus-1 dbus-1-glib device-mapper \
-	dhcpcd diffutils expat fillup gawk gdbm glib2 glibc-locale \
-	gnome-filesystem gpg hal hwinfo info insserv iproute2 \
-	irqbalance libnscd libxcrypt libxml2 libzio limal \
-	limal-bootloader limal-perl logrotate lvm2 man mdadm mingetty \
-	mkinitrd net-tools netcfg openSUSE-release openldap2-client \
-	openslp openssl pam pam-modules pcre perl perl-Bootloader \
-	perl-gettext permissions pm-utils pmtools python python \
-	python-elementtree python-xml resmgr rpm-python smart \
-	suse-build-key tcpd udev gzip
+	PolicyKit audit-libs blocxx cpio cyrus-sasl db dbus-1 dbus-1-glib \
+	diffutils expat fillup gawk gdbm glib2 glibc-locale gnome-filesystem \
+	gpg hal info insserv iproute2 irqbalance libnscd libxcrypt libxml2 \
+	libzio limal limal-bootloader limal-perl logrotate mdadm mingetty \
+	mkinitrd net-tools openSUSE-release openldap2-client openslp openssl \
+	pam pam-modules pcre perl perl-Bootloader perl-gettext permissions \
+	pm-utils pmtools python python-xml resmgr rpm-python smart \
+	suse-build-key udev gzip
 do
 	rpm -e $i --nodeps
 done
