@@ -21,17 +21,18 @@ package KIWIRoot;
 use strict;
 use KIWIURL;
 use KIWILog;
+use KIWIManager;
 
 #==========================================
 # Private
 #------------------------------------------
 my @mountList;
-my @smartOpts;
 my $imageDesc;
 my $imageVirt;
 my $baseSystem;
+my $manager;
 my $selfRoot;
-my %smartChannel;
+my %sourceChannel;
 my $root;
 my $xml;
 my $kiwi;
@@ -85,7 +86,7 @@ sub new {
 	}
 	my $count = 1;
 	#==========================================
-	# Create smartChannel hash
+	# Create sourceChannel hash
 	#------------------------------------------
 	foreach my $source (keys %repository) {
 		my $type = $repository{$source};
@@ -114,8 +115,8 @@ sub new {
 		my @public_options  = ("type=$type","name=$channel",
 			"$srckey=$publics_url","-y"
 		);
-		$smartChannel{private}{$channel} = \@private_options;
-		$smartChannel{public}{$channel}  = \@public_options;
+		$sourceChannel{private}{$channel} = \@private_options;
+		$sourceChannel{public}{$channel}  = \@public_options;
 		$count++;
 	}
 	#==========================================
@@ -140,6 +141,26 @@ sub new {
 		$kiwi -> failed ();
 		return undef;
 	}
+	#==========================================
+	# Get configured name of package manager
+	#------------------------------------------
+	$kiwi -> info ("Setting up package manager: ");
+	my $pmgr = $xml -> getPackageManager();
+	if (! defined $pmgr) {
+		return undef;
+	}
+	$kiwi -> note ($pmgr);
+	$kiwi -> done ();
+
+	#==========================================
+	# Create package manager object
+	#------------------------------------------
+	$manager = new KIWIManager (
+		$kiwi,$xml,\%sourceChannel,$root,$pmgr
+	);
+	if (! defined $manager) {
+		return undef;
+	}
 	return $this;
 }
 
@@ -156,149 +177,38 @@ sub init {
 	# Get base Package list
 	#------------------------------------------
 	my @initPacs = $xml -> getBaseList();
-	my @channelList;
-	my $data;
-	my $code;
-	#==========================================
-	# Check base package list
-	#------------------------------------------
 	if (! @initPacs) {
 		$kiwi -> error ("Couldn't create base package list");
 		$kiwi -> failed ();
 		return undef;
 	}
 	#==========================================
-	# Setup signature check
+	# Setup preperation checks
 	#------------------------------------------
-	my $curCheckSig = qx (smart config --show rpm-check-signatures|tr -d '\n');
-	my $imgCheckSig = $xml->getRPMCheckSignatures();
-	if (defined $imgCheckSig) {
-		$kiwi -> info ("Setting RPM signature check to: $imgCheckSig");
-		$data = qx (smart config --set rpm-check-signatures=$imgCheckSig 2>&1);
-		$code = $? >> 8;
-		if ($code != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ($data);
-			return undef;
-		}
-		$kiwi -> done ();
-	}
-	#==========================================
-	# Add channel, install and remove channel
-	#------------------------------------------
-	foreach my $channel (keys %{$smartChannel{public}}) {
-		my @opts = @{$smartChannel{public}{$channel}};
-		$kiwi -> info ("Adding local smart channel: $channel");
-		$data = qx ( smart channel --add $channel @opts 2>&1 );
-		$code = $? >> 8;
-		if ($code != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ($data);
-			return undef;
-		}
-		push (@channelList,$channel);
-		$kiwi -> done ();
-	}
-	#==========================================
-	# Create smart install options
-	#------------------------------------------
-	my $forceChannels = join (",",@channelList);
-	my @installOpts = (
-		"-o rpm-root=$root",
-		"-o deb-root=$root",
-		"-o force-channels=$forceChannels",
-		"-y"
-	);
-	$kiwi -> info ("Initializing image system on: $root...");
-	#==========================================
-	# Create screen call file
-	#------------------------------------------
-	my $smartCall = $root."/screenrc.smart";
-	my $smartCtrl = $root."/screenrc.ctrls";
-	my $smartLogs = $root."/screenrc.log";
-	if ((! open (FD,">$smartCall")) || (! open (CD,">$smartCtrl"))) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't create call file: $!");
-		$kiwi -> failed ();
-		$kiwi -> info ("Removing smart channels: @channelList...");
-		$data = qx ( smart channel --remove @channelList -y 2>&1 );
-		$code = $? >> 8;
-		if ($code != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ($data);
-			$kiwi -> failed ();
-		} else {
-			$kiwi -> done();
-		}
+	$manager -> switchToLocal();
+	if (! $manager -> setupSignatureCheck()) {
 		return undef;
 	}
-	print CD "logfile $smartLogs\n";
-	close CD;
-	print FD "smart update @channelList\n";
-	print FD "test \$? = 0 && smart install @initPacs @installOpts\n";
-	print FD "echo \$? > $smartCall.exit\n";
-	close FD;
-
 	#==========================================
-	# run smart update and install in screen
+	# Add source, install and remove source
 	#------------------------------------------
-	$data = qx ( chmod 755 $smartCall );
-	$data = qx ( screen -L -D -m -c $smartCtrl $smartCall );
-	$code = $? >> 8;
-	if (open (FD,$smartLogs)) {
-		local $/; $data = <FD>; close FD;
-	}
-	if ($code == 0) {
-		if (! open (FD,"$smartCall.exit")) {
-			$code = 1;
-		} else {
-			$code = <FD>; chomp $code;
-			close FD;
-		}
-	}
-	qx ( rm -f $smartCall* );
-	qx ( rm -f $smartCtrl );
-	qx ( rm -f $smartLogs );
-
-	#==========================================
-	# check exit code from screen session
-	#------------------------------------------
-	if ($code != 0) {
-		$kiwi -> failed ();
-		$kiwi -> error  ($data);
-		$kiwi -> info ("Removing smart channels: @channelList...");
-		$data = qx ( smart channel --remove @channelList -y 2>&1 );
-		$code = $? >> 8;
-		if ($code != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ($data);
-		}
-		$kiwi -> done();
+	if (! $manager -> setupInstallationSource()) {
 		return undef;
 	}
-	$kiwi -> done ();
-	$kiwi -> info ("Removing smart channel(s): @channelList");
-	$data = qx ( smart channel --remove @channelList -y 2>&1 );
-	$code = $? >> 8;
-	if ($code != 0) {
-		$kiwi -> failed ();
-		$kiwi -> error  ($data);
+	if (! $manager -> setupRootSystem(@initPacs)) {
 		return undef;
 	}
-	$kiwi -> done ();
 	#==========================================
-	# Reset signature check
+	# reset installation source
 	#------------------------------------------
-	if (defined $imgCheckSig) {
-		$kiwi -> info ("Resetting RPM signature check to: $curCheckSig");
-		$data = qx (smart config --set rpm-check-signatures=$curCheckSig 2>&1);
-		$code = $? >> 8;
-		if ($code != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ($data);
-			return undef;
-		}
-		$kiwi -> done ();
+	if (!$manager -> resetInstallationSource()) {
+		return undef;
+	}
+	#==========================================
+	# Reset preperation checks
+	#------------------------------------------
+	if (! $manager -> resetSignatureCheck()) {
+		return undef;
 	}
 	#==================================
 	# Copy/touch some defaults files
@@ -393,84 +303,19 @@ sub install {
 	#==========================================
 	# Setup signature check
 	#------------------------------------------
-	my $imgCheckSig = $xml->getRPMCheckSignatures();
-	if (defined $imgCheckSig) {
-		$kiwi -> info ("Setting RPM signature check to: $imgCheckSig");
-		my $option = "rpm-check-signatures=$imgCheckSig";
-		my $data = qx ( chroot $root smart config --set $option 2>&1);
-		my $code = $? >> 8;
-		if ($code != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ($data);
-			return undef;
-		}
-		$kiwi -> done ();
-	}
-	#==========================================
-	# Add smart channel(s) and install
-	#------------------------------------------
-	foreach my $channel (keys %{$smartChannel{private}}) {
-		my @opts = @{$smartChannel{private}{$channel}};
-		$kiwi -> info ("Adding image smart channel: $channel");
-		my $data = qx ( chroot $root smart channel --add $channel @opts 2>&1 );
-		my $code = $? >> 8;
-		if ($code != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ($data);
-			return undef;
-		}
-		$kiwi -> done ();
-	}
-	$kiwi -> info ("Installing image packages...");
-	#==========================================
-	# Create screen call file
-	#------------------------------------------
-	my $smartCall = $root."/screenrc.smart";
-	my $smartCtrl = $root."/screenrc.ctrls";
-	my $smartLogs = $root."/screenrc.log";
-	if ((! open (FD,">$smartCall")) || (! open (CD,">$smartCtrl"))) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't create call file: $!");
-		$kiwi -> failed ();
+	$manager -> switchToChroot();
+	if (! $manager -> setupSignatureCheck()) {
 		return undef;
 	}
-	print CD "logfile $smartLogs\n";
-	close CD;
-	print FD "chroot $root smart update\n";
-	print FD "test \$? = 0 && chroot $root smart install @packList -y\n";
-	print FD "echo \$? > $smartCall.exit\n";
-	close FD;
-
 	#==========================================
-	# run smart update and install in screen
+	# Add source(s) and install
 	#------------------------------------------
-	qx ( chmod 755 $smartCall );
-	my $data = qx ( screen -L -D -m -c $smartCtrl $smartCall );
-	my $code = $? >> 8;
-	if (open (FD,$smartLogs)) {
-		local $/; $data = <FD>; close FD;
-	}
-	if ($code == 0) {
-		if (! open (FD,"$smartCall.exit")) {
-			$code = 1;
-		} else {
-			$code = <FD>; chomp $code;
-			close FD;
-		}
-	}
-	qx (rm -f $smartCall* );
-	qx (rm -f $smartCtrl );
-	qx (rm -f $smartLogs );
-
-	#==========================================
-	# check exit code from screen session
-	#------------------------------------------
-	if ($code != 0) {
-		$kiwi -> failed ();
-		$kiwi -> error  ($data);
+	if (! $manager -> setupInstallationSource()) {
 		return undef;
 	}
-	$kiwi -> done();
+	if (! $manager -> setupRootSystem (@packList)) {
+		return undef;
+	}
 	return $this;
 }
 
@@ -556,15 +401,10 @@ sub setup {
 		my @scriptList = readdir FD;
 		foreach my $script (@scriptList) {
 			if (-f "$root/image/config/$script") {
-				$kiwi -> info ("Calling package setup script: $script");
-				qx ( chroot $root smart query --installed $script 2>&1 );
-				my $exit = $? >> 8;
-				if ($exit != 0) {
-					$kiwi -> failed ();
-					$kiwi -> error  ("Package $script is not installed");
-					$kiwi -> failed ();
+				if ($manager -> setupPackageInfo ( $script )) {
 					next;
 				}
+				$kiwi -> info ("Calling package setup script: $script");
 				qx ( chmod u+x $root/image/config/$script);
 				my $data = qx ( chroot $root /image/config/$script 2>&1 );
 				my $code = $? >> 8;
@@ -720,30 +560,6 @@ sub setup {
 }
 
 #==========================================
-# solve
-#------------------------------------------
-sub solve {
-	# ...
-	# solve and fix package dependencies using smart.
-	# The method will mount all rreachable local and nfs
-	# directories and will setup a smart channel for
-	# checking the package dependency tree
-	# ---
-	my $this   = shift;
-	$kiwi -> info ("Solving/Fixing package dependencies");
-	my $data = qx ( chroot $root smart fix -y 2>&1 );
-	my $code = $? >> 8;
-	if ($code != 0) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't resolve dependencies");
-		$kiwi -> failed ();
-		return undef;
-	}
-	$kiwi -> done();
-	return $this;
-}
-
-#==========================================
 # setupMount
 #------------------------------------------
 sub setupMount {
@@ -846,17 +662,14 @@ sub cleanMount {
 }
 
 #==========================================
-# cleanSmart
+# cleanSource
 #------------------------------------------
-sub cleanSmart {
+sub cleanSource {
 	# ...
-	# remove all smart channels created by kiwi
+	# remove all source locations created by kiwi
 	# ---
 	my $this = shift;
-	foreach my $channel (keys %{$smartChannel{public}}) {
-		#$kiwi -> info ("Removing smart channel: $channel\n");
-		qx ( smart channel --remove $channel -y 2>&1 );
-	}
+	$manager -> resetSource();
 	return $this;
 }
 

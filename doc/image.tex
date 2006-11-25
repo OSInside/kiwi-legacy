@@ -87,6 +87,7 @@ the format:
       \hspace*{1cm}<preferences>\\
       \hspace*{2cm}<type>Type</type>\\
       \hspace*{2cm}<size unit="Unit">Size</size>\\
+      \hspace*{2cm}<packagemanager>name</packagemanager>\\
       \hspace*{2cm}<compressed>Yes/No</compressed>\\
       \hspace*{1cm}</preferences>\\
       \hspace*{1cm}<users group="groupname">\\
@@ -121,6 +122,10 @@ the format:
           create the logical extend. For this tag the following subtags
           are defined:
           \begin{itemize}
+              \item \textbf{packagemanager}\\
+                    Name of the packagemanager to be used for installing
+                    packages. Currently smart is the default packagemanager
+                    but zypper will be supported as well
               \item \textbf{size}\\
                     Image size as a number whereas the attribute
                     \textbf{unit} defines the scale unit \textbf{M} or

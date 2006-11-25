@@ -190,11 +190,38 @@ sub getCompressed {
 }
 
 #==========================================
+# getPackageManager
+#------------------------------------------
+sub getPackageManager {
+	# ...
+	# Get the name of the package manager if set.
+	# if not set return smart as the default
+	# package manager
+	# ---
+	my $this = shift;
+	my $node = $optionsNodeList -> get_node(1);
+	my $pmgr = $node -> getElementsByTagName ("packagemanager");
+	if (! $pmgr) {
+		$pmgr = "smart";
+	}
+	if ("$pmgr" eq "smart") {
+		return "$pmgr";
+	}
+	if ("$pmgr" eq "zypper") {
+		return "$pmgr";
+	}
+	$kiwi -> failed ();
+	$kiwi -> error  ("Invalid package manager: $pmgr");
+	$kiwi -> failed ();
+	return undef;
+}
+
+#==========================================
 # getRPMCheckSignatures
 #------------------------------------------
 sub getRPMCheckSignatures {
 	# ...
-	# Check if the smart package manager should check for
+	# Check if the package manager should check for
 	# RPM signatures or not
 	# ---
 	my $this = shift;
@@ -239,9 +266,9 @@ sub getUsers {
 #------------------------------------------
 sub getRepository {
 	# ...
-	# Get the smart package manager type used for building
+	# Get the repository type used for building
 	# up the physical extend. For information on the available
-	# types refer to the smart documentation
+	# types refer to the package manager documentation
 	# ---
 	my $this = shift;
 	my @node = $repositNodeList -> get_nodelist();
@@ -310,7 +337,7 @@ sub getList {
 	# Create a package list out of the given base xml
 	# object list. The xml objects are searched for the
 	# attribute "name" to build up the package list.
-	# Each entry must be found on the smart source medium
+	# Each entry must be found on the source medium
 	# ---
 	my $this = shift;
 	my $what = shift;

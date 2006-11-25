@@ -380,8 +380,8 @@ sub quit {
 	$kiwi -> info ("\nReceived signal $_[0]");
 	$kiwi -> done ();
 	if (defined $root) {
-		$root  -> cleanMount ();
-		$root  -> cleanSmart ();
+		$root  -> cleanMount  ();
+		$root  -> cleanSource ();
 	}
 	if (defined $image) {
 		$image -> cleanMount ();

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-echo "Configure image: [netboot-suse-10.1]..."
+echo "Configure image: [xenboot-suse-10.1]..."
 test -f /.profile && . /.profile
 
 #==========================================

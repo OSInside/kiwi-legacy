@@ -3,6 +3,7 @@
 		<type>cpio</type>
 		<size unit="M">60</size>
 		<compressed>yes</compressed>
+		<packagemanager>smart</packagemanager>
 		<rpm-check-signatures>False</rpm-check-signatures>
 	</preferences>
 	<drivers type="drivers">
@@ -53,10 +54,9 @@
 		<package name="grub"/>
 	</packages>
 	<packages type="boot">
+		<package name="kernel-xen"/>
 		<package name="filesystem"/>
 		<package name="glibc-locale"/>
 		<package name="devs"/>
-		<package name="rpm"/>
-		<package name="smart"/>
 	</packages>
 </image>

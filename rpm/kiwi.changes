@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Fri Nov 24 14:01:12 CET 2006 - ms@suse.de
+
+- rewrite root code to be able to easily exchange the
+  package manager. This has been done to be able to integrate
+  other package managers like zypper.
+- update documentation
+
+-------------------------------------------------------------------
 Wed Nov 22 16:50:47 CET 2006 - ms@suse.de
 
 - reduced boot image size of netboot-suse-10.2 image
