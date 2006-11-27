@@ -17,19 +17,34 @@ package KIWIManager;
 #==========================================
 # Modules
 #------------------------------------------
+require Exporter;
 use strict;
 use KIWILog;
 
 #==========================================
+# Exports
+#------------------------------------------
+our @ISA    = qw (Exporter);
+our @EXPORT = qw (%packageManager);
+
+#==========================================
 # Private
 #------------------------------------------
-my $kiwi;        # log handler
-my $xml;         # xml description
-my $manager;     # package manager name
-my %source;      # installation sources
-my @channelList; # list of channel names
-my $root;        # root path
-my $chroot = 0;  # is chroot or not
+my $kiwi;           # log handler
+my $xml;            # xml description
+my $manager;        # package manager name
+my %source;         # installation sources
+my @channelList;    # list of channel names
+my $root;           # root path
+my $chroot = 0;     # is chroot or not
+
+#==========================================
+# Private
+#------------------------------------------
+our %packageManager;
+$packageManager{smart}   = "/usr/bin/smart";
+$packageManager{zypper}  = "/usr/bin/zypper";
+$packageManager{default} = "smart";
 
 #==========================================
 # Private [internal]

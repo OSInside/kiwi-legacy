@@ -21,6 +21,7 @@ use strict;
 use XML::LibXML;
 use KIWILog;
 use KIWIPattern;
+use KIWIManager qw (%packageManager);
 
 #==========================================
 # Private
@@ -195,20 +196,26 @@ sub getCompressed {
 sub getPackageManager {
 	# ...
 	# Get the name of the package manager if set.
-	# if not set return smart as the default
-	# package manager
+	# if not set set return the default package
+	# manager name
 	# ---
 	my $this = shift;
 	my $node = $optionsNodeList -> get_node(1);
 	my $pmgr = $node -> getElementsByTagName ("packagemanager");
 	if (! $pmgr) {
-		$pmgr = "smart";
+		return $packageManager{default};
 	}
-	if ("$pmgr" eq "smart") {
-		return "$pmgr";
-	}
-	if ("$pmgr" eq "zypper") {
-		return "$pmgr";
+	foreach my $manager (keys %packageManager) {
+		if ("$pmgr" eq "$manager") {
+			my $file = $packageManager{$manager};
+			if (! -f $file) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Package manager $file doesn't exist");
+				$kiwi -> failed ();
+				return undef;
+			}
+			return $manager;
+		}
 	}
 	$kiwi -> failed ();
 	$kiwi -> error  ("Invalid package manager: $pmgr");

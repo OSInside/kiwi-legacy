@@ -147,6 +147,7 @@ sub new {
 	$kiwi -> info ("Setting up package manager: ");
 	my $pmgr = $xml -> getPackageManager();
 	if (! defined $pmgr) {
+		rmdir $root;
 		return undef;
 	}
 	$kiwi -> note ($pmgr);
