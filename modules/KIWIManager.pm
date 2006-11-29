@@ -154,8 +154,8 @@ sub setupSignatureCheck {
 	#------------------------------------------
 	if ($manager eq "zypper") {
 		# TODO
-		$kiwi -> error ("*** not implemented ***");
-		$kiwi -> done  ();
+		$kiwi -> error  ("*** not implemented ***");
+		$kiwi -> failed ();
 		return undef;
 	}
 	return $this;
@@ -199,8 +199,8 @@ sub resetSignatureCheck {
 	#------------------------------------------
 	if ($manager eq "zypper") {
 		# TODO
-		$kiwi -> error ("*** not implemented ***");
-		$kiwi -> done  ();
+		$kiwi -> error  ("*** not implemented ***");
+		$kiwi -> failed ();
 		return undef;
 	}
 	return $this;
@@ -254,10 +254,35 @@ sub setupInstallationSource {
 	# zypper
 	#------------------------------------------
 	if ($manager eq "zypper") {
-		# TODO
-		$kiwi -> error ("*** not implemented ***");
-		$kiwi -> done  ();
-		return undef;
+		if (! $chroot) {
+			$kiwi -> error  ("*** not implemented ***");
+			$kiwi -> failed ();
+		} else {
+			foreach my $alias (keys %{$source{private}}) {
+				my @sopts = @{$source{private}{$alias}};
+				my @zopts = ();
+				foreach my $opt (@sopts) {
+					my ($key,$val) = split (/=/,$opt);
+					if (($key eq "baseurl") || ($key eq "path")) {
+						if ($val =~ /^\//) {
+							$val = "file://$val";
+						}
+						push (@zopts,$val);
+					}
+				}
+				my $zypp = "zypper service-add @zopts";
+				$kiwi -> info ("Adding image zypper service: $alias");
+				$data = qx (chroot $root bash -c "yes | $zypp $alias 2>&1");
+				$code = $? >> 8;
+				if ($code != 0) {
+					$kiwi -> failed ();
+					$kiwi -> error  ($data);
+					return undef;
+				}
+				push (@channelList,$alias);
+				$kiwi -> done ();
+			}
+		}
 	}
 	return $this;
 }
@@ -298,8 +323,8 @@ sub resetInstallationSource {
 	#------------------------------------------
 	if ($manager eq "zypper") {
 		# TODO
-		$kiwi -> error ("*** not implemented ***");
-		$kiwi -> done  ();
+		$kiwi -> error  ("*** not implemented ***");
+		$kiwi -> failed ();
 		return undef;
 	}
 	return $this;
@@ -375,8 +400,8 @@ sub setupRootSystem {
 	#------------------------------------------
 	if ($manager eq "zypper") {
 		# TODO
-		$kiwi -> error ("*** not implemented ***");
-		$kiwi -> done  ();
+		$kiwi -> error  ("*** not implemented ***");
+		$kiwi -> failed ();
 		return undef;
 	}
 	#==========================================
@@ -435,8 +460,8 @@ sub resetSource {
 	#------------------------------------------
 	if ($manager eq "zypper") {
 		# TODO
-		$kiwi -> error ("*** not implemented ***");
-		$kiwi -> done  ();
+		$kiwi -> error  ("*** not implemented ***");
+		$kiwi -> failed ();
 		return undef;
 	}
 	return $this;
@@ -482,8 +507,8 @@ sub setupPackageInfo {
 	#------------------------------------------
 	if ($manager eq "zypper") {
 		# TODO
-		$kiwi -> error ("*** not implemented ***");
-		$kiwi -> done  ();
+		$kiwi -> error  ("*** not implemented ***");
+		$kiwi -> failed ();
 		return undef;
 	}
 	return 1;

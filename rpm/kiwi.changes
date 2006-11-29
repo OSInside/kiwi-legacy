@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Nov 29 11:24:15 CET 2006 - ms@suse.de
+
+- starting zypper integration: added support for adding installation
+  sources. This means method: KIWIManager::setupInstallationSource()
+
+-------------------------------------------------------------------
 Fri Nov 24 14:01:12 CET 2006 - ms@suse.de
 
 - rewrite root code to be able to easily exchange the

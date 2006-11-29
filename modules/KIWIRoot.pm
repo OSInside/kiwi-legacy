@@ -215,6 +215,7 @@ sub init {
 	# Copy/touch some defaults files
 	#----------------------------------
 	qx ( mkdir -p $root/etc/sysconfig );
+	qx ( mkdir -p $root/var/log/YaST2 );
 	qx ( touch $root/etc/mtab );
 	qx ( touch $root/etc/sysconfig/bootloader ); 
 	qx ( cp /etc/resolv.conf $root/etc );

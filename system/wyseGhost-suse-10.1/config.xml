@@ -4,6 +4,7 @@
 		<type>ext2</type>
 		<size unit="M">460</size>
 		<!--<compressed>yes</compressed>-->
+		<packagemanager>smart</packagemanager>
 		<rpm-check-signatures>False</rpm-check-signatures>
 	</preferences>
 	<repository type="yast2">
@@ -81,7 +82,6 @@
 		<package name="filesystem"/>
 		<package name="glibc-locale"/>
 		<package name="devs"/>
-		<package name="rpm"/>
-		<package name="smart"/>
+		<package name="procps"/>
 	</packages>
 </image>
