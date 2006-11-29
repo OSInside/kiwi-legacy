@@ -153,10 +153,7 @@ sub setupSignatureCheck {
 	# zypper
 	#------------------------------------------
 	if ($manager eq "zypper") {
-		# TODO
-		$kiwi -> error  ("*** not implemented ***");
-		$kiwi -> failed ();
-		return undef;
+		# nothing to do for zypper here...
 	}
 	return $this;
 }
@@ -198,10 +195,7 @@ sub resetSignatureCheck {
 	# zypper
 	#------------------------------------------
 	if ($manager eq "zypper") {
-		# TODO
-		$kiwi -> error  ("*** not implemented ***");
-		$kiwi -> failed ();
-		return undef;
+		# nothing to do for zypper here...
 	}
 	return $this;
 }
@@ -254,34 +248,51 @@ sub setupInstallationSource {
 	# zypper
 	#------------------------------------------
 	if ($manager eq "zypper") {
+		my $stype = "private";
 		if (! $chroot) {
-			$kiwi -> error  ("*** not implemented ***");
-			$kiwi -> failed ();
-		} else {
-			foreach my $alias (keys %{$source{private}}) {
-				my @sopts = @{$source{private}{$alias}};
-				my @zopts = ();
-				foreach my $opt (@sopts) {
-					my ($key,$val) = split (/=/,$opt);
-					if (($key eq "baseurl") || ($key eq "path")) {
-						if ($val =~ /^\//) {
-							$val = "file://$val";
-						}
-						push (@zopts,$val);
+			$stype = "public";
+		}
+		foreach my $alias (keys %{$source{$stype}}) {
+			my @sopts = @{$source{$stype}{$alias}};
+			my @zopts = ();
+			foreach my $opt (@sopts) {
+				my ($key,$val) = split (/=/,$opt);
+				#==========================================
+				# Adapt URI parameter
+				#------------------------------------------
+				if (($key eq "baseurl") || ($key eq "path")) {
+					if ($val =~ /^\//) {
+						$val = "file://$val";
 					}
+					push (@zopts,$val);
 				}
-				my $zypp = "zypper service-add @zopts";
+				#==========================================
+				# Adapt type parameter
+				#------------------------------------------
+				if ($key eq "type") {
+					if ($val eq "yast2") {
+						$val = "YaST";
+					}
+					push (@zopts,"--type $val");
+				}
+			}
+			my $zypp = "zypper service-add @zopts";
+			if (! $chroot) {
+				$kiwi -> info ("Adding local zypper service: $alias");
+				$data = qx (bash -c "yes | $zypp $alias 2>&1");
+				$code = $? >> 8;
+			} else {
 				$kiwi -> info ("Adding image zypper service: $alias");
 				$data = qx (chroot $root bash -c "yes | $zypp $alias 2>&1");
 				$code = $? >> 8;
-				if ($code != 0) {
-					$kiwi -> failed ();
-					$kiwi -> error  ($data);
-					return undef;
-				}
-				push (@channelList,$alias);
-				$kiwi -> done ();
 			}
+			if ($code != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error  ($data);
+				return undef;
+			}
+			push (@channelList,$alias);
+			$kiwi -> done ();
 		}
 	}
 	return $this;
@@ -322,10 +333,21 @@ sub resetInstallationSource {
 	# zypper
 	#------------------------------------------
 	if ($manager eq "zypper") {
-		# TODO
-		$kiwi -> error  ("*** not implemented ***");
-		$kiwi -> failed ();
-		return undef;
+		$kiwi -> info ("Removing zypper service(s): @channelList");
+		my @list = @channelList;
+		if (! $chroot) {
+			$data = qx ( zypper service-delete @list 2>&1 );
+			$code = $? >> 8;
+		} else {
+			$data = qx ( chroot $root zypper service-delete @list 2>&1 );
+			$code = $? >> 8;
+		}
+		if ($code != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ($data);
+			return undef;
+		}
+		$kiwi -> done ();
 	}
 	return $this;
 }
@@ -402,6 +424,7 @@ sub setupRootSystem {
 		# TODO
 		$kiwi -> error  ("*** not implemented ***");
 		$kiwi -> failed ();
+		resetInstallationSource();
 		return undef;
 	}
 	#==========================================
@@ -459,10 +482,10 @@ sub resetSource {
 	# zypper
 	#------------------------------------------
 	if ($manager eq "zypper") {
-		# TODO
-		$kiwi -> error  ("*** not implemented ***");
-		$kiwi -> failed ();
-		return undef;
+		foreach my $channel (keys %{$source{public}}) {
+			#$kiwi -> info ("Removing zypper service: $channel\n");
+			qx ( zypper service-delete $channel 2>&1 );
+		}
 	}
 	return $this;
 }
@@ -506,10 +529,23 @@ sub setupPackageInfo {
 	# zypper
 	#------------------------------------------
 	if ($manager eq "zypper") {
-		# TODO
-		$kiwi -> error  ("*** not implemented ***");
-		$kiwi -> failed ();
-		return undef;
+		$kiwi -> info ("Checking for package: $pack");
+		my $str = "not installed";
+		if (! $chroot) {
+			$data = qx ( zypper info $pack | grep -qi $str 2>&1 );
+			$code = $? >> 8;
+		} else {
+			$data = qx ( chroot $root zypper info $pack | grep -qi $str 2>&1 );
+			$code = $? >> 8;
+		}
+		if ($code == 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Package $pack is not installed");
+			$kiwi -> failed ();
+			return 1;
+		}
+		$kiwi -> done();
+		return 0;
 	}
 	return 1;
 }
