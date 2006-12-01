@@ -1,0 +1,6 @@
+Penguin theme originally made by Raphael Quinet
+(http://www.gamers.org/~quinet/lilo/).
+Modernized for openSUSE by Steffen Winterfeldt.
+
+Like it or hate it? Edit gfxboot.cfg in /boot/message
+to have it always or to get rid of it.

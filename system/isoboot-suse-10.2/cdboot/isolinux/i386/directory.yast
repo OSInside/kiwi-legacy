@@ -21,13 +21,16 @@ en.hlp
 en.tr
 es.hlp
 es.tr
+et.tr
 fi.hlp
 fi.tr
 fr.hlp
 fr.tr
+gfxboot.cfg
 hapysuse.mod
 hu.hlp
 hu.tr
+id.tr
 initrd
 isolinux.bin
 isolinux.cfg
@@ -45,6 +48,11 @@ nb.tr
 nl.hlp
 nl.tr
 pa.tr
+pabout.txt
+panim.jpg
+panim_a.jpg
+pback.jpg
+phead.jpg
 pl.hlp
 pl.tr
 pt.hlp
@@ -69,6 +77,7 @@ text4a.pcx
 text4b.pcx
 text4c.pcx
 timer_a.jpg
+tr.tr
 uk.hlp
 uk.tr
 welcome.jpg

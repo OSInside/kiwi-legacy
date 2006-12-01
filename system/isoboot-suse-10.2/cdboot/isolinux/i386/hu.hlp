@@ -28,15 +28,15 @@ Kérem válassza ki a kívánt funkciót a menüből. Ha gondot okoz a súgóren
 
 Navigációs billentyűk
 
-  Felfelé nyíl: az előző hivatkozás kiemelése
-  Lefelé nyíl: a következő hivatkozás kiemelése
-  Bal nyíl, Backspace: visszatérés az előző témakörre
-  Jobb nyíl, Enter, szóköz: következő hivatkozás
-  Page Up: egy oldallal feljebb ugrás
-  Page Down: egy oldallal lejjebb ugrás
-  Home: oldal elejére ugrás
-  End: oldal végére ugrás
-  Esc: kilépés a súgóból
+Felfelé nyíl: az előző hivatkozás kiemelése
+Lefelé nyíl: a következő hivatkozás kiemelése
+Bal nyíl, Backspace: visszatérés az előző témakörre
+Jobb nyíl, Enter, szóköz: következő hivatkozás
+Page Up: egy oldallal feljebb ugrás
+Page Down: egy oldallal lejjebb ugrás
+Home: oldal elejére ugrás
+End: oldal végére ugrás
+Esc: kilépés a súgóból
 
 
 Visszatérés a mainKezdőoldalradriverupdateMeghajtóprogram frissítéseHa egy meghajtóprogram-frissítő hajlékonylemezt vagy CD-t kíván használni, nyomja meg az F5 billentyűt. A rendszertöltő a Linux kernel betöltése után felszólítja a meghajtóprogram-frissítő adathordozó behelyezésére.
@@ -97,16 +97,16 @@ Visszatérés a mainKezdőoldalraoptRendszerindítási paraméterekKétf�
 
 a) telepítési beállítások
 
-  o_installinstall -- telepítési forrás megadása
-  networkhálózatibeállítások -- a hálózati beállítások
-  o_vncvncbeállítások -- beállítások VNC-n keresztüli telepítéshez
+o_installinstall -- telepítési forrás megadása
+networkhálózatibeállítások -- a hálózati beállítások
+o_vncvncbeállítások -- beállítások VNC-n keresztüli telepítéshez
 
 b) kernelbeállítások
 
-  o_splashsplash -- a rendszerindító képernyő viselkedésének beállítása
-  o_apmapm -- tápellátás-felügyelet átkapcsolása
-  o_acpiacpi -- Speciális beállítási és tápellátási felület (Advanced Configuration and Power Interface)
-  o_ideide -- az IDE-alrendszer szabályozása
+o_splashsplash -- a rendszerindító képernyő viselkedésének beállítása
+o_apmapm -- tápellátás-felügyelet átkapcsolása
+o_acpiacpi -- Speciális beállítási és tápellátási felület (Advanced Configuration and Power Interface)
+o_ideide -- az IDE-alrendszer szabályozása
 
 
 
@@ -116,7 +116,7 @@ Visszatérés a mainKezdőoldalrao_installTelepítési beállítások: ins
 * HTTP
 A szintaxis pontosan olyan, mint a szokásos URL-eké. Ha például a szerver a 192.168.0.1 címen található és a szerver /install könyvtárából kíván NFS alapú telepítést végrehajtani, akkor így kell megadni a forrást:
 
-  install=nfs://192.168.0.1/install
+install=nfs://192.168.0.1/install
 
 A hálózati kártya beállítása történhet dhcp segítségével, vagy a networkhálózatibeállítások között bemutatott módon megadhatók kézzel a paraméterek.
 
@@ -138,21 +138,21 @@ Megjelenik a rendszerindító képernyő, de üzenetek nem láthatók. Ehelyett 
 
 Visszatérés a optRendszerindításibeállításokhoznetworkTelepítési beállítások: Hálózati beállításokItt közvetlenül be lehet állítani a hálózati csatolót. A YaST2 a hardvert majd később felismeri. A hálózat beállításának minimális szintje a gép IP-címének és alhálózati maszkjának megadása. Például:
 
-  hostip=192.168.0.10 netmask=255.255.255.0
+hostip=192.168.0.10 netmask=255.255.255.0
 
 vagy rövidebb formában:
 
-  hostip=192.168.0.10/24
+hostip=192.168.0.10/24
 
 Ha o_installhálózatialapútelepítést ír elő, de nem adja meg ezeket a paramétereket, akkor a telepítőprogram dhcp segítségével próbálja meg beállítani a hálózati csatolót. Ha szükséges, az alapértelmezett átjáró a gateway paraméterrel adható meg. Például:
 
-  gateway=192.168.0.8
+gateway=192.168.0.8
 
 
 
 Visszatérés a optRendszerindításibeállításokhozo_vncTelepítési beállítások: vncA VNC-telepítés bekapcsolásához a vnc és vncpassword paramétereket kell megadni:
 
-  vnc=1 vncpassword=mintajelszó
+vnc=1 vncpassword=mintajelszó
 
 Elindul a VNC szerver és a YaST2 távolról, VNC-kliensen keresztül vezérelhető
 
@@ -160,22 +160,22 @@ Elindul a VNC szerver és a YaST2 távolról, VNC-kliensen keresztül vezérelhe
 
 Visszatérés a optRendszerindításibeállításokhozo_apmKernelbeállítások: apmAz APM a mai gépeken használt kétféle tápellátás-felügyeleti rendszer egyike. Általában noteszgépeken használatos olyan funkciókra, mint a rendszer felfüggesztése a memória lemezre írásával, de ez felelős a kikapcsolás után a számítógép lekapcsolásáért is. Az APM használhatához egy helyesen működő BIOS-ra van szükség. Ha a BIOS sérült, akkor előfordulhat, hogy az APM csak korlátozott mértékben használható, sőt, az is, hogy miatta nem működik a számítógép. Éppen ezért kikapcsolható az alábbi paraméterrel:
 
-  apm=off -- az APM teljes kikapcsolása
+apm=off -- az APM teljes kikapcsolása
 
 Néhány újabb számítógép a modernebb o_acpiACPI rendszert használja.
 
 Visszatérés a optRendszerindításibeállításokhozo_acpiKernelbeállítások: acpiAz ACPI (Advanced Configuration and Power Interface) nevű szabvány az operációs rendszer és a BIOS közötti tápellátási és konfiguráció-felügyeleti illesztőket definiálja. Alapértelmezés szerint az acpi paraméter bekapcsolásra kerül, ha 2000-nél frissebb BIOS-t észlel a telepítőprogram. Az ACPI működése többféle módon is szabályozható:
 
-  pci=noacpi -- ne az ACPI irányítsa át a PCI-megszakításokat acpi=oldboot -- az ACPI-nek csak a rendszerindításhoz kapcsolódó részei kerülnek aktiválásra
+pci=noacpi -- ne az ACPI irányítsa át a PCI-megszakításokat acpi=oldboot -- az ACPI-nek csak a rendszerindításhoz kapcsolódó részei kerülnek aktiválásra
 
-  acpi=off -- az ACPI teljes kikapcsolása
-  acpi=force -- az ACPI bekapcsolása még akkor is, ha a BIOS 2000-nél régebbi
+acpi=off -- az ACPI teljes kikapcsolása
+acpi=force -- az ACPI bekapcsolása még akkor is, ha a BIOS 2000-nél régebbi
 
 Különösen új számítógépeken az ACPI teljesen felváltja a régebbi o_apmapm rendszert.
 
 Visszatérés a optRendszerindításibeállításokhozo_ideKernelbeállítások: ideSzemben az SCSI illesztővel, az IDE-felület szinte minden asztali munkaállomásban megtalálható. Az IDE-rendszerekkel kapcsolatban előforduló esetleges hardverproblémák elkerüléséhez használható a következő paraméter:
 
-  ide=nodma -- a DMA-kezelés kikapcsolása az IDE-meghajtók számárabitsSzoftvertípus kiválasztásaTelepítheti a openSUSE akár 32, akár 64 bites változatát.
+ide=nodma -- a DMA-kezelés kikapcsolása az IDE-meghajtók számárabitsSzoftvertípus kiválasztásaTelepítheti a openSUSE akár 32, akár 64 bites változatát.
 
 Visszatérés a mainKezdőoldalra
 

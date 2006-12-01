@@ -28,15 +28,15 @@ Använd denna meny för att välja önskad funktion. Om du har problem att navig
 
 Navigeringstangenter
 
-  Uppåtpil: Markera föregående länk
-  Nedåtpil: Markera nästa länk
-  Vänsterpil, Bakåtknapp: Tillbaka till föregående alternativ
-  Högerpil, Retur, Mellanslag: Följ länk
-  Sida upp: Bläddra upp en sida
-  Sida ner: Bläddra ner en sida
-  Hem: Gå till sidans början
-  Slut: Gå till sidans slut
-  Esc: Lämna hjälpen
+Uppåtpil: Markera föregående länk
+Nedåtpil: Markera nästa länk
+Vänsterpil, Bakåtknapp: Tillbaka till föregående alternativ
+Högerpil, Retur, Mellanslag: Följ länk
+Sida upp: Bläddra upp en sida
+Sida ner: Bläddra ner en sida
+Hem: Gå till sidans början
+Slut: Gå till sidans slut
+Esc: Lämna hjälpen
 
 
 Tillbaka till mainStartsidandriverupdateDrivrutinsuppdateringOm du behöver använda en drivrutinsuppateringsskiva, floppy eller CD-ROM, tryck F5. Starthanteraren ber dig sätta i mediet efter att Linuxkärnan laddats.
@@ -69,8 +69,8 @@ Tillbaka till mainStartsidannoacpiInstallation -- ACPI avaktiveratVäldig
 
 Välj Installation -- ACPI avaktiverat om du stöter på problem under kärnans uppstart. Kända problem med maskiner som har problem med ACPI är:
 
-   * kärnan "fryser" och stannar under uppstart
-   * PCI kort detekteras eller initieras inte korrekt
+* kärnan "fryser" och stannar under uppstart
+* PCI kort detekteras eller initieras inte korrekt
 
 
 
@@ -88,25 +88,25 @@ Tillbaka till mainStartsidanoptStartalternativDet finns två olika typer 
 
 a) Installationsalternativ
 
-  o_installInstallera -- Välj en källa för installationen
-  networkNätverksalternativ -- Alternativ för nätverk
-  o_vncVNCalternativ -- Alternativ för installation via VNC
+o_installInstallera -- Välj en källa för installationen
+networkNätverksalternativ -- Alternativ för nätverk
+o_vncVNCalternativ -- Alternativ för installation via VNC
 
 b) Kärnalternativ
 
-  o_splashsplash -- Påverkar uppträdandet hos startbilden
-  o_apmapm -- Slå till eller från strömsparfunktioner
-  o_acpiacpi -- Avancerad konfiguration och strömsparhantering
-  o_ideide -- Kontrollerar IDE undersystemet
+o_splashsplash -- Påverkar uppträdandet hos startbilden
+o_apmapm -- Slå till eller från strömsparfunktioner
+o_acpiacpi -- Avancerad konfiguration och strömsparhantering
+o_ideide -- Kontrollerar IDE undersystemet
 
 
 Tillbaka till mainStartsidano_installInstallationsalternativ: installSom standard genomsöks de lokala CD-ROM enheterna för installationskällan. För en nätverksinstallation, välj installation alternativ. Möjliga installationsprotokoll är
-  * FTP
-  * NFS
-  * HTTP
+* FTP
+* NFS
+* HTTP
 Syntaxen som skall användas är prcis som vanliga URLer. Till exempel om din server finns på 192.168.0.1 och du vill göra en NFS-baserad installation från katalogen /install på denna server, ange källan som följer:
 
-  install=nfs://192.168.0.1/install
+install=nfs://192.168.0.1/install
 
 Nätverkskortet kan konfigureras via dhcp eller så måste du ange parametrarna själv, som beskrivs i networknätverksalternativ.
 
@@ -127,42 +127,42 @@ Aktiverar bilden, men inga meddelanden visas. Istället visas en växande indika
 
 Tillbaka till optStartalternativ.networkInstallationsalternativ: NätverkDet är möjligt att konfigurera nätverkskort redan nu. Hårdvaran kommer att identifieras senare av YaST2. De minimala uppgifterna för att konfigurera ditt nätverkskort består av värd IP adress och nätmask. Till exempel:
 
-  hostip=192.168.0.10 netmask=255.255.255.0
+hostip=192.168.0.10 netmask=255.255.255.0
 
 eller i kortare format:
 
-  hostip=192.168.0.10/24
+hostip=192.168.0.10/24
 
 Om du angivit en o_installnätverksinstallation och du inte anger båda dess alternativ kommer installationen att försöka konfigurera nätverkskortet med dhcp. Om du behäver ange en standardgateway, specificera detta med alternativet gateway. Till exempel:
 
-  gateway=192.168.0.8
+gateway=192.168.0.8
 
 
 Tillbaka till optStartalternativ.o_vncInstallationsalternativ: vncFör att aktivera VNC installation, specificera parametrarna vnc och vncpassword:
 
-  vnc=1 vncpassword=exampel
+vnc=1 vncpassword=exampel
 
 VNC servern kommer att startas och du kan kontrollera YaST2 från vilken VNC klient som helst på ett annat system.
 
 
 Tillbaka till optStartalternativ.o_apmKärnalternativ: apmAPM är en av två strategier för strömsparhantering som används av moderna datorer. Den används främst av bärbara datorer för funktioner som viloläge till disk, men kan också ansvara för att stänga av datorn efter nedstängning. APM förlitar sig på ett korrekt fungerande BIOS. Om BIOS är felaktig har APM endast begränsad funktionalitet eller kan till och med hindra datorn från att fungera. Därför kan den stängas av med denna parameter
 
-  apm=off -- Stäng av APM helt och hållet.
+apm=off -- Stäng av APM helt och hållet.
 
 Vissa väldigt nya datorer kan ha bättre nytta av det nyare o_acpiACPI.
 
 Tillbaka till optStartalternativ.o_acpiKärnalternativ: acpiACPI (Advanced Configuration and Power Interface) är en standard som definierar strömspar och konfigurationshantering mellan BIOS och operativsystemet. Som standard är acpi påkopplat om BIOS anger att det är nyare än från år 2000. Det finns flera vanligt använda parametrar för att kontrollera ACPI uppträdande:
 
-  pci=noacpi -- Använd inte ACPI att skicka PCI avbrott
-  acpi=oldboot -- Endast de delar av ACPI som är relevanta för uppstart är aktiverade
-  acpi=off -- Stäng av ACPI helt och hållet
-  acpi=force -- Slå på ACPI även om ditt BIOS är daterat före 2000
+pci=noacpi -- Använd inte ACPI att skicka PCI avbrott
+acpi=oldboot -- Endast de delar av ACPI som är relevanta för uppstart är aktiverade
+acpi=off -- Stäng av ACPI helt och hållet
+acpi=force -- Slå på ACPI även om ditt BIOS är daterat före 2000
 
 Framförallt på nyare datorer ersätter acpi det äldre o_apmapm systemet.
 
 Tillbaka till optStartalternativ.o_ideKärnalternativ: ideIDE är, olikt SCSI, vanligt förekommande i de flesta skrivbordsdatorer. För att undvika en del hårdvaruproblem som kan uppstå med IDE system, använd kärnparameter:
 
-  ide=nodma -- Koppla från dma för IDE enheter
+ide=nodma -- Koppla från dma för IDE enheter
 
 
 Tillbaka till optStartalternativ.bitsVal av mjukvarutypDu kan välja mellan att installera 32-bit eller 64-bit versionen av openSUSE.

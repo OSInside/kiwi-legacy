@@ -1,169 +1,167 @@
-mainNápověda zavaděčeVítejte v systému openSUSE 10.2
+mainNápověda zavaděčeWelcome to openSUSE 10.2
 
-K výběru požadované funkce použijte tuto nabídku. Pokud máte problém s pohybem po systému nápovědy, stiskněte klávesu F1. Tak vstoupíte do helppopisu systému nápovědy. Hlavní funkce této nabídky jsou:
+Z této nabídky zvolte požadovanou funkci. Máte-li problémy s orientací v této nápovědě, stiskněte F1 pro vstup do helppopis systému nápovědy. Hlavní funkce v této nabídce jsou:
 
-harddiskSpustitzdisku: Tato volba nevede k žádným operacím se systémem. Pouze spustí již nainstalovaný systém.
+harddiskSpustitzdisku: Tato volba systém nijak neovlivní. Pouze spustí dříve nainstalovaný systém.
 
-linuxInstalace: Tato volba je vhodná pro naprostou většinu počítačů. Pokud při instalaci dojde k zatuhnutí nebo špatné detekci některých zařízení, vyzkoušejte některou z dalších voleb.
+linuxInstalace:Tento instalační režim je vhodný pro naprostou většinu počítačů. Pokud při instalaci dojde k zatuhnutí nebo špatné detekci některých zařízení, například diskových řadičů či síťových karet, vyzkoušejte některou z dalších voleb.
 
-noacpiInstalace--bezACPI: řada současných počítačů stále ještě neobsahuje implementaci ACPI nebo je tato implementace vadná. Tímto výběrem zakážete podporu ACPI v jádře, ale stále budete mít k dispozici řadu dalších funkcí jako například DMA pro IDE zařízení.
+noacpiInstalace--bezACPI: Mnoho v současnosti prodávaných počítačů stále ještě neobsahuje implementaci ACPI nebo je tato implementace vadná. Tímto výběrem zakážete podporu ACPI v jádře, ale stále budete mít k dispozici řadu dalších funkcí jako například DMA pro IDE zařízení.
 
-failsafeInstalace--bezpečnénastavení: Pokud volba Instalace vedla k zatuhnutí systému nebo chybám, použijte tuto nabídku.
+nolapicInstalace--bezlocalAPIC: Selhání normální instalace může být způsobeno tím, že systémový hardware nepodporuje lokální APIC. Pokud se zdá, že nastal tento případ, použijtetuto volbu pro instalaci bez podpory lokálního APIC.
 
-rescueZáchrannýsystém: Spuštění malého linuxového systému přímo z RAM. Použijte ho v případě vážných problémů s nainstalovaným systémem. Po spuštění se přihlaste jako uživatel root.
+failsafeInstalace--bezpečnénastavení: Pokud jste nebyli s Instalace úspěšní, může vám tato sekce pomoci vyřešit problém.
 
-memtestTestpaměti: Test paměti je užitečný při zjišťování stavu paměťových modulů. Jde o zátěžový test.
+rescueZáchrannýsystém: Tento obraz spouští malý linuxový systém v RAM. Je užitečný, pokud systém správně nestartuje. Po spuštění tohoto systému se přihlaste jako root.
 
-mainParametrystartu: Startovací parametry mohou ovlivnit chování systému.
+firmwareTestfirmwaru: Spouští nástroj pro validaci ACPI a dalších částí BIOSu vašeho počítače.
 
-helpF1Nápověda: Nápověda zavaděče je citlivá na obsah. Poskytuje informace o zvolené nabídce nebo pokud editujete parametry jádra, snaží se poskytnout informace o dané volbě. Obsahuje také popis samotného systému nápovědy.
+memtestTestpaměti: Testování paměti je užitečné nejen při instalaci nových paměťových modulů. Je to zátěžový test velké části systému a může pomoci odhalit hardwarové problémy.
 
-videomodeF3Videorežim: Zde můžete nastavit různá rozlišení. V případě problémů zvolte textový režim.
+optParametrystartu: Volby spouštění mohou zcela změnit chování vašeho systému. Jsou to parametry jádra..
 
-install_srcF4Instalačnízdroj: Zvolte instalační zdroj.
+helpF1Nápověda: Toto je kontextově závislé. Obrazovky se budou lišit v závislosti na aktivním prvku spouštěcí obrazovky. Tento systém nápovědy má k dispozici i popis svých funkcí.
 
-keytableF2Jazyk: Nastavení jazyka a rozložení kláves během používání zavaděče.
+keytableF2Jazyk: Nastavte jazyk a rozložení klávesnice používané zavaděčem.
 
-driverupdateF5Updateovladače: U některých velmi nových systémů může být při instalaci potřeba updatovat ovladače.helpPoužívání systému nápovědyNápověda zavaděče je citlivá na obsah. Poskytuje informace o zvolené nabídce nebo pokud editujete parametry jádra, snaží se poskytnout informace o dané volbě.
+videomodeF3Videorežim: Zde si vyberte rozlišení obrazovky pro instalaci. Při problémech s grafickou instalací můžete jako řešení použít textový režim.
+
+install_srcF4Instalačnízdroj: Vyberte instalační zdroj.
+
+driverupdateF5Aktualizaceovladače: U velmi nových počítačů je pro instalaci systému potřeba aktualizace ovladače.helpPoužití systému nápovědyNápověda zavaděče je citlivá na obsah. Poskytuje informace o zvolené nabídce nebo pokud editujete parametry jádra, snaží se poskytnout informace o volbě podle polohy kurzoru.
 
 Navigační klávesy
 
- Up Arrow: návrat na předešlý odkaz
-  Down Arrow: přechod na následující odkaz
-  Left Arrow, Backspace: návrat k předešlému tématu
-  Right Arrow, Enter, Space: přejít na označený odkaz
-  Page Up: o stránku nahoru
-  Page Down: o stránku dolů
-  Home: přechod na začátek stránky
-  End: přechod na konec stránky
-  Esc: ukončení nápovědy
+Šipka nahoru: zvýraznit předchozí odkaz
+Šipka dolů: zvýraznit následující odkaz
+Šipka vlevo, Backspace: návrat k předchozímu tématu
+Šipka vpravo, Enter, Mezerník: následovat odkaz
+Page Up: o stránku nahoru
+Page Down: o stránku dolů
+Home: přejít na začátek stránky
+End: přejít na konec stránky
+Esc: opustit nápovědu
 
+Návrat k mainÚvodnístránkadriverupdateAktualizace ovladačePokud potřebujete disketu nebo CD s aktualizací ovladačů, stiskněte F5. Zavaděč vás požádá o médium s aktualizacemi ovladačů po zavedení linuxového jádra.
 
-Návrat do mainstartovacínabídkydriverupdateUpdate ovladačeV případě potřeby zavedení ovladače z diskety nebo CD stiskněte F5. Zavaděč vás po zavedené jádra požádá o médium s ovladačem.
+Aktualizace ovladačů je typicky disketa s novými verzemi hardwarových ovladačů nebo opravami chyb potřebnými během instalace.
 
-Update ovladače je obvykle novější verzi ovladače potřebná pro průběh instalace.
+Návrat k mainÚvodnístránkavideomodeVýběr video režimuStiskněte F3 pro získání seznamu video režimů podporovaných vaší grafickou kartou. Přednastaven je nejvyšší podporovaný režim.
 
-Návrat do mainstartovacínabídkyvideomodeVýběr video režimuRozlišení a video režim můžete změnit pomocí klávesy F3. Jako výchozí je nastavené nejvyšší dostupné rozlišení.
+Je možné, že váš monitor nelze automaticky detekovat. V takovém případě zvolte svůj preferovaný režim ručně.
 
-Může se stát, že váš monitor nelze automaticky detekovat. V takovém případě odpovídající režim zvolte ručně.
+Pokud má váš systém během instalace problé=my s grafickou kartou, může být textový režim použitelným řešením.
 
-Pokud máte během instalace problémy s grafickou kartou, zvolte textový režim.
+Návrat k mainÚvodnístránkakeytableVýběr jazyka a rozložení klávesniceStiskněte F2 pro změnu jazyka a rozložení klávesnice.
 
-Návrat do mainstartovacínabídkykeytableJazyk a výběr klávesové mapyStisknutím F2 můžete změnit jazyk a rozložení klávesové mapy.
+Návrat k mainÚvodnístránkainstall_srcInstalační zdrojStiskněte F4 pro výběr instalačního zdroje.
 
-Návrat do mainstartovacínabídkyinstall_srcInstalační zdrojStisknutím F4 můžete zvolit instalační zdroj.
+Totéž jako použití spouštěcího parametruo_installinstalovat.
 
-Tato volba má stejný význam jako parametr o_installinstall.
+Návrat k mainÚvodnístránkalinuxInstalaceZvolte Instalace pro zahájení implicitní instalace. Zadané optparametrystartu jsou použity během spouštění. Tato položka aktivuje mnoho vlastností běžného hardwaru.
 
-Návrat do mainstartovacínabídkylinuxInstalaceVýběrem Instalace spustíte výchozí nastavení instalace. Při startu můžete vybírat z dalších mainstartovacíchnabídek. Výchozí volbou aktivujete řadu funkcí běžně dostupného hardwaru.
+Návrat k mainÚvodnístránkaharddiskSpustit z diskuZvolte Spustit nainstalovaný systém pro spuštění systému nainstalovaného na lokálním disku. Systém, musí být správně nainstalován , protože je spouštěn pouze MB na prvním disku. ID zařízení tohoto disku je poskytován BIOSem počítače.
 
+Toto použijte, pokud zapomenete CD nebo DVD v mechanice a chcete počítač spustit z pevného disku.
 
+Návrat k mainÚvodnístránkanoacpiInstalace -- bez ACPISoučasný hardware obvykle vyžaduje ACPI (Advanced Configuration and Power Interface) pro kontrolu přerušení. ACPI zcela nahrazuje starý APM systém.
 
-Návrat do mainstartovacínabídkyharddiskSpustit z diskuVolbou Spustit z disku spustíte systém nainstalovaný na lokálním disku. Systém musí být nainstalován správně, protože ke spuštění se použijte pouze MBR (Master Boot Record) prvního disku. ID zařízení prvního disku je předáváno systému BIOSem počítače.
+Pokud při startu jádra narazíte na problémy, zvolte Instalace -- bez ACPI. Známe problémy strojů s problematickým ACPI jsou:
 
-Použijte tuto volbu v případě, že zapomenete instalační CD nebo DVD v mechanice a chcete spustit nainstalovaný systém.
+* jádro zatuhne během startu
+* PCI karty nejsou správně detekovány nebo inicializovány
 
+Můžete rovněž vyzkoušet volbu spouštění firmwareTestfirmwaru a prohlédnout si výsledky validace ACPI.
 
+Návrat k mainÚvodnístránkanolapicInstalace -- bez local APICZa běžných okolností nejsou s APIC (Advanced Programmable Interrupt Controller) žádné problémy. Pokud ale problémy máte, zkuste tuto volbu pro spouštění systému bez podpory lokálního APIC.
 
-Návrat do mainstartovacínabídkynoacpiInstalace -- bez ACPIVelmi nový hardware může ACPI vyžadovat pro správu přerušení. ACPI kompletně nahrazuje starší systém APM.
+Nezaměňujte prosím s noacpiACPI (Advanced Configuration and Power Interface).
 
-Pokud se při startu jádra objeví problémy, zvolte Instalace -- bez ACPI. Nejobvyklejší příznaky problémů s ACPI:
+Návrat k mainÚvodnístránkafailsafeInstalace -- bezpečné nastaveníZvolte Instalace -- bezpečné nastavení, pokud během instalace narazíte na zatuhnutí systému nebo na nereprodukovatelné chyby. Tato volba zakáže DMA pro IDE jednotky a veškeré funkce správy napájení. Viz také parametry jádra pro o_apmapm, o_acpiacpi a o_ideide.
 
-   * jádro při stratu zamrzne
-   * PCI karty nejsou správně detekovány nebo inicializovány
+Návrat k mainÚvodnístránkarescueZáchranný systémZáchranný systém je malý systém na RAM disku. Z něj je možno provádět všechny druhy změn instalovaného systému. Protože však obsahuje pouze nízkoúrovňové nástroje, je určen pro experty.
 
+Návrat k mainÚvodnístránkafirmwareTest firmwaruSpouští kontrolu BIOSu validující tabulky ACPI a další součásti vašeho BIOSu. Výsledky testu lze uložit na USB disk nebo po síti.
 
+Návrat k mainÚvodnístránkamemtestTest pamětiTest paměti umožňuje provést zátěžový test hardware systému. Testuje hlavně operační paměť, ale i jiné součásti systému.
+Nejsou-li nalezeny chyby, není žádná záruka, že je paměť v pořádku. Většina chyb však bývá nalezena.
 
-Návrat do mainstartovacínabídkyfailsafeInstalace -- bezpečné nastaveníPokud se při instalaci setkáte s problémy nebo zatuhnutím, zvolte Instalace -- bezpečné nastavení. Touto volbou zakážete DMA pro všechna IDE zařízení a používání všech typů správy napájení pro celý systém. Více informací získáte v nápovědě parametrů jádra o_apmapm, o_acpiacpi a o_ideide.
+Návrat k mainÚvodnístránkaoptParametry startuJsou dav typy spouštěcích voleb. Zaprvé jsou to parametry ovlivňující instalátor. Zadruhé jsou to parametry jádra, Mezi běžné parametry patří:
 
-Návrat do mainstartovacínabídkyrescueZáchranný systémZáchranný systém je malý systém uložený přímo v RAM. Z tohoto systému je možné provádět změny na systému již nainstalovaném. V tomto systému jsou dostupné pouze textové nástroje a je určen pouze pro pokročilejší uživatele.
+a) volby instalátoru
 
-
-
-Návrat do mainstartovacínabídkymemtestTest pamětiS nabídkou Test paměti získáváte vynikající nástroj na test paměti. Hlavním účelem tohoto programu je kontrola paměti RAM, ale dá se použít i pro jiné části systému.
-Bezproblémový průběh testu nezaručuji stoprocentní nezávadnost paměti. Měl by však najít naprostou většinu vad.
-
-
-Návrat do mainstartovacínabídkyoptParametry startuExistují dva typy parametrů. První ovlivňují chování instalátoru, druhé jádra. Mezi nejčastěji používané patří:
-
-a) parametry instalátoru
-
-  o_installinstall -- volba instalačního zdroje
-  networksíťovénastavení -- síťové volby
-  o_vncvnc -- parametr pro instalaci přes VNC
+o_installinstalovat -- výběr instalačního zdroje
+networknastavenísítě -- volby sítě
+o_vncnastavenívnc -- parametry pro instalaci přes VNC
 
 b) parametry jádra
 
-o_splashsplash -- ovládá splash screen
-  o_apmapm -- nastavení správy napájení
-  o_acpiacpi -- advanced configuration and power interface
-  o_ideide -- ovládání IDE subsystému
+o_splashsplash -- ovlivňuje chování úvodní obrazovky
+o_apmapm -- zapnout správu napájení
+o_acpiacpi -- advanced configuration and power interface
+o_ideide -- ovládá subsystém IDE
 
+Návrat k mainÚvodnístránkao_installParametry instalátoru: installVe výchozím nastavení se instalační zdroj hledá v lokálních CD mechanikách. Pro síťovou instalaci zvolte instalovat. Možné instalační protokoly jsou
+* FTP
+* NFS
+* HTTP
+Syntaxe je jako u běžných URL. Pokud je například váš systém na adrese 192.168.0.1 a chcete provést NFS instalaci z adresáře /install na tomto serveru, zadejte zdroj takto:
 
-Návrat do mainstartovacínabídkyo_installParametry instalátoru: installJako výchozí instalační zdroj je nastaven CD-ROM. Pokud chcete instalovat ze sítě, použijte parametr install. Možné protokoly jsou
-  * FTP
-  * NFS
-  * HTTP
-Syntaxe je podobná zadání URL. Například pokud máte server na adrese a chcete provést instalaci přes NFS adresář /install, zadáte zdroj takto:
+install=nfs://192.168.0.1/install
 
-  install=nfs://192.168.0.1/install
+Síťová karta bude nastavena buď pomocí dhcp nebo musíte zadat parametry sami, jak je popsáno v networknastavenísítě.
 
-Síťová karta bude nastavena pomocí dhcp nebo musíte zadat síťové parametry tak, jak je uvedenov části networksíťovénastavení.
-
-
-Návrat na optParametrystartuo_splashParametry jádra: splashSplash screen je obrázek znázorňující průběh spouštění a vypínání.
+Návrat k optParametrystartuo_splashParametry jádra: splashSplash screen je obrázek zobrazený během spouštění systému.
 
 splash=0
 
-Splash screen je vypnutý. Tato volba je velmi užitečná pro staré monitory a v případě problémů.
+Splash obrazovka je vypnuta. To může být vhodné pro velmi staré monitory nebo v případě výskytu problémů.
 
 splash=verbose
 
- Splash screen je puštěný, ale stále vidíte hlášení jádra.
+Aktivuje splash obrazovku, zprávy jádra a spouštění jsou stále zobrazeny.
 
 splash=silent
 
-Splash screen je puštěný a zcela zakrývá hlášení jádra.
+Aktivuje splash obrazovku, ale žádné zprávy. Místo toho je zobrazen ukazatel průběhu.
 
-Návrat na optParametrystartunetworkParametry instalátoru: síťové nastaveníPřímo při instalaci je možné nastavit síťové rozhraní. Hardware bude detekován později pomocí programu YaST2. Minimální nastavení se skládá z IP počítače a masky sítě. Například:
+Návrat k optParametrystartunetworkParametry instalátoru: síťové nastaveníNyní je možné nastavit síťové rozhraní. Hardware bude detekován později pomocí programu YaST2. Minimální nastavení se skládá z IP počítače a masky sítě. Například:
 
-  hostip=192.168.0.10 netmask=255.255.255.0
+hostip=192.168.0.10 netmask=255.255.255.0
 
-nebo kratší forma:
+nebo v kratší podobě:
 
-  hostip=192.168.0.10/24
+hostip=192.168.0.10/24
 
-Pokud zvolíte o_installsíťovouinstalaci, ale nezadáte žádnou volbu, použije se nastavení pomocí dhcp. Jestliže potřebujete zadat také bránu, použijte parametr gateway. Například:
+Pokud jste zadali o_installsíťováinstalace a nezadáte obě tyto volby, pokusí se instalátor nastavit síť pomocí dhcp. Potřebujete-li výchozí bránu, zadejte ji parametrem gateway. Například:
 
-  gateway=192.168.0.8
+gateway=192.168.0.8
 
+Návrat k optParametrystartuo_vncParametry instalátoru: vncPro umožnění VNC instalace zadejte parametry vnc a vncpassword:
 
-Návrat na optParametrystartuo_vncParametry instalátoru: vncAbyste povolili VNC instalaci, zadejte parametry vnc a vncpassword:
+vnc=1 vncpassword=example
 
-  vnc=1 vncpassword=example
+Bude spuštěn VNC server; YaST2 můžete ovládat ze vzdáleného systému pomocí VNC klienta.
 
-Spustí se VNC server a vy můžete YaST2 ovládat z libovolného VNC klienta na vzdáleném systému.
+Návrat k optParametrystartu.o_apmParametry jádra: apmAPM je jednou ze dvou dnešních strategií správy napájení. Používá se hlavně na noteboocích pro uspávání disků a podobně, může však zodpovídat i za vypínání počítače. APM je závislé na správně fungujícím BIOSu. Je-li BIOS nefunkční, mohou být funkce APM omezeny nebo může APM znemožnit funkci počítače. Lze proto vypnout parametrem
 
+apm=off -- zcela vypnout APM
 
-Návrat na optParametrystartu.o_apmParametry jádra: apmAPM je jedním ze standardů správy napájení používaných na současných počítačích. Obvykle je používán například pro uspání na disk u notebooků a také je odpovědný za vypnutí počítače po ukončení operačního systému. APM je závislé na správně fungujícím BIOSu. V případě poškození BIOSu by měla být funkce APM omezena. Z toho důvodu můžete APM vypnout parametrem:
+Některé nové počítače mohou s výhodou použít novější o_acpiACPI.
 
-  apm=off -- kompletní vypnutí APM
+Návrat k optParametrystartuo_acpiParametry jádra: acpiACPI (Advanced Configuration and Power Interface) je standard definující nastavení napájení a správu zařízení mezi operačním systémem a BIOSem. Ve výchozím nastavení je acpi zapnuto v případě, že jde o BIOS vydaný po roce 2000. Nejčastěji používané nastavení:
 
-Některé velmi nové počítače místo APM používají o_acpiACPI.
+pci=noacpi -- nepoužívat ACPI pro předávání PCI přerušení
+acpi=oldboot -- aktivní zůstane pouze ta část ACPI, která je potřebná pro start systému
+acpi=off -- zcela vypnout ACPI
+acpi=force -- zapnout ACPI i pro BIOS vydaný před rokem 2000
 
-Návrat na optParametrystartuo_acpiParametry jádra: acpiACPI (Advanced Configuration and Power Interface) je standard definující nastavení napájení a správu zařízení mezi operačním systémem a BIOSem. Ve výchozím nastavení je acpi zapnuto v případě, že jde o BIOS vydaný po roce 2000. Nejčastěji používané nastavení:
+Zvláště na nových počítačích nahrazuje starší systém o_apmapm.
 
-  pci=noacpi -- nepoužívat ACPI k předávání PCI přerušení   acpi=oldboot -- aktivní zůstane pouze ta část ACPI, která je potřebná pro start systému
-  acpi=off -- vypnutí ACPI
-  acpi=force -- zapnutí ACPI i pro BIOS vydaný před rokem 2000
+Návrat k optParametrystartuo_ideParametry jádra: ideIDE je na rozdíl od SCSI obvykle používáno na pracovních stanicích. V případě výskytu problémů s IDE systémem můžete použít parametr:
 
-Na nových počítačích nahrazuje starší o_apmapm systém.
+ide=nodma -- vypnout DMA pro IDE jednotky
 
-Návrat na optParametrystartuo_ideParametry jádra: ideIDE je na rozdíl od SCSI obvykle používáno na pracovních stanicích. V případě výskytu problémů s IDE systémem můžete použít parametr:
+Návrat k optParametrystartu.bitsVýběr softwaruMůžete zvolit mezi instalací 32bitové či 64bitové verze openSUSE 10.2.
 
-  ide=nodma -- vypnutí DMA pro IDE zařízení
-
-
-Návrat na optParametrystartu.bitsVolba architekturyMůžete si zvolit mezi 32 nebo 64 bitovou verzí openSUSEu.
-
-Návrat na mainParametrystartu 
+Návrat k mainÚvodnístránka 

@@ -1,169 +1,167 @@
-mainHjelp for oppstartslasterVelkommen til openSUSE 10.2
+mainHjelp for oppstartslasterWelcome to openSUSE 10.2
 
-Velg ønsket funksjon i denne menyen. Hvis du har problemer med å navigere i dette hjelpesystemet, trykk F1 for å vise helpbeskrivelsen av systemet. Hovedfunksjonene i denne menyen er:
+Bruk denne menyen for å velge ønsket funksjon. Hvis du har problemer med å finne frem i Hjelp-systemet, trykk F1 for å vise helpbeskrivelse for Hjelp-systemet. Hovedfunksjonene i denne menyen er:
 
-harddiskStartfraharddisk: Dette valget vil ikke endre systemet på noen måte. Det vil bare starte et tidligere installert operativsystem.
+harddiskStartfraharddisk: Dette valget gjør ingenting med systemet. Det starter bare et tidligere installert operativsystem.
 
-linuxInstallasjon: Denne installasjonsmodusen fungerer på de fleste maskiner. Hvis systemet fryser under oppstart eller har problemer med å finne maskinvarekomponenter som diskkontrollere eller nettverkskort, kan du forsøke en av følgende installasjonsalternativer.
+linuxInstallasjon: Denne installasjonsmodusen fungerer for de fleste datamaskiner. Hvis systemet fryser under oppstart eller hvis det oppstår problemer med registrering av maskinvarekomponenter, f.eks. diskkontrollere eller nettverkskort, kan du forsøke ett av følgende installasjonsvalg.
 
-noacpiInstallasjon--ACPIdeaktivert: Mange datamaskiner som selges i dag, har mangelfull eller defekt ACPI-implementasjon. Dette valget deaktiverer ACPI-støtte i kjernen, men mange funksjoner for bedre ytelse vil fremdeles være aktivert, f.eks. DMA for IDE-harddisker.
+noacpiInstallasjon--ACPIdeaktivert: Mange datamaskiner har ufullstendige eller defekte ACPI-funksjoner. Dette valget deaktiverer ACPI-støtte i kjernen, men mange andre ytelsesfunksjoner vil fremdeles være aktivert, som DMA for IDE-harddisker.
 
-failsafeInstallasjon--sikkermodus: Hvis installasjonen ikke var vellykket med valget Installasjon, kan dette valget løse problemet.
+nolapicInstallation--LocalAPICDisabled: If the normal installation fails, this might be due to the system hardware not supporting local APIC. If this seems to be the case, use this option to install without local APIC support.
 
-rescueRedningssystem: Oppstartsdiskbildet starter et lite Linux-system i RAM. Dette er nyttig hvis systemet ikke starter opp som det skal. Logg inn som rot etter at dette systemet er startet opp.
+failsafeInstallasjon--sikkermodus: Hvis Installasjon mislyktes, kan dette valget løse problemet.
 
-memtestMinnekontroll: Minnekontroll er nyttig for mer enn å søke etter nye minnemoduler ved installasjonen. Det er en viktig stresstest for datamaskinen som kan avsløre maskinvareproblemer.
+rescueRedningssystem: This boot image starts a small Linux system in RAM. This is useful if the system does not start properly. After booting this system, log in as root.
 
-optOppstartsalternativer: Oppstartsalternativene kan endre systemets egenskaper fullstendig. De endrer innstillinger for kjernen.
+firmwareFastvarekontroll: Runs a BIOS test tool that validates ACPI and other parts of your BIOS.
 
-helpF1Hjelp: Dette er kontekstfølsom informasjon. Skjermbildene som vises, avhenger av hvilket element på oppstartsskjermen som er aktivt. Det finnes også en beskrivelse av dette hjelpesystemet.
+memtestMinnekontroll: Memory testing is useful for more than checking installation of new memory modules. It is a stress test for a big part of your computer system and may indicate hardware problems.
 
-videomodeF3Skjermmodus: Her kan du velge ulike skjermoppløsninger under installasjonen. Hvis du støter på problemer under den grafiske installasjonen, kan tekstmodus være en løsning.
+optOppstartsalternativer: Oppstartsvalgene kan endre systemets funksjon fullstendig. De er innstillinger for kjernen.
 
-install_srcF4Installasjonskilde: Velg installasjonskilde.
+helpF1Hjelp: Hjelpen er kontekstsensitiv. Ulike skjermbilder vil vises, avhengig av det aktive elementet på oppstartsskjermen. Det finnes også en beskrivelse av dette Hjelp-systemet.
 
-keytableF2Språk: Velg språk og tastaturoppsett som skal brukes av oppstartslasteren.
+keytableF2Språk: Angi språk og tastaturoppsett for oppstartslasteren.
 
-driverupdateF5Driveroppgradering: For helt nye maskiner trenger du kanskje en driveroppgradering for å installere systemet.helpBruke hjelpesystemetDen elektroniske hjelpen for oppstartslasteren er kontekstfølsom. Den gir informasjon om det valgte menypunktet, og når du redigerer oppstartsalternativer, forsøker hjelpeprogrammet å søke etter informasjon om alternativet der skrivemerket befinner seg.
+videomodeF3Skjermmodus: Her kan du velge mellom ulike skjermoppløsninger for installasjonen. Hvis det oppstår problemer med den grafiske installasjonen, kan tekstmodus være en løsning.
+
+install_srcF4Installasjonskilde: Velg installasjonskilden.
+
+driverupdateF5Driveroppdatering: For very new machines, a driver update may be needed to install the system.helpBruke Hjelp-systemetDen elektroniske hjelpen for oppstartslasteren er kontekstsensitiv. Den gir informasjon om det valgte menyelementet eller forsøker å finne informasjon om valget som markøren er plassert på, når du redigerer oppstartsvalg.
 
 Navigasjonstaster
 
-  Pil opp: Merk forrige lenke
-  Pil ned: Merk neste lenke
-  Pil venstre, Backspace: Gå tilbake til forrige emne
-  Pil høyre, Enter, Mellomrom: Følg lenke
-  Page Up: Rull én side oppover
-  Page Down: Rull én side nedover
-  Home: Gå til begynnelsen av siden
-  End: Gå til slutten av siden
-  Esc: Avslutt hjelpen
+Pil opp: aktiver forrige lenke
+Pil ned: aktiver neste lenke
+Pil venstre, Backspace: tilbake til forrige emne
+Pil høyre, Enter, Mellomrom: følg lenken
+Page Up: bla én side oppover
+Page Down: bla én side nedover
+Home: til begynnelsen av siden
+End: til slutten av siden
+Esc: leave help
 
+Tilbake til mainStartsidedriverupdateDriveroppdateringTrykk F5 hvis du trenger en diskett eller en CD-ROM med en driveroppdatering. Oppstartslasteren vil be deg om å sette inn mediet med driveroppdateringen etter at Linux-kjernen er lastet.
 
-Gå tilbake til mainstartsidendriverupdateDriveroppgraderingTrykk F5 hvis du trenger en oppgraderingsdiskett eller -CD-ROM. Oppstartslasteren ber deg om å sette inn mediet med driveroppgraderingen etter at Linux-kjernen er lastet.
+En driveroppdatering er vanligvis en diskett med nye versjoner av maskinvaredrivere eller oppdateringer som kreves for installasjonen.
 
-En driveroppgradering er normalt en diskett med nye versjoner eller rettelser av feil i maskinvaredrivere som er nødvendige under installasjon.
+Tilbake til mainStartsidevideomodeValg av skjermmodusTrykk F3 for å få opp en liste over skjermmoduser som støttes av grafikkortet. Den høyeste modusen som støttes av skjermen, er forhåndsvalgt.
 
-Gå tilbake til mainstartsidenvideomodeValg av skjermmodusTrykk F3 for å vise listen over skjermmoduser som grafikkortet støtter. Den høyeste oppløsningen som skjermen kan bruke, er forhåndsvalgt.
+Det kan hende at skjermen ikke oppdages automatisk. Velg i så fall ønsket modus manuelt.
 
-I noen tilfeller blir ikke skjermen funnet automatisk. I så fall må du velge modus manuelt.
+Hvis systemet har problemer med grafikkortet under installasjonen, kan det hende at tekstmodus bruker en reserveløsning.
 
-Hvis systemet har problemer med grafikkortet under installasjonen, kan tekstmodus løse problemet.
+Tilbake til mainStartsidekeytableValg av språk og tastaturoppsettTrykk F2 for å endre språket og tastaturoppsettet for oppstartslasteren.
 
-Gå tilbake til mainstartsidenkeytableValg av språk og tastaturoppsettTrykk F2 for å endre språket og tastaturoppsettet som oppstartslasteren bruker.
+Tilbake til mainStartsideinstall_srcInstallasjonskildeTrykk F4 for å velge en installasjonskilde.
 
-Gå tilbake til mainstartsideninstall_srcInstallasjonskildeTrykk F4 for å velge en installasjonskilde.
+Dette er det samme som å bruke oppstartsvalget o_installinstaller.
 
-Dette er det samme som å bruke oppstartsalternativet o_installinstall .
+Tilbake til mainStartsidelinuxInstallasjonSelect Installasjon to start the default installation. The optoppstartsalternativer entered are used in the start-up. This item activates many features of commonly available hardware.
 
-Gå tilbake til mainstartsidenlinuxInstallasjonVelg Installasjon for å starte standardinstallasjonen. Velg optoppstartsalternativer som skal brukes ved oppstart. Her kan mange funksjoner for vanlige maskinvaretyper aktiveres.
+Tilbake til mainStartsideharddiskStart fra harddiskVelgStart installert OS for å starte systemet som er installert på den lokale harddisken. Dette systemet må være riktig installert fordi bare MBR (Master Boot Record) på første harddisk vil bli startet. Enhets-ID-en for første harddisk hentes fra datamaskinens BIOS.
 
+Use this if you forgot to remove the CD or DVD from your drive and want to start the computer from the hard disk.
 
+Tilbake til mainStartsidenoacpiInstallasjon--ACPI deaktivertCurrent hardware usually requires ACPI (Advanced Configuration and Power Interface) to control the interrupt handling. ACPI completely replaces the old APM system.
 
-Gå tilbake til mainstartsidenharddiskStart fra harddiskVelg Start installert OS for å starte systemet som er installert på den lokale harddisken. Dette systemet må være riktig installert, fordi bare MBR (Master Boot Record) på første harddisk blir startet. Enhets-IDen for første harddisk defineres av datamaskinens BIOS.
+VelgInstallasjon--ACPI deaktivert hvis det oppstår problemer under oppstart av kjernen. Vanlige problemer på maskiner med ACPI-problemer er:
 
-Bruk dette alternativet hvis du har glemt å ta ut en CD eller DVD fra stasjonen og ønsker å starte datamaskinen fra harddisken.
+* kjernen fryser under oppstart
+* PCI Cards are not detected or initialized properly
 
+You may also try the firmwareFastvarekontroll boot option and look at the test results of the ACPI validation.
 
+Tilbake til mainStartsidenolapicInstallation -- Local APIC DisabledNormally there are no problems with the APIC (Advanced Programmable Interrupt Controller). But if you seem to have some, try this option to boot without local APIC support.
 
-Gå tilbake til mainstartsidennoacpiInstallasjon -- ACPI deaktivertNy maskinvare krever iblant ACPI for å kontrollere avbruddshåndteringen. ACPI erstatter alle funksjonene i det gamle APM-systemet.
+Please don't confuse this with noacpiACPI (Advanced Configuration and Power Interface).
 
-Velg Installasjon -- ACPI deaktivert hvis du får problemer ved å starte opp kjernen. Kjente problemer med maskiner med mangelfull ACPI-implementering:
+Tilbake til mainStartsidefailsafeInstallasjon--sikker modusVelgInstallasjon--sikker modus hvis systemet henger under installasjonen eller ved uforklarlige feil. Dette valget deaktiverer DMA for IDE-disker og alle strømstyringsfunksjoner. Se også kjernevalgene for o_apmapm, o_acpiacpi og o_ideide.
 
-   * kjernen fryser under oppstart
-   * PCI-kort blir ikke funnet eller blir ikke riktig initialisert
+Tilbake til mainStartsiderescueRedningssystemThe Redningssystem is a small RAM disk base system. From there, it is possible to make all kinds of changes to an installed system. Because only low-level tools are available in this system, it is intended for experts.
 
+Tilbake til mainStartsidefirmwareFastvarekontrollStarts a BIOS checker that validates the ACPI tables and many other parts of your BIOS. Test results can be stored on usb disk or saved via network.
 
+Tilbake til mainStartsidememtestMinnekontrollMinnekontroll gir gode muligheter til å kontrollere maskinvaren på systemet. Hovedformålet er å oppdage dårlige minnebrikker, men andre deler av systemet blir også kontrollert.
+There is no guarantee that the memory is good if no errors are found, although most of memory defects will be found.
 
-Gå tilbake til mainstartsidenfailsafeInstallasjon -- sikker modusVelg Installasjon -- sikker modus hvis installasjonen henger eller uforklarlige feil oppstår. Dette alternativet deaktiverer DMA for IDE-stasjoner og alle strømsparefunksjoner. Se også kjernealternativene for o_apmapm, o_acpiacpi og o_ideide.
+Tilbake til mainStartsideoptOppstartsalternativerDet er to tilgjengelige typer oppstartsvalg, valg for installasjonsprogrammet og valg for kjernen. Noen av de vanligste valgene er:
 
-Gå tilbake til mainstartsidenrescueRedningssystemRedningssystemet er et lite grunnsystem som lastes inn i RAM-disken. Derfra kan alle typer endringer utføres i et installert system. Fordi bare lavnivåverktøy er tilgjengelige i dette systemet, er det beregnet på avanserte brukere.
+a) valg for installasjonsprogrammet
 
+o_installinstaller -- velg en installasjonskilde
+networknettverksvalg -- nettverksvalg
+o_vncvnc-valg -- valg for installasjon via VNC
 
+b) valg for kjernen
 
-Gå tilbake til mainstartsidenmemtestMinnekontrollMinnekontrollen gir gode muligheter til å stressteste systemets maskinvare. Hovedformålet er å oppdage defekte minnebrikker, men kontrollen stresser også mange andre deler av systemet.
-Det er ingen garanti for at minnebrikkene er i orden selv om ingen feil blir registrert, men de fleste minnefeil blir funnet.
+o_splashskjerm -- påvirker hvordan oppstartsbildet fungerer
+o_apmapm -- slår strømstyring av og på
+o_acpiacpi -- advanced configuration and power interface
+o_ideide -- control the IDE subsystem
 
+Tilbake til mainStartsideo_installInstallasjonsvalg: installerSom standard søker installasjonsprogrammet etter en kilde på lokale CD-ROM-stasjoner. For en nettverksinstallasjon, velg installer. Mulige installasjonsprotokoller er
+* FTP
+* NFS
+* HTTP
+Syntaksen er den samme som i vanlige nettverksadresser. Hvis for eksempel serveren befinner seg på 192.168.0.1 og du vil utføre en NFS-basert installasjon fra the katalogen /install på denne serveren, angir du følgende kilde:
 
-Gå tilbake til mainstartsidenoptOppstartsalternativerTo typer oppstartsalternativer er tilgjengelige. Noen alternativer påvirker installasjonsprogrammet. Andre alternativer påvirker kjernen. Noen av de vanligste alternativene er:
+install=nfs://192.168.0.1/install
 
-a) Alternativer for installasjonsprogrammet
+The network card will either be configured with dhcp or you must specify the parameters yourself as described in the networknettverksvalg.
 
-  o_installinstall -- velg en installasjonskilde
-  networknetworkoptions -- nettverksalternativer
-  o_vncvncoptions -- alternativer for installasjon via VNC
-
-b) Alternativer for kjernen
-
-  o_splashsplash -- påvirker oppstartsskjermbildet
-  o_apmapm -- slår strømsparing av og på
-  o_acpiacpi -- avanserte konfigurasjons- og strømsparefunksjoner
-  o_ideide -- styrer IDE-undersystemet
-
-
-Gå tilbake til mainstartsideno_installAlternativer for installasjonsprogrammet: installStandardinnstillingen er at det søkes etter en installasjonskilde på lokale CD-ROM-stasjoner. Velg install-alternativet for nettverksinstallasjoner. Mulige installasjonsprotokoller:
-  * FTP
-  * NFS
-  * HTTP
-Bruk samme syntaks som i vanlige nettadresser. Hvis for eksempel serveren befinner seg på 192.168.0.1 og du vil utføre en NFS-basert installasjon fra katalogen /install på denne serveren, angir du kilden på følgende måte:
-
-  install=nfs://192.168.0.1/install
-
-Nettverkskortet vil enten bli konfigurert med dhcp eller du må spesifisere parametere manuelt som beskrevet under networknettverksalternativer.
-
-
-Gå tilbake til optOppstartsalternativero_splashAlternativer for kjerne: splashDette er bakgrunnsbildet som vises under oppstart av systemet.
+Tilbake til optOppstartsalternativero_splashKjernevalg: splashOppstartsskjermen er bildet som vises når systemet starter opp.
 
 splash=0
 
-Bakgrunnsbildet er slått av. Dette kan være nyttig for svært gamle skjermmodeller eller hvis det oppstår en feil.
+Oppstartsbildet slås av. Dette kan være nyttig for svært gamle skjermer, eller hvis det oppstår en feil.
 
 splash=verbose
 
-Aktiverer bakgrunnsbilde ved oppstart, men kjerne- og oppstartsmeldinger vises likevel.
+Aktiverer et oppstartsbilde, med kjerne- og oppstartsmeldinger vises likevel.
 
 splash=silent
 
-Aktiverer bakgrunnsbilde ved oppstart uten meldinger. En fremdriftsindikator vises i stedet.
+Activates splash, but no messages. Instead a progress bar is drawn.
 
-Gå tilbake til optOppstartsalternativernetworkAlternativer for installasjonsprogrammet: NettverksalternativerNettverksgrensesnittet kan konfigureres nå. Maskinvaren vil bli funnet senere av YaST2. Du må minst angi vertsmaskinens IP og nettverksmaske for å konfigurere nettverkskortet. For eksempel:
+Tilbake til optOppstartsalternativernetworkInstallasjonsvalg: nettverksvalgDu kan konfigurere nettverksgrensesnittet allerede nå. Maskinvaren vil ble registrert senere av YaST2. Du må minst angi IP-adressen og nettverksmasken for å konfigurere et nettverkskort. For eksempel:
 
-  hostip=192.168.0.10 netmask=255.255.255.0
+hostip=192.168.0.10 netmask=255.255.255.0
 
-eller i kortform:
+eller med kortformen:
 
-  hostip=192.168.0.10/24
+hostip=192.168.0.10/24
 
-Hvis du valgte o_installnettverksbasertinstallasjon uten å spesifisere disse to alternativene, vil installasjonsprogrammet forsøke å konfigurere nettverksgrensesnittet med dhcp. Hvis du trenger en standard systemport, spesifiserer du dette med alternativet gateway. For eksempel:
+If you specified a o_installnettverksbasertinstallasjon and do not specify both of these options, the installer tries to configure the network interface with dhcp. If you need a default gateway, specify this with the option systemport. For example:
 
-  gateway=192.168.0.8
+gateway=192.168.0.8
 
+Tilbake til optOppstartsalternativero_vncInstallasjonsvalg: vncFor å aktivere VNC-installasjon, definer parametrene vnc og vncpassword:
 
-Gå tilbake til optOppstartsalternativero_vncAlternativer for installasjonsprogrammet: vncFor å aktivere en VNC-installasjon må parametrene vnc og vncpassword spesifiseres:
+vnc=1 vncpassword=eksempel
 
-  vnc=1 vncpassword=eksempel
+The VNC server will be started and you may control YaST2 over any VNC client from a remote system.
 
-VNC-serveren vil bli aktivert, og du kan administrere YaST2 via en VNC-klient på et eksternt system.
+Tilbake til optOppstartsalternativer.o_apmKjernevalg: apmAPM er én av to strømstyringsstrategier som brukes på moderne datamaskiner. APM brukes hovedsakelig på bærbare maskiner for funksjoner som diskdvale, men kan også slå av maskinen når strømmen brytes. APM krever at BIOS fungerer riktig. Hvis BIOS er skadet, har APM begrenset nytte, og kan til og med føre til at datamaskinen ikke fungerer. Derfor kan APM deaktiveres med parameteren
 
+apm=off -- deaktiver APM helt
 
-Gå tilbake til optOppstartsalternativer.o_apmAlternativer for kjerne: apmAPM er en av de to strategiene for strømsparing som benyttes av moderne datamaskiner. APM brukes hovedsakelig av bærbare maskiner, f.eks. for diskdvalemodus, men kan også slå av maskinen på en sikker måte når strømmen blir brutt. APM er avhengig av at BIOS er riktig konfigurert. Hvis BIOS ikke fungerer riktig, er bruksområdet til APM begrenset, og funksjonen kan til og med hindre at maskinen starter opp riktig. Derfor kan APM slås av med parameteren
+For enkelte helt nye datamaskiner kan det være en fordel å bruke den nyere o_acpiACPI.
 
-  apm=off -- slå av APM helt
+Tilbake til optOppstartsalternativero_acpiKjernevalg: acpiACPI (Advanced Configuration and Power Interface) er en standard som definerer kommunikasjonen med hensyn til strømstyring og konfigurasjon mellom et operativsystem og BIOS. Som standard aktiveres acpi dersom BIOS er nyere enn fra år 2000. Det finnes flere vanlige parametere som som styrer ACPI-funksjonen:
 
-Noen moderne datamaskiner kan ha nytte av det nyere o_acpiACPI-systemet.
+pci=noacpi -- do not use ACPI to route PCI interrupts
+acpi=oldboot -- only the parts of ACPI that are relevant for booting remain activated
+acpi=off -- deaktiver ACPI helt
+acpi=force -- aktiver ACPI selv om BIOS er datert tidligere enn 2000
 
-Gå tilbake til optOppstartsalternativero_acpiAlternativer for kjerne: acpiACPI (Advanced Configuration and Power Interface) er en standard for kommunikasjonen mellom operativsystemet og BIOS i forbindelse med konfigurasjons- og strømsparefunksjoner. Som standard er acpi slått på når en BIOS produsert etter år 2000 er registrert. ACPI-funksjonene kan styres ved hjelp av en del vanlige parametere:
+Spesielt på nye datamaskiner, erstatter dette den tidligere o_apmapm system.
 
-  pci=noacpi -- Ikke bruk ACPI for å rute PCI-avbrudd acpi=oldboot -- bare ACPI -funksjoner i forbindelse med oppstart er aktivert
-  acpi=off -- slå av ACPI helt
-  acpi=force -- slå på ACPI selv om BIOS er produsert før 2000
+Tilbake til optOppstartsalternativero_ideKjernevalg: ideIDE benyttes, i motsetning til SCSI, for de fleste skrivebordsmaskiner. For å unngå enkelte maskinvareproblemer som forekommer med IDE-systemer, bruk kjerneparameteren:
 
-Spesielt i nye maskiner benyttes acpi i stedet for o_apmapm.
+ide=nodma -- switch off DMA for IDE drives
 
-Gå tilbake til optOppstartsalternativero_ideAlternativer for kjerne: ideIDE er langt vanligere i skrivebordsmaskiner enn SCSI. For å løse maskinvareproblemer som kan oppstå i IDE-systemer, kan følgende kjerneparameter brukes:
+Tilbake til optOppstartsalternativer.bitsValg av programvaretypeYou have the choice to install the 32-bit or 64-bit version of openSUSE 10.2.
 
-  ide=nodma -- slå av DMA for IDE-stasjoner
-
-
-Gå tilbake til optOppstartsalternativer.bitsSoftware Type SelectionYou have the choice to install the 32-bit or 64-bit version of openSUSE.
-
-Return to mainStartPage 
+Tilbake til mainStartside 

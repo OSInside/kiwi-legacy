@@ -1,170 +1,167 @@
-mainAide relative au chargeur d'amorçageopenSUSE 10.2 vous souhaite la bienvenue !
+mainAide sur le chargeur d'amorçageWelcome to openSUSE 10.2
 
-Utilisez ce menu pour sélectionner la fonction désirée. Si vous avez des problèmes de navigation dans ce système d'aide, pressez la touche F1 pour entrer dans la helpdescription du système d'aide. Les fonctions principales dans ce menu sont :
+Utilisez ce menu pour sélectionner une fonction. Si vous rencontrez des problèmes de navigation dans ce système d'aide, appuyez sur F1 pour entrer dans la helpdescription du système d'aide. Les fonctions principales du menu sont les suivantes.
 
-harddiskAmorcerdepuisledisquedur : cette sélection ne fera rien au système. Cela démarre simplement un système d'exploitation installé précédemment.
+harddiskAmorcerdepuisledisquedur : cette opération n'agit pas sur le système. Elle permet seulement de démarrer un système d'exploitation installé précédemment.
 
-linuxInstallation : ce mode d'installation fonctionne sur la plupart des machines. Si, lors de l'amorçage, vous connaissez un gel du système ou des problèmes de reconnaissance des composants matériels tels que contrôleurs de disque ou cartes réseau, essayez l'une des options d'installation suivantes.
+linuxInstallation : ce mode d'installation fonctionne sur la plupart des machines. Si vous rencontrez un gel du système lors de l'amorçage ou des problèmes de reconnaissance des composants matériels tels que les contrôleurs de disque ou cartes réseau, essayez l'une des options d'installation suivantes.
 
-noacpiInstallation--ACPIdésactivé : nombre des ordinateurs vendus actuellement ont des implémentations ACPI incomplètes ou défectueuses. Cette sélection désactive la prise en charge ACPI dans le noyau mais laisse actives des caractéristiques relatives à la performance telles que DMA pour les disques durs IDE.
+noacpiInstallation--ACPIdésactivé : en général, les ordinateurs vendus actuellement ont des implémentations ACPI incomplètes ou défectueuses. Pour désactiver la prise en charge ACPI dans le kernel, utilisez la présente option. Celle-ci laisse toutefois actives de nombreuses fonctions de performances, notamment DMA pour les disques durs IDE.
 
-failsafeInstallation--Modesécurisé : si vous n'avez pas réussi avec Installation, cette sélection pourrait résoudre votre problème.
+nolapicInstallation--LocalAPICDisabled: If the normal installation fails, this might be due to the system hardware not supporting local APIC. If this seems to be the case, use this option to install without local APIC support.
 
-rescueSystèmedesecours : cette image d'amorçage démarre un petit système Linux dans le RAM. Ceci est utile si le système ne démarre pas correctement. Une fois ce système amorcé, connectez-vous en tant que root.
+failsafeInstallation--Paramètressécurisés : en cas d'échec avec Installation, cette option peut résoudre votre problème.
 
-memtestTestdemémoire : ce test de mémoire n'est pas uniquement utile à la vérification de l'installation des nouveaux modules de mémoire. Il s'agit également d'un test de contraintes pour une bonne part de votre système et cela peut mettre en évidence des problèmes matériels.
+rescueSystèmedesecours: This boot image starts a small Linux system in RAM. This is useful if the system does not start properly. After booting this system, log in as root.
 
-optOptionsd'amorçage : les options d'amorçage peuvent changer complètement le comportement de votre système. Ce sont des paramètres pour le noyau.
+firmwareTestdemicroprogramme: Runs a BIOS test tool that validates ACPI and other parts of your BIOS.
 
-helpF1Aide : cette aide est sensible au contexte. Elle affichera différents écrans selon l'élément actif sur l'écran de démarrage. Une description de ce système d'aide est également disponible.
+memtestTestdemémoire: Memory testing is useful for more than checking installation of new memory modules. It is a stress test for a big part of your computer system and may indicate hardware problems.
 
-videomodeF3Modevidéo : cette fonction permet de choisir entre différentes résolutions pour l'écran lors de l'installation. Si vous rencontrez des problèmes avec l'installation graphique, le mode textuel peut vous permettre de contourner le problème.
+optOptionsd'amorçage : les options d'amorçage peuvent changer complètement le fonctionnement de votre système. Elles correspondent aux paramètres du kernel.
 
-install_srcF4Sourced'installation : cette fonction permet de choisir la source d'installation.
+helpF1--Aide : cette aide est contextuelle. Elle affichera différents écrans selon l'élément actif de l'écran d'amorçage. Une description de ce système d'aide est également disponible.
 
-keytableF2Langue : cette fonction permet de définir la langue et la disposition du clavier utilisées par le chargeur d'amorçage.
+keytableF2--Langue : cette fonction permet de définir la langue et la disposition du clavier utilisées par le chargeur d'amorçage.
 
-driverupdateF5Miseàjourdepilotes : pour des ordinateurs très récents, il peut être nécessaire de procéder à une mise à jour des pilotes pour pouvoir installer le système.helpUtilisation du système d'aideL'aide en ligne du chargeur d'amorçage est sensible au contexte. Elle donne des informations relatives à l'élément du menu sélectionné ou, si vous êtes en train de modifier des options d'amorçage, elle cherche à vous renseigner au sujet de l'option sur laquelle le curseur est positionné.
+videomodeF3--Modevidéo : cette fonction permet de choisir entre différentes résolutions d'écran lors de l'installation. Si vous rencontrez des problèmes avec l'installation graphique, le Mode texte peut vous permettre de contourner le problème.
+
+install_srcF4--Sourced'installation : cette fonction permet de choisir la source d'installation.
+
+driverupdateF5--Miseàjourdepilotes: For very new machines, a driver update may be needed to install the system.helpUtilisation du système d'aideL'aide en ligne du chargeur d'amorçage est contextuelle. Elle fournit des informations sur l'élément du menu sélectionné. Lors de la modification de la configuration d'amorçage, elle recherche des informations sur l'option indiquée par l'emplacement du curseur.
 
 Touches de navigation
 
-Flèche vers le haut : marquer le lien précédent
-Flèche vers le bas : marquer le lien suivant
-Flèche vers la gauche, Espace arrière : retourner au sujet précédent
-Flèche vers la droite, Retour, Espace : suivre le lien
-Page précédente : faire défiler vers le haut (une page)
-Page suivante : faire défiler vers le bas (une page)
-Début : aller à la première page
-Fin : aller à la dernière page
-Échap. : quitter l'aide
+Flèche haut : mettre en surbrillance le lien précédent
+Flèche bas : mettre en surbrillance le lien suivant
+Flèche gauche et Retour arrière : retour à la rubrique précédente
+Flèche droite, Entrée et Espace : suivre le lien
+Page haut : faire défiler une page vers le haut
+Page bas : faire défiler une page vers le bas
+Domicile : aller au début de la page
+Fin : aller à la fin de la page
+Échap: leave help
 
+Retour à la rubrique mainPagededémarragedriverupdateMise à jour de pilotesSi vous nécessitez une disquette ou un CD de mise à jour des pilotes, appuyez sur F5. Le chargeur d'amorçage vous demandera d'insérer le support de mise à jour de pilotes après le chargement du kernel Linux.
 
-Retour à la mainpagededémarragedriverupdateMise à jour des pilotesSi vous nécessitez une disquette ou un CD de mise à jour des pilotes, pressez F5. Le chargeur d'amorçage vous demandera d'insérer le support de mise à jour des pilotes après le chargement du noyau Linux.
+En général, une mise à jour de pilotes est une disquette contenant la nouvelle version de pilotes matériels ou les corrections de bogues nécessaires à l'installation.
 
-Une mise à jour des pilotes est une disquette contenant les nouvelles versions des pilotes pour le matériel ou des corrections de bogues nécessaires à l'installation.
+Retour à la rubrique mainPagededémarragevideomodeSélection du mode vidéoAppuyez sur F3 pour obtenir la liste des modes vidéo pris en charge par votre carte graphique. Le mode d'affichage maximum de votre moniteur est présélectionné.
 
-Retour à la mainpagededémarragevideomodeSélection du mode vidéoPressez F3 pour obtenir la liste des modes vidéo que supporte votre carte graphique. Le mode le plus élevé que peut afficher votre écran est présélectionné.
+Votre moniteur peut ne pas être détecté automatiquement. Dans ce cas, sélectionnez votre mode préféré manuellement.
 
-Il est possible que votre écran ne puisse pas être détecté automatiquement. Dans ce cas, sélectionnez votre mode préféré manuellement.
+Si votre système rencontre des problèmes avec la carte graphique lors de l'installation, le Mode texte peut vous permettre de contourner le problème.
 
-Si votre système rencontre des problèmes avec la carte graphique lors de l'installation, le mode textuel peut vous permettre de contourner le problème.
+Retour à la rubrique mainPagededémarragekeytableSélection de la langue et de la disposition du clavierCliquez sur F2 pour changer la langue et la disposition du clavier utilisées par le chargeur d'amorçage.
 
-Retour à la mainpagededémarragekeytableSélection de la langue et de la disposition du clavierPressez F2 pour changer la langue et la disposition du clavier utilisées par le chargeur d'amorçage.
+Retour à la rubrique mainPagededémarrageinstall_srcSource d'installationAppuyez sur F4 pour choisir une source d'installation.
 
-Retour à la mainpagededémarrageinstall_srcSource d'installationPressez F4 pour choisir une source d'installation.
+Cette opération revient au même que d'utiliser l'option d'amorçage o_installinstall.
 
-Cela revient au même que l'utilisation de l'option d'amorçage o_installinstaller.
+Retour à la rubrique mainPagededémarragelinuxInstallationSelect Installation to start the default installation. The optOptionsd'amorçage entered are used in the start-up. This item activates many features of commonly available hardware.
 
-Retour à la mainpagededémarragelinuxInstallationSélectionnez Installation pour démarrer l'installation par défaut. Les optoptionsd'amorçage entrées sont utilisées lors du démarrage. Cet élément active de nombreuses fonctionnalités du matériel couramment disponible.
+Retour à la rubrique mainPagededémarrageharddiskAmorcer depuis le disque durSélectionnez Amorcer le système installé pour démarrer le système installé sur votre disque dur local. Ce système doit être installé correctement parce que seul le MBR (Master Boot Record - secteur d'amorçage principal) du premier disque dur est démarré. L'ID matériel du premier disque dur est fourni par le BIOS de l'ordinateur.
 
+Use this if you forgot to remove the CD or DVD from your drive and want to start the computer from the hard disk.
 
+Retour à la rubrique mainPagededémarragenoacpiInstallation -- ACPI désactivéCurrent hardware usually requires ACPI (Advanced Configuration and Power Interface) to control the interrupt handling. ACPI completely replaces the old APM system.
 
-Retour à la mainpagededémarrageharddiskAmorcer depuis le disque durSélectionnez Amorcer le système installé pour démarrer le système installé sur votre disque dur local. Ce système doit être installé correctement parce qu'uniquement le secteur maître d'amorçage (MBR, Master Boot Record) du premier disque dur est démarré. L'ID matériel du premier disque dur est fourni par le BIOS de l'ordinateur.
+Sélectionnez Installation -- ACPI désactivé si vous rencontrez des problèmes lors de l'amorçage du kernel. Les problèmes connus avec ACPI sont :
 
-Utilisez cette option si vous avez oublié de retirer le CD ou le DVD du lecteur et que vous voulez démarrer l'ordinateur depuis le disque dur.
+* gel du kernel lors de l'amorçage
+* PCI Cards are not detected or initialized properly
 
+You may also try the firmwareTestdemicroprogramme boot option and look at the test results of the ACPI validation.
 
+Retour à la rubrique mainPagededémarragenolapicInstallation -- Local APIC DisabledNormally there are no problems with the APIC (Advanced Programmable Interrupt Controller). But if you seem to have some, try this option to boot without local APIC support.
 
-Retour à la mainpagededémarragenoacpiInstallation -- ACPI désactivéCertains matériels très récents peuvent nécessiter ACPI qui remplace complètement l'ancien système APM pour contrôler la gestion des interruptions.
+Please don't confuse this with noacpiacpi (Advanced Configuration and Power Interface).
 
-Sélectionnez Installation -- ACPI désactivé si vous avez des problèmes lors de l'amorçage du noyau. Les problèmes connus avec ACPI sont :
+Retour à la rubrique mainPagededémarragefailsafeInstallation -- Paramètres sécurisésSélectionnez Installation -- Paramètres sécurisés si votre système reste bloqué lors de l'installation ou si des erreurs non reproductibles se produisent. Cette option désactive DMA pour les unités IDE et toutes les fonctions de gestion de l'alimentation. Reportez-vous également aux options de kernel de o_apmapm, o_acpiacpi et o_ideide.
 
-* gel du noyau lors de l'amorçage
-* cartes PCI incorrectement détectées ou initialisées
+Retour à la rubrique mainPagededémarragerescueSystème de secoursThe Système de secours is a small RAM disk base system. From there, it is possible to make all kinds of changes to an installed system. Because only low-level tools are available in this system, it is intended for experts.
 
+Retour à la rubrique mainPagededémarragefirmwareTest de microprogrammeStarts a BIOS checker that validates the ACPI tables and many other parts of your BIOS. Test results can be stored on usb disk or saved via network.
 
+Retour à la rubrique mainPagededémarragememtestTest de mémoireLe Test de mémoire inclus fournit de bonnes possibilités de procéder à des tests de contraintes du matériel. Il vise principalement à détecter des RAM défectueuses mais il teste également beaucoup d'autres parties du système.
+There is no guarantee that the memory is good if no errors are found, although most of memory defects will be found.
 
-Retour à la mainpagededémarragefailsafeInstallation -- Mode sécuriséSélectionnez Installation -- Mode sécurisé si votre système reste bloqué lors de l'installation ou si des erreurs non reproductibles se produisent. Cette option désactive DMA pour les périphériques IDE et toutes les fonctions de gestion de l'énergie. Voyez également les options de noyau pour o_apmapm, o_acpiacpi et o_ideide.
+Retour à la rubrique mainPagededémarrageoptOptions d'amorçageDeux types d'options d'amorçage sont disponibles : celles du programme d'installation et celles de kernel. Les plus courantes sont notamment les suivantes.
 
-Retour à la mainpagededémarragerescueSystème de secoursLe système de secours est un petit système RAM de base. Depuis ce système, il est possible de procéder à tous les types de changements sur votre système installé. Étant donné que ce système ne dispose que d'outils de bas niveau, il est réservé aux experts.
+a) Options du programme d'installation
 
+o_installinstall -- détermine une source d'installation
+networkoptionsréseau -- concerne les options réseau
+o_vncoptionsVNC -- concerne les options d'installation VNC
 
+b) Options de kernel
 
-Retour à la mainpagededémarragememtestTest de mémoireLe test de mémoire inclus fournit de bonnes possibilités de procéder à des tests de contraintes du matériel d'un système. Son objectif principal est de détecter des RAM défectueux mais il teste également beaucoup d'autres parties du système.
-Cependant, si aucune erreur n'est trouvée, cela ne présente aucune garantie quant à la qualité de la mémoire bien que la plupart des défauts de mémoire soient détectés.
+o_splashsplash -- détermine le fonctionnement de l'écran de démarrage
+o_apmapm -- active ou non la fonction de gestion de l'alimentation
+o_acpiacpi -- concerne l'interface de gestion de l'alimentation et de configuration avancée
+o_ideide -- control the IDE subsystem
 
-
-Retour à la mainpagededémarrageoptOptions d'amorçageIl existe deux types d'options d'amorçage disponibles. D'une part, les options qui affectent le programme d'installation, d'autre part les options de noyau. Certaines des options courantes sont :
-
-a) options du programme d'installation
-
-o_installinstaller -- sélectionner une source d'installation
-networkoptionsréseau -- options réseau
-o_vncoptionsvnc -- options pour l'installation via VNC
-
-b) options de noyau
-
-o_splashsplash -- détermine le comportement de l'écran de démarrage (splash screen)
-o_apmapm -- interrupteur de gestion d'énergie
-o_acpiacpi -- interface avancée de configuration et énergie
-o_ideide -- contrôle du sous-système IDE
-
-
-Retour à la mainpagededémarrageo_installOptions du programme d'installation : installerPar défaut, la source d'installation est recherchée dans les CD locaux. Pour une installation à travers le réseau, sélectionnez l'option installer. Les protocoles d'installation possibles sont
+Retour à la rubrique mainPagededémarrageo_installOptions du programme d'installation : installPar défaut, la source d'installation est recherchée dans les CD locaux. Pour une installation réseau, sélectionnez l'option install. Les protocoles d'installation possibles sont les suivants.
 * FTP
 * NFS
 * HTTP
-La syntaxe à utiliser est simplement comme celle des URL standards. Par exemple, si votre serveur se trouve à l'adresse 192.168.0.1 et vous voulez procéder à une installation basée NFS depuis le répertoire /install de ce serveur, spécifiez la source comme suit :
+La syntaxe à utiliser est simplement comme celle des URL standard. Par exemple, si votre serveur se trouve à l'adresse 192.168.0.1 et si vous voulez procéder à une installation basée NFS depuis le répertoire /install de ce serveur, spécifiez la source comme suit :
 
 install=nfs://192.168.0.1/install
 
-Soit la carte réseau sera configurée avec dhcp, soit vous devrez spécifier les paramètres vous-même comme décrits dans les networkoptionsréseau.
+The network card will either be configured with DHCP or you must specify the parameters yourself as described in the networkoptionsréseau.
 
-
-Retour aux optoptionsd'amorçageo_splashOptions de noyau : splashL'écran de démarrage (splash screen) est l'image affichée durant l'amorçage du système.
+Retour à la rubrique optOptionsd'amorçageo_splashOptions de kernel : splashL'écran de démarrage est l'image affichée durant l'amorçage du système.
 
 splash=0
 
-L'écran de démarrage est désactivé. Ceci peut être utile avec de très vieux moniteurs ou lorsqu'une erreur se produit.
+L'écran de démarrage est désactivé. Ce résultat peut être utile en cas de moniteurs très anciens ou de certaines erreurs.
 
 splash=verbose
 
-Active l'écran de démarrage, les messages de noyau et d'amorçage sont également affichés.
+Active l'écran de démarrage sans faire disparaître les messages de kernel et d'amorçage.
 
 splash=silent
 
-Active l'écran de démarrage, les messages ne sont pas affichés. À la place, une barre de progression est affichée.
+Activates splash, but no messages. Instead a progress bar is drawn.
 
-Retour aux optoptionsd'amorçagenetworkOptions du programme d'installation : options réseauIl est possible de configurer l'interface réseau dès maintenant. Le matériel sera détecté plus tard par YaST2. Le jeu minimum d'options pour configurer votre carte réseau consiste en l'IP d'hôte et le masque réseau. Par exemple :
+Retour à la rubrique optOptionsd'amorçagenetworkOptions du programme d'installation : options réseauIl est possible de configurer l'interface réseau dès maintenant. Le matériel sera détecté ultérieurement par YaST2. Le jeu minimum d'options pour configurer votre carte réseau consiste en l'IP d'hôte et le masque réseau. Par exemple :
 
 hostip=192.168.0.10 netmask=255.255.255.0
 
-ou, en plus court :
+En abrégé :
 
 hostip=192.168.0.10/24
 
-Si vous spécifiez une o_installinstallationbaséeréseau et ne définissez aucune de ces options, le programme d'installation essaie de configurer l'interface réseau avec dhcp. Si vous nécessitez une passerelle par défaut, spécifiez-le avec l'option gateway. Par exemple :
+If you specified a o_installinstallationbaséeréseau and do not specify both of these options, the installer tries to configure the network interface with DHCP. If you need a default gateway, specify this with the option Passerelle. For example:
 
 gateway=192.168.0.8
 
-
-Retour aux optoptionsd'amorçageo_vncOptions du programme d'installation : vncPour activer l'installation VNC, spécifiez les paramètres vnc et vncpassword :
+Retour à la rubrique optOptionsd'amorçageo_vncOptions du programme d'installation : vncPour activer l'installation VNC, spécifiez les paramètres vnc et vncpassword :
 
 vnc=1 vncpassword=example
 
-Le serveur VNC sera démarré et vous pourrez contrôler YaST2 à travers n'importe quel client VNC depuis un système à distance.
+The VNC server will be started and you may control YaST2 over any VNC client from a remote system.
 
+Retour à la rubrique optOptionsd'amorçage.o_apmOptions de kernel : apmAPM est l'une des deux stratégies de gestion de l'alimentation des ordinateurs actuels. Elle est utilisée principalement sur les ordinateurs portables pour des fonctions telles que la mise en veille sur disque. Par ailleurs, elle peut désactiver l'ordinateur après sa mise hors tension. APM dépend du fonctionnement correct du BIOS. Si le BIOS est défectueux, APM peut être d'une utilité limitée ou même empêcher l'ordinateur de fonctionner. Dans ces cas, elle peut être désactivée à l'aide du paramètre
 
-Retour aux optoptionsd'amorçageo_apmOptions de noyau : apmAPM est l'une des stratégies de gestion de l'énergie utilisée sur les ordinateurs courants. Elle est utilisée principalement sur les ordinateurs portables pour des fonctions telles que la mise en veille, mais peut également être responsable de l'arrêt de l'ordinateur après sa mise hors tension. APM dépend d'un BIOS fonctionnant correctement. Si le BIOS est déterioré, APM peut n'être que d'une utilité limitée ou même empêcher votre ordinateur de fonctionner. Dans ce cas, il peut être désactivé à l'aide du paramètre
+apm=off -- désactiver complètement APM
 
-apm=off -- désactiver APM complètement
+Dans certains cas, un tout nouvel ordinateur est équipé du système o_acpiacpi plus récent.
 
-Certains ordinateurs très récents peuvent être équipés du système plus récent o_acpiACPI.
+Retour à la rubrique optOptionsd'amorçageo_acpiOptions de kernel : acpiLe standard ACPI (Advanced Configuration and Power Interface) définit les interfaces de gestion d'alimentation et de configuration entre un système d'exploitation et le BIOS. Par défaut, acpi est activé lorsqu'un BIOS ultérieur à l'année 2000 est détecté. Il existe plusieurs paramètres utilisés couramment pour contrôler le fonctionnement de ACPI.
 
-Retour aux optoptionsd'amorçageo_acpiOptions de noyau : acpiACPI (Advanced Configuration and Power Interface) est un standard qui définit les interfaces de gestion d'énergie et de configuration entre un système d'exploitation et le BIOS. Par défaut, acpi est activé lorsqu'un BIOS ultérieur à l'année 2000 est détecté. Il existe plusieurs paramètres utilisés couramment pour contrôler le comportement de ACPI :
-
-pci=noacpi -- ne pas utiliser ACPI pour router les interruptions PCI
-acpi=oldboot -- uniquement les parties de ACPI qui relèvent de l'amorçage restent activées
-acpi=off -- désactiver ACPI complètement
+pci=noacpi -- do not use ACPI to route PCI interrupts
+acpi=oldboot -- only the parts of ACPI that are relevant for booting remain activated
+acpi=off -- désactiver complètement ACPI
 acpi=force -- activer ACPI même si votre BIOS est antérieur à 2000
 
-En particulier dans le cas d'ordinateurs récents, il remplace l'ancien système o_apmapm.
+Le remplacement de l'ancien système o_apmapm s'applique notamment aux nouveaux ordinateurs.
 
-Retour aux optoptionsd'amorçageo_ideOptions de noyau : ideÀ la différence de SCSI, IDE est utilisé couramment sur la plupart des postes de travail de bureau. Pour réduire certains problèmes matériels qui se produisent avec les systèmes IDE, utilisez le paramètre de noyau :
+Retour à la rubrique optOptionsd'amorçageo_ideOptions de kernel : ideÀ la différence de SCSI, IDE est couramment utilisé sur la plupart des postes de travail de bureau. Pour contourner certains problèmes matériels des systèmes IDE, utilisez le paramètre de kernel suivant.
 
-ide=nodma -- désactiver dma pour les périphériques IDE
+ide=nodma -- switch off DMA for IDE drives
 
+Retour à la rubrique optOptionsd'amorçage.bitsSélection du type de logicielYou have the choice to install the 32-bit or 64-bit version of openSUSE 10.2.
 
-Retour aux optoptionsd'amorçagebitsSélection du type de logicielVous avez le choix entre installer la version 32 bits ou la version 64 bits de openSUSE.
-
-Retour à la mainpagededémarrage 
+Retour à la rubrique mainPagededémarrage 

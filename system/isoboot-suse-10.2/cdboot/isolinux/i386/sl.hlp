@@ -28,15 +28,15 @@ Naslednje možnosti uporabite za izbiro željene funkcije. Za pomoč pri uporabi
 
 Navigacijske tipke
 
-  Puščica navzgor: osvetli predhodno povezavo
-  Puščica navzdol: osvetli naslednjo povezavo
-  Puščica levo, Backspace: vrnitev na prejšno stran
-  Puščica desno, Enter, Preslednica: sledi povezavi
-  Stran gor: premik za stran navzor
-  Stran dol: premik za stran navzdol
-  Home: na začetek strani
-  End: na konec strani
-  Esc: zapustitev sistema pomoči
+Puščica navzgor: osvetli predhodno povezavo
+Puščica navzdol: osvetli naslednjo povezavo
+Puščica levo, Backspace: vrnitev na prejšno stran
+Puščica desno, Enter, Preslednica: sledi povezavi
+Stran gor: premik za stran navzor
+Stran dol: premik za stran navzdol
+Home: na začetek strani
+End: na konec strani
+Esc: zapustitev sistema pomoči
 
 
 Vrnitev na mainZačetnostrandriverupdatePosodobitev gonilnikovČe potrebujete posodobitev gonilnikov z disketne enote ali CD-ja, pritisnite tipko F5. Zagonski nalagalnik po končanem nalaganju Linux jedra od vas zahteval medij z najnovejšimi gonilniki.
@@ -71,8 +71,8 @@ Vrnitev na mainZačetnostrannoacpiNamestitev - ACPI izključenNajnovejš
 
 Če med zagonom jedra sistema naletite na težave, izberite možnost Namestitev - ACPI izključen. Znane težave z računalniki, ki imajo težave z ACPI so:
 
-   * jedro sistema med zagonom zmrzne
-   * PCI kartice so nepravilno zaznane ali inicializirane
+* jedro sistema med zagonom zmrzne
+* PCI kartice so nepravilno zaznane ali inicializirane
 
 
 
@@ -90,25 +90,25 @@ Vrnitev na mainZačetnostranoptMožnosti pri zagonuNa voljo sta dve vrst
 
 a) pri postopku namestitve
 
-  o_installinstall -- izbira izvora namestitve
-  networknetworkoptions -- možnosti omrežja
-  o_vncvncoptions -- možnosti za namestitev preko VNC
+o_installinstall -- izbira izvora namestitve
+networknetworkoptions -- možnosti omrežja
+o_vncvncoptions -- možnosti za namestitev preko VNC
 
 b) možnosti jedra
 
-  o_splashsplash -- vplivanje na obnašanje začetnega zaslona
-  o_apmapm -- vplivanje na upravljanje z energijo
-  o_acpiacpi -- advanced configuration and power interface
-  o_ideide -- nadzor nad IDE podsistemom
+o_splashsplash -- vplivanje na obnašanje začetnega zaslona
+o_apmapm -- vplivanje na upravljanje z energijo
+o_acpiacpi -- advanced configuration and power interface
+o_ideide -- nadzor nad IDE podsistemom
 
 
 Vrnitev na mainZačetnostrano_installMožnosti pri postopku namestitve: installPrivzeti izvor namestitve je lokalna CD-ROM/DVD enota. Za namestitve preko omrežja, izberite možnost install. Možni namestitveni protokoli so:
-  * FTP
-  * NFS
-  * HTTP
+* FTP
+* NFS
+* HTTP
 Izvor namestitve se poda v obliki običajnega URL naslova. Primer: če ima vaš strežnik naslov 192.168.0.1 in želite namestiti sistem preko NFS protokola in imenika /install, je izvor namestitve:
 
-  install=nfs://192.168.0.1/install
+install=nfs://192.168.0.1/install
 
 Nastavitev omrežne kartice se naredi preko protokola dhcp ali pa sami vpišete parametre, kot je opisano v networkmožnostiomrežja.
 Vrnitev na optMožnostiprizagonuo_splashMožnosti jedra: splashZačetni zaslon je slika, ki se prikaže med zagonom sistema.
@@ -124,41 +124,41 @@ Zagonski zaslon je vključen, vendar se prikaže je stolpec napredka.
 
 Vrnitev na optMožnostiprizagonunetworkMožnosti pri postopku namestitve: možnosti omrežjaOmrežno kartico je možno nastaviti takoj. Omrežno strojno opremo bo kasneje zaznal YaST2. Minimalni set nastavitev za priključitev na omrežje sestavljajo IP naslov in maska omrežja. Primer:
 
-  hostip=192.168.0.10 netmask=255.255.255.0
+hostip=192.168.0.10 netmask=255.255.255.0
 
 ali v krajši obliki:
 
-  hostip=192.168.0.10/24
+hostip=192.168.0.10/24
 
 Če ste izbrali o_installnamestitevprekoomrežja in niste določili obeh vrednosti, bo namestitveni program poizkusil nastaviti omrežni vmesnik preko protokola DHCP. Če morate določiti privzeti prehod (gateway), lahko to storite s parametrom gateway. Primer:
 
-  gateway=192.168.0.8
+gateway=192.168.0.8
 
 
 Vrnitev na optMožnostiprizagonuo_vncMožnosti pri postopku namestitve: vncZa namestitev preko protokola VNC, napišite parameter vnc in vnc geslo (vncpassword). Primer:
 
-  vnc=1 vncpassword=example
+vnc=1 vncpassword=example
 
 Pri namestitvi se do zagnal VNC strežnik in YaST2 boste lahko upravljali preko VNC protokola z odjemalcem na oddaljenem sistemu.
 
 
 Vrnitev na optMožnostiprizagonuo_apmMožnosti jedra: apmAPM je eden od dveh možnih strategij upravljanja z energijo na računalnikih. V večini primerov se uporablja v prenosnih računalnikih za funkcionalnost kot je zaustavitev in shranitev na disk. Lahko pa nadzira tudi ugašanje računalnika. APM za delovanje potrebuje pravilno delovanje BIOSa. Če BIOS ne deluje pravilno, ima APM omejene možnosti delovanja ali pa lahko celo prepreči delovanje računalnika. V primeru težav, je možno APM sistem izključiti z naslenjim parametrom:
 
-  apm=off -- v celoti izključi APM
+apm=off -- v celoti izključi APM
 
 Nekateri novi računalniki lahko izkoristijo nov sistem - o_acpiACPI.
 
 Vrnitev na optMožnostiprizagonuo_acpiMožnosti jedra: acpiACPI (Advanced Configuration and Power Interface) je standard, ki določa vmesnik za urejanje nastavitev in upravljanja z energijo med operacijskim sistemom in BIOSom. Če je med zagonom zaznan BIOS, ki je bil izdelan po letu 2000, je acpi vključen. Najbolj uporabni paramteri za določanje obnašanja ACPI sistema:
 
-  pci=noacpi -- ne uporabi ACPI sistem za preusmeritve PCI prekinitev   acpi=oldboot -- le za zagon pomebni deli ACPIja ostanejo aktivni
-  acpi=off -- v celoti izključi ACPI
-  acpi=force -- vključi ACPI tudi v primeru, da je bil BIOS narejen pred letom 2000
+pci=noacpi -- ne uporabi ACPI sistem za preusmeritve PCI prekinitev acpi=oldboot -- le za zagon pomebni deli ACPIja ostanejo aktivni
+acpi=off -- v celoti izključi ACPI
+acpi=force -- vključi ACPI tudi v primeru, da je bil BIOS narejen pred letom 2000
 
 ACPI sistem zamenjuje sistem o_apmapm, predvsem na novih računalnikih.
 
 Vrnitev na optMožnostiprizagonuo_ideMožnosti jedra: ideIDE je, nasprotno kot SCSI, v splošni rabi v večini namiznih računalnikov. Za premostitev nekaterih napak strojne opreme, lahko uporabite parameter jedra:
 
-  ide=nodma -- za IDE naprave izključi DMA
+ide=nodma -- za IDE naprave izključi DMA
 
 
 Vrnitev na optMožnostiprizagonu.bitsIzbira različice programske opremePri namestitvi mora izbrati ali želite namestiti 32-bitno ali 64-bitno različico openSUSEa.

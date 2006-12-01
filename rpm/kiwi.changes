@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Dec  1 12:25:14 CET 2006 - ms@suse.de
+
+- update isoboot-suse-10.2 CD data
+
+-------------------------------------------------------------------
 Wed Nov 29 16:27:10 CET 2006 - ms@suse.de
 
 - starting zypper integration: added support removing services

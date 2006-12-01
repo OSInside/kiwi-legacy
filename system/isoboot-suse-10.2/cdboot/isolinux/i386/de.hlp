@@ -1,170 +1,167 @@
-mainBootloader HilfeWillkommen zu openSUSE 10.2
+mainBootloader-HilfeWelcome to openSUSE 10.2
 
-Wählen Sie in diesem Menü die gewünschte Funktion. Sollten Sie Probleme beim Navigieren in diesem Hilfesystem haben, drücken Sie F1, um zur helpBeschreibung des Hilfesystems zu gelangen. Die Hauptfunktionen in diesem Menü sind:
+Wählen Sie in diesem Menü die gewünschte Funktion aus. Falls Ihnen die Navigation in diesem Hilfesystem Schwierigkeiten bereitet, drücken Sie F1, um die helpBeschreibung dieses Hilfesystems zu öffnen. Die wichtigsten Funktionen dieses Menüs sind:
 
-harddiskVonFestplattebooten: Diese Auswahl belässt Ihr System im aktuellen Zustand. Es wird lediglich ein vorher installiertes Betriebssystem gestartet.
+harddiskVonFestplattebooten: Diese Option nimmt an Ihrem System keinerlei Änderung vor. Sie startet lediglich ein bereits installiertes Betriebssystem.
 
-linuxInstallation: Dieser Installationsmodus funktioniert auf allen Rechnern. Sollte während des Systemstarts das System einfrieren oder Probleme bei der Hardware-Erkennung auftreten, wie z.B. bei den Platten-Controllern oder Netzwerkkarten, probieren Sie eine der folgenden Installationsoptionen aus.
+linuxInstallation: Dieser Installationsmodus wird von den meisten Computern unterstützt. Falls Ihr System beim Booten hängen bleibt oder Probleme mit der Erkennung von Hardwarekomponenten auftreten (Festplatten-Controller oder Netzwerkkarten werden zum Beispiel nicht erkannt), versuchen Sie es mit einer der folgenden Installationsoptionen.
 
-noacpiInstallation--ACPIdeaktiviert: Viele der derzeit verkauften Rechner haben unvollständige oder fehlerhafte ACPI-Implementationen. Diese Auswahl deaktiviert die ACPI-Unterstützung im Kernel, aktiviert jedoch trotzdem viele Performance-Funktionen, wie DMA für IDE-Festplatten.
+noacpiInstallation--ACPIdeaktiviert: Auf vielen der heute erhältlichen Computer ist ACPI noch unvollständig oder fehlerhaft implementiert. Mit dieser Option deaktivieren Sie die ACPI-Unterstützung im Kernel, behalten aber viele der Leistungsmerkmale, wie DMA für IDE-Festplatten, bei.
 
-failsafeInstallation--SichereEinstellungen: Sollte Installation keinen Erfolg zeigen, dann könnte diese Auswahl das Problem lösen.
+nolapicInstallation--LocalAPICDisabled: If the normal installation fails, this might be due to the system hardware not supporting local APIC. If this seems to be the case, use this option to install without local APIC support.
 
-rescueRettungssystem: Dieses Boot-Image startet ein kleines Linux-System im RAM. Dies ist dann nützlich, wenn das System nicht korrekt startet. Melden Sie sich nach dem Systemstart als root an.
+failsafeInstallation--SichereEinstellungen: Falls Installation nicht zum Erfolg führt, können Sie das Problem mit dieser Option eventuell lösen.
 
-memtestSpeichertest: Ein Speichertest ist nicht nur zur Überprüfung der Installation von neuen Speichermodulen nützlich. Es dient auch als Belastungstest für einen großen Teil Ihres Rechnersystems und kann Hardware-Probleme erkennen.
+rescueRettungssystem: This boot image starts a small Linux system in RAM. This is useful if the system does not start properly. After booting this system, log in as root.
 
-optBootoptionen: Die Optionen für den Systemstart können Ihr Systemverhalten komplett ändern. Es sind Kernel-Einstellungen.
+firmwareFirmware-Test: Runs a BIOS test tool that validates ACPI and other parts of your BIOS.
 
-helpF1Hilfe: Diese ist kontextsensitiv. Abhängig von dem jeweils aktiven Element des Startbildschirms werden unterschiedliche Fenster angezeigt. Für dieses Hilfesystem steht auch eine Beschreibung zur Verfügung.
+memtestSpeichertest: Memory testing is useful for more than checking installation of new memory modules. It is a stress test for a big part of your computer system and may indicate hardware problems.
 
-videomodeF3Grafik-Modus: Wählen Sie hier während der Installation zwischen verschiedenen Bildschirmauflösungen. Sollten bei der grafischen Installation Probleme auftreten, könnte der Textmodus ein Workaround für Sie sein.
+optBootoptionen: Durch die Boot-Optionen ändert sich eventuell das Verhalten Ihres Systems. Es handelt sich hier um Einstellungen für den Kernel.
 
-install_srcF4Installationsquelle: Wählen Sie eine Installationsquelle.
+helpF1Hilfe: Die Hilfe ist kontextsensitiv. Sie zeigt zum jeweils aktiven Element im Boot-Fenster die entsprechende Hilfe an. Auch eine Beschreibung des Hilfesystems steht zur Verfügung.
 
-keytableF2Sprache: Legen Sie die Sprach- und Tastaturzuordnung für den Bootloader fest.
+keytableF2Sprache: Stellen Sie die Sprache und Tastaturbelegung des Bootloaders ein.
 
-driverupdateF5Treiber-Update: Für sehr neue Rechner könnte ein Treiber-Update zur Installation des Systems nötig sein.helpVerwenden des HilfesystemsDie Online-Hilfe des Bootloaders ist kontextsensitiv. Sie enthält Informationen zum gewählten Menüpunkt und sucht beim Bearbeiten von Bootoptionen nach Informationen zur Option, auf der der Cursor sich befindet.
+videomodeF3Videomodus: Wählen Sie hier die Bildschirmauflösung für die Installation aus. Falls mit der grafischen Installationsschnittstelle Probleme auftreten, empfiehlt sich als Workaround eventuell Textmodus.
+
+install_srcF4Installationsquelle: Wählen Sie die Installationsquelle aus.
+
+driverupdateF5Treiber-Update: For very new machines, a driver update may be needed to install the system.helpHilfesystem verwendenDie Online-Hilfe des Bootloaders ist kontextsensitiv. Sie zeigt Informationen über die ausgewählte Menüoption an bzw. versucht bei der Bearbeitung der Bootoptionen, Informationen über die Option bereitzustellen, auf der sich der Mauszeiger zur Zeit befindet.
 
 Navigationstasten
 
-  Pfeil nach oben: vorherigen Link markieren
-  Pfeil nach unten: Nächsten Link markieren
-  Linker Pfeil, Backspace: zu vorherigem Punkt gehen
-  Rechter Pfeil, Enter, Leertaste: Link folgen
-  Bild nach oben: eine Seite nach oben scrollen
-  Bild nach unten: eine Seite nach unten scrollen
-  Home: zu Startseite gehen
-  Ende: ans Ende der Seite gehen
-  Esc: Hilfe verlassen
+Pfeil nach oben: Hebt vorherigen Link hervor
+Pfeil nach unten: Hebt nächsten Link hervor
+Pfeil nach links, Rücktaste: Kehrt zum vorherigen Thema zurück
+Pfeil nach rechts, Eingabe, Leerzeichen: Folgt Link
+Bild auf: Blättert eine Seite nach oben
+Bild ab: Blättert eine Seite nach unten
+Privat: Geht zum Seitenanfang
+Ende: Geht zum Seitenende
+Esc: leave help
 
+Zurück zu mainStartseitedriverupdateTreiber-UpdateWenn ein Treiber-Update erforderlich ist, drücken Sie F5. Der Bootloader lädt daraufhin zunächst den Linux-Kernel und fordert Sie anschließend auf, den Datenträger mit dem Treiber-Update einzulegen.
 
-Zur mainStartseite zurückgehendriverupdateTreiber-UpdateBenötigen Sie eine Diskette oder CD-ROM für ein Treiber-Update, drücken Sie F5. Der Bootloader fordert Sie auf, nach dem Laden des Linux-Kernels das Medium für das Treiber-Update einzulegen.
+Ein Treiber-Update ist in der Regel eine Diskette mit neuen Hardware-Treiberversionen oder Bug Fixes, die für die Installation benötigt werden.
 
-Ein Treiber-Update ist typischerweise eine Diskette mit neuen Hardware-Treiber-Versionen oder Bug Fixes, die während der Installation benötigt werden.
+Zurück zu mainStartseitevideomodeAuswahl des VideomodusDrücken Sie F3, um eine Liste der von der Grafikkarte unterstützten Videomodi anzuzeigen. Die höchste von Ihrem Monitor unterstützte Einstellung ist bereits ausgewählt.
 
-Zur mainStartseite zurückgehenvideomodeGrafik-Modus-AuswahlDrücken Sie F3, um eine Liste mit Grafik-Modi, die von Ihrer Grafikkarte unterstützt werden, zu erhalten. Es wird der höchste Modus vorausgewählt, den Ihr Monitor anzeigen kann.
+Möglicherweise wird Ihr Monitor nicht automatisch erkannt. Wählen Sie in diesem Fall den von Ihnen bevorzugten Modus manuell aus.
 
-Möglicherweise wird Ihr Monitor nicht automatisch erkannt. In diesem Fall müssen Sie Ihren bevorzugten Modus manuell wählen.
+Falls während der Installation Probleme mit der Grafikkarte auftreten, empfiehlt sich als Workaround eventuell Textmodus.
 
-Sollte Ihr System während der Installation Probleme mit der Grafikkarte haben, könnte der Textmodus eine Lösung sein.
+Zurück zu mainStartseitekeytableAuswahl der Sprache und TastaturbelegungDrücken Sie F2, um die vom Bootloader verwendete Sprache und Tastaturbelegung zu ändern.
 
-Zur mainStartseite zurückgehenkeytableSprachauswahl und TastaturbelegungDrücken Sie F2 zum Ändern der Sprache und der Tastaturbelegung für den Bootloader.
+Zurück zu mainStartseiteinstall_srcInstallationsquelleDrücken Sie F4, um die Installationsquelle zu wählen.
 
-Zurück zur mainStartseiteinstall_srcInstallationsquelleDrücken Sie F4 zum Wählen einer Installationsquelle.
+Diese Option entspricht der Boot-Option o_installInstallieren.
 
-Dies ist identisch zur Verwendung der Bootoption o_installInstallieren.
+Zurück zu mainStartseitelinuxInstallationSelect Installation to start the default installation. The optBootoptionen entered are used in the start-up. This item activates many features of commonly available hardware.
 
-Zurück zur mainStartseitelinuxInstallationWählen Sie Installation zum Starten der Standardinstallation. Die eingegebenen optBootoptionen werden beim Starten des Systems verwendet. Diese Option aktiviert viele Funktionen üblicherweise verfügbarer Hardware.
+Zurück zu mainStartseiteharddiskVon Festplatte bootenWählen Sie Installiertes Betriebssystem starten aus, um das auf der lokalen Festplatte installierte System zu starten. Dieses System muss ordnungsgemäß installiert sein, da nur der MBR (Master Boot Record) auf der primären Festplatte gestartet wird. Die Geräte-ID der primären Festplatte wird vom BIOS des Computers bereitgestellt.
 
+Use this if you forgot to remove the CD or DVD from your drive and want to start the computer from the hard disk.
 
+Zurück zu mainStartseitenoacpiInstallation -- ACPI deaktiviertCurrent hardware usually requires ACPI (Advanced Configuration and Power Interface) to control the interrupt handling. ACPI completely replaces the old APM system.
 
-Zurück zur mainStartseiteharddiskVon Festplatte bootenWählen Sie Installiertes Betriebssystem starten, um das auf Ihrer lokalen Festplatte installierte System zu starten. Dieses System muss richtig installiert sein, da nur der MBR (Master Boot Record) auf der ersten Festplatte gestartet wird. Die Gerätekennung der ersten Festplatte wird vom BIOS des Rechners zur Verfügung gestellt.
+Wählen Sie Installation -- ACPI deaktiviert aus, wenn beim Booten des Kernels Fehler auftreten. Bei Computern, die ACPI nicht richtig unterstützen, sind u.a. folgende Probleme bekannt:
 
-Verwenden Sie diese Option, wenn Sie vergessen haben, Ihre CD oder DVD aus Ihrem Laufwerk zu entfernen und den Rechner von Festplatte starten wollen.
+* Kernel bleibt beim Booten hängen
+* PCI Cards are not detected or initialized properly
 
+You may also try the firmwareFirmware-Test boot option and look at the test results of the ACPI validation.
 
+Zurück zu mainStartseitenolapicInstallation -- Local APIC DisabledNormally there are no problems with the APIC (Advanced Programmable Interrupt Controller). But if you seem to have some, try this option to boot without local APIC support.
 
-Zurück zur mainStartseitenoacpiInstallation -- ACPI deaktiviertGanz neue Hardware benötigt eventuell ACPI zur Interrupt-Steuerung. ACPI ersetzt komplett das alte APM-System.
+Please don't confuse this with noacpiacpi (Advanced Configuration and Power Interface).
 
-Wählen Sie Installation -- ACPI deaktiviert, wenn Sie Probleme beim Starten des Kernels haben. Bekannte Probleme bei Rechnern, die Probleme mit ACPI haben:
+Zurück zu mainStartseitefailsafeInstallation -- Sichere EinstellungenWählen Sie Installation -- Sichere Einstellungen aus, wenn Ihr System während der Installation hängen bleibt oder nicht nachvollziehbare Fehler auftreten. Diese Option deaktiviert DMA für IDE-Laufwerke und alle Energieverwaltungsfunktionen. Sehen Sie sich hierzu auch die Kernel-Optionen für o_apmapm, o_acpiacpi und o_ideIDE an.
 
-   * Kernel friert beim Systemstart ein
-   * PCI-Karten werden nicht erkannt oder nicht richtig initialisiert
+Zurück zu mainStartseiterescueRettungssystemThe Rettungssystem is a small RAM disk base system. From there, it is possible to make all kinds of changes to an installed system. Because only low-level tools are available in this system, it is intended for experts.
 
+Zurück zu mainStartseitefirmwareFirmware-TestStarts a BIOS checker that validates the ACPI tables and many other parts of your BIOS. Test results can be stored on usb disk or saved via network.
 
+Zurück zu mainStartseitememtestSpeichertestDas im Lieferumfang enthaltene Speichertest bietet hervorragende Möglichkeiten, die Systemhardware einem Belastungstest zu unterziehen. In erster Linie soll dieser Test RAM-Defekte feststellen, es werden aber auch zahlreiche andere Systembereiche untersucht.
+There is no guarantee that the memory is good if no errors are found, although most of memory defects will be found.
 
-Zurück zur mainStartseitefailsafeInstallation -- Sichere EinstellungenWählen Sie Installation -- Sichere Einstellungen, wenn die Installation hängt oder nicht nachvollziehbare Fehler auftreten. Diese Option deaktiviert DMA für die IDE-Treiber und alle Power-Management-Funktionen. Sehen Sie sich auch die Kernel-Optionen für o_apmapm, o_acpiacpi und o_ideide an.
+Zurück zu mainStartseiteoptBootoptionenDie Boot-Optionen unterteilen sich in zwei Kategorien: Optionen, die das Installationsprogramm betreffen, und Kernel-Optionen. Einige der gängigeren Optionen sind:
 
-Zurück zur mainStartseiterescueRettungssystemDas Rettungssystem ist ein kleines RAM Disk-Basissystem. Damit ist es möglich, alle möglichen Änderungen am installierten System vorzunehmen. Da dieses System nur Low-Level-Werkzeuge enthält, ist es für Experten gedacht.
+a) Installationsoptionen
 
-
-
-Zurück zur mainStartseitememtestSpeichertestDer enthaltene Speichertest bietet gute Möglichkeiten für einen Belastungstest der System-Hardware. Sein Hauptzweck besteht in der Erkennung defekten RAMs, es werden jedoch noch viele weitere Systembereiche belastet.
-Auch wenn keine Fehler gefunden werden, gibt es keine Garantie dafür, dass der Speicher in Ordnung ist. Die meisten Speicherdefekte werden jedoch erkannt.
-
-
-Zurück zur mainStartseiteoptBootoptionenEs stehen zwei Arten von Optionen für den Systemstart zur Verfügung. Zunächst gibt es Optionen für den Installer. Zweitens gibt es Kerneloptionen. Einige der üblicheren Optionen sind:
-
-a) Installer-Optionen
-
-  o_installInstallieren -- Installationsquelle wählen
-  networkNetzwerkoptionen -- Netzwerkoptionen
-  o_vncvnc-Optionen -- Optionen für die Installation über VNC
+o_installInstallieren -- Geben Sie hier die Installationsquelle an
+networkNetzwerkoptionen -- Netzwerkoptionen
+o_vncVNCOptionen -- Optionen für die Installation via VNC
 
 b) Kernel-Optionen
 
-  o_splashSplash -- Verhalten des Splash-Screens beeinflussen
-  o_apmapm -- Power-Management umschalten
-  o_acpiacpi -- erweiterte Konfiguration und Power-Interface
-  o_ideide -- IDE-Subsystem steuern
+o_splashsplash -- Beeinflusst das Verhalten des Splash-Screen
+o_apmapm -- Schaltet die Energieverwaltung ein/aus
+o_acpiacpi -- Advanced Configuration and Power Interface
+o_ideIDE -- control the IDE subsystem
 
+Zurück zu mainStartseiteo_installInstallationsoptionen: installStandardmäßig werden die lokalen CD-ROMs nach der Installationsquelle durchsucht. Bei einer Netzwerkinstallation müssen Sie die Option Installieren wählen. Mögliche Installationsprotokolle sind
+* FTP
+* NFS
+* HTTP
+Die Syntax entspricht derjenigen von Standard-URLs. Lautet die Adresse Ihres Servers beispielsweise 192.168.0.1 und Sie möchten auf diesem Server eine NFS-basierte Installation aus dem Verzeichnis /install ausführen, müssen Sie die Quelle wie folgt angeben:
 
-Zurück zur mainStartseiteo_installInstaller-Optionen: installStandardmäßig werden die lokalen CD-ROMs nach der Installationsquelle durchsucht. Wählen Sie für eine Netzwerkinstallation die Option Installieren. Mögliche Installationsprotokolle sind
-  * FTP
-  * NFS
-  * HTTP
-Die zu verwendende Syntax entspricht den Standard-URLs. Wird Ihr Server z.B. unter 192.168.0.1 gefunden und Sie wollen eine NFS-basierte Installation aus dem Verzeichnis /install auf diesem Server vornehmen, geben Sie die Quelle wie folgt an:
+install=nfs://192.168.0.1/install
 
-  install=nfs://192.168.0.1/install
+The network card will either be configured with DHCP or you must specify the parameters yourself as described in the networkNetzwerkoptionen.
 
-Die Netzwerkkarte wird entweder mit dhcp konfiguriert oder Sie   müssen die Parameter selbst wie in den networkNetzwerkoptionen beschrieben angeben.
-
-
-Zurück zu den optBootoptioneno_splashKernel-Optionen: splashDer Splash-Screen ist das Bild, das beim Systemstart gezeigt wird.
+Zurück zu optBootoptioneno_splashKernel-Optionen: splashDer Splash-Screen ist das Bild, das beim Systemstart eingeblendet wird.
 
 splash=0
 
-Der Splash-Screen ist ausgeschaltet. Dies mag für sehr alte Monitore nützlich sein oder beim Auftreten von Fehlern.
+Der Splash-Screen ist deaktiviert. Diese Einstellung empfiehlt sich eventuell bei sehr alten Bildschirmen oder bei bestimmten Fehlern.
 
 splash=verbose
 
-Aktiviert Splash; Kernel- und Boot-Meldungen werden weiterhin angezeigt.
+Aktiviert den Splash-Screen. Kernel- und Boot-Meldungen werden nach wie vor angezeigt.
 
 splash=silent
 
-Aktiviert Splash, jedoch keine Meldungen. Stattdessen erscheint eine Fortschrittsanzeige.
+Activates splash, but no messages. Instead a progress bar is drawn.
 
-Zurück zu den optBootoptionennetworkInstaller-Optionen: NetzwerkoptionenDie Netzwerkschnittstelle kann nun konfiguriert werden. Die Hardware-Erkennung wird später durch YaST durchgeführt. Die minimal erforderlichen Optionen zum Konfigurieren Ihrer Netzwerkkarte bestehen aus der Rechner-IP und der Netzmaske. Zum Beispiel:
+Zurück zu optBootoptionennetworkInstallationsoptionen: NetzwerkoptionenWenn Sie möchten, können Sie die Netzwerkschnittstelle gleich jetzt konfigurieren. Die Hardware wird später durch YaST2 ermittelt. Zur Konfiguration Ihrer Netzwerkkarte müssen Sie zumindest die Host-IP und die Netzmaske angeben. Beispiel:
 
-  hostip=192.168.0.10 netmask=255.255.255.0
+hostip=192.168.0.10 netmask=255.255.255.0
 
 oder kürzer:
 
-  hostip=192.168.0.10/24
+hostip=192.168.0.10/24
 
-Haben Sie eine o_installNetzwerk-basierteInstallation angegeben aber keine der beiden Optionen, dann versucht der Installer die Konfiguration der Netzwerkschnittstelle mit dhcp. Benötigen Sie einen Standard-Gateway, geben Sie diesen mit der Option Gateway an. Zum Beispiel:
+If you specified a o_installnetzwerkbasierteInstallation and do not specify both of these options, the installer tries to configure the network interface with DHCP. If you need a default gateway, specify this with the option Gateway. For example:
 
-  gateway=192.168.0.8
+gateway=192.168.0.8
 
+Zurück zu optBootoptioneno_vncInstallationsoptionen: vncGeben Sie für die VNC-Installation die Parameter vnc und vncpassword an:
 
-Zurück zu den optBootoptioneno_vncInstaller-Optionen: vncGeben Sie zum Aktivieren der VNC-Installation die Parameter vnc und vncpassword an:
+vnc=1 vncpassword=example
 
-  vnc=1 vncpassword=example
+The VNC server will be started and you may control YaST2 over any VNC client from a remote system.
 
-Der VNC-Server wird gestartet und Sie können YaST über jeden VNC-Client von einem entfernten Rechner steuern.
+Zurück zu optBootoptionen.o_apmKernel-Optionen: apmAPM ist eine der beiden Energieverwaltungsstrategien heutiger Computer. APM wird in erster Linie auf Notebook-Computern für Funktionen wie 'Suspend to Disk' eingesetzt, kann aber auch für das Abschalten des Computers nach dem Herunterfahren verantwortlich sein. Die Funktion von APM hängt in höchstem Maße von der einwandfreien Funktion des BIOS ab. Bei einem fehlerhaften BIOS funktioniert das APM eventuell nur eingeschränkt, womöglich funktioniert der Computer überhaupt nicht mehr. Aus diesem Grund kann das APM mit folgendem Parameter deaktiviert werden
 
+apm=off -- Deaktiviert APM vollständig
 
-Zurück zu den optBootoptionen.o_apmKernel-Optionen: apmAPM ist eine der beiden Power-Management-Möglichkeiten, die derzeit auf aktuellen Rechnern verwendet werden. Es wird hauptsächlich für Laptop-Funktionen wie Suspend to Disk verwendet. Es kann jedoch auch zum Ausschalten des Rechners nach dem Herunterfahren verwendet werden. APM hängt von einem funktionierenden BIOS ab. Ist das BIOS defekt, kann APM möglicherweise nur begrenzt eingesetzt werden oder den Rechner sogar funktionsunfähig machen. Deshalb kann es mit dem Parameter
+Einige sehr neue Computer profitieren womöglich mehr von dem neueren o_acpiacpi.
 
-  apm=off -- APM komplett abschalten
+Zurück zu optBootoptioneno_acpiKernel-Optionen: acpiACPI (Advanced Configuration and Power Interface) ist ein Standard, der die Energie- und Konfigurationsverwaltungsschnittstellen zwischen dem Betriebssystem und dem BIOS festlegt. acpi ist standardmäßig aktiviert, wenn ein BIOS festgestellt wird, das neueren Datums ist (ab dem Jahr 2000). Zur Steuerung des ACPI-Verhaltens können verschiedene gängige Parameter verwendet werden:
 
-abgeschaltet werden. Einige neuere Rechner ziehen eventuell mehr Nutzen aus dem aktuelleren o_acpiACPI.
+pci=noacpi -- do not use ACPI to route PCI interrupts
+acpi=oldboot -- only the parts of ACPI that are relevant for booting remain activated
+acpi=off -- Deaktiviert die ACPI vollständig
+acpi=force -- Aktiviert die ACPI, selbst wenn Ihr BIOS älteren Datums ist (vor dem Jahr 2000)
 
-Zurück zu den optBootoptioneno_acpiKernel-Optionen: acpiACPI (Advanced Configuration and Power Interface) ist ein Standard, der Power- und Konfigurations-Management-Schnittstellen zwischen einem Betriebssystem und dem BIOS definiert. Standardmäßig wird acpi angeschaltet, wenn ein neueres BIOS als das vom Jahr 2000 erkannt wird. Es gibt verschiedene gebräuchliche Parameter zum Steuern des Verhaltens von ACPI:
+Besonders auf neuen Computern wird dadurch das alte o_apmapm-System ersetzt.
 
-  pci=noacpi -- ACPI nicht zum Weiterleiten von PCI-Interrupts verwenden
-  acpi=oldboot -- nur die ACPI-Bereiche, die für den Systemstart relevant sind, bleiben aktiv
-  acpi=off -- ACPI komplett abschalten
-  acpi=force -- ACPI sogar dann anschalten, wenn Ihr BIOS vor dem Jahr 2000 datiert ist
+Zurück zu optBootoptioneno_ideKernel-Optionen: ideIDE wird im Gegensatz zu SCSI auf den meisten Desktop-Arbeitsstationen verwendet. Zur Umgehung einiger typischer Hardwareprobleme von IDE-Systemen sollten Sie folgenden Kernel-Parameter verwenden:
 
-Besonders auf neuen Rechnern ersetzt es das alte o_apmapm-System.
+ide=nodma -- switch off DMA for IDE drives
 
-Zurück zu den optBootoptioneno_ideKernel-Optionen: ideIDE wird, anders wie SCSI, häufig in den meisten Desktop-Workstations verwendet. Um einige Hardware-Probleme zu umgehen, die unter IDE-Systemen auftreten, verwenden Sie den Kernel-Parameter:
+Zurück zu optBootoptionen.bitsAuswahl des SoftwaretypsYou have the choice to install the 32-bit or 64-bit version of openSUSE 10.2.
 
-  ide=nodma -- DMA für IDE-Treiber abschalten
-
-
-Zurück zu den optBootoptionen.bitsAuswahl des SoftwaretypsSie können die 32-bit- oder die 64-bit-Version von openSUSE installieren.
-
-Return to mainStartseite 
+Zurück zu mainStartseite 

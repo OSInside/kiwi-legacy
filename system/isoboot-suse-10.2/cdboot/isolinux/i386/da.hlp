@@ -28,15 +28,15 @@ Brug denne menu til at vælge den ønskede funktion. Hvis du har problemer med a
 
 Navigationstaster
 
-  Pil op: Fremhæv forrige link
-  Pil ned: Fremhæv næste link
-  Pil til venstre, Backspace: Vend tilbage til forrige emne
-  Pil til højre, Enter, Space: Følg link
-  Page Up: Gå en side op
-  Page Down: Gå en side ned
-  Home: Gå til starten af siden
-  End: Gå til slutningen af siden
-  Esc: Forlad hjælp igen
+Pil op: Fremhæv forrige link
+Pil ned: Fremhæv næste link
+Pil til venstre, Backspace: Vend tilbage til forrige emne
+Pil til højre, Enter, Space: Følg link
+Page Up: Gå en side op
+Page Down: Gå en side ned
+Home: Gå til starten af siden
+End: Gå til slutningen af siden
+Esc: Forlad hjælp igen
 
 Vend tilbage til mainStartsidendriverupdateDriveropdateringHvis du har en driveropdaterings diskette eller CD-ROM du skal bruge, så tryk F5. Opstartsindlæsere vil bede dig om at indsætte dette medie efter Linuxkernen er blevet indlæst.
 
@@ -68,8 +68,8 @@ Vend tilbage til mainStartsidennoacpiInstallation uden ACPI understøttels
 
 Vælg Installation uden ACPI understøttelse hvis du oplever problemer under opstart af kernen. Kendte problemer med maskiner der har problemer med ACPI er:
 
-   * Kernen fryser under opstart
-   * PCI kort bliver ikke fundet eller initialiseret korrekt
+* Kernen fryser under opstart
+* PCI kort bliver ikke fundet eller initialiseret korrekt
 
 
 
@@ -87,25 +87,25 @@ Vend tilbage til mainStartsidenoptOpstartsmulighederDer er 2 typer af ops
 
 a) installationsmuligheder
 
-  o_installinstall -- vælg installationskilden
-  networknetværksmuligheder -- netværksopsætning
-  o_vncvnctilvalg -- muliggør installation via VNC
+o_installinstall -- vælg installationskilden
+networknetværksmuligheder -- netværksopsætning
+o_vncvnctilvalg -- muliggør installation via VNC
 
 b) kerne tilvalg
 
-  o_splashsplash -- bestemmer hvordan opstarten ser ud
-  o_apmapm -- vælg eler fravælg strømstyring
-  o_acpiacpi -- avanceret opsætning af strømstyring
-  o_ideide -- IDE subsystem indstillinger
+o_splashsplash -- bestemmer hvordan opstarten ser ud
+o_apmapm -- vælg eler fravælg strømstyring
+o_acpiacpi -- avanceret opsætning af strømstyring
+o_ideide -- IDE subsystem indstillinger
 
 
 Vend tilbage til mainStartsideno_installInstaller Options: installSom standard vil CD-ROM/DVD drevet blive gennemsøgt for en installationskilde. Hvis du vil lave en netværksinstallation så vælg install muligheden. Du kan vælge imellem følgende protokoller:
-  * FTP
-  * NFS
-  * HTTP
+* FTP
+* NFS
+* HTTP
 Syntaksen er den samme som almindelige URL'er. Hvis du for eksempel har en server på IP 192.168.0.1 og du vil lave en NFS-baseret installation fra kataloget /install på denne server så angiv kilden som følger:
 
-  install=nfs://192.168.0.1/install
+install=nfs://192.168.0.1/install
 
 netkortet skal enten være opsat med DHCP eller også skal du angive netværksparametrene selv som beskrevet i afsnittet networknetværksmuligheder.
 
@@ -123,46 +123,46 @@ Aktiverer splash billedet, men ingen beskeder vises. I stedet vises en grafisk f
 
 Vend tilbage til optOpstartsmulighedernetworkInstallationmuligheder: NetværkDet er muligt at opsætte netkoret med det samme. Hardwaren vil blive fundet senere af YaST2. Minimaltopsætningen af netkortet består af en IP adresse og en netmaske. For eksempel:
 
-  hostip=192.168.0.10 netmask=255.255.255.0
+hostip=192.168.0.10 netmask=255.255.255.0
 
 eller endnu kortere:
 
-  hostip=192.168.0.10/24
+hostip=192.168.0.10/24
 
 Hvis du har valgt en o_installnetværksbaseretinstallation og du ikke angiver nogen af disse linier vil installationsprogrammet forsøge at sætte netkortet op med DHCP. Hvis du har brug for en standard rute/gateway så angiv denne med gateway tilvalget. For eksempel:
 
-  gateway=192.168.0.8
+gateway=192.168.0.8
 
 Det er muligt at angive proxy instillinger for FTP og HTTP installationer med følgende valg:
 
-  proxy=ProxyIP proxyport=port
+proxy=ProxyIP proxyport=port
 
 Eksempel: proxy=192.168.0.250 proxyport=3128
 
 Vend tilbage til optOpstartsmulighedero_vncInstallationsmuligheder: vncFor at slå VNC installation til skal du angive parametrene vnc og vncpassword:
 
-  vnc=1 vncpassword=example
+vnc=1 vncpassword=example
 
 Hvis du ikke angiver vncpassword vil du blive promptet for adgangskode senere. VNC serveren vil herefter blive startet og du kan styre YaST2 delen af installationen med et hvilket som helst VNC program fra et fjernsystem.
 
 
 Vend tilbage til optOpstartsmuligheder.o_apmKerne tilvalg: apmAPM er en af de to strømstyrings strategier der bruges på moderne computere. Den bruges hovedsagelig på bærbare til ting som suspendering til disk, men kan bl.a. også bruges til at slukke maskinen. For at APM skal virke godt er en korrekt opsat BIOS en nødvendighed. Hvis BIOSen er dårlig vil APM kun være af begrænset nytte eller måske endda forhindre computeren i at fungere korrekt. Det er derfor muligt at slå APM fra med parametren
 
-  apm=off -- Deaktiverer APM fuldstændig
+apm=off -- Deaktiverer APM fuldstændig
 
 Visse nye computere kan have glæde af den nyere o_acpiACPI.
 
 Vend tilbage til optOpstartsmulighedero_acpiKerne tilvalg: acpiACPI (Advanced Configuration and Power Interface) er en standard der angiver opsætning af strømstyring og anden hardware opsætning mellem operativsystemet og BIOSen. Som standard bliver acpi slået til når en BIOS bliver fundet der er nyere end år 2000. Der er en række ofte brugte parametre der styrer hvordan ACPI fungerer:
 
-  pci=noacpi -- Brug ikke ACPI til at rute PCI interrupts   acpi=oldboot -- Nøjes med at bruge de dele af ACPI der bruges til at boote systemet
-  acpi=off -- Slår ACPI helt fra
-  acpi=force -- Aktivér ACPI selvom BIOSen er fra før 2000
+pci=noacpi -- Brug ikke ACPI til at rute PCI interrupts acpi=oldboot -- Nøjes med at bruge de dele af ACPI der bruges til at boote systemet
+acpi=off -- Slår ACPI helt fra
+acpi=force -- Aktivér ACPI selvom BIOSen er fra før 2000
 
 Især på nyere computere erstatter denne det ældre o_apmapm system.
 
 Vend tilbage til optOpstartsmulighedero_ideKerne tilvalg: ideIDE er almindeligvis anvendt i desktopcomputere, i modsætning til SCSI. For at omgå visse hardware problemer der kan opstå med IDE systemer kan du bruge kerneparametren:
 
-  ide=nodma -- Deaktiverer DMA for IDE drev
+ide=nodma -- Deaktiverer DMA for IDE drev
 
 
 Vend tilbage til optOpstartsmuligheder.bitsSoftwaretype valgDu kan vælge imellem at installere 32-bit eller 64-bit versionen af openSUSE.

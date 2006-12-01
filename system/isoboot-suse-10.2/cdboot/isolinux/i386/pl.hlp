@@ -28,15 +28,15 @@ Menu to pozwala wybrać odpowiednią funkcję. W przypadku problemów z nawigacj
 
 Klawisze nawigacyjne
 
-  Strzałka w górę: podświetlenie poprzedniego odnośnika
-  Strzałka w dół: podświetlenie następnego odnośnika
-  Strzałka w lewo, Backspace: powrót do poprzedniego tematu
-  Strzałka w prawo, Enter, Spacja: otwarcie odnośnika
-  Page Up: przewinięcie strony w górę
-  Page Down: przewinięcie strony w dół
-  Home: przejście na początek strony
-  End: przejście na koniec strony
-  Esc: opuszczenie pomocy
+Strzałka w górę: podświetlenie poprzedniego odnośnika
+Strzałka w dół: podświetlenie następnego odnośnika
+Strzałka w lewo, Backspace: powrót do poprzedniego tematu
+Strzałka w prawo, Enter, Spacja: otwarcie odnośnika
+Page Up: przewinięcie strony w górę
+Page Down: przewinięcie strony w dół
+Home: przejście na początek strony
+End: przejście na koniec strony
+Esc: opuszczenie pomocy
 
 
 Powrót do mainstronypoczątkowejdriverupdateAktualizacja sterownikówJeśli potrzebna jest dyskietka lub płyta CD z aktualizacją sterowników, należy nacisnąć klawisz F5. Program rozruchowy poprosi o umieszczenie nośnika w napędzie po wczytaniu jądra systemu Linux.
@@ -69,8 +69,8 @@ Powrót do mainstronypoczątkowejnoacpiInstalacja (bez ACPI)Komputery z 
 
 Opcji Instalacja (bez ACPI) można użyć, jeśli wystąpią problemy podczas uruchamiania jądra. Typowe problemy z ACPI to:
 
-   * system przestaje odpowiadać podczas uruchamiania
-   * karty PCI nie są prawidłowo wykrywane lub inicjowane
+* system przestaje odpowiadać podczas uruchamiania
+* karty PCI nie są prawidłowo wykrywane lub inicjowane
 
 
 
@@ -88,25 +88,25 @@ Powrót do mainstronypoczątkowejoptOpcje rozruchoweDostępne są dwa ty
 
 a) opcje instalatora
 
-  o_installinstalacja -- wybór źródła instalacji
-  networkopcjesieciowe -- opcje sieciowe
-  o_vncopcjevnc -- opcje instalacji przez VNC
+o_installinstalacja -- wybór źródła instalacji
+networkopcjesieciowe -- opcje sieciowe
+o_vncopcjevnc -- opcje instalacji przez VNC
 
 b) opcje jądra
 
-  o_splashsplash -- zmiana wyglądu ekranu powitalnego (splash screen)
-  o_apmapm -- włączenie trybu zarządzania energią APM
-  o_acpiacpi -- włączenie trybu zarządzania energią ACPI
-  o_ideide -- zarządzanie podsystemem IDE
+o_splashsplash -- zmiana wyglądu ekranu powitalnego (splash screen)
+o_apmapm -- włączenie trybu zarządzania energią APM
+o_acpiacpi -- włączenie trybu zarządzania energią ACPI
+o_ideide -- zarządzanie podsystemem IDE
 
 
 Powrót do mainstronypoczątkowejo_installOpcje instalatora: instalacjaDomyślnie, jako źródło instalacji przeszukiwane są lokalne napędy CD-ROM. Dla instalacji sieciowej należy wybrać opcję install. Do instalacji można wykorzystać protokoły:
-  * FTP
-  * NFS
-  * HTTP
+* FTP
+* NFS
+* HTTP
 Składnia jest taka sama jak w standardowych adresach URL. Na przykład, jeśli serwer jest pod adresem 192.168.0.1 i instalacja przeprowadzona będzie przez NFS z katalogu /install na tym serwerze, należy określić źródło w następujący sposób:
 
-  install=nfs://192.168.0.1/install
+install=nfs://192.168.0.1/install
 
 Karta sieciowa zostanie skonfigurowana przez dhcp albo konieczne będzie ręczne podanie parametrów, jak opisano w networkopcjachsieciowych.
 
@@ -124,42 +124,42 @@ Aktywacja ekranu powitalnego, brak komunikatów. Wyświetlany jest pasek postęp
 
 Powrót do optopcjirozruchowychnetworkOpcje instalatora: opcje siecioweMożliwe jest skonfigurowanie interfejsu sieciowego. Sprzęt zostanie wykryty później przez program YaST2. Do poprawnej pracy sieci potrzebne są co najmniej adres IP i maska sieci, na przykład:
 
-  hostip=192.168.0.10 netmask=255.255.255.0
+hostip=192.168.0.10 netmask=255.255.255.0
 
 albo w formie skróconej:
 
-  hostip=192.168.0.10/24
+hostip=192.168.0.10/24
 
 Jeśli wybrano o_installinstalacjęsieciową i nie użyto powyższych parametrów, instalator spróbuje skonfigurować interfejs sieciowy za pomocą dhcp. Domyślną bramę można podać za pomocą parametru gateway, na przykład:
 
-  gateway=192.168.0.8
+gateway=192.168.0.8
 
 
 Powrót do optopcjirozruchowycho_vncOpcje instalatora: vncAby włączyć instalację VNC, należy podać parametry vnc i vncpassword:
 
-  vnc=1 vncpassword=example
+vnc=1 vncpassword=example
 
 Zostanie uruchomiony serwer VNC i będzie można sterować programem YaST2 za pośrednictwem klienta VNC ze zdalnego hosta.
 
 
 Powrót do optopcjirozruchowycho_apmOpcje jądra: apmAPM (Advanced Power Management) jest jednym z dwóch systemów zarządzania energią używanych we współczesnych komputerach. System APM wykorzystywany jest głównie w komputerach przenośnych do takich funkcji, jak usypianie z zrzutem pamięci na dysk, ale może być także odpowiedzialny za poprawne wyłączanie komputera po wciśnięciu wyłącznika. System APM zależy od prawidłowego funkcjonowania BIOS-u. Jeśli BIOS nie działa prawidłowo, APM ma ograniczone zastosowanie, może nawet uniemożliwić pracę komputera. W takiej sytuacji można go wyłączyć parametrem:
 
-  apm=off -- całkowicie wyłącz APM
+apm=off -- całkowicie wyłącz APM
 
 Dla niektórych nowoczesnych komputerów bardziej odpowiedni może okazać się nowszy system o_acpiACPI.
 
 Powrót do optopcjirozruchowycho_acpiOpcje jądra: acpiACPI (Advanced Configuration and Power Interface) jest nowoczesnym systemem zarządzania energią. Przy instalacji ACPI jest włączany domyślnie po wykryciu BIOS-u z roku późniejszego niż 2000. Istnieje kilka typowych parametrów sterujących działaniem ACPI:
 
-  pci=noacpi -- bez użycia ACPI do przekierowywania przerwań PCI
-  acpi=oldboot -- aktywowane są tylko części ACPI dotyczące procesu rozruchu systemu
-  acpi=off -- całkowite wyłączenie ACPI
-  acpi=force -- włączenie ACPI, nawet jeśli BIOS pochodzi sprzed roku 2000
+pci=noacpi -- bez użycia ACPI do przekierowywania przerwań PCI
+acpi=oldboot -- aktywowane są tylko części ACPI dotyczące procesu rozruchu systemu
+acpi=off -- całkowite wyłączenie ACPI
+acpi=force -- włączenie ACPI, nawet jeśli BIOS pochodzi sprzed roku 2000
 
 Na nowszych komputerach ACPI zastępuje stary system o_apmAPM.
 
 Powrót do optopcjirozruchowycho_ideOpcje jądra: ideIDE jest, w przeciwieństwie do SCSI, powszechnie wykorzystywane w stacjach roboczych. Aby zapobiec niektórym problemom z systemami IDE, można użyć parametru jądra:
 
-  ide=nodma -- wyłączenie DMA dla urządzeń IDE
+ide=nodma -- wyłączenie DMA dla urządzeń IDE
 
 
 Powrót do optopcjirozruchowychbitsWybór rodzaju oprogramowaniaIstnieje możliwość zainstalowania 32- lub 64-bitowej wersji systemu openSUSE.

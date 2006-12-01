@@ -10,7 +10,7 @@ Tramite questo menu potete selezionare la funzione desiderata. Se doveste incont
 
 failsafeInstallazione--SafeSettings: Se la voce Installazione non ha portato al risultato sperato, questa voce potrebbe risolvere il problema.
 
-rescueSistemadisalvataggio: Questa immagine di boot avvia un piccolo sistema Linux nella RAM. Ciò è utile se il sistema non si avvia correttamente. Dopo il boot del sistema, eseguite il log in come root.  
+rescueSistemadisalvataggio: Questa immagine di boot avvia un piccolo sistema Linux nella RAM. Ciò è utile se il sistema non si avvia correttamente. Dopo il boot del sistema, eseguite il log in come root.
 
 memtestVerificadellamemoria: Questa verifica è utile non solo per controllare l'installazione di nuovi moduli di memoria. Si tratta di una dura prova per la maggior parte del vostro sistema e potrebbe rilevare dei problemi dovuti all'hardware.
 
@@ -28,15 +28,15 @@ Tramite questo menu potete selezionare la funzione desiderata. Se doveste incont
 
 Tasti di navigazione
 
-  Freccia su: evidenzia link precedente
-  Freccia giù: evidenzia prossimo link
-  Freccia sinistra, Backspace: ritorna al topic precedente
-  Freccia destra, Invio, Spazio: segui il link
-  Pag Su: scorri su di una pagina
-  Pag Giù: scrorri giù di una pagina
-  Home: vai alla pagina iniziale
-  Fine: vai alla fine della pagina
-  Esc: esci
+Freccia su: evidenzia link precedente
+Freccia giù: evidenzia prossimo link
+Freccia sinistra, Backspace: ritorna al topic precedente
+Freccia destra, Invio, Spazio: segui il link
+Pag Su: scorri su di una pagina
+Pag Giù: scrorri giù di una pagina
+Home: vai alla pagina iniziale
+Fine: vai alla fine della pagina
+Esc: esci
 
 
 Ritorna alla mainPaginainizialedriverupdateAggiornamento driverSe vi serve un dischetto o CD-Rom con aggiornamenti di driver, premete F5. Il boot loader vi chiederà di inserire il dispositivo dopo aver caricato il kernel di Linux.
@@ -69,8 +69,8 @@ Ritorna alla mainPaginainizialenoacpiInstallazione -- ACPI disabilitataH
 
 Selezionate Installazione -- ACPI disabilitata se doveste incontrare delle difficoltà durante il processo di boot del kernel. Le difficoltà risapute con macchine che non si sposano bene con ACPI sono:
 
-   * blocco del kernel in fase di boot
-   * le schede PCI non vengono rilevate o non vengono inzializzate      correttamente
+* blocco del kernel in fase di boot
+* le schede PCI non vengono rilevate o non vengono inzializzate correttamente
 
 
 
@@ -88,25 +88,25 @@ Ritorna alla mainPaginainizialeoptOpzioni di bootSono disponibili due ti
 
 a) opzioni per l'installer
 
-  o_installinstall -- seleziona una origine di installazione
-  networknetworkoptions -- le opzioni di rete
-  o_vncvncoptions -- opzioni per l'installazione via VNC
+o_installinstall -- seleziona una origine di installazione
+networknetworkoptions -- le opzioni di rete
+o_vncvncoptions -- opzioni per l'installazione via VNC
 
 b) opzioni per il kernel
 
-  o_splashsplash -- influisce sul comportamento dello splash screen
-  o_apmapm -- interessa le funzioni di risparmio energetico del sistema
-  o_acpiacpi -- advanced configuration and power interface
-  o_ideide -- controlla il sottosistema IDE
+o_splashsplash -- influisce sul comportamento dello splash screen
+o_apmapm -- interessa le funzioni di risparmio energetico del sistema
+o_acpiacpi -- advanced configuration and power interface
+o_ideide -- controlla il sottosistema IDE
 
 
 Ritorna alla mainPaginainizialeo_installOpzioni dell'installer: installDi default, si cercano i CD-Rom locali quale origine di installazione. Se eseguite l'installazione via rete, selezionate l'opzione install. Protocolli di installazione possibili sono
-  * FTP
-  * NFS
-  * HTTP
+* FTP
+* NFS
+* HTTP
 La sintassi da utilizzare corrisponde a quella delle URL standard. Ad esempio, se il vostro server ha l'indirizzo 192.168.0.1 e volete installare tramite NFS dalla directory /install che risiede su questo server, specificate l'origine di installazione nel modo seguente:
 
-  install=nfs://192.168.0.1/install
+install=nfs://192.168.0.1/install
 
 La scheda di rete viene configurata tramite dhcp oppure potete specificate i parametri voi stessi come descritto nelle networkopzionidirete.
 
@@ -127,42 +127,42 @@ Attiva lo splash screen, senza visualizzare dei messaggi. Viene mostrata invece 
 
 Ritorna alle optOpzionidibootnetworkOpzioni per l'installer: opzioni di retePotete configurare l'interfaccia di rete adesso. L'hardware verrà rilevato in un secondo momento da YaST2. Per configurare la scheda di rete dovrete almeno impostare l'indirizzo IP dell'host e la maschera di rete. Per esempio:
 
-  hostip=192.168.0.10 netmask=255.255.255.0
+hostip=192.168.0.10 netmask=255.255.255.0
 
 o in forma più breve:
 
-  hostip=192.168.0.10/24
+hostip=192.168.0.10/24
 
 Se avete specificato o_installinstallazioneviarete senza specificare questi due valori, l'installer tenderà di configurare l'interfaccia di rete tramite dhcp. Se vi serve un gateway di default, specificatelo tramite l'opzione gateway. Ad esempio:
 
-  gateway=192.168.0.8
+gateway=192.168.0.8
 
 
-Ritorna alle optOpzionidibooto_vncOpzioni per l'installer: vncPer abilitare una installazione VNC, specificate i parametri  vnc e la vncpassword:
+Ritorna alle optOpzionidibooto_vncOpzioni per l'installer: vncPer abilitare una installazione VNC, specificate i parametri vnc e la vncpassword:
 
-  vnc=1 vncpassword=esempio
+vnc=1 vncpassword=esempio
 
 Il server VNC si avvierà e potrete gestire YaST2 tramite un client VNC qualsiasi da remoto.
 
 
 Ritorna alle optOpzionidibooto_apmOpzioni per il kernel: apmAPM è una delle due strategie da poter applicare in tema di risparmio energetico su computer comunemente diffusi. Si usa soprattutto con portatili per funzioni del tipo suspend to disk, ma può essere anche preposto allo spegnimento del computer dopo lo shutdown. APM si basa sul corretto funzionamento del BIOS. Se il BIOS non funziona a dovere, l'utilità dell'APM si riduce notevolmente o può addirittura compromettere il funzionamento del computer. Per tale ragione avete la possibilità di disabilitarlo tramite questo parametro:
 
-  apm=off -- disattiva completamente APM
+apm=off -- disattiva completamente APM
 
 Su alcuni computer recentissimi si potrà trarre beneficio da o_acpiACPI più recenti.
 
 Ritorna alle optOpzionidibooto_acpiOpzioni per il kernel: acpiACPI (Advanced Configuration and Power Interface) è uno standard di interfaccia posta tra sistema operativo e BIOS. Di default, acpi è attivata se è stato rilevato un BIOS del dopo 2000. Vi sono una serie d parametri per intervenire sul comportamento dell' ACPI:
 
-  pci=noacpi -- non utilizzare ACPI per gestire gli interrupt PCI
-  acpi=oldboot -- solo le parti dell'ACPI che sono rilevanti per il processo di boot rimangono attivate
-  acpi=off -- spegni completamente l'ACPI
-  acpi=force -- attiva ACPI anche se il BIOS è di un anno precedente al 2000
+pci=noacpi -- non utilizzare ACPI per gestire gli interrupt PCI
+acpi=oldboot -- solo le parti dell'ACPI che sono rilevanti per il processo di boot rimangono attivate
+acpi=off -- spegni completamente l'ACPI
+acpi=force -- attiva ACPI anche se il BIOS è di un anno precedente al 2000
 
 Soprattutto su computer recenti, ACPI si sostituisce al vecchio sistema o_apmapm.
 
 Ritorna alle optOpzionidibooto_ideOpzioni per il kernel: ideIDE - a differenza di SCSI- viene utilizzato di solito su postazioni di lavoro desktop. Per aggirare degli eventuali problemi dovuti all' hardware che si possono verificare con sistemi IDE, utilizzate il parametro del kernel:
 
-  ide=nodma -- spengi DMA per drive IDE
+ide=nodma -- spengi DMA per drive IDE
 
 
 Ritorna alle optOpzionidibootbitsSelezione tipo di softwareÈ possibile installare la versione di openSUSE a 32 o 64 bit.
