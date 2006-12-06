@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Wed Dec  6 09:35:04 CET 2006 - ms@suse.de
+
+- added support for modifiying user accounts
+- added support for --list option which gives an overview
+  about the available image descriptions
+- added support for specifying --prepare without path. In that
+  case it is assumed the image can be found in /usr/share/kiwi/image
+- changed repository and package structure. Split kiwi-images
+  into kiwi-images-boot and a kiwi-images-<Systems> packages
+
+-------------------------------------------------------------------
 Fri Dec  1 12:25:14 CET 2006 - ms@suse.de
 
 - update isoboot-suse-10.2 CD data

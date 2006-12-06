@@ -7,8 +7,8 @@ Name:          kiwi
 BuildRequires: syslinux
 Requires:      perl smart perl-XML-LibXML syslinux perl-libwww-perl
 Summary:       OpenSuSE - KIWI Image System
-Version:       1.2
-Release:       1
+Version:       1.7
+Release:       7
 Group:         System
 License:       GPL
 Source:        kiwi.tar.bz2
@@ -22,8 +22,6 @@ Authors:
     Marcus Schäfer <ms@suse.de>
 
 %package -n kiwi-pxeboot
-Version:      1.2
-Release:      1
 Summary:      OpenSuSE - KIWI TFTP boot structure
 Group:        System
 
@@ -35,16 +33,35 @@ Authors:
     Marcus Schäfer <ms@suse.de>
 
 
-%package -n kiwi-images
+%package -n kiwi-images-boot
 Requires:     kiwi
-Version:      1.2
-Release:      1
 Summary:      OpenSuSE - KIWI image descriptions
 Group:        System
 
-%description -n kiwi-images
+%description -n kiwi-images-boot
 This package contains the OpenSuSE - KIWI image descriptions.
-Each image description exists in a single directory 
+Each image description exists in a single directory and contains
+a boot image description
+
+%package -n kiwi-images-wyse
+Requires:     kiwi
+Summary:      OpenSuSE - KIWI image descriptions
+Group:        System
+
+%description -n kiwi-images-wyse
+This package contains the OpenSuSE - KIWI image descriptions.
+Each image description exists in a single directory and contains
+a thin client description for Wyse terminals
+
+%package -n kiwi-images-buildservice
+Requires:     kiwi
+Summary:      OpenSuSE - KIWI image descriptions
+Group:        System
+
+%description -n kiwi-images-buildservice
+This package contains the OpenSuSE - KIWI image descriptions.
+Each image description exists in a single directory and contains
+a buildservice description for a package building client
 
 Authors:
 --------
@@ -102,6 +119,14 @@ cat kiwi.loader
 #=================================================
 # KIWI-images...
 # ------------------------------------------------
-%files -n kiwi-images
+%files -n kiwi-images-boot
 %defattr(-, root, root)
-%{_datadir}/kiwi/image
+%{_datadir}/kiwi/image/*boot*
+
+%files -n kiwi-images-wyse
+%defattr(-, root, root)
+%{_datadir}/kiwi/image/wyseGhost-suse-10.1
+
+%files -n kiwi-images-buildservice
+%{_datadir}/kiwi/image/buildhost-suse-10.1
+%defattr(-, root, root)

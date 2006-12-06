@@ -265,6 +265,7 @@ sub init {
 		"version"             => \&version,
 		"logfile=s"           => \$LogFile,
 		"prepare|p=s"         => \$Prepare,
+		"list|l"              => \&listImage,
 		"create|c=s"          => \$Create,
 		"destdir|d=s"         => \$Destination,
 		"virtual|v=s"         => \$Virtual,
@@ -315,6 +316,7 @@ sub usage {
 	print "\n";
 
 	print "Usage:\n";
+	print "  kiwi -l | --list\n";
 	print "  kiwi -p | --prepare <image-path>\n";
 	print "  kiwi -c | --create  <image-root>\n";
 	print "  kiwi --bootstick <initrd> [ --bootstick-system <systemImage> ]\n";
@@ -344,6 +346,32 @@ sub usage {
 	print "    the terminal.\n";
 	print "--\n";
 	exit 1;
+}
+
+#==========================================
+# listImage
+#------------------------------------------
+sub listImage {
+	# ...
+	# list known image descriptions and exit
+	# ---
+	opendir (FD,$System);
+	my @images = readdir (FD); closedir (FD);
+	foreach my $image (@images) {
+		if ($image =~ /^\./) {
+			next;
+		}
+		if (-l "$System/$image") {
+			next;
+		}
+		if (open (HD,"$System/$image/VERSION")) {
+			my $version = <HD>;
+			my $line = sprintf ("%-20s -> Version: %s",$image,$version);
+			$kiwi -> info ("Image: $line");
+			close HD;
+		}
+	}
+	exit 0;
 }
 
 #==========================================

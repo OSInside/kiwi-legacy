@@ -61,6 +61,9 @@ sub new {
 	if (! defined $kiwi) {
 		$kiwi = new KIWILog();
 	}
+	if ($imageDesc !~ /\//) {
+		$imageDesc = $main::System."/".$imageDesc;
+	}
 	my $controlFile = $imageDesc."/config.xml";
 	my $versionFile = $imageDesc."/VERSION";
 	my $systemXML   = new XML::LibXML;

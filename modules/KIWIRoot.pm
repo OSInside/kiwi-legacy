@@ -438,6 +438,7 @@ sub setup {
 	my %users = $xml -> getUsers();
 	if (defined %users) {
 		my $adduser  = "/usr/sbin/useradd";
+		my $moduser  = "/usr/sbin/usermod";
 		my $addgroup = "/usr/sbin/groupadd";
 		foreach my $user (keys %users) {
 			my $group = $users{$user}{group};
@@ -445,6 +446,7 @@ sub setup {
 			my $home  = $users{$user}{home};
 			if (defined $pwd) {
 				$adduser .= " -p '$pwd'";
+				$moduser .= " -p '$pwd'";
 			}
 			if (defined $home) {
 				$adduser .= " -m -d $home";
@@ -466,9 +468,17 @@ sub setup {
 				}
 				$adduser .= " -G $group";
 			}
-			$kiwi -> info ("Adding user: $user [$group]");
-			my $data = qx ( chroot $root $adduser $user 2>&1 );
+			my $data = qx ( chroot $root grep -q $user /etc/passwd 2>&1 );
 			my $code = $? >> 8;
+			if ($code != 0) {
+				$kiwi -> info ("Adding user: $user [$group]");
+				$data = qx ( chroot $root $adduser $user 2>&1 );
+				$code = $? >> 8;
+			} else {
+				$kiwi -> info ("Modifying user: $user [$group]");
+				$data = qx ( chroot $root $moduser $user 2>&1 );
+				$code = $? >> 8;
+			}
 			if ($code != 0) {
 				$kiwi -> failed ();
 				$kiwi -> info   ($data);
