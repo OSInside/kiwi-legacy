@@ -1,0 +1,81 @@
+<image name="fidelity-suse-10.2">
+	<preferences>
+		<type>ext3</type>
+		<size unit="M">460</size>
+		<rpm-check-signatures>False</rpm-check-signatures>
+	</preferences>
+	<repository type="yast2">
+		<source path="/image/CDs/full-i386"/>
+	</repository>
+	<packages type="image">
+		<package name="binutils"/>
+        <package name="file"/>
+        <package name="gawk"/>
+        <package name="kernel-default"/>
+        <package name="module-init-tools"/>
+        <package name="net-tools"/>
+        <package name="netcfg"/>
+        <package name="openssh"/>
+        <package name="pam-modules"/>
+        <package name="procinfo"/>
+        <package name="sysconfig"/>
+        <package name="syslinux"/>
+        <package name="sysfsutils"/>
+        <package name="syslog-ng"/>
+        <package name="kbd"/>
+        <package name="ksymoops"/>
+        <package name="less"/>
+        <package name="initviocons"/>
+        <package name="iputils"/>
+        <package name="procps"/>
+        <package name="psmisc"/>
+        <package name="pwdutils"/>
+        <package name="portmap"/>
+        <package name="dhcpcd"/>
+		<package name="dbus-1"/>
+		<package name="resmgr"/>
+		<package name="hal"/>
+		<package name="grub"/>
+		<!-- PLUS: Samba -->
+		<package name="samba"/>
+		<!-- PLUS: X11 -->
+		<package name="xorg-x11"/>
+        <package name="xorg-x11-server"/>
+        <package name="xorg-x11-driver-video"/>
+        <package name="xorg-x11-fonts-scalable"/>
+        <package name="xterm"/>
+		<!-- PLUS: Gnome -->
+		<package name="gdm"/>
+		<package name="control-center2"/>
+		<package name="gnome-main-menu"/>
+		<package name="gnome-panel"/>
+		<package name="gnome-screensaver"/>
+		<package name="gnome-session"/>
+        <package name="gnome-volume-manager"/>
+        <package name="libgnomesu"/>
+		<package name="metacity"/>
+		<package name="nautilus"/>
+		<package name="gok"/>
+		<package name="gnopernicus"/>
+		<package name="gnome-speech"/>
+		<package name="festival"/>
+		<package name="resapplet"/>
+		<package name="libgnomesu"/>
+		<package name="gnome-applets"/>
+		<!-- PLUS: FireFox -->
+		<package name="firefox"/>
+		<!-- PLUS: ICAClient -->
+		<!-- <package name="ICAClient"/> -->
+	</packages>
+	<packages type="xen">
+		<package name="kernel-xen"/>
+		<package name="xen"/>
+	</packages>
+	<packages type="boot">
+		<package name="filesystem"/>
+		<package name="glibc-locale"/>
+		<package name="devs"/>
+		<package name="rpm"/>
+		<package name="smart"/>
+	</packages>
+</image>

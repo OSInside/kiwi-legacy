@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Dec  6 13:50:06 CET 2006 - ms@suse.de
+
+- added wyseGhost-suse-10.2 system to kiwi
+
+-------------------------------------------------------------------
 Wed Dec  6 09:35:04 CET 2006 - ms@suse.de
 
 - added support for modifiying user accounts
