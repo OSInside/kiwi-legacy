@@ -1,0 +1,65 @@
+<image name="initrd-netboot">
+	<preferences>
+		<type>cpio</type>
+		<size unit="M">60</size>
+		<compressed>yes</compressed>
+		<packagemanager>smart</packagemanager>
+		<rpm-check-signatures>False</rpm-check-signatures>
+	</preferences>
+	<drivers type="drivers">
+		<file name="drivers/ide/*"/>
+		<file name="net/packet/*"/>
+		<file name="fs/ext3/*"/>
+		<file name="fs/ext2/*"/>
+		<file name="fs/binfmt_aout.ko"/>
+		<file name="fs/binfmt_misc.ko"/>
+		<file name="fs/mbcache.ko"/>
+		<file name="fs/quota_v1.ko"/>
+		<file name="fs/quota_v2.ko"/>
+		<file name="fs/jbd/*"/>
+		<file name="fs/fat/*"/>
+		<file name="fs/vfat/*"/>
+		<file name="fs/reiserfs/*"/>
+		<file name="net/ipv6/*"/>
+		<file name="drivers/scsi/*"/>
+		<file name="drivers/message/fusion/*"/>
+		<file name="drivers/net/*"/>
+	</drivers>
+	<repository type="yast2">
+		<!-- <source path="opensuse://SL-10.1"/> -->
+		<source path="/image/dist/full-sled10-i386"/>
+	</repository>
+    <repository type="rpm-dir">
+        <source path="this://repo"/>
+    </repository>
+	<packages type="image">
+		<package name="atftp"/>
+		<package name="bind-libs"/>
+		<package name="bind-utils"/>
+		<package name="dhcpcd"/>
+		<package name="e2fsprogs"/>
+		<package name="file"/>
+		<package name="gawk"/>
+		<package name="hwinfo"/>
+		<package name="iproute2"/>
+		<package name="libcom_err"/>
+		<package name="lvm2"/>
+		<package name="module-init-tools"/>
+		<package name="net-tools"/>
+		<package name="netcfg"/>
+		<package name="pciutils"/>
+		<package name="reiserfs"/>
+		<package name="sysconfig"/>
+		<package name="sysfsutils"/>
+		<package name="tcpd"/>
+		<package name="util-linux"/>
+		<package name="grub"/>
+	</packages>
+	<packages type="boot">
+		<package name="kernel-smp"/>
+		<package name="filesystem"/>
+		<package name="glibc-locale"/>
+		<package name="devs"/>
+		<package name="procps"/>
+	</packages>
+</image>
