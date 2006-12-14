@@ -1078,7 +1078,7 @@ sub setupEXT2 {
 	my $fileCount = int (qx (find $tree | wc -l));
 	my $nodeCount = $fileCount * 2;
 	if (defined $journal) {
-		$fsopts = "-b 4096 -j -J size=4 -q -F -N $nodeCount";
+		$fsopts = "-O dir_index -b 4096 -j -J size=4 -q -F -N $nodeCount";
 	} else {  
 		$fsopts = "-q -F -N $nodeCount";
 	}

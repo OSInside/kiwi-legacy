@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Dec 14 12:24:29 CET 2006 - ms@suse.de
+
+- added option -O dir_index for ext3 images
+
+-------------------------------------------------------------------
 Wed Dec  6 13:50:06 CET 2006 - ms@suse.de
 
 - added wyseGhost-suse-10.2 system to kiwi
