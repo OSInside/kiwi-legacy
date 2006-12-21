@@ -62,7 +62,7 @@ install:
 	ln -s ${syslinux}/pxelinux.0     ${TFTPBOOT}/pxelinux.0
 	test -f ${syslinux}/mboot.c32 && \
 		ln -s ${syslinux}/mboot.c32  ${TFTPBOOT}/mboot.c32 || /bin/true
-	install -m 755 pxeboot/pxelinux.0.config ${TFTPBOOTCONF}/default
+	#install -m 755 pxeboot/pxelinux.0.config ${TFTPBOOTCONF}/default
 
 	#============================================
 	# Install image descriptions

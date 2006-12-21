@@ -631,12 +631,12 @@ sub setupMount {
 					my $mtab   = "/etc/mtab";
 					my $lofile = qx (cat $mtab | grep $lobase | cut -f1 -d' ');
 					chomp $lofile;
-					qx (mount -o loop $lofile $mount);
+					qx (mount -o loop $lofile $mount 2>&1);
 				}
 			} else {			
 				#$kiwi -> info ("Mounting local device: $device $mount\n");
 				qx (mkdir -p $mount);
-				qx (mount $device $mount);
+				qx (mount $device $mount 2>&1);
 			}
 		}
 		if ($_ =~ /(.*:\/.*) (.*) nfs/) {
@@ -646,7 +646,7 @@ sub setupMount {
 			push (@mountList,$mount);
 			#$kiwi -> info ("Mounting NFS device: $device $mount\n");
 			qx (mkdir -p $mount);
-			qx (mount $device $mount);
+			qx (mount $device $mount 2>&1);
 		}
 	}
 	close  FD;

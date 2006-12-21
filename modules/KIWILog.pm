@@ -52,7 +52,10 @@ sub getColumns {
 	# to put the status text at the end of the line
 	# ---
 	my $this = shift;
-	my $size = qx (stty size); chomp ($size);
+	my $size = qx (stty size 2>/dev/null); chomp ($size);
+	if ($size eq "") {
+		return 80;
+	}
 	my @size = split (/ +/,$size);
 	return pop @size;
 }

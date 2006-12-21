@@ -4,8 +4,8 @@
 # Please submit bugfixes or comments via http://bugs.opensuse.org
 # ---
 Name:          kiwi
-BuildRequires: syslinux
-Requires:      perl smart perl-XML-LibXML syslinux perl-libwww-perl
+BuildRequires: perl smart perl-XML-LibXML syslinux perl-libwww-perl screen
+Requires:      perl smart perl-XML-LibXML syslinux perl-libwww-perl screen
 Summary:       OpenSuSE - KIWI Image System
 Version:       1.7
 Release:       7
@@ -72,11 +72,69 @@ Authors:
 # %patch
 
 %build
+rm -rf $RPM_BUILD_ROOT
 test -e /.buildenv && . /.buildenv
+cat /proc/mounts > /etc/fstab
 make buildroot=$RPM_BUILD_ROOT CFLAGS="$RPM_OPT_FLAGS"
 
+# prepare and create boot images...
+mkdir -p /usr/share/kiwi/tools
+mkdir -p $RPM_BUILD_ROOT/%{_var}/lib/tftpboot/pxelinux.cfg
+mkdir -p $RPM_BUILD_ROOT/%{_var}/lib/tftpboot/boot
+cp -a tools/restart /usr/share/kiwi/tools
+cp -a tools/timed   /usr/share/kiwi/tools
+cd modules
+pxedefault=$RPM_BUILD_ROOT/%{_var}/lib/tftpboot/pxelinux.cfg/default
+echo "# /.../" > $pxedefault
+echo "# KIWI boot image setup" >> $pxedefault
+echo "# select boot label according to your system image" >> $pxedefault
+echo "# ..."  >> $pxedefault
+echo "DEFAULT Local-Boot" >> $pxedefault
+images="
+	netboot-suse-10.1 netboot-suse-10.1-smp
+	netboot-suse-10.2 netboot-suse-10.2-smp
+	xenboot-suse-10.1
+	xenboot-suse-10.2
+"
+for i in $images;do
+	echo "#DEFAULT $i" >> $pxedefault
+done
+echo >> $pxedefault
+echo "LABEL Local-Boot"  >> $pxedefault
+echo "      localboot 0" >> $pxedefault
+for i in $images;do
+	../kiwi.pl --root $RPM_BUILD_ROOT/root-$i --prepare ../system/boot/$i
+	../kiwi.pl --create $RPM_BUILD_ROOT/root-$i \
+		-d $RPM_BUILD_ROOT/%{_var}/lib/tftpboot/boot
+	rm -rf $RPM_BUILD_ROOT/root-$i
+	echo >> $pxedefault
+	echo "LABEL $i" >> $pxedefault
+	(
+		cd $RPM_BUILD_ROOT/%{_var}/lib/tftpboot/boot
+		xenkernel=""
+		xenloader=""
+		initrd=""
+		kernel=""
+		for n in *$i*;do
+			echo $n | grep -q xen$      && xenkernel=$n || true
+			echo $n | grep -q xen.gz$   && xenloader=$n || true
+			echo $n | grep -q [0-9].gz$ && initrd=$n    || true
+			echo $n | grep -q kernel    && kernel=$n    || true
+		done
+		if [ -n "$xenkernel" ];then
+			echo "      kernel mboot.c32" >> $pxedefault
+			echo "      append boot/$xenloader --- boot/$xenkernel vga=0x318 --- boot/$initrd" >> $pxedefault
+			echo "      IPAPPEND 1" >> $pxedefault
+		else
+			echo "      kernel boot/$kernel" >> $pxedefault
+			echo "      append initrd=boot/$initrd vga=0x318" >> $pxedefault
+			echo "      IPAPPEND 1" >> $pxedefault
+		fi
+	)
+done
+rm -f $RPM_BUILD_ROOT/%{_var}/lib/tftpboot/boot/*.md5
+
 %install
-rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT/etc/permissions.d
 echo "/var/lib/tftpboot/upload root:root 0777" \
 	> $RPM_BUILD_ROOT/etc/permissions.d/kiwi
@@ -98,6 +156,7 @@ cat kiwi.loader
 %files
 %defattr(-, root, root)
 %dir %{_datadir}/kiwi
+%dir %{_datadir}/kiwi/image
 %{_datadir}/kiwi/modules
 %{_datadir}/kiwi/tools
 %{_sbindir}/kiwi
@@ -114,6 +173,7 @@ cat kiwi.loader
 %dir %{_var}/lib/tftpboot/pxelinux.cfg
 %dir %{_var}/lib/tftpboot/image
 %dir %{_var}/lib/tftpboot/upload
+%{_var}/lib/tftpboot/boot
 %{_var}/lib/tftpboot/pxelinux.cfg/default
 
 #=================================================

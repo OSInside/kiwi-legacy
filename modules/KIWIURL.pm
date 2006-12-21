@@ -96,7 +96,7 @@ sub openSUSEpath {
 	my $browser  = LWP::UserAgent->new;
 	my $location = qw (http://ftp.opensuse.org/pub/opensuse);
 	my @types    = qw (distribution repositories);
-	my @dists    = qw (inst-source media.1);
+	my @dists    = qw (inst-source repo/oss);
 	my @urllist  = ();
 	#==========================================
 	# normalize URL data
@@ -119,8 +119,8 @@ sub openSUSEpath {
 			next;
 		}
 		foreach my $dist (@dists) {
-			$url = $url."/".$dist;
-			push @urllist,$url;
+			my $newurl = $url."/".$dist;
+			push @urllist,$newurl;
 		}
 	}
 	#==========================================
