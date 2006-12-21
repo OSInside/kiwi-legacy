@@ -1,4 +1,4 @@
-<image name="initrd-netboot">
+<image name="initrd-netboot-suse-10.2-smp">
 	<preferences>
 		<type>cpio</type>
 		<size unit="M">60</size>
@@ -27,7 +27,8 @@
 		<file name="drivers/net/*"/>
 	</drivers>
 	<repository type="yast2">
-		<source path="/image/CDs/full-i386"/>
+		<source path="opensuse://10.2"/>
+		<!-- <source path="/image/CDs/full-i386"/> -->
 	</repository>
 	<packages type="image">
 		<package name="atftp"/>
@@ -49,10 +50,11 @@
 		<package name="grub"/>
 	</packages>
 	<packages type="boot">
-		<package name="kernel-smp"/>
+		<package name="kernel-bigsmp"/>
 		<package name="filesystem"/>
 		<package name="glibc-locale"/>
 		<package name="devs"/>
+		<package name="diffutils"/>
 		<package name="procps"/>
 	</packages>
 </image>

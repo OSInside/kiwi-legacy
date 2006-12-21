@@ -1,4 +1,4 @@
-<image name="initrd-isoboot">
+<image name="initrd-isoboot-suse-10.2">
 	<preferences>
 		<type>cpio</type>
 		<size unit="M">60</size>
