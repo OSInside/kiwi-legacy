@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Dec 19 16:24:29 CET 2006 - ms@suse.de
+
+- added documentation about image deployment
+- added prebuild boot images
+
+-------------------------------------------------------------------
 Thu Dec 14 12:24:29 CET 2006 - ms@suse.de
 
 - added option -O dir_index for ext3 images

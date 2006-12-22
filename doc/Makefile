@@ -9,7 +9,7 @@ TEX=kiwi.tex           \
 	intro.tex          \
 	image.tex  		   \
     activate.tex       \
-	cdboot.tex
+	deploy.tex
 
 all: ps
 
