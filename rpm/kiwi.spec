@@ -74,7 +74,7 @@ Authors:
 %build
 rm -rf $RPM_BUILD_ROOT
 test -e /.buildenv && . /.buildenv
-cat /proc/mounts > /etc/fstab
+#cat /proc/mounts > /etc/fstab
 make buildroot=$RPM_BUILD_ROOT CFLAGS="$RPM_OPT_FLAGS"
 
 # prepare and create boot images...
