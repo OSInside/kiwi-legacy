@@ -78,11 +78,14 @@ test -e /.buildenv && . /.buildenv
 make buildroot=$RPM_BUILD_ROOT CFLAGS="$RPM_OPT_FLAGS"
 
 # prepare and create boot images...
-mkdir -p /usr/share/kiwi/tools
 mkdir -p $RPM_BUILD_ROOT/%{_var}/lib/tftpboot/pxelinux.cfg
 mkdir -p $RPM_BUILD_ROOT/%{_var}/lib/tftpboot/boot
-cp -a tools/restart /usr/share/kiwi/tools
-cp -a tools/timed   /usr/share/kiwi/tools
+for i in `find system/boot/ -name restart`;do
+	cp -a tools/restart $i
+done
+for i in `find system/boot/ -name timed`;do
+	cp -a tools/timed $i
+done
 cd modules
 pxedefault=$RPM_BUILD_ROOT/%{_var}/lib/tftpboot/pxelinux.cfg/default
 echo "# /.../" > $pxedefault
