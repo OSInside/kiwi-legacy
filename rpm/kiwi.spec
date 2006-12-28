@@ -81,10 +81,10 @@ make buildroot=$RPM_BUILD_ROOT CFLAGS="$RPM_OPT_FLAGS"
 mkdir -p $RPM_BUILD_ROOT/%{_var}/lib/tftpboot/pxelinux.cfg
 mkdir -p $RPM_BUILD_ROOT/%{_var}/lib/tftpboot/boot
 for i in `find system/boot/ -name restart`;do
-	cp -a tools/restart $i
+	rm -f $i && cp -a tools/restart $i
 done
 for i in `find system/boot/ -name timed`;do
-	cp -a tools/timed $i
+	rm -f $i && cp -a tools/timed $i
 done
 cd modules
 pxedefault=$RPM_BUILD_ROOT/%{_var}/lib/tftpboot/pxelinux.cfg/default
