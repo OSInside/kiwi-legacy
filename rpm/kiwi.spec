@@ -77,7 +77,7 @@ test -e /.buildenv && . /.buildenv
 #cat /proc/mounts > /etc/fstab
 make buildroot=$RPM_BUILD_ROOT CFLAGS="$RPM_OPT_FLAGS"
 
-if [ $UID eq 0 ];then
+if [ $UID = 0 ];then
 	# prepare and create boot images...
 	mkdir -p $RPM_BUILD_ROOT/%{_var}/lib/tftpboot/pxelinux.cfg
 	mkdir -p $RPM_BUILD_ROOT/%{_var}/lib/tftpboot/boot
@@ -151,7 +151,7 @@ make buildroot=$RPM_BUILD_ROOT \
      man_prefix=$RPM_BUILD_ROOT/%{_mandir} \
      install
 touch kiwi.loader
-if [ ! $UID eq 0 ];then
+if [ ! $UID = 0 ];then
 	install -m 755 pxeboot/pxelinux.0.config \
 		$RPM_BUILD_ROOT/%{_var}/lib/tftpboot/pxelinux.cfg/default
 fi
