@@ -1,13 +1,17 @@
 <image name="buildhost-10.1">
 	<preferences>
-		<type>reiserfs</type>
-		<size unit="M">570</size>
+		<type>ext3</type>
+		<size unit="M">600</size>
 		<compressed>yes</compressed>
 		<packagemanager>smart</packagemanager>
 		<rpm-check-signatures>False</rpm-check-signatures>
 	</preferences>
+	<repository type="rpm-dir">
+        <source path="this://repo"/>
+    </repository>
 	<repository type="yast2">
-		<source path="opensuse://SL-10.1"/>
+		<!--<source path="opensuse://SL-10.1"/>-->
+		<source path="/mounts/machcd2/CDs/SLES-10-SP1-DVD-x86_64-pr2/DVD1"/>
 	</repository>
 	<packages type="image">
 	    <package name="OpenIPMI"/>
@@ -15,7 +19,6 @@
 		<package name="SuSEfirewall2"/>
 		<package name="aaa_base"/>
 		<package name="aaa_skel"/>
-		<package name="subversion"/>
 		<package name="acl"/>
 		<package name="acpid"/>
 		<package name="attr"/>
@@ -27,7 +30,7 @@
 		<package name="bootcycle"/>
 		<package name="screen"/>
 		<package name="bridge-utils"/>
-		<package name="build"/>
+		<package name="mdadm"/>
 		<package name="bzip2"/>
 		<package name="coreutils"/>
 		<package name="cpio"/>
@@ -56,7 +59,7 @@
 		<package name="iputils"/>
 		<package name="kbd"/>
 		<package name="kernel-xen"/>
-		<package name="kernel-default"/>
+		<package name="kernel-smp"/>
 		<package name="klogd"/>
 		<package name="ksymoops"/>
 		<package name="less"/>
