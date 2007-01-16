@@ -77,65 +77,70 @@ test -e /.buildenv && . /.buildenv
 #cat /proc/mounts > /etc/fstab
 make buildroot=$RPM_BUILD_ROOT CFLAGS="$RPM_OPT_FLAGS"
 
-# prepare and create boot images...
-mkdir -p $RPM_BUILD_ROOT/%{_var}/lib/tftpboot/pxelinux.cfg
-mkdir -p $RPM_BUILD_ROOT/%{_var}/lib/tftpboot/boot
-for i in `find system/boot/ -name restart`;do
-	rm -f $i && cp -a tools/restart $i
-done
-for i in `find system/boot/ -name timed`;do
-	rm -f $i && cp -a tools/timed $i
-done
-cd modules
-pxedefault=$RPM_BUILD_ROOT/%{_var}/lib/tftpboot/pxelinux.cfg/default
-echo "# /.../" > $pxedefault
-echo "# KIWI boot image setup" >> $pxedefault
-echo "# select boot label according to your system image" >> $pxedefault
-echo "# ..."  >> $pxedefault
-echo "DEFAULT Local-Boot" >> $pxedefault
-images="
-	netboot-suse-10.1 netboot-suse-10.1-smp
-	netboot-suse-10.2 netboot-suse-10.2-smp
-	xenboot-suse-10.1
-	xenboot-suse-10.2
-"
-for i in $images;do
-	echo "#DEFAULT $i" >> $pxedefault
-done
-echo >> $pxedefault
-echo "LABEL Local-Boot"  >> $pxedefault
-echo "      localboot 0" >> $pxedefault
-for i in $images;do
-	../kiwi.pl --root $RPM_BUILD_ROOT/root-$i --prepare ../system/boot/$i
-	../kiwi.pl --create $RPM_BUILD_ROOT/root-$i \
-		-d $RPM_BUILD_ROOT/%{_var}/lib/tftpboot/boot
-	rm -rf $RPM_BUILD_ROOT/root-$i
+if [ $UID eq 0 ];then
+	# prepare and create boot images...
+	mkdir -p $RPM_BUILD_ROOT/%{_var}/lib/tftpboot/pxelinux.cfg
+	mkdir -p $RPM_BUILD_ROOT/%{_var}/lib/tftpboot/boot
+	for i in `find system/boot/ -name restart`;do
+		rm -f $i && cp -a tools/restart $i
+	done
+	for i in `find system/boot/ -name timed`;do
+		rm -f $i && cp -a tools/timed $i
+	done
+	cd modules
+	pxedefault=$RPM_BUILD_ROOT/%{_var}/lib/tftpboot/pxelinux.cfg/default
+	echo "# /.../" > $pxedefault
+	echo "# KIWI boot image setup" >> $pxedefault
+	echo "# select boot label according to your system image" >> $pxedefault
+	echo "# ..."  >> $pxedefault
+	echo "DEFAULT Local-Boot" >> $pxedefault
+	images="
+		netboot-suse-10.1 netboot-suse-10.1-smp
+		netboot-suse-10.2 netboot-suse-10.2-smp
+		xenboot-suse-10.1
+		xenboot-suse-10.2
+	"
+	for i in $images;do
+		echo "#DEFAULT $i" >> $pxedefault
+	done
 	echo >> $pxedefault
-	echo "LABEL $i" >> $pxedefault
-	(
-		cd $RPM_BUILD_ROOT/%{_var}/lib/tftpboot/boot
-		xenkernel=""
-		xenloader=""
-		initrd=""
-		kernel=""
-		for n in *$i*;do
-			echo $n | grep -q xen$      && xenkernel=$n || true
-			echo $n | grep -q xen.gz$   && xenloader=$n || true
-			echo $n | grep -q [0-9].gz$ && initrd=$n    || true
-			echo $n | grep -q kernel    && kernel=$n    || true
-		done
-		if [ -n "$xenkernel" ];then
-			echo "      kernel mboot.c32" >> $pxedefault
-			echo "      append boot/$xenloader --- boot/$xenkernel vga=0x318 --- boot/$initrd" >> $pxedefault
-			echo "      IPAPPEND 1" >> $pxedefault
-		else
-			echo "      kernel boot/$kernel" >> $pxedefault
-			echo "      append initrd=boot/$initrd vga=0x318" >> $pxedefault
-			echo "      IPAPPEND 1" >> $pxedefault
-		fi
-	)
-done
-rm -f $RPM_BUILD_ROOT/%{_var}/lib/tftpboot/boot/*.md5
+	echo "LABEL Local-Boot"  >> $pxedefault
+	echo "      localboot 0" >> $pxedefault
+	for i in $images;do
+		../kiwi.pl --root $RPM_BUILD_ROOT/root-$i --prepare ../system/boot/$i
+		../kiwi.pl --create $RPM_BUILD_ROOT/root-$i \
+			-d $RPM_BUILD_ROOT/%{_var}/lib/tftpboot/boot
+		rm -rf $RPM_BUILD_ROOT/root-$i
+		echo >> $pxedefault
+		echo "LABEL $i" >> $pxedefault
+		(
+			cd $RPM_BUILD_ROOT/%{_var}/lib/tftpboot/boot
+			xenkernel=""
+			xenloader=""
+			initrd=""
+			kernel=""
+			for n in *$i*;do
+				echo $n | grep -q xen$      && xenkernel=$n || true
+				echo $n | grep -q xen.gz$   && xenloader=$n || true
+				echo $n | grep -q [0-9].gz$ && initrd=$n    || true
+				echo $n | grep -q kernel    && kernel=$n    || true
+			done
+			if [ -n "$xenkernel" ];then
+				echo "      kernel mboot.c32" >> $pxedefault
+				echo "      append boot/$xenloader --- boot/$xenkernel vga=0x318 --- boot/$initrd" >> $pxedefault
+				echo "      IPAPPEND 1" >> $pxedefault
+			else
+				echo "      kernel boot/$kernel" >> $pxedefault
+				echo "      append initrd=boot/$initrd vga=0x318" >> $pxedefault
+				echo "      IPAPPEND 1" >> $pxedefault
+			fi
+		)
+	done
+	rm -f $RPM_BUILD_ROOT/%{_var}/lib/tftpboot/boot/*.md5
+else
+	echo "cannot build prebuild images without root privileges"
+	true
+fi
 
 %install
 mkdir -p $RPM_BUILD_ROOT/etc/permissions.d
