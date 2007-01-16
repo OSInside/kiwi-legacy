@@ -151,6 +151,10 @@ make buildroot=$RPM_BUILD_ROOT \
      man_prefix=$RPM_BUILD_ROOT/%{_mandir} \
      install
 touch kiwi.loader
+if [ ! $UID eq 0 ];then
+	install -m 755 pxeboot/pxelinux.0.config \
+		$RPM_BUILD_ROOT/%{_var}/lib/tftpboot/pxelinux.cfg/default
+fi
 test -L $RPM_BUILD_ROOT/%{_var}/lib/tftpboot/pxelinux.0 && \
 	echo %{_var}/lib/tftpboot/pxelinux.0 > kiwi.loader
 test -L $RPM_BUILD_ROOT/%{_var}/lib/tftpboot/mboot.c32 && \
