@@ -36,6 +36,7 @@ my @urllist;
 my @pattern;
 my %cache;
 my %patdone;
+my $arch;
 
 #==========================================
 # Constructor
@@ -65,6 +66,10 @@ sub new {
 		$kiwi -> error ("No URL list for pattern search");
 		$kiwi -> failed ();
 		return undef;
+	}
+	$arch = qx (arch); chomp $arch;
+	if ($arch =~ /^i.86/) {
+		$arch = 'i*86';
 	}
 	@urllist = @{$urlref};
 	my @patdata = getPatternContents (\@pattern);
@@ -120,7 +125,11 @@ sub downloadPattern {
 		return $cache{$pattern};
 	}
 	if ($url =~ /^\//) {
-		my $file = bsd_glob ("$url//suse/setup/descr/$pattern-*.pat");
+		my $path = "$url//suse/setup/descr";
+		my $file = bsd_glob ("$path/$pattern-*.$arch.pat");
+		if (! defined $file) {
+			$file = bsd_glob ("$path/$pattern-*.pat");
+		}
 		if (! open (FD,$file)) {
 			return undef;
 		}
@@ -171,7 +180,9 @@ sub getSection {
 		}
 		if ($start) {
 			if ($line) {
+			if ($line !~ /^[\+\-]/) {
 				$result{$line} = $line;
+			}
 			}
 		}
 	}
