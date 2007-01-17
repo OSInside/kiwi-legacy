@@ -352,7 +352,11 @@ createPartition () {
 		if test $partSize = "x";then
 			partSize=""
 		fi
-		echo ",$partSize,$partID,-" >> $PART_FILE
+		if [ $PART_COUNT -eq 1 ];then
+			echo ",$partSize,$partID,*" >> $PART_FILE
+		else
+			echo ",$partSize,$partID,-" >> $PART_FILE
+		fi
 		PART_COUNT=`expr $PART_COUNT + 1`
 		if [ $PART_NEED_EXTENDED -eq 1 ];then
 		if [ $PART_COUNT -eq 3 ];then

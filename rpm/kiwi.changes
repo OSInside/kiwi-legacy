@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Jan 17 18:30:26 CET 2007 - ms@suse.de
+
+- added bootable flag for first system partition
+
+-------------------------------------------------------------------
 Tue Jan 16 10:48:28 CET 2007 - ms@suse.de
 
 - fixed pattern support
