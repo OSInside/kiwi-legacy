@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Jan 19 14:57:45 CET 2007 - ms@suse.de
+
+- added bsmd init script for buildservice image. This runlevel
+  script is used to automatically setup a md0 raid for /abuild
+
+-------------------------------------------------------------------
 Wed Jan 17 18:30:26 CET 2007 - ms@suse.de
 
 - added bootable flag for first system partition

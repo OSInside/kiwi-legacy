@@ -10,7 +10,7 @@ for i in \
 	acpid dbus boot.loadmodules boot.localfs boot.xen random \
 	resmgr boot.cleanup boot.localnet haldaemon network syslog \
 	portmap kbd sshd boot.clock nscd cron boot.rootfsck \
-	boot.device-mapper boot.lvm xend ntp bsworker
+	boot.device-mapper boot.lvm xend ntp bsworker bsmd
 do
 	/sbin/insserv /etc/init.d/$i
 done
