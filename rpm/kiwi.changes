@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Sun Jan 21 16:26:37 CET 2007 - ms@suse.de
+
+- added perl-TimeDate to buildhost image
+- fixed linuxrc to provide reiserfs in INITRD_MODULES even if
+  the image is not reiserfs based. This has been done for backward
+  compatibility
+
+-------------------------------------------------------------------
 Fri Jan 19 14:57:45 CET 2007 - ms@suse.de
 
 - added bsmd init script for buildservice image. This runlevel

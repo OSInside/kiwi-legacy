@@ -101,6 +101,7 @@
 		<package name="pax"/>
 		<package name="pciutils"/>
 		<package name="perl"/>
+		<package name="perl-TimeDate"/>
 		<package name="perl-Bit-Vector"/>
 		<package name="perl-Bootloader"/>
 		<package name="perl-Carp-Clan"/>

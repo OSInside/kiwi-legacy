@@ -27,7 +27,7 @@ export PART_FILE="/etc/partition.table"
 export DOMURD_MODULES="xennet xenblk"
 export PART_MOUNT
 export PART_DEV
-export INITRD_MODULES
+export INITRD_MODULES="reiserfs"
 export KERNEL_LIST
 
 export PART_COUNT=0
@@ -352,7 +352,11 @@ createPartition () {
 		if test $partSize = "x";then
 			partSize=""
 		fi
-		echo ",$partSize,$partID,-" >> $PART_FILE
+		if [ $PART_COUNT -eq 1 ];then
+			echo ",$partSize,$partID,*" >> $PART_FILE
+		else
+			echo ",$partSize,$partID,-" >> $PART_FILE
+		fi
 		PART_COUNT=`expr $PART_COUNT + 1`
 		if [ $PART_NEED_EXTENDED -eq 1 ];then
 		if [ $PART_COUNT -eq 3 ];then
@@ -841,6 +845,7 @@ IFS="," ; for i in $IMAGE;do
 		if test "$FSTYPE" = "ext2";then
 			e2fsck -y -f $imageDevice
 			resize2fs -F -p $imageDevice
+			INITRD_MODULES="$INITRD_MODULES ext2"
 		fi
 		if test "$FSTYPE" = "ext3";then
 			e2fsck -y -f $imageDevice
