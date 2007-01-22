@@ -109,6 +109,8 @@ case "$1" in
 			EOF
 			if [ $? -ne 0 ];then
 				rc_failed 3
+				rc_status -v
+				rc_exit
 			fi
 		done
 		#============================================
@@ -122,6 +124,8 @@ case "$1" in
 			fsck.ext3 $i >/dev/null 2>&1
 			if [ $? -ne 0 ];then
 				rc_failed 3
+				rc_status -v
+				rc_exit
 			else
 				have_new=1
 			fi
@@ -141,16 +145,28 @@ case "$1" in
 			if [ $devices -gt 1 ];then
 				yes | mdadm --create /dev/md0 \
 					--level=raid0 --raid-devices=$devices $parties \
-				>/dev/null 2>&1 || rc_failed 3
+				>/dev/null 2>&1
+				if [ $? -ne 0 ];then
+					rc_failed 3
+					rc_status -v
+					rc_exit
+				fi
 			else
 				rc_failed 3
+				rc_status -v
+				rc_exit
 			fi
 		else
 			# raid system already running add new devices...
 			if [ $have_new -eq 1 ];then
 				yes | mdadm /dev/md0 \
 					--add $part_new \
-				>/dev/null 2>&1 || rc_failed 3
+				>/dev/null 2>&1
+				if [ $? -ne 0 ];then
+					rc_failed 3
+					rc_status -v
+					rc_exit
+				fi
 			fi
 		fi
 		#============================================
