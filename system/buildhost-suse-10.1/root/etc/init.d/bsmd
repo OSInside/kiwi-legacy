@@ -132,9 +132,13 @@ case "$1" in
 				devices=`expr $devices + 1`
 				parties="$parties $i"
 			done
-			mdadm --create /dev/md0 \
-				--level=raid0 --raid-devices=$devices $parties \
-			>/dev/null 2>&1 || rc_failed 3
+			if [ $devices -gt 1 ];then
+				mdadm --create /dev/md0 \
+					--level=raid0 --raid-devices=$devices $parties \
+				>/dev/null 2>&1 || rc_failed 3
+			else
+				rc_failed 3
+			fi
 		else
 			# raid system already running add new devices...
 			if [ $have_new -eq 1 ];then
