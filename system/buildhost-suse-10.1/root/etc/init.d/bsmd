@@ -117,8 +117,14 @@ case "$1" in
 		have_new=0
 		part_new=""
 		for i in `getPartitions`;do
-			mkfs.ext3 $i || rc_failed 3 && have_new=1
 			part_new="$part_new $i"
+			mkfs.ext3 $i >/dev/null 2>&1
+			fsck.ext3 $i >/dev/null 2>&1
+			if [ $? -ne 0 ];then
+				rc_failed 3
+			else
+				have_new=1
+			fi
 		done
 		#============================================
 		# setup md0 raid with striping level
@@ -133,7 +139,7 @@ case "$1" in
 				parties="$parties $i"
 			done
 			if [ $devices -gt 1 ];then
-				mdadm --create /dev/md0 \
+				yes | mdadm --create /dev/md0 \
 					--level=raid0 --raid-devices=$devices $parties \
 				>/dev/null 2>&1 || rc_failed 3
 			else
@@ -142,7 +148,7 @@ case "$1" in
 		else
 			# raid system already running add new devices...
 			if [ $have_new -eq 1 ];then
-				mdadm /dev/md0 \
+				yes | mdadm /dev/md0 \
 					--add $part_new \
 				>/dev/null 2>&1 || rc_failed 3
 			fi
