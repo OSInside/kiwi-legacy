@@ -146,7 +146,12 @@ case "$1" in
 		#============================================
 		# 3) create and mount filesystem on array
 		#--------------------------------------------
-		mkfs.ext3 /dev/md0 >/dev/null 2>&1
+		fsystem=`getFileSystem /dev/md0`
+		if [ $fsystem = "unknown" ];then
+			mkfs.ext3 /dev/md0 >/dev/null 2>&1
+		else
+			true
+		fi
 		if [ $? -ne 0 ];then
 			rc_failed 3
 		else
