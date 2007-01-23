@@ -101,7 +101,7 @@ case "$1" in
 	start)
 		echo -n "Starting buildservice raid (striping)"
 		#============================================
-		# incorporate empty disks first
+		# 1) incorporate empty disks
 		#--------------------------------------------
 		for disk in `getEmptyDisk`;do
 			sfdisk $disk >/dev/null 2>&1 <<- EOF
@@ -114,24 +114,7 @@ case "$1" in
 			fi
 		done
 		#============================================
-		# incorporate raid partitions with no fs
-		#--------------------------------------------
-		have_new=0
-		part_new=""
-		for i in `getPartitions`;do
-			part_new="$part_new $i"
-			mkfs.ext3 $i >/dev/null 2>&1
-			fsck.ext3 $i >/dev/null 2>&1
-			if [ $? -ne 0 ];then
-				rc_failed 3
-				rc_status -v
-				rc_exit
-			else
-				have_new=1
-			fi
-		done
-		#============================================
-		# setup md0 raid with striping level
+		# 2) setup md0 raid with striping level
 		#--------------------------------------------
 		mdadm --query /dev/md0 | grep -q "not active"
 		if [ $? -eq 0 ];then
@@ -143,7 +126,7 @@ case "$1" in
 				parties="$parties $i"
 			done
 			if [ $devices -gt 1 ];then
-				yes | mdadm --create /dev/md0 \
+				mdadm --build /dev/md0 \
 					--level=raid0 --raid-devices=$devices $parties \
 				>/dev/null 2>&1
 				if [ $? -ne 0 ];then
@@ -152,27 +135,23 @@ case "$1" in
 					rc_exit
 				fi
 			else
-				rc_failed 3
-				rc_status -v
+				rc_status -s
 				rc_exit
 			fi
 		else
 			# raid system already running add new devices...
-			if [ $have_new -eq 1 ];then
-				yes | mdadm /dev/md0 \
-					--add $part_new \
-				>/dev/null 2>&1
-				if [ $? -ne 0 ];then
-					rc_failed 3
-					rc_status -v
-					rc_exit
-				fi
-			fi
+			rc_status -s
+			rc_exit
 		fi
 		#============================================
-		# mount array
+		# 3) create and mount filesystem on array
 		#--------------------------------------------
-		mkdir -p /abuild && mount /dev/md0 /abuild
+		mkfs.ext3 /dev/md0 >/dev/null 2>&1
+		if [ $? -ne 0 ];then
+			rc_failed 3
+		else
+			mkdir -p /abuild && mount /dev/md0 /abuild
+		fi
 		rc_status -v
 	;;
 	stop)
