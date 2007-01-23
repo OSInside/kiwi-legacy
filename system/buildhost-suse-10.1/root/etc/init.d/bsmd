@@ -33,7 +33,7 @@ function getEmptyDisk () {
 				continue
 			fi
 		done
-		if [ $count -eq 4 ];then
+		if [ $count -eq 4 ] || [ $count -eq 0 ];then
 			echo $disk
 		fi
 	done
