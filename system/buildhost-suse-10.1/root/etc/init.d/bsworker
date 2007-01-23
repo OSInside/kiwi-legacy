@@ -41,7 +41,6 @@ case "$1" in
 		rsync -avHL $hostip::opensuse-bsworker /root/bs
 	
 		cd /root/bs
-		rpm -Uvh build.rpm
 		NUM=`grep ^processor /proc/cpuinfo  | wc -l`
 		I=0
 		ROOT="/abuild"
