@@ -411,8 +411,13 @@ sub setupRootSystem {
 			print FD "echo \$? > $screenCall.exit\n";
 		} else {
 			$kiwi -> info ("Installing image packages...");
+			my @installOpts = (
+				"-o rpm-force=true",
+				"-y"
+			);
 			print FD "chroot $root smart update\n";
-			print FD "test \$? = 0 && chroot $root smart install @packs -y\n";
+			print FD "test \$? = 0 && chroot $root smart install @packs ";
+			print FD "@installOpts\n";
 			print FD "echo \$? > $screenCall.exit\n";
 		}
 		close FD;
@@ -421,11 +426,18 @@ sub setupRootSystem {
 	# zypper
 	#------------------------------------------
 	if ($manager eq "zypper") {
-		# TODO
-		$kiwi -> error  ("*** not implemented ***");
-		$kiwi -> failed ();
-		resetInstallationSource();
-		return undef;
+		if (! $chroot) {
+			# TODO
+			$kiwi -> error  ("*** not implemented ***");
+			$kiwi -> failed ();
+			resetInstallationSource();
+			return undef;
+		} else {
+			$kiwi -> info ("Installing image packages...");
+			print FD "chroot $root zypper install -y @packs\n";
+			print FD "echo \$? > $screenCall.exit\n";
+		}
+		close FD;
 	}
 	#==========================================
 	# run update and install in screen

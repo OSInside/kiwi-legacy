@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Jan 24 11:41:46 CET 2007 - ms@suse.de
+
+- added rpm-force=true option for smart level 2 installation
+- added support for zypper level 2 installation
+
+-------------------------------------------------------------------
 Sun Jan 21 16:26:37 CET 2007 - ms@suse.de
 
 - added perl-TimeDate to buildhost image
