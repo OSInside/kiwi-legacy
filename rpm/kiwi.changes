@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Jan 26 16:52:05 CET 2007 - ms@suse.de
+
+- added wyseXMini description for a 128 MB image usable
+  on a Wyse Model VX0 terminal only
+
+-------------------------------------------------------------------
 Wed Jan 24 11:41:46 CET 2007 - ms@suse.de
 
 - added rpm-force=true option for smart level 2 installation
