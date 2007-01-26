@@ -105,7 +105,8 @@ find /usr/X11R6/lib/modules/drivers/ |\
 # remove unneeded x tools
 #------------------------------------------
 find /usr/X11R6/bin/x* |\
-	grep -v xdm | grep -v xauth | grep -v xsetroot | grep -v xkb | xargs rm -f
+	grep -v xdm | grep -v xauth | grep -v xsetroot |\
+	grep -v xinit | grep -v xkb | xargs rm -f
 
 #==========================================
 # remove unneeded kernel drivers
@@ -143,6 +144,25 @@ for i in /usr/lib/X11/locale/*;do
 		continue
 	fi
 	rm -rf $i
+done
+
+#==========================================
+# remove unneeded tools in /usr/bin
+#------------------------------------------
+for file in `find /usr/bin`;do
+	found=0
+	base=`basename $file`
+	for need in \
+		cut mkfifo locale find grep xargs tail head file which firefox
+	do
+		if [ $base = $need ];then
+			found=1
+			break
+		fi
+	done
+	if [ $found = 0 ];then
+		rm -f $file
+	fi
 done
 
 exit 0
