@@ -153,7 +153,8 @@ for file in `find /usr/bin`;do
 	found=0
 	base=`basename $file`
 	for need in \
-		cut mkfifo locale find grep xargs tail head file which firefox
+		cut mkfifo locale find grep xargs tail head \
+		file which firefox ssh-keygen
 	do
 		if [ $base = $need ];then
 			found=1
