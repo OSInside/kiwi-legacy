@@ -1,0 +1,1072 @@
+#!/bin/bash
+#================
+# FILE          : linuxrc
+#----------------
+# PROJECT       : OpenSuSE KIWI Image System
+# COPYRIGHT     : (c) 2006 SUSE LINUX Products GmbH. All rights reserved
+#               :
+# AUTHOR        : Marcus Schaefer <ms@suse.de>
+#               :
+# BELONGS TO    : Operating System images
+#               :
+# DESCRIPTION   : This file is changed to become the real
+#               : linuxrc script which is used to prepare the
+#               : operating system for the main image
+#               :
+#               :
+# STATUS        : BETA
+#----------------
+#
+#======================================
+# Exports...
+#--------------------------------------
+export PATH="/sbin:/bin:/usr/sbin:/usr/bin"
+export MODD="pcnet32:tulip:natsemi:e100:eepro100"
+export NAME=0
+export PART_FILE="/etc/partition.table"
+export DOMURD_MODULES="xennet xenblk"
+export PART_MOUNT
+export PART_DEV
+export INITRD_MODULES="reiserfs"
+export KERNEL_LIST
+
+export PART_COUNT=0
+export PART_NUMBER=0
+export PART_NEED_EXTENDED=0
+export PART_NEED_FILL=0
+export NO_FILE_SYSTEM=0
+export IFS_ORIG=$IFS
+
+export SYSTEM_INTEGRITY
+export SYSTEM_MD5STATUS
+
+DEBUG=0
+SYSALIAS="undefined"
+#======================================
+# Functions...
+#--------------------------------------
+Debug () {
+	if test "$DEBUG" = 1;then
+		echo "+++++> $1"
+	fi
+}
+Echo () {
+	if test "$1" = "-n";then
+		echo $1 "-----> $2"
+	elif test "$1" = "-b";then
+		echo "       $2"
+	else
+		echo "-----> $1"
+	fi
+}
+WaitKey () {
+	if test "$DEBUG" = 1;then
+		Echo -n "Press any key to continue..."
+		read
+	fi
+}
+closeKernelConsole () {
+	if test "$DEBUG" = 0;then
+		/usr/sbin/klogconsole -l 1
+	fi
+}
+reopenKernelConsole () {
+	/usr/sbin/klogconsole -l 7
+}
+importFile () {
+	IFS="
+	"
+	while read line;do
+	IFS="="
+	count=0
+	for item in $line;do
+		if test $count = 0 ; then
+			key=$item ; count=1 ; continue
+		fi
+		if test $count = 1 ; then
+			item=`echo $item | tr -d \'`
+			Debug "$key=$item"
+			eval export $key\=\"$item\"
+			count=0
+		fi
+	done
+	done
+}
+probeDeviceAlias () {
+	modalias=/tmp/modalias
+	cat > $modalias < /dev/null
+	for i in `find /sys -name modalias 2>/dev/null`;do
+		alias=`cat $i | grep pci:`
+		if [ ! -z "$alias" ];then
+			echo $alias >> $modalias
+		fi
+	done
+	cat $modalias | sort | uniq > $modalias.new
+	mv $modalias.new $modalias
+}
+probeDeviceInfo () {
+	modinfo=/tmp/modinfo
+	cat > $modinfo < /dev/null
+	for file in `find /lib/modules/*/kernel/drivers -type f`;do
+	for info in `/sbin/modinfo -F alias $file`;do
+		echo "$info%$file" >> $modinfo
+	done
+	done
+	cat $modinfo | sort | uniq |\
+		sed -e s@*@.*@g \
+	> $modinfo.new
+	mv $modinfo.new $modinfo
+}
+probeDevices () {
+	IFS=$IFS_ORIG
+	probeDeviceInfo
+	probeDeviceAlias
+	for i in `cat $modinfo`;do
+		info=`echo $i | cut -f1 -d%`
+		file=`echo $i | cut -f2 -d%`
+		grep -q $info $modalias >/dev/null 2>&1
+		if [ $? = 0 ];then
+			module=`basename $file`
+			module=`echo $module | sed -e s@.ko@@`
+			INITRD_MODULES="$INITRD_MODULES $module"
+			modprobe $module >/dev/null 2>&1
+		fi
+	done
+	# bad fix for ata probe, load order is required
+	Echo "Waiting for devices to become ready..."
+	lsmod | grep -q ata_piix
+	if [ $? = 0 ];then
+		rmmod ata_piix
+		sleep 5
+		modprobe ata_piix
+	fi
+}
+probeNetworkCard () {
+	hwnet=/usr/sbin/hwinfo
+	hwstr="Driver Activation Cmd:"
+	hwcmd=`$hwnet --netcard | grep "$hwstr" | head -n 1`
+	hwcmd=`echo $hwcmd | cut -f2 -d:`
+	hwcmd=`echo $hwcmd | tr -d \" | cut -f2 -d " "`
+	if [ ! -z "$hwcmd" ];then
+		networkModule=$hwcmd
+	fi
+}
+setupNetwork () {
+	dhcpcd eth0 >/dev/null 2>&1
+	if test $? != 0;then
+		systemException \
+			"Failed to setup DHCP network interface !" \
+		"reboot"
+	fi
+	ifconfig lo 127.0.0.1 netmask 255.0.0.0 up
+	for i in 1 2 3 4 5 6 7 8 9 0;do
+		[ -s /var/lib/dhcpcd/dhcpcd-eth0.info ] && break
+		sleep 5
+	done
+	importFile < /var/lib/dhcpcd/dhcpcd-eth0.info
+	echo "search $DOMAIN" > /etc/resolv.conf
+	IFS="," ; for i in $DNS;do
+		echo "nameserver $i" >> /etc/resolv.conf
+	done
+}
+systemException () {
+	Echo "$1"
+	case "$2" in
+	"reboot")
+		Echo "rebootException: reboot in 60 sec..."; sleep 60
+		/sbin/restart >/dev/null 2>&1
+	;;
+	"wait")
+		Echo "waitException: waiting for ever..."
+		while true;do sleep 100;done
+	;;
+	"shell")
+		Echo "shellException: providing shell..."
+		/bin/sh
+	;;
+	*)
+		Echo "unknownException..."
+	;;
+	esac
+}
+updateNeeded () {
+	SYSTEM_INTEGRITY=""
+	SYSTEM_MD5STATUS=""
+	count=0
+	IFS="," ; for i in $IMAGE;do
+		field=0
+		IFS=";" ; for n in $i;do
+		case $field in
+			0) field=1 ;;
+			1) imageName=$n   ; field=2 ;;
+			2) imageVersion=$n; field=3 ;;
+			3) imageServer=$n ; field=4 ;;
+			4) imageBlkSize=$n
+		esac
+		done
+		atversion="$imageName-$imageVersion"
+		versionFile="/mnt/etc/ImageVersion-$atversion"
+		IFS=" "
+		if [ -f "$versionFile" ];then
+			read installed sum2 < $versionFile
+		fi
+		imageMD5s="image/$imageName-$imageVersion.md5"
+		[ -z "$imageServer" ]  && imageServer=$TSERVER
+		[ -z "$imageBlkSize" ] && imageBlkSize=8192
+		atftp -g -r $imageMD5s -l /etc/image.md5 $imageServer >/dev/null 2>&1
+		read sum1 blocks blocksize < /etc/image.md5
+		if [ ! -z "$sum1" ];then
+			SYSTEM_MD5STATUS="$SYSTEM_MD5STATUS:$sum1"
+		else
+			SYSTEM_MD5STATUS="$SYSTEM_MD5STATUS:none"
+		fi
+		if [ ! -z "$1" ];then
+			continue
+		fi
+		if test "$count" = 1;then
+		if test "$SYSTEM_INTEGRITY" = ":clean";then
+			Echo "Main OS image update needed"
+			Echo -b "Forcing download for multi image session"
+			RELOAD_IMAGE="yes"
+		fi
+		fi
+		count=$(($count + 1))
+		Echo "Cecking update status for image: $imageName"
+		if test ! -z $RELOAD_IMAGE;then
+			Echo -b "Update forced via RELOAD_IMAGE..."
+			Echo -b "Update status: Clean"
+			SYSTEM_INTEGRITY="$SYSTEM_INTEGRITY:clean"
+			continue
+		fi
+		if test ! -f $versionFile;then
+			Echo -b "Update forced: /etc/ImageVersion-$atversion not found"
+			Echo -b "Update status: Clean"
+			SYSTEM_INTEGRITY="$SYSTEM_INTEGRITY:clean"
+			continue
+		fi
+		Echo -b "Current: $atversion Installed: $installed"
+		if test "$atversion" = "$installed";then
+			if test $sum1 = $sum2;then
+				Echo -b "Update status: Fine"
+				SYSTEM_INTEGRITY="$SYSTEM_INTEGRITY:fine"
+				continue
+			fi
+			Echo -b "Image Update for image [ $imageName ] needed"
+			Echo -b "Image version equals but md5 checksum failed"
+			Echo -b "This means the contents of the new image differ"
+		else
+			Echo -b "Image Update for image [ $imageName ] needed"
+			Echo -b "Name and/or image version differ"
+		fi
+		Echo -b "Update status: Clean"
+		SYSTEM_INTEGRITY="$SYSTEM_INTEGRITY:clean"
+	done
+	SYSTEM_INTEGRITY=`echo $SYSTEM_INTEGRITY | cut -f2- -d:`
+	SYSTEM_MD5STATUS=`echo $SYSTEM_MD5STATUS | cut -f2- -d:`
+}
+getSystemIntegrity () {
+	if [ -z "$SYSTEM_INTEGRITY" ];then
+		echo "clean"
+	else  
+		echo $SYSTEM_INTEGRITY | cut -f$1 -d:
+	fi
+}
+getSystemMD5Status() {
+	echo $SYSTEM_MD5STATUS | cut -f$1 -d:
+}
+cleanSweep () {
+	diskDevice=$1
+	dd if=/dev/zero of=$diskDevice bs=32M >/dev/null 2>&1
+}
+createFileSystem () {
+	diskPartition=$1
+	diskID=`echo $diskPartition | sed -e s@[^0-9]@@g`
+	diskPD=`echo $diskPartition | sed -e s@[0-9]@@g`
+	diskPartitionType=`sfdisk -c $diskPD $diskID 2>/dev/null`
+	if test "$diskPartitionType" = "8e";then
+		Echo "Creating Volume group [systemvg]"
+		pvcreate $diskPartition >/dev/null 2>&1
+		vgcreate systemvg $diskPartition >/dev/null 2>&1
+	else
+		# .../
+		# There is no need to create a filesystem on the partition
+		# because the image itself contains the filesystem
+		# ----
+		# mke2fs $diskPartition >/dev/null 2>&1
+		# if test $? != 0;then
+		# 	systemException \
+		# 		"Failed to create filesystem on: $diskPartition !" \
+		# 	"reboot"
+		# fi
+		:
+	fi
+}
+partitionCount () {
+	IFS="," ; for i in $PART;do
+		PART_NUMBER=`expr $PART_NUMBER + 1`
+	done
+	if [ $PART_NUMBER -gt 4 ];then
+		PART_NEED_EXTENDED=1
+	fi
+	PART_NUMBER=`expr $PART_NUMBER + 1`
+	PART_NEED_FILL=`expr $PART_NUMBER / 8`
+	PART_NEED_FILL=`expr 8 - \( $PART_NUMBER - $PART_NEED_FILL \* 8 \)`
+}
+fillPartition () {
+	while test $PART_NEED_FILL -gt 0;do
+		echo
+		PART_NEED_FILL=`expr $PART_NEED_FILL - 1`
+	done
+}
+createSwap () {
+	IFS="," ; for i in $PART;do
+		field=0
+		IFS=";" ; for n in $i;do
+		case $field in
+			0) partSize=$n   ; field=1 ;;
+			1) partID=$n     ; field=2 ;;
+			2) partMount=$n;
+		esac
+		done
+		if test $partID = "82" -o $partID = "S";then
+			echo "0,$partSize,$partID,-" > $PART_FILE
+			PART_COUNT=`expr $PART_COUNT + 1`
+			return
+		fi
+	done
+}
+createPartition () {
+	devices=1
+	IFS="," ; for i in $PART;do
+		field=0
+		IFS=";" ; for n in $i;do
+		case $field in
+			0) partSize=$n   ; field=1 ;;
+			1) partID=$n     ; field=2 ;;
+			2) partMount=$n;
+		esac
+		done
+		if test $partID = "82" -o $partID = "S";then
+			continue
+		fi
+		if test $partSize = "x";then
+			partSize=""
+		fi
+		if [ $PART_COUNT -eq 1 ];then
+			echo ",$partSize,$partID,*" >> $PART_FILE
+		else
+			echo ",$partSize,$partID,-" >> $PART_FILE
+		fi
+		PART_COUNT=`expr $PART_COUNT + 1`
+		if [ $PART_NEED_EXTENDED -eq 1 ];then
+		if [ $PART_COUNT -eq 3 ];then
+			echo ",,E" >> $PART_FILE
+			NO_FILE_SYSTEM=1
+		fi
+		fi
+		devices=`expr $devices + 1`
+		if test -z "$PART_MOUNT";then
+			PART_MOUNT="$partMount"
+			PART_DEV="$DISK$devices"
+		else
+			PART_MOUNT="$PART_MOUNT:$partMount"
+			if [ $NO_FILE_SYSTEM -eq 2 ];then
+				devices=`expr $devices + 1`
+				NO_FILE_SYSTEM=0
+			fi
+			PART_DEV="$PART_DEV:$DISK$devices"
+		fi
+		if [ $NO_FILE_SYSTEM -eq 1 ];then
+			NO_FILE_SYSTEM=2
+		fi
+	done
+	if [ $PART_NEED_EXTENDED -eq 1 ];then
+		fillPartition
+	fi
+}
+writePartitionTable () {
+	diskDevice=$1
+	sfdisk -uM --force $diskDevice < $PART_FILE >/dev/null 2>&1
+	if test $? != 0;then
+		systemException \
+			"Failed to create partition table on: $diskDevice !" \
+		"reboot"
+	fi
+	rm -f $PART_FILE
+}
+linuxPartition () {
+	diskDevice=$1
+	diskPartitionType=`sfdisk -c $diskDevice 2 2>/dev/null`
+	if test "$diskPartitionType" = "83";then
+		return 0
+	fi
+	return 1
+}
+fileSystem () {
+	imageConfig=$1
+	if [ ! -f $imageConfig ];then
+		FSTYPE=auto
+		return
+	fi
+	data=`cat $imageConfig | grep "<type>" | cut -f2 -d ">" | cut -f1 -d "<"`
+	case $data in
+		*ext3*)     FSTYPE=ext3 ;;
+		*ext2*)     FSTYPE=ext2 ;;
+		*reiserfs*) FSTYPE=reiserfs ;;
+		*)
+			FSTYPE=auto
+		;;
+	esac
+}
+kernelList () {
+	prefix=$1
+	KERNEL_LIST=""
+	kcount=0
+	for i in $prefix/lib/modules/*;do
+		if [ ! -d $i ];then
+			continue
+		fi
+		name=${i##*/}
+		if [ ! -f $prefix/boot/vmlinux-$name.gz ];then
+			continue
+		fi
+		KERNEL_PAIR=""
+		for n in $prefix/boot/*;do
+			if [ ! -L $n ];then
+				continue
+			fi
+			real=`readlink $n`
+			if [ $real = vmlinuz-$name ];then
+				kernel=${n##*/}
+				kcount=$((kcount+1))
+			fi
+			if [ $real = initrd-$name ];then
+				initrd=${n##*/}
+			fi
+			KERNEL_PAIR=$kernel:$initrd
+		done
+		if [ $kcount = 1 ];then
+			KERNEL_LIST=$KERNEL_PAIR
+		elif [ $kcount -gt 1 ];then
+			KERNEL_LIST=$KERNEL_LIST,$KERNEL_PAIR
+		fi
+	done
+}
+validateSize () {
+	haveBytes=`sfdisk -s $imageDevice`
+	haveBytes=`expr $haveBytes \* 1024`
+	haveMByte=`expr $haveBytes / 1048576`
+	needBytes=`expr $blocks \* $blocksize`
+	needMByte=`expr $needBytes / 1048576`
+	Echo "Have size: $imageDevice -> $haveBytes Bytes [ $haveMByte MB ]"
+	Echo "Need size: $needBytes Bytes [ $needMByte MB ]"
+	if test $haveBytes -gt $needBytes;then
+		return 0
+	fi
+	return 1
+}
+validateBlockSize () {
+	isize=`expr $blocks \* $blocksize` 
+	isize=`expr $isize / 32768`
+	if [ $isize -gt $imageBlkSize ];then
+		imageBlkSize=`expr $isize + 1024`
+	fi
+}
+loadOK () {
+	echo $1 | grep -q "File not found"
+	if [ $? = 0 ];then
+		return 1
+	fi
+	echo $1 | grep -q "aborting"
+	if [ $? = 0 ];then
+		return 1
+	fi
+	return 0
+}
+validateRAM () {
+	needRAM=`expr $blocks \* $blocksize`
+	needRAM=`expr $needRAM / 1024`
+	needRAM=`expr $needRAM + 128`
+	hasRAM=`cat /proc/meminfo | grep MemFree | cut -f2 -d:`
+	hasRAM=`echo $hasRAM | cut -f1 -d" "`
+	if test $hasRAM -gt $needRAM;then
+		return 0
+	fi
+	return 1
+}
+checkTFTP () {
+	IFS=$IFS_ORIG
+	for i in `cat /proc/cmdline`;do
+		echo $i | grep -q kiwitftp
+		if [ $? = 0 ];then
+			TSERVER=`echo $i | cut -f2 -d=`
+			if [ ! -z $TSERVER ];then
+				Echo "Found TFTP server in kernel cmdline"
+			fi
+		fi
+	done
+}
+
+#======================================
+# Beautify Startup
+#--------------------------------------
+clear
+echo "Loading KIWI Boot-System..."
+echo "---------------------------"
+
+#======================================
+# 1) Mounting local file systems
+#--------------------------------------
+mount -t proc  proc    /proc
+mount -t sysfs sysfs   /sys
+mount -t devpts devpts /dev/pts
+closeKernelConsole
+
+#======================================
+# 2) Prepare module load support 
+#--------------------------------------
+touch /etc/modules.conf
+touch /lib/modules/*/modules.dep
+
+#======================================
+# 3) Obtain/load network module
+#--------------------------------------
+loaded=0
+probeNetworkCard
+if test -z "$networkModule";then
+	#=============================================
+	# network module wasn't found, check defaults
+	#---------------------------------------------
+	Echo "Couldn't assign net-module, checking fixed list..."
+	IFS=":" ; for i in $MODD;do
+		Echo -n "Network module: Trying: $i... "
+		/sbin/modprobe $i >/dev/null 2>&1
+		cat /proc/net/dev | grep -q eth0
+		if test $? = 0;then
+			loaded=1
+			networkModule=$i
+			echo "Success !" ; break
+		fi
+		echo "Failed !"
+	done
+else 
+	#=============================================
+	# network module found, try to load
+	#---------------------------------------------
+	modprobe $networkModule 2>/dev/null
+	if test $? = 0;then
+		loaded=1
+	fi
+fi
+if test $loaded = 0;then
+	systemException \
+		"Network module: Failed to load network module !" \
+	"reboot"
+fi
+
+#======================================
+# 4) Setup network interface and DNS
+#--------------------------------------
+setupNetwork
+
+#======================================
+# 5) get TFTP Server IP/name
+#--------------------------------------
+checkTFTP
+if [ -z $TSERVER ];then
+	TSERVER=tftp.$DOMAIN
+fi
+Echo "Checking TFTP Server name: $TSERVER"
+ip=`host $TSERVER | cut -f4 -d' '`
+if test $ip = "found:" -o $ip = "out;";then
+	Echo "TFTP Server: $TSERVER not found"
+	Echo "Using: $DHCPSIADDR from dhcpcd-info"
+	TSERVER=$DHCPSIADDR
+fi
+
+#======================================
+# 6) Load configuration
+#--------------------------------------
+CONFIG=/etc/config.netclient
+while true;do
+	result=`atftp -g \
+		-r KIWI/config.$DHCPCHADDR -l $CONFIG $TSERVER 2>&1 | head -n 1`
+	status1=`echo $result | cut -f2 -d" "`
+	status2=`echo $result | cut -f6,7 -d" "`
+	if test "$status1" = "unknown";then
+		Echo -n "TFTP Server unknown, enter IP: " && read TSERVER
+	elif test "$status2" = "<Access violation>";then
+		Echo -n "TFTP access violation, enter IP: " && read TSERVER
+	else
+		break
+	fi
+	if test -z $TSERVER;then
+		TSERVER=$DHCPSIADDR
+	fi
+done
+if test $? != 0 -o ! -s $CONFIG;then
+	#======================================
+	# Register new network client
+	#--------------------------------------
+	Echo "Register new network client..."
+	if test $NAME -ne 0;then
+	if test $NAME -eq -1;then
+		Echo -n "Enter Alias Name for this system: " && \
+		read SYSALIAS
+	else
+		Echo -n "Enter Alias Name for this system [timeout in $NAME sec]: " && \
+		SYSALIAS=`/sbin/timed $NAME`
+	fi
+	fi
+	echo "NCNAME=$SYSALIAS" >> hwtype.$DHCPCHADDR
+	atftp -p -l hwtype.$DHCPCHADDR \
+		-r upload/hwtype.$DHCPCHADDR $TSERVER >/dev/null 2>&1
+	echo
+	Echo "Registered as: $DHCPCHADDR"
+	Echo "Waiting for configuration..."
+	sleep 60
+
+	#======================================
+	# Try to get config again
+	#--------------------------------------
+	while test ! -s $CONFIG;do
+		Echo "Lookup network client config file again..."
+		dhcpcd -n
+		atftp -g -r KIWI/config.$DHCPCHADDR -l $CONFIG $TSERVER >/dev/null 2>&1
+		test -s $CONFIG || {
+			Echo "Couldn't get image configuration"
+			Echo "sleeping [60 sec]..."
+			sleep 60
+		}
+	done
+fi
+importFile < $CONFIG
+
+export systemIntegrity="clean"
+#======================================
+# 7) Is this a diskful station
+#--------------------------------------
+if test ! -z $PART;then
+	#======================================
+	# Load Device modules
+	#--------------------------------------
+	Echo "Including required kernel modules..."
+	probeDevices
+
+	#======================================
+	# Check for installed system
+	#--------------------------------------
+	count=0
+	IFS="," ; for i in $IMAGE;do
+	case $count in
+	0) {
+		field=0
+		IFS=";" ; for n in $i;do
+		case $field in
+			0) imageDevice=$n ; field=1 ;;
+			1) imageName=$n   ; field=2 ;;
+			2) imageVersion=$n; field=3
+		esac
+		done
+		count=1
+		updateNeeded initialize
+		if linuxPartition $DISK;then
+			#e2fsck -y -C 0 $imageDevice
+			mount $imageDevice /mnt >/dev/null 2>&1
+			mountstatus=$?
+			updateNeeded
+			if test $mountstatus = 0;then
+				umount /mnt
+			fi
+			systemIntegrity=`getSystemIntegrity 1`
+			if [ $systemIntegrity = "fine" ];then
+				Echo "Base system is up to date, activating disk system..."
+			fi
+		fi
+	}
+	;;
+	*)
+		# handle other images here...
+	;;
+	esac
+	done
+	#======================================
+	# Create partition table if needed
+	#--------------------------------------
+	if test $systemIntegrity = "clean";then
+		Echo "Creating partition table..."
+		partitionCount
+		createSwap
+		createPartition
+		writePartitionTable $DISK
+		IFS=":" ; for i in $PART_DEV;do
+		if test ! -z "$i";then
+			createFileSystem $i
+		fi
+		done
+		mkswap ${DISK}1 >/dev/null 2>&1
+	fi
+fi
+
+#======================================
+# 9) Download network client image
+#--------------------------------------
+count=0
+IFS="," ; for i in $IMAGE;do
+	imageZipped="uncompressed"
+	count=$(($count + 1))
+	field=0
+	IFS=";" ; for n in $i;do
+	case $field in
+		0) imageDevice=$n ; field=1 ;;
+		1) imageName=$n   ; field=2 ;;
+		2) imageVersion=$n; field=3 ;;
+		3) imageServer=$n ; field=4 ;;
+		4) imageBlkSize=$n; field=5 ;;
+		5) imageZipped=$n ;
+	esac
+	done
+	if [ $count = 1 ];then
+		imageRootDevice=$imageDevice
+		imageRootName=$imageName
+	fi
+	if [ $count = 2 ];then
+		imageNextRootDevice=$imageDevice
+	fi
+	if test `getSystemIntegrity $count` = "fine";then
+		continue
+	fi
+	imageName="image/$imageName-$imageVersion"
+	imageMD5s="$imageName.md5"
+	[ -z "$imageServer" ]  && imageServer=$TSERVER
+	[ -z "$imageBlkSize" ] && imageBlkSize=8192
+	while true;do
+		# /.../
+		# get image md5sum to be able to check for the size
+		# requirements if we are loading into RAM
+		# ---
+		loadStatus=`atftp -g \
+			-r $imageMD5s -l /etc/image.md5 $imageServer 2>&1`
+		if ! loadOK "$loadStatus";then
+			systemException \
+			"Failed to load image MD5: $imageName -> no such image MD5" \
+			"reboot"
+		fi
+		IFS=" "
+		read sum1 blocks blocksize < /etc/image.md5
+		if test -z $DISK;then
+			if ! validateRAM;then
+				systemException \
+					"Not enough RAM available for this image" \
+				"reboot"
+			fi
+		else
+			if ! validateSize;then
+				systemException \
+					"Not enough space available for this image" \
+				"reboot"
+			fi
+		fi
+		validateBlockSize
+		# /.../
+		# now load the image into the imageDevice
+		# ---
+		multicast="-m"
+		if test "$imageZipped" = "compressed"; then
+			Echo "Compressed image found: Disable multicast download"
+			multicast=""
+			test ! -p /dev/compressed_image && mkfifo /dev/compressed_image
+			cat /dev/compressed_image | gzip -d > $imageDevice 2>/dev/null &
+			imageDevice_orig=$imageDevice
+			imageName_orig=$imageName
+			imageDevice="/dev/compressed_image"
+			imageName="$imageName.gz"
+		fi
+		Echo "Loading $imageName [$imageDevice BS:$imageBlkSize Byte]..."
+		loadStatus=`atftp $multicast --option "blksize $imageBlkSize" -g \
+			-r $imageName -l $imageDevice $imageServer 2>&1`
+		if ! loadOK "$loadStatus";then
+			systemException \
+				"Failed to load image: $imageName -> no such image" \
+			"reboot"
+		fi
+		if test "$imageZipped" = "compressed"; then
+			imageDevice=$imageDevice_orig
+			imageName=$imageName_orig
+		fi
+		# /.../
+		# check the md5sum of the downloaded data records
+		# ----
+		dd if=$imageDevice count=$blocks bs=$blocksize 2>/dev/null |\
+			md5sum - > /etc/ireal.md5
+		read sum2 dumy < /etc/ireal.md5
+		if test $sum1 = $sum2;then
+			Echo "Image checksum test: fine :-)"
+			break
+		fi
+		Echo "Image checksum test failed:"
+		Echo "Possible reasons:"
+		echo 
+		Echo -b "1) Physical ethernet connection lost:"
+		Echo -b "   please check cable"
+		echo
+		Echo -b "2) Data corruption while loading the image:"
+		Echo -b "   will give it a new try..."
+		echo
+		Echo -b "3) wrong checksum file created for the image:"
+		Echo -b "   check with the md5sum command if the image on the"
+		Echo -b "   TFTP server provides the same md5 sum as included"
+		Echo -b "   within the appropriate .md5 file for this image"
+		echo
+		if test -z $DISK;then
+		Echo -b "4) ramdisk size is too small for the image:"
+		Echo -b "   check the ramdisk_size parameter of the PXE"
+		Echo -b "   configuration file on the TFTP server"
+		else
+		Echo -b "4) partition size is too small for the image:"
+		Echo -b "   check the PART line in the image config file on the"
+		Echo -b "   TFTP server"
+		fi
+		echo
+		Echo "Retry to load image..."
+		sleep 15
+	done
+	echo $imageDevice | grep -q ram
+	haveDataInRam=$?
+	if test ! -z $DISK && test $haveDataInRam != 0;then
+		mount $imageRootDevice /mnt
+		fileSystem /mnt/image/config.xml
+		umount /mnt
+		Echo "Resize filesystem to full partition space..."
+		if test "$FSTYPE" = "reiserfs";then
+			resize_reiserfs $imageDevice
+			INITRD_MODULES="$INITRD_MODULES reiserfs"
+		fi
+		if test "$FSTYPE" = "ext2";then
+			e2fsck -y -f $imageDevice
+			resize2fs -F -p $imageDevice
+			INITRD_MODULES="$INITRD_MODULES ext2"
+		fi
+		if test "$FSTYPE" = "ext3";then
+			e2fsck -y -f $imageDevice
+			resize2fs -F -p $imageDevice
+			tune2fs -j $imageDevice
+			INITRD_MODULES="$INITRD_MODULES ext3"
+		fi
+	fi
+	if test ! -z $DISK && test $haveDataInRam = 0;then
+		Echo "Including RAM device data to disk..."
+		RELOAD_CONFIG="yes"
+		mkdir -p /config
+		mount $imageDevice /mnt
+		rm -rf /mnt/lost+found
+		cp -a /mnt/* /config && rm -f /mnt/*
+		umount /mnt
+	fi
+	rm -f /etc/ireal.md5
+	rm -f /etc/image.md5
+done
+
+#======================================
+# 10) Check for RELOAD_CONFIG
+#--------------------------------------
+if test ! -z $DISK;then
+if test ! -z $RELOAD_CONFIG;then
+	systemIntegrity_save=$systemIntegrity
+	systemIntegrity="clean"
+fi
+fi
+
+#======================================
+# 11) Import fixed configuration files
+#--------------------------------------
+if test $systemIntegrity = "clean";then
+	mkdir -p /config
+	IFS="," ; for i in $CONF;do
+		field=0
+		IFS=";" ; for n in $i;do
+		case $field in
+			0) configSource=$n ; field=1 ;;
+			1) configDest=$n   ; field=2 ;;
+			2) configServer=$n ; field=3 ;;
+			3) configBlkSize=$n;
+		esac
+		done
+		Echo "Import configuration file: $configDest"
+		dirs=`dirname  $configDest`
+		mkdir -p /config/$dirs
+		atftp --option "blksize $configBlkSize" -g \
+			-r $configSource -l /config/$configDest $configServer \
+		>/dev/null 2>&1
+	done
+fi
+
+#======================================
+# 12) send DHCP_RELEASE, reset cache
+#--------------------------------------
+if test $systemIntegrity = "clean";then
+	dhcpcd -k
+fi
+
+#======================================
+# 13) Mount OS image to /mnt
+#--------------------------------------
+mount $imageRootDevice /mnt
+
+#======================================
+# 14) Check if this is a split image
+#--------------------------------------
+if test ! -z $COMBINED_IMAGE; then
+	READ_ONLY_SYSTEM=system
+	mkdir -p /mnt/$READ_ONLY_SYSTEM && \
+		mount $imageNextRootDevice /mnt/$READ_ONLY_SYSTEM
+	cd /mnt
+	for dir in bin boot lib opt sbin usr;do
+		ln -s $READ_ONLY_SYSTEM/$dir $dir
+	done
+	cd /
+fi
+
+#======================================
+# 15) check filesystem and kernels
+#--------------------------------------
+if test $systemIntegrity = "clean";then
+	fileSystem /mnt/image/config.xml
+	kernelList /mnt
+fi
+
+#======================================
+# 16) Create system dependant files
+#--------------------------------------
+if test $systemIntegrity = "clean";then
+	mkdir -p /config/etc
+	echo "$imageRootDevice / $FSTYPE defaults 0 0"        > /config/etc/fstab
+	echo "devpts  /dev/pts   devpts mode=0620,gid=5 0 0" >> /config/etc/fstab
+	echo "proc    /proc   proc    defaults 0 0"          >> /config/etc/fstab
+	echo "sysfs   /sys    sysfs   noauto 0 0"            >> /config/etc/fstab
+	echo "tmpfs   /dev/shm tmpfs  defaults 0 0"          >> /config/etc/fstab
+	if test ! -z $DISK;then
+		# a) /etc/fstab...
+		# ----------------
+		echo "${DISK}1 swap swap pri=42 0 0" >> /config/etc/fstab
+		index=0
+		IFS=":" ; for i in $PART_MOUNT;do
+		if test ! -z "$i";then
+			count=0
+			IFS=":" ; for n in $PART_DEV;do
+				device=$n
+				if test $count -eq $index;then
+					break
+				fi
+				count=`expr $count + 1`
+			done
+			index=`expr $index + 1`
+			if test ! $i = "/";then
+				fileSystem $device
+				echo "$device $i $FSTYPE defaults 1 1" >> /config/etc/fstab
+			fi
+		fi
+		done
+		# b) /boot/grub/menu.lst...
+		# -------------------------
+		console=""
+		mkdir -p /config/boot/grub
+		echo "timeout 10" > /config/boot/grub/menu.lst
+		IFS="," ; for i in $KERNEL_LIST;do
+		if test ! -z "$i";then
+			kernel=`echo $i | cut -f1 -d:`
+			initrd=`echo $i | cut -f2 -d:`
+			menu=/config/boot/grub/menu.lst
+			echo "title $kernel" >> $menu
+			if [ $kernel = "vmlinuz-xen" ];then
+				echo " root (hd0,1)"                   >> $menu
+				echo " kernel /boot/xen.gz"            >> $menu
+				echo -n " module /boot/$kernel"        >> $menu
+				echo " root=${DISK}2 $console"         >> $menu
+				echo " module /boot/$initrd"           >> $menu
+			else
+				echo -n " kernel (hd0,1)/boot/$kernel" >> $menu
+				echo " root=${DISK}2 $console"         >> $menu
+				echo " initrd (hd0,1)/boot/$initrd"    >> $menu
+			fi
+		fi
+		done
+		# c) /etc/grub.conf...
+		# -------------------------
+		mkdir -p /config/etc
+		gconf=/config/etc/grub.conf
+		echo -en "root (hd0,1)\ninstall"         > $gconf
+		echo -n " --stage2=/boot/grub/stage2"   >> $gconf
+		echo -n " /boot/grub/stage1 d (hd0)"    >> $gconf
+		echo -n " /boot/grub/stage2 0x8000"     >> $gconf
+		echo " (hd0,1)/boot/grub/menu.lst"      >> $gconf
+		echo "quit"                             >> $gconf
+		# d) /etc/sysconfig/kernel...
+		# ---------------------------
+		mkdir -p /config/etc/sysconfig
+		syskernel=/config/etc/sysconfig/kernel
+		echo "INITRD_MODULES=\"$INITRD_MODULES\""       > $syskernel
+		echo "DOMU_INITRD_MODULES=\"$DOMURD_MODULES\"" >> $syskernel
+	fi
+fi
+
+#======================================
+# 17) copy system dependant files
+#--------------------------------------
+if test $systemIntegrity = "clean";then
+	cd /config
+	find . -type d | while read d ; do  mkdir -p /mnt/$d ; done
+	find . -type f | while read f ; do  cp $f /mnt/$f ; done
+	cd /
+	rm -rf /config
+fi
+echo 256 > /proc/sys/kernel/real-root-dev
+
+#======================================
+# 18) umount system filesystems
+#--------------------------------------
+umount /dev/pts
+umount /sys
+umount /proc
+
+#======================================
+# 19) copy initrd files to image
+#--------------------------------------
+cp /preinit /mnt
+
+#======================================
+# 20) Activate new root
+#--------------------------------------
+Echo "Activating Image: [$imageRootName]"
+cd /mnt && exec < dev/console >dev/console 2>&1
+Echo "Calling preinit phase..."
+/mnt/sbin/pivot_root . mnt >/dev/null 2>&1
+if test $? != 0;then
+	PIVOT=false
+	mount --move . / && chroot . ./preinit
+	chroot . rm ./preinit
+else
+	PIVOT=true
+	./preinit
+	rm ./preinit
+fi
+#======================================
+# 21) reboot system if specified
+#--------------------------------------
+if test ! -z $REBOOT_IMAGE;then
+	Echo "Rebooting System to activate new kernel..."
+	/sbin/restart >/dev/null 2>&1
+fi
+#======================================
+# 22) Unmount initrd / system init
+#--------------------------------------
+echo " "
+echo "Booting into final System..."
+echo "----------------------------"
+reopenKernelConsole
+mount -n -o remount,rw / 2>/dev/null
+if [ $PIVOT = "true" ];then
+	exec umount -n -l /mnt
+else
+	exec chroot . /sbin/init
+fi
