@@ -67,7 +67,6 @@ rm -rf /usr/X11R6/lib/X11/icons
 rm -rf /usr/share/mime
 rm -rf /usr/share/susehelp
 rm -rf /usr/lib/X11/fonts/Type1
-rm -rf /usr/X11R6/lib/X11/fonts/misc/*ISO8859-??.pcf*
 rm -rf /opt/gnome/lib/libIDL*
 rm -rf /opt/gnome/lib/libORBit*
 rm -rf /opt/gnome/lib/libbonobo*
@@ -88,6 +87,12 @@ rm -rf /boot/*
 #------------------------------------------
 rm -rf /var/lib/rpm
 rm -rf /usr/lib/rpm
+
+#==========================================
+# remove unneeded X11 fonts
+#------------------------------------------
+find /usr/X11R6/lib/X11/fonts/misc/*.pcf.gz |\
+	grep -v 6x13-I | grep -v cursor | xargs rm -f
 
 #==========================================
 # remove unneeded console fonts
