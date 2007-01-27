@@ -271,7 +271,7 @@ sub createImageLiveCD {
 	#==========================================
 	# Count disk space for RW extend
 	#------------------------------------------
-	my $mbytesrw = getSize ($imageTree);
+	my ($mbytesreal,$mbytesrw,$xmlsize) = getSize ($imageTree);
 
 	#==========================================
 	# Create RW logical extend
@@ -522,8 +522,8 @@ sub createImageSplit {
 	#==========================================
 	# Count disk space for extends
 	#------------------------------------------
-	my $mbytesrw = getSize ($imageTree);
-	my $mbytesro = getSize ($imageTreeReadOnly);
+	my ($mbytesreal,$mbytesrw,$xmlsize) = getSize ($imageTree);
+	my ($mbytesreal,$mbytesro,$xmlsize) = getSize ($imageTreeReadOnly);
 
 	#==========================================
 	# Create RW logical extend
@@ -965,9 +965,11 @@ sub setupLogicalExtend {
 	#==========================================
 	# Calculate needed space
 	#------------------------------------------
-	my $mbytes = getSize ($imageTree);
+	my ($mbytesreal,$mbytes,$xmlsize) = getSize ($imageTree);
 	if (! defined $quiet) {
-		$kiwi -> info ("Image requires $mbytes MB of disk space");
+		$kiwi -> info ("Image requires $mbytesreal MB, got $xmlsize MB");
+		$kiwi -> done ();
+		$kiwi -> info ("Suggested Image size: $mbytes MB");
 		$kiwi -> done ();
 	}
 	return $mbytes;
@@ -1217,10 +1219,13 @@ sub getSize {
 	if ($spare <= 8192) {
 		$spare = 8192;
 	}
+	my $orig = $size;
+	$orig /= 1024;
+	$orig = int ($orig);
 	$size += $spare;
 	$size /= 1024;
 	$size = int ($size);
-	return $size;
+	return ($orig,$size,$xml->getImageSize());
 }
 
 #==========================================
