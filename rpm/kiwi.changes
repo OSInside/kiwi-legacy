@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Jan 30 15:19:55 CET 2007 - ms@suse.de
+
+- fixed chroot path problem if repository pointer is a
+  symbolic link to somewhere else
+
+-------------------------------------------------------------------
 Sat Jan 27 17:33:38 CET 2007 - ms@suse.de
 
 - added improved size information

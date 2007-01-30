@@ -286,7 +286,7 @@ sub getRepository {
 	foreach my $element (@node) {
 		my $type = $element -> getAttribute("type");
 		my $stag = $element -> getElementsByTagName ("source") -> get_node(1);
-		my $source =  $stag -> getAttribute ("path");
+		my $source = resolveLink ( $stag -> getAttribute ("path") );
 		$result{$source} = $type;
 	}
 	return %result;
@@ -504,6 +504,23 @@ sub setupImageInheritance {
 	$kiwi -> done();
 	$ixml -> setupImageInheritance();
 #	return $this;    
+}
+
+#==========================================
+# resolveLink
+#------------------------------------------
+sub resolveLink {
+	my $data  = shift;
+	my @dirs  = split (/\//,$data);
+	while (@dirs) {
+		my $path = join ("/",@dirs);
+		my $link = readlink $path;
+		if (defined $link) {
+			$data =~ s/$path/$link/;
+		}
+		pop (@dirs);
+	}
+	return $data;
 }
 
 #==========================================
