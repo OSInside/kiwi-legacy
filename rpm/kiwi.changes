@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Feb  1 10:54:54 CET 2007 - ms@suse.de
+
+- added check for second level installation. The check will
+  lookup already installed packages and remove them from the
+  list if set
+
+-------------------------------------------------------------------
 Tue Jan 30 15:19:55 CET 2007 - ms@suse.de
 
 - fixed chroot path problem if repository pointer is a

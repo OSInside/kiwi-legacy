@@ -397,6 +397,7 @@ sub setupRootSystem {
 				"-o rpm-root=$root",
 				"-o deb-root=$root",
 				"-o force-channels=$forceChannels",
+				"--explain",
 				"-y"
 			);
 			#==========================================
@@ -411,12 +412,27 @@ sub setupRootSystem {
 			print FD "echo \$? > $screenCall.exit\n";
 		} else {
 			$kiwi -> info ("Installing image packages...");
+			my $querypack = "--installed --hide-version";
+			my @installed = qx ( chroot $root smart query '*' $querypack );
+			chomp ( @installed );
+			my @install   = ();
+			foreach my $need (@packs) {
+				my $found = 0;
+				foreach my $have (@installed) {
+					if ($have eq $need) {
+						$found = 1; last;
+					}
+				}
+				if (! $found) {
+					push @install,$need;
+				}
+			}
 			my @installOpts = (
-				"-o rpm-force=true",
+				"--explain",
 				"-y"
 			);
 			print FD "chroot $root smart update\n";
-			print FD "test \$? = 0 && chroot $root smart install @packs ";
+			print FD "test \$? = 0 && chroot $root smart install @install ";
 			print FD "@installOpts\n";
 			print FD "echo \$? > $screenCall.exit\n";
 		}
