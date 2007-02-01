@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Feb  1 14:47:15 CET 2007 - ms@suse.de
+
+- added wyseXMini-suse-10.1 to kiwi-images-wyse package
+
+-------------------------------------------------------------------
 Thu Feb  1 10:54:54 CET 2007 - ms@suse.de
 
 - added check for second level installation. The check will

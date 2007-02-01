@@ -199,6 +199,7 @@ cat kiwi.loader
 %defattr(-, root, root)
 %{_datadir}/kiwi/image/wyseGhost-suse-10.1
 %{_datadir}/kiwi/image/wyseGhost-suse-10.2
+%{_datadir}/kiwi/image/wyseXMini-suse-10.1
 
 %files -n kiwi-images-buildservice
 %{_datadir}/kiwi/image/buildhost-suse-10.1
