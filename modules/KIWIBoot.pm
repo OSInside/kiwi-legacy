@@ -32,6 +32,7 @@ my $kernel;  # kernel for initrd
 my $tmpdir;  # temporary directory
 my $result;  # result of external calls
 my $status;  # output of last command
+my $vmsize;  # size of virtual disk
 
 #==========================================
 # Constructor
@@ -43,6 +44,7 @@ sub new {
 	$kiwi   = shift;
 	$initrd = shift;
 	$system = shift;
+	$vmsize = shift;
 	if (! defined $kiwi) {
 		$kiwi = new KIWILog();
 	}
@@ -78,6 +80,9 @@ sub new {
 		$kiwi -> failed ();
 		return undef;
 	}
+	if (! defined $vmsize) {
+		$vmsize = "10G";
+	}
 	chomp  $tmpdir;
 	return $this;
 }
@@ -86,7 +91,15 @@ sub new {
 # createBootStructure
 #------------------------------------------
 sub createBootStructure {
-	my $this = shift;
+	my $loc   = shift;
+	my $lname = "linux";
+	my $iname = "initrd";
+	if (defined $loc) {
+		rmdir $tmpdir;
+		$tmpdir = "/mnt";
+		$lname  = $lname.".".$loc;
+		$iname  = $iname.".".$loc;
+	}
 	$kiwi -> info ("Creating initial boot structure");
 	$status = qx ( mkdir -p $tmpdir/boot/grub 2>&1 );
 	$result = $? >> 8;
@@ -96,7 +109,7 @@ sub createBootStructure {
 		$kiwi -> failed ();
 		return undef;
 	}
-	$status = qx ( cp $initrd $tmpdir/boot/initrd 2>&1 );
+	$status = qx ( cp $initrd $tmpdir/boot/$iname 2>&1 );
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -104,7 +117,7 @@ sub createBootStructure {
 		$kiwi -> failed ();
 		return undef;
 	}
-	$status = qx ( cp $kernel $tmpdir/boot/linux 2>&1 );
+	$status = qx ( cp $kernel $tmpdir/boot/$lname 2>&1 );
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -451,4 +464,185 @@ sub setupBootCD {
 	$kiwi -> done ();
 }
 
-1;
+#==========================================
+# setupBootDisk
+#------------------------------------------
+sub setupBootDisk {
+	my $this = shift;
+	my $diskname = $system.".qemu";
+	my $vmdkname = $system.".vmdk";
+	my $loop = "/dev/loop0";
+	my $result;
+	my $status;
+	#==========================================
+	# create virtual disk
+	#------------------------------------------
+	$kiwi -> info ("Creating virtual disk...");
+	if (! defined $system) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("No system image given");
+		$kiwi -> failed ();
+		return undef;
+	}	
+	$status = qx (qemu-img create $diskname $vmsize 2>&1);
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Failed creating virtual disk: $status");
+		$kiwi -> failed ();
+		return undef;
+	}
+	$status = qx ( /sbin/losetup $loop $diskname 2>&1 );
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Failed binding virtual disk: $status");
+		$kiwi -> failed ();
+		return undef;
+	}
+	#==========================================
+	# create virtual disk partition
+	#------------------------------------------
+	if (! open (FD,"|/sbin/fdisk $loop &>/dev/null")) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Failed creating virtual partition");
+		$kiwi -> failed ();
+		qx ( losetup -d $loop );
+		return undef;
+	}
+	my @commands = (
+		"n","p","1",".",".","w","q"
+	);
+	foreach my $cmd (@commands) {
+		if ($cmd eq ".") {
+			print FD "\n";
+		} else {
+			print FD "$cmd\n";
+		}
+	}
+	close FD;
+	#==========================================
+	# setup device mapper
+	#------------------------------------------
+	$status = qx ( /sbin/kpartx -a $loop 2>&1 );
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Failed mapping virtual partition: $status");
+		$kiwi -> failed ();
+		qx ( /sbin/losetup -d $loop );
+		return undef;
+	}
+	my $dmap = $loop; $dmap =~ s/dev\///;
+	my $root = "/dev/mapper".$dmap."p1";
+	#==========================================
+	# Dump system image on virtual disk
+	#------------------------------------------
+	$kiwi -> done();
+	$kiwi -> info ("Dumping system image on virtual disk");
+	$status = qx (dd if=$system of=$root bs=8k 2>&1);
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't dump image to virtual disk: $status");
+		$kiwi -> failed ();
+		qx ( /sbin/kpartx  -d $loop );
+		qx ( /sbin/losetup -d $loop );
+		return undef;
+	}
+	$kiwi -> done();
+	#==========================================
+	# Mount system image
+	#------------------------------------------
+	$status = qx (mount $root /mnt/ 2>&1);
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't mount image: $status");
+		$kiwi -> failed ();
+		qx ( /sbin/kpartx  -d $loop );
+		qx ( /sbin/losetup -d $loop );
+		return undef;
+	}
+	#==========================================
+	# Dump initial initrd on system image
+	#------------------------------------------
+	createBootStructure ("vmx");
+
+	#==========================================
+	# Creating menu.lst for the grub
+	#------------------------------------------
+	$kiwi -> info ("Creating grub menu and device map");
+	if (! open (FD,">/mnt/boot/grub/menu.lst")) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't create menu.lst: $!");
+		$kiwi -> failed ();
+		qx ( umount /mnt/ 2>&1 );
+		qx ( /sbin/kpartx  -d $loop );
+		qx ( /sbin/losetup -d $loop );
+		return undef;
+	}
+	print FD "color cyan/blue white/blue\n";
+	print FD "default 0\n";
+	print FD "timeout 10\n";
+	print FD "framebuffer 1\n";
+	print FD "title KIWI VM boot\n";
+	print FD " root (hd0,0)\n";
+	print FD " kernel /boot/linux.vmx vga=normal\n";
+	print FD " initrd /boot/initrd.vmx\n";
+	close FD;
+	$kiwi -> done();
+
+	#==========================================
+	# cleanup device maps and part mount
+	#------------------------------------------
+	qx ( umount /mnt/ 2>&1 );
+	qx ( /sbin/kpartx  -d $loop );
+
+	#==========================================
+	# Install grub on virtual disk
+	#------------------------------------------
+	$kiwi -> info ("Installing grub on virtual disk");
+	if (! open (FD,"|/usr/sbin/grub --batch >/dev/null 2>&1")) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't install grub on virtual disk: $status");
+		$kiwi -> failed ();
+		qx ( /sbin/losetup -d $loop );
+		return undef;
+	}
+	print FD "device (hd0) $diskname\n";
+	print FD "root (hd0,0)\n";
+	print FD "setup (hd0)\n";
+	print FD "quit\n";
+	close FD;
+	$result = $? >> 8;
+	if ($result != 0) { 
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't install grub on virtual disk: $status");
+		$kiwi -> failed ();
+		qx ( /sbin/losetup -d $loop );
+		return undef;
+	}
+	$kiwi -> done ();
+	#==========================================
+	# Create vmdk (VMware) image
+	#------------------------------------------
+	$kiwi -> info ("Creating vmdk image");
+	$status = qx ( qemu-img convert -f raw $loop -O vmdk $vmdkname );
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't create vmdk image: $status");
+		$kiwi -> failed ();
+		qx ( /sbin/losetup -d $loop );
+		return undef;
+	}
+	$kiwi -> done ();
+	#==========================================
+	# cleanup loop setup and device mapper
+	#------------------------------------------
+	qx ( /sbin/losetup -d $loop );
+	return $this;
+}
+
+1; 

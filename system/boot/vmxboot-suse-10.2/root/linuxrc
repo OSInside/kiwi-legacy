@@ -1,0 +1,407 @@
+#!/bin/bash
+#================
+# FILE          : linuxrc
+#----------------
+# PROJECT       : OpenSuSE KIWI Image System
+# COPYRIGHT     : (c) 2006 SUSE LINUX Products GmbH. All rights reserved
+#               :
+# AUTHOR        : Marcus Schaefer <ms@suse.de>
+#               :
+# BELONGS TO    : Operating System images
+#               :
+# DESCRIPTION   : This file is changed to become the real
+#               : linuxrc script which is used to prepare the
+#               : operating system for the main image
+#               :
+#               :
+# STATUS        : BETA
+#----------------
+#
+#======================================
+# Exports...
+#--------------------------------------
+export PATH="/sbin:/bin:/usr/sbin:/usr/bin"
+export MODD="pcnet32:tulip:natsemi:e100:eepro100"
+export NAME=0
+export PART_FILE="/etc/partition.table"
+export DOMURD_MODULES="xennet xenblk"
+export PART_MOUNT
+export PART_DEV
+export INITRD_MODULES="reiserfs"
+export KERNEL_LIST
+
+export PART_COUNT=0
+export PART_NUMBER=0
+export PART_NEED_EXTENDED=0
+export PART_NEED_FILL=0
+export NO_FILE_SYSTEM=0
+export IFS_ORIG=$IFS
+
+export SYSTEM_INTEGRITY
+export SYSTEM_MD5STATUS
+
+DEBUG=0
+SYSALIAS="undefined"
+#======================================
+# Functions...
+#--------------------------------------
+Debug () {
+	if test "$DEBUG" = 1;then
+		echo "+++++> $1"
+	fi
+}
+Echo () {
+	if test "$1" = "-n";then
+		echo $1 "-----> $2"
+	elif test "$1" = "-b";then
+		echo "       $2"
+	else
+		echo "-----> $1"
+	fi
+}
+WaitKey () {
+	if test "$DEBUG" = 1;then
+		Echo -n "Press any key to continue..."
+		read
+	fi
+}
+closeKernelConsole () {
+	if test "$DEBUG" = 0;then
+		/usr/sbin/klogconsole -l 1
+	fi
+}
+reopenKernelConsole () {
+	/usr/sbin/klogconsole -l 7
+}
+importFile () {
+	IFS="
+	"
+	while read line;do
+	IFS="="
+	count=0
+	for item in $line;do
+		if test $count = 0 ; then
+			key=$item ; count=1 ; continue
+		fi
+		if test $count = 1 ; then
+			item=`echo $item | tr -d \'`
+			Debug "$key=$item"
+			eval export $key\=\"$item\"
+			count=0
+		fi
+	done
+	done
+}
+probeDeviceAlias () {
+	modalias=/tmp/modalias
+	cat > $modalias < /dev/null
+	for i in `find /sys -name modalias 2>/dev/null`;do
+		alias=`cat $i | grep pci:`
+		if [ ! -z "$alias" ];then
+			echo $alias >> $modalias
+		fi
+	done
+	cat $modalias | sort | uniq > $modalias.new
+	mv $modalias.new $modalias
+}
+probeDeviceInfo () {
+	modinfo=/tmp/modinfo
+	cat > $modinfo < /dev/null
+	for file in `find /lib/modules/*/kernel/drivers -type f`;do
+	for info in `/sbin/modinfo -F alias $file`;do
+		echo "$info%$file" >> $modinfo
+	done
+	done
+	cat $modinfo | sort | uniq |\
+		sed -e s@*@.*@g \
+	> $modinfo.new
+	mv $modinfo.new $modinfo
+}
+probeDevices () {
+	IFS=$IFS_ORIG
+	probeDeviceInfo
+	probeDeviceAlias
+	for i in `cat $modinfo`;do
+		info=`echo $i | cut -f1 -d%`
+		file=`echo $i | cut -f2 -d%`
+		grep -q $info $modalias >/dev/null 2>&1
+		if [ $? = 0 ];then
+			module=`basename $file`
+			module=`echo $module | sed -e s@.ko@@`
+			INITRD_MODULES="$INITRD_MODULES $module"
+			modprobe $module >/dev/null 2>&1
+		fi
+	done
+	# bad fix for ata probe, load order is required
+	Echo "Waiting for devices to become ready..."
+	lsmod | grep -q ata_piix
+	if [ $? = 0 ];then
+		rmmod ata_piix
+		sleep 5
+		modprobe ata_piix
+	fi
+}
+systemException () {
+	Echo "$1"
+	case "$2" in
+	"reboot")
+		Echo "rebootException: reboot in 60 sec..."; sleep 60
+		/sbin/restart >/dev/null 2>&1
+	;;
+	"wait")
+		Echo "waitException: waiting for ever..."
+		while true;do sleep 100;done
+	;;
+	"shell")
+		Echo "shellException: providing shell..."
+		/bin/sh
+	;;
+	*)
+		Echo "unknownException..."
+	;;
+	esac
+}
+fileSystem () {
+	imageConfig=$1
+	if [ ! -f $imageConfig ];then
+		FSTYPE=auto
+		return
+	fi
+	data=`cat $imageConfig | grep "<type>" | cut -f2 -d ">" | cut -f1 -d "<"`
+	case $data in
+		*ext3*)     FSTYPE=ext3 ;;
+		*ext2*)     FSTYPE=ext2 ;;
+		*reiserfs*) FSTYPE=reiserfs ;;
+		*)
+			FSTYPE=auto
+		;;
+	esac
+}
+kernelList () {
+	prefix=$1
+	KERNEL_LIST=""
+	kcount=0
+	for i in $prefix/lib/modules/*;do
+		if [ ! -d $i ];then
+			continue
+		fi
+		name=${i##*/}
+		if [ ! -f $prefix/boot/vmlinux-$name.gz ];then
+			continue
+		fi
+		KERNEL_PAIR=""
+		for n in $prefix/boot/*;do
+			if [ ! -L $n ];then
+				continue
+			fi
+			real=`readlink $n`
+			if [ $real = vmlinuz-$name ];then
+				kernel=${n##*/}
+				kcount=$((kcount+1))
+			fi
+			if [ $real = initrd-$name ];then
+				initrd=${n##*/}
+			fi
+			KERNEL_PAIR=$kernel:$initrd
+		done
+		if [ $kcount = 1 ];then
+			KERNEL_LIST=$KERNEL_PAIR
+		elif [ $kcount -gt 1 ];then
+			KERNEL_LIST=$KERNEL_LIST,$KERNEL_PAIR
+		fi
+	done
+}
+VMMountSystem () {
+	for rdevice in /dev/hda1 /dev/sda1;do
+		imageRootDevice=$rdevice
+		mount $imageRootDevice /mnt &>/dev/null
+		if [ $? = 0 ];then
+			break
+		fi
+	done
+}
+VMUmountSystem () {
+	umount /mnt
+}
+#======================================
+# Beautify Startup
+#--------------------------------------
+clear
+echo "Loading KIWI VMX Boot-System..."
+echo "-------------------------------"
+
+#======================================
+# 1) Mounting local file systems
+#--------------------------------------
+mount -t proc  proc    /proc
+mount -t sysfs sysfs   /sys
+mount -t devpts devpts /dev/pts
+closeKernelConsole
+
+#======================================
+# 2) Prepare module load support 
+#--------------------------------------
+touch /etc/modules.conf
+touch /lib/modules/*/modules.dep
+
+#======================================
+# 3) Including required kernel modules
+#--------------------------------------
+Echo "Including required kernel modules..."
+probeDevices
+
+#======================================
+# 4) Mount VM (boot)
+#--------------------------------------
+VMMountSystem
+
+#======================================
+# 5) Get filesystem type
+#--------------------------------------
+fileSystem /mnt/image/config.xml
+kernelList /mnt
+
+#======================================
+# 6) Umount VM system
+#--------------------------------------
+VMUmountSystem
+
+#======================================
+# 7) Resize filesystem to full space
+#--------------------------------------
+Echo "Resize filesystem to full partition space..."
+if test "$FSTYPE" = "reiserfs";then
+	resize_reiserfs $imageRootDevice
+	INITRD_MODULES="$INITRD_MODULES reiserfs"
+fi
+if test "$FSTYPE" = "ext2";then
+	e2fsck -y -f $imageRootDevice
+	resize2fs -F -p $imageRootDevice
+	INITRD_MODULES="$INITRD_MODULES ext2"
+fi
+if test "$FSTYPE" = "ext3";then
+	e2fsck -y -f $imageRootDevice
+	resize2fs -F -p $imageRootDevice
+	tune2fs -j $imageRootDevice
+	INITRD_MODULES="$INITRD_MODULES ext3"
+fi
+
+#======================================
+# 8) Mount VM (boot)
+#--------------------------------------
+VMMountSystem
+
+#======================================
+# 9) Create system dependant files
+#--------------------------------------
+#======================================
+# a) /etc/fstab
+#--------------------------------------
+mkdir -p /config/etc
+echo "$imageRootDevice / $FSTYPE defaults 0 0"        > /config/etc/fstab
+echo "devpts  /dev/pts   devpts mode=0620,gid=5 0 0" >> /config/etc/fstab
+echo "proc    /proc   proc    defaults 0 0"          >> /config/etc/fstab
+echo "sysfs   /sys    sysfs   noauto 0 0"            >> /config/etc/fstab
+echo "tmpfs   /dev/shm tmpfs  defaults 0 0"          >> /config/etc/fstab
+
+#======================================
+# b) /boot/grub/menu.lst
+#--------------------------------------
+console=""
+mkdir -p /config/boot/grub
+echo "timeout 10" > /config/boot/grub/menu.lst
+IFS="," ; for i in $KERNEL_LIST;do
+	if test ! -z "$i";then
+		kernel=`echo $i | cut -f1 -d:`
+		initrd=`echo $i | cut -f2 -d:`
+		menu=/config/boot/grub/menu.lst
+		echo "title $kernel" >> $menu
+		if [ $kernel = "vmlinuz-xen" ];then
+			echo " root (hd0,0)"                   >> $menu
+			echo " kernel /boot/xen.gz"            >> $menu
+			echo -n " module /boot/$kernel"        >> $menu
+			echo " root=$imageRootDevice $console" >> $menu
+			echo " module /boot/$initrd"           >> $menu
+		else
+			echo -n " kernel (hd0,0)/boot/$kernel" >> $menu
+			echo " root=$imageRootDevice $console" >> $menu
+			echo " initrd (hd0,0)/boot/$initrd"    >> $menu
+		fi
+	fi
+done
+
+#======================================
+# c) /etc/grub.conf
+#--------------------------------------
+mkdir -p /config/etc
+gconf=/config/etc/grub.conf
+echo -en "root (hd0,1)\ninstall"         > $gconf
+echo -n " --stage2=/boot/grub/stage2"   >> $gconf
+echo -n " /boot/grub/stage1 d (hd0)"    >> $gconf
+echo -n " /boot/grub/stage2 0x8000"     >> $gconf
+echo " (hd0,1)/boot/grub/menu.lst"      >> $gconf
+echo "quit"                             >> $gconf
+
+#======================================
+# d) /etc/sysconfig/kernel
+#--------------------------------------
+mkdir -p /config/etc/sysconfig
+syskernel=/config/etc/sysconfig/kernel
+echo "INITRD_MODULES=\"$INITRD_MODULES\""       > $syskernel
+echo "DOMU_INITRD_MODULES=\"$DOMURD_MODULES\"" >> $syskernel
+
+#======================================
+# 10) copy system dependant files
+#--------------------------------------
+cd /config
+find . -type d | while read d ; do  mkdir -p /mnt/$d ; done
+find . -type f | while read f ; do  cp $f /mnt/$f ; done
+cd /
+rm -rf /config
+
+#======================================
+# 11) setup real root device
+#--------------------------------------
+echo 256 > /proc/sys/kernel/real-root-dev
+
+#======================================
+# 12) umount system filesystems
+#--------------------------------------
+umount /dev/pts
+umount /sys
+umount /proc
+
+#======================================
+# 13) copy initrd files to image
+#--------------------------------------
+cp /preinit /mnt
+
+#======================================
+# 14) Activate new root
+#--------------------------------------
+Echo "Activating Image: [$imageRootDevice]"
+cd /mnt && exec < dev/console >dev/console 2>&1
+Echo "Calling preinit phase..."
+/mnt/sbin/pivot_root . mnt >/dev/null 2>&1
+if test $? != 0;then
+	PIVOT=false
+	mount --move . / && chroot . ./preinit
+	chroot . rm ./preinit
+else
+	PIVOT=true
+	./preinit
+	rm ./preinit
+fi
+#======================================
+# 15) Unmount initrd / system init
+#--------------------------------------
+echo " "
+echo "Booting into final System..."
+echo "----------------------------"
+reopenKernelConsole
+mount -n -o remount,rw / 2>/dev/null
+if [ $PIVOT = "true" ];then
+	exec umount -n -l /mnt
+else
+	exec chroot . /sbin/init
+fi

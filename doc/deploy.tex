@@ -108,7 +108,7 @@ burned on a CD. The following file will be created after the call:
 \textit{/tmp/initrd-netboot-suse-10.2.i686-2.1.1.cdboot.iso}
 
 \begin{Command}{14cm}
-    -plug in a USB stick then call-\\
+    -plug in an USB stick then call-\\
 	kiwi --bootstick /tmp/initrd-netboot-suse-10.2.i686-2.1.1.gz
 \end{Command}
 
@@ -180,33 +180,67 @@ the stick but also the entire system image is part of the stick.
 To be able to do this kiwi provides a special boot image named
 \textbf{usbboot}. Currently it is tested and available
 for SuSE Linux 10.2 only but can be adapted to other versions as well.
-To create the boot image call:
+To use your system image on a boot stick setup the system's config.xml
+as follows:
 
 \begin{Command}{14cm}
-	kiwi --prepare usbboot-suse-10.2 --root /tmp/myboot\\
-	kiwi --create /tmp/myboot -d /tmp\\
+<preferences>\\
+\hspace*{1cm}<type>usb:ext3:usbboot-suse-10.2</type>\\
+\hspace*{1cm}...\\
+</preferences>
 \end{Command}
 
-After this the system image which should run on your stick needs to be
+After this the boot and system image needs to be
 created. Concerning to the size of the stick the image is not allowed to
 grow beyond it. Assuming the system image is named full-suse-10.2
 the command is as follows:
 
 \begin{Command}{14cm}
 	kiwi --prepare full-suse-10.2 --root /tmp/mysystem\\
-	kiwi --create /tmp/mysystem -d /tmp\\
+	kiwi --create /tmp/mysystem -d /tmp
 \end{Command}
 
 The result of the command above is represented in the image file
-\textit{/tmp/full-suse-10.2.i686-1.1.2}. The usbboot image from the
-first call is stored as \textit{/tmp/initrd-usbboot-suse-10.2.i686-2.1.1.gz}.
+\textit{/tmp/full-suse-10.2.i686-1.1.2}. The usbboot image is created
+automatically and is stored as
+\textit{/tmp/initrd-usbboot-suse-10.2.i686-2.1.1.gz}.
 To create a bootable stick with a SuSE Linux 10.2 operating system on
-it, plug in a stick and call:
+it, plug in the stick and call:
 
 \begin{Command}{14cm}
-	-plug in a USB stick then call-\\
+	-plug in an USB stick then call-\\
 	kiwi --bootstick /tmp/initrd-usbboot-suse-10.2.i686-2.1.1.gz \bs\\
     \hspace*{1.1cm}--bootstick-system /tmp/full-suse-10.2.i686-1.1.2
+\end{Command}
+
+\section{Virtual disk system (QEMU or VMware)}
+To be able to use a virtualization system a virtual disk needs to
+be created. This can be done by specifying the following type in the
+system's image config.xml:
+
+\begin{Command}{14cm}
+<preferences>\\
+\hspace*{1cm}<type>vmx:ext3:vmxboot-suse-10.2</type>\\
+\hspace*{1cm}...\\
+</preferences>
+\end{Command}
+
+After this the system image can be created. The process will create the
+system image and the specified vmxboot-suse-10.2 boot image. The result
+is then used to create the virtual disk. The following command needs
+to be called:
+
+\begin{Command}{14cm}
+	kiwi --prepare full-suse-10.2 --root /tmp/mysystem\\
+	kiwi --create /tmp/mysystem -d /tmp
+\end{Command}
+
+The result of the command above is a set of virtual disks, one with
+suffix .qemu and the other with the suffix .vmdk (VMware). To run the
+system on the virtual disk with for example qemu call:
+
+\begin{Command}{14cm}
+	qemu /tmp/full-suse-10.2.i686-1.1.2.qemu
 \end{Command}
 
 \section{Live CD system}

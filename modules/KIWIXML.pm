@@ -185,6 +185,12 @@ sub getCompressed {
 	# otherwise false. 
 	# ---
 	my $this = shift;
+	my $type = getImageType();
+	if ($type =~ /^vmx:/) {
+		$kiwi -> info ("Virtual machine type: ignoring compressed flag");
+		$kiwi -> done ();
+		return 0;
+	}
 	my $node = $optionsNodeList -> get_node(1);
 	my $gzip = $node -> getElementsByTagName ("compressed");
 	if ((defined $gzip) && ("$gzip" eq "yes")) {

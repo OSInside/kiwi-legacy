@@ -4,8 +4,8 @@
 # Please submit bugfixes or comments via http://bugs.opensuse.org
 # ---
 Name:          kiwi
-BuildRequires: perl smart perl-XML-LibXML syslinux perl-libwww-perl screen
-Requires:      perl smart perl-XML-LibXML syslinux perl-libwww-perl screen
+BuildRequires: perl smart perl-XML-LibXML syslinux perl-libwww-perl screen qemu multipath-tools
+Requires:      perl smart perl-XML-LibXML syslinux perl-libwww-perl screen qemu multipath-tools
 Summary:       OpenSuSE - KIWI Image System
 Version:       1.7
 Release:       7

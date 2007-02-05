@@ -63,8 +63,8 @@ case "$1" in
 				mkdir -p $ROOT/root_$I
 			fi
 			if [ ! -z $bsopt ];then
-				dd if=/dev/zero of=$ROOT/root_$I/root bs=1M count=$XEN_ROOT
-				dd if=/dev/zero of=$ROOT/root_$I/swap bs=1M count=$XEN_SWAP
+				dd if=/dev/zero of=$ROOT/root_$I/root bs=1M seek=$XEN_ROOT count=1
+				dd if=/dev/zero of=$ROOT/root_$I/swap bs=1M seek=$XEN_SWAP count=1
 				echo $XEN_MEMX > $ROOT/root_$I/memory
 			fi
 			mkdir -p /var/run/bsworker_$I

@@ -72,16 +72,35 @@ to the selected filesystem. Supported image types are:
 	\item \textbf{\underline{Special cpio/ext2 Boot image}}\\
           for image installation via network
 	\item \textbf{\underline{Special cpio/ext2 XEN-Boot image}}\\
-          based on Xen kernel
-          and mboot.c32 for multiboot xen and initrd
+          based on Xen kernel and mboot.c32 for multiboot of xen plus
+		  initrd (kiwi boot image).
 	\item \textbf{\underline{Special cpio/ext2 ISO-Boot image}}\\
-          to create a live CD from
-          an image. Used within the iso:<name> image type 
-	\item \textbf{\underline{iso:<name> image support}}\\
-          Which means the image gets
+          to create a kiwi boot image for booting a live CD 
+          system image. Used in combination with the \textbf{iso:}
+          image type 
+	\item \textbf{\underline{Special cpio/ext2 USB-Boot image}}\\
+          to create a kiwi boot image for booting a USB stick
+          system image. Used in combination with the
+          \textbf{usb:} image type
+	\item \textbf{\underline{Special cpio/ext2 VMX-Boot image}}\\
+          to create a kiwi boot image for booting a virtual
+          machine system image. This is \textbf{not} used for paravirtualized
+	      machines like Xen but for full virtual machines like
+          QEMU and VMware. Used in combination with the \textbf{vmx:}
+          image type
+	\item \textbf{\underline{iso:<boot-image-name> image support}}\\
+          LiveCD/DVD system image, which means the image gets
           splitted into two ext2 based sub-images whereas one represents
           the loop read-only part on CD and the other represents the
           read-write data in RAM
+	\item \textbf{\underline{usb:<fstype>:<boot-image-name>}}\\
+          USB stick system image, which means the system image and
+          the boot image will be created automatically. To deploy the
+          image on the stick the --bootstick option can be used
+	\item \textbf{\underline{vmx:<fstype>:<boot-image-name>}}\\
+          Virtual machine system image, which means a virtual disk will
+          be created including boot manager boot image and system image
+          to be used within qemu (.qemu file) or vmware player (.vmdk file)
 	\item \textbf{\underline{split:<fstypeRW,fstypeRO> image support}}\\
           Which means the image is splitted into a read-only and a
           read-write part whereas each part can have a different

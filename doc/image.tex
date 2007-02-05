@@ -141,9 +141,33 @@ the format:
                     configure additional space, for example, if custom scripts
                     are run.
               \item \textbf{type}\\
-                    The image type of the logical extend: \textbf{ext2},
-                    \textbf{ext3}, \textbf{cpio}, \textbf{reiserfs}.
-                    Different formats are possible, if necessary.
+                    The image type of the logical extend:
+					\begin{itemize}
+						\item ext2,ext3 or reiserfs\\
+                              can be used as system image filesystem
+						\item cpio\\
+                              for boot images only
+                        \item iso:filename\\
+                              to create an .iso image whereas filename
+                              must be the name of an appropriate isoboot
+                              boot image
+                        \item usb:type:filename\\
+                              to create a system and boot image suitable
+                              to run on an USB stick deployed with the kiwi
+                              --bootstick option. type specifies one of 
+                              ext2,ext3 or reiserfs and filename must be
+                              the name of an appropriate usbboot boot image  
+                        \item vmx:type:filename\\
+                              to create virtual disk images for qemu and
+                              VMware. type specifies one of ext2,ext3 or
+                              reiserfs and filename must be the name of an
+                              appropriate vmxboot boot image
+                        \item split:type-rw,type-ro\\
+                              to create a splitted image into a read-only
+                              and a read-write part. type-rw specifies one of
+                              ext2,ext3 or reiserfs type-ro specifies one
+                              of ext2,ext3,reiserfs or cramfs
+					\end{itemize}
               \item \textbf{timezone}\\
                     The time zone. The possible time zones are located in the
                     directory \textit{/usr/share/zoneinfo}. For the image

@@ -208,6 +208,136 @@ sub createImageCPIO {
 }
 
 #==========================================
+# createImageUSB
+#------------------------------------------
+sub createImageUSB {
+	# ...
+	# Create all images needed to use it on an USB stick.
+	# This includes the system image and the boot image appropriate
+	# for the system image. The boot image description must exist
+	# in /usr/share/kiwi/image. The process will create all images
+	# but will _not_ deploy the images on the stick. To do this
+	# call kiwi with the --bootstick option after the image creation
+	# process is finished
+	#
+	# Note: Virtual machine images requires the same steps than USB
+	# images. The only difference is that there is no real disk
+	# (USB-storage) the images are deployed to. Because of this we
+	# are using the same code for creating the system and boot image
+	# in the createImageVMX() method
+	# ---
+	#==========================================
+	# Create USB boot and system image
+	#------------------------------------------
+	my $this = shift;
+	my $para = shift;
+	my $text = shift;
+	my $type;
+	my $boot;
+	my %result;
+	my $ok;
+	if ($para =~ /(.*):(.*)/) {
+		$type = $1;
+		$boot = $2;
+	}
+	if (! defined $text) {
+		$text = "USB";
+	}
+	if ((! defined $type) || (! defined $boot)) {
+		$kiwi -> error  ("Invalid $text type specified: $para");
+		$kiwi -> failed ();
+		return undef;
+	}
+	SWITCH: for ($type) {
+		/^ext2/       && do {
+			$ok = createImageEXT2 ();
+			last SWITCH;
+		};
+		/^ext3/       && do {
+			$ok = createImageEXT3 ();
+			last SWITCH;
+		};
+		/^reiserfs/   && do {
+			$ok = createImageReiserFS ();
+			last SWITCH;
+		};
+		$kiwi -> error  ("Unsupported $text type: $type");
+		$kiwi -> failed ();
+		return undef;
+	};
+	if (! $ok) {
+		return undef;
+	}
+	$result{systemImage} = $main::ImageName;
+	#==========================================
+	# Prepare and Create USB boot image
+	#------------------------------------------
+	if (open (FD,"$imageTree/image/main::Prepare")) {
+		my $Prepare = <FD>; close FD; chomp $Prepare;
+		my $xml = new KIWIXML ( $kiwi,$Prepare );
+		$main::ForeignRepo{xmlnode} = $xml -> getForeignNodeList();
+		$main::ForeignRepo{prepare} = $Prepare;
+	}
+	$main::Survive  = "yes";
+	$main::RootTree = "/tmp/kiwi-".$text."boot-$$";
+	$main::Prepare  = $main::System."/".$boot;
+	$main::Create   = $main::RootTree;
+	$kiwi -> info ("Creating $text boot image: $boot...\n");
+	if (! defined main::main()) {
+		$main::Survive = "default";
+		if (! -d "$main::RootTree/base-system") {
+			qx (rm -rf $main::RootTree);
+		}
+		return undef;
+	}
+	if (! -d "$main::RootTree/base-system") {
+		qx (rm -rf $main::RootTree);
+	}
+	$result{bootImage} = $main::ImageName;
+	return \%result;
+}
+
+#==========================================
+# createImageVMX
+#------------------------------------------
+sub createImageVMX {
+	# ...
+	# Create virtual machine disks usable for QEMU and VMware virtual
+	# machines. The process will create the system image and the
+	# appropriate vmx boot image plus a .qemu and a .vmdk image usable
+	# in qemu or vmware player. The boot image description must exist
+	# in /usr/share/kiwi/image.
+	#
+	# NOTE: Because the first steps of creating
+	# a virtual machine image are the same as creating a usb stick image
+	# we make use of the usb code above to create the system and boot
+	# image
+	# ---
+	#==========================================
+	# Create VMX boot and system image
+	#------------------------------------------
+	my $this = shift;
+	my $para = shift;
+	my $name = createImageUSB ($this,$para,"VMX");
+	if (! defined $name) {
+		return undef;
+	}
+	undef $main::Prepare;
+	undef $main::Create;
+	#==========================================
+	# Create .qemu and .vmdk VM images
+	#------------------------------------------
+	$main::BootVMDisk   = $main::Destination."/".$name->{bootImage}.".gz";
+	$main::BootVMSystem = $main::Destination."/".$name->{systemImage};
+	$main::BootVMSize   = $main::BootVMSize;
+	if (! defined main::main()) {
+		$main::Survive = "default";
+		return undef;
+	}
+	return $this;
+}
+
+#==========================================
 # createImageCD
 #------------------------------------------
 sub createImageLiveCD {
@@ -367,8 +497,10 @@ sub createImageLiveCD {
 	$kiwi -> info ("Creating ISO boot image: $boot...\n");
 	if (! defined main::main()) {
 		$main::Survive = "default";
-		qx (rm -rf $main::RootTree);
-		qx (rm -rf $imageTreeReadOnly);
+		if (! -d "$main::RootTree/base-system") {
+			qx (rm -rf $main::RootTree);
+			qx (rm -rf $imageTreeReadOnly);
+		}
 		return undef;
 	}
 	#==========================================
@@ -377,6 +509,12 @@ sub createImageLiveCD {
 	undef %main::ForeignRepo;
 	$main::Survive = "default";
 	$kiwi -> info ("Creating CD filesystem");
+	if (-d "$main::RootTree/base-system") {
+		$kiwi -> failed ();
+		$kiwi -> error  ("base-system link still exists... abort");
+		$kiwi -> failed ();
+		return undef;
+	}
 	qx (rm -rf $main::RootTree/*);
 	qx (mkdir -p $main::RootTree/CD/boot/loader);
 	qx (mkdir -p $main::RootTree/CD/read-only-system);
@@ -413,7 +551,7 @@ sub createImageLiveCD {
 	}
 	if (! -f "$main::Prepare/cdboot/isolinux/$arch/isolinux.bin") {
 		$kiwi -> failed ();
-		$kiwi -> error ("isoboot description doesn't provide $arch loader");
+		$kiwi -> error  ("isoboot description doesn't provide $arch loader");
 		$kiwi -> failed ();
 		return undef;
 	}
@@ -453,7 +591,9 @@ sub createImageLiveCD {
 		$kiwi -> failed ();
 		return undef;
 	}
-	qx (rm -rf $main::RootTree);
+	if (! -d "$main::RootTree/base-system") {
+		qx (rm -rf $main::RootTree);
+	}
 	$kiwi -> done();
 	return $this;
 }
@@ -876,6 +1016,7 @@ sub buildImageName {
 		$name = $name.$arch.$separator.$iver;
 	}
 	chomp  $name;
+	$main::ImageName = $name;
 	return $name;
 }
 

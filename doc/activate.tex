@@ -2,7 +2,7 @@
 \label{activate}
 \minitoc
 After a logical extend (an image) has been created from a physical
-extend there are in principal three possibilities to activate the
+extend there are in principal four possibilities to activate the
 image:
 
 \begin{enumerate}
@@ -18,11 +18,14 @@ image:
           \textbf{linuxrc} which takes over all tasks needed to download
           and install the system image. The installation can be done
           persistently on disk or temporary into the RAM of the machine.
-	\item In case of a \textbf{virtual target system} like Xen, the image can
-          be be installed by copying and loop mounting the image file on
-          the target system. To activate the virtual system the loop mounted
-          location needs to be configured according to the needs of the
-          virtualisation system.
+	\item In case of a \textbf{para virtualized target system} like Xen,
+          the image can be be installed by copying the image file on the
+          target system. To activate the virtual system a configuration
+          must be provided which points to the image in some way. One
+          possibility is to use a loop mounted location.
+	\item In case of a \textbf{full virtualized target system} like VMware,
+          or QEMU the image represents a virtual disk as file which can
+          be \textit{played} by the virtualisation system.
 \end{enumerate}
 
 \section{The KIWI netboot image}
@@ -342,3 +345,15 @@ needs to be performed:
           \end{Command}
 \end{enumerate}
 
+\section{The VMware virtual machine}
+VMware represents a full virtualized machine which means all components
+are virtualized. This includes the storage devices as well as the
+processor and all other parts of the system. An image for such a system
+is in principal a virtual disk which contains the boot manager the
+initrd and all other system data as one file. Kiwi is able to create
+such a disk appropriate for use in QEMU and VMware (vmdk format).
+
+\subsection{Activate a KIWI virtual disk system}
+To activate such a system the user only needs to call the correct
+\textit{player} application which in case of QEMU is \textbf{qemu} and
+in case of VMware \textbf{vmplayer} is used.

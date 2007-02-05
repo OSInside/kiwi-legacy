@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Sun Feb  4 16:25:55 CET 2007 - ms@suse.de
+
+- added support for qemu and vmdk (VMware) images (F:#301945)
+- added targets usb:<type><boot> and vmx:<type><boot>
+- use sparse files for buildhost image (Xen support)
+- update documentation
+
+-------------------------------------------------------------------
 Thu Feb  1 14:47:15 CET 2007 - ms@suse.de
 
 - added wyseXMini-suse-10.1 to kiwi-images-wyse package

@@ -40,10 +40,14 @@ our $Virtual;         # optional virtualisation setup
 our $RootTree;        # optional root tree destination
 our $Survive;         # if set to "yes" don't exit kiwi
 our $BootStick;       # deploy initrd booting from USB stick
-our $BootStickSystem; # sytem image to be copied on an USB stick
+our $BootStickSystem; # system image to be copied on an USB stick
+our $BootVMSystem;    # system image to be copied on a VM disk
+our $BootVMDisk;      # deploy initrd booting from a VM 
+our $BootVMSize;      # size of virtual disk
 our $BootCD;          # deploy initrd booting from CD
 our $StripImage;      # strip shared objects and binaries
 our $CreatePassword;  # create crypt password string
+our $ImageName;       # filename of current image, used in Modules
 our %ForeignRepo;     # may contain XML::LibXML::Element objects
 
 #============================================
@@ -177,6 +181,14 @@ sub main {
 				$ok = $image -> createImageSplit ( $1 );
 				last SWITCH;
 			};
+			/^usb:(.*)/   && do {
+				$ok = $image -> createImageUSB ( $1 );
+				last SWITCH;
+			};
+			/^vmx:(.*)/   && do {
+				$ok = $image -> createImageVMX ( $1 );
+				last SWITCH;
+			};
 			$kiwi -> error  ("Unsupported type: $type");
 			$kiwi -> failed ();
 			my $code = kiwiExit (1); return $code;
@@ -245,6 +257,39 @@ sub main {
 		}
 		my $code = kiwiExit (0); return $code;
 	}
+
+	#==========================================
+	# Create a virtual disk image
+	#------------------------------------------
+	if (defined $BootVMDisk) {
+		$kiwi -> info ("Creating boot VM disk from: $BootVMDisk...\n");
+		if (! defined $BootVMSystem) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("No VM system specified");
+			$kiwi -> failed ();
+			my $code = kiwiExit (1);
+			return $code;
+		}
+		qx ( file $BootVMSystem | grep -q 'gzip compressed data' );
+		my $code = $? >> 8;
+		if ($code == 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Can't use compressed VM system");
+			$kiwi -> failed ();
+			my $code = kiwiExit (1);
+			return $code;
+		}
+		my $boot = new KIWIBoot (
+			$kiwi,$BootVMDisk,$BootVMSystem,$BootVMSize
+		);
+		if (! defined $boot) {
+			my $code = kiwiExit (1); return $code;
+		}
+		if (! $boot -> setupBootDisk()) {
+			my $code = kiwiExit (1); return $code;
+		}
+		my $code = kiwiExit (0); return $code;
+	}
 	return 1;
 }
 
@@ -271,7 +316,10 @@ sub init {
 		"virtual|v=s"         => \$Virtual,
 		"root|r=s"            => \$RootTree,
 		"bootstick=s"         => \$BootStick,
+		"bootvm=s"            => \$BootVMDisk,
 		"bootstick-system=s"  => \$BootStickSystem,
+		"bootvm-system=s"     => \$BootVMSystem,
+		"bootvm-disksize=s"   => \$BootVMSize,
 		"bootcd=s"            => \$BootCD,
 		"strip|s"             => \$StripImage,
 		"createpassword"      => \$CreatePassword,
@@ -289,8 +337,8 @@ sub init {
 	}
 	if (
 		(! defined $Prepare) && (! defined $Create) &&
-		(! defined $BootStick) && (! defined $BootCD) &&
-		(! defined $CreatePassword)
+		(! defined $BootStick) && (! defined $BootCD) && 
+		(! defined $BootVMDisk) && (! defined $CreatePassword)
 	) {
 		$kiwi -> info ("No operation specified");
 		$kiwi -> failed ();
@@ -320,6 +368,8 @@ sub usage {
 	print "  kiwi -p | --prepare <image-path>\n";
 	print "  kiwi -c | --create  <image-root>\n";
 	print "  kiwi --bootstick <initrd> [ --bootstick-system <systemImage> ]\n";
+	print "  kiwi --bootvm <initrd> --bootvm-system <systemImage> \\\n";
+	print "     [ --bootvm-disksize <size> ]\n";
 	print "  kiwi --bootcd <initrd>\n";
 	print "  kiwi --createpassword\n";
 	print "--\n";
