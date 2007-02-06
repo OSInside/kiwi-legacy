@@ -11,7 +11,8 @@
     </repository>
 	<repository type="yast2">
 		<!--<source path="opensuse://SL-10.1"/>-->
-		<source path="/mounts/machcd2/CDs/SLES-10-SP1-DVD-x86_64-Build00010/DVD1"/>
+		<!--<source path="/mounts/machcd2/CDs/SLES-10-SP1-DVD-x86_64-Build00010/DVD1"/>-->
+		<source path="/mounts/machcd2/CDs/SLES-10-SP1-DVD-i386-Build00011/DVD1"/>
 	</repository>
 	<packages type="image">
 	    <package name="OpenIPMI"/>
@@ -22,7 +23,8 @@
 		<package name="acl"/>
 		<package name="acpid"/>
 		<package name="attr"/>
-		<package name="linux32"/>
+		<!-- for x86_64 only -->
+		<!-- <package name="linux32"/> -->
 		<package name="bash"/>
 		<package name="bc"/>
 		<package name="bind-libs"/>
