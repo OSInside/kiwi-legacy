@@ -1,11 +1,12 @@
 #!/bin/sh
-echo "kernel-bigsmp: Image [netboot-suse-10.2-smp]..."
+test -f /.profile && . /.profile
+
+echo "kernel-bigsmp: Image [$name]..."
 
 #==========================================
 # setup kernel version to deal with
 #------------------------------------------
 VERSION=`rpm -q --qf %{VERSION}-%{RELEASE}-bigsmp kernel-bigsmp`
-test -f /.profile && . /.profile
 
 #==========================================
 # move interesting stuff to /tmp

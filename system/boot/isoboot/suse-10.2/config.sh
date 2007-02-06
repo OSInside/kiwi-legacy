@@ -1,7 +1,7 @@
 #!/bin/sh
-
-echo "Configure image: [isoboot-suse-10.2]..."
 test -f /.profile && . /.profile
+
+echo "Configure image: [$name]..."
 
 #==========================================
 # Copy linuxrc to init

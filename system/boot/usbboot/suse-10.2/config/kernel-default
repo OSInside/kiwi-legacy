@@ -1,11 +1,12 @@
 #!/bin/sh
-echo "kernel-default: Image [usbboot-suse-10.2]..."
+test -f /.profile && . /.profile
+
+echo "kernel-default: Image [$name]..."
 
 #==========================================
 # setup kernel version to deal with
 #------------------------------------------
 VERSION=`rpm -q --qf %{VERSION}-%{RELEASE}-default kernel-default`
-test -f /.profile && . /.profile
 
 #==========================================
 # move interesting stuff to /tmp

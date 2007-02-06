@@ -1,7 +1,7 @@
 #!/bin/sh
-
-echo "Configure image: [isoboot-suse-10.1]..."
 test -f /.profile && . /.profile
+
+echo "Configure image: [$name]..."
 
 #==========================================
 # remove unneeded packages

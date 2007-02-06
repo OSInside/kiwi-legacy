@@ -1,7 +1,7 @@
 #!/bin/sh
-
-echo "Configure image: [netboot-suse-10.1]..."
 test -f /.profile && . /.profile
+
+echo "Configure image: [$name]..."
 
 #==========================================
 # Copy linuxrc to init

@@ -1,4 +1,4 @@
-<image name="initrd-netboot-suse-10.1-smp">
+<image name="initrd-netboot-suse-SLES10-SP1-smp">
 	<preferences>
 		<type>cpio</type>
 		<size unit="M">60</size>

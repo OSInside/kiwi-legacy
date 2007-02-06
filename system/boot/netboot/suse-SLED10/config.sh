@@ -1,7 +1,7 @@
 #!/bin/sh
-
-echo "Configure image: [netboot-suse-SLE10]..."
 test -f /.profile && . /.profile
+
+echo "Configure image: [$name]..."
 
 #==========================================
 # Install default kernel

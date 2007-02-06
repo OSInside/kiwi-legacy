@@ -1,7 +1,7 @@
 #!/bin/sh
-
-echo "Configure image: [netboot-suse-10.2-smp]..."
 test -f /.profile && . /.profile
+
+echo "Configure image: [$name]..."
 
 #==========================================
 # remove unneeded packages

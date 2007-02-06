@@ -1,11 +1,12 @@
 #!/bin/sh
-echo "kernel-smp: Image [netboot-suse-10.1]..."
+test -f /.profile && . /.profile
+
+echo "kernel-smp: Image [$name]..."
 
 #==========================================
 # setup kernel version to deal with
 #------------------------------------------
 VERSION=`rpm -q --qf %{VERSION}-%{RELEASE}-smp kernel-smp`
-test -f /.profile && . /.profile
 
 #==========================================
 # move interesting stuff to /tmp

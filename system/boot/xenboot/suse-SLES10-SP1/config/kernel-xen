@@ -1,11 +1,12 @@
 #!/bin/sh
-echo "kernel-xen: Image [xenboot-suse-10.1]..."
+test -f /.profile && . /.profile
+
+echo "kernel-xen: Image [$name]..."
 
 #==========================================
 # setup kernel version to deal with
 #------------------------------------------
 VERSION=`rpm -q --qf %{VERSION}-%{RELEASE}-xen kernel-xen`
-test -f /.profile && . /.profile
 
 #==========================================
 # move interesting stuff to /tmp

@@ -1,4 +1,4 @@
-<image name="initrd-netboot-suse-SLE10">
+<image name="initrd-netboot-suse-SLED10">
 	<preferences>
 		<type>cpio</type>
 		<size unit="M">60</size>
@@ -26,7 +26,6 @@
 		<file name="drivers/net/*"/>
 	</drivers>
 	<repository type="yast2">
-		<!-- <source path="opensuse://SL-10.1"/> -->
 		<source path="/image/dist/full-sled10-i386"/>
 	</repository>
     <repository type="rpm-dir">

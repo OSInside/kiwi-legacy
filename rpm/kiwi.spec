@@ -95,10 +95,10 @@ if [ $UID = 0 ];then
 	echo "# ..."  >> $pxedefault
 	echo "DEFAULT Local-Boot" >> $pxedefault
 	images="
-		netboot-suse-10.1 netboot-suse-10.1-smp
-		netboot-suse-10.2 netboot-suse-10.2-smp
-		xenboot-suse-10.1
-		xenboot-suse-10.2
+		netboot/suse-10.1 netboot/suse-10.1-smp
+		netboot/suse-10.2 netboot/suse-10.2-smp
+		xenboot/suse-10.1
+		xenboot/suse-10.2
 	"
 	for i in $images;do
 		echo "#DEFAULT $i" >> $pxedefault
