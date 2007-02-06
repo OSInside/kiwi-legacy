@@ -108,22 +108,18 @@ probeDeviceInfo () {
 	modinfo=/tmp/modinfo
 	cat > $modinfo < /dev/null
 	for file in `find /lib/modules/*/kernel/drivers -type f`;do
-	for info in `/sbin/modinfo -F alias $file`;do
-		echo "$info%$file" >> $modinfo
+		/sbin/modinfo -F alias $file |\
+			sed -e s@*@.*@g -e s@.@$file%\&@ \
+		>> $modinfo
 	done
-	done
-	cat $modinfo | sort | uniq |\
-		sed -e s@*@.*@g \
-	> $modinfo.new
+	cat $modinfo | sort | uniq > $modinfo.new
 	mv $modinfo.new $modinfo
 }
 probeDevices () {
 	IFS=$IFS_ORIG
 	probeDeviceInfo
 	probeDeviceAlias
-	for i in `cat $modinfo`;do
-		info=`echo $i | cut -f1 -d%`
-		file=`echo $i | cut -f2 -d%`
+	IFS="%"; while read file info in;do
 		grep -q $info $modalias >/dev/null 2>&1
 		if [ $? = 0 ];then
 			module=`basename $file`
@@ -131,7 +127,8 @@ probeDevices () {
 			INITRD_MODULES="$INITRD_MODULES $module"
 			modprobe $module >/dev/null 2>&1
 		fi
-	done
+	done < $modinfo
+	IFS=$IFS_ORIG
 	# bad fix for ata probe, load order is required
 	Echo "Waiting for devices to become ready..."
 	lsmod | grep -q ata_piix
