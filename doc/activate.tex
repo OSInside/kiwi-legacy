@@ -260,7 +260,12 @@ The following format is used:
 	\item \textbf{PART}\\
 		Specifies the partitioning data. The comma-separated list
 		must contain the size (size), the type number (id), and the
-		mount point (Mount).
+		mount point (Mount). The size is measured in MB by default.
+		Additionally all size specifications supported by the sfdisk
+		program are allowed as well. The type number specifies the ID
+		of the partition. Valid ID's are listed via the
+		\textit{sfdisk --list-types} command. The mount specifies the
+		directory the partition is mounted to.
 		\begin{itemize}
 			\item The first element of the list must define the swap
                   partition.
