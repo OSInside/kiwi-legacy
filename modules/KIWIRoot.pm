@@ -221,10 +221,10 @@ sub init {
 	qx ( mkdir -p $root/var/log/YaST2 );
 	qx ( touch $root/etc/mtab );
 	qx ( touch $root/etc/sysconfig/bootloader ); 
-	qx ( cp /etc/resolv.conf $root/etc );
-	qx ( cp /etc/fstab  $root/etc );
-	qx ( cp /etc/group  $root/etc );
-	qx ( cp /etc/passwd $root/etc );
+	qx ( cp /etc/resolv.conf $root/etc 2>&1 );
+	qx ( cp /etc/fstab  $root/etc 2>&1 );
+	qx ( cp /etc/group  $root/etc 2>&1 );
+	qx ( cp /etc/passwd $root/etc 2>&1 );
 
 	#==================================
 	# Create /etc/ImageVersion file
