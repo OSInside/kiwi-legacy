@@ -1,0 +1,170 @@
+mainHjälp för starthanterarenVälkommen till openSUSE 10.2
+
+Använd denna meny för att välja önskad funktion. Om du har problem att navigera i detta hjälpsystem, tryck på F1 för att komma till helpbeskrivningen av hjälpsystemet. Huvudfunktionerna i denna meny är:
+
+harddiskStartafrånhårddisk: Detta val kommer inte att påverka systemet. Det startar bara ett tidigare installerat operativsystem.
+
+linuxInstallation: Denna installationmetod fungerar på de flesta maskiner. Om du upplever att systemet hänger sig under uppstart, eller problem under detekteringen av hårdvarukomponenterna, som diskkontrollers eller nätverkskort, prova något av de följande installationsalternativen.
+
+noacpiInstallation--ACPIavstängt: Många av de maskiner som säljs idag har inkompletta eller felaktiga ACPI implementationer. Detta val avaktiverar ACPI-stödet i kärnan, men medger ändå många prestandafunktioner, som DMA för IDE hårddiskar.
+
+failsafeInstallation--Säkrainställningar: Om du inte lyckades med Installation, kanske detta val kan lösa problemet.
+
+rescueRäddningssystem: Denna startavbild startar ett litet Linux system i RAM-minnet. Detta är användbart om systemet inte startar på ett korrekt vis. Efter att systemet startats, logga in som root.
+
+memtestMinnestest: Minnestestning är bra för mer än bara kontrollera installationen av nya minnesmoduler. Det är också ett stresstest för en stor del av ditt datorsystem och kan indikera hårdvaruproblem.
+
+optStartalternativ: Startalternativen kan ändra systemets uppförande helt och hållet. De är inställningar för kärnan.
+
+helpF1Hjälp: Detta är kontextmedveten hjälp. Den kommer att visa olika texter beroende på det aktiva alternativet i startmenyn. Det finns också en beskrivning av detta hjälpsystem tillgänglig.
+
+videomodeF3Bildskärmsläge: Här väljer du mellan olika skärmupplösningar under installationen. Om du upplever problem med den grafiska installationen kan text läge vara en lösning för dig.
+
+install_srcF4Installationskälla: Välj den källa du vill installera från.
+
+keytableF2Språk: Välj det språk och den tangentbordslayout som starthanteraren skall använda.
+
+driverupdateF5Drivrutinsuppdatering: För väldigt nya maskiner kan en uppdatering av drivrutiner krävas för att installera systemet.helpAnvändande av hjälpsystemetStarthanterarens hjälp är kontextmedveten. Den ger information om det valda menyobjektet, eller om du redigerar startalternativ så försöker hjälpen leta upp information om det val markören befinner sig på.
+
+Navigeringstangenter
+
+Uppåtpil: Markera föregående länk
+Nedåtpil: Markera nästa länk
+Vänsterpil, Bakåtknapp: Tillbaka till föregående alternativ
+Högerpil, Retur, Mellanslag: Följ länk
+Sida upp: Bläddra upp en sida
+Sida ner: Bläddra ner en sida
+Hem: Gå till sidans början
+Slut: Gå till sidans slut
+Esc: Lämna hjälpen
+
+
+Tillbaka till mainStartsidandriverupdateDrivrutinsuppdateringOm du behöver använda en drivrutinsuppateringsskiva, floppy eller CD-ROM, tryck F5. Starthanteraren ber dig sätta i mediet efter att Linuxkärnan laddats.
+
+En drivrutinsuppdatering är vanligen en diskett med en ny version av drivrutinen till hårdvaran, eller buggfixar som behövs under installationen.
+
+Tillbaka till mainStartsidanvideomodeVal av grafiklägeTryck på F3 för att se en lista av de grafiklägen ditt grafikkort stödjer. Den högsta upplösningen din monitor klarar är förvald.
+
+Det är möjligt att din monitor inte kan detekteras automatiskt. I så fall måste du välja ditt föredragna läge manuellt.
+
+Om ditt system har problem med grafikkortet under installationen kan text läge vara en användbar lösning.
+
+Tillbaka till mainStartsidankeytableVal av språk och tangentborslayoutTryck på F2 för att ändra språket och tangentbordslayouten som starthanteraren använder.
+
+Return to mainStartPageinstall_srcInstallationskällaTryck på F4 för att välja källa för installationen.
+
+Detta är samma som o_installinstallation startval.
+
+Tillbaka till mainStartsidanlinuxInstallationVälj Installation för att starta standardinstallationen. De optstartalternativ du valt kommer att användas under uppstarten. Detta val aktiverar de flesta funktionerna hos de flesta maskiner.
+
+
+
+Tillbaka till mainStartsidanharddiskStarta från hårddiskVälj Starta installerat OS för att starta det system som finns installerat på din lokala hårddisk. Detta system måste vara korrekt installerat eftersom endast MBR (Master Boot Record) på den första hårddisken används. Enhets ID för den första hårddisken rapporteras av datorns BIOS.
+
+Använd detta val om du glömt ta ur din CD eller DVD från läsaren och du vill starta datorn från hårddisken.
+
+
+
+Tillbaka till mainStartsidannoacpiInstallation -- ACPI avaktiveratVäldigt ny hårdvara kräver ibland att ACPI hanterar datorns avbrottsrutiner. ACPI ersätter det äldre APM systemet helt och hållet.
+
+Välj Installation -- ACPI avaktiverat om du stöter på problem under kärnans uppstart. Kända problem med maskiner som har problem med ACPI är:
+
+* kärnan "fryser" och stannar under uppstart
+* PCI kort detekteras eller initieras inte korrekt
+
+
+
+Tillbaka till mainStartsidanfailsafeInstallation -- Säkra inställningarVälj Installation -- Säkra inställningar om du upplever att datorn hänger sig under installationen, eller om du får oåterkallegia fel. Detta val inaktiverar DMA för IDE diskar och alla strömsparfunktioner. Se också kärnalternativen för o_apmapm, o_acpiacpi och o_ideide.
+
+Tillbaka till mainStartsidanrescueRäddningssystemRäddningssystemet är ett litet RAM-disk baserat system. Därifrån har du möjlighet att göra alla sorters ändringar i ett installerat system. Eftersom endast lågnivå-verktyg är tillgängliga i detta system är det avsett för experter.
+
+
+
+Tillbaka till mainStartsidanmemtestMinnestestDet inkluderade Minnestestet erbjuder goda möjligheter att stresstesta hårdvaran i systemet. Dess huvudsakliga uppgift är att detektera felaktigt RAM, men funktionen stressbelastar även många andra komponenter i systemet.
+Det finns inga garantier att minnes är felfritt om inga fel rapporteras, även om de flesta minnesproblem kommer att upptäckas.
+
+
+Tillbaka till mainStartsidanoptStartalternativDet finns två olika typer av startalternativ tillgängliga. Först är det de alternativ som påverkar installeraren. Sedan är det de olika kärnalternativen. Några av de vanligare alternativen är:
+
+a) Installationsalternativ
+
+o_installInstallera -- Välj en källa för installationen
+networkNätverksalternativ -- Alternativ för nätverk
+o_vncVNCalternativ -- Alternativ för installation via VNC
+
+b) Kärnalternativ
+
+o_splashsplash -- Påverkar uppträdandet hos startbilden
+o_apmapm -- Slå till eller från strömsparfunktioner
+o_acpiacpi -- Avancerad konfiguration och strömsparhantering
+o_ideide -- Kontrollerar IDE undersystemet
+
+
+Tillbaka till mainStartsidano_installInstallationsalternativ: installSom standard genomsöks de lokala CD-ROM enheterna för installationskällan. För en nätverksinstallation, välj installation alternativ. Möjliga installationsprotokoll är
+* FTP
+* NFS
+* HTTP
+Syntaxen som skall användas är prcis som vanliga URLer. Till exempel om din server finns på 192.168.0.1 och du vill göra en NFS-baserad installation från katalogen /install på denna server, ange källan som följer:
+
+install=nfs://192.168.0.1/install
+
+Nätverkskortet kan konfigureras via dhcp eller så måste du ange parametrarna själv, som beskrivs i networknätverksalternativ.
+
+
+Tillbaka till optStartalternativ.o_splashKärnalternativ: splashStartbilden är en bild som visas under systemstart.
+
+splash=0
+
+Startbilden är inaktiverad. Detta kan vara användbart med väldigt gamla bildskärmar eller om något fel uppstår.
+
+splash=verbose
+
+Aktiverar bilden, kärn- och startmeddelanden visas fortfarande.
+
+splash=silent
+
+Aktiverar bilden, men inga meddelanden visas. Istället visas en växande indikatorstapel.
+
+Tillbaka till optStartalternativ.networkInstallationsalternativ: NätverkDet är möjligt att konfigurera nätverkskort redan nu. Hårdvaran kommer att identifieras senare av YaST2. De minimala uppgifterna för att konfigurera ditt nätverkskort består av värd IP adress och nätmask. Till exempel:
+
+hostip=192.168.0.10 netmask=255.255.255.0
+
+eller i kortare format:
+
+hostip=192.168.0.10/24
+
+Om du angivit en o_installnätverksinstallation och du inte anger båda dess alternativ kommer installationen att försöka konfigurera nätverkskortet med dhcp. Om du behäver ange en standardgateway, specificera detta med alternativet gateway. Till exempel:
+
+gateway=192.168.0.8
+
+
+Tillbaka till optStartalternativ.o_vncInstallationsalternativ: vncFör att aktivera VNC installation, specificera parametrarna vnc och vncpassword:
+
+vnc=1 vncpassword=exampel
+
+VNC servern kommer att startas och du kan kontrollera YaST2 från vilken VNC klient som helst på ett annat system.
+
+
+Tillbaka till optStartalternativ.o_apmKärnalternativ: apmAPM är en av två strategier för strömsparhantering som används av moderna datorer. Den används främst av bärbara datorer för funktioner som viloläge till disk, men kan också ansvara för att stänga av datorn efter nedstängning. APM förlitar sig på ett korrekt fungerande BIOS. Om BIOS är felaktig har APM endast begränsad funktionalitet eller kan till och med hindra datorn från att fungera. Därför kan den stängas av med denna parameter
+
+apm=off -- Stäng av APM helt och hållet.
+
+Vissa väldigt nya datorer kan ha bättre nytta av det nyare o_acpiACPI.
+
+Tillbaka till optStartalternativ.o_acpiKärnalternativ: acpiACPI (Advanced Configuration and Power Interface) är en standard som definierar strömspar och konfigurationshantering mellan BIOS och operativsystemet. Som standard är acpi påkopplat om BIOS anger att det är nyare än från år 2000. Det finns flera vanligt använda parametrar för att kontrollera ACPI uppträdande:
+
+pci=noacpi -- Använd inte ACPI att skicka PCI avbrott
+acpi=oldboot -- Endast de delar av ACPI som är relevanta för uppstart är aktiverade
+acpi=off -- Stäng av ACPI helt och hållet
+acpi=force -- Slå på ACPI även om ditt BIOS är daterat före 2000
+
+Framförallt på nyare datorer ersätter acpi det äldre o_apmapm systemet.
+
+Tillbaka till optStartalternativ.o_ideKärnalternativ: ideIDE är, olikt SCSI, vanligt förekommande i de flesta skrivbordsdatorer. För att undvika en del hårdvaruproblem som kan uppstå med IDE system, använd kärnparameter:
+
+ide=nodma -- Koppla från dma för IDE enheter
+
+
+Tillbaka till optStartalternativ.bitsVal av mjukvarutypDu kan välja mellan att installera 32-bit eller 64-bit versionen av openSUSE.
+
+Tillbaka till mainStartsidan 

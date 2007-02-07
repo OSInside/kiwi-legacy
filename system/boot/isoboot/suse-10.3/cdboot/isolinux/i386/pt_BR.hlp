@@ -1,0 +1,167 @@
+mainAjuda do Carregador de BootWelcome to openSUSE 10.2
+
+Use este menu para selecionar a função desejada. Se tiver problemas ao navegar no sistema de ajuda, pressione F1 para acessar a helpdescrição do sistema de ajuda. As funções principais desse menu são:
+
+harddiskInicializardoDiscoRígido: Esta seleção não fará nada no sistema. Ela apenas inicia um sistema operacional instalado anteriormente.
+
+linuxInstalação: Este modo de instalação funciona na maioria das máquinas. Se o sistema for congelado durante a inicialização ou se houver problemas na detecção dos componentes de hardware, como controladoras de disco ou placas de rede, tente uma das opções de instalação a seguir.
+
+noacpiInstalação--ACPIDesabilitada: Muitos dos computadores vendidos atualmente têm implementações de ACPI incompletas ou defeituosas. Esta seleção desabilita o suporte a ACPI no kernel, mas ainda habilita muitos recursos de desempenho, como DMA para discos rígidos IDE.
+
+nolapicInstallation--LocalAPICDisabled: If the normal installation fails, this might be due to the system hardware not supporting local APIC. If this seems to be the case, use this option to install without local APIC support.
+
+failsafeInstalação--ConfiguraçõesSeguras: Se você não tiver obtido êxito com Instalação, esta seleção talvez resolva o problema.
+
+rescueSistemadeRecuperação: This boot image starts a small Linux system in RAM. This is useful if the system does not start properly. After booting this system, log in as root.
+
+firmwareFirmwareTest: Runs a BIOS test tool that validates ACPI and other parts of your BIOS.
+
+memtestTestedeMemória: Memory testing is useful for more than checking installation of new memory modules. It is a stress test for a big part of your computer system and may indicate hardware problems.
+
+optOpçõesdeBoot: As opções de boot podem mudar completamente o comportamento de seu sistema. Elas são configurações para o kernel.
+
+helpF1Ajuda: Esta opção é sensível ao contexto. Ela mostrará telas diferentes dependendo do elemento ativo da tela de inicialização. Também há uma descrição desse sistema de ajuda disponível.
+
+keytableF2Idioma: Definir idioma e mapeamento de teclado usados pelo carregador de boot.
+
+videomodeF3MododeVídeo: Aqui, escolha entre diferentes resoluções de tela durante a instalação. Se houver problemas com a instalação gráfica, o Modo de Texto poderá ser uma solução para você.
+
+install_srcF4FontedeInstalação: Escolher a fonte de instalação.
+
+driverupdateF5AtualizaçãodeDriver: For very new machines, a driver update may be needed to install the system.helpUsando o Sistema de AjudaA ajuda online do carregador de boot é sensível ao contexto. Ela fornece informações sobre o item de menu selecionado ou, se você estiver editando opções de boot, tenta procurar informações sobre a opção em que o cursor está posicionado.
+
+Teclas de Navegação
+
+Seta para Cima: realçar link anterior
+Seta para Baixo: realçar próximo link
+Seta para a Esquerda, Backspace: retornar ao tópico anterior
+Seta para a Direita, Enter, Espaço: seguir link
+Page Up: rolar uma página para cima
+Page Down: rolar uma página para baixo
+Casa: ir para o início da página
+Fim: ir para o final da página
+Esc: leave help
+
+Retornar a mainPáginaInicialdriverupdateAtualização de DriverSe precisar de um disquete ou CD-ROM de atualização de driver, pressione F5. O carregador de boot pedirá que você insira o meio de atualização de driver após carregar o kernel do Linux.
+
+Uma atualização de driver geralmente é um disquete com novas versões de drivers de hardware ou correções de erros necessárias durante a instalação.
+
+Retornar a mainPáginaInicialvideomodeSeleção de Modo de VídeoPressione F3 para obter a lista de modos de vídeo suportados por sua placa gráfica. O modo mais elevado que seu monitor pode exibir é pré-selecionado.
+
+É possível que seu monitor não possa ser detectado automaticamente. Nesse caso, selecione manualmente seu modo preferido.
+
+Se o sistema tiver problemas com a placa gráfica durante a instalação, o Modo de Texto poderá ser uma solução viável.
+
+Retornar a mainPáginaInicialkeytableSeleção de Idioma e Layout de TecladoPressione F2 para mudar o idioma e o layout de teclado usados pelo carregador de boot.
+
+Retornar a mainPáginaInicialinstall_srcFonte de InstalaçãoPressione F4 para escolher uma origem de instalação.
+
+Isso é o mesmo que usar a opção de inicialização o_installInstalar.
+
+Retornar a mainPáginaIniciallinuxInstalaçãoSelect Instalação to start the default installation. The optOpçõesdeBoot entered are used in the start-up. This item activates many features of commonly available hardware.
+
+Retornar a mainPáginaInicialharddiskInicializar do Disco RígidoSelecione Inicializar OS Instalado para iniciar o sistema instalado no disco rígido local. Esse sistema deve ser instalado corretamente, pois apenas o MBR (Master Boot Record) no primeiro disco rígido é iniciado. O ID de dispositivo do primeiro disco rígido é fornecido pelo BIOS do computador.
+
+Use this if you forgot to remove the CD or DVD from your drive and want to start the computer from the hard disk.
+
+Retornar a mainPáginaInicialnoacpiInstalação -- ACPI DesabilitadaCurrent hardware usually requires ACPI (Advanced Configuration and Power Interface) to control the interrupt handling. ACPI completely replaces the old APM system.
+
+Selecione Instalação -- ACPI Desabilitada se encontrar problemas durante a inicialização do kernel. Os problemas conhecidos de máquinas que têm problemas com ACPI são:
+
+* o kernel congela durante a inicialização
+* PCI Cards are not detected or initialized properly
+
+You may also try the firmwareFirmwareTest boot option and look at the test results of the ACPI validation.
+
+Retornar a mainPáginaInicialnolapicInstallation -- Local APIC DisabledNormally there are no problems with the APIC (Advanced Programmable Interrupt Controller). But if you seem to have some, try this option to boot without local APIC support.
+
+Please don't confuse this with noacpiacpi (Advanced Configuration and Power Interface).
+
+Retornar a mainPáginaInicialfailsafeInstalação -- Configurações SegurasSelecione Instalação -- Configurações Seguras se ocorrerem travamentos ou erros irreproduzíveis durante a instalação. Essa opção desabilita o DMA para unidades IDE e todos os recursos de gerenciamento de energia. Consulte também as opções do kernel para o_apmapm, o_acpiacpi e o_ideIDE.
+
+Retornar a mainPáginaInicialrescueSistema de RecuperaçãoThe Sistema de Recuperação is a small RAM disk base system. From there, it is possible to make all kinds of changes to an installed system. Because only low-level tools are available in this system, it is intended for experts.
+
+Retornar a mainPáginaInicialfirmwareFirmware TestStarts a BIOS checker that validates the ACPI tables and many other parts of your BIOS. Test results can be stored on usb disk or saved via network.
+
+Retornar a mainPáginaInicialmemtestTeste de MemóriaO Teste de Memória incluído oferece boas possibilidades de executar um stress test no hardware de um sistema. Seu objetivo principal é detectar RAM com defeitos, mas também testa muitas outras partes do sistema.
+There is no guarantee that the memory is good if no errors are found, although most of memory defects will be found.
+
+Retornar a mainPáginaInicialoptOpções de BootHá dois tipos de opções de boot disponíveis. Em primeiro lugar, há opções que afetam o instalador. Em segundo lugar, há opções do kernel. Algumas das opções mais comuns são:
+
+a) opções do instalador
+
+o_installInstalar -- selecione uma origem de instalação
+networkopçõesderede -- as opções de rede
+o_vncOpçõesdoVNC -- opções para instalação via VNC
+
+b) opções do kernel
+
+o_splashsplash -- influenciar o comportamento da splash screen
+o_apmapm -- alternar gerenciamento de energia
+o_acpiacpi -- interface avançada de configuração e energia
+o_ideIDE -- control the IDE subsystem
+
+Retornar a mainPáginaInicialo_installOpções do Instalador: instalarPor padrão, a origem da instalação é pesquisada nos CD-ROMs locais. Para uma instalação de rede, selecione a opção Instalar. Os protocolos de instalação possíveis são
+* FTP
+* NFS
+* HTTP
+A sintaxe a ser usada é semelhante a URLs padrão. Por exemplo, se o servidor for encontrado em 192.168.0.1 e você desejar fazer uma instalação baseada em NFS do diretório /install nesse servidor, especifique a origem da seguinte forma:
+
+install=nfs://192.168.0.1/install
+
+The network card will either be configured with DHCP or you must specify the parameters yourself as described in the networkopçõesderede.
+
+Retornar a optOpçõesdeBooto_splashOpções de Kernel: splashA splash screen é a imagem mostrada durante a inicialização do sistema.
+
+splash=0
+
+A splash screen é desativada. Isso poderá ser útil com monitores muito antigos ou se ocorrerem erros.
+
+splash=verbose
+
+Ativa a splash; as mensagens de inicialização e do kernel ainda são mostradas.
+
+splash=silent
+
+Activates splash, but no messages. Instead a progress bar is drawn.
+
+Retornar a optOpçõesdeBootnetworkOpções do Instalador: Opções de RedeÉ possível configurar a interface de rede agora. O hardware será detectado mais tarde pelo YaST2. O conjunto mínimo de opções para configurar a placa de rede consiste em máscara de rede e IP de host. Por exemplo:
+
+hostip=192.168.0.10 netmask=255.255.255.0
+
+ou, em um formato mais curto:
+
+hostip=192.168.0.10/24
+
+If you specified a o_installinstalaçãobaseadaemrede and do not specify both of these options, the installer tries to configure the network interface with DHCP. If you need a default gateway, specify this with the option Gateway. For example:
+
+gateway=192.168.0.8
+
+Retornar a optOpçõesdeBooto_vncOpções do Instalador: vncPara habilitar a instalação do VNC, especifique os parâmetros vnc e vncpassword:
+
+vnc=1 vncpassword=example
+
+The VNC server will be started and you may control YaST2 over any VNC client from a remote system.
+
+Retornar a optOpçõesdeBoot.o_apmOpções de Kernel: apmO APM representa uma das duas estratégias de gerenciamento de energia usadas nos computadores atuais. Ele é usado principalmente com laptops para funções como suspensão para o disco, mas também pode ser responsável pela desativação do computador após uma queda de energia. O APM depende do correto funcionamento do BIOS. Se o BIOS estiver danificado, o APM talvez tenha apenas uso limitado ou até impeça o funcionamento do computador. Portanto, ele pode ser desativado com o parâmetro
+
+apm=off -- desativar o APM completamente
+
+Alguns computadores muito novos podem tirar mais proveito da o_acpiacpi mais recente.
+
+Retornar a optOpçõesdeBooto_acpiOpções de Kernel: acpiACPI (Advanced Configuration and Power Interface - Interface Avançada de Configuração e Alimentação) é um padrão que define as interfaces de gerenciamento de configuração e energia entre um sistema operacional e o BIOS. Por padrão, acpi é ativado quando é detectado um BIOS mais recente do que o ano 2000. Há vários parâmetros normalmente usados para controlar o comportamento da ACPI:
+
+pci=noacpi -- do not use ACPI to route PCI interrupts
+acpi=oldboot -- only the parts of ACPI that are relevant for booting remain activated
+acpi=off -- desativar a ACPI completamente
+acpi=force -- ativar a ACPI mesmo que o BIOS tenha data anterior a 2000
+
+Principalmente em novos computadores, ele substitui o antigo sistema o_apmapm.
+
+Retornar a optOpçõesdeBooto_ideOpções de Kernel: ideDiferentemente do SCSI, o IDE costuma ser usado na maioria das estações de trabalho de área de trabalho. Para contornar alguns problemas de hardware que ocorrem com sistemas IDE, use o parâmetro de kernel:
+
+ide=nodma -- switch off DMA for IDE drives
+
+Retornar a optOpçõesdeBoot.bitsSeleção do Tipo de SoftwareYou have the choice to install the 32-bit or 64-bit version of openSUSE 10.2.
+
+Retornar a mainPáginaInicial 

@@ -1,0 +1,166 @@
+mainKäynnistyslataimen ohjeWelcome to openSUSE 10.2
+
+Valitse tästä valikosta haluttu toiminto. Jos ohjejärjestelmässä ilmenee ongelmia liikkumisessa, paina F1 päästäksesi ohjejärjestelmän helpkuvaus. Valikon päätoiminntoja ovat:
+
+harddiskKäynnistäkiintolevyltä: Tämä valinta ei tee mitään järjestelmälle. Se käynnistää aiemmin asennetun käyttöjärjestelmän.
+
+linuxAsennus: Tämä asennustila toimii useimmissa koneissa. Jos järjestelmä pysähtyy käynnistyksen aikana tai laitteiston tunnistamisessa on ongelmia (levyohjaimet ja verkkokortit), kokeile jotakin seuraavista asennusvalinnoista.
+
+noacpiAsennus--ACPIpoissakäytöstä: Useissa myynnissä olevissa tietokoneissa on keskeneräinen tai virheellinen ACPI toteutus. Tämä valinta poistaa ACPI -tuen ytimestä, mutta käyttää silti useita suorituskykyä parantavia ominaisuuksia, kuten DMA:ta IDE -kiintolevyille.
+
+nolapicAsennus--PaikallinenAPICpoiskäytöstä: Jos normaali asennus epäonnistuu, tämä voi johtua paikallisen APICin puutteellisesta tuesta järjestelmän laitteille. Jos nhäin on, käytä tätä valintaa suorittaaksesi asennuksen ilman paikallista APIV tukea.
+
+failsafeAsennus--Turvallisetasetukset: Jos et onnistunut Asennus kanssa, tämä valinta saattaa ratkaista asian.
+
+rescueKorjausjärjestelmä: Tämä käynnistyslevykuva käynnistää pienen Linux -järjestelmän RAM -muistiin. Se on käytännöllinen, jos järjestelmä ei käynnisty kunnolla. Järjestelmän käynnistymisen jälkeen kirjaudu sisään root-käyttäjänä.
+
+firmwareLaiteohjelmistontesti: Suorittaa BIOS tarkistustyökalun joka vahvistaa ACPIn ja muita BIOSin osia.
+
+memtestMuistitesti: Muistitesti on käytännöllinen muutenkin kuin vain uusien muistimoduulien testaamisessa. Se on kestotesti suurelle osalle tietokonettasi ja voi osoittaa mahdolliset laiteongelmat.
+
+optKäynnistysvalinnat: Käynnistysvalinnat voivat täydellisesti muuttaa järjestelmän käyttäytymistä. Ne ovat ytimen asetuksia.
+
+helpF1Ohje: Tämä on kontekstiriippuvainen. Se näyttää eri asioita riippuen valitusta käynnistysnäytön kohdasta. Myös ohjejärjestelmän kuvaus on saatavilla.
+
+keytableF2Kieli: Aseta käynnistyslataimen käyttämä kieli ja näppäimistökartta.
+
+videomodeF3Videotila: Tässä valitset asennuksen aikana käytettävän näytönkoon. Jos kohtaat ongelmia graafisessa asennuksessa, tekstitila voi olla toimiva vaihtoehto.
+
+install_srcF4Asennuslähde: Valitse asennuslähde.
+
+driverupdateF5Ohjainpäivitys: Uusimmat tietokoneet voivat vaatia ajuripäivityksen, jotta järjestelmän voi asentaa.helpOhjejärjestelmän käyttäminenKäynnistyslataimen ohje on kontekstiriippuvainen. Se antaa tietoja valitusta valikon kohdasta tai, jos muokkaat käynnistysvalintoja, se yrittää hakea tietoa valinnasta jolla kursori on.
+
+Ohjausnäppäimet
+
+Nuoli ylös: korosta aiempi linkki
+Nuoli alas: korosta seuraava linkki
+Nuoli vasemmalle, Backspace: palaa aiempaan ohjeeseen
+Nuoli oikealle, Enter, Välilyönti: seuraa linkkiä
+Page Up: vierittää sivun ylöspäin
+Page Down: vierittää sivun alaspäin
+Home: mene sivun alkuun
+End: mene sivun loppuun
+Esc: lopeta ohje
+
+Palaa mainAloitussivudriverupdateOhjainpäivitysJos tarvitset ajurin päivitykseen levykkeen tai CD-ROM -levyn, paina F5. Käynnistyslatain pyytää syöttämään ajurin päivitysmedian Linux-ytimen lataamisen jälkeen.
+
+Ajuripäivitys on yleensä levyke, jossa on uusin versio laiteajureista tai virhekorjaus jota tarvitaan asennuksen aikana.
+
+Palaa mainAloitussivuvideomodeVideotilan valintaPaina F3 saadaksesi luettelon näytönohjaimesi tukemista näyttötiloista. Korkein tila jota näyttösi voi käyttää on esivalittu.
+
+On mahdollista että näyttöäsi ei voida tunnistaa automaattisesti. Tässä tapauksessa, valitse haluamasi tila käsin.
+
+Jos järjestelmälläsi on ongelmia näytönohjaimen kanssa asennuksen aikana, tekstitila voi olla toimiva vaihtoehto.
+
+Palaa mainAloitussivukeytableKieli ja näppäimistökartta -valinnatPaina F2 vaihtaaksesi käynnistyslataimen kieltä ja näppäimistökarttaa.
+
+Palaa mainAloitussivuinstall_srcAsennuslähdePaina F4 valitaksesi asennuslähteen.
+
+Tämä tarkoittaa samaa kuin o_installasenna käynnistysvalinnan käyttö.
+
+Palaa mainAloitussivulinuxAsennusValitseAsennus käynnistääksesi oletusasennuksen. optkäynnistysvalinnat:sta käytetään käynnistämiseen. Valinta ottaa käyttöön useita yleisesti käytettävien laitteiden ominaisuuksia.
+
+Palaa mainAloitussivuharddiskKäynnistä kiintolevyltäValitse Käynnistä asennettu käyttöjärjestelmä käynnistääksesi paikalliselle kiintolevylle asennetun käyttöjärjestelmän. Järjestelmän tulee olla oikein asennettu, koska vain MBR (Master Boot Record) ensimmäiseltä levyltä käynnistetään. Ensimmäisen kiintolevyn laite ID saadaan tietokoneen BIOS:lta.
+
+Käytä tätä jos unohdit poistaa CD- tai DVD -levyn asemasta ja haluat käynnistää tietokoneen kiintolevyltä.
+
+Palaa mainAloitussivunoacpiAsennus -- ACPI poissa käytöstäUusimmat laitteistot vaativat joskus ACPIn (Advanced Configuration and Power Interface) ohjaavan keskeytysten hallintaa. ACPI korvaa täysin vanhan APM järjestelmän.
+
+Valitse Asennus -- ACPI poissa käytöstä jos kohtaat ongelmia ytimen käynnistyksen aikana. Tunnettuja ongelmia ACPI:ta käyttävissä koneissa ovat:
+
+* ydin pysähtyy käynnistettäessä
+* PCI -kortteja ei tunnistettu tai alustettu oikein
+
+Voit myös kokeilla firmwareLaiteohjelmistontesti käynnistysvalintaa ja katsoa ACPI vahvistuksen tarkistustuloksen.
+
+Palaa mainAloitussivunolapicAsennus--Paikallinen APIC pois käytöstäNormaalisti APIC:in (Advanced Programmable Interrupt Controller) ei ole ongelmia. Mutta jos törmäät sellaisiin, kokeile käynnistää kone ilman paikallista APIC tukea tällä valinnalla.
+
+Älä sekoita tätä noacpiACPI:iin (Advanced Configuration and Power Interface).
+
+Palaa mainAloitussivufailsafeAsennus -- Turvalliset asetuksetValitse Asennus -- Turvalliset asetukset jos asennus pysähtelee tai esiintyy satunnaisia virheitä. Valinta poistaa käytöstä sekä DMA:n IDE -levyiltä, että kaikki virranhallinta toiminnot. Katso myös ytimen valinnat o_apmapm, o_acpiacpi ja o_ideide.
+
+Palaa mainAloitussivurescueKorjausjärjestelmäKorjausjärjestelmä on pieni RAM -levy pohjainen perusjärjestelmä. Sen kautta on mahdollista tehdä kaikenlaisia muutoksia asennettuun järjestelmään. Koska vain matalan tason työkalut ovat saatavilla, se on tarkoitettu asiantuntijoille.
+
+Palaa mainAloitussivufirmwareLaiteohjelmiston testiKäynnistää BIOS tarkistuksen joka vahvistaa ACPI taulut ja monta muuta BIOSin osaa. Tarkistuksen voi tallentaa usb-tikulle tai verkkoon.
+
+Palaa mainAloitussivumemtestMuistitestiMukana oleva Muistitesti tarjoaa hyvän mahdollisuuden suorittaa kestotesti järjestelmän laitteille. Sen päätarkoitus on tunnistaa vioittunut RAM -muisti, mutta se rasittaa myös järjestelmän muita osia.
+Ei ole taattua että muisti olisi kunnossa vaikka virheitä ei löytyisi, vaikka yleensä useimmat muistin viat löytyvät.
+
+Palaa mainAloitussivuoptKäynnistysvalinnatVoit valita kahden tyyppisiä käynnistysvalintoja. 1) valinnat jotka vaikuttavat asentimeen. 2) ytimen valinnat. Yleisiä valintoja ovat:
+
+a) asentimen valinnat
+
+o_installasenna -- valitse asennuslähde
+networkverkonvalinnat -- verkon valinnat
+o_vncvncvalinnat -- valinnat VNC-asennusta varten
+
+b) ytimen valinnat
+
+o_splashsplash -- muokkaa splash-näytön käyttäytymistä
+o_apmapm -- virranhallinta päälle/pois
+o_acpiacpi -- advanced configuration and power interface
+o_ideide -- hallitse IDE alijärjestelmää
+
+Palaa mainAloitussivuo_installAsentimen valinnat: asennaOletuksena asennuslähteiksietsitään paikallisia CD-ROM-asemia. Verkkoasennusta varten valitse asenna. Mahdollisia asennuskäytäntöjä ovat
+* FTP
+* NFS
+* HTTP
+Kirjoitusmuoto on kuten normaaleissa URL-osoitteissa. Esim., jos palvelin löytyy osoitteesta 192.168.0.1 ja haluat tehdä NFS-pohjaisen asennuksen palvelimen /install hakemistosta, määritä asennuslähde seuraavasti:
+
+install=nfs://192.168.0.1/install
+
+Verkkokortti määritetään joko dhcp:llä, tai sinun pitää määrittää parametrit, kuten on kuvattu: networkverkonvalinnat.
+
+Palaa optKäynnistysvalinnato_splashYtimen valinnat: splashsplash-näyttö on kuva, joka näytetään järjestelmän käynnistyksen yhteydessä.
+
+splash=0
+
+Splash-näyttö on poistettu käytöstä. Tämä voi olla käytännöllistä todella vanhojen monitoreiden kanssa, tai jos virheitä ilmenee.
+
+splash=verbose
+
+Ottaa käyttöön splash-näyttö. Näytä myös ydin- ja käynnistysviestit.
+
+splash=silent
+Ottaa käyttöön splash-näytön, mutta ei viestejä. Näiden sijasta näytetään etenemispalkki.
+
+Palaa optKäynnistysvalinnatnetworkAsentimen valinnat: Verkon valinnatVerkkoliitäntä on mahdollista määrittää nyt. Laitteisto tunnistetaan myöhemmin YaST2 toimesta. Pakolliset valinnat verkon määrittämiseksi ovat IP-osoite ja aliverkon peite. Esim:
+
+hostip=192.168.0.10 netmask=255.255.255.0
+
+tai lyhyemmässä muodossa:
+
+hostip=192.168.0.10/24
+
+Jos määritit o_installasennusverkosta:n etkä määritä molempia näistä valinnoista, asennusohjelma yrittää määrittää verkkoliitännän dhcp:llä. Jos tarvitset oletusyhdyskäytävän, määritä se valinnalla gateway. Esim:
+
+gateway=192.168.0.8
+
+Palaa optKäynnistysvalinnato_vncAsentimen valinnat: vncOttaaksesi käyttöön VNC-asennuksen, määritä parametrit vnc ja vncpassword:
+
+vnc=1 vncpassword=esimerkki
+
+VNC-palvelin käynnistetään ja voit hallita YaST2:sta millä tahansa VNC -asiakasohjelmalla etäjärjestelmästä.
+
+Palaa optKäynnistysvalinnato_apmYtimen valinnat: apmAPM on toinen nykyisissä tietokoneissa käytettävistä virranhallinta strategioista. Sitä käytetään pääasiassa kannettavien tietokoneiden toiminnoissa kuten "suspend to disk", mutta se voi olla vastuussa myös tietokoneen sammuttamisesta. APM on riippuvainen toimivasta BIOS:sta. Jos BIOS on rikkinäinen, APM:llä voi olla vain rajoitettua käyttöä, tai se voi jopa estää tietokonetta toimimasta. APM voidaan poistaa käytöstä parametrilla
+
+apm=off -- poistaa APM -toiminnon kokonaan
+
+Uusimmat tietokoneet voivat hyötyä enemmän uudemmasta o_acpiACPI:sta.
+
+Palaa optKäynnistysvalinnato_acpiYtimen valinnat: acpiACPI (Advanced Configuration and Power Interface) on standardi, joka määrittelee virran- ja laitteistohallinnan liittymän käyttöjärjestelmän ja BIOS välillä. Oletuksena, acpi otetaan käyttöön kun BIOS on uudempi kuin vuodelta 2000. Muutamia yleisesti käytettyjä parametreja ACPI:n ohjaamiseksi ovat:
+
+pci=noacpi - älä käytä ACPI:a ohjaamaan PCI keskeytyksiä
+acpi=oldboot - vain ne osat ACPI:sta, jotka kuuluvat käynnistykseen jäävät käyttöön
+acpi=off -- poistaa ACPI:n kokonaan käytöstä
+acpi=force -- käyttää ACPI:a vaikka BIOS olisi päivätty ennen vuotta 2000
+
+Uusissa tietokoneissa tämä korvaa vanhan o_apmapm-järjestelmän.
+
+Palaa optKäynnistysvalinnato_ideYtimen valinnat: ideIDE (toisin kuin SCSI) on yleisesti käytetty useimmissa työasemissa. Ohittaaksesi joitakin IDE -järjestelmien laitteisto-ongelmia, käytä ytimen parametria:
+
+ide=nodma -- poistaa DMA:n IDE-levyiltä
+
+Palaa optKäynnistysvalinnatbitsOhjelmistotyypin valintaSinulla on mahdollisuus valita asennatko 32-bittisen vai 64-bittisen openSUSE 10.2 version.
+
+Palaa mainAloitussivu. 
