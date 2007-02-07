@@ -177,15 +177,15 @@ COMBINED_IMAGE=yes
 A very popular method is storing complete operating systems on an USB
 stick. This means not only the boot image and the kernel is stored on
 the stick but also the entire system image is part of the stick.
-To be able to do this kiwi provides a special boot image named
-\textbf{usbboot}. Currently it is tested and available
+To be able to do this kiwi provides special boot image(s) located in
+\textbf{/usr/share/kiwi/image/usbboot}. Currently it is tested and available
 for SuSE Linux 10.2 only but can be adapted to other versions as well.
 To use your system image on a boot stick setup the system's config.xml
 as follows:
 
 \begin{Command}{14cm}
 <preferences>\\
-\hspace*{1cm}<type>usb:ext3:usbboot-suse-10.2</type>\\
+\hspace*{1cm}<type>usb:ext3:usbboot/suse-10.2</type>\\
 \hspace*{1cm}...\\
 </preferences>
 \end{Command}
@@ -275,7 +275,7 @@ This is done by setting the \textbf{type} of the image in the
 \end{Command}
 
 The parameter \textbf{name} refers to the CD boot image which
-must exist in \textit{/usr/share/kiwi/image}. Like for all boot
+must exist in \textit{/usr/share/kiwi/image/isoboot}. Like for all boot
 images the most important point is that the boot image has to
 match the operating system image. This means the kernel of the boot-
 and operating system image must be the same. If there is no

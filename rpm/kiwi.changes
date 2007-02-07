@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Wed Feb  7 10:07:51 CET 2007 - ms@suse.de
+
+- changed boot image structure into groups of boot images
+  each group contains its own linuxrc/preinit files to which
+  the images of the group create a link to. This will reduce
+  the overhead of same linuxrc/preinit files for each image
+- update documentation
+
+-------------------------------------------------------------------
 Wed Feb  7 09:17:30 CET 2007 - ms@suse.de
 
 - added patch from James Willcox <james@ximian.com> to
