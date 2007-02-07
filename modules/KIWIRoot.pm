@@ -63,6 +63,9 @@ sub new {
 	if (! defined $kiwi) {
 		$kiwi = new KIWILog();
 	}
+	if ($imageDesc !~ /\//) {
+		$imageDesc = $main::System."/".$imageDesc;
+	}
 	if (! defined $baseSystem) {
 		$kiwi -> error ("No base system path specified");
 		$kiwi -> failed ();

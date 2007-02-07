@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Feb  7 09:17:30 CET 2007 - ms@suse.de
+
+- added patch from James Willcox <james@ximian.com> to
+  fix the default search path if no path is set for preparing
+  the image
+
+-------------------------------------------------------------------
 Tue Feb  6 16:13:25 CET 2007 - ms@suse.de
 
 - better/faster device probing
