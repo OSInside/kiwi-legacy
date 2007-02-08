@@ -1,0 +1,35 @@
+<image name="liveDVD-suse-10.3">
+	<preferences>
+		<type>iso:isoboot/suse-10.3</type>
+		<size unit="M">2700</size>
+		<packagemanager>smart</packagemanager>
+		<rpm-check-signatures>False</rpm-check-signatures>
+		<rpm-force>True</rpm-force>
+	</preferences>
+	<users group="users">
+		<user name="linux" pwd="$2a$10$90AjhfXU2YIwTRrIftBauecvWXVuaNZ6JLM2IpWi0svu2kO16le9e" home="/home/linux"/>
+	</users>
+	<repository type="yast2">
+		<source path="/image/CDs/full-i386"/>
+	</repository>
+	<packages type="image">
+		<opensusePattern name="default"/>
+		<opensusePattern name="apparmor"/>
+		<opensusePattern name="imaging"/>
+		<opensusePattern name="kde"/>
+		<opensusePattern name="kde_imaging"/>
+		<!--missing libs... not build ?-->
+		<ignore  name="amarok-xine"/>
+		<ignore  name="amarok"/>
+		<!--not existing packageas-->
+		<ignore  name="smtp_daemon"/>
+		<ignore  name="mcelog"/>
+		<ignore  name="numactl"/>
+	</packages>
+    <packages type="boot">
+        <package name="filesystem"/> 
+        <package name="glibc-locale"/>
+		<package name="kernel-default"/>
+        <package name="devs"/>
+    </packages>
+</image>

@@ -431,6 +431,10 @@ sub setupRootSystem {
 				"--explain",
 				"-y"
 			);
+			my $force = $xml -> getRPMForce();
+			if (defined $force) {
+				push (@installOpts,"-o rpm-force=yes");
+			}
 			print FD "chroot $root smart update\n";
 			print FD "test \$? = 0 && chroot $root smart install @install ";
 			print FD "@installOpts\n";

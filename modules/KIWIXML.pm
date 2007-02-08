@@ -250,6 +250,23 @@ sub getRPMCheckSignatures {
 }
 
 #==========================================
+# getRPMForce
+#------------------------------------------
+sub getRPMForce {
+	# ...
+	# Check if the package manager should force
+	# installing packages
+	# ---
+	my $this = shift;
+	my $node = $optionsNodeList -> get_node(1);
+	my $frpm = $node -> getElementsByTagName ("rpm-force");
+	if ((! defined $frpm) || ("$frpm" eq "")) {
+		return undef;
+	}
+	return $frpm;
+}
+
+#==========================================
 # getUsers
 #------------------------------------------
 sub getUsers {
