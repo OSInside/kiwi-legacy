@@ -2,6 +2,9 @@
 Wed Feb  7 15:35:46 CET 2007 - ms@suse.de
 
 - added isoboot/suse-10.3 boot image
+- added modprobe.conf.local (max_loop=32) for buildhosts
+- changed live CD/DVD setup to resize RW part on the fly instead
+  of downloading RW part + free space in one file 
 
 -------------------------------------------------------------------
 Wed Feb  7 10:07:51 CET 2007 - ms@suse.de
