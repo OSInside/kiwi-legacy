@@ -21,7 +21,6 @@ done
 # remove unneeded files
 #------------------------------------------
 rm -rf `find -type d | grep .svn`
-rm -rf /usr/share/misc
 rm -rf /usr/share/info
 rm -rf /usr/share/man
 rm -rf /usr/share/cracklib

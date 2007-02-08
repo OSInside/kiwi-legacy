@@ -96,32 +96,6 @@ systemException () {
 	;;
 	esac
 }
-probeNetworkCard () {
-	hwnet=/usr/sbin/hwinfo
-	hwstr="Driver Activation Cmd:"
-	hwcmd=`$hwnet --netcard | grep "$hwstr" | head -n 1`
-	hwcmd=`echo $hwcmd | cut -f2 -d:`
-	hwcmd=`echo $hwcmd | tr -d \" | cut -f2 -d " "`
-	if [ ! -z "$hwcmd" ];then
-		networkModule=$hwcmd
-	fi
-}
-setupNetwork () {
-	dhcpcd eth0 >/dev/null 2>&1
-	if test $? != 0;then
-		return
-	fi
-	ifconfig lo 127.0.0.1 netmask 255.0.0.0 up
-	for i in 1 2 3 4 5 6 7 8 9 0;do
-		[ -s /var/lib/dhcpcd/dhcpcd-eth0.info ] && break
-		sleep 5
-	done
-	importFile < /var/lib/dhcpcd/dhcpcd-eth0.info
-	echo "search $DOMAIN" > /etc/resolv.conf
-	IFS="," ; for i in $DNS;do
-		echo "nameserver $i" >> /etc/resolv.conf
-	done
-}
 enoughRAM () {
 	needRAM=`expr $blocks \* $blocksize`
 	needRAM=`expr $needRAM / 1024`
@@ -132,6 +106,19 @@ enoughRAM () {
 		return 0
 	fi
 	return 1
+}
+fileSystem () {
+	FSTYPE=unknown
+	dd if=$1 of=/tmp/filesystem-$$ bs=128k count=1 >/dev/null 2>&1
+	data=$(file /tmp/filesystem-$$) && rm -f /tmp/filesystem-$$
+	case $data in
+		*ext3*)     FSTYPE=ext3 ;;
+		*ext2*)     FSTYPE=ext2 ;;
+		*ReiserFS*) FSTYPE=reiserfs ;;
+		*)
+			FSTYPE=unknown
+		;;
+	esac
 }
 CDDevice () {
 	for module in usb-storage sr_mod cdrom ide-generic ide-cd;do
@@ -178,28 +165,12 @@ touch /etc/modules.conf
 touch /lib/modules/*/modules.dep
 
 #======================================
-# 3) Obtain/load network module
-#--------------------------------------
-probeNetworkCard
-if test ! -z "$networkModule";then
-	#=============================================
-	# network module found, try to load
-	#---------------------------------------------
-	modprobe $networkModule 2>/dev/null
-fi  
-
-#======================================
-# 4) Setup network interface and DNS
-#--------------------------------------
-# setupNetwork
-
-#======================================
-# 5) Mount the CD device
+# 3) Mount the CD device
 #--------------------------------------
 CDMount
 
 #======================================
-# 6) Load configuration
+# 4) Load configuration
 #--------------------------------------
 if [ ! -f $CONFIG ];then
 	systemException \
@@ -209,7 +180,7 @@ fi
 importFile < $CONFIG
 
 #======================================
-# 7) Download RW part of the CD image
+# 5) Download RW part of the CD image
 #--------------------------------------
 IFS="," ; for i in $IMAGE;do
 	field=0
@@ -254,6 +225,28 @@ IFS="," ; for i in $IMAGE;do
 	rm -f /etc/ireal.md5
 done
 CDUmount
+
+#======================================
+# 6) Get filesystem type
+#--------------------------------------
+fileSystem $imageDevice
+
+#======================================
+# 7) Resize filesystem to full space
+#--------------------------------------
+Echo "Resize filesystem to full partition space..."
+if test "$FSTYPE" = "reiserfs";then
+	resize_reiserfs $imageDevice
+fi
+if test "$FSTYPE" = "ext2";then
+	e2fsck -y -f $imageDevice
+	resize2fs -F -p $imageDevice
+fi
+if test "$FSTYPE" = "ext3";then
+	e2fsck -y -f $imageDevice
+	resize2fs -F -p $imageDevice
+	tune2fs -j $imageDevice
+fi
 
 #======================================
 # 8) Mount OS image to /mnt

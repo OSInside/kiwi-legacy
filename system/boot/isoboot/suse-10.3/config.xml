@@ -16,6 +16,7 @@
 	<drivers type="drivers">
 		<file name="drivers/ide/*"/>
 		<file name="drivers/block/loop.ko"/>
+		<file name="drivers/block/rd.ko"/>
 		<file name="net/packet/*"/>
 		<file name="fs/ext3/*"/>
 		<file name="fs/ext2/*"/>
@@ -49,6 +50,7 @@
 		<package name="netcfg"/>
 		<package name="sysconfig"/>
 		<package name="sysfsutils"/>
+		<package name="file"/>
 	</packages>
 	<packages type="boot">
 		<package name="kernel-default"/>
