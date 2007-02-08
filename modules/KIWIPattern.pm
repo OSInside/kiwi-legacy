@@ -19,6 +19,7 @@ package KIWIPattern;
 #------------------------------------------
 use strict;
 use KIWILog;
+use KIWIURL;
 use File::Glob ':glob';
 
 #==========================================
@@ -135,12 +136,18 @@ sub downloadPattern {
 		}
 		local $/; $content = <FD>; close FD;
 	} else {
+		my $urlHandler  = new KIWIURL ($kiwi);
+		my $publics_url = $url;
+		my $highlvl_url = $urlHandler -> openSUSEpath ($publics_url);
+		if (defined $highlvl_url) {
+			$publics_url = $highlvl_url;
+		}
 		my $browser  = LWP::UserAgent->new;
-		my $location = $url."/suse/setup/descr";
+		my $location = $publics_url."/suse/setup/descr";
 		my $request  = HTTP::Request->new (GET => $location);
 		my $response = $browser  -> request ( $request );
 		my $title    = $response -> title ();
-		my $content  = $response -> content ();
+		$content  = $response -> content ();
 		if ((! defined $title) || ($title =~ /not found/i)) {
 			return undef;
 		}
