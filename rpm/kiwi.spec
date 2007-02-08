@@ -63,6 +63,16 @@ This package contains the OpenSuSE - KIWI image descriptions.
 Each image description exists in a single directory and contains
 a buildservice description for a package building client
 
+%package -n kiwi-images-liveDVD
+Requires:     kiwi
+Summary:      OpenSuSE - KIWI image descriptions
+Group:        System
+
+%description -n kiwi-images-liveDVD
+This package contains the OpenSuSE - KIWI image descriptions.
+Each image description exists in a single directory and contains
+a live DVD description for a package building client
+
 Authors:
 --------
     Marcus Schäfer <ms@suse.de>
@@ -205,6 +215,10 @@ cat kiwi.loader
 
 %files -n kiwi-images-buildservice
 %{_datadir}/kiwi/image/buildhost-suse-10.1
+%defattr(-, root, root)
+
+%files -n kiwi-images-liveDVD
+%{_datadir}/kiwi/image/kwliveDVD-suse-10.3
 %defattr(-, root, root)
 
 %changelog -n kiwi

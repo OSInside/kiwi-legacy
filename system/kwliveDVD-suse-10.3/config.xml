@@ -23,6 +23,14 @@
 		<ignore  name="amarok-xine"/>
 		<ignore  name="amarok"/>
 		<!--not existing packageas-->
+		<ignore  name="qlogic-firmware"/>
+		<ignore  name="opensuse-quickstart_en"/>
+		<ignore  name="java-1_5_0-sun"/>
+		<ignore  name="java-1_5_0-sun-plugin"/>
+		<ignore  name="flash-player"/>
+		<ignore  name="AdobeICCProfiles"/>
+		<ignore  name="agfa-fonts"/>
+		<ignore  name="RealPlayer"/>
 		<ignore  name="smtp_daemon"/>
 		<ignore  name="mcelog"/>
 		<ignore  name="numactl"/>
