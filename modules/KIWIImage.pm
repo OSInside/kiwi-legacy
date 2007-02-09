@@ -272,17 +272,18 @@ sub createImageUSB {
 	#==========================================
 	# Prepare and Create USB boot image
 	#------------------------------------------
-	if (open (FD,"$imageTree/image/main::Prepare")) {
-		my $Prepare = <FD>; close FD; chomp $Prepare;
-		my $xml = new KIWIXML ( $kiwi,$Prepare );
-		$main::ForeignRepo{xmlnode} = $xml -> getForeignNodeList();
-		$main::ForeignRepo{prepare} = $Prepare;
+	$kiwi -> info ("Creating $text boot image: $boot...\n");
+	my $Prepare = $imageTree."/image";
+	my $xml = new KIWIXML ( $kiwi,$Prepare );
+	if (! defined $xml) {
+		return undef;
 	}
+	$main::ForeignRepo{xmlnode} = $xml -> getForeignNodeList();
+	$main::ForeignRepo{prepare} = $Prepare;
 	$main::Survive  = "yes";
 	$main::RootTree = "/tmp/kiwi-".$text."boot-$$";
 	$main::Prepare  = $main::System."/".$boot;
 	$main::Create   = $main::RootTree;
-	$kiwi -> info ("Creating $text boot image: $boot...\n");
 	if (! defined main::main()) {
 		$main::Survive = "default";
 		if (! -d "$main::RootTree/base-system") {
@@ -481,17 +482,19 @@ sub createImageLiveCD {
 	#==========================================
 	# Prepare and Create ISO boot image
 	#------------------------------------------
-	if (open (FD,"$imageTree/image/main::Prepare")) {
-		my $Prepare = <FD>; close FD; chomp $Prepare;
-		my $xml = new KIWIXML ( $kiwi,$Prepare );
-		$main::ForeignRepo{xmlnode} = $xml -> getForeignNodeList();
-		$main::ForeignRepo{prepare} = $Prepare;
+	$kiwi -> info ("Creating ISO boot image: $boot...\n");
+	my $Prepare = $imageTree."/image";
+	my $xml = new KIWIXML ( $kiwi,$Prepare );
+	if (! defined $xml) {
+		qx (rm -rf $imageTreeReadOnly);
+		return undef;
 	}
+	$main::ForeignRepo{xmlnode} = $xml -> getForeignNodeList();
+	$main::ForeignRepo{prepare} = $Prepare;
 	$main::Survive  = "yes";
 	$main::RootTree = "/tmp/kiwi-cdboot-$$";
 	$main::Prepare  = $main::System."/".$boot;
 	$main::Create   = $main::RootTree;
-	$kiwi -> info ("Creating ISO boot image: $boot...\n");
 	if (! defined main::main()) {
 		$main::Survive = "default";
 		if (! -d "$main::RootTree/base-system") {

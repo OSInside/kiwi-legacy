@@ -433,7 +433,12 @@ sub setup {
 	qx ( cp $imageDesc/images.sh $root/image 2>&1 );
 	qx ( cp $imageDesc/VERSION $root/image 2>&1 );
 	if (open (FD,">$root/image/main::Prepare")) {
-		print FD $imageDesc; close FD;
+		if ($imageDesc !~ /^\//) {
+			my $pwd = qx ( pwd ); chomp $pwd;
+			print FD $pwd."/".$imageDesc; close FD;
+		} else {
+			print FD $imageDesc; close FD;
+		}
 	}
 	#========================================
 	# check <users> tag, create users/groups
