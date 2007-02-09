@@ -35,6 +35,7 @@ my $repositNodeList;
 my $packageNodeList;
 my $imgnameNodeList;
 my @urllist;
+my $arch;
 
 #==========================================
 # Constructor
@@ -64,6 +65,7 @@ sub new {
 	if ($imageDesc !~ /\//) {
 		$imageDesc = $main::System."/".$imageDesc;
 	}
+	$arch = qx ( arch ); chomp $arch;
 	my $controlFile = $imageDesc."/config.xml";
 	my $versionFile = $imageDesc."/VERSION";
 	my $systemXML   = new XML::LibXML;
@@ -114,7 +116,7 @@ sub new {
 		my $highlvl_url = $urlHandler -> openSUSEpath ($publics_url);
 		if (defined $highlvl_url) {
 			$publics_url = $highlvl_url;
-		}		
+		}
 		$highlvl_url = $urlHandler -> thisPath ($publics_url);
 		if (defined $highlvl_url) {
 			$publics_url = $highlvl_url;
@@ -387,6 +389,23 @@ sub getList {
 		my @plist = $node -> getElementsByTagName ("package");
 		foreach my $element (@plist) {
 			my $package = $element -> getAttribute ("name");
+			my $forarch = $element -> getAttribute ("arch");
+			my $allowed = 1;
+			if (defined $forarch) {
+				my @archlst = split (/,/,$forarch);
+				my $foundit = 0;
+				foreach my $archok (@archlst) {
+					if ($archok eq $arch) {
+						$foundit = 1; last;
+					}
+				}
+				if (! $foundit) {
+					$allowed = 0;
+				}
+			}
+			if (! $allowed) {
+				next;
+			}
 			if (! defined $package) {
 				next;
 			}
@@ -533,7 +552,7 @@ sub setupImageInheritance {
 # resolveLink
 #------------------------------------------
 sub resolveLink {
-	my $data  = shift;
+	my $data  = resolveArchitectur ($_[0]);
 	my @dirs  = split (/\//,$data);
 	while (@dirs) {
 		my $path = join ("/",@dirs);
@@ -544,6 +563,18 @@ sub resolveLink {
 		pop (@dirs);
 	}
 	return $data;
+}
+
+#========================================== 
+# resolveArchitectur
+#------------------------------------------
+sub resolveArchitectur {
+	my $path = shift;
+	if ($arch =~ /i.86/) {
+		$arch = "i386";
+	}
+	$path =~ s/\%arch/$arch/;
+	return $path;
 }
 
 #==========================================

@@ -100,7 +100,7 @@ the format:
       \hspace*{2cm}<source path="URL"/>\\
       \hspace*{1cm}</repository>\\
       \hspace*{1cm}<packages type="Type">\\
-      \hspace*{2cm}<package name="Packagename"/>\\
+      \hspace*{2cm}<package name="Packagename" arch="Architecture"/>\\
       \hspace*{2cm}<opensusePattern name="Patternname"/>\\
       \hspace*{2cm}<ignore name="Packagename"/>\\
       \hspace*{1cm}</packages>\\
@@ -207,17 +207,19 @@ the format:
                       \textit{/lib/modules/$<$Version$>$/kernel}
                 \end{itemize}
           \item The \textbf{repository} tag defines the source path and
-                type used by smart. The attribute \textbf{type} setup the
-                the smart type of the repository, for example,
+                type used by the package manager. The attribute
+                \textbf{type} specifies the
+                type of the repository, for example,
                 \textbf{type=''yast2''} and the subtag \textbf{source}
                 contains the attribute \textbf{path} to setup the
-                the smart location of the repository, for example,
+                the location of the repository, for example,
                 \textbf{source=''/image/CDs/full-i386''}. The path
                 specifaction can be done as:
                 \begin{itemize}
                 \item local path starting with /
                 \item \textbf{html://} or \textbf{ftp://} Network-Location
                 \item opensuse://Project-Name
+                \item The path can include the \%arch macro if needed
                 \end{itemize}
                 Multiple repository
                 tags are allowed. For information on how to setup a smart
@@ -244,7 +246,11 @@ the format:
 				openSuSE v10.2 or higher. If a pattern adds something you
                 don't want to have in your image it is possible to specify
                 an \textbf{ignore} tag together with the \textbf{name} of the
-                package or package alias as tag attribute.
+                package or package alias as tag attribute. If there is a
+                package a pattern you want to use for a specific architecture
+                only it is possible to specify an optional attribute named
+                \textbf{arch} followed by a comma seperated list of allowed
+                architectures.
       \end{enumerate}
 \item \textbf{\underline{cdboot}}\\
 A directory containing all information required for the isolinux

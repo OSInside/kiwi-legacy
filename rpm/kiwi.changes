@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Feb  9 15:02:47 CET 2007 - ms@suse.de
+
+- added %arch tag for source specifications
+- added arch=... attribute for package tags
+
+-------------------------------------------------------------------
 Fri Feb  9 10:48:02 CET 2007 - ms@suse.de
 
 - fixed design bug. If someone wants to prepare an image on one
