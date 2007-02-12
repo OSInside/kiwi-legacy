@@ -1,6 +1,9 @@
 -------------------------------------------------------------------
 Mon Feb 12 10:08:35 CET 2007 - ms@suse.de
 
+- better XML checking (not only syntax check). In the long
+  run I would like to have DTD here but currently the document
+  type is not stable
 - added hwinfo.$DHCPCHADDR file for machine registration
 - added architecture to hwtype.$DHCPCHADDR file
 

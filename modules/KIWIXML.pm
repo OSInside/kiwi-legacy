@@ -91,11 +91,35 @@ sub new {
 		$packageNodeList = $systemTree -> getElementsByTagName ("packages");
 		$imgnameNodeList = $systemTree -> getElementsByTagName ("image");
 	};
-	if ((! $optionsNodeList) || (! $repositNodeList) || (! $packageNodeList)) {
+	if ($@) {
 		$kiwi -> failed ();
-		$kiwi -> error ("Problem reading control file");
+		$kiwi -> error  ("Problem reading control file");
 		$kiwi -> failed ();
-		$kiwi -> error ("$@\n");
+		$kiwi -> error  ("$@\n");
+		return undef;
+	}
+	if (! $optionsNodeList) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("No <preferences> section found");
+		$kiwi -> failed ();
+		return undef;
+	}
+	if (! $packageNodeList) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("No <packages> section found");
+		$kiwi -> failed ();
+		return undef;
+	}
+	if (! $repositNodeList) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("No <repository> section found");
+		$kiwi -> failed ();
+		return undef;
+	}
+	if (! $imgnameNodeList) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("No <image> section found");
+		$kiwi -> failed ();
 		return undef;
 	}
 	if ( defined $foreignRepo{xmlnode} ) {
