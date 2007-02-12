@@ -36,6 +36,7 @@ export PART_NEED_EXTENDED=0
 export PART_NEED_FILL=0
 export NO_FILE_SYSTEM=0
 export IFS_ORIG=$IFS
+export ARCH=`arch`
 
 export SYSTEM_INTEGRITY
 export SYSTEM_MD5STATUS
@@ -605,7 +606,7 @@ if test $? != 0 -o ! -s $CONFIG;then
 	#======================================
 	# Register new network client
 	#--------------------------------------
-	Echo "Register new network client..."
+	Echo "Registering new network client..."
 	if test $NAME -ne 0;then
 	if test $NAME -eq -1;then
 		Echo -n "Enter Alias Name for this system: " && \
@@ -615,9 +616,13 @@ if test $? != 0 -o ! -s $CONFIG;then
 		SYSALIAS=`/sbin/timed $NAME`
 	fi
 	fi
-	echo "NCNAME=$SYSALIAS" >> hwtype.$DHCPCHADDR
+	hwinfo --all --log=hwinfo.$DHCPCHADDR >/dev/null
+	echo "NCNAME=$SYSALIAS"   >> hwtype.$DHCPCHADDR
+	echo "ARCHITECTURE=$ARCH" >> hwtype.$DHCPCHADDR
 	atftp -p -l hwtype.$DHCPCHADDR \
 		-r upload/hwtype.$DHCPCHADDR $TSERVER >/dev/null 2>&1
+	atftp -p -l hwinfo.$DHCPCHADDR \
+		-r upload/hwinfo.$DHCPCHADDR $TSERVER >/dev/null 2>&1
 	echo
 	Echo "Registered as: $DHCPCHADDR"
 	Echo "Waiting for configuration..."

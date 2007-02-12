@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Feb 12 10:08:35 CET 2007 - ms@suse.de
+
+- added hwinfo.$DHCPCHADDR file for machine registration
+- added architecture to hwtype.$DHCPCHADDR file
+
+-------------------------------------------------------------------
 Fri Feb  9 15:02:47 CET 2007 - ms@suse.de
 
 - added %arch tag for source specifications
