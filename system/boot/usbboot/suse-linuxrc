@@ -152,16 +152,17 @@ USBStickDevice () {
 				devicebID=`basename $description | cut -f2 -d:`
 				serial="/sys/bus/usb/devices/$storageID/serial"
 				device="/dev/$devicebID"
-				if [ ! -f $serial ];then
-					continue;
-				fi
 				if [ ! -b $device ];then
 					continue;
 				fi
 				if [ ! -f $isremovable ];then
 					continue;
 				fi
-				serial=`cat $serial`
+				if [ ! -f $serial ];then
+					serial="USB Stick (unknown type)"
+				else
+					serial=`cat $serial`
+				fi
 				removable=`cat $isremovable`
 				if [ $removable -eq 1 ];then
 					stickDevice="$device"2

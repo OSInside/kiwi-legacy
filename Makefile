@@ -31,6 +31,11 @@ TFTPIMAGE   = ${tftp_prefix}/image
 
 all:
 	#============================================
+	# Check XSD Scheme...
+	#--------------------------------------------
+	find -name config.xml | xargs xmllint -noout -schema modules/KIWIScheme.xsd 
+
+	#============================================
 	# building kiwi tools...
 	#--------------------------------------------
 	${MAKE} -C ./tools -f Makefile all

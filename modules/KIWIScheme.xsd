@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	elementFormDefault="qualified">
+
+	<xs:annotation>
+		<xs:documentation>
+			This schema specifies the format of the config.xml image
+			description used by kiwi to generate operating system images
+		</xs:documentation>
+	</xs:annotation>
+
+	<xs:element name="image">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="preferences" minOccurs="1" maxOccurs="1"/>
+				<xs:element ref="users"       minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="drivers"     minOccurs="0" maxOccurs="3"/>
+				<xs:element ref="repository"  minOccurs="1" maxOccurs="unbounded"/>
+				<xs:element ref="packages"    minOccurs="1" maxOccurs="3"/>
+			</xs:sequence>
+			<xs:attribute name="name" type="xs:string"/>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="users">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="user" minOccurs="1" maxOccurs="unbounded"/>
+			</xs:sequence>
+			<xs:attribute name="group" type="xs:string"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="user">
+		<xs:complexType>
+			<xs:attribute name="name" type="xs:string"/>
+			<xs:attribute name="pwd"  type="xs:string"/>
+			<xs:attribute name="home" type="xs:string"/>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="drivers">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="file" minOccurs="1" maxOccurs="unbounded"/>
+			</xs:sequence>
+			<xs:attribute name="type" type="xs:string"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="file">
+		<xs:complexType>
+			<xs:attribute name="name" type="xs:string"/>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="packages">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="package" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="opensusePattern" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="ignore" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+			<xs:attribute name="type" type="xs:string"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="package">
+		<xs:complexType>
+			<xs:attribute name="name" type="xs:string"/>
+			<xs:attribute name="arch" type="xs:string"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="opensusePattern">
+		<xs:complexType>
+			<xs:attribute name="name" type="xs:string"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ignore">
+		<xs:complexType>
+			<xs:attribute name="name" type="xs:string"/>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="repository">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="source" minOccurs="1"/>
+			</xs:sequence>
+			<xs:attribute name="type" type="xs:string"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="source">
+		<xs:complexType>
+			<xs:attribute name="path" type="xs:string"/>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="preferences">
+		<xs:complexType>
+			<xs:all>
+				<xs:element ref="type" minOccurs="1" maxOccurs="1"/>
+				<xs:element ref="compressed" minOccurs="0" maxOccurs="1"/>
+				<xs:element ref="packagemanager" minOccurs="0" maxOccurs="1"/>
+				<xs:element ref="rpm-check-signatures" minOccurs="0" maxOccurs="1"/>
+				<xs:element ref="rpm-force" minOccurs="0" maxOccurs="1"/>
+				<xs:element ref="size" minOccurs="1" maxOccurs="1"/>
+			</xs:all>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="type" type="xs:string"/>
+	<xs:element name="compressed" type="xs:string"/>
+	<xs:element name="packagemanager" type="xs:string"/>
+	<xs:element name="rpm-check-signatures" type="xs:string"/>
+	<xs:element name="rpm-force" type="xs:string"/>
+	<xs:element name="size">
+		<xs:complexType>
+			<xs:simpleContent>
+				<xs:extension base="xs:integer">
+					<xs:attribute name="unit" type="xs:string" />
+				</xs:extension>
+			</xs:simpleContent>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

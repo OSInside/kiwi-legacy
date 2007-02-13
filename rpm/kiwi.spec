@@ -3,6 +3,7 @@
 # Copyright (c) 2006 SUSE LINUX Products GmbH, Nuernberg, Germany.
 # Please submit bugfixes or comments via http://bugs.opensuse.org
 # ---
+# needsrootforbuild
 Name:          kiwi
 BuildRequires: perl smart perl-XML-LibXML syslinux perl-libwww-perl screen qemu multipath-tools
 Requires:      perl smart perl-XML-LibXML syslinux perl-libwww-perl screen qemu multipath-tools
@@ -91,6 +92,9 @@ if [ $UID = 0 ];then
 	# prepare and create boot images...
 	mkdir -p $RPM_BUILD_ROOT/%{_var}/lib/tftpboot/pxelinux.cfg
 	mkdir -p $RPM_BUILD_ROOT/%{_var}/lib/tftpboot/boot
+	mkdir -p /usr/share/kiwi/modules
+	rm -f /usr/share/kiwi/modules/KIWIScheme.xsd
+	cp -f modules/KIWIScheme.xsd /usr/share/kiwi/modules
 	for i in `find system/boot/ -name restart`;do
 		rm -f $i && cp -a tools/restart $i
 	done
@@ -214,12 +218,12 @@ cat kiwi.loader
 %{_datadir}/kiwi/image/wyseXMini-suse-10.1
 
 %files -n kiwi-images-buildservice
-%{_datadir}/kiwi/image/buildhost-suse-10.1
 %defattr(-, root, root)
+%{_datadir}/kiwi/image/buildhost-suse-10.1
 
 %files -n kiwi-images-liveDVD
-%{_datadir}/kiwi/image/kwliveDVD-suse-10.3
 %defattr(-, root, root)
+%{_datadir}/kiwi/image/kwliveDVD-suse-10.3
 
 %changelog -n kiwi
 * Tue Feb 06 2007 - ms@suse.de

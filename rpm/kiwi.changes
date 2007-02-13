@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Mon Feb 12 14:14:22 CET 2007 - ms@suse.de
+
+- added needsrootforbuild
+- added kiwi XSD scheme for XML validation
+- added --recheck option while calling grub-install
+- fixed USB stick detection if no serial identifier exists
+  Thanks to: Guy Coste <gcoste@novell.com>
+
+-------------------------------------------------------------------
 Mon Feb 12 10:08:35 CET 2007 - ms@suse.de
 
 - better XML checking (not only syntax check). In the long

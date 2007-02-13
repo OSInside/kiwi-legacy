@@ -66,9 +66,11 @@ sub new {
 		$imageDesc = $main::System."/".$imageDesc;
 	}
 	$arch = qx ( arch ); chomp $arch;
+	my $systemTree;
 	my $controlFile = $imageDesc."/config.xml";
 	my $versionFile = $imageDesc."/VERSION";
 	my $systemXML   = new XML::LibXML;
+	my $systemXSD   = new XML::LibXML::Schema ( location => $main::Scheme );
 	if (! -f $controlFile) {
 		$kiwi -> failed ();
 		$kiwi -> error ("Cannot open control file: $controlFile");
@@ -82,7 +84,7 @@ sub new {
 		return undef;
 	}
 	eval {
-		my $systemTree = $systemXML
+		$systemTree = $systemXML
 			-> parse_file ( $controlFile );
 		$optionsNodeList = $systemTree -> getElementsByTagName ("preferences");
 		$driversNodeList = $systemTree -> getElementsByTagName ("drivers");
@@ -98,28 +100,14 @@ sub new {
 		$kiwi -> error  ("$@\n");
 		return undef;
 	}
-	if (! $optionsNodeList) {
+	eval {
+		$systemXSD ->validate ( $systemTree );
+	};
+	if ($@) {
 		$kiwi -> failed ();
-		$kiwi -> error  ("No <preferences> section found");
+		$kiwi -> error  ("Scheme validation failed");
 		$kiwi -> failed ();
-		return undef;
-	}
-	if (! $packageNodeList) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("No <packages> section found");
-		$kiwi -> failed ();
-		return undef;
-	}
-	if (! $repositNodeList) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("No <repository> section found");
-		$kiwi -> failed ();
-		return undef;
-	}
-	if (! $imgnameNodeList) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("No <image> section found");
-		$kiwi -> failed ();
+		$kiwi -> error  ("$@\n");
 		return undef;
 	}
 	if ( defined $foreignRepo{xmlnode} ) {

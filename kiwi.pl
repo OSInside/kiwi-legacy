@@ -29,6 +29,7 @@ use KIWIBoot;
 
 our $Version = "1.2";
 our $System  = "/usr/share/kiwi/image";
+our $Scheme  = "/usr/share/kiwi/modules/KIWIScheme.xsd";
 #============================================
 # Globals
 #--------------------------------------------

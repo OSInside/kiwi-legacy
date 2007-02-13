@@ -143,15 +143,14 @@ sub getRemovableUSBStorageDevices {
 					next;
 				}
 				my $isremovable = glob ("$description/removable");
-				my $serial;
+				my $serial = "USB Stick (unknown type)";
 				if ($description =~ /usb-storage\/(.*?):.*/) {
 					$serial = "/sys/bus/usb/devices/$1/serial";
-					if (! open (FD,$serial)) {
-						next;
+					if (open (FD,$serial)) {
+						$serial = <FD>;
+						chomp $serial;
+						close FD;
 					}
-					$serial = <FD>;
-					chomp $serial;
-					close FD;
 				}
 				if ($description =~ /block:(.*)/) {
 					$description = "/dev/".$1;
@@ -379,7 +378,9 @@ sub setupBootStick {
 		$kiwi -> failed ();
 		return undef;
 	}
-	$status = qx (/usr/sbin/grub-install --root-directory=/mnt/ $stick 2>&1);
+	my $gopt = "--recheck";
+	my $grub = "/usr/sbin/grub-install";
+	$status = qx ($grub $gopt --root-directory=/mnt/ $stick 2>&1);
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
