@@ -339,7 +339,7 @@ sub createImageVMX {
 }
 
 #==========================================
-# createImageCD
+# createImageLiveCD
 #------------------------------------------
 sub createImageLiveCD {
 	# ...
