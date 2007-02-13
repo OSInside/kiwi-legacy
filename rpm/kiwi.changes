@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Feb 13 14:01:43 CET 2007 - ms@suse.de
+
+- exclude archs not supported by OBS
+
+-------------------------------------------------------------------
 Mon Feb 12 14:14:22 CET 2007 - ms@suse.de
 
 - added needsrootforbuild

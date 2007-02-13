@@ -14,6 +14,7 @@ Group:         System
 License:       GPL
 Source:        kiwi.tar.bz2
 BuildRoot:     %{_tmppath}/%{name}-%{version}-build
+ExcludeArch:   ia64 ppc64 s390x s390 ppc
 
 %description
 This package contains the OpenSuSE - KIWI Image System
