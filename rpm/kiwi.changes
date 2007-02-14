@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Feb 13 17:14:08 CET 2007 - ms@suse.de
+
+- activated zypper support, currently broken in zypper
+- added kiwi-images-boot requirement
+
+-------------------------------------------------------------------
 Tue Feb 13 14:01:43 CET 2007 - ms@suse.de
 
 - exclude archs not supported by OBS

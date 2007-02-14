@@ -276,14 +276,14 @@ sub setupInstallationSource {
 					push (@zopts,"--type $val");
 				}
 			}
-			my $zypp = "zypper service-add @zopts";
+			my $sadd = "service-add @zopts $alias";
 			if (! $chroot) {
 				$kiwi -> info ("Adding local zypper service: $alias");
-				$data = qx (bash -c "yes | $zypp $alias 2>&1");
+				$data = qx (bash -c "yes | zypper --root $root $sadd 2>&1");
 				$code = $? >> 8;
 			} else {
 				$kiwi -> info ("Adding image zypper service: $alias");
-				$data = qx (chroot $root bash -c "yes | $zypp $alias 2>&1");
+				$data = qx (chroot $root bash -c "yes | zypper $sadd 2>&1");
 				$code = $? >> 8;
 			}
 			if ($code != 0) {
@@ -335,11 +335,12 @@ sub resetInstallationSource {
 	if ($manager eq "zypper") {
 		$kiwi -> info ("Removing zypper service(s): @channelList");
 		my @list = @channelList;
+		my $sdel = "service-delete @list";
 		if (! $chroot) {
-			$data = qx ( zypper service-delete @list 2>&1 );
+			$data = qx ( bash -c "yes | zypper --root $root $sdel 2>&1" );
 			$code = $? >> 8;
 		} else {
-			$data = qx ( chroot $root zypper service-delete @list 2>&1 );
+			$data = qx ( chroot $root bash -c "yes | zypper $sdel 2>&1" );
 			$code = $? >> 8;
 		}
 		if ($code != 0) {
@@ -435,6 +436,9 @@ sub setupRootSystem {
 			if (defined $force) {
 				push (@installOpts,"-o rpm-force=yes");
 			}
+			#==========================================
+			# Create screen call file
+			#------------------------------------------
 			print FD "chroot $root smart update\n";
 			print FD "test \$? = 0 && chroot $root smart install @install ";
 			print FD "@installOpts\n";
@@ -447,14 +451,24 @@ sub setupRootSystem {
 	#------------------------------------------
 	if ($manager eq "zypper") {
 		if (! $chroot) {
-			# TODO
-			$kiwi -> error  ("*** not implemented ***");
-			$kiwi -> failed ();
-			resetInstallationSource();
-			return undef;
+			$kiwi -> info ("Initializing image system on: $root...");
+			my $forceChannels = join (",",@channelList);
+			my @installOpts = (
+				"--catalog $forceChannels",
+				"-y"
+			);
+			#==========================================
+			# Add package manager to package list
+			#------------------------------------------
+			push (@packs,$manager);
+			#==========================================
+			# Create screen call file
+			#------------------------------------------
+			print FD "yes | zypper --root $root install @installOpts @packs\n";
+			print FD "echo \$? > $screenCall.exit\n";
 		} else {
 			$kiwi -> info ("Installing image packages...");
-			print FD "chroot $root zypper install -y @packs\n";
+			print FD "chroot $root yes | zypper install -y @packs\n";
 			print FD "echo \$? > $screenCall.exit\n";
 		}
 		close FD;
@@ -516,7 +530,7 @@ sub resetSource {
 	if ($manager eq "zypper") {
 		foreach my $channel (keys %{$source{public}}) {
 			#$kiwi -> info ("Removing zypper service: $channel\n");
-			qx ( zypper service-delete $channel 2>&1 );
+			qx ( bash -c "yes | zypper service-delete $channel 2>&1" );
 		}
 	}
 	return $this;

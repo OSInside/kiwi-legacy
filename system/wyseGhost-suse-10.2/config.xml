@@ -3,6 +3,7 @@
 		<type>ext3</type>
 		<size unit="M">460</size>
 		<rpm-check-signatures>False</rpm-check-signatures>
+		<packagemanager>smart</packagemanager>
 	</preferences>
 	<repository type="yast2">
 		<!--<source path="opensuse://10.2"/>-->
@@ -77,6 +78,5 @@
 		<package name="glibc-locale"/>
 		<package name="devs"/>
 		<package name="rpm"/>
-		<package name="smart"/>
 	</packages>
 </image>

@@ -6,7 +6,7 @@
 # needsrootforbuild
 Name:          kiwi
 BuildRequires: perl smart perl-XML-LibXML syslinux perl-libwww-perl screen qemu multipath-tools
-Requires:      perl smart perl-XML-LibXML syslinux perl-libwww-perl screen qemu multipath-tools
+Requires:      perl smart perl-XML-LibXML syslinux perl-libwww-perl screen qemu multipath-tools kiwi-images-boot
 Summary:       OpenSuSE - KIWI Image System
 Version:       1.7
 Release:       7
@@ -36,7 +36,6 @@ Authors:
 
 
 %package -n kiwi-images-boot
-Requires:     kiwi
 Summary:      OpenSuSE - KIWI image descriptions
 Group:        System
 
