@@ -516,7 +516,7 @@ sub createImageLiveCD {
 		return undef;
 	}
 	qx (rm -rf $main::RootTree/*);
-	qx (mkdir -p $main::RootTree/CD/boot/loader);
+	qx (mkdir -p $main::RootTree/CD/boot);
 	qx (mkdir -p $main::RootTree/CD/read-only-system);
 	$kiwi -> done ();
 
@@ -531,41 +531,45 @@ sub createImageLiveCD {
 	$kiwi -> done ();
 
 	#==========================================
-	# copy kernel and initrd
+	# copy boot files for isolinux
 	#------------------------------------------
-	$kiwi -> info ("Copying boot image and kernel");
+	my $CD = "$main::Prepare/cdboot";
 	my $xml = new KIWIXML ( $kiwi,$main::Prepare );
 	my $iso = $xml -> getImageName();
-	qx (mv $imageDest/$iso*.gz $main::RootTree/CD/boot/loader/initrd);
-	qx (mv $imageDest/$iso*.kernel* $main::RootTree/CD/boot/loader/linux);
-	qx (rm -f $imageDest/$iso*.md5);
-	$kiwi -> done ();
-
-	#==========================================
-	# Checking architecture
-	#------------------------------------------
-	$kiwi -> info ("Checking for architecture specific boot loader");
-	my $arch = qx (/bin/arch); chomp ($arch);
-	if ($arch =~ /i.86/) {
-		$arch = "i386";
-	}
-	if (! -f "$main::Prepare/cdboot/isolinux/$arch/isolinux.bin") {
-		$kiwi -> failed ();
-		$kiwi -> error  ("isoboot description doesn't provide $arch loader");
+	if (! opendir (FD,"$CD/isolinux")) {
+		$kiwi -> error  ("Couldn't open directory $CD/isolinux: $!");
 		$kiwi -> failed ();
 		return undef;
 	}
-	$kiwi -> done ();
+	while (my $arch = readdir (FD)) {
+		if (($arch =~ /^\./) || (! -d "$CD/isolinux/$arch")) {
+			next;
+		}
+		#==========================================
+		# copy kernel and initrd
+		#------------------------------------------
+		$kiwi -> info ("Copying boot image and kernel [$arch]");
+		my $destination = "$main::RootTree/CD/boot/$arch/loader";
+		qx (mkdir -p $destination);
+		qx (cp $imageDest/$iso*.gz $destination/initrd);
+		qx (cp $imageDest/$iso*.kernel* $destination/linux);
+		$kiwi -> done ();
+
+		#==========================================
+		# copy base CD files
+		#------------------------------------------
+		$kiwi -> info ("Setting up isolinux boot CD [$arch]");
+		qx (cp $CD/isolinux/$arch/* $destination);
+		qx (cp $CD/isolinux.cfg $destination);
+		qx (cp $CD/isolinux.msg $destination);
+		$kiwi -> done ();
+	}
+	closedir FD;
 
 	#==========================================
-	# copy base CD files
+	# remove original kernel and initrd
 	#------------------------------------------
-	$kiwi -> info ("Setting up isolinux boot CD"); 
-	my $CD = "$main::Prepare/cdboot";
-	qx (cp $CD/isolinux/$arch/* $main::RootTree/CD/boot/loader);
-	qx (cp $CD/isolinux.cfg $main::RootTree/CD/boot/loader);
-	qx (cp $CD/isolinux.msg $main::RootTree/CD/boot/loader);
-	$kiwi -> done ();
+	qx (rm -f $imageDest/$iso*.*]);
 
 	#==========================================
 	# Create boot configuration
