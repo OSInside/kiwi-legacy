@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Wed Feb 14 10:09:31 CET 2007 - ms@suse.de
+
+v1.8
+  * support for qemu, vmware, Xen images
+  * support for zypper and smart
+  * xsd scheme for XML validation
+  * target: vmx: automatic build of vmware/qemu disk images
+  * target: usb: automatic build of usb boot images
+
+-------------------------------------------------------------------
 Tue Feb 13 17:14:08 CET 2007 - ms@suse.de
 
 - activated zypper support, currently broken in zypper
