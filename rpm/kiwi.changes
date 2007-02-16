@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Feb 16 08:19:23 CET 2007 - ms@suse.de
+
+v1.9
+  * fixed broken isoboot links
+
+-------------------------------------------------------------------
 Wed Feb 14 14:45:42 CET 2007 - ms@suse.de
 
 - added boot/<arch>/loader scheme for iso systems

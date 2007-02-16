@@ -1,5 +1,5 @@
 # /.../
-# spec file for package kiwi (Version 1.8)
+# spec file for package kiwi (Version 1.9)
 # Copyright (c) 2006 SUSE LINUX Products GmbH, Nuernberg, Germany.
 # Please submit bugfixes or comments via http://bugs.opensuse.org
 # ---
@@ -8,8 +8,8 @@ Name:          kiwi
 BuildRequires: perl smart perl-XML-LibXML syslinux perl-libwww-perl screen qemu multipath-tools
 Requires:      perl smart perl-XML-LibXML syslinux perl-libwww-perl screen qemu multipath-tools kiwi-images-boot
 Summary:       OpenSuSE - KIWI Image System
-Version:       1.8
-Release:       8
+Version:       1.9
+Release:       9
 Group:         System
 License:       GPL
 Source:        kiwi.tar.bz2

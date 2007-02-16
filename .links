@@ -1,0 +1,14 @@
+for file in `find -type l`;do
+	real=`readlink $file`
+	echo $real | grep -q ^/
+	if [ ! $? = 0 ];then
+		linkFile=`echo ${file/.\/system\/boot/\/usr\/share\/kiwi\/image}`
+		linkName=`basename $file`
+		ldirName=`dirname  $file`
+		(
+			cd $ldirName
+			rm -f $linkName
+			ln -s $linkFile $linkName
+		)
+	fi
+done

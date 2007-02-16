@@ -36,6 +36,11 @@ all:
 	find -name config.xml | xargs xmllint -noout -schema modules/KIWIScheme.xsd 
 
 	#============================================
+	# resolve relative links
+	#--------------------------------------------
+	# ./.links
+
+	#============================================
 	# building kiwi tools...
 	#--------------------------------------------
 	${MAKE} -C ./tools -f Makefile all
