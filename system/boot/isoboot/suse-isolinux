@@ -198,7 +198,7 @@ then
 	fi
 fi
 
-isolinux-config --base $BOOT_ISOLINUX $SOURCE/$BOOT_ISOLINUX/isolinux.bin
+/usr/bin/isolinux-config --base $BOOT_ISOLINUX $SOURCE/$BOOT_ISOLINUX/isolinux.bin
 mkisofs \
 	-p "$CD_PREPARER" \
 	-publisher "$CD_PUBLISHER" \

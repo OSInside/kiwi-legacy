@@ -60,6 +60,9 @@
 		<package name="sysfsutils"/>
 		<package name="tcpd"/>
 		<package name="util-linux"/>
+		<package name="gfxboot"/>
+		<package name="syslinux"/>
+		<package name="make"/>
 	</packages>
 	<packages type="boot">
 		<package name="kernel-default"/>

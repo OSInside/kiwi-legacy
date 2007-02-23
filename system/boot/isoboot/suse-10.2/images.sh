@@ -4,6 +4,17 @@ test -f /.profile && . /.profile
 echo "Configure image: [$name]..."
 
 #==========================================
+# setup isolinux
+#------------------------------------------
+export PATH=$PATH:/usr/sbin
+mkdir /image/loader
+cd /usr/share/gfxboot/themes/SuSE && make
+rm -f install/init install/languages install/log
+mv install/* /image/loader
+mv /usr/share/syslinux/isolinux.bin /image/loader
+make clean
+
+#==========================================
 # remove unneeded packages
 #------------------------------------------
 for i in \
@@ -13,7 +24,8 @@ for i in \
     libzio limal limal-bootloader limal-perl logrotate mdadm mingetty \
     openSUSE-release openldap2-client openslp pam pam-modules pcre \
     perl perl-Bootloader perl-gettext permissions pm-utils pmtools \
-    python python-xml resmgr rpm-python smart suse-build-key udev
+    python python-xml resmgr rpm-python smart suse-build-key udev \
+	syslinux gfxboot make
 do
     rpm -e $i --nodeps
 done

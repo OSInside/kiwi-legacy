@@ -1,4 +1,17 @@
 -------------------------------------------------------------------
+Wed Feb 21 11:11:44 CET 2007 - ms@suse.de
+
+- v1.10
+- changed liveDVD description, enable amarok again
+- changed isoboot descriptions, removed static isolinux part.
+  kiwi will provide the isolinux and gfxboot data within the
+  <root>/image/loader/ metadata directory. For SuSE this means the
+  package gfxboot and syslinux must be installed in order to create
+  the needed data for booting the ISO in graphics mode. The needed
+  preparation steps are implemented in the images.sh script.
+- changed package structure
+
+-------------------------------------------------------------------
 Fri Feb 16 08:19:23 CET 2007 - ms@suse.de
 
 v1.9

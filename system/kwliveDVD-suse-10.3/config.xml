@@ -19,12 +19,8 @@
 		<opensusePattern name="imaging"/>
 		<opensusePattern name="kde"/>
 		<opensusePattern name="kde_imaging"/>
-		<!--missing libs... not build ?-->
-		<ignore  name="amarok-xine"/>
-		<ignore  name="amarok"/>
-		<!--not existing packageas-->
+		<!--non existing packages on openSUSE but referenced in pattern-->
 		<ignore  name="qlogic-firmware"/>
-		<ignore  name="opensuse-quickstart_en"/>
 		<ignore  name="java-1_5_0-sun"/>
 		<ignore  name="java-1_5_0-sun-plugin"/>
 		<ignore  name="flash-player"/>
