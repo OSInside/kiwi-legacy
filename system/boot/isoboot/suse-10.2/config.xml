@@ -63,6 +63,7 @@
 		<package name="gfxboot"/>
 		<package name="syslinux"/>
 		<package name="make"/>
+		<package name="memtest86+"/>
 	</packages>
 	<packages type="boot">
 		<package name="kernel-default"/>

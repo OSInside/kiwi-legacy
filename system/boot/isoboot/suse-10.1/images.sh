@@ -12,6 +12,7 @@ cd /usr/share/gfxboot/themes/SuSE && make
 rm -f install/init install/languages install/log
 mv install/* /image/loader
 mv /usr/share/syslinux/isolinux.bin /image/loader
+mv /boot/memtest.bin /image/loader/memtest
 make clean
 
 #==========================================
@@ -24,7 +25,7 @@ for i in \
 	openslp rpm-python suse-build-key permissions \
 	fillup pam expat suse-release libxml2 openldap2-client \
 	logrotate diffutils cpio bzip2 insserv ash gdbm rpm \
-	syslinux gfxboot make
+	syslinux gfxboot make memtest86
 do
 	rpm -e $i --nodeps
 done
