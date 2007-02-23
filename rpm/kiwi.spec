@@ -5,8 +5,8 @@
 # ---
 # needsrootforbuild
 Name:          kiwi
-BuildRequires: perl smart perl-XML-LibXML syslinux perl-libwww-perl screen qemu multipath-tools
-Requires:      perl smart perl-XML-LibXML syslinux perl-libwww-perl screen qemu multipath-tools kiwi-images-boot
+BuildRequires: perl smart perl-XML-LibXML perl-libwww-perl screen syslinux
+Requires:      perl smart perl-XML-LibXML perl-libwww-perl screen syslinux
 Summary:       OpenSuSE - KIWI Image System
 Version:       1.10
 Release:       10
@@ -54,6 +54,7 @@ Each image description exists in a single directory and contains
 an usbboot image description
 
 %package -n kiwi-desc-vmxboot
+Requires:     qemu multipath-tools
 Summary:      OpenSuSE - KIWI image descriptions
 Group:        System
 
@@ -70,6 +71,15 @@ Group:        System
 This package contains the OpenSuSE - KIWI image descriptions.
 Each image description exists in a single directory and contains
 a netboot image description
+
+%package -n kiwi-desc-xenboot
+Summary:      OpenSuSE - KIWI image descriptions
+Group:        System
+
+%description -n kiwi-desc-xenboot
+This package contains the OpenSuSE - KIWI image descriptions.
+Each image description exists in a single directory and contains
+a xenboot image description
 
 %package -n kiwi-desc-wyse
 Requires:     kiwi
@@ -92,7 +102,7 @@ Each image description exists in a single directory and contains
 a buildservice description for a package building client
 
 %package -n kiwi-desc-livesystem
-Requires:     kiwi
+Requires:     kiwi kiwi-desc-isoboot
 Summary:      OpenSuSE - KIWI image descriptions
 Group:        System
 
@@ -249,6 +259,10 @@ cat kiwi.loader
 %files -n kiwi-desc-netboot
 %defattr(-, root, root)
 %{_datadir}/kiwi/image/netboot
+
+%files -n kiwi-desc-xenboot
+%defattr(-, root, root)
+%{_datadir}/kiwi/image/xenboot
 
 %files -n kiwi-desc-wyse
 %defattr(-, root, root)
