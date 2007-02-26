@@ -4,16 +4,21 @@ test -f /.profile && . /.profile
 echo "Configure image: [$name]..."
 
 #==========================================
-# setup isolinux
+# setup gfxboot
 #------------------------------------------
 export PATH=$PATH:/usr/sbin
 mkdir /image/loader
-cd /usr/share/gfxboot/themes/SuSE && make
-rm -f install/init install/languages install/log
-mv install/* /image/loader
+cd /usr/share/gfxboot
+make -C themes/SuSE prep
+make -C themes/SuSE
+cp themes/SuSE/install/* /image/loader
+bin/unpack_bootlogo /image/loader
+for i in init languages log;do
+	rm -f /image/loader/$i
+done
 mv /usr/share/syslinux/isolinux.bin /image/loader
 mv /boot/memtest.bin /image/loader/memtest
-make clean
+make -C themes/SuSE clean
 
 #==========================================
 # remove unneeded packages
