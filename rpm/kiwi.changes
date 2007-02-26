@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Mon Feb 26 17:16:16 CET 2007 - ms@suse.de
+
+- removed atftp from vmxboot descriptions
+- added repository check for local paths before adding them
+- check return value from createBootStructure() method
+- added timezone and keytable to XSD scheme
+- fixed resolveLink() method
+
+-------------------------------------------------------------------
 Wed Feb 21 11:11:44 CET 2007 - ms@suse.de
 
 - v1.10

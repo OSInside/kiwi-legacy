@@ -101,6 +101,8 @@
 				<xs:element ref="packagemanager" minOccurs="0" maxOccurs="1"/>
 				<xs:element ref="rpm-check-signatures" minOccurs="0" maxOccurs="1"/>
 				<xs:element ref="rpm-force" minOccurs="0" maxOccurs="1"/>
+				<xs:element ref="keytable" minOccurs="0" maxOccurs="1"/>
+				<xs:element ref="timezone" minOccurs="0" maxOccurs="1"/>
 				<xs:element ref="size" minOccurs="1" maxOccurs="1"/>
 			</xs:all>
 		</xs:complexType>
@@ -110,6 +112,8 @@
 	<xs:element name="packagemanager" type="xs:string"/>
 	<xs:element name="rpm-check-signatures" type="xs:string"/>
 	<xs:element name="rpm-force" type="xs:string"/>
+	<xs:element name="keytable" type="xs:string"/>
+	<xs:element name="timezone" type="xs:string"/>
 	<xs:element name="size">
 		<xs:complexType>
 			<xs:simpleContent>

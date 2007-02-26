@@ -103,6 +103,13 @@ sub new {
 		if (defined $highlvl_url) {
 			$publics_url = $highlvl_url;
 		}
+		if ($publics_url =~ /^\//) {
+			if (! -d $publics_url) {
+				$kiwi -> warning ("local URL path not found: $publics_url");
+				$kiwi -> skipped ();
+				next;
+			}
+		}
 		my $private_url = $publics_url;
 		if ($private_url =~ /^\//) {
 			$private_url = $baseSystem."/".$private_url;

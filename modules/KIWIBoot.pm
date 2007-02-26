@@ -177,8 +177,9 @@ sub setupBootStick {
 	#==========================================
 	# Create Stick structure
 	#------------------------------------------
-	createBootStructure();
-
+	if (! createBootStructure()) {
+		return undef;
+	}
 	#==========================================
 	# Import grub stages
 	#------------------------------------------
@@ -402,8 +403,9 @@ sub setupBootCD {
 	#==========================================
 	# Create CD structure
 	#------------------------------------------
-	createBootStructure();
-    
+	if (! createBootStructure()) {
+		return undef;
+	}
 	#==========================================
 	# Import grub stages
 	#------------------------------------------
@@ -568,8 +570,12 @@ sub setupBootDisk {
 	#==========================================
 	# Dump initial initrd on system image
 	#------------------------------------------
-	createBootStructure ("vmx");
-
+	if (! createBootStructure ("vmx")) {
+		qx ( umount /mnt/ 2>&1 );
+		qx ( /sbin/kpartx  -d $loop );
+		qx ( /sbin/losetup -d $loop );
+		return undef;
+	}
 	#==========================================
 	# Creating menu.lst for the grub
 	#------------------------------------------

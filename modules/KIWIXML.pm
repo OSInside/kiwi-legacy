@@ -565,14 +565,11 @@ sub setupImageInheritance {
 #------------------------------------------
 sub resolveLink {
 	my $data  = resolveArchitectur ($_[0]);
-	my @dirs  = split (/\//,$data);
-	while (@dirs) {
-		my $path = join ("/",@dirs);
-		my $link = readlink $path;
-		if (defined $link) {
-			$data =~ s/$path/$link/;
-		}
-		pop (@dirs);
+	my $cdir = qx (pwd); chomp $cdir;
+	if (chdir $data) {
+		my $pdir = qx (pwd); chomp $pdir;
+		chdir $cdir;
+		return $pdir
 	}
 	return $data;
 }
