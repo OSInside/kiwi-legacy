@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Feb 27 11:54:26 CET 2007 - ms@suse.de
+
+- added dependency graph for current package structure: .kiwi.dot
+
+-------------------------------------------------------------------
 Mon Feb 26 17:16:16 CET 2007 - ms@suse.de
 
 - removed atftp from vmxboot descriptions

@@ -6,7 +6,7 @@
 # needsrootforbuild
 Name:          kiwi
 BuildRequires: perl smart perl-XML-LibXML perl-libwww-perl screen syslinux
-Requires:      perl smart perl-XML-LibXML perl-libwww-perl screen syslinux
+Requires:      perl perl-XML-LibXML perl-libwww-perl screen
 Summary:       OpenSuSE - KIWI Image System
 Version:       1.10
 Release:       10
@@ -24,6 +24,7 @@ Authors:
     Marcus Schäfer <ms@suse.de>
 
 %package -n kiwi-pxeboot
+Requires:     syslinux
 Summary:      OpenSuSE - KIWI TFTP boot structure
 Group:        System
 
@@ -36,6 +37,7 @@ Authors:
 
 
 %package -n kiwi-desc-isoboot
+Requires:     kiwi smart syslinux
 Summary:      OpenSuSE - KIWI image descriptions
 Group:        System
 
@@ -45,6 +47,7 @@ Each image description exists in a single directory and contains
 an isoboot image description
 
 %package -n kiwi-desc-usbboot
+Requires:     kiwi smart
 Summary:      OpenSuSE - KIWI image descriptions
 Group:        System
 
@@ -54,7 +57,7 @@ Each image description exists in a single directory and contains
 an usbboot image description
 
 %package -n kiwi-desc-vmxboot
-Requires:     qemu multipath-tools
+Requires:     kiwi qemu multipath-tools smart
 Summary:      OpenSuSE - KIWI image descriptions
 Group:        System
 
@@ -64,6 +67,7 @@ Each image description exists in a single directory and contains
 a vmxboot image description
 
 %package -n kiwi-desc-netboot
+Requires:     kiwi smart
 Summary:      OpenSuSE - KIWI image descriptions
 Group:        System
 
@@ -73,6 +77,7 @@ Each image description exists in a single directory and contains
 a netboot image description
 
 %package -n kiwi-desc-xenboot
+Requires:     kiwi smart
 Summary:      OpenSuSE - KIWI image descriptions
 Group:        System
 
@@ -82,7 +87,7 @@ Each image description exists in a single directory and contains
 a xenboot image description
 
 %package -n kiwi-desc-wyse
-Requires:     kiwi
+Requires:     kiwi smart
 Summary:      OpenSuSE - KIWI image descriptions
 Group:        System
 
@@ -92,7 +97,7 @@ Each image description exists in a single directory and contains
 a thin client description for Wyse terminals
 
 %package -n kiwi-desc-buildservice
-Requires:     kiwi
+Requires:     kiwi smart
 Summary:      OpenSuSE - KIWI image descriptions
 Group:        System
 
@@ -102,7 +107,7 @@ Each image description exists in a single directory and contains
 a buildservice description for a package building client
 
 %package -n kiwi-desc-livesystem
-Requires:     kiwi kiwi-desc-isoboot
+Requires:     kiwi kiwi-desc-isoboot smart
 Summary:      OpenSuSE - KIWI image descriptions
 Group:        System
 
