@@ -46,6 +46,8 @@ our $BootVMSystem;    # system image to be copied on a VM disk
 our $BootVMDisk;      # deploy initrd booting from a VM 
 our $BootVMSize;      # size of virtual disk
 our $BootCD;          # deploy initrd booting from CD
+our $InstallCD;       # deploy initrd installing from cD
+our $InstallCDSystem; # system image to be deployed via CD
 our $StripImage;      # strip shared objects and binaries
 our $CreatePassword;  # create crypt password string
 our $ImageName;       # filename of current image, used in Modules
@@ -260,6 +262,30 @@ sub main {
 	}
 
 	#==========================================
+	# Create an initrd .iso for CD install
+	#------------------------------------------
+	if (defined $InstallCD) {
+		$kiwi -> info ("Creating install ISO from: $InstallCD...\n");
+		if (! defined $InstallCDSystem) {
+			$kiwi -> failed ();
+			$kiwi -> error ("No CD system specified");
+			$kiwi -> failed ();
+			my $code = kiwiExit (1);
+			return $code;
+		}
+
+		my $boot = new KIWIBoot ($kiwi,$InstallCD);
+		if (! defined $boot) {
+			my $code = kiwiExit (1); return $code;
+		}
+		if (! $boot -> setupBootCD ($InstallCDSystem)) {
+			my $code = kiwiExit (1); return $code;
+		}
+
+		my $code = kiwiExit (0); return $code;
+	}
+
+	#==========================================
 	# Create a virtual disk image
 	#------------------------------------------
 	if (defined $BootVMDisk) {
@@ -322,6 +348,8 @@ sub init {
 		"bootvm-system=s"     => \$BootVMSystem,
 		"bootvm-disksize=s"   => \$BootVMSize,
 		"bootcd=s"            => \$BootCD,
+		"installcd=s"         => \$InstallCD,
+		"installcd-system=s"  => \$InstallCDSystem,
 		"strip|s"             => \$StripImage,
 		"createpassword"      => \$CreatePassword,
 		"help|h"              => \&usage,
@@ -338,7 +366,8 @@ sub init {
 	}
 	if (
 		(! defined $Prepare) && (! defined $Create) &&
-		(! defined $BootStick) && (! defined $BootCD) && 
+		(! defined $BootStick) && (! defined $BootCD) &&
+		(! defined $InstallCD) &&
 		(! defined $BootVMDisk) && (! defined $CreatePassword)
 	) {
 		$kiwi -> info ("No operation specified");
@@ -372,6 +401,7 @@ sub usage {
 	print "  kiwi --bootvm <initrd> --bootvm-system <systemImage> \\\n";
 	print "     [ --bootvm-disksize <size> ]\n";
 	print "  kiwi --bootcd <initrd>\n";
+	print "  kiwi --installcd <initrd> --installcd-system <systemImage>\n";
 	print "  kiwi --createpassword\n";
 	print "--\n";
 	print "  [ -d | --destdir <destination-path> ]\n";

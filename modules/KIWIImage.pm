@@ -913,6 +913,54 @@ sub preImage {
 }
 
 #==========================================
+# writeImageConfig
+#------------------------------------------
+sub writeImageConfig {
+	my $configName = buildImageName() . ".config";
+
+	my $device = $xml -> getImageDevice ();
+	if (! defined $device) {
+		return undef;
+	}
+
+	my $namecd = buildImageName(";");
+	
+	if (! open (FD,">$imageDest/$configName")) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't create image boot configuration");
+		$kiwi -> failed ();
+		return undef;
+	}
+
+	print FD "IMAGE=${device}2;image/$namecd\n";
+	print FD "DISK=${device}\n";
+
+	my @parts = $xml -> getPartitions ();
+	if ((scalar @parts) > 0) {
+		print FD "PART=";
+
+		for my $href (@parts) {
+			print FD $href->{size};
+			if ($href -> {type} eq "swap") {
+				print FD ";S;x,";
+			} else {
+				print FD ";L;/,";
+			}
+		}
+
+		print FD "\n";
+	}
+
+	if ($xml -> getImageType () =~ /^split:(.*)/) {
+		print FD "COMBINED_IMAGE=yes\n";
+	}
+
+	close FD;
+
+	return $configName;
+}
+
+#==========================================
 # postImage
 #------------------------------------------
 sub postImage {
@@ -990,6 +1038,13 @@ sub postImage {
 		return undef;
 	}
 	}
+
+	$kiwi -> info ("Creating boot configuration...");
+	if (! writeImageConfig ()) {
+		$kiwi -> failed ();
+		return undef;
+	}
+	
 	return $name;
 }
 

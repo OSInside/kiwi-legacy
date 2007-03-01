@@ -400,6 +400,17 @@ sub setupBootStick {
 #------------------------------------------
 sub setupBootCD {
 	my $this = shift;
+	my $imageData = shift;
+
+	if (defined $imageData) {
+		my $imageDataMd5 = "$imageData.md5";
+		my $imageDataConfig = "$imageData.config";
+		qx ( mkdir -p $tmpdir/image 2>&1 );
+		qx ( cp $imageData $tmpdir/image 2>&1 );
+		qx ( cp $imageDataMd5 $tmpdir/image 2>&1 );
+		qx ( cp $imageDataConfig $tmpdir/config.isoclient 2>&1 );
+	}
+	
 	#==========================================
 	# Create CD structure
 	#------------------------------------------

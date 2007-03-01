@@ -1,0 +1,108 @@
+#!/bin/bash
+#================
+# FILE          : preinit
+#----------------
+# PROJECT       : OpenSuSE KIWI Image System
+# COPYRIGHT     : (c) 2006 SUSE LINUX Products GmbH. All rights reserved
+#               :
+# AUTHOR        : Marcus Schaefer <ms@suse.de>
+#               :
+# BELONGS TO    : Operating System images
+#               :
+# DESCRIPTION   : This file is called after the image root
+#               : has changed by the linuxrc script
+#               :
+# STATUS        : BETA
+#----------------
+#
+#======================================
+# Functions...
+#--------------------------------------
+Echo () {
+	if test "$1" = "-n";then
+		echo $1 "-----> $2"
+	elif test "$1" = "-b";then
+		echo "       $2"
+	else
+		echo "-----> $1"
+	fi
+}
+systemException () {
+	Echo "$1"
+	case "$2" in
+	"reboot")
+		Echo "rebootException: reboot in 60 sec..."; sleep 60
+		/sbin/restart >/dev/null 2>&1
+	;;
+	"wait")
+		Echo "waitException: waiting for ever..."
+		while true;do sleep 100;done
+	;;
+	"shell")
+		Echo "shellException: providing shell..."
+		/bin/sh
+	;;
+	*)
+		Echo "unknownException..."
+	;;
+	esac
+}
+getSystemIntegrity () {
+	if [ -z "$SYSTEM_INTEGRITY" ];then
+		echo "clean"
+	else  
+		echo $SYSTEM_INTEGRITY | cut -f$1 -d:
+	fi
+}
+getSystemMD5Status() {
+	echo $SYSTEM_MD5STATUS | cut -f$1 -d:
+}
+
+#=====================================
+# 1) Update /etc/ImageVersion files
+#-------------------------------------
+count=0
+IFS="," ; for i in $IMAGE;do
+	count=$(($count + 1))
+	field=0
+	IFS=";" ; for n in $i;do
+		case $field in
+			0) field=1 ;;
+			1) imageName=$n   ; field=2 ;;
+			2) imageVersion=$n; field=3 ;;
+			3) imageServer=$n ; field=4 ;;
+			4) imageBlkSize=$n
+		esac
+	done
+	atversion="$imageName-$imageVersion"
+	versionFile="/etc/ImageVersion-$atversion"
+	md5sum=`getSystemMD5Status $count`
+	if test `getSystemIntegrity $count` = "clean";then
+		echo "$atversion $md5sum" > $versionFile
+	fi
+done
+
+#======================================
+# 2) create initrd
+#--------------------------------------
+if test -L /boot/boot;then
+	mount -t proc proc /proc
+	mount -t sysfs sysfs /sys
+	mkinitrd 
+	umount /sys
+	umount /proc
+else
+	Echo "Image doesn't provide kernel system map"
+	Echo "Can't create initrd"
+fi
+
+#======================================
+# 3) Install boot loader
+#--------------------------------------
+if test -f "/usr/sbin/grub";then
+	Echo "Installing boot loader..."
+	/usr/sbin/grub --batch --no-floppy < /etc/grub.conf >/dev/null 2>&1
+else
+	Echo "Image doesn't provide grub support"
+	Echo "Can't install boot loader"
+fi

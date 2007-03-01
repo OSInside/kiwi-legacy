@@ -34,6 +34,7 @@ my $usrdataNodeList;
 my $repositNodeList;
 my $packageNodeList;
 my $imgnameNodeList;
+my $partitionsNodeList;
 my @urllist;
 my $arch;
 
@@ -92,6 +93,7 @@ sub new {
 		$repositNodeList = $systemTree -> getElementsByTagName ("repository");
 		$packageNodeList = $systemTree -> getElementsByTagName ("packages");
 		$imgnameNodeList = $systemTree -> getElementsByTagName ("image");
+		$partitionsNodeList = $systemTree -> getElementsByTagName ("partitions");
 	};
 	if ($@) {
 		$kiwi -> failed ();
@@ -187,6 +189,59 @@ sub getImageType {
 	my $node = $optionsNodeList -> get_node(1);
 	my $type = $node -> getElementsByTagName ("type");
 	return $type;
+}
+
+#==========================================
+# getImageDevice
+#------------------------------------------
+sub getImageDevice {
+	# ...
+	# Get the device the image will be installed to
+	# ---
+	my $this = shift;
+	my $node = $partitionsNodeList -> get_node(1);
+	if (defined $node) {
+		return $node -> getAttribute ("device");
+	} else {
+		return undef;
+	}
+}
+
+#==========================================
+# getPartitions
+#------------------------------------------
+sub getPartitions {
+	# ...
+	# Get the partition configuration for this image
+	# ---
+	my $this = shift;
+
+	my $partitionNodes = $partitionsNodeList -> get_node(1) -> getElementsByTagName ("partition");
+	my @result = ();
+
+	for (my $i=1;$i<= $partitionNodes->size();$i++) {
+		my $node = $partitionNodes -> get_node($i);
+
+		my $number = $node -> getAttribute ("number");
+		my $type = $node -> getAttribute ("type");
+		if (!defined $type) {
+			$type = "linux";
+		}
+		
+		my $size = $node -> getAttribute ("size");
+		if (!defined $size) {
+			$size = "x";
+		}
+
+		my %part = ();
+		$part{number} = $number;
+		$part{type} = $type;
+		$part{size} = $size;
+
+		push @result, { %part };
+	}
+
+	return sort { $a->{number} cmp $b->{number} } @result;
 }
 
 #==========================================

@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Feb 27 11:27:23 CST 2007 - james@ximian.com
+- added a new type of boot image, 'isoinstboot', which boots from CD
+  and installs a system image to the hard disk (or flash drive, etc)
+- added code to generate the boot config files automatically from
+  information found in config.xml
+
+-------------------------------------------------------------------
 Tue Feb 27 11:54:26 CET 2007 - ms@suse.de
 
 - added dependency graph for current package structure: .kiwi.dot
