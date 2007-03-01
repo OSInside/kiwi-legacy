@@ -30,6 +30,7 @@
 		<ignore  name="smtp_daemon"/>
 		<ignore  name="mcelog"/>
 		<ignore  name="numactl"/>
+		<ignore  name="opensuse-quickstart_en"/>
 	</packages>
     <packages type="boot">
         <package name="filesystem"/> 

@@ -548,8 +548,8 @@ sub createImageLiveCD {
 	$kiwi -> info ("Copying boot image and kernel [$isoarch]");
 	my $destination = "$main::RootTree/CD/boot/$isoarch/loader";
 	qx (mkdir -p $destination);
-	qx (cp $imageDest/$iso*.gz $destination/initrd);
-	qx (cp $imageDest/$iso*.kernel* $destination/linux);
+	qx (cp $imageDest/$iso*$isoarch*.gz $destination/initrd);
+	qx (cp $imageDest/$iso*$isoarch*.kernel* $destination/linux);
 	$kiwi -> done ();
 
 	#==========================================
