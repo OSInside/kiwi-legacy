@@ -122,6 +122,7 @@
 		<xs:complexType>
 			<xs:all>
 				<xs:element ref="type" minOccurs="1" maxOccurs="1"/>
+				<xs:element ref="version" minOccurs="1" maxOccurs="1"/>
 				<xs:element ref="compressed" minOccurs="0" maxOccurs="1"/>
 				<xs:element ref="packagemanager" minOccurs="0" maxOccurs="1"/>
 				<xs:element ref="rpm-check-signatures" minOccurs="0" maxOccurs="1"/>
@@ -133,6 +134,7 @@
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="type" type="xs:string"/>
+	<xs:element name="version" type="xs:string"/>
 	<xs:element name="compressed" type="xs:string"/>
 	<xs:element name="packagemanager" type="xs:string"/>
 	<xs:element name="rpm-check-signatures" type="xs:string"/>

@@ -2,6 +2,7 @@
 	<preferences>
 		<!--<type>iso:isoboot-suse-10.1</type>-->
 		<type>ext2</type>
+		<version>1.2.7</version>
 		<size unit="M">121</size>
 		<!--<compressed>yes</compressed>-->
 		<packagemanager>smart</packagemanager>

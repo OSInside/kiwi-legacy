@@ -1,6 +1,7 @@
 <image name="initrd-netboot-suse-10.2-smp">
 	<preferences>
 		<type>cpio</type>
+		<version>2.1.1</version>
 		<size unit="M">60</size>
 		<compressed>yes</compressed>
 		<packagemanager>smart</packagemanager>

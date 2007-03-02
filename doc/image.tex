@@ -7,7 +7,7 @@ The creation of operating system images is based on image description
 trees. An image description contains all the files in a directory that
 are required to generate an image using the Perl-based image builder
 \textbf{kiwi.pl}. The directory to which the description files are
-written must contain a VERSION file with a three-part version number of
+written must contain a config.xml file with a three-part version number of
 the format:
 
 \begin{Command}{9cm}
@@ -30,9 +30,6 @@ the format:
 \label{imagetree}
 \begin{itemize}
 
-\item \textbf{\underline{VERSION}}\\
-      This file contains the version number of the image description tree,
-      for example, 1.1.2.
 \item \textbf{\underline{root}}\\
       Subdirectory that contains special files, directories, and scripts for
       adapting the image environment \textbf{after} the installation of all the
@@ -86,6 +83,7 @@ the format:
       <image name="Name" inherit="optional-path">\\
       \hspace*{1cm}<preferences>\\
       \hspace*{2cm}<type>Type</type>\\
+      \hspace*{2cm}<version>1.2.3</version>
       \hspace*{2cm}<size unit="Unit">Size</size>\\
       \hspace*{2cm}<packagemanager>name</packagemanager>\\
       \hspace*{2cm}<compressed>Yes/No</compressed>\\

@@ -69,18 +69,11 @@ sub new {
 	$arch = qx ( arch ); chomp $arch;
 	my $systemTree;
 	my $controlFile = $imageDesc."/config.xml";
-	my $versionFile = $imageDesc."/VERSION";
 	my $systemXML   = new XML::LibXML;
 	my $systemXSD   = new XML::LibXML::Schema ( location => $main::Scheme );
 	if (! -f $controlFile) {
 		$kiwi -> failed ();
 		$kiwi -> error ("Cannot open control file: $controlFile");
-		$kiwi -> failed ();
-		return undef;
-	}
-	if (! -f $versionFile) {
-		$kiwi -> failed ();
-		$kiwi -> error ("Cannot open VERSION file: $versionFile");
 		$kiwi -> failed ();
 		return undef;
 	}
@@ -93,7 +86,7 @@ sub new {
 		$repositNodeList = $systemTree -> getElementsByTagName ("repository");
 		$packageNodeList = $systemTree -> getElementsByTagName ("packages");
 		$imgnameNodeList = $systemTree -> getElementsByTagName ("image");
-		$partitionsNodeList = $systemTree -> getElementsByTagName ("partitions");
+		$partitionsNodeList = $systemTree -> getElementsByTagName("partitions");
 	};
 	if ($@) {
 		$kiwi -> failed ();
@@ -189,6 +182,19 @@ sub getImageType {
 	my $node = $optionsNodeList -> get_node(1);
 	my $type = $node -> getElementsByTagName ("type");
 	return $type;
+}
+
+#==========================================
+# getImageVersion
+#------------------------------------------
+sub getImageVersion {
+	# ...
+	# Get the version of the logical extend
+	# ---
+	my $this = shift;
+	my $node = $optionsNodeList -> get_node(1);
+	my $version = $node -> getElementsByTagName ("version");
+	return $version;
 }
 
 #==========================================
@@ -399,9 +405,10 @@ sub getImageConfig {
 	if (getCompressed ($this)) {
 		$result{compressed} = "yes";
 	}
-	my $type = getImageType ($this);
-	my $size = getImageSize ($this);
-	my $name = getImageName ($this);
+	my $type = getImageType    ($this);
+	my $iver = getImageVersion ($this);
+	my $size = getImageSize    ($this);
+	my $name = getImageName    ($this);
 	if ($type) {
 		$result{type} = $type;
 	}
@@ -410,6 +417,9 @@ sub getImageConfig {
 	}
 	if ($name) {
 		$result{name} = $name;
+	}
+	if ($iver) {
+		$result{version} = $iver;
 	}
 	#==========================================
 	# drivers

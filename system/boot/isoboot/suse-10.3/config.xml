@@ -1,6 +1,7 @@
 <image name="initrd-isoboot-suse-10.3">
 	<preferences>
 		<type>cpio</type>
+		<version>2.1.2</version>
 		<size unit="M">60</size>
 		<compressed>yes</compressed>
 		<packagemanager>smart</packagemanager>

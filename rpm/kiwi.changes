@@ -1,5 +1,13 @@
 -------------------------------------------------------------------
+Fri Mar  2 14:11:28 CET 2007 - ms@suse.de
+
+- v1.11
+- added isoinstboot to package kiwi-desc-isoboot
+- moved VERSION file information into config.xml <version> tag
+
+-------------------------------------------------------------------
 Thu Feb 27 11:27:23 CST 2007 - james@ximian.com
+
 - added a new type of boot image, 'isoinstboot', which boots from CD
   and installs a system image to the hard disk (or flash drive, etc)
 - added code to generate the boot config files automatically from

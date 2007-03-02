@@ -1057,13 +1057,8 @@ sub buildImageName {
 	if (! defined $separator) {
 		$separator = "-";
 	}
-	if (! open (FD,"$imageTree/image/VERSION")) {
-		$kiwi -> error  ("Couldn't open image VERSION file");
-		$kiwi -> failed ();
-		return undef;
-	}
-	my $iver = <FD>; close FD; chomp ($iver);
 	my $name = $xml -> getImageName();
+	my $iver = $xml -> getImageVersion();
 	if (defined $extension) {
 		$name = $name.$extension.$arch.$separator.$iver;
 	} else {

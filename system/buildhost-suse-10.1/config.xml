@@ -1,6 +1,7 @@
 <image name="buildhost-10.1">
 	<preferences>
 		<type>ext3</type>
+		<version>1.2.10</version>
 		<size unit="M">600</size>
 		<compressed>yes</compressed>
 		<packagemanager>smart</packagemanager>

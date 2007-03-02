@@ -4,6 +4,7 @@
 
 	<preferences>
 		<type>ext3</type>
+		<version>1.2.3</version>
 		<size unit="M">460</size>
 		<rpm-check-signatures>False</rpm-check-signatures>
 		<packagemanager>smart</packagemanager>

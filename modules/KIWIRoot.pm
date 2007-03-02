@@ -237,20 +237,13 @@ sub init {
 	# Create /etc/ImageVersion file
 	#----------------------------------
 	my $imageVersionFile = "$root/etc/ImageVersion";
-	my $imageVersion = "$imageDesc/VERSION";
-	my $imageName = $xml -> getImageName();
+	my $imageVersion = $xml -> getImageVersion();
+	my $imageName    = $xml -> getImageName();
 	if ( ! open (FD,">$imageVersionFile")) {
 		$kiwi -> error ("Failed to create Version File: $!");
 		$kiwi -> failed ();
 		return undef;
 	}
-	if ( ! open (VD,$imageVersion)) {
-		$kiwi -> error ("Failed to open VERSION file: $!");
-		$kiwi -> failed ();
-		return undef; 
-	}
-	$imageVersion = <VD>;
-	chomp $imageVersion; close VD;
 	print FD $imageName."-".$imageVersion; close FD;
 	#==================================
 	# Return object reference
@@ -438,7 +431,6 @@ sub setup {
 	qx ( mkdir -p $root/image );
 	qx ( cp $imageDesc/config.xml $root/image 2>&1 );
 	qx ( cp $imageDesc/images.sh $root/image 2>&1 );
-	qx ( cp $imageDesc/VERSION $root/image 2>&1 );
 	if (open (FD,">$root/image/main::Prepare")) {
 		if ($imageDesc !~ /^\//) {
 			my $pwd = qx ( pwd ); chomp $pwd;
