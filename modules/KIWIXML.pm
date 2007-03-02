@@ -215,10 +215,9 @@ sub getPartitions {
 	# Get the partition configuration for this image
 	# ---
 	my $this = shift;
-
-	my $partitionNodes = $partitionsNodeList -> get_node(1) -> getElementsByTagName ("partition");
+	my $partitionNodes = $partitionsNodeList -> get_node(1)
+		-> getElementsByTagName ("partition");
 	my @result = ();
-
 	for (my $i=1;$i<= $partitionNodes->size();$i++) {
 		my $node = $partitionNodes -> get_node($i);
 
@@ -240,7 +239,6 @@ sub getPartitions {
 
 		push @result, { %part };
 	}
-
 	return sort { $a->{number} cmp $b->{number} } @result;
 }
 

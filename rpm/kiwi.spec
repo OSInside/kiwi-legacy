@@ -252,6 +252,7 @@ cat kiwi.loader
 %files -n kiwi-desc-isoboot
 %defattr(-, root, root)
 %{_datadir}/kiwi/image/isoboot
+%{_datadir}/kiwi/image/isoinstboot
 
 %files -n kiwi-desc-vmxboot
 %defattr(-, root, root)
