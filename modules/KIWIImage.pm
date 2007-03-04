@@ -917,46 +917,47 @@ sub preImage {
 #------------------------------------------
 sub writeImageConfig {
 	my $configName = buildImageName() . ".config";
-
 	my $device = $xml -> getImageDevice ();
-	if (! defined $device) {
-		return undef;
-	}
-
-	my $namecd = buildImageName(";");
-	
-	if (! open (FD,">$imageDest/$configName")) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't create image boot configuration");
-		$kiwi -> failed ();
-		return undef;
-	}
-
-	print FD "IMAGE=${device}2;image/$namecd\n";
-	print FD "DISK=${device}\n";
-
-	my @parts = $xml -> getPartitions ();
-	if ((scalar @parts) > 0) {
-		print FD "PART=";
-
-		for my $href (@parts) {
-			print FD $href->{size};
-			if ($href -> {type} eq "swap") {
-				print FD ";S;x,";
-			} else {
-				print FD ";L;/,";
-			}
+	#==========================================
+	# create .config for types which needs it
+	#------------------------------------------
+	if (defined $device) {
+		if (! open (FD,">$imageDest/$configName")) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create image boot configuration");
+			$kiwi -> failed ();
+			return undef;
 		}
-
-		print FD "\n";
+		my $namecd = buildImageName(";");
+		print FD "IMAGE=${device}2;image/$namecd\n";
+		print FD "DISK=${device}\n";
+		#==========================================
+		# PART information
+		#------------------------------------------
+		my @parts = $xml -> getPartitions ();
+		if ((scalar @parts) > 0) {
+			print FD "PART=";
+			for my $href (@parts) {
+				print FD $href->{size};
+				if ($href -> {type} eq "swap") {
+					print FD ";S;x,";
+				} else {
+					print FD ";L;/,";
+				}
+			}
+			print FD "\n";
+		}
+		#==========================================
+		# COMBINED_IMAGE information
+		#------------------------------------------
+		if ($xml -> getImageType () =~ /^split:(.*)/) {
+			print FD "COMBINED_IMAGE=yes\n";
+		}
+		#==========================================
+		# More to come...
+		#------------------------------------------
+		close FD;
 	}
-
-	if ($xml -> getImageType () =~ /^split:(.*)/) {
-		print FD "COMBINED_IMAGE=yes\n";
-	}
-
-	close FD;
-
 	return $configName;
 }
 
@@ -1038,13 +1039,15 @@ sub postImage {
 		return undef;
 	}
 	}
-
+	#==========================================
+	# Create image boot configuration
+	#------------------------------------------
 	$kiwi -> info ("Creating boot configuration...");
 	if (! writeImageConfig ()) {
 		$kiwi -> failed ();
 		return undef;
 	}
-	
+	$kiwi -> done();	
 	return $name;
 }
 
