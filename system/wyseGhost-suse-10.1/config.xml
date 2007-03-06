@@ -1,4 +1,9 @@
 <image name="fidelity-sles10">
+	<description type="system">
+		<author>Marcus Schaefer</author>
+		<contact>ms@novell.com</contact>
+		<specification>SLE10 Wyse VX0 terminal system 512MB</specification>
+	</description>
 	<preferences>
 		<!--<type>iso:isoboot-suse-10.1</type>-->
 		<type>ext2</type>

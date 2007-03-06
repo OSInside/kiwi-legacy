@@ -1,4 +1,9 @@
 <image name="fidelity-suse-10.2">
+	<description type="system">
+		<author>Marcus Schaefer</author>
+		<contact>ms@novell.com</contact>
+		<specification>openSUSE 10.2 Wyse VX0 terminal system 512MB</specification>
+	</description>
 	<preferences>
 		<type>ext3</type>
 		<version>1.2.7</version>

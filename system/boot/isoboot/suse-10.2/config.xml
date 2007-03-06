@@ -1,4 +1,9 @@
 <image name="initrd-isoboot-suse-10.2">
+	<description type="boot">
+		<author>Marcus Schaefer</author>
+		<contact>ms@novell.com</contact>
+		<specification>boot/initrd image used for LiveDVD media</specification>
+	</description>
 	<preferences>
 		<type>cpio</type>
 		<version>2.1.1</version>

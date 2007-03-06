@@ -2,6 +2,12 @@
 
 <image name="bob">
 
+	<description type="boot">
+		<author>Marcus Schaefer</author>
+		<contact>ms@novell.com</contact>
+		<specification>Boot/initrd image used for PXE</specification>
+	</description>
+
 	<preferences>
 		<type>ext3</type>
 		<version>1.2.3</version>
