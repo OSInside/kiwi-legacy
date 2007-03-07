@@ -14,6 +14,8 @@ export
 #--------------------------------------------
 kiwi_prefix = ${buildroot}/usr/share/kiwi
 tftp_prefix = ${buildroot}/var/lib/tftpboot
+doc_prefix  = ${buildroot}/usr/share/doc/packages
+man_prefix  = ${buildroot}/usr/share/man
 
 #============================================
 # Variables... 
@@ -28,6 +30,7 @@ TFTPBOOTBOOT= ${tftp_prefix}/boot
 TFTPBOOTCONF= ${tftp_prefix}/pxelinux.cfg
 TFTPUPLOAD  = ${tftp_prefix}/upload
 TFTPIMAGE   = ${tftp_prefix}/image
+PACKDOCVZ   = ${doc_prefix}/kiwi
 
 all:
 	#============================================
@@ -53,6 +56,12 @@ install:
 	install -d -m 755 ${TFTPKIWI} ${TFTPBOOT} ${TFTPBOOTCONF} ${TFTPIMAGE}
 	install -d -m 755 ${TFTPBOOTBOOT}
 	install -d -m 777 ${TFTPUPLOAD}
+	install -d -m 755 ${PACKDOCVZ}
+
+	#============================================
+	# kiwi system draft
+	#--------------------------------------------
+	install -m 644 ./doc/kiwi.pdf  ${PACKDOCVZ}
 
 	#============================================
 	# Install kiwi tools
