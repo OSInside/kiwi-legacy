@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Mar  7 17:43:12 CET 2007 - ms@suse.de
+
+- fixed network detection for netboot/xenboot. In case of
+  multiple nic's all modules should be loaded
+
+-------------------------------------------------------------------
 Wed Mar  7 11:36:55 CET 2007 - ms@suse.de
 
 - update documentation v2.8

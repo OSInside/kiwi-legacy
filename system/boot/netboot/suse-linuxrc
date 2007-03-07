@@ -142,12 +142,16 @@ probeDevices () {
 probeNetworkCard () {
 	hwnet=/usr/sbin/hwinfo
 	hwstr="Driver Activation Cmd:"
-	hwcmd=`$hwnet --netcard | grep "$hwstr" | head -n 1`
-	hwcmd=`echo $hwcmd | cut -f2 -d:`
-	hwcmd=`echo $hwcmd | tr -d \" | cut -f2 -d " "`
+	IFS="
+	"
+	for i in `$hwnet --netcard | grep "$hwstr" | cut -f2 -d:`;do
+		hwmod=`echo $i | tr -d \" | cut -f3 -d" "`
+		hwcmd="$hwcmd:$hwmod"
+	done
 	if [ ! -z "$hwcmd" ];then
 		networkModule=$hwcmd
 	fi
+	IFS=$IFS_ORIG
 }
 setupNetwork () {
 	dhcpcd eth0 >/dev/null 2>&1
@@ -551,10 +555,16 @@ else
 	#=============================================
 	# network module found, try to load
 	#---------------------------------------------
-	modprobe $networkModule 2>/dev/null
-	if test $? = 0;then
-		loaded=1
-	fi
+	IFS=":"
+	for i in $networkModule;do
+		if [ ! -z $i ];then
+			modprobe $i 2>/dev/null
+			if test $? = 0;then
+				loaded=1
+			fi
+		fi
+	done
+	IFS=$IFS_ORIG
 fi
 if test $loaded = 0;then
 	systemException \
