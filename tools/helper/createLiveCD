@@ -1,0 +1,12 @@
+#!/bin/bash
+
+if [ ! $UID = 0 ];then
+	echo "$0: needs root privileges... abort"
+	exit 1
+fi
+
+kiwi --root /tmp/mydvd --prepare /usr/share/kiwi/image/kwliveDVD-suse-10.3 && \
+kiwi --create /tmp/mydvd -d /tmp
+
+file=`ls -1 /tmp/liveDVD-suse-10.3*.iso`
+echo "ISO image created: $file"

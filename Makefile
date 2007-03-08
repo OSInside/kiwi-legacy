@@ -66,8 +66,9 @@ install:
 	#============================================
 	# Install kiwi tools
 	#--------------------------------------------
-	install -m 755 ./tools/restart ${TOOLSVZ}
-	install -m 755 ./tools/timed   ${TOOLSVZ}
+	install -m 755 ./tools/restart  ${TOOLSVZ}
+	install -m 755 ./tools/timed    ${TOOLSVZ}
+	install -m 755 ./tools/helper/* ${TOOLSVZ}
 
 	#============================================
 	# Install KIWI base and modules

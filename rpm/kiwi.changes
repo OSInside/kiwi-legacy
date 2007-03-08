@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Mar  8 14:27:43 CET 2007 - ms@suse.de
+
+- added helper script createLiveCD
+
+-------------------------------------------------------------------
 Wed Mar  7 17:43:12 CET 2007 - ms@suse.de
 
 - fixed network detection for netboot/xenboot. In case of
