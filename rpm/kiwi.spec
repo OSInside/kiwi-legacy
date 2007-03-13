@@ -241,7 +241,6 @@ cat kiwi.loader
 /etc/permissions.d/kiwi
 %dir %{_var}/lib/tftpboot
 %dir %{_var}/lib/tftpboot/KIWI
-%dir %{_var}/lib/tftpboot/boot
 %dir %{_var}/lib/tftpboot/pxelinux.cfg
 %dir %{_var}/lib/tftpboot/image
 %dir %{_var}/lib/tftpboot/upload
