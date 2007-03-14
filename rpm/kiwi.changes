@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Mar 14 17:30:29 CET 2007 - ms@suse.de
+
+- fixed architecture search in KIWIImage (isoboot)
+
+-------------------------------------------------------------------
 Thu Mar  8 14:27:43 CET 2007 - ms@suse.de
 
 - added helper script createLiveCD
