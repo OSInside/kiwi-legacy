@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Wed Mar 14 17:57:38 CET 2007 - ms@suse.de
+
+- v1.14
+- added netboot/suse-10.3 for network deployment
+- added support for creating Xen configuration files
+- fixed /etc/fstab in case of Xen deployment
+
+-------------------------------------------------------------------
 Wed Mar 14 17:30:29 CET 2007 - ms@suse.de
 
 - fixed architecture search in KIWIImage (isoboot)

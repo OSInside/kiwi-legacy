@@ -440,6 +440,36 @@ sub getImageConfig {
 }
 
 #==========================================
+# getPackageAttributes
+#------------------------------------------
+sub getPackageAttributes {
+	# ...
+	# Create an attribute hash from the given
+	# package category.
+	# ---
+	my $this = shift;
+	my $what = shift;
+	my %result;
+	for (my $i=1;$i<= $packageNodeList->size();$i++) {
+		my $node = $packageNodeList -> get_node($i);
+		my $type = $node -> getAttribute ("type");
+		$result{type} = $type;
+		if ($result{type} eq "xen") {
+			my $memory  = $node -> getAttribute ("memory");
+			my $disk    = $node -> getAttribute ("disk");
+			if ((! $memory) || (! $disk)) {
+				$kiwi -> warning ("Missing Xen virtualisation config data");
+				$kiwi -> skipped ();
+				return undef;
+			}
+			$result{memory}  = $memory;
+			$result{disk}    = $disk;
+		}
+	}
+	return %result;
+}
+
+#==========================================
 # getList
 #------------------------------------------
 sub getList {

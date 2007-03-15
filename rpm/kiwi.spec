@@ -1,5 +1,5 @@
 # /.../
-# spec file for package kiwi (Version 1.13)
+# spec file for package kiwi (Version 1.14)
 # Copyright (c) 2006 SUSE LINUX Products GmbH, Nuernberg, Germany.
 # Please submit bugfixes or comments via http://bugs.opensuse.org
 # ---
@@ -8,8 +8,8 @@ Name:          kiwi
 BuildRequires: perl smart perl-XML-LibXML perl-libwww-perl screen syslinux
 Requires:      perl perl-XML-LibXML perl-libwww-perl screen
 Summary:       OpenSuSE - KIWI Image System
-Version:       1.13
-Release:       13
+Version:       1.14
+Release:       14
 Group:         System
 License:       GPL
 Source:        kiwi.tar.bz2
@@ -275,6 +275,7 @@ cat kiwi.loader
 %defattr(-, root, root)
 %{_datadir}/kiwi/image/wyseGhost-suse-10.1
 %{_datadir}/kiwi/image/wyseGhost-suse-10.2
+%{_datadir}/kiwi/image/wyseGhost-suse-10.3
 %{_datadir}/kiwi/image/wyseXMini-suse-10.1
 
 %files -n kiwi-desc-buildservice

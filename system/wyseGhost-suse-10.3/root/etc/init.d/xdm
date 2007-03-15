@@ -1,0 +1,200 @@
+#! /bin/bash
+# Copyright (c) 1996-2002 SuSE Linux AG, Nuernberg, Germany.
+# All rights reserved.
+#
+# Author: Florian La Roche, 1996
+#	  Werner Fink <werner@suse.de>, 1996,98,99
+#         Martin Scherbaum, 1997
+#         Reinhard Max <max@suse.de>, 1997
+#
+# Please send feedback to http://www.suse.de/feedback
+#
+# /etc/init.d/xdm
+#
+### BEGIN INIT INFO
+# Provides:          xdm
+# Required-Start:    $remote_fs
+# Should-Start: ypbind $syslog gpm firstboot kbd resmgr earlykdm
+# Required-Stop:
+# Default-Start:     5
+# Default-Stop:
+# Description:       X Display Manager
+### END INIT INFO
+
+. /etc/rc.status
+. /etc/sysconfig/displaymanager
+. /etc/sysconfig/language
+. /etc/sysconfig/windowmanager
+test -e /etc/SuSEconfig/profile        && . /etc/SuSEconfig/profile
+test -r /etc/profile.d/desktop-data.sh && . /etc/profile.d/desktop-data.sh
+
+locale_vars="     \
+LANG              \
+LC_CTYPE          \
+LC_NUMERIC        \
+LC_TIME           \
+LC_COLLATE        \
+LC_MONETARY       \
+LC_MESSAGES       \
+LC_PAPER          \
+LC_NAME           \
+LC_ADDRESS        \
+LC_TELEPHONE      \
+LC_MEASUREMENT    \
+LC_IDENTIFICATION \
+LC_ALL"
+
+unset LC_ALL
+for lc in $locale_vars
+do
+    eval val="\$RC_$lc"
+    if test -n "$val"; then
+        eval $lc="\$RC_$lc"
+        export $lc
+    fi
+done
+unset lc val
+
+test -z "$DEFAULT_WM" && DEFAULT_WM=twm
+SAVEPATH=$PATH
+PATH=$PATH:/usr/X11R6/bin:/opt/gnome/bin:/usr/openwin/bin
+WINDOWMANAGER="`type -p ${DEFAULT_WM##*/}`"
+PATH=$SAVEPATH
+export WINDOWMANAGER
+unset DEFAULT_WM SAVEPATH
+
+PIDFILE="/var/run/xdm.pid"
+KDEROOTHOME=/root/.kdm
+export KDEROOTHOME
+
+
+if [ "$DISPLAYMANAGER_XSERVER" == "Xgl" -a -r /etc/X11/xorg.conf ]; then
+  cat /etc/X11/xorg.conf | tr "\t" " " | \
+    grep -q -i -E '^ *Driver +"fglrx"'
+  if [ $? -eq 0 ]; then
+    /sbin/lsmod | grep -q fglrx || /sbin/modprobe fglrx &> /dev/null
+  fi
+  test -r /etc/profile.d/fglrx.sh && . /etc/profile.d/fglrx.sh
+fi
+
+case "${DISPLAYMANAGER##*/}" in
+    kdm|kde|KDM|KDE)	 DISPLAYMANAGER=/opt/kde3/bin/kdm
+			 PIDFILE="/var/run/kdm.pid"
+			 ;;
+    xdm)		 DISPLAYMANAGER=/usr/X11R6/bin/xdm
+			 ;;
+    gdm|GDM|Gnome|GNOME) DISPLAYMANAGER=/opt/gnome/sbin/gdm
+			 PIDFILE="/var/run/gdm.pid"
+			 ;;
+    wdm|WDM)		 DISPLAYMANAGER=/usr/X11R6/bin/wdm
+			 ;;
+    console)		 exit 0
+			 ;;
+    *)			 DISPLAYMANAGER=/usr/X11R6/bin/xdm
+			 if test -x /opt/kde3/bin/kdm; then
+				DISPLAYMANAGER=/opt/kde3/bin/kdm
+				PIDFILE="/var/run/kdm.pid"
+			 fi 
+			 ;;
+esac
+test ! -x "$DISPLAYMANAGER" && DISPLAYMANAGER=/usr/X11R6/bin/xdm
+
+DM=${DISPLAYMANAGER##*/}
+
+rc_reset
+case "$1" in
+    start)
+		# create config file using -configure option
+		if [ ! -f /etc/X11/xorg.conf ];then
+			/usr/X11R6/bin/X -configure && \
+			mv /xorg.conf.new /etc/X11/xorg.conf
+			sleep 1
+		fi
+
+        # Avoid duplicated messages when earlykdm is in use
+        if test "$DISPLAYMANAGER" = /opt/kde3/bin/kdm && \
+	   test -s /var/run/kdm.pid && \
+	   /sbin/checkproc -p /var/run/kdm.pid /opt/kde3/bin/kdm; then
+	  rc_exit 0
+        fi
+
+	echo -n "Starting service $DM"
+	# Don't start xdm if no Xserver is configured and xdm is not 
+	# configured for remote access 
+	if [ ! -x /usr/X11R6/bin/X -a \
+		"$DISPLAYMANAGER_REMOTE_ACCESS" = "no" ]; then 
+			rc_status -u 
+			rc_exit 
+	fi
+	if [ "$DISPLAYMANAGER" = "/usr/X11R6/bin/xdm" ]; then
+		ln -snf $PIDFILE /etc/X11/xdm/xdm-pid
+		ln -snf /var/log/xdm.errors /etc/X11/xdm/xdm-errors
+	fi 
+	if [ "$DISPLAYMANAGER" = "/opt/gnome/sbin/gdm" -a \
+		 "$DISPLAYMANAGER_REMOTE_ACCESS" = "yes"  -a \
+		 "$DISPLAYMANAGER_STARTS_XSERVER" = "no" ]; then
+		XDMOPTIONS="--no-console"
+	fi
+	startproc -p $PIDFILE $DISPLAYMANAGER $XDMOPTIONS || rc_failed
+	# After a crash or a kill signal we may have
+	# a wrong owner ship of /dev/xconsole
+	if rc_status ; then
+	    if test -x /etc/X11/xdm/TakeDevices ; then
+		/etc/X11/xdm/TakeDevices
+	    else
+		chown root:tty /dev/xconsole /dev/tty0
+		chmod 622      /dev/xconsole /dev/tty0
+	    fi
+	fi
+	rc_status -v
+	;;
+    stop)
+	echo -n "Shutting down service $DM"
+	# 
+	# killproc(8) sleep upto five seconds and sends
+	# SIGKILL if xdm does not terminate within
+	#
+	if [ "$DISPLAYMANAGER" = "/usr/X11R6/bin/xdm" ]; then
+		rm -f /etc/X11/xdm/xdm-pid
+		rm -f /etc/X11/xdm/xdm-errors
+	fi
+	killproc -p $PIDFILE -TERM $DISPLAYMANAGER
+	rc_status -v
+	;;
+    restart)
+	$0 stop
+        $0 start
+	rc_status
+	;;
+    reload|force-reload)
+	echo -n "Reload service $DM"
+	killproc -p $PIDFILE -HUP  $DISPLAYMANAGER
+	rc_status -v
+	;;
+    status|check)
+	echo -n "Checking for service ${DM}: "
+	checkproc -p $PIDFILE $DISPLAYMANAGER
+	rc_status -v
+	;;
+    probe)
+	XDMDIR=/usr/X11R6/lib/X11/xdm
+	if test $XDMDIR/xdm-config -nt $PIDFILE -o \
+	        $XDMDIR/Xservers   -nt $PIDFILE
+	then
+	    echo reload
+	fi
+	;;
+    try-restart|condrestart)
+	$0 status
+	if test $? = 0; then
+	    $0 restart
+	else
+	    rc_reset
+	fi
+	rc_status
+	;;
+    *)
+	echo "Usage: $0 {start|stop|status|restart|reload|force-reload|probe|try-restart}"
+	exit 1
+esac
+rc_exit

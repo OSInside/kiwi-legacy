@@ -1,0 +1,62 @@
+## Path:	Desktop/Window manager
+## Description:	
+## Type:	string(kde,fvwm,gnome,windowmaker)
+## Default:	kde
+## Config:      profiles,kde,susewm
+#
+# Here you can set the default window manager (kde, fvwm, ...)
+# changes here require at least a re-login
+DEFAULT_WM="gnome"
+
+## Type:	yesno
+## Default:	yes
+#
+# install the SuSE extension for new users
+# (theme and additional functions)
+#
+INSTALL_DESKTOP_EXTENSIONS="yes"
+## Type:    string
+## Default:
+## Path: Desktop
+## Description: default mouse cursor theme
+#
+# Name of mouse cursor theme for X11. Possible themes can be found
+# in /usr/X11R6/lib/X11/icons/
+#
+X_MOUSE_CURSOR="Industrial"
+
+## Type:   boolean
+## Default: true
+## Path: Desktop
+## Description: create XDG menus for other windowmanagers
+## (black, flux, openbox)
+#
+# Should SuSEconfig create XDG menus for other windowmanagers
+# like blackbox, fluxbox, openbox?
+# Possible values are lowercase "true" or "false".
+#
+CREATE_XDG_MENUS="true"
+## Path:        Desktop
+## Description: prepare global sycoca database for faster first startup
+## Type:        list(yes,initial,no)
+## Default:     initial
+#
+# building a global sycoca database, which can be used at first user
+# login in KDE
+#
+KDE_BUILD_GLOBAL_SYCOCA="initial"
+
+## Type:        yesno
+## Default:     yes
+#
+# To disable IPv6 support within KDE. It might solve large timeouts due to
+# broken servers which claim to have IPv6 support, but do not respond.
+#
+KDE_USE_IPV6="yes"
+
+## Type:        yesno
+## Default:     yes
+#
+# IDN support can get disabled to avoid DNS phishing for example.
+#
+KDE_USE_IDN="yes"

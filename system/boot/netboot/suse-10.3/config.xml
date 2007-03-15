@@ -1,8 +1,8 @@
-<image name="initrd-usbboot-suse-10.2">
+<image name="initrd-netboot-suse-10.3">
 	<description type="boot">
 		<author>Marcus Schaefer</author>
 		<contact>ms@novell.com</contact>
-		<specification>boot/initrd image for USB stick systems</specification>
+		<specification>boot/initrd image used for PXE</specification>
 	</description>
 	<preferences>
 		<type>cpio</type>
@@ -12,17 +12,8 @@
 		<packagemanager>smart</packagemanager>
 		<rpm-check-signatures>False</rpm-check-signatures>
 	</preferences>
-	<drivers type="usbdrivers">
-		<file name="usb/host/usb-uhci.ko"/>
-		<file name="usb/host/usb-ohci.ko"/>
-		<file name="usb/host/ehci-hcd.ko"/>
-		<file name="usb/host/uhci-hcd.ko"/>
-		<file name="usb/core/usbcore.ko"/>
-		<file name="usb/storage/usb-storage.ko"/>
-	</drivers>
 	<drivers type="drivers">
 		<file name="drivers/ide/*"/>
-		<file name="drivers/block/loop.ko"/>
 		<file name="net/packet/*"/>
 		<file name="fs/ext3/*"/>
 		<file name="fs/ext2/*"/>
@@ -35,33 +26,41 @@
 		<file name="fs/fat/*"/>
 		<file name="fs/vfat/*"/>
 		<file name="fs/reiserfs/*"/>
-		<file name="fs/nls/nls_utf8.ko"/>
 		<file name="net/ipv6/*"/>
-		<file name="drivers/cdrom/*"/>
+		<file name="drivers/ata/*"/>
 		<file name="drivers/scsi/*"/>
 		<file name="drivers/message/fusion/*"/>
 		<file name="drivers/net/*"/>
 	</drivers>
 	<repository type="yast2">
-		<!--<source path="opensuse://10.2"/>-->
-		<source path="/image/dist/full-10.2-i386"/>
+		<!--<source path="opensuse://10.3"/>-->
+		<source path="/image/CDs/full-i386"/>
 	</repository>
 	<packages type="image">
+		<package name="atftp"/>
+		<package name="bind-libs"/>
+		<package name="bind-utils"/>
+		<package name="dhcpcd"/>
 		<package name="e2fsprogs"/>
 		<package name="file"/>
+		<package name="hwinfo"/>
 		<package name="libcom_err"/>
 		<package name="module-init-tools"/>
+		<package name="net-tools"/>
+		<package name="netcfg"/>
 		<package name="pciutils"/>
 		<package name="reiserfs"/>
 		<package name="sysconfig"/>
 		<package name="sysfsutils"/>
 		<package name="util-linux"/>
+		<package name="grub"/>
 	</packages>
 	<packages type="boot">
 		<package name="kernel-default"/>
 		<package name="filesystem"/>
 		<package name="glibc-locale"/>
 		<package name="devs"/>
+		<package name="diffutils"/>
 		<package name="procps"/>
 	</packages>
 </image>

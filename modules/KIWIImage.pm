@@ -1032,6 +1032,12 @@ sub postImage {
 		return undef;
 	}
 	#==========================================
+	# Create image xenconfig when needed
+	#------------------------------------------
+	if (! buildXenConfig ($name)) {
+		return undef;
+	}
+	#==========================================
 	# Compress image using gzip
 	#------------------------------------------
 	if ($xml->getCompressed()) {
@@ -1320,6 +1326,36 @@ sub setupCramFS {
 		$kiwi -> failed ();
 		$kiwi -> error  ($data);
 		return undef;
+	}
+	return $name;
+}
+
+#==========================================
+# buildVMConfig
+#------------------------------------------
+sub buildXenConfig {
+	my $name = shift;
+	my %xenconfig = $xml -> getPackageAttributes ("xen");
+	if (defined $xenconfig{disk}) {
+		$kiwi -> info ("Creating image Xen configuration file...");
+		if (! open (FD,">$imageDest/$name.xenconfig")) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create xenconfig file: $!");
+			$kiwi -> failed ();
+			return undef;
+		}
+		my $device = $xenconfig{disk}."1";
+		my $part   = $device;
+		my $memory = $xenconfig{memory};
+		$part =~ s/\/dev\///;
+		print FD '#  -*- mode: python; -*-'."\n";
+		print FD 'kernel="/boot/vmlinuz-xen"'."\n";
+		print FD 'ramdisk="/boot/initrd-xen"'."\n";
+		print FD 'memory='.$memory."\n";
+		print FD 'disk=[ "file:'.$imageDest."/".$name.','.$part.',w" ]'."\n";
+		print FD 'root="'.$device.' ro"'."\n";
+		close FD;
+		$kiwi -> done();
 	}
 	return $name;
 }

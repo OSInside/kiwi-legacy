@@ -280,6 +280,7 @@ sub install {
 			/^xen$/  && do {
 				$kiwi -> info ("Creating Xen package list");
 				my @xenList = $xml -> getXenList();
+				my $fstype  = $xml -> getImageType();
 				if (! @xenList) {
 					$kiwi -> error ("Couldn't create xen package list");
 					$kiwi -> failed ();
@@ -287,6 +288,21 @@ sub install {
 				}
 				@packList = (@packList,@xenList);
 				$kiwi -> done ();
+				my %xenconfig = $xml -> getPackageAttributes ("xen");
+				if (defined $xenconfig{disk}) {
+					$kiwi -> info ("Creating Xen filesystem table");
+					if (! open (FD, ">$root/etc/fstab")) {
+						$kiwi -> failed ();
+						$kiwi -> error ("Couldn't create fstab: $!");
+						$kiwi -> failed ();
+						return undef;
+					}
+					print FD "$xenconfig{disk}1 / $fstype defaults 1 1\n";
+					print FD "devpts /dev/pts devpts mode=0620,gid=5 0 0\n";
+					print FD "proc /proc proc defaults 0 0\n";
+					close FD;
+					$kiwi -> done ();
+				}
 				last SWITCH;
 			};
 			#==========================================

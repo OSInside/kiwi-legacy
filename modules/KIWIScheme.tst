@@ -39,7 +39,7 @@
 		<package name="ICAClient"/>
 	</packages>
 
-	<packages type="xen">
+	<packages type="xen" memory="128" disk="/dev/sda">
 		<package name="kernel-xen"/>
 		<package name="xen"/>
 	</packages>

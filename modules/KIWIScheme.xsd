@@ -107,6 +107,8 @@
 				<xs:element ref="ignore" minOccurs="0" maxOccurs="unbounded"/>
 			</xs:sequence>
 			<xs:attribute name="type" type="xs:string"/>
+			<xs:attribute name="memory" type="xs:integer"/>
+			<xs:attribute name="disk" type="xs:string"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="package">
