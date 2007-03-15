@@ -135,10 +135,11 @@ sub setupSignatureCheck {
 		if (defined $imgCheckSig) {
 			$kiwi -> info ("Setting RPM signature check to: $imgCheckSig");
 			my $option = "$optionName=$imgCheckSig";
+			my $cmdstr = "yes n | smart config --set";
 			if (! $chroot) {
-				$data = qx ( smart config --set $option 2>&1 );
+				$data = qx ( bash -c "$cmdstr $option 2>&1" );
 			} else {
-				$data = qx ( chroot $root smart config --set $option 2>&1 );
+				$data = qx ( chroot $root bash -c "$cmdstr $option 2>&1" );
 			}
 			$code = $? >> 8;
 			if ($code != 0) {
@@ -177,10 +178,11 @@ sub resetSignatureCheck {
 			my $optionName  = "rpm-check-signatures";
 			$kiwi -> info ("Resetting RPM signature check to: $curCheckSig");
 			my $option = "$optionName=$imgCheckSig";
+			my $cmdstr = "yes n | smart config --set";
 			if (! $chroot) {
-				$data = qx (smart config --set $option 2>&1);
+				$data = qx ( bash -c "$cmdstr $option 2>&1" );
 			} else {
-				$data = qx (chroot $root smart config --set $option 2>&1);
+				$data = qx ( chroot $root bash -c "$cmdstr $option 2>&1" );
 			}
 			$code = $? >> 8;
 			if ($code != 0) {
@@ -226,13 +228,14 @@ sub setupInstallationSource {
 		}
 		foreach my $chl (keys %{$source{$stype}}) {
 			my @opts = @{$source{$stype}{$chl}};
+			my $cmds = "yes n | smart channel --add";
 			if (! $chroot) {
 				$kiwi -> info ("Adding local smart channel: $chl");
-				$data = qx ( smart channel --add $chl @opts 2>&1 );
+				$data = qx ( bash -c "$cmds $chl @opts 2>&1" );
 				$code = $? >> 8;
 			} else {
 				$kiwi -> info ("Adding image smart channel: $chl");
-				$data = qx ( chroot $root smart channel --add $chl @opts 2>&1 );
+				$data = qx ( chroot $root bash -c "$cmds $chl @opts 2>&1" );
 				$code = $? >> 8;
 			}
 			if ($code != 0) {
@@ -315,11 +318,12 @@ sub resetInstallationSource {
 	if ($manager eq "smart") {
 		$kiwi -> info ("Removing smart channel(s): @channelList");
 		my @list = @channelList;
+		my $cmds = "yes n | smart channel --remove";
 		if (! $chroot) {
-			$data = qx ( smart channel --remove @list -y 2>&1 );
+			$data = qx ( bash -c "$cmds @list -y 2>&1" );
 			$code = $? >> 8;
 		} else {
-			$data = qx ( chroot $root smart channel --remove @list -y 2>&1 );
+			$data = qx ( chroot $root bash -c "$cmds @list -y 2>&1" );
 			$code = $? >> 8;
 		}
 		if ($code != 0) {
@@ -413,8 +417,8 @@ sub setupRootSystem {
 			print FD "echo \$? > $screenCall.exit\n";
 		} else {
 			$kiwi -> info ("Installing image packages...");
-			my $querypack = "--installed --hide-version";
-			my @installed = qx ( chroot $root smart query '*' $querypack );
+			my $querypack = "smart query '*' --installed --hide-version";
+			my @installed = qx ( chroot $root $querypack 2>/dev/null);
 			chomp ( @installed );
 			my @install   = ();
 			foreach my $need (@packs) {

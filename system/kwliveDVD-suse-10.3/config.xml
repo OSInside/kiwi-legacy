@@ -17,7 +17,7 @@
 	</users>
 	<repository type="yast2">
 		<!--<source path="/image/CDs/full-i386"/>-->
-		<source path="opensuse://openSUSE-stable"/>
+		<source path="opensuse://SL-OSS-factory"/>
 	</repository>
 	<packages type="image">
 		<opensusePattern name="default"/>

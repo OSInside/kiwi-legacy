@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Thu Mar 15 13:47:40 CET 2007 - ms@suse.de
+
+- v1.15
+- changed live DVD source to SL-OSS-factory
+- fixed new smart behaviour of asking questions even if it
+  shouldn't ask. Option -y was again useless so I changed the
+  calls to yes | ...
+
+-------------------------------------------------------------------
 Wed Mar 14 17:57:38 CET 2007 - ms@suse.de
 
 - v1.14
