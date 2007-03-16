@@ -37,7 +37,6 @@ our $Prepare;         # control XML file for building chroot extend
 our $Create;          # image description for building image extend
 our $Destination;     # destination directory for logical extends
 our $LogFile;         # optional file name for logging
-our $Virtual;         # optional virtualisation setup
 our $RootTree;        # optional root tree destination
 our $Survive;         # if set to "yes" don't exit kiwi
 our $BootStick;       # deploy initrd booting from USB stick
@@ -111,7 +110,7 @@ sub main {
 		# Initialize root system
 		#------------------------------------------
 		$root = new KIWIRoot (
-			$kiwi,$xml,$Prepare,$Virtual,$RootTree,
+			$kiwi,$xml,$Prepare,$RootTree,
 			"/base-system"
 		);
 		if (! defined $root) {
@@ -190,6 +189,10 @@ sub main {
 			};
 			/^vmx:(.*)/   && do {
 				$ok = $image -> createImageVMX ( $1 );
+				last SWITCH;
+			};
+			/^xen:(.*)/   && do {
+				$ok = $image -> createImageXen ( $1 );
 				last SWITCH;
 			};
 			$kiwi -> error  ("Unsupported type: $type");
@@ -340,7 +343,6 @@ sub init {
 		"list|l"              => \&listImage,
 		"create|c=s"          => \$Create,
 		"destdir|d=s"         => \$Destination,
-		"virtual|v=s"         => \$Virtual,
 		"root|r=s"            => \$RootTree,
 		"bootstick=s"         => \$BootStick,
 		"bootvm=s"            => \$BootVMDisk,
@@ -379,6 +381,10 @@ sub init {
 		$kiwi -> failed ();
 		my $code = kiwiExit (1); return $code;
 	}
+	#==========================================
+	# remove pre-defined smart channels
+	#------------------------------------------
+	qx ( rm -f /etc/smart/channels/* );
 }
 
 #==========================================
@@ -408,10 +414,6 @@ sub usage {
 	print "    Specify an alternative destination directory for\n";
 	print "    storing the logical extends. By default the current\n";
 	print "    directory is used\n";
-	print "\n";
-	print "  [ -v | --virtual <vm-system> ]\n";
-	print "    Install additional packages for the given vm-system.\n";
-	print "    Currently only the <xen> vm-system is supported.\n";
 	print "\n";
 	print "  [ -r | --root <root-path> ]\n";
 	print "    Setup the physical extend, chroot system below the\n";

@@ -1,0 +1,231 @@
+#!/bin/bash
+#================
+# FILE          : linuxrc
+#----------------
+# PROJECT       : OpenSuSE KIWI Image System
+# COPYRIGHT     : (c) 2006 SUSE LINUX Products GmbH. All rights reserved
+#               :
+# AUTHOR        : Marcus Schaefer <ms@suse.de>
+#               :
+# BELONGS TO    : Operating System images
+#               :
+# DESCRIPTION   : This file is changed to become the real
+#               : linuxrc script which is used to prepare the
+#               : operating system for the main image
+#               :
+#               :
+# STATUS        : BETA
+#----------------
+#
+#======================================
+# Exports...
+#--------------------------------------
+export PATH="/sbin:/bin:/usr/sbin:/usr/bin"
+export IFS_ORIG=$IFS
+
+DEBUG=0
+#======================================
+# Functions...
+#--------------------------------------
+Debug () {
+	if test "$DEBUG" = 1;then
+		echo "+++++> $1"
+	fi
+}
+Echo () {
+	if test "$1" = "-n";then
+		echo $1 "-----> $2"
+	elif test "$1" = "-b";then
+		echo "       $2"
+	else
+		echo "-----> $1"
+	fi
+}
+WaitKey () {
+	if test "$DEBUG" = 1;then
+		Echo -n "Press any key to continue..."
+		read
+	fi
+}
+closeKernelConsole () {
+	if test "$DEBUG" = 0;then
+		/usr/sbin/klogconsole -l 1
+	fi
+}
+reopenKernelConsole () {
+	/usr/sbin/klogconsole -l 7
+}
+importFile () {
+	IFS="
+	"
+	while read line;do
+	IFS="="
+	count=0
+	for item in $line;do
+		if test $count = 0 ; then
+			key=$item ; count=1 ; continue
+		fi
+		if test $count = 1 ; then
+			item=`echo $item | tr -d \'`
+			Debug "$key=$item"
+			eval export $key\=\"$item\"
+			count=0
+		fi
+	done
+	done
+}
+systemException () {
+	Echo "$1"
+	case "$2" in
+	"reboot")
+		Echo "rebootException: reboot in 60 sec..."; sleep 60
+		/sbin/restart >/dev/null 2>&1
+	;;
+	"wait")
+		Echo "waitException: waiting for ever..."
+		while true;do sleep 100;done
+	;;
+	"shell")
+		Echo "shellException: providing shell..."
+		/bin/sh
+	;;
+	*)
+		Echo "unknownException..."
+	;;
+	esac
+}
+fileSystem () {
+	imageConfig=$1
+	if [ ! -f $imageConfig ];then
+		FSTYPE=auto
+		return
+	fi
+	data=`cat $imageConfig | grep "<type>" | cut -f2 -d ">" | cut -f1 -d "<"`
+	case $data in 
+		*ext3*)     FSTYPE=ext3 ;;
+		*ext2*)     FSTYPE=ext2 ;;
+		*reiserfs*) FSTYPE=reiserfs ;;
+		*)
+			FSTYPE=auto
+		;;
+	esac
+}
+VMMountSystem () {
+	for rdevice in /dev/hda1 /dev/sda1;do
+		imageRootDevice=$rdevice
+		mount $imageRootDevice /mnt &>/dev/null
+		if [ $? = 0 ];then
+			break
+		fi
+	done
+}
+VMUmountSystem () {
+	umount /mnt
+}
+#======================================
+# Beautify Startup
+#--------------------------------------
+clear
+echo "Loading KIWI Xen Boot-System..."
+echo "-------------------------------"
+
+#======================================
+# 1) Mounting local file systems
+#--------------------------------------
+mount -t proc  proc    /proc
+mount -t sysfs sysfs   /sys
+mount -t devpts devpts /dev/pts
+closeKernelConsole
+
+#======================================
+# 2) Prepare module load support 
+#--------------------------------------
+touch /etc/modules.conf
+touch /lib/modules/*/modules.dep
+
+#======================================
+# 3) Including required kernel modules
+#--------------------------------------
+Echo "Including required kernel modules..."
+for module in xennet xenblk reiserfs ext2 ext3 loop ipv6;do
+	modprobe $module
+done
+
+#======================================
+# 4) Mount VM (boot)
+#--------------------------------------
+VMMountSystem
+
+#======================================
+# 5) Get filesystem type
+#--------------------------------------
+fileSystem /mnt/image/config.xml
+
+#======================================
+# 6) Create system dependant files
+#--------------------------------------
+#======================================
+# a) /etc/fstab
+#--------------------------------------
+mkdir -p /config/etc
+echo "$imageRootDevice / $FSTYPE defaults 0 0"        > /config/etc/fstab
+echo "devpts  /dev/pts   devpts mode=0620,gid=5 0 0" >> /config/etc/fstab
+echo "proc    /proc   proc    defaults 0 0"          >> /config/etc/fstab
+echo "sysfs   /sys    sysfs   noauto 0 0"            >> /config/etc/fstab
+echo "tmpfs   /dev/shm tmpfs  defaults 0 0"          >> /config/etc/fstab
+
+#======================================
+# 7) copy system dependant files
+#--------------------------------------
+cd /config
+find . -type d | while read d ; do  mkdir -p /mnt/$d ; done
+find . -type f | while read f ; do  cp $f /mnt/$f ; done
+cd /
+rm -rf /config
+
+#======================================
+# 8) setup real root device
+#--------------------------------------
+echo 256 > /proc/sys/kernel/real-root-dev
+
+#======================================
+# 9) umount system filesystems
+#--------------------------------------
+umount /dev/pts
+umount /sys
+umount /proc
+
+#======================================
+# 10) copy initrd files to image
+#--------------------------------------
+cp /preinit /mnt
+
+#======================================
+# 11) Activate new root
+#--------------------------------------
+Echo "Activating Image: [$imageRootDevice]"
+cd /mnt && exec < dev/console >dev/console 2>&1
+Echo "Calling preinit phase..."
+/mnt/sbin/pivot_root . mnt >/dev/null 2>&1
+if test $? != 0;then
+	PIVOT=false
+	mount --move . / && chroot . ./preinit
+	chroot . rm ./preinit
+else
+	PIVOT=true
+	./preinit
+	rm ./preinit
+fi
+#======================================
+# 12) Unmount initrd / system init
+#--------------------------------------
+echo " "
+echo "Booting into Xen System..."
+echo "--------------------------"
+reopenKernelConsole
+mount -n -o remount,rw / &>/dev/null
+if [ $PIVOT = "true" ];then
+	exec umount -n -l /mnt
+else
+	exec chroot . /sbin/init
+fi

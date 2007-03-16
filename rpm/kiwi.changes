@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Fri Mar 16 13:40:24 CET 2007 - ms@suse.de
+
+- v1.16
+- moved xenboot to xennetboot, used for PXE boot of Xen kernel
+- added xenboot used as boot image for xm create -c ...
+- added new target: xen:fs:boot-image. This allows you to create
+  Xen images with automatic boot image setup plus Xen config file
+- removed --virtual option
+
+-------------------------------------------------------------------
 Thu Mar 15 13:47:40 CET 2007 - ms@suse.de
 
 - v1.15

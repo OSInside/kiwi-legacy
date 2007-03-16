@@ -1,5 +1,5 @@
 # /.../
-# spec file for package kiwi (Version 1.15)
+# spec file for package kiwi (Version 1.16)
 # Copyright (c) 2006 SUSE LINUX Products GmbH, Nuernberg, Germany.
 # Please submit bugfixes or comments via http://bugs.opensuse.org
 # ---
@@ -8,8 +8,8 @@ Name:          kiwi
 BuildRequires: perl smart perl-XML-LibXML perl-libwww-perl screen syslinux
 Requires:      perl perl-XML-LibXML perl-libwww-perl screen
 Summary:       OpenSuSE - KIWI Image System
-Version:       1.15
-Release:       15
+Version:       1.16
+Release:       16
 Group:         System
 License:       GPL
 Source:        kiwi.tar.bz2
@@ -75,6 +75,16 @@ Group:        System
 This package contains the OpenSuSE - KIWI image descriptions.
 Each image description exists in a single directory and contains
 a netboot image description
+
+%package -n kiwi-desc-xennetboot
+Requires:     kiwi smart
+Summary:      OpenSuSE - KIWI image descriptions
+Group:        System
+
+%description -n kiwi-desc-xennetboot
+This package contains the OpenSuSE - KIWI image descriptions.
+Each image description exists in a single directory and contains
+a xennetboot image description
 
 %package -n kiwi-desc-xenboot
 Requires:     kiwi smart
@@ -153,8 +163,8 @@ if [ $UID = 0 ];then
 	images="
 		netboot/suse-10.1 netboot/suse-10.1-smp
 		netboot/suse-10.2 netboot/suse-10.2-smp
-		xenboot/suse-10.1
-		xenboot/suse-10.2
+		xennetboot/suse-10.1
+		xennetboot/suse-10.2
 	"
 	for i in $images;do
 		rootName=`echo $i | tr / -`
@@ -266,6 +276,10 @@ cat kiwi.loader
 %files -n kiwi-desc-netboot
 %defattr(-, root, root)
 %{_datadir}/kiwi/image/netboot
+
+%files -n kiwi-desc-xennetboot
+%defattr(-, root, root)
+%{_datadir}/kiwi/image/xennetboot
 
 %files -n kiwi-desc-xenboot
 %defattr(-, root, root)

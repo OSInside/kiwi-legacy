@@ -135,7 +135,7 @@ sub setupSignatureCheck {
 		if (defined $imgCheckSig) {
 			$kiwi -> info ("Setting RPM signature check to: $imgCheckSig");
 			my $option = "$optionName=$imgCheckSig";
-			my $cmdstr = "yes n | smart config --set";
+			my $cmdstr = "smart config --set";
 			if (! $chroot) {
 				$data = qx ( bash -c "$cmdstr $option 2>&1" );
 			} else {
@@ -178,7 +178,7 @@ sub resetSignatureCheck {
 			my $optionName  = "rpm-check-signatures";
 			$kiwi -> info ("Resetting RPM signature check to: $curCheckSig");
 			my $option = "$optionName=$imgCheckSig";
-			my $cmdstr = "yes n | smart config --set";
+			my $cmdstr = "smart config --set";
 			if (! $chroot) {
 				$data = qx ( bash -c "$cmdstr $option 2>&1" );
 			} else {
@@ -228,7 +228,7 @@ sub setupInstallationSource {
 		}
 		foreach my $chl (keys %{$source{$stype}}) {
 			my @opts = @{$source{$stype}{$chl}};
-			my $cmds = "yes n | smart channel --add";
+			my $cmds = "smart channel --add";
 			if (! $chroot) {
 				$kiwi -> info ("Adding local smart channel: $chl");
 				$data = qx ( bash -c "$cmds $chl @opts 2>&1" );
@@ -318,7 +318,7 @@ sub resetInstallationSource {
 	if ($manager eq "smart") {
 		$kiwi -> info ("Removing smart channel(s): @channelList");
 		my @list = @channelList;
-		my $cmds = "yes n | smart channel --remove";
+		my $cmds = "smart channel --remove";
 		if (! $chroot) {
 			$data = qx ( bash -c "$cmds @list -y 2>&1" );
 			$code = $? >> 8;
@@ -415,6 +415,7 @@ sub setupRootSystem {
 			print FD "smart update @channelList\n";
 			print FD "test \$? = 0 && smart install @packs @installOpts\n";
 			print FD "echo \$? > $screenCall.exit\n";
+			print FD "rm -f $root/etc/smart/channels/*\n";
 		} else {
 			$kiwi -> info ("Installing image packages...");
 			my $querypack = "smart query '*' --installed --hide-version";

@@ -295,6 +295,9 @@ sub createImageUSB {
 		qx (rm -rf $main::RootTree);
 	}
 	$result{bootImage} = $main::ImageName;
+	if ($text eq "USB") {
+		$main::Survive = "default";
+	}
 	return \%result;
 }
 
@@ -335,6 +338,45 @@ sub createImageVMX {
 		$main::Survive = "default";
 		return undef;
 	}
+	$main::Survive = "default";
+	return $this;
+}
+
+#==========================================
+# createImageXen
+#------------------------------------------
+sub createImageXen {
+	# ...
+	# Create a para virtualized image usable in Xen. The process
+	# will create the system image and the appropriate xen initrd
+	# and kernel plus a Xen configuration to be able to run the
+	# image within Xen
+	#
+	# NOTE: Because the first steps of creating
+	# a Xen image are the same as creating a usb stick image
+	# we make use of the usb code above to create the system and boot
+	# image
+	# ---
+	#==========================================
+	# Create Xen boot and system image
+	#------------------------------------------
+	my $this = shift;
+	my $para = shift;
+	my %xenc = $xml -> getPackageAttributes ("xen");
+	my $name = createImageUSB ($this,$para,"Xen");
+	if (! defined $name) {
+		return undef;
+	}
+	undef $main::Prepare;
+	undef $main::Create;
+	#==========================================
+	# Create image xenconfig
+	#------------------------------------------
+	if (! buildXenConfig ($main::Destination,$name,\%xenc)) {
+		$main::Survive = "default";
+		return undef;
+	}
+	$main::Survive = "default";
 	return $this;
 }
 
@@ -1032,12 +1074,6 @@ sub postImage {
 		return undef;
 	}
 	#==========================================
-	# Create image xenconfig when needed
-	#------------------------------------------
-	if (! buildXenConfig ($name)) {
-		return undef;
-	}
-	#==========================================
 	# Compress image using gzip
 	#------------------------------------------
 	if ($xml->getCompressed()) {
@@ -1331,14 +1367,20 @@ sub setupCramFS {
 }
 
 #==========================================
-# buildVMConfig
+# buildXenConfig
 #------------------------------------------
 sub buildXenConfig {
-	my $name = shift;
-	my %xenconfig = $xml -> getPackageAttributes ("xen");
+	my $dest   = shift;
+	my $name   = shift;
+	my $xenref = shift;
+	my $file   = $dest."/".$name->{systemImage}.".xenconfig";
+	my $initrd = $dest."/".$name->{bootImage}.".gz";
+	my $kernel = $dest."/".$name->{bootImage}.".kernel";
+	$kernel    = glob ("$kernel\.*");
+	my %xenconfig = %{$xenref};
 	if (defined $xenconfig{disk}) {
 		$kiwi -> info ("Creating image Xen configuration file...");
-		if (! open (FD,">$imageDest/$name.xenconfig")) {
+		if (! open (FD,">$file")) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't create xenconfig file: $!");
 			$kiwi -> failed ();
@@ -1347,17 +1389,18 @@ sub buildXenConfig {
 		my $device = $xenconfig{disk}."1";
 		my $part   = $device;
 		my $memory = $xenconfig{memory};
+		my $image  = $dest."/".$name->{systemImage};
 		$part =~ s/\/dev\///;
 		print FD '#  -*- mode: python; -*-'."\n";
-		print FD 'kernel="/boot/vmlinuz-xen"'."\n";
-		print FD 'ramdisk="/boot/initrd-xen"'."\n";
+		print FD 'kernel="'.$kernel.'"'."\n";
+		print FD 'ramdisk="'.$initrd.'"'."\n";
 		print FD 'memory='.$memory."\n";
-		print FD 'disk=[ "file:'.$imageDest."/".$name.','.$part.',w" ]'."\n";
+		print FD 'disk=[ "file:'.$image.','.$part.',w" ]'."\n";
 		print FD 'root="'.$device.' ro"'."\n";
 		close FD;
 		$kiwi -> done();
 	}
-	return $name;
+	return $dest;
 }
 
 #==========================================

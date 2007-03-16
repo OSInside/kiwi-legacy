@@ -1,8 +1,8 @@
-<image name="initrd-xennetboot-suse-10.1">
+<image name="initrd-xenboot-suse-10.2">
 	<description type="boot">
 		<author>Marcus Schaefer</author>
 		<contact>ms@novell.com</contact>
-		<specification>boot/initrd image for mboot.c32 Xen boot</specification>
+		<specification>boot/initrd image for Xen VM systems</specification>
 	</description>
 	<preferences>
 		<type>cpio</type>
@@ -14,6 +14,7 @@
 	</preferences>
 	<drivers type="drivers">
 		<file name="drivers/ide/*"/>
+		<file name="drivers/block/loop.ko"/>
 		<file name="net/packet/*"/>
 		<file name="fs/ext3/*"/>
 		<file name="fs/ext2/*"/>
@@ -26,38 +27,31 @@
 		<file name="fs/fat/*"/>
 		<file name="fs/vfat/*"/>
 		<file name="fs/reiserfs/*"/>
+		<file name="fs/nls/nls_utf8.ko"/>
 		<file name="net/ipv6/*"/>
+		<file name="drivers/cdrom/*"/>
+		<file name="drivers/xen/*"/>
+		<file name="drivers/ata/*"/>
 		<file name="drivers/scsi/*"/>
 		<file name="drivers/message/fusion/*"/>
 		<file name="drivers/net/*"/>
 	</drivers>
 	<repository type="yast2">
-		<source path="opensuse://SL-10.1"/>
-		<!-- <source path="/image/dist/full-10.1-i386"/> -->
+		<!--<source path="opensuse://10.2"/>-->
+		<source path="/image/dist/full-10.2-i386"/>
 	</repository>
 	<packages type="image">
-		<package name="atftp"/>
-		<package name="bind-libs"/>
-		<package name="bind-utils"/>
-		<package name="dhcpcd"/>
 		<package name="e2fsprogs"/>
 		<package name="file"/>
-		<package name="gawk"/>
-		<package name="hwinfo"/>
-		<package name="iproute2"/>
 		<package name="libcom_err"/>
-		<package name="lvm2"/>
 		<package name="module-init-tools"/>
-		<package name="net-tools"/>
-		<package name="netcfg"/>
 		<package name="pciutils"/>
 		<package name="reiserfs"/>
 		<package name="sysconfig"/>
 		<package name="sysfsutils"/>
-		<package name="tcpd"/>
 		<package name="util-linux"/>
+		<package name="hwinfo"/>
 		<package name="xen"/>
-		<package name="grub"/>
 	</packages>
 	<packages type="boot">
 		<package name="kernel-xen"/>

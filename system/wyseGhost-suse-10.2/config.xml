@@ -5,7 +5,7 @@
 		<specification>openSUSE 10.2 Wyse VX0 terminal system 512MB</specification>
 	</description>
 	<preferences>
-		<type>ext3</type>
+		<type>xen:ext3:xenboot/suse-10.2</type>
 		<version>1.2.7</version>
 		<size unit="M">460</size>
 		<rpm-check-signatures>False</rpm-check-signatures>

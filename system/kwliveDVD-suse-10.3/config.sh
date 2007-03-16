@@ -1,8 +1,7 @@
 #!/bin/sh
-
-echo "Configure image: [full-suse-10.2]..."
 test -f /.profile && . /.profile
 
+echo "Configure image: [$name]..."
 #==========================================
 # Activate Services
 #------------------------------------------
