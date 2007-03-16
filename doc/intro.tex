@@ -101,6 +101,9 @@ to the selected filesystem. Supported image types are:
           Virtual machine system image, which means a virtual disk will
           be created including boot manager boot image and system image
           to be used within qemu (.qemu file) or vmware player (.vmdk file)
+    \item \textbf{\underline{xen:<fstype>:<boot-image-name>}}\\
+          Xen machine system image, which means an image plus boot image will
+          be created including the Xen configuration to start the image.
 	\item \textbf{\underline{split:<fstypeRW,fstypeRO> image support}}\\
           Which means the image is splitted into a read-only and a
           read-write part whereas each part can have a different

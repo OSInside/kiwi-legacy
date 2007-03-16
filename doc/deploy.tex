@@ -220,13 +220,13 @@ system's image config.xml:
 
 \begin{Command}{14cm}
 <preferences>\\
-\hspace*{1cm}<type>vmx:ext3:vmxboot-suse-10.2</type>\\
+\hspace*{1cm}<type>vmx:ext3:vmxboot/suse-10.2</type>\\
 \hspace*{1cm}...\\
 </preferences>
 \end{Command}
 
 After this the system image can be created. The process will create the
-system image and the specified vmxboot-suse-10.2 boot image. The result
+system image and the specified vmxboot/suse-10.2 boot image. The result
 is then used to create the virtual disk. The following command needs
 to be called:
 
@@ -241,6 +241,35 @@ system on the virtual disk with for example qemu call:
 
 \begin{Command}{14cm}
 	qemu /tmp/full-suse-10.2.i686-1.1.2.qemu
+\end{Command}
+
+\section{Para virtual image for Xen}
+To be able to use an image within Xen a system image and an initrd file
+needs to be created. This can be done by specifying the following type in the
+system's image config.xml:
+
+\begin{Command}{14cm}
+<preferences>\\
+\hspace*{1cm}<type>xen:ext3:xenboot/suse-10.2</type>\\
+\hspace*{1cm}...\\
+</preferences>
+\end{Command}
+
+After this the system image can be created. The process will create the
+system image and the specified xenboot/suse-10.2 boot image. Additionally
+an appropriate Xen configuration file will be created. The config file
+will use the \textbf{.xenconfig} suffix. The following command needs
+to be called:
+
+\begin{Command}{14cm}
+    kiwi --prepare full-suse-10.2 --root /tmp/mysystem\\
+    kiwi --create /tmp/mysystem -d /tmp
+\end{Command}
+
+To run the system within Xen one need to call:
+
+\begin{Command}{14cm}
+   xm create -c /tmp/full-suse-10.2.i686-1.1.2.xenconfig
 \end{Command}
 
 \section{Live CD system}

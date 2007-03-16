@@ -328,26 +328,18 @@ To activate an image including the xen kernel the following steps
 needs to be performed:
 
 \begin{enumerate}
-	\item loop mount the image
-       
-          \begin{Command}{9cm}
-          mount -o loop <image> <loop path>
-          \end{Command}       
-
-	\item create a xen configuration file and use the loop mounted
-          path as disk parameter:
-
-          \begin{Command}{9cm}
-          disk = [ 'phy:<loop path>' ]
-          \end{Command}
-          
-          for more information on how to configure xen refer to\\
-          http://en.opensuse.org/Installing\_Xen3
 	\item boot the system using the command:
 
           \begin{Command}{9cm}
           xm create -c <xen config file>
           \end{Command}
+
+          The xen config file will be created automatically by kiwi.
+          Of course this file can be enhanced to some degree, for example
+          adding the virtual network driver, etc...
+
+    \item for more information on how to configure xen refer to\\
+          http://en.opensuse.org/Installing\_Xen3
 \end{enumerate}
 
 \section{The VMware virtual machine}

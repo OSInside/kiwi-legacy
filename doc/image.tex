@@ -166,6 +166,11 @@ the format:
                               VMware. type specifies one of ext2,ext3 or
                               reiserfs and filename must be the name of an
                               appropriate vmxboot boot image
+                        \item xen:type:filename\\
+                              to create Xen boot and system image as well
+                              as the xen configuration file. type specifies
+                              one of ext2,ext3 or reiserfs and filename must
+                              be the name of an appropriate xenboot boot image
                         \item split:type-rw,type-ro\\
                               to create a splitted image into a read-only
                               and a read-write part. type-rw specifies one of
@@ -241,7 +246,7 @@ the format:
                       here.
                 \item \textbf{\underline{xen}}\\
                       used when the image needs support for Xen based
-                      virtualisation. Option \textbf{--virtual xen}
+                      virtualisation.
                 \end{itemize}
 				Using a pattern name will enhance the package list to
 				a number of additional packages belonging to this pattern.
