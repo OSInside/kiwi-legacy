@@ -1,8 +1,7 @@
 #!/bin/sh
-
-echo "Configure image: [minimal-suse-10.1]..."
 test -f /.profile && . /.profile
 
+echo "Configure image: [$name]..."
 #==========================================
 # remove all non mixer files from applets
 #------------------------------------------

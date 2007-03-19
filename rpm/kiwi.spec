@@ -1,5 +1,5 @@
 # /.../
-# spec file for package kiwi (Version 1.16)
+# spec file for package kiwi (Version 1.17)
 # Copyright (c) 2006 SUSE LINUX Products GmbH, Nuernberg, Germany.
 # Please submit bugfixes or comments via http://bugs.opensuse.org
 # ---
@@ -8,8 +8,8 @@ Name:          kiwi
 BuildRequires: perl smart perl-XML-LibXML perl-libwww-perl screen syslinux
 Requires:      perl perl-XML-LibXML perl-libwww-perl screen
 Summary:       OpenSuSE - KIWI Image System
-Version:       1.16
-Release:       16
+Version:       1.17
+Release:       17
 Group:         System
 License:       GPL
 Source:        kiwi.tar.bz2

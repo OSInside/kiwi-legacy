@@ -151,7 +151,7 @@ sub downloadPattern {
 		if ((! defined $title) || ($title =~ /not found/i)) {
 			return undef;
 		}
-		if ($content !~ /\"($pattern-.*\.pat)\"/) {
+		if ($content !~ /\"($pattern-.*$arch\.pat)\"/) {
 			return undef;
 		}
 		$location = $location."/".$1;

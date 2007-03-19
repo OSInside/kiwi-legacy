@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Mon Mar 19 14:40:06 CET 2007 - ms@suse.de
+
+- v1.17
+- added Wyse terminal image for 10.3
+- fixed pattern download. wrong patterns concerning the
+  architecture were used
+
+-------------------------------------------------------------------
 Fri Mar 16 13:40:24 CET 2007 - ms@suse.de
 
 - v1.16

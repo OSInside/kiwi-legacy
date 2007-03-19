@@ -1,24 +1,16 @@
 #!/bin/sh
-
-echo "Configure image: [minimal-suse-10.1]..."
 test -f /.profile && . /.profile
 
-#==========================================
-# remove all non mixer files from applets
-#------------------------------------------
-rpm -ql gnome-applets | grep -v mixer | xargs rm -rf
-
+echo "Configure image: [$name]..."
 #==========================================
 # remove unneeded packages
 #------------------------------------------
 for i in \
-	info smart python-xml python-elementtree \
-	perl-gettext perl-Bootloader openslp rpm-python \
-	suse-build-key python perl perl-XML-Parser \
-	xscreensaver yast2-theme-NLD yast2-theme-SuSELinux \
-	yast2-hardware-detection yast2-power-management \
-	yast2-xml samba-client yast2-pkg-bindings \
-	yast2 yast2-core \
+	info smart python-xml perl-gettext perl-Bootloader openslp \
+	rpm-python suse-build-key python perl xscreensaver \
+	yast2-hardware-detection yast2-xml samba-client \
+	yast2-pkg-bindings yast2 yast2-core docbook_4 docbook_3 \
+	docbook-xsl-stylesheets docbook-dsssl-stylesheets \
 	rpm
 do
 	rpm -e $i --nodeps
@@ -55,6 +47,8 @@ rm -rf /usr/share/fonts/100dpi
 rm -rf /usr/share/fonts/Type1
 rm -rf /usr/share/fonts/Speedo
 rm -rf /usr/lib/dri
+rm -rf /usr/lib/YaST2
+rm -rf /usr/share/gnome/help
 
 #==========================================
 # remove local kernel and boot data
@@ -73,47 +67,16 @@ rm -rf /usr/lib/rpm
 find /usr/lib/xorg/modules/drivers/* | grep -v via | xargs rm -f
 
 #==========================================
-# remove unneeded Gnome files
+# remove unneeded X11 fonts
 #------------------------------------------
-rm -rf /opt/gnome/share/locale
-rm -rf /opt/gnome/include
-rm -rf /opt/gnome/share/galeon
+find /usr/share/fonts/misc/*.pcf.gz -type f |\
+	grep -v 6x13-I | grep -v cursor | xargs rm -f
 
 #==========================================
-# remove unneeded Gnome themes
+# remove unneeded console fonts
 #------------------------------------------
-for i in \
-	AgingGorilla Atlanta Clean ColorStep Crux Emacs Esco Glider \
-	Grand-Canyon LighthouseBlue Mac2 Metabox Metal Mist NewPsychicAbilities \
-	Notif Ocean-Dream Pixmap Raleigh Redmond Redmond95 Sandwish Simple \
-	Smokey SphereCrystal Step Synchronicity ThinIce Traditional \
-	XenoThin Xenophilia Xfce*
-do
-	rm -rf /opt/gnome/share/themes/$i
-done
-
-#==========================================
-# remove unneeded Gnome icons
-#------------------------------------------
-for i in \
-	"Flat Blue" SphereCrystal Sandy GnomeCrystal
-do
-	rm -rf /opt/gnome/share/icons/$i
-done
-
-#==========================================
-# remove Gnome help files except C locale
-#------------------------------------------
-for i in /opt/gnome/share/gnome/help/*;do
-	pushd $i &>/dev/null
-	for n in *;do
-		if [ $n = 'C' ];then
-			continue
-		fi
-		rm -rf $n
-	done
-	popd &>/dev/null
-done
+find /usr/share/kbd/consolefonts/ -type f |\
+	grep -v default | grep -v lat9w-16 | xargs rm -f
 
 #==========================================
 # remove X11 locales except C locale

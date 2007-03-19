@@ -54,6 +54,7 @@
         <package name="xterm"/>
 		<!-- PLUS: Gnome -->
 		<package name="gdm"/>
+		<package name="at-spi"/>
 		<package name="control-center2"/>
 		<package name="gnome-main-menu"/>
 		<package name="gnome-panel"/>

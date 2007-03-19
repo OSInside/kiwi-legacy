@@ -66,22 +66,19 @@ unset DEFAULT_WM SAVEPATH
 PIDFILE="/var/run/xdm.pid"
 KDEROOTHOME=/root/.kdm
 export KDEROOTHOME
-
-
-if [ "$DISPLAYMANAGER_XSERVER" == "Xgl" -a -r /etc/X11/xorg.conf ]; then
-  cat /etc/X11/xorg.conf | tr "\t" " " | \
-    grep -q -i -E '^ *Driver +"fglrx"'
-  if [ $? -eq 0 ]; then
-    /sbin/lsmod | grep -q fglrx || /sbin/modprobe fglrx &> /dev/null
-  fi
-  test -r /etc/profile.d/fglrx.sh && . /etc/profile.d/fglrx.sh
+XDMDIR=/etc/X11/xdm
+if [ -x /usr/bin/xdm ]; then
+  XDM_BIN=/usr/bin/xdm
+else
+  XDM_BIN=/usr/X11R6/bin/xdm
 fi
+
 
 case "${DISPLAYMANAGER##*/}" in
     kdm|kde|KDM|KDE)	 DISPLAYMANAGER=/opt/kde3/bin/kdm
 			 PIDFILE="/var/run/kdm.pid"
 			 ;;
-    xdm)		 DISPLAYMANAGER=/usr/X11R6/bin/xdm
+    xdm)		 DISPLAYMANAGER=$XDM_BIN
 			 ;;
     gdm|GDM|Gnome|GNOME) DISPLAYMANAGER=/opt/gnome/sbin/gdm
 			 PIDFILE="/var/run/gdm.pid"
@@ -90,14 +87,14 @@ case "${DISPLAYMANAGER##*/}" in
 			 ;;
     console)		 exit 0
 			 ;;
-    *)			 DISPLAYMANAGER=/usr/X11R6/bin/xdm
+    *)			 DISPLAYMANAGER=$XDM_BIN
 			 if test -x /opt/kde3/bin/kdm; then
 				DISPLAYMANAGER=/opt/kde3/bin/kdm
 				PIDFILE="/var/run/kdm.pid"
 			 fi 
 			 ;;
 esac
-test ! -x "$DISPLAYMANAGER" && DISPLAYMANAGER=/usr/X11R6/bin/xdm
+test ! -x "$DISPLAYMANAGER" && DISPLAYMANAGER=$XDM_BIN
 
 DM=${DISPLAYMANAGER##*/}
 
@@ -105,11 +102,11 @@ rc_reset
 case "$1" in
     start)
 		# create config file using -configure option
-		if [ ! -f /etc/X11/xorg.conf ];then
-			/usr/X11R6/bin/X -configure && \
-			mv /xorg.conf.new /etc/X11/xorg.conf
-			sleep 1
-		fi
+        if [ ! -f /etc/X11/xorg.conf ];then
+            /usr/bin/X -configure && \
+            mv /xorg.conf.new /etc/X11/xorg.conf
+            sleep 1
+        fi
 
         # Avoid duplicated messages when earlykdm is in use
         if test "$DISPLAYMANAGER" = /opt/kde3/bin/kdm && \
@@ -118,18 +115,20 @@ case "$1" in
 	  rc_exit 0
         fi
 
+        test -x /etc/X11/xdm/SuSEconfig.xdm && \
+        MD5DIR="/var/adm/SuSEconfig/md5" \
+          /etc/X11/xdm/SuSEconfig.xdm | \
+          sed 's+\(.*\)+/etc/init.d/xdm: \1+g' | \
+          /bin/logger
+
 	echo -n "Starting service $DM"
 	# Don't start xdm if no Xserver is configured and xdm is not 
 	# configured for remote access 
-	if [ ! -x /usr/X11R6/bin/X -a \
+	if [ ! -x /usr/bin/X -a ! -x /usr/X11R6/bin/X -a \
 		"$DISPLAYMANAGER_REMOTE_ACCESS" = "no" ]; then 
 			rc_status -u 
 			rc_exit 
 	fi
-	if [ "$DISPLAYMANAGER" = "/usr/X11R6/bin/xdm" ]; then
-		ln -snf $PIDFILE /etc/X11/xdm/xdm-pid
-		ln -snf /var/log/xdm.errors /etc/X11/xdm/xdm-errors
-	fi 
 	if [ "$DISPLAYMANAGER" = "/opt/gnome/sbin/gdm" -a \
 		 "$DISPLAYMANAGER_REMOTE_ACCESS" = "yes"  -a \
 		 "$DISPLAYMANAGER_STARTS_XSERVER" = "no" ]; then
@@ -139,8 +138,8 @@ case "$1" in
 	# After a crash or a kill signal we may have
 	# a wrong owner ship of /dev/xconsole
 	if rc_status ; then
-	    if test -x /etc/X11/xdm/TakeDevices ; then
-		/etc/X11/xdm/TakeDevices
+	    if test -x $XDMDIR/TakeDevices ; then
+		$XDMDIR/TakeDevices
 	    else
 		chown root:tty /dev/xconsole /dev/tty0
 		chmod 622      /dev/xconsole /dev/tty0
@@ -154,10 +153,6 @@ case "$1" in
 	# killproc(8) sleep upto five seconds and sends
 	# SIGKILL if xdm does not terminate within
 	#
-	if [ "$DISPLAYMANAGER" = "/usr/X11R6/bin/xdm" ]; then
-		rm -f /etc/X11/xdm/xdm-pid
-		rm -f /etc/X11/xdm/xdm-errors
-	fi
 	killproc -p $PIDFILE -TERM $DISPLAYMANAGER
 	rc_status -v
 	;;
@@ -167,6 +162,11 @@ case "$1" in
 	rc_status
 	;;
     reload|force-reload)
+        test -x /etc/X11/xdm/SuSEconfig.xdm && \
+        MD5DIR="/var/adm/SuSEconfig/md5" \
+          /etc/X11/xdm/SuSEconfig.xdm | \
+          sed 's+\(.*\)+/etc/init.d/xdm: \1+g' | \
+          /bin/logger
 	echo -n "Reload service $DM"
 	killproc -p $PIDFILE -HUP  $DISPLAYMANAGER
 	rc_status -v
@@ -177,7 +177,6 @@ case "$1" in
 	rc_status -v
 	;;
     probe)
-	XDMDIR=/usr/X11R6/lib/X11/xdm
 	if test $XDMDIR/xdm-config -nt $PIDFILE -o \
 	        $XDMDIR/Xservers   -nt $PIDFILE
 	then
