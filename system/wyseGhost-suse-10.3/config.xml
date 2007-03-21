@@ -45,7 +45,7 @@
 		<package name="hal"/>
 		<package name="grub"/>
 		<!-- PLUS: Samba -->
-		<package name="samba"/>
+		<!-- <package name="samba"/>-->
 		<!-- PLUS: X11 -->
 		<package name="xorg-x11"/>
         <package name="xorg-x11-server"/>
@@ -72,7 +72,7 @@
 		<package name="libgnomesu"/>
 		<package name="gnome-applets"/>
 		<!-- PLUS: FireFox -->
-		<package name="firefox"/>
+		<!-- <package name="firefox"/>-->
 		<!-- PLUS: ICAClient -->
 		<!-- <package name="ICAClient"/> -->
 	</packages>

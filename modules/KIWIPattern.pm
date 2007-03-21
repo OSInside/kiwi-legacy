@@ -204,7 +204,7 @@ sub getRequiredPatterns {
 	my @pattern = @{$pattref};
 	my @patdata = getPatternContents (\@pattern);
 	my @reqs = getSection (
-		'^\+Re[qc]:','^\-Re[qc]:',\@patdata
+		'^\+Req:','^\-Req:',\@patdata
 	);
 	push (@reqs,"base");
 	push (@reqs,"desktop-base");
@@ -235,7 +235,7 @@ sub getPackages {
 	my $this = shift;
 	my %result;
 	my @reqs = getRequiredPatterns (\@pattern);
-	my @pacs = getSection ('^\+Pr[qc]:','^\-Pr[qc]:');
+	my @pacs = getSection ('^\+Prq:','^\-Prq:');
 	return @pacs;
 }
 
