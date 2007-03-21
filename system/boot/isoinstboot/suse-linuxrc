@@ -67,18 +67,6 @@ export SYSTEM_MD5STATUS
 . /include
 
 #======================================
-# Functions
-#--------------------------------------
-CDMount () {
-	CDDevice
-	mkdir -p /cdrom
-	mount $cddev /cdrom &>/dev/null
-}
-CDUmount () {
-	umount $cddev
-}
-
-#======================================
 # Beautify Startup
 #--------------------------------------
 clear
@@ -113,11 +101,6 @@ CDMount
 #======================================
 # 4) Load configuration
 #--------------------------------------
-if [ ! -f $CONFIG ];then
-	systemException \
-		"Couldn't find CD image configuration file ($CONFIG)" \
-	"reboot"
-fi
 importFile < $CONFIG
 
 export systemIntegrity="clean"

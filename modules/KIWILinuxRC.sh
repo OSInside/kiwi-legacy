@@ -288,15 +288,50 @@ function CDDevice {
 		/sbin/modprobe $module
 	done
 	info="/proc/sys/dev/cdrom/info"
-	cddev=`cat $info | grep "drive name:" | cut -f2 -d: | tr "\t" ":"`
-	cddev=`echo $cddev | cut -f3 -d:`
-	cddev=`echo $cddev | tr -d [:space:]`
-	if test ! -b "/dev/$cddev"; then
+	cddevs=`cat $info | grep "drive name:" | cut -f2 -d: | tr "\t" ":"`
+	cddevs=`echo $cddevs | cut -f3- -d:`
+	cddevs=`echo $cddevs | tr -d [:space:]`
+	IFS=":"; for i in $cddevs;do
+		if [ -b "/dev/$i" ];then
+			test -z $cddev && cddev=/dev/$i || cddev=$cddev:/dev/$i
+		fi
+	done
+	IFS=$IFS_ORIG
+	if [ -z $cddev ]; then
 		systemException \
 			"Failed to detect CD drive !" \
 		"reboot"
 	fi
-	cddev="/dev/$cddev"
+}
+#======================================
+# CDMount
+#--------------------------------------
+function CDMount {
+	# /.../
+	# search all CD/DVD drives and use the one we can find
+	# the CD configuration on
+	# ----
+	CDDevice
+	mkdir -p /cdrom
+	IFS=":"; for i in $cddev;do
+		mount $i /cdrom &>/dev/null
+		if [ -f $CONFIG ];then
+			cddev=$i; return
+		fi
+		umount $i &>/dev/null
+	done
+	systemException \
+		"Couldn't find CD image configuration file" \
+	"reboot"
+}
+#======================================
+# CDUmount
+#--------------------------------------
+function CDUmount {
+	# /.../
+	# umount the CD device
+	# ----
+	umount $cddev
 }
 #======================================
 # probeNetworkCard
