@@ -14,52 +14,13 @@
 #               :
 # STATUS        : BETA
 #----------------
-#
 #======================================
 # Functions...
 #--------------------------------------
-Echo () {
-	if test "$1" = "-n";then
-		echo $1 "-----> $2"
-	elif test "$1" = "-b";then
-		echo "       $2"
-	else
-		echo "-----> $1"
-	fi
-}
-systemException () {
-	Echo "$1"
-	case "$2" in
-	"reboot")
-		Echo "rebootException: reboot in 60 sec..."; sleep 60
-		/sbin/restart >/dev/null 2>&1
-	;;
-	"wait")
-		Echo "waitException: waiting for ever..."
-		while true;do sleep 100;done
-	;;
-	"shell")
-		Echo "shellException: providing shell..."
-		/bin/sh
-	;;
-	*)
-		Echo "unknownException..."
-	;;
-	esac
-}
-getSystemIntegrity () {
-	if [ -z "$SYSTEM_INTEGRITY" ];then
-		echo "clean"
-	else  
-		echo $SYSTEM_INTEGRITY | cut -f$1 -d:
-	fi
-}
-getSystemMD5Status() {
-	echo $SYSTEM_MD5STATUS | cut -f$1 -d:
-}
+. /include
 
 #======================================
-# 14) create initrd on diskful
+# 1) create initrd on diskful
 #--------------------------------------
 if test -L /boot/boot;then
 	mount -t proc proc /proc
@@ -73,7 +34,7 @@ else
 fi
 
 #======================================
-# 15) Install boot loader on diskful
+# 2) Install boot loader on diskful
 #--------------------------------------
 if test -f "/usr/sbin/grub";then
 	Echo "Installing boot loader..."

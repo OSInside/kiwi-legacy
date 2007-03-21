@@ -14,70 +14,40 @@
 #               :
 # STATUS        : BETA
 #----------------
-#
 #======================================
-# Functions...
+# Functions
 #--------------------------------------
-Echo () {
-	if test "$1" = "-n";then
-		echo $1 "-----> $2"
-	elif test "$1" = "-b";then
-		echo "       $2"
-	else
-		echo "-----> $1"
-	fi
-}
-systemException () {
-	Echo "$1"
-	case "$2" in
-	"reboot")
-		Echo "rebootException: reboot in 60 sec..."; sleep 60
-		/sbin/restart >/dev/null 2>&1
-	;;
-	"wait")
-		Echo "waitException: waiting for ever..."
-		while true;do sleep 100;done
-	;;
-	"shell")
-		Echo "shellException: providing shell..."
-		/bin/sh
-	;;
-	*)
-		Echo "unknownException..."
-	;;
-	esac
-}
-getSystemIntegrity () {
-	if [ -z "$SYSTEM_INTEGRITY" ];then
-		echo "clean"
-	else  
-		echo $SYSTEM_INTEGRITY | cut -f$1 -d:
-	fi
-}
-getSystemMD5Status() {
-	echo $SYSTEM_MD5STATUS | cut -f$1 -d:
-}
+. /include
 
 #======================================
-# 14) create initrd on diskful
+# 1) check for LOCAL_BOOT
 #--------------------------------------
+if [ $LOCAL_BOOT = "yes" ];then
+	exit 0
+fi
+
+#======================================
+# 2) create initrd on diskful
+#--------------------------------------
+if test -z $KIWI_INITRD;then
 if test ! -z $DISK;then
-if test $systemIntegrity = "clean";then
-	if test -L /boot/boot;then
-		mount -t proc proc /proc
-		mount -t sysfs sysfs /sys
-		mkinitrd 
-		umount /sys
-		umount /proc
-	else
-		Echo "Image doesn't provide kernel system map"
-		Echo "Can't create initrd"
+	if test $systemIntegrity = "clean";then
+		if test -L /boot/boot;then
+			mount -t proc proc /proc
+			mount -t sysfs sysfs /sys
+			mkinitrd 
+			umount /sys
+			umount /proc
+		else
+			Echo "Image doesn't provide kernel system map"
+			Echo "Can't create initrd"
+		fi
 	fi
 fi
 fi
 
 #======================================
-# 15) Install boot loader on diskful
+# 3) Install boot loader on diskful
 #--------------------------------------
 if test ! -z $DISK;then
 if test $systemIntegrity = "clean";then
@@ -93,7 +63,7 @@ fi
 fi
 
 #======================================
-# 16) Reset systemIntegrity
+# 4) Reset systemIntegrity
 #--------------------------------------
 if test ! -z $DISK;then
 if test ! -z $RELOAD_CONFIG;then
@@ -102,7 +72,7 @@ fi
 fi
 
 #======================================
-# 17) check for valid mount points 
+# 5) check for valid mount points 
 #--------------------------------------
 if test ! -z $DISK;then
 	IFS=":" ; for i in $PART_MOUNT;do
@@ -115,7 +85,7 @@ if test ! -z $DISK;then
 fi
 
 #======================================
-# 18) Update /etc/ImageVersion files
+# 6) Update /etc/ImageVersion files
 #--------------------------------------
 if test ! -z $DISK;then
 	count=0

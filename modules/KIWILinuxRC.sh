@@ -1,0 +1,766 @@
+#!/bin/bash
+#================
+# FILE          : KIWILinuxRC.sh
+#----------------
+# PROJECT       : OpenSUSE Build-Service
+# COPYRIGHT     : (c) 2006 SUSE LINUX Products GmbH, Germany
+#               :
+# AUTHOR        : Marcus Schaefer <ms@suse.de>
+#               :
+# BELONGS TO    : Operating System images
+#               :
+# DESCRIPTION   : This module contains common used functions
+#               : for the suse linuxrc and preinit boot image
+#               : files
+#               : 
+#               :
+# STATUS        : Development
+#----------------
+#======================================
+# Debug
+#--------------------------------------
+function Debug {
+	# /.../
+	# print message if variable DEBUG is set to 1
+	# -----
+	if test "$DEBUG" = 1;then
+		echo "+++++> $1"
+	fi
+}
+#======================================
+# Echo
+#--------------------------------------
+function Echo {
+	# /.../
+	# print a message to the controling terminal
+	# ----
+	if test "$1" = "-n";then
+		echo $1 "-----> $2"
+	elif test "$1" = "-b";then
+		echo "       $2"
+	else
+		echo "-----> $1"
+	fi
+}
+#======================================
+# WaitKey
+#--------------------------------------
+function WaitKey {
+	# /.../
+	# if DEBUG is set wait for any key to continue
+	# ----
+	if test "$DEBUG" = 1;then
+		Echo -n "Press any key to continue..."
+		read
+	fi
+}
+#======================================
+# closeKernelConsole
+#--------------------------------------
+function closeKernelConsole {
+	# /.../
+	# close the kernel console, messages from the kernel
+	# will not be displayed on the controling terminal
+	# if DEBUG is set the kernel console remains open
+	# ----
+	if test "$DEBUG" = 0;then
+		/usr/sbin/klogconsole -l 1
+	fi
+}
+#======================================
+# reopenKernelConsole
+#--------------------------------------
+function reopenKernelConsole {
+	# /.../
+	# reopen kernel console to be able to see kernel messages
+	# while the system is booting
+	# ----
+	/usr/sbin/klogconsole -l 7
+}
+#======================================
+# importFile
+#--------------------------------------
+function importFile {
+	# /.../
+	# import the config.<MAC> style format. the function
+	# will export each entry of the file as variable into
+	# the current shell environment
+	# ----
+	IFS="
+	"
+	while read line;do
+	IFS="="
+	count=0
+	for item in $line;do
+		if test $count = 0 ; then
+			key=$item ; count=1 ; continue
+		fi
+		if test $count = 1 ; then
+			item=`echo $item | tr -d \'`
+			Debug "$key=$item"
+			eval export $key\=\"$item\"
+			count=0
+		fi
+	done
+	done
+}
+#======================================
+# systemException
+#--------------------------------------
+function systemException {
+	# /.../
+	# print a message to the controling terminal followed
+	# by an action. Possible actions are reboot, wait
+	# and opening a shell
+	# ----
+	Echo "$1"
+	case "$2" in
+	"reboot")
+		Echo "rebootException: reboot in 60 sec..."; sleep 60
+		/sbin/restart >/dev/null 2>&1
+	;;
+	"wait")
+		Echo "waitException: waiting for ever..."
+		while true;do sleep 100;done
+	;;
+	"shell")
+		Echo "shellException: providing shell..."
+		/bin/sh
+	;;
+	*)
+		Echo "unknownException..."
+	;;
+	esac
+}
+#======================================
+# probeFileSystem
+#--------------------------------------
+function probeFileSystem {
+	# /.../
+	# probe for the filesystem type. The function will
+	# read the first 128 kB of the given device and check
+	# the filesystem header data to detect the type of the
+	# filesystem
+	# ----
+	FSTYPE=unknown
+	dd if=$1 of=/tmp/filesystem-$$ bs=128k count=1 >/dev/null 2>&1
+	data=$(file /tmp/filesystem-$$) && rm -f /tmp/filesystem-$$
+	case $data in
+		*ext3*)     FSTYPE=ext3 ;;
+		*ext2*)     FSTYPE=ext2 ;;
+		*ReiserFS*) FSTYPE=reiserfs ;;
+		*cramfs*)   FSTYPE=cramfs ;;
+		*squashfs*) FSTYPE=squashfs ;;
+		*)
+			FSTYPE=unknown
+		;;
+	esac
+}
+#======================================
+# readFileSystem
+#--------------------------------------
+function readFileSystem {
+	# /.../
+	# read the image type information from the image itself
+	# and return the appropriate filesystem type.
+	# ----
+	imageConfig=$1
+	if [ ! -f $imageConfig ];then
+		FSTYPE=auto
+		return
+	fi
+	data=`cat $imageConfig | grep "<type>" | cut -f2 -d ">" | cut -f1 -d "<"`
+	case $data in
+		*ext3*)     FSTYPE=ext3 ;;
+		*ext2*)     FSTYPE=ext2 ;;
+		*reiserfs*) FSTYPE=reiserfs ;;
+		*cramfs*)   FSTYPE=cramfs ;;
+		*squashfs*) FSTYPE=squashfs ;;
+		*)
+			FSTYPE=auto
+		;;
+	esac
+}
+#======================================
+# getSystemIntegrity
+#--------------------------------------
+function getSystemIntegrity {
+	# /.../
+	# check the variable SYSTEM_INTEGRITY which contains
+	# information about the status of all image portions
+	# per partition. If a number is given as parameter only
+	# the information from the image assigned to this partition
+	# is returned
+	# ----
+	if [ -z "$SYSTEM_INTEGRITY" ];then
+		echo "clean"
+	else
+		echo $SYSTEM_INTEGRITY | cut -f$1 -d:
+	fi
+}
+#======================================
+# getSystemMD5Status
+#--------------------------------------
+function getSystemMD5Status {
+	# /.../
+	# return the md5 status of the given image number.
+	# the function works similar to getSystemIntegrity
+	# ----
+	echo $SYSTEM_MD5STATUS | cut -f$1 -d:
+}
+#======================================
+# probeDeviceAlias
+#--------------------------------------
+function probeDeviceAlias {
+	# /.../
+	# create the modalias information file from all
+	# registered devices of the kernel
+	# ----
+	modalias=/tmp/modalias
+	cat > $modalias < /dev/null
+	for i in `find /sys -name modalias 2>/dev/null`;do
+		alias=`cat $i | grep pci:`
+		if [ ! -z "$alias" ];then
+			echo $alias >> $modalias
+		fi
+	done
+	cat $modalias | sort | uniq > $modalias.new
+	mv $modalias.new $modalias
+}
+#======================================
+# probeDeviceInfo
+#--------------------------------------
+function probeDeviceInfo {
+	# /.../
+	# create the modinfo information file from all
+	# installed kernel drivers
+	# ----
+	modinfo=/tmp/modinfo
+	cat > $modinfo < /dev/null
+	for file in `find /lib/modules/*/kernel/drivers -type f`;do
+		/sbin/modinfo -F alias $file |\
+			sed -e s@*@.*@g -e s@.@$file%\&@ \
+		>> $modinfo
+	done
+	cat $modinfo | sort | uniq > $modinfo.new
+	mv $modinfo.new $modinfo
+}
+#======================================
+# probeDevices
+#--------------------------------------
+function probeDevices {
+	# /.../
+	# check the modalias with the modinfo file and load
+	# all matching kernel modules into the kernel
+	# ----
+	Echo "Including required kernel modules..."
+	IFS=$IFS_ORIG
+	probeDeviceInfo
+	probeDeviceAlias
+	IFS="%"; while read file info in;do
+		grep -q $info $modalias >/dev/null 2>&1
+		if [ $? = 0 ];then
+			module=`basename $file`
+			module=`echo $module | sed -e s@.ko@@`
+			INITRD_MODULES="$INITRD_MODULES $module"
+			modprobe $module >/dev/null 2>&1
+		fi
+	done < $modinfo
+	IFS=$IFS_ORIG
+	# bad fix for ata probe, load order is required
+	Echo "Waiting for devices to become ready..."
+	lsmod | grep -q ata_piix
+	if [ $? = 0 ];then
+		rmmod ata_piix
+		sleep 5
+		modprobe ata_piix
+	fi
+}
+#======================================
+# CDDevice
+#--------------------------------------
+function CDDevice {
+	# /.../
+	# detect CD/DVD device. The function use the information
+	# from /proc/sys/dev/cdrom/info to activate the drive
+	# ----
+	for module in usb-storage sr_mod cdrom ide-generic ide-cd BusLogic;do
+		/sbin/modprobe $module
+	done
+	info="/proc/sys/dev/cdrom/info"
+	cddev=`cat $info | grep "drive name:" | cut -f2 -d: | tr "\t" ":"`
+	cddev=`echo $cddev | cut -f3 -d:`
+	cddev=`echo $cddev | tr -d [:space:]`
+	if test ! -b "/dev/$cddev"; then
+		systemException \
+			"Failed to detect CD drive !" \
+		"reboot"
+	fi
+	cddev="/dev/$cddev"
+}
+#======================================
+# probeNetworkCard
+#--------------------------------------
+function probeNetworkCard {
+	# /.../
+	# use hwinfo to probe for all network devices. The
+	# function will check for the driver which is needed
+	# to support the card and returns the information in
+	# the networkModule variable
+	# ----
+	hwnet=/usr/sbin/hwinfo
+	hwstr="Driver Activation Cmd:"
+	IFS="
+	"
+	for i in `$hwnet --netcard | grep "$hwstr" | cut -f2 -d:`;do
+		hwmod=`echo $i | tr -d \" | cut -f3 -d" "`
+		hwcmd="$hwcmd:$hwmod"
+	done
+	if [ ! -z "$hwcmd" ];then
+		networkModule=$hwcmd
+	fi
+	IFS=$IFS_ORIG
+}
+#======================================
+# setupNetwork
+#--------------------------------------
+function setupNetwork {
+	# /.../
+	# setup the eth0 network interface using a dhcp
+	# request. On success the dhcp info file is imported
+	# into the current shell environment and the nameserver
+	# information is written to /etc/resolv.conf
+	# ----
+	dhcpcd eth0 >/dev/null 2>&1
+	if test $? != 0;then
+		systemException \
+			"Failed to setup DHCP network interface !" \
+		"reboot"
+	fi
+	ifconfig lo 127.0.0.1 netmask 255.0.0.0 up
+	for i in 1 2 3 4 5 6 7 8 9 0;do
+		[ -s /var/lib/dhcpcd/dhcpcd-eth0.info ] && break
+		sleep 5
+	done
+	importFile < /var/lib/dhcpcd/dhcpcd-eth0.info
+	echo "search $DOMAIN" > /etc/resolv.conf
+	IFS="," ; for i in $DNS;do
+		echo "nameserver $i" >> /etc/resolv.conf
+	done
+}
+#======================================
+# updateNeeded
+#--------------------------------------
+function updateNeeded {
+	# /.../
+	# check the contents of the IMAGE key and compare the
+	# image version file as well as the md5 sum of the installed
+	# and the available image on the tftp server
+	# ----
+	SYSTEM_INTEGRITY=""
+	SYSTEM_MD5STATUS=""
+	count=0
+	IFS="," ; for i in $IMAGE;do
+		field=0
+		IFS=";" ; for n in $i;do
+		case $field in
+			0) field=1 ;;
+			1) imageName=$n   ; field=2 ;;
+			2) imageVersion=$n; field=3 ;;
+			3) imageServer=$n ; field=4 ;;
+			4) imageBlkSize=$n
+		esac
+		done
+		atversion="$imageName-$imageVersion"
+		versionFile="/mnt/etc/ImageVersion-$atversion"
+		IFS=" "
+		if [ -f "$versionFile" ];then
+			read installed sum2 < $versionFile
+		fi
+		imageMD5s="image/$imageName-$imageVersion.md5"
+		[ -z "$imageServer" ]  && imageServer=$TSERVER
+		[ -z "$imageBlkSize" ] && imageBlkSize=8192
+		atftp -g -r $imageMD5s -l /etc/image.md5 $imageServer >/dev/null 2>&1
+		read sum1 blocks blocksize < /etc/image.md5
+		if [ ! -z "$sum1" ];then
+			SYSTEM_MD5STATUS="$SYSTEM_MD5STATUS:$sum1"
+		else
+			SYSTEM_MD5STATUS="$SYSTEM_MD5STATUS:none"
+		fi
+		if [ ! -z "$1" ];then
+			continue
+		fi
+		if test "$count" = 1;then
+		if test "$SYSTEM_INTEGRITY" = ":clean";then
+			Echo "Main OS image update needed"
+			Echo -b "Forcing download for multi image session"
+			RELOAD_IMAGE="yes"
+		fi
+		fi
+		count=$(($count + 1))
+		Echo "Cecking update status for image: $imageName"
+		if test ! -z $RELOAD_IMAGE;then
+			Echo -b "Update forced via RELOAD_IMAGE..."
+			Echo -b "Update status: Clean"
+			SYSTEM_INTEGRITY="$SYSTEM_INTEGRITY:clean"
+			continue
+		fi
+		if test ! -f $versionFile;then
+			Echo -b "Update forced: /etc/ImageVersion-$atversion not found"
+			Echo -b "Update status: Clean"
+			SYSTEM_INTEGRITY="$SYSTEM_INTEGRITY:clean"
+			continue
+		fi
+		Echo -b "Current: $atversion Installed: $installed"
+		if test "$atversion" = "$installed";then
+			if test $sum1 = $sum2;then
+				Echo -b "Update status: Fine"
+				SYSTEM_INTEGRITY="$SYSTEM_INTEGRITY:fine"
+				continue
+			fi
+			Echo -b "Image Update for image [ $imageName ] needed"
+			Echo -b "Image version equals but md5 checksum failed"
+			Echo -b "This means the contents of the new image differ"
+		else
+			Echo -b "Image Update for image [ $imageName ] needed"
+			Echo -b "Name and/or image version differ"
+		fi
+		Echo -b "Update status: Clean"
+		SYSTEM_INTEGRITY="$SYSTEM_INTEGRITY:clean"
+	done
+	SYSTEM_INTEGRITY=`echo $SYSTEM_INTEGRITY | cut -f2- -d:`
+	SYSTEM_MD5STATUS=`echo $SYSTEM_MD5STATUS | cut -f2- -d:`
+}
+#======================================
+# cleanSweep
+#--------------------------------------
+function cleanSweep {
+	# /.../
+	# zero out a the given disk device
+	# ----
+	diskDevice=$1
+	dd if=/dev/zero of=$diskDevice bs=32M >/dev/null 2>&1
+}
+#======================================
+# createFileSystem
+#--------------------------------------
+function createFileSystem {
+	# /.../
+	# create a filesystem on the specified partition
+	# if the partition is of type LVM a volume group
+	# is created
+	# ----
+	diskPartition=$1
+	diskID=`echo $diskPartition | sed -e s@[^0-9]@@g`
+	diskPD=`echo $diskPartition | sed -e s@[0-9]@@g`
+	diskPartitionType=`sfdisk -c $diskPD $diskID 2>/dev/null`
+	if test "$diskPartitionType" = "8e";then
+		Echo "Creating Volume group [systemvg]"
+		pvcreate $diskPartition >/dev/null 2>&1
+		vgcreate systemvg $diskPartition >/dev/null 2>&1
+	else
+		# .../
+		# There is no need to create a filesystem on the partition
+		# because the image itself contains the filesystem
+		# ----
+		# mke2fs $diskPartition >/dev/null 2>&1
+		# if test $? != 0;then
+		#   systemException \
+		#       "Failed to create filesystem on: $diskPartition !" \
+		#   "reboot"
+		# fi
+		:
+	fi
+}
+#======================================
+# partitionCount
+#--------------------------------------
+function partitionCount {
+	# /.../
+	# calculate the number of partitions to create. If the
+	# number is more than 4 an extended partition needs to be
+	# created.
+	IFS="," ; for i in $PART;do
+		PART_NUMBER=`expr $PART_NUMBER + 1`
+	done
+	if [ $PART_NUMBER -gt 4 ];then
+		PART_NEED_EXTENDED=1
+	fi
+	PART_NUMBER=`expr $PART_NUMBER + 1`
+	PART_NEED_FILL=`expr $PART_NUMBER / 8`
+	PART_NEED_FILL=`expr 8 - \( $PART_NUMBER - $PART_NEED_FILL \* 8 \)`
+}
+#======================================
+# fillPartition
+#--------------------------------------
+function fillPartition {
+	# /.../
+	# in case of an extended partition the number of input lines
+	# must be a multiple of 4, so this function will fill the input
+	# with empty lines to make sfdisk happy
+	# ----
+	while test $PART_NEED_FILL -gt 0;do
+		echo >> $PART_FILE
+		PART_NEED_FILL=`expr $PART_NEED_FILL - 1`
+	done
+}
+#======================================
+# createSwap
+#--------------------------------------
+function createSwap {
+	# /.../
+	# create the sfdisk input line for setting up the
+	# swap space
+	# ----
+	IFS="," ; for i in $PART;do
+		field=0
+		IFS=";" ; for n in $i;do
+		case $field in
+			0) partSize=$n   ; field=1 ;;
+			1) partID=$n     ; field=2 ;;
+			2) partMount=$n;
+		esac
+		done
+		if test $partID = "82" -o $partID = "S";then
+			echo "0,$partSize,$partID,-" > $PART_FILE
+			PART_COUNT=`expr $PART_COUNT + 1`
+			return
+		fi
+	done
+}
+#======================================
+# createPartition
+#--------------------------------------
+function createPartition {
+	# /.../
+	# create the sfdisk input lines for setting up the
+	# partition table except the swap space
+	# ----
+	devices=1
+	IFS="," ; for i in $PART;do
+		field=0
+		IFS=";" ; for n in $i;do
+		case $field in
+			0) partSize=$n   ; field=1 ;;
+			1) partID=$n     ; field=2 ;;
+			2) partMount=$n;
+		esac
+		done
+		if test $partID = "82" -o $partID = "S";then
+			continue
+		fi
+		if test $partSize = "x";then
+			partSize=""
+		fi
+		if [ $PART_COUNT -eq 1 ];then
+			echo ",$partSize,$partID,*" >> $PART_FILE
+		else
+			echo ",$partSize,$partID,-" >> $PART_FILE
+		fi
+		PART_COUNT=`expr $PART_COUNT + 1`
+		if [ $PART_NEED_EXTENDED -eq 1 ];then
+		if [ $PART_COUNT -eq 3 ];then
+			echo ",,E" >> $PART_FILE
+			NO_FILE_SYSTEM=1
+		fi
+		fi
+		devices=`expr $devices + 1`
+		if test -z "$PART_MOUNT";then
+			PART_MOUNT="$partMount"
+			PART_DEV="$DISK$devices"
+		else
+			PART_MOUNT="$PART_MOUNT:$partMount"
+			if [ $NO_FILE_SYSTEM -eq 2 ];then
+				devices=`expr $devices + 1`
+				NO_FILE_SYSTEM=0
+			fi
+			PART_DEV="$PART_DEV:$DISK$devices"
+		fi
+		if [ $NO_FILE_SYSTEM -eq 1 ];then
+			NO_FILE_SYSTEM=2
+		fi
+	done
+	if [ $PART_NEED_EXTENDED -eq 1 ];then
+		fillPartition
+	fi
+}
+#======================================
+# writePartitionTable
+#--------------------------------------
+function writePartitionTable {
+	# /.../
+	# write the partition table using PART_FILE as
+	# input for sfdisk
+	# ----
+	diskDevice=$1
+	sfdisk -uM --force $diskDevice < $PART_FILE >/dev/null 2>&1
+	if test $? != 0;then
+		systemException \
+			"Failed to create partition table on: $diskDevice !" \
+		"reboot"
+	fi
+	rm -f $PART_FILE
+}
+#======================================
+# linuxPartition
+#--------------------------------------
+function linuxPartition {
+	# /.../
+	# check for a linux partition on partition number 2
+	# using the given disk device. On success return 0
+	# ----
+	diskDevice=$1
+	diskPartitionType=`sfdisk -c $diskDevice 2 2>/dev/null`
+	if test "$diskPartitionType" = "83";then
+		return 0
+	fi
+	return 1
+}
+#======================================
+# kernelList
+#--------------------------------------
+function kernelList {
+	# /.../
+	# check for all installed kernels whether there are valid
+	# links to the initrd and kernel files. The function will
+	# save the valid linknames in the variable KERNEL_LIST
+	# ----
+	prefix=$1
+	KERNEL_LIST=""
+	kcount=0
+	for i in $prefix/lib/modules/*;do
+		if [ ! -d $i ];then
+			continue
+		fi
+		name=${i##*/}
+		if [ ! -f $prefix/boot/vmlinux-$name.gz ];then
+			continue
+		fi
+		KERNEL_PAIR=""
+		for n in $prefix/boot/*;do
+			if [ ! -L $n ];then
+				continue
+			fi
+			real=`readlink $n`
+			if [ $real = vmlinuz-$name ];then
+				kernel=${n##*/}
+				kcount=$((kcount+1))
+			fi
+			if [ $real = initrd-$name ];then
+				initrd=${n##*/}
+			fi
+			KERNEL_PAIR=$kernel:$initrd
+		done
+		if [ $kcount = 1 ];then
+			KERNEL_LIST=$KERNEL_PAIR
+		elif [ $kcount -gt 1 ];then
+			KERNEL_LIST=$KERNEL_LIST,$KERNEL_PAIR
+		fi
+	done
+}
+#======================================
+# validateSize
+#--------------------------------------
+function validateSize {
+	# /.../
+	# check if the image fits into the requested partition.
+	# An information about the sizes is printed out
+	# ----
+	haveBytes=`sfdisk -s $imageDevice`
+	haveBytes=`expr $haveBytes \* 1024`
+	haveMByte=`expr $haveBytes / 1048576`
+	needBytes=`expr $blocks \* $blocksize`
+	needMByte=`expr $needBytes / 1048576`
+	Echo "Have size: $imageDevice -> $haveBytes Bytes [ $haveMByte MB ]"
+	Echo "Need size: $needBytes Bytes [ $needMByte MB ]"
+	if test $haveBytes -gt $needBytes;then
+		return 0
+	fi
+	return 1
+}
+#======================================
+# validateBlockSize
+#--------------------------------------
+function validateBlockSize {
+	# /.../
+	# check the block size value. atftp limits to a maximum of
+	# 32768 blocks, so the block size must be checked according
+	# to the size of the image
+	# ----
+	isize=`expr $blocks \* $blocksize`
+	isize=`expr $isize / 32768`
+	if [ $isize -gt $imageBlkSize ];then
+		imageBlkSize=`expr $isize + 1024`
+	fi
+}
+#======================================
+# loadOK
+#--------------------------------------
+function loadOK {
+	# /.../
+	# check the output of the atftp command, unfortunately
+	# there is no useful return code to check so we have to
+	# check the output of the command
+	# ----
+    echo $1 | grep -q "File not found"
+    if [ $? = 0 ];then
+        return 1
+    fi
+    echo $1 | grep -q "aborting"
+    if [ $? = 0 ];then
+        return 1
+    fi
+    return 0
+}
+#======================================
+# validateRAM
+#--------------------------------------
+function validateRAM {
+	# /.../
+	# check if the image fits into the ramdisk.
+	# An information about the sizes is printed out
+	# ----
+	needRAM=`expr $blocks \* $blocksize`
+	needRAM=`expr $needRAM / 1024`
+	needRAM=`expr $needRAM + 128`
+	needMByte=`expr $needRAM / 1024`
+	hasRAM=`cat /proc/meminfo | grep MemFree | cut -f2 -d:`
+	hasRAM=`echo $hasRAM | cut -f1 -d" "`
+	hasMByte=`expr $hasRAM / 1024`
+	Echo "Have size: $imageDevice -> $hasRAM KBytes [ $hasMByte MB ]"
+	Echo "Need size: $needRAM KBytes [ $needMByte MB ]"
+	if test $hasRAM -gt $needRAM;then
+		return 0
+	fi
+	return 1
+}
+#======================================
+# includeKernelParameters
+#--------------------------------------
+function includeKernelParameters {
+	# /.../
+	# include the parameters from /proc/cmdline into
+	# the current shell environment
+	# ----
+	IFS=$IFS_ORIG
+	for i in `cat /proc/cmdline`;do
+		kernelKey=`echo $i | cut -f1 -d=`
+		kernelVal=`echo $i | cut -f2 -d=`
+		eval $kernelKey=$kernelVal
+	done
+}
+#======================================
+# checkTFTP
+#--------------------------------------
+function checkTFTP {
+	# /.../
+	# check the kernel commandline parameter kiwitftp.
+	# If it exists its contents will be used as tftp
+	# server address stored in the TSERVER variabe
+	# ----
+	if [ ! -z $kiwitftp ];then
+		Echo "Found TFTP server in kernel cmdline"
+		TSERVER=$kiwitftp
+	fi
+}
+

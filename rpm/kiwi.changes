@@ -1,4 +1,17 @@
 -------------------------------------------------------------------
+Tue Mar 20 10:06:55 CET 2007 - ms@suse.de
+
+- v1.18
+- added functions module KIWILinuxRC for linuxrc and preinit
+- fixed permission problem on live media (#252546)
+- added support for using the kiwi netboot initrd for local boot
+  as well. This makes sense if the image type is something not
+  locally bootable by the standard initrd creation mechanism of
+  the distribution
+- changed pattern support, include only required data not
+  recommended data (#255226)
+
+-------------------------------------------------------------------
 Mon Mar 19 14:40:06 CET 2007 - ms@suse.de
 
 - v1.17

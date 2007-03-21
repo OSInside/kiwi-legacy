@@ -16,129 +16,21 @@
 #               :
 # STATUS        : BETA
 #----------------
-#
 #======================================
-# Exports...
+# Exports (General)...
 #--------------------------------------
 export PATH="/sbin:/bin:/usr/sbin:/usr/bin"
 export IFS_ORIG=$IFS
+export DEBUG=0
 
-DEBUG=0
 #======================================
 # Functions...
 #--------------------------------------
-Debug () {
-	if test "$DEBUG" = 1;then
-		echo "+++++> $1"
-	fi
-}
-Echo () {
-	if test "$1" = "-n";then
-		echo $1 "-----> $2"
-	elif test "$1" = "-b";then
-		echo "       $2"
-	else
-		echo "-----> $1"
-	fi
-}
-WaitKey () {
-	if test "$DEBUG" = 1;then
-		Echo -n "Press any key to continue..."
-		read
-	fi
-}
-closeKernelConsole () {
-	if test "$DEBUG" = 0;then
-		/usr/sbin/klogconsole -l 1
-	fi
-}
-reopenKernelConsole () {
-	/usr/sbin/klogconsole -l 7
-}
-importFile () {
-	IFS="
-	"
-	while read line;do
-	IFS="="
-	count=0
-	for item in $line;do
-		if test $count = 0 ; then
-			key=$item ; count=1 ; continue
-		fi
-		if test $count = 1 ; then
-			item=`echo $item | tr -d \'`
-			Debug "$key=$item"
-			eval export $key\=\"$item\"
-			count=0
-		fi
-	done
-	done
-}
-systemException () {
-	Echo "$1"
-	case "$2" in
-	"reboot")
-		Echo "rebootException: reboot in 60 sec..."; sleep 60
-		/sbin/restart >/dev/null 2>&1
-	;;
-	"wait")
-		Echo "waitException: waiting for ever..."
-		while true;do sleep 100;done
-	;;
-	"shell")
-		Echo "shellException: providing shell..."
-		/bin/sh
-	;;
-	*)
-		Echo "unknownException..."
-	;;
-	esac
-}
-probeDeviceAlias () {
-	modalias=/tmp/modalias
-	cat > $modalias < /dev/null
-	for i in `find /sys -name modalias 2>/dev/null`;do
-		alias=`cat $i | grep pci:`
-		if [ ! -z "$alias" ];then
-			echo $alias >> $modalias
-		fi
-	done
-	cat $modalias | sort | uniq > $modalias.new
-	mv $modalias.new $modalias
-}
-probeDeviceInfo () {
-	modinfo=/tmp/modinfo
-	cat > $modinfo < /dev/null
-	for file in `find /lib/modules/*/kernel/drivers -type f`;do
-		/sbin/modinfo -F alias $file |\
-			sed -e s@*@.*@g -e s@.@$file%\&@ \
-		>> $modinfo
-	done
-	cat $modinfo | sort | uniq > $modinfo.new
-	mv $modinfo.new $modinfo
-}
-probeDevices () {
-	IFS=$IFS_ORIG
-	probeDeviceInfo
-	probeDeviceAlias
-	IFS="%"; while read file info in;do
-		grep -q $info $modalias >/dev/null 2>&1
-		if [ $? = 0 ];then
-			module=`basename $file`
-			module=`echo $module | sed -e s@.ko@@`
-			modprobe $module >/dev/null 2>&1
-		fi
-	done < $modinfo
-	IFS=$IFS_ORIG
-	# bad fix for ata probe, load order is required
-	Echo "Waiting for devices to become ready..."
-	lsmod | grep -q ata_piix
-	if [ $? = 0 ];then
-		rmmod ata_piix
-		sleep 5
-		modprobe ata_piix
-	fi
-}
+. /include
+
+#======================================
+# Functions...
+#--------------------------------------
 USBStickDevice () {
 	for device in /sys/bus/usb/drivers/usb-storage/*;do
 		if [ -L $device ];then
@@ -171,22 +63,6 @@ USBStickDevice () {
 			done
 		fi
 	done
-}
-fileSystem () {
-	imageConfig=$1
-	if [ ! -f $imageConfig ];then
-		FSTYPE=auto
-		return
-	fi
-	data=`cat $imageConfig | grep "<type>" | cut -f2 -d ">" | cut -f1 -d "<"`
-	case $data in
-		*ext3*)     FSTYPE=ext3 ;;
-		*ext2*)     FSTYPE=ext2 ;;
-		*reiserfs*) FSTYPE=reiserfs ;;
-		*)
-			FSTYPE=auto
-		;;
-	esac
 }
 stickMountSystem () {
 	mount $stickDevice /mnt &>/dev/null
@@ -242,7 +118,7 @@ stickMountSystem
 #======================================
 # 6) Get filesystem type
 #--------------------------------------
-fileSystem /mnt/image/config.xml
+readFileSystem /mnt/image/config.xml
 stickUmountSystem
 
 #======================================
@@ -283,6 +159,7 @@ umount /proc
 # 11) copy initrd files to image
 #--------------------------------------
 cp /preinit /mnt
+cp /include /mnt
 
 #======================================
 # 12) Activate new root

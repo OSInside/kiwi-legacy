@@ -16,125 +16,27 @@
 #               :
 # STATUS        : BETA
 #----------------
-#
 #======================================
-# Exports...
+# Exports (General)...
 #--------------------------------------
 export PATH="/sbin:/bin:/usr/sbin:/usr/bin"
+export IFS_ORIG=$IFS
+export DEBUG=0
+
+#======================================
+# Exports (Configuration)...
+#--------------------------------------
 export CONFIG="/cdrom/config.isoclient"
 export LIVECD="livecd"
-export IFS_ORIG=$IFS
 
-DEBUG=0
 #======================================
 # Functions...
 #--------------------------------------
-Debug () {
-	if test "$DEBUG" = 1;then
-		echo "+++++> $1"
-	fi
-}
-Echo () {
-	if test "$1" = "-n";then
-		echo $1 "-----> $2"
-	elif test "$1" = "-b";then
-		echo "       $2"
-	else
-		echo "-----> $1"
-	fi
-}
-WaitKey () {
-	if test "$DEBUG" = 1;then
-		Echo -n "Press any key to continue..."
-		read
-	fi
-}
-closeKernelConsole () {
-	if test "$DEBUG" = 0;then
-		/usr/sbin/klogconsole -l 1
-	fi
-}
-reopenKernelConsole () {
-	/usr/sbin/klogconsole -l 7
-}
-importFile () {
-	IFS="
-	"
-	while read line;do
-	IFS="="
-	count=0
-	for item in $line;do
-		if test $count = 0 ; then
-			key=$item ; count=1 ; continue
-		fi
-		if test $count = 1 ; then
-			item=`echo $item | tr -d \'`
-			Debug "$key=$item"
-			eval export $key\=\"$item\"
-			count=0
-		fi
-	done
-	done
-}
-systemException () {
-	Echo "$1"
-	case "$2" in
-	"reboot")
-		Echo "rebootException: reboot in 60 sec..."; sleep 60
-		/sbin/restart >/dev/null 2>&1
-	;;
-	"wait")
-		Echo "waitException: waiting for ever..."
-		while true;do sleep 100;done
-	;;
-	"shell")
-		Echo "shellException: providing shell..."
-		/bin/sh
-	;;
-	*)
-		Echo "unknownException..."
-	;;
-	esac
-}
-enoughRAM () {
-	needRAM=`expr $blocks \* $blocksize`
-	needRAM=`expr $needRAM / 1024`
-	needRAM=`expr $needRAM + 128`
-	hasRAM=`cat /proc/meminfo | grep MemFree | cut -f2 -d:`
-	hasRAM=`echo $hasRAM | cut -f1 -d" "`
-	if test $hasRAM -gt $needRAM;then
-		return 0
-	fi
-	return 1
-}
-fileSystem () {
-	FSTYPE=unknown
-	dd if=$1 of=/tmp/filesystem-$$ bs=128k count=1 >/dev/null 2>&1
-	data=$(file /tmp/filesystem-$$) && rm -f /tmp/filesystem-$$
-	case $data in
-		*ext3*)     FSTYPE=ext3 ;;
-		*ext2*)     FSTYPE=ext2 ;;
-		*ReiserFS*) FSTYPE=reiserfs ;;
-		*)
-			FSTYPE=unknown
-		;;
-	esac
-}
-CDDevice () {
-	for module in usb-storage sr_mod cdrom ide-generic ide-cd;do
-		/sbin/modprobe $module
-	done
-	info="/proc/sys/dev/cdrom/info"
-	cddev=`cat $info | grep "drive name:" | cut -f2 -d: | tr "\t" ":"`
-	cddev=`echo $cddev | cut -f3 -d:`
-	cddev=`echo $cddev | tr -d [:space:]`
-	if test ! -b "/dev/$cddev"; then
-		systemException \
-			"Failed to detect CD drive !" \
-		"reboot"
-	fi
-	cddev="/dev/$cddev"
-}
+. /include
+
+#======================================
+# Functions...
+#--------------------------------------
 CDMount () {
 	CDDevice
 	mkdir -p /cdrom
@@ -197,7 +99,7 @@ IFS="," ; for i in $IMAGE;do
 		Echo "Loading $imageName [$imageDevice]..."
 		IFS=" "
 		read sum1 blocks blocksize < $imageMD5s
-		if ! enoughRAM;then
+		if ! validateRAM;then
 			systemException \
 				"Not enough RAM available for this image" \
 			"reboot"
@@ -229,7 +131,7 @@ CDUmount
 #======================================
 # 6) Get filesystem type
 #--------------------------------------
-fileSystem $imageDevice
+probeFileSystem $imageDevice
 
 #======================================
 # 7) Resize filesystem to full space
@@ -296,6 +198,7 @@ umount /proc
 # 14) copy initrd files to image
 #--------------------------------------
 cp /preinit /mnt
+cp /include /mnt
 
 #======================================
 # 15) Activate new root

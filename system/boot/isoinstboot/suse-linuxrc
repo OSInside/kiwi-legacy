@@ -16,471 +16,59 @@
 #               :
 # STATUS        : BETA
 #----------------
-#
 #======================================
-# Exports...
+# Exports (General)
 #--------------------------------------
 export PATH="/sbin:/bin:/usr/sbin:/usr/bin"
-export CONFIG="/cdrom/config.isoclient"
-export NAME=0
-export PART_FILE="/etc/partition.table"
+export IFS_ORIG=$IFS
+export ARCH=`arch`
+export DEBUG=0
+
+#======================================
+# Exports (Booting)
+#--------------------------------------
 export DOMURD_MODULES="xennet xenblk"
-export PART_MOUNT
-export PART_DEV
 export INITRD_MODULES="reiserfs"
+export LOCAL_BOOT="no"
 export KERNEL_LIST
 
+#======================================
+# Exports (Alias)
+#--------------------------------------
+export SYSALIAS="undefined"
+export NAME=0
+
+#======================================
+# Exports (Partitioning)
+#--------------------------------------
+export PART_FILE="/etc/partition.table"
+export PART_MOUNT
+export PART_DEV
 export PART_COUNT=0
 export PART_NUMBER=0
 export PART_NEED_EXTENDED=0
 export PART_NEED_FILL=0
 export NO_FILE_SYSTEM=0
-export IFS_ORIG=$IFS
-export ARCH=`arch`
 
+#======================================
+# Exports (Configuration)
+#--------------------------------------
+export CONFIG="/cdrom/config.isoclient"
+
+#======================================
+# Exports (Status)
+#--------------------------------------
 export SYSTEM_INTEGRITY
 export SYSTEM_MD5STATUS
 
-DEBUG=0
-SYSALIAS="undefined"
 #======================================
-# Functions...
+# Functions
 #--------------------------------------
-Debug () {
-	if test "$DEBUG" = 1;then
-		echo "+++++> $1"
-	fi
-}
-Echo () {
-	if test "$1" = "-n";then
-		echo $1 "-----> $2"
-	elif test "$1" = "-b";then
-		echo "       $2"
-	else
-		echo "-----> $1"
-	fi
-}
-WaitKey () {
-	if test "$DEBUG" = 1;then
-		Echo -n "Press any key to continue..."
-		read
-	fi
-}
-closeKernelConsole () {
-	if test "$DEBUG" = 0;then
-		/usr/sbin/klogconsole -l 1
-	fi
-}
-reopenKernelConsole () {
-	/usr/sbin/klogconsole -l 7
-}
-importFile () {
-	IFS="
-	"
-	while read line;do
-	IFS="="
-	count=0
-	for item in $line;do
-		if test $count = 0 ; then
-			key=$item ; count=1 ; continue
-		fi
-		if test $count = 1 ; then
-			item=`echo $item | tr -d \'`
-			Debug "$key=$item"
-			eval export $key\=\"$item\"
-			count=0
-		fi
-	done
-	done
-}
-probeDeviceAlias () {
-	modalias=/tmp/modalias
-	cat > $modalias < /dev/null
-	for i in `find /sys -name modalias 2>/dev/null`;do
-		alias=`cat $i | grep pci:`
-		if [ ! -z "$alias" ];then
-			echo $alias >> $modalias
-		fi
-	done
-	cat $modalias | sort | uniq > $modalias.new
-	mv $modalias.new $modalias
-}
-probeDeviceInfo () {
-	modinfo=/tmp/modinfo
-	cat > $modinfo < /dev/null
-	for file in `find /lib/modules/*/kernel/drivers -type f`;do
-		/sbin/modinfo -F alias $file |\
-			sed -e s@*@.*@g -e s@.@$file%\&@ \
-		>> $modinfo
-	done
-	cat $modinfo | sort | uniq > $modinfo.new
-	mv $modinfo.new $modinfo
-}
-probeDevices () {
-	IFS=$IFS_ORIG
-	probeDeviceInfo
-	probeDeviceAlias
-	IFS="%"; while read file info in;do
-		grep -q $info $modalias >/dev/null 2>&1
-		if [ $? = 0 ];then
-			module=`basename $file`
-			module=`echo $module | sed -e s@.ko@@`
-			INITRD_MODULES="$INITRD_MODULES $module"
-			modprobe $module >/dev/null 2>&1
-		fi
-	done < $modinfo
-	IFS=$IFS_ORIG
-	
-	modprobe BusLogic
-	
-	# bad fix for ata probe, load order is required
-	Echo "Waiting for devices to become ready..."
-	lsmod | grep -q ata_piix
-	if [ $? = 0 ];then
-		rmmod ata_piix
-		sleep 5
-		modprobe ata_piix
-	fi
-}
-systemException () {
-	Echo "$1"
-	case "$2" in
-	"reboot")
-		Echo "rebootException: reboot in 60 sec..."; sleep 60
-		/sbin/restart >/dev/null 2>&1
-	;;
-	"wait")
-		Echo "waitException: waiting for ever..."
-		while true;do sleep 100;done
-	;;
-	"shell")
-		Echo "shellException: providing shell..."
-		/bin/sh
-	;;
-	*)
-		Echo "unknownException..."
-	;;
-	esac
-}
-updateNeeded () {
-	SYSTEM_INTEGRITY=""
-	SYSTEM_MD5STATUS=""
-	count=0
-	IFS="," ; for i in $IMAGE;do
-		field=0
-		IFS=";" ; for n in $i;do
-		case $field in
-			0) field=1 ;;
-			1) imageName=$n   ; field=2 ;;
-			2) imageVersion=$n; field=3 ;;
-			3) imageServer=$n ; field=4 ;;
-			4) imageBlkSize=$n
-		esac
-		done
-		atversion="$imageName-$imageVersion"
-		versionFile="/mnt/etc/ImageVersion-$atversion"
-		IFS=" "
-		if [ -f "$versionFile" ];then
-			read installed sum2 < $versionFile
-		fi
-		imageMD5s="/cdrom/$imageName-$imageVersion.md5"
-		read sum1 blocks blocksize < $imageMD5s
-		if [ ! -z "$sum1" ];then
-			SYSTEM_MD5STATUS="$SYSTEM_MD5STATUS:$sum1"
-		else
-			SYSTEM_MD5STATUS="$SYSTEM_MD5STATUS:none"
-		fi
-		if [ ! -z "$1" ];then
-			continue
-		fi
-		if test "$count" = 1;then
-		if test "$SYSTEM_INTEGRITY" = ":clean";then
-			Echo "Main OS image update needed"
-			Echo -b "Forcing download for multi image session"
-			RELOAD_IMAGE="yes"
-		fi
-		fi
-		count=$(($count + 1))
-		Echo "Checking update status for image: $imageName"
-		if test ! -z $RELOAD_IMAGE;then
-			Echo -b "Update forced via RELOAD_IMAGE..."
-			Echo -b "Update status: Clean"
-			SYSTEM_INTEGRITY="$SYSTEM_INTEGRITY:clean"
-			continue
-		fi
-		if test ! -f $versionFile;then
-			Echo -b "Update forced: /etc/ImageVersion-$atversion not found"
-			Echo -b "Update status: Clean"
-			SYSTEM_INTEGRITY="$SYSTEM_INTEGRITY:clean"
-			continue
-		fi
-		Echo -b "Current: $atversion Installed: $installed"
-		if test "$atversion" = "$installed";then
-			if test $sum1 = $sum2;then
-				Echo -b "Update status: Fine"
-				SYSTEM_INTEGRITY="$SYSTEM_INTEGRITY:fine"
-				continue
-			fi
-			Echo -b "Image Update for image [ $imageName ] needed"
-			Echo -b "Image version equals but md5 checksum failed"
-			Echo -b "This means the contents of the new image differ"
-		else
-			Echo -b "Image Update for image [ $imageName ] needed"
-			Echo -b "Name and/or image version differ"
-		fi
-		Echo -b "Update status: Clean"
-		SYSTEM_INTEGRITY="$SYSTEM_INTEGRITY:clean"
-	done
-	SYSTEM_INTEGRITY=`echo $SYSTEM_INTEGRITY | cut -f2- -d:`
-	SYSTEM_MD5STATUS=`echo $SYSTEM_MD5STATUS | cut -f2- -d:`
-}
-getSystemIntegrity () {
-	if [ -z "$SYSTEM_INTEGRITY" ];then
-		echo "clean"
-	else  
-		echo $SYSTEM_INTEGRITY | cut -f$1 -d:
-	fi
-}
-getSystemMD5Status() {
-	echo $SYSTEM_MD5STATUS | cut -f$1 -d:
-}
-cleanSweep () {
-	diskDevice=$1
-	dd if=/dev/zero of=$diskDevice bs=32M >/dev/null 2>&1
-}
-createFileSystem () {
-	diskPartition=$1
-	diskID=`echo $diskPartition | sed -e s@[^0-9]@@g`
-	diskPD=`echo $diskPartition | sed -e s@[0-9]@@g`
-	diskPartitionType=`sfdisk -c $diskPD $diskID 2>/dev/null`
-	if test "$diskPartitionType" = "8e";then
-		Echo "Creating Volume group [systemvg]"
-		pvcreate $diskPartition >/dev/null 2>&1
-		vgcreate systemvg $diskPartition >/dev/null 2>&1
-	else
-		# .../
-		# There is no need to create a filesystem on the partition
-		# because the image itself contains the filesystem
-		# ----
-		# mke2fs $diskPartition >/dev/null 2>&1
-		# if test $? != 0;then
-		# 	systemException \
-		# 		"Failed to create filesystem on: $diskPartition !" \
-		# 	"reboot"
-		# fi
-		:
-	fi
-}
-partitionCount () {
-	IFS="," ; for i in $PART;do
-		PART_NUMBER=`expr $PART_NUMBER + 1`
-	done
-	if [ $PART_NUMBER -gt 4 ];then
-		PART_NEED_EXTENDED=1
-	fi
-	PART_NUMBER=`expr $PART_NUMBER + 1`
-	PART_NEED_FILL=`expr $PART_NUMBER / 8`
-	PART_NEED_FILL=`expr 8 - \( $PART_NUMBER - $PART_NEED_FILL \* 8 \)`
-}
-fillPartition () {
-	while test $PART_NEED_FILL -gt 0;do
-		echo
-		PART_NEED_FILL=`expr $PART_NEED_FILL - 1`
-	done
-}
-createSwap () {
-	IFS="," ; for i in $PART;do
-		field=0
-		IFS=";" ; for n in $i;do
-		case $field in
-			0) partSize=$n   ; field=1 ;;
-			1) partID=$n     ; field=2 ;;
-			2) partMount=$n;
-		esac
-		done
-		if test $partID = "82" -o $partID = "S";then
-			echo "0,$partSize,$partID,-" > $PART_FILE
-			PART_COUNT=`expr $PART_COUNT + 1`
-			return
-		fi
-	done
-}
-createPartition () {
-	devices=1
-	IFS="," ; for i in $PART;do
-		field=0
-		IFS=";" ; for n in $i;do
-		case $field in
-			0) partSize=$n   ; field=1 ;;
-			1) partID=$n     ; field=2 ;;
-			2) partMount=$n;
-		esac
-		done
-		if test $partID = "82" -o $partID = "S";then
-			continue
-		fi
-		if test $partSize = "x";then
-			partSize=""
-		fi
-		if [ $PART_COUNT -eq 1 ];then
-			echo ",$partSize,$partID,*" >> $PART_FILE
-		else
-			echo ",$partSize,$partID,-" >> $PART_FILE
-		fi
-		PART_COUNT=`expr $PART_COUNT + 1`
-		if [ $PART_NEED_EXTENDED -eq 1 ];then
-		if [ $PART_COUNT -eq 3 ];then
-			echo ",,E" >> $PART_FILE
-			NO_FILE_SYSTEM=1
-		fi
-		fi
-		devices=`expr $devices + 1`
-		if test -z "$PART_MOUNT";then
-			PART_MOUNT="$partMount"
-			PART_DEV="$DISK$devices"
-		else
-			PART_MOUNT="$PART_MOUNT:$partMount"
-			if [ $NO_FILE_SYSTEM -eq 2 ];then
-				devices=`expr $devices + 1`
-				NO_FILE_SYSTEM=0
-			fi
-			PART_DEV="$PART_DEV:$DISK$devices"
-		fi
-		if [ $NO_FILE_SYSTEM -eq 1 ];then
-			NO_FILE_SYSTEM=2
-		fi
-	done
-	if [ $PART_NEED_EXTENDED -eq 1 ];then
-		fillPartition
-	fi
-}
-writePartitionTable () {
-	diskDevice=$1
-	sfdisk -uM --force $diskDevice < $PART_FILE >/dev/null 2>&1
-	if test $? != 0;then
-		systemException \
-			"Failed to create partition table on: $diskDevice !" \
-		"reboot"
-	fi
-	rm -f $PART_FILE
-}
-linuxPartition () {
-	diskDevice=$1
-	diskPartitionType=`sfdisk -c $diskDevice 2 2>/dev/null`
-	if test "$diskPartitionType" = "83";then
-		return 0
-	fi
-	return 1
-}
-fileSystem () {
-	imageConfig=$1
-	if [ ! -f $imageConfig ];then
-		FSTYPE=auto
-		return
-	fi
-	data=`cat $imageConfig | grep "<type>" | cut -f2 -d ">" | cut -f1 -d "<"`
-	case $data in
-		*ext3*)     FSTYPE=ext3 ;;
-		*ext2*)     FSTYPE=ext2 ;;
-		*reiserfs*) FSTYPE=reiserfs ;;
-		*cramfs*)   FSTYPE=cramfs ;;
-		*squashfs*) FSTYPE=squashfs ;;
-		*)
-			FSTYPE=auto
-		;;
-	esac
-}
-kernelList () {
-	prefix=$1
-	KERNEL_LIST=""
-	kcount=0
-	for i in $prefix/lib/modules/*;do
-		if [ ! -d $i ];then
-			continue
-		fi
-		name=${i##*/}
-		if [ ! -f $prefix/boot/vmlinux-$name.gz ];then
-			continue
-		fi
-		KERNEL_PAIR=""
-		for n in $prefix/boot/*;do
-			if [ ! -L $n ];then
-				continue
-			fi
-			real=`readlink $n`
-			if [ $real = vmlinuz-$name ];then
-				kernel=${n##*/}
-				kcount=$((kcount+1))
-			fi
-			if [ $real = initrd-$name ];then
-				initrd=${n##*/}
-			fi
-			KERNEL_PAIR=$kernel:$initrd
-		done
-		if [ $kcount = 1 ];then
-			KERNEL_LIST=$KERNEL_PAIR
-		elif [ $kcount -gt 1 ];then
-			KERNEL_LIST=$KERNEL_LIST,$KERNEL_PAIR
-		fi
-	done
-}
-validateSize () {
-	haveBytes=`sfdisk -s $imageDevice`
-	haveBytes=`expr $haveBytes \* 1024`
-	haveMByte=`expr $haveBytes / 1048576`
-	needBytes=`expr $blocks \* $blocksize`
-	needMByte=`expr $needBytes / 1048576`
-	Echo "Have size: $imageDevice -> $haveBytes Bytes [ $haveMByte MB ]"
-	Echo "Need size: $needBytes Bytes [ $needMByte MB ]"
-	if test $haveBytes -gt $needBytes;then
-		return 0
-	fi
-	return 1
-}
-validateBlockSize () {
-	isize=`expr $blocks \* $blocksize` 
-	isize=`expr $isize / 32768`
-	if [ $isize -gt $imageBlkSize ];then
-		imageBlkSize=`expr $isize + 1024`
-	fi
-}
-loadOK () {
-	echo $1 | grep -q "File not found"
-	if [ $? = 0 ];then
-		return 1
-	fi
-	echo $1 | grep -q "aborting"
-	if [ $? = 0 ];then
-		return 1
-	fi
-	return 0
-}
-validateRAM () {
-	needRAM=`expr $blocks \* $blocksize`
-	needRAM=`expr $needRAM / 1024`
-	needRAM=`expr $needRAM + 128`
-	hasRAM=`cat /proc/meminfo | grep MemFree | cut -f2 -d:`
-	hasRAM=`echo $hasRAM | cut -f1 -d" "`
-	if test $hasRAM -gt $needRAM;then
-		return 0
-	fi
-	return 1
-}
-CDDevice () {
-	for module in usb-storage sr_mod cdrom ide-generic ide-cd;do
-		/sbin/modprobe $module
-	done
-	info="/proc/sys/dev/cdrom/info"
-	cddev=`cat $info | grep "drive name:" | cut -f2 -d: | tr "\t" ":"`
-	cddev=`echo $cddev | cut -f3 -d:`
-	cddev=`echo $cddev | tr -d [:space:]`
-	if test ! -b "/dev/$cddev"; then
-		systemException \
-			"Failed to detect CD drive !" \
-		"reboot"
-	fi
-	cddev="/dev/$cddev"
-}
+. /include
+
+#======================================
+# Functions
+#--------------------------------------
 CDMount () {
 	CDDevice
 	mkdir -p /cdrom
@@ -688,7 +276,7 @@ IFS="," ; for i in $IMAGE;do
 
 	mkdir -p /mnt
 	mount $imageRootDevice /mnt
-	fileSystem /mnt/image/config.xml
+	readFileSystem /mnt/image/config.xml
 	umount /mnt
 	Echo "Resize filesystem to full partition space..."
 	if test "$FSTYPE" = "reiserfs";then
@@ -732,7 +320,7 @@ mount $imageRootDevice /mnt
 # 10) check filesystem and kernels
 #--------------------------------------
 if test $systemIntegrity = "clean";then
-	fileSystem /mnt/image/config.xml
+	readFileSystem /mnt/image/config.xml
 	kernelList /mnt
 fi
 
@@ -763,7 +351,7 @@ if test $systemIntegrity = "clean";then
 			done
 			index=`expr $index + 1`
 			if test ! $i = "/";then
-				fileSystem $device
+				probeFileSystem $device
 				echo "$device $i $FSTYPE defaults 1 1" >> /config/etc/fstab
 			fi
 		fi
@@ -826,6 +414,7 @@ fi
 # 13) copy initrd files to image
 #--------------------------------------
 cp /preinit /mnt
+cp /include /mnt
 
 #======================================
 # 14) unmount the CD

@@ -10,6 +10,7 @@
 		<size unit="M">460</size>
 		<rpm-check-signatures>False</rpm-check-signatures>
 		<packagemanager>smart</packagemanager>
+		<rpm-force>True</rpm-force>
 	</preferences>
 	<repository type="yast2">
 		<!--<source path="opensuse://10.3"/>-->

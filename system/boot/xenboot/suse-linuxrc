@@ -16,100 +16,21 @@
 #               :
 # STATUS        : BETA
 #----------------
-#
 #======================================
-# Exports...
+# Exports (General)...
 #--------------------------------------
 export PATH="/sbin:/bin:/usr/sbin:/usr/bin"
 export IFS_ORIG=$IFS
+export DEBUG=0
 
-DEBUG=0
 #======================================
 # Functions...
 #--------------------------------------
-Debug () {
-	if test "$DEBUG" = 1;then
-		echo "+++++> $1"
-	fi
-}
-Echo () {
-	if test "$1" = "-n";then
-		echo $1 "-----> $2"
-	elif test "$1" = "-b";then
-		echo "       $2"
-	else
-		echo "-----> $1"
-	fi
-}
-WaitKey () {
-	if test "$DEBUG" = 1;then
-		Echo -n "Press any key to continue..."
-		read
-	fi
-}
-closeKernelConsole () {
-	if test "$DEBUG" = 0;then
-		/usr/sbin/klogconsole -l 1
-	fi
-}
-reopenKernelConsole () {
-	/usr/sbin/klogconsole -l 7
-}
-importFile () {
-	IFS="
-	"
-	while read line;do
-	IFS="="
-	count=0
-	for item in $line;do
-		if test $count = 0 ; then
-			key=$item ; count=1 ; continue
-		fi
-		if test $count = 1 ; then
-			item=`echo $item | tr -d \'`
-			Debug "$key=$item"
-			eval export $key\=\"$item\"
-			count=0
-		fi
-	done
-	done
-}
-systemException () {
-	Echo "$1"
-	case "$2" in
-	"reboot")
-		Echo "rebootException: reboot in 60 sec..."; sleep 60
-		/sbin/restart >/dev/null 2>&1
-	;;
-	"wait")
-		Echo "waitException: waiting for ever..."
-		while true;do sleep 100;done
-	;;
-	"shell")
-		Echo "shellException: providing shell..."
-		/bin/sh
-	;;
-	*)
-		Echo "unknownException..."
-	;;
-	esac
-}
-fileSystem () {
-	imageConfig=$1
-	if [ ! -f $imageConfig ];then
-		FSTYPE=auto
-		return
-	fi
-	data=`cat $imageConfig | grep "<type>" | cut -f2 -d ">" | cut -f1 -d "<"`
-	case $data in 
-		*ext3*)     FSTYPE=ext3 ;;
-		*ext2*)     FSTYPE=ext2 ;;
-		*reiserfs*) FSTYPE=reiserfs ;;
-		*)
-			FSTYPE=auto
-		;;
-	esac
-}
+. /include
+
+#======================================
+# Functions...
+#--------------------------------------
 VMMountSystem () {
 	for rdevice in /dev/hda1 /dev/sda1;do
 		imageRootDevice=$rdevice
@@ -159,7 +80,7 @@ VMMountSystem
 #======================================
 # 5) Get filesystem type
 #--------------------------------------
-fileSystem /mnt/image/config.xml
+readFileSystem /mnt/image/config.xml
 
 #======================================
 # 6) Create system dependant files
@@ -199,6 +120,7 @@ umount /proc
 # 10) copy initrd files to image
 #--------------------------------------
 cp /preinit /mnt
+cp /include /mnt
 
 #======================================
 # 11) Activate new root
