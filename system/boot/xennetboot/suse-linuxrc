@@ -568,7 +568,7 @@ if test $systemIntegrity = "clean";then
 			done
 			index=`expr $index + 1`
 			if test ! $i = "/";then
-				readFileSystem $device
+				probeFileSystem $device
 				echo "$device $i $FSTYPE defaults 1 1" >> /config/etc/fstab
 			fi
 		fi
