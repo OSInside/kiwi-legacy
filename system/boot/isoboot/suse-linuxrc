@@ -195,10 +195,12 @@ if test $? != 0;then
 	PIVOT=false
 	mount --move . / && chroot . ./preinit
 	chroot . rm ./preinit
+	chroot . rm ./include
 else
 	PIVOT=true
 	./preinit
 	rm ./preinit
+	rm ./include
 fi
 #======================================
 # 16) Unmount initrd / system init

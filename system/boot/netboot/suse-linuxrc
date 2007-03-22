@@ -492,7 +492,7 @@ if [ $LOCAL_BOOT = "no" ];then
 		#======================================
 		# Check for KIWI_INITRD
 		#--------------------------------------
-		for i in $KIWI_INITRD;do
+		if [ ! -z $KIWI_INITRD ];then
 			Echo "Import kiwi initrd file: $KIWI_INITRD"
 			rm -f /mnt/boot/initrd* && mkdir -p /mnt/boot
 			atftp -g -r $KIWI_INITRD -l /mnt/boot/initrd \
@@ -503,7 +503,7 @@ if [ $LOCAL_BOOT = "no" ];then
 				SPLIT="COMBINED_IMAGE=$COMBINED_IMAGE"
 				KIWI_INITRD_PARAMS="$KIWI_INITRD_PARAMS $SPLIT"
 			fi
-		done
+		fi
 	fi
 fi
 
@@ -657,10 +657,12 @@ if test $? != 0;then
 	PIVOT=false
 	mount --move . / && chroot . ./preinit
 	chroot . rm ./preinit
+	chroot . rm ./include
 else
 	PIVOT=true
 	./preinit
 	rm ./preinit
+	rm ./include
 fi
 #======================================
 # 22) reboot system if specified
