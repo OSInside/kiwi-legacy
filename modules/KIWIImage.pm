@@ -168,6 +168,50 @@ sub createImageReiserFS {
 }
 
 #==========================================
+# createImageSquashFS
+#------------------------------------------
+sub createImageSquashFS {
+	# ...
+	# create squashfs image from source tree
+	# ---
+	my $this = shift;
+	#==========================================
+	# PRE filesystem setup
+	#------------------------------------------
+	my $name = preImage ("haveExtend");
+	if (! defined $name) {
+		return undef;
+	}
+	#==========================================
+	# Create filesystem on extend
+	#------------------------------------------
+	if (! setupSquashFS ( $name )) {
+		return undef;
+	}
+	#==========================================
+	# Create image md5sum
+	#------------------------------------------
+	if (! buildMD5Sum ($name)) {
+		return undef;
+	}
+	#==========================================
+	# Compress image using gzip
+	#------------------------------------------
+	if ($xml->getCompressed()) {
+	if (! compressImage ($name)) {
+		return undef;
+	}
+	}
+
+	$kiwi -> info ("Creating boot configuration...");
+	if (! writeImageConfig ($name)) {
+		$kiwi -> failed ();
+		return undef;
+	}
+	return $this;
+}
+
+#==========================================
 # createImageCPIO
 #------------------------------------------
 sub createImageCPIO {
@@ -259,6 +303,10 @@ sub createImageUSB {
 		};
 		/^reiserfs/   && do {
 			$ok = createImageReiserFS ();
+			last SWITCH;
+		};
+		/^squashfs/   && do {
+			$ok = createImageSquashFS ();
 			last SWITCH;
 		};
 		$kiwi -> error  ("Unsupported $text type: $type");
@@ -769,6 +817,10 @@ sub createImageSplit {
 			$ok = setupCramFS ( $namero,$imageTreeReadOnly );
 			last SWITCH;
 		};
+		/squashfs/   && do {
+			$ok = setupSquashFS ( $namero,$imageTreeReadOnly );
+			last SWITCH;
+		};
 		$kiwi -> error  ("Unsupported type: $FSTypeRO");
 		$kiwi -> failed ();
 		restoreSplitExtend ($imageTreeReadOnly);
@@ -835,6 +887,10 @@ sub createImageSplit {
 			/cramfs/     && do {
 				qx (/sbin/fsck.cramfs -v $imageDest/$name 2>&1);
 				$kiwi -> done();
+				last SWITCH;
+			};
+			/squashfs/   && do {
+				$kiwi -> done ();
 				last SWITCH;
 			};
 			$kiwi -> error  ("Unsupported type: $type");
@@ -958,8 +1014,10 @@ sub preImage {
 # writeImageConfig
 #------------------------------------------
 sub writeImageConfig {
+	my $name = shift;
 	my $configName = buildImageName() . ".config";
 	my $device = $xml -> getImageDevice ();
+
 	#==========================================
 	# create .config for types which needs it
 	#------------------------------------------
@@ -971,7 +1029,7 @@ sub writeImageConfig {
 			return undef;
 		}
 		my $namecd = buildImageName(";");
-		print FD "IMAGE=${device}2;image/$namecd\n";
+		print FD "IMAGE=${device}2;$namecd\n";
 		print FD "DISK=${device}\n";
 		#==========================================
 		# PART information
@@ -980,11 +1038,17 @@ sub writeImageConfig {
 		if ((scalar @parts) > 0) {
 			print FD "PART=";
 			for my $href (@parts) {
-				print FD $href->{size};
+				if ($href->{size} eq "image") {
+					print FD int (((-s "$imageDest/$name") / 1024 / 1024) + .5);
+				} else {
+					print FD $href->{size};
+				}
+
 				if ($href -> {type} eq "swap") {
 					print FD ";S;x,";
 				} else {
-					print FD ";L;/,";
+					my $mountpoint = $href -> {mountpoint};
+					print FD ";L;$mountpoint,";
 				}
 			}
 			print FD "\n";
@@ -1085,7 +1149,7 @@ sub postImage {
 	# Create image boot configuration
 	#------------------------------------------
 	$kiwi -> info ("Creating boot configuration...");
-	if (! writeImageConfig ()) {
+	if (! writeImageConfig ($name)) {
 		$kiwi -> failed ();
 		return undef;
 	}
@@ -1175,6 +1239,36 @@ sub installLogicalExtend {
 #------------------------------------------
 sub setupLogicalExtend {
 	my $quiet = shift;
+
+	#==========================================
+	# Call depmod
+	#------------------------------------------
+	my $systemMap = glob("$imageTree/boot/System.map*");
+	if (defined $systemMap) {
+		$kiwi -> info ("Calculating kernel module dependencies...");
+		my $kernelVersion;
+		
+		if ($systemMap =~ /System.map-(.*)/) {
+			$kernelVersion = $1;
+		} else {
+			$kiwi -> failed ();
+			$kiwi -> info ("Could not determine kernel version");
+			clearMount ();
+			return undef;
+		}
+
+		my $data = qx ( /sbin/depmod -F $systemMap -b $imageTree $kernelVersion );
+		my $code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> failed ();
+			$kiwi -> info ($data);
+			cleanMount();
+			return undef;
+		}
+
+		$kiwi -> done ();
+	}
+	
 	#==========================================
 	# Call images.sh script
 	#------------------------------------------
@@ -1261,6 +1355,10 @@ sub extractKernel {
 			if ($name !~ /boot/) {
 				return $name;
 			}
+			last SWITCH;
+		};
+		/squashfs/i && do {
+			return $name;
 			last SWITCH;
 		};
 	}
@@ -1363,6 +1461,29 @@ sub setupCramFS {
 		$kiwi -> error  ($data);
 		return undef;
 	}
+	return $name;
+}
+
+#==========================================
+# setupSquashFS
+#------------------------------------------
+sub setupSquashFS {
+	my $name = shift;
+	my $tree = shift;
+	if (! defined $tree) {
+		$tree = $imageTree;
+	}
+
+	qx (rm -f $imageDest/$name 2>&1);
+	my $data = qx (/usr/bin/mksquashfs $tree $imageDest/$name -noI 2>&1);
+	my $code = $? >> 8; 
+	if ($code != 0) {
+		$kiwi -> error  ("Couldn't create squashfs filesystem");
+		$kiwi -> failed ();
+		$kiwi -> error  ($data);
+		return undef;
+	}
+	qx (chmod 644 $imageDest/$name);
 	return $name;
 }
 

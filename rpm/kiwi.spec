@@ -8,8 +8,8 @@ Name:          kiwi
 BuildRequires: perl smart perl-XML-LibXML perl-libwww-perl screen syslinux
 Requires:      perl perl-XML-LibXML perl-libwww-perl screen
 Summary:       OpenSuSE - KIWI Image System
-Version:       1.18
-Release:       18
+Version:       1.19
+Release:       19
 Group:         System
 License:       GPL
 Source:        kiwi.tar.bz2

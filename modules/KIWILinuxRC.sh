@@ -799,3 +799,50 @@ function checkTFTP {
 	fi
 }
 
+#======================================
+# mountSystem
+#--------------------------------------
+mountSystem () {
+	OLDIFS=$IFS
+	IFS=$IFS_ORIG
+	mountDevice=$imageRootDevice
+	if test ! -z $1;then
+		mountDevice=$1
+	fi
+
+	if test ! -z $UNIONFS_CONFIG;then
+		mkdir -p /ro_branch
+		mkdir -p /rw_branch
+
+		rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
+		roDevice=`echo $UNIONFS_CONFIG | cut -d , -f 2`
+
+		if test $LOCAL_BOOT = "no" && test $systemIntegrity = "clean";then
+			if ! mke2fs $rwDevice >/dev/null 2>&1;then
+				systemException \
+					"Failed to create ext2 filesystem" \
+					"reboot"
+			fi
+		else
+			e2fsck -y -f $rwDevice >/dev/null 2>&1
+		fi
+		
+		mount $rwDevice /rw_branch >/dev/null 2>&1
+		if ! mount $roDevice /ro_branch >/dev/null 2>&1;then
+			mount -t squashfs $roDevice /ro_branch >/dev/null 2>&1
+		fi
+		mount -t unionfs -o dirs=/rw_branch=rw:/ro_branch=ro none /mnt >/dev/null 2>&1
+		umount -l /rw_branch >/dev/null 2>&1
+		umount -l /ro_branch >/dev/null 2>&1
+	else
+		mount $mountDevice /mnt >/dev/null 2>&1
+	fi
+	IFS=$OLDIFS
+}
+
+#======================================
+# umountSystem
+#--------------------------------------
+umountSystem () {
+	umount /mnt >/dev/null 2>&1
+}

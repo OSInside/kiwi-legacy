@@ -1,4 +1,18 @@
 -------------------------------------------------------------------
+Thu Mar 22 17:40:28 CET 2007 - ms@suse.de
+
+- v1.19
+- added support for /unionfs images by James Willcox <james@ximian.com>
+  the main point is to add support for squashfs/unionfs images.
+  Using squashfs is straightforward -- just set 'squashfs' as the
+  image type.  Using unionfs is a little trickier, and only netboot
+  is supported currently.  You need to add something like
+  UNIONFS_CONFIG=/dev/hda2,/dev/hda3 to config.<MAC> where the first
+  partition is the writable one (where an ext2 filesystem will
+  be created), and the second is the read-only filesystem (squashfs,
+  cramfs, whatever).
+
+-------------------------------------------------------------------
 Thu Mar 22 09:40:44 CET 2007 - ms@suse.de
 
 - fixed lo setup problem during boot time (#252543)

@@ -171,6 +171,10 @@ sub main {
 				$ok = $image -> createImageReiserFS ();
 				last SWITCH;
 			};
+			/^squashfs/   && do {
+				$ok = $image -> createImageSquashFS ();
+				last SWITCH;
+			};
 			/^cpio/       && do {
 				$ok = $image -> createImageCPIO ();
 				last SWITCH;

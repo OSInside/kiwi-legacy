@@ -75,6 +75,7 @@
 			<xs:attribute name="type" type="xs:string"/>
 			<xs:attribute name="number"/>
 			<xs:attribute name="size"/>
+			<xs:attribute name="mountpoint"/>
 		</xs:complexType>
 	</xs:element>
 

@@ -213,7 +213,7 @@ fi
 #--------------------------------------
 probeDevices
 
-export systemIntegrity="clean"
+export systemIntegrity="unknown"
 #======================================
 # 9) Is this a diskful station
 #--------------------------------------
@@ -238,16 +238,16 @@ if [ ! -z $PART ];then
 		updateNeeded initialize
 		if linuxPartition $DISK;then
 			#e2fsck -y -C 0 $imageDevice
-			mount $imageDevice /mnt >/dev/null 2>&1
-			mountstatus=$?
+			mountSystem
 			updateNeeded
-			if test $mountstatus = 0;then
-				umount /mnt
-			fi
+			
+			umountSystem
 			systemIntegrity=`getSystemIntegrity 1`
 			if [ $systemIntegrity = "fine" ];then
 				Echo "Base system is up to date, activating disk system..."
 			fi
+		else
+			systemIntegrity="clean"
 		fi
 	}
 	;;
@@ -404,9 +404,9 @@ IFS="," ; for i in $IMAGE;do
 	echo $imageDevice | grep -q ram
 	haveDataInRam=$?
 	if test ! -z $DISK && test $haveDataInRam != 0;then
-		mount $imageRootDevice /mnt
+		mountSystem $imageRootDevice
 		readFileSystem /mnt/image/config.xml
-		umount /mnt
+		umountSystem
 		if test "$FSTYPE" = "reiserfs";then
 			Echo "Resize Reiser filesystem to full partition space..."
 			resize_reiserfs $imageDevice
@@ -437,10 +437,10 @@ IFS="," ; for i in $IMAGE;do
 		Echo "Including RAM device data to disk..."
 		RELOAD_CONFIG="yes"
 		mkdir -p /config
-		mount $imageDevice /mnt
+		mountSystem
 		rm -rf /mnt/lost+found
 		cp -a /mnt/* /config && rm -f /mnt/*
-		umount /mnt
+		umountSystem
 	fi
 	rm -f /etc/ireal.md5
 	rm -f /etc/image.md5
@@ -461,7 +461,7 @@ fi
 #======================================
 # 12) Mount OS image to /mnt
 #--------------------------------------
-mount $imageRootDevice /mnt
+mountSystem
 
 #======================================
 # 13) Import fixed configuration files
@@ -493,7 +493,7 @@ if [ $LOCAL_BOOT = "no" ];then
 		# Check for KIWI_INITRD
 		#--------------------------------------
 		if [ ! -z $KIWI_INITRD ];then
-			Echo "Import kiwi initrd file: $KIWI_INITRD"
+			Echo "Import KIWI initrd file: $KIWI_INITRD"
 			rm -f /mnt/boot/initrd* && mkdir -p /mnt/boot
 			atftp -g -r $KIWI_INITRD -l /mnt/boot/initrd \
 				$TSERVER \
@@ -502,6 +502,10 @@ if [ $LOCAL_BOOT = "no" ];then
 			if [ ! -z $COMBINED_IMAGE ]; then
 				SPLIT="COMBINED_IMAGE=$COMBINED_IMAGE"
 				KIWI_INITRD_PARAMS="$KIWI_INITRD_PARAMS $SPLIT"
+			fi
+			if [ ! -z "$UNIONFS_CONFIG" ]; then
+				UNIONED="UNIONFS_CONFIG=$UNIONFS_CONFIG"
+				KIWI_INITRD_PARAMS="$KIWI_INITRD_PARAMS $UNIONED"
 			fi
 		fi
 	fi
@@ -541,7 +545,18 @@ if [ $LOCAL_BOOT = "no" ];then
 fi
 
 #======================================
-# 17) Create system dependant files
+# 17) make kernel/initrd available on unionfs
+#--------------------------------------
+if [ $LOCAL_BOOT = "no" ];then
+	if test ! -z "$UNIONFS_CONFIG" && test $systemIntegrity = "clean";then
+		cp -a /mnt/boot /mnt/boot2
+		rm -rf /mnt/boot
+		mv /mnt/boot2 /mnt/boot
+	fi
+fi
+
+#======================================
+# 18) Create system dependant files
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 if test $systemIntegrity = "clean";then
@@ -567,7 +582,7 @@ if test $systemIntegrity = "clean";then
 				count=`expr $count + 1`
 			done
 			index=`expr $index + 1`
-			if test ! $i = "/";then
+			if test ! $i = "/" && test ! $i = "x";then
 				probeFileSystem $device
 				echo "$device $i $FSTYPE defaults 1 1" >> /config/etc/fstab
 			fi
@@ -620,7 +635,7 @@ fi
 fi
 
 #======================================
-# 18) copy system dependant files
+# 19) copy system dependant files
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	if test $systemIntegrity = "clean";then
@@ -634,20 +649,20 @@ fi
 
 echo 256 > /proc/sys/kernel/real-root-dev
 #======================================
-# 19) umount system filesystems
+# 20) umount system filesystems
 #--------------------------------------
 umount /dev/pts
 umount /sys
 umount /proc
 
 #======================================
-# 20) copy initrd files to image
+# 21) copy initrd files to image
 #--------------------------------------
 cp /preinit /mnt
 cp /include /mnt
 
 #======================================
-# 21) Activate new root
+# 22) Activate new root
 #--------------------------------------
 Echo "Activating Image: [$imageRootName]"
 cd /mnt && exec < dev/console >dev/console 2>&1
@@ -665,7 +680,7 @@ else
 	rm ./include
 fi
 #======================================
-# 22) reboot system if specified
+# 23) reboot system if specified
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	if test ! -z $REBOOT_IMAGE;then
@@ -674,7 +689,7 @@ if [ $LOCAL_BOOT = "no" ];then
 	fi
 fi
 #======================================
-# 23) Unmount initrd / system init
+# 24) Unmount initrd / system init
 #--------------------------------------
 echo " "
 echo "Booting into final System..."

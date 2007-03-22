@@ -238,10 +238,16 @@ sub getPartitions {
 			$size = "x";
 		}
 
+		my $mountpoint = $node -> getAttribute ("mountpoint");
+		if (!defined $mountpoint) {
+			$mountpoint = "x";
+		}
+
 		my %part = ();
 		$part{number} = $number;
 		$part{type} = $type;
 		$part{size} = $size;
+		$part{mountpoint} = $mountpoint;
 
 		push @result, { %part };
 	}
