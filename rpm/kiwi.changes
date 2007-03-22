@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Thu Mar 22 09:40:44 CET 2007 - ms@suse.de
 
+- fixed lo setup problem during boot time (#252543)
 - remove include file after preinit
 - update documentation
 

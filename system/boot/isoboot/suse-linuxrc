@@ -26,7 +26,7 @@ export DEBUG=0
 #======================================
 # Exports (Configuration)...
 #--------------------------------------
-export CONFIG="/cdrom/config.isoclient"
+export LIVECD_CONFIG="/cdrom/config.isoclient"
 export LIVECD="livecd"
 
 #======================================
@@ -63,7 +63,7 @@ CDMount
 #======================================
 # 4) Load configuration
 #--------------------------------------
-importFile < $CONFIG
+importFile < $LIVECD_CONFIG
 
 #======================================
 # 5) Download RW part of the CD image

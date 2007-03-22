@@ -315,7 +315,7 @@ function CDMount {
 	mkdir -p /cdrom
 	IFS=":"; for i in $cddev;do
 		mount $i /cdrom &>/dev/null
-		if [ -f $CONFIG ];then
+		if [ -f $LIVECD_CONFIG ];then
 			cddev=$i; return
 		fi
 		umount $i &>/dev/null
