@@ -10,7 +10,7 @@ Thu Mar 22 17:59:36 CET 2007 - ms@suse.de
 Thu Mar 22 17:40:28 CET 2007 - ms@suse.de
 
 - v1.19
-- added support for /unionfs images by James Willcox <james@ximian.com>
+- added support for squashfs/unionfs by James Willcox <james@ximian.com>
   the main point is to add support for squashfs/unionfs images.
   Using squashfs is straightforward -- just set 'squashfs' as the
   image type.  Using unionfs is a little trickier, and only netboot
