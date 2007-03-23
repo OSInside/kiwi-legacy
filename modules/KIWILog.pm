@@ -27,6 +27,8 @@ use Carp qw (cluck);
 my @showLevel = (0,1,2,3,4,5);
 my $channel   = \*STDOUT;
 my $logfile;
+my $errorFile = "/var/log/kiwi";
+my $errorOk   = 1;
 
 #==========================================
 # Constructor
@@ -40,6 +42,10 @@ sub new {
 	my $this  = {};
 	my $class = shift;
 	bless $this,$class;
+	if (! (open EFD,">$errorFile")) {
+		warning ( $this,"Couldn't open error log channel: $!\n" );
+		$errorOk = 0;
+	}
 	return $this;
 }
 
@@ -185,6 +191,9 @@ sub printLog {
 	foreach my $level (@showLevel) {
 	if ($level == $lglevel) {
 		setOutputChannel();
+		if ($errorOk) {
+			print EFD "$date $logdata\n";
+		}
 		if (($lglevel == 1) || ($lglevel == 2) || ($lglevel == 3)) {
 			print $date,$logdata;
 		} elsif ($lglevel == 5) {
@@ -265,6 +274,13 @@ sub setLogFile {
 	$logfile = \*FD;
 	$channel = \*FD;
 	return $this;
+}
+
+#==========================================
+# Destructor
+#------------------------------------------
+sub DESTROY {
+	close EFD;
 }
 
 1;
