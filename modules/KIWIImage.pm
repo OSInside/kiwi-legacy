@@ -29,6 +29,7 @@ use Math::BigFloat;
 my $imageTree;
 my $imageDest;
 my $imageStrip;
+my $baseSystem;
 my $kiwi;
 my $xml;
 my $arch;
@@ -45,8 +46,14 @@ sub new {
 	$imageTree  = shift;
 	$imageDest  = shift;
 	$imageStrip = shift;
+	$baseSystem = shift;
 	if (! defined $kiwi) {
 		$kiwi = new KIWILog();
+	}
+	if (! defined $baseSystem) {
+		$kiwi -> error ("No base system path specified");
+		$kiwi -> failed ();
+		return undef;
 	}
 	if (! defined $imageTree) {
 		$kiwi -> error  ("No image tree specified");
@@ -334,12 +341,12 @@ sub createImageUSB {
 	$main::Create   = $main::RootTree;
 	if (! defined main::main()) {
 		$main::Survive = "default";
-		if (! -d "$main::RootTree/base-system") {
+		if (! -d $main::RootTree.$baseSystem) {
 			qx (rm -rf $main::RootTree);
 		}
 		return undef;
 	}
-	if (! -d "$main::RootTree/base-system") {
+	if (! -d $main::RootTree.$baseSystem) {
 		qx (rm -rf $main::RootTree);
 	}
 	$result{bootImage} = $main::ImageName;
@@ -587,7 +594,7 @@ sub createImageLiveCD {
 	$main::Create   = $main::RootTree;
 	if (! defined main::main()) {
 		$main::Survive = "default";
-		if (! -d "$main::RootTree/base-system") {
+		if (! -d $main::RootTree.$baseSystem) {
 			qx (rm -rf $main::RootTree);
 			qx (rm -rf $imageTreeReadOnly);
 		}
@@ -626,7 +633,7 @@ sub createImageLiveCD {
 	}
 	if (! -d $gfx) {
 		$kiwi -> error  ("Couldn't open directory $gfx: $!");
-		if (! -d "$main::RootTree/base-system") {
+		if (! -d $main::RootTree.$baseSystem) {
 			qx (rm -rf $main::RootTree);
 		}
 		$kiwi -> failed ();
@@ -680,7 +687,7 @@ sub createImageLiveCD {
 		$kiwi -> failed ();
 		return undef;
 	}
-	if (! -d "$main::RootTree/base-system") {
+	if (! -d $main::RootTree.$baseSystem) {
 		qx (rm -rf $main::RootTree);
 	}
 	$kiwi -> done();

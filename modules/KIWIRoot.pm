@@ -30,6 +30,7 @@ my @mountList;
 my $imageDesc;
 my $baseSystem;
 my $manager;
+my $useRoot;
 my $selfRoot;
 my %sourceChannel;
 my $root;
@@ -54,6 +55,7 @@ sub new {
 	$imageDesc  = shift;
 	$selfRoot   = shift;
 	$baseSystem = shift;
+	$useRoot    = shift;
 	my $code;
 	#==========================================
 	# Check parameters
@@ -131,16 +133,23 @@ sub new {
 	# Create root directory
 	#------------------------------------------
 	my $rootError = 1;
-	if (! defined $selfRoot) {
-		$root = qx ( mktemp -q -d /tmp/kiwi.XXXXXX );
-		$code = $? >> 8;
-		if ($code == 0) {
-			$rootError = 0;
+	if (! defined $useRoot) {
+		if (! defined $selfRoot) {
+			$root = qx ( mktemp -q -d /tmp/kiwi.XXXXXX );
+			$code = $? >> 8;
+			if ($code == 0) {
+				$rootError = 0;
+			}
+			chomp $root;
+		} else {
+			$root = $selfRoot;
+			if (mkdir $root) {
+				$rootError = 0;
+			}
 		}
-		chomp $root;
 	} else {
-		$root = $selfRoot;
-		if (mkdir $root) {
+		if (-d $useRoot) {
+			$root = $useRoot;
 			$rootError = 0;
 		}
 	}
@@ -246,6 +255,32 @@ sub init {
 	#==================================
 	# Return object reference
 	#----------------------------------
+	return $this;
+}
+
+#==========================================
+# upgrade
+#------------------------------------------
+sub upgrade {
+	# ...
+	# Upgrade a previosly prepared image root tree
+	# with respect to changes of the installation source(s)
+	# ---
+	my $this = shift;
+	#==========================================
+	# Mount local and NFS directories
+	#------------------------------------------
+	if (! setupMount ($this)) {
+		$kiwi -> error ("Couldn't mount base system");
+		$kiwi -> failed ();
+		return undef;
+	}
+	#==========================================
+	# Upgrade system
+	#------------------------------------------
+	if (! $manager -> setupUpgrade()) {
+		return undef;
+	}
 	return $this;
 }
 

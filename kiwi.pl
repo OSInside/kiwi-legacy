@@ -35,6 +35,7 @@ our $Scheme  = "/usr/share/kiwi/modules/KIWIScheme.xsd";
 #--------------------------------------------
 our $Prepare;         # control XML file for building chroot extend
 our $Create;          # image description for building image extend
+our $Upgrade;         # upgrade physical extend
 our $Destination;     # destination directory for logical extends
 our $LogFile;         # optional file name for logging
 our $RootTree;        # optional root tree destination
@@ -155,7 +156,10 @@ sub main {
 		#==========================================
 		# Initialize logical image extend
 		#------------------------------------------
-		$image = new KIWIImage ( $kiwi,$xml,$Create,$Destination,$StripImage );
+		$image = new KIWIImage (
+			$kiwi,$xml,$Create,$Destination,$StripImage,
+			"/base-system"
+		);
 		my $type = $xml->getImageType();
 		my $ok;
 		SWITCH: for ($type) {
@@ -208,6 +212,41 @@ sub main {
 		} else {
 			my $code = kiwiExit (1); return $code;
 		}
+	}
+
+	#==========================================
+	# Upgrade image in chroot system
+	#------------------------------------------
+	if (defined $Upgrade) {
+		$kiwi -> info ("Reading image description...");
+		my $xml = new KIWIXML ( $kiwi,"$Upgrade/image" );
+		if (! defined $xml) {
+			my $code = kiwiExit (1); return $code;
+		}
+		$kiwi -> done();
+		#==========================================
+		# Initialize root system, use existing root
+		#------------------------------------------
+		$root = new KIWIRoot (
+			$kiwi,$xml,$Upgrade,undef,
+			"/base-system",$Upgrade
+		);
+		if (! defined $root) {
+			$kiwi -> error ("Couldn't create root object");
+			$kiwi -> failed ();
+			my $code = kiwiExit (1); return $code;
+		}
+		#==========================================
+		# Upgrade root system
+		#------------------------------------------
+		if (! $root -> upgrade ()) {
+			$kiwi -> error ("Image Upgrade failed");
+			$kiwi -> failed ();
+			$root -> cleanMount ();
+			my $code = kiwiExit (1); return $code;
+		}
+		$root -> cleanMount ();
+		kiwiExit (0);
 	}
 
 	#==========================================
@@ -346,6 +385,7 @@ sub init {
 		"prepare|p=s"         => \$Prepare,
 		"list|l"              => \&listImage,
 		"create|c=s"          => \$Create,
+		"upgrade|u=s"         => \$Upgrade,
 		"destdir|d=s"         => \$Destination,
 		"root|r=s"            => \$RootTree,
 		"bootstick=s"         => \$BootStick,
@@ -373,7 +413,7 @@ sub init {
 	if (
 		(! defined $Prepare) && (! defined $Create) &&
 		(! defined $BootStick) && (! defined $BootCD) &&
-		(! defined $InstallCD) &&
+		(! defined $InstallCD) && (! defined $Upgrade) &&
 		(! defined $BootVMDisk) && (! defined $CreatePassword)
 	) {
 		$kiwi -> info ("No operation specified");
@@ -407,6 +447,7 @@ sub usage {
 	print "  kiwi -l | --list\n";
 	print "  kiwi -p | --prepare <image-path>\n";
 	print "  kiwi -c | --create  <image-root>\n";
+	print "  kiwi -u | --upgrade <image-root>\n";
 	print "  kiwi --bootstick <initrd> [ --bootstick-system <systemImage> ]\n";
 	print "  kiwi --bootvm <initrd> --bootvm-system <systemImage> \\\n";
 	print "     [ --bootvm-disksize <size> ]\n";

@@ -358,6 +358,95 @@ sub resetInstallationSource {
 }
 
 #==========================================
+# setupUpgrade
+#------------------------------------------
+sub setupUpgrade {
+	# ...
+	# upgrade the previosly installed root system
+	# using the package manager upgrade functionality
+	# ---
+	my $this  = shift;
+	my $screenCall;
+	my $screenCtrl;
+	my $screenLogs;
+	my $data;
+	my $code;
+	#==========================================
+	# screen files
+	#------------------------------------------
+	my $screenCall = $root."/screenrc.smart";
+	my $screenCtrl = $root."/screenrc.ctrls";
+	my $screenLogs = $root."/screenrc.log";
+
+	#==========================================
+	# Initiate screen call file
+	#------------------------------------------
+	if ((! open (FD,">$screenCall")) || (! open (CD,">$screenCtrl"))) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't create call file: $!");
+		$kiwi -> failed ();
+		return undef;
+	}
+	print CD "logfile $screenLogs\n";
+	close CD;
+	#==========================================
+	# smart
+	#------------------------------------------
+	if ($manager eq "smart") {
+		#==========================================
+		# Create screen call file
+		#------------------------------------------
+		$kiwi -> info ("Upgrading image...");
+		print FD "chroot $root smart update\n";
+		print FD "chroot $root smart upgrade -y\n";
+		print FD "echo \$? > $screenCall.exit\n";
+		close FD;
+	}
+	#==========================================
+	# zypper
+	#------------------------------------------
+	if ($manager eq "zypper") {
+		#==========================================
+		# Create screen call file
+		#------------------------------------------
+		$kiwi -> info ("Upgrading image...");
+		print FD "chroot $root yes | zypper upgrade -y\n";
+		print FD "echo \$? > $screenCall.exit\n";
+		close FD;
+	}
+	#==========================================
+	# run upgrade process in screen
+	#------------------------------------------
+	$data = qx ( chmod 755 $screenCall );
+	$data = qx ( screen -L -D -m -c $screenCtrl $screenCall );
+	$code = $? >> 8;
+	if (open (FD,$screenLogs)) {
+		local $/; $data = <FD>; close FD;
+	}
+	if ($code == 0) {
+		if (! open (FD,"$screenCall.exit")) {
+			$code = 1;
+		} else {
+			$code = <FD>; chomp $code;
+			close FD; 
+		}
+	}
+	qx ( rm -f $screenCall* );
+	qx ( rm -f $screenCtrl );
+	qx ( rm -f $screenLogs );
+	#==========================================
+	# check exit code from screen session
+	#------------------------------------------
+	if ($code != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ($data);
+		return undef;
+	}
+	$kiwi -> done ();
+	return $this;
+}
+
+#==========================================
 # setupRootSystem
 #------------------------------------------
 sub setupRootSystem {

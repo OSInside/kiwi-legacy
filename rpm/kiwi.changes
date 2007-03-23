@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Thu Mar 22 17:59:36 CET 2007 - ms@suse.de
+
+- v1.20
+- added default displaymanager/windowmanager files to liveDVD
+- added support for upgrading a prepared image in case
+  of changes to the installation source
+
+-------------------------------------------------------------------
 Thu Mar 22 17:40:28 CET 2007 - ms@suse.de
 
 - v1.19
