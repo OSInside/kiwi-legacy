@@ -237,10 +237,8 @@ if [ ! -z $PART ];then
 		count=1
 		updateNeeded initialize
 		if linuxPartition $DISK;then
-			#e2fsck -y -C 0 $imageDevice
-			mountSystem
+			mountSystem $imageDevice
 			updateNeeded
-			
 			umountSystem
 			systemIntegrity=`getSystemIntegrity 1`
 			if [ $systemIntegrity = "fine" ];then
