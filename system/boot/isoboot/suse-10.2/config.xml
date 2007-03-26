@@ -33,6 +33,7 @@
 		<file name="fs/jbd/*"/>
 		<file name="fs/fat/*"/>
 		<file name="fs/vfat/*"/>
+		<file name="fs/squashfs.ko"/>
 		<file name="fs/reiserfs/*"/>
 		<file name="fs/nls/nls_utf8.ko"/>
 		<file name="net/ipv6/*"/>
@@ -70,6 +71,8 @@
 		<package name="syslinux"/>
 		<package name="make"/>
 		<package name="memtest86+"/>
+		<package name="squashfs"/>
+		<package name="squashfs-kmp-default"/>
 	</packages>
 	<packages type="boot">
 		<package name="kernel-default"/>

@@ -22,6 +22,7 @@ use strict;
 use KIWIURL;
 use KIWILog;
 use KIWIManager;
+use KIWIConfigure;
 
 #==========================================
 # Private
@@ -349,13 +350,15 @@ sub install {
 #------------------------------------------
 sub setup {
 	# ...
-	# Setup the installed system. This method will copy the user
-	# defined files to the root tree and creates the .profile
-	# environment file. Additionally the config.sh and package
-	# scripts are called within the chroot of the physical extend.
-	# At the end of this procedure the complete image description
-	# tree is copied to /image which contains information to
-	# create a logical extend from the chroot.
+	# Setup the installed system. This method will:
+	# 1) copy the user defined files to the root tree and
+	#    creates the .profile environment file.
+	# 2) calls the config.sh and package scripts within the
+	#    chroot of the physical extend.
+	# 3) copy the complete image description tree to
+	#    /image which contains information to create a logical
+	#    extend from the chroot.
+	# 4) configure the system with methods from KIWIConfigure
 	# ---
 	my $this = shift;
 	#======================================== 
@@ -460,140 +463,29 @@ sub setup {
 		}
 	}
 	#========================================
-	# check <users> tag, create users/groups
+	# configure the system
 	#----------------------------------------
-	my %users = $xml -> getUsers();
-	if (defined %users) {
-		my $adduser  = "/usr/sbin/useradd";
-		my $moduser  = "/usr/sbin/usermod";
-		my $addgroup = "/usr/sbin/groupadd";
-		foreach my $user (keys %users) {
-			my $group = $users{$user}{group};
-			my $pwd   = $users{$user}{pwd};
-			my $home  = $users{$user}{home};
-			if (defined $pwd) {
-				$adduser .= " -p '$pwd'";
-				$moduser .= " -p '$pwd'";
-			}
-			if (defined $home) {
-				$adduser .= " -m -d $home";
-			}
-			if (defined $group) {
-				my $data = qx ( chroot $root grep -q $group /etc/group 2>&1 );
-				my $code = $? >> 8;
-				if ($code != 0) {
-					$kiwi -> info ("Adding group: $group");
-					my $data = qx ( chroot $root $addgroup $group );
-					my $code = $? >> 8;
-					if ($code != 0) {
-						$kiwi -> failed ();
-						$kiwi -> info   ($data);
-						$kiwi -> failed ();
-						return undef;
-					}
-					$kiwi -> done();
-				}
-				$adduser .= " -G $group";
-			}
-			my $data = qx ( chroot $root grep -q $user /etc/passwd 2>&1 );
-			my $code = $? >> 8;
-			if ($code != 0) {
-				$kiwi -> info ("Adding user: $user [$group]");
-				$data = qx ( chroot $root $adduser $user 2>&1 );
-				$code = $? >> 8;
-			} else {
-				$kiwi -> info ("Modifying user: $user [$group]");
-				$data = qx ( chroot $root $moduser $user 2>&1 );
-				$code = $? >> 8;
-			}
-			if ($code != 0) {
-				$kiwi -> failed ();
-				$kiwi -> info   ($data);
-				$kiwi -> failed ();
-				return undef;
-			}
-			$kiwi -> done ();
-		}
+	my $configure = new KIWIConfigure ( $kiwi,$xml,$root,$imageDesc );
+	if (! defined $configure) {
+		return undef;
+	}
+	#========================================
+	# setup users/groups
+	#----------------------------------------
+	if (! $configure -> setupUsersGroups()) {
+		return undef;
 	}
 	#========================================
 	# setup yast if config-yast.xml exists
 	#----------------------------------------
-	if (-f "$imageDesc/config-yast.xml") {
-		$kiwi -> info ("Setting up AutoYaST...");
-		my $autodir = "var/lib/autoinstall/autoconf";
-		my $autocnf = "autoconf.xml";
-		if (! -d "$root/$autodir") {
-			$kiwi -> failed ();
-			$kiwi -> error  ("AutoYaST seems not be installed");
-			$kiwi -> failed ();
-			return undef;
-		}
-		qx ( cp $imageDesc/config-yast.xml $root/$autodir/$autocnf 2>&1 );
-		if ( ! open (FD,">$root/etc/install.inf")) {
-			$kiwi -> failed ();
-			$kiwi -> error ("Failed to create install.inf: $!");
-			$kiwi -> failed ();
-			return undef;
-		}
-		print FD "AutoYaST: http://192.168.100.99/part2.xml\n";
-		close FD;
-		if ( ! open (FD,">$root/var/lib/YaST2/runme_at_boot")) {
-			$kiwi -> failed ();
-			$kiwi -> error ("Failed to create runme_at_boot: $!");
-			$kiwi -> failed ();
-			return undef;
-		}
-		close FD;
-		$kiwi -> done ();
+	if (! $configure -> setupAutoYaST()) {
+		return undef;
 	}
 	#========================================
 	# Create in place SVN repos from /etc
 	#----------------------------------------
-	if (-f "$root/usr/bin/svn") {
-		$kiwi -> info ("Creating in-place SVN repository...");
-		my $repo = "/var/adm/etc-repos";
-		my $file = "/etc-repos.sh";
-		if ( ! open (FD,">$root/$file")) {
-			$kiwi -> failed ();
-			$kiwi -> error ("Failed to create SVN script: $!");
-			$kiwi -> failed ();
-			return undef;
-		}
-		print FD "#!/bin/bash\n";
-		print FD "svnadmin create $repo\n";
-		print FD "chmod 700 $repo\n";
-		print FD "svn mkdir -m created file:///$repo/trunk\n";
-		print FD "svn mkdir -m created file:///$repo/trunk/etc\n";
-		print FD "svn mkdir -m created file:///$repo/trunk/srv\n";
-		print FD "svn mkdir -m created file:///$repo/trunk/var\n";
-		print FD "svn mkdir -m created file:///$repo/trunk/var/log\n";
-		print FD "svn co file:///$repo/trunk/etc /etc\n";
-		print FD "svn co file:///$repo/trunk/srv /srv\n";
-		print FD "svn co file:///$repo/trunk/var/log /var/log\n";
-		print FD "chmod 700 /etc/.svn\n";
-		print FD "chmod 700 /srv/.svn\n";
-		print FD "chmod 700 /var/log/.svn\n";
-		print FD "svn add /etc/*\n";
-		print FD "find /etc -name .svn | xargs chmod 700\n";
-		print FD "svn ci -m initial /etc\n";
-		print FD "svn add /srv/*\n";
-		print FD "find /srv -name .svn | xargs chmod 700\n";
-		print FD "svn ci -m initial /srv\n";
-		print FD "svn add /var/log/*\n";
-		print FD "find /var/log -name .svn | xargs chmod 700\n";
-		print FD "svn ci -m initial /var/log\n";
-		close FD;
-		qx ( chmod 755 $root/$file 2>&1 );
-		my $data = qx ( chroot $root $file 2>&1 );
-		my $exit = $? >> 8;
-		if ($exit != 0) {
-			$kiwi -> failed ();
-			$kiwi -> info ("Failed to create SVN repository: $data");
-			$kiwi -> failed ();
-			return undef;
-		}
-		unlink ("$root/$file");
-		$kiwi -> done();
+	if (! $configure -> setupInPlaceSVNRepository()) {
+		return undef;
 	}
 	return $this;
 }

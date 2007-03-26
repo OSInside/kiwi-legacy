@@ -5,7 +5,7 @@
 		<specification>openSUSE 10.3 LiveDVD System</specification>
 	</description>
 	<preferences>
-		<type>iso:isoboot/suse-10.3</type>
+		<type>iso:isoboot/suse-10.3,compressed</type>
 		<version>1.1.2</version>
 		<size unit="M">2700</size>
 		<packagemanager>smart</packagemanager>
@@ -20,6 +20,7 @@
 		<source path="opensuse://SL-OSS-factory"/>
 	</repository>
 	<packages type="image">
+		<package name="subversion"/>
 		<opensusePattern name="default"/>
 		<opensusePattern name="apparmor"/>
 		<opensusePattern name="imaging"/>

@@ -445,19 +445,36 @@ sub createImageXen {
 #------------------------------------------
 sub createImageLiveCD {
 	# ...
-	# Create a live filesystem on CD using the iso boot image
+	# Create a live filesystem on CD using the isoboot boot image
 	# 1) split physical extend into two parts:
 	#    part1 -> writable
 	#    part2 -> readonly
-	# 2) Create two ext2 based images from the part extends
+	# 2) Setup an ext2 based image for the RW part and a squashfs
+	#    image if it should be compressed. If no compression is used
+	#    all RO data will be directly on CD/DVD as part of the ISO
+	#    filesystem
 	# 3) Prepare and Create the given iso <$boot> boot image
 	# 4) Setup the CD structure and copy all files
 	#    including the syslinux isolinux data
 	# 5) Create the iso image using isolinux.sh
 	# ---
 	my $this = shift;
-	my $boot = shift;
+	my $para = shift;
 	my $error;
+	my $data;
+	my $code;
+	#==========================================
+	# Get boot image name and compressed flag
+	#------------------------------------------
+	my @plist = split (/,/,$para);
+	my $boot  = $plist[0];
+	my $gzip  = $plist[1];
+	if (! defined $boot) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("No boot image name specified");
+		$kiwi -> failed ();
+		return undef;
+	}
 	#==========================================
 	# Get image creation date and name
 	#------------------------------------------
@@ -490,8 +507,8 @@ sub createImageLiveCD {
 		}
 		my @rodirs = qw (bin boot lib opt sbin usr);
 		foreach my $dir (@rodirs) {
-			my $data = qx (mv $imageTree/$dir $imageTreeReadOnly 2>&1);
-			my $code = $? >> 8;
+			$data = qx (mv $imageTree/$dir $imageTreeReadOnly 2>&1);
+			$code = $? >> 8;
 			if ($code != 0) {
 				$kiwi -> failed ();
 				$kiwi -> error  ("Couldn't setup ro directory: $data");
@@ -510,11 +527,11 @@ sub createImageLiveCD {
 	# Create RW logical extend
 	#------------------------------------------
 	$kiwi -> info ("Image RW part requires $mbytesrw MB of disk space");
-	$kiwi -> done ();
 	if (! buildLogicalExtend ($namerw,$mbytesrw."M")) {
 		restoreSplitExtend ($imageTreeReadOnly);
 		return undef;
 	}
+	$kiwi -> done ();
 	#==========================================
 	# Create EXT2 filesystem on RW extend
 	#------------------------------------------
@@ -539,7 +556,18 @@ sub createImageLiveCD {
 	}
 	cleanMount();
 	#==========================================
-	# Checking file system
+	# Create compressed filesystem on RO extend
+	#------------------------------------------
+	if (defined $gzip) {
+		$kiwi -> info ("Creating compressed read only filesystem");
+		if (! setupSquashFS ( $namero,$imageTreeReadOnly )) {
+			restoreSplitExtend ($imageTreeReadOnly);
+			return undef;
+		}
+		$kiwi -> done();
+	}
+	#==========================================
+	# Checking RW file system
 	#------------------------------------------
 	qx (/sbin/e2fsck -f -y $imageDest/$namerw 2>&1);
 
@@ -559,7 +587,7 @@ sub createImageLiveCD {
 	#==========================================
 	# recreate a copy of the read-only data
 	#------------------------------------------	
-	if (! -d $imageTreeReadOnly) {
+	if ((! -d $imageTreeReadOnly) && (! defined $gzip)) {
 		$kiwi -> info ("Creating read only reference...");
 		if (! mkdir $imageTreeReadOnly) {
 			$error = $!;
@@ -570,8 +598,8 @@ sub createImageLiveCD {
 		}
 		my @rodirs = qw (bin boot lib opt sbin usr);
 		foreach my $dir (@rodirs) {
-			my $data = qx (cp -a $imageTree/$dir $imageTreeReadOnly 2>&1);
-			my $code = $? >> 8;
+			$data = qx (cp -a $imageTree/$dir $imageTreeReadOnly 2>&1);
+			$code = $? >> 8;
 			if ($code != 0) {
 				$kiwi -> failed ();
 				$kiwi -> error  ("Couldn't setup ro directory: $data");
@@ -612,7 +640,6 @@ sub createImageLiveCD {
 	#------------------------------------------
 	$kiwi -> info ("Creating CD filesystem");
 	qx (mkdir -p $main::RootTree/CD/boot);
-	qx (mkdir -p $main::RootTree/CD/read-only-system);
 	$kiwi -> done ();
 
 	#==========================================
@@ -621,8 +648,13 @@ sub createImageLiveCD {
 	$kiwi -> info ("Moving CD image data into boot structure");
 	qx (mv $imageDest/$namerw.md5 $main::RootTree/CD);
 	qx (mv $imageDest/$namerw $main::RootTree/CD);
-	qx (mv $imageTreeReadOnly/* $main::RootTree/CD/read-only-system);
-	rmdir $imageTreeReadOnly;
+	if (defined $gzip) {
+		qx (mv $imageDest/$namero $main::RootTree/CD);
+	} else {
+		qx (mkdir -p $main::RootTree/CD/read-only-system);
+		qx (mv $imageTreeReadOnly/* $main::RootTree/CD/read-only-system);
+		rmdir $imageTreeReadOnly;
+	}
 	$kiwi -> done ();
 
 	#==========================================
@@ -1208,6 +1240,7 @@ sub buildLogicalExtend {
 	#==========================================
 	# Create logical extend storage and FS
 	#------------------------------------------
+	unlink ("$imageDest/$name");
 	my $data = qx (dd if=/dev/zero of=$imageDest/$name bs=$bs count=$cnt 2>&1);
 	my $code = $? >> 8;
 	if ($code != 0) {
@@ -1317,11 +1350,12 @@ sub setupLogicalExtend {
 #------------------------------------------
 sub mountLogicalExtend {
 	my $name = shift;
+	my $opts = shift;
 	#==========================================
 	# mount logical extend for data transfer
 	#------------------------------------------
 	mkdir "$imageDest/mnt-$$";
-	my $data = qx (mount -oloop $imageDest/$name $imageDest/mnt-$$);
+	my $data = qx (mount $opts -oloop $imageDest/$name $imageDest/mnt-$$);
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> error  ("Couldn't mount image");
@@ -1481,11 +1515,11 @@ sub setupSquashFS {
 	if (! defined $tree) {
 		$tree = $imageTree;
 	}
-
-	qx (rm -f $imageDest/$name 2>&1);
+	unlink ("$imageDest/$name");
 	my $data = qx (/usr/bin/mksquashfs $tree $imageDest/$name -noI 2>&1);
 	my $code = $? >> 8; 
 	if ($code != 0) {
+		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't create squashfs filesystem");
 		$kiwi -> failed ();
 		$kiwi -> error  ($data);

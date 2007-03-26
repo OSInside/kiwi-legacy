@@ -22,6 +22,7 @@
 export PATH="/sbin:/bin:/usr/sbin:/usr/bin"
 export IFS_ORIG=$IFS
 export DEBUG=0
+export ARCH=`arch`
 
 #======================================
 # Exports (Configuration)...
@@ -77,6 +78,9 @@ IFS="," ; for i in $IMAGE;do
 		2) imageVersion=$n
 	esac
 	done
+	imageReadOnly="$imageName"
+	imageReadOnly=`echo $imageReadOnly | sed -e s@.$ARCH@@`
+	imageReadOnly="$imageReadOnly-read-only.$ARCH-$imageVersion"
 	imageName="/cdrom/$imageName-$imageVersion"
 	imageMD5s="$imageName.md5"
 	while true;do
@@ -142,9 +146,20 @@ mkdir -p /mnt/$LIVECD && mount $cddev /mnt/$LIVECD &>/dev/null
 # 9) Create RO Link list
 #--------------------------------------
 cd /mnt
-for dir in bin boot lib opt sbin usr;do
-	ln -s $LIVECD/read-only-system/$dir $dir
-done
+if [ ! -d $LIVECD/read-only-system ];then
+	Echo "Mounting compressed read only tree..."
+	mkdir -p /mnt/read-only-system
+	mount -t squashfs -o loop /mnt/$LIVECD/$imageReadOnly /mnt/read-only-system
+	Echo "Creating live media links..."
+	for dir in bin boot lib opt sbin usr;do
+		ln -s read-only-system/$dir $dir
+	done
+else
+	Echo "Creating live media links..."
+	for dir in bin boot lib opt sbin usr;do
+		ln -s $LIVECD/read-only-system/$dir $dir
+	done
+fi
 cd /
 
 #======================================

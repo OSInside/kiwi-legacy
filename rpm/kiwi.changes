@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Mon Mar 26 11:47:20 CEST 2007 - ms@suse.de
+
+- v1.21
+- added support for compressed ISO live media based on squashfs
+- added KIWIConfigure module which implements all the
+  configuration tasks like setting up users/groups,
+  autoyast, subversion, etc...
+
+-------------------------------------------------------------------
 Fri Mar 23 16:10:07 CET 2007 - ms@suse.de
 
 - added /var/log/kiwi

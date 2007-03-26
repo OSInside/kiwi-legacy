@@ -150,10 +150,12 @@ the format:
                               can be used as system image filesystem
 						\item cpio\\
                               for boot images only
-                        \item iso:filename\\
+                        \item iso:filename[,compressed]\\
                               to create an .iso image whereas filename
                               must be the name of an appropriate isoboot
-                              boot image from
+                              boot image from. Optional one can activate
+                              squashfs compression for the read-only part
+                              of the iso.
                               \textit{/usr/share/kiwi/image/isoboot}
                         \item usb:type:filename\\
                               to create a system and boot image suitable
