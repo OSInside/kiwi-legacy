@@ -50,6 +50,11 @@ sub new {
 	if (! defined $kiwi) {
 		$kiwi = new KIWILog();
 	}
+	if (! defined $xml) {
+		$kiwi -> error ("No XML reference specified");
+		$kiwi -> failed ();
+		return undef;
+	}
 	if (! defined $baseSystem) {
 		$kiwi -> error ("No base system path specified");
 		$kiwi -> failed ();
@@ -1246,25 +1251,23 @@ sub installLogicalExtend {
 #------------------------------------------
 sub setupLogicalExtend {
 	my $quiet = shift;
-
 	#==========================================
 	# Call depmod
 	#------------------------------------------
+	my $depmod = "/sbin/depmod";
 	my $systemMap = glob("$imageTree/boot/System.map*");
 	if (defined $systemMap) {
 		$kiwi -> info ("Calculating kernel module dependencies...");
 		my $kernelVersion;
-		
 		if ($systemMap =~ /System.map-(.*)/) {
 			$kernelVersion = $1;
 		} else {
 			$kiwi -> failed ();
 			$kiwi -> info ("Could not determine kernel version");
-			clearMount ();
+			cleanMount ();
 			return undef;
 		}
-
-		my $data = qx ( /sbin/depmod -F $systemMap -b $imageTree $kernelVersion );
+		my $data = qx ( $depmod -F $systemMap -b $imageTree $kernelVersion );
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
@@ -1272,10 +1275,8 @@ sub setupLogicalExtend {
 			cleanMount();
 			return undef;
 		}
-
 		$kiwi -> done ();
 	}
-	
 	#==========================================
 	# Call images.sh script
 	#------------------------------------------
