@@ -117,7 +117,7 @@ Each image description exists in a single directory and contains
 a buildservice description for a package building client
 
 %package -n kiwi-desc-livesystem
-Requires:     kiwi kiwi-desc-isoboot smart
+Requires:     kiwi kiwi-desc-isoboot smart squashfs
 Summary:      OpenSuSE - KIWI image descriptions
 Group:        System
 

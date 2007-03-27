@@ -27,7 +27,7 @@ use KIWILog;
 use KIWIImage;
 use KIWIBoot;
 
-our $Version = "1.2";
+our $Version = "1.21";
 our $System  = "/usr/share/kiwi/image";
 our $Scheme  = "/usr/share/kiwi/modules/KIWIScheme.xsd";
 #============================================
@@ -533,15 +533,17 @@ sub quit {
 	# ...
 	# signal received, exit safely
 	# ---
-	$kiwi -> info ("\nReceived signal $_[0]");
-	$kiwi -> done ();
+	$kiwi -> note ("\n*** Received signal $_[0] ***\n");
 	if (defined $root) {
 		$root  -> cleanMount  ();
 		$root  -> cleanSource ();
 	}
 	if (defined $image) {
 		$image -> cleanMount ();
+		$image -> restoreSplitExtend ();
 	}
+	$kiwi -> error ("KIWI exited on signal: $_[0]");
+	$kiwi -> done  ();
 	exit 1;
 }
 

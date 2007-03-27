@@ -26,6 +26,7 @@ use Math::BigFloat;
 #==========================================
 # Private
 #------------------------------------------
+my $imageTreeReadOnly;
 my $imageTree;
 my $imageDest;
 my $imageStrip;
@@ -493,7 +494,7 @@ sub createImageLiveCD {
 	#==========================================
 	# split physical extend into RW / RO part
 	#------------------------------------------
-	my $imageTreeReadOnly = $imageTree;
+	$imageTreeReadOnly = $imageTree;
 	$imageTreeReadOnly =~ s/\/+$//;
 	$imageTreeReadOnly.= "-read-only/";
 	if (! -d $imageTreeReadOnly) {
@@ -521,14 +522,16 @@ sub createImageLiveCD {
 	#==========================================
 	# Count disk space for RW extend
 	#------------------------------------------
+	$kiwi -> info ("Computing disk space...");
 	my ($mbytesreal,$mbytesrw,$xmlsize) = getSize ($imageTree);
+	$kiwi -> done ();
 
 	#==========================================
 	# Create RW logical extend
 	#------------------------------------------
 	$kiwi -> info ("Image RW part requires $mbytesrw MB of disk space");
 	if (! buildLogicalExtend ($namerw,$mbytesrw."M")) {
-		restoreSplitExtend ($imageTreeReadOnly);
+		restoreSplitExtend ();
 		return undef;
 	}
 	$kiwi -> done ();
@@ -536,7 +539,7 @@ sub createImageLiveCD {
 	# Create EXT2 filesystem on RW extend
 	#------------------------------------------
 	if (! setupEXT2 ( $namerw,$imageTree )) {
-		restoreSplitExtend ($imageTreeReadOnly);
+		restoreSplitExtend ();
 		return undef;
 	}
 	#==========================================
@@ -544,14 +547,14 @@ sub createImageLiveCD {
 	#------------------------------------------
 	my $extend = mountLogicalExtend ($namerw);
 	if (! defined $extend) {
-		restoreSplitExtend ($imageTreeReadOnly);
+		restoreSplitExtend ();
 		return undef;
 	}
 	#==========================================
 	# copy physical to logical
 	#------------------------------------------
 	if (! installLogicalExtend ($extend,$imageTree)) {
-		restoreSplitExtend ($imageTreeReadOnly);
+		restoreSplitExtend ();
 		return undef;
 	}
 	cleanMount();
@@ -559,9 +562,9 @@ sub createImageLiveCD {
 	# Create compressed filesystem on RO extend
 	#------------------------------------------
 	if (defined $gzip) {
-		$kiwi -> info ("Creating compressed read only filesystem");
+		$kiwi -> info ("Creating compressed read only filesystem...");
 		if (! setupSquashFS ( $namero,$imageTreeReadOnly )) {
-			restoreSplitExtend ($imageTreeReadOnly);
+			restoreSplitExtend ();
 			return undef;
 		}
 		$kiwi -> done();
@@ -575,13 +578,13 @@ sub createImageLiveCD {
 	# Create image md5sum
 	#------------------------------------------
 	if (! buildMD5Sum ($namerw)) {
-		restoreSplitExtend ($imageTreeReadOnly);
+		restoreSplitExtend ();
 		return undef;
 	}
 	#==========================================
 	# Restoring physical extend
 	#------------------------------------------
-	if (! restoreSplitExtend ($imageTreeReadOnly)) {
+	if (! restoreSplitExtend ()) {
 		return undef;
 	}
 	#==========================================
@@ -767,7 +770,7 @@ sub createImageSplit {
 	#==========================================
 	# split physical extend into RW / RO part
 	#------------------------------------------
-	my $imageTreeReadOnly = $imageTree;
+	$imageTreeReadOnly = $imageTree;
 	$imageTreeReadOnly =~ s/\/+$//;
 	$imageTreeReadOnly.= "-read-only/";
 	if (! -d $imageTreeReadOnly) {
@@ -795,15 +798,17 @@ sub createImageSplit {
 	#==========================================
 	# Count disk space for extends
 	#------------------------------------------
+	$kiwi -> info ("Computing disk space...");
 	my ($mbytesreal,$mbytesrw,$xmlsize) = getSize ($imageTree);
 	my ($mbytesreal,$mbytesro,$xmlsize) = getSize ($imageTreeReadOnly);
+	$kiwi -> done ();
 
 	#==========================================
 	# Create RW logical extend
 	#------------------------------------------
 	$kiwi -> info ("Image RW part requires $mbytesrw MB of disk space");
 	if (! buildLogicalExtend ($namerw,$mbytesrw."M")) {
-		restoreSplitExtend ($imageTreeReadOnly);
+		restoreSplitExtend ();
 		return undef;
 	}
 	$kiwi -> done();
@@ -825,11 +830,11 @@ sub createImageSplit {
 		};
 		$kiwi -> error  ("Unsupported type: $FSTypeRW");
 		$kiwi -> failed ();
-		restoreSplitExtend ($imageTreeReadOnly);
+		restoreSplitExtend ();
 		return undef;
 	}
 	if (! $ok) {
-		restoreSplitExtend ($imageTreeReadOnly);
+		restoreSplitExtend ();
 		return undef;
 	}
 	#==========================================
@@ -837,7 +842,7 @@ sub createImageSplit {
 	#------------------------------------------
 	$kiwi -> info ("Image RO part requires $mbytesro MB of disk space");
 	if (! buildLogicalExtend ($namero,$mbytesro."M")) {
-		restoreSplitExtend ($imageTreeReadOnly);
+		restoreSplitExtend ();
 		return undef;
 	}
 	$kiwi -> done();
@@ -867,11 +872,11 @@ sub createImageSplit {
 		};
 		$kiwi -> error  ("Unsupported type: $FSTypeRO");
 		$kiwi -> failed ();
-		restoreSplitExtend ($imageTreeReadOnly);
+		restoreSplitExtend ();
 		return undef;
 	}
 	if (! $ok) {
-		restoreSplitExtend ($imageTreeReadOnly);
+		restoreSplitExtend ();
 		return undef;
 	}
 	#==========================================
@@ -896,14 +901,14 @@ sub createImageSplit {
 			#------------------------------------------
 			my $extend = mountLogicalExtend ($name);
 			if (! defined $extend) {
-				restoreSplitExtend ($imageTreeReadOnly);
+				restoreSplitExtend ();
 				return undef;
 			}
 			#==========================================
 			# copy physical to logical
 			#------------------------------------------
 			if (! installLogicalExtend ($extend,$source)) {
-				restoreSplitExtend ($imageTreeReadOnly);
+				restoreSplitExtend ();
 				return undef;
 			}
 			cleanMount();
@@ -939,21 +944,21 @@ sub createImageSplit {
 			};
 			$kiwi -> error  ("Unsupported type: $type");
 			$kiwi -> failed ();
-			restoreSplitExtend ($imageTreeReadOnly);
+			restoreSplitExtend ();
 			return undef;
 		}
 		#==========================================
 		# Create image md5sum
 		#------------------------------------------
 		if (! buildMD5Sum ($name)) {
-			restoreSplitExtend ($imageTreeReadOnly);
+			restoreSplitExtend ();
 			return undef;
 		}
 	}
 	#==========================================
 	# Restoring physical extend
 	#------------------------------------------
-	if (! restoreSplitExtend ($imageTreeReadOnly)) {
+	if (! restoreSplitExtend ()) {
 		return undef;
 	}
 	return $this;
@@ -1597,7 +1602,9 @@ sub buildMD5Sum {
 # restoreSplitExtend
 #------------------------------------------
 sub restoreSplitExtend {
-	my $imageTreeReadOnly = shift;
+	if ((! defined $imageTreeReadOnly) || ( ! -d $imageTreeReadOnly)) {
+		return $imageTreeReadOnly;
+	}
 	$kiwi -> info ("Restoring physical extend...");
 	my @rodirs = qw (bin boot lib opt sbin usr);
 	foreach my $dir (@rodirs) {
