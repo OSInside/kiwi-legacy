@@ -169,7 +169,7 @@
 		<package name="portmap"/>
 		<package name="cron"/>
 	</packages>
-	<packages type="xen">
+	<packages type="xen" memory="512" disk="/dev/sda">
 		<package name="kernel-xen"/>
 		<package name="xen"/>
 	</packages>

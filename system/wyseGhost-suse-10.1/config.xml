@@ -80,10 +80,6 @@
 		<!-- PLUS: ICAClient -->
 		<package name="ICAClient"/>
 	</packages>
-	<packages type="xen">
-		<package name="kernel-xen"/>
-		<package name="xen"/>
-	</packages>
 	<packages type="boot">
 		<package name="filesystem"/>
 		<package name="glibc-locale"/>
