@@ -32,7 +32,7 @@ export DEBUG=0
 # Functions...
 #--------------------------------------
 VMMountSystem () {
-	for rdevice in /dev/hda1 /dev/sda1;do
+	for rdevice in /dev/hda1 /dev/sda1 /dev/hda /dev/sda;do
 		imageRootDevice=$rdevice
 		mount $imageRootDevice /mnt &>/dev/null
 		if [ $? = 0 ];then
@@ -69,7 +69,7 @@ touch /lib/modules/*/modules.dep
 #--------------------------------------
 Echo "Including required kernel modules..."
 for module in xennet xenblk reiserfs ext2 ext3 loop ipv6;do
-	modprobe $module
+	modprobe $module >/dev/null 2>&1
 done
 
 #======================================
