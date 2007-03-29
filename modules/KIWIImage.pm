@@ -1554,8 +1554,8 @@ sub buildXenConfig {
 			$kiwi -> failed ();
 			return undef;
 		}
-		my $device = $xenconfig{disk}."1";
-		my $part   = $device;
+		my $device = $xenconfig{disk};
+		my $part   = $device."1";
 		my $memory = $xenconfig{memory};
 		my $image  = $dest."/".$name->{systemImage};
 		$part =~ s/\/dev\///;
@@ -1565,6 +1565,7 @@ sub buildXenConfig {
 		print FD 'memory='.$memory."\n";
 		print FD 'disk=[ "file:'.$image.','.$part.',w" ]'."\n";
 		print FD 'root="'.$device.' ro"'."\n";
+		print FD 'extra=" xencons=tty "'."\n";
 		close FD;
 		$kiwi -> done();
 	}

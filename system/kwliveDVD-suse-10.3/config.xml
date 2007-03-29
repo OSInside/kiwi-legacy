@@ -6,6 +6,7 @@
 	</description>
 	<preferences>
 		<type>iso:isoboot/suse-10.3,compressed</type>
+		<!--<type>vmx:ext3:vmxboot/suse-10.3</type>-->
 		<version>1.1.2</version>
 		<size unit="M">2700</size>
 		<packagemanager>smart</packagemanager>
@@ -17,6 +18,7 @@
 	</users>
 	<repository type="yast2">
 		<!--<source path="/image/CDs/full-i386"/>-->
+		<!--<source path="/mounts/machcd2/consistent/full-i386"/>-->
 		<source path="opensuse://SL-OSS-factory"/>
 	</repository>
 	<packages type="image">

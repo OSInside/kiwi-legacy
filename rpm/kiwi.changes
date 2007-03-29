@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Mar 29 11:54:27 CEST 2007 - ms@suse.de
+
+- v1.22
+- fixed .xenconfig, patch from Magnus Boman <captain.magnus@gmail.com>
+- fixed kernel-default package script for vmxboot/netboot 10.3
+
+-------------------------------------------------------------------
 Tue Mar 27 10:07:22 CEST 2007 - ms@suse.de
 
 - added squashfs requirement for kiwi-desc-livesystem

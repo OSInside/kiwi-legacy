@@ -7,6 +7,9 @@ echo "kernel-default: Image [$name]..."
 # setup kernel version to deal with
 #------------------------------------------
 VERSION=`rpm -q --qf %{VERSION}-%{RELEASE}-default kernel-default`
+if [ ! -d lib/modules/$VERSION ];then
+	for VERSION in $(ls -1 lib/modules);do :; done
+fi
 
 #==========================================
 # move interesting stuff to /tmp
