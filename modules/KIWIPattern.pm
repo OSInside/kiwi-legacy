@@ -69,7 +69,7 @@ sub new {
 		$kiwi -> failed ();
 		return undef;
 	}
-	my $pattype = shift;
+	$pattype = shift;
 	if (! defined $pattype) {
 		$kiwi -> error ("No pattern type specified");
 		$kiwi -> failed ();
