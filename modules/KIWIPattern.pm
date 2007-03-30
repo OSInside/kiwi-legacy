@@ -35,6 +35,7 @@ my $kiwi;
 my @data;
 my @urllist;
 my @pattern;
+my $pattype;
 my %cache;
 my %patdone;
 my $arch;
@@ -65,6 +66,12 @@ sub new {
 	my $urlref = shift;
 	if (! defined $urlref) {
 		$kiwi -> error ("No URL list for pattern search");
+		$kiwi -> failed ();
+		return undef;
+	}
+	my $pattype = shift;
+	if (! defined $pattype) {
+		$kiwi -> error ("No pattern type specified");
 		$kiwi -> failed ();
 		return undef;
 	}
@@ -203,9 +210,16 @@ sub getRequiredPatterns {
 	my $pattref = shift;
 	my @pattern = @{$pattref};
 	my @patdata = getPatternContents (\@pattern);
-	my @reqs = getSection (
-		'^\+Req:','^\-Req:',\@patdata
-	);
+	my @reqs;
+	if ($pattype eq "onlyRequired") {
+		@reqs = getSection (
+			'^\+Req:','^\-Req:',\@patdata
+		);
+	} else {
+		@reqs = getSection (
+			'^\+Re[qc]:','^\-Re[qc]:',\@patdata
+		);
+	}
 	push (@reqs,"base");
 	push (@reqs,"desktop-base");
 	foreach my $rpattern (@reqs) {
@@ -235,7 +249,12 @@ sub getPackages {
 	my $this = shift;
 	my %result;
 	my @reqs = getRequiredPatterns (\@pattern);
-	my @pacs = getSection ('^\+Prq:','^\-Prq:');
+	my @pacs;
+	if ($pattype eq "onlyRequired") {
+		@pacs = getSection ('^\+Prq:','^\-Prq:');
+	} else {
+		@pacs = getSection ('^\+Pr[qc]:','^\-Pr[qc]:');
+	}
 	return @pacs;
 }
 

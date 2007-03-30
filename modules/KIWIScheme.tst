@@ -34,9 +34,10 @@
 		</partitions>
 	</deploy>
 
-	<packages type="image">
+	<packages type="image" patternType="onlyRequired">
 		<package name="libgnomesu"/>
 		<package name="ICAClient"/>
+		<opensusePattern name="default"/>
 	</packages>
 
 	<packages type="xen" memory="128" disk="/dev/sda">

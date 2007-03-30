@@ -454,11 +454,15 @@ sub getPackageAttributes {
 	# package category.
 	# ---
 	my $this = shift;
-	my $what = shift;
 	my %result;
 	for (my $i=1;$i<= $packageNodeList->size();$i++) {
 		my $node = $packageNodeList -> get_node($i);
 		my $type = $node -> getAttribute ("type");
+		my $ptype= $node -> getAttribute ("patternType");
+		if (! defined $ptype) {
+			$ptype = "onlyRequired";
+		}
+		$result{patternType} = $ptype; 
 		$result{type} = $type;
 		if ($result{type} eq "xen") {
 			my $memory  = $node -> getAttribute ("memory");
@@ -535,7 +539,10 @@ sub getList {
 			push @pattlist,$pattern;
 		}
 		if (@pattlist) {
-			my $psolve = new KIWIPattern ($kiwi,\@pattlist,\@urllist);
+			my %pattr  = getPackageAttributes ();
+			my $psolve = new KIWIPattern (
+				$kiwi,\@pattlist,\@urllist,$pattr{patternType}
+			);
 			if (! defined $psolve) {
 				return ();
 			}

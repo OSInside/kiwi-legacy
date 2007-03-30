@@ -21,7 +21,7 @@
 		<!--<source path="/mounts/machcd2/consistent/full-i386"/>-->
 		<source path="opensuse://SL-OSS-factory"/>
 	</repository>
-	<packages type="image">
+	<packages type="image" patternType="onlyRequired">
 		<package name="subversion"/>
 		<opensusePattern name="default"/>
 		<opensusePattern name="apparmor"/>

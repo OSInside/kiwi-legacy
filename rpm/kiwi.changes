@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Mar 30 10:46:37 CEST 2007 - ms@suse.de
+
+- allow use of recommended pattern entries by setting up
+  the option <packages> attribute patternType. Default type
+  is "onlyRequired"
+
+-------------------------------------------------------------------
 Thu Mar 29 11:54:27 CEST 2007 - ms@suse.de
 
 - v1.22

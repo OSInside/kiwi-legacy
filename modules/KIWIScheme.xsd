@@ -110,6 +110,14 @@
 			<xs:attribute name="type" type="xs:string"/>
 			<xs:attribute name="memory" type="xs:integer"/>
 			<xs:attribute name="disk" type="xs:string"/>
+			<xs:attribute name="patternType" use="optional">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="onlyRequired"/>
+						<xs:enumeration value="plusRecommended"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="package">
