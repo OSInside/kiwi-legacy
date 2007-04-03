@@ -26,7 +26,7 @@ function suseInsertService {
 	local service=$1
 	local result
 	while true;do
-		result=`insserv $service 2>&1`
+		result=`/sbin/insserv $service 2>&1`
 		if [ $? = 0 ];then
 			echo "Service $service inserted"
 			break
@@ -50,7 +50,7 @@ function suseRemoveService {
 	# Remove a service using insserv -r
 	# ----
 	local service=$1
-	insserv -r $service
+	/sbin/insserv -r $service
 }
 
 #======================================
