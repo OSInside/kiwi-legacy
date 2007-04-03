@@ -90,7 +90,6 @@ touch /lib/modules/*/modules.dep
 #======================================
 # 3) Including required kernel modules
 #--------------------------------------
-Echo "Including required kernel modules..."
 probeDevices
 
 #======================================
