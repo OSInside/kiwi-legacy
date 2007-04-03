@@ -632,8 +632,16 @@ function writePartitionTable {
 	if test $? != 0;then
 		systemException \
 			"Failed to create partition table on: $diskDevice !" \
-		"reboot"
+			"reboot"
 	fi
+
+	verifyOutput=`sfdisk -V $diskDevice 2>&1`
+	if test $? != 0;then
+		systemException \
+			"Failed to verify partition table on $diskDevice: $verifyOutput" \
+			"reboot"
+	fi
+	
 	rm -f $PART_FILE
 }
 #======================================
@@ -802,7 +810,8 @@ function checkTFTP {
 #======================================
 # mountSystem
 #--------------------------------------
-mountSystem () {
+function mountSystem () {
+	retval=0
 	OLDIFS=$IFS
 	IFS=$IFS_ORIG
 	mountDevice=$imageRootDevice
@@ -813,6 +822,7 @@ mountSystem () {
 	if test ! -z $UNIONFS_CONFIG;then
 		mkdir -p /ro_branch
 		mkdir -p /rw_branch
+		mkdir -p /xino
 
 		rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
 		roDevice=`echo $UNIONFS_CONFIG | cut -d , -f 2`
@@ -826,23 +836,60 @@ mountSystem () {
 		else
 			e2fsck -y -f $rwDevice >/dev/null 2>&1
 		fi
-		
-		mount $rwDevice /rw_branch >/dev/null 2>&1
-		if ! mount $roDevice /ro_branch >/dev/null 2>&1;then
-			mount -t squashfs $roDevice /ro_branch >/dev/null 2>&1
+
+		if ! mount $rwDevice /rw_branch >/dev/null 2>&1;then
+			retval=1
 		fi
-		mount -t unionfs -o dirs=/rw_branch=rw:/ro_branch=ro none /mnt >/dev/null 2>&1
-		umount -l /rw_branch >/dev/null 2>&1
-		umount -l /ro_branch >/dev/null 2>&1
+
+		if ! mount -t squashfs $roDevice /ro_branch >/dev/null 2>&1;then
+			if ! mount $roDevice /ro_branch >/dev/null 2>&1;then
+				retval=1
+			fi
+		fi
+
+		if ! mount -t tmpfs tmpfs /xino >/dev/null 2>&1;then
+		    retval=1
+		fi
+
+		if ! mount -t aufs -o dirs=/rw_branch=rw:/ro_branch=ro,xino=/xino/.aufs.xino none /mnt >/dev/null 2>&1;then
+		    retval=1
+		fi
+		usleep 500000
 	else
 		mount $mountDevice /mnt >/dev/null 2>&1
+		retval=$?
 	fi
 	IFS=$OLDIFS
+
+	return $retval
 }
 
 #======================================
 # umountSystem
 #--------------------------------------
-umountSystem () {
+function umountSystem () {
 	umount /mnt >/dev/null 2>&1
+
+	if test ! -z "$UNIONFS_CONFIG";then
+		umount /ro_branch >/dev/null 2>&1
+		umount /rw_branch >/dev/null 2>&1
+		umount /xino >/dev/null 2>&1
+	fi
+}
+
+#======================================
+# cleanDirectory
+#--------------------------------------
+function cleanDirectory () {
+	directory=$1
+	shift 1
+	save=$@
+
+	tmpdir=`mktemp -d`
+	for saveItem in $save;do
+		mv $directory/$saveItem $tmpdir >/dev/null 2>&1
+	done
+	rm -rf $directory/*
+	mv $tmpdir/* $directory
+	rm -rf $tmpdir
 }

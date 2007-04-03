@@ -365,6 +365,7 @@ IFS="," ; for i in $IMAGE;do
 		# /.../
 		# check the md5sum of the downloaded data records
 		# ----
+		Echo "Download complete, checking data..."
 		dd if=$imageDevice count=$blocks bs=$blocksize 2>/dev/null |\
 			md5sum - > /etc/ireal.md5
 		read sum2 dumy < /etc/ireal.md5
@@ -459,7 +460,9 @@ fi
 #======================================
 # 12) Mount OS image to /mnt
 #--------------------------------------
-mountSystem
+if ! mountSystem;then
+	systemException "Failed to mount root filesystem" "reboot"
+fi
 
 #======================================
 # 13) Import fixed configuration files
