@@ -1,2 +1,0 @@
-options rd    rd_size=256000
-options loop  max_loop=32
