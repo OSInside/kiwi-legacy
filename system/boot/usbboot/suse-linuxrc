@@ -24,6 +24,13 @@ export IFS_ORIG=$IFS
 export DEBUG=0
 
 #======================================
+# Exports (Booting)
+#--------------------------------------
+export LOCAL_BOOT=no
+export systemIntegrity="clean"
+export stickFound=0
+
+#======================================
 # Functions...
 #--------------------------------------
 . /include
@@ -57,6 +64,8 @@ USBStickDevice () {
 				fi
 				removable=`cat $isremovable`
 				if [ $removable -eq 1 ];then
+					stickFound=1
+					stickRoot=$device
 					stickDevice="$device"2
 					stickSerial=$serial
 				fi
@@ -65,10 +74,12 @@ USBStickDevice () {
 	done
 }
 stickMountSystem () {
-	mount $stickDevice /mnt &>/dev/null
+	if ! mount $stickDevice /mnt &>/dev/null;then
+		mount -t squashfs $stickDevice /mnt &>/dev/null
+	fi
 }
 stickUmountSystem () {
-	umount /mnt
+	umount /mnt &>/dev/null
 }
 #======================================
 # Beautify Startup
@@ -94,7 +105,6 @@ touch /lib/modules/*/modules.dep
 #======================================
 # 3) Including required kernel modules
 #--------------------------------------
-Echo "Including required kernel modules..."
 probeDevices
 
 #======================================
@@ -109,6 +119,11 @@ sleep 5
 # 5) Search USB stick device
 #--------------------------------------
 USBStickDevice
+if [ $stickFound = 0 ];then
+	systemException \
+		"No USB stick found... abort" \
+	"reboot"
+fi
 
 #======================================
 # 6) Mount USB stick (boot)
@@ -116,53 +131,57 @@ USBStickDevice
 stickMountSystem
 
 #======================================
-# 6) Get filesystem type
+# 7) Get filesystem type
 #--------------------------------------
 readFileSystem /mnt/image/config.xml
 stickUmountSystem
 
 #======================================
-# 7) Resize filesystem to full space
+# 8) Resize filesystem to full space
 #--------------------------------------
-Echo "Resize filesystem to full partition space..."
-if test "$FSTYPE" = "reiserfs";then
-	resize_reiserfs $stickDevice
-fi
-if test "$FSTYPE" = "ext2";then
-	e2fsck -y -f $stickDevice
-	resize2fs -F -p $stickDevice
-fi
-if test "$FSTYPE" = "ext3";then
-	e2fsck -y -f $stickDevice
-	resize2fs -F -p $stickDevice
-	tune2fs -j $stickDevice
+if test "$FSTYPE" = "squashfs";then
+	export UNIONFS_CONFIG="$stickRoot"3,"$stickRoot"2
+else
+	Echo "Resize filesystem to full partition space..."
+	if test "$FSTYPE" = "reiserfs";then
+		resize_reiserfs $stickDevice
+	fi
+	if test "$FSTYPE" = "ext2";then
+		e2fsck -y -f $stickDevice
+		resize2fs -F -p $stickDevice
+	fi
+	if test "$FSTYPE" = "ext3";then
+		e2fsck -y -f $stickDevice
+		resize2fs -F -p $stickDevice
+		tune2fs -j $stickDevice
+	fi
 fi
 
 #======================================
-# 8) Mount USB stick (system)
+# 9) Mount USB stick (system)
 #--------------------------------------
-stickMountSystem
+mountSystem $stickDevice
 
 #======================================
-# 9) setup real root device
+# 10) setup real root device
 #--------------------------------------
 echo 256 > /proc/sys/kernel/real-root-dev
 
 #======================================
-# 10) umount system filesystems
+# 11) umount system filesystems
 #--------------------------------------
 umount /dev/pts
 umount /sys
 umount /proc
 
 #======================================
-# 11) copy initrd files to image
+# 12) copy initrd files to image
 #--------------------------------------
 cp /preinit /mnt
 cp /include /mnt
 
 #======================================
-# 12) Activate new root
+# 13) Activate new root
 #--------------------------------------
 Echo "Activating Image: [$stickSerial on -> $stickDevice]"
 cd /mnt && exec < dev/console >dev/console 2>&1
@@ -180,7 +199,7 @@ else
 	rm ./include
 fi
 #======================================
-# 13) Unmount initrd / system init
+# 14) Unmount initrd / system init
 #--------------------------------------
 echo " "
 echo "Booting into USB-Stick System..."

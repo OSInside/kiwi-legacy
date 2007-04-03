@@ -240,6 +240,7 @@ sub init {
 	qx ( cp /etc/fstab  $root/etc 2>&1 );
 	qx ( cp /etc/group  $root/etc 2>&1 );
 	qx ( cp /etc/passwd $root/etc 2>&1 );
+	qx ( cp $main::KConfig $root/.kconfig 2>&1 );
 
 	#==================================
 	# Create /etc/ImageVersion file
@@ -408,13 +409,28 @@ sub setup {
 		if ($code != 0) {
 			$kiwi -> failed ();
 			$kiwi -> info   ($data);
+			return undef;
 		}
 		qx ( rm -f $root/tmp/config.sh );
 		$kiwi -> done ();
 	}
-	#=============================================
+	#========================================
+	# check for linuxrc
+	#----------------------------------------
+	if (-f "$root/linuxrc") {
+		$kiwi -> info ("Setting up linuxrc...");
+		my $data = qx ( cp $root/linuxrc $root/init 2>&1 );
+		my $code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> failed ();
+			$kiwi -> info   ($data);
+			return undef;
+		}
+		$kiwi -> done ();
+	}
+	#========================================
 	# call setup scripts
-	#---------------------------------------------
+	#----------------------------------------
 	if (-d "$imageDesc/config") {
 		$kiwi -> info ("Preparing package setup scripts");
 		qx ( mkdir -p $root/image/config );

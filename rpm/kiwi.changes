@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Tue Apr  3 17:36:23 CEST 2007 - ms@suse.de
+
+- v1.23
+- added support for squashfs on USB stick images
+- fixed grub installation on usb stick devices
+- added KIWIConfig.sh module to be used in config.sh scripts
+- removed config.sh from the boot descriptions. The only action
+  was to copy linuxrc to init which is done in the KIWIRoot module
+  now
+
+-------------------------------------------------------------------
 Fri Mar 30 10:46:37 CEST 2007 - ms@suse.de
 
 - allow use of recommended pattern entries by setting up

@@ -1,40 +1,49 @@
-#!/bin/sh
+#!/bin/bash
+#================
+# FILE          : config.sh
+#----------------
+# PROJECT       : OpenSuSE KIWI Image System
+# COPYRIGHT     : (c) 2006 SUSE LINUX Products GmbH. All rights reserved
+#               :
+# AUTHOR        : Marcus Schaefer <ms@suse.de>
+#               :
+# BELONGS TO    : Operating System images
+#               :
+# DESCRIPTION   : configuration script for SUSE based
+#               : operating systems
+#               :
+#               :
+# STATUS        : BETA
+#----------------
+#======================================
+# Functions...
+#--------------------------------------
+test -f /.kconfig && . /.kconfig
 test -f /.profile && . /.profile
 
+#======================================
+# Greeting...
+#--------------------------------------
 echo "Configure image: [$name]..."
-#==========================================
-# Activate Services
-#------------------------------------------
-for i in \
-	acpid dbus boot.loadmodules boot.localfs boot.xen random \
-	resmgr boot.cleanup boot.localnet haldaemon network syslog \
-	portmap kbd sshd boot.clock nscd cron boot.rootfsck \
-	boot.device-mapper boot.lvm boot.swap xend ntp bsmd bsworker
-do
-	/sbin/insserv /etc/init.d/$i
-done
 
-#==========================================
-# Deactivate Services
-#------------------------------------------
-for i in irq_balancer
-do
-	/sbin/insserv -r /etc/init.d/irq_balancer
-done
+#======================================
+# Activate services
+#--------------------------------------
+suseActivateServices
 
-#==========================================
-# Call SuSEconfig
-#------------------------------------------
-/sbin/SuSEconfig
+#======================================
+# SuSEconfig
+#--------------------------------------
+suseConfig
 
-#==========================================
+#======================================
 # Setup ssh permissions
-#------------------------------------------
-cd /etc/ssh
-chmod og-r *_key
+#--------------------------------------
+cd /etc/ssh && chmod og-r *_key
 
-umount /proc
-umount /dev/pts
-umount /sys
+#======================================
+# Umount kernel filesystems
+#--------------------------------------
+baseCleanMount
 
 exit 0

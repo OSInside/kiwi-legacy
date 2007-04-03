@@ -33,6 +33,7 @@ my $tmpdir;  # temporary directory
 my $result;  # result of external calls
 my $status;  # output of last command
 my $vmsize;  # size of virtual disk
+my $usbzip;  # is the USB image compressed
 
 #==========================================
 # Constructor
@@ -45,6 +46,7 @@ sub new {
 	$initrd = shift;
 	$system = shift;
 	$vmsize = shift;
+	$usbzip = 0;
 	if (! defined $kiwi) {
 		$kiwi = new KIWILog();
 	}
@@ -54,11 +56,21 @@ sub new {
 		return undef;
 	}
 	if (defined $system) {
-	if (! -f $system) {
-		$kiwi -> error  ("Couldn't find system image file: $system");
-		$kiwi -> failed ();
-		return undef;
-	}
+		if (! -f $system) {
+			$kiwi -> error  ("Couldn't find system image file: $system");
+			$kiwi -> failed ();
+			return undef;
+		} else {
+			my $status = qx ( file $system | grep -qi squashfs 2>&1 );
+			my $result = $? >> 8;
+			if ($result == 0) {
+				$usbzip = -s $system;
+				$usbzip /= 1024 * 1024;
+				$usbzip = int $usbzip + 5;
+			} else {
+				$usbzip = 0;
+			}
+		}
 	}
 	if (! -d "/usr/lib/grub") {
 		$kiwi -> error  ("Couldn't find the grub");
@@ -193,11 +205,43 @@ sub setupBootStick {
 		return undef;
 	}
 	$kiwi -> done ();
-
+	#==========================================
+	# Find USB stick devices
+	#------------------------------------------
+	my %storage = getRemovableUSBStorageDevices();
+	if (! %storage) {
+		$kiwi -> error  ("Couldn't find any removable USB storage devices");
+		$kiwi -> failed ();
+		return undef;
+	}
+	my $prefix = $kiwi -> getPrefix (1);
+	print STDERR $prefix,"Found following removable USB devices:\n";
+	foreach my $dev (keys %storage) {
+		print STDERR $prefix,"---> $storage{$dev} at $dev\n";
+	}
+	my $stick;
+	while (1) {
+		$prefix = $kiwi -> getPrefix (1);
+		print STDERR $prefix,"Your choice (enter device name): ";
+		chomp ($stick = <>);
+		my $found = 0;
+		foreach my $dev (keys %storage) {
+			if ($dev eq $stick) {
+				$found = 1; last;
+			}
+		}
+		if (! $found) {
+			if ($stick) {
+				print STDERR $prefix,"Couldn't find [ $stick ] in list\n";
+			}
+			next;
+		}
+		last;
+	}
 	#==========================================
 	# Creating menu.lst for the grub
 	#------------------------------------------
-	$kiwi -> info ("Creating grub menu and device map");
+	$kiwi -> info ("Creating grub menu list file...");
 	if (! open (FD,">$tmpdir/boot/grub/menu.lst")) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't create menu.lst: $!");
@@ -213,16 +257,7 @@ sub setupBootStick {
 	print FD " kernel /boot/linux vga=normal\n";
 	print FD " initrd /boot/initrd\n"; 
 	close FD;
-	if (! open (FD,">$tmpdir/boot/grub/device.map")) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't create device.map: $!");
-		$kiwi -> failed ();
-		return undef;
-	}
-	print FD "(hd0) /dev/sda\n";
-	close FD;
 	$kiwi -> done();
-
 	#==========================================
 	# Create ext2 image
 	#------------------------------------------
@@ -264,40 +299,6 @@ sub setupBootStick {
 	}
 	qx (umount /mnt/ 2>&1);
 	$kiwi -> done();
-
-	#==========================================
-	# Find USB stick devices
-	#------------------------------------------
-	my %storage = getRemovableUSBStorageDevices();
-	if (! %storage) {
-		$kiwi -> error  ("Couldn't find any removable USB storage devices");
-		$kiwi -> failed ();
-		return undef;
-	}
-	my $prefix = $kiwi -> getPrefix (1);
-	print STDERR $prefix,"Found following removable USB devices:\n";
-	foreach my $dev (keys %storage) {
-		print STDERR $prefix,"---> $storage{$dev} at $dev\n";
-	}
-	my $stick;
-	while (1) {
-		$prefix = $kiwi -> getPrefix (1);
-		print STDERR $prefix,"Your choice (enter device name): ";
-		chomp ($stick = <>);
-		my $found = 0;
-		foreach my $dev (keys %storage) {
-			if ($dev eq $stick) {
-				$found = 1; last;
-			}
-		}
-		if (! $found) {
-			if ($stick) {
-				print STDERR $prefix,"Couldn't find [ $stick ] in list\n";
-			}
-			next;
-		}
-		last;
-	}
 	#==========================================
 	# Create new partition table on stick
 	#------------------------------------------
@@ -313,8 +314,14 @@ sub setupBootStick {
 	# Prepare sfdisk input file
 	#------------------------------------------
 	if (defined $system) {
-		print FD ",20,L,*\n";
-		print FD ",,L\n";
+		if ($usbzip > 0) {
+			print FD ",20,L,*\n";
+			print FD ",$usbzip,L\n";
+			print FD ",,L\n";
+		} else {
+			print FD ",20,L,*\n";
+			print FD ",,L\n";
+		}
 	} else {
 		print FD ",,L,*\n";
 	}
@@ -328,13 +335,12 @@ sub setupBootStick {
 		return undef;
 	}
 	$kiwi -> done();
-
 	#==========================================
 	# Clean tmp
 	#------------------------------------------
 	unlink $pinfo;
 	rmdir  $tmpdir;
-	
+
 	#==========================================
 	# Dump initrd image on stick
 	#------------------------------------------
@@ -349,7 +355,6 @@ sub setupBootStick {
 		return undef;
 	}
 	$kiwi -> done();
-
 	#==========================================
 	# Dump system image on stick
 	#------------------------------------------
@@ -368,30 +373,28 @@ sub setupBootStick {
 		$kiwi -> done();
 	}
 	#==========================================
-	# Install grub on stick
+	# Install grub on USB stick
 	#------------------------------------------
-	$kiwi -> info ("Installing boot manager on stick");
-	$status = qx (mount $stick"1" /mnt/ 2>&1);
-	$result = $? >> 8;
-	if ($result != 0) {
+	$kiwi -> info ("Installing grub on USB stick");
+	if (! open (FD,"|/usr/sbin/grub --batch >/dev/null 2>&1")) {
 		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't mount stick image: $status");
+		$kiwi -> error  ("Couldn't call grub: $!");
 		$kiwi -> failed ();
 		return undef;
 	}
-	my $gopt = "--recheck";
-	my $grub = "/usr/sbin/grub-install";
-	$status = qx ($grub $gopt --root-directory=/mnt/ $stick 2>&1);
+	print FD "device (hd0) $stick\n";
+	print FD "root (hd0,0)\n";
+	print FD "setup (hd0)\n";
+	print FD "quit\n";
+	close FD;
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't install grub on stick: $status");
+		$kiwi -> error  ("Couldn't install grub on USB stick: $!");
 		$kiwi -> failed ();
-		qx (umount /mnt/ 2>&1);
 		return undef;
 	}
-	qx (umount /mnt/ 2>&1);
-	$kiwi -> done();
+	$kiwi -> done ();
 	return $this;
 }
 
@@ -623,7 +626,7 @@ sub setupBootDisk {
 	$kiwi -> info ("Installing grub on virtual disk");
 	if (! open (FD,"|/usr/sbin/grub --batch >/dev/null 2>&1")) {
 		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't install grub on virtual disk: $status");
+		$kiwi -> error  ("Couldn't call grub: $!");
 		$kiwi -> failed ();
 		qx ( /sbin/losetup -d $loop );
 		return undef;
@@ -636,7 +639,7 @@ sub setupBootDisk {
 	$result = $? >> 8;
 	if ($result != 0) { 
 		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't install grub on virtual disk: $status");
+		$kiwi -> error  ("Couldn't install grub on virtual disk: $!");
 		$kiwi -> failed ();
 		qx ( /sbin/losetup -d $loop );
 		return undef;

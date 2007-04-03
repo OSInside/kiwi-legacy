@@ -1,25 +1,49 @@
-#!/bin/sh
+#!/bin/bash
+#================
+# FILE          : config.sh
+#----------------
+# PROJECT       : OpenSuSE KIWI Image System
+# COPYRIGHT     : (c) 2006 SUSE LINUX Products GmbH. All rights reserved
+#               :
+# AUTHOR        : Marcus Schaefer <ms@suse.de>
+#               :
+# BELONGS TO    : Operating System images
+#               :
+# DESCRIPTION   : configuration script for SUSE based
+#               : operating systems
+#               :
+#               :
+# STATUS        : BETA
+#----------------
+#======================================
+# Functions...
+#--------------------------------------
+test -f /.kconfig && . /.kconfig
 test -f /.profile && . /.profile
 
+#======================================
+# Greeting...
+#--------------------------------------
 echo "Configure image: [$name]..."
-#==========================================
-# Activate Services
-#------------------------------------------
-for i in \
-	dbus boot.loadmodules boot.localfs random \
-	resmgr boot.cleanup boot.localnet haldaemon network syslog \
-	portmap kbd sshd boot.clock nscd cron boot.rootfsck xdm
-do
-	/sbin/insserv /etc/init.d/$i
-done
+
+#======================================
+# Activate services
+#--------------------------------------
+suseActivateServices
+
+#======================================
+# SuSEconfig
+#--------------------------------------
+suseConfig
 
 #==========================================
-# Call SuSEconfig
+# set X link
 #------------------------------------------
-/sbin/SuSEconfig
+ln -s /usr/bin/Xorg /usr/X11R6/bin/X
 
-umount /proc
-umount /dev/pts
-umount /sys
+#======================================
+# Umount kernel filesystems
+#--------------------------------------
+baseCleanMount
 
 exit 0

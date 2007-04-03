@@ -215,10 +215,11 @@ sub createImageSquashFS {
 		return undef;
 	}
 	}
-
+	#==========================================
+	# Create image boot configuration
+	#------------------------------------------
 	$kiwi -> info ("Creating boot configuration...");
 	if (! writeImageConfig ($name)) {
-		$kiwi -> failed ();
 		return undef;
 	}
 	return $this;
@@ -307,19 +308,19 @@ sub createImageUSB {
 	}
 	SWITCH: for ($type) {
 		/^ext2/       && do {
-			$ok = createImageEXT2 ();
+			$ok = $this -> createImageEXT2 ();
 			last SWITCH;
 		};
 		/^ext3/       && do {
-			$ok = createImageEXT3 ();
+			$ok = $this -> createImageEXT3 ();
 			last SWITCH;
 		};
 		/^reiserfs/   && do {
-			$ok = createImageReiserFS ();
+			$ok = $this -> createImageReiserFS ();
 			last SWITCH;
 		};
 		/^squashfs/   && do {
-			$ok = createImageSquashFS ();
+			$ok = $this -> createImageSquashFS ();
 			last SWITCH;
 		};
 		$kiwi -> error  ("Unsupported $text type: $type");
@@ -1112,6 +1113,9 @@ sub writeImageConfig {
 		# More to come...
 		#------------------------------------------
 		close FD;
+		$kiwi -> done ();
+	} else {
+		$kiwi -> skipped ();
 	}
 	return $configName;
 }
@@ -1199,7 +1203,6 @@ sub postImage {
 	#------------------------------------------
 	$kiwi -> info ("Creating boot configuration...");
 	if (! writeImageConfig ($name)) {
-		$kiwi -> failed ();
 		return undef;
 	}
 	$kiwi -> done();	
