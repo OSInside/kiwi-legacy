@@ -1205,7 +1205,6 @@ sub postImage {
 	if (! writeImageConfig ($name)) {
 		return undef;
 	}
-	$kiwi -> done();	
 	return $name;
 }
 
