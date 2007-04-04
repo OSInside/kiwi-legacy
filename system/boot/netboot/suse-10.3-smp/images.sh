@@ -23,7 +23,6 @@ done
 #------------------------------------------
 rpm -e popt bzip2 --nodeps
 rm -rf `find -type d | grep .svn`
-rm -rf /usr/share/misc
 rm -rf /usr/share/info
 rm -rf /usr/share/man
 rm -rf /usr/share/cracklib
