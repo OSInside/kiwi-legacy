@@ -448,7 +448,7 @@ function updateNeeded {
 		fi
 		Echo -b "Current: $atversion Installed: $installed"
 		if test "$atversion" = "$installed";then
-			if test $sum1 = $sum2;then
+			if test "$sum1" = "$sum2";then
 				Echo -b "Update status: Fine"
 				SYSTEM_INTEGRITY="$SYSTEM_INTEGRITY:fine"
 				continue
