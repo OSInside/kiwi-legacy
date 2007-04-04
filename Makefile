@@ -87,6 +87,4 @@ install:
 	#============================================
 	# Install image descriptions
 	#--------------------------------------------
-	cp -a system/* ${KIWIIMAGE}
-	mv ${KIWIIMAGE}/boot/* ${KIWIIMAGE}
-	rmdir ${KIWIIMAGE}/boot
+	cp -a system/boot/* ${KIWIIMAGE}
