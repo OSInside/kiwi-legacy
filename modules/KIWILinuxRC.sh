@@ -150,7 +150,7 @@ function probeFileSystem {
 		*ext2*)     FSTYPE=ext2 ;;
 		*ReiserFS*) FSTYPE=reiserfs ;;
 		*cramfs*)   FSTYPE=cramfs ;;
-		*squashfs*) FSTYPE=squashfs ;;
+		*Squashfs*) FSTYPE=squashfs ;;
 		*)
 			FSTYPE=unknown
 		;;
@@ -818,41 +818,43 @@ function mountSystem () {
 	if test ! -z $1;then
 		mountDevice=$1
 	fi
-
 	if test ! -z $UNIONFS_CONFIG;then
 		mkdir -p /ro_branch
 		mkdir -p /rw_branch
 		mkdir -p /xino
-
 		rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
 		roDevice=`echo $UNIONFS_CONFIG | cut -d , -f 2`
-
+		unionFST=`echo $UNIONFS_CONFIG | cut -d , -f 3`
 		if test $LOCAL_BOOT = "no" && test $systemIntegrity = "clean";then
+			Echo "Creating EXT2 filesystem for write extend..."
 			if ! mke2fs $rwDevice >/dev/null 2>&1;then
 				systemException \
 					"Failed to create ext2 filesystem" \
-					"reboot"
+				"reboot"
 			fi
 		else
+			Echo "Checking EXT2 write extend..."
 			e2fsck -y -f $rwDevice >/dev/null 2>&1
 		fi
-
 		if ! mount $rwDevice /rw_branch >/dev/null 2>&1;then
 			retval=1
 		fi
-
 		if ! mount -t squashfs $roDevice /ro_branch >/dev/null 2>&1;then
 			if ! mount $roDevice /ro_branch >/dev/null 2>&1;then
 				retval=1
 			fi
 		fi
-
-		if ! mount -t tmpfs tmpfs /xino >/dev/null 2>&1;then
-		    retval=1
-		fi
-
-		if ! mount -t aufs -o dirs=/rw_branch=rw:/ro_branch=ro,xino=/xino/.aufs.xino none /mnt >/dev/null 2>&1;then
-		    retval=1
+		if [ $unionFST = "aufs" ];then
+			mount -t tmpfs tmpfs /xino >/dev/null 2>&1 || retval=1
+			mount -t aufs \
+				-o dirs=/rw_branch=rw:/ro_branch=ro,xino=/xino/.aufs.xino \
+				none /mnt \
+			>/dev/null 2>&1 || retval=1
+		else
+			mount -t unionfs \
+				-o dirs=/rw_branch=rw:/ro_branch=ro \
+				none /mnt
+			>/dev/null 2>&1 || retval=1
 		fi
 		usleep 500000
 	else
@@ -860,7 +862,6 @@ function mountSystem () {
 		retval=$?
 	fi
 	IFS=$OLDIFS
-
 	return $retval
 }
 
@@ -869,7 +870,6 @@ function mountSystem () {
 #--------------------------------------
 function umountSystem () {
 	umount /mnt >/dev/null 2>&1
-
 	if test ! -z "$UNIONFS_CONFIG";then
 		umount /ro_branch >/dev/null 2>&1
 		umount /rw_branch >/dev/null 2>&1

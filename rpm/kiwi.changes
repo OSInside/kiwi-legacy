@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Thu Apr  5 00:35:36 CEST 2007 - ms@suse.de
+
+- James Willcox added basic support for aufs.
+- Changed UNIONFS_CONFIG to allow specification of union
+  filesystem type. Currently unionfs and aufs are possible 
+- added magic files to be used for filesystem detection in
+  netboot/xennetboot and usbboot
+
+-------------------------------------------------------------------
 Tue Apr  3 17:14:05 CEST 2007 - ms@suse.de
 
 - v1.24
