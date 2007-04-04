@@ -1,5 +1,5 @@
 # /.../
-# spec file for package kiwi (Version 1.23)
+# spec file for package kiwi (Version 1.24)
 # Copyright (c) 2006 SUSE LINUX Products GmbH, Nuernberg, Germany.
 # Please submit bugfixes or comments via http://bugs.opensuse.org
 # ---
@@ -8,8 +8,8 @@ Name:          kiwi
 BuildRequires: perl smart perl-XML-LibXML perl-libwww-perl screen syslinux
 Requires:      perl perl-XML-LibXML perl-libwww-perl screen
 Summary:       OpenSuSE - KIWI Image System
-Version:       1.23
-Release:       23
+Version:       1.24
+Release:       24
 Group:         System
 License:       GPL
 Source:        kiwi.tar.bz2
@@ -95,36 +95,6 @@ Group:        System
 This package contains the OpenSuSE - KIWI image descriptions.
 Each image description exists in a single directory and contains
 a xenboot image description
-
-%package -n kiwi-desc-wyse
-Requires:     kiwi smart
-Summary:      OpenSuSE - KIWI image descriptions
-Group:        System
-
-%description -n kiwi-desc-wyse
-This package contains the OpenSuSE - KIWI image descriptions.
-Each image description exists in a single directory and contains
-a thin client description for Wyse terminals
-
-%package -n kiwi-desc-buildservice
-Requires:     kiwi smart
-Summary:      OpenSuSE - KIWI image descriptions
-Group:        System
-
-%description -n kiwi-desc-buildservice
-This package contains the OpenSuSE - KIWI image descriptions.
-Each image description exists in a single directory and contains
-a buildservice description for a package building client
-
-%package -n kiwi-desc-livesystem
-Requires:     kiwi kiwi-desc-isoboot smart squashfs
-Summary:      OpenSuSE - KIWI image descriptions
-Group:        System
-
-%description -n kiwi-desc-livesystem
-This package contains the OpenSuSE - KIWI image descriptions.
-Each image description exists in a single directory and contains
-a live DVD description for a package building client
 
 Authors:
 --------
@@ -284,20 +254,4 @@ cat kiwi.loader
 %files -n kiwi-desc-xenboot
 %defattr(-, root, root)
 %{_datadir}/kiwi/image/xenboot
-
-%files -n kiwi-desc-wyse
-%defattr(-, root, root)
-%{_datadir}/kiwi/image/wyseGhost-suse-10.1
-%{_datadir}/kiwi/image/wyseGhost-suse-10.2
-%{_datadir}/kiwi/image/wyseGhost-suse-10.3
-%{_datadir}/kiwi/image/wyseXMini-suse-10.1
-
-%files -n kiwi-desc-buildservice
-%defattr(-, root, root)
-%{_datadir}/kiwi/image/buildhost-suse-10.1
-
-%files -n kiwi-desc-livesystem
-%defattr(-, root, root)
-%{_datadir}/kiwi/image/kwliveDVD-suse-10.3
-
 

@@ -28,15 +28,4 @@ digraph kiwi {
 
 	"kiwi-desc-xenboot" -> "kiwi"
     "kiwi-desc-xenboot" -> "smart"
-
-	"kiwi-desc-wyse"    -> "kiwi"
-	"kiwi-desc-wyse"    -> "smart"
-
-	"kiwi-desc-buildservice" -> "kiwi"
-	"kiwi-desc-buildservice" -> "smart"
-
-	"kiwi-desc-livesystem" -> "kiwi"
-	"kiwi-desc-livesystem" -> "kiwi-desc-isoboot"
-	"kiwi-desc-livesystem" -> "smart"
-	"kiwi-desc-livesystem" -> "squashfs"
 }
