@@ -5,7 +5,7 @@
 # ---
 # needsrootforbuild
 Name:          kiwi
-BuildRequires: perl smart perl-XML-LibXML perl-libwww-perl screen syslinux
+BuildRequires: perl smart perl-XML-LibXML perl-libwww-perl screen syslinux module-init-tools
 Requires:      perl perl-XML-LibXML perl-libwww-perl screen
 Summary:       OpenSuSE - KIWI Image System
 Version:       1.24
