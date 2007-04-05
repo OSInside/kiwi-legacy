@@ -155,25 +155,55 @@ fi
 mountSystem $stickDevice
 
 #======================================
-# 9) setup real root device
+# 9) Create system dependant files
+#--------------------------------------
+if [ $LOCAL_BOOT = "no" ];then
+if test $systemIntegrity = "clean";then
+	mkdir -p /config/etc
+	cat > /config/etc/fstab < /dev/null
+	if [ ! $FSTYPE = "squashfs" ];then
+		echo "$stickDevice / $FSTYPE defaults 0 0"       > /config/etc/fstab
+	fi
+	echo "devpts  /dev/pts   devpts mode=0620,gid=5 0 0" >> /config/etc/fstab
+	echo "proc    /proc   proc    defaults 0 0"          >> /config/etc/fstab
+	echo "sysfs   /sys    sysfs   noauto 0 0"            >> /config/etc/fstab
+	echo "tmpfs   /dev/shm tmpfs  defaults 0 0"          >> /config/etc/fstab
+fi
+fi
+
+#======================================
+# 10) copy system dependant files
+#--------------------------------------
+if [ $LOCAL_BOOT = "no" ];then
+	if test $systemIntegrity = "clean";then
+		cd /config
+		find . -type d | while read d ; do  mkdir -p /mnt/$d ; done
+		find . -type f | while read f ; do  cp $f /mnt/$f ; done
+		cd /
+		rm -rf /config
+	fi
+fi
+
+#======================================
+# 11) setup real root device
 #--------------------------------------
 echo 256 > /proc/sys/kernel/real-root-dev
 
 #======================================
-# 10) umount system filesystems
+# 12) umount system filesystems
 #--------------------------------------
 umount /dev/pts
 umount /sys
 umount /proc
 
 #======================================
-# 11) copy initrd files to image
+# 13) copy initrd files to image
 #--------------------------------------
 cp /preinit /mnt
 cp /include /mnt
 
 #======================================
-# 12) Activate new root
+# 14) Activate new root
 #--------------------------------------
 Echo "Activating Image: [$stickSerial on -> $stickDevice]"
 cd /mnt && exec < dev/console >dev/console 2>&1
@@ -191,7 +221,7 @@ else
 	rm ./include
 fi
 #======================================
-# 13) Unmount initrd / system init
+# 15) Unmount initrd / system init
 #--------------------------------------
 echo " "
 echo "Booting into USB-Stick System..."

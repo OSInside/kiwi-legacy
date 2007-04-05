@@ -832,10 +832,9 @@ function mountSystem () {
 					"Failed to create ext2 filesystem" \
 				"reboot"
 			fi
-		else
-			Echo "Checking EXT2 write extend..."
-			e2fsck -y -f $rwDevice >/dev/null 2>&1
 		fi
+		Echo "Checking EXT2 write extend..."
+		e2fsck -y -f $rwDevice
 		if ! mount $rwDevice /rw_branch >/dev/null 2>&1;then
 			retval=1
 		fi
