@@ -108,7 +108,16 @@ sub new {
 	if ( defined $foreignRepo{xmlnode} ) {
 		$kiwi -> done ();
 		$kiwi -> info ("Including foreign repository node(s)");
+		my $need = new XML::LibXML::NodeList();
+		my @node = $repositNodeList -> get_nodelist();
+		foreach my $element (@node) {
+			my $status = $element -> getAttribute("status");
+			if ((! defined $status) || ($status eq "fixed")) {
+				$need -> push ($element);
+			}
+		}
 		$repositNodeList = $foreignRepo{xmlnode};
+		$repositNodeList -> prepend ($need);
 	}
 	@urllist = ();
 	my %repository = getRepository ($this);

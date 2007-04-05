@@ -1,4 +1,17 @@
 -------------------------------------------------------------------
+Thu Apr  5 22:14:04 CEST 2007 - ms@suse.de
+
+- v1.25
+- make use of kernel updates directory if it exists
+- fixed repository handling for auto generated boot images.
+  These images could use a foreign repository for building but
+  could also have additional repos in its configuration. To handle
+  them correctly a status attribute with either "replaceable" or
+  "fixed" determines wheter this repository could be replaced
+  by a foreign node or not. Default for this option attribute
+  is "fixed"
+
+-------------------------------------------------------------------
 Thu Apr  5 00:35:36 CEST 2007 - ms@suse.de
 
 - James Willcox added basic support for aufs.

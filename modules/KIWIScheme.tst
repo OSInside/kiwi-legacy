@@ -24,7 +24,7 @@
         <file name="drivers/ide/*"/>
 	</drivers>
 
-	<repository type="yast2">
+	<repository type="yast2" status="fixed">
 		<source path="/image/dist/full-10.2-i386"/>
 	</repository>
 

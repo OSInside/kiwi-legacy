@@ -41,7 +41,7 @@
 		<file name="drivers/message/fusion/*"/>
 		<file name="drivers/net/*"/>
 	</drivers>
-	<repository type="yast2">
+	<repository type="yast2" status="replaceable">
 		<source path="opensuse://10.2"/>
 	</repository>
 	<packages type="image">

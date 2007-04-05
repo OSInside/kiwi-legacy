@@ -143,6 +143,14 @@
 				<xs:element ref="source" minOccurs="1"/>
 			</xs:sequence>
 			<xs:attribute name="type" type="xs:string"/>
+			<xs:attribute name="status" use="optional">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="replaceable"/>
+						<xs:enumeration value="fixed"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="source">

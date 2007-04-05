@@ -340,12 +340,12 @@ sub createImageUSB {
 	if (! defined $xml) {
 		return undef;
 	}
-	$main::ForeignRepo{xmlnode} = $xml -> getForeignNodeList();
-	$main::ForeignRepo{prepare} = $Prepare;
 	$main::Survive  = "yes";
 	$main::RootTree = "/tmp/kiwi-".$text."boot-$$";
 	$main::Prepare  = $main::System."/".$boot;
 	$main::Create   = $main::RootTree;
+	$main::ForeignRepo{xmlnode} = $xml -> getForeignNodeList();
+	$main::ForeignRepo{prepare} = $main::Prepare;
 	if (! defined main::main()) {
 		$main::Survive = "default";
 		if (! -d $main::RootTree.$baseSystem) {
@@ -623,12 +623,12 @@ sub createImageLiveCD {
 		qx (rm -rf $imageTreeReadOnly);
 		return undef;
 	}
-	$main::ForeignRepo{xmlnode} = $xml -> getForeignNodeList();
-	$main::ForeignRepo{prepare} = $Prepare;
 	$main::Survive  = "yes";
 	$main::RootTree = "/tmp/kiwi-cdboot-$$";
 	$main::Prepare  = $main::System."/".$boot;
 	$main::Create   = $main::RootTree;
+	$main::ForeignRepo{xmlnode} = $xml -> getForeignNodeList();
+	$main::ForeignRepo{prepare} = $main::Prepare;
 	if (! defined main::main()) {
 		$main::Survive = "default";
 		if (! -d $main::RootTree.$baseSystem) {

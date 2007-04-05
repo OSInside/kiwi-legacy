@@ -11,6 +11,7 @@ VERSION=`rpm -q --qf %{VERSION}-%{RELEASE}-default kernel-default`
 #==========================================
 # move interesting stuff to /tmp
 #------------------------------------------
+mv lib/modules/$VERSION/updates     /tmp
 mv lib/modules/$VERSION/kernel/*    /tmp
 mv lib/modules/$VERSION/modules.*   /tmp
 
@@ -23,6 +24,7 @@ rm -r lib/modules/$VERSION/*
 # insert modules.* files
 #------------------------------------------
 mv /tmp/modules.* /lib/modules/$VERSION/
+mv /tmp/updates   /lib/modules/$VERSION/
 
 #==========================================
 # create driver-used dirs with .o's to use
