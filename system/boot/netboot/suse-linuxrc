@@ -567,7 +567,10 @@ fi
 if [ $LOCAL_BOOT = "no" ];then
 if test $systemIntegrity = "clean";then
 	mkdir -p /config/etc
-	echo "$imageRootDevice / $FSTYPE defaults 0 0"        > /config/etc/fstab
+	cat > /config/etc/fstab < /dev/null
+	if [ -z "$UNIONFS_CONFIG" ]; then
+		echo "$imageRootDevice / $FSTYPE defaults 0 0"    > /config/etc/fstab
+	fi
 	echo "devpts  /dev/pts   devpts mode=0620,gid=5 0 0" >> /config/etc/fstab
 	echo "proc    /proc   proc    defaults 0 0"          >> /config/etc/fstab
 	echo "sysfs   /sys    sysfs   noauto 0 0"            >> /config/etc/fstab

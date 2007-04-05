@@ -161,7 +161,7 @@ if [ $LOCAL_BOOT = "no" ];then
 if test $systemIntegrity = "clean";then
 	mkdir -p /config/etc
 	cat > /config/etc/fstab < /dev/null
-	if [ ! $FSTYPE = "squashfs" ];then
+	if [ -z "$UNIONFS_CONFIG" ]; then
 		echo "$stickDevice / $FSTYPE defaults 0 0"       > /config/etc/fstab
 	fi
 	echo "devpts  /dev/pts   devpts mode=0620,gid=5 0 0" >> /config/etc/fstab
