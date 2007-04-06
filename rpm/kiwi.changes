@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Apr  6 14:58:26 CEST 2007 - ms@suse.de
+
+- v1.26
+- fixed logging to /var/log/kiwi
+- added USER variable to enable/disable prebuild
+
+-------------------------------------------------------------------
 Thu Apr  5 22:14:04 CEST 2007 - ms@suse.de
 
 - v1.25

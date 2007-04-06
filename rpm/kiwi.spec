@@ -1,5 +1,5 @@
 # /.../
-# spec file for package kiwi (Version 1.25)
+# spec file for package kiwi (Version 1.26)
 # Copyright (c) 2006 SUSE LINUX Products GmbH, Nuernberg, Germany.
 # Please submit bugfixes or comments via http://bugs.opensuse.org
 # ---
@@ -8,8 +8,8 @@ Name:          kiwi
 BuildRequires: perl smart perl-XML-LibXML perl-libwww-perl screen syslinux module-init-tools
 Requires:      perl perl-XML-LibXML perl-libwww-perl screen
 Summary:       OpenSuSE - KIWI Image System
-Version:       1.25
-Release:       25
+Version:       1.26
+Release:       26
 Group:         System
 License:       GPL
 Source:        kiwi.tar.bz2
@@ -105,12 +105,13 @@ Authors:
 # %patch
 
 %build
+export USER=-1 # set value to 0 to build boot images
 rm -rf $RPM_BUILD_ROOT
 test -e /.buildenv && . /.buildenv
 #cat /proc/mounts > /etc/fstab
 make buildroot=$RPM_BUILD_ROOT CFLAGS="$RPM_OPT_FLAGS"
 
-if [ $UID = 0 ];then
+if [ $UID = $USER ];then
 	# prepare and create boot images...
 	mkdir -p $RPM_BUILD_ROOT/%{_var}/lib/tftpboot/pxelinux.cfg
 	mkdir -p $RPM_BUILD_ROOT/%{_var}/lib/tftpboot/boot
@@ -189,7 +190,7 @@ make buildroot=$RPM_BUILD_ROOT \
      man_prefix=$RPM_BUILD_ROOT/%{_mandir} \
      install
 touch kiwi.loader
-if [ ! $UID = 0 ];then
+if [ ! $UID = $USER ];then
 	install -m 755 pxeboot/pxelinux.0.config \
 		$RPM_BUILD_ROOT/%{_var}/lib/tftpboot/pxelinux.cfg/default
 fi

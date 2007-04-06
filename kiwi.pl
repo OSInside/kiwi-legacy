@@ -75,8 +75,9 @@ sub main {
 	#==========================================
 	# Create logger object
 	#------------------------------------------
-	$kiwi = new KIWILog();
-
+	if (! defined $kiwi) {
+		$kiwi = new KIWILog();
+	}
 	#==========================================
 	# Initialize and check options
 	#------------------------------------------
