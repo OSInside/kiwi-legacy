@@ -1117,6 +1117,8 @@ sub writeImageConfig {
 	} else {
 		$kiwi -> skipped ();
 	}
+	# Reset main::ImageName...
+	buildImageName();
 	return $configName;
 }
 
