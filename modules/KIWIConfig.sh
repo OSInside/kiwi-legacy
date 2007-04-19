@@ -47,10 +47,25 @@ function suseInsertService {
 #--------------------------------------
 function suseRemoveService {
 	# /.../
-	# Remove a service using insserv -r
+	# Remove a service and its dependant services
+	# using insserv -r
 	# ----
-	local service=$1
-	/sbin/insserv -r $service
+	local service=/etc/init.d/$1
+	while true;do
+		/sbin/insserv -r $service &>/dev/null
+		if [ $? = 0 ];then
+			echo "Service $service removed"
+			break
+		else
+			result=`/sbin/insserv -r $service 2>&1|tail -n 2|cut -f10 -d " "`
+			if [ -f /etc/init.d/$result ];then
+				suseRemoveService $result
+			else
+				echo "$service: $result not found...skipped"
+				break
+			fi
+		fi
+	done
 }
 
 #======================================
@@ -68,6 +83,53 @@ function suseActivateServices {
 				continue
 			fi
 			suseInsertService $i
+		fi
+	done
+}
+
+#======================================
+# suseService
+#--------------------------------------
+function suseService {
+	# /.../
+	# if a service exist then enable or disable it using chkconfig
+	# example : suseService apache2 on
+	# example : suseService apache2 off
+	# ----
+	local service=$1
+	local action=$2
+	if [ -x /etc/init.d/$i ] && [ -f /etc/init.d/$service ];then
+		if [ $action = on ];then
+			/sbin/chkconfig $service on
+		elif [ $action = off ];then
+			/sbin/chkconfig $service off
+		fi
+	fi
+}
+
+#======================================
+# suseServiceDefaultOn
+#--------------------------------------
+function suseServiceDefaultOn {
+	# /.../
+	# Some basic services that needs to be on.
+	# ----
+	services=(
+		boot.rootfsck
+		boot.cleanup
+		boot.localfs
+		boot.localnet
+		boot.clock
+		policykitd
+		haldaemon
+		network
+		atd
+		syslog
+		cron
+	)
+	for i in "${services[@]}";do
+		if [ -x /etc/init.d/$i ] && [ -f /etc/init.d/$i ];then
+			/sbin/chkconfig $i on
 		fi
 	done
 }

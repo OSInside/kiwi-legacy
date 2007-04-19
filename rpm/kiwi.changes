@@ -14,6 +14,9 @@ Thu Apr 19 17:05:53 CEST 2007 - ms@suse.de
 - include enhancements for deploy section, allow server and
   blocksize to be set, allow configuration files to be
   included. fixed partition setup
+- fixed suseRemoveService to know about dependant services
+- added suseService/suseServiceDefaultOn by
+  Mike Veltman <gwayne@xs4all.nl>
 
 -------------------------------------------------------------------
 Fri Apr  6 14:58:26 CEST 2007 - ms@suse.de
