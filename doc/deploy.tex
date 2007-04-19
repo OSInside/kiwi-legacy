@@ -33,7 +33,7 @@ as well as a DHCP server running. kiwi provides the package
 some prebuild boot images.
 
 If the plan is to use a system image for which no prebuild boot image
-exist, it is need to create a custom boot image before a system image
+exist, it is needed to create a custom boot image before a system image
 could be deployed. Boot images consists of the image itself and
 the appropriate kernel to that image. Both file must be stored in
 the directory \textit{/var/lib/tftpboot/boot}. Assuming there is no
@@ -41,7 +41,8 @@ prebuild boot image for the SuSE Linux 10.2 distribution the steps
 to create it are as follows:
 
 \begin{Command}{13cm}
-	kiwi --prepare netboot-suse-10.2 --root /tmp/myroot\\
+	cd /usr/share/kiwi/image
+	kiwi --prepare netboot/suse-10.2 --root /tmp/myroot\\
 	kiwi --create /tmp/myroot -d /tmp
 \end{Command}
 
@@ -52,6 +53,21 @@ ls -1 /tmp/initrd-netboot*
    /tmp/initrd-netboot-suse-10.2.i686-2.1.1.gz
    /tmp/initrd-netboot-suse-10.2.i686-2.1.1.kernel.2.6.18.2-31-default
 \end{verbatim} 
+
+If you don't want to prepare/create the boot image manually you
+can let kiwi do the job by setting up the \textbf{pxe} type in your
+system image config.xml file. For example:
+
+\begin{Command}{12cm}
+<preferences>\\
+\hspace*{1cm}<type>pxe:ext3:netboot/suse-10.2</type>\\
+\hspace*{1cm}...\\
+</preferences>
+\end{Command}
+
+In this case the boot image will be created automatically and from
+the same source as the system image as soon as the \textbf{creation}
+step is performed for the system image.
 
 The next step is to make the boot image known to the TFTP server.
 To do this the files must be copied to the \textit{/var/lib/tftpboot/boot}

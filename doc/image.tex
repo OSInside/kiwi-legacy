@@ -79,7 +79,7 @@ the format:
       options, and which packages make up the image. The structure of the
 	  file corresponds to the format
 
-      \begin{Command}{13cm}
+      \begin{Command}{15cm}
       <image name="Name" inherit="optional-path">\\
       \hspace*{1cm}<description type="boot|system">\\
       \hspace*{2cm}<author>Marcus Schaefer</author>\\
@@ -102,6 +102,13 @@ the format:
       \hspace*{1cm}<repository type="Type">\\
       \hspace*{2cm}<source path="URL"/>\\
       \hspace*{1cm}</repository>\\
+      \hspace*{1cm}</deploy server="192.168.1.1" blocksize="4096">\\
+      \hspace*{2cm}<partitions device="/dev/sda">\\
+      \hspace*{3cm}<partition type="swap" number="1" size="10"/>\\
+      \hspace*{3cm}<partition .../>\\
+      \hspace*{2cm}</partitions>\\
+      \hspace*{2cm}<configuration source="bob" dest="/etc/bob"/>\\
+      \hspace*{1cm}</deploy>\\
       \hspace*{1cm}<packages type="Type">\\
       \hspace*{2cm}<package name="Packagename" arch="Arch"/>\\
       \hspace*{2cm}<opensusePattern name="Patternname"/>\\
@@ -173,6 +180,11 @@ the format:
                               as the xen configuration file. type specifies
                               one of ext2,ext3 or reiserfs and filename must
                               be the name of an appropriate xenboot boot image
+						\item pxe:type:filename\\
+							  to create PXE boot and system image. type
+                              specifies one of ext2,ext3 or reiserfs and
+                              filename must be the name of an appropriate
+                              netboot or xennetboot boot image
                         \item split:type-rw,type-ro\\
                               to create a splitted image into a read-only
                               and a read-write part. type-rw specifies one of
@@ -287,8 +299,9 @@ template:
 
 \begin{Command}{9cm}
 \textbf{\#!/bin/sh}\\
-\textbf{echo -n "}Image [$<$name$>$]...\textbf{"}\\
+\textbf{test -f /.kconfig \&\& . /.kconfig}\\
 \textbf{test -f /.profile \&\& . /.profile}\\
+\textbf{echo -n "}Image [$<$name$>$]...\textbf{"}\\
 \\
 ... script code\\
 \\

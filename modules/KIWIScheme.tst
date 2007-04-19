@@ -28,11 +28,15 @@
 		<source path="/image/dist/full-10.2-i386"/>
 	</repository>
 
-	<deploy>
+	<deploy server="192.168.1.1" blocksize="4096">
 		<partitions device="/dev/sda">
-			<partition type="bla" number="2" size="200"/>
+			<partition type="swap" number="1" size="1000"/>
+			<partition type="L" number="2" size="10000" mountpoint="/"/>
+			<partition type="fd" number="3"/>
 		</partitions>
-	</deploy>
+		<configuration source="bla1" dest="blub1"/>
+		<configuration source="lala" dest="/etc/lala"/>
+    </deploy>
 
 	<packages type="image" patternType="onlyRequired">
 		<package name="libgnomesu"/>
