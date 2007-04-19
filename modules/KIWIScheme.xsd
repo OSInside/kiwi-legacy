@@ -58,7 +58,10 @@
 		<xs:complexType>
 			<xs:sequence>
 				<xs:element ref="partitions" minOccurs="0" maxOccurs="1"/>
+				<xs:element ref="configuration" minOccurs="0" maxOccurs="unbounded"/>
 			</xs:sequence>
+			<xs:attribute name="server" type="xs:string"/>
+			<xs:attribute name="blocksize" type="xs:integer"/>
 		</xs:complexType>
 	</xs:element>
 
@@ -76,6 +79,13 @@
 			<xs:attribute name="number"/>
 			<xs:attribute name="size"/>
 			<xs:attribute name="mountpoint"/>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="configuration">
+		<xs:complexType>
+			<xs:attribute name="source" type="xs:string"/>
+			<xs:attribute name="dest" type="xs:string"/>
 		</xs:complexType>
 	</xs:element>
 

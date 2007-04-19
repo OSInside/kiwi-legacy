@@ -176,7 +176,7 @@ sub setupInPlaceSVNRepository {
 		my $file = "/screenrc.svn";
 		my $screenCall = $root.$file;
 		my $screenCtrl = $root."/screenrc.ctl";
-		my $screenLogs = $root."/screenrc.log";
+		my $screenLogs = $kiwi -> getRootLog();
 		my $data;
 		my $code;
 		#==========================================
@@ -189,6 +189,7 @@ sub setupInPlaceSVNRepository {
 			return undef;
 		}
 		print CD "logfile $screenLogs\n";
+		print CD "logfile flush 0\n";
 		close CD;
 		#==========================================
 		# Create screen call file
@@ -237,7 +238,6 @@ sub setupInPlaceSVNRepository {
 		}
 		qx ( rm -f $screenCall* );
 		qx ( rm -f $screenCtrl );
-		qx ( rm -f $screenLogs );
 		#==========================================
 		# check exit code from screen session
 		#------------------------------------------

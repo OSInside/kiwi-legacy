@@ -160,6 +160,11 @@ sub new {
 		return undef;
 	}
 	#==========================================
+	# Set root log file
+	#------------------------------------------
+	$kiwi -> setRootLog ($root."/screenrc.log");
+
+	#==========================================
 	# Get configured name of package manager
 	#------------------------------------------
 	$kiwi -> info ("Setting up package manager: ");

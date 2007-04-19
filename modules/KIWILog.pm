@@ -26,9 +26,9 @@ use Carp qw (cluck);
 #------------------------------------------
 my @showLevel = (0,1,2,3,4,5);
 my $channel   = \*STDOUT;
+my $errorOk   = 0;
+my $rootLog;
 my $logfile;
-my $errorFile = "/var/log/kiwi";
-my $errorOk   = 1;
 
 #==========================================
 # Constructor
@@ -41,11 +41,7 @@ sub new {
 	# ---
 	my $this  = {};
 	my $class = shift;
-	bless $this,$class;
-	if (! (open EFD,">$errorFile")) {
-		warning ( $this,"Couldn't open error log channel: $!\n" );
-		$errorOk = 0;
-	}
+	bless  $this,$class;
 	return $this;
 }
 
@@ -274,6 +270,41 @@ sub setLogFile {
 	$logfile = \*FD;
 	$channel = \*FD;
 	return $this;
+}
+
+#==========================================
+# setRootLog
+#------------------------------------------
+sub setRootLog {
+	# ...
+	# set a root log file which corresponds with the
+	# screen log file so that there is a complete log per
+	# image prepare/build process available
+	# ---
+	my $this = shift;
+	my $file = shift;
+	if ($errorOk) {
+		return;
+	}
+	info ( $this, "Setting up root log on: $file..." );
+	if (! (open EFD,">$file")) {
+		skipped ();
+		warning ( $this,"Couldn't open root log channel: $!\n" );
+		$errorOk = 0;
+	}
+	done ();
+	$rootLog = $file;
+	$errorOk = 1;
+}
+
+#==========================================
+# getRootLog
+#------------------------------------------
+sub getRootLog {
+	# ...
+	# return the current root log file name
+	# ---
+	return $rootLog;
 }
 
 #==========================================

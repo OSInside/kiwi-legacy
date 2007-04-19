@@ -76,6 +76,7 @@ sub new {
 		$kiwi -> failed ();
 		return undef;
 	}
+	$kiwi -> setRootLog ($imageTree."/screenrc.log");
 	$arch = qx ( arch ); chomp ( $arch );
 	$arch = ".$arch";
 	return $this;
@@ -361,6 +362,34 @@ sub createImageUSB {
 		$main::Survive = "default";
 	}
 	return \%result;
+}
+
+#==========================================
+# createImagePXE
+#------------------------------------------
+sub createImagePXE {
+	# ...
+	# Create Image usable within a PXE boot environment. The
+	# method will create the specified boot image (initrd) and
+	# the system image. In order to use this image via PXE the
+	# administration needs to provide the images via TFTP
+	#
+	# NOTE: Because the steps of creating
+	# a PXE image are the same as creating an usb stick image
+	# we make use of the usb code above to create the system and boot
+	# image
+	# ---
+	#==========================================
+	# Create PXE boot and system image
+	#------------------------------------------
+	my $this = shift;
+	my $para = shift;
+	my $name = createImageUSB ($this,$para,"PXE");
+	if (! defined $name) {
+		return undef;
+	}
+	$main::Survive = "default";
+	return $this;
 }
 
 #==========================================
@@ -1066,7 +1095,7 @@ sub preImage {
 sub writeImageConfig {
 	my $name = shift;
 	my $configName = buildImageName() . ".config";
-	my $device = $xml -> getImageDevice ();
+	my $device = $xml -> getDeployImageDevice ();
 
 	#==========================================
 	# create .config for types which needs it
@@ -1079,12 +1108,18 @@ sub writeImageConfig {
 			return undef;
 		}
 		my $namecd = buildImageName(";");
-		print FD "IMAGE=${device}2;$namecd\n";
+		my $server = $xml -> getDeployServer ();
+		my $blocks = $xml -> getDeployBlockSize ();
+		if ($xml->getCompressed()) {
+			print FD "IMAGE=${device}2;$namecd;$server;$blocks;compressed\n";
+		} else {
+			print FD "IMAGE=${device}2;$namecd;$server;$blocks\n";
+		}
 		print FD "DISK=${device}\n";
 		#==========================================
 		# PART information
 		#------------------------------------------
-		my @parts = $xml -> getPartitions ();
+		my @parts = $xml -> getDeployPartitions ();
 		if ((scalar @parts) > 0) {
 			print FD "PART=";
 			for my $href (@parts) {
@@ -1093,13 +1128,24 @@ sub writeImageConfig {
 				} else {
 					print FD $href->{size};
 				}
-
 				if ($href -> {type} eq "swap") {
 					print FD ";S;x,";
 				} else {
 					my $mountpoint = $href -> {mountpoint};
-					print FD ";L;$mountpoint,";
+					my $type = $href -> {type};
+					print FD ";$type;$mountpoint,";
 				}
+			}
+			print FD "\n";
+		}
+		#==========================================
+		# CONF information
+		#------------------------------------------
+		my %confs = $xml -> getDeployConfiguration ();
+		if ((scalar keys %confs) > 0) {
+			print FD "CONF=";
+			foreach my $source (keys %confs) {
+				print FD "$source;$confs{$source};$server;$blocks,";
 			}
 			print FD "\n";
 		}

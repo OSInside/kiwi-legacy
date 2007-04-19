@@ -205,6 +205,10 @@ sub main {
 				$ok = $image -> createImageXen ( $1 );
 				last SWITCH;
 			};
+			/^pxe:(.*)/   && do {
+				$ok = $image -> createImagePXE ( $1 );
+				last SWITCH;
+			};
 			$kiwi -> error  ("Unsupported type: $type");
 			$kiwi -> failed ();
 			my $code = kiwiExit (1); return $code;
@@ -517,6 +521,15 @@ sub kiwiExit {
 			return undef;
 		}
 		return $code;
+	}
+	my $rootLog = $kiwi -> getRootLog();
+	if (( -f $rootLog) && ($rootLog =~ /(.*)\/.*/)) {
+		my $logfile = $1;
+		$logfile =~ s/\/$//;
+		$logfile = "$logfile.log";
+		$kiwi -> info ("Logfile available at: $logfile");
+		$kiwi -> done ();
+		qx (mv $rootLog $logfile 2>&1);
 	}
 	if ($code != 0) {
 		$kiwi -> error  ("KIWI exited with error(s)");

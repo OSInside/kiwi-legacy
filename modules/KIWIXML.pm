@@ -34,7 +34,9 @@ my $usrdataNodeList;
 my $repositNodeList;
 my $packageNodeList;
 my $imgnameNodeList;
+my $deploysNodeList;
 my $partitionsNodeList;
+my $configfileNodeList;
 my @urllist;
 my $arch;
 
@@ -86,7 +88,11 @@ sub new {
 		$repositNodeList = $systemTree -> getElementsByTagName ("repository");
 		$packageNodeList = $systemTree -> getElementsByTagName ("packages");
 		$imgnameNodeList = $systemTree -> getElementsByTagName ("image");
-		$partitionsNodeList = $systemTree -> getElementsByTagName("partitions");
+		$deploysNodeList = $systemTree -> getElementsByTagName ("deploy");
+		$partitionsNodeList = $systemTree 
+			-> getElementsByTagName ("partitions");
+		$configfileNodeList = $systemTree 
+			-> getElementsByTagName("configuration");
 	};
 	if ($@) {
 		$kiwi -> failed ();
@@ -207,9 +213,9 @@ sub getImageVersion {
 }
 
 #==========================================
-# getImageDevice
+# getDeployImageDevice
 #------------------------------------------
-sub getImageDevice {
+sub getDeployImageDevice {
 	# ...
 	# Get the device the image will be installed to
 	# ---
@@ -223,9 +229,41 @@ sub getImageDevice {
 }
 
 #==========================================
-# getPartitions
+# getDeployServer
 #------------------------------------------
-sub getPartitions {
+sub getDeployServer {
+	# ...
+	# Get the server the config data is obtained from
+	# ---
+	my $this = shift;
+	my $node = $deploysNodeList -> get_node(1);
+	if (defined $node) {
+		return $node -> getAttribute ("server");
+	} else {
+		return "192.168.1.1";
+	}
+}
+
+#==========================================
+# getDeployBlockSize
+#------------------------------------------
+sub getDeployBlockSize {
+	# ...
+	# Get the block size the deploy server should use
+	# ---
+	my $this = shift;
+	my $node = $deploysNodeList -> get_node(1);
+	if (defined $node) {
+		return $node -> getAttribute ("blocksize");
+	} else {
+		return "4096";
+	}
+}
+
+#==========================================
+# getDeployPartitions
+#------------------------------------------
+sub getDeployPartitions {
 	# ...
 	# Get the partition configuration for this image
 	# ---
@@ -235,32 +273,45 @@ sub getPartitions {
 	my @result = ();
 	for (my $i=1;$i<= $partitionNodes->size();$i++) {
 		my $node = $partitionNodes -> get_node($i);
-
 		my $number = $node -> getAttribute ("number");
 		my $type = $node -> getAttribute ("type");
-		if (!defined $type) {
-			$type = "linux";
+		if (! defined $type) {
+			$type = "L";
 		}
-		
 		my $size = $node -> getAttribute ("size");
-		if (!defined $size) {
+		if (! defined $size) {
 			$size = "x";
 		}
-
 		my $mountpoint = $node -> getAttribute ("mountpoint");
-		if (!defined $mountpoint) {
+		if (! defined $mountpoint) {
 			$mountpoint = "x";
 		}
-
 		my %part = ();
 		$part{number} = $number;
 		$part{type} = $type;
 		$part{size} = $size;
 		$part{mountpoint} = $mountpoint;
-
 		push @result, { %part };
 	}
 	return sort { $a->{number} cmp $b->{number} } @result;
+}
+
+#==========================================
+# getDeployConfiguration
+#------------------------------------------
+sub getDeployConfiguration {
+	# ...
+	# Get the configuration file information for this image
+	# ---
+	my $this = shift;
+	my @node = $configfileNodeList -> get_nodelist();
+	my %result;
+	foreach my $element (@node) {
+		my $source = $element -> getAttribute("source");
+		my $dest   = $element -> getAttribute("dest");
+		$result{$source} = $dest;
+	}
+	return %result;
 }
 
 #==========================================

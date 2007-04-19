@@ -376,7 +376,7 @@ sub setupUpgrade {
 	#------------------------------------------
 	my $screenCall = $root."/screenrc.smart";
 	my $screenCtrl = $root."/screenrc.ctrls";
-	my $screenLogs = $root."/screenrc.log";
+	my $screenLogs = $kiwi -> getRootLog();
 
 	#==========================================
 	# Initiate screen call file
@@ -388,6 +388,7 @@ sub setupUpgrade {
 		return undef;
 	}
 	print CD "logfile $screenLogs\n";
+	print CD "logfile flush 0\n";
 	close CD;
 	#==========================================
 	# smart
@@ -433,7 +434,6 @@ sub setupUpgrade {
 	}
 	qx ( rm -f $screenCall* );
 	qx ( rm -f $screenCtrl );
-	qx ( rm -f $screenLogs );
 	#==========================================
 	# check exit code from screen session
 	#------------------------------------------
@@ -466,7 +466,7 @@ sub setupRootSystem {
 	#------------------------------------------
 	my $screenCall = $root."/screenrc.smart";
 	my $screenCtrl = $root."/screenrc.ctrls";
-	my $screenLogs = $root."/screenrc.log";
+	my $screenLogs = $kiwi -> getRootLog();
 
 	#==========================================
 	# Initiate screen call file
@@ -479,6 +479,7 @@ sub setupRootSystem {
 		return undef;
 	}
 	print CD "logfile $screenLogs\n";
+	print CD "logfile flush 0\n";
 	close CD;
 	#==========================================
 	# smart
@@ -492,6 +493,7 @@ sub setupRootSystem {
 				"-o deb-root=$root",
 				"-o force-channels=$forceChannels",
 				"--explain",
+				"--log-level=error",
 				"-y"
 			);
 			#==========================================
@@ -524,6 +526,7 @@ sub setupRootSystem {
 			}
 			my @installOpts = (
 				"--explain",
+				"--log-level=error",
 				"-y"
 			);
 			my $force = $xml -> getRPMForce();
@@ -586,7 +589,6 @@ sub setupRootSystem {
 	}
 	qx ( rm -f $screenCall* );
 	qx ( rm -f $screenCtrl );
-	qx ( rm -f $screenLogs );
 	#==========================================
 	# check exit code from screen session
 	#------------------------------------------

@@ -36,7 +36,7 @@
 		<file name="drivers/message/fusion/*"/>
 		<file name="drivers/net/*"/>
 	</drivers>
-	<repository type="yast2">
+	<repository type="yast2" status="replaceable">
 		<!--<source path="opensuse://10.3"/>-->
 		<source path="/image/CDs/full-i386"/>
 	</repository>
