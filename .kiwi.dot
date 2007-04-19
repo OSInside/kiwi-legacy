@@ -25,6 +25,7 @@ digraph kiwi {
 
 	"kiwi-desc-xennetboot" -> "kiwi"
 	"kiwi-desc-xennetboot" -> "smart"
+	"kiwi-desc-xennetboot" -> "kiwi-desc-netboot"
 
 	"kiwi-desc-xenboot" -> "kiwi"
     "kiwi-desc-xenboot" -> "smart"

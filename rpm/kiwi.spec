@@ -77,7 +77,7 @@ Each image description exists in a single directory and contains
 a netboot image description
 
 %package -n kiwi-desc-xennetboot
-Requires:     kiwi smart
+Requires:     kiwi smart kiwi-desc-netboot
 Summary:      OpenSuSE - KIWI image descriptions
 Group:        System
 

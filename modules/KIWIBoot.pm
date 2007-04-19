@@ -489,8 +489,29 @@ sub setupBootDisk {
 	my $diskname = $system.".qemu";
 	my $vmdkname = $system.".vmdk";
 	my $loop = "/dev/loop0";
+	my $loopfound = 0;
 	my $result;
 	my $status;
+	#==========================================
+	# search free loop device
+	#------------------------------------------
+	$kiwi -> info ("Searching for free loop device...");
+	for (my $id=0;$id<=7;$id++) {
+		$status = qx ( /sbin/losetup /dev/loop$id 2>&1 );
+		$result = $? >> 8;
+		if ($result eq 1) {
+			$loopfound = 1;
+			$loop = "/dev/loop".$id;
+			last;
+		}
+	}
+	if (! $loopfound) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't find free loop device");
+		$kiwi -> failed ();
+		return undef;
+	}
+	$kiwi -> done();
 	#==========================================
 	# create virtual disk
 	#------------------------------------------

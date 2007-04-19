@@ -2,6 +2,10 @@
 Thu Apr 19 17:05:53 CEST 2007 - ms@suse.de
 
 - v1.27
+- fixed xennetboot requirements, adapt .dot graph
+- added loop search while creating virtual disk
+- added --non-interactive option for zypper. Unfortunately there
+  are still questions in case of gpg keys or missing patterns
 - added pxe: target within <type> of config.xml
   This allows you to create the system and boot image in one
   creation run from the same source the system image used
