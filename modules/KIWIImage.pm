@@ -1343,25 +1343,29 @@ sub setupLogicalExtend {
 	# Call depmod
 	#------------------------------------------
 	my $depmod = "/sbin/depmod";
-	my $systemMap = glob("$imageTree/boot/System.map*");
-	if (defined $systemMap) {
+	my @systemMaps = qx ( chroot $imageTree bash -c "ls -1 /boot/System.map*" );
+	if ( @systemMaps ) {
 		$kiwi -> info ("Calculating kernel module dependencies...");
-		my $kernelVersion;
-		if ($systemMap =~ /System.map-(.*)/) {
-			$kernelVersion = $1;
-		} else {
-			$kiwi -> failed ();
-			$kiwi -> info ("Could not determine kernel version");
-			cleanMount ();
-			return undef;
-		}
-		my $data = qx ( $depmod -F $systemMap -b $imageTree $kernelVersion );
-		my $code = $? >> 8;
-		if ($code != 0) {
-			$kiwi -> failed ();
-			$kiwi -> info ($data);
-			cleanMount();
-			return undef;
+		foreach my $systemMap (@systemMaps) {
+			chomp $systemMap;
+			my $kernelVersion;
+			if ($systemMap =~ /System.map-(.*)/) {
+				$kernelVersion = $1;
+			} else {
+				$kiwi -> failed ();
+				$kiwi -> info ("Could not determine kernel version");
+				cleanMount ();
+				return undef;
+			}
+			my $call = "$depmod -F $systemMap $kernelVersion";
+			my $data = qx ( chroot $imageTree $call );
+			my $code = $? >> 8;
+			if ($code != 0) {
+				$kiwi -> failed ();
+				$kiwi -> info ($data);
+				cleanMount();
+				return undef;
+			}
 		}
 		$kiwi -> done ();
 	}
