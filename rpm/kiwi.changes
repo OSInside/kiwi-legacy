@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Mon Apr 23 09:35:32 CEST 2007 - ms@suse.de
+
+- v1.29
+- don't create a 10GB default virtual disk in case of vmware and qemu
+  images. kiwi now calculates the size and provides the information
+  to the user. Overriding the calucaltion can still be done by using
+  the --bootvm-disksize option
+
+-------------------------------------------------------------------
 Fri Apr 20 14:59:34 CEST 2007 - ms@suse.de
 
 - v1.28

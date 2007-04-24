@@ -424,7 +424,6 @@ sub createImageVMX {
 	#------------------------------------------
 	$main::BootVMDisk   = $main::Destination."/".$name->{bootImage}.".gz";
 	$main::BootVMSystem = $main::Destination."/".$name->{systemImage};
-	$main::BootVMSize   = $main::BootVMSize;
 	if (! defined main::main()) {
 		$main::Survive = "default";
 		return undef;

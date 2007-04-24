@@ -93,8 +93,20 @@ sub new {
 		return undef;
 	}
 	if (! defined $vmsize) {
-		$vmsize = "10G";
+		my $kernelSize = -s $kernel; # the kernel
+		my $initrdSize = -s $initrd; # the boot image
+		my $systemSize = -s $system; # the system image
+		$vmsize = $kernelSize + $initrdSize + $systemSize;
+		my $sparesSize = 0.1 * $vmsize; # and 10% free space
+		$vmsize = $vmsize + $sparesSize;
+		$vmsize = $vmsize / 1024 / 1024;
+		$vmsize = int $vmsize;
+		$vmsize = $vmsize."M";
+		$kiwi -> info ("Using computed virtual disk size of: $vmsize"); 
+	} else {
+		$kiwi -> info ("Using given virtual disk size of: $vmsize");
 	}
+	$kiwi -> done ();
 	chomp  $tmpdir;
 	return $this;
 }
