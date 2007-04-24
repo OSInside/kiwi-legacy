@@ -267,6 +267,8 @@ sub setLogFile {
 		warning ( $this,"Couldn't open log channel: $!\n" );
 		return undef;
 	}
+	binmode(FD,':unix');
+	$rootLog = $file;
 	$logfile = \*FD;
 	$channel = \*FD;
 	return $this;
@@ -292,6 +294,7 @@ sub setRootLog {
 		warning ( $this,"Couldn't open root log channel: $!\n" );
 		$errorOk = 0;
 	}
+	binmode(EFD,':unix');
 	done ();
 	$rootLog = $file;
 	$errorOk = 1;

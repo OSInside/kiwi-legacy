@@ -179,6 +179,7 @@ sub setupInPlaceSVNRepository {
 		my $screenLogs = $kiwi -> getRootLog();
 		my $data;
 		my $code;
+		my $logs;
 		#==========================================
 		# Initiate screen call file
 		#------------------------------------------
@@ -225,15 +226,21 @@ sub setupInPlaceSVNRepository {
 		$data = qx ( chmod 755 $screenCall );
 		$data = qx ( screen -L -D -m -c $screenCtrl chroot $root $file );
 		$code = $? >> 8;
-		if (open (FD,$screenLogs)) {
-			local $/; $data = <FD>; close FD;
+		$logs = 1;
+		if ($main::LogFile =~ /\/dev\//) {
+			$logs = 0;
 		}
-		if ($code == 0) {
-			if (! open (FD,"$screenCall.exit")) {
-				$code = 1;
-			} else {
-				$code = <FD>; chomp $code;
-				close FD;
+		if ($logs) {
+			if (open (FD,$screenLogs)) {
+				local $/; $data = <FD>; close FD;
+			}
+			if ($code == 0) {
+				if (! open (FD,"$screenCall.exit")) {
+					$code = 1;
+				} else {
+					$code = <FD>; chomp $code;
+					close FD;
+				}
 			}
 		}
 		qx ( rm -f $screenCall* );
@@ -243,7 +250,9 @@ sub setupInPlaceSVNRepository {
 		#------------------------------------------
 		if ($code != 0) {
 			$kiwi -> failed ();
-			$kiwi -> error  ($data);
+			if ($logs) {
+				$kiwi -> error  ($data);
+			}
 			return undef;
 		}
 		$kiwi -> done();

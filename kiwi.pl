@@ -87,6 +87,9 @@ sub main {
 	# Setup logging location
 	#------------------------------------------
 	if (defined $LogFile) {
+		if ($LogFile eq "terminal") {
+			$LogFile = qx ( tty ); chomp $LogFile;
+		}
 		$kiwi -> info ("Setting log file to: $LogFile\n");
 		if (! $kiwi -> setLogFile ( $LogFile )) {
 			my $code = kiwiExit (1); return $code;
@@ -475,7 +478,7 @@ sub usage {
 	print "    Strip shared objects and executables\n";
 	print "    makes only sense in combination with --create\n";
 	print "\n";
-	print "  [ --logfile <filename> ]\n";
+	print "  [ --logfile <filename> | terminal ]\n";
 	print "    Write to the log file \`<filename>' instead of\n";
 	print "    the terminal.\n";
 	print "--\n";
@@ -522,14 +525,16 @@ sub kiwiExit {
 		}
 		return $code;
 	}
-	my $rootLog = $kiwi -> getRootLog();
-	if (( -f $rootLog) && ($rootLog =~ /(.*)\/.*/)) {
-		my $logfile = $1;
-		$logfile =~ s/\/$//;
-		$logfile = "$logfile.log";
-		$kiwi -> info ("Logfile available at: $logfile");
-		$kiwi -> done ();
-		qx (mv $rootLog $logfile 2>&1);
+	if (! defined $LogFile) {
+		my $rootLog = $kiwi -> getRootLog();
+		if (( -f $rootLog) && ($rootLog =~ /(.*)\/.*/)) {
+			my $logfile = $1;
+			$logfile =~ s/\/$//;
+			$logfile = "$logfile.log";
+			$kiwi -> info ("Logfile available at: $logfile");
+			$kiwi -> done ();
+			qx (mv $rootLog $logfile 2>&1);
+		}
 	}
 	if ($code != 0) {
 		$kiwi -> error  ("KIWI exited with error(s)");

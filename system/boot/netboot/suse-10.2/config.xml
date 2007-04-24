@@ -26,6 +26,10 @@
 		<file name="fs/fat/*"/>
 		<file name="fs/vfat/*"/>
 		<file name="fs/reiserfs/*"/>
+		<file name="fs/nfs/*"/>
+		<file name="net/sunrpc/*"/>
+		<file name="fs/lockd/*"/>
+		<file name="fs/nfs_common/*"/>
 		<file name="net/ipv6/*"/>
 		<file name="drivers/ata/*"/>
 		<file name="drivers/scsi/*"/>
@@ -34,7 +38,7 @@
 	</drivers>
 	<repository type="yast2" status="replaceable">
 		<source path="opensuse://10.2"/>
-        <!--<source path="/image/dist/full-10.2-i386"/>-->
+		<!--<source path="/image/dist/full-10.2-i386"/>-->
 	</repository>
 	<packages type="image">
 		<package name="atftp"/>

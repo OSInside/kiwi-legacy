@@ -371,6 +371,7 @@ sub setupUpgrade {
 	my $screenLogs;
 	my $data;
 	my $code;
+	my $logs;
 	#==========================================
 	# screen files
 	#------------------------------------------
@@ -421,15 +422,21 @@ sub setupUpgrade {
 	$data = qx ( chmod 755 $screenCall );
 	$data = qx ( screen -L -D -m -c $screenCtrl $screenCall );
 	$code = $? >> 8;
-	if (open (FD,$screenLogs)) {
-		local $/; $data = <FD>; close FD;
+	$logs = 1;
+	if ($main::LogFile =~ /\/dev\//) {
+		$logs = 0;
 	}
-	if ($code == 0) {
-		if (! open (FD,"$screenCall.exit")) {
-			$code = 1;
-		} else {
-			$code = <FD>; chomp $code;
-			close FD; 
+	if ($logs) {
+		if (open (FD,$screenLogs)) {
+			local $/; $data = <FD>; close FD;
+		}
+		if ($code == 0) {
+			if (! open (FD,"$screenCall.exit")) {
+				$code = 1;
+			} else {
+				$code = <FD>; chomp $code;
+				close FD; 
+			}
 		}
 	}
 	qx ( rm -f $screenCall* );
@@ -439,7 +446,9 @@ sub setupUpgrade {
 	#------------------------------------------
 	if ($code != 0) {
 		$kiwi -> failed ();
-		$kiwi -> error  ($data);
+		if ($logs) {
+			$kiwi -> error  ($data);
+		}
 		return undef;
 	}
 	$kiwi -> done ();
@@ -461,6 +470,7 @@ sub setupRootSystem {
 	my $screenLogs;
 	my $data;
 	my $code;
+	my $logs;
 	#==========================================
 	# screen files
 	#------------------------------------------
@@ -576,15 +586,21 @@ sub setupRootSystem {
 	$data = qx ( chmod 755 $screenCall );
 	$data = qx ( screen -L -D -m -c $screenCtrl $screenCall );
 	$code = $? >> 8;
-	if (open (FD,$screenLogs)) {
-		local $/; $data = <FD>; close FD;
+	$logs = 1;
+	if ($main::LogFile =~ /\/dev\//) {
+		$logs = 0;
 	}
-	if ($code == 0) {
-		if (! open (FD,"$screenCall.exit")) {
-			$code = 1;
-		} else {
-			$code = <FD>; chomp $code;
-			close FD;
+	if ($logs) {
+		if (open (FD,$screenLogs)) {
+			local $/; $data = <FD>; close FD;
+		}
+		if ($code == 0) {
+			if (! open (FD,"$screenCall.exit")) {
+				$code = 1;
+			} else {
+				$code = <FD>; chomp $code;
+				close FD;
+			}
 		}
 	}
 	qx ( rm -f $screenCall* );
@@ -594,7 +610,9 @@ sub setupRootSystem {
 	#------------------------------------------
 	if ($code != 0) {
 		$kiwi -> failed ();
-		$kiwi -> error  ($data);
+		if ($logs) {
+			$kiwi -> error  ($data);
+		}
 		resetInstallationSource();
 		return undef;
 	}

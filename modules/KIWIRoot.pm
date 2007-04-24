@@ -162,8 +162,9 @@ sub new {
 	#==========================================
 	# Set root log file
 	#------------------------------------------
-	$kiwi -> setRootLog ($root."/screenrc.log");
-
+	if (! defined $main::LogFile) {
+		$kiwi -> setRootLog ($root."/screenrc.log");
+	}
 	#==========================================
 	# Get configured name of package manager
 	#------------------------------------------

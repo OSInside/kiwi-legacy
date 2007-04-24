@@ -76,7 +76,9 @@ sub new {
 		$kiwi -> failed ();
 		return undef;
 	}
-	$kiwi -> setRootLog ($imageTree."/screenrc.log");
+	if (! defined $main::LogFile) {
+		$kiwi -> setRootLog ($imageTree."/screenrc.log");
+	}
 	$arch = qx ( arch ); chomp ( $arch );
 	$arch = ".$arch";
 	return $this;
@@ -1342,7 +1344,7 @@ sub setupLogicalExtend {
 	# Call depmod
 	#------------------------------------------
 	my $depmod = "/sbin/depmod";
-	my @systemMaps = qx ( chroot $imageTree bash -c "ls -1 /boot/System.map*" );
+	my @systemMaps = qx ( chroot $imageTree bash -c "ls -1 /boot/System.map* 2>/dev/null" );
 	if ( @systemMaps ) {
 		$kiwi -> info ("Calculating kernel module dependencies...");
 		foreach my $systemMap (@systemMaps) {
