@@ -455,7 +455,7 @@ else
 		esac
 		done
 		Echo "Mounting NFS root system: $nfsRootServer:$nfsRootDevice..."
-		imageRootDevice="-o rw $nfsRootServer:$nfsRootDevice"
+		imageRootDevice="-o nolock,rw $nfsRootServer:$nfsRootDevice"
 		imageRootName="NFSRoot-System"
 		systemIntegrity="clean"
 	done

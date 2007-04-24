@@ -114,9 +114,9 @@ fi
 # 7) setup network for nfs boot
 #--------------------------------------
 if test ! -z $NFSROOT;then
-	mount -t proc  proc    /proc
-	mount -t sysfs sysfs   /sys
-	mount -t devpts devpts /dev/pts
+	mount -o nolock -t proc  proc    /proc
+	mount -o nolock -t sysfs sysfs   /sys
+	mount -o nolock -t devpts devpts /dev/pts
 	/etc/init.d/portmap start
 	systemException "FOO" "shell"
 	# TODO
