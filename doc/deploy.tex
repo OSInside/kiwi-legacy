@@ -41,7 +41,7 @@ prebuild boot image for the SuSE Linux 10.2 distribution the steps
 to create it are as follows:
 
 \begin{Command}{13cm}
-	cd /usr/share/kiwi/image
+	cd /usr/share/kiwi/image\\
 	kiwi --prepare netboot/suse-10.2 --root /tmp/myroot\\
 	kiwi --create /tmp/myroot -d /tmp
 \end{Command}
@@ -224,9 +224,10 @@ terminal server configuration which needs to export the system image using
 a NFS server. The following steps needs to be performed in order to activate
 a diskless station:
 \begin{enumerate}
-\item Prepare the system image using \textbf{kiwi --root /tmp/kiwi.nfsroot --prepare ...}
+\item Prepare the system image using\\
+      \textbf{kiwi --root /tmp/kiwi.nfsroot --prepare ...}
 \item Setup a NFS server which exports the /tmp/kiwi.nfsroot path. The
-      following export options in /etc/exports are recommended:
+      following export options in /etc/exports are recommended:\\
       \textbf{/tmp/kiwi.nfsroot  *(rw,no\_root\_squash,sync,no\_subtree\_check)}
 \item Create an appropriate netboot boot image (initrd) with kiwi. Appropriate
       means the package repository for the system image and the netboot image
