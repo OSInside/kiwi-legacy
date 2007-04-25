@@ -118,6 +118,4 @@ if test ! -z $NFSROOT;then
 	mount -o nolock -t sysfs sysfs   /sys
 	mount -o nolock -t devpts devpts /dev/pts
 	/etc/init.d/portmap start
-	systemException "FOO" "shell"
-	# TODO
 fi

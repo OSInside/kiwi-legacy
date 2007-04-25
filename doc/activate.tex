@@ -339,6 +339,25 @@ The following format is used:
         the tftpserver do a chroot into the tftp server path you need
         to specify the initrd file as the following example shows:
         \textbf{KIWI\_INITRD=/boot/<name-of-initrd-file>}
+	\item \textbf{UNIONFS\_CONFIG}\\
+		For netboot and usbboot images there is the possibility to
+		use unionfs or aufs as container filesystem in combination
+		with a compressed system image. The recommended compressed
+		filesystem type for the system image is \textbf{squashfs}.
+		In case of a usb-stick system the usbboot image will 
+		automatically setup the unionfs/aufs filesystem. In case of
+		a PXE network image the netboot image requires a config.<MAC>
+		setup like the following example shows:
+		\textbf{UNIONFS\_CONFIG=/dev/sda3,/dev/sda2,aufs}. In this
+		example the first device /dev/sda3 represents the read/write
+		filesystem and the second device /dev/sda2 represents the
+		compressed system image filesystem. The container filesystem
+		aufs is then used to cover the read/write layer with the
+		read-only device to one read/write filesystem. If a file on
+		the read-only device is going to be written the changes inodes
+		are part of the read/write filesystem. Please note the device
+		specifications in UNIONFS\_CONFIG must correspond with
+		the partition information in PART.
 \end{itemize}
 
 %\newpage

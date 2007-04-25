@@ -136,6 +136,31 @@ all data on the given device will be lost. Because of this reason
 the user has to type the device name which hopefully increases the
 chance not to do something thoughtlessly.
 
+\section{Installation on client via CD}
+If there is no network infrastructure available a client can only receive
+the system image from a storage media like a CD or an USB stick. This section
+explains how to create a CD with kiwi which supports system image
+installation to the storage device of the client. The following steps
+needs to be processed:
+\begin{enumerate}
+\item Create the boot image which takes over the task of installing the
+      system image. For that purpose kiwi provides the \textbf{isoinstboot}
+      boot image type.
+\item Next step is creating the system image which should make it on the
+      client. The boot and the system image package source should be the same.
+      The system image description requires a \textbf{deploy} section within
+      the config.xml file. The deploy section describes how the clients
+      storage device should be partitioned and which device is the root
+      device for the later image.
+\item Last step is to create an .iso file together with the boot- and
+      system image. Therefore call kiwi like the following example:
+	  \textbf{kiwi --installcd bootImageName --installcd-system systemImageName}
+\end{enumerate}
+
+\section{Installation on client via USB stick}
+*** not yet implemented ***
+%TODO ..
+
 \section{Split image system via PXE}
 kiwi supports system images to be splitted into two parts, a read-only
 part and a read-write part. This allows to put data on different
@@ -188,6 +213,36 @@ PART=200;S;x,500;L;/,x;L;
 DISK=/dev/sda
 COMBINED_IMAGE=yes
 \end{verbatim}
+
+\section{Via network using NFS mounted root system}
+In principal kiwi was designed to upload an image onto a client in different
+ways but out there you will find diskless machines as well. Those devices
+doesn't provide permanent storage and rely on the network. The most oft used
+process to activate such terminals is to NFS mount the system image via
+the network. kiwi supports that as well but it additionally requires a
+terminal server configuration which needs to export the system image using
+a NFS server. The following steps needs to be performed in order to activate
+a diskless station:
+\begin{enumerate}
+\item Prepare the system image using \textbf{kiwi --root /tmp/kiwi.nfsroot --prepare ...}
+\item Setup a NFS server which exports the /tmp/kiwi.nfsroot path. The
+      following export options in /etc/exports are recommended:
+      \textbf{/tmp/kiwi.nfsroot  *(rw,no\_root\_squash,sync,no\_subtree\_check)}
+\item Create an appropriate netboot boot image (initrd) with kiwi. Appropriate
+      means the package repository for the system image and the netboot image
+	  must be the same
+\item Copy the boot image/kernel to the PXE server in /var/lib/tftpboot/boot
+      The package kiwi-pxeboot helps you in setting up the PXE/TFTP server
+\item Create a config.<MAC> file in /var/lib/tftpboot/KIWI with the following
+      contents:
+\begin{verbatim}
+NFSROOT=129.168.100.7;/tmp/kiwi.nfsroot
+\end{verbatim} 
+\item Boot the client. If everything works the client will receive the boot
+      image and kernel via PXE/TFTP. The boot image NFS mounts the system image
+      according to the data in config.<MAC>. After that the mounted root filesystem
+      will be activated  
+\end{enumerate}
 
 \section{USB stick system}
 A very popular method is storing complete operating systems on an USB
