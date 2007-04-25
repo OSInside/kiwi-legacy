@@ -27,6 +27,7 @@ use Carp qw (cluck);
 my @showLevel = (0,1,2,3,4,5);
 my $channel   = \*STDOUT;
 my $errorOk   = 0;
+my $fileLog;
 my $rootLog;
 my $logfile;
 
@@ -95,11 +96,15 @@ sub done {
 	# ...
 	# This is the green "done" flag
 	# ---
-    doStat();
-	setOutputChannel();
-    print "\033[1;32mdone\n";
-	resetOutputChannel();
-    doNorm();
+	if (! defined $fileLog) {
+	    doStat();
+		setOutputChannel();
+		print "\033[1;32mdone\n";
+		resetOutputChannel();
+		doNorm();
+	} else {
+		print "   done\n";
+	}
 }
 
 #==========================================
@@ -109,11 +114,15 @@ sub failed {
 	# ...
 	# This is the red "failed" flag
 	# ---
-    doStat();
-	setOutputChannel();
-    print "\033[1;31mfailed\n";
-	resetOutputChannel();
-    doNorm();
+	if (! defined $fileLog) {
+		doStat();
+		setOutputChannel();
+		print "\033[1;31mfailed\n";
+		resetOutputChannel();
+		doNorm();
+	} else {
+		print "   failed\n";
+	}
 }
 
 #==========================================
@@ -123,11 +132,15 @@ sub skipped {
 	# ...
 	# This is the yellow "skipped" flag
 	# ---
-	doStat();
-	setOutputChannel();
-	print "\033[1;33mskipped\n";
-	resetOutputChannel();
-	doNorm();
+	if (! defined $fileLog) {
+		doStat();
+		setOutputChannel();
+		print "\033[1;33mskipped\n";
+		resetOutputChannel();
+		doNorm();
+	} else {
+		print "   skipped\n";
+	}
 }
 
 #==========================================
@@ -268,6 +281,7 @@ sub setLogFile {
 		return undef;
 	}
 	binmode(FD,':unix');
+	$fileLog = 1;
 	$rootLog = $file;
 	$logfile = \*FD;
 	$channel = \*FD;
