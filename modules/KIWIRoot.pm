@@ -82,9 +82,18 @@ sub new {
 		$kiwi -> failed ();
 		return undef;
 	}
-	my %repository = $xml -> getRepository();
+	my %repository;
+	if ($baseSystem eq "/meta-system") {
+		%repository = $xml -> getMetaRepository();
+	} else {
+		%repository = $xml -> getRepository();
+	}
 	if (! %repository) {
-		$kiwi -> error ("No repository specified in XML tree");
+		if ($baseSystem eq "/meta-system") {
+			$kiwi -> error ("No instsource repository specified in XML tree");
+		} else {
+			$kiwi -> error ("No repository specified in XML tree");
+		}
 		$kiwi -> failed ();
 		return undef; 
 	}
@@ -117,14 +126,16 @@ sub new {
 		}
 		my $channel = "kiwi".$count."-".$$;
 		my $srckey  = "baseurl";
+		my $srcopt;
 		if ($type eq "rpm-dir") {
 			$srckey = "path";
+			$srcopt = "recursive=True";
 		}
 		my @private_options = ("type=$type","name=$channel",
-			"$srckey=$private_url","-y"
+			"$srckey=$private_url",$srcopt,"-y"
 		);
 		my @public_options  = ("type=$type","name=$channel",
-			"$srckey=$publics_url","-y"
+			"$srckey=$publics_url",$srcopt,"-y"
 		);
 		$sourceChannel{private}{$channel} = \@private_options;
 		$sourceChannel{public}{$channel}  = \@public_options;
@@ -201,7 +212,12 @@ sub init {
 	#==========================================
 	# Get base Package list
 	#------------------------------------------
-	my @initPacs = $xml -> getBaseList();
+	my @initPacs;
+	if ($baseSystem eq "/meta-system") {
+		@initPacs = $xml -> getBaseMetaList();
+	} else {
+		@initPacs = $xml -> getBaseList();
+	}
 	if (! @initPacs) {
 		$kiwi -> error ("Couldn't create base package list");
 		$kiwi -> failed ();
@@ -234,6 +250,12 @@ sub init {
 	#------------------------------------------
 	if (! $manager -> resetSignatureCheck()) {
 		return undef;
+	}
+	#==========================================
+	# Return in case of instsource creation
+	#------------------------------------------
+	if ($baseSystem eq "/meta-system") {
+		return $this;
 	}
 	#==================================
 	# Copy/touch some defaults files

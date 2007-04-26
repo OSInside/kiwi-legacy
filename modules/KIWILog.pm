@@ -29,7 +29,6 @@ my $channel   = \*STDOUT;
 my $errorOk   = 0;
 my $fileLog;
 my $rootLog;
-my $logfile;
 
 #==========================================
 # Constructor
@@ -102,8 +101,13 @@ sub done {
 		print "\033[1;32mdone\n";
 		resetOutputChannel();
 		doNorm();
+		if ($errorOk) {
+			print EFD "   done\n";
+		}
 	} else {
+		setOutputChannel();
 		print "   done\n";
+		resetOutputChannel();
 	}
 }
 
@@ -120,8 +124,13 @@ sub failed {
 		print "\033[1;31mfailed\n";
 		resetOutputChannel();
 		doNorm();
+		if ($errorOk) {
+			print EFD "   failed\n";
+		}
 	} else {
+		setOutputChannel();
 		print "   failed\n";
+		resetOutputChannel();
 	}
 }
 
@@ -138,8 +147,13 @@ sub skipped {
 		print "\033[1;33mskipped\n";
 		resetOutputChannel();
 		doNorm();
+		if ($errorOk) {
+			print EFD "   skipped\n";
+		}
 	} else {
+		setOutputChannel();
 		print "   skipped\n";
+		resetOutputChannel();
 	}
 }
 
@@ -200,13 +214,16 @@ sub printLog {
 	foreach my $level (@showLevel) {
 	if ($level == $lglevel) {
 		setOutputChannel();
-		if ($errorOk) {
-			print EFD "$date $logdata\n";
-		}
 		if (($lglevel == 1) || ($lglevel == 2) || ($lglevel == 3)) {
 			print $date,$logdata;
+			if ($errorOk) {
+				print EFD $date,$logdata;
+			}
 		} elsif ($lglevel == 5) {
 			print $logdata;
+			if ($errorOk) {
+				print EFD $logdata;
+			}
 		} else {
 			cluck $date,$logdata;
 		}
@@ -276,15 +293,16 @@ sub setLogFile {
 	# ---
 	my $this = shift;
 	my $file = $_[0];
-	if (! (open FD,">$file")) {
-		warning ( $this,"Couldn't open log channel: $!\n" );
-		return undef;
+	if ($file ne "terminal") {
+		if (! (open FD,">$file")) {
+			warning ( $this,"Couldn't open log channel: $!\n" );
+			return undef;
+		}
+		binmode(FD,':unix');
+		$channel = \*FD;
 	}
-	binmode(FD,':unix');
-	$fileLog = 1;
 	$rootLog = $file;
-	$logfile = \*FD;
-	$channel = \*FD;
+	$fileLog = 1;
 	return $this;
 }
 

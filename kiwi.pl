@@ -36,6 +36,7 @@ our $KConfig = "/usr/share/kiwi/modules/KIWIConfig.sh";
 #--------------------------------------------
 our $Prepare;         # control XML file for building chroot extend
 our $Create;          # image description for building image extend
+our $CreateInstSource;# create installation source from meta packages
 our $Upgrade;         # upgrade physical extend
 our $Destination;     # destination directory for logical extends
 our $LogFile;         # optional file name for logging
@@ -87,13 +88,40 @@ sub main {
 	# Setup logging location
 	#------------------------------------------
 	if (defined $LogFile) {
-		if ($LogFile eq "terminal") {
-			$LogFile = qx ( tty ); chomp $LogFile;
-		}
 		$kiwi -> info ("Setting log file to: $LogFile\n");
 		if (! $kiwi -> setLogFile ( $LogFile )) {
 			my $code = kiwiExit (1); return $code;
 		}
+	}
+
+	#========================================
+	# Create instsource from meta packages
+	#----------------------------------------
+	if (defined $CreateInstSource) {
+		$kiwi -> info ("Reading image description...");
+		my $xml = new KIWIXML ( $kiwi,$CreateInstSource );
+		if (! defined $xml) {
+			my $code = kiwiExit (1); return $code;
+		}
+		$kiwi -> done();
+		#==========================================
+		# Initialize installation source tree
+		#------------------------------------------
+		$root = new KIWIRoot (
+			$kiwi,$xml,$CreateInstSource,$RootTree,
+			"/meta-system"
+		);
+		if (! defined $root) {
+			$kiwi -> error ("Couldn't create root object");
+			$kiwi -> failed ();
+			my $code = kiwiExit (1); return $code;
+		}
+		if (! defined $root -> init ()) {
+			$kiwi -> error ("Base initialization failed");
+			$kiwi -> failed ();
+			my $code = kiwiExit (1); return $code;
+		}
+		# TODO
 	}
 
 	#========================================
@@ -389,26 +417,27 @@ sub init {
 	$SIG{"INT"}      = \&quit;
 
 	my $result = GetOptions(
-		"version"             => \&version,
-		"logfile=s"           => \$LogFile,
-		"prepare|p=s"         => \$Prepare,
-		"list|l"              => \&listImage,
-		"create|c=s"          => \$Create,
-		"upgrade|u=s"         => \$Upgrade,
-		"destdir|d=s"         => \$Destination,
-		"root|r=s"            => \$RootTree,
-		"bootstick=s"         => \$BootStick,
-		"bootvm=s"            => \$BootVMDisk,
-		"bootstick-system=s"  => \$BootStickSystem,
-		"bootvm-system=s"     => \$BootVMSystem,
-		"bootvm-disksize=s"   => \$BootVMSize,
-		"bootcd=s"            => \$BootCD,
-		"installcd=s"         => \$InstallCD,
-		"installcd-system=s"  => \$InstallCDSystem,
-		"strip|s"             => \$StripImage,
-		"createpassword"      => \$CreatePassword,
-		"help|h"              => \&usage,
-		"<>"                  => \&usage
+		"version"               => \&version,
+		"logfile=s"             => \$LogFile,
+		"prepare|p=s"           => \$Prepare,
+		"list|l"                => \&listImage,
+		"create|c=s"            => \$Create,
+		"create-instsource|C=s" => \$CreateInstSource,
+		"upgrade|u=s"           => \$Upgrade,
+		"destdir|d=s"           => \$Destination,
+		"root|r=s"              => \$RootTree,
+		"bootstick=s"           => \$BootStick,
+		"bootvm=s"              => \$BootVMDisk,
+		"bootstick-system=s"    => \$BootStickSystem,
+		"bootvm-system=s"       => \$BootVMSystem,
+		"bootvm-disksize=s"     => \$BootVMSize,
+		"bootcd=s"              => \$BootCD,
+		"installcd=s"           => \$InstallCD,
+		"installcd-system=s"    => \$InstallCDSystem,
+		"strip|s"               => \$StripImage,
+		"createpassword"        => \$CreatePassword,
+		"help|h"                => \&usage,
+		"<>"                    => \&usage
 	);
 	my $user = qx (whoami);
 	if ($user !~ /root/i) {
@@ -423,7 +452,8 @@ sub init {
 		(! defined $Prepare) && (! defined $Create) &&
 		(! defined $BootStick) && (! defined $BootCD) &&
 		(! defined $InstallCD) && (! defined $Upgrade) &&
-		(! defined $BootVMDisk) && (! defined $CreatePassword)
+		(! defined $BootVMDisk) && (! defined $CreatePassword) &&
+		(! defined $CreateInstSource)
 	) {
 		$kiwi -> info ("No operation specified");
 		$kiwi -> failed ();
@@ -454,6 +484,7 @@ sub usage {
 
 	print "Usage:\n";
 	print "  kiwi -l | --list\n";
+	print "Image Preparation/Creation:\n";
 	print "  kiwi -p | --prepare <image-path>\n";
 	print "  kiwi -c | --create  <image-root>\n";
 	print "  kiwi -u | --upgrade <image-root>\n";
@@ -462,7 +493,10 @@ sub usage {
 	print "     [ --bootvm-disksize <size> ]\n";
 	print "  kiwi --bootcd <initrd>\n";
 	print "  kiwi --installcd <initrd> --installcd-system <systemImage>\n";
+	print "Helper Tools:\n";
 	print "  kiwi --createpassword\n";
+	print "  kiwi -C | --create-instsource <image-path>\n";
+	print "Options:\n";
 	print "--\n";
 	print "  [ -d | --destdir <destination-path> ]\n";
 	print "    Specify an alternative destination directory for\n";

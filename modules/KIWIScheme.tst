@@ -16,6 +16,14 @@
 		<packagemanager>smart</packagemanager>
 	</preferences>
 
+	<instsource>
+		<metadata type="rpm-dir">
+			<source path="/mounts/work3/CDs/full-i386/suse/%arch"/>
+		</metadata>
+		<package name="bob"/>
+		<package name="foo"/>
+	</instsource>
+
 	<users group="users">
 		<user name="linux" pwd="$2a$10$90AjhfXU2YIwTRrIftBauecvWXVuaNZ6JLM2IpWi0svu2kO16le9e" home="/home/linux"/>
 	</users>

@@ -179,7 +179,7 @@ sub setupInPlaceSVNRepository {
 		my $screenLogs = $kiwi -> getRootLog();
 		my $data;
 		my $code;
-		my $logs;
+		my $logs = 1;
 		#==========================================
 		# Initiate screen call file
 		#------------------------------------------
@@ -221,16 +221,18 @@ sub setupInPlaceSVNRepository {
 		print FD "echo \$? > $file.exit\n";
 		close FD;
 		#==========================================
+		# Check log location
+		#------------------------------------------
+		if ($main::LogFile eq "terminal") {
+			$logs = 0;
+		}
+		#==========================================
 		# run repository creation in screen
 		#------------------------------------------
 		$data = qx ( chmod 755 $screenCall );
-		$data = qx ( screen -L -D -m -c $screenCtrl chroot $root $file );
-		$code = $? >> 8;
-		$logs = 1;
-		if ($main::LogFile =~ /\/dev\//) {
-			$logs = 0;
-		}
-		if ($logs) {
+		if ( $logs ) {
+			$data = qx ( screen -L -D -m -c $screenCtrl chroot $root $file );
+			$code = $? >> 8;
 			if (open (FD,$screenLogs)) {
 				local $/; $data = <FD>; close FD;
 			}
@@ -242,6 +244,9 @@ sub setupInPlaceSVNRepository {
 					close FD;
 				}
 			}
+		} else {
+			$code = system ( "chroot $root $file" );
+			$code = $code >> 8;
 		}
 		qx ( rm -f $screenCall* );
 		qx ( rm -f $screenCtrl );
@@ -250,7 +255,7 @@ sub setupInPlaceSVNRepository {
 		#------------------------------------------
 		if ($code != 0) {
 			$kiwi -> failed ();
-			if ($logs) {
+			if ( $logs ) {
 				$kiwi -> error  ($data);
 			}
 			return undef;

@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Thu Apr 26 12:51:18 CEST 2007 - ms@suse.de
+
+- v1.30
+- added experimental <instsource> section in config.xml.
+  This should be used to setup an installation source specified
+  by meta packages
+- fixed terminal logging, don't use screen if you want logging
+  to the terminal
+
+-------------------------------------------------------------------
 Mon Apr 23 09:35:32 CEST 2007 - ms@suse.de
 
 - v1.29

@@ -371,7 +371,7 @@ sub setupUpgrade {
 	my $screenLogs;
 	my $data;
 	my $code;
-	my $logs;
+	my $logs = 1;
 	#==========================================
 	# screen files
 	#------------------------------------------
@@ -417,16 +417,18 @@ sub setupUpgrade {
 		close FD;
 	}
 	#==========================================
+	# Check log location
+	#------------------------------------------
+	if ($main::LogFile eq "terminal") {
+		$logs = 0;
+	}
+	#==========================================
 	# run upgrade process in screen
 	#------------------------------------------
 	$data = qx ( chmod 755 $screenCall );
-	$data = qx ( screen -L -D -m -c $screenCtrl $screenCall );
-	$code = $? >> 8;
-	$logs = 1;
-	if ($main::LogFile =~ /\/dev\//) {
-		$logs = 0;
-	}
 	if ($logs) {
+		$data = qx ( screen -L -D -m -c $screenCtrl $screenCall );
+		$code = $? >> 8;
 		if (open (FD,$screenLogs)) {
 			local $/; $data = <FD>; close FD;
 		}
@@ -438,6 +440,9 @@ sub setupUpgrade {
 				close FD; 
 			}
 		}
+	} else {
+		$code = system ( $screenCall );
+		$code = $code >> 8;
 	}
 	qx ( rm -f $screenCall* );
 	qx ( rm -f $screenCtrl );
@@ -446,7 +451,7 @@ sub setupUpgrade {
 	#------------------------------------------
 	if ($code != 0) {
 		$kiwi -> failed ();
-		if ($logs) {
+		if ( $logs ) {
 			$kiwi -> error  ($data);
 		}
 		return undef;
@@ -470,7 +475,7 @@ sub setupRootSystem {
 	my $screenLogs;
 	my $data;
 	my $code;
-	my $logs;
+	my $logs = 1;
 	#==========================================
 	# screen files
 	#------------------------------------------
@@ -581,16 +586,18 @@ sub setupRootSystem {
 		close FD;
 	}
 	#==========================================
+	# Check log location
+	#------------------------------------------
+	if ($main::LogFile eq "terminal") {
+		$logs = 0;
+	}
+	#==========================================
 	# run update and install in screen
 	#------------------------------------------
 	$data = qx ( chmod 755 $screenCall );
-	$data = qx ( screen -L -D -m -c $screenCtrl $screenCall );
-	$code = $? >> 8;
-	$logs = 1;
-	if ($main::LogFile =~ /\/dev\//) {
-		$logs = 0;
-	}
-	if ($logs) {
+	if ( $logs ) {
+		$data = qx ( screen -L -D -m -c $screenCtrl $screenCall );
+		$code = $? >> 8;
 		if (open (FD,$screenLogs)) {
 			local $/; $data = <FD>; close FD;
 		}
@@ -602,6 +609,9 @@ sub setupRootSystem {
 				close FD;
 			}
 		}
+	} else {
+		$code = system ( $screenCall );
+		$code = $code >> 8;
 	}
 	qx ( rm -f $screenCall* );
 	qx ( rm -f $screenCtrl );
@@ -610,7 +620,7 @@ sub setupRootSystem {
 	#------------------------------------------
 	if ($code != 0) {
 		$kiwi -> failed ();
-		if ($logs) {
+		if ( $logs ) {
 			$kiwi -> error  ($data);
 		}
 		resetInstallationSource();

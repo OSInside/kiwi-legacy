@@ -35,6 +35,7 @@ my $repositNodeList;
 my $packageNodeList;
 my $imgnameNodeList;
 my $deploysNodeList;
+my $instsrcNodeList;
 my $partitionsNodeList;
 my $configfileNodeList;
 my @urllist;
@@ -89,6 +90,7 @@ sub new {
 		$packageNodeList = $systemTree -> getElementsByTagName ("packages");
 		$imgnameNodeList = $systemTree -> getElementsByTagName ("image");
 		$deploysNodeList = $systemTree -> getElementsByTagName ("deploy");
+		$instsrcNodeList = $systemTree -> getElementsByTagName ("instsource");
 		$partitionsNodeList = $systemTree 
 			-> getElementsByTagName ("partitions");
 		$configfileNodeList = $systemTree 
@@ -434,6 +436,31 @@ sub getUsers {
 }
 
 #==========================================
+# getMetaRepository
+#------------------------------------------
+sub getMetaRepository {
+	# ...
+	# Get the repository type used for building
+	# up an installation source tree. For information on the
+	# available types refer to the package manager documentation
+	# ---
+	my $this = shift;
+	my %result;
+	my $base = $instsrcNodeList -> get_node(1);
+	if (! defined $base) {
+		return %result;
+	}
+	my @node = $base -> getElementsByTagName ("metadata");
+	foreach my $element (@node) {
+		my $type = $element -> getAttribute("type");
+		my $stag = $element -> getElementsByTagName ("source") -> get_node(1);
+		my $source = resolveLink ( $stag -> getAttribute ("path") );
+		$result{$source} = $type;
+	}
+	return %result;
+}
+
+#==========================================
 # getRepository
 #------------------------------------------
 sub getRepository {
@@ -555,16 +582,30 @@ sub getList {
 	# ---
 	my $this = shift;
 	my $what = shift;
-	my %pattr= getPackageAttributes ($this,$what);
+	my %pattr;
+	my $nodes;
+	if ($what ne "meta") {
+		%pattr= getPackageAttributes ($this,$what);
+	}
+	if ($what ne "meta") {
+		$nodes = $packageNodeList;
+	} else {
+		$nodes = $instsrcNodeList;
+	}
 	my @result;
-	for (my $i=1;$i<= $packageNodeList->size();$i++) {
+	for (my $i=1;$i<= $nodes->size();$i++) {
 		#==========================================
 		# Get type and packages
 		#------------------------------------------
-		my $node = $packageNodeList -> get_node($i);
-		my $type = $node -> getAttribute ("type");
-		if ($type ne $what) {
-			next;
+		my $node = $nodes -> get_node($i);
+		my $type;
+		if ($what ne "meta") {
+			$type = $node -> getAttribute ("type");
+			if ($type ne $what) {
+				next;
+			}
+		} else {
+			$type = $what;
 		}
 		my @plist = $node -> getElementsByTagName ("package");
 		foreach my $element (@plist) {
@@ -594,24 +635,26 @@ sub getList {
 		#==========================================
 		# Check for pattern descriptions
 		#------------------------------------------
-		my @slist = $node -> getElementsByTagName ("opensusePattern");
-		my @pattlist = ();
-		foreach my $element (@slist) {
-			my $pattern = $element -> getAttribute ("name");
-			if (! defined $pattern) {
-				next;
+		if ($type ne "meta") {
+			my @slist = $node -> getElementsByTagName ("opensusePattern");
+			my @pattlist = ();
+			foreach my $element (@slist) {
+				my $pattern = $element -> getAttribute ("name");
+				if (! defined $pattern) {
+					next;
+				}
+				push @pattlist,$pattern;
 			}
-			push @pattlist,$pattern;
-		}
-		if (@pattlist) {
-			my $psolve = new KIWIPattern (
-				$kiwi,\@pattlist,\@urllist,$pattr{patternType}
-			);
-			if (! defined $psolve) {
-				return ();
+			if (@pattlist) {
+				my $psolve = new KIWIPattern (
+					$kiwi,\@pattlist,\@urllist,$pattr{patternType}
+				);
+				if (! defined $psolve) {
+					return ();
+				}
+				my @packageList = $psolve -> getPackages();
+				push @result,@packageList;
 			}
-			my @packageList = $psolve -> getPackages();
-			push @result,@packageList;
 		}
 		#==========================================
 		# Check for ignore list
@@ -650,6 +693,18 @@ sub getList {
 		$packHash{$package} = $package;
 	}
 	return sort keys %packHash;
+}
+
+#==========================================
+# getBaseMetaList
+#------------------------------------------
+sub getBaseMetaList {
+	# ...
+	# Create base package list needed to create the
+	# installation source tree
+	# ---
+	my $this = shift;
+	return getList ($this,"meta");
 }
 
 #==========================================
