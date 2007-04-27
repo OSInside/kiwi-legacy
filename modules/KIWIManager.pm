@@ -134,6 +134,7 @@ sub setupScreen {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't create call file: $!");
 		$kiwi -> failed ();
+		resetInstallationSource();
 		return undef;
 	}
 	print $cd "logfile $screenLogs\n";
@@ -192,6 +193,7 @@ sub setupScreenCall {
 		if ( $logs ) {
 			$kiwi -> error  ($data);
 		}
+		resetInstallationSource();
 		return undef;
 	}
 	$kiwi -> done ();
@@ -504,31 +506,13 @@ sub setupUpgrade {
 	# using the package manager upgrade functionality
 	# ---
 	my $this  = shift;
-	my $screenCall;
-	my $screenCtrl;
-	my $screenLogs;
-	my $data;
-	my $code;
-	my $logs = 1;
 	#==========================================
-	# screen files
+	# setup screen call
 	#------------------------------------------
-	my $screenCall = $root."/screenrc.smart";
-	my $screenCtrl = $root."/screenrc.ctrls";
-	my $screenLogs = $kiwi -> getRootLog();
-
-	#==========================================
-	# Initiate screen call file
-	#------------------------------------------
-	if ((! open (FD,">$screenCall")) || (! open (CD,">$screenCtrl"))) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't create call file: $!");
-		$kiwi -> failed ();
+	my $fd = $this -> setupScreen();
+	if (! defined $fd) {
 		return undef;
 	}
-	print CD "logfile $screenLogs\n";
-	print CD "logfile flush 0\n";
-	close CD;
 	#==========================================
 	# smart
 	#------------------------------------------
@@ -537,10 +521,10 @@ sub setupUpgrade {
 		# Create screen call file
 		#------------------------------------------
 		$kiwi -> info ("Upgrading image...");
-		print FD "chroot $root smart update\n";
-		print FD "chroot $root smart upgrade -y\n";
-		print FD "echo \$? > $screenCall.exit\n";
-		close FD;
+		print $fd "chroot $root smart update\n";
+		print $fd "chroot $root smart upgrade -y\n";
+		print $fd "echo \$? > $screenCall.exit\n";
+		$fd -> close();
 	}
 	#==========================================
 	# zypper
@@ -550,52 +534,11 @@ sub setupUpgrade {
 		# Create screen call file
 		#------------------------------------------
 		$kiwi -> info ("Upgrading image...");
-		print FD "chroot $root yes | zypper upgrade -y\n";
-		print FD "echo \$? > $screenCall.exit\n";
-		close FD;
+		print $fd "chroot $root yes | zypper upgrade -y\n";
+		print $fd "echo \$? > $screenCall.exit\n";
+		$fd -> close();
 	}
-	#==========================================
-	# Check log location
-	#------------------------------------------
-	if ($main::LogFile eq "terminal") {
-		$logs = 0;
-	}
-	#==========================================
-	# run upgrade process in screen
-	#------------------------------------------
-	$data = qx ( chmod 755 $screenCall );
-	if ($logs) {
-		$data = qx ( screen -L -D -m -c $screenCtrl $screenCall );
-		$code = $? >> 8;
-		if (open (FD,$screenLogs)) {
-			local $/; $data = <FD>; close FD;
-		}
-		if ($code == 0) {
-			if (! open (FD,"$screenCall.exit")) {
-				$code = 1;
-			} else {
-				$code = <FD>; chomp $code;
-				close FD; 
-			}
-		}
-	} else {
-		$code = system ( $screenCall );
-		$code = $code >> 8;
-	}
-	qx ( rm -f $screenCall* );
-	qx ( rm -f $screenCtrl );
-	#==========================================
-	# check exit code from screen session
-	#------------------------------------------
-	if ($code != 0) {
-		$kiwi -> failed ();
-		if ( $logs ) {
-			$kiwi -> error  ($data);
-		}
-		return undef;
-	}
-	$kiwi -> done ();
-	return $this;
+	return $this -> setupScreenCall();
 }
 
 #==========================================
@@ -608,32 +551,13 @@ sub setupRootSystem {
 	# ---
 	my $this  = shift;
 	my @packs = @_;
-	my $screenCall;
-	my $screenCtrl;
-	my $screenLogs;
-	my $data;
-	my $code;
-	my $logs = 1;
 	#==========================================
-	# screen files
+	# setup screen call
 	#------------------------------------------
-	my $screenCall = $root."/screenrc.smart";
-	my $screenCtrl = $root."/screenrc.ctrls";
-	my $screenLogs = $kiwi -> getRootLog();
-
-	#==========================================
-	# Initiate screen call file
-	#------------------------------------------
-	if ((! open (FD,">$screenCall")) || (! open (CD,">$screenCtrl"))) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't create call file: $!");
-		$kiwi -> failed ();
-		resetInstallationSource();
+	my $fd = $this -> setupScreen();
+	if (! defined $fd) {
 		return undef;
 	}
-	print CD "logfile $screenLogs\n";
-	print CD "logfile flush 0\n";
-	close CD;
 	#==========================================
 	# smart
 	#------------------------------------------
@@ -656,10 +580,10 @@ sub setupRootSystem {
 			#==========================================
 			# Create screen call file
 			#------------------------------------------
-			print FD "smart update @channelList\n";
-			print FD "test \$? = 0 && smart install @packs @installOpts\n";
-			print FD "echo \$? > $screenCall.exit\n";
-			print FD "rm -f $root/etc/smart/channels/*\n";
+			print $fd "smart update @channelList\n";
+			print $fd "test \$? = 0 && smart install @packs @installOpts\n";
+			print $fd "echo \$? > $screenCall.exit\n";
+			print $fd "rm -f $root/etc/smart/channels/*\n";
 		} else {
 			$kiwi -> info ("Installing image packages...");
 			my $querypack = "smart query '*' --installed --hide-version";
@@ -689,12 +613,12 @@ sub setupRootSystem {
 			#==========================================
 			# Create screen call file
 			#------------------------------------------
-			print FD "chroot $root smart update\n";
-			print FD "test \$? = 0 && chroot $root smart install @install ";
-			print FD "@installOpts\n";
-			print FD "echo \$? > $screenCall.exit\n";
+			print $fd "chroot $root smart update\n";
+			print $fd "test \$? = 0 && chroot $root smart install @install ";
+			print $fd "@installOpts\n";
+			print $fd "echo \$? > $screenCall.exit\n";
 		}
-		close FD;
+		$fd -> close();
 	}
 	#==========================================
 	# zypper
@@ -714,58 +638,16 @@ sub setupRootSystem {
 			#==========================================
 			# Create screen call file
 			#------------------------------------------
-			print FD "yes | zypper --root $root install @installOpts @packs\n";
-			print FD "echo \$? > $screenCall.exit\n";
+			print $fd "yes | zypper --root $root install @installOpts @packs\n";
+			print $fd "echo \$? > $screenCall.exit\n";
 		} else {
 			$kiwi -> info ("Installing image packages...");
-			print FD "chroot $root yes | zypper install -y @packs\n";
-			print FD "echo \$? > $screenCall.exit\n";
+			print $fd "chroot $root yes | zypper install -y @packs\n";
+			print $fd "echo \$? > $screenCall.exit\n";
 		}
-		close FD;
+		$fd -> close();
 	}
-	#==========================================
-	# Check log location
-	#------------------------------------------
-	if ($main::LogFile eq "terminal") {
-		$logs = 0;
-	}
-	#==========================================
-	# run update and install in screen
-	#------------------------------------------
-	$data = qx ( chmod 755 $screenCall );
-	if ( $logs ) {
-		$data = qx ( screen -L -D -m -c $screenCtrl $screenCall );
-		$code = $? >> 8;
-		if (open (FD,$screenLogs)) {
-			local $/; $data = <FD>; close FD;
-		}
-		if ($code == 0) {
-			if (! open (FD,"$screenCall.exit")) {
-				$code = 1;
-			} else {
-				$code = <FD>; chomp $code;
-				close FD;
-			}
-		}
-	} else {
-		$code = system ( $screenCall );
-		$code = $code >> 8;
-	}
-	qx ( rm -f $screenCall* );
-	qx ( rm -f $screenCtrl );
-	#==========================================
-	# check exit code from screen session
-	#------------------------------------------
-	if ($code != 0) {
-		$kiwi -> failed ();
-		if ( $logs ) {
-			$kiwi -> error  ($data);
-		}
-		resetInstallationSource();
-		return undef;
-	}
-	$kiwi -> done ();
-	return $this;
+	return $this -> setupScreenCall();
 }
 
 #==========================================
