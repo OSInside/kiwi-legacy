@@ -38,6 +38,8 @@ my $deploysNodeList;
 my $instsrcNodeList;
 my $partitionsNodeList;
 my $configfileNodeList;
+my $schemeNodeList;
+my $schemeVers;
 my @urllist;
 my $arch;
 
@@ -71,13 +73,27 @@ sub new {
 	}
 	$arch = qx ( arch ); chomp $arch;
 	my $systemTree;
+	my $schemeTree;
 	my $controlFile = $imageDesc."/config.xml";
+	my $schemeXML   = new XML::LibXML;
 	my $systemXML   = new XML::LibXML;
 	my $systemXSD   = new XML::LibXML::Schema ( location => $main::Scheme );
 	if (! -f $controlFile) {
 		$kiwi -> failed ();
 		$kiwi -> error ("Cannot open control file: $controlFile");
 		$kiwi -> failed ();
+		return undef;
+	}
+	eval {
+		$schemeTree = $schemeXML
+			-> parse_file ( $main::Scheme );
+		$schemeNodeList = $schemeTree -> getElementsByTagName ("xs:schema");
+	};
+	if ($@) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Problem reading scheme description");
+		$kiwi -> failed ();
+		$kiwi -> error  ("$@\n");
 		return undef;
 	}
 	eval {
@@ -103,6 +119,9 @@ sub new {
 		$kiwi -> error  ("$@\n");
 		return undef;
 	}
+	#==========================================
+	# Validate xml input with current scheme
+	#------------------------------------------
 	eval {
 		$systemXSD ->validate ( $systemTree );
 	};
@@ -113,6 +132,21 @@ sub new {
 		$kiwi -> error  ("$@\n");
 		return undef;
 	}
+	#==========================================
+	# Check version information of the scheme
+	#------------------------------------------
+	my $schemeVers = $schemeNodeList -> get_node (1)
+		-> getAttribute ("version");
+	if ($main::SchemeVersion ne $schemeVers) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("*** XML Scheme version mismatch ***\n");
+		$kiwi -> error  ("Need v$main::SchemeVersion got v$schemeVers");
+		$kiwi -> failed ();
+		return undef;
+	}
+	#==========================================
+	# setup foreign repository sections
+	#------------------------------------------
 	if ( defined $foreignRepo{xmlnode} ) {
 		$kiwi -> done ();
 		$kiwi -> info ("Including foreign repository node(s)");
@@ -127,6 +161,9 @@ sub new {
 		$repositNodeList = $foreignRepo{xmlnode};
 		$repositNodeList -> prepend ($need);
 	}
+	#==========================================
+	# Create URL list from all locations
+	#------------------------------------------
 	@urllist = ();
 	my %repository = getRepository ($this);
 	foreach my $source (keys %repository) {

@@ -27,7 +27,14 @@ use KIWILog;
 use KIWIImage;
 use KIWIBoot;
 
-our $Version = "1.29";
+#============================================
+# Globals (Version)
+#--------------------------------------------
+our $Version       = "1.30";
+our $SchemeVersion = "1.2";
+#============================================
+# Globals
+#--------------------------------------------
 our $System  = "/usr/share/kiwi/image";
 our $Scheme  = "/usr/share/kiwi/modules/KIWIScheme.xsd";
 our $KConfig = "/usr/share/kiwi/modules/KIWIConfig.sh";

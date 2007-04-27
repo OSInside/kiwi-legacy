@@ -664,7 +664,7 @@ sub resetSource {
 	#------------------------------------------
 	if ($manager eq "smart") {
 		foreach my $channel (keys %{$source{public}}) {
-			#$kiwi -> info ("Removing smart channel: $channel\n");
+			$kiwi -> info ("Removing smart channel: $channel\n");
 			qx ( smart channel --remove $channel -y 2>&1 );
 		}
 	}
@@ -673,7 +673,7 @@ sub resetSource {
 	#------------------------------------------
 	if ($manager eq "zypper") {
 		foreach my $channel (keys %{$source{public}}) {
-			#$kiwi -> info ("Removing zypper service: $channel\n");
+			$kiwi -> info ("Removing zypper service: $channel\n");
 			qx ( bash -c "yes | zypper service-delete $channel 2>&1" );
 		}
 	}

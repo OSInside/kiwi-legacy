@@ -2,6 +2,7 @@
 Thu Apr 26 12:51:18 CEST 2007 - ms@suse.de
 
 - v1.30
+- added XML version validation, current XSD version 1.2
 - added experimental <instsource> section in config.xml.
   This should be used to setup an installation source specified
   by meta packages
