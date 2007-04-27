@@ -19,6 +19,7 @@ package KIWIManager;
 #------------------------------------------
 require Exporter;
 use strict;
+use FileHandle;
 use KIWILog;
 
 #==========================================
@@ -37,6 +38,9 @@ my %source;         # installation sources
 my @channelList;    # list of channel names
 my $root;           # root path
 my $chroot = 0;     # is chroot or not
+my $screenCall;     # screen call script
+my $screenCtrl;     # control commands for screen
+my $screenLogs;     # screen log file
 
 #==========================================
 # Private
@@ -107,6 +111,91 @@ sub switchToChroot {
 #------------------------------------------
 sub switchToLocal {
 	$chroot = 0;
+}
+
+#==========================================
+# setupScreen
+#------------------------------------------
+sub setupScreen {
+	my $this = shift;
+	#==========================================
+	# screen files
+	#------------------------------------------
+	$screenCall = $root."/screenrc.smart";
+	$screenCtrl = $root."/screenrc.ctrls";
+	$screenLogs = $kiwi -> getRootLog();
+
+	#==========================================
+	# Initiate screen call file
+	#------------------------------------------
+	my $fd = new FileHandle;
+	my $cd = new FileHandle;
+	if ((! $fd -> open (">$screenCall")) || (! $cd -> open (">$screenCtrl"))) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't create call file: $!");
+		$kiwi -> failed ();
+		return undef;
+	}
+	print $cd "logfile $screenLogs\n";
+	print $cd "logfile flush 0\n";
+	$cd -> close();
+
+	#==========================================
+	# return screen call file handle
+	#------------------------------------------
+	return $fd;
+}
+
+#==========================================
+# setupScreenCall
+#------------------------------------------
+sub setupScreenCall {
+	my $this = shift;
+	my $logs = 1;
+	my $code;
+	#==========================================
+	# Check log location
+	#------------------------------------------
+	if ($main::LogFile eq "terminal") {
+		$logs = 0;
+	}
+	#==========================================
+	# run upgrade process in screen
+	#------------------------------------------
+	my $data = qx ( chmod 755 $screenCall );
+	my $fd = new FileHandle;
+	if ($logs) {
+		$data = qx ( screen -L -D -m -c $screenCtrl $screenCall );
+		$code = $? >> 8;
+		if ($fd -> open ($screenLogs)) {
+			local $/; $data = <$fd>; $fd -> close();
+		}
+		if ($code == 0) {
+			if (! $fd -> open ("$screenCall.exit")) {
+				$code = 1;
+			} else {
+				$code = <$fd>; chomp $code;
+				$fd -> close();
+			}
+		}
+	} else {
+		$code = system ( $screenCall );
+		$code = $code >> 8;
+	}
+	qx ( rm -f $screenCall* );
+	qx ( rm -f $screenCtrl );
+	#==========================================
+	# check exit code from screen session
+	#------------------------------------------
+	if ($code != 0) {
+		$kiwi -> failed ();
+		if ( $logs ) {
+			$kiwi -> error  ($data);
+		}
+		return undef;
+	}
+	$kiwi -> done ();
+	return $this;
 }
 
 #==========================================
@@ -355,6 +444,55 @@ sub resetInstallationSource {
 		$kiwi -> done ();
 	}
 	return $this;
+}
+
+#==========================================
+# setupDownload
+#------------------------------------------
+sub setupDownload {
+	# ...
+	# download package files for later handling
+	# using the package manager download functionality
+	# ---
+	my $this  = shift;
+	my @pacs  = @_;
+	#==========================================
+	# setup screen call
+	#------------------------------------------
+	my $fd = $this -> setupScreen();
+	if (! defined $fd) {
+		return undef;
+	}
+	#==========================================
+	# smart
+	#------------------------------------------
+	if ($manager eq "smart") {
+		$kiwi -> info ("Downloading packages...");
+		my $forceChannels = join (",",@channelList);
+		my @loadOpts = (
+			"-o force-channels=$forceChannels",
+			"--target=$root"
+		);
+		#==========================================
+		# Create screen call file
+		#------------------------------------------
+		print $fd "smart update @channelList\n";
+		print $fd "test \$? = 0 && smart download @pacs @loadOpts\n";
+		print $fd "echo \$? > $screenCall.exit\n";
+		print $fd "rm -f $root/etc/smart/channels/*\n";
+		$fd -> close();
+	}
+	#==========================================
+	# zypper
+	#------------------------------------------
+	if ($manager eq "zypper") {
+		# TODO
+		$kiwi -> failed ();
+		$kiwi -> error  ("*** not implemeted ***");
+		$kiwi -> failed ();
+		return undef;
+	}
+	return $this -> setupScreenCall();
 }
 
 #==========================================

@@ -122,6 +122,10 @@ sub main {
 			my $code = kiwiExit (1); return $code;
 		}
 		# TODO
+		# 1) unpack downloaded packages
+		# 2) call config/ package scripts
+		# ...
+		kiwiExit (0);
 	}
 
 	#========================================

@@ -231,18 +231,26 @@ sub init {
 		return undef;
 	}
 	#==========================================
-	# Add source, install and remove source
+	# Add src, install/download and clean src
 	#------------------------------------------
 	if (! $manager -> setupInstallationSource()) {
 		return undef;
 	}
-	if (! $manager -> setupRootSystem(@initPacs)) {
-		return undef;
+	if ($baseSystem eq "/meta-system") {
+		if (! $manager -> setupDownload (@initPacs)) {
+			$manager -> resetInstallationSource();
+			return undef;
+		}
+	} else {
+		if (! $manager -> setupRootSystem(@initPacs)) {
+			$manager -> resetInstallationSource();
+			return undef;
+		}
 	}
 	#==========================================
 	# reset installation source
 	#------------------------------------------
-	if (!$manager -> resetInstallationSource()) {
+	if (! $manager -> resetInstallationSource()) {
 		return undef;
 	}
 	#==========================================
