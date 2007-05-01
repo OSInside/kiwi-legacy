@@ -1157,6 +1157,13 @@ sub writeImageConfig {
 			print FD "COMBINED_IMAGE=yes\n";
 		}
 		#==========================================
+		# UNIONFS_CONFIG information
+		#------------------------------------------
+		my %unionConfig = $xml -> getDeployUnionConfig ();
+		if (defined %unionConfig) {
+			print FD "UNIONFS_CONFIG=$unionConfig{rw},$unionConfig{ro},$unionConfig{type}\n";
+		}
+		#==========================================
 		# More to come...
 		#------------------------------------------
 		close FD;
@@ -1576,7 +1583,7 @@ sub setupSquashFS {
 		$tree = $imageTree;
 	}
 	unlink ("$imageDest/$name");
-	my $data = qx (/usr/bin/mksquashfs $tree $imageDest/$name -noI 2>&1);
+	my $data = qx (/usr/bin/mksquashfs $tree $imageDest/$name 2>&1);
 	my $code = $? >> 8; 
 	if ($code != 0) {
 		$kiwi -> failed ();

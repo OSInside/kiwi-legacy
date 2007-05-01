@@ -39,6 +39,7 @@ my $instsrcNodeList;
 my $partitionsNodeList;
 my $configfileNodeList;
 my $schemeNodeList;
+my $unionNodeList;
 my $schemeVers;
 my @urllist;
 my $arch;
@@ -111,6 +112,7 @@ sub new {
 			-> getElementsByTagName ("partitions");
 		$configfileNodeList = $systemTree 
 			-> getElementsByTagName("configuration");
+		$unionNodeList = $systemTree -> getElementsByTagName ("union");
 	};
 	if ($@) {
 		$kiwi -> failed ();
@@ -249,6 +251,27 @@ sub getImageVersion {
 	my $node = $optionsNodeList -> get_node(1);
 	my $version = $node -> getElementsByTagName ("version");
 	return $version;
+}
+
+#==========================================
+# getDeployUnionConfig
+#------------------------------------------
+sub getDeployUnionConfig {
+	# ...
+	# Get the union file system configuration, if any
+	# ---
+	my $this = shift;
+	my $node = $unionNodeList -> get_node(1);
+	if (!defined $node) {
+		return undef;
+	}
+
+	my %config = ();
+	$config{ro} = $node -> getAttribute ("ro");
+	$config{rw} = $node -> getAttribute ("rw");
+	$config{type} = $node -> getAttribute ("type");
+
+	return %config;
 }
 
 #==========================================

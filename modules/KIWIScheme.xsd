@@ -78,10 +78,19 @@
 		<xs:complexType>
 			<xs:sequence>
 				<xs:element ref="partitions" minOccurs="0" maxOccurs="1"/>
+				<xs:element ref="union" minOccurs="0" maxOccurs="1"/>
 				<xs:element ref="configuration" minOccurs="0" maxOccurs="unbounded"/>
 			</xs:sequence>
 			<xs:attribute name="server" type="xs:string"/>
 			<xs:attribute name="blocksize" type="xs:integer"/>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="union">
+		<xs:complexType>
+			<xs:attribute name="ro" type="xs:string"/>
+			<xs:attribute name="rw" type="xs:string"/>
+			<xs:attribute name="type" type="xs:string"/>
 		</xs:complexType>
 	</xs:element>
 
