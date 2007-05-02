@@ -546,11 +546,16 @@ sub listImage {
 		if (-l "$System/$image") {
 			next;
 		}
-		if (open (HD,"$System/$image/VERSION")) {
-			my $version = <HD>;
-			my $line = sprintf ("%-20s -> Version: %s",$image,$version);
-			$kiwi -> info ("Image: $line");
-			close HD;
+		if (-f "$System/$image/config.xml") {
+			$kiwi -> info ("$image");
+			my $xml = new KIWIXML ( $kiwi,"$System/$image" );
+			if (! $xml) {
+				$kiwi -> failed();
+				next;
+			}
+			my $version = $xml -> getImageVersion();
+			$kiwi -> note (" -> Version: $version");
+			$kiwi -> done();
 		}
 	}
 	exit 0;
