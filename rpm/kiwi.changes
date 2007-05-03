@@ -3,6 +3,7 @@ Wed May  2 14:35:59 CEST 2007 - ms@suse.de
 
 - v1.31
 - fixed option -c / -C clash
+- fixed pattern support for -32bit patterns
 - added maintenance chapter to kiwi documentation
 - added missing inherit attribute to KIWIScheme.xsd
 - fixed --list option, method listImage()

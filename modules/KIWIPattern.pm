@@ -134,14 +134,17 @@ sub downloadPattern {
 	}
 	if ($url =~ /^\//) {
 		my $path = "$url//suse/setup/descr";
-		my $file = bsd_glob ("$path/$pattern-*.$arch.pat");
-		if (! defined $file) {
-			$file = bsd_glob ("$path/$pattern-*.pat");
+		my @file = bsd_glob ("$path/$pattern-*.$arch.pat");
+		foreach my $file (@file) {
+			# / FIXME /
+			# The glob match will include the -32bit patterns in any
+			# case. Is that ok or not ? should it be configurable ?
+			# ---
+			if (! open (FD,$file)) {
+				return undef;
+			}
+			local $/; $content .= <FD>; close FD;
 		}
-		if (! open (FD,$file)) {
-			return undef;
-		}
-		local $/; $content = <FD>; close FD;
 	} else {
 		my $urlHandler  = new KIWIURL ($kiwi);
 		my $publics_url = $url;
