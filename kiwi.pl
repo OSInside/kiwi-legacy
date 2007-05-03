@@ -61,6 +61,8 @@ our $StripImage;      # strip shared objects and binaries
 our $CreatePassword;  # create crypt password string
 our $ImageName;       # filename of current image, used in Modules
 our %ForeignRepo;     # may contain XML::LibXML::Element objects
+our $AddRepository;   # add repository for building physical extend
+our $AddRepositoryType; # add repository type
 
 #============================================
 # Globals
@@ -145,6 +147,12 @@ sub main {
 			my $code = kiwiExit (1); return $code;
 		}
 		$kiwi -> done();
+		#==========================================
+		# Check for add-repo option
+		#------------------------------------------
+		if (defined $AddRepository) {
+			$xml -> addRepository ($AddRepositoryType,$AddRepository);
+		}
 		#==========================================
 		# Check for inheritance
 		#------------------------------------------
@@ -272,6 +280,12 @@ sub main {
 			my $code = kiwiExit (1); return $code;
 		}
 		$kiwi -> done();
+		#==========================================
+		# Check for add-repo option
+		#------------------------------------------
+		if (defined $AddRepository) {
+			$xml -> addRepository ($AddRepositoryType,$AddRepository);
+		}
 		#==========================================
 		# Initialize root system, use existing root
 		#------------------------------------------
@@ -434,6 +448,8 @@ sub init {
 		"list|l"                => \&listImage,
 		"create|c=s"            => \$Create,
 		"create-instsource|C=s" => \$CreateInstSource,
+		"add-repo=s"            => \$AddRepository,
+		"add-repotype=s"        => \$AddRepositoryType,
 		"upgrade|u=s"           => \$Upgrade,
 		"destdir|d=s"           => \$Destination,
 		"root|r=s"              => \$RootTree,
@@ -472,6 +488,11 @@ sub init {
 	}
 	if ((defined $Create) && (! defined $Destination)) {
 		$kiwi -> info ("No destination directory specified");
+		$kiwi -> failed ();
+		my $code = kiwiExit (1); return $code;
+	}
+	if ((defined $AddRepository) && (! defined $AddRepositoryType)) {
+		$kiwi -> info ("No repository type specified");
 		$kiwi -> failed ();
 		my $code = kiwiExit (1); return $code;
 	}
@@ -522,6 +543,10 @@ sub usage {
 	print "  [ -s | --strip ]\n";
 	print "    Strip shared objects and executables\n";
 	print "    makes only sense in combination with --create\n";
+	print "\n";
+	print "  [ --add-repo <repo-path> --add-repotype <type> ]\n";
+    print "    Add the given repository and type for this run of an\n";
+	print "    image prepare or upgrade process.\n";
 	print "\n";
 	print "  [ --logfile <filename> | terminal ]\n";
 	print "    Write to the log file \`<filename>' instead of\n";

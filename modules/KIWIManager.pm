@@ -161,7 +161,7 @@ sub setupScreenCall {
 		$logs = 0;
 	}
 	#==========================================
-	# run upgrade process in screen
+	# run process in screen session
 	#------------------------------------------
 	my $data = qx ( chmod 755 $screenCall );
 	my $fd = new FileHandle;
@@ -628,8 +628,7 @@ sub setupRootSystem {
 			$kiwi -> info ("Initializing image system on: $root...");
 			my $forceChannels = join (",",@channelList);
 			my @installOpts = (
-				"--catalog $forceChannels",
-				"-y"
+				"--catalog $forceChannels"
 			);
 			#==========================================
 			# Add package manager to package list

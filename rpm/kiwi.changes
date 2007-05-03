@@ -2,7 +2,12 @@
 Wed May  2 14:35:59 CEST 2007 - ms@suse.de
 
 - v1.31
+- added maintenance chapter to kiwi documentation
 - fixed --list option, method listImage()
+- added --add-repo and --add-repotype option to kiwi. This allows
+  you to specify an additional repository used within a prepare
+  or upgrade process. The information will not be written to the
+  config.xml file
 
 -------------------------------------------------------------------
 Thu Apr 26 12:51:18 CEST 2007 - ms@suse.de

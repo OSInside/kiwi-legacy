@@ -542,6 +542,28 @@ sub getRepository {
 }
 
 #==========================================
+# addRepository
+#------------------------------------------
+sub addRepository {
+	my $this = shift;
+	my $type = shift;
+	my $path = shift;
+	my $tempXML  = new XML::LibXML;
+	my $xaddXML  = new XML::LibXML::NodeList;
+	my $tempFile = $imageDesc."/config.xml";
+	my $tempTree = $tempXML -> parse_file ( $tempFile );
+	my $temprepositNodeList = $tempTree -> getElementsByTagName ("repository");
+	my $element = $temprepositNodeList  -> get_node(1);
+	$element -> setAttribute ("type",$type);
+	$element -> setAttribute ("status","fixed");
+	$element -> getElementsByTagName ("source") -> get_node (1)
+		 -> setAttribute ("path",$path);
+	$xaddXML -> push ( $element );
+	$repositNodeList -> append ( $xaddXML );
+	return $xaddXML;
+}
+
+#==========================================
 # getImageConfig
 #------------------------------------------
 sub getImageConfig {
