@@ -2,7 +2,9 @@
 Wed May  2 14:35:59 CEST 2007 - ms@suse.de
 
 - v1.31
+- fixed option -c / -C clash
 - added maintenance chapter to kiwi documentation
+- added missing inherit attribute to KIWIScheme.xsd
 - fixed --list option, method listImage()
 - added --add-repo and --add-repotype option to kiwi. This allows
   you to specify an additional repository used within a prepare

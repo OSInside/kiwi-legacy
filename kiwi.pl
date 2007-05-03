@@ -447,7 +447,7 @@ sub init {
 		"prepare|p=s"           => \$Prepare,
 		"list|l"                => \&listImage,
 		"create|c=s"            => \$Create,
-		"create-instsource|C=s" => \$CreateInstSource,
+		"create-instsource=s"   => \$CreateInstSource,
 		"add-repo=s"            => \$AddRepository,
 		"add-repotype=s"        => \$AddRepositoryType,
 		"upgrade|u=s"           => \$Upgrade,
@@ -527,7 +527,7 @@ sub usage {
 	print "  kiwi --installcd <initrd> --installcd-system <systemImage>\n";
 	print "Helper Tools:\n";
 	print "  kiwi --createpassword\n";
-	print "  kiwi -C | --create-instsource <image-path>\n";
+	print "  kiwi --create-instsource <image-path>\n";
 	print "Options:\n";
 	print "--\n";
 	print "  [ -d | --destdir <destination-path> ]\n";
