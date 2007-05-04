@@ -534,7 +534,7 @@ sub setupUpgrade {
 		# Create screen call file
 		#------------------------------------------
 		$kiwi -> info ("Upgrading image...");
-		print $fd "chroot $root yes | zypper upgrade -y\n";
+		print $fd "chroot $root yes | zypper upgrade\n";
 		print $fd "echo \$? > $screenCall.exit\n";
 		$fd -> close();
 	}
