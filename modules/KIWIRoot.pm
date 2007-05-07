@@ -552,7 +552,7 @@ sub setupMount {
 	# ---
 	my $this   = shift;
 	my $prefix = $root."/".$baseSystem;
-	$kiwi -> info ("Mounting local/NFS file systems");
+	$kiwi -> info ("Mounting required file systems");
 	if (! -d $prefix) {
 	if (! mkdir $prefix) {
 		$kiwi -> failed ();
@@ -563,12 +563,6 @@ sub setupMount {
 	} else {
 		$kiwi -> failed ();
 		$kiwi -> error ("Entity $prefix already exist");
-		$kiwi -> failed ();
-		return undef;
-	}
-	if (! open (FD,"cat /proc/mounts|")) {
-		$kiwi -> failed ();
-		$kiwi -> error ("Couldn't open mount table: $!");
 		$kiwi -> failed ();
 		return undef;
 	}
@@ -584,6 +578,7 @@ sub setupMount {
 		push (@mountList,"$root/sys");
 		push (@mountList,"$root/dev/pts");
 	}
+	$kiwi -> done();
 	foreach my $chl (keys %{$sourceChannel{private}}) {
 		my @opts = @{$sourceChannel{private}{$chl}};
 		my $path = $opts[2];
@@ -592,12 +587,31 @@ sub setupMount {
 		} else {
 			next;
 		}
-		my $mount= $prefix.$path;
+		$kiwi -> info ("Mounting local channel: $chl");
+		my $cache = "/var/cache/kiwi";
+		my $roopt = "dirs=$cache=rw:$path=ro,ro";
+		my $mount = $prefix.$path;
 		push (@mountList,$mount);
+		if (! -d $cache) {
+			qx ( mkdir -p $cache );
+		}
 		qx (mkdir -p $mount);
-		qx (mount -o bind $path $mount 2>&1);
+		my $data = qx (mount -t unionfs -o $roopt unionfs $mount 2>&1);
+		my $code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> skipped ();
+			$kiwi -> warning ("Couldn't mount read-only, using bind mount");
+			my $data = qx ( mount -o bind $path $mount 2>&1 );
+			my $code = $? >> 8;
+			if ($code != 0) {
+				$kiwi -> failed();
+				return undef;
+			}
+			$kiwi -> done();
+		} else {
+			$kiwi -> done();
+		}
 	}
-	$kiwi -> done();
 	return $this;
 }
 
@@ -611,7 +625,7 @@ sub cleanMount {
 	my $this = shift;
 	my $prefix = $root."/".$baseSystem;
 	foreach my $item (reverse @mountList) {
-		$kiwi -> info ("Umounting path: $item\n");
+		#$kiwi -> info ("Umounting path: $item\n");
 		qx (umount $item 2>/dev/null);
 		if ($item =~ /^$prefix/) {
 			qx ( rmdir -p $item 2>&1 );

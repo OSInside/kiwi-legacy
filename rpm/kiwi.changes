@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Mon May  7 17:12:11 CEST 2007 - ms@suse.de
+
+- v1.32
+- use unionfs to implement read-only mounts. If unionfs mount
+  fails kiwi will use standard bind mount to access the data.
+  A warning message is printed on stdout in that case (#270945)
+
+-------------------------------------------------------------------
 Wed May  2 14:35:59 CEST 2007 - ms@suse.de
 
 - v1.31
