@@ -584,43 +584,19 @@ sub setupMount {
 		push (@mountList,"$root/sys");
 		push (@mountList,"$root/dev/pts");
 	}
-	while (<FD>) {
-		if ($_ =~ /^#/) {
+	foreach my $chl (keys %{$sourceChannel{private}}) {
+		my @opts = @{$sourceChannel{private}{$chl}};
+		my $path = $opts[2];
+		if ($path =~ /=$baseSystem\/(.*)$/) {
+			$path = $1;
+		} else {
 			next;
 		}
-		if ($_ =~ /(^\/.*)/) {
-			my @list = split (/ +/,$1);
-			my $device = shift @list;
-			my $mount  = shift @list;
-			$mount = $prefix.$mount;
-			push (@mountList,$mount);
-			if ($device =~ /loop/) {
-				#$kiwi -> info ("Mounting local loop: $device $mount\n");
-				my $loop = qx (/sbin/losetup $device); chomp ($loop);
-				if ($loop =~ /\((.*)\)/) {
-					my $lobase = $1;
-					my $mtab   = "/etc/mtab";
-					my $lofile = qx (cat $mtab | grep $lobase | cut -f1 -d' ');
-					chomp $lofile;
-					qx (mount -o loop $lofile $mount 2>&1);
-				}
-			} else {			
-				#$kiwi -> info ("Mounting local device: $device $mount\n");
-				qx (mkdir -p $mount);
-				qx (mount $device $mount 2>&1);
-			}
-		}
-		if ($_ =~ /(.*:\/.*) (.*) nfs/) {
-			my $device = $1;
-			my $mount  = $2;
-			$mount = $prefix.$mount;
-			push (@mountList,$mount);
-			#$kiwi -> info ("Mounting NFS device: $device $mount\n");
-			qx (mkdir -p $mount);
-			qx (mount $device $mount 2>&1);
-		}
+		my $mount= $prefix.$path;
+		push (@mountList,$mount);
+		qx (mkdir -p $mount);
+		qx (mount -o bind $path $mount 2>&1);
 	}
-	close  FD;
 	$kiwi -> done();
 	return $this;
 }
@@ -635,10 +611,10 @@ sub cleanMount {
 	my $this = shift;
 	my $prefix = $root."/".$baseSystem;
 	foreach my $item (reverse @mountList) {
-		#$kiwi -> info ("Umounting device: $item\n"); 
+		$kiwi -> info ("Umounting path: $item\n");
 		qx (umount $item 2>/dev/null);
 		if ($item =~ /^$prefix/) {
-			rmdir $item;
+			qx ( rmdir -p $item 2>&1 );
 		}
 	}
 	return $this;

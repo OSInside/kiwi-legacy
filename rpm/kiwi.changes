@@ -7,6 +7,9 @@ Wed May  2 14:35:59 CEST 2007 - ms@suse.de
 - added maintenance chapter to kiwi documentation
 - added missing inherit attribute to KIWIScheme.xsd
 - fixed --list option, method listImage()
+- prevent mounting the system (/) path to the image chroot (#270945)
+  kiwi will bind mount the repository location only. The bind mount
+  now also happens on _local_ repository references only
 - added --add-repo and --add-repotype option to kiwi. This allows
   you to specify an additional repository used within a prepare
   or upgrade process. The information will not be written to the
