@@ -13,7 +13,7 @@ export
 # Prefixs...
 #--------------------------------------------
 kiwi_prefix = ${buildroot}/usr/share/kiwi
-tftp_prefix = ${buildroot}/var/lib/tftpboot
+tftp_prefix = ${buildroot}/srv/tftpboot
 doc_prefix  = ${buildroot}/usr/share/doc/packages
 man_prefix  = ${buildroot}/usr/share/man
 

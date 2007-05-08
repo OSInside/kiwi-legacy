@@ -1,5 +1,5 @@
 # /.../
-# spec file for package kiwi (Version 1.32)
+# spec file for package kiwi (Version 1.33)
 # Copyright (c) 2006 SUSE LINUX Products GmbH, Nuernberg, Germany.
 # Please submit bugfixes or comments via http://bugs.opensuse.org
 # ---
@@ -8,7 +8,7 @@ Name:          kiwi
 BuildRequires: perl smart perl-XML-LibXML perl-libwww-perl screen syslinux module-init-tools
 Requires:      perl perl-XML-LibXML perl-libwww-perl screen
 Summary:       OpenSuSE - KIWI Image System
-Version:       1.32
+Version:       1.33
 Release:       28
 Group:         System
 License:       GPL
@@ -113,8 +113,8 @@ make buildroot=$RPM_BUILD_ROOT CFLAGS="$RPM_OPT_FLAGS"
 
 if [ $UID = $USER ];then
 	# prepare and create boot images...
-	mkdir -p $RPM_BUILD_ROOT/%{_var}/lib/tftpboot/pxelinux.cfg
-	mkdir -p $RPM_BUILD_ROOT/%{_var}/lib/tftpboot/boot
+	mkdir -p $RPM_BUILD_ROOT/srv/tftpboot/pxelinux.cfg
+	mkdir -p $RPM_BUILD_ROOT/srv/tftpboot/boot
 	mkdir -p /usr/share/kiwi/modules
 	rm -f /usr/share/kiwi/modules/KIWIScheme.xsd
 	cp -f modules/KIWIScheme.xsd /usr/share/kiwi/modules
@@ -125,7 +125,7 @@ if [ $UID = $USER ];then
 		rm -f $i && cp -a tools/timed $i
 	done
 	cd modules
-	pxedefault=$RPM_BUILD_ROOT/%{_var}/lib/tftpboot/pxelinux.cfg/default
+	pxedefault=$RPM_BUILD_ROOT/srv/tftpboot/pxelinux.cfg/default
 	echo "# /.../" > $pxedefault
 	echo "# KIWI boot image setup" >> $pxedefault
 	echo "# select boot label according to your system image" >> $pxedefault
@@ -148,12 +148,12 @@ if [ $UID = $USER ];then
 		rootName=`echo $i | tr / -`
 		../kiwi.pl --root $RPM_BUILD_ROOT/root-$rootName --prepare ../system/boot/$i
 		../kiwi.pl --create $RPM_BUILD_ROOT/root-$rootName \
-			-d $RPM_BUILD_ROOT/%{_var}/lib/tftpboot/boot
+			-d $RPM_BUILD_ROOT/srv/tftpboot/boot
 		rm -rf $RPM_BUILD_ROOT/root-$rootName
 		echo >> $pxedefault
 		echo "LABEL $rootName" >> $pxedefault
 		(
-			cd $RPM_BUILD_ROOT/%{_var}/lib/tftpboot/boot
+			cd $RPM_BUILD_ROOT/srv/tftpboot/boot
 			xenkernel=""
 			xenloader=""
 			initrd=""
@@ -175,7 +175,7 @@ if [ $UID = $USER ];then
 			fi
 		)
 	done
-	rm -f $RPM_BUILD_ROOT/%{_var}/lib/tftpboot/boot/*.md5
+	rm -f $RPM_BUILD_ROOT/srv/tftpboot/boot/*.md5
 else
 	echo "cannot build prebuild images without root privileges"
 	true
@@ -183,7 +183,7 @@ fi
 
 %install
 mkdir -p $RPM_BUILD_ROOT/etc/permissions.d
-echo "/var/lib/tftpboot/upload root:root 0777" \
+echo "/srv/tftpboot/upload root:root 0777" \
 	> $RPM_BUILD_ROOT/etc/permissions.d/kiwi
 make buildroot=$RPM_BUILD_ROOT \
      doc_prefix=$RPM_BUILD_ROOT/%{_defaultdocdir} \
@@ -192,12 +192,12 @@ make buildroot=$RPM_BUILD_ROOT \
 touch kiwi.loader
 if [ ! $UID = $USER ];then
 	install -m 755 pxeboot/pxelinux.0.config \
-		$RPM_BUILD_ROOT/%{_var}/lib/tftpboot/pxelinux.cfg/default
+		$RPM_BUILD_ROOT/srv/tftpboot/pxelinux.cfg/default
 fi
-test -L $RPM_BUILD_ROOT/%{_var}/lib/tftpboot/pxelinux.0 && \
-	echo %{_var}/lib/tftpboot/pxelinux.0 > kiwi.loader
-test -L $RPM_BUILD_ROOT/%{_var}/lib/tftpboot/mboot.c32 && \
-	echo %{_var}/lib/tftpboot/mboot.c32 >> kiwi.loader
+test -L $RPM_BUILD_ROOT/srv/tftpboot/pxelinux.0 && \
+	echo /srv/tftpboot/pxelinux.0 > kiwi.loader
+test -L $RPM_BUILD_ROOT/srv/tftpboot/mboot.c32 && \
+	echo /srv/tftpboot/mboot.c32 >> kiwi.loader
 
 cat kiwi.loader
 
@@ -220,13 +220,13 @@ cat kiwi.loader
 %files -n kiwi-pxeboot -f kiwi.loader
 %defattr(-, root, root)
 /etc/permissions.d/kiwi
-%dir %{_var}/lib/tftpboot
-%dir %{_var}/lib/tftpboot/KIWI
-%dir %{_var}/lib/tftpboot/pxelinux.cfg
-%dir %{_var}/lib/tftpboot/image
-%dir %{_var}/lib/tftpboot/upload
-%{_var}/lib/tftpboot/boot
-%{_var}/lib/tftpboot/pxelinux.cfg/default
+%dir /srv/tftpboot
+%dir /srv/tftpboot/KIWI
+%dir /srv/tftpboot/pxelinux.cfg
+%dir /srv/tftpboot/image
+%dir /srv/tftpboot/upload
+/srv/tftpboot/boot
+/srv/tftpboot/pxelinux.cfg/default
 
 #=================================================
 # KIWI-images...
