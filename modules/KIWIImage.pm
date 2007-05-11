@@ -349,6 +349,7 @@ sub createImageUSB {
 	$main::Create   = $main::RootTree;
 	$main::ForeignRepo{xmlnode} = $xml -> getForeignNodeList();
 	$main::ForeignRepo{prepare} = $main::Prepare;
+	undef $main::SetImageType;
 	if (! defined main::main()) {
 		$main::Survive = "default";
 		if (! -d $main::RootTree.$baseSystem) {
@@ -659,6 +660,7 @@ sub createImageLiveCD {
 	$main::Create   = $main::RootTree;
 	$main::ForeignRepo{xmlnode} = $xml -> getForeignNodeList();
 	$main::ForeignRepo{prepare} = $main::Prepare;
+	undef $main::SetImageType;
 	if (! defined main::main()) {
 		$main::Survive = "default";
 		if (! -d $main::RootTree.$baseSystem) {
@@ -1153,7 +1155,8 @@ sub writeImageConfig {
 		#==========================================
 		# COMBINED_IMAGE information
 		#------------------------------------------
-		if ($xml -> getImageType () =~ /^split:(.*)/) {
+		my %type = %{$xml -> getImageTypeAndAttributes()};
+		if ("$type{type}" eq "split") {
 			print FD "COMBINED_IMAGE=yes\n";
 		}
 		#==========================================
@@ -1206,8 +1209,9 @@ sub postImage {
 	# Check image file system
 	#------------------------------------------
 	$kiwi -> info ("Checking file system...");
-	my $type = $xml->getImageType();
-	SWITCH: for ($type) {
+	my %type = %{$xml->getImageTypeAndAttributes()};
+	my $para = $type{type}.":".$type{filesystem};
+	SWITCH: for ($para) {
 		#==========================================
 		# Check EXT3 file system
 		#------------------------------------------
@@ -1236,7 +1240,7 @@ sub postImage {
 		# Unknown filesystem type
 		#------------------------------------------
 		$kiwi -> failed();
-		$kiwi -> error ("Unsupported filesystem type: $type");
+		$kiwi -> error ("Unsupported filesystem type: $type{filesystem}");
 		$kiwi -> failed();
 		return undef;
 	}
@@ -1446,8 +1450,9 @@ sub extractKernel {
 	# These files are created from the kernel package
 	# script which exists for boot images only
 	# ---
-	my $type = $xml->getImageType();
-	SWITCH: for ($type) {
+	my %type = %{$xml->getImageTypeAndAttributes()};
+	my $para = $type{type}.":".$type{filesystem};
+	SWITCH: for ($para) {
 		/ext3/i     && do {
 			return $name;
 			last SWITCH;
@@ -1456,7 +1461,7 @@ sub extractKernel {
 			return $name;
 			last SWITCH;
 		};
-		/iso:(.*)/i && do {
+		/iso/i && do {
 			return $name;
 			last SWITCH;
 		};

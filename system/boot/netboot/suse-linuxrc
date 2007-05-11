@@ -147,7 +147,11 @@ fi
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	CONFIG=/etc/config.netclient
+	#======================================
+	# Connection/access check for TSERVER
+	#--------------------------------------
 	while true;do
+		Echo "Checking for config file: config.$DHCPCHADDR"
 		result=`atftp -g \
 			-r KIWI/config.$DHCPCHADDR -l $CONFIG $TSERVER 2>&1 | head -n 1`
 		status1=`echo $result | cut -f2 -d" "`
@@ -163,7 +167,16 @@ if [ $LOCAL_BOOT = "no" ];then
 			TSERVER=$DHCPSIADDR
 		fi
 	done
-	if test $? != 0 -o ! -s $CONFIG;then
+	#======================================
+	# Check alternative config names
+	#--------------------------------------
+	if test ! -s $CONFIG;then
+		searchAlternativeConfig
+	fi
+	#======================================
+	# No config found register new client
+	#--------------------------------------
+	if test ! -s $CONFIG;then
 		#======================================
 		# Register new network client
 		#--------------------------------------
@@ -194,10 +207,14 @@ if [ $LOCAL_BOOT = "no" ];then
 		#--------------------------------------
 		while test ! -s $CONFIG;do
 			Echo "Lookup network client config file again..."
+			Echo "Checking for config file: config.$DHCPCHADDR"
 			dhcpcd -n
 			atftp -g -r KIWI/config.$DHCPCHADDR \
 				-l $CONFIG $TSERVER \
 			>/dev/null 2>&1
+			if test ! -s $CONFIG;then
+				searchAlternativeConfig
+			fi
 			test -s $CONFIG || {
 				Echo "Couldn't get image configuration"
 				Echo "sleeping [60 sec]..."

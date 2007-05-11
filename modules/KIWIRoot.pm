@@ -141,6 +141,11 @@ sub new {
 		$sourceChannel{public}{$channel}  = \@public_options;
 		$count++;
 	}
+	if ($count == 1) {
+		$kiwi -> error  ("No Channels left");
+		$kiwi -> failed ();
+		return undef;
+	}
 	#==========================================
 	# Create root directory
 	#------------------------------------------
@@ -343,8 +348,8 @@ sub install {
 	#==========================================
 	# Get Xen package if type is appropriate
 	#------------------------------------------
-	my $type = $xml -> getImageType();
-	if ($type =~ /^xen/) {
+	my %type = %{$xml -> getImageTypeAndAttributes()};
+	if ("$type{type}" eq "xen") {
 		$kiwi -> info ("Creating Xen package list");
 		my @xenList = $xml -> getXenList();
 		if (! @xenList) {

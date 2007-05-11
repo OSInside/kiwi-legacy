@@ -87,7 +87,9 @@ the format:
       \hspace*{2cm}<specification>some text</specification>\\
       \hspace*{1cm}</description>\\
       \hspace*{1cm}<preferences>\\
-      \hspace*{2cm}<type>Type</type>\\
+      \hspace*{2cm}<type primary="true" boot="..."\\
+      \hspace*{3cm}filesystem="..." flags="..."\\
+      \hspace*{2cm}>Type</type>\\
       \hspace*{2cm}<version>1.2.3</version>\\
       \hspace*{2cm}<size unit="Unit">Size</size>\\
       \hspace*{2cm}<packagemanager>name</packagemanager>\\
@@ -151,45 +153,87 @@ the format:
                     configure additional space, for example, if custom scripts
                     are run.
               \item \textbf{type}\\
-                    The image type of the logical extend:
+                    The image type of the logical extend: Multiple type entries
+					are possible whereas one primary type should be specified by
+					an attribute named \textbf{primary}. Without setting a
+					primary type the first entry of the type list is the primary
+					type. The value for type can be set to one of the following:
+					\begin{enumerate}
+						\item ext2, ext3, reiserfs, squashfs, cpio
+						\item iso, split, usb vmx, xen, pxe
+					\end{enumerate}
+					The second group of types requires additional paramaters
+					which are given by the following attributes
 					\begin{itemize}
-						\item ext2,ext3 or reiserfs\\
-                              can be used as system image filesystem
-						\item cpio\\
-                              for boot images only
-                        \item iso:filename[,compressed]\\
+						\item primary\\
+                              attribute to specify the primary type. The kiwi
+							  option --type allows to select between the types
+						\item boot\\
+                              attribute to specify the boot image (initrd)
+                              which should be used and created for this system
+                              image description. The boot images for kiwi are
+                              stored below the path 
+                              \textit{/usr/share/kiwi/image} and are grouped
+                              according to their capabilities into the following
+                              directories: \textbf{isoboot, netboot, xennetboot,
+                              usbboot, vmxboot and xenboot}. Setting the name
+                              of a boot image is done relatively to the
+                              /usr/share/kiwi/image path. For example:
+                              \textbf{isoboot/suse-10.3}. This will create
+                              the boot (initrd) image from the suse-10.3
+                              description which exists in
+                              /usr/share/kiwi/image/isoboot/suse-10.3
+						\item flags\\
+                              attribute to specify flags for the image type.
+                              Currently only the \textbf{compressed} flag
+                              for the \textbf{iso} type exists. This flag
+                              causes the live media to be based on a
+                              squashfs compressed file system
+						\item filesystem\\
+                              attribute to specify the filesystem. Could be
+                              set to ext2, ext3, reiserfs, squashfs or cpio.
+					\end{itemize}
+					The following list gives you an overview about the
+			        different boot image (initrd) types and what they are
+                    good for:
+                    \begin{itemize}
+                        \item iso boot=isoboot/... flags=compressed\\
                               to create an .iso image whereas filename
                               must be the name of an appropriate isoboot
                               boot image from. Optional one can activate
                               squashfs compression for the read-only part
                               of the iso.
                               \textit{/usr/share/kiwi/image/isoboot}
-                        \item usb:type:filename\\
+                        \item usb boot=usbboot/... filesystem=...\\
                               to create a system and boot image suitable
                               to run on an USB stick deployed with the kiwi
-                              --bootstick option. type specifies one of 
-                              ext2,ext3 or reiserfs and filename must be
+                              --bootstick option. filesystem specifies one of 
+                              ext2,ext3 or reiserfs and boot must be
                               the name of an appropriate usbboot boot image  
-                        \item vmx:type:filename\\
+                        \item vmx boot=vmxboot/... filesystem=...\\
                               to create virtual disk images for qemu and
-                              VMware. type specifies one of ext2,ext3 or
-                              reiserfs and filename must be the name of an
+                              VMware. filesystem specifies one of ext2,ext3 or
+                              reiserfs and boot must be the name of an
                               appropriate vmxboot boot image
-                        \item xen:type:filename\\
+                        \item xen boot=xenboot/... filesystem=...\\
                               to create Xen boot and system image as well
-                              as the xen configuration file. type specifies
-                              one of ext2,ext3 or reiserfs and filename must
-                              be the name of an appropriate xenboot boot image
-						\item pxe:type:filename\\
-							  to create PXE boot and system image. type
+                              as the xen configuration file. filesystem
                               specifies one of ext2,ext3 or reiserfs and
-                              filename must be the name of an appropriate
+                              boot must be the name of an appropriate
+                              xenboot boot image
+						\item pxe boot=netboot/... filesystem=...\\
+							  to create PXE boot and system image. filesystem
+                              specifies one of ext2,ext3 or reiserfs and
+                              boot must be the name of an appropriate
                               netboot or xennetboot boot image
-                        \item split:type-rw,type-ro\\
+                        \item split filesystem=type-rw,type-ro\\
                               to create a splitted image into a read-only
                               and a read-write part. type-rw specifies one of
                               ext2,ext3 or reiserfs type-ro specifies one
-                              of ext2,ext3,reiserfs or cramfs
+                              of ext2,ext3,reiserfs,cramfs or squashfs.
+                              Booting split images is only supported by the
+                              netboot and xennetboot boot images which needs
+                              to be created in a separate kiwi run
 					\end{itemize}
               \item \textbf{timezone}\\
                     The time zone. The possible time zones are located in the

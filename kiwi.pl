@@ -30,8 +30,8 @@ use KIWIBoot;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "1.30";
-our $SchemeVersion = "1.2";
+our $Version       = "1.33";
+our $SchemeVersion = "1.3";
 #============================================
 # Globals
 #--------------------------------------------
@@ -41,28 +41,31 @@ our $KConfig = "/usr/share/kiwi/modules/KIWIConfig.sh";
 #============================================
 # Globals
 #--------------------------------------------
-our $Prepare;         # control XML file for building chroot extend
-our $Create;          # image description for building image extend
-our $CreateInstSource;# create installation source from meta packages
-our $Upgrade;         # upgrade physical extend
-our $Destination;     # destination directory for logical extends
-our $LogFile;         # optional file name for logging
-our $RootTree;        # optional root tree destination
-our $Survive;         # if set to "yes" don't exit kiwi
-our $BootStick;       # deploy initrd booting from USB stick
-our $BootStickSystem; # system image to be copied on an USB stick
-our $BootVMSystem;    # system image to be copied on a VM disk
-our $BootVMDisk;      # deploy initrd booting from a VM 
-our $BootVMSize;      # size of virtual disk
-our $BootCD;          # deploy initrd booting from CD
-our $InstallCD;       # deploy initrd installing from cD
-our $InstallCDSystem; # system image to be deployed via CD
-our $StripImage;      # strip shared objects and binaries
-our $CreatePassword;  # create crypt password string
-our $ImageName;       # filename of current image, used in Modules
-our %ForeignRepo;     # may contain XML::LibXML::Element objects
-our $AddRepository;   # add repository for building physical extend
+our $Prepare;           # control XML file for building chroot extend
+our $Create;            # image description for building image extend
+our $CreateInstSource;  # create installation source from meta packages
+our $Upgrade;           # upgrade physical extend
+our $Destination;       # destination directory for logical extends
+our $LogFile;           # optional file name for logging
+our $RootTree;          # optional root tree destination
+our $Survive;           # if set to "yes" don't exit kiwi
+our $BootStick;         # deploy initrd booting from USB stick
+our $BootStickSystem;   # system image to be copied on an USB stick
+our $BootVMSystem;      # system image to be copied on a VM disk
+our $BootVMDisk;        # deploy initrd booting from a VM 
+our $BootVMSize;        # size of virtual disk
+our $BootCD;            # deploy initrd booting from CD
+our $InstallCD;         # deploy initrd installing from cD
+our $InstallCDSystem;   # system image to be deployed via CD
+our $StripImage;        # strip shared objects and binaries
+our $CreatePassword;    # create crypt password string
+our $ImageName;         # filename of current image, used in Modules
+our %ForeignRepo;       # may contain XML::LibXML::Element objects
+our $AddRepository;     # add repository for building physical extend
 our $AddRepositoryType; # add repository type
+our $SetRepository;     # set first repository for building physical extend
+our $SetRepositoryType; # set firt repository type
+our $SetImageType;      # set image type to use, default is primary type
 
 #============================================
 # Globals
@@ -148,6 +151,12 @@ sub main {
 		}
 		$kiwi -> done();
 		#==========================================
+		# Check for set-repo option
+		#------------------------------------------
+		if (defined $SetRepository) {
+			$xml -> setRepository ($SetRepositoryType,$SetRepository);
+		}
+		#==========================================
 		# Check for add-repo option
 		#------------------------------------------
 		if (defined $AddRepository) {
@@ -200,7 +209,7 @@ sub main {
 	#------------------------------------------
 	if (defined $Create) {
 		$kiwi -> info ("Reading image description...");
-		my $xml = new KIWIXML ( $kiwi,"$Create/image" );
+		my $xml = new KIWIXML ( $kiwi,"$Create/image",undef,$SetImageType );
 		if (! defined $xml) {
 			my $code = kiwiExit (1); return $code;
 		}
@@ -212,54 +221,58 @@ sub main {
 			$kiwi,$xml,$Create,$Destination,$StripImage,
 			"/base-system"
 		);
-		my $type = $xml->getImageType();
+		my %type = %{$xml->getImageTypeAndAttributes()};
+		my $para = checkType ( \%type );
+		if (! defined $para) {
+			my $code = kiwiExit (1); return $code;
+		}
 		my $ok;
-		SWITCH: for ($type) {
-			/^ext2/       && do {
+		SWITCH: for ($type{type}) {
+			/^ext2/     && do {
 				$ok = $image -> createImageEXT2 ();
 				last SWITCH;
 			};
-			/^ext3/       && do {
+			/^ext3/     && do {
 				$ok = $image -> createImageEXT3 ();
 				last SWITCH;
 			};
-			/^reiserfs/   && do {
+			/^reiserfs/ && do {
 				$ok = $image -> createImageReiserFS ();
 				last SWITCH;
 			};
-			/^squashfs/   && do {
+			/^squashfs/ && do {
 				$ok = $image -> createImageSquashFS ();
 				last SWITCH;
 			};
-			/^cpio/       && do {
+			/^cpio/     && do {
 				$ok = $image -> createImageCPIO ();
 				last SWITCH;
 			};
-			/^iso:(.*)/   && do {
-				$ok = $image -> createImageLiveCD ( $1 );
+			/^iso/      && do {
+				$ok = $image -> createImageLiveCD ( $para );
 				last SWITCH;
 			};
-			/^split:(.*)/ && do {
-				$ok = $image -> createImageSplit ( $1 );
+			/^split/    && do {
+				$ok = $image -> createImageSplit ( $para );
 				last SWITCH;
 			};
-			/^usb:(.*)/   && do {
-				$ok = $image -> createImageUSB ( $1 );
+			/^usb/      && do {
+				$ok = $image -> createImageUSB ( $para );
 				last SWITCH;
 			};
-			/^vmx:(.*)/   && do {
-				$ok = $image -> createImageVMX ( $1 );
+			/^vmx/      && do {
+				$ok = $image -> createImageVMX ( $para );
 				last SWITCH;
 			};
-			/^xen:(.*)/   && do {
-				$ok = $image -> createImageXen ( $1 );
+			/^xen/      && do {
+				$ok = $image -> createImageXen ( $para );
 				last SWITCH;
 			};
-			/^pxe:(.*)/   && do {
-				$ok = $image -> createImagePXE ( $1 );
+			/^pxe/      && do {
+				$ok = $image -> createImagePXE ( $para );
 				last SWITCH;
 			};
-			$kiwi -> error  ("Unsupported type: $type");
+			$kiwi -> error  ("Unsupported type: $type{type}");
 			$kiwi -> failed ();
 			my $code = kiwiExit (1); return $code;
 		}
@@ -280,6 +293,12 @@ sub main {
 			my $code = kiwiExit (1); return $code;
 		}
 		$kiwi -> done();
+		#==========================================
+		# Check for set-repo option
+		#------------------------------------------
+		if (defined $SetRepository) {
+			$xml -> setRepository ($SetRepositoryType,$SetRepository);
+		}
 		#==========================================
 		# Check for add-repo option
 		#------------------------------------------
@@ -450,6 +469,9 @@ sub init {
 		"create-instsource=s"   => \$CreateInstSource,
 		"add-repo=s"            => \$AddRepository,
 		"add-repotype=s"        => \$AddRepositoryType,
+		"set-repo=s"            => \$SetRepository,
+		"set-repotype=s"        => \$SetRepositoryType,
+		"type|t=s"              => \$SetImageType,
 		"upgrade|u=s"           => \$Upgrade,
 		"destdir|d=s"           => \$Destination,
 		"root|r=s"              => \$RootTree,
@@ -535,6 +557,14 @@ sub usage {
 	print "    storing the logical extends. By default the current\n";
 	print "    directory is used\n";
 	print "\n";
+	print "  [ -t | --type <image-type> ]\n";
+	print "    Specify the output image type to use for this image\n";
+	print "    The type must exist in the config.xml description\n";
+	print "    By the default the primary type will be used. If there is\n";
+	print "    no primary attribute set the first type entry of the\n";
+	print "    preferences section is the primary type\n"; 
+	print "    makes only sense in combination with --create\n";
+	print "\n";
 	print "  [ -r | --root <root-path> ]\n";
 	print "    Setup the physical extend, chroot system below the\n";
 	print "    given root-path path. By default a mktmp directory\n";
@@ -546,13 +576,20 @@ sub usage {
 	print "\n";
 	print "  [ --add-repo <repo-path> --add-repotype <type> ]\n";
     print "    Add the given repository and type for this run of an\n";
+	print "    image prepare or upgrade process. The change will not\n";
+	print "    be written to the config.xml file\n";
+	print "\n";
+	print "  [ --set-repo <repo-path> [ --set-repotype <type> ]]\n";
+	print "    set the given repository and optional type for the first\n";
+	print "    repository entry within the config.xml. The change will not\n";
+	print "    be written to the xml file and is valid for this run of\n";
 	print "    image prepare or upgrade process.\n";
 	print "\n";
 	print "  [ --logfile <filename> | terminal ]\n";
 	print "    Write to the log file \`<filename>' instead of\n";
 	print "    the terminal.\n";
 	print "--\n";
-	exit 1;
+	version();
 }
 
 #==========================================
@@ -651,6 +688,52 @@ sub version {
 	# ---
 	$kiwi -> info ("kiwi version v$Version\n");
 	exit 0;
+}
+
+#==========================================
+# checkType
+#------------------------------------------
+sub checkType {
+	my (%type) = %{$_[0]};
+	my $para   = "ok";
+	SWITCH: for ($type{type}) {
+		/^iso/ && do {
+			if (! defined $type{boot}) {
+				$kiwi -> error ("$type{type}: No boot image specified");
+				$kiwi -> failed ();
+				return undef;
+			}
+			$para = $type{boot};
+			if (defined $type{flags}) {
+				$para .= ",$type{flags}";
+			} 
+			last SWITCH;
+		};
+		/^split/ && do {
+			if (! defined $type{filesystem}) {
+				$kiwi -> error ("$type{type}: No filesystem pair specified");
+				$kiwi -> failed ();
+				return undef;
+			}
+			$para = $type{filesystem};
+			last SWITCH;
+		};
+		/^usb|vmx|xen|pxe/ && do {
+			if (! defined $type{filesystem}) {
+				$kiwi -> error ("$type{type}: No filesystem specified");
+				$kiwi -> failed ();
+				return undef;
+			}
+			if (! defined $type{boot}) {
+				$kiwi -> error ("$type{type}: No boot image specified");
+				$kiwi -> failed ();
+				return undef;
+			}
+			$para = $type{filesystem}.":".$type{boot};
+			last SWITCH;
+		};
+	}
+	return $para;
 }
 
 main();

@@ -109,3 +109,13 @@ if test ! -z $DISK;then
 		fi
 	done
 fi
+
+#======================================
+# 7) setup network for nfs boot
+#--------------------------------------
+if test ! -z $NFSROOT;then
+	mount -o nolock -t proc  proc    /proc
+	mount -o nolock -t sysfs sysfs   /sys
+	mount -o nolock -t devpts devpts /dev/pts
+	/etc/init.d/portmap start
+fi

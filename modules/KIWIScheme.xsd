@@ -3,7 +3,7 @@
 	xmlns:xs="http://www.w3.org/2001/XMLSchema"
 	elementFormDefault="qualified"
 	attributeFormDefault="unqualified"
-	version="1.2">
+	version="1.3">
 	<xs:annotation>
 		<xs:documentation>
 			This schema specifies the format of the config.xml image
@@ -201,20 +201,31 @@
 
 	<xs:element name="preferences">
 		<xs:complexType>
-			<xs:all>
-				<xs:element ref="type" minOccurs="1" maxOccurs="1"/>
+			<xs:sequence>
+				<xs:element ref="type" minOccurs="1" maxOccurs="unbounded"/>
 				<xs:element ref="version" minOccurs="1" maxOccurs="1"/>
+				<xs:element ref="size" minOccurs="1" maxOccurs="1"/>
 				<xs:element ref="compressed" minOccurs="0" maxOccurs="1"/>
 				<xs:element ref="packagemanager" minOccurs="0" maxOccurs="1"/>
 				<xs:element ref="rpm-check-signatures" minOccurs="0" maxOccurs="1"/>
 				<xs:element ref="rpm-force" minOccurs="0" maxOccurs="1"/>
 				<xs:element ref="keytable" minOccurs="0" maxOccurs="1"/>
 				<xs:element ref="timezone" minOccurs="0" maxOccurs="1"/>
-				<xs:element ref="size" minOccurs="1" maxOccurs="1"/>
-			</xs:all>
+			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
-	<xs:element name="type" type="xs:string"/>
+	<xs:element name="type">
+		<xs:complexType>
+			<xs:simpleContent>
+				<xs:extension base="xs:string">
+					<xs:attribute name="primary" type="xs:boolean"/>
+					<xs:attribute name="boot"  type="xs:string"/>
+					<xs:attribute name="flags" type="xs:string"/>
+					<xs:attribute name="filesystem" type="xs:string"/>
+				</xs:extension>
+			</xs:simpleContent>
+		</xs:complexType>
+	</xs:element>
 	<xs:element name="version" type="xs:string"/>
 	<xs:element name="compressed" type="xs:string"/>
 	<xs:element name="packagemanager" type="xs:string"/>

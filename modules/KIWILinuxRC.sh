@@ -892,3 +892,33 @@ function cleanDirectory () {
 	mv $tmpdir/* $directory
 	rm -rf $tmpdir
 }
+
+#======================================
+# searchAlternativeConfig
+#--------------------------------------
+function searchAlternativeConfig () {
+	# Check config.IP in Hex (pxelinux style)
+	localip=$IPADDR
+	hexip1=`echo $localip | cut -f1 -d'.'`
+	hexip2=`echo $localip | cut -f2 -d'.'`
+	hexip3=`echo $localip | cut -f3 -d'.'`
+	hexip4=`echo $localip | cut -f4 -d'.'`
+	hexip=`printf "%02X" $hexip1 $hexip2 $hexip3 $hexip4`
+	STEP=8
+	while [ $STEP -gt 0 ]; do
+		hexippart=`echo $hexip | cut -b -$STEP`
+		Echo "Checking for config file: config.$hexippart"
+		result=`atftp -g \
+			-r KIWI/config.$hexippart -l $CONFIG $TSERVER 2>&1 | head -n 1`
+		if test -s $CONFIG;then
+			break
+		fi
+		let STEP=STEP-1
+	done
+	# Check config.default if no hex config was found
+	if test ! -s $CONFIG;then
+		Echo "Checking for config file: config.default"
+		result=`atftp -g \
+			-r KIWI/config.default -l $CONFIG $TSERVER 2>&1 | head -n 1`
+	fi
+}

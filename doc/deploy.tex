@@ -58,9 +58,9 @@ If you don't want to prepare/create the boot image manually you
 can let kiwi do the job by setting up the \textbf{pxe} type in your
 system image config.xml file. For example:
 
-\begin{Command}{12cm}
+\begin{Command}{15cm}
 <preferences>\\
-\hspace*{1cm}<type>pxe:ext3:netboot/suse-10.2</type>\\
+\hspace*{1cm}<type filesystem=ext3 boot=netboot/suse-10.2>pxe</type>\\
 \hspace*{1cm}...\\
 </preferences>
 \end{Command}
@@ -173,9 +173,9 @@ To turn a system image into a split image only the type of the image
 must be adapted. This information is part of the \textbf{config.xml}
 file and could be changed like the following example shows:
 
-\begin{Command}{9cm}
+\begin{Command}{12cm}
 <preferences>\\
-\hspace*{1cm}<type>split:ext3,cramfs</type>\\
+\hspace*{1cm}<type filesystem=ext3,cramfs>split</type>\\
 \hspace*{1cm}...\\
 </preferences>
 \end{Command}
@@ -255,9 +255,9 @@ for SuSE Linux 10.2 only but can be adapted to other versions as well.
 To use your system image on a boot stick setup the system's config.xml
 as follows:
 
-\begin{Command}{14cm}
+\begin{Command}{15cm}
 <preferences>\\
-\hspace*{1cm}<type>usb:ext3:usbboot/suse-10.2</type>\\
+\hspace*{1cm}<type filesystem=ext3 boot=usbboot/suse-10.2>usb</type>\\
 \hspace*{1cm}...\\
 </preferences>
 \end{Command}
@@ -290,9 +290,9 @@ To be able to use a virtualization system a virtual disk needs to
 be created. This can be done by specifying the following type in the
 system's image config.xml:
 
-\begin{Command}{14cm}
+\begin{Command}{16cm}
 <preferences>\\
-\hspace*{1cm}<type>vmx:ext3:vmxboot/suse-10.2</type>\\
+\hspace*{1cm}<type filesystem=ext3 boot=vmxboot/suse-10.2>vmx</type>\\
 \hspace*{1cm}...\\
 </preferences>
 \end{Command}
@@ -320,9 +320,9 @@ To be able to use an image within Xen a system image and an initrd file
 needs to be created. This can be done by specifying the following type in the
 system's image config.xml:
 
-\begin{Command}{14cm}
+\begin{Command}{16cm}
 <preferences>\\
-\hspace*{1cm}<type>xen:ext3:xenboot/suse-10.2</type>\\
+\hspace*{1cm}<type filesystem=ext3 boot=xenboot/suse-10.2>xen</type>\\
 \hspace*{1cm}...\\
 </preferences>
 \end{Command}
@@ -368,14 +368,14 @@ to specify the boot image which should handle your live system.
 This is done by setting the \textbf{type} of the image in the
 \textbf{config.xml} file as follows:
 
-\begin{Command}{9cm}
+\begin{Command}{12cm}
 <preferences>\\
-\hspace*{1cm}<type>iso:name</type>\\
+\hspace*{1cm}<type boot="isoboot/suse-10.3">iso</type>\\
 \hspace*{1cm}...\\
 </preferences>
 \end{Command}
 
-The parameter \textbf{name} refers to the CD boot image which
+The attribute \textbf{boot} refers to the CD boot image which
 must exist in \textit{/usr/share/kiwi/image/isoboot}. Like for all boot
 images the most important point is that the boot image has to
 match the operating system image. This means the kernel of the boot-

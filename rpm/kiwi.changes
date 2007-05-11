@@ -3,6 +3,20 @@ Tue May  8 17:27:19 CEST 2007 - ms@suse.de
 
 - v1.33
 - kiwi-pxeboot: install files to /srv/tftpboot (#248008)
+- added patch for netboot and xennetboot linuxrc to allow
+  alternative config files. The same search order like PXE
+  implements it was used (#272337)
+- print version information in help output
+- scheme version upgrade from 1.2 to 1.3. The type specification
+  within the preferences section has changed.
+- added --set-repo and --set-repotype options. This allows a
+  temporary overwrite of the first repository entry within the
+  config.xml file.
+- added possibility to include multiple type sections into
+  the preferences section of the config.xml file. There should
+  be one primary type which is used if no other type was selected
+  with the option --type. If there is no primary attribute the
+  first type specified is the primary type
 
 -------------------------------------------------------------------
 Mon May  7 17:12:11 CEST 2007 - ms@suse.de

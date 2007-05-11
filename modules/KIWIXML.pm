@@ -28,6 +28,7 @@ use KIWIManager qw (%packageManager);
 #------------------------------------------
 my $kiwi;
 my $imageDesc;
+my $imageWhat;
 my $optionsNodeList;
 my $driversNodeList;
 my $usrdataNodeList;
@@ -62,6 +63,7 @@ sub new {
 	$kiwi = shift;
 	$imageDesc = shift;
 	my $otherRepo = shift;
+	$imageWhat = shift;
 	my %foreignRepo;
 	if (defined $otherRepo) {
 		 %foreignRepo = %{$otherRepo};
@@ -147,6 +149,15 @@ sub new {
 		return undef;
 	}
 	#==========================================
+	# Check type information from xml input
+	#------------------------------------------
+	if (! $this -> getImageTypeAndAttributes()) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Boot type: $imageWhat not specified in config.xml");
+		$kiwi -> failed ();
+		return undef;
+	}
+	#==========================================
 	# setup foreign repository sections
 	#------------------------------------------
 	if ( defined $foreignRepo{xmlnode} ) {
@@ -223,21 +234,50 @@ sub getImageSize {
 	my $node = $optionsNodeList -> get_node(1);
 	my $size = $node -> getElementsByTagName ("size");
 	my $unit = $node -> getElementsByTagName ("size")
-		-> get_node(1) ->getAttribute("unit");
+		-> get_node(1) -> getAttribute("unit");
 	return $size.$unit;
 }
 
 #==========================================
-# getImageType
+# getImageTypeAndAttributes
 #------------------------------------------
-sub getImageType {
+sub getImageTypeAndAttributes {
 	# ...
-	# Get the filesystem type of the logical extend
+	# Get the image type and its attributes for beeing
+	# able to create the appropriate logical extend
 	# ---
-	my $this = shift;
-	my $node = $optionsNodeList -> get_node(1);
-	my $type = $node -> getElementsByTagName ("type");
-	return $type;
+	my $this   = shift;
+	my %result = ();
+	my $count  = 0;
+	my $first  = "";
+	my @node   = $optionsNodeList -> get_node(1)
+		-> getElementsByTagName ("type");
+	foreach my $node (@node) {
+		my %record = ();
+		my $prim = $node -> getAttribute("primary");
+		if ((! defined $prim) || ($prim eq "false") || ($prim eq "0")) {
+			$prim = $node -> string_value();
+		} else {
+			$prim = "primary";
+		}
+		if ($count == 0) {
+			$first = $prim;
+		}
+		$record{type} = $node -> string_value();
+		$record{boot} = $node -> getAttribute("boot");
+		$record{flags}= $node -> getAttribute("flags");
+		$record{filesystem} = $node -> getAttribute("filesystem");
+		$result{$prim} = \%record;
+		$count++;
+	}
+	if (! defined $imageWhat) {
+		if (defined $result{primary}) {
+			return $result{primary};
+		} else {
+			return $result{$first};
+		}
+	}
+	return $result{$imageWhat};
 }
 
 #==========================================
@@ -386,8 +426,8 @@ sub getCompressed {
 	# otherwise false. 
 	# ---
 	my $this = shift;
-	my $type = getImageType();
-	if ($type =~ /^vmx:/) {
+	my %type = %{getImageTypeAndAttributes()};
+	if ("$type{type}" eq "vmx") {
 		$kiwi -> info ("Virtual machine type: ignoring compressed flag");
 		$kiwi -> done ();
 		return 0;
@@ -542,9 +582,39 @@ sub getRepository {
 }
 
 #==========================================
+# setRepository
+#------------------------------------------
+sub setRepository {
+	# ...
+	# Overwerite the repository path and type of the first
+	# repository node with the given data
+	# ---
+	my $this = shift;
+	my $type = shift;
+	my $path = shift;
+	my $element = $repositNodeList -> get_node(1);
+	if (defined $type) {
+		$element -> setAttribute ("type",$type);
+	}
+	if (defined $path) {
+		$element -> getElementsByTagName ("source")
+			-> get_node (1) -> setAttribute ("path",$path);
+	}
+	return $this;
+}
+
+#==========================================
 # addRepository
 #------------------------------------------
 sub addRepository {
+	# ...
+	# Add a repository node to the current list of repos
+	# this is done by reading the config.xml file again and
+	# overwriting the first repository node with the new data
+	# A new object XML::LibXML::NodeList is created which
+	# contains the changed element. The element is then appended
+	# the the global repositNodeList
+	# ---
 	my $this = shift;
 	my $type = shift;
 	my $path = shift;
@@ -580,12 +650,12 @@ sub getImageConfig {
 	if (getCompressed ($this)) {
 		$result{compressed} = "yes";
 	}
-	my $type = getImageType    ($this);
+	my %type = %{getImageTypeAndAttributes()};
 	my $iver = getImageVersion ($this);
 	my $size = getImageSize    ($this);
 	my $name = getImageName    ($this);
-	if ($type) {
-		$result{type} = $type;
+	if (%type) {
+		$result{type} = $type{type};
 	}
 	if ($size) {
 		$result{size} = $size;
