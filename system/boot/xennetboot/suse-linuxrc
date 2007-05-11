@@ -421,9 +421,7 @@ if [ -z "$NFSROOT" ];then
 		echo $imageDevice | grep -q ram
 		haveDataInRam=$?
 		if test ! -z $DISK && test $haveDataInRam != 0;then
-			mountSystem $imageRootDevice
-			readFileSystem /mnt/image/config.xml
-			umountSystem
+			probeFileSystem $imageRootDevice
 			if test "$FSTYPE" = "reiserfs";then
 				Echo "Resize Reiser filesystem to full partition space..."
 				resize_reiserfs $imageDevice
@@ -443,8 +441,6 @@ if [ -z "$NFSROOT" ];then
 				e2fsck -f $imageDevice -y
 				Echo "Resize EXT3 filesystem to full partition space..."
 				resize2fs -F -p $imageDevice
-				Echo "Adding EXT3 journal..."
-				tune2fs -j $imageDevice
 				Echo "Checking EXT3 filesystem..."
 				e2fsck -f $imageDevice -y
 				INITRD_MODULES="$INITRD_MODULES ext3"
@@ -573,7 +569,7 @@ fi
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	if test $systemIntegrity = "clean";then
-		readFileSystem /mnt/image/config.xml
+		probeFileSystem $imageRootDevice
 		kernelList /mnt
 	fi
 fi

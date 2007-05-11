@@ -257,9 +257,7 @@ IFS="," ; for i in $IMAGE;do
 	done
 
 	mkdir -p /mnt
-	mount $imageRootDevice /mnt
-	readFileSystem /mnt/image/config.xml
-	umount /mnt
+	probeFileSystem $imageRootDevice
 	Echo "Resize filesystem to full partition space..."
 	if test "$FSTYPE" = "reiserfs";then
 		resize_reiserfs $imageDevice
@@ -302,7 +300,7 @@ mount $imageRootDevice /mnt
 # 10) check filesystem and kernels
 #--------------------------------------
 if test $systemIntegrity = "clean";then
-	readFileSystem /mnt/image/config.xml
+	probeFileSystem $imageRootDevice
 	kernelList /mnt
 fi
 

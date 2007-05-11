@@ -157,31 +157,6 @@ function probeFileSystem {
 	esac
 }
 #======================================
-# readFileSystem
-#--------------------------------------
-function readFileSystem {
-	# /.../
-	# read the image type information from the image itself
-	# and return the appropriate filesystem type.
-	# ----
-	imageConfig=$1
-	if [ ! -f $imageConfig ];then
-		FSTYPE=auto
-		return
-	fi
-	data=`cat $imageConfig | grep "<type>" | cut -f2 -d ">" | cut -f1 -d "<"`
-	case $data in
-		*ext3*)     FSTYPE=ext3 ;;
-		*ext2*)     FSTYPE=ext2 ;;
-		*reiserfs*) FSTYPE=reiserfs ;;
-		*cramfs*)   FSTYPE=cramfs ;;
-		*squashfs*) FSTYPE=squashfs ;;
-		*)
-			FSTYPE=auto
-		;;
-	esac
-}
-#======================================
 # getSystemIntegrity
 #--------------------------------------
 function getSystemIntegrity {

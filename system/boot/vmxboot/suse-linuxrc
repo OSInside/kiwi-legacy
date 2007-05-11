@@ -110,7 +110,7 @@ VMMountSystem
 #======================================
 # 5) Get filesystem type
 #--------------------------------------
-readFileSystem /mnt/image/config.xml
+probeFileSystem $imageRootDevice
 kernelList /mnt
 
 #======================================

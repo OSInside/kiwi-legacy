@@ -958,6 +958,7 @@ sub createImageSplit {
 			};
 			/ext3/       && do {
 				qx (/sbin/fsck.ext3 -f -y $imageDest/$name 2>&1);
+				qx (/sbin/tune2fs -j $imageDest/$name 2>&1);
 				$kiwi -> done();
 				last SWITCH;
 			};
@@ -1208,15 +1209,16 @@ sub postImage {
 	#==========================================
 	# Check image file system
 	#------------------------------------------
-	$kiwi -> info ("Checking file system...");
 	my %type = %{$xml->getImageTypeAndAttributes()};
 	my $para = $type{type}.":".$type{filesystem};
+	$kiwi -> info ("Checking file system: $type{filesystem}...");
 	SWITCH: for ($para) {
 		#==========================================
 		# Check EXT3 file system
 		#------------------------------------------
 		/ext3/i && do {
 			qx (/sbin/fsck.ext3 -f -y $imageDest/$name 2>&1);
+			qx (/sbin/tune2fs -j $imageDest/$name 2>&1);
 			$kiwi -> done();
 			last SWITCH;
 		};

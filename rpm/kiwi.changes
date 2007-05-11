@@ -17,6 +17,9 @@ Tue May  8 17:27:19 CEST 2007 - ms@suse.de
   be one primary type which is used if no other type was selected
   with the option --type. If there is no primary attribute the
   first type specified is the primary type
+- replace readFileSystem with probeFileSystem in all
+  linuxrc files. Removed readFileSystem function from
+  KIWILinuxRC.sh
 
 -------------------------------------------------------------------
 Mon May  7 17:12:11 CEST 2007 - ms@suse.de
