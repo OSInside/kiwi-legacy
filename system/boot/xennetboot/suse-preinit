@@ -41,6 +41,7 @@ if test ! -z $DISK;then
 		else
 			Echo "Image doesn't provide kernel system map"
 			Echo "Can't create initrd"
+			systemIntegrity=unknown
 		fi
 	fi
 fi
