@@ -451,6 +451,8 @@ sub setup {
 			$kiwi -> failed ();
 			$kiwi -> info   ($data);
 			return undef;
+		} else {
+			$kiwi -> loginfo ("config.sh: $data");
 		}
 		qx ( rm -f $root/tmp/config.sh );
 		$kiwi -> done ();
@@ -497,6 +499,8 @@ sub setup {
 					$kiwi -> failed ();
 					$kiwi -> info   ($data);
 					$kiwi -> failed ();
+				} else {
+					$kiwi -> loginfo ("$script: $data");
 				}
 				qx (rm -f $root/image/config/$script);
 				$kiwi -> done ();

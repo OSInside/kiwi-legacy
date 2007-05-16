@@ -1411,6 +1411,8 @@ sub setupLogicalExtend {
 			$kiwi -> info   ($data);
 			cleanMount();
 			return undef;
+		} else {
+			$kiwi -> loginfo ("images.sh: $data");
 		}
 		qx ( rm -f $imageTree/image/images.sh );
 		$kiwi -> done ();

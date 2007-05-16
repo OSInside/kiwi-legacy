@@ -7,6 +7,7 @@ Mon May 14 13:57:39 CEST 2007 - ms@suse.de
   using aufs for live media requires: "flags=unified" to be set
 - added cleanInitrd method to remove the boot image data from
   main memory before chroot'ing into the system
+- added loginfo method and include script output to root log
 
 -------------------------------------------------------------------
 Tue May  8 17:27:19 CEST 2007 - ms@suse.de

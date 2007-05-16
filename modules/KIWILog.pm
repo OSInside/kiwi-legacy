@@ -202,6 +202,7 @@ sub printLog {
 	my $this = shift;
 	my $lglevel = $_[0];
 	my $logdata = $_[1];
+	my $flag    = $_[2];
 
 	if (! defined $channel) {
 		$channel = \*STDOUT;
@@ -211,6 +212,10 @@ sub printLog {
 		$lglevel = 1;
 	}
 	my $date = getPrefix ( $this,$lglevel );
+	if (defined $flag) {
+		print EFD $date,$logdata;
+		return;
+	}
 	foreach my $level (@showLevel) {
 	if ($level == $lglevel) {
 		setOutputChannel();
@@ -231,6 +236,18 @@ sub printLog {
 		return $lglevel;
 	}
 	}
+}
+
+#==========================================
+# info
+#------------------------------------------
+sub loginfo {
+	# ...
+	# print an info log message to channel <1>
+	# ---
+	my $this = shift;
+	my $data = shift;
+	printLog ( $this,1,$data,"loginfo" );
 }
 
 #==========================================
