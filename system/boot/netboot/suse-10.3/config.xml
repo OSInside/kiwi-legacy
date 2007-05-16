@@ -64,7 +64,8 @@
 		<package name="grub"/>
 		<package name="squashfs"/>
 		<package name="squashfs-kmp-default"/>
-		<package name="unionfs-kmp-default"/>
+		<package name="aufs"/>
+		<package name="aufs-kmp-default"/>	
 	</packages>
 	<packages type="boot">
 		<package name="kernel-default"/>
