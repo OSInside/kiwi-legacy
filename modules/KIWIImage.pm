@@ -526,98 +526,109 @@ sub createImageLiveCD {
 	#==========================================
 	# split physical extend into RW / RO part
 	#------------------------------------------
-	$imageTreeReadOnly = $imageTree;
-	$imageTreeReadOnly =~ s/\/+$//;
-	$imageTreeReadOnly.= "-read-only/";
-	if (! -d $imageTreeReadOnly) {
-		$kiwi -> info ("Creating read only image part");
-		if (! mkdir $imageTreeReadOnly) {
-			$error = $!;
-			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't create ro directory: $error");
-			$kiwi -> failed ();
-			return undef;
-		}
-		my @rodirs = qw (bin boot lib opt sbin usr);
-		foreach my $dir (@rodirs) {
-			$data = qx (mv $imageTree/$dir $imageTreeReadOnly 2>&1);
-			$code = $? >> 8;
-			if ($code != 0) {
+	if ((! defined $gzip) || ($gzip eq "compressed")) {
+		$imageTreeReadOnly = $imageTree;
+		$imageTreeReadOnly =~ s/\/+$//;
+		$imageTreeReadOnly.= "-read-only/";
+		if (! -d $imageTreeReadOnly) {
+			$kiwi -> info ("Creating read only image part");
+			if (! mkdir $imageTreeReadOnly) {
+				$error = $!;
 				$kiwi -> failed ();
-				$kiwi -> error  ("Couldn't setup ro directory: $data");
+				$kiwi -> error  ("Couldn't create ro directory: $error");
 				$kiwi -> failed ();
 				return undef;
 			}
+			my @rodirs = qw (bin boot lib opt sbin usr);
+			foreach my $dir (@rodirs) {
+				$data = qx (mv $imageTree/$dir $imageTreeReadOnly 2>&1);
+				$code = $? >> 8;
+				if ($code != 0) {
+					$kiwi -> failed ();
+					$kiwi -> error  ("Couldn't setup ro directory: $data");
+					$kiwi -> failed ();
+					return undef;
+				}
+			}
+			$kiwi -> done();
 		}
-		$kiwi -> done();
-	}
-	#==========================================
-	# Count disk space for RW extend
-	#------------------------------------------
-	$kiwi -> info ("Computing disk space...");
-	my ($mbytesreal,$mbytesrw,$xmlsize) = getSize ($imageTree);
-	$kiwi -> done ();
+		#==========================================
+		# Count disk space for RW extend
+		#------------------------------------------
+		$kiwi -> info ("Computing disk space...");
+		my ($mbytesreal,$mbytesrw,$xmlsize) = getSize ($imageTree);
+		$kiwi -> done ();
 
-	#==========================================
-	# Create RW logical extend
-	#------------------------------------------
-	$kiwi -> info ("Image RW part requires $mbytesrw MB of disk space");
-	if (! buildLogicalExtend ($namerw,$mbytesrw."M")) {
-		restoreSplitExtend ();
-		return undef;
+		#==========================================
+		# Create RW logical extend
+		#------------------------------------------
+		$kiwi -> info ("Image RW part requires $mbytesrw MB of disk space");
+		if (! buildLogicalExtend ($namerw,$mbytesrw."M")) {
+			restoreSplitExtend ();
+			return undef;
+		}
+		$kiwi -> done ();
+		#==========================================
+		# Create EXT2 filesystem on RW extend
+		#------------------------------------------
+		if (! setupEXT2 ( $namerw,$imageTree )) {
+			restoreSplitExtend ();
+			return undef;
+		}
+		#==========================================
+		# mount logical extend for data transfer
+		#------------------------------------------
+		my $extend = mountLogicalExtend ($namerw);
+		if (! defined $extend) {
+			restoreSplitExtend ();
+			return undef;
+		}
+		#==========================================
+		# copy physical to logical
+		#------------------------------------------
+		if (! installLogicalExtend ($extend,$imageTree)) {
+			restoreSplitExtend ();
+			return undef;
+		}
+		cleanMount();
 	}
-	$kiwi -> done ();
-	#==========================================
-	# Create EXT2 filesystem on RW extend
-	#------------------------------------------
-	if (! setupEXT2 ( $namerw,$imageTree )) {
-		restoreSplitExtend ();
-		return undef;
-	}
-	#==========================================
-	# mount logical extend for data transfer
-	#------------------------------------------
-	my $extend = mountLogicalExtend ($namerw);
-	if (! defined $extend) {
-		restoreSplitExtend ();
-		return undef;
-	}
-	#==========================================
-	# copy physical to logical
-	#------------------------------------------
-	if (! installLogicalExtend ($extend,$imageTree)) {
-		restoreSplitExtend ();
-		return undef;
-	}
-	cleanMount();
 	#==========================================
 	# Create compressed filesystem on RO extend
 	#------------------------------------------
 	if (defined $gzip) {
 		$kiwi -> info ("Creating compressed read only filesystem...");
-		if (! setupSquashFS ( $namero,$imageTreeReadOnly )) {
+		my $systemTree = $imageTreeReadOnly;
+		if ($gzip eq "unified") {
+			$systemTree = $imageTree;
+		}
+		if (! setupSquashFS ( $namero,$systemTree )) {
 			restoreSplitExtend ();
 			return undef;
 		}
 		$kiwi -> done();
 	}
 	#==========================================
-	# Checking RW file system
+	# Check / build md5 sum of RW extend
 	#------------------------------------------
-	qx (/sbin/e2fsck -f -y $imageDest/$namerw 2>&1);
+	if ((! defined $gzip) || ($gzip eq "compressed")) {
+		#==========================================
+		# Checking RW file system
+		#------------------------------------------
+		qx (/sbin/e2fsck -f -y $imageDest/$namerw 2>&1);
 
-	#==========================================
-	# Create image md5sum
-	#------------------------------------------
-	if (! buildMD5Sum ($namerw)) {
-		restoreSplitExtend ();
-		return undef;
-	}
-	#==========================================
-	# Restoring physical extend
-	#------------------------------------------
-	if (! restoreSplitExtend ()) {
-		return undef;
+		#==========================================
+		# Create image md5sum
+		#------------------------------------------
+		if (! buildMD5Sum ($namerw)) {
+			restoreSplitExtend ();
+			return undef;
+		}
+		#==========================================
+		# Restoring physical extend
+		#------------------------------------------
+		if (! restoreSplitExtend ()) {
+			return undef;
+		}
 	}
 	#==========================================
 	# recreate a copy of the read-only data
@@ -682,8 +693,10 @@ sub createImageLiveCD {
 	# Installing second stage images
 	#------------------------------------------
 	$kiwi -> info ("Moving CD image data into boot structure");
-	qx (mv $imageDest/$namerw.md5 $main::RootTree/CD);
-	qx (mv $imageDest/$namerw $main::RootTree/CD);
+	if ((! defined $gzip) || ($gzip eq "compressed")) {
+		qx (mv $imageDest/$namerw.md5 $main::RootTree/CD);
+		qx (mv $imageDest/$namerw $main::RootTree/CD);
+	}
 	if (defined $gzip) {
 		qx (mv $imageDest/$namero $main::RootTree/CD);
 	} else {
@@ -745,6 +758,9 @@ sub createImageLiveCD {
 		return undef;
 	}
 	print FD "IMAGE=/dev/ram1;$namecd\n";
+	if ((defined $gzip) && ($gzip eq "unified")) {
+		print FD "UNIONFS_CONFIG=/dev/ram1,/dev/loop1,aufs\n";
+	}
 	close FD;
 
 	#==========================================

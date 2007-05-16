@@ -25,7 +25,7 @@ make -C themes/SuSE clean
 #------------------------------------------
 for i in \
     PolicyKit audit-libs blocxx cpio cyrus-sasl db \
-    diffutils expat fillup gawk gdbm glib2 glibc-locale gnome-filesystem \
+    expat fillup gawk gdbm glib2 glibc-locale gnome-filesystem \
     gpg info insserv iproute2 irqbalance libxcrypt libxml2 \
     libzio limal limal-bootloader limal-perl logrotate mdadm mingetty \
     openSUSE-release openldap2-client openslp pam pam-modules pcre \

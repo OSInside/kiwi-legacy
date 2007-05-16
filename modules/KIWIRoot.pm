@@ -595,14 +595,19 @@ sub setupMount {
 		$kiwi -> info ("Mounting local channel: $chl");
 		my $cache = "/var/cache/kiwi";
 		my $roopt = "dirs=$cache=rw:$path=ro,ro";
+		my $auopt = "dirs=$path=ro";
 		my $mount = $prefix.$path;
 		push (@mountList,$mount);
 		if (! -d $cache) {
 			qx ( mkdir -p $cache );
 		}
 		qx (mkdir -p $mount);
-		my $data = qx (mount -t unionfs -o $roopt unionfs $mount 2>&1);
+		my $data = qx (mount -t aufs -o $auopt aufs $mount 2>&1);
 		my $code = $? >> 8;
+		if ($code != 0) {
+			$data = qx (mount -t unionfs -o $roopt unionfs $mount 2>&1);
+			$code = $? >> 8;
+		}
 		if ($code != 0) {
 			$kiwi -> skipped ();
 			$kiwi -> warning ("Couldn't mount read-only, using bind mount");

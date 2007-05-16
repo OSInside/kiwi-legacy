@@ -869,6 +869,23 @@ function cleanDirectory () {
 }
 
 #======================================
+# cleanInitrd
+#--------------------------------------
+function cleanInitrd () {
+	cp /usr/bin/chroot /bin
+	for dir in /*;do
+		case "$dir" in
+			"/lib") continue ;;
+			"/bin") continue ;;
+			"/mnt") continue ;;
+		esac
+		rm -rf $dir/*
+	done
+	# mount opens fstab so we give them one
+	touch /etc/fstab
+}
+
+#======================================
 # searchAlternativeConfig
 #--------------------------------------
 function searchAlternativeConfig () {

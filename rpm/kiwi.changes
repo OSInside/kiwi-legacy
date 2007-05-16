@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Mon May 14 13:57:39 CEST 2007 - ms@suse.de
+
+- v1.34
+- use aufs || unionfs for read-only mounts in KIWIRoot.pm
+- added support for aufs to isoboot live media for suse >= 10.3
+  using aufs for live media requires: "flags=unified" to be set
+- added cleanInitrd method to remove the boot image data from
+  main memory before chroot'ing into the system
+
+-------------------------------------------------------------------
 Tue May  8 17:27:19 CEST 2007 - ms@suse.de
 
 - v1.33
