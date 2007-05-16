@@ -92,7 +92,7 @@ IFS="," ; for i in $IMAGE;do
 		Echo "Loading $imageName [$imageDevice]..."
 		IFS=" "
 		read sum1 blocks blocksize < $imageMD5s
-		if ! validateRAM;then
+		if ! validateSize;then
 			systemException \
 				"Not enough RAM available for this image" \
 			"reboot"
@@ -152,7 +152,9 @@ if [ -z "$UNIONFS_CONFIG" ];then
 	#======================================
 	# 8.1) mount RW part and CD to /mnt
 	#--------------------------------------
-	mount $imageDevice /mnt &>/dev/null
+	if ! mount $imageDevice /mnt &>/dev/null;then
+		systemException "Failed to mount RW root filesystem" "reboot"
+	fi
 	mkdir -p /mnt/$LIVECD && mount $cddev /mnt/$LIVECD &>/dev/null
 
 	#======================================
@@ -164,6 +166,9 @@ if [ -z "$UNIONFS_CONFIG" ];then
 		mkdir -p /mnt/read-only-system
 		mount -t squashfs -o loop /mnt/$LIVECD/$imageReadOnly \
 			/mnt/read-only-system
+		if [ ! $? = 0 ];then
+			systemException "Failed to mount RO root filesystem" "reboot"
+		fi
 		Echo "Creating live media links..."
 		for dir in bin boot lib opt sbin usr;do
 			ln -s read-only-system/$dir $dir
@@ -182,7 +187,9 @@ else
 	Echo "Mounting compressed unified tree..."
 	mkdir -p /mnt/$LIVECD && mount $cddev /mnt/$LIVECD &>/dev/null
 	losetup /dev/loop1 /mnt/$LIVECD/$imageReadOnly
-	mountSystem /dev/loop1
+	if ! mountSystem /dev/loop1;then
+		systemException "Failed to mount root filesystem" "reboot"
+	fi
 fi
 
 #======================================
