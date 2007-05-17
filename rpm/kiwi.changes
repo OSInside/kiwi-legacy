@@ -8,6 +8,8 @@ Mon May 14 13:57:39 CEST 2007 - ms@suse.de
 - added cleanInitrd method to remove the boot image data from
   main memory before chroot'ing into the system
 - added loginfo method and include script output to root log
+- fixed set-repo option to use this path for downloading
+  patterns if specified
 
 -------------------------------------------------------------------
 Tue May  8 17:27:19 CEST 2007 - ms@suse.de
