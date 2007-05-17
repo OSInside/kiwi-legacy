@@ -43,7 +43,6 @@ my $schemeNodeList;
 my $unionNodeList;
 my $schemeVers;
 my @urllist;
-my %foreignRepo;
 my $arch;
 
 #==========================================
@@ -65,6 +64,7 @@ sub new {
 	$imageDesc = shift;
 	my $otherRepo = shift;
 	$imageWhat = shift;
+	my %foreignRepo;
 	if (defined $otherRepo) {
 		 %foreignRepo = %{$otherRepo};
 	}
@@ -177,7 +177,7 @@ sub new {
 	#==========================================
 	# Create URL list from all locations
 	#------------------------------------------
-	$this -> createURLList();
+	$this -> createURLList (\%foreignRepo);
 	return $this;
 }
 
@@ -186,6 +186,11 @@ sub new {
 #------------------------------------------
 sub createURLList {
 	my $this = shift;
+	my $otherRepo = shift;
+	my %foreignRepo;
+	if (defined $otherRepo) {
+		%foreignRepo = %{$otherRepo};
+	}
 	my %repository = getRepository ($this);
 	@urllist = ();
 	foreach my $source (keys %repository) {
