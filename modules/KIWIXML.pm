@@ -416,7 +416,6 @@ sub getDeployPartitions {
 		$part{mountpoint} = $mountpoint;
 		$part{target} = $target;
 
-		print "Parition $number target value is $target\n";
 		push @result, { %part };
 	}
 	return sort { $a->{number} cmp $b->{number} } @result;
