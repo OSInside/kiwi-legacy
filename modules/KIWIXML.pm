@@ -402,11 +402,21 @@ sub getDeployPartitions {
 		if (! defined $mountpoint) {
 			$mountpoint = "x";
 		}
+		my $target = $node -> getAttribute ("target");
+		if (! defined $target or $target eq "false" or $target eq "0") {
+			$target = 0;
+		} else {
+			$target = 1
+		}
+		
 		my %part = ();
 		$part{number} = $number;
 		$part{type} = $type;
 		$part{size} = $size;
 		$part{mountpoint} = $mountpoint;
+		$part{target} = $target;
+
+		print "Parition $number target value is $target\n";
 		push @result, { %part };
 	}
 	return sort { $a->{number} cmp $b->{number} } @result;

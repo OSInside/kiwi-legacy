@@ -109,6 +109,7 @@
 			<xs:attribute name="number"/>
 			<xs:attribute name="size"/>
 			<xs:attribute name="mountpoint"/>
+			<xs:attribute name="target" type="xs:boolean"/>
 		</xs:complexType>
 	</xs:element>
 

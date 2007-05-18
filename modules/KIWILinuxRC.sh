@@ -878,8 +878,11 @@ function cleanInitrd () {
 			"/lib") continue ;;
 			"/bin") continue ;;
 			"/mnt") continue ;;
+			"/ro_branch") continue ;;
+			"/rw_branch") continue ;;
+			"/xino") continue ;;
 		esac
-		rm -rf $dir/*
+		rm -rf $dir/* 2>&1 >/dev/null
 	done
 	# mount opens fstab so we give them one
 	touch /etc/fstab

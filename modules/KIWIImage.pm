@@ -1130,12 +1130,10 @@ sub writeImageConfig {
 		my $namecd = buildImageName(";");
 		my $server = $xml -> getDeployServer ();
 		my $blocks = $xml -> getDeployBlockSize ();
-		if ($xml->getCompressed()) {
-			print FD "IMAGE=${device}2;$namecd;$server;$blocks;compressed\n";
-		} else {
-			print FD "IMAGE=${device}2;$namecd;$server;$blocks\n";
-		}
+
 		print FD "DISK=${device}\n";
+
+		my $targetPartition = 2;
 		#==========================================
 		# PART information
 		#------------------------------------------
@@ -1143,21 +1141,43 @@ sub writeImageConfig {
 		if ((scalar @parts) > 0) {
 			print FD "PART=";
 			for my $href (@parts) {
-				if ($href->{size} eq "image") {
+				if ($href -> {target}) {
+					$targetPartition = $href -> {number};
+				}
+				if ($href -> {size} eq "image") {
 					print FD int (((-s "$imageDest/$name") / 1024 / 1024) + .5);
 				} else {
-					print FD $href->{size};
+					print FD $href -> {size};
 				}
-				if ($href -> {type} eq "swap") {
-					print FD ";S;x,";
-				} else {
-					my $mountpoint = $href -> {mountpoint};
-					my $type = $href -> {type};
-					print FD ";$type;$mountpoint,";
+
+				my $type = $href -> {type};
+				my $mountpoint = $href -> {mountpoint};
+
+				SWITCH: for ($type) {
+					/swap/i && do {
+						$type = "S";
+						last SWITCH;
+					};
+					/linux/i && do {
+						$type = "L";
+						last SWITCH;
+					};
 				}
+
+				print FD ";$type;$mountpoint,";
 			}
 			print FD "\n";
 		}
+
+		#==========================================
+		# IMAGE information
+		#------------------------------------------
+		if ($xml->getCompressed()) {
+			print FD "IMAGE=${device}${targetPartition};$namecd;$server;$blocks;compressed\n";
+		} else {
+			print FD "IMAGE=${device}${targetPartition};$namecd;$server;$blocks\n";
+		}
+		
 		#==========================================
 		# CONF information
 		#------------------------------------------
