@@ -531,7 +531,7 @@ sub setupBootDisk {
 	my $kiwi      = $this->{kiwi};
 	my $system    = $this->{system};
 	my $vmsize    = $this->{vmsize};
-	my $diskname  = $system.".qemu";
+	my $diskname  = $system.".raw";
 	my $vmdkname  = $system.".vmdk";
 	my $loop      = "/dev/loop0";
 	my $loopfound = 0;

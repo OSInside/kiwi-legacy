@@ -424,11 +424,11 @@ sub createImagePXE {
 #------------------------------------------
 sub createImageVMX {
 	# ...
-	# Create virtual machine disks usable for QEMU and VMware virtual
+	# Create virtual machine disks usable for QEMU (raw) and VMware virtual
 	# machines. The process will create the system image and the
-	# appropriate vmx boot image plus a .qemu and a .vmdk image usable
-	# in qemu or vmware player. The boot image description must exist
-	# in /usr/share/kiwi/image.
+	# appropriate vmx boot image plus a .raw and a .vmdk image usable
+	# in vmware player or qemu (after converting the raw file). The boot
+	# image description must exist in /usr/share/kiwi/image.
 	#
 	# NOTE: Because the first steps of creating
 	# a virtual machine image are the same as creating a usb stick image
@@ -447,7 +447,7 @@ sub createImageVMX {
 	undef $main::Prepare;
 	undef $main::Create;
 	#==========================================
-	# Create .qemu and .vmdk VM images
+	# Create .raw and .vmdk VM images
 	#------------------------------------------
 	$main::BootVMDisk   = $main::Destination."/".$name->{bootImage}.".gz";
 	$main::BootVMSystem = $main::Destination."/".$name->{systemImage};
