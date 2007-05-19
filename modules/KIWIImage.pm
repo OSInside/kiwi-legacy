@@ -24,30 +24,32 @@ use KIWILog;
 use Math::BigFloat;
 
 #==========================================
-# Private
-#------------------------------------------
-my $imageTreeReadOnly;
-my $imageTree;
-my $imageDest;
-my $imageStrip;
-my $baseSystem;
-my $kiwi;
-my $xml;
-my $arch;
-
-#==========================================
 # Constructor
 #------------------------------------------
 sub new {
+	# ...
+	# Create a new KIWIImage object which is used to create
+	# the different output image formats from a previosly
+	# prepared physical extend
+	# ---
+	#==========================================
+	# Object setup
+	#------------------------------------------
 	my $this  = {};
 	my $class = shift;
 	bless $this,$class;
-	$kiwi = shift;
-	$xml  = shift;
-	$imageTree  = shift;
-	$imageDest  = shift;
-	$imageStrip = shift;
-	$baseSystem = shift;
+	#==========================================
+	# Module Parameters
+	#------------------------------------------
+	my $kiwi       = shift;
+	my $xml        = shift;
+	my $imageTree  = shift;
+	my $imageDest  = shift;
+	my $imageStrip = shift;
+	my $baseSystem = shift;
+	#==========================================
+	# Constructor setup
+	#------------------------------------------
 	if (! defined $kiwi) {
 		$kiwi = new KIWILog();
 	}
@@ -79,8 +81,18 @@ sub new {
 	if (! defined $main::LogFile) {
 		$kiwi -> setRootLog ($imageTree."/screenrc.log");
 	}
-	$arch = qx ( arch ); chomp ( $arch );
+	my $arch = qx ( arch ); chomp ( $arch );
 	$arch = ".$arch";
+	#==========================================
+	# Store object data
+	#------------------------------------------
+	$this->{kiwi}       = $kiwi;
+	$this->{xml}        = $xml;
+	$this->{imageTree}  = $imageTree;
+	$this->{imageDest}  = $imageDest;
+	$this->{imageStrip} = $imageStrip;
+	$this->{baseSystem} = $baseSystem;
+	$this->{arch}       = $arch;
 	return $this;
 }
 
@@ -93,6 +105,8 @@ sub stripImage {
 	# using strip -p
 	# ---
 	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $imageTree = $this->{imageTree};
 	$kiwi -> info ("Stripping shared objects/executables...");
 	my @list = qx (find $imageTree -type f -perm -755);
 	foreach my $file (@list) {
@@ -121,23 +135,24 @@ sub createImageEXT2 {
 	# ---
 	my $this    = shift;
 	my $journal = shift;
+	my $imageTree = $this->{imageTree};
 	#==========================================
 	# PRE filesystem setup
 	#------------------------------------------
-	my $name = preImage ();
+	my $name = $this -> preImage ();
 	if (! defined $name) {
 		return undef;
 	}
 	#==========================================
 	# Create filesystem on extend
 	#------------------------------------------
-	if (! setupEXT2 ( $name,$imageTree,$journal )) {
+	if (! $this -> setupEXT2 ( $name,$imageTree,$journal )) {
 		return undef;
 	}
 	#==========================================
 	# POST filesystem setup
 	#------------------------------------------
-	if (! postImage ($name)) {
+	if (! $this -> postImage ($name)) {
 		return undef;
 	}
 	return $this;
@@ -150,7 +165,8 @@ sub createImageEXT3 {
 	# ...
 	# create journaled EXT3 image from source tree
 	# ---
-	createImageEXT2 ("journaled");
+	my $this = shift;
+	$this -> createImageEXT2 ("journaled");
 }
 
 #==========================================
@@ -164,20 +180,20 @@ sub createImageReiserFS {
 	#==========================================
 	# PRE filesystem setup
 	#------------------------------------------
-	my $name = preImage ();
+	my $name = $this -> preImage ();
 	if (! defined $name) {
 		return undef;
 	}
 	#==========================================
 	# Create filesystem on extend
 	#------------------------------------------
-	if (! setupReiser ( $name )) {
+	if (! $this -> setupReiser ( $name )) {
 		return undef;
 	}
 	#==========================================
 	# POST filesystem setup
 	#------------------------------------------
-	if (! postImage ($name)) {
+	if (! $this -> postImage ($name)) {
 		return undef;
 	}
 	return $this;
@@ -191,30 +207,32 @@ sub createImageSquashFS {
 	# create squashfs image from source tree
 	# ---
 	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $xml  = $this->{xml};
 	#==========================================
 	# PRE filesystem setup
 	#------------------------------------------
-	my $name = preImage ("haveExtend");
+	my $name = $this -> preImage ("haveExtend");
 	if (! defined $name) {
 		return undef;
 	}
 	#==========================================
 	# Create filesystem on extend
 	#------------------------------------------
-	if (! setupSquashFS ( $name )) {
+	if (! $this -> setupSquashFS ( $name )) {
 		return undef;
 	}
 	#==========================================
 	# Create image md5sum
 	#------------------------------------------
-	if (! buildMD5Sum ($name)) {
+	if (! $this -> buildMD5Sum ($name)) {
 		return undef;
 	}
 	#==========================================
 	# Compress image using gzip
 	#------------------------------------------
 	if ($xml->getCompressed()) {
-	if (! compressImage ($name)) {
+	if (! $this -> compressImage ($name)) {
 		return undef;
 	}
 	}
@@ -222,7 +240,7 @@ sub createImageSquashFS {
 	# Create image boot configuration
 	#------------------------------------------
 	$kiwi -> info ("Creating boot configuration...");
-	if (! writeImageConfig ($name)) {
+	if (! $this -> writeImageConfig ($name)) {
 		return undef;
 	}
 	return $this;
@@ -238,10 +256,13 @@ sub createImageCPIO {
 	# cpio archive
 	# ---
 	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $imageTree = $this->{imageTree};
+	my $imageDest = $this->{imageDest};
 	#==========================================
 	# PRE filesystem setup
 	#------------------------------------------
-	my $name = preImage ("haveExtend");
+	my $name = $this -> preImage ("haveExtend");
 	if (! defined $name) {
 		return undef;
 	}
@@ -262,7 +283,7 @@ sub createImageCPIO {
 	#==========================================
 	# POST filesystem setup
 	#------------------------------------------
-	if (! buildMD5Sum ($name.".gz")) {
+	if (! $this -> buildMD5Sum ($name.".gz")) {
 		return undef;
 	}
 	return $this;
@@ -293,6 +314,9 @@ sub createImageUSB {
 	my $this = shift;
 	my $para = shift;
 	my $text = shift;
+	my $kiwi = $this->{kiwi};
+	my $imageTree = $this->{imageTree};
+	my $baseSystem= $this->{baseSystem};
 	my $type;
 	my $boot;
 	my %result;
@@ -387,7 +411,7 @@ sub createImagePXE {
 	#------------------------------------------
 	my $this = shift;
 	my $para = shift;
-	my $name = createImageUSB ($this,$para,"PXE");
+	my $name = $this -> createImageUSB ($para,"PXE");
 	if (! defined $name) {
 		return undef;
 	}
@@ -416,7 +440,7 @@ sub createImageVMX {
 	#------------------------------------------
 	my $this = shift;
 	my $para = shift;
-	my $name = createImageUSB ($this,$para,"VMX");
+	my $name = $this -> createImageUSB ($para,"VMX");
 	if (! defined $name) {
 		return undef;
 	}
@@ -455,8 +479,9 @@ sub createImageXen {
 	#------------------------------------------
 	my $this = shift;
 	my $para = shift;
-	my %xenc = $xml -> getPackageAttributes ("xen");
-	my $name = createImageUSB ($this,$para,"Xen");
+	my $xml  = $this->{xml};
+	my %xenc = $xml  -> getPackageAttributes ("xen");
+	my $name = $this -> createImageUSB ($para,"Xen");
 	if (! defined $name) {
 		return undef;
 	}
@@ -465,7 +490,7 @@ sub createImageXen {
 	#==========================================
 	# Create image xenconfig
 	#------------------------------------------
-	if (! buildXenConfig ($main::Destination,$name,\%xenc)) {
+	if (! $this -> buildXenConfig ($main::Destination,$name,\%xenc)) {
 		$main::Survive = "default";
 		return undef;
 	}
@@ -493,9 +518,15 @@ sub createImageLiveCD {
 	# ---
 	my $this = shift;
 	my $para = shift;
+	my $kiwi = $this->{kiwi};
+	my $arch = $this->{arch};
+	my $imageTree = $this->{imageTree};
+	my $imageDest = $this->{imageDest};
+	my $baseSystem= $this->{baseSystem};
 	my $error;
 	my $data;
 	my $code;
+	my $imageTreeReadOnly;
 	#==========================================
 	# Get boot image name and compressed flag
 	#------------------------------------------
@@ -511,16 +542,16 @@ sub createImageLiveCD {
 	#==========================================
 	# Get image creation date and name
 	#------------------------------------------
-	my $namecd = buildImageName (";");
-	my $namerw = buildImageName ();
-	my $namero = buildImageName ("-","-read-only");
+	my $namecd = $this -> buildImageName (";");
+	my $namerw = $this -> buildImageName ();
+	my $namero = $this -> buildImageName ("-","-read-only");
 	if (! defined $namerw) {
 		return undef;
 	}
 	#==========================================
 	# Call images.sh script
 	#------------------------------------------
-	if (! setupLogicalExtend ("quiet")) {
+	if (! $this -> setupLogicalExtend ("quiet")) {
 		return undef;
 	}
 	#==========================================
@@ -530,6 +561,7 @@ sub createImageLiveCD {
 		$imageTreeReadOnly = $imageTree;
 		$imageTreeReadOnly =~ s/\/+$//;
 		$imageTreeReadOnly.= "-read-only/";
+		$this->{imageTreeReadOnly} = $imageTreeReadOnly;
 		if (! -d $imageTreeReadOnly) {
 			$kiwi -> info ("Creating read only image part");
 			if (! mkdir $imageTreeReadOnly) {
@@ -556,41 +588,41 @@ sub createImageLiveCD {
 		# Count disk space for RW extend
 		#------------------------------------------
 		$kiwi -> info ("Computing disk space...");
-		my ($mbytesreal,$mbytesrw,$xmlsize) = getSize ($imageTree);
+		my ($mbytesreal,$mbytesrw,$xmlsize) = $this -> getSize ($imageTree);
 		$kiwi -> done ();
 
 		#==========================================
 		# Create RW logical extend
 		#------------------------------------------
 		$kiwi -> info ("Image RW part requires $mbytesrw MB of disk space");
-		if (! buildLogicalExtend ($namerw,$mbytesrw."M")) {
-			restoreSplitExtend ();
+		if (! $this -> buildLogicalExtend ($namerw,$mbytesrw."M")) {
+			$this -> restoreSplitExtend ();
 			return undef;
 		}
 		$kiwi -> done ();
 		#==========================================
 		# Create EXT2 filesystem on RW extend
 		#------------------------------------------
-		if (! setupEXT2 ( $namerw,$imageTree )) {
-			restoreSplitExtend ();
+		if (! $this -> setupEXT2 ( $namerw,$imageTree )) {
+			$this -> restoreSplitExtend ();
 			return undef;
 		}
 		#==========================================
 		# mount logical extend for data transfer
 		#------------------------------------------
-		my $extend = mountLogicalExtend ($namerw);
+		my $extend = $this -> mountLogicalExtend ($namerw);
 		if (! defined $extend) {
-			restoreSplitExtend ();
+			$this -> restoreSplitExtend ();
 			return undef;
 		}
 		#==========================================
 		# copy physical to logical
 		#------------------------------------------
-		if (! installLogicalExtend ($extend,$imageTree)) {
-			restoreSplitExtend ();
+		if (! $this -> installLogicalExtend ($extend,$imageTree)) {
+			$this -> restoreSplitExtend ();
 			return undef;
 		}
-		cleanMount();
+		$this -> cleanMount();
 	}
 	#==========================================
 	# Create compressed filesystem on RO extend
@@ -601,8 +633,8 @@ sub createImageLiveCD {
 		if ($gzip eq "unified") {
 			$systemTree = $imageTree;
 		}
-		if (! setupSquashFS ( $namero,$systemTree )) {
-			restoreSplitExtend ();
+		if (! $this -> setupSquashFS ( $namero,$systemTree )) {
+			$this -> restoreSplitExtend ();
 			return undef;
 		}
 		$kiwi -> done();
@@ -619,14 +651,14 @@ sub createImageLiveCD {
 		#==========================================
 		# Create image md5sum
 		#------------------------------------------
-		if (! buildMD5Sum ($namerw)) {
-			restoreSplitExtend ();
+		if (! $this -> buildMD5Sum ($namerw)) {
+			$this -> restoreSplitExtend ();
 			return undef;
 		}
 		#==========================================
 		# Restoring physical extend
 		#------------------------------------------
-		if (! restoreSplitExtend ()) {
+		if (! $this -> restoreSplitExtend ()) {
 			return undef;
 		}
 	}
@@ -789,10 +821,14 @@ sub createImageLiveCD {
 sub createImageSplit {
 	my $this = shift;
 	my $type = shift;
+	my $kiwi = $this->{kiwi};
+	my $imageTree = $this->{imageTree};
+	my $imageDest = $this->{imageDest};
 	my $FSTypeRW;
 	my $FSTypeRO;
 	my $error;
 	my $ok;
+	my $imageTreeReadOnly;
 	#==========================================
 	# Get filesystem info for split image
 	#------------------------------------------
@@ -805,15 +841,15 @@ sub createImageSplit {
 	#==========================================
 	# Get image creation date and name
 	#------------------------------------------
-	my $namerw = buildImageName ();
-	my $namero = buildImageName ("-","-read-only");
+	my $namerw = $this -> buildImageName ();
+	my $namero = $this -> buildImageName ("-","-read-only");
 	if (! defined $namerw) {
 		return undef;
 	}
 	#==========================================
 	# Call images.sh script
 	#------------------------------------------
-	if (! setupLogicalExtend ("quiet")) {
+	if (! $this -> setupLogicalExtend ("quiet")) {
 		return undef;
 	}
 	#==========================================
@@ -822,6 +858,7 @@ sub createImageSplit {
 	$imageTreeReadOnly = $imageTree;
 	$imageTreeReadOnly =~ s/\/+$//;
 	$imageTreeReadOnly.= "-read-only/";
+	$this->{imageTreeReadOnly} = $imageTreeReadOnly;
 	if (! -d $imageTreeReadOnly) {
 		$kiwi -> info ("Creating read only image part");
 		if (! mkdir $imageTreeReadOnly) {
@@ -848,16 +885,16 @@ sub createImageSplit {
 	# Count disk space for extends
 	#------------------------------------------
 	$kiwi -> info ("Computing disk space...");
-	my ($mbytesreal,$mbytesrw,$xmlsize) = getSize ($imageTree);
-	my ($mbytesreal,$mbytesro,$xmlsize) = getSize ($imageTreeReadOnly);
+	my ($mbytesreal,$mbytesrw,$xmlsize) = $this -> getSize ($imageTree);
+	my ($mbytesreal,$mbytesro,$xmlsize) = $this -> getSize ($imageTreeReadOnly);
 	$kiwi -> done ();
 
 	#==========================================
 	# Create RW logical extend
 	#------------------------------------------
 	$kiwi -> info ("Image RW part requires $mbytesrw MB of disk space");
-	if (! buildLogicalExtend ($namerw,$mbytesrw."M")) {
-		restoreSplitExtend ();
+	if (! $this -> buildLogicalExtend ($namerw,$mbytesrw."M")) {
+		$this -> restoreSplitExtend ();
 		return undef;
 	}
 	$kiwi -> done();
@@ -866,32 +903,32 @@ sub createImageSplit {
 	#------------------------------------------
 	SWITCH: for ($FSTypeRW) {
 		/ext2/       && do {
-			$ok = setupEXT2 ( $namerw,$imageTree );
+			$ok = $this -> setupEXT2 ( $namerw,$imageTree );
 			last SWITCH;
 		};
 		/ext3/       && do {
-			$ok = setupEXT2 ( $namerw,$imageTree,"journaled" );
+			$ok = $this -> setupEXT2 ( $namerw,$imageTree,"journaled" );
 			last SWITCH;
 		};
 		/reiserfs/   && do {
-			$ok = setupReiser ( $namerw );
+			$ok = $this -> setupReiser ( $namerw );
 			last SWITCH;
 		};
 		$kiwi -> error  ("Unsupported type: $FSTypeRW");
 		$kiwi -> failed ();
-		restoreSplitExtend ();
+		$this -> restoreSplitExtend ();
 		return undef;
 	}
 	if (! $ok) {
-		restoreSplitExtend ();
+		$this -> restoreSplitExtend ();
 		return undef;
 	}
 	#==========================================
 	# Create RO logical extend
 	#------------------------------------------
 	$kiwi -> info ("Image RO part requires $mbytesro MB of disk space");
-	if (! buildLogicalExtend ($namero,$mbytesro."M")) {
-		restoreSplitExtend ();
+	if (! $this -> buildLogicalExtend ($namero,$mbytesro."M")) {
+		$this -> restoreSplitExtend ();
 		return undef;
 	}
 	$kiwi -> done();
@@ -900,32 +937,32 @@ sub createImageSplit {
 	#------------------------------------------
 	SWITCH: for ($FSTypeRO) {
 		/ext2/       && do {
-			$ok = setupEXT2 ( $namero,$imageTreeReadOnly );
+			$ok = $this -> setupEXT2 ( $namero,$imageTreeReadOnly );
 			last SWITCH;
 		};
 		/ext3/       && do {
-			$ok = setupEXT2 ( $namero,$imageTreeReadOnly,"journaled" );
+			$ok = $this -> setupEXT2 ( $namero,$imageTreeReadOnly,"journaled" );
 			last SWITCH;
 		};
 		/reiserfs/   && do {
-			$ok = setupReiser ( $namero );
+			$ok = $this -> setupReiser ( $namero );
 			last SWITCH;
 		};
 		/cramfs/     && do {
-			$ok = setupCramFS ( $namero,$imageTreeReadOnly );
+			$ok = $this -> setupCramFS ( $namero,$imageTreeReadOnly );
 			last SWITCH;
 		};
 		/squashfs/   && do {
-			$ok = setupSquashFS ( $namero,$imageTreeReadOnly );
+			$ok = $this -> setupSquashFS ( $namero,$imageTreeReadOnly );
 			last SWITCH;
 		};
 		$kiwi -> error  ("Unsupported type: $FSTypeRO");
 		$kiwi -> failed ();
-		restoreSplitExtend ();
+		$this -> restoreSplitExtend ();
 		return undef;
 	}
 	if (! $ok) {
-		restoreSplitExtend ();
+		$this -> restoreSplitExtend ();
 		return undef;
 	}
 	#==========================================
@@ -948,19 +985,19 @@ sub createImageSplit {
 			#==========================================
 			# mount logical extend for data transfer
 			#------------------------------------------
-			my $extend = mountLogicalExtend ($name);
+			my $extend = $this -> mountLogicalExtend ($name);
 			if (! defined $extend) {
-				restoreSplitExtend ();
+				$this -> restoreSplitExtend ();
 				return undef;
 			}
 			#==========================================
 			# copy physical to logical
 			#------------------------------------------
-			if (! installLogicalExtend ($extend,$source)) {
-				restoreSplitExtend ();
+			if (! $this -> installLogicalExtend ($extend,$source)) {
+				$this -> restoreSplitExtend ();
 				return undef;
 			}
-			cleanMount();
+			$this -> cleanMount();
 		}
 		#==========================================
 		# Checking file system
@@ -994,21 +1031,21 @@ sub createImageSplit {
 			};
 			$kiwi -> error  ("Unsupported type: $type");
 			$kiwi -> failed ();
-			restoreSplitExtend ();
+			$this -> restoreSplitExtend ();
 			return undef;
 		}
 		#==========================================
 		# Create image md5sum
 		#------------------------------------------
-		if (! buildMD5Sum ($name)) {
-			restoreSplitExtend ();
+		if (! $this -> buildMD5Sum ($name)) {
+			$this -> restoreSplitExtend ();
 			return undef;
 		}
 	}
 	#==========================================
 	# Restoring physical extend
 	#------------------------------------------
-	if (! restoreSplitExtend ()) {
+	if (! $this -> restoreSplitExtend ()) {
 		return undef;
 	}
 	return $this;
@@ -1078,31 +1115,32 @@ sub preImage {
 	# dependant tasks before the logical extend
 	# has been created
 	# ---
+	my $this = shift;
 	my $haveExtend = shift;
 	#==========================================
 	# Get image creation date and name
 	#------------------------------------------
-	my $name = buildImageName ();
+	my $name = $this -> buildImageName ();
 	if (! defined $name) {
 		return undef;
 	}
 	#==========================================
 	# extract kernel from physical extend
 	#------------------------------------------
-	if (! extractKernel ($name)) {
+	if (! $this -> extractKernel ($name)) {
 		return undef;
 	}
 	#==========================================
 	# Call images.sh script
 	#------------------------------------------
-	if (! setupLogicalExtend ()) {
+	if (! $this -> setupLogicalExtend ()) {
 		return undef;
 	}
 	#==========================================
 	# Create logical extend
 	#------------------------------------------
 	if (! defined $haveExtend) {
-	if (! buildLogicalExtend ($name)) {
+	if (! $this -> buildLogicalExtend ($name)) {
 		return undef;
 	}
 	}
@@ -1113,8 +1151,12 @@ sub preImage {
 # writeImageConfig
 #------------------------------------------
 sub writeImageConfig {
+	my $this = shift;
 	my $name = shift;
-	my $configName = buildImageName() . ".config";
+	my $kiwi = $this->{kiwi};
+	my $xml  = $this->{xml};
+	my $imageDest = $this->{imageDest};
+	my $configName = $this -> buildImageName() . ".config";
 	my $device = $xml -> getDeployImageDevice ();
 
 	#==========================================
@@ -1127,7 +1169,7 @@ sub writeImageConfig {
 			$kiwi -> failed ();
 			return undef;
 		}
-		my $namecd = buildImageName(";");
+		my $namecd = $this -> buildImageName(";");
 		my $server = $xml -> getDeployServer ();
 		my $blocks = $xml -> getDeployBlockSize ();
 
@@ -1212,7 +1254,7 @@ sub writeImageConfig {
 		$kiwi -> skipped ();
 	}
 	# Reset main::ImageName...
-	buildImageName();
+	$this -> buildImageName();
 	return $configName;
 }
 
@@ -1226,21 +1268,25 @@ sub postImage {
 	# dependant tasks after the logical extend has
 	# been created
 	# ---
+	my $this = shift;
 	my $name = shift;
+	my $kiwi = $this->{kiwi};
+	my $xml  = $this->{xml};
+	my $imageDest = $this->{imageDest};
 	#==========================================
 	# mount logical extend for data transfer
 	#------------------------------------------
-	my $extend = mountLogicalExtend ($name);
+	my $extend = $this -> mountLogicalExtend ($name);
 	if (! defined $extend) {
 		return undef;
 	}
 	#==========================================
 	# copy physical to logical
 	#------------------------------------------
-	if (! installLogicalExtend ($extend)) {
+	if (! $this -> installLogicalExtend ($extend)) {
 		return undef;
 	}
-	cleanMount();
+	$this -> cleanMount();
 
 	#==========================================
 	# Check image file system
@@ -1285,14 +1331,14 @@ sub postImage {
 	#==========================================
 	# Create image md5sum
 	#------------------------------------------
-	if (! buildMD5Sum ($name)) {
+	if (! $this -> buildMD5Sum ($name)) {
 		return undef;
 	}
 	#==========================================
 	# Compress image using gzip
 	#------------------------------------------
 	if ($xml->getCompressed()) {
-	if (! compressImage ($name)) {
+	if (! $this -> compressImage ($name)) {
 		return undef;
 	}
 	}
@@ -1300,7 +1346,7 @@ sub postImage {
 	# Create image boot configuration
 	#------------------------------------------
 	$kiwi -> info ("Creating boot configuration...");
-	if (! writeImageConfig ($name)) {
+	if (! $this -> writeImageConfig ($name)) {
 		return undef;
 	}
 	return $name;
@@ -1310,6 +1356,9 @@ sub postImage {
 # buildImageName
 #------------------------------------------
 sub buildImageName {
+	my $this = shift;
+	my $xml  = $this->{xml};
+	my $arch = $this->{arch};
 	my $separator = shift;
 	my $extension = shift;
 	if (! defined $separator) {
@@ -1331,8 +1380,12 @@ sub buildImageName {
 # buildLogicalExtend
 #------------------------------------------
 sub buildLogicalExtend {
+	my $this = shift;
 	my $name = shift;
 	my $size = shift;
+	my $kiwi = $this->{kiwi};
+	my $xml  = $this->{xml};
+	my $imageDest = $this->{imageDest};
 	#==========================================
 	# Calculate block size and number of blocks
 	#------------------------------------------
@@ -1361,8 +1414,11 @@ sub buildLogicalExtend {
 # installLogicalExtend
 #------------------------------------------
 sub installLogicalExtend {
+	my $this   = shift;
 	my $extend = shift;
 	my $source = shift;
+	my $kiwi   = $this->{kiwi};
+	my $imageTree = $this->{imageTree};
 	if (! defined $source) {
 		$source = $imageTree;
 	}
@@ -1377,7 +1433,7 @@ sub installLogicalExtend {
 		$kiwi -> failed ();
 		$kiwi -> info   ("No space left on device: $!");
 		$kiwi -> failed ();
-		cleanMount();
+		$this -> cleanMount();
 		return undef;
 	}
 	$kiwi -> done();
@@ -1388,7 +1444,11 @@ sub installLogicalExtend {
 # setupLogicalExtend
 #------------------------------------------
 sub setupLogicalExtend {
+	my $this  = shift;
 	my $quiet = shift;
+	my $kiwi  = $this->{kiwi};
+	my $imageTree = $this->{imageTree};
+	my $imageStrip= $this->{imageStrip};
 	#==========================================
 	# Call depmod
 	#------------------------------------------
@@ -1404,7 +1464,7 @@ sub setupLogicalExtend {
 			} else {
 				$kiwi -> failed ();
 				$kiwi -> info ("Could not determine kernel version");
-				cleanMount ();
+				$this -> cleanMount ();
 				return undef;
 			}
 			my $call = "$depmod -F $systemMap $kernelVersion";
@@ -1413,7 +1473,7 @@ sub setupLogicalExtend {
 			if ($code != 0) {
 				$kiwi -> failed ();
 				$kiwi -> info ($data);
-				cleanMount();
+				$this -> cleanMount();
 				return undef;
 			}
 		}
@@ -1429,7 +1489,7 @@ sub setupLogicalExtend {
 		if ($code != 0) {
 			$kiwi -> failed ();
 			$kiwi -> info   ($data);
-			cleanMount();
+			$this -> cleanMount();
 			return undef;
 		} else {
 			$kiwi -> loginfo ("images.sh: $data");
@@ -1446,7 +1506,7 @@ sub setupLogicalExtend {
 	#==========================================
 	# Calculate needed space
 	#------------------------------------------
-	my ($mbytesreal,$mbytes,$xmlsize) = getSize ($imageTree);
+	my ($mbytesreal,$mbytes,$xmlsize) = $this -> getSize ($imageTree);
 	if (! defined $quiet) {
 		$kiwi -> info ("Image requires $mbytesreal MB, got $xmlsize MB");
 		$kiwi -> done ();
@@ -1460,8 +1520,11 @@ sub setupLogicalExtend {
 # mountLogicalExtend
 #------------------------------------------
 sub mountLogicalExtend {
+	my $this = shift;
 	my $name = shift;
 	my $opts = shift;
+	my $kiwi = $this->{kiwi};
+	my $imageDest = $this->{imageDest};
 	#==========================================
 	# mount logical extend for data transfer
 	#------------------------------------------
@@ -1481,7 +1544,12 @@ sub mountLogicalExtend {
 # extractKernel
 #------------------------------------------
 sub extractKernel {
+	my $this = shift;
 	my $name = shift;
+	my $kiwi = $this->{kiwi};
+	my $xml  = $this->{xml}; 
+	my $imageTree = $this->{imageTree};
+	my $imageDest = $this->{imageDest};
 	#==========================================
 	# extract kernel from physical extend
 	#------------------------------------------
@@ -1557,9 +1625,13 @@ sub extractKernel {
 # setupEXT2
 #------------------------------------------
 sub setupEXT2 {
+	my $this    = shift;
 	my $name    = shift;
 	my $tree    = shift;
 	my $journal = shift;
+	my $kiwi    = $this->{kiwi};
+	my $imageTree = $this->{imageTree};
+	my $imageDest = $this->{imageDest};
 	if (! defined $tree) {
 		$tree = $imageTree;
 	}
@@ -1586,7 +1658,10 @@ sub setupEXT2 {
 # setupReiser
 #------------------------------------------
 sub setupReiser {
+	my $this = shift;
 	my $name = shift;
+	my $kiwi = $this->{kiwi};
+	my $imageDest = $this->{imageDest};
 	my $data = qx (/sbin/mkreiserfs -q -f -b 4096 $imageDest/$name 2>&1);
 	my $code = $? >> 8;
 	if ($code != 0) {
@@ -1602,8 +1677,12 @@ sub setupReiser {
 # setupCramFS
 #------------------------------------------
 sub setupCramFS {
+	my $this = shift;
 	my $name = shift;
 	my $tree = shift;
+	my $kiwi = $this->{kiwi};
+	my $imageTree = $this->{imageTree};
+	my $imageDest = $this->{imageDest};
 	if (! defined $tree) {
 		$tree = $imageTree;
 	}
@@ -1622,8 +1701,12 @@ sub setupCramFS {
 # setupSquashFS
 #------------------------------------------
 sub setupSquashFS {
+	my $this = shift;
 	my $name = shift;
 	my $tree = shift;
+	my $kiwi = $this->{kiwi};
+	my $imageTree = $this->{imageTree};
+	my $imageDest = $this->{imageDest};
 	if (! defined $tree) {
 		$tree = $imageTree;
 	}
@@ -1645,9 +1728,11 @@ sub setupSquashFS {
 # buildXenConfig
 #------------------------------------------
 sub buildXenConfig {
+	my $this   = shift;
 	my $dest   = shift;
 	my $name   = shift;
 	my $xenref = shift;
+	my $kiwi   = $this->{kiwi};
 	my $file   = $dest."/".$name->{systemImage}.".xenconfig";
 	my $initrd = $dest."/".$name->{bootImage}.".gz";
 	my $kernel = $dest."/".$name->{bootImage}.".kernel";
@@ -1683,7 +1768,10 @@ sub buildXenConfig {
 # buildMD5Sum
 #------------------------------------------
 sub buildMD5Sum {
+	my $this = shift;
 	my $name = shift;
+	my $kiwi = $this->{kiwi};
+	my $imageDest = $this->{imageDest};
 	#==========================================
 	# Create image md5sum
 	#------------------------------------------
@@ -1710,6 +1798,10 @@ sub buildMD5Sum {
 # restoreSplitExtend
 #------------------------------------------
 sub restoreSplitExtend {
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $imageTreeReadOnly = $this->{imageTreeReadOnly};
+	my $imageTree = $this->{imageTree};
 	if ((! defined $imageTreeReadOnly) || ( ! -d $imageTreeReadOnly)) {
 		return $imageTreeReadOnly;
 	}
@@ -1734,7 +1826,10 @@ sub restoreSplitExtend {
 # compressImage
 #------------------------------------------
 sub compressImage {
+	my $this = shift;
 	my $name = shift;
+	my $kiwi = $this->{kiwi};
+	my $imageDest = $this->{imageDest};
 	#==========================================
 	# Compress image using gzip
 	#------------------------------------------
@@ -1759,6 +1854,8 @@ sub getSize {
 	# calculate size of the logical extend. The
 	# method returns the size value in MegaByte
 	# ---
+	my $this   = shift;
+	my $xml    = $this->{xml};
 	my $extend = shift;
 	my $size = qx ( du -ks $extend );
 	$size =~ /(\d+)\s.*/;
@@ -1782,6 +1879,8 @@ sub getSize {
 # cleanMount
 #------------------------------------------
 sub cleanMount {
+	my $this = shift;
+	my $imageDest = $this->{imageDest};
 	qx (umount $imageDest/mnt-$$ 2>&1);
 	rmdir "$imageDest/mnt-$$";
 }

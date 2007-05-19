@@ -24,28 +24,6 @@ use KIWIPattern;
 use KIWIManager qw (%packageManager);
 
 #==========================================
-# Private
-#------------------------------------------
-my $kiwi;
-my $imageDesc;
-my $imageWhat;
-my $optionsNodeList;
-my $driversNodeList;
-my $usrdataNodeList;
-my $repositNodeList;
-my $packageNodeList;
-my $imgnameNodeList;
-my $deploysNodeList;
-my $instsrcNodeList;
-my $partitionsNodeList;
-my $configfileNodeList;
-my $schemeNodeList;
-my $unionNodeList;
-my $schemeVers;
-my @urllist;
-my $arch;
-
-#==========================================
 # Constructor
 #------------------------------------------
 sub new { 
@@ -57,24 +35,29 @@ sub new {
 	# type there will be a node list created for each of the
 	# major tags.
 	# ---
+	#==========================================
+	# Object setup
+	#------------------------------------------
 	my $this  = {};
 	my $class = shift;
 	bless $this,$class;
-	$kiwi = shift;
-	$imageDesc = shift;
-	my $otherRepo = shift;
-	$imageWhat = shift;
-	my %foreignRepo;
-	if (defined $otherRepo) {
-		 %foreignRepo = %{$otherRepo};
-	}
+	#==========================================
+	# Module Parameters
+	#------------------------------------------
+	my $kiwi        = shift;
+	my $imageDesc   = shift;
+	my $foreignRepo = shift;
+	my $imageWhat   = shift;
+	#==========================================
+	# Constructor setup
+	#------------------------------------------
 	if (! defined $kiwi) {
 		$kiwi = new KIWILog();
 	}
 	if ($imageDesc !~ /\//) {
 		$imageDesc = $main::System."/".$imageDesc;
 	}
-	$arch = qx ( arch ); chomp $arch;
+	my $arch = qx ( arch ); chomp $arch;
 	my $systemTree;
 	my $schemeTree;
 	my $controlFile = $imageDesc."/config.xml";
@@ -87,6 +70,7 @@ sub new {
 		$kiwi -> failed ();
 		return undef;
 	}
+	my $schemeNodeList;
 	eval {
 		$schemeTree = $schemeXML
 			-> parse_file ( $main::Scheme );
@@ -99,6 +83,17 @@ sub new {
 		$kiwi -> error  ("$@\n");
 		return undef;
 	}
+	my $optionsNodeList;
+	my $driversNodeList;
+	my $usrdataNodeList;
+	my $repositNodeList;
+	my $packageNodeList;
+	my $imgnameNodeList;
+	my $deploysNodeList;
+	my $instsrcNodeList;
+	my $partitionsNodeList;
+	my $configfileNodeList;
+	my $unionNodeList;
 	eval {
 		$systemTree = $systemXML
 			-> parse_file ( $controlFile );
@@ -149,18 +144,9 @@ sub new {
 		return undef;
 	}
 	#==========================================
-	# Check type information from xml input
-	#------------------------------------------
-	if (! $this -> getImageTypeAndAttributes()) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Boot type: $imageWhat not specified in config.xml");
-		$kiwi -> failed ();
-		return undef;
-	}
-	#==========================================
 	# setup foreign repository sections
 	#------------------------------------------
-	if ( defined $foreignRepo{xmlnode} ) {
+	if ( defined $foreignRepo->{xmlnode} ) {
 		$kiwi -> done ();
 		$kiwi -> info ("Including foreign repository node(s)");
 		my $need = new XML::LibXML::NodeList();
@@ -171,13 +157,45 @@ sub new {
 				$need -> push ($element);
 			}
 		}
-		$repositNodeList = $foreignRepo{xmlnode};
+		$repositNodeList = $foreignRepo->{xmlnode};
 		$repositNodeList -> prepend ($need);
 	}
 	#==========================================
-	# Create URL list from all locations
+	# Store object data
 	#------------------------------------------
-	$this -> createURLList (\%foreignRepo);
+	$this->{kiwi}               = $kiwi;
+	$this->{imageDesc}          = $imageDesc;
+	$this->{imageWhat}          = $imageWhat;
+	$this->{foreignRepo}        = $foreignRepo;
+	$this->{optionsNodeList}    = $optionsNodeList;
+	$this->{driversNodeList}    = $driversNodeList;
+	$this->{usrdataNodeList}    = $usrdataNodeList;
+	$this->{repositNodeList}    = $repositNodeList;
+	$this->{packageNodeList}    = $packageNodeList;
+	$this->{imgnameNodeList}    = $imgnameNodeList;
+	$this->{deploysNodeList}    = $deploysNodeList;
+	$this->{instsrcNodeList}    = $instsrcNodeList;
+	$this->{partitionsNodeList} = $partitionsNodeList;
+	$this->{configfileNodeList} = $configfileNodeList;
+	$this->{schemeNodeList}     = $schemeNodeList;
+	$this->{unionNodeList}      = $unionNodeList;
+	$this->{schemeVers}         = $schemeVers;
+	$this->{arch}               = $arch;
+
+	#==========================================
+	# Store object data (create URL list)
+	#------------------------------------------
+	$this -> createURLList ();
+
+	#==========================================
+	# Check type information from xml input
+	#------------------------------------------
+	if (! $this -> getImageTypeAndAttributes()) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Boot type: $imageWhat not specified in config.xml");
+		$kiwi -> failed ();
+		return undef;
+	}
 	return $this;
 }
 
@@ -186,19 +204,16 @@ sub new {
 #------------------------------------------
 sub createURLList {
 	my $this = shift;
-	my $otherRepo = shift;
-	my %foreignRepo;
-	if (defined $otherRepo) {
-		%foreignRepo = %{$otherRepo};
-	}
-	my %repository = getRepository ($this);
-	@urllist = ();
+	my $kiwi = $this->{kiwi};
+	my $foreignRepo = $this->{foreignRepo};
+	my %repository  = $this->getRepository();
+	my @urllist     = ();
 	foreach my $source (keys %repository) {
 		my $urlHandler;
-		if ( defined $foreignRepo{prepare} ) {
-			$urlHandler = new KIWIURL ($kiwi,$foreignRepo{prepare});
+		if ( defined $foreignRepo->{prepare} ) {
+			$urlHandler = new KIWIURL ($kiwi,$foreignRepo->{prepare});
 		} else {
-			$urlHandler = new KIWIURL ($kiwi,$imageDesc);
+			$urlHandler = new KIWIURL ($kiwi,$this->{imageDesc});
 		}
 		my $publics_url = $source;
 		my $highlvl_url = $urlHandler -> openSUSEpath ($publics_url);
@@ -211,6 +226,7 @@ sub createURLList {
 		}
 		push (@urllist,$publics_url);
 	}
+	$this->{urllist} = \@urllist;
 	return $this;
 }
 
@@ -222,7 +238,7 @@ sub getImageName {
 	# Get the name of the logical extend
 	# ---
 	my $this = shift;
-	my $node = $imgnameNodeList -> get_node(1);
+	my $node = $this->{imgnameNodeList} -> get_node(1);
 	my $name = $node -> getAttribute ("name");
 	return $name;
 }
@@ -232,7 +248,7 @@ sub getImageName {
 #------------------------------------------
 sub getImageInherit {
 	my $this = shift;
-	my $node = $imgnameNodeList -> get_node(1);
+	my $node = $this->{imgnameNodeList} -> get_node(1);
 	my $path = $node -> getAttribute ("inherit");
 	return $path;
 }
@@ -245,7 +261,7 @@ sub getImageSize {
 	# Get the predefined size of the logical extend
 	# ---
 	my $this = shift;
-	my $node = $optionsNodeList -> get_node(1);
+	my $node = $this->{optionsNodeList} -> get_node(1);
 	my $size = $node -> getElementsByTagName ("size");
 	my $unit = $node -> getElementsByTagName ("size")
 		-> get_node(1) -> getAttribute("unit");
@@ -264,7 +280,7 @@ sub getImageTypeAndAttributes {
 	my %result = ();
 	my $count  = 0;
 	my $first  = "";
-	my @node   = $optionsNodeList -> get_node(1)
+	my @node   = $this->{optionsNodeList} -> get_node(1)
 		-> getElementsByTagName ("type");
 	foreach my $node (@node) {
 		my %record = ();
@@ -284,14 +300,14 @@ sub getImageTypeAndAttributes {
 		$result{$prim} = \%record;
 		$count++;
 	}
-	if (! defined $imageWhat) {
+	if (! defined $this->{imageWhat}) {
 		if (defined $result{primary}) {
 			return $result{primary};
 		} else {
 			return $result{$first};
 		}
 	}
-	return $result{$imageWhat};
+	return $result{$this->{imageWhat}};
 }
 
 #==========================================
@@ -302,7 +318,7 @@ sub getImageVersion {
 	# Get the version of the logical extend
 	# ---
 	my $this = shift;
-	my $node = $optionsNodeList -> get_node(1);
+	my $node = $this->{optionsNodeList} -> get_node(1);
 	my $version = $node -> getElementsByTagName ("version");
 	return $version;
 }
@@ -315,14 +331,13 @@ sub getDeployUnionConfig {
 	# Get the union file system configuration, if any
 	# ---
 	my $this = shift;
-	my $node = $unionNodeList -> get_node(1);
+	my $node = $this->{unionNodeList} -> get_node(1);
 	if (!defined $node) {
 		return undef;
 	}
-
 	my %config = ();
-	$config{ro} = $node -> getAttribute ("ro");
-	$config{rw} = $node -> getAttribute ("rw");
+	$config{ro}   = $node -> getAttribute ("ro");
+	$config{rw}   = $node -> getAttribute ("rw");
 	$config{type} = $node -> getAttribute ("type");
 
 	return %config;
@@ -336,7 +351,7 @@ sub getDeployImageDevice {
 	# Get the device the image will be installed to
 	# ---
 	my $this = shift;
-	my $node = $partitionsNodeList -> get_node(1);
+	my $node = $this->{partitionsNodeList} -> get_node(1);
 	if (defined $node) {
 		return $node -> getAttribute ("device");
 	} else {
@@ -352,7 +367,7 @@ sub getDeployServer {
 	# Get the server the config data is obtained from
 	# ---
 	my $this = shift;
-	my $node = $deploysNodeList -> get_node(1);
+	my $node = $this->{deploysNodeList} -> get_node(1);
 	if (defined $node) {
 		return $node -> getAttribute ("server");
 	} else {
@@ -368,7 +383,7 @@ sub getDeployBlockSize {
 	# Get the block size the deploy server should use
 	# ---
 	my $this = shift;
-	my $node = $deploysNodeList -> get_node(1);
+	my $node = $this->{deploysNodeList} -> get_node(1);
 	if (defined $node) {
 		return $node -> getAttribute ("blocksize");
 	} else {
@@ -384,7 +399,7 @@ sub getDeployPartitions {
 	# Get the partition configuration for this image
 	# ---
 	my $this = shift;
-	my $partitionNodes = $partitionsNodeList -> get_node(1)
+	my $partitionNodes = $this->{partitionsNodeList} -> get_node(1)
 		-> getElementsByTagName ("partition");
 	my @result = ();
 	for (my $i=1;$i<= $partitionNodes->size();$i++) {
@@ -429,7 +444,7 @@ sub getDeployConfiguration {
 	# Get the configuration file information for this image
 	# ---
 	my $this = shift;
-	my @node = $configfileNodeList -> get_nodelist();
+	my @node = $this->{configfileNodeList} -> get_nodelist();
 	my %result;
 	foreach my $element (@node) {
 		my $source = $element -> getAttribute("source");
@@ -449,13 +464,14 @@ sub getCompressed {
 	# otherwise false. 
 	# ---
 	my $this = shift;
-	my %type = %{getImageTypeAndAttributes()};
+	my $kiwi = $this->{kiwi};
+	my %type = %{$this->getImageTypeAndAttributes()};
 	if ("$type{type}" eq "vmx") {
 		$kiwi -> info ("Virtual machine type: ignoring compressed flag");
 		$kiwi -> done ();
 		return 0;
 	}
-	my $node = $optionsNodeList -> get_node(1);
+	my $node = $this->{optionsNodeList} -> get_node(1);
 	my $gzip = $node -> getElementsByTagName ("compressed");
 	if ((defined $gzip) && ("$gzip" eq "yes")) {
 		return 1;
@@ -473,7 +489,8 @@ sub getPackageManager {
 	# manager name
 	# ---
 	my $this = shift;
-	my $node = $optionsNodeList -> get_node(1);
+	my $kiwi = $this->{kiwi};
+	my $node = $this->{optionsNodeList} -> get_node(1);
 	my $pmgr = $node -> getElementsByTagName ("packagemanager");
 	if (! $pmgr) {
 		return $packageManager{default};
@@ -505,7 +522,7 @@ sub getRPMCheckSignatures {
 	# RPM signatures or not
 	# ---
 	my $this = shift;
-	my $node = $optionsNodeList -> get_node(1);
+	my $node = $this->{optionsNodeList} -> get_node(1);
 	my $sigs = $node -> getElementsByTagName ("rpm-check-signatures");
 	if ((! defined $sigs) || ("$sigs" eq "")) {
 		return undef;
@@ -522,7 +539,7 @@ sub getRPMForce {
 	# installing packages
 	# ---
 	my $this = shift;
-	my $node = $optionsNodeList -> get_node(1);
+	my $node = $this->{optionsNodeList} -> get_node(1);
 	my $frpm = $node -> getElementsByTagName ("rpm-force");
 	if ((! defined $frpm) || ("$frpm" eq "")) {
 		return undef;
@@ -539,8 +556,9 @@ sub getUsers {
 	# the user specification contains an optional password
 	# and group. If the group doesn't exist it will be created
 	# ---
+	my $this   = shift;
 	my %result = ();
-	my @node = $usrdataNodeList -> get_nodelist();
+	my @node   = $this->{usrdataNodeList} -> get_nodelist();
 	foreach my $element (@node) {
 		my $group = $element -> getAttribute("group");
 		my @ntag  = $element -> getElementsByTagName ("user") -> get_nodelist();
@@ -569,7 +587,7 @@ sub getMetaRepository {
 	# ---
 	my $this = shift;
 	my %result;
-	my $base = $instsrcNodeList -> get_node(1);
+	my $base = $this->{instsrcNodeList} -> get_node(1);
 	if (! defined $base) {
 		return %result;
 	}
@@ -577,7 +595,7 @@ sub getMetaRepository {
 	foreach my $element (@node) {
 		my $type = $element -> getAttribute("type");
 		my $stag = $element -> getElementsByTagName ("source") -> get_node(1);
-		my $source = resolveLink ( $stag -> getAttribute ("path") );
+		my $source = $this -> resolveLink ( $stag -> getAttribute ("path") );
 		$result{$source} = $type;
 	}
 	return %result;
@@ -593,12 +611,12 @@ sub getRepository {
 	# types refer to the package manager documentation
 	# ---
 	my $this = shift;
-	my @node = $repositNodeList -> get_nodelist();
+	my @node = $this->{repositNodeList} -> get_nodelist();
 	my %result;
 	foreach my $element (@node) {
 		my $type = $element -> getAttribute("type");
 		my $stag = $element -> getElementsByTagName ("source") -> get_node(1);
-		my $source = resolveLink ( $stag -> getAttribute ("path") );
+		my $source = $this -> resolveLink ( $stag -> getAttribute ("path") );
 		$result{$source} = $type;
 	}
 	return %result;
@@ -615,7 +633,7 @@ sub setRepository {
 	my $this = shift;
 	my $type = shift;
 	my $path = shift;
-	my $element = $repositNodeList -> get_node(1);
+	my $element = $this->{repositNodeList} -> get_node(1);
 	if (defined $type) {
 		$element -> setAttribute ("type",$type);
 	}
@@ -644,7 +662,7 @@ sub addRepository {
 	my $path = shift;
 	my $tempXML  = new XML::LibXML;
 	my $xaddXML  = new XML::LibXML::NodeList;
-	my $tempFile = $imageDesc."/config.xml";
+	my $tempFile = $this->{imageDesc}."/config.xml";
 	my $tempTree = $tempXML -> parse_file ( $tempFile );
 	my $temprepositNodeList = $tempTree -> getElementsByTagName ("repository");
 	my $element = $temprepositNodeList  -> get_node(1);
@@ -653,7 +671,7 @@ sub addRepository {
 	$element -> getElementsByTagName ("source") -> get_node (1)
 		 -> setAttribute ("path",$path);
 	$xaddXML -> push ( $element );
-	$repositNodeList -> append ( $xaddXML );
+	$this->{repositNodeList} -> append ( $xaddXML );
 	return $xaddXML;
 }
 
@@ -674,7 +692,7 @@ sub getImageConfig {
 	if (getCompressed ($this)) {
 		$result{compressed} = "yes";
 	}
-	my %type = %{getImageTypeAndAttributes()};
+	my %type = %{$this->getImageTypeAndAttributes()};
 	my $iver = getImageVersion ($this);
 	my $size = getImageSize    ($this);
 	my $name = getImageName    ($this);
@@ -693,7 +711,7 @@ sub getImageConfig {
 	#==========================================
 	# drivers
 	#------------------------------------------
-	my @node = $driversNodeList -> get_nodelist();
+	my @node = $this->{driversNodeList} -> get_nodelist();
 	foreach my $element (@node) {
 		my $type = $element -> getAttribute("type");
 		my @ntag = $element -> getElementsByTagName ("file") -> get_nodelist();
@@ -718,9 +736,10 @@ sub getPackageAttributes {
 	# ---
 	my $this = shift;
 	my $what = shift;
+	my $kiwi = $this->{kiwi};
 	my %result;
-	for (my $i=1;$i<= $packageNodeList->size();$i++) {
-		my $node = $packageNodeList -> get_node($i);
+	for (my $i=1;$i<= $this->{packageNodeList}->size();$i++) {
+		my $node = $this->{packageNodeList} -> get_node($i);
 		my $type = $node -> getAttribute ("type");
 		if ($type ne $what) {
 			next;
@@ -758,15 +777,16 @@ sub getList {
 	# ---
 	my $this = shift;
 	my $what = shift;
+	my $kiwi = $this->{kiwi};
 	my %pattr;
 	my $nodes;
 	if ($what ne "meta") {
 		%pattr= getPackageAttributes ($this,$what);
 	}
 	if ($what ne "meta") {
-		$nodes = $packageNodeList;
+		$nodes = $this->{packageNodeList};
 	} else {
-		$nodes = $instsrcNodeList;
+		$nodes = $this->{instsrcNodeList};
 	}
 	my @result;
 	for (my $i=1;$i<= $nodes->size();$i++) {
@@ -792,7 +812,7 @@ sub getList {
 				my @archlst = split (/,/,$forarch);
 				my $foundit = 0;
 				foreach my $archok (@archlst) {
-					if ($archok eq $arch) {
+					if ($archok eq $this->{arch}) {
 						$foundit = 1; last;
 					}
 				}
@@ -823,7 +843,7 @@ sub getList {
 			}
 			if (@pattlist) {
 				my $psolve = new KIWIPattern (
-					$kiwi,\@pattlist,\@urllist,$pattr{patternType}
+					$kiwi,\@pattlist,$this->{urllist},$pattr{patternType}
 				);
 				if (! defined $psolve) {
 					return ();
@@ -928,7 +948,8 @@ sub getForeignNodeList {
 	# Return the current <repository> list which consists
 	# of XML::LibXML::Element object pointers
 	# ---
-	return $repositNodeList;
+	my $this = shift;
+	return $this->{repositNodeList};
 }
 
 #==========================================
@@ -942,6 +963,7 @@ sub setupImageInheritance {
 	# <packages> nodes are used from the base description
 	# ---
 	my $this = shift;
+	my $kiwi = $this->{kiwi};
 	my $path = $this -> getImageInherit();
 	if (! defined $path) {
 		return $this;
@@ -953,19 +975,20 @@ sub setupImageInheritance {
 	}
 	my $name = $ixml -> getImageName();
 	$kiwi -> note ("[$name]");
-	$packageNodeList -> prepend (
+	$this->{packageNodeList} -> prepend (
 		$ixml -> getPackageNodeList()
 	);
 	$kiwi -> done();
 	$ixml -> setupImageInheritance();
-#	return $this;    
+	#return $this;
 }
 
 #==========================================
 # resolveLink
 #------------------------------------------
 sub resolveLink {
-	my $data  = resolveArchitectur ($_[0]);
+	my $this = shift;
+	my $data = $this -> resolveArchitectur ($_[0]);
 	my $cdir = qx (pwd); chomp $cdir;
 	if (chdir $data) {
 		my $pdir = qx (pwd); chomp $pdir;
@@ -979,11 +1002,12 @@ sub resolveLink {
 # resolveArchitectur
 #------------------------------------------
 sub resolveArchitectur {
+	my $this = shift;
 	my $path = shift;
-	if ($arch =~ /i.86/) {
-		$arch = "i386";
+	if ($this->{arch} =~ /i.86/) {
+		$this->{arch} = "i386";
 	}
-	$path =~ s/\%arch/$arch/;
+	$path =~ s/\%arch/$this->{arch}/;
 	return $path;
 }
 
@@ -991,7 +1015,8 @@ sub resolveArchitectur {
 # getPackageNodeList
 #------------------------------------------
 sub getPackageNodeList {
-	return $packageNodeList;
+	my $this = shift;
+	return $this->{packageNodeList};
 }
 
 1;

@@ -21,14 +21,6 @@ use strict;
 use KIWILog;
 
 #==========================================
-# Private
-#------------------------------------------
-my $kiwi;
-my $imageDesc;
-my $xml;
-my $root;
-
-#==========================================
 # Constructor
 #------------------------------------------
 sub new { 
@@ -37,13 +29,22 @@ sub new {
 	# different image configuration functions. Configurations are
 	# done within the pyhsical extend
 	# ---
+	#==========================================
+	# Object setup
+	#------------------------------------------
 	my $this  = {};
 	my $class = shift;
 	bless $this,$class;
-	$kiwi = shift;
-	$xml  = shift; 
-	$root = shift;
-	$imageDesc = shift;
+	#==========================================
+	# Module Parameters
+	#------------------------------------------
+	my $kiwi = shift;
+	my $xml  = shift; 
+	my $root = shift;
+	my $imageDesc = shift;
+	#==========================================
+	# Constructor setup
+	#------------------------------------------
 	if (! defined $kiwi) {
 		$kiwi = new KIWILog();
 	}
@@ -62,6 +63,13 @@ sub new {
 		$kiwi -> failed (); 
 		return undef;
 	}
+	#==========================================
+	# Store object data
+	#------------------------------------------
+	$this->{kiwi}      = $kiwi;
+	$this->{imageDesc} = $imageDesc;
+	$this->{xml}       = $xml;
+	$this->{root}      = $root;
 	return $this;
 }
 
@@ -69,7 +77,10 @@ sub new {
 # setupUsersGroups
 #------------------------------------------
 sub setupUsersGroups {
-	my $this = shift;
+	my $this  = shift;
+	my $kiwi  = $this->{kiwi};
+	my $xml   = $this->{xml};
+	my $root  = $this->{root};
 	my %users = $xml -> getUsers();
 	if (defined %users) {
 		my $adduser  = "/usr/sbin/useradd";
@@ -131,6 +142,9 @@ sub setupUsersGroups {
 #------------------------------------------
 sub setupAutoYaST {
 	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $root = $this->{root};
+	my $imageDesc = $this->{imageDesc};
 	if (-f "$imageDesc/config-yast.xml") {
 		$kiwi -> info ("Setting up AutoYaST...");
 		my $autodir = "var/lib/autoinstall/autoconf";
@@ -167,6 +181,8 @@ sub setupAutoYaST {
 #------------------------------------------
 sub setupInPlaceSVNRepository {
 	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $root = $this->{root};
 	if (-f "$root/usr/bin/svn") {
 		$kiwi -> info ("Creating in-place SVN repository...");
 		#==========================================

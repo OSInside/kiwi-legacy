@@ -23,30 +23,33 @@ use strict;
 use KIWILog;
 
 #==========================================
-# Private
-#------------------------------------------
-my $kiwi;    # log handler
-my $initrd;  # initrd file name
-my $system;  # sytem image file name
-my $kernel;  # kernel for initrd
-my $tmpdir;  # temporary directory
-my $result;  # result of external calls
-my $status;  # output of last command
-my $vmsize;  # size of virtual disk
-my $usbzip;  # is the USB image compressed
-
-#==========================================
 # Constructor
 #------------------------------------------
 sub new {
+	# ...
+	# Create a new KIWIBoot object which is used to create bootable
+	# media images like CD/DVD's , USB sticks or Virtual disks 
+	# ---
+	#==========================================
+	# Object setup
+	#------------------------------------------
 	my $this  = {};
 	my $class = shift;
 	bless $this,$class;
-	$kiwi   = shift;
-	$initrd = shift;
-	$system = shift;
-	$vmsize = shift;
-	$usbzip = 0;
+	#==========================================
+	# Module Parameters
+	#------------------------------------------
+	my $kiwi   = shift;
+	my $initrd = shift;
+	my $system = shift;
+	my $vmsize = shift;
+	#==========================================
+	# Constructor setup
+	#------------------------------------------
+	my $usbzip = 0;
+	my $kernel;
+	my $tmpdir;
+	my $result;
 	if (! defined $kiwi) {
 		$kiwi = new KIWILog();
 	}
@@ -108,6 +111,16 @@ sub new {
 	}
 	$kiwi -> done ();
 	chomp  $tmpdir;
+	#==========================================
+	# Store object data
+	#------------------------------------------
+	$this->{kiwi}   = $kiwi;
+	$this->{initrd} = $initrd;
+	$this->{system} = $system;
+	$this->{kernel} = $kernel;
+	$this->{tmpdir} = $tmpdir;
+	$this->{vmsize} = $vmsize;
+	$this->{usbzip} = $usbzip;
 	return $this;
 }
 
@@ -115,9 +128,16 @@ sub new {
 # createBootStructure
 #------------------------------------------
 sub createBootStructure {
-	my $loc   = shift;
-	my $lname = "linux";
-	my $iname = "initrd";
+	my $this   = shift;
+	my $loc    = shift;
+	my $kiwi   = $this->{kiwi};
+	my $initrd = $this->{initrd};
+	my $tmpdir = $this->{tmpdir};
+	my $kernel = $this->{kernel};
+	my $lname  = "linux";
+	my $iname  = "initrd";
+	my $status;
+	my $result;
 	if (defined $loc) {
 		rmdir $tmpdir;
 		$tmpdir = "/mnt";
@@ -197,11 +217,18 @@ sub getRemovableUSBStorageDevices {
 # setupBootStick
 #------------------------------------------
 sub setupBootStick {
-	my $this = shift;
+	my $this   = shift;
+	my $kiwi   = $this->{kiwi};
+	my $tmpdir = $this->{tmpdir};
+	my $initrd = $this->{initrd};
+	my $system = $this->{system};
+	my $usbzip = $this->{usbzip};
+	my $status;
+	my $result;
 	#==========================================
 	# Create Stick structure
 	#------------------------------------------
-	if (! createBootStructure()) {
+	if (! $this -> createBootStructure()) {
 		return undef;
 	}
 	#==========================================
@@ -414,9 +441,13 @@ sub setupBootStick {
 # setupBootCD
 #------------------------------------------
 sub setupBootCD {
-	my $this = shift;
+	my $this      = shift;
 	my $imageData = shift;
-
+	my $kiwi      = $this->{kiwi};
+	my $tmpdir    = $this->{tmpdir};
+	my $initrd    = $this->{initrd};
+	my $status;
+	my $result;
 	if (defined $imageData) {
 		my $imageDataMd5 = "$imageData.md5";
 		my $imageDataConfig = "$imageData.config";
@@ -425,11 +456,10 @@ sub setupBootCD {
 		qx ( cp $imageDataMd5 $tmpdir/image 2>&1 );
 		qx ( cp $imageDataConfig $tmpdir/config.isoclient 2>&1 );
 	}
-	
 	#==========================================
 	# Create CD structure
 	#------------------------------------------
-	if (! createBootStructure()) {
+	if (! $this -> createBootStructure()) {
 		return undef;
 	}
 	#==========================================
@@ -497,10 +527,13 @@ sub setupBootCD {
 # setupBootDisk
 #------------------------------------------
 sub setupBootDisk {
-	my $this = shift;
-	my $diskname = $system.".qemu";
-	my $vmdkname = $system.".vmdk";
-	my $loop = "/dev/loop0";
+	my $this      = shift;
+	my $kiwi      = $this->{kiwi};
+	my $system    = $this->{system};
+	my $vmsize    = $this->{vmsize};
+	my $diskname  = $system.".qemu";
+	my $vmdkname  = $system.".vmdk";
+	my $loop      = "/dev/loop0";
 	my $loopfound = 0;
 	my $result;
 	my $status;
@@ -617,7 +650,7 @@ sub setupBootDisk {
 	#==========================================
 	# Dump initial initrd on system image
 	#------------------------------------------
-	if (! createBootStructure ("vmx")) {
+	if (! $this -> createBootStructure ("vmx")) {
 		qx ( umount /mnt/ 2>&1 );
 		qx ( /sbin/kpartx  -d $loop );
 		qx ( /sbin/losetup -d $loop );

@@ -24,11 +24,11 @@ use Carp qw (cluck);
 #==========================================
 # Private
 #------------------------------------------
-my @showLevel = (0,1,2,3,4,5);
-my $channel   = \*STDOUT;
-my $errorOk   = 0;
-my $fileLog;
-my $rootLog;
+#my @showLevel = (0,1,2,3,4,5);
+#my $channel   = \*STDOUT;
+#my $errorOk   = 0;
+#my $fileLog;
+#my $rootLog;
 
 #==========================================
 # Constructor
@@ -39,9 +39,18 @@ sub new {
 	# is used to print out info, error and warning
 	# messages
 	# ---
+	#==========================================
+	# Object setup
+	#------------------------------------------
 	my $this  = {};
 	my $class = shift;
 	bless  $this,$class;
+	#==========================================
+	# Store object data
+	#------------------------------------------
+	$this->{showLevel} = [0,1,2,3,4,5];
+	$this->{channel}   = \*STDOUT;
+	$this->{errorOk}   = 0;
 	return $this;
 }
 
@@ -70,10 +79,11 @@ sub doStat {
 	# Initialize cursor position counting from the
 	# end of the line
 	# ---
-	setOutputChannel();
-	my $cols = getColumns();
+	my $this = shift;
+	$this -> setOutputChannel();
+	my $cols = $this -> getColumns();
 	printf ("\015\033[%sC\033[10D",$cols);
-	resetOutputChannel();
+	$this -> resetOutputChannel();
 }
 
 #==========================================
@@ -83,9 +93,10 @@ sub doNorm {
 	# ...
 	# Reset cursor position to standard value
 	# ---
-	setOutputChannel();
+	my $this = shift;
+	$this -> setOutputChannel();
 	print "\033[m\017";
-	resetOutputChannel();
+	$this -> resetOutputChannel();
 }
 
 #==========================================
@@ -95,19 +106,20 @@ sub done {
 	# ...
 	# This is the green "done" flag
 	# ---
-	if (! defined $fileLog) {
-	    doStat();
-		setOutputChannel();
+	my $this = shift;
+	if (! defined $this->{fileLog}) {
+	    $this -> doStat();
+		$this -> setOutputChannel();
 		print "\033[1;32mdone\n";
-		resetOutputChannel();
-		doNorm();
-		if ($errorOk) {
+		$this -> resetOutputChannel();
+		$this -> doNorm();
+		if ($this->{errorOk}) {
 			print EFD "   done\n";
 		}
 	} else {
-		setOutputChannel();
+		$this -> setOutputChannel();
 		print "   done\n";
-		resetOutputChannel();
+		$this -> resetOutputChannel();
 	}
 }
 
@@ -118,19 +130,20 @@ sub failed {
 	# ...
 	# This is the red "failed" flag
 	# ---
-	if (! defined $fileLog) {
-		doStat();
-		setOutputChannel();
+	my $this = shift;
+	if (! defined $this->{fileLog}) {
+		$this -> doStat();
+		$this -> setOutputChannel();
 		print "\033[1;31mfailed\n";
-		resetOutputChannel();
-		doNorm();
-		if ($errorOk) {
+		$this -> resetOutputChannel();
+		$this -> doNorm();
+		if ($this->{errorOk}) {
 			print EFD "   failed\n";
 		}
 	} else {
-		setOutputChannel();
+		$this -> setOutputChannel();
 		print "   failed\n";
-		resetOutputChannel();
+		$this -> resetOutputChannel();
 	}
 }
 
@@ -141,19 +154,20 @@ sub skipped {
 	# ...
 	# This is the yellow "skipped" flag
 	# ---
-	if (! defined $fileLog) {
-		doStat();
-		setOutputChannel();
+	my $this = shift;
+	if (! defined $this->{fileLog}) {
+		$this -> doStat();
+		$this -> setOutputChannel();
 		print "\033[1;33mskipped\n";
-		resetOutputChannel();
-		doNorm();
-		if ($errorOk) {
+		$this -> resetOutputChannel();
+		$this -> doNorm();
+		if ($this->{errorOk}) {
 			print EFD "   skipped\n";
 		}
 	} else {
-		setOutputChannel();
+		$this -> setOutputChannel();
 		print "   skipped\n";
-		resetOutputChannel();
+		$this -> resetOutputChannel();
 	}
 }
 
@@ -161,6 +175,8 @@ sub skipped {
 # setOutputChannel
 #------------------------------------------
 sub setOutputChannel {
+	my $this = shift;
+	my $channel = $this->{channel};
 	open ( OLDERR, ">&STDERR" );
 	open ( OLDSTD, ">&STDOUT" );
 	open ( STDERR,">&$$channel" );
@@ -171,6 +187,7 @@ sub setOutputChannel {
 # resetOutputChannel
 #------------------------------------------
 sub resetOutputChannel {
+	my $this = shift;
 	close ( STDERR );
 	open  ( STDERR, ">&OLDERR" );
 	close ( STDOUT );
@@ -204,8 +221,9 @@ sub printLog {
 	my $logdata = $_[1];
 	my $flag    = $_[2];
 
-	if (! defined $channel) {
-		$channel = \*STDOUT;
+	my @showLevel = @{$this->{showLevel}};
+	if (! defined $this->{channel}) {
+		$this->{channel} = \*STDOUT;
 	}
 	if ($lglevel !~ /^\d$/) {
 		$logdata = $lglevel;
@@ -218,21 +236,21 @@ sub printLog {
 	}
 	foreach my $level (@showLevel) {
 	if ($level == $lglevel) {
-		setOutputChannel();
+		$this -> setOutputChannel();
 		if (($lglevel == 1) || ($lglevel == 2) || ($lglevel == 3)) {
 			print $date,$logdata;
-			if ($errorOk) {
+			if ($this->{errorOk}) {
 				print EFD $date,$logdata;
 			}
 		} elsif ($lglevel == 5) {
 			print $logdata;
-			if ($errorOk) {
+			if ($this->{errorOk}) {
 				print EFD $logdata;
 			}
 		} else {
 			cluck $date,$logdata;
 		}
-		resetOutputChannel();
+		$this -> resetOutputChannel();
 		return $lglevel;
 	}
 	}
@@ -316,10 +334,10 @@ sub setLogFile {
 			return undef;
 		}
 		binmode(FD,':unix');
-		$channel = \*FD;
+		$this->{channel} = \*FD;
 	}
-	$rootLog = $file;
-	$fileLog = 1;
+	$this->{rootLog} = $file;
+	$this->{fileLog} = 1;
 	return $this;
 }
 
@@ -334,19 +352,19 @@ sub setRootLog {
 	# ---
 	my $this = shift;
 	my $file = shift;
-	if ($errorOk) {
+	if ($this->{errorOk}) {
 		return;
 	}
 	info ( $this, "Setting up root log on: $file..." );
 	if (! (open EFD,">$file")) {
-		skipped ();
+		$this -> skipped ();
 		warning ( $this,"Couldn't open root log channel: $!\n" );
-		$errorOk = 0;
+		$this->{errorOk} = 0;
 	}
 	binmode(EFD,':unix');
-	done ();
-	$rootLog = $file;
-	$errorOk = 1;
+	$this -> done ();
+	$this->{rootLog} = $file;
+	$this->{errorOk} = 1;
 }
 
 #==========================================
@@ -356,7 +374,8 @@ sub getRootLog {
 	# ...
 	# return the current root log file name
 	# ---
-	return $rootLog;
+	my $this = shift;
+	return $this->{rootLog};
 }
 
 #==========================================

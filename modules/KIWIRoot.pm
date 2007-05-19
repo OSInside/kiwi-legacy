@@ -25,20 +25,6 @@ use KIWIManager;
 use KIWIConfigure;
 
 #==========================================
-# Private
-#------------------------------------------
-my @mountList;
-my $imageDesc;
-my $baseSystem;
-my $manager;
-my $useRoot;
-my $selfRoot;
-my %sourceChannel;
-my $root;
-my $xml;
-my $kiwi;
-
-#==========================================
 # Constructor
 #------------------------------------------
 sub new {
@@ -48,19 +34,25 @@ sub new {
 	# object creates a chroot environment including all
 	# packages which makes the image
 	# ---
+	#==========================================
+	# Object setup
+	#------------------------------------------
 	my $this  = {};
 	my $class = shift;
 	bless $this,$class;
-	$kiwi = shift;
-	$xml  = shift;
-	$imageDesc  = shift;
-	$selfRoot   = shift;
-	$baseSystem = shift;
-	$useRoot    = shift;
-	my $code;
 	#==========================================
-	# Check parameters
+	# Module Parameters
 	#------------------------------------------
+	my $kiwi = shift;
+	my $xml  = shift;
+	my $imageDesc  = shift;
+	my $selfRoot   = shift;
+	my $baseSystem = shift;
+	my $useRoot    = shift;
+	#==========================================
+	# Constructor setup
+	#------------------------------------------
+	my $code;
 	if (! defined $kiwi) {
 		$kiwi = new KIWILog();
 	}
@@ -98,6 +90,7 @@ sub new {
 		return undef; 
 	}
 	my $count = 1;
+	my %sourceChannel = ();
 	#==========================================
 	# Create sourceChannel hash
 	#------------------------------------------
@@ -150,6 +143,7 @@ sub new {
 	# Create root directory
 	#------------------------------------------
 	my $rootError = 1;
+	my $root;
 	if (! defined $useRoot) {
 		if (! defined $selfRoot) {
 			$root = qx ( mktemp -q -d /tmp/kiwi.XXXXXX );
@@ -192,16 +186,27 @@ sub new {
 	}
 	$kiwi -> note ($pmgr);
 	$kiwi -> done ();
-
 	#==========================================
 	# Create package manager object
 	#------------------------------------------
-	$manager = new KIWIManager (
+	my $manager = new KIWIManager (
 		$kiwi,$xml,\%sourceChannel,$root,$pmgr
 	);
 	if (! defined $manager) {
 		return undef;
 	}
+	#==========================================
+	# Store object data
+	#------------------------------------------
+	$this->{kiwi}          = $kiwi;
+	$this->{sourceChannel} = \%sourceChannel;
+	$this->{xml}           = $xml;
+	$this->{imageDesc}     = $imageDesc;
+	$this->{selfRoot}      = $selfRoot;
+	$this->{baseSystem}    = $baseSystem;
+	$this->{useRoot}       = $useRoot;
+	$this->{root}          = $root;
+	$this->{manager}       = $manager;
 	return $this;
 }
 
@@ -214,6 +219,11 @@ sub init {
 	# tmp directory and extract all the given base files.
 	# ---
 	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $xml  = $this->{xml};
+	my $root = $this->{root};
+	my $manager    = $this->{manager};
+	my $baseSystem = $this->{baseSystem};
 	#==========================================
 	# Get base Package list
 	#------------------------------------------
@@ -310,10 +320,12 @@ sub upgrade {
 	# with respect to changes of the installation source(s)
 	# ---
 	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $manager = $this->{manager};
 	#==========================================
 	# Mount local and NFS directories
 	#------------------------------------------
-	if (! setupMount ($this)) {
+	if (! $this -> setupMount ()) {
 		$kiwi -> error ("Couldn't mount base system");
 		$kiwi -> failed ();
 		return undef;
@@ -336,6 +348,9 @@ sub install {
 	# directory of the image system
 	# ---
 	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $xml  = $this->{xml};
+	my $manager = $this->{manager};
 	#==========================================
 	# Get image package list
 	#------------------------------------------
@@ -403,6 +418,11 @@ sub setup {
 	# 4) configure the system with methods from KIWIConfigure
 	# ---
 	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $root = $this->{root};
+	my $xml  = $this->{xml};
+	my $imageDesc = $this->{imageDesc};
+	my $manager   = $this->{manager};
 	#======================================== 
 	# Consistency check
 	#----------------------------------------
@@ -560,7 +580,11 @@ sub setupMount {
 	# and register them in the mountList
 	# ---
 	my $this   = shift;
-	my $prefix = $root."/".$baseSystem;
+	my $kiwi   = $this->{kiwi};
+	my $root   = $this->{root};
+	my $baseSystem = $this->{baseSystem};
+	my $prefix     = $root."/".$baseSystem;
+	my @mountList  = ();
 	$kiwi -> info ("Mounting required file systems");
 	if (! -d $prefix) {
 	if (! mkdir $prefix) {
@@ -588,8 +612,8 @@ sub setupMount {
 		push (@mountList,"$root/dev/pts");
 	}
 	$kiwi -> done();
-	foreach my $chl (keys %{$sourceChannel{private}}) {
-		my @opts = @{$sourceChannel{private}{$chl}};
+	foreach my $chl (keys %{$this->{sourceChannel}{private}}) {
+		my @opts = @{$this->{sourceChannel}{private}{$chl}};
 		my $path = $opts[2];
 		if ($path =~ /=$baseSystem\/(.*)$/) {
 			$path = $1;
@@ -619,6 +643,7 @@ sub setupMount {
 			my $code = $? >> 8;
 			if ($code != 0) {
 				$kiwi -> failed();
+				$this->{mountList} = \@mountList;
 				return undef;
 			}
 			$kiwi -> done();
@@ -626,6 +651,7 @@ sub setupMount {
 			$kiwi -> done();
 		}
 	}
+	$this->{mountList} = \@mountList;
 	return $this;
 }
 
@@ -637,6 +663,10 @@ sub cleanMount {
 	# umount all mountList registered devices
 	# ---
 	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $root = $this->{root};
+	my @mountList  = @{$this->{mountList}};
+	my $baseSystem = $this->{baseSystem};
 	my $prefix = $root."/".$baseSystem;
 	foreach my $item (reverse @mountList) {
 		#$kiwi -> info ("Umounting path: $item\n");
@@ -656,6 +686,8 @@ sub cleanSource {
 	# remove all source locations created by kiwi
 	# ---
 	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $manager = $this->{manager};
 	$manager -> resetSource();
 	return $this;
 }

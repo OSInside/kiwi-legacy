@@ -29,32 +29,12 @@ our @ISA    = qw (Exporter);
 our @EXPORT = qw (%packageManager);
 
 #==========================================
-# Private
-#------------------------------------------
-my $kiwi;           # log handler
-my $xml;            # xml description
-my $manager;        # package manager name
-my %source;         # installation sources
-my @channelList;    # list of channel names
-my $root;           # root path
-my $chroot = 0;     # is chroot or not
-my $screenCall;     # screen call script
-my $screenCtrl;     # control commands for screen
-my $screenLogs;     # screen log file
-
-#==========================================
-# Private
+# Exports
 #------------------------------------------
 our %packageManager;
 $packageManager{smart}   = "/usr/bin/smart";
 $packageManager{zypper}  = "/usr/bin/zypper";
 $packageManager{default} = "smart";
-
-#==========================================
-# Private [internal]
-#------------------------------------------
-my $curCheckSig;
-my $imgCheckSig;
 
 #==========================================
 # Constructor
@@ -65,37 +45,59 @@ sub new {
 	# to import all data needed to abstract from different
 	# package managers
 	# ---
+	#==========================================
+	# Object setup
+	#------------------------------------------
 	my $this  = {};
 	my $class = shift;
 	bless $this,$class;
-	$kiwi = shift;
+	#==========================================
+	# Module Parameters
+	#------------------------------------------
+	my $kiwi      = shift;
+	my $xml       = shift;
+	my $sourceRef = shift;
+	my $root      = shift;
+	my $manager   = shift;
+	#==========================================
+	# Constructor setup
+	#------------------------------------------
 	if (! defined $kiwi) {
 		$kiwi = new KIWILog();
 	}
-	$xml = shift;
 	if (! defined $xml) {
 		$kiwi -> error  ("Missing XML description pointer");
 		$kiwi -> failed ();
 		return undef;
 	}
-	my $sourceRef = shift;
 	if (! defined $sourceRef) {
 		$kiwi -> error  ("Missing channel description pointer");
 		$kiwi -> failed ();
 		return undef;
 	}
-	%source  = %{$sourceRef};
-	$root = shift;
+	my %source = %{$sourceRef};
 	if (! defined $root) {
 		$kiwi -> error  ("Missing chroot path");
 		$kiwi -> failed ();
 		return undef;
 	}
-	$manager = shift;
 	if (! defined $manager) {
 		$manager = "smart";
 	}
-	@channelList = ();
+	my @channelList = ();
+	#==========================================
+	# Store object data
+	#------------------------------------------
+	$this->{kiwi}        = $kiwi;
+	$this->{channelList} = \@channelList;
+	$this->{xml}         = $xml;
+	$this->{source}      = \%source;
+	$this->{manager}     = $manager;
+	$this->{root}        = $root;
+	$this->{chroot}      = 0;
+	$this->{screenCall}  = $root."/screenrc.smart";
+	$this->{screenCtrl}  = $root."/screenrc.ctrls";
+	$this->{screenLogs}  = $kiwi -> getRootLog();
 	return $this;
 }
 
@@ -103,14 +105,16 @@ sub new {
 # switchToChroot
 #------------------------------------------
 sub switchToChroot {
-	$chroot = 1;
+	my $this = shift;
+	$this->{chroot} = 1;
 }
 
 #==========================================
 # switchToLocal
 #------------------------------------------
 sub switchToLocal {
-	$chroot = 0;
+	my $this = shift;
+	$this->{chroot} = 0;
 }
 
 #==========================================
@@ -118,12 +122,14 @@ sub switchToLocal {
 #------------------------------------------
 sub setupScreen {
 	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $root = $this->{root};
 	#==========================================
 	# screen files
 	#------------------------------------------
-	$screenCall = $root."/screenrc.smart";
-	$screenCtrl = $root."/screenrc.ctrls";
-	$screenLogs = $kiwi -> getRootLog();
+	my $screenCall = $this->{screenCall};
+	my $screenCtrl = $this->{screenCtrl};
+	my $screenLogs = $this->{screenLogs};
 
 	#==========================================
 	# Initiate screen call file
@@ -134,7 +140,7 @@ sub setupScreen {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't create call file: $!");
 		$kiwi -> failed ();
-		resetInstallationSource();
+		$this -> resetInstallationSource();
 		return undef;
 	}
 	print $cd "logfile $screenLogs\n";
@@ -152,6 +158,10 @@ sub setupScreen {
 #------------------------------------------
 sub setupScreenCall {
 	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $screenCall = $this->{screenCall};
+	my $screenCtrl = $this->{screenCtrl};
+	my $screenLogs = $this->{screenLogs};
 	my $logs = 1;
 	my $code;
 	#==========================================
@@ -193,7 +203,7 @@ sub setupScreenCall {
 		if ( $logs ) {
 			$kiwi -> error  ($data);
 		}
-		resetInstallationSource();
+		$this -> resetInstallationSource();
 		return undef;
 	}
 	$kiwi -> done ();
@@ -210,19 +220,26 @@ sub setupSignatureCheck {
 	# according to the used package manager
 	# ---
 	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $xml  = $this->{xml};
+	my $manager = $this->{manager};
+	my $chroot  = $this->{chroot};
+	my $root    = $this->{root};
 	my $data;
 	my $code;
 	#==========================================
 	# Get signature information
 	#------------------------------------------
-	$imgCheckSig = $xml -> getRPMCheckSignatures();
+	my $imgCheckSig = $xml -> getRPMCheckSignatures();
+	$this->{imgCheckSig} = $imgCheckSig;
 
 	#==========================================
 	# smart
 	#------------------------------------------
 	if ($manager eq "smart") {
 		my $optionName  = "rpm-check-signatures";
-		$curCheckSig = qx (smart config --show $optionName|tr -d '\n');
+		my $curCheckSig = qx (smart config --show $optionName|tr -d '\n');
+		$this->{curCheckSig} = $curCheckSig;
 		if (defined $imgCheckSig) {
 			$kiwi -> info ("Setting RPM signature check to: $imgCheckSig");
 			my $option = "$optionName=$imgCheckSig";
@@ -258,17 +275,22 @@ sub resetSignatureCheck {
 	# reset the signature check option to the previos
 	# value of the package manager
 	# ---
-	my $this = shift;
+	my $this   = shift;
+	my $kiwi   = $this->{kiwi};
+	my $chroot = $this->{chroot};
+	my $manager= $this->{manager};
+	my $root   = $this->{root};
+	my $curCheckSig = $this->{curCheckSig};
 	my $data;
 	my $code;
 	#==========================================
 	# smart
 	#------------------------------------------
 	if ($manager eq "smart") {
-		if (defined $imgCheckSig) {
+		if (defined $this->{imgCheckSig}) {
 			my $optionName  = "rpm-check-signatures";
 			$kiwi -> info ("Resetting RPM signature check to: $curCheckSig");
-			my $option = "$optionName=$imgCheckSig";
+			my $option = "$optionName=$curCheckSig";
 			my $cmdstr = "smart config --set";
 			if (! $chroot) {
 				$data = qx ( bash -c "$cmdstr $option 2>&1" );
@@ -301,13 +323,18 @@ sub setupInstallationSource {
 	# setup an installation source to retrieve packages
 	# from. multiple sources are allowed
 	# ---
-	my $this = shift;
+	my $this   = shift;
+	my $kiwi   = $this->{kiwi};
+	my $chroot = $this->{chroot};
+	my %source = %{$this->{source}};
+	my $root   = $this->{root};
+	my $manager= $this->{manager};
 	my $data;
 	my $code;
 	#==========================================
 	# Reset channel list
 	#------------------------------------------
-	@channelList = ();
+	my @channelList = ();
 
 	#==========================================
 	# smart
@@ -389,6 +416,7 @@ sub setupInstallationSource {
 			$kiwi -> done ();
 		}
 	}
+	$this->{channelList} = \@channelList;
 	return $this;
 }
 
@@ -400,7 +428,12 @@ sub resetInstallationSource {
 	# clean the installation source environment
 	# which means remove temporary inst-sources
 	# ---
-	my $this = shift;
+	my $this   = shift;
+	my $kiwi   = $this->{kiwi};
+	my $chroot = $this->{chroot};
+	my $manager= $this->{manager};
+	my $root   = $this->{root};
+	my @channelList = @{$this->{channelList}};
 	my $data;
 	my $code;
 	#==========================================
@@ -456,8 +489,13 @@ sub setupDownload {
 	# download package files for later handling
 	# using the package manager download functionality
 	# ---
-	my $this  = shift;
-	my @pacs  = @_;
+	my $this   = shift;
+	my $kiwi   = $this->{kiwi};
+	my $manager= $this->{manager};
+	my $root   = $this->{root};
+	my @channelList = @{$this->{channelList}};
+	my $screenCall  = $this->{screenCall};
+	my @pacs   = @_;
 	#==========================================
 	# setup screen call
 	#------------------------------------------
@@ -505,7 +543,11 @@ sub setupUpgrade {
 	# upgrade the previosly installed root system
 	# using the package manager upgrade functionality
 	# ---
-	my $this  = shift;
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $root = $this->{root};
+	my $manager    = $this->{manager};
+	my $screenCall = $this->{screenCall};
 	#==========================================
 	# setup screen call
 	#------------------------------------------
@@ -549,8 +591,15 @@ sub setupRootSystem {
 	# install the bootstrap system to be able to
 	# chroot into this minimal image
 	# ---
-	my $this  = shift;
-	my @packs = @_;
+	my $this   = shift;
+	my @packs  = @_;
+	my $kiwi   = $this->{kiwi};
+	my $chroot = $this->{chroot};
+	my $root   = $this->{root};
+	my $xml    = $this->{xml};
+	my $manager= $this->{manager};
+	my @channelList = @{$this->{channelList}};
+	my $screenCall  = $this->{screenCall};
 	#==========================================
 	# setup screen call
 	#------------------------------------------
@@ -658,6 +707,9 @@ sub resetSource {
 	# which means remove all changes made by %source
 	# ---
 	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my %source  = %{$this->{source}};
+	my $manager = $this->{manager};
 	#==========================================
 	# smart
 	#------------------------------------------
@@ -687,8 +739,12 @@ sub setupPackageInfo {
 	# check if a given package is installed or not.
 	# return the exit code from the call
 	# ---
-	my $this = shift;
-	my $pack = shift;
+	my $this   = shift;
+	my $pack   = shift;
+	my $kiwi   = $this->{kiwi};
+	my $chroot = $this->{chroot};
+	my $root   = $this->{root};
+	my $manager= $this->{manager};
 	my $data;
 	my $code;
 	my $opts;

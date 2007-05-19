@@ -22,11 +22,6 @@ use KIWILog;
 use LWP;
 
 #==========================================
-# Private
-#------------------------------------------
-my $kiwi;
-
-#==========================================
 # Constructor
 #------------------------------------------
 sub new { 
@@ -35,13 +30,26 @@ sub new {
 	# the high level location information into a low level
 	# distribution independent network url
 	# ---
+	#==========================================
+	# Object setup
+	#------------------------------------------
 	my $this  = {};
 	my $class = shift;
 	bless $this,$class;
-	$kiwi   = shift;
+	#==========================================
+	# Module Parameters
+	#------------------------------------------	
+	my $kiwi = shift;
+	#==========================================
+	# Constructor setup
+	#------------------------------------------
 	if (! defined $kiwi) {
 		$kiwi = new KIWILog();
 	}
+	#==========================================
+	# Store object data
+	#------------------------------------------
+	$this->{kiwi} = $kiwi;
 	return $this;
 }
 
@@ -56,6 +64,7 @@ sub thisPath {
 	# ---
 	my $this   = shift;
 	my $module = shift;
+	my $kiwi   = $this->{kiwi};
 	#==========================================
 	# normalize URL data
 	#------------------------------------------
@@ -98,6 +107,7 @@ sub openSUSEpath {
 	my @types    = qw (distribution repositories);
 	my @dists    = qw (inst-source repo/oss);
 	my @urllist  = ();
+	my $kiwi     = $this->{kiwi};
 	#==========================================
 	# normalize URL data
 	#------------------------------------------

@@ -23,24 +23,6 @@ use KIWIURL;
 use File::Glob ':glob';
 
 #==========================================
-# Private
-#------------------------------------------
-my $infodefault = "Including pattern";
-my $infomessage = $infodefault;
-
-#==========================================
-# Private
-#------------------------------------------
-my $kiwi;
-my @data;
-my @urllist;
-my @pattern;
-my $pattype;
-my %cache;
-my %patdone;
-my $arch;
-
-#==========================================
 # Constructor
 #------------------------------------------
 sub new {
@@ -49,42 +31,69 @@ sub new {
 	# the given pattern data stream and provide all information
 	# via member methods
 	# ---
+	#==========================================
+	# Object setup
+	#------------------------------------------
 	my $this  = {};
 	my $class = shift;
 	bless $this,$class;
-	$kiwi   = shift;
+	#==========================================
+	# Module Parameters
+	#------------------------------------------
+	my $kiwi    = shift;
+	my $pattref = shift;
+	my $urlref  = shift;
+	my $pattype = shift;
+	#==========================================
+	# Constructor setup
+	#------------------------------------------
+	my @data = ();
 	if (! defined $kiwi) {
 		$kiwi = new KIWILog();
 	}
-	my $pattref = shift;
 	if (! defined $pattref) {
 		$kiwi -> error ("Invalid pattern name");
 		$kiwi -> failed ();
 		return undef;
 	}
-	@pattern = @{$pattref};
-	my $urlref = shift;
+	my @pattern = @{$pattref};
 	if (! defined $urlref) {
 		$kiwi -> error ("No URL list for pattern search");
 		$kiwi -> failed ();
 		return undef;
 	}
-	$pattype = shift;
 	if (! defined $pattype) {
 		$kiwi -> error ("No pattern type specified");
 		$kiwi -> failed ();
 		return undef;
 	}
-	$arch = qx (arch); chomp $arch;
+	my $arch = qx (arch); chomp $arch;
 	if ($arch =~ /^i.86/) {
 		$arch = 'i*86';
 	}
-	@urllist = @{$urlref};
-	my @patdata = getPatternContents (\@pattern);
+	my @urllist = @{$urlref};
+	#==========================================
+	# Store object data
+	#------------------------------------------
+	$this->{infodefault} = "Including pattern";
+	$this->{infomessage} = $this->{infodefault};
+	$this->{kiwi}        = $kiwi;
+	$this->{urllist}     = \@urllist;
+	$this->{pattern}     = \@pattern;
+	$this->{pattype}     = $pattype;
+	$this->{arch}        = $arch;
+	#==========================================
+	# Initial check for pattern contents
+	#------------------------------------------
+	my @patdata = $this -> getPatternContents (\@pattern);
 	if (! @patdata) {
 		return undef;
 	}
 	push ( @data,@patdata );
+	#==========================================
+	# Store object data
+	#------------------------------------------
+	$this->{data} = \@data;
 	return $this;
 }
 
@@ -92,20 +101,23 @@ sub new {
 # getPatternContents
 #------------------------------------------
 sub getPatternContents {
+	my $this    = shift;
 	my $pattref = shift;
+	my $kiwi    = $this->{kiwi};
+	my @urllist = @{$this->{urllist}};
 	my @pattern = @{$pattref};
 	my $content;
 	foreach my $pat (@pattern) {
 		my $result;
 		my $printinfo = 0;
-		if (! defined $cache{$pat}) {
+		if (! defined $this->{cache}{$pat}) {
 			$printinfo = 1;
 		}
 		if ($printinfo) {
-			$kiwi -> info ("$infomessage: $pat");
+			$kiwi -> info ("$this->{infomessage}: $pat");
 		}
 		foreach my $url (@urllist) {
-			$result .= downloadPattern ( $url,$pat );
+			$result .= $this -> downloadPattern ( $url,$pat );
 		}
 		if (! $result) {
 			if ($printinfo) {
@@ -126,11 +138,14 @@ sub getPatternContents {
 # downloadPattern
 #------------------------------------------
 sub downloadPattern {
+	my $this    = shift;
 	my $url     = shift;
 	my $pattern = shift;
+	my $arch    = $this->{arch};
+	my $kiwi    = $this->{kiwi};
 	my $content;
-	if (defined $cache{$pattern}) {
-		return $cache{$pattern};
+	if (defined $this->{cache}{$pattern}) {
+		return $this->{cache}{$pattern};
 	}
 	if ($url =~ /^\//) {
 		my $path = "$url//suse/setup/descr";
@@ -169,7 +184,7 @@ sub downloadPattern {
 		$response = $browser  -> request ( $request );
 		$content  = $response -> content ();
 	}
-	$cache{$pattern} = $content;
+	$this->{cache}{$pattern} = $content;
 	return $content;
 }
 
@@ -177,9 +192,11 @@ sub downloadPattern {
 # getSection
 #------------------------------------------
 sub getSection {
+	my $this   = shift;
 	my $begin  = shift;
 	my $end    = shift;
 	my $patdata= shift;
+	my @data   = @{$this->{data}};
 	my @plist  = ();
 	if (defined $patdata) {
 		@plist = @{$patdata};
@@ -210,37 +227,41 @@ sub getSection {
 # getRequiredPatterns
 #------------------------------------------
 sub getRequiredPatterns {
+	my $this    = shift;
 	my $pattref = shift;
+	my $kiwi    = $this->{kiwi};
+	my $pattype = $this->{pattype};
+	my @data    = @{$this->{data}};
 	my @pattern = @{$pattref};
-	my @patdata = getPatternContents (\@pattern);
+	my @patdata = $this -> getPatternContents (\@pattern);
 	my @reqs;
 	if ($pattype eq "onlyRequired") {
-		@reqs = getSection (
+		@reqs = $this -> getSection (
 			'^\+Req:','^\-Req:',\@patdata
 		);
 	} else {
-		@reqs = getSection (
+		@reqs = $this -> getSection (
 			'^\+Re[qc]:','^\-Re[qc]:',\@patdata
 		);
 	}
 	push (@reqs,"base");
 	push (@reqs,"desktop-base");
 	foreach my $rpattern (@reqs) {
-		if (defined $patdone{$rpattern}) {
+		if (defined $this->{patdone}{$rpattern}) {
 			next;
 		}
-		$infomessage = "--> Including required pattern";
-		my @patdata = getPatternContents ([$rpattern]);
-		$infomessage = $infodefault;
+		$this->{infomessage} = "--> Including required pattern";
+		my @patdata = $this -> getPatternContents ([$rpattern]);
+		$this->{infomessage} = $this->{infodefault};
 		if (! @patdata) {
 			$kiwi -> warning ("Couldn't find required pattern: $rpattern");
 			$kiwi -> skipped ();
-			$patdone{$rpattern} = $rpattern;
+			$this->{patdone}{$rpattern} = $rpattern;
 			next;
 		}
 		push ( @data,@patdata );
-		$patdone{$rpattern} = $rpattern;
-		getRequiredPatterns ([$rpattern]);
+		$this->{patdone}{$rpattern} = $rpattern;
+		$this -> getRequiredPatterns ([$rpattern]);
 	}
 	return @reqs;
 }
@@ -250,13 +271,14 @@ sub getRequiredPatterns {
 #------------------------------------------
 sub getPackages {
 	my $this = shift;
+	my $pattype = $this->{pattype};
 	my %result;
-	my @reqs = getRequiredPatterns (\@pattern);
+	my @reqs = $this -> getRequiredPatterns ($this->{pattern});
 	my @pacs;
 	if ($pattype eq "onlyRequired") {
-		@pacs = getSection ('^\+Prq:','^\-Prq:');
+		@pacs = $this -> getSection ('^\+Prq:','^\-Prq:');
 	} else {
-		@pacs = getSection ('^\+Pr[qc]:','^\-Pr[qc]:');
+		@pacs = $this -> getSection ('^\+Pr[qc]:','^\-Pr[qc]:');
 	}
 	return @pacs;
 }
