@@ -657,6 +657,19 @@ sub setupBootDisk {
 		return undef;
 	}
 	#==========================================
+	# Import grub stages
+	#------------------------------------------
+	$kiwi -> info ("Importing grub stages for virtual disk boot");
+	$status = qx ( cp /usr/lib/grub/* /mnt/boot/grub 2>&1 );
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Failed importing grub stages: $status");
+		$kiwi -> failed ();
+		return undef;
+	}
+	$kiwi -> done ();
+	#==========================================
 	# Creating menu.lst for the grub
 	#------------------------------------------
 	$kiwi -> info ("Creating grub menu and device map");

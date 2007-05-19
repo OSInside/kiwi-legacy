@@ -4,6 +4,7 @@ Mon May 14 13:57:39 CEST 2007 - ms@suse.de
 - v1.34
 - code cleanup: reduce amount of package variables. Move module
   variables into this hash, don't allow private data to be exported
+- fixed grub virtual disk setup, grub stages were missing 
 - use aufs || unionfs for read-only mounts in KIWIRoot.pm
 - added support for aufs to isoboot live media for suse >= 10.3
   using aufs for live media requires: "flags=unified" to be set
