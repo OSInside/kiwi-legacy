@@ -68,6 +68,7 @@
 		<package name="squashfs-kmp-default"/>
 		<package name="aufs"/>
 		<package name="aufs-kmp-default"/>
+		<package name="fribidi"/>
 	</packages>
 	<packages type="boot">
 		<package name="kernel-default"/>

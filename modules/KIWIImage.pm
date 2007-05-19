@@ -741,8 +741,8 @@ sub createImageLiveCD {
 	#==========================================
 	# copy boot files for isolinux
 	#------------------------------------------
-	my $CD  = "$main::Prepare/cdboot";
-	my $gfx = $imageTree."/image/loader";
+	my $CD  = $main::Prepare."/cdboot";
+	my $gfx = $main::RootTree."/image/loader";
 	my $xml = new KIWIXML ( $kiwi,$main::Prepare );
 	my $iso = $xml -> getImageName();
 	my $isoarch = qx (arch); chomp $isoarch;

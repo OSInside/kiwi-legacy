@@ -6,7 +6,7 @@ echo "Configure image: [$name]..."
 #==========================================
 # setup gfxboot
 #------------------------------------------
-export PATH=$PATH:/usr/sbin
+export PATH=$PATH:/usr/sbin:/usr/bin
 mkdir /image/loader
 cd /usr/share/gfxboot
 make -C themes/SuSE prep
