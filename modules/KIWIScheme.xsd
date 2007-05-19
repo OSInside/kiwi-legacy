@@ -155,6 +155,7 @@
 				<xs:simpleType>
 					<xs:restriction base="xs:string">
 						<xs:enumeration value="onlyRequired"/>
+						<xs:enumeration value="plusSuggested"/>
 						<xs:enumeration value="plusRecommended"/>
 					</xs:restriction>
 				</xs:simpleType>

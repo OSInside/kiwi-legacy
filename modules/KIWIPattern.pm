@@ -239,9 +239,13 @@ sub getRequiredPatterns {
 		@reqs = $this -> getSection (
 			'^\+Req:','^\-Req:',\@patdata
 		);
+	} elsif ($pattype eq "plusSuggested") {
+		@reqs = $this -> getSection (
+			'^(\+Req:|\+Sug:)','^(\-Req:|\-Sug:)',\@patdata
+		);
 	} else {
 		@reqs = $this -> getSection (
-			'^\+Re[qc]:','^\-Re[qc]:',\@patdata
+			'^(\+Re[qc]:|\+Sug:)','^(\-Re[qc]:|\-Sug:)',\@patdata
 		);
 	}
 	push (@reqs,"base");
@@ -276,9 +280,17 @@ sub getPackages {
 	my @reqs = $this -> getRequiredPatterns ($this->{pattern});
 	my @pacs;
 	if ($pattype eq "onlyRequired") {
-		@pacs = $this -> getSection ('^\+Prq:','^\-Prq:');
+		@pacs = $this -> getSection (
+			'^\+Prq:','^\-Prq:'
+		);
+	} elsif ($pattype eq "plusSuggested") {
+		@pacs = $this -> getSection (
+			'^(\+Prq:|\+Psg:)','^(\-Prq:|\-Psg:)'
+		);
 	} else {
-		@pacs = $this -> getSection ('^\+Pr[qc]:','^\-Pr[qc]:');
+		@pacs = $this -> getSection (
+			'^(\+Pr[qc]:|\+Psg:)','^(\-Pr[qc]:|\-Psg:)'
+		);
 	}
 	return @pacs;
 }
