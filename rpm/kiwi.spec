@@ -105,7 +105,7 @@ Authors:
 # %patch
 
 %build
-export USER=-1 # set value to 0 to build boot images
+export USER=0 # set value to 0 to build boot images
 rm -rf $RPM_BUILD_ROOT
 test -e /.buildenv && . /.buildenv
 #cat /proc/mounts > /etc/fstab
@@ -132,10 +132,7 @@ if [ $UID = $USER ];then
 	echo "# ..."  >> $pxedefault
 	echo "DEFAULT Local-Boot" >> $pxedefault
 	images="
-		netboot/suse-10.1 netboot/suse-10.1-smp
-		netboot/suse-10.2 netboot/suse-10.2-smp
-		xennetboot/suse-10.1
-		xennetboot/suse-10.2
+		netboot/suse-SLES10 netboot/suse-SLED10
 	"
 	for i in $images;do
 		rootName=`echo $i | tr / -`

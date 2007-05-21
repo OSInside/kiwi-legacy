@@ -36,7 +36,7 @@
 		<file name="drivers/net/*"/>
 	</drivers>
 	<repository type="yast2" status="replaceable">
-		<source path="/image/dist/full-sles10-i386"/>
+		<source path="ftp://dist.suse.de/install/SLP/SLES-10-GM/%arch/DVD1"/>
 	</repository>
     <repository type="rpm-dir">
         <source path="this://repo"/>

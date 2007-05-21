@@ -19,7 +19,7 @@ Mon May 14 13:57:39 CEST 2007 - ms@suse.de
   Added options KIWI_KERNEL_OPTIONS and KIWI_BOOT_TIMEOUT.
   Thanks to snorp@novell.com who created the patch
 - added required netboot versions for SLES and SLED
-  GA and SP1 (#270881)
+  GM and SP1, activate prebuilding for GM versions (#270881)
 - allow USB stick device to be selected via --bootstick-device
   option. The given device must be one of the devices detected
   by the getRemovableUSBStorageDevices() method (#275137)
