@@ -51,6 +51,7 @@ our $RootTree;          # optional root tree destination
 our $Survive;           # if set to "yes" don't exit kiwi
 our $BootStick;         # deploy initrd booting from USB stick
 our $BootStickSystem;   # system image to be copied on an USB stick
+our $BootStickDevice;   # device to install stick image on
 our $BootVMSystem;      # system image to be copied on a VM disk
 our $BootVMDisk;        # deploy initrd booting from a VM 
 our $BootVMSize;        # size of virtual disk
@@ -363,7 +364,10 @@ sub main {
 	#------------------------------------------
 	if (defined $BootStick) {
 		$kiwi -> info ("Creating boot USB stick from: $BootStick...\n");
-		my $boot = new KIWIBoot ($kiwi,$BootStick,$BootStickSystem);
+		my $boot = new KIWIBoot (
+			$kiwi,$BootStick,$BootStickSystem,undef,
+			$BootStickDevice
+		);
 		if (! defined $boot) {
 			my $code = kiwiExit (1); return $code;
 		}
@@ -478,6 +482,7 @@ sub init {
 		"bootstick=s"           => \$BootStick,
 		"bootvm=s"              => \$BootVMDisk,
 		"bootstick-system=s"    => \$BootStickSystem,
+		"bootstick-device=s"    => \$BootStickDevice,
 		"bootvm-system=s"       => \$BootVMSystem,
 		"bootvm-disksize=s"     => \$BootVMSize,
 		"bootcd=s"              => \$BootCD,
@@ -542,7 +547,9 @@ sub usage {
 	print "  kiwi -p | --prepare <image-path>\n";
 	print "  kiwi -c | --create  <image-root>\n";
 	print "  kiwi -u | --upgrade <image-root>\n";
-	print "  kiwi --bootstick <initrd> [ --bootstick-system <systemImage> ]\n";
+	print "  kiwi --bootstick <initrd> \\\n";
+	print "     [ --bootstick-system <systemImage> ] \\\n";
+	print "     [ --bootstick-device <device> ] \\\n";
 	print "  kiwi --bootvm <initrd> --bootvm-system <systemImage> \\\n";
 	print "     [ --bootvm-disksize <size> ]\n";
 	print "  kiwi --bootcd <initrd>\n";

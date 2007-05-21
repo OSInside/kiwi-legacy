@@ -43,6 +43,7 @@ sub new {
 	my $initrd = shift;
 	my $system = shift;
 	my $vmsize = shift;
+	my $device = shift;
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
@@ -121,6 +122,7 @@ sub new {
 	$this->{tmpdir} = $tmpdir;
 	$this->{vmsize} = $vmsize;
 	$this->{usbzip} = $usbzip;
+	$this->{device} = $device;
 	return $this;
 }
 
@@ -223,6 +225,7 @@ sub setupBootStick {
 	my $initrd = $this->{initrd};
 	my $system = $this->{system};
 	my $usbzip = $this->{usbzip};
+	my $device = $this->{device};
 	my $status;
 	my $result;
 	#==========================================
@@ -259,10 +262,33 @@ sub setupBootStick {
 		print STDERR $prefix,"---> $storage{$dev} at $dev\n";
 	}
 	my $stick;
-	while (1) {
-		$prefix = $kiwi -> getPrefix (1);
-		print STDERR $prefix,"Your choice (enter device name): ";
-		chomp ($stick = <>);
+	if (! defined $device) {
+		#==========================================
+		# Let the user select the device
+		#------------------------------------------
+		while (1) {
+			$prefix = $kiwi -> getPrefix (1);
+			print STDERR $prefix,"Your choice (enter device name): ";
+			chomp ($stick = <>);
+			my $found = 0;
+			foreach my $dev (keys %storage) {
+				if ($dev eq $stick) {
+					$found = 1; last;
+				}
+			}
+			if (! $found) {
+				if ($stick) {
+					print STDERR $prefix,"Couldn't find [ $stick ] in list\n";
+				}
+				next;
+			}
+			last;
+		}
+	} else {
+		#==========================================
+		# Check the given device
+		#------------------------------------------
+		$stick = $device;
 		my $found = 0;
 		foreach my $dev (keys %storage) {
 			if ($dev eq $stick) {
@@ -270,12 +296,9 @@ sub setupBootStick {
 			}
 		}
 		if (! $found) {
-			if ($stick) {
-				print STDERR $prefix,"Couldn't find [ $stick ] in list\n";
-			}
-			next;
+			print STDERR $prefix,"Couldn't find [ $stick ] in list\n";
+			return undef;
 		}
-		last;
 	}
 	#==========================================
 	# Creating menu.lst for the grub

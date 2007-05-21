@@ -155,6 +155,7 @@ function suseConfig {
 # baseCleanMount
 #--------------------------------------
 function baseCleanMount {
+	umount /proc/sys/fs/binfmt_misc
 	umount /proc
 	umount /dev/pts
 	umount /sys

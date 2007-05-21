@@ -89,19 +89,11 @@ function importFile {
 	IFS="
 	"
 	while read line;do
-	IFS="="
-	count=0
-	for item in $line;do
-		if test $count = 0 ; then
-			key=$item ; count=1 ; continue
-		fi
-		if test $count = 1 ; then
-			item=`echo $item | tr -d \'`
-			Debug "$key=$item"
-			eval export $key\=\"$item\"
-			count=0
-		fi
-	done
+		echo $line | grep -qi "^#" && continue
+		key=`echo "$line" | cut -d '=' -f1`
+		item=`echo "$line" | cut -d '=' -f2- | tr -d \'`
+		Debug "$key=$item"
+		eval export $key\=\"$item\"
 	done
 }
 #======================================
@@ -675,6 +667,18 @@ function kernelList {
 			KERNEL_LIST=$KERNEL_LIST,$KERNEL_PAIR
 		fi
 	done
+	if [ -z "$KERNEL_LIST" ];then
+		if [ -f /mnt/boot/vmlinuz ] && [ -f /mnt/boot/initrd ];then
+			# /.../
+			# the system image doesn't provide the kernel and initrd but
+			# there is a downloaded kernel and initrd from the KIWI_INITRD
+			# setup. the kernelList function won't find initrds that get
+			# downloaded over tftp so make sure the vmlinuz/initrd combo
+			# gets added
+			# ----
+			KERNEL_LIST="vmlinuz:initrd"
+		fi
+	fi
 }
 #======================================
 # validateSize

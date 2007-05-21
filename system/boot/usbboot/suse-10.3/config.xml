@@ -37,7 +37,7 @@
 		<file name="fs/hfs/*"/>
 		<file name="fs/exportfs/*"/>
 		<file name="fs/squashfs.ko"/>
-		<file name="fs/unionfs.ko"/>
+		<file name="fs/aufs.ko"/>
 		<file name="fs/reiserfs/*"/>
 		<file name="fs/nls/nls_utf8.ko"/>
 		<file name="net/ipv6/*"/>
@@ -61,7 +61,8 @@
 		<package name="util-linux"/>
 		<package name="squashfs"/>
 		<package name="squashfs-kmp-default"/>
-		<package name="unionfs-kmp-default"/>
+		<package name="aufs"/>
+		<package name="aufs-kmp-default"/>
 	</packages>
 	<packages type="boot">
 		<package name="kernel-default"/>

@@ -630,7 +630,10 @@ if test $systemIntegrity = "clean";then
 		# -------------------------
 		console=""
 		mkdir -p /config/boot/grub
-		echo "timeout 10" > /config/boot/grub/menu.lst
+		if test -z $KIWI_BOOT_TIMEOUT;then
+			KIWI_BOOT_TIMEOUT=10;
+		fi
+		echo "timeout $KIWI_BOOT_TIMEOUT" > /config/boot/grub/menu.lst
 		IFS="," ; for i in $KERNEL_LIST;do
 		if test ! -z "$i";then
 			kernel=`echo $i | cut -f1 -d:`
@@ -642,12 +645,14 @@ if test $systemIntegrity = "clean";then
 				echo " kernel /boot/xen.gz"            >> $menu
 				echo -n " module /boot/$kernel"        >> $menu
 				echo -n " root=${DISK}2 $console"      >> $menu
-				echo " $KIWI_INITRD_PARAMS"            >> $menu
+				echo -n " $KIWI_INITRD_PARAMS"         >> $menu
+				echo " $KIWI_KERNEL_OPTIONS"           >> $menu
 				echo " module /boot/$initrd"           >> $menu
 			else
 				echo -n " kernel (hd0,1)/boot/$kernel" >> $menu
 				echo -n " root=${DISK}2 $console"      >> $menu
-				echo " $KIWI_INITRD_PARAMS"            >> $menu
+				echo -n " $KIWI_INITRD_PARAMS"         >> $menu
+				echo " $KIWI_KERNEL_OPTIONS"           >> $menu
 				echo " initrd (hd0,1)/boot/$initrd"    >> $menu
 			fi
 		fi

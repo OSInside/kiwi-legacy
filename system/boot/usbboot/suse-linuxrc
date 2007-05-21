@@ -132,7 +132,7 @@ fi
 #--------------------------------------
 Echo "Filesystem of stick system is: $FSTYPE -> $stickDevice"
 if test "$FSTYPE" = "squashfs";then
-	export UNIONFS_CONFIG="$stickRoot"3,"$stickRoot"2,unionfs
+	export UNIONFS_CONFIG="$stickRoot"3,"$stickRoot"2,aufs
 else
 	Echo "Resize filesystem to full partition space..."
 	if test "$FSTYPE" = "reiserfs";then

@@ -14,6 +14,15 @@ Mon May 14 13:57:39 CEST 2007 - ms@suse.de
 - added loginfo method and include script output to root log
 - fixed set-repo option to use this path for downloading
   patterns if specified
+- make importFile function easier, fixed KERNEL_LIST content
+  if system image doesn't provide it but KIWI_INITRD does.
+  Added options KIWI_KERNEL_OPTIONS and KIWI_BOOT_TIMEOUT.
+  Thanks to snorp@novell.com who created the patch
+- added required netboot versions for SLES and SLED
+  GA and SP1 (#270881)
+- allow USB stick device to be selected via --bootstick-device
+  option. The given device must be one of the devices detected
+  by the getRemovableUSBStorageDevices() method (#275137)
 
 -------------------------------------------------------------------
 Tue May  8 17:27:19 CEST 2007 - ms@suse.de
