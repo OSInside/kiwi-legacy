@@ -49,6 +49,7 @@ sub new {
 	#------------------------------------------
 	my $usbzip = 0;
 	my $kernel;
+	my $knlink;
 	my $tmpdir;
 	my $result;
 	if (! defined $kiwi) {
@@ -82,8 +83,8 @@ sub new {
 		return undef;
 	}
 	$kernel = $initrd;
-	$kernel =~ s/gz$/kernel/;
-	$kernel = glob ("$kernel*");
+	$knlink =~ s/gz$/kernel/;
+	$kernel = readlink ($knlink);
 	if (! -f $kernel) {
 		$kiwi -> error  ("Couldn't find kernel file: $kernel");
 		$kiwi -> failed ();

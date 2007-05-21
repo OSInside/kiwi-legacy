@@ -1610,7 +1610,7 @@ sub extractKernel {
 		}
 		my $kernel = qx (gzip -dc $gzfile | strings | grep $lx | cut $sp);
 		chomp $kernel;
-		qx (mv $file $file.$kernel);
+		qx (mv $file $file.$kernel && ln -s $file.$kernel $file );
 		if (-f "$imageTree/boot/xen.gz") {
 			$file = "$imageDest/$name.kernel-xen";
 			qx (cp $imageTree/boot/xen.gz $file);
