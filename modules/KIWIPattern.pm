@@ -231,7 +231,6 @@ sub getRequiredPatterns {
 	my $pattref = shift;
 	my $kiwi    = $this->{kiwi};
 	my $pattype = $this->{pattype};
-	my @data    = @{$this->{data}};
 	my @pattern = @{$pattref};
 	my @patdata = $this -> getPatternContents (\@pattern);
 	my @reqs;
@@ -248,8 +247,11 @@ sub getRequiredPatterns {
 			'^(\+Re[qc]:|\+Sug:)','^(\-Re[qc]:|\-Sug:)',\@patdata
 		);
 	}
-	push (@reqs,"base");
-	push (@reqs,"desktop-base");
+	foreach (my $count=0;$count<@reqs;$count++) {
+		if ($reqs[$count] eq "basesystem") {
+			$reqs[$count] = "base";
+		}
+	}
 	foreach my $rpattern (@reqs) {
 		if (defined $this->{patdone}{$rpattern}) {
 			next;
@@ -263,7 +265,7 @@ sub getRequiredPatterns {
 			$this->{patdone}{$rpattern} = $rpattern;
 			next;
 		}
-		push ( @data,@patdata );
+		push ( @{$this->{data}} , @patdata );
 		$this->{patdone}{$rpattern} = $rpattern;
 		$this -> getRequiredPatterns ([$rpattern]);
 	}
