@@ -105,13 +105,13 @@ Authors:
 # %patch
 
 %build
-export USER=0 # set value to 0 to build boot images
+export K_USER=0 # set value to 0 to build boot images
 rm -rf $RPM_BUILD_ROOT
 test -e /.buildenv && . /.buildenv
 #cat /proc/mounts > /etc/fstab
 make buildroot=$RPM_BUILD_ROOT CFLAGS="$RPM_OPT_FLAGS"
 
-if [ $UID = $USER ];then
+if [ $UID = $K_USER ];then
 	# prepare and create boot images...
 	mkdir -p $RPM_BUILD_ROOT/srv/tftpboot/pxelinux.cfg
 	mkdir -p $RPM_BUILD_ROOT/srv/tftpboot/boot
@@ -146,7 +146,7 @@ if [ $UID = $USER ];then
 		../kiwi.pl --root $RPM_BUILD_ROOT/root-$rootName --prepare ../system/boot/$i
 		../kiwi.pl --create $RPM_BUILD_ROOT/root-$rootName \
 			-d $RPM_BUILD_ROOT/srv/tftpboot/boot
-		rm -rf $RPM_BUILD_ROOT/root-$rootName
+		rm -rf $RPM_BUILD_ROOT/root-$rootName*
 		echo >> $pxedefault
 		echo "LABEL $rootName" >> $pxedefault
 		(
@@ -187,7 +187,7 @@ make buildroot=$RPM_BUILD_ROOT \
      man_prefix=$RPM_BUILD_ROOT/%{_mandir} \
      install
 touch kiwi.loader
-if [ ! $UID = $USER ];then
+if [ ! $UID = $K_USER ];then
 	install -m 755 pxeboot/pxelinux.0.config \
 		$RPM_BUILD_ROOT/srv/tftpboot/pxelinux.cfg/default
 fi
