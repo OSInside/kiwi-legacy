@@ -358,6 +358,13 @@ The following format is used:
 		are part of the read/write filesystem. Please note the device
 		specifications in UNIONFS\_CONFIG must correspond with
 		the partition information in PART.
+	\item \textbf{KIWI\_KERNEL\_OPTIONS}\\
+		Specifies additional command line options to be passed to
+		the kernel when booting from disk.  For instance, to enable
+		a splash screen, you might use 'vga=0x317 splash=silent'.
+	\item \textbf{KIWI\_BOOT\_TIMEOUT}\\
+		Specifies the number of seconds to wait at the grub boot
+		screen when doing a local boot.  The default is 10.
 \end{itemize}
 
 %\newpage
