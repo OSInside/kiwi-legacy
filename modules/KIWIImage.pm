@@ -764,7 +764,7 @@ sub createImageLiveCD {
 	my $destination = "$main::RootTree/CD/boot/$isoarch/loader";
 	qx (mkdir -p $destination);
 	qx (cp $imageDest/$iso*$arch*.gz $destination/initrd);
-	qx (cp $imageDest/$iso*$arch*.kernel* $destination/linux);
+	qx (cp $imageDest/$iso*$arch*.kernel $destination/linux);
 	$kiwi -> done ();
 
 	#==========================================
@@ -1589,6 +1589,7 @@ sub extractKernel {
 		my $file = "$imageDest/$name.kernel";
 		my $lx = '"^Linux version"';
 		my $sp = '-f3 -d" "';
+		qx (rm -f $file);
 		qx (cp $imageTree/boot/vmlinuz $file);
 		my $code = $? >> 8;
 		if ($code != 0) {
@@ -1610,6 +1611,7 @@ sub extractKernel {
 		}
 		my $kernel = qx (gzip -dc $gzfile | strings | grep $lx | cut $sp);
 		chomp $kernel;
+		qx (rm -f $file.$kernel);
 		qx (mv $file $file.$kernel && ln -s $file.$kernel $file );
 		if (-f "$imageTree/boot/xen.gz") {
 			$file = "$imageDest/$name.kernel-xen";
