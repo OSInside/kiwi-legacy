@@ -105,8 +105,9 @@ Authors:
 # %patch
 
 %build
-export K_USER=0 # set value to 0 to build boot images
+export K_USER=0 # set value to -1 to prevent building boot images
 rm -rf $RPM_BUILD_ROOT
+test -e /.buildenv || export K_USER=-1 # no buildenv, no boot image build
 test -e /.buildenv && . /.buildenv
 #cat /proc/mounts > /etc/fstab
 make buildroot=$RPM_BUILD_ROOT CFLAGS="$RPM_OPT_FLAGS"
