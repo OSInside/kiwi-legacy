@@ -83,6 +83,7 @@ sub new {
 		return undef;
 	}
 	$kernel = $initrd;
+	$knlink = $kernel;
 	$knlink =~ s/gz$/kernel/;
 	$kernel = readlink ($knlink);
 	if (! -f $kernel) {
