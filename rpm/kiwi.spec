@@ -174,6 +174,7 @@ if [ "$UID" = "$K_USER" ];then
 		)
 	done
 	rm -f $RPM_BUILD_ROOT/srv/tftpboot/boot/*.md5
+	rm -f $RPM_BUILD_ROOT/srv/tftpboot/boot/*.kernel
 else
 	echo "cannot build prebuild images without root privileges"
 	true
