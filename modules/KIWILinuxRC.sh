@@ -886,7 +886,7 @@ function cleanInitrd () {
 			"/rw_branch") continue ;;
 			"/xino") continue ;;
 		esac
-		rm -rf $dir/* 2>&1 >/dev/null
+		rm -rf $dir/* >/dev/null 2>&1
 	done
 	# mount opens fstab so we give them one
 	touch /etc/fstab
