@@ -136,7 +136,7 @@ function probeFileSystem {
 	# ----
 	FSTYPE=unknown
 	dd if=$1 of=/tmp/filesystem-$$ bs=128k count=1 >/dev/null 2>&1
-	data=$(file /tmp/filesystem-$$) && rm -f /tmp/filesystem-$$
+	data=$(file /tmp/filesystem-$$ 2> /dev/null) && rm -f /tmp/filesystem-$$
 	case $data in
 		*ext3*)     FSTYPE=ext3 ;;
 		*ext2*)     FSTYPE=ext2 ;;
@@ -595,6 +595,8 @@ function writePartitionTable {
 	# input for sfdisk
 	# ----
 	diskDevice=$1
+
+	dd if=/dev/zero of=$diskDevice bs=512 count=1 >/dev/null 2>&1
 	sfdisk -uM --force $diskDevice < $PART_FILE >/dev/null 2>&1
 	if test $? != 0;then
 		systemException \
@@ -813,7 +815,7 @@ function mountSystem () {
 			fi
 		fi
 		Echo "Checking EXT2 write extend..."
-		e2fsck -y -f $rwDevice
+		e2fsck -y -f $rwDevice >/dev/null 2>&1
 		if ! mount $rwDevice /rw_branch >/dev/null 2>&1;then
 			retval=1
 		fi
@@ -885,6 +887,7 @@ function cleanInitrd () {
 			"/ro_branch") continue ;;
 			"/rw_branch") continue ;;
 			"/xino") continue ;;
+			"/dev") continue ;;
 		esac
 		rm -rf $dir/* >/dev/null 2>&1
 	done
