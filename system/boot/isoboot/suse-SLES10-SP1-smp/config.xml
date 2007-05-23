@@ -1,4 +1,4 @@
-<image name="initrd-isoboot-suse-SLES10">
+<image name="initrd-isoboot-suse-SLES10-SP1-smp">
 	<description type="boot">
 		<author>Marcus Schaefer</author>
 		<contact>ms@novell.com</contact>
@@ -36,6 +36,7 @@
 		<file name="fs/reiserfs/*"/>
 		<file name="fs/nls/nls_utf8.ko"/>
 		<file name="net/ipv6/*"/>
+		<file name="drivers/ata/*"/>
 		<file name="drivers/cdrom/*"/>
 		<file name="drivers/scsi/*"/>
 		<file name="drivers/message/fusion/*"/>
@@ -45,7 +46,7 @@
 		<source path="this://repo"/>
 	</repository>
 	<repository type="yast2" status="replaceable">
-		<source path="ftp://dist.suse.de/install/SLP/SLES-10-GM/%arch/DVD1"/>
+		<source path="/mounts/machcd2/dists/full-sle10-sp-%arch"/>
 	</repository>
 	<packages type="image">
 		<package name="atftp"/>
@@ -71,9 +72,10 @@
 		<package name="gfxboot"/>
 		<package name="syslinux"/>
 		<package name="make"/>
+		<package name="memtest86"/>
 	</packages>
 	<packages type="boot">
-		<package name="kernel-default"/>
+		<package name="kernel-smp"/>
 		<package name="filesystem"/>
 		<package name="glibc-locale"/>
 		<package name="devs"/>
