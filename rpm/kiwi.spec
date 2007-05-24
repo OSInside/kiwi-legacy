@@ -169,6 +169,7 @@ if [ "$UID" = "$K_USER" ];then
 	done
 	rm -f $RPM_BUILD_ROOT/srv/tftpboot/boot/*.md5
 	rm -f $RPM_BUILD_ROOT/srv/tftpboot/boot/*.kernel
+	chmod 644 $pxedefault
 else
 	echo "cannot build prebuild images without root privileges"
 	true
@@ -184,7 +185,7 @@ make buildroot=$RPM_BUILD_ROOT \
      install
 touch kiwi.loader
 if [ ! "$UID" = "$K_USER" ];then
-	install -m 755 pxeboot/pxelinux.0.config \
+	install -m 644 pxeboot/pxelinux.0.config \
 		$RPM_BUILD_ROOT/srv/tftpboot/pxelinux.cfg/default
 fi
 test -L $RPM_BUILD_ROOT/srv/tftpboot/pxelinux.0 && \

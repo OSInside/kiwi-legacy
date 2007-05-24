@@ -1,0 +1,5 @@
+#/.../
+# kiwi usbboot descriptions
+# The boot images here are used for booting live USB sticks
+# The complete operating system and boot facility is on the
+# stick. A portable operating system.

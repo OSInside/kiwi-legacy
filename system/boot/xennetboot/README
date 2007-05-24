@@ -1,0 +1,7 @@
+#/.../
+# kiwi xennetboot descriptions
+# The boot images here are used in the same way than the netboot
+# boot images except that the used kernel is the xen kernel. The
+# xen kernel consists of the kernel itself and the hypervisor which
+# requires the mboot.c32 loader to be able to load the xen kernel
+# directly over the network using the PXE protocol
