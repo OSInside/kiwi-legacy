@@ -228,26 +228,33 @@ cat kiwi.loader
 # ------------------------------------------------
 %files -n kiwi-desc-isoboot
 %defattr(-, root, root)
+%doc %{_datadir}/kiwi/image/isoboot/README
+%doc %{_datadir}/kiwi/image/isoinstboot/README
 %{_datadir}/kiwi/image/isoboot
 %{_datadir}/kiwi/image/isoinstboot
 
 %files -n kiwi-desc-vmxboot
 %defattr(-, root, root)
+%doc %{_datadir}/kiwi/image/vmxboot/README
 %{_datadir}/kiwi/image/vmxboot
 
 %files -n kiwi-desc-usbboot
 %defattr(-, root, root)
+%doc %{_datadir}/kiwi/image/usbboot/README
 %{_datadir}/kiwi/image/usbboot
 
 %files -n kiwi-desc-netboot
 %defattr(-, root, root)
+%doc %{_datadir}/kiwi/image/netboot/README
 %{_datadir}/kiwi/image/netboot
 
 %files -n kiwi-desc-xennetboot
 %defattr(-, root, root)
+%doc %{_datadir}/kiwi/image/xennetboot/README
 %{_datadir}/kiwi/image/xennetboot
 
 %files -n kiwi-desc-xenboot
 %defattr(-, root, root)
+%doc %{_datadir}/kiwi/image/xenboot/README
 %{_datadir}/kiwi/image/xenboot
 
