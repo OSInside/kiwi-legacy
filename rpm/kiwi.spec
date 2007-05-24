@@ -230,31 +230,31 @@ cat kiwi.loader
 %defattr(-, root, root)
 %doc %{_datadir}/kiwi/image/isoboot/README
 %doc %{_datadir}/kiwi/image/isoinstboot/README
-%{_datadir}/kiwi/image/isoboot
-%{_datadir}/kiwi/image/isoinstboot
+%{_datadir}/kiwi/image/isoboot/suse*
+%{_datadir}/kiwi/image/isoinstboot/suse*
 
 %files -n kiwi-desc-vmxboot
 %defattr(-, root, root)
 %doc %{_datadir}/kiwi/image/vmxboot/README
-%{_datadir}/kiwi/image/vmxboot
+%{_datadir}/kiwi/image/vmxboot/suse*
 
 %files -n kiwi-desc-usbboot
 %defattr(-, root, root)
 %doc %{_datadir}/kiwi/image/usbboot/README
-%{_datadir}/kiwi/image/usbboot
+%{_datadir}/kiwi/image/usbboot/suse*
 
 %files -n kiwi-desc-netboot
 %defattr(-, root, root)
 %doc %{_datadir}/kiwi/image/netboot/README
-%{_datadir}/kiwi/image/netboot
+%{_datadir}/kiwi/image/netboot/suse*
 
 %files -n kiwi-desc-xennetboot
 %defattr(-, root, root)
 %doc %{_datadir}/kiwi/image/xennetboot/README
-%{_datadir}/kiwi/image/xennetboot
+%{_datadir}/kiwi/image/xennetboot/suse*
 
 %files -n kiwi-desc-xenboot
 %defattr(-, root, root)
 %doc %{_datadir}/kiwi/image/xenboot/README
-%{_datadir}/kiwi/image/xenboot
+%{_datadir}/kiwi/image/xenboot/suse*
 
