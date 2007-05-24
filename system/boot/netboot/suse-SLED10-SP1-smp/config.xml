@@ -37,8 +37,8 @@
 		<file name="drivers/net/*"/>
 	</drivers>
 	<repository type="rpm-dir">
-        <source path="this://repo"/>
-    </repository>
+		<source path="/usr/share/kiwi/image/netboot/suse-sles-repo"/>
+	</repository>
 	<repository type="yast2" status="replaceable">
 		<source path="/mounts/machcd2/dists/full-sle10-sp-%arch"/>
 	</repository>

@@ -38,9 +38,9 @@
 	<repository type="yast2" status="replaceable">
 		<source path="ftp://dist.suse.de/install/SLP/SLES-10-GM/%arch/DVD1"/>
 	</repository>
-    <repository type="rpm-dir">
-        <source path="this://repo"/>
-    </repository>
+	<repository type="rpm-dir">
+		<source path="/usr/share/kiwi/image/netboot/suse-sles-repo"/>
+	</repository>
 	<packages type="image">
 		<package name="atftp"/>
 		<package name="bind-libs"/>
