@@ -2,8 +2,9 @@
 Wed May 23 20:50:34 CEST 2007 - ms@suse.de
 
 - v1.37
-- added boot images for SLES10/SLED10 isoboot
-- added boot images for SLES10/SLED10 vmxboot
+- added boot images for SLES10/SLED10 isoboot (#270881)
+- added boot images for SLES10/SLED10 vmxboot (#270881)
+- added boot images for SLES10/SLED10 xenboot (#270881)
 - replaced tools restart and timed with reboot and read -t
 - some package building changes to make rpmlint happy
 
