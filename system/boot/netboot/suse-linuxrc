@@ -187,7 +187,7 @@ if [ $LOCAL_BOOT = "no" ];then
 			read SYSALIAS
 		else
 			Echo -n "Enter Alias Name [timeout in $NAME sec]: " && \
-			SYSALIAS=`/sbin/timed $NAME`
+			read -t $NAME SYSALIAS
 		fi
 		fi
 		hwinfo --all --log=hwinfo.$DHCPCHADDR >/dev/null
@@ -729,7 +729,7 @@ fi
 if [ $LOCAL_BOOT = "no" ];then
 	if test ! -z $REBOOT_IMAGE;then
 		Echo "Rebooting System to activate new kernel..."
-		/sbin/restart >/dev/null 2>&1
+		/sbin/reboot -f -i >/dev/null 2>&1
 	fi
 fi
 #======================================

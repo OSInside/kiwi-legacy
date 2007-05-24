@@ -119,12 +119,6 @@ if [ "$UID" = "$K_USER" ];then
 	mkdir -p /usr/share/kiwi/modules
 	rm -f /usr/share/kiwi/modules/KIWIScheme.xsd
 	cp -f modules/KIWIScheme.xsd /usr/share/kiwi/modules
-	for i in `find system/boot/ -name restart`;do
-		rm -f $i && cp -a tools/restart $i
-	done
-	for i in `find system/boot/ -name timed`;do
-		rm -f $i && cp -a tools/timed $i
-	done
 	cd modules
 	pxedefault=$RPM_BUILD_ROOT/srv/tftpboot/pxelinux.cfg/default
 	echo "# /.../" > $pxedefault

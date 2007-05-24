@@ -423,4 +423,4 @@ fi
 
 Echo "Rebooting System..."
 sleep 5
-/sbin/restart >/dev/null 2>&1
+/sbin/reboot -f -i >/dev/null 2>&1

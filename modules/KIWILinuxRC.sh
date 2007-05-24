@@ -109,7 +109,7 @@ function systemException {
 	case "$2" in
 	"reboot")
 		Echo "rebootException: reboot in 60 sec..."; sleep 60
-		/sbin/restart >/dev/null 2>&1
+		/sbin/reboot -f -i >/dev/null 2>&1
 	;;
 	"wait")
 		Echo "waitException: waiting for ever..."
