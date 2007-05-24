@@ -213,6 +213,7 @@ cat kiwi.loader
 # ------------------------------------------------
 %files -n kiwi-pxeboot -f kiwi.loader
 %defattr(-, root, root)
+%doc /srv/tftpboot/README
 /etc/permissions.d/kiwi
 %dir /srv/tftpboot
 %dir /srv/tftpboot/KIWI
