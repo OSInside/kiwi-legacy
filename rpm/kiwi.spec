@@ -188,9 +188,9 @@ if [ ! "$UID" = "$K_USER" ];then
 	install -m 644 pxeboot/pxelinux.0.config \
 		$RPM_BUILD_ROOT/srv/tftpboot/pxelinux.cfg/default
 fi
-test -L $RPM_BUILD_ROOT/srv/tftpboot/pxelinux.0 && \
+test -f $RPM_BUILD_ROOT/srv/tftpboot/pxelinux.0 && \
 	echo /srv/tftpboot/pxelinux.0 > kiwi.loader
-test -L $RPM_BUILD_ROOT/srv/tftpboot/mboot.c32 && \
+test -f $RPM_BUILD_ROOT/srv/tftpboot/mboot.c32 && \
 	echo /srv/tftpboot/mboot.c32 >> kiwi.loader
 
 cat kiwi.loader
