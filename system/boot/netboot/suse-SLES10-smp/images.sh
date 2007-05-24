@@ -7,21 +7,19 @@ echo "Configure image: [$name]..."
 # remove unneeded packages
 #------------------------------------------
 for i in \
-	PolicyKit audit-libs blocxx cpio cyrus-sasl db \
-	diffutils expat fillup gawk gdbm glib2 glibc-locale gnome-filesystem \
-	gpg info insserv iproute2 irqbalance libxcrypt libxml2 \
-	libzio limal limal-bootloader limal-perl logrotate mdadm mingetty \
-	openSUSE-release openldap2-client openslp pam pam-modules pcre \
-	perl perl-Bootloader perl-gettext permissions pm-utils pmtools \
-	python python-xml resmgr rpm-python smart suse-build-key udev
+	perl glibc-locale man info smart python \
+	python-xml python-elementtree perl-gettext \
+	perl-Bootloader pam-modules gawk gnome-filesystem \
+	openslp rpm-python suse-build-key permissions \
+	fillup pam expat suse-release libxml2 openldap2-client \
+	logrotate diffutils cpio bzip2 insserv ash gdbm rpm
 do
-    rpm -e $i --nodeps
+	rpm -e $i --nodeps
 done
 
 #==========================================
 # remove unneeded files
 #------------------------------------------
-rpm -e popt bzip2 --nodeps
 rm -rf `find -type d | grep .svn`
 rm -rf /usr/share/info
 rm -rf /usr/share/man
@@ -34,10 +32,5 @@ rm -rf /var/lib/rpm
 rm -rf /usr/lib/rpm
 rm -rf /var/lib/smart
 rm -rf /boot/* /opt/*
-
-#==========================================
-# umount /proc
-#------------------------------------------
-umount /proc
 
 exit 0

@@ -1,19 +1,27 @@
-<image name="initrd-vmxboot-suse-SLES10-SP1-smp">
+<image name="initrd-isoboot-suse-SLES10-smp">
 	<description type="boot">
 		<author>Marcus Schaefer</author>
 		<contact>ms@novell.com</contact>
-		<specification>boot/initrd image for virtual machines</specification>
+		<specification>boot/initrd image used for LiveDVD media</specification>
 	</description>
 	<preferences>
 		<type>cpio</type>
-		<version>2.7.1</version>
+		<version>2.1.1</version>
 		<size unit="M">60</size>
 		<compressed>yes</compressed>
 		<packagemanager>smart</packagemanager>
 		<rpm-check-signatures>False</rpm-check-signatures>
 	</preferences>
+	<drivers type="usbdrivers">
+		<file name="usb/host/usb-uhci.ko"/>
+		<file name="usb/host/usb-ohci.ko"/>
+		<file name="usb/host/ehci-hcd.ko"/>
+		<file name="usb/core/usbcore.ko"/>
+		<file name="usb/storage/usb-storage.ko"/>
+	</drivers>
 	<drivers type="drivers">
 		<file name="drivers/ide/*"/>
+		<file name="drivers/block/loop.ko"/>
 		<file name="net/packet/*"/>
 		<file name="fs/ext3/*"/>
 		<file name="fs/ext2/*"/>
@@ -26,26 +34,31 @@
 		<file name="fs/fat/*"/>
 		<file name="fs/vfat/*"/>
 		<file name="fs/reiserfs/*"/>
+		<file name="fs/nls/nls_utf8.ko"/>
 		<file name="net/ipv6/*"/>
-		<file name="drivers/ata/*"/>
+		<file name="drivers/cdrom/*"/>
 		<file name="drivers/scsi/*"/>
 		<file name="drivers/message/fusion/*"/>
 		<file name="drivers/net/*"/>
 	</drivers>
-	<repository type="yast2" status="replaceable">
-		<source path="/mounts/machcd2/dists/full-sle10-sp-%arch"/>
-	</repository>
 	<repository type="rpm-dir">
-		<source path="/usr/share/kiwi/image/vmxboot/suse-sles-repo"/>
+		<source path="/usr/share/kiwi/image/isoboot/suse-sles-repo"/>
+	</repository>
+	<repository type="yast2" status="replaceable">
+		<source path="ftp://dist.suse.de/install/SLP/SLES-10-GM/%arch/DVD1"/>
 	</repository>
 	<packages type="image">
+		<package name="atftp"/>
 		<package name="bind-libs"/>
 		<package name="bind-utils"/>
 		<package name="dhcpcd"/>
 		<package name="e2fsprogs"/>
 		<package name="file"/>
+		<package name="gawk"/>
 		<package name="hwinfo"/>
+		<package name="iproute2"/>
 		<package name="libcom_err"/>
+		<package name="lvm2"/>
 		<package name="module-init-tools"/>
 		<package name="net-tools"/>
 		<package name="netcfg"/>
@@ -53,15 +66,17 @@
 		<package name="reiserfs"/>
 		<package name="sysconfig"/>
 		<package name="sysfsutils"/>
+		<package name="tcpd"/>
 		<package name="util-linux"/>
-		<package name="grub"/>
+		<package name="gfxboot"/>
+		<package name="syslinux"/>
+		<package name="make"/>
 	</packages>
 	<packages type="boot">
 		<package name="kernel-smp"/>
 		<package name="filesystem"/>
 		<package name="glibc-locale"/>
 		<package name="devs"/>
-		<package name="diffutils"/>
 		<package name="procps"/>
 	</packages>
 </image>
