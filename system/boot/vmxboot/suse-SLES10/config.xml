@@ -1,0 +1,67 @@
+<image name="initrd-vmxboot-suse-SLES10">
+	<description type="boot">
+		<author>Marcus Schaefer</author>
+		<contact>ms@novell.com</contact>
+		<specification>boot/initrd image for virtual machines</specification>
+	</description>
+	<preferences>
+		<type>cpio</type>
+		<version>2.7.1</version>
+		<size unit="M">60</size>
+		<compressed>yes</compressed>
+		<packagemanager>smart</packagemanager>
+		<rpm-check-signatures>False</rpm-check-signatures>
+	</preferences>
+	<drivers type="drivers">
+		<file name="drivers/ide/*"/>
+		<file name="net/packet/*"/>
+		<file name="fs/ext3/*"/>
+		<file name="fs/ext2/*"/>
+		<file name="fs/binfmt_aout.ko"/>
+		<file name="fs/binfmt_misc.ko"/>
+		<file name="fs/mbcache.ko"/>
+		<file name="fs/quota_v1.ko"/>
+		<file name="fs/quota_v2.ko"/>
+		<file name="fs/jbd/*"/>
+		<file name="fs/fat/*"/>
+		<file name="fs/vfat/*"/>
+		<file name="fs/reiserfs/*"/>
+		<file name="net/ipv6/*"/>
+		<file name="drivers/ata/*"/>
+		<file name="drivers/scsi/*"/>
+		<file name="drivers/message/fusion/*"/>
+		<file name="drivers/net/*"/>
+	</drivers>
+	<repository type="yast2" status="replaceable">
+		<source path="ftp://dist.suse.de/install/SLP/SLES-10-GM/%arch/DVD1"/>
+	</repository>
+	<repository type="rpm-dir">
+		<source path="/usr/share/kiwi/image/vmxboot/suse-sles-repo"/>
+	</repository>
+	<packages type="image">
+		<package name="bind-libs"/>
+		<package name="bind-utils"/>
+		<package name="dhcpcd"/>
+		<package name="e2fsprogs"/>
+		<package name="file"/>
+		<package name="hwinfo"/>
+		<package name="libcom_err"/>
+		<package name="module-init-tools"/>
+		<package name="net-tools"/>
+		<package name="netcfg"/>
+		<package name="pciutils"/>
+		<package name="reiserfs"/>
+		<package name="sysconfig"/>
+		<package name="sysfsutils"/>
+		<package name="util-linux"/>
+		<package name="grub"/>
+	</packages>
+	<packages type="boot">
+		<package name="kernel-default"/>
+		<package name="filesystem"/>
+		<package name="glibc-locale"/>
+		<package name="devs"/>
+		<package name="diffutils"/>
+		<package name="procps"/>
+	</packages>
+</image>
