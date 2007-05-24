@@ -464,9 +464,13 @@ sub getCompressed {
 	# otherwise false. 
 	# ---
 	my $this = shift;
+	my $quiet= shift;
 	my $kiwi = $this->{kiwi};
 	my %type = %{$this->getImageTypeAndAttributes()};
 	if ("$type{type}" eq "vmx") {
+		if (defined $quiet) {
+			return 0;
+		}
 		$kiwi -> info ("Virtual machine type: ignoring compressed flag");
 		$kiwi -> done ();
 		return 0;
@@ -689,7 +693,7 @@ sub getImageConfig {
 	#==========================================
 	# preferences
 	#------------------------------------------
-	if (getCompressed ($this)) {
+	if (getCompressed ($this,"quiet")) {
 		$result{compressed} = "yes";
 	}
 	my %type = %{$this->getImageTypeAndAttributes()};
