@@ -117,8 +117,10 @@ if [ "$UID" = "$K_USER" ];then
 	mkdir -p $RPM_BUILD_ROOT/srv/tftpboot/pxelinux.cfg
 	mkdir -p $RPM_BUILD_ROOT/srv/tftpboot/boot
 	mkdir -p /usr/share/kiwi/modules
+	mkdir -p /usr/share/kiwi/image/netboot
 	rm -f /usr/share/kiwi/modules/KIWIScheme.xsd
 	cp -f modules/KIWIScheme.xsd /usr/share/kiwi/modules
+	cp -a system/boot/netboot/suse-sles-repo /usr/share/kiwi/image/netboot
 	cd modules
 	pxedefault=$RPM_BUILD_ROOT/srv/tftpboot/pxelinux.cfg/default
 	echo "# /.../" > $pxedefault
