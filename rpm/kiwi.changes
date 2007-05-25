@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri May 25 10:55:41 CEST 2007 - ms@suse.de
+
+- v1.38
+- use 192.168.0.254 as default server address in default
+  pxelinux.cfg/default file kiwitftp=... (#277958)
+
+-------------------------------------------------------------------
 Wed May 23 20:50:34 CEST 2007 - ms@suse.de
 
 - v1.37
