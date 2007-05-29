@@ -348,16 +348,31 @@ The following format is used:
 		automatically setup the unionfs/aufs filesystem. In case of
 		a PXE network image the netboot image requires a config.<MAC>
 		setup like the following example shows:
-		\textbf{UNIONFS\_CONFIG=/dev/sda3,/dev/sda2,aufs}. In this
-		example the first device /dev/sda3 represents the read/write
-		filesystem and the second device /dev/sda2 represents the
+		\textbf{UNIONFS\_CONFIG=/dev/sda2,/dev/sda3,aufs}. In this
+		example the first device /dev/sda2 represents the read/write
+		filesystem and the second device /dev/sda3 represents the
 		compressed system image filesystem. The container filesystem
 		aufs is then used to cover the read/write layer with the
 		read-only device to one read/write filesystem. If a file on
 		the read-only device is going to be written the changes inodes
 		are part of the read/write filesystem. Please note the device
 		specifications in UNIONFS\_CONFIG must correspond with
-		the partition information in PART.
+		the IMAGE and PART information. The following example should
+        explain the interconnections:
+
+		\begin{verbatim}
+		IMAGE=/dev/sda3;image/browser;1.1.1;192.168.1.1;4096
+		PART=200;S;x,300;L;/,x;L;x
+		UNIONFS_CONFIG=/dev/sda2,/dev/sda3,aufs
+		DISK=/dev/sda
+		\end{verbatim}
+
+        As the second element of the PART list must define the \textbf{root}
+        partition it's absolutely important that the first device in
+        UNIONFS\_CONFIG references this device as read/write device.
+        The second device of UNIONFS\_CONFIG has to reference the given
+        IMAGE device name.
+
 	\item \textbf{KIWI\_KERNEL\_OPTIONS}\\
 		Specifies additional command line options to be passed to
 		the kernel when booting from disk.  For instance, to enable
