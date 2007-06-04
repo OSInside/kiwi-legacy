@@ -20,6 +20,7 @@
 		<metadata type="rpm-dir">
 			<source path="/mounts/work3/CDs/full-i386/suse/%arch"/>
 		</metadata>
+		<srctool name="suse-instsource"/>
 		<package name="bob"/>
 		<package name="foo"/>
 	</instsource>

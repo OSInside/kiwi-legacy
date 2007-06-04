@@ -606,6 +606,32 @@ sub getMetaRepository {
 }
 
 #==========================================
+# getMetaTool
+#------------------------------------------
+sub getMetaTool {
+	# ...
+	# In order to be able to setup an installation source a tool
+	# must be available to handle the downloaded packages correctly.
+	# In case of suse a set of RPM packages must be unpacked using
+	# rpm2cpio and other suse specific tasks may be needed. All this
+	# is handled in the given tool which is different from one
+	# distribution to another. Kiwi itself provdes only the suse
+	# tool which is named suse-instsource
+	# ---
+	my $this = shift;
+	my $base = $this->{instsrcNodeList} -> get_node(1);
+	if (! defined $base) {
+		return undef;
+	}
+	my $element = $base -> getElementsByTagName ("srctool") -> get_node(1);
+	my $tool = $element -> getAttribute("name");
+	if (! $tool) {
+		return undef;
+	}
+	return $tool;
+}
+
+#==========================================
 # getRepository
 #------------------------------------------
 sub getRepository {

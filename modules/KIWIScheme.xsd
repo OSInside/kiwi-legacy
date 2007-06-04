@@ -19,9 +19,9 @@
 				<xs:element ref="instsource"  minOccurs="0" maxOccurs="1"/>
 				<xs:element ref="users"       minOccurs="0" maxOccurs="unbounded"/>
 				<xs:element ref="drivers"     minOccurs="0" maxOccurs="3"/>
-				<xs:element ref="repository"  minOccurs="1" maxOccurs="unbounded"/>
+				<xs:element ref="repository"  minOccurs="0" maxOccurs="unbounded"/>
 				<xs:element ref="deploy"      minOccurs="0" maxOccurs="1"/>
-				<xs:element ref="packages"    minOccurs="1" maxOccurs="3"/>
+				<xs:element ref="packages"    minOccurs="0" maxOccurs="3"/>
 			</xs:sequence>
 			<xs:attribute name="name" type="xs:string"/>
 			<xs:attribute name="inherit" type="xs:string"/>
@@ -32,8 +32,14 @@
 		<xs:complexType>
 			<xs:sequence>
 				<xs:element ref="metadata" minOccurs="1" maxOccurs="unbounded"/>
+				<xs:element ref="srctool"  minOccurs="1" maxOccurs="1"/>
 				<xs:element ref="package"  minOccurs="1" maxOccurs="unbounded"/>
 			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="srctool">
+		<xs:complexType>
+			<xs:attribute name="name" type="xs:string"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="metadata">
@@ -206,7 +212,7 @@
 			<xs:sequence>
 				<xs:element ref="type" minOccurs="1" maxOccurs="unbounded"/>
 				<xs:element ref="version" minOccurs="1" maxOccurs="1"/>
-				<xs:element ref="size" minOccurs="1" maxOccurs="1"/>
+				<xs:element ref="size" minOccurs="0" maxOccurs="1"/>
 				<xs:element ref="compressed" minOccurs="0" maxOccurs="1"/>
 				<xs:element ref="packagemanager" minOccurs="0" maxOccurs="1"/>
 				<xs:element ref="rpm-check-signatures" minOccurs="0" maxOccurs="1"/>

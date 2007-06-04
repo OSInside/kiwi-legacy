@@ -30,12 +30,13 @@ use KIWIBoot;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "1.38";
+our $Version       = "1.39";
 our $SchemeVersion = "1.3";
 #============================================
 # Globals
 #--------------------------------------------
 our $System  = "/usr/share/kiwi/image";
+our $Tools   = "/usr/share/kiwi/tools";
 our $Scheme  = "/usr/share/kiwi/modules/KIWIScheme.xsd";
 our $KConfig = "/usr/share/kiwi/modules/KIWIConfig.sh";
 #============================================
@@ -134,6 +135,26 @@ sub main {
 			$kiwi -> failed ();
 			my $code = kiwiExit (1); return $code;
 		}
+		#==========================================
+		# Initialize installation source tree
+		#------------------------------------------
+		my $tool = $xml -> getMetaTool();
+		if (! defined $tool) {
+			$kiwi -> error ("No instsource tool specified");
+			$kiwi -> failed ();
+			my $code = kiwiExit (1); return $code;
+		}
+		if (! -f $tool) {
+			if ($tool !~ /\//) {
+				$tool = $Tools."/".$tool;
+			}
+			if (! -f $tool) {
+				$kiwi -> error ("Couldn't find instsource tool: $tool");
+				$kiwi -> failed ();
+				my $code = kiwiExit (1); return $code;
+			}
+		}
+		print "***** $tool ******\n";
 		# TODO
 		# 1) unpack downloaded packages
 		# 2) call config/ package scripts
