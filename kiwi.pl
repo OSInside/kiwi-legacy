@@ -54,6 +54,7 @@ our $BootStick;         # deploy initrd booting from USB stick
 our $BootStickSystem;   # system image to be copied on an USB stick
 our $BootStickDevice;   # device to install stick image on
 our $BootVMSystem;      # system image to be copied on a VM disk
+our $BootVMFormat;      # virtual disk format supported by qemu-img
 our $BootVMDisk;        # deploy initrd booting from a VM 
 our $BootVMSize;        # size of virtual disk
 our $BootCD;            # deploy initrd booting from CD
@@ -459,7 +460,8 @@ sub main {
 			return $code;
 		}
 		my $boot = new KIWIBoot (
-			$kiwi,$BootVMDisk,$BootVMSystem,$BootVMSize
+			$kiwi,$BootVMDisk,$BootVMSystem,
+			$BootVMSize,undef,$BootVMFormat
 		);
 		if (! defined $boot) {
 			my $code = kiwiExit (1); return $code;
@@ -505,6 +507,7 @@ sub init {
 		"bootstick-system=s"    => \$BootStickSystem,
 		"bootstick-device=s"    => \$BootStickDevice,
 		"bootvm-system=s"       => \$BootVMSystem,
+		"bootvm-format=s"       => \$BootVMFormat,
 		"bootvm-disksize=s"     => \$BootVMSize,
 		"bootcd=s"              => \$BootCD,
 		"installcd=s"           => \$InstallCD,
@@ -573,6 +576,7 @@ sub usage {
 	print "     [ --bootstick-device <device> ] \\\n";
 	print "  kiwi --bootvm <initrd> --bootvm-system <systemImage> \\\n";
 	print "     [ --bootvm-disksize <size> ]\n";
+	print "     [ --bootvm-format <format> ]\n";
 	print "  kiwi --bootcd <initrd>\n";
 	print "  kiwi --installcd <initrd> --installcd-system <systemImage>\n";
 	print "Helper Tools:\n";

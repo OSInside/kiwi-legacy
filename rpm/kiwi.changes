@@ -2,6 +2,8 @@
 Mon Jun  4 10:59:48 CEST 2007 - ms@suse.de
 
 - v1.39
+- added format attribute to specify virtual disk format supported
+  by qemu-img. By default only the raw type will be generated
 - added srctool attribute to instsource section. This allows you
   to set a program name for setting up the installation source
   after the required meta packages were downloaded. This tool

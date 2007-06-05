@@ -230,6 +230,20 @@
 					<xs:attribute name="boot"  type="xs:string"/>
 					<xs:attribute name="flags" type="xs:string"/>
 					<xs:attribute name="filesystem" type="xs:string"/>
+					<xs:attribute name="format" use="optional">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:enumeration value="vvfat"/>
+								<xs:enumeration value="vpc"/>
+								<xs:enumeration value="bochs"/>
+								<xs:enumeration value="dmg"/>
+								<xs:enumeration value="cloop"/>
+								<xs:enumeration value="vmdk"/>
+								<xs:enumeration value="qcow"/>
+								<xs:enumeration value="cow"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:attribute>
 				</xs:extension>
 			</xs:simpleContent>
 		</xs:complexType>

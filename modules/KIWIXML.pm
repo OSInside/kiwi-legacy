@@ -297,6 +297,7 @@ sub getImageTypeAndAttributes {
 		$record{boot} = $node -> getAttribute("boot");
 		$record{flags}= $node -> getAttribute("flags");
 		$record{filesystem} = $node -> getAttribute("filesystem");
+		$record{format} = $node -> getAttribute("format");
 		$result{$prim} = \%record;
 		$count++;
 	}

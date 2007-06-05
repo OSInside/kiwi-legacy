@@ -44,6 +44,7 @@ sub new {
 	my $system = shift;
 	my $vmsize = shift;
 	my $device = shift;
+	my $format = shift;
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
@@ -125,6 +126,7 @@ sub new {
 	$this->{vmsize} = $vmsize;
 	$this->{usbzip} = $usbzip;
 	$this->{device} = $device;
+	$this->{format} = $format;
 	return $this;
 }
 
@@ -556,8 +558,8 @@ sub setupBootDisk {
 	my $kiwi      = $this->{kiwi};
 	my $system    = $this->{system};
 	my $vmsize    = $this->{vmsize};
+	my $format    = $this->{format};
 	my $diskname  = $system.".raw";
-	my $vmdkname  = $system.".vmdk";
 	my $loop      = "/dev/loop0";
 	my $loopfound = 0;
 	my $result;
@@ -750,19 +752,22 @@ sub setupBootDisk {
 	}
 	$kiwi -> done ();
 	#==========================================
-	# Create vmdk (VMware) image
+	# Create image described by given format
 	#------------------------------------------
-	$kiwi -> info ("Creating vmdk image");
-	$status = qx ( qemu-img convert -f raw $loop -O vmdk $vmdkname );
-	$result = $? >> 8;
-	if ($result != 0) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't create vmdk image: $status");
-		$kiwi -> failed ();
-		qx ( /sbin/losetup -d $loop );
-		return undef;
+	if (defined $format) {
+		$kiwi -> info ("Creating $format image");
+		my $formatname = $system.".".$format;
+		$status = qx ( qemu-img convert -f raw $loop -O $format $formatname );
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create $format image: $status");
+			$kiwi -> failed ();
+			qx ( /sbin/losetup -d $loop );
+			return undef;
+		}
+		$kiwi -> done ();
 	}
-	$kiwi -> done ();
 	#==========================================
 	# cleanup loop setup and device mapper
 	#------------------------------------------

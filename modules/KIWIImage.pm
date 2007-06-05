@@ -363,7 +363,7 @@ sub createImageUSB {
 	#------------------------------------------
 	$kiwi -> info ("Creating $text boot image: $boot...\n");
 	my $Prepare = $imageTree."/image";
-	my $xml = new KIWIXML ( $kiwi,$Prepare );
+	my $xml = new KIWIXML ( $kiwi,$Prepare,undef,$main::SetImageType );
 	if (! defined $xml) {
 		return undef;
 	}
@@ -385,6 +385,10 @@ sub createImageUSB {
 		qx (rm -rf $main::RootTree);
 	}
 	$result{bootImage} = $main::ImageName;
+	if ($text eq "VMX") {
+		my %type = %{$xml->getImageTypeAndAttributes()};
+		$result{format} = $type{format};
+	}
 	if ($text eq "USB") {
 		$main::Survive = "default";
 	}
@@ -424,11 +428,13 @@ sub createImagePXE {
 #------------------------------------------
 sub createImageVMX {
 	# ...
-	# Create virtual machine disks usable for QEMU (raw) and VMware virtual
-	# machines. The process will create the system image and the
-	# appropriate vmx boot image plus a .raw and a .vmdk image usable
-	# in vmware player or qemu (after converting the raw file). The boot
-	# image description must exist in /usr/share/kiwi/image.
+	# Create virtual machine disks. By default a raw disk image will
+	# created from which other types can be converted. The output
+	# format is specified by the format attribute in the type section.
+	# Supported formats are: vvfat vpc bochs dmg cloop vmdk qcow cow raw
+	# The process will create the system image and the appropriate vmx
+	# boot image plus a .raw and an optional format specific image.
+	# The boot image description must exist in /usr/share/kiwi/image.
 	#
 	# NOTE: Because the first steps of creating
 	# a virtual machine image are the same as creating a usb stick image
@@ -447,10 +453,11 @@ sub createImageVMX {
 	undef $main::Prepare;
 	undef $main::Create;
 	#==========================================
-	# Create .raw and .vmdk VM images
+	# Create virtual disk images
 	#------------------------------------------
 	$main::BootVMDisk   = $main::Destination."/".$name->{bootImage}.".gz";
 	$main::BootVMSystem = $main::Destination."/".$name->{systemImage};
+	$main::BootVMFormat = $name->{format};
 	if (! defined main::main()) {
 		$main::Survive = "default";
 		return undef;
