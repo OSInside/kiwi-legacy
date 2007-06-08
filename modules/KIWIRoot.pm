@@ -74,18 +74,9 @@ sub new {
 		$kiwi -> failed ();
 		return undef;
 	}
-	my %repository;
-	if ($baseSystem eq "/meta-system") {
-		%repository = $xml -> getMetaRepository();
-	} else {
-		%repository = $xml -> getRepository();
-	}
+	my %repository = $xml -> getRepository();
 	if (! %repository) {
-		if ($baseSystem eq "/meta-system") {
-			$kiwi -> error ("No instsource repository specified in XML tree");
-		} else {
-			$kiwi -> error ("No repository specified in XML tree");
-		}
+		$kiwi -> error ("No repository specified in XML tree");
 		$kiwi -> failed ();
 		return undef; 
 	}
@@ -142,29 +133,8 @@ sub new {
 	#==========================================
 	# Create root directory
 	#------------------------------------------
-	my $rootError = 1;
-	my $root;
-	if (! defined $useRoot) {
-		if (! defined $selfRoot) {
-			$root = qx ( mktemp -q -d /tmp/kiwi.XXXXXX );
-			$code = $? >> 8;
-			if ($code == 0) {
-				$rootError = 0;
-			}
-			chomp $root;
-		} else {
-			$root = $selfRoot;
-			if (mkdir $root) {
-				$rootError = 0;
-			}
-		}
-	} else {
-		if (-d $useRoot) {
-			$root = $useRoot;
-			$rootError = 0;
-		}
-	}
-	if ( $rootError ) {
+	my $root = $xml -> createTmpDirectory ( $useRoot,$selfRoot );
+	if ( ! defined $root ) {
 		$kiwi -> error ("Couldn't create root dir: $root: $!");
 		$kiwi -> failed ();
 		return undef;
@@ -227,12 +197,7 @@ sub init {
 	#==========================================
 	# Get base Package list
 	#------------------------------------------
-	my @initPacs;
-	if ($baseSystem eq "/meta-system") {
-		@initPacs = $xml -> getBaseMetaList();
-	} else {
-		@initPacs = $xml -> getBaseList();
-	}
+	my @initPacs = $xml -> getBaseList();
 	if (! @initPacs) {
 		$kiwi -> error ("Couldn't create base package list");
 		$kiwi -> failed ();
@@ -246,21 +211,14 @@ sub init {
 		return undef;
 	}
 	#==========================================
-	# Add src, install/download and clean src
+	# Add source, install and clean source
 	#------------------------------------------
 	if (! $manager -> setupInstallationSource()) {
 		return undef;
 	}
-	if ($baseSystem eq "/meta-system") {
-		if (! $manager -> setupDownload (@initPacs)) {
-			$manager -> resetInstallationSource();
-			return undef;
-		}
-	} else {
-		if (! $manager -> setupRootSystem(@initPacs)) {
-			$manager -> resetInstallationSource();
-			return undef;
-		}
+	if (! $manager -> setupRootSystem(@initPacs)) {
+		$manager -> resetInstallationSource();
+		return undef;
 	}
 	#==========================================
 	# reset installation source
@@ -273,12 +231,6 @@ sub init {
 	#------------------------------------------
 	if (! $manager -> resetSignatureCheck()) {
 		return undef;
-	}
-	#==========================================
-	# Return in case of instsource creation
-	#------------------------------------------
-	if ($baseSystem eq "/meta-system") {
-		return $this;
 	}
 	#==================================
 	# Copy/touch some defaults files

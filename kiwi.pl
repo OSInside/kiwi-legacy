@@ -122,43 +122,37 @@ sub main {
 		#==========================================
 		# Initialize installation source tree
 		#------------------------------------------
-		$root = new KIWIRoot (
-			$kiwi,$xml,$CreateInstSource,$RootTree,
-			"/meta-system"
-		);
+		my $root = $xml -> createTmpDirectory ( $RootTree );
 		if (! defined $root) {
-			$kiwi -> error ("Couldn't create root object");
+			$kiwi -> error ("Couldn't create instsource root");
 			$kiwi -> failed ();
 			my $code = kiwiExit (1); return $code;
 		}
-		if (! defined $root -> init ()) {
-			$kiwi -> error ("Base initialization failed");
-			$kiwi -> failed ();
-			my $code = kiwiExit (1); return $code;
-		}
-		#==========================================
-		# Initialize installation source tree
-		#------------------------------------------
-		my $tool = $xml -> getMetaTool();
-		if (! defined $tool) {
-			$kiwi -> error ("No instsource tool specified");
-			$kiwi -> failed ();
-			my $code = kiwiExit (1); return $code;
-		}
-		if (! -f $tool) {
-			if ($tool !~ /\//) {
-				$tool = $Tools."/".$tool;
-			}
-			if (! -f $tool) {
-				$kiwi -> error ("Couldn't find instsource tool: $tool");
-				$kiwi -> failed ();
-				my $code = kiwiExit (1); return $code;
+		print "*** DIR = $root\n";
+		my %source = $xml -> getInstSourceRepository();
+		my @slist  = keys %source;
+		print "*** SOURCE = @slist\n";
+		my @arch = $xml -> getInstSourceArchList();
+		print "*** ARCH(S): @arch\n";
+		my %meta = $xml -> getInstSourceMetaList();
+		my %pack = $xml -> getInstSourceList();
+		foreach (keys %meta) {
+			my $p = $_;
+			my $a = $meta{$p};
+			print "$p -> ";
+			if (defined $a) {
+				print "$a\n";
+			} else {
+				print "undefined\n";
 			}
 		}
-		print "***** $tool ******\n";
+		my $file="$slist[1]/kiwi-desc-usbboot";
+		if (! $xml->getInstSourceFile ($file,$root)) {
+			$kiwi -> error ("Couldn't download file");
+			$kiwi -> failed ();
+		}
 		# TODO
-		# 1) unpack downloaded packages
-		# 2) call config/ package scripts
+		# Hi Jan, this is your playground :-) Have fun
 		# ...
 		kiwiExit (0);
 	}

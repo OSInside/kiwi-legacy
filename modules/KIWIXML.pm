@@ -19,6 +19,7 @@ package KIWIXML;
 #------------------------------------------
 use strict;
 use XML::LibXML;
+use LWP;
 use KIWILog;
 use KIWIPattern;
 use KIWIManager qw (%packageManager);
@@ -190,6 +191,9 @@ sub new {
 	#==========================================
 	# Check type information from xml input
 	#------------------------------------------
+	if (! $optionsNodeList) {
+		return $this;
+	}
 	if (! $this -> getImageTypeAndAttributes()) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Boot type: $imageWhat not specified in config.xml");
@@ -206,8 +210,12 @@ sub createURLList {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $foreignRepo = $this->{foreignRepo};
-	my %repository  = $this->getRepository();
+	my %repository  = ();
 	my @urllist     = ();
+	%repository = $this->getRepository();
+	if (! %repository) {
+		%repository = $this->getInstSourceRepository();
+	}
 	foreach my $source (keys %repository) {
 		my $urlHandler;
 		if ( defined $foreignRepo->{prepare} ) {
@@ -582,13 +590,12 @@ sub getUsers {
 }
 
 #==========================================
-# getMetaRepository
+# getInstSourceRepository
 #------------------------------------------
-sub getMetaRepository {
+sub getInstSourceRepository {
 	# ...
-	# Get the repository type used for building
-	# up an installation source tree. For information on the
-	# available types refer to the package manager documentation
+	# Get the repository path and priority used for building
+	# up an installation source tree.
 	# ---
 	my $this = shift;
 	my %result;
@@ -596,40 +603,28 @@ sub getMetaRepository {
 	if (! defined $base) {
 		return %result;
 	}
-	my @node = $base -> getElementsByTagName ("metadata");
+	my @node = $base -> getElementsByTagName ("instrepo");
 	foreach my $element (@node) {
-		my $type = $element -> getAttribute("type");
+		my $prio = $element -> getAttribute("priority");
 		my $stag = $element -> getElementsByTagName ("source") -> get_node(1);
 		my $source = $this -> resolveLink ( $stag -> getAttribute ("path") );
-		$result{$source} = $type;
+		$result{$source} = $prio;
 	}
 	return %result;
 }
 
 #==========================================
-# getMetaTool
+# getInstSourceArchList
 #------------------------------------------
-sub getMetaTool {
+sub getInstSourceArchList {
 	# ...
-	# In order to be able to setup an installation source a tool
-	# must be available to handle the downloaded packages correctly.
-	# In case of suse a set of RPM packages must be unpacked using
-	# rpm2cpio and other suse specific tasks may be needed. All this
-	# is handled in the given tool which is different from one
-	# distribution to another. Kiwi itself provdes only the suse
-	# tool which is named suse-instsource
+	# Get the architecture list used for building up
+	# an installation source tree
 	# ---
 	my $this = shift;
-	my $base = $this->{instsrcNodeList} -> get_node(1);
-	if (! defined $base) {
-		return undef;
-	}
-	my $element = $base -> getElementsByTagName ("srctool") -> get_node(1);
-	my $tool = $element -> getAttribute("name");
-	if (! $tool) {
-		return undef;
-	}
-	return $tool;
+	my $base = $this->{instsrcNodeList} ->  get_node(1);
+	my $attr = $base->getAttribute ("arch");
+	return split (",",$attr);
 }
 
 #==========================================
@@ -797,6 +792,49 @@ sub getPackageAttributes {
 }
 
 #==========================================
+# getInstSourcePackageAttributes
+#------------------------------------------
+sub getInstSourcePackageAttributes {
+	# ...
+	# Create an attribute hash for the given package
+	# and package category.
+	# ---
+	my $this = shift;
+	my $what = shift;
+	my $pack = shift;
+	my $nodes;
+	my $base = $this->{instsrcNodeList} -> get_node(1);
+	if ($what eq "metapackages") {
+		$nodes = $base -> getElementsByTagName ("metadata");
+	} elsif ($what eq "instpackages") {
+		$nodes = $base -> getElementsByTagName ("packages");
+	}
+	my %result;
+	my @attrib = (
+		"priority" ,"addarch","removearch",
+		"forcearch","source" ,"script"
+	);
+	for (my $i=1;$i<= $nodes->size();$i++) {
+		my $node  = $nodes -> get_node($i);
+		my @plist = $node  -> getElementsByTagName ("package");
+		foreach my $element (@plist) {
+			my $package = $element -> getAttribute ("name");
+			if ($package ne $pack) {
+				next;
+			}
+			foreach my $key (@attrib) {
+				my $value = $element -> getAttribute ($key);
+				if (defined $value) {
+					$result{$key} = $value;
+					return \%result;
+				}
+			}
+		}
+	}
+	return undef;
+}
+
+#==========================================
 # getList
 #------------------------------------------
 sub getList {
@@ -811,13 +849,17 @@ sub getList {
 	my $kiwi = $this->{kiwi};
 	my %pattr;
 	my $nodes;
-	if ($what ne "meta") {
-		%pattr= getPackageAttributes ($this,$what);
+	if ($what ne "metapackages") {
+		%pattr= $this -> getPackageAttributes ( $what );
 	}
-	if ($what ne "meta") {
-		$nodes = $this->{packageNodeList};
+	if ($what eq "metapackages") {
+		my $base = $this->{instsrcNodeList} -> get_node(1);
+		$nodes = $base -> getElementsByTagName ("metadata");
+	} elsif ($what eq "instpackages") {
+		my $base = $this->{instsrcNodeList} -> get_node(1);
+		$nodes = $base -> getElementsByTagName ("packages");
 	} else {
-		$nodes = $this->{instsrcNodeList};
+		$nodes = $this->{packageNodeList};
 	}
 	my @result;
 	for (my $i=1;$i<= $nodes->size();$i++) {
@@ -826,7 +868,7 @@ sub getList {
 		#------------------------------------------
 		my $node = $nodes -> get_node($i);
 		my $type;
-		if ($what ne "meta") {
+		if (($what ne "metapackages") && ($what ne "instpackages")) {
 			$type = $node -> getAttribute ("type");
 			if ($type ne $what) {
 				next;
@@ -862,7 +904,7 @@ sub getList {
 		#==========================================
 		# Check for pattern descriptions
 		#------------------------------------------
-		if ($type ne "meta") {
+		if ($type ne "metapackages") {
 			my @slist = $node -> getElementsByTagName ("opensusePattern");
 			my @pattlist = ();
 			foreach my $element (@slist) {
@@ -923,15 +965,43 @@ sub getList {
 }
 
 #==========================================
-# getBaseMetaList
+# getInstSourceMetaList
 #------------------------------------------
-sub getBaseMetaList {
+sub getInstSourceMetaList {
 	# ...
-	# Create base package list needed to create the
-	# installation source tree
+	# Create base package list of the instsource
+	# metadata package description
 	# ---
 	my $this = shift;
-	return getList ($this,"meta");
+	my @list = getList ($this,"metapackages");
+	my %data = ();
+	foreach my $pack (@list) {
+		my $attr = $this -> getInstSourcePackageAttributes (
+			"metapackages",$pack
+		);
+		$data{$pack} = $attr;
+	}
+	return %data;
+}
+
+#==========================================
+# getInstSourceList
+#------------------------------------------
+sub getInstSourceList {
+	# ...
+	# Create base package list of the instsource
+	# packages package description
+	# ---
+	my $this = shift;
+	my @list = getList ($this,"instpackages");
+	my %data = ();
+	foreach my $pack (@list) {
+		my $attr = $this -> getInstSourcePackageAttributes (
+			"instpackages",$pack
+		);
+		$data{$pack} = $attr;
+	}
+	return %data;
 }
 
 #==========================================
@@ -1048,6 +1118,126 @@ sub resolveArchitectur {
 sub getPackageNodeList {
 	my $this = shift;
 	return $this->{packageNodeList};
+}
+
+#==========================================
+# createTmpDirectory
+#------------------------------------------
+sub createTmpDirectory {
+	my $this      = shift;
+	my $useRoot   = shift;
+	my $selfRoot  = shift;
+	my $rootError = 1;
+	my $root;
+	my $code;
+	if (! defined $useRoot) {
+		if (! defined $selfRoot) {
+			$root = qx ( mktemp -q -d /tmp/kiwi.XXXXXX );
+			$code = $? >> 8;
+			if ($code == 0) {
+				$rootError = 0;
+			}
+			chomp $root;
+		} else {
+			$root = $selfRoot;
+			if (mkdir $root) {
+				$rootError = 0;
+			}
+		}
+	} else {
+		if (-d $useRoot) { 
+			$root = $useRoot;
+			$rootError = 0;
+		}
+	}
+	if ( $rootError ) {
+		return undef;
+	}
+	return $root;
+}
+
+#==========================================
+# getInstSourceFile
+#------------------------------------------
+sub getInstSourceFile {
+	# ...
+	# download a file from a network or local location to
+	# a given local path
+	# ---
+	my $this    = shift;
+	my $url     = shift;
+	my $dest    = shift;
+	my $dirname;
+	my $basename;
+	#==========================================
+	# Check parameters
+	#------------------------------------------
+	if ((! defined $dest) || (! defined $url)) {
+		return undef;
+	}
+	#==========================================
+	# setup destination base and dir name
+	#------------------------------------------
+	if ($dest =~ /(^.*\/)(.*)/) {
+		$dirname  = $1;
+		$basename = $2;
+		if (! $basename) {
+			$url =~ /(^.*\/)(.*)/;
+			$basename = $2;
+		}
+	} else {
+		return undef;
+	}
+	#==========================================
+	# check base and dir name
+	#------------------------------------------
+	if (! $basename) {
+		return undef;
+	}
+	if (! -d $dirname) {
+		return undef;
+	}
+	#==========================================
+	# download file
+	#------------------------------------------
+	if ($url =~ /^\//) {
+		if (! open (IN,$url)) {
+			return undef;
+		}
+		if (! open (OU,">$dirname/$basename")) {
+			return undef;
+		}
+		while (<IN>) {
+			print OU $_;
+		}
+		close IN;
+		close OU;
+	} else {
+		my $dest = $dirname."/".$basename;
+		my $data = qx (lwp-download $url $dest);
+		my $code = $? >> 8;
+		if ($code == 0) {
+			return $this;
+		}
+		if ($url =~ /(^.*\/)(.*)/) {
+			my $location = $1;
+			my $search   = $2;
+			my $browser  = LWP::UserAgent->new;
+			my $request  = HTTP::Request->new (GET => $location);
+			my $response = $browser  -> request ( $request );
+			my $content  = $response -> content ();
+			if ($content =~ /\"($search.*)\"/) {
+				$url  = $location.$1;
+				$data = qx (lwp-download $url $dest);
+				$code = $? >> 8;
+				if ($code == 0) {
+					return $this;
+				}
+			}
+		}
+		return undef;
+	}
+	return $this;
 }
 
 1;
