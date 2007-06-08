@@ -399,7 +399,7 @@ function updateNeeded {
 		fi
 		fi
 		count=$(($count + 1))
-		Echo "Cecking update status for image: $imageName"
+		Echo "Checking update status for image: $imageName"
 		if test ! -z $RELOAD_IMAGE;then
 			Echo -b "Update forced via RELOAD_IMAGE..."
 			Echo -b "Update status: Clean"
