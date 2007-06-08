@@ -269,9 +269,13 @@ sub createImageCPIO {
 	#==========================================
 	# Create filesystem on extend
 	#------------------------------------------
+	my $pwd  = qx (pwd); chomp $pwd;
 	my @cpio = ("--create", "--format=newc", "--quiet");
 	my $tree = $imageTree;
 	my $dest = $imageDest."/".$name.".gz";
+	if ($dest !~ /^\//) {
+		$dest = $pwd."/".$dest;
+	}
 	my $data = qx (cd $tree && find . | cpio @cpio | gzip > $dest);
 	my $code = $? >> 8;
 	if ($code != 0) {
@@ -1593,9 +1597,13 @@ sub extractKernel {
 	}
 	if (-f "$imageTree/boot/vmlinuz") {
 		$kiwi -> info ("Extracting kernel...");
+		my $pwd = qx (pwd); chomp $pwd;
 		my $file = "$imageDest/$name.kernel";
 		my $lx = '"^Linux version"';
 		my $sp = '-f3 -d" "';
+		if ($file !~ /^\//) {
+			$file = $pwd."/".$file;
+		}
 		qx (rm -f $file);
 		qx (cp $imageTree/boot/vmlinuz $file);
 		my $code = $? >> 8;

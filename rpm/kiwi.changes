@@ -4,6 +4,7 @@ Wed Jun  6 10:53:48 CEST 2007 - ms@suse.de
 - v1.40
 - fixed typo in KIWILinuxRC.sh (#281760)
 - mark pxelinux default file as %config
+- fixed cpio creation if destination dir is a relative path
 - changed instsource format according to the discussion with
   Lars, Rudi and Jan
 
