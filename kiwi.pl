@@ -128,6 +128,8 @@ sub main {
 			$kiwi -> failed ();
 			my $code = kiwiExit (1); return $code;
 		}
+		# TODO
+		# test code only...
 		print "*** DIR = $root\n";
 		my %source = $xml -> getInstSourceRepository();
 		my @slist  = keys %source;
@@ -146,7 +148,7 @@ sub main {
 				print "undefined\n";
 			}
 		}
-		my $file="$slist[1]/kiwi-desc-usbboot";
+		my $file="$slist[1]/kiwi-desc-usbboot.*\.rpm";
 		if (! $xml->getInstSourceFile ($file,$root)) {
 			$kiwi -> error ("Couldn't download file");
 			$kiwi -> failed ();

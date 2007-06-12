@@ -23,6 +23,7 @@ use LWP;
 use KIWILog;
 use KIWIPattern;
 use KIWIManager qw (%packageManager);
+use File::Glob ':glob';
 
 #==========================================
 # Constructor
@@ -1200,9 +1201,17 @@ sub getInstSourceFile {
 	#==========================================
 	# download file
 	#------------------------------------------
-	if ($url =~ /^\//) {
+	if ($url !~ /:\/\//) {
+		# /.../
+		# local files, allow glob search if first open failed
+		# This is different from network search which allows
+		# regular expressions
+		# ----
 		if (! open (IN,$url)) {
-			return undef;
+			$url = bsd_glob ($url);
+			if (! open (IN,$url)) {
+				return undef;
+			}
 		}
 		if (! open (OU,">$dirname/$basename")) {
 			return undef;
@@ -1213,6 +1222,12 @@ sub getInstSourceFile {
 		close IN;
 		close OU;
 	} else {
+		# /.../
+		# remote files, use lwp-download to manage the process.
+		# if first download failed check the directory list with
+		# a regular expression to find the file. After that repeat
+		# the download
+		# ----
 		my $dest = $dirname."/".$basename;
 		my $data = qx (lwp-download $url $dest);
 		my $code = $? >> 8;
@@ -1226,12 +1241,19 @@ sub getInstSourceFile {
 			my $request  = HTTP::Request->new (GET => $location);
 			my $response = $browser  -> request ( $request );
 			my $content  = $response -> content ();
-			if ($content =~ /\"($search.*)\"/) {
-				$url  = $location.$1;
-				$data = qx (lwp-download $url $dest);
-				$code = $? >> 8;
-				if ($code == 0) {
-					return $this;
+			my @lines    = split (/\n/,$content);
+			foreach my $line (@lines) {
+				if ($line !~ /href=\"(.*)\"/) {
+					next;
+				}
+				my $link = $1;
+				if ($link =~ /$search/) {
+					$url  = $location.$link;
+					$data = qx (lwp-download $url $dest);
+					$code = $? >> 8;
+					if ($code == 0) {
+						return $this;
+					}
 				}
 			}
 		}
