@@ -152,7 +152,9 @@ fi
 #======================================
 # 8) Mount USB stick (system)
 #--------------------------------------
-mountSystem $stickDevice
+if ! mountSystem $stickDevice;then
+	systemException "Failed to mount root filesystem" "reboot"
+fi
 
 #======================================
 # 9) Create system dependant files

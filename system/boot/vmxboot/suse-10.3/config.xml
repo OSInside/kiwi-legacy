@@ -25,7 +25,12 @@
 		<file name="fs/jbd/*"/>
 		<file name="fs/fat/*"/>
 		<file name="fs/vfat/*"/>
+		<file name="fs/hfs/*"/>
+		<file name="fs/exportfs/*"/>
+		<file name="fs/squashfs.ko"/>
+		<file name="fs/aufs.ko"/>
 		<file name="fs/reiserfs/*"/>
+		<file name="fs/nls/nls_utf8.ko"/>
 		<file name="net/ipv6/*"/>
 		<file name="drivers/ata/*"/>
 		<file name="drivers/scsi/*"/>
@@ -52,6 +57,10 @@
 		<package name="sysfsutils"/>
 		<package name="util-linux"/>
 		<package name="grub"/>
+		<package name="squashfs"/>
+		<package name="squashfs-kmp-default"/>
+		<package name="aufs"/>
+		<package name="aufs-kmp-default"/>
 	</packages>
 	<packages type="boot">
 		<package name="kernel-default"/>

@@ -3,11 +3,12 @@ Wed Jun  6 10:53:48 CEST 2007 - ms@suse.de
 
 - v1.40
 - fixed typo in KIWILinuxRC.sh (#281760)
-- mark pxelinux default file as %config
+- mark pxelinux default file as %config in spec file
 - fixed cpio creation if destination dir is a relative path
 - added getInstSourceFile() method to allow local/network
   downloads from the given file. This method is outside of
   the package manager functionality
+- added support for squashfs/aufs in usb and vmx typed images
 - changed instsource format according to the discussion with
   Lars, Rudi and Jan
 

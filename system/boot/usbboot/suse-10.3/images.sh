@@ -8,7 +8,7 @@ echo "Configure image: [$name]..."
 #------------------------------------------
 for i in \
 	PolicyKit audit-libs blocxx cpio cyrus-sasl db dbus-1 dbus-1-glib \
-	diffutils expat fillup gawk gdbm glib2 glibc-locale gnome-filesystem \
+	expat fillup gawk gdbm glib2 glibc-locale gnome-filesystem \
 	gpg hal info insserv iproute2 irqbalance libnscd libxcrypt libxml2 \
 	libzio limal limal-bootloader limal-perl logrotate mdadm mingetty \
 	mkinitrd net-tools openSUSE-release openldap2-client openslp openssl \

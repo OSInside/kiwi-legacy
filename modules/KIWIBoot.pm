@@ -48,7 +48,7 @@ sub new {
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
-	my $usbzip = 0;
+	my $syszip = 0;
 	my $kernel;
 	my $knlink;
 	my $tmpdir;
@@ -70,11 +70,11 @@ sub new {
 			my $status = qx ( file $system | grep -qi squashfs 2>&1 );
 			my $result = $? >> 8;
 			if ($result == 0) {
-				$usbzip = -s $system;
-				$usbzip /= 1024 * 1024;
-				$usbzip = int $usbzip + 5;
+				$syszip = -s $system;
+				$syszip /= 1024 * 1024;
+				$syszip = int $syszip + 70;
 			} else {
-				$usbzip = 0;
+				$syszip = 0;
 			}
 		}
 	}
@@ -104,7 +104,7 @@ sub new {
 		my $initrdSize = -s $initrd; # the boot image
 		my $systemSize = -s $system; # the system image
 		$vmsize = $kernelSize + $initrdSize + $systemSize;
-		my $sparesSize = 0.1 * $vmsize; # and 10% free space
+		my $sparesSize = 0.2 * $vmsize; # and 20% free space
 		$vmsize = $vmsize + $sparesSize;
 		$vmsize = $vmsize / 1024 / 1024;
 		$vmsize = int $vmsize;
@@ -124,7 +124,7 @@ sub new {
 	$this->{kernel} = $kernel;
 	$this->{tmpdir} = $tmpdir;
 	$this->{vmsize} = $vmsize;
-	$this->{usbzip} = $usbzip;
+	$this->{syszip} = $syszip;
 	$this->{device} = $device;
 	$this->{format} = $format;
 	return $this;
@@ -228,7 +228,7 @@ sub setupBootStick {
 	my $tmpdir = $this->{tmpdir};
 	my $initrd = $this->{initrd};
 	my $system = $this->{system};
-	my $usbzip = $this->{usbzip};
+	my $syszip = $this->{syszip};
 	my $device = $this->{device};
 	my $status;
 	my $result;
@@ -380,13 +380,13 @@ sub setupBootStick {
 	# Prepare sfdisk input file
 	#------------------------------------------
 	if (defined $system) {
-		if ($usbzip > 0) {
-			print FD ",20,L,*\n";
-			print FD ",$usbzip,L\n";
-			print FD ",,L\n";
+		if ($syszip > 0) {
+			print FD ",20,L,*\n";      # xda1  boot
+			print FD ",$syszip,L\n";   # xda2  ro
+			print FD ",,L\n";          # xda3  rw
 		} else {
-			print FD ",20,L,*\n";
-			print FD ",,L\n";
+			print FD ",20,L,*\n";      # xda1  boot
+			print FD ",,L\n";          # xda2  rw
 		}
 	} else {
 		print FD ",,L,*\n";
@@ -559,6 +559,7 @@ sub setupBootDisk {
 	my $system    = $this->{system};
 	my $vmsize    = $this->{vmsize};
 	my $format    = $this->{format};
+	my $syszip    = $this->{syszip};
 	my $diskname  = $system.".raw";
 	my $loop      = "/dev/loop0";
 	my $loopfound = 0;
@@ -620,9 +621,18 @@ sub setupBootDisk {
 		qx ( losetup -d $loop );
 		return undef;
 	}
-	my @commands = (
-		"n","p","1",".",".","w","q"
-	);
+	my @commands;
+	if ($syszip > 0) {
+		# xda1 boot / xda2 ro / xda3 rw
+		@commands = (
+			"n","p","1",".","+20M",
+			"n","p","2",".","+".$syszip."M",
+			"n","p","3",".",".","w","q"
+		);
+	} else {
+		# xda1 rw
+		@commands = ( "n","p","1",".",".","w","q");
+	}
 	foreach my $cmd (@commands) {
 		if ($cmd eq ".") {
 			print FD "\n";
@@ -645,6 +655,9 @@ sub setupBootDisk {
 	}
 	my $dmap = $loop; $dmap =~ s/dev\///;
 	my $root = "/dev/mapper".$dmap."p1";
+	if ($syszip > 0) {
+		$root = "/dev/mapper".$dmap."p2";
+	}
 	#==========================================
 	# Dump system image on virtual disk
 	#------------------------------------------
@@ -661,6 +674,20 @@ sub setupBootDisk {
 		return undef;
 	}
 	$kiwi -> done();
+	#==========================================
+	# Create filesystem if compression is used
+	#------------------------------------------
+	if ($syszip > 0) {
+		$root = "/dev/mapper".$dmap."p1";
+		$status = qx (/sbin/mkfs.ext2 -F $root 2>&1);
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create filesystem: $status");
+			$kiwi -> failed ();
+			return undef;
+		}
+	}
 	#==========================================
 	# Mount system image
 	#------------------------------------------

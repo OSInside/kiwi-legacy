@@ -337,6 +337,11 @@ sub createImageUSB {
 		$kiwi -> failed ();
 		return undef;
 	}
+	if (($type eq "squashfs") && ($text eq "Xen")) {
+		$kiwi -> error  ("Unsupported $text type: $type");
+		$kiwi -> failed ();
+		return undef;
+	}
 	SWITCH: for ($type) {
 		/^ext2/       && do {
 			$ok = $this -> createImageEXT2 ();

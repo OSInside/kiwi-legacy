@@ -799,14 +799,17 @@ function mountSystem () {
 		mountDevice=$1
 	fi
 	if test ! -z $UNIONFS_CONFIG;then
-		mkdir -p /ro_branch
-		mkdir -p /rw_branch
-		mkdir -p /xino
+		roDir=/mnt/ro_branch
+		rwDir=/mnt/rw_branch
+		xiDir=/mnt/xino
+		for dir in $roDir $rwDir $xiDir;do
+			mkdir -p $dir
+		done
 		rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
 		roDevice=`echo $UNIONFS_CONFIG | cut -d , -f 2`
 		unionFST=`echo $UNIONFS_CONFIG | cut -d , -f 3`
 		if test $LOCAL_BOOT = "no" && test $systemIntegrity = "clean";then
-			Echo "Creating EXT2 filesystem for write extend..."
+			Echo "Creating EXT2 filesystem for write extend on $rwDevice..."
 			if ! mke2fs $rwDevice >/dev/null 2>&1;then
 				systemException \
 					"Failed to create ext2 filesystem" \
@@ -815,23 +818,23 @@ function mountSystem () {
 		fi
 		Echo "Checking EXT2 write extend..."
 		e2fsck -y -f $rwDevice >/dev/null 2>&1
-		if ! mount $rwDevice /rw_branch >/dev/null 2>&1;then
+		if ! mount $rwDevice $rwDir >/dev/null 2>&1;then
 			retval=1
 		fi
-		if ! mount -t squashfs $roDevice /ro_branch >/dev/null 2>&1;then
-			if ! mount $roDevice /ro_branch >/dev/null 2>&1;then
+		if ! mount -t squashfs $roDevice $roDir >/dev/null 2>&1;then
+			if ! mount $roDevice $roDir >/dev/null 2>&1;then
 				retval=1
 			fi
 		fi
 		if [ $unionFST = "aufs" ];then
-			mount -t tmpfs tmpfs /xino >/dev/null 2>&1 || retval=1
+			mount -t tmpfs tmpfs $xiDir >/dev/null 2>&1 || retval=1
 			mount -t aufs \
-				-o dirs=/rw_branch=rw:/ro_branch=ro,xino=/xino/.aufs.xino \
+				-o dirs=$rwDir=rw:$roDir=ro,xino=$xiDir/.aufs.xino \
 				none /mnt \
 			>/dev/null 2>&1 || retval=1
 		else
 			mount -t unionfs \
-				-o dirs=/rw_branch=rw:/ro_branch=ro \
+				-o dirs=$rwDir=rw:$roDir=ro \
 				none /mnt
 			>/dev/null 2>&1 || retval=1
 		fi

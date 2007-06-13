@@ -20,7 +20,19 @@
 . /include
 
 #======================================
-# 1) create initrd on diskful
+# 1) check for union filesystem
+#--------------------------------------
+if [ ! -z "$UNIONFS_CONFIG" ]; then
+	# /.../
+	# we are using a special root setup with aufs. In this case
+	# we can't use the SuSE Linux initrd but must stick to the
+	# kiwi boot system.
+	# ---- 
+	exit 0
+fi
+
+#======================================
+# 2) create initrd on diskful
 #--------------------------------------
 if test -L /boot/boot;then
 	mount -t proc proc /proc
@@ -34,7 +46,7 @@ else
 fi
 
 #======================================
-# 2) Install boot loader on diskful
+# 3) Install boot loader on diskful
 #--------------------------------------
 if test -f "/usr/sbin/grub";then
 	Echo "Installing boot loader..."
