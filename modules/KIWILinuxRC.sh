@@ -808,18 +808,31 @@ function mountSystem () {
 		rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
 		roDevice=`echo $UNIONFS_CONFIG | cut -d , -f 2`
 		unionFST=`echo $UNIONFS_CONFIG | cut -d , -f 3`
-		if test $LOCAL_BOOT = "no" && test $systemIntegrity = "clean";then
-			Echo "Creating EXT2 filesystem for write extend on $rwDevice..."
-			if ! mke2fs $rwDevice >/dev/null 2>&1;then
-				systemException \
-					"Failed to create ext2 filesystem" \
-				"reboot"
+		echo $rwDevice | grep -q ram
+		if [ $? = 0 ];then
+			# /.../
+			# write part is a ram location, use tmpfs for ram
+			# disk data storage
+			# ----
+			mount -t tmpfs tmpfs $rwDir >/dev/null 2>&1 || retval=1
+		else
+			# /.../
+			# write part is not a ram disk, create ext2 filesystem on it
+			# check and mount the filesystem
+			# ----
+			if test $LOCAL_BOOT = "no" && test $systemIntegrity = "clean";then
+				Echo "Creating EXT2 filesystem for write extend on $rwDevice..."
+				if ! mke2fs $rwDevice >/dev/null 2>&1;then
+					systemException \
+						"Failed to create ext2 filesystem" \
+					"reboot"
+				fi
 			fi
-		fi
-		Echo "Checking EXT2 write extend..."
-		e2fsck -y -f $rwDevice >/dev/null 2>&1
-		if ! mount $rwDevice $rwDir >/dev/null 2>&1;then
-			retval=1
+			Echo "Checking EXT2 write extend..."
+			e2fsck -y -f $rwDevice >/dev/null 2>&1
+			if ! mount $rwDevice $rwDir >/dev/null 2>&1;then
+				retval=1
+			fi
 		fi
 		if ! mount -t squashfs $roDevice $roDir >/dev/null 2>&1;then
 			if ! mount $roDevice $roDir >/dev/null 2>&1;then
@@ -829,13 +842,11 @@ function mountSystem () {
 		if [ $unionFST = "aufs" ];then
 			mount -t tmpfs tmpfs $xiDir >/dev/null 2>&1 || retval=1
 			mount -t aufs \
-				-o dirs=$rwDir=rw:$roDir=ro,xino=$xiDir/.aufs.xino \
-				none /mnt \
+				-o dirs=$rwDir=rw:$roDir=ro,xino=$xiDir/.aufs.xino none /mnt \
 			>/dev/null 2>&1 || retval=1
 		else
 			mount -t unionfs \
-				-o dirs=$rwDir=rw:$roDir=ro \
-				none /mnt
+				-o dirs=$rwDir=rw:$roDir=ro none /mnt
 			>/dev/null 2>&1 || retval=1
 		fi
 		usleep 500000
