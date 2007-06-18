@@ -11,6 +11,14 @@ Wed Jun  6 10:53:48 CEST 2007 - ms@suse.de
 - added support for squashfs/aufs in usb and vmx typed images
 - changed instsource format according to the discussion with
   Lars, Rudi and Jan
+- renamed method: getInstSourceMetaList -> getInstSourceMetaPackageList
+- renamed method: getInstSourceList -> getInstSourcePackageList
+- added name, username, pwd attributes to <instrepo> tag
+- added getInstSourceMetaFiles() method to handle file downloads
+  within the new <metafile> tag
+- changed getInstSourceRepository() method to work with
+  new instrepo attributes. The method now returns a hash of the
+  following structure: hash{reponame}{repoattr} = attrvalue
 
 -------------------------------------------------------------------
 Mon Jun  4 10:59:48 CEST 2007 - ms@suse.de

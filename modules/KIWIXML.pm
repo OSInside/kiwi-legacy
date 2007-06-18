@@ -213,11 +213,17 @@ sub createURLList {
 	my $foreignRepo = $this->{foreignRepo};
 	my %repository  = ();
 	my @urllist     = ();
+	my @sourcelist  = ();
 	%repository = $this->getRepository();
 	if (! %repository) {
 		%repository = $this->getInstSourceRepository();
+		foreach my $name (keys %repository) {
+			push (@sourcelist,$repository{$name}{source});
+		}
+	} else {
+		@sourcelist = keys %repository;
 	}
-	foreach my $source (keys %repository) {
+	foreach my $source (@sourcelist) {
 		my $urlHandler;
 		if ( defined $foreignRepo->{prepare} ) {
 			$urlHandler = new KIWIURL ($kiwi,$foreignRepo->{prepare});
@@ -607,9 +613,19 @@ sub getInstSourceRepository {
 	my @node = $base -> getElementsByTagName ("instrepo");
 	foreach my $element (@node) {
 		my $prio = $element -> getAttribute("priority");
+		my $name = $element -> getAttribute("name");
+		my $user = $element -> getAttribute("username");
+		my $pwd  = $element -> getAttribute("pwd");
 		my $stag = $element -> getElementsByTagName ("source") -> get_node(1);
 		my $source = $this -> resolveLink ( $stag -> getAttribute ("path") );
-		$result{$source} = $prio;
+		if (! defined $name) {
+			$name = "noname";
+		}
+		$result{$name}{source}   = $source;
+		$result{$name}{priority} = $prio;
+		if (defined $user) {
+			$result{$name}{user} = $user.":".$pwd;
+		}
 	}
 	return %result;
 }
@@ -626,6 +642,41 @@ sub getInstSourceArchList {
 	my $base = $this->{instsrcNodeList} ->  get_node(1);
 	my $attr = $base->getAttribute ("arch");
 	return split (",",$attr);
+}
+
+#==========================================
+# getInstSourceMetaFiles
+#------------------------------------------
+sub getInstSourceMetaFiles {
+	# ...
+	# Get the metafile data if any. The method is returning
+	# a hash with key=metafile and a hashreference for the
+	# attribute values url, target and script
+	# ---
+	my $this  = shift;
+	my $base  = $this->{instsrcNodeList} -> get_node(1);
+	my $nodes = $base -> getElementsByTagName ("metadata");
+	my %result;
+	my @attrib = (
+		"target","script"
+	);
+	for (my $i=1;$i<= $nodes->size();$i++) {
+		my $node  = $nodes -> get_node($i);
+		my @flist = $node  -> getElementsByTagName ("metafile");
+		foreach my $element (@flist) {
+			my $file = $element -> getAttribute ("url");
+			if (! defined $file) {
+				next;
+			}
+			foreach my $key (@attrib) {
+				my $value = $element -> getAttribute ($key);
+				if (defined $value) {
+					$result{$file}{$key} = $value;
+				}
+			}
+		}
+	}
+	return %result;
 }
 
 #==========================================
@@ -966,9 +1017,9 @@ sub getList {
 }
 
 #==========================================
-# getInstSourceMetaList
+# getInstSourceMetaPackageList
 #------------------------------------------
-sub getInstSourceMetaList {
+sub getInstSourceMetaPackageList {
 	# ...
 	# Create base package list of the instsource
 	# metadata package description
@@ -986,9 +1037,9 @@ sub getInstSourceMetaList {
 }
 
 #==========================================
-# getInstSourceList
+# getInstSourcePackageList
 #------------------------------------------
-sub getInstSourceList {
+sub getInstSourcePackageList {
 	# ...
 	# Create base package list of the instsource
 	# packages package description

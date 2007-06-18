@@ -136,11 +136,12 @@ sub main {
 		print "*** SOURCE = @slist\n";
 		my @arch = $xml -> getInstSourceArchList();
 		print "*** ARCH(S): @arch\n";
-		my %meta = $xml -> getInstSourceMetaList();
-		my %pack = $xml -> getInstSourceList();
-		foreach (keys %meta) {
+		my %metapacks = $xml -> getInstSourceMetaPackageList();
+		my %metafiles = $xml -> getInstSourceMetaFiles();
+		my %pack = $xml -> getInstSourcePackageList();
+		foreach (keys %metapacks) {
 			my $p = $_;
-			my $a = $meta{$p};
+			my $a = $metapacks{$p};
 			print "$p -> ";
 			if (defined $a) {
 				print "$a\n";
@@ -148,7 +149,11 @@ sub main {
 				print "undefined\n";
 			}
 		}
-		my $file="$slist[1]/kiwi-desc-usbboot.*\.rpm";
+		foreach (keys %metafiles) {
+			print "URL: $_\n";
+		}
+		my $surl=$source{other_repo}{source};
+		my $file="$surl/kiwi-desc-usbboot.*\.rpm";
 		if (! $xml->getInstSourceFile ($file,$root)) {
 			$kiwi -> error ("Couldn't download file");
 			$kiwi -> failed ();
