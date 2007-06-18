@@ -1214,7 +1214,8 @@ sub createTmpDirectory {
 sub getInstSourceFile {
 	# ...
 	# download a file from a network or local location to
-	# a given local path
+	# a given local path. It's possible to use regular expressions
+	# in the source file specification
 	# ---
 	my $this    = shift;
 	my $url     = shift;
@@ -1254,60 +1255,45 @@ sub getInstSourceFile {
 	#------------------------------------------
 	if ($url !~ /:\/\//) {
 		# /.../
-		# local files, allow glob search if first open failed
-		# This is different from network search which allows
-		# regular expressions
+		# local files, make them a file:// url
 		# ----
-		if (! open (IN,$url)) {
-			$url = bsd_glob ($url);
-			if (! open (IN,$url)) {
-				return undef;
+		$url = "file://".$url;
+	}
+	# /.../
+	# use lwp-download to manage the process.
+	# if first download failed check the directory list with
+	# a regular expression to find the file. After that repeat
+	# the download
+	# ----
+	my $dest = $dirname."/".$basename;
+	my $data = qx (lwp-download $url $dest);
+	my $code = $? >> 8;
+	if ($code == 0) {
+		return $this;
+	}
+	if ($url =~ /(^.*\/)(.*)/) {
+		my $location = $1;
+		my $search   = $2;
+		my $browser  = LWP::UserAgent->new;
+		my $request  = HTTP::Request->new (GET => $location);
+		my $response = $browser  -> request ( $request );
+		my $content  = $response -> content ();
+		my @lines    = split (/\n/,$content);
+		foreach my $line (@lines) {
+			if ($line !~ /href=\"(.*)\"/) {
+				next;
+			}
+			my $link = $1;
+			if ($link =~ /$search/) {
+				$url  = $location.$link;
+				$data = qx (lwp-download $url $dest);
+				$code = $? >> 8;
+				if ($code == 0) {
+					return $this;
+				}
 			}
 		}
-		if (! open (OU,">$dirname/$basename")) {
-			return undef;
-		}
-		while (<IN>) {
-			print OU $_;
-		}
-		close IN;
-		close OU;
 	} else {
-		# /.../
-		# remote files, use lwp-download to manage the process.
-		# if first download failed check the directory list with
-		# a regular expression to find the file. After that repeat
-		# the download
-		# ----
-		my $dest = $dirname."/".$basename;
-		my $data = qx (lwp-download $url $dest);
-		my $code = $? >> 8;
-		if ($code == 0) {
-			return $this;
-		}
-		if ($url =~ /(^.*\/)(.*)/) {
-			my $location = $1;
-			my $search   = $2;
-			my $browser  = LWP::UserAgent->new;
-			my $request  = HTTP::Request->new (GET => $location);
-			my $response = $browser  -> request ( $request );
-			my $content  = $response -> content ();
-			my @lines    = split (/\n/,$content);
-			foreach my $line (@lines) {
-				if ($line !~ /href=\"(.*)\"/) {
-					next;
-				}
-				my $link = $1;
-				if ($link =~ /$search/) {
-					$url  = $location.$link;
-					$data = qx (lwp-download $url $dest);
-					$code = $? >> 8;
-					if ($code == 0) {
-						return $this;
-					}
-				}
-			}
-		}
 		return undef;
 	}
 	return $this;
