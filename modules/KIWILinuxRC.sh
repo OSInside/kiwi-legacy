@@ -799,9 +799,9 @@ function mountSystem () {
 		mountDevice=$1
 	fi
 	if test ! -z $UNIONFS_CONFIG;then
-		roDir=/mnt/ro_branch
-		rwDir=/mnt/rw_branch
-		xiDir=/mnt/xino
+		roDir=/ro_branch
+		rwDir=/rw_branch
+		xiDir=/xino
 		for dir in $roDir $rwDir $xiDir;do
 			mkdir -p $dir
 		done
@@ -827,9 +827,9 @@ function mountSystem () {
 						"Failed to create ext2 filesystem" \
 					"reboot"
 				fi
+				Echo "Checking EXT2 write extend..."
+				e2fsck -y -f $rwDevice >/dev/null 2>&1
 			fi
-			Echo "Checking EXT2 write extend..."
-			e2fsck -y -f $rwDevice >/dev/null 2>&1
 			if ! mount $rwDevice $rwDir >/dev/null 2>&1;then
 				retval=1
 			fi
