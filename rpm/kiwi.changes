@@ -4,6 +4,7 @@ Wed Jun  6 10:53:48 CEST 2007 - ms@suse.de
 - v1.40
 - fixed typo in KIWILinuxRC.sh (#281760)
 - fixed type in documentation OpenSuSE -> openSUSE (#285483)
+- added suse-repo directory for repo packages not on media (#282531)
 - removed atftp from the isoboot descriptions
 - mark pxelinux default file as %config in spec file
 - fixed cpio creation if destination dir is a relative path (#283862)
