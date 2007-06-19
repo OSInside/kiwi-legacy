@@ -49,7 +49,6 @@
 		<source path="/mounts/machcd2/dists/full-sle10-sp-%arch"/>
 	</repository>
 	<packages type="image">
-		<package name="atftp"/>
 		<package name="bind-libs"/>
 		<package name="bind-utils"/>
 		<package name="dhcpcd"/>
