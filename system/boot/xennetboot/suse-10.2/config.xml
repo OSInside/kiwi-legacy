@@ -37,7 +37,7 @@
 		<!--<source path="/image/dist/full-10.2-i386"/>-->
 	</repository>
 	<repository type="rpm-dir">
-		<source path="/usr/share/kiwi/image/xennetboot/suse-10.2-repo"/>
+		<source path="/usr/share/kiwi/image/xennetboot/suse-repo/suse-10.2-repo"/>
 	</repository>
 	<packages type="image">
 		<package name="atftp"/>

@@ -33,7 +33,7 @@
 		<file name="drivers/net/*"/>
 	</drivers>
 	<repository type="rpm-dir">
-		<source path="/usr/share/kiwi/image/xennetboot/suse-sles-repo"/>
+		<source path="/usr/share/kiwi/image/xennetboot/suse-repo/suse-sles-repo"/>
 	</repository>
 	<repository type="yast2" status="replaceable">
 		<source path="/mounts/machcd2/dists/full-sle10-sp-%arch"/>
