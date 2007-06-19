@@ -70,8 +70,6 @@
 		<package name="syslinux"/>
 		<package name="make"/>
 		<package name="memtest86+"/>
-		<package name="squashfs"/>
-		<package name="squashfs-kmp-default"/>
 	</packages>
 	<packages type="boot">
 		<package name="kernel-default"/>
