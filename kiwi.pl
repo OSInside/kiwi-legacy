@@ -30,7 +30,7 @@ use KIWIBoot;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "1.40";
+our $Version       = "1.41";
 our $SchemeVersion = "1.4";
 #============================================
 # Globals
@@ -64,8 +64,9 @@ our $StripImage;        # strip shared objects and binaries
 our $CreatePassword;    # create crypt password string
 our $ImageName;         # filename of current image, used in Modules
 our %ForeignRepo;       # may contain XML::LibXML::Element objects
-our $AddRepository;     # add repository for building physical extend
-our $AddRepositoryType; # add repository type
+our @AddRepository;     # add repository for building physical extend
+our @AddRepositoryType; # add repository type
+our @AddPackage;        # add packages to the image package list
 our $SetRepository;     # set first repository for building physical extend
 our $SetRepositoryType; # set firt repository type
 our $SetImageType;      # set image type to use, default is primary type
@@ -183,8 +184,14 @@ sub main {
 		#==========================================
 		# Check for add-repo option
 		#------------------------------------------
-		if (defined $AddRepository) {
-			$xml -> addRepository ($AddRepositoryType,$AddRepository);
+		if (defined @AddRepository) {
+			$xml -> addRepository (\@AddRepositoryType,\@AddRepository);
+		}
+		#==========================================
+		# Check for add-package option
+		#------------------------------------------
+		if (defined @AddPackage) {
+			$xml -> addImagePackages (@AddPackage);
 		}
 		#==========================================
 		# Check for inheritance
@@ -326,8 +333,14 @@ sub main {
 		#==========================================
 		# Check for add-repo option
 		#------------------------------------------
-		if (defined $AddRepository) {
-			$xml -> addRepository ($AddRepositoryType,$AddRepository);
+		if (defined @AddRepository) {
+			$xml -> addRepository (\@AddRepositoryType,\@AddRepository);
+		}
+		#==========================================
+		# Check for add-package option
+		#------------------------------------------
+		if (defined @AddPackage) {
+			$xml -> addImagePackages (@AddPackage);
 		}
 		#==========================================
 		# Initialize root system, use existing root
@@ -495,8 +508,9 @@ sub init {
 		"list|l"                => \&listImage,
 		"create|c=s"            => \$Create,
 		"create-instsource=s"   => \$CreateInstSource,
-		"add-repo=s"            => \$AddRepository,
-		"add-repotype=s"        => \$AddRepositoryType,
+		"add-repo=s"            => \@AddRepository,
+		"add-repotype=s"        => \@AddRepositoryType,
+		"add-package=s"         => \@AddPackage,
 		"set-repo=s"            => \$SetRepository,
 		"set-repotype=s"        => \$SetRepositoryType,
 		"type|t=s"              => \$SetImageType,
@@ -543,7 +557,7 @@ sub init {
 		$kiwi -> failed ();
 		my $code = kiwiExit (1); return $code;
 	}
-	if ((defined $AddRepository) && (! defined $AddRepositoryType)) {
+	if ((defined @AddRepository) && (! defined @AddRepositoryType)) {
 		$kiwi -> info ("No repository type specified");
 		$kiwi -> failed ();
 		my $code = kiwiExit (1); return $code;
@@ -609,14 +623,20 @@ sub usage {
 	print "\n";
 	print "  [ --add-repo <repo-path> --add-repotype <type> ]\n";
     print "    Add the given repository and type for this run of an\n";
-	print "    image prepare or upgrade process. The change will not\n";
-	print "    be written to the config.xml file\n";
+	print "    image prepare or upgrade process.\n";
+	print "    Multiple --add-repo/--add-repotype options are possible\n";
+	print "    The change will not be written to the config.xml file\n";
 	print "\n";
 	print "  [ --set-repo <repo-path> [ --set-repotype <type> ]]\n";
 	print "    set the given repository and optional type for the first\n";
 	print "    repository entry within the config.xml. The change will not\n";
 	print "    be written to the xml file and is valid for this run of\n";
 	print "    image prepare or upgrade process.\n";
+	print "\n";
+	print "  [ --add-package <package> ]\n";
+	print "    Add the given package name to the list of image packages\n";
+	print "    multiple --add-package options are possible. The change\n";
+	print "    will not be written to the config.xml file\n";
 	print "\n";
 	print "  [ --logfile <filename> | terminal ]\n";
 	print "    Write to the log file \`<filename>' instead of\n";

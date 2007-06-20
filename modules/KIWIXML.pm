@@ -736,21 +736,58 @@ sub addRepository {
 	# the the global repositNodeList
 	# ---
 	my $this = shift;
-	my $type = shift;
-	my $path = shift;
-	my $tempXML  = new XML::LibXML;
-	my $xaddXML  = new XML::LibXML::NodeList;
-	my $tempFile = $this->{imageDesc}."/config.xml";
-	my $tempTree = $tempXML -> parse_file ( $tempFile );
-	my $temprepositNodeList = $tempTree -> getElementsByTagName ("repository");
-	my $element = $temprepositNodeList  -> get_node(1);
-	$element -> setAttribute ("type",$type);
-	$element -> setAttribute ("status","fixed");
-	$element -> getElementsByTagName ("source") -> get_node (1)
-		 -> setAttribute ("path",$path);
-	$xaddXML -> push ( $element );
-	$this->{repositNodeList} -> append ( $xaddXML );
-	return $xaddXML;
+	my $kiwi = $this->{kiwi};
+	my @type = @{$_[0]};
+	my @path = @{$_[1]};
+	foreach my $path (@path) {
+		my $type = shift @type;
+		if (! defined $type) {
+			$kiwi -> error   ("No type for repo [$path] specified");
+			$kiwi -> skipped ();
+			next;
+		}
+		my $tempXML  = new XML::LibXML;
+		my $xaddXML  = new XML::LibXML::NodeList;
+		my $tempFile = $this->{imageDesc}."/config.xml";
+		my $tempTree = $tempXML -> parse_file ( $tempFile );
+		my $temprepositNodeList = $tempTree->getElementsByTagName("repository");
+		my $element = $temprepositNodeList->get_node(1);
+		$element -> setAttribute ("type",$type);
+		$element -> setAttribute ("status","fixed");
+		$element -> getElementsByTagName ("source") -> get_node (1)
+			 -> setAttribute ("path",$path);
+		$xaddXML -> push ( $element );
+		$this->{repositNodeList} -> append ( $xaddXML );
+	}
+	return $this;
+}
+
+#==========================================
+# addImagePackages
+#------------------------------------------
+sub addImagePackages {
+	# ...
+	# Add the given package list to the type=image packages
+	# section of the config.xml parse tree.
+	# ----
+	my $this  = shift;
+	my @packs = @_;
+	my $nodes = $this->{packageNodeList};
+	my $nodeNumber = 1;
+	for (my $i=1;$i<= $nodes->size();$i++) {
+		my $node = $nodes -> get_node($i);
+		my $type = $node  -> getAttribute ("type");
+		if ($type eq "image") {
+			$nodeNumber = $i; last;
+		}
+	}
+	foreach my $pack (@packs) {
+		my $addElement = new XML::LibXML::Element ("package");
+		$addElement -> setAttribute("name",$pack);
+		$this->{packageNodeList} -> get_node($nodeNumber)
+			-> addChild ($addElement);
+	}
+	return $this;
 }
 
 #==========================================
