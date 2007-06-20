@@ -1230,7 +1230,7 @@ sub writeImageConfig {
 		#==========================================
 		# IMAGE information
 		#------------------------------------------
-		if ($xml->getCompressed()) {
+		if ($xml->getCompressed("quiet")) {
 			print FD "IMAGE=${device}${targetPartition};$namecd;$server;$blocks;compressed\n";
 		} else {
 			print FD "IMAGE=${device}${targetPartition};$namecd;$server;$blocks\n";
