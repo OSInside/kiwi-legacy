@@ -562,6 +562,10 @@ sub init {
 		$kiwi -> failed ();
 		my $code = kiwiExit (1); return $code;
 	}
+	if ((defined $RootTree) && ($RootTree !~ /^\//)) {
+		my $workingDir = qx ( pwd ); chomp $workingDir;
+		$RootTree = $workingDir."/".$RootTree;
+	}
 	#==========================================
 	# remove pre-defined smart channels
 	#------------------------------------------
