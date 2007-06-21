@@ -894,13 +894,14 @@ function cleanInitrd () {
 	cp /usr/bin/chroot /bin
 	for dir in /*;do
 		case "$dir" in
-			"/lib") continue ;;
-			"/bin") continue ;;
-			"/mnt") continue ;;
+			"/lib")   continue ;;
+			"/lib64") continue ;;
+			"/bin")   continue ;;
+			"/mnt")   continue ;;
 			"/ro_branch") continue ;;
 			"/rw_branch") continue ;;
-			"/xino") continue ;;
-			"/dev") continue ;;
+			"/xino")  continue ;;
+			"/dev")   continue ;;
 		esac
 		rm -rf $dir/* >/dev/null 2>&1
 	done

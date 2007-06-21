@@ -2,6 +2,7 @@
 Wed Jun 20 15:48:09 CEST 2007 - ms@suse.de
 
 - v1.41
+- fixed cleanInitrd() for 64bit archs
 - allow multiple pairs of --add-repo / --add-repotype options (#285845)
 - added --add-package option to allow adding image packages (#285845)
 - fixed relative --root path setup (#286264)
