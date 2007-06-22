@@ -239,11 +239,21 @@ sub init {
 	qx ( mkdir -p $root/var/log/YaST2 );
 	qx ( touch $root/etc/mtab );
 	qx ( touch $root/etc/sysconfig/bootloader ); 
-	qx ( cp /etc/resolv.conf $root/etc 2>&1 );
-	qx ( cp /etc/fstab  $root/etc 2>&1 );
 	qx ( cp /etc/group  $root/etc 2>&1 );
 	qx ( cp /etc/passwd $root/etc 2>&1 );
 	qx ( cp $main::KConfig $root/.kconfig 2>&1 );
+
+	#==================================
+	# Create default fstab file
+	#----------------------------------
+	if ( ! open (FD,">$root/etc/fstab")) {
+		$kiwi -> error ("Failed to create fstab file: $!");
+		$kiwi -> failed ();
+		return undef;
+	}
+	print FD "devpts /dev/pts devpts mode=0620,gid=5 0 0\n";
+	print FD "proc   /proc    proc   defaults        0 0\n";
+	close FD;
 
 	#==================================
 	# Create /etc/ImageVersion file
@@ -252,7 +262,7 @@ sub init {
 	my $imageVersion = $xml -> getImageVersion();
 	my $imageName    = $xml -> getImageName();
 	if ( ! open (FD,">$imageVersionFile")) {
-		$kiwi -> error ("Failed to create Version File: $!");
+		$kiwi -> error ("Failed to create version file: $!");
 		$kiwi -> failed ();
 		return undef;
 	}
