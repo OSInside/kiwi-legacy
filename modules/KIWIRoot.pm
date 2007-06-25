@@ -49,6 +49,7 @@ sub new {
 	my $selfRoot   = shift;
 	my $baseSystem = shift;
 	my $useRoot    = shift;
+	my $addPacks   = shift;
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
@@ -177,6 +178,7 @@ sub new {
 	$this->{useRoot}       = $useRoot;
 	$this->{root}          = $root;
 	$this->{manager}       = $manager;
+	$this->{addPacks}      = $addPacks;
 	return $this;
 }
 
@@ -283,7 +285,8 @@ sub upgrade {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $manager = $this->{manager};
+	my $manager  = $this->{manager};
+	my $addPacks = $this->{addPacks};
 	#==========================================
 	# Mount local and NFS directories
 	#------------------------------------------
@@ -295,7 +298,7 @@ sub upgrade {
 	#==========================================
 	# Upgrade system
 	#------------------------------------------
-	if (! $manager -> setupUpgrade()) {
+	if (! $manager -> setupUpgrade ($addPacks)) {
 		return undef;
 	}
 	return $this;

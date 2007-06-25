@@ -337,17 +337,11 @@ sub main {
 			$xml -> addRepository (\@AddRepositoryType,\@AddRepository);
 		}
 		#==========================================
-		# Check for add-package option
-		#------------------------------------------
-		if (defined @AddPackage) {
-			$xml -> addImagePackages (@AddPackage);
-		}
-		#==========================================
 		# Initialize root system, use existing root
 		#------------------------------------------
 		$root = new KIWIRoot (
 			$kiwi,$xml,$Upgrade,undef,
-			"/base-system",$Upgrade
+			"/base-system",$Upgrade,\@AddPackage
 		);
 		if (! defined $root) {
 			$kiwi -> error ("Couldn't create root object");

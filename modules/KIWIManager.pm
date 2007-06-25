@@ -544,6 +544,7 @@ sub setupUpgrade {
 	# using the package manager upgrade functionality
 	# ---
 	my $this = shift;
+	my $addPacks = shift;
 	my $kiwi = $this->{kiwi};
 	my $root = $this->{root};
 	my $manager    = $this->{manager};
@@ -564,7 +565,13 @@ sub setupUpgrade {
 		#------------------------------------------
 		$kiwi -> info ("Upgrading image...");
 		print $fd "chroot $root smart update\n";
-		print $fd "chroot $root smart upgrade -y\n";
+		if (defined $addPacks) {
+			my @addonPackages = @{$addPacks};
+			print $fd "chroot $root smart upgrade -y && ";
+			print $fd "chroot $root smart install -y @addonPackages\n";
+		} else {
+			print $fd "chroot $root smart upgrade -y\n";
+		}
 		print $fd "echo \$? > $screenCall.exit\n";
 		$fd -> close();
 	}
@@ -576,7 +583,13 @@ sub setupUpgrade {
 		# Create screen call file
 		#------------------------------------------
 		$kiwi -> info ("Upgrading image...");
-		print $fd "chroot $root yes | zypper upgrade\n";
+		if (defined $addPacks) {
+			my @addonPackages = @{$addPacks};
+			print $fd "chroot $root yes | zypper upgrade && ";
+			print $fd "chroot $root yes | zypper install -y @addonPackages\n";
+		} else {
+			print $fd "chroot $root yes | zypper upgrade\n";
+		}
 		print $fd "echo \$? > $screenCall.exit\n";
 		$fd -> close();
 	}
