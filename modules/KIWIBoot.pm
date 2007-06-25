@@ -21,6 +21,8 @@ package KIWIBoot;
 #------------------------------------------
 use strict;
 use KIWILog;
+use File::Basename;
+use File::Spec;
 
 #==========================================
 # Constructor
@@ -84,9 +86,14 @@ sub new {
 		return undef;
 	}
 	$kernel = $initrd;
-	$knlink = $kernel;
-	$knlink =~ s/gz$/kernel/;
-	$kernel = readlink ($knlink);
+	$kernel =~ s/gz$/kernel/;
+	if (-l $kernel) {
+		$knlink = $kernel;
+		$kernel = readlink ($knlink);
+		if (!File::Spec->file_name_is_absolute($kernel)) {
+			$kernel = File::Spec->catfile(dirname($initrd), $kernel);
+		}
+	}
 	if (! -f $kernel) {
 		$kiwi -> error  ("Couldn't find kernel file: $kernel");
 		$kiwi -> failed ();
