@@ -159,3 +159,32 @@ function baseCleanMount {
 	umount /dev/pts
 	umount /sys
 }
+
+#======================================
+# stripLocales
+#--------------------------------------
+function stripLocales {
+	local imageLocales="$@"
+	local directories="/opt/gnome/share/locale /usr/share/locale /opt/kde3/share/locale /usr/lib/locale"
+	for dir in $directories; do
+		locales=`find $dir -type d -maxdepth 1 2>/dev/null`
+		for locale in $locales;do
+			if test $locale = $dir;then
+				continue
+			fi
+			
+			local baseLocale=`basename $locale`
+			local found="no"
+			for keep in $imageLocales;do
+				if echo $baseLocale | grep $keep;then
+					found="yes"
+					break
+				fi
+			done
+
+			if test $found = "no";then
+				rm -rf $locale
+			fi
+		done
+	done
+}
