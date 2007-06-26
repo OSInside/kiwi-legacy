@@ -378,7 +378,10 @@ sub createImageUSB {
 	}
 	$main::Survive  = "yes";
 	$main::RootTree = "/tmp/kiwi-".$text."boot-$$";
-	$main::Prepare  = $main::System."/".$boot;
+	$main::Prepare  = $boot;
+	if ($boot !~ /^\//) {
+		$main::Prepare  = $main::System."/".$boot;
+	}
 	$main::Create   = $main::RootTree;
 	$main::ForeignRepo{xmlnode} = $xml -> getForeignNodeList();
 	$main::ForeignRepo{prepare} = $main::Prepare;
@@ -715,7 +718,10 @@ sub createImageLiveCD {
 	}
 	$main::Survive  = "yes";
 	$main::RootTree = "/tmp/kiwi-cdboot-$$";
-	$main::Prepare  = $main::System."/".$boot;
+	$main::Prepare  = $boot;
+	if ($boot !~ /^\//) {
+		$main::Prepare  = $main::System."/".$boot;
+	}
 	$main::Create   = $main::RootTree;
 	$main::ForeignRepo{xmlnode} = $xml -> getForeignNodeList();
 	$main::ForeignRepo{prepare} = $main::Prepare;
