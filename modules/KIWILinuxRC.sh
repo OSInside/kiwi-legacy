@@ -666,7 +666,7 @@ function partedCreatePartition {
 			NO_FILE_SYSTEM=2
 		fi
 	done
-	p_cmd="$p_cmd set 1 boot on"
+	p_cmd="$p_cmd set 2 boot on"
 }
 #======================================
 # partedGetSectors
