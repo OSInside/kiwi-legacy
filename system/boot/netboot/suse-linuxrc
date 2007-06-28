@@ -528,6 +528,12 @@ if [ $LOCAL_BOOT = "no" ];then
 			atftp -g -r $KIWI_INITRD -l /mnt/boot/initrd \
 				$TSERVER \
 			>/dev/null 2>&1
+			if [ ! -z $KIWI_KERNEL ];then
+				Echo "Import KIWI kernel file: $KIWI_KERNEL"
+				atftp -g -r $KIWI_KERNEL -l /mnt/boot/vmlinuz \
+					$TSERVER \
+				>/dev/null 2>&1
+			fi
 			KIWI_INITRD_PARAMS="IMAGE=\"$IMAGE\""
 			if [ ! -z $COMBINED_IMAGE ]; then
 				SPLIT="COMBINED_IMAGE=$COMBINED_IMAGE"
