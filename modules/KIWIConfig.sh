@@ -163,9 +163,14 @@ function baseCleanMount {
 #======================================
 # stripLocales
 #--------------------------------------
-function stripLocales {
+function baseStripLocales {
 	local imageLocales="$@"
-	local directories="/opt/gnome/share/locale /usr/share/locale /opt/kde3/share/locale /usr/lib/locale"
+	local directories="
+		/opt/gnome/share/locale
+		/usr/share/locale
+		/opt/kde3/share/locale
+		/usr/lib/locale
+	"
 	for dir in $directories; do
 		locales=`find $dir -type d -maxdepth 1 2>/dev/null`
 		for locale in $locales;do
