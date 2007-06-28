@@ -7,6 +7,7 @@ Fri Jun 22 10:56:38 CEST 2007 - ms@suse.de
   packages as specified into the existing root tree after the upgrade
   was finished successfully
 - added support for parted partitioner in KIWILinuxRC.sh
+- fixed standalone grub setup if UNIONFS_CONFIG is used
 
 -------------------------------------------------------------------
 Wed Jun 20 15:48:09 CEST 2007 - ms@suse.de

@@ -629,9 +629,13 @@ if test $systemIntegrity = "clean";then
 		# b) /boot/grub/menu.lst...
 		# -------------------------
 		console=""
+		gdev="(hd0,1)"
 		mkdir -p /config/boot/grub
 		if test -z $KIWI_BOOT_TIMEOUT;then
 			KIWI_BOOT_TIMEOUT=10;
+		fi
+		if [ ! -z "$UNIONFS_CONFIG" ]; then
+			gdev="(hd0,2)"
 		fi
 		echo "timeout $KIWI_BOOT_TIMEOUT" > /config/boot/grub/menu.lst
 		IFS="," ; for i in $KERNEL_LIST;do
@@ -641,7 +645,7 @@ if test $systemIntegrity = "clean";then
 			menu=/config/boot/grub/menu.lst
 			echo "title $kernel" >> $menu
 			if [ $kernel = "vmlinuz-xen" ];then
-				echo " root (hd0,1)"                   >> $menu
+				echo " root $gdev"                     >> $menu
 				echo " kernel /boot/xen.gz"            >> $menu
 				echo -n " module /boot/$kernel"        >> $menu
 				echo -n " root=${DISK}2 $console"      >> $menu
@@ -649,11 +653,11 @@ if test $systemIntegrity = "clean";then
 				echo " $KIWI_KERNEL_OPTIONS"           >> $menu
 				echo " module /boot/$initrd"           >> $menu
 			else
-				echo -n " kernel (hd0,1)/boot/$kernel" >> $menu
+				echo -n " kernel $gdev/boot/$kernel"   >> $menu
 				echo -n " root=${DISK}2 $console"      >> $menu
 				echo -n " $KIWI_INITRD_PARAMS"         >> $menu
 				echo " $KIWI_KERNEL_OPTIONS"           >> $menu
-				echo " initrd (hd0,1)/boot/$initrd"    >> $menu
+				echo " initrd $gdev/boot/$initrd"      >> $menu
 			fi
 		fi
 		done
@@ -661,11 +665,11 @@ if test $systemIntegrity = "clean";then
 		# -------------------------
 		mkdir -p /config/etc
 		gconf=/config/etc/grub.conf
-		echo -en "root (hd0,1)\ninstall"         > $gconf
+		echo -en "root $gdev\ninstall"           > $gconf
 		echo -n " --stage2=/boot/grub/stage2"   >> $gconf
 		echo -n " /boot/grub/stage1 d (hd0)"    >> $gconf
 		echo -n " /boot/grub/stage2 0x8000"     >> $gconf
-		echo " (hd0,1)/boot/grub/menu.lst"      >> $gconf
+		echo " $gdev/boot/grub/menu.lst"        >> $gconf
 		echo "quit"                             >> $gconf
 		# d) /etc/sysconfig/kernel...
 		# ---------------------------
