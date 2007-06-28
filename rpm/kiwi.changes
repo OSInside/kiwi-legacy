@@ -6,6 +6,7 @@ Fri Jun 22 10:56:38 CEST 2007 - ms@suse.de
 - allow --add-package in --upgrade mode. This will install additional
   packages as specified into the existing root tree after the upgrade
   was finished successfully
+- added support for parted partitioner in KIWILinuxRC.sh
 
 -------------------------------------------------------------------
 Wed Jun 20 15:48:09 CEST 2007 - ms@suse.de

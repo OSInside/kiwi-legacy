@@ -1223,7 +1223,7 @@ sub writeImageConfig {
 						last SWITCH;
 					};
 					/linux/i && do {
-						$type = "L";
+						$type = "83";
 						last SWITCH;
 					};
 				}

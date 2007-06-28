@@ -16,6 +16,11 @@
 # STATUS        : Development
 #----------------
 #======================================
+# Exports (General)
+#--------------------------------------
+export PARTITIONER=sfdisk
+
+#======================================
 # Debug
 #--------------------------------------
 function Debug {
@@ -474,9 +479,9 @@ function createFileSystem {
 	fi
 }
 #======================================
-# partitionCount
+# sfdiskPartitionCount
 #--------------------------------------
-function partitionCount {
+function sfdiskPartitionCount {
 	# /.../
 	# calculate the number of partitions to create. If the
 	# number is more than 4 an extended partition needs to be
@@ -492,9 +497,9 @@ function partitionCount {
 	PART_NEED_FILL=`expr 8 - \( $PART_NUMBER - $PART_NEED_FILL \* 8 \)`
 }
 #======================================
-# fillPartition
+# sfdiskFillPartition
 #--------------------------------------
-function fillPartition {
+function sfdiskFillPartition {
 	# /.../
 	# in case of an extended partition the number of input lines
 	# must be a multiple of 4, so this function will fill the input
@@ -506,9 +511,9 @@ function fillPartition {
 	done
 }
 #======================================
-# createSwap
+# sfdiskCreateSwap
 #--------------------------------------
-function createSwap {
+function sfdiskCreateSwap {
 	# /.../
 	# create the sfdisk input line for setting up the
 	# swap space
@@ -530,9 +535,9 @@ function createSwap {
 	done
 }
 #======================================
-# createPartition
+# sfdiskCreatePartition
 #--------------------------------------
-function createPartition {
+function sfdiskCreatePartition {
 	# /.../
 	# create the sfdisk input lines for setting up the
 	# partition table except the swap space
@@ -586,9 +591,126 @@ function createPartition {
 	fi
 }
 #======================================
-# writePartitionTable
+# partedCreatePartition
 #--------------------------------------
-function writePartitionTable {
+function partedCreatePartition {
+	# /.../
+	# create the parted input data for setting up the
+	# partition table
+	# ----
+	p_stopp=0
+	dd if=/dev/zero of=$DISK bs=512 count=1 >/dev/null 2>&1 && \
+		/usr/sbin/parted -s $DISK mklabel msdos
+	if [ $? -ne 0 ];then
+		systemException \
+			"Failed to clean partition table on: $DISK !" \
+			"reboot"
+	fi
+	p_opts="-s $DISK unit s print"
+	p_size=`/usr/sbin/parted $p_opts | grep "Disk" | cut -f2 -d: | cut -f1 -ds`
+	p_size=`echo $p_size`
+	p_cmd="/usr/sbin/parted -s $DISK unit s"
+	p_idc="/sbin/sfdisk -c $DISK"
+	p_ids="true"
+	IFS="," ; for i in $PART;do
+		field=0
+		IFS=";" ; for n in $i;do
+		case $field in
+			0) partSize=$n ; field=1 ;;
+			1) partID=$n   ; field=2 ;;
+			2) partMount=$n;
+		esac
+		done
+		PART_COUNT=`expr $PART_COUNT + 1`
+		if test $partSize = "x";then
+			partSize=$p_size
+		else
+			partSize=`expr $partSize \* 2048`
+		fi
+		if test $partID = "82" -o $partID = "S";then
+			partedGetSectors 63 $partSize
+			p_cmd="$p_cmd mkpartfs primary linux-swap $p_start $p_stopp"
+			continue
+		fi
+		if [ $p_stopp = 0 ];then
+			systemException \
+				"Invalid partition setup: $PART !" \
+				"reboot"
+		fi
+		partedGetSectors $p_stopp $partSize
+		if [ $PART_COUNT -le 3 ];then
+			p_cmd="$p_cmd mkpart primary $p_start $p_stopp"
+			p_ids="$p_ids && $p_idc $PART_COUNT $partID"
+		else
+			if [ $PART_COUNT -eq 4 ];then
+				p_cmd="$p_cmd mkpart extended $p_start $p_size"
+				p_ids="$p_ids && $p_idc $PART_COUNT 85"
+				PART_COUNT=`expr $PART_COUNT + 1`
+				NO_FILE_SYSTEM=1
+			fi
+			p_start=`expr $p_start + 1`
+			p_cmd="$p_cmd mkpart logical $p_start $p_stopp"
+			p_ids="$p_ids && $p_idc $PART_COUNT $partID"
+		fi
+		if test -z "$PART_MOUNT";then
+			PART_MOUNT="$partMount"
+			PART_DEV="$DISK$devices"
+		else
+			PART_MOUNT="$PART_MOUNT:$partMount"
+			if [ $NO_FILE_SYSTEM -eq 2 ];then
+				NO_FILE_SYSTEM=0
+			fi
+			PART_DEV="$PART_DEV:$DISK$devices"
+		fi
+		if [ $NO_FILE_SYSTEM -eq 1 ];then
+			NO_FILE_SYSTEM=2
+		fi
+	done
+	p_cmd="$p_cmd set 1 boot on"
+}
+#======================================
+# partedGetSectors
+#--------------------------------------
+function partedGetSectors {
+	# /.../
+	# calculate start/end sector for given
+	# sector size
+	# ---
+	p_start=$1
+	if [ $p_start -gt 63 ];then
+		p_start=`expr $p_start + 1`
+	fi
+	p_stopp=`expr $p_start + $2`
+	if [ $p_stopp -gt $p_size ];then
+		p_stopp=$p_size
+	fi
+}
+#======================================
+# partedWritePartitionTable
+#--------------------------------------
+function partedWritePartitionTable {
+	# /.../
+	# write the partition table using parted
+	# ----
+	diskDevice=$1
+
+	eval $p_cmd
+	if test $? != 0;then
+		systemException \
+			"Failed to create partition table on: $diskDevice !" \
+			"reboot"
+	fi
+	eval $p_ids >/dev/null 2>&1
+	if test $? != 0;then
+		systemException \
+			"Failed to setup partition IDs on: $diskDevice !" \
+			"reboot"
+	fi
+}
+#======================================
+# sfdiskWritePartitionTable
+#--------------------------------------
+function sfdiskWritePartitionTable {
 	# /.../
 	# write the partition table using PART_FILE as
 	# input for sfdisk
@@ -611,6 +733,42 @@ function writePartitionTable {
 	fi
 	
 	rm -f $PART_FILE
+}
+#======================================
+# partitionCount
+#--------------------------------------
+function partitionCount {
+	if [ $PARTITIONER = "sfdisk" ];then
+		sfdiskPartitionCount
+	fi
+}
+#======================================
+# createSwap
+#--------------------------------------
+function createSwap {
+	if [ $PARTITIONER = "sfdisk" ];then
+		sfdiskCreateSwap
+	fi
+}
+#======================================
+# createPartition
+#--------------------------------------
+function createPartition {
+	if [ $PARTITIONER = "sfdisk" ];then
+		sfdiskCreatePartition
+	else
+		partedCreatePartition
+	fi
+}
+#======================================
+# writePartitionTable
+#--------------------------------------
+function writePartitionTable {
+	if [ $PARTITIONER = "sfdisk" ];then
+		sfdiskWritePartitionTable $1
+	else
+		partedWritePartitionTable $1
+	fi
 }
 #======================================
 # linuxPartition
