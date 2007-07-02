@@ -341,6 +341,18 @@ sub install {
 		$kiwi -> done ();
 	}
 	#==========================================
+	# Get VMware package if type is appropriate
+	#------------------------------------------
+	my %type = %{$xml -> getImageTypeAndAttributes()};
+	if ("$type{type}" eq "vmware") {
+		$kiwi -> info ("Creating VMware package list");
+		my @vmwareList = $xml -> getVMwareList();
+		if (@vmwareList) {
+			@packList = (@packList,@vmwareList);
+		}
+		$kiwi -> done ();
+	}
+	#==========================================
 	# Mount local and NFS directories
 	#------------------------------------------
 	if (! setupMount ($this)) {

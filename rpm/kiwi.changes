@@ -9,6 +9,8 @@ Fri Jun 22 10:56:38 CEST 2007 - ms@suse.de
 - added support for parted partitioner in KIWILinuxRC.sh
 - fixed standalone grub setup if UNIONFS_CONFIG is used
 - added optional config.<mac> parameter KIWI_KERNEL
+- added vmware package/configuration description section. This
+  will lead to an appropriate .vmx file for use in vmware player
 
 -------------------------------------------------------------------
 Wed Jun 20 15:48:09 CEST 2007 - ms@suse.de

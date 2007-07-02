@@ -21,7 +21,7 @@
 				<xs:element ref="drivers"     minOccurs="0" maxOccurs="3"/>
 				<xs:element ref="repository"  minOccurs="0" maxOccurs="unbounded"/>
 				<xs:element ref="deploy"      minOccurs="0" maxOccurs="1"/>
-				<xs:element ref="packages"    minOccurs="0" maxOccurs="3"/>
+				<xs:element ref="packages"    minOccurs="0" maxOccurs="4"/>
 			</xs:sequence>
 			<xs:attribute name="name" type="xs:string"/>
 			<xs:attribute name="inherit" type="xs:string"/>

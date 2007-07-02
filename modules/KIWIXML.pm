@@ -865,11 +865,11 @@ sub getPackageAttributes {
 		}
 		$result{patternType} = $ptype;
 		$result{type} = $type;
-		if ($result{type} eq "xen") {
+		if (($type eq "xen") || ($type eq "vmware")) {
 			my $memory  = $node -> getAttribute ("memory");
 			my $disk    = $node -> getAttribute ("disk");
 			if ((! $memory) || (! $disk)) {
-				$kiwi -> warning ("Missing Xen virtualisation config data");
+				$kiwi -> warning ("Missing $type virtualisation config data");
 				$kiwi -> skipped ();
 				return undef;
 			}
@@ -1128,6 +1128,18 @@ sub getXenList {
 	# ---
 	my $this = shift;
 	return getList ($this,"xen");
+}
+
+#==========================================
+# getVMwareList
+#------------------------------------------
+sub getVMwareList {
+	# ...
+	# Create virtualisation package list needed to run that
+	# image within VMware
+	# ---
+	my $this = shift;
+	return getList ($this,"vmware");
 }
 
 #==========================================

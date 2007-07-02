@@ -458,6 +458,8 @@ sub createImageVMX {
 	#------------------------------------------
 	my $this = shift;
 	my $para = shift;
+	my $xml  = $this->{xml};
+	my %vmwc = $xml  -> getPackageAttributes ("vmware");
 	my $name = $this -> createImageUSB ($para,"VMX");
 	if (! defined $name) {
 		return undef;
@@ -473,6 +475,16 @@ sub createImageVMX {
 	if (! defined main::main()) {
 		$main::Survive = "default";
 		return undef;
+	}
+	#==========================================
+	# Create virtual disk configuration
+	#------------------------------------------
+	if ($main::BootVMFormat eq "vmdk") {
+		# VMware vmx file...
+		if (! $this -> buildVMwareConfig ($main::Destination,$name,\%vmwc)) {
+			$main::Survive = "default";
+			return undef;
+		}	
 	}
 	$main::Survive = "default";
 	return $this;
@@ -1786,6 +1798,70 @@ sub buildXenConfig {
 		print FD 'disk=[ "file:'.$image.','.$part.',w" ]'."\n";
 		print FD 'root="'.$device.' ro"'."\n";
 		print FD 'extra=" xencons=tty "'."\n";
+		close FD;
+		$kiwi -> done();
+	}
+	return $dest;
+}
+
+#==========================================
+# buildVMwareConfig
+#------------------------------------------
+sub buildVMwareConfig {
+	my $this   = shift;
+	my $dest   = shift;
+	my $name   = shift;
+	my $vmwref = shift;
+	my $kiwi   = $this->{kiwi};
+	my $file   = $dest."/".$name->{systemImage}.".vmx";
+	my %vmwconfig = %{$vmwref};
+	if (defined $vmwconfig{disk}) {
+		$kiwi -> info ("Creating image VMware configuration file...");
+		if (! open (FD,">$file")) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create xenconfig file: $!");
+			$kiwi -> failed ();
+			return undef;
+		}
+		my $device = $vmwconfig{disk};
+		my $memory = $vmwconfig{memory};
+		my $image  = $dest."/".$name->{systemImage};
+		# General...
+		print FD '#!/usr/bin/vmware'."\n";
+		print FD 'config.version = "8"'."\n";
+		print FD 'virtualHW.version = "3"'."\n";
+		print FD 'memsize = "'.$memory.'"'."\n";
+		print FD 'guestOS = "Linux"'."\n";
+		print FD 'displayName = "'.$name->{systemImage}.'"'."\n";
+		if ($device =~ /^ide/) {
+			# IDE Interface...
+			print FD $device.':0.present = "true"'."\n";
+			print FD $device.':0.fileName= "'.$image.'"'."\n";
+		} else {
+			# SCSI Interface...
+			print FD $device.'.present = "true"'."\n";
+			print FD $device.'.sharedBus = "none"'."\n";
+			print FD $device.'.virtualDev = "lsilogic"'."\n";
+			print FD $device.':0.present = "true"'."\n";
+			print FD $device.':0.fileName = "'.$image.'"'."\n";
+			print FD $device.':0.deviceType = "scsi-hardDisk"'."\n";
+		}
+		# Floppy...
+		print FD 'floppy0.fileName = "/dev/fd0"'."\n";
+		# Network...
+		print FD 'Ethernet0.present = "true"'."\n";
+		print FD 'ethernet0.addressType = "generated"'."\n";
+		print FD 'ethernet0.generatedAddress = "00:0c:29:13:ea:50"'."\n";
+		print FD 'ethernet0.generatedAddressOffset = "0"'."\n";
+		# USB...
+		print FD 'usb.present = "true"'."\n";
+		# Power management...
+		print FD 'priority.grabbed = "normal"'."\n";
+		print FD 'priority.ungrabbed = "normal"'."\n";
+		print FD 'powerType.powerOff = "hard"'."\n";
+		print FD 'powerType.powerOn  = "hard"'."\n";
+		print FD 'powerType.suspend  = "hard"'."\n";
+		print FD 'powerType.reset    = "hard"'."\n";
 		close FD;
 		$kiwi -> done();
 	}
