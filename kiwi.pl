@@ -246,7 +246,7 @@ sub main {
 		}
 		$kiwi -> done();
 		#==========================================
-		# Initialize logical image extend
+		# Check type params and create image obj
 		#------------------------------------------
 		$image = new KIWIImage (
 			$kiwi,$xml,$Create,$Destination,$StripImage,
@@ -257,6 +257,40 @@ sub main {
 		if (! defined $para) {
 			my $code = kiwiExit (1); return $code;
 		}
+		#==========================================
+		# Check for type packages if any
+		#------------------------------------------
+		my @addonList;
+		if ($type{type} eq "vmx") {
+			$kiwi -> info ("Creating VMware package list");
+			@addonList = $xml -> getVMwareList();
+			$kiwi -> done();
+		}
+		if ($type{type} eq "xen") {
+			$kiwi -> info ("Creating Xen package list");
+			@addonList = $xml -> getXenList();
+			$kiwi -> done();
+		}
+		if (@addonList) {
+			$kiwi -> info ("Installing packages: @addonList...\n");
+			$kiwi -> warning (
+				"*** Packages installed here won't be removed later ***\n"
+			);
+			$main::Survive = "yes";
+			$main::Upgrade = $Create;
+			@main::AddPackage = @addonList;
+			undef $main::Create;
+			if (! defined main::main()) {
+				$main::Survive = "default";
+				my $code = kiwiExit (1); return $code;
+			}
+			$main::Survive = "default";
+			$main::Create  = $main::Upgrade;
+			undef $main::Upgrade;
+		}
+		#==========================================
+		# Initialize logical image extend
+		#------------------------------------------
 		my $ok;
 		SWITCH: for ($type{type}) {
 			/^ext2/     && do {

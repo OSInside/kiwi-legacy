@@ -329,7 +329,7 @@ sub install {
 	#==========================================
 	# Get Xen package if type is appropriate
 	#------------------------------------------
-	%type = %{$xml -> getImageTypeAndAttributes("xen")};
+	%type = %{$xml -> getImageTypeAndAttributes()};
 	if ("$type{type}" eq "xen") {
 		$kiwi -> info ("Creating Xen package list");
 		my @xenList = $xml -> getXenList();
@@ -344,8 +344,7 @@ sub install {
 	#==========================================
 	# Get VMware package if type is appropriate
 	#------------------------------------------
-	%type = %{$xml -> getImageTypeAndAttributes("vmware")};
-	if ("$type{type}" eq "vmware") {
+	if ("$type{type}" eq "vmx") {
 		$kiwi -> info ("Creating VMware package list");
 		my @vmwareList = $xml -> getVMwareList();
 		if (@vmwareList) {

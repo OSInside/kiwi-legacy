@@ -1836,7 +1836,8 @@ sub buildVMwareConfig {
 		if ($device =~ /^ide/) {
 			# IDE Interface...
 			print FD $device.':0.present = "true"'."\n";
-			print FD $device.':0.fileName= "'.$image.'"'."\n";
+			print FD $device.':0.fileName= "'.$image.'.vmdk"'."\n";
+			print FD $device.':0.redo = ""'."\n";
 		} else {
 			# SCSI Interface...
 			print FD $device.'.present = "true"'."\n";
