@@ -129,7 +129,16 @@ if [ -z "$UNIONFS_CONFIG" ];then
 fi
 
 #======================================
-# 7) Resize filesystem to full space
+# 7) Check for swap space
+#--------------------------------------
+probeDevices
+swapDevice=`searchSwapSpace`
+if [ ! -z "$swapDevice" ];then
+	Echo "Found swap space on: $swapDevice"
+fi
+
+#======================================
+# 8) Resize filesystem to full space
 #--------------------------------------
 if [ -z "$UNIONFS_CONFIG" ];then
 	Echo "Resize filesystem to full partition space..."
@@ -146,11 +155,11 @@ if [ -z "$UNIONFS_CONFIG" ];then
 fi
 
 #======================================
-# 8) Mount OS image to /mnt
+# 9) Mount OS image to /mnt
 #--------------------------------------
 if [ -z "$UNIONFS_CONFIG" ];then
 	#======================================
-	# 8.1) mount RW part and CD to /mnt
+	# 9.1) mount RW part and CD to /mnt
 	#--------------------------------------
 	if ! mount $imageDevice /mnt &>/dev/null;then
 		systemException "Failed to mount RW root filesystem" "reboot"
@@ -158,7 +167,7 @@ if [ -z "$UNIONFS_CONFIG" ];then
 	mkdir -p /mnt/$LIVECD && mount $cddev /mnt/$LIVECD &>/dev/null
 
 	#======================================
-	# 8.2) Create RO Link list
+	# 9.2) Create RO Link list
 	#--------------------------------------
 	cd /mnt
 	if [ ! -d $LIVECD/read-only-system ];then
@@ -182,7 +191,7 @@ if [ -z "$UNIONFS_CONFIG" ];then
 	cd /
 else
 	#======================================
-	# 8.1) mount CD to /mnt and unify
+	# 9.1) mount CD to /mnt and unify
 	#--------------------------------------
 	Echo "Mounting compressed unified tree..."
 	mkdir -p /mnt/$LIVECD && mount $cddev /mnt/$LIVECD &>/dev/null
@@ -193,17 +202,22 @@ else
 fi
 
 #======================================
-# 9) Create system dependant files
+# 10) Create system dependant files
 #--------------------------------------
 mkdir -p /config/etc
-echo "$imageDevice / $FSTYPE   defaults 0 0"         > /config/etc/fstab
+if [ -z "$UNIONFS_CONFIG" ];then
+	echo "$imageDevice / $FSTYPE   defaults 0 0"     > /config/etc/fstab
+fi
+if [ ! -z "$swapDevice" ];then
+	echo "$swapDevice swap swap pri=42  0 0"        >> /config/etc/fstab
+fi
 echo "devpts  /dev/pts devpts  mode=0620,gid=5 0 0" >> /config/etc/fstab
 echo "proc    /proc    proc    defaults 0 0"        >> /config/etc/fstab
 echo "sysfs   /sys     sysfs   noauto 0 0"          >> /config/etc/fstab
 echo "tmpfs   /dev/shm tmpfs   defaults 0 0"        >> /config/etc/fstab
 
 #======================================
-# 10) copy system dependant files
+# 11) copy system dependant files
 #--------------------------------------
 cd /config
 find . -type d | while read d ; do  mkdir -p /mnt/$d ; done
@@ -212,25 +226,25 @@ cd /
 rm -rf /config
 
 #======================================
-# 11) setup real root device
+# 12) setup real root device
 #--------------------------------------
 echo 256 > /proc/sys/kernel/real-root-dev
 
 #======================================
-# 12) umount system filesystems
+# 13) umount system filesystems
 #--------------------------------------
 umount /dev/pts
 umount /sys
 umount /proc
 
 #======================================
-# 13) copy initrd files to image
+# 14) copy initrd files to image
 #--------------------------------------
 cp /preinit /mnt
 cp /include /mnt
 
 #======================================
-# 14) Activate new root
+# 15) Activate new root
 #--------------------------------------
 Echo "Activating Image: [$imageName]"
 cd /mnt && exec < dev/console >dev/console 2>&1
@@ -249,7 +263,7 @@ else
 	rm ./include
 fi
 #======================================
-# 15) Unmount initrd / system init
+# 16) Unmount initrd / system init
 #--------------------------------------
 echo " "
 echo "Booting into Live CD System..."
