@@ -2,7 +2,8 @@
 Tue Jul  3 10:24:33 CEST 2007 - ms@suse.de
 
 - v1.43
-- added searchSwapSpace() function for live media
+- added searchSwapSpace() function for live media. include swap
+  activation of partition or into a file (#289313)
 
 -------------------------------------------------------------------
 Fri Jun 22 10:56:38 CEST 2007 - ms@suse.de

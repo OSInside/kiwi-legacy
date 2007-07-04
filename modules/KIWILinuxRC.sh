@@ -308,11 +308,32 @@ function CDUmount {
 # searchSwapSpace
 #--------------------------------------
 function searchSwapSpace {
+	# /.../
+	# search for a type=82 swap partition
+	# ----
 	hwapp=/usr/sbin/hwinfo
 	for diskdev in `$hwapp --disk | grep "Device File:" | cut -f2 -d:`;do
 		for disknr in 1 2 3 4;do
 			id=`/sbin/sfdisk --print-id $diskdev $disknr`
 			if [ $id = "82" ];then
+				echo $diskdev$disknr
+				break
+			fi
+		done
+	done
+}
+#======================================
+# searchDiskSpace
+#--------------------------------------
+function searchDiskSpace {
+	# /.../
+	# search for a free non swap partition
+	# ----
+	hwapp=/usr/sbin/hwinfo
+	for diskdev in `$hwapp --disk | grep "Device File:" | cut -f2 -d:`;do
+		for disknr in 1 2 3 4;do
+			id=`/sbin/sfdisk --print-id $diskdev $disknr`
+			if [ $id -ne 82 ] && [ $id -ne 0 ];then
 				echo $diskdev$disknr
 				break
 			fi

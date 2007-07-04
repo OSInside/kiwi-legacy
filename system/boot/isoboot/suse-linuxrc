@@ -132,9 +132,49 @@ fi
 # 7) Check for swap space
 #--------------------------------------
 probeDevices
-swapDevice=`searchSwapSpace`
-if [ ! -z "$swapDevice" ];then
-	Echo "Found swap space on: $swapDevice"
+swapSpace=`searchSwapSpace`
+if [ ! -z "$swapSpace" ];then
+	#======================================
+	# 7.1) use an existing swap partition
+	#--------------------------------------
+	Echo "Found swap space on: $swapSpace"
+else
+	#======================================
+	# 7.1) use a swap file on a free part.
+	#--------------------------------------
+	swapDevice=`searchDiskSpace`
+	if [ ! -z "$swapDevice" ];then
+		FSTYPE_SAVE=$FSTYPE
+		probeFileSystem $swapDevice
+		SWTYPE=$FSTYPE
+		FSTYPE=$FSTYPE_SAVE
+		Echo "Setting up swap file on: $swapDevice -> $SWTYPE"
+		mRAM=`cat /proc/meminfo | grep MemTotal | cut -f2 -d:`
+		mRAM=`echo $mRAM | cut -f1 -d" "`
+		SWSIZE=`expr $mRAM / 1024`
+		SWSIZE=`expr $SWSIZE \* 2`
+		if [ $SWSIZE -lt 64 ];then
+			SWSIZE=64
+		fi
+		SWFILE=/mnt/kiwiswap
+		if ! mount -t $SWTYPE $swapDevice /mnt >/dev/null 2>&1;then
+			Echo "Failed to mount swap device on: $swapDevice"
+			unset swapDevice
+		fi
+		if [ ! -f $SWFILE ];then
+			dd if=/dev/zero of=$SWFILE bs=1M count=$SWSIZE &>/dev/null
+			if [ ! $? = 0 ];then
+				Echo "Failed to create swap file on: $swapDevice"
+				unset swapDevice
+			fi
+			if ! mkswap $SWFILE &>/dev/null;then
+				Echo "Failed to initialize swap file"
+				unset swapDevice
+			fi
+		fi
+		Echo "Created swap file: kiwiswap [ $SWSIZE MB ]"
+		umount /mnt
+	fi
 fi
 
 #======================================
@@ -208,8 +248,13 @@ mkdir -p /config/etc
 if [ -z "$UNIONFS_CONFIG" ];then
 	echo "$imageDevice / $FSTYPE   defaults 0 0"     > /config/etc/fstab
 fi
+if [ ! -z "$swapSpace" ];then
+	echo "$swapSpace swap swap pri=42  0 0"         >> /config/etc/fstab
+fi
 if [ ! -z "$swapDevice" ];then
-	echo "$swapDevice swap swap pri=42  0 0"        >> /config/etc/fstab
+	mkdir -p /mnt/swap
+	echo "$swapDevice /swap $SWTYPE defaults 1 1"   >> /config/etc/fstab
+	echo "/swap/kiwiswap none swap sw 0 0"          >> /config/etc/fstab
 fi
 echo "devpts  /dev/pts devpts  mode=0620,gid=5 0 0" >> /config/etc/fstab
 echo "proc    /proc    proc    defaults 0 0"        >> /config/etc/fstab
