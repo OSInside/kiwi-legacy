@@ -1167,14 +1167,15 @@ sub preImage {
 	#==========================================
 	# Call images.sh script
 	#------------------------------------------
-	if (! $this -> setupLogicalExtend ()) {
+	my $mBytes = $this -> setupLogicalExtend ();
+	if (! defined $mBytes) {
 		return undef;
 	}
 	#==========================================
 	# Create logical extend
 	#------------------------------------------
 	if (! defined $haveExtend) {
-	if (! $this -> buildLogicalExtend ($name)) {
+	if (! $this -> buildLogicalExtend ($name,$mBytes."M")) {
 		return undef;
 	}
 	}
@@ -1424,7 +1425,7 @@ sub buildLogicalExtend {
 	# Calculate block size and number of blocks
 	#------------------------------------------
 	if (! defined $size) {
-		$size = $xml -> getImageSize();
+		return undef;
 	}
 	my @bsc  = getBlocks ( $size );
 	my $bs   = $bsc[0];
@@ -1487,7 +1488,8 @@ sub setupLogicalExtend {
 	# Call depmod
 	#------------------------------------------
 	my $depmod = "/sbin/depmod";
-	my @systemMaps = qx ( chroot $imageTree bash -c "ls -1 /boot/System.map* 2>/dev/null" );
+	my $map    = "/boot/System.map*";
+	my @systemMaps = qx ( chroot $imageTree bash -c "ls -1 $map 2>/dev/null" );
 	if ( @systemMaps ) {
 		$kiwi -> info ("Calculating kernel module dependencies...");
 		foreach my $systemMap (@systemMaps) {
@@ -1547,7 +1549,7 @@ sub setupLogicalExtend {
 		$kiwi -> info ("Suggested Image size: $mbytes MB");
 		$kiwi -> done ();
 	}
-	return $mbytes;
+	return $xmlsize;
 }
 
 #==========================================
@@ -1977,7 +1979,11 @@ sub getSize {
 	$size += $spare;
 	$size /= 1024;
 	$size = int ($size);
-	return ($orig,$size,$xml->getImageSize());
+	my $xmlsize = $xml->getImageSize();
+	if ($xmlsize eq "auto") {
+		$xmlsize = $size;
+	}
+	return ($orig,$size,$xmlsize);
 }
 
 #==========================================

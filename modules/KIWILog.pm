@@ -172,6 +172,52 @@ sub skipped {
 }
 
 #==========================================
+# step
+#------------------------------------------
+sub step {
+	# ...
+	# This is the green "(...)" flag
+	# ---
+	my $this = shift;
+	my $data = shift;
+	if ($data > 100) {
+		$data = 100;
+	}
+	if (! defined $this->{fileLog}) {
+		$this -> doStat();
+		$this -> setOutputChannel();
+		print "\033[1;32m($data%)";
+		$this -> resetOutputChannel();
+		$this -> doStat();
+		if ($this->{errorOk}) {
+			# Don't set progress info to log file
+		}
+	} else {
+		# Don't set progress info to log file
+	}
+}
+
+#==========================================
+# cursorOFF
+#------------------------------------------
+sub cursorOFF {
+	my $this = shift;
+	if (! defined $this->{fileLog}) {
+		print "\033[?25l";
+	}
+}
+
+#==========================================
+# cursorON
+#------------------------------------------
+sub cursorON {
+	my $this = shift;
+	if (! defined $this->{fileLog}) {
+		print "\033[?25h";
+	}
+}
+
+#==========================================
 # setOutputChannel
 #------------------------------------------
 sub setOutputChannel {

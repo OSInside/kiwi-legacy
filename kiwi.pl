@@ -26,6 +26,7 @@ use KIWIXML;
 use KIWILog;
 use KIWIImage;
 use KIWIBoot;
+use KIWIMigrate;
 
 #============================================
 # Globals (Version)
@@ -39,6 +40,7 @@ our $System  = "/usr/share/kiwi/image";
 our $Tools   = "/usr/share/kiwi/tools";
 our $Scheme  = "/usr/share/kiwi/modules/KIWIScheme.xsd";
 our $KConfig = "/usr/share/kiwi/modules/KIWIConfig.sh";
+our $KMigrate= "/usr/share/kiwi/modules/KIWIMigrate.txt";
 #============================================
 # Globals
 #--------------------------------------------
@@ -70,6 +72,7 @@ our @AddPackage;        # add packages to the image package list
 our $SetRepository;     # set first repository for building physical extend
 our $SetRepositoryType; # set firt repository type
 our $SetImageType;      # set image type to use, default is primary type
+our $Migrate;           # migrate running system to image description
 
 #============================================
 # Globals
@@ -396,6 +399,29 @@ sub main {
 	}
 
 	#==========================================
+	# Migrate systm to image description
+	#------------------------------------------
+	if (defined $Migrate) {
+		$kiwi -> info ("Starting system to image migration");
+		my $migrate = new KIWIMigrate ( $kiwi,$Destination,$Migrate );
+		if (! defined $migrate) {
+			my $code = kiwiExit (1); return $code;
+		}
+		if (! $migrate -> setTemplate()) {
+			my $code = kiwiExit (1); return $code;
+		}
+		if (! $migrate -> setServiceList()) {
+			my $code = kiwiExit (1); return $code;
+		}
+		# *** RUN IN DEMO MODE ***
+		# FIXME: remove demo after testing phase !
+		if (! $migrate -> setSystemConfiguration ("demo")) {
+			my $code = kiwiExit (1); return $code;
+		}
+		kiwiExit (0);
+	}
+
+	#==========================================
 	# Create a crypted password and print it
 	#------------------------------------------
 	if (defined $CreatePassword) {
@@ -533,6 +559,7 @@ sub init {
 		"version"               => \&version,
 		"logfile=s"             => \$LogFile,
 		"prepare|p=s"           => \$Prepare,
+		"migrate|m=s"           => \$Migrate,
 		"list|l"                => \&listImage,
 		"create|c=s"            => \$Create,
 		"create-instsource=s"   => \$CreateInstSource,
@@ -574,7 +601,7 @@ sub init {
 		(! defined $BootStick) && (! defined $BootCD) &&
 		(! defined $InstallCD) && (! defined $Upgrade) &&
 		(! defined $BootVMDisk) && (! defined $CreatePassword) &&
-		(! defined $CreateInstSource)
+		(! defined $CreateInstSource) && (! defined $Migrate)
 	) {
 		$kiwi -> info ("No operation specified");
 		$kiwi -> failed ();
@@ -593,6 +620,11 @@ sub init {
 	if ((defined $RootTree) && ($RootTree !~ /^\//)) {
 		my $workingDir = qx ( pwd ); chomp $workingDir;
 		$RootTree = $workingDir."/".$RootTree;
+	}
+	if ((defined $Migrate) && (! defined $Destination)) {
+		$kiwi -> info ("No migration destination directory specified");
+		$kiwi -> failed ();
+		my $code = kiwiExit (1); return $code;
 	}
 	#==========================================
 	# remove pre-defined smart channels
@@ -618,6 +650,7 @@ sub usage {
 	print "  kiwi -p | --prepare <image-path>\n";
 	print "  kiwi -c | --create  <image-root>\n";
 	print "  kiwi -u | --upgrade <image-root>\n";
+	print "  kiwi -m | --migrate <name> --destdir <destination-path>\n";
 	print "  kiwi --bootstick <initrd> \\\n";
 	print "     [ --bootstick-system <systemImage> ] \\\n";
 	print "     [ --bootstick-device <device> ] \\\n";

@@ -232,7 +232,7 @@
 			<xs:sequence>
 				<xs:element ref="type" minOccurs="1" maxOccurs="unbounded"/>
 				<xs:element ref="version" minOccurs="1" maxOccurs="1"/>
-				<xs:element ref="size" minOccurs="1" maxOccurs="1"/>
+				<xs:element ref="size" minOccurs="0" maxOccurs="1"/>
 				<xs:element ref="compressed" minOccurs="0" maxOccurs="1"/>
 				<xs:element ref="packagemanager" minOccurs="0" maxOccurs="1"/>
 				<xs:element ref="rpm-check-signatures" minOccurs="0" maxOccurs="1"/>

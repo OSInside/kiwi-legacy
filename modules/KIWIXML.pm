@@ -278,9 +278,13 @@ sub getImageSize {
 	my $this = shift;
 	my $node = $this->{optionsNodeList} -> get_node(1);
 	my $size = $node -> getElementsByTagName ("size");
-	my $unit = $node -> getElementsByTagName ("size")
-		-> get_node(1) -> getAttribute("unit");
-	return $size.$unit;
+	if ($size) {
+		my $unit = $node -> getElementsByTagName ("size")
+			-> get_node(1) -> getAttribute("unit");
+		return $size.$unit;
+	} else {
+		return "auto";
+	}
 }
 
 #==========================================
