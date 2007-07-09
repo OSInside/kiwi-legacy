@@ -2,6 +2,8 @@
 Tue Jul  3 10:24:33 CEST 2007 - ms@suse.de
 
 - v1.43
+- re-added resolv.conf to be part of the chroot system. This was the reason
+  for the smart error: "Temporary failure in name resolution" (#290379)
 - added baseSetupUserPermissions() method in KIWIConfig.sh to change
   the user and group ownership of the files referenced by /etc/passwd
 - added searchSwapSpace() function for live media. include swap
@@ -12,7 +14,8 @@ Tue Jul  3 10:24:33 CEST 2007 - ms@suse.de
   image description. This is in an experimental stage and was
   designed for suse(rpm) based systems:
 
-  kiwi --migrate mySystem --destdir ...
+  kiwi --migrate mySystem --destdir /tmp/migrated \
+       [ --exclude ... --exclude ... ] [ --report ]
 
 -------------------------------------------------------------------
 Fri Jun 22 10:56:38 CEST 2007 - ms@suse.de

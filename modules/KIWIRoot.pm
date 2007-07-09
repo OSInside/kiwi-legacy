@@ -239,10 +239,14 @@ sub init {
 	#----------------------------------
 	qx ( mkdir -p $root/etc/sysconfig );
 	qx ( mkdir -p $root/var/log/YaST2 );
+	# need mtab at least empty for mount calls
 	qx ( touch $root/etc/mtab );
-	qx ( touch $root/etc/sysconfig/bootloader ); 
+	qx ( touch $root/etc/sysconfig/bootloader );
+	# need user/group files as template
 	qx ( cp /etc/group  $root/etc 2>&1 );
 	qx ( cp /etc/passwd $root/etc 2>&1 );
+	# need resolv.conf for internal chroot name resolution
+	qx ( cp /etc/resolv.conf $root/etc 2>&1 );
 	qx ( cp $main::KConfig $root/.kconfig 2>&1 );
 
 	#==================================

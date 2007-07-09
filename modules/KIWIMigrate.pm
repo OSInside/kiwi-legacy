@@ -44,6 +44,8 @@ sub new {
 	my $kiwi = shift;
 	my $dest = shift;
 	my $name = shift;
+	my $excl = shift;
+	my $demo = shift;
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
@@ -104,16 +106,28 @@ sub new {
 	}
 	close FD;
 	my @denyFiles = (
-		'\.rpmnew',
-		'\.rpmsave',
-		'\.rpmorig',
-		'~',
-		'\/etc\/init\.d\/rc.*\/',
-		'\/etc\/init\.d\/boot.d\/',
-		'\.gz',
-		'\/usr\/src\/',
-		'\/spool'
+		'\.rpmnew',                  # no RPM backup files
+		'\.rpmsave',                 # []
+		'\.rpmorig',                 # []
+		'~$',                        # no emacs backup files
+		'\.swp$',                    # no vim backup files
+		'\.rej$',                    # no diff reject files
+		'\.lock$',                   # no lock files
+		'\.tmp$',                    # no tmp files
+		'\/etc\/init\.d\/rc.*\/',    # no service links
+		'\/etc\/init\.d\/boot.d\/',  # no boot service links
+		'\.depend',                  # no make depend targets
+		'\.backup',                  # no sysconfig backup files
+		'\.gz',                      # no gzip archives
+		'\/usr\/src\/',              # no sources
+		'\/spool',                   # no spool directories
+		'^\/dev\/',                  # no device node files
+		'\/usr\/X11R6\/'             # no depreciated dirs
 	);
+	if (defined $excl) {
+		my @exclude = @{$excl};
+		push @denyFiles,@exclude;
+	}
 	#==========================================
 	# Store object data
 	#------------------------------------------
@@ -122,6 +136,7 @@ sub new {
 	$this->{dest}   = $dest;
 	$this->{name}   = $name;
 	$this->{source} = \%OSSource;
+	$this->{demo}   = $demo;
 	return $this;
 }
 
@@ -352,7 +367,7 @@ sub setSystemConfiguration {
 	# 2) Find all files changed according to the package manager
 	# ---
 	my $this = shift;
-	my $demo = shift;
+	my $demo = $this->{demo};
 	my $dest = $this->{dest};
 	my $kiwi = $this->{kiwi};
 	my $rdev = $this->{rdev};
@@ -368,6 +383,7 @@ sub setSystemConfiguration {
 		$kiwi -> failed ();
 		return undef;
 	}
+	$this->{mounted} = $code;
 	#==========================================
 	# generate File::Find closure
 	#------------------------------------------
@@ -389,7 +405,7 @@ sub setSystemConfiguration {
 	my $wref = generateWanted (\%result);
 	$kiwi -> info ("Inspecting root file system...");
 	find ($wref, @dirs);
-	qx(umount /mnt);
+	$this -> cleanMount();
 	$kiwi -> done ();
 	$kiwi -> info ("Inspecting RPM database [installed files]...");
 	my @rpmlist = qx(rpm -qal);
@@ -413,7 +429,7 @@ sub setSystemConfiguration {
 	foreach my $file (sort keys %result) {
 		foreach my $exp (@deny) {
 			if ($file =~ /$exp/) {
-				delete $result{$file};
+				delete $result{$file}; last;
 			}
 		}
 		$done = int ($count * $spart);
@@ -430,19 +446,27 @@ sub setSystemConfiguration {
 	# Find files packaged but changed
 	#------------------------------------------
 	$kiwi -> info ("Inspecting RPM database [verify]...");
-	my @rpmcheck = qx(rpm -Va);
+	my @rpmcheck = qx(rpm -Va); chomp @rpmcheck;
 	$rpmsize = @rpmcheck;
 	$spart = 100 / $rpmsize;
-	$count = 0;
+	$count = 1;
 	$kiwi -> cursorOFF();
 	foreach my $check (@rpmcheck) {
 		if ($check =~ /^missing/) {
-			next;
+			$count++; next;
 		}
 		if ($check =~ /(\/.*)/) {
 			my $file = $1;
 			my $dir  = qx (dirname $file); chomp $dir;
-			$result{$file} = $dir;
+			my $ok   = 1;
+			foreach my $exp (@deny) {
+				if ($file =~ /$exp/) {
+					$ok = 0; last;
+				}
+			}
+			if ($ok) {
+				$result{$file} = $dir;
+			}
 		}
 		$done = int ($count * $spart);
 		if ($done != $done_old) {
@@ -454,24 +478,35 @@ sub setSystemConfiguration {
 	$kiwi -> note ("\n");
 	$kiwi -> doNorm ();
 	$kiwi -> cursorON();
-	$kiwi -> info ("Setting up custom root tree...");
+	#==========================================
+	# Create report or custom root tree
+	#------------------------------------------
 	@rpmcheck = sort keys %result;
-	$rpmsize  = @rpmcheck;
-	$spart = 100 / $rpmsize;
-	$count = 0;
-	my $total = 0;
 	if (defined $demo) {
-		$kiwi -> note ("\n***demo mode***\n");
+		$kiwi -> info ("Creating report for root tree: $dest/report");
+		my $data = qx(du -ch --time @rpmcheck > $dest/report 2>&1);
+		my $code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create report file: $data");
+			$kiwi -> failed ();
+			return undef;
+		}
+		$kiwi -> done ();
 	} else {
+		$kiwi -> info ("Setting up custom root tree...");
 		$kiwi -> cursorOFF();
-	}
-	foreach my $file (sort keys %result) {
-		if (defined $demo) {
-			my $size = -s $file;
-			$total += $size;
-			print "$file\n";
-		} else {
-			qx(cp -a $file $dest/root);
+		$rpmsize  = @rpmcheck;
+		$spart = 100 / $rpmsize;
+		$count = 1;
+		foreach my $file (@rpmcheck) {
+			if (-e $file) {
+				my $dir = $result{$file};
+				if (! -d "$dest/root/$dir") {
+					qx(mkdir -p $dest/root/$dir);
+				}
+				qx(cp -a $file $dest/root/$file);
+			}
 			$done = int ($count * $spart);
 			if ($done != $done_old) {
 				$kiwi -> step ($done);
@@ -479,15 +514,22 @@ sub setSystemConfiguration {
 			$done_old = $done;
 			$count++;
 		}
-	}
-	if (! defined $demo) {
 		$kiwi -> note ("\n");
 		$kiwi -> doNorm ();
 		$kiwi -> cursorON();
-	} else {
-		print "Total: $total Bytes\n";
 	}
 	return %result;
+}
+
+#==========================================
+# cleanMount
+#------------------------------------------
+sub cleanMount {
+	my $this = shift;
+	if (defined $this->{mounted}) {
+		qx(umount /mnt); undef $this->{mounted};
+	}
+	return $this;
 }
 
 1;

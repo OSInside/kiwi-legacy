@@ -73,6 +73,8 @@ our $SetRepository;     # set first repository for building physical extend
 our $SetRepositoryType; # set firt repository type
 our $SetImageType;      # set image type to use, default is primary type
 our $Migrate;           # migrate running system to image description
+our @Exclude;           # exclude directories in migrate search
+our $Report;            # create report on root/ tree migration only
 
 #============================================
 # Globals
@@ -80,6 +82,7 @@ our $Migrate;           # migrate running system to image description
 my $kiwi;       # global logging handler object
 my $root;       # KIWIRoot  object for installations
 my $image;      # KIWIImage object for logical extends
+my $migrate;    # KIWIMigrate object for system to image migration
 
 #==========================================
 # main
@@ -403,7 +406,9 @@ sub main {
 	#------------------------------------------
 	if (defined $Migrate) {
 		$kiwi -> info ("Starting system to image migration");
-		my $migrate = new KIWIMigrate ( $kiwi,$Destination,$Migrate );
+		$migrate = new KIWIMigrate (
+			$kiwi,$Destination,$Migrate,\@Exclude,$Report
+		);
 		if (! defined $migrate) {
 			my $code = kiwiExit (1); return $code;
 		}
@@ -413,9 +418,7 @@ sub main {
 		if (! $migrate -> setServiceList()) {
 			my $code = kiwiExit (1); return $code;
 		}
-		# *** RUN IN DEMO MODE ***
-		# FIXME: remove demo after testing phase !
-		if (! $migrate -> setSystemConfiguration ("demo")) {
+		if (! $migrate -> setSystemConfiguration()) {
 			my $code = kiwiExit (1); return $code;
 		}
 		kiwiExit (0);
@@ -560,6 +563,8 @@ sub init {
 		"logfile=s"             => \$LogFile,
 		"prepare|p=s"           => \$Prepare,
 		"migrate|m=s"           => \$Migrate,
+		"exclude|e=s"           => \@Exclude,
+		"report"                => \$Report,
 		"list|l"                => \&listImage,
 		"create|c=s"            => \$Create,
 		"create-instsource=s"   => \$CreateInstSource,
@@ -649,8 +654,13 @@ sub usage {
 	print "Image Preparation/Creation:\n";
 	print "  kiwi -p | --prepare <image-path>\n";
 	print "  kiwi -c | --create  <image-root>\n";
+	print "Image Upgrade:\n";
 	print "  kiwi -u | --upgrade <image-root>\n";
-	print "  kiwi -m | --migrate <name> --destdir <destination-path>\n";
+	print "System to Image migration:\n";
+	print "  kiwi -m | --migrate <name> --destdir <destination-path> \\\n";
+	print "     [ --exclude <directory> --exclude ... ] \\\n";
+	print "     [ --report ]\n";
+	print "Image postprocessing modes:\n";
 	print "  kiwi --bootstick <initrd> \\\n";
 	print "     [ --bootstick-system <systemImage> ] \\\n";
 	print "     [ --bootstick-device <device> ] \\\n";
@@ -791,6 +801,9 @@ sub quit {
 	if (defined $image) {
 		$image -> cleanMount ();
 		$image -> restoreSplitExtend ();
+	}
+	if (defined $migrate) {
+		$migrate -> cleanMount ();
 	}
 	$kiwi -> error ("KIWI exited on signal: $_[0]");
 	$kiwi -> done  ();
