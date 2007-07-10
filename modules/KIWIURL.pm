@@ -105,7 +105,7 @@ sub openSUSEpath {
 	my $browser  = LWP::UserAgent->new;
 	my $location = qw (http://ftp.opensuse.org/pub/opensuse);
 	my @types    = qw (distribution repositories);
-	my @dists    = qw (inst-source repo/oss);
+	my @dists    = qw (inst-source inst-source-extra repo/oss);
 	my @urllist  = ();
 	my $kiwi     = $this->{kiwi};
 	#==========================================

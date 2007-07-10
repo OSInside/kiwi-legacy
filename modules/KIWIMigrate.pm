@@ -355,6 +355,7 @@ sub getRootDevice {
 	}	
 	$this->{rdev}  = $rootdev;
 	$this->{rsize} = $data;
+	$this->{mount} = "/kiwiroot";
 	return $this;
 }
 
@@ -371,12 +372,18 @@ sub setSystemConfiguration {
 	my $dest = $this->{dest};
 	my $kiwi = $this->{kiwi};
 	my $rdev = $this->{rdev};
+	my $mount= $this->{mount};
 	my @deny = @{$this->{deny}};
 	my %result;
 	#==========================================
 	# mount root system
 	#------------------------------------------
-	my $data = qx(mount $rdev /mnt 2>&1);
+	if (! -d $mount && ! mkdir $mount) {
+		$kiwi -> error  ("Failed to create kiwi root mount point: $!");
+		$kiwi -> failed ();
+		return undef;
+	}
+	my $data = qx(mount $rdev $mount 2>&1);
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> error  ("Failed to mount root system: $data");
@@ -391,17 +398,17 @@ sub setSystemConfiguration {
 		my $filehash = shift;
 		return sub {
 			if (-f $File::Find::name) {
-				$filehash->{$File::Find::name} = $File::Find::dir;
+				my $expr = quotemeta $mount;
+				my $file = $File::Find::name; $file =~ s/$expr//;
+				my $dirn = $File::Find::dir;  $dirn =~ s/$expr//;
+				$filehash->{$file} = $dirn;
 			}
 		}
 	};
 	#==========================================
 	# Find files not packaged
 	#------------------------------------------
-	my @dirs = (
-		"/etc","/lib","/lib64","/bin",
-		"/sbin","/opt","/srv","/usr"
-	);
+	my @dirs = ($mount);
 	my $wref = generateWanted (\%result);
 	$kiwi -> info ("Inspecting root file system...");
 	find ($wref, @dirs);
@@ -530,8 +537,12 @@ sub setSystemConfiguration {
 #------------------------------------------
 sub cleanMount {
 	my $this = shift;
+	my $mount= $this->{mount};
 	if (defined $this->{mounted}) {
-		qx(umount /mnt); undef $this->{mounted};
+		qx(umount $mount); undef $this->{mounted};
+	}
+	if (-d $mount) {
+		rmdir $mount;
 	}
 	return $this;
 }
