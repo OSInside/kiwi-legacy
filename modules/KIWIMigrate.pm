@@ -122,7 +122,11 @@ sub new {
 		'\/usr\/src\/',              # no sources
 		'\/spool',                   # no spool directories
 		'^\/dev\/',                  # no device node files
-		'\/usr\/X11R6\/'             # no depreciated dirs
+		'\/usr\/X11R6\/',            # no depreciated dirs
+		'\/tmp\/',                   # no /tmp data
+		'\/boot\/',                  # no /boot data
+		'\/proc\/',                  # no /proc data
+		'\/sys\/'                    # no /sys data
 	);
 	if (defined $excl) {
 		my @exclude = @{$excl};
@@ -401,6 +405,7 @@ sub setSystemConfiguration {
 				my $expr = quotemeta $mount;
 				my $file = $File::Find::name; $file =~ s/$expr//;
 				my $dirn = $File::Find::dir;  $dirn =~ s/$expr//;
+				print "$file\n";
 				$filehash->{$file} = $dirn;
 			}
 		}
@@ -495,6 +500,7 @@ sub setSystemConfiguration {
 		foreach my $file (@rpmcheck) {
 			push (@list,"\"$file\"");
 		}
+		qx(echo du -ch --time @list > $dest/report-1);
 		my $data = qx(du -ch --time @list | column -t > $dest/report 2>&1);
 		my $code = $? >> 8;
 		if ($code != 0) {
