@@ -646,6 +646,9 @@ sub cleanMount {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $root = $this->{root};
+	if (! defined $this->{mountList}) {
+		return $this;
+	}
 	my @mountList  = @{$this->{mountList}};
 	my $baseSystem = $this->{baseSystem};
 	my $prefix = $root."/".$baseSystem;
