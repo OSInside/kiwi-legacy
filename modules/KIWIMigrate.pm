@@ -484,7 +484,11 @@ sub setSystemConfiguration {
 	@rpmcheck = sort keys %result;
 	if (defined $demo) {
 		$kiwi -> info ("Creating report for root tree: $dest/report");
-		my $data = qx(du -ch --time @rpmcheck > $dest/report 2>&1);
+		my @list = ();
+		foreach my $file (@rpmcheck) {
+			push (@list,"\"$file\"");
+		}
+		my $data = qx(du -ch --time @list | column -t > $dest/report 2>&1);
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
