@@ -240,7 +240,7 @@ sub getRequiredPatterns {
 		);
 	} elsif ($pattype eq "plusSuggested") {
 		@reqs = $this -> getSection (
-			'^(\+Re[qc]:|\+Sug:)','^(\-Re[qc]:|\-Sug:)',\@patdata
+			'^(\+Req:|\+Sug:)','^(\-Req:|\-Sug:)',\@patdata
 		);
 	} else {
 		@reqs = $this -> getSection (
@@ -287,7 +287,7 @@ sub getPackages {
 		);
 	} elsif ($pattype eq "plusSuggested") {
 		@pacs = $this -> getSection (
-			'^(\+Pr[qc]:|\+Psg:)','^(\-Pr[qc]:|\-Psg:)'
+			'^(\+Prq:|\+Psg:)','^(\-Prq:|\-Psg:)'
 		);
 	} else {
 		@pacs = $this -> getSection (

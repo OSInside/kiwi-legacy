@@ -3,6 +3,7 @@ Tue Jul 10 13:12:56 CEST 2007 - ms@suse.de
 
 - v1.44
 - fixed use of undefined reference
+- fixed use of plusSuggested, means required + suggested only
 
 -------------------------------------------------------------------
 Tue Jul  3 10:24:33 CEST 2007 - ms@suse.de
