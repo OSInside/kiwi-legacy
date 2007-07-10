@@ -499,10 +499,9 @@ sub setSystemConfiguration {
 		my @list = ();
 		foreach my $file (@rpmcheck) {
 			my $data = quotemeta $file;
-			push (@list,"\"$data\"");
-			print "++++++\"$data\"\n";
+			push (@list,$data);
 		}
-		my $data = qx(du -ch --time @list | column -t > $dest/report 2>&1);
+		my $data = qx(du -ch --time @list | column -t > $dest/report);
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
