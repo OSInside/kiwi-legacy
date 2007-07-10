@@ -127,7 +127,14 @@ sub new {
 		'\/boot\/',                  # no /boot data
 		'\/proc\/',                  # no /proc data
 		'\/sys\/',                   # no /sys data
-		'\/abuild\/'                 # no /abuild data
+		'\/abuild\/',                # no /abuild data
+		'\/cache',                   # no cache files
+		'\/fillup-templates',        # no fillup data
+		'\/var\/lib\/rpm',           # no RPM data
+		'\/var\/lib\/zypp',          # no ZYPP data
+		'\/var\/lib\/smart',         # no smart data
+		'\/var\/log',                # no logs
+		'\/var\/run'                 # no pid files
 	);
 	if (defined $excl) {
 		my @exclude = @{$excl};
