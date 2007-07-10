@@ -126,7 +126,8 @@ sub new {
 		'\/tmp\/',                   # no /tmp data
 		'\/boot\/',                  # no /boot data
 		'\/proc\/',                  # no /proc data
-		'\/sys\/'                    # no /sys data
+		'\/sys\/',                   # no /sys data
+		'\/abuild\/'                 # no /abuild data
 	);
 	if (defined $excl) {
 		my @exclude = @{$excl};
@@ -405,7 +406,6 @@ sub setSystemConfiguration {
 				my $expr = quotemeta $mount;
 				my $file = $File::Find::name; $file =~ s/$expr//;
 				my $dirn = $File::Find::dir;  $dirn =~ s/$expr//;
-				print "$file\n";
 				$filehash->{$file} = $dirn;
 			}
 		}
@@ -498,9 +498,10 @@ sub setSystemConfiguration {
 		$kiwi -> info ("Creating report for root tree: $dest/report");
 		my @list = ();
 		foreach my $file (@rpmcheck) {
-			push (@list,"\"$file\"");
+			my $data = quotemeta $file;
+			push (@list,"\"$data\"");
+			print "++++++\"$data\"\n";
 		}
-		qx(echo du -ch --time @list > $dest/report-1);
 		my $data = qx(du -ch --time @list | column -t > $dest/report 2>&1);
 		my $code = $? >> 8;
 		if ($code != 0) {
