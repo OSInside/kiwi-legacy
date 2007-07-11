@@ -472,10 +472,7 @@ sub setSystemConfiguration {
 	$count = 1;
 	$kiwi -> cursorOFF();
 	foreach my $check (@rpmcheck) {
-		if ($check =~ /^missing/) {
-			$count++; next;
-		}
-		if ($check =~ /(\/.*)/) {
+		if ($check =~ /^(\/.*)/) {
 			my $file = $1;
 			my $dir  = qx (dirname $file); chomp $dir;
 			my $ok   = 1;
