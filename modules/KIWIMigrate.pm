@@ -500,12 +500,21 @@ sub setSystemConfiguration {
 	@rpmcheck = sort keys %result;
 	if (defined $demo) {
 		$kiwi -> info ("Creating report for root tree: $dest/report");
+		if (! open (FD,"$dest/report-files")) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create report file: $!");
+			$kiwi -> failed ();
+			return undef;
+		}
 		my @list = ();
 		foreach my $file (@rpmcheck) {
 			my $data = quotemeta $file;
-			push (@list,$data);
+			print FD $data."\n";
 		}
-		my $data = qx(du -ch --time @list | column -t > $dest/report);
+		close FD;
+		my $file = "$dest/report-files";
+		my $prog = "du -ch --time";
+		my $data = qx($prog `cat $file | xargs -0` | column -t > $dest/report);
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
