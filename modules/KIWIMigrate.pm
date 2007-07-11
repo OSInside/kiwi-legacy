@@ -134,7 +134,8 @@ sub new {
 		'\/var\/lib\/zypp',          # no ZYPP data
 		'\/var\/lib\/smart',         # no smart data
 		'\/var\/log',                # no logs
-		'\/var\/run'                 # no pid files
+		'\/var\/run',                # no pid files
+		'\/media\/'                  # no media automount files
 	);
 	if (defined $excl) {
 		my @exclude = @{$excl};
