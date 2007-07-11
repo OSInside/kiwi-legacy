@@ -3,6 +3,7 @@ Wed Jul 11 15:31:02 CEST 2007 - ms@suse.de
 
 - v1.45
 - fixed rpm validation expression
+- don't follow symlinks in File::Find
 
 -------------------------------------------------------------------
 Tue Jul 10 13:12:56 CEST 2007 - ms@suse.de

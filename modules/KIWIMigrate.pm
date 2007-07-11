@@ -421,10 +421,9 @@ sub setSystemConfiguration {
 	#==========================================
 	# Find files not packaged
 	#------------------------------------------
-	my @dirs = ($mount);
 	my $wref = generateWanted (\%result);
 	$kiwi -> info ("Inspecting root file system...");
-	find ($wref, @dirs);
+	find ({ wanted => $wref, follow => 0 }, $mount );
 	$this -> cleanMount();
 	$kiwi -> done ();
 	$kiwi -> info ("Inspecting RPM database [installed files]...");
