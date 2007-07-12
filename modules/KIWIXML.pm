@@ -700,10 +700,11 @@ sub getRepository {
 		my $type = $element -> getAttribute("type");
 		my $stag = $element -> getElementsByTagName ("source") -> get_node(1);
 		my $source = $this -> resolveLink ( $stag -> getAttribute ("path") );
-		if ($source =~ /^opensuse:\/\//) {
+		if (($source =~ /^opensuse:\/\//) && ($type ne "rpm-md")) {
 			$kiwi -> done ();
 			$kiwi -> warning ("opensuse URL used, forcing repo type [rpm-md]");
 			$type = "rpm-md";
+			$element -> setAttribute ("type",$type);
 		}
 		$result{$source} = $type;
 	}
