@@ -135,7 +135,8 @@ sub new {
 		'\/var\/lib\/smart',         # no smart data
 		'\/var\/log',                # no logs
 		'\/var\/run',                # no pid files
-		'\/media\/'                  # no media automount files
+		'\/media\/',                 # no media automount files
+		'\/var\/lib\/hardware\/'     # no hwinfo hardware files
 	);
 	if (defined $excl) {
 		my @exclude = @{$excl};
@@ -508,13 +509,12 @@ sub setSystemConfiguration {
 		}
 		my @list = ();
 		foreach my $file (@rpmcheck) {
-			my $data = quotemeta $file;
-			print FD $data."\n";
+			print FD $file."\0";
 		}
 		close FD;
 		my $file = "$dest/report-files";
-		my $prog = "du -ch --time";
-		my $data = qx($prog `cat $file | xargs -0` | column -t > $dest/report);
+		my $prog = "du -ch --time --files0-from";
+		my $data = qx($prog $file | column -t > $dest/report);
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
@@ -522,6 +522,7 @@ sub setSystemConfiguration {
 			$kiwi -> failed ();
 			return undef;
 		}
+		#unlink $file;
 		$kiwi -> done ();
 	} else {
 		$kiwi -> info ("Setting up custom root tree...");
