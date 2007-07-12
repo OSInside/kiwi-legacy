@@ -500,7 +500,7 @@ sub setSystemConfiguration {
 	@rpmcheck = sort keys %result;
 	if (defined $demo) {
 		$kiwi -> info ("Creating report for root tree: $dest/report");
-		if (! open (FD,"$dest/report-files")) {
+		if (! open (FD,">$dest/report-files")) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't create report file: $!");
 			$kiwi -> failed ();
