@@ -693,12 +693,18 @@ sub getRepository {
 	# types refer to the package manager documentation
 	# ---
 	my $this = shift;
+	my $kiwi = $this->{kiwi};
 	my @node = $this->{repositNodeList} -> get_nodelist();
 	my %result;
 	foreach my $element (@node) {
 		my $type = $element -> getAttribute("type");
 		my $stag = $element -> getElementsByTagName ("source") -> get_node(1);
 		my $source = $this -> resolveLink ( $stag -> getAttribute ("path") );
+		if ($source =~ /^opensuse:\/\//) {
+			$kiwi -> done ();
+			$kiwi -> warning ("opensuse URL used, forcing repo type [rpm-md]");
+			$type = "rpm-md";
+		}
 		$result{$source} = $type;
 	}
 	return %result;

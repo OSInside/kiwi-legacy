@@ -37,8 +37,8 @@
 		<file name="drivers/net/*"/>
 	</drivers>
 	<repository type="yast2" status="replaceable">
-		<!--<source path="opensuse://10.1"/>-->
-		<source path="/image/dist/full-10.1-i386"/>
+		<source path="opensuse://openSUSE:10.1"/>
+		<!--<source path="/image/dist/full-10.1-i386"/>-->
 	</repository>
 	<packages type="image">
 		<package name="e2fsprogs"/>

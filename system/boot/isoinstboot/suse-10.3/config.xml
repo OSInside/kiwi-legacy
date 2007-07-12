@@ -43,8 +43,7 @@
 		<file name="drivers/net/*"/>
 	</drivers>
 	<repository type="yast2" status="replaceable">
-		<!--<source path="/image/CDs/full-i386"/>-->
-		<source path="/image/dist/full-10.2-i386"/>
+		<source path="/image/CDs/full-i386"/>
 	</repository>
 	<packages type="image">
 		<package name="bind-libs"/>

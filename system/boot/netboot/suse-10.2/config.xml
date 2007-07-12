@@ -37,7 +37,7 @@
 		<file name="drivers/net/*"/>
 	</drivers>
 	<repository type="yast2" status="replaceable">
-		<source path="opensuse://10.2"/>
+		<source path="opensuse://openSUSE:10.2"/>
 		<!--<source path="/image/dist/full-10.2-i386"/>-->
 	</repository>
 	<repository type="rpm-dir">

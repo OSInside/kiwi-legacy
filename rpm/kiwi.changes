@@ -2,8 +2,10 @@
 Wed Jul 11 15:31:02 CEST 2007 - ms@suse.de
 
 - v1.45
-- fixed rpm validation expression
-- don't follow symlinks in File::Find
+- fixed rpm validation expression in KIWIMigrate and change the 
+  File::Find to prevent the call from following symlinks
+- use http://software.opensuse.org/download/ within the URL
+  type opensuse://...
 
 -------------------------------------------------------------------
 Tue Jul 10 13:12:56 CEST 2007 - ms@suse.de

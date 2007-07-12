@@ -103,9 +103,8 @@ sub openSUSEpath {
 	my $this     = shift;
 	my $module   = shift;
 	my $browser  = LWP::UserAgent->new;
-	my $location = qw (http://ftp.opensuse.org/pub/opensuse);
-	my @types    = qw (distribution repositories);
-	my @dists    = qw (inst-source inst-source-extra repo/oss);
+	my $location = $main::openSUSE;
+	my @dists    = qw (standard);
 	my @urllist  = ();
 	my $kiwi     = $this->{kiwi};
 	#==========================================
@@ -115,23 +114,19 @@ sub openSUSEpath {
 		return ( undef,undef );
 	}
 	$module =~ s/opensuse:\/\///;
-	$module =~ s/:/:\//g;
-	if ((! defined $module) || ($module eq "/")) {
+	$module =~ s/\/$//;
+	$module =~ s/^\///;
+	if ((! defined $module) || ($module eq "")) {
 		return ( undef,undef );
 	}
 	#==========================================
 	# Create urllist for later testing
 	#------------------------------------------
-	foreach my $type (@types) {
-		my $url = $location."/".$type."/".$module;
-		if ($type eq $types[1]) {
-			push @urllist,$url;
-			next;
-		}
-		foreach my $dist (@dists) {
-			my $newurl = $url."/".$dist;
-			push @urllist,$newurl;
-		}
+	foreach my $dist (@dists) {
+		my $url1 = $location.$module."/";
+		my $url2 = $location.$module."/".$dist."/";
+		push @urllist,$url1;
+		push @urllist,$url2;
 	}
 	#==========================================
 	# Check url entries in urllist
@@ -141,16 +136,11 @@ sub openSUSEpath {
 		my $response = $browser -> request  ( $request );
 		my $title = $response -> title ();
 		if ((defined $title) && ($title !~ /not found/i)) {
-			$url =~ s/([^:])\/+/\1\//g;
-			if ($url =~ /repositories/) {
-				my $repourl = $url;
-				my $request = HTTP::Request->new (GET => $repourl."/repodata");
-				my $answer  = $browser -> request  ( $request );
-				my $title = $answer -> title ();
-				if ((defined $title) && ($title !~ /not found/i)) {
-					return ( $response,$url );
-				}
-			} else {
+			my $repourl = $url;
+			my $request = HTTP::Request->new (GET => $repourl."/repodata");
+			my $answer  = $browser -> request  ( $request );
+			my $title = $answer -> title ();
+			if ((defined $title) && ($title !~ /not found/i)) {
 				return ( $response,$url );
 			}
 		}
