@@ -68,7 +68,7 @@ sub new {
 		$kiwi -> failed ();
 		return undef;
 	}
-	if (! -f "$imageTree/etc/ImageVersion") {
+	if (! -f "$imageTree/image/config.xml") {
 		$kiwi -> error  ("Validation of $imageTree failed");
 		$kiwi -> failed ();
 		return undef;

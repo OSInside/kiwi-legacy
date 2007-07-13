@@ -31,7 +31,7 @@ use KIWIMigrate;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "1.44";
+our $Version       = "1.46";
 our $SchemeVersion = "1.4";
 our $openSUSE      = "http://software.opensuse.org/download/";
 #============================================
@@ -259,6 +259,9 @@ sub main {
 			$kiwi,$xml,$Create,$Destination,$StripImage,
 			"/base-system"
 		);
+		if (! defined $image) {
+			my $code = kiwiExit (1); return $code;
+		}
 		my %type = %{$xml->getImageTypeAndAttributes()};
 		my $para = checkType ( \%type );
 		if (! defined $para) {

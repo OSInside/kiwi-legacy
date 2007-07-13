@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Jul 13 14:38:46 CEST 2007 - ms@suse.de
+
+- v1.46
+- fixed exit criteria in case of of KIWIImage error
+- fixed image tree validation code
+
+-------------------------------------------------------------------
 Wed Jul 11 15:31:02 CEST 2007 - ms@suse.de
 
 - v1.45
