@@ -209,3 +209,72 @@ function baseStripLocales {
 		done
 	done
 }
+
+#======================================
+# baseStripTools
+#--------------------------------------
+function baseStripTools {
+	local tpath=$1
+	local tools=$2
+	for file in `find $tpath`;do
+		found=0
+		base=`basename $file`
+		for need in $tools;do
+			if [ $base = $need ];then
+				found=1
+				break
+			fi
+		done
+		if [ $found = 0 ];then
+			rm -f $file
+		fi
+	done
+}
+
+#======================================
+# suseStripInitrd
+#--------------------------------------
+function suseStripInitrd {
+	#==========================================
+	# remove unneeded files
+	#------------------------------------------
+	rpm -e popt bzip2 --nodeps
+	rm -rf `find -type d | grep .svn`
+	local files="
+		/usr/share/info /usr/share/man /usr/share/cracklib /usr/lib/python*
+		/usr/lib/perl* /usr/share/locale /usr/share/doc/packages /var/lib/rpm
+		/usr/lib/rpm /var/lib/smart /boot/* /opt/* /usr/include /root/.gnupg
+		/etc/PolicyKit /etc/sysconfig /etc/init.d /etc/profile.d /etc/skel
+		/etc/ssl /etc/java /etc/default /etc/cron* /etc/dbus* /etc/modprobe*
+		/etc/pam.d* /etc/DIR_COLORS /etc/rc* /usr/share/hal /usr/share/ssl
+		/usr/lib/hal /usr/lib/*.a /usr/lib/*.la /usr/lib/librpm*
+		/usr/lib/libssl* /usr/lib/libpanel* /usr/lib/libncursesw*
+		/usr/lib/libmenu*
+		/lib/modules/*/kernel/drivers/net/wireless
+		/lib/modules/*/kernel/drivers/net/pcmcia
+		/lib/modules/*/kernel/drivers/net/tokenring
+		/lib/modules/*/kernel/drivers/net/bonding
+		/lib/modules/*/kernel/drivers/net/hamradio
+	"
+	for i in $files;do
+		rm -rf $i
+	done
+	#==========================================
+	# remove unneeded tools
+	#------------------------------------------
+	local tools="
+		tune2fs swapon shutdown sfdisk resize_reiserfs
+		reiserfsck reboot halt pivot_root modprobe modinfo
+		mkswap mkinitrd mkreiserfs mkfs.ext3 mkfs.ext2 mkfs.cramfs
+		losetup ldconfig insmod init ifconfig fdisk e2fsck dhcpcd
+		depmod atftpd klogconsole hwinfo xargs wc tail tac readlink
+		mkfifo md5sum head expr file free find env du dirname cut
+		column chroot atftp clear tr host test printf mount dd uname umount
+		true touch sleep sh pidof sed rmdir rm pwd ps mv mkdir kill hostname
+		gzip grep false df cp cat bash basename arch sort ls uniq lsmod
+		usleep parted mke2fs pvcreate vgcreate lvm
+	"
+	for path in /sbin /usr/sbin /usr/bin /bin;do
+		baseStripTools "$path" "$tools"
+	done
+}
