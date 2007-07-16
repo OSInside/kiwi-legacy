@@ -51,6 +51,7 @@ sub new {
 	# Constructor setup
 	#------------------------------------------
 	my $syszip = 0;
+	my $sysird = 0;
 	my $kernel;
 	my $knlink;
 	my $tmpdir;
@@ -152,8 +153,6 @@ sub createBootStructure {
 	my $status;
 	my $result;
 	if (defined $loc) {
-		rmdir $tmpdir;
-		$tmpdir = "/mnt";
 		$lname  = $lname.".".$loc;
 		$iname  = $iname.".".$loc;
 	}
@@ -237,10 +236,11 @@ sub setupBootStick {
 	my $system = $this->{system};
 	my $syszip = $this->{syszip};
 	my $device = $this->{device};
+	my $sysird;
 	my $status;
 	my $result;
 	#==========================================
-	# Create Stick structure
+	# Create Stick boot structure
 	#------------------------------------------
 	if (! $this -> createBootStructure()) {
 		return undef;
@@ -338,6 +338,8 @@ sub setupBootStick {
 	my $name = $initrd; $name =~ s/gz$/stickboot/;
 	my $size = qx (du -ks $tmpdir | cut -f1 2>&1);
 	chomp ($size); $size += 1024;
+	$sysird = int ( $size / 1024 );
+	$sysird = $sysird + 1;
 	$status = qx (dd if=/dev/zero of=$name bs=1k count=$size 2>&1);
 	$result = $? >> 8;
 	if ($result != 0) {
@@ -388,17 +390,20 @@ sub setupBootStick {
 	#------------------------------------------
 	if (defined $system) {
 		if ($syszip > 0) {
-			print FD ",20,L,*\n";      # xda1  boot
+			print FD ",$sysird,L,*\n"; # xda1  boot
 			print FD ",$syszip,L\n";   # xda2  ro
 			print FD ",,L\n";          # xda3  rw
 		} else {
-			print FD ",20,L,*\n";      # xda1  boot
+			print FD ",$sysird,L,*\n"; # xda1  boot
 			print FD ",,L\n";          # xda2  rw
 		}
 	} else {
 		print FD ",,L,*\n";
 	}
 	close FD;
+	$status = qx ( dd if=/dev/zero of=$stick bs=512 count=1 2>&1 );	
+	$result = $? >> 8;
+	sleep 1;
 	$status = qx ( /sbin/sfdisk -uM --force $stick < $pinfo 2>&1 );
 	$result = $? >> 8;
 	if ($result != 0) {
@@ -419,7 +424,7 @@ sub setupBootStick {
 	#------------------------------------------
 	$kiwi -> info ("Dumping initrd image to stick");
 	$status = qx ( umount $stick"1" 2>&1 );
-	$status = qx (dd if=$name of=$stick"1" bs=1k 2>&1);
+	$status = qx (dd if=$name of=$stick"1" bs=8k 2>&1);
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -427,6 +432,7 @@ sub setupBootStick {
 		$kiwi -> failed ();
 		return undef;
 	}
+	unlink $name;
 	$kiwi -> done();
 	#==========================================
 	# Dump system image on stick
@@ -444,6 +450,39 @@ sub setupBootStick {
 			return undef;
 		}
 		$kiwi -> done();
+		#==========================================
+		# Mount system img for removal of boot data
+		#------------------------------------------
+		# Remove /boot from system image, we are booting from
+		# the kiwi initrd image and so the system image doesn't need
+		# any boot kernel/initrd. Problem is if the system image is
+		# a read-only image we can't remove data from it
+		# ---
+		if (! $syszip) {
+			$kiwi -> info ("Removing unused boot kernel/initrd from stick");
+			$status = qx (mount $stick"2" /mnt/ 2>&1);
+			$result = $? >> 8;
+			if ($result != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Couldn't mount stick image: $status");
+				$kiwi -> failed ();
+				return undef;
+			}
+			if (-d "/mnt/boot") {
+				$status = qx (rm -r /mnt/boot 2>&1);
+				$result = $? >> 8;
+				if ($result != 0) {
+					$kiwi -> skipped ();
+					$kiwi -> warning ("Couldn't remove data: $status");
+					$kiwi -> skipped ();
+				} else {
+					$kiwi -> done();
+				}
+			} else {
+				$kiwi -> done();
+			}
+			qx (umount /mnt/ 2>&1);
+		}
 	}
 	#==========================================
 	# Install grub on USB stick
@@ -567,9 +606,13 @@ sub setupBootDisk {
 	my $vmsize    = $this->{vmsize};
 	my $format    = $this->{format};
 	my $syszip    = $this->{syszip};
+	my $tmpdir    = $this->{tmpdir};
+	my $initrd    = $this->{initrd};
 	my $diskname  = $system.".raw";
 	my $loop      = "/dev/loop0";
 	my $loopfound = 0;
+	my $sysname;
+	my $sysird;
 	my $result;
 	my $status;
 	#==========================================
@@ -592,6 +635,94 @@ sub setupBootDisk {
 		return undef;
 	}
 	$kiwi -> done();
+	#==========================================
+	# Create Virtual Disk boot structure
+	#------------------------------------------
+	if (! $this -> createBootStructure("vmx")) {
+		return undef;
+	}
+	#==========================================
+	# Import grub stages
+	#------------------------------------------
+	$kiwi -> info ("Importing grub stages for stick boot");
+	$status = qx ( cp /usr/lib/grub/* $tmpdir/boot/grub 2>&1 );
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Failed importing grub stages: $status");
+		$kiwi -> failed ();
+		return undef;
+	}
+	$kiwi -> done ();
+	#==========================================
+	# Creating menu.lst for the grub
+	#------------------------------------------
+	$kiwi -> info ("Creating grub menu and device map");
+	if (! open (FD,">$tmpdir/boot/grub/menu.lst")) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't create menu.lst: $!");
+		$kiwi -> failed ();
+		return undef;
+	}
+	print FD "color cyan/blue white/blue\n";
+	print FD "default 0\n";
+	print FD "timeout 10\n";
+	print FD "framebuffer 1\n";
+	print FD "title KIWI VM boot\n";
+	print FD " root (hd0,0)\n";
+	print FD " kernel /boot/linux.vmx vga=normal\n";
+	print FD " initrd /boot/initrd.vmx\n";
+	close FD;
+	$kiwi -> done();
+	#==========================================
+	# Create ext2 image if syszip is active
+	#------------------------------------------
+	if ($syszip > 0) {
+		$kiwi -> info ("Creating VM boot image");
+		my $size = qx (du -ks $tmpdir | cut -f1 2>&1);
+		chomp ($size); $size += 1024;
+		$sysird = int ( $size / 1024 );
+		$sysird = $sysird + 1;
+		$sysname= $initrd; $sysname =~ s/gz$/vmboot/;
+		my $size = qx (du -ks $tmpdir | cut -f1 2>&1);
+		chomp ($size); $size += 1024;
+		$sysird = int ( $size / 1024 );
+		$sysird = $sysird + 1;
+		$status = qx (dd if=/dev/zero of=$sysname bs=1k count=$size 2>&1);
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create image file: $status");
+			$kiwi -> failed ();
+			return undef;
+		}
+		$status = qx (/sbin/mkfs.ext2 -F $sysname 2>&1);
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create filesystem: $status");
+			$kiwi -> failed ();
+			return undef;
+		}
+		$status = qx (mount -o loop $sysname /mnt/ 2>&1);
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't mount image: $status");
+			$kiwi -> failed ();
+			return undef;
+		}
+		$status = qx (mv $tmpdir/boot /mnt/ 2>&1);
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't install image: $status");
+			$kiwi -> failed ();
+			return undef;
+		}
+		qx (umount /mnt/ 2>&1);
+		$kiwi -> done();
+	}
 	#==========================================
 	# create virtual disk
 	#------------------------------------------
@@ -632,7 +763,7 @@ sub setupBootDisk {
 	if ($syszip > 0) {
 		# xda1 boot / xda2 ro / xda3 rw
 		@commands = (
-			"n","p","1",".","+20M",
+			"n","p","1",".","+".$sysird."M",
 			"n","p","2",".","+".$syszip."M",
 			"n","p","3",".",".","w","q"
 		);
@@ -682,82 +813,54 @@ sub setupBootDisk {
 	}
 	$kiwi -> done();
 	#==========================================
-	# Create filesystem if compression is used
+	# Dump boot image on virtual disk
 	#------------------------------------------
+	$kiwi -> info ("Dumping boot image to virtual disk");
 	if ($syszip > 0) {
 		$root = "/dev/mapper".$dmap."p1";
-		$status = qx (/sbin/mkfs.ext2 -F $root 2>&1);
+		$status = qx (dd if=$sysname of=$root bs=8k 2>&1);
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't create filesystem: $status");
+			$kiwi -> error  ("Couldn't dump image: $status");
 			$kiwi -> failed ();
 			return undef;
 		}
-	}
-	#==========================================
-	# Mount system image
-	#------------------------------------------
-	$status = qx (mount $root /mnt/ 2>&1);
-	$result = $? >> 8;
-	if ($result != 0) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't mount image: $status");
-		$kiwi -> failed ();
-		qx ( /sbin/kpartx  -d $loop );
-		qx ( /sbin/losetup -d $loop );
-		return undef;
-	}
-	#==========================================
-	# Dump initial initrd on system image
-	#------------------------------------------
-	if (! $this -> createBootStructure ("vmx")) {
+		unlink $sysname;
+	} else {
+		#==========================================
+		# Mount system image
+		#------------------------------------------
+		$status = qx (mount $root /mnt/ 2>&1);
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't mount image: $status");
+			$kiwi -> failed ();
+			qx ( /sbin/kpartx  -d $loop );
+			qx ( /sbin/losetup -d $loop );
+			return undef;
+		}
+		#==========================================
+		# Copy boot data on system image
+		#------------------------------------------
+		$status = qx (mv $tmpdir/boot /mnt/ 2>&1);
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't install image: $status");
+			$kiwi -> failed ();
+			qx ( /sbin/kpartx  -d $loop );
+			qx ( /sbin/losetup -d $loop );
+			qx ( umount /mnt/ 2>&1 );
+			return undef;
+		}
 		qx ( umount /mnt/ 2>&1 );
-		qx ( /sbin/kpartx  -d $loop );
-		qx ( /sbin/losetup -d $loop );
-		return undef;
 	}
-	#==========================================
-	# Import grub stages
-	#------------------------------------------
-	$kiwi -> info ("Importing grub stages for virtual disk boot");
-	$status = qx ( cp /usr/lib/grub/* /mnt/boot/grub 2>&1 );
-	$result = $? >> 8;
-	if ($result != 0) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Failed importing grub stages: $status");
-		$kiwi -> failed ();
-		return undef;
-	}
-	$kiwi -> done ();
-	#==========================================
-	# Creating menu.lst for the grub
-	#------------------------------------------
-	$kiwi -> info ("Creating grub menu and device map");
-	if (! open (FD,">/mnt/boot/grub/menu.lst")) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't create menu.lst: $!");
-		$kiwi -> failed ();
-		qx ( umount /mnt/ 2>&1 );
-		qx ( /sbin/kpartx  -d $loop );
-		qx ( /sbin/losetup -d $loop );
-		return undef;
-	}
-	print FD "color cyan/blue white/blue\n";
-	print FD "default 0\n";
-	print FD "timeout 10\n";
-	print FD "framebuffer 1\n";
-	print FD "title KIWI VM boot\n";
-	print FD " root (hd0,0)\n";
-	print FD " kernel /boot/linux.vmx vga=normal\n";
-	print FD " initrd /boot/initrd.vmx\n";
-	close FD;
 	$kiwi -> done();
-
 	#==========================================
 	# cleanup device maps and part mount
 	#------------------------------------------
-	qx ( umount /mnt/ 2>&1 );
 	qx ( /sbin/kpartx  -d $loop );
 
 	#==========================================

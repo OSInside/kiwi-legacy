@@ -771,9 +771,8 @@ sub kiwiExit {
 	}
 	if (! defined $LogFile) {
 		my $rootLog = $kiwi -> getRootLog();
-		if (( -f $rootLog) && ($rootLog =~ /(.*)\/.*/)) {
+		if (( -f $rootLog) && ($rootLog =~ /(.*)\..*\.screenrc\.log/)) {
 			my $logfile = $1;
-			$logfile =~ s/\/$//;
 			$logfile = "$logfile.log";
 			$kiwi -> info ("Logfile available at: $logfile");
 			$kiwi -> done ();

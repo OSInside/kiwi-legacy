@@ -51,6 +51,7 @@ sub new {
 	$this->{showLevel} = [0,1,2,3,4,5];
 	$this->{channel}   = \*STDOUT;
 	$this->{errorOk}   = 0;
+	$this->{state}     = "O";
 	return $this;
 }
 
@@ -121,6 +122,7 @@ sub done {
 		print "   done\n";
 		$this -> resetOutputChannel();
 	}
+	$this->{state} = "O";
 }
 
 #==========================================
@@ -145,6 +147,7 @@ sub failed {
 		print "   failed\n";
 		$this -> resetOutputChannel();
 	}
+	$this->{state} = "O";
 }
 
 #==========================================
@@ -169,6 +172,7 @@ sub skipped {
 		print "   skipped\n";
 		$this -> resetOutputChannel();
 	}
+	$this->{state} = "O";
 }
 
 #==========================================
@@ -266,7 +270,24 @@ sub printLog {
 	my $lglevel = $_[0];
 	my $logdata = $_[1];
 	my $flag    = $_[2];
-
+	my $needcr  = "";
+	#==========================================
+	# check log status 
+	#------------------------------------------
+	if (($this->{state} eq "I") && ($lglevel != 5)) {
+		$needcr = "\n";
+	}
+	#==========================================
+	# save log status 
+	#------------------------------------------
+	if ($logdata !~ /\n$/) {
+		$this->{state} = "I";
+	} else {
+		$this->{state} = "O";
+	}
+	#==========================================
+	# set log status 
+	#------------------------------------------
 	my @showLevel = @{$this->{showLevel}};
 	if (! defined $this->{channel}) {
 		$this->{channel} = \*STDOUT;
@@ -277,7 +298,7 @@ sub printLog {
 	}
 	my $date = getPrefix ( $this,$lglevel );
 	if (defined $flag) {
-		print EFD $date,$logdata;
+		print EFD $needcr,$date,$logdata;
 		return;
 	}
 	foreach my $level (@showLevel) {
@@ -286,15 +307,15 @@ sub printLog {
 		if (($lglevel == 1) || ($lglevel == 2) || ($lglevel == 3)) {
 			print $date,$logdata;
 			if ($this->{errorOk}) {
-				print EFD $date,$logdata;
+				print EFD $needcr,$date,$logdata;
 			}
 		} elsif ($lglevel == 5) {
 			print $logdata;
 			if ($this->{errorOk}) {
-				print EFD $logdata;
+				print EFD $needcr,$logdata;
 			}
 		} else {
-			cluck $date,$logdata;
+			cluck $needcr,$date,$logdata;
 		}
 		$this -> resetOutputChannel();
 		return $lglevel;
@@ -365,6 +386,17 @@ sub note {
 }
 
 #==========================================
+# state
+#------------------------------------------
+sub state {
+	# ...
+	# get current cursor log state
+	# ---
+	my $this = shift;
+	return $this->{state};
+}
+
+#==========================================
 # setLogFile
 #------------------------------------------
 sub setLogFile {
@@ -401,7 +433,7 @@ sub setRootLog {
 	if ($this->{errorOk}) {
 		return;
 	}
-	info ( $this, "Setting up root log on: $file..." );
+	info ( $this, "Set root log: $file..." );
 	if (! (open EFD,">$file")) {
 		$this -> skipped ();
 		warning ( $this,"Couldn't open root log channel: $!\n" );

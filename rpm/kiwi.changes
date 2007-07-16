@@ -4,6 +4,11 @@ Fri Jul 13 14:38:46 CEST 2007 - ms@suse.de
 - v1.46
 - fixed exit criteria in case of of KIWIImage error
 - fixed image tree validation code
+- removed redundant screenrc.log from image
+- removed unused boot/initrd data from USB stick system image. The
+  data is unneeded because an extra boot partition is created
+- fixed pattern search for local repositories
+- removed fixed size in boot partitions, use the size of the initrd
 - added suseStripInitrd() function to reduce size of netboot/xennetboot
   boot images. The boot images are about 12MB of size now. This is
   comparable to the standard suse initrd size (#291643)

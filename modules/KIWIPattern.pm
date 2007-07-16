@@ -148,7 +148,7 @@ sub downloadPattern {
 		return $this->{cache}{$pattern};
 	}
 	if ($url =~ /^\//) {
-		my $path = "$url//suse/setup/descr";
+		my $path = "$url//setup/descr";
 		my @file = bsd_glob ("$path/$pattern-*.$arch.pat");
 		foreach my $file (@file) {
 			# / FIXME /
@@ -168,7 +168,7 @@ sub downloadPattern {
 			$publics_url = $highlvl_url;
 		}
 		my $browser  = LWP::UserAgent->new;
-		my $location = $publics_url."/suse/setup/descr";
+		my $location = $publics_url."/setup/descr";
 		my $request  = HTTP::Request->new (GET => $location);
 		my $response = $browser  -> request ( $request );
 		my $title    = $response -> title ();

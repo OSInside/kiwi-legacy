@@ -79,7 +79,7 @@ sub new {
 		return undef;
 	}
 	if (! defined $main::LogFile) {
-		$kiwi -> setRootLog ($imageTree."/screenrc.log");
+		$kiwi -> setRootLog ($imageTree.".".$$.".screenrc.log");
 	}
 	my $arch = qx ( arch ); chomp ( $arch );
 	$arch = ".$arch";
