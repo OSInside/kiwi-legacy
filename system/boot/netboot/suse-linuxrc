@@ -641,7 +641,8 @@ if test $systemIntegrity = "clean";then
 			KIWI_BOOT_TIMEOUT=10;
 		fi
 		if [ ! -z "$UNIONFS_CONFIG" ]; then
-			gdev="(hd0,2)"
+			gnum=`echo $imageRootDevice | sed -e "s/\/dev.*\([0-9]\)/\\1/"`
+			gdev="(hd0,$gnum)"
 		fi
 		echo "timeout $KIWI_BOOT_TIMEOUT" > /config/boot/grub/menu.lst
 		IFS="," ; for i in $KERNEL_LIST;do

@@ -90,6 +90,7 @@ sub setupUsersGroups {
 			my $group = $users{$user}{group};
 			my $pwd   = $users{$user}{pwd};
 			my $home  = $users{$user}{home};
+			my $realname = $users{$user}{realname};
 			if (defined $pwd) {
 				$adduser .= " -p '$pwd'";
 				$moduser .= " -p '$pwd'";
@@ -113,6 +114,10 @@ sub setupUsersGroups {
 					$kiwi -> done();
 				}
 				$adduser .= " -G $group";
+			}
+			if (defined $realname) {
+				$adduser .= " -c '$realname'";
+				$moduser .= " -c '$realname'";
 			}
 			my $data = qx ( chroot $root grep -q $user /etc/passwd 2>&1 );
 			my $code = $? >> 8;

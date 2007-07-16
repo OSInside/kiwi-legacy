@@ -590,10 +590,12 @@ sub getUsers {
 			my $name = $element -> getAttribute ("name");
 			my $pwd  = $element -> getAttribute ("pwd");
 			my $home = $element -> getAttribute ("home");
+			my $realname = $element -> getAttribute ("realname");
 			if (defined $name) {
 				$result{$name}{group} = $group;
 				$result{$name}{home}  = $home;
 				$result{$name}{pwd}   = $pwd;
+				$result{$name}{realname} = $realname;
 			}
 		}
 	}

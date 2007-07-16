@@ -76,6 +76,7 @@
 	<xs:element name="user">
 		<xs:complexType>
 			<xs:attribute name="name" type="xs:string"/>
+			<xs:attribute name="realname" type="xs:string"/>
 			<xs:attribute name="pwd"  type="xs:string"/>
 			<xs:attribute name="home" type="xs:string"/>
 		</xs:complexType>
