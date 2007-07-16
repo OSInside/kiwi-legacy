@@ -1364,75 +1364,75 @@ sub getInstSourceFile {
 	return $this;
 }
 
-
-
 #==========================================
 # splitPathHTTP
 #------------------------------------------
-# This method receives a pair of (hostname, path)
-# containing arbitrary regular expressions as 
-# parameters.
-# It creates a list of pathnames that match the
-# expressions. Depending on the "leafonly" parameter
-# it returns only paths mathing the *whole* expression
-# (leafonly==0) or any part in between (leafonly==1).
-# The call depends on how the repo is structured.
-#------------------------------------------
-sub splitPathHTTP
-{
-	my $this = shift;
-
-	my $targets = shift;
-	my $browser = shift;
+sub splitPathHTTP {
+	# ...
+	# This method receives a pair of (hostname, path)
+	# containing arbitrary regular expressions as 
+	# parameters.
+	# It creates a list of pathnames that match the
+	# expressions. Depending on the "leafonly" parameter
+	# it returns only paths mathing the *whole* expression
+	# (leafonly==0) or any part in between (leafonly==1).
+	# The call depends on how the repo is structured.
+	# ---
+	my $this     = shift;
+	my $targets  = shift;
+	my $browser  = shift;
 	my $basepath = shift;
-	my $pattern = shift;
-	
-	# cancel on missing parameters:
-	if( !defined($browser) or !defined($targets) or !defined($basepath) ) {
-		$this->{kiwi}->log("splitPath: cannot proceed request due to missing parameters!");
-		return;
-	}
-	
+	my $pattern  = shift;
 	#==========================================
+	# cancel on missing parameters:
+	#------------------------------------------
+	my $kiwi = $this->{kiwi};
+	if( !defined($browser) or !defined($targets) or !defined($basepath) ) {
+		$kiwi -> info  ("Can't proceed request due to missing parameters!");
+		$kiwi -> failed();
+		return undef;
+	}
+	# /.../
 	# optional: only shows directories matching the complete expression
 	# when set to 1. Default mode shows every step
 	# Example: /foo*/bar* may expand to
 	# /football, /football/bart, /fools, /fools/barbarian
 	# with leafonly, the folders /football and /fools are omitted.
-	#------------------------------------------
+	# ----
 	my $leafonly = shift;
-	if( !defined( $leafonly ) )
-	{
+	if( !defined( $leafonly ) ) {
 		$leafonly = 0;
 	}
-
-
-	$pattern =~ s#^/*(.*)#\1#;	# remove leading slashes if any
-	$pattern =~ s#(.*)/$#\1#;	# remove trailing slash if any
-		
+	#==========================================
+	# remove leading/trailing slashes if any
+	#------------------------------------------
+	$pattern =~ s#^/*(.*)#\1#;
+	$pattern =~ s#(.*)/$#\1#;
 	my @testlist = split( "/", $pattern, 2);
 	my $prefix = $testlist[0];
-	my $rest = $testlist[1];	# this is "undef" if there's no slash
-
+	my $rest   = $testlist[1];
+	#==========================================
+	# Form LWP request
+	#------------------------------------------
 	my $request  = HTTP::Request->new( GET => $basepath );
 	my $response = $browser->request( $request );
 	my $content  = $response->content();
 	my @links    = ();
-	if ($content =~ /Error 404/)
-	{
-		#print "Error 404 occured at site $basepath - ignoring link subtree\n";
+	if ($content =~ /Error 404/) {
 		pop @{$targets};
-		return;
+		return undef;
 	}
-
-	my @lines    = split (/\n/,$content);
-		
+	#==========================================
+	# Evaluate LWP content
+	#------------------------------------------
+	# /.../
 	# do the actual work:
 	# get the current dir list, parse for links and match them to prefix
 	# for each match call splitPath with the correct parameters recursively
+	# ----
+	my @lines = split (/\n/,$content);
 	my $atleastonce = 0;
-	foreach my $line (@lines)
-	{
+	foreach my $line (@lines) {
 		next if ($line !~ /<img.*href="(.*)\/">/);
 		# skip "parent dir" to avoid cycles
 		next if ($line =~ /[pP]arent.+[dD]irectory/);
@@ -1443,88 +1443,87 @@ sub splitPathHTTP
 		# In that case the server puts the whole path into the link
 		# This is fatal for descending...
 		$link =~ s#.*/##g;
-		if ($link =~ m/$prefix/)
-		{
-			if( defined( $rest ) )
-			{
-				if( $leafonly == 1 )
-				{
-				# list directory even if the path is not finished
+		if ($link =~ m/$prefix/) {
+			if( defined( $rest ) ) {
+				if( $leafonly == 1 ) {
+					# list directory even if the path is not finished
 					push @{$targets}, $basepath."/".$link;
 				}
-				$this->splitPathHTTP( $targets, $browser, $basepath."/".$link, $rest, $leafonly);
-			}
-			else
-			{
-			# if the path is finished the leaves are stored
+				$this->splitPathHTTP(
+					$targets, $browser, $basepath."/".$link, $rest, $leafonly
+				);
+			} else {
+				# if the path is finished the leaves are stored
 				push @{$targets}, $basepath."/".$link;
-				return;
+				return $this;
 			}
 		}
 	}
-	if( $atleastonce == 0 and $leafonly != 1 )
-	{	# we're in a dir where no subdirs are found and $rest may be non-zero
+	if( $atleastonce == 0 and $leafonly != 1 ) {
+		# we're in a dir where no subdirs are found but:
+		# $rest may be non-zero
 		push @{$targets}, $basepath;
 	}
-	return;
+	return $this;
 }
-
-
 
 #==========================================
 # expandFilename
 #------------------------------------------
-# This method receives a pair of (path, pattern)
-# containing a regular expression for a filename
-# (e.g. ".*\.[rs]pm") set by the caller.
-# The method returns a list of files matching the
-# pattern as full URI.
-# This method works for both HTTP(S) and FTP.
-#------------------------------------------
-sub expandFilename
-{
-	my $this = shift;
-	my $browser = shift;
+sub expandFilename {
+	# ...
+	# This method receives a pair of (path, pattern)
+	# containing a regular expression for a filename
+	# (e.g. ".*\.[rs]pm") set by the caller.
+	# The method returns a list of files matching the
+	# pattern as full URI.
+	# This method works for both HTTP(S) and FTP.
+	# ---
+	my $this     = shift;
+	my $browser  = shift;
 	my $basepath = shift;
 	my $filename = shift;
-	
+	#==========================================
 	# cancel on missing parameters:
+	#------------------------------------------
+	my $kiwi = $this->{kiwi};
 	if( !defined($browser) or !defined($basepath) or !defined($filename) ) {
-		$this->{kiwi}->log("expandFilename: cannot proceed request due to missing parameters!");
+		$kiwi -> info  ("Can't proceed request due to missing parameters!");
+		$kiwi -> failed();
 		return undef;
 	}
-
+	#==========================================
+	# form LWP request
+	#------------------------------------------
 	my @filelist = ();
-	
 	my $request  = HTTP::Request->new( GET => $basepath );
 	my $response = $browser->request( $request );
 	my $content  = $response->content();
 	my @links    = ();
-	if ($content =~ /Error 404/)
-	{
+	if ($content =~ /Error 404/) {
 		return undef;
 	}
-
+	#==========================================
+	# Evaluate LWP content
+	#------------------------------------------
 	my @lines    = split (/\n/,$content);
-	foreach my $line (@lines)
-	{
+	foreach my $line (@lines) {
 		next if ($line !~ /<img.*href="(.*)">/);
 		# skip "parent dir" to avoid cycles
 		next if ($line =~ /[pP]arent.+[dD]irectory/);
 		my $link = $1;
 		$link =~ s#^[./]+##g;
+		# /.../
 		# remove leading path. This only happens once: if the root dir is read
 		# In that case the server puts the whole path into the link
 		# This is fatal for descending...
+		# ----
 		$link =~ s#.*/##g;
-		if ($link =~ m/$filename/)
-		{
+		if ($link =~ m/$filename/) {
 			push @filelist, $basepath."/".$link;
 		}
 	}
 	return @filelist;
 }
-
-
 
 1;

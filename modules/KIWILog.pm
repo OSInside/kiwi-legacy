@@ -305,12 +305,12 @@ sub printLog {
 	if ($level == $lglevel) {
 		$this -> setOutputChannel();
 		if (($lglevel == 1) || ($lglevel == 2) || ($lglevel == 3)) {
-			print $date,$logdata;
+			print $needcr,$date,$logdata;
 			if ($this->{errorOk}) {
 				print EFD $needcr,$date,$logdata;
 			}
 		} elsif ($lglevel == 5) {
-			print $logdata;
+			print $needcr,$logdata;
 			if ($this->{errorOk}) {
 				print EFD $needcr,$logdata;
 			}
