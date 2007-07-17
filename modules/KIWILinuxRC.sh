@@ -645,6 +645,7 @@ function partedCreatePartition {
 	p_opts="-s $DISK unit s print"
 	p_size=`/usr/sbin/parted $p_opts | grep "Disk" | cut -f2 -d: | cut -f1 -ds`
 	p_size=`echo $p_size`
+	p_size=`expr $p_size - 1`
 	p_cmd="/usr/sbin/parted -s $DISK unit s"
 	p_idc="/sbin/sfdisk -c $DISK"
 	p_ids="true"
