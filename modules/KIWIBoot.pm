@@ -198,7 +198,7 @@ sub getRemovableUSBStorageDevices {
 				if (! -d $description) {
 					next;
 				}
-				my $isremovable = glob ("$description/removable");
+				my $isremovable = "$description/removable";
 				my $serial = "USB Stick (unknown type)";
 				if ($description =~ /usb-storage\/(.*?):.*/) {
 					$serial = "/sys/bus/usb/devices/$1/serial";
