@@ -382,9 +382,10 @@ sub createImageUSB {
 	if ($boot !~ /^\//) {
 		$main::Prepare  = $main::System."/".$boot;
 	}
-	$main::Create   = $main::RootTree;
 	$main::ForeignRepo{xmlnode} = $xml -> getForeignNodeList();
 	$main::ForeignRepo{prepare} = $main::Prepare;
+	$main::ForeignRepo{create}  = $main::Create;
+	$main::Create = $main::RootTree;
 	undef $main::SetImageType;
 	if (! defined main::main()) {
 		$main::Survive = "default";
@@ -734,9 +735,10 @@ sub createImageLiveCD {
 	if ($boot !~ /^\//) {
 		$main::Prepare  = $main::System."/".$boot;
 	}
-	$main::Create   = $main::RootTree;
 	$main::ForeignRepo{xmlnode} = $xml -> getForeignNodeList();
 	$main::ForeignRepo{prepare} = $main::Prepare;
+	$main::ForeignRepo{create}  = $main::Create;
+	$main::Create = $main::RootTree;
 	undef $main::SetImageType;
 	if (! defined main::main()) {
 		$main::Survive = "default";

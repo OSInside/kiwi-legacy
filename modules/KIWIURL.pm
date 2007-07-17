@@ -78,7 +78,11 @@ sub thisPath {
 	}
 	my $thisPath;
 	if (defined $main::ForeignRepo{prepare}) {
-		$thisPath = "$main::ForeignRepo{prepare}/$module";
+		if (! open FD,"$main::ForeignRepo{create}/image/main::Prepare") {
+			return undef;
+		}
+		$thisPath = <FD>; close FD;
+		$thisPath = "$thisPath/$module";
 	} else {
 		$thisPath = "$main::Prepare/$module";
 	}
