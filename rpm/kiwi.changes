@@ -9,6 +9,7 @@ Fri Jul 13 14:38:46 CEST 2007 - ms@suse.de
   data is unneeded because an extra boot partition is created
 - fixed pattern search for local repositories
 - removed fixed size in boot partitions, use the size of the initrd
+- added umount information if there is something kiwi has mounted
 - added suseStripInitrd() function to reduce size of netboot/xennetboot
   boot images. The boot images are about 12MB of size now. This is
   comparable to the standard suse initrd size (#291643)

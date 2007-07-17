@@ -808,6 +808,7 @@ sub quit {
 	if (defined $migrate) {
 		$migrate -> cleanMount ();
 	}
+	$kiwi -> note ("*** done ***\n");
 	$kiwi -> error ("KIWI exited on signal: $_[0]");
 	$kiwi -> done  ();
 	exit 1;
