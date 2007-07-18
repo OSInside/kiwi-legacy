@@ -1,4 +1,5 @@
 #!/bin/sh
+test -f /.kconfig && . /.kconfig
 test -f /.profile && . /.profile
 
 echo "Configure image: [$name]..."
@@ -38,17 +39,11 @@ done
 #==========================================
 # remove unneeded files
 #------------------------------------------
-rm -rf `find -type d | grep .svn`
-rm -rf /usr/share/info
-rm -rf /usr/share/man
-rm -rf /usr/share/cracklib
-rm -rf /usr/lib/python*
-rm -rf /usr/lib/perl*
-rm -rf /usr/share/locale
-rm -rf /usr/share/doc/packages
-rm -rf /var/lib/rpm
-rm -rf /usr/lib/rpm
-rm -rf /var/lib/smart
-rm -rf /boot/* /opt/*
+suseStripInitrd
+
+#==========================================
+# umount /proc
+#------------------------------------------
+umount /proc
 
 exit 0
