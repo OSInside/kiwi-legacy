@@ -514,13 +514,10 @@ sub setSystemConfiguration {
 		close FD;
 		my $file = "$dest/report-files";
 		my $prog = "du -ch --time --files0-from";
-		my $data = qx($prog $file 2>/dev/null > $dest/report);
+		my $data = qx($prog $file 2>$dest/report-lost > $dest/report);
 		my $code = $? >> 8;
-		if ($code != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't create report file: $data");
-			$kiwi -> failed ();
-			return undef;
+		if ($code == 0) {
+			unlink "$dest/report-lost";
 		}
 		unlink $file;
 		$kiwi -> done ();

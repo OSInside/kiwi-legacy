@@ -93,6 +93,10 @@ sub new {
 	$this->{imageStrip} = $imageStrip;
 	$this->{baseSystem} = $baseSystem;
 	$this->{arch}       = $arch;
+	#==========================================
+	# Clean kernel mounts if any
+	#------------------------------------------
+	$this -> cleanKernelFSMount();
 	return $this;
 }
 
@@ -1996,6 +2000,18 @@ sub cleanMount {
 	my $imageDest = $this->{imageDest};
 	qx (umount $imageDest/mnt-$$ 2>&1);
 	rmdir "$imageDest/mnt-$$";
+}
+
+#==========================================
+# cleanKernelFSMount
+#------------------------------------------
+sub cleanKernelFSMount {
+	my $this = shift;
+	my $imageDest = $this->{imageDest};
+	my @kfs  = ("/proc/sys/fs/binfmt_misc","/proc","/dev/pts","/sys");
+	foreach my $system (@kfs) {
+		qx (umount $imageDest/$system 2>&1);
+	}
 }
 
 1;

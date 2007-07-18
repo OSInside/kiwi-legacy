@@ -2,6 +2,8 @@
 Fri Jul 13 14:38:46 CEST 2007 - ms@suse.de
 
 - v1.46
+- umount kernel filesystems like /proc in KIWIImage constructor.
+  This will umount any kernel filesystems as soon as --create is used
 - added yast second stage to be called during initial boot of a
   kiwi migrated image. This will re-detect and configure the
   eventually changed hardware. This one needs some testing
