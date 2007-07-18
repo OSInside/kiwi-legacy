@@ -2,6 +2,9 @@
 Fri Jul 13 14:38:46 CEST 2007 - ms@suse.de
 
 - v1.46
+- added yast second stage to be called during initial boot of a
+  kiwi migrated image. This will re-detect and configure the
+  eventually changed hardware. This one needs some testing
 - fixed exit criteria in case of of KIWIImage error
 - fixed image tree validation code
 - removed redundant screenrc.log from image

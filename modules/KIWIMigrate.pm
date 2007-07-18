@@ -548,8 +548,140 @@ sub setSystemConfiguration {
 		$kiwi -> note ("\n");
 		$kiwi -> doNorm ();
 		$kiwi -> cursorON();
+		$kiwi -> info ("Setting up initial deployment workflow...");
+		if (! $this -> setInitialSetup()) {
+			return undef;
+		}
+		$kiwi -> done();
 	}
 	return %result;
+}
+
+#==========================================
+# setInitialSetup
+#------------------------------------------
+sub setInitialSetup {
+	# ...
+	# During first deployment of the migrated image we will call
+	# the second phase of the YaST2 installation workflow. This step
+	# takes care for the hardware detection/configuration which may
+	# have changed because of another system environment.
+	# ---
+	# 1) create a framebuffer based xorg.conf file
+	# 2) create the file /var/lib/YaST2/runme_at_boot
+	# ---
+	my $this = shift;
+	my $dest = $this->{dest};
+	my $kiwi = $this->{kiwi};
+	#==========================================
+	# create xorg.conf [fbdev]
+	#------------------------------------------
+	qx(mkdir -p $dest/etc/X11);
+	qx(mkdir -p $dest/var/lib/YaST2);
+	if (-f "/etc/X11/xorg.conf.install") {
+		qx(cp /etc/X11/xorg.conf.install $dest/etc/X11/xorg.conf);
+	} else {
+		if (! open (FD,">$dest/etc/X11/xorg.conf")) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create fbdev xorg.conf: $!");
+			$kiwi -> failed ();
+			return undef;
+		}
+		#==========================================
+		# Files
+		#------------------------------------------
+		print FD 'Section "Files"'."\n";
+		print FD "\t".'FontPath   "/usr/share/fonts/truetype/"'."\n";
+		print FD "\t".'FontPath   "/usr/share/fonts/uni/"'."\n";
+		print FD "\t".'FontPath   "/usr/share/fonts/misc/"'."\n";
+		print FD "\t".'ModulePath "/usr/lib/xorg/modules"'."\n";
+		print FD 'EndSection'."\n";
+		#==========================================
+		# ServerFlags / Module
+		#------------------------------------------
+		print FD 'Section "ServerFlags"'."\n";
+		print FD "\t".'Option "AllowMouseOpenFail"'."\n";
+		print FD "\t".'Option "BlankTime" "0"'."\n";
+		print FD 'EndSection'."\n";
+		print FD 'Section "Module"'."\n";
+		print FD "\t".'Load  "dbe"'."\n";
+		print FD "\t".'Load  "extmod"'."\n";
+		print FD 'EndSection'."\n";
+		#==========================================
+		# InputDevice [kbd/mouse]
+		#------------------------------------------
+		print FD 'Section "InputDevice"'."\n";
+		print FD "\t".'Driver      "kbd"'."\n";
+		print FD "\t".'Identifier  "Keyboard[0]"'."\n";
+		print FD "\t".'Option      "Protocol"      "Standard"'."\n";
+		print FD "\t".'Option      "XkbRules"      "xfree86"'."\n";
+		print FD "\t".'Option      "XkbKeycodes"   "xfree86"'."\n";
+		print FD "\t".'Option      "XkbModel"      "pc104"'."\n";
+		print FD "\t".'Option      "XkbLayout"     "us"'."\n";
+		print FD 'EndSection'."\n";
+		print FD 'Section "InputDevice"'."\n";
+		print FD "\t".'Driver      "mouse"'."\n";
+		print FD "\t".'Identifier  "Mouse[1]"'."\n";
+		print FD "\t".'Option      "Device"    "/dev/input/mice"'."\n";
+		print FD "\t".'Option      "Protocol"  "explorerps/2"'."\n";
+		print FD 'EndSection'."\n";
+		#==========================================
+		# Monitor
+		#------------------------------------------
+		print FD 'Section "Monitor"'."\n";
+		print FD "\t".'HorizSync     25-40'."\n";
+		print FD "\t".'Identifier    "Monitor[0]"'."\n";
+		print FD "\t".'ModelName     "Initial"'."\n";
+		print FD "\t".'VendorName    "Initial"'."\n";
+		print FD "\t".'VertRefresh   47-75'."\n";
+		print FD 'EndSection'."\n";
+		#==========================================
+		# Screen
+		#------------------------------------------
+		print FD 'Section "Screen"'."\n";
+		print FD "\t".'SubSection "Display"'."\n";
+		print FD "\t\t".'Depth  8'."\n";
+		print FD "\t\t".'Modes  "default"'."\n";
+		print FD "\t".'EndSubSection'."\n";
+		print FD "\t".'SubSection "Display"'."\n";
+		print FD "\t\t".'Depth  15'."\n";
+		print FD "\t\t".'Modes  "default"'."\n";
+		print FD "\t".'EndSubSection'."\n";
+		print FD "\t".'SubSection "Display"'."\n";
+		print FD "\t\t".'Depth  16'."\n";
+		print FD "\t\t".'Modes  "default"'."\n";
+		print FD "\t".'EndSubSection'."\n";
+		print FD "\t".'SubSection "Display"'."\n";
+		print FD "\t\t".'Depth  24'."\n";
+		print FD "\t\t".'Modes  "default"'."\n";
+		print FD "\t".'EndSubSection'."\n";
+		print FD "\t".'Device     "Device[fbdev]"'."\n";
+		print FD "\t".'Identifier "Screen[fbdev]"'."\n";
+		print FD "\t".'Monitor    "Monitor[0]"'."\n";
+		print FD 'EndSection'."\n";
+		#==========================================
+		# Device
+		#------------------------------------------
+		print FD 'Section "Device"'."\n";
+		print FD "\t".'Driver      "fbdev"'."\n";
+		print FD "\t".'Identifier  "Device[fbdev]"'."\n";
+		print FD 'EndSection'."\n";
+		#==========================================
+		# ServerLayout
+		#------------------------------------------
+		print FD 'Section "ServerLayout"'."\n";
+		print FD "\t".'Identifier    "Layout[all]"'."\n";
+		print FD "\t".'InputDevice   "Keyboard[0]"  "CoreKeyboard"'."\n";
+		print FD "\t".'InputDevice   "Mouse[1]"     "CorePointer"'."\n";
+		print FD "\t".'Screen        "Screen[fbdev]"'."\n";
+		print FD 'EndSection'."\n";
+		close FD;
+	}
+	#==========================================
+	# Activate YaST on initial deployment
+	#------------------------------------------
+	qx(touch /var/lib/YaST2/runme_at_boot);	
+	return $this;
 }
 
 #==========================================
