@@ -59,17 +59,22 @@ touch /etc/modules.conf
 touch /lib/modules/*/modules.dep
 
 #======================================
-# 3) Mount the CD device
+# 3) Including required kernel modules
+#--------------------------------------
+probeDevices
+
+#======================================
+# 4) Mount the CD device
 #--------------------------------------
 CDMount
 
 #======================================
-# 4) Load configuration
+# 5) Load configuration
 #--------------------------------------
 importFile < $LIVECD_CONFIG
 
 #======================================
-# 5) Download RW part of the CD image
+# 6) Download RW part of the CD image
 #--------------------------------------
 IFS="," ; for i in $IMAGE;do
 	field=0
@@ -122,16 +127,15 @@ done
 CDUmount
 
 #======================================
-# 6) Get filesystem type
+# 7) Get filesystem type
 #--------------------------------------
 if [ -z "$UNIONFS_CONFIG" ];then
 	probeFileSystem $imageDevice
 fi
 
 #======================================
-# 7) Check for swap space
+# 8) Check for swap space
 #--------------------------------------
-probeDevices
 swapSpace=`searchSwapSpace`
 if [ ! -z "$swapSpace" ];then
 	#======================================
@@ -178,7 +182,7 @@ else
 fi
 
 #======================================
-# 8) Resize filesystem to full space
+# 9) Resize filesystem to full space
 #--------------------------------------
 if [ -z "$UNIONFS_CONFIG" ];then
 	Echo "Resize filesystem to full partition space..."
@@ -195,7 +199,7 @@ if [ -z "$UNIONFS_CONFIG" ];then
 fi
 
 #======================================
-# 9) Mount OS image to /mnt
+# 10) Mount OS image to /mnt
 #--------------------------------------
 if [ -z "$UNIONFS_CONFIG" ];then
 	#======================================
@@ -242,7 +246,7 @@ else
 fi
 
 #======================================
-# 10) Create system dependant files
+# 11) Create system dependant files
 #--------------------------------------
 mkdir -p /config/etc
 if [ -z "$UNIONFS_CONFIG" ];then
@@ -262,7 +266,7 @@ echo "sysfs   /sys     sysfs   noauto 0 0"          >> /config/etc/fstab
 echo "tmpfs   /dev/shm tmpfs   defaults 0 0"        >> /config/etc/fstab
 
 #======================================
-# 11) copy system dependant files
+# 12) copy system dependant files
 #--------------------------------------
 cd /config
 find . -type d | while read d ; do  mkdir -p /mnt/$d ; done
@@ -271,25 +275,25 @@ cd /
 rm -rf /config
 
 #======================================
-# 12) setup real root device
+# 13) setup real root device
 #--------------------------------------
 echo 256 > /proc/sys/kernel/real-root-dev
 
 #======================================
-# 13) umount system filesystems
+# 14) umount system filesystems
 #--------------------------------------
 umount /dev/pts
 umount /sys
 umount /proc
 
 #======================================
-# 14) copy initrd files to image
+# 15) copy initrd files to image
 #--------------------------------------
 cp /preinit /mnt
 cp /include /mnt
 
 #======================================
-# 15) Activate new root
+# 16) Activate new root
 #--------------------------------------
 Echo "Activating Image: [$imageName]"
 cd /mnt && exec < dev/console >dev/console 2>&1
@@ -308,7 +312,7 @@ else
 	rm ./include
 fi
 #======================================
-# 16) Unmount initrd / system init
+# 17) Unmount initrd / system init
 #--------------------------------------
 echo " "
 echo "Booting into Live CD System..."

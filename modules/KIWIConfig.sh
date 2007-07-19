@@ -272,7 +272,7 @@ function suseStripInitrd {
 		column chroot atftp clear tr host test printf mount dd uname umount
 		true touch sleep sh pidof sed rmdir rm pwd ps mv mkdir kill hostname
 		gzip grep false df cp cat bash basename arch sort ls uniq lsmod
-		usleep parted mke2fs pvcreate vgcreate lvm resize2fs ln
+		usleep parted mke2fs pvcreate vgcreate lvm resize2fs ln hdparm
 	"
 	for path in /sbin /usr/sbin /usr/bin /bin;do
 		baseStripTools "$path" "$tools"

@@ -2,6 +2,7 @@
 Fri Jul 13 14:38:46 CEST 2007 - ms@suse.de
 
 - v1.46
+- activate DMA mode for live media boot (#292782)
 - umount kernel filesystems like /proc in KIWIImage constructor.
   This will umount any kernel filesystems as soon as --create is
   used in order to create an image (#292686)

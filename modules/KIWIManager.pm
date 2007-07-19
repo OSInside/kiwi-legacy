@@ -397,7 +397,9 @@ sub setupInstallationSource {
 					push (@zopts,"--type $val");
 				}
 			}
-			my $sadd = "--non-interactive service-add @zopts $alias";
+			my $sadd = "--non-interactive";
+			$sadd = $sadd." --auto-agree-with-licenses";
+			$sadd = $sadd." service-add @zopts $alias";
 			if (! $chroot) {
 				$kiwi -> info ("Adding local zypper service: $alias");
 				$data = qx (bash -c "yes | zypper --root $root $sadd 2>&1");
