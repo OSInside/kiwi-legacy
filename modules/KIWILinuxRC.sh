@@ -234,18 +234,12 @@ function probeDevices {
 			module=`basename $file`
 			module=`echo $module | sed -e s@.ko@@`
 			INITRD_MODULES="$INITRD_MODULES $module"
-			modprobe $module >/dev/null 2>&1
+			if [ ! $module = "generic" ];then
+				modprobe $module >/dev/null 2>&1
+			fi
 		fi
 	done < $modinfo
 	IFS=$IFS_ORIG
-	# bad fix for ata probe, load order is required
-	Echo "Waiting for devices to become ready..."
-	lsmod | grep -q ata_piix
-	if [ $? = 0 ];then
-		rmmod ata_piix
-		sleep 5
-		modprobe ata_piix
-	fi
 }
 #======================================
 # CDDevice
@@ -255,7 +249,7 @@ function CDDevice {
 	# detect CD/DVD device. The function use the information
 	# from /proc/sys/dev/cdrom/info to activate the drive
 	# ----
-	for module in usb-storage sr_mod cdrom ide-generic ide-cd BusLogic;do
+	for module in usb-storage sr_mod cdrom ide-cd BusLogic;do
 		/sbin/modprobe $module
 	done
 	info="/proc/sys/dev/cdrom/info"
@@ -314,8 +308,8 @@ function searchSwapSpace {
 	hwapp=/usr/sbin/hwinfo
 	for diskdev in `$hwapp --disk | grep "Device File:" | cut -f2 -d:`;do
 		for disknr in 1 2 3 4;do
-			id=`/sbin/sfdisk --print-id $diskdev $disknr`
-			if [ $id = "82" ];then
+			id=`/sbin/sfdisk --print-id $diskdev $disknr 2>/dev/null`
+			if [ "$id" = "82" ];then
 				echo $diskdev$disknr
 				break
 			fi
@@ -332,8 +326,11 @@ function searchDiskSpace {
 	hwapp=/usr/sbin/hwinfo
 	for diskdev in `$hwapp --disk | grep "Device File:" | cut -f2 -d:`;do
 		for disknr in 1 2 3 4;do
-			id=`/sbin/sfdisk --print-id $diskdev $disknr`
-			if [ $id -ne 82 ] && [ $id -ne 0 ];then
+			id=`/sbin/sfdisk --print-id $diskdev $disknr 2>/dev/null`
+			if [ -z $id ];then
+				id=0
+			fi
+			if [ "$id" -ne 82 ] && [ "$id" -ne 0 ];then
 				echo $diskdev$disknr
 				break
 			fi
