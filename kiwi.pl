@@ -31,7 +31,7 @@ use KIWIMigrate;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "1.46";
+our $Version       = "1.47";
 our $SchemeVersion = "1.4";
 our $openSUSE      = "http://software.opensuse.org/download/";
 #============================================
@@ -840,7 +840,12 @@ sub checkType {
 			}
 			$para = $type{boot};
 			if (defined $type{flags}) {
-				$para .= ",$type{flags}";
+				if (-f "/usr/bin/mksquashfs") {	
+					$para .= ",$type{flags}";
+				} else {
+					$kiwi -> warning ("missing mksquashfs: flags $type{flags}");
+					$kiwi -> skipped ();
+				}
 			} 
 			last SWITCH;
 		};
