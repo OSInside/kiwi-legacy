@@ -325,7 +325,7 @@ sub setupBootStick {
 	print FD "default 0\n";
 	print FD "timeout 10\n";
 	print FD "gfxmenu (hd0,0)/image/loader/message\n";
-	print FD "framebuffer 1\n";
+	print FD "\n";
 	print FD "title KIWI Stick boot\n";
 	print FD " root (hd0,0)\n";
 	print FD " kernel /boot/linux vga=0x318\n";
@@ -669,7 +669,7 @@ sub setupBootDisk {
 	print FD "default 0\n";
 	print FD "timeout 10\n";
 	print FD "gfxmenu (hd0,0)/image/loader/message\n";
-	print FD "framebuffer 1\n";
+	print FD "\n";
 	print FD "title KIWI VM boot\n";
 	print FD " root (hd0,0)\n";
 	print FD " kernel /boot/linux.vmx vga=0x318\n";

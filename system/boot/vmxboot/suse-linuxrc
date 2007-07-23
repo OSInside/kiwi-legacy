@@ -183,7 +183,7 @@ IFS="," ; for i in $KERNEL_LIST;do
 	if test ! -z "$i";then
 		kernel=`echo $i | cut -f1 -d:`
 		initrd=`echo $i | cut -f2 -d:`
-		echo "title $kernel" >> $menu
+		echo "title KIWI VM boot" >> $menu
 		if [ $kernel = "vmlinuz-xen" ];then
 			echo " root (hd0,0)"                      >> $menu
 			echo " kernel /boot/xen.gz"               >> $menu
