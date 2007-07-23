@@ -89,6 +89,7 @@ IFS="," ; for i in $IMAGE;do
 	imageReadOnly=`echo $imageReadOnly | sed -e s@.$ARCH@@`
 	imageReadOnly="$imageReadOnly-read-only.$ARCH-$imageVersion"
 	imageName="/cdrom/$imageName-$imageVersion"
+	gzippName=$imageName.gz
 	imageMD5s="$imageName.md5"
 	if [ ! -z "$UNIONFS_CONFIG" ];then
 		continue
@@ -102,7 +103,7 @@ IFS="," ; for i in $IMAGE;do
 				"Not enough RAM available for this image" \
 			"reboot"
 		fi
-		dd if=$imageName of=$imageDevice count=$blocks \
+		gzip -cd $gzippName | dd of=$imageDevice count=$blocks \
 			bs=$blocksize >/dev/null 2>&1
 		dd if=$imageDevice count=$blocks bs=$blocksize 2>/dev/null |\
 			md5sum - > /etc/ireal.md5

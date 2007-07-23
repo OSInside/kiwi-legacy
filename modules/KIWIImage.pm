@@ -697,6 +697,12 @@ sub createImageLiveCD {
 		if (! $this -> restoreSplitExtend ()) {
 			return undef;
 		}
+		#==========================================
+		# compress RW extend
+		#------------------------------------------
+		if (! $this -> compressImage ($namerw)) {
+			return undef;
+		}
 	}
 	#==========================================
 	# recreate a copy of the read-only data
@@ -767,7 +773,7 @@ sub createImageLiveCD {
 	$kiwi -> info ("Moving CD image data into boot structure");
 	if ((! defined $gzip) || ($gzip eq "compressed")) {
 		qx (mv $imageDest/$namerw.md5 $main::RootTree/CD);
-		qx (mv $imageDest/$namerw $main::RootTree/CD);
+		qx (mv $imageDest/$namerw.gz $main::RootTree/CD);
 	}
 	if (defined $gzip) {
 		qx (mv $imageDest/$namero $main::RootTree/CD);

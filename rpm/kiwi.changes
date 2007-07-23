@@ -6,6 +6,7 @@ Fri Jul 20 16:24:49 CEST 2007 - ms@suse.de
 - added special handling in probeDevices() for ata_piix (#292782)
 - added suseGFXBoot function in KIWIConfig.sh, activate graphics
   menu for grub (gfxmenu)
+- compress RW part of an old-style live CD/DVD to enable fast boot
 - fixed KIWIMigrate, creates activation files in wrong place
 - activate kernel framebuffer for VM systems
 
