@@ -373,6 +373,18 @@ sub setupBootStick {
 		$kiwi -> failed ();
 		return undef;
 	}
+	#==========================================
+	# check for message file in initrd
+	#------------------------------------------
+	my $message = "'image/loader/message'";
+	$status = qx (cd /mnt/ && gzip -cd $initrd | cpio -d -i $message 2>&1);
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't find message file: $status");
+		$kiwi -> failed ();
+		return undef;
+	}
 	qx (umount /mnt/ 2>&1);
 	$kiwi -> done();
 	#==========================================
