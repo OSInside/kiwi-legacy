@@ -63,6 +63,9 @@
 		<package name="squashfs-kmp-default"/>
 		<package name="aufs"/>
 		<package name="aufs-kmp-default"/>
+		<package name="gfxboot"/>
+		<package name="fribidi"/>
+		<package name="make"/>
 	</packages>
 	<packages type="boot">
 		<package name="kernel-default"/>

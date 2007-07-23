@@ -56,6 +56,9 @@
 		<package name="sysconfig"/>
 		<package name="sysfsutils"/>
 		<package name="util-linux"/>
+		<package name="gfxboot"/>
+		<package name="fribidi"/>
+		<package name="make"/>
 	</packages>
 	<packages type="boot">
 		<package name="kernel-default"/>

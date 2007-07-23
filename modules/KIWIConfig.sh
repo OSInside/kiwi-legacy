@@ -278,3 +278,33 @@ function suseStripInitrd {
 		baseStripTools "$path" "$tools"
 	done
 }
+
+#======================================
+# suseGFXBoot
+#--------------------------------------
+function suseGFXBoot {
+	local theme=$1
+	local loader=$2
+	export PATH=$PATH:/usr/sbin
+	if [ ! -d /usr/share/gfxboot ];then
+		echo "gfxboot not installed... skipped"
+		return
+	fi
+	cd /usr/share/gfxboot
+	make -C themes/$theme prep
+	make -C themes/$theme
+	mkdir /image/loader
+	if [ $loader = "isolinux" ];then
+		cp themes/$theme/install/* /image/loader
+		bin/unpack_bootlogo /image/loader
+		for i in init languages log;do
+			rm -f /image/loader/$i
+		done
+		mv /usr/share/syslinux/isolinux.bin /image/loader
+		mv /boot/memtest.bin /image/loader/memtest
+	fi
+	if [ $loader = "grub" ];then
+		mv themes/$theme/boot/message /image/loader
+	fi
+	make -C themes/$theme clean
+}

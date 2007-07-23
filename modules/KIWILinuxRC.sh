@@ -224,6 +224,8 @@ function probeDevices {
 	# check the modalias with the modinfo file and load
 	# all matching kernel modules into the kernel
 	# ----
+	DRIVER_GENERIC=0
+	DRIVER_ATA_PIIX=0
 	Echo "Including required kernel modules..."
 	IFS=$IFS_ORIG
 	probeDeviceInfo
@@ -234,12 +236,28 @@ function probeDevices {
 			module=`basename $file`
 			module=`echo $module | sed -e s@.ko@@`
 			INITRD_MODULES="$INITRD_MODULES $module"
-			if [ ! $module = "generic" ];then
+			if [ $module = "generic" ];then
+				DRIVER_GENERIC=1
+			elif [  $module = "ata_piix" ] ; then
+				DRIVER_ATA_PIIX=1
+			else
+				Echo "Probing module: $module"
 				modprobe $module >/dev/null 2>&1
 			fi
 		fi
 	done < $modinfo
 	IFS=$IFS_ORIG
+	#======================================
+	# Handle special cases
+	#--------------------------------------
+	if [ $DRIVER_ATA_PIIX -eq 1 ] ; then
+		Echo "Probing module: ata_piix"
+		modprobe ata_piix >/dev/null 2>&1
+	fi
+	if [ $DRIVER_GENERIC -eq 1 ] ; then
+		Echo "Probing module: generic"
+		modprobe generic >/dev/null 2>&1
+	fi
 }
 #======================================
 # CDDevice

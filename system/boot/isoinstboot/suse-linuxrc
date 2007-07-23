@@ -339,23 +339,28 @@ if test $systemIntegrity = "clean";then
 		# b) /boot/grub/menu.lst...
 		# -------------------------
 		console=""
+		menu=/config/boot/grub/menu.lst
 		mkdir -p /config/boot/grub
-		echo "timeout 10" > /config/boot/grub/menu.lst
+		echo "timeout 10"                               > $menu
+		if [ -f /image/loader/message ];then
+			echo "gfxmenu (hd0,1)/boot/message"        >> $menu
+		fi
 		IFS="," ; for i in $KERNEL_LIST;do
 		if test ! -z "$i";then
 			kernel=`echo $i | cut -f1 -d:`
 			initrd=`echo $i | cut -f2 -d:`
-			menu=/config/boot/grub/menu.lst
 			echo "title $kernel" >> $menu
 			if [ $kernel = "vmlinuz-xen" ];then
 				echo " root (hd0,1)"                   >> $menu
 				echo " kernel /boot/xen.gz"            >> $menu
 				echo -n " module /boot/$kernel"        >> $menu
-				echo " root=${DISK}2 $console"         >> $menu
+				echo -n " root=${DISK}2 $console"      >> $menu
+				echo " vga=0x318"                      >> $menu
 				echo " module /boot/$initrd"           >> $menu
 			else
 				echo -n " kernel (hd0,1)/boot/$kernel" >> $menu
-				echo " root=${DISK}2 $console"         >> $menu
+				echo -n " root=${DISK}2 $console"      >> $menu
+				echo " vga=0x318"                      >> $menu
 				echo " initrd (hd0,1)/boot/$initrd"    >> $menu
 			fi
 		fi
@@ -393,6 +398,9 @@ fi
 #======================================
 # 13) copy initrd files to image
 #--------------------------------------
+if [ -f /image/loader/message ];then
+	mv /image/loader/message /mnt/boot
+fi
 cp /preinit /mnt
 cp /include /mnt
 

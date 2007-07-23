@@ -64,6 +64,9 @@
 		<package name="lvm2"/>
 		<package name="squashfs-kmp-bigsmp"/>
 		<package name="aufs-kmp-bigsmp"/>
+		<package name="gfxboot"/>
+		<package name="fribidi"/>
+		<package name="make"/>
 	</packages>
 	<packages type="boot">
 		<package name="filesystem"/>

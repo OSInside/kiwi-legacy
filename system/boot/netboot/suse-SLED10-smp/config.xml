@@ -59,6 +59,9 @@
 		<package name="diffutils"/>
 		<package name="procps"/>
 		<package name="lvm2"/>
+		<package name="gfxboot"/>
+		<package name="fribidi"/>
+		<package name="make"/>
 	</packages>
 	<packages type="boot">
 		<package name="filesystem"/>

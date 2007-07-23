@@ -5,6 +5,11 @@ test -f /.profile && . /.profile
 echo "Configure image: [$name]..."
 
 #==========================================
+# setup gfxboot
+#------------------------------------------
+suseGFXBoot SuSE grub
+
+#==========================================
 # remove unneeded packages
 #------------------------------------------
 for i in \
@@ -15,7 +20,7 @@ for i in \
 	mkinitrd net-tools openSUSE-release openldap2-client openslp openssl \
 	pam pam-modules pcre perl perl-Bootloader perl-gettext permissions \
 	pm-utils pmtools python python-xml resmgr rpm-python smart \
-	suse-build-key udev gzip
+	suse-build-key udev gzip gfxboot fribidi make
 do
 	rpm -e $i --nodeps
 done

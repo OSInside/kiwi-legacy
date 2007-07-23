@@ -636,6 +636,7 @@ if test $systemIntegrity = "clean";then
 		# -------------------------
 		console=""
 		gdev="(hd0,1)"
+		menu=/config/boot/grub/menu.lst
 		mkdir -p /config/boot/grub
 		if test -z $KIWI_BOOT_TIMEOUT;then
 			KIWI_BOOT_TIMEOUT=10;
@@ -644,24 +645,28 @@ if test $systemIntegrity = "clean";then
 			gnum=`echo $imageRootDevice | sed -e "s/\/dev.*\([0-9]\)/\\1/"`
 			gdev="(hd0,$gnum)"
 		fi
-		echo "timeout $KIWI_BOOT_TIMEOUT" > /config/boot/grub/menu.lst
+		echo "timeout $KIWI_BOOT_TIMEOUT"               > $menu
+		if [ -f /image/loader/message ];then
+			echo "gfxmenu $gdev/boot/message"          >> $menu
+		fi
 		IFS="," ; for i in $KERNEL_LIST;do
 		if test ! -z "$i";then
 			kernel=`echo $i | cut -f1 -d:`
 			initrd=`echo $i | cut -f2 -d:`
-			menu=/config/boot/grub/menu.lst
 			echo "title $kernel" >> $menu
 			if [ $kernel = "vmlinuz-xen" ];then
 				echo " root $gdev"                     >> $menu
 				echo " kernel /boot/xen.gz"            >> $menu
 				echo -n " module /boot/$kernel"        >> $menu
 				echo -n " root=${DISK}2 $console"      >> $menu
+				echo -n " vga=0x318"                   >> $menu
 				echo -n " $KIWI_INITRD_PARAMS"         >> $menu
 				echo " $KIWI_KERNEL_OPTIONS"           >> $menu
 				echo " module /boot/$initrd"           >> $menu
 			else
 				echo -n " kernel $gdev/boot/$kernel"   >> $menu
 				echo -n " root=${DISK}2 $console"      >> $menu
+				echo -n " vga=0x318"                   >> $menu
 				echo -n " $KIWI_INITRD_PARAMS"         >> $menu
 				echo " $KIWI_KERNEL_OPTIONS"           >> $menu
 				echo " initrd $gdev/boot/$initrd"      >> $menu
@@ -712,6 +717,9 @@ umount /proc
 #======================================
 # 21) copy initrd files to image
 #--------------------------------------
+if [ -f /image/loader/message ];then
+	mv /image/loader/message /mnt/boot
+fi
 cp /preinit /mnt
 cp /include /mnt
 

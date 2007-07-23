@@ -221,6 +221,7 @@ sub setTemplate {
 	print FD ' filesystem="ext3">pxe</type>'."\n";
 	print FD "\t\t".'<version>1.1.2</version>'."\n";
 	print FD "\t\t".'<packagemanager>smart</packagemanager>'."\n";
+	print FD "\t\t".'<rpm-check-signatures>False</rpm-check-signatures>'."\n";
 	print FD "\t".'</preferences>'."\n";
 	#==========================================
 	# <repository>
@@ -573,12 +574,12 @@ sub setInitialSetup {
 	#==========================================
 	# create xorg.conf [fbdev]
 	#------------------------------------------
-	qx(mkdir -p $dest/etc/X11);
-	qx(mkdir -p $dest/var/lib/YaST2);
+	qx(mkdir -p $dest/root/etc/X11);
+	qx(mkdir -p $dest/root/var/lib/YaST2);
 	if (-f "/etc/X11/xorg.conf.install") {
-		qx(cp /etc/X11/xorg.conf.install $dest/etc/X11/xorg.conf);
+		qx(cp /etc/X11/xorg.conf.install $dest/root/etc/X11/xorg.conf);
 	} else {
-		if (! open (FD,">$dest/etc/X11/xorg.conf")) {
+		if (! open (FD,">$dest/root/etc/X11/xorg.conf")) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't create fbdev xorg.conf: $!");
 			$kiwi -> failed ();
@@ -677,7 +678,7 @@ sub setInitialSetup {
 	#==========================================
 	# Activate YaST on initial deployment
 	#------------------------------------------
-	qx(touch /var/lib/YaST2/runme_at_boot);	
+	qx(touch $dest/root/var/lib/YaST2/runme_at_boot);
 	return $this;
 }
 

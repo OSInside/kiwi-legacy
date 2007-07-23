@@ -324,10 +324,11 @@ sub setupBootStick {
 	print FD "color cyan/blue white/blue\n";
 	print FD "default 0\n";
 	print FD "timeout 10\n";
+	print FD "gfxmenu (hd0,0)/image/loader/message\n";
 	print FD "framebuffer 1\n";
 	print FD "title KIWI Stick boot\n";
 	print FD " root (hd0,0)\n";
-	print FD " kernel /boot/linux vga=normal\n";
+	print FD " kernel /boot/linux vga=0x318\n";
 	print FD " initrd /boot/initrd\n"; 
 	close FD;
 	$kiwi -> done();
@@ -567,7 +568,7 @@ sub setupBootCD {
 	print FD "timeout 10\n";
 	print FD "framebuffer 1\n";
 	print FD "title KIWI CD boot\n";
-	print FD " kernel (cd)/boot/linux vga=normal ramdisk_size=256000\n";
+	print FD " kernel (cd)/boot/linux vga=0x318 ramdisk_size=256000\n";
 	print FD " initrd (cd)/boot/initrd\n";
 	close FD;
 	$kiwi -> done();
@@ -644,7 +645,7 @@ sub setupBootDisk {
 	#==========================================
 	# Import grub stages
 	#------------------------------------------
-	$kiwi -> info ("Importing grub stages for stick boot");
+	$kiwi -> info ("Importing grub stages for VM boot");
 	$status = qx ( cp /usr/lib/grub/* $tmpdir/boot/grub 2>&1 );
 	$result = $? >> 8;
 	if ($result != 0) {
@@ -667,10 +668,11 @@ sub setupBootDisk {
 	print FD "color cyan/blue white/blue\n";
 	print FD "default 0\n";
 	print FD "timeout 10\n";
+	print FD "gfxmenu (hd0,0)/image/loader/message\n";
 	print FD "framebuffer 1\n";
 	print FD "title KIWI VM boot\n";
 	print FD " root (hd0,0)\n";
-	print FD " kernel /boot/linux.vmx vga=normal\n";
+	print FD " kernel /boot/linux.vmx vga=0x318\n";
 	print FD " initrd /boot/initrd.vmx\n";
 	close FD;
 	$kiwi -> done();
@@ -844,11 +846,26 @@ sub setupBootDisk {
 		#==========================================
 		# Copy boot data on system image
 		#------------------------------------------
-		$status = qx (mv $tmpdir/boot /mnt/ 2>&1);
+		$status = qx (cp -a $tmpdir/boot /mnt/ 2>&1);
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't install image: $status");
+			$kiwi -> failed ();
+			qx ( /sbin/kpartx  -d $loop );
+			qx ( /sbin/losetup -d $loop );
+			qx ( umount /mnt/ 2>&1 );
+			return undef;
+		}
+		#==========================================
+		# check for message file in initrd
+		#------------------------------------------
+		my $message = "'image/loader/message'";
+		$status = qx (cd /mnt/ && gzip -cd $initrd | cpio -d -i $message 2>&1);
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't find message file: $status");
 			$kiwi -> failed ();
 			qx ( /sbin/kpartx  -d $loop );
 			qx ( /sbin/losetup -d $loop );
@@ -862,6 +879,7 @@ sub setupBootDisk {
 	# cleanup device maps and part mount
 	#------------------------------------------
 	qx ( /sbin/kpartx  -d $loop );
+	qx (rm -rf $tmpdir);
 
 	#==========================================
 	# Install grub on virtual disk

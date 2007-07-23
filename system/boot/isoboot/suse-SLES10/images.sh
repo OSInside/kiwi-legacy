@@ -7,19 +7,7 @@ echo "Configure image: [$name]..."
 #==========================================
 # setup gfxboot
 #------------------------------------------
-export PATH=$PATH:/usr/sbin
-mkdir /image/loader
-cd /usr/share/gfxboot
-make -C themes/SLES prep
-make -C themes/SLES
-cp themes/SLES/install/* /image/loader
-bin/unpack_bootlogo /image/loader
-for i in init languages log;do
-	rm -f /image/loader/$i
-done
-mv /usr/share/syslinux/isolinux.bin /image/loader
-mv /boot/memtest.bin /image/loader/memtest
-make -C themes/SLES clean
+suseGFXBoot SLES isolinux
 
 #==========================================
 # remove unneeded packages

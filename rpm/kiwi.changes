@@ -3,6 +3,11 @@ Fri Jul 20 16:24:49 CEST 2007 - ms@suse.de
 
 - v1.47
 - added check for squashfs in iso creation (#289552)
+- added special handling in probeDevices() for ata_piix (#292782)
+- added suseGFXBoot function in KIWIConfig.sh, activate graphics
+  menu for grub (gfxmenu)
+- fixed KIWIMigrate, creates activation files in wrong place
+- activate kernel framebuffer for VM systems
 
 -------------------------------------------------------------------
 Fri Jul 13 14:38:46 CEST 2007 - ms@suse.de

@@ -5,6 +5,11 @@ test -f /.profile && . /.profile
 echo "Configure image: [$name]..."
 
 #==========================================
+# setup gfxboot
+#------------------------------------------
+suseGFXBoot SuSE grub
+
+#==========================================
 # remove unneeded packages
 #------------------------------------------
 for i in \
@@ -14,7 +19,8 @@ for i in \
 	libzio limal limal-bootloader limal-perl logrotate mdadm mingetty \
 	openSUSE-release openldap2-client openslp pam pam-modules pcre \
 	perl perl-Bootloader perl-gettext permissions pm-utils pmtools \
-	python python-xml resmgr rpm-python smart suse-build-key udev
+	python python-xml resmgr rpm-python smart suse-build-key udev \
+	gfxboot fribidi make
 do
     rpm -e $i --nodeps
 done
@@ -22,19 +28,7 @@ done
 #==========================================
 # remove unneeded files
 #------------------------------------------
-rpm -e popt bzip2 --nodeps
-rm -rf `find -type d | grep .svn`
-rm -rf /usr/share/info
-rm -rf /usr/share/man
-rm -rf /usr/share/cracklib
-rm -rf /usr/lib/python*
-rm -rf /usr/lib/perl*
-rm -rf /usr/share/locale
-rm -rf /usr/share/doc/packages
-rm -rf /var/lib/rpm
-rm -rf /usr/lib/rpm
-rm -rf /var/lib/smart
-rm -rf /boot/* /opt/*
+suseStripInitrd
 
 #==========================================
 # umount /proc

@@ -7,19 +7,7 @@ echo "Configure image: [$name]..."
 #==========================================
 # setup gfxboot
 #------------------------------------------
-export PATH=$PATH:/usr/sbin:/usr/bin
-mkdir /image/loader
-cd /usr/share/gfxboot
-make -C themes/SuSE prep
-make -C themes/SuSE
-cp themes/SuSE/install/* /image/loader
-bin/unpack_bootlogo /image/loader
-for i in init languages log;do
-	rm -f /image/loader/$i
-done
-mv /usr/share/syslinux/isolinux.bin /image/loader
-mv /boot/memtest.bin /image/loader/memtest
-make -C themes/SuSE clean
+suseGFXBoot SuSE isolinux
 
 #==========================================
 # remove unneeded packages

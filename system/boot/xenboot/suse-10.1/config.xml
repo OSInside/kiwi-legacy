@@ -52,6 +52,9 @@
 		<package name="util-linux"/>
 		<package name="hwinfo"/>
 		<package name="xen"/>
+		<package name="gfxboot"/>
+		<package name="fribidi"/>
+		<package name="make"/>
 	</packages>
 	<packages type="boot">
 		<package name="kernel-xen"/>
