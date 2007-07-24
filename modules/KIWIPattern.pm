@@ -148,7 +148,7 @@ sub downloadPattern {
 		return $this->{cache}{$pattern};
 	}
 	if ($url =~ /^\//) {
-		my $path = "$url//setup/descr";
+		my $path = "$url//suse/setup/descr";
 		my @file = bsd_glob ("$path/$pattern-*.$arch.pat");
 		foreach my $file (@file) {
 			# / FIXME /
