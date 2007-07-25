@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Wed Jul 25 10:00:25 CEST 2007 - ms@suse.de
+
+- v1.49
+- fix by Jan-Christoph Bornschlegel <jcbornschlegel@novell.com>
+  extraction of message file from initrd doesn't work in case of
+  relative paths
+
+-------------------------------------------------------------------
 Tue Jul 24 14:04:19 CEST 2007 - ms@suse.de
 
 - v1.48

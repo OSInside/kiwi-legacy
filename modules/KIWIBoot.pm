@@ -873,7 +873,7 @@ sub setupBootDisk {
 		# check for message file in initrd
 		#------------------------------------------
 		my $message = "'image/loader/message'";
-		$status = qx (cd /mnt/ && gzip -cd $initrd | cpio -d -i $message 2>&1);
+		$status = qx (gzip -cd $initrd | (cd /mnt && cpio -d -i $message 2>&1));
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
