@@ -1031,14 +1031,18 @@ function mountSystem () {
 			# check and mount the filesystem
 			# ----
 			if test $LOCAL_BOOT = "no" && test $systemIntegrity = "clean";then
-				Echo "Creating EXT2 filesystem for write extend on $rwDevice..."
-				if ! mke2fs $rwDevice >/dev/null 2>&1;then
-					systemException \
-						"Failed to create ext2 filesystem" \
-					"reboot"
+				if ! mount $rwDevice $rwDir >/dev/null 2>&1;then
+					Echo "Creating EXT2 filesystem for RW data on $rwDevice..."
+					if ! mke2fs $rwDevice >/dev/null 2>&1;then
+						systemException \
+							"Failed to create ext2 filesystem" \
+						"reboot"
+					fi
+					Echo "Checking EXT2 write extend..."
+					e2fsck -y -f $rwDevice >/dev/null 2>&1
+				else
+					umount $rwDevice
 				fi
-				Echo "Checking EXT2 write extend..."
-				e2fsck -y -f $rwDevice >/dev/null 2>&1
 			fi
 			if ! mount $rwDevice $rwDir >/dev/null 2>&1;then
 				retval=1
