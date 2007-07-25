@@ -398,7 +398,7 @@ sub setupInstallationSource {
 				}
 			}
 			my $sadd = "--non-interactive";
-			$sadd = $sadd." --auto-agree-with-licenses";
+			#$sadd = $sadd." --auto-agree-with-licenses";
 			$sadd = $sadd." service-add @zopts $alias";
 			if (! $chroot) {
 				$kiwi -> info ("Adding local zypper service: $alias");
@@ -692,7 +692,8 @@ sub setupRootSystem {
 			$kiwi -> info ("Initializing image system on: $root...");
 			my $forceChannels = join (",",@channelList);
 			my @installOpts = (
-				"--catalog $forceChannels"
+				"--catalog $forceChannels",
+				"-y"
 			);
 			#==========================================
 			# Add package manager to package list
