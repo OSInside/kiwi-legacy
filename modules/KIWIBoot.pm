@@ -338,7 +338,7 @@ sub setupBootStick {
 	$kiwi -> info ("Creating stick image");
 	my $name = $initrd; $name =~ s/gz$/stickboot/;
 	my $size = qx (du -ks $tmpdir | cut -f1 2>&1);
-	chomp ($size); $size += 1024;
+	chomp ($size); $size += 2048;
 	$sysird = int ( $size / 1024 );
 	$sysird = $sysird + 1;
 	$status = qx (dd if=/dev/zero of=$name bs=1k count=$size 2>&1);
@@ -383,6 +383,7 @@ sub setupBootStick {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't find message file: $status");
 		$kiwi -> failed ();
+		qx (umount /mnt/ 2>&1);
 		return undef;
 	}
 	qx (umount /mnt/ 2>&1);
@@ -693,13 +694,9 @@ sub setupBootDisk {
 	#------------------------------------------
 	if ($syszip > 0) {
 		$kiwi -> info ("Creating VM boot image");
-		my $size = qx (du -ks $tmpdir | cut -f1 2>&1);
-		chomp ($size); $size += 1024;
-		$sysird = int ( $size / 1024 );
-		$sysird = $sysird + 1;
 		$sysname= $initrd; $sysname =~ s/gz$/vmboot/;
 		my $size = qx (du -ks $tmpdir | cut -f1 2>&1);
-		chomp ($size); $size += 1024;
+		chomp ($size); $size += 2048;
 		$sysird = int ( $size / 1024 );
 		$sysird = $sysird + 1;
 		$status = qx (dd if=/dev/zero of=$sysname bs=1k count=$size 2>&1);

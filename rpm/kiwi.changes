@@ -3,6 +3,8 @@ Wed Jul 25 10:00:25 CEST 2007 - ms@suse.de
 
 - v1.49
 - added setValidateRepositoryType() method
+- fixed creation of stick image, it might happen that there is no space
+  left to copy the grub stages or the grub message file
 - fixed mountSystem() in case of squashfs/aufs mounts to use
   eventually existing write extend instead of creating a new one
   all the time which overwrites the previously stored data. 
