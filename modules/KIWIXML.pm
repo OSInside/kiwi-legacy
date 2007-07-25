@@ -695,25 +695,40 @@ sub getRepository {
 	# types refer to the package manager documentation
 	# ---
 	my $this = shift;
-	my $kiwi = $this->{kiwi};
 	my @node = $this->{repositNodeList} -> get_nodelist();
 	my %result;
 	foreach my $element (@node) {
 		my $type = $element -> getAttribute("type");
 		my $stag = $element -> getElementsByTagName ("source") -> get_node(1);
 		my $source = $this -> resolveLink ( $stag -> getAttribute ("path") );
-		if (($source =~ /^opensuse:\/\//) && ($type ne "rpm-md")) {
-			my $state = $kiwi -> state();
-			if ($state eq "I") {
-				$kiwi -> done ();
-			}
-			$kiwi -> warning ("opensuse URL used, forcing repo type [rpm-md]");
-			$type = "rpm-md";
-			$element -> setAttribute ("type",$type);
-		}
 		$result{$source} = $type;
 	}
 	return %result;
+}
+
+#==========================================
+# setValidateRepositoryType
+#------------------------------------------
+sub setValidateRepositoryType {
+	# ...
+	# check the source URL and the used repo type. in case of
+	# opensuse:// we have to use the rpm-md repo type because the
+	# openSUSE buildservice repositories are no valid yast2 repos
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my @node = $this->{repositNodeList} -> get_nodelist();
+	foreach my $element (@node) {
+		my $type = $element -> getAttribute("type");
+		my $stag = $element -> getElementsByTagName ("source") -> get_node(1);
+		my $source = $this -> resolveLink ( $stag -> getAttribute ("path") );
+		if (($source =~ /^opensuse:\/\//) && ($type ne "rpm-md")) {
+			$kiwi -> warning ("$source: forcing repo type [rpm-md]");
+			$element -> setAttribute ("type","rpm-md");
+			$kiwi -> done();
+		}
+	}
+	return $this;
 }
 
 #==========================================

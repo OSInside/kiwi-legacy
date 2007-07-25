@@ -195,6 +195,10 @@ sub main {
 			$xml -> addRepository (\@AddRepositoryType,\@AddRepository);
 		}
 		#==========================================
+		# Validate repo types
+		#------------------------------------------
+		$xml -> setValidateRepositoryType();
+		#==========================================
 		# Check for add-package option
 		#------------------------------------------
 		if (defined @AddPackage) {
@@ -380,6 +384,10 @@ sub main {
 		if (defined @AddRepository) {
 			$xml -> addRepository (\@AddRepositoryType,\@AddRepository);
 		}
+		#==========================================
+		# Validate repo types
+		#------------------------------------------
+		$xml -> setValidateRepositoryType();
 		#==========================================
 		# Initialize root system, use existing root
 		#------------------------------------------
