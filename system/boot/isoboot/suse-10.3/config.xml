@@ -69,6 +69,7 @@
 		<package name="aufs-kmp-default"/>
 		<package name="fribidi"/>
 		<package name="hdparm"/>
+		<package name="grub"/>
 	</packages>
 	<packages type="boot">
 		<package name="kernel-default"/>

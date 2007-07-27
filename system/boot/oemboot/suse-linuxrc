@@ -1,0 +1,283 @@
+#!/bin/bash
+#================
+# FILE          : linuxrc
+#----------------
+# PROJECT       : OpenSuSE KIWI Image System
+# COPYRIGHT     : (c) 2006 SUSE LINUX Products GmbH. All rights reserved
+#               :
+# AUTHOR        : Marcus Schaefer <ms@suse.de>
+#               :
+# BELONGS TO    : Operating System images
+#               :
+# DESCRIPTION   : This file is changed to become the real
+#               : linuxrc script which is used to prepare the
+#               : operating system for the main image
+#               :
+#               :
+# STATUS        : BETA
+#----------------
+#======================================
+# Exports (General)...
+#--------------------------------------
+export PATH="/sbin:/bin:/usr/sbin:/usr/bin"
+export IFS_ORIG=$IFS
+export DEBUG=0
+
+#======================================
+# Exports (Booting)
+#--------------------------------------
+export DOMURD_MODULES="xennet xenblk"
+export INITRD_MODULES="reiserfs"
+export LOCAL_BOOT=no
+export systemIntegrity="clean"
+export deviceFound=0
+
+#======================================
+# Functions...
+#--------------------------------------
+. /include
+
+#======================================
+# Functions...
+#--------------------------------------
+USBStickDevice () {
+	for device in /sys/bus/usb/drivers/usb-storage/*;do
+		if [ -L $device ];then
+			descriptions=$device/host*/target*/*/block*
+			for description in $descriptions;do
+				if [ ! -d $description ];then
+					continue
+				fi
+				isremovable=$description/removable
+				storageID=`echo $description | cut -f1 -d: | xargs basename`
+				devicebID=`basename $description | cut -f2 -d:`
+				serial="/sys/bus/usb/devices/$storageID/serial"
+				device="/dev/$devicebID"
+				if [ ! -b $device ];then
+					continue;
+				fi
+				if [ ! -f $isremovable ];then
+					continue;
+				fi
+				if [ ! -f $serial ];then
+					serial="USB Stick (unknown type)"
+				else
+					serial=`cat $serial`
+				fi
+				removable=`cat $isremovable`
+				if [ $removable -eq 1 ];then
+					deviceFound=1
+					deviceRoot="$device"1
+				fi
+			done
+		fi
+	done
+}
+#======================================
+# Beautify Startup
+#--------------------------------------
+clear
+echo "Loading KIWI OEM Boot-System..."
+echo "-------------------------------"
+
+#======================================
+# 1) Mounting local file systems
+#--------------------------------------
+mount -t proc  proc    /proc
+mount -t sysfs sysfs   /sys
+mount -t devpts devpts /dev/pts
+closeKernelConsole
+
+#======================================
+# 2) Prepare module load support 
+#--------------------------------------
+touch /etc/modules.conf
+touch /lib/modules/*/modules.dep
+
+#======================================
+# 3) Including required kernel modules
+#--------------------------------------
+probeDevices
+for module in usb_storage sg sd_mod;do
+	modprobe $module
+done
+
+#======================================
+# 5) Search disks, prefer removable one
+#--------------------------------------
+USBStickDevice
+if [ $deviceFound = 0 ];then
+	for deviceRoot in /dev/sda1 /dev/hda1;do
+		if mount $deviceRoot /mnt &>/dev/null;then
+			deviceFound=1
+			umount /mnt
+			break
+		fi
+	done
+	if [ $deviceFound = 0 ];then
+		systemException \
+			"Couldn't find any disk device... abort" \
+		"reboot"
+	fi
+	deviceDisk=`echo $deviceRoot | tr -d [0-9]`
+	deviceSwap="$deviceDisk"2
+	deviceHome="$deviceDisk"3
+fi
+
+#======================================
+# 6) Probe filesystem of disk device
+#--------------------------------------
+probeFileSystem $deviceRoot
+if [ $FSTYPE = "unknown" ];then
+	systemException \
+		"Couldn't determine filesystem type... abort" \
+	"reboot"
+fi
+
+#======================================
+# 7) repartition the disk device
+#--------------------------------------
+# TODO
+# resize /dev/xda1 to be 10GB
+# add primary partition for swap space (1GB)
+# add primary partition for home space (rest)
+
+#======================================
+# 8) Resize filesystem to full space
+#--------------------------------------
+Echo "Filesystem of root system is: $FSTYPE -> $deviceRoot"
+if test "$FSTYPE" = "reiserfs";then
+	Echo "Resize Reiser filesystem to full partition space..."
+	resize_reiserfs $deviceRoot
+	INITRD_MODULES="$INITRD_MODULES reiserfs"
+fi
+if test "$FSTYPE" = "ext2";then
+	Echo "Checking EXT2 filesystem..."
+	e2fsck -y -f $deviceRoot
+	Echo "Resize EXT2 filesystem to full partition space..."
+	resize2fs -F -p $deviceRoot
+	INITRD_MODULES="$INITRD_MODULES ext2"
+fi
+if test "$FSTYPE" = "ext3";then
+	Echo "Checking EXT3 filesystem..."
+	e2fsck -y -f $deviceRoot
+	Echo "Resize EXT3 filesystem to full partition space..."
+	resize2fs -F -p $deviceRoot
+	Echo "Checking EXT3 journal..."
+	tune2fs -j $deviceRoot
+	INITRD_MODULES="$INITRD_MODULES ext3"
+fi
+
+#======================================
+# 9) Mount system
+#--------------------------------------
+if ! mountSystem $deviceRoot;then
+	systemException "Failed to mount root filesystem" "reboot"
+fi
+
+#======================================
+# 10) get installed kernels
+#--------------------------------------
+kernelList /mnt
+
+#======================================
+# 11) Create system dependant files
+#--------------------------------------
+# a) /etc/fstab
+mkdir -p /config/etc
+cat > /config/etc/fstab < /dev/null
+echo "$deviceRoot /      $FSTYPE defaults   0 0"       > /config/etc/fstab
+echo "$deviceSwap swap   swap    pri=42  0 0"         >> /config/etc/fstab
+echo "$deviceHome /home  ext3    defaults 0 0"        >> /config/etc/fstab
+echo "devpts  /dev/pts   devpts  mode=0620,gid=5 0 0" >> /config/etc/fstab
+echo "proc    /proc      proc    defaults 0 0"        >> /config/etc/fstab
+echo "sysfs   /sys       sysfs   noauto 0 0"          >> /config/etc/fstab
+echo "tmpfs   /dev/shm   tmpfs   defaults 0 0"        >> /config/etc/fstab
+
+# b) /boot/grub/menu.lst
+console=""
+gdev="(hd0,0)"
+menu=/config/boot/grub/menu.lst
+mkdir -p /config/boot/grub
+echo "timeout 8"                                 > $menu
+if [ -f /image/loader/message ];then
+	echo "gfxmenu $gdev/boot/message"           >> $menu
+fi
+IFS="," ; for i in $KERNEL_LIST;do
+	if test ! -z "$i";then
+		kernel=`echo $i | cut -f1 -d:`
+		initrd=`echo $i | cut -f2 -d:`
+		echo "title SUSE Linux Enterprise Desktop 10 SP1 ($kernel)" >> $menu
+		echo -n " kernel $gdev/boot/$kernel"    >> $menu
+		echo -n " root=${deviceDisk}2 $console" >> $menu
+		echo " vga=0x318"                       >> $menu
+		echo " initrd $gdev/boot/$initrd"       >> $menu
+	fi
+done
+
+# c) /etc/grub.conf...
+# -------------------------
+mkdir -p /config/etc
+gconf=/config/etc/grub.conf
+echo -en "root $gdev\ninstall"           > $gconf 
+echo -n " --stage2=/boot/grub/stage2"   >> $gconf
+echo -n " /boot/grub/stage1 d (hd0)"    >> $gconf
+echo -n " /boot/grub/stage2 0x8000"     >> $gconf
+echo " $gdev/boot/grub/menu.lst"        >> $gconf
+echo "quit"                             >> $gconf
+
+# d) /etc/sysconfig/kernel...
+# ---------------------------
+mkdir -p /config/etc/sysconfig
+syskernel=/config/etc/sysconfig/kernel
+echo "INITRD_MODULES=\"$INITRD_MODULES\""       > $syskernel
+echo "DOMU_INITRD_MODULES=\"$DOMURD_MODULES\"" >> $syskernel
+
+#======================================
+# 12) copy system dependant files
+#--------------------------------------
+cd /config
+find . -type d | while read d ; do  mkdir -p /mnt/$d ; done
+find . -type f | while read f ; do  cp $f /mnt/$f ; done
+cd /
+rm -rf /config
+
+#======================================
+# 13) setup real root device
+#--------------------------------------
+# echo 256 > /proc/sys/kernel/real-root-dev
+
+#======================================
+# 14) umount system filesystems
+#--------------------------------------
+umount /dev/pts
+umount /sys
+umount /proc
+
+#======================================
+# 15) copy initrd files to image
+#--------------------------------------
+if [ -f /image/loader/message ];then
+	mv /image/loader/message /mnt/boot
+fi
+cp /preinit /mnt
+cp /include /mnt
+
+#======================================
+# 16) Set up system and reboot
+#--------------------------------------
+Echo "Setting up System on: [$deviceDisk]"
+cd /mnt && exec < dev/console >dev/console 2>&1
+Echo "Calling preinit phase..."
+reopenKernelConsole
+chroot /mnt ./preinit
+
+systemException "break" "shell"
+
+rm -f /mnt/preinit
+rm -f /mnt/include
+umount /mnt
+
+systemException "break" "shell"
+
+/sbin/reboot -f

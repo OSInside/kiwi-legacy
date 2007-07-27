@@ -1,5 +1,5 @@
 # /.../
-# spec file for package kiwi (Version 1.49
+# spec file for package kiwi (Version 1.50
 # Copyright (c) 2006 SUSE LINUX Products GmbH, Nuernberg, Germany.
 # Please submit bugfixes or comments via http://bugs.opensuse.org
 # ---
@@ -8,7 +8,7 @@ Name:          kiwi
 BuildRequires: perl smart perl-XML-LibXML perl-libwww-perl screen syslinux module-init-tools
 Requires:      perl perl-XML-LibXML perl-libwww-perl screen
 Summary:       OpenSuSE - KIWI Image System
-Version:       1.49
+Version:       1.50
 Release:       28
 Group:         System
 License:       GPL
@@ -95,6 +95,20 @@ Group:        System
 This package contains the OpenSuSE - KIWI image descriptions.
 Each image description exists in a single directory and contains
 a xenboot image description
+
+Authors:
+--------
+    Marcus Schäfer <ms@suse.de>
+
+%package -n kiwi-desc-oemboot
+Requires:     kiwi smart
+Summary:      OpenSuSE - KIWI image descriptions
+Group:        System
+
+%description -n kiwi-desc-oemboot
+This package contains the OpenSuSE - KIWI image descriptions.
+Each image description exists in a single directory and contains
+an oemboot image description
 
 Authors:
 --------
@@ -270,3 +284,8 @@ cat kiwi.loader
 %doc %{_datadir}/kiwi/image/xenboot/README
 %{_datadir}/kiwi/image/xenboot/suse*
 
+%files -n kiwi-desc-oemboot
+%defattr(-, root, root)
+%dir %{_datadir}/kiwi/image/oemboot
+%doc %{_datadir}/kiwi/image/oemboot/README
+%{_datadir}/kiwi/image/oemboot/suse*

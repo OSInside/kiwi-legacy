@@ -81,11 +81,6 @@ sub new {
 			}
 		}
 	}
-	if (! -d "/usr/lib/grub") {
-		$kiwi -> error  ("Couldn't find the grub");
-		$kiwi -> failed ();
-		return undef;
-	}
 	$kernel = $initrd;
 	$kernel =~ s/gz$/kernel/;
 	if (-l $kernel) {
@@ -248,8 +243,10 @@ sub setupBootStick {
 	#==========================================
 	# Import grub stages
 	#------------------------------------------
+	my $stages = "'usr/lib/grub/*'";
 	$kiwi -> info ("Importing grub stages for stick boot");
-	$status = qx ( cp /usr/lib/grub/* $tmpdir/boot/grub 2>&1 );
+	$status = qx (gzip -cd $initrd | (cd $tmpdir && cpio -d -i $stages 2>&1));
+	$status = qx ( mv $tmpdir/usr/lib/grub/* $tmpdir/boot/grub 2>&1 );
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -553,10 +550,12 @@ sub setupBootCD {
 	# Import grub stages
 	#------------------------------------------
 	$kiwi -> info ("Importing grub stages for CD boot");
-	my $stage1 = "/usr/lib/grub/stage1";
-	my $stage2 = "/usr/lib/grub/stage2_eltorito";
-	$status = qx ( cp $stage1 $tmpdir/boot/grub/stage1 2>&1 );
-	$status = qx ( cp $stage2 $tmpdir/boot/grub/stage2 2>&1 );
+	my $stage1 = "'usr/lib/grub/stage1'";
+	my $stage2 = "'usr/lib/grub/stage2_eltorito'";
+	$status = qx (gzip -cd $initrd | (cd $tmpdir && cpio -d -i $stage1 2>&1));
+	$status = qx (gzip -cd $initrd | (cd $tmpdir && cpio -d -i $stage2 2>&1));
+	$status = qx ( mv $tmpdir/$stage1 $tmpdir/boot/grub/stage1 2>&1 );
+	$status = qx ( mv $tmpdir/$stage2 $tmpdir/boot/grub/stage2 2>&1 );
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -658,8 +657,10 @@ sub setupBootDisk {
 	#==========================================
 	# Import grub stages
 	#------------------------------------------
+	my $stages = "'usr/lib/grub/*'";
 	$kiwi -> info ("Importing grub stages for VM boot");
-	$status = qx ( cp /usr/lib/grub/* $tmpdir/boot/grub 2>&1 );
+	$status = qx (gzip -cd $initrd | (cd $tmpdir && cpio -d -i $stages 2>&1));
+	$status = qx ( mv $tmpdir/usr/lib/grub/* $tmpdir/boot/grub 2>&1 );
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();

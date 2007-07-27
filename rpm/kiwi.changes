@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Fri Jul 27 09:07:29 CEST 2007 - ms@suse.de
+
+- v1.50
+- fixed import of grub stages, get the stages from the initrd.
+  Because if this grub has been included into the iso/usb/vmx/oemboot
+  descriptions
+- added oemboot system, usable for OEM contracts with customers
+  who would like to deliver their hardware with a pre-installed
+  Linux operating system
+
+-------------------------------------------------------------------
 Wed Jul 25 10:00:25 CEST 2007 - ms@suse.de
 
 - v1.49

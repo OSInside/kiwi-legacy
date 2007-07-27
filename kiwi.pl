@@ -31,7 +31,7 @@ use KIWIMigrate;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "1.49";
+our $Version       = "1.50";
 our $SchemeVersion = "1.4";
 our $openSUSE      = "http://software.opensuse.org/download/";
 #============================================

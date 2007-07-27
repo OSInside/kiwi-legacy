@@ -71,6 +71,7 @@
 		<package name="syslinux"/>
 		<package name="make"/>
 		<package name="hdparm"/>
+		<package name="grub"/>
 	</packages>
 	<packages type="boot">
 		<package name="kernel-smp"/>
