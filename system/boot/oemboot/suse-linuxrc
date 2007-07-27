@@ -209,7 +209,7 @@ IFS="," ; for i in $KERNEL_LIST;do
 		initrd=`echo $i | cut -f2 -d:`
 		echo "title SUSE Linux Enterprise Desktop 10 SP1 ($kernel)" >> $menu
 		echo -n " kernel $gdev/boot/$kernel"    >> $menu
-		echo -n " root=${deviceDisk}2 $console" >> $menu
+		echo -n " root=${deviceDisk}1 $console" >> $menu
 		echo " vga=0x318"                       >> $menu
 		echo " initrd $gdev/boot/$initrd"       >> $menu
 	fi
@@ -272,12 +272,12 @@ Echo "Calling preinit phase..."
 reopenKernelConsole
 chroot /mnt ./preinit
 
-systemException "break" "shell"
+#systemException "break" "shell"
 
 rm -f /mnt/preinit
 rm -f /mnt/include
-umount /mnt
+umount -l /mnt
 
-systemException "break" "shell"
+#systemException "break" "shell"
 
 /sbin/reboot -f
