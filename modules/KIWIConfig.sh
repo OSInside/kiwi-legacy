@@ -302,6 +302,7 @@ function suseGFXBoot {
 		done
 		mv /usr/share/syslinux/isolinux.bin /image/loader
 		mv /boot/memtest.bin /image/loader/memtest
+		echo "livecd=1" >> /image/loader/gfxboot.cfg
 	fi
 	if [ $loader = "grub" ];then
 		mv themes/$theme/boot/message /image/loader
