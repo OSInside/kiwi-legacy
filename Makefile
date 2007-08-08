@@ -50,7 +50,7 @@ install:
 	install -d -m 755 ${KIWIBINVZ} ${KIWIMODVZ} ${TOOLSVZ} ${KIWIIMAGE}
 	install -d -m 755 ${TFTPKIWI} ${TFTPBOOT} ${TFTPBOOTCONF} ${TFTPIMAGE}
 	install -d -m 755 ${TFTPBOOTBOOT}
-	install -d -m 777 ${TFTPUPLOAD}
+	install -d -m 755 ${TFTPUPLOAD}
 	install -d -m 755 ${PACKDOCVZ}
 
 	#============================================

@@ -196,7 +196,7 @@ fi
 
 %install
 mkdir -p $RPM_BUILD_ROOT/etc/permissions.d
-echo "/srv/tftpboot/upload root:root 0777" \
+echo "/srv/tftpboot/upload root:root 0755" \
 	> $RPM_BUILD_ROOT/etc/permissions.d/kiwi
 make buildroot=$RPM_BUILD_ROOT \
      doc_prefix=$RPM_BUILD_ROOT/%{_defaultdocdir} \
