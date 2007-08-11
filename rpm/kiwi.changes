@@ -5,6 +5,9 @@ Tue Aug  7 17:11:21 CEST 2007 - ms@suse.de
 - added livecd=1 to gfxboot.cfg in function suseGFXBoot (#296778)
 - changed permissons of tftpboot upload directory to 755 (#298337)
 - changed vga param from 318 to 317, bootsplash works in 15bit only
+- fixed mountSystem to create write part in case of an image update
+  reload process. Patch by James Willcox <snorp@novell.com>
+- fixed prebuild boot image creation
 
 -------------------------------------------------------------------
 Fri Jul 27 09:07:29 CEST 2007 - ms@suse.de

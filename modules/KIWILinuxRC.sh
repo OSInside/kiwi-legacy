@@ -466,6 +466,7 @@ function updateNeeded {
 			Echo -b "Update forced: /etc/ImageVersion-$atversion not found"
 			Echo -b "Update status: Clean"
 			SYSTEM_INTEGRITY="$SYSTEM_INTEGRITY:clean"
+			RELOAD_IMAGE="yes"
 			continue
 		fi
 		Echo -b "Current: $atversion Installed: $installed"
@@ -478,9 +479,11 @@ function updateNeeded {
 			Echo -b "Image Update for image [ $imageName ] needed"
 			Echo -b "Image version equals but md5 checksum failed"
 			Echo -b "This means the contents of the new image differ"
+			RELOAD_IMAGE="yes"
 		else
 			Echo -b "Image Update for image [ $imageName ] needed"
 			Echo -b "Name and/or image version differ"
+			RELOAD_IMAGE="yes"
 		fi
 		Echo -b "Update status: Clean"
 		SYSTEM_INTEGRITY="$SYSTEM_INTEGRITY:clean"
@@ -1031,7 +1034,10 @@ function mountSystem () {
 			# check and mount the filesystem
 			# ----
 			if test $LOCAL_BOOT = "no" && test $systemIntegrity = "clean";then
-				if ! mount $rwDevice $rwDir >/dev/null 2>&1;then
+				if
+					test "$RELOAD_IMAGE" = "yes" || \
+					! mount $rwDevice $rwDir >/dev/null 2>&1
+				then
 					Echo "Creating EXT2 filesystem for RW data on $rwDevice..."
 					if ! mke2fs $rwDevice >/dev/null 2>&1;then
 						systemException \
