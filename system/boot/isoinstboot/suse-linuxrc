@@ -355,12 +355,12 @@ if test $systemIntegrity = "clean";then
 				echo " kernel /boot/xen.gz"            >> $menu
 				echo -n " module /boot/$kernel"        >> $menu
 				echo -n " root=${DISK}2 $console"      >> $menu
-				echo " vga=0x318"                      >> $menu
+				echo " vga=0x317"                      >> $menu
 				echo " module /boot/$initrd"           >> $menu
 			else
 				echo -n " kernel (hd0,1)/boot/$kernel" >> $menu
 				echo -n " root=${DISK}2 $console"      >> $menu
-				echo " vga=0x318"                      >> $menu
+				echo " vga=0x317"                      >> $menu
 				echo " initrd (hd0,1)/boot/$initrd"    >> $menu
 			fi
 		fi
