@@ -138,7 +138,6 @@ test -e /.buildenv && . /.buildenv
 make buildroot=$RPM_BUILD_ROOT CFLAGS="$RPM_OPT_FLAGS"
 
 if [ "$UID" = "$K_USER" ];then
-	%define prebuild_images 1
 	# prepare and create boot images...
 	mkdir -p $RPM_BUILD_ROOT/srv/tftpboot/pxelinux.cfg
 	mkdir -p $RPM_BUILD_ROOT/srv/tftpboot/boot
@@ -203,7 +202,6 @@ if [ "$UID" = "$K_USER" ];then
 	chmod 644 $pxedefault
 else
 	echo "cannot build prebuild images without root privileges"
-	%define prebuild_images 0
 	true
 fi
 
@@ -252,16 +250,14 @@ cat kiwi.loader
 %dir /srv/tftpboot/pxelinux.cfg
 %dir /srv/tftpboot/image
 %dir /srv/tftpboot/upload
-%dir /srv/tftpboot/boot
 %config /srv/tftpboot/pxelinux.cfg/default
 
 #=================================================
 # KIWI-pxeboot-prebuild files...  
 # ------------------------------------------------
-%if %{prebuild_images}
 %files -n kiwi-pxeboot-prebuild
+%dir /srv/tftpboot/boot
 /srv/tftpboot/boot
-%endif
 
 #=================================================
 # KIWI-desc-*...
