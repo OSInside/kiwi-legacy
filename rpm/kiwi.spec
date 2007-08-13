@@ -35,6 +35,17 @@ Authors:
 --------
     Marcus Schäfer <ms@suse.de>
 
+%package -n kiwi-pxeboot-prebuild
+Requires:     syslinux
+Summary:      OpenSuSE - KIWI TFTP prebuild boot images
+Group:        System
+
+%description -n kiwi-pxeboot-prebuild
+This package contains the OpenSuSE - KIWI TFTP prebuild boot images
+
+Authors:
+--------
+    Marcus Schäfer <ms@suse.de>
 
 %package -n kiwi-desc-isoboot
 Requires:     kiwi smart syslinux
@@ -228,7 +239,7 @@ cat kiwi.loader
 %{_sbindir}/kiwi
 
 #=================================================
-# KIWI-netboot files...  
+# KIWI-pxeboot files...  
 # ------------------------------------------------
 %files -n kiwi-pxeboot -f kiwi.loader
 %defattr(-, root, root)
@@ -239,11 +250,17 @@ cat kiwi.loader
 %dir /srv/tftpboot/pxelinux.cfg
 %dir /srv/tftpboot/image
 %dir /srv/tftpboot/upload
-/srv/tftpboot/boot
+%dir /srv/tftpboot/boot
 %config /srv/tftpboot/pxelinux.cfg/default
 
 #=================================================
-# KIWI-images...
+# KIWI-pxeboot-prebuild files...  
+# ------------------------------------------------
+%files -n kiwi-pxeboot-prebuild
+/srv/tftpboot/boot
+
+#=================================================
+# KIWI-desc-*...
 # ------------------------------------------------
 %files -n kiwi-desc-isoboot
 %defattr(-, root, root)
