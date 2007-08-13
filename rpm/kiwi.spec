@@ -250,13 +250,13 @@ cat kiwi.loader
 %dir /srv/tftpboot/pxelinux.cfg
 %dir /srv/tftpboot/image
 %dir /srv/tftpboot/upload
+%dir /srv/tftpboot/boot
 %config /srv/tftpboot/pxelinux.cfg/default
 
 #=================================================
 # KIWI-pxeboot-prebuild files...  
 # ------------------------------------------------
 %files -n kiwi-pxeboot-prebuild
-%dir /srv/tftpboot/boot
 /srv/tftpboot/boot
 
 #=================================================
