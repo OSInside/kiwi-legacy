@@ -9,6 +9,7 @@ Tue Aug  7 17:11:21 CEST 2007 - ms@suse.de
   reload process. Patch by James Willcox <snorp@novell.com>
 - improved runtime check for mksquashfs (#298781)
 - added kiwi-pxeboot-prebuild boot images package (#299573)
+- use option --non-interactive for all zypper related actions
 - fixed prebuild boot image creation
 
 -------------------------------------------------------------------

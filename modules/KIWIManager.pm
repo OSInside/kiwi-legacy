@@ -373,6 +373,10 @@ sub setupInstallationSource {
 		if (! $chroot) {
 			$stype = "public";
 		}
+		my @zypper = (
+			"zypper",
+			"--non-interactive"
+		);
 		foreach my $alias (keys %{$source{$stype}}) {
 			my @sopts = @{$source{$stype}{$alias}};
 			my @zopts = ();
@@ -397,16 +401,14 @@ sub setupInstallationSource {
 					push (@zopts,"--type $val");
 				}
 			}
-			my $sadd = "--non-interactive";
-			#$sadd = $sadd." --auto-agree-with-licenses";
-			$sadd = $sadd." service-add @zopts $alias";
+			my $sadd = "service-add @zopts $alias";
 			if (! $chroot) {
 				$kiwi -> info ("Adding local zypper service: $alias");
-				$data = qx (bash -c "yes | zypper --root $root $sadd 2>&1");
+				$data = qx (bash -c "yes | @zypper --root $root $sadd 2>&1");
 				$code = $? >> 8;
 			} else {
 				$kiwi -> info ("Adding image zypper service: $alias");
-				$data = qx (chroot $root bash -c "yes | zypper $sadd 2>&1");
+				$data = qx (chroot $root bash -c "yes | @zypper $sadd 2>&1");
 				$code = $? >> 8;
 			}
 			if ($code != 0) {
@@ -585,12 +587,16 @@ sub setupUpgrade {
 		# Create screen call file
 		#------------------------------------------
 		$kiwi -> info ("Upgrading image...");
+		my @zypper = (
+			"zypper",
+			"--non-interactive"
+		);
 		if (defined $addPacks) {
 			my @addonPackages = @{$addPacks};
-			print $fd "chroot $root yes | zypper upgrade && ";
-			print $fd "chroot $root yes | zypper install -y @addonPackages\n";
+			print $fd "chroot $root yes | @zypper upgrade && ";
+			print $fd "chroot $root yes | @zypper install @addonPackages\n";
 		} else {
-			print $fd "chroot $root yes | zypper upgrade\n";
+			print $fd "chroot $root yes | @zypper upgrade\n";
 		}
 		print $fd "echo \$? > $screenCall.exit\n";
 		$fd -> close();
@@ -688,12 +694,15 @@ sub setupRootSystem {
 	# zypper
 	#------------------------------------------
 	if ($manager eq "zypper") {
+		my @zypper = ( 
+			"zypper",
+			"--non-interactive"
+		);
 		if (! $chroot) {
 			$kiwi -> info ("Initializing image system on: $root...");
 			my $forceChannels = join (",",@channelList);
 			my @installOpts = (
-				"--catalog $forceChannels",
-				"-y"
+				"--catalog $forceChannels"
 			);
 			#==========================================
 			# Add package manager to package list
@@ -702,11 +711,11 @@ sub setupRootSystem {
 			#==========================================
 			# Create screen call file
 			#------------------------------------------
-			print $fd "yes | zypper --root $root install @installOpts @packs\n";
+			print $fd "yes|@zypper --root $root install @installOpts @packs\n";
 			print $fd "echo \$? > $screenCall.exit\n";
 		} else {
 			$kiwi -> info ("Installing image packages...");
-			print $fd "chroot $root yes | zypper install -y @packs\n";
+			print $fd "chroot $root yes | @zypper install @packs\n";
 			print $fd "echo \$? > $screenCall.exit\n";
 		}
 		$fd -> close();
