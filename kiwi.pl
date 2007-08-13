@@ -839,6 +839,21 @@ sub version {
 sub checkType {
 	my (%type) = %{$_[0]};
 	my $para   = "ok";
+	#==========================================
+	# check filesystem tool
+	#------------------------------------------
+	if (defined $type{filesystem}) {
+		if ($type{filesystem} eq "squashfs") {
+			if (! -f "/usr/bin/mksquashfs") {
+				$kiwi -> warning ("missing mksquashfs: reset to ext3 !");
+				$type{filesystem} = "ext3";
+				$kiwi -> skipped ();
+			}
+		}	
+	}
+	#==========================================
+	# build and check KIWIImage method params
+	#------------------------------------------
 	SWITCH: for ($type{type}) {
 		/^iso/ && do {
 			if (! defined $type{boot}) {

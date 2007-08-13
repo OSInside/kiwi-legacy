@@ -7,6 +7,7 @@ Tue Aug  7 17:11:21 CEST 2007 - ms@suse.de
 - changed vga param from 318 to 317, bootsplash works in 15bit only
 - fixed mountSystem to create write part in case of an image update
   reload process. Patch by James Willcox <snorp@novell.com>
+- improved runtime check for mksquashfs (#298781)
 - fixed prebuild boot image creation
 
 -------------------------------------------------------------------
