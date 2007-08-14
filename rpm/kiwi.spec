@@ -258,6 +258,7 @@ cat kiwi.loader
 # ------------------------------------------------
 %files -n kiwi-pxeboot-prebuild
 %defattr(-, root, root)
+%doc /srv/tftpboot/README.prebuild
 /srv/tftpboot/boot
 
 #=================================================

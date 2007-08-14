@@ -2,6 +2,7 @@
 Tue Aug 14 11:19:27 CEST 2007 - ms@suse.de
 
 - v1.52
+- added README.prebuild for the kiwi-pxeboot-prebuild package
 - fixed searchSwapSpace and searchDiskSpace to look for a
   maximum number of 15 partitions per disk (Linux specific)
 
