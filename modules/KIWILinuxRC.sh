@@ -325,7 +325,7 @@ function searchSwapSpace {
 	# ----
 	hwapp=/usr/sbin/hwinfo
 	for diskdev in `$hwapp --disk | grep "Device File:" | cut -f2 -d:`;do
-		for disknr in 1 2 3 4;do
+		for disknr in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15;do
 			id=`/sbin/sfdisk --print-id $diskdev $disknr 2>/dev/null`
 			if [ "$id" = "82" ];then
 				echo $diskdev$disknr
@@ -343,7 +343,7 @@ function searchDiskSpace {
 	# ----
 	hwapp=/usr/sbin/hwinfo
 	for diskdev in `$hwapp --disk | grep "Device File:" | cut -f2 -d:`;do
-		for disknr in 1 2 3 4;do
+		for disknr in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15;do
 			id=`/sbin/sfdisk --print-id $diskdev $disknr 2>/dev/null`
 			if [ -z $id ];then
 				id=0

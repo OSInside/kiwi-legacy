@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Aug 14 11:19:27 CEST 2007 - ms@suse.de
+
+- v1.52
+- fixed searchSwapSpace and searchDiskSpace to look for a
+  maximum number of 15 partitions per disk (Linux specific)
+
+-------------------------------------------------------------------
 Tue Aug  7 17:11:21 CEST 2007 - ms@suse.de
 
 - v1.51
