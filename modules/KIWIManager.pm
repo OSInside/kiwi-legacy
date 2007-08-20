@@ -98,6 +98,9 @@ sub new {
 	$this->{screenCall}  = $root."/screenrc.smart";
 	$this->{screenCtrl}  = $root."/screenrc.ctrls";
 	$this->{screenLogs}  = $kiwi -> getRootLog();
+	$this->{zypper}      = [
+		"zypper","--non-interactive","--no-gpg-checks"
+	];
 	return $this;
 }
 
@@ -329,6 +332,7 @@ sub setupInstallationSource {
 	my %source = %{$this->{source}};
 	my $root   = $this->{root};
 	my $manager= $this->{manager};
+	my @zypper = @{$this->{zypper}};
 	my $data;
 	my $code;
 	#==========================================
@@ -373,10 +377,6 @@ sub setupInstallationSource {
 		if (! $chroot) {
 			$stype = "public";
 		}
-		my @zypper = (
-			"zypper",
-			"--non-interactive"
-		);
 		foreach my $alias (keys %{$source{$stype}}) {
 			my @sopts = @{$source{$stype}{$alias}};
 			my @zopts = ();
@@ -404,11 +404,11 @@ sub setupInstallationSource {
 			my $sadd = "service-add @zopts $alias";
 			if (! $chroot) {
 				$kiwi -> info ("Adding local zypper service: $alias");
-				$data = qx (bash -c "yes | @zypper --root $root $sadd 2>&1");
+				$data = qx (bash -c "@zypper --root $root $sadd 2>&1");
 				$code = $? >> 8;
 			} else {
 				$kiwi -> info ("Adding image zypper service: $alias");
-				$data = qx (chroot $root bash -c "yes | @zypper $sadd 2>&1");
+				$data = qx (chroot $root bash -c "@zypper $sadd 2>&1");
 				$code = $? >> 8;
 			}
 			if ($code != 0) {
@@ -437,6 +437,7 @@ sub resetInstallationSource {
 	my $chroot = $this->{chroot};
 	my $manager= $this->{manager};
 	my $root   = $this->{root};
+	my @zypper = @{$this->{zypper}};
 	my @channelList = @{$this->{channelList}};
 	my $data;
 	my $code;
@@ -469,10 +470,10 @@ sub resetInstallationSource {
 		my @list = @channelList;
 		my $sdel = "service-delete @list";
 		if (! $chroot) {
-			$data = qx ( bash -c "yes | zypper --root $root $sdel 2>&1" );
+			$data = qx ( bash -c "@zypper --root $root $sdel 2>&1" );
 			$code = $? >> 8;
 		} else {
-			$data = qx ( chroot $root bash -c "yes | zypper $sdel 2>&1" );
+			$data = qx ( chroot $root bash -c "@zypper $sdel 2>&1" );
 			$code = $? >> 8;
 		}
 		if ($code != 0) {
@@ -551,7 +552,8 @@ sub setupUpgrade {
 	my $addPacks = shift;
 	my $kiwi = $this->{kiwi};
 	my $root = $this->{root};
-	my $manager    = $this->{manager};
+	my $manager = $this->{manager};
+	my @zypper  = @{$this->{zypper}};
 	my $screenCall = $this->{screenCall};
 	#==========================================
 	# setup screen call
@@ -587,16 +589,12 @@ sub setupUpgrade {
 		# Create screen call file
 		#------------------------------------------
 		$kiwi -> info ("Upgrading image...");
-		my @zypper = (
-			"zypper",
-			"--non-interactive"
-		);
 		if (defined $addPacks) {
 			my @addonPackages = @{$addPacks};
-			print $fd "chroot $root yes | @zypper upgrade && ";
-			print $fd "chroot $root yes | @zypper install @addonPackages\n";
+			print $fd "chroot $root @zypper upgrade && ";
+			print $fd "chroot $root @zypper install @addonPackages\n";
 		} else {
-			print $fd "chroot $root yes | @zypper upgrade\n";
+			print $fd "chroot $root @zypper upgrade\n";
 		}
 		print $fd "echo \$? > $screenCall.exit\n";
 		$fd -> close();
@@ -619,6 +617,7 @@ sub setupRootSystem {
 	my $root   = $this->{root};
 	my $xml    = $this->{xml};
 	my $manager= $this->{manager};
+	my @zypper = @{$this->{zypper}};
 	my @channelList = @{$this->{channelList}};
 	my $screenCall  = $this->{screenCall};
 	#==========================================
@@ -694,10 +693,6 @@ sub setupRootSystem {
 	# zypper
 	#------------------------------------------
 	if ($manager eq "zypper") {
-		my @zypper = ( 
-			"zypper",
-			"--non-interactive"
-		);
 		if (! $chroot) {
 			$kiwi -> info ("Initializing image system on: $root...");
 			my $forceChannels = join (",",@channelList);
@@ -711,11 +706,11 @@ sub setupRootSystem {
 			#==========================================
 			# Create screen call file
 			#------------------------------------------
-			print $fd "yes|@zypper --root $root install @installOpts @packs\n";
+			print $fd "@zypper --root $root install @installOpts @packs\n";
 			print $fd "echo \$? > $screenCall.exit\n";
 		} else {
 			$kiwi -> info ("Installing image packages...");
-			print $fd "chroot $root yes | @zypper install @packs\n";
+			print $fd "chroot $root @zypper install @packs\n";
 			print $fd "echo \$? > $screenCall.exit\n";
 		}
 		$fd -> close();
@@ -735,6 +730,7 @@ sub resetSource {
 	my $kiwi = $this->{kiwi};
 	my %source  = %{$this->{source}};
 	my $manager = $this->{manager};
+	my @zypper  = @{$this->{zypper}};
 	#==========================================
 	# smart
 	#------------------------------------------
@@ -750,7 +746,7 @@ sub resetSource {
 	if ($manager eq "zypper") {
 		foreach my $channel (keys %{$source{public}}) {
 			$kiwi -> info ("Removing zypper service: $channel\n");
-			qx ( bash -c "yes | zypper service-delete $channel 2>&1" );
+			qx ( bash -c "@zypper service-delete $channel 2>&1" );
 		}
 	}
 	return $this;
@@ -770,6 +766,7 @@ sub setupPackageInfo {
 	my $chroot = $this->{chroot};
 	my $root   = $this->{root};
 	my $manager= $this->{manager};
+	my @zypper = @{$this->{zypper}};
 	my $data;
 	my $code;
 	my $opts;
@@ -805,7 +802,7 @@ sub setupPackageInfo {
 			$data = qx ( zypper info $pack | grep -qi $str 2>&1 );
 			$code = $? >> 8;
 		} else {
-			$data = qx ( chroot $root zypper info $pack | grep -qi $str 2>&1 );
+			$data = qx ( chroot $root @zypper info $pack | grep -qi $str 2>&1 );
 			$code = $? >> 8;
 		}
 		if ($code == 0) {
