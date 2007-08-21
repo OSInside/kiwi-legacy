@@ -286,10 +286,16 @@ function suseGFXBoot {
 	local theme=$1
 	local loader=$2
 	export PATH=$PATH:/usr/sbin
+	#======================================
+	# check for gfxboot package
+	#--------------------------------------
 	if [ ! -d /usr/share/gfxboot ];then
 		echo "gfxboot not installed... skipped"
 		return
 	fi
+	#======================================
+	# create boot theme
+	#--------------------------------------
 	cd /usr/share/gfxboot
 	make -C themes/$theme prep
 	make -C themes/$theme
@@ -308,4 +314,36 @@ function suseGFXBoot {
 		mv themes/$theme/boot/message /image/loader
 	fi
 	make -C themes/$theme clean
+	#======================================
+	# create splash screen
+	#--------------------------------------
+	if [ ! -f /sbin/splash ];then
+		echo "bootsplash not installed... skipped"
+		return
+	fi
+	sname[0]="08000600.spl"
+	sname[1]="10240768.spl"
+	sname[2]="12801024.spl"
+	sname[3]="14001050.spl"
+	sname[4]="16001200.spl"
+	index=0
+	for cfg in 800x600 1024x768 1280x1024 1400x1050 1600x1200;do
+		/sbin/splash -s -c -f \
+			/etc/bootsplash/themes/$theme/config/bootsplash-$cfg.cfg |\
+			gzip -9c \
+		> /image/loader/${sname[$index]}
+		index=`expr $index + 1`
+		tdir=/image/loader/xxx
+		mkdir $tdir
+		cp -a --parents /etc/bootsplash/themes/$theme/config/*-$cfg.* $tdir
+		cp -a --parents /etc/bootsplash/themes/$theme/images/*-$cfg.* $tdir
+		ln -s /etc/bootsplash/themes/$theme/config/bootsplash-$cfg.cfg \
+				$tdir/etc/splash.cfg
+		pushd $tdir
+		chmod -R a+rX .
+		find | cpio --quiet -o -H newc |\
+			gzip -9 >> /image/loader/${sname[$index]}
+		popd
+		rm -rf $tdir
+	done
 }

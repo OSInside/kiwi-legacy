@@ -398,6 +398,12 @@ sub setupInstallationSource {
 					if ($val eq "yast2") {
 						$val = "YaST";
 					}
+					if ($val eq "rpm-dir") {
+						$val = "plaindir";
+					}
+					if ($val eq "rpm-md") {
+						$val = "YUM";
+					}
 					push (@zopts,"--type $val");
 				}
 			}

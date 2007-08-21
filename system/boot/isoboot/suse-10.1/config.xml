@@ -71,6 +71,8 @@
 		<package name="memtest86"/>
 		<package name="hdparm"/>
 		<package name="grub"/>
+		<package name="bootsplash"/>
+		<package name="bootsplash-theme-SuSE"/>
 	</packages>
 	<packages type="boot">
 		<package name="kernel-default"/>

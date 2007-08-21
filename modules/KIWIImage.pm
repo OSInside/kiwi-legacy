@@ -280,7 +280,7 @@ sub createImageCPIO {
 	if ($dest !~ /^\//) {
 		$dest = $pwd."/".$dest;
 	}
-	my $data = qx (cd $tree && find . | cpio @cpio | gzip > $dest);
+	my $data = qx (cd $tree && find . | cpio @cpio | gzip -f > $dest);
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> error  ("Couldn't create cpio archive");

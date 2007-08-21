@@ -72,6 +72,8 @@
 		<package name="make"/>
 		<package name="hdparm"/>
 		<package name="grub"/>
+		<package name="bootsplash"/>
+		<package name="bootsplash-theme-SuSE-SLES"/>
 	</packages>
 	<packages type="boot">
 		<package name="kernel-smp"/>

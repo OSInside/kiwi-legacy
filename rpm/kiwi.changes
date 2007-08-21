@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Mon Aug 20 10:00:49 CEST 2007 - ms@suse.de
+
+- v1.54
+- use gzip --force in KIWIImage to compress data
+- activate splash screen for isoboot images, live media (#293742)
+- added zypper type conversion from rpm-dir to plaindir (#301839)
+- implement splash support if installed (#293742)
+
+-------------------------------------------------------------------
 Mon Aug 20 09:06:58 CEST 2007 - ms@suse.de
 
 - v1.53
