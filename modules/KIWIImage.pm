@@ -380,8 +380,15 @@ sub createImageUSB {
 	if (! defined $xml) {
 		return undef;
 	}
+	my $tmpdir = qx ( mktemp -q -d /tmp/kiwi-$text.XXXXXX );
+	my $result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> error  ("Couldn't create tmp dir: $tmpdir: $!");
+		$kiwi -> failed ();
+		return undef;
+	}
 	$main::Survive  = "yes";
-	$main::RootTree = "/tmp/kiwi-".$text."boot-$$";
+	$main::RootTree = "$tmpdir/kiwi-".$text."boot-$$";
 	$main::Prepare  = $boot;
 	if ($boot !~ /^\//) {
 		$main::Prepare  = $main::System."/".$boot;
@@ -400,6 +407,7 @@ sub createImageUSB {
 	}
 	if (! -d $main::RootTree.$baseSystem) {
 		qx (rm -rf $main::RootTree);
+		qx (rm -rf $tmpdir);
 	}
 	$result{bootImage} = $main::ImageName;
 	if ($text eq "VMX") {
@@ -739,8 +747,15 @@ sub createImageLiveCD {
 		qx (rm -rf $imageTreeReadOnly);
 		return undef;
 	}
+	my $tmpdir = qx ( mktemp -q -d /tmp/kiwi-cdboot.XXXXXX );
+	my $result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> error  ("Couldn't create tmp dir: $tmpdir: $!");
+		$kiwi -> failed ();
+		return undef;
+	}
 	$main::Survive  = "yes";
-	$main::RootTree = "/tmp/kiwi-cdboot-$$";
+	$main::RootTree = "$tmpdir/kiwi-cdboot-$$";
 	$main::Prepare  = $boot;
 	if ($boot !~ /^\//) {
 		$main::Prepare  = $main::System."/".$boot;
@@ -754,6 +769,7 @@ sub createImageLiveCD {
 		$main::Survive = "default";
 		if (! -d $main::RootTree.$baseSystem) {
 			qx (rm -rf $main::RootTree);
+			qx (rm -rf $tmpdir);
 			qx (rm -rf $imageTreeReadOnly);
 		}
 		return undef;

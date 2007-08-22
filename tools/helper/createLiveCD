@@ -5,8 +5,8 @@ if [ ! $UID = 0 ];then
 	exit 1
 fi
 
-kiwi --root /tmp/mydvd --prepare /usr/share/kiwi/image/kwliveDVD-suse-10.3 && \
-kiwi --create /tmp/mydvd -d /tmp
+kiwi --root $HOME/mydvd --prepare /usr/share/kiwi/image/kwliveDVD-suse-10.3 && \
+kiwi --create $HOME/mydvd -d $HOME
 
-file=`ls -1 /tmp/liveDVD-suse-10.3*.iso`
+file=`ls -1 $HOME/liveDVD-suse-10.3*.iso`
 echo "ISO image created: $file"

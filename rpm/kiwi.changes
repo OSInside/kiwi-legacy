@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Aug 22 18:07:45 CEST 2007 - ms@suse.de
+
+- v1.55
+- fixed /tmp security problems (#302552)
+- don't remove dmesg application from initrd
+
+-------------------------------------------------------------------
 Mon Aug 20 10:00:49 CEST 2007 - ms@suse.de
 
 - v1.54

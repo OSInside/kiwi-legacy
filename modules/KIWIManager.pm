@@ -147,7 +147,7 @@ sub setupScreen {
 		return undef;
 	}
 	print $cd "logfile $screenLogs\n";
-	print $cd "logfile flush 0\n";
+	print $cd "logfile flush 10\n";
 	$cd -> close();
 
 	#==========================================
