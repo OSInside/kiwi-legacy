@@ -26,6 +26,11 @@ use KIWIManager qw (%packageManager);
 use File::Glob ':glob';
 
 #==========================================
+# Globals
+#------------------------------------------
+our %inheritanceHash;
+
+#==========================================
 # Constructor
 #------------------------------------------
 sub new { 
@@ -1218,6 +1223,10 @@ sub setupImageInheritance {
 		return $this;
 	}
 	$kiwi -> info ("--> Inherit: $path ");
+	if (defined $KIWIXML::inheritanceHash{$path}) {
+		$kiwi -> skipped();
+		return $this;
+	}
 	my $ixml = new KIWIXML ( $kiwi,$path );
 	if (! defined $ixml) {
 		return undef;
@@ -1228,6 +1237,7 @@ sub setupImageInheritance {
 		$ixml -> getPackageNodeList()
 	);
 	$kiwi -> done();
+	$KIWIXML::inheritanceHash{$path} = 1;
 	$ixml -> setupImageInheritance();
 	#return $this;
 }
