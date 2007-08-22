@@ -163,6 +163,37 @@ function baseSetupBoot {
 # suseConfig
 #--------------------------------------
 function suseConfig {
+	#======================================
+	# keytable
+	#--------------------------------------
+	if [ ! -z "$keytable" ];then
+		cat etc/sysconfig/keyboard |\
+			sed -e s@KEYTABLE=\".*\"@KEYTABLE=\"$keytable\"@ \
+		> etc/sysconfig/keyboard.new
+		mv etc/sysconfig/keyboard.new etc/sysconfig/keyboard
+	fi
+	#======================================
+	# locale
+	#--------------------------------------
+	if [ ! -z "$locale" ];then
+		cat /etc/sysconfig/language |\
+			sed -e s@RC_LANG=\".*\"@RC_LANG=\"$locale\"@ \
+		> etc/sysconfig/language.new
+		mv etc/sysconfig/language.new etc/sysconfig/language
+	fi
+	#======================================
+	# timezone
+	#--------------------------------------
+	if [ ! -z "$timezone" ];then
+		if [ -f /usr/share/zoneinfo/$timezone ];then
+			mv /usr/share/zoneinfo/$timezone /etc/localtime
+		else
+			echo "timezone: $timezone not found"
+		fi
+	fi
+	#======================================
+	# SuSEconfig
+	#--------------------------------------
 	/sbin/SuSEconfig
 }
 

@@ -869,6 +869,22 @@ sub getImageConfig {
 		$data =~ s/^,+//;
 		$result{$type} = $data;
 	}
+	#==========================================
+	# preferences options
+	#------------------------------------------
+	my $node = $this->{optionsNodeList} -> get_node(1);
+	my $keytable = $node -> getElementsByTagName ("keytable");
+	my $timezone = $node -> getElementsByTagName ("timezone");
+	my $language = $node -> getElementsByTagName ("locale");
+	if (defined $keytable) {
+		$result{keytable} = $keytable;
+	}
+	if (defined $timezone) {
+		$result{timezone} = $timezone;
+	}
+	if (defined $language) {
+		$result{language} = $language;
+	}
 	return %result;
 }
 
