@@ -327,6 +327,9 @@ function suseGFXBoot {
 	sname[3]="14001050.spl"
 	sname[4]="16001200.spl"
 	index=0
+	if [ ! $theme = "SuSE" ];then
+		theme="SuSE-$theme"
+	fi
 	for cfg in 800x600 1024x768 1280x1024 1400x1050 1600x1200;do
 		/sbin/splash -s -c -f \
 			/etc/bootsplash/themes/$theme/config/bootsplash-$cfg.cfg |\
