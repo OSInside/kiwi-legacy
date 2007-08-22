@@ -655,8 +655,9 @@ sub setupRootSystem {
 			#==========================================
 			# Create screen call file
 			#------------------------------------------
-			print $fd "smart update @channelList\n";
-			print $fd "test \$? = 0 && smart install @packs @installOpts\n";
+			#print $fd "smart update @channelList\n";
+			#print $fd "test \$? = 0 && smart install @packs @installOpts\n";
+			print $fd "smart install @packs @installOpts\n";
 			print $fd "echo \$? > $screenCall.exit\n";
 			print $fd "rm -f $root/etc/smart/channels/*\n";
 		} else {
@@ -688,8 +689,9 @@ sub setupRootSystem {
 			#==========================================
 			# Create screen call file
 			#------------------------------------------
-			print $fd "chroot $root smart update\n";
-			print $fd "test \$? = 0 && chroot $root smart install @install ";
+			#print $fd "chroot $root smart update\n";
+			#print $fd "test \$? = 0 && chroot $root smart install @install ";
+			print $fd "chroot $root smart install @install ";
 			print $fd "@installOpts\n";
 			print $fd "echo \$? > $screenCall.exit\n";
 		}
@@ -716,7 +718,22 @@ sub setupRootSystem {
 			print $fd "echo \$? > $screenCall.exit\n";
 		} else {
 			$kiwi -> info ("Installing image packages...");
-			print $fd "chroot $root @zypper install @packs\n";
+			my $querypack = "rpm -qa --qf %'{NAME}\n'";
+			my @installed = qx ( chroot $root $querypack 2>/dev/null);
+			chomp ( @installed );
+			my @install   = ();
+			foreach my $need (@packs) {
+				my $found = 0;
+				foreach my $have (@installed) {
+					if ($have eq $need) {
+						$found = 1; last;
+					}
+				}
+				if (! $found) {
+					push @install,$need;
+				}
+			}
+			print $fd "chroot $root @zypper install @install\n";
 			print $fd "echo \$? > $screenCall.exit\n";
 		}
 		$fd -> close();
