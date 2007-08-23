@@ -20,7 +20,7 @@ for i in \
     openSUSE-release openldap2-client openslp pam pam-modules pcre \
     perl perl-Bootloader perl-gettext permissions pm-utils pmtools \
     python python-xml resmgr rpm-python smart suse-build-key udev \
-	syslinux gfxboot make memtest86+
+	syslinux gfxboot make memtest86+ bootsplash bootsplash-theme-SuSE
 do
     rpm -e $i --nodeps
 done
