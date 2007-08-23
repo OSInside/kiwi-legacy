@@ -380,7 +380,7 @@ sub createImageUSB {
 	if (! defined $xml) {
 		return undef;
 	}
-	my $tmpdir = qx ( mktemp -q -d /tmp/kiwi-$text.XXXXXX );
+	my $tmpdir = qx ( mktemp -q -d /tmp/kiwi-$text.XXXXXX ); chomp $tmpdir;
 	my $result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> error  ("Couldn't create tmp dir: $tmpdir: $!");
@@ -747,7 +747,7 @@ sub createImageLiveCD {
 		qx (rm -rf $imageTreeReadOnly);
 		return undef;
 	}
-	my $tmpdir = qx ( mktemp -q -d /tmp/kiwi-cdboot.XXXXXX );
+	my $tmpdir = qx ( mktemp -q -d /tmp/kiwi-cdboot.XXXXXX ); chomp $tmpdir;
 	my $result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> error  ("Couldn't create tmp dir: $tmpdir: $!");
@@ -1969,7 +1969,7 @@ sub compressImage {
 	# Compress image using gzip
 	#------------------------------------------
 	$kiwi -> info ("Compressing image...");
-	my $data = qx (gzip $imageDest/$name);
+	my $data = qx (gzip -f $imageDest/$name);
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> failed ();

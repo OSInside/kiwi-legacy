@@ -1298,6 +1298,7 @@ sub createTmpDirectory {
 			chomp $root;
 		} else {
 			$root = $selfRoot;
+			rmdir $root;
 			if (mkdir $root) {
 				$rootError = 0;
 			}
