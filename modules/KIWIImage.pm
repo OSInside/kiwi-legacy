@@ -833,7 +833,7 @@ sub createImageLiveCD {
 	# copy base CD files
 	#------------------------------------------
 	$kiwi -> info ("Setting up isolinux boot CD [$isoarch]");
-	qx (cp $gfx/* $destination);
+	qx (cp -a $gfx/* $destination);
 	qx (cp $CD/isolinux.cfg $destination);
 	qx (cp $CD/isolinux.msg $destination);
 	$kiwi -> done ();
