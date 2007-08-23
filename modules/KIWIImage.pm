@@ -402,6 +402,7 @@ sub createImageUSB {
 		$main::Survive = "default";
 		if (! -d $main::RootTree.$baseSystem) {
 			qx (rm -rf $main::RootTree);
+			qx (rm -rf $tmpdir);
 		}
 		return undef;
 	}
@@ -815,6 +816,7 @@ sub createImageLiveCD {
 		$kiwi -> error  ("Couldn't open directory $gfx: $!");
 		if (! -d $main::RootTree.$baseSystem) {
 			qx (rm -rf $main::RootTree);
+			qx (rm -rf $tmpdir);
 		}
 		$kiwi -> failed ();
 		return undef;
@@ -872,6 +874,7 @@ sub createImageLiveCD {
 	}
 	if (! -d $main::RootTree.$baseSystem) {
 		qx (rm -rf $main::RootTree);
+		qx (rm -rf $tmpdir);
 	}
 	$kiwi -> done();
 	return $this;
