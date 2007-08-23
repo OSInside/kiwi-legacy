@@ -19,7 +19,7 @@ for i in \
 	openslp rpm-python suse-build-key permissions \
 	fillup pam expat suse-release libxml2 openldap2-client \
 	logrotate diffutils cpio bzip2 insserv ash gdbm rpm \
-	syslinux gfxboot make memtest86 bootsplash bootsplash-theme-SuSE-NLD
+	syslinux gfxboot make memtest86 bootsplash-theme-SuSE-NLD
 do
 	rpm -e $i --nodeps
 done

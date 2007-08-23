@@ -304,7 +304,7 @@ function suseStripInitrd {
 		true touch sleep sh pidof sed rmdir rm pwd ps mv mkdir kill hostname
 		gzip grep false df cp cat bash basename arch sort ls uniq lsmod
 		usleep parted mke2fs pvcreate vgcreate lvm resize2fs ln hdparm
-		dmesg
+		dmesg splash fbmngplay
 	"
 	for path in /sbin /usr/sbin /usr/bin /bin;do
 		baseStripTools "$path" "$tools"
@@ -362,12 +362,13 @@ function suseGFXBoot {
 	if [ ! $theme = "SuSE" ];then
 		theme="SuSE-$theme"
 	fi
+	mkdir /image/loader/animations
+	cp /etc/bootsplash/themes/$theme/animations/* /image/loader/animations
 	for cfg in 800x600 1024x768 1280x1024 1400x1050 1600x1200;do
 		/sbin/splash -s -c -f \
 			/etc/bootsplash/themes/$theme/config/bootsplash-$cfg.cfg |\
 			gzip -9c \
 		> /image/loader/${sname[$index]}
-		index=`expr $index + 1`
 		tdir=/image/loader/xxx
 		mkdir $tdir
 		cp -a --parents /etc/bootsplash/themes/$theme/config/*-$cfg.* $tdir
@@ -380,5 +381,6 @@ function suseGFXBoot {
 			gzip -9 >> /image/loader/${sname[$index]}
 		popd
 		rm -rf $tdir
+		index=`expr $index + 1`
 	done
 }
