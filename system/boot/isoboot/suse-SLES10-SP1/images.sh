@@ -18,7 +18,7 @@ for i in \
 	perl-Bootloader pam-modules gawk gnome-filesystem \
 	openslp rpm-python suse-build-key permissions \
 	fillup pam expat suse-release libxml2 openldap2-client \
-	logrotate diffutils cpio bzip2 insserv ash gdbm rpm \
+	logrotate diffutils cpio insserv ash gdbm \
 	syslinux gfxboot make memtest86 bootsplash-theme-SuSE-SLES
 do
 	rpm -e $i --nodeps
