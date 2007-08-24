@@ -9,7 +9,7 @@ fi
 # code version update
 cat kiwi.pl | sed \
 	-e s"@our \$Version       = \".*\"@our \$Version       = \"$version\"@"\
-> kiwi.pl.new && mv kiwi.pl.new kiwi.pl
+> kiwi.pl.new && mv kiwi.pl.new kiwi.pl && chmod 755 kiwi.pl
 
 # spec file version update
 cat rpm/kiwi.spec | sed \
