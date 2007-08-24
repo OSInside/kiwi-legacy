@@ -325,7 +325,7 @@ sub setupBootStick {
 	print FD "\n";
 	print FD "title KIWI Stick boot\n";
 	print FD " root (hd0,0)\n";
-	print FD " kernel /boot/linux vga=0x317\n";
+	print FD " kernel /boot/linux vga=0x317 splash=silent\n";
 	print FD " initrd /boot/initrd\n"; 
 	close FD;
 	$kiwi -> done();
@@ -580,7 +580,8 @@ sub setupBootCD {
 	print FD "timeout 10\n";
 	print FD "framebuffer 1\n";
 	print FD "title KIWI CD boot\n";
-	print FD " kernel (cd)/boot/linux vga=0x317 ramdisk_size=256000\n";
+	print FD " kernel (cd)/boot/linux vga=0x317 splash=silent";
+	print FD " ramdisk_size=512000\n";
 	print FD " initrd (cd)/boot/initrd\n";
 	close FD;
 	$kiwi -> done();
@@ -686,7 +687,7 @@ sub setupBootDisk {
 	print FD "\n";
 	print FD "title KIWI VM boot\n";
 	print FD " root (hd0,0)\n";
-	print FD " kernel /boot/linux.vmx vga=0x317\n";
+	print FD " kernel /boot/linux.vmx vga=0x317 splash=silent\n";
 	print FD " initrd /boot/initrd.vmx\n";
 	close FD;
 	$kiwi -> done();
