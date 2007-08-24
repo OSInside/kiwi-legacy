@@ -1,4 +1,4 @@
-<image name="initrd-xenboot-suse-10.3">
+<image name="initrd-xenboot-suse-10.3" schemeversion="1.4">
 	<description type="boot">
 		<author>Marcus Schaefer</author>
 		<contact>ms@novell.com</contact>

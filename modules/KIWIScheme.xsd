@@ -25,6 +25,13 @@
 			</xs:sequence>
 			<xs:attribute name="name" type="xs:string"/>
 			<xs:attribute name="inherit" type="xs:string"/>
+			<xs:attribute name="schemeversion" use="required">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="1.4"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
 		</xs:complexType>
 	</xs:element>
 

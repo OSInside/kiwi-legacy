@@ -659,14 +659,14 @@ if test $systemIntegrity = "clean";then
 				echo " kernel /boot/xen.gz"            >> $menu
 				echo -n " module /boot/$kernel"        >> $menu
 				echo -n " root=${DISK}2 $console"      >> $menu
-				echo -n " vga=0x317"                   >> $menu
+				echo -n " vga=0x314"                   >> $menu
 				echo -n " $KIWI_INITRD_PARAMS"         >> $menu
 				echo " $KIWI_KERNEL_OPTIONS"           >> $menu
 				echo " module /boot/$initrd"           >> $menu
 			else
 				echo -n " kernel $gdev/boot/$kernel"   >> $menu
 				echo -n " root=${DISK}2 $console"      >> $menu
-				echo -n " vga=0x317"                   >> $menu
+				echo -n " vga=0x314"                   >> $menu
 				echo -n " $KIWI_INITRD_PARAMS"         >> $menu
 				echo " $KIWI_KERNEL_OPTIONS"           >> $menu
 				echo " initrd $gdev/boot/$initrd"      >> $menu

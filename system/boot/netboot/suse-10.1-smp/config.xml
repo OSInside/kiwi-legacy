@@ -1,4 +1,4 @@
-<image name="initrd-netboot-suse-10.1-smp">
+<image name="initrd-netboot-suse-10.1-smp" schemeversion="1.4">
 	<description type="boot">
 		<author>Marcus Schaefer</author>
 		<contact>ms@novell.com</contact>

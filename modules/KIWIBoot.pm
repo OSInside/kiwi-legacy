@@ -241,6 +241,10 @@ sub setupBootStick {
 		return undef;
 	}
 	#==========================================
+	# recreate initrd with splash support
+	#------------------------------------------
+	$this -> setupSplashForGrub();
+	#==========================================
 	# Import grub stages
 	#------------------------------------------
 	my $stages = "'usr/lib/grub/*'";
@@ -325,7 +329,7 @@ sub setupBootStick {
 	print FD "\n";
 	print FD "title KIWI Stick boot\n";
 	print FD " root (hd0,0)\n";
-	print FD " kernel /boot/linux vga=0x317 splash=silent\n";
+	print FD " kernel /boot/linux vga=0x314 splash=silent showopts\n";
 	print FD " initrd /boot/initrd\n"; 
 	close FD;
 	$kiwi -> done();
@@ -580,8 +584,8 @@ sub setupBootCD {
 	print FD "timeout 10\n";
 	print FD "framebuffer 1\n";
 	print FD "title KIWI CD boot\n";
-	print FD " kernel (cd)/boot/linux vga=0x317 splash=silent";
-	print FD " ramdisk_size=512000\n";
+	print FD " kernel (cd)/boot/linux vga=0x314 splash=silent";
+	print FD " ramdisk_size=512000 showopts\n";
 	print FD " initrd (cd)/boot/initrd\n";
 	close FD;
 	$kiwi -> done();
@@ -656,6 +660,10 @@ sub setupBootDisk {
 		return undef;
 	}
 	#==========================================
+	# recreate initrd with splash support
+	#------------------------------------------
+	$this -> setupSplashForGrub();
+	#==========================================
 	# Import grub stages
 	#------------------------------------------
 	my $stages = "'usr/lib/grub/*'";
@@ -687,7 +695,7 @@ sub setupBootDisk {
 	print FD "\n";
 	print FD "title KIWI VM boot\n";
 	print FD " root (hd0,0)\n";
-	print FD " kernel /boot/linux.vmx vga=0x317 splash=silent\n";
+	print FD " kernel /boot/linux.vmx vga=0x314 splash=silent showopts\n";
 	print FD " initrd /boot/initrd.vmx\n";
 	close FD;
 	$kiwi -> done();
@@ -938,6 +946,41 @@ sub setupBootDisk {
 	# cleanup loop setup and device mapper
 	#------------------------------------------
 	qx ( /sbin/losetup -d $loop );
+	return $this;
+}
+
+#==========================================
+# setupSplashForGrub
+#------------------------------------------
+sub setupSplashForGrub {
+	my $this   = shift;
+	my $kiwi   = $this->{kiwi};
+	my $initrd = $this->{initrd};
+	my $spldir = $initrd."-".$$.".splash";
+	if (! mkdir $spldir) {
+		$kiwi -> warning ("Failed to create splash directory");
+		$kiwi -> skipped ();
+		return undef;
+	}
+	my $splash = "'image/loader/*.spl'";
+	my $status = qx (gzip -cd $initrd|(cd $spldir && cpio -d -i $splash 2>&1));
+	my $result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> warning ("Failed to extract data: $!");
+		$kiwi -> skipped ();
+		qx (rm -rf $spldir);
+		return undef;
+	}
+	if (! -d "$spldir/image/loader") {
+		$kiwi -> warning ("No splash files found in initrd");
+		$kiwi -> skipped ();
+		qx (rm -rf $spldir);
+		return undef;
+	}
+	qx (gzip -d $initrd); $initrd =~ s/\.gz//;
+	qx (cat $spldir/image/loader/*.spl >> $initrd);
+	qx (gzip -f $initrd);
+	qx (rm -rf $spldir);
 	return $this;
 }
 

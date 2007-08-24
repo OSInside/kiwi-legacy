@@ -1,4 +1,4 @@
-<image name="initrd-vmxboot-suse-10.1">
+<image name="initrd-vmxboot-suse-10.1" schemeversion="1.4">
 	<description type="boot">
 		<author>Marcus Schaefer</author>
 		<contact>ms@novell.com</contact>

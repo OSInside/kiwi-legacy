@@ -210,7 +210,7 @@ IFS="," ; for i in $KERNEL_LIST;do
 		echo "title SUSE Linux Enterprise Desktop 10 SP1 ($kernel)" >> $menu
 		echo -n " kernel $gdev/boot/$kernel"    >> $menu
 		echo -n " root=${deviceDisk}1 $console" >> $menu
-		echo " vga=0x317"                       >> $menu
+		echo " vga=0x314"                       >> $menu
 		echo " initrd $gdev/boot/$initrd"       >> $menu
 	fi
 done

@@ -189,12 +189,12 @@ IFS="," ; for i in $KERNEL_LIST;do
 			echo " kernel /boot/xen.gz"               >> $menu
 			echo -n " module /boot/$kernel"           >> $menu
 			echo -n " root=$imageRootDevice $console" >> $menu
-			echo " vga=0x317"                         >> $menu
+			echo " vga=0x314"                         >> $menu
 			echo " module /boot/$initrd"              >> $menu
 		else
 			echo -n " kernel (hd0,0)/boot/$kernel"    >> $menu
 			echo -n " root=$imageRootDevice $console" >> $menu
-			echo " vga=0x317"                         >> $menu
+			echo " vga=0x314"                         >> $menu
 			echo " initrd (hd0,0)/boot/$initrd"       >> $menu
 		fi
 	fi
