@@ -160,6 +160,7 @@ sub createBootStructure {
 		$kiwi -> failed ();
 		return undef;
 	}
+	$initrd = $this -> setupSplashForGrub();
 	$status = qx ( cp $initrd $tmpdir/boot/$iname 2>&1 );
 	$result = $? >> 8;
 	if ($result != 0) {
@@ -240,10 +241,6 @@ sub setupBootStick {
 	if (! $this -> createBootStructure()) {
 		return undef;
 	}
-	#==========================================
-	# recreate initrd with splash support
-	#------------------------------------------
-	$this -> setupSplashForGrub();
 	#==========================================
 	# Import grub stages
 	#------------------------------------------
@@ -660,10 +657,6 @@ sub setupBootDisk {
 		return undef;
 	}
 	#==========================================
-	# recreate initrd with splash support
-	#------------------------------------------
-	$this -> setupSplashForGrub();
-	#==========================================
 	# Import grub stages
 	#------------------------------------------
 	my $stages = "'usr/lib/grub/*'";
@@ -956,11 +949,11 @@ sub setupSplashForGrub {
 	my $this   = shift;
 	my $kiwi   = $this->{kiwi};
 	my $initrd = $this->{initrd};
-	my $spldir = $initrd."-".$$.".splash";
+	my $spldir = $initrd."_".$$.".splash";
 	if (! mkdir $spldir) {
 		$kiwi -> warning ("Failed to create splash directory");
 		$kiwi -> skipped ();
-		return undef;
+		return $initrd;
 	}
 	my $splash = "'image/loader/*.spl'";
 	my $status = qx (gzip -cd $initrd|(cd $spldir && cpio -d -i $splash 2>&1));
@@ -969,19 +962,21 @@ sub setupSplashForGrub {
 		$kiwi -> warning ("Failed to extract data: $!");
 		$kiwi -> skipped ();
 		qx (rm -rf $spldir);
-		return undef;
+		return $initrd;
 	}
 	if (! -d "$spldir/image/loader") {
 		$kiwi -> warning ("No splash files found in initrd");
 		$kiwi -> skipped ();
 		qx (rm -rf $spldir);
-		return undef;
+		return $initrd;
 	}
-	qx (gzip -d $initrd); $initrd =~ s/\.gz//;
-	qx (cat $spldir/image/loader/*.spl >> $initrd);
-	qx (gzip -f $initrd);
+	my $newinitrd = $initrd;
+	$newinitrd =~ s/\.gz/\.splash/;
+	qx (gzip -cd $initrd > $newinitrd);
+	qx (gzip -cd $spldir/image/loader/*.spl >> $newinitrd);
+	qx (gzip -f $newinitrd);
 	qx (rm -rf $spldir);
-	return $this;
+	return $newinitrd.".gz";
 }
 
 1; 
