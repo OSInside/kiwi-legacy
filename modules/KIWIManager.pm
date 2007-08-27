@@ -400,7 +400,7 @@ sub setupInstallationSource {
 						$val = "YaST";
 					}
 					if ($val eq "rpm-dir") {
-						$val = "plaindir";
+						$val = "Plaindir";
 					}
 					if ($val eq "rpm-md") {
 						$val = "YUM";
