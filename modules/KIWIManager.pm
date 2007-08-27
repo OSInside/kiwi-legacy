@@ -229,8 +229,10 @@ sub setupSignatureCheck {
 	my $manager = $this->{manager};
 	my $chroot  = $this->{chroot};
 	my $root    = $this->{root};
+	my $lock    = $this->{lock};
 	my $data;
 	my $code;
+
 	#==========================================
 	# Get signature information
 	#------------------------------------------
@@ -245,12 +247,16 @@ sub setupSignatureCheck {
 		my $curCheckSig = qx (smart config --show $optionName|tr -d '\n');
 		$this->{curCheckSig} = $curCheckSig;
 		if (defined $imgCheckSig) {
-			$kiwi -> info ("Setting RPM signature check to: $imgCheckSig");
 			my $option = "$optionName=$imgCheckSig";
 			my $cmdstr = "smart config --set";
 			if (! $chroot) {
+				$this -> checkExclusiveLock();
+				$kiwi -> info ("Setting RPM signature check to: $imgCheckSig");
+				$this -> setLock();
 				$data = qx ( bash -c "$cmdstr $option 2>&1" );
+				$this -> freeLock();
 			} else {
+				$kiwi -> info ("Setting RPM signature check to: $imgCheckSig");
 				$data = qx ( chroot $root bash -c "$cmdstr $option 2>&1" );
 			}
 			$code = $? >> 8;
@@ -284,6 +290,7 @@ sub resetSignatureCheck {
 	my $chroot = $this->{chroot};
 	my $manager= $this->{manager};
 	my $root   = $this->{root};
+	my $lock   = $this->{lock};
 	my $curCheckSig = $this->{curCheckSig};
 	my $data;
 	my $code;
@@ -293,12 +300,16 @@ sub resetSignatureCheck {
 	if ($manager eq "smart") {
 		if (defined $this->{imgCheckSig}) {
 			my $optionName  = "rpm-check-signatures";
-			$kiwi -> info ("Resetting RPM signature check to: $curCheckSig");
 			my $option = "$optionName=$curCheckSig";
 			my $cmdstr = "smart config --set";
 			if (! $chroot) {
+				$this -> checkExclusiveLock();
+				$kiwi -> info ("Reset RPM signature check to: $curCheckSig");
+				$this -> setLock();
 				$data = qx ( bash -c "$cmdstr $option 2>&1" );
+				$this -> freeLock();
 			} else {
+				$kiwi -> info ("Reset RPM signature check to: $curCheckSig");
 				$data = qx ( chroot $root bash -c "$cmdstr $option 2>&1" );
 			}
 			$code = $? >> 8;
@@ -334,6 +345,7 @@ sub setupInstallationSource {
 	my $root   = $this->{root};
 	my $manager= $this->{manager};
 	my @zypper = @{$this->{zypper}};
+	my $lock   = $this->{lock};
 	my $data;
 	my $code;
 	#==========================================
@@ -353,9 +365,12 @@ sub setupInstallationSource {
 			my @opts = @{$source{$stype}{$chl}};
 			my $cmds = "smart channel --add";
 			if (! $chroot) {
+				$this -> checkExclusiveLock();
+				$this -> setLock();
 				$kiwi -> info ("Adding local smart channel: $chl");
 				$data = qx ( bash -c "$cmds $chl @opts 2>&1" );
 				$code = $? >> 8;
+				$this -> freeLock();
 			} else {
 				$kiwi -> info ("Adding image smart channel: $chl");
 				$data = qx ( chroot $root bash -c "$cmds $chl @opts 2>&1" );
@@ -410,9 +425,12 @@ sub setupInstallationSource {
 			}
 			my $sadd = "service-add @zopts $alias";
 			if (! $chroot) {
+				$this -> checkExclusiveLock();
+				$this -> setLock();
 				$kiwi -> info ("Adding local zypper service: $alias");
 				$data = qx (bash -c "@zypper --root $root $sadd 2>&1");
 				$code = $? >> 8;
+				$this -> freeLock();
 			} else {
 				$kiwi -> info ("Adding image zypper service: $alias");
 				$data = qx (chroot $root bash -c "@zypper $sadd 2>&1");
@@ -445,6 +463,7 @@ sub resetInstallationSource {
 	my $manager= $this->{manager};
 	my $root   = $this->{root};
 	my @zypper = @{$this->{zypper}};
+	my $lock   = $this->{lock};
 	my @channelList = @{$this->{channelList}};
 	my $data;
 	my $code;
@@ -452,13 +471,17 @@ sub resetInstallationSource {
 	# smart
 	#------------------------------------------
 	if ($manager eq "smart") {
-		$kiwi -> info ("Removing smart channel(s): @channelList");
 		my @list = @channelList;
 		my $cmds = "smart channel --remove";
 		if (! $chroot) {
+			$this -> checkExclusiveLock();
+			$kiwi -> info ("Removing smart channel(s): @channelList");
+			$this -> setLock();
 			$data = qx ( bash -c "$cmds @list -y 2>&1" );
 			$code = $? >> 8;
+			$this -> freeLock();
 		} else {
+			$kiwi -> info ("Removing smart channel(s): @channelList");
 			$data = qx ( chroot $root bash -c "$cmds @list -y 2>&1" );
 			$code = $? >> 8;
 		}
@@ -473,13 +496,17 @@ sub resetInstallationSource {
 	# zypper
 	#------------------------------------------
 	if ($manager eq "zypper") {
-		$kiwi -> info ("Removing zypper service(s): @channelList");
 		my @list = @channelList;
 		my $sdel = "service-delete @list";
 		if (! $chroot) {
+			$this -> checkExclusiveLock();
+			$kiwi -> info ("Removing zypper service(s): @channelList");
+			$this -> setLock();
 			$data = qx ( bash -c "@zypper --root $root $sdel 2>&1" );
 			$code = $? >> 8;
+			$this -> freeLock();
 		} else {
+			$kiwi -> info ("Removing zypper service(s): @channelList");
 			$data = qx ( chroot $root bash -c "@zypper $sdel 2>&1" );
 			$code = $? >> 8;
 		}
@@ -762,6 +789,12 @@ sub resetSource {
 	my %source  = %{$this->{source}};
 	my $manager = $this->{manager};
 	my @zypper  = @{$this->{zypper}};
+	my $lock    = $this->{lock};
+	#==========================================
+	# check lock
+	#------------------------------------------
+	$this -> checkExclusiveLock();
+	$this -> setLock();
 	#==========================================
 	# smart
 	#------------------------------------------
@@ -780,6 +813,7 @@ sub resetSource {
 			qx ( bash -c "@zypper service-delete $channel 2>&1" );
 		}
 	}
+	$this -> freeLock();
 	return $this;
 }
 
@@ -798,6 +832,7 @@ sub setupPackageInfo {
 	my $root   = $this->{root};
 	my $manager= $this->{manager};
 	my @zypper = @{$this->{zypper}};
+	my $lock   = $this->{lock};
 	my $data;
 	my $code;
 	my $opts;
@@ -805,11 +840,15 @@ sub setupPackageInfo {
 	# smart
 	#------------------------------------------
 	if ($manager eq "smart") {
-		$kiwi -> info ("Checking for package: $pack");
 		if (! $chroot) {
+			$this -> checkExclusiveLock();
+			$kiwi -> info ("Checking for package: $pack");
+			$this -> setLock();
 			$data = qx ( smart query --installed $pack | grep -qi $pack 2>&1 );
 			$code = $? >> 8;
+			$this -> freeLock();
 		} else {
+			$kiwi -> info ("Checking for package: $pack");
 			$opts = "--installed $pack";
 			$data = qx ( chroot $root smart query $opts | grep -qi $pack 2>&1 );
 			$code = $? >> 8;
@@ -827,12 +866,16 @@ sub setupPackageInfo {
 	# zypper
 	#------------------------------------------
 	if ($manager eq "zypper") {
-		$kiwi -> info ("Checking for package: $pack");
 		my $str = "not installed";
 		if (! $chroot) {
+			$this -> checkExclusiveLock();
+			$kiwi -> info ("Checking for package: $pack");
+			$this -> setLock();
 			$data = qx ( zypper info $pack | grep -qi $str 2>&1 );
 			$code = $? >> 8;
+			$this -> freeLock();
 		} else {
+			$kiwi -> info ("Checking for package: $pack");
 			$data = qx ( chroot $root @zypper info $pack | grep -qi $str 2>&1 );
 			$code = $? >> 8;
 		}
@@ -866,10 +909,28 @@ sub checkExclusiveLock {
 		return $this;
 	}
 	while (-f $lock) {
-		sleep (1);
+		sleep (5);
 	}
 	$kiwi -> done();
 	return $this;
+}
+
+#==========================================
+# setLock
+#------------------------------------------
+sub setLock {
+	my $this = shift;
+	my $lock = $this->{lock};
+	qx ( touch $lock );
+}
+
+#==========================================
+# freeLock
+#------------------------------------------
+sub freeLock {
+	my $this = shift;
+	my $lock = $this->{lock};
+	qx ( rm -f $lock );
 }
 
 1;
