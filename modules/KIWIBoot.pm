@@ -950,11 +950,15 @@ sub setupSplashForGrub {
 	my $kiwi   = $this->{kiwi};
 	my $initrd = $this->{initrd};
 	my $spldir = $initrd."_".$$.".splash";
+	my $newspl = "$spldir/image/splash";
 	if (! mkdir $spldir) {
 		$kiwi -> warning ("Failed to create splash directory");
 		$kiwi -> skipped ();
 		return $initrd;
 	}
+	#==========================================
+	# unpack splash files
+	#------------------------------------------
 	my $splash = "'image/loader/*.spl'";
 	my $status = qx (gzip -cd $initrd|(cd $spldir && cpio -d -i $splash 2>&1));
 	my $result = $? >> 8;
@@ -970,10 +974,26 @@ sub setupSplashForGrub {
 		qx (rm -rf $spldir);
 		return $initrd;
 	}
-	my $newinitrd = $initrd;
-	$newinitrd =~ s/\.gz/\.splash/;
+	#==========================================
+	# create new splash with all pictures
+	#------------------------------------------
+	mkdir $newspl;
+	while (my $splash = glob("$spldir/image/loader/*.spl")) {
+		mkdir "$splash.dir";
+		qx (gzip -cd $splash | sed -e s#TRAILER\!\!\!#BOB# > $splash.bob);
+		qx (cat $splash.bob |(cd $splash.dir && cpio -i 2>&1));
+		qx (rm -f $splash.dir/BOB);
+		qx (cp -a $splash.dir/etc $newspl);
+		qx (cat $splash.dir/bootsplash >> $newspl/bootsplash);
+	}
+	qx (cd $newspl && find|cpio --quiet -oH newc | gzip -9 >> $spldir/all.spl);
+	#==========================================
+	# create splash initrd
+	#------------------------------------------
+	my $newinitrd = $initrd; $newinitrd =~ s/\.gz/\.splash/;
 	qx (gzip -cd $initrd > $newinitrd);
-	qx (gzip -cd $spldir/image/loader/*.spl >> $newinitrd);
+	#qx (gzip -cd $spldir/image/loader/08000600.spl >> $newinitrd);
+	qx (gzip -cd $spldir/all.spl >> $newinitrd);
 	qx (gzip -f $newinitrd);
 	qx (rm -rf $spldir);
 	return $newinitrd.".gz";

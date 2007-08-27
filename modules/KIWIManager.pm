@@ -95,6 +95,7 @@ sub new {
 	$this->{manager}     = $manager;
 	$this->{root}        = $root;
 	$this->{chroot}      = 0;
+	$this->{lock}        = "/var/lock/kiwi-init.lock";
 	$this->{screenCall}  = $root."/screenrc.smart";
 	$this->{screenCtrl}  = $root."/screenrc.ctrls";
 	$this->{screenLogs}  = $kiwi -> getRootLog();
@@ -624,6 +625,7 @@ sub setupRootSystem {
 	my $xml    = $this->{xml};
 	my $manager= $this->{manager};
 	my @zypper = @{$this->{zypper}};
+	my $lock   = $this->{lock};
 	my @channelList = @{$this->{channelList}};
 	my $screenCall  = $this->{screenCall};
 	#==========================================
@@ -638,6 +640,7 @@ sub setupRootSystem {
 	#------------------------------------------
 	if ($manager eq "smart") {
 		if (! $chroot) {
+			$this -> checkExclusiveLock();
 			$kiwi -> info ("Initializing image system on: $root...");
 			my $forceChannels = join (",",@channelList);
 			my @installOpts = (
@@ -657,9 +660,11 @@ sub setupRootSystem {
 			#------------------------------------------
 			#print $fd "smart update @channelList\n";
 			#print $fd "test \$? = 0 && smart install @packs @installOpts\n";
+			print $fd "touch $lock\n";
 			print $fd "smart install @packs @installOpts\n";
 			print $fd "echo \$? > $screenCall.exit\n";
 			print $fd "rm -f $root/etc/smart/channels/*\n";
+			print $fd "rm -f $lock\n";
 		} else {
 			$kiwi -> info ("Installing image packages...");
 			my $querypack = "smart query '*' --installed --hide-version";
@@ -702,6 +707,7 @@ sub setupRootSystem {
 	#------------------------------------------
 	if ($manager eq "zypper") {
 		if (! $chroot) {
+			$this -> checkExclusiveLock();
 			$kiwi -> info ("Initializing image system on: $root...");
 			my $forceChannels = join (",",@channelList);
 			my @installOpts = (
@@ -714,8 +720,10 @@ sub setupRootSystem {
 			#==========================================
 			# Create screen call file
 			#------------------------------------------
+			print $fd "touch $lock\n";
 			print $fd "@zypper --root $root install @installOpts @packs\n";
 			print $fd "echo \$? > $screenCall.exit\n";
+			print $fd "rm -f $lock\n";
 		} else {
 			$kiwi -> info ("Installing image packages...");
 			my $querypack = "rpm -qa --qf %'{NAME}\n'";
@@ -838,6 +846,30 @@ sub setupPackageInfo {
 		return 0;
 	}
 	return 1;
+}
+
+#==========================================
+# checkExclusiveLock
+#------------------------------------------
+sub checkExclusiveLock {
+	# ...
+	# During very first chroot build phase the package manager
+	# requires an exclusive lock. Another kiwi process at that stage
+	# will fail so we are waiting until the lock is done
+	# ---
+	my $this = shift;
+	my $lock = $this->{lock};
+	my $kiwi = $this->{kiwi};
+	if (-f $lock) {
+		$kiwi -> info ("Waiting for package lock to disappear...")
+	} else {
+		return $this;
+	}
+	while (-f $lock) {
+		sleep (1);
+	}
+	$kiwi -> done();
+	return $this;
 }
 
 1;
