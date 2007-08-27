@@ -3,9 +3,9 @@ Fri Aug 24 12:23:04 CEST 2007 - ms@suse.de
 
 - v1.56
 - added checkExclusiveLock function (#304769)
-- added defaultdestination attribute to optionally specified 
-  in config.xml <preferences> section (#304775)
-- added mandatory schemeversion attribute
+- added defaultdestination attribute to optionally be
+  specified in config.xml <preferences> section (#304775)
+- added mandatory schemeversion attribute (v1.4)
 - added splash screen for vmxboot boot images
 - fixed zypper service name: Plaindir instead of plaindir
 - added splash=silent and vga=0x317 to isoboot configurations
