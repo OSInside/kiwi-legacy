@@ -182,6 +182,22 @@ sub main {
 		}
 		$kiwi -> done();
 		#==========================================
+		# Check for default root
+		#------------------------------------------	
+		if (! defined $RootTree) {
+			$kiwi -> info ("Checking for defaultroot in XML data...");
+			$RootTree = $xml -> getImageDefaultRoot();
+			if ($RootTree) {
+				if ($RootTree !~ /^\//) {
+					my $workingDir = qx ( pwd ); chomp $workingDir;
+					$RootTree = $workingDir."/".$RootTree;
+				}
+			} else {
+				undef $RootTree;
+			}
+			$kiwi -> done();
+		}
+		#==========================================
 		# Check for set-repo option
 		#------------------------------------------
 		if (defined $SetRepository) {
@@ -709,8 +725,10 @@ sub usage {
 	print "\n";
 	print "  [ -r | --root <root-path> ]\n";
 	print "    Setup the physical extend, chroot system below the\n";
-	print "    given root-path path. By default a mktmp directory\n";
-	print "    will be used\n";
+	print "    given root-path path. If no --root option is given kiwi\n";
+	print "    will search for the attribute defaultroot in config.xml\n";
+	print "    If no root directory is known a mktmp directory\n";
+	print "    will be created and used as root directory\n";
 	print "\n";
 	print "  [ -s | --strip ]\n";
 	print "    Strip shared objects and executables\n";

@@ -280,6 +280,22 @@ sub getImageDefaultDestination {
 }
 
 #==========================================
+# getImageDefaultRoot
+#------------------------------------------
+sub getImageDefaultRoot {
+	# ...
+	# Get the default root directory name to build up a new image
+	# normally this is given by the --root option but if
+	# not and defaultroot is specified in config.xml we
+	# will use this path as root path.
+	# ---
+	my $this = shift;
+	my $node = $this->{optionsNodeList} -> get_node(1);
+	my $root = $node -> getElementsByTagName ("defaultroot");
+	return $root;
+}
+
+#==========================================
 # getImageTypeAndAttributes
 #------------------------------------------
 sub getImageTypeAndAttributes {

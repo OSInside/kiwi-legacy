@@ -249,6 +249,7 @@
 				<xs:element ref="timezone" minOccurs="0" maxOccurs="1"/>
 				<xs:element ref="locale" minOccurs="0" maxOccurs="1"/>
 				<xs:element ref="defaultdestination" minOccurs="0" maxOccurs="1"/>
+				<xs:element ref="defaultroot" minOccurs="0" maxOccurs="1"/>
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
@@ -287,6 +288,7 @@
 	<xs:element name="timezone" type="xs:string"/>
 	<xs:element name="locale"   type="xs:string"/>
 	<xs:element name="defaultdestination" type="xs:string"/>
+	<xs:element name="defaultroot" type="xs:string"/>
 	<xs:element name="size">
 		<xs:complexType>
 			<xs:simpleContent>
