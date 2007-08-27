@@ -3,6 +3,8 @@ Fri Aug 24 12:23:04 CEST 2007 - ms@suse.de
 
 - v1.56
 - added checkExclusiveLock function (#304769)
+- added defaultdestination attribute to optionally specified 
+  in config.xml <preferences> section (#304775)
 - added mandatory schemeversion attribute
 - added splash screen for vmxboot boot images
 - added splash=silent and vga=0x317 to isoboot configurations

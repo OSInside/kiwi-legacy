@@ -256,6 +256,20 @@ sub main {
 		}
 		$kiwi -> done();
 		#==========================================
+		# Check for default destination
+		#------------------------------------------
+		if (! defined $Destination) {
+			$kiwi -> info ("Checking for defaultdestination in XML data...");
+			$Destination = $xml -> getImageDefaultDestination();
+			if (! $Destination) {
+				$kiwi -> failed ();
+				$kiwi -> info   ("No destination directory specified");
+				$kiwi -> failed ();
+				my $code = kiwiExit (1); return $code;
+			}
+			$kiwi -> done();
+		}
+		#==========================================
 		# Check type params and create image obj
 		#------------------------------------------
 		$image = new KIWIImage (
@@ -623,11 +637,6 @@ sub init {
 		$kiwi -> failed ();
 		my $code = kiwiExit (1); return $code;
 	}
-	if ((defined $Create) && (! defined $Destination)) {
-		$kiwi -> info ("No destination directory specified");
-		$kiwi -> failed ();
-		my $code = kiwiExit (1); return $code;
-	}
 	if ((defined @AddRepository) && (! defined @AddRepositoryType)) {
 		$kiwi -> info ("No repository type specified");
 		$kiwi -> failed ();
@@ -686,9 +695,9 @@ sub usage {
 	print "Options:\n";
 	print "--\n";
 	print "  [ -d | --destdir <destination-path> ]\n";
-	print "    Specify an alternative destination directory for\n";
-	print "    storing the logical extends. By default the current\n";
-	print "    directory is used\n";
+	print "    Specify destination directory to store the image file(s)\n";
+	print "    If not specified the the attribute <defaultdestination>\n";
+	print "    is used. If no destination can be found an error occurs\n";
 	print "\n";
 	print "  [ -t | --type <image-type> ]\n";
 	print "    Specify the output image type to use for this image\n";

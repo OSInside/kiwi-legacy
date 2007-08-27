@@ -264,6 +264,22 @@ sub getImageSize {
 }
 
 #==========================================
+# getImageDefaultDestination
+#------------------------------------------
+sub getImageDefaultDestination {
+	# ...
+	# Get the default destination to store the images below
+	# normally this is given by the --destination option but if
+	# not and defaultdestination is specified in config.xml we
+	# will use this path as destination
+	# ---
+	my $this = shift;
+	my $node = $this->{optionsNodeList} -> get_node(1);
+	my $dest = $node -> getElementsByTagName ("defaultdestination");
+	return $dest;
+}
+
+#==========================================
 # getImageTypeAndAttributes
 #------------------------------------------
 sub getImageTypeAndAttributes {
