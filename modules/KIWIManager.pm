@@ -685,10 +685,9 @@ sub setupRootSystem {
 			#==========================================
 			# Create screen call file
 			#------------------------------------------
-			#print $fd "smart update @channelList\n";
-			#print $fd "test \$? = 0 && smart install @packs @installOpts\n";
 			print $fd "touch $lock\n";
-			print $fd "smart install @packs @installOpts\n";
+			print $fd "smart update @channelList\n";
+			print $fd "test \$? = 0 && smart install @packs @installOpts\n";
 			print $fd "echo \$? > $screenCall.exit\n";
 			print $fd "rm -f $root/etc/smart/channels/*\n";
 			print $fd "rm -f $lock\n";
@@ -721,9 +720,8 @@ sub setupRootSystem {
 			#==========================================
 			# Create screen call file
 			#------------------------------------------
-			#print $fd "chroot $root smart update\n";
-			#print $fd "test \$? = 0 && chroot $root smart install @install ";
-			print $fd "chroot $root smart install @install ";
+			print $fd "chroot $root smart update\n";
+			print $fd "test \$? = 0 && chroot $root smart install @install ";
 			print $fd "@installOpts\n";
 			print $fd "echo \$? > $screenCall.exit\n";
 		}

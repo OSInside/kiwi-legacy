@@ -1,5 +1,5 @@
 # /.../
-# spec file for package kiwi (Version 1.56
+# spec file for package kiwi (Version 1.57
 # Copyright (c) 2006 SUSE LINUX Products GmbH, Nuernberg, Germany.
 # Please submit bugfixes or comments via http://bugs.opensuse.org
 # ---
@@ -8,7 +8,7 @@ Name:          kiwi
 BuildRequires: perl smart perl-XML-LibXML perl-libwww-perl screen syslinux module-init-tools
 Requires:      perl perl-XML-LibXML perl-libwww-perl screen
 Summary:       OpenSuSE - KIWI Image System
-Version:       1.56
+Version:       1.57
 Release:       28
 Group:         System
 License:       GPL
@@ -130,7 +130,7 @@ Authors:
 # %patch
 
 %build
-export K_USER=-1 # set value to -1 to prevent building boot images
+export K_USER=0 # set value to -1 to prevent building boot images
 rm -rf $RPM_BUILD_ROOT
 test -e /.buildenv || export K_USER=-1 # no buildenv, no boot image build
 test -e /.buildenv && . /.buildenv
