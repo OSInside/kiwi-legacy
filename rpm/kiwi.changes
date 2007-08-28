@@ -2,6 +2,8 @@
 Fri Aug 24 12:23:04 CEST 2007 - ms@suse.de
 
 - v1.56
+- added patch by Magnus Boman <captain.magnus@gmail.com> which
+  is preventing a few NFS boot required binaries from being deleted
 - added checkExclusiveLock function (#304769)
 - added defaultdestination/defaultroot attribute to optionally be
   specified in config.xml <preferences> section (#304775)

@@ -304,7 +304,8 @@ function suseStripInitrd {
 		true touch sleep sh pidof sed rmdir rm pwd ps mv mkdir kill hostname
 		gzip grep false df cp cat bash basename arch sort ls uniq lsmod
 		usleep parted mke2fs pvcreate vgcreate lvm resize2fs ln hdparm
-		dmesg splash fbmngplay
+		dmesg splash fbmngplay portmap start-statd sm-notify
+		rpc.statd rpc.idmapd
 	"
 	for path in /sbin /usr/sbin /usr/bin /bin;do
 		baseStripTools "$path" "$tools"
