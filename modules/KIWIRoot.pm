@@ -516,6 +516,7 @@ sub setup {
 	qx ( mkdir -p $root/image );
 	qx ( cp $imageDesc/config.xml $root/image 2>&1 );
 	qx ( cp $imageDesc/images.sh $root/image 2>&1 );
+	qx ( cp $imageDesc/config-cdroot.tgz $root/image 2>&1 );
 	if (open (FD,">$root/image/main::Prepare")) {
 		if ($imageDesc !~ /^\//) {
 			my $pwd = qx ( pwd ); chomp $pwd;

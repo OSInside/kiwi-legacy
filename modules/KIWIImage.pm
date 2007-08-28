@@ -785,6 +785,24 @@ sub createImageLiveCD {
 	$kiwi -> done ();
 
 	#==========================================
+	# Check for optional config-cdroot archive
+	#------------------------------------------
+	$kiwi -> info ("Integrating CD root information...");
+	my $cdrootData = $imageTree."/image/config-cdroot.tgz";
+	if (-f $cdrootData) {
+		my $data = qx ( tar -C $main::RootTree/CD -xvf $cdrootData );
+		my $code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Failed to integrate CD root data: $data");
+			$kiwi -> failed ();
+			return undef;
+		}
+		$kiwi -> done();
+	} else {
+		$kiwi -> skipped();
+	}
+	#==========================================
 	# Installing second stage images
 	#------------------------------------------
 	$kiwi -> info ("Moving CD image data into boot structure");

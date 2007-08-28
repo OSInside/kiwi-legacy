@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Tue Aug 28 15:35:20 CEST 2007 - ms@suse.de
+
+- v1.58
+- added optional CD root data. The description can contain
+  the file config-cdroot.tgz which is a gzip tar archive.
+  The archive will be unpacked as CD root data and can contain
+  license and/or README data (#299732)
+
+-------------------------------------------------------------------
 Tue Aug 28 15:05:43 CEST 2007 - ms@suse.de
 
 - v1.57
