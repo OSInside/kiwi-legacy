@@ -75,6 +75,8 @@ our $SetImageType;      # set image type to use, default is primary type
 our $Migrate;           # migrate running system to image description
 our @Exclude;           # exclude directories in migrate search
 our $Report;            # create report on root/ tree migration only
+our @Profiles;          # list of profiles to include in image
+our $ListProfiles;      # lists the available profiles in image
 
 #============================================
 # Globals
@@ -114,6 +116,13 @@ sub main {
 		if (! $kiwi -> setLogFile ( $LogFile )) {
 			my $code = kiwiExit (1); return $code;
 		}
+	}
+
+	#==========================================
+	# Handle ListProfiles option
+	#------------------------------------------
+	if (defined $ListProfiles) {
+		listProfiles();
 	}
 
 	#========================================
@@ -176,7 +185,7 @@ sub main {
 	#----------------------------------------
 	if (defined $Prepare) {
 		$kiwi -> info ("Reading image description...");
-		my $xml = new KIWIXML ( $kiwi,$Prepare,\%ForeignRepo );
+		my $xml = new KIWIXML ( $kiwi,$Prepare,\%ForeignRepo,undef,\@Profiles );
 		if (! defined $xml) {
 			my $code = kiwiExit (1); return $code;
 		}
@@ -603,6 +612,7 @@ sub init {
 		"version"               => \&version,
 		"logfile=s"             => \$LogFile,
 		"prepare|p=s"           => \$Prepare,
+		"add-profile=s"         => \@Profiles,
 		"migrate|m=s"           => \$Migrate,
 		"exclude|e=s"           => \@Exclude,
 		"report"                => \$Report,
@@ -630,6 +640,7 @@ sub init {
 		"installcd-system=s"    => \$InstallCDSystem,
 		"strip|s"               => \$StripImage,
 		"createpassword"        => \$CreatePassword,
+		"list-profiles|i=s"     => \$ListProfiles,
 		"help|h"                => \&usage,
 		"<>"                    => \&usage
 	);
@@ -647,7 +658,8 @@ sub init {
 		(! defined $BootStick) && (! defined $BootCD) &&
 		(! defined $InstallCD) && (! defined $Upgrade) &&
 		(! defined $BootVMDisk) && (! defined $CreatePassword) &&
-		(! defined $CreateInstSource) && (! defined $Migrate)
+		(! defined $CreateInstSource) && (! defined $Migrate) &&
+		(! defined $ListProfiles)
 	) {
 		$kiwi -> info ("No operation specified");
 		$kiwi -> failed ();
@@ -687,6 +699,7 @@ sub usage {
 
 	print "Usage:\n";
 	print "  kiwi -l | --list\n";
+	print "  kiwi -i | --list-profiles\n";
 	print "Image Preparation/Creation:\n";
 	print "  kiwi -p | --prepare <image-path>\n";
 	print "  kiwi -c | --create  <image-root>\n";
@@ -785,6 +798,33 @@ sub listImage {
 			$kiwi -> note (" -> Version: $version");
 			$kiwi -> done();
 		}
+	}
+	exit 0;
+}
+
+#==========================================
+# listProfiles
+#------------------------------------------
+sub listProfiles {
+	# ...
+	# list the available profiles in image
+	# ---
+	my $xml = new KIWIXML ($kiwi, $ListProfiles);
+	if (! defined $xml) {
+		$kiwi -> failed();
+		exit 1;
+	}
+	my @profiles = $xml -> getProfiles ();
+	if ((scalar @profiles) == 0) {
+		$kiwi -> info ("No profiles available");
+		$kiwi -> done ();
+		exit 0;
+	}
+	foreach my $profile (@profiles) {
+		my $name = $profile -> {name};
+		my $desc = $profile -> {description};
+		$kiwi -> info ("$name\t$desc");
+		$kiwi -> done ();
 	}
 	exit 0;
 }

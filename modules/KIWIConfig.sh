@@ -280,7 +280,7 @@ function suseStripInitrd {
 		/etc/pam.d* /etc/DIR_COLORS /etc/rc* /usr/share/hal /usr/share/ssl
 		/usr/lib*/hal /usr/lib*/*.a /usr/lib*/*.la /usr/lib*/librpm*
 		/usr/lib*/libssl* /usr/lib*/libpanel* /usr/lib*/libncursesw*
-		/usr/lib*/libmenu*
+		/usr/lib*/libmenu* /usr/share/X11/locale /usr/src/packages/RPMS
 		/lib/modules/*/kernel/drivers/net/wireless
 		/lib/modules/*/kernel/drivers/net/pcmcia
 		/lib/modules/*/kernel/drivers/net/tokenring

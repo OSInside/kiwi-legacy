@@ -2,8 +2,7 @@
 Fri Aug 24 12:23:04 CEST 2007 - ms@suse.de
 
 - v1.56
-- added patch by Magnus Boman <captain.magnus@gmail.com> which
-  is preventing a few NFS boot required binaries from being deleted
+- fixed UNIONFS_CONFIG setup in KIWIImage.pm
 - added checkExclusiveLock function (#304769)
 - added defaultdestination/defaultroot attribute to optionally be
   specified in config.xml <preferences> section (#304775)
@@ -13,6 +12,50 @@ Fri Aug 24 12:23:04 CEST 2007 - ms@suse.de
 - added splash=silent and vga=0x317 to isoboot configurations
 - disable build of prebuild boot images. I can't access the
   repo via smart on either ftp or http
+- added patch by Magnus Boman <captain.magnus@gmail.com> which
+  is preventing a few NFS boot required binaries from being deleted
+- added patch by James Willcox <james@ximian.com> which implements
+  profile support into kiwi's config.xml format
+
+  **** description ****  
+  It allows you to maintain one image description while
+  still allowing for some variation in the set of packages and drivers
+  that are included.  For instance, a good use of profiles would be to
+  have a 'gnome' and 'kde' profile for a LiveCD.  The patch adds two new
+  command line arguments to kiwi: --list-profiles and --add-profile.
+  * The first allows you to simply list the profiles available in a given
+    image. Each one has a name and description.
+  * The second option allows you to specify which profiles should be
+    included when preparing the image.
+
+  The other part of the patch modifies the config.xml and the code
+  which reads it.  You can now use the following to create a set of
+  profiles in config.xml:
+
+  <profiles>
+    <profile name="gnome" description="The GNOME desktop"/>
+    <profile name="kde"   description="The KDE desktop"/>
+    <profile name="www"   description="The Apache, PHP, etc"/>
+  </profiles>
+
+  To mark a set of packages as belonging to a profile, simply annotate
+  the 'packages' tag with the 'profiles' attribute.  For example,
+
+  <packages type="image" profiles="gnome">
+     ...
+  </packages>
+
+  If a given set of packages belongs to more than one profile, separate
+  them with a comma.  Example:
+
+  <packages type="image" profiles="gnome,kde,webserver"/>
+     ...
+  </packages>
+
+  If a 'packages' tag has no 'profile' attribute, it is assumed to be
+  present for all profiles.  BTW, all of the above also goes for the
+  'drivers' tag too.
+  *** end ***
 
 -------------------------------------------------------------------
 Wed Aug 22 18:07:45 CEST 2007 - ms@suse.de

@@ -16,12 +16,13 @@
 			<xs:sequence>
 				<xs:element ref="description" minOccurs="1" maxOccurs="1"/>
 				<xs:element ref="preferences" minOccurs="0" maxOccurs="1"/>
+				<xs:element ref="profiles"    minOccurs="0" maxOccurs="1"/>
 				<xs:element ref="instsource"  minOccurs="0" maxOccurs="1"/>
 				<xs:element ref="users"       minOccurs="0" maxOccurs="unbounded"/>
-				<xs:element ref="drivers"     minOccurs="0" maxOccurs="3"/>
+				<xs:element ref="drivers"     minOccurs="0" maxOccurs="unbounded"/>
 				<xs:element ref="repository"  minOccurs="0" maxOccurs="unbounded"/>
 				<xs:element ref="deploy"      minOccurs="0" maxOccurs="1"/>
-				<xs:element ref="packages"    minOccurs="0" maxOccurs="4"/>
+				<xs:element ref="packages"    minOccurs="0" maxOccurs="unbounded"/>
 			</xs:sequence>
 			<xs:attribute name="name" type="xs:string"/>
 			<xs:attribute name="inherit" type="xs:string"/>
@@ -88,6 +89,19 @@
 			<xs:attribute name="home" type="xs:string"/>
 		</xs:complexType>
 	</xs:element>
+	<xs:element name="profiles">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="profile" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="profile">
+		<xs:complexType>
+			<xs:attribute name="name" type="xs:string"/>
+			<xs:attribute name="description" type="xs:string"/>
+		</xs:complexType>
+	</xs:element>
 
 	<xs:element name="drivers">
 		<xs:complexType>
@@ -95,6 +109,7 @@
 				<xs:element ref="file" minOccurs="1" maxOccurs="unbounded"/>
 			</xs:sequence>
 			<xs:attribute name="type" type="xs:string"/>
+			<xs:attribute name="profiles" type="xs:string"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="file">
@@ -179,6 +194,7 @@
 			<xs:attribute name="type" type="xs:string"/>
 			<xs:attribute name="memory" type="xs:integer"/>
 			<xs:attribute name="disk" type="xs:string"/>
+			<xs:attribute name="profiles" type="xs:string"/>
 			<xs:attribute name="patternType" use="optional">
 				<xs:simpleType>
 					<xs:restriction base="xs:string">

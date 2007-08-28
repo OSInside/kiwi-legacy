@@ -280,7 +280,7 @@ sub createImageCPIO {
 	if ($dest !~ /^\//) {
 		$dest = $pwd."/".$dest;
 	}
-	my $data = qx (cd $tree && find . | cpio @cpio | gzip -f > $dest);
+	my $data = qx (cd $tree && find . | cpio @cpio | gzip -9 -f > $dest);
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> error  ("Couldn't create cpio archive");
@@ -1309,7 +1309,18 @@ sub writeImageConfig {
 		#------------------------------------------
 		my %unionConfig = $xml -> getDeployUnionConfig ();
 		if (defined %unionConfig) {
-			print FD "UNIONFS_CONFIG=$unionConfig{rw},$unionConfig{ro},$unionConfig{type}\n";
+			my $valid = 0;
+			my $value;
+			if (! $unionConfig{type}) {
+				$unionConfig{type} = "aufs";
+			}
+			if (($unionConfig{rw}) && ($unionConfig{ro})) {
+				$value = "$unionConfig{rw},$unionConfig{ro},$unionConfig{type}";
+				$valid = 1;
+			}
+			if ($valid) {
+				print FD "UNIONFS_CONFIG=$value\n";
+			}
 		}
 		#==========================================
 		# More to come...
@@ -1972,7 +1983,7 @@ sub compressImage {
 	# Compress image using gzip
 	#------------------------------------------
 	$kiwi -> info ("Compressing image...");
-	my $data = qx (gzip -f $imageDest/$name);
+	my $data = qx (gzip -9 -f $imageDest/$name);
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> failed ();

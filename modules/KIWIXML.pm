@@ -55,6 +55,7 @@ sub new {
 	my $imageDesc   = shift;
 	my $foreignRepo = shift;
 	my $imageWhat   = shift;
+	my $reqProfiles = shift;
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
@@ -86,6 +87,7 @@ sub new {
 	my $partitionsNodeList;
 	my $configfileNodeList;
 	my $unionNodeList;
+	my $profilesNodeList;
 	eval {
 		$systemTree = $systemXML
 			-> parse_file ( $controlFile );
@@ -102,6 +104,7 @@ sub new {
 		$configfileNodeList = $systemTree 
 			-> getElementsByTagName("configuration");
 		$unionNodeList = $systemTree -> getElementsByTagName ("union");
+		$profilesNodeList = $systemTree -> getElementsByTagName ("profiles");
 	};
 	if ($@) {
 		$kiwi -> failed ();
@@ -158,8 +161,10 @@ sub new {
 	$this->{partitionsNodeList} = $partitionsNodeList;
 	$this->{configfileNodeList} = $configfileNodeList;
 	$this->{unionNodeList}      = $unionNodeList;
+	$this->{profilesNodeList}   = $profilesNodeList;
+	$this->{reqProfiles}        = $reqProfiles;
 	$this->{arch}               = $arch;
-
+	
 	#==========================================
 	# Store object data (create URL list)
 	#------------------------------------------
@@ -360,14 +365,13 @@ sub getDeployUnionConfig {
 	# ---
 	my $this = shift;
 	my $node = $this->{unionNodeList} -> get_node(1);
-	if (!defined $node) {
+	if (! $node) {
 		return undef;
 	}
-	my %config = ();
+	my %config;
 	$config{ro}   = $node -> getAttribute ("ro");
 	$config{rw}   = $node -> getAttribute ("rw");
 	$config{type} = $node -> getAttribute ("type");
-
 	return %config;
 }
 
@@ -608,6 +612,76 @@ sub getUsers {
 		}
 	}
 	return %result;
+}
+
+#==========================================
+# getProfiles
+#------------------------------------------
+sub getProfiles {
+	# ...
+	# Receive a list of profiles available for this image
+	# ---
+	my $this = shift;
+	my @result;
+	if (! defined $this->{profilesNodeList}) {
+		return @result;
+	}
+	my $base = $this->{profilesNodeList} -> get_node(1);
+	if (! defined $base) {
+		return @result;
+	}
+	my @node = $base -> getElementsByTagName ("profile");
+	foreach my $element (@node) {
+		my $name = $element -> getAttribute ("name");
+		my $desc = $element -> getAttribute ("description");
+		
+		my %profile = ();
+		$profile{name} = $name;
+		$profile{description} = $desc;
+		push @result, { %profile };
+	}
+	return @result;
+}
+
+#==========================================
+# requestedProfile
+#------------------------------------------
+sub requestedProfile {
+	# ...
+	# Return a boolean representing whether or not
+	# a given element is requested to be included
+	# in this image.
+	# ---
+	my $this = shift;
+	my $element = shift;
+	if (! defined $element) {
+		return 1;
+	}
+	my $profiles = $element -> getAttribute ("profiles");
+	if (! defined $profiles) {
+		# If no profile is specified, then it is assumed
+		# to be in all profiles.
+		return 1;
+	}
+	if ((scalar $this->{reqProfiles}) == 0) {
+		# element has a profile, but no profiles requested
+		# so exclude it.
+		return 0;
+	}
+	my @splitProfiles = split(/,/, $profiles);
+	my %profileHash = ();
+	foreach my $profile (@splitProfiles) {
+		$profileHash{$profile} = 1;
+	}
+	foreach my $reqprof (@{$this->{reqProfiles}}) {
+		# strip whitespace
+		$reqprof =~ s/^\s+//s;
+		$reqprof =~ s/\s+$//s;
+		if (defined $profileHash{$reqprof}) {
+			return 1;
+		}
+	}
+	return 0;
 }
 
 #==========================================
@@ -868,6 +942,9 @@ sub getImageConfig {
 	my @node = $this->{driversNodeList} -> get_nodelist();
 	foreach my $element (@node) {
 		my $type = $element -> getAttribute("type");
+		if (! $this -> requestedProfile ($element)) {
+			next;
+		}
 		my @ntag = $element -> getElementsByTagName ("file") -> get_nodelist();
 		my $data = "";
 		foreach my $element (@ntag) {
@@ -892,6 +969,12 @@ sub getImageConfig {
 	}
 	if (defined $language) {
 		$result{language} = $language;
+	}
+	#==========================================
+	# profiles
+	#------------------------------------------
+	if (defined $this->{reqProfiles}) {
+		$result{profiles} = join ",", @{$this->{reqProfiles}};
 	}
 	return %result;
 }
@@ -1019,6 +1102,12 @@ sub getList {
 			}
 		} else {
 			$type = $what;
+		}
+		#============================================
+		# Check to see if node is in included profile
+		#--------------------------------------------
+		if (! $this -> requestedProfile ($node)) {
+			next;
 		}
 		my @plist = $node -> getElementsByTagName ("package");
 		foreach my $element (@plist) {
