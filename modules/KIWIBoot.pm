@@ -151,6 +151,7 @@ sub createBootStructure {
 		$lname  = $lname.".".$loc;
 		$iname  = $iname.".".$loc;
 	}
+	$initrd = $this -> setupSplashForGrub();
 	$kiwi -> info ("Creating initial boot structure");
 	$status = qx ( mkdir -p $tmpdir/boot/grub 2>&1 );
 	$result = $? >> 8;
@@ -160,7 +161,6 @@ sub createBootStructure {
 		$kiwi -> failed ();
 		return undef;
 	}
-	$initrd = $this -> setupSplashForGrub();
 	$status = qx ( cp $initrd $tmpdir/boot/$iname 2>&1 );
 	$result = $? >> 8;
 	if ($result != 0) {
