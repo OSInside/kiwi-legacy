@@ -235,7 +235,7 @@ export systemIntegrity="unknown"
 # 9) Is this a diskful station
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
-if [ ! -z "$PART" ] && [ -z "$NFSROOT" ];then
+if [ ! -z "$PART" ] && [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ];then
 	#======================================
 	# Check for installed system
 	#--------------------------------------
@@ -293,7 +293,7 @@ fi
 #======================================
 # 10) Download network client image
 #--------------------------------------
-if [ -z "$NFSROOT" ];then
+if [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ];then
 	count=0
 	IFS="," ; for i in $IMAGE;do
 		imageZipped="uncompressed"
@@ -459,19 +459,53 @@ if [ -z "$NFSROOT" ];then
 		rm -f /etc/image.md5
 	done
 else
-	IFS="," ; for i in $NFSROOT;do
-		field=0
-		IFS=";" ; for n in $i;do
-		case $field in
-			0) nfsRootServer=$n ; field=1 ;;
-			1) nfsRootDevice=$n ; field=2
-		esac
+	#======================================
+	# 10.1) Check for NFS root
+	#--------------------------------------
+	if [ ! -z "$NFSROOT" ];then
+		IFS="," ; for i in $NFSROOT;do
+			field=0
+			IFS=";" ; for n in $i;do
+			case $field in
+				0) nfsRootServer=$n ; field=1 ;;
+				1) nfsRootDevice=$n ; field=2
+			esac
+			done
 		done
 		Echo "Mounting NFS root system: $nfsRootServer:$nfsRootDevice..."
 		imageRootDevice="-o nolock,rw $nfsRootServer:$nfsRootDevice"
 		imageRootName="NFSRoot-System"
 		systemIntegrity="clean"
-	done
+	fi
+	#======================================
+	# 10.2) Check for NBD root
+	#--------------------------------------
+	if [ ! -z "$NBDROOT" ];then
+		if ! modprobe nbd;then
+			systemException "Failed to load network blk device module" "reboot"
+		fi
+		IFS="," ; for i in $NBDROOT;do
+			field=0
+			IFS=";" ; for n in $i;do
+			case $field in
+				0) nbdRootServer=$n ; field=1 ;;
+				1) nbdRootPort=$n   ; field=2
+			esac
+			done
+		done
+		Echo "Mounting NBD root system: $nbdRootServer:$nbdRootPort..."
+		if ! /usr/sbin/nbd-client $nbdRootServer $nbdRootPort /dev/nd0;then
+			systemException "Failed to setup nd0 device" "reboot"
+		fi
+		imageRootDevice="/dev/nd0"
+		probeFileSystem $imageRootDevice
+		Echo "Filesystem of remote root system is: $FSTYPE"
+		if test "$FSTYPE" = "squashfs";then
+			export UNIONFS_CONFIG="/dev/ram1,"$imageRootDevice",aufs"
+		fi
+		imageRootName="NBDRoot-System"
+		systemIntegrity="clean"
+	fi
 fi
 
 #======================================
@@ -550,7 +584,7 @@ fi
 #======================================
 # 14) send DHCP_RELEASE, reset cache
 #--------------------------------------
-if [ $LOCAL_BOOT = "no" ] && [ -z "$NFSROOT" ];then
+if [ $LOCAL_BOOT = "no" ] && [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ];then
 	if test $systemIntegrity = "clean";then
 		dhcpcd -k
 	fi
@@ -559,7 +593,7 @@ fi
 #======================================
 # 15) Check if this is a split image
 #--------------------------------------
-if [ ! -z "$COMBINED_IMAGE" ] && [ -z "$NFSROOT" ]; then
+if [ ! -z "$COMBINED_IMAGE" ] && [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ]; then
 	READ_ONLY_SYSTEM=system
 	mkdir -p /mnt/$READ_ONLY_SYSTEM && \
 		mount $imageNextRootDevice /mnt/$READ_ONLY_SYSTEM

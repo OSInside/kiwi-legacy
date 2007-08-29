@@ -2,6 +2,8 @@
 Tue Aug 28 15:35:20 CEST 2007 - ms@suse.de
 
 - v1.58
+- added experimental support for network block device diskless
+  boot, NBDROOT support (#304760)
 - fixed splash files detection check in setupSplashForGrub()
 - removed squashfs-kmp-default from descriptions. The module ist part
   of the standard kernel of openSUSE 10.3 now

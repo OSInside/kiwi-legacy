@@ -39,6 +39,7 @@
 		<file name="drivers/scsi/*"/>
 		<file name="drivers/message/fusion/*"/>
 		<file name="drivers/net/*"/>
+		<file name="drivers/block/nbd.ko"/>
 	</drivers>
 	<repository type="yast2" status="replaceable">
 		<!--<source path="opensuse://10.3"/>-->
@@ -67,6 +68,7 @@
 		<package name="gfxboot"/>
 		<package name="fribidi"/>
 		<package name="make"/>
+		<package name="nbd"/>
 	</packages>
 	<packages type="boot">
 		<package name="filesystem"/>

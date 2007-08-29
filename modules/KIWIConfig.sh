@@ -305,7 +305,7 @@ function suseStripInitrd {
 		gzip grep false df cp cat bash basename arch sort ls uniq lsmod
 		usleep parted mke2fs pvcreate vgcreate lvm resize2fs ln hdparm
 		dmesg splash fbmngplay portmap start-statd sm-notify
-		rpc.statd rpc.idmapd
+		rpc.statd rpc.idmapd nbd-client
 	"
 	for path in /sbin /usr/sbin /usr/bin /bin;do
 		baseStripTools "$path" "$tools"
