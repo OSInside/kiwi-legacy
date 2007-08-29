@@ -61,7 +61,6 @@
 		<package name="diffutils"/>
 		<package name="procps"/>
 		<package name="lvm2"/>
-		<package name="squashfs-kmp-default"/>
 		<package name="aufs-kmp-default"/>	
 		<package name="gfxboot"/>
 		<package name="fribidi"/>

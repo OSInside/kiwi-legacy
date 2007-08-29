@@ -64,7 +64,6 @@
 		<package name="make"/>
 		<package name="memtest86+"/>
 		<package name="squashfs"/>
-		<package name="squashfs-kmp-default"/>
 		<package name="aufs"/>
 		<package name="aufs-kmp-default"/>
 		<package name="fribidi"/>

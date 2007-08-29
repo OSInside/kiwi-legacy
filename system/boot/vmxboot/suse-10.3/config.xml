@@ -58,7 +58,6 @@
 		<package name="util-linux"/>
 		<package name="grub"/>
 		<package name="squashfs"/>
-		<package name="squashfs-kmp-default"/>
 		<package name="aufs"/>
 		<package name="aufs-kmp-default"/>
 		<package name="gfxboot"/>

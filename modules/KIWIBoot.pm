@@ -971,17 +971,17 @@ sub setupSplashForGrub {
 		qx (rm -rf $spldir);
 		return $initrd;
 	}
-	if (! -d "$irddir/image/loader") {
+	#==========================================
+	# move splash files
+	#------------------------------------------
+	$status = qx (mv $irddir/image/loader/*.spl $newspl 2>&1);
+	$result = $? >> 8;
+	if ($result != 0) {
 		$kiwi -> warning ("No splash files found in initrd");
 		$kiwi -> skipped ();
 		qx (rm -rf $spldir);
 		return $initrd;
 	}
-	#==========================================
-	# move splash files
-	#------------------------------------------
-	qx (mv $irddir/image/loader/*.spl $newspl);
-
 	#==========================================
 	# create new splash with all pictures
 	#------------------------------------------

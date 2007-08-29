@@ -2,6 +2,9 @@
 Tue Aug 28 15:35:20 CEST 2007 - ms@suse.de
 
 - v1.58
+- fixed splash files detection check in setupSplashForGrub()
+- removed squashfs-kmp-default from descriptions. The module ist part
+  of the standard kernel of openSUSE 10.3 now
 - added optional CD root data. The description can contain
   the file config-cdroot.tgz which is a gzip tar archive.
   The archive will be unpacked as CD root data and can contain
