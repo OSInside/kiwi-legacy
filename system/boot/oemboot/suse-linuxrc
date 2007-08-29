@@ -137,10 +137,32 @@ fi
 #======================================
 # 7) repartition the disk device
 #--------------------------------------
-# TODO
 # resize /dev/xda1 to be 10GB
 # add primary partition for swap space (1GB)
+# -> swap_size = 2*RAM
 # add primary partition for home space (rest)
+
+#AVAIL_DISK=${deviceDisk}
+MEM_SIZE=`grep MemTotal: /proc/meminfo | tr -dc '[0-9]'`
+SWAP_SIZE=$(( $MEM_SIZE *2 / 1024 ))
+#echo "Available block device: $AVAIL_DISK"
+#echo "Physical memory: $MEM_SIZE"
+#echo "Recommended swap size: $SWAP_SIZE"
+
+cat<<END | sfdisk -q -uM -D ${deviceDisk}
+1,10240,L,*
+,$SWAP_SIZE,S
+,,L
+END
+
+if test $? != 0; then
+	echo "Error: partitioning didn't work!"
+	systemException "Failed to create patritions" "shell"
+else
+	mkswap ${deviceDisk}2
+	mke2fs -j -q ${deviceDisk}3
+	deviceHome=${deviceDisk}3
+fi
 
 #======================================
 # 8) Resize filesystem to full space
@@ -148,19 +170,19 @@ fi
 Echo "Filesystem of root system is: $FSTYPE -> $deviceRoot"
 if test "$FSTYPE" = "reiserfs";then
 	Echo "Resize Reiser filesystem to full partition space..."
-	resize_reiserfs $deviceRoot
+	resize_reiserfs -q $deviceRoot
 	INITRD_MODULES="$INITRD_MODULES reiserfs"
 fi
 if test "$FSTYPE" = "ext2";then
-	Echo "Checking EXT2 filesystem..."
-	e2fsck -y -f $deviceRoot
+	#Echo "Checking EXT2 filesystem..."
+	#e2fsck -y -f $deviceRoot
 	Echo "Resize EXT2 filesystem to full partition space..."
 	resize2fs -F -p $deviceRoot
 	INITRD_MODULES="$INITRD_MODULES ext2"
 fi
 if test "$FSTYPE" = "ext3";then
-	Echo "Checking EXT3 filesystem..."
-	e2fsck -y -f $deviceRoot
+	#Echo "Checking EXT3 filesystem..."
+	#e2fsck -y -f $deviceRoot
 	Echo "Resize EXT3 filesystem to full partition space..."
 	resize2fs -F -p $deviceRoot
 	Echo "Checking EXT3 journal..."
@@ -210,7 +232,7 @@ IFS="," ; for i in $KERNEL_LIST;do
 		echo "title SUSE Linux Enterprise Desktop 10 SP1 ($kernel)" >> $menu
 		echo -n " kernel $gdev/boot/$kernel"    >> $menu
 		echo -n " root=${deviceDisk}1 $console" >> $menu
-		echo " vga=0x314"                       >> $menu
+		echo " vga=0x318"                       >> $menu
 		echo " initrd $gdev/boot/$initrd"       >> $menu
 	fi
 done
@@ -264,20 +286,40 @@ cp /preinit /mnt
 cp /include /mnt
 
 #======================================
-# 16) Set up system and reboot
+# 16) Start YaST when booting final sys
 #--------------------------------------
-Echo "Setting up System on: [$deviceDisk]"
+touch /mnt/var/lib/YaST2/runme_at_boot
+
+#======================================
+# 17) Activate new root
+#--------------------------------------
+Echo "Activating Image: [$imageRootName]"
 cd /mnt && exec < dev/console >dev/console 2>&1
 Echo "Calling preinit phase..."
 reopenKernelConsole
-chroot /mnt ./preinit
+/mnt/sbin/pivot_root . mnt >/dev/null 2>&1
+if test $? != 0;then
+	PIVOT=false
+	cleanInitrd && mount --move . / && chroot . ./preinit
+	chroot . rm ./preinit
+	chroot . rm ./include
+else
+	PIVOT=true
+	./preinit
+	rm ./preinit
+	rm ./include
+fi
 
-#systemException "break" "shell"
+#======================================
+# 18) Unmount initrd / system init
+#--------------------------------------
+echo " "
+echo "Booting into final System..."
+echo "----------------------------"
+mount -n -o remount,rw / 2>/dev/null
+if [ $PIVOT = "true" ];then
+	exec umount -n -l /mnt
+else
+	exec chroot . /sbin/init
+fi
 
-rm -f /mnt/preinit
-rm -f /mnt/include
-umount -l /mnt
-
-#systemException "break" "shell"
-
-/sbin/reboot -f
