@@ -63,7 +63,6 @@
 		<package name="gfxboot"/>
 		<package name="fribidi"/>
 		<package name="make"/>
-		<package name="nbd"/>
 	</packages>
 	<packages type="boot">
 		<package name="filesystem"/>
