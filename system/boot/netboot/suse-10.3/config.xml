@@ -67,6 +67,7 @@
 		<package name="fribidi"/>
 		<package name="make"/>
 		<package name="nbd"/>
+		<package name="nfs-client"/>
 	</packages>
 	<packages type="boot">
 		<package name="filesystem"/>

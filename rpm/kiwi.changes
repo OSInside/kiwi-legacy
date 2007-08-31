@@ -2,6 +2,12 @@
 Tue Aug 28 15:35:20 CEST 2007 - ms@suse.de
 
 - v1.58
+- moved documentation to openSUSE book on forge.novell.com
+  The book is work in progress as well as the kiwi chapter in
+  there. I started to update the documentation and set the
+  initial structure. There are some TODO entries which we are
+  working on
+- added nfs-client package to be part of netboot/suse-10.3
 - added partition code by Jan <jcbornschlegel@novell.com> and
   activate bootsplash for oemboot initrd
 - added experimental support for network block device diskless
