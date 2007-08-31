@@ -8,6 +8,7 @@ Tue Aug 28 15:35:20 CEST 2007 - ms@suse.de
   initial structure. There are some TODO entries which we are
   working on
 - added nfs-client package to be part of netboot/suse-10.3
+  fixed nfs mount for 10.3 mount.nfs was missing
 - added partition code by Jan <jcbornschlegel@novell.com> and
   activate bootsplash for oemboot initrd
 - added experimental support for network block device diskless
