@@ -2,7 +2,7 @@
 Mon Sep  3 16:06:32 CEST 2007 - ms@suse.de
 
 - v1.60
-- remove isoinstboot description from repo, not valid anymore
+- removed isoinstboot description from repo, not valid anymore
 
 -------------------------------------------------------------------
 Mon Sep  3 10:19:20 CEST 2007 - ms@suse.de
