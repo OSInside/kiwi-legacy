@@ -995,8 +995,8 @@ sub setupSplashForGrub {
 		qx (rm -rf $splash.dir);
 		qx (rm -f $splash);
 	}
-	qx (cd $newspl && find|cpio --quiet -oH newc | gzip -9 > $spldir/all.spl);
-	qx (cd $irddir && find|cpio --quiet -oH newc | gzip -9 > $newird);
+	qx ((cd $newspl && find|cpio --quiet -oH newc | gzip -9) > $spldir/all.spl);
+	qx ((cd $irddir && find|cpio --quiet -oH newc | gzip -9) > $newird);
 	#==========================================
 	# create splash initrd
 	#------------------------------------------

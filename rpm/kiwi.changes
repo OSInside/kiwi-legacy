@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Sep  3 10:19:20 CEST 2007 - ms@suse.de
+
+- v1.59
+- added patch by Jan <jcbornschlegel@novell.com> which fixes
+  directory changes not happen in subshells
+
+-------------------------------------------------------------------
 Tue Aug 28 15:35:20 CEST 2007 - ms@suse.de
 
 - v1.58
