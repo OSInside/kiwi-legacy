@@ -2,7 +2,7 @@
 Mon Sep  3 10:19:20 CEST 2007 - ms@suse.de
 
 - v1.59
-- fixed network block device naming nd0 -> ndb0
+- fixed network block device naming nd0 -> nbd0
 - added patch by Jan <jcbornschlegel@novell.com> which fixes
   directory changes not happen in subshells
 
