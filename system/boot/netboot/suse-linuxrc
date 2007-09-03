@@ -494,10 +494,10 @@ else
 			done
 		done
 		Echo "Mounting NBD root system: $nbdRootServer:$nbdRootPort..."
-		if ! /usr/sbin/nbd-client $nbdRootServer $nbdRootPort /dev/nbd0;then
-			systemException "Failed to setup nbd0 device" "reboot"
+		if ! /usr/sbin/nbd-client $nbdRootServer $nbdRootPort /dev/nb0;then
+			systemException "Failed to setup nb0 device" "reboot"
 		fi
-		imageRootDevice="/dev/nbd0"
+		imageRootDevice="/dev/nb0"
 		probeFileSystem $imageRootDevice
 		Echo "Filesystem of remote root system is: $FSTYPE"
 		if test "$FSTYPE" = "squashfs";then
