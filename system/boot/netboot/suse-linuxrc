@@ -488,16 +488,20 @@ else
 			field=0
 			IFS=";" ; for n in $i;do
 			case $field in
-				0) nbdRootServer=$n ; field=1 ;;
-				1) nbdRootPort=$n   ; field=2
+				0) nbdServer=$n ; field=1 ;;
+				1) nbdPort=$n   ; field=2 ;;
+				2) nbdDevice=$n ; field=3
 			esac
 			done
 		done
-		Echo "Mounting NBD root system: $nbdRootServer:$nbdRootPort..."
-		if ! /usr/sbin/nbd-client $nbdRootServer $nbdRootPort /dev/nb0;then
-			systemException "Failed to setup nb0 device" "reboot"
+		if [ -z "$nbdDevice" ];then
+			nbdDevice="/dev/nbd0"
 		fi
-		imageRootDevice="/dev/nb0"
+		Echo "Mounting NBD root system: $nbdServer $nbdPort [$nbdDevice]..."
+		if ! /usr/sbin/nbd-client $nbdServer $nbdPort $nbdDevice;then
+			systemException "Failed to setup $nbdDevice device" "reboot"
+		fi
+		imageRootDevice=$nbdDevice
 		probeFileSystem $imageRootDevice
 		Echo "Filesystem of remote root system is: $FSTYPE"
 		if test "$FSTYPE" = "squashfs";then
