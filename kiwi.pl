@@ -31,7 +31,7 @@ use KIWIMigrate;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "1.59";
+our $Version       = "1.60";
 our $openSUSE      = "http://software.opensuse.org/download/";
 #============================================
 # Globals
@@ -60,8 +60,6 @@ our $BootVMFormat;      # virtual disk format supported by qemu-img
 our $BootVMDisk;        # deploy initrd booting from a VM 
 our $BootVMSize;        # size of virtual disk
 our $BootCD;            # deploy initrd booting from CD
-our $InstallCD;         # deploy initrd installing from cD
-our $InstallCDSystem;   # system image to be deployed via CD
 our $StripImage;        # strip shared objects and binaries
 our $CreatePassword;    # create crypt password string
 our $ImageName;         # filename of current image, used in Modules
@@ -536,30 +534,6 @@ sub main {
 	}
 
 	#==========================================
-	# Create an initrd .iso for CD install
-	#------------------------------------------
-	if (defined $InstallCD) {
-		$kiwi -> info ("Creating install ISO from: $InstallCD...\n");
-		if (! defined $InstallCDSystem) {
-			$kiwi -> failed ();
-			$kiwi -> error ("No CD system specified");
-			$kiwi -> failed ();
-			my $code = kiwiExit (1);
-			return $code;
-		}
-
-		my $boot = new KIWIBoot ($kiwi,$InstallCD);
-		if (! defined $boot) {
-			my $code = kiwiExit (1); return $code;
-		}
-		if (! $boot -> setupBootCD ($InstallCDSystem)) {
-			my $code = kiwiExit (1); return $code;
-		}
-
-		my $code = kiwiExit (0); return $code;
-	}
-
-	#==========================================
 	# Create a virtual disk image
 	#------------------------------------------
 	if (defined $BootVMDisk) {
@@ -636,8 +610,6 @@ sub init {
 		"bootvm-format=s"       => \$BootVMFormat,
 		"bootvm-disksize=s"     => \$BootVMSize,
 		"bootcd=s"              => \$BootCD,
-		"installcd=s"           => \$InstallCD,
-		"installcd-system=s"    => \$InstallCDSystem,
 		"strip|s"               => \$StripImage,
 		"createpassword"        => \$CreatePassword,
 		"list-profiles|i=s"     => \$ListProfiles,
@@ -656,7 +628,7 @@ sub init {
 	if (
 		(! defined $Prepare) && (! defined $Create) &&
 		(! defined $BootStick) && (! defined $BootCD) &&
-		(! defined $InstallCD) && (! defined $Upgrade) &&
+		(! defined $Upgrade) &&
 		(! defined $BootVMDisk) && (! defined $CreatePassword) &&
 		(! defined $CreateInstSource) && (! defined $Migrate) &&
 		(! defined $ListProfiles)
@@ -717,7 +689,6 @@ sub usage {
 	print "     [ --bootvm-disksize <size> ]\n";
 	print "     [ --bootvm-format <format> ]\n";
 	print "  kiwi --bootcd <initrd>\n";
-	print "  kiwi --installcd <initrd> --installcd-system <systemImage>\n";
 	print "Helper Tools:\n";
 	print "  kiwi --createpassword\n";
 	print "  kiwi --create-instsource <image-path>\n";
