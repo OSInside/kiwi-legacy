@@ -70,4 +70,38 @@
 		<package name="glibc-locale"/>
 		<package name="devs"/>
 	</packages>
+	<packages type="delete">
+		<package name="perl"/>
+		<package name="glibc-locale"/>
+		<package name="man"/>
+		<package name="info"/>
+		<package name="smart"/>
+		<package name="python"/>
+		<package name="python-xml"/>
+		<package name="python-elementtree"/>
+		<package name="perl-gettext"/>
+		<package name="perl-Bootloader"/>
+		<package name="pam-modules"/>
+		<package name="gawk"/>
+		<package name="gnome-filesystem"/>
+		<package name="openslp"/>
+		<package name="rpm-python"/>
+		<package name="suse-build-key"/>
+		<package name="permissions"/>
+		<package name="fillup"/>
+		<package name="pam"/>
+		<package name="expat"/>
+		<package name="suse-release"/>
+		<package name="libxml2"/>
+		<package name="openldap2-client"/>
+		<package name="logrotate"/>
+		<package name="diffutils"/>
+		<package name="cpio"/>
+		<package name="insserv"/>
+		<package name="ash"/>
+		<package name="gdbm"/>
+		<package name="gfxboot"/>
+		<package name="fribidi"/>
+		<package name="make"/>
+	</packages>
 </image>

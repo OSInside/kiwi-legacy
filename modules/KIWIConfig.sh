@@ -198,6 +198,13 @@ function suseConfig {
 }
 
 #======================================
+# baseGetPackagesForDeletion
+#--------------------------------------
+function baseGetPackagesForDeletion {
+	echo $delete
+}
+
+#======================================
 # baseCleanMount
 #--------------------------------------
 function baseCleanMount {

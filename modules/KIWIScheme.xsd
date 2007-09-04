@@ -175,6 +175,7 @@
 					<xs:restriction base="xs:string">
 						<xs:enumeration value="boot"/>
 						<xs:enumeration value="system"/>
+						<xs:enumeration value="delete"/>
 					</xs:restriction>
 				</xs:simpleType>
 			</xs:attribute>

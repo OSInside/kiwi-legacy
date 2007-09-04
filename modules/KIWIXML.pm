@@ -921,9 +921,13 @@ sub getImageConfig {
 		$result{compressed} = "yes";
 	}
 	my %type = %{$this->getImageTypeAndAttributes()};
+	my @delp = $this -> getDeleteList();
 	my $iver = getImageVersion ($this);
 	my $size = getImageSize    ($this);
 	my $name = getImageName    ($this);
+	if (@delp) {
+		$result{delete} = join(" ",@delp);
+	}
 	if (%type) {
 		$result{type} = $type{type};
 	}
@@ -1248,6 +1252,22 @@ sub getBaseList {
 	# ---
 	my $this = shift;
 	return getList ($this,"boot");
+}
+
+#==========================================
+# getDeleteList
+#------------------------------------------
+sub getDeleteList {
+	# ...
+	# Create delete package list which are packages
+	# which have already been installed but could be
+	# forced for deletion in images.sh. The KIWIConfig.sh
+	# module provides a function to get the contents of
+	# this list. KIWI will store the delete list as
+	# .profile variable
+	# ---
+	my $this = shift;
+	return getList ($this,"delete");
 }
 
 #==========================================

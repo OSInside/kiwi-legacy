@@ -2,6 +2,7 @@
 Mon Sep  3 16:06:32 CEST 2007 - ms@suse.de
 
 - v1.60
+- added support for <packages type="delete"> section (#304765)
 - removed isoinstboot description from repo, not valid anymore
 - got a nice cover page by Frank Sundermeyer <fs@novell.com> for
   the documentation, thanks Frank

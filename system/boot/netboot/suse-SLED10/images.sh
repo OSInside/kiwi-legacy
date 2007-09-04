@@ -12,15 +12,7 @@ suseGFXBoot NLD grub
 #==========================================
 # remove unneeded packages
 #------------------------------------------
-for i in \
-	perl glibc-locale man info smart python \
-	python-xml python-elementtree perl-gettext \
-	perl-Bootloader pam-modules gawk gnome-filesystem \
-	openslp rpm-python suse-build-key permissions \
-	fillup pam expat suse-release libxml2 openldap2-client \
-	logrotate diffutils cpio insserv ash gdbm \
-	gfxboot fribidi make
-do
+for i in `baseGetPackagesForDeletion`;do
 	rpm -e $i --nodeps
 done
 
