@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Sep  4 17:04:59 CEST 2007 - ms@suse.de
+
+- v1.61
+- added patch by Cornelius Schumacher <cschum@novell.com>
+  which allows optional remove of root directory 
+
+-------------------------------------------------------------------
 Mon Sep  3 16:06:32 CEST 2007 - ms@suse.de
 
 - v1.60

@@ -31,7 +31,7 @@ use KIWIMigrate;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "1.60";
+our $Version       = "1.61";
 our $openSUSE      = "http://software.opensuse.org/download/";
 #============================================
 # Globals
@@ -75,6 +75,7 @@ our @Exclude;           # exclude directories in migrate search
 our $Report;            # create report on root/ tree migration only
 our @Profiles;          # list of profiles to include in image
 our $ListProfiles;      # lists the available profiles in image
+our $ForceNewRoot;      # force creation of new root directory
 
 #============================================
 # Globals
@@ -613,6 +614,7 @@ sub init {
 		"strip|s"               => \$StripImage,
 		"createpassword"        => \$CreatePassword,
 		"list-profiles|i=s"     => \$ListProfiles,
+		"force-new-root"        => \$ForceNewRoot,
 		"help|h"                => \&usage,
 		"<>"                    => \&usage
 	);
@@ -738,6 +740,10 @@ sub usage {
 	print "  [ --logfile <filename> | terminal ]\n";
 	print "    Write to the log file \`<filename>' instead of\n";
 	print "    the terminal.\n";
+	print "\n";
+	print "  [ --force-new-root ]\n";
+	print "    Force creation of new root directory. If the directory\n";
+	print "    already exists, it is deleted.\n";
 	print "--\n";
 	version();
 }

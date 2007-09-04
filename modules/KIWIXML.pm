@@ -1400,6 +1400,7 @@ sub createTmpDirectory {
 	my $rootError = 1;
 	my $root;
 	my $code;
+	my $kiwi = $this->{kiwi};
 	if (! defined $useRoot) {
 		if (! defined $selfRoot) {
 			$root = qx ( mktemp -q -d /tmp/kiwi.XXXXXX );
@@ -1411,6 +1412,11 @@ sub createTmpDirectory {
 		} else {
 			$root = $selfRoot;
 			rmdir $root;
+			if ( -e $root && -d $root && $main::ForceNewRoot ) {
+				$kiwi -> info ("Removing old root directory '$root'");
+				qx (rm -R $root);
+				$kiwi -> done();
+			}
 			if (mkdir $root) {
 				$rootError = 0;
 			}
