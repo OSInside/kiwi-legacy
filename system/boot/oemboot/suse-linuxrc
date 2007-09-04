@@ -150,7 +150,7 @@ SWAP_SIZE=$(( $MEM_SIZE *2 / 1024 ))
 #echo "Recommended swap size: $SWAP_SIZE"
 
 cat<<END | sfdisk -q -uM -D ${deviceDisk}
-1,10240,L,*
+1,10000,L,*
 ,$SWAP_SIZE,S
 ,,L
 END
@@ -175,14 +175,14 @@ if test "$FSTYPE" = "reiserfs";then
 fi
 if test "$FSTYPE" = "ext2";then
 	#Echo "Checking EXT2 filesystem..."
-	#e2fsck -y -f $deviceRoot
+	e2fsck -y -f $deviceRoot
 	Echo "Resize EXT2 filesystem to full partition space..."
 	resize2fs -F -p $deviceRoot
 	INITRD_MODULES="$INITRD_MODULES ext2"
 fi
 if test "$FSTYPE" = "ext3";then
 	#Echo "Checking EXT3 filesystem..."
-	#e2fsck -y -f $deviceRoot
+	e2fsck -y -f $deviceRoot
 	Echo "Resize EXT3 filesystem to full partition space..."
 	resize2fs -F -p $deviceRoot
 	Echo "Checking EXT3 journal..."
