@@ -348,7 +348,7 @@ sub install {
 	#==========================================
 	# Get VMware package if type is appropriate
 	#------------------------------------------
-	if ("$type{type}" eq "vmx") {
+	if (("$type{type}" eq "vmx") && ("$type{boot}" =~ /vmxboot/)) {
 		$kiwi -> info ("Creating VMware package list");
 		my @vmwareList = $xml -> getVMwareList();
 		if (@vmwareList) {

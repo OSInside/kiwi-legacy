@@ -289,6 +289,7 @@
 								<xs:enumeration value="vmdk"/>
 								<xs:enumeration value="qcow"/>
 								<xs:enumeration value="cow"/>
+								<xs:enumeration value="iso"/>
 							</xs:restriction>
 						</xs:simpleType>
 					</xs:attribute>

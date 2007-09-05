@@ -60,6 +60,7 @@ our $BootVMFormat;      # virtual disk format supported by qemu-img
 our $BootVMDisk;        # deploy initrd booting from a VM 
 our $BootVMSize;        # size of virtual disk
 our $BootCD;            # deploy initrd booting from CD
+our $BootCDSystem;      # virtual disk system image to be installed on disk
 our $StripImage;        # strip shared objects and binaries
 our $CreatePassword;    # create crypt password string
 our $ImageName;         # filename of current image, used in Modules
@@ -502,7 +503,7 @@ sub main {
 	}
 
 	#==========================================
-	# Write an initrd image to a boot USB stick
+	# Write a initrd/system image to USB stick
 	#------------------------------------------
 	if (defined $BootStick) {
 		$kiwi -> info ("Creating boot USB stick from: $BootStick...\n");
@@ -520,11 +521,11 @@ sub main {
 	}
 
 	#==========================================
-	# Create an initrd .iso for CD boot
+	# Create a initrd/system ISO for CD boot
 	#------------------------------------------
 	if (defined $BootCD) {
-		$kiwi -> info ("Creating boot ISO from: $BootCD...\n");
-		my $boot = new KIWIBoot ($kiwi,$BootCD);
+		$kiwi -> info ("Creating install ISO from: $BootCD...\n");
+		my $boot = new KIWIBoot ($kiwi,$BootCD,$BootCDSystem);
 		if (! defined $boot) {
 			my $code = kiwiExit (1); return $code;
 		}
@@ -540,7 +541,6 @@ sub main {
 	if (defined $BootVMDisk) {
 		$kiwi -> info ("Creating boot VM disk from: $BootVMDisk...\n");
 		if (! defined $BootVMSystem) {
-			$kiwi -> failed ();
 			$kiwi -> error  ("No VM system specified");
 			$kiwi -> failed ();
 			my $code = kiwiExit (1);
@@ -611,6 +611,7 @@ sub init {
 		"bootvm-format=s"       => \$BootVMFormat,
 		"bootvm-disksize=s"     => \$BootVMSize,
 		"bootcd=s"              => \$BootCD,
+		"bootcd-system=s"       => \$BootCDSystem,
 		"strip|s"               => \$StripImage,
 		"createpassword"        => \$CreatePassword,
 		"list-profiles|i=s"     => \$ListProfiles,
@@ -691,6 +692,7 @@ sub usage {
 	print "     [ --bootvm-disksize <size> ]\n";
 	print "     [ --bootvm-format <format> ]\n";
 	print "  kiwi --bootcd <initrd>\n";
+	print "     [ --bootcd-system <system-image> ]\n";
 	print "Helper Tools:\n";
 	print "  kiwi --createpassword\n";
 	print "  kiwi --create-instsource <image-path>\n";

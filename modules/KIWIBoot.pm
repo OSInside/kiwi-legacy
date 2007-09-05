@@ -527,20 +527,54 @@ sub setupBootStick {
 #------------------------------------------
 sub setupBootCD {
 	my $this      = shift;
-	my $imageData = shift;
 	my $kiwi      = $this->{kiwi};
 	my $tmpdir    = $this->{tmpdir};
 	my $initrd    = $this->{initrd};
+	my $system    = $this->{system};
+	my $irddir    = $initrd."_".$$.".vmxsystem";
 	my $status;
 	my $result;
-	if (defined $imageData) {
-		my $imageDataMd5 = "$imageData.md5";
-		my $imageDataConfig = "$imageData.config";
-		qx ( mkdir -p $tmpdir/image 2>&1 );
-		qx ( cp $imageData $tmpdir/image 2>&1 );
-		qx ( cp $imageDataMd5 $tmpdir/image 2>&1 );
-		qx ( cp $imageDataConfig $tmpdir/config.isoclient 2>&1 );
+	if (! mkdir $irddir) {
+		$kiwi -> error  ("Failed to create vmxsystem directory");
+		$kiwi -> failed ();
+		return undef;
 	}
+	#==========================================
+	# unpack initrd files
+	#------------------------------------------
+	$status = qx (gzip -cd $initrd|(cd $irddir && cpio -d -i 2>&1));
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> error  ("Failed to extract data: $!");
+		$kiwi -> failed ();
+		qx (rm -rf $irddir);
+		return undef;
+	}
+	#==========================================
+	# add config.vmxsystem file to initrd
+	#------------------------------------------
+	if (defined $system) {
+		if (! open (FD,">$irddir/config.vmxsystem")) {
+			$kiwi -> error  ("Couldn't create image boot configuration");
+			$kiwi -> failed ();
+			return undef;
+		}
+		my $namecd = qx (basename $system); chomp $namecd;
+		print FD "IMAGE=$namecd\n";
+		close FD;
+	}
+	#==========================================
+	# create new initrd with vmxsystem file
+	#------------------------------------------
+	$status = qx ((cd $irddir && find|cpio --quiet -oH newc|gzip -9) > $initrd);
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> error  ("Failed to re-create initrd: $status");
+		$kiwi -> failed ();
+		qx (rm -rf $irddir);
+		return undef;
+	}
+	qx (rm -rf $irddir);
 	#==========================================
 	# Create CD structure
 	#------------------------------------------
@@ -553,8 +587,11 @@ sub setupBootCD {
 	$kiwi -> info ("Importing grub stages for CD boot");
 	my $stage1 = "'usr/lib/grub/stage1'";
 	my $stage2 = "'usr/lib/grub/stage2_eltorito'";
+	my $message= "'image/loader/message'";
+	$status = qx (gzip -cd $initrd | (cd $tmpdir && cpio -d -i $message 2>&1));
 	$status = qx (gzip -cd $initrd | (cd $tmpdir && cpio -d -i $stage1 2>&1));
 	$status = qx (gzip -cd $initrd | (cd $tmpdir && cpio -d -i $stage2 2>&1));
+	$status = qx ( mv $tmpdir/$message $tmpdir/boot/message 2>&1 );
 	$status = qx ( mv $tmpdir/$stage1 $tmpdir/boot/grub/stage1 2>&1 );
 	$status = qx ( mv $tmpdir/$stage2 $tmpdir/boot/grub/stage2 2>&1 );
 	$result = $? >> 8;
@@ -564,6 +601,8 @@ sub setupBootCD {
 		$kiwi -> failed ();
 		return undef; 
 	}
+	qx (rm -rf $tmpdir/usr 2>&1);
+	qx (rm -rf $tmpdir/image 2>&1);
 	$kiwi -> done ();
 
 	#==========================================
@@ -579,7 +618,7 @@ sub setupBootCD {
 	print FD "color cyan/blue white/blue\n";
 	print FD "default 0\n";
 	print FD "timeout 10\n";
-	print FD "framebuffer 1\n";
+	print FD "gfxmenu (cd)/boot/message\n";
 	print FD "title KIWI CD boot\n";
 	print FD " kernel (cd)/boot/linux vga=0x314 splash=silent";
 	print FD " ramdisk_size=512000 showopts\n";
@@ -588,10 +627,25 @@ sub setupBootCD {
 	$kiwi -> done();
 
 	#==========================================
+	# Copy system image if defined
+	#------------------------------------------
+	if (defined $system) {
+		$kiwi -> info ("Importing system image: $system");
+		$status = qx (cp $system $tmpdir 2>&1);
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Failed importing system image: $status");
+			$kiwi -> failed ();
+			return undef;
+		}
+		$kiwi -> done();
+	}
+	#==========================================
 	# Create an iso image from the tree
 	#------------------------------------------
 	$kiwi -> info ("Creating ISO image");
-	my $name = $initrd; $name =~ s/gz$/cdboot.iso/;
+	my $name = $system; $name =~ s/raw$/iso/;
 	my $base = "-R -b boot/grub/stage2";
 	my $opts = "-no-emul-boot -boot-load-size 4 -boot-info-table";
 	$status = qx (cd $tmpdir && mkisofs $base $opts -o $name . 2>&1);
@@ -922,18 +976,24 @@ sub setupBootDisk {
 	# Create image described by given format
 	#------------------------------------------
 	if (defined $format) {
-		$kiwi -> info ("Creating $format image");
-		my $formatname = $system.".".$format;
-		$status = qx ( qemu-img convert -f raw $loop -O $format $formatname );
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't create $format image: $status");
-			$kiwi -> failed ();
-			qx ( /sbin/losetup -d $loop );
-			return undef;
+		if ($format eq "iso") {
+			$this -> {system} = $system.".raw";
+			$kiwi -> info ("Creating install ISO image\n");
+			$this -> setupBootCD();
+		} else {
+			$kiwi -> info ("Creating $format image");
+			my $fname = $system.".".$format;
+			$status = qx ( qemu-img convert -f raw $loop -O $format $fname );
+			$result = $? >> 8;
+			if ($result != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Couldn't create $format image: $status");
+				$kiwi -> failed ();
+				qx ( /sbin/losetup -d $loop );
+				return undef;
+			}
+			$kiwi -> done ();
 		}
-		$kiwi -> done ();
 	}
 	#==========================================
 	# cleanup loop setup and device mapper

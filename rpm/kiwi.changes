@@ -3,6 +3,22 @@ Tue Sep  4 17:04:59 CEST 2007 - ms@suse.de
 
 - v1.61
 - changed default NBD device to be /dev/nb0
+- added oemboot description for suse-10.3
+- implemented the previous system installer code from isoinstboot
+  into oemboot. The mechanism is based on a virtual disk image
+  created before. Using the kiwi call:
+
+     kiwi --bootcd <oemboot-initrd> --bootcd-system <virtual-disk-system>
+
+  will create an ISO image which serves as installation media.
+  Burned on a CD or DVD one can boot from it and the oemboot initrd
+  automatically will install the disk image on the disk. Please note
+  like before with isoinstboot all data on the disk will be lost.
+  The system will be rebooted automatically and the same oemboot initrd
+  takes care for the initial boot of the virtual disk system image.
+  The oemboot initrd will adapt the disk geometry to the real disk
+  and will boot into the system.
+- added oemboot installcd documentation
 - added patch by Cornelius Schumacher <cschum@novell.com>
   which allows optional remove of root directory 
 

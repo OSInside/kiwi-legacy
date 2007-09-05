@@ -33,6 +33,11 @@ export systemIntegrity="clean"
 export deviceFound=0
 
 #======================================
+# Exports (Configuration)
+#--------------------------------------
+export VMX_SYSTEM="/config.vmxsystem"
+
+#======================================
 # Functions...
 #--------------------------------------
 . /include
@@ -125,7 +130,65 @@ if [ $deviceFound = 0 ];then
 fi
 
 #======================================
-# 6) Probe filesystem of disk device
+# 6) Check for vmx system
+#--------------------------------------
+if [ -f $VMX_SYSTEM ];then
+	#======================================
+	# 6.1) import vmx configuration file
+	#--------------------------------------
+	importFile < $VMX_SYSTEM
+	#======================================
+	# 6.2) mount CD/DVD
+	#--------------------------------------
+	CDMount
+	#======================================
+	# 6.3) install disk system
+	#--------------------------------------
+	# /.../
+	# install virtual disk image from the CD/DVD onto the
+	# real disk. All data on the disk will be lost
+	# ----
+	imageZipped="uncompressed"
+	imageDevice=$deviceDisk
+	imageName="/cdrom/$IMAGE"
+	echo $imageName | grep -qE ".gz$"
+	if [ $? = 0 ];then
+		imageZipped="compressed"
+	fi
+	IFS=" "
+	if test "$imageZipped" = "compressed"; then
+		Echo "Compressed image found"
+		test ! -p /dev/compressed_image && mkfifo /dev/compressed_image
+		cat /dev/compressed_image | gzip -d > $imageDevice 2>/dev/null &
+		imageDevice_orig=$imageDevice
+		imageName_orig=$imageName
+		imageDevice="/dev/compressed_image"
+		imageName="$imageName.gz"
+	fi
+	Echo "Loading $imageName [$imageDevice]..."
+	if ! dd if=$imageName of=$imageDevice >/dev/null 2>&1; then
+		systemException \
+			"Failed to install image: $imageName -> $imageDevice" \
+		"reboot"
+	fi
+	if test "$imageZipped" = "compressed"; then
+		imageDevice=$imageDevice_orig
+		imageName=$imageName_orig
+		rm -f /dev/compressed_image
+	fi
+	#======================================
+	# 6.4) Umount the CD/DVD
+	#--------------------------------------
+	CDUmount
+	#======================================
+	# 6.5) reboot system
+	#--------------------------------------
+	Echo "System installation has finished... reboot"
+	/sbin/reboot -f -i >/dev/null 2>&1
+fi
+
+#======================================
+# 7) Probe filesystem of disk device
 #--------------------------------------
 probeFileSystem $deviceRoot
 if [ $FSTYPE = "unknown" ];then
@@ -135,26 +198,25 @@ if [ $FSTYPE = "unknown" ];then
 fi
 
 #======================================
-# 7) repartition the disk device
+# 8) repartition the disk device
 #--------------------------------------
 # resize /dev/xda1 to be 10GB
 # add primary partition for swap space (1GB)
 # -> swap_size = 2*RAM
 # add primary partition for home space (rest)
-
+#
 #AVAIL_DISK=${deviceDisk}
 MEM_SIZE=`grep MemTotal: /proc/meminfo | tr -dc '[0-9]'`
 SWAP_SIZE=$(( $MEM_SIZE *2 / 1024 ))
 #echo "Available block device: $AVAIL_DISK"
 #echo "Physical memory: $MEM_SIZE"
 #echo "Recommended swap size: $SWAP_SIZE"
-
+#
 cat<<END | sfdisk -q -uM -D ${deviceDisk}
 1,10000,L,*
 ,$SWAP_SIZE,S
 ,,L
 END
-
 if test $? != 0; then
 	echo "Error: partitioning didn't work!"
 	systemException "Failed to create patritions" "shell"
@@ -165,7 +227,7 @@ else
 fi
 
 #======================================
-# 8) Resize filesystem to full space
+# 9) Resize filesystem to full space
 #--------------------------------------
 Echo "Filesystem of root system is: $FSTYPE -> $deviceRoot"
 if test "$FSTYPE" = "reiserfs";then
@@ -191,19 +253,19 @@ if test "$FSTYPE" = "ext3";then
 fi
 
 #======================================
-# 9) Mount system
+# 10) Mount system
 #--------------------------------------
 if ! mountSystem $deviceRoot;then
 	systemException "Failed to mount root filesystem" "reboot"
 fi
 
 #======================================
-# 10) get installed kernels
+# 11) get installed kernels
 #--------------------------------------
 kernelList /mnt
 
 #======================================
-# 11) Create system dependant files
+# 12) Create system dependant files
 #--------------------------------------
 # a) /etc/fstab
 mkdir -p /config/etc
@@ -256,7 +318,7 @@ echo "INITRD_MODULES=\"$INITRD_MODULES\""       > $syskernel
 echo "DOMU_INITRD_MODULES=\"$DOMURD_MODULES\"" >> $syskernel
 
 #======================================
-# 12) copy system dependant files
+# 13) copy system dependant files
 #--------------------------------------
 cd /config
 find . -type d | while read d ; do  mkdir -p /mnt/$d ; done
@@ -265,19 +327,19 @@ cd /
 rm -rf /config
 
 #======================================
-# 13) setup real root device
+# 14) setup real root device
 #--------------------------------------
 # echo 256 > /proc/sys/kernel/real-root-dev
 
 #======================================
-# 14) umount system filesystems
+# 15) umount system filesystems
 #--------------------------------------
 umount /dev/pts
 umount /sys
 umount /proc
 
 #======================================
-# 15) copy initrd files to image
+# 16) copy initrd files to image
 #--------------------------------------
 if [ -f /image/loader/message ];then
 	mv /image/loader/message /mnt/boot
@@ -286,14 +348,14 @@ cp /preinit /mnt
 cp /include /mnt
 
 #======================================
-# 16) Start YaST when booting final sys
+# 17) Start YaST when booting final sys
 #--------------------------------------
 touch /mnt/var/lib/YaST2/runme_at_boot
 
 #======================================
-# 17) Activate new root
+# 18) Activate new root
 #--------------------------------------
-Echo "Activating Image: [$imageRootName]"
+Echo "Activating Image: [$deviceDisk]"
 cd /mnt && exec < dev/console >dev/console 2>&1
 Echo "Calling preinit phase..."
 reopenKernelConsole
@@ -311,7 +373,7 @@ else
 fi
 
 #======================================
-# 18) Unmount initrd / system init
+# 19) Unmount initrd / system init
 #--------------------------------------
 echo " "
 echo "Booting into final System..."
