@@ -495,7 +495,7 @@ else
 			done
 		done
 		if [ -z "$nbdDevice" ];then
-			nbdDevice="/dev/nbd0"
+			nbdDevice="/dev/nb0"
 		fi
 		Echo "Mounting NBD root system: $nbdServer $nbdPort [$nbdDevice]..."
 		if ! /usr/sbin/nbd-client $nbdServer $nbdPort $nbdDevice;then

@@ -2,6 +2,7 @@
 Tue Sep  4 17:04:59 CEST 2007 - ms@suse.de
 
 - v1.61
+- changed default NBD device to be /dev/nb0
 - added patch by Cornelius Schumacher <cschum@novell.com>
   which allows optional remove of root directory 
 
