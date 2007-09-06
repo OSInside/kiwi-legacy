@@ -27,7 +27,7 @@
 		<file name="fs/vfat/*"/>
 		<file name="fs/hfs/*"/>
 		<file name="fs/exportfs/*"/>
-		<file name="fs/squashfs.ko"/>
+		<file name="fs/squashfs/*"/>
 		<file name="fs/aufs.ko"/>
 		<file name="fs/reiserfs/*"/>
 		<file name="fs/nfs/*"/>

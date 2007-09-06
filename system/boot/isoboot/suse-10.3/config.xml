@@ -34,7 +34,7 @@
 		<file name="fs/jbd/*"/>
 		<file name="fs/fat/*"/>
 		<file name="fs/vfat/*"/>
-		<file name="fs/squashfs.ko"/>
+		<file name="fs/squashfs/*"/>
 		<file name="fs/aufs.ko"/>
 		<file name="fs/reiserfs/*"/>
 		<file name="fs/nls/nls_utf8.ko"/>

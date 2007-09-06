@@ -736,7 +736,8 @@ sub setupRootSystem {
 			$kiwi -> info ("Initializing image system on: $root...");
 			my $forceChannels = join (",",@channelList);
 			my @installOpts = (
-				"--catalog $forceChannels"
+				"--catalog $forceChannels",
+				"--auto-agree-with-licenses"
 			);
 			#==========================================
 			# Add package manager to package list

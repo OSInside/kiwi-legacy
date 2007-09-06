@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Thu Sep  6 10:21:42 CEST 2007 - ms@suse.de
+
+- v1.62
+- fixed changed location of squashfs module in 10.3 kernel
+- added --auto-agree-with-licenses option for zypper
+- include packagemanager adaption from system to boot image
+
+-------------------------------------------------------------------
 Tue Sep  4 17:04:59 CEST 2007 - ms@suse.de
 
 - v1.61

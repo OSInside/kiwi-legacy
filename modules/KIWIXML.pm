@@ -142,6 +142,14 @@ sub new {
 		}
 		$repositNodeList = $foreignRepo->{xmlnode};
 		$repositNodeList -> prepend ($need);
+		if (defined $foreignRepo->{packagemanager}) {
+			my $manager = $foreignRepo->{packagemanager};
+			$kiwi -> done ();
+			$kiwi -> info ("Including foreign package manager: $manager");
+			$optionsNodeList -> get_node(1) -> setAttribute (
+				"packagemanager",$manager
+			);
+		}
 	}
 	#==========================================
 	# Store object data
