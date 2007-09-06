@@ -37,11 +37,11 @@
 		<file name="drivers/net/*"/>
 		<file name="drivers/block/nbd.ko"/>
 	</drivers>
-	<repository type="rpm-dir">
-		<source path="/usr/share/kiwi/image/netboot/suse-repo/suse-sles-repo"/>
-	</repository>
 	<repository type="yast2" status="replaceable">
 		<source path="ftp://dist.suse.de/install/SLP/SLED-10-SP1-GM/%arch/DVD1"/>
+	</repository>
+	<repository type="rpm-dir">
+		<source path="/usr/share/kiwi/image/netboot/suse-repo/suse-sles-repo"/>
 	</repository>
 	<packages type="image">
 		<package name="atftp"/>

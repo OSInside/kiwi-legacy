@@ -41,11 +41,11 @@
 		<file name="drivers/message/fusion/*"/>
 		<file name="drivers/net/*"/>
 	</drivers>
-	<repository type="rpm-dir">
-		<source path="/usr/share/kiwi/image/isoboot/suse-repo/suse-sles-repo"/>
-	</repository>
 	<repository type="yast2" status="replaceable">
 		<source path="ftp://dist.suse.de/install/SLP/SLES-10-GM/%arch/DVD1"/>
+	</repository>
+	<repository type="rpm-dir">
+		<source path="/usr/share/kiwi/image/isoboot/suse-repo/suse-sles-repo"/>
 	</repository>
 	<packages type="image">
 		<package name="bind-libs"/>

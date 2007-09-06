@@ -112,11 +112,11 @@ sub new {
 		$vmsize = $vmsize / 1024 / 1024;
 		$vmsize = int $vmsize;
 		$vmsize = $vmsize."M";
-		$kiwi -> info ("Using computed virtual disk size of: $vmsize"); 
+		#$kiwi -> info ("Using computed virtual disk size of: $vmsize"); 
 	} else {
-		$kiwi -> info ("Using given virtual disk size of: $vmsize");
+		#$kiwi -> info ("Using given virtual disk size of: $vmsize");
 	}
-	$kiwi -> done ();
+	#$kiwi -> done ();
 	chomp  $tmpdir;
 	#==========================================
 	# Store object data
@@ -687,6 +687,8 @@ sub setupBootDisk {
 	#==========================================
 	# search free loop device
 	#------------------------------------------
+	$kiwi -> info ("Using virtual disk size of: $vmsize");
+	$kiwi -> done ();
 	$kiwi -> info ("Searching for free loop device...");
 	for (my $id=0;$id<=7;$id++) {
 		$status = qx ( /sbin/losetup /dev/loop$id 2>&1 );

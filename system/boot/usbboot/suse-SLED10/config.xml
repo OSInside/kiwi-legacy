@@ -1,8 +1,8 @@
-<image name="initrd-isoboot-suse-SLED10-smp" schemeversion="1.4">
+<image name="initrd-usbboot-suse-SLED10" schemeversion="1.4">
 	<description type="boot">
 		<author>Marcus Schaefer</author>
 		<contact>ms@novell.com</contact>
-		<specification>boot/initrd image used for LiveDVD media</specification>
+		<specification>boot/initrd image for USB stick systems</specification>
 	</description>
 	<preferences>
 		<type>cpio</type>
@@ -16,6 +16,7 @@
 		<file name="usb/host/usb-uhci.ko"/>
 		<file name="usb/host/usb-ohci.ko"/>
 		<file name="usb/host/ehci-hcd.ko"/>
+		<file name="usb/host/uhci-hcd.ko"/>
 		<file name="usb/core/usbcore.ko"/>
 		<file name="usb/storage/usb-storage.ko"/>
 	</drivers>
@@ -41,81 +42,93 @@
 		<file name="drivers/message/fusion/*"/>
 		<file name="drivers/net/*"/>
 	</drivers>
-		<repository type="yast2" status="replaceable">
-		<source path="ftp://dist.suse.de/install/SLP/SLES-10-GM/%arch/DVD1"/>
+	<repository type="yast2" status="replaceable">
+		<source path="opensuse://openSUSE:10.2"/>
+		<!--<source path="/image/dist/full-10.2-i386"/>-->
 	</repository>
 	<repository type="rpm-dir">
-		<source path="/usr/share/kiwi/image/isoboot/suse-repo/suse-sles-repo"/>
+		<source path="/usr/share/kiwi/image/usbboot/suse-repo/suse-sles-repo"/>
 	</repository>
 	<packages type="image">
-		<package name="bind-libs"/>
-		<package name="bind-utils"/>
-		<package name="dhcpcd"/>
 		<package name="e2fsprogs"/>
 		<package name="file"/>
-		<package name="gawk"/>
-		<package name="hwinfo"/>
-		<package name="iproute2"/>
 		<package name="libcom_err"/>
-		<package name="lvm2"/>
 		<package name="module-init-tools"/>
-		<package name="net-tools"/>
-		<package name="netcfg"/>
 		<package name="pciutils"/>
 		<package name="reiserfs"/>
 		<package name="sysconfig"/>
 		<package name="sysfsutils"/>
-		<package name="tcpd"/>
 		<package name="util-linux"/>
 		<package name="gfxboot"/>
-		<package name="syslinux"/>
+		<package name="fribidi"/>
 		<package name="make"/>
-		<package name="hdparm"/>
 		<package name="grub"/>
-		<package name="bootsplash"/>
-		<package name="bootsplash-theme-SuSE-NLD"/>
 	</packages>
 	<packages type="boot">
-		<package name="kernel-smp"/>
+		<package name="kernel-default"/>
 		<package name="filesystem"/>
 		<package name="glibc-locale"/>
 		<package name="devs"/>
 		<package name="procps"/>
 	</packages>
 	<packages type="delete">
-		<package name="perl"/>
+		<package name="PolicyKit"/>
+		<package name="audit-libs"/>
+		<package name="blocxx"/>
+		<package name="cpio"/>
+		<package name="cyrus-sasl"/>
+		<package name="db"/>
+		<package name="dbus-1"/>
+		<package name="dbus-1-glib"/>
+		<package name="diffutils"/>
+		<package name="expat"/>
+		<package name="fillup"/>
+		<package name="gawk"/>
+		<package name="gdbm"/>
+		<package name="glib2"/>
 		<package name="glibc-locale"/>
-		<package name="man"/>
+		<package name="gnome-filesystem"/>
+		<package name="gpg"/>
+		<package name="hal"/>
 		<package name="info"/>
-		<package name="smart"/>
+		<package name="insserv"/>
+		<package name="iproute2"/>
+		<package name="irqbalance"/>
+		<package name="libnscd"/>
+		<package name="libxcrypt"/>
+		<package name="libxml2"/>
+		<package name="libzio"/>
+		<package name="limal"/>
+		<package name="limal-bootloader"/>
+		<package name="limal-perl"/>
+		<package name="logrotate"/>
+		<package name="mdadm"/>
+		<package name="mingetty"/>
+		<package name="mkinitrd"/>
+		<package name="net-tools"/>
+		<package name="openSUSE-release"/>
+		<package name="openldap2-client"/>
+		<package name="openslp"/>
+		<package name="openssl"/>
+		<package name="pam"/>
+		<package name="pam-modules"/>
+		<package name="pcre"/>
+		<package name="perl"/>
+		<package name="perl-Bootloader"/>
+		<package name="perl-gettext"/>
+		<package name="permissions"/>
+		<package name="pm-utils"/>
+		<package name="pmtools"/>
 		<package name="python"/>
 		<package name="python-xml"/>
-		<package name="python-elementtree"/>
-		<package name="perl-gettext"/>
-		<package name="perl-Bootloader"/>
-		<package name="pam-modules"/>
-		<package name="gawk"/>
-		<package name="gnome-filesystem"/>
-		<package name="openslp"/>
+		<package name="resmgr"/>
 		<package name="rpm-python"/>
+		<package name="smart"/>
 		<package name="suse-build-key"/>
-		<package name="permissions"/>
-		<package name="fillup"/>
-		<package name="pam"/>
-		<package name="expat"/>
-		<package name="suse-release"/>
-		<package name="libxml2"/>
-		<package name="openldap2-client"/>
-		<package name="logrotate"/>
-		<package name="diffutils"/>
-		<package name="cpio"/>
-		<package name="insserv"/>
-		<package name="ash"/>
-		<package name="gdbm"/>
-		<package name="syslinux"/>
+		<package name="udev"/>
+		<package name="gzip"/>
 		<package name="gfxboot"/>
+		<package name="fribidi"/>
 		<package name="make"/>
-		<package name="memtest86"/>
-		<package name="bootsplash-theme-SuSE-NLD"/>
 	</packages>
 </image>

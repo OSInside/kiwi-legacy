@@ -42,11 +42,11 @@
 		<file name="drivers/message/fusion/*"/>
 		<file name="drivers/net/*"/>
 	</drivers>
-	<repository type="rpm-dir">
-		<source path="/usr/share/kiwi/image/isoboot/suse-repo/suse-sles-repo"/>
-	</repository>
 	<repository type="yast2" status="replaceable">
 		<source path="/mounts/machcd2/dists/full-sle10-sp-%arch"/>
+	</repository>
+	<repository type="rpm-dir">
+		<source path="/usr/share/kiwi/image/isoboot/suse-repo/suse-sles-repo"/>
 	</repository>
 	<packages type="image">
 		<package name="bind-libs"/>

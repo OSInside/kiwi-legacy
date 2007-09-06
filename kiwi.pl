@@ -31,7 +31,7 @@ use KIWIMigrate;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "1.62";
+our $Version       = "1.63";
 our $openSUSE      = "http://software.opensuse.org/download/";
 #============================================
 # Globals
@@ -63,6 +63,7 @@ our $BootCD;            # deploy initrd booting from CD
 our $BootCDSystem;      # virtual disk system image to be installed on disk
 our $StripImage;        # strip shared objects and binaries
 our $CreatePassword;    # create crypt password string
+our $SetupSplashForGrub;# setup splash screen(s) for grub
 our $ImageName;         # filename of current image, used in Modules
 our %ForeignRepo;       # may contain XML::LibXML::Element objects
 our @AddRepository;     # add repository for building physical extend
@@ -503,6 +504,18 @@ sub main {
 	}
 
 	#==========================================
+	# setup a splash initrd
+	#------------------------------------------
+	if (defined $SetupSplashForGrub) {
+		my $boot = new KIWIBoot ($kiwi,$SetupSplashForGrub);
+		if (! defined $boot) {
+			my $code = kiwiExit (1); return $code;
+		}
+		$boot -> setupSplashForGrub();
+		my $code = kiwiExit (0); return $code;
+	}
+
+	#==========================================
 	# Write a initrd/system image to USB stick
 	#------------------------------------------
 	if (defined $BootStick) {
@@ -614,6 +627,7 @@ sub init {
 		"bootcd-system=s"       => \$BootCDSystem,
 		"strip|s"               => \$StripImage,
 		"createpassword"        => \$CreatePassword,
+		"setup-grub-splash=s"   => \$SetupSplashForGrub,
 		"list-profiles|i=s"     => \$ListProfiles,
 		"force-new-root"        => \$ForceNewRoot,
 		"help|h"                => \&usage,
@@ -631,7 +645,7 @@ sub init {
 	if (
 		(! defined $Prepare) && (! defined $Create) &&
 		(! defined $BootStick) && (! defined $BootCD) &&
-		(! defined $Upgrade) &&
+		(! defined $Upgrade) && (! defined $SetupSplashForGrub) &&
 		(! defined $BootVMDisk) && (! defined $CreatePassword) &&
 		(! defined $CreateInstSource) && (! defined $Migrate) &&
 		(! defined $ListProfiles)
@@ -696,6 +710,7 @@ sub usage {
 	print "Helper Tools:\n";
 	print "  kiwi --createpassword\n";
 	print "  kiwi --create-instsource <image-path>\n";
+	print "  kiwi --setup-grub-splash <initrd>\n";
 	print "Options:\n";
 	print "--\n";
 	print "  [ -d | --destdir <destination-path> ]\n";

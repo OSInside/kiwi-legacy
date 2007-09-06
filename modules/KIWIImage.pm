@@ -411,6 +411,11 @@ sub createImageUSB {
 		qx (rm -rf $main::RootTree);
 		qx (rm -rf $tmpdir);
 	}
+	my $boot = new KIWIBoot ($kiwi,$main::ImageName);
+	if (! defined $boot) {
+		return undef;
+	}
+	$boot -> setupSplashForGrub();
 	$result{bootImage} = $main::ImageName;
 	if ($text eq "VMX") {
 		my %type = %{$xml->getImageTypeAndAttributes()};

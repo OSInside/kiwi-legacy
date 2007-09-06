@@ -33,12 +33,12 @@
 		<file name="drivers/net/*"/>
 		<file name="drivers/block/nbd.ko"/>
 	</drivers>
-	<repository type="rpm-dir">
-		<source path="/usr/share/kiwi/image/xennetboot/suse-repo/suse-sles-repo"/>
-	</repository>
 	<repository type="yast2" status="replaceable">
 		<source path="/mounts/machcd2/dists/full-sle10-sp-%arch"/>
     </repository>
+	<repository type="rpm-dir">
+		<source path="/usr/share/kiwi/image/xennetboot/suse-repo/suse-sles-repo"/>
+	</repository>
 	<packages type="image">
 		<package name="atftp"/>
 		<package name="bind-libs"/>
