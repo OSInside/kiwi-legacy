@@ -3,6 +3,8 @@ Tue Sep  4 17:04:59 CEST 2007 - ms@suse.de
 
 - v1.61
 - changed default NBD device to be /dev/nb0
+- added support for NBD swap space if NBDROOT is used. Patch by
+  Jigish Gohil <jigish.gohil@gmail.com>
 - added oemboot description for suse-10.3
 - implemented the previous system installer code from isoinstboot
   into oemboot. The mechanism is based on a virtual disk image

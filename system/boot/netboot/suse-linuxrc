@@ -488,18 +488,42 @@ else
 			field=0
 			IFS=";" ; for n in $i;do
 			case $field in
-				0) nbdServer=$n ; field=1 ;;
-				1) nbdPort=$n   ; field=2 ;;
-				2) nbdDevice=$n ; field=3
+				0) nbdServer=$n     ; field=1 ;;
+				1) nbdPort=$n       ; field=2 ;;
+				2) nbdDevice=$n     ; field=3 ;;
+				3) nbdswapPort=$n   ; field=4 ;;
+				4) nbdswapDevice=$n ; field=5
 			esac
 			done
 		done
 		if [ -z "$nbdDevice" ];then
 			nbdDevice="/dev/nb0"
 		fi
+		if [ -z "$nbdswapDevice" ];then
+			nbdDevice="/dev/nb1"
+		fi
+		if [ -z "$nbdswapPort" ];then
+			nbdswapPort="9210"
+		fi
 		Echo "Mounting NBD root system: $nbdServer $nbdPort [$nbdDevice]..."
 		if ! /usr/sbin/nbd-client $nbdServer $nbdPort $nbdDevice;then
 			systemException "Failed to setup $nbdDevice device" "reboot"
+		fi
+		# /.../
+		# try to get swap from the server if we dont have
+		# enough ram (less than 48M)
+		# ----
+		min_ram=49152
+		real_ram=$(cat /proc/meminfo |grep MemTotal|tr -d " [a-z][A-Z]:")
+		if [ ${real_ram} -lt ${min_ram} ];then
+			Echo "NBD: memory is below required 48M"
+			Echo "NBD: Mounting NBD swap: $nbdServer $nbdPort [$nbdDevice]..."
+			if ! /usr/sbin/nbd-client $nbdServer $nbdswapPort $nbdswapDevice
+			then
+				systemException "Failed to setup $nbdswapDevice device" "reboot"
+			fi
+			/sbin/mkswap $nbdswapDevice || true
+			/sbin/swapon $nbdswapDevice || true
 		fi
 		imageRootDevice=$nbdDevice
 		probeFileSystem $imageRootDevice
