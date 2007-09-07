@@ -175,7 +175,7 @@ if [ "$UID" = "$K_USER" ];then
 		echo >> $pxedefault
 		echo "LABEL $rootName" >> $pxedefault
 		(
-			cd $RPM_BUILD_ROOT/srv/tftpboot/boot
+			pushd $RPM_BUILD_ROOT/srv/tftpboot/boot
 			xenkernel=""
 			xenloader=""
 			initrd=""
@@ -186,6 +186,12 @@ if [ "$UID" = "$K_USER" ];then
 				echo $n | grep -q [0-9].gz$ && initrd=$n    || true
 				echo $n | grep -q kernel    && kernel=$n    || true
 			done
+			popd
+			../kiwi.pl --setup-grub-splash \
+				$RPM_BUILD_ROOT/srv/tftpboot/boot/$initrd && \
+			initrd=`echo $initrd | sed -e "s@.gz@.splash.gz@"` || false
+			pushd $RPM_BUILD_ROOT/srv/tftpboot/boot
+			cd $RPM_BUILD_ROOT/srv/tftpboot/boot
 			if [ -n "$xenkernel" ];then
 				echo "      kernel mboot.c32" >> $pxedefault
 				echo "      append boot/$xenloader --- boot/$xenkernel vga=0x318 --- boot/$initrd" >> $pxedefault
@@ -195,6 +201,7 @@ if [ "$UID" = "$K_USER" ];then
 				echo "      append initrd=boot/$initrd vga=0x318" >> $pxedefault
 				echo "      IPAPPEND 1" >> $pxedefault
 			fi
+			popd
 		)
 	done
 	rm -f $RPM_BUILD_ROOT/srv/tftpboot/boot/*.md5
