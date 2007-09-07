@@ -188,8 +188,9 @@ if [ "$UID" = "$K_USER" ];then
 			done
 			popd
 			../kiwi.pl --setup-grub-splash \
-				$RPM_BUILD_ROOT/srv/tftpboot/boot/$initrd && \
-			initrd=`echo $initrd | sed -e "s@.gz@.splash.gz@"` || false
+				$RPM_BUILD_ROOT/srv/tftpboot/boot/$initrd   && \
+			rm -f $RPM_BUILD_ROOT/srv/tftpboot/boot/$initrd && \
+			initrd=`echo $initrd | sed -e "s@.gz@.splash.gz@"`
 			pushd $RPM_BUILD_ROOT/srv/tftpboot/boot
 			cd $RPM_BUILD_ROOT/srv/tftpboot/boot
 			if [ -n "$xenkernel" ];then
