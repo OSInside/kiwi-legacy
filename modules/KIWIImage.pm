@@ -21,6 +21,7 @@ package KIWIImage;
 #------------------------------------------
 use strict;
 use KIWILog;
+use KIWIBoot;
 use Math::BigFloat;
 
 #==========================================
@@ -411,7 +412,7 @@ sub createImageUSB {
 		qx (rm -rf $main::RootTree);
 		qx (rm -rf $tmpdir);
 	}
-	my $boot = new KIWIBoot ($kiwi,$main::ImageName);
+	my $boot = new KIWIBoot ($kiwi,$main::ImageName.".gz");
 	if (! defined $boot) {
 		return undef;
 	}

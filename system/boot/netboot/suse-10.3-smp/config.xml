@@ -69,6 +69,9 @@
 		<package name="fribidi"/>
 		<package name="make"/>
 		<package name="nbd"/>
+		<package name="nfs-client"/>
+		<package name="bootsplash"/>
+		<package name="bootsplash-theme-SuSE"/>
 	</packages>
 	<packages type="boot">
 		<package name="filesystem"/>
@@ -125,5 +128,6 @@
 		<package name="gfxboot"/>
 		<package name="fribidi"/>
 		<package name="make"/>
+		<package name="bootsplash-theme-SuSE"/>
 	</packages>
 </image>

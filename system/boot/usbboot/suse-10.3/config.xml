@@ -66,6 +66,8 @@
 		<package name="fribidi"/>
 		<package name="make"/>
 		<package name="grub"/>
+		<package name="bootsplash"/>
+		<package name="bootsplash-theme-SuSE"/>
 	</packages>
 	<packages type="boot">
 		<package name="kernel-default"/>
@@ -131,5 +133,6 @@
 		<package name="gfxboot"/>
 		<package name="fribidi"/>
 		<package name="make"/>
+		<package name="bootsplash-theme-SuSE"/>
 	</packages>
 </image>

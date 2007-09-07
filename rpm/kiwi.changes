@@ -2,6 +2,7 @@
 Thu Sep  6 16:51:01 CEST 2007 - ms@suse.de
 
 - v1.63
+- added splash support for usbboot boot images
 - added usbboot boot image for SLED10 (#308187)
 - added bootsplash support for netboot (#308233)
   implement option --setup-grub-splash
