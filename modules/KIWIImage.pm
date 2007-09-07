@@ -412,7 +412,8 @@ sub createImageUSB {
 		qx (rm -rf $main::RootTree);
 		qx (rm -rf $tmpdir);
 	}
-	my $boot = new KIWIBoot ($kiwi,$main::ImageName.".gz");
+	my $initrd = $main::Destination."/".$main::ImageName.".gz";
+	my $boot = new KIWIBoot ($kiwi,$initrd);
 	if (! defined $boot) {
 		return undef;
 	}
