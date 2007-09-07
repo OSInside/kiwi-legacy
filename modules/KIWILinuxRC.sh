@@ -96,6 +96,9 @@ function importFile {
 		echo $line | grep -qi "^#" && continue
 		key=`echo "$line" | cut -d '=' -f1`
 		item=`echo "$line" | cut -d '=' -f2- | tr -d \'`
+		if [ -z "$key" ] || [ -z "$item" ];then
+			continue
+		fi
 		Debug "$key=$item"
 		eval export $key\=\"$item\"
 	done
