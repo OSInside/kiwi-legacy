@@ -1011,19 +1011,19 @@ sub setupBootDisk {
 sub extractCPIO {
 	my $this = shift;
 	my $file = shift;
-	my $fd   = new FileHandle $file,O_RDONLY;
-	if (! defined $fd) {
+	if (! open FD,$file) {
 		return 0;
 	}
+	local $/;
+	my $data   = <FD>; close FD;
+	my @data   = split (//,$data);
 	my $stream = "";
 	my $count  = 1;
-	while (! $fd -> eof()) {
-		my $sign = $fd ->getc();
+	foreach my $sign (@data) {
 		$stream .= $sign;
-		if (($stream =~ /TRAILER!!!/) && ($stream =~ /07070$/)) {
-			$stream =~ s/07070$//;
+		if ((substr ($stream,-5) eq "07070") && ($stream =~ /TRAILER!!!/)) {
+			$stream = substr ($stream,0,-5);
 			if (! open FD,">$file.$count") {
-				$fd -> close();
 				return 0;
 			}
 			print FD $stream;
@@ -1032,7 +1032,6 @@ sub extractCPIO {
 			$count++;
 		}
 	}
-	$fd -> close();
 	if ($stream ne "07070") {
 		if (! open FD,">$file.$count") {
 			return 0;
