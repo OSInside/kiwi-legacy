@@ -21,6 +21,7 @@ package KIWIBoot;
 #------------------------------------------
 use strict;
 use KIWILog;
+use FileHandle;
 use File::Basename;
 use File::Spec;
 
@@ -1005,6 +1006,44 @@ sub setupBootDisk {
 }
 
 #==========================================
+# extractCPIO
+#------------------------------------------
+sub extractCPIO {
+	my $this = shift;
+	my $file = shift;
+	my $fd   = new FileHandle $file,O_RDONLY;
+	if (! defined $fd) {
+		return 0;
+	}
+	my $stream = "";
+	my $count  = 1;
+	while (! $fd -> eof()) {
+		my $sign = $fd ->getc();
+		$stream .= $sign;
+		if (($stream =~ /TRAILER!!!/) && ($stream =~ /07070$/)) {
+			$stream =~ s/07070$//;
+			if (! open FD,">$file.$count") {
+				$fd -> close();
+				return 0;
+			}
+			print FD $stream;
+			close FD;
+			$stream = "07070";
+			$count++;
+		}
+	}
+	$fd -> close();
+	if ($stream ne "07070") {
+		if (! open FD,">$file.$count") {
+			return 0;
+		}
+		print FD $stream;
+		close FD;
+	}
+	return $count;
+}
+
+#==========================================
 # setupSplashForGrub
 #------------------------------------------
 sub setupSplashForGrub {
@@ -1049,9 +1088,11 @@ sub setupSplashForGrub {
 	#------------------------------------------
 	while (my $splash = glob("$newspl/*.spl")) {
 		mkdir "$splash.dir";
-		qx (gzip -cd $splash | sed -e s#TRAILER\!\!\!#BOB# > $splash.bob);
-		qx (cat $splash.bob |(cd $splash.dir && cpio -i 2>&1));
-		qx (rm -f $splash.dir/BOB);
+		qx (gzip -cd $splash > $splash.bob);
+		my $count = $this -> extractCPIO ( $splash.".bob" );
+		for (my $id=1; $id <= $count; $id++) {
+			qx (cat $splash.bob.$id |(cd $splash.dir && cpio -i 2>&1));
+		}
 		qx (cp -a $splash.dir/etc $newspl);
 		qx (cat $splash.dir/bootsplash >> $newspl/bootsplash);
 		qx (rm -rf $splash.dir);
