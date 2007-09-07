@@ -1018,26 +1018,41 @@ sub extractCPIO {
 	my $data   = <FD>; close FD;
 	my @data   = split (//,$data);
 	my $stream = "";
-	my $count  = 1;
-	foreach my $sign (@data) {
-		$stream .= $sign;
-		if ((substr ($stream,-5) eq "07070") && ($stream =~ /TRAILER!!!/)) {
-			$stream = substr ($stream,0,-5);
+	my $count  = 0;
+	my $start  = 0;
+	my $pos1   = -1;
+	my $pos2   = -1;
+	my @index;
+	while (1) {
+		my $pos1 = index ($data,"TRAILER!!!",$start);
+		if ($pos1 >= $start) {
+			$pos2 = index ($data,"07070",$pos1);
+		} else {
+			last;
+		}
+		if ($pos2 >= $pos1) {
+			$pos2--;
+			push (@index,$pos2);
+			#print "$start -> $pos2\n";
+			$start = $pos2;
+		} else {
+			$pos2 = @data; $pos2--;
+			push (@index,$pos2);
+			#print "$start -> $pos2\n";
+			last;
+		}
+	}
+	for (my $i=0;$i<@data;$i++) {
+		$stream .= $data[$i];
+		if ($i == $index[$count]) {
+			$count++;
 			if (! open FD,">$file.$count") {
 				return 0;
 			}
 			print FD $stream;
 			close FD;
-			$stream = "07070";
-			$count++;
+			$stream = "";
 		}
-	}
-	if ($stream ne "07070") {
-		if (! open FD,">$file.$count") {
-			return 0;
-		}
-		print FD $stream;
-		close FD;
 	}
 	return $count;
 }
