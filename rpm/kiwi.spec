@@ -194,11 +194,11 @@ if [ "$UID" = "$K_USER" ];then
 			cd $RPM_BUILD_ROOT/srv/tftpboot/boot
 			if [ -n "$xenkernel" ];then
 				echo "      kernel mboot.c32" >> $pxedefault
-				echo "      append boot/$xenloader --- boot/$xenkernel vga=0x318 --- boot/$initrd" >> $pxedefault
+				echo "      append boot/$xenloader --- boot/$xenkernel vga=0x314 splash=silent showopts --- boot/$initrd" >> $pxedefault
 				echo "      IPAPPEND 1" >> $pxedefault
 			else
 				echo "      kernel boot/$kernel" >> $pxedefault
-				echo "      append initrd=boot/$initrd vga=0x318" >> $pxedefault
+				echo "      append initrd=boot/$initrd vga=0x314 splash=silent showopts" >> $pxedefault
 				echo "      IPAPPEND 1" >> $pxedefault
 			fi
 			popd
