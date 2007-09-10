@@ -381,6 +381,7 @@ sub createImageUSB {
 	if (! defined $xml) {
 		return undef;
 	}
+	my %type   = %{$xml->getImageTypeAndAttributes()};
 	my $tmpdir = qx ( mktemp -q -d /tmp/kiwi-$text.XXXXXX ); chomp $tmpdir;
 	my $result = $? >> 8;
 	if ($result != 0) {
@@ -393,6 +394,9 @@ sub createImageUSB {
 	$main::Prepare  = $boot;
 	if ($boot !~ /^\//) {
 		$main::Prepare  = $main::System."/".$boot;
+	}
+	if ($type{bootprofile}) {
+		@main::Profiles = split (/,/,$type{bootprofile});
 	}
 	$main::ForeignRepo{xmlnode} = $xml -> getForeignNodeList();
 	$main::ForeignRepo{packagemanager} = $xml -> getPackageManager();
@@ -420,7 +424,6 @@ sub createImageUSB {
 	$boot -> setupSplashForGrub();
 	$result{bootImage} = $main::ImageName;
 	if ($text eq "VMX") {
-		my %type = %{$xml->getImageTypeAndAttributes()};
 		$result{format} = $type{format};
 	}
 	if ($text eq "USB") {

@@ -5,4 +5,5 @@
 # by various methods like:
 # * installation on system disk
 # * installation to system main memory
+# * nbd root mount of the system (network block device)
 # * nfs root mount of the system

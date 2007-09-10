@@ -31,7 +31,7 @@ use KIWIMigrate;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "1.63";
+our $Version       = "1.64";
 our $openSUSE      = "http://software.opensuse.org/download/";
 #============================================
 # Globals
@@ -191,6 +191,21 @@ sub main {
 			my $code = kiwiExit (1); return $code;
 		}
 		$kiwi -> done();
+		#==========================================
+		# Check for bootprofile in config.xml
+		#------------------------------------------
+		if (! @Profiles) {
+			my %type = %{$xml->getImageTypeAndAttributes()};
+			if (($type{"type"} eq "cpio") && ($type{bootprofile})) {
+				$kiwi -> info ("Using boot profile(s): $type{bootprofile}");
+				@Profiles = split (/,/,$type{bootprofile});
+				if (! $xml -> checkProfiles (\@Profiles)) {
+					$kiwi -> failed ();
+					my $code = kiwiExit (1); return $code;
+				}
+				$kiwi -> done ();
+			}
+		}
 		#==========================================
 		# Check for default root
 		#------------------------------------------	

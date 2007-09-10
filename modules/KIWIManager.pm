@@ -853,9 +853,9 @@ sub setupPackageInfo {
 			$code = $? >> 8;
 		}
 		if ($code != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Package $pack is not installed");
-			$kiwi -> failed ();
+			$kiwi -> failed  ();
+			$kiwi -> error   ("Package $pack is not installed");
+			$kiwi -> skipped ();
 			return $code;
 		}
 		$kiwi -> done();
@@ -879,9 +879,9 @@ sub setupPackageInfo {
 			$code = $? >> 8;
 		}
 		if ($code == 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Package $pack is not installed");
-			$kiwi -> failed ();
+			$kiwi -> failed  ();
+			$kiwi -> error   ("Package $pack is not installed");
+			$kiwi -> skipped ();
 			return 1;
 		}
 		$kiwi -> done();

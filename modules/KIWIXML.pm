@@ -190,6 +190,12 @@ sub new {
 		$kiwi -> failed ();
 		return undef;
 	}
+	#==========================================
+	# Check profile names
+	#------------------------------------------
+	if (! $this -> checkProfiles()) {
+		return undef;
+	}
 	return $this;
 }
 
@@ -336,7 +342,8 @@ sub getImageTypeAndAttributes {
 		$record{type} = $node -> string_value();
 		$record{boot} = $node -> getAttribute("boot");
 		$record{flags}= $node -> getAttribute("flags");
-		$record{filesystem} = $node -> getAttribute("filesystem");
+		$record{filesystem}  = $node -> getAttribute("filesystem");
+		$record{bootprofile} = $node -> getAttribute("bootprofile");
 		$record{format} = $node -> getAttribute("format");
 		$result{$prim} = \%record;
 		$count++;
@@ -649,6 +656,47 @@ sub getProfiles {
 		push @result, { %profile };
 	}
 	return @result;
+}
+
+#==========================================
+# checkProfiles
+#------------------------------------------
+sub checkProfiles {
+	# ...
+	# validate profile names. Wrong profile names are treated
+	# as fatal error because you can't know what the result of
+	# your image would be without the requested profile
+	# ---
+	my $this = shift;
+	my $pref = shift;
+	my $kiwi = $this->{kiwi};
+	my $rref = $this->{reqProfiles};
+	my @prequest;
+	my @profiles = $this -> getProfiles();
+	if (defined $pref) {
+		@prequest = @{$pref};
+	} elsif (defined $rref) {
+		@prequest = @{$rref};
+	}
+	if (@prequest) {
+		foreach my $requested (@prequest) {
+			my $ok = 0;
+			foreach my $profile (@profiles) {
+				if ($profile->{name} eq $requested) {
+					$ok=1; last;
+				}
+			}
+			if (! $ok) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Profile $requested: not found");
+				if (! defined $pref) {
+					$kiwi -> failed ();
+				}
+				return undef;
+			}
+		}
+	}
+	return $this;
 }
 
 #==========================================

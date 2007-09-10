@@ -1,5 +1,5 @@
 # /.../
-# spec file for package kiwi (Version 1.63
+# spec file for package kiwi (Version 1.64
 # Copyright (c) 2006 SUSE LINUX Products GmbH, Nuernberg, Germany.
 # Please submit bugfixes or comments via http://bugs.opensuse.org
 # ---
@@ -8,7 +8,7 @@ Name:          kiwi
 BuildRequires: perl smart perl-XML-LibXML perl-libwww-perl screen syslinux module-init-tools
 Requires:      perl perl-XML-LibXML perl-libwww-perl screen
 Summary:       OpenSuSE - KIWI Image System
-Version:       1.63
+Version:       1.64
 Release:       28
 Group:         System
 License:       GPL
@@ -86,16 +86,6 @@ Group:        System
 This package contains the OpenSuSE - KIWI image descriptions.
 Each image description exists in a single directory and contains
 a netboot image description
-
-%package -n kiwi-desc-xennetboot
-Requires:     kiwi smart kiwi-desc-netboot
-Summary:      OpenSuSE - KIWI image descriptions
-Group:        System
-
-%description -n kiwi-desc-xennetboot
-This package contains the OpenSuSE - KIWI image descriptions.
-Each image description exists in a single directory and contains
-a xennetboot image description
 
 %package -n kiwi-desc-xenboot
 Requires:     kiwi smart
@@ -295,12 +285,6 @@ cat kiwi.loader
 %dir %{_datadir}/kiwi/image/netboot
 %doc %{_datadir}/kiwi/image/netboot/README
 %{_datadir}/kiwi/image/netboot/suse*
-
-%files -n kiwi-desc-xennetboot
-%defattr(-, root, root)
-%dir %{_datadir}/kiwi/image/xennetboot
-%doc %{_datadir}/kiwi/image/xennetboot/README
-%{_datadir}/kiwi/image/xennetboot/suse*
 
 %files -n kiwi-desc-xenboot
 %defattr(-, root, root)

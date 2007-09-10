@@ -1,12 +1,17 @@
 #!/bin/sh
 test -f /.profile && . /.profile
 
-echo "kernel-default: Image [$name]..."
+sname=`basename $0`
+bname=`echo $sname | cut -f2 -d-`
+echo "$sname: Image [$name]..."
 
 #==========================================
 # setup kernel version to deal with
 #------------------------------------------
-VERSION=`rpm -q --qf %{VERSION}-%{RELEASE}-default kernel-default`
+VERSION=`rpm -q --qf %{VERSION}-%{RELEASE}-$bname $sname`
+if [ ! -d lib/modules/$VERSION ];then
+	for VERSION in $(ls -1 lib/modules);do :; done
+fi
 
 #==========================================
 # move interesting stuff to /tmp
@@ -122,7 +127,7 @@ rm -rf /tmp/*
 #==========================================
 # create common kernel files...
 #------------------------------------------
-cd /boot 
+cd /boot
 mv vmlinux-$VERSION.gz vmlinux.gz
 mv vmlinuz-$VERSION vmlinuz
 

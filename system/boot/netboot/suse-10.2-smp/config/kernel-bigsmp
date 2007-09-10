@@ -1,16 +1,22 @@
 #!/bin/sh
 test -f /.profile && . /.profile
 
-echo "kernel-bigsmp: Image [$name]..."
+sname=`basename $0`
+bname=`echo $sname | cut -f2 -d-`
+echo "$sname: Image [$name]..."
 
 #==========================================
 # setup kernel version to deal with
 #------------------------------------------
-VERSION=`rpm -q --qf %{VERSION}-%{RELEASE}-bigsmp kernel-bigsmp`
+VERSION=`rpm -q --qf %{VERSION}-%{RELEASE}-$bname $sname`
+if [ ! -d lib/modules/$VERSION ];then
+	for VERSION in $(ls -1 lib/modules);do :; done
+fi
 
 #==========================================
 # move interesting stuff to /tmp
 #------------------------------------------
+mv lib/modules/$VERSION/updates     /tmp
 mv lib/modules/$VERSION/kernel/*    /tmp
 mv lib/modules/$VERSION/modules.*   /tmp
 
@@ -23,6 +29,7 @@ rm -r lib/modules/$VERSION/*
 # insert modules.* files
 #------------------------------------------
 mv /tmp/modules.* /lib/modules/$VERSION/
+mv /tmp/updates   /lib/modules/$VERSION/
 
 #==========================================
 # create driver-used dirs with .o's to use
@@ -120,7 +127,7 @@ rm -rf /tmp/*
 #==========================================
 # create common kernel files...
 #------------------------------------------
-cd /boot 
+cd /boot
 mv vmlinux-$VERSION.gz vmlinux.gz
 mv vmlinuz-$VERSION vmlinuz
 
