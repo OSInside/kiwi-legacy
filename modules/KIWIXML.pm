@@ -687,13 +687,22 @@ sub checkProfiles {
 				}
 			}
 			if (! $ok) {
-				$kiwi -> failed ();
-				$kiwi -> error  ("Profile $requested: not found");
 				if (! defined $pref) {
 					$kiwi -> failed ();
 				}
+				$kiwi -> error  ("Profile $requested: not found");
+				$kiwi -> failed ();
 				return undef;
 			}
+		}
+	}
+	if (@prequest) {
+		if (! defined $pref) {
+			$kiwi -> done ();
+		}
+		$kiwi -> info ("Using profile(s): @prequest");
+		if (defined $pref) {
+			$kiwi -> done ();
 		}
 	}
 	return $this;

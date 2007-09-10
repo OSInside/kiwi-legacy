@@ -197,13 +197,10 @@ sub main {
 		if (! @Profiles) {
 			my %type = %{$xml->getImageTypeAndAttributes()};
 			if (($type{"type"} eq "cpio") && ($type{bootprofile})) {
-				$kiwi -> info ("Using boot profile(s): $type{bootprofile}");
 				@Profiles = split (/,/,$type{bootprofile});
 				if (! $xml -> checkProfiles (\@Profiles)) {
-					$kiwi -> failed ();
 					my $code = kiwiExit (1); return $code;
 				}
-				$kiwi -> done ();
 			}
 		}
 		#==========================================

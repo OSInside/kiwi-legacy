@@ -1122,4 +1122,12 @@ sub setupSplashForGrub {
 	return $newird;
 }
 
+#==========================================
+# Destructor
+#------------------------------------------
+sub DESTROY {
+	my $this = shift;
+	qx (rm -rf $this->{tmpdir} 2>&1);
+}
+
 1; 
