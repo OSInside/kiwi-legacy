@@ -562,6 +562,13 @@ sub setupBootCD {
 		}
 		my $namecd = qx (basename $system); chomp $namecd;
 		print FD "IMAGE=$namecd\n";
+		if ($namecd =~ /.*-(\d+\.\d+\.\d+$)/) {
+			print FD "VMXVERSION=$1\n";
+		} else {
+			$kiwi -> error  ("Couldn't extract version information");
+			$kiwi -> failed ();
+			return undef;
+		}
 		close FD;
 	}
 	#==========================================
