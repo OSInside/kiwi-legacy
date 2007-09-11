@@ -2,6 +2,11 @@
 Mon Sep 10 16:06:53 CEST 2007 - ms@suse.de
 
 - v1.64
+- changed KIWIPattern.pm to know about compressed patterns. With 10.3
+  the yast2 repositories provides compressed meta and pattern files
+- changed oemboot repartition code to use the same default
+  partition names than netboot does. This means the partition
+  are as follows: root -> xda2 / swap -> xda1 / home -> xda3
 - make use of the profile mode and added a default and a xen
   profile into the netboot boot images. According to this the
   xennetboot boot images can be removed and are replaced by the

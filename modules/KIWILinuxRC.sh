@@ -440,7 +440,10 @@ function updateNeeded {
 		imageMD5s="image/$imageName-$imageVersion.md5"
 		[ -z "$imageServer" ]  && imageServer=$TSERVER
 		[ -z "$imageBlkSize" ] && imageBlkSize=8192
-		atftp -g -r $imageMD5s -l /etc/image.md5 $imageServer >/dev/null 2>&1
+		if [ ! -f /etc/image.md5 ];then
+			atftp -g -r $imageMD5s \
+				-l /etc/image.md5 $imageServer >/dev/null 2>&1
+		fi
 		read sum1 blocks blocksize < /etc/image.md5
 		if [ ! -z "$sum1" ];then
 			SYSTEM_MD5STATUS="$SYSTEM_MD5STATUS:$sum1"

@@ -150,13 +150,22 @@ sub downloadPattern {
 	if ($url =~ /^\//) {
 		my $path = "$url//suse/setup/descr";
 		my @file = bsd_glob ("$path/$pattern-*.$arch.pat");
+		if (! @file) {
+			@file = bsd_glob ("$path/$pattern-*.$arch.pat.gz");
+		}
 		foreach my $file (@file) {
 			# / FIXME /
 			# The glob match will include the -32bit patterns in any
 			# case. Is that ok or not ? should it be configurable ?
 			# ---
-			if (! open (FD,$file)) {
-				return undef;
+			if ($file =~ /\.gz$/) {
+				if (! open (FD,"cat $file | gzip -cd|")) {
+					return undef;
+				}
+			} else {
+				if (! open (FD,$file)) {
+					return undef;
+				}
 			}
 			local $/; $content .= <FD>; close FD;
 		}
@@ -176,13 +185,35 @@ sub downloadPattern {
 		if ((! defined $title) || ($title =~ /not found/i)) {
 			return undef;
 		}
+		my $pzip = 0;
 		if ($content !~ /\"($pattern-.*$arch\.pat)\"/) {
-			return undef;
+			if ($content !~ /\"($pattern-.*$arch\.pat\.gz)\"/) {
+				return undef;
+			} else {
+				$pzip = 1;
+			}
 		}
 		$location = $location."/".$1;
 		$request  = HTTP::Request->new (GET => $location);
 		$response = $browser  -> request ( $request );
 		$content  = $response -> content ();
+		if ($pzip) {
+			my $tmpdir = qx ( mktemp -q -d /tmp/kiwipattern.XXXXXX );
+			my $result = $? >> 8;
+			if ($result != 0) {
+				return undef;
+			}
+			if (! open (FD,">$tmpdir/pattern")) {
+				return undef;
+			}
+			print FD $content; close FD;
+			if (! open (FD,"cat $tmpdir/pattern | gzip -cd|")) {
+				return undef;
+			}
+			local $/; $content .= <FD>; close FD;
+			unlink ($tmpdir."/pattern");
+			rmdir  ($tmpdir);
+		}
 	}
 	$this->{cache}{$pattern} = $content;
 	return $content;

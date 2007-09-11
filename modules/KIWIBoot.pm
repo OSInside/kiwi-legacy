@@ -535,6 +535,8 @@ sub setupBootCD {
 	my $irddir    = $initrd."_".$$.".vmxsystem";
 	my $status;
 	my $result;
+	my $ibasename;
+	my $iversion;
 	if (! mkdir $irddir) {
 		$kiwi -> error  ("Failed to create vmxsystem directory");
 		$kiwi -> failed ();
@@ -551,25 +553,43 @@ sub setupBootCD {
 		qx (rm -rf $irddir);
 		return undef;
 	}
-	#==========================================
-	# add config.vmxsystem file to initrd
-	#------------------------------------------
+	#===========================================
+	# add image.md5 / config.vmxsystem to initrd
+	#-------------------------------------------
 	if (defined $system) {
+		my $imd5 = $system;
+		$imd5 =~ s/\.raw/\.md5/;
+		my $status = qx (cp $imd5 $irddir/etc/image.md5 2>&1);
+		my $result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> error  ("Failed importing md5 file: $status");
+			$kiwi -> failed ();
+			qx (rm -rf $irddir);
+			return undef;
+		}
 		if (! open (FD,">$irddir/config.vmxsystem")) {
 			$kiwi -> error  ("Couldn't create image boot configuration");
 			$kiwi -> failed ();
 			return undef;
 		}
 		my $namecd = qx (basename $system); chomp $namecd;
-		print FD "IMAGE=$namecd\n";
-		if ($namecd =~ /.*-(\d+\.\d+\.\d+$)/) {
-			print FD "VMXVERSION=$1\n";
-		} else {
+		if ($namecd !~ /(.*)-(\d+\.\d+\.\d+)\.raw$/) {
 			$kiwi -> error  ("Couldn't extract version information");
 			$kiwi -> failed ();
+			qx (rm -rf $irddir);
 			return undef;
 		}
+		$ibasename = $1;
+		$iversion  = $2;
+		if (! -f $imd5) {
+			$kiwi -> error  ("Couldn't find md5 file");
+			$kiwi -> failed ();
+			qx (rm -rf $irddir);
+			return undef;
+		}
+		print FD "IMAGE=nope;$ibasename;$iversion\n";
 		close FD;
+		
 	}
 	#==========================================
 	# create new initrd with vmxsystem file
@@ -639,7 +659,7 @@ sub setupBootCD {
 	#------------------------------------------
 	if (defined $system) {
 		$kiwi -> info ("Importing system image: $system");
-		$status = qx (cp $system $tmpdir 2>&1);
+		$status = qx (cp $system $tmpdir/$ibasename 2>&1);
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -902,6 +922,8 @@ sub setupBootDisk {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't dump image: $status");
 			$kiwi -> failed ();
+			qx ( /sbin/kpartx  -d $loop );
+			qx ( /sbin/losetup -d $loop );
 			return undef;
 		}
 		unlink $sysname;
@@ -928,9 +950,9 @@ sub setupBootDisk {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't install image: $status");
 			$kiwi -> failed ();
+			qx ( umount /mnt/ 2>&1 );
 			qx ( /sbin/kpartx  -d $loop );
 			qx ( /sbin/losetup -d $loop );
-			qx ( umount /mnt/ 2>&1 );
 			return undef;
 		}
 		#==========================================
@@ -943,9 +965,9 @@ sub setupBootDisk {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't find message file: $status");
 			$kiwi -> failed ();
+			qx ( umount /mnt/ 2>&1 );
 			qx ( /sbin/kpartx  -d $loop );
 			qx ( /sbin/losetup -d $loop );
-			qx ( umount /mnt/ 2>&1 );
 			return undef;
 		}
 		qx ( umount /mnt/ 2>&1 );
