@@ -829,7 +829,7 @@ sub listProfiles {
 	foreach my $profile (@profiles) {
 		my $name = $profile -> {name};
 		my $desc = $profile -> {description};
-		$kiwi -> info ("$name\t$desc");
+		$kiwi -> info ("$name: [ $desc ]");
 		$kiwi -> done ();
 	}
 	exit 0;
