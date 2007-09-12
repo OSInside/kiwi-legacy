@@ -54,6 +54,11 @@ install:
 	install -d -m 755 ${PACKDOCVZ}
 
 	#============================================
+	# install .revision file
+	#--------------------------------------------
+	install -m 644 ./.revision ${kiwi_prefix}
+
+	#============================================
 	# kiwi system draft
 	#--------------------------------------------
 	install -m 644 ./doc/kiwi.pdf  ${PACKDOCVZ}

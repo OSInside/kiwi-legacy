@@ -232,6 +232,7 @@ cat kiwi.loader
 %dir %{_datadir}/kiwi
 %dir %{_datadir}/kiwi/image
 %doc %{_defaultdocdir}/kiwi/kiwi.pdf
+%{_datadir}/kiwi/.revision
 %{_datadir}/kiwi/modules
 %{_datadir}/kiwi/tools
 %{_sbindir}/kiwi

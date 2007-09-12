@@ -1077,7 +1077,9 @@ function mountSystem () {
 		fi
 		usleep 500000
 	else
-		mount $mountDevice /mnt >/dev/null 2>&1
+		if ! mount $mountDevice /mnt >/dev/null 2>&1;then
+			mount -t squashfs $mountDevice /mnt >/dev/null 2>&1
+		fi
 		retval=$?
 	fi
 	IFS=$OLDIFS

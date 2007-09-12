@@ -32,6 +32,7 @@ use KIWIMigrate;
 # Globals (Version)
 #--------------------------------------------
 our $Version       = "1.64";
+our $Revision      = "/usr/share/kiwi/.revision";
 our $openSUSE      = "http://software.opensuse.org/download/";
 #============================================
 # Globals
@@ -901,7 +902,11 @@ sub version {
 	# ...
 	# Version information
 	# ---
-	$kiwi -> info ("kiwi version v$Version\n");
+	my $rev = "unknown";
+	if (open FD,$Revision) {
+		$rev = <FD>; close FD;
+	}
+	$kiwi -> info ("kiwi version v$Version SVN: Revision: $rev\n");
 	exit 0;
 }
 

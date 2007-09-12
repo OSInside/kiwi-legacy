@@ -11,6 +11,7 @@
 #===========================================
 # make tarball from the current source tree
 #-------------------------------------------
+./.version > .revision
 rm -rf `find -type d | grep .svn`
 rm -rf rpm/
 

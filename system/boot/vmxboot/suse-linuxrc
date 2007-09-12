@@ -163,7 +163,9 @@ kernelList /mnt
 # a) /etc/fstab
 #--------------------------------------
 mkdir -p /config/etc
-echo "$imageRootDevice / $FSTYPE defaults 0 0"        > /config/etc/fstab
+if [ -z "$UNIONFS_CONFIG" ]; then
+	echo "$imageRootDevice / $FSTYPE defaults 0 0"    > /config/etc/fstab
+fi
 echo "devpts  /dev/pts   devpts mode=0620,gid=5 0 0" >> /config/etc/fstab
 echo "proc    /proc   proc    defaults 0 0"          >> /config/etc/fstab
 echo "sysfs   /sys    sysfs   noauto 0 0"            >> /config/etc/fstab
@@ -173,11 +175,16 @@ echo "tmpfs   /dev/shm tmpfs  defaults 0 0"          >> /config/etc/fstab
 # b) /boot/grub/menu.lst
 #--------------------------------------
 console=""
+gdev="(hd0,0)"
 menu=/config/boot/grub/menu.lst
 mkdir -p /config/boot/grub
+if [ ! -z "$UNIONFS_CONFIG" ]; then
+	gnum=`echo $imageRootDevice | sed -e "s/\/dev.*\([0-9]\)/\\1/"`
+	gdev="(hd0,$gnum)"
+fi
 echo "timeout 10"                                      > $menu
 if [ -f /image/loader/message ];then
-	echo "gfxmenu (hd0,0)/boot/message"               >> $menu
+	echo "gfxmenu $gdev/boot/message"                 >> $menu
 fi
 IFS="," ; for i in $KERNEL_LIST;do
 	if test ! -z "$i";then
@@ -185,17 +192,17 @@ IFS="," ; for i in $KERNEL_LIST;do
 		initrd=`echo $i | cut -f2 -d:`
 		echo "title KIWI VM boot" >> $menu
 		if [ $kernel = "vmlinuz-xen" ];then
-			echo " root (hd0,0)"                      >> $menu
+			echo " root $gdev"                        >> $menu
 			echo " kernel /boot/xen.gz"               >> $menu
 			echo -n " module /boot/$kernel"           >> $menu
 			echo -n " root=$imageRootDevice $console" >> $menu
 			echo " vga=0x314"                         >> $menu
 			echo " module /boot/$initrd"              >> $menu
 		else
-			echo -n " kernel (hd0,0)/boot/$kernel"    >> $menu
+			echo -n " kernel $gdev/boot/$kernel"      >> $menu
 			echo -n " root=$imageRootDevice $console" >> $menu
 			echo " vga=0x314"                         >> $menu
-			echo " initrd (hd0,0)/boot/$initrd"       >> $menu
+			echo " initrd $gdev/boot/$initrd"         >> $menu
 		fi
 	fi
 done
@@ -205,11 +212,16 @@ done
 #--------------------------------------
 mkdir -p /config/etc
 gconf=/config/etc/grub.conf
-echo -en "root (hd0,1)\ninstall"         > $gconf
+gdev="(hd0,1)"
+if [ ! -z "$UNIONFS_CONFIG" ]; then
+	gnum=`echo $imageRootDevice | sed -e "s/\/dev.*\([0-9]\)/\\1/"`
+	gdev="(hd0,$gnum)"
+fi
+echo -en "root $gdev\ninstall"           > $gconf
 echo -n " --stage2=/boot/grub/stage2"   >> $gconf
 echo -n " /boot/grub/stage1 d (hd0)"    >> $gconf
 echo -n " /boot/grub/stage2 0x8000"     >> $gconf
-echo " (hd0,1)/boot/grub/menu.lst"      >> $gconf
+echo " $gdev/boot/grub/menu.lst"        >> $gconf
 echo "quit"                             >> $gconf
 
 #======================================

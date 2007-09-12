@@ -1,0 +1,4 @@
+#!/bin/sh
+
+rev=`svn info | grep Revision | cut -f2 -d:`
+echo -n $rev

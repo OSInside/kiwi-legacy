@@ -2,6 +2,8 @@
 Wed Sep 12 12:04:19 CEST 2007 - ms@suse.de
 
 - show the output of --list-profiles in a nicer format
+- added installed OS version check for oemboot
+- added revision information to kiwi --version
 
 -------------------------------------------------------------------
 Mon Sep 10 16:06:53 CEST 2007 - ms@suse.de
