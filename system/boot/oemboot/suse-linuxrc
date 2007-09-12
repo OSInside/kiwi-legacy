@@ -270,12 +270,12 @@ fi
 # 9) repartition the disk device
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
+	#======================================
+	# 8.1 calculate amount of swap space
+	#--------------------------------------
+	mem_size=`grep MemTotal: /proc/meminfo | tr -dc '[0-9]'`
+	swapsize=$(( $mem_size *2 / 1024 ))
 	if ! test "$FSTYPE" = "squashfs";then
-		#======================================
-		# 8.1 calculate amount of swap space
-		#--------------------------------------
-		mem_size=`grep MemTotal: /proc/meminfo | tr -dc '[0-9]'`
-		swapsize=$(( $mem_size *2 / 1024 ))
 		#======================================
 		# 8.2 write new partition table
 		#--------------------------------------
@@ -337,8 +337,54 @@ if [ $LOCAL_BOOT = "no" ];then
 			systemException "Failed to create home filesystem" "reboot"
 		fi
 	else
-		# TODO: repartitioning for squashfs/aufs virtual disks
-		Echo "*** not yet implemented ***"
+		#======================================
+		# 8.2 calculate end block - swapspace
+		#--------------------------------------
+		swapblocks=$(( $swapsize * 1024 ))
+		diskblocks=`sfdisk -s $deviceDisk`
+		diskblocks=$(( $diskblocks - $swapblocks ))
+		#======================================
+		# 8.3 write new partition table
+		#--------------------------------------
+		# /.../
+		# Explanation of the fdisk commands used within the
+		# here document below:
+		# ----
+		# d              # delete xda partition
+		# 3              # [ 3 ]
+		# n              # create xda partition at same place than xda3
+		# p              # primary
+		# 3              # [ 3 ]
+		#                # accept old xda3 start block
+		# $diskblocks    # accept new RW device size of disk blocks - swap
+		# n              # create xda swap partition
+		# p              # primary
+		# 4              # [ 4 ]
+		#                # accept start block
+		#                # accept end block
+		# t              # change swap system id
+		# 4              # [ 4 ]
+		# 82             # Linux Swap
+		# w              # write partition table
+		# ----
+		input=/part.input
+		rm -f $input
+		for cmd in d 3 n p 3 . $diskblocks n p 4 . . t 4 82 w;do
+			if [ $cmd = "." ];then
+				echo >> $input
+				continue
+			fi
+			echo $cmd >> $input
+		done
+		fdisk $deviceDisk < $input >/dev/null 2>&1
+		if test $? != 0; then
+			systemException "Failed to create partition table" "reboot"
+		fi
+		#======================================
+		# 8.4 Update new device names
+		#--------------------------------------
+		deviceRoot="$deviceDisk"2
+		deviceSwap="$deviceDisk"4
 	fi
 fi
 
@@ -399,9 +445,9 @@ if [ $LOCAL_BOOT = "no" ];then
 	cat > /config/etc/fstab < /dev/null
 	if [ -z "$UNIONFS_CONFIG" ]; then
 		echo "$deviceRoot /      $FSTYPE defaults   0 0"   > /config/etc/fstab
+		echo "$deviceHome /home  ext3    defaults 0 0"    >> /config/etc/fstab
 	fi
 	echo "$deviceSwap swap   swap    pri=42  0 0"         >> /config/etc/fstab
-	echo "$deviceHome /home  ext3    defaults 0 0"        >> /config/etc/fstab
 	echo "devpts  /dev/pts   devpts  mode=0620,gid=5 0 0" >> /config/etc/fstab
 	echo "proc    /proc      proc    defaults 0 0"        >> /config/etc/fstab
 	echo "sysfs   /sys       sysfs   noauto 0 0"          >> /config/etc/fstab
