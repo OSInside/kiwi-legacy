@@ -4,6 +4,12 @@ Wed Sep 12 12:04:19 CEST 2007 - ms@suse.de
 - show the output of --list-profiles in a nicer format
 - added installed OS version check for oemboot
 - added revision information to kiwi --version
+- added filesystem check for unified write extend. If first
+  mount failed, try to check filesystem, if next mount failed
+  re-create the write filesystem of the unified tree
+- added support for unified virtual disk images to oemboot.
+  In this case the kiwi initrd will not be replaced by the
+  distribution default initrd
 
 -------------------------------------------------------------------
 Mon Sep 10 16:06:53 CEST 2007 - ms@suse.de

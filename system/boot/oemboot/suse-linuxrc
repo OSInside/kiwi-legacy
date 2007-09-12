@@ -100,7 +100,20 @@ touch /etc/modules.conf
 touch /lib/modules/*/modules.dep
 
 #======================================
-# 3) Including required kernel modules
+# 3) Include proc/cmdline information
+#--------------------------------------
+includeKernelParameters
+if [ ! -z $UNIONFS_CONFIG ];then
+	# /.../
+	# if the unionfs information is already in place at this stage
+	# it comes from the cmdline data which means we are not booting
+	# from CD/DVD USB stick but want to boot the local system
+	# ----
+	LOCAL_BOOT="yes"   
+fi
+
+#======================================
+# 4) Including required kernel modules
 #--------------------------------------
 probeDevices
 for module in usb_storage sg sd_mod;do
@@ -108,28 +121,44 @@ for module in usb_storage sg sd_mod;do
 done
 
 #======================================
-# 4) Search disks, prefer removable one
+# 5) Search disks, prefer removable one
 #--------------------------------------
 if [ ! -f $VMX_SYSTEM ];then
-	USBStickDevice
-	if [ $deviceFound = 0 ];then
-		for deviceRoot in /dev/sda1 /dev/hda1;do
-			if mount $deviceRoot /mnt &>/dev/null;then
-				deviceFound=1
-				umount /mnt
-				break
-			fi
-		done
+	# /.../
+	# installed system: Check for a root device to mount and
+	# prefer a USB stick if there is any. Otherwise check for
+	# first partition of a disk device. During first boot of
+	# the installed system there is only one partition and this
+	# initrd is going to be replaced by a later mkinitrd call
+	# for unified systems the kiwi initrd is used and the
+	# kernel parameters of this initrd defines the missing
+	# information
+	# ----
+	if [ $LOCAL_BOOT = "no" ];then
+		USBStickDevice
 		if [ $deviceFound = 0 ];then
-			systemException \
-				"Couldn't find any disk device... abort" \
-			"reboot"
+			for deviceRoot in /dev/sda1 /dev/hda1;do
+				if mount $deviceRoot /mnt &>/dev/null;then
+					deviceFound=1
+					umount /mnt
+					break
+				fi
+			done
+			if [ $deviceFound = 0 ];then
+				systemException \
+					"Couldn't find any disk device... abort" \
+				"reboot"
+			fi
+			deviceDisk=`echo $deviceRoot | tr -d [0-9]`
+			deviceSwap="$deviceDisk"2
+			deviceHome="$deviceDisk"3
 		fi
-		deviceDisk=`echo $deviceRoot | tr -d [0-9]`
-		deviceSwap="$deviceDisk"2
-		deviceHome="$deviceDisk"3
 	fi
 else
+	# /.../
+	# installation mode: find a usable disk to install the image
+	# on. The image is a virtual disk with one partition
+	# ----
 	hwinfo="/usr/sbin/hwinfo --disk"
 	deviceDisk=`$hwinfo | grep "Device File:" | head -n 1 | cut -f2 -d:`
 	deviceDisk=`echo $deviceDisk`
@@ -142,36 +171,38 @@ else
 fi
 
 #======================================
-# 5) mount OS and call update check
+# 6) mount OS and call update check
 #--------------------------------------
-probeFileSystem $deviceRoot
-if test "$FSTYPE" = "squashfs";then
-	export UNIONFS_CONFIG="$deviceDisk"3,"$deviceDisk"2,aufs
+if [ $LOCAL_BOOT = "no" ];then
+	probeFileSystem $deviceRoot
+	if test "$FSTYPE" = "squashfs";then
+		export UNIONFS_CONFIG="$deviceDisk"3,"$deviceDisk"2,aufs
+	fi
+	mountSystem $deviceRoot; updateNeeded
+	umount /mnt >/dev/null 2>&1
 fi
-mountSystem $deviceRoot; updateNeeded
-umount /mnt >/dev/null 2>&1
 
 #======================================
-# 6) Check for vmx system
+# 7) Check for vmx system
 #--------------------------------------
 if [ -f $VMX_SYSTEM ];then
 	#======================================
-	# 6.1) check version of installed OS
+	# 71) check version of installed OS
 	#--------------------------------------
 	if test `getSystemIntegrity 1` = "fine";then
 		Echo "Base system is up to date... reboot"
 		/sbin/reboot -f -i >/dev/null 2>&1
 	fi
 	#======================================
-	# 6.2) import vmx configuration file
+	# 7.2) import vmx configuration file
 	#--------------------------------------
 	importFile < $VMX_SYSTEM
 	#======================================
-	# 6.3) mount CD/DVD
+	# 7.3) mount CD/DVD
 	#--------------------------------------
 	CDMount
 	#======================================
-	# 6.4) install disk system
+	# 7.4) install disk system
 	#--------------------------------------
 	# /.../
 	# install virtual disk image from the CD/DVD onto the
@@ -214,237 +245,256 @@ if [ -f $VMX_SYSTEM ];then
 		rm -f /dev/compressed_image
 	fi
 	#======================================
-	# 6.5) Umount the CD/DVD
+	# 7.5) Umount the CD/DVD
 	#--------------------------------------
 	CDUmount
 	#======================================
-	# 6.6) reboot system
+	# 7.6) reboot system
 	#--------------------------------------
 	Echo "System installation has finished... reboot"
 	/sbin/reboot -f -i >/dev/null 2>&1
 fi
 
 #======================================
-# 7) Probe filesystem of disk device
+# 8) Probe filesystem of disk device
 #--------------------------------------
-probeFileSystem $deviceRoot
-if [ $FSTYPE = "unknown" ];then
-	systemException \
-		"Couldn't determine filesystem type... abort" \
-	"reboot"
+if [ $LOCAL_BOOT = "no" ];then
+	probeFileSystem $deviceRoot
+	if [ $FSTYPE = "unknown" ];then
+		systemException \
+			"Couldn't determine filesystem type... abort" \
+		"reboot"
+	fi
 fi
 #======================================
-# 8) repartition the disk device
+# 9) repartition the disk device
 #--------------------------------------
-if ! test "$FSTYPE" = "squashfs";then
-	#======================================
-	# 8.1 calculate amount of swap space
-	#--------------------------------------
-	mem_size=`grep MemTotal: /proc/meminfo | tr -dc '[0-9]'`
-	swapsize=$(( $mem_size *2 / 1024 ))
-	#======================================
-	# 8.2 write new partition table
-	#--------------------------------------
-	# /.../
-	# Explanation of the fdisk commands used within the
-	# here document below:
-	# ----
-	# d              # delete xda partition [ 1 ]
-	# n              # create xda partition at same place than xda1
-	# p              # primary
-	# 2              # [ 2 ]
-	# 1              # accept old xda1 start block for xda2
-	# +10240M        # accept new root device size of 10GB
-	# n              # create xda swap partition
-	# p              # primary
-	# 1              # [ 1 ]
-	#                # accept start block
-	# +"$swapsize"M  # accept new swapsize
-	# n              # create xda3 home partition
-	# p              # primary
-	# 3              # [ 3 ]
-	#                # accept start block
-	#                # accept end block, complete disk
-	# t              # change swap system id
-	# 1              # [ 1 ]
-	# 82             # Linux Swap
-	# w              # write partition table
-	# ----
-	input=/part.input
-	rm -f $input
-	for cmd in d n p 2 1 +10240M n p 1 . +"$swapsize"M n p 3 . . t 1 82 w;do
-		if [ $cmd = "." ];then
-			echo >> $input
-			continue
+if [ $LOCAL_BOOT = "no" ];then
+	if ! test "$FSTYPE" = "squashfs";then
+		#======================================
+		# 8.1 calculate amount of swap space
+		#--------------------------------------
+		mem_size=`grep MemTotal: /proc/meminfo | tr -dc '[0-9]'`
+		swapsize=$(( $mem_size *2 / 1024 ))
+		#======================================
+		# 8.2 write new partition table
+		#--------------------------------------
+		# /.../
+		# Explanation of the fdisk commands used within the
+		# here document below:
+		# ----
+		# d              # delete xda partition [ 1 ]
+		# n              # create xda partition at same place than xda1
+		# p              # primary
+		# 2              # [ 2 ]
+		# 1              # accept old xda1 start block for xda2
+		# +10240M        # accept new root device size of 10GB
+		# n              # create xda swap partition
+		# p              # primary
+		# 1              # [ 1 ]
+		#                # accept start block
+		# +"$swapsize"M  # accept new swapsize
+		# n              # create xda3 home partition
+		# p              # primary
+		# 3              # [ 3 ]
+		#                # accept start block
+		#                # accept end block, complete disk
+		# t              # change swap system id
+		# 1              # [ 1 ]
+		# 82             # Linux Swap
+		# w              # write partition table
+		# ----
+		input=/part.input
+		rm -f $input
+		for cmd in d n p 2 1 +10240M n p 1 . +"$swapsize"M n p 3 . . t 1 82 w;do
+			if [ $cmd = "." ];then
+				echo >> $input
+				continue
+			fi
+			echo $cmd >> $input
+		done
+		fdisk $deviceDisk < $input >/dev/null 2>&1
+		if test $? != 0; then
+			systemException "Failed to create partition table" "reboot"
 		fi
-		echo $cmd >> $input
-	done
-	fdisk $deviceDisk < $input >/dev/null 2>&1
-	if test $? != 0; then
-		systemException "Failed to create partition table" "reboot"
-	fi
-	#======================================
-	# 8.3 Update new device names
-	#--------------------------------------
-	deviceRoot="$deviceDisk"2
-	deviceSwap="$deviceDisk"1
-	deviceHome="$deviceDisk"3
+		#======================================
+		# 8.3 Update new device names
+		#--------------------------------------
+		deviceRoot="$deviceDisk"2
+		deviceSwap="$deviceDisk"1
+		deviceHome="$deviceDisk"3
 
-	#======================================
-	# 8.4 Activate swap space
-	#--------------------------------------
-	if ! mkswap $deviceSwap >/dev/null 2>&1;then
-		systemException "Failed to create swap signature" "reboot"
+		#======================================
+		# 8.4 Activate swap space
+		#--------------------------------------
+		if ! mkswap $deviceSwap >/dev/null 2>&1;then
+			systemException "Failed to create swap signature" "reboot"
+		fi
+		#======================================
+		# 8.5 Create home file system
+		#--------------------------------------
+		if ! mke2fs -j -q $deviceHome >/dev/null 2>&1;then
+			systemException "Failed to create home filesystem" "reboot"
+		fi
+	else
+		# TODO: repartitioning for squashfs/aufs virtual disks
+		Echo "*** not yet implemented ***"
 	fi
-	#======================================
-	# 8.5 Create home file system
-	#--------------------------------------
-	if ! mke2fs -j -q $deviceHome >/dev/null 2>&1;then
-		systemException "Failed to create home filesystem" "reboot"
-	fi
-else
-	# TODO: repartitioning for squashfs/aufs virtual disks not yet implemented
-	Echo "*** not yet implemented ***"
 fi
 
 #======================================
-# 9) Resize filesystem to full space
+# 10) Resize filesystem to full space
 #--------------------------------------
-Echo "Filesystem of root system is: $FSTYPE -> $deviceRoot"
-if test "$FSTYPE" = "squashfs";then
-	export UNIONFS_CONFIG="$deviceDisk"3,"$deviceDisk"2,aufs
-else
-	if test "$FSTYPE" = "reiserfs";then
-		Echo "Resize Reiser filesystem to full partition space..."
-		resize_reiserfs -q $deviceRoot
-		INITRD_MODULES="$INITRD_MODULES reiserfs"
-	fi
-	if test "$FSTYPE" = "ext2";then
-		#Echo "Checking EXT2 filesystem..."
-		e2fsck -y -f $deviceRoot
-		Echo "Resize EXT2 filesystem to full partition space..."
-		resize2fs -F -p $deviceRoot
-		INITRD_MODULES="$INITRD_MODULES ext2"
-	fi
-	if test "$FSTYPE" = "ext3";then
-		#Echo "Checking EXT3 filesystem..."
-		e2fsck -y -f $deviceRoot
-		Echo "Resize EXT3 filesystem to full partition space..."
-		resize2fs -F -p $deviceRoot
-		Echo "Checking EXT3 journal..."
-		tune2fs -j $deviceRoot
-		INITRD_MODULES="$INITRD_MODULES ext3"
+if [ $LOCAL_BOOT = "no" ];then
+	Echo "Filesystem of root system is: $FSTYPE -> $deviceRoot"
+	if test "$FSTYPE" = "squashfs";then
+		UNIONFS_CONFIG="$deviceDisk"3,"$deviceDisk"2,aufs
+		KIWI_INITRD_PARAMS="UNIONFS_CONFIG=\"$UNIONFS_CONFIG\""
+		KIWI_INITRD_PARAMS="$KIWI_INITRD_PARAMS deviceRoot=\"$deviceRoot\""
+	else
+		if test "$FSTYPE" = "reiserfs";then
+			Echo "Resize Reiser filesystem to full partition space..."
+			resize_reiserfs -q $deviceRoot
+			INITRD_MODULES="$INITRD_MODULES reiserfs"
+		fi
+		if test "$FSTYPE" = "ext2";then
+			#Echo "Checking EXT2 filesystem..."
+			e2fsck -y -f $deviceRoot
+			Echo "Resize EXT2 filesystem to full partition space..."
+			resize2fs -F -p $deviceRoot
+			INITRD_MODULES="$INITRD_MODULES ext2"
+		fi
+		if test "$FSTYPE" = "ext3";then
+			#Echo "Checking EXT3 filesystem..."
+			e2fsck -y -f $deviceRoot
+			Echo "Resize EXT3 filesystem to full partition space..."
+			resize2fs -F -p $deviceRoot
+			Echo "Checking EXT3 journal..."
+			tune2fs -j $deviceRoot
+			INITRD_MODULES="$INITRD_MODULES ext3"
+		fi
 	fi
 fi
 
 #======================================
-# 10) Mount system
+# 11) Mount system
 #--------------------------------------
 if ! mountSystem $deviceRoot;then
 	systemException "Failed to mount root filesystem" "reboot"
 fi
 
 #======================================
-# 11) get installed kernels
+# 12) get installed kernels
 #--------------------------------------
-kernelList /mnt
+if [ $LOCAL_BOOT = "no" ];then
+	kernelList /mnt
+fi
 
 #======================================
-# 12) Create system dependant files
+# 13) Create system dependant files
 #--------------------------------------
-# a) /etc/fstab
-mkdir -p /config/etc
-cat > /config/etc/fstab < /dev/null
-if [ -z "$UNIONFS_CONFIG" ]; then
-	echo "$deviceRoot /      $FSTYPE defaults   0 0"   > /config/etc/fstab
-fi
-echo "$deviceSwap swap   swap    pri=42  0 0"         >> /config/etc/fstab
-echo "$deviceHome /home  ext3    defaults 0 0"        >> /config/etc/fstab
-echo "devpts  /dev/pts   devpts  mode=0620,gid=5 0 0" >> /config/etc/fstab
-echo "proc    /proc      proc    defaults 0 0"        >> /config/etc/fstab
-echo "sysfs   /sys       sysfs   noauto 0 0"          >> /config/etc/fstab
-echo "tmpfs   /dev/shm   tmpfs   defaults 0 0"        >> /config/etc/fstab
-
-# b) /boot/grub/menu.lst
-console=""
-gdev="(hd0,1)"
-if [ ! -z "$UNIONFS_CONFIG" ]; then
-	gnum=`echo $deviceRoot | sed -e "s/\/dev.*\([0-9]\)/\\1/"`
-	gdev="(hd0,$gnum)"
-fi
-menu=/config/boot/grub/menu.lst
-mkdir -p /config/boot/grub
-echo "timeout 10"                                > $menu
-if [ -f /image/loader/message ];then
-	echo "gfxmenu $gdev/boot/message"           >> $menu
-fi
-IFS="," ; for i in $KERNEL_LIST;do
-	if test ! -z "$i";then
-		kernel=`echo $i | cut -f1 -d:`
-		initrd=`echo $i | cut -f2 -d:`
-		echo "title SUSE Linux Enterprise Desktop 10 SP1 ($kernel)" >> $menu
-		echo -n " kernel $gdev/boot/$kernel"    >> $menu
-		echo -n " root=${deviceDisk}1 $console" >> $menu
-		echo " vga=0x318"                       >> $menu
-		echo " initrd $gdev/boot/$initrd"       >> $menu
+if [ $LOCAL_BOOT = "no" ];then
+	# a) /etc/fstab
+	mkdir -p /config/etc
+	cat > /config/etc/fstab < /dev/null
+	if [ -z "$UNIONFS_CONFIG" ]; then
+		echo "$deviceRoot /      $FSTYPE defaults   0 0"   > /config/etc/fstab
 	fi
-done
+	echo "$deviceSwap swap   swap    pri=42  0 0"         >> /config/etc/fstab
+	echo "$deviceHome /home  ext3    defaults 0 0"        >> /config/etc/fstab
+	echo "devpts  /dev/pts   devpts  mode=0620,gid=5 0 0" >> /config/etc/fstab
+	echo "proc    /proc      proc    defaults 0 0"        >> /config/etc/fstab
+	echo "sysfs   /sys       sysfs   noauto 0 0"          >> /config/etc/fstab
+	echo "tmpfs   /dev/shm   tmpfs   defaults 0 0"        >> /config/etc/fstab
 
-# c) /etc/grub.conf...
-# -------------------------
-mkdir -p /config/etc
-gconf=/config/etc/grub.conf
-echo -en "root $gdev\ninstall"           > $gconf 
-echo -n " --stage2=/boot/grub/stage2"   >> $gconf
-echo -n " /boot/grub/stage1 d (hd0)"    >> $gconf
-echo -n " /boot/grub/stage2 0x8000"     >> $gconf
-echo " $gdev/boot/grub/menu.lst"        >> $gconf
-echo "quit"                             >> $gconf
+	# b) /boot/grub/menu.lst
+	console=""
+	gdev="(hd0,1)"
+	if [ ! -z "$UNIONFS_CONFIG" ]; then
+		gnum=`echo $deviceRoot | sed -e "s/\/dev.*\([0-9]\)/\\1/"`
+		gdev="(hd0,$gnum)"
+	fi
+	menu=/config/boot/grub/menu.lst
+	mkdir -p /config/boot/grub
+	echo "timeout 10"                                > $menu
+	if [ -f /image/loader/message ];then
+		echo "gfxmenu $gdev/boot/message"           >> $menu
+	fi
+	IFS="," ; for i in $KERNEL_LIST;do
+		if test ! -z "$i";then
+			kernel=`echo $i | cut -f1 -d:`
+			initrd=`echo $i | cut -f2 -d:`
+			echo "title SUSE Linux Enterprise Desktop 10 SP1 ($kernel)" >> $menu
+			echo -n " kernel $gdev/boot/$kernel"    >> $menu
+			echo -n " root=${deviceDisk}1 $console" >> $menu
+			echo -n " vga=0x314"                    >> $menu
+			echo " $KIWI_INITRD_PARAMS"             >> $menu
+			echo " initrd $gdev/boot/$initrd"       >> $menu
+		fi
+	done
 
-# d) /etc/sysconfig/kernel...
-# ---------------------------
-mkdir -p /config/etc/sysconfig
-syskernel=/config/etc/sysconfig/kernel
-echo "INITRD_MODULES=\"$INITRD_MODULES\""       > $syskernel
-echo "DOMU_INITRD_MODULES=\"$DOMURD_MODULES\"" >> $syskernel
+	# c) /etc/grub.conf...
+	# -------------------------
+	mkdir -p /config/etc
+	gconf=/config/etc/grub.conf
+	echo -en "root $gdev\ninstall"           > $gconf 
+	echo -n " --stage2=/boot/grub/stage2"   >> $gconf
+	echo -n " /boot/grub/stage1 d (hd0)"    >> $gconf
+	echo -n " /boot/grub/stage2 0x8000"     >> $gconf
+	echo " $gdev/boot/grub/menu.lst"        >> $gconf
+	echo "quit"                             >> $gconf
+
+	# d) /etc/sysconfig/kernel...
+	# ---------------------------
+	mkdir -p /config/etc/sysconfig
+	syskernel=/config/etc/sysconfig/kernel
+	echo "INITRD_MODULES=\"$INITRD_MODULES\""       > $syskernel
+	echo "DOMU_INITRD_MODULES=\"$DOMURD_MODULES\"" >> $syskernel
+fi
 
 #======================================
-# 13) copy system dependant files
+# 14) copy system dependant files
 #--------------------------------------
-cd /config
-find . -type d | while read d ; do  mkdir -p /mnt/$d ; done
-find . -type f | while read f ; do  cp $f /mnt/$f ; done
-cd /
-rm -rf /config
+if [ $LOCAL_BOOT = "no" ];then
+	cd /config
+	find . -type d | while read d ; do  mkdir -p /mnt/$d ; done
+	find . -type f | while read f ; do  cp $f /mnt/$f ; done
+	cd /
+	rm -rf /config
+fi
 
 #======================================
-# 14) setup real root device
+# 15) setup real root device
 #--------------------------------------
 # echo 256 > /proc/sys/kernel/real-root-dev
 
 #======================================
-# 15) umount system filesystems
+# 16) umount system filesystems
 #--------------------------------------
 umount /dev/pts
 umount /sys
 umount /proc
 
 #======================================
-# 16) copy initrd files to image
+# 17) copy initrd files to image
 #--------------------------------------
-if [ -f /image/loader/message ];then
-	mv /image/loader/message /mnt/boot
+if [ $LOCAL_BOOT = "no" ];then
+	if [ -f /image/loader/message ];then
+		mv /image/loader/message /mnt/boot
+	fi
+	cp /preinit /mnt
+	cp /include /mnt
 fi
-cp /preinit /mnt
-cp /include /mnt
 
 #======================================
-# 17) Start YaST when booting final sys
+# 18) Start YaST when booting final sys
 #--------------------------------------
-touch /mnt/var/lib/YaST2/runme_at_boot
+if [ $LOCAL_BOOT = "no" ];then
+	touch /mnt/var/lib/YaST2/runme_at_boot >/dev/null 2>&1
+fi
 
 #======================================
-# 18) Activate new root
+# 19) Activate new root
 #--------------------------------------
 Echo "Activating Image: [$deviceDisk]"
 cd /mnt && exec < dev/console >dev/console 2>&1
@@ -464,7 +514,7 @@ else
 fi
 
 #======================================
-# 19) Unmount initrd / system init
+# 20) Unmount initrd / system init
 #--------------------------------------
 echo " "
 echo "Booting into final System..."

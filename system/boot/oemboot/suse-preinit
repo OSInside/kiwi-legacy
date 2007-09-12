@@ -20,21 +20,30 @@
 . /include
 
 #======================================
-# 1) create initrd on diskful
+# 1) check for LOCAL_BOOT
 #--------------------------------------
-if test -L /boot/boot;then
-	mount -t proc proc /proc
-	mount -t sysfs sysfs /sys
-	mkinitrd 
-	umount /sys
-	umount /proc
-else
-	Echo "Image doesn't provide kernel system map"
-	Echo "Can't create initrd"
+if [ $LOCAL_BOOT = "yes" ];then
+	exit 0
 fi
 
 #======================================
-# 2) Install boot loader on diskful
+# 2) create initrd on diskful
+#--------------------------------------
+if test -z $KIWI_INITRD_PARAMS;then
+	if test -L /boot/boot;then
+		mount -t proc proc /proc
+		mount -t sysfs sysfs /sys
+		mkinitrd 
+		umount /sys
+		umount /proc
+	else
+		Echo "Image doesn't provide kernel system map"
+		Echo "Can't create initrd"
+	fi
+fi
+
+#======================================
+# 3) Install boot loader on diskful
 #--------------------------------------
 if test -f "/usr/sbin/grub";then
 	Echo "Installing boot loader..."
@@ -45,7 +54,7 @@ else
 fi
 
 #======================================
-# 3) Update /etc/ImageVersion files
+# 4) Update /etc/ImageVersion files
 #--------------------------------------
 count=1
 field=0
