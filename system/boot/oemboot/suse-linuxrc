@@ -147,7 +147,7 @@ if [ ! -f $VMX_SYSTEM ];then
 			if [ $deviceFound = 0 ];then
 				systemException \
 					"Couldn't find any disk device... abort" \
-				"reboot"
+				"shell"
 			fi
 			deviceDisk=`echo $deviceRoot | tr -d [0-9]`
 			deviceSwap="$deviceDisk"2
@@ -162,24 +162,11 @@ else
 	hwinfo="/usr/sbin/hwinfo --disk"
 	deviceDisk=`$hwinfo | grep "Device File:" | head -n 1 | cut -f2 -d:`
 	deviceDisk=`echo $deviceDisk`
-	deviceRoot="$deviceDisk"2
 	if [ -z $deviceDisk ];then
 		systemException \
 			"No hard disk found... abort" \
-		"reboot"
+		"shell"
 	fi
-fi
-
-#======================================
-# 6) mount OS and call update check
-#--------------------------------------
-if [ $LOCAL_BOOT = "no" ];then
-	probeFileSystem $deviceRoot
-	if test "$FSTYPE" = "squashfs";then
-		export UNIONFS_CONFIG="$deviceDisk"3,"$deviceDisk"2,aufs
-	fi
-	mountSystem $deviceRoot; updateNeeded
-	umount /mnt >/dev/null 2>&1
 fi
 
 #======================================
@@ -187,16 +174,27 @@ fi
 #--------------------------------------
 if [ -f $VMX_SYSTEM ];then
 	#======================================
-	# 71) check version of installed OS
+	# 7.1) import vmx configuration file
 	#--------------------------------------
+	importFile < $VMX_SYSTEM
+	#======================================
+	# 7.2) check version of installed OS
+	#--------------------------------------
+	deviceRoot="$deviceDisk"2
+	probeFileSystem $deviceRoot
+	if test "$FSTYPE" = "unknown";then
+		deviceRoot="$deviceDisk"1
+		probeFileSystem $deviceRoot
+	fi
+	if test "$FSTYPE" = "squashfs";then
+		export UNIONFS_CONFIG="$deviceDisk"3,"$deviceDisk"2,aufs
+	fi
+	mountSystem $deviceRoot; updateNeeded
+	umount /mnt >/dev/null 2>&1
 	if test `getSystemIntegrity 1` = "fine";then
 		Echo "Base system is up to date... reboot"
 		/sbin/reboot -f -i >/dev/null 2>&1
 	fi
-	#======================================
-	# 7.2) import vmx configuration file
-	#--------------------------------------
-	importFile < $VMX_SYSTEM
 	#======================================
 	# 7.3) mount CD/DVD
 	#--------------------------------------
@@ -237,7 +235,7 @@ if [ -f $VMX_SYSTEM ];then
 	if ! dd if=$imageName of=$imageDevice >/dev/null 2>&1; then
 		systemException \
 			"Failed to install image: $imageName -> $imageDevice" \
-		"reboot"
+		"shell"
 	fi
 	if test "$imageZipped" = "compressed"; then
 		imageDevice=$imageDevice_orig
@@ -248,6 +246,40 @@ if [ -f $VMX_SYSTEM ];then
 	# 7.5) Umount the CD/DVD
 	#--------------------------------------
 	CDUmount
+	#======================================
+	# 7.6) find new root partition
+	#--------------------------------------
+	deviceRoot="$deviceDisk"2
+	probeFileSystem $deviceRoot
+	if test "$FSTYPE" = "unknown";then
+		deviceRoot="$deviceDisk"1
+		probeFileSystem $deviceRoot
+	fi
+	if test "$FSTYPE" = "squashfs";then
+		export UNIONFS_CONFIG="$deviceDisk"3,"$deviceDisk"2,aufs
+	fi
+	#======================================
+	# 7.6) Create md5 version info file
+	#--------------------------------------
+	if ! mountSystem $deviceRoot;then
+		systemException \
+			"Couldn't mount installed system... abort" \
+		"shell"
+	fi
+	updateNeeded initialize
+	field=0
+	IFS=";" ; for n in $IMAGE;do
+	case $field in
+		0) field=1 ;;
+		1) imageName=$n   ; field=2 ;;
+		2) imageVersion=$n
+	esac
+	done
+	atversion="$imageName-$imageVersion"
+	versionFile="/mnt/etc/ImageVersion-$atversion"
+	md5sum=`getSystemMD5Status 1`
+	echo "$atversion $md5sum" > $versionFile
+	umount /mnt
 	#======================================
 	# 7.6) reboot system
 	#--------------------------------------
@@ -263,7 +295,7 @@ if [ $LOCAL_BOOT = "no" ];then
 	if [ $FSTYPE = "unknown" ];then
 		systemException \
 			"Couldn't determine filesystem type... abort" \
-		"reboot"
+		"shell"
 	fi
 fi
 #======================================
@@ -313,9 +345,10 @@ if [ $LOCAL_BOOT = "no" ];then
 			fi
 			echo $cmd >> $input
 		done
+		Echo "Repartition the disk according to current geometry"
 		fdisk $deviceDisk < $input >/dev/null 2>&1
 		if test $? != 0; then
-			systemException "Failed to create partition table" "reboot"
+			systemException "Failed to create partition table" "shell"
 		fi
 		#======================================
 		# 8.3 Update new device names
@@ -327,14 +360,16 @@ if [ $LOCAL_BOOT = "no" ];then
 		#======================================
 		# 8.4 Activate swap space
 		#--------------------------------------
+		Echo "Activating swap space on $deviceSwap"
 		if ! mkswap $deviceSwap >/dev/null 2>&1;then
-			systemException "Failed to create swap signature" "reboot"
+			systemException "Failed to create swap signature" "shell"
 		fi
 		#======================================
 		# 8.5 Create home file system
 		#--------------------------------------
+		Echo "Creating Home filesystem on $deviceHome"
 		if ! mke2fs -j -q $deviceHome >/dev/null 2>&1;then
-			systemException "Failed to create home filesystem" "reboot"
+			systemException "Failed to create home filesystem" "shell"
 		fi
 	else
 		#======================================
@@ -378,7 +413,7 @@ if [ $LOCAL_BOOT = "no" ];then
 		done
 		fdisk $deviceDisk < $input >/dev/null 2>&1
 		if test $? != 0; then
-			systemException "Failed to create partition table" "reboot"
+			systemException "Failed to create partition table" "shell"
 		fi
 		#======================================
 		# 8.4 Update new device names
@@ -426,7 +461,7 @@ fi
 # 11) Mount system
 #--------------------------------------
 if ! mountSystem $deviceRoot;then
-	systemException "Failed to mount root filesystem" "reboot"
+	systemException "Failed to mount root filesystem" "shell"
 fi
 
 #======================================
@@ -472,7 +507,11 @@ if [ $LOCAL_BOOT = "no" ];then
 			initrd=`echo $i | cut -f2 -d:`
 			echo "title SUSE Linux Enterprise Desktop 10 SP1 ($kernel)" >> $menu
 			echo -n " kernel $gdev/boot/$kernel"    >> $menu
-			echo -n " root=${deviceDisk}1 $console" >> $menu
+			if [ -z "$UNIONFS_CONFIG" ]; then
+				echo -n " root=${deviceDisk}2 $console" >> $menu
+			else
+				echo -n " root=${deviceDisk}1 $console" >> $menu
+			fi
 			echo -n " vga=0x314"                    >> $menu
 			echo " $KIWI_INITRD_PARAMS"             >> $menu
 			echo " initrd $gdev/boot/$initrd"       >> $menu

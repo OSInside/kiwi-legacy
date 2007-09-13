@@ -52,23 +52,3 @@ else
 	Echo "Image doesn't provide grub support"
 	Echo "Can't install boot loader"
 fi
-
-#======================================
-# 4) Update /etc/ImageVersion files
-#--------------------------------------
-count=1
-field=0
-IFS=";" ; for n in $IMAGE;do
-case $field in
-	0) field=1 ;;
-	1) imageName=$n   ; field=2 ;;
-	2) imageVersion=$n
-esac
-done
-atversion="$imageName-$imageVersion"
-versionFile="/etc/ImageVersion-$atversion"
-md5sum=`getSystemMD5Status $count`
-if test `getSystemIntegrity $count` = "clean";then
-	echo "$atversion $md5sum" > $versionFile
-fi
-
