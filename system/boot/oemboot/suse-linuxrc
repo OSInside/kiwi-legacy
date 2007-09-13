@@ -111,7 +111,7 @@ if [ ! -f $VMX_SYSTEM ];then
 			if [ $deviceFound = 0 ];then
 				systemException \
 					"Couldn't find any disk device... abort" \
-				"shell"
+				"reboot"
 			fi
 			deviceDisk=`echo $deviceRoot | tr -d [0-9]`
 			deviceSwap="$deviceDisk"2
@@ -133,7 +133,7 @@ else
 	if [ -z $deviceDisk ];then
 		systemException \
 			"No hard disk found... abort" \
-		"shell"
+		"reboot"
 	fi
 fi
 
@@ -210,7 +210,7 @@ if [ -f $VMX_SYSTEM ];then
 	if ! dd if=$imageName of=$imageDevice >/dev/null 2>&1; then
 		systemException \
 			"Failed to install image: $imageName -> $imageDevice" \
-		"shell"
+		"reboot"
 	fi
 	if test "$imageZipped" = "compressed"; then
 		imageDevice=$imageDevice_orig
@@ -239,7 +239,7 @@ if [ -f $VMX_SYSTEM ];then
 	if ! mountSystem $deviceRoot;then
 		systemException \
 			"Couldn't mount installed system... abort" \
-		"shell"
+		"reboot"
 	fi
 	updateNeeded initialize
 	field=0
@@ -270,7 +270,7 @@ if [ $LOCAL_BOOT = "no" ];then
 	if [ $FSTYPE = "unknown" ];then
 		systemException \
 			"Couldn't determine filesystem type... abort" \
-		"shell"
+		"reboot"
 	fi
 fi
 #======================================
@@ -323,7 +323,7 @@ if [ $LOCAL_BOOT = "no" ];then
 		Echo "Repartition the disk according to current geometry"
 		fdisk $deviceDisk < $input >/dev/null 2>&1
 		if test $? != 0; then
-			systemException "Failed to create partition table" "shell"
+			systemException "Failed to create partition table" "reboot"
 		fi
 		#======================================
 		# 8.3 Update new device names
@@ -337,14 +337,14 @@ if [ $LOCAL_BOOT = "no" ];then
 		#--------------------------------------
 		Echo "Activating swap space on $deviceSwap"
 		if ! mkswap $deviceSwap >/dev/null 2>&1;then
-			systemException "Failed to create swap signature" "shell"
+			systemException "Failed to create swap signature" "reboot"
 		fi
 		#======================================
 		# 8.5 Create home file system
 		#--------------------------------------
 		Echo "Creating Home filesystem on $deviceHome"
 		if ! mke2fs -j -q $deviceHome >/dev/null 2>&1;then
-			systemException "Failed to create home filesystem" "shell"
+			systemException "Failed to create home filesystem" "reboot"
 		fi
 	else
 		#======================================
@@ -388,7 +388,7 @@ if [ $LOCAL_BOOT = "no" ];then
 		done
 		fdisk $deviceDisk < $input >/dev/null 2>&1
 		if test $? != 0; then
-			systemException "Failed to create partition table" "shell"
+			systemException "Failed to create partition table" "reboot"
 		fi
 		#======================================
 		# 8.4 Update new device names
@@ -436,7 +436,7 @@ fi
 # 10) Mount system
 #--------------------------------------
 if ! mountSystem $deviceRoot;then
-	systemException "Failed to mount root filesystem" "shell"
+	systemException "Failed to mount root filesystem" "reboot"
 fi
 
 #======================================
