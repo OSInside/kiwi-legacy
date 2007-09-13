@@ -170,15 +170,15 @@ else
 fi
 
 #======================================
-# 7) Check for vmx system
+# 6) Check for vmx system
 #--------------------------------------
 if [ -f $VMX_SYSTEM ];then
 	#======================================
-	# 7.1) import vmx configuration file
+	# 6.1) import vmx configuration file
 	#--------------------------------------
 	importFile < $VMX_SYSTEM
 	#======================================
-	# 7.2) check version of installed OS
+	# 6.2) check version of installed OS
 	#--------------------------------------
 	deviceRoot="$deviceDisk"2
 	probeFileSystem $deviceRoot
@@ -196,11 +196,11 @@ if [ -f $VMX_SYSTEM ];then
 		/sbin/reboot -f -i >/dev/null 2>&1
 	fi
 	#======================================
-	# 7.3) mount CD/DVD
+	# 6.3) mount CD/DVD
 	#--------------------------------------
 	CDMount
 	#======================================
-	# 7.4) install disk system
+	# 6.4) install disk system
 	#--------------------------------------
 	# /.../
 	# install virtual disk image from the CD/DVD onto the
@@ -243,11 +243,11 @@ if [ -f $VMX_SYSTEM ];then
 		rm -f /dev/compressed_image
 	fi
 	#======================================
-	# 7.5) Umount the CD/DVD
+	# 6.5) Umount the CD/DVD
 	#--------------------------------------
 	CDUmount
 	#======================================
-	# 7.6) find new root partition
+	# 6.6) find new root partition
 	#--------------------------------------
 	deviceRoot="$deviceDisk"2
 	probeFileSystem $deviceRoot
@@ -259,7 +259,7 @@ if [ -f $VMX_SYSTEM ];then
 		export UNIONFS_CONFIG="$deviceDisk"3,"$deviceDisk"2,aufs
 	fi
 	#======================================
-	# 7.6) Create md5 version info file
+	# 6.7) Create md5 version info file
 	#--------------------------------------
 	if ! mountSystem $deviceRoot;then
 		systemException \
@@ -281,14 +281,14 @@ if [ -f $VMX_SYSTEM ];then
 	echo "$atversion $md5sum" > $versionFile
 	umount /mnt
 	#======================================
-	# 7.6) reboot system
+	# 6.8) reboot system
 	#--------------------------------------
 	Echo "System installation has finished... reboot"
 	/sbin/reboot -f -i >/dev/null 2>&1
 fi
 
 #======================================
-# 8) Probe filesystem of disk device
+# 7) Probe filesystem of disk device
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	probeFileSystem $deviceRoot
@@ -299,7 +299,7 @@ if [ $LOCAL_BOOT = "no" ];then
 	fi
 fi
 #======================================
-# 9) repartition the disk device
+# 8) repartition the disk device
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	#======================================
@@ -424,7 +424,7 @@ if [ $LOCAL_BOOT = "no" ];then
 fi
 
 #======================================
-# 10) Resize filesystem to full space
+# 9) Resize filesystem to full space
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	Echo "Filesystem of root system is: $FSTYPE -> $deviceRoot"
@@ -458,21 +458,21 @@ if [ $LOCAL_BOOT = "no" ];then
 fi
 
 #======================================
-# 11) Mount system
+# 10) Mount system
 #--------------------------------------
 if ! mountSystem $deviceRoot;then
 	systemException "Failed to mount root filesystem" "shell"
 fi
 
 #======================================
-# 12) get installed kernels
+# 11) get installed kernels
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	kernelList /mnt
 fi
 
 #======================================
-# 13) Create system dependant files
+# 12) Create system dependant files
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	# a) /etc/fstab
@@ -538,7 +538,7 @@ if [ $LOCAL_BOOT = "no" ];then
 fi
 
 #======================================
-# 14) copy system dependant files
+# 13) copy system dependant files
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	cd /config
@@ -549,19 +549,19 @@ if [ $LOCAL_BOOT = "no" ];then
 fi
 
 #======================================
-# 15) setup real root device
+# 14) setup real root device
 #--------------------------------------
 # echo 256 > /proc/sys/kernel/real-root-dev
 
 #======================================
-# 16) umount system filesystems
+# 15) umount system filesystems
 #--------------------------------------
 umount /dev/pts
 umount /sys
 umount /proc
 
 #======================================
-# 17) copy initrd files to image
+# 16) copy initrd files to image
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	if [ -f /image/loader/message ];then
@@ -572,14 +572,14 @@ if [ $LOCAL_BOOT = "no" ];then
 fi
 
 #======================================
-# 18) Start YaST when booting final sys
+# 17) Start YaST when booting final sys
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	touch /mnt/var/lib/YaST2/runme_at_boot >/dev/null 2>&1
 fi
 
 #======================================
-# 19) Activate new root
+# 18) Activate new root
 #--------------------------------------
 Echo "Activating Image: [$deviceDisk]"
 cd /mnt && exec < dev/console >dev/console 2>&1
@@ -599,7 +599,7 @@ else
 fi
 
 #======================================
-# 20) Unmount initrd / system init
+# 19) Unmount initrd / system init
 #--------------------------------------
 echo " "
 echo "Booting into final System..."
