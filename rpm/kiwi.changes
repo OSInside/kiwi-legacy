@@ -10,6 +10,13 @@ Wed Sep 12 12:04:19 CEST 2007 - ms@suse.de
 - added support for unified virtual disk images to oemboot.
   In this case the kiwi initrd will not be replaced by the
   distribution default initrd
+- added additional patternPackageType attribute which allows
+  to distinguish between pattern and package references of a
+  specified pattern. For example one can use only required
+  patterns with patternType="onlyRequired" but want to use
+  all suggested packages of these required packages with
+  patternPackageType="plusSuggested" (#309989)
+- added support for USB install sticks.
 
 -------------------------------------------------------------------
 Mon Sep 10 16:06:53 CEST 2007 - ms@suse.de

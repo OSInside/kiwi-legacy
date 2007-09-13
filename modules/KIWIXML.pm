@@ -1066,11 +1066,16 @@ sub getPackageAttributes {
 		if ($type ne $what) {
 			next;
 		}
-		my $ptype= $node -> getAttribute ("patternType");
+		my $ptype = $node -> getAttribute ("patternType");
 		if (! defined $ptype) {
 			$ptype = "onlyRequired";
 		}
+		my $ppactype = $node -> getAttribute ("patternPackageType");
+		if (! defined $ppactype) {
+			$ppactype = "onlyRequired";
+		}
 		$result{patternType} = $ptype;
+		$result{patternPackageType} = $ppactype;
 		$result{type} = $type;
 		if (($type eq "xen") || ($type eq "vmware")) {
 			my $memory  = $node -> getAttribute ("memory");
@@ -1218,7 +1223,8 @@ sub getList {
 			}
 			if (@pattlist) {
 				my $psolve = new KIWIPattern (
-					$kiwi,\@pattlist,$this->{urllist},$pattr{patternType}
+					$kiwi,\@pattlist,$this->{urllist},
+					$pattr{patternType},$pattr{patternPackageType}
 				);
 				if (! defined $psolve) {
 					return ();

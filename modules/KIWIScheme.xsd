@@ -205,6 +205,15 @@
 					</xs:restriction>
 				</xs:simpleType>
 			</xs:attribute>
+			<xs:attribute name="patternPackageType" use="optional">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="onlyRequired"/>
+						<xs:enumeration value="plusSuggested"/>
+						<xs:enumeration value="plusRecommended"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="package">
@@ -291,6 +300,7 @@
 								<xs:enumeration value="qcow"/>
 								<xs:enumeration value="cow"/>
 								<xs:enumeration value="iso"/>
+								<xs:enumeration value="usb"/>
 							</xs:restriction>
 						</xs:simpleType>
 					</xs:attribute>

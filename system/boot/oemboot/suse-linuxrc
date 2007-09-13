@@ -30,7 +30,6 @@ export DOMURD_MODULES="xennet xenblk"
 export INITRD_MODULES="reiserfs"
 export LOCAL_BOOT=no
 export systemIntegrity="clean"
-export deviceFound=0
 
 #======================================
 # Exports (Configuration)
@@ -42,42 +41,6 @@ export VMX_SYSTEM="/config.vmxsystem"
 #--------------------------------------
 . /include
 
-#======================================
-# Functions...
-#--------------------------------------
-USBStickDevice () {
-	for device in /sys/bus/usb/drivers/usb-storage/*;do
-		if [ -L $device ];then
-			descriptions=$device/host*/target*/*/block*
-			for description in $descriptions;do
-				if [ ! -d $description ];then
-					continue
-				fi
-				isremovable=$description/removable
-				storageID=`echo $description | cut -f1 -d: | xargs basename`
-				devicebID=`basename $description | cut -f2 -d:`
-				serial="/sys/bus/usb/devices/$storageID/serial"
-				device="/dev/$devicebID"
-				if [ ! -b $device ];then
-					continue;
-				fi
-				if [ ! -f $isremovable ];then
-					continue;
-				fi
-				if [ ! -f $serial ];then
-					serial="USB Stick (unknown type)"
-				else
-					serial=`cat $serial`
-				fi
-				removable=`cat $isremovable`
-				if [ $removable -eq 1 ];then
-					deviceFound=1
-					deviceRoot="$device"1
-				fi
-			done
-		fi
-	done
-}
 #======================================
 # Beautify Startup
 #--------------------------------------
@@ -136,7 +99,8 @@ if [ ! -f $VMX_SYSTEM ];then
 	# ----
 	if [ $LOCAL_BOOT = "no" ];then
 		USBStickDevice
-		if [ $deviceFound = 0 ];then
+		if [ $stickFound = 0 ];then
+			deviceFound=0
 			for deviceRoot in /dev/sda1 /dev/hda1;do
 				if mount $deviceRoot /mnt &>/dev/null;then
 					deviceFound=1
@@ -150,6 +114,10 @@ if [ ! -f $VMX_SYSTEM ];then
 				"shell"
 			fi
 			deviceDisk=`echo $deviceRoot | tr -d [0-9]`
+			deviceSwap="$deviceDisk"2
+			deviceHome="$deviceDisk"3
+		else
+			deviceDisk=$stickRoot
 			deviceSwap="$deviceDisk"2
 			deviceHome="$deviceDisk"3
 		fi
@@ -196,9 +164,16 @@ if [ -f $VMX_SYSTEM ];then
 		/sbin/reboot -f -i >/dev/null 2>&1
 	fi
 	#======================================
-	# 6.3) mount CD/DVD
+	# 6.3) mount CD/DVD/USB stick
 	#--------------------------------------
-	CDMount
+	USBStickDevice
+	if [ $stickFound = 0 ];then
+		Echo "Search for USB stick failed, checking CD/DVD drive"
+		CDMount
+	else
+		Echo "Found Stick: $stickDevice -> $stickSerial"
+		mkdir -p /cdrom && mount $stickDevice /cdrom
+	fi
 	#======================================
 	# 6.4) install disk system
 	#--------------------------------------
@@ -245,7 +220,7 @@ if [ -f $VMX_SYSTEM ];then
 	#======================================
 	# 6.5) Umount the CD/DVD
 	#--------------------------------------
-	CDUmount
+	umount /cdrom
 	#======================================
 	# 6.6) find new root partition
 	#--------------------------------------
@@ -505,7 +480,11 @@ if [ $LOCAL_BOOT = "no" ];then
 		if test ! -z "$i";then
 			kernel=`echo $i | cut -f1 -d:`
 			initrd=`echo $i | cut -f2 -d:`
-			echo "title SUSE Linux Enterprise Desktop 10 SP1 ($kernel)" >> $menu
+			if [ ! -z "$UNIONFS_CONFIG" ]; then
+				kernel=linux.vmx
+				initrd=initrd.vmx
+			fi
+			echo "title SUSE Linux OEM ($kernel)"   >> $menu
 			echo -n " kernel $gdev/boot/$kernel"    >> $menu
 			if [ -z "$UNIONFS_CONFIG" ]; then
 				echo -n " root=${deviceDisk}2 $console" >> $menu

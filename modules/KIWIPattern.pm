@@ -40,10 +40,11 @@ sub new {
 	#==========================================
 	# Module Parameters
 	#------------------------------------------
-	my $kiwi    = shift;
-	my $pattref = shift;
-	my $urlref  = shift;
-	my $pattype = shift;
+	my $kiwi       = shift;
+	my $pattref    = shift;
+	my $urlref     = shift;
+	my $pattype    = shift;
+	my $patpactype = shift;
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
@@ -67,6 +68,11 @@ sub new {
 		$kiwi -> failed ();
 		return undef;
 	}
+	if (! defined $patpactype) {
+		$kiwi -> error ("No pattern package type specified");
+		kiwi -> failed ();
+		return undef;
+	}
 	my $arch = qx (arch); chomp $arch;
 	if ($arch =~ /^i.86/) {
 		$arch = 'i*86';
@@ -81,6 +87,7 @@ sub new {
 	$this->{urllist}     = \@urllist;
 	$this->{pattern}     = \@pattern;
 	$this->{pattype}     = $pattype;
+	$this->{patpactype}  = $patpactype;
 	$this->{arch}        = $arch;
 	#==========================================
 	# Initial check for pattern contents
@@ -261,7 +268,7 @@ sub getRequiredPatterns {
 	my $this    = shift;
 	my $pattref = shift;
 	my $kiwi    = $this->{kiwi};
-	my $pattype = $this->{pattype};
+	my $pattype = $this->{patpactype};
 	my @pattern = @{$pattref};
 	my @patdata = $this -> getPatternContents (\@pattern);
 	my @reqs;

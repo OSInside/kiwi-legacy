@@ -601,7 +601,7 @@ sub setupInstallCD {
 	print FD "default 0\n";
 	print FD "timeout 10\n";
 	print FD "gfxmenu (cd)/boot/message\n";
-	print FD "title KIWI CD boot\n";
+	print FD "title KIWI CD Installation\n";
 	print FD " kernel (cd)/boot/linux vga=0x314 splash=silent";
 	print FD " ramdisk_size=512000 showopts\n";
 	print FD " initrd (cd)/boot/initrd\n";
@@ -645,17 +645,296 @@ sub setupInstallCD {
 	qx (rm -rf $tmpdir);
 	$kiwi -> info ("Created $name to be burned on CD");
 	$kiwi -> done ();
+	return $this;
 }
 
 #==========================================
 # setupInstallStick
 #------------------------------------------
 sub setupInstallStick {
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	# TODO
-	$kiwi -> info ("*** not yet implemented ***\n");
-	return undef;
+	my $this      = shift;
+	my $kiwi      = $this->{kiwi};
+	my $tmpdir    = $this->{tmpdir};
+	my $initrd    = $this->{initrd};
+	my $system    = $this->{system};
+	my $oldird    = $this->{initrd};
+	my $vmsize    = $this->{vmsize};
+	my $diskname  = $system.".install.raw";
+	my $namecd    = qx (basename $system); chomp $namecd;
+	my $loop      = "/dev/loop0";
+	my $loopfound = 0;
+	my $status;
+	my $result;
+	my $ibasename;
+	#==========================================
+	# search free loop device
+	#------------------------------------------
+	$kiwi -> info ("Searching for free loop device...");
+	for (my $id=0;$id<=7;$id++) {
+		$status = qx ( /sbin/losetup /dev/loop$id 2>&1 );
+		$result = $? >> 8;
+		if ($result eq 1) {
+			$loopfound = 1;
+			$loop = "/dev/loop".$id;
+			last;
+		}
+	}
+	if (! $loopfound) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't find free loop device");
+		$kiwi -> failed ();
+		return undef;
+	}
+	$kiwi -> done();
+	#==========================================
+	# Setup image basename
+	#------------------------------------------
+	if ($namecd !~ /(.*)-(\d+\.\d+\.\d+)\.raw$/) {
+		$kiwi -> error  ("Couldn't extract version information");
+		$kiwi -> failed ();
+		return undef;
+	}
+	$ibasename = $1;
+	#==========================================
+	# Setup initrd for install purpose
+	#------------------------------------------
+	$initrd = $this -> setupInstallFlags();
+	if (! defined $initrd) {
+		return undef;
+	}
+	$this->{initrd} = $initrd;
+	#==========================================
+	# Create Virtual Disk boot structure
+	#------------------------------------------
+	if (! $this -> createBootStructure("vmx")) {
+		$this->{initrd} = $oldird;
+		return undef;
+	}
+	#==========================================
+	# Import grub stages
+	#------------------------------------------
+	my $stages = "'usr/lib/grub/*'";
+	$kiwi -> info ("Importing grub stages for VM boot");
+	$status = qx (gzip -cd $initrd | (cd $tmpdir && cpio -d -i $stages 2>&1));
+	$status = qx ( mv $tmpdir/usr/lib/grub/* $tmpdir/boot/grub 2>&1 );
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Failed importing grub stages: $status");
+		$kiwi -> failed ();
+		$this->{initrd} = $oldird;
+		return undef;
+	}
+	$kiwi -> done ();
+	#==========================================
+	# Creating menu.lst for the grub
+	#------------------------------------------
+	$kiwi -> info ("Creating grub menu and device map");
+	if (! open (FD,">$tmpdir/boot/grub/menu.lst")) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't create menu.lst: $!");
+		$kiwi -> failed ();
+		$this->{initrd} = $oldird;
+		return undef;
+	}
+	print FD "color cyan/blue white/blue\n";
+	print FD "default 0\n";
+	print FD "timeout 10\n";
+	print FD "gfxmenu (hd0,0)/image/loader/message\n";
+	print FD "\n";
+	print FD "title KIWI USB-Stick Installation\n";
+	print FD " root (hd0,0)\n";
+	print FD " kernel /boot/linux.vmx vga=0x314 splash=silent showopts\n";
+	print FD " initrd /boot/initrd.vmx\n";
+	close FD;
+	$this->{initrd} = $oldird;
+	$kiwi -> done();
+	#==========================================
+	# create virtual disk
+	#------------------------------------------
+	$kiwi -> info ("Creating virtual disk...");
+	$status = qx (qemu-img create $diskname $vmsize 2>&1);
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Failed creating virtual disk: $status");
+		$kiwi -> failed ();
+		return undef;
+	}
+	$kiwi -> done();
+	$kiwi -> info ("Binding virtual disk to loop device");
+	$status = qx ( /sbin/losetup $loop $diskname 2>&1 );
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Failed binding virtual disk: $status");
+		$kiwi -> failed ();
+		return undef;
+	}
+	$kiwi -> done();
+	#==========================================
+	# create virtual disk partitions
+	#------------------------------------------
+	$kiwi -> info ("Create partition table for virtual disk");
+	if (! open (FD,"|/sbin/fdisk $loop &>/dev/null")) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Failed creating virtual partition");
+		$kiwi -> failed ();
+		qx ( losetup -d $loop );
+		return undef;
+	}
+	my @commands = (
+		"n","p","1",".","+30M",
+		"n","p","2",".",".","w","q"
+	);
+	foreach my $cmd (@commands) {
+		if ($cmd eq ".") {
+			print FD "\n";
+		} else {
+			print FD "$cmd\n";
+		}
+	}
+	close FD;
+	$kiwi -> done();
+	#==========================================
+	# setup device mapper
+	#------------------------------------------
+	$kiwi -> info ("Setup device mapper for virtual partition access");
+	$status = qx ( /sbin/kpartx -a $loop 2>&1 );
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Failed mapping virtual partition: $status");
+		$kiwi -> failed ();
+		qx ( /sbin/losetup -d $loop );
+		return undef;
+	}
+	my $dmap = $loop; $dmap =~ s/dev\///;
+	my $boot = "/dev/mapper".$dmap."p1";
+	my $data = "/dev/mapper".$dmap."p2";
+	$kiwi -> done();
+	#==========================================
+	# Create filesystem on virtual partitions
+	#------------------------------------------
+	foreach my $root ($boot,$data) {
+		$kiwi -> info ("Creating filesystem on $root partition");
+		$status = qx ( /sbin/mke2fs -j -q $root 2>&1 );
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Failed creating filesystem: $status");
+			$kiwi -> failed ();
+			qx ( /sbin/kpartx  -d $loop );
+			qx ( /sbin/losetup -d $loop );
+			return undef;
+		}
+		$kiwi -> done();
+	}
+	#==========================================
+	# Copy boot data on first partition
+	#------------------------------------------
+	$kiwi -> info ("Installing boot data to virtual disk");
+	$status = qx (mount $boot /mnt/ 2>&1);
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't mount boot partition: $status");
+		$kiwi -> failed ();
+		qx ( /sbin/kpartx  -d $loop );
+		qx ( /sbin/losetup -d $loop );
+		return undef;
+	}
+	$status = qx (cp -a $tmpdir/boot /mnt/ 2>&1);
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't install boot data: $status");
+		$kiwi -> failed ();
+		qx ( umount /mnt/ 2>&1 );
+		qx ( /sbin/kpartx  -d $loop );
+		qx ( /sbin/losetup -d $loop );
+		return undef;
+	}
+	my $message = "'image/loader/message'";
+	$status = qx (gzip -cd $initrd | ( cd /mnt/ && cpio -d -i $message 2>&1));
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't find message file: $status");
+		$kiwi -> failed ();
+		qx ( umount /mnt/ 2>&1 );
+		qx ( /sbin/kpartx  -d $loop );
+		qx ( /sbin/losetup -d $loop );
+		return undef;
+	}
+	qx ( umount /mnt/ 2>&1 );
+	$kiwi -> done();
+	#==========================================
+	# Copy system image if defined
+	#------------------------------------------
+	if (defined $system) {
+		$kiwi -> info ("Installing image data to virtual disk");
+		$status = qx (mount $data /mnt/ 2>&1);
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't mount data partition: $status");
+			$kiwi -> failed ();
+			qx ( /sbin/kpartx  -d $loop );
+			qx ( /sbin/losetup -d $loop );
+			return undef;
+		}
+		$status = qx (cp $system /mnt/$ibasename 2>&1);
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Failed importing system image: $status");
+			$kiwi -> failed ();
+			qx ( umount /mnt/ 2>&1 );
+			qx ( /sbin/kpartx  -d $loop );
+			qx ( /sbin/losetup -d $loop );
+			return undef;
+		}
+		qx ( umount /mnt/ 2>&1 );
+		$kiwi -> done();
+	}
+	#==========================================
+	# cleanup device maps and part mount
+	#------------------------------------------
+	qx ( /sbin/kpartx  -d $loop );
+	qx (rm -rf $tmpdir);
+	#==========================================
+	# Install grub on virtual disk
+	#------------------------------------------
+	$kiwi -> info ("Installing grub on virtual disk");
+	if (! open (FD,"|/usr/sbin/grub --batch >/dev/null 2>&1")) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't call grub: $!");
+		$kiwi -> failed ();
+		qx ( /sbin/losetup -d $loop );
+		return undef;
+	}
+	print FD "device (hd0) $diskname\n";
+	print FD "root (hd0,0)\n";
+	print FD "setup (hd0)\n";
+	print FD "quit\n";
+	close FD;
+	$result = $? >> 8;
+	if ($result != 0) { 
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't install grub on virtual disk: $!");
+		$kiwi -> failed ();
+		qx ( /sbin/losetup -d $loop );
+		return undef;
+	}
+	$kiwi -> done ();
+	#==========================================
+	# cleanup loop setup and device mapper
+	#------------------------------------------
+	qx ( /sbin/losetup -d $loop );
+	$kiwi -> info ("Created $diskname to be dd'ed on Stick");
+	$kiwi -> done ();
+	return $this;
 }
 
 #==========================================
@@ -976,7 +1255,17 @@ sub setupBootDisk {
 		if ($format eq "iso") {
 			$this -> {system} = $system.".raw";
 			$kiwi -> info ("Creating install ISO image\n");
-			$this -> setupInstallCD();
+			qx ( /sbin/losetup -d $loop );
+			if (! $this -> setupInstallCD()) {
+				return undef;
+			}
+		} elsif ($format eq "usb") {
+			$this -> {system} = $system.".raw";
+			$kiwi -> info ("Creating install USB Stick image\n");
+			qx ( /sbin/losetup -d $loop );
+			if (! $this -> setupInstallStick()) {
+				return undef;
+			}
 		} else {
 			$kiwi -> info ("Creating $format image");
 			my $fname = $system.".".$format;
