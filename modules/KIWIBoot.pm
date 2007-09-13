@@ -1284,7 +1284,7 @@ sub setupBootDisk {
 	#==========================================
 	# cleanup loop setup and device mapper
 	#------------------------------------------
-	qx ( /sbin/losetup -d $loop );
+	qx ( /sbin/losetup -d $loop 2>&1 );
 	return $this;
 }
 
