@@ -60,8 +60,10 @@ our $BootVMSystem;      # system image to be copied on a VM disk
 our $BootVMFormat;      # virtual disk format supported by qemu-img
 our $BootVMDisk;        # deploy initrd booting from a VM 
 our $BootVMSize;        # size of virtual disk
-our $BootCD;            # deploy initrd booting from CD
-our $BootCDSystem;      # virtual disk system image to be installed on disk
+our $InstallCD;         # Installation initrd booting from CD
+our $InstallCDSystem;   # virtual disk system image to be installed on disk
+our $InstallStick;      # Installation initrd booting from USB stick
+our $InstallStickSystem;# virtual disk system image to be installed on disk
 our $StripImage;        # strip shared objects and binaries
 our $CreatePassword;    # create crypt password string
 our $SetupSplashForGrub;# setup splash screen(s) for grub
@@ -547,15 +549,42 @@ sub main {
 	}
 
 	#==========================================
-	# Create a initrd/system ISO for CD boot
+	# Create an install CD (ISO)
 	#------------------------------------------
-	if (defined $BootCD) {
-		$kiwi -> info ("Creating install ISO from: $BootCD...\n");
-		my $boot = new KIWIBoot ($kiwi,$BootCD,$BootCDSystem);
+	if (defined $InstallCD) {
+		$kiwi -> info ("Creating install ISO from: $InstallCD...\n");
+		if (! defined $InstallCDSystem) {
+			$kiwi -> error  ("No Install system image specified");
+			$kiwi -> failed ();
+			my $code = kiwiExit (1);
+			return $code;
+		}
+		my $boot = new KIWIBoot ($kiwi,$InstallCD,$InstallCDSystem);
 		if (! defined $boot) {
 			my $code = kiwiExit (1); return $code;
 		}
-		if (! $boot -> setupBootCD()) {
+		if (! $boot -> setupInstallCD()) {
+			my $code = kiwiExit (1); return $code;
+		}
+		my $code = kiwiExit (0); return $code;
+	}
+
+	#==========================================
+	# Create an install USB stick
+	#------------------------------------------
+	if (defined $InstallStick) {
+		$kiwi -> info ("Creating install Stick from: $InstallStick...\n");
+		if (! defined $InstallStickSystem) {
+			$kiwi -> error  ("No Install system image specified");
+			$kiwi -> failed ();
+			my $code = kiwiExit (1);
+			return $code;
+		}
+		my $boot = new KIWIBoot ($kiwi,$InstallStick,$InstallStickSystem);
+		if (! defined $boot) {
+			my $code = kiwiExit (1); return $code;
+		}
+		if (! $boot -> setupInstallStick()) {
 			my $code = kiwiExit (1); return $code;
 		}
 		my $code = kiwiExit (0); return $code;
@@ -567,7 +596,7 @@ sub main {
 	if (defined $BootVMDisk) {
 		$kiwi -> info ("Creating boot VM disk from: $BootVMDisk...\n");
 		if (! defined $BootVMSystem) {
-			$kiwi -> error  ("No VM system specified");
+			$kiwi -> error  ("No VM system image specified");
 			$kiwi -> failed ();
 			my $code = kiwiExit (1);
 			return $code;
@@ -636,8 +665,10 @@ sub init {
 		"bootvm-system=s"       => \$BootVMSystem,
 		"bootvm-format=s"       => \$BootVMFormat,
 		"bootvm-disksize=s"     => \$BootVMSize,
-		"bootcd=s"              => \$BootCD,
-		"bootcd-system=s"       => \$BootCDSystem,
+		"installcd=s"           => \$InstallCD,
+		"installcd-system=s"    => \$InstallCDSystem,
+		"installstick=s"        => \$InstallStick,
+		"installstick-system=s" => \$InstallStickSystem,
 		"strip|s"               => \$StripImage,
 		"createpassword"        => \$CreatePassword,
 		"setup-grub-splash=s"   => \$SetupSplashForGrub,
@@ -657,11 +688,11 @@ sub init {
 	}
 	if (
 		(! defined $Prepare) && (! defined $Create) &&
-		(! defined $BootStick) && (! defined $BootCD) &&
+		(! defined $BootStick) && (! defined $InstallCD) &&
 		(! defined $Upgrade) && (! defined $SetupSplashForGrub) &&
 		(! defined $BootVMDisk) && (! defined $CreatePassword) &&
 		(! defined $CreateInstSource) && (! defined $Migrate) &&
-		(! defined $ListProfiles)
+		(! defined $ListProfiles) && (! defined $InstallStick)
 	) {
 		$kiwi -> info ("No operation specified");
 		$kiwi -> failed ();
@@ -718,8 +749,10 @@ sub usage {
 	print "  kiwi --bootvm <initrd> --bootvm-system <systemImage> \\\n";
 	print "     [ --bootvm-disksize <size> ]\n";
 	print "     [ --bootvm-format <format> ]\n";
-	print "  kiwi --bootcd <initrd>\n";
-	print "     [ --bootcd-system <system-image> ]\n";
+	print "  kiwi --installcd <initrd>\n";
+	print "       --installcd-system <vmx-system-image>\n";
+	print "  kiwi --installstick <initrd>\n";
+	print "  kiwi --installstick-system <vmx-system-image>\n";
 	print "Helper Tools:\n";
 	print "  kiwi --createpassword\n";
 	print "  kiwi --create-instsource <image-path>\n";

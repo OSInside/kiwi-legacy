@@ -524,89 +524,41 @@ sub setupBootStick {
 }
 
 #==========================================
-# setupBootCD
+# setupInstallCD
 #------------------------------------------
-sub setupBootCD {
-	my $this      = shift;
-	my $kiwi      = $this->{kiwi};
-	my $tmpdir    = $this->{tmpdir};
-	my $initrd    = $this->{initrd};
-	my $system    = $this->{system};
-	my $irddir    = $initrd."_".$$.".vmxsystem";
+sub setupInstallCD {
+	my $this    = shift;
+	my $kiwi    = $this->{kiwi};
+	my $tmpdir  = $this->{tmpdir};
+	my $initrd  = $this->{initrd};
+	my $system  = $this->{system};
+	my $oldird  = $this->{initrd};
+	my $namecd  = qx (basename $system); chomp $namecd;
 	my $status;
 	my $result;
 	my $ibasename;
-	my $iversion;
-	if (! mkdir $irddir) {
-		$kiwi -> error  ("Failed to create vmxsystem directory");
-		$kiwi -> failed ();
-		return undef;
-	}
 	#==========================================
-	# unpack initrd files
+	# Setup image basename
 	#------------------------------------------
-	$status = qx (gzip -cd $initrd|(cd $irddir && cpio -d -i 2>&1));
-	$result = $? >> 8;
-	if ($result != 0) {
-		$kiwi -> error  ("Failed to extract data: $!");
+	if ($namecd !~ /(.*)-(\d+\.\d+\.\d+)\.raw$/) {
+		$kiwi -> error  ("Couldn't extract version information");
 		$kiwi -> failed ();
-		qx (rm -rf $irddir);
 		return undef;
 	}
-	#===========================================
-	# add image.md5 / config.vmxsystem to initrd
-	#-------------------------------------------
-	if (defined $system) {
-		my $imd5 = $system;
-		$imd5 =~ s/\.raw/\.md5/;
-		my $status = qx (cp $imd5 $irddir/etc/image.md5 2>&1);
-		my $result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> error  ("Failed importing md5 file: $status");
-			$kiwi -> failed ();
-			qx (rm -rf $irddir);
-			return undef;
-		}
-		if (! open (FD,">$irddir/config.vmxsystem")) {
-			$kiwi -> error  ("Couldn't create image boot configuration");
-			$kiwi -> failed ();
-			return undef;
-		}
-		my $namecd = qx (basename $system); chomp $namecd;
-		if ($namecd !~ /(.*)-(\d+\.\d+\.\d+)\.raw$/) {
-			$kiwi -> error  ("Couldn't extract version information");
-			$kiwi -> failed ();
-			qx (rm -rf $irddir);
-			return undef;
-		}
-		$ibasename = $1;
-		$iversion  = $2;
-		if (! -f $imd5) {
-			$kiwi -> error  ("Couldn't find md5 file");
-			$kiwi -> failed ();
-			qx (rm -rf $irddir);
-			return undef;
-		}
-		print FD "IMAGE=nope;$ibasename;$iversion\n";
-		close FD;
-		
-	}
+	$ibasename = $1;
 	#==========================================
-	# create new initrd with vmxsystem file
+	# Setup initrd for install purpose
 	#------------------------------------------
-	$status = qx ((cd $irddir && find|cpio --quiet -oH newc|gzip -9) > $initrd);
-	$result = $? >> 8;
-	if ($result != 0) {
-		$kiwi -> error  ("Failed to re-create initrd: $status");
-		$kiwi -> failed ();
-		qx (rm -rf $irddir);
+	$initrd = $this -> setupInstallFlags();
+	if (! defined $initrd) {
 		return undef;
 	}
-	qx (rm -rf $irddir);
 	#==========================================
 	# Create CD structure
 	#------------------------------------------
+	$this->{initrd} = $initrd;
 	if (! $this -> createBootStructure()) {
+		$this->{initrd} = $oldird;
 		return undef;
 	}
 	#==========================================
@@ -627,10 +579,12 @@ sub setupBootCD {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Failed importing grub stages: $status");
 		$kiwi -> failed ();
+		$this->{initrd} = $oldird;
 		return undef; 
 	}
 	qx (rm -rf $tmpdir/usr 2>&1);
 	qx (rm -rf $tmpdir/image 2>&1);
+	$this->{initrd} = $oldird;
 	$kiwi -> done ();
 
 	#==========================================
@@ -691,6 +645,17 @@ sub setupBootCD {
 	qx (rm -rf $tmpdir);
 	$kiwi -> info ("Created $name to be burned on CD");
 	$kiwi -> done ();
+}
+
+#==========================================
+# setupInstallStick
+#------------------------------------------
+sub setupInstallStick {
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	# TODO
+	$kiwi -> info ("*** not yet implemented ***\n");
+	return undef;
 }
 
 #==========================================
@@ -1011,7 +976,7 @@ sub setupBootDisk {
 		if ($format eq "iso") {
 			$this -> {system} = $system.".raw";
 			$kiwi -> info ("Creating install ISO image\n");
-			$this -> setupBootCD();
+			$this -> setupInstallCD();
 		} else {
 			$kiwi -> info ("Creating $format image");
 			my $fname = $system.".".$format;
@@ -1084,6 +1049,90 @@ sub extractCPIO {
 		}
 	}
 	return $count;
+}
+
+#==========================================
+# setupInstallFlags
+#------------------------------------------
+sub setupInstallFlags {
+	my $this   = shift;
+	my $kiwi   = $this->{kiwi};
+	my $initrd = $this->{initrd};
+	my $system = $this->{system};
+	my $irddir = $initrd."_".$$.".vmxsystem";
+	my $status;
+	my $result;
+	my $ibasename;
+	my $iversion;
+	my $newird;
+	if (! mkdir $irddir) {
+		$kiwi -> error  ("Failed to create vmxsystem directory");
+		$kiwi -> failed ();
+		return undef;
+	}
+	#==========================================
+	# unpack initrd files
+	#------------------------------------------
+	$status = qx (gzip -cd $initrd|(cd $irddir && cpio -d -i 2>&1));
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> error  ("Failed to extract initrd data: $!");
+		$kiwi -> failed ();
+		qx (rm -rf $irddir);
+		return undef;
+	}
+	#===========================================
+	# add image.md5 / config.vmxsystem to initrd
+	#-------------------------------------------
+	if (defined $system) {
+		my $imd5 = $system;
+		$imd5 =~ s/\.raw/\.md5/;
+		my $status = qx (cp $imd5 $irddir/etc/image.md5 2>&1);
+		my $result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> error  ("Failed importing md5 file: $status");
+			$kiwi -> failed ();
+			qx (rm -rf $irddir);
+			return undef;
+		}
+		if (! open (FD,">$irddir/config.vmxsystem")) {
+			$kiwi -> error  ("Couldn't create image boot configuration");
+			$kiwi -> failed ();
+			return undef;
+		}
+		my $namecd = qx (basename $system); chomp $namecd;
+		if ($namecd !~ /(.*)-(\d+\.\d+\.\d+)\.raw$/) {
+			$kiwi -> error  ("Couldn't extract version information");
+			$kiwi -> failed ();
+			qx (rm -rf $irddir);
+			return undef;
+		}
+		$ibasename = $1;
+		$iversion  = $2;
+		if (! -f $imd5) {
+			$kiwi -> error  ("Couldn't find md5 file");
+			$kiwi -> failed ();
+			qx (rm -rf $irddir);
+			return undef;
+		}
+		print FD "IMAGE=nope;$ibasename;$iversion\n";
+		close FD;
+	}
+	#==========================================
+	# create new initrd with vmxsystem file
+	#------------------------------------------
+	$newird = $initrd;
+	$newird =~ s/\.gz/\.install\.gz/;
+	$status = qx ((cd $irddir && find|cpio --quiet -oH newc|gzip -9) > $newird);
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> error  ("Failed to re-create initrd: $status");
+		$kiwi -> failed ();
+		qx (rm -rf $irddir);
+		return undef;
+	}
+	qx (rm -rf $irddir);
+	return $newird;
 }
 
 #==========================================
