@@ -82,6 +82,7 @@ probeDevices
 for module in usb_storage sg sd_mod;do
 	modprobe $module
 done
+sleep 5
 
 #======================================
 # 5) Search disks, prefer removable one

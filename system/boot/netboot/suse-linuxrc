@@ -192,7 +192,12 @@ if [ $LOCAL_BOOT = "no" ];then
 		fi
 		hwinfo --all --log=hwinfo.$DHCPCHADDR >/dev/null
 		echo "NCNAME=$SYSALIAS"   >> hwtype.$DHCPCHADDR
+		echo "CRNAME=$SYSALIAS"   >> hwtype.$DHCPCHADDR
+		echo "IPADDR=$IPADDR"     >> hwtype.$DHCPCHADDR
 		echo "ARCHITECTURE=$ARCH" >> hwtype.$DHCPCHADDR
+		if [ -f /sbin/posbios ];then
+			# TODO... check bios information from a IBM machine
+		fi
 		atftp -p -l hwtype.$DHCPCHADDR \
 			-r upload/hwtype.$DHCPCHADDR $TSERVER >/dev/null 2>&1
 		atftp -p -l hwinfo.$DHCPCHADDR \

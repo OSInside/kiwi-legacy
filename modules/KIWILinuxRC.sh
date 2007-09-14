@@ -309,6 +309,9 @@ USBStickDevice () {
 				if [ ! -f $isremovable ];then
 					continue;
 				fi
+				if ! sfdisk -s $device >/dev/null 2>&1;then
+					continue;
+				fi
 				if [ ! -f $serial ];then
 					serial="USB Stick (unknown type)"
 				else
@@ -320,6 +323,7 @@ USBStickDevice () {
 					stickRoot=$device
 					stickDevice="$device"2
 					stickSerial=$serial
+					return
 				fi
 			done
 		fi

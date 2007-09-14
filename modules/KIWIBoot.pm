@@ -210,10 +210,13 @@ sub getRemovableUSBStorageDevices {
 					if (! open (FD,$isremovable)) {
 						next;
 					}
-					$isremovable = <FD>;
-					close FD;
+					$isremovable = <FD>; close FD;
 					if ($isremovable == 1) {
-						$devices{$description} = $serial;
+						my $status = qx (/sbin/sfdisk -s $description 2>&1);
+						my $result = $? >> 8;
+						if ($result == 0) {
+							$devices{$description} = $serial;
+						}
 					}
 				}
 			}
@@ -1477,6 +1480,7 @@ sub setupSplashForGrub {
 		qx (cp -a $splash.dir/etc $newspl);
 		qx (cat $splash.dir/bootsplash >> $newspl/bootsplash);
 		qx (rm -rf $splash.dir);
+		qx (rm -f $splash.bob*);
 		qx (rm -f $splash);
 	}
 	qx ((cd $newspl && find|cpio --quiet -oH newc | gzip -9) > $spldir/all.spl);

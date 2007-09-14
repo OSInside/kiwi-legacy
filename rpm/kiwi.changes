@@ -17,6 +17,8 @@ Wed Sep 12 12:04:19 CEST 2007 - ms@suse.de
   all suggested packages of these required packages with
   patternPackageType="plusSuggested" (#309989)
 - added support for USB install sticks.
+- fixed USB stick search, check if device is active
+- added CRNAME and IPADDR values to upload file
 
 -------------------------------------------------------------------
 Mon Sep 10 16:06:53 CEST 2007 - ms@suse.de
