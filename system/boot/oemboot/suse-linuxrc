@@ -259,8 +259,15 @@ if [ -f $VMX_SYSTEM ];then
 	#======================================
 	# 6.8) reboot system
 	#--------------------------------------
-	Echo "System installation has finished... reboot"
-	/sbin/reboot -f -i >/dev/null 2>&1
+	if [ $stickFound = 0 ];then
+		Echo "NOTE: Please remove the installation CD before reboot !"
+		CDEject
+	else
+		Echo "NOTE: Please unplug the USB stick before reboot !"
+	fi
+	systemException \
+		"System installation has finished" \
+	"reboot"
 fi
 
 #======================================

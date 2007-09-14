@@ -360,6 +360,12 @@ function CDUmount {
 	umount $cddev
 }
 #======================================
+# CDEject
+#--------------------------------------
+function CDEject {
+	eject $cddev
+}
+#======================================
 # searchSwapSpace
 #--------------------------------------
 function searchSwapSpace {

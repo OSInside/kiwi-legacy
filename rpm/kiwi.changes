@@ -19,6 +19,8 @@ Wed Sep 12 12:04:19 CEST 2007 - ms@suse.de
 - added support for USB install sticks.
 - fixed USB stick search, check if device is active
 - added CRNAME and IPADDR values to upload file
+- added CDEject function to KIWILinuxRC and eject the install
+  CD when installation has finished
 
 -------------------------------------------------------------------
 Mon Sep 10 16:06:53 CEST 2007 - ms@suse.de

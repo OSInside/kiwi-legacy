@@ -74,6 +74,7 @@
 		<package name="make"/>
 		<package name="bootsplash"/>
 		<package name="bootsplash-theme-SuSE"/>
+		<package name="eject"/>
 	</packages>
 	<packages type="boot">
 		<package name="kernel-default"/>
