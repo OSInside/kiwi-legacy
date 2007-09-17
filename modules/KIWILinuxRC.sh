@@ -132,6 +132,35 @@ function systemException {
 	esac
 }
 #======================================
+# kernelCheck
+#--------------------------------------
+function kernelCheck {
+	# /.../
+	# Check this running kernel against the kernel
+	# installed in the image. If the version doesn't
+	# match we need to reboot to activate the system
+	# image kernel.
+	# ----
+	kactive=`uname -r`
+	kreboot=1
+	prefix=$1
+	for i in $prefix/lib/modules/*;do
+		if [ ! -d $i ];then
+			continue
+		fi
+		kinstname=${i##*/}
+		if [ $kinstname = $kactive ];then
+			kreboot=0
+			break
+		fi
+	done
+	if [ $kreboot = 1 ];then
+		Echo "Kernel versions do not match rebooting in 5 sec..."
+		REBOOT_IMAGE="yes"
+		sleep 5
+	fi
+}
+#======================================
 # probeFileSystem
 #--------------------------------------
 function probeFileSystem {

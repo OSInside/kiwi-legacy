@@ -1,4 +1,27 @@
 -------------------------------------------------------------------
+Mon Sep 17 08:44:37 CEST 2007 - ms@suse.de
+
+- added call of posbios if installed to obtain BIOS information
+  uploaded into the registry file while a new network client is
+  registered
+- added kernelCheck for installed and active kernel in
+  netboot boot image, suse-linuxrc
+- added image notification if a new image is installed on the
+  client via PXE in the netboot boot image, suse-linuxrc
+- added support for base image usage. This means you can use
+  the contents of a given directory as the base image instead of
+  starting with a clean and empty directory. kiwi will use the
+  overlay technique with either aufs or unionfs to build the
+  target directory as combination of the base (--base-root) image
+  and a new image directory optionally specified with the --root
+  option. As result the image root directory will contain only a
+  part of the complete image which is the data not part of the
+  base image or the data which has been touched/copied. In
+  principal all copy-on-write actions within the combined filesystem
+  causes data to be written in the image root directory. base
+  image support works for the prepare and create steps of kiwi
+   
+-------------------------------------------------------------------
 Wed Sep 12 12:04:19 CEST 2007 - ms@suse.de
 
 - show the output of --list-profiles in a nicer format

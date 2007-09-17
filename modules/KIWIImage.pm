@@ -48,6 +48,7 @@ sub new {
 	my $imageDest  = shift;
 	my $imageStrip = shift;
 	my $baseSystem = shift;
+	my $imageOrig  = shift;
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
@@ -80,7 +81,11 @@ sub new {
 		return undef;
 	}
 	if (! defined $main::LogFile) {
-		$kiwi -> setRootLog ($imageTree.".".$$.".screenrc.log");
+		if (defined $imageOrig) {
+			$kiwi -> setRootLog ($imageOrig.".".$$.".screenrc.log");
+		} else {
+			$kiwi -> setRootLog ($imageTree.".".$$.".screenrc.log");
+		}
 	}
 	my $arch = qx ( arch ); chomp ( $arch );
 	$arch = ".$arch";

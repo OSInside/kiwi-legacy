@@ -22,6 +22,7 @@ use XML::LibXML;
 use LWP;
 use KIWILog;
 use KIWIPattern;
+use KIWIOverlay;
 use KIWIManager qw (%packageManager);
 use File::Glob ':glob';
 
@@ -1468,6 +1469,7 @@ sub createTmpDirectory {
 	my $this      = shift;
 	my $useRoot   = shift;
 	my $selfRoot  = shift;
+	my $baseRoot  = shift;
 	my $rootError = 1;
 	my $root;
 	my $code;
@@ -1501,7 +1503,29 @@ sub createTmpDirectory {
 	if ( $rootError ) {
 		return undef;
 	}
-	return $root;
+	my $origroot = $root;
+	my $overlay;
+	if (defined $baseRoot) {
+		$kiwi -> info ("Creating overlay path [$root(rw) + $baseRoot(ro)] ");
+		$overlay = new KIWIOverlay ( $kiwi,$baseRoot,$root );
+		if (! defined $overlay) {
+			$rootError = 1;
+		}
+		$root = $overlay -> mountOverlay();
+		if (! defined $root) {
+			$rootError = 1;
+		}
+		if ($rootError) {
+			$kiwi -> failed;
+		} else {
+			$kiwi -> note ("-> $root");
+			$kiwi -> done ();
+		}
+	}
+	if ( $rootError ) {
+		return undef;
+	}
+	return ($root,$origroot,$overlay);
 }
 
 #==========================================

@@ -195,8 +195,14 @@ if [ $LOCAL_BOOT = "no" ];then
 		echo "CRNAME=$SYSALIAS"   >> hwtype.$DHCPCHADDR
 		echo "IPADDR=$IPADDR"     >> hwtype.$DHCPCHADDR
 		echo "ARCHITECTURE=$ARCH" >> hwtype.$DHCPCHADDR
+		#========================================
+		# Try to get BIOS data if tools are there
+		#----------------------------------------
 		if [ -f /sbin/posbios ];then
-			# TODO... check bios information from a IBM machine
+			HWBIOS=`/sbin/posbios -b`
+			echo "HWBIOS=$HWBIOS" >> hwtype.$DHCPCHADDR
+			HWTYPE=`/sbin/posbios -ms`
+			echo "HWTYPE=$HWTYPE" >> hwtype.$DHCPCHADDR
 		fi
 		atftp -p -l hwtype.$DHCPCHADDR \
 			-r upload/hwtype.$DHCPCHADDR $TSERVER >/dev/null 2>&1
@@ -761,7 +767,35 @@ fi
 fi
 
 #======================================
-# 19) copy system dependant files
+# 19) If image is new, notify
+#--------------------------------------
+if [ $LOCAL_BOOT = "no" ];then
+	if test $systemIntegrity = "clean"; then
+		count=0
+		IFS="," ; for i in $IMAGE;do
+			count=$(($count + 1))
+			field=0
+			IFS=";" ; for n in $i;do
+			case $field in
+				0) field=1 ;;
+				1) imageName=$n   ; field=2 ;;
+				2) imageVersion=$n; field=3 ;;
+				3) imageServer=$n ; field=4 ;;
+				4) imageBlkSize=$n
+			esac
+			done
+			Echo "Notify of new image: image/$imageName"
+			echo "image/$imageName" > bootversion.$DHCPCHADDR
+			echo "$imageVersion"   >> bootversion.$DHCPCHADDR
+			atftp --option "blksize 1024" -p -l bootversion.$DHCPCHADDR \
+				-r upload/bootversion.$DHCPCHADDR $TSERVER >/dev/null 2>&1
+			rm -f bootversion.$DHCPCHADDR
+		done
+	fi
+fi
+
+#======================================
+# 20) copy system dependant files
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	if test $systemIntegrity = "clean";then
@@ -775,14 +809,14 @@ fi
 
 echo 256 > /proc/sys/kernel/real-root-dev
 #======================================
-# 20) umount system filesystems
+# 21) umount system filesystems
 #--------------------------------------
 umount /dev/pts
 umount /sys
 umount /proc
 
 #======================================
-# 21) copy initrd files to image
+# 22) copy initrd files to image
 #--------------------------------------
 if [ -f /image/loader/message ];then
 	mv /image/loader/message /mnt/boot
@@ -791,7 +825,12 @@ cp /preinit /mnt
 cp /include /mnt
 
 #======================================
-# 22) Activate new root
+# 23) check if reboot is required
+#--------------------------------------
+kernelCheck /mnt
+
+#======================================
+# 24) Activate new root
 #--------------------------------------
 Echo "Activating Image: [$imageRootName]"
 cd /mnt && exec < dev/console >dev/console 2>&1
@@ -810,7 +849,7 @@ else
 	rm ./include
 fi
 #======================================
-# 23) reboot system if specified
+# 25) reboot system if specified
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	if test ! -z $REBOOT_IMAGE;then
@@ -819,7 +858,7 @@ if [ $LOCAL_BOOT = "no" ];then
 	fi
 fi
 #======================================
-# 24) Unmount initrd / system init
+# 26) Unmount initrd / system init
 #--------------------------------------
 echo " "
 echo "Booting into final System..."

@@ -50,6 +50,7 @@ sub new {
 	my $baseSystem = shift;
 	my $useRoot    = shift;
 	my $addPacks   = shift;
+	my $baseRoot   = shift;
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
@@ -134,7 +135,9 @@ sub new {
 	#==========================================
 	# Create root directory
 	#------------------------------------------
-	my $root = $xml -> createTmpDirectory ( $useRoot,$selfRoot );
+	my @root = $xml -> createTmpDirectory ( $useRoot,$selfRoot,$baseRoot );
+	my $overlay = $root[2];
+	my $root    = $root[0];
 	if ( ! defined $root ) {
 		$kiwi -> error ("Couldn't create root dir: $root: $!");
 		$kiwi -> failed ();
@@ -144,7 +147,7 @@ sub new {
 	# Set root log file
 	#------------------------------------------
 	if (! defined $main::LogFile) {
-		$kiwi -> setRootLog ($root."."."$$".".screenrc.log");
+		$kiwi -> setRootLog ($root[1]."."."$$".".screenrc.log");
 	}
 	#==========================================
 	# Get configured name of package manager
@@ -152,7 +155,10 @@ sub new {
 	$kiwi -> info ("Setting up package manager: ");
 	my $pmgr = $xml -> getPackageManager();
 	if (! defined $pmgr) {
-		rmdir $root;
+		if (defined $overlay) {
+			$overlay -> resetOverlay();
+		}
+		rmdir $root[1];
 		return undef;
 	}
 	$kiwi -> note ($pmgr);
@@ -164,6 +170,10 @@ sub new {
 		$kiwi,$xml,\%sourceChannel,$root,$pmgr
 	);
 	if (! defined $manager) {
+		if (defined $overlay) {
+			$overlay -> resetOverlay();
+		}
+		rmdir $root[1];
 		return undef;
 	}
 	#==========================================
@@ -179,6 +189,8 @@ sub new {
 	$this->{root}          = $root;
 	$this->{manager}       = $manager;
 	$this->{addPacks}      = $addPacks;
+	$this->{baseRoot}      = $baseRoot;
+	$this->{overlay}       = $overlay;
 	return $this;
 }
 
@@ -589,6 +601,7 @@ sub setupMount {
 	if (! -d "$root/sys/block") {
 		qx (mkdir -p $root/sys);
 		qx (mount -t sysfs  none $root/sys);
+		qx (mkdir -p $root/dev/pts);
 		qx (mount -t devpts none $root/dev/pts);
 		push (@mountList,"$root/sys");
 		push (@mountList,"$root/dev/pts");
@@ -647,6 +660,8 @@ sub cleanMount {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $root = $this->{root};
+	my $xml  = $this->{xml};
+	my $overlay = $this->{overlay};
 	if (! defined $this->{mountList}) {
 		return $this;
 	}
@@ -659,6 +674,9 @@ sub cleanMount {
 		if ($item =~ /^$prefix/) {
 			qx ( rmdir -p $item 2>&1 );
 		}
+	}
+	if (defined $this->{baseRoot}) {
+		$overlay -> resetOverlay();
 	}
 	return $this;
 }

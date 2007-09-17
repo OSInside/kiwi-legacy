@@ -27,6 +27,7 @@ use KIWILog;
 use KIWIImage;
 use KIWIBoot;
 use KIWIMigrate;
+use KIWIOverlay;
 
 #============================================
 # Globals (Version)
@@ -81,6 +82,7 @@ our $Report;            # create report on root/ tree migration only
 our @Profiles;          # list of profiles to include in image
 our $ListProfiles;      # lists the available profiles in image
 our $ForceNewRoot;      # force creation of new root directory
+our $BaseRoot;          # use given path as base system
 
 #============================================
 # Globals
@@ -142,7 +144,8 @@ sub main {
 		#==========================================
 		# Initialize installation source tree
 		#------------------------------------------
-		my $root = $xml -> createTmpDirectory ( $RootTree );
+		my @root = $xml -> createTmpDirectory ( $RootTree );
+		my $root = $root[1];
 		if (! defined $root) {
 			$kiwi -> error ("Couldn't create instsource root");
 			$kiwi -> failed ();
@@ -255,17 +258,19 @@ sub main {
 		#------------------------------------------
 		$root = new KIWIRoot (
 			$kiwi,$xml,$Prepare,$RootTree,
-			"/base-system"
+			"/base-system",undef,undef,$BaseRoot
 		);
 		if (! defined $root) {
 			$kiwi -> error ("Couldn't create root object");
 			$kiwi -> failed ();
 			my $code = kiwiExit (1); return $code;
 		}
-		if (! defined $root -> init ()) {
-			$kiwi -> error ("Base initialization failed");
-			$kiwi -> failed ();
-			my $code = kiwiExit (1); return $code;
+		if (! defined $BaseRoot) {
+			if (! defined $root -> init ()) {
+				$kiwi -> error ("Base initialization failed");
+				$kiwi -> failed ();
+				my $code = kiwiExit (1); return $code;
+			}
 		}
 		#==========================================
 		# Install root system
@@ -290,9 +295,28 @@ sub main {
 	# Create image from chroot system
 	#------------------------------------------
 	if (defined $Create) {
+		#==========================================
+		# Check for overlay requirements
+		#------------------------------------------
+		my $overlay;
+		my $origroot;
+		if (defined $BaseRoot) {
+			$overlay = new KIWIOverlay ( $kiwi,$BaseRoot,$Create );
+			if (! defined $overlay) {
+				my $code = kiwiExit (1); return $code;
+			}
+			$origroot = $Create;
+			$Create = $overlay -> mountOverlay();
+			if (! defined $Create) {
+				my $code = kiwiExit (1); return $code;
+			}
+		}
 		$kiwi -> info ("Reading image description...");
 		my $xml = new KIWIXML ( $kiwi,"$Create/image",undef,$SetImageType );
 		if (! defined $xml) {
+			if (defined $BaseRoot) {
+				$overlay -> resetOverlay();
+			}
 			my $code = kiwiExit (1); return $code;
 		}
 		$kiwi -> done();
@@ -306,6 +330,9 @@ sub main {
 				$kiwi -> failed ();
 				$kiwi -> info   ("No destination directory specified");
 				$kiwi -> failed ();
+				if (defined $BaseRoot) {
+					$overlay -> resetOverlay();
+				}
 				my $code = kiwiExit (1); return $code;
 			}
 			$kiwi -> done();
@@ -315,14 +342,20 @@ sub main {
 		#------------------------------------------
 		$image = new KIWIImage (
 			$kiwi,$xml,$Create,$Destination,$StripImage,
-			"/base-system"
+			"/base-system",$origroot
 		);
 		if (! defined $image) {
+			if (defined $BaseRoot) {
+				$overlay -> resetOverlay();
+			}
 			my $code = kiwiExit (1); return $code;
 		}
 		my %type = %{$xml->getImageTypeAndAttributes()};
 		my $para = checkType ( \%type );
 		if (! defined $para) {
+			if (defined $BaseRoot) {
+				$overlay -> resetOverlay();
+			}
 			my $code = kiwiExit (1); return $code;
 		}
 		#==========================================
@@ -350,6 +383,9 @@ sub main {
 			undef $main::Create;
 			if (! defined main::main()) {
 				$main::Survive = "default";
+				if (defined $BaseRoot) {
+					$overlay -> resetOverlay();
+				}
 				my $code = kiwiExit (1); return $code;
 			}
 			$main::Survive = "default";
@@ -407,7 +443,13 @@ sub main {
 			};
 			$kiwi -> error  ("Unsupported type: $type{type}");
 			$kiwi -> failed ();
+			if (defined $BaseRoot) {
+				$overlay -> resetOverlay();
+			}
 			my $code = kiwiExit (1); return $code;
+		}
+		if (defined $BaseRoot) {
+			$overlay -> resetOverlay();
 		}
 		if ($ok) {
 			my $code = kiwiExit (0); return $code;
@@ -447,7 +489,7 @@ sub main {
 		#------------------------------------------
 		$root = new KIWIRoot (
 			$kiwi,$xml,$Upgrade,undef,
-			"/base-system",$Upgrade,\@AddPackage
+			"/base-system",$Upgrade,\@AddPackage,$BaseRoot
 		);
 		if (! defined $root) {
 			$kiwi -> error ("Couldn't create root object");
@@ -674,6 +716,7 @@ sub init {
 		"setup-grub-splash=s"   => \$SetupSplashForGrub,
 		"list-profiles|i=s"     => \$ListProfiles,
 		"force-new-root"        => \$ForceNewRoot,
+		"base-root=s"           => \$BaseRoot,
 		"help|h"                => \&usage,
 		"<>"                    => \&usage
 	);
@@ -735,9 +778,12 @@ sub usage {
 	print "  kiwi -i | --list-profiles\n";
 	print "Image Preparation/Creation:\n";
 	print "  kiwi -p | --prepare <image-path>\n";
+	print "     [ --base-root <base-path> ]\n";
 	print "  kiwi -c | --create  <image-root>\n";
+	print "     [ --base-root <base-path> ]\n";
 	print "Image Upgrade:\n";
 	print "  kiwi -u | --upgrade <image-root>\n";
+	print "     [ --base-root <base-path> ]\n";
 	print "System to Image migration:\n";
 	print "  kiwi -m | --migrate <name> --destdir <destination-path> \\\n";
 	print "     [ --exclude <directory> --exclude ... ] \\\n";
