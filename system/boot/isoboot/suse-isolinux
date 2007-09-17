@@ -203,6 +203,7 @@ mkisofs \
 	-p "$CD_PREPARER" \
 	-publisher "$CD_PUBLISHER" \
 	$PARAMS -o $DEST $XPARAMS $SOURCE
+code=$?
 
 #=======================================
 # Clean up
@@ -216,3 +217,5 @@ if [ -e "$SORTFILE" ] ; then
 	echo removing $SORTFILE
 	rm -f "$SORTFILE"
 fi
+
+exit $code

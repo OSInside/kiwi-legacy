@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Sep 17 15:24:47 CEST 2007 - ms@suse.de
+
+- fixed suse-isolinux exit code
+
+-------------------------------------------------------------------
 Mon Sep 17 08:44:37 CEST 2007 - ms@suse.de
 
 - added call of posbios if installed to obtain BIOS information
