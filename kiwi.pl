@@ -1022,8 +1022,9 @@ sub checkType {
 				if (-f "/usr/bin/mksquashfs") {	
 					$para .= ",$type{flags}";
 				} else {
-					$kiwi -> warning ("missing mksquashfs: flags $type{flags}");
-					$kiwi -> skipped ();
+					$kiwi -> error("missing mksquashfs for flag: $type{flags}");
+					$kiwi -> failed();
+					return undef;
 				}
 			} 
 			last SWITCH;
