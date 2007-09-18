@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Sep 18 11:44:28 CEST 2007 - ms@suse.de
+
+- fixed missing message file for vmx type
+
+-------------------------------------------------------------------
 Mon Sep 17 16:48:51 CEST 2007 - ms@suse.de
 
 - missing mksquashfs is now handled as fatal error

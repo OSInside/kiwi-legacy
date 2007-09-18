@@ -991,7 +991,10 @@ sub setupBootDisk {
 	# Import grub stages
 	#------------------------------------------
 	my $stages = "'usr/lib/grub/*'";
+	my $message= "'image/loader/message'";
 	$kiwi -> info ("Importing grub stages for VM boot");
+	$status = qx (gzip -cd $initrd | (cd $tmpdir && cpio -d -i $message 2>&1));
+	$status = qx ( mv $tmpdir/$message $tmpdir/boot/message 2>&1 );
 	$status = qx (gzip -cd $initrd | (cd $tmpdir && cpio -d -i $stages 2>&1));
 	$status = qx ( mv $tmpdir/usr/lib/grub/* $tmpdir/boot/grub 2>&1 );
 	$result = $? >> 8;
@@ -1015,7 +1018,7 @@ sub setupBootDisk {
 	print FD "color cyan/blue white/blue\n";
 	print FD "default 0\n";
 	print FD "timeout 10\n";
-	print FD "gfxmenu (hd0,0)/image/loader/message\n";
+	print FD "gfxmenu (hd0,0)/boot/message\n";
 	print FD "\n";
 	print FD "title KIWI VM boot\n";
 	print FD " root (hd0,0)\n";
