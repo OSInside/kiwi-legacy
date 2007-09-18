@@ -779,6 +779,7 @@ sub usage {
 	print "Image Preparation/Creation:\n";
 	print "  kiwi -p | --prepare <image-path>\n";
 	print "     [ --base-root <base-path> ]\n";
+	print "     [ --add-profile <profile-name> ]\n";
 	print "  kiwi -c | --create  <image-root>\n";
 	print "     [ --base-root <base-path> ]\n";
 	print "Image Upgrade:\n";
