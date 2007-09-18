@@ -205,6 +205,13 @@ function baseGetPackagesForDeletion {
 }
 
 #======================================
+# baseGetProfilesUsed
+#--------------------------------------
+function baseGetProfilesUsed {
+	echo $profiles
+}
+
+#======================================
 # baseCleanMount
 #--------------------------------------
 function baseCleanMount {

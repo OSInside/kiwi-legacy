@@ -268,7 +268,7 @@ sub getRequiredPatterns {
 	my $this    = shift;
 	my $pattref = shift;
 	my $kiwi    = $this->{kiwi};
-	my $pattype = $this->{patpactype};
+	my $pattype = $this->{pattype};
 	my @pattern = @{$pattref};
 	my @patdata = $this -> getPatternContents (\@pattern);
 	my @reqs;
@@ -315,7 +315,7 @@ sub getRequiredPatterns {
 #------------------------------------------
 sub getPackages {
 	my $this = shift;
-	my $pattype = $this->{pattype};
+	my $pattype = $this->{patpactype};
 	my %result;
 	my @reqs = $this -> getRequiredPatterns ($this->{pattern});
 	my @pacs;
