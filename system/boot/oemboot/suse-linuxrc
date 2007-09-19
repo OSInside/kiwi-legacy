@@ -246,6 +246,7 @@ if [ -f $VMX_SYSTEM ];then
 	#======================================
 	# 6.7) find new root partition
 	#--------------------------------------
+	unset UNIONFS_CONFIG
 	deviceRoot="$deviceDisk"2
 	probeFileSystem $deviceRoot
 	if test "$FSTYPE" = "unknown";then
