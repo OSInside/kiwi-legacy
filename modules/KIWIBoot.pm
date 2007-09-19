@@ -1204,7 +1204,7 @@ sub setupBootDisk {
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't install image: $status");
+			$kiwi -> error ("Couldn't copy boot data to system image: $status");
 			$kiwi -> failed ();
 			qx ( umount /mnt/ 2>&1 );
 			qx ( /sbin/kpartx  -d $loop );

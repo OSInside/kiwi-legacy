@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Sep 19 19:31:24 CEST 2007 - ms@suse.de
+
+- better failed message if system image is too small to hold
+  the boot image data required for virtual disk boot
+
+-------------------------------------------------------------------
 Tue Sep 18 20:01:01 CEST 2007 - ms@suse.de
 
 - reread partition table after oemboot installation
