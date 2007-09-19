@@ -33,16 +33,37 @@ use KIWIOverlay;
 # Globals (Version)
 #--------------------------------------------
 our $Version       = "1.64";
-our $Revision      = "/usr/share/kiwi/.revision";
 our $openSUSE      = "http://software.opensuse.org/download/";
+our $ConfigFile    = "$ENV{'HOME'}/.kiwirc";
+#============================================
+# Read $HOME/.kiwirc
+#--------------------------------------------
+if ( -f $ConfigFile) {
+	my $kiwi = new KIWILog();
+	if (! do $ConfigFile) {
+		$kiwi -> warning ("Invalid $ConfigFile file...");
+		$kiwi -> skipped ();
+	} else {
+		$kiwi -> info ("Using $ConfigFile");
+		$kiwi -> done ();
+	}
+}
 #============================================
 # Globals
 #--------------------------------------------
-our $System  = "/usr/share/kiwi/image";
-our $Tools   = "/usr/share/kiwi/tools";
-our $Scheme  = "/usr/share/kiwi/modules/KIWIScheme.xsd";
-our $KConfig = "/usr/share/kiwi/modules/KIWIConfig.sh";
-our $KMigrate= "/usr/share/kiwi/modules/KIWIMigrate.txt";
+our $BasePath;  # configurable base kiwi path
+our $System;    # configurable baes kiwi image desc. path
+if ( ! defined $BasePath ) {
+	$BasePath = "/usr/share/kiwi";
+}
+if ( ! defined $System ) {
+	$System  = $BasePath."/image";
+}
+our $Tools   = $BasePath."/tools";
+our $Scheme  = $BasePath."/modules/KIWIScheme.xsd";
+our $KConfig = $BasePath."/modules/KIWIConfig.sh";
+our $KMigrate= $BasePath."/modules/KIWIMigrate.txt";
+our $Revision= $BasePath."/.revision";
 #============================================
 # Globals
 #--------------------------------------------

@@ -255,8 +255,27 @@ sub init {
 	qx ( touch $root/etc/mtab );
 	qx ( touch $root/etc/sysconfig/bootloader );
 	# need user/group files as template
-	qx ( cp /etc/group  $root/etc 2>&1 );
-	qx ( cp /etc/passwd $root/etc 2>&1 );
+	my $groupTemplate = "/etc/group"; 
+	my $paswdTemplate = "/etc/passwd";
+	# search for template files, add paths for different distros here
+	my @searchPWD = (
+		"/var/adm/fillup-templates/passwd.aaa_base"
+	);
+	my @searchGRP = (
+		"/var/adm/fillup-templates/group.aaa_base"
+	);
+	foreach my $group (@searchGRP) {
+		if ( -f $group ) {
+			$groupTemplate = $group; last;
+		}
+	}
+	foreach my $paswd (@searchPWD) {
+		if ( -f $paswd ) {
+			$paswdTemplate = $paswd; last;
+		}
+	}
+	qx ( cp $groupTemplate $root/etc/group  2>&1 );
+	qx ( cp $paswdTemplate $root/etc/passwd 2>&1 );
 	# need resolv.conf for internal chroot name resolution
 	qx ( cp /etc/resolv.conf $root/etc 2>&1 );
 	qx ( cp $main::KConfig $root/.kconfig 2>&1 );

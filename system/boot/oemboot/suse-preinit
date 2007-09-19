@@ -29,7 +29,7 @@ fi
 #======================================
 # 2) create initrd on diskful
 #--------------------------------------
-if test -z $KIWI_INITRD_PARAMS;then
+if [ -z "$UNIONFS_CONFIG" ]; then
 	if test -L /boot/boot;then
 		mount -t proc proc /proc
 		mount -t sysfs sysfs /sys
@@ -39,6 +39,25 @@ if test -z $KIWI_INITRD_PARAMS;then
 	else
 		Echo "Image doesn't provide kernel system map"
 		Echo "Can't create initrd"
+	fi
+else
+	if mount $deviceBoot /kiwiboot;then
+		rm -rf /boot && ln -s /kiwiboot/boot /boot
+		console=""
+		gdev="(hd0,0)"
+		menu=/boot/grub/menu.lst
+		echo "timeout 10"                          > $menu
+		if [ -f /boot/message ];then
+			echo "gfxmenu $gdev/boot/message"     >> $menu
+		fi
+		echo "title KIWI VM boot"   >> $menu
+		echo -n " kernel $gdev/boot/linux.vmx"    >> $menu
+		echo -n " root=${deviceDisk}1 $console"   >> $menu
+		echo " $KIWI_INITRD_PARAMS vga=0x314"     >> $menu
+		echo " initrd $gdev/boot/initrd.vmx"      >> $menu
+	else
+		Echo "Failed to mount boot partition"
+		Echo "Local grub installation will fail !"
 	fi
 fi
 

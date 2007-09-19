@@ -1080,7 +1080,34 @@ function checkTFTP {
 		TSERVER=$kiwitftp
 	fi
 }
-
+#======================================
+# umountSystem
+#--------------------------------------
+function umountSystem () {
+	retval=0
+	OLDIFS=$IFS
+	IFS=$IFS_ORIG
+	mountPath=/mnt
+	if test ! -z $UNIONFS_CONFIG;then
+		roDir=/ro_branch
+		rwDir=/rw_branch
+		xiDir=/xino
+		if ! umount $mountPath >/dev/null 2>&1;then
+			retval=1
+		fi
+		for dir in $roDir $rwDir $xiDir;do
+			if ! umount $dir >/dev/null 2>&1;then
+				retval=1
+			fi
+		done
+	else
+		if ! umount $mountPath >/dev/null 2>&1;then
+			retval=1
+		fi
+	fi
+	IFS=$OLDIFS
+	return $retval
+}
 #======================================
 # mountSystem
 #--------------------------------------
@@ -1124,9 +1151,8 @@ function mountSystem () {
 					if ! mount $rwDevice $rwDir >/dev/null 2>&1;then
 						Echo "Creating filesystem for RW data on $rwDevice..."
 						if ! mke2fs $rwDevice >/dev/null 2>&1;then
-							systemException \
-								"Failed to create ext2 filesystem" \
-							"reboot"
+							Echo "Failed to create ext2 filesystem"
+							retval=1; return $retval
 						fi
 						Echo "Checking EXT2 write extend..."
 						e2fsck -y -f $rwDevice >/dev/null 2>&1
@@ -1164,19 +1190,6 @@ function mountSystem () {
 	IFS=$OLDIFS
 	return $retval
 }
-
-#======================================
-# umountSystem
-#--------------------------------------
-function umountSystem () {
-	umount /mnt >/dev/null 2>&1
-	if test ! -z "$UNIONFS_CONFIG";then
-		umount /ro_branch >/dev/null 2>&1
-		umount /rw_branch >/dev/null 2>&1
-		umount /xino >/dev/null 2>&1
-	fi
-}
-
 #======================================
 # cleanDirectory
 #--------------------------------------
@@ -1193,7 +1206,6 @@ function cleanDirectory () {
 	mv $tmpdir/* $directory
 	rm -rf $tmpdir
 }
-
 #======================================
 # cleanInitrd
 #--------------------------------------
@@ -1215,7 +1227,6 @@ function cleanInitrd () {
 	# mount opens fstab so we give them one
 	touch /etc/fstab
 }
-
 #======================================
 # searchAlternativeConfig
 #--------------------------------------

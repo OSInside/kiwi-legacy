@@ -75,8 +75,7 @@ sub new {
 			my $result = $? >> 8;
 			if ($result == 0) {
 				$syszip = -s $system;
-				$syszip /= 1024 * 1024;
-				$syszip = int $syszip + 70;
+				$syszip+= 70 * 1024 * 1024;
 			} else {
 				$syszip = 0;
 			}
@@ -96,7 +95,7 @@ sub new {
 		$kiwi -> failed ();
 		return undef;
 	}
-	$tmpdir = qx ( mktemp -q -d /tmp/kiwiboot.XXXXXX );
+	$tmpdir = qx ( mktemp -q -d /tmp/kiwiboot.XXXXXX ); chomp $tmpdir;
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> error  ("Couldn't create tmp dir: $tmpdir: $!");
@@ -107,8 +106,12 @@ sub new {
 		my $kernelSize = -s $kernel; # the kernel
 		my $initrdSize = -s $initrd; # the boot image
 		my $systemSize = -s $system; # the system image
-		$vmsize = $kernelSize + $initrdSize + $systemSize;
-		my $sparesSize = 0.2 * $vmsize; # and 20% free space
+		if ($syszip) {
+			$vmsize = $kernelSize + $initrdSize + $syszip;
+		} else {
+			$vmsize = $kernelSize + $initrdSize + $systemSize;
+		}
+		my $sparesSize = 0.3 * $vmsize; # and 30% free space
 		$vmsize = $vmsize + $sparesSize;
 		$vmsize = $vmsize / 1024 / 1024;
 		$vmsize = int $vmsize;
@@ -118,7 +121,10 @@ sub new {
 		#$kiwi -> info ("Using given virtual disk size of: $vmsize");
 	}
 	#$kiwi -> done ();
-	chomp  $tmpdir;
+	if ($syszip) {
+		$syszip = $syszip / 1024 / 1024;
+		$syszip = int $syszip;
+	}
 	#==========================================
 	# Store object data
 	#------------------------------------------

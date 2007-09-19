@@ -1,4 +1,22 @@
 -------------------------------------------------------------------
+Tue Sep 18 20:01:01 CEST 2007 - ms@suse.de
+
+- reread partition table after oemboot installation
+- fixed repartition code for squasfs/aufs based system images
+  installed by oemboot
+- fixed virtual disk size calculation if squashfs is used
+- don't throw a reboot exception in mountSystem but return
+  with code 1 to allow caller to check the return value
+- added support for $HOME/.kiwirc file. It's perl syntax and
+  allows to set the variables $BasePath and $System. By default
+  /usr/share/kiwi is used for $BasePath and /usr/share/kiwi/image
+  is used for $System (#308597)
+- use correct passwd and group template file of the
+  distribution. image descriptions should _not_ provide
+  a passwd or group file within the image description root/
+  path anymore (#297610)
+
+-------------------------------------------------------------------
 Tue Sep 18 11:44:28 CEST 2007 - ms@suse.de
 
 - fixed missing message file for vmx type
