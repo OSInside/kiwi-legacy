@@ -23,6 +23,7 @@ use strict;
 use KIWILog;
 use KIWIBoot;
 use Math::BigFloat;
+use File::Basename;
 
 #==========================================
 # Constructor
@@ -1562,7 +1563,7 @@ sub installLogicalExtend {
 	#==========================================
 	# copy physical to logical
 	#------------------------------------------
-	my $name = qx (basename $source); chomp $name;
+	my $name = basename ($source);
 	$kiwi -> info ("Copying physical to logical [$name]...");
 	my $data = qx (cp -a $source/* $extend 2>&1);
 	my $code = $? >> 8;

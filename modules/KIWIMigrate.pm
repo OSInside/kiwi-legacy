@@ -22,6 +22,7 @@ package KIWIMigrate;
 #------------------------------------------
 use strict;
 use File::Find;
+use File::Basename;
 use KIWILog;
 
 #==========================================
@@ -475,7 +476,7 @@ sub setSystemConfiguration {
 	foreach my $check (@rpmcheck) {
 		if ($check =~ /^(\/.*)/) {
 			my $file = $1;
-			my $dir  = qx (dirname $file); chomp $dir;
+			my $dir  = dirname ($file);
 			my $ok   = 1;
 			foreach my $exp (@deny) {
 				if ($file =~ /$exp/) {

@@ -239,7 +239,7 @@ function baseStripLocales {
 				continue
 			fi
 			
-			local baseLocale=`basename $locale`
+			local baseLocale=`/usr/bin/basename $locale`
 			local found="no"
 			for keep in $imageLocales;do
 				if echo $baseLocale | grep $keep;then
@@ -263,7 +263,7 @@ function baseStripTools {
 	local tools=$2
 	for file in `find $tpath`;do
 		found=0
-		base=`basename $file`
+		base=`/usr/bin/basename $file`
 		for need in $tools;do
 			if [ $base = $need ];then
 				found=1

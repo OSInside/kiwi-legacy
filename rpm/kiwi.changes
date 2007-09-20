@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Sep 20 17:28:49 CEST 2007 - ms@suse.de
+
+- fixed usage of basename and dirname by using  File::Basename and
+  in scripts use /usr/bin/[basename|dirname] so a function can't
+  overwrite the use case here (#326758)
+
+-------------------------------------------------------------------
 Thu Sep 20 14:44:02 CEST 2007 - ms@suse.de
 
 - fixed oemboot linuxrc for vmx raw boot (#309800)

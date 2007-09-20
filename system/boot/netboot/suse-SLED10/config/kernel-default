@@ -86,8 +86,8 @@ done
 # handle misc drivers...
 #------------------------------------------
 test ! -z "$drivers";for i in $drivers;do
-	path=`dirname $i`
-	base=`basename $i`
+	path=`/usr/bin/dirname $i`
+	base=`/usr/bin/basename $i`
 	if [ "$base" = "*" ];then
 		test -d /tmp/$path && \
 		mkdir -p /tmp/misc-used/$path && \

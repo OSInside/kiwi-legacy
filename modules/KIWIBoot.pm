@@ -542,7 +542,7 @@ sub setupInstallCD {
 	my $initrd  = $this->{initrd};
 	my $system  = $this->{system};
 	my $oldird  = $this->{initrd};
-	my $namecd  = qx (basename $system); chomp $namecd;
+	my $namecd  = basename ($system);
 	my $status;
 	my $result;
 	my $ibasename;
@@ -669,7 +669,7 @@ sub setupInstallStick {
 	my $oldird    = $this->{initrd};
 	my $vmsize    = $this->{vmsize};
 	my $diskname  = $system.".install.raw";
-	my $namecd    = qx (basename $system); chomp $namecd;
+	my $namecd    = basename ($system);
 	my $loop      = "/dev/loop0";
 	my $loopfound = 0;
 	my $status;
@@ -1401,7 +1401,7 @@ sub setupInstallFlags {
 			$kiwi -> failed ();
 			return undef;
 		}
-		my $namecd = qx (basename $system); chomp $namecd;
+		my $namecd = basename ($system);
 		if ($namecd !~ /(.*)-(\d+\.\d+\.\d+)\.raw$/) {
 			$kiwi -> error  ("Couldn't extract version information");
 			$kiwi -> failed ();
