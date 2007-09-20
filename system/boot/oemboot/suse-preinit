@@ -52,7 +52,7 @@ else
 		if [ -f /boot/message ];then
 			echo "gfxmenu $gdev/boot/message"     >> $menu
 		fi
-		echo "title KIWI VM boot"   >> $menu
+		echo "title SLE/SUSE Linux OEM"           >> $menu
 		echo -n " kernel $gdev/boot/linux.vmx"    >> $menu
 		echo -n " root=${deviceDisk}1 $console"   >> $menu
 		echo " $KIWI_INITRD_PARAMS vga=0x314"     >> $menu
