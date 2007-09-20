@@ -134,6 +134,8 @@ if [ ! -f $VMX_SYSTEM ];then
 			export UNIONFS_CONFIG="$deviceDisk"3,"$deviceDisk"2,aufs
 			export deviceRoot="$deviceDisk"2
 			export deviceSwap="$deviceDisk"4
+		else
+			export deviceRoot="$deviceDisk"1
 		fi
 		Echo "Using root partition $deviceRoot on disk $deviceDisk"
 	fi
@@ -345,7 +347,26 @@ if [ $LOCAL_BOOT = "no" ];then
 		# ----
 		input=/part.input
 		rm -f $input
-		for cmd in d n p 2 1 +10240M n p 1 . +"$swapsize"M n p 3 . . t 1 82 w;do
+		disk1MBytes=10240
+		diskXMBytes=`sfdisk -s $deviceDisk`
+		diskXMBytes=`expr $diskXMBytes / 1024`
+		if [ $disk1MBytes -gt $diskXMBytes ];then
+			# /.../
+			# Very small disk, we use half of the size for root and
+			# assume the rest is ok for /home and /. Additionally we set
+			# the swap space to 50MB. All this could fail if the disk
+			# is really small so that / doesn't fit into half of
+			# $diskXMBytes
+			# ----
+			disk1MBytes=`expr $diskXMBytes / 2`
+			swapsize=50
+		fi
+		for cmd in \
+			d n p 2 1 +"$disk1MBytes"M \
+			n p 1 . +"$swapsize"M \
+			n p 3 . . \
+			t 1 82 w
+		do
 			if [ $cmd = "." ];then
 				echo >> $input
 				continue
@@ -391,6 +412,18 @@ if [ $LOCAL_BOOT = "no" ];then
 		disk2MBytes=`expr $disk2MBytes / 1024`
 		disk3MBytes=`expr $diskXMBytes - $disk1MBytes - $disk2MBytes`
 		disk3MBytes=`expr $disk3MBytes - $swapXMBytes`
+		if [ $disk3MBytes -lt 100 ];then
+			# /.../
+			# Very small disk, we use only 50MB of swap and assume
+			# that the rest disk space is big enough to create the
+			# RW and swap partition. All this could fail if the disk
+			# is not big enough compared to the system image already
+			# installed
+			# ----
+			swapsize=50
+			disk3MBytes=`expr $diskXMBytes - $disk1MBytes - $disk2MBytes`
+			disk3MBytes=`expr $disk3MBytes - $swapXMBytes`
+		fi
 		#======================================
 		# 8.3 write new partition table
 		#--------------------------------------
