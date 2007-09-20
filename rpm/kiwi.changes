@@ -1,6 +1,8 @@
 -------------------------------------------------------------------
 Wed Sep 19 19:31:24 CEST 2007 - ms@suse.de
 
+- don't install grub if initrd and/or menu.lst can't be
+  created in case of an oemboot system 
 - fixed mount in oemboot if not unified system
 - better failed message if system image is too small to hold
   the boot image data required for virtual disk boot

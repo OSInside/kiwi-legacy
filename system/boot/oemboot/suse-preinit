@@ -29,6 +29,7 @@ fi
 #======================================
 # 2) create initrd on diskful
 #--------------------------------------
+grubOK=1
 if [ -z "$UNIONFS_CONFIG" ]; then
 	if test -L /boot/boot;then
 		mount -t proc proc /proc
@@ -39,6 +40,7 @@ if [ -z "$UNIONFS_CONFIG" ]; then
 	else
 		Echo "Image doesn't provide kernel system map"
 		Echo "Can't create initrd"
+		grubOK=0
 	fi
 else
 	if mount $deviceBoot /kiwiboot;then
@@ -57,17 +59,20 @@ else
 		echo " initrd $gdev/boot/initrd.vmx"      >> $menu
 	else
 		Echo "Failed to mount boot partition"
-		Echo "Local grub installation will fail !"
+		Echo "Can't create grub configuration"
+		grubOK=0
 	fi
 fi
 
 #======================================
-# 3) Install boot loader on diskful
+# 3) Install boot loader if ok
 #--------------------------------------
-if test -f "/usr/sbin/grub";then
-	Echo "Installing boot loader..."
-	/usr/sbin/grub --batch --no-floppy < /etc/grub.conf >/dev/null 2>&1
-else
-	Echo "Image doesn't provide grub support"
-	Echo "Can't install boot loader"
+if [ $grubOK = 1 ];then
+	if test -f "/usr/sbin/grub";then
+		Echo "Installing boot loader..."
+		/usr/sbin/grub --batch --no-floppy < /etc/grub.conf >/dev/null 2>&1
+	else
+		Echo "Image doesn't provide grub support"
+		Echo "Can't install boot loader"
+	fi
 fi
