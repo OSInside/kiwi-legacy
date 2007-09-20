@@ -1,6 +1,9 @@
 -------------------------------------------------------------------
 Wed Sep 19 19:31:24 CEST 2007 - ms@suse.de
 
+- added check for isolinux-config in suse-isolinux
+- added checks for copy calls in KIWIImage.pm while creating
+  a live ISO image
 - don't install grub if initrd and/or menu.lst can't be
   created in case of an oemboot system 
 - fixed mount in oemboot if not unified system

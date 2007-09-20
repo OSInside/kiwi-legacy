@@ -862,24 +862,49 @@ sub createImageLiveCD {
 	$kiwi -> info ("Copying boot image and kernel [$isoarch]");
 	my $destination = "$main::RootTree/CD/boot/$isoarch/loader";
 	qx (mkdir -p $destination);
-	qx (cp $imageDest/$iso*$arch*.gz $destination/initrd);
-	qx (cp $imageDest/$iso*$arch*.kernel $destination/linux);
+	$data = qx (cp $imageDest/$iso*$arch*.gz $destination/initrd);
+	$code = $? >> 8;
+	if ($code == 0) {
+		$data = qx (cp $imageDest/$iso*$arch*.kernel $destination/linux);
+		$code = $? >> 8;
+	}
+	if ($code != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Copy failed: $data");
+		$kiwi -> failed ();
+		return undef;
+	}
 	$kiwi -> done ();
-
 	#==========================================
 	# copy base CD files
 	#------------------------------------------
 	$kiwi -> info ("Setting up isolinux boot CD [$isoarch]");
-	qx (cp -a $gfx/* $destination);
-	qx (cp $CD/isolinux.cfg $destination);
-	qx (cp $CD/isolinux.msg $destination);
+	$data = qx (cp -a $gfx/* $destination);
+	$code = $? >> 8;
+	if ($code == 0) {
+		$data = qx (cp $CD/isolinux.cfg $destination);
+		$code = $? >> 8;
+		if ($code == 0) {
+			$data = qx (cp $CD/isolinux.msg $destination);
+			$code = $? >> 8;
+		}
+	}
+	if ($code != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Copy failed: $data");
+		$kiwi -> failed ();
+		return undef;
+    }
 	$kiwi -> done ();
-
 	#==========================================
 	# remove original kernel and initrd
 	#------------------------------------------
-	qx (rm -f $imageDest/$iso*.*]);
-
+	$data = qx (rm $imageDest/$iso*.* 2>&1);
+	$code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> warning ("Couldn't cleanup boot files: $data");
+		$kiwi -> skipped ();
+	}
 	#==========================================
 	# Create boot configuration
 	#------------------------------------------

@@ -198,7 +198,12 @@ then
 	fi
 fi
 
-/usr/bin/isolinux-config --base $BOOT_ISOLINUX $SOURCE/$BOOT_ISOLINUX/isolinux.bin
+if [ ! -x /usr/bin/isolinux-config ];then
+	echo "Can't find isolinux-config binary"
+	exit 1
+fi
+/usr/bin/isolinux-config \
+	--base $BOOT_ISOLINUX $SOURCE/$BOOT_ISOLINUX/isolinux.bin
 mkisofs \
 	-p "$CD_PREPARER" \
 	-publisher "$CD_PUBLISHER" \
