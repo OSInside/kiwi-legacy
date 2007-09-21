@@ -318,9 +318,10 @@ fi
 echo " "
 echo "Booting into Live CD System..."
 echo "------------------------------"
+export IFS=$IFS_ORIG
 mount -n -o remount,rw / &>/dev/null
 if [ $PIVOT = "true" ];then
 	exec umount -n -l /mnt
 else
-	exec chroot . /sbin/init
+	exec chroot . /sbin/init $@
 fi

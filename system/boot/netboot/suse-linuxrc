@@ -863,9 +863,10 @@ fi
 echo " "
 echo "Booting into final System..."
 echo "----------------------------"
+export IFS=$IFS_ORIG
 mount -n -o remount,rw / 2>/dev/null
 if [ $PIVOT = "true" ];then
 	exec umount -n -l /mnt
 else
-	exec chroot . /sbin/init
+	exec chroot . /sbin/init $@
 fi
