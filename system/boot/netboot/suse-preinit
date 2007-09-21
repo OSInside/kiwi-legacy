@@ -27,7 +27,12 @@ if [ $LOCAL_BOOT = "yes" ];then
 fi
 
 #======================================
-# 2) create initrd on diskful
+# 2) update mount table
+#--------------------------------------
+updateMTAB
+
+#======================================
+# 3) create initrd on diskful
 #--------------------------------------
 if test -z $KIWI_INITRD;then
 if test ! -z $DISK;then
@@ -48,7 +53,7 @@ fi
 fi
 
 #======================================
-# 3) Install boot loader on diskful
+# 4) Install boot loader on diskful
 #--------------------------------------
 if test ! -z $DISK;then
 if test $systemIntegrity = "clean";then
@@ -64,7 +69,7 @@ fi
 fi
 
 #======================================
-# 4) Reset systemIntegrity
+# 5) Reset systemIntegrity
 #--------------------------------------
 if test ! -z $DISK;then
 if test ! -z $RELOAD_CONFIG;then
@@ -73,7 +78,7 @@ fi
 fi
 
 #======================================
-# 5) check for valid mount points 
+# 6) check for valid mount points 
 #--------------------------------------
 if test ! -z $DISK;then
 	IFS=":" ; for i in $PART_MOUNT;do
@@ -86,7 +91,7 @@ if test ! -z $DISK;then
 fi
 
 #======================================
-# 6) Update /etc/ImageVersion files
+# 7) Update /etc/ImageVersion files
 #--------------------------------------
 if test ! -z $DISK;then
 	count=0
@@ -112,7 +117,7 @@ if test ! -z $DISK;then
 fi
 
 #======================================
-# 7) setup network for nfs boot
+# 8) setup network for nfs boot
 #--------------------------------------
 if test ! -z $NFSROOT;then
 	mount -o nolock -t proc  proc    /proc

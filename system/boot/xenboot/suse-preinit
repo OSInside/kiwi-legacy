@@ -20,5 +20,6 @@
 . /include
 
 #======================================
-# nothing to do here for xenboot
+# 1) update mount table
 #--------------------------------------
+updateMTAB

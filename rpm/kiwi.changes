@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Sep 21 09:42:27 CEST 2007 - ms@suse.de
+
+- added updateMTAB function for all linuxrc's (#326386)
+
+-------------------------------------------------------------------
 Thu Sep 20 17:28:49 CEST 2007 - ms@suse.de
 
 - fixed usage of basename and dirname by using  File::Basename and

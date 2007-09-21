@@ -20,7 +20,12 @@
 . /include
 
 #======================================
-# 1) check for union filesystem
+# 1) update mount table
+#--------------------------------------
+updateMTAB
+
+#======================================
+# 2) check for union filesystem
 #--------------------------------------
 if [ ! -z "$UNIONFS_CONFIG" ]; then
 	# /.../
@@ -32,7 +37,7 @@ if [ ! -z "$UNIONFS_CONFIG" ]; then
 fi
 
 #======================================
-# 2) create initrd on diskful
+# 3) create initrd on diskful
 #--------------------------------------
 if test -L /boot/boot;then
 	mount -t proc proc /proc
@@ -46,7 +51,7 @@ else
 fi
 
 #======================================
-# 3) Install boot loader on diskful
+# 4) Install boot loader on diskful
 #--------------------------------------
 if test -f "/usr/sbin/grub";then
 	Echo "Installing boot loader..."

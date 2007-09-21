@@ -434,6 +434,21 @@ function searchDiskSpace {
 	done
 }
 #======================================
+# updateMTAB
+#--------------------------------------
+function updateMTAB {
+	prefix=$1
+	umount=0
+	if [ ! -e /proc/mounts ];then
+		mount -t proc proc /proc
+		umount=1
+	fi
+	cat /proc/mounts > $prefix/etc/mtab
+	if [ $umount = 1 ];then
+		umount /proc
+	fi
+}
+#======================================
 # probeNetworkCard
 #--------------------------------------
 function probeNetworkCard {
