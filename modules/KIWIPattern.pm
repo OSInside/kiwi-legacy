@@ -221,10 +221,13 @@ sub downloadPattern {
 				return undef;
 			}
 			if (! open (FD,">$tmpdir/pattern")) {
+				rmdir  ($tmpdir);
 				return undef;
 			}
 			print FD $content; close FD;
 			if (! open (FD,"cat $tmpdir/pattern | gzip -cd|")) {
+				unlink ($tmpdir."/pattern");
+				rmdir  ($tmpdir);
 				return undef;
 			}
 			local $/; $content .= <FD>; close FD;
