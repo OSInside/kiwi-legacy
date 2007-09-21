@@ -190,22 +190,32 @@ sub downloadPattern {
 		my $title    = $response -> title ();
 		$content  = $response -> content ();
 		if ((! defined $title) || ($title =~ /not found/i)) {
-			return undef;
+			$location = $publics_url."/suse/setup/descr";
+			$request  = HTTP::Request->new (GET => $location);
+			$response = $browser  -> request ( $request );
+			$title    = $response -> title ();
+			$content  = $response -> content ();
+			if ((! defined $title) || ($title =~ /not found/i)) {
+				return undef;
+			}
 		}
 		my $pzip = 0;
 		if ($content !~ /\"($pattern-.*$arch\.pat)\"/) {
 			if ($content !~ /\"($pattern-.*$arch\.pat\.gz)\"/) {
 				return undef;
 			} else {
+				$location = $location."/".$1;
 				$pzip = 1;
 			}
+		} else {
+			$location = $location."/".$1;
 		}
-		$location = $location."/".$1;
 		$request  = HTTP::Request->new (GET => $location);
 		$response = $browser  -> request ( $request );
 		$content  = $response -> content ();
 		if ($pzip) {
 			my $tmpdir = qx ( mktemp -q -d /tmp/kiwipattern.XXXXXX );
+			chomp $tmpdir;
 			my $result = $? >> 8;
 			if ($result != 0) {
 				return undef;

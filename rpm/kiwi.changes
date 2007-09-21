@@ -2,6 +2,7 @@
 Fri Sep 21 09:42:27 CEST 2007 - ms@suse.de
 
 - pass allong $@ to init process (#327037)
+- fixed remote download of pattern files (#327096)
 - added updateMTAB function for all linuxrc's (#326386)
 
 -------------------------------------------------------------------
