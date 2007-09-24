@@ -2,6 +2,9 @@
 Mon Sep 24 11:06:10 CEST 2007 - ms@suse.de
 
 - fixed documentation typos (#327668)
+- added posbios as allowed tool in initrd
+- allow tool parameter to suseStripInitrd() function to
+  prevent the given tools from being deleted
 
 -------------------------------------------------------------------
 Fri Sep 21 09:42:27 CEST 2007 - ms@suse.de
