@@ -805,20 +805,47 @@ sub createImageLiveCD {
 	#==========================================
 	# Check for optional config-cdroot archive
 	#------------------------------------------
-	$kiwi -> info ("Integrating CD root information...");
 	my $cdrootData = $imageTree."/image/config-cdroot.tgz";
 	if (-f $cdrootData) {
+		$kiwi -> info ("Integrating CD root information...");
 		my $data = qx ( tar -C $main::RootTree/CD -xvf $cdrootData );
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Failed to integrate CD root data: $data");
 			$kiwi -> failed ();
+			if (! -d $main::RootTree.$baseSystem) {
+				qx (rm -rf $main::RootTree);
+				qx (rm -rf $tmpdir);
+				qx (rm -rf $imageTreeReadOnly);
+			}
 			return undef;
 		}
 		$kiwi -> done();
-	} else {
-		$kiwi -> skipped();
+	}
+	#==========================================
+	# Check for optional config-cdroot.sh
+	#------------------------------------------
+	$cdrootData = $imageTree."/image/config-cdroot.sh";
+	if (-x $cdrootData) {
+		$kiwi -> info ("Calling CD root setup script...");
+		my $cdrootEnv = $imageTree."/.profile";
+		my $CCD  = "$main::RootTree/CD";
+		my $data = qx (cd $CCD && bash -c '. $cdrootEnv && . $cdrootData' 2>&1);
+		my $code = $? >> 8;
+		if ($code != 0) {
+			chomp $data;
+			$kiwi -> failed ();
+			$kiwi -> error  ("Failed to call CD root script: $data");
+			$kiwi -> failed ();
+			if (! -d $main::RootTree.$baseSystem) {
+				qx (rm -rf $main::RootTree);
+				qx (rm -rf $tmpdir);
+				qx (rm -rf $imageTreeReadOnly);
+			}
+			return undef;
+		}
+		$kiwi -> done();
 	}
 	#==========================================
 	# Installing second stage images
@@ -1668,12 +1695,13 @@ sub mountLogicalExtend {
 	# mount logical extend for data transfer
 	#------------------------------------------
 	mkdir "$imageDest/mnt-$$";
-	my $data = qx (mount $opts -oloop $imageDest/$name $imageDest/mnt-$$);
+	my $data = qx (mount $opts -oloop $imageDest/$name $imageDest/mnt-$$ 2>&1);
 	my $code = $? >> 8;
 	if ($code != 0) {
-		$kiwi -> error  ("Couldn't mount image");
+		chomp $data;
+		$kiwi -> error  ("Image loop mount failed:");
 		$kiwi -> failed ();
-		$kiwi -> error  ($data);
+		$kiwi -> error  ("mount: $imageDest/$name -> $imageDest/mnt-$$: $data");
 		return undef;
 	}
 	return "$imageDest/mnt-$$";

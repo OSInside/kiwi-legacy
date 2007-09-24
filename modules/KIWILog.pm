@@ -19,6 +19,7 @@ package KIWILog;
 # Modules
 #------------------------------------------
 use strict;
+use Net::Jabber qw(Client);
 use Carp qw (cluck);
 
 #==========================================
@@ -43,6 +44,95 @@ sub new {
 	$this->{channel}   = \*STDOUT;
 	$this->{errorOk}   = 0;
 	$this->{state}     = "O";
+	#============================================
+	# kiwirc jabber data
+	#--------------------------------------------
+	my $jstatus = 1;
+	if ( ! -f $main::ConfigFile ) {
+		$jstatus = 0;
+	}
+	#============================================
+	# set local jabber variables
+	#--------------------------------------------
+	my $JabberServer;     # configurable jabber server
+	my $JabberPort;       # configurable jabber port
+	my $JabberUserName;   # configurable jabber user name
+	my $JabberPassword;   # configurable jabber password
+	my $JabberRessource;  # configurable jabber ressource
+	my $JabberComponent;  # configurable jabber component
+	if (! defined $JabberPort) {
+		$JabberPort = 5223;
+	}
+	#============================================
+	# Read $HOME/.kiwirc and setup jabber if ok
+	#--------------------------------------------
+	if (($jstatus) && (! do $main::ConfigFile)) {
+		$this -> warning ("Invalid $main::ConfigFile file...");
+		$this -> skipped ();
+		$jstatus = 0;
+	}
+	if (($jstatus) &&
+		((! defined $JabberServer)   || (! defined $JabberUserName)  ||
+		 (! defined $JabberPassword) || (! defined $JabberRessource) ||
+		 (! defined $JabberComponent))
+	) {
+		#$this -> warning ("Jabber setup skipped: Missing login data");
+		#$this -> skipped ();
+		$jstatus = 0;
+	}
+	my $jclient;
+	my $jstatus;
+	my @jresult;
+	if ($jstatus) {
+		$this -> info ("Connecting to Jabber server: $JabberServer");
+		$jclient = new Net::Jabber::Client;
+		$jstatus = $jclient -> Connect (
+			hostname => $JabberServer,
+			port     => $JabberPort
+		);
+		if (! defined $jstatus) {
+			$this -> failed ();
+			$this -> error  ("Server is not answering: $!");
+			$this -> skipped ();
+		} else {
+			$this -> done();
+			$this -> info ("Login to Jabber server: $JabberUserName");
+			@jresult = $jclient -> AuthSend (
+				username => $JabberUserName,
+				password => $JabberPassword,
+				resource => $JabberRessource
+			);
+			if ($jresult[0] ne "ok") {
+				$this -> error   ("Failed: $jresult[0] $jresult[1]");
+				$this -> skipped ();
+			} else {
+				$this -> done ();
+			}
+		}
+	}
+	#==========================================
+	# Store object data
+	#------------------------------------------
+	$this->{jcomponent}= $JabberComponent;
+	$this->{jclient}   = $jclient;
+	return $this;
+}
+
+#==========================================
+# sendJabberMessage
+#------------------------------------------
+sub sendJabberMessage {
+	my $this       = shift;
+	my $message    = shift;
+	my $jclient    = $this->{jclient};
+	my $jcomponent = $this->{jcomponent};
+	if (defined $jclient) {
+		$jclient -> MessageSend (
+			to   => $jcomponent,
+			body => $message
+		);
+		$jclient->Process();
+	}
 	return $this;
 }
 
@@ -297,16 +387,22 @@ sub printLog {
 		$this -> setOutputChannel();
 		if (($lglevel == 1) || ($lglevel == 2) || ($lglevel == 3)) {
 			print $needcr,$date,$logdata;
+			$this -> sendJabberMessage ("$needcr,$date,$logdata");
 			if ($this->{errorOk}) {
 				print EFD $needcr,$date,$logdata;
 			}
 		} elsif ($lglevel == 5) {
 			print $needcr,$logdata;
+			$this -> sendJabberMessage ("$needcr,$logdata");
 			if ($this->{errorOk}) {
 				print EFD $needcr,$logdata;
 			}
 		} else {
-			cluck $needcr,$date,$logdata;
+			print Carp::longmess("$needcr,$logdata");
+			$this -> sendJabberMessage ("$needcr,$logdata");
+			if ($this->{errorOk}) {
+				print EFD Carp::longmess("$needcr,$logdata");
+			}
 		}
 		$this -> resetOutputChannel();
 		return $lglevel;
@@ -451,7 +547,12 @@ sub getRootLog {
 # Destructor
 #------------------------------------------
 sub DESTROY {
+	my $this    = shift;
+	my $jclient = $this->{jclient};
 	close EFD;
+	if (defined $jclient) {
+		$jclient -> Disconnect();
+	}
 }
 
 1;
