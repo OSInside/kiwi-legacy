@@ -6,7 +6,7 @@
 # needsrootforbuild
 Name:          kiwi
 BuildRequires: perl smart perl-XML-LibXML perl-libwww-perl screen module-init-tools perl-Net-Jabber
-%ifarch %ix86
+%ifarch %ix86 x86_64
 BuildRequires: syslinux
 %endif
 Requires:      perl perl-XML-LibXML perl-libwww-perl screen coreutils perl-Net-Jabber

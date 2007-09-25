@@ -829,7 +829,11 @@ sub createImageLiveCD {
 	$cdrootData = $imageTree."/image/config-cdroot.sh";
 	if (-x $cdrootData) {
 		$kiwi -> info ("Calling CD root setup script...");
+		my $pwd = qx (pwd); chomp $pwd;
 		my $cdrootEnv = $imageTree."/.profile";
+		if ($cdrootEnv !~ /^\//) {
+			$cdrootEnv = $pwd."/".$cdrootEnv;
+		}
 		my $CCD  = "$main::RootTree/CD";
 		my $data = qx (cd $CCD && bash -c '. $cdrootEnv && . $cdrootData' 2>&1);
 		my $code = $? >> 8;
