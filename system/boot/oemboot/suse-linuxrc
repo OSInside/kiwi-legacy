@@ -146,7 +146,8 @@ else
 	# ----
 	Echo "Searching harddrive for installation"
 	hwinfo="/usr/sbin/hwinfo --disk"
-	export deviceDisk=`$hwinfo | grep "Device File:" | head -n 1 | cut -f2 -d:`
+	export deviceDisk=`$hwinfo |\
+		grep "Device File:" | head -n 1 | cut -f2 -d: | cut -f1 -d\(`
 	export deviceDisk=`echo $deviceDisk`
 	if [ -z $deviceDisk ];then
 		systemException \
