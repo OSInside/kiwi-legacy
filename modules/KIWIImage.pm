@@ -907,6 +907,10 @@ sub createImageLiveCD {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Copy failed: $data");
 		$kiwi -> failed ();
+		if (! -d $main::RootTree.$baseSystem) {
+			qx (rm -rf $main::RootTree);
+			qx (rm -rf $tmpdir);
+		}
 		return undef;
 	}
 	$kiwi -> done ();
@@ -928,6 +932,10 @@ sub createImageLiveCD {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Copy failed: $data");
 		$kiwi -> failed ();
+		if (! -d $main::RootTree.$baseSystem) {
+			qx (rm -rf $main::RootTree);
+			qx (rm -rf $tmpdir);
+		}
 		return undef;
     }
 	$kiwi -> done ();
@@ -946,6 +954,10 @@ sub createImageLiveCD {
 	if (! open (FD,">$main::RootTree/CD/config.isoclient")) {
 		$kiwi -> error  ("Couldn't create image boot configuration");
 		$kiwi -> failed ();
+		if (! -d $main::RootTree.$baseSystem) {
+			qx (rm -rf $main::RootTree);
+			qx (rm -rf $tmpdir);
+		}
 		return undef;
 	}
 	print FD "IMAGE=/dev/ram1;$namecd\n";
@@ -965,6 +977,10 @@ sub createImageLiveCD {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Failed to create ISO image: $data");
 		$kiwi -> failed ();
+		if (! -d $main::RootTree.$baseSystem) {
+			qx (rm -rf $main::RootTree);
+			qx (rm -rf $tmpdir);
+		}
 		return undef;
 	}
 	if (! -d $main::RootTree.$baseSystem) {
@@ -1679,6 +1695,7 @@ sub setupLogicalExtend {
 	#==========================================
 	# Calculate needed space
 	#------------------------------------------
+	$this -> cleanKernelFSMount();
 	my ($mbytesreal,$mbytes,$xmlsize) = $this -> getSize ($imageTree);
 	if (! defined $quiet) {
 		$kiwi -> info ("Image requires $mbytesreal MB, got $xmlsize MB");

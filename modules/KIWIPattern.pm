@@ -116,6 +116,7 @@ sub getPatternContents {
 	my $content;
 	foreach my $pat (@pattern) {
 		my $result;
+		my @errors;
 		my $printinfo = 0;
 		if (! defined $this->{cache}{$pat}) {
 			$printinfo = 1;
@@ -124,11 +125,16 @@ sub getPatternContents {
 			$kiwi -> info ("$this->{infomessage}: $pat");
 		}
 		foreach my $url (@urllist) {
-			$result .= $this -> downloadPattern ( $url,$pat );
+			my @load = $this -> downloadPattern ( $url,$pat );
+			$result .= $load[0]; push (@errors,$load[1]);
 		}
 		if (! $result) {
 			if ($printinfo) {
 				$kiwi -> failed ();
+				foreach my $error (@errors) {
+					$kiwi -> error  ($error);
+					$kiwi -> failed ();
+				}
 			}
 			return ();
 		}
@@ -155,10 +161,18 @@ sub downloadPattern {
 		return $this->{cache}{$pattern};
 	}
 	if ($url =~ /^\//) {
+		#==========================================
+		# local pattern check
+		#------------------------------------------
 		my $path = "$url//suse/setup/descr";
 		my @file = bsd_glob ("$path/$pattern-*.$arch.pat");
 		if (! @file) {
 			@file = bsd_glob ("$path/$pattern-*.$arch.pat.gz");
+		}
+		if (! @file) {
+			return (undef,
+				"Couldn't find pat by glob: \<$path/$pattern-*.$arch.pat\>"
+			);
 		}
 		foreach my $file (@file) {
 			# / FIXME /
@@ -167,16 +181,19 @@ sub downloadPattern {
 			# ---
 			if ($file =~ /\.gz$/) {
 				if (! open (FD,"cat $file | gzip -cd|")) {
-					return undef;
+					return (undef,"Couldn't uncompress pattern: $file: $!");
 				}
 			} else {
 				if (! open (FD,$file)) {
-					return undef;
+					return (undef,"Couldn't open pattern: $file: $!");
 				}
 			}
 			local $/; $content .= <FD>; close FD;
 		}
 	} else {
+		#==========================================
+		# remote pattern check
+		#------------------------------------------
 		my $urlHandler  = new KIWIURL ($kiwi);
 		my $publics_url = $url;
 		my $highlvl_url = $urlHandler -> openSUSEpath ($publics_url);
@@ -188,21 +205,25 @@ sub downloadPattern {
 		my $request  = HTTP::Request->new (GET => $location);
 		my $response = $browser  -> request ( $request );
 		my $title    = $response -> title ();
-		$content  = $response -> content ();
+		$content     = $response -> content ();
 		if ((! defined $title) || ($title =~ /not found/i)) {
 			$location = $publics_url."/suse/setup/descr";
 			$request  = HTTP::Request->new (GET => $location);
 			$response = $browser  -> request ( $request );
 			$title    = $response -> title ();
 			$content  = $response -> content ();
-			if ((! defined $title) || ($title =~ /not found/i)) {
-				return undef;
+			if ($title =~ /not found/i) {
+				return (undef,"Page not found: $location");
 			}
 		}
+		#==========================================
+		# check for http pages first...
+		#------------------------------------------
 		my $pzip = 0;
+		my $perr = 0;
 		if ($content !~ /\"($pattern-.*$arch\.pat)\"/) {
 			if ($content !~ /\"($pattern-.*$arch\.pat\.gz)\"/) {
-				return undef;
+				$perr = 1;
 			} else {
 				$location = $location."/".$1;
 				$pzip = 1;
@@ -210,25 +231,51 @@ sub downloadPattern {
 		} else {
 			$location = $location."/".$1;
 		}
+		#==========================================
+		# check for ftp pages next...
+		#------------------------------------------
+		if ($perr) {
+			my @plines = split (/\n/,$content);
+			foreach my $line (@plines) {
+				if ($line =~ / ($pattern-.*$arch\.pat\.gz)/) {
+					$location = $location."/".$1;
+					$pzip = 1; $perr = 0;
+					last;
+				}
+				if ($line =~ / ($pattern-.*$arch\.pat)/) {
+					$location = $location."/".$1;
+					$pzip = 0; $perr = 0;
+					last;
+				}
+			}
+		}
+		if ($perr) {
+			return (undef,
+				"Couldn't find pat by regexp: /$pattern-.*$arch\.pat/"
+			);
+		}
+		#==========================================
+		# finally get the pattern
+		#------------------------------------------
 		$request  = HTTP::Request->new (GET => $location);
 		$response = $browser  -> request ( $request );
 		$content  = $response -> content ();
 		if ($pzip) {
 			my $tmpdir = qx ( mktemp -q -d /tmp/kiwipattern.XXXXXX );
-			chomp $tmpdir;
 			my $result = $? >> 8;
+			chomp $tmpdir;
 			if ($result != 0) {
-				return undef;
+				return (undef,"Couldn't create tmpdir: $!");
 			}
 			if (! open (FD,">$tmpdir/pattern")) {
 				rmdir  ($tmpdir);
-				return undef;
+				return (undef,"Couldn't create: $tmpdir/pattern: $!");
 			}
 			print FD $content; close FD;
 			if (! open (FD,"cat $tmpdir/pattern | gzip -cd|")) {
 				unlink ($tmpdir."/pattern");
 				rmdir  ($tmpdir);
-				return undef;
+				return (undef,"Couldn't uncompress pattern: $!");
 			}
 			local $/; $content .= <FD>; close FD;
 			unlink ($tmpdir."/pattern");
@@ -236,7 +283,7 @@ sub downloadPattern {
 		}
 	}
 	$this->{cache}{$pattern} = $content;
-	return $content;
+	return ($content,$this);
 }
 
 #==========================================
