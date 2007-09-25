@@ -1163,7 +1163,7 @@ function mountSystem () {
 				then
 					Echo "Checking filesystem for RW data on $rwDevice..."
 					e2fsck -y -f $rwDevice >/dev/null 2>&1
-					if ! mount $rwDevice $rwDir >/dev/null 2>&1;then
+					if test "$RELOAD_IMAGE" = "yes" || ! mount $rwDevice $rwDir >/dev/null 2>&1;then
 						Echo "Creating filesystem for RW data on $rwDevice..."
 						if ! mke2fs $rwDevice >/dev/null 2>&1;then
 							Echo "Failed to create ext2 filesystem"
