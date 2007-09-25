@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Sep 25 16:48:45 CEST 2007 - ms@suse.de
+
+- really fixed call of config-cdroot.sh if relative path is used
+
+-------------------------------------------------------------------
 Tue Sep 25 15:51:05 CEST 2007 - ms@suse.de
 
 - fixed build for x86_64

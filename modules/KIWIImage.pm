@@ -834,6 +834,9 @@ sub createImageLiveCD {
 		if ($cdrootEnv !~ /^\//) {
 			$cdrootEnv = $pwd."/".$cdrootEnv;
 		}
+		if ($cdrootData !~ /^\//) {
+			$cdrootData = $pwd."/".$cdrootData;
+		}
 		my $CCD  = "$main::RootTree/CD";
 		my $data = qx (cd $CCD && bash -c '. $cdrootEnv && . $cdrootData' 2>&1);
 		my $code = $? >> 8;
