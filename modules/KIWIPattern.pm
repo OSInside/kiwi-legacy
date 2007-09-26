@@ -148,6 +148,55 @@ sub getPatternContents {
 }
 
 #==========================================
+# checkContentFile
+#------------------------------------------
+sub checkContentData {
+	my $this    = shift;
+	my $location= shift;
+	my $content = shift;
+	my $pattern = shift;
+	my $arch    = $this->{arch};
+	#==========================================
+	# check content: DESCRDIR...
+	#------------------------------------------
+	my $perr   = 1;
+	my @plines = split (/\n/,$content);
+	foreach my $line (@plines) {
+		if ($line =~ /DESCRDIR (.*)/) {
+			$location = $location."/".$1;
+			$perr = 0;
+			last;
+		}
+	}
+	if ($perr) {
+		return undef;
+	}
+	#===========================================
+	# check content: pattern file...
+	#-------------------------------------------
+	$perr = 1;
+	$this->{pzip} = 0;
+	foreach my $line (@plines) {
+		if ($line =~ / ($pattern-.*$arch\.pat\.gz)/) {
+			$location = $location."/".$1;
+			$this->{pzip} = 1;
+			$perr = 0;
+			last;
+		}
+		if ($line =~ / ($pattern-.*$arch\.pat)/) {
+			$location = $location."/".$1;
+			$this->{pzip} = 0;
+			$perr = 0;
+			last;
+		}
+	}
+	if ($perr) {
+		return undef;
+	}
+	return $location;
+}
+
+#==========================================
 # downloadPattern
 #------------------------------------------
 sub downloadPattern {
@@ -164,32 +213,50 @@ sub downloadPattern {
 		#==========================================
 		# local pattern check
 		#------------------------------------------
-		my $path = "$url//suse/setup/descr";
-		my @file = bsd_glob ("$path/$pattern-*.$arch.pat");
-		if (! @file) {
-			@file = bsd_glob ("$path/$pattern-*.$arch.pat.gz");
-		}
-		if (! @file) {
+		my $cfile = $url."/content";
+		if (! -f $cfile) {
 			return (undef,
-				"Couldn't find pat by glob: \<$path/$pattern-*.$arch.pat\>"
+				"Couldn't find content file: $cfile"
 			);
-		}
-		foreach my $file (@file) {
-			# / FIXME /
-			# The glob match will include the -32bit patterns in any
-			# case. Is that ok or not ? should it be configurable ?
-			# ---
-			if ($file =~ /\.gz$/) {
-				if (! open (FD,"cat $file | gzip -cd|")) {
-					return (undef,"Couldn't uncompress pattern: $file: $!");
-				}
-			} else {
-				if (! open (FD,$file)) {
-					return (undef,"Couldn't open pattern: $file: $!");
-				}
+			if (! open (FD,$cfile)) {
+				return (undef,"Couldn't open content file: $cfile: $!");
 			}
 			local $/; $content .= <FD>; close FD;
 		}
+		#==========================================
+		# check content file
+		#------------------------------------------
+		my $pfile = $this -> checkContentData ($url,$content,$pattern);
+		if (! defined $pfile) {
+			#===========================================
+			# no content file but local, try glob search
+			#-------------------------------------------
+			my $path = "$url//suse/setup/descr";
+			my @file = bsd_glob ("$path/$pattern-*.$arch.pat");
+			if (! @file) {
+				@file = bsd_glob ("$path/$pattern-*.$arch.pat.gz");
+			}
+			if (! @file) {
+				return (undef,
+					"Pattern glob match failed: $pattern"
+				);
+			}
+			$pfile = $file[0];
+		}
+		#==========================================
+		# finally get the pattern
+		#------------------------------------------
+		if ($pfile =~ /\.gz$/) {
+			if (! open (FD,"cat $pfile | gzip -cd|")) {
+				return (undef,"Couldn't uncompress pattern: $pfile: $!");
+			}
+		} else {
+			if (! open (FD,$pfile)) {
+				return (undef,"Couldn't open pattern: $pfile: $!");
+			}
+		}
+		local $/; $content .= <FD>;
+		close FD;
 	} else {
 		#==========================================
 		# remote pattern check
@@ -201,57 +268,20 @@ sub downloadPattern {
 			$publics_url = $highlvl_url;
 		}
 		my $browser  = LWP::UserAgent->new;
-		my $location = $publics_url."/setup/descr";
+		my $location = $publics_url."/content";
 		my $request  = HTTP::Request->new (GET => $location);
 		my $response = $browser  -> request ( $request );
-		my $title    = $response -> title ();
 		$content     = $response -> content ();
-		if ((! defined $title) || ($title =~ /not found/i)) {
-			$location = $publics_url."/suse/setup/descr";
-			$request  = HTTP::Request->new (GET => $location);
-			$response = $browser  -> request ( $request );
-			$title    = $response -> title ();
-			$content  = $response -> content ();
-			if ($title =~ /not found/i) {
-				return (undef,"Page not found: $location");
-			}
+		if (! defined $content) {
+			return (undef,"Failed to load content file: $location");
 		}
 		#==========================================
-		# check for http pages first...
+		# check content file
 		#------------------------------------------
-		my $pzip = 0;
-		my $perr = 0;
-		if ($content !~ /\"($pattern-.*$arch\.pat)\"/) {
-			if ($content !~ /\"($pattern-.*$arch\.pat\.gz)\"/) {
-				$perr = 1;
-			} else {
-				$location = $location."/".$1;
-				$pzip = 1;
-			}
-		} else {
-			$location = $location."/".$1;
-		}
-		#==========================================
-		# check for ftp pages next...
-		#------------------------------------------
-		if ($perr) {
-			my @plines = split (/\n/,$content);
-			foreach my $line (@plines) {
-				if ($line =~ / ($pattern-.*$arch\.pat\.gz)/) {
-					$location = $location."/".$1;
-					$pzip = 1; $perr = 0;
-					last;
-				}
-				if ($line =~ / ($pattern-.*$arch\.pat)/) {
-					$location = $location."/".$1;
-					$pzip = 0; $perr = 0;
-					last;
-				}
-			}
-		}
-		if ($perr) {
+		$location = $this -> checkContentData ($publics_url,$content,$pattern);
+		if (! defined $location) {
 			return (undef,
-				"Couldn't find pat by regexp: /$pattern-.*$arch\.pat/"
+				"Pattern match or DESCRDIR search failed: $pattern"
 			);
 		}
 		#==========================================
@@ -260,7 +290,7 @@ sub downloadPattern {
 		$request  = HTTP::Request->new (GET => $location);
 		$response = $browser  -> request ( $request );
 		$content  = $response -> content ();
-		if ($pzip) {
+		if ($this->{pzip}) {
 			my $tmpdir = qx ( mktemp -q -d /tmp/kiwipattern.XXXXXX );
 			my $result = $? >> 8;
 			chomp $tmpdir;

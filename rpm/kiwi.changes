@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Sep 26 16:29:16 CEST 2007 - ms@suse.de
+
+- added harddisk boot for isoboot (#328509)
+- fixed pattern download by using the content file. On local
+  repo check by glob search if no content file exists (#328003)
+
+-------------------------------------------------------------------
 Tue Sep 25 23:07:24 CEST 2007 - ms@suse.de
 
 - added more robust disk device detection for oemboot (#328327)
