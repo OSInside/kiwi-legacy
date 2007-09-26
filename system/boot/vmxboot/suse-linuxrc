@@ -66,6 +66,10 @@ export SYSTEM_MD5STATUS
 # Functions
 #--------------------------------------
 VMFindSystem () {
+	for module in BusLogic;do
+		modprobe $module >/dev/null 2>&1
+	done
+	sleep 5
 	for rdevice in /dev/hda2 /dev/sda2 /dev/hda1 /dev/sda1;do
 		imageRootDevice=$rdevice
 		imageDiskDevice=`echo $imageRootDevice | tr -d [0-9]`

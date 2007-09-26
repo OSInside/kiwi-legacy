@@ -80,8 +80,8 @@ fi
 # 4) Including required kernel modules
 #--------------------------------------
 probeDevices
-for module in usb_storage sg sd_mod;do
-	modprobe $module
+for module in usb_storage sg sd_mod BusLogic;do
+	modprobe $module >/dev/null 2>&1
 done
 sleep 5
 
