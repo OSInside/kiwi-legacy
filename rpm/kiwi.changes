@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Sep 26 23:22:38 CEST 2007 - ms@suse.de
+
+- fixed stick creation for compressed images. Too many spare
+  space was added to the read-only image part. This was a waste
+  of space
+
+-------------------------------------------------------------------
 Wed Sep 26 16:29:16 CEST 2007 - ms@suse.de
 
 - added harddisk boot for isoboot (#328509)

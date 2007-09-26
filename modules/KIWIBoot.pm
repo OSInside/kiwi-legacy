@@ -75,7 +75,7 @@ sub new {
 			my $result = $? >> 8;
 			if ($result == 0) {
 				$syszip = -s $system;
-				$syszip+= 70 * 1024 * 1024;
+				$syszip+= 5 * 1024 * 1024;
 			} else {
 				$syszip = 0;
 			}
@@ -110,9 +110,8 @@ sub new {
 			$vmsize = $kernelSize + $initrdSize + $syszip;
 		} else {
 			$vmsize = $kernelSize + $initrdSize + $systemSize;
+			$vmsize+= $vmsize * 0.3 # and 30% free space
 		}
-		my $sparesSize = 0.3 * $vmsize; # and 30% free space
-		$vmsize = $vmsize + $sparesSize;
 		$vmsize = $vmsize / 1024 / 1024;
 		$vmsize = int $vmsize;
 		$vmsize = $vmsize."M";
