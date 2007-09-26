@@ -63,7 +63,7 @@ sub new {
 	if (! defined $kiwi) {
 		$kiwi = new KIWILog();
 	}
-	if ($imageDesc !~ /\//) {
+	if (($imageDesc !~ /\//) && (! -d $imageDesc)) {
 		$imageDesc = $main::System."/".$imageDesc;
 	}
 	my $arch = qx ( arch ); chomp $arch;
