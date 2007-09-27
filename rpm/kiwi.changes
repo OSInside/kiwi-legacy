@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Sep 27 01:39:09 CEST 2007 - ms@suse.de
+
+- v1.65
+- added KIWISocket module for milestone server
+
+-------------------------------------------------------------------
 Wed Sep 26 23:22:38 CEST 2007 - ms@suse.de
 
 - fixed stick creation for compressed images. Too many spare

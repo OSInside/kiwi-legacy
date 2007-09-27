@@ -32,7 +32,7 @@ use KIWIOverlay;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "1.64";
+our $Version       = "1.65";
 our $openSUSE      = "http://software.opensuse.org/download/";
 our $ConfigFile    = "$ENV{'HOME'}/.kiwirc";
 #============================================
