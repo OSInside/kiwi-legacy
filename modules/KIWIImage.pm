@@ -582,6 +582,7 @@ sub createImageLiveCD {
 	my $para = shift;
 	my $kiwi = $this->{kiwi};
 	my $arch = $this->{arch};
+	my $sxml = $this->{xml};
 	my $imageTree = $this->{imageTree};
 	my $imageDest = $this->{imageDest};
 	my $baseSystem= $this->{baseSystem};
@@ -589,6 +590,10 @@ sub createImageLiveCD {
 	my $data;
 	my $code;
 	my $imageTreeReadOnly;
+	#==========================================
+	# Get system image name
+	#------------------------------------------
+	my $systemName = $sxml -> getImageName();
 	#==========================================
 	# Get boot image name and compressed flag
 	#------------------------------------------
@@ -942,7 +947,7 @@ sub createImageLiveCD {
 	#==========================================
 	# setup isolinux boot label name
 	#------------------------------------------
-	my $label = "$iso [ ISO ]";
+	my $label = "$systemName [ ISO ]";
 	qx (sed -i -e "s:Live-System:$label:" $destination/isolinux.cfg);
 	#==========================================
 	# remove original kernel and initrd
