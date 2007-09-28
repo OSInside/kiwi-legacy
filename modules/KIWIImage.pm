@@ -943,7 +943,7 @@ sub createImageLiveCD {
 	# setup isolinux boot label name
 	#------------------------------------------
 	my $label = "$iso [ ISO ]";
-	qx (sed -i -e s:Live-System:$label: $destination/isolinux.cfg);
+	qx (sed -i -e "s:Live-System:$label:" $destination/isolinux.cfg);
 	#==========================================
 	# remove original kernel and initrd
 	#------------------------------------------
