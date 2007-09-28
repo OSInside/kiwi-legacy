@@ -3,6 +3,8 @@ Thu Sep 27 01:39:09 CEST 2007 - ms@suse.de
 
 - v1.65
 - added KIWISocket module for milestone server
+- added image name to be displayed in the boot loader setup
+- fixed TFTP server lookup
 
 -------------------------------------------------------------------
 Wed Sep 26 23:22:38 CEST 2007 - ms@suse.de

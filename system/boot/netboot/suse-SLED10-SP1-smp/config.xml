@@ -44,6 +44,7 @@
 		<source path="/usr/share/kiwi/image/netboot/suse-repo/suse-sles-repo"/>
 	</repository>
 	<packages type="image">
+		<package name="iputils"/>
 		<package name="atftp"/>
 		<package name="bind-libs"/>
 		<package name="bind-utils"/>

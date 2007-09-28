@@ -124,6 +124,7 @@ sub new {
 		$syszip = $syszip / 1024 / 1024;
 		$syszip = int $syszip;
 	}
+	my $arch = qx (arch); chomp $arch;
 	#==========================================
 	# Store object data
 	#------------------------------------------
@@ -136,6 +137,7 @@ sub new {
 	$this->{syszip} = $syszip;
 	$this->{device} = $device;
 	$this->{format} = $format;
+	$this->{arch}   = $arch;
 	return $this;
 }
 
@@ -328,12 +330,13 @@ sub setupBootStick {
 		$kiwi -> failed ();
 		return undef;
 	}
+	my $label = $this -> getImageName();
 	print FD "color cyan/blue white/blue\n";
 	print FD "default 0\n";
 	print FD "timeout 10\n";
 	print FD "gfxmenu (hd0,0)/image/loader/message\n";
 	print FD "\n";
-	print FD "title KIWI Stick boot\n";
+	print FD "title $label [ USB ]\n";
 	print FD " root (hd0,0)\n";
 	print FD " kernel /boot/linux vga=0x314 splash=silent showopts\n";
 	print FD " initrd /boot/initrd\n"; 
@@ -1020,12 +1023,13 @@ sub setupBootDisk {
 		$kiwi -> failed ();
 		return undef;
 	}
+	my $label = $this -> getImageName();
 	print FD "color cyan/blue white/blue\n";
 	print FD "default 0\n";
 	print FD "timeout 10\n";
 	print FD "gfxmenu (hd0,0)/boot/message\n";
 	print FD "\n";
-	print FD "title KIWI VM boot\n";
+	print FD "title $label [ VMX ]\n";
 	print FD " root (hd0,0)\n";
 	print FD " kernel /boot/linux.vmx vga=0x314 splash=silent showopts\n";
 	print FD " initrd /boot/initrd.vmx\n";
@@ -1499,6 +1503,18 @@ sub setupSplashForGrub {
 	qx (cat $spldir/all.spl >> $newird);
 	qx (rm -rf $spldir);
 	return $newird;
+}
+
+#==========================================
+# getImageName
+#------------------------------------------
+sub getImageName {
+	my $this   = shift;
+	my $system = $this->{system};
+	my $arch   = $this->{arch};
+	my $label  = basename ($system);
+	$label =~ s/\.$arch.*$//;
+	return $label;
 }
 
 #==========================================

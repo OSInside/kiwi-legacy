@@ -551,6 +551,9 @@ if [ $LOCAL_BOOT = "no" ];then
 	# b) /boot/grub/menu.lst
 	# ----------------------
 	if [ -z "$UNIONFS_CONFIG" ]; then
+		if [ -f /mnt/.profile ];then
+			importFile < /mnt/.profile
+		fi
 		console=""
 		gdev="(hd0,1)"
 		menu=/config/boot/grub/menu.lst
@@ -563,7 +566,11 @@ if [ $LOCAL_BOOT = "no" ];then
 			if test ! -z "$i";then
 				kernel=`echo $i | cut -f1 -d:`
 				initrd=`echo $i | cut -f2 -d:`
-				echo "title SLE/SUSE Linux OEM"         >> $menu
+				if [ -z "$name" ];then
+					echo "title SLE/SUSE Linux [ OEM ]" >> $menu
+				else
+					echo "title $name [ OEM ]"          >> $menu
+				fi
 				echo -n " kernel $gdev/boot/$kernel"    >> $menu
 				echo -n " root=${deviceDisk}2 $console" >> $menu
 				echo " vga=0x314"                       >> $menu

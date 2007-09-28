@@ -134,8 +134,7 @@ if [ $LOCAL_BOOT = "no" ];then
 		TSERVER=tftp.$DOMAIN
 	fi
 	Echo "Checking TFTP Server name: $TSERVER"
-	ip=`host $TSERVER | cut -f4 -d' '`
-	if test $ip = "found:" -o $ip = "out;";then
+	if ! ping -c 1 $TSERVER >/dev/null 2>&1;then
 		Echo "TFTP Server: $TSERVER not found"
 		Echo "Using: $DHCPSIADDR from dhcpcd-info"
 		TSERVER=$DHCPSIADDR
@@ -707,6 +706,9 @@ if test $systemIntegrity = "clean";then
 		done
 		# b) /boot/grub/menu.lst...
 		# -------------------------
+		if [ -f /mnt/.profile ];then
+			importFile < /mnt/.profile
+		fi
 		console=""
 		gdev="(hd0,1)"
 		menu=/config/boot/grub/menu.lst
@@ -726,7 +728,11 @@ if test $systemIntegrity = "clean";then
 		if test ! -z "$i";then
 			kernel=`echo $i | cut -f1 -d:`
 			initrd=`echo $i | cut -f2 -d:`
-			echo "title $kernel" >> $menu
+			if [ -z "$name" ];then
+				echo "title $kernel [ NET ]"           >> $menu
+			else
+				echo "title $name [ NET ]"             >> $menu
+			fi
 			if [ $kernel = "vmlinuz-xen" ];then
 				echo " root $gdev"                     >> $menu
 				echo " kernel /boot/xen.gz"            >> $menu

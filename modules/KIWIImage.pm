@@ -940,6 +940,11 @@ sub createImageLiveCD {
     }
 	$kiwi -> done ();
 	#==========================================
+	# setup isolinux boot label name
+	#------------------------------------------
+	my $label = "$iso [ ISO ]";
+	qx (cat $destination/isolinux.cfg | sed -i -e s:Live-System:$label:);
+	#==========================================
 	# remove original kernel and initrd
 	#------------------------------------------
 	$data = qx (rm $imageDest/$iso*.* 2>&1);
