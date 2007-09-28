@@ -87,6 +87,24 @@ function suseActivateServices {
 }
 
 #======================================
+# suseActivateDefaultServices
+#--------------------------------------
+function suseActivateDefaultServices {
+	# /.../
+	# Call all postin scriptlets which among other things activates
+	# all default services required using insserv
+	# -----
+	for p in `rpm -qa`;do
+		echo "Creating post script for package: $p"
+		rpm -q --qf \
+			"%|POSTIN?{%|POSTINPROG?{}|%{POSTIN}\n}:{%|POSTINPROG?{}|}|" \
+		$p > $p.sh
+		echo "Calling post script $p.sh"
+		bash $p.sh
+	done
+}
+
+#======================================
 # suseService
 #--------------------------------------
 function suseService {
