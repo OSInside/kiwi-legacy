@@ -398,8 +398,14 @@ sub createImageUSB {
 	$main::Survive  = "yes";
 	$main::RootTree = "$tmpdir/kiwi-".$text."boot-$$";
 	$main::Prepare  = $boot;
-	if (($boot !~ /^\//) && (! -d $boot)) {
-		$main::Prepare  = $main::System."/".$boot;
+	$main::BaseRoot = $type{baseroot};
+	if (defined $main::BaseRoot) {
+		if (($main::BaseRoot !~ /^\//) && (! -d $main::BaseRoot)) {
+			$main::BaseRoot = $main::System."/".$main::BaseRoot;
+		}
+	}
+	if (($main::Prepare !~ /^\//) && (! -d $main::Prepare)) {
+		$main::Prepare = $main::System."/".$main::Prepare;
 	}
 	if ($type{bootprofile}) {
 		@main::Profiles = split (/,/,$type{bootprofile});
@@ -595,6 +601,10 @@ sub createImageLiveCD {
 	#------------------------------------------
 	my $systemName = $sxml -> getImageName();
 	#==========================================
+	# Get system image type information
+	#------------------------------------------
+	my %type = %{$sxml->getImageTypeAndAttributes()};
+	#==========================================
 	# Get boot image name and compressed flag
 	#------------------------------------------
 	my @plist = split (/,/,$para);
@@ -780,8 +790,14 @@ sub createImageLiveCD {
 	$main::Survive  = "yes";
 	$main::RootTree = "$tmpdir/kiwi-cdboot-$$";
 	$main::Prepare  = $boot;
-	if (($boot !~ /^\//) && (! -d $boot)) {
-		$main::Prepare  = $main::System."/".$boot;
+	$main::BaseRoot = $type{baseroot};
+	if (defined $main::BaseRoot) {
+		if (($main::BaseRoot !~ /^\//) && (! -d $main::BaseRoot)) {
+			$main::BaseRoot = $main::System."/".$main::BaseRoot;
+		}
+	}
+	if (($main::Prepare !~ /^\//) && (! -d $main::Prepare)) {
+		$main::Prepare = $main::System."/".$main::Prepare;
 	}
 	$main::ForeignRepo{xmlnode} = $xml -> getForeignNodeList();
 	$main::ForeignRepo{packagemanager} = $xml -> getPackageManager();

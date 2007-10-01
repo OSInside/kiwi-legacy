@@ -300,6 +300,16 @@ sub getImageDefaultDestination {
 }
 
 #==========================================
+# getImageDefaultBaseRoot
+#------------------------------------------
+sub getImageDefaultBaseRoot {
+	my $this = shift;
+	my $node = $this->{imgnameNodeList} -> get_node(1);
+	my $path = $node -> getAttribute ("defaultbaseroot");
+	return $path;
+}
+
+#==========================================
 # getImageDefaultRoot
 #------------------------------------------
 sub getImageDefaultRoot {
@@ -344,6 +354,7 @@ sub getImageTypeAndAttributes {
 		$record{boot} = $node -> getAttribute("boot");
 		$record{flags}= $node -> getAttribute("flags");
 		$record{filesystem}  = $node -> getAttribute("filesystem");
+		$record{baseroot}    = $node -> getAttribute("baseroot");
 		$record{bootprofile} = $node -> getAttribute("bootprofile");
 		$record{format} = $node -> getAttribute("format");
 		$result{$prim} = \%record;

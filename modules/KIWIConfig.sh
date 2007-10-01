@@ -99,8 +99,11 @@ function suseActivateDefaultServices {
 		rpm -q --qf \
 			"%|POSTIN?{%|POSTINPROG?{}|%{POSTIN}\n}:{%|POSTINPROG?{}|}|" \
 		$p > $p.sh
-		echo "Calling post script $p.sh"
-		bash $p.sh
+		if [ -s "$p.sh" ];then
+			echo "Calling post script $p.sh"
+			bash $p.sh
+		fi
+		rm -f $p.sh
 	done
 }
 

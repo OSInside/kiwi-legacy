@@ -276,6 +276,7 @@
 				<xs:element ref="locale" minOccurs="0" maxOccurs="1"/>
 				<xs:element ref="defaultdestination" minOccurs="0" maxOccurs="1"/>
 				<xs:element ref="defaultroot" minOccurs="0" maxOccurs="1"/>
+				<xs:element ref="defaultbaseroot" minOccurs="0" maxOccurs="1"/>
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
@@ -288,6 +289,7 @@
 					<xs:attribute name="boot"  type="xs:string"/>
 					<xs:attribute name="flags" type="xs:string"/>
 					<xs:attribute name="filesystem" type="xs:string"/>
+					<xs:attribute name="baseroot" type="xs:string"/>
 					<xs:attribute name="format" use="optional">
 						<xs:simpleType>
 							<xs:restriction base="xs:string">
@@ -318,6 +320,7 @@
 	<xs:element name="locale"   type="xs:string"/>
 	<xs:element name="defaultdestination" type="xs:string"/>
 	<xs:element name="defaultroot" type="xs:string"/>
+	<xs:element name="defaultbaseroot" type="xs:string"/>
 	<xs:element name="size">
 		<xs:complexType>
 			<xs:simpleContent>

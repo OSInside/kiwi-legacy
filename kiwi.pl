@@ -231,20 +231,34 @@ sub main {
 			}
 		}
 		#==========================================
-		# Check for default root
+		# Check for default root in XML
 		#------------------------------------------	
 		if (! defined $RootTree) {
-			$kiwi -> info ("Checking for defaultroot in XML data...");
+			$kiwi -> info ("Checking for default root in XML data...");
 			$RootTree = $xml -> getImageDefaultRoot();
 			if ($RootTree) {
 				if ($RootTree !~ /^\//) {
 					my $workingDir = qx ( pwd ); chomp $workingDir;
 					$RootTree = $workingDir."/".$RootTree;
 				}
+				$kiwi -> done();
 			} else {
 				undef $RootTree;
+				$kiwi -> notset();
 			}
-			$kiwi -> done();
+		}
+		#==========================================
+		# Check for default base root in XML
+		#------------------------------------------
+		if (! defined $BaseRoot) {
+			$kiwi -> info ("Checking for default baseroot in XML data...");
+			$BaseRoot = $xml -> getImageDefaultBaseRoot();
+			if ($BaseRoot) {
+				$kiwi -> done();
+			} else {
+				undef $BaseRoot;
+				$kiwi -> notset();
+			}
 		}
 		#==========================================
 		# Check for set-repo option
@@ -342,7 +356,7 @@ sub main {
 		}
 		$kiwi -> done();
 		#==========================================
-		# Check for default destination
+		# Check for default destination in XML
 		#------------------------------------------
 		if (! defined $Destination) {
 			$kiwi -> info ("Checking for defaultdestination in XML data...");
@@ -358,6 +372,19 @@ sub main {
 			}
 			$kiwi -> done();
 		}
+		#==========================================
+		# Check for default base root in XML
+		#------------------------------------------
+		if (! defined $BaseRoot) {
+			$kiwi -> info ("Checking for default baseroot in XML data...");
+			$BaseRoot = $xml -> getImageDefaultBaseRoot();
+			if ($BaseRoot) {
+				$kiwi -> done();
+			} else {
+				undef $BaseRoot;
+				$kiwi -> notset();
+			}
+        }
 		#==========================================
 		# Check type params and create image obj
 		#------------------------------------------
@@ -489,6 +516,19 @@ sub main {
 			my $code = kiwiExit (1); return $code;
 		}
 		$kiwi -> done();
+		#==========================================
+		# Check for default base root in XML
+		#------------------------------------------
+		if (! defined $BaseRoot) {
+			$kiwi -> info ("Checking for default baseroot in XML data...");
+			$BaseRoot = $xml -> getImageDefaultBaseRoot();
+			if ($BaseRoot) {
+				$kiwi -> done();
+			} else {
+				undef $BaseRoot;
+				$kiwi -> notset();
+			}
+		}
 		#==========================================
 		# Check for set-repo option
 		#------------------------------------------

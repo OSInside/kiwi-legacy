@@ -257,6 +257,31 @@ sub skipped {
 }
 
 #==========================================
+# notset
+#------------------------------------------
+sub notset {
+	# ...
+	# This is the cyan "notset" flag
+	# ---
+	my $this = shift;
+	if (! defined $this->{fileLog}) {
+		$this -> doStat();
+		$this -> setOutputChannel();
+		print "\033[1;36mnotset\n";
+		$this -> resetOutputChannel();
+		$this -> doNorm();
+		if ($this->{errorOk}) {
+			print EFD "   notset\n";
+		}
+	} else {
+		$this -> setOutputChannel();
+		print "   notset\n";
+		$this -> resetOutputChannel();
+	}
+	$this->{state} = "O";
+}
+
+#==========================================
 # step
 #------------------------------------------
 sub step {
