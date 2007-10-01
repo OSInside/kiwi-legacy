@@ -35,24 +35,39 @@ use KIWIOverlay;
 our $Version       = "1.65";
 our $openSUSE      = "http://software.opensuse.org/download/";
 our $ConfigFile    = "$ENV{'HOME'}/.kiwirc";
+our $ConfigStatus  = 0;
 #============================================
 # Read $HOME/.kiwirc
 #--------------------------------------------
 if ( -f $ConfigFile) {
-	my $kiwi = new KIWILog();
+	my $kiwi = new KIWILog("tiny");
 	if (! do $ConfigFile) {
 		$kiwi -> warning ("Invalid $ConfigFile file...");
 		$kiwi -> skipped ();
 	} else {
 		$kiwi -> info ("Using $ConfigFile");
 		$kiwi -> done ();
+		$ConfigStatus = 1;
 	}
 }
 #============================================
 # Globals
 #--------------------------------------------
-our $BasePath;  # configurable base kiwi path
-our $System;    # configurable baes kiwi image desc. path
+our $BasePath;         # configurable base kiwi path
+our $System;           # configurable baes kiwi image desc. path
+our $JabberServer;     # configurable jabber server
+our $JabberPort;       # configurable jabber port
+our $JabberUserName;   # configurable jabber user name
+our $JabberPassword;   # configurable jabber password
+our $JabberRessource;  # configurable jabber ressource
+our $JabberComponent;  # configurable jabber component
+our $LogServerPort;    # configurable log server port
+if (! defined $LogServerPort) {
+	$LogServerPort = 9000;
+}
+if (! defined $JabberPort) {
+	$JabberPort = 5223;
+}
 if ( ! defined $BasePath ) {
 	$BasePath = "/usr/share/kiwi";
 }

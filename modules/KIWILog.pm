@@ -21,6 +21,7 @@ package KIWILog;
 use strict;
 use Net::Jabber qw(Client);
 use Carp qw (cluck);
+use KIWISocket;
 
 #==========================================
 # Constructor
@@ -38,57 +39,37 @@ sub new {
 	my $class = shift;
 	bless  $this,$class;
 	#==========================================
+	# Module Parameters
+	#------------------------------------------
+	my $tiny  = shift;
+	#==========================================
 	# Store object data
 	#------------------------------------------
 	$this->{showLevel} = [0,1,2,3,4,5];
 	$this->{channel}   = \*STDOUT;
 	$this->{errorOk}   = 0;
 	$this->{state}     = "O";
-	#============================================
-	# kiwirc jabber data
-	#--------------------------------------------
-	my $jstatus = 1;
-	if ( ! -f $main::ConfigFile ) {
-		$jstatus = 0;
+	if (defined $tiny) {
+		return $this;
 	}
-	#============================================
-	# set local jabber variables
-	#--------------------------------------------
-	my $JabberServer;     # configurable jabber server
-	my $JabberPort;       # configurable jabber port
-	my $JabberUserName;   # configurable jabber user name
-	my $JabberPassword;   # configurable jabber password
-	my $JabberRessource;  # configurable jabber ressource
-	my $JabberComponent;  # configurable jabber component
-	if (! defined $JabberPort) {
-		$JabberPort = 5223;
-	}
-	#============================================
-	# Read $HOME/.kiwirc and setup jabber if ok
-	#--------------------------------------------
-	if (($jstatus) && (! do $main::ConfigFile)) {
-		$this -> warning ("Invalid $main::ConfigFile file...");
-		$this -> skipped ();
-		$jstatus = 0;
-	}
-	if (($jstatus) &&
-		((! defined $JabberServer)   || (! defined $JabberUserName)  ||
-		 (! defined $JabberPassword) || (! defined $JabberRessource) ||
-		 (! defined $JabberComponent))
+	my $jstatus = $main::ConfigStatus;
+	if (($main::ConfigStatus) &&
+		((! defined $main::JabberServer)  ||(! defined $main::JabberUserName) ||
+		 (! defined $main::JabberPassword)||(! defined $main::JabberRessource)||
+		 (! defined $main::JabberComponent))
 	) {
 		#$this -> warning ("Jabber setup skipped: Missing login data");
 		#$this -> skipped ();
 		$jstatus = 0;
 	}
 	my $jclient;
-	my $jstatus;
 	my @jresult;
 	if ($jstatus) {
-		$this -> info ("Connecting to Jabber server: $JabberServer");
+		$this -> info ("Connecting to Jabber server: $main::JabberServer");
 		$jclient = new Net::Jabber::Client;
 		$jstatus = $jclient -> Connect (
-			hostname => $JabberServer,
-			port     => $JabberPort
+			hostname => $main::JabberServer,
+			port     => $main::JabberPort
 		);
 		if (! defined $jstatus) {
 			$this -> failed ();
@@ -96,11 +77,11 @@ sub new {
 			$this -> skipped ();
 		} else {
 			$this -> done();
-			$this -> info ("Login to Jabber server: $JabberUserName");
+			$this -> info ("Login to Jabber server: $main::JabberUserName");
 			@jresult = $jclient -> AuthSend (
-				username => $JabberUserName,
-				password => $JabberPassword,
-				resource => $JabberRessource
+				username => $main::JabberUserName,
+				password => $main::JabberPassword,
+				resource => $main::JabberRessource
 			);
 			if ($jresult[0] ne "ok") {
 				$this -> error   ("Failed: $jresult[0] $jresult[1]");
@@ -111,9 +92,18 @@ sub new {
 		}
 	}
 	#==========================================
+	# Create Log Server on $LogServerPort
+	#------------------------------------------
+	my $logServer = new KIWISocket ( $this,$main::LogServerPort );
+	if (! defined $logServer) {
+		$this -> warning ("Can't create logserver port: $main::LogServerPort");
+		$this -> skipped ();
+	}
+	#==========================================
 	# Store object data
 	#------------------------------------------
-	$this->{jcomponent}= $JabberComponent;
+	$this->{logserver} = $logServer;
+	$this->{jcomponent}= $main::JabberComponent;
 	$this->{jclient}   = $jclient;
 	return $this;
 }

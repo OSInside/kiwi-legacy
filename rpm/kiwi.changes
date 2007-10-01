@@ -3,6 +3,12 @@ Thu Sep 27 01:39:09 CEST 2007 - ms@suse.de
 
 - v1.65
 - added suseActivateDefaultServices function (#309801)
+- opened log server for XML based milestone logs on default
+  port number 9000. One can change the port by setting
+  our $LogServerPort = ... in $HOME/.kiwirc. The server runs
+  as long as kiwi runs and accept a small set of commands.
+  Right now only the server is there but no commands exists.
+  This will follow the next days.  
 - added optional defaultbaseroot element to preferences section
 - added optional baseroot attribute to type section
 - update documentation concerning the new element/attribute 

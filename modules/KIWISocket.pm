@@ -48,6 +48,10 @@ sub new {
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
+	$port = int $port;
+	if ($port <= 0) {
+		return undef;
+	}
 	my $server = $this -> serverSocket ($port);
 	if (! defined $server) {
 		return undef;
@@ -130,6 +134,8 @@ sub read {
 	my $client = $this->{client};
 	my $line   = <$client>;
 	flush $client;
+	chop $line;
+	chop $line;
 	return $line;
 }
 
