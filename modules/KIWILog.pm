@@ -19,6 +19,7 @@ package KIWILog;
 # Modules
 #------------------------------------------
 use strict;
+use Time::HiRes qw ( setitimer ITIMER_REAL time );
 use Net::Jabber qw(Client);
 use Carp qw (cluck);
 use KIWISocket;
@@ -98,6 +99,9 @@ sub new {
 	if (! defined $logServer) {
 		$this -> warning ("Can't create logserver port: $main::LogServerPort");
 		$this -> skipped ();
+	} else {
+		$SIG{ALRM} = \&KIWILog::socketTimer;
+		setitimer (ITIMER_REAL,1,1);
 	}
 	#==========================================
 	# Store object data
@@ -109,9 +113,28 @@ sub new {
 }
 
 #==========================================
+# socketTimer
+#------------------------------------------
+sub socketTimer {
+	# ...
+	# Every second the log socket is checked for requests.
+	# In case of a valid request the data is processed
+	# ---
+	# TODO
+	my $this = $KIWILog::this;
+	my $logserver = $this->{logserver};
+	print "timer done: $this\n";
+}
+
+#==========================================
 # sendJabberMessage
 #------------------------------------------
 sub sendJabberMessage {
+	# ...
+	# send a jabber message to the jabber server with the
+	# given component. The same information which one can see
+	# on the command line will be send
+	# ---
 	my $this       = shift;
 	my $message    = shift;
 	my $jclient    = $this->{jclient};

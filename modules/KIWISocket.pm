@@ -56,7 +56,6 @@ sub new {
 	if (! defined $server) {
 		return undef;
 	}
-	$SIG{CHLD} = \&KIWISocket::reaper;
 	#==========================================
 	# Store object data
 	#------------------------------------------
@@ -85,15 +84,6 @@ sub serverSocket {
 }
 
 #==========================================
-# reaper
-#------------------------------------------
-sub reaper {
-	my $waitedpid = wait;
-	$SIG{CHLD} = \&KIWISocket::reaper;
-	#print ("+++ reaped $waitedpid". ($? ? " with exit $?" : ""));
-}
-
-#==========================================
 # acceptConnection
 #------------------------------------------
 sub acceptConnection {
@@ -114,16 +104,9 @@ sub write {
 	my $this    = shift;
 	my $message = shift;
 	my $client  = $this->{client};
-	my $pid;
-	if (! defined ($pid = fork)) {
-		return undef;
-	} elsif ($pid) {
-		# nothing to do for the parent here...
-		return $this;
-	}
 	print $client $message;
 	flush $client;
-	exit 0;
+	return $this;
 }
 
 #==========================================
