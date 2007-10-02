@@ -224,7 +224,7 @@ done
 #--------------------------------------
 mkdir -p /config/etc
 gconf=/config/etc/grub.conf
-gdev="(hd0,1)"
+gdev="(hd0,0)"
 if [ ! -z "$UNIONFS_CONFIG" ]; then
 	gnum=`echo $imageRootDevice | sed -e "s/\/dev.*\([0-9]\)/\\1/"`
 	gdev="(hd0,$gnum)"
