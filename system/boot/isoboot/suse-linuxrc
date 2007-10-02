@@ -192,9 +192,11 @@ if [ -z "$UNIONFS_CONFIG" ];then
 	fi
 	if test "$FSTYPE" = "ext2";then
 		resize2fs -p $imageDevice
+		e2fsck -y -f $imageDevice
 	fi
 	if test "$FSTYPE" = "ext3";then
 		resize2fs -p $imageDevice
+		e2fsck -y -f $imageDevice
 		tune2fs -j $imageDevice
 	fi
 fi

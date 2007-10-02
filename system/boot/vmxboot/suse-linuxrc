@@ -143,6 +143,7 @@ else
 	if test "$FSTYPE" = "ext3";then
 		e2fsck -y -f $imageRootDevice
 		resize2fs -F -p $imageRootDevice
+		e2fsck -y -f $imageRootDevice
 		tune2fs -j $imageRootDevice
 		INITRD_MODULES="$INITRD_MODULES ext3"
 	fi

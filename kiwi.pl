@@ -496,6 +496,10 @@ sub main {
 				$ok = $image -> createImageVMX ( $para );
 				last SWITCH;
 			};
+			/^oem/      && do {
+				$ok = $image -> createImageVMX ( $para );
+				last SWITCH;
+			};
 			/^xen/      && do {
 				$ok = $image -> createImageXen ( $para );
 				last SWITCH;
@@ -1115,7 +1119,7 @@ sub checkType {
 			$para = $type{filesystem};
 			last SWITCH;
 		};
-		/^usb|vmx|xen|pxe/ && do {
+		/^usb|vmx|oem|xen|pxe/ && do {
 			if (! defined $type{filesystem}) {
 				$kiwi -> error ("$type{type}: No filesystem specified");
 				$kiwi -> failed ();
