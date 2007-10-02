@@ -625,10 +625,10 @@ sub setupUpgrade {
 		$kiwi -> info ("Upgrading image...");
 		if (defined $addPacks) {
 			my @addonPackages = @{$addPacks};
-			print $fd "chroot $root @zypper upgrade && ";
+			print $fd "chroot $root @zypper update && ";
 			print $fd "chroot $root @zypper install @addonPackages\n";
 		} else {
-			print $fd "chroot $root @zypper upgrade\n";
+			print $fd "chroot $root @zypper update\n";
 		}
 		print $fd "echo \$? > $screenCall.exit\n";
 		$fd -> close();
