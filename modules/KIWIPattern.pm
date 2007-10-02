@@ -131,9 +131,11 @@ sub getPatternContents {
 		if (! $result) {
 			if ($printinfo) {
 				$kiwi -> failed ();
+				my $count = 1;
 				foreach my $error (@errors) {
-					$kiwi -> error  ($error);
+					$kiwi -> error  ("    $count) $error");
 					$kiwi -> failed ();
+					$count++;
 				}
 			}
 			return ();

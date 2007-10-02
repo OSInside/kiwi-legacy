@@ -95,13 +95,16 @@ function suseActivateDefaultServices {
 	# all default services required using insserv
 	# -----
 	for p in `rpm -qa`;do
-		echo "Creating post script for package: $p"
+		#echo "Creating post script for package: $p"
 		rpm -q --qf \
 			"%|POSTIN?{%|POSTINPROG?{}|%{POSTIN}\n}:{%|POSTINPROG?{}|}|" \
 		$p > $p.sh
 		if [ -s "$p.sh" ];then
 			echo "Calling post script $p.sh"
-			bash $p.sh
+			need=`bash $p.sh 2>&1 | grep "for service" | cut -f10 -d " "`
+			if [ ! -z "$need" ];then
+				suseInsertService $need
+			fi
 		fi
 		rm -f $p.sh
 	done
