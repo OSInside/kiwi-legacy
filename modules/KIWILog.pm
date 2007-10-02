@@ -112,41 +112,67 @@ sub new {
 		return $this;
 	}
 	if ($child) {
-		#=============================
-		# Parent log process
-		#-----------------------------
+		#==========================================
+		# Parent log server process
+		#------------------------------------------
 		$this->{logchild} = $child;
 		return $this;
 	} else {
-		#=============================
-		# Child log process
-		#-----------------------------
+		#==========================================
+		# Child log server process
+		#------------------------------------------
+		our @logChilds = ();
 		our $logServer = new KIWISocket ( $this,$main::LogServerPort );
 		if (! defined $logServer) {
 			$this -> warning ("Can't open log port: $main::LogServerPort");
 			$this -> skipped ();
 			exit 1;
 		}
-		$SIG{TERM} = sub { undef $logServer; exit 0 };
-		$logServer -> acceptConnection();
+		$SIG{TERM} = sub {
+			foreach my $child (@logChilds) { kill (13,$child); };
+			undef $logServer;
+			exit 0;
+		};
 		while (1) {
-			my $command = $logServer -> read();
-			#==========================================
-			# Handle command: status
-			#------------------------------------------
-			if ($command eq "status") {
-				# TODO
-				$logServer -> write ("*** not implemented ***\n");
-				next;
+			$logServer -> acceptConnection();
+			my $child = fork();
+			if (! defined $child) {
+				$this -> warning ("Can't fork logserver process: $!");
+				$this -> skipped ();
+				last;
 			}
-			#==========================================
-			# Add More commands here...
-			#------------------------------------------
-			# ...
-			#==========================================
-			# Invalid command...
-			#------------------------------------------
-			$logServer -> write ("*** unknown ***\n");
+			if ($child) {
+				#==========================================
+				# Wait for incoming connections
+                #------------------------------------------
+				push @logChilds,$child;
+				next;
+			} else {
+				#==========================================
+				# Handle log requests...
+				#------------------------------------------
+				$SIG{PIPE} = sub { $logServer-> closeConnection(); exit 0; };
+				while (my $command = $logServer -> read()) {
+					#==========================================
+					# Handle command: status
+					#------------------------------------------
+					if ($command eq "status") {
+						# TODO
+						$logServer -> write ("*** not implemented ***\n");
+						next;
+					}
+					#==========================================
+					# Add More commands here...
+					#------------------------------------------
+					# ...
+					#==========================================
+					# Invalid command...
+					#------------------------------------------
+					$logServer -> write ("*** unknown ***\n");
+				}
+				$logServer -> closeConnection();
+				exit 0;
+			}
 		}
 		undef $logServer;
 		exit 0;

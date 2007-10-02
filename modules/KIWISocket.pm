@@ -72,15 +72,15 @@ sub serverSocket {
 	my $this  = shift;
 	my $port  = shift;
 	my $proto = getprotobyname("tcp");
-	socket(FD, PF_INET, SOCK_STREAM, $proto) ||
+	socket(SD, PF_INET, SOCK_STREAM, $proto) ||
 		return undef;
-	setsockopt(FD, SOL_SOCKET, SO_REUSEADDR, pack("l",1)) ||
+	setsockopt(SD, SOL_SOCKET, SO_REUSEADDR, pack("l",1)) ||
 		return undef;
-	bind(FD, sockaddr_in($port,INADDR_ANY)) ||
+	bind(SD, sockaddr_in($port,INADDR_ANY)) ||
 		return undef;
-	listen(FD,SOMAXCONN) ||
+	listen(SD,SOMAXCONN) ||
 		return undef;
-	return *FD;
+	return *SD;
 }
 
 #==========================================
@@ -89,12 +89,23 @@ sub serverSocket {
 sub acceptConnection {
 	my $this    = shift;
 	my $server  = $this->{server};
-	my $paddr   = accept (FD,$server);
+	my $paddr   = accept (CD,$server);
 	if (! $paddr) {
 		return undef;
 	}
-	$this->{client} = *FD;
-	return $this;
+	$this->{client} = *CD;
+	return $this->{client};
+}
+
+#==========================================
+# closeConnection
+#------------------------------------------
+sub closeConnection {
+	my $this   = shift;
+	my $client = $this->{client};
+	if (defined $client) {
+		close $client;
+	}
 }
 
 #==========================================
@@ -113,9 +124,12 @@ sub write {
 # read
 #------------------------------------------
 sub read {
-	my $this   = shift;
-	my $client = $this->{client};
-	my $line   = <$client>;
+	my $this    = shift;
+	my $client  = $this->{client};
+	if (! defined $client) {
+		return undef;
+	}
+	my $line = <$client>;
 	flush $client;
 	chop $line;
 	chop $line;
@@ -126,11 +140,15 @@ sub read {
 # Destructor
 #------------------------------------------
 sub DESTROY {
-	my $this   = shift;
-	my $client = $this->{client};
-	my $server = $this->{server};
-	close $client;
-	close $server;
+	my $this    = shift;
+	my $client  = $this->{client};
+	my $server  = $this->{server};
+	if (defined $client) {
+		close $client;
+	}
+	if (defined $server) {
+		close $server;
+	}
 }
 
 1;
