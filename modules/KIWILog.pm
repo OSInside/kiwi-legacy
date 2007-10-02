@@ -19,7 +19,6 @@ package KIWILog;
 # Modules
 #------------------------------------------
 use strict;
-use Time::HiRes qw ( setitimer ITIMER_REAL time );
 use Net::Jabber qw(Client);
 use Carp qw (cluck);
 use KIWISocket;
@@ -50,9 +49,15 @@ sub new {
 	$this->{channel}   = \*STDOUT;
 	$this->{errorOk}   = 0;
 	$this->{state}     = "O";
+	#==========================================
+	# Check for tiny object
+	#------------------------------------------
 	if (defined $tiny) {
 		return $this;
 	}
+	#==========================================
+	# Setup jabber connection if possible
+	#------------------------------------------
 	my $jstatus = $main::ConfigStatus;
 	if (($main::ConfigStatus) &&
 		((! defined $main::JabberServer)  ||(! defined $main::JabberUserName) ||
@@ -93,37 +98,60 @@ sub new {
 		}
 	}
 	#==========================================
-	# Create Log Server on $LogServerPort
-	#------------------------------------------
-	my $logServer = new KIWISocket ( $this,$main::LogServerPort );
-	if (! defined $logServer) {
-		$this -> warning ("Can't create logserver port: $main::LogServerPort");
-		$this -> skipped ();
-	} else {
-		$SIG{ALRM} = \&KIWILog::socketTimer;
-		setitimer (ITIMER_REAL,1,1);
-	}
-	#==========================================
 	# Store object data
 	#------------------------------------------
-	$this->{logserver} = $logServer;
 	$this->{jcomponent}= $main::JabberComponent;
 	$this->{jclient}   = $jclient;
+	#==========================================
+	# Create Log Server on $LogServerPort
+	#------------------------------------------
+	my $child = fork();
+	if (! defined $child) {
+		$this -> warning ("Can't fork logserver process: $!");
+		$this -> skipped ();
+		return $this;
+	}
+	if ($child) {
+		#=============================
+		# Parent log process
+		#-----------------------------
+		$this->{logchild} = $child;
+		return $this;
+	} else {
+		#=============================
+		# Child log process
+		#-----------------------------
+		our $logServer = new KIWISocket ( $this,$main::LogServerPort );
+		if (! defined $logServer) {
+			$this -> warning ("Can't open log port: $main::LogServerPort");
+			$this -> skipped ();
+			exit 1;
+		}
+		$SIG{TERM} = sub { undef $logServer; exit 0 };
+		$logServer -> acceptConnection();
+		while (1) {
+			my $command = $logServer -> read();
+			#==========================================
+			# Handle command: status
+			#------------------------------------------
+			if ($command eq "status") {
+				# TODO
+				$logServer -> write ("*** not implemented ***\n");
+				next;
+			}
+			#==========================================
+			# Add More commands here...
+			#------------------------------------------
+			# ...
+			#==========================================
+			# Invalid command...
+			#------------------------------------------
+			$logServer -> write ("*** unknown ***\n");
+		}
+		undef $logServer;
+		exit 0;
+	}
 	return $this;
-}
-
-#==========================================
-# socketTimer
-#------------------------------------------
-sub socketTimer {
-	# ...
-	# Every second the log socket is checked for requests.
-	# In case of a valid request the data is processed
-	# ---
-	# TODO
-	my $this = $KIWILog::this;
-	my $logserver = $this->{logserver};
-	print "timer done: $this\n";
 }
 
 #==========================================
@@ -587,9 +615,13 @@ sub getRootLog {
 sub DESTROY {
 	my $this    = shift;
 	my $jclient = $this->{jclient};
+	my $logchild= $this->{logchild};
 	close EFD;
 	if (defined $jclient) {
 		$jclient -> Disconnect();
+	}
+	if (defined $logchild) {
+		kill 15, $logchild;
 	}
 }
 
