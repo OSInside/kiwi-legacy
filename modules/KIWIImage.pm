@@ -2148,9 +2148,9 @@ sub getSize {
 	my $size = qx ( du -ks $extend );
 	$size =~ /(\d+)\s.*/;
 	#==========================================
-	# Add 10% more space for later filesystem
+	# Add 30% more space for later filesystem
 	#------------------------------------------
-	my $spare = 0.1 * $size;
+	my $spare = 0.3 * $size;
 	if ($spare <= 8192) {
 		$spare = 8192;
 	}
