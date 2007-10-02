@@ -42,7 +42,9 @@ fi
 if test -L /boot/boot;then
 	mount -t proc proc /proc
 	mount -t sysfs sysfs /sys
-	mkinitrd 
+	/etc/init.d/boot.device-mapper start
+	mkinitrd
+	/etc/init.d/boot.device-mapper stop
 	umount /sys
 	umount /proc
 else
@@ -56,6 +58,9 @@ fi
 if test -f "/usr/sbin/grub";then
 	Echo "Installing boot loader..."
 	/usr/sbin/grub --batch --no-floppy < /etc/grub.conf >/dev/null 2>&1
+	if [ ! $? = 0 ];then
+		Echo "Failed to install boot loader"
+	fi
 else
 	Echo "Image doesn't provide grub support"
 	Echo "Can't install boot loader"
