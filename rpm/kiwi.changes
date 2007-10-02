@@ -2,6 +2,7 @@
 Thu Sep 27 01:39:09 CEST 2007 - ms@suse.de
 
 - v1.65
+- fixed relative path problem of --installcd (#329842)
 - added suseActivateDefaultServices function (#309801)
 - opened log server for XML based milestone logs on default
   port number 9000. One can change the port by setting
@@ -15,6 +16,9 @@ Thu Sep 27 01:39:09 CEST 2007 - ms@suse.de
 - added KIWISocket module for milestone server
 - added image name to be displayed in the boot loader setup
 - fixed TFTP server lookup
+- added check for livecd_config in /proc/cmdline for isoboot
+  linuxrc to allow changing the image file name via kernel
+  option. Patch by Christoph Thiel <cthiel@novell.com>
 
 -------------------------------------------------------------------
 Wed Sep 26 23:22:38 CEST 2007 - ms@suse.de

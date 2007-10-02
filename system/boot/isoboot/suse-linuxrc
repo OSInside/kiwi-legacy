@@ -53,28 +53,35 @@ mount -t devpts devpts /dev/pts
 closeKernelConsole
 
 #======================================
-# 2) Prepare module load support 
+# 2) probe for livecd_config in cmdline
+#--------------------------------------
+if grep -i -q "livecd_config=[a-zA-Z0-9/]" /proc/cmdline; then
+	export LIVECD_CONFIG=`sed 's/.*livecd_config=\([^ ]*\).*/\1/' /proc/cmdline`
+fi
+
+#======================================
+# 3) Prepare module load support 
 #--------------------------------------
 touch /etc/modules.conf
 touch /lib/modules/*/modules.dep
 
 #======================================
-# 3) Including required kernel modules
+# 4) Including required kernel modules
 #--------------------------------------
 probeDevices
 
 #======================================
-# 4) Mount the CD device
+# 5) Mount the CD device
 #--------------------------------------
 CDMount
 
 #======================================
-# 5) Load configuration
+# 6) Load configuration
 #--------------------------------------
 importFile < $LIVECD_CONFIG
 
 #======================================
-# 6) Download RW part of the CD image
+# 7) Download RW part of the CD image
 #--------------------------------------
 IFS="," ; for i in $IMAGE;do
 	field=0
@@ -128,24 +135,24 @@ done
 CDUmount
 
 #======================================
-# 7) Get filesystem type
+# 8) Get filesystem type
 #--------------------------------------
 if [ -z "$UNIONFS_CONFIG" ];then
 	probeFileSystem $imageDevice
 fi
 
 #======================================
-# 8) Check for swap space
+# 9) Check for swap space
 #--------------------------------------
 swapSpace=`searchSwapSpace`
 if [ ! -z "$swapSpace" ];then
 	#======================================
-	# 7.1) use an existing swap partition
+	# 9.1) use an existing swap partition
 	#--------------------------------------
 	Echo "Found swap space on: $swapSpace"
 else
 	#======================================
-	# 7.1) use a swap file on a free part.
+	# 9.1) use a swap file on a free part.
 	#--------------------------------------
 	swapDevice=`searchDiskSpace`
 	if [ ! -z "$swapDevice" ];then
@@ -183,7 +190,7 @@ else
 fi
 
 #======================================
-# 9) Resize filesystem to full space
+# 10) Resize filesystem to full space
 #--------------------------------------
 if [ -z "$UNIONFS_CONFIG" ];then
 	Echo "Resize filesystem to full partition space..."
@@ -191,22 +198,22 @@ if [ -z "$UNIONFS_CONFIG" ];then
 		resize_reiserfs $imageDevice
 	fi
 	if test "$FSTYPE" = "ext2";then
-		resize2fs -p $imageDevice
+		resize2fs -f -F -p $imageDevice
 		e2fsck -y -f $imageDevice
 	fi
 	if test "$FSTYPE" = "ext3";then
-		resize2fs -p $imageDevice
+		resize2fs -f -F -p $imageDevice
 		e2fsck -y -f $imageDevice
 		tune2fs -j $imageDevice
 	fi
 fi
 
 #======================================
-# 10) Mount OS image to /mnt
+# 11) Mount OS image to /mnt
 #--------------------------------------
 if [ -z "$UNIONFS_CONFIG" ];then
 	#======================================
-	# 9.1) mount RW part and CD to /mnt
+	# 11.1) mount RW part and CD to /mnt
 	#--------------------------------------
 	if ! mount $imageDevice /mnt &>/dev/null;then
 		systemException "Failed to mount RW root filesystem" "reboot"
@@ -214,7 +221,7 @@ if [ -z "$UNIONFS_CONFIG" ];then
 	mkdir -p /mnt/$LIVECD && mount $cddev /mnt/$LIVECD &>/dev/null
 
 	#======================================
-	# 9.2) Create RO Link list
+	# 11.2) Create RO Link list
 	#--------------------------------------
 	cd /mnt
 	if [ ! -d $LIVECD/read-only-system ];then
@@ -238,7 +245,7 @@ if [ -z "$UNIONFS_CONFIG" ];then
 	cd /
 else
 	#======================================
-	# 9.1) mount CD to /mnt and unify
+	# 11.1) mount CD to /mnt and unify
 	#--------------------------------------
 	Echo "Mounting compressed unified tree..."
 	mkdir -p /mnt/$LIVECD && mount $cddev /mnt/$LIVECD &>/dev/null
@@ -249,7 +256,7 @@ else
 fi
 
 #======================================
-# 11) Create system dependant files
+# 12) Create system dependant files
 #--------------------------------------
 mkdir -p /config/etc
 if [ -z "$UNIONFS_CONFIG" ];then
@@ -269,7 +276,7 @@ echo "sysfs   /sys     sysfs   noauto 0 0"          >> /config/etc/fstab
 echo "tmpfs   /dev/shm tmpfs   defaults 0 0"        >> /config/etc/fstab
 
 #======================================
-# 12) copy system dependant files
+# 13) copy system dependant files
 #--------------------------------------
 cd /config
 find . -type d | while read d ; do  mkdir -p /mnt/$d ; done
@@ -278,25 +285,25 @@ cd /
 rm -rf /config
 
 #======================================
-# 13) setup real root device
+# 14) setup real root device
 #--------------------------------------
 echo 256 > /proc/sys/kernel/real-root-dev
 
 #======================================
-# 14) umount system filesystems
+# 15) umount system filesystems
 #--------------------------------------
 umount /dev/pts
 umount /sys
 umount /proc
 
 #======================================
-# 15) copy initrd files to image
+# 16) copy initrd files to image
 #--------------------------------------
 cp /preinit /mnt
 cp /include /mnt
 
 #======================================
-# 16) Activate new root
+# 17) Activate new root
 #--------------------------------------
 Echo "Activating Image: [$imageName]"
 cd /mnt && exec < dev/console >dev/console 2>&1
@@ -315,7 +322,7 @@ else
 	rm ./include
 fi
 #======================================
-# 17) Unmount initrd / system init
+# 18) Unmount initrd / system init
 #--------------------------------------
 echo " "
 echo "Booting into Live CD System..."

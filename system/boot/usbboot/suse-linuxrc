@@ -102,11 +102,11 @@ else
 	fi
 	if test "$FSTYPE" = "ext2";then
 		e2fsck -y -f $stickDevice
-		resize2fs -F -p $stickDevice
+		resize2fs -f -F -p $stickDevice
 	fi
 	if test "$FSTYPE" = "ext3";then
 		e2fsck -y -f $stickDevice
-		resize2fs -F -p $stickDevice
+		resize2fs -f -F -p $stickDevice
 		e2fsck -y -f $stickDevice
 		tune2fs -j $stickDevice
 	fi

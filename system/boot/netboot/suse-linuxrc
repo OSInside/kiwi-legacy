@@ -441,7 +441,7 @@ if [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ];then
 				Echo "Checking EXT2 filesystem..."
 				e2fsck -f $imageDevice -y
 				Echo "Resize EXT2 filesystem to full partition space..."
-				resize2fs -F -p $imageDevice
+				resize2fs -f -F -p $imageDevice
 				Echo "Checking EXT2 filesystem..."
 				e2fsck -f $imageDevice -y
 				INITRD_MODULES="$INITRD_MODULES ext2"
@@ -450,7 +450,7 @@ if [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ];then
 				Echo "Checking EXT3 filesystem..."
 				e2fsck -f $imageDevice -y
 				Echo "Resize EXT3 filesystem to full partition space..."
-				resize2fs -F -p $imageDevice
+				resize2fs -f -F -p $imageDevice
 				Echo "Checking EXT3 filesystem..."
 				e2fsck -f $imageDevice -y
 				INITRD_MODULES="$INITRD_MODULES ext3"

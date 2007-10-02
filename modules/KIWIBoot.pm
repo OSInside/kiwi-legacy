@@ -641,6 +641,10 @@ sub setupInstallCD {
 	my $name = $system; $name =~ s/raw$/iso/;
 	my $base = "-R -b boot/grub/stage2";
 	my $opts = "-no-emul-boot -boot-load-size 4 -boot-info-table";
+	if ($name !~ /^\//) {
+		my $workingDir = qx ( pwd ); chomp $workingDir;
+		$name = $workingDir."/".$name;
+	}
 	$status = qx (cd $tmpdir && mkisofs $base $opts -o $name . 2>&1);
 	$result = $? >> 8;
 	if ($result != 0) {
