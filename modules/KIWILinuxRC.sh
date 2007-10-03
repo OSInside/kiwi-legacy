@@ -1169,6 +1169,7 @@ function mountSystem () {
 							Echo "Failed to create ext2 filesystem"
 							retval=1; return $retval
 						fi
+						tune2fs -m 0 $rwDevice >/dev/null 2>&1
 						Echo "Checking EXT2 write extend..."
 						e2fsck -y -f $rwDevice >/dev/null 2>&1
 					fi
