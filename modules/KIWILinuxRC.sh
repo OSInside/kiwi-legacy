@@ -112,8 +112,14 @@ function systemException {
 	# by an action. Possible actions are reboot, wait
 	# and opening a shell
 	# ----
+	local what=$2
+	if [ $what = "reboot" ];then
+		if cat /proc/cmdline | grep -qi "kiwidebug=1";then
+			what="shell"
+		fi
+	fi
 	Echo "$1"
-	case "$2" in
+	case "$what" in
 	"reboot")
 		Echo "rebootException: reboot in 60 sec..."; sleep 60
 		/sbin/reboot -f -i >/dev/null 2>&1
@@ -537,21 +543,17 @@ function probeDevices {
 function CDDevice {
 	# /.../
 	# detect CD/DVD device. The function use the information
-	# from /proc/sys/dev/cdrom/info to activate the drive
+	# from hwinfo --cdrom to activate the drive
 	# ----
 	for module in usb-storage sr_mod cdrom ide-cd BusLogic;do
 		/sbin/modprobe $module
 	done
-	info="/proc/sys/dev/cdrom/info"
-	cddevs=`cat $info | grep "drive name:" | cut -f2 -d: | tr "\t" ":"`
-	cddevs=`echo $cddevs | cut -f3- -d:`
-	cddevs=`echo $cddevs | tr -d [:space:]`
-	IFS=":"; for i in $cddevs;do
-		if [ -b "/dev/$i" ];then
-			test -z $cddev && cddev=/dev/$i || cddev=$cddev:/dev/$i
+	cddevs=`/usr/sbin/hwinfo --cdrom | grep "Device File:" | cut -f2 -d:`
+	for i in $cddevs;do
+		if [ -b $i ];then
+			test -z $cddev && cddev=$i || cddev=$cddev:$i
 		fi
 	done
-	IFS=$IFS_ORIG
 	if [ -z $cddev ]; then
 		systemException \
 			"Failed to detect CD drive !" \
