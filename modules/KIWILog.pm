@@ -272,7 +272,7 @@ sub done {
 	# This is the green "done" flag
 	# ---
 	my $this = shift;
-	if (! defined $this->{fileLog}) {
+	if ((! defined $this->{fileLog}) && (! defined $this->{nocolor})) {
 	    $this -> doStat();
 		$this -> setOutputChannel();
 		print "\033[1;32mdone\n";
@@ -297,7 +297,7 @@ sub failed {
 	# This is the red "failed" flag
 	# ---
 	my $this = shift;
-	if (! defined $this->{fileLog}) {
+	if ((! defined $this->{fileLog}) && (! defined $this->{nocolor})) {
 		$this -> doStat();
 		$this -> setOutputChannel();
 		print "\033[1;31mfailed\n";
@@ -322,7 +322,7 @@ sub skipped {
 	# This is the yellow "skipped" flag
 	# ---
 	my $this = shift;
-	if (! defined $this->{fileLog}) {
+	if ((! defined $this->{fileLog}) && (! defined $this->{nocolor})) {
 		$this -> doStat();
 		$this -> setOutputChannel();
 		print "\033[1;33mskipped\n";
@@ -376,7 +376,7 @@ sub step {
 	if ($data > 100) {
 		$data = 100;
 	}
-	if (! defined $this->{fileLog}) {
+	if ((! defined $this->{fileLog}) && (! defined $this->{nocolor})) {
 		$this -> doStat();
 		$this -> setOutputChannel();
 		print "\033[1;32m($data%)";
@@ -395,7 +395,7 @@ sub step {
 #------------------------------------------
 sub cursorOFF {
 	my $this = shift;
-	if (! defined $this->{fileLog}) {
+	if ((! defined $this->{fileLog}) && (! defined $this->{nocolor})) {
 		print "\033[?25l";
 	}
 }
@@ -405,7 +405,7 @@ sub cursorOFF {
 #------------------------------------------
 sub cursorON {
 	my $this = shift;
-	if (! defined $this->{fileLog}) {
+	if ((! defined $this->{fileLog}) && (! defined $this->{nocolor})) {
 		print "\033[?25h";
 	}
 }
@@ -611,6 +611,18 @@ sub setLogFile {
 	}
 	$this->{rootLog} = $file;
 	$this->{fileLog} = 1;
+	return $this;
+}
+
+#==========================================
+# setColorOff
+#------------------------------------------
+sub setColorOff {
+	# ...
+	# switch off the colored output - do it by simulating output file
+	# ---
+	my $this = shift;
+	$this->{nocolor} = 1;
 	return $this;
 }
 

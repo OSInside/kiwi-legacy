@@ -119,6 +119,7 @@ our @Profiles;          # list of profiles to include in image
 our $ListProfiles;      # lists the available profiles in image
 our $ForceNewRoot;      # force creation of new root directory
 our $BaseRoot;          # use given path as base system
+our $NoColor;           # do not used colored output (done/failed messages)
 
 #============================================
 # Globals
@@ -151,6 +152,15 @@ sub main {
 	init();
 
 	#==========================================
+	# Check for nocolor option
+	#------------------------------------------
+	if (defined $NoColor) {
+		$kiwi -> info ("Switching off colored output\n");
+		if (! $kiwi -> setColorOff ()) {
+			my $code = kiwiExit (1); return $code;
+		}
+	}
+	#==========================================
 	# Setup logging location
 	#------------------------------------------
 	if (defined $LogFile) {
@@ -159,7 +169,6 @@ sub main {
 			my $code = kiwiExit (1); return $code;
 		}
 	}
-
 	#==========================================
 	# Handle ListProfiles option
 	#------------------------------------------
@@ -798,6 +807,7 @@ sub init {
 		"force-new-root"        => \$ForceNewRoot,
 		"base-root=s"           => \$BaseRoot,
 		"help|h"                => \&usage,
+		"nocolor"               => \$NoColor,
 		"<>"                    => \&usage
 	);
 	my $user = qx (whoami);

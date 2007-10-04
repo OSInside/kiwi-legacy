@@ -7,6 +7,7 @@ Thu Sep 27 01:39:09 CEST 2007 - ms@suse.de
 - added better CD detection based on hwinfo (#299663)
 - added kiwidebug kernel option which turns every reboot
   exception into a shell exception. related to (#299663)
+- added option nocolor to prevent color output (#328298)
 - make perl-Net-Jabber an option not a requirement
 - created common functions for setting up grub and change all
   suse-linuxrc / suse-preinit files accordingly
@@ -29,6 +30,11 @@ Thu Sep 27 01:39:09 CEST 2007 - ms@suse.de
   sometimes gets the partition size wrong for partitions that are marked
   to be just big enough for the image. Patched by
   James Willcox <james@ximian.com>
+- added experimental callSUSEInitrdScripts to KIWILinuxRC.sh
+  The function is not called right now but should be in the
+  future to ensure a better pre-init environment for SUSE
+  based systems. This is related to missing udev support
+  and bootsplash problems during boot
 
 -------------------------------------------------------------------
 Wed Sep 26 23:22:38 CEST 2007 - ms@suse.de
