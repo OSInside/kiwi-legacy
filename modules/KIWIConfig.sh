@@ -344,7 +344,7 @@ function suseStripInitrd {
 		usleep parted mke2fs pvcreate vgcreate lvm resize2fs ln hdparm
 		dmesg splash fbmngplay portmap start-statd sm-notify
 		rpc.statd rpc.idmapd nbd-client mount.nfs mount.nfs4 eject
-		blockdev posbios ping
+		blockdev posbios ping killall5
 	"
 	tools="$tools $1"
 	for path in /sbin /usr/sbin /usr/bin /bin;do
