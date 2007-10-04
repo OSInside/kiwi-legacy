@@ -4,6 +4,7 @@ Thu Sep 27 01:39:09 CEST 2007 - ms@suse.de
 - v1.65
 - fixed relative path problem of --installcd (#329842)
 - added suseActivateDefaultServices function (#309801)
+- make perl-Net-Jabber an option not a requirement
 - created common functions for setting up grub and change all
   suse-linuxrc / suse-preinit files accordingly
 - opened log server for XML based milestone logs on default

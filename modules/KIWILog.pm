@@ -19,9 +19,22 @@ package KIWILog;
 # Modules
 #------------------------------------------
 use strict;
-use Net::Jabber qw(Client);
 use Carp qw (cluck);
 use KIWISocket;
+
+#==========================================
+# Plugins
+#------------------------------------------
+BEGIN {
+	$KIWILog::haveJabberSupport = 1;
+	eval {
+		require Net::Jabber;
+		Net::Jabber->import qw(Client);
+	};
+	if ($@) {
+		$KIWILog::haveJabberSupport = 0;
+	}
+}
 
 #==========================================
 # Constructor
@@ -66,6 +79,9 @@ sub new {
 	) {
 		#$this -> warning ("Jabber setup skipped: Missing login data");
 		#$this -> skipped ();
+		$jstatus = 0;
+	}
+	if (! $KIWILog::haveJabberSupport) {
 		$jstatus = 0;
 	}
 	my $jclient;
