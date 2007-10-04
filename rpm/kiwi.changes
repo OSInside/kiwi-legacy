@@ -4,6 +4,8 @@ Thu Sep 27 01:39:09 CEST 2007 - ms@suse.de
 - v1.65
 - fixed relative path problem of --installcd (#329842)
 - added suseActivateDefaultServices function (#309801)
+- created common functions for setting up grub and change all
+  suse-linuxrc / suse-preinit files accordingly
 - opened log server for XML based milestone logs on default
   port number 9000. One can change the port by setting
   our $LogServerPort = ... in $HOME/.kiwirc. The server runs
@@ -19,6 +21,10 @@ Thu Sep 27 01:39:09 CEST 2007 - ms@suse.de
 - added check for livecd_config in /proc/cmdline for isoboot
   linuxrc to allow changing the image file name via kernel
   option. Patch by Christoph Thiel <cthiel@novell.com>
+- Currently when KIWI writes out the image config file for netboot, it
+  sometimes gets the partition size wrong for partitions that are marked
+  to be just big enough for the image. Patched by
+  James Willcox <james@ximian.com>
 
 -------------------------------------------------------------------
 Wed Sep 26 23:22:38 CEST 2007 - ms@suse.de

@@ -532,10 +532,8 @@ fi
 # 12) Create system dependant files
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
-	# a) /etc/fstab...
-	#-----------------
-	mkdir -p /config/etc
-	cat > /config/etc/fstab < /dev/null
+	setupDefaultFstab /config
+	updateSwapDeviceFstab /config $deviceSwap
 	if [ -z "$UNIONFS_CONFIG" ]; then
 		echo "$deviceRoot /      $FSTYPE defaults 0 0"     > /config/etc/fstab
 		echo "$deviceHome /home  ext3    defaults 0 0"    >> /config/etc/fstab
@@ -543,63 +541,8 @@ if [ $LOCAL_BOOT = "no" ];then
 		mkdir -p /config/kiwiboot
 		echo "$deviceBoot /kiwiboot ext2 defaults 0 0"    >> /config/etc/fstab
 	fi
-	echo "$deviceSwap swap   swap    pri=42  0 0"         >> /config/etc/fstab
-	echo "devpts  /dev/pts   devpts  mode=0620,gid=5 0 0" >> /config/etc/fstab
-	echo "proc    /proc      proc    defaults 0 0"        >> /config/etc/fstab
-	echo "sysfs   /sys       sysfs   noauto 0 0"          >> /config/etc/fstab
-	echo "tmpfs   /dev/shm   tmpfs   defaults 0 0"        >> /config/etc/fstab
-
-	# b) /boot/grub/menu.lst
-	# ----------------------
-	if [ -z "$UNIONFS_CONFIG" ]; then
-		if [ -f /mnt/.profile ];then
-			importFile < /mnt/.profile
-		fi
-		console=""
-		gdev="(hd0,1)"
-		menu=/config/boot/grub/menu.lst
-		mkdir -p /config/boot/grub
-		echo "timeout 10"                                > $menu
-		if [ -f /image/loader/message ];then
-			echo "gfxmenu $gdev/boot/message"           >> $menu
-		fi
-		IFS="," ; for i in $KERNEL_LIST;do
-			if test ! -z "$i";then
-				kernel=`echo $i | cut -f1 -d:`
-				initrd=`echo $i | cut -f2 -d:`
-				if [ -z "$name" ];then
-					echo "title SLE/SUSE Linux [ OEM ]" >> $menu
-				else
-					echo "title $name [ OEM ]"          >> $menu
-				fi
-				echo -n " kernel $gdev/boot/$kernel"    >> $menu
-				echo -n " root=${deviceDisk}2 $console" >> $menu
-				echo " vga=0x314"                       >> $menu
-				echo " initrd $gdev/boot/$initrd"       >> $menu
-			fi
-		done
-	fi
-
-	# c) /etc/grub.conf...
-	# --------------------
-	mkdir -p /config/etc
-	gconf=/config/etc/grub.conf
-	if [ ! -z "$UNIONFS_CONFIG" ]; then
-		gdev="(hd0,0)"
-	fi
-	echo -en "root $gdev\ninstall"           > $gconf 
-	echo -n " --stage2=/boot/grub/stage2"   >> $gconf
-	echo -n " /boot/grub/stage1 d (hd0)"    >> $gconf
-	echo -n " /boot/grub/stage2 0x8000"     >> $gconf
-	echo " $gdev/boot/grub/menu.lst"        >> $gconf
-	echo "quit"                             >> $gconf
-
-	# d) /etc/sysconfig/kernel...
-	# ---------------------------
-	mkdir -p /config/etc/sysconfig
-	syskernel=/config/etc/sysconfig/kernel
-	echo "INITRD_MODULES=\"$INITRD_MODULES\""       > $syskernel
-	echo "DOMU_INITRD_MODULES=\"$DOMURD_MODULES\"" >> $syskernel
+	setupBootLoaderGrub /mnt /config 1 ${deviceDisk}2 OEM
+	setupKernelModules /config
 fi
 
 #======================================

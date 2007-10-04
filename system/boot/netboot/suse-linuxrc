@@ -672,104 +672,16 @@ fi
 # 18) Create system dependant files
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
-if test $systemIntegrity = "clean";then
-	mkdir -p /config/etc
-	cat > /config/etc/fstab < /dev/null
-	if [ -z "$UNIONFS_CONFIG" ]; then
-		echo "$imageRootDevice / $FSTYPE defaults 0 0"    > /config/etc/fstab
+	if test $systemIntegrity = "clean";then
+		setupDefaultFstab /config
+		updateRootDeviceFstab /config $imageRootDevice
+		if test ! -z $DISK;then
+			updateSwapDeviceFstab /config ${DISK}1
+			updateOtherDeviceFstab /config
+			setupBootLoaderGrub /mnt /config 1 ${DISK}2 NET
+			setupKernelModules /config
+		fi
 	fi
-	echo "devpts  /dev/pts   devpts mode=0620,gid=5 0 0" >> /config/etc/fstab
-	echo "proc    /proc   proc    defaults 0 0"          >> /config/etc/fstab
-	echo "sysfs   /sys    sysfs   noauto 0 0"            >> /config/etc/fstab
-	echo "tmpfs   /dev/shm tmpfs  defaults 0 0"          >> /config/etc/fstab
-	if test ! -z $DISK;then
-		# a) /etc/fstab...
-		# ----------------
-		echo "${DISK}1 swap swap pri=42 0 0" >> /config/etc/fstab
-		index=0
-		IFS=":" ; for i in $PART_MOUNT;do
-		if test ! -z "$i";then
-			count=0
-			IFS=":" ; for n in $PART_DEV;do
-				device=$n
-				if test $count -eq $index;then
-					break
-				fi
-				count=`expr $count + 1`
-			done
-			index=`expr $index + 1`
-			if test ! $i = "/" && test ! $i = "x";then
-				probeFileSystem $device
-				echo "$device $i $FSTYPE defaults 1 1" >> /config/etc/fstab
-			fi
-		fi
-		done
-		# b) /boot/grub/menu.lst...
-		# -------------------------
-		if [ -f /mnt/.profile ];then
-			importFile < /mnt/.profile
-		fi
-		console=""
-		gdev="(hd0,1)"
-		menu=/config/boot/grub/menu.lst
-		mkdir -p /config/boot/grub
-		if test -z $KIWI_BOOT_TIMEOUT;then
-			KIWI_BOOT_TIMEOUT=10;
-		fi
-		if [ ! -z "$UNIONFS_CONFIG" ]; then
-			gnum=`echo $imageRootDevice | sed -e "s/\/dev.*\([0-9]\)/\\1/"`
-			gdev="(hd0,$gnum)"
-		fi
-		echo "timeout $KIWI_BOOT_TIMEOUT"               > $menu
-		if [ -f /image/loader/message ];then
-			echo "gfxmenu $gdev/boot/message"          >> $menu
-		fi
-		IFS="," ; for i in $KERNEL_LIST;do
-		if test ! -z "$i";then
-			kernel=`echo $i | cut -f1 -d:`
-			initrd=`echo $i | cut -f2 -d:`
-			if [ -z "$name" ];then
-				echo "title $kernel [ NET ]"           >> $menu
-			else
-				echo "title $name [ NET ]"             >> $menu
-			fi
-			if [ $kernel = "vmlinuz-xen" ];then
-				echo " root $gdev"                     >> $menu
-				echo " kernel /boot/xen.gz"            >> $menu
-				echo -n " module /boot/$kernel"        >> $menu
-				echo -n " root=${DISK}2 $console"      >> $menu
-				echo -n " vga=0x314"                   >> $menu
-				echo -n " $KIWI_INITRD_PARAMS"         >> $menu
-				echo " $KIWI_KERNEL_OPTIONS"           >> $menu
-				echo " module /boot/$initrd"           >> $menu
-			else
-				echo -n " kernel $gdev/boot/$kernel"   >> $menu
-				echo -n " root=${DISK}2 $console"      >> $menu
-				echo -n " vga=0x314"                   >> $menu
-				echo -n " $KIWI_INITRD_PARAMS"         >> $menu
-				echo " $KIWI_KERNEL_OPTIONS"           >> $menu
-				echo " initrd $gdev/boot/$initrd"      >> $menu
-			fi
-		fi
-		done
-		# c) /etc/grub.conf...
-		# -------------------------
-		mkdir -p /config/etc
-		gconf=/config/etc/grub.conf
-		echo -en "root $gdev\ninstall"           > $gconf
-		echo -n " --stage2=/boot/grub/stage2"   >> $gconf
-		echo -n " /boot/grub/stage1 d (hd0)"    >> $gconf
-		echo -n " /boot/grub/stage2 0x8000"     >> $gconf
-		echo " $gdev/boot/grub/menu.lst"        >> $gconf
-		echo "quit"                             >> $gconf
-		# d) /etc/sysconfig/kernel...
-		# ---------------------------
-		mkdir -p /config/etc/sysconfig
-		syskernel=/config/etc/sysconfig/kernel
-		echo "INITRD_MODULES=\"$INITRD_MODULES\""       > $syskernel
-		echo "DOMU_INITRD_MODULES=\"$DOMURD_MODULES\"" >> $syskernel
-	fi
-fi
 fi
 
 #======================================

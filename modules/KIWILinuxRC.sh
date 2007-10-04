@@ -132,6 +132,245 @@ function systemException {
 	esac
 }
 #======================================
+# installGrub
+#--------------------------------------
+function installBootLoaderGrub {
+	# /.../
+	# install the grub according to the contents of
+	# /etc/grub.conf and /boot/grub/menu.lst
+	# ----
+	if [ -x /usr/sbin/grub ];then
+		Echo "Installing boot loader..."
+		/usr/sbin/grub --batch --no-floppy < /etc/grub.conf >/dev/null 2>&1
+		if [ ! $? = 0 ];then
+			Echo "Failed to install boot loader"
+		fi
+	else
+		Echo "Image doesn't have grub installed"
+		Echo "Can't install boot loader"
+	fi
+}
+#======================================
+# setupSUSEInitrd
+#--------------------------------------
+function setupSUSEInitrd {
+	# /.../
+	# call mkinitrd on suse systems to create the distro initrd
+	# based on /etc/sysconfig/kernel
+	# ----
+	grubOK=1
+	if [ -f /boot/System.map* ];then
+		mount -t proc proc /proc
+		mount -t sysfs sysfs /sys
+		if [ -f /etc/init.d/boot.device-mapper ];then
+			/etc/init.d/boot.device-mapper start
+		fi
+		mkinitrd
+		if [ -f /etc/init.d/boot.device-mapper ];then
+			/etc/init.d/boot.device-mapper stop
+		fi
+		umount /sys
+		umount /proc
+	else
+		Echo "Image doesn't include kernel system map"
+		Echo "Can't create initrd"
+		systemIntegrity=unknown
+		grubOK=0
+	fi
+}
+#======================================
+# installGrub
+#--------------------------------------
+function setupBootLoaderGrub {
+	# /.../
+	# create grub.conf and menu.lst file used for
+	# installing the bootloader
+	# ----
+	local mountPrefix=$1  # mount path of the image
+	local destsPrefix=$2  # base dir for the config files
+	local gnum=$3         # grub boot partition ID
+	local rdev=$4         # grub root partition
+	local gfix=$5         # grub title postfix
+	local menu=$destsPrefix/boot/grub/menu.lst
+	local conf=$destsPrefix/etc/grub.conf
+	local console=""
+	#======================================
+	# check for system image .profile
+	#--------------------------------------
+	if [ -f $mountPrefix/image/.profile ];then
+		importFile < $mountPrefix/image/.profile
+	fi
+	#======================================
+	# check for grub device
+	#--------------------------------------
+	if test -z $gnum;then
+		gnum=1
+	fi
+	#======================================
+	# check for grub title postfix
+	#--------------------------------------
+	if test -z $gfix;then
+		gfix="unknown"
+	fi
+	#======================================
+	# check for boot TIMEOUT
+	#--------------------------------------
+	if test -z $KIWI_BOOT_TIMEOUT;then
+		KIWI_BOOT_TIMEOUT=10;
+	fi
+	#======================================
+	# check for UNIONFS_CONFIG
+	#--------------------------------------
+	if [ ! -z "$UNIONFS_CONFIG" ]; then
+		rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
+		gnum=`echo $rwDevice | sed -e "s/\/dev.*\([0-9]\)/\\1/"`
+		gnum=`expr $gnum - 1`
+	fi
+	#======================================
+	# create directory structure
+	#--------------------------------------
+	for dir in $menu $conf;do
+		dir=`dirname $dir`; mkdir -p $dir
+	done
+	#======================================
+	# setup grub device node
+	#--------------------------------------
+	gdev="(hd0,$gnum)"
+	#======================================
+	# create menu.lst file
+	#--------------------------------------
+	echo "timeout $KIWI_BOOT_TIMEOUT"  > $menu
+	if [ -f /image/loader/message ] || [ -f /boot/message ];then
+		echo "gfxmenu $gdev/boot/message" >> $menu
+	fi
+	IFS="," ; for i in $KERNEL_LIST;do
+		if test ! -z "$i";then
+			kernel=`echo $i | cut -f1 -d:`
+			initrd=`echo $i | cut -f2 -d:`
+			if [ -z "$name" ];then
+				echo "title $kernel [ $gfix ]"  >> $menu
+			else
+				echo "title $name [ $gfix ]"    >> $menu
+			fi
+			if [ $kernel = "vmlinuz-xen" ];then
+				echo " root $gdev"                     >> $menu
+				echo " kernel /boot/xen.gz"            >> $menu
+				echo -n " module /boot/$kernel"        >> $menu
+				echo -n " root=$rdev $console"         >> $menu
+				echo -n " vga=0x314 splash=silent"     >> $menu
+				echo -n " $KIWI_INITRD_PARAMS"         >> $menu
+				echo " $KIWI_KERNEL_OPTIONS showopts"  >> $menu
+				echo " module /boot/$initrd"           >> $menu
+			else
+				echo -n " kernel $gdev/boot/$kernel"   >> $menu
+				echo -n " root=$rdev $console"         >> $menu
+				echo -n " vga=0x314 splash=silent"     >> $menu
+				echo -n " $KIWI_INITRD_PARAMS"         >> $menu
+				echo " $KIWI_KERNEL_OPTIONS showopts"  >> $menu
+				echo " initrd $gdev/boot/$initrd"      >> $menu
+			fi
+		fi
+	done
+	#======================================
+	# create grub.conf file
+	#--------------------------------------
+	gnum=`echo $rdev | sed -e "s/\/dev.*\([0-9]\)/\\1/"`
+	gnum=`expr $gnum - 1`
+	echo -en "root (hd0,$gnum)\ninstall"     > $conf
+	echo -n " --stage2=/boot/grub/stage2"   >> $conf
+	echo -n " /boot/grub/stage1 d (hd0)"    >> $conf
+	echo -n " /boot/grub/stage2 0x8000"     >> $conf
+	echo " $gdev/boot/grub/menu.lst"        >> $conf
+	echo "quit"                             >> $conf
+}
+#======================================
+# setupDefaultFstab
+#--------------------------------------
+function setupDefaultFstab {
+	# /.../
+	# create a new /etc/fstab file with the default entries
+	# ----
+	local prefix=$1
+	local nfstab=$prefix/etc/fstab
+	mkdir -p $prefix/etc
+	cat > $nfstab < /dev/null
+	echo "devpts  /dev/pts   devpts  mode=0620,gid=5 0 0"   >> $nfstab
+	echo "proc    /proc      proc    defaults 0 0"          >> $nfstab
+	echo "sysfs   /sys       sysfs   noauto 0 0"            >> $nfstab
+	echo "tmpfs   /dev/shm   tmpfs   defaults 0 0"          >> $nfstab
+}
+#======================================
+# updateRootDeviceFstab
+#--------------------------------------
+function updateRootDeviceFstab {
+	# /.../
+	# add one line to the fstab file for the root device
+	# ----
+	local prefix=$1
+	local rdev=$2
+	local nfstab=$prefix/etc/fstab
+	if [ -z "$UNIONFS_CONFIG" ]; then
+		echo "$rdev / $FSTYPE defaults 0 0" >> $nfstab
+	fi
+}
+#======================================
+# updateSwapDeviceFstab
+#--------------------------------------
+function updateSwapDeviceFstab {
+	# /.../
+	# add one line to the fstab file for the swap device
+	# ----
+	local prefix=$1
+	local sdev=$2
+	local nfstab=$prefix/etc/fstab
+	echo "$sdev swap swap pri=42 0 0" >> $nfstab
+}
+#======================================
+# updateOtherDeviceFstab
+#--------------------------------------
+function updateOtherDeviceFstab {
+	# /.../
+	# check the contents of the $PART_MOUNT variable and
+	# add one line to the fstab file for each partition
+	# to mount.
+	# ----
+	local prefix=$1
+	local nfstab=$prefix/etc/fstab
+	local index=0
+	IFS=":" ; for i in $PART_MOUNT;do
+		if test ! -z "$i";then
+			count=0
+			IFS=":" ; for n in $PART_DEV;do
+				device=$n
+				if test $count -eq $index;then
+					break
+				fi
+				count=`expr $count + 1`
+			done
+			index=`expr $index + 1`
+			if test ! $i = "/" && test ! $i = "x";then
+				probeFileSystem $device
+				echo "$device $i $FSTYPE defaults 1 1" >> $nfstab
+			fi
+		fi
+	done
+}
+#======================================
+# setupKernelModules
+#--------------------------------------
+function setupKernelModules {
+	# /.../
+	# create sysconfig/kernel file which includes the
+	# kernel modules to become integrated into the initrd
+	# if created by the distro mkinitrd tool
+	# ----
+	local prefix=$1
+	mkdir -p $prefix/etc/sysconfig
+	syskernel=$prefix/etc/sysconfig/kernel
+	echo "INITRD_MODULES=\"$INITRD_MODULES\""       > $syskernel
+	echo "DOMU_INITRD_MODULES=\"$DOMURD_MODULES\"" >> $syskernel
+}
+#======================================
 # kernelCheck
 #--------------------------------------
 function kernelCheck {
@@ -183,6 +422,7 @@ function probeFileSystem {
 			FSTYPE=unknown
 		;;
 	esac
+	export FSTYPE
 }
 #======================================
 # getSystemIntegrity
@@ -739,6 +979,8 @@ function sfdiskCreatePartition {
 	if [ $PART_NEED_EXTENDED -eq 1 ];then
 		fillPartition
 	fi
+	export PART_MOUNT
+	export PART_DEV
 }
 #======================================
 # partedCreatePartition
@@ -817,6 +1059,8 @@ function partedCreatePartition {
 			NO_FILE_SYSTEM=2
 		fi
 	done
+	export PART_MOUNT
+	export PART_DEV
 	p_cmd="$p_cmd set 2 boot on"
 }
 #======================================
@@ -989,6 +1233,7 @@ function kernelList {
 			KERNEL_LIST="vmlinuz:initrd"
 		fi
 	fi
+	export KERNEL_LIST
 }
 #======================================
 # validateSize
@@ -1163,7 +1408,10 @@ function mountSystem () {
 				then
 					Echo "Checking filesystem for RW data on $rwDevice..."
 					e2fsck -y -f $rwDevice >/dev/null 2>&1
-					if test "$RELOAD_IMAGE" = "yes" || ! mount $rwDevice $rwDir >/dev/null 2>&1;then
+					if
+						test "$RELOAD_IMAGE" = "yes" || \
+						! mount $rwDevice $rwDir >/dev/null 2>&1
+					then
 						Echo "Creating filesystem for RW data on $rwDevice..."
 						if ! mke2fs $rwDevice >/dev/null 2>&1;then
 							Echo "Failed to create ext2 filesystem"

@@ -1390,7 +1390,7 @@ sub writeImageConfig {
 					$targetPartition = $href -> {number};
 				}
 				if ($href -> {size} eq "image") {
-					print FD int (((-s "$imageDest/$name") / 1024 / 1024) + .5);
+					print FD int (((-s "$imageDest/$name") / 1024 / 1024) + 1);
 				} else {
 					print FD $href -> {size};
 				}

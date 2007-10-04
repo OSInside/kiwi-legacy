@@ -35,46 +35,30 @@ updateMTAB
 # 3) create initrd on diskful
 #--------------------------------------
 if test -z $KIWI_INITRD;then
-if test ! -z $DISK;then
-	if test $systemIntegrity = "clean";then
-		if test -L /boot/boot;then
-			mount -t proc proc /proc
-			mount -t sysfs sysfs /sys
-			mkinitrd 
-			umount /sys
-			umount /proc
-		else
-			Echo "Image doesn't provide kernel system map"
-			Echo "Can't create initrd"
-			systemIntegrity=unknown
+	if test ! -z $DISK;then
+		if test $systemIntegrity = "clean";then
+			setupSUSEInitrd
 		fi
 	fi
-fi
 fi
 
 #======================================
 # 4) Install boot loader on diskful
 #--------------------------------------
 if test ! -z $DISK;then
-if test $systemIntegrity = "clean";then
-	if test -f "/usr/sbin/grub";then
-		Echo "Installing boot loader..."
-		/usr/sbin/grub --batch --no-floppy < /etc/grub.conf >/dev/null 2>&1
+	if test $systemIntegrity = "clean";then
+		installBootLoaderGrub
 		echo "alias eth0 $networkModule" >> /etc/modules.conf
-	else
-		Echo "Image doesn't provide grub support"
-		Echo "Can't install boot loader"
 	fi
-fi
 fi
 
 #======================================
 # 5) Reset systemIntegrity
 #--------------------------------------
 if test ! -z $DISK;then
-if test ! -z $RELOAD_CONFIG;then
-	systemIntegrity=$systemIntegrity_save
-fi
+	if test ! -z $RELOAD_CONFIG;then
+		systemIntegrity=$systemIntegrity_save
+	fi
 fi
 
 #======================================

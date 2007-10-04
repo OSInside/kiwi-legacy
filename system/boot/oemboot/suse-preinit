@@ -34,34 +34,22 @@ updateMTAB
 #======================================
 # 2) create initrd on diskful
 #--------------------------------------
-grubOK=1
 if [ -z "$UNIONFS_CONFIG" ]; then
-	if test -L /boot/boot;then
-		mount -t proc proc /proc
-		mount -t sysfs sysfs /sys
-		mkinitrd 
-		umount /sys
-		umount /proc
-	else
-		Echo "Image doesn't provide kernel system map"
-		Echo "Can't create initrd"
-		grubOK=0
-	fi
+	#======================================
+	# use distro initrd via mkinitrd
+	#--------------------------------------
+	setupSUSEInitrd
 else
+	#======================================
+	# use kiwi initrd from boot partition
+	#--------------------------------------
 	if mount $deviceBoot /kiwiboot;then
 		rm -rf /boot && ln -s /kiwiboot/boot /boot
-		console=""
-		gdev="(hd0,0)"
-		menu=/boot/grub/menu.lst
-		echo "timeout 10"                          > $menu
-		if [ -f /boot/message ];then
-			echo "gfxmenu $gdev/boot/message"     >> $menu
-		fi
-		echo "title SLE/SUSE Linux OEM"           >> $menu
-		echo -n " kernel $gdev/boot/linux.vmx"    >> $menu
-		echo -n " root=${deviceDisk}1 $console"   >> $menu
-		echo " $KIWI_INITRD_PARAMS vga=0x314"     >> $menu
-		echo " initrd $gdev/boot/initrd.vmx"      >> $menu
+		pushd /boot &>/dev/null
+		rm -f vmlinuz && ln -s linux.vmx  vmlinuz
+		rm -f initrd  && ln -s initrd.vmx initrd
+		popd &>/dev/null
+		setupBootLoaderGrub / / 0 ${deviceDisk}1 OEM
 	else
 		Echo "Failed to mount boot partition"
 		Echo "Can't create grub configuration"
@@ -73,11 +61,5 @@ fi
 # 3) Install boot loader if ok
 #--------------------------------------
 if [ $grubOK = 1 ];then
-	if test -f "/usr/sbin/grub";then
-		Echo "Installing boot loader..."
-		/usr/sbin/grub --batch --no-floppy < /etc/grub.conf >/dev/null 2>&1
-	else
-		Echo "Image doesn't provide grub support"
-		Echo "Can't install boot loader"
-	fi
+	installBootLoaderGrub
 fi
