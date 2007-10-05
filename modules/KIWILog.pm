@@ -660,10 +660,15 @@ sub setJabberConnection {
 	my $jclient;
 	my @jresult;
 	my $jstatus;
-	if (($main::ConfigStatus) &&
-		((! defined $main::JabberServer)  ||(! defined $main::JabberUserName) ||
-		 (! defined $main::JabberPassword)||(! defined $main::JabberRessource)||
-		 (! defined $main::JabberComponent))
+	if (! $main::ConfigStatus) {
+		return undef;
+	}
+	if (
+		(! defined $main::JabberServer)    ||
+		(! defined $main::JabberUserName)  ||
+		(! defined $main::JabberPassword)  ||
+		(! defined $main::JabberRessource) ||
+		(! defined $main::JabberComponent)
 	) {
 		#$this -> warning ("Jabber setup skipped: Missing login data");
 		#$this -> skipped ();
@@ -682,21 +687,21 @@ sub setJabberConnection {
 		$this -> failed ();
 		$this -> error  ("Server is not answering: $!");
 		$this -> skipped ();
-	} else {
-		$this -> done();
-		$this -> info ("Login to Jabber server: $main::JabberUserName");
-		@jresult = $jclient -> AuthSend (
-			username => $main::JabberUserName,
-			password => $main::JabberPassword,
-			resource => $main::JabberRessource
-		);
-		if ($jresult[0] ne "ok") {
-			$this -> error   ("Failed: $jresult[0] $jresult[1]");
-			$this -> skipped ();
-		} else {
-			$this -> done ();
-		}
+		return $this;
 	}
+	$this -> done();
+	$this -> info ("Login to Jabber server: $main::JabberUserName");
+	@jresult = $jclient -> AuthSend (
+		username => $main::JabberUserName,
+		password => $main::JabberPassword,
+		resource => $main::JabberRessource
+	);
+	if ($jresult[0] ne "ok") {
+		$this -> error   ("Failed: $jresult[0] $jresult[1]");
+		$this -> skipped ();
+		return $this;
+	}
+	$this -> done ();
 	#==========================================
 	# Store object data
 	#------------------------------------------
