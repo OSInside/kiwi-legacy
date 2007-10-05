@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Fri Oct  5 10:05:26 CEST 2007 - ms@suse.de
+
+- v1.66
+- added ata drivers to isoboot boot image (#299663)
+- create /etc/sysconfig/bootsplash which is used by the distro
+  initrd tool. Added function call to all linuxrc's 
+
+-------------------------------------------------------------------
 Thu Sep 27 01:39:09 CEST 2007 - ms@suse.de
 
 - v1.65

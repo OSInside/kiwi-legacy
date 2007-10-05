@@ -21,6 +21,7 @@ package KIWILog;
 use strict;
 use Carp qw (cluck);
 use KIWISocket;
+use KIWISharedMem;
 
 #==========================================
 # Plugins
@@ -33,6 +34,9 @@ BEGIN {
 	};
 	if ($@) {
 		$KIWILog::haveJabberSupport = 0;
+	}
+	if (! $KIWILog::haveJabberSupport) {
+		package Net::Jabber::Client;
 	}
 }
 
@@ -62,6 +66,8 @@ sub new {
 	$this->{channel}   = \*STDOUT;
 	$this->{errorOk}   = 0;
 	$this->{state}     = "O";
+	$this->{message}   = "initialize";
+	$this -> getPrefix (1);
 	#==========================================
 	# Check for tiny object
 	#------------------------------------------
@@ -69,130 +75,24 @@ sub new {
 		return $this;
 	}
 	#==========================================
-	# Setup jabber connection if possible
+	# Setup jabber connection
 	#------------------------------------------
-	my $jstatus = $main::ConfigStatus;
-	if (($main::ConfigStatus) &&
-		((! defined $main::JabberServer)  ||(! defined $main::JabberUserName) ||
-		 (! defined $main::JabberPassword)||(! defined $main::JabberRessource)||
-		 (! defined $main::JabberComponent))
-	) {
-		#$this -> warning ("Jabber setup skipped: Missing login data");
-		#$this -> skipped ();
-		$jstatus = 0;
-	}
-	if (! $KIWILog::haveJabberSupport) {
-		$jstatus = 0;
-	}
-	my $jclient;
-	my @jresult;
-	if ($jstatus) {
-		$this -> info ("Connecting to Jabber server: $main::JabberServer");
-		$jclient = new Net::Jabber::Client;
-		$jstatus = $jclient -> Connect (
-			hostname => $main::JabberServer,
-			port     => $main::JabberPort
-		);
-		if (! defined $jstatus) {
-			$this -> failed ();
-			$this -> error  ("Server is not answering: $!");
-			$this -> skipped ();
-		} else {
-			$this -> done();
-			$this -> info ("Login to Jabber server: $main::JabberUserName");
-			@jresult = $jclient -> AuthSend (
-				username => $main::JabberUserName,
-				password => $main::JabberPassword,
-				resource => $main::JabberRessource
-			);
-			if ($jresult[0] ne "ok") {
-				$this -> error   ("Failed: $jresult[0] $jresult[1]");
-				$this -> skipped ();
-			} else {
-				$this -> done ();
-			}
-		}
-	}
+	$this -> setJabberConnection();
+
 	#==========================================
-	# Store object data
+	# Create shmem segment for log messages
 	#------------------------------------------
-	$this->{jcomponent}= $main::JabberComponent;
-	$this->{jclient}   = $jclient;
-	#==========================================
-	# Create Log Server on $LogServerPort
-	#------------------------------------------
-	my $child = fork();
-	if (! defined $child) {
-		$this -> warning ("Can't fork logserver process: $!");
+	my $smem = new KIWISharedMem ( $this,$this->{message} );
+	if (! defined $smem) {
+		$this -> warning ("Can't create shared log memory segment");
 		$this -> skipped ();
 		return $this;
 	}
-	if ($child) {
-		#==========================================
-		# Parent log server process
-		#------------------------------------------
-		$this->{logchild} = $child;
-		return $this;
-	} else {
-		#==========================================
-		# Child log server process
-		#------------------------------------------
-		our @logChilds = ();
-		our $logServer = new KIWISocket ( $this,$main::LogServerPort );
-		if (! defined $logServer) {
-			$this -> warning ("Can't open log port: $main::LogServerPort");
-			$this -> skipped ();
-			exit 1;
-		}
-		$SIG{TERM} = sub {
-			foreach my $child (@logChilds) { kill (13,$child); };
-			undef $logServer;
-			exit 0;
-		};
-		while (1) {
-			$logServer -> acceptConnection();
-			my $child = fork();
-			if (! defined $child) {
-				$this -> warning ("Can't fork logserver process: $!");
-				$this -> skipped ();
-				last;
-			}
-			if ($child) {
-				#==========================================
-				# Wait for incoming connections
-                #------------------------------------------
-				push @logChilds,$child;
-				next;
-			} else {
-				#==========================================
-				# Handle log requests...
-				#------------------------------------------
-				$SIG{PIPE} = sub { $logServer-> closeConnection(); exit 0; };
-				while (my $command = $logServer -> read()) {
-					#==========================================
-					# Handle command: status
-					#------------------------------------------
-					if ($command eq "status") {
-						# TODO
-						$logServer -> write ("*** not implemented ***\n");
-						next;
-					}
-					#==========================================
-					# Add More commands here...
-					#------------------------------------------
-					# ...
-					#==========================================
-					# Invalid command...
-					#------------------------------------------
-					$logServer -> write ("*** unknown ***\n");
-				}
-				$logServer -> closeConnection();
-				exit 0;
-			}
-		}
-		undef $logServer;
-		exit 0;
-	}
+	$this->{smem} = $smem;
+	#==========================================
+	# Create Log Server on $LogServerPort
+	#------------------------------------------
+	$this -> setLogServer();
 	return $this;
 }
 
@@ -217,6 +117,77 @@ sub sendJabberMessage {
 		$jclient->Process();
 	}
 	return $this;
+}
+
+#==========================================
+# sendLogServerMessage
+#------------------------------------------
+sub sendLogServerMessage {
+	# ...
+	# send the current message to the shared memory segment.
+	# with getLogServerMessage the current memory contents
+	# will be read
+	# ---
+	my $this    = shift;
+	my $smem    = $this->{smem};
+	my $message = $this->{message};
+	my $level   = $this->{level};
+	my $date    = $this->{date};
+	if (! defined $smem) {
+		return undef;
+	}
+	my $data;
+	if ($level == 1) {
+		$data = '<info>';
+	} elsif ($level == 2) {
+		$data = '<warning>';
+	} else {
+		$data = '<error>';
+	}
+	$data .= "\n".'  <message info="'.$message.'"/>'."\n";
+	if ($level == 1) {
+        $data .= '</info>';
+	} elsif ($level == 2) {
+		$data .= '</warning>';
+	} else {
+		$data .= '</error>';
+	}
+	$data .= "\n";
+	$smem -> lock();
+	$smem -> poke($data);
+	$smem -> unlock();
+	return $this;
+}
+
+#==========================================
+# getLogServerMessage
+#------------------------------------------
+sub getLogServerMessage {
+	# ...
+	# get the contents of the shared memory segment and
+	# return them
+	# ---
+	my $this = shift;
+	my $smem = $this->{smem};
+	if (! defined $smem) {
+		return undef;
+	}
+	return $smem -> get();
+}
+
+#==========================================
+# getLogServerDefaultErrorMessage
+#------------------------------------------
+sub getLogServerDefaultErrorMessage {
+	# ...
+	# create the default answer if an unknown query command
+	# was passed to the log server port
+	# ---
+	my $this = shift;
+	my $data = '<error>';
+	$data .= "\n".'  <message info="unknown command"/>'."\n";
+	$data .= '</error>'."\n";
+	return $data;
 }
 
 #==========================================
@@ -420,6 +391,8 @@ sub setOutputChannel {
 	open ( OLDSTD, ">&STDOUT" );
 	open ( STDERR,">&$$channel" );
 	open ( STDOUT,">&$$channel" );
+	$this->{olderr} = \*OLDERR;
+	$this->{oldstd} = \*OLDSTD;
 }
 
 #==========================================
@@ -427,10 +400,12 @@ sub setOutputChannel {
 #------------------------------------------
 sub resetOutputChannel {
 	my $this = shift;
+	my $olderr = $this->{olderr}; 
+	my $oldstd = $this->{oldstd};
 	close ( STDERR );
-	open  ( STDERR, ">&OLDERR" );
+	open  ( STDERR, ">&$$olderr" );
 	close ( STDOUT );
-	open  ( STDOUT, ">&OLDSTD" );
+	open  ( STDOUT, ">&$$oldstd" );
 }
 
 #==========================================
@@ -440,8 +415,9 @@ sub getPrefix {
 	my $this  = shift;
 	my $level = shift;
 	my $date;
-	$date = qx ( LANG=POSIX /bin/date "+%h-%d %H:%M");
-	$date =~ s/\n$//;
+	$date = qx ( LANG=POSIX /bin/date "+%h-%d %H:%M"); chomp $date;
+	$this->{date} = $date;
+	$this->{level}= $level;
 	$date .= " <$level> : ";
 	return $date;
 }
@@ -456,10 +432,20 @@ sub printLog {
 	# channels or a previosly opened file
 	# ---
 	my $this = shift;
+	my $smem    = $this->{smem};
 	my $lglevel = $_[0];
 	my $logdata = $_[1];
 	my $flag    = $_[2];
 	my $needcr  = "";
+	my $date    = $this -> getPrefix ( $lglevel );
+	#==========================================
+	# store current message in object data
+	#------------------------------------------
+	$this->{message} = $logdata;
+	#==========================================
+	# store current message in shared mem
+	#------------------------------------------
+	$this -> sendLogServerMessage ();
 	#==========================================
 	# check log status 
 	#------------------------------------------
@@ -485,7 +471,6 @@ sub printLog {
 		$logdata = $lglevel;
 		$lglevel = 1;
 	}
-	my $date = getPrefix ( $this,$lglevel );
 	if (defined $flag) {
 		print EFD $needcr,$date,$logdata;
 		return;
@@ -664,12 +649,162 @@ sub getRootLog {
 }
 
 #==========================================
+# setJabberConnection
+#------------------------------------------
+sub setJabberConnection {
+	# ...
+	# Setup jabber connection if possible. This requires the
+	# package perl-Net-Jabber to be installed
+	# ---
+	my $this = shift;
+	my $jclient;
+	my @jresult;
+	my $jstatus;
+	if (($main::ConfigStatus) &&
+		((! defined $main::JabberServer)  ||(! defined $main::JabberUserName) ||
+		 (! defined $main::JabberPassword)||(! defined $main::JabberRessource)||
+		 (! defined $main::JabberComponent))
+	) {
+		#$this -> warning ("Jabber setup skipped: Missing login data");
+		#$this -> skipped ();
+		return undef;
+	}
+	if (! $KIWILog::haveJabberSupport) {
+		return undef;
+	}
+	$this -> info ("Connecting to Jabber server: $main::JabberServer");
+	$jclient = new Net::Jabber::Client;
+	$jstatus = $jclient -> Connect (
+		hostname => $main::JabberServer,
+		port     => $main::JabberPort
+	);
+	if (! defined $jstatus) {
+		$this -> failed ();
+		$this -> error  ("Server is not answering: $!");
+		$this -> skipped ();
+	} else {
+		$this -> done();
+		$this -> info ("Login to Jabber server: $main::JabberUserName");
+		@jresult = $jclient -> AuthSend (
+			username => $main::JabberUserName,
+			password => $main::JabberPassword,
+			resource => $main::JabberRessource
+		);
+		if ($jresult[0] ne "ok") {
+			$this -> error   ("Failed: $jresult[0] $jresult[1]");
+			$this -> skipped ();
+		} else {
+			$this -> done ();
+		}
+	}
+	#==========================================
+	# Store object data
+	#------------------------------------------
+	$this->{jcomponent}= $main::JabberComponent;
+	$this->{jclient}   = $jclient;
+	return $this;
+}
+
+#==========================================
+# setLogServer
+#------------------------------------------
+sub setLogServer {
+	# ...
+	# setup a log server which can be queried. The answer to each
+	# query is a XML formated information
+	# ---
+	my $this  = shift;
+	my $child = fork();
+	if (! defined $child) {
+		$this -> warning ("Can't fork logserver process: $!");
+		$this -> skipped ();
+		return undef;
+	}
+	if ($child) {
+		#==========================================
+		# Parent log server process
+		#------------------------------------------
+		$this->{logchild} = $child;
+		return $this;
+	} else {
+		#==========================================
+		# Child log server process
+		#------------------------------------------
+		our @logChilds = ();
+		our $logServer = new KIWISocket ( $this,$main::LogServerPort );
+		our $sharedMem = $this->{smem};
+		if (! defined $logServer) {
+			$this -> warning ("Can't open log port: $main::LogServerPort");
+			$this -> skipped ();
+			exit 1;
+		}
+		$SIG{TERM} = sub {
+			foreach my $child (@logChilds) { kill (13,$child); };
+			undef $logServer;
+			exit 0;
+		};
+		while (1) {
+			$logServer -> acceptConnection();
+			my $child = fork();
+			if (! defined $child) {
+				$this -> warning ("Can't fork logserver process: $!");
+				$this -> skipped ();
+				last;
+			}
+			if ($child) {
+				#==========================================
+				# Wait for incoming connections
+                #------------------------------------------
+				push @logChilds,$child;
+				next;
+			} else {
+				#==========================================
+				# Handle log requests...
+				#------------------------------------------
+				$SIG{PIPE} = sub {
+					$logServer -> write ( $this -> getLogServerMessage() );
+					$logServer -> closeConnection(); exit 0;
+					$sharedMem -> closeSegment();
+				};
+				while (my $command = $logServer -> read()) {
+					#==========================================
+					# Handle command: status
+					#------------------------------------------
+					if ($command eq "status") {
+						$logServer -> write (
+							$this -> getLogServerMessage()
+						);
+						next;
+					}
+					#==========================================
+					# Add More commands here...
+					#------------------------------------------
+					# ...
+					#==========================================
+					# Invalid command...
+					#------------------------------------------
+					$logServer -> write (
+						$this -> getLogServerDefaultErrorMessage()
+					);
+				}
+				$logServer -> closeConnection();
+				$sharedMem -> closeSegment();
+				exit 0;
+			}
+		}
+		undef $logServer;
+		exit 0;
+	}
+	return $this;
+}
+
+#==========================================
 # Destructor
 #------------------------------------------
 sub DESTROY {
-	my $this    = shift;
-	my $jclient = $this->{jclient};
-	my $logchild= $this->{logchild};
+	my $this     = shift;
+	my $jclient  = $this->{jclient};
+	my $logchild = $this->{logchild};
 	close EFD;
 	if (defined $jclient) {
 		$jclient -> Disconnect();

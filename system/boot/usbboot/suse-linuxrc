@@ -123,17 +123,11 @@ fi
 # 9) Create system dependant files
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
-if test $systemIntegrity = "clean";then
-	mkdir -p /config/etc
-	cat > /config/etc/fstab < /dev/null
-	if [ -z "$UNIONFS_CONFIG" ]; then
-		echo "$stickDevice / $FSTYPE defaults 0 0"       > /config/etc/fstab
+	if test $systemIntegrity = "clean";then
+		setupBootSplash /config
+		setupDefaultFstab /config
+		updateRootDeviceFstab /config $stickDevice
 	fi
-	echo "devpts  /dev/pts   devpts mode=0620,gid=5 0 0" >> /config/etc/fstab
-	echo "proc    /proc   proc    defaults 0 0"          >> /config/etc/fstab
-	echo "sysfs   /sys    sysfs   noauto 0 0"            >> /config/etc/fstab
-	echo "tmpfs   /dev/shm tmpfs  defaults 0 0"          >> /config/etc/fstab
-fi
 fi
 
 #======================================

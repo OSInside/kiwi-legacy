@@ -673,6 +673,7 @@ fi
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	if test $systemIntegrity = "clean";then
+		setupBootSplash /config
 		setupDefaultFstab /config
 		updateRootDeviceFstab /config $imageRootDevice
 		if test ! -z $DISK;then

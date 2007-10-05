@@ -258,22 +258,17 @@ fi
 #======================================
 # 12) Create system dependant files
 #--------------------------------------
-mkdir -p /config/etc
-if [ -z "$UNIONFS_CONFIG" ];then
-	echo "$imageDevice / $FSTYPE   defaults 0 0"     > /config/etc/fstab
-fi
+setupBootSplash /config
+setupDefaultFstab /config
+updateRootDeviceFstab /config $imageDevice
 if [ ! -z "$swapSpace" ];then
-	echo "$swapSpace swap swap pri=42  0 0"         >> /config/etc/fstab
+	updateSwapDeviceFstab /config $swapSpace
 fi
 if [ ! -z "$swapDevice" ];then
 	mkdir -p /mnt/swap
 	echo "$swapDevice /swap $SWTYPE defaults 1 1"   >> /config/etc/fstab
 	echo "/swap/kiwiswap none swap sw 0 0"          >> /config/etc/fstab
 fi
-echo "devpts  /dev/pts devpts  mode=0620,gid=5 0 0" >> /config/etc/fstab
-echo "proc    /proc    proc    defaults 0 0"        >> /config/etc/fstab
-echo "sysfs   /sys     sysfs   noauto 0 0"          >> /config/etc/fstab
-echo "tmpfs   /dev/shm tmpfs   defaults 0 0"        >> /config/etc/fstab
 
 #======================================
 # 13) copy system dependant files

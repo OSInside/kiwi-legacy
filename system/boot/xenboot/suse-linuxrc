@@ -85,15 +85,9 @@ probeFileSystem $imageRootDevice
 #======================================
 # 6) Create system dependant files
 #--------------------------------------
-#======================================
-# a) /etc/fstab
-#--------------------------------------
-mkdir -p /config/etc
-echo "$imageRootDevice / $FSTYPE defaults 0 0"        > /config/etc/fstab
-echo "devpts  /dev/pts   devpts mode=0620,gid=5 0 0" >> /config/etc/fstab
-echo "proc    /proc   proc    defaults 0 0"          >> /config/etc/fstab
-echo "sysfs   /sys    sysfs   noauto 0 0"            >> /config/etc/fstab
-echo "tmpfs   /dev/shm tmpfs  defaults 0 0"          >> /config/etc/fstab
+setupBootSplash /config
+setupDefaultFstab /config
+updateRootDeviceFstab /config $imageRootDevice
 
 #======================================
 # 7) copy system dependant files
