@@ -92,9 +92,7 @@ echo "-------------------------------"
 #======================================
 # 1) Mounting local file systems
 #--------------------------------------
-mount -t proc  proc    /proc
-mount -t sysfs sysfs   /sys
-mount -t devpts devpts /dev/pts
+mountSystemFilesystems
 closeKernelConsole
 
 #======================================
@@ -106,7 +104,7 @@ touch /lib/modules/*/modules.dep
 #======================================
 # 3) Including required kernel modules
 #--------------------------------------
-probeDevices
+probeDevices; udevStart
 
 #======================================
 # 4) Mount VM (boot)
@@ -187,9 +185,8 @@ echo 256 > /proc/sys/kernel/real-root-dev
 #======================================
 # 12) umount system filesystems
 #--------------------------------------
-umount /dev/pts
-umount /sys
-umount /proc
+udevKill
+umountSystemFilesystems
 
 #======================================
 # 13) copy initrd files to image

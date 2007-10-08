@@ -84,6 +84,10 @@ sub new {
 	if (! defined $manager) {
 		$manager = "smart";
 	}
+	my $dataDir = "/var/cache/kiwi/smart";
+	if ($manager eq "smart") {
+		qx (mkdir -p $dataDir);
+	}
 	my @channelList = ();
 	#==========================================
 	# Store object data
@@ -99,6 +103,10 @@ sub new {
 	$this->{screenCall}  = $root."/screenrc.smart";
 	$this->{screenCtrl}  = $root."/screenrc.ctrls";
 	$this->{screenLogs}  = $kiwi -> getRootLog();
+	$this->{dataDir}     = $dataDir;
+	$this->{smart}       = [
+		"smart","--data-dir=$dataDir"
+	];
 	$this->{zypper}      = [
 		"zypper","--non-interactive","--no-gpg-checks"
 	];
@@ -226,6 +234,7 @@ sub setupSignatureCheck {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $xml  = $this->{xml};
+	my @smart   = @{$this->{smart}};
 	my $manager = $this->{manager};
 	my $chroot  = $this->{chroot};
 	my $root    = $this->{root};
@@ -244,11 +253,14 @@ sub setupSignatureCheck {
 	#------------------------------------------
 	if ($manager eq "smart") {
 		my $optionName  = "rpm-check-signatures";
-		my $curCheckSig = qx (smart config --show $optionName|tr -d '\n');
+		my $curCheckSig = qx (@smart config --show $optionName|tr -d '\n');
+		my $cmdstr = "smart config --set";
+		if (! $chroot) {
+			$cmdstr = "@smart config --set";
+		}
 		$this->{curCheckSig} = $curCheckSig;
 		if (defined $imgCheckSig) {
 			my $option = "$optionName=$imgCheckSig";
-			my $cmdstr = "smart config --set";
 			if (! $chroot) {
 				$this -> checkExclusiveLock();
 				$kiwi -> info ("Setting RPM signature check to: $imgCheckSig");
@@ -291,6 +303,7 @@ sub resetSignatureCheck {
 	my $manager= $this->{manager};
 	my $root   = $this->{root};
 	my $lock   = $this->{lock};
+	my @smart  = @{$this->{smart}};
 	my $curCheckSig = $this->{curCheckSig};
 	my $data;
 	my $code;
@@ -302,6 +315,9 @@ sub resetSignatureCheck {
 			my $optionName  = "rpm-check-signatures";
 			my $option = "$optionName=$curCheckSig";
 			my $cmdstr = "smart config --set";
+			if (! $chroot) {
+				$cmdstr = "@smart config --set";
+			}
 			if (! $chroot) {
 				$this -> checkExclusiveLock();
 				$kiwi -> info ("Reset RPM signature check to: $curCheckSig");
@@ -345,6 +361,7 @@ sub setupInstallationSource {
 	my $root   = $this->{root};
 	my $manager= $this->{manager};
 	my @zypper = @{$this->{zypper}};
+	my @smart  = @{$this->{smart}};
 	my $lock   = $this->{lock};
 	my $data;
 	my $code;
@@ -358,12 +375,13 @@ sub setupInstallationSource {
 	#------------------------------------------
 	if ($manager eq "smart") {
 		my $stype = "private";
+		my $cmds  = "smart channel --add";
 		if (! $chroot) {
 			$stype = "public";
+			$cmds  = "@smart channel --add";
 		}
 		foreach my $chl (keys %{$source{$stype}}) {
 			my @opts = @{$source{$stype}{$chl}};
-			my $cmds = "smart channel --add";
 			if (! $chroot) {
 				$this -> checkExclusiveLock();
 				$this -> setLock();
@@ -463,6 +481,7 @@ sub resetInstallationSource {
 	my $manager= $this->{manager};
 	my $root   = $this->{root};
 	my @zypper = @{$this->{zypper}};
+	my @smart  = @{$this->{smart}};
 	my $lock   = $this->{lock};
 	my @channelList = @{$this->{channelList}};
 	my $data;
@@ -473,6 +492,9 @@ sub resetInstallationSource {
 	if ($manager eq "smart") {
 		my @list = @channelList;
 		my $cmds = "smart channel --remove";
+		if (! $chroot) {
+			$cmds = "@smart channel --remove";
+		}
 		if (! $chroot) {
 			$this -> checkExclusiveLock();
 			$kiwi -> info ("Removing smart channel(s): @channelList");
@@ -532,6 +554,7 @@ sub setupDownload {
 	my $kiwi   = $this->{kiwi};
 	my $manager= $this->{manager};
 	my $root   = $this->{root};
+	my @smart  = @{$this->{smart}};
 	my @channelList = @{$this->{channelList}};
 	my $screenCall  = $this->{screenCall};
 	my @pacs   = @_;
@@ -547,16 +570,14 @@ sub setupDownload {
 	#------------------------------------------
 	if ($manager eq "smart") {
 		$kiwi -> info ("Downloading packages...");
-		my $forceChannels = join (",",@channelList);
 		my @loadOpts = (
-			"-o force-channels=$forceChannels",
 			"--target=$root"
 		);
 		#==========================================
 		# Create screen call file
 		#------------------------------------------
-		print $fd "smart update @channelList\n";
-		print $fd "test \$? = 0 && smart download @pacs @loadOpts\n";
+		print $fd "@smart update @channelList\n";
+		print $fd "test \$? = 0 && @smart download @pacs @loadOpts\n";
 		print $fd "echo \$? > $screenCall.exit\n";
 		print $fd "rm -f $root/etc/smart/channels/*\n";
 		$fd -> close();
@@ -652,6 +673,7 @@ sub setupRootSystem {
 	my $xml    = $this->{xml};
 	my $manager= $this->{manager};
 	my @zypper = @{$this->{zypper}};
+	my @smart  = @{$this->{smart}};
 	my $lock   = $this->{lock};
 	my @channelList = @{$this->{channelList}};
 	my $screenCall  = $this->{screenCall};
@@ -669,11 +691,9 @@ sub setupRootSystem {
 		if (! $chroot) {
 			$this -> checkExclusiveLock();
 			$kiwi -> info ("Initializing image system on: $root...");
-			my $forceChannels = join (",",@channelList);
 			my @installOpts = (
 				"-o rpm-root=$root",
 				"-o deb-root=$root",
-				"-o force-channels=$forceChannels",
 				"--explain",
 				"--log-level=error",
 				"-y"
@@ -686,8 +706,8 @@ sub setupRootSystem {
 			# Create screen call file
 			#------------------------------------------
 			print $fd "touch $lock\n";
-			print $fd "smart update @channelList\n";
-			print $fd "test \$? = 0 && smart install @packs @installOpts\n";
+			print $fd "@smart update @channelList\n";
+			print $fd "test \$? = 0 && @smart install @packs @installOpts\n";
 			print $fd "echo \$? > $screenCall.exit\n";
 			print $fd "rm -f $root/etc/smart/channels/*\n";
 			print $fd "rm -f $lock\n";
@@ -787,6 +807,7 @@ sub resetSource {
 	my $kiwi = $this->{kiwi};
 	my %source  = %{$this->{source}};
 	my $manager = $this->{manager};
+	my @smart   = @{$this->{smart}};
 	my @zypper  = @{$this->{zypper}};
 	my $lock    = $this->{lock};
 	#==========================================
@@ -800,7 +821,7 @@ sub resetSource {
 	if ($manager eq "smart") {
 		foreach my $channel (keys %{$source{public}}) {
 			$kiwi -> info ("Removing smart channel: $channel\n");
-			qx ( smart channel --remove $channel -y 2>&1 );
+			qx ( @smart channel --remove $channel -y 2>&1 );
 		}
 	}
 	#==========================================
@@ -831,6 +852,7 @@ sub setupPackageInfo {
 	my $root   = $this->{root};
 	my $manager= $this->{manager};
 	my @zypper = @{$this->{zypper}};
+	my @smart  = @{$this->{smart}};
 	my $lock   = $this->{lock};
 	my $data;
 	my $code;
@@ -843,7 +865,7 @@ sub setupPackageInfo {
 			$this -> checkExclusiveLock();
 			$kiwi -> info ("Checking for package: $pack");
 			$this -> setLock();
-			$data = qx ( smart query --installed $pack | grep -qi $pack 2>&1 );
+			$data = qx ( @smart query --installed $pack | grep -qi $pack 2>&1 );
 			$code = $? >> 8;
 			$this -> freeLock();
 		} else {
@@ -930,6 +952,15 @@ sub freeLock {
 	my $this = shift;
 	my $lock = $this->{lock};
 	qx ( rm -f $lock );
+}
+
+#==========================================
+# Destructor
+#------------------------------------------
+sub DESTROY {
+	my $this    = shift;
+	my $dataDir = $this->{dataDir};
+	qx (rm -rf $dataDir);
 }
 
 1;

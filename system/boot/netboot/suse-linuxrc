@@ -71,9 +71,7 @@ echo "---------------------------"
 #======================================
 # 1) Mounting local file systems
 #--------------------------------------
-mount -t proc  proc    /proc
-mount -t sysfs sysfs   /sys
-mount -t devpts devpts /dev/pts
+mountSystemFilesystems
 closeKernelConsole
 
 #======================================
@@ -238,7 +236,7 @@ fi
 #======================================
 # (8) Load Device modules
 #--------------------------------------
-probeDevices
+probeDevices; udevStart
 
 export systemIntegrity="unknown"
 #======================================
@@ -730,9 +728,8 @@ echo 256 > /proc/sys/kernel/real-root-dev
 #======================================
 # 21) umount system filesystems
 #--------------------------------------
-umount /dev/pts
-umount /sys
-umount /proc
+udevKill
+umountSystemFilesystems
 
 #======================================
 # 22) copy initrd files to image

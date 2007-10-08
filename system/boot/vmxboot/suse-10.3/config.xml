@@ -120,7 +120,6 @@
 		<package name="rpm-python"/>
 		<package name="smart"/>
 		<package name="suse-build-key"/>
-		<package name="udev"/>
 		<package name="gfxboot"/>
 		<package name="fribidi"/>
 		<package name="make"/>

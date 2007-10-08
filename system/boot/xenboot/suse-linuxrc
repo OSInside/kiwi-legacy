@@ -53,9 +53,7 @@ echo "-------------------------------"
 #======================================
 # 1) Mounting local file systems
 #--------------------------------------
-mount -t proc  proc    /proc
-mount -t sysfs sysfs   /sys
-mount -t devpts devpts /dev/pts
+mountSystemFilesystems
 closeKernelConsole
 
 #======================================
@@ -71,6 +69,7 @@ Echo "Including required kernel modules..."
 for module in xennet xenblk reiserfs ext2 ext3 loop ipv6;do
 	modprobe $module >/dev/null 2>&1
 done
+udevStart
 
 #======================================
 # 4) Mount VM (boot)
@@ -106,9 +105,8 @@ echo 256 > /proc/sys/kernel/real-root-dev
 #======================================
 # 9) umount system filesystems
 #--------------------------------------
-umount /dev/pts
-umount /sys
-umount /proc
+udevKill
+umountSystemFilesystems
 
 #======================================
 # 10) copy initrd files to image

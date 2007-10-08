@@ -32,7 +32,12 @@ fi
 updateMTAB
 
 #======================================
-# 2) create initrd on diskful
+# 3) create framebuffer devices
+#--------------------------------------
+createFramebufferDevices
+
+#======================================
+# 4) create initrd on diskful
 #--------------------------------------
 if [ -z "$UNIONFS_CONFIG" ]; then
 	#======================================
@@ -58,7 +63,7 @@ else
 fi
 
 #======================================
-# 3) Install boot loader if ok
+# 5) Install boot loader if ok
 #--------------------------------------
 if [ $grubOK = 1 ];then
 	installBootLoaderGrub

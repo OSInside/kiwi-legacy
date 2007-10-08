@@ -138,6 +138,50 @@ function systemException {
 	esac
 }
 #======================================
+# mountSystemFilesystems
+#--------------------------------------
+function mountSystemFilesystems {
+	mount -t proc  proc    /proc     &>/dev/null
+	mount -t sysfs sysfs   /sys      &>/dev/null
+	mount -t devpts devpts /dev/pts  &>/dev/null
+}
+#======================================
+# umountSystemFilesystems
+#--------------------------------------
+function umountSystemFilesystems {
+	umount /dev/pts &>/dev/null
+	umount /sys     &>/dev/null
+	umount /proc    &>/dev/null
+}
+#======================================
+# createFramebufferDevices
+#--------------------------------------
+function createFramebufferDevices {
+	if [ -f /proc/fb ]; then
+		Echo "Creating framebuffer devices"
+		while read fbnum fbtype; do
+			if [ $(($fbnum < 32)) ] ; then
+				[ -c /dev/fb$fbnum ] || mknod -m 0660 /dev/fb$fbnum c 29 $fbnum
+			fi
+		done < /proc/fb
+	fi
+}
+#======================================
+# udevStart
+#--------------------------------------
+function udevStart {
+	Echo "Creating device nodes with udev"
+	/sbin/udevd --daemon
+	/sbin/udevtrigger
+	/sbin/udevsettle --timeout=30
+}
+#======================================
+# udevKill
+#--------------------------------------
+function udevKill {
+	kill $(/sbin/pidof udevd)
+}
+#======================================
 # installGrub
 #--------------------------------------
 function installBootLoaderGrub {
@@ -540,9 +584,9 @@ function probeDeviceInfo {
 	mv $modinfo.new $modinfo
 }
 #======================================
-# probeDevices
+# probeDevicesForAlias
 #--------------------------------------
-function probeDevices {
+function probeDevicesForAlias {
 	# /.../
 	# check the modalias with the modinfo file and load
 	# all matching kernel modules into the kernel
@@ -561,7 +605,7 @@ function probeDevices {
 			INITRD_MODULES="$INITRD_MODULES $module"
 			if [ $module = "generic" ];then
 				DRIVER_GENERIC=1
-			elif [  $module = "ata_piix" ] ; then
+			elif [ $module = "ata_piix" ] ; then
 				DRIVER_ATA_PIIX=1
 			else
 				Echo "Probing module: $module"
@@ -581,6 +625,19 @@ function probeDevices {
 		Echo "Probing module: generic"
 		modprobe generic >/dev/null 2>&1
 	fi
+}
+#======================================
+# probeDevices
+#--------------------------------------
+function probeDevices {
+	Echo "Including required kernel modules..."
+	stdevs=`/usr/sbin/hwinfo --storage | grep "Activation Cmd"| cut -f2 -d:`
+	stdevs=`echo $stdevs | tr -d \" | sed -e s"@modprobe@@g"` 
+	for module in $stdevs;do
+		Echo "Probing module: $module"
+		INITRD_MODULES="$INITRD_MODULES $module"
+		modprobe $module >/dev/null 2>&1
+	done
 }
 #======================================
 # CDDevice

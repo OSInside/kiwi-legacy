@@ -32,7 +32,12 @@ fi
 updateMTAB
 
 #======================================
-# 3) create initrd on diskful
+# 3) create framebuffer devices
+#--------------------------------------
+createFramebufferDevices
+
+#======================================
+# 4) create initrd on diskful
 #--------------------------------------
 if test -z $KIWI_INITRD;then
 	if test ! -z $DISK;then
@@ -43,7 +48,7 @@ if test -z $KIWI_INITRD;then
 fi
 
 #======================================
-# 4) Install boot loader on diskful
+# 5) Install boot loader on diskful
 #--------------------------------------
 if test ! -z $DISK;then
 	if test $systemIntegrity = "clean";then
@@ -53,7 +58,7 @@ if test ! -z $DISK;then
 fi
 
 #======================================
-# 5) Reset systemIntegrity
+# 6) Reset systemIntegrity
 #--------------------------------------
 if test ! -z $DISK;then
 	if test ! -z $RELOAD_CONFIG;then
@@ -62,7 +67,7 @@ if test ! -z $DISK;then
 fi
 
 #======================================
-# 6) check for valid mount points 
+# 7) check for valid mount points 
 #--------------------------------------
 if test ! -z $DISK;then
 	IFS=":" ; for i in $PART_MOUNT;do
@@ -75,7 +80,7 @@ if test ! -z $DISK;then
 fi
 
 #======================================
-# 7) Update /etc/ImageVersion files
+# 8) Update /etc/ImageVersion files
 #--------------------------------------
 if test ! -z $DISK;then
 	count=0
@@ -101,7 +106,7 @@ if test ! -z $DISK;then
 fi
 
 #======================================
-# 8) setup network for nfs boot
+# 9) setup network for nfs boot
 #--------------------------------------
 if test ! -z $NFSROOT;then
 	mount -o nolock -t proc  proc    /proc

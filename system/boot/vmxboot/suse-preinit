@@ -25,24 +25,30 @@
 updateMTAB
 
 #======================================
-# 2) check for union filesystem
+# 2) create framebuffer devices
+#--------------------------------------
+createFramebufferDevices
+
+#======================================
+# 3) check for union filesystem
 #--------------------------------------
 if [ ! -z "$UNIONFS_CONFIG" ]; then
 	# /.../
 	# we are using a special root setup with aufs. In this case
 	# we can't use the SuSE Linux initrd but must stick to the
 	# kiwi boot system.
-	# ---- 
+	# ----
+	updateMTAB
 	exit 0
 fi
 
 #======================================
-# 3) create initrd on diskful
+# 4) create initrd on diskful
 #--------------------------------------
 setupSUSEInitrd
 
 #======================================
-# 4) Install boot loader on diskful
+# 5) Install boot loader on diskful
 #--------------------------------------
 if [ $grubOK = 1 ];then
 	installBootLoaderGrub

@@ -23,3 +23,8 @@
 # 1) update mount table
 #--------------------------------------
 updateMTAB
+
+#======================================
+# 2) create framebuffer devices
+#--------------------------------------
+createFramebufferDevices

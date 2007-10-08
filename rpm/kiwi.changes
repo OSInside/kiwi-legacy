@@ -1,4 +1,16 @@
 -------------------------------------------------------------------
+Mon Oct  8 09:04:18 CEST 2007 - ms@suse.de
+
+- v1.68
+- use hwinfo to load storage drivers in correct order (#299663)
+- added framebuffer devices in initrd suse-preinit
+- added udev start/stop to initrd linuxrc's, don't delete udev
+  for suse 10.2 / 10.3 boot descriptions
+- use smart --data-dir instead of force-channels. This will setup
+  a clean data dir channel repo for smart used by kiwi only. The
+  standard channel list in /var/lib/smart remains untouched
+
+-------------------------------------------------------------------
 Fri Oct  5 16:28:43 CEST 2007 - ms@suse.de
 
 - v1.67
