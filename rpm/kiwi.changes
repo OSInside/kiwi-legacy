@@ -6,6 +6,7 @@ Mon Oct  8 09:04:18 CEST 2007 - ms@suse.de
 - added framebuffer devices in initrd suse-preinit
 - added udev start/stop to initrd linuxrc's, don't delete udev
   for suse 10.2 / 10.3 boot descriptions
+- added creation of /boot/grub/device.map used by mkinitrd
 - use smart --data-dir instead of force-channels. This will setup
   a clean data dir channel repo for smart used by kiwi only. The
   standard channel list in /var/lib/smart remains untouched

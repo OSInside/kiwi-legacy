@@ -288,6 +288,7 @@ function setupBootLoaderGrub {
 	local gfix=$5         # grub title postfix
 	local menu=$destsPrefix/boot/grub/menu.lst
 	local conf=$destsPrefix/etc/grub.conf
+	local dmap=$destsPrefix/boot/grub/device.map
 	local console=""
 	#======================================
 	# check for system image .profile
@@ -324,7 +325,7 @@ function setupBootLoaderGrub {
 	#======================================
 	# create directory structure
 	#--------------------------------------
-	for dir in $menu $conf;do
+	for dir in $menu $conf $dmap;do
 		dir=`dirname $dir`; mkdir -p $dir
 	done
 	#======================================
@@ -377,6 +378,11 @@ function setupBootLoaderGrub {
 	echo -n " /boot/grub/stage2 0x8000"     >> $conf
 	echo " $gdev/boot/grub/menu.lst"        >> $conf
 	echo "quit"                             >> $conf
+	#======================================
+	# create grub device map
+	#--------------------------------------
+	rdisk=`echo $rdev | sed -e s"@[0-9]@@g"`
+	echo "(hd0) $rdisk" > $dmap
 }
 #======================================
 # setupDefaultFstab
