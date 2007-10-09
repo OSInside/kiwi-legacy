@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Tue Oct  9 10:07:19 CEST 2007 - ms@suse.de
+
+- v1.69
+- There are some nice deployment options in config.mac, but nothing to set
+  these from config.xml.  Specifically, I'm talking about the
+  KIWI_BOOT_TIMEOUT, KIWI_KERNEL_OPTIONS, KIWI_KERNEL and KIWI_INITRD
+  settings.  This patch adds the ability to set these from config.xml
+  Patch by James Willcox <james@ximian.com>
+
+-------------------------------------------------------------------
 Mon Oct  8 09:04:18 CEST 2007 - ms@suse.de
 
 - v1.68

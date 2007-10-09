@@ -121,6 +121,10 @@
 	<xs:element name="deploy">
 		<xs:complexType>
 			<xs:sequence>
+				<xs:element name="timeout" minOccurs="0" maxOccurs="1" type="xs:string"/>
+				<xs:element name="commandline" minOccurs="0" maxOccurs="1" type="xs:string"/>
+				<xs:element name="kernel" minOccurs="0" maxOccurs="1" type="xs:string"/>
+				<xs:element name="initrd" minOccurs="0" maxOccurs="1" type="xs:string"/>
 				<xs:element ref="partitions" minOccurs="0" maxOccurs="1"/>
 				<xs:element ref="union" minOccurs="0" maxOccurs="1"/>
 				<xs:element ref="configuration" minOccurs="0" maxOccurs="unbounded"/>

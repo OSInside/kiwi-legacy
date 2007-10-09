@@ -514,6 +514,74 @@ sub getDeployConfiguration {
 }
 
 #==========================================
+# getDeployTimeout
+#------------------------------------------
+sub getDeployTimeout {
+	# ...
+	# Get the boot timeout, if specified
+	# ---
+	my $this = shift;
+	my $node = $this->{deploysNodeList} -> get_node(1);
+	my $timeout = $node -> getElementsByTagName ("timeout");
+	if ((defined $timeout) && ! ("$timeout" eq "")) {
+		return $timeout;
+	} else {
+		return undef;
+	}
+}
+
+#==========================================
+# getDeployCommandline
+#------------------------------------------
+sub getDeployCommandline {
+	# ...
+	# Get the boot commandline, if specified
+	# ---
+	my $this = shift;
+	my $node = $this->{deploysNodeList} -> get_node(1);
+	my $cmdline = $node -> getElementsByTagName ("commandline");
+	if ((defined $cmdline) && ! ("$cmdline" eq "")) {
+		return $cmdline;
+	} else {
+		return undef;
+	}
+}
+
+#==========================================
+# getDeployKernel
+#------------------------------------------
+sub getDeployKernel {
+	# ...
+	# Get the deploy kernel, if specified
+	# ---
+	my $this = shift;
+	my $node = $this->{deploysNodeList} -> get_node(1);
+	my $kernel = $node -> getElementsByTagName ("kernel");
+	if ((defined $kernel) && ! ("$kernel" eq "")) {
+		return $kernel;
+	} else {
+		return undef;
+	}
+}
+
+#==========================================
+# getDeployInitrd
+#------------------------------------------
+sub getDeployInitrd {
+	# ...
+	# Get the deploy initrd, if specified
+	# ---
+	my $this = shift;
+	my $node = $this->{deploysNodeList} -> get_node(1);
+	my $initrd = $node -> getElementsByTagName ("initrd");
+	if ((defined $initrd) && ! ("$initrd" eq "")) {
+		return $initrd;
+	} else {
+		return undef;
+	}
+}
+
+#==========================================
 # getCompressed
 #------------------------------------------
 sub getCompressed {

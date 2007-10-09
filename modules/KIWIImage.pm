@@ -1460,6 +1460,34 @@ sub writeImageConfig {
 			}
 		}
 		#==========================================
+		# KIWI_BOOT_TIMEOUT information
+		#------------------------------------------
+		my $timeout = $xml -> getDeployTimeout ();
+		if (defined $timeout) {
+			print FD "KIWI_BOOT_TIMEOUT=$timeout\n";
+		}
+		#==========================================
+		# KIWI_KERNEL_OPTIONS information
+		#------------------------------------------
+		my $cmdline = $xml -> getDeployCommandline ();
+		if (defined $timeout) {
+			print FD "KIWI_KERNEL_OPTIONS='$cmdline'\n";
+		}
+		#==========================================
+		# KIWI_KERNEL information
+		#------------------------------------------
+		my $kernel = $xml -> getDeployKernel ();
+		if (defined $kernel) {
+			print FD "KIWI_KERNEL=$kernel\n";
+		}
+		#==========================================
+		# KIWI_INITRD information
+		#------------------------------------------
+		my $initrd = $xml -> getDeployInitrd ();
+		if (defined $initrd) {
+			print FD "KIWI_INITRD=$initrd\n";
+		}
+		#==========================================
 		# More to come...
 		#------------------------------------------
 		close FD;
