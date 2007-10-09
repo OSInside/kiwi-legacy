@@ -693,7 +693,6 @@ sub setupRootSystem {
 			$kiwi -> info ("Initializing image system on: $root...");
 			my @installOpts = (
 				"-o rpm-root=$root",
-				"-o deb-root=$root",
 				"--explain",
 				"--log-level=error",
 				"-y"
