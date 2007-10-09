@@ -87,6 +87,7 @@
 			<xs:attribute name="realname" type="xs:string"/>
 			<xs:attribute name="pwd"  type="xs:string"/>
 			<xs:attribute name="home" type="xs:string"/>
+			<xs:attribute name="shell" type="xs:string"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="profiles">

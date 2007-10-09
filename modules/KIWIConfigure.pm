@@ -90,10 +90,15 @@ sub setupUsersGroups {
 			my $group = $users{$user}{group};
 			my $pwd   = $users{$user}{pwd};
 			my $home  = $users{$user}{home};
+			my $shell = $users{$user}{shell};
 			my $realname = $users{$user}{realname};
 			if (defined $pwd) {
 				$adduser .= " -p '$pwd'";
 				$moduser .= " -p '$pwd'";
+			}
+			if (defined $shell) {
+				$adduser .= " -s '$shell'";
+				$moduser .= " -s '$shell'";
 			}
 			if (defined $home) {
 				$adduser .= " -m -d $home";

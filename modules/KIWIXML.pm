@@ -698,11 +698,13 @@ sub getUsers {
 			my $pwd  = $element -> getAttribute ("pwd");
 			my $home = $element -> getAttribute ("home");
 			my $realname = $element -> getAttribute ("realname");
+			my $shell = $element -> getAttribute ("shell");
 			if (defined $name) {
 				$result{$name}{group} = $group;
 				$result{$name}{home}  = $home;
 				$result{$name}{pwd}   = $pwd;
 				$result{$name}{realname} = $realname;
+				$result{$name}{shell} = $shell;
 			}
 		}
 	}

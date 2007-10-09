@@ -2,6 +2,8 @@
 Tue Oct  9 10:07:19 CEST 2007 - ms@suse.de
 
 - v1.69
+- allow shell attribute to setup the login shell for a user
+  Patch by Nat Friedman <nat@novell.com>
 - There are some nice deployment options in config.mac, but nothing to set
   these from config.xml.  Specifically, I'm talking about the
   KIWI_BOOT_TIMEOUT, KIWI_KERNEL_OPTIONS, KIWI_KERNEL and KIWI_INITRD
