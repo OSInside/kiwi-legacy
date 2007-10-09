@@ -92,7 +92,7 @@ echo "-------------------------------"
 #======================================
 # 1) Mounting local file systems
 #--------------------------------------
-mountSystemFilesystems
+mountSystemFilesystems >/dev/null 2>&1
 closeKernelConsole
 
 #======================================
