@@ -345,7 +345,7 @@ function suseStripInitrd {
 		dmesg splash fbmngplay portmap start-statd sm-notify
 		rpc.statd rpc.idmapd nbd-client mount.nfs mount.nfs4 eject
 		blockdev posbios ping killall killall5 udevcontrol udevd
-		udevsettle udevtrigger
+		udevsettle udevtrigger mknod
 	"
 	tools="$tools $1"
 	for path in /sbin /usr/sbin /usr/bin /bin;do

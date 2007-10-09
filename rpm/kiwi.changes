@@ -2,6 +2,11 @@
 Tue Oct  9 10:07:19 CEST 2007 - ms@suse.de
 
 - v1.69
+- create device nodes in shared memory segment which fixes
+  the nodes created in initrd from being removed while booting
+  into the system. This also fixes the splash problem (#332036)
+- removed devs package from 10.3 boot images
+- removed deb-root from being set for smart
 - allow shell attribute to setup the login shell for a user
   Patch by Nat Friedman <nat@novell.com>
 - There are some nice deployment options in config.mac, but nothing to set

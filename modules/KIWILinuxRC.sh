@@ -141,15 +141,31 @@ function systemException {
 # mountSystemFilesystems
 #--------------------------------------
 function mountSystemFilesystems {
-	mount -t proc  proc    /proc     &>/dev/null
-	mount -t sysfs sysfs   /sys      &>/dev/null
-	mount -t devpts devpts /dev/pts  &>/dev/null
+	mount -t proc               proc   /proc    &>/dev/null
+	mount -t sysfs              sysfs  /sys     &>/dev/null
+	mount -t tmpfs -o mode=0755 udev   /dev     &>/dev/null
+	mount -t devpts             devpts /dev/pts &>/dev/null
+	mknod -m 0666 /dev/tty     c 5 0
+	mknod -m 0600 /dev/console c 5 1
+	mknod -m 0666 /dev/ptmx    c 5 2
+	mknod -m 0666 /dev/null c 1 3
+	mknod -m 0600 /dev/kmsg c 1 11
+	mknod -m 0660 /dev/snapshot c 10 231
+	mknod -m 0666 /dev/random c 1 8
+	mknod -m 0644 /dev/urandom c 1 9
+	mkdir -m 0755 /dev/pts
+	mkdir -m 1777 /dev/shm
+	ln -s /proc/self/fd /dev/fd
+	ln -s fd/0 /dev/stdin
+	ln -s fd/1 /dev/stdout
+	ln -s fd/2 /dev/stderr
 }
 #======================================
 # umountSystemFilesystems
 #--------------------------------------
 function umountSystemFilesystems {
 	umount /dev/pts &>/dev/null
+	umount /dev     &>/dev/null
 	umount /sys     &>/dev/null
 	umount /proc    &>/dev/null
 }
