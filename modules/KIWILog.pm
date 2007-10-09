@@ -318,7 +318,7 @@ sub notset {
 	# This is the cyan "notset" flag
 	# ---
 	my $this = shift;
-	if (! defined $this->{fileLog}) {
+	if ((! defined $this->{fileLog}) && (! defined $this->{nocolor})) {
 		$this -> doStat();
 		$this -> setOutputChannel();
 		print "\033[1;36mnotset\n";
