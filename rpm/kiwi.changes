@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Oct 10 17:54:32 CEST 2007 - ms@suse.de
+
+- v1.71
+- move initrd device nodes to system image to allow system
+  images without static devs
+
+-------------------------------------------------------------------
 Wed Oct 10 09:27:27 CEST 2007 - ms@suse.de
 
 - v1.70

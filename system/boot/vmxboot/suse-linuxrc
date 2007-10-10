@@ -201,6 +201,7 @@ cp /include /mnt
 # 14) Activate new root
 #--------------------------------------
 Echo "Activating Image: [$imageRootDevice]"
+mkdir -p /mnt/dev && mv -f /dev/* /mnt/dev >/dev/null 2>&1
 cd /mnt && exec < dev/console >dev/console 2>&1
 Echo "Calling preinit phase..."
 reopenKernelConsole
