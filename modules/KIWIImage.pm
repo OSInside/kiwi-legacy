@@ -1260,7 +1260,7 @@ sub getBlocks {
 	# ...
 	# calculate the block size and number of blocks used
 	# to create a <size> bytes long image. Return list
-	# (bs,count)
+	# (bs,count,seek)
 	# ---
 	my $size = $_[0];
 	my $bigimage   = 1048576; # 1M
@@ -1298,12 +1298,12 @@ sub getBlocks {
 		# big image...
 		$count = $number / $bigimage;
 		$count = Math::BigFloat->new($count)->ffround(0);
-		return (($bigimage,$count));
+		return (($bigimage,$count,$count*$bigimage));
 	} else {
 		# small image...
 		$count = $number / $smallimage;
 		$count = Math::BigFloat->new($count)->ffround(0);
-		return (($smallimage,$count));
+		return (($smallimage,$count,$count*$smallimage));
 	}
 }
 
@@ -1413,16 +1413,16 @@ sub writeImageConfig {
 			}
 			print FD "\n";
 		}
-
 		#==========================================
 		# IMAGE information
 		#------------------------------------------
 		if ($xml->getCompressed("quiet")) {
-			print FD "IMAGE=${device}${targetPartition};$namecd;$server;$blocks;compressed\n";
+			print FD "IMAGE=${device}${targetPartition};";
+			print FD "$namecd;$server;$blocks;compressed\n";
 		} else {
-			print FD "IMAGE=${device}${targetPartition};$namecd;$server;$blocks\n";
+			print FD "IMAGE=${device}${targetPartition};";
+			print "$namecd;$server;$blocks\n";
 		}
-		
 		#==========================================
 		# CONF information
 		#------------------------------------------
@@ -1628,6 +1628,7 @@ sub buildLogicalExtend {
 	my $kiwi = $this->{kiwi};
 	my $xml  = $this->{xml};
 	my $imageDest = $this->{imageDest};
+	my $out  = $imageDest."/".$name;
 	#==========================================
 	# Calculate block size and number of blocks
 	#------------------------------------------
@@ -1635,13 +1636,12 @@ sub buildLogicalExtend {
 		return undef;
 	}
 	my @bsc  = getBlocks ( $size );
-	my $bs   = $bsc[0];
-	my $cnt  = $bsc[1];
+	my $seek = $bsc[2];
 	#==========================================
 	# Create logical extend storage and FS
 	#------------------------------------------
-	unlink ("$imageDest/$name");
-	my $data = qx (dd if=/dev/zero of=$imageDest/$name bs=$bs count=$cnt 2>&1);
+	unlink ($out);
+	my $data = qx (dd if=/dev/zero of=$out bs=1 seek=$seek count=1 2>&1);
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> error  ("Couldn't create logical extend");

@@ -32,7 +32,7 @@ use KIWIOverlay;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "1.69";
+our $Version       = "1.70";
 our $openSUSE      = "http://software.opensuse.org/download/";
 our $ConfigFile    = "$ENV{'HOME'}/.kiwirc";
 our $ConfigStatus  = 0;
@@ -120,6 +120,7 @@ our $ListProfiles;      # lists the available profiles in image
 our $ForceNewRoot;      # force creation of new root directory
 our $BaseRoot;          # use given path as base system
 our $NoColor;           # do not used colored output (done/failed messages)
+our $LogPort;           # specify alternative log server port
 
 #============================================
 # Globals
@@ -141,16 +142,15 @@ sub main {
 	# OS image types.
 	# ---
 	#==========================================
+	# Initialize and check options
+	#------------------------------------------
+	init();
+	#==========================================
 	# Create logger object
 	#------------------------------------------
 	if (! defined $kiwi) {
 		$kiwi = new KIWILog();
 	}
-	#==========================================
-	# Initialize and check options
-	#------------------------------------------
-	init();
-
 	#==========================================
 	# Check for nocolor option
 	#------------------------------------------
@@ -768,7 +768,7 @@ sub init {
 	$SIG{"HUP"}      = \&quit;
 	$SIG{"TERM"}     = \&quit;
 	$SIG{"INT"}      = \&quit;
-
+	my $kiwi = new KIWILog("tiny");
 	my $result = GetOptions(
 		"version"               => \&version,
 		"logfile=s"             => \$LogFile,
@@ -806,8 +806,9 @@ sub init {
 		"list-profiles|i=s"     => \$ListProfiles,
 		"force-new-root"        => \$ForceNewRoot,
 		"base-root=s"           => \$BaseRoot,
-		"help|h"                => \&usage,
 		"nocolor"               => \$NoColor,
+		"log-port=i"            => \$LogPort,
+		"help|h"                => \&usage,
 		"<>"                    => \&usage
 	);
 	my $user = qx (whoami);
@@ -845,6 +846,11 @@ sub init {
 		$kiwi -> failed ();
 		my $code = kiwiExit (1); return $code;
 	}
+	if (defined $LogPort) {
+		$kiwi -> info ("Setting log server port to: $LogPort");
+		$LogServerPort = $LogPort;
+		$kiwi -> done ();
+	}
 	#==========================================
 	# remove pre-defined smart channels
 	#------------------------------------------
@@ -859,6 +865,7 @@ sub usage {
 	# Explain the available options for this
 	# image creation system
 	# ---
+	my $kiwi = new KIWILog("tiny");
 	print "Linux KIWI setup  (image builder) (2006-06-05)\n";
 	print "Copyright (c) 2006 - SUSE LINUX Products GmbH\n";
 	print "\n";
@@ -944,6 +951,11 @@ sub usage {
 	print "  [ --force-new-root ]\n";
 	print "    Force creation of new root directory. If the directory\n";
 	print "    already exists, it is deleted.\n";
+	print "\n";
+	print "  [ --log-port <port-number> ]\n";
+	print "    Set the log server port. By default port 9000 is used\n";
+	print "    If multiple kiwi processes runs on one system it's\n";
+	print "    recommended to set the logging port per process\n";
 	print "--\n";
 	version();
 }
@@ -955,6 +967,7 @@ sub listImage {
 	# ...
 	# list known image descriptions and exit
 	# ---
+	my $kiwi = new KIWILog("tiny");
 	opendir (FD,$System);
 	my @images = readdir (FD); closedir (FD);
 	foreach my $image (@images) {
@@ -1072,7 +1085,8 @@ sub version {
 	# ...
 	# Version information
 	# ---
-	my $rev = "unknown";
+	my $kiwi = new KIWILog("tiny");
+	my $rev  = "unknown";
 	if (open FD,$Revision) {
 		$rev = <FD>; close FD;
 	}

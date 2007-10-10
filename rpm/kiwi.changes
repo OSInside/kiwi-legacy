@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Oct 10 09:27:27 CEST 2007 - ms@suse.de
+
+- v1.70
+- added option --log-port to specify the log server port
+- use sparse files for image creation
+
+-------------------------------------------------------------------
 Tue Oct  9 10:07:19 CEST 2007 - ms@suse.de
 
 - v1.69
