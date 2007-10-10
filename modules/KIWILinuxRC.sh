@@ -145,14 +145,17 @@ function mountSystemFilesystems {
 	mount -t sysfs              sysfs  /sys     &>/dev/null
 	mount -t tmpfs -o mode=0755 udev   /dev     &>/dev/null
 	mount -t devpts             devpts /dev/pts &>/dev/null
-	mknod -m 0666 /dev/tty     c 5 0
-	mknod -m 0600 /dev/console c 5 1
-	mknod -m 0666 /dev/ptmx    c 5 2
-	mknod -m 0666 /dev/null c 1 3
-	mknod -m 0600 /dev/kmsg c 1 11
+	mknod -m 0640 /dev/loop0    b 7 0
+	mknod -m 0640 /dev/loop1    b 7 1
+	mknod -m 0640 /dev/loop2    b 7 2
+	mknod -m 0666 /dev/tty      c 5 0
+	mknod -m 0600 /dev/console  c 5 1
+	mknod -m 0666 /dev/ptmx     c 5 2
+	mknod -m 0666 /dev/null     c 1 3
+	mknod -m 0600 /dev/kmsg     c 1 11
 	mknod -m 0660 /dev/snapshot c 10 231
-	mknod -m 0666 /dev/random c 1 8
-	mknod -m 0644 /dev/urandom c 1 9
+	mknod -m 0666 /dev/random   c 1 8
+	mknod -m 0644 /dev/urandom  c 1 9
 	mkdir -m 0755 /dev/pts
 	mkdir -m 1777 /dev/shm
 	ln -s /proc/self/fd /dev/fd
