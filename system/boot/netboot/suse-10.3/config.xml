@@ -114,7 +114,8 @@
 		<package name="limal-bootloader"/>
 		<package name="limal-perl"/>
 		<package name="logrotate"/>
-		<package name="mdadm mingetty"/>
+		<package name="mdadm"/>
+		<package name="mingetty"/>
 		<package name="openSUSE-release"/>
 		<package name="openldap2-client"/>
 		<package name="openslp"/>

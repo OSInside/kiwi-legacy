@@ -337,6 +337,7 @@ sub getImageTypeAndAttributes {
 	my %result = ();
 	my $count  = 0;
 	my $first  = "";
+	my $ptype  = "";
 	my @node   = $this->{optionsNodeList} -> get_node(1)
 		-> getElementsByTagName ("type");
 	foreach my $node (@node) {
@@ -345,7 +346,8 @@ sub getImageTypeAndAttributes {
 		if ((! defined $prim) || ($prim eq "false") || ($prim eq "0")) {
 			$prim = $node -> string_value();
 		} else {
-			$prim = "primary";
+			$prim  = "primary";
+			$ptype = $node -> string_value();
 		}
 		if ($count == 0) {
 			$first = $prim;
@@ -367,7 +369,11 @@ sub getImageTypeAndAttributes {
 			return $result{$first};
 		}
 	}
-	return $result{$this->{imageWhat}};
+	if ($ptype eq $this->{imageWhat}) {
+		return $result{primary};
+	} else {
+		return $result{$this->{imageWhat}};
+	}
 }
 
 #==========================================

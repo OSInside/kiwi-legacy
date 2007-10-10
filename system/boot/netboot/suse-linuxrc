@@ -505,10 +505,10 @@ else
 			done
 		done
 		if [ -z "$nbdDevice" ];then
-			nbdDevice="/dev/nb0"
+			nbdDevice="/dev/nbd0"
 		fi
 		if [ -z "$nbdswapDevice" ];then
-			nbdDevice="/dev/nb1"
+			nbdDevice="/dev/nbd1"
 		fi
 		if [ -z "$nbdswapPort" ];then
 			nbdswapPort="9210"

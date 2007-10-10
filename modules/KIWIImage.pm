@@ -355,15 +355,27 @@ sub createImageUSB {
 	}
 	SWITCH: for ($type) {
 		/^ext2/       && do {
-			$ok = $this -> createImageEXT2 ();
+			$ok = 1;
+			if ($text ne "VMX") {
+				$ok = $this -> createImageEXT2 ();
+			}
+			$result{imageTree} = $imageTree;
 			last SWITCH;
 		};
 		/^ext3/       && do {
-			$ok = $this -> createImageEXT3 ();
+			$ok = 1;
+			if ($text ne "VMX") {
+				$ok = $this -> createImageEXT3 ();
+			}
+			$result{imageTree} = $imageTree;
 			last SWITCH;
 		};
 		/^reiserfs/   && do {
-			$ok = $this -> createImageReiserFS ();
+			$ok = 1;
+			if ($text ne "VMX") {
+				$ok = $this -> createImageReiserFS ();
+			}
+			$result{imageTree} = $imageTree;
 			last SWITCH;
 		};
 		/^squashfs/   && do {
@@ -428,12 +440,20 @@ sub createImageUSB {
 		qx (rm -rf $main::RootTree);
 		qx (rm -rf $tmpdir);
 	}
+	#==========================================
+	# Include splash screen to initrd
+	#------------------------------------------
 	my $initrd = $main::Destination."/".$main::ImageName.".gz";
 	my $boot = new KIWIBoot ($kiwi,$initrd);
 	if (! defined $boot) {
 		return undef;
 	}
-	$boot -> setupSplashForGrub();
+	if ($text ne "VMX") {
+		$boot -> setupSplashForGrub();
+	}
+	#==========================================
+	# Store meta data for subsequent calls
+	#------------------------------------------
 	$result{bootImage} = $main::ImageName;
 	if ($text eq "VMX") {
 		$result{format} = $type{format};
@@ -509,6 +529,9 @@ sub createImageVMX {
 	$main::BootVMDisk   = $main::Destination."/".$name->{bootImage}.".gz";
 	$main::BootVMSystem = $main::Destination."/".$name->{systemImage};
 	$main::BootVMFormat = $name->{format};
+	if (defined $name->{imageTree}) {
+		$main::BootVMSystem = $name->{imageTree};
+	}
 	if (! defined main::main()) {
 		$main::Survive = "default";
 		return undef;

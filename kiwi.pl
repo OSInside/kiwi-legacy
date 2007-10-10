@@ -1060,6 +1060,7 @@ sub quit {
 	# ...
 	# signal received, exit safely
 	# ---
+	my $kiwi = new KIWILog("tiny");
 	$kiwi -> note ("\n*** Received signal $_[0] ***\n");
 	if (defined $root) {
 		$root  -> cleanMount  ();

@@ -2,8 +2,11 @@
 Wed Oct 10 09:27:27 CEST 2007 - ms@suse.de
 
 - v1.70
+- fixed NBD support udev creates nbd not nb device nodes (#332493)
+- fixed device probing bug, restore IFS before probing
 - added option --log-port to specify the log server port
-- use sparse files for image creation
+- use sparse files for image creation [speedup]
+- copy system image directly for vmx types [speedup]
 
 -------------------------------------------------------------------
 Tue Oct  9 10:07:19 CEST 2007 - ms@suse.de

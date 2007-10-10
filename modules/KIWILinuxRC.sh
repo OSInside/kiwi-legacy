@@ -653,6 +653,7 @@ function probeDevicesForAlias {
 #--------------------------------------
 function probeDevices {
 	Echo "Including required kernel modules..."
+	IFS=$IFS_ORIG
 	stdevs=`/usr/sbin/hwinfo --storage | grep "Activation Cmd"| cut -f2 -d:`
 	stdevs=`echo $stdevs | tr -d \" | sed -e s"@modprobe@@g"` 
 	for module in $stdevs;do

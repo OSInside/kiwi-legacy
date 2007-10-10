@@ -66,11 +66,7 @@ sub new {
 		return undef;
 	}
 	if (defined $system) {
-		if (! -f $system) {
-			$kiwi -> error  ("Couldn't find system image file: $system");
-			$kiwi -> failed ();
-			return undef;
-		} else {
+		if (-f $system) {
 			my $status = qx ( file $system | grep -qi squashfs 2>&1 );
 			my $result = $? >> 8;
 			if ($result == 0) {
@@ -79,6 +75,10 @@ sub new {
 			} else {
 				$syszip = 0;
 			}
+		} elsif (! -d $system) {
+			$kiwi -> error  ("Couldn't find image file/directory: $system");
+			$kiwi -> failed ();
+			return undef;
 		}
 	}
 	$kernel = $initrd;
@@ -105,7 +105,13 @@ sub new {
 	if (! defined $vmsize) {
 		my $kernelSize = -s $kernel; # the kernel
 		my $initrdSize = -s $initrd; # the boot image
-		my $systemSize = -s $system; # the system image
+		my $systemSize; # the system image
+		if (-d $system) {
+			$systemSize = qx (du -bs $system | cut -f1 2>&1);
+			chomp $systemSize;
+		} else {
+			$systemSize = -s $system;
+		}
 		if ($syszip) {
 			$vmsize = $kernelSize + $initrdSize + $syszip;
 		} else {
@@ -958,6 +964,7 @@ sub setupInstallStick {
 sub setupBootDisk {
 	my $this      = shift;
 	my $kiwi      = $this->{kiwi};
+	my $arch      = $this->{arch};
 	my $system    = $this->{system};
 	my $vmsize    = $this->{vmsize};
 	my $format    = $this->{format};
@@ -965,12 +972,50 @@ sub setupBootDisk {
 	my $tmpdir    = $this->{tmpdir};
 	my $initrd    = $this->{initrd};
 	my $diskname  = $system.".raw";
+	my $label     = $this -> getImageName();
 	my $loop      = "/dev/loop0";
 	my $loopfound = 0;
+	my $haveTree  = 0;
+	my $version;
+	my $fstype;
 	my $sysname;
 	my $sysird;
 	my $result;
 	my $status;
+	my $destdir;
+	#==========================================
+	# check if system is tree or image file
+	#------------------------------------------
+	if ( -d $system ) {
+		my $xml = new KIWIXML ( $kiwi,$system."/image",undef,"vmx" );
+		if (! defined $xml) {
+			return undef;
+		}
+		#==========================================
+		# build disk name and label from xml data
+		#------------------------------------------
+		$destdir  = dirname ($initrd);
+		$label    = $xml -> getImageName();
+		$version  = $xml -> getImageVersion();
+		$diskname = $label;
+		$diskname = $destdir."/".$diskname.".".$arch."-".$version.".raw";
+		$haveTree = 1;
+		#==========================================
+		# obtain filesystem type from xml data
+		#------------------------------------------
+		my %type = %{$xml->getImageTypeAndAttributes()};
+		$fstype  = $type{filesystem};
+		if (! $fstype) {
+			$kiwi -> error  ("Can't find filesystem type in image tree");
+			$kiwi -> failed ();
+			return undef;
+		}
+		if ($fstype eq "squashfs") {
+			$kiwi -> error ("Can't copy data into requested RO filesystem");
+			$kiwi -> failed ();
+			return undef;
+		}
+	}
 	#==========================================
 	# search free loop device
 	#------------------------------------------
@@ -1027,7 +1072,6 @@ sub setupBootDisk {
 		$kiwi -> failed ();
 		return undef;
 	}
-	my $label = $this -> getImageName();
 	print FD "color cyan/blue white/blue\n";
 	print FD "default 0\n";
 	print FD "timeout 10\n";
@@ -1161,18 +1205,88 @@ sub setupBootDisk {
 	# Dump system image on virtual disk
 	#------------------------------------------
 	$kiwi -> done();
-	$kiwi -> info ("Dumping system image on virtual disk");
-	$status = qx (dd if=$system of=$root bs=8k 2>&1);
-	$result = $? >> 8;
-	if ($result != 0) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't dump image to virtual disk: $status");
-		$kiwi -> failed ();
-		qx ( /sbin/kpartx  -d $loop );
-		qx ( /sbin/losetup -d $loop );
-		return undef;
+	if (! $haveTree) {
+		$kiwi -> info ("Dumping system image on virtual disk");
+		$status = qx (dd if=$system of=$root bs=8k 2>&1);
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't dump image to virtual disk: $status");
+			$kiwi -> failed ();
+			qx ( /sbin/kpartx  -d $loop );
+			qx ( /sbin/losetup -d $loop );
+			return undef;
+		}
+		$kiwi -> done();
+	} else {
+		#==========================================
+		# Create filesystem on system image part.
+		#------------------------------------------
+		SWITCH: for ($fstype) {
+			/^ext2/     && do {
+				$kiwi -> info ("Creating ext2 root filesystem");
+				my $fsopts = "-q -F";
+				$status = qx (/sbin/mke2fs $fsopts $root 2>&1);
+				$result = $? >> 8;
+				last SWITCH;
+			};
+			/^ext3/     && do {
+				$kiwi -> info ("Creating ext3 root filesystem");
+				my $fsopts = "-O dir_index -b 4096 -j -J size=4 -q -F";
+				$status = qx (/sbin/mke2fs $fsopts $root 2>&1);
+				$result = $? >> 8;
+				last SWITCH;
+			};
+			/^reiserfs/ && do {
+				$kiwi -> info ("Creating reiserfs root filesystem");
+				$status = qx (/sbin/mkreiserfs -q -f -b 4096 $root 2>&1);
+				$result = $? >> 8;
+				last SWITCH;
+			};
+			$kiwi -> error  ("Unsupported filesystem type: $fstype");
+			$kiwi -> failed ();
+			return undef;
+		};
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create $fstype filesystem: $status");
+			$kiwi -> failed ();
+			return undef;
+		}
+		$kiwi -> done();
+		#==========================================
+		# Mount system image partition
+		#------------------------------------------
+		$status = qx (mount $root /mnt/ 2>&1);
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't mount partition: $status");
+			$kiwi -> failed ();
+			qx ( /sbin/kpartx  -d $loop );
+			qx ( /sbin/losetup -d $loop );
+			return undef;
+		}
+		#==========================================
+		# Copy root tree to virtual disk
+		#------------------------------------------
+		$kiwi -> info ("Copying system image tree on virtual disk");
+		$status = qx (cp -a $system/* /mnt 2>&1);
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Can't copy image tree to virtual disk: $status");
+			$kiwi -> failed ();
+			qx ( /sbin/kpartx  -d $loop );
+			qx ( /sbin/losetup -d $loop );
+			return undef;
+		}
+		$kiwi -> done();
+		#==========================================
+		# Umount system image partition
+		#------------------------------------------
+		qx ( umount /mnt/ 2>&1 );
 	}
-	$kiwi -> done();
 	#==========================================
 	# Dump boot image on virtual disk
 	#------------------------------------------
@@ -1272,14 +1386,14 @@ sub setupBootDisk {
 	#------------------------------------------
 	if (defined $format) {
 		if ($format eq "iso") {
-			$this -> {system} = $system.".raw";
+			$this -> {system} = $diskname;
 			$kiwi -> info ("Creating install ISO image\n");
 			qx ( /sbin/losetup -d $loop );
 			if (! $this -> setupInstallCD()) {
 				return undef;
 			}
 		} elsif ($format eq "usb") {
-			$this -> {system} = $system.".raw";
+			$this -> {system} = $diskname;
 			$kiwi -> info ("Creating install USB Stick image\n");
 			qx ( /sbin/losetup -d $loop );
 			if (! $this -> setupInstallStick()) {
@@ -1287,7 +1401,8 @@ sub setupBootDisk {
 			}
 		} else {
 			$kiwi -> info ("Creating $format image");
-			my $fname = $system.".".$format;
+			my $fname = $diskname;
+			$fname  =~ s/\.raw$/\.$format/;
 			$status = qx ( qemu-img convert -f raw $loop -O $format $fname );
 			$result = $? >> 8;
 			if ($result != 0) {
@@ -1454,7 +1569,9 @@ sub setupSplashForGrub {
 	my $newspl = "$spldir/splash";
 	my $irddir = "$spldir/initrd";
 	my $newird = $initrd; $newird =~ s/\.gz/\.splash.gz/;
+	$kiwi -> info ("Setting up splash screen...");
 	if (! mkdir $spldir) {
+		$kiwi -> skipped ();
 		$kiwi -> warning ("Failed to create splash directory");
 		$kiwi -> skipped ();
 		return $initrd;
@@ -1467,6 +1584,7 @@ sub setupSplashForGrub {
 	my $status = qx (gzip -cd $initrd|(cd $irddir && cpio -d -i 2>&1));
 	my $result = $? >> 8;
 	if ($result != 0) {
+		$kiwi -> skipped ();
 		$kiwi -> warning ("Failed to extract data: $!");
 		$kiwi -> skipped ();
 		qx (rm -rf $spldir);
@@ -1478,6 +1596,7 @@ sub setupSplashForGrub {
 	$status = qx (mv $irddir/image/loader/*.spl $newspl 2>&1);
 	$result = $? >> 8;
 	if ($result != 0) {
+		$kiwi -> skipped ();
 		$kiwi -> warning ("No splash files found in initrd");
 		$kiwi -> skipped ();
 		qx (rm -rf $spldir);
@@ -1506,6 +1625,7 @@ sub setupSplashForGrub {
 	#------------------------------------------
 	qx (cat $spldir/all.spl >> $newird);
 	qx (rm -rf $spldir);
+	$kiwi -> done();
 	return $newird;
 }
 
