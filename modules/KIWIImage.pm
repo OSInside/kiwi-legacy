@@ -1444,7 +1444,7 @@ sub writeImageConfig {
 			print FD "$namecd;$server;$blocks;compressed\n";
 		} else {
 			print FD "IMAGE=${device}${targetPartition};";
-			print "$namecd;$server;$blocks\n";
+			print FD "$namecd;$server;$blocks\n";
 		}
 		#==========================================
 		# CONF information
