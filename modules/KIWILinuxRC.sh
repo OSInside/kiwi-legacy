@@ -138,6 +138,45 @@ function systemException {
 	esac
 }
 #======================================
+# copyDevices
+#--------------------------------------
+function copyDevices {
+	local prefix=$1
+	local search=$2
+	local dtype
+	local major
+	local minor
+	local perms
+	if [ -z "$search" ];then
+		search=/dev
+	fi
+	pushd $search >/dev/null 2>&1
+	for i in *;do
+		if [ -e $prefix/$i ];then
+			continue
+		fi
+		if [ -b $i ];then
+			dtype=b
+		elif [ -c $i ];then
+			dtype=c
+		elif [ -p $i ];then
+			dtype=p
+		else
+			continue
+		fi
+		info=`stat $i -c "0%a:0x%t:0x%T"`
+		major=`echo $info | cut -f2 -d:`
+		minor=`echo $info | cut -f3 -d:`
+		perms=`echo $info | cut -f1 -d:`
+		if [ $dtype = "p" ];then
+			mknod -m $perms $prefix/$i $dtype
+		else
+			mknod -m $perms $prefix/$i $dtype $major $minor
+		fi
+	done
+	popd >/dev/null 2>&1
+}
+#======================================
 # mountSystemFilesystems
 #--------------------------------------
 function mountSystemFilesystems {
@@ -190,9 +229,21 @@ function createFramebufferDevices {
 #--------------------------------------
 function udevStart {
 	Echo "Creating device nodes with udev"
-	/sbin/udevd --daemon
+	# disable hotplug helper, udevd listens to netlink
+	echo "" > /proc/sys/kernel/hotplug
+	# create min devices
+	copyDevices /dev /lib/udev/devices
+	# start udevd
+	udevd --daemon
+	# cleanup some stuff
+	rm -f /var/run/sysconfig/network
+	# unlikely, but we may be faster than the first event
+	mkdir -p /dev/.udev
+	mkdir -p /dev/.udev/queue
+	# create devices
 	/sbin/udevtrigger
-	/sbin/udevsettle --timeout=30
+	# 10 min - just long enough
+	/sbin/udevsettle --timeout=600
 }
 #======================================
 # udevKill

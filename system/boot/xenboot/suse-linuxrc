@@ -65,11 +65,11 @@ touch /lib/modules/*/modules.dep
 #======================================
 # 3) Including required kernel modules
 #--------------------------------------
+udevStart
 Echo "Including required kernel modules..."
 for module in xennet xenblk reiserfs ext2 ext3 loop ipv6;do
 	modprobe $module >/dev/null 2>&1
 done
-udevStart
 
 #======================================
 # 4) Mount VM (boot)
@@ -118,7 +118,7 @@ cp /include /mnt
 # 11) Activate new root
 #--------------------------------------
 Echo "Activating Image: [$imageRootDevice]"
-mkdir -p /mnt/dev && mv -f /dev/* /mnt/dev >/dev/null 2>&1
+mkdir -p /mnt/dev && copyDevices /mnt/dev
 cd /mnt && exec < dev/console >dev/console 2>&1
 Echo "Calling preinit phase..."
 reopenKernelConsole

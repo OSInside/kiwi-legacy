@@ -60,7 +60,6 @@
 		<package name="kernel-xen"/>
 		<package name="filesystem"/>
 		<package name="glibc-locale"/>
-		<package name="devs"/>
 		<package name="procps"/>
 	</packages>
 	<packages type="delete">

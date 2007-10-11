@@ -236,7 +236,7 @@ fi
 #======================================
 # (8) Load Device modules
 #--------------------------------------
-probeDevices; udevStart
+udevStart; probeDevices
 
 export systemIntegrity="unknown"
 #======================================
@@ -749,7 +749,7 @@ kernelCheck /mnt
 # 24) Activate new root
 #--------------------------------------
 Echo "Activating Image: [$imageRootName]"
-mkdir -p /mnt/dev && mv -f /dev/* /mnt/dev >/dev/null 2>&1
+mkdir -p /mnt/dev && copyDevices /mnt/dev
 cd /mnt && exec < dev/console >dev/console 2>&1
 Echo "Calling preinit phase..."
 reopenKernelConsole

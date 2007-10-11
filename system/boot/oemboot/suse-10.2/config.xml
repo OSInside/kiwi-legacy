@@ -80,7 +80,6 @@
 		<package name="kernel-default"/>
 		<package name="filesystem"/>
 		<package name="glibc-locale"/>
-		<package name="devs"/>
 		<package name="diffutils"/>
 		<package name="procps"/>
 	</packages>

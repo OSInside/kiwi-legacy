@@ -79,7 +79,6 @@
 	<packages type="boot">
 		<package name="filesystem"/>
 		<package name="glibc-locale"/>
-		<package name="devs"/>
 	</packages>
 	<packages type="delete">
 		<package name="perl"/>
