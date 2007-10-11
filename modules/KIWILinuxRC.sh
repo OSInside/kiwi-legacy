@@ -673,34 +673,23 @@ function probeDevicesForAlias {
 	IFS=$IFS_ORIG
 	probeDeviceInfo
 	probeDeviceAlias
+	if [ ! -z "$kiwikernelmodule" ];then
+		for module in $kiwikernelmodule;do
+			Echo "Probing module (cmdline): $module"
+			modprobe $module >/dev/null 2>&1
+		done
+	fi
 	IFS="%"; while read file info in;do
 		grep -q $info $modalias >/dev/null 2>&1
 		if [ $? = 0 ];then
 			module=`basename $file`
 			module=`echo $module | sed -e s@.ko@@`
 			INITRD_MODULES="$INITRD_MODULES $module"
-			if [ $module = "generic" ];then
-				DRIVER_GENERIC=1
-			elif [ $module = "ata_piix" ] ; then
-				DRIVER_ATA_PIIX=1
-			else
-				Echo "Probing module: $module"
-				modprobe $module >/dev/null 2>&1
-			fi
+			Echo "Probing module: $module"
+			modprobe $module >/dev/null 2>&1
 		fi
 	done < $modinfo
 	IFS=$IFS_ORIG
-	#======================================
-	# Handle special cases
-	#--------------------------------------
-	if [ $DRIVER_ATA_PIIX -eq 1 ] ; then
-		Echo "Probing module: ata_piix"
-		modprobe ata_piix >/dev/null 2>&1
-	fi
-	if [ $DRIVER_GENERIC -eq 1 ] ; then
-		Echo "Probing module: generic"
-		modprobe generic >/dev/null 2>&1
-	fi
 }
 #======================================
 # probeDevices
@@ -709,11 +698,19 @@ function probeDevices {
 	Echo "Including required kernel modules..."
 	IFS=$IFS_ORIG
 	stdevs=`/usr/sbin/hwinfo --storage | grep "Activation Cmd"| cut -f2 -d:`
-	stdevs=`echo $stdevs | tr -d \" | sed -e s"@modprobe@@g"` 
+	stdevs=`echo $stdevs | tr -d \" | sed -e s"@modprobe@@g"`
+	if [ ! -z "$kiwikernelmodule" ];then
+		for module in $kiwikernelmodule;do
+			Echo "Probing module (cmdline): $module"
+			modprobe $module >/dev/null 2>&1
+		done
+	fi
 	for module in $stdevs;do
-		Echo "Probing module: $module"
-		INITRD_MODULES="$INITRD_MODULES $module"
-		modprobe $module >/dev/null 2>&1
+		if ! lsmod | grep -q $module;then
+			Echo "Probing module: $module"
+			INITRD_MODULES="$INITRD_MODULES $module"
+			modprobe $module >/dev/null 2>&1
+		fi
 	done
 }
 #======================================

@@ -57,7 +57,7 @@ touch /lib/modules/*/modules.dep
 #======================================
 # 3) Including required kernel modules
 #--------------------------------------
-udevStart; probeDevices
+probeDevices
 
 #======================================
 # 4) Load USB storage modules
@@ -66,6 +66,7 @@ for module in usb_storage sg sd_mod;do
 	modprobe $module
 done
 sleep 5
+udevStart
 
 #======================================
 # 5) Search USB stick device

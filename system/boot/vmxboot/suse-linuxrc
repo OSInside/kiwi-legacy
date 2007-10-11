@@ -104,7 +104,7 @@ touch /lib/modules/*/modules.dep
 #======================================
 # 3) Including required kernel modules
 #--------------------------------------
-udevStart; probeDevices
+probeDevices; udevStart
 
 #======================================
 # 4) Mount VM (boot)

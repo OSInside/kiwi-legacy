@@ -236,7 +236,7 @@ fi
 #======================================
 # (8) Load Device modules
 #--------------------------------------
-udevStart; probeDevices
+probeDevices; udevStart
 
 export systemIntegrity="unknown"
 #======================================

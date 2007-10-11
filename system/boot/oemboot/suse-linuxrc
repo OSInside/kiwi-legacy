@@ -77,11 +77,12 @@ fi
 #======================================
 # 4) Including required kernel modules
 #--------------------------------------
-udevStart; probeDevices
+probeDevices
 for module in usb_storage sg sd_mod BusLogic;do
 	modprobe $module >/dev/null 2>&1
 done
 sleep 5
+udevStart
 
 #======================================
 # 5) Search disks, prefer removable one
