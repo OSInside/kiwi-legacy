@@ -2,9 +2,9 @@
 Thu Oct 11 11:32:29 CEST 2007 - ms@suse.de
 
 - v1.72
-- added copyDevices function, bettern than moving it
 - fixed udevStart function, added missing udev tools (#332678)
 - removed devs package from all boot image descriptions
+- added copyDevices function, bettern than moving it
 
 -------------------------------------------------------------------
 Wed Oct 10 17:54:32 CEST 2007 - ms@suse.de
