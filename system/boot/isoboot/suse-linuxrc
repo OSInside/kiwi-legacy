@@ -256,7 +256,6 @@ fi
 #======================================
 # 12) Create system dependant files
 #--------------------------------------
-setupBootSplash /config
 setupDefaultFstab /config
 updateRootDeviceFstab /config $imageDevice
 if [ ! -z "$swapSpace" ];then

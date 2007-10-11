@@ -531,7 +531,6 @@ fi
 # 12) Create system dependant files
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
-	setupBootSplash /config
 	setupDefaultFstab /config
 	updateSwapDeviceFstab /config $deviceSwap
 	if [ -z "$UNIONFS_CONFIG" ]; then

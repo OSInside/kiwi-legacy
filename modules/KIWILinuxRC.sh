@@ -330,20 +330,6 @@ function callSUSEInitrdScripts {
 	chroot . bash ./run_all.sh
 }
 #======================================
-# setupBootSplash
-#--------------------------------------
-function setupBootSplash {
-	# /.../
-	# create the /etc/sysconfig/bootsplash file and activate
-	# the splash while the distro mkinitrd tool runs
-	# ----
-	local prefix=$1
-	local splash=$prefix/etc/sysconfig/bootsplash
-	mkdir -p $prefix/etc/sysconfig
-	echo "THEME=\"SuSE\""  > $splash
-	echo "SPLASH=\"yes\"" >> $splash
-}
-#======================================
 # installGrub
 #--------------------------------------
 function setupBootLoaderGrub {

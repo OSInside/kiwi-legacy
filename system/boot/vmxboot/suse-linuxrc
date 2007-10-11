@@ -162,7 +162,6 @@ kernelList /mnt
 #======================================
 # 9) Create system dependant files
 #--------------------------------------
-setupBootSplash /config
 setupDefaultFstab /config
 updateRootDeviceFstab /config $imageRootDevice
 setupBootLoaderGrub /mnt /config 0 $imageRootDevice VMX
