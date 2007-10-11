@@ -139,7 +139,26 @@ if [ -z "$UNIONFS_CONFIG" ];then
 fi
 
 #======================================
-# 9) Check for swap space
+# 9) Resize filesystem to full space
+#--------------------------------------
+#if [ -z "$UNIONFS_CONFIG" ];then
+#	Echo "Resize filesystem to full partition space..."
+#	if test "$FSTYPE" = "reiserfs";then
+#		resize_reiserfs $imageDevice
+#	fi
+#	if test "$FSTYPE" = "ext2";then
+#		resize2fs -f -F -p $imageDevice
+#		e2fsck -y -f $imageDevice
+#	fi
+#	if test "$FSTYPE" = "ext3";then
+#		resize2fs -f -F -p $imageDevice
+#		e2fsck -y -f $imageDevice
+#		tune2fs -j $imageDevice
+#	fi
+#fi
+
+#======================================
+# 10) Check for swap space
 #--------------------------------------
 swapSpace=`searchSwapSpace`
 if [ ! -z "$swapSpace" ];then
@@ -183,25 +202,6 @@ else
 		fi
 		Echo "Created swap file: kiwiswap [ $SWSIZE MB ]"
 		umount /mnt
-	fi
-fi
-
-#======================================
-# 10) Resize filesystem to full space
-#--------------------------------------
-if [ -z "$UNIONFS_CONFIG" ];then
-	Echo "Resize filesystem to full partition space..."
-	if test "$FSTYPE" = "reiserfs";then
-		resize_reiserfs $imageDevice
-	fi
-	if test "$FSTYPE" = "ext2";then
-		resize2fs -f -F -p $imageDevice
-		e2fsck -y -f $imageDevice
-	fi
-	if test "$FSTYPE" = "ext3";then
-		resize2fs -f -F -p $imageDevice
-		e2fsck -y -f $imageDevice
-		tune2fs -j $imageDevice
 	fi
 fi
 
