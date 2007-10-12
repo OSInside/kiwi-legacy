@@ -89,7 +89,7 @@ sub new {
 		$this -> skipped ();
 		return $this;
 	}
-	$this->{smem} = $smem;
+	$this->{smem}   = $smem;
 	#==========================================
 	# Create Log Server on $LogServerPort
 	#------------------------------------------
@@ -259,6 +259,7 @@ sub done {
 		print "   done\n";
 		$this -> resetOutputChannel();
 	}
+	$this -> saveInCache ("   done\n");
 	$this->{state} = "O";
 }
 
@@ -285,6 +286,7 @@ sub failed {
 		print "   failed\n";
 		$this -> resetOutputChannel();
 	}
+	$this -> saveInCache ("   failed\n");
 	$this->{state} = "O";
 }
 
@@ -311,6 +313,7 @@ sub skipped {
 		print "   skipped\n";
 		$this -> resetOutputChannel();
 	}
+	$this -> saveInCache ("   skipped\n");
 	$this->{state} = "O";
 }
 
@@ -337,6 +340,7 @@ sub notset {
 		print "   notset\n";
 		$this -> resetOutputChannel();
 	}
+	$this -> saveInCache ("   notset\n");
 	$this->{state} = "O";
 }
 
@@ -462,27 +466,27 @@ sub printLog {
 	# reference. The output channel can be one of the standard
 	# channels or a previosly opened file
 	# ---
-	my $this = shift;
+	my $this    = shift;
 	my $smem    = $this->{smem};
 	my $rootEFD = $this->{rootefd};
 	my $lglevel = $_[0];
 	my $logdata = $_[1];
 	my $flag    = $_[2];
+	my @mcache  = ();
 	my $needcr  = "";
 	my $date    = $this -> getPrefix ( $lglevel );
 	#==========================================
-	# store current message in object data
-	#------------------------------------------
-	$this->{message} = $logdata;
-	#==========================================
-	# store current message in shared mem
-	#------------------------------------------
-	$this -> sendLogServerMessage ();
-	#==========================================
 	# check log status 
 	#------------------------------------------
+	if (! defined $lglevel) {
+		$logdata = $lglevel;
+		$lglevel = 1;
+	}
 	if (($this->{state} eq "I") && ($lglevel != 5)) {
 		$needcr = "\n";
+	}
+	if (defined $this->{mcache}) {
+		@mcache = @{$this->{mcache}};
 	}
 	#==========================================
 	# save log status 
@@ -499,40 +503,81 @@ sub printLog {
 	if (! defined $this->{channel}) {
 		$this->{channel} = *STDOUT;
 	}
-	if ($lglevel !~ /^\d$/) {
-		$logdata = $lglevel;
-		$lglevel = 1;
-	}
-	if ((defined $flag) && ($this->{errorOk})) {
-		print $rootEFD $needcr,$date,$logdata;
-		return;
-	}
+	#==========================================
+	# setup message string
+	#------------------------------------------
+	my $result;
 	foreach my $level (@showLevel) {
-	if ($level == $lglevel) {
-		$this -> setOutputChannel();
-		if (($lglevel == 1) || ($lglevel == 2) || ($lglevel == 3)) {
-			print $needcr,$date,$logdata;
-			$this -> sendJabberMessage ("$needcr,$date,$logdata");
-			if ($this->{errorOk}) {
-				print $rootEFD $needcr,$date,$logdata;
-			}
-		} elsif ($lglevel == 5) {
-			print $needcr,$logdata;
-			$this -> sendJabberMessage ("$needcr,$logdata");
-			if ($this->{errorOk}) {
-				print $rootEFD $needcr,$logdata;
-			}
-		} else {
-			print Carp::longmess("$needcr,$logdata");
-			$this -> sendJabberMessage ("$needcr,$logdata");
-			if ($this->{errorOk}) {
-				print $rootEFD Carp::longmess("$needcr,$logdata");
-			}
+		if ($level != $lglevel) {
+			next;
 		}
+		if (($lglevel == 1) || ($lglevel == 2) || ($lglevel == 3)) {
+			$result = $needcr.$date.$logdata;
+		} elsif ($lglevel == 5) {
+			$result = $needcr.$logdata;
+		} else {
+			$result = Carp::longmess($needcr.$logdata);
+		}
+	}
+	#==========================================
+	# send message cache if needed
+	#------------------------------------------
+	if ((($this->{fileLog}) || ($this->{errorOk})) && (@mcache)) {
+		foreach my $message (@mcache) {
+			print $rootEFD $message;
+		}
+		undef $this->{mcache};
+	}
+	#==========================================
+	# store current message in shared mem
+	#------------------------------------------
+	$this -> {message} = $logdata;
+	$this -> sendLogServerMessage ();
+	#==========================================
+	# send message to jabber server if con
+	#------------------------------------------
+	$this -> sendJabberMessage ("$needcr,$date,$logdata");
+	#==========================================
+	# print message to root file
+	#------------------------------------------
+	if ($this->{errorOk}) {
+		print $rootEFD $result;
+	}
+	#==========================================
+	# print message to log channel (stdin,file)
+	#------------------------------------------
+	if (! defined $flag) {
+		$this -> setOutputChannel();
+		print $result;
 		$this -> resetOutputChannel();
-		return $lglevel;
 	}
+	#==========================================
+	# save in cache if needed
+	#------------------------------------------
+	$this -> saveInCache ($result);
+	return $lglevel;
+}
+
+#==========================================
+# saveInCache
+#------------------------------------------
+sub saveInCache {
+	# ...
+	# save message in object cache if needed. If no
+	# log or root-log file is set the message will
+	# be cached until a file was set
+	# ---
+	my $this    = shift;
+	my $logdata = shift;
+	my @mcache;
+	if (defined $this->{mcache}) {
+		@mcache = @{$this->{mcache}};
 	}
+	if ((! $this->{fileLog}) && (! $this->{errorOk})) {
+		push (@mcache,$logdata);
+		$this->{mcache} = \@mcache;
+	}
+	return $this;
 }
 
 #==========================================

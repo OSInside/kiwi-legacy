@@ -1028,26 +1028,21 @@ sub kiwiExit {
 	# ---
 	my $code = $_[0];
 	$kiwi -> setLogHumanReadable();
-	if ($Survive eq "yes") {
-		if ($code != 0) {
-			return undef;
-		}
-		return $code;
-	}
 	if (! defined $LogFile) {
 		my $rootLog = $kiwi -> getRootLog();
 		if (( -f $rootLog) && ($rootLog =~ /(.*)\..*\.screenrc\.log/)) {
 			my $logfile = $1;
 			$logfile = "$logfile.log";
 			$kiwi -> info ("Logfile available at: $logfile");
+			qx (mv $rootLog $logfile 2>&1);
 			$kiwi -> done ();
-			if (! -f $logfile) {
-				qx (mv $rootLog $logfile 2>&1);
-			} else {
-				qx (cat $rootLog >> $logfile 2>&1);
-				unlink $rootLog;
-			}
 		}
+	}
+	if ($Survive eq "yes") {
+		if ($code != 0) {
+			return undef;
+		}
+		return $code;
 	}
 	if ($code != 0) {
 		$kiwi -> error  ("KIWI exited with error(s)");
