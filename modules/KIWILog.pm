@@ -522,7 +522,7 @@ sub printLog {
 	#==========================================
 	# send message cache if needed
 	#------------------------------------------
-	if ((($this->{fileLog}) || ($this->{errorOk})) && (@mcache)) {
+	if ((($this->{fileLog}) || ($this->{errorOk})) && (@mcache) && ($rootEFD)) {
 		foreach my $message (@mcache) {
 			print $rootEFD $message;
 		}
