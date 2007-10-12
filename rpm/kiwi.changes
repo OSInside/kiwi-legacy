@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Fri Oct 12 12:07:13 CEST 2007 - ms@suse.de
+
+- v1.73
+- added setLogHumanReadable() function to convert the kiwi log
+  file into something readable, concerning the \r escape sequences
+- fixed inplace kiwi calls to not overwrite the log file
+
+-------------------------------------------------------------------
 Thu Oct 11 11:32:29 CEST 2007 - ms@suse.de
 
 - v1.72

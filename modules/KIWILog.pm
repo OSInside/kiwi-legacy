@@ -22,6 +22,7 @@ use strict;
 use Carp qw (cluck);
 use KIWISocket;
 use KIWISharedMem;
+use FileHandle;
 
 #==========================================
 # Plugins
@@ -63,7 +64,7 @@ sub new {
 	# Store object data
 	#------------------------------------------
 	$this->{showLevel} = [0,1,2,3,4,5];
-	$this->{channel}   = \*STDOUT;
+	$this->{channel}   = *STDOUT;
 	$this->{errorOk}   = 0;
 	$this->{state}     = "O";
 	$this->{message}   = "initialize";
@@ -242,7 +243,8 @@ sub done {
 	# ...
 	# This is the green "done" flag
 	# ---
-	my $this = shift;
+	my $this    = shift;
+	my $rootEFD = $this->{rootefd};
 	if ((! defined $this->{fileLog}) && (! defined $this->{nocolor})) {
 	    $this -> doStat();
 		$this -> setOutputChannel();
@@ -250,7 +252,7 @@ sub done {
 		$this -> resetOutputChannel();
 		$this -> doNorm();
 		if ($this->{errorOk}) {
-			print EFD "   done\n";
+			print $rootEFD "   done\n";
 		}
 	} else {
 		$this -> setOutputChannel();
@@ -267,7 +269,8 @@ sub failed {
 	# ...
 	# This is the red "failed" flag
 	# ---
-	my $this = shift;
+	my $this    = shift;
+	my $rootEFD = $this->{rootefd};
 	if ((! defined $this->{fileLog}) && (! defined $this->{nocolor})) {
 		$this -> doStat();
 		$this -> setOutputChannel();
@@ -275,7 +278,7 @@ sub failed {
 		$this -> resetOutputChannel();
 		$this -> doNorm();
 		if ($this->{errorOk}) {
-			print EFD "   failed\n";
+			print $rootEFD "   failed\n";
 		}
 	} else {
 		$this -> setOutputChannel();
@@ -292,7 +295,8 @@ sub skipped {
 	# ...
 	# This is the yellow "skipped" flag
 	# ---
-	my $this = shift;
+	my $this    = shift;
+	my $rootEFD = $this->{rootefd};
 	if ((! defined $this->{fileLog}) && (! defined $this->{nocolor})) {
 		$this -> doStat();
 		$this -> setOutputChannel();
@@ -300,7 +304,7 @@ sub skipped {
 		$this -> resetOutputChannel();
 		$this -> doNorm();
 		if ($this->{errorOk}) {
-			print EFD "   skipped\n";
+			print $rootEFD "   skipped\n";
 		}
 	} else {
 		$this -> setOutputChannel();
@@ -317,7 +321,8 @@ sub notset {
 	# ...
 	# This is the cyan "notset" flag
 	# ---
-	my $this = shift;
+	my $this    = shift;
+	my $rootEFD = $this->{rootefd};
 	if ((! defined $this->{fileLog}) && (! defined $this->{nocolor})) {
 		$this -> doStat();
 		$this -> setOutputChannel();
@@ -325,7 +330,7 @@ sub notset {
 		$this -> resetOutputChannel();
 		$this -> doNorm();
 		if ($this->{errorOk}) {
-			print EFD "   notset\n";
+			print $rootEFD "   notset\n";
 		}
 	} else {
 		$this -> setOutputChannel();
@@ -382,6 +387,32 @@ sub cursorON {
 }
 
 #==========================================
+# closeRootChannel
+#------------------------------------------
+sub closeRootChannel {
+	my $this    = shift;
+	my $rootEFD = $this->{rootefd};
+	close $rootEFD;
+}
+
+#==========================================
+# reopenRootChannel
+#------------------------------------------
+sub reopenRootChannel {
+	my $this = shift;
+	my $file = $this->{rootLog};
+	if (! (open EFD,">>$file")) {
+		return undef;
+	}
+	binmode(EFD,':unix');
+	$this->{rootefd} = *EFD;
+	if ($this->{fileLog}) {
+		$this->{channel} = *EFD;
+	}
+	return $this;
+}
+
+#==========================================
 # setOutputChannel
 #------------------------------------------
 sub setOutputChannel {
@@ -389,8 +420,8 @@ sub setOutputChannel {
 	my $channel = $this->{channel};
 	open ( OLDERR, ">&STDERR" );
 	open ( OLDSTD, ">&STDOUT" );
-	open ( STDERR,">&$$channel" );
-	open ( STDOUT,">&$$channel" );
+	open ( STDERR,">&$channel" );
+	open ( STDOUT,">&$channel" );
 	$this->{olderr} = \*OLDERR;
 	$this->{oldstd} = \*OLDSTD;
 }
@@ -433,6 +464,7 @@ sub printLog {
 	# ---
 	my $this = shift;
 	my $smem    = $this->{smem};
+	my $rootEFD = $this->{rootefd};
 	my $lglevel = $_[0];
 	my $logdata = $_[1];
 	my $flag    = $_[2];
@@ -465,14 +497,14 @@ sub printLog {
 	#------------------------------------------
 	my @showLevel = @{$this->{showLevel}};
 	if (! defined $this->{channel}) {
-		$this->{channel} = \*STDOUT;
+		$this->{channel} = *STDOUT;
 	}
 	if ($lglevel !~ /^\d$/) {
 		$logdata = $lglevel;
 		$lglevel = 1;
 	}
-	if (defined $flag) {
-		print EFD $needcr,$date,$logdata;
+	if ((defined $flag) && ($this->{errorOk})) {
+		print $rootEFD $needcr,$date,$logdata;
 		return;
 	}
 	foreach my $level (@showLevel) {
@@ -482,19 +514,19 @@ sub printLog {
 			print $needcr,$date,$logdata;
 			$this -> sendJabberMessage ("$needcr,$date,$logdata");
 			if ($this->{errorOk}) {
-				print EFD $needcr,$date,$logdata;
+				print $rootEFD $needcr,$date,$logdata;
 			}
 		} elsif ($lglevel == 5) {
 			print $needcr,$logdata;
 			$this -> sendJabberMessage ("$needcr,$logdata");
 			if ($this->{errorOk}) {
-				print EFD $needcr,$logdata;
+				print $rootEFD $needcr,$logdata;
 			}
 		} else {
 			print Carp::longmess("$needcr,$logdata");
 			$this -> sendJabberMessage ("$needcr,$logdata");
 			if ($this->{errorOk}) {
-				print EFD Carp::longmess("$needcr,$logdata");
+				print $rootEFD Carp::longmess("$needcr,$logdata");
 			}
 		}
 		$this -> resetOutputChannel();
@@ -588,14 +620,55 @@ sub setLogFile {
 	my $file = $_[0];
 	if ($file ne "terminal") {
 		if (! (open FD,">$file")) {
-			warning ( $this,"Couldn't open log channel: $!\n" );
+			$this -> warning ("Couldn't open log channel: $!\n");
 			return undef;
 		}
 		binmode(FD,':unix');
-		$this->{channel} = \*FD;
+		$this->{channel} = *FD;
+		$this->{rootefd} = *FD;
 	}
 	$this->{rootLog} = $file;
 	$this->{fileLog} = 1;
+	return $this;
+}
+
+#==========================================
+# setLogHumanReadable
+#------------------------------------------
+sub setLogHumanReadable {
+	my $this = shift;
+	my $rootLog = $this->{rootLog};
+	local $/;
+	if (! open (FD, $rootLog)) {
+		return undef;
+	}
+	my $stream = <FD>; close FD;
+	my @stream = split (//,$stream);
+	my $line = "";
+	my $cr   = 0;
+	if (! open (FD, ">$rootLog")) {
+		return undef;
+	}
+	foreach my $l (@stream) {
+		if ($l eq "\r") {
+			# got carriage return, store it
+			$cr = 1; next;
+		}
+		if (($l eq "\n") && (! $cr)) {
+			# normal line, print it
+			print FD "$line\n"; $line = ""; next;
+		}
+		if (($l eq "\n") && ($cr)) {
+			# multi line ended with line feed, print it
+			print FD "$line\n"; $cr = 0; $line = ""; next;
+		}
+		if (($l ne "\n") && ($cr)) {
+			# multi line unfinished, overwrite 
+			$line = $l; $cr = 0; next;
+		}
+		$line .= $l;
+	}
+	close FD;
 	return $this;
 }
 
@@ -628,13 +701,14 @@ sub setRootLog {
 	info ( $this, "Set root log: $file..." );
 	if (! (open EFD,">$file")) {
 		$this -> skipped ();
-		warning ( $this,"Couldn't open root log channel: $!\n" );
+		$this -> warning ("Couldn't open root log channel: $!\n");
 		$this->{errorOk} = 0;
 	}
 	binmode(EFD,':unix');
 	$this -> done ();
 	$this->{rootLog} = $file;
 	$this->{errorOk} = 1;
+	$this->{rootefd} = *EFD;
 }
 
 #==========================================
@@ -768,8 +842,9 @@ sub setLogServer {
 				#------------------------------------------
 				$SIG{PIPE} = sub {
 					$logServer -> write ( $this -> getLogServerMessage() );
-					$logServer -> closeConnection(); exit 0;
+					$logServer -> closeConnection();
 					$sharedMem -> closeSegment();
+					exit 0;
 				};
 				while (my $command = $logServer -> read()) {
 					#==========================================
@@ -810,7 +885,10 @@ sub DESTROY {
 	my $this     = shift;
 	my $jclient  = $this->{jclient};
 	my $logchild = $this->{logchild};
-	close EFD;
+	my $rootEFD  = $this->{rootefd};
+	if ($this->{errorOk}) {
+		close $rootEFD;
+	}
 	if (defined $jclient) {
 		$jclient -> Disconnect();
 	}

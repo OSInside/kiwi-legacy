@@ -32,7 +32,7 @@ use KIWIOverlay;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "1.72";
+our $Version       = "1.73";
 our $openSUSE      = "http://software.opensuse.org/download/";
 our $ConfigFile    = "$ENV{'HOME'}/.kiwirc";
 our $ConfigStatus  = 0;
@@ -1027,6 +1027,7 @@ sub kiwiExit {
 	# private Exit function, exit safely
 	# ---
 	my $code = $_[0];
+	$kiwi -> setLogHumanReadable();
 	if ($Survive eq "yes") {
 		if ($code != 0) {
 			return undef;
@@ -1040,7 +1041,12 @@ sub kiwiExit {
 			$logfile = "$logfile.log";
 			$kiwi -> info ("Logfile available at: $logfile");
 			$kiwi -> done ();
-			qx (mv $rootLog $logfile 2>&1);
+			if (! -f $logfile) {
+				qx (mv $rootLog $logfile 2>&1);
+			} else {
+				qx (cat $rootLog >> $logfile 2>&1);
+				unlink $rootLog;
+			}
 		}
 	}
 	if ($code != 0) {

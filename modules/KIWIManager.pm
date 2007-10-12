@@ -156,7 +156,7 @@ sub setupScreen {
 		return undef;
 	}
 	print $cd "logfile $screenLogs\n";
-	print $cd "logfile flush 10\n";
+	print $cd "logfile flush 1\n";
 	$cd -> close();
 
 	#==========================================
@@ -188,8 +188,10 @@ sub setupScreenCall {
 	my $data = qx ( chmod 755 $screenCall );
 	my $fd = new FileHandle;
 	if ($logs) {
+		$kiwi -> closeRootChannel();
 		$data = qx ( screen -L -D -m -c $screenCtrl $screenCall );
 		$code = $? >> 8;
+		$kiwi -> reopenRootChannel();
 		if ($fd -> open ($screenLogs)) {
 			local $/; $data = <$fd>; $fd -> close();
 		}
@@ -711,7 +713,7 @@ sub setupRootSystem {
 			print $fd "rm -f $root/etc/smart/channels/*\n";
 			print $fd "rm -f $lock\n";
 		} else {
-			$kiwi -> info ("Installing image packages...");
+			$kiwi -> info ("Checking for already installed packages...");
 			my $querypack = "smart query '*' --installed --hide-version";
 			my @installed = qx ( chroot $root $querypack 2>/dev/null);
 			chomp ( @installed );
@@ -736,9 +738,11 @@ sub setupRootSystem {
 			if (defined $force) {
 				push (@installOpts,"-o rpm-force=yes");
 			}
+			$kiwi -> done();
 			#==========================================
 			# Create screen call file
 			#------------------------------------------
+			$kiwi -> info ("Installing image packages...");
 			print $fd "chroot $root smart update\n";
 			print $fd "test \$? = 0 && chroot $root smart install @install ";
 			print $fd "@installOpts\n";
@@ -770,7 +774,7 @@ sub setupRootSystem {
 			print $fd "echo \$? > $screenCall.exit\n";
 			print $fd "rm -f $lock\n";
 		} else {
-			$kiwi -> info ("Installing image packages...");
+			$kiwi -> info ("Checking for already Installed image packages...");
 			my $querypack = "rpm -qa --qf %'{NAME}\n'";
 			my @installed = qx ( chroot $root $querypack 2>/dev/null);
 			chomp ( @installed );
@@ -786,6 +790,11 @@ sub setupRootSystem {
 					push @install,$need;
 				}
 			}
+			$kiwi -> done();
+			#==========================================
+			# Create screen call file
+			#------------------------------------------
+			$kiwi -> info ("Installing image packages...");
 			print $fd "chroot $root @zypper install @install\n";
 			print $fd "echo \$? > $screenCall.exit\n";
 		}
