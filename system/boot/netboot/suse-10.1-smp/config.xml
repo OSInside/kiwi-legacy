@@ -5,13 +5,17 @@
 		<specification>boot/initrd image used for PXE</specification>
 	</description>
 	<preferences>
-		<type>cpio</type>
+		<type bootprofile="default">cpio</type>
 		<version>2.1.1</version>
 		<size unit="M">60</size>
 		<compressed>yes</compressed>
 		<packagemanager>smart</packagemanager>
 		<rpm-check-signatures>False</rpm-check-signatures>
 	</preferences>
+	<profiles>
+		<profile name="default" description="Boot with default smp kernel"/>
+		<profile name="xen" description="Boot with xen kernel/mboot.c32"/>
+	</profiles>
 	<drivers type="drivers">
 		<file name="drivers/ide/*"/>
 		<file name="net/packet/*"/>
@@ -40,6 +44,13 @@
 		<source path="opensuse://SL-10.1"/>
 		<!-- <source path="/image/dist/full-10.1-i386"/> -->
 	</repository>
+	<packages type="image" profiles="default">
+		<package name="kernel-smp"/>
+	</packages>
+	<packages type="image" profiles="xen">
+		<package name="kernel-xen"/>
+		<package name="xen"/>
+	</packages>
 	<packages type="image">
 		<package name="iputils"/>
 		<package name="atftp"/>
@@ -55,7 +66,6 @@
 		<package name="parted"/>
 		<package name="reiserfs"/>
 		<package name="util-linux"/>
-		<package name="kernel-smp"/>
 		<package name="diffutils"/>
 		<package name="procps"/>
 		<package name="lvm2"/>
