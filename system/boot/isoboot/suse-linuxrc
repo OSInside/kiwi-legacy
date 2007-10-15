@@ -66,6 +66,10 @@ touch /lib/modules/*/modules.dep
 #======================================
 # 4) Including required kernel modules
 #--------------------------------------
+if [ -z "$UNIONFS_CONFIG" ];then
+	Echo "Probing module: rd"
+	modprobe rd >/dev/null 2>&1
+fi
 probeDevices; udevStart
 
 #======================================
@@ -139,26 +143,7 @@ if [ -z "$UNIONFS_CONFIG" ];then
 fi
 
 #======================================
-# 9) Resize filesystem to full space
-#--------------------------------------
-#if [ -z "$UNIONFS_CONFIG" ];then
-#	Echo "Resize filesystem to full partition space..."
-#	if test "$FSTYPE" = "reiserfs";then
-#		resize_reiserfs $imageDevice
-#	fi
-#	if test "$FSTYPE" = "ext2";then
-#		resize2fs -f -F -p $imageDevice
-#		e2fsck -y -f $imageDevice
-#	fi
-#	if test "$FSTYPE" = "ext3";then
-#		resize2fs -f -F -p $imageDevice
-#		e2fsck -y -f $imageDevice
-#		tune2fs -j $imageDevice
-#	fi
-#fi
-
-#======================================
-# 10) Check for swap space
+# 9) Check for swap space
 #--------------------------------------
 swapSpace=`searchSwapSpace`
 if [ ! -z "$swapSpace" ];then
@@ -206,11 +191,11 @@ else
 fi
 
 #======================================
-# 11) Mount OS image to /mnt
+# 10) Mount OS image to /mnt
 #--------------------------------------
 if [ -z "$UNIONFS_CONFIG" ];then
 	#======================================
-	# 11.1) mount RW part and CD to /mnt
+	# 10.1) mount RW part and CD to /mnt
 	#--------------------------------------
 	if ! mount $imageDevice /mnt &>/dev/null;then
 		systemException "Failed to mount RW root filesystem" "reboot"
@@ -218,7 +203,7 @@ if [ -z "$UNIONFS_CONFIG" ];then
 	mkdir -p /mnt/$LIVECD && mount $cddev /mnt/$LIVECD &>/dev/null
 
 	#======================================
-	# 11.2) Create RO Link list
+	# 10.2) Create RO Link list
 	#--------------------------------------
 	cd /mnt
 	if [ ! -d $LIVECD/read-only-system ];then
@@ -242,7 +227,7 @@ if [ -z "$UNIONFS_CONFIG" ];then
 	cd /
 else
 	#======================================
-	# 11.1) mount CD to /mnt and unify
+	# 10.1) mount CD to /mnt and unify
 	#--------------------------------------
 	Echo "Mounting compressed unified tree..."
 	mkdir -p /mnt/$LIVECD && mount $cddev /mnt/$LIVECD &>/dev/null
@@ -253,7 +238,7 @@ else
 fi
 
 #======================================
-# 12) Create system dependant files
+# 11) Create system dependant files
 #--------------------------------------
 setupDefaultFstab /config
 updateRootDeviceFstab /config $imageDevice
@@ -267,7 +252,7 @@ if [ ! -z "$swapDevice" ];then
 fi
 
 #======================================
-# 13) copy system dependant files
+# 12) copy system dependant files
 #--------------------------------------
 cd /config
 find . -type d | while read d ; do  mkdir -p /mnt/$d ; done
@@ -276,24 +261,24 @@ cd /
 rm -rf /config
 
 #======================================
-# 14) setup real root device
+# 13) setup real root device
 #--------------------------------------
 echo 256 > /proc/sys/kernel/real-root-dev
 
 #======================================
-# 15) umount system filesystems
+# 14) umount system filesystems
 #--------------------------------------
 udevKill
 umountSystemFilesystems
 
 #======================================
-# 16) copy initrd files to image
+# 15) copy initrd files to image
 #--------------------------------------
 cp /preinit /mnt
 cp /include /mnt
 
 #======================================
-# 17) Activate new root
+# 16) Activate new root
 #--------------------------------------
 Echo "Activating Image: [$imageName]"
 mkdir -p /mnt/dev && copyDevices /mnt/dev
@@ -313,7 +298,7 @@ else
 	rm ./include
 fi
 #======================================
-# 18) Unmount initrd / system init
+# 17) Unmount initrd / system init
 #--------------------------------------
 echo " "
 echo "Booting into Live CD System..."
