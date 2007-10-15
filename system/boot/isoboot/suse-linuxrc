@@ -66,11 +66,12 @@ touch /lib/modules/*/modules.dep
 #======================================
 # 4) Including required kernel modules
 #--------------------------------------
+probeDevices
 if [ -z "$UNIONFS_CONFIG" ];then
 	Echo "Probing module: rd"
 	modprobe rd >/dev/null 2>&1
 fi
-probeDevices; udevStart
+udevStart
 
 #======================================
 # 5) Mount the CD device
