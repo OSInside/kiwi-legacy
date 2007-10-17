@@ -63,32 +63,36 @@ touch /etc/modules.conf
 touch /lib/modules/*/modules.dep
 
 #======================================
-# 3) Including required kernel modules
+# 3) run udevd
+#--------------------------------------
+udevStart
+
+#======================================
+# 4) Including required kernel modules
 #--------------------------------------
 Echo "Including required kernel modules..."
 for module in xennet xenblk reiserfs ext2 ext3 loop ipv6;do
 	modprobe $module >/dev/null 2>&1
 done
-udevStart
 
 #======================================
-# 4) Mount VM (boot)
+# 5) Mount VM (boot)
 #--------------------------------------
 VMMountSystem
 
 #======================================
-# 5) Get filesystem type
+# 6) Get filesystem type
 #--------------------------------------
 probeFileSystem $imageRootDevice
 
 #======================================
-# 6) Create system dependant files
+# 7) Create system dependant files
 #--------------------------------------
 setupDefaultFstab /config
 updateRootDeviceFstab /config $imageRootDevice
 
 #======================================
-# 7) copy system dependant files
+# 8) copy system dependant files
 #--------------------------------------
 cd /config
 find . -type d | while read d ; do  mkdir -p /mnt/$d ; done
@@ -97,29 +101,29 @@ cd /
 rm -rf /config
 
 #======================================
-# 8) setup real root device
+# 9) setup real root device
 #--------------------------------------
 echo 256 > /proc/sys/kernel/real-root-dev
 
 #======================================
-# 9) umount system filesystems
+# 10) umount system filesystems
 #--------------------------------------
-udevKill
 umountSystemFilesystems
 
 #======================================
-# 10) copy initrd files to image
+# 11) copy initrd files to image
 #--------------------------------------
 cp /preinit /mnt
 cp /include /mnt
 
 #======================================
-# 11) Activate new root
+# 12) Activate new root
 #--------------------------------------
 Echo "Activating Image: [$imageRootDevice]"
-mkdir -p /mnt/dev && copyDevices /mnt/dev
-cd /mnt && exec < dev/console >dev/console 2>&1
+/sbin/udevsettle --timeout=30
+mount --move /dev /mnt/dev
 Echo "Calling preinit phase..."
+cd /mnt && exec < dev/console >dev/console 2>&1
 reopenKernelConsole
 /mnt/sbin/pivot_root . mnt >/dev/null 2>&1
 if test $? != 0;then
@@ -134,13 +138,14 @@ else
 	rm ./include
 fi
 #======================================
-# 12) Unmount initrd / system init
+# 13) Unmount initrd / system init
 #--------------------------------------
 echo " "
 echo "Booting into Xen System..."
 echo "--------------------------"
 export IFS=$IFS_ORIG
 mount -n -o remount,rw / &>/dev/null
+udevKill
 if [ $PIVOT = "true" ];then
 	exec umount -n -l /mnt
 else

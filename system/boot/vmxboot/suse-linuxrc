@@ -102,17 +102,22 @@ touch /etc/modules.conf
 touch /lib/modules/*/modules.dep
 
 #======================================
-# 3) Including required kernel modules
+# 3) run udevd
 #--------------------------------------
-probeDevices; udevStart
+udevStart
 
 #======================================
-# 4) Mount VM (boot)
+# 4) Including required kernel modules
+#--------------------------------------
+probeDevices
+
+#======================================
+# 5) Mount VM (boot)
 #--------------------------------------
 VMFindSystem
 
 #======================================
-# 5) Get filesystem type
+# 6) Get filesystem type
 #--------------------------------------
 probeFileSystem $imageRootDevice
 if [ $FSTYPE = "unknown" ];then
@@ -122,7 +127,7 @@ if [ $FSTYPE = "unknown" ];then
 fi
 
 #======================================
-# 6) Resize filesystem to full space
+# 7) Resize filesystem to full space
 #--------------------------------------
 Echo "Filesystem of VMX system is: $FSTYPE -> $imageRootDevice"
 if test "$FSTYPE" = "squashfs";then
@@ -148,19 +153,19 @@ else
 fi
 
 #======================================
-# 7) Mount VM (boot)
+# 8) Mount VM (boot)
 #--------------------------------------
 if ! mountSystem $imageRootDevice;then
 	systemException "Failed to mount root filesystem" "reboot"
 fi
 
 #======================================
-# 8) Get kernel list for local boot
+# 9) Get kernel list for local boot
 #--------------------------------------
 kernelList /mnt
 
 #======================================
-# 9) Create system dependant files
+# 10) Create system dependant files
 #--------------------------------------
 setupDefaultFstab /config
 updateRootDeviceFstab /config $imageRootDevice
@@ -168,7 +173,7 @@ setupBootLoaderGrub /mnt /config 0 $imageRootDevice VMX
 setupKernelModules /config
 
 #======================================
-# 10) copy system dependant files
+# 11) copy system dependant files
 #--------------------------------------
 cd /config
 find . -type d | while read d ; do  mkdir -p /mnt/$d ; done
@@ -177,18 +182,17 @@ cd /
 rm -rf /config
 
 #======================================
-# 11) setup real root device
+# 12) setup real root device
 #--------------------------------------
 echo 256 > /proc/sys/kernel/real-root-dev
 
 #======================================
-# 12) umount system filesystems
+# 13) umount system filesystems
 #--------------------------------------
-udevKill
 umountSystemFilesystems
 
 #======================================
-# 13) copy initrd files to image
+# 14) copy initrd files to image
 #--------------------------------------
 if [ -f /image/loader/message ];then
 	mv /image/loader/message /mnt/boot
@@ -197,12 +201,13 @@ cp /preinit /mnt
 cp /include /mnt
 
 #======================================
-# 14) Activate new root
+# 15) Activate new root
 #--------------------------------------
 Echo "Activating Image: [$imageRootDevice]"
-mkdir -p /mnt/dev && copyDevices /mnt/dev
-cd /mnt && exec < dev/console >dev/console 2>&1
+/sbin/udevsettle --timeout=30
+mount --move /dev /mnt/dev
 Echo "Calling preinit phase..."
+cd /mnt && exec < dev/console >dev/console 2>&1
 reopenKernelConsole
 /mnt/sbin/pivot_root . mnt >/dev/null 2>&1
 if test $? != 0;then
@@ -217,13 +222,14 @@ else
 	rm ./include
 fi
 #======================================
-# 15) Unmount initrd / system init
+# 16) Unmount initrd / system init
 #--------------------------------------
 echo " "
 echo "Booting into final System..."
 echo "----------------------------"
 export IFS=$IFS_ORIG
 mount -n -o remount,rw / 2>/dev/null
+udevKill
 if [ $PIVOT = "true" ];then
 	exec umount -n -l /mnt
 else

@@ -64,27 +64,31 @@ touch /etc/modules.conf
 touch /lib/modules/*/modules.dep
 
 #======================================
-# 4) Including required kernel modules
+# 4) run udevd
+#--------------------------------------
+udevStart
+
+#======================================
+# 5) Including required kernel modules
 #--------------------------------------
 probeDevices
 if [ -z "$UNIONFS_CONFIG" ];then
 	Echo "Probing module: rd"
 	modprobe rd >/dev/null 2>&1
 fi
-udevStart
 
 #======================================
-# 5) Mount the CD device
+# 6) Mount the CD device
 #--------------------------------------
 CDMount
 
 #======================================
-# 6) Load configuration
+# 7) Load configuration
 #--------------------------------------
 importFile < $LIVECD_CONFIG
 
 #======================================
-# 7) Download RW part of the CD image
+# 8) Download RW part of the CD image
 #--------------------------------------
 IFS="," ; for i in $IMAGE;do
 	field=0
@@ -137,24 +141,24 @@ done
 CDUmount
 
 #======================================
-# 8) Get filesystem type
+# 9) Get filesystem type
 #--------------------------------------
 if [ -z "$UNIONFS_CONFIG" ];then
 	probeFileSystem $imageDevice
 fi
 
 #======================================
-# 9) Check for swap space
+# 10) Check for swap space
 #--------------------------------------
 swapSpace=`searchSwapSpace`
 if [ ! -z "$swapSpace" ];then
 	#======================================
-	# 9.1) use an existing swap partition
+	# 10.1) use an existing swap partition
 	#--------------------------------------
 	Echo "Found swap space on: $swapSpace"
 else
 	#======================================
-	# 9.1) use a swap file on a free part.
+	# 10.1) use a swap file on a free part.
 	#--------------------------------------
 	swapDevice=`searchDiskSpace`
 	if [ ! -z "$swapDevice" ];then
@@ -192,11 +196,11 @@ else
 fi
 
 #======================================
-# 10) Mount OS image to /mnt
+# 11) Mount OS image to /mnt
 #--------------------------------------
 if [ -z "$UNIONFS_CONFIG" ];then
 	#======================================
-	# 10.1) mount RW part and CD to /mnt
+	# 11.1) mount RW part and CD to /mnt
 	#--------------------------------------
 	if ! mount $imageDevice /mnt &>/dev/null;then
 		systemException "Failed to mount RW root filesystem" "reboot"
@@ -204,7 +208,7 @@ if [ -z "$UNIONFS_CONFIG" ];then
 	mkdir -p /mnt/$LIVECD && mount $cddev /mnt/$LIVECD &>/dev/null
 
 	#======================================
-	# 10.2) Create RO Link list
+	# 11.2) Create RO Link list
 	#--------------------------------------
 	cd /mnt
 	if [ ! -d $LIVECD/read-only-system ];then
@@ -228,7 +232,7 @@ if [ -z "$UNIONFS_CONFIG" ];then
 	cd /
 else
 	#======================================
-	# 10.1) mount CD to /mnt and unify
+	# 11.1) mount CD to /mnt and unify
 	#--------------------------------------
 	Echo "Mounting compressed unified tree..."
 	mkdir -p /mnt/$LIVECD && mount $cddev /mnt/$LIVECD &>/dev/null
@@ -239,7 +243,7 @@ else
 fi
 
 #======================================
-# 11) Create system dependant files
+# 12) Create system dependant files
 #--------------------------------------
 setupDefaultFstab /config
 updateRootDeviceFstab /config $imageDevice
@@ -253,7 +257,7 @@ if [ ! -z "$swapDevice" ];then
 fi
 
 #======================================
-# 12) copy system dependant files
+# 13) copy system dependant files
 #--------------------------------------
 cd /config
 find . -type d | while read d ; do  mkdir -p /mnt/$d ; done
@@ -262,29 +266,29 @@ cd /
 rm -rf /config
 
 #======================================
-# 13) setup real root device
+# 14) setup real root device
 #--------------------------------------
 echo 256 > /proc/sys/kernel/real-root-dev
 
 #======================================
-# 14) umount system filesystems
+# 15) umount system filesystems
 #--------------------------------------
-udevKill
 umountSystemFilesystems
 
 #======================================
-# 15) copy initrd files to image
+# 16) copy initrd files to image
 #--------------------------------------
 cp /preinit /mnt
 cp /include /mnt
 
 #======================================
-# 16) Activate new root
+# 17) Activate new root
 #--------------------------------------
 Echo "Activating Image: [$imageName]"
-mkdir -p /mnt/dev && copyDevices /mnt/dev
-cd /mnt && exec < dev/console >dev/console 2>&1
+/sbin/udevsettle --timeout=30
+mount --move /dev /mnt/dev
 Echo "Calling preinit phase..."
+cd /mnt && exec < dev/console >dev/console 2>&1
 reopenKernelConsole
 /mnt/sbin/pivot_root . mnt >/dev/null 2>&1
 if test $? != 0;then
@@ -299,13 +303,14 @@ else
 	rm ./include
 fi
 #======================================
-# 17) Unmount initrd / system init
+# 18) Unmount initrd / system init
 #--------------------------------------
 echo " "
 echo "Booting into Live CD System..."
 echo "------------------------------"
 export IFS=$IFS_ORIG
 mount -n -o remount,rw / &>/dev/null
+udevKill
 if [ $PIVOT = "true" ];then
 	exec umount -n -l /mnt
 else

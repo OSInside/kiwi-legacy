@@ -81,7 +81,12 @@ touch /etc/modules.conf
 touch /lib/modules/*/modules.dep
 
 #======================================
-# 3) Include proc/cmdline information
+# 3) run udevd
+#--------------------------------------
+udevStart
+
+#======================================
+# 4) Include proc/cmdline information
 #--------------------------------------
 includeKernelParameters
 if [ ! -z $IMAGE ];then
@@ -94,7 +99,7 @@ if [ ! -z $IMAGE ];then
 fi
 
 #======================================
-# 4) Obtain/load network module
+# 5) Obtain/load network module
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	loaded=0
@@ -117,14 +122,14 @@ if [ $LOCAL_BOOT = "no" ];then
 fi
 
 #======================================
-# 5) Setup network interface and DNS
+# 6) Setup network interface and DNS
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	setupNetwork
 fi
 
 #======================================
-# 6) get TFTP Server IP/name
+# 7) get TFTP Server IP/name
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	checkTFTP
@@ -140,7 +145,7 @@ if [ $LOCAL_BOOT = "no" ];then
 fi
 
 #======================================
-# 7) Load configuration
+# 8) Load configuration
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	CONFIG=/etc/config.netclient
@@ -234,13 +239,13 @@ if [ $LOCAL_BOOT = "no" ];then
 fi
 
 #======================================
-# (8) Load Device modules
+# 9) Load Device modules
 #--------------------------------------
-probeDevices; udevStart
+probeDevices
 
 export systemIntegrity="unknown"
 #======================================
-# 9) Is this a diskful station
+# 10) Is this a diskful station
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 if [ ! -z "$PART" ] && [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ];then
@@ -299,7 +304,7 @@ fi
 fi
 
 #======================================
-# 10) Download network client image
+# 11) Download network client image
 #--------------------------------------
 if [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ];then
 	count=0
@@ -468,7 +473,7 @@ if [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ];then
 	done
 else
 	#======================================
-	# 10.1) Check for NFS root
+	# 11.1) Check for NFS root
 	#--------------------------------------
 	if [ ! -z "$NFSROOT" ];then
 		IFS="," ; for i in $NFSROOT;do
@@ -486,7 +491,7 @@ else
 		systemIntegrity="clean"
 	fi
 	#======================================
-	# 10.2) Check for NBD root
+	# 11.2) Check for NBD root
 	#--------------------------------------
 	if [ ! -z "$NBDROOT" ];then
 		if ! modprobe nbd;then
@@ -545,7 +550,7 @@ else
 fi
 
 #======================================
-# 11) Check for RELOAD_CONFIG
+# 12) Check for RELOAD_CONFIG
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	if test ! -z $DISK;then
@@ -557,14 +562,14 @@ if [ $LOCAL_BOOT = "no" ];then
 fi
 
 #======================================
-# 12) Mount OS image to /mnt
+# 13) Mount OS image to /mnt
 #--------------------------------------
 if ! mountSystem;then
 	systemException "Failed to mount root filesystem" "reboot"
 fi
 
 #======================================
-# 13) Import fixed configuration files
+# 14) Import fixed configuration files
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	if test $systemIntegrity = "clean";then
@@ -618,7 +623,7 @@ if [ $LOCAL_BOOT = "no" ];then
 fi
 
 #======================================
-# 14) send DHCP_RELEASE, reset cache
+# 15) send DHCP_RELEASE, reset cache
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ] && [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ];then
 	if test $systemIntegrity = "clean";then
@@ -627,7 +632,7 @@ if [ $LOCAL_BOOT = "no" ] && [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ];then
 fi
 
 #======================================
-# 15) Check if this is a split image
+# 16) Check if this is a split image
 #--------------------------------------
 if [ ! -z "$COMBINED_IMAGE" ] && [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ]; then
 	READ_ONLY_SYSTEM=system
@@ -641,7 +646,7 @@ if [ ! -z "$COMBINED_IMAGE" ] && [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ]; then
 fi
 
 #======================================
-# 16) check filesystem and kernels
+# 17) check filesystem and kernels
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	if test $systemIntegrity = "clean";then
@@ -651,7 +656,7 @@ if [ $LOCAL_BOOT = "no" ];then
 fi
 
 #======================================
-# 17) make initrd available on unionfs
+# 18) make initrd available on unionfs
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	if test ! -z "$UNIONFS_CONFIG" && test $systemIntegrity = "clean";then
@@ -667,7 +672,7 @@ if [ $LOCAL_BOOT = "no" ];then
 fi
 
 #======================================
-# 18) Create system dependant files
+# 19) Create system dependant files
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	if test $systemIntegrity = "clean";then
@@ -683,7 +688,7 @@ if [ $LOCAL_BOOT = "no" ];then
 fi
 
 #======================================
-# 19) If image is new, notify
+# 20) If image is new, notify
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	if test $systemIntegrity = "clean"; then
@@ -711,7 +716,7 @@ if [ $LOCAL_BOOT = "no" ];then
 fi
 
 #======================================
-# 20) copy system dependant files
+# 21) copy system dependant files
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	if test $systemIntegrity = "clean";then
@@ -725,13 +730,12 @@ fi
 
 echo 256 > /proc/sys/kernel/real-root-dev
 #======================================
-# 21) umount system filesystems
+# 22) umount system filesystems
 #--------------------------------------
-udevKill
 umountSystemFilesystems
 
 #======================================
-# 22) copy initrd files to image
+# 23) copy initrd files to image
 #--------------------------------------
 if [ -f /image/loader/message ];then
 	mv /image/loader/message /mnt/boot
@@ -740,17 +744,18 @@ cp /preinit /mnt
 cp /include /mnt
 
 #======================================
-# 23) check if reboot is required
+# 24) check if reboot is required
 #--------------------------------------
 kernelCheck /mnt
 
 #======================================
-# 24) Activate new root
+# 25) Activate new root
 #--------------------------------------
 Echo "Activating Image: [$imageRootName]"
-mkdir -p /mnt/dev && copyDevices /mnt/dev
-cd /mnt && exec < dev/console >dev/console 2>&1
+/sbin/udevsettle --timeout=30
+mount --move /dev /mnt/dev
 Echo "Calling preinit phase..."
+cd /mnt && exec < dev/console >dev/console 2>&1
 reopenKernelConsole
 /mnt/sbin/pivot_root . mnt >/dev/null 2>&1
 if test $? != 0;then
@@ -765,7 +770,7 @@ else
 	rm ./include
 fi
 #======================================
-# 25) reboot system if specified
+# 26) reboot system if specified
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	if test ! -z $REBOOT_IMAGE;then
@@ -774,13 +779,14 @@ if [ $LOCAL_BOOT = "no" ];then
 	fi
 fi
 #======================================
-# 26) Unmount initrd / system init
+# 27) Unmount initrd / system init
 #--------------------------------------
 echo " "
 echo "Booting into final System..."
 echo "----------------------------"
 export IFS=$IFS_ORIG
 mount -n -o remount,rw / 2>/dev/null
+udevKill
 if [ $PIVOT = "true" ];then
 	exec umount -n -l /mnt
 else

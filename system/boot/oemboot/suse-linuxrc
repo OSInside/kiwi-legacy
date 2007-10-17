@@ -62,7 +62,12 @@ touch /etc/modules.conf
 touch /lib/modules/*/modules.dep
 
 #======================================
-# 3) Include proc/cmdline information
+# 3) run udevd
+#--------------------------------------
+udevStart
+
+#======================================
+# 4) Include proc/cmdline information
 #--------------------------------------
 includeKernelParameters
 if [ ! -z $UNIONFS_CONFIG ];then
@@ -75,17 +80,16 @@ if [ ! -z $UNIONFS_CONFIG ];then
 fi
 
 #======================================
-# 4) Including required kernel modules
+# 5) Including required kernel modules
 #--------------------------------------
 probeDevices
 for module in usb_storage sg sd_mod BusLogic;do
 	modprobe $module >/dev/null 2>&1
 done
 sleep 5
-udevStart
 
 #======================================
-# 5) Search disks, prefer removable one
+# 6) Search disks, prefer removable one
 #--------------------------------------
 if [ ! -f $VMX_SYSTEM ];then
 	# /.../
@@ -157,15 +161,15 @@ else
 fi
 
 #======================================
-# 6) Check for vmx system
+# 7) Check for vmx system
 #--------------------------------------
 if [ -f $VMX_SYSTEM ];then
 	#======================================
-	# 6.1) import vmx configuration file
+	# 7.1) import vmx configuration file
 	#--------------------------------------
 	importFile < $VMX_SYSTEM
 	#======================================
-	# 6.2) check version of installed OS
+	# 7.2) check version of installed OS
 	#--------------------------------------
 	deviceRoot="$deviceDisk"2
 	probeFileSystem $deviceRoot
@@ -184,7 +188,7 @@ if [ -f $VMX_SYSTEM ];then
 		/sbin/reboot -f -i >/dev/null 2>&1
 	fi
 	#======================================
-	# 6.3) mount CD/DVD/USB stick
+	# 7.3) mount CD/DVD/USB stick
 	#--------------------------------------
 	USBStickDevice
 	if [ $stickFound = 0 ];then
@@ -195,7 +199,7 @@ if [ -f $VMX_SYSTEM ];then
 		mkdir -p /cdrom && mount $stickDevice /cdrom
 	fi
 	#======================================
-	# 6.4) install disk system
+	# 7.4) install disk system
 	#--------------------------------------
 	# /.../
 	# install virtual disk image from the CD/DVD onto the
@@ -238,15 +242,15 @@ if [ -f $VMX_SYSTEM ];then
 		rm -f /dev/compressed_image
 	fi
 	#======================================
-	# 6.5) Umount the CD/DVD
+	# 7.5) Umount the CD/DVD
 	#--------------------------------------
 	umount /cdrom
 	#======================================
-	# 6.6) reread partition table
+	# 7.6) reread partition table
 	#--------------------------------------
 	blockdev --rereadpt $deviceDisk
 	#======================================
-	# 6.7) find new root partition
+	# 7.7) find new root partition
 	#--------------------------------------
 	unset UNIONFS_CONFIG
 	deviceRoot="$deviceDisk"2
@@ -260,7 +264,7 @@ if [ -f $VMX_SYSTEM ];then
 		export UNIONFS_CONFIG="$deviceDisk"3,"$deviceDisk"2,aufs
 	fi
 	#======================================
-	# 6.8) Create md5 version info file
+	# 7.8) Create md5 version info file
 	#--------------------------------------
 	if ! mountSystem $deviceRoot;then
 		systemException \
@@ -282,7 +286,7 @@ if [ -f $VMX_SYSTEM ];then
 	echo "$atversion $md5sum" > $versionFile
 	umountSystem
 	#======================================
-	# 6.9) reboot system
+	# 7.9) reboot system
 	#--------------------------------------
 	if [ $stickFound = 0 ];then
 		Echo "NOTE: Please remove the installation CD before reboot !"
@@ -296,7 +300,7 @@ if [ -f $VMX_SYSTEM ];then
 fi
 
 #======================================
-# 7) Probe filesystem of disk device
+# 8) Probe filesystem of disk device
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	probeFileSystem $deviceRoot
@@ -307,18 +311,18 @@ if [ $LOCAL_BOOT = "no" ];then
 	fi
 fi
 #======================================
-# 8) repartition the disk device
+# 9) repartition the disk device
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	#======================================
-	# 8.1 calculate amount of swap space
+	# 9.1 calculate amount of swap space
 	#--------------------------------------
 	mem_size=`grep MemTotal: /proc/meminfo | tr -dc '[0-9]'`
 	swapsize=$(( $mem_size *2 / 1024 ))
 	Echo "Filesystem of root system is: $FSTYPE -> $deviceRoot"
 	if ! test "$FSTYPE" = "squashfs";then
 		#======================================
-		# 8.2 write new partition table
+		# 9.2 write new partition table
 		#--------------------------------------
 		# /.../
 		# Explanation of the fdisk commands used within the
@@ -379,21 +383,21 @@ if [ $LOCAL_BOOT = "no" ];then
 			systemException "Failed to create partition table" "reboot"
 		fi
 		#======================================
-		# 8.3 Update new device names
+		# 9.3 Update new device names
 		#--------------------------------------
 		export deviceRoot="$deviceDisk"2
 		export deviceSwap="$deviceDisk"1
 		export deviceHome="$deviceDisk"3
 
 		#======================================
-		# 8.4 Activate swap space
+		# 9.4 Activate swap space
 		#--------------------------------------
 		Echo "Activating swap space on $deviceSwap"
 		if ! mkswap $deviceSwap >/dev/null 2>&1;then
 			systemException "Failed to create swap signature" "reboot"
 		fi
 		#======================================
-		# 8.5 Create home file system
+		# 9.5 Create home file system
 		#--------------------------------------
 		Echo "Creating Home filesystem on $deviceHome"
 		if ! mke2fs -j -q $deviceHome >/dev/null 2>&1;then
@@ -401,7 +405,7 @@ if [ $LOCAL_BOOT = "no" ];then
 		fi
 	else
 		#======================================
-		# 8.2 calculate end block - swapspace
+		# 9.2 calculate end block - swapspace
 		#--------------------------------------
 		swapXMBytes=$swapsize
 		diskXMBytes=`sfdisk -s $deviceDisk`
@@ -425,7 +429,7 @@ if [ $LOCAL_BOOT = "no" ];then
 			disk3MBytes=`expr $disk3MBytes - $swapXMBytes`
 		fi
 		#======================================
-		# 8.3 write new partition table
+		# 9.3 write new partition table
 		#--------------------------------------
 		# /.../
 		# Explanation of the fdisk commands used within the
@@ -462,14 +466,14 @@ if [ $LOCAL_BOOT = "no" ];then
 			systemException "Failed to create partition table" "reboot"
 		fi
 		#======================================
-		# 8.4 Update new device names
+		# 9.4 Update new device names
 		#--------------------------------------
 		export deviceBoot="$deviceDisk"1
 		export deviceRoot="$deviceDisk"2
 		export deviceSwap="$deviceDisk"4
 
 		#======================================
-		# 8.5 Activate swap space
+		# 9.5 Activate swap space
 		#--------------------------------------
 		Echo "Activating swap space on $deviceSwap"
 		if ! mkswap $deviceSwap >/dev/null 2>&1;then
@@ -479,7 +483,7 @@ if [ $LOCAL_BOOT = "no" ];then
 fi
 
 #======================================
-# 9) Resize filesystem to full space
+# 10) Resize filesystem to full space
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	if test "$FSTYPE" = "squashfs";then
@@ -514,21 +518,21 @@ if [ $LOCAL_BOOT = "no" ];then
 fi
 
 #======================================
-# 10) Mount system
+# 11) Mount system
 #--------------------------------------
 if ! mountSystem $deviceRoot;then
 	systemException "Failed to mount root filesystem" "reboot"
 fi
 
 #======================================
-# 11) get installed kernels
+# 12) get installed kernels
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	kernelList /mnt
 fi
 
 #======================================
-# 12) Create system dependant files
+# 13) Create system dependant files
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	setupDefaultFstab /config
@@ -545,7 +549,7 @@ if [ $LOCAL_BOOT = "no" ];then
 fi
 
 #======================================
-# 13) copy system dependant files
+# 14) copy system dependant files
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	cd /config
@@ -556,18 +560,17 @@ if [ $LOCAL_BOOT = "no" ];then
 fi
 
 #======================================
-# 14) setup real root device
+# 15) setup real root device
 #--------------------------------------
 echo 256 > /proc/sys/kernel/real-root-dev
 
 #======================================
-# 15) umount system filesystems
+# 16) umount system filesystems
 #--------------------------------------
-udevKill
 umountSystemFilesystems
 
 #======================================
-# 16) copy initrd files to image
+# 17) copy initrd files to image
 #--------------------------------------
 if [ -f /image/loader/message ];then
 	mv /image/loader/message /mnt/boot
@@ -576,19 +579,13 @@ cp /preinit /mnt
 cp /include /mnt
 
 #======================================
-# 17) Start YaST when booting final sys
-#--------------------------------------
-if [ $LOCAL_BOOT = "no" ];then
-	touch /mnt/var/lib/YaST2/runme_at_boot >/dev/null 2>&1
-fi
-
-#======================================
 # 18) Activate new root
 #--------------------------------------
 Echo "Activating Image: [$deviceDisk]"
-mkdir -p /mnt/dev && copyDevices /mnt/dev
-cd /mnt && exec < dev/console >dev/console 2>&1
+/sbin/udevsettle --timeout=30
+mount --move /dev /mnt/dev
 Echo "Calling preinit phase..."
+cd /mnt && exec < dev/console >dev/console 2>&1
 reopenKernelConsole
 /mnt/sbin/pivot_root . mnt >/dev/null 2>&1
 if test $? != 0;then
@@ -604,13 +601,14 @@ else
 fi
 
 #======================================
-# 19) Unmount initrd / system init
+# 18) Unmount initrd / system init
 #--------------------------------------
 echo " "
 echo "Booting into final System..."
 echo "----------------------------"
 export IFS=$IFS_ORIG
 mount -n -o remount,rw / 2>/dev/null
+udevKill
 if [ $PIVOT = "true" ];then
 	exec umount -n -l /mnt
 else

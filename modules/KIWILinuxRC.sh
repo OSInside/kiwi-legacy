@@ -140,9 +140,9 @@ function systemException {
 #======================================
 # copyDevices
 #--------------------------------------
-function copyDevices {
-	local prefix=$1
-	local search=$2
+function copyDeviceNodes {
+	local search=$1
+	local prefix=$2
 	local dtype
 	local major
 	local minor
@@ -177,37 +177,51 @@ function copyDevices {
 	popd >/dev/null 2>&1
 }
 #======================================
+# copyDevices
+#--------------------------------------
+function createInitialDevices {
+	local prefix=$1
+	mkdir -p $prefix
+	if [ ! -d $prefix ];then
+		return
+	fi
+	if [ -e $prefix/null ];then
+		rm -f $prefix/null
+	fi
+	test -c $prefix/tty      || mknod -m 0666 $prefix/tty      c 5 0 
+	test -c $prefix/console  || mknod -m 0600 $prefix/console  c 5 1
+	test -c $prefix/ptmx     || mknod -m 0666 $prefix/ptmx     c 5 2
+	exec < $prefix/console > $prefix/console 2>&1
+	test -c $prefix/null     || mknod -m 0666 $prefix/null     c 1 3
+	test -c $prefix/kmsg     || mknod -m 0600 $prefix/kmsg     c 1 11
+	test -c $prefix/snapshot || mknod -m 0660 $prefix/snapshot c 10 231
+	test -c $prefix/random   || mknod -m 0666 $prefix/random   c 1 8
+	test -c $prefix/urandom  || mknod -m 0644 $prefix/urandom  c 1 9
+	test -b $prefix/loop0    || mknod -m 0640 $prefix/loop0    b 7 0
+	test -b $prefix/loop1    || mknod -m 0640 $prefix/loop1    b 7 1
+	test -b $prefix/loop2    || mknod -m 0640 $prefix/loop2    b 7 2
+	mkdir -p -m 0755 $prefix/pts
+	mkdir -p -m 1777 $prefix/shm
+	test -L $prefix/fd     || ln -s /proc/self/fd $prefix/fd
+	test -L $prefix/stdin  || ln -s fd/0 $prefix/stdin
+	test -L $prefix/stdout || ln -s fd/1 $prefix/stdout
+	test -L $prefix/stderr || ln -s fd/2 $prefix/stderr
+}
+#======================================
 # mountSystemFilesystems
 #--------------------------------------
 function mountSystemFilesystems {
-	mount -t proc               proc   /proc    &>/dev/null
-	mount -t sysfs              sysfs  /sys     &>/dev/null
-	mount -t tmpfs -o mode=0755 udev   /dev     &>/dev/null
-	mount -t devpts             devpts /dev/pts &>/dev/null
-	mknod -m 0640 /dev/loop0    b 7 0
-	mknod -m 0640 /dev/loop1    b 7 1
-	mknod -m 0640 /dev/loop2    b 7 2
-	mknod -m 0666 /dev/tty      c 5 0
-	mknod -m 0600 /dev/console  c 5 1
-	mknod -m 0666 /dev/ptmx     c 5 2
-	mknod -m 0666 /dev/null     c 1 3
-	mknod -m 0600 /dev/kmsg     c 1 11
-	mknod -m 0660 /dev/snapshot c 10 231
-	mknod -m 0666 /dev/random   c 1 8
-	mknod -m 0644 /dev/urandom  c 1 9
-	mkdir -m 0755 /dev/pts
-	mkdir -m 1777 /dev/shm
-	ln -s /proc/self/fd /dev/fd
-	ln -s fd/0 /dev/stdin
-	ln -s fd/1 /dev/stdout
-	ln -s fd/2 /dev/stderr
+	mount -t proc  proc   /proc
+	mount -t sysfs sysfs  /sys
+	mount -t tmpfs -o mode=0755 udev /dev
+	createInitialDevices /dev
+	mount -t devpts devpts /dev/pts
 }
 #======================================
 # umountSystemFilesystems
 #--------------------------------------
 function umountSystemFilesystems {
 	umount /dev/pts &>/dev/null
-	umount /dev     &>/dev/null
 	umount /sys     &>/dev/null
 	umount /proc    &>/dev/null
 }
@@ -232,9 +246,9 @@ function udevStart {
 	# disable hotplug helper, udevd listens to netlink
 	echo "" > /proc/sys/kernel/hotplug
 	# create min devices
-	copyDevices /dev /lib/udev/devices
+	copyDeviceNodes /lib/udev/devices /dev
 	# start udevd
-	udevd --daemon
+	udevd --daemon udev_log="debug"
 	# cleanup some stuff
 	rm -f /var/run/sysconfig/network
 	# unlikely, but we may be faster than the first event
@@ -242,14 +256,15 @@ function udevStart {
 	mkdir -p /dev/.udev/queue
 	# create devices
 	/sbin/udevtrigger
-	# 10 min - just long enough
-	/sbin/udevsettle --timeout=600
+	# 30 sec - just long enough
+	/sbin/udevsettle --timeout=30
+	udevPID=`/sbin/pidof udevd`
 }
 #======================================
 # udevKill
 #--------------------------------------
 function udevKill {
-	kill $(/sbin/pidof udevd)
+	kill $udevPID
 }
 #======================================
 # installGrub
@@ -279,9 +294,17 @@ function setupSUSEInitrd {
 	# based on /etc/sysconfig/kernel
 	# ----
 	grubOK=1
+	local umountProc=0
+	local umountSys=0
 	if [ -f /boot/System.map* ];then
-		mount -t proc proc /proc
-		mount -t sysfs sysfs /sys
+		if [ ! -e /proc/mounts ];then
+			mount -t proc proc /proc
+			umountProc=1
+		fi
+		if [ ! -e /sys/block ];then
+			mount -t sysfs sysfs /sys
+			umountSys=1
+		fi
 		if [ -f /etc/init.d/boot.device-mapper ];then
 			/etc/init.d/boot.device-mapper start
 		fi
@@ -289,8 +312,12 @@ function setupSUSEInitrd {
 		if [ -f /etc/init.d/boot.device-mapper ];then
 			/etc/init.d/boot.device-mapper stop
 		fi
-		umount /sys
-		umount /proc
+		if [ $umountSys -eq 1 ];then
+			umount /sys
+		fi
+		if [ $umountProc -eq 1 ];then
+			umount /proc
+		fi
 	else
 		Echo "Image doesn't include kernel system map"
 		Echo "Can't create initrd"
@@ -707,16 +734,26 @@ function CDDevice {
 	# detect CD/DVD device. The function use the information
 	# from hwinfo --cdrom to activate the drive
 	# ----
+	local count=0
 	for module in usb-storage sr_mod cdrom ide-cd BusLogic;do
 		/sbin/modprobe $module
 	done
-	cddevs=`/usr/sbin/hwinfo --cdrom | grep "Device File:" | cut -f2 -d:`
-	for i in $cddevs;do
-		if [ -b $i ];then
-			test -z $cddev && cddev=$i || cddev=$cddev:$i
+	while true;do
+		cddevs=`/usr/sbin/hwinfo --cdrom | grep "Device File:" | cut -f2 -d:`
+		for i in $cddevs;do
+			if [ -b $i ];then
+				test -z $cddev && cddev=$i || cddev=$cddev:$i
+			fi
+		done
+		if [ ! -z $cddev ] || [ $count -eq 4 ]; then
+			break
+		else
+			Echo "Drive not ready yet... waiting"
+			sleep 1
 		fi
+		count=`expr $count + 1`
 	done
-	if [ -z $cddev ]; then
+	if [ -z $cddev ];then
 		systemException \
 			"Failed to detect CD drive !" \
 		"reboot"
@@ -848,7 +885,7 @@ function updateMTAB {
 		umount=1
 	fi
 	cat /proc/mounts > $prefix/etc/mtab
-	if [ $umount = 1 ];then
+	if [ $umount -eq 1 ];then
 		umount /proc
 	fi
 }
