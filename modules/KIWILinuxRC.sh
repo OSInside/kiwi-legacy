@@ -296,7 +296,11 @@ function setupSUSEInitrd {
 	grubOK=1
 	local umountProc=0
 	local umountSys=0
-	if [ -f /boot/System.map* ];then
+	local systemMap=0
+	for i in /boot/System.map*;do
+		systemMap=1
+	done
+	if [ $systemMap -eq 1 ];then
 		if [ ! -e /proc/mounts ];then
 			mount -t proc proc /proc
 			umountProc=1

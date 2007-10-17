@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Tue Oct 16 15:18:38 CEST 2007 - ms@suse.de
 
+- v1.74
 - fixed cdrom detection, wait for usb devices to settle (#333498)
 - make devices visible for udev by mount --move /dev /mnt/dev (#332678)
 - don't remove udev from boot images, related to (#332678)
