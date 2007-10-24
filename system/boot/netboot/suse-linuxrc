@@ -681,7 +681,7 @@ if [ $LOCAL_BOOT = "no" ];then
 		if test ! -z $DISK;then
 			updateSwapDeviceFstab /config ${DISK}1
 			updateOtherDeviceFstab /config
-			setupBootLoaderGrub /mnt /config 1 ${DISK}2 NET
+			setupBootLoaderGrub /mnt /config 1 ${DISK}2 NET ${DISK}1
 			setupKernelModules /config
 		fi
 	fi
@@ -761,13 +761,15 @@ reopenKernelConsole
 if test $? != 0;then
 	PIVOT=false
 	cleanInitrd && mount --move . / && chroot . ./preinit
-	chroot . rm ./preinit
-	chroot . rm ./include
+	chroot . rm -f  ./preinit
+	chroot . rm -f  ./include
+	chroot . rm -rf ./image
 else
 	PIVOT=true
 	./preinit
-	rm ./preinit
-	rm ./include
+	rm -f  ./preinit
+	rm -f  ./include
+	rm -rf ./image
 fi
 #======================================
 # 26) reboot system if specified

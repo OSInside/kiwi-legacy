@@ -345,7 +345,13 @@ sub setupBootStick {
 	print FD "title $label [ USB ]\n";
 	print FD " root (hd0,0)\n";
 	print FD " kernel /boot/linux vga=0x314 splash=silent showopts\n";
-	print FD " initrd /boot/initrd\n"; 
+	print FD " initrd /boot/initrd\n";
+	print FD "title Failsafe -- $label [ USB ]\n";
+	print FD " root (hd0,0)\n";
+	print FD " kernel /boot/linux vga=0x314 splash=silent showopts";
+	print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
+	print FD " noapic maxcpus=0 edd=off\n";
+	print FD " initrd /boot/initrd\n";
 	close FD;
 	$kiwi -> done();
 	#==========================================
@@ -622,6 +628,12 @@ sub setupInstallCD {
 	print FD " kernel (cd)/boot/linux vga=0x314 splash=silent";
 	print FD " ramdisk_size=512000 showopts\n";
 	print FD " initrd (cd)/boot/initrd\n";
+	print FD "title Failsafe -- KIWI CD Installation\n";
+	print FD " kernel (cd)/boot/linux vga=0x314 splash=silent";
+	print FD " ramdisk_size=512000 showopts";
+	print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
+	print FD " noapic maxcpus=0 edd=off\n";
+	print FD " initrd (cd)/boot/initrd\n";
 	close FD;
 	$kiwi -> done();
 
@@ -766,6 +778,12 @@ sub setupInstallStick {
 	print FD "title KIWI USB-Stick Installation\n";
 	print FD " root (hd0,0)\n";
 	print FD " kernel /boot/linux.vmx vga=0x314 splash=silent showopts\n";
+	print FD " initrd /boot/initrd.vmx\n";
+	print FD "title Failsafe -- KIWI USB-Stick Installation\n";
+	print FD " root (hd0,0)\n";
+	print FD " kernel /boot/linux.vmx vga=0x314 splash=silent showopts";
+	print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
+	print FD " noapic maxcpus=0 edd=off\n";
 	print FD " initrd /boot/initrd.vmx\n";
 	close FD;
 	$this->{initrd} = $oldird;
@@ -1080,6 +1098,12 @@ sub setupBootDisk {
 	print FD "title $label [ VMX ]\n";
 	print FD " root (hd0,0)\n";
 	print FD " kernel /boot/linux.vmx vga=0x314 splash=silent showopts\n";
+	print FD " initrd /boot/initrd.vmx\n";
+	print FD "title Failsafe -- $label [ VMX ]\n";
+	print FD " root (hd0,0)\n";
+	print FD " kernel /boot/linux.vmx vga=0x314 splash=silent showopts";
+	print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
+	print FD " noapic maxcpus=0 edd=off\n";
 	print FD " initrd /boot/initrd.vmx\n";
 	close FD;
 	$kiwi -> done();

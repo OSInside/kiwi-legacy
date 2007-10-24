@@ -129,13 +129,15 @@ reopenKernelConsole
 if test $? != 0;then
 	PIVOT=false
 	cleanInitrd && mount --move . / && chroot . ./preinit
-	chroot . rm ./preinit
-	chroot . rm ./include
+	chroot . rm -f  ./preinit
+	chroot . rm -f  ./include
+	chroot . rm -rf ./image
 else
 	PIVOT=true
 	./preinit
-	rm ./preinit
-	rm ./include
+	rm -f  ./preinit
+	rm -f  ./include
+	rm -rf ./image
 fi
 #======================================
 # 13) Unmount initrd / system init

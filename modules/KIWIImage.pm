@@ -866,6 +866,21 @@ sub createImageLiveCD {
 			return undef;
 		}
 		$kiwi -> done();
+		$kiwi -> info ("Removing CD root tarball from system image");
+		$data = qx (rm $cdrootData);
+		$code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ($data);
+			$kiwi -> failed ();
+			if (! -d $main::RootTree.$baseSystem) {
+				qx (rm -rf $main::RootTree);
+				qx (rm -rf $tmpdir);
+				qx (rm -rf $imageTreeReadOnly);
+			}
+			return undef;
+		}
+		$kiwi -> done();
 	}
 	#==========================================
 	# Check for optional config-cdroot.sh
@@ -888,6 +903,21 @@ sub createImageLiveCD {
 			chomp $data;
 			$kiwi -> failed ();
 			$kiwi -> error  ("Failed to call CD root script: $data");
+			$kiwi -> failed ();
+			if (! -d $main::RootTree.$baseSystem) {
+				qx (rm -rf $main::RootTree);
+				qx (rm -rf $tmpdir);
+				qx (rm -rf $imageTreeReadOnly);
+			}
+			return undef;
+		}
+		$kiwi -> done();
+		$kiwi -> info ("Removing CD root setup script from system image");
+		$data = qx (rm $cdrootData);
+		$code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ($data);
 			$kiwi -> failed ();
 			if (! -d $main::RootTree.$baseSystem) {
 				qx (rm -rf $main::RootTree);

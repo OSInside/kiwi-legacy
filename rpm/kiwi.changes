@@ -1,4 +1,18 @@
 -------------------------------------------------------------------
+Wed Oct 24 09:34:19 CEST 2007 - ms@suse.de
+
+- v1.75
+- added failsafe entry to grub configuration (#334712)
+- added resume=/dev/<swap-part> to grub configuration (#335522)
+- remove unneeded /image directory after deployment (#335517)
+- fixed resetInstallationSource for zypper manager (#335134)
+- remove config-cdroot.tgz and config-cdroot.sh from image (#334645)
+- fixed interrupt signal handling for log process (#335588)
+- added "ZYPP_MODALIAS_SYSFS=/tmp" for zypper install/update (#335116)
+- use --auto-agree-with-licenses option for zypper in and outside
+  of the chroot environment (#335147)
+
+-------------------------------------------------------------------
 Tue Oct 16 15:18:38 CEST 2007 - ms@suse.de
 
 - v1.74

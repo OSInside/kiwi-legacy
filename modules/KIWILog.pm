@@ -867,6 +867,8 @@ sub setLogServer {
 			undef $logServer;
 			exit 0;
 		};
+		$SIG{INT} = "IGNORE";
+		$SIG{HUP} = "IGNORE";
 		while (1) {
 			$logServer -> acceptConnection();
 			my $child = fork();

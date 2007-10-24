@@ -373,6 +373,7 @@ function setupBootLoaderGrub {
 	local gnum=$3         # grub boot partition ID
 	local rdev=$4         # grub root partition
 	local gfix=$5         # grub title postfix
+	local swap=$6         # optional swap partition
 	local menu=$destsPrefix/boot/grub/menu.lst
 	local conf=$destsPrefix/etc/grub.conf
 	local dmap=$destsPrefix/boot/grub/device.map
@@ -428,6 +429,9 @@ function setupBootLoaderGrub {
 	fi
 	IFS="," ; for i in $KERNEL_LIST;do
 		if test ! -z "$i";then
+			#======================================
+			# create standard entry
+			#--------------------------------------
 			kernel=`echo $i | cut -f1 -d:`
 			initrd=`echo $i | cut -f2 -d:`
 			if [ -z "$name" ];then
@@ -441,6 +445,9 @@ function setupBootLoaderGrub {
 				echo -n " module /boot/$kernel"        >> $menu
 				echo -n " root=$rdev $console"         >> $menu
 				echo -n " vga=0x314 splash=silent"     >> $menu
+				if [ ! -z "$swap" ];then
+					echo -n " resume=/dev/$swap"       >> $menu
+				fi
 				echo -n " $KIWI_INITRD_PARAMS"         >> $menu
 				echo " $KIWI_KERNEL_OPTIONS showopts"  >> $menu
 				echo " module /boot/$initrd"           >> $menu
@@ -448,9 +455,49 @@ function setupBootLoaderGrub {
 				echo -n " kernel $gdev/boot/$kernel"   >> $menu
 				echo -n " root=$rdev $console"         >> $menu
 				echo -n " vga=0x314 splash=silent"     >> $menu
+				if [ ! -z "$swap" ];then
+					echo -n " resume=/dev/$swap"       >> $menu
+				fi
 				echo -n " $KIWI_INITRD_PARAMS"         >> $menu
 				echo " $KIWI_KERNEL_OPTIONS showopts"  >> $menu
 				echo " initrd $gdev/boot/$initrd"      >> $menu
+			fi
+			#======================================
+			# create failsafe entry
+			#--------------------------------------
+			if [ -z "$name" ];then
+				echo "title Failsafe -- $kernel [ $gfix ]"  >> $menu
+			else
+				echo "title Failsafe -- $name [ $gfix ]"    >> $menu
+			fi
+			if [ $kernel = "vmlinuz-xen" ];then
+				echo " root $gdev"                       >> $menu
+				echo " kernel /boot/xen.gz"              >> $menu
+				echo -n " module /boot/$kernel"          >> $menu
+				echo -n " root=$rdev $console"           >> $menu
+				echo -n " vga=0x314 splash=silent"       >> $menu
+				if [ ! -z "$swap" ];then
+					echo -n " resume=/dev/$swap"         >> $menu
+				fi
+				echo -n " $KIWI_INITRD_PARAMS"           >> $menu
+				echo -n " $KIWI_KERNEL_OPTIONS showopts" >> $menu
+				echo -n " ide=nodma apm=off acpi=off"    >> $menu
+				echo -n " noresume selinux=0 nosmp"      >> $menu
+				echo " noapic maxcpus=0 edd=off"         >> $menu
+				echo " module /boot/$initrd"             >> $menu
+			else
+				echo -n " kernel $gdev/boot/$kernel"     >> $menu
+				echo -n " root=$rdev $console"           >> $menu
+				echo -n " vga=0x314 splash=silent"       >> $menu
+				if [ ! -z "$swap" ];then
+					echo -n " resume=/dev/$swap"         >> $menu
+				fi
+				echo -n " $KIWI_INITRD_PARAMS"           >> $menu
+				echo -n " $KIWI_KERNEL_OPTIONS showopts" >> $menu
+				echo -n " ide=nodma apm=off acpi=off"    >> $menu
+				echo -n " noresume selinux=0 nosmp"      >> $menu
+				echo " noapic maxcpus=0 edd=off"         >> $menu
+				echo " initrd $gdev/boot/$initrd"        >> $menu
 			fi
 		fi
 	done

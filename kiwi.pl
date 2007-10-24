@@ -32,7 +32,7 @@ use KIWIOverlay;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "1.74";
+our $Version       = "1.75";
 our $openSUSE      = "http://software.opensuse.org/download/";
 our $ConfigFile    = "$ENV{'HOME'}/.kiwirc";
 our $ConfigStatus  = 0;
@@ -1062,7 +1062,7 @@ sub quit {
 	# signal received, exit safely
 	# ---
 	my $kiwi = new KIWILog("tiny");
-	$kiwi -> note ("\n*** Received signal $_[0] ***\n");
+	$kiwi -> note ("\n*** $$: Received signal $_[0] ***\n");
 	if (defined $root) {
 		$root  -> cleanMount  ();
 		$root  -> cleanSource ();

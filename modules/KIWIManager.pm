@@ -521,18 +521,31 @@ sub resetInstallationSource {
 	#------------------------------------------
 	if ($manager eq "zypper") {
 		my @list = @channelList;
-		my $sdel = "service-delete @list";
+		my $cmds = "@zypper service-delete";
+		if (! $chroot) {
+			$cmds = "@zypper --root $root service-delete";
+		}
 		if (! $chroot) {
 			$this -> checkExclusiveLock();
 			$kiwi -> info ("Removing zypper service(s): @channelList");
 			$this -> setLock();
-			$data = qx ( bash -c "@zypper --root $root $sdel 2>&1" );
-			$code = $? >> 8;
+			foreach my $chl (@list) {
+				$data = qx ( bash -c "$cmds $chl 2>&1" );
+				$code = $? >> 8;
+				if ($code != 0) {
+					last;
+				}
+			}
 			$this -> freeLock();
 		} else {
 			$kiwi -> info ("Removing zypper service(s): @channelList");
-			$data = qx ( chroot $root bash -c "@zypper $sdel 2>&1" );
-			$code = $? >> 8;
+			foreach my $chl (@list) {
+				$data = qx ( chroot $root bash -c "$cmds $chl 2>&1" );
+				$code = $? >> 8;
+				if ($code != 0) {
+					last;
+				}
+			}
 		}
 		if ($code != 0) {
 			$kiwi -> failed ();
@@ -646,6 +659,7 @@ sub setupUpgrade {
 		# Create screen call file
 		#------------------------------------------
 		$kiwi -> info ("Upgrading image...");
+		print $fd "ZYPP_MODALIAS_SYSFS=/tmp";
 		if (defined $addPacks) {
 			my @addonPackages = @{$addPacks};
 			print $fd "chroot $root @zypper update && ";
@@ -790,12 +804,16 @@ sub setupRootSystem {
 					push @install,$need;
 				}
 			}
+			my @installOpts = (
+				"--auto-agree-with-licenses"
+			);
 			$kiwi -> done();
 			#==========================================
 			# Create screen call file
 			#------------------------------------------
 			$kiwi -> info ("Installing image packages...");
-			print $fd "chroot $root @zypper install @install\n";
+			print $fd "ZYPP_MODALIAS_SYSFS=/tmp";
+			print $fd "chroot $root @zypper install @installOpts @install\n";
 			print $fd "echo \$? > $screenCall.exit\n";
 		}
 		$fd -> close();
