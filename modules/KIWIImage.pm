@@ -1017,7 +1017,9 @@ sub createImageLiveCD {
 	# setup isolinux boot label name
 	#------------------------------------------
 	my $label = "$systemName [ ISO ]";
+	my $lsafe = "Failsafe-$label";
 	qx (sed -i -e "s:Live-System:$label:" $destination/isolinux.cfg);
+	qx (sed -i -e "s:Live-Failsafe:$lsafe:" $destination/isolinux.cfg);
 	#==========================================
 	# remove original kernel and initrd
 	#------------------------------------------
