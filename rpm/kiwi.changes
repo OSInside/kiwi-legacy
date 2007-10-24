@@ -2,6 +2,7 @@
 Wed Oct 24 09:34:19 CEST 2007 - ms@suse.de
 
 - v1.75
+- kill udev before preinit starts (#332678)
 - added failsafe entry to grub configuration (#334712)
 - added resume=/dev/<swap-part> to grub configuration (#335522)
 - remove unneeded /image directory after deployment (#335517)

@@ -287,6 +287,7 @@ cp /include /mnt
 Echo "Activating Image: [$imageName]"
 /sbin/udevsettle --timeout=30
 mount --move /dev /mnt/dev
+udevKill
 Echo "Calling preinit phase..."
 cd /mnt && exec < dev/console >dev/console 2>&1
 reopenKernelConsole
@@ -312,7 +313,6 @@ echo "Booting into Live CD System..."
 echo "------------------------------"
 export IFS=$IFS_ORIG
 mount -n -o remount,rw / &>/dev/null
-udevKill
 if [ $PIVOT = "true" ];then
 	exec umount -n -l /mnt
 else
