@@ -659,7 +659,7 @@ sub setupUpgrade {
 		# Create screen call file
 		#------------------------------------------
 		$kiwi -> info ("Upgrading image...");
-		print $fd "ZYPP_MODALIAS_SYSFS=/tmp";
+		print $fd "ZYPP_MODALIAS_SYSFS=/tmp\n";
 		if (defined $addPacks) {
 			my @addonPackages = @{$addPacks};
 			print $fd "chroot $root @zypper update && ";
@@ -812,7 +812,7 @@ sub setupRootSystem {
 			# Create screen call file
 			#------------------------------------------
 			$kiwi -> info ("Installing image packages...");
-			print $fd "ZYPP_MODALIAS_SYSFS=/tmp";
+			print $fd "ZYPP_MODALIAS_SYSFS=/tmp\n";
 			print $fd "chroot $root @zypper install @installOpts @install\n";
 			print $fd "echo \$? > $screenCall.exit\n";
 		}
