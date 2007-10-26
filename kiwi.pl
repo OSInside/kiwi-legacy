@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
 #================
 # FILE          : kiwi.pl
 #----------------
@@ -32,7 +32,7 @@ use KIWIOverlay;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "1.76";
+our $Version       = "1.77";
 our $openSUSE      = "http://software.opensuse.org/download/";
 our $ConfigFile    = "$ENV{'HOME'}/.kiwirc";
 our $ConfigStatus  = 0;
@@ -338,15 +338,18 @@ sub main {
 			$kiwi -> error ("Image installation failed");
 			$kiwi -> failed ();
 			$root -> cleanMount ();
+			$root -> cleanManager ();
 			my $code = kiwiExit (1); return $code;
 		}
 		if (! $root -> setup ()) {
 			$kiwi -> error ("Couldn't setup image system");
 			$kiwi -> failed ();
 			$root -> cleanMount ();
+			$root -> cleanManager ();
 			my $code = kiwiExit (1); return $code;
 		}
 		$root -> cleanMount ();
+		$root -> cleanManager ();
 		kiwiExit (0);
 	}
 
@@ -592,9 +595,11 @@ sub main {
 			$kiwi -> error ("Image Upgrade failed");
 			$kiwi -> failed ();
 			$root -> cleanMount ();
+			$root -> cleanManager ();
 			my $code = kiwiExit (1); return $code;
 		}
 		$root -> cleanMount ();
+		$root -> cleanManager ();
 		kiwiExit (0);
 	}
 
@@ -751,7 +756,7 @@ sub main {
 		if (! $boot -> setupBootDisk()) {
 			my $code = kiwiExit (1); return $code;
 		}
-		my $code = kiwiExit (0); return $code;
+		$code = kiwiExit (0); return $code;
 	}
 	return 1;
 }
@@ -1051,6 +1056,7 @@ sub kiwiExit {
 		$kiwi -> info ("KIWI exited successfully");
 		$kiwi -> done ();
 	}
+	$kiwi -> cleanSweep();
 	exit $code;
 }
 
@@ -1061,11 +1067,14 @@ sub quit {
 	# ...
 	# signal received, exit safely
 	# ---
-	my $kiwi = new KIWILog("tiny");
+	if (! defined $kiwi) {
+		$kiwi = new KIWILog("tiny");
+	}
 	$kiwi -> note ("\n*** $$: Received signal $_[0] ***\n");
 	if (defined $root) {
 		$root  -> cleanMount  ();
 		$root  -> cleanSource ();
+		$root  -> cleanManager();
 	}
 	if (defined $image) {
 		$image -> cleanMount ();
@@ -1074,9 +1083,7 @@ sub quit {
 	if (defined $migrate) {
 		$migrate -> cleanMount ();
 	}
-	$kiwi -> note ("*** done ***\n");
-	$kiwi -> error ("KIWI exited on signal: $_[0]");
-	$kiwi -> done  ();
+	$kiwi -> cleanSweep();
 	exit 1;
 }
 
@@ -1087,12 +1094,15 @@ sub version {
 	# ...
 	# Version information
 	# ---
-	my $kiwi = new KIWILog("tiny");
+	if (! defined $kiwi) {
+		$kiwi = new KIWILog("tiny");
+	}
 	my $rev  = "unknown";
 	if (open FD,$Revision) {
 		$rev = <FD>; close FD;
 	}
 	$kiwi -> info ("kiwi version v$Version SVN: Revision: $rev\n");
+	$kiwi -> cleanSweep();
 	exit 0;
 }
 

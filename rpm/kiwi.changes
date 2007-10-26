@@ -1,4 +1,23 @@
 -------------------------------------------------------------------
+Thu Oct 25 12:09:15 CEST 2007 - ms@suse.de
+
+- v1.77
+- fixed exit code of kiwi call. Some module destructors call
+  external processes which causes the exit code to be the value
+  of this process, which is apparently wrong. (#336734)
+- added support for pre-built boot images. To enable the lookup
+  one had to specify the attribute checkprebuilt="true" within the
+  type section(s). If specified the prebuilt boot image must reside
+  in /usr/share/kiwi/image/*boot/*-prebuilt/. The search is based
+  on the boot="..." attribute given in the type section (#334475)
+- moved call of config.sh at the end of all configurations
+- moved in place repo code into extra function called
+  baseSetupInPlaceSVNRepository. This function can be called
+  on demand in config.sh with the directories the repo should
+  take control over as function arguments
+- code cleanup, added -w switch
+
+-------------------------------------------------------------------
 Thu Oct 25 10:42:44 CEST 2007 - ms@suse.de
 
 - v1.76

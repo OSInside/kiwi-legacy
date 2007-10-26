@@ -301,6 +301,45 @@ function baseStripTools {
 }
 
 #======================================
+# baseSetupInPlaceSVNRepository
+#--------------------------------------
+function baseSetupInPlaceSVNRepository {
+	# /.../
+	# create an in place subversion repository for the
+	# specified directories. A standard call could look like this
+	# baseSetupInPlaceSVNRepository /etc /srv /var/log
+	# ----
+	local paths=$1
+	local repo=/var/adm/sys-repo
+	if [ ! -x /usr/bin/svn ];then
+		echo "subversion not installed... skipped"
+		return
+	fi
+	svnadmin create $repo
+	chmod 700 $repo
+	svn mkdir -m created file:///$repo/trunk
+	local ifss=$IFS
+	local subp=""
+	for dir in $paths;do
+		subp=""
+		IFS="/"; for n in $dir;do
+			if [ -z $n ];then
+				continue
+			fi
+			subp="$subp/$n"
+			svn mkdir -m created file:///$repo/trunk/$subp
+		done
+	done
+	IFS=$ifss
+	for dir in $paths;do
+		chmod 700 $dir/.svn
+		svn add $dir/*
+		find $dir -name .svn | xargs chmod 700
+		svn ci -m initial $dir
+	done
+}
+
+#======================================
 # suseStripInitrd
 #--------------------------------------
 function suseStripInitrd {

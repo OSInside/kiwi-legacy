@@ -181,6 +181,7 @@ sub createBootStructure {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Failed importing initrd: $status");
 		$kiwi -> failed ();
+		qx (rm -rf $tmpdir);
 		return undef;
 	}
 	$status = qx ( cp $kernel $tmpdir/boot/$lname 2>&1 );
@@ -189,6 +190,7 @@ sub createBootStructure {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Failed importing kernel: $status");
 		$kiwi -> failed ();
+		qx (rm -rf $tmpdir);
 		return undef;
 	}
 	$kiwi -> done();
@@ -270,6 +272,7 @@ sub setupBootStick {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Failed importing grub stages: $status");
 		$kiwi -> failed ();
+		qx (rm -rf $tmpdir);
 		return undef;
 	}
 	$kiwi -> done ();
@@ -280,6 +283,7 @@ sub setupBootStick {
 	if (! %storage) {
 		$kiwi -> error  ("Couldn't find any removable USB storage devices");
 		$kiwi -> failed ();
+		qx (rm -rf $tmpdir);
 		return undef;
 	}
 	my $prefix = $kiwi -> getPrefix (1);
@@ -323,6 +327,7 @@ sub setupBootStick {
 		}
 		if (! $found) {
 			print STDERR $prefix,"Couldn't find [ $stick ] in list\n";
+			qx (rm -rf $tmpdir);
 			return undef;
 		}
 	}
@@ -334,6 +339,7 @@ sub setupBootStick {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't create menu.lst: $!");
 		$kiwi -> failed ();
+		qx (rm -rf $tmpdir);
 		return undef;
 	}
 	my $label = $this -> getImageName();
@@ -369,6 +375,7 @@ sub setupBootStick {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't create image file: $status");
 		$kiwi -> failed ();
+		qx (rm -rf $tmpdir);
 		return undef;
 	}
 	$status = qx (/sbin/mkfs.ext2 -F $name 2>&1);
@@ -377,6 +384,7 @@ sub setupBootStick {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't create filesystem: $status");
 		$kiwi -> failed ();
+		qx (rm -rf $tmpdir);
 		return undef;
 	}
 	$status = qx (mount -o loop $name /mnt/ 2>&1);
@@ -385,6 +393,7 @@ sub setupBootStick {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't mount image: $status");
 		$kiwi -> failed ();
+		qx (rm -rf $tmpdir);
 		return undef;
 	}
 	$status = qx (mv $tmpdir/boot /mnt/ 2>&1);
@@ -393,19 +402,21 @@ sub setupBootStick {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't install image: $status");
 		$kiwi -> failed ();
+		qx (rm -rf $tmpdir);
 		return undef;
 	}
 	#==========================================
 	# check for message file in initrd
 	#------------------------------------------
 	my $message = "'image/loader/message'";
-	$status = qx (gzip -cd $initrd | (cd /mnt && cpio -d -i $message 2>&1));
+	$status = qx (gzip -cd $initrd | (cd /mnt/ && cpio -d -i $message 2>&1));
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't find message file: $status");
 		$kiwi -> failed ();
 		qx (umount /mnt/ 2>&1);
+		qx (rm -rf $tmpdir);
 		return undef;
 	}
 	qx (umount /mnt/ 2>&1);
@@ -419,6 +430,7 @@ sub setupBootStick {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't create temporary partition data: $!");
 		$kiwi -> failed ();
+		qx (rm -rf $tmpdir);
 		return undef;
 	}
 	#==========================================
@@ -446,6 +458,7 @@ sub setupBootStick {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't create partition table: $status");
 		$kiwi -> failed ();
+		qx (rm -rf $tmpdir);
 		return undef;
 	}
 	$kiwi -> done();
@@ -566,6 +579,7 @@ sub setupInstallCD {
 	if ($namecd !~ /(.*)-(\d+\.\d+\.\d+)\.raw$/) {
 		$kiwi -> error  ("Couldn't extract version information");
 		$kiwi -> failed ();
+		qx (rm -rf $tmpdir);
 		return undef;
 	}
 	$ibasename = $1;
@@ -574,6 +588,7 @@ sub setupInstallCD {
 	#------------------------------------------
 	$initrd = $this -> setupInstallFlags();
 	if (! defined $initrd) {
+		qx (rm -rf $tmpdir);
 		return undef;
 	}
 	#==========================================
@@ -603,6 +618,7 @@ sub setupInstallCD {
 		$kiwi -> error  ("Failed importing grub stages: $status");
 		$kiwi -> failed ();
 		$this->{initrd} = $oldird;
+		qx (rm -rf $tmpdir);
 		return undef; 
 	}
 	qx (rm -rf $tmpdir/usr 2>&1);
@@ -618,6 +634,7 @@ sub setupInstallCD {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't create menu.lst: $!");
 		$kiwi -> failed ();
+		qx (rm -rf $tmpdir);
 		return undef;
 	}
 	print FD "color cyan/blue white/blue\n";
@@ -648,6 +665,7 @@ sub setupInstallCD {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Failed importing system image: $status");
 			$kiwi -> failed ();
+			qx (rm -rf $tmpdir);
 			return undef;
 		}
 		$kiwi -> done();
@@ -669,6 +687,7 @@ sub setupInstallCD {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Failed creating ISO image: $status");
 		$kiwi -> failed ();
+		qx (rm -rf $tmpdir);
 		return undef;
 	}
 	$kiwi -> done ();
@@ -716,6 +735,7 @@ sub setupInstallStick {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't find free loop device");
 		$kiwi -> failed ();
+		qx (rm -rf $tmpdir);
 		return undef;
 	}
 	$kiwi -> done();
@@ -725,6 +745,7 @@ sub setupInstallStick {
 	if ($namecd !~ /(.*)-(\d+\.\d+\.\d+)\.raw$/) {
 		$kiwi -> error  ("Couldn't extract version information");
 		$kiwi -> failed ();
+		qx (rm -rf $tmpdir);
 		return undef;
 	}
 	$ibasename = $1;
@@ -733,6 +754,7 @@ sub setupInstallStick {
 	#------------------------------------------
 	$initrd = $this -> setupInstallFlags();
 	if (! defined $initrd) {
+		qx (rm -rf $tmpdir);
 		return undef;
 	}
 	$this->{initrd} = $initrd;
@@ -756,6 +778,7 @@ sub setupInstallStick {
 		$kiwi -> error  ("Failed importing grub stages: $status");
 		$kiwi -> failed ();
 		$this->{initrd} = $oldird;
+		qx (rm -rf $tmpdir);
 		return undef;
 	}
 	$kiwi -> done ();
@@ -768,6 +791,7 @@ sub setupInstallStick {
 		$kiwi -> error  ("Couldn't create menu.lst: $!");
 		$kiwi -> failed ();
 		$this->{initrd} = $oldird;
+		qx (rm -rf $tmpdir);
 		return undef;
 	}
 	print FD "color cyan/blue white/blue\n";
@@ -798,6 +822,7 @@ sub setupInstallStick {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Failed creating virtual disk: $status");
 		$kiwi -> failed ();
+		qx (rm -rf $tmpdir);
 		return undef;
 	}
 	$kiwi -> done();
@@ -808,6 +833,7 @@ sub setupInstallStick {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Failed binding virtual disk: $status");
 		$kiwi -> failed ();
+		qx (rm -rf $tmpdir);
 		return undef;
 	}
 	$kiwi -> done();
@@ -846,6 +872,7 @@ sub setupInstallStick {
 		$kiwi -> error  ("Failed mapping virtual partition: $status");
 		$kiwi -> failed ();
 		qx ( /sbin/losetup -d $loop );
+		qx (rm -rf $tmpdir);
 		return undef;
 	}
 	my $dmap = $loop; $dmap =~ s/dev\///;
@@ -865,6 +892,7 @@ sub setupInstallStick {
 			$kiwi -> failed ();
 			qx ( /sbin/kpartx  -d $loop );
 			qx ( /sbin/losetup -d $loop );
+			qx (rm -rf $tmpdir);
 			return undef;
 		}
 		$kiwi -> done();
@@ -881,6 +909,7 @@ sub setupInstallStick {
 		$kiwi -> failed ();
 		qx ( /sbin/kpartx  -d $loop );
 		qx ( /sbin/losetup -d $loop );
+		qx (rm -rf $tmpdir);
 		return undef;
 	}
 	$status = qx (cp -a $tmpdir/boot /mnt/ 2>&1);
@@ -892,6 +921,7 @@ sub setupInstallStick {
 		qx ( umount /mnt/ 2>&1 );
 		qx ( /sbin/kpartx  -d $loop );
 		qx ( /sbin/losetup -d $loop );
+		qx (rm -rf $tmpdir);
 		return undef;
 	}
 	my $message = "'image/loader/message'";
@@ -904,6 +934,7 @@ sub setupInstallStick {
 		qx ( umount /mnt/ 2>&1 );
 		qx ( /sbin/kpartx  -d $loop );
 		qx ( /sbin/losetup -d $loop );
+		qx (rm -rf $tmpdir);
 		return undef;
 	}
 	qx ( umount /mnt/ 2>&1 );
@@ -921,6 +952,7 @@ sub setupInstallStick {
 			$kiwi -> failed ();
 			qx ( /sbin/kpartx  -d $loop );
 			qx ( /sbin/losetup -d $loop );
+			qx (rm -rf $tmpdir);
 			return undef;
 		}
 		$status = qx (cp $system /mnt/$ibasename 2>&1);
@@ -932,6 +964,7 @@ sub setupInstallStick {
 			qx ( umount /mnt/ 2>&1 );
 			qx ( /sbin/kpartx  -d $loop );
 			qx ( /sbin/losetup -d $loop );
+			qx (rm -rf $tmpdir);
 			return undef;
 		}
 		qx ( umount /mnt/ 2>&1 );
@@ -1007,6 +1040,7 @@ sub setupBootDisk {
 	if ( -d $system ) {
 		my $xml = new KIWIXML ( $kiwi,$system."/image",undef,"vmx" );
 		if (! defined $xml) {
+			qx (rm -rf $tmpdir);
 			return undef;
 		}
 		#==========================================
@@ -1026,11 +1060,13 @@ sub setupBootDisk {
 		if (! $fstype) {
 			$kiwi -> error  ("Can't find filesystem type in image tree");
 			$kiwi -> failed ();
+			qx (rm -rf $tmpdir);
 			return undef;
 		}
 		if ($fstype eq "squashfs") {
 			$kiwi -> error ("Can't copy data into requested RO filesystem");
 			$kiwi -> failed ();
+			qx (rm -rf $tmpdir);
 			return undef;
 		}
 	}
@@ -1053,6 +1089,7 @@ sub setupBootDisk {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't find free loop device");
 		$kiwi -> failed ();
+		qx (rm -rf $tmpdir);
 		return undef;
 	}
 	$kiwi -> done();
@@ -1077,6 +1114,7 @@ sub setupBootDisk {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Failed importing grub stages: $status");
 		$kiwi -> failed ();
+		qx (rm -rf $tmpdir);
 		return undef;
 	}
 	$kiwi -> done ();
@@ -1088,6 +1126,7 @@ sub setupBootDisk {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't create menu.lst: $!");
 		$kiwi -> failed ();
+		qx (rm -rf $tmpdir);
 		return undef;
 	}
 	print FD "color cyan/blue white/blue\n";
@@ -1123,6 +1162,7 @@ sub setupBootDisk {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't create image file: $status");
 			$kiwi -> failed ();
+			qx (rm -rf $tmpdir);
 			return undef;
 		}
 		$status = qx (/sbin/mkfs.ext2 -F $sysname 2>&1);
@@ -1131,6 +1171,7 @@ sub setupBootDisk {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't create filesystem: $status");
 			$kiwi -> failed ();
+			qx (rm -rf $tmpdir);
 			return undef;
 		}
 		$status = qx (mount -o loop $sysname /mnt/ 2>&1);
@@ -1139,6 +1180,7 @@ sub setupBootDisk {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't mount image: $status");
 			$kiwi -> failed ();
+			qx (rm -rf $tmpdir);
 			return undef;
 		}
 		$status = qx (mv $tmpdir/boot /mnt/ 2>&1);
@@ -1147,6 +1189,7 @@ sub setupBootDisk {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't install image: $status");
 			$kiwi -> failed ();
+			qx (rm -rf $tmpdir);
 			return undef;
 		}
 		qx (umount /mnt/ 2>&1);
@@ -1160,6 +1203,7 @@ sub setupBootDisk {
 		$kiwi -> failed ();
 		$kiwi -> error  ("No system image given");
 		$kiwi -> failed ();
+		qx (rm -rf $tmpdir);
 		return undef;
 	}	
 	$status = qx (qemu-img create $diskname $vmsize 2>&1);
@@ -1168,6 +1212,7 @@ sub setupBootDisk {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Failed creating virtual disk: $status");
 		$kiwi -> failed ();
+		qx (rm -rf $tmpdir);
 		return undef;
 	}
 	$status = qx ( /sbin/losetup $loop $diskname 2>&1 );
@@ -1176,6 +1221,7 @@ sub setupBootDisk {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Failed binding virtual disk: $status");
 		$kiwi -> failed ();
+		qx (rm -rf $tmpdir);
 		return undef;
 	}
 	#==========================================
@@ -1186,6 +1232,7 @@ sub setupBootDisk {
 		$kiwi -> error  ("Failed creating virtual partition");
 		$kiwi -> failed ();
 		qx ( losetup -d $loop );
+		qx (rm -rf $tmpdir);
 		return undef;
 	}
 	my @commands;
@@ -1218,6 +1265,7 @@ sub setupBootDisk {
 		$kiwi -> error  ("Failed mapping virtual partition: $status");
 		$kiwi -> failed ();
 		qx ( /sbin/losetup -d $loop );
+		qx (rm -rf $tmpdir);
 		return undef;
 	}
 	my $dmap = $loop; $dmap =~ s/dev\///;
@@ -1239,6 +1287,7 @@ sub setupBootDisk {
 			$kiwi -> failed ();
 			qx ( /sbin/kpartx  -d $loop );
 			qx ( /sbin/losetup -d $loop );
+			qx (rm -rf $tmpdir);
 			return undef;
 		}
 		$kiwi -> done();
@@ -1269,12 +1318,14 @@ sub setupBootDisk {
 			};
 			$kiwi -> error  ("Unsupported filesystem type: $fstype");
 			$kiwi -> failed ();
+			qx (rm -rf $tmpdir);
 			return undef;
 		};
 		if ($result != 0) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't create $fstype filesystem: $status");
 			$kiwi -> failed ();
+			qx (rm -rf $tmpdir);
 			return undef;
 		}
 		$kiwi -> done();
@@ -1289,13 +1340,14 @@ sub setupBootDisk {
 			$kiwi -> failed ();
 			qx ( /sbin/kpartx  -d $loop );
 			qx ( /sbin/losetup -d $loop );
+			qx (rm -rf $tmpdir);
 			return undef;
 		}
 		#==========================================
 		# Copy root tree to virtual disk
 		#------------------------------------------
 		$kiwi -> info ("Copying system image tree on virtual disk");
-		$status = qx (cp -a $system/* /mnt 2>&1);
+		$status = qx (cp -a $system/* /mnt/ 2>&1);
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -1303,6 +1355,7 @@ sub setupBootDisk {
 			$kiwi -> failed ();
 			qx ( /sbin/kpartx  -d $loop );
 			qx ( /sbin/losetup -d $loop );
+			qx (rm -rf $tmpdir);
 			return undef;
 		}
 		$kiwi -> done();
@@ -1325,6 +1378,7 @@ sub setupBootDisk {
 			$kiwi -> failed ();
 			qx ( /sbin/kpartx  -d $loop );
 			qx ( /sbin/losetup -d $loop );
+			qx (rm -rf $tmpdir);
 			return undef;
 		}
 		unlink $sysname;
@@ -1340,6 +1394,7 @@ sub setupBootDisk {
 			$kiwi -> failed ();
 			qx ( /sbin/kpartx  -d $loop );
 			qx ( /sbin/losetup -d $loop );
+			qx (rm -rf $tmpdir);
 			return undef;
 		}
 		#==========================================
@@ -1354,6 +1409,7 @@ sub setupBootDisk {
 			qx ( umount /mnt/ 2>&1 );
 			qx ( /sbin/kpartx  -d $loop );
 			qx ( /sbin/losetup -d $loop );
+			qx (rm -rf $tmpdir);
 			return undef;
 		}
 		#==========================================
@@ -1369,6 +1425,7 @@ sub setupBootDisk {
 			qx ( umount /mnt/ 2>&1 );
 			qx ( /sbin/kpartx  -d $loop );
 			qx ( /sbin/losetup -d $loop );
+			qx (rm -rf $tmpdir);
 			return undef;
 		}
 		qx ( umount /mnt/ 2>&1 );
@@ -1663,14 +1720,6 @@ sub getImageName {
 	my $label  = basename ($system);
 	$label =~ s/\.$arch.*$//;
 	return $label;
-}
-
-#==========================================
-# Destructor
-#------------------------------------------
-sub DESTROY {
-	my $this = shift;
-	qx (rm -rf $this->{tmpdir} 2>&1);
 }
 
 1; 

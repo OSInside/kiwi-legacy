@@ -891,7 +891,7 @@ sub setLogServer {
 					$logServer -> write ( $this -> getLogServerMessage() );
 					$logServer -> closeConnection();
 					$sharedMem -> closeSegment();
-					exit 0;
+					exit 1;
 				};
 				while (my $command = $logServer -> read()) {
 					#==========================================
@@ -920,15 +920,15 @@ sub setLogServer {
 			}
 		}
 		undef $logServer;
-		exit 0;
+		exit 1;
 	}
 	return $this;
 }
 
 #==========================================
-# Destructor
+# cleanSweep
 #------------------------------------------
-sub DESTROY {
+sub cleanSweep {
 	my $this     = shift;
 	my $jclient  = $this->{jclient};
 	my $logchild = $this->{logchild};
@@ -940,8 +940,11 @@ sub DESTROY {
 		$jclient -> Disconnect();
 	}
 	if (defined $logchild) {
-		kill 15, $logchild;
+		kill (15, $logchild);
+		waitpid ($logchild,0);
+		undef $this->{logchild};
 	}
+	return $this;
 }
 
 1;

@@ -412,6 +412,7 @@ sub setSystemConfiguration {
 	#------------------------------------------
 	sub generateWanted {
 		my $filehash = shift;
+		my $mount    = shift;
 		return sub {
 			if (-f $File::Find::name) {
 				my $expr = quotemeta $mount;
@@ -424,7 +425,7 @@ sub setSystemConfiguration {
 	#==========================================
 	# Find files not packaged
 	#------------------------------------------
-	my $wref = generateWanted (\%result);
+	my $wref = generateWanted (\%result,$mount);
 	$kiwi -> info ("Inspecting root file system...");
 	find ({ wanted => $wref, follow => 0 }, $mount );
 	$this -> cleanMount();

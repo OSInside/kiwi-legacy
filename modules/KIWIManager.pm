@@ -179,7 +179,7 @@ sub setupScreenCall {
 	#==========================================
 	# Check log location
 	#------------------------------------------
-	if ($main::LogFile eq "terminal") {
+	if ((defined $main::LogFile) && ($main::LogFile eq "terminal")) {
 		$logs = 0;
 	}
 	#==========================================
@@ -384,6 +384,7 @@ sub setupInstallationSource {
 		}
 		foreach my $chl (keys %{$source{$stype}}) {
 			my @opts = @{$source{$stype}{$chl}};
+			@opts = map { if (defined $_) { $_ }  } @opts;
 			if (! $chroot) {
 				$this -> checkExclusiveLock();
 				$this -> setLock();
@@ -981,12 +982,13 @@ sub freeLock {
 }
 
 #==========================================
-# Destructor
+# removeCacheDir
 #------------------------------------------
-sub DESTROY {
+sub removeCacheDir {
 	my $this    = shift;
 	my $dataDir = $this->{dataDir};
 	qx (rm -rf $dataDir);
+	return $this;
 }
 
 1;

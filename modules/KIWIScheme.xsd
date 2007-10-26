@@ -289,6 +289,7 @@
 		<xs:complexType>
 			<xs:simpleContent>
 				<xs:extension base="xs:string">
+					<xs:attribute name="checkprebuilt" type="xs:boolean"/>
 					<xs:attribute name="bootprofile" type="xs:string"/>
 					<xs:attribute name="primary" type="xs:boolean"/>
 					<xs:attribute name="boot"  type="xs:string"/>

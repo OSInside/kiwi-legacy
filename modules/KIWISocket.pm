@@ -149,6 +149,7 @@ sub DESTROY {
 	if (defined $server) {
 		close $server;
 	}
+	return $this;
 }
 
 1;

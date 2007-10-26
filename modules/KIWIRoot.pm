@@ -472,24 +472,6 @@ sub setup {
 	}
 	close FD;
 	#========================================
-	# call config.sh image script
-	#----------------------------------------
-	if (-x "$imageDesc/config.sh") {
-		$kiwi -> info ("Calling image script: config.sh");
-		qx ( cp $imageDesc/config.sh $root/tmp );
-		my $data = qx ( chroot $root /tmp/config.sh 2>&1 );
-		my $code = $? >> 8;
-		if ($code != 0) {
-			$kiwi -> failed ();
-			$kiwi -> info   ($data);
-			return undef;
-		} else {
-			$kiwi -> loginfo ("config.sh: $data");
-		}
-		qx ( rm -f $root/tmp/config.sh );
-		$kiwi -> done ();
-	}
-	#========================================
 	# check for linuxrc
 	#----------------------------------------
 	if (-f "$root/linuxrc") {
@@ -578,10 +560,22 @@ sub setup {
 		return undef;
 	}
 	#========================================
-	# Create in place SVN repos from /etc
+	# call config.sh image script
 	#----------------------------------------
-	if (! $configure -> setupInPlaceSVNRepository()) {
-		return undef;
+	if (-x "$imageDesc/config.sh") {
+		$kiwi -> info ("Calling image script: config.sh");
+		qx ( cp $imageDesc/config.sh $root/tmp );
+		my $data = qx ( chroot $root /tmp/config.sh 2>&1 );
+		my $code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> failed ();
+			$kiwi -> info   ($data);
+			return undef;
+		} else {
+			$kiwi -> loginfo ("config.sh: $data");
+		}
+		qx ( rm -f $root/tmp/config.sh );
+		$kiwi -> done ();
 	}
 	return $this;
 }
@@ -710,9 +704,22 @@ sub cleanSource {
 	# remove all source locations created by kiwi
 	# ---
 	my $this = shift;
-	my $kiwi = $this->{kiwi};
 	my $manager = $this->{manager};
 	$manager -> resetSource();
+	return $this;
+}
+
+#==========================================
+# cleanManager
+#------------------------------------------
+sub cleanManager {
+	# ...
+	# remove data dir(s) of the packagemanager created
+	# for kiwi in /var/cache/kiwi/<packagemanager>
+	# ---
+	my $this = shift;
+	my $manager = $this->{manager};
+	$manager -> removeCacheDir();
 	return $this;
 }
 

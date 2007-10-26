@@ -352,13 +352,14 @@ sub getImageTypeAndAttributes {
 		if ($count == 0) {
 			$first = $prim;
 		}
-		$record{type} = $node -> string_value();
-		$record{boot} = $node -> getAttribute("boot");
-		$record{flags}= $node -> getAttribute("flags");
-		$record{filesystem}  = $node -> getAttribute("filesystem");
-		$record{baseroot}    = $node -> getAttribute("baseroot");
-		$record{bootprofile} = $node -> getAttribute("bootprofile");
+		$record{type}   = $node -> string_value();
+		$record{boot}   = $node -> getAttribute("boot");
+		$record{flags}  = $node -> getAttribute("flags");
 		$record{format} = $node -> getAttribute("format");
+		$record{checkprebuilt} = $node -> getAttribute("checkprebuilt");
+		$record{filesystem}    = $node -> getAttribute("filesystem");
+		$record{baseroot}      = $node -> getAttribute("baseroot");
+		$record{bootprofile}   = $node -> getAttribute("bootprofile");
 		$result{$prim} = \%record;
 		$count++;
 	}
@@ -1672,7 +1673,7 @@ sub getInstSourceFile {
 	# a regular expression to find the file. After that repeat
 	# the download
 	# ----
-	my $dest = $dirname."/".$basename;
+	$dest = $dirname."/".$basename;
 	my $data = qx (lwp-download $url $dest);
 	my $code = $? >> 8;
 	if ($code == 0) {
@@ -1748,8 +1749,8 @@ sub splitPathHTTP {
 	#==========================================
 	# remove leading/trailing slashes if any
 	#------------------------------------------
-	$pattern =~ s#^/*(.*)#\1#;
-	$pattern =~ s#(.*)/$#\1#;
+	$pattern =~ s#^/*(.*)#$1#;
+	$pattern =~ s#(.*)/$#$1#;
 	my @testlist = split( "/", $pattern, 2);
 	my $prefix = $testlist[0];
 	my $rest   = $testlist[1];
