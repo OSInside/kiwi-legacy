@@ -18,7 +18,7 @@ Thu Oct 25 12:09:15 CEST 2007 - ms@suse.de
 - added creation of md5 file which was skipped due to performance
   patches. In case kiwi directly writes the system image data onto
   a device mapper partition the md5 file needs to be created
-  afterwards
+  afterwards (#337096)
 - use bs=32k for image installation in oemboot linuxrc. Patch
   by Till Franke <franke@novell.com>
 - code cleanup, added -w switch
