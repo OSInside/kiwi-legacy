@@ -338,18 +338,15 @@ sub main {
 			$kiwi -> error ("Image installation failed");
 			$kiwi -> failed ();
 			$root -> cleanMount ();
-			$root -> cleanManager ();
 			my $code = kiwiExit (1); return $code;
 		}
 		if (! $root -> setup ()) {
 			$kiwi -> error ("Couldn't setup image system");
 			$kiwi -> failed ();
 			$root -> cleanMount ();
-			$root -> cleanManager ();
 			my $code = kiwiExit (1); return $code;
 		}
 		$root -> cleanMount ();
-		$root -> cleanManager ();
 		kiwiExit (0);
 	}
 
@@ -595,11 +592,9 @@ sub main {
 			$kiwi -> error ("Image Upgrade failed");
 			$kiwi -> failed ();
 			$root -> cleanMount ();
-			$root -> cleanManager ();
 			my $code = kiwiExit (1); return $code;
 		}
 		$root -> cleanMount ();
-		$root -> cleanManager ();
 		kiwiExit (0);
 	}
 
@@ -1055,6 +1050,9 @@ sub kiwiExit {
 	} else {
 		$kiwi -> info ("KIWI exited successfully");
 		$kiwi -> done ();
+	}
+	if (defined $root) {
+		$root -> cleanManager ();
 	}
 	$kiwi -> cleanSweep();
 	exit $code;
