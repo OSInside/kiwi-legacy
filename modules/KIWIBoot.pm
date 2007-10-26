@@ -470,7 +470,7 @@ sub setupBootStick {
 	#------------------------------------------
 	$kiwi -> info ("Dumping initrd image to stick");
 	$status = qx ( umount $stick"1" 2>&1 );
-	$status = qx (dd if=$name of=$stick"1" bs=8k 2>&1);
+	$status = qx (dd if=$name of=$stick"1" bs=32k 2>&1);
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -487,7 +487,7 @@ sub setupBootStick {
 		$kiwi -> info ("Dumping system image to stick");
 		$status = qx ( umount $stick"1" 2>&1 );
 		$status = qx ( umount $stick"2" 2>&1 );
-		$status = qx (dd if=$system of=$stick"2" bs=8k 2>&1);
+		$status = qx (dd if=$system of=$stick"2" bs=32k 2>&1);
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -1276,7 +1276,7 @@ sub setupBootDisk {
 	$kiwi -> done();
 	if (! $haveTree) {
 		$kiwi -> info ("Dumping system image on virtual disk");
-		$status = qx (dd if=$system of=$root bs=8k 2>&1);
+		$status = qx (dd if=$system of=$root bs=32k 2>&1);
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -1367,7 +1367,7 @@ sub setupBootDisk {
 	$kiwi -> info ("Dumping boot image to virtual disk");
 	if ($syszip > 0) {
 		$root = "/dev/mapper".$dmap."p1";
-		$status = qx (dd if=$sysname of=$root bs=8k 2>&1);
+		$status = qx (dd if=$sysname of=$root bs=32k 2>&1);
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
