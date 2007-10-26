@@ -102,7 +102,7 @@ sub new {
 		$kiwi -> failed ();
 		return undef;
 	}
-	if (! defined $vmsize) {
+	if ((! defined $vmsize) && (defined $system)) {
 		my $kernelSize = -s $kernel; # the kernel
 		my $initrdSize = -s $initrd; # the boot image
 		my $systemSize; # the system image
@@ -121,9 +121,6 @@ sub new {
 		$vmsize = $vmsize / 1024 / 1024;
 		$vmsize = int $vmsize;
 		$vmsize = $vmsize."M";
-		#$kiwi -> info ("Using computed virtual disk size of: $vmsize"); 
-	} else {
-		#$kiwi -> info ("Using given virtual disk size of: $vmsize");
 	}
 	#$kiwi -> done ();
 	if ($syszip) {

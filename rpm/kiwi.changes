@@ -15,6 +15,12 @@ Thu Oct 25 12:09:15 CEST 2007 - ms@suse.de
   baseSetupInPlaceSVNRepository. This function can be called
   on demand in config.sh with the directories the repo should
   take control over as function arguments
+- added creation of md5 file which was skipped due to performance
+  patches. In case kiwi directly writes the system image data onto
+  a device mapper partition the md5 file needs to be created
+  afterwards
+- use bs=32k for image installation in oemboot linuxrc. Patch
+  by Till Franke <franke@novell.com>
 - code cleanup, added -w switch
 
 -------------------------------------------------------------------

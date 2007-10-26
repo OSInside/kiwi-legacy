@@ -231,7 +231,7 @@ if [ -f $VMX_SYSTEM ];then
 		imageName="$imageName.gz"
 	fi
 	Echo "Loading $imageName [$imageDevice]..."
-	if ! dd if=$imageName of=$imageDevice >/dev/null 2>&1; then
+	if ! dd bs=32k if=$imageName of=$imageDevice >/dev/null 2>&1; then
 		systemException \
 			"Failed to install image: $imageName -> $imageDevice" \
 		"reboot"
