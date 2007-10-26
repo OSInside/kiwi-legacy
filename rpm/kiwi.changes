@@ -22,6 +22,7 @@ Thu Oct 25 12:09:15 CEST 2007 - ms@suse.de
 - use bs=32k for image installation in oemboot linuxrc. Patch
   by Till Franke <franke@novell.com>
 - use bs=32k for usb and virtual disk dumps (#336822)
+- prevent e2fsck from being called too often (#336889)
 - code cleanup, added -w switch
 
 -------------------------------------------------------------------

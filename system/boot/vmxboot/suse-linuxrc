@@ -133,21 +133,23 @@ Echo "Filesystem of VMX system is: $FSTYPE -> $imageRootDevice"
 if test "$FSTYPE" = "squashfs";then
 	export UNIONFS_CONFIG="$imageDiskDevice"3,"$imageDiskDevice"2,aufs
 else
-	Echo "Resize filesystem to full partition space..."
 	if test "$FSTYPE" = "reiserfs";then
+		Echo "Resize Reiser filesystem to full partition space..."
 		resize_reiserfs $imageRootDevice
 		INITRD_MODULES="$INITRD_MODULES reiserfs"
 	fi
 	if test "$FSTYPE" = "ext2";then
-		e2fsck -y -f $imageRootDevice
+		Echo "Resize EXT2 filesystem to full partition space..."
 		resize2fs -f -F -p $imageRootDevice
+		Echo "Checking EXT2 filesystem..."
+		e2fsck -y -f $imageRootDevice
 		INITRD_MODULES="$INITRD_MODULES ext2"
 	fi
 	if test "$FSTYPE" = "ext3";then
-		e2fsck -y -f $imageRootDevice
+		Echo "Resize EXT3 filesystem to full partition space..."
 		resize2fs -f -F -p $imageRootDevice
+		Echo "Checking EXT3 filesystem..."
 		e2fsck -y -f $imageRootDevice
-		tune2fs -j $imageRootDevice
 		INITRD_MODULES="$INITRD_MODULES ext3"
 	fi
 fi
