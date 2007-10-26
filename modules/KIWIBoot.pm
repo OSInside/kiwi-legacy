@@ -1708,6 +1708,16 @@ sub setupSplashForGrub {
 }
 
 #==========================================
+# cleanTmp
+#------------------------------------------
+sub cleanTmp {
+	my $this = shift;
+	my $tmpdir = $this->{tmpdir};
+	qx (rm -rf $tmpdir);
+	return $this;
+}
+
+#==========================================
 # getImageName
 #------------------------------------------
 sub getImageName {

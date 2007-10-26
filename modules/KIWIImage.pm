@@ -489,10 +489,13 @@ sub createImageUSB {
 			}
 			return undef;
 		}
-		if (! -d $main::RootTree.$baseSystem) {
-			qx (rm -rf $main::RootTree);
-			qx (rm -rf $tmpdir);
-		}
+	}
+	#==========================================
+	# remove tmpdir with boot tree
+	#------------------------------------------
+	if (! -d $main::RootTree.$baseSystem) {
+		qx (rm -rf $main::RootTree);
+		qx (rm -rf $tmpdir);
 	}
 	#==========================================
 	# Include splash screen to initrd
@@ -505,6 +508,7 @@ sub createImageUSB {
 	if ($text ne "VMX") {
 		$kboot -> setupSplashForGrub();
 	}
+	$kboot -> cleanTmp();
 	#==========================================
 	# Store meta data for subsequent calls
 	#------------------------------------------
@@ -1189,6 +1193,9 @@ sub createImageLiveCD {
 		}
 		return undef;
 	}
+	#==========================================
+	# remove tmpdir with boot tree
+	#------------------------------------------
 	if (! -d $main::RootTree.$baseSystem) {
 		qx (rm -rf $main::RootTree);
 		qx (rm -rf $tmpdir);
