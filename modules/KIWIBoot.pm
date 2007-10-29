@@ -725,6 +725,7 @@ sub setupInstallStick {
 		if ($result eq 1) {
 			$loopfound = 1;
 			$loop = "/dev/loop".$id;
+			$this->{loop} = $loop;
 			last;
 		}
 	}
@@ -1079,6 +1080,7 @@ sub setupBootDisk {
 		if ($result eq 1) {
 			$loopfound = 1;
 			$loop = "/dev/loop".$id;
+			$this->{loop} = $loop;
 			last;
 		}
 	}
@@ -1413,7 +1415,7 @@ sub setupBootDisk {
 		# check for message file in initrd
 		#------------------------------------------
 		my $message = "'image/loader/message'";
-		$status = qx (gzip -cd $initrd | (cd /mnt && cpio -d -i $message 2>&1));
+		$status = qx (gzip -cd $initrd|(cd /mnt/ && cpio -d -i $message 2>&1));
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -1714,6 +1716,23 @@ sub cleanTmp {
 	my $this = shift;
 	my $tmpdir = $this->{tmpdir};
 	qx (rm -rf $tmpdir);
+	return $this;
+}
+
+#==========================================
+# cleanLoop
+#------------------------------------------
+sub cleanLoop {
+	my $this = shift;
+	my $tmpdir = $this->{tmpdir};
+	my $loop   = $this->{loop};
+	if (defined $loop) {
+		qx ( umount /mnt/ 2>&1 );
+		qx ( /sbin/kpartx  -d $loop 2>&1 );
+		qx ( /sbin/losetup -d $loop 2>&1 );
+		qx ( rm -rf $tmpdir );
+		undef $this->{loop};
+	}
 	return $this;
 }
 

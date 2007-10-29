@@ -32,7 +32,7 @@ use KIWIOverlay;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "1.78";
+our $Version       = "1.79";
 our $openSUSE      = "http://software.opensuse.org/download/";
 our $ConfigFile    = "$ENV{'HOME'}/.kiwirc";
 our $ConfigStatus  = 0;
@@ -128,6 +128,7 @@ our $LogPort;           # specify alternative log server port
 my $kiwi;       # global logging handler object
 my $root;       # KIWIRoot  object for installations
 my $image;      # KIWIImage object for logical extends
+my $boot;       # KIWIBoot  object for logical extends
 my $migrate;    # KIWIMigrate object for system to image migration
 
 #==========================================
@@ -653,7 +654,7 @@ sub main {
 	# setup a splash initrd
 	#------------------------------------------
 	if (defined $SetupSplashForGrub) {
-		my $boot = new KIWIBoot ($kiwi,$SetupSplashForGrub);
+		$boot = new KIWIBoot ($kiwi,$SetupSplashForGrub);
 		if (! defined $boot) {
 			my $code = kiwiExit (1); return $code;
 		}
@@ -666,7 +667,7 @@ sub main {
 	#------------------------------------------
 	if (defined $BootStick) {
 		$kiwi -> info ("Creating boot USB stick from: $BootStick...\n");
-		my $boot = new KIWIBoot (
+		$boot = new KIWIBoot (
 			$kiwi,$BootStick,$BootStickSystem,undef,
 			$BootStickDevice
 		);
@@ -690,7 +691,7 @@ sub main {
 			my $code = kiwiExit (1);
 			return $code;
 		}
-		my $boot = new KIWIBoot ($kiwi,$InstallCD,$InstallCDSystem);
+		$boot = new KIWIBoot ($kiwi,$InstallCD,$InstallCDSystem);
 		if (! defined $boot) {
 			my $code = kiwiExit (1); return $code;
 		}
@@ -711,7 +712,7 @@ sub main {
 			my $code = kiwiExit (1);
 			return $code;
 		}
-		my $boot = new KIWIBoot ($kiwi,$InstallStick,$InstallStickSystem);
+		$boot = new KIWIBoot ($kiwi,$InstallStick,$InstallStickSystem);
 		if (! defined $boot) {
 			my $code = kiwiExit (1); return $code;
 		}
@@ -741,7 +742,7 @@ sub main {
 			my $code = kiwiExit (1);
 			return $code;
 		}
-		my $boot = new KIWIBoot (
+		$boot = new KIWIBoot (
 			$kiwi,$BootVMDisk,$BootVMSystem,
 			$BootVMSize,undef,$BootVMFormat
 		);
@@ -1069,6 +1070,9 @@ sub quit {
 		$kiwi = new KIWILog("tiny");
 	}
 	$kiwi -> note ("\n*** $$: Received signal $_[0] ***\n");
+	if (defined $boot) {
+		$boot -> cleanLoop ();
+	}
 	if (defined $root) {
 		$root  -> cleanMount  ();
 		$root  -> cleanSource ();

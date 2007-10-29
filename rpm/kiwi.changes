@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Oct 29 14:13:54 CET 2007 - ms@suse.de
+
+- v1.79
+- added cleanLoop function for KIWIBoot objects. clean loop
+  and device mapper setup in case of an interrupt signal
+
+-------------------------------------------------------------------
 Sat Oct 27 16:01:44 CEST 2007 - ms@suse.de
 
 - v1.78
