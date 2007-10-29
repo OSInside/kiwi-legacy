@@ -368,6 +368,18 @@ function suseStripInitrd {
 		rm -rf $i
 	done
 	#==========================================
+	# remove unneeded files
+	#------------------------------------------
+	if [ -d /var/cache/zypp ];then
+		files="
+			/usr/lib*/libzypp* /usr/lib*/libx*
+			/var/cache/zypp /usr/X11R6/lib /usr/lib/xorg
+		"
+		for i in $files;do
+			rm -rf $i
+		done
+	fi
+	#==========================================
 	# remove unneeded tools
 	#------------------------------------------
 	local tools="

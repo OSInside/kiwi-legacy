@@ -224,31 +224,10 @@ sub init {
 	if (! $manager -> setupSignatureCheck()) {
 		return undef;
 	}
-	#==========================================
-	# Add source, install and clean source
-	#------------------------------------------
-	if (! $manager -> setupInstallationSource()) {
-		return undef;
-	}
-	if (! $manager -> setupRootSystem(@initPacs)) {
-		$manager -> resetInstallationSource();
-		return undef;
-	}
-	#==========================================
-	# reset installation source
-	#------------------------------------------
-	if (! $manager -> resetInstallationSource()) {
-		return undef;
-	}
-	#==========================================
-	# Reset preperation checks
-	#------------------------------------------
-	if (! $manager -> resetSignatureCheck()) {
-		return undef;
-	}
 	#==================================
 	# Copy/touch some defaults files
 	#----------------------------------
+	$kiwi -> info ("Creating default template files for new root system");
 	qx ( mkdir -p $root/etc/sysconfig );
 	qx ( mkdir -p $root/var/log/YaST2 );
 	# need mtab at least empty for mount calls
@@ -279,7 +258,30 @@ sub init {
 	# need resolv.conf for internal chroot name resolution
 	qx ( cp /etc/resolv.conf $root/etc 2>&1 );
 	qx ( cp $main::KConfig $root/.kconfig 2>&1 );
+	$kiwi -> done();
 
+	#==========================================
+	# Add source, install and clean source
+	#------------------------------------------
+	if (! $manager -> setupInstallationSource()) {
+		return undef;
+	}
+	if (! $manager -> setupRootSystem(@initPacs)) {
+		$manager -> resetInstallationSource();
+		return undef;
+	}
+	#==========================================
+	# reset installation source
+	#------------------------------------------
+	if (! $manager -> resetInstallationSource()) {
+		return undef;
+	}
+	#==========================================
+	# Reset preperation checks
+	#------------------------------------------
+	if (! $manager -> resetSignatureCheck()) {
+		return undef;
+	}
 	#==================================
 	# Create default fstab file
 	#----------------------------------
