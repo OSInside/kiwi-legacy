@@ -176,6 +176,7 @@ sub setupScreenCall {
 	my $screenLogs = $this->{screenLogs};
 	my $logs = 1;
 	my $code;
+	my $data;
 	#==========================================
 	# Check log location
 	#------------------------------------------
@@ -183,10 +184,21 @@ sub setupScreenCall {
 		$logs = 0;
 	}
 	#==========================================
+	# activate shell set -x mode
+	#------------------------------------------
+	my $fd = new FileHandle;
+	if ($fd -> open ($screenCall)) {
+		local $/; $data = <$fd>; $fd -> close();
+		if ($fd -> open (">$screenCall")) {
+			print $fd "set -x\n";
+			print $fd $data;
+			$fd -> close();
+		}
+	}
+	#==========================================
 	# run process in screen session
 	#------------------------------------------
-	my $data = qx ( chmod 755 $screenCall );
-	my $fd = new FileHandle;
+	$data = qx ( chmod 755 $screenCall );
 	if ($logs) {
 		$kiwi -> closeRootChannel();
 		$data = qx ( screen -L -D -m -c $screenCtrl $screenCall );
@@ -217,6 +229,7 @@ sub setupScreenCall {
 		if ( $logs ) {
 			$kiwi -> error  ($data);
 		}
+		$this -> freeLock();
 		$this -> resetInstallationSource();
 		return undef;
 	}
@@ -418,6 +431,7 @@ sub setupInstallationSource {
 			my @sopts = @{$source{$stype}{$alias}};
 			my @zopts = ();
 			foreach my $opt (@sopts) {
+				next if ! defined $opt;
 				my ($key,$val) = split (/=/,$opt);
 				#==========================================
 				# Adapt URI parameter
@@ -772,11 +786,19 @@ sub setupRootSystem {
 		if (! $chroot) {
 			$this -> checkExclusiveLock();
 			$kiwi -> info ("Initializing image system on: $root...");
-			my $forceChannels = join (",",@channelList);
 			my @installOpts = (
-				"--catalog $forceChannels",
 				"--auto-agree-with-licenses"
 			);
+			#FIXME:
+			# zypper can't setup multiple --repo options and --catalog
+			# option is gone. I'm lost here in saying use only the kiwi
+			# created zypper services for this image. Therefore this is
+			# disabled now. I hope if the --data-dir options are available
+			# we can solve this in a clean way
+			# ----
+			#foreach my $c (@channelList) {
+			#	push (@installOpts,"--repo $c");
+			#}
 			#==========================================
 			# Add package manager to package list
 			#------------------------------------------

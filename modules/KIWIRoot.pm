@@ -139,7 +139,7 @@ sub new {
 	my $overlay = $root[2];
 	my $root    = $root[0];
 	if ( ! defined $root ) {
-		$kiwi -> error ("Couldn't create root dir: $root: $!");
+		$kiwi -> error ("Couldn't create root directory: $!");
 		$kiwi -> failed ();
 		return undef;
 	}

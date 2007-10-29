@@ -104,7 +104,7 @@ sub setupUsersGroups {
 				$adduser .= " -m -d $home";
 			}
 			if (defined $group) {
-				my $data = qx ( chroot $root grep -q $group /etc/group 2>&1 );
+				my $data = qx ( chroot $root grep -q ^$group: /etc/group 2>&1 );
 				my $code = $? >> 8;
 				if ($code != 0) {
 					$kiwi -> info ("Adding group: $group");
@@ -124,7 +124,7 @@ sub setupUsersGroups {
 				$adduser .= " -c '$realname'";
 				$moduser .= " -c '$realname'";
 			}
-			my $data = qx ( chroot $root grep -q $user /etc/passwd 2>&1 );
+			my $data = qx ( chroot $root grep -q ^$user: /etc/passwd 2>&1 );
 			my $code = $? >> 8;
 			if ($code != 0) {
 				$kiwi -> info ("Adding user: $user [$group]");

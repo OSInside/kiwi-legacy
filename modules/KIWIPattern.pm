@@ -126,7 +126,10 @@ sub getPatternContents {
 		}
 		foreach my $url (@urllist) {
 			my @load = $this -> downloadPattern ( $url,$pat );
-			$result .= $load[0]; push (@errors,$load[1]);
+			if ($load[0]) {
+				$result .= $load[0];
+			}
+			push (@errors,$load[1]);
 		}
 		if (! $result) {
 			if ($printinfo) {
@@ -158,6 +161,12 @@ sub checkContentData {
 	my $content = shift;
 	my $pattern = shift;
 	my $arch    = $this->{arch};
+	#==========================================
+	# check content...
+	#------------------------------------------
+	if (! $content) {
+		return undef;
+	}
 	#==========================================
 	# check content: DESCRDIR...
 	#------------------------------------------

@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Sat Oct 27 16:01:44 CEST 2007 - ms@suse.de
+
+- v1.78
+- activated shell set -x mode (#335573)
+- fixed createLiveCD script due to renaming of image (#337391
+- use Recommends flag for packagemanager (#300981)
+- disable use of zypper --catalog option it doesn't exist in newer
+  versions. zypper v0.9.0-7 (#335116)
+- fixed users and group matching (#336884)
+
+-------------------------------------------------------------------
 Thu Oct 25 12:09:15 CEST 2007 - ms@suse.de
 
 - v1.77

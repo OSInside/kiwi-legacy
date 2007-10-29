@@ -1,5 +1,5 @@
 # /.../
-# spec file for package kiwi (Version 1.77
+# spec file for package kiwi (Version 1.78
 # Copyright (c) 2006 SUSE LINUX Products GmbH, Nuernberg, Germany.
 # Please submit bugfixes or comments via http://bugs.opensuse.org
 # ---
@@ -11,13 +11,14 @@ BuildRequires: syslinux
 %endif
 Requires:      perl perl-XML-LibXML perl-libwww-perl screen coreutils
 Summary:       OpenSuSE - KIWI Image System
-Version:       1.77
+Version:       1.78
 Release:       28
 Group:         System
 License:       GPL
 Source:        kiwi.tar.bz2
 BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 ExcludeArch:   ia64 ppc64 s390x s390 ppc
+Recommends:    smart zypper
 
 %description
 This package contains the OpenSuSE - KIWI Image System
@@ -51,7 +52,7 @@ Authors:
     Marcus Schäfer <ms@suse.de>
 
 %package -n kiwi-desc-isoboot
-Requires:     kiwi smart syslinux
+Requires:     kiwi syslinux
 Summary:      OpenSuSE - KIWI image descriptions
 Group:        System
 
@@ -61,7 +62,7 @@ Each image description exists in a single directory and contains
 an isoboot image description
 
 %package -n kiwi-desc-usbboot
-Requires:     kiwi smart
+Requires:     kiwi
 Summary:      OpenSuSE - KIWI image descriptions
 Group:        System
 
@@ -71,7 +72,7 @@ Each image description exists in a single directory and contains
 an usbboot image description
 
 %package -n kiwi-desc-vmxboot
-Requires:     kiwi qemu multipath-tools smart
+Requires:     kiwi qemu multipath-tools
 Summary:      OpenSuSE - KIWI image descriptions
 Group:        System
 
@@ -81,7 +82,7 @@ Each image description exists in a single directory and contains
 a vmxboot image description
 
 %package -n kiwi-desc-netboot
-Requires:     kiwi smart
+Requires:     kiwi
 Summary:      OpenSuSE - KIWI image descriptions
 Group:        System
 
@@ -91,7 +92,7 @@ Each image description exists in a single directory and contains
 a netboot image description
 
 %package -n kiwi-desc-xenboot
-Requires:     kiwi smart
+Requires:     kiwi
 Summary:      OpenSuSE - KIWI image descriptions
 Group:        System
 
@@ -105,7 +106,7 @@ Authors:
     Marcus Schäfer <ms@suse.de>
 
 %package -n kiwi-desc-oemboot
-Requires:     kiwi smart
+Requires:     kiwi qemu multipath-tools
 Summary:      OpenSuSE - KIWI image descriptions
 Group:        System
 

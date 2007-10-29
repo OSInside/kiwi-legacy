@@ -684,7 +684,7 @@ sub setLogHumanReadable {
 	my $this = shift;
 	my $rootLog = $this->{rootLog};
 	local $/;
-	if (! open (FD, $rootLog)) {
+	if ((! defined $rootLog) || (! open (FD, $rootLog))) {
 		return undef;
 	}
 	my $stream = <FD>; close FD;

@@ -32,7 +32,7 @@ use KIWIOverlay;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "1.77";
+our $Version       = "1.78";
 our $openSUSE      = "http://software.opensuse.org/download/";
 our $ConfigFile    = "$ENV{'HOME'}/.kiwirc";
 our $ConfigStatus  = 0;
@@ -1030,7 +1030,7 @@ sub kiwiExit {
 	$kiwi -> setLogHumanReadable();
 	if (! defined $LogFile) {
 		my $rootLog = $kiwi -> getRootLog();
-		if (( -f $rootLog) && ($rootLog =~ /(.*)\..*\.screenrc\.log/)) {
+		if ((defined $rootLog) && ( -f $rootLog) && ($rootLog =~ /(.*)\..*\.screenrc\.log/)) {
 			my $logfile = $1;
 			$logfile = "$logfile.log";
 			$kiwi -> info ("Logfile available at: $logfile");
@@ -1038,7 +1038,7 @@ sub kiwiExit {
 			$kiwi -> done ();
 		}
 	}
-	if ($Survive eq "yes") {
+	if ((defined $Survive) && ($Survive eq "yes")) {
 		if ($code != 0) {
 			return undef;
 		}
