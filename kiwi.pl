@@ -897,7 +897,7 @@ sub usage {
 	print "  kiwi --installcd <initrd>\n";
 	print "       --installcd-system <vmx-system-image>\n";
 	print "  kiwi --installstick <initrd>\n";
-	print "  kiwi --installstick-system <vmx-system-image>\n";
+	print "       --installstick-system <vmx-system-image>\n";
 	print "Helper Tools:\n";
 	print "  kiwi --createpassword\n";
 	print "  kiwi --create-instsource <image-path>\n";
