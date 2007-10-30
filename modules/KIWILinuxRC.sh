@@ -1733,9 +1733,14 @@ function mountSystem () {
 		fi
 		usleep 500000
 	elif test ! -z $COMBINED_IMAGE;then
+		roDevice=$mountDevice
+		rwDevice=`echo $roDevice | sed -e "s/.*\([0-9]\)/\1/"`
+		rwDevice=`expr $rwDevice + 1`
+		rwDevice="${DISK}${rwDevice}"
+		
 		mkdir /read-only >/dev/null 2>&1
-		if ! mount $imageRootDevice /read-only >/dev/null 2>&1;then
-			mount -t squashfs $imageRootDevice /read-only &>/dev/null||retval=1
+		if ! mount $roDevice /read-only >/dev/null 2>&1;then
+			mount -t squashfs $roDevice /read-only &>/dev/null||retval=1
 		fi
 		mount -t tmpfs none /mnt &>/dev/null || retval=1
 		cd /mnt && tar xvfj /read-only/rootfs.tar.bz2 &>/dev/null && cd /
@@ -1746,7 +1751,7 @@ function mountSystem () {
 		ln -s /mnt/read-only /read-only >/dev/null 2>&1 || retval=1
 
 		mkdir /mnt/read-write >/dev/null 2>&1
-		mount $imageNextRootDevice /mnt/read-write >/dev/null 2>&1 || retval=1
+		mount $rwDevice /mnt/read-write >/dev/null 2>&1 || retval=1
 		rm -f /read-write >/dev/null 2>&1
 		ln -s /mnt/read-write /read-write >/dev/null 2>&1 || retval=1
 	else
