@@ -5,7 +5,9 @@ if [ ! $UID = 0 ];then
 	exit 1
 fi
 
-kiwi --root $HOME/mydvd --prepare /usr/share/kiwi/image/kwliveCD-suse-10.3 && \
+kiwi --root $HOME/mydvd \
+	 --prepare /usr/share/kiwi/image/kwliveCD-suse-10.3 \
+	 --add-profile KDE && \
 kiwi --create $HOME/mydvd -d $HOME
 
 file=`ls -1 $HOME/openSUSE-10.3*.iso`

@@ -1139,7 +1139,7 @@ sub checkType {
 				return undef;
 			}
 			$para = $type{boot};
-			if (defined $type{flags}) {
+			if ((defined $type{flags}) && ($type{flags} ne "")) {
 				if (-f "/usr/bin/mksquashfs") {	
 					$para .= ",$type{flags}";
 				} else {

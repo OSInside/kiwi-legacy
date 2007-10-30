@@ -2,6 +2,8 @@
 Mon Oct 29 14:13:54 CET 2007 - ms@suse.de
 
 - v1.79
+- added KDE profile to createLiveCD script
+- fixed attribute flags check, check for empty value too 
 - added cleanLoop function for KIWIBoot objects. clean loop
   and device mapper setup in case of an interrupt signal
 
