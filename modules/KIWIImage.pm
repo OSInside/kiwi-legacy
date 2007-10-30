@@ -849,7 +849,9 @@ sub createImageLiveCD {
 	#==========================================
 	# recreate a copy of the read-only data
 	#------------------------------------------	
-	if ((! -d $imageTreeReadOnly) && (! defined $gzip)) {
+	if ((defined $imageTreeReadOnly) && (! -d $imageTreeReadOnly) &&
+		(! defined $gzip)
+	) {
 		$kiwi -> info ("Creating read only reference...");
 		if (! mkdir $imageTreeReadOnly) {
 			$error = $!;
