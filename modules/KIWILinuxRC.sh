@@ -1734,10 +1734,8 @@ function mountSystem () {
 		usleep 500000
 	elif test ! -z $COMBINED_IMAGE;then
 		roDevice=$mountDevice
-		rwDevice=`echo $roDevice | sed -e "s/.*\([0-9]\)/\1/"`
-		rwDevice=`expr $rwDevice + 1`
-		rwDevice="${DISK}${rwDevice}"
-		
+		rwDevice=`getNextPartition $mountDevice`
+
 		mkdir /read-only >/dev/null 2>&1
 		if ! mount $roDevice /read-only >/dev/null 2>&1;then
 			mount -t squashfs $roDevice /read-only &>/dev/null||retval=1
@@ -1843,4 +1841,16 @@ function runHook () {
 	if [ -e $HOOK ]; then
 		. $HOOK
 	fi
+}
+#======================================
+# getNextPartition
+#--------------------------------------
+function getNextPartition () {
+	part=$1
+
+	nextPart=`echo $part | sed -e "s/\(.*\)[0-9]/\1/"`
+	nextPartNum=`echo $part | sed -e "s/.*\([0-9]\)/\1/"`
+	nextPartNum=`expr $nextPartNum + 1`
+	nextPart="${nextPart}${nextPartNum}"
+	echo $nextPart
 }
