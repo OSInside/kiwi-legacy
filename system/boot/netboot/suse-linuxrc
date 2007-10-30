@@ -79,6 +79,7 @@ closeKernelConsole
 #--------------------------------------
 touch /etc/modules.conf
 touch /lib/modules/*/modules.dep
+runHook init
 
 #======================================
 # 3) run udevd
@@ -241,7 +242,9 @@ fi
 #======================================
 # 9) Load Device modules
 #--------------------------------------
+runHook preprobe
 probeDevices
+runHook postprobe
 
 export systemIntegrity="unknown"
 #======================================
@@ -306,6 +309,7 @@ fi
 #======================================
 # 11) Download network client image
 #--------------------------------------
+runHook predownload
 if [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ];then
 	count=0
 	IFS="," ; for i in $IMAGE;do
@@ -434,7 +438,7 @@ if [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ];then
 		echo $imageDevice | grep -q ram
 		haveDataInRam=$?
 		if test ! -z $DISK && test $haveDataInRam != 0;then
-			probeFileSystem $imageRootDevice
+			probeFileSystem $imageDevice
 			if test "$FSTYPE" = "reiserfs";then
 				Echo "Resize Reiser filesystem to full partition space..."
 				resize_reiserfs $imageDevice
@@ -544,6 +548,7 @@ else
 		systemIntegrity="clean"
 	fi
 fi
+runHook postdownload
 
 #======================================
 # 12) Check for RELOAD_CONFIG
@@ -560,13 +565,16 @@ fi
 #======================================
 # 13) Mount OS image to /mnt
 #--------------------------------------
+runHook premount
 if ! mountSystem;then
 	systemException "Failed to mount root filesystem" "reboot"
 fi
+runHook postmount
 
 #======================================
 # 14) Import fixed configuration files
 #--------------------------------------
+runHook preconfig
 if [ $LOCAL_BOOT = "no" ];then
 	if test $systemIntegrity = "clean";then
 		mkdir -p /config
@@ -595,7 +603,7 @@ if [ $LOCAL_BOOT = "no" ];then
 		#--------------------------------------
 		if [ ! -z $KIWI_INITRD ];then
 			Echo "Import KIWI initrd file: $KIWI_INITRD"
-			rm -f /mnt/boot/initrd* && mkdir -p /mnt/boot
+			rm -f /mnt/boot/initrd* && mkdir -p /mnt/boot >/dev/null 2>&1
 			atftp -g -r $KIWI_INITRD -l /mnt/boot/initrd \
 				$TSERVER \
 			>/dev/null 2>&1
@@ -617,6 +625,7 @@ if [ $LOCAL_BOOT = "no" ];then
 		fi
 	fi
 fi
+runHook postconfig
 
 #======================================
 # 15) send DHCP_RELEASE, reset cache
@@ -628,21 +637,7 @@ if [ $LOCAL_BOOT = "no" ] && [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ];then
 fi
 
 #======================================
-# 16) Check if this is a split image
-#--------------------------------------
-if [ ! -z "$COMBINED_IMAGE" ] && [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ]; then
-	READ_ONLY_SYSTEM=system
-	mkdir -p /mnt/$READ_ONLY_SYSTEM && \
-		mount $imageNextRootDevice /mnt/$READ_ONLY_SYSTEM
-	cd /mnt
-	for dir in bin boot lib opt sbin usr;do
-		ln -s $READ_ONLY_SYSTEM/$dir $dir
-	done
-	cd /
-fi
-
-#======================================
-# 17) check filesystem and kernels
+# 16) check filesystem and kernels
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	if test $systemIntegrity = "clean";then
@@ -652,7 +647,7 @@ if [ $LOCAL_BOOT = "no" ];then
 fi
 
 #======================================
-# 18) make initrd available on unionfs
+# 17) make initrd available on unionfs
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	if test ! -z "$UNIONFS_CONFIG" && test $systemIntegrity = "clean";then
@@ -668,7 +663,7 @@ if [ $LOCAL_BOOT = "no" ];then
 fi
 
 #======================================
-# 19) Create system dependant files
+# 18) Create system dependant files
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	if test $systemIntegrity = "clean";then
@@ -677,15 +672,22 @@ if [ $LOCAL_BOOT = "no" ];then
 		if test ! -z $DISK;then
 			updateSwapDeviceFstab /config ${DISK}1
 			updateOtherDeviceFstab /config
-			setupBootLoaderGrub /mnt /config 1 ${DISK}2 NET ${DISK}1
+			if ! test -z $COMBINED_IMAGE; then
+				gnum=`echo $imageNextRootDevice | sed -e "s/.*\([0-9]\)/\1/"`
+				gnum=`expr $gnum - 1`
+				setupBootLoaderGrub /mnt /config $gnum $imageNextRootDevice NET ${DISK}1
+			else
+				setupBootLoaderGrub /mnt /config 1 ${DISK}2 NET ${DISK}1
+			fi
 			setupKernelModules /config
 		fi
 	fi
 fi
 
 #======================================
-# 20) If image is new, notify
+# 19) If image is new, notify
 #--------------------------------------
+runHook prenotify
 if [ $LOCAL_BOOT = "no" ];then
 	if test $systemIntegrity = "clean"; then
 		count=0
@@ -710,9 +712,10 @@ if [ $LOCAL_BOOT = "no" ];then
 		done
 	fi
 fi
+runHook postnotify
 
 #======================================
-# 21) copy system dependant files
+# 20) copy system dependant files
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	if test $systemIntegrity = "clean";then
@@ -726,12 +729,12 @@ fi
 
 echo 256 > /proc/sys/kernel/real-root-dev
 #======================================
-# 22) umount system filesystems
+# 21) umount system filesystems
 #--------------------------------------
 umountSystemFilesystems
 
 #======================================
-# 23) copy initrd files to image
+# 22) copy initrd files to image
 #--------------------------------------
 if [ -f /image/loader/message ];then
 	mv /image/loader/message /mnt/boot
@@ -740,13 +743,14 @@ cp /preinit /mnt
 cp /include /mnt
 
 #======================================
-# 24) check if reboot is required
+# 23) check if reboot is required
 #--------------------------------------
 kernelCheck /mnt
 
 #======================================
-# 25) Activate new root
+# 24) Activate new root
 #--------------------------------------
+runHook preactivate
 Echo "Activating Image: [$imageRootName]"
 /sbin/udevsettle --timeout=30
 mount --move /dev /mnt/dev
@@ -769,7 +773,7 @@ else
 	rm -rf ./image
 fi
 #======================================
-# 26) reboot system if specified
+# 25) reboot system if specified
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	if test ! -z $REBOOT_IMAGE;then
@@ -778,7 +782,7 @@ if [ $LOCAL_BOOT = "no" ];then
 	fi
 fi
 #======================================
-# 27) Unmount initrd / system init
+# 26) Unmount initrd / system init
 #--------------------------------------
 echo " "
 echo "Booting into final System..."

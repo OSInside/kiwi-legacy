@@ -1110,7 +1110,12 @@ sub getImageConfig {
 			$data = $data.",".$name
 		}
 		$data =~ s/^,+//;
-		$result{$type} = $data;
+
+		if (defined $result{$type}) {
+			$result{$type} .= ",".$data;
+		} else {
+			$result{$type} = $data;
+		}
 	}
 	#==========================================
 	# preferences options

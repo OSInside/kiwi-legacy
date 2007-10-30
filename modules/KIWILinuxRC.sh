@@ -1629,8 +1629,8 @@ function umountSystem () {
 	IFS=$IFS_ORIG
 	mountPath=/mnt
 	if test ! -z $UNIONFS_CONFIG;then
-		roDir=/ro_branch
-		rwDir=/rw_branch
+		roDir=/read-only
+		rwDir=/read-write
 		xiDir=/xino
 		if ! umount $mountPath >/dev/null 2>&1;then
 			retval=1
@@ -1640,6 +1640,12 @@ function umountSystem () {
 				retval=1
 			fi
 		done
+	elif test ! -z $COMBINED_IMAGE;then
+		rm -f /read-only >/dev/null 2>&1
+		rm -f /read-write >/dev/null 2>&1
+		umount /mnt/read-only >/dev/null 2>&1 || retval=1
+		umount /mnt/read-write >/dev/null 2>&1 || retval=1
+		umount /mnt >/dev/null 2>&1 || retval=1
 	else
 		if ! umount $mountPath >/dev/null 2>&1;then
 			retval=1
@@ -1659,9 +1665,10 @@ function mountSystem () {
 	if test ! -z $1;then
 		mountDevice=$1
 	fi
+	
 	if test ! -z $UNIONFS_CONFIG;then
-		roDir=/ro_branch
-		rwDir=/rw_branch
+		roDir=/read-only
+		rwDir=/read-write
 		xiDir=/xino
 		for dir in $roDir $rwDir $xiDir;do
 			mkdir -p $dir
@@ -1725,6 +1732,23 @@ function mountSystem () {
 			>/dev/null 2>&1 || retval=1
 		fi
 		usleep 500000
+	elif test ! -z $COMBINED_IMAGE;then
+		mkdir /read-only >/dev/null 2>&1
+		if ! mount $imageRootDevice /read-only >/dev/null 2>&1;then
+			mount -t squashfs $imageRootDevice /read-only &>/dev/null||retval=1
+		fi
+		mount -t tmpfs none /mnt &>/dev/null || retval=1
+		cd /mnt && tar xvfj /read-only/rootfs.tar.bz2 &>/dev/null && cd /
+
+		mkdir /mnt/read-only >/dev/null 2>&1
+		mount --move /read-only /mnt/read-only >/dev/null 2>&1
+		rm -rf /read-only >/dev/null 2>&1
+		ln -s /mnt/read-only /read-only >/dev/null 2>&1 || retval=1
+
+		mkdir /mnt/read-write >/dev/null 2>&1
+		mount $imageNextRootDevice /mnt/read-write >/dev/null 2>&1 || retval=1
+		rm -f /read-write >/dev/null 2>&1
+		ln -s /mnt/read-write /read-write >/dev/null 2>&1 || retval=1
 	else
 		if ! mount $mountDevice /mnt >/dev/null 2>&1;then
 			mount -t squashfs $mountDevice /mnt >/dev/null 2>&1
@@ -1761,13 +1785,19 @@ function cleanInitrd () {
 			"/lib64") continue ;;
 			"/bin")   continue ;;
 			"/mnt")   continue ;;
-			"/ro_branch") continue ;;
-			"/rw_branch") continue ;;
+			"/read-only") continue ;;
+			"/read-write") continue ;;
 			"/xino")  continue ;;
 			"/dev")   continue ;;
 		esac
 		rm -rf $dir/* >/dev/null 2>&1
 	done
+	if test -L /read-only;then
+		rm -f /read-only
+	fi
+	if test -L /read-write;then
+		rm -f /read-write
+	fi
 	# mount opens fstab so we give them one
 	touch /etc/fstab
 }
@@ -1798,5 +1828,14 @@ function searchAlternativeConfig () {
 		Echo "Checking for config file: config.default"
 		result=`atftp -g \
 			-r KIWI/config.default -l $CONFIG $TSERVER 2>&1 | head -n 1`
+	fi
+}
+#======================================
+# runHook
+#--------------------------------------
+function runHook () {
+	HOOK="/hooks/$1.sh"
+	if [ -e $HOOK ]; then
+		. $HOOK
 	fi
 }

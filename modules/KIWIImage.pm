@@ -24,6 +24,9 @@ use KIWILog;
 use KIWIBoot;
 use Math::BigFloat;
 use File::Basename;
+use File::Find qw(find);
+use File::stat;
+use Fcntl ':mode';
 
 #==========================================
 # Constructor
@@ -1217,11 +1220,13 @@ sub createImageSplit {
 	my $FSTypeRO;
 	my $error;
 	my $ok;
-	my $imageTreeReadOnly;
+	my $imageTreeRW;
+	my $imageTreeTmp;
 	my $mbytesreal;
-	my $mbytesrw;
 	my $mbytesro;
+	my $mbytesrw;
 	my $xmlsize;
+
 	#==========================================
 	# Get filesystem info for split image
 	#------------------------------------------
@@ -1229,13 +1234,14 @@ sub createImageSplit {
 		$FSTypeRW = $1;
 		$FSTypeRO = $2;
 	} else {
+		$kiwi -> error ("Could not determine filesystem types");
 		return undef;
 	}
 	#==========================================
 	# Get image creation date and name
 	#------------------------------------------
-	my $namerw = $this -> buildImageName ();
-	my $namero = $this -> buildImageName ("-","-read-only");
+	my $namerw = $this -> buildImageName ("-","-read-write");
+	my $namero = $this -> buildImageName ();
 	if (! defined $namerw) {
 		return undef;
 	}
@@ -1246,40 +1252,103 @@ sub createImageSplit {
 		return undef;
 	}
 	#==========================================
-	# split physical extend into RW / RO part
+	# split physical extend into RW / RO / tmp part
 	#------------------------------------------
-	$imageTreeReadOnly = $imageTree;
-	$imageTreeReadOnly =~ s/\/+$//;
-	$imageTreeReadOnly.= "-read-only/";
-	$this->{imageTreeReadOnly} = $imageTreeReadOnly;
-	if (! -d $imageTreeReadOnly) {
-		$kiwi -> info ("Creating read only image part");
-		if (! mkdir $imageTreeReadOnly) {
+	$imageTreeTmp = $imageTree;
+	$imageTreeTmp =~ s/\/+$//;
+	$imageTreeTmp.= "-tmp/";
+	$this->{imageTreeTmp} = $imageTreeTmp;
+	if (! -d $imageTreeTmp) {
+		$kiwi -> info ("Creating tmp image part");
+		if (! mkdir $imageTreeTmp) {
 			$error = $!;
 			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't create ro directory: $error");
+			$kiwi -> error  ("Couldn't create tmp directory: $error");
 			$kiwi -> failed ();
 			return undef;
-		} 
-		my @rodirs = qw (bin boot lib opt sbin usr);
-		foreach my $dir (@rodirs) {
-			my $data = qx (mv $imageTree/$dir $imageTreeReadOnly 2>&1);
-			my $code = $? >> 8;
-			if ($code != 0) {
-				$kiwi -> failed ();
-				$kiwi -> error  ("Couldn't setup ro directory: $data");
-				$kiwi -> failed ();
-				return undef;
-			}
 		}
+
+		my $filter = sub {
+			my $file = $_;
+			my $dir = $File::Find::dir;
+			my $path = "$dir/$file";
+
+			my $target = $path;
+			$target =~ s#$imageTree#$imageTreeTmp#;
+
+			my $rerooted = $path;
+			$rerooted =~ s#$imageTree#/read-only#;
+
+			my $st = stat($path);
+
+			if (-d $path) {
+				mkdir $target;
+
+				chmod S_IMODE($st->mode), $target;
+				chown $st->uid, $st->gid, $target;
+			} elsif (-c $path || -b $path || -l $path) {
+				qx ( cp -a $path $target );
+			} else {
+				symlink ($rerooted, $target);
+			}
+		};
+
+		find(\&$filter, $imageTree);
+
 		$kiwi -> done();
 	}
+	
+	$imageTreeRW = $imageTree;
+	$imageTreeRW =~ s/\/+$//;
+	$imageTreeRW.= "-read-write";
+	$this->{imageTreeRW} = $imageTreeRW;
+	if (! -d $imageTreeRW) {
+		$kiwi -> info ("Creating rw image part");
+		if (! mkdir $imageTreeRW) {
+			$error = $!;
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create rw directory: $error");
+			$kiwi -> failed ();
+			return undef;
+		}
+
+		my @rwTrees = ("/etc", "/home", "/root", "/mnt", "/var/lib/rpm");
+		foreach my $tree (@rwTrees) {
+			qx ( mkdir -p `dirname $tree` );
+			qx ( mv $imageTreeTmp$tree $imageTreeRW/`dirname $tree` 2>&1 );
+			symlink ("/read-write$tree", "${imageTreeTmp}${tree}");
+		}
+
+		my @rwFiles = ("/etc/fstab", "/etc/passwd", "/etc/group", "/etc/shadow", "/etc/mtab", "/boot",
+					   "/etc/init.d/.depend.boot", "/etc/init.d/.depend.start", "/etc/init.d/.depend.stop");
+		foreach my $file (@rwFiles) {
+			my $tmpfile = "$imageTreeTmp"."$file";
+			my $rwfile = "$imageTreeRW"."$file";
+			my $rofile = "$imageTree"."$file";
+			
+			qx ( rm -rf $tmpfile );
+
+			if (-l $rwfile) {
+				unlink ($rwfile);
+			}
+
+			qx ( mkdir -p `dirname $rwfile` 2>&1 );
+			qx ( cp -a $rofile $rwfile 2>&1 );
+			symlink ("/read-write${file}", "$tmpfile");
+		}
+	}
+
+	#==========================================
+	# Embed tmp extend into ro extend
+	#------------------------------------------
+	qx ( cd $imageTreeTmp && tar cvfj $imageTree/rootfs.tar.bz2 * 2>&1 );
+
 	#==========================================
 	# Count disk space for extends
 	#------------------------------------------
 	$kiwi -> info ("Computing disk space...");
-	($mbytesreal,$mbytesrw,$xmlsize) = $this -> getSize ($imageTree);
-	($mbytesreal,$mbytesro,$xmlsize) = $this -> getSize ($imageTreeReadOnly);
+	($mbytesreal,$mbytesro,$xmlsize) = $this -> getSize ($imageTree);
+	($mbytesreal,$mbytesrw,$xmlsize) = $this -> getSize ($imageTreeRW);
 	$kiwi -> done ();
 
 	#==========================================
@@ -1287,7 +1356,6 @@ sub createImageSplit {
 	#------------------------------------------
 	$kiwi -> info ("Image RW part requires $mbytesrw MB of disk space");
 	if (! $this -> buildLogicalExtend ($namerw,$mbytesrw."M")) {
-		$this -> restoreSplitExtend ();
 		return undef;
 	}
 	$kiwi -> done();
@@ -1296,11 +1364,11 @@ sub createImageSplit {
 	#------------------------------------------
 	SWITCH: for ($FSTypeRW) {
 		/ext2/       && do {
-			$ok = $this -> setupEXT2 ( $namerw,$imageTree );
+			$ok = $this -> setupEXT2 ( $namerw,$imageTreeRW );
 			last SWITCH;
 		};
 		/ext3/       && do {
-			$ok = $this -> setupEXT2 ( $namerw,$imageTree,"journaled" );
+			$ok = $this -> setupEXT2 ( $namerw,$imageTreeRW,"journaled" );
 			last SWITCH;
 		};
 		/reiserfs/   && do {
@@ -1309,11 +1377,9 @@ sub createImageSplit {
 		};
 		$kiwi -> error  ("Unsupported type: $FSTypeRW");
 		$kiwi -> failed ();
-		$this -> restoreSplitExtend ();
 		return undef;
 	}
 	if (! $ok) {
-		$this -> restoreSplitExtend ();
 		return undef;
 	}
 	#==========================================
@@ -1321,7 +1387,6 @@ sub createImageSplit {
 	#------------------------------------------
 	$kiwi -> info ("Image RO part requires $mbytesro MB of disk space");
 	if (! $this -> buildLogicalExtend ($namero,$mbytesro."M")) {
-		$this -> restoreSplitExtend ();
 		return undef;
 	}
 	$kiwi -> done();
@@ -1330,11 +1395,11 @@ sub createImageSplit {
 	#------------------------------------------
 	SWITCH: for ($FSTypeRO) {
 		/ext2/       && do {
-			$ok = $this -> setupEXT2 ( $namero,$imageTreeReadOnly );
+			$ok = $this -> setupEXT2 ( $namero,$imageTree );
 			last SWITCH;
 		};
 		/ext3/       && do {
-			$ok = $this -> setupEXT2 ( $namero,$imageTreeReadOnly,"journaled" );
+			$ok = $this -> setupEXT2 ( $namero,$imageTree,"journaled" );
 			last SWITCH;
 		};
 		/reiserfs/   && do {
@@ -1342,20 +1407,18 @@ sub createImageSplit {
 			last SWITCH;
 		};
 		/cramfs/     && do {
-			$ok = $this -> setupCramFS ( $namero,$imageTreeReadOnly );
+			$ok = $this -> setupCramFS ( $namero,$imageTree );
 			last SWITCH;
 		};
 		/squashfs/   && do {
-			$ok = $this -> setupSquashFS ( $namero,$imageTreeReadOnly );
+			$ok = $this -> setupSquashFS ( $namero,$imageTree );
 			last SWITCH;
 		};
 		$kiwi -> error  ("Unsupported type: $FSTypeRO");
 		$kiwi -> failed ();
-		$this -> restoreSplitExtend ();
 		return undef;
 	}
 	if (! $ok) {
-		$this -> restoreSplitExtend ();
 		return undef;
 	}
 	#==========================================
@@ -1368,26 +1431,24 @@ sub createImageSplit {
 		my $source;
 		my $type;
 		if ($name eq $namerw) {
-			$source = $imageTree;
+			$source = $imageTreeRW;
 			$type = $FSTypeRW;
 		} else {
-			$source = $imageTreeReadOnly;
+			$source = $imageTree;
 			$type = $FSTypeRO;
 		}
-		if ($type ne "cramfs") {
+		if ($type ne "cramfs" && $type ne "squashfs") {
 			#==========================================
 			# mount logical extend for data transfer
 			#------------------------------------------
 			my $extend = $this -> mountLogicalExtend ($name);
 			if (! defined $extend) {
-				$this -> restoreSplitExtend ();
 				return undef;
 			}
 			#==========================================
 			# copy physical to logical
 			#------------------------------------------
 			if (! $this -> installLogicalExtend ($extend,$source)) {
-				$this -> restoreSplitExtend ();
 				return undef;
 			}
 			$this -> cleanMount();
@@ -1424,23 +1485,21 @@ sub createImageSplit {
 			};
 			$kiwi -> error  ("Unsupported type: $type");
 			$kiwi -> failed ();
-			$this -> restoreSplitExtend ();
 			return undef;
 		}
 		#==========================================
 		# Create image md5sum
 		#------------------------------------------
 		if (! $this -> buildMD5Sum ($name)) {
-			$this -> restoreSplitExtend ();
 			return undef;
 		}
 	}
-	#==========================================
-	# Restoring physical extend
-	#------------------------------------------
-	if (! $this -> restoreSplitExtend ()) {
+
+	$kiwi -> info ("Creating boot configuration...");
+	if (! $this -> writeImageConfig ($namero)) {
 		return undef;
 	}
+	
 	return $this;
 }
 
@@ -1564,12 +1623,18 @@ sub writeImageConfig {
 			return undef;
 		}
 		my $namecd = $this -> buildImageName(";");
+		my $namerw = $this -> buildImageName(";", "-read-write");
 		my $server = $xml -> getDeployServer ();
 		my $blocks = $xml -> getDeployBlockSize ();
-
+		if (! defined $server) {
+			$server = "";
+		}
+		if (! defined $blocks) {
+			$blocks = "";
+		}
 		print FD "DISK=${device}\n";
-
 		my $targetPartition = 2;
+		my $targetPartitionNext = 3;
 		#==========================================
 		# PART information
 		#------------------------------------------
@@ -1579,6 +1644,7 @@ sub writeImageConfig {
 			for my $href (@parts) {
 				if ($href -> {target}) {
 					$targetPartition = $href -> {number};
+					$targetPartitionNext = $targetPartition + 1;
 				}
 				if ($href -> {size} eq "image") {
 					print FD int (((-s "$imageDest/$name") / 1024 / 1024) + 1);
@@ -1604,15 +1670,28 @@ sub writeImageConfig {
 			}
 			print FD "\n";
 		}
+		my %type = %{$xml -> getImageTypeAndAttributes()};
 		#==========================================
 		# IMAGE information
 		#------------------------------------------
 		if ($xml->getCompressed("quiet")) {
 			print FD "IMAGE=${device}${targetPartition};";
-			print FD "$namecd;$server;$blocks;compressed\n";
+			print FD "$namecd;$server;$blocks;compressed";
+			if ("$type{type}" eq "split" && defined $this->{imageTreeRW}) {
+				print FD ",${device}${targetPartitionNext}";
+				print FD ";$namerw;$server;$blocks;compressed\n";
+			} else {
+				print FD "\n";
+			}
 		} else {
 			print FD "IMAGE=${device}${targetPartition};";
-			print FD "$namecd;$server;$blocks\n";
+			print FD "$namecd;$server;$blocks";
+			if ("$type{type}" eq "split" && defined $this->{imageTreeRW}) {
+				print FD ",${device}${targetPartitionNext}";
+				print FD ";$namerw;$server;$blocks\n";
+			} else {
+				print FD "\n";
+			}
 		}
 		#==========================================
 		# CONF information
@@ -1628,7 +1707,6 @@ sub writeImageConfig {
 		#==========================================
 		# COMBINED_IMAGE information
 		#------------------------------------------
-		my %type = %{$xml -> getImageTypeAndAttributes()};
 		if ("$type{type}" eq "split") {
 			print FD "COMBINED_IMAGE=yes\n";
 		}
@@ -2111,7 +2189,7 @@ sub setupReiser {
 	my $name = shift;
 	my $kiwi = $this->{kiwi};
 	my $imageDest = $this->{imageDest};
-	my $data = qx (/sbin/mkreiserfs -q -f -b 4096 $imageDest/$name 2>&1);
+	my $data = qx (/sbin/mkreiserfs -q -f -s 513 $imageDest/$name 2>&1);
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> error  ("Couldn't create Reiser filesystem");

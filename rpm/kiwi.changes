@@ -12,6 +12,36 @@ Mon Oct 29 14:13:54 CET 2007 - ms@suse.de
   space or swap file (#337533)
 - added cleanLoop function for KIWIBoot objects. clean loop
   and device mapper setup in case of an interrupt signal
+- using new split image system by James Willcox <james@ximian.com>
+  Thanks James, great job !
+  ---snip---
+  The split image type has changed:
+  Given a read-only image, a tarball of directories and symbolic
+  links is created which mirrors the structure of the read-only image.
+  The symbolic link for each file points to the location where the
+  read-only image will be mounted.  For instance, /usr/lib/libfoo.so
+  will be a link to /read-only/usr/lib/libfoo.so.  After creating this
+  tarball, it is placed in the read-only image at /rootfs.tar.bz2.
+  At mount time, this tarball is unpacked into a tmpfs and used as the
+  root filesystem.  The advantage of this approach over a typical 'split'
+  filesystem is that new files can be created in every directory
+  instead of just a few pre-defined toplevel trees.
+
+  This patch also goes one level further and separates some directories
+  (/etc, /root, /home, /var/lib/rpm) to be put onto a separate read-write
+  image.  The advantage of this is that when deployed onto a diskful
+  machine, any files created in those trees will be stored on the disk
+  instead of tmpfs.  We may want to have a way for images to specify those
+  paths directly instead of having a hard-coded list.
+
+  Secondly, the patch adds a hook mechanism to the netboot script.  With
+  this, custom images can get their own script code executed at various
+  points.  This is great if, for instance, you need to conditionally load
+  kernel modules with specific parameters.  It can be used by simply
+  creating a file like /hooks/<hook_name>.sh with the custom bits inside.
+  These scripts are sourced from the init script so they have access to
+  the same variables/functions.
+  ---snap---
 
 -------------------------------------------------------------------
 Sat Oct 27 16:01:44 CEST 2007 - ms@suse.de
