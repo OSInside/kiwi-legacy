@@ -164,7 +164,7 @@ sub main {
 	#==========================================
 	# Setup logging location
 	#------------------------------------------
-	if ((defined $LogFile) && ($Survive ne "yes")) {
+	if ((defined $LogFile) && (defined $Survive) && ($Survive ne "yes")) {
 		$kiwi -> info ("Setting log file to: $LogFile\n");
 		if (! $kiwi -> setLogFile ( $LogFile )) {
 			my $code = kiwiExit (1); return $code;

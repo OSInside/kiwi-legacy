@@ -748,9 +748,17 @@ function probeDevicesForAlias {
 		if [ $? = 0 ];then
 			module=`basename $file`
 			module=`echo $module | sed -e s@.ko@@`
-			INITRD_MODULES="$INITRD_MODULES $module"
-			Echo "Probing module: $module"
-			modprobe $module >/dev/null 2>&1
+			loadok=1
+			for broken in $kiwibrokenmodule;do
+				if [ $broken = $module ];then
+					loadok=0; break
+				fi
+			done
+			if [ $loadok = 1 ];then
+				INITRD_MODULES="$INITRD_MODULES $module"
+				Echo "Probing module: $module"
+				modprobe $module >/dev/null 2>&1
+			fi
 		fi
 	done < $modinfo
 	IFS=$IFS_ORIG
@@ -771,9 +779,17 @@ function probeDevices {
 	fi
 	for module in $stdevs;do
 		if ! lsmod | grep -q $module;then
-			Echo "Probing module: $module"
-			INITRD_MODULES="$INITRD_MODULES $module"
-			modprobe $module >/dev/null 2>&1
+			loadok=1
+			for broken in $kiwibrokenmodule;do
+				if [ $broken = $module ];then
+					loadok=0; break
+				fi
+			done
+			if [ $loadok = 1 ];then
+				Echo "Probing module: $module"
+				INITRD_MODULES="$INITRD_MODULES $module"
+				modprobe $module >/dev/null 2>&1
+			fi
 		fi
 	done
 }
@@ -893,6 +909,9 @@ function searchSwapSpace {
 	# /.../
 	# search for a type=82 swap partition
 	# ----
+	if [ ! -z $kiwinoswapsearch ];then
+		return
+	fi
 	hwapp=/usr/sbin/hwinfo
 	for diskdev in `$hwapp --disk | grep "Device File:" | cut -f2 -d:`;do
 		for disknr in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15;do
@@ -911,6 +930,9 @@ function searchDiskSpace {
 	# /.../
 	# search for a free non swap partition
 	# ----
+	if [ ! -z $kiwinoswapsearch ];then
+		return
+	fi
 	hwapp=/usr/sbin/hwinfo
 	for diskdev in `$hwapp --disk | grep "Device File:" | cut -f2 -d:`;do
 		for disknr in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15;do
@@ -1577,6 +1599,12 @@ function includeKernelParameters {
 		kernelVal=`echo $i | cut -f2 -d=`
 		eval $kernelKey=$kernelVal
 	done
+	if [ ! -z "$kiwikernelmodule" ];then
+		kiwikernelmodule=`echo $kiwikernelmodule | tr , " "`
+	fi
+	if [ ! -z "$kiwibrokenmodule" ];then
+		kiwibrokenmodule=`echo $kiwibrokenmodule | tr , " "`
+	fi
 }
 #======================================
 # checkTFTP
