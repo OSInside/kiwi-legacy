@@ -195,41 +195,68 @@ sub setupScreenCall {
 			$fd -> close();
 		}
 	}
-	#==========================================
-	# run process in screen session
-	#------------------------------------------
-	$data = qx ( chmod 755 $screenCall );
+	qx ( chmod 755 $screenCall );
 	if ($logs) {
 		$kiwi -> closeRootChannel();
-		$data = qx ( screen -L -D -m -c $screenCtrl $screenCall );
+	}
+	#==========================================
+	# run process in screen/terminal session
+	#------------------------------------------
+	$this->{child} = fork();
+	if (! defined $this->{child}) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("fork failed: $!");
+		$kiwi -> failed ();
+		return undef;
+	}
+	if ($this->{child}) {
+		#==========================================
+		# wait for the process to finish
+		#------------------------------------------
+		waitpid $this->{child},0;
 		$code = $? >> 8;
-		$kiwi -> reopenRootChannel();
-		if ($fd -> open ($screenLogs)) {
-			local $/; $data = <$fd>; $fd -> close();
-		}
-		if ($code == 0) {
-			if (! $fd -> open ("$screenCall.exit")) {
-				$code = 1;
-			} else {
-				$code = <$fd>; chomp $code;
-				$fd -> close();
+		$data = "";
+		undef $this->{child};
+		#==========================================
+		# create exit code and data value if screen
+		#------------------------------------------
+		if ($logs) {
+			$kiwi -> reopenRootChannel();
+			if ($fd -> open ($screenLogs)) {
+				local $/; $data = <$fd>; $fd -> close();
+			}   
+			if ($code == 0) {
+				if (! $fd -> open ("$screenCall.exit")) {
+					$code = 1;
+				} else {
+					$code = <$fd>; chomp $code;
+					$fd -> close();
+				}
 			}
 		}
+		#==========================================
+		# remove call and control files
+		#------------------------------------------
+		qx ( rm -f $screenCall* );
+		qx ( rm -f $screenCtrl );
 	} else {
-		$code = system ( $screenCall );
-		$code = $code >> 8;
+		#==========================================
+		# do the job in the child process
+		#------------------------------------------
+		if ($logs) {
+			exec ( "screen -L -D -m -c $screenCtrl $screenCall" );
+		} else {
+			exec ( $screenCall );
+		}
 	}
-	qx ( rm -f $screenCall* );
-	qx ( rm -f $screenCtrl );
 	#==========================================
-	# check exit code from screen session
+	# check exit code from session
 	#------------------------------------------
 	if ($code != 0) {
 		$kiwi -> failed ();
-		if ( $logs ) {
-			$kiwi -> error  ($data);
+		if (($logs) && ($data)) {
+			$kiwi -> error ($data);
 		}
-		$this -> freeLock();
 		$this -> resetInstallationSource();
 		return undef;
 	}
@@ -606,8 +633,14 @@ sub setupDownload {
 		#==========================================
 		# Create screen call file
 		#------------------------------------------
-		print $fd "@smart update @channelList\n";
-		print $fd "test \$? = 0 && @smart download @pacs @loadOpts\n";
+		print $fd "function clean { kill \$SPID; ";
+		print $fd "rm -f $root/etc/smart/channels/*; ";
+		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
+		print $fd "trap clean INT TERM\n";
+		print $fd "@smart update @channelList &\n";
+		print $fd "SPID=\$!;wait\n";
+		print $fd "test \$? = 0 && @smart download @pacs @loadOpts &\n";
+		print $fd "SPID=\$!;wait\n";
 		print $fd "echo \$? > $screenCall.exit\n";
 		print $fd "rm -f $root/etc/smart/channels/*\n";
 		$fd -> close();
@@ -655,13 +688,20 @@ sub setupUpgrade {
 		# Create screen call file
 		#------------------------------------------
 		$kiwi -> info ("Upgrading image...");
+		print $fd "function clean { kill \$SPID;";
+		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
+		print $fd "trap clean INT TERM\n";
 		print $fd "chroot $root smart update\n";
 		if (defined $addPacks) {
 			my @addonPackages = @{$addPacks};
-			print $fd "chroot $root smart upgrade -y && ";
-			print $fd "chroot $root smart install -y @addonPackages\n";
+			print $fd "chroot $root smart upgrade -y & ";
+			print $fd "SPID=\$!;wait\n";
+			print $fd "test \$? = 0 && chroot $root smart install -y ";
+			print $fd "@addonPackages &\n";
+			print $fd "SPID=\$!;wait\n";
 		} else {
-			print $fd "chroot $root smart upgrade -y\n";
+			print $fd "chroot $root smart upgrade -y &\n";
+			print $fd "SPID=\$!;wait\n";
 		}
 		print $fd "echo \$? > $screenCall.exit\n";
 		$fd -> close();
@@ -674,13 +714,20 @@ sub setupUpgrade {
 		# Create screen call file
 		#------------------------------------------
 		$kiwi -> info ("Upgrading image...");
+		print $fd "function clean { kill \$SPID;";
+		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
+		print $fd "trap clean INT TERM\n";
 		print $fd "ZYPP_MODALIAS_SYSFS=/tmp\n";
 		if (defined $addPacks) {
 			my @addonPackages = @{$addPacks};
-			print $fd "chroot $root @zypper update && ";
-			print $fd "chroot $root @zypper install @addonPackages\n";
+			print $fd "chroot $root @zypper update & ";
+			print $fd "SPID=\$!;wait\n";
+			print $fd "test \$? = 0 && chroot $root @zypper install ";
+			print $fd "@addonPackages &\n";
+			print $fd "SPID=\$!;wait\n";
 		} else {
-			print $fd "chroot $root @zypper update\n";
+			print $fd "chroot $root @zypper update &\n";
+			print $fd "SPID=\$!;wait\n";
 		}
 		print $fd "echo \$? > $screenCall.exit\n";
 		$fd -> close();
@@ -735,9 +782,15 @@ sub setupRootSystem {
 			#==========================================
 			# Create screen call file
 			#------------------------------------------
+			print $fd "function clean { kill \$SPID;";
+			print $fd "rm -f $root/etc/smart/channels/*;rm -f $lock;";
+			print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
+			print $fd "trap clean INT TERM\n";
 			print $fd "touch $lock\n";
-			print $fd "@smart update @channelList\n";
-			print $fd "test \$? = 0 && @smart install @packs @installOpts\n";
+			print $fd "@smart update @channelList &\n";
+			print $fd "SPID=\$!;wait\n";
+			print $fd "test \$? = 0 && @smart install @packs @installOpts &\n";
+			print $fd "SPID=\$!;wait\n";
 			print $fd "echo \$? > $screenCall.exit\n";
 			print $fd "rm -f $root/etc/smart/channels/*\n";
 			print $fd "rm -f $lock\n";
@@ -772,9 +825,14 @@ sub setupRootSystem {
 			# Create screen call file
 			#------------------------------------------
 			$kiwi -> info ("Installing image packages...");
-			print $fd "chroot $root smart update\n";
+			print $fd "function clean { kill \$SPID;";
+			print $fd "echo 1 > $screenCall.exit;exit 1; }\n";
+			print $fd "trap clean INT TERM\n";
+			print $fd "chroot $root smart update &\n";
+			print $fd "SPID=\$!;wait\n";
 			print $fd "test \$? = 0 && chroot $root smart install @install ";
-			print $fd "@installOpts\n";
+			print $fd "@installOpts &\n";
+			print $fd "SPID=\$!;wait\n";
 			print $fd "echo \$? > $screenCall.exit\n";
 		}
 		$fd -> close();
@@ -806,8 +864,12 @@ sub setupRootSystem {
 			#==========================================
 			# Create screen call file
 			#------------------------------------------
+			print $fd "function clean { kill \$SPID;";
+			print $fd "echo 1 > $screenCall.exit; rm -f $lock; exit 1; }\n";
+			print $fd "trap clean INT TERM\n";
 			print $fd "touch $lock\n";
-			print $fd "@zypper --root $root install @installOpts @packs\n";
+			print $fd "@zypper --root $root install @installOpts @packs &\n";
+			print $fd "SPID=\$!;wait\n";
 			print $fd "echo \$? > $screenCall.exit\n";
 			print $fd "rm -f $lock\n";
 		} else {
@@ -835,8 +897,12 @@ sub setupRootSystem {
 			# Create screen call file
 			#------------------------------------------
 			$kiwi -> info ("Installing image packages...");
+			print $fd "function clean { kill \$SPID;";
+			print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
+			print $fd "trap clean INT TERM\n";
 			print $fd "ZYPP_MODALIAS_SYSFS=/tmp\n";
-			print $fd "chroot $root @zypper install @installOpts @install\n";
+			print $fd "chroot $root @zypper install @installOpts @install &\n";
+			print $fd "SPID=\$!;wait\n";
 			print $fd "echo \$? > $screenCall.exit\n";
 		}
 		$fd -> close();
@@ -1009,6 +1075,10 @@ sub freeLock {
 sub removeCacheDir {
 	my $this    = shift;
 	my $dataDir = $this->{dataDir};
+	if (defined $this->{child}) {
+		$this -> freeLock();
+		kill 15,$this->{child};
+	}
 	qx (rm -rf $dataDir);
 	return $this;
 }

@@ -12,6 +12,7 @@ Mon Oct 29 14:13:54 CET 2007 - ms@suse.de
   space or swap file (#337533)
 - added cleanLoop function for KIWIBoot objects. clean loop
   and device mapper setup in case of an interrupt signal
+- fixed interrupt signal handling (#337009)
 - using new split image system by James Willcox <james@ximian.com>
   Thanks James, great job !
   ---snip---

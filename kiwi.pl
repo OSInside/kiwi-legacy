@@ -1070,15 +1070,17 @@ sub quit {
 	# ---
 	if (! defined $kiwi) {
 		$kiwi = new KIWILog("tiny");
+	} else {
+		$kiwi -> reopenRootChannel();
 	}
 	$kiwi -> note ("\n*** $$: Received signal $_[0] ***\n");
 	if (defined $boot) {
 		$boot -> cleanLoop ();
 	}
 	if (defined $root) {
+		$root  -> cleanManager();
 		$root  -> cleanMount  ();
 		$root  -> cleanSource ();
-		$root  -> cleanManager();
 	}
 	if (defined $image) {
 		$image -> cleanMount ();

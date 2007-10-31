@@ -397,6 +397,7 @@ sub closeRootChannel {
 	my $this    = shift;
 	my $rootEFD = $this->{rootefd};
 	close $rootEFD;
+	undef $this->{rootefd};
 }
 
 #==========================================
@@ -405,6 +406,9 @@ sub closeRootChannel {
 sub reopenRootChannel {
 	my $this = shift;
 	my $file = $this->{rootLog};
+	if (defined $this->{rootefd}) {
+		return $this;
+	}
 	if (! (open EFD,">>$file")) {
 		return undef;
 	}
