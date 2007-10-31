@@ -121,6 +121,8 @@ our $ForceNewRoot;      # force creation of new root directory
 our $BaseRoot;          # use given path as base system
 our $NoColor;           # do not used colored output (done/failed messages)
 our $LogPort;           # specify alternative log server port
+our $PrebuiltBootImage; # directory where a prepared boot image may be found
+our $listXMLInfo;       # list XML information for this operation
 
 #============================================
 # Globals
@@ -170,13 +172,6 @@ sub main {
 			my $code = kiwiExit (1); return $code;
 		}
 	}
-	#==========================================
-	# Handle ListProfiles option
-	#------------------------------------------
-	if (defined $ListProfiles) {
-		listProfiles();
-	}
-
 	#========================================
 	# Create instsource from meta packages
 	#----------------------------------------
@@ -809,6 +804,8 @@ sub init {
 		"base-root=s"           => \$BaseRoot,
 		"nocolor"               => \$NoColor,
 		"log-port=i"            => \$LogPort,
+		"prebuiltbootimage=s"   => \$PrebuiltBootImage,
+		"listxmlinfo|x=s"       => \$listXMLInfo,
 		"help|h"                => \&usage,
 		"<>"                    => \&usage
 	);
@@ -827,7 +824,8 @@ sub init {
 		(! defined $Upgrade) && (! defined $SetupSplashForGrub) &&
 		(! defined $BootVMDisk) && (! defined $CreatePassword) &&
 		(! defined $CreateInstSource) && (! defined $Migrate) &&
-		(! defined $ListProfiles) && (! defined $InstallStick)
+		(! defined $ListProfiles) && (! defined $InstallStick) &&
+		(! defined $listXMLInfo)
 	) {
 		$kiwi -> info ("No operation specified");
 		$kiwi -> failed ();
@@ -856,6 +854,18 @@ sub init {
 	# remove pre-defined smart channels
 	#------------------------------------------
 	qx ( rm -f /etc/smart/channels/* );
+	#==========================================
+	# Handle ListProfiles option
+	#------------------------------------------
+	if (defined $ListProfiles) {
+		listProfiles();
+	}
+	#==========================================
+	# Handle listXMLInfo option
+	#------------------------------------------
+	if (defined $listXMLInfo) {
+		listXMLInfo();
+	}
 }
 
 #==========================================
@@ -873,13 +883,15 @@ sub usage {
 
 	print "Usage:\n";
 	print "  kiwi -l | --list\n";
-	print "  kiwi -i | --list-profiles\n";
+	print "  kiwi -i | --list-profiles <image-path>\n";
+	print "  kiwi -x | --listxmlinfo <image-path> [--type <image-type>]\n";
 	print "Image Preparation/Creation:\n";
 	print "  kiwi -p | --prepare <image-path>\n";
 	print "     [ --base-root <base-path> ]\n";
 	print "     [ --add-profile <profile-name> ]\n";
 	print "  kiwi -c | --create  <image-root>\n";
 	print "     [ --base-root <base-path> ]\n";
+	print "     [ --prebuiltbootimage <directory>]\n";
 	print "Image Upgrade:\n";
 	print "  kiwi -u | --upgrade <image-root>\n";
 	print "     [ --base-root <base-path> ]\n";
@@ -957,6 +969,9 @@ sub usage {
 	print "    Set the log server port. By default port 9000 is used\n";
 	print "    If multiple kiwi processes runs on one system it's\n";
 	print "    recommended to set the logging port per process\n";
+	print "\n";
+	print "  [ --prebuiltbootimage <directory> ]\n";
+	print "    search in <directory> for pre-built boot images\n";
 	print "--\n";
 	version();
 }
@@ -1000,7 +1015,8 @@ sub listProfiles {
 	# ...
 	# list the available profiles in image
 	# ---
-	my $xml = new KIWIXML ($kiwi, $ListProfiles);
+	my $kiwi = new KIWILog("tiny");
+	my $xml  = new KIWIXML ($kiwi, $ListProfiles);
 	if (! defined $xml) {
 		$kiwi -> failed();
 		exit 1;
@@ -1017,6 +1033,36 @@ sub listProfiles {
 		$kiwi -> info ("$name: [ $desc ]");
 		$kiwi -> done ();
 	}
+	exit 0;
+}
+
+#==========================================
+# listXMLInfo
+#------------------------------------------
+sub listXMLInfo {
+	# ...
+	# print information about the XML description. The
+	# information listed here is for information only and
+	# not specified in its format
+	# ---
+	my $kiwi = new KIWILog("tiny");
+	my $xml  = new KIWIXML ($kiwi,$listXMLInfo,undef,$SetImageType);
+	if (! defined $xml) {
+		$kiwi -> failed();
+		exit 1;
+	}
+	my %type = %{$xml->getImageTypeAndAttributes()};
+	#==========================================
+	# print boot information of type section
+	#------------------------------------------
+	if (defined $type{boot}) {
+		$kiwi -> info ("Boot Type: $type{type} @ $type{boot}\n");
+	} else {
+		$kiwi -> info ("Boot Type: $type{type}\n");
+	}
+	#==========================================
+	# more to come...
+	#------------------------------------------
 	exit 0;
 }
 

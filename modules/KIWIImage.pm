@@ -451,6 +451,9 @@ sub createImageUSB {
 		$this -> buildImageName();
 		$this->{xml} = $storexml;
 		my $lookup  = $main::Prepare."-prebuilt/";
+		if (defined $main::PrebuiltBootImage) {
+			$lookup = $main::PrebuiltBootImage."/";
+		}
 		my $pinitrd = $lookup.$main::ImageName.".gz";
 		my $plinux  = $lookup.$main::ImageName.".kernel";
 		if ((! -f $pinitrd) || (! -f $plinux)) {
@@ -924,9 +927,12 @@ sub createImageLiveCD {
 		#==========================================
 		# check if a prebuilt boot image exists
 		#------------------------------------------
-		$pinitrd = glob ("$main::Prepare-prebuilt/$iso*$arch*.gz");
-		$plinux  = glob ("$main::Prepare-prebuilt/$iso*$arch*.kernel");
-		my $lookup = $main::Prepare."-prebuilt/";
+		my $lookup = $main::Prepare."-prebuilt";
+		if (defined $main::PrebuiltBootImage) {
+			$lookup = $main::PrebuiltBootImage;
+		}
+		$pinitrd = glob ("$lookup/$iso*$arch*.gz");
+		$plinux  = glob ("$lookup/$iso*$arch*.kernel");
 		if ((! -f $pinitrd) || (! -f $plinux)) {
 			$kiwi -> skipped();
 			$kiwi -> info ("Cant't find pre-built boot image in $lookup");
