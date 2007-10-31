@@ -761,10 +761,10 @@ reopenKernelConsole
 /mnt/sbin/pivot_root . mnt >/dev/null 2>&1
 if test $? != 0;then
 	PIVOT=false
-	cleanInitrd && mount --move . / && chroot . ./preinit
-	chroot . rm -f  ./preinit
-	chroot . rm -f  ./include
-	chroot . rm -rf ./image
+	cleanInitrd && mount --move . / && /bin/chroot . ./preinit
+	/bin/chroot . rm -f  ./preinit
+	/bin/chroot . rm -f  ./include
+	/bin/chroot . rm -rf ./image
 else
 	PIVOT=true
 	./preinit
@@ -792,5 +792,5 @@ mount -n -o remount,rw / 2>/dev/null
 if [ $PIVOT = "true" ];then
 	exec umount -n -l /mnt
 else
-	exec chroot . /sbin/init $@
+	exec /bin/chroot . /sbin/init $@
 fi
