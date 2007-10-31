@@ -1,5 +1,5 @@
 # /.../
-# spec file for package kiwi (Version 1.79
+# spec file for package kiwi (Version 1.80
 # Copyright (c) 2006 SUSE LINUX Products GmbH, Nuernberg, Germany.
 # Please submit bugfixes or comments via http://bugs.opensuse.org
 # ---
@@ -11,7 +11,7 @@ BuildRequires: syslinux
 %endif
 Requires:      perl perl-XML-LibXML perl-libwww-perl screen coreutils
 Summary:       OpenSuSE - KIWI Image System
-Version:       1.79
+Version:       1.80
 Release:       28
 Group:         System
 License:       GPL
@@ -34,6 +34,18 @@ Group:        System
 
 %description -n kiwi-pxeboot
 This package contains the OpenSuSE - KIWI TFTP boot structure
+
+Authors:
+--------
+    Marcus Schäfer <ms@suse.de>
+
+%package -n kiwi-tools
+Summary:      OpenSuSE - KIWI TFTP boot structure
+Group:        System
+
+%description -n kiwi-tools
+This package contains the OpenSuSE - KIWI tools set usable in
+and outside of operating system images
 
 Authors:
 --------
@@ -238,7 +250,6 @@ cat kiwi.loader
 %doc %{_defaultdocdir}/kiwi/kiwi.pdf
 %{_datadir}/kiwi/.revision
 %{_datadir}/kiwi/modules
-%{_datadir}/kiwi/tools
 %{_sbindir}/kiwi
 
 #=================================================
@@ -263,6 +274,14 @@ cat kiwi.loader
 %defattr(-, root, root)
 %doc /srv/tftpboot/README.prebuild
 /srv/tftpboot/boot
+
+#=================================================
+# KIWI-tools files...  
+# ------------------------------------------------
+%files -n kiwi-tools
+%defattr(-, root, root)
+%dir %{_datadir}/kiwi/tools
+%{_datadir}/kiwi/tools
 
 #=================================================
 # KIWI-desc-*...
