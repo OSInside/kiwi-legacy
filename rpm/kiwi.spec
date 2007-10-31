@@ -237,6 +237,8 @@ test -f $RPM_BUILD_ROOT/srv/tftpboot/pxelinux.0 && \
 test -f $RPM_BUILD_ROOT/srv/tftpboot/mboot.c32 && \
 	echo /srv/tftpboot/mboot.c32 >> kiwi.loader
 
+install -m 644 tools/README $RPM_BUILD_ROOT/usr/share/kiwi/tools
+
 cat kiwi.loader
 
 #=================================================
@@ -281,6 +283,7 @@ cat kiwi.loader
 %files -n kiwi-tools
 %defattr(-, root, root)
 %dir %{_datadir}/kiwi/tools
+%doc %{_datadir}/kiwi/tools/README
 %{_datadir}/kiwi/tools
 
 #=================================================
