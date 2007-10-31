@@ -56,6 +56,7 @@ install:
 	#============================================
 	# install .revision file
 	#--------------------------------------------
+	test -f ./.revision || ./.version > .revision
 	install -m 644 ./.revision ${kiwi_prefix}
 
 	#============================================
