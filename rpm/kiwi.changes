@@ -18,6 +18,7 @@ Mon Oct 29 14:13:54 CET 2007 - ms@suse.de
 - added option --listxmlinfo which prints information from
   config.xml. Right now this function is used for internal reasons
   only but can be enhanced to print more useful information
+- fixed use of --logfile option
 - using new split image system by James Willcox <james@ximian.com>
   Thanks James, great job !
   ---snip---

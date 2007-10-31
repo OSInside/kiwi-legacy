@@ -394,10 +394,11 @@ sub cursorON {
 # closeRootChannel
 #------------------------------------------
 sub closeRootChannel {
-	my $this    = shift;
-	my $rootEFD = $this->{rootefd};
-	close $rootEFD;
-	undef $this->{rootefd};
+	my $this = shift;
+	if (defined $this->{rootefd}) {
+		close $this->{rootefd};
+		undef $this->{rootefd};
+	}
 }
 
 #==========================================
