@@ -266,11 +266,20 @@ sub setupBootStick {
 	$status = qx ( mv $tmpdir/usr/lib/grub/* $tmpdir/boot/grub 2>&1 );
 	$result = $? >> 8;
 	if ($result != 0) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Failed importing grub stages: $status");
-		$kiwi -> failed ();
-		qx (rm -rf $tmpdir);
-		return undef;
+		$kiwi -> skipped ();
+		$kiwi -> error   ("Failed importing grub stages: $status");
+		$kiwi -> skipped ();
+		$kiwi -> info    ("Trying to use grub stages from local machine");
+		$status = qx ( cp /usr/lib/grub/* $tmpdir/boot/grub 2>&1 );
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Failed importing grub stages: $status");
+			$kiwi -> failed ();
+			qx (rm -rf $tmpdir);
+			return undef;
+		}
+		$kiwi -> done();
 	}
 	$kiwi -> done ();
 	#==========================================
@@ -566,20 +575,30 @@ sub setupInstallCD {
 	my $initrd  = $this->{initrd};
 	my $system  = $this->{system};
 	my $oldird  = $this->{initrd};
-	my $namecd  = basename ($system);
+	my $gotsys  = 1;
 	my $status;
 	my $result;
 	my $ibasename;
 	#==========================================
+	# check if system image is given
+	#------------------------------------------
+	if (! defined $system) {
+		$system = $initrd;
+		$gotsys = 0;
+	}
+	#==========================================
 	# Setup image basename
 	#------------------------------------------
-	if ($namecd !~ /(.*)-(\d+\.\d+\.\d+)\.raw$/) {
-		$kiwi -> error  ("Couldn't extract version information");
-		$kiwi -> failed ();
-		qx (rm -rf $tmpdir);
-		return undef;
+	my $namecd = basename ($system);
+	if ($gotsys) {
+		if ($namecd !~ /(.*)-(\d+\.\d+\.\d+)\.raw$/) {
+			$kiwi -> error  ("Couldn't extract version information");
+			$kiwi -> failed ();
+			qx (rm -rf $tmpdir);
+			return undef;
+		}
+		$ibasename = $1;
 	}
-	$ibasename = $1;
 	#==========================================
 	# Setup initrd for install purpose
 	#------------------------------------------
@@ -611,12 +630,22 @@ sub setupInstallCD {
 	$status = qx ( mv $tmpdir/$stage2 $tmpdir/boot/grub/stage2 2>&1 );
 	$result = $? >> 8;
 	if ($result != 0) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Failed importing grub stages: $status");
-		$kiwi -> failed ();
-		$this->{initrd} = $oldird;
-		qx (rm -rf $tmpdir);
-		return undef; 
+		$kiwi -> skipped ();
+		$kiwi -> error   ("Failed importing grub stages: $status");
+		$kiwi -> skipped ();
+		$kiwi -> info    ("Trying to use grub stages from local machine");
+		$status = qx ( cp /$stage1 $tmpdir/boot/grub/stage1 2>&1 );
+		$status = qx ( cp /$stage2 $tmpdir/boot/grub/stage2 2>&1 );
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Failed importing grub stages: $status");
+			$kiwi -> failed ();
+			$this->{initrd} = $oldird;
+			qx (rm -rf $tmpdir);
+			return undef;
+		}
+		$kiwi -> done();
 	}
 	qx (rm -rf $tmpdir/usr 2>&1);
 	qx (rm -rf $tmpdir/image 2>&1);
@@ -634,15 +663,19 @@ sub setupInstallCD {
 		qx (rm -rf $tmpdir);
 		return undef;
 	}
+	my $title = "KIWI CD Installation";
+	if (! $gotsys) {
+		$title = "KIWI CD Boot: $namecd";
+	}
 	print FD "color cyan/blue white/blue\n";
 	print FD "default 0\n";
 	print FD "timeout 10\n";
 	print FD "gfxmenu (cd)/boot/message\n";
-	print FD "title KIWI CD Installation\n";
+	print FD "title $title\n";
 	print FD " kernel (cd)/boot/linux vga=0x314 splash=silent";
 	print FD " ramdisk_size=512000 showopts\n";
 	print FD " initrd (cd)/boot/initrd\n";
-	print FD "title Failsafe -- KIWI CD Installation\n";
+	print FD "title Failsafe -- $title\n";
 	print FD " kernel (cd)/boot/linux vga=0x314 splash=silent";
 	print FD " ramdisk_size=512000 showopts";
 	print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
@@ -652,9 +685,9 @@ sub setupInstallCD {
 	$kiwi -> done();
 
 	#==========================================
-	# Copy system image if defined
+	# Copy system image if given
 	#------------------------------------------
-	if (defined $system) {
+	if ($gotsys) {
 		$kiwi -> info ("Importing system image: $system");
 		$status = qx (cp $system $tmpdir/$ibasename 2>&1);
 		$result = $? >> 8;
@@ -671,7 +704,12 @@ sub setupInstallCD {
 	# Create an iso image from the tree
 	#------------------------------------------
 	$kiwi -> info ("Creating ISO image");
-	my $name = $system; $name =~ s/raw$/iso/;
+	my $name = $system;
+	if ($gotsys) {
+		$name =~ s/raw$/iso/;
+	} else {
+		$name =~ s/gz$/iso/;
+	}
 	my $base = "-R -b boot/grub/stage2";
 	my $opts = "-no-emul-boot -boot-load-size 4 -boot-info-table";
 	if ($name !~ /^\//) {
@@ -709,12 +747,21 @@ sub setupInstallStick {
 	my $oldird    = $this->{initrd};
 	my $vmsize    = $this->{vmsize};
 	my $diskname  = $system.".install.raw";
-	my $namecd    = basename ($system);
 	my $loop      = "/dev/loop0";
 	my $loopfound = 0;
+	my $gotsys    = 1;
 	my $status;
 	my $result;
 	my $ibasename;
+	#==========================================
+	# check if system image is given
+	#------------------------------------------
+	if (! defined $system) {
+		$system   = $initrd;
+		$diskname = $initrd;
+		$diskname =~ s/gz$/raw/;
+		$gotsys   = 0;
+	}
 	#==========================================
 	# search free loop device
 	#------------------------------------------
@@ -740,13 +787,16 @@ sub setupInstallStick {
 	#==========================================
 	# Setup image basename
 	#------------------------------------------
-	if ($namecd !~ /(.*)-(\d+\.\d+\.\d+)\.raw$/) {
-		$kiwi -> error  ("Couldn't extract version information");
-		$kiwi -> failed ();
-		qx (rm -rf $tmpdir);
-		return undef;
+	my $nameusb = basename ($system);
+	if ($gotsys) {
+		if ($nameusb !~ /(.*)-(\d+\.\d+\.\d+)\.raw$/) {
+			$kiwi -> error  ("Couldn't extract version information");
+			$kiwi -> failed ();
+			qx (rm -rf $tmpdir);
+			return undef;
+		}
+		$ibasename = $1;
 	}
-	$ibasename = $1;
 	#==========================================
 	# Setup initrd for install purpose
 	#------------------------------------------
@@ -772,12 +822,21 @@ sub setupInstallStick {
 	$status = qx ( mv $tmpdir/usr/lib/grub/* $tmpdir/boot/grub 2>&1 );
 	$result = $? >> 8;
 	if ($result != 0) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Failed importing grub stages: $status");
-		$kiwi -> failed ();
-		$this->{initrd} = $oldird;
-		qx (rm -rf $tmpdir);
-		return undef;
+		$kiwi -> skipped ();
+		$kiwi -> error   ("Failed importing grub stages: $status");
+		$kiwi -> skipped ();
+		$kiwi -> info    ("Trying to use grub stages from local machine");
+		$status = qx ( cp /usr/lib/grub/* $tmpdir/boot/grub 2>&1 );
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Failed importing grub stages: $status");
+			$kiwi -> failed ();
+			$this->{initrd} = $oldird;
+			qx (rm -rf $tmpdir);
+			return undef;
+		}
+		$kiwi -> done();
 	}
 	$kiwi -> done ();
 	#==========================================
@@ -792,16 +851,20 @@ sub setupInstallStick {
 		qx (rm -rf $tmpdir);
 		return undef;
 	}
+	my $title = "KIWI USB-Stick Installation";
+	if (! $gotsys) {
+		$title = "KIWI USB Boot: $nameusb";
+	}
 	print FD "color cyan/blue white/blue\n";
 	print FD "default 0\n";
 	print FD "timeout 10\n";
 	print FD "gfxmenu (hd0,0)/image/loader/message\n";
 	print FD "\n";
-	print FD "title KIWI USB-Stick Installation\n";
+	print FD "title $title\n";
 	print FD " root (hd0,0)\n";
 	print FD " kernel /boot/linux.vmx vga=0x314 splash=silent showopts\n";
 	print FD " initrd /boot/initrd.vmx\n";
-	print FD "title Failsafe -- KIWI USB-Stick Installation\n";
+	print FD "title Failsafe -- $title\n";
 	print FD " root (hd0,0)\n";
 	print FD " kernel /boot/linux.vmx vga=0x314 splash=silent showopts";
 	print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
@@ -940,7 +1003,7 @@ sub setupInstallStick {
 	#==========================================
 	# Copy system image if defined
 	#------------------------------------------
-	if (defined $system) {
+	if ($gotsys) {
 		$kiwi -> info ("Installing image data to virtual disk");
 		$status = qx (mount $data /mnt/ 2>&1);
 		$result = $? >> 8;
@@ -1110,11 +1173,20 @@ sub setupBootDisk {
 	$status = qx ( mv $tmpdir/usr/lib/grub/* $tmpdir/boot/grub 2>&1 );
 	$result = $? >> 8;
 	if ($result != 0) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Failed importing grub stages: $status");
-		$kiwi -> failed ();
-		qx (rm -rf $tmpdir);
-		return undef;
+		$kiwi -> skipped ();
+		$kiwi -> error   ("Failed importing grub stages: $status");
+		$kiwi -> skipped ();
+		$kiwi -> info    ("Trying to use grub stages from local machine");
+		$status = qx ( cp /usr/lib/grub/* $tmpdir/boot/grub 2>&1 );
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Failed importing grub stages: $status");
+			$kiwi -> failed ();
+			qx (rm -rf $tmpdir);
+			return undef;
+		}
+		$kiwi -> done();	
 	}
 	$kiwi -> done ();
 	#==========================================
