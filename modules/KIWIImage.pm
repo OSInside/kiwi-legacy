@@ -1235,7 +1235,6 @@ sub createImageSplit {
 	my $mbytesro;
 	my $mbytesrw;
 	my $xmlsize;
-
 	#==========================================
 	# Get filesystem info for split image
 	#------------------------------------------
@@ -1276,7 +1275,6 @@ sub createImageSplit {
 			$kiwi -> failed ();
 			return undef;
 		}
-
 		my $filter = sub {
 			my $file = $_;
 			my $dir = $File::Find::dir;
@@ -1306,7 +1304,6 @@ sub createImageSplit {
 
 		$kiwi -> done();
 	}
-	
 	$imageTreeRW = $imageTree;
 	$imageTreeRW =~ s/\/+$//;
 	$imageTreeRW.= "-read-write";
@@ -1320,16 +1317,18 @@ sub createImageSplit {
 			$kiwi -> failed ();
 			return undef;
 		}
-
 		my @rwTrees = ("/etc", "/home", "/root", "/mnt", "/var/lib/rpm");
 		foreach my $tree (@rwTrees) {
 			qx ( mkdir -p `dirname $tree` );
 			qx ( mv $imageTreeTmp$tree $imageTreeRW/`dirname $tree` 2>&1 );
 			symlink ("/read-write$tree", "${imageTreeTmp}${tree}");
 		}
-
-		my @rwFiles = ("/etc/fstab", "/etc/passwd", "/etc/group", "/etc/shadow", "/etc/mtab", "/boot",
-					   "/etc/init.d/.depend.boot", "/etc/init.d/.depend.start", "/etc/init.d/.depend.stop");
+		my @rwFiles = (
+			"/etc/fstab", "/etc/passwd", "/etc/group",
+			"/etc/shadow", "/etc/mtab", "/boot",
+			"/etc/init.d/.depend.boot", "/etc/init.d/.depend.start",
+			"/etc/init.d/.depend.stop"
+		);
 		foreach my $file (@rwFiles) {
 			my $tmpfile = "$imageTreeTmp"."$file";
 			my $rwfile = "$imageTreeRW"."$file";
@@ -1346,7 +1345,6 @@ sub createImageSplit {
 			symlink ("/read-write${file}", "$tmpfile");
 		}
 	}
-
 	#==========================================
 	# Embed tmp extend into ro extend
 	#------------------------------------------
