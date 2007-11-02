@@ -1540,6 +1540,7 @@ sub setupBootDisk {
 		if ($format eq "iso") {
 			$this -> {system} = $diskname;
 			$kiwi -> info ("Creating install ISO image\n");
+			$this -> buildMD5Sum ($diskname);
 			qx ( /sbin/losetup -d $loop );
 			if (! $this -> setupInstallCD()) {
 				return undef;
@@ -1818,6 +1819,32 @@ sub getImageName {
 	my $label  = basename ($system);
 	$label =~ s/\.$arch.*$//;
 	return $label;
+}
+
+#==========================================
+# buildMD5Sum
+#------------------------------------------
+sub buildMD5Sum {
+	my $this = shift;
+	my $file = shift;
+	my $kiwi = $this->{kiwi};
+	$kiwi -> info ("Creating image MD5 sum...");
+	my $size = -s $file;
+	my $primes = qx (factor $size); $primes =~ s/^.*: //;
+	my $blocksize = 1;
+	for my $factor (split /\s/,$primes) {
+		last if ($blocksize * $factor > 8192);
+		$blocksize *= $factor;
+	}
+	my $blocks = $size / $blocksize;
+	my $sum  = qx (cat $file | md5sum - | cut -f 1 -d-);
+	chomp $sum;
+	if ($file =~ /\.raw$/) {
+		$file =~ s/raw$/md5/;
+	}
+	qx (echo "$sum $blocks $blocksize" > $file);
+	$kiwi -> done();
+	return $this;
 }
 
 1; 

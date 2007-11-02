@@ -601,20 +601,6 @@ sub createImageVMX {
 		return undef;
 	}
 	#==========================================
-	# Create md5sum if not yet done
-	#------------------------------------------
-	if (defined $name->{imageTree}) {
-		my $nsys = $name->{systemImage}.".raw";
-		my $nmd5 = $name->{systemImage}.".md5";
-		if (! $this -> buildMD5Sum ($nsys)) {
-			return undef;
-		}
-		$nsys = $main::Destination."/".$nsys.".md5";
-		$nmd5 = $main::Destination."/".$nmd5;
-		unlink ($nmd5);
-		rename ($nsys,$nmd5);
-	}
-	#==========================================
 	# Create virtual disk configuration
 	#------------------------------------------
 	if ((defined $main::BootVMFormat) && ($main::BootVMFormat eq "vmdk")) {
