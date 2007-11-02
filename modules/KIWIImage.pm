@@ -91,7 +91,7 @@ sub new {
 			$kiwi -> setRootLog ($imageTree.".".$$.".screenrc.log");
 		}
 	}
-	my $arch = qx ( arch ); chomp ( $arch );
+	my $arch = qx (uname -m); chomp ( $arch );
 	$arch = ".$arch";
 	#==========================================
 	# Store object data
@@ -1082,7 +1082,7 @@ sub createImageLiveCD {
 	#------------------------------------------
 	my $CD  = $main::Prepare."/cdboot";
 	my $gfx = $main::RootTree."/image/loader";
-	my $isoarch = qx (arch); chomp $isoarch;
+	my $isoarch = qx (uname -m); chomp $isoarch;
 	if ($isoarch =~ /i.86/) {
 		$isoarch = "i386";
 	}

@@ -73,7 +73,7 @@ sub new {
 		kiwi -> failed ();
 		return undef;
 	}
-	my $arch = qx (arch); chomp $arch;
+	my $arch = qx (uname -m); chomp $arch;
 	if ($arch =~ /^i.86/) {
 		$arch = 'i*86';
 	}

@@ -127,7 +127,7 @@ sub new {
 		$syszip = $syszip / 1024 / 1024;
 		$syszip = int $syszip;
 	}
-	my $arch = qx (arch); chomp $arch;
+	my $arch = qx (uname -m); chomp $arch;
 	#==========================================
 	# Store object data
 	#------------------------------------------

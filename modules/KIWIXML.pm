@@ -66,7 +66,7 @@ sub new {
 	if (($imageDesc !~ /\//) && (! -d $imageDesc)) {
 		$imageDesc = $main::System."/".$imageDesc;
 	}
-	my $arch = qx ( arch ); chomp $arch;
+	my $arch = qx (uname -m); chomp $arch;
 	my $systemTree;
 	my $controlFile = $imageDesc."/config.xml";
 	my $systemXML   = new XML::LibXML;
