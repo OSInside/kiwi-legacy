@@ -40,7 +40,7 @@ Authors:
     Marcus Schäfer <ms@suse.de>
 
 %package -n kiwi-tools
-Summary:      OpenSuSE - KIWI TFTP boot structure
+Summary:      OpenSuSE - KIWI tools collection
 Group:        System
 
 %description -n kiwi-tools
