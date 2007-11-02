@@ -1192,6 +1192,7 @@ sub createImageLiveCD {
 	#------------------------------------------
 	$kiwi -> info ("Calling mkisofs...");
 	my $name = $imageDest."/".$namerw.".iso";
+	$kiwi -> loginfo ("Calling: $CD/isolinux.sh $main::RootTree/CD $name");
 	$data = qx ($CD/isolinux.sh $main::RootTree/CD $name 2>&1);
 	$code = $? >> 8;
 	if ($code != 0) {
