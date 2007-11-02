@@ -147,9 +147,13 @@ sub new {
 			my $manager = $foreignRepo->{packagemanager};
 			$kiwi -> done ();
 			$kiwi -> info ("Including foreign package manager: $manager");
-			$optionsNodeList -> get_node(1) -> setAttribute (
-				"packagemanager",$manager
-			);
+			my $addElement = new XML::LibXML::Element ("packagemanager");
+			$addElement -> appendText ($manager);
+			my $opts = $optionsNodeList -> get_node(1);
+			my $node = $opts -> getElementsByTagName ("packagemanager")
+				-> get_node(1);
+			$opts -> removeChild ($node);
+			$opts -> appendChild ($addElement);
 		}
 	}
 	#==========================================
