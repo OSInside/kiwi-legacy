@@ -5,6 +5,7 @@ Mon Nov  5 10:29:19 CET 2007 - ms@suse.de
 - cleaned KIWILinuxRC.sh code according to shell syntax
 - added startShell and killShell function to KIWILinuxRC.sh (#335678)
 - added netboot/suse-11.0 target and fix diskless profile (#332595)
+- fixed use of uninitialized value in KIWIURL.pm:87
 - added next release targets as copy of 10.3
 
 -------------------------------------------------------------------

@@ -83,6 +83,12 @@ sub thisPath {
 		}
 		$thisPath = <FD>; close FD;
 		$thisPath = "$thisPath/$module";
+	} elsif (defined $main::Create) {
+		if (! open FD,"$main::Create/image/main::Prepare") {
+			return undef;
+		}
+		$thisPath = <FD>; close FD;
+		$thisPath = "$thisPath/$module";
 	} else {
 		$thisPath = "$main::Prepare/$module";
 	}
