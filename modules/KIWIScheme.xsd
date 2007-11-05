@@ -22,6 +22,7 @@
 				<xs:element ref="drivers"     minOccurs="0" maxOccurs="unbounded"/>
 				<xs:element ref="repository"  minOccurs="0" maxOccurs="unbounded"/>
 				<xs:element ref="deploy"      minOccurs="0" maxOccurs="1"/>
+				<xs:element ref="split"      minOccurs="0" maxOccurs="1"/>
 				<xs:element ref="packages"    minOccurs="0" maxOccurs="unbounded"/>
 			</xs:sequence>
 			<xs:attribute name="name" type="xs:string"/>
@@ -134,6 +135,29 @@
 			<xs:attribute name="blocksize" type="xs:integer"/>
 		</xs:complexType>
 	</xs:element>
+
+	<xs:element name="split">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="temporary" minOccurs="0" maxOccurs="1"/>
+				<xs:element ref="persistent" minOccurs="0" maxOccurs="1"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="temporary">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="file" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>  
+	<xs:element name="persistent">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="file" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>  
 
 	<xs:element name="union">
 		<xs:complexType>

@@ -84,6 +84,7 @@ sub new {
 	my $packageNodeList;
 	my $imgnameNodeList;
 	my $deploysNodeList;
+	my $splitNodeList;
 	my $instsrcNodeList;
 	my $partitionsNodeList;
 	my $configfileNodeList;
@@ -99,6 +100,7 @@ sub new {
 		$packageNodeList = $systemTree -> getElementsByTagName ("packages");
 		$imgnameNodeList = $systemTree -> getElementsByTagName ("image");
 		$deploysNodeList = $systemTree -> getElementsByTagName ("deploy");
+		$splitNodeList   = $systemTree -> getElementsByTagName ("split");
 		$instsrcNodeList = $systemTree -> getElementsByTagName ("instsource");
 		$partitionsNodeList = $systemTree 
 			-> getElementsByTagName ("partitions");
@@ -170,6 +172,7 @@ sub new {
 	$this->{packageNodeList}    = $packageNodeList;
 	$this->{imgnameNodeList}    = $imgnameNodeList;
 	$this->{deploysNodeList}    = $deploysNodeList;
+	$this->{splitNodeList}      = $splitNodeList;
 	$this->{instsrcNodeList}    = $instsrcNodeList;
 	$this->{partitionsNodeList} = $partitionsNodeList;
 	$this->{configfileNodeList} = $configfileNodeList;
@@ -573,6 +576,57 @@ sub getDeployKernel {
 	} else {
 		return undef;
 	}
+}
+
+#==========================================
+# getSplitPersistentFiles
+#------------------------------------------
+sub getSplitPersistentFiles {
+	# ...
+	# Get the persistent files/directories for split image
+	# ---
+	my $this = shift;
+	my $node = $this->{splitNodeList} -> get_node(1);
+	my @result = ();
+	if (! defined $node) {
+		return @result;
+	}
+	my $persistNode = $node -> getElementsByTagName ("persistent")
+		-> get_node(1);
+	if (! defined $persistNode) {
+		return @result;
+	}
+	my @fileNodeList = $persistNode -> getElementsByTagName ("file")
+		-> get_nodelist();
+	foreach my $fileNode (@fileNodeList) {
+		push @result, $fileNode -> getAttribute ("name");
+	}
+	return @result;
+}
+
+#==========================================
+# getSplitTempFiles
+#------------------------------------------
+sub getSplitTempFiles {
+	# ...
+	# Get the persistent files/directories for split image
+	# ---
+	my $this = shift;
+	my $node = $this->{splitNodeList} -> get_node(1);
+	my @result = ();
+	if (! defined $node) {
+		return @result;
+	}
+	my $tempNode = $node -> getElementsByTagName ("temporary") -> get_node(1);
+	if (! defined $tempNode) {
+		return @result;
+	}
+	my @fileNodeList = $tempNode -> getElementsByTagName ("file")
+		-> get_nodelist();
+	foreach my $fileNode (@fileNodeList) {
+		push @result, $fileNode -> getAttribute ("name");
+	}
+	return @result;
 }
 
 #==========================================

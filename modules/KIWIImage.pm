@@ -1211,6 +1211,7 @@ sub createImageSplit {
 	my $kiwi = $this->{kiwi};
 	my $imageTree = $this->{imageTree};
 	my $imageDest = $this->{imageDest};
+	my $xml = $this->{xml};
 	my $FSTypeRW;
 	my $FSTypeRO;
 	my $error;
@@ -1288,13 +1289,36 @@ sub createImageSplit {
 
 		find(\&$filter, $imageTree);
 
+		my @tempFiles = $xml -> getSplitTempFiles ();
+		if (@tempFiles) {
+			foreach my $temp (@tempFiles) {
+				my $globsource = "${imageTree}${temp}";
+				my @files = glob($globsource);
+				foreach my $file (@files) {
+					if (! -e $file) {
+						next;
+					}
+					
+					my $dest = $file;
+					$dest =~ s#$imageTree#$imageTreeTmp#;
+
+					qx ( rm -rf $dest );
+					qx ( cp -a $file $dest );
+				}
+			}
+		}
+			
 		$kiwi -> done();
 	}
+
+	my @persistFiles = $xml -> getSplitPersistentFiles ();
+	
 	$imageTreeRW = $imageTree;
 	$imageTreeRW =~ s/\/+$//;
 	$imageTreeRW.= "-read-write";
-	$this->{imageTreeRW} = $imageTreeRW;
-	if (! -d $imageTreeRW) {
+	if (! -d $imageTreeRW && @persistFiles) {
+		$this->{imageTreeRW} = $imageTreeRW;
+
 		$kiwi -> info ("Creating rw image part");
 		if (! mkdir $imageTreeRW) {
 			$error = $!;
@@ -1303,32 +1327,58 @@ sub createImageSplit {
 			$kiwi -> failed ();
 			return undef;
 		}
-		my @rwTrees = ("/etc", "/home", "/root", "/mnt", "/var/lib/rpm");
-		foreach my $tree (@rwTrees) {
-			qx ( mkdir -p `dirname $tree` );
-			qx ( mv $imageTreeTmp$tree $imageTreeRW/`dirname $tree` 2>&1 );
-			symlink ("/read-write$tree", "${imageTreeTmp}${tree}");
-		}
-		my @rwFiles = (
-			"/etc/fstab", "/etc/passwd", "/etc/group",
-			"/etc/shadow", "/etc/mtab", "/boot",
-			"/etc/init.d/.depend.boot", "/etc/init.d/.depend.start",
-			"/etc/init.d/.depend.stop"
-		);
-		foreach my $file (@rwFiles) {
-			my $tmpfile = "$imageTreeTmp"."$file";
-			my $rwfile = "$imageTreeRW"."$file";
-			my $rofile = "$imageTree"."$file";
-			
-			qx ( rm -rf $tmpfile );
+		my @expandedPersistFiles = ();
 
-			if (-l $rwfile) {
-				unlink ($rwfile);
+		foreach my $persist (@persistFiles) {
+			my $globsource = "${imageTreeTmp}${persist}";
+			my @files = glob($globsource);
+			foreach my $file (@files) {
+				push @expandedPersistFiles, $file;
 			}
+		}
 
-			qx ( mkdir -p `dirname $rwfile` 2>&1 );
-			qx ( cp -a $rofile $rwfile 2>&1 );
-			symlink ("/read-write${file}", "$tmpfile");
+		sub dirsort {
+			if (-d $a && -d $b) {
+				my $lena = length($a);
+				my $lenb = length($b);
+
+				if ($lena == $lenb) {
+					return 0;
+				} elsif ($lena < $lenb) {
+					return -1;
+				} else {
+					return 1;
+				}
+			} elsif (-d $a) {
+				return -1;
+			} else {
+				return 1;
+			}
+		}
+
+		my @sortedPersistFiles = sort dirsort @expandedPersistFiles;
+
+		foreach my $file (@sortedPersistFiles) {
+			my $source = $file;
+			
+			my $rosource = $file;
+			$rosource =~ s#$imageTreeTmp#$imageTree#;
+
+			my $dest = $file;
+			$dest =~ s#$imageTreeTmp#$imageTreeRW#;
+
+			my $rwroot = $file;
+			$rwroot =~ s#$imageTreeTmp#/read-write#;
+
+			qx ( rm -rf $dest );
+			qx ( mkdir -p `dirname $dest` );
+			if (-d $source) {
+				qx ( mv $source $dest );
+				symlink ($rwroot, $source);
+			} else {
+				qx ( cp -a $rosource $dest );
+				symlink ($rwroot, $source);
+			}
 		}
 	}
 	#==========================================
@@ -1341,39 +1391,46 @@ sub createImageSplit {
 	#------------------------------------------
 	$kiwi -> info ("Computing disk space...");
 	($mbytesreal,$mbytesro,$xmlsize) = $this -> getSize ($imageTree);
-	($mbytesreal,$mbytesrw,$xmlsize) = $this -> getSize ($imageTreeRW);
+
+	if (defined $this->{imageTreeRW}) {
+		($mbytesreal,$mbytesrw,$xmlsize) = $this -> getSize ($imageTreeRW);
+	}
 	$kiwi -> done ();
 
-	#==========================================
-	# Create RW logical extend
-	#------------------------------------------
-	$kiwi -> info ("Image RW part requires $mbytesrw MB of disk space");
-	if (! $this -> buildLogicalExtend ($namerw,$mbytesrw."M")) {
-		return undef;
-	}
-	$kiwi -> done();
-	#==========================================
-	# Create filesystem on RW extend
-	#------------------------------------------
-	SWITCH: for ($FSTypeRW) {
-		/ext2/       && do {
-			$ok = $this -> setupEXT2 ( $namerw,$imageTreeRW );
-			last SWITCH;
-		};
-		/ext3/       && do {
-			$ok = $this -> setupEXT2 ( $namerw,$imageTreeRW,"journaled" );
-			last SWITCH;
-		};
-		/reiserfs/   && do {
-			$ok = $this -> setupReiser ( $namerw );
-			last SWITCH;
-		};
-		$kiwi -> error  ("Unsupported type: $FSTypeRW");
-		$kiwi -> failed ();
-		return undef;
-	}
-	if (! $ok) {
-		return undef;
+	if (defined $this->{imageTreeRW}) {
+		#==========================================
+		# Create RW logical extend
+		#------------------------------------------
+		if (defined $this->{imageTreeRW}) {
+			$kiwi -> info ("Image RW part requires $mbytesrw MB of disk space");
+			if (! $this -> buildLogicalExtend ($namerw,$mbytesrw."M")) {
+				return undef;
+			}
+			$kiwi -> done();
+		}
+		#==========================================
+		# Create filesystem on RW extend
+		#------------------------------------------
+		SWITCH: for ($FSTypeRW) {
+			/ext2/       && do {
+				$ok = $this -> setupEXT2 ( $namerw,$imageTreeRW );
+				last SWITCH;
+			};
+			/ext3/       && do {
+				$ok = $this -> setupEXT2 ( $namerw,$imageTreeRW,"journaled" );
+				last SWITCH;
+			};
+			/reiserfs/   && do {
+				$ok = $this -> setupReiser ( $namerw );
+				last SWITCH;
+			};
+			$kiwi -> error  ("Unsupported type: $FSTypeRW");
+			$kiwi -> failed ();
+			return undef;
+		}
+		if (! $ok) {
+			return undef;
+		}
 	}
 	#==========================================
 	# Create RO logical extend
@@ -1429,6 +1486,9 @@ sub createImageSplit {
 		} else {
 			$source = $imageTree;
 			$type = $FSTypeRO;
+		}
+		if (! -d $source) {
+			next;
 		}
 		if ($type ne "cramfs" && $type ne "squashfs") {
 			#==========================================

@@ -1,4 +1,60 @@
 -------------------------------------------------------------------
+Mon Nov  5 09:19:23 CET 2007 - ms@suse.de
+
+- v1.82
+- optional split section added by James Willcox <james@ximian.com>
+  The following applies to the new split image type:
+  ---snip---
+  In the new split image type, files/directories can exist in one
+  of three places:
+
+    1) read-only disk area
+    2) read-write disk area
+    3) tmpfs
+
+  By default, every directory is in tmpfs and every file is a symbolic
+  link to the read-only location.  The patch I have attached allows you to
+  specify which files/directories should be in one of the two other
+  locations.  For instance, take the following:
+
+  <split>
+        <temporary>
+                <file name="/etc/fstab"/>
+                <file name="/etc/mtab"/>
+        </temporary>
+        <persistent>
+                <file name="/boot"/>
+        </persistent>
+  </split>
+
+  This would copy /etc/fstab and /etc/mtab to tmpfs and put /boot in the
+  read-write disk area.  Note, however, that none of the files
+  *within* /boot are affected.  They remain symbolic links to the real
+  files in the read-only area.  The main advantage to putting just a
+  directory in the read-write area is that any new files created there are
+  stored on the disk instead of tmpfs.  Of course files can be specified
+  here too, and wildcards are allowed.  Example:
+
+  <split>
+        <temporary>
+                <file name="/etc/fstab"/>
+                <file name="/etc/mtab"/>
+        </temporary>
+        <persistent>
+                <file name="/boot"/>
+                <file name="/boot/*"/>
+        </persistent>
+  </split>
+
+  This time, all files and directories within /boot are copied to the
+  read-write disk image as well.
+
+  The 'split' information is optional.  When left out, no read-write disk
+  image is produced since everything is either read-only or on tmpfs in
+  that case.
+  ---snap---
+
+-------------------------------------------------------------------
 Fri Nov  2 09:45:37 CET 2007 - ms@suse.de
 
 - v1.81

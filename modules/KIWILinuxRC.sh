@@ -1749,9 +1749,9 @@ function mountSystem () {
 		ln -s /mnt/read-only /read-only >/dev/null 2>&1 || retval=1
 
 		mkdir /mnt/read-write >/dev/null 2>&1
-		mount $rwDevice /mnt/read-write >/dev/null 2>&1 || retval=1
+		mount $rwDevice /mnt/read-write >/dev/null 2>&1
 		rm -f /read-write >/dev/null 2>&1
-		ln -s /mnt/read-write /read-write >/dev/null 2>&1 || retval=1
+		ln -s /mnt/read-write /read-write >/dev/null 2>&1
 	else
 		if ! mount $mountDevice /mnt >/dev/null 2>&1;then
 			mount -t squashfs $mountDevice /mnt >/dev/null 2>&1
