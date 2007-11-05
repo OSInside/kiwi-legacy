@@ -1094,6 +1094,9 @@ sub kiwiExit {
 	# private Exit function, exit safely
 	# ---
 	my $code = $_[0];
+	if (! defined $kiwi) {
+		$kiwi = new KIWILog("tiny");
+	}
 	$kiwi -> setLogHumanReadable();
 	if (! defined $LogFile) {
 		my $rootLog = $kiwi -> getRootLog();
