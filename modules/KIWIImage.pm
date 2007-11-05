@@ -1262,7 +1262,7 @@ sub createImageSplit {
 			$kiwi -> failed ();
 			return undef;
 		}
-		my $filter = sub {
+		my $createTmpTree = sub {
 			my $file = $_;
 			my $dir = $File::Find::dir;
 			my $path = "$dir/$file";
@@ -1287,7 +1287,7 @@ sub createImageSplit {
 			}
 		};
 
-		find(\&$filter, $imageTree);
+		find(\&$createTmpTree, $imageTree);
 
 		my @tempFiles = $xml -> getSplitTempFiles ();
 		if (@tempFiles) {
@@ -1792,7 +1792,7 @@ sub writeImageConfig {
 		# KIWI_KERNEL_OPTIONS information
 		#------------------------------------------
 		my $cmdline = $xml -> getDeployCommandline ();
-		if (defined $timeout) {
+		if (defined $cmdline) {
 			print FD "KIWI_KERNEL_OPTIONS='$cmdline'\n";
 		}
 		#==========================================
