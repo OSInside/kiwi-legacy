@@ -49,23 +49,28 @@ mountSystemFilesystems >/dev/null 2>&1
 closeKernelConsole
 
 #======================================
-# 2) Prepare module load support 
+# 2) start boot shell
+#--------------------------------------
+startShell
+
+#======================================
+# 3) Prepare module load support 
 #--------------------------------------
 touch /etc/modules.conf
 touch /lib/modules/*/modules.dep
 
 #======================================
-# 3) run udevd
+# 4) run udevd
 #--------------------------------------
 udevStart
 
 #======================================
-# 4) Including required kernel modules
+# 5) Including required kernel modules
 #--------------------------------------
 probeDevices
 
 #======================================
-# 5) Load USB storage modules
+# 6) Load USB storage modules
 #--------------------------------------
 for module in usb_storage sg sd_mod;do
 	modprobe $module
@@ -73,7 +78,7 @@ done
 sleep 5
 
 #======================================
-# 6) Search USB stick device
+# 7) Search USB stick device
 #--------------------------------------
 USBStickDevice
 if [ $stickFound = 0 ];then
@@ -83,7 +88,7 @@ if [ $stickFound = 0 ];then
 fi
 
 #======================================
-# 7) Probe filesystem of stick system
+# 8) Probe filesystem of stick system
 #--------------------------------------
 probeFileSystem $stickDevice
 if [ $FSTYPE = "unknown" ];then
@@ -93,7 +98,7 @@ if [ $FSTYPE = "unknown" ];then
 fi
 
 #======================================
-# 8) Resize filesystem to full space
+# 9) Resize filesystem to full space
 #--------------------------------------
 Echo "Filesystem of stick system is: $FSTYPE -> $stickDevice"
 if test "$FSTYPE" = "squashfs";then
@@ -118,14 +123,14 @@ else
 fi
 
 #======================================
-# 9) Mount USB stick (system)
+# 10) Mount USB stick (system)
 #--------------------------------------
 if ! mountSystem $stickDevice;then
 	systemException "Failed to mount root filesystem" "reboot"
 fi
 
 #======================================
-# 10) Create system dependant files
+# 11) Create system dependant files
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	if test $systemIntegrity = "clean";then
@@ -135,7 +140,7 @@ if [ $LOCAL_BOOT = "no" ];then
 fi
 
 #======================================
-# 11) copy system dependant files
+# 12) copy system dependant files
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	if test $systemIntegrity = "clean";then
@@ -148,23 +153,23 @@ if [ $LOCAL_BOOT = "no" ];then
 fi
 
 #======================================
-# 12) setup real root device
+# 13) setup real root device
 #--------------------------------------
 echo 256 > /proc/sys/kernel/real-root-dev
 
 #======================================
-# 13) umount system filesystems
+# 14) umount system filesystems
 #--------------------------------------
 umountSystemFilesystems
 
 #======================================
-# 14) copy initrd files to image
+# 15) copy initrd files to image
 #--------------------------------------
 cp /preinit /mnt
 cp /include /mnt
 
 #======================================
-# 15) Activate new root
+# 16) Activate new root
 #--------------------------------------
 Echo "Activating Image: [$stickSerial on -> $stickDevice]"
 /sbin/udevsettle --timeout=30
@@ -187,8 +192,14 @@ else
 	rm -f  ./include
 	rm -rf ./image
 fi
+
 #======================================
-# 16) Unmount initrd / system init
+# 17) kill boot shell
+#--------------------------------------
+killShell
+
+#======================================
+# 18) Unmount initrd / system init
 #--------------------------------------
 echo " "
 echo "Booting into USB-Stick System..."

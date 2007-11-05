@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Nov  5 10:29:19 CET 2007 - ms@suse.de
+
+- v1.83
+- cleaned KIWILinuxRC.sh code according to shell syntax
+- added startShell and killShell function to KIWILinuxRC.sh (#335678)
+
+-------------------------------------------------------------------
 Mon Nov  5 09:19:23 CET 2007 - ms@suse.de
 
 - v1.82

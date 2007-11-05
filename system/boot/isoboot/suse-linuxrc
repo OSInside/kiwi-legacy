@@ -51,25 +51,30 @@ mountSystemFilesystems >/dev/null 2>&1
 closeKernelConsole
 
 #======================================
-# 2) probe for livecd_config in cmdline
+# 2) start boot shell
+#--------------------------------------
+startShell
+
+#======================================
+# 3) probe for livecd_config in cmdline
 #--------------------------------------
 if grep -i -q "livecd_config=[a-zA-Z0-9/]" /proc/cmdline; then
 	export LIVECD_CONFIG=`sed 's/.*livecd_config=\([^ ]*\).*/\1/' /proc/cmdline`
 fi
 
 #======================================
-# 3) Prepare module load support 
+# 4) Prepare module load support 
 #--------------------------------------
 touch /etc/modules.conf
 touch /lib/modules/*/modules.dep
 
 #======================================
-# 4) run udevd
+# 5) run udevd
 #--------------------------------------
 udevStart
 
 #======================================
-# 5) Including required kernel modules
+# 6) Including required kernel modules
 #--------------------------------------
 probeDevices
 if [ -z "$UNIONFS_CONFIG" ];then
@@ -78,17 +83,17 @@ if [ -z "$UNIONFS_CONFIG" ];then
 fi
 
 #======================================
-# 6) Mount the CD device
+# 7) Mount the CD device
 #--------------------------------------
 CDMount
 
 #======================================
-# 7) Load configuration
+# 8) Load configuration
 #--------------------------------------
 importFile < $LIVECD_CONFIG
 
 #======================================
-# 8) Download RW part of the CD image
+# 9) Download RW part of the CD image
 #--------------------------------------
 IFS="," ; for i in $IMAGE;do
 	field=0
@@ -141,24 +146,24 @@ done
 CDUmount
 
 #======================================
-# 9) Get filesystem type
+# 10) Get filesystem type
 #--------------------------------------
 if [ -z "$UNIONFS_CONFIG" ];then
 	probeFileSystem $imageDevice
 fi
 
 #======================================
-# 10) Check for swap space
+# 11) Check for swap space
 #--------------------------------------
 swapSpace=`searchSwapSpace`
 if [ ! -z "$swapSpace" ];then
 	#======================================
-	# 10.1) use an existing swap partition
+	# 11.1) use an existing swap partition
 	#--------------------------------------
 	Echo "Found swap space on: $swapSpace"
 else
 	#======================================
-	# 10.1) use a swap file on a free part.
+	# 11.1) use a swap file on a free part.
 	#--------------------------------------
 	swapDevice=`searchDiskSpace`
 	if [ ! -z "$swapDevice" ];then
@@ -196,11 +201,11 @@ else
 fi
 
 #======================================
-# 11) Mount OS image to /mnt
+# 12) Mount OS image to /mnt
 #--------------------------------------
 if [ -z "$UNIONFS_CONFIG" ];then
 	#======================================
-	# 11.1) mount RW part and CD to /mnt
+	# 12.1) mount RW part and CD to /mnt
 	#--------------------------------------
 	if ! mount $imageDevice /mnt &>/dev/null;then
 		systemException "Failed to mount RW root filesystem" "reboot"
@@ -208,7 +213,7 @@ if [ -z "$UNIONFS_CONFIG" ];then
 	mkdir -p /mnt/$LIVECD && mount $cddev /mnt/$LIVECD &>/dev/null
 
 	#======================================
-	# 11.2) Create RO Link list
+	# 12.2) Create RO Link list
 	#--------------------------------------
 	cd /mnt
 	if [ ! -d $LIVECD/read-only-system ];then
@@ -232,7 +237,7 @@ if [ -z "$UNIONFS_CONFIG" ];then
 	cd /
 else
 	#======================================
-	# 11.1) mount CD to /mnt and unify
+	# 12.1) mount CD to /mnt and unify
 	#--------------------------------------
 	Echo "Mounting compressed unified tree..."
 	mkdir -p /mnt/$LIVECD && mount $cddev /mnt/$LIVECD &>/dev/null
@@ -243,7 +248,7 @@ else
 fi
 
 #======================================
-# 12) Create system dependant files
+# 13) Create system dependant files
 #--------------------------------------
 setupDefaultFstab /config
 updateRootDeviceFstab /config $imageDevice
@@ -257,7 +262,7 @@ if [ ! -z "$swapDevice" ];then
 fi
 
 #======================================
-# 13) copy system dependant files
+# 14) copy system dependant files
 #--------------------------------------
 cd /config
 find . -type d | while read d ; do  mkdir -p /mnt/$d ; done
@@ -266,23 +271,23 @@ cd /
 rm -rf /config
 
 #======================================
-# 14) setup real root device
+# 15) setup real root device
 #--------------------------------------
 echo 256 > /proc/sys/kernel/real-root-dev
 
 #======================================
-# 15) umount system filesystems
+# 16) umount system filesystems
 #--------------------------------------
 umountSystemFilesystems
 
 #======================================
-# 16) copy initrd files to image
+# 17) copy initrd files to image
 #--------------------------------------
 cp /preinit /mnt
 cp /include /mnt
 
 #======================================
-# 17) Activate new root
+# 18) Activate new root
 #--------------------------------------
 Echo "Activating Image: [$imageName]"
 /sbin/udevsettle --timeout=30
@@ -305,8 +310,14 @@ else
 	rm -f  ./include
 	rm -rf ./image
 fi
+
 #======================================
-# 18) Unmount initrd / system init
+# 19) kill boot shell
+#--------------------------------------
+killShell
+
+#======================================
+# 20) Unmount initrd / system init
 #--------------------------------------
 echo " "
 echo "Booting into Live CD System..."

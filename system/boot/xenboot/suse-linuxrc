@@ -57,18 +57,23 @@ mountSystemFilesystems >/dev/null 2>&1
 closeKernelConsole
 
 #======================================
-# 2) Prepare module load support 
+# 2) start boot shell
+#--------------------------------------
+startShell
+
+#======================================
+# 3) Prepare module load support 
 #--------------------------------------
 touch /etc/modules.conf
 touch /lib/modules/*/modules.dep
 
 #======================================
-# 3) run udevd
+# 4) run udevd
 #--------------------------------------
 udevStart
 
 #======================================
-# 4) Including required kernel modules
+# 5) Including required kernel modules
 #--------------------------------------
 Echo "Including required kernel modules..."
 for module in xennet xenblk reiserfs ext2 ext3 loop ipv6;do
@@ -76,23 +81,23 @@ for module in xennet xenblk reiserfs ext2 ext3 loop ipv6;do
 done
 
 #======================================
-# 5) Mount VM (boot)
+# 6) Mount VM (boot)
 #--------------------------------------
 VMMountSystem
 
 #======================================
-# 6) Get filesystem type
+# 7) Get filesystem type
 #--------------------------------------
 probeFileSystem $imageRootDevice
 
 #======================================
-# 7) Create system dependant files
+# 8) Create system dependant files
 #--------------------------------------
 setupDefaultFstab /config
 updateRootDeviceFstab /config $imageRootDevice
 
 #======================================
-# 8) copy system dependant files
+# 9) copy system dependant files
 #--------------------------------------
 cd /config
 find . -type d | while read d ; do  mkdir -p /mnt/$d ; done
@@ -101,23 +106,23 @@ cd /
 rm -rf /config
 
 #======================================
-# 9) setup real root device
+# 10) setup real root device
 #--------------------------------------
 echo 256 > /proc/sys/kernel/real-root-dev
 
 #======================================
-# 10) umount system filesystems
+# 11) umount system filesystems
 #--------------------------------------
 umountSystemFilesystems
 
 #======================================
-# 11) copy initrd files to image
+# 12) copy initrd files to image
 #--------------------------------------
 cp /preinit /mnt
 cp /include /mnt
 
 #======================================
-# 12) Activate new root
+# 13) Activate new root
 #--------------------------------------
 Echo "Activating Image: [$imageRootDevice]"
 /sbin/udevsettle --timeout=30
@@ -140,8 +145,14 @@ else
 	rm -f  ./include
 	rm -rf ./image
 fi
+
 #======================================
-# 13) Unmount initrd / system init
+# 14) kill boot shell
+#--------------------------------------
+killShell
+
+#======================================
+# 15) Unmount initrd / system init
 #--------------------------------------
 echo " "
 echo "Booting into Xen System..."

@@ -826,7 +826,7 @@ function CDDevice {
 		"reboot"
 	fi
 }
-USBStickDevice () {
+function USBStickDevice {
 	stickFound=0
 	for device in /sys/bus/usb/drivers/usb-storage/*;do
 		if [ -L $device ];then
@@ -1623,7 +1623,7 @@ function checkTFTP {
 #======================================
 # umountSystem
 #--------------------------------------
-function umountSystem () {
+function umountSystem {
 	retval=0
 	OLDIFS=$IFS
 	IFS=$IFS_ORIG
@@ -1657,7 +1657,7 @@ function umountSystem () {
 #======================================
 # mountSystem
 #--------------------------------------
-function mountSystem () {
+function mountSystem {
 	retval=0
 	OLDIFS=$IFS
 	IFS=$IFS_ORIG
@@ -1764,7 +1764,7 @@ function mountSystem () {
 #======================================
 # cleanDirectory
 #--------------------------------------
-function cleanDirectory () {
+function cleanDirectory {
 	directory=$1
 	shift 1
 	save=$@
@@ -1780,7 +1780,7 @@ function cleanDirectory () {
 #======================================
 # cleanInitrd
 #--------------------------------------
-function cleanInitrd () {
+function cleanInitrd {
 	cp /usr/bin/chroot /bin
 	for dir in /*;do
 		case "$dir" in
@@ -1807,7 +1807,7 @@ function cleanInitrd () {
 #======================================
 # searchAlternativeConfig
 #--------------------------------------
-function searchAlternativeConfig () {
+function searchAlternativeConfig {
 	# Check config.IP in Hex (pxelinux style)
 	localip=$IPADDR
 	hexip1=`echo $localip | cut -f1 -d'.'`
@@ -1836,7 +1836,7 @@ function searchAlternativeConfig () {
 #======================================
 # runHook
 #--------------------------------------
-function runHook () {
+function runHook {
 	HOOK="/hooks/$1.sh"
 	if [ -e $HOOK ]; then
 		. $HOOK
@@ -1845,12 +1845,36 @@ function runHook () {
 #======================================
 # getNextPartition
 #--------------------------------------
-function getNextPartition () {
+function getNextPartition {
 	part=$1
-
 	nextPart=`echo $part | sed -e "s/\(.*\)[0-9]/\1/"`
 	nextPartNum=`echo $part | sed -e "s/.*\([0-9]\)/\1/"`
 	nextPartNum=`expr $nextPartNum + 1`
 	nextPart="${nextPart}${nextPartNum}"
 	echo $nextPart
+}
+#======================================
+# startShell
+#--------------------------------------
+function startShell {
+	# /.../
+	# start a debugging shell on tty2. This requires the
+	# package kiwi-tools to be part of the boot image.
+	# ----
+	if [ -x /usr/share/kiwi/tools/startshell ];then
+		Echo "Starting boot shell on tty2"
+		SHELL_PID=`/usr/lib/YaST2/bin/startshell /dev/tty2`
+	fi
+}
+#======================================
+# killShell
+#--------------------------------------
+function killShell {
+	# /.../
+	# kill debugging shell on tty2
+	# ----
+	if [ ! -z "$SHELL_PID" ]; then 
+		Echo "Stopping boot shell"
+		kill -KILL $SHELL_PID &>/dev/null
+	fi
 }
