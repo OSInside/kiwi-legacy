@@ -405,11 +405,11 @@ sub getDeployUnionConfig {
 	# Get the union file system configuration, if any
 	# ---
 	my $this = shift;
+	my %config = ();
 	my $node = $this->{unionNodeList} -> get_node(1);
 	if (! $node) {
-		return undef;
+		return %config;
 	}
-	my %config;
 	$config{ro}   = $node -> getAttribute ("ro");
 	$config{rw}   = $node -> getAttribute ("rw");
 	$config{type} = $node -> getAttribute ("type");
