@@ -91,7 +91,6 @@
 		<package name="glibc-locale"/>
 		<package name="gnome-filesystem"/>
 		<package name="gpg"/>
-		<package name="hal"/>
 		<package name="info"/>
 		<package name="insserv"/>
 		<package name="iproute2"/>
