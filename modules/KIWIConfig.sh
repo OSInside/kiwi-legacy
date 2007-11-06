@@ -340,6 +340,25 @@ function baseSetupInPlaceSVNRepository {
 }
 
 #======================================
+# baseSetupInPlaceGITRepository
+#--------------------------------------
+function baseSetupInPlaceGITRepository {
+	# /.../
+	# create an in place git repository of the root
+	# directory. This process may take some time and you
+	# may expect problems with binary data handling
+	# ----
+	if [ -x /usr/bin/git ];then
+		echo "git not installed... skipped"
+		return
+	fi
+	pushd /
+	git init && git add . && \
+	git commit -m "deployed"
+	popd
+}
+
+#======================================
 # suseStripInitrd
 #--------------------------------------
 function suseStripInitrd {

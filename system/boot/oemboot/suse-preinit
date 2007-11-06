@@ -68,3 +68,11 @@ fi
 if [ $grubOK = 1 ];then
 	installBootLoaderGrub
 fi
+
+#======================================
+# 6) create /etc/ImagePackages
+#--------------------------------------
+if [ -x /bin/rpm ];then
+	Echo "Creating initial image package info file"
+	rpm -qa --last > /etc/ImagePackages
+fi

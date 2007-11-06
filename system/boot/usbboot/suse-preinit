@@ -28,3 +28,13 @@ updateMTAB
 # 2) create framebuffer devices
 #--------------------------------------
 createFramebufferDevices
+
+#======================================
+# 3) create /etc/ImagePackages
+#--------------------------------------
+if test $systemIntegrity = "clean";then
+	if [ -x /bin/rpm ];then
+		Echo "Creating initial image package info file"
+		rpm -qa --last > /etc/ImagePackages
+	fi
+fi

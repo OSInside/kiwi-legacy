@@ -4,6 +4,9 @@ Tue Nov  6 11:06:33 CET 2007 - ms@suse.de
 - v1.84
 - fixed killing dhcpcd if no system update is required (#339460)
 - fixed fstab setup, overwritten due to wrong IO redirection (#339458)
+- added /etc/ImagePackages file on initial deployment
+- added hwinfo to be part of the usbboot boot images
+- added baseSetupInPlaceGITRepository() function
 
 -------------------------------------------------------------------
 Mon Nov  5 10:29:19 CET 2007 - ms@suse.de

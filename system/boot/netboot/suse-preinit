@@ -58,7 +58,17 @@ if test ! -z $DISK;then
 fi
 
 #======================================
-# 6) Reset systemIntegrity
+# 6) create /etc/ImagePackages
+#--------------------------------------
+if test $systemIntegrity = "clean";then
+	if [ -x /bin/rpm ];then
+		Echo "Creating initial image package info file"
+		rpm -qa --last > /etc/ImagePackages
+	fi
+fi
+
+#======================================
+# 7) Reset systemIntegrity
 #--------------------------------------
 if test ! -z $DISK;then
 	if test ! -z $RELOAD_CONFIG;then
@@ -67,7 +77,7 @@ if test ! -z $DISK;then
 fi
 
 #======================================
-# 7) check for valid mount points 
+# 8) check for valid mount points 
 #--------------------------------------
 if test ! -z $DISK;then
 	IFS=":" ; for i in $PART_MOUNT;do
@@ -80,7 +90,7 @@ if test ! -z $DISK;then
 fi
 
 #======================================
-# 8) Update /etc/ImageVersion files
+# 9) Update /etc/ImageVersion files
 #--------------------------------------
 if test ! -z $DISK;then
 	count=0
@@ -106,7 +116,7 @@ if test ! -z $DISK;then
 fi
 
 #======================================
-# 9) setup network for nfs boot
+# 10) setup network for nfs boot
 #--------------------------------------
 if test ! -z $NFSROOT;then
 	mount -o nolock -t proc  proc    /proc

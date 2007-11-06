@@ -66,6 +66,7 @@
 		<package name="fribidi"/>
 		<package name="make"/>
 		<package name="grub"/>
+		<package name="hwinfo"/>
 		<package name="bootsplash"/>
 		<package name="bootsplash-theme-SuSE"/>
 	</packages>
