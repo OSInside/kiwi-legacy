@@ -7,6 +7,7 @@ Tue Nov  6 11:06:33 CET 2007 - ms@suse.de
 - added /etc/ImagePackages file on initial deployment
 - added hwinfo to be part of the usbboot boot images
 - added baseSetupInPlaceGITRepository() function
+- added integrity check for --force-new-root option
 
 -------------------------------------------------------------------
 Mon Nov  5 10:29:19 CET 2007 - ms@suse.de

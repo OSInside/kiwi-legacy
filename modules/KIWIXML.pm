@@ -1638,6 +1638,12 @@ sub createTmpDirectory {
 			rmdir $root;
 			if ( -e $root && -d $root && $main::ForceNewRoot ) {
 				$kiwi -> info ("Removing old root directory '$root'");
+				if (-e $root."/base-system") {
+					$kiwi -> failed();
+					$kiwi -> info  ("Mount point /base-system exists");
+					$kiwi -> failed();
+					return undef;
+				}
 				qx (rm -R $root);
 				$kiwi -> done();
 			}
