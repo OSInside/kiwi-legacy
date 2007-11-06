@@ -636,9 +636,7 @@ runHook postconfig
 # 16) send DHCP_RELEASE, reset cache
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ] && [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ];then
-	if test $systemIntegrity = "clean";then
-		dhcpcd -k
-	fi
+	dhcpcd -k
 fi
 
 #======================================

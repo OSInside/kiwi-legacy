@@ -540,7 +540,7 @@ if [ $LOCAL_BOOT = "no" ];then
 	setupDefaultFstab /config
 	updateSwapDeviceFstab /config $deviceSwap
 	if [ -z "$UNIONFS_CONFIG" ]; then
-		echo "$deviceRoot /      $FSTYPE defaults 0 0"     > /config/etc/fstab
+		echo "$deviceRoot /      $FSTYPE defaults 0 0"    >> /config/etc/fstab
 		echo "$deviceHome /home  ext3    defaults 0 0"    >> /config/etc/fstab
 	else
 		mkdir -p /config/kiwiboot
