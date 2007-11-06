@@ -353,6 +353,9 @@ function baseSetupInPlaceGITRepository {
 		return
 	fi
 	pushd /
+	echo /proc > .gitignore
+	echo /sys >> .gitignore
+	echo /dev >> .gitignore
 	git init && git add . && \
 	git commit -m "deployed"
 	popd
