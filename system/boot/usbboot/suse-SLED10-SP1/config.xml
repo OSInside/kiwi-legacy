@@ -80,8 +80,6 @@
 		<package name="cpio"/>
 		<package name="cyrus-sasl"/>
 		<package name="db"/>
-		<package name="dbus-1"/>
-		<package name="dbus-1-glib"/>
 		<package name="diffutils"/>
 		<package name="expat"/>
 		<package name="fillup"/>
