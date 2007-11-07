@@ -1829,6 +1829,17 @@ sub splitPathHTTP {
 	my $request  = HTTP::Request->new( GET => $basepath );
 	my $response = $browser->request( $request );
 	my $content  = $response->content();
+
+	# descend if the root page doesn't do dir listing:
+	if($response->title !~ m/index of/i)
+	{
+		# this means that no dir listing is done here, try one descend.
+		$this->{kiwi}->note("Directory $basepath has no listings, descencding");
+		 return $this->splitPathHTTP(
+			$targets, $browser, $basepath."/".$prefix, $rest, $leafonly
+		);
+	}
+
 	my @links    = ();
 	if ($content =~ /Error 404/) {
 		pop @{$targets};
@@ -1842,12 +1853,13 @@ sub splitPathHTTP {
 	# get the current dir list, parse for links and match them to prefix
 	# for each match call splitPath with the correct parameters recursively
 	# ----
-	my @lines = split (/\n/,$content);
+	my @lines = split(/\n/,$content);
 	my $atleastonce = 0;
 	foreach my $line (@lines) {
-		next if ($line !~ /<img.*href="(.*)\/">/);
 		# skip "parent dir" to avoid cycles
-		next if ($line =~ /[pP]arent.+[dD]irectory/);
+		next if($line =~ /[pP]arent.+[dD]irectory/);
+
+		next if($line !~ /<img.*href="(.*)\/">/);
 		$atleastonce++;	# at least ONE match means the dir contains subdirs!
 		my $link = $1;
 		$link =~ s#^[./]+##g;
@@ -1856,15 +1868,19 @@ sub splitPathHTTP {
 		# This is fatal for descending...
 		$link =~ s#.*/##g;
 		if ($link =~ m/$prefix/) {
-			if( defined( $rest ) ) {
-				if( $leafonly == 1 ) {
+			if(defined($rest))
+			{
+				if($leafonly == 1)
+				{
 					# list directory even if the path is not finished
 					push @{$targets}, $basepath."/".$link;
 				}
 				$this->splitPathHTTP(
 					$targets, $browser, $basepath."/".$link, $rest, $leafonly
 				);
-			} else {
+			}
+			else
+			{
 				# if the path is finished the leaves are stored
 				push @{$targets}, $basepath."/".$link;
 				return $this;

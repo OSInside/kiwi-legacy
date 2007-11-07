@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 #================
 # FILE          : kiwi.pl
 #----------------
@@ -30,10 +30,17 @@ use KIWIMigrate;
 use KIWIOverlay;
 
 #============================================
+# perl debugger setup
+#--------------------------------------------
+$DB::inhibit_exit = 0;
+
+use warnings;
+
+#============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "1.84";
-our $openSUSE      = "http://software.opensuse.org/download/";
+our $Version       = "1.85";
+our $openSUSE      = "http://download.opensuse.org/repositories/";
 our $ConfigFile    = "$ENV{'HOME'}/.kiwirc";
 our $ConfigStatus  = 0;
 #============================================
