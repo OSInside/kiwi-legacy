@@ -532,7 +532,6 @@ function setupDefaultFstab {
 	echo "devpts  /dev/pts   devpts  mode=0620,gid=5 0 0"   >> $nfstab
 	echo "proc    /proc      proc    defaults 0 0"          >> $nfstab
 	echo "sysfs   /sys       sysfs   noauto 0 0"            >> $nfstab
-	echo "tmpfs   /dev/shm   tmpfs   defaults 0 0"          >> $nfstab
 }
 #======================================
 # updateRootDeviceFstab
