@@ -3,6 +3,7 @@ Wed Nov  7 10:59:10 CET 2007 - ms@suse.de
 
 - v1.85
 - dont add /dev/shm as tmpfs to fstab
+- added kiwi-tools package to SUSE 11.0 boot descriptions
 - fixed opensuse:// URL type. Fixed by Jan <jcbornschlegel@suse.de>
 - fixed splitPathHTTP which fails if the base URL doesn't return a
   dir listing but something different. Fixed by Jan too

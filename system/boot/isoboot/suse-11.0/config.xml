@@ -50,6 +50,7 @@
 		<source path="/image/CDs/full-i386"/>
 	</repository>
 	<packages type="image">
+		<package name="kiwi-tools"/>
 		<package name="bind-libs"/>
 		<package name="bind-utils"/>
 		<package name="dhcpcd"/>
