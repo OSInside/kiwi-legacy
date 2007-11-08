@@ -40,7 +40,6 @@
 		<source path="/image/CDs/full-i386"/>
 	</repository>
 	<packages type="image">
-		<package name="kiwi-tools"/>
 		<package name="e2fsprogs"/>
 		<package name="file"/>
 		<package name="libcom_err"/>

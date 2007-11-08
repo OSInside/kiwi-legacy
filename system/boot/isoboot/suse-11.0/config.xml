@@ -50,7 +50,6 @@
 		<source path="/image/CDs/full-i386"/>
 	</repository>
 	<packages type="image">
-		<package name="kiwi-tools"/>
 		<package name="bind-libs"/>
 		<package name="bind-utils"/>
 		<package name="dhcpcd"/>
@@ -67,6 +66,8 @@
 		<package name="make"/>
 		<package name="memtest86+"/>
 		<package name="squashfs"/>
+		<package name="aufs"/>
+		<package name="aufs-kmp-default"/>
 		<package name="fribidi"/>
 		<package name="hdparm"/>
 		<package name="grub"/>

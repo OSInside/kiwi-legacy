@@ -75,21 +75,21 @@ mountSystemFilesystems >/dev/null 2>&1
 closeKernelConsole
 
 #======================================
-# 2) start boot shell
-#--------------------------------------
-startShell
-
-#======================================
-# 3) Prepare module load support 
+# 2) Prepare module load support 
 #--------------------------------------
 touch /etc/modules.conf
 touch /lib/modules/*/modules.dep
 runHook init
 
 #======================================
-# 4) run udevd
+# 3) run udevd
 #--------------------------------------
 udevStart
+
+#======================================
+# 4) start boot shell
+#--------------------------------------
+startShell
 
 #======================================
 # 5) Include proc/cmdline information

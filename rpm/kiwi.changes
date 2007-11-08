@@ -9,6 +9,13 @@ Wed Nov  7 10:59:10 CET 2007 - ms@suse.de
 - fixed splitPathHTTP which fails if the base URL doesn't return a
   dir listing but something different. Fixed by Jan too
 - check result of copying root/ data to image (#339814)
+- added read-only check for mounting the repositories. If a
+  repository path has no write permissions it doesn't make sense to
+  use aufs/unionfs to implement a read-only mount. Use bind mount
+  directly in that situation (#339503)
+- use setctsid to call a systemException shell. Fix call of
+  boot shell on /dev/tty2
+- aufs back again in SUSE 11.0 :-)
 - allow use of perl debugger
 
 -------------------------------------------------------------------

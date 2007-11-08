@@ -51,27 +51,27 @@ mountSystemFilesystems >/dev/null 2>&1
 closeKernelConsole
 
 #======================================
-# 2) start boot shell
-#--------------------------------------
-startShell
-
-#======================================
-# 3) probe for livecd_config in cmdline
+# 2) probe for livecd_config in cmdline
 #--------------------------------------
 if grep -i -q "livecd_config=[a-zA-Z0-9/]" /proc/cmdline; then
 	export LIVECD_CONFIG=`sed 's/.*livecd_config=\([^ ]*\).*/\1/' /proc/cmdline`
 fi
 
 #======================================
-# 4) Prepare module load support 
+# 3) Prepare module load support 
 #--------------------------------------
 touch /etc/modules.conf
 touch /lib/modules/*/modules.dep
 
 #======================================
-# 5) run udevd
+# 4) run udevd
 #--------------------------------------
 udevStart
+
+#======================================
+# 5) start boot shell
+#--------------------------------------
+startShell
 
 #======================================
 # 6) Including required kernel modules

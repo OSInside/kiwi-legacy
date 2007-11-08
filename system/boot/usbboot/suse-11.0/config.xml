@@ -50,7 +50,6 @@
 		<source path="/image/CDs/full-i386"/>
 	</repository>
 	<packages type="image">
-		<package name="kiwi-tools"/>
 		<package name="e2fsprogs"/>
 		<package name="file"/>
 		<package name="libcom_err"/>
@@ -61,6 +60,8 @@
 		<package name="sysfsutils"/>
 		<package name="util-linux"/>
 		<package name="squashfs"/>
+		<package name="aufs"/>
+		<package name="aufs-kmp-default"/>
 		<package name="gfxboot"/>
 		<package name="fribidi"/>
 		<package name="make"/>

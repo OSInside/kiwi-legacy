@@ -655,15 +655,27 @@ sub setupMount {
 			qx ( mkdir -p $cache );
 		}
 		qx (mkdir -p $mount);
-		my $data = qx (mount -t aufs -o $auopt aufs $mount 2>&1);
+		my $data = qx ( touch $path/bob 2>&1 );
 		my $code = $? >> 8;
-		if ($code != 0) {
-			$data = qx (mount -t unionfs -o $roopt unionfs $mount 2>&1);
+		if ($code == 0) {
+			#==========================================
+			# $path is writable try overlay ro mount
+			#------------------------------------------
+			$kiwi -> skipped ();
+			$kiwi -> warning ("Path $path is writable, trying read-only mount");
+			qx ( rm -f $path/bob 2>&1 );
+			$data = qx (mount -t aufs -o $auopt aufs $mount 2>&1);
 			$code = $? >> 8;
+			if ($code != 0) {
+				$data = qx (mount -t unionfs -o $roopt unionfs $mount 2>&1);
+				$code = $? >> 8;
+			}
+			if ($code != 0) {
+				$kiwi -> skipped ();
+				$kiwi -> warning ("Couldn't mount read-only, using bind mount");
+			}
 		}
 		if ($code != 0) {
-			$kiwi -> skipped ();
-			$kiwi -> warning ("Couldn't mount read-only, using bind mount");
 			my $data = qx ( mount -o bind $path $mount 2>&1 );
 			my $code = $? >> 8;
 			if ($code != 0) {

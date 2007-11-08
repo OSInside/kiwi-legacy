@@ -130,7 +130,7 @@ function systemException {
 	;;
 	"shell")
 		Echo "shellException: providing shell..."
-		/bin/sh
+		setctsid /dev/tty1 /bin/bash
 	;;
 	*)
 		Echo "unknownException..."
@@ -1857,12 +1857,13 @@ function getNextPartition {
 #--------------------------------------
 function startShell {
 	# /.../
-	# start a debugging shell on tty2. This requires the
-	# package kiwi-tools to be part of the boot image.
+	# start a debugging shell on tty2
 	# ----
-	if [ -x /usr/share/kiwi/tools/startshell ];then
-		Echo "Starting boot shell on tty2"
-		SHELL_PID=`/usr/share/kiwi/tools/startshell /dev/tty2`
+	Echo "Starting boot shell on tty2"
+	setctsid -f /dev/tty2 /bin/bash
+	SHELL_PID=`pidof bash | cut -f1 -d " "`
+	if [ ! -z "$SHELL_PID" ];then
+		Echo "Boot shell started on tty2 with PID: $SHELL_PID"
 	fi
 }
 #======================================

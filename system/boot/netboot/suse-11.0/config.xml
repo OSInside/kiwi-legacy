@@ -110,22 +110,24 @@
 	<packages type="image" profiles="default">
 		<!-- KERNEL AND MODULE PACKAGES START DEFAULT -->
 		<package name="kernel-default"/>
+		<package name="aufs-kmp-default"/>
 		<!-- KERNEL AND MODULE PACKAGES END DEFAULT -->
 	</packages>
 	<packages type="image" profiles="xen">
 		<!-- KERNEL AND MODULE PACKAGES START XEN -->
 		<package name="kernel-xen"/>
+		<package name="aufs-kmp-xen"/>
 		<package name="xen"/>
 		<!-- KERNEL AND MODULE PACKAGES END XEN -->
 	</packages>
 	<packages type="image" profiles="diskless">
 		<!-- KERNEL AND MODULE PACKAGES START DISKLESS -->
 		<package name="kernel-default"/>
+		<package name="aufs-kmp-default"/>
 		<!-- KERNEL AND MODULE PACKAGES END DISKLESS -->
 	</packages>
 	<packages type="image" profiles="default,xen">
 		<!-- PACKAGES START DEFAULT AND XEN -->
-		<package name="kiwi-tools"/>
 		<package name="iputils"/>
 		<package name="atftp"/>
 		<package name="bind-libs"/>
@@ -154,7 +156,6 @@
 	</packages>
 	<packages type="image" profiles="diskless">
 		<!-- PACKAGES START DISKLESS -->
-		<package name="kiwi-tools"/>
 		<package name="iputils"/>
 		<package name="atftp"/>
 		<package name="dhcpcd"/>
