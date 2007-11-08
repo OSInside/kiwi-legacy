@@ -1862,7 +1862,7 @@ function startShell {
 	# ----
 	if [ -x /usr/share/kiwi/tools/startshell ];then
 		Echo "Starting boot shell on tty2"
-		SHELL_PID=`/usr/lib/YaST2/bin/startshell /dev/tty2`
+		SHELL_PID=`/usr/share/kiwi/tools/startshell /dev/tty2`
 	fi
 }
 #======================================

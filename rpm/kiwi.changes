@@ -2,11 +2,13 @@
 Wed Nov  7 10:59:10 CET 2007 - ms@suse.de
 
 - v1.85
-- dont add /dev/shm as tmpfs to fstab
+- dont add /dev/shm as tmpfs to fstab. This fixes the network
+  setup done by /etc/init.d/network
 - added kiwi-tools package to SUSE 11.0 boot descriptions
 - fixed opensuse:// URL type. Fixed by Jan <jcbornschlegel@suse.de>
 - fixed splitPathHTTP which fails if the base URL doesn't return a
   dir listing but something different. Fixed by Jan too
+- check result of copying root/ data to image (#339814)
 - allow use of perl debugger
 
 -------------------------------------------------------------------
