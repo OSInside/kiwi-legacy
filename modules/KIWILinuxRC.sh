@@ -297,7 +297,7 @@ function setupSUSEInitrd {
 	local umountProc=0
 	local umountSys=0
 	local systemMap=0
-	find /boot -name "System.map*" | while read i; do
+	for i in `find /boot -name "System.map*"`;do
 		systemMap=1
 	done
 	if [ $systemMap -eq 1 ];then
