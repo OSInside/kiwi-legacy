@@ -379,7 +379,12 @@ function suseStripInitrd {
 		/etc/pam.d* /etc/DIR_COLORS /etc/rc* /usr/share/hal /usr/share/ssl
 		/usr/lib*/hal /usr/lib*/*.a /usr/lib*/*.la /usr/lib*/librpm*
 		/usr/lib*/libssl* /usr/lib*/libpanel* /usr/lib*/libncursesw*
-		/usr/lib*/libmenu* /usr/share/X11/locale /usr/src/packages/RPMS
+		/usr/lib*/libmenu* /usr/src/packages/RPMS
+		/usr/X11R6 /usr/lib*/X11 /var/X11R6 /usr/share/X11 /etc/X11
+		/usr/lib*/libX* /usr/lib*/xorg
+		/etc/ppp /etc/xdg /etc/NetworkManager /lib*/YaST /lib*/security
+		/lib*/mkinitrd /srv /var/adm /usr/lib/engines /usr/src/packages
+		/usr/src/linux* /usr/local
 		/lib/modules/*/kernel/drivers/net/wireless
 		/lib/modules/*/kernel/drivers/net/pcmcia
 		/lib/modules/*/kernel/drivers/net/tokenring
@@ -395,7 +400,7 @@ function suseStripInitrd {
 	if [ -d /var/cache/zypp ];then
 		files="
 			/usr/lib*/libzypp* /usr/lib*/libx*
-			/var/cache/zypp /usr/X11R6/lib /usr/lib/xorg
+			/var/cache/zypp
 		"
 		for i in $files;do
 			rm -rf $i
@@ -472,15 +477,13 @@ function suseGFXBoot {
 	sname[0]="08000600.spl"
 	sname[1]="10240768.spl"
 	sname[2]="12801024.spl"
-	sname[3]="14001050.spl"
-	sname[4]="16001200.spl"
 	index=0
 	if [ ! $theme = "SuSE" ];then
 		theme="SuSE-$theme"
 	fi
 	mkdir /image/loader/animations
 	cp /etc/bootsplash/themes/$theme/animations/* /image/loader/animations
-	for cfg in 800x600 1024x768 1280x1024 1400x1050 1600x1200;do
+	for cfg in 800x600 1024x768 1280x1024;do
 		/sbin/splash -s -c -f \
 			/etc/bootsplash/themes/$theme/config/bootsplash-$cfg.cfg |\
 			gzip -9c \

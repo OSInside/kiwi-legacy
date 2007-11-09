@@ -24,6 +24,7 @@ use KIWILog;
 use FileHandle;
 use File::Basename;
 use File::Spec;
+use Math::BigFloat;
 
 #==========================================
 # Constructor
@@ -83,6 +84,9 @@ sub new {
 	}
 	$kernel = $initrd;
 	$kernel =~ s/gz$/kernel/;
+	if (! -e $kernel) {
+		$kernel =~ s/splash\.kernel$/kernel/;
+	}
 	if (-l $kernel) {
 		$knlink = $kernel;
 		$kernel = readlink ($knlink);
@@ -162,7 +166,9 @@ sub createBootStructure {
 		$lname  = $lname.".".$loc;
 		$iname  = $iname.".".$loc;
 	}
-	$initrd = $this -> setupSplashForGrub();
+	if ($initrd !~ /splash\.gz$/) {
+		$initrd = $this -> setupSplashForGrub();
+	}
 	$kiwi -> info ("Creating initial boot structure");
 	$status = qx ( mkdir -p $tmpdir/boot/grub 2>&1 );
 	$result = $? >> 8;
@@ -261,10 +267,14 @@ sub setupBootStick {
 	# Import grub stages
 	#------------------------------------------
 	my $stages = "'usr/lib/grub/*'";
+	my $unzip  = "gzip -cd $initrd 2>&1";
 	$kiwi -> info ("Importing grub stages for stick boot");
-	$status = qx (gzip -cd $initrd | (cd $tmpdir && cpio -d -i $stages 2>&1));
-	$status = qx ( mv $tmpdir/usr/lib/grub/* $tmpdir/boot/grub 2>&1 );
+	$status = qx ($unzip | (cd $tmpdir && cpio -di $stages 2>&1));
 	$result = $? >> 8;
+	if ($result == 0) {
+		$status = qx ( mv $tmpdir/usr/lib/grub/* $tmpdir/boot/grub 2>&1 );
+		$result = $? >> 8;
+	}
 	if ($result != 0) {
 		$kiwi -> skipped ();
 		$kiwi -> error   ("Failed importing grub stages: $status");
@@ -372,10 +382,11 @@ sub setupBootStick {
 	$kiwi -> info ("Creating stick image");
 	my $name = $initrd; $name =~ s/gz$/stickboot/;
 	my $size = qx (du -ks $tmpdir | cut -f1 2>&1);
-	chomp ($size); $size += 2048;
-	$sysird = int ( $size / 1024 );
-	$sysird = $sysird + 1;
-	$status = qx (dd if=/dev/zero of=$name bs=1k count=$size 2>&1);
+	my $ddev = "/dev/zero";
+	chomp ($size); $size += 1024; # 1M free space for initrd fs
+	$sysird = $size / 1024;
+	$sysird = Math::BigFloat->new($sysird)->ffround(0);
+	$status = qx (dd if=$ddev of=$name bs=1M seek=$sysird count=1 2>&1);
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -415,7 +426,8 @@ sub setupBootStick {
 	# check for message file in initrd
 	#------------------------------------------
 	my $message = "'image/loader/message'";
-	$status = qx (gzip -cd $initrd | (cd /mnt/ && cpio -d -i $message 2>&1));
+	my $unzip   = "gzip -cd $initrd 2>&1";
+	$status = qx ($unzip | (cd /mnt/ && cpio -d -i $message 2>&1));
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -472,7 +484,7 @@ sub setupBootStick {
 	# Clean tmp
 	#------------------------------------------
 	unlink $pinfo;
-	rmdir  $tmpdir;
+	qx ( rm -rf $tmpdir );
 
 	#==========================================
 	# Dump initrd image on stick
@@ -622,13 +634,28 @@ sub setupInstallCD {
 	my $stage1 = "'usr/lib/grub/stage1'";
 	my $stage2 = "'usr/lib/grub/stage2_eltorito'";
 	my $message= "'image/loader/message'";
-	$status = qx (gzip -cd $initrd | (cd $tmpdir && cpio -d -i $message 2>&1));
-	$status = qx (gzip -cd $initrd | (cd $tmpdir && cpio -d -i $stage1 2>&1));
-	$status = qx (gzip -cd $initrd | (cd $tmpdir && cpio -d -i $stage2 2>&1));
-	$status = qx ( mv $tmpdir/$message $tmpdir/boot/message 2>&1 );
-	$status = qx ( mv $tmpdir/$stage1 $tmpdir/boot/grub/stage1 2>&1 );
-	$status = qx ( mv $tmpdir/$stage2 $tmpdir/boot/grub/stage2 2>&1 );
+	my $unzip  = "gzip -cd $initrd 2>&1";
+	$status = qx ($unzip | (cd $tmpdir && cpio -d -i $message 2>&1));
 	$result = $? >> 8;
+	if ($result == 0) {
+		$status = qx ($unzip | (cd $tmpdir && cpio -d -i $stage1 2>&1));
+		$result = $? >> 8;
+		if ($result == 0) {
+			$status = qx ($unzip | (cd $tmpdir && cpio -d -i $stage2 2>&1));
+		}
+	}
+	if ($result == 0) {
+		$status = qx (mv $tmpdir/$message $tmpdir/boot/message 2>&1);
+		$result = $? >> 8;
+		if ($result == 0) {
+			$status = qx (mv $tmpdir/$stage1 $tmpdir/boot/grub/stage1 2>&1);
+			$result = $? >> 8;
+			if ($result == 0) {
+				$status = qx (mv $tmpdir/$stage2 $tmpdir/boot/grub/stage2 2>&1);
+				$result = $? >> 8;
+			}
+		}
+	}
 	if ($result != 0) {
 		$kiwi -> skipped ();
 		$kiwi -> error   ("Failed importing grub stages: $status");
@@ -817,10 +844,14 @@ sub setupInstallStick {
 	# Import grub stages
 	#------------------------------------------
 	my $stages = "'usr/lib/grub/*'";
+	my $unzip  = "gzip -cd $initrd 2>&1";
 	$kiwi -> info ("Importing grub stages for VM boot");
-	$status = qx (gzip -cd $initrd | (cd $tmpdir && cpio -d -i $stages 2>&1));
-	$status = qx ( mv $tmpdir/usr/lib/grub/* $tmpdir/boot/grub 2>&1 );
+	$status = qx ($unzip | (cd $tmpdir && cpio -di $stages 2>&1));
 	$result = $? >> 8;
+	if ($result == 0) {
+		$status = qx ( mv $tmpdir/usr/lib/grub/* $tmpdir/boot/grub 2>&1 );
+		$result = $? >> 8;
+	}
 	if ($result != 0) {
 		$kiwi -> skipped ();
 		$kiwi -> error   ("Failed importing grub stages: $status");
@@ -986,7 +1017,8 @@ sub setupInstallStick {
 		return undef;
 	}
 	my $message = "'image/loader/message'";
-	$status = qx (gzip -cd $initrd | ( cd /mnt/ && cpio -d -i $message 2>&1));
+	my $unzip   = "gzip -cd $initrd 2>&1";
+	$status = qx ($unzip | ( cd /mnt/ && cpio -di $message 2>&1));
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -1166,12 +1198,22 @@ sub setupBootDisk {
 	#------------------------------------------
 	my $stages = "'usr/lib/grub/*'";
 	my $message= "'image/loader/message'";
+	my $unzip  = "gzip -cd $initrd 2>&1";
 	$kiwi -> info ("Importing grub stages for VM boot");
-	$status = qx (gzip -cd $initrd | (cd $tmpdir && cpio -d -i $message 2>&1));
-	$status = qx ( mv $tmpdir/$message $tmpdir/boot/message 2>&1 );
-	$status = qx (gzip -cd $initrd | (cd $tmpdir && cpio -d -i $stages 2>&1));
-	$status = qx ( mv $tmpdir/usr/lib/grub/* $tmpdir/boot/grub 2>&1 );
+	$status = qx ($unzip | (cd $tmpdir && cpio -di $message 2>&1));
 	$result = $? >> 8;
+	if ($result == 0) {
+		$status = qx (mv $tmpdir/$message $tmpdir/boot/message 2>&1);
+		$result = $? >> 8;
+		if ($result == 0) {
+			$status = qx ($unzip | (cd $tmpdir && cpio -di $stages 2>&1));
+			$result = $? >> 8;
+			if ($result == 0) {
+				$status = qx (mv $tmpdir/usr/lib/grub/* $tmpdir/boot/grub 2>&1);
+				$result = $? >> 8;
+			}
+		}
+	}
 	if ($result != 0) {
 		$kiwi -> skipped ();
 		$kiwi -> error   ("Failed importing grub stages: $status");
@@ -1223,11 +1265,12 @@ sub setupBootDisk {
 	if ($syszip > 0) {
 		$kiwi -> info ("Creating VM boot image");
 		$sysname= $initrd; $sysname =~ s/gz$/vmboot/;
+		my $ddev = "/dev/zero";
 		my $size = qx (du -ks $tmpdir | cut -f1 2>&1);
-		chomp ($size); $size += 2048;
-		$sysird = int ( $size / 1024 );
-		$sysird = $sysird + 1;
-		$status = qx (dd if=/dev/zero of=$sysname bs=1k count=$size 2>&1);
+		chomp ($size); $size += 1024; # 1M free space for initrd fs
+		$sysird = $size / 1024;
+		$sysird = Math::BigFloat->new($sysird)->ffround(0);
+		$status = qx (dd if=$ddev of=$sysname bs=1M seek=$sysird count=1 2>&1);
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -1487,7 +1530,8 @@ sub setupBootDisk {
 		# check for message file in initrd
 		#------------------------------------------
 		my $message = "'image/loader/message'";
-		$status = qx (gzip -cd $initrd|(cd /mnt/ && cpio -d -i $message 2>&1));
+		my $unzip   = "gzip -cd $initrd 2>&1";
+		$status = qx ($unzip | (cd /mnt/ && cpio -di $message 2>&1));
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -1636,8 +1680,6 @@ sub setupInstallFlags {
 	my $initrd = $this->{initrd};
 	my $system = $this->{system};
 	my $irddir = $initrd."_".$$.".vmxsystem";
-	my $status;
-	my $result;
 	my $ibasename;
 	my $iversion;
 	my $newird;
@@ -1649,8 +1691,9 @@ sub setupInstallFlags {
 	#==========================================
 	# unpack initrd files
 	#------------------------------------------
-	$status = qx (gzip -cd $initrd|(cd $irddir && cpio -d -i 2>&1));
-	$result = $? >> 8;
+	my $unzip  = "gzip -cd $initrd 2>&1";
+	my $status = qx ($unzip | (cd $irddir && cpio -di 2>&1));
+	my $result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> error  ("Failed to extract initrd data: $!");
 		$kiwi -> failed ();
@@ -1734,7 +1777,8 @@ sub setupSplashForGrub {
 	#==========================================
 	# unpack initrd files
 	#------------------------------------------
-	my $status = qx (gzip -cd $initrd|(cd $irddir && cpio -d -i 2>&1));
+	my $unzip  = "gzip -cd $initrd 2>&1";
+	my $status = qx ($unzip | (cd $irddir && cpio -di 2>&1));
 	my $result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> skipped ();
@@ -1803,9 +1847,9 @@ sub cleanLoop {
 		qx ( umount /mnt/ 2>&1 );
 		qx ( /sbin/kpartx  -d $loop 2>&1 );
 		qx ( /sbin/losetup -d $loop 2>&1 );
-		qx ( rm -rf $tmpdir );
 		undef $this->{loop};
 	}
+	qx ( rm -rf $tmpdir );
 	return $this;
 }
 

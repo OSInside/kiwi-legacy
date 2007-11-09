@@ -39,7 +39,7 @@ use warnings;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "1.85";
+our $Version       = "1.86";
 our $openSUSE      = "http://download.opensuse.org/repositories/";
 our $ConfigFile    = "$ENV{'HOME'}/.kiwirc";
 our $ConfigStatus  = 0;
@@ -903,8 +903,9 @@ sub usage {
 	# image creation system
 	# ---
 	my $kiwi = new KIWILog("tiny");
-	print "Linux KIWI setup  (image builder) (2006-06-05)\n";
-	print "Copyright (c) 2006 - SUSE LINUX Products GmbH\n";
+	my $date = qx ( LANG=POSIX date -I ); chomp $date;
+	print "Linux KIWI setup  (image builder) ($date)\n";
+	print "Copyright (c) 2007 - SUSE LINUX Products GmbH\n";
 	print "\n";
 
 	print "Usage:\n";

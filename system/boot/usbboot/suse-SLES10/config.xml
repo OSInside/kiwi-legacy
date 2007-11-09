@@ -1,4 +1,4 @@
-<image name="initrd-usbboot-suse-10.3" schemeversion="1.4">
+<image name="initrd-usbboot-suse-SLES10" schemeversion="1.4">
 	<description type="boot">
 		<author>Marcus Schaefer</author>
 		<contact>ms@novell.com</contact>
@@ -34,10 +34,6 @@
 		<file name="fs/jbd/*"/>
 		<file name="fs/fat/*"/>
 		<file name="fs/vfat/*"/>
-		<file name="fs/hfs/*"/>
-		<file name="fs/exportfs/*"/>
-		<file name="fs/squashfs/*"/>
-		<file name="fs/aufs.ko"/>
 		<file name="fs/reiserfs/*"/>
 		<file name="fs/nls/nls_utf8.ko"/>
 		<file name="net/ipv6/*"/>
@@ -47,7 +43,10 @@
 		<file name="drivers/net/*"/>
 	</drivers>
 	<repository type="yast2" status="replaceable">
-		<source path="/image/CDs/full-10.3-i386"/>
+		<source path="/image/dist/full-sles10-i386"/>
+	</repository>
+	<repository type="rpm-dir">
+		<source path="/usr/share/kiwi/image/usbboot/suse-repo/suse-sles-repo"/>
 	</repository>
 	<packages type="image">
 		<package name="e2fsprogs"/>
@@ -59,16 +58,13 @@
 		<package name="sysconfig"/>
 		<package name="sysfsutils"/>
 		<package name="util-linux"/>
-		<package name="squashfs"/>
-		<package name="aufs"/>
-		<package name="aufs-kmp-default"/>
 		<package name="gfxboot"/>
 		<package name="fribidi"/>
 		<package name="make"/>
 		<package name="grub"/>
 		<package name="hwinfo"/>
 		<package name="bootsplash"/>
-		<package name="bootsplash-theme-SuSE"/>
+		<package name="bootsplash-theme-SuSE-SLES"/>
 	</packages>
 	<packages type="boot">
 		<package name="kernel-default"/>
@@ -83,6 +79,7 @@
 		<package name="cpio"/>
 		<package name="cyrus-sasl"/>
 		<package name="db"/>
+		<package name="diffutils"/>
 		<package name="expat"/>
 		<package name="fillup"/>
 		<package name="gawk"/>
@@ -130,6 +127,6 @@
 		<package name="gfxboot"/>
 		<package name="fribidi"/>
 		<package name="make"/>
-		<package name="bootsplash-theme-SuSE"/>
+		<package name="bootsplash-theme-SuSE-SLES"/>
 	</packages>
 </image>
