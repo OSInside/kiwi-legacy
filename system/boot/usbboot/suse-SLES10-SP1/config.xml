@@ -12,14 +12,6 @@
 		<packagemanager>smart</packagemanager>
 		<rpm-check-signatures>False</rpm-check-signatures>
 	</preferences>
-	<drivers type="usbdrivers">
-		<file name="usb/host/usb-uhci.ko"/>
-		<file name="usb/host/usb-ohci.ko"/>
-		<file name="usb/host/ehci-hcd.ko"/>
-		<file name="usb/host/uhci-hcd.ko"/>
-		<file name="usb/core/usbcore.ko"/>
-		<file name="usb/storage/usb-storage.ko"/>
-	</drivers>
 	<drivers type="drivers">
 		<file name="drivers/ide/*"/>
 		<file name="drivers/block/loop.ko"/>
@@ -41,6 +33,9 @@
 		<file name="drivers/scsi/*"/>
 		<file name="drivers/message/fusion/*"/>
 		<file name="drivers/net/*"/>
+		<file name="drivers/usb/host/*"/>
+		<file name="drivers/usb/core/*"/>
+		<file name="drivers/usb/storage/*"/>
 	</drivers>
 	<repository type="yast2" status="replaceable">
 		<source path="/image/dist/full-sles10-sp1-i386"/>

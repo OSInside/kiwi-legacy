@@ -7,7 +7,7 @@ echo "Configure image: [$name]..."
 #==========================================
 # setup gfxboot
 #------------------------------------------
-suseGFXBoot SuSE grub
+suseGFXBoot NLD grub
 
 #==========================================
 # remove unneeded packages

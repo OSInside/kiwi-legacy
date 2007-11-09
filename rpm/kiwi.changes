@@ -6,6 +6,7 @@ Fri Nov  9 10:41:18 CET 2007 - ms@suse.de
 - cleanup initrd stuff in suseStripInitrd, cleanup KIWIBoot code
   better error checking when calling multiple commands
 - remove 1400x1050 and 1600x1200 from suseGFXBoot function
+- fixed usbboot boot images for SLE (#340467)
 
 -------------------------------------------------------------------
 Wed Nov  7 10:59:10 CET 2007 - ms@suse.de

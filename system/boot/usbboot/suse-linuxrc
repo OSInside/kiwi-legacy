@@ -72,10 +72,11 @@ probeDevices
 #======================================
 # 6) Load USB storage modules
 #--------------------------------------
-for module in usb_storage sg sd_mod;do
-	modprobe $module
+for module in ehci-hcd uhci-hcd usb_storage sg sd_mod;do
+	modprobe $module &>/dev/null
 done
-sleep 5
+Echo "Waiting for USB devices to settle..."
+sleep 10
 
 #======================================
 # 7) Search USB stick device
