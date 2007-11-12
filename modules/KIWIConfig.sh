@@ -426,7 +426,7 @@ function suseStripInitrd {
 		udevsettle udevtrigger mknod stat path_id hwup scsi_id scsi_tur
 		usb_id ata_id vol_id edd_id setctsid
 	"
-	tools="$tools $1"
+	tools="$tools $@"
 	for path in /sbin /usr/sbin /usr/bin /bin;do
 		baseStripTools "$path" "$tools"
 	done

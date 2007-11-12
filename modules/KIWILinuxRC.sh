@@ -827,8 +827,11 @@ function CDDevice {
 }
 function USBStickDevice {
 	stickFound=0
-	for device in /sys/bus/usb/drivers/usb-storage/*;do
-		if [ -L $device ];then
+	for redo in 1 2 3 4 5;do
+		for device in /sys/bus/usb/drivers/usb-storage/*;do
+			if [ ! -L $device ];then
+				continue
+			fi
 			descriptions=$device/host*/target*/*/block*
 			for description in $descriptions;do
 				if [ ! -d $description ];then
@@ -862,7 +865,9 @@ function USBStickDevice {
 					return
 				fi
 			done
-		fi
+		done
+		Echo "Waiting for USB devices to settle..."
+		sleep 2
 	done
 }
 #======================================

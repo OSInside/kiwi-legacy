@@ -217,6 +217,8 @@ sub downloadPattern {
 	my $arch    = $this->{arch};
 	my $kiwi    = $this->{kiwi};
 	my $content;
+	my $pfile;
+	my $message;
 	if (defined $this->{cache}{$pattern}) {
 		return $this->{cache}{$pattern};
 	}
@@ -225,20 +227,21 @@ sub downloadPattern {
 		# local pattern check
 		#------------------------------------------
 		my $cfile = $url."/content";
-		if (! -f $cfile) {
-			return (undef,
-				"Couldn't find content file: $cfile"
-			);
+		if (-f $cfile) {
+			#==========================================
+			# check content file
+			#------------------------------------------
 			if (! open (FD,$cfile)) {
-				return (undef,"Couldn't open content file: $cfile: $!");
+				$message = "couldn't open content file";
+				return (undef,"local[content]: $message: $cfile: $!");
 			}
 			local $/; $content .= <FD>; close FD;
-		}
-		#==========================================
-		# check content file
-		#------------------------------------------
-		my $pfile = $this -> checkContentData ($url,$content,$pattern);
-		if (! defined $pfile) {
+			$pfile = $this -> checkContentData ($url,$content,$pattern);
+			if (! defined $pfile) {
+				$message = "pattern match or DESCRDIR search failed";
+				return (undef, "local[search]: $message: $pattern");
+			}
+		} else {
 			#===========================================
 			# no content file but local, try glob search
 			#-------------------------------------------
@@ -248,9 +251,8 @@ sub downloadPattern {
 				@file = bsd_glob ("$path/$pattern-*.$arch.pat.gz");
 			}
 			if (! @file) {
-				return (undef,
-					"Pattern glob match failed: $pattern"
-				);
+				$message = "pattern glob match failed";
+				return (undef,"local[glob]: $message: $pattern");
 			}
 			$pfile = $file[0];
 		}
@@ -259,11 +261,13 @@ sub downloadPattern {
 		#------------------------------------------
 		if ($pfile =~ /\.gz$/) {
 			if (! open (FD,"cat $pfile | gzip -cd|")) {
-				return (undef,"Couldn't uncompress pattern: $pfile: $!");
+				$message = "couldn't uncompress pattern";
+				return (undef,"local[gzip]: $message: $pfile: $!");
 			}
 		} else {
 			if (! open (FD,$pfile)) {
-				return (undef,"Couldn't open pattern: $pfile: $!");
+				$message = "couldn't open pattern";
+				return (undef,"local[open]: $message: $pfile: $!");
 			}
 		}
 		local $/; $content .= <FD>;
@@ -283,17 +287,56 @@ sub downloadPattern {
 		my $request  = HTTP::Request->new (GET => $location);
 		my $response = $browser  -> request ( $request );
 		$content     = $response -> content ();
-		if (! defined $content) {
-			return (undef,"Failed to load content file: $location");
-		}
-		#==========================================
-		# check content file
-		#------------------------------------------
-		$location = $this -> checkContentData ($publics_url,$content,$pattern);
-		if (! defined $location) {
-			return (undef,
-				"Pattern match or DESCRDIR search failed: $pattern"
+		if ((defined $content) && ($content ne "")) {
+			#==========================================
+			# check content file
+			#------------------------------------------
+			$location = $this -> checkContentData (
+				$publics_url,$content,$pattern
 			);
+			if (! defined $location) {
+				$message = "pattern match or DESCRDIR search failed";
+				return (undef, "remote[content]: $message: $pattern");
+			}
+		} else {
+			#==========================================
+			# no content file try remote file listing
+			#------------------------------------------
+			# Note:
+			# some firewalls block active FTP access which will cause
+			# download problems with LWP. This can be fixed by using
+			# export FTP_PASSIVE=1 in your shell environment
+			# ---- 
+			$location = $publics_url."//suse/setup/descr";
+			$request  = HTTP::Request->new (GET => $location);
+			#$request -> header(Accept => "text/html");
+			$response = $browser  -> request ( $request );
+			$content  = $response -> content ();
+			if ((! defined $content) || ($content eq "")) {
+				$message = "couldn't get directory listing: ";
+				$message.= $response->status_line;
+				return (undef, "remote[dirlist]: $message: $location");
+			}
+			my $perr = 1;
+			my @plines = split (/\n/,$content);
+			foreach my $line (@plines) {
+				if ($line =~ /[\" ]($pattern-.*$arch\.pat\.gz)(\"|$)/) {
+					$location = $location."/".$1;
+					$this->{pzip} = 1;
+					$perr = 0;
+					last;
+				}
+				if ($line =~ /[\" ]($pattern-.*$arch\.pat)(\"|$)/) {
+					$location = $location."/".$1;
+					$this->{pzip} = 0;
+					$perr = 0;
+					last;
+				}
+			}
+			if ($perr) {
+				$message = "pattern match or DESCRDIR search failed";
+				return (undef, "remote[glob]: $message: $pattern");
+			}
 		}
 		#==========================================
 		# finally get the pattern
@@ -306,17 +349,20 @@ sub downloadPattern {
 			my $result = $? >> 8;
 			chomp $tmpdir;
 			if ($result != 0) {
-				return (undef,"Couldn't create tmpdir: $!");
+				$message = "couldn't create tmpdir";
+				return (undef,"remote[tmpdir] $message: $!");
 			}
 			if (! open (FD,">$tmpdir/pattern")) {
 				rmdir  ($tmpdir);
-				return (undef,"Couldn't create: $tmpdir/pattern: $!");
+				$message = "couldn't create";
+				return (undef,"remote[open] $message: $tmpdir/pattern: $!");
 			}
 			print FD $content; close FD;
 			if (! open (FD,"cat $tmpdir/pattern | gzip -cd|")) {
 				unlink ($tmpdir."/pattern");
 				rmdir  ($tmpdir);
-				return (undef,"Couldn't uncompress pattern: $!");
+				$message = "couldn't uncompress pattern";
+				return (undef,"remote[gzip] $message: $!");
 			}
 			local $/; $content .= <FD>; close FD;
 			unlink ($tmpdir."/pattern");
