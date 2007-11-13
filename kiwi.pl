@@ -1155,9 +1155,10 @@ sub quit {
 		$boot -> cleanLoop ();
 	}
 	if (defined $root) {
-		$root  -> cleanManager();
+		$root  -> cleanLock   ();
 		$root  -> cleanMount  ();
 		$root  -> cleanSource ();
+		$root  -> cleanManager();
 	}
 	if (defined $image) {
 		$image -> cleanMount ();

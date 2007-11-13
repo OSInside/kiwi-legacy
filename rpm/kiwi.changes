@@ -2,6 +2,9 @@
 Mon Nov 12 09:53:33 CET 2007 - ms@suse.de
 
 - v1.87
+- fixed removal of cache dir in case of interrupt
+- fixed shell wait call to provide the correct exit code of the
+  process which wait is waiting for
 - better local and remote pattern file check
 - better USB stick detection, wait until device is ready
   remove static sleep

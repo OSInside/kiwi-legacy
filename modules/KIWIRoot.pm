@@ -750,4 +750,17 @@ sub cleanManager {
 	return $this;
 }
 
+#==========================================
+# cleanLock
+#------------------------------------------
+sub cleanLock {
+	# ...
+	# remove stale lock files
+	# ---
+	my $this = shift;
+	my $manager = $this->{manager};
+	$manager -> freeLock();
+	return $this;
+}
+
 1;

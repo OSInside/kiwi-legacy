@@ -638,9 +638,9 @@ sub setupDownload {
 		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 		print $fd "trap clean INT TERM\n";
 		print $fd "@smart update @channelList &\n";
-		print $fd "SPID=\$!;wait\n";
+		print $fd "SPID=\$!;wait \$SPID\n";
 		print $fd "test \$? = 0 && @smart download @pacs @loadOpts &\n";
-		print $fd "SPID=\$!;wait\n";
+		print $fd "SPID=\$!;wait \$SPID\n";
 		print $fd "echo \$? > $screenCall.exit\n";
 		print $fd "rm -f $root/etc/smart/channels/*\n";
 		$fd -> close();
@@ -695,13 +695,13 @@ sub setupUpgrade {
 		if (defined $addPacks) {
 			my @addonPackages = @{$addPacks};
 			print $fd "chroot $root smart upgrade -y & ";
-			print $fd "SPID=\$!;wait\n";
+			print $fd "SPID=\$!;wait \$SPID\n";
 			print $fd "test \$? = 0 && chroot $root smart install -y ";
 			print $fd "@addonPackages &\n";
-			print $fd "SPID=\$!;wait\n";
+			print $fd "SPID=\$!;wait \$SPID\n";
 		} else {
 			print $fd "chroot $root smart upgrade -y &\n";
-			print $fd "SPID=\$!;wait\n";
+			print $fd "SPID=\$!;wait \$SPID\n";
 		}
 		print $fd "echo \$? > $screenCall.exit\n";
 		$fd -> close();
@@ -721,13 +721,13 @@ sub setupUpgrade {
 		if (defined $addPacks) {
 			my @addonPackages = @{$addPacks};
 			print $fd "chroot $root @zypper update & ";
-			print $fd "SPID=\$!;wait\n";
+			print $fd "SPID=\$!;wait \$SPID\n";
 			print $fd "test \$? = 0 && chroot $root @zypper install ";
 			print $fd "@addonPackages &\n";
-			print $fd "SPID=\$!;wait\n";
+			print $fd "SPID=\$!;wait \$SPID\n";
 		} else {
 			print $fd "chroot $root @zypper update &\n";
-			print $fd "SPID=\$!;wait\n";
+			print $fd "SPID=\$!;wait \$SPID\n";
 		}
 		print $fd "echo \$? > $screenCall.exit\n";
 		$fd -> close();
@@ -788,9 +788,9 @@ sub setupRootSystem {
 			print $fd "trap clean INT TERM\n";
 			print $fd "touch $lock\n";
 			print $fd "@smart update @channelList &\n";
-			print $fd "SPID=\$!;wait\n";
+			print $fd "SPID=\$!;wait \$SPID\n";
 			print $fd "test \$? = 0 && @smart install @packs @installOpts &\n";
-			print $fd "SPID=\$!;wait\n";
+			print $fd "SPID=\$!;wait \$SPID\n";
 			print $fd "echo \$? > $screenCall.exit\n";
 			print $fd "rm -f $root/etc/smart/channels/*\n";
 			print $fd "rm -f $lock\n";
@@ -829,10 +829,10 @@ sub setupRootSystem {
 			print $fd "echo 1 > $screenCall.exit;exit 1; }\n";
 			print $fd "trap clean INT TERM\n";
 			print $fd "chroot $root smart update &\n";
-			print $fd "SPID=\$!;wait\n";
+			print $fd "SPID=\$!;wait \$SPID\n";
 			print $fd "test \$? = 0 && chroot $root smart install @install ";
 			print $fd "@installOpts &\n";
-			print $fd "SPID=\$!;wait\n";
+			print $fd "SPID=\$!;wait \$SPID\n";
 			print $fd "echo \$? > $screenCall.exit\n";
 		}
 		$fd -> close();
@@ -869,7 +869,7 @@ sub setupRootSystem {
 			print $fd "trap clean INT TERM\n";
 			print $fd "touch $lock\n";
 			print $fd "@zypper --root $root install @installOpts @packs &\n";
-			print $fd "SPID=\$!;wait\n";
+			print $fd "SPID=\$!;wait \$SPID\n";
 			print $fd "echo \$? > $screenCall.exit\n";
 			print $fd "rm -f $lock\n";
 		} else {
@@ -902,7 +902,7 @@ sub setupRootSystem {
 			print $fd "trap clean INT TERM\n";
 			print $fd "ZYPP_MODALIAS_SYSFS=/tmp\n";
 			print $fd "chroot $root @zypper install @installOpts @install &\n";
-			print $fd "SPID=\$!;wait\n";
+			print $fd "SPID=\$!;wait \$SPID\n";
 			print $fd "echo \$? > $screenCall.exit\n";
 		}
 		$fd -> close();
@@ -1057,6 +1057,8 @@ sub checkExclusiveLock {
 sub setLock {
 	my $this = shift;
 	my $lock = $this->{lock};
+	my $kiwi = $this->{kiwi};
+	$kiwi -> loginfo ("Set package manager lock\n");
 	qx ( touch $lock );
 }
 
@@ -1066,6 +1068,8 @@ sub setLock {
 sub freeLock {
 	my $this = shift;
 	my $lock = $this->{lock};
+	my $kiwi = $this->{kiwi};
+	$kiwi -> loginfo ("Release package manager lock\n");
 	qx ( rm -f $lock );
 }
 
@@ -1075,10 +1079,12 @@ sub freeLock {
 sub removeCacheDir {
 	my $this    = shift;
 	my $dataDir = $this->{dataDir};
+	my $kiwi    = $this->{kiwi};
+	$this -> freeLock();
 	if (defined $this->{child}) {
-		$this -> freeLock();
 		kill 15,$this->{child};
 	}
+	$kiwi -> loginfo ("Removing cache directory: $dataDir\n");
 	qx (rm -rf $dataDir);
 	return $this;
 }

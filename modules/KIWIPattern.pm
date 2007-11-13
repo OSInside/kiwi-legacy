@@ -129,7 +129,7 @@ sub getPatternContents {
 			if ($load[0]) {
 				$result .= $load[0];
 			}
-			push (@errors,$load[1]);
+			push (@errors,"[$url] -> $load[1]");
 		}
 		if (! $result) {
 			if ($printinfo) {
@@ -232,14 +232,14 @@ sub downloadPattern {
 			# check content file
 			#------------------------------------------
 			if (! open (FD,$cfile)) {
-				$message = "couldn't open content file";
-				return (undef,"local[content]: $message: $cfile: $!");
+				$message = "couldn't open \$url/content file";
+				return (undef,"local[content]: $message: $!");
 			}
 			local $/; $content .= <FD>; close FD;
 			$pfile = $this -> checkContentData ($url,$content,$pattern);
 			if (! defined $pfile) {
-				$message = "pattern match or DESCRDIR search failed";
-				return (undef, "local[search]: $message: $pattern");
+				$message = "pattern match or DESCRDIR search in content failed";
+				return (undef, "local[content]: $message: $pattern");
 			}
 		} else {
 			#===========================================
@@ -251,7 +251,7 @@ sub downloadPattern {
 				@file = bsd_glob ("$path/$pattern-*.$arch.pat.gz");
 			}
 			if (! @file) {
-				$message = "pattern glob match failed";
+				$message = "pattern glob match in dirlist failed";
 				return (undef,"local[glob]: $message: $pattern");
 			}
 			$pfile = $file[0];
@@ -260,7 +260,7 @@ sub downloadPattern {
 		# finally get the pattern
 		#------------------------------------------
 		if ($pfile =~ /\.gz$/) {
-			if (! open (FD,"cat $pfile | gzip -cd|")) {
+			if ((! -e $pfile) || (! open (FD,"cat $pfile | gzip -cd|"))) {
 				$message = "couldn't uncompress pattern";
 				return (undef,"local[gzip]: $message: $pfile: $!");
 			}
@@ -295,7 +295,7 @@ sub downloadPattern {
 				$publics_url,$content,$pattern
 			);
 			if (! defined $location) {
-				$message = "pattern match or DESCRDIR search failed";
+				$message = "pattern match or DESCRDIR search in content failed";
 				return (undef, "remote[content]: $message: $pattern");
 			}
 		} else {
@@ -334,7 +334,7 @@ sub downloadPattern {
 				}
 			}
 			if ($perr) {
-				$message = "pattern match or DESCRDIR search failed";
+				$message = "pattern glob match in dirlist failed";
 				return (undef, "remote[glob]: $message: $pattern");
 			}
 		}
