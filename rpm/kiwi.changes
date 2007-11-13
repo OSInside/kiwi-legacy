@@ -2,6 +2,8 @@
 Mon Nov 12 09:53:33 CET 2007 - ms@suse.de
 
 - v1.87
+- added warning message to check the architecture / repository
+  combination if a pattern match results in an empty list (#340263)
 - added faster md5sum check. A fixed blocksize is used. Patch
   by Peter Stark <Peter.Stark@fujitsu-siemens.com> (#341240)
 - fixed removal of cache dir in case of interrupt

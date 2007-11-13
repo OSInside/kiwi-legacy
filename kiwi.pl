@@ -653,6 +653,7 @@ sub main {
 		$kiwi -> done ();
 		my $pwd = crypt ($word1, $salt);
 		$kiwi -> info ("Your password:\n\t$pwd\n");
+		my $code = kiwiExit (0); return $code;
 	}
 
 	#==========================================

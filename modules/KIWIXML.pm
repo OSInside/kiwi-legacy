@@ -1379,6 +1379,15 @@ sub getList {
 					$pattr{patternType},$pattr{patternPackageType}
 				);
 				if (! defined $psolve) {
+					$kiwi -> warning (
+						"Pattern match failed for arch: $this->{arch}\n"
+					);
+					$kiwi -> warning (
+						"    a) Check if the pattern is written correctly?\n"
+					);
+					$kiwi -> warning (
+						"    b) Check if the arch is provided by the repo(s)?\n"
+					);
 					return ();
 				}
 				my @packageList = $psolve -> getPackages();
