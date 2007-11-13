@@ -2,6 +2,8 @@
 Mon Nov 12 09:53:33 CET 2007 - ms@suse.de
 
 - v1.87
+- added faster md5sum check. A fixed blocksize is used. Patch
+  by Peter Stark <Peter.Stark@fujitsu-siemens.com> (#341240)
 - fixed removal of cache dir in case of interrupt
 - fixed shell wait call to provide the correct exit code of the
   process which wait is waiting for

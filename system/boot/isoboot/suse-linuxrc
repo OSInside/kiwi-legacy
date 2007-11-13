@@ -123,7 +123,8 @@ IFS="," ; for i in $IMAGE;do
 		fi
 		Echo "Loading $imageName [$imageDevice]..."
 		gzip -cd $gzippName | dd of=$imageDevice >/dev/null 2>&1
-		dd if=$imageDevice count=$blocks bs=$blocksize 2>/dev/null |\
+		dd if=$imageDevice bs=1024 2>/dev/null |\
+			head --bytes=$((blocks * blocksize)) |\
 			md5sum - > /etc/ireal.md5
 		read sum2 dumy < /etc/ireal.md5
 		if test $sum1 = $sum2;then
