@@ -593,7 +593,7 @@ reopenKernelConsole
 /mnt/sbin/pivot_root . mnt >/dev/null 2>&1
 if test $? != 0;then
 	PIVOT=false
-	cleanInitrd && mount --move . / && chroot . ./preinit
+	mount --move . / && chroot . ./preinit
 	chroot . rm -f  ./preinit
 	chroot . rm -f  ./include
 	chroot . rm -rf ./image
@@ -615,6 +615,5 @@ killShell
 #--------------------------------------
 Echo "Rebooting System to activate setup..."
 /sbin/reboot -f -i &>/dev/null
-systemException \
-	"Failed to reboot system" \
-"shell"
+Echo "Failed to reboot system"
+/bin/sh
