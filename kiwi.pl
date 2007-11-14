@@ -39,7 +39,7 @@ use warnings;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "1.87";
+our $Version       = "1.88";
 our $openSUSE      = "http://download.opensuse.org/repositories/";
 our $ConfigFile    = "$ENV{'HOME'}/.kiwirc";
 our $ConfigStatus  = 0;
@@ -127,6 +127,7 @@ our @Profiles;          # list of profiles to include in image
 our $ListProfiles;      # lists the available profiles in image
 our $ForceNewRoot;      # force creation of new root directory
 our $BaseRoot;          # use given path as base system
+our $BaseRootMode;      # specify base-root mode copy | union
 our $NoColor;           # do not used colored output (done/failed messages)
 our $LogPort;           # specify alternative log server port
 our $PrebuiltBootImage; # directory where a prepared boot image may be found
@@ -323,7 +324,7 @@ sub main {
 		#------------------------------------------
 		$root = new KIWIRoot (
 			$kiwi,$xml,$Prepare,$RootTree,
-			"/base-system",undef,undef,$BaseRoot
+			"/base-system",undef,undef,$BaseRoot,$BaseRootMode
 		);
 		if (! defined $root) {
 			$kiwi -> error ("Couldn't create root object");
@@ -369,6 +370,9 @@ sub main {
 			$overlay = new KIWIOverlay ( $kiwi,$BaseRoot,$Create );
 			if (! defined $overlay) {
 				my $code = kiwiExit (1); return $code;
+			}
+			if (defined $BaseRootMode) {
+				$overlay -> setMode ($BaseRootMode);
 			}
 			$origroot = $Create;
 			$Create = $overlay -> mountOverlay();
@@ -584,7 +588,7 @@ sub main {
 		#------------------------------------------
 		$root = new KIWIRoot (
 			$kiwi,$xml,$Upgrade,undef,
-			"/base-system",$Upgrade,\@AddPackage,$BaseRoot
+			"/base-system",$Upgrade,\@AddPackage,$BaseRoot,$BaseRootMode
 		);
 		if (! defined $root) {
 			$kiwi -> error ("Couldn't create root object");
@@ -829,6 +833,7 @@ sub init {
 		"list-profiles|i=s"     => \$ListProfiles,
 		"force-new-root"        => \$ForceNewRoot,
 		"base-root=s"           => \$BaseRoot,
+		"base-root-mode=s"      => \$BaseRootMode,
 		"nocolor"               => \$NoColor,
 		"log-port=i"            => \$LogPort,
 		"prebuiltbootimage=s"   => \$PrebuiltBootImage,
@@ -876,6 +881,16 @@ sub init {
 		$kiwi -> info ("Setting log server port to: $LogPort");
 		$LogServerPort = $LogPort;
 		$kiwi -> done ();
+	}
+	if ((defined $BaseRootMode) && (! defined $BaseRoot)) {
+		$kiwi -> info ("base root mode specified but no base root tree");
+		$kiwi -> failed ();
+		my $code = kiwiExit (1); return $code;   
+	}
+	if ((defined $BaseRootMode) && ($BaseRootMode !~ /^copy$|^union$/)) {
+		$kiwi -> info ("Invalid base root mode, allowed are copy or union");
+		$kiwi -> failed ();
+		my $code = kiwiExit (1); return $code;
 	}
 	#==========================================
 	# remove pre-defined smart channels

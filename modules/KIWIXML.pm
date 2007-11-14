@@ -1626,10 +1626,11 @@ sub getPackageNodeList {
 # createTmpDirectory
 #------------------------------------------
 sub createTmpDirectory {
-	my $this      = shift;
-	my $useRoot   = shift;
-	my $selfRoot  = shift;
-	my $baseRoot  = shift;
+	my $this     = shift;
+	my $useRoot  = shift;
+	my $selfRoot = shift;
+	my $baseRoot = shift;
+	my $baseRootMode = shift;
 	my $rootError = 1;
 	my $root;
 	my $code;
@@ -1672,10 +1673,17 @@ sub createTmpDirectory {
 	my $origroot = $root;
 	my $overlay;
 	if (defined $baseRoot) {
-		$kiwi -> info ("Creating overlay path [$root(rw) + $baseRoot(ro)] ");
+		if ((defined $baseRootMode) && ($baseRootMode eq "union")) {
+			$kiwi -> info("Creating overlay path [$root(rw) + $baseRoot(ro)] ");
+		} else {
+			$kiwi -> info("Importing overlay path $baseRoot -> $root");
+		}
 		$overlay = new KIWIOverlay ( $kiwi,$baseRoot,$root );
 		if (! defined $overlay) {
 			$rootError = 1;
+		}
+		if (defined $baseRootMode) {
+			$overlay -> setMode ($baseRootMode);
 		}
 		$root = $overlay -> mountOverlay();
 		if (! defined $root) {
@@ -1684,7 +1692,9 @@ sub createTmpDirectory {
 		if ($rootError) {
 			$kiwi -> failed;
 		} else {
-			$kiwi -> note ("-> $root");
+			if ((defined $baseRootMode) && ($baseRootMode eq "union")) {
+				$kiwi -> note ("-> $root");
+			}
 			$kiwi -> done ();
 		}
 	}

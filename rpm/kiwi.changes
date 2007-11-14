@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Wed Nov 14 11:14:09 CET 2007 - ms@suse.de
+
+- v1.88
+- enhanced base-root support to be able to choose two modes. The mode
+  can be set by --base-root-mode and allows the values "union" or "copy".
+  The union type is the already existing overlay support by mounting a
+  readonly base tree together with a new image tree. The second and new
+  mode is the copy mode which tar/untar the base root tree instead
+  of using an overlay mount via aufs. The default mode is: copy
+
+-------------------------------------------------------------------
 Wed Nov 14 10:49:39 CET 2007 - ms@suse.de
 
 - v1.87

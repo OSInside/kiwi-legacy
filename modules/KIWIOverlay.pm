@@ -62,6 +62,30 @@ sub new {
 	$this->{kiwi}   = $kiwi;
 	$this->{baseRO} = $baseRO;
 	$this->{rootRW} = $rootRW;
+	$this->{mode}   = "copy";
+	return $this;
+}
+
+#==========================================
+# setMode
+#------------------------------------------
+sub setMode {
+	# ...
+	# set the overlay mode. There are two modes "union" and
+	# "copy". The copy mode is the default mode. While in the
+	# union mode the overlay root system will be created by
+	# mounting the baseRO together with the rootRW tree into
+	# a temporary new root tree. The copy mode will tar/untar
+	# the baseRO into the rootRW and return the rootRW as root
+	# directory.
+	# ---
+	my $this = shift;
+	my $mode = shift;
+	if ($mode eq "union") {
+		$this->{mode} = $mode;
+	} else {
+		$this->{mode} = "copy";
+	}
 	return $this;
 }
 
@@ -69,6 +93,23 @@ sub new {
 # mountOverlay
 #------------------------------------------
 sub mountOverlay {
+	# ...
+	# call the appropriate overlay function according to the
+	# specified mode. Note if in copy mode mountOverlay will
+	# _not_ mount anything
+	# ---
+	my $this = shift;
+	if ($this->{mode} eq "union") {
+		return $this -> unionOverlay();
+	} else {
+		return $this -> copyOverlay();
+	}
+}
+
+#==========================================
+# unionOverlay
+#------------------------------------------
+sub unionOverlay {
 	my $this   = shift;
 	my $kiwi   = $this->{kiwi};
 	my $baseRO = $this->{baseRO};
@@ -116,6 +157,26 @@ sub mountOverlay {
 }
 
 #==========================================
+# copyOverlay
+#------------------------------------------
+sub copyOverlay {
+	my $this   = shift;
+	my $kiwi   = $this->{kiwi};
+	my $baseRO = $this->{baseRO};
+	my $rootRW = $this->{rootRW};
+	my $data;
+	my $code;
+	$data = qx (tar -C $baseRO -cz --to-stdout . | tar -C $rootRW -xz);
+	$code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> error  ("Failed to tar/untar base tree: $data");
+		$kiwi -> failed ();
+		return undef;
+	}
+	return $rootRW;
+}
+
+#==========================================
 # resetOverlay
 #------------------------------------------
 sub resetOverlay {
@@ -125,6 +186,9 @@ sub resetOverlay {
 	my $inodir = $this->{inodir};
 	my $data;
 	my $code;
+	if ($this->{mode} eq "copy") {
+		return $this;
+	}
 	$data = qx (umount $tmpdir 2>&1);
 	$code = $? >> 8;
 	if ($code != 0) {

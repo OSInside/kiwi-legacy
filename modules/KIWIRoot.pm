@@ -45,12 +45,13 @@ sub new {
 	#------------------------------------------
 	my $kiwi = shift;
 	my $xml  = shift;
-	my $imageDesc  = shift;
-	my $selfRoot   = shift;
-	my $baseSystem = shift;
-	my $useRoot    = shift;
-	my $addPacks   = shift;
-	my $baseRoot   = shift;
+	my $imageDesc    = shift;
+	my $selfRoot     = shift;
+	my $baseSystem   = shift;
+	my $useRoot      = shift;
+	my $addPacks     = shift;
+	my $baseRoot     = shift;
+	my $baseRootMode = shift;
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
@@ -135,7 +136,9 @@ sub new {
 	#==========================================
 	# Create root directory
 	#------------------------------------------
-	my @root = $xml -> createTmpDirectory ( $useRoot,$selfRoot,$baseRoot );
+	my @root = $xml -> createTmpDirectory (
+		$useRoot,$selfRoot,$baseRoot,$baseRootMode
+	);
 	my $overlay = $root[2];
 	my $root    = $root[0];
 	if ( ! defined $root ) {
