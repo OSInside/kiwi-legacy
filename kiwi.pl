@@ -367,17 +367,19 @@ sub main {
 		my $overlay;
 		my $origroot;
 		if (defined $BaseRoot) {
-			$overlay = new KIWIOverlay ( $kiwi,$BaseRoot,$Create );
-			if (! defined $overlay) {
-				my $code = kiwiExit (1); return $code;
-			}
-			if (defined $BaseRootMode) {
-				$overlay -> setMode ($BaseRootMode);
-			}
-			$origroot = $Create;
-			$Create = $overlay -> mountOverlay();
-			if (! defined $Create) {
-				my $code = kiwiExit (1); return $code;
+			if ((defined $BaseRootMode) && ($BaseRootMode eq "union")) {
+				$overlay = new KIWIOverlay ( $kiwi,$BaseRoot,$Create );
+				if (! defined $overlay) {
+					my $code = kiwiExit (1); return $code;
+				}
+				if (defined $BaseRootMode) {
+					$overlay -> setMode ($BaseRootMode);
+				}
+				$origroot = $Create;
+				$Create = $overlay -> mountOverlay();
+				if (! defined $Create) {
+					my $code = kiwiExit (1); return $code;
+				}
 			}
 		}
 		$kiwi -> info ("Reading image description...");
@@ -930,10 +932,10 @@ sub usage {
 	print "  kiwi -x | --listxmlinfo <image-path> [--type <image-type>]\n";
 	print "Image Preparation/Creation:\n";
 	print "  kiwi -p | --prepare <image-path>\n";
-	print "     [ --base-root <base-path> ]\n";
+	print "     [ --base-root <base-path> --base-root-mode <copy|union> ]\n";
 	print "     [ --add-profile <profile-name> ]\n";
 	print "  kiwi -c | --create  <image-root>\n";
-	print "     [ --base-root <base-path> ]\n";
+	print "     [ --base-root <base-path> --base-root-mode <copy|union> ]\n";
 	print "     [ --prebuiltbootimage <directory>]\n";
 	print "Image Upgrade:\n";
 	print "  kiwi -u | --upgrade <image-root>\n";
