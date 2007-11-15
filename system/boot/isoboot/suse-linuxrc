@@ -292,6 +292,7 @@ cp /include /mnt
 # 18) Activate new root
 #--------------------------------------
 Echo "Activating Image: [$imageName]"
+reopenKernelConsole
 /sbin/udevsettle --timeout=30
 mount --move /dev /mnt/dev
 udevKill
@@ -315,7 +316,6 @@ fi
 #======================================
 # 19) kill boot shell
 #--------------------------------------
-reopenKernelConsole
 killShell
 
 #======================================

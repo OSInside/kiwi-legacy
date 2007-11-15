@@ -172,6 +172,7 @@ cp /include /mnt
 # 16) Activate new root
 #--------------------------------------
 Echo "Activating Image: [$stickSerial on -> $stickDevice]"
+reopenKernelConsole
 /sbin/udevsettle --timeout=30
 mount --move /dev /mnt/dev
 udevKill
@@ -195,7 +196,6 @@ fi
 #======================================
 # 17) kill boot shell
 #--------------------------------------
-reopenKernelConsole
 killShell
 
 #======================================

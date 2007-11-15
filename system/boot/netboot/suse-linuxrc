@@ -757,6 +757,7 @@ kernelCheck /mnt
 #--------------------------------------
 runHook preactivate
 Echo "Activating Image: [$imageRootName]"
+reopenKernelConsole
 /sbin/udevsettle --timeout=30
 mount --move /dev /mnt/dev
 udevKill
@@ -788,7 +789,6 @@ fi
 #======================================
 # 27) kill boot shell
 #--------------------------------------
-reopenKernelConsole
 killShell
 
 #======================================

@@ -1886,7 +1886,7 @@ function startShell {
 	# start a debugging shell on tty2
 	# ----
 	Echo "Starting boot shell on tty2"
-	setctsid -f /dev/tty2 /bin/bash && sleep 3
+	setctsid -f /dev/tty2 /bin/bash
 	SHELL_PID=`pidof bash | cut -f1 -d " "`
 	if [ ! -z "$SHELL_PID" ];then
 		Echo "Boot shell started on tty2 with PID: $SHELL_PID"
