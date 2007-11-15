@@ -20,24 +20,29 @@
 . /include
 
 #======================================
-# 1) check for LOCAL_BOOT
+# 1) start error log
+#--------------------------------------
+errorLogStart
+
+#======================================
+# 2) check for LOCAL_BOOT
 #--------------------------------------
 if [ $LOCAL_BOOT = "yes" ];then
 	exit 0
 fi
 
 #======================================
-# 2) update mount table
+# 3) update mount table
 #--------------------------------------
 updateMTAB
 
 #======================================
-# 3) create framebuffer devices
+# 4) create framebuffer devices
 #--------------------------------------
 createFramebufferDevices
 
 #======================================
-# 4) create initrd on diskful
+# 5) create initrd on diskful
 #--------------------------------------
 if [ -z "$UNIONFS_CONFIG" ]; then
 	#======================================
@@ -63,14 +68,14 @@ else
 fi
 
 #======================================
-# 5) Install boot loader if ok
+# 6) Install boot loader if ok
 #--------------------------------------
 if [ $grubOK = 1 ];then
 	installBootLoaderGrub
 fi
 
 #======================================
-# 6) create /etc/ImagePackages
+# 7) create /etc/ImagePackages
 #--------------------------------------
 if [ -x /bin/rpm ];then
 	Echo "Creating initial image package info file"

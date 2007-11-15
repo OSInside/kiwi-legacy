@@ -11,9 +11,14 @@ VERSION=`rpm -q --qf %{VERSION}-%{RELEASE}-default kernel-default`
 #==========================================
 # move interesting stuff to /tmp
 #------------------------------------------
-mv lib/modules/$VERSION/updates     /tmp
-mv lib/modules/$VERSION/kernel/*    /tmp
-mv lib/modules/$VERSION/modules.*   /tmp
+if [ -d lib/modules/$VERSION/updates ];then
+	mv lib/modules/$VERSION/updates      /tmp
+fi
+if [ -d lib/modules/$VERSION/weak-updates ];then
+	mv lib/modules/$VERSION/weak-updates /tmp
+fi
+mv lib/modules/$VERSION/kernel/*     /tmp
+mv lib/modules/$VERSION/modules.*    /tmp
 
 #==========================================
 # remove unneeded stuff
@@ -24,7 +29,12 @@ rm -r lib/modules/$VERSION/*
 # insert modules.* files
 #------------------------------------------
 mv /tmp/modules.* /lib/modules/$VERSION/
-mv /tmp/updates   /lib/modules/$VERSION/
+if [ -d /tmp/updates ];then
+	mv /tmp/updates /lib/modules/$VERSION/
+fi
+if [ -d /tmp/weak-updates ];then
+	mv /tmp/weak-updates /lib/modules/$VERSION/
+fi
 
 #==========================================
 # create driver-used dirs with .o's to use

@@ -20,17 +20,22 @@
 . /include
 
 #======================================
-# 1) update mount table
+# 1) start error log
+#--------------------------------------
+errorLogStart
+
+#======================================
+# 2) update mount table
 #--------------------------------------
 updateMTAB
 
 #======================================
-# 2) create framebuffer devices
+# 3) create framebuffer devices
 #--------------------------------------
 createFramebufferDevices
 
 #======================================
-# 3) check for union filesystem
+# 4) check for union filesystem
 #--------------------------------------
 if [ ! -z "$UNIONFS_CONFIG" ]; then
 	# /.../
@@ -43,19 +48,19 @@ if [ ! -z "$UNIONFS_CONFIG" ]; then
 fi
 
 #======================================
-# 4) create initrd on diskful
+# 5) create initrd on diskful
 #--------------------------------------
 setupSUSEInitrd
 
 #======================================
-# 5) Install boot loader on diskful
+# 6) Install boot loader on diskful
 #--------------------------------------
 if [ $grubOK = 1 ];then
 	installBootLoaderGrub
 fi
 
 #======================================
-# 6) create /etc/ImagePackages
+# 7) create /etc/ImagePackages
 #--------------------------------------
 if [ -x /bin/rpm ];then
 	Echo "Creating initial image package info file"

@@ -20,24 +20,29 @@
 . /include
 
 #======================================
-# 1) check for LOCAL_BOOT
+# 1) start error log
+#--------------------------------------
+errorLogStart
+
+#======================================
+# 2) check for LOCAL_BOOT
 #--------------------------------------
 if [ $LOCAL_BOOT = "yes" ];then
 	exit 0
 fi
 
 #======================================
-# 2) update mount table
+# 3) update mount table
 #--------------------------------------
 updateMTAB
 
 #======================================
-# 3) create framebuffer devices
+# 4) create framebuffer devices
 #--------------------------------------
 createFramebufferDevices
 
 #======================================
-# 4) create initrd on diskful
+# 5) create initrd on diskful
 #--------------------------------------
 if test -z $KIWI_INITRD;then
 	if test ! -z $DISK;then
@@ -48,7 +53,7 @@ if test -z $KIWI_INITRD;then
 fi
 
 #======================================
-# 5) Install boot loader on diskful
+# 6) Install boot loader on diskful
 #--------------------------------------
 if test ! -z $DISK;then
 	if test $systemIntegrity = "clean";then
@@ -58,7 +63,7 @@ if test ! -z $DISK;then
 fi
 
 #======================================
-# 6) create /etc/ImagePackages
+# 7) create /etc/ImagePackages
 #--------------------------------------
 if test $systemIntegrity = "clean";then
 	if [ -x /bin/rpm ];then
@@ -68,7 +73,7 @@ if test $systemIntegrity = "clean";then
 fi
 
 #======================================
-# 7) Reset systemIntegrity
+# 8) Reset systemIntegrity
 #--------------------------------------
 if test ! -z $DISK;then
 	if test ! -z $RELOAD_CONFIG;then
@@ -77,7 +82,7 @@ if test ! -z $DISK;then
 fi
 
 #======================================
-# 8) check for valid mount points 
+# 9) check for valid mount points 
 #--------------------------------------
 if test ! -z $DISK;then
 	IFS=":" ; for i in $PART_MOUNT;do
@@ -90,7 +95,7 @@ if test ! -z $DISK;then
 fi
 
 #======================================
-# 9) Update /etc/ImageVersion files
+# 10) Update /etc/ImageVersion files
 #--------------------------------------
 if test ! -z $DISK;then
 	count=0
@@ -116,7 +121,7 @@ if test ! -z $DISK;then
 fi
 
 #======================================
-# 10) setup network for nfs boot
+# 11) setup network for nfs boot
 #--------------------------------------
 if test ! -z $NFSROOT;then
 	mount -o nolock -t proc  proc    /proc

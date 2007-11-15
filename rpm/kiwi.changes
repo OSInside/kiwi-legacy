@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Nov 15 16:37:19 CET 2007 - ms@suse.de
+
+- v1.89
+- fixed kernel scripts to take care for the weak-updates dir (#341876)
+- added boot logging on /dev/tty3 for all boot images (#341924)
+
+-------------------------------------------------------------------
 Wed Nov 14 11:14:09 CET 2007 - ms@suse.de
 
 - v1.88

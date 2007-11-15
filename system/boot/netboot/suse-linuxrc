@@ -71,8 +71,7 @@ echo "---------------------------"
 #======================================
 # 1) Mounting local file systems
 #--------------------------------------
-mountSystemFilesystems >/dev/null 2>&1
-closeKernelConsole
+mountSystemFilesystems &>/dev/null
 
 #======================================
 # 2) Prepare module load support 
@@ -90,6 +89,8 @@ udevStart
 # 4) start boot shell
 #--------------------------------------
 startShell
+errorLogStart
+closeKernelConsole
 
 #======================================
 # 5) Include proc/cmdline information
@@ -761,7 +762,6 @@ mount --move /dev /mnt/dev
 udevKill
 Echo "Calling preinit phase..."
 cd /mnt && exec < dev/console >dev/console 2>&1
-reopenKernelConsole
 /mnt/sbin/pivot_root . mnt >/dev/null 2>&1
 if test $? != 0;then
 	PIVOT=false
@@ -788,6 +788,7 @@ fi
 #======================================
 # 27) kill boot shell
 #--------------------------------------
+reopenKernelConsole
 killShell
 
 #======================================

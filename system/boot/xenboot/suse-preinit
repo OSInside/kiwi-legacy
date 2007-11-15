@@ -20,17 +20,22 @@
 . /include
 
 #======================================
-# 1) update mount table
+# 1) start error log
+#--------------------------------------
+errorLogStart
+
+#======================================
+# 2) update mount table
 #--------------------------------------
 updateMTAB
 
 #======================================
-# 2) create framebuffer devices
+# 3) create framebuffer devices
 #--------------------------------------
 createFramebufferDevices
 
 #======================================
-# 3) create /etc/ImagePackages
+# 4) create /etc/ImagePackages
 #--------------------------------------
 if test $systemIntegrity = "clean";then
 	if [ -x /bin/rpm ];then

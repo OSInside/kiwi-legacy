@@ -47,8 +47,7 @@ echo "------------------------------"
 #======================================
 # 1) Mounting local file systems
 #--------------------------------------
-mountSystemFilesystems >/dev/null 2>&1
-closeKernelConsole
+mountSystemFilesystems &>/dev/null
 
 #======================================
 # 2) probe for livecd_config in cmdline
@@ -69,9 +68,11 @@ touch /lib/modules/*/modules.dep
 udevStart
 
 #======================================
-# 5) start boot shell
+# 5) start boot shell and logging
 #--------------------------------------
 startShell
+errorLogStart
+closeKernelConsole
 
 #======================================
 # 6) Including required kernel modules
@@ -296,7 +297,6 @@ mount --move /dev /mnt/dev
 udevKill
 Echo "Calling preinit phase..."
 cd /mnt && exec < dev/console >dev/console 2>&1
-reopenKernelConsole
 /mnt/sbin/pivot_root . mnt >/dev/null 2>&1
 if test $? != 0;then
 	PIVOT=false
@@ -315,6 +315,7 @@ fi
 #======================================
 # 19) kill boot shell
 #--------------------------------------
+reopenKernelConsole
 killShell
 
 #======================================

@@ -18,6 +18,8 @@
 #======================================
 # Exports (General)
 #--------------------------------------
+export ELOG_CONSOLE=/dev/tty3
+export KLOG_CONSOLE=4
 export PARTITIONER=sfdisk
 
 #======================================
@@ -63,12 +65,15 @@ function WaitKey {
 #--------------------------------------
 function closeKernelConsole {
 	# /.../
-	# close the kernel console, messages from the kernel
-	# will not be displayed on the controling terminal
-	# if DEBUG is set the kernel console remains open
+	# move the kernel console to tty3 as you can't see the messages
+	# now directly it looks like the kernel console is switched off
+	# but it isn't really. If DEBUG is set the logging remains on
+	# the first console
 	# ----
 	if test "$DEBUG" = 0;then
-		/usr/sbin/klogconsole -l 1
+		Echo "Kernel logging enabled on: /dev/tty$KLOG_CONSOLE"
+		setctsid /dev/tty$KLOG_CONSOLE \
+			klogconsole -l 7 -r$KLOG_CONSOLE
 	fi
 }
 #======================================
@@ -79,7 +84,8 @@ function reopenKernelConsole {
 	# reopen kernel console to be able to see kernel messages
 	# while the system is booting
 	# ----
-	/usr/sbin/klogconsole -l 7
+	Echo "Kernel logging enabled on: /dev/tty1"
+	klogconsole -l 7 -r1
 }
 #======================================
 # importFile
@@ -122,7 +128,7 @@ function systemException {
 	case "$what" in
 	"reboot")
 		Echo "rebootException: reboot in 60 sec..."; sleep 60
-		/sbin/reboot -f -i >/dev/null 2>&1
+		/sbin/reboot -f -i >/dev/null
 	;;
 	"wait")
 		Echo "waitException: waiting for ever..."
@@ -150,7 +156,7 @@ function copyDeviceNodes {
 	if [ -z "$search" ];then
 		search=/dev
 	fi
-	pushd $search >/dev/null 2>&1
+	pushd $search >/dev/null
 	for i in *;do
 		if [ -e $prefix/$i ];then
 			continue
@@ -174,7 +180,7 @@ function copyDeviceNodes {
 			mknod -m $perms $prefix/$i $dtype $major $minor
 		fi
 	done
-	popd >/dev/null 2>&1
+	popd >/dev/null
 }
 #======================================
 # copyDevices
@@ -191,7 +197,7 @@ function createInitialDevices {
 	test -c $prefix/tty      || mknod -m 0666 $prefix/tty      c 5 0 
 	test -c $prefix/console  || mknod -m 0600 $prefix/console  c 5 1
 	test -c $prefix/ptmx     || mknod -m 0666 $prefix/ptmx     c 5 2
-	exec < $prefix/console > $prefix/console 2>&1
+	exec < $prefix/console > $prefix/console
 	test -c $prefix/null     || mknod -m 0666 $prefix/null     c 1 3
 	test -c $prefix/kmsg     || mknod -m 0600 $prefix/kmsg     c 1 11
 	test -c $prefix/snapshot || mknod -m 0660 $prefix/snapshot c 10 231
@@ -221,9 +227,9 @@ function mountSystemFilesystems {
 # umountSystemFilesystems
 #--------------------------------------
 function umountSystemFilesystems {
-	umount /dev/pts &>/dev/null
-	umount /sys     &>/dev/null
-	umount /proc    &>/dev/null
+	umount /dev/pts >/dev/null
+	umount /sys     >/dev/null
+	umount /proc    >/dev/null
 }
 #======================================
 # createFramebufferDevices
@@ -239,9 +245,23 @@ function createFramebufferDevices {
 	fi
 }
 #======================================
+# errorLogStart
+#--------------------------------------
+function errorLogStart {
+	# /.../
+	# Log all errors up to now to /dev/tty3
+	# ----
+	Echo "Error logging enabled on $ELOG_CONSOLE"
+	echo "Error Log:" >$ELOG_CONSOLE
+	exec 2>$ELOG_CONSOLE
+}
+#======================================
 # udevStart
 #--------------------------------------
 function udevStart {
+	#======================================
+	# start udev
+	#--------------------------------------
 	Echo "Creating device nodes with udev"
 	# disable hotplug helper, udevd listens to netlink
 	echo "" > /proc/sys/kernel/hotplug
@@ -276,7 +296,7 @@ function installBootLoaderGrub {
 	# ----
 	if [ -x /usr/sbin/grub ];then
 		Echo "Installing boot loader..."
-		/usr/sbin/grub --batch --no-floppy < /etc/grub.conf >/dev/null 2>&1
+		/usr/sbin/grub --batch --no-floppy < /etc/grub.conf >/dev/null
 		if [ ! $? = 0 ];then
 			Echo "Failed to install boot loader"
 		fi
@@ -344,7 +364,7 @@ function callSUSEInitrdScripts {
 		Echo "Can't call initrd scripts"
 		return
 	fi
-	mkinitrd &>/dev/null
+	mkinitrd >/dev/null
 	if [ ! -f $prefix/boot/initrd ];then
 		Echo "No initrd file found"
 		Echo "Can't call initrd scripts"
@@ -644,8 +664,8 @@ function probeFileSystem {
 	# filesystem
 	# ----
 	FSTYPE=unknown
-	dd if=$1 of=/tmp/filesystem-$$ bs=128k count=1 >/dev/null 2>&1
-	data=$(file /tmp/filesystem-$$ 2> /dev/null) && rm -f /tmp/filesystem-$$
+	dd if=$1 of=/tmp/filesystem-$$ bs=128k count=1 >/dev/null
+	data=$(file /tmp/filesystem-$$) && rm -f /tmp/filesystem-$$
 	case $data in
 		*ext3*)     FSTYPE=ext3 ;;
 		*ext2*)     FSTYPE=ext2 ;;
@@ -695,7 +715,7 @@ function probeDeviceAlias {
 	# ----
 	modalias=/tmp/modalias
 	cat > $modalias < /dev/null
-	for i in `find /sys -name modalias 2>/dev/null`;do
+	for i in `find /sys -name modalias`;do
 		alias=`cat $i | grep pci:`
 		if [ ! -z "$alias" ];then
 			echo $alias >> $modalias
@@ -739,11 +759,11 @@ function probeDevicesForAlias {
 	if [ ! -z "$kiwikernelmodule" ];then
 		for module in $kiwikernelmodule;do
 			Echo "Probing module (cmdline): $module"
-			modprobe $module >/dev/null 2>&1
+			modprobe $module >/dev/null
 		done
 	fi
 	IFS="%"; while read file info in;do
-		grep -q $info $modalias >/dev/null 2>&1
+		grep -q $info $modalias >/dev/null
 		if [ $? = 0 ];then
 			module=`basename $file`
 			module=`echo $module | sed -e s@.ko@@`
@@ -756,7 +776,7 @@ function probeDevicesForAlias {
 			if [ $loadok = 1 ];then
 				INITRD_MODULES="$INITRD_MODULES $module"
 				Echo "Probing module: $module"
-				modprobe $module >/dev/null 2>&1
+				modprobe $module >/dev/null
 			fi
 		fi
 	done < $modinfo
@@ -773,7 +793,7 @@ function probeDevices {
 	if [ ! -z "$kiwikernelmodule" ];then
 		for module in $kiwikernelmodule;do
 			Echo "Probing module (cmdline): $module"
-			modprobe $module >/dev/null 2>&1
+			modprobe $module >/dev/null
 		done
 	fi
 	for module in $stdevs;do
@@ -787,7 +807,7 @@ function probeDevices {
 			if [ $loadok = 1 ];then
 				Echo "Probing module: $module"
 				INITRD_MODULES="$INITRD_MODULES $module"
-				modprobe $module >/dev/null 2>&1
+				modprobe $module >/dev/null
 			fi
 		fi
 	done
@@ -848,7 +868,7 @@ function USBStickDevice {
 				if [ ! -f $isremovable ];then
 					continue;
 				fi
-				if ! sfdisk -s $device >/dev/null 2>&1;then
+				if ! sfdisk -s $device >/dev/null;then
 					continue;
 				fi
 				if [ ! -f $serial ];then
@@ -881,11 +901,11 @@ function CDMount {
 	CDDevice
 	mkdir -p /cdrom
 	IFS=":"; for i in $cddev;do
-		mount $i /cdrom &>/dev/null
+		mount $i /cdrom >/dev/null
 		if [ -f $LIVECD_CONFIG ];then
 			cddev=$i; return
 		fi
-		umount $i &>/dev/null
+		umount $i >/dev/null
 	done
 	systemException \
 		"Couldn't find CD image configuration file" \
@@ -919,7 +939,7 @@ function searchSwapSpace {
 	hwapp=/usr/sbin/hwinfo
 	for diskdev in `$hwapp --disk | grep "Device File:" | cut -f2 -d:`;do
 		for disknr in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15;do
-			id=`/sbin/sfdisk --print-id $diskdev $disknr 2>/dev/null`
+			id=`/sbin/sfdisk --print-id $diskdev $disknr`
 			if [ "$id" = "82" ];then
 				echo $diskdev$disknr
 				break
@@ -940,7 +960,7 @@ function searchDiskSpace {
 	hwapp=/usr/sbin/hwinfo
 	for diskdev in `$hwapp --disk | grep "Device File:" | cut -f2 -d:`;do
 		for disknr in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15;do
-			id=`/sbin/sfdisk --print-id $diskdev $disknr 2>/dev/null`
+			id=`/sbin/sfdisk --print-id $diskdev $disknr`
 			if [ -z $id ];then
 				id=0
 			fi
@@ -999,7 +1019,7 @@ function setupNetwork {
 	# into the current shell environment and the nameserver
 	# information is written to /etc/resolv.conf
 	# ----
-	dhcpcd eth0 >/dev/null 2>&1
+	dhcpcd eth0 >/dev/null
 	if test $? != 0;then
 		systemException \
 			"Failed to setup DHCP network interface !" \
@@ -1050,7 +1070,7 @@ function updateNeeded {
 		[ -z "$imageBlkSize" ] && imageBlkSize=8192
 		if [ ! -f /etc/image.md5 ];then
 			atftp -g -r $imageMD5s \
-				-l /etc/image.md5 $imageServer >/dev/null 2>&1
+				-l /etc/image.md5 $imageServer >/dev/null
 		fi
 		read sum1 blocks blocksize < /etc/image.md5
 		if [ ! -z "$sum1" ];then
@@ -1113,7 +1133,7 @@ function cleanSweep {
 	# zero out a the given disk device
 	# ----
 	diskDevice=$1
-	dd if=/dev/zero of=$diskDevice bs=32M >/dev/null 2>&1
+	dd if=/dev/zero of=$diskDevice bs=32M >/dev/null
 }
 #======================================
 # createFileSystem
@@ -1127,17 +1147,17 @@ function createFileSystem {
 	diskPartition=$1
 	diskID=`echo $diskPartition | sed -e s@[^0-9]@@g`
 	diskPD=`echo $diskPartition | sed -e s@[0-9]@@g`
-	diskPartitionType=`sfdisk -c $diskPD $diskID 2>/dev/null`
+	diskPartitionType=`sfdisk -c $diskPD $diskID`
 	if test "$diskPartitionType" = "8e";then
 		Echo "Creating Volume group [systemvg]"
-		pvcreate $diskPartition >/dev/null 2>&1
-		vgcreate systemvg $diskPartition >/dev/null 2>&1
+		pvcreate $diskPartition >/dev/null
+		vgcreate systemvg $diskPartition >/dev/null
 	else
 		# .../
 		# There is no need to create a filesystem on the partition
 		# because the image itself contains the filesystem
 		# ----
-		# mke2fs $diskPartition >/dev/null 2>&1
+		# mke2fs $diskPartition >/dev/null
 		# if test $? != 0;then
 		#   systemException \
 		#       "Failed to create filesystem on: $diskPartition !" \
@@ -1269,7 +1289,7 @@ function partedCreatePartition {
 	# partition table
 	# ----
 	p_stopp=0
-	dd if=/dev/zero of=$DISK bs=512 count=1 >/dev/null 2>&1 && \
+	dd if=/dev/zero of=$DISK bs=512 count=1 >/dev/null && \
 		/usr/sbin/parted -s $DISK mklabel msdos
 	if [ $? -ne 0 ];then
 		systemException \
@@ -1373,7 +1393,7 @@ function partedWritePartitionTable {
 			"Failed to create partition table on: $diskDevice !" \
 			"reboot"
 	fi
-	eval $p_ids >/dev/null 2>&1
+	eval $p_ids >/dev/null
 	if test $? != 0;then
 		systemException \
 			"Failed to setup partition IDs on: $diskDevice !" \
@@ -1390,15 +1410,15 @@ function sfdiskWritePartitionTable {
 	# ----
 	diskDevice=$1
 
-	dd if=/dev/zero of=$diskDevice bs=512 count=1 >/dev/null 2>&1
-	sfdisk -uM --force $diskDevice < $PART_FILE >/dev/null 2>&1
+	dd if=/dev/zero of=$diskDevice bs=512 count=1 >/dev/null
+	sfdisk -uM --force $diskDevice < $PART_FILE >/dev/null
 	if test $? != 0;then
 		systemException \
 			"Failed to create partition table on: $diskDevice !" \
 			"reboot"
 	fi
 
-	verifyOutput=`sfdisk -V $diskDevice 2>&1`
+	verifyOutput=`sfdisk -V $diskDevice`
 	if test $? != 0;then
 		systemException \
 			"Failed to verify partition table on $diskDevice: $verifyOutput" \
@@ -1452,7 +1472,7 @@ function linuxPartition {
 	# using the given disk device. On success return 0
 	# ----
 	diskDevice=$1
-	diskPartitionType=`sfdisk -c $diskDevice 2 2>/dev/null`
+	diskPartitionType=`sfdisk -c $diskDevice 2`
 	if test "$diskPartitionType" = "83";then
 		return 0
 	fi
@@ -1636,22 +1656,22 @@ function umountSystem {
 		roDir=/read-only
 		rwDir=/read-write
 		xiDir=/xino
-		if ! umount $mountPath >/dev/null 2>&1;then
+		if ! umount $mountPath >/dev/null;then
 			retval=1
 		fi
 		for dir in $roDir $rwDir $xiDir;do
-			if ! umount $dir >/dev/null 2>&1;then
+			if ! umount $dir >/dev/null;then
 				retval=1
 			fi
 		done
 	elif test ! -z $COMBINED_IMAGE;then
-		rm -f /read-only >/dev/null 2>&1
-		rm -f /read-write >/dev/null 2>&1
-		umount /mnt/read-only >/dev/null 2>&1 || retval=1
-		umount /mnt/read-write >/dev/null 2>&1 || retval=1
-		umount /mnt >/dev/null 2>&1 || retval=1
+		rm -f /read-only >/dev/null
+		rm -f /read-write >/dev/null
+		umount /mnt/read-only >/dev/null || retval=1
+		umount /mnt/read-write >/dev/null || retval=1
+		umount /mnt >/dev/null || retval=1
 	else
-		if ! umount $mountPath >/dev/null 2>&1;then
+		if ! umount $mountPath >/dev/null;then
 			retval=1
 		fi
 	fi
@@ -1686,7 +1706,7 @@ function mountSystem {
 			# write part is a ram location, use tmpfs for ram
 			# disk data storage
 			# ----
-			mount -t tmpfs tmpfs $rwDir >/dev/null 2>&1 || retval=1
+			mount -t tmpfs tmpfs $rwDir >/dev/null || retval=1
 		else
 			# /.../
 			# write part is not a ram disk, create ext2 filesystem on it
@@ -1695,70 +1715,70 @@ function mountSystem {
 			if test $LOCAL_BOOT = "no" && test $systemIntegrity = "clean";then
 				if
 					test "$RELOAD_IMAGE" = "yes" || \
-					! mount $rwDevice $rwDir >/dev/null 2>&1
+					! mount $rwDevice $rwDir >/dev/null
 				then
 					Echo "Checking filesystem for RW data on $rwDevice..."
-					e2fsck -y -f $rwDevice >/dev/null 2>&1
+					e2fsck -y -f $rwDevice >/dev/null
 					if
 						test "$RELOAD_IMAGE" = "yes" || \
-						! mount $rwDevice $rwDir >/dev/null 2>&1
+						! mount $rwDevice $rwDir >/dev/null
 					then
 						Echo "Creating filesystem for RW data on $rwDevice..."
-						if ! mke2fs $rwDevice >/dev/null 2>&1;then
+						if ! mke2fs $rwDevice >/dev/null;then
 							Echo "Failed to create ext2 filesystem"
 							retval=1; return $retval
 						fi
-						tune2fs -m 0 $rwDevice >/dev/null 2>&1
+						tune2fs -m 0 $rwDevice >/dev/null
 						Echo "Checking EXT2 write extend..."
-						e2fsck -y -f $rwDevice >/dev/null 2>&1
+						e2fsck -y -f $rwDevice >/dev/null
 					fi
 				else
 					umount $rwDevice
 				fi
 			fi
-			if ! mount $rwDevice $rwDir >/dev/null 2>&1;then
+			if ! mount $rwDevice $rwDir >/dev/null;then
 				retval=1
 			fi
 		fi
-		if ! mount -t squashfs $roDevice $roDir >/dev/null 2>&1;then
-			if ! mount $roDevice $roDir >/dev/null 2>&1;then
+		if ! mount -t squashfs $roDevice $roDir >/dev/null;then
+			if ! mount $roDevice $roDir >/dev/null;then
 				retval=1
 			fi
 		fi
 		if [ $unionFST = "aufs" ];then
-			mount -t tmpfs tmpfs $xiDir >/dev/null 2>&1 || retval=1
+			mount -t tmpfs tmpfs $xiDir >/dev/null || retval=1
 			mount -t aufs \
 				-o dirs=$rwDir=rw:$roDir=ro,xino=$xiDir/.aufs.xino none /mnt \
-			>/dev/null 2>&1 || retval=1
+			>/dev/null || retval=1
 		else
 			mount -t unionfs \
 				-o dirs=$rwDir=rw:$roDir=ro none /mnt
-			>/dev/null 2>&1 || retval=1
+			>/dev/null || retval=1
 		fi
 		usleep 500000
 	elif test ! -z $COMBINED_IMAGE;then
 		roDevice=$mountDevice
 		rwDevice=`getNextPartition $mountDevice`
 
-		mkdir /read-only >/dev/null 2>&1
-		if ! mount $roDevice /read-only >/dev/null 2>&1;then
-			mount -t squashfs $roDevice /read-only &>/dev/null||retval=1
+		mkdir /read-only >/dev/null
+		if ! mount $roDevice /read-only >/dev/null;then
+			mount -t squashfs $roDevice /read-only >/dev/null||retval=1
 		fi
-		mount -t tmpfs none /mnt &>/dev/null || retval=1
-		cd /mnt && tar xvfj /read-only/rootfs.tar.bz2 &>/dev/null && cd /
+		mount -t tmpfs none /mnt >/dev/null || retval=1
+		cd /mnt && tar xvfj /read-only/rootfs.tar.bz2 >/dev/null && cd /
 
-		mkdir /mnt/read-only >/dev/null 2>&1
-		mount --move /read-only /mnt/read-only >/dev/null 2>&1
-		rm -rf /read-only >/dev/null 2>&1
-		ln -s /mnt/read-only /read-only >/dev/null 2>&1 || retval=1
+		mkdir /mnt/read-only >/dev/null
+		mount --move /read-only /mnt/read-only >/dev/null
+		rm -rf /read-only >/dev/null
+		ln -s /mnt/read-only /read-only >/dev/null || retval=1
 
-		mkdir /mnt/read-write >/dev/null 2>&1
-		mount $rwDevice /mnt/read-write >/dev/null 2>&1
-		rm -f /read-write >/dev/null 2>&1
-		ln -s /mnt/read-write /read-write >/dev/null 2>&1
+		mkdir /mnt/read-write >/dev/null
+		mount $rwDevice /mnt/read-write >/dev/null
+		rm -f /read-write >/dev/null
+		ln -s /mnt/read-write /read-write >/dev/null
 	else
-		if ! mount $mountDevice /mnt >/dev/null 2>&1;then
-			mount -t squashfs $mountDevice /mnt >/dev/null 2>&1
+		if ! mount $mountDevice /mnt >/dev/null;then
+			mount -t squashfs $mountDevice /mnt >/dev/null
 		fi
 		retval=$?
 	fi
@@ -1775,7 +1795,7 @@ function cleanDirectory {
 
 	tmpdir=`mktemp -d`
 	for saveItem in $save;do
-		mv $directory/$saveItem $tmpdir >/dev/null 2>&1
+		mv $directory/$saveItem $tmpdir >/dev/null
 	done
 	rm -rf $directory/*
 	mv $tmpdir/* $directory
@@ -1786,6 +1806,7 @@ function cleanDirectory {
 #--------------------------------------
 function cleanInitrd {
 	cp /usr/bin/chroot /bin
+	cp /usr/sbin/klogconsole /bin
 	for dir in /*;do
 		case "$dir" in
 			"/lib")   continue ;;
@@ -1797,7 +1818,7 @@ function cleanInitrd {
 			"/xino")  continue ;;
 			"/dev")   continue ;;
 		esac
-		rm -rf $dir/* >/dev/null 2>&1
+		rm -rf $dir/* &>/dev/null
 	done
 	if test -L /read-only;then
 		rm -f /read-only
@@ -1824,7 +1845,7 @@ function searchAlternativeConfig {
 		hexippart=`echo $hexip | cut -b -$STEP`
 		Echo "Checking for config file: config.$hexippart"
 		result=`atftp -g \
-			-r KIWI/config.$hexippart -l $CONFIG $TSERVER 2>&1 | head -n 1`
+			-r KIWI/config.$hexippart -l $CONFIG $TSERVER | head -n 1`
 		if test -s $CONFIG;then
 			break
 		fi
@@ -1834,7 +1855,7 @@ function searchAlternativeConfig {
 	if test ! -s $CONFIG;then
 		Echo "Checking for config file: config.default"
 		result=`atftp -g \
-			-r KIWI/config.default -l $CONFIG $TSERVER 2>&1 | head -n 1`
+			-r KIWI/config.default -l $CONFIG $TSERVER | head -n 1`
 	fi
 }
 #======================================
@@ -1865,7 +1886,7 @@ function startShell {
 	# start a debugging shell on tty2
 	# ----
 	Echo "Starting boot shell on tty2"
-	setctsid -f /dev/tty2 /bin/bash
+	setctsid -f /dev/tty2 /bin/bash && sleep 3
 	SHELL_PID=`pidof bash | cut -f1 -d " "`
 	if [ ! -z "$SHELL_PID" ];then
 		Echo "Boot shell started on tty2 with PID: $SHELL_PID"
@@ -1879,7 +1900,7 @@ function killShell {
 	# kill debugging shell on tty2
 	# ----
 	if [ ! -z "$SHELL_PID" ]; then 
-		Echo "Stopping boot shell"
-		kill -KILL $SHELL_PID &>/dev/null
+		Echo "Stopping boot shell: $SHELL_PID"
+		kill -9 $SHELL_PID &>/dev/null
 	fi
 }
