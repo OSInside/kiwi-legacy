@@ -1635,6 +1635,9 @@ sub createTmpDirectory {
 	my $root;
 	my $code;
 	my $kiwi = $this->{kiwi};
+	if ((defined $baseRootMode) && ($baseRootMode eq "recycle")) {
+		$useRoot = $baseRoot;
+	}
 	if (! defined $useRoot) {
 		if (! defined $selfRoot) {
 			$root = qx ( mktemp -q -d /tmp/kiwi.XXXXXX );
@@ -1675,6 +1678,8 @@ sub createTmpDirectory {
 	if (defined $baseRoot) {
 		if ((defined $baseRootMode) && ($baseRootMode eq "union")) {
 			$kiwi -> info("Creating overlay path [$root(rw) + $baseRoot(ro)] ");
+		} elsif ((defined $baseRootMode) && ($baseRootMode eq "recycle")) {
+			$kiwi -> info("Using overlay path $baseRoot");
 		} else {
 			$kiwi -> info("Importing overlay path $baseRoot -> $root");
 		}

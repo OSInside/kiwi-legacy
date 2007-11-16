@@ -83,6 +83,8 @@ sub setMode {
 	my $mode = shift;
 	if ($mode eq "union") {
 		$this->{mode} = $mode;
+	} elsif ($mode eq "recycle") {
+		$this->{mode} = $mode;
 	} else {
 		$this->{mode} = "copy";
 	}
@@ -101,6 +103,8 @@ sub mountOverlay {
 	my $this = shift;
 	if ($this->{mode} eq "union") {
 		return $this -> unionOverlay();
+	} elsif ($this->{mode} eq "recycle") {
+		return $this -> recycleOverlay();
 	} else {
 		return $this -> copyOverlay();
 	}
@@ -177,6 +181,14 @@ sub copyOverlay {
 }
 
 #==========================================
+# recycleOverlay
+#------------------------------------------
+sub recycleOverlay {
+	my $this = shift;
+	return $this->{baseRO};
+}
+
+#==========================================
 # resetOverlay
 #------------------------------------------
 sub resetOverlay {
@@ -187,6 +199,9 @@ sub resetOverlay {
 	my $data;
 	my $code;
 	if ($this->{mode} eq "copy") {
+		return $this;
+	}
+	if ($this->{mode} eq "recycle") {
 		return $this;
 	}
 	$data = qx (umount $tmpdir 2>&1);

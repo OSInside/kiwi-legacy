@@ -889,10 +889,19 @@ sub init {
 		$kiwi -> failed ();
 		my $code = kiwiExit (1); return $code;   
 	}
-	if ((defined $BaseRootMode) && ($BaseRootMode !~ /^copy$|^union$/)) {
-		$kiwi -> info ("Invalid base root mode, allowed are copy or union");
+	if ((defined $BaseRootMode) &&
+		($BaseRootMode !~ /^copy$|^union$|^recycle$/)
+	) {
+		$kiwi -> info ("Invalid baseroot mode, allowed are copy|union|recycle");
 		$kiwi -> failed ();
 		my $code = kiwiExit (1); return $code;
+	}
+	if ((defined $BaseRootMode) && ($BaseRootMode eq "recycle")) {
+		if (defined $RootTree) {
+			$kiwi -> warning ("--root ignored in recycle base root mode !");
+			$kiwi -> skipped ();
+		}
+		$RootTree = $BaseRoot;
 	}
 	#==========================================
 	# remove pre-defined smart channels
@@ -932,23 +941,25 @@ sub usage {
 	print "  kiwi -x | --listxmlinfo <image-path> [--type <image-type>]\n";
 	print "Image Preparation/Creation:\n";
 	print "  kiwi -p | --prepare <image-path>\n";
-	print "     [ --base-root <base-path> --base-root-mode <copy|union> ]\n";
+	print "     [ --base-root <base-path> ]\n";
+	print "     [ --base-root-mode <copy|union|recycle> ]\n";
 	print "     [ --add-profile <profile-name> ]\n";
 	print "  kiwi -c | --create  <image-root>\n";
-	print "     [ --base-root <base-path> --base-root-mode <copy|union> ]\n";
+	print "     [ --base-root <base-path> ]\n";
+	print "     [ --base-root-mode <copy|union|recycle> ]\n";
 	print "     [ --prebuiltbootimage <directory>]\n";
 	print "Image Upgrade:\n";
 	print "  kiwi -u | --upgrade <image-root>\n";
 	print "     [ --base-root <base-path> ]\n";
 	print "System to Image migration:\n";
-	print "  kiwi -m | --migrate <name> --destdir <destination-path> \\\n";
-	print "     [ --exclude <directory> --exclude ... ] \\\n";
+	print "  kiwi -m | --migrate <name> --destdir <destination-path>\n";
+	print "     [ --exclude <directory> --exclude ... ]\n";
 	print "     [ --report ]\n";
 	print "Image postprocessing modes:\n";
-	print "  kiwi --bootstick <initrd> \\\n";
-	print "     [ --bootstick-system <systemImage> ] \\\n";
-	print "     [ --bootstick-device <device> ] \\\n";
-	print "  kiwi --bootvm <initrd> --bootvm-system <systemImage> \\\n";
+	print "  kiwi --bootstick <initrd>\n";
+	print "     [ --bootstick-system <systemImage> ]\n";
+	print "     [ --bootstick-device <device> ]\n";
+	print "  kiwi --bootvm <initrd> --bootvm-system <systemImage>\n";
 	print "     [ --bootvm-disksize <size> ]\n";
 	print "     [ --bootvm-format <format> ]\n";
 	print "  kiwi --bootcd <initrd>\n";

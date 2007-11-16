@@ -4,6 +4,8 @@ Thu Nov 15 16:37:19 CET 2007 - ms@suse.de
 - v1.89
 - fixed kernel scripts to take care for the weak-updates dir (#341876)
 - added boot logging on /dev/tty3 for all boot images (#341924)
+- added base root mode recycle to allow an existing base root path
+  to be used directly. This of course will change the base root path
 
 -------------------------------------------------------------------
 Wed Nov 14 11:14:09 CET 2007 - ms@suse.de
