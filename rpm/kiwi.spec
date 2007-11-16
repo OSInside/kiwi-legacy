@@ -1,5 +1,5 @@
 # /.../
-# spec file for package kiwi (Version 1.89
+# spec file for package kiwi (Version 1.90
 # Copyright (c) 2006 SUSE LINUX Products GmbH, Nuernberg, Germany.
 # Please submit bugfixes or comments via http://bugs.opensuse.org
 # ---
@@ -11,7 +11,7 @@ BuildRequires: syslinux
 %endif
 Requires:      perl perl-XML-LibXML perl-libwww-perl screen coreutils
 Summary:       OpenSuSE - KIWI Image System
-Version:       1.89
+Version:       1.90
 Release:       28
 Group:         System
 License:       GPL
@@ -201,11 +201,11 @@ if [ "$UID" = "$K_USER" ];then
 			cd $RPM_BUILD_ROOT/srv/tftpboot/boot
 			if [ -n "$xenkernel" ];then
 				echo "      kernel mboot.c32" >> $pxedefault
-				echo "      append boot/$xenloader --- boot/$xenkernel vga=0x314 splash=silent showopts --- boot/$initrd" >> $pxedefault
+				echo "      append boot/$xenloader --- boot/$xenkernel vga=0x314 ramdisk_size=512000 ramdisk_blocksize=4096 splash=silent showopts --- boot/$initrd" >> $pxedefault
 				echo "      IPAPPEND 1" >> $pxedefault
 			else
 				echo "      kernel boot/$kernel" >> $pxedefault
-				echo "      append initrd=boot/$initrd vga=0x314 splash=silent showopts" >> $pxedefault
+				echo "      append initrd=boot/$initrd vga=0x314 ramdisk_size=512000 ramdisk_blocksize=4096 splash=silent showopts" >> $pxedefault
 				echo "      IPAPPEND 1" >> $pxedefault
 			fi
 			popd

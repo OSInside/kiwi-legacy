@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Fri Nov 16 15:15:28 CET 2007 - ms@suse.de
+
+- v1.90
+- all filesystems created by kiwi use blocksize 4096 (#341909)
+- added ramdisk_blocksize=4096 as kernel append parameter to the
+  sample pxelinux.cfg/default file provided with the kiwi-pxeboot
+  package (#341909)
+- added rd_blocksize=4096 to modprobe.conf.local to isoboot and
+  netboot boot images up to suse-10.3 (#341909)
+
+-------------------------------------------------------------------
 Thu Nov 15 16:37:19 CET 2007 - ms@suse.de
 
 - v1.89

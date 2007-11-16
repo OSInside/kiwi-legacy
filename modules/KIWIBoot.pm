@@ -395,7 +395,7 @@ sub setupBootStick {
 		qx (rm -rf $tmpdir);
 		return undef;
 	}
-	$status = qx (/sbin/mkfs.ext2 -F $name 2>&1);
+	$status = qx (/sbin/mkfs.ext2 -b 4096 -F $name 2>&1);
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -700,11 +700,11 @@ sub setupInstallCD {
 	print FD "gfxmenu (cd)/boot/message\n";
 	print FD "title $title\n";
 	print FD " kernel (cd)/boot/linux vga=0x314 splash=silent";
-	print FD " ramdisk_size=512000 showopts\n";
+	print FD " ramdisk_size=512000 ramdisk_blocksize=4096 showopts\n";
 	print FD " initrd (cd)/boot/initrd\n";
 	print FD "title Failsafe -- $title\n";
 	print FD " kernel (cd)/boot/linux vga=0x314 splash=silent";
-	print FD " ramdisk_size=512000 showopts";
+	print FD " ramdisk_size=512000 ramdisk_blocksize=4096 showopts";
 	print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
 	print FD " noapic maxcpus=0 edd=off\n";
 	print FD " initrd (cd)/boot/initrd\n";
@@ -1279,7 +1279,7 @@ sub setupBootDisk {
 			qx (rm -rf $tmpdir);
 			return undef;
 		}
-		$status = qx (/sbin/mkfs.ext2 -F $sysname 2>&1);
+		$status = qx (/sbin/mkfs.ext2 -b 4096 -F $sysname 2>&1);
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -1426,7 +1426,7 @@ sub setupBootDisk {
 			};
 			/^reiserfs/ && do {
 				$kiwi -> info ("Creating reiserfs root filesystem");
-				$status = qx (/sbin/mkreiserfs -q -f -b 4096 $root 2>&1);
+				$status = qx (/sbin/mkreiserfs -q -f -s 513 -b 4096 $root 2>&1);
 				$result = $? >> 8;
 				last SWITCH;
 			};

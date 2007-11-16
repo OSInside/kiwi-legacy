@@ -2221,7 +2221,7 @@ sub setupEXT2 {
 	if (defined $journal) {
 		$fsopts = "-O dir_index -b 4096 -j -J size=4 -q -F -N $nodeCount";
 	} else {  
-		$fsopts = "-q -F -N $nodeCount";
+		$fsopts = "-b 4096 -q -F -N $nodeCount";
 	}
 	my $data = qx (/sbin/mke2fs $fsopts $imageDest/$name 2>&1);
 	my $code = $? >> 8;
@@ -2242,7 +2242,7 @@ sub setupReiser {
 	my $name = shift;
 	my $kiwi = $this->{kiwi};
 	my $imageDest = $this->{imageDest};
-	my $data = qx (/sbin/mkreiserfs -q -f -s 513 $imageDest/$name 2>&1);
+	my $data = qx (/sbin/mkreiserfs -q -f -s 513 -b 4096 $imageDest/$name 2>&1);
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> error  ("Couldn't create Reiser filesystem");
@@ -2266,7 +2266,7 @@ sub setupCramFS {
 	if (! defined $tree) {
 		$tree = $imageTree;
 	}
-	my $data = qx (/sbin/mkfs.cramfs -v $tree $imageDest/$name 2>&1);
+	my $data = qx (/sbin/mkfs.cramfs -b 4096 -v $tree $imageDest/$name 2>&1);
 	my $code = $? >> 8; 
 	if ($code != 0) {
 		$kiwi -> error  ("Couldn't create CRam filesystem");
@@ -2291,7 +2291,7 @@ sub setupSquashFS {
 		$tree = $imageTree;
 	}
 	unlink ("$imageDest/$name");
-	my $data = qx (/usr/bin/mksquashfs $tree $imageDest/$name 2>&1);
+	my $data = qx (/usr/bin/mksquashfs -b 4096 $tree $imageDest/$name 2>&1);
 	my $code = $? >> 8; 
 	if ($code != 0) {
 		$kiwi -> failed ();

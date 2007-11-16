@@ -380,10 +380,10 @@ if [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ];then
 			# /.../
 			# now load the image into the imageDevice
 			# ---
-			multicast="-m"
+			multicast="--option \"multicast on\""
 			if test "$imageZipped" = "compressed"; then
 				Echo "Compressed image found: Disable multicast download"
-				multicast=""
+				multicast="--option \"multicast off\""
 				test ! -p /dev/compressed_image && mkfifo /dev/compressed_image
 				cat /dev/compressed_image | gzip -d > $imageDevice 2>/dev/null &
 				imageDevice_orig=$imageDevice
