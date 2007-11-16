@@ -1180,6 +1180,10 @@ sub quit {
 		$kiwi -> reopenRootChannel();
 	}
 	$kiwi -> note ("\n*** $$: Received signal $_[0] ***\n");
+	$kiwi -> cleanSweep();
+
+	sleep 10;
+
 	if (defined $boot) {
 		$boot -> cleanLoop ();
 	}
@@ -1196,7 +1200,6 @@ sub quit {
 	if (defined $migrate) {
 		$migrate -> cleanMount ();
 	}
-	$kiwi -> cleanSweep();
 	exit 1;
 }
 

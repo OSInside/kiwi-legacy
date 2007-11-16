@@ -466,7 +466,7 @@ function setupBootLoaderGrub {
 				echo -n " root=$rdev $console"         >> $menu
 				echo -n " vga=0x314 splash=silent"     >> $menu
 				if [ ! -z "$swap" ];then
-					echo -n " resume=/dev/$swap"       >> $menu
+					echo -n " resume=$swap"            >> $menu
 				fi
 				echo -n " $KIWI_INITRD_PARAMS"         >> $menu
 				echo " $KIWI_KERNEL_OPTIONS showopts"  >> $menu
@@ -476,7 +476,7 @@ function setupBootLoaderGrub {
 				echo -n " root=$rdev $console"         >> $menu
 				echo -n " vga=0x314 splash=silent"     >> $menu
 				if [ ! -z "$swap" ];then
-					echo -n " resume=/dev/$swap"       >> $menu
+					echo -n " resume=$swap"            >> $menu
 				fi
 				echo -n " $KIWI_INITRD_PARAMS"         >> $menu
 				echo " $KIWI_KERNEL_OPTIONS showopts"  >> $menu
@@ -497,7 +497,7 @@ function setupBootLoaderGrub {
 				echo -n " root=$rdev $console"           >> $menu
 				echo -n " vga=0x314 splash=silent"       >> $menu
 				if [ ! -z "$swap" ];then
-					echo -n " resume=/dev/$swap"         >> $menu
+					echo -n " resume=$swap"              >> $menu
 				fi
 				echo -n " $KIWI_INITRD_PARAMS"           >> $menu
 				echo -n " $KIWI_KERNEL_OPTIONS showopts" >> $menu
@@ -510,7 +510,7 @@ function setupBootLoaderGrub {
 				echo -n " root=$rdev $console"           >> $menu
 				echo -n " vga=0x314 splash=silent"       >> $menu
 				if [ ! -z "$swap" ];then
-					echo -n " resume=/dev/$swap"         >> $menu
+					echo -n " resume=$swap"              >> $menu
 				fi
 				echo -n " $KIWI_INITRD_PARAMS"           >> $menu
 				echo -n " $KIWI_KERNEL_OPTIONS showopts" >> $menu
