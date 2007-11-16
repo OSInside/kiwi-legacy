@@ -289,13 +289,22 @@ cp /preinit /mnt
 cp /include /mnt
 
 #======================================
-# 18) Activate new root
+# 18) kill boot shell
+#--------------------------------------
+killShell
+
+#======================================
+# 19) Activate new root
 #--------------------------------------
 Echo "Activating Image: [$imageName]"
 reopenKernelConsole
 /sbin/udevsettle --timeout=30
 mount --move /dev /mnt/dev
 udevKill
+
+#======================================
+# 20) call preinit phase
+#--------------------------------------
 Echo "Calling preinit phase..."
 cd /mnt && exec < dev/console >dev/console 2>&1
 /mnt/sbin/pivot_root . mnt >/dev/null 2>&1
@@ -314,12 +323,7 @@ else
 fi
 
 #======================================
-# 19) kill boot shell
-#--------------------------------------
-killShell
-
-#======================================
-# 20) Unmount initrd / system init
+# 21) Unmount initrd / system init
 #--------------------------------------
 echo " "
 echo "Booting into Live CD System..."

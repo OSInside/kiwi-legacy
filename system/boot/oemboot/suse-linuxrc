@@ -582,13 +582,22 @@ cp /preinit /mnt
 cp /include /mnt
 
 #======================================
-# 19) Activate new root
+# 19) kill boot shell
+#--------------------------------------
+killShell
+
+#======================================
+# 20) Activate new root
 #--------------------------------------
 Echo "Activating Image: [$deviceDisk]"
 reopenKernelConsole
 /sbin/udevsettle --timeout=30
 mount --move /dev /mnt/dev
 udevKill
+
+#======================================
+# 21) call preinit phase
+#--------------------------------------
 Echo "Calling preinit phase..."
 cd /mnt && exec < dev/console >dev/console 2>&1
 /mnt/sbin/pivot_root . mnt >/dev/null 2>&1
@@ -607,14 +616,9 @@ else
 fi
 
 #======================================
-# 20) kill boot shell
-#--------------------------------------
-killShell
-
-#======================================
-# 21) Unmount initrd / system init
+# 22 Unmount initrd / system init
 #--------------------------------------
 Echo "Rebooting System to activate setup..."
-/sbin/reboot -f -i &>/dev/null
+reboot -f -i &>/dev/null
 Echo "Failed to reboot system"
 /bin/sh

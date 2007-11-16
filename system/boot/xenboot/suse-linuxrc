@@ -123,13 +123,22 @@ cp /preinit /mnt
 cp /include /mnt
 
 #======================================
-# 13) Activate new root
+# 13) kill boot shell
+#--------------------------------------
+killShell
+
+#======================================
+# 14) Activate new root
 #--------------------------------------
 Echo "Activating Image: [$imageRootDevice]"
 reopenKernelConsole
 /sbin/udevsettle --timeout=30
 mount --move /dev /mnt/dev
 udevKill
+
+#======================================
+# 15) call preinit phase
+#--------------------------------------
 Echo "Calling preinit phase..."
 cd /mnt && exec < dev/console >dev/console 2>&1
 /mnt/sbin/pivot_root . mnt >/dev/null 2>&1
@@ -148,12 +157,7 @@ else
 fi
 
 #======================================
-# 14) kill boot shell
-#--------------------------------------
-killShell
-
-#======================================
-# 15) Unmount initrd / system init
+# 16) Unmount initrd / system init
 #--------------------------------------
 echo " "
 echo "Booting into Xen System..."

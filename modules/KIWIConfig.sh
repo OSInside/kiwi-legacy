@@ -424,7 +424,8 @@ function suseStripInitrd {
 		rpc.statd rpc.idmapd nbd-client mount.nfs mount.nfs4 eject
 		blockdev posbios ping killall killall5 udevcontrol udevd
 		udevsettle udevtrigger mknod stat path_id hwup scsi_id scsi_tur
-		usb_id ata_id vol_id edd_id setctsid
+		usb_id ata_id vol_id edd_id setctsid dumpe2fs debugreiserfs
+		fuser
 	"
 	tools="$tools $@"
 	for path in /sbin /usr/sbin /usr/bin /bin;do

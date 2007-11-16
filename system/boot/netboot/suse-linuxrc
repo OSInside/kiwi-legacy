@@ -753,7 +753,12 @@ cp /include /mnt
 kernelCheck /mnt
 
 #======================================
-# 25) Activate new root
+# 25 kill boot shell
+#--------------------------------------
+killShell
+
+#======================================
+# 26 Activate new root
 #--------------------------------------
 runHook preactivate
 Echo "Activating Image: [$imageRootName]"
@@ -761,6 +766,10 @@ reopenKernelConsole
 /sbin/udevsettle --timeout=30
 mount --move /dev /mnt/dev
 udevKill
+
+#======================================
+# 27) call preinit phase
+#--------------------------------------
 Echo "Calling preinit phase..."
 cd /mnt && exec < dev/console >dev/console 2>&1
 /mnt/sbin/pivot_root . mnt >/dev/null 2>&1
@@ -778,21 +787,17 @@ else
 	rm -rf ./image
 fi
 #======================================
-# 26) reboot system if specified
+# 28) reboot system if specified
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	if test ! -z $REBOOT_IMAGE;then
 		Echo "Rebooting System to activate new kernel..."
-		/sbin/reboot -f -i >/dev/null 2>&1
+		reboot -f -i >/dev/null 2>&1
 	fi
 fi
-#======================================
-# 27) kill boot shell
-#--------------------------------------
-killShell
 
 #======================================
-# 28) Unmount initrd / system init
+# 29) Unmount initrd / system init
 #--------------------------------------
 echo " "
 echo "Booting into final System..."

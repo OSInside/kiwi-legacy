@@ -1807,6 +1807,7 @@ function cleanDirectory {
 function cleanInitrd {
 	cp /usr/bin/chroot /bin
 	cp /usr/sbin/klogconsole /bin
+	cp /sbin/halt /bin/reboot
 	for dir in /*;do
 		case "$dir" in
 			"/lib")   continue ;;
@@ -1887,10 +1888,6 @@ function startShell {
 	# ----
 	Echo "Starting boot shell on tty2"
 	setctsid -f /dev/tty2 /bin/bash
-	SHELL_PID=`pidof bash | cut -f1 -d " "`
-	if [ ! -z "$SHELL_PID" ];then
-		Echo "Boot shell started on tty2 with PID: $SHELL_PID"
-	fi
 }
 #======================================
 # killShell
@@ -1899,8 +1896,14 @@ function killShell {
 	# /.../
 	# kill debugging shell on tty2
 	# ----
-	if [ ! -z "$SHELL_PID" ]; then 
-		Echo "Stopping boot shell: $SHELL_PID"
-		kill -9 $SHELL_PID &>/dev/null
+	local umountProc=0
+	if [ ! -e /proc/mounts ];then
+		mount -t proc proc /proc
+		umountProc=1
+	fi
+	Echo "Stopping boot shell"
+	fuser -k /dev/tty2
+	if [ $umountProc -eq 1 ];then
+		umount /proc
 	fi
 }
