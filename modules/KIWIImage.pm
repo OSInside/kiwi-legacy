@@ -2291,7 +2291,7 @@ sub setupSquashFS {
 		$tree = $imageTree;
 	}
 	unlink ("$imageDest/$name");
-	my $data = qx (/usr/bin/mksquashfs -b 4096 $tree $imageDest/$name 2>&1);
+	my $data = qx (/usr/bin/mksquashfs $tree $imageDest/$name -b 4096 2>&1);
 	my $code = $? >> 8; 
 	if ($code != 0) {
 		$kiwi -> failed ();
