@@ -39,6 +39,7 @@
 		<source path="/usr/share/kiwi/image/vmxboot/suse-repo/suse-sles-repo"/>
 	</repository>
 	<packages type="image">
+		<package name="psmisc"/>
 		<package name="bind-libs"/>
 		<package name="bind-utils"/>
 		<package name="dhcpcd"/>

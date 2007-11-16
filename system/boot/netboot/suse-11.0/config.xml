@@ -128,6 +128,7 @@
 	</packages>
 	<packages type="image" profiles="default,xen">
 		<!-- PACKAGES START DEFAULT AND XEN -->
+		<package name="psmisc"/>
 		<package name="iputils"/>
 		<package name="atftp"/>
 		<package name="bind-libs"/>
@@ -156,6 +157,7 @@
 	</packages>
 	<packages type="image" profiles="diskless">
 		<!-- PACKAGES START DISKLESS -->
+		<package name="psmisc"/>
 		<package name="iputils"/>
 		<package name="atftp"/>
 		<package name="dhcpcd"/>

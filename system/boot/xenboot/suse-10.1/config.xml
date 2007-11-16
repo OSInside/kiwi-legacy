@@ -41,6 +41,7 @@
 		<!--<source path="/image/dist/full-10.1-i386"/>-->
 	</repository>
 	<packages type="image">
+		<package name="psmisc"/>
 		<package name="e2fsprogs"/>
 		<package name="file"/>
 		<package name="libcom_err"/>

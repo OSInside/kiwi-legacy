@@ -43,6 +43,7 @@
 		<source path="/usr/share/kiwi/image/xenboot/suse-repo/suse-sles-repo"/>
 	</repository>
 	<packages type="image">
+		<package name="psmisc"/>
 		<package name="e2fsprogs"/>
 		<package name="file"/>
 		<package name="libcom_err"/>

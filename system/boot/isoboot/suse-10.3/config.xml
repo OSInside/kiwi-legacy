@@ -50,6 +50,7 @@
 		<source path="/image/CDs/full-10.3-i386"/>
 	</repository>
 	<packages type="image">
+		<package name="psmisc"/>
 		<package name="bind-libs"/>
 		<package name="bind-utils"/>
 		<package name="dhcpcd"/>

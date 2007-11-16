@@ -58,6 +58,7 @@
 		<package name="xen"/>
 	</packages>
 	<packages type="image">
+		<package name="psmisc"/>
 		<package name="iputils"/>
 		<package name="atftp"/>
 		<package name="bind-libs"/>

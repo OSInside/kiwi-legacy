@@ -1902,7 +1902,7 @@ function killShell {
 		umountProc=1
 	fi
 	Echo "Stopping boot shell"
-	fuser -k /dev/tty2
+	fuser -k /dev/tty2 >/dev/null
 	if [ $umountProc -eq 1 ];then
 		umount /proc
 	fi
