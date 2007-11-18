@@ -1,4 +1,28 @@
 -------------------------------------------------------------------
+Sun Nov 18 11:22:13 CET 2007 - ms@suse.de
+
+- use default block size for mksquashfs call. This also means
+  you can't use squashfs compressed images in ramdisk devices
+  without the following patch:
+
+Index: modules/KIWIImage.pm
+===================================================================
+--- modules/KIWIImage.pm        (revision 823)
++++ modules/KIWIImage.pm        (working copy)
+@@ -2291,7 +2291,7 @@
+                $tree = $imageTree;
+        }
+        unlink ("$imageDest/$name");
+-       my $data = qx (/usr/bin/mksquashfs $tree $imageDest/$name 2>&1);
++       my $data = qx (/usr/bin/mksquashfs $tree $imageDest/$name -b 4096 2>&1);
+        my $code = $? >> 8; 
+        if ($code != 0) {
+                $kiwi -> failed ();
+
+  As it is more important to have best compression results I reverted
+  the blocksize option for mksquashfs. This is related to bug (#341909)  
+
+-------------------------------------------------------------------
 Fri Nov 16 18:09:49 CET 2007 - ms@suse.de
 
 - fixed call of mksquashfs (#342263)
