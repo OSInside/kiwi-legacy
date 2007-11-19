@@ -1,5 +1,5 @@
 # /.../
-# spec file for package kiwi (Version 1.90
+# spec file for package kiwi (Version 1.91
 # Copyright (c) 2006 SUSE LINUX Products GmbH, Nuernberg, Germany.
 # Please submit bugfixes or comments via http://bugs.opensuse.org
 # ---
@@ -11,7 +11,7 @@ BuildRequires: syslinux
 %endif
 Requires:      perl perl-XML-LibXML perl-libwww-perl screen coreutils
 Summary:       OpenSuSE - KIWI Image System
-Version:       1.90
+Version:       1.91
 Release:       28
 Group:         System
 License:       GPL

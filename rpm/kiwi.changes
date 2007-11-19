@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Mon Nov 19 10:55:22 CET 2007 - ms@suse.de
+
+- v1.91
+- fixed partition table setup for USB sticks. The problem was
+  that the sparse file created for the boot partition add 1MB
+  more space than calculated before (#342604)
+
+-------------------------------------------------------------------
 Sun Nov 18 11:22:13 CET 2007 - ms@suse.de
 
 - use default block size for mksquashfs call. This also means

@@ -381,11 +381,10 @@ sub setupBootStick {
 	#------------------------------------------
 	$kiwi -> info ("Creating stick image");
 	my $name = $initrd; $name =~ s/gz$/stickboot/;
-	my $size = qx (du -ks $tmpdir | cut -f1 2>&1);
+	my $size = qx (du -ms $tmpdir | cut -f1 2>&1);
 	my $ddev = "/dev/zero";
-	chomp ($size); $size += 1024; # 1M free space for initrd fs
-	$sysird = $size / 1024;
-	$sysird = Math::BigFloat->new($sysird)->ffround(0);
+	chomp ($size); $size += 1; # add 1M free space for filesystem
+	$sysird = $size;
 	$status = qx (dd if=$ddev of=$name bs=1M seek=$sysird count=1 2>&1);
 	$result = $? >> 8;
 	if ($result != 0) {
@@ -395,6 +394,7 @@ sub setupBootStick {
 		qx (rm -rf $tmpdir);
 		return undef;
 	}
+	$sysird += 1; # add another 1M free space because of sparse seek
 	$status = qx (/sbin/mkfs.ext2 -b 4096 -F $name 2>&1);
 	$result = $? >> 8;
 	if ($result != 0) {
@@ -1266,10 +1266,9 @@ sub setupBootDisk {
 		$kiwi -> info ("Creating VM boot image");
 		$sysname= $initrd; $sysname =~ s/gz$/vmboot/;
 		my $ddev = "/dev/zero";
-		my $size = qx (du -ks $tmpdir | cut -f1 2>&1);
-		chomp ($size); $size += 1024; # 1M free space for initrd fs
-		$sysird = $size / 1024;
-		$sysird = Math::BigFloat->new($sysird)->ffround(0);
+		my $size = qx (du -ms $tmpdir | cut -f1 2>&1);
+		chomp ($size); $size += 1; # add 1M free space for filesystem
+		$sysird = $size;
 		$status = qx (dd if=$ddev of=$sysname bs=1M seek=$sysird count=1 2>&1);
 		$result = $? >> 8;
 		if ($result != 0) {
@@ -1279,6 +1278,7 @@ sub setupBootDisk {
 			qx (rm -rf $tmpdir);
 			return undef;
 		}
+		$sysird += 1; # add another 1M free space because of sparse seek
 		$status = qx (/sbin/mkfs.ext2 -b 4096 -F $sysname 2>&1);
 		$result = $? >> 8;
 		if ($result != 0) {
