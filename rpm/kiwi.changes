@@ -2,6 +2,8 @@
 Mon Nov 19 10:55:22 CET 2007 - ms@suse.de
 
 - v1.91
+- fixed removal of base-system path
+- fixed cache dir name for smart to be a unique name 
 - fixed partition table setup for USB sticks. The problem was
   that the sparse file created for the boot partition add 1MB
   more space than calculated before (#342604)

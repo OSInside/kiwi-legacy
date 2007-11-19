@@ -723,6 +723,9 @@ sub cleanMount {
 	if (defined $this->{baseRoot}) {
 		$overlay -> resetOverlay();
 	}
+	if (-d $prefix) {
+		rmdir $prefix;
+	}
 	return $this;
 }
 
