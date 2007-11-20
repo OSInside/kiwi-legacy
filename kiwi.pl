@@ -39,7 +39,7 @@ use warnings;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "1.91";
+our $Version       = "1.92";
 our $openSUSE      = "http://download.opensuse.org/repositories/";
 our $ConfigFile    = "$ENV{'HOME'}/.kiwirc";
 our $ConfigStatus  = 0;
@@ -1181,17 +1181,14 @@ sub quit {
 	}
 	$kiwi -> note ("\n*** $$: Received signal $_[0] ***\n");
 	$kiwi -> cleanSweep();
-
-	sleep 10;
-
 	if (defined $boot) {
 		$boot -> cleanLoop ();
 	}
 	if (defined $root) {
 		$root  -> cleanLock   ();
-		$root  -> cleanMount  ();
 		$root  -> cleanSource ();
 		$root  -> cleanManager();
+		$root  -> cleanMount  ();
 	}
 	if (defined $image) {
 		$image -> cleanMount ();

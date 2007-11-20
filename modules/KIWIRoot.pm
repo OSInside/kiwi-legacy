@@ -715,7 +715,7 @@ sub cleanMount {
 	my $prefix = $root."/".$baseSystem;
 	foreach my $item (reverse @mountList) {
 		$kiwi -> info ("Umounting path: $item\n");
-		qx (umount $item 2>/dev/null);
+		qx (umount -l $item 2>/dev/null);
 		if ($item =~ /^$prefix/) {
 			qx ( rmdir -p $item 2>&1 );
 		}
