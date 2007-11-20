@@ -90,16 +90,8 @@ sub new {
 	#------------------------------------------
 	foreach my $source (keys %repository) {
 		my $type = $repository{$source};
-		my $urlHandler  = new KIWIURL ($kiwi);
-		my $publics_url = $source;
-		my $highlvl_url = $urlHandler -> openSUSEpath ($publics_url);
-		if (defined $highlvl_url) {
-			$publics_url = $highlvl_url;
-		}
-		$highlvl_url = $urlHandler -> thisPath ($publics_url);
-		if (defined $highlvl_url) {
-			$publics_url = $highlvl_url;
-		}
+		my $urlHandler  = new KIWIURL ($kiwi,$this);
+		my $publics_url = $urlHandler -> normalizePath ($source);
 		if ($publics_url =~ /^\//) {
 			if (! -d $publics_url) {
 				$kiwi -> warning ("local URL path not found: $publics_url");
@@ -599,6 +591,26 @@ sub setup {
 }
 
 #==========================================
+# addToMountList
+#------------------------------------------
+sub addToMountList {
+	# ...
+	# add mount path to mount list
+	# ---
+	my $this = shift;
+	my $path = shift;
+	my @mountList;
+	if (defined $this->{mountList}) {
+		@mountList = @{$this->{mountList}};
+	} else {
+		@mountList = ();
+	}
+	push (@mountList,$path);
+	$this->{mountList} = \@mountList;
+	return $this;
+}
+
+#==========================================
 # setupMount
 #------------------------------------------
 sub setupMount {
@@ -611,7 +623,12 @@ sub setupMount {
 	my $root   = $this->{root};
 	my $baseSystem = $this->{baseSystem};
 	my $prefix     = $root."/".$baseSystem;
-	my @mountList  = ();
+	my @mountList;
+	if (defined $this->{mountList}) {
+		@mountList = @{$this->{mountList}};
+	} else {
+		@mountList = ();
+	}
 	$kiwi -> info ("Mounting required file systems");
 	if (! -d $prefix) {
 	if (! mkdir $prefix) {
@@ -719,6 +736,9 @@ sub cleanMount {
 		if ($item =~ /^$prefix/) {
 			qx ( rmdir -p $item 2>&1 );
 		}
+		if ($item =~ /^\/tmp\/kiwimount/) {
+			qx ( rmdir -p $item 2>&1 );
+		}
 	}
 	if (defined $this->{baseRoot}) {
 		$overlay -> resetOverlay();
@@ -726,6 +746,7 @@ sub cleanMount {
 	if (-d $prefix) {
 		rmdir $prefix;
 	}
+	undef $this->{mountList};
 	return $this;
 }
 

@@ -213,7 +213,6 @@ sub new {
 sub createURLList {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $foreignRepo = $this->{foreignRepo};
 	my %repository  = ();
 	my @urllist     = ();
 	my @sourcelist  = ();
@@ -227,21 +226,8 @@ sub createURLList {
 		@sourcelist = keys %repository;
 	}
 	foreach my $source (@sourcelist) {
-		my $urlHandler;
-		if ( defined $foreignRepo->{prepare} ) {
-			$urlHandler = new KIWIURL ($kiwi,$foreignRepo->{prepare});
-		} else {
-			$urlHandler = new KIWIURL ($kiwi,$this->{imageDesc});
-		}
-		my $publics_url = $source;
-		my $highlvl_url = $urlHandler -> openSUSEpath ($publics_url);
-		if (defined $highlvl_url) {
-			$publics_url = $highlvl_url;
-		}
-		$highlvl_url = $urlHandler -> thisPath ($publics_url);
-		if (defined $highlvl_url) {
-			$publics_url = $highlvl_url;
-		}
+		my $urlHandler  = new KIWIURL ($kiwi,undef);
+		my $publics_url = $urlHandler -> normalizePath ($source);
 		push (@urllist,$publics_url);
 	}
 	$this->{urllist} = \@urllist;

@@ -276,7 +276,7 @@ sub downloadPattern {
 		#==========================================
 		# remote pattern check
 		#------------------------------------------
-		my $urlHandler  = new KIWIURL ($kiwi);
+		my $urlHandler  = new KIWIURL ($kiwi,undef);
 		my $publics_url = $url;
 		my $highlvl_url = $urlHandler -> openSUSEpath ($publics_url);
 		if (defined $highlvl_url) {

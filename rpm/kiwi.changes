@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Nov 20 13:50:57 CET 2007 - ms@suse.de
+
+- v1.93
+- added support for iso:///path/to/iso/file (#338090)
+- fixed initial creation of /dev/tty1-4 devices
+
+-------------------------------------------------------------------
 Tue Nov 20 10:17:15 CET 2007 - ms@suse.de
 
 - v1.92

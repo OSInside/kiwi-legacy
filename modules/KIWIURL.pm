@@ -18,6 +18,7 @@ package KIWIURL;
 # Modules
 #------------------------------------------
 use strict;
+use File::Basename;
 use KIWILog;
 use LWP;
 
@@ -40,6 +41,7 @@ sub new {
 	# Module Parameters
 	#------------------------------------------	
 	my $kiwi = shift;
+	my $root = shift;
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
@@ -50,10 +52,38 @@ sub new {
 	# Store object data
 	#------------------------------------------
 	$this->{kiwi} = $kiwi;
+	$this->{root} = $root;
 	return $this;
 }
 
-#========================================== 
+#==========================================
+# normalizePath
+#------------------------------------------
+sub normalizePath {
+	# ...
+	# check all path functions and normalize the high level
+	# URLs if required
+	# ---
+	my $this   = shift;
+	my $module = shift;
+	my $kiwi   = $this->{kiwi};
+	my $path;
+	$path = $this -> thisPath ($module);
+	if (defined $path) {
+		return $path;
+	}
+	$path = $this -> openSUSEpath ($module);
+	if (defined $path) {
+		return $path;
+	}
+	$path = $this -> isoPath ($module);
+	if (defined $path) {
+		return $path;
+	}
+	return $module;
+}
+
+#==========================================
 # thisPath
 #------------------------------------------
 sub thisPath {
@@ -97,6 +127,66 @@ sub thisPath {
 		$thisPath = $pwd."/".$thisPath;
 	}
 	return $thisPath;
+}
+
+#==========================================
+# isPath
+#------------------------------------------
+sub isoPath {
+	# ...
+	# This method builds a valid path from a iso://...
+	# description. The iso woll be loop mounted and
+	# the loop location serves as source path
+	# ---
+	my $this   = shift;
+	my $module = shift;
+	my $kiwi   = $this->{kiwi};
+	my $root   = $this->{root};
+	my $result;
+	my $status;
+	#==========================================
+	# normalize URL data
+	#------------------------------------------
+	if ($module !~ /^iso:\/\//) {
+		return undef;
+	}
+	$module =~ s/iso:\/\///;
+	if ($module !~ /^\//) {
+		my $pwd = qx (pwd); chomp $pwd;
+		$module = $pwd."/".$module;
+	}
+	if (! -e $module) {
+		$kiwi -> warning ("ISO path: $module doesn't exist: $!");
+		$kiwi -> skipped ();
+		return undef;
+	}
+	my $name   = basename ($module);
+	my $tmpdir = "/tmp/kiwimount-$name-$$";
+	#==========================================
+	# create ISO mount point and perform mount
+	#------------------------------------------
+	if (! defined $root) {
+		return $tmpdir;
+	}
+	$status = qx (mkdir -p $tmpdir 2>&1);
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> warning ("Couldn't create tmp dir for iso mount: $status: $!");
+		$kiwi -> skipped ();
+		return undef;
+	}
+	$status = qx (mount -o loop $module $tmpdir 2>&1);
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> warning ("Failed to loop mount ISO path: $status");
+		$kiwi -> skipped ();
+		return undef;
+	}
+	#==========================================
+	# add loop mount to mount list of root obj
+	#------------------------------------------
+	$root -> addToMountList ($tmpdir);
+	return $tmpdir;
 }
 
 #==========================================

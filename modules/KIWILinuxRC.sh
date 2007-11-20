@@ -194,7 +194,11 @@ function createInitialDevices {
 	if [ -e $prefix/null ];then
 		rm -f $prefix/null
 	fi
-	test -c $prefix/tty      || mknod -m 0666 $prefix/tty      c 5 0 
+	test -c $prefix/tty      || mknod -m 0666 $prefix/tty      c 5 0
+	test -c $prefix/tty1     || mknod -m 0666 $prefix/tty1     c 4 1
+	test -c $prefix/tty2     || mknod -m 0666 $prefix/tty2     c 4 2
+	test -c $prefix/tty3     || mknod -m 0666 $prefix/tty3     c 4 3
+	test -c $prefix/tty4     || mknod -m 0666 $prefix/tty4     c 4 4
 	test -c $prefix/console  || mknod -m 0600 $prefix/console  c 5 1
 	test -c $prefix/ptmx     || mknod -m 0666 $prefix/ptmx     c 5 2
 	exec < $prefix/console > $prefix/console
