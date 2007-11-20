@@ -142,6 +142,18 @@ sub setupUsersGroups {
 				return undef;
 			}
 			$kiwi -> done ();
+			if (defined $home) {
+				$kiwi -> info("Setting owner/group permissions $user [$group]");
+				$data = qx ( chroot $root chown -R $user:$group $home );
+				$code = $? >> 8;
+				if ($code != 0) {
+					$kiwi -> failed ();
+					$kiwi -> info   ($data);
+					$kiwi -> failed ();
+					return undef;
+				}
+				$kiwi -> done();
+			}
 		}
 	}
 	return $this;

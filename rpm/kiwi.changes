@@ -3,6 +3,7 @@ Tue Nov 20 13:50:57 CET 2007 - ms@suse.de
 
 - v1.93
 - added support for iso:///path/to/iso/file (#338090)
+- added update of user/group permissions (#342219)
 - added closeKernelConsole function and rename existing function
   to openKernelConsole which is more what it does
 - fixed initial creation of /dev/tty1-4 devices
