@@ -93,6 +93,7 @@ echo "-------------------------------"
 # 1) Mounting local file systems
 #--------------------------------------
 mountSystemFilesystems &>/dev/null
+closeKernelConsole
 
 #======================================
 # 2) Prepare module load support 
@@ -110,7 +111,7 @@ udevStart
 #--------------------------------------
 startShell
 errorLogStart
-closeKernelConsole
+openKernelConsole
 
 #======================================
 # 5) Including required kernel modules

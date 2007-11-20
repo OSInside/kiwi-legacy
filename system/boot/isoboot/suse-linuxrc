@@ -48,6 +48,7 @@ echo "------------------------------"
 # 1) Mounting local file systems
 #--------------------------------------
 mountSystemFilesystems &>/dev/null
+closeKernelConsole
 
 #======================================
 # 2) probe for livecd_config in cmdline
@@ -72,7 +73,7 @@ udevStart
 #--------------------------------------
 startShell
 errorLogStart
-closeKernelConsole
+openKernelConsole
 
 #======================================
 # 6) Including required kernel modules

@@ -65,6 +65,15 @@ function WaitKey {
 #--------------------------------------
 function closeKernelConsole {
 	# /.../
+	# close the kernel console, set level to 1
+	# ----
+	klogconsole -l 1
+}
+#======================================
+# openKernelConsole
+#--------------------------------------
+function openKernelConsole {
+	# /.../
 	# move the kernel console to tty3 as you can't see the messages
 	# now directly it looks like the kernel console is switched off
 	# but it isn't really. If DEBUG is set the logging remains on
