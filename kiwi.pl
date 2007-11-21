@@ -111,6 +111,7 @@ our $InstallStick;      # Installation initrd booting from USB stick
 our $InstallStickSystem;# virtual disk system image to be installed on disk
 our $StripImage;        # strip shared objects and binaries
 our $CreatePassword;    # create crypt password string
+our $CreateHash;        # create .checksum.md5 for given description
 our $SetupSplashForGrub;# setup splash screen(s) for grub
 our $ImageName;         # filename of current image, used in Modules
 our %ForeignRepo;       # may contain XML::LibXML::Element objects
@@ -667,6 +668,34 @@ sub main {
 	}
 
 	#==========================================
+	# Create md5 hash for given description
+	#------------------------------------------
+	if (defined $CreateHash) {
+		$kiwi -> info ("Creating MD5 sum for $CreateHash...");
+		if (! -d $CreateHash) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Not a directory: $CreateHash: $!");
+			$kiwi -> failed ();
+			my $code = kiwiExit (1); return $code;
+		}
+		if (! -f "$CreateHash/config.xml") {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Not a kiwi description: no config.xml found");
+			$kiwi -> failed ();
+			my $code = kiwiExit (1); return $code;
+		}
+		my $cmd  = "find -L -type f";
+		my $status = qx (cd $CreateHash && $cmd | xargs md5sum > .checksum.md5);
+		my $result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> error  ("Failed creating md5 sum: $status: $!");
+			$kiwi -> failed ();
+		}
+		$kiwi -> done();
+		my $code = kiwiExit (0); return $code;
+	}
+
+	#==========================================
 	# setup a splash initrd
 	#------------------------------------------
 	if (defined $SetupSplashForGrub) {
@@ -835,6 +864,7 @@ sub init {
 		"installstick-system=s" => \$InstallStickSystem,
 		"strip|s"               => \$StripImage,
 		"createpassword"        => \$CreatePassword,
+		"createhash=s"          => \$CreateHash,
 		"setup-grub-splash=s"   => \$SetupSplashForGrub,
 		"list-profiles|i=s"     => \$ListProfiles,
 		"force-new-root"        => \$ForceNewRoot,
@@ -863,7 +893,8 @@ sub init {
 		(! defined $BootVMDisk) && (! defined $CreatePassword) &&
 		(! defined $CreateInstSource) && (! defined $Migrate) &&
 		(! defined $ListProfiles) && (! defined $InstallStick) &&
-		(! defined $listXMLInfo) && (! defined $BootCD)
+		(! defined $listXMLInfo) && (! defined $BootCD) &&
+		(! defined $CreateHash)
 	) {
 		$kiwi -> info ("No operation specified");
 		$kiwi -> failed ();
@@ -973,6 +1004,7 @@ sub usage {
 	print "       --installstick-system <vmx-system-image>\n";
 	print "Helper Tools:\n";
 	print "  kiwi --createpassword\n";
+	print "  kiwi --createhash <image-path>\n";
 	print "  kiwi --create-instsource <image-path>\n";
 	print "  kiwi --setup-grub-splash <initrd>\n";
 	print "Options:\n";
