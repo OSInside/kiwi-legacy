@@ -249,6 +249,10 @@ sub main {
 			my $code = kiwiExit (1); return $code;
 		}
 		$kiwi -> done();
+		if (! $xml -> haveMD5File()) {
+			$kiwi -> warning ("Description provides no MD5 hash, check");
+			$kiwi -> skipped ();
+		}
 		#==========================================
 		# Check for bootprofile in config.xml
 		#------------------------------------------

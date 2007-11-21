@@ -70,6 +70,7 @@ sub new {
 	my $systemTree;
 	my $controlFile = $imageDesc."/config.xml";
 	my $checkmdFile = $imageDesc."/.checksum.md5";
+	my $havemd5File = 1;
 	my $systemXML   = new XML::LibXML;
 	my $systemXSD   = new XML::LibXML::Schema ( location => $main::Scheme );
 	if (-f $checkmdFile) {
@@ -82,6 +83,8 @@ sub new {
 			$kiwi -> failed ();
 			return undef;
 		}
+	} else {
+		$havemd5File = 0;
 	}
 	if (! -f $controlFile) {
 		$kiwi -> failed ();
@@ -191,6 +194,7 @@ sub new {
 	$this->{unionNodeList}      = $unionNodeList;
 	$this->{profilesNodeList}   = $profilesNodeList;
 	$this->{reqProfiles}        = $reqProfiles;
+	$this->{havemd5File}        = $havemd5File;
 	$this->{arch}               = $arch;
 	
 	#==========================================
@@ -217,6 +221,14 @@ sub new {
 		return undef;
 	}
 	return $this;
+}
+
+#==========================================
+# haveMD5File
+#------------------------------------------
+sub haveMD5File {
+	my $this = shift;
+	return $this->{havemd5File};
 }
 
 #==========================================
