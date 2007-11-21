@@ -39,6 +39,11 @@ all:
 	find -name config.xml | xargs xmllint -noout -schema modules/KIWIScheme.xsd 
 
 	#============================================
+	# create checksum files for boot images...
+	#--------------------------------------------
+	cd system/boot && ./.md5
+
+	#============================================
 	# resolve relative links
 	#--------------------------------------------
 	# ./.links

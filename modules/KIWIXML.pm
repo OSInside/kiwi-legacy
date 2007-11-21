@@ -69,8 +69,20 @@ sub new {
 	my $arch = qx (uname -m); chomp $arch;
 	my $systemTree;
 	my $controlFile = $imageDesc."/config.xml";
+	my $checkmdFile = $imageDesc."/checksum.md5";
 	my $systemXML   = new XML::LibXML;
 	my $systemXSD   = new XML::LibXML::Schema ( location => $main::Scheme );
+	if (-f $checkmdFile) {
+		my $data = qx (cd $imageDesc && md5sum -c checksum.md5 2>&1);
+		my $code = $? >> 8;
+		if ($code != 0) {
+			chomp $data;
+			$kiwi -> failed ();
+			$kiwi -> error ("Integrity check for $imageDesc failed:\n$data");
+			$kiwi -> failed ();
+			return undef;
+		}
+	}
 	if (! -f $controlFile) {
 		$kiwi -> failed ();
 		$kiwi -> error ("Cannot open control file: $controlFile");

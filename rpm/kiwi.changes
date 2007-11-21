@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Wed Nov 21 14:37:07 CET 2007 - ms@suse.de
+
+- v1.94
+- added md5 based integrity check for image descriptions. As
+  soon as the file checksum.md5 exists in the image directory
+  it will be used to check the md5 hash for all files listed in
+  the md5 file. Kiwi creates by default checksums for all boot
+  images
+
+-------------------------------------------------------------------
 Tue Nov 20 13:50:57 CET 2007 - ms@suse.de
 
 - v1.93

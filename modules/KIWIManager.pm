@@ -20,6 +20,7 @@ package KIWIManager;
 require Exporter;
 use strict;
 use FileHandle;
+use File::Basename;
 use KIWILog;
 
 #==========================================
@@ -1080,12 +1081,14 @@ sub removeCacheDir {
 	my $this    = shift;
 	my $dataDir = $this->{dataDir};
 	my $kiwi    = $this->{kiwi};
+	my $config  = dirname ($dataDir);
 	$this -> freeLock();
 	if (defined $this->{child}) {
 		kill 15,$this->{child};
 	}
 	$kiwi -> loginfo ("Removing cache directory: $dataDir\n");
 	qx (rm -rf $dataDir);
+	qx (rm -rf $config/config);
 	return $this;
 }
 
