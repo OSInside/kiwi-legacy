@@ -39,7 +39,7 @@ use warnings;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "1.94";
+our $Version       = "1.95";
 our $openSUSE      = "http://download.opensuse.org/repositories/";
 our $ConfigFile    = "$ENV{'HOME'}/.kiwirc";
 our $ConfigStatus  = 0;
@@ -118,6 +118,7 @@ our %ForeignRepo;       # may contain XML::LibXML::Element objects
 our @AddRepository;     # add repository for building physical extend
 our @AddRepositoryType; # add repository type
 our @AddPackage;        # add packages to the image package list
+our $IgnoreRepos;       # ignore repositories specified so far
 our $SetRepository;     # set first repository for building physical extend
 our $SetRepositoryType; # set firt repository type
 our $SetImageType;      # set image type to use, default is primary type
@@ -295,6 +296,12 @@ sub main {
 				undef $BaseRoot;
 				$kiwi -> notset();
 			}
+		}
+		#==========================================
+		# Check for ignore-repos option
+		#------------------------------------------
+		if (defined $IgnoreRepos) {
+			$xml -> ignoreRepositories ();
 		}
 		#==========================================
 		# Check for set-repo option
@@ -575,6 +582,12 @@ sub main {
 			}
 		}
 		#==========================================
+		# Check for ignore-repos option
+		#------------------------------------------
+		if (defined $IgnoreRepos) {
+			$xml -> ignoreRepositories ();
+		}
+		#==========================================
 		# Check for set-repo option
 		#------------------------------------------
 		if (defined $SetRepository) {
@@ -841,6 +854,7 @@ sub init {
 		"list|l"                => \&listImage,
 		"create|c=s"            => \$Create,
 		"create-instsource=s"   => \$CreateInstSource,
+		"ignore-repos"          => \$IgnoreRepos,
 		"add-repo=s"            => \@AddRepository,
 		"add-repotype=s"        => \@AddRepositoryType,
 		"add-package=s"         => \@AddPackage,
@@ -1034,10 +1048,17 @@ sub usage {
 	print "    makes only sense in combination with --create\n";
 	print "\n";
 	print "  [ --add-repo <repo-path> --add-repotype <type> ]\n";
-    print "    Add the given repository and type for this run of an\n";
+	print "    Add the given repository and type for this run of an\n";
 	print "    image prepare or upgrade process.\n";
 	print "    Multiple --add-repo/--add-repotype options are possible\n";
 	print "    The change will not be written to the config.xml file\n";
+	print "\n";
+	print "  [ --ignore-repos ]\n";
+	print "    Ignore all repositories specified so-far, in XML or\n";
+	print "    otherwise.  This option should be used in conjunction\n";
+	print "    with subsequent calls to --add-repo to specify\n";
+	print "    repositories at the command-line that override previous\n";
+	print "    specifications.\n";
 	print "\n";
 	print "  [ --set-repo <repo-path> [ --set-repotype <type> ]]\n";
 	print "    set the given repository and optional type for the first\n";

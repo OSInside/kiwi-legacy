@@ -455,7 +455,7 @@ sub getPrefix {
 	my $this  = shift;
 	my $level = shift;
 	my $date;
-	$date = qx ( LANG=POSIX /bin/date "+%h-%d %H:%M"); chomp $date;
+	$date = qx ( LANG=POSIX /bin/date "+%h-%d %H:%M:%S"); chomp $date;
 	$this->{date} = $date;
 	$this->{level}= $level;
 	$date .= " <$level> : ";

@@ -317,6 +317,7 @@ if [ $LOCAL_BOOT = "no" ];then
 		"reboot"
 	fi
 fi
+
 #======================================
 # 10) repartition the disk device
 #--------------------------------------
@@ -363,13 +364,15 @@ if [ $LOCAL_BOOT = "no" ];then
 		diskXMBytes=`expr $diskXMBytes / 1024`
 		if [ $disk1MBytes -gt $diskXMBytes ];then
 			# /.../
-			# Very small disk, we use half of the size for root and
-			# assume the rest is ok for /home and /. Additionally we set
-			# the swap space to 50MB. All this could fail if the disk
-			# is really small so that / doesn't fit into half of
-			# $diskXMBytes
+			# Very small disk, we use the size of the root partition (/)
+			# plus 200MB, we assume the rest is ok for /home and a
+			# 50MB swap space. All this could fail if the disk
+			# is so small that only / without any additional space
+			# fits on it
 			# ----
-			disk1MBytes=`expr $diskXMBytes / 2`
+			disk1MBytes=`sfdisk -s $deviceRoot`
+			disk1MBytes=`expr $disk1MBytes / 1024`
+			disk1MBytes=`expr $disk1MBytes + 200`
 			swapsize=50
 		fi
 		for cmd in \
@@ -604,7 +607,7 @@ cd /mnt && exec < dev/console >dev/console 2>&1
 /mnt/sbin/pivot_root . mnt >/dev/null 2>&1
 if test $? != 0;then
 	PIVOT=false
-	mount --move . / && chroot . ./preinit
+	cleanInitrd && mount --move . / && chroot . ./preinit
 	chroot . rm -f  ./preinit
 	chroot . rm -f  ./include
 	chroot . rm -rf ./image
@@ -619,7 +622,14 @@ fi
 #======================================
 # 22 Unmount initrd / system init
 #--------------------------------------
-Echo "Rebooting System to activate setup..."
-reboot -f -i &>/dev/null
-Echo "Failed to reboot system"
-/bin/sh
+echo " "
+echo "Booting into final System..."
+echo "----------------------------"
+export IFS=$IFS_ORIG
+mount -n -o remount,rw / 2>/dev/null
+if [ $PIVOT = "true" ];then
+	exec umount -n -l /mnt
+else
+	exec chroot . /sbin/init $@
+fi
+

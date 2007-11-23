@@ -1036,6 +1036,18 @@ sub setValidateRepositoryType {
 }
 
 #==========================================
+# ignoreRepositories
+#------------------------------------------
+sub ignoreRepositories {
+	# ...
+	# Ignore all the repositories in the XML file.
+	# ---
+	my $this = shift;
+	$this->{repositNodeList} = new XML::LibXML::NodeList;
+	return $this;
+}
+
+#==========================================
 # setRepository
 #------------------------------------------
 sub setRepository {

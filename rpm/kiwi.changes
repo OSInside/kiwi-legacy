@@ -1,4 +1,17 @@
 -------------------------------------------------------------------
+Fri Nov 23 10:55:28 CET 2007 - ms@suse.de
+
+- v1.95
+- fixed oemboot repartition code for small disks
+- patch by Nat Friedman <nat@novell.com> which adds an argument
+  to kiwi, --ignore-repos, which causes Kiwi to Ignore all repositories
+  specified so-far, in XML or otherwise.  This option should be used in
+  conjunction with subsequent calls to --add-repo to specify repositories
+  at the command-line that override previous specifications.
+- patch by Nat Friedman <nat@novell.com> which makes Kiwi's log files
+  include seconds, which is very useful when you're optimizing.
+
+-------------------------------------------------------------------
 Wed Nov 21 14:37:07 CET 2007 - ms@suse.de
 
 - v1.94

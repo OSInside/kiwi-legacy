@@ -808,5 +808,5 @@ mount -n -o remount,rw / 2>/dev/null
 if [ $PIVOT = "true" ];then
 	exec umount -n -l /mnt
 else
-	exec /bin/chroot . /sbin/init $@
+	exec chroot . /sbin/init $@
 fi
