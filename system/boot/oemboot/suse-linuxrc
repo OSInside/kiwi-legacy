@@ -545,8 +545,14 @@ if [ $LOCAL_BOOT = "no" ];then
 	setupDefaultFstab /config
 	updateSwapDeviceFstab /config $deviceSwap
 	if [ -z "$UNIONFS_CONFIG" ]; then
-		echo "$deviceRoot /      $FSTYPE defaults 0 0"    >> /config/etc/fstab
-		echo "$deviceHome /home  ext3    defaults 0 0"    >> /config/etc/fstab
+		echo "$deviceRoot /      $FSTYPE defaults 0 0"      >> /config/etc/fstab
+		if [ ! -d /mnt/home/* ];then
+			echo "$deviceHome /home  ext3    defaults 0 0"  >> /config/etc/fstab
+		else
+			Echo "Found non empty home/ directory !"
+			Echo "Will not activate home partition $deviceHome in fstab"
+			echo "#$deviceHome /home  ext3    defaults 0 0" >> /config/etc/fstab
+		fi
 	else
 		mkdir -p /config/kiwiboot
 		echo "$deviceBoot /kiwiboot ext2 defaults 0 0"    >> /config/etc/fstab

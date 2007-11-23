@@ -3,6 +3,11 @@ Fri Nov 23 10:55:28 CET 2007 - ms@suse.de
 
 - v1.95
 - fixed oemboot repartition code for small disks
+- fixed oemboot fstab setup to check whether there is already
+  a non empty /home directory which would become covered by
+  the mount of the extra home partition. If such a /home directory
+  exists we will prevent the partition from being mounted
+  automatically
 - patch by Nat Friedman <nat@novell.com> which adds an argument
   to kiwi, --ignore-repos, which causes Kiwi to Ignore all repositories
   specified so-far, in XML or otherwise.  This option should be used in
