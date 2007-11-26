@@ -409,7 +409,7 @@ if [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ];then
 			# ----
 			Echo "Download complete, checking data..."
 			dd if=$imageDevice bs=1024 2>/dev/null |\
-				tail --bytes=$((blocks * blocksize)) |\
+				head --bytes=$((blocks * blocksize)) |\
 				md5sum - > /etc/ireal.md5
 			read sum2 dumy < /etc/ireal.md5
 			if test $sum1 = $sum2;then

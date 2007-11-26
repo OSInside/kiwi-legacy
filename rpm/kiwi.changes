@@ -3,6 +3,10 @@ Mon Nov 26 10:58:02 CET 2007 - ms@suse.de
 
 - v1.96
 - fixed block count used with sparse files (#343845)
+- fixed md5sum check, use head not tail (#341240)
+- added better error checking for setupSplashForGrub()
+- udevtrigger and udevsettle are links to udevadm
+- fixed package query call
 
 -------------------------------------------------------------------
 Fri Nov 23 10:55:28 CET 2007 - ms@suse.de

@@ -1810,10 +1810,22 @@ sub setupSplashForGrub {
 			qx (cat $splash.bob.$id |(cd $splash.dir && cpio -i 2>&1));
 		}
 		qx (cp -a $splash.dir/etc $newspl);
-		qx (cat $splash.dir/bootsplash >> $newspl/bootsplash);
+		$result = 1;
+		if (-e "$splash.dir/bootsplash") {
+			qx (cat $splash.dir/bootsplash >> $newspl/bootsplash);
+			$result = $? >> 8;
+		}
 		qx (rm -rf $splash.dir);
 		qx (rm -f $splash.bob*);
 		qx (rm -f $splash);
+		if ($result != 0) {
+			my $splfile = basename ($splash);
+			$kiwi -> skipped ();
+			$kiwi -> warning ("No bootsplash file found in $splfile cpio");
+			$kiwi -> skipped ();
+			qx (rm -rf $spldir);
+			return $initrd;
+		}
 	}
 	qx ((cd $newspl && find|cpio --quiet -oH newc | gzip -9) > $spldir/all.spl);
 	qx ((cd $irddir && find|cpio --quiet -oH newc | gzip -9) > $newird);

@@ -972,7 +972,6 @@ sub setupPackageInfo {
 	my $lock   = $this->{lock};
 	my $data;
 	my $code;
-	my $opts;
 	#==========================================
 	# smart
 	#------------------------------------------
@@ -981,13 +980,12 @@ sub setupPackageInfo {
 			$this -> checkExclusiveLock();
 			$kiwi -> info ("Checking for package: $pack");
 			$this -> setLock();
-			$data = qx ( @smart query --installed $pack | grep -qi $pack 2>&1 );
+			$data = qx ( @smart query --installed $pack 2>&1 );
 			$code = $? >> 8;
 			$this -> freeLock();
 		} else {
 			$kiwi -> info ("Checking for package: $pack");
-			$opts = "--installed $pack";
-			$data = qx ( chroot $root smart query $opts | grep -qi $pack 2>&1 );
+			$data = qx ( chroot $root smart query --installed $pack 2>&1 );
 			$code = $? >> 8;
 		}
 		if ($code != 0) {
@@ -1008,13 +1006,13 @@ sub setupPackageInfo {
 			$this -> checkExclusiveLock();
 			$kiwi -> info ("Checking for package: $pack");
 			$this -> setLock();
-			$data = qx ( zypper info $pack | grep -qi $str 2>&1 );
+			$data = qx ( zypper info $pack 2>&1 | grep -qi $str 2>&1 );
 			$code = $? >> 8;
 			$this -> freeLock();
 		} else {
 			$kiwi -> info ("Checking for package: $pack");
-			$data = qx ( chroot $root @zypper info $pack | grep -qi $str 2>&1 );
-			$code = $? >> 8;
+			$data= qx (chroot $root @zypper info $pack 2>&1|grep -qi $str 2>&1);
+			$code= $? >> 8;
 		}
 		if ($code == 0) {
 			$kiwi -> failed  ();
