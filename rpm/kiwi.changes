@@ -6,6 +6,9 @@ Mon Nov 26 10:58:02 CET 2007 - ms@suse.de
 - fixed md5sum check, use head not tail (#341240)
 - added better error checking for setupSplashForGrub()
 - udevtrigger and udevsettle are links to udevadm
+- added device wait check for storage device to appear
+- make gzip a configurable command, default is gzip -9
+- fixed parted partition setup
 - fixed package query call
 
 -------------------------------------------------------------------

@@ -267,6 +267,7 @@ function errorLogStart {
 	Echo "Error logging enabled on $ELOG_CONSOLE"
 	echo "Error Log:" >$ELOG_CONSOLE
 	exec 2>$ELOG_CONSOLE
+	set -x 1>&2
 }
 #======================================
 # udevStart
@@ -1310,7 +1311,7 @@ function partedCreatePartition {
 			"reboot"
 	fi
 	p_opts="-s $DISK unit s print"
-	p_size=`/usr/sbin/parted $p_opts | grep "Disk" | cut -f2 -d: | cut -f1 -ds`
+	p_size=`/usr/sbin/parted $p_opts | grep "^Disk" | cut -f2 -d: | cut -f1 -ds`
 	p_size=`echo $p_size`
 	p_size=`expr $p_size - 1`
 	p_cmd="/usr/sbin/parted -s $DISK unit s"

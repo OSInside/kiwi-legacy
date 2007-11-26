@@ -267,7 +267,7 @@ sub setupBootStick {
 	# Import grub stages
 	#------------------------------------------
 	my $stages = "'usr/lib/grub/*'";
-	my $unzip  = "gzip -cd $initrd 2>&1";
+	my $unzip  = "$main::Gzip -cd $initrd 2>&1";
 	$kiwi -> info ("Importing grub stages for stick boot");
 	$status = qx ($unzip | (cd $tmpdir && cpio -di $stages 2>&1));
 	$result = $? >> 8;
@@ -426,7 +426,7 @@ sub setupBootStick {
 	# check for message file in initrd
 	#------------------------------------------
 	my $message = "'image/loader/message'";
-	my $unzip   = "gzip -cd $initrd 2>&1";
+	my $unzip   = "$main::Gzip -cd $initrd 2>&1";
 	$status = qx ($unzip | (cd /mnt/ && cpio -d -i $message 2>&1));
 	$result = $? >> 8;
 	if ($result != 0) {
@@ -634,7 +634,7 @@ sub setupInstallCD {
 	my $stage1 = "'usr/lib/grub/stage1'";
 	my $stage2 = "'usr/lib/grub/stage2_eltorito'";
 	my $message= "'image/loader/message'";
-	my $unzip  = "gzip -cd $initrd 2>&1";
+	my $unzip  = "$main::Gzip -cd $initrd 2>&1";
 	$status = qx ($unzip | (cd $tmpdir && cpio -d -i $message 2>&1));
 	$result = $? >> 8;
 	if ($result == 0) {
@@ -844,7 +844,7 @@ sub setupInstallStick {
 	# Import grub stages
 	#------------------------------------------
 	my $stages = "'usr/lib/grub/*'";
-	my $unzip  = "gzip -cd $initrd 2>&1";
+	my $unzip  = "$main::Gzip -cd $initrd 2>&1";
 	$kiwi -> info ("Importing grub stages for VM boot");
 	$status = qx ($unzip | (cd $tmpdir && cpio -di $stages 2>&1));
 	$result = $? >> 8;
@@ -1017,7 +1017,7 @@ sub setupInstallStick {
 		return undef;
 	}
 	my $message = "'image/loader/message'";
-	my $unzip   = "gzip -cd $initrd 2>&1";
+	my $unzip   = "$main::Gzip -cd $initrd 2>&1";
 	$status = qx ($unzip | ( cd /mnt/ && cpio -di $message 2>&1));
 	$result = $? >> 8;
 	if ($result != 0) {
@@ -1198,7 +1198,7 @@ sub setupBootDisk {
 	#------------------------------------------
 	my $stages = "'usr/lib/grub/*'";
 	my $message= "'image/loader/message'";
-	my $unzip  = "gzip -cd $initrd 2>&1";
+	my $unzip  = "$main::Gzip -cd $initrd 2>&1";
 	$kiwi -> info ("Importing grub stages for VM boot");
 	$status = qx ($unzip | (cd $tmpdir && cpio -di $message 2>&1));
 	$result = $? >> 8;
@@ -1530,7 +1530,7 @@ sub setupBootDisk {
 		# check for message file in initrd
 		#------------------------------------------
 		my $message = "'image/loader/message'";
-		my $unzip   = "gzip -cd $initrd 2>&1";
+		my $unzip   = "$main::Gzip -cd $initrd 2>&1";
 		$status = qx ($unzip | (cd /mnt/ && cpio -di $message 2>&1));
 		$result = $? >> 8;
 		if ($result != 0) {
@@ -1691,7 +1691,7 @@ sub setupInstallFlags {
 	#==========================================
 	# unpack initrd files
 	#------------------------------------------
-	my $unzip  = "gzip -cd $initrd 2>&1";
+	my $unzip  = "$main::Gzip -cd $initrd 2>&1";
 	my $status = qx ($unzip | (cd $irddir && cpio -di 2>&1));
 	my $result = $? >> 8;
 	if ($result != 0) {
@@ -1742,7 +1742,9 @@ sub setupInstallFlags {
 	#------------------------------------------
 	$newird = $initrd;
 	$newird =~ s/\.gz/\.install\.gz/;
-	$status = qx ((cd $irddir && find|cpio --quiet -oH newc|gzip -9) > $newird);
+	$status = qx (
+		(cd $irddir && find|cpio --quiet -oH newc | $main::Gzip) > $newird
+	);
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> error  ("Failed to re-create initrd: $status");
@@ -1777,7 +1779,7 @@ sub setupSplashForGrub {
 	#==========================================
 	# unpack initrd files
 	#------------------------------------------
-	my $unzip  = "gzip -cd $initrd 2>&1";
+	my $unzip  = "$main::Gzip -cd $initrd 2>&1";
 	my $status = qx ($unzip | (cd $irddir && cpio -di 2>&1));
 	my $result = $? >> 8;
 	if ($result != 0) {
@@ -1804,7 +1806,7 @@ sub setupSplashForGrub {
 	#------------------------------------------
 	while (my $splash = glob("$newspl/*.spl")) {
 		mkdir "$splash.dir";
-		qx (gzip -cd $splash > $splash.bob);
+		qx ($main::Gzip -cd $splash > $splash.bob);
 		my $count = $this -> extractCPIO ( $splash.".bob" );
 		for (my $id=1; $id <= $count; $id++) {
 			qx (cat $splash.bob.$id |(cd $splash.dir && cpio -i 2>&1));
@@ -1827,8 +1829,8 @@ sub setupSplashForGrub {
 			return $initrd;
 		}
 	}
-	qx ((cd $newspl && find|cpio --quiet -oH newc | gzip -9) > $spldir/all.spl);
-	qx ((cd $irddir && find|cpio --quiet -oH newc | gzip -9) > $newird);
+	qx ((cd $newspl && find|cpio --quiet -oH newc|$main::Gzip)>$spldir/all.spl);
+	qx ((cd $irddir && find|cpio --quiet -oH newc|$main::Gzip)>$newird);
 	#==========================================
 	# create splash initrd
 	#------------------------------------------

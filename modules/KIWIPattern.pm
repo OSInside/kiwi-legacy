@@ -260,7 +260,7 @@ sub downloadPattern {
 		# finally get the pattern
 		#------------------------------------------
 		if ($pfile =~ /\.gz$/) {
-			if ((! -e $pfile) || (! open (FD,"cat $pfile | gzip -cd|"))) {
+			if ((! -e $pfile) || (! open (FD,"cat $pfile|$main::Gzip -cd|"))) {
 				$message = "couldn't uncompress pattern";
 				return (undef,"local[gzip]: $message: $pfile: $!");
 			}
@@ -358,7 +358,7 @@ sub downloadPattern {
 				return (undef,"remote[open] $message: $tmpdir/pattern: $!");
 			}
 			print FD $content; close FD;
-			if (! open (FD,"cat $tmpdir/pattern | gzip -cd|")) {
+			if (! open (FD,"cat $tmpdir/pattern | $main::Gzip -cd|")) {
 				unlink ($tmpdir."/pattern");
 				rmdir  ($tmpdir);
 				$message = "couldn't uncompress pattern";

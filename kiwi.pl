@@ -69,8 +69,12 @@ our $JabberPassword;   # configurable jabber password
 our $JabberRessource;  # configurable jabber ressource
 our $JabberComponent;  # configurable jabber component
 our $LogServerPort;    # configurable log server port
+our $Gzip;             # configurable gzip command
 if (! defined $LogServerPort) {
 	$LogServerPort = 9000;
+}
+if (! defined $Gzip) {
+	$Gzip = "gzip -9";
 }
 if (! defined $JabberPort) {
 	$JabberPort = 5223;
@@ -132,6 +136,7 @@ our $BaseRoot;          # use given path as base system
 our $BaseRootMode;      # specify base-root mode copy | union
 our $NoColor;           # do not used colored output (done/failed messages)
 our $LogPort;           # specify alternative log server port
+our $GzipCmd;           # command to run to gzip things
 our $PrebuiltBootImage; # directory where a prepared boot image may be found
 our $listXMLInfo;       # list XML information for this operation
 
@@ -886,6 +891,7 @@ sub init {
 		"base-root-mode=s"      => \$BaseRootMode,
 		"nocolor"               => \$NoColor,
 		"log-port=i"            => \$LogPort,
+		"gzip-cmd=s"            => \$GzipCmd,
 		"prebuiltbootimage=s"   => \$PrebuiltBootImage,
 		"listxmlinfo|x=s"       => \$listXMLInfo,
 		"help|h"                => \&usage,
@@ -931,6 +937,11 @@ sub init {
 	if (defined $LogPort) {
 		$kiwi -> info ("Setting log server port to: $LogPort");
 		$LogServerPort = $LogPort;
+		$kiwi -> done ();
+	}
+	if (defined $GzipCmd) {
+		$kiwi -> info ("Setting gzip command to: $GzipCmd");
+		$Gzip = $GzipCmd;
 		$kiwi -> done ();
 	}
 	if ((defined $BaseRootMode) && (! defined $BaseRoot)) {
@@ -1074,6 +1085,10 @@ sub usage {
 	print "  [ --logfile <filename> | terminal ]\n";
 	print "    Write to the log file \`<filename>' instead of\n";
 	print "    the terminal.\n";
+	print "\n";
+	print "  [ --gzip-cmd <cmd> ]\n";
+	print "    Specify an alternate command to run when compressing boot\n";
+	print "    and system images.  Command must accept gzip options.\n";
 	print "\n";
 	print "  [ --force-new-root ]\n";
 	print "    Force creation of new root directory. If the directory\n";

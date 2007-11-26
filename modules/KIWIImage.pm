@@ -290,7 +290,7 @@ sub createImageCPIO {
 	if ($dest !~ /^\//) {
 		$dest = $pwd."/".$dest;
 	}
-	my $data = qx (cd $tree && find . | cpio @cpio | gzip -9 -f > $dest);
+	my $data = qx (cd $tree && find . | cpio @cpio | $main::Gzip -f > $dest);
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> error  ("Couldn't create cpio archive");
@@ -928,7 +928,9 @@ sub createImageLiveCD {
 			$kiwi -> done();
 			$kiwi -> info ("Extracting pre-built boot image");
 			$data = qx (mkdir -p $main::Create);
-			$data = qx (gzip -cd $pinitrd|(cd $main::Create && cpio -di 2>&1));
+			$data = qx (
+				$main::Gzip -cd $pinitrd|(cd $main::Create && cpio -di 2>&1)
+			);
 			$code = $? >> 8;
 			if ($code != 0) {
 				$kiwi -> failed();
@@ -2187,7 +2189,9 @@ sub extractKernel {
 			$kiwi -> failed ();
 			return undef;
 		}
-		my $kernel = qx (gzip -dc $gzfile | strings | grep $lx | cut $sp);
+		my $kernel = qx (
+			$main::Gzip -dc $gzfile | strings | grep $lx | cut $sp
+		);
 		chomp $kernel;
 		qx (rm -f $file.$kernel);
 		qx (mv $file $file.$kernel && ln -s $file.$kernel $file );
@@ -2479,7 +2483,7 @@ sub compressImage {
 	# Compress image using gzip
 	#------------------------------------------
 	$kiwi -> info ("Compressing image...");
-	my $data = qx (gzip -9 -f $imageDest/$name);
+	my $data = qx ($main::Gzip -f $imageDest/$name);
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> failed ();

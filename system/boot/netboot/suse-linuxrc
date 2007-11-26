@@ -275,6 +275,21 @@ if [ ! -z "$PART" ] && [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ];then
 		esac
 		done
 		count=1
+		check=0
+		while true;do
+			sfdisk -s $DISK &>/dev/null
+			if [ $? = 0 ] || [ $check -eq 4 ];then
+				break
+			fi
+			Echo "Waiting for disk $DISK to settle..."
+			check=`expr $check + 1`
+			sleep 2
+		done
+		if ! sfdisk -s $DISK &>/dev/null;then
+			systemException \
+				"Disk $DISK doesn't appear... fatal !" \
+			"reboot"
+		fi
 		updateNeeded initialize
 		if linuxPartition $DISK;then
 			mountSystem $imageDevice
@@ -359,7 +374,7 @@ if [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ];then
 				-r $imageMD5s -l /etc/image.md5 $imageServer 2>&1`
 			if ! loadOK "$loadStatus";then
 				systemException \
-				"Failed to load image MD5: $imageName -> no such image MD5" \
+					"Failed to load image MD5: $imageName -> no such file" \
 				"reboot"
 			fi
 			IFS=" "
