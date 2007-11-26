@@ -1958,7 +1958,7 @@ sub buildLogicalExtend {
 		return undef;
 	}
 	my @bsc  = getBlocks ( $size );
-	my $seek = $bsc[2];
+	my $seek = $bsc[2] - 1;
 	#==========================================
 	# Create logical extend storage and FS
 	#------------------------------------------
