@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Nov 27 14:05:39 CET 2007 - ms@suse.de
+
+- v1.97
+- fixed package query call for older smart versions
+- performance fix: prevent gzip from beeing called too often
+
+-------------------------------------------------------------------
 Mon Nov 26 10:58:02 CET 2007 - ms@suse.de
 
 - v1.96

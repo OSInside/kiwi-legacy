@@ -39,7 +39,7 @@ use warnings;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "1.96";
+our $Version       = "1.97";
 our $openSUSE      = "http://download.opensuse.org/repositories/";
 our $ConfigFile    = "$ENV{'HOME'}/.kiwirc";
 our $ConfigStatus  = 0;
@@ -139,6 +139,7 @@ our $LogPort;           # specify alternative log server port
 our $GzipCmd;           # command to run to gzip things
 our $PrebuiltBootImage; # directory where a prepared boot image may be found
 our $listXMLInfo;       # list XML information for this operation
+our $Compress;          # set compression level
 
 #============================================
 # Globals
@@ -438,6 +439,14 @@ sub main {
 				$kiwi -> notset();
 			}
         }
+		#==========================================
+		# Check for --compress option
+		#------------------------------------------
+		if (defined $Compress) {
+			$kiwi -> info ("Set compression level to: $Compress");
+			$xml  -> setCompressed ($Compress);
+			$kiwi -> done();
+		}
 		#==========================================
 		# Check type params and create image obj
 		#------------------------------------------
@@ -894,6 +903,7 @@ sub init {
 		"gzip-cmd=s"            => \$GzipCmd,
 		"prebuiltbootimage=s"   => \$PrebuiltBootImage,
 		"listxmlinfo|x=s"       => \$listXMLInfo,
+		"compress=s"            => \$Compress,
 		"help|h"                => \&usage,
 		"<>"                    => \&usage
 	);
@@ -962,6 +972,11 @@ sub init {
 			$kiwi -> skipped ();
 		}
 		$RootTree = $BaseRoot;
+	}
+	if ((defined $Compress) && ($Compress !~ /^yes$|^no$/)) {
+		$kiwi -> info ("Invalid compress argument, expected yes|no");
+		$kiwi -> failed ();
+		my $code = kiwiExit (1); return $code;
 	}
 	#==========================================
 	# remove pre-defined smart channels

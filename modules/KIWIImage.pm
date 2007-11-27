@@ -271,8 +271,16 @@ sub createImageCPIO {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
+	my $xml  = $this->{xml};
 	my $imageTree = $this->{imageTree};
 	my $imageDest = $this->{imageDest};
+	my $compress  = 1;
+	#==========================================
+	# PRE check compression level
+	#------------------------------------------
+	if (! $xml -> getCompressed()) {
+		$compress = 0;
+	}
 	#==========================================
 	# PRE filesystem setup
 	#------------------------------------------
@@ -281,16 +289,24 @@ sub createImageCPIO {
 		return undef;
 	}
 	#==========================================
-	# Create filesystem on extend
+	# PRE Create filesystem on extend
 	#------------------------------------------
 	my $pwd  = qx (pwd); chomp $pwd;
 	my @cpio = ("--create", "--format=newc", "--quiet");
 	my $tree = $imageTree;
 	my $dest = $imageDest."/".$name.".gz";
+	my $data;
+	if (! $compress) {
+		$dest = $imageDest."/".$name;
+	}
 	if ($dest !~ /^\//) {
 		$dest = $pwd."/".$dest;
 	}
-	my $data = qx (cd $tree && find . | cpio @cpio | $main::Gzip -f > $dest);
+	if ($compress) {
+		$data = qx (cd $tree && find . | cpio @cpio | $main::Gzip -f > $dest);
+	} else {
+		$data = qx (cd $tree && find . | cpio @cpio > $dest);
+	}
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> error  ("Couldn't create cpio archive");
@@ -299,9 +315,12 @@ sub createImageCPIO {
 		return undef;
 	}
 	#==========================================
-	# POST filesystem setup
+	# PRE filesystem setup
 	#------------------------------------------
-	if (! $this -> buildMD5Sum ($name.".gz")) {
+	if ($compress) {
+		$name = $name.".gz";
+	}
+	if (! $this -> buildMD5Sum ($name)) {
 		return undef;
 	}
 	return $this;
@@ -433,7 +452,8 @@ sub createImageUSB {
 	$main::ForeignRepo{packagemanager} = $xml -> getPackageManager();
 	$main::ForeignRepo{prepare} = $main::Prepare;
 	$main::ForeignRepo{create}  = $main::Create;
-	$main::Create = $main::RootTree;
+	$main::Compress = "no";
+	$main::Create   = $main::RootTree;
 	undef $main::SetImageType;
 	$kiwi -> info ("Checking for pre-built boot image");
 	if ((! $pblt) || ($pblt eq "false") || ($pblt eq "0")) {
@@ -456,6 +476,9 @@ sub createImageUSB {
 		}
 		my $pinitrd = $lookup.$main::ImageName.".gz";
 		my $plinux  = $lookup.$main::ImageName.".kernel";
+		if (! -f $pinitrd) {
+			$pinitrd = $lookup.$main::ImageName;
+		}
 		if ((! -f $pinitrd) || (! -f $plinux)) {
 			$kiwi -> skipped();
 			$kiwi -> info ("Can't find pre-built boot image in $lookup");
@@ -507,13 +530,14 @@ sub createImageUSB {
 	# Include splash screen to initrd
 	#------------------------------------------
 	my $initrd = $main::Destination."/".$main::ImageName.".gz";
+	if (! -f $initrd) {
+		$initrd = $main::Destination."/".$main::ImageName;
+	}
 	my $kboot  = new KIWIBoot ($kiwi,$initrd);
 	if (! defined $kboot) {
 		return undef;
 	}
-	if ($text ne "VMX") {
-		$kboot -> setupSplashForGrub();
-	}
+	$kboot -> setupSplashForGrub();
 	$kboot -> cleanTmp();
 	#==========================================
 	# Store meta data for subsequent calls
@@ -590,9 +614,9 @@ sub createImageVMX {
 	#==========================================
 	# Create virtual disk images
 	#------------------------------------------
-	$main::BootVMDisk   = $main::Destination."/".$name->{bootImage}.".gz";
-	$main::BootVMSystem = $main::Destination."/".$name->{systemImage};
-	$main::BootVMFormat = $name->{format};
+	$main::BootVMDisk  = $main::Destination."/".$name->{bootImage}.".splash.gz";
+	$main::BootVMSystem= $main::Destination."/".$name->{systemImage};
+	$main::BootVMFormat= $name->{format};
 	if (defined $name->{imageTree}) {
 		$main::BootVMSystem = $name->{imageTree};
 	}

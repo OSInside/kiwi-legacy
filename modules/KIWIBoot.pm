@@ -1766,7 +1766,18 @@ sub setupSplashForGrub {
 	my $spldir = $initrd."_".$$.".splash";
 	my $newspl = "$spldir/splash";
 	my $irddir = "$spldir/initrd";
-	my $newird = $initrd; $newird =~ s/\.gz/\.splash.gz/;
+	my $zipped = 0;
+	my $newird;
+	my $status;
+	my $result;
+	if ($initrd =~ /\.gz$/) {
+		$zipped = 1;
+	}
+	if ($zipped) {
+		$newird = $initrd; $newird =~ s/\.gz/\.splash.gz/;
+	} else {
+		$newird = $initrd.".splash.gz";
+	}
 	$kiwi -> info ("Setting up splash screen...");
 	if (! mkdir $spldir) {
 		$kiwi -> skipped ();
@@ -1780,8 +1791,12 @@ sub setupSplashForGrub {
 	# unpack initrd files
 	#------------------------------------------
 	my $unzip  = "$main::Gzip -cd $initrd 2>&1";
-	my $status = qx ($unzip | (cd $irddir && cpio -di 2>&1));
-	my $result = $? >> 8;
+	if ($zipped) {
+		$status = qx ($unzip | (cd $irddir && cpio -di 2>&1));
+	} else {
+		$status = qx (cat $initrd | (cd $irddir && cpio -di 2>&1));
+	}
+	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> skipped ();
 		$kiwi -> warning ("Failed to extract data: $!");

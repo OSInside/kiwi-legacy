@@ -980,13 +980,18 @@ sub setupPackageInfo {
 			$this -> checkExclusiveLock();
 			$kiwi -> info ("Checking for package: $pack");
 			$this -> setLock();
-			$data = qx ( @smart query --installed $pack 2>&1 );
+			$data = qx (@smart query --installed $pack 2>/dev/null);
 			$code = $? >> 8;
 			$this -> freeLock();
 		} else {
 			$kiwi -> info ("Checking for package: $pack");
-			$data = qx ( chroot $root smart query --installed $pack 2>&1 );
+			$data = qx (chroot $root smart query --installed $pack 2>/dev/null);
 			$code = $? >> 8;
+		}
+		if ($code == 0) {
+			if (! grep (/$pack/,$data)) {
+				$code = 1;
+			}
 		}
 		if ($code != 0) {
 			$kiwi -> failed  ();

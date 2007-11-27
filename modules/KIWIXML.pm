@@ -686,6 +686,29 @@ sub getCompressed {
 }
 
 #==========================================
+# setCompressed
+#------------------------------------------
+sub setCompressed {
+	# ...
+	# Set compressed element to yes or no. Sometimes the
+	# compression state of an image needs to be adapted according
+	# to the output image type
+	# ---
+	my $this  = shift;
+	my $value = shift;
+	if (($value ne "no") && ($value ne "yes")) {
+		return $this;
+	}
+	my $addElement = new XML::LibXML::Element ("compressed");
+	$addElement -> appendText ($value);
+	my $opts = $this->{optionsNodeList} -> get_node(1);
+	my $node = $opts -> getElementsByTagName ("compressed") -> get_node(1);
+	$opts -> removeChild ($node);
+	$opts -> appendChild ($addElement);
+	return $this;
+}
+
+#==========================================
 # getPackageManager
 #------------------------------------------
 sub getPackageManager {
