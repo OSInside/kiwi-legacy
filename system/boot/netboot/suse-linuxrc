@@ -787,7 +787,7 @@ udevKill
 # 27) call preinit phase
 #--------------------------------------
 Echo "Calling preinit phase..."
-cd /mnt && exec < dev/console >dev/console 2>&1
+cd /mnt
 /mnt/sbin/pivot_root . mnt >/dev/null 2>&1
 if test $? != 0;then
 	PIVOT=false
@@ -821,7 +821,9 @@ echo "----------------------------"
 export IFS=$IFS_ORIG
 mount -n -o remount,rw / 2>/dev/null
 if [ $PIVOT = "true" ];then
+	exec < dev/console >dev/console 2>&1
 	exec umount -n -l /mnt
 else
+	exec < dev/console >dev/console 2>&1
 	exec chroot . /sbin/init $@
 fi

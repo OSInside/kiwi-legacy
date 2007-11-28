@@ -39,7 +39,7 @@ use warnings;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "1.97";
+our $Version       = "1.98";
 our $openSUSE      = "http://download.opensuse.org/repositories/";
 our $ConfigFile    = "$ENV{'HOME'}/.kiwirc";
 our $ConfigStatus  = 0;
