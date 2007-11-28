@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Wed Nov 28 22:33:15 CET 2007 - ms@suse.de
+
+- v1.99
+- added pigz to kiwi-tools package
+- start blogd for setting up /var/log/boot.msg file
+- added two examples to /usr/share/doc/packages/kiwi/examples
+  the documentation will refer to this examples in the future
+
+-------------------------------------------------------------------
 Wed Nov 28 11:51:35 CET 2007 - ms@suse.de
 
 - v1.98
@@ -15,7 +24,7 @@ Tue Nov 27 14:05:39 CET 2007 - ms@suse.de
 
 - v1.97
 - fixed package query call for older smart versions
-- performance fix: prevent gzip from beeing called too often
+- performance fix: prevent gzip from being called too often
 
 -------------------------------------------------------------------
 Mon Nov 26 10:58:02 CET 2007 - ms@suse.de

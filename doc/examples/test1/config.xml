@@ -1,0 +1,44 @@
+<image name="test1" schemeversion="1.4">
+	<description type="system">
+		<author>Marcus Schaefer</author>
+		<contact>ms@novell.com</contact>
+		<specification>openSUSE 10.3 KDE system with patterns</specification>
+	</description>
+	<preferences>
+		<type primary="true" boot="isoboot/suse-10.3" flags="unified">iso</type>
+		<type filesystem="ext3" boot="vmxboot/suse-10.3">vmx</type>
+		<type filesystem="ext3" boot="usbboot/suse-10.3">usb</type>
+		<version>1.1.1</version>
+		<packagemanager>smart</packagemanager>
+		<rpm-check-signatures>False</rpm-check-signatures>
+	</preferences>
+	<!-- Password for all users is linux -->
+	<users group="users">
+		<user name="linux" pwd="$2a$10$fq4yOF75pQY0lKjZkG2DBOdOlptomWELi0Gxd71pziLMGk4ZGIRH2" home="/home/linux" realname="Test User"/>
+	</users>
+	<users group="root">
+		<user name="root" pwd="$2a$10$fq4yOF75pQY0lKjZkG2DBOdOlptomWELi0Gxd71pziLMGk4ZGIRH2" home="/root"/>
+	</users>
+	<repository type="yast2">
+		<source path="http://download.opensuse.org/distribution/10.3/repo/oss"/>
+	</repository>
+	<repository type="yast2">
+		<source path="http://download.opensuse.org/distribution/10.3/repo/non-oss"/>
+	</repository>
+	<packages type="image" patternType="plusRecommended" patternPackageType="plusRecommended">
+		<package name="kernel-default"/>
+		<package name="bootsplash"/>
+		<package name="bootsplash-theme-SuSE"/>
+		<package name="vim"/>
+		<opensusePattern name="default"/>
+		<opensusePattern name="kde"/>
+		<ignore name="agfa-fonts"/>
+		<ignore name="kino"/>
+	</packages>
+	<packages type="vmware" memory="512" disk="ide0">
+	</packages>
+	<packages type="boot">
+		<package name="filesystem"/> 
+		<package name="glibc-locale"/>
+	</packages>
+</image>

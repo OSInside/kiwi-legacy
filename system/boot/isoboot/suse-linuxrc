@@ -71,6 +71,7 @@ udevStart
 #======================================
 # 5) start boot shell and logging
 #--------------------------------------
+startBlogD
 startShell
 errorLogStart
 openKernelConsole
@@ -293,6 +294,7 @@ cp /include /mnt
 # 18) kill boot shell
 #--------------------------------------
 killShell
+killBlogD
 
 #======================================
 # 19) Activate new root

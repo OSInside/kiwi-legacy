@@ -425,7 +425,7 @@ function suseStripInitrd {
 		blockdev posbios ping killall killall5 udevcontrol udevd
 		udevsettle udevtrigger mknod stat path_id hwup scsi_id scsi_tur
 		usb_id ata_id vol_id edd_id setctsid dumpe2fs debugreiserfs
-		fuser udevadm
+		fuser udevadm blogd showconsole
 	"
 	tools="$tools $@"
 	for path in /sbin /usr/sbin /usr/bin /bin;do

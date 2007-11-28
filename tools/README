@@ -13,6 +13,10 @@ startshell
      used in initrd images for providing shell access while init
      is not called
 
+pigz
+   * small libz based tool which does compression on multiple
+     processors. It's compatible to gzip
+
 createLiveCD
    * wrapper script for kiwi to create the current SuSE Linux
      live CD

@@ -71,9 +71,9 @@ install:
 	install -m 644 ./.revision ${kiwi_prefix}
 
 	#============================================
-	# kiwi system draft
+	# kiwi system draft and examples
 	#--------------------------------------------
-	install -m 644 ./doc/kiwi.pdf  ${PACKDOCVZ}
+	cp -a doc/* ${PACKDOCVZ}
 
 	#============================================
 	# Install kiwi tools

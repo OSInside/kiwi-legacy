@@ -276,7 +276,7 @@ function udevStart {
 	#======================================
 	# start udev
 	#--------------------------------------
-	Echo "Creating device nodes with udev"
+	echo "Creating device nodes with udev"
 	# disable hotplug helper, udevd listens to netlink
 	echo "" > /proc/sys/kernel/hotplug
 	# create min devices
@@ -299,6 +299,40 @@ function udevStart {
 #--------------------------------------
 function udevKill {
 	kill $udevPID
+	rm -f /var/log/boot.msg
+	umount -t devpts /mnt/dev/pts
+	mkdir -p /mnt/var/log
+	cp /mnt/dev/shm/initrd.msg /mnt/var/log/boot.msg
+}
+#======================================
+# startBlogD
+#--------------------------------------
+function startBlogD {
+	REDIRECT=$(showconsole 2>/dev/null)
+	if test -n "$REDIRECT" ; then
+		> /dev/shm/initrd.msg
+		ln -sf /dev/shm/initrd.msg /var/log/boot.msg
+		mkdir -p /var/run
+		/sbin/blogd $REDIRECT
+	fi
+}
+#======================================
+# killBlogD
+#--------------------------------------
+function killBlogD {
+	# /.../
+	# kill blogd on /dev/console
+	# ----
+	local umountProc=0
+	if [ ! -e /proc/mounts ];then
+		mount -t proc proc /proc
+		umountProc=1
+	fi
+	Echo "Stopping boot logging"
+	killall -9 blogd
+	if [ $umountProc -eq 1 ];then
+		umount /proc
+	fi
 }
 #======================================
 # installGrub

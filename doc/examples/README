@@ -1,0 +1,27 @@
+Here you'll find two example images
+===================================
+test1:
+ Is an openSUSE 10.3 KDE system based on patterns. You are able
+ to login via KDM as user root or linux and password 'linux'. The
+ X system will be setup automatically using sax2 during boot time
+ 
+    kiwi --prepare /usr/share/doc/packages/kiwi/examples/test1 \
+         --root /tmp/kiwi-test1
+
+    kiwi --create /tmp/kiwi-test1 -d /tmp --type iso
+
+test2:
+ Is an openSUSE 10.3 console system based on a package list.
+ You are able to login to the system with user root or linux
+ and password 'linux'. There is no graphics system installed 
+
+	kiwi --prepare /usr/share/doc/packages/kiwi/examples/test2 \
+         --root /tmp/kiwi-test2
+
+    kiwi --create /tmp/kiwi-test2 -d /tmp --type iso
+
+Note:
+=====
+By default an .iso (live)image will be created. Other images
+types available for this images are: usb and vmx
+        
