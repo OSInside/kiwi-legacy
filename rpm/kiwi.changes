@@ -3,6 +3,7 @@ Wed Nov 28 11:51:35 CET 2007 - ms@suse.de
 
 - v1.98
 - fixed console redirect while booting into the system
+- fixed oemboot descriptions, atftp is not required (#344546)
 
 -------------------------------------------------------------------
 Wed Nov 28 10:45:36 CET 2007 - ms@suse.de
