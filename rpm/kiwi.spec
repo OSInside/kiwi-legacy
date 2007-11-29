@@ -239,6 +239,7 @@ test -f $RPM_BUILD_ROOT/srv/tftpboot/mboot.c32 && \
 
 install -m 644 tools/README \
 	$RPM_BUILD_ROOT/usr/share/doc/packages/kiwi/README.tools
+rm -rf $RPM_BUILD_ROOT/usr/share/doc/packages/kiwi/kiwi-man
 
 cat kiwi.loader
 
@@ -286,12 +287,9 @@ cat kiwi.loader
 # ------------------------------------------------
 %files -n kiwi-tools
 %defattr(-, root, root)
-%dir /usr/local/bin
-%dir /usr/local/etc/init.d
-/usr/local/etc/init.d
-/usr/local/bin
+/usr/bin
+/etc/init.d
 %doc %{_defaultdocdir}/kiwi/README.tools
-%{_datadir}/kiwi/tools
 
 #=================================================
 # KIWI-desc-*...

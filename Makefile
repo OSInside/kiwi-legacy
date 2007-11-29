@@ -12,8 +12,8 @@ export
 #============================================
 # Prefixs...
 #--------------------------------------------
-local_bin   = ${buildroot}/usr/local/bin
-local_init  = ${buildroot}/usr/local/etc/init.d
+bin_prefix  = ${buildroot}/usr/bin
+init_prefix = ${buildroot}/etc/init.d
 kiwi_prefix = ${buildroot}/usr/share/kiwi
 tftp_prefix = ${buildroot}/srv/tftpboot
 doc_prefix  = ${buildroot}/usr/share/doc/packages
@@ -24,8 +24,8 @@ man_prefix  = ${buildroot}/usr/share/man
 #--------------------------------------------
 KIWIBINVZ   = ${buildroot}/usr/sbin
 KIWIMODVZ   = ${kiwi_prefix}/modules
-TOOLSVZ     = ${local_bin}
-INITVZ      = ${local_init}
+TOOLSVZ     = ${bin_prefix}
+INITVZ      = ${init_prefix}
 KIWIIMAGE   = ${kiwi_prefix}/image
 TFTPKIWI    = ${tftp_prefix}/KIWI
 TFTPBOOT    = ${tftp_prefix}/
