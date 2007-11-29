@@ -1933,7 +1933,7 @@ local void copymeta(char *from, char *to)
     chmod(to, st.st_mode & 07777);
 
     /* copy owner's user and group, ignore errors */
-    chown(to, st.st_uid, st.st_gid);
+    (void) chown(to, st.st_uid, st.st_gid);
 
     /* copy access and modify times, ignore errors */
     times[0].tv_sec = st.st_atime;
