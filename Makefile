@@ -12,6 +12,8 @@ export
 #============================================
 # Prefixs...
 #--------------------------------------------
+local_bin   = ${buildroot}/usr/local/bin
+local_init  = ${buildroot}/usr/local/etc/init.d
 kiwi_prefix = ${buildroot}/usr/share/kiwi
 tftp_prefix = ${buildroot}/srv/tftpboot
 doc_prefix  = ${buildroot}/usr/share/doc/packages
@@ -22,7 +24,8 @@ man_prefix  = ${buildroot}/usr/share/man
 #--------------------------------------------
 KIWIBINVZ   = ${buildroot}/usr/sbin
 KIWIMODVZ   = ${kiwi_prefix}/modules
-TOOLSVZ     = ${kiwi_prefix}/tools
+TOOLSVZ     = ${local_bin}
+INITVZ      = ${local_init}
 KIWIIMAGE   = ${kiwi_prefix}/image
 TFTPKIWI    = ${tftp_prefix}/KIWI
 TFTPBOOT    = ${tftp_prefix}/
@@ -59,11 +62,12 @@ install:
 	#============================================
 	# Install base directories
 	#--------------------------------------------
-	install -d -m 755 ${KIWIBINVZ} ${KIWIMODVZ} ${TOOLSVZ} ${KIWIIMAGE}
+	install -d -m 755 ${KIWIBINVZ} ${KIWIMODVZ} ${KIWIIMAGE}
 	install -d -m 755 ${TFTPKIWI} ${TFTPBOOT} ${TFTPBOOTCONF} ${TFTPIMAGE}
-	install -d -m 755 ${TFTPBOOTBOOT} ${MANVZ}
+	install -d -m 755 ${TFTPBOOTBOOT}
 	install -d -m 755 ${TFTPUPLOAD}
-	install -d -m 755 ${PACKDOCVZ}
+	install -d -m 755 ${PACKDOCVZ} ${MANVZ}
+	install -d -m 755 ${TOOLSVZ} ${INITVZ}
 
 	#============================================
 	# install .revision file
@@ -86,7 +90,7 @@ install:
 	#============================================
 	# Install kiwi tools
 	#--------------------------------------------
-	${MAKE} -C tools TOOLSVZ=${TOOLSVZ} install
+	${MAKE} -C tools TOOLSVZ=${TOOLSVZ} INITVZ=${INITVZ} install
 
 	#============================================
 	# Install KIWI base and modules

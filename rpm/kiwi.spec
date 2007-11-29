@@ -5,7 +5,7 @@
 # ---
 # needsrootforbuild
 Name:          kiwi
-BuildRequires: perl smart perl-XML-LibXML perl-libwww-perl screen module-init-tools
+BuildRequires: perl smart perl-XML-LibXML perl-libwww-perl screen module-init-tools zlib-devel
 %ifarch %ix86 x86_64
 BuildRequires: syslinux
 %endif
@@ -237,7 +237,8 @@ test -f $RPM_BUILD_ROOT/srv/tftpboot/pxelinux.0 && \
 test -f $RPM_BUILD_ROOT/srv/tftpboot/mboot.c32 && \
 	echo /srv/tftpboot/mboot.c32 >> kiwi.loader
 
-install -m 644 tools/README $RPM_BUILD_ROOT/usr/share/kiwi/tools
+install -m 644 tools/README \
+	$RPM_BUILD_ROOT/usr/share/doc/packages/kiwi/README.tools
 
 cat kiwi.loader
 
@@ -250,7 +251,9 @@ cat kiwi.loader
 %dir %{_datadir}/kiwi
 %dir %{_datadir}/kiwi/image
 %doc %{_mandir}/man1/kiwi.1.gz
-%doc %{_defaultdocdir}/kiwi
+%doc %{_defaultdocdir}/kiwi/COPYING
+%doc %{_defaultdocdir}/kiwi/examples
+%doc %{_defaultdocdir}/kiwi/kiwi.pdf
 %{_datadir}/kiwi/.revision
 %{_datadir}/kiwi/modules
 %{_sbindir}/kiwi
@@ -283,8 +286,11 @@ cat kiwi.loader
 # ------------------------------------------------
 %files -n kiwi-tools
 %defattr(-, root, root)
-%dir %{_datadir}/kiwi/tools
-%doc %{_datadir}/kiwi/tools/README
+%dir /usr/local/bin
+%dir /usr/local/etc/init.d
+/usr/local/etc/init.d
+/usr/local/bin
+%doc %{_defaultdocdir}/kiwi/README.tools
 %{_datadir}/kiwi/tools
 
 #=================================================
