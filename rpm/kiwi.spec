@@ -249,6 +249,7 @@ cat kiwi.loader
 %dir %{_defaultdocdir}/kiwi
 %dir %{_datadir}/kiwi
 %dir %{_datadir}/kiwi/image
+%doc %{_mandir}/man1/kiwi.1.gz
 %doc %{_defaultdocdir}/kiwi
 %{_datadir}/kiwi/.revision
 %{_datadir}/kiwi/modules

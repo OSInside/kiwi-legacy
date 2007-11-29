@@ -31,6 +31,7 @@ TFTPBOOTCONF= ${tftp_prefix}/pxelinux.cfg
 TFTPUPLOAD  = ${tftp_prefix}/upload
 TFTPIMAGE   = ${tftp_prefix}/image
 PACKDOCVZ   = ${doc_prefix}/kiwi
+MANVZ       = ${man_prefix}/man1
 
 all:
 	#============================================
@@ -60,7 +61,7 @@ install:
 	#--------------------------------------------
 	install -d -m 755 ${KIWIBINVZ} ${KIWIMODVZ} ${TOOLSVZ} ${KIWIIMAGE}
 	install -d -m 755 ${TFTPKIWI} ${TFTPBOOT} ${TFTPBOOTCONF} ${TFTPIMAGE}
-	install -d -m 755 ${TFTPBOOTBOOT}
+	install -d -m 755 ${TFTPBOOTBOOT} ${MANVZ}
 	install -d -m 755 ${TFTPUPLOAD}
 	install -d -m 755 ${PACKDOCVZ}
 
@@ -74,6 +75,13 @@ install:
 	# kiwi system draft and examples
 	#--------------------------------------------
 	cp -a doc/* ${PACKDOCVZ}
+
+	#============================================
+	# kiwi manual pages
+	#--------------------------------------------
+	for i in `ls -1 ./doc/kiwi-man`;do \
+		install -m 644 ./doc/kiwi-man/$$i ${MANVZ} ;\
+	done
 
 	#============================================
 	# Install kiwi tools
