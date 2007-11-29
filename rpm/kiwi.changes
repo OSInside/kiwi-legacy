@@ -2,7 +2,11 @@
 Wed Nov 28 22:33:15 CET 2007 - ms@suse.de
 
 - v1.99
-- added pigz to kiwi-tools package
+- don't use /mnt as mount directory (#344589)
+- reread partition table using blockdev (#340317)
+- fixed cleanup code in KIWIBoot and objects of this class
+- added pigz to kiwi-tools package and fixed pigz to allow
+  splash files which are compressed cpio archives
 - start blogd for setting up /var/log/boot.msg file
 - added two examples to /usr/share/doc/packages/kiwi/examples
   the documentation will refer to this examples in the future
