@@ -10,6 +10,8 @@ Wed Nov 28 22:33:15 CET 2007 - ms@suse.de
 - start blogd for setting up /var/log/boot.msg file
 - added two examples to /usr/share/doc/packages/kiwi/examples
   the documentation will refer to this examples in the future
+- fixed --bootstick and --bootvm options when uncompressed
+  boot images are used
 
 -------------------------------------------------------------------
 Wed Nov 28 11:51:35 CET 2007 - ms@suse.de
