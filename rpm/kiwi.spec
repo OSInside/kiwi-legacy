@@ -287,9 +287,9 @@ cat kiwi.loader
 # ------------------------------------------------
 %files -n kiwi-tools
 %defattr(-, root, root)
-/usr/bin/*
-/etc/init.d/*
 %doc %{_defaultdocdir}/kiwi/README.tools
+/etc/init.d/*
+/usr/bin/*
 
 #=================================================
 # KIWI-desc-*...
