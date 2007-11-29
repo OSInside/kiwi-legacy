@@ -1924,16 +1924,17 @@ local void copymeta(char *from, char *to)
 {
     struct stat st;
     struct timeval times[2];
+    int status = 0;
 
     /* get all of from's Unix meta data, return if not a regular file */
     if (stat(from, &st) != 0 || (st.st_mode & S_IFMT) != S_IFREG)
         return;
 
     /* set to's mode bits, ignore errors */
-    chmod(to, st.st_mode & 07777);
+    status = chmod(to, st.st_mode & 07777);
 
     /* copy owner's user and group, ignore errors */
-    (void) chown(to, st.st_uid, st.st_gid);
+    status = chown(to, st.st_uid, st.st_gid);
 
     /* copy access and modify times, ignore errors */
     times[0].tv_sec = st.st_atime;
