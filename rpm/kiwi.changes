@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Fri Nov 30 14:34:37 CET 2007 - ms@suse.de
+
+- v2.00
+- changed config-yast.xml to config-yast-autoyast.xml
+- added support for config-yast-firstboot.xml based on the
+  yast2-firstboot mechanism
+- update documentation according to the yast2 autoyast and
+  firstboot changes
+
+-------------------------------------------------------------------
 Wed Nov 28 22:33:15 CET 2007 - ms@suse.de
 
 - v1.99

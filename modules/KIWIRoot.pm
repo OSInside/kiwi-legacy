@@ -564,9 +564,13 @@ sub setup {
 		return undef;
 	}
 	#========================================
-	# setup yast if config-yast.xml exists
+	# check for yast firstboot setup file
 	#----------------------------------------
-	if (! $configure -> setupAutoYaST()) {
+	my $status = $configure -> setupFirstBootYaST();
+	if ($status eq "skipped") {
+		$status = $configure -> setupAutoYaST();
+	}
+	if ($status eq "failed") {
 		return undef;
 	}
 	#========================================

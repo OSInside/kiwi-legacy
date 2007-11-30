@@ -163,39 +163,111 @@ sub setupUsersGroups {
 # setupAutoYaST
 #------------------------------------------
 sub setupAutoYaST {
+	# ...
+	# This function will make use of the autoyast system and setup
+	# the image to call the autoyast automatically on first boot of
+	# the system. To activate the call of yast on first boot the
+	# file /var/lib/YaST2/runme_at_boot is created. Please note
+	# according to the YaST people this is not the preferred method
+	# of calling YaST to perform tasks on first boot. Use the function
+	# setupFirstBootYaST below which uses yast2-firstboot to do the job
+	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $root = $this->{root};
 	my $imageDesc = $this->{imageDesc};
-	if (-f "$imageDesc/config-yast.xml") {
-		$kiwi -> info ("Setting up AutoYaST...");
-		my $autodir = "var/lib/autoinstall/autoconf";
-		my $autocnf = "autoconf.xml";
-		if (! -d "$root/$autodir") {
-			$kiwi -> failed ();
-			$kiwi -> error  ("AutoYaST seems not be installed");
-			$kiwi -> failed ();
-			return undef;
-		}
-		qx ( cp $imageDesc/config-yast.xml $root/$autodir/$autocnf 2>&1 );
-		if ( ! open (FD,">$root/etc/install.inf")) {
-			$kiwi -> failed ();
-			$kiwi -> error ("Failed to create install.inf: $!");
-			$kiwi -> failed ();
-			return undef;
-		}
-		print FD "AutoYaST: http://192.168.100.99/part2.xml\n";
-		close FD;
-		if ( ! open (FD,">$root/var/lib/YaST2/runme_at_boot")) {
-			$kiwi -> failed ();
-			$kiwi -> error ("Failed to create runme_at_boot: $!");
-			$kiwi -> failed ();
-			return undef;
-		}
-		close FD;
-		$kiwi -> done ();
+	if (! -f "$imageDesc/config-yast-autoyast.xml") {
+		return "skipped";
 	}
-	return $this;
+	$kiwi -> info ("Setting up AutoYaST...");
+	my $autodir = "var/lib/autoinstall/autoconf";
+	my $autocnf = "autoconf.xml";
+	if (! -d "$root/$autodir") {
+		$kiwi -> failed ();
+		$kiwi -> error  ("AutoYaST seems not be installed");
+		$kiwi -> failed ();
+		return "failed";
+	}
+	qx ( cp $imageDesc/config-yast-autoyast.xml $root/$autodir/$autocnf 2>&1 );
+	if ( ! open (FD,">$root/etc/install.inf")) {
+		$kiwi -> failed ();
+		$kiwi -> error ("Failed to create install.inf: $!");
+		$kiwi -> failed ();
+		return "failed";
+	}
+	print FD "AutoYaST: http://192.168.100.99/part2.xml\n";
+	close FD;
+	if ( ! open (FD,">$root/var/lib/YaST2/runme_at_boot")) {
+		$kiwi -> failed ();
+		$kiwi -> error ("Failed to create runme_at_boot: $!");
+		$kiwi -> failed ();
+		return "failed";
+	}
+	close FD;
+	$kiwi -> done ();
+	return "success";
+}
+
+#==========================================
+# setupFirstBootYaST
+#------------------------------------------
+sub setupFirstBootYaST {
+	# ...
+	# This function is based on the yast2-firstboot functionality which
+	# is a service which will be enabled by insserv. The firstboot service
+	# uses a different xml format than the autoyast system. According to
+	# this the input file has a different name. the firstboot input file
+	# is preferred over the config-yast-autoyast.xml file
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $root = $this->{root};
+	my $imageDesc = $this->{imageDesc};
+	if (! -f "$imageDesc/config-yast-firstboot.xml") {
+		return "skipped";
+	}
+	$kiwi -> info ("Setting up YaST firstboot service...");
+	if (! -f "$root/etc/init.d/firstboot") {
+		$kiwi -> failed ();
+		$kiwi -> error  ("yast2-firstboot seems not be installed");
+		$kiwi -> failed ();
+		return "failed";
+	}
+	my $firstboot = "$root/etc/YaST2/firstboot.xml";
+	my $data = qx (cp $imageDesc/config-yast-firstboot.xml $firstboot 2>&1 );
+	my $code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Failed to copy config-yast-firstboot.xml: $data");
+		$kiwi -> failed ();
+		return "failed"; 
+	}
+	if ( ! open (FD,">$root/etc/sysconfig/firstboot")) {
+		$kiwi -> failed ();
+		$kiwi -> error ("Failed to create /etc/sysconfig/firstboot: $!");
+		$kiwi -> failed ();
+		return "failed";
+	}
+	print FD "## Description: Firstboot Configuration\n";
+	print FD "## Default: /usr/share/firstboot/scripts\n";
+	print FD "SCRIPT_DIR=\"/usr/share/firstboot/scripts\"\n";
+	print FD "FIRSTBOOT_WELCOME_DIR=\"/usr/share/firstboot\"\n";
+	print FD "FIRSTBOOT_WELCOME_PATTERNS=\"\"\n";
+	print FD "FIRSTBOOT_LICENSE_DIR=\"/usr/share/firstboot\"\n";
+	print FD "FIRSTBOOT_NOVELL_LICENSE_DIR=\"/etc/YaST2\"\n";
+	print FD "FIRSTBOOT_FINISH_FILE=\"/usr/share/firstboot/congrats.txt\"\n";
+	print FD "FIRSTBOOT_RELEASE_NOTES_PATH=\"\"\n";
+	close FD;
+	$data = qx ( chroot $root chkconfig firstboot on 2>&1 );
+	$code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error ("Failed to activate firstboot service: $data");
+		$kiwi -> failed ();
+		return "failed";
+	}
+	$kiwi -> done();
+	return "success";
 }
 
 1;
