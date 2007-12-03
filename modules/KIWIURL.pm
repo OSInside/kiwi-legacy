@@ -53,7 +53,19 @@ sub new {
 	#------------------------------------------
 	$this->{kiwi} = $kiwi;
 	$this->{root} = $root;
+	$this->{type} = "unknown";
 	return $this;
+}
+
+#==========================================
+# getRepoType
+#------------------------------------------
+sub getRepoType {
+	# ...
+	# return repo type, could be unknown
+	# ---
+	my $this = shift;
+	return $this->{type};
 }
 
 #==========================================
@@ -241,6 +253,14 @@ sub openSUSEpath {
 			my $answer  = $browser -> request  ( $request );
 			my $title = $answer -> title ();
 			if ((defined $title) && ($title !~ /not found/i)) {
+				$this->{type} = "rpm-md";
+				return ( $response,$url );
+			}
+			my $request = HTTP::Request->new (GET => $repourl."/media.1");
+			my $answer  = $browser -> request  ( $request );
+			my $title = $answer -> title ();
+			if ((defined $title) && ($title !~ /not found/i)) {
+				$this->{type} = "yast2";
 				return ( $response,$url );
 			}
 		}

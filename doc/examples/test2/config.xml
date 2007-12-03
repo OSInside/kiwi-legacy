@@ -20,7 +20,7 @@
 		<user name="root" pwd="$2a$10$fq4yOF75pQY0lKjZkG2DBOdOlptomWELi0Gxd71pziLMGk4ZGIRH2" home="/root"/>
 	</users>
 	<repository type="yast2">
-		<source path="http://download.opensuse.org/distribution/10.3/repo/oss"/>
+		<source path="opensuse://openSUSE:10.3/standard/"/>
 	</repository>
 	<packages type="image">
 		<package name="aaa_base"/>

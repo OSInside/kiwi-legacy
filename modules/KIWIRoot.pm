@@ -103,6 +103,14 @@ sub new {
 		if ($private_url =~ /^\//) {
 			$private_url = $baseSystem."/".$private_url;
 		}
+		my $publics_type = $urlHandler -> getRepoType();
+		if (($publics_type ne "unknown") && ($publics_type ne $type)) {
+			$kiwi -> warning (
+				"$private_url: overwrite repo type $type with: $publics_type"
+			);
+			$kiwi -> done();
+			$type = $publics_type;
+		}
 		my $channel = "kiwi".$count."-".$$;
 		my $srckey  = "baseurl";
 		my $srcopt;

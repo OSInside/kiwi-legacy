@@ -1049,11 +1049,6 @@ sub setValidateRepositoryType {
 		my $type = $element -> getAttribute("type");
 		my $stag = $element -> getElementsByTagName ("source") -> get_node(1);
 		my $source = $this -> resolveLink ( $stag -> getAttribute ("path") );
-		if (($source =~ /^opensuse:\/\//) && ($type ne "rpm-md")) {
-			$kiwi -> warning ("$source: forcing repo type [rpm-md]");
-			$element -> setAttribute ("type","rpm-md");
-			$kiwi -> done();
-		}
 	}
 	return $this;
 }

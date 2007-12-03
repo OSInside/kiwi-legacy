@@ -2,6 +2,7 @@
 Fri Nov 30 14:34:37 CET 2007 - ms@suse.de
 
 - v2.00
+- fixed repotype detection for opensuse:// url type
 - changed config-yast.xml to config-yast-autoyast.xml
 - added support for config-yast-firstboot.xml based on the
   yast2-firstboot mechanism
