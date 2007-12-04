@@ -2117,6 +2117,10 @@ sub mountLogicalExtend {
 	my $opts = shift;
 	my $kiwi = $this->{kiwi};
 	my $imageDest = $this->{imageDest};
+	my $loopfound = 0;
+	my $status;
+	my $result;
+	my $loop;
 	#==========================================
 	# mount logical extend for data transfer
 	#------------------------------------------
@@ -2125,8 +2129,23 @@ sub mountLogicalExtend {
 	if (defined $opts) {
 		$mount = "mount $opts";
 	}
-	my $data = qx ($mount -oloop $imageDest/$name $imageDest/mnt-$$ 2>&1);
-	my $code = $? >> 8;
+	for (my $id=0;$id<=7;$id++) {
+		$status = qx ( /sbin/losetup /dev/loop$id 2>&1 );
+		$result = $? >> 8;
+		if ($result eq 1) {
+			$loopfound = 1;
+			$loop = "/dev/loop".$id;
+			$this->{loop} = $loop;
+			last;
+		}
+	}
+	if (! $loopfound) {
+		$kiwi -> error  ("Couldn't find free loop device");
+		$kiwi -> failed ();
+		return undef;
+	}
+	my $data= qx ($mount -o loop=$loop $imageDest/$name $imageDest/mnt-$$ 2>&1);
+	my $code= $? >> 8;
 	if ($code != 0) {
 		chomp $data;
 		$kiwi -> error  ("Image loop mount failed:");
@@ -2560,7 +2579,10 @@ sub getSize {
 sub cleanMount {
 	my $this = shift;
 	my $imageDest = $this->{imageDest};
-	qx (umount $imageDest/mnt-$$ 2>&1);
+	qx (umount -l $imageDest/mnt-$$ 2>&1);
+	if (defined $this->{loop}) {
+		system ("/sbin/losetup -d $this->{loop}");
+	}
 	rmdir "$imageDest/mnt-$$";
 }
 

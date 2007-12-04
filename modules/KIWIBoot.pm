@@ -459,7 +459,7 @@ sub setupBootStick {
 	# check for message file in initrd
 	#------------------------------------------
 	my $message = "'image/loader/message'";
-	my $unzip   = "$main::Gzip -cd $initrd 2>&1";
+	$unzip = "$main::Gzip -cd $initrd 2>&1";
 	if ($zipped) {
 		$status = qx ($unzip | (cd $loopdir && cpio -d -i $message 2>&1));
 	} else {
@@ -1080,7 +1080,7 @@ sub setupInstallStick {
 		return undef;
 	}
 	my $message = "'image/loader/message'";
-	my $unzip   = "$main::Gzip -cd $initrd 2>&1";
+	$unzip  = "$main::Gzip -cd $initrd 2>&1";
 	$status = qx ($unzip | ( cd $loopdir && cpio -di $message 2>&1));
 	$result = $? >> 8;
 	if ($result != 0) {

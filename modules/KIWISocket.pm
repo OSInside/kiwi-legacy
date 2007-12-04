@@ -20,7 +20,6 @@ package KIWISocket;
 # Modules
 #------------------------------------------
 use strict;
-use KIWILog;
 use FileHandle;
 use Socket;
 

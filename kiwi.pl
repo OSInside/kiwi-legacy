@@ -20,6 +20,15 @@ use lib './modules';
 use lib '/usr/share/kiwi/modules';
 use strict;
 
+#============================================
+# perl debugger setup
+#--------------------------------------------
+$DB::inhibit_exit = 0;
+
+#============================================
+# Modules
+#--------------------------------------------
+use warnings;
 use Getopt::Long;
 use KIWIRoot;
 use KIWIXML;
@@ -28,13 +37,6 @@ use KIWIImage;
 use KIWIBoot;
 use KIWIMigrate;
 use KIWIOverlay;
-
-#============================================
-# perl debugger setup
-#--------------------------------------------
-$DB::inhibit_exit = 0;
-
-use warnings;
 
 #============================================
 # Globals (Version)

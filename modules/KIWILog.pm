@@ -19,6 +19,7 @@ package KIWILog;
 # Modules
 #------------------------------------------
 use strict;
+use POSIX ":sys_wait_h";
 use Carp qw (cluck);
 use KIWISocket;
 use KIWISharedMem;
@@ -860,6 +861,7 @@ sub setLogServer {
 		# Child log server process
 		#------------------------------------------
 		our @logChilds = ();
+		our %logChilds = ();
 		our $logServer = new KIWISocket ( $this,$main::LogServerPort );
 		our $sharedMem = $this->{smem};
 		if (! defined $logServer) {
@@ -872,8 +874,13 @@ sub setLogServer {
 			undef $logServer;
 			exit 0;
 		};
-		$SIG{INT} = "IGNORE";
-		$SIG{HUP} = "IGNORE";
+		$SIG{CHLD} = sub {
+			while ((my $child = waitpid(-1,WNOHANG)) > 0) {
+				$logServer -> closeConnection();
+				kill (13,$child);
+			}
+		};
+		$SIG{INT} = $SIG{TERM};
 		while (1) {
 			$logServer -> acceptConnection();
 			my $child = fork();
@@ -885,8 +892,9 @@ sub setLogServer {
 			if ($child) {
 				#==========================================
 				# Wait for incoming connections
-                #------------------------------------------
-				push @logChilds,$child;
+				#------------------------------------------
+				$logChilds{$child} = $child;
+				@logChilds = keys %logChilds;
 				next;
 			} else {
 				#==========================================
@@ -909,6 +917,12 @@ sub setLogServer {
 						next;
 					}
 					#==========================================
+					# Handle command: exit
+					#------------------------------------------
+					if ($command eq "exit") {
+						last;
+					}
+					#==========================================
 					# Add More commands here...
 					#------------------------------------------
 					# ...
@@ -920,7 +934,6 @@ sub setLogServer {
 					);
 				}
 				$logServer -> closeConnection();
-				$sharedMem -> closeSegment();
 				exit 0;
 			}
 		}

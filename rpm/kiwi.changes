@@ -4,6 +4,10 @@ Fri Nov 30 14:34:37 CET 2007 - ms@suse.de
 - v2.00
 - fixed netboot atftp download, patch by
   jacob berkman <jberkman@novell.com>. Thanks Jacob (#345859)
+- fixed pattern search if pattern name contains regular
+  expression information which needs to be quoted
+- fixed cleanup code and log server session. Added a new
+  command 'exit' for log server sessions
 - fixed repotype detection for opensuse:// url type
 - changed config-yast.xml to config-yast-autoyast.xml
 - added support for config-yast-firstboot.xml based on the

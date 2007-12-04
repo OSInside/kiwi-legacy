@@ -57,7 +57,11 @@ sub new {
 		$kiwi -> failed ();
 		return undef;
 	}
-	my @pattern = @{$pattref};
+	my @pattern = ();
+	foreach my $p (@{$pattref}) {
+		my $pname = quotemeta $p;
+		push (@pattern,$pname);
+	}
 	if (! defined $urlref) {
 		$kiwi -> error ("No URL list for pattern search");
 		$kiwi -> failed ();

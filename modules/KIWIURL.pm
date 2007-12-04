@@ -256,9 +256,9 @@ sub openSUSEpath {
 				$this->{type} = "rpm-md";
 				return ( $response,$url );
 			}
-			my $request = HTTP::Request->new (GET => $repourl."/media.1");
-			my $answer  = $browser -> request  ( $request );
-			my $title = $answer -> title ();
+			$request = HTTP::Request->new (GET => $repourl."/media.1");
+			$answer  = $browser -> request  ( $request );
+			$title = $answer -> title ();
 			if ((defined $title) && ($title !~ /not found/i)) {
 				$this->{type} = "yast2";
 				return ( $response,$url );
