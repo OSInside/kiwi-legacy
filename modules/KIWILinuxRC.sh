@@ -1625,15 +1625,12 @@ function loadOK {
 	# there is no useful return code to check so we have to
 	# check the output of the command
 	# ----
-    echo $1 | grep -q "File not found"
-    if [ $? = 0 ];then
-        return 1
-    fi
-    echo $1 | grep -q "aborting"
-    if [ $? = 0 ];then
-        return 1
-    fi
-    return 0
+	for i in "File not found" "aborting" "no option named" "unknown host" ; do
+	    if echo "$1" | grep -q  "$i" ; then
+	       return 1
+	    fi
+	done
+	return 0
 }
 #======================================
 # validateRAM

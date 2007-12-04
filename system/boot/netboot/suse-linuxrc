@@ -397,10 +397,10 @@ if [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ];then
 			# /.../
 			# now load the image into the imageDevice
 			# ---
-			multicast="--option \"multicast on\""
+			multicast="on"
 			if test "$imageZipped" = "compressed"; then
 				Echo "Compressed image found: Disable multicast download"
-				multicast="--option \"multicast off\""
+				multicast="off"
 				test ! -p /dev/compressed_image && mkfifo /dev/compressed_image
 				cat /dev/compressed_image | gzip -d > $imageDevice 2>/dev/null &
 				imageDevice_orig=$imageDevice
@@ -409,11 +409,11 @@ if [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ];then
 				imageName="$imageName.gz"
 			fi
 			Echo "Loading $imageName [$imageDevice BS:$imageBlkSize Byte]..."
-			loadStatus=`atftp $multicast --option "blksize $imageBlkSize" -g \
+			loadStatus=`atftp --option "multicast $multicast" --option "blksize $imageBlkSize" -g \
 				-r $imageName -l $imageDevice $imageServer 2>&1`
 			if ! loadOK "$loadStatus";then
 				systemException \
-					"Failed to load image: $imageName -> no such image" \
+					"Failed to load image $imageName: atftp output: $loadStatus" \
 				"reboot"
 			fi
 			if test "$imageZipped" = "compressed"; then
@@ -793,10 +793,10 @@ cd /mnt
 /mnt/sbin/pivot_root . mnt >/dev/null 2>&1
 if test $? != 0;then
 	PIVOT=false
-	cleanInitrd && mount --move . / && /bin/chroot . ./preinit
-	/bin/chroot . rm -f  ./preinit
-	/bin/chroot . rm -f  ./include
-	/bin/chroot . rm -rf ./image
+	cleanInitrd && mount --move . / && chroot . ./preinit
+	chroot . rm -f  ./preinit
+	chroot . rm -f  ./include
+	chroot . rm -rf ./image
 else
 	PIVOT=true
 	./preinit
@@ -827,5 +827,5 @@ if [ $PIVOT = "true" ];then
 	exec umount -n -l /mnt
 else
 	exec < dev/console >dev/console 2>&1
-	exec /bin/chroot . /sbin/init $@
+	exec chroot . /sbin/init $@
 fi
