@@ -1626,9 +1626,9 @@ function loadOK {
 	# check the output of the command
 	# ----
 	for i in "File not found" "aborting" "no option named" "unknown host" ; do
-	    if echo "$1" | grep -q  "$i" ; then
-	       return 1
-	    fi
+		if echo "$1" | grep -q  "$i" ; then
+			return 1
+		fi
 	done
 	return 0
 }

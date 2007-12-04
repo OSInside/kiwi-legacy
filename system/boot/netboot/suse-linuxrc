@@ -409,11 +409,13 @@ if [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ];then
 				imageName="$imageName.gz"
 			fi
 			Echo "Loading $imageName [$imageDevice BS:$imageBlkSize Byte]..."
-			loadStatus=`atftp --option "multicast $multicast" --option "blksize $imageBlkSize" -g \
-				-r $imageName -l $imageDevice $imageServer 2>&1`
+			loadStatus=`atftp \
+				--option "multicast $multicast"  \
+				--option "blksize $imageBlkSize" \
+				-g -r $imageName -l $imageDevice $imageServer 2>&1`
 			if ! loadOK "$loadStatus";then
 				systemException \
-					"Failed to load image $imageName: atftp output: $loadStatus" \
+					"Download of $imageName failed: atftp output: $loadStatus" \
 				"reboot"
 			fi
 			if test "$imageZipped" = "compressed"; then
