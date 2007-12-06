@@ -1299,14 +1299,14 @@ sub createImageSplit {
 			my $rerooted = $path;
 			$rerooted =~ s#$imageTree#/read-only#;
 
-			my $st = stat($path);
+			my $st = lstat($path);
 
-			if (-d $path) {
+			if (S_ISDIR($st->mode)) {
 				mkdir $target;
 
 				chmod S_IMODE($st->mode), $target;
 				chown $st->uid, $st->gid, $target;
-			} elsif (-c $path || -b $path || -l $path) {
+			} elsif (S_ISCHR($st->mode) || S_ISBLK($st->mode) || S_ISLNK($st->mode)) {
 				qx ( cp -a $path $target );
 			} else {
 				symlink ($rerooted, $target);
