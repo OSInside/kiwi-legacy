@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Wed Dec  5 23:57:46 CET 2007 - ms@suse.de
+
+- v2.01
+- fixed size check and decompression for gz images (#345896)
+- call hash -r at the end of cleanInitrd (#346356)
+- use killproc to stop udevd (#332678)
+
+-------------------------------------------------------------------
 Fri Nov 30 14:34:37 CET 2007 - ms@suse.de
 
 - v2.00

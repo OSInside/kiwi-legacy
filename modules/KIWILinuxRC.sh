@@ -292,13 +292,12 @@ function udevStart {
 	/sbin/udevtrigger
 	# 30 sec - just long enough
 	/sbin/udevsettle --timeout=30
-	udevPID=`/sbin/pidof udevd`
 }
 #======================================
 # udevKill
 #--------------------------------------
 function udevKill {
-	kill $udevPID
+	killproc /sbin/udevd
 	rm -f /var/log/boot.msg
 	umount -t devpts /mnt/dev/pts
 	mkdir -p /mnt/var/log
@@ -1633,28 +1632,6 @@ function loadOK {
 	return 0
 }
 #======================================
-# validateRAM
-#--------------------------------------
-function validateRAM {
-	# /.../
-	# check if the image fits into the ramdisk.
-	# An information about the sizes is printed out
-	# ----
-	needRAM=`expr $blocks \* $blocksize`
-	needRAM=`expr $needRAM / 1024`
-	needRAM=`expr $needRAM + 128`
-	needMByte=`expr $needRAM / 1024`
-	hasRAM=`cat /proc/meminfo | grep MemFree | cut -f2 -d:`
-	hasRAM=`echo $hasRAM | cut -f1 -d" "`
-	hasMByte=`expr $hasRAM / 1024`
-	Echo "Have size: $imageDevice -> $hasRAM KBytes [ $hasMByte MB ]"
-	Echo "Need size: $needRAM KBytes [ $needMByte MB ]"
-	if test $hasRAM -gt $needRAM;then
-		return 0
-	fi
-	return 1
-}
-#======================================
 # includeKernelParameters
 #--------------------------------------
 function includeKernelParameters {
@@ -1852,6 +1829,7 @@ function cleanDirectory {
 function cleanInitrd {
 	cp /usr/bin/chroot /bin
 	cp /usr/sbin/klogconsole /bin
+	cp /sbin/killproc /bin
 	cp /sbin/halt /bin/reboot
 	for dir in /*;do
 		case "$dir" in
@@ -1874,6 +1852,7 @@ function cleanInitrd {
 	fi
 	# mount opens fstab so we give them one
 	touch /etc/fstab
+	hash -r
 }
 #======================================
 # searchAlternativeConfig

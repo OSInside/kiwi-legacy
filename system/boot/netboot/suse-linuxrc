@@ -380,18 +380,10 @@ if [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ];then
 			fi
 			IFS=" "
 			read sum1 blocks blocksize < /etc/image.md5
-			if test -z $DISK;then
-				if ! validateRAM;then
-					systemException \
-						"Not enough RAM available for this image" \
-					"reboot"
-				fi
-			else
-				if ! validateSize;then
-					systemException \
-						"Not enough space available for this image" \
-					"reboot"
-				fi
+			if ! validateSize;then
+				systemException \
+					"Not enough space available for this image" \
+				"reboot"
 			fi
 			validateBlockSize
 			# /.../
@@ -401,25 +393,31 @@ if [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ];then
 			if test "$imageZipped" = "compressed"; then
 				Echo "Compressed image found: Disable multicast download"
 				multicast="off"
-				test ! -p /dev/compressed_image && mkfifo /dev/compressed_image
-				cat /dev/compressed_image | gzip -d > $imageDevice 2>/dev/null &
-				imageDevice_orig=$imageDevice
-				imageName_orig=$imageName
-				imageDevice="/dev/compressed_image"
-				imageName="$imageName.gz"
 			fi
 			Echo "Loading $imageName [$imageDevice BS:$imageBlkSize Byte]..."
-			loadStatus=`atftp \
-				--option "multicast $multicast"  \
-				--option "blksize $imageBlkSize" \
-				-g -r $imageName -l $imageDevice $imageServer 2>&1`
-			if ! loadOK "$loadStatus";then
+			if test "$imageZipped" = "compressed"; then
+				imageName_orig=$imageName
+				imageName="$imageName.gz"
+				atftp \
+					--option "multicast $multicast" \
+					--option "blksize $imageBlkSize" -g -r $imageName \
+					-l /dev/stdout $imageServer 2>/tmp/transfer.errors |\
+					gzip -d > $imageDevice 2>>/tmp/transfer.errors
+				loadCode=$?
+				loadStatus=`cat /tmp/transfer.errors`
+			else
+				loadStatus=`atftp \
+					--option "multicast $multicast"  \
+					--option "blksize $imageBlkSize" \
+					-g -r $imageName -l $imageDevice $imageServer 2>&1`
+				loadCode=$?
+			fi
+			if test $loadCode != 0 || ! loadOK "$loadStatus";then
 				systemException \
 					"Download of $imageName failed: atftp output: $loadStatus" \
 				"reboot"
 			fi
 			if test "$imageZipped" = "compressed"; then
-				imageDevice=$imageDevice_orig
 				imageName=$imageName_orig
 			fi
 			# /.../
