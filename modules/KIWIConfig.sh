@@ -372,7 +372,7 @@ function suseStripInitrd {
 	rm -rf `find -type d | grep .svn`
 	local files="
 		/usr/share/info /usr/share/man /usr/share/cracklib /usr/lib*/python*
-		/usr/lib*/perl* /usr/share/locale /usr/share/doc/packages /var/lib/rpm
+		/usr/lib*/perl* /usr/share/locale* /usr/share/doc/packages /var/lib/rpm
 		/usr/lib*/rpm /var/lib/smart /boot/* /opt/* /usr/include /root/.gnupg
 		/etc/PolicyKit /etc/sysconfig /etc/init.d /etc/profile.d /etc/skel
 		/etc/ssl /etc/java /etc/default /etc/cron* /etc/dbus* /etc/modprobe*
