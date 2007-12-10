@@ -1,5 +1,5 @@
 # /.../
-# spec file for package kiwi (Version 2.01
+# spec file for package kiwi (Version 2.02
 # Copyright (c) 2006 SUSE LINUX Products GmbH, Nuernberg, Germany.
 # Please submit bugfixes or comments via http://bugs.opensuse.org
 # ---
@@ -11,7 +11,7 @@ BuildRequires: syslinux
 %endif
 Requires:      perl perl-XML-LibXML perl-libwww-perl screen coreutils
 Summary:       OpenSuSE - KIWI Image System
-Version:       2.01
+Version:       2.02
 Release:       28
 Group:         System
 License:       GPL

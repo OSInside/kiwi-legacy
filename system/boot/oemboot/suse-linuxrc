@@ -257,6 +257,13 @@ if [ -f $VMX_SYSTEM ];then
 	# 8.6) reread partition table
 	#--------------------------------------
 	blockdev --rereadpt $deviceDisk
+	deviceTest="$deviceDisk"1
+	waitForStorageDevice $deviceTest
+	if ! sfdisk -s $deviceTest &>/dev/null;then
+		systemException \
+			"Partition $deviceTest doesn't appear... fatal !" \
+		"reboot"
+	fi
 	#======================================
 	# 8.7) find new root partition
 	#--------------------------------------
@@ -546,17 +553,18 @@ if [ $LOCAL_BOOT = "no" ];then
 	setupDefaultFstab /config
 	updateSwapDeviceFstab /config $deviceSwap
 	if [ -z "$UNIONFS_CONFIG" ]; then
-		echo "$deviceRoot /      $FSTYPE defaults 0 0"      >> /config/etc/fstab
-		if [ ! -d /mnt/home/* ];then
-			echo "$deviceHome /home  ext3    defaults 0 0"  >> /config/etc/fstab
-		else
+		echo "$deviceRoot /      $FSTYPE defaults 0 0" >> /config/etc/fstab
+		if [ `ls /mnt/home/ | wc -l` != 0]; then
 			Echo "Found non empty home/ directory !"
-			Echo "Will not activate home partition $deviceHome in fstab"
-			echo "#$deviceHome /home  ext3    defaults 0 0" >> /config/etc/fstab
+			Echo "Moving home/ data to newly created home partition $deviceHome"
+			mount $deviceHome /mnt/mnt && mv /mnt/home/* /mnt/mnt
+			umount /mnt/mnt
 		fi
+		Echo "Activate home partition $deviceHome in fstab"
+		echo "$deviceHome /home  ext3    defaults 0 0"  >> /config/etc/fstab
 	else
 		mkdir -p /config/kiwiboot
-		echo "$deviceBoot /kiwiboot ext2 defaults 0 0"    >> /config/etc/fstab
+		echo "$deviceBoot /kiwiboot ext2 defaults 0 0"  >> /config/etc/fstab
 	fi
 	setupBootLoaderGrub /mnt /config 1 ${deviceDisk}2 OEM $deviceSwap
 	setupKernelModules /config

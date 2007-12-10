@@ -805,6 +805,7 @@ function probeDevicesForAlias {
 	probeDeviceAlias
 	if [ ! -z "$kiwikernelmodule" ];then
 		for module in $kiwikernelmodule;do
+			INITRD_MODULES="$INITRD_MODULES $module"
 			Echo "Probing module (cmdline): $module"
 			modprobe $module >/dev/null
 		done
@@ -840,22 +841,21 @@ function probeDevices {
 	if [ ! -z "$kiwikernelmodule" ];then
 		for module in $kiwikernelmodule;do
 			Echo "Probing module (cmdline): $module"
+			INITRD_MODULES="$INITRD_MODULES $module"
 			modprobe $module >/dev/null
 		done
 	fi
 	for module in $stdevs;do
-		if ! lsmod | grep -q $module;then
-			loadok=1
-			for broken in $kiwibrokenmodule;do
-				if [ $broken = $module ];then
-					loadok=0; break
-				fi
-			done
-			if [ $loadok = 1 ];then
-				Echo "Probing module: $module"
-				INITRD_MODULES="$INITRD_MODULES $module"
-				modprobe $module >/dev/null
+		loadok=1
+		for broken in $kiwibrokenmodule;do
+			if [ $broken = $module ];then
+				loadok=0; break
 			fi
+		done
+		if [ $loadok = 1 ];then
+			Echo "Probing module: $module"
+			INITRD_MODULES="$INITRD_MODULES $module"
+			modprobe $module >/dev/null
 		fi
 	done
 }
@@ -1930,4 +1930,27 @@ function killShell {
 	if [ $umountProc -eq 1 ];then
 		umount /proc
 	fi
+}
+#======================================
+# waitForStorageDevice
+#--------------------------------------
+function waitForStorageDevice {
+	# /.../
+	# function to check access on a storage device
+	# which could be a whole disk or a partition.
+	# the function will wait until the size of the
+	# storage device could be obtained or the check
+	# counter equals 4
+	# ----
+	local device=$1
+	local check=0
+	while true;do
+		sfdisk -s $device &>/dev/null
+		if [ $? = 0 ] || [ $check -eq 4 ];then
+			break
+		fi
+		Echo "Waiting for device $device to settle..."
+		check=`expr $check + 1`
+		sleep 2
+	done
 }

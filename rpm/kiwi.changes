@@ -1,4 +1,18 @@
 -------------------------------------------------------------------
+Fri Dec  7 10:44:21 CET 2007 - ms@suse.de
+
+- v2.02
+- fixed local grub setup and sysconfig/kernel (#346824)
+- fixed home partition handling in oemboot linuxrc (#346644)
+- added waitForStorageDevice function which was implemented as
+  inline code in the netboot linuxrc. The function is used in
+  the netboot and oemboot images to check for disk/partition
+  devices (#346644)
+- added netboot config.xml patch to reduce initrd size for
+  diskless systems. Patch by Jigish Gohil <gohil@gmail.com> added
+  to suse-10.3 and suse-11.0 netboot descriptions (#347182)
+
+-------------------------------------------------------------------
 Wed Dec  5 23:57:46 CET 2007 - ms@suse.de
 
 - v2.01

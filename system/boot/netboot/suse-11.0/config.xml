@@ -60,6 +60,7 @@
 		<file name="fs/aufs.ko"/>
 		<file name="fs/nfs/*"/>
 		<file name="fs/lockd/*"/>
+		<file name="net/sunrpc/*"/>
 		<file name="fs/nfs_common/*"/>
 		<file name="drivers/message/fusion/*"/>
 		<file name="drivers/block/nbd.ko"/>
@@ -157,7 +158,6 @@
 	</packages>
 	<packages type="image" profiles="diskless">
 		<!-- PACKAGES START DISKLESS -->
-		<package name="psmisc"/>
 		<package name="iputils"/>
 		<package name="atftp"/>
 		<package name="dhcpcd"/>
@@ -169,18 +169,13 @@
 		<package name="util-linux"/>
 		<package name="diffutils"/>
 		<package name="procps"/>
-		<package name="gfxboot"/>
 		<package name="fribidi"/>
-		<package name="make"/>
 		<package name="nbd"/>
 		<package name="nfs-client"/>
-		<package name="bootsplash"/>
-		<package name="bootsplash-theme-SuSE"/>
 		<!-- PACKAGES STOP DISKLESS -->
 	</packages>
 	<packages type="boot">
 		<package name="filesystem"/>
-		<package name="glibc-locale"/>
 	</packages>
 	<packages type="delete" profiles="default,xen,diskless">
 		<!-- DELETE PACKAGES START DEFAULT, XEN AND DISKLESS -->
@@ -240,6 +235,34 @@
 		<!-- DELETE PACKAGES START DISKLESS -->
 		<package name="e2fsprogs"/>
 		<package name="mkinitrd"/>
+                <package name="xorg-x11-libxcb"/>
+                <package name="xorg-x11-libX11"/>
+                <package name="xorg-x11-libXau"/>
+                <package name="openldap2-client"/>
+                <package name="pam-modules"/>
+                <package name="openslp"/>
+                <package name="perl-HTML-Tagset"/>
+                <package name="perl"/>
+                <package name="gfxboot"/>
+                <package name="perl-gettext"/>
+                <package name="setserial"/>
+                <package name="bundle-lang-common-zh"/>
+                <package name="file"/>
+                <package name="libjpeg"/>
+                <package name="libtiff3"/>
+                <package name="libmng"/>
+                <package name="liblcms"/>
+                <package name="parted"/>
+                <package name="e2fsprogs"/>
+                <package name="make"/>
+                <package name="pciutils"/>
+                <package name="gzip"/>
+                <package name="krb5"/>
+                <package name="openldap2-client"/>
+                <package name="cyrus-sasl"/>
+                <package name="pam-modules"/>
+                <package name="pam-config"/>
+                <package name="PolicyKit"/>
 		<!-- DELETE PACKAGES END DISKLESS -->
 	</packages>
 </image>
