@@ -273,7 +273,23 @@
 			<xs:sequence>
 				<xs:element ref="source" minOccurs="1"/>
 			</xs:sequence>
-			<xs:attribute name="type" type="xs:string"/>
+			<xs:attribute name="type" use="required">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="apt-deb"/>
+						<xs:enumeration value="apt-rpm"/>
+						<xs:enumeration value="deb-dir"/>
+						<xs:enumeration value="mirrors"/>
+						<xs:enumeration value="red-carpet"/>
+						<xs:enumeration value="rpm-dir"/>
+						<xs:enumeration value="rpm-md"/>
+						<xs:enumeration value="slack-site"/>
+						<xs:enumeration value="up2date-mirrors"/>
+						<xs:enumeration value="urpmi"/>
+						<xs:enumeration value="yast2"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
 			<xs:attribute name="status" use="optional">
 				<xs:simpleType>
 					<xs:restriction base="xs:string">
