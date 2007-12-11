@@ -94,7 +94,8 @@
 		<package name="perl-gettext"/>
 		<package name="perl-Bootloader"/>
 		<package name="pam-modules"/>
-		<package name="gawk gnome-filesystem"/>
+		<package name="gawk"/>
+		<package name="gnome-filesystem"/>
 		<package name="openslp"/>
 		<package name="rpm-python"/>
 		<package name="suse-build-key"/>

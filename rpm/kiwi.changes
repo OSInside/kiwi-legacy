@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Dec 11 11:28:47 CET 2007 - ms@suse.de
+
+- v2.03
+- fixed isoboot config.xml which have 2 rpm declarations
+  wrapped in one line. Patch by Guy Lunardi <glunardi@novell.com>
+
+-------------------------------------------------------------------
 Fri Dec  7 10:44:21 CET 2007 - ms@suse.de
 
 - v2.02
