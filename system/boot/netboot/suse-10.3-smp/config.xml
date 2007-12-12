@@ -1,4 +1,4 @@
-<image name="initrd-netboot-suse-10.3" schemeversion="1.4">
+<image name="initrd-netboot-suse-10.3-smp" schemeversion="1.4">
 	<description type="boot">
 		<author>Marcus Schaefer</author>
 		<contact>ms@novell.com</contact>
@@ -13,7 +13,7 @@
 		<rpm-check-signatures>False</rpm-check-signatures>
 	</preferences>
 	<profiles>
-		<profile name="default" description="Boot with default kernel"/>
+		<profile name="default" description="Boot with default smp kernel"/>
 		<profile name="xen" description="Boot with xen kernel/mboot.c32"/>
 		<profile name="diskless" description="Booting diskless thin clients"/>
 	</profiles>
@@ -110,8 +110,8 @@
 	</repository>
 	<packages type="image" profiles="default">
 		<!-- KERNEL AND MODULE PACKAGES START DEFAULT -->
-		<package name="kernel-default"/>
-		<package name="aufs-kmp-default"/>
+		<package name="kernel-bigsmp"/>
+		<package name="aufs-kmp-bigsmp"/>
 		<!-- KERNEL AND MODULE PACKAGES END DEFAULT -->
 	</packages>
 	<packages type="image" profiles="xen">
@@ -123,8 +123,8 @@
 	</packages>
 	<packages type="image" profiles="diskless">
 		<!-- KERNEL AND MODULE PACKAGES START DISKLESS -->
-		<package name="kernel-default"/>
-		<package name="aufs-kmp-default"/>
+		<package name="kernel-bigsmp"/>
+		<package name="aufs-kmp-bigsmp"/>
 		<!-- KERNEL AND MODULE PACKAGES END DISKLESS -->
 	</packages>
 	<packages type="image" profiles="default,xen">
