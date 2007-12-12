@@ -79,7 +79,7 @@
 		<package name="bootsplash-theme-SuSE-NLD"/>
 	</packages>
 	<packages type="boot">
-		<package name="kernel-default"/>
+		<package name="kernel-smp"/>
 		<package name="filesystem"/>
 		<package name="glibc-locale"/>
 		<package name="procps"/>

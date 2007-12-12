@@ -2,6 +2,7 @@
 Tue Dec 11 11:28:47 CET 2007 - ms@suse.de
 
 - v2.03
+- fixed kernel package name in isoboot/suse-SLES10-SP1-smp (#346753)
 - added repository type validation to KIWIScheme.xsd (#347479)
 - fixed isoboot config.xml which have 2 rpm declarations
   wrapped in one line. Patch by Guy Lunardi <glunardi@novell.com>
