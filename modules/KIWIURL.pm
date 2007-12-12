@@ -74,7 +74,8 @@ sub getRepoType {
 sub normalizePath {
 	# ...
 	# check all path functions and normalize the high level
-	# URLs if required
+	# URLs if required. This function also quotes reserved
+	# characters in an URL.
 	# ---
 	my $this   = shift;
 	my $module = shift;
@@ -92,7 +93,62 @@ sub normalizePath {
 	if (defined $path) {
 		return $path;
 	}
-	return $module;
+	return quote ($module);
+}
+
+#==========================================
+# quote
+#------------------------------------------
+sub quote {
+	# ...
+	# Each part of a URL, e.g. the path info,
+	# the query, etc., has a different set of reserved characters that
+	# must be quoted.
+	#
+	# RFC 2396 Uniform Resource Identifiers (URI): Generic Syntax lists
+	# the following reserved characters.
+	#
+	# reserved    = ";" | "?" | ":" | "@" | "&" | "=" | "+" | "$" | "," | "/"
+	#
+	# This function will quote the user name and password of a given
+	# URL string identified by .*://<user>:<pwd>@...
+	# ---
+	my $this = shift;
+	my $surl = shift;
+	my $part1;
+	my $part2;
+	my $part3;
+	my $part4;
+	if ($surl =~ /^(.*:\/\/)(.*):(.*)(\@.*)$/) {
+		$part1 = $1;
+		$part2 = $2;
+		$part3 = $3;
+		$part4 = $4;
+	} else {
+		return $surl;
+	}
+	my $safe = (
+		'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.-'
+	);
+	my %safe = {};
+	foreach my $key (split (//,$safe)) {
+		$safe{$key} = $key;
+	}
+	my $run = sub {
+		my $part = $_[0];
+		my %safe = %{$_[1]};
+		my @done = ();
+		foreach my $key (split (//,$part)) {
+			if (! $safe{$key}) {
+				$key = sprintf ("%%%02X",ord($key));
+			}
+			push @done,$key;
+		}
+		return join ("",@done);
+	};
+	$part2 = &{$run}($part2,\%safe);
+	$part3 = &{$run}($part3,\%safe);
+	return $part1.$part2.":".$part3.$part4;
 }
 
 #==========================================
