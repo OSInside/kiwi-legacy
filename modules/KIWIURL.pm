@@ -81,6 +81,7 @@ sub normalizePath {
 	my $module = shift;
 	my $kiwi   = $this->{kiwi};
 	my $path;
+	$module = $this -> quote ($module);
 	$path = $this -> thisPath ($module);
 	if (defined $path) {
 		return $path;
@@ -93,7 +94,7 @@ sub normalizePath {
 	if (defined $path) {
 		return $path;
 	}
-	return quote ($module);
+	return $module;
 }
 
 #==========================================
