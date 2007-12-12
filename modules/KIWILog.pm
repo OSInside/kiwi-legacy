@@ -552,7 +552,7 @@ sub printLog {
 	#==========================================
 	# print message to log channel (stdin,file)
 	#------------------------------------------
-	if (! defined $flag) {
+	if ((! defined $flag) || ($this->{fileLog})) {
 		$this -> setOutputChannel();
 		print $result;
 		$this -> resetOutputChannel();
