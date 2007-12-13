@@ -1753,269 +1753,95 @@ sub createTmpDirectory {
 # getInstSourceFile
 #------------------------------------------
 sub getInstSourceFile {
-	# ...
-	# download a file from a network or local location to
-	# a given local path. It's possible to use regular expressions
-	# in the source file specification
-	# ---
-	my $this    = shift;
-	my $url     = shift;
-	my $dest    = shift;
-	my $dirname;
-	my $basename;
-	#==========================================
-	# Check parameters
-	#------------------------------------------
-	if ((! defined $dest) || (! defined $url)) {
-		return undef;
+  # ...
+  # download a file from a network or local location to
+  # a given local path. It's possible to use regular expressions
+  # in the source file specification
+  # ---
+  my $this    = shift;
+  my $url     = shift;
+  my $dest    = shift;
+  my $dirname;
+  my $basename;
+  #==========================================
+  # Check parameters
+  #------------------------------------------
+  if ((! defined $dest) || (! defined $url)) {
+    return undef;
+  }
+  #==========================================
+  # setup destination base and dir name
+  #------------------------------------------
+  if ($dest =~ /(^.*\/)(.*)/) {
+    $dirname  = $1;
+    $basename = $2;
+    if (! $basename) {
+      $url =~ /(^.*\/)(.*)/;
+      $basename = $2;
+    }
+  } else {
+    return undef;
+  }
+  #==========================================
+  # check base and dir name
+  #------------------------------------------
+  if (! $basename) {
+    return undef;
+  }
+  if (! -d $dirname) {
+    return undef;
+  }
+  #==========================================
+  # download file
+  #------------------------------------------
+  if ($url !~ /:\/\//) {
+    # /.../
+    # local files, make them a file:// url
+    # ----
+    $url = "file://".$url;
+  }
+
+  # /.../
+  # use lwp-download to manage the process.
+  # if first download failed check the directory list with
+  # a regular expression to find the file. After that repeat
+  # the download
+  # ----
+  $dest = $dirname."/".$basename;
+  my $data = qx (lwp-download $url $dest);
+  my $code = $? >> 8;
+  if($code == 0) {
+    return $this;
+  }
+  if($url =~ /(^.*\/)(.*)/) {
+    my $location = $1;
+    my $search   = $2;
+    my $browser  = LWP::UserAgent->new;
+    my $request  = HTTP::Request->new (GET => $location);
+    my $response = $browser  -> request ( $request );
+    my $content  = $response -> content ();
+    my @lines    = split (/\n/,$content);
+    foreach my $line(@lines) {
+      if($line !~ /href=\"(.*)\"/) {
+	next;
+      }
+      my $link = $1;
+      if($link =~ /$search/) {
+	$url  = $location.$link;
+	$data = qx (lwp-download $url $dest);
+	$code = $? >> 8;
+	if($code == 0) {
+	  return $this;
 	}
-	#==========================================
-	# setup destination base and dir name
-	#------------------------------------------
-	if ($dest =~ /(^.*\/)(.*)/) {
-		$dirname  = $1;
-		$basename = $2;
-		if (! $basename) {
-			$url =~ /(^.*\/)(.*)/;
-			$basename = $2;
-		}
-	} else {
-		return undef;
-	}
-	#==========================================
-	# check base and dir name
-	#------------------------------------------
-	if (! $basename) {
-		return undef;
-	}
-	if (! -d $dirname) {
-		return undef;
-	}
-	#==========================================
-	# download file
-	#------------------------------------------
-	if ($url !~ /:\/\//) {
-		# /.../
-		# local files, make them a file:// url
-		# ----
-		$url = "file://".$url;
-	}
-	# /.../
-	# use lwp-download to manage the process.
-	# if first download failed check the directory list with
-	# a regular expression to find the file. After that repeat
-	# the download
-	# ----
-	$dest = $dirname."/".$basename;
-	my $data = qx (lwp-download $url $dest);
-	my $code = $? >> 8;
-	if ($code == 0) {
-		return $this;
-	}
-	if ($url =~ /(^.*\/)(.*)/) {
-		my $location = $1;
-		my $search   = $2;
-		my $browser  = LWP::UserAgent->new;
-		my $request  = HTTP::Request->new (GET => $location);
-		my $response = $browser  -> request ( $request );
-		my $content  = $response -> content ();
-		my @lines    = split (/\n/,$content);
-		foreach my $line (@lines) {
-			if ($line !~ /href=\"(.*)\"/) {
-				next;
-			}
-			my $link = $1;
-			if ($link =~ /$search/) {
-				$url  = $location.$link;
-				$data = qx (lwp-download $url $dest);
-				$code = $? >> 8;
-				if ($code == 0) {
-					return $this;
-				}
-			}
-		}
-	} else {
-		return undef;
-	}
-	return $this;
+      }
+    }
+  }
+  else {
+    return undef;
+  }
+  return $this;
 }
 
-#==========================================
-# splitPathHTTP
-#------------------------------------------
-sub splitPathHTTP {
-	# ...
-	# This method receives a pair of (hostname, path)
-	# containing arbitrary regular expressions as 
-	# parameters.
-	# It creates a list of pathnames that match the
-	# expressions. Depending on the "leafonly" parameter
-	# it returns only paths mathing the *whole* expression
-	# (leafonly==0) or any part in between (leafonly==1).
-	# The call depends on how the repo is structured.
-	# ---
-	my $this     = shift;
-	my $targets  = shift;
-	my $browser  = shift;
-	my $basepath = shift;
-	my $pattern  = shift;
-	#==========================================
-	# cancel on missing parameters:
-	#------------------------------------------
-	my $kiwi = $this->{kiwi};
-	if( !defined($browser) or !defined($targets) or !defined($basepath) ) {
-		$kiwi -> info  ("Can't proceed request due to missing parameters!");
-		$kiwi -> failed();
-		return undef;
-	}
-	# /.../
-	# optional: only shows directories matching the complete expression
-	# when set to 1. Default mode shows every step
-	# Example: /foo*/bar* may expand to
-	# /football, /football/bart, /fools, /fools/barbarian
-	# with leafonly, the folders /football and /fools are omitted.
-	# ----
-	my $leafonly = shift;
-	if( !defined( $leafonly ) ) {
-		$leafonly = 0;
-	}
-	#==========================================
-	# remove leading/trailing slashes if any
-	#------------------------------------------
-	$pattern =~ s#^/*(.*)#$1#;
-	$pattern =~ s#(.*)/$#$1#;
-	my @testlist = split( "/", $pattern, 2);
-	my $prefix = $testlist[0];
-	my $rest   = $testlist[1];
-	#==========================================
-	# Form LWP request
-	#------------------------------------------
-	my $request  = HTTP::Request->new( GET => $basepath );
-	my $response = $browser->request( $request );
-	my $content  = $response->content();
 
-	# descend if the root page doesn't do dir listing:
-	if($response->title !~ m/index of/i)
-	{
-		# this means that no dir listing is done here, try one descend.
-		$this->{kiwi}->note("Directory $basepath has no listings, descencding");
-		 return $this->splitPathHTTP(
-			$targets, $browser, $basepath."/".$prefix, $rest, $leafonly
-		);
-	}
-
-	my @links    = ();
-	if ($content =~ /Error 404/) {
-		pop @{$targets};
-		return undef;
-	}
-	#==========================================
-	# Evaluate LWP content
-	#------------------------------------------
-	# /.../
-	# do the actual work:
-	# get the current dir list, parse for links and match them to prefix
-	# for each match call splitPath with the correct parameters recursively
-	# ----
-	my @lines = split(/\n/,$content);
-	my $atleastonce = 0;
-	foreach my $line (@lines) {
-		# skip "parent dir" to avoid cycles
-		next if($line =~ /[pP]arent.+[dD]irectory/);
-
-		next if($line !~ /<img.*href="(.*)\/">/);
-		$atleastonce++;	# at least ONE match means the dir contains subdirs!
-		my $link = $1;
-		$link =~ s#^[./]+##g;
-		# remove leading path. This only happens once: if the root dir is read
-		# In that case the server puts the whole path into the link
-		# This is fatal for descending...
-		$link =~ s#.*/##g;
-		if ($link =~ m/$prefix/) {
-			if(defined($rest))
-			{
-				if($leafonly == 1)
-				{
-					# list directory even if the path is not finished
-					push @{$targets}, $basepath."/".$link;
-				}
-				$this->splitPathHTTP(
-					$targets, $browser, $basepath."/".$link, $rest, $leafonly
-				);
-			}
-			else
-			{
-				# if the path is finished the leaves are stored
-				push @{$targets}, $basepath."/".$link;
-				return $this;
-			}
-		}
-	}
-	if( $atleastonce == 0 and $leafonly != 1 ) {
-		# we're in a dir where no subdirs are found but:
-		# $rest may be non-zero
-		push @{$targets}, $basepath;
-	}
-	return $this;
-}
-
-#==========================================
-# expandFilename
-#------------------------------------------
-sub expandFilename {
-	# ...
-	# This method receives a pair of (path, pattern)
-	# containing a regular expression for a filename
-	# (e.g. ".*\.[rs]pm") set by the caller.
-	# The method returns a list of files matching the
-	# pattern as full URI.
-	# This method works for both HTTP(S) and FTP.
-	# ---
-	my $this     = shift;
-	my $browser  = shift;
-	my $basepath = shift;
-	my $filename = shift;
-	#==========================================
-	# cancel on missing parameters:
-	#------------------------------------------
-	my $kiwi = $this->{kiwi};
-	if( !defined($browser) or !defined($basepath) or !defined($filename) ) {
-		$kiwi -> info  ("Can't proceed request due to missing parameters!");
-		$kiwi -> failed();
-		return undef;
-	}
-	#==========================================
-	# form LWP request
-	#------------------------------------------
-	my @filelist = ();
-	my $request  = HTTP::Request->new( GET => $basepath );
-	my $response = $browser->request( $request );
-	my $content  = $response->content();
-	my @links    = ();
-	if ($content =~ /Error 404/) {
-		return undef;
-	}
-	#==========================================
-	# Evaluate LWP content
-	#------------------------------------------
-	my @lines    = split (/\n/,$content);
-	foreach my $line (@lines) {
-		next if ($line !~ /<img.*href="(.*)">/);
-		# skip "parent dir" to avoid cycles
-		next if ($line =~ /[pP]arent.+[dD]irectory/);
-		my $link = $1;
-		$link =~ s#^[./]+##g;
-		# /.../
-		# remove leading path. This only happens once: if the root dir is read
-		# In that case the server puts the whole path into the link
-		# This is fatal for descending...
-		# ----
-		$link =~ s#.*/##g;
-		if ($link =~ m/$filename/) {
-			push @filelist, $basepath."/".$link;
-		}
-	}
-	return @filelist;
-}
 
 1;
