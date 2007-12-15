@@ -175,32 +175,36 @@ else
 		probeFileSystem $swapDevice
 		SWTYPE=$FSTYPE
 		FSTYPE=$FSTYPE_SAVE
-		Echo "Setting up swap file on: $swapDevice -> $SWTYPE"
-		mRAM=`cat /proc/meminfo | grep MemTotal | cut -f2 -d:`
-		mRAM=`echo $mRAM | cut -f1 -d" "`
-		SWSIZE=`expr $mRAM / 1024`
-		SWSIZE=`expr $SWSIZE \* 2`
-		if [ $SWSIZE -lt 64 ];then
-			SWSIZE=64
-		fi
-		SWFILE=/mnt/kiwiswap
-		if ! mount -t $SWTYPE $swapDevice /mnt >/dev/null 2>&1;then
-			Echo "Failed to mount swap device on: $swapDevice"
-			unset swapDevice
-		fi
-		if [ ! -f $SWFILE ];then
-			dd if=/dev/zero of=$SWFILE bs=1M count=$SWSIZE &>/dev/null
-			if [ ! $? = 0 ];then
-				Echo "Failed to create swap file on: $swapDevice"
+		if [ $SWTYPE = "unknown" ];then
+			Echo "Can't use unknown filesystem for swap file... skipped"
+		else
+			Echo "Setting up swap file on: $swapDevice -> $SWTYPE"
+			mRAM=`cat /proc/meminfo | grep MemTotal | cut -f2 -d:`
+			mRAM=`echo $mRAM | cut -f1 -d" "`
+			SWSIZE=`expr $mRAM / 1024`
+			SWSIZE=`expr $SWSIZE \* 2`
+			if [ $SWSIZE -lt 64 ];then
+				SWSIZE=64
+			fi
+			SWFILE=/mnt/kiwiswap
+			if ! mount -t $SWTYPE $swapDevice /mnt >/dev/null 2>&1;then
+				Echo "Failed to mount swap device on: $swapDevice"
 				unset swapDevice
 			fi
-			if ! mkswap $SWFILE &>/dev/null;then
-				Echo "Failed to initialize swap file"
-				unset swapDevice
+			if [ ! -f $SWFILE ];then
+				dd if=/dev/zero of=$SWFILE bs=1M count=$SWSIZE &>/dev/null
+				if [ ! $? = 0 ];then
+					Echo "Failed to create swap file on: $swapDevice"
+					unset swapDevice
+				fi
+				if ! mkswap $SWFILE &>/dev/null;then
+					Echo "Failed to initialize swap file"
+					unset swapDevice
+				fi
 			fi
+			Echo "Created swap file: kiwiswap [ $SWSIZE MB ]"
+			umount /mnt
 		fi
-		Echo "Created swap file: kiwiswap [ $SWSIZE MB ]"
-		umount /mnt
 	fi
 fi
 

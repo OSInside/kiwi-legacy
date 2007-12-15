@@ -4,6 +4,7 @@ Wed Dec 12 18:56:14 CET 2007 - ms@suse.de
 - v2.04
 - added URL quoting according to RFC 2396
 - added KIWIUtil.pm module used by Jan-Christoph Bornschlegel
+- fixed swap file setup if filesystem type is unknown (#348623)
 
 -------------------------------------------------------------------
 Tue Dec 11 11:28:47 CET 2007 - ms@suse.de
