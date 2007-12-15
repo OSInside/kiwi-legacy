@@ -3,6 +3,7 @@ Wed Dec 12 18:56:14 CET 2007 - ms@suse.de
 
 - v2.04
 - added URL quoting according to RFC 2396
+- added KIWIUtil.pm module used by Jan-Christoph Bornschlegel
 
 -------------------------------------------------------------------
 Tue Dec 11 11:28:47 CET 2007 - ms@suse.de
