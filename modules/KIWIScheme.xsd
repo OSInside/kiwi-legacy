@@ -204,7 +204,6 @@
 					<xs:restriction base="xs:string">
 						<xs:enumeration value="boot"/>
 						<xs:enumeration value="system"/>
-						<xs:enumeration value="delete"/>
 					</xs:restriction>
 				</xs:simpleType>
 			</xs:attribute>
@@ -221,7 +220,17 @@
 				<xs:element ref="opensusePattern" minOccurs="0" maxOccurs="unbounded"/>
 				<xs:element ref="ignore" minOccurs="0" maxOccurs="unbounded"/>
 			</xs:sequence>
-			<xs:attribute name="type" type="xs:string"/>
+			<xs:attribute name="type" use="required">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="image"/>
+						<xs:enumeration value="boot"/>
+						<xs:enumeration value="delete"/>
+						<xs:enumeration value="xen"/>
+						<xs:enumeration value="vmware"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
 			<xs:attribute name="memory" type="xs:integer"/>
 			<xs:attribute name="disk" type="xs:string"/>
 			<xs:attribute name="profiles" type="xs:string"/>
