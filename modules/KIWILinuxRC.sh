@@ -989,7 +989,7 @@ function searchSwapSpace {
 			id=`/sbin/sfdisk --print-id $diskdev $disknr`
 			if [ "$id" = "82" ];then
 				echo $diskdev$disknr
-				break
+				return
 			fi
 		done
 	done
@@ -1013,7 +1013,7 @@ function searchDiskSpace {
 			fi
 			if [ "$id" -ne 82 ] && [ "$id" -ne 0 ];then
 				echo $diskdev$disknr
-				break
+				return
 			fi
 		done
 	done
