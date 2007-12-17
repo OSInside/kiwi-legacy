@@ -5,7 +5,7 @@
 # ---
 # needsrootforbuild
 Name:          kiwi
-BuildRequires: perl smart perl-XML-LibXML perl-libwww-perl screen module-init-tools zlib-devel
+BuildRequires: perl smart perl-XML-LibXML perl-libwww-perl screen module-init-tools zlib-devel jing trang
 %ifarch %ix86 x86_64
 BuildRequires: syslinux
 %endif

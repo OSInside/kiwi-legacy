@@ -72,7 +72,7 @@ sub new {
 	my $checkmdFile = $imageDesc."/.checksum.md5";
 	my $havemd5File = 1;
 	my $systemXML   = new XML::LibXML;
-	my $systemXSD   = new XML::LibXML::Schema ( location => $main::Scheme );
+	my $systemRNG   = new XML::LibXML::RelaxNG ( location => $main::Scheme );
 	if (-f $checkmdFile) {
 		my $data = qx (cd $imageDesc && md5sum -c .checksum.md5 2>&1);
 		my $code = $? >> 8;
@@ -135,7 +135,7 @@ sub new {
 	# Validate xml input with current scheme
 	#------------------------------------------
 	eval {
-		$systemXSD ->validate ( $systemTree );
+		$systemRNG ->validate ( $systemTree );
 	};
 	if ($@) {
 		$kiwi -> failed ();

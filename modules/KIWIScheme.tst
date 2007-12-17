@@ -1,6 +1,6 @@
 <!-- TEST XML SCHEME FOR KIWI -->
 
-<image name="bob">
+<image name="bob" schemeversion="1.4">
 
 	<description type="boot">
 		<author>Marcus Schaefer</author>
@@ -12,17 +12,20 @@
 		<type>ext3</type>
 		<version>1.2.3</version>
 		<size unit="M">460</size>
-		<rpm-check-signatures>False</rpm-check-signatures>
 		<packagemanager>smart</packagemanager>
 	</preferences>
 
-	<instsource>
-		<metadata type="rpm-dir">
-			<source path="/mounts/work3/CDs/full-i386/suse/%arch"/>
+	<instsource arch="i686">
+		<instrepo name="lala" priority="1">
+			<source path="...."/>
+		</instrepo>
+		<metadata>
+			<repopackage name="bob" arch="x86_64"/>
+			<repopackage name="foo" source="lala"/>
 		</metadata>
-		<srctool name="suse-instsource"/>
-		<package name="bob"/>
-		<package name="foo"/>
+		<repopackages>
+			<repopackage name="bob"/>
+		</repopackages>
 	</instsource>
 
 	<users group="users">
@@ -38,10 +41,12 @@
 	</repository>
 
 	<deploy server="192.168.1.1" blocksize="4096">
+		<kernel>bla</kernel>
+		<initrd>lala</initrd>
 		<partitions device="/dev/sda">
 			<partition type="swap" number="1" size="1000"/>
 			<partition type="L" number="2" size="10000" mountpoint="/"/>
-			<partition type="fd" number="3"/>
+			<partition type="fd" number="3" size="auto"/>
 		</partitions>
 		<configuration source="bla1" dest="blub1"/>
 		<configuration source="lala" dest="/etc/lala"/>

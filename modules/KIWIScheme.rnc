@@ -1,0 +1,1041 @@
+#================
+# FILE          : kiwi.rnc
+#****************
+# PROJECT       : OpenSUSE Build-Service
+# COPYRIGHT     : (c) 2006 SUSE LINUX Products GmbH, Germany
+#               :
+# AUTHOR        : Thomas Schraitle <toms@suse.de>
+# AUTHOR        : Marcus Schaefer <ms@suse.de>
+#               :
+# BELONGS TO    : Operating System images
+#               :
+# DESCRIPTION   : This is the RELAX NG Schema for KIWI
+#               : configuration files.
+#               : This RNG Schema is derived from the
+#               : original XSD file.
+#               : 
+#               :
+# STATUS        : Development
+#****************
+namespace rng = "http://relaxng.org/ns/structure/1.0"
+namespace xsi = "http://www.w3.org/2001/XMLSchema-instance"
+datatypes xsd = "http://www.w3.org/2001/XMLSchema-datatypes"
+namespace db  = "http://docbook.org/ns/docbook"
+
+#==========================================
+# start with image description
+#
+start =
+	## The start pattern of an image
+	k.image
+
+#==========================================
+# main block: <image>
+#
+div {
+	k.image.name.attribute = k.name.attribute
+	k.image.noNamespaceSchemaLocation.attribute =
+		## The location of the XSD Schema (not relevant for RELAX NG or DTD)
+		attribute xsi:noNamespaceSchemaLocation { xsd:anyURI }
+	k.image.schemaLocation.attribute =
+		## A pair of URI references: First is a namespace name,
+		## second the location of the XSD Schema
+		## (not relevant for RELAX NG or DTD)
+		attribute xsi:schemaLocation { xsd:anyURI }
+	k.image.inherit.attribute =
+		## Path to an image description directory from which
+		## the package Information is inherited
+		attribute inherit { text }
+	k.image.schemeversion.attribute =
+		## The allowed Schema version (fixed value)
+		attribute schemeversion { "1.4" }
+	k.image.attlist = k.image.name.attribute 
+		& k.image.inherit.attribute?
+		& k.image.schemeversion.attribute
+		& ( k.image.noNamespaceSchemaLocation.attribute?
+		  | k.image.schemaLocation.attribute? )?
+
+	k.image =
+		## The root element of the configuration file
+		element image {
+			k.image.attlist,
+			k.description,
+			k.preferences,
+			k.profiles?,
+			k.instsource?,
+			k.users*,
+			k.drivers*,
+			k.repository+,
+			k.deploy?,
+			k.split?,
+			k.packages*
+		}
+}
+
+#==========================================
+# common attributes
+#
+k.name.attribute        =
+	## A name
+	attribute name { text }
+k.arch.attribute        =
+	## An architecture
+	attribute arch { text }
+k.description.attribute =
+	## A short description
+	attribute description { text }
+k.path.attribute        =
+	## A path
+	attribute path { text }
+k.profiles.attribute    =
+	## A profile name which binds the section to this name
+	attribute profiles { text }
+k.pwd.attribute         =
+	## The password
+	attribute pwd { text }
+k.script.attribute      =
+	## A script hook for meta files to be called after the
+	## file was fetched
+	attribute script { text }
+k.source.attribute      =
+	## A location where packages can be found to build an
+	## installation source from
+	attribute source { text }
+k.size.attribute        =
+	## A partition size or optional image size
+	attribute size { text }
+k.dest.attribute        =
+	## Destination of a ressource
+	attribute dest { text }
+k.username.attribute    =
+	## A name of a user
+	attribute username { text }
+
+#==========================================
+# common element <author>
+#
+div {
+	k.author.attlist = empty
+	k.author =
+		## Author of the image
+		element author { k.author.attlist, text }
+}
+
+#==========================================
+# common element <compressed>
+#
+div {
+	k.compressed.attlist = empty
+	k.compressed =
+		## Compress image. The compression may be changed by the
+		## code according to the image output type
+		element compressed {
+			k.compressed.attlist,
+			text
+		}
+}
+
+#==========================================
+# common element <configuration>
+#
+div {
+	k.configuration.source.attribute = k.source.attribute
+	k.configuration.dest.attribute = k.dest.attribute
+	k.configuration.attlist = 
+		k.configuration.source.attribute &
+		k.configuration.dest.attribute
+
+	k.configuration =
+		## As part of the network deploy configuration this section 
+		## specifies the configuration files which should be included
+		## into the image after deployment
+		element configuration {
+			k.configuration.attlist,
+			empty
+		}
+}
+
+#==========================================
+# common element <commandline>
+#
+div {
+	k.commandline.attlist = empty
+	k.commandline = 
+		## As part of the network deploy configuration this section
+		## specifies the kernel boot commandline used when the image
+		## gets deployed
+		element commandline {
+			k.commandline.attlist,
+			text
+		}
+}
+
+#==========================================
+# common element <contact>
+#
+div {
+	k.contact.attlist = empty
+	k.contact = 
+		## Contact information from the author, like email etc.
+		element contact {
+			k.contact.attlist,
+			text
+		}
+}
+
+#==========================================
+# common element <defaultbaseroot>
+#
+div {
+	k.defaultbaseroot.attlist = empty
+	k.defaultbaseroot =
+		## Default path if --baseroot option is no specified
+		element defaultbaseroot {
+			k.defaultbaseroot.attlist,
+			text
+		}
+}
+
+#==========================================
+# common element <defaultdestination>
+#
+div {
+	k.defaultdestination.attlist = empty
+	k.defaultdestination =
+		## Default path if --destdir option is not specified
+		element defaultdestination {
+			k.defaultdestination.attlist,
+			text
+		}
+}
+
+#==========================================
+# common element <defaultroot>
+#
+div {
+	k.defaultroot.attlist = empty
+	k.defaultroot =
+		## Default root directory name if --root option is not specified
+		element defaultroot {
+			k.defaultroot.attlist,
+			text
+		}
+}
+
+#==========================================
+# common element <file>
+#
+div {
+	k.file.name.attribute = k.name.attribute
+	k.file.arch.attribute = k.arch.attribute
+	k.file.attlist =
+		k.file.name.attribute &
+		k.file.arch.attribute?
+	k.file =
+		## A pointer to a file
+		element file {
+			k.file.attlist,
+			empty
+		}
+}
+
+#==========================================
+# common element <ignore>
+#
+div {
+	k.ignore.name.attribute = k.name.attribute
+	k.ignore.attlist = k.ignore.name.attribute
+	k.ignore = 
+		## Ignores a package
+		element ignore {
+			k.ignore.attlist,
+			empty
+		}
+}
+
+#==========================================
+# common element <initrd>
+#
+div {
+	k.initrd.attlist = empty
+	k.initrd =
+		## As part of the network deploy configuration this element
+		## specifies where the boot image (initrd) can be found
+		element initrd {
+			k.initrd.attlist,
+			text
+		}
+}
+
+#==========================================
+# common element <instrepo>
+#
+div {
+	k.instrepo.name.attribute = k.name.attribute
+	k.instrepo.priority.attribute =
+		## Search priority for packages in this repo
+		attribute priority { text }
+	k.instrepo.username.attribute = k.username.attribute
+	k.instrepo.pwd.attribute = k.pwd.attribute
+	k.instrepo.attlist =
+		k.instrepo.name.attribute &
+		k.instrepo.priority.attribute &
+		k.instrepo.username.attribute? &
+		k.instrepo.pwd.attribute?
+	k.instrepo =
+		## Name of a repository which is used to create an
+		## installation source
+		element instrepo {
+			k.instrepo.attlist,
+			k.source
+		}
+}
+
+#==========================================
+# common element <kernel>
+#
+div {
+	k.kernel.attlist = empty
+	k.kernel =
+		## As part of the network deploy configuration this section
+		## specifies the where to find the boot kernel
+		element kernel {
+			k.kernel.attlist,
+			text
+		}
+}
+
+#==========================================
+# common element <keytable>
+#
+div {
+	k.keytable.attlist = empty
+	k.keytable =
+		## Image keytable setup. The value will be part of
+		## /etc/sysconfig/keyboard
+		element keytable {
+			k.keytable.attlist,
+			text
+		}
+}
+
+#==========================================
+# common element <locale>
+#
+div { # locale
+	k.locale.attlist = empty
+	k.locale =
+		## Image locale setup. The value will be part of
+		## /etc/sysconfig/language
+		element locale {
+			k.locale.attlist,
+			text
+		}
+}
+
+#==========================================
+# common element <metadata>
+#
+div {
+	k.metadata.attlist = empty
+	k.metadata =
+		## When building an installation source not only packages are
+		## relevant but also metadata. metadata are files or packages combined
+		## with script calls. If a package is specified as metadata it will
+		## not be installed by rpm but its cpio archive is extracted in a
+		## specific way
+		element metadata {
+			k.metadata.attlist,
+			k.repopackage+,
+			k.metafile*
+		}
+}
+
+#==========================================
+# common element <metafile>
+#
+div {
+	k.metafile.url.attribute =
+		## URL where to find the metafile
+		attribute url { text }
+	k.metafile.script.attribute = k.script.attribute
+	k.metafile.target.attribute =
+		## Destination path where to download the file
+		attribute target { text }
+	k.metafile.attlist =
+		k.metafile.url.attribute &
+		k.metafile.script.attribute &
+		k.metafile.target.attribute
+	k.metafile =
+		## A file pointer optionally bundled with a script
+		element metafile {
+			k.metafile.attlist,
+			empty
+		}
+}
+
+#==========================================
+# common element <opensusePattern>
+#
+div {
+	k.opensusepattern.name.attribute = k.name.attribute
+	k.opensusepattern.attlist = k.opensusepattern.name.attribute
+	k.opensusepattern =
+		## Name of a pattern from openSUSE
+		element opensusePattern {
+			k.opensusepattern.attlist,
+			empty
+		}
+}
+
+#==========================================
+# common element <repopackage>
+#
+div {
+	k.repopackage.name.attribute = k.name.attribute
+	k.repopackage.arch.attribute = k.arch.attribute
+	k.repopackage.priority.attribute =
+		## Specifies the search priority
+		attribute priority { text }
+	k.repopackage.addarch.attribute =
+		## Specifies that this package should
+		## additionally add the same package from the given arch
+		attribute addarch { text }
+	k.repopackage.removearch.attribute =
+		## Specifies that the package with the
+		## given arch should be removed
+		attribute removearch { text }
+	k.repopackage.forcearch.attribute =
+		## Specifies that the package with
+		## the given arch should be used in any case
+		attribute forcearch { text }
+	k.repopackage.source.attribute = k.source.attribute
+	k.repopackage.script.attribute = k.script.attribute
+	k.repopackage.attlist =
+		k.repopackage.name.attribute & 
+		k.repopackage.arch.attribute? &
+		k.repopackage.priority.attribute? &
+		k.repopackage.addarch.attribute? &
+		k.repopackage.removearch.attribute? &
+		k.repopackage.source.attribute? &
+		k.repopackage.script.attribute?
+	k.repopackage =
+		## Name of an instsource package
+		element repopackage {
+			k.repopackage.attlist,
+			empty
+		}
+}
+
+#==========================================
+# common element <package>
+#
+div {
+	k.package.name.attribute = k.name.attribute
+	k.package.arch.attribute = k.arch.attribute
+    k.package.attlist =
+		k.package.name.attribute &
+		k.package.arch.attribute?
+	k.package =
+		## Name of an image package
+		element package {
+			k.package.attlist,
+			empty
+		}
+}
+
+#==========================================
+# common element <packagemanager>
+#
+div {
+	k.packagemanager.attlist = empty
+	k.packagemanager =
+		## The package manager used for package installation
+		## could be either zypper or smart
+		element packagemanager {
+			k.packagemanager.attlist,
+			text # zypper or smart
+		}
+}
+
+#==========================================
+# common element <partitions>
+#
+div {
+	k.partitions.device.attribute =
+		## As part of the network deploy configuration this section
+		## specifies the disk device name
+		attribute device { text }
+	k.partitions.attlist = k.partitions.device.attribute?
+	k.partitions =
+		## A list of partitions
+		element partitions { 
+			k.partitions.attlist, 
+			k.partition+
+		}
+}
+
+#==========================================
+# common element <partition>
+#
+div {
+	k.partition.type.attribute =
+		## Partition Type identifier, see fdisk for details
+		attribute type { text }
+	k.partition.number.attribute =
+		## Partition ID
+		attribute number { text }
+	k.partition.size.attribute = k.size.attribute
+	k.partition.mountpoint.attribute = 
+		## Mount path for this partition
+		attribute mountpoint { text }
+	k.partition.target.attribute =
+		## Is a real target or not which means is part of
+		## the /etc/fstab file or not
+		attribute target { xsd:boolean }
+	k.partition.attlist =
+		k.partition.type.attribute &
+		k.partition.number.attribute & 
+		k.partition.size.attribute? &
+		k.partition.mountpoint.attribute? &
+		k.partition.target.attribute?
+	k.partition =
+		## A partition
+		element partition {
+			k.partition.attlist,
+			empty
+		}
+}
+
+#==========================================
+# common element <persistent>
+#
+div {
+	k.persistent.attlist = empty
+	k.persistent =
+		## As part of the split section the persistent element
+		## specifies file names which are in the read-write disk area
+		element persistent {
+			k.persistent.attlist ,
+			k.file*
+		}
+}
+
+#==========================================
+# common element <profile>
+#
+div {
+	k.profile.name.attribute = k.name.attribute
+	k.profile.description.attribute =
+		## Description of how this profiles influences the image
+		attribute description { text }
+	k.profile.attlist =
+		k.profile.name.attribute &
+		k.profile.description.attribute
+	k.profile =
+		## Profiles creates a namespace on an image description and
+		## thus can be used to have one description with different
+		## profiles for example KDE and GNOME including different
+		## packages
+		element profile {
+			k.profile.attlist,
+			empty
+		}
+}
+
+#==========================================
+# common element <repository>
+#
+div {
+	k.repository.type.attribute = attribute type {
+		"apt-deb" | "apt-rpm" | "deb-dir" | "mirrors" | "red-carpet" |
+		"rpm-dir" | "rpm-md"  | "slack-site" | "up2date-mirrors" | "urpmi" |
+		"yast2"
+	}
+	k.repository.status.attribute =
+		## specifies the status of the repository. This can be
+		## replacable or if not specified it's a must have repository
+		attribute status { "replaceable" | "fixed" }
+	k.repository.attlist =
+		k.repository.type.attribute &
+		k.repository.status.attribute?
+	k.repository =
+		## The name of the repository
+		element repository {
+			k.repository.attlist,
+			k.source
+		}
+}
+
+#==========================================
+# common element <rpm-check-signatures>
+#
+div {
+	k.rpm-check-signatures.attlist = empty
+	k.rpm-check-signatures =
+		## Setup if the package manager should check the package
+		## signature or not. This option could be ignored according
+		## to the used package manager
+		element rpm-check-signatures {
+			k.rpm-check-signatures.attlist,
+			text
+		}
+}
+
+#==========================================
+# common element <rpm-force>
+#
+div {
+	k.rpm-force.attlist = empty
+	k.rpm-force =
+		## Setup if the package manager should force the install of the
+		## package or not. This option could be ignored according
+		## to the used package manager
+		element rpm-force {
+			k.rpm-force.attlist,
+			text
+		}
+}
+
+#==========================================
+# common element <size>
+#
+div {
+	k.size.unit.attribute =
+		## The unit of the image
+		attribute unit { "M" | "G" }
+	k.size.attlist = k.size.unit.attribute?
+	k.size =
+		## Specifies the size of an image in (M)egabyte or (G)igabyte
+		element size {
+			k.size.attlist,
+			text
+		}
+}
+
+#==========================================
+# common element <source>
+#
+div {
+	k.source.path.attribute = k.path.attribute
+	k.source.attlist = k.source.path.attribute
+	k.source =
+		## A pointer to a repository/package source
+		element source {
+			k.source.attlist,
+			empty
+		}
+}
+
+#==========================================
+# common element <specification>
+#
+div {
+	k.specification.attlist = empty
+	k.specification =
+		## A detailed description of this image and what it can be
+		## used for.
+		element specification {
+			k.specification.attlist,
+			text
+		}
+}
+
+#==========================================
+# common element <temporary>
+#
+div {
+	k.temporary.attlist = empty
+	k.temporary =
+		## As part of the split section the temporary element
+		## specifies file names which are in the RAM disk  area
+		element temporary {
+			k.temporary.attlist,
+			empty
+		}
+}
+
+#==========================================
+# common element <timeout>
+#
+div {
+	k.timeout.attlist = empty
+	k.timeout = 
+		## As part of the network deploy configuration this section 
+		## specifies an atftp download timeout
+		element timeout {
+			k.timeout.attlist,
+			text
+		}
+}
+
+#==========================================
+# common element <timezone>
+#
+div {
+	k.timezone.attlist = empty
+	k.timezone =  
+		## Image timezone setup. The value will be used to search
+		## the correct timezone and copy it to /etc/localtime
+		element timezone {
+			k.timezone.attlist,
+			text
+		}
+}
+
+#==========================================
+# common element <type>
+#
+div {
+	k.type.baseroot.attribute =
+		## Specify the path to a pre created base root system.
+		attribute baseroot { text }
+	k.type.bootprofile.attribute =
+		## Specifies the boot profile if defined in the boot image
+		## description. Used when KIWI option --add-profile is used
+		attribute bootprofile { text }
+	k.type.boot.attribute =
+		## Specifies the path of the boot image (initrd), relative
+		## to /usr/share/kiwi/image
+		attribute boot { text }
+	k.type.checkprebuilt.attribute =
+		## Activates whether KIWI should search for a prebuild boot
+		## image or not
+		attribute checkprebuilt { xsd:boolean }
+	k.type.flags.attribute =
+		## Specifies flags for the image type. This could be compressed
+		## or unified and applies to the iso type only
+		attribute flags { "unified" | "compressed" }
+	k.type.filesystem.attribute = 
+		## Specifies the filesystem:
+		## ext2 | ext3 | reiserfs | squashfs | cpio
+		attribute filesystem {
+			"ext2" | "ext3" | "reiserfs" | "squashfs" | "cpio" | "cramfs"
+		} 
+	k.type.format.attribute =
+		## Specifies the format of the virtual disk. This applies to the
+		## vmx/oem types only.
+		attribute format {
+			"vvfat" | "vpc" | "bochs" | "dmg" | "cloop" | "vmdk" | "qcow" |
+			"cow" | "iso" | "usb"
+		}
+	k.type.primary.attribute =
+		## Specifies the primary type (choose KIWI option --type)
+		attribute primary { xsd:boolean }
+	k.type.attlist =
+		k.type.checkprebuilt.attribute? &
+		k.type.bootprofile.attribute? &
+		k.type.boot.attribute? &
+		k.type.flags.attribute? &
+		k.type.filesystem.attribute? &
+		k.type.baseroot.attribute? &
+		k.type.format.attribute? &
+		k.type.primary.attribute?
+	k.type =
+		## The image type of the logical extend.
+		element type { 
+			k.type.attlist, 
+			text 
+		}
+}
+
+#==========================================
+# common element <union>
+#
+div {
+	k.union.ro.attribute =
+		## Device only for read-only 
+		attribute ro { text }
+	k.union.rw.attribute =
+		## Device for Read-Write
+		attribute rw { text }
+	k.union.type.attribute = attribute type { "aufs" | "unionfs" }
+	k.union.attlist =
+		k.union.ro.attribute &
+		k.union.rw.attribute &
+		k.union.type.attribute
+	
+	k.union =  
+		## As part of the network deploy configuration this section
+		## specifies the overlay filesystem setup if required by the
+		## filesystem type of the system image. An overlay setup is
+		## only required if the system image uses a squashfs compressed
+		## filesystem.
+		element union {
+			k.union.attlist,
+			empty
+		}
+}
+
+#==========================================
+# common element <user>
+#
+div {
+	k.user.name.attribute = k.name.attribute
+	k.user.realname.attribute =
+		## The name of an user
+		attribute realname { text }
+	k.user.pwd.attribute = k.pwd.attribute
+	k.user.home.attribute =
+		## The home directory for this user
+		attribute home { text }
+	k.user.shell.attribute =
+		## The shell for this user
+		attribute shell { text }
+	k.user.attlist =
+		k.user.name.attribute &
+		k.user.realname.attribute? &
+		k.user.pwd.attribute &
+		k.user.home.attribute &
+		k.user.shell.attribute?
+	k.user =
+		## A user with name, password, path to its home and shell
+		element user {
+			k.user.attlist,
+			empty
+		}
+}
+
+#==========================================
+# common element <version>
+#
+div {
+	k.version.attlist = empty
+	k.version =
+		## A version number for the image, consists of Major.Minor.Release 
+		element version {
+			k.version.attlist,
+			text
+		}
+}
+
+#==========================================
+# main block: <deploy>
+#
+div {
+	k.deploy.server.attribute =
+		## Name or IP Address of server for downloading the data
+		attribute server { text }
+	k.deploy.blocksize.attribute = 
+		## Blocksize value used for atftp downloads
+		attribute blocksize { text }
+	k.deploy.attlist =
+		k.deploy.server.attribute &
+		k.deploy.blocksize.attribute
+	k.deploy =
+		## The deploy section is used to allow kiwi to create the
+		## config.<MAC> file required by PXE based network images.
+		## the contents of this file controls the image deploy process
+		element deploy {
+			k.deploy.attlist,
+			k.timeout?,
+			k.commandline?,
+			k.kernel?,
+			k.initrd?,
+			k.partitions?,
+			k.union?,
+			k.configuration*
+		}
+}
+
+#==========================================
+# main block: <description>
+#
+div {
+	k.description.type.attribute = 
+		## Kiwi distinguishes between two basic image description types
+		## which uses the same format but one is created and provided by
+		## the kiwi developers and the other is created by the users of
+		## kiwi. The type=boot specifies a boot image (initrd) which should
+		## be provided by the kiwi developers wheras type=system specifies
+		## a standard image description created by a kiwi user.
+		attribute type { "boot" | "system" }
+	k.description.attlist = k.description.type.attribute
+	k.description =  
+		## A short description
+		element description {
+			k.description.attlist,
+			k.author,
+			k.contact+,
+			k.specification
+		}
+}
+
+#==========================================
+# main block: <drivers>
+#
+div {
+	k.drivers.type.attribute = attribute type {
+		"drivers" | "usbdrivers" | "scsidrivers" | "netdrivers"
+	}
+	k.drivers.profiles.attribute = k.profiles.attribute
+	k.drivers.attlist = 
+		k.drivers.type.attribute &
+		k.drivers.profiles.attribute?
+		
+	k.drivers =
+		## A collection of driver files 
+		element drivers {
+			k.drivers.attlist,
+			k.file+
+		}
+}
+
+#==========================================
+# main block: <instsource>
+#
+div {
+	k.instsource.arch.attribute = k.arch.attribute
+	k.instsource.attlist = k.instsource.arch.attribute
+	k.instsource =  
+		## The instsource element is used to describe the packages
+		## and the metadata which is required to build an installation
+		## source suitable for Novell SUSE Linux installation media.
+		## From such a source it should be possible to create the
+		## standard SUSE CD/DVD's as well as use this source as
+		## repository for image building
+		element instsource {
+			k.instsource.attlist,
+			k.instrepo+,
+			k.metadata,
+			k.repopackages
+		}
+}
+
+#==========================================
+# main block: <repopackages>
+#
+div {
+	k.repopackages.attlist = empty
+	k.repopackages =  
+		## The repopackages elements specifies a set of packages which
+		## are used for creating a Novell SUSE installation source
+		element repopackages {
+			k.repopackages.attlist,
+			k.repopackage*
+		}
+}
+
+#==========================================
+# main block: <packages>
+#
+div {
+	k.packages.type.attribute = attribute type {
+		"image" | "boot" | "delete" | "xen" | "vmware"
+	}
+	k.packages.memory.attribute =
+		## The memory setup for the guest VM. Used only with the
+		## packages types xen and vmware
+		attribute memory { text }
+	k.packages.disk.attribute =
+		## The virtual disk device name of the guest VM. Used only
+		## with the packages types xen and vmware
+		attribute disk { text }
+	k.packages.profiles.attribute =
+		## Namespace this section applies to. If not specified it
+		## applies to all namespaces
+		attribute profiles { text }
+	k.packages.patternType.attribute =
+		## Selection type for patterns. Could be onlyRequired
+		## plusSuggested or plusRecommended
+		attribute patternType {
+			"onlyRequired" | "plusSuggested" | "plusRecommended"
+		}
+	k.packages.patternPackageType.attribute =
+		## Selection type for packages in patterns. Could be
+		## onlyRequired, plusSuggested or plusRecommended
+		attribute patternPackageType {
+			"onlyRequired" | "plusSuggested" | "plusRecommended"
+		}
+	k.packages.attlist =
+		k.packages.type.attribute &
+		k.packages.memory.attribute? &
+		k.packages.disk.attribute? &
+		k.packages.profiles.attribute? &
+		k.packages.patternType.attribute? &
+		k.packages.patternPackageType.attribute?
+	k.packages =
+		## The packages elements specifies a set of packages and/or patterns
+		## which are used in different stages of the image building process
+		## and also depends of the selected image output type
+		element packages {
+			k.packages.attlist,
+			k.package*,
+			k.opensusepattern*,
+			k.ignore*
+		}
+}
+
+#==========================================
+# main block: <preferences>
+#
+div {
+	k.preferences.attlist = empty
+	k.preferences =  
+		## Configuration information needed for logical extend
+		element preferences {
+			k.preferences.attlist,
+			k.type+,
+			k.version,
+			k.size?,
+			k.compressed?,
+			k.packagemanager?,
+			k.rpm-check-signatures?,
+			k.rpm-force?,
+			k.keytable?,
+			k.timezone?,
+			k.locale?,
+			k.defaultdestination?,
+			k.defaultroot?,
+			k.defaultbaseroot?
+		}
+}
+
+#==========================================
+# main block: <profiles>
+#
+div {
+	k.profiles.attlist = empty
+	k.profiles =  
+		## Namespace section which creates a namespace and the
+		## description of this namespace. The section packages and
+		## drivers can bind itself to one of the listed namespaces
+		element profiles {
+			k.profiles.attlist,
+			k.profile+
+		}
+}
+
+#==========================================
+# main block: <split>
+#
+div {
+	k.split.attlist = empty
+	k.split =  
+		## When the image type split is requested the image will be splitted
+		## into a read-only and a read-write image portion. Each portion
+		## can have different filesystems and the split section describes
+		## which files/directories should go in what portion
+		element split {
+			k.split.attlist,
+			k.temporary?,
+			k.persistent?
+		}
+}
+
+#==========================================
+# main block: <users>
+#
+div {
+	k.users.group.attribute =
+		## Contains the group to which the user belongs
+		attribute group { text }
+	k.users.attlist = k.users.group.attribute
+	k.users = 
+		## A list of users
+		element users {
+			k.users.attlist,
+			k.user+
+		}
+}
+

@@ -88,7 +88,7 @@ if ( ! defined $System ) {
 	$System  = $BasePath."/image";
 }
 our $Tools   = $BasePath."/tools";
-our $Scheme  = $BasePath."/modules/KIWIScheme.xsd";
+our $Scheme  = $BasePath."/modules/KIWIScheme.rng";
 our $KConfig = $BasePath."/modules/KIWIConfig.sh";
 our $KMigrate= $BasePath."/modules/KIWIMigrate.txt";
 our $Revision= $BasePath."/.revision";

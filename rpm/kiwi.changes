@@ -6,6 +6,9 @@ Wed Dec 12 18:56:14 CET 2007 - ms@suse.de
 - added KIWIUtil.pm module used by Jan-Christoph Bornschlegel
 - fixed swap file setup if filesystem type is unknown (#348623)
 - fixed umount of iso loop mounted paths (#348722)
+- fixed searchSwapSpace / searchDiskSpace function to return
+  after first match (#349123)
+- moved schema description from xsd to RelaxNG (#348084)
 
 -------------------------------------------------------------------
 Tue Dec 11 11:28:47 CET 2007 - ms@suse.de

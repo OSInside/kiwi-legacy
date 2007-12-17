@@ -6,6 +6,7 @@
 # ---
 buildroot = /
 syslinux  = /usr/share/syslinux
+bindlib   = lib
 
 export
 
@@ -36,12 +37,7 @@ TFTPIMAGE   = ${tftp_prefix}/image
 PACKDOCVZ   = ${doc_prefix}/kiwi
 MANVZ       = ${man_prefix}/man1
 
-all:
-	#============================================
-	# Check XSD Scheme...
-	#--------------------------------------------
-	find -name config.xml | xargs xmllint -noout -schema modules/KIWIScheme.xsd 
-
+all: modules/KIWIScheme.rng
 	#============================================
 	# create checksum files for boot images...
 	#--------------------------------------------
@@ -112,3 +108,23 @@ install:
 	# Install image descriptions
 	#--------------------------------------------
 	cp -a system/boot/* ${KIWIIMAGE}
+
+modules/KIWIScheme.rng: modules/KIWIScheme.rnc
+	#============================================
+	# Convert RNC -> RNG...
+	#--------------------------------------------
+	@echo "*** Converting KIWI RNC -> RNG..."
+	trang -I rnc -O rng modules/KIWIScheme.rnc modules/KIWIScheme.rng
+
+	#============================================
+	# Check RNG Scheme...
+	#--------------------------------------------
+	for i in `find -name config.xml`;do \
+		echo $$i; j=`jing modules/KIWIScheme.rng $$i`;if test ! -z "$$j";then\
+			echo $$j; break;\
+		fi;\
+	done; test -z "$$j" || false
+
+clean:
+	rm -f modules/KIWIScheme.rng
+	${MAKE} -C tools clean
