@@ -265,6 +265,7 @@ cat kiwi.loader
 %doc %{_defaultdocdir}/kiwi/COPYING
 %doc %{_defaultdocdir}/kiwi/examples
 %doc %{_defaultdocdir}/kiwi/kiwi.pdf
+%doc %{_defaultdocdir}/kiwi/ChangeLog
 %{_datadir}/kiwi/.revision
 %{_datadir}/kiwi/modules
 %{_sbindir}/kiwi

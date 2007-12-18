@@ -13,6 +13,7 @@
 #-------------------------------------------
 ./.version > .revision
 rm -rf `find -type d | grep .svn`
+mv rpm/kiwi.changes doc/ChangeLog
 rm -rf rpm/
 
 cd ..
