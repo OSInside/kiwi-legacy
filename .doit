@@ -104,7 +104,7 @@ sub checkout {
 #
 	my $pacdir = svnup (@_);
 	chdir $pacdir;
-	qx( mv kiwi/rpm/* . );
+	qx( cp kiwi/rpm/* . );
 	chdir "./kiwi";
 	qx (./.archive);
 	chdir $pacdir;
