@@ -4,10 +4,6 @@
 # just set the package kiwi-tools in your config.xml file
 # ----
 
-/etc/init.d/boot.xen
-   * can be used for xen guests to boot correctly concerning the
-     tty restrictions of a Xen guest
-
 /usr/bin/startshell
    * small tool to run a shell on a specified console. Most often
      used in initrd images for providing shell access while init

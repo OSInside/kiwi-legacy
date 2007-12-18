@@ -304,7 +304,6 @@ cat kiwi.loader
 %files -n kiwi-tools
 %defattr(-, root, root)
 %doc %{_defaultdocdir}/kiwi/README.tools
-/etc/init.d/*
 /usr/bin/*
 
 #=================================================
