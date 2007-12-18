@@ -45,9 +45,9 @@ all: modules/KIWIScheme.rng
 	(cd system/boot && chmod -R u-w .)
 
 	#============================================
-	# resolve relative links
+	# resolve links
 	#--------------------------------------------
-	# ./.links
+	./.links
 
 	#============================================
 	# build tools
