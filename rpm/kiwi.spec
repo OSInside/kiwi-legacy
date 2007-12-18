@@ -5,11 +5,18 @@
 # ---
 # needsrootforbuild
 Name:          kiwi
-BuildRequires: perl smart perl-XML-LibXML perl-libwww-perl screen module-init-tools zlib-devel jing trang
+%if %{suse_version} > 1030
+BuildRequires: perl smart perl-XML-LibXML perl-libwww-perl screen module-init-tools zlib-devel jing trang swig libsatsolver libsatsolver-devel
+%else
+BuildRequires: perl smart perl-XML-LibXML perl-libwww-perl screen module-init-tools zlib-devel
+%endif
 %ifarch %ix86 x86_64
 BuildRequires: syslinux
 %endif
 Requires:      perl perl-XML-LibXML perl-libwww-perl screen coreutils
+%if %{suse_version} > 1030
+Requires:      libsatsolver
+%endif
 Summary:       OpenSuSE - KIWI Image System
 Version:       2.04
 Release:       28
@@ -258,6 +265,10 @@ cat kiwi.loader
 %{_datadir}/kiwi/.revision
 %{_datadir}/kiwi/modules
 %{_sbindir}/kiwi
+%if %{suse_version} > 1030
+%{perl_vendorarch}/SaT.pm
+%{perl_vendorarch}/auto/SaT
+%endif
 
 #=================================================
 # KIWI-pxeboot files...  
