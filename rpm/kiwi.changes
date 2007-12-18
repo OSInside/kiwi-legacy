@@ -12,6 +12,7 @@ Wed Dec 12 18:56:14 CET 2007 - ms@suse.de
 - resize ramdisk filesystem to get full access (#348316)
 - added first version of SaT module (#348734)
 - added /usr/share/doc/packages/kiwi/ChangeLog (#349492)
+- added cleanup code for temporary resolv.conf (#349491)
 
 -------------------------------------------------------------------
 Tue Dec 11 11:28:47 CET 2007 - ms@suse.de

@@ -599,6 +599,16 @@ sub setup {
 		qx ( rm -f $root/tmp/config.sh );
 		$kiwi -> done ();
 	}
+	#========================================
+	# cleanup temporary copy of resolv.conf
+	#----------------------------------------
+	my $data = qx (diff -q /etc/resolv.conf $root/etc/resolv.conf);
+	my $code = $? >> 8;
+	if ($code == 0) {
+		$kiwi -> info ("Cleanup temporary copy of resolv.conf");
+		qx (rm -f $root/etc/resolv.conf);
+		$kiwi -> done ();
+	}
 	return $this;
 }
 
