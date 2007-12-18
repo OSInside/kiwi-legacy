@@ -14,7 +14,7 @@ int main (void) {
 	FILE   *fp     = 0;
 	int b;
 	Queue  queue;
-	int fd = open ("/suse/ms/primary", O_RDONLY);
+	int fd = open ("tmp/primary", O_RDONLY);
 	if (fd == -1) {
 		return 1;
 	}

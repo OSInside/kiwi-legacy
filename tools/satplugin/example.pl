@@ -5,7 +5,7 @@ use lib './blib/arch/auto/SaT';
 use SaT;
 
 # Open Solvable file
-open(F, "cat /suse/ms/primary |") || die;
+open(F, "gzip -cd tmp/primary.gz |") || die;
 
 # Create Pool and Repository 
 my $pool = new SaT::_Pool;
