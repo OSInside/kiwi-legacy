@@ -14,7 +14,13 @@ install:
 	install -m 755 startshell/startshell ${TOOLSVZ}
 	install -m 755 pigz/pigz ${TOOLSVZ}
 	install -m 755 wrapper/* ${TOOLSVZ}
-	( cd ./satplugin && make DESTDIR=${buildroot} install_vendor )
+	( \
+		if test -x /usr/bin/swig;then \
+			cd ./satplugin && make DESTDIR=${buildroot} install_vendor;\
+		else \
+			true;\
+		fi\
+	)
 
 clean:
 	${MAKE} -C startshell clean
