@@ -2,8 +2,11 @@ all:
 	${MAKE} -C startshell all
 	${MAKE} -C pigz all
 	( \
-		cd ./satplugin && \
-		make -f Makefile.swig && make BINDLIB=${bindlib} \
+		if test -x /usr/bin/swig;then \
+			cd ./satplugin && make -f Makefile.swig && make BINDLIB=${bindlib};\
+		else \
+			true;\
+		fi\
 	)
 
 install:
