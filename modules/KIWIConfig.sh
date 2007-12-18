@@ -375,7 +375,7 @@ function suseStripInitrd {
 		/usr/lib*/perl* /usr/share/locale* /usr/share/doc/packages /var/lib/rpm
 		/usr/lib*/rpm /var/lib/smart /boot/* /opt/* /usr/include /root/.gnupg
 		/etc/PolicyKit /etc/sysconfig /etc/init.d /etc/profile.d /etc/skel
-		/etc/ssl /etc/java /etc/default /etc/cron* /etc/dbus* /etc/modprobe*
+		/etc/ssl /etc/java /etc/default /etc/cron* /etc/dbus*
 		/etc/pam.d* /etc/DIR_COLORS /etc/rc* /usr/share/hal /usr/share/ssl
 		/usr/lib*/hal /usr/lib*/*.a /usr/lib*/*.la /usr/lib*/librpm*
 		/usr/lib*/libssl* /usr/lib*/libpanel* /usr/lib*/libncursesw*

@@ -154,6 +154,18 @@ CDUmount
 #--------------------------------------
 if [ -z "$UNIONFS_CONFIG" ];then
 	probeFileSystem $imageDevice
+	if test "$FSTYPE" = "reiserfs";then
+		Echo "Resize Reiser filesystem to full ramdisk space..."
+		resize_reiserfs $imageDevice
+	fi
+	if test "$FSTYPE" = "ext2";then
+		Echo "Resize EXT2 filesystem to full ramdisk space..."
+		resize2fs -f $imageDevice
+	fi
+	if test "$FSTYPE" = "ext3";then
+		Echo "Resize EXT3 filesystem to full ramdisk space..."
+		resize2fs -f $imageDevice
+	fi
 fi
 
 #======================================

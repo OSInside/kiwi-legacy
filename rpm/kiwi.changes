@@ -9,6 +9,8 @@ Wed Dec 12 18:56:14 CET 2007 - ms@suse.de
 - fixed searchSwapSpace / searchDiskSpace function to return
   after first match (#349123)
 - moved schema description from xsd to RelaxNG (#348084)
+- resize ramdisk filesystem to get full access (#348316)
+- added first version of SaT module (#348734)
 
 -------------------------------------------------------------------
 Tue Dec 11 11:28:47 CET 2007 - ms@suse.de
