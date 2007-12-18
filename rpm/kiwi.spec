@@ -250,7 +250,7 @@ rm -rf $RPM_BUILD_ROOT/usr/share/doc/packages/kiwi/kiwi-man
 %perl_process_packlist
 
 rm -f $RPM_BUILD_ROOT/%{perl_vendorarch}/example.pl
-rm -f /var/adm/perl-modules/kiwi
+rm -f $RPM_BUILD_ROOT/var/adm/perl-modules/kiwi
 cat kiwi.loader
 
 #=================================================
