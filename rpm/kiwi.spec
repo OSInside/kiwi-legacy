@@ -6,9 +6,9 @@
 # needsrootforbuild
 Name:          kiwi
 %if %{suse_version} > 1030
-BuildRequires: perl smart perl-XML-LibXML perl-libwww-perl screen module-init-tools zlib-devel jing trang swig libsatsolver libsatsolver-devel
+BuildRequires: perl smart perl-XML-LibXML perl-libwww-perl screen module-init-tools zlib-devel jing trang swig libsatsolver libsatsolver-devel db-devel gcc-c++ libexpat-devel
 %else
-BuildRequires: perl smart perl-XML-LibXML perl-libwww-perl screen module-init-tools zlib-devel
+BuildRequires: perl smart perl-XML-LibXML perl-libwww-perl screen module-init-tools zlib-devel jing trang
 %endif
 %ifarch %ix86 x86_64
 BuildRequires: syslinux
@@ -247,7 +247,10 @@ test -f $RPM_BUILD_ROOT/srv/tftpboot/mboot.c32 && \
 install -m 644 tools/README \
 	$RPM_BUILD_ROOT/usr/share/doc/packages/kiwi/README.tools
 rm -rf $RPM_BUILD_ROOT/usr/share/doc/packages/kiwi/kiwi-man
+%perl_process_packlist
 
+rm -f $RPM_BUILD_ROOT/%{perl_vendorarch}/example.pl
+rm -f /var/adm/perl-modules/kiwi
 cat kiwi.loader
 
 #=================================================
