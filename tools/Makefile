@@ -2,7 +2,7 @@ all:
 	${MAKE} -C startshell all
 	${MAKE} -C pigz all
 	( \
-		if test -x /usr/bin/swig;then \
+		if test -d /usr/include/satsolver;then \
 			cd ./satplugin && make -f Makefile.swig && make BINDLIB=${bindlib};\
 		else \
 			true;\
@@ -15,7 +15,7 @@ install:
 	install -m 755 pigz/pigz ${TOOLSVZ}
 	install -m 755 wrapper/* ${TOOLSVZ}
 	( \
-		if test -x /usr/bin/swig;then \
+		if test -d /usr/include/satsolver;then \
 			cd ./satplugin && make DESTDIR=${buildroot} install_vendor;\
 		else \
 			true;\

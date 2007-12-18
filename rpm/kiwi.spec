@@ -5,18 +5,14 @@
 # ---
 # needsrootforbuild
 Name:          kiwi
-%if %{suse_version} > 1030
-BuildRequires: perl smart perl-XML-LibXML perl-libwww-perl screen module-init-tools zlib-devel jing trang swig libsatsolver libsatsolver-devel db-devel gcc-c++ libexpat-devel
-%else
 BuildRequires: perl smart perl-XML-LibXML perl-libwww-perl screen module-init-tools zlib-devel jing trang
-%endif
 %ifarch %ix86 x86_64
 BuildRequires: syslinux
 %endif
-Requires:      perl perl-XML-LibXML perl-libwww-perl screen coreutils
 %if %{suse_version} > 1030
-Requires:      libsatsolver
+BuildRequires: swig libsatsolver libsatsolver-devel db-devel gcc-c++ libexpat-devel
 %endif
+Requires:      perl perl-XML-LibXML perl-libwww-perl screen coreutils
 Summary:       OpenSuSE - KIWI Image System
 Version:       2.04
 Release:       28
