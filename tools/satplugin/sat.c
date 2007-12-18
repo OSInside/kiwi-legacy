@@ -6,7 +6,7 @@
 #include <satsolver/repo_solv.h>
 #include <satsolver/policy.h>
 
-Solvable* select_solvable (Repo*, Pool*,char*);
+Id select_solvable (Repo*, Pool*,char*);
 
 int main (void) {
 	Pool   *pool   = 0;
@@ -27,17 +27,16 @@ int main (void) {
 	fclose(fp);
 	close (fd);
 
+	Repo *empty_installed = repo_create(pool, "empty");
+
+	pool_createwhatprovides(pool);
 
 	queue_init (&queue);
+	queue_push (&queue, SOLVER_INSTALL_SOLVABLE);
+	queue_push (&queue, select_solvable(new_repo,pool,"pattern:default"));
 
-	queue_push (&queue, SOLVER_INSTALL_SOLVABLE_NAME);
-	queue_push (&queue, select_solvable(new_repo,pool,"pattern:default")->name);
 
-
-	Repo *empty_installed = repo_create(pool, "empty");
-	pool_createwhatprovides(pool);
 	solver = solver_create (pool,empty_installed);
-
 
 	solver_solve (solver, &queue);
 	
@@ -58,7 +57,7 @@ int main (void) {
 	return 0;
 }
 
-Solvable* select_solvable (Repo *repo, Pool* pool,char *name) {
+Id select_solvable (Repo *repo, Pool* pool,char *name) {
 	Id id;
 	Queue plist;
 	int i, end;
@@ -85,5 +84,5 @@ Solvable* select_solvable (Repo *repo, Pool* pool,char *name) {
 	}
 	id = plist.elements[0];
 	queue_free(&plist);
-	return pool->solvables + id;
+	return id;
 }

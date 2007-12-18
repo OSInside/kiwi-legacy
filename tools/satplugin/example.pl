@@ -18,17 +18,17 @@ close(F) || die;
 # Create Solver
 my $solver = new SaT::Solver ($pool);
 
+# Create dependencies to provides table
+$pool -> createWhatProvides();
+
 # Create Queue
 my $job = new SaT::Queue;
 
 # Push jobs on Queue
 $job -> queuePush ( $SaT::SOLVER_INSTALL_SOLVABLE );
-if (! $job -> queuePush ( $pool -> selectSolvable ($repo,"pattern:base"))) {
+if (! $job -> queuePush ( $pool -> selectSolvable ($repo,"pattern:default"))) {
 	die "failed to push job";
 }
-
-# Create dependencies to provides table
-$pool -> createWhatProvides();
 
 # Solve the jobs
 $solver -> solve ($job);
