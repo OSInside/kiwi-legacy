@@ -13,6 +13,12 @@ Wed Dec 12 18:56:14 CET 2007 - ms@suse.de
 - added first version of SaT module (#348734)
 - added /usr/share/doc/packages/kiwi/ChangeLog (#349492)
 - added cleanup code for temporary resolv.conf (#349491)
+- added baseSetupBusyBox function which allows you to replace
+  the mentioned programs in busybox.links by a link to the
+  busybox binary. This function should be used in boot images
+  only and can reduce the size of your boot image. Using this
+  function requires the package busybox to be installed as
+  part of the boot image config.xml (#349181)
 
 -------------------------------------------------------------------
 Tue Dec 11 11:28:47 CET 2007 - ms@suse.de

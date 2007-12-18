@@ -362,6 +362,45 @@ function baseSetupInPlaceGITRepository {
 }
 
 #======================================
+# baseSetupBusyBox
+#--------------------------------------
+function baseSetupBusyBox {
+	# /.../
+	# activates busybox if installed for all links from
+	# the busybox/busybox.links file - you can choose custom apps to
+	# be forced into busybox with the "-f" option as first parameter
+	# ---
+	# example: baseSetupBusyBox -f /bin/zcat /bin/vi
+	# ---
+	local applets=""
+	local force="no"
+	local busyboxlinks="/usr/share/busybox/busybox.links"
+	if ! rpm -q --quiet busybox; then
+		echo "Busybox not installed... skipped"
+		return 0;
+	fi
+	if [ $# -gt 0 ] && [ "$1" = "-f" ]; then
+		force="yes"
+		shift
+	fi
+	if [ $# -gt 0 ]; then
+		for i in "$@"; do
+			if grep -q "^$i$" "$busyboxlinks"; then 
+				applets="${applets} $i"
+			fi
+		done
+	else
+		applets=`cat "$busyboxlinks"`
+	fi
+	for applet in $applets; do
+		if [ ! -f "$applet" ] || [ "$force" = "yes" ]; then
+			echo "Busybox Link: ln -sf /usr/bin/busybox $applet"
+			ln -sf /usr/bin/busybox "$applet"
+		fi
+	done
+}
+
+#======================================
 # suseStripInitrd
 #--------------------------------------
 function suseStripInitrd {
