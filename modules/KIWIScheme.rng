@@ -1265,8 +1265,12 @@ filesystem.</a:documentation>
     </define>
     <define name="k.deploy.attlist">
       <interleave>
-        <ref name="k.deploy.server.attribute"/>
-        <ref name="k.deploy.blocksize.attribute"/>
+        <optional>
+          <ref name="k.deploy.server.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.deploy.blocksize.attribute"/>
+        </optional>
       </interleave>
     </define>
     <define name="k.deploy">
