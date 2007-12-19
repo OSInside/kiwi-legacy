@@ -5,7 +5,7 @@
 # ---
 # needsrootforbuild
 Name:          kiwi
-BuildRequires: perl smart perl-XML-LibXML perl-libwww-perl screen module-init-tools zlib-devel jing trang
+BuildRequires: perl smart perl-XML-LibXML perl-libwww-perl screen module-init-tools zlib-devel
 %ifarch %ix86 x86_64
 BuildRequires: syslinux
 %endif
@@ -143,9 +143,6 @@ export K_USER=0 # set value to -1 to prevent building boot images
 rm -rf $RPM_BUILD_ROOT
 test -e /.buildenv || export K_USER=-1 # no buildenv, no boot image build
 test -e /.buildenv && . /.buildenv
-if [ -x /usr/bin/java ];then
-	rm modules/KIWIScheme.rng
-fi
 make buildroot=$RPM_BUILD_ROOT CFLAGS="$RPM_OPT_FLAGS"
 
 if [ "$UID" = "$K_USER" ];then
