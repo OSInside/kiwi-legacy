@@ -708,10 +708,9 @@ div {
 		attribute flags { "unified" | "compressed" }
 	k.type.filesystem.attribute = 
 		## Specifies the filesystem:
-		## ext2 | ext3 | reiserfs | squashfs | cpio
-		attribute filesystem {
-			"ext2" | "ext3" | "reiserfs" | "squashfs" | "cpio" | "cramfs"
-		} 
+		## ext2 | ext3 | reiserfs | squashfs | cpio. or a combination
+		## of two of these types with the split image type
+		attribute filesystem { text }
 	k.type.format.attribute =
 		## Specifies the format of the virtual disk. This applies to the
 		## vmx/oem types only.

@@ -1075,15 +1075,8 @@ or unified and applies to the iso type only</a:documentation>
     <define name="k.type.filesystem.attribute">
       <attribute name="filesystem">
         <a:documentation>Specifies the filesystem:
-ext2 | ext3 | reiserfs | squashfs | cpio</a:documentation>
-        <choice>
-          <value>ext2</value>
-          <value>ext3</value>
-          <value>reiserfs</value>
-          <value>squashfs</value>
-          <value>cpio</value>
-          <value>cramfs</value>
-        </choice>
+ext2 | ext3 | reiserfs | squashfs | cpio. or a combination
+of two of these types with the split image type</a:documentation>
       </attribute>
     </define>
     <define name="k.type.format.attribute">
