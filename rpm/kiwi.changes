@@ -1,4 +1,16 @@
 -------------------------------------------------------------------
+Wed Dec 19 11:46:24 CET 2007 - ms@suse.de
+
+- v2.05
+- fixed package check when zypper is used (#348031)
+- fixed size of boot images when zypper is used (#348031)
+- make isoboot linuxrc to be more verbose (#349764)
+- added product information when zypper is used. This can
+  be done by a function named suseSetupProductInformation()
+  The function must be called in config.sh (#348029)
+- fixed permission setup in Makefile
+
+-------------------------------------------------------------------
 Wed Dec 12 18:56:14 CET 2007 - ms@suse.de
 
 - v2.04

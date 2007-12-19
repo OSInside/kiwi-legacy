@@ -42,7 +42,7 @@ all: modules/KIWIScheme.rng
 	# create checksum files for boot images...
 	#--------------------------------------------
 	(cd system/boot && ./.md5)
-	(cd system/boot && chmod -R u-w .)
+	(cd system/boot && chmod -R u-w *boot)
 
 	#============================================
 	# build tools

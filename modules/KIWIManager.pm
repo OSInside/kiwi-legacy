@@ -848,16 +848,6 @@ sub setupRootSystem {
 			my @installOpts = (
 				"--auto-agree-with-licenses"
 			);
-			#FIXME:
-			# zypper can't setup multiple --repo options and --catalog
-			# option is gone. I'm lost here in saying use only the kiwi
-			# created zypper services for this image. Therefore this is
-			# disabled now. I hope if the --data-dir options are available
-			# we can solve this in a clean way
-			# ----
-			#foreach my $c (@channelList) {
-			#	push (@installOpts,"--repo $c");
-			#}
 			#==========================================
 			# Add package manager to package list
 			#------------------------------------------
@@ -1011,15 +1001,15 @@ sub setupPackageInfo {
 			$this -> checkExclusiveLock();
 			$kiwi -> info ("Checking for package: $pack");
 			$this -> setLock();
-			$data = qx ( zypper info $pack 2>&1 | grep -qi $str 2>&1 );
+			$data = qx ( rpm -q $pack 2>&1 );
 			$code = $? >> 8;
 			$this -> freeLock();
 		} else {
 			$kiwi -> info ("Checking for package: $pack");
-			$data= qx (chroot $root @zypper info $pack 2>&1|grep -qi $str 2>&1);
+			$data= qx (chroot $root rpm -q $pack 2>&1 );
 			$code= $? >> 8;
 		}
-		if ($code == 0) {
+		if ($code != 0) {
 			$kiwi -> failed  ();
 			$kiwi -> error   ("Package $pack is not installed");
 			$kiwi -> skipped ();

@@ -125,8 +125,8 @@ IFS="," ; for i in $IMAGE;do
 			"reboot"
 		fi
 		Echo "Loading $imageName [$imageDevice]..."
-		gzip -cd $gzippName | dd of=$imageDevice >/dev/null 2>&1
-		dd if=$imageDevice bs=1024 2>/dev/null |\
+		gzip -cd $gzippName | dd of=$imageDevice
+		dd if=$imageDevice bs=1024 |\
 			head --bytes=$((blocks * blocksize)) |\
 			md5sum - > /etc/ireal.md5
 		read sum2 dumy < /etc/ireal.md5
@@ -199,17 +199,17 @@ else
 				SWSIZE=64
 			fi
 			SWFILE=/mnt/kiwiswap
-			if ! mount -t $SWTYPE $swapDevice /mnt >/dev/null 2>&1;then
+			if ! mount -t $SWTYPE $swapDevice /mnt;then
 				Echo "Failed to mount swap device on: $swapDevice"
 				unset swapDevice
 			fi
 			if [ ! -f $SWFILE ];then
-				dd if=/dev/zero of=$SWFILE bs=1M count=$SWSIZE &>/dev/null
+				dd if=/dev/zero of=$SWFILE bs=1M count=$SWSIZE >/dev/null
 				if [ ! $? = 0 ];then
 					Echo "Failed to create swap file on: $swapDevice"
 					unset swapDevice
 				fi
-				if ! mkswap $SWFILE &>/dev/null;then
+				if ! mkswap $SWFILE >/dev/null;then
 					Echo "Failed to initialize swap file"
 					unset swapDevice
 				fi
@@ -227,10 +227,10 @@ if [ -z "$UNIONFS_CONFIG" ];then
 	#======================================
 	# 12.1) mount RW part and CD to /mnt
 	#--------------------------------------
-	if ! mount $imageDevice /mnt &>/dev/null;then
+	if ! mount $imageDevice /mnt >/dev/null;then
 		systemException "Failed to mount RW root filesystem" "reboot"
 	fi
-	mkdir -p /mnt/$LIVECD && mount $cddev /mnt/$LIVECD &>/dev/null
+	mkdir -p /mnt/$LIVECD && mount $cddev /mnt/$LIVECD >/dev/null
 
 	#======================================
 	# 12.2) Create RO Link list
@@ -260,7 +260,7 @@ else
 	# 12.1) mount CD to /mnt and unify
 	#--------------------------------------
 	Echo "Mounting compressed unified tree..."
-	mkdir -p /mnt/$LIVECD && mount $cddev /mnt/$LIVECD &>/dev/null
+	mkdir -p /mnt/$LIVECD && mount $cddev /mnt/$LIVECD >/dev/null
 	losetup /dev/loop1 /mnt/$LIVECD/$imageReadOnly
 	if ! mountSystem /dev/loop1;then
 		systemException "Failed to mount root filesystem" "reboot"

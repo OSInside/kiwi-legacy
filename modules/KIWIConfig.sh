@@ -418,12 +418,12 @@ function suseStripInitrd {
 		/etc/pam.d* /etc/DIR_COLORS /etc/rc* /usr/share/hal /usr/share/ssl
 		/usr/lib*/hal /usr/lib*/*.a /usr/lib*/*.la /usr/lib*/librpm*
 		/usr/lib*/libssl* /usr/lib*/libpanel* /usr/lib*/libncursesw*
-		/usr/lib*/libmenu* /usr/src/packages/RPMS
+		/usr/lib*/libmenu* /usr/lib*/libx* /usr/src/packages/RPMS
 		/usr/X11R6 /usr/lib*/X11 /var/X11R6 /usr/share/X11 /etc/X11
-		/usr/lib*/libX* /usr/lib*/xorg
+		/usr/lib*/libX* /usr/lib*/xorg /usr/lib*/libidn*
 		/etc/ppp /etc/xdg /etc/NetworkManager /lib*/YaST /lib*/security
 		/lib*/mkinitrd /srv /var/adm /usr/lib/engines /usr/src/packages
-		/usr/src/linux* /usr/local
+		/usr/src/linux* /usr/local /var/log/* /usr/share/pixmaps
 		/lib/modules/*/kernel/drivers/net/wireless
 		/lib/modules/*/kernel/drivers/net/pcmcia
 		/lib/modules/*/kernel/drivers/net/tokenring
@@ -438,8 +438,13 @@ function suseStripInitrd {
 	#------------------------------------------
 	if [ -d /var/cache/zypp ];then
 		files="
-			/usr/lib*/libzypp* /usr/lib*/libx*
-			/var/cache/zypp
+			/usr/lib*/libzypp* /lib*/libgcrypt* /lib*/libgpg*
+			/usr/lib*/dirmngr /usr/lib*/gnupg* /usr/lib*/gpg*
+			/usr/lib*/libboost* /usr/lib*/libcurl* /usr/lib*/libicu*
+			/usr/lib*/libksba* /usr/lib*/libpth*
+			/var/cache/zypp /usr/lib*/zypp* /usr/share/curl
+			/usr/share/emacs /usr/share/gnupg
+			/usr/share/zypp* /var/lib/zypp* /var/log/zypper.log
 		"
 		for i in $files;do
 			rm -rf $i
@@ -543,3 +548,27 @@ function suseGFXBoot {
 		index=`expr $index + 1`
 	done
 }
+
+#======================================
+# suseSetupProductInformation
+#--------------------------------------
+function suseSetupProductInformation {
+	# /.../
+	# This function will use zypper to search for the installed
+	# product and prepare the product specific information
+	# for YaST
+	# ----
+	if [ ! -x /usr/bin/zypper ];then
+		echo "zypper not installed... skipped"
+		return
+	fi
+	local zypper="zypper --non-interactive --no-gpg-checks"
+	local product=$($zypper search -t product | grep product | head -n 1)
+	local p_alias=$(echo $product | cut -f4 -d'|')
+	local p_name=$(echo $product | cut -f 4-5 -d'|' | tr '|' '-' | tr -d " ")
+	p_alias=$(echo $p_alias)
+	p_name=$(echo $p_name)
+	echo "Installing product information for $p_name"
+	$zypper install -t product $p_alias
+}
+
