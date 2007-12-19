@@ -70,6 +70,7 @@ openKernelConsole
 #======================================
 # 5) Including required kernel modules
 #--------------------------------------
+includeKernelParameters
 probeDevices
 
 #======================================

@@ -53,6 +53,7 @@ closeKernelConsole
 #======================================
 # 2) probe for livecd_config in cmdline
 #--------------------------------------
+includeKernelParameters
 if grep -i -q "livecd_config=[a-zA-Z0-9/]" /proc/cmdline; then
 	export LIVECD_CONFIG=`sed 's/.*livecd_config=\([^ ]*\).*/\1/' /proc/cmdline`
 fi

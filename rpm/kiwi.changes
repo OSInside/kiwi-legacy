@@ -8,6 +8,7 @@ Wed Dec 19 11:46:24 CET 2007 - ms@suse.de
 - added product information when zypper is used. This can
   be done by a function named suseSetupProductInformation()
   The function must be called in config.sh (#348029)
+- fixed missing includeKernelParameters() calls (#349781)
 - fixed permission setup in Makefile
 
 -------------------------------------------------------------------
