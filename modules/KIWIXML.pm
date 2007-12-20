@@ -1300,7 +1300,7 @@ sub getInstSourcePackageAttributes {
 	if ($what eq "metapackages") {
 		$nodes = $base -> getElementsByTagName ("metadata");
 	} elsif ($what eq "instpackages") {
-		$nodes = $base -> getElementsByTagName ("packages");
+		$nodes = $base -> getElementsByTagName ("repopackages");
 	}
 	my %result;
 	my @attrib = (
@@ -1309,7 +1309,7 @@ sub getInstSourcePackageAttributes {
 	);
 	for (my $i=1;$i<= $nodes->size();$i++) {
 		my $node  = $nodes -> get_node($i);
-		my @plist = $node  -> getElementsByTagName ("package");
+		my @plist = $node  -> getElementsByTagName ("repopackage");
 		foreach my $element (@plist) {
 			my $package = $element -> getAttribute ("name");
 			if ($package ne $pack) {
@@ -1350,7 +1350,7 @@ sub getList {
 		$nodes = $base -> getElementsByTagName ("metadata");
 	} elsif ($what eq "instpackages") {
 		my $base = $this->{instsrcNodeList} -> get_node(1);
-		$nodes = $base -> getElementsByTagName ("packages");
+		$nodes = $base -> getElementsByTagName ("repopackages");
 	} else {
 		$nodes = $this->{packageNodeList};
 	}
@@ -1375,7 +1375,7 @@ sub getList {
 		if (! $this -> requestedProfile ($node)) {
 			next;
 		}
-		my @plist = $node -> getElementsByTagName ("package");
+		my @plist = $node -> getElementsByTagName ("repopackage");
 		foreach my $element (@plist) {
 			my $package = $element -> getAttribute ("name");
 			my $forarch = $element -> getAttribute ("arch");
