@@ -1,5 +1,5 @@
 # /.../
-# spec file for package kiwi (Version 2.05
+# spec file for package kiwi (Version 2.06
 # Copyright (c) 2006 SUSE LINUX Products GmbH, Nuernberg, Germany.
 # Please submit bugfixes or comments via http://bugs.opensuse.org
 # ---
@@ -14,7 +14,7 @@ BuildRequires: swig libsatsolver libsatsolver-devel db-devel gcc-c++ libexpat-de
 %endif
 Requires:      perl perl-XML-LibXML perl-libwww-perl screen coreutils
 Summary:       OpenSuSE - KIWI Image System
-Version:       2.05
+Version:       2.06
 Release:       28
 Group:         System
 License:       GPL

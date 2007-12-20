@@ -5,6 +5,11 @@ test -f /.profile && . /.profile
 echo "Configure image: [$name]..."
 
 #==========================================
+# remove unneded kernel files
+#------------------------------------------
+suseStripKernel
+
+#==========================================
 # setup gfxboot
 #------------------------------------------
 suseGFXBoot SLES grub

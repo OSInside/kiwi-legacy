@@ -1656,15 +1656,9 @@ sub preImage {
 		return undef;
 	}
 	#==========================================
-	# extract kernel from physical extend
-	#------------------------------------------
-	if (! $this -> extractKernel ($name)) {
-		return undef;
-	}
-	#==========================================
 	# Call images.sh script
 	#------------------------------------------
-	my $mBytes = $this -> setupLogicalExtend ();
+	my $mBytes = $this -> setupLogicalExtend (undef,$name);
 	if (! defined $mBytes) {
 		return undef;
 	}
@@ -2036,6 +2030,7 @@ sub installLogicalExtend {
 sub setupLogicalExtend {
 	my $this  = shift;
 	my $quiet = shift;
+	my $name  = shift;
 	my $kiwi  = $this->{kiwi};
 	my $imageTree = $this->{imageTree};
 	my $imageStrip= $this->{imageStrip};
@@ -2087,6 +2082,12 @@ sub setupLogicalExtend {
 		}
 		qx ( rm -f $imageTree/image/images.sh );
 		$kiwi -> done ();
+	}
+	#==========================================
+	# extract kernel from physical extend
+	#------------------------------------------
+	if (! $this -> extractKernel ($name)) {
+		return undef;
 	}
 	#==========================================
 	# Strip if specified
@@ -2203,7 +2204,7 @@ sub extractKernel {
 			last SWITCH;
 		};
 	}
-	if (-f "$imageTree/boot/vmlinuz") {
+	if (-f "$imageTree/boot/vmlinux.gz") {
 		$kiwi -> info ("Extracting kernel...");
 		my $pwd = qx (pwd); chomp $pwd;
 		my $file = "$imageDest/$name.kernel";
@@ -2243,6 +2244,7 @@ sub extractKernel {
 			qx (cp $imageTree/boot/xen.gz $file);
 			qx (mv $file $file.$kernel."gz");
 		}
+		qx (rm -rf $imageTree/boot/*);
 		$kiwi -> done();
 	}
 	return $name;

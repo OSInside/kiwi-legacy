@@ -294,7 +294,7 @@ function baseStripTools {
 				break
 			fi
 		done
-		if [ $found = 0 ];then
+		if [ $found = 0 ] && [ ! -d $file ];then
 			rm -f $file
 		fi
 	done
@@ -412,7 +412,7 @@ function suseStripInitrd {
 	local files="
 		/usr/share/info /usr/share/man /usr/share/cracklib /usr/lib*/python*
 		/usr/lib*/perl* /usr/share/locale* /usr/share/doc/packages /var/lib/rpm
-		/usr/lib*/rpm /var/lib/smart /boot/* /opt/* /usr/include /root/.gnupg
+		/usr/lib*/rpm /var/lib/smart /opt/* /usr/include /root/.gnupg
 		/etc/PolicyKit /etc/sysconfig /etc/init.d /etc/profile.d /etc/skel
 		/etc/ssl /etc/java /etc/default /etc/cron* /etc/dbus*
 		/etc/pam.d* /etc/DIR_COLORS /etc/rc* /usr/share/hal /usr/share/ssl
@@ -527,7 +527,8 @@ function suseGFXBoot {
 		theme="SuSE-$theme"
 	fi
 	mkdir /image/loader/animations
-	cp /etc/bootsplash/themes/$theme/animations/* /image/loader/animations
+	cp /etc/bootsplash/themes/$theme/animations/* \
+		/image/loader/animations &>/dev/null
 	for cfg in 800x600 1024x768 1280x1024;do
 		/sbin/splash -s -c -f \
 			/etc/bootsplash/themes/$theme/config/bootsplash-$cfg.cfg |\
@@ -572,3 +573,153 @@ function suseSetupProductInformation {
 	$zypper install -t product $p_alias
 }
 
+#======================================
+# suseStripKernel
+#--------------------------------------
+function suseStripKernel {
+	# /.../
+	# this function will strip the kernel according to the
+	# drivers information in config.xml. It also will create
+	# the vmlinux.gz and vmlinuz files which are required
+	# for the kernel extraction in case of kiwi boot images
+	# ----
+	IFS_SAVE=$IFS
+	for i in /lib/modules/*;do
+		IFS="
+		"
+		for p in `rpm -qf $i`;do
+			#==========================================
+			# get kernel VERSION information
+			#------------------------------------------
+			if [ ! $? = 0 ];then
+				# not in a package...
+				continue
+			fi
+			if echo $p | grep -q "\-kmp\-";then  
+				# a kernel module package...
+				continue
+			fi
+			VERSION=$(/usr/bin/basename $i)
+			echo "Stripping kernel $p: Image [$name]..."
+			#==========================================
+			# move interesting stuff to /tmp
+			#------------------------------------------
+			if [ -d lib/modules/$VERSION/updates ];then
+				mv lib/modules/$VERSION/updates /tmp
+			fi
+			if [ -d lib/modules/$VERSION/weak-updates ];then
+				mv lib/modules/$VERSION/weak-updates /tmp
+			fi
+			mv lib/modules/$VERSION/kernel/*  /tmp
+			mv lib/modules/$VERSION/modules.* /tmp
+			#==========================================
+			# remove unneeded stuff
+			#------------------------------------------
+			rm -r lib/modules/$VERSION/*
+			#==========================================
+			# insert modules.* files
+			#------------------------------------------
+			mv /tmp/modules.* /lib/modules/$VERSION/
+			if [ -d /tmp/updates ];then
+				mv /tmp/updates /lib/modules/$VERSION/
+			fi
+			if [ -d /tmp/weak-updates ];then
+				mv /tmp/weak-updates /lib/modules/$VERSION/
+			fi
+			#==========================================
+			# create driver-used dirs with .o's to use
+			#------------------------------------------
+			mkdir -p /tmp/usb-used
+			mkdir -p /tmp/scsi-used/drivers/scsi
+			mkdir -p /tmp/net-used/drivers/net
+			mkdir -p /tmp/misc-used
+			IFS=","
+			#==========================================
+			# handle USB drivers...
+			#------------------------------------------
+			test ! -z "$usbdrivers";for i in $usbdrivers;do
+				local path=`dirname $i`
+				test -f /tmp/drivers/$i && \
+				mkdir -p /tmp/usb-used/drivers/$path && \
+				mv /tmp/drivers/$i /tmp/usb-used/drivers/$path
+			done
+			#==========================================
+			# handle SCSI drivers...
+			#------------------------------------------
+			test ! -z "$scsidrivers";for i in $scsidrivers;do
+				local path=`dirname $i`
+				if [ $path = "." ];then
+					test -f /tmp/drivers/scsi/$i && \
+					mv /tmp/drivers/scsi/$i /tmp/scsi-used/drivers/scsi
+				else
+					test -f /tmp/drivers/scsi/$i && \
+					mkdir -p /tmp/scsi-used/drivers/scsi/$path && \
+					mv /tmp/drivers/scsi/$i /tmp/scsi-used/drivers/scsi/$path
+				fi
+			done
+			#==========================================
+			# handle Network drivers...
+			#------------------------------------------
+			test ! -z "$netdrivers";for i in $netdrivers;do
+				local path=`dirname $i`
+				if [ $path = "." ];then
+					test -f /tmp/drivers/net/$i && \
+					mv /tmp/drivers/net/$i /tmp/net-used/drivers/net
+				else
+					test -f /tmp/drivers/net/$i && \
+					mkdir -p /tmp/net-used/drivers/net/$path && \
+					mv /tmp/drivers/net/$i /tmp/net-used/drivers/net/$path
+				fi
+			done
+			#==========================================
+			# handle misc drivers...
+			#------------------------------------------
+			test ! -z "$drivers";for i in $drivers;do
+				local path=`/usr/bin/dirname $i`
+				local base=`/usr/bin/basename $i`
+				if [ "$base" = "*" ];then
+					test -d /tmp/$path && \
+					mkdir -p /tmp/misc-used/$path && \
+					mv /tmp/$path/* /tmp/misc-used/$path
+				else
+					test -f /tmp/$i && \
+					mkdir -p /tmp/misc-used/$path && \
+					mv /tmp/$i /tmp/misc-used/$path
+				fi
+			done
+			#==========================================
+			# Save all needed drivers...
+			#------------------------------------------
+			IFS=$IFS_SAVE
+			for root in \
+				/tmp/scsi-used /tmp/net-used /tmp/usb-used /tmp/misc-used
+			do
+				cd $root
+				for dir in `find -type d`;do
+					if [ ! -d /lib/modules/$VERSION/kernel/$dir ];then
+						mkdir -p /lib/modules/$VERSION/kernel/$dir 2>/dev/null
+					fi
+				done
+			done
+			for root in \
+				/tmp/scsi-used /tmp/net-used /tmp/usb-used /tmp/misc-used
+			do
+				cd $root
+				for file in `find -type f`;do
+					local path=`/usr/bin/dirname $file`
+					mv $file /lib/modules/$VERSION/kernel/$path;
+				done
+			done
+			#==========================================
+			# Cleanup /tmp...
+			#------------------------------------------
+			rm -rf /tmp/*
+			#==========================================
+			# create common kernel files, last wins !
+			#------------------------------------------
+			cd /boot
+			mv vmlinux-$VERSION.gz vmlinux.gz
+			mv vmlinuz-$VERSION vmlinuz
+		done
+	done
+}

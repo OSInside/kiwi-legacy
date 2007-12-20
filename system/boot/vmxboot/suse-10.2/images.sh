@@ -5,6 +5,16 @@ test -f /.profile && . /.profile
 echo "Configure image: [$name]..."
 
 #==========================================
+# remove unneded kernel files
+#------------------------------------------
+suseStripKernel
+
+#==========================================
+# setup gfxboot
+#------------------------------------------
+suseGFXBoot SuSE grub
+
+#==========================================
 # remove unneeded packages
 #------------------------------------------
 for i in `baseGetPackagesForDeletion`;do

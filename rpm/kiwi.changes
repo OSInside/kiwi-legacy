@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Thu Dec 20 09:52:46 CET 2007 - ms@suse.de
+
+- v2.06
+- added common suseStripKernel function and fix version check (#349829)
+- use suseStripKernel in all boot images and remove config/kernel-*
+  package scripts. Related to (#349829)
+
+-------------------------------------------------------------------
 Wed Dec 19 11:46:24 CET 2007 - ms@suse.de
 
 - v2.05
