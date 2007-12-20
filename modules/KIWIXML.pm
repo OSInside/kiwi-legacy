@@ -1375,7 +1375,12 @@ sub getList {
 		if (! $this -> requestedProfile ($node)) {
 			next;
 		}
-		my @plist = $node -> getElementsByTagName ("repopackage");
+		my @plist = ();
+		if (($what ne "metapackages") && ($what ne "instpackages")) {
+			@plist = $node -> getElementsByTagName ("package");
+		} else {
+			@plist = $node -> getElementsByTagName ("repopackage");
+		}
 		foreach my $element (@plist) {
 			my $package = $element -> getAttribute ("name");
 			my $forarch = $element -> getAttribute ("arch");
