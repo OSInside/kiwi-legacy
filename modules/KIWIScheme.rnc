@@ -819,8 +819,8 @@ div {
 		## Blocksize value used for atftp downloads
 		attribute blocksize { text }
 	k.deploy.attlist =
-		k.deploy.server.attribute &
-		k.deploy.blocksize.attribute
+		k.deploy.server.attribute? &
+		k.deploy.blocksize.attribute?
 	k.deploy =
 		## The deploy section is used to allow kiwi to create the
 		## config.<MAC> file required by PXE based network images.
