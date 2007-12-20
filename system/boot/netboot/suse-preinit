@@ -22,6 +22,7 @@
 #======================================
 # 1) start error log
 #--------------------------------------
+Echo "Calling pre-init stage in system image"
 errorLogStart
 
 #======================================
