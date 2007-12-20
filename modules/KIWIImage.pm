@@ -1269,7 +1269,7 @@ sub createImageSplit {
 	#==========================================
 	# Call images.sh script
 	#------------------------------------------
-	if (! $this -> setupLogicalExtend ("quiet")) {
+	if (! $this -> setupLogicalExtend ("quiet", $namero)) {
 		return undef;
 	}
 	#==========================================
