@@ -2170,16 +2170,19 @@ sub extractKernel {
 	#==========================================
 	# extract kernel from physical extend
 	#------------------------------------------
-	# This is done for boot images only. Which means
-	# we will check for files named vmlinuz,vmlinux.gz.
-	# These files are created from the kernel package
-	# script which exists for boot images only
+	# This is done for boot images only. Therefore we check
+	# if the file vmlinux.gz exists which was created by the
+	# suseStripKernel() function
 	# ---
+	if (! defined $name) {
+		return $this;
+	}
 	my %type = %{$xml->getImageTypeAndAttributes()};
 	my $para = $type{type};
 	if (defined $type{filesystem}) {
 		$para = $para.":".$type{filesystem};
 	}
+	print "$para\n";
 	SWITCH: for ($para) {
 		/ext3/i     && do {
 			return $name;
