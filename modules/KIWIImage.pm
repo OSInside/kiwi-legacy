@@ -2182,7 +2182,6 @@ sub extractKernel {
 	if (defined $type{filesystem}) {
 		$para = $para.":".$type{filesystem};
 	}
-	print "$para\n";
 	SWITCH: for ($para) {
 		/ext3/i     && do {
 			return $name;
