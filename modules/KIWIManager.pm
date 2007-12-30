@@ -715,17 +715,36 @@ sub setupUpgrade {
 		# Create screen call file
 		#------------------------------------------
 		$kiwi -> info ("Upgrading image...");
+		my @installOpts = (
+			"--auto-agree-with-licenses"
+		);
 		print $fd "function clean { kill \$SPID;";
 		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 		print $fd "trap clean INT TERM\n";
 		print $fd "ZYPP_MODALIAS_SYSFS=/tmp\n";
 		if (defined $addPacks) {
 			my @addonPackages = @{$addPacks};
+			my @newpatts = ();
+			my @newpacks = ();
+			foreach my $pac (@addonPackages) {
+				if ($pac =~ /^pattern:(.*)/) {
+					push @newpatts,$1;
+				} else {
+					push @newpacks,$pac;
+				}
+			}
+			@addonPackages = @newpacks;
 			print $fd "chroot $root @zypper update & ";
 			print $fd "SPID=\$!;wait \$SPID\n";
 			print $fd "test \$? = 0 && chroot $root @zypper install ";
-			print $fd "@addonPackages &\n";
+			print $fd "@installOpts @addonPackages &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
+			if (@newpatts) {
+				print $fd "test \$? = 0 && ";
+				print $fd "chroot $root @zypper install @installOpts ";
+				print $fd "-t pattern @newpatts &\n";
+				print $fd "SPID=\$!;wait \$SPID\n";
+			}
 		} else {
 			print $fd "chroot $root @zypper update &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
@@ -853,6 +872,19 @@ sub setupRootSystem {
 			#------------------------------------------
 			push (@packs,$manager);
 			#==========================================
+			# check input list for pattern names
+			#------------------------------------------
+			my @newpacks = ();
+			my @newpatts = ();
+			foreach my $pac (@packs) {
+				if ($pac =~ /^pattern:(.*)/) {
+					push @newpatts,$1;
+				} else {
+					push @newpacks,$pac;
+				}
+			}
+			@packs = @newpacks;
+			#==========================================
 			# Create screen call file
 			#------------------------------------------
 			print $fd "function clean { kill \$SPID;";
@@ -861,6 +893,12 @@ sub setupRootSystem {
 			print $fd "touch $lock\n";
 			print $fd "@zypper --root $root install @installOpts @packs &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
+			if (@newpatts) {
+				print $fd "test \$? = 0 && ";
+				print $fd "@zypper --root $root install @installOpts ";
+				print $fd "-t pattern @newpatts &\n";
+				print $fd "SPID=\$!;wait \$SPID\n";
+			}
 			print $fd "echo \$? > $screenCall.exit\n";
 			print $fd "rm -f $lock\n";
 		} else {
@@ -869,7 +907,12 @@ sub setupRootSystem {
 			my @installed = qx ( chroot $root $querypack 2>/dev/null);
 			chomp ( @installed );
 			my @install   = ();
+			my @newpatts  = ();
 			foreach my $need (@packs) {
+				if ($need =~ /^pattern:(.*)/) {
+					push @newpatts,$1;
+					next;
+				}
 				my $found = 0;
 				foreach my $have (@installed) {
 					if ($have eq $need) {
@@ -894,6 +937,12 @@ sub setupRootSystem {
 			print $fd "ZYPP_MODALIAS_SYSFS=/tmp\n";
 			print $fd "chroot $root @zypper install @installOpts @install &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
+			if (@newpatts) {
+				print $fd "test \$? = 0 && ";
+				print $fd "chroot $root @zypper install @installOpts ";
+				print $fd "-t pattern @newpatts &\n";
+				print $fd "SPID=\$!;wait \$SPID\n";
+			}
 			print $fd "echo \$? > $screenCall.exit\n";
 		}
 		$fd -> close();

@@ -714,7 +714,7 @@ sub setCompressed {
 sub getPackageManager {
 	# ...
 	# Get the name of the package manager if set.
-	# if not set set return the default package
+	# if not set return the default package
 	# manager name
 	# ---
 	my $this = shift;
@@ -1411,6 +1411,7 @@ sub getList {
 		if ($type ne "metapackages") {
 			my @slist = $node -> getElementsByTagName ("opensusePattern");
 			my @pattlist = ();
+			my $manager  = $this -> getPackageManager();
 			foreach my $element (@slist) {
 				my $pattern = $element -> getAttribute ("name");
 				if (! defined $pattern) {
@@ -1419,24 +1420,35 @@ sub getList {
 				push @pattlist,$pattern;
 			}
 			if (@pattlist) {
-				my $psolve = new KIWIPattern (
-					$kiwi,\@pattlist,$this->{urllist},
-					$pattr{patternType},$pattr{patternPackageType}
-				);
-				if (! defined $psolve) {
-					$kiwi -> warning (
-						"Pattern match failed for arch: $this->{arch}\n"
+				if ($manager ne "zypper") {
+					#==========================================
+					# turn patterns into pacs for this manager
+					#------------------------------------------
+					my $psolve = new KIWIPattern (
+						$kiwi,\@pattlist,$this->{urllist},
+						$pattr{patternType},$pattr{patternPackageType}
 					);
-					$kiwi -> warning (
-						"    a) Check if the pattern is written correctly?\n"
-					);
-					$kiwi -> warning (
-						"    b) Check if the arch is provided by the repo(s)?\n"
-					);
-					return ();
+					if (! defined $psolve) {
+						my $e1 ="Pattern match failed for arch: $this->{arch}";
+						my $e2 ="Check if the pattern is written correctly?";
+						my $e3 ="Check if the arch is provided by the repo(s)?";
+						$kiwi -> warning ("$e1\n");
+						$kiwi -> warning ("    a) $e2\n");
+						$kiwi -> warning ("    b) $e3\n");
+						return ();
+					}
+					my @packageList = $psolve -> getPackages();
+					push @result,@packageList;
+				} else {
+					#==========================================
+					# zypper knows about patterns
+					#------------------------------------------
+					foreach my $pname (@pattlist) {
+						$kiwi -> info ("--> Requesting pattern: $pname");
+						push @result,"pattern:".$pname;
+						$kiwi -> done();
+					}
 				}
-				my @packageList = $psolve -> getPackages();
-				push @result,@packageList;
 			}
 		}
 		#==========================================
