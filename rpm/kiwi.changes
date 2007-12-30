@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Sun Dec 30 17:10:03 CET 2007 - ms@suse.de
+
+- v2.08
+- fixed netboot bootsplash setup, glibc-locale was missing
+  when suseGFXBoot was called. this was necessary for 10.3 and 11.0
+- cosmetic change: fixed error messages when stripping down the initrd
+
+-------------------------------------------------------------------
 Fri Dec 21 13:56:30 CET 2007 - ms@suse.de
 
 - v2.07

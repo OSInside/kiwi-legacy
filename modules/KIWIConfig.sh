@@ -407,7 +407,7 @@ function suseStripInitrd {
 	#==========================================
 	# remove unneeded files
 	#------------------------------------------
-	rpm -e popt bzip2 --nodeps
+	rpm -e popt bzip2 --nodeps --noscripts &>/dev/null
 	rm -rf `find -type d | grep .svn`
 	local files="
 		/usr/share/info /usr/share/man /usr/share/cracklib /usr/lib*/python*

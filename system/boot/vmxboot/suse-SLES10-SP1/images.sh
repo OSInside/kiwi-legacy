@@ -18,7 +18,7 @@ suseGFXBoot SLES grub
 # remove unneeded packages
 #------------------------------------------
 for i in `baseGetPackagesForDeletion`;do
-	rpm -e $i --nodeps
+	rpm -q $i &> /dev/null && rpm -e $i --nodeps --noscripts
 done
 
 #==========================================
@@ -29,6 +29,6 @@ suseStripInitrd
 #==========================================
 # umount /proc
 #------------------------------------------
-umount /proc
+umount /proc &>/dev/null
 
 exit 0

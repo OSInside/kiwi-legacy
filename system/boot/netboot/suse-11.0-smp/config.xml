@@ -176,6 +176,7 @@
 	</packages>
 	<packages type="boot">
 		<package name="filesystem"/>
+		<package name="glibc-locale"/>
 	</packages>
 	<packages type="delete" profiles="default,xen,diskless">
 		<!-- DELETE PACKAGES START DEFAULT, XEN AND DISKLESS -->
