@@ -593,10 +593,12 @@ function suseStripKernel {
 			#------------------------------------------
 			if [ ! $? = 0 ];then
 				# not in a package...
+				IFS=$ifss
 				continue
 			fi
 			if echo $p | grep -q "\-kmp\-";then  
 				# a kernel module package...
+				IFS=$ifss
 				continue
 			fi
 			VERSION=$(/usr/bin/basename $i)
@@ -722,5 +724,4 @@ function suseStripKernel {
 			mv vmlinuz-$VERSION vmlinuz
 		done
 	done
-	unset IFS
 }
