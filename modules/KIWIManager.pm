@@ -736,13 +736,14 @@ sub setupUpgrade {
 			@addonPackages = @newpacks;
 			print $fd "chroot $root @zypper update & ";
 			print $fd "SPID=\$!;wait \$SPID\n";
-			print $fd "test \$? = 0 && chroot $root @zypper install ";
-			print $fd "@installOpts @addonPackages &\n";
-			print $fd "SPID=\$!;wait \$SPID\n";
+			if (@addonPackages) {
+				print $fd "test \$? = 0 && chroot $root @zypper install ";
+				print $fd "@installOpts @addonPackages &\n";
+				print $fd "SPID=\$!;wait \$SPID\n";
+			}
 			if (@newpatts) {
-				print $fd "test \$? = 0 && ";
-				print $fd "chroot $root @zypper install @installOpts ";
-				print $fd "-t pattern @newpatts &\n";
+				print $fd "test \$? = 0 && chroot $root @zypper install ";
+				print $fd "@installOpts -t pattern @newpatts &\n";
 				print $fd "SPID=\$!;wait \$SPID\n";
 			}
 		} else {
@@ -891,12 +892,17 @@ sub setupRootSystem {
 			print $fd "echo 1 > $screenCall.exit; rm -f $lock; exit 1; }\n";
 			print $fd "trap clean INT TERM\n";
 			print $fd "touch $lock\n";
-			print $fd "@zypper --root $root install @installOpts @packs &\n";
-			print $fd "SPID=\$!;wait \$SPID\n";
+			if (@packs) {
+				print $fd "@zypper --root $root install ";
+				print $fd "@installOpts @packs &\n";
+				print $fd "SPID=\$!;wait \$SPID\n";
+			}
 			if (@newpatts) {
-				print $fd "test \$? = 0 && ";
-				print $fd "@zypper --root $root install @installOpts ";
-				print $fd "-t pattern @newpatts &\n";
+				if (@packs) {
+					print $fd "test \$? = 0 && ";
+				}
+				print $fd "@zypper --root $root install ";
+				print $fd "@installOpts -t pattern @newpatts &\n";
 				print $fd "SPID=\$!;wait \$SPID\n";
 			}
 			print $fd "echo \$? > $screenCall.exit\n";
@@ -935,12 +941,17 @@ sub setupRootSystem {
 			print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 			print $fd "trap clean INT TERM\n";
 			print $fd "ZYPP_MODALIAS_SYSFS=/tmp\n";
-			print $fd "chroot $root @zypper install @installOpts @install &\n";
-			print $fd "SPID=\$!;wait \$SPID\n";
+			if (@install) {
+				print $fd "chroot $root @zypper install ";
+				print $fd "@installOpts @install &\n";
+				print $fd "SPID=\$!;wait \$SPID\n";
+			}
 			if (@newpatts) {
-				print $fd "test \$? = 0 && ";
-				print $fd "chroot $root @zypper install @installOpts ";
-				print $fd "-t pattern @newpatts &\n";
+				if (@install) {
+					print $fd "test \$? = 0 && ";
+				}
+				print $fd "chroot $root @zypper install ";
+				print $fd "@installOpts -t pattern @newpatts &\n";
 				print $fd "SPID=\$!;wait \$SPID\n";
 			}
 			print $fd "echo \$? > $screenCall.exit\n";
