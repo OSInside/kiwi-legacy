@@ -583,7 +583,7 @@ function suseStripKernel {
 	# the vmlinux.gz and vmlinuz files which are required
 	# for the kernel extraction in case of kiwi boot images
 	# ----
-	IFS_SAVE=$IFS
+	local ifss=$IFS
 	for i in /lib/modules/*;do
 		IFS="
 		"
@@ -690,7 +690,7 @@ function suseStripKernel {
 			#==========================================
 			# Save all needed drivers...
 			#------------------------------------------
-			IFS=$IFS_SAVE
+			IFS=$ifss
 			for root in \
 				/tmp/scsi-used /tmp/net-used /tmp/usb-used /tmp/misc-used
 			do
@@ -722,4 +722,5 @@ function suseStripKernel {
 			mv vmlinuz-$VERSION vmlinuz
 		done
 	done
+	unset IFS
 }
