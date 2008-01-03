@@ -45,6 +45,8 @@
 		<file name="drivers/scsi/*"/>
 		<file name="drivers/message/fusion/*"/>
 		<file name="drivers/net/*"/>
+		<file name="drivers/parport/*"/>
+		<file name="drivers/char/lp.ko"/>
 	</drivers>
 	<repository type="yast2" status="replaceable">
 		<source path="/image/CDs/full-i386"/>

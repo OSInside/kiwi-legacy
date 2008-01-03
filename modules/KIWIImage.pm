@@ -450,6 +450,7 @@ sub createImageUSB {
 	}
 	$main::ForeignRepo{xmlnode} = $xml -> getForeignNodeList();
 	$main::ForeignRepo{packagemanager} = $xml -> getPackageManager();
+	$main::ForeignRepo{locale}  = $xml -> getLocale();
 	$main::ForeignRepo{prepare} = $main::Prepare;
 	$main::ForeignRepo{create}  = $main::Create;
 	$main::Compress = "no";
@@ -920,6 +921,7 @@ sub createImageLiveCD {
 	}
 	$main::ForeignRepo{xmlnode} = $xml -> getForeignNodeList();
 	$main::ForeignRepo{packagemanager} = $xml -> getPackageManager();
+	$main::ForeignRepo{locale}  = $xml -> getLocale();
 	$main::ForeignRepo{prepare} = $main::Prepare;
 	$main::ForeignRepo{create}  = $main::Create;
 	$main::Create = $main::RootTree;

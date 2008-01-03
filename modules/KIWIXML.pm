@@ -160,6 +160,21 @@ sub new {
 		}
 		$repositNodeList = $foreignRepo->{xmlnode};
 		$repositNodeList -> prepend ($need);
+		if (defined $foreignRepo->{locale}) {
+			my $lang = $foreignRepo->{locale};
+			$kiwi -> done ();
+			$kiwi -> info ("Including foreign locale: $lang");
+			my $addElement = new XML::LibXML::Element ("locale");
+			$addElement -> appendText ($lang);
+			my $opts = $optionsNodeList -> get_node(1);
+			my $node = $opts -> getElementsByTagName ("locale");
+			if ($node) {
+				$node = $node -> get_node(1);
+				$opts -> removeChild ($node);
+			}
+			$opts -> appendChild ($addElement);
+			$kiwi -> done ();
+		}
 		if (defined $foreignRepo->{packagemanager}) {
 			my $manager = $foreignRepo->{packagemanager};
 			$kiwi -> done ();
@@ -740,6 +755,22 @@ sub getPackageManager {
 	$kiwi -> error  ("Invalid package manager: $pmgr");
 	$kiwi -> failed ();
 	return undef;
+}
+
+#==========================================
+# getLocale
+#------------------------------------------
+sub getLocale {
+	# ...
+	# Obtain the locale value or return undef
+	# ---
+	my $this = shift;
+	my $node = $this->{optionsNodeList} -> get_node(1);
+	my $lang = $node -> getElementsByTagName ("locale");
+	if ((! defined $lang) || ("$lang" eq "")) {
+		return undef;
+	}
+	return $lang;
 }
 
 #==========================================
