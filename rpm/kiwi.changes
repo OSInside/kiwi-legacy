@@ -10,6 +10,13 @@ Sun Dec 30 17:10:03 CET 2007 - ms@suse.de
 - added parport and lp kernel modules to boot image descriptions
 - fixed locale setup and add boot default language if locale is
   specified in system image description
+- added function getInstSourceSatSolvable to KIWIXML.pm
+  This function will return an uncompressed sat solvable record
+  for the given repository list. If it's required to create
+  this solvable because it doesn't exist on the repository
+  the satsolver toolkit is used and therefore required in
+  order to allow this function to work correctly. Right now this
+  function is not actively in use
 
 -------------------------------------------------------------------
 Fri Dec 21 13:56:30 CET 2007 - ms@suse.de

@@ -1801,95 +1801,257 @@ sub createTmpDirectory {
 # getInstSourceFile
 #------------------------------------------
 sub getInstSourceFile {
-  # ...
-  # download a file from a network or local location to
-  # a given local path. It's possible to use regular expressions
-  # in the source file specification
-  # ---
-  my $this    = shift;
-  my $url     = shift;
-  my $dest    = shift;
-  my $dirname;
-  my $basename;
-  #==========================================
-  # Check parameters
-  #------------------------------------------
-  if ((! defined $dest) || (! defined $url)) {
-    return undef;
-  }
-  #==========================================
-  # setup destination base and dir name
-  #------------------------------------------
-  if ($dest =~ /(^.*\/)(.*)/) {
-    $dirname  = $1;
-    $basename = $2;
-    if (! $basename) {
-      $url =~ /(^.*\/)(.*)/;
-      $basename = $2;
-    }
-  } else {
-    return undef;
-  }
-  #==========================================
-  # check base and dir name
-  #------------------------------------------
-  if (! $basename) {
-    return undef;
-  }
-  if (! -d $dirname) {
-    return undef;
-  }
-  #==========================================
-  # download file
-  #------------------------------------------
-  if ($url !~ /:\/\//) {
-    # /.../
-    # local files, make them a file:// url
-    # ----
-    $url = "file://".$url;
-  }
-
-  # /.../
-  # use lwp-download to manage the process.
-  # if first download failed check the directory list with
-  # a regular expression to find the file. After that repeat
-  # the download
-  # ----
-  $dest = $dirname."/".$basename;
-  my $data = qx (lwp-download $url $dest);
-  my $code = $? >> 8;
-  if($code == 0) {
-    return $this;
-  }
-  if($url =~ /(^.*\/)(.*)/) {
-    my $location = $1;
-    my $search   = $2;
-    my $browser  = LWP::UserAgent->new;
-    my $request  = HTTP::Request->new (GET => $location);
-    my $response = $browser  -> request ( $request );
-    my $content  = $response -> content ();
-    my @lines    = split (/\n/,$content);
-    foreach my $line(@lines) {
-      if($line !~ /href=\"(.*)\"/) {
-	next;
-      }
-      my $link = $1;
-      if($link =~ /$search/) {
-	$url  = $location.$link;
-	$data = qx (lwp-download $url $dest);
-	$code = $? >> 8;
-	if($code == 0) {
-	  return $this;
+	# ...
+	# download a file from a network or local location to
+	# a given local path. It's possible to use regular expressions
+	# in the source file specification
+	# ---
+	my $this    = shift;
+	my $url     = shift;
+	my $dest    = shift;
+	my $dirname;
+	my $basename;
+	#==========================================
+	# Check parameters
+	#------------------------------------------
+	if ((! defined $dest) || (! defined $url)) {
+		return undef;
 	}
-      }
-    }
-  }
-  else {
-    return undef;
-  }
-  return $this;
+	#==========================================
+	# setup destination base and dir name
+	#------------------------------------------
+	if ($dest =~ /(^.*\/)(.*)/) {
+		$dirname  = $1;
+		$basename = $2;
+		if (! $basename) {
+			$url =~ /(^.*\/)(.*)/;
+			$basename = $2;
+		}
+	} else {
+		return undef;
+	}
+	#==========================================
+	# check base and dir name
+	#------------------------------------------
+	if (! $basename) {
+		return undef;
+	}
+	if (! -d $dirname) {
+		return undef;
+	}
+	#==========================================
+	# download file
+	#------------------------------------------
+	if ($url !~ /:\/\//) {
+		# /.../
+		# local files, make them a file:// url
+		# ----
+		$url = "file://".$url;
+	}
+	# /.../
+	# use lwp-download to manage the process.
+	# if first download failed check the directory list with
+	# a regular expression to find the file. After that repeat
+	# the download
+	# ----
+	$dest = $dirname."/".$basename;
+	my $data = qx (lwp-download $url $dest 2>&1);
+	my $code = $? >> 8;
+	if ($code == 0) {
+		return $this;
+	}
+	if ($url =~ /(^.*\/)(.*)/) {
+		my $location = $1;
+		my $search   = $2;
+		my $browser  = LWP::UserAgent -> new;
+		my $request  = HTTP::Request  -> new (GET => $location);
+		my $response = $browser  -> request ( $request );
+		my $content  = $response -> content ();
+		my @lines    = split (/\n/,$content);
+		foreach my $line(@lines) {
+			if ($line !~ /href=\"(.*)\"/) {
+				next;
+			}
+			my $link = $1;
+			if ($link =~ /$search/) {
+				$url  = $location.$link;
+				print ("NEXT\n");
+				$data = qx (lwp-download $url $dest 2>&1);
+				$code = $? >> 8;
+				if ($code == 0) {
+					return $this;
+				}
+			}
+		}
+		return undef;
+	} else {
+		return undef;
+	}
+	return $this;
 }
 
-
+#==========================================
+# getInstSourceSatSolvable
+#------------------------------------------
+sub getInstSourceSatSolvable {
+	# /.../
+	# This function will return an uncompressed solvable record
+	# for the given repository list. If it's required to create
+	# this solvable because it doesn't exist on the repository
+	# the satsolver toolkit is used and therefore required in
+	# order to allow this function to work correctly
+	# ----
+	my $this     = shift;
+	my $repos    = shift;
+	my $kiwi     = $this->{kiwi};
+	my $patternd = "/suse/setup/descr/";
+	my $patterns = "/suse/setup/descr/patterns";
+	my $packages = "/suse/setup/descr/packages.gz";
+	my $solvable = "/suse/setup/descr/primary.gz";
+	my $count    = 0;
+	my $index    = 0;
+	my $error    = 0;
+	#==========================================
+	# check for sat tools
+	#------------------------------------------
+	if ((! -x "/usr/bin/mergesolv") || (! -x "/usr/bin/susetags2solv")) {
+		$kiwi -> error  ("can't find satsolver tools");
+		$kiwi -> failed ();
+		return undef;
+	}
+	#==========================================
+	# check/create cache directory
+	#------------------------------------------
+	my $sdir = "/var/cache/kiwi/satsolver";
+	if (! -d $sdir) {
+		if (! mkdir $sdir) {
+			$kiwi -> error  ("couldn't create cache dir: $!");
+			$kiwi -> failed ();
+			return undef;
+		}
+	}
+	#==========================================
+	# check/create solvable index file
+	#------------------------------------------
+	$index = join (":",@{$repos});
+	$index = qx (echo $index | md5sum | cut -f1 -d-);
+	$index = $sdir."/".$index; chomp $index;
+	$index=~ s/ +$//;
+	if (-f $index) {
+		return $index;
+	}
+	#==========================================
+	# find system architecture
+	#------------------------------------------
+	my $arch = qx (uname -m); chomp $arch;
+	if ($arch =~ /^i.86/) {
+		$arch = 'i.86';
+	}
+	my $destfile;
+	my $scommand;
+	foreach my $repo (@{$repos}) {
+		$count++;
+		#==========================================
+		# check for pre-created solvable first
+		#------------------------------------------
+		$destfile = $sdir."/primary-".$count.".gz";
+		if ($this -> getInstSourceFile ($repo.$solvable,$destfile)) {
+			next;
+		}
+		#==========================================
+		# get patterns file next
+		#------------------------------------------
+		$destfile = $sdir."/patterns-".$count;
+		if (! $this -> getInstSourceFile ($repo.$patterns,$destfile)) {
+			$kiwi -> warning ("no patterns file on repo: $repo");
+			$kiwi -> skipped ();
+			next;
+		}
+		#==========================================
+		# get files listed in patterns
+		#------------------------------------------
+		my $patfile = $destfile;
+		if (! open (FD,$patfile)) {
+			$kiwi -> warning ("couldn't open patterns file: $!");
+			$kiwi -> skipped ();
+			unlink $patfile;
+			next;
+		}
+		foreach my $line (<FD>) {
+			chomp $line; $destfile = $sdir."/".$line;
+			if ($line !~ /\.$arch\./) {
+				next;
+			}
+			my $file = $repo.$patternd.$line;
+			if (! $this -> getInstSourceFile($file,$destfile)) {
+				$kiwi -> warning ("error pattern $line not found");
+				$kiwi -> skipped ();
+				next;
+			}
+		}
+		close FD;
+		unlink $patfile;
+		#==========================================
+		# get packages.gz file next
+		#------------------------------------------
+		$destfile = $sdir."/packages-".$count.".gz";
+		if (! $this -> getInstSourceFile ($repo.$packages,$destfile)) {
+			$kiwi -> warning ("no packages file on repo: $repo");
+			$kiwi -> skipped ();
+			next;
+		}
+	}
+	$count++;
+	#==========================================
+	# create solvable from suse tags data
+	#------------------------------------------
+	if (-f "$sdir/packages-1.gz") {
+		$destfile = $sdir."/primary-".$count;
+		$scommand = "gzip -cd $sdir/packages-*.gz; gzip -cd $sdir/*.pat.gz";
+		my $data = qx (($scommand) | susetags2solv > $destfile);
+		my $code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> error  ("can't create sat solvable file");
+			$kiwi -> failed ();
+			$error = 1;
+		}
+	}
+	#==========================================
+	# uncompress all pre-created solvables
+	#------------------------------------------
+	if (! $error) {
+		foreach my $solvables (glob ("$sdir/primary-*.gz")) {
+			my $data = qx (gzip -d $sdir/primary-*.gz);
+			my $code = $? >> 8;
+			if ($code != 0) {
+				$kiwi -> error  ("couldn't uncompress solve files");
+				$kiwi -> failed ();
+				$error = 1;
+			}
+		}
+	}
+	#==========================================
+	# merge all solvables into one
+	#------------------------------------------
+	if (! $error) {
+		my $data = qx (mergesolv $sdir/primary-* > $index);
+		my $code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> error  ("couldn't merge solve files");
+			$kiwi -> failed ();
+			$error = 1;
+		}
+	}
+	#==========================================
+	# cleanup cache dir
+	#------------------------------------------
+	qx (rm -f $sdir/primary-*);
+	qx (rm -f $sdir/packages-*.gz);
+	qx (rm -f $sdir/*.pat.gz);
+	if (! $error) {
+		return $index;
+	}
+	return undef;
+}
 
 1;
