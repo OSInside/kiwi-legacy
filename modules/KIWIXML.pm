@@ -23,6 +23,7 @@ use LWP;
 use KIWILog;
 use KIWIPattern;
 use KIWIOverlay;
+use KIWISatSolver;
 use KIWIManager qw (%packageManager);
 use File::Glob ':glob';
 
@@ -1455,10 +1456,21 @@ sub getList {
 					#==========================================
 					# turn patterns into pacs for this manager
 					#------------------------------------------
-					my $psolve = new KIWIPattern (
-						$kiwi,\@pattlist,$this->{urllist},
-						$pattr{patternType},$pattr{patternPackageType}
+					# 1) try to use libsatsolver...
+					my $psolve = new KIWISatSolver (
+						$kiwi,$this,\@pattlist,$this->{urllist}
 					);
+					if (! defined $psolve) {
+						# 2) use generic pattern module
+						$kiwi -> warning (
+							"SaT solver setup failed, using generic module"
+						);
+						$kiwi -> skipped ();
+						$psolve = new KIWIPattern (
+							$kiwi,\@pattlist,$this->{urllist},
+							$pattr{patternType},$pattr{patternPackageType}
+						);
+					}
 					if (! defined $psolve) {
 						my $e1 ="Pattern match failed for arch: $this->{arch}";
 						my $e2 ="Check if the pattern is written correctly?";
@@ -1916,7 +1928,7 @@ sub getInstSourceSatSolvable {
 	# check for sat tools
 	#------------------------------------------
 	if ((! -x "/usr/bin/mergesolv") || (! -x "/usr/bin/susetags2solv")) {
-		$kiwi -> error  ("can't find satsolver tools");
+		$kiwi -> error  ("--> Can't find satsolver tools");
 		$kiwi -> failed ();
 		return undef;
 	}
@@ -1926,7 +1938,7 @@ sub getInstSourceSatSolvable {
 	my $sdir = "/var/cache/kiwi/satsolver";
 	if (! -d $sdir) {
 		if (! mkdir $sdir) {
-			$kiwi -> error  ("couldn't create cache dir: $!");
+			$kiwi -> error  ("--> Couldn't create cache dir: $!");
 			$kiwi -> failed ();
 			return undef;
 		}
@@ -1997,7 +2009,7 @@ sub getInstSourceSatSolvable {
 		#------------------------------------------
 		$destfile = $sdir."/patterns-".$count;
 		if (! $this -> getInstSourceFile ($repo.$patterns,$destfile)) {
-			$kiwi -> warning ("no patterns file on repo: $repo");
+			$kiwi -> warning ("--> No patterns file on repo: $repo");
 			$kiwi -> skipped ();
 			next;
 		}
@@ -2006,7 +2018,7 @@ sub getInstSourceSatSolvable {
 		#------------------------------------------
 		my $patfile = $destfile;
 		if (! open (FD,$patfile)) {
-			$kiwi -> warning ("couldn't open patterns file: $!");
+			$kiwi -> warning ("--> Couldn't open patterns file: $!");
 			$kiwi -> skipped ();
 			unlink $patfile;
 			next;
@@ -2018,7 +2030,7 @@ sub getInstSourceSatSolvable {
 			}
 			my $file = $repo.$patternd.$line;
 			if (! $this -> getInstSourceFile($file,$destfile)) {
-				$kiwi -> warning ("error pattern $line not found");
+				$kiwi -> warning ("--> Pattern file $line not found");
 				$kiwi -> skipped ();
 				next;
 			}
@@ -2030,7 +2042,7 @@ sub getInstSourceSatSolvable {
 		#------------------------------------------
 		$destfile = $sdir."/packages-".$count.".gz";
 		if (! $this -> getInstSourceFile ($repo.$packages,$destfile)) {
-			$kiwi -> warning ("no packages file on repo: $repo");
+			$kiwi -> warning ("--> No packages.gz file on repo: $repo");
 			$kiwi -> skipped ();
 			next;
 		}
@@ -2045,7 +2057,7 @@ sub getInstSourceSatSolvable {
 		my $data = qx (($scommand) | susetags2solv > $destfile);
 		my $code = $? >> 8;
 		if ($code != 0) {
-			$kiwi -> error  ("can't create sat solvable file");
+			$kiwi -> error  ("--> Can't create SaT solvable file");
 			$kiwi -> failed ();
 			$error = 1;
 		}
@@ -2058,7 +2070,7 @@ sub getInstSourceSatSolvable {
 			my $data = qx (gzip -d $sdir/primary-*.gz);
 			my $code = $? >> 8;
 			if ($code != 0) {
-				$kiwi -> error  ("couldn't uncompress solve files");
+				$kiwi -> error  ("--> Couldn't uncompress solve files");
 				$kiwi -> failed ();
 				$error = 1;
 			}
@@ -2069,14 +2081,14 @@ sub getInstSourceSatSolvable {
 	#------------------------------------------
 	if (! $error) {
 		if (! glob ("$sdir/primary-*")) {
-			$kiwi -> error  ("no sat solvable file were created");
+			$kiwi -> error  ("--> Couldn't find any SaT solvable file(s)");
 			$kiwi -> failed ();
 			$error = 1;
 		} else {
 			my $data = qx (mergesolv $sdir/primary-* > $index);
 			my $code = $? >> 8;
 			if ($code != 0) {
-				$kiwi -> error  ("couldn't merge solve files");
+				$kiwi -> error  ("--> Couldn't merge solve files");
 				$kiwi -> failed ();
 				$error = 1;
 			}

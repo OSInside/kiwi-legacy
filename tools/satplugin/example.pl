@@ -6,7 +6,7 @@ use strict;
 use SaT;
 
 # Open Solvable file
-open(F, "gzip -cd tmp/primary.gz |") || die;
+open(F, "gzip -cd tmp/primary-x86_64.gz |") || die;
 
 # Create Pool and Repository 
 my $pool = new SaT::_Pool;

@@ -214,7 +214,7 @@ extern "C"
             }
             Solvable *s = self->pool->solvables + p;
             //printf ("SOLVER NAME: %d %s\n",p,id2str(pool, s->name));
-            char* myel = (char*)id2str(pool, s->name);
+            const char* myel = (char*)id2str(pool, s->name);
             mysv = sv_newmortal();
             mysv = perl_get_sv (myel,TRUE);
             sv_setpv(mysv, myel);

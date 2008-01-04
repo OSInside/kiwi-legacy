@@ -26,6 +26,9 @@ package KIWISatSolver;
 use strict;
 use KIWILog;
 
+use lib '/opt/kiwi/tools/satplugin/blib/arch/auto/SaT';
+use lib '/opt/kiwi/tools/satplugin';
+
 #==========================================
 # Plugins
 #------------------------------------------
@@ -75,26 +78,28 @@ sub new {
 	my $repo;     # sat repo object
 	my $solver;   # sat solver object
 	my $job;      # sat job queue
+	my @solved;   # solve result
 	if (! defined $kiwi) {
 		$kiwi = new KIWILog("tiny");
 	}
+	$kiwi -> info ("Setting up SaT solver...\n");
 	if (! defined $xml) {
-		$kiwi -> error ("No XML reference specified");
+		$kiwi -> error ("--> No XML reference specified");
 		$kiwi -> failed ();
 		return undef;
 	}
 	if (! $KIWISatSolver::haveSaT) {
-		$kiwi -> error ("No perl SaT plugin installed");
+		$kiwi -> error ("--> No SaT plugin installed");
 		$kiwi -> failed ();
 		return undef;
 	}
 	if (! defined $pref) {
-		$kiwi -> error ("Invalid package/pattern reference");
+		$kiwi -> error ("--> Invalid package/pattern reference");
 		$kiwi -> failed ();
 		return undef;
 	}
 	if (! defined $urlref) {
-		$kiwi -> error ("Invalid repository URL reference");
+		$kiwi -> error ("--> Invalid repository URL reference");
 		$kiwi -> failed ();
 		return undef;
 	}
@@ -109,7 +114,7 @@ sub new {
 	# Create SaT repository and job queue
 	#------------------------------------------
 	if (! open (FD,$solvable)) {
-		$kiwi -> error  ("Couldn't open solvable: $!");
+		$kiwi -> error  ("--> Couldn't open solvable: $!");
 		$kiwi -> failed ();
 		return undef;
 	}
@@ -119,14 +124,26 @@ sub new {
 	$solver = new SaT::Solver ($pool);
 	$pool -> createWhatProvides();
 	$job = new SaT::Queue;
-	$job -> queuePush (
-		$SaT::SOLVER_INSTALL_SOLVABLE
-	);
-	foreach my $name (@{$pref}) {
+	$job -> queuePush ( $SaT::SOLVER_INSTALL_SOLVABLE );
+	foreach my $p (@{$pref}) {
+		my $name = "pattern:".$p;
 		if (! $job -> queuePush ( $pool -> selectSolvable ($repo,$name))) {
-			$kiwi -> error ("Failed to queue job: $name");
+			$kiwi -> error ("--> Failed to queue job: $name");
 			$kiwi -> failed ();
 			return undef;
+		}
+	}
+	#==========================================
+	# Solve the job(s)
+	#------------------------------------------
+	$solver -> solve ($job);
+	my $list = $solver -> getInstallList ($pool);
+	foreach my $name (@{$list}) {
+		if ($name =~ /^pattern:(.*)/) {
+			$kiwi -> info ("Including pattern: $1");
+			$kiwi -> done ();
+		} else {
+			push (@solved,$name);
 		}
 	}
 	#==========================================
@@ -139,6 +156,7 @@ sub new {
 	$this->{job}     = $job;
 	$this->{repo}    = $repo;
 	$this->{solver}  = $solver;
+	$this->{result}  = \@solved;
 	return $this;
 }
 
@@ -147,23 +165,13 @@ sub new {
 #------------------------------------------
 sub getPackages {
 	# /.../
-	# solve pattern and package queue
+	# return solved list
 	# ----
 	my $this   = shift;
-	my $solver = $this->{solver};
-	my $job    = $this->{job};
-	my $pool   = $this->{pool};
+	my $result = $this->{result};
 	my @result = ();
-	my $list;
-	#==========================================
-	# Solve the job(s)
-	#------------------------------------------
-	$solver -> solve ($job);
-	$list = $solver -> getInstallList ($pool);
-	foreach my $name (@{$list}) {
-    	if ($name !~ /^pattern:/) {
-			push (@result,$name);
-		}
+	if (defined $result) {
+		return @{$result};
 	}
 	return @result;
 }
