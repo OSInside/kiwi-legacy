@@ -1910,6 +1910,7 @@ sub getInstSourceSatSolvable {
 	my $solvable = "/suse/setup/descr/primary.gz";
 	my $count    = 0;
 	my $index    = 0;
+	my @index    = ();
 	my $error    = 0;
 	#==========================================
 	# check for sat tools
@@ -1933,7 +1934,40 @@ sub getInstSourceSatSolvable {
 	#==========================================
 	# check/create solvable index file
 	#------------------------------------------
-	$index = join (":",@{$repos});
+	foreach my $repo (@{$repos}) {
+		#==========================================
+		# create directory listing for each repo
+		#------------------------------------------
+		my $destfile = $sdir."/listing";
+		if (! $this -> getInstSourceFile ($repo.$patternd,$destfile)) {
+			next;
+		}
+		#==========================================
+		# check if this is a valid suse repo
+		#------------------------------------------
+		if (! open (FD,$destfile)) {
+			unlink $destfile; next;
+		}
+		my $repoOK = -1;
+		foreach my $line (<FD>) {
+			if ($line =~ /\"primary.gz\"/) {
+				$repoOK = 1; last;
+			}
+			if ($line =~ /\"packages.gz\"/) {
+				$repoOK++;
+			}
+			if ($line =~ /\"patterns\"/) {
+				$repoOK++;
+			}
+		}
+		if ($repoOK) {
+			push (@index,$repo);
+		}
+		close FD;
+		unlink $destfile;
+	}
+	@index = sort (@index);
+	$index = join (":",@index);
 	$index = qx (echo $index | md5sum | cut -f1 -d-);
 	$index = $sdir."/".$index; chomp $index;
 	$index=~ s/ +$//;
