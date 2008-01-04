@@ -2,6 +2,7 @@
 
 use lib './blib/arch/auto/SaT';
 
+use strict;
 use SaT;
 
 # Open Solvable file
@@ -12,7 +13,7 @@ my $pool = new SaT::_Pool;
 my $repo = $pool -> createRepo('repo');
 
 # Add Solvable to Repository
-$repo -> addSolvable (F);
+$repo -> addSolvable (*F);
 close(F) || die;
 
 # Create Solver
