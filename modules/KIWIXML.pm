@@ -2068,12 +2068,18 @@ sub getInstSourceSatSolvable {
 	# merge all solvables into one
 	#------------------------------------------
 	if (! $error) {
-		my $data = qx (mergesolv $sdir/primary-* > $index);
-		my $code = $? >> 8;
-		if ($code != 0) {
-			$kiwi -> error  ("couldn't merge solve files");
+		if (! glob ("$sdir/primary-*")) {
+			$kiwi -> error  ("no sat solvable file were created");
 			$kiwi -> failed ();
 			$error = 1;
+		} else {
+			my $data = qx (mergesolv $sdir/primary-* > $index);
+			my $code = $? >> 8;
+			if ($code != 0) {
+				$kiwi -> error  ("couldn't merge solve files");
+				$kiwi -> failed ();
+				$error = 1;
+			}
 		}
 	}
 	#==========================================
