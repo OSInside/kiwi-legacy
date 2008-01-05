@@ -26,9 +26,6 @@ package KIWISatSolver;
 use strict;
 use KIWILog;
 
-use lib '/opt/kiwi/tools/satplugin/blib/arch/auto/SaT';
-use lib '/opt/kiwi/tools/satplugin';
-
 #==========================================
 # Plugins
 #------------------------------------------
