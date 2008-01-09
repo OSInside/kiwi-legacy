@@ -290,7 +290,7 @@ gets deployed</a:documentation>
     </define>
     <define name="k.defaultbaseroot">
       <element name="defaultbaseroot">
-        <a:documentation>Default path if --baseroot option is no specified</a:documentation>
+        <a:documentation>Default path if baseroot option is no specified</a:documentation>
         <ref name="k.defaultbaseroot.attlist"/>
         <text/>
       </element>
@@ -307,7 +307,7 @@ gets deployed</a:documentation>
     </define>
     <define name="k.defaultdestination">
       <element name="defaultdestination">
-        <a:documentation>Default path if --destdir option is not specified</a:documentation>
+        <a:documentation>Default path if destdir option is not specified</a:documentation>
         <ref name="k.defaultdestination.attlist"/>
         <text/>
       </element>
@@ -324,7 +324,7 @@ gets deployed</a:documentation>
     </define>
     <define name="k.defaultroot">
       <element name="defaultroot">
-        <a:documentation>Default root directory name if --root option is not specified</a:documentation>
+        <a:documentation>Default root directory name if root option is not specified</a:documentation>
         <ref name="k.defaultroot.attlist"/>
         <text/>
       </element>
@@ -1046,7 +1046,7 @@ the correct timezone and copy it to /etc/localtime</a:documentation>
     <define name="k.type.bootprofile.attribute">
       <attribute name="bootprofile">
         <a:documentation>Specifies the boot profile if defined in the boot image
-description. Used when KIWI option --add-profile is used</a:documentation>
+description. Used when KIWI option add-profile is used</a:documentation>
       </attribute>
     </define>
     <define name="k.type.boot.attribute">
@@ -1099,7 +1099,7 @@ vmx/oem types only.</a:documentation>
     </define>
     <define name="k.type.primary.attribute">
       <attribute name="primary">
-        <a:documentation>Specifies the primary type (choose KIWI option --type)</a:documentation>
+        <a:documentation>Specifies the primary type (choose KIWI option type)</a:documentation>
         <data type="boolean"/>
       </attribute>
     </define>
