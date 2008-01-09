@@ -3,6 +3,7 @@ Wed Jan  9 12:11:27 CET 2008 - ms@suse.de
 
 - v2.09
 - added simple html schema documentation
+- added missing forcearch attribute to instsource
 
 -------------------------------------------------------------------
 Sun Dec 30 17:10:03 CET 2007 - ms@suse.de
