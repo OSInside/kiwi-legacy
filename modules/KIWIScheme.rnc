@@ -417,6 +417,7 @@ div {
 		k.repopackage.priority.attribute? &
 		k.repopackage.addarch.attribute? &
 		k.repopackage.removearch.attribute? &
+		k.repopackage.forcearch.attribute? &
 		k.repopackage.source.attribute? &
 		k.repopackage.script.attribute?
 	k.repopackage =

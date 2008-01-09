@@ -629,6 +629,9 @@ the given arch should be used in any case</a:documentation>
           <ref name="k.repopackage.removearch.attribute"/>
         </optional>
         <optional>
+          <ref name="k.repopackage.forcearch.attribute"/>
+        </optional>
+        <optional>
           <ref name="k.repopackage.source.attribute"/>
         </optional>
         <optional>
