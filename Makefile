@@ -42,7 +42,7 @@ all: modules/KIWIScheme.rng
 	# create checksum files for boot images...
 	#--------------------------------------------
 	(cd system/boot && ./.md5)
-	(cd system/boot && find | grep -v .svn | xargs chmod u-w)
+	(cd system/boot && find -type f | grep -v .svn | xargs chmod u-w)
 
 	#============================================
 	# build tools
