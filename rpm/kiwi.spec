@@ -258,8 +258,8 @@ cat kiwi.loader
 %dir %{_datadir}/kiwi
 %dir %{_datadir}/kiwi/image
 %doc %{_mandir}/man1/kiwi.1.gz
-%doc %{_mandir}/man1/KIWI::images.sh.1
-%doc %{_mandir}/man1/KIWI::config.sh.1
+%doc %{_mandir}/man1/KIWI::images.sh.1.gz
+%doc %{_mandir}/man1/KIWI::config.sh.1.gz
 %doc %{_defaultdocdir}/kiwi/COPYING
 %doc %{_defaultdocdir}/kiwi/examples
 %doc %{_defaultdocdir}/kiwi/kiwi.pdf
