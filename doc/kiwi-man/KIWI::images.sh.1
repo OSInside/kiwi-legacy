@@ -1,0 +1,139 @@
+.\"     Title: kiwi
+.\"    Author: Marcus Schäfer <ms (AT) suse.de>
+.\" Generator: DocBook XSL Stylesheets v1.73.1 <http://docbook.sf.net/>
+.\"      Date: Created: 01/11/2008
+.\"    Manual: KIWI Manualpage
+.\"    Source: KIWI v2.10, r938
+.\"
+.TH "KIWI" "1" "Created: 01/11/2008" "KIWI v2\.10, r938" "KIWI Manualpage"
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.SH "NAME"
+KIWI::images.sh - Configuration File for KIWI image description
+.SH "DESCRIPTION"
+.PP
+The kiwi image description allows to have an optional images\.sh script in place\. This script is called at the beginning of the kiwi create step\. It is allowed to remove software there to shrink down the size of the image\. Most often images\.sh is used for boot images because they needs to be small\. As images\.sh is called in the create step you should be aware to design the script in a way that it can be called multiple times without shooting itself into its knee\. As kiwi allows to create different image types from one previosly prepared tree one needs to take into account that images\.sh can be called more than one time\. If you exit images\.sh with an exit code != 0 kiwi will exit with an error too\.
+.PP
+\fBExample\ 1.\ Template\fR
+.sp
+.RS 4
+.nf
+#======================================
+# Functions\.\.\.
+#\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
+test \-f /\.kconfig && \. /\.kconfig
+test \-f /\.profile && \. /\.profile
+
+#======================================
+# Greeting\.\.\.
+#\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
+echo "Configure image: [$name]\.\.\."
+
+#======================================
+# Call configuration code/functions
+#\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
+\.\.\.
+
+#======================================
+# Exit safely
+#\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
+exit
+.fi
+.RE
+.SH "COMMON FUNCTIONS"
+.PP
+The \.kconfig file allows to make use of a common set of functions\. Those which are SUSE Linux specific starts with the name
+\fIsuse\fR\. Those which are common to all linux systems starts with the name
+\fIbase\fR\. The following list describes which functions are available for images\.sh
+.PP
+[baseCleanMount]
+.RS 4
+Umount the system filesystems /proc /dev/pts /sys
+.RE
+.PP
+[baseGetProfilesUsed]
+.RS 4
+Return the name(s) of profiles used to build this image
+.RE
+.PP
+[baseGetPackagesForDeletion]
+.RS 4
+Return the list of packages setup in the packages type=\'delete\' section of the config\.xml used to build this image
+.RE
+.PP
+[suseGFXBoot]
+.RS 4
+This function requires the gfxboot and at least one bootsplash\-theme\-* package to be installed in order to work correctly\. The function creates from this package data a graphics boot screen for the isolinux and grub boot loaders\. Additionally it creates the bootsplash files for the resolutions 800x600 1024x768 and 1280x1024
+.RE
+.PP
+[suseStripKernel]
+.RS 4
+This function removes all kernel drivers which are not listed in the *drivers sections of the config\.xml file
+.RE
+.PP
+[suseStripInitrd]
+.RS 4
+This function removes a whole bunch of tools binaries and libraries which are not required in order to boot a suse system with kiwi\.
+.RE
+.SH "PROFILE ENVIRONMENT VARIABLES"
+.PP
+The \.profile environment file contains a specific set of variables which are listed below\. Some of the functions above makes use of the variables\.
+.PP
+[$name]
+.RS 4
+The name of the image as listed in config\.xml
+.RE
+.PP
+[$keytablee]
+.RS 4
+The contents of the keytable setup as done in config\.xml
+.RE
+.PP
+[$language]
+.RS 4
+The contents of the locale setup as done in config\.xml
+.RE
+.PP
+[$timezone]
+.RS 4
+The contents of the timezone setup as done in config\.xml
+.RE
+.PP
+[$delete]
+.RS 4
+A list of all packages which are part of the packages section with type=\'delete\' in config\.xml
+.RE
+.PP
+[$profiles]
+.RS 4
+A list of profiles used to build this image
+.RE
+.PP
+[$drivers]
+.RS 4
+A comma seperated list of the driver entries as listed in the drivers section of the config\.xml\. Similar variables exists for the usbdrivers and scsidrivers sections
+.RE
+.PP
+[$size]
+.RS 4
+The predefined size value for this image\. This is not the computed size but only the optional size value of the preferences section in config\.xml
+.RE
+.PP
+[$compressed]
+.RS 4
+The value of the compressed flag of the preferences section in config\.xml
+.RE
+.PP
+[$type]
+.RS 4
+The basic image type\. Can be a simply filesystem image type of ext2 ext3 reiserfs squashfs cpio or one of the following complex image types: iso split usb vmx oem xen pxe
+.RE
+.SH "AUTHOR"
+.PP
+\fBMarcus Schäfer\fR <\&ms (AT) suse\.de\&>
+.sp -1n
+.IP "" 4
+Developer
+

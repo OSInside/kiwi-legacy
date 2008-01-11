@@ -1,11 +1,11 @@
 .\"     Title: kiwi
 .\"    Author: Marcus Schäfer <ms (AT) suse.de>
 .\" Generator: DocBook XSL Stylesheets v1.73.1 <http://docbook.sf.net/>
-.\"      Date: Created: 11/29/2007
+.\"      Date: Created: 01/11/2008
 .\"    Manual: KIWI Manualpage
-.\"    Source: KIWI v1.98, r847
+.\"    Source: KIWI v2.10, r938
 .\"
-.TH "KIWI" "1" "Created: 11/29/2007" "KIWI v1\.98, r847" "KIWI Manualpage"
+.TH "KIWI" "1" "Created: 01/11/2008" "KIWI v2\.10, r938" "KIWI Manualpage"
 .\" disable hyphenation
 .nh
 .\" disable justification (adjust text to left margin only)
@@ -21,11 +21,12 @@ kiwi - Creating Operating System Images
 \fBkiwi\fR {\-x | \-\-listxmlinfo} \fIImagePath\fR [\-\-type\ \fIImageType\fR]
 .SH "IMAGE PREPARATION AND CREATION"
 .PP
-KIWI is a complete imaging solution that is based on an image description\. Such a description is represented by a directory which includes at least one
+KIWI is a complete imaging solution that is based on image description\. Such a description is represented by a directory which includes at least one
 \fIconfig\.xml\fR
-file but can also include other files like scripts or configuration data\. With KIWI two example descriptions are provided in
+file and may as well include other files like scripts or configuration data\. Two example descriptions are provided with KIWI in
 \fI\%file:///usr/share/doc/packages/kiwi/examples/\fR\. A detailed description of the contents of an image description exists in the system design document in
-\fI\%file:///usr/share/doc/packages/kiwi/kiwi.pdf\fR\. KIWI always operates in two steps the first step is the prepare step and if that step was successful a create step follows which is able to create different image output types\. In the prepare step, you prepare a directory containing the contents of your new filesystem based on one or more software package source(s) (such as openSUSE 10\.3)\. The create step is based on the result of the create step and uses the contents of the new image root tree to create the output image\. If the image type iso was requested the output image would be a file with the suffix
+\fI\%file:///usr/share/doc/packages/kiwi/kiwi.pdf\fR\. KIWI always operates in two steps\. The first step is the preparation step and if that step was successful, a creation step follows which is able to create different image output types\. In the preparation step, you prepare a directory including the contents of your new filesystem based on one or more software package source(s) (such as openSUSE 10\.3)\. The creation step is based on the result of the
+create step and uses the contents of the new image root tree to create the output image\. If the image type ISO was requested, the output image would be a file with the suffix
 \fI\.iso\fR
 representing a live system on CD or DVD\.
 .HP 5
@@ -38,19 +39,21 @@ representing a live system on CD or DVD\.
 [\-\-base\-root\ \fIBasePath\fR] [\-\-base\-root\-mode\ {copy\ |\ union\ |\ recycle}] [\-\-prebuiltbootimage\ \fIDirectory\fR]
 .SH "IMAGE UPGRADE"
 .PP
-If the image root tree is stored and not removed it can be used for upgrading the image root tree according to the changes made in the repositories used for this image\. If a distributor provides an update channel for package updates and an image
+If the image root tree is stored and not removed, it can be used for upgrading the image root tree according to the changes made in the repositories used for this image\. If a distributor provides an update channel for package updates and an image
 \fIconfig\.xml\fR
-includes this update channel as repository it is useful to store the image root tree and upgrade the tree according to changes on the update channel\.
+includes this update channel as repository, it is useful to store the image root tree and upgrade the tree according to changes on the update channel\.
 .HP 5
 \fBkiwi\fR {\-u | \-\-upgrade} \fIImageroot\fR [\-\-base\-root\ \fIBasepath\fR]
 .SH "SYSTEM TO IMAGE MIGRATION"
 .PP
-The migration module allows you to migrate your currently running system into an image description\. The module will check for files not managed by a package manager and it will guess a repository from which this operating system could be rebuild\. Among some other magic the result is quite useful but in almost all cases a manual fine tuning is needed\. This includes the repository selection and the unmanaged files along with the configuration details of your currently running operating system\.
+The migration module allows you to migrate your currently running system into an image description\.
+The module will check for files not managed by a package manager and it will guess a repository from which this operating system could be rebuild\. Among some other magic the result is quite useful but in most of the cases a manual fine tuning is needed\. This includes the repository selection and the unmanaged files along with the configuration details of your currently running operating system\.
 .HP 5
 \fBkiwi\fR {\-m | \-\-migrate} \fIname\fR \-\-destdir\ \fIDestinationPath\fR [\-\-exclude\ \fIDirectory\fR...] [\-\-report]
 .SH "IMAGE POSTPROCESSING MODES"
 .PP
-The KIWI postprocessing modes are used for special image deployment tasks, like install the image on a USB stick\. The postprocessing modes are the third step after prepare and create and if possible KIWI calls them automatically depending on the specified output image type and attributes\.
+The KIWI post\-processing modes are used for special image deployment tasks, like installing the image on a USB stick\. They are the third step after preparing and creating
+and if possible, KIWI calls them automatically depending on the specified output image type and attributes\.
 .HP 5
 \fBkiwi\fR \-\-bootstick\ \fIInitrd\fR [\-\-bootstick\-system\ \fISystemImage\fR] [\-\-bootstick\-device\ \fIDevice\fR]
 .HP 5
@@ -63,7 +66,7 @@ The KIWI postprocessing modes are used for special image deployment tasks, like 
 \fBkiwi\fR \-\-installstick\ \fIInitrd\fR \-\-installstick\-system\ \fIVMXSystemImage\fR
 .SH "HELPER TOOLS"
 .PP
-The helper tools provides optional functions like the creation of a crypted password string for the users section of the
+The helper tools provide optional functions like creating a crypted password string for the users section of the
 \fIconfig\.xml\fR
 file or signing the image description with an md5sum hash as well as adding splash data to the boot image used by the bootloader\.
 .HP 5
@@ -78,32 +81,33 @@ KIWI has the following options:
 .PP
 [\fB\-d\fR | \fB\-\-destdir \fR\fB\fIDestinationPath\fR\fR]
 .RS 4
-Specify destination directory to store the image file(s) If not specified the the attribute
+Specify destination directory to store the image file(s) If not specified the attribute
+
 \fIDefaultDestination\fR
-is used\. If no destination can be found an error occurs
+is used\. If no destination can be found, an error occurs
 .RE
 .PP
 [\fB\-t\fR | \fB\-\-type \fR\fB\fIImagetype\fR\fR]
 .RS 4
-Specify the output image type to use for this image The type must exist in the
+Specify the output image type to use for this image\. The type must exist in the
 \fIconfig\.xml\fR
-description\. By the default the primary type will be used\. If there is no primary attribute set the first type entry of the preferences section is the primary type makes only sense in combination with
+description\. By default, the primary type will be used\. If there is no primary attribute set, the first type entry of the preferences section is the primary type makes only sense in combination with
 \fB\-\-create\fR
 .RE
 .PP
 [\fB\-r\fR | \fB\-\-root \fR\fB\fIRootPath\fR\fR]
 .RS 4
-Setup the physical extend, chroot system below the given root\-path path\. If no
+Set up the physical extend, chroot system below the given root\-path path\. If no
 \fB\-\-root\fR
-option is given KIWI will search for the attribute defaultroot in
-\fIconfig\.xml\fR\. If no root directory is known a
+option is given, KIWI will search for the attribute defaultroot in
+\fIconfig\.xml\fR\. If no root directory is known, a
 \fBmktmp\fR
 directory will be created and used as root directory
 .RE
 .PP
 [\fB\-s\fR | \fB\-\-strip\fR]
 .RS 4
-Strip shared objects and executables makes only sense in combination with
+Strip shared objects and executables only make sense in combination with
 \fB\-\-create\fR
 .RE
 .PP
@@ -118,7 +122,7 @@ file
 .PP
 [\fB\-\-ignore\-repos\fR]
 .RS 4
-Ignore all repositories specified so far, in XML or otherwise\. This option should be used in conjunction with subsequent calls to
+Ignore all repositories specified so far, in XML or elsewhere\. This option should be used in conjunction with subsequent calls to
 \fB\-\-add\-repo\fR
 to specify repositories at the commandline that override previous specifications\.
 .RE
@@ -126,7 +130,8 @@ to specify repositories at the commandline that override previous specifications
 [\fB\-\-set\-repo \fR\fB\fIRepoPath\fR\fR\fB \fR\fB[\fB\-\-set\-repotype \fR\fB\fIType\fR\fR]\fR]
 .RS 4
 Set the given repository and optional type for the first repository entry within the
-\fIconfig\.xml\fR\. The change will not be written to the XML file and is valid for this run of image prepare or upgrade process\.
+\fIconfig\.xml\fR\. The change will not be written to the XML file and is valid
+for this run of image prepare or upgrade process\.
 .RE
 .PP
 [\fB\-\-logfile \fR\fB\fIFilename\fR\fR | \fBterminal\fR]

@@ -888,6 +888,7 @@ sub setupRootSystem {
 			#==========================================
 			# Create screen call file
 			#------------------------------------------
+			mkdir "$root/tmp";
 			print $fd "function clean { kill \$SPID;";
 			print $fd "echo 1 > $screenCall.exit; rm -f $lock; exit 1; }\n";
 			print $fd "trap clean INT TERM\n";

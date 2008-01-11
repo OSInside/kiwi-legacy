@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Fri Jan 11 15:26:30 CET 2008 - ms@suse.de
+
+- v2.10
+- fixed ZYPP_MOD_ALIAS setup
+- added kiwi config file manual pages:
+     KIWI::config.sh.1
+     KIWI::images.sh.1
+
+-------------------------------------------------------------------
 Wed Jan  9 12:11:27 CET 2008 - ms@suse.de
 
 - v2.09

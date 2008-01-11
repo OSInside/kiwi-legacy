@@ -1,5 +1,5 @@
 # /.../
-# spec file for package kiwi (Version 2.09
+# spec file for package kiwi (Version 2.10
 # Copyright (c) 2006 SUSE LINUX Products GmbH, Nuernberg, Germany.
 # Please submit bugfixes or comments via http://bugs.opensuse.org
 # ---
@@ -14,7 +14,7 @@ BuildRequires: swig libsatsolver libsatsolver-devel db-devel gcc-c++ libexpat-de
 %endif
 Requires:      perl perl-XML-LibXML perl-libwww-perl screen coreutils
 Summary:       OpenSuSE - KIWI Image System
-Version:       2.09
+Version:       2.10
 Release:       28
 Group:         System
 License:       GPL
@@ -258,6 +258,8 @@ cat kiwi.loader
 %dir %{_datadir}/kiwi
 %dir %{_datadir}/kiwi/image
 %doc %{_mandir}/man1/kiwi.1.gz
+%doc %{_mandir}/man1/KIWI::images.sh.1
+%doc %{_mandir}/man1/KIWI::config.sh.1
 %doc %{_defaultdocdir}/kiwi/COPYING
 %doc %{_defaultdocdir}/kiwi/examples
 %doc %{_defaultdocdir}/kiwi/kiwi.pdf
