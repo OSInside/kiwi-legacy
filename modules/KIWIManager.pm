@@ -721,7 +721,7 @@ sub setupUpgrade {
 		print $fd "function clean { kill \$SPID;";
 		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 		print $fd "trap clean INT TERM\n";
-		print $fd "ZYPP_MODALIAS_SYSFS=/tmp\n";
+		print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
 		if (defined $addPacks) {
 			my @addonPackages = @{$addPacks};
 			my @newpatts = ();
@@ -891,6 +891,7 @@ sub setupRootSystem {
 			print $fd "function clean { kill \$SPID;";
 			print $fd "echo 1 > $screenCall.exit; rm -f $lock; exit 1; }\n";
 			print $fd "trap clean INT TERM\n";
+			print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
 			print $fd "touch $lock\n";
 			if (@packs) {
 				print $fd "@zypper --root $root install ";
@@ -940,7 +941,7 @@ sub setupRootSystem {
 			print $fd "function clean { kill \$SPID;";
 			print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 			print $fd "trap clean INT TERM\n";
-			print $fd "ZYPP_MODALIAS_SYSFS=/tmp\n";
+			print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
 			if (@install) {
 				print $fd "chroot $root @zypper install ";
 				print $fd "@installOpts @install &\n";
