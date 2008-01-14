@@ -1,11 +1,11 @@
 .\"     Title: kiwi
 .\"    Author: Marcus Schäfer <ms (AT) suse.de>
 .\" Generator: DocBook XSL Stylesheets v1.73.1 <http://docbook.sf.net/>
-.\"      Date: Created: 01/11/2008
+.\"      Date: Created: 01/14/2008
 .\"    Manual: KIWI Manualpage
 .\"    Source: KIWI v2.10, r938
 .\"
-.TH "KIWI" "1" "Created: 01/11/2008" "KIWI v2\.10, r938" "KIWI Manualpage"
+.TH "KIWI" "1" "Created: 01/14/2008" "KIWI v2\.10, r938" "KIWI Manualpage"
 .\" disable hyphenation
 .nh
 .\" disable justification (adjust text to left margin only)
@@ -25,8 +25,7 @@ KIWI is a complete imaging solution that is based on image description\. Such a 
 \fIconfig\.xml\fR
 file and may as well include other files like scripts or configuration data\. Two example descriptions are provided with KIWI in
 \fI\%file:///usr/share/doc/packages/kiwi/examples/\fR\. A detailed description of the contents of an image description exists in the system design document in
-\fI\%file:///usr/share/doc/packages/kiwi/kiwi.pdf\fR\. KIWI always operates in two steps\. The first step is the preparation step and if that step was successful, a creation step follows which is able to create different image output types\. In the preparation step, you prepare a directory including the contents of your new filesystem based on one or more software package source(s) (such as openSUSE 10\.3)\. The creation step is based on the result of the
-create step and uses the contents of the new image root tree to create the output image\. If the image type ISO was requested, the output image would be a file with the suffix
+\fI\%file:///usr/share/doc/packages/kiwi/kiwi.pdf\fR\. KIWI always operates in two steps\. The first step is the preparation step and if that step was successful, a creation step follows which is able to create different image output types\. In the preparation step, you prepare a directory including the contents of your new filesystem based on one or more software package source(s) (such as openSUSE 10\.3)\. The creation step is based on the result of the preparation step and uses the contents of the new image root tree to create the output image\. If the image type ISO was requested, the output image would be a file with the suffix
 \fI\.iso\fR
 representing a live system on CD or DVD\.
 .HP 5
@@ -46,8 +45,7 @@ includes this update channel as repository, it is useful to store the image root
 \fBkiwi\fR {\-u | \-\-upgrade} \fIImageroot\fR [\-\-base\-root\ \fIBasepath\fR]
 .SH "SYSTEM TO IMAGE MIGRATION"
 .PP
-The migration module allows you to migrate your currently running system into an image description\.
-The module will check for files not managed by a package manager and it will guess a repository from which this operating system could be rebuild\. Among some other magic the result is quite useful but in most of the cases a manual fine tuning is needed\. This includes the repository selection and the unmanaged files along with the configuration details of your currently running operating system\.
+The migration module allows you to migrate your currently running system into an image description\. The module will check for files not managed by a package manager and it will suggest a repository from which this operating system could be rebuild\. The result is quite useful but in most cases a manual fine tuning is required\. This includes the repository selection and the unmanaged files along with the configuration details of your currently running operating system\.
 .HP 5
 \fBkiwi\fR {\-m | \-\-migrate} \fIname\fR \-\-destdir\ \fIDestinationPath\fR [\-\-exclude\ \fIDirectory\fR...] [\-\-report]
 .SH "IMAGE POSTPROCESSING MODES"
@@ -81,18 +79,27 @@ KIWI has the following options:
 .PP
 [\fB\-d\fR | \fB\-\-destdir \fR\fB\fIDestinationPath\fR\fR]
 .RS 4
-Specify destination directory to store the image file(s) If not specified the attribute
-
-\fIDefaultDestination\fR
-is used\. If no destination can be found, an error occurs
+Specify destination directory to store the image file(s) If not specified kiwi try to find the attribute
+\fIdefaultdestination\fR
+which can be specified in the
+\fIpreferences\fR
+section of the config\.xml file\. If it exists its value is used as destination directory\. If no destination information can be found, an error occurs
 .RE
 .PP
 [\fB\-t\fR | \fB\-\-type \fR\fB\fIImagetype\fR\fR]
 .RS 4
-Specify the output image type to use for this image\. The type must exist in the
+Specify the output image type to use for this image\. Each type is described in a
+\fItype\fR
+section of the preferences section\. At least one type has to be specified in the
 \fIconfig\.xml\fR
-description\. By default, the primary type will be used\. If there is no primary attribute set, the first type entry of the preferences section is the primary type makes only sense in combination with
+description\. By default those type specifying the
+\fIprimary\fR
+attribute will be used\. If there is no primary attribute set, the first type section of the preferences section is the primary type\. The types are only evaluated when kiwi runs the
 \fB\-\-create\fR
+step\. With the option
+\fB\-\-type\fR
+one can distinguish between the types stored in
+\fIconfig\.xml\fR
 .RE
 .PP
 [\fB\-r\fR | \fB\-\-root \fR\fB\fIRootPath\fR\fR]
@@ -130,8 +137,7 @@ to specify repositories at the commandline that override previous specifications
 [\fB\-\-set\-repo \fR\fB\fIRepoPath\fR\fR\fB \fR\fB[\fB\-\-set\-repotype \fR\fB\fIType\fR\fR]\fR]
 .RS 4
 Set the given repository and optional type for the first repository entry within the
-\fIconfig\.xml\fR\. The change will not be written to the XML file and is valid
-for this run of image prepare or upgrade process\.
+\fIconfig\.xml\fR\. The change will not be written to the XML file and is valid for the subsequent image preparation or upgrade process\.
 .RE
 .PP
 [\fB\-\-logfile \fR\fB\fIFilename\fR\fR | \fBterminal\fR]
