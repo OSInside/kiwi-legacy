@@ -2,6 +2,7 @@
 Mon Jan 14 14:12:45 CET 2008 - ms@suse.de
 
 - v2.11
+- fixed config-yast-firstboot.xml service setup
 - fixed KIWILinuxRC.sh::importFile if \" are used (#353601)
 - fixed KIWILog.pm: Don't create a bogus terminal file (#353610)
 - fixed KIWILog.pm: Don't open huge amounts of redundant file 

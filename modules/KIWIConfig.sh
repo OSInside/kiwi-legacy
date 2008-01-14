@@ -144,6 +144,8 @@ function suseServiceDefaultOn {
 		boot.localnet
 		boot.clock
 		policykitd
+		dbus
+		consolekit
 		haldaemon
 		network
 		atd

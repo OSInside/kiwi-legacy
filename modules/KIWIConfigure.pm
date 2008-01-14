@@ -242,6 +242,13 @@ sub setupFirstBootYaST {
 		$kiwi -> failed ();
 		return "failed"; 
 	}
+	if ( ! open (FD,">$root/etc/reconfig_system")) {
+		$kiwi -> failed ();
+		$kiwi -> error ("Failed to create /etc/reconfig_system: $!");
+		$kiwi -> failed ();
+		return "failed";
+	}
+	close FD;
 	if ( ! open (FD,">$root/etc/sysconfig/firstboot")) {
 		$kiwi -> failed ();
 		$kiwi -> error ("Failed to create /etc/sysconfig/firstboot: $!");
@@ -258,13 +265,23 @@ sub setupFirstBootYaST {
 	print FD "FIRSTBOOT_FINISH_FILE=\"/usr/share/firstboot/congrats.txt\"\n";
 	print FD "FIRSTBOOT_RELEASE_NOTES_PATH=\"\"\n";
 	close FD;
-	$data = qx ( chroot $root chkconfig firstboot on 2>&1 );
-	$code = $? >> 8;
-	if ($code != 0) {
-		$kiwi -> failed ();
-		$kiwi -> error ("Failed to activate firstboot service: $data");
-		$kiwi -> failed ();
-		return "failed";
+	my @services = (
+		"boot.rootfsck","boot.cleanup","boot.localfs","boot.localnet",
+		"boot.clock","policykitd","dbus","consolekit","haldaemon","network",
+		"atd","syslog","cron","firstboot"
+	);
+	foreach my $service (@services) {
+		if (! -e "/etc/init.d/$service") {
+			next;
+		}
+		$data = qx ( chroot $root insserv /etc/init.d/$service 2>&1 );
+		$code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error ("Failed to activate firstboot service(s): $data");
+			$kiwi -> failed ();
+			return "failed";
+		}
 	}
 	$kiwi -> done();
 	return "success";
