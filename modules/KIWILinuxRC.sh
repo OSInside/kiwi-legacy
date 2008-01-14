@@ -110,7 +110,7 @@ function importFile {
 	while read line;do
 		echo $line | grep -qi "^#" && continue
 		key=`echo "$line" | cut -d '=' -f1`
-		item=`echo "$line" | cut -d '=' -f2- | tr -d \'`
+		item=`echo "$line" | cut -d '=' -f2- | tr -d \' | tr -d \"`
 		if [ -z "$key" ] || [ -z "$item" ];then
 			continue
 		fi
