@@ -79,11 +79,13 @@ KIWI has the following options:
 .PP
 [\fB\-d\fR | \fB\-\-destdir \fR\fB\fIDestinationPath\fR\fR]
 .RS 4
-Specify destination directory to store the image file(s) If not specified kiwi try to find the attribute
+Specify destination directory to store the image file(s) If not specified, KIWI will try to find the attribute
 \fIdefaultdestination\fR
 which can be specified in the
 \fIpreferences\fR
-section of the config\.xml file\. If it exists its value is used as destination directory\. If no destination information can be found, an error occurs
+section of the
+\fIconfig\.xml\fR
+file\. If it exists its value is used as destination directory\. If no destination information can be found, an error occurs
 .RE
 .PP
 [\fB\-t\fR | \fB\-\-type \fR\fB\fIImagetype\fR\fR]
@@ -92,7 +94,7 @@ Specify the output image type to use for this image\. Each type is described in 
 \fItype\fR
 section of the preferences section\. At least one type has to be specified in the
 \fIconfig\.xml\fR
-description\. By default those type specifying the
+description\. By default, the types specifying the
 \fIprimary\fR
 attribute will be used\. If there is no primary attribute set, the first type section of the preferences section is the primary type\. The types are only evaluated when kiwi runs the
 \fB\-\-create\fR
