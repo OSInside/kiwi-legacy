@@ -218,10 +218,9 @@ sub doStat {
 	# end of the line
 	# ---
 	my $this = shift;
-	$this -> setOutputChannel();
 	my $cols = $this -> getColumns();
-	printf ("\015\033[%sC\033[10D",$cols);
-	$this -> resetOutputChannel();
+	my $FD   = $this->{channel};
+	printf $FD "\015\033[%sC\033[10D" , $cols;
 }
 
 #==========================================
@@ -232,9 +231,8 @@ sub doNorm {
 	# Reset cursor position to standard value
 	# ---
 	my $this = shift;
-	$this -> setOutputChannel();
-	print "\033[m\017";
-	$this -> resetOutputChannel();
+	my $FD   = $this->{channel};
+	print $FD "\033[m\017";
 }
 
 #==========================================
@@ -246,19 +244,16 @@ sub done {
 	# ---
 	my $this    = shift;
 	my $rootEFD = $this->{rootefd};
+	my $FD      = $this->{channel};
 	if ((! defined $this->{fileLog}) && (! defined $this->{nocolor})) {
 	    $this -> doStat();
-		$this -> setOutputChannel();
-		print "\033[1;32mdone\n";
-		$this -> resetOutputChannel();
+		print $FD "\033[1;32mdone\n";
 		$this -> doNorm();
 		if ($this->{errorOk}) {
 			print $rootEFD "   done\n";
 		}
 	} else {
-		$this -> setOutputChannel();
-		print "   done\n";
-		$this -> resetOutputChannel();
+		print $FD "   done\n";
 	}
 	$this -> saveInCache ("   done\n");
 	$this->{state} = "O";
@@ -273,19 +268,16 @@ sub failed {
 	# ---
 	my $this    = shift;
 	my $rootEFD = $this->{rootefd};
+	my $FD      = $this->{channel};
 	if ((! defined $this->{fileLog}) && (! defined $this->{nocolor})) {
 		$this -> doStat();
-		$this -> setOutputChannel();
-		print "\033[1;31mfailed\n";
-		$this -> resetOutputChannel();
+		print $FD "\033[1;31mfailed\n";
 		$this -> doNorm();
 		if ($this->{errorOk}) {
 			print $rootEFD "   failed\n";
 		}
 	} else {
-		$this -> setOutputChannel();
-		print "   failed\n";
-		$this -> resetOutputChannel();
+		print $FD "   failed\n";
 	}
 	$this -> saveInCache ("   failed\n");
 	$this->{state} = "O";
@@ -300,19 +292,16 @@ sub skipped {
 	# ---
 	my $this    = shift;
 	my $rootEFD = $this->{rootefd};
+	my $FD      = $this->{channel};
 	if ((! defined $this->{fileLog}) && (! defined $this->{nocolor})) {
 		$this -> doStat();
-		$this -> setOutputChannel();
-		print "\033[1;33mskipped\n";
-		$this -> resetOutputChannel();
+		print $FD "\033[1;33mskipped\n";
 		$this -> doNorm();
 		if ($this->{errorOk}) {
 			print $rootEFD "   skipped\n";
 		}
 	} else {
-		$this -> setOutputChannel();
-		print "   skipped\n";
-		$this -> resetOutputChannel();
+		print $FD "   skipped\n";
 	}
 	$this -> saveInCache ("   skipped\n");
 	$this->{state} = "O";
@@ -327,19 +316,16 @@ sub notset {
 	# ---
 	my $this    = shift;
 	my $rootEFD = $this->{rootefd};
+	my $FD      = $this->{channel};
 	if ((! defined $this->{fileLog}) && (! defined $this->{nocolor})) {
 		$this -> doStat();
-		$this -> setOutputChannel();
-		print "\033[1;36mnotset\n";
-		$this -> resetOutputChannel();
+		print $FD "\033[1;36mnotset\n";
 		$this -> doNorm();
 		if ($this->{errorOk}) {
 			print $rootEFD "   notset\n";
 		}
 	} else {
-		$this -> setOutputChannel();
-		print "   notset\n";
-		$this -> resetOutputChannel();
+		print $FD "   notset\n";
 	}
 	$this -> saveInCache ("   notset\n");
 	$this->{state} = "O";
@@ -354,14 +340,13 @@ sub step {
 	# ---
 	my $this = shift;
 	my $data = shift;
+	my $FD   = $this->{channel};
 	if ($data > 100) {
 		$data = 100;
 	}
 	if ((! defined $this->{fileLog}) && (! defined $this->{nocolor})) {
 		$this -> doStat();
-		$this -> setOutputChannel();
-		print "\033[1;32m($data%)";
-		$this -> resetOutputChannel();
+		print $FD "\033[1;32m($data%)";
 		$this -> doStat();
 		if ($this->{errorOk}) {
 			# Don't set progress info to log file
@@ -420,33 +405,6 @@ sub reopenRootChannel {
 		$this->{channel} = *EFD;
 	}
 	return $this;
-}
-
-#==========================================
-# setOutputChannel
-#------------------------------------------
-sub setOutputChannel {
-	my $this = shift;
-	my $channel = $this->{channel};
-	open ( OLDERR, ">&STDERR" );
-	open ( OLDSTD, ">&STDOUT" );
-	open ( STDERR,">&$channel" );
-	open ( STDOUT,">&$channel" );
-	$this->{olderr} = \*OLDERR;
-	$this->{oldstd} = \*OLDSTD;
-}
-
-#==========================================
-# resetOutputChannel
-#------------------------------------------
-sub resetOutputChannel {
-	my $this = shift;
-	my $olderr = $this->{olderr}; 
-	my $oldstd = $this->{oldstd};
-	close ( STDERR );
-	open  ( STDERR, ">&$$olderr" );
-	close ( STDOUT );
-	open  ( STDOUT, ">&$$oldstd" );
 }
 
 #==========================================
@@ -513,6 +471,7 @@ sub printLog {
 	# setup message string
 	#------------------------------------------
 	my $result;
+	my $FD = $this->{channel};
 	foreach my $level (@showLevel) {
 		if ($level != $lglevel) {
 			next;
@@ -553,9 +512,7 @@ sub printLog {
 	# print message to log channel (stdin,file)
 	#------------------------------------------
 	if ((! defined $flag) || ($this->{fileLog})) {
-		$this -> setOutputChannel();
-		print $result;
-		$this -> resetOutputChannel();
+		print $FD $result;
 	}
 	#==========================================
 	# save in cache if needed
@@ -669,15 +626,16 @@ sub setLogFile {
 	# ---
 	my $this = shift;
 	my $file = $_[0];
-	if ($file ne "terminal") {
-		if (! (open FD,">$file")) {
-			$this -> warning ("Couldn't open log channel: $!\n");
-			return undef;
-		}
-		binmode(FD,':unix');
-		$this->{channel} = *FD;
-		$this->{rootefd} = *FD;
+	if ($file eq "terminal") {
+		return $this;
 	}
+	if (! (open FD,">$file")) {
+		$this -> warning ("Couldn't open log channel: $!\n");
+		return undef;
+	}
+	binmode(FD,':unix');
+	$this->{channel} = *FD;
+	$this->{rootefd} = *FD;
 	$this->{rootLog} = $file;
 	$this->{fileLog} = 1;
 	return $this;
