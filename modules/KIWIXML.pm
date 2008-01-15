@@ -1164,7 +1164,7 @@ sub addRepository {
 #------------------------------------------
 sub addImagePackages {
 	# ...
-	# Add the given package list to the type=image packages
+	# Add the given package list to the type=boot packages
 	# section of the config.xml parse tree.
 	# ----
 	my $this  = shift;
@@ -1174,7 +1174,7 @@ sub addImagePackages {
 	for (my $i=1;$i<= $nodes->size();$i++) {
 		my $node = $nodes -> get_node($i);
 		my $type = $node  -> getAttribute ("type");
-		if ($type eq "image") {
+		if ($type eq "boot") {
 			$nodeNumber = $i; last;
 		}
 	}
