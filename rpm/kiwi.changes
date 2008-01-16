@@ -7,6 +7,10 @@ Mon Jan 14 14:12:45 CET 2008 - ms@suse.de
 - fixed KIWILog.pm: Don't create a bogus terminal file (#353610)
 - fixed KIWILog.pm: Don't open huge amounts of redundant file 
   descriptors (#353610)
+- added option --prechroot-call. If specified within --prepare
+  this option allows you to name a program which is called before
+  the switch into the chroot system happens and the second phase of
+  the prepare call starts.
 
 -------------------------------------------------------------------
 Fri Jan 11 15:26:30 CET 2008 - ms@suse.de

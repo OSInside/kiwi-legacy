@@ -140,6 +140,7 @@ our $NoColor;           # do not used colored output (done/failed messages)
 our $LogPort;           # specify alternative log server port
 our $GzipCmd;           # command to run to gzip things
 our $PrebuiltBootImage; # directory where a prepared boot image may be found
+our $PreChrootCall;     # program name called before chroot switch
 our $listXMLInfo;       # list XML information for this operation
 our $Compress;          # set compression level
 
@@ -357,6 +358,24 @@ sub main {
 				$kiwi -> failed ();
 				my $code = kiwiExit (1); return $code;
 			}
+		}
+		#==========================================
+		# Check for pre chroot call
+		#------------------------------------------
+		if (defined $PreChrootCall) {
+			$kiwi -> info ("Calling pre-chroot program: $PreChrootCall");
+			my $path = $root -> getRootPath();
+			my $data = qx ($PreChrootCall "$path" 2>&1);
+			my $code = $? >> 8;
+			if ($code != 0) {
+				$kiwi -> failed ();
+				$kiwi -> info   ($data);
+				$kiwi -> failed ();
+				my $code = kiwiExit (1); return $code;
+			} else {
+				$kiwi -> loginfo ("$PreChrootCall: $data");
+			}
+			$kiwi -> done ();
 		}
 		#==========================================
 		# Install root system
@@ -913,6 +932,7 @@ sub init {
 		"log-port=i"            => \$LogPort,
 		"gzip-cmd=s"            => \$GzipCmd,
 		"prebuiltbootimage=s"   => \$PrebuiltBootImage,
+		"prechroot-call=s"      => \$PreChrootCall,
 		"listxmlinfo|x=s"       => \$listXMLInfo,
 		"compress=s"            => \$Compress,
 		"help|h"                => \&usage,
@@ -920,7 +940,7 @@ sub init {
 	);
 	my $user = qx (whoami);
 	if ($user !~ /root/i) {
-		$kiwi -> info ("Only root can do this");
+		$kiwi -> error ("Only root can do this");
 		$kiwi -> failed ();
 		usage();
 	}
@@ -937,12 +957,12 @@ sub init {
 		(! defined $listXMLInfo) && (! defined $BootCD) &&
 		(! defined $CreateHash)
 	) {
-		$kiwi -> info ("No operation specified");
+		$kiwi -> error ("No operation specified");
 		$kiwi -> failed ();
 		my $code = kiwiExit (1); return $code;
 	}
 	if ((defined @AddRepository) && (! defined @AddRepositoryType)) {
-		$kiwi -> info ("No repository type specified");
+		$kiwi -> error ("No repository type specified");
 		$kiwi -> failed ();
 		my $code = kiwiExit (1); return $code;
 	}
@@ -951,7 +971,7 @@ sub init {
 		$RootTree = $workingDir."/".$RootTree;
 	}
 	if ((defined $Migrate) && (! defined $Destination)) {
-		$kiwi -> info ("No migration destination directory specified");
+		$kiwi -> error ("No migration destination directory specified");
 		$kiwi -> failed ();
 		my $code = kiwiExit (1); return $code;
 	}
@@ -966,14 +986,14 @@ sub init {
 		$kiwi -> done ();
 	}
 	if ((defined $BaseRootMode) && (! defined $BaseRoot)) {
-		$kiwi -> info ("base root mode specified but no base root tree");
+		$kiwi -> error ("base root mode specified but no base root tree");
 		$kiwi -> failed ();
 		my $code = kiwiExit (1); return $code;   
 	}
 	if ((defined $BaseRootMode) &&
 		($BaseRootMode !~ /^copy$|^union$|^recycle$/)
 	) {
-		$kiwi -> info ("Invalid baseroot mode, allowed are copy|union|recycle");
+		$kiwi -> error ("Invalid baseroot mode,allowed are copy|union|recycle");
 		$kiwi -> failed ();
 		my $code = kiwiExit (1); return $code;
 	}
@@ -985,8 +1005,15 @@ sub init {
 		$RootTree = $BaseRoot;
 	}
 	if ((defined $Compress) && ($Compress !~ /^yes$|^no$/)) {
-		$kiwi -> info ("Invalid compress argument, expected yes|no");
+		$kiwi -> error ("Invalid compress argument, expected yes|no");
 		$kiwi -> failed ();
+		my $code = kiwiExit (1); return $code;
+	}
+	if ((defined $PreChrootCall) && (! -x $PreChrootCall)) {
+		$kiwi -> error ("pre-chroot program: $PreChrootCall");
+		$kiwi -> failed ();
+		$kiwi -> error ("--> 1) no such file or directory\n");
+		$kiwi -> error ("--> 2) and/or not in executable format\n");
 		my $code = kiwiExit (1); return $code;
 	}
 	#==========================================
