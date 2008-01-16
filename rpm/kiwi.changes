@@ -2,7 +2,8 @@
 Mon Jan 14 14:12:45 CET 2008 - ms@suse.de
 
 - v2.11
-- added support for execution logging (#335573)
+- added support for execution logging into kiwi log file
+  if perl version >= v5.9.x is used (#335573)
 - fixed config-yast-firstboot.xml service setup
 - fixed KIWILinuxRC.sh::importFile if \" are used (#353601)
 - fixed KIWILog.pm: Don't create a bogus terminal file (#353610)
