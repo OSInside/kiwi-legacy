@@ -26,6 +26,7 @@ use KIWIOverlay;
 use KIWISatSolver;
 use KIWIManager qw (%packageManager);
 use File::Glob ':glob';
+use KIWIQX;
 
 #==========================================
 # Globals
@@ -67,7 +68,7 @@ sub new {
 	if (($imageDesc !~ /\//) && (! -d $imageDesc)) {
 		$imageDesc = $main::System."/".$imageDesc;
 	}
-	my $arch = qx (uname -m); chomp $arch;
+	my $arch = qxx ("uname -m"); chomp $arch;
 	my $systemTree;
 	my $controlFile = $imageDesc."/config.xml";
 	my $checkmdFile = $imageDesc."/.checksum.md5";
@@ -75,7 +76,7 @@ sub new {
 	my $systemXML   = new XML::LibXML;
 	my $systemRNG   = new XML::LibXML::RelaxNG ( location => $main::Scheme );
 	if (-f $checkmdFile) {
-		my $data = qx (cd $imageDesc && md5sum -c .checksum.md5 2>&1);
+		my $data = qxx ("cd $imageDesc && md5sum -c .checksum.md5 2>&1");
 		my $code = $? >> 8;
 		if ($code != 0) {
 			chomp $data;
@@ -1692,9 +1693,9 @@ sub setupImageInheritance {
 sub resolveLink {
 	my $this = shift;
 	my $data = $this -> resolveArchitectur ($_[0]);
-	my $cdir = qx (pwd); chomp $cdir;
+	my $cdir = qxx ("pwd"); chomp $cdir;
 	if (chdir $data) {
-		my $pdir = qx (pwd); chomp $pdir;
+		my $pdir = qxx ("pwd"); chomp $pdir;
 		chdir $cdir;
 		return $pdir
 	}
@@ -1740,7 +1741,7 @@ sub createTmpDirectory {
 	}
 	if (! defined $useRoot) {
 		if (! defined $selfRoot) {
-			$root = qx ( mktemp -q -d /tmp/kiwi.XXXXXX );
+			$root = qxx (" mktemp -q -d /tmp/kiwi.XXXXXX ");
 			$code = $? >> 8;
 			if ($code == 0) {
 				$rootError = 0;
@@ -1757,7 +1758,7 @@ sub createTmpDirectory {
 					$kiwi -> failed();
 					return undef;
 				}
-				qx (rm -R $root);
+				qxx ("rm -R $root");
 				$kiwi -> done();
 			}
 			if (mkdir $root) {
@@ -1867,7 +1868,7 @@ sub getInstSourceFile {
 	# the download
 	# ----
 	$dest = $dirname."/".$basename;
-	my $data = qx (lwp-download $url $dest 2>&1);
+	my $data = qxx ("lwp-download $url $dest 2>&1");
 	my $code = $? >> 8;
 	if ($code == 0) {
 		return $this;
@@ -1888,7 +1889,7 @@ sub getInstSourceFile {
 			if ($link =~ /$search/) {
 				$url  = $location.$link;
 				print ("NEXT\n");
-				$data = qx (lwp-download $url $dest 2>&1);
+				$data = qxx ("lwp-download $url $dest 2>&1");
 				$code = $? >> 8;
 				if ($code == 0) {
 					return $this;
@@ -1980,7 +1981,7 @@ sub getInstSourceSatSolvable {
 	}
 	@index = sort (@index);
 	$index = join (":",@index);
-	$index = qx (echo $index | md5sum | cut -f1 -d-);
+	$index = qxx ("echo $index | md5sum | cut -f1 -d-");
 	$index = $sdir."/".$index; chomp $index;
 	$index=~ s/ +$//;
 	if (-f $index) {
@@ -1989,7 +1990,7 @@ sub getInstSourceSatSolvable {
 	#==========================================
 	# find system architecture
 	#------------------------------------------
-	my $arch = qx (uname -m); chomp $arch;
+	my $arch = qxx ("uname -m"); chomp $arch;
 	if ($arch =~ /^i.86/) {
 		$arch = 'i.86';
 	}
@@ -2054,7 +2055,7 @@ sub getInstSourceSatSolvable {
 	if (-f "$sdir/packages-1.gz") {
 		$destfile = $sdir."/primary-".$count;
 		$scommand = "gzip -cd $sdir/packages-*.gz; gzip -cd $sdir/*.pat.gz";
-		my $data = qx (($scommand) | susetags2solv > $destfile);
+		my $data = qxx ("($scommand) | susetags2solv > $destfile");
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> error  ("--> Can't create SaT solvable file");
@@ -2067,7 +2068,7 @@ sub getInstSourceSatSolvable {
 	#------------------------------------------
 	if (! $error) {
 		foreach my $solvables (glob ("$sdir/primary-*.gz")) {
-			my $data = qx (gzip -d $sdir/primary-*.gz);
+			my $data = qxx ("gzip -d $sdir/primary-*.gz");
 			my $code = $? >> 8;
 			if ($code != 0) {
 				$kiwi -> error  ("--> Couldn't uncompress solve files");
@@ -2085,7 +2086,7 @@ sub getInstSourceSatSolvable {
 			$kiwi -> failed ();
 			$error = 1;
 		} else {
-			my $data = qx (mergesolv $sdir/primary-* > $index);
+			my $data = qxx ("mergesolv $sdir/primary-* > $index");
 			my $code = $? >> 8;
 			if ($code != 0) {
 				$kiwi -> error  ("--> Couldn't merge solve files");
@@ -2097,9 +2098,9 @@ sub getInstSourceSatSolvable {
 	#==========================================
 	# cleanup cache dir
 	#------------------------------------------
-	qx (rm -f $sdir/primary-*);
-	qx (rm -f $sdir/packages-*.gz);
-	qx (rm -f $sdir/*.pat.gz);
+	qxx ("rm -f $sdir/primary-*");
+	qxx ("rm -f $sdir/packages-*.gz");
+	qxx ("rm -f $sdir/*.pat.gz");
 	if (! $error) {
 		return $index;
 	}

@@ -27,6 +27,7 @@ use File::Basename;
 use File::Find qw(find);
 use File::stat;
 use Fcntl ':mode';
+use KIWIQX;
 
 #==========================================
 # Constructor
@@ -91,7 +92,7 @@ sub new {
 			$kiwi -> setRootLog ($imageTree.".".$$.".screenrc.log");
 		}
 	}
-	my $arch = qx (uname -m); chomp ( $arch );
+	my $arch = qxx ("uname -m"); chomp ( $arch );
 	$arch = ".$arch";
 	#==========================================
 	# Store object data
@@ -122,17 +123,17 @@ sub stripImage {
 	my $kiwi = $this->{kiwi};
 	my $imageTree = $this->{imageTree};
 	$kiwi -> info ("Stripping shared objects/executables...");
-	my @list = qx (find $imageTree -type f -perm -755);
+	my @list = qxx ("find $imageTree -type f -perm -755");
 	foreach my $file (@list) {
 		chomp $file;
-		my $data = qx (file "$file");
+		my $data = qxx ("file \"$file\"");
 		chomp $data;
 		if ($data =~ /not stripped/) {
 		if ($data =~ /shared object/) {
-			qx ( strip -p $file 2>&1 );
+			qxx ("strip -p $file 2>&1");
 		}
 		if ($data =~ /executable/) {
-			qx ( strip -p $file 2>&1 );
+			qxx ("strip -p $file 2>&1");
 		}
 		}
 	}
@@ -291,7 +292,7 @@ sub createImageCPIO {
 	#==========================================
 	# PRE Create filesystem on extend
 	#------------------------------------------
-	my $pwd  = qx (pwd); chomp $pwd;
+	my $pwd  = qxx ("pwd"); chomp $pwd;
 	my @cpio = ("--create", "--format=newc", "--quiet");
 	my $tree = $imageTree;
 	my $dest = $imageDest."/".$name.".gz";
@@ -303,9 +304,9 @@ sub createImageCPIO {
 		$dest = $pwd."/".$dest;
 	}
 	if ($compress) {
-		$data = qx (cd $tree && find . | cpio @cpio | $main::Gzip -f > $dest);
+		$data = qxx ("cd $tree && find . | cpio @cpio | $main::Gzip -f > $dest");
 	} else {
-		$data = qx (cd $tree && find . | cpio @cpio > $dest);
+		$data = qxx ("cd $tree && find . | cpio @cpio > $dest");
 	}
 	my $code = $? >> 8;
 	if ($code != 0) {
@@ -426,7 +427,7 @@ sub createImageUSB {
 	}
 	my %type   = %{$xml->getImageTypeAndAttributes()};
 	my $pblt   = $type{checkprebuilt};
-	my $tmpdir = qx ( mktemp -q -d /tmp/kiwi-$text.XXXXXX ); chomp $tmpdir;
+	my $tmpdir = qxx ("mktemp -q -d /tmp/kiwi-$text.XXXXXX"); chomp $tmpdir;
 	my $result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> error  ("Couldn't create tmp dir: $tmpdir: $!");
@@ -488,7 +489,7 @@ sub createImageUSB {
 		} else {
 			$kiwi -> done();
 			$kiwi -> info ("Copying pre-built boot image to destination");
-			my $data = qx (cp -a $pinitrd $main::Destination 2>&1);
+			my $data = qxx ("cp -a $pinitrd $main::Destination 2>&1");
 			my $code = $? >> 8;
 			if ($code != 0) {
 				$kiwi -> failed();
@@ -496,7 +497,7 @@ sub createImageUSB {
 				$kiwi -> failed();
 				$pblt = 0;
 			} else {
-				$data = qx (cp -a $plinux* $main::Destination 2>&1);
+				$data = qxx ("cp -a $plinux* $main::Destination 2>&1");
 				$code = $? >> 8;
 				if ($code != 0) {
 					$kiwi -> failed();
@@ -514,8 +515,8 @@ sub createImageUSB {
 		if (! defined main::main()) {
 			$main::Survive = "default";
 			if (! -d $main::RootTree.$baseSystem) {
-				qx (rm -rf $main::RootTree);
-				qx (rm -rf $tmpdir);
+				qxx ("rm -rf $main::RootTree");
+				qxx ("rm -rf $tmpdir");
 			}
 			return undef;
 		}
@@ -524,8 +525,8 @@ sub createImageUSB {
 	# remove tmpdir with boot tree
 	#------------------------------------------
 	if (! -d $main::RootTree.$baseSystem) {
-		qx (rm -rf $main::RootTree);
-		qx (rm -rf $tmpdir);
+		qxx ("rm -rf $main::RootTree");
+		qxx ("rm -rf $tmpdir");
 	}
 	#==========================================
 	# Include splash screen to initrd
@@ -765,7 +766,7 @@ sub createImageLiveCD {
 			}
 			my @rodirs = qw (bin boot lib opt sbin usr);
 			foreach my $dir (@rodirs) {
-				$data = qx (mv $imageTree/$dir $imageTreeReadOnly 2>&1);
+				$data = qxx ("mv $imageTree/$dir $imageTreeReadOnly 2>&1");
 				$code = $? >> 8;
 				if ($code != 0) {
 					$kiwi -> failed ();
@@ -838,7 +839,7 @@ sub createImageLiveCD {
 		#==========================================
 		# Checking RW file system
 		#------------------------------------------
-		qx (/sbin/e2fsck -f -y $imageDest/$namerw 2>&1);
+		qxx ("/sbin/e2fsck -f -y $imageDest/$namerw 2>&1");
 
 		#==========================================
 		# Create image md5sum
@@ -876,7 +877,7 @@ sub createImageLiveCD {
 		}
 		my @rodirs = qw (bin boot lib opt sbin usr);
 		foreach my $dir (@rodirs) {
-			$data = qx (cp -a $imageTree/$dir $imageTreeReadOnly 2>&1);
+			$data = qxx ("cp -a $imageTree/$dir $imageTreeReadOnly 2>&1");
 			$code = $? >> 8;
 			if ($code != 0) {
 				$kiwi -> failed ();
@@ -894,10 +895,10 @@ sub createImageLiveCD {
 	my $Prepare = $imageTree."/image";
 	my $xml = new KIWIXML ( $kiwi,$Prepare );
 	if (! defined $xml) {
-		qx (rm -rf $imageTreeReadOnly);
+		qxx ("rm -rf $imageTreeReadOnly");
 		return undef;
 	}
-	my $tmpdir = qx ( mktemp -q -d /tmp/kiwi-cdboot.XXXXXX ); chomp $tmpdir;
+	my $tmpdir = qxx (" mktemp -q -d /tmp/kiwi-cdboot.XXXXXX "); chomp $tmpdir;
 	my $result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> error  ("Couldn't create tmp dir: $tmpdir: $!");
@@ -953,9 +954,9 @@ sub createImageLiveCD {
 		} else {
 			$kiwi -> done();
 			$kiwi -> info ("Extracting pre-built boot image");
-			$data = qx (mkdir -p $main::Create);
-			$data = qx (
-				$main::Gzip -cd $pinitrd|(cd $main::Create && cpio -di 2>&1)
+			$data = qxx ("mkdir -p $main::Create");
+			$data = qxx (
+				"$main::Gzip -cd $pinitrd|(cd $main::Create && cpio -di 2>&1)"
 			);
 			$code = $? >> 8;
 			if ($code != 0) {
@@ -976,9 +977,9 @@ sub createImageLiveCD {
 		if (! defined main::main()) {
 			$main::Survive = "default";
 			if (! -d $main::RootTree.$baseSystem) {
-				qx (rm -rf $main::RootTree);
-				qx (rm -rf $tmpdir);
-				qx (rm -rf $imageTreeReadOnly);
+				qxx ("rm -rf $main::RootTree");
+				qxx ("rm -rf $tmpdir");
+				qxx ("rm -rf $imageTreeReadOnly");
 			}
 			return undef;
 		}
@@ -989,7 +990,7 @@ sub createImageLiveCD {
 	# Prepare for CD ISO image
 	#------------------------------------------
 	$kiwi -> info ("Creating CD filesystem");
-	qx (mkdir -p $main::RootTree/CD/boot);
+	qxx ("mkdir -p $main::RootTree/CD/boot");
 	$kiwi -> done ();
 
 	#==========================================
@@ -998,31 +999,31 @@ sub createImageLiveCD {
 	my $cdrootData = $imageTree."/image/config-cdroot.tgz";
 	if (-f $cdrootData) {
 		$kiwi -> info ("Integrating CD root information...");
-		my $data = qx ( tar -C $main::RootTree/CD -xvf $cdrootData );
+		my $data = qxx (" tar -C $main::RootTree/CD -xvf $cdrootData ");
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Failed to integrate CD root data: $data");
 			$kiwi -> failed ();
 			if (! -d $main::RootTree.$baseSystem) {
-				qx (rm -rf $main::RootTree);
-				qx (rm -rf $tmpdir);
-				qx (rm -rf $imageTreeReadOnly);
+				qxx ("rm -rf $main::RootTree");
+				qxx ("rm -rf $tmpdir");
+				qxx ("rm -rf $imageTreeReadOnly");
 			}
 			return undef;
 		}
 		$kiwi -> done();
 		$kiwi -> info ("Removing CD root tarball from system image");
-		$data = qx (rm $cdrootData);
+		$data = qxx ("rm $cdrootData");
 		$code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
 			$kiwi -> error  ($data);
 			$kiwi -> failed ();
 			if (! -d $main::RootTree.$baseSystem) {
-				qx (rm -rf $main::RootTree);
-				qx (rm -rf $tmpdir);
-				qx (rm -rf $imageTreeReadOnly);
+				qxx ("rm -rf $main::RootTree");
+				qxx ("rm -rf $tmpdir");
+				qxx ("rm -rf $imageTreeReadOnly");
 			}
 			return undef;
 		}
@@ -1034,7 +1035,7 @@ sub createImageLiveCD {
 	$cdrootData = $imageTree."/image/config-cdroot.sh";
 	if (-x $cdrootData) {
 		$kiwi -> info ("Calling CD root setup script...");
-		my $pwd = qx (pwd); chomp $pwd;
+		my $pwd = qxx ("pwd"); chomp $pwd;
 		my $cdrootEnv = $imageTree."/.profile";
 		if ($cdrootEnv !~ /^\//) {
 			$cdrootEnv = $pwd."/".$cdrootEnv;
@@ -1043,7 +1044,7 @@ sub createImageLiveCD {
 			$cdrootData = $pwd."/".$cdrootData;
 		}
 		my $CCD  = "$main::RootTree/CD";
-		my $data = qx (cd $CCD && bash -c '. $cdrootEnv && . $cdrootData' 2>&1);
+		my $data = qxx ("cd $CCD && bash -c '. $cdrootEnv && . $cdrootData' 2>&1");
 		my $code = $? >> 8;
 		if ($code != 0) {
 			chomp $data;
@@ -1051,24 +1052,24 @@ sub createImageLiveCD {
 			$kiwi -> error  ("Failed to call CD root script: $data");
 			$kiwi -> failed ();
 			if (! -d $main::RootTree.$baseSystem) {
-				qx (rm -rf $main::RootTree);
-				qx (rm -rf $tmpdir);
-				qx (rm -rf $imageTreeReadOnly);
+				qxx ("rm -rf $main::RootTree");
+				qxx ("rm -rf $tmpdir");
+				qxx ("rm -rf $imageTreeReadOnly");
 			}
 			return undef;
 		}
 		$kiwi -> done();
 		$kiwi -> info ("Removing CD root setup script from system image");
-		$data = qx (rm $cdrootData);
+		$data = qxx ("rm $cdrootData");
 		$code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
 			$kiwi -> error  ($data);
 			$kiwi -> failed ();
 			if (! -d $main::RootTree.$baseSystem) {
-				qx (rm -rf $main::RootTree);
-				qx (rm -rf $tmpdir);
-				qx (rm -rf $imageTreeReadOnly);
+				qxx ("rm -rf $main::RootTree");
+				qxx ("rm -rf $tmpdir");
+				qxx ("rm -rf $imageTreeReadOnly");
 			}
 			return undef;
 		}
@@ -1079,14 +1080,14 @@ sub createImageLiveCD {
 	#------------------------------------------
 	$kiwi -> info ("Moving CD image data into boot structure");
 	if ((! defined $gzip) || ($gzip eq "compressed")) {
-		qx (mv $imageDest/$namerw.md5 $main::RootTree/CD);
-		qx (mv $imageDest/$namerw.gz $main::RootTree/CD);
+		qxx ("mv $imageDest/$namerw.md5 $main::RootTree/CD");
+		qxx ("mv $imageDest/$namerw.gz $main::RootTree/CD");
 	}
 	if (defined $gzip) {
-		qx (mv $imageDest/$namero $main::RootTree/CD);
+		qxx ("mv $imageDest/$namero $main::RootTree/CD");
 	} else {
-		qx (mkdir -p $main::RootTree/CD/read-only-system);
-		qx (mv $imageTreeReadOnly/* $main::RootTree/CD/read-only-system);
+		qxx ("mkdir -p $main::RootTree/CD/read-only-system");
+		qxx ("mv $imageTreeReadOnly/* $main::RootTree/CD/read-only-system");
 		rmdir $imageTreeReadOnly;
 	}
 	$kiwi -> done ();
@@ -1096,15 +1097,15 @@ sub createImageLiveCD {
 	#------------------------------------------
 	my $CD  = $main::Prepare."/cdboot";
 	my $gfx = $main::RootTree."/image/loader";
-	my $isoarch = qx (uname -m); chomp $isoarch;
+	my $isoarch = qxx ("uname -m"); chomp $isoarch;
 	if ($isoarch =~ /i.86/) {
 		$isoarch = "i386";
 	}
 	if (! -d $gfx) {
 		$kiwi -> error  ("Couldn't open directory $gfx: $!");
 		if (! -d $main::RootTree.$baseSystem) {
-			qx (rm -rf $main::RootTree);
-			qx (rm -rf $tmpdir);
+			qxx ("rm -rf $main::RootTree");
+			qxx ("rm -rf $tmpdir");
 		}
 		$kiwi -> failed ();
 		return undef;
@@ -1114,18 +1115,18 @@ sub createImageLiveCD {
 	#------------------------------------------
 	$kiwi -> info ("Copying boot image and kernel [$isoarch]");
 	my $destination = "$main::RootTree/CD/boot/$isoarch/loader";
-	qx (mkdir -p $destination);
+	qxx ("mkdir -p $destination");
 	if ($pblt) {
-		$data = qx (cp $pinitrd $destination/initrd);
+		$data = qxx ("cp $pinitrd $destination/initrd");
 	} else {
-		$data = qx (cp $imageDest/$iso*$arch*.gz $destination/initrd);
+		$data = qxx ("cp $imageDest/$iso*$arch*.gz $destination/initrd");
 	}
 	$code = $? >> 8;
 	if ($code == 0) {
 		if ($pblt) {
-			$data = qx (cp $plinux $destination/linux);
+			$data = qxx ("cp $plinux $destination/linux");
 		} else {
-			$data = qx (cp $imageDest/$iso*$arch*.kernel $destination/linux);
+			$data = qxx ("cp $imageDest/$iso*$arch*.kernel $destination/linux");
 		}
 		$code = $? >> 8;
 	}
@@ -1134,8 +1135,8 @@ sub createImageLiveCD {
 		$kiwi -> error  ("Copy failed: $data");
 		$kiwi -> failed ();
 		if (! -d $main::RootTree.$baseSystem) {
-			qx (rm -rf $main::RootTree);
-			qx (rm -rf $tmpdir);
+			qxx ("rm -rf $main::RootTree");
+			qxx ("rm -rf $tmpdir");
 		}
 		return undef;
 	}
@@ -1144,13 +1145,13 @@ sub createImageLiveCD {
 	# copy base CD files
 	#------------------------------------------
 	$kiwi -> info ("Setting up isolinux boot CD [$isoarch]");
-	$data = qx (cp -a $gfx/* $destination);
+	$data = qxx ("cp -a $gfx/* $destination");
 	$code = $? >> 8;
 	if ($code == 0) {
-		$data = qx (cp $CD/isolinux.cfg $destination);
+		$data = qxx ("cp $CD/isolinux.cfg $destination");
 		$code = $? >> 8;
 		if ($code == 0) {
-			$data = qx (cp $CD/isolinux.msg $destination);
+			$data = qxx ("cp $CD/isolinux.msg $destination");
 			$code = $? >> 8;
 		}
 	}
@@ -1159,8 +1160,8 @@ sub createImageLiveCD {
 		$kiwi -> error  ("Copy failed: $data");
 		$kiwi -> failed ();
 		if (! -d $main::RootTree.$baseSystem) {
-			qx (rm -rf $main::RootTree);
-			qx (rm -rf $tmpdir);
+			qxx ("rm -rf $main::RootTree");
+			qxx ("rm -rf $tmpdir");
 		}
 		return undef;
     }
@@ -1170,13 +1171,13 @@ sub createImageLiveCD {
 	#------------------------------------------
 	my $label = "$systemName [ ISO ]";
 	my $lsafe = "Failsafe-$label";
-	qx (sed -i -e "s:Live-System:$label:" $destination/isolinux.cfg);
-	qx (sed -i -e "s:Live-Failsafe:$lsafe:" $destination/isolinux.cfg);
+	qxx ("sed -i -e \"s:Live-System:$label:\" $destination/isolinux.cfg");
+	qxx ("sed -i -e \"s:Live-Failsafe:$lsafe:\" $destination/isolinux.cfg");
 	#==========================================
 	# remove original kernel and initrd
 	#------------------------------------------
 	if (! $pblt) {
-		$data = qx (rm $imageDest/$iso*.* 2>&1);
+		$data = qxx ("rm $imageDest/$iso*.* 2>&1");
 		$code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> warning ("Couldn't cleanup boot files: $data");
@@ -1190,8 +1191,8 @@ sub createImageLiveCD {
 		$kiwi -> error  ("Couldn't create image boot configuration");
 		$kiwi -> failed ();
 		if (! -d $main::RootTree.$baseSystem) {
-			qx (rm -rf $main::RootTree);
-			qx (rm -rf $tmpdir);
+			qxx ("rm -rf $main::RootTree");
+			qxx ("rm -rf $tmpdir");
 		}
 		return undef;
 	}
@@ -1207,15 +1208,15 @@ sub createImageLiveCD {
 	$kiwi -> info ("Calling mkisofs...");
 	my $name = $imageDest."/".$namerw.".iso";
 	$kiwi -> loginfo ("Calling: $CD/isolinux.sh $main::RootTree/CD $name");
-	$data = qx ($CD/isolinux.sh $main::RootTree/CD $name 2>&1);
+	$data = qxx ("$CD/isolinux.sh $main::RootTree/CD $name 2>&1");
 	$code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Failed to create ISO image: $data");
 		$kiwi -> failed ();
 		if (! -d $main::RootTree.$baseSystem) {
-			qx (rm -rf $main::RootTree);
-			qx (rm -rf $tmpdir);
+			qxx ("rm -rf $main::RootTree");
+			qxx ("rm -rf $tmpdir");
 		}
 		return undef;
 	}
@@ -1223,8 +1224,8 @@ sub createImageLiveCD {
 	# remove tmpdir with boot tree
 	#------------------------------------------
 	if (! -d $main::RootTree.$baseSystem) {
-		qx (rm -rf $main::RootTree);
-		qx (rm -rf $tmpdir);
+		qxx ("rm -rf $main::RootTree");
+		qxx ("rm -rf $tmpdir");
 	}
 	$kiwi -> done();
 	return $this;
@@ -1309,7 +1310,7 @@ sub createImageSplit {
 				chmod S_IMODE($st->mode), $target;
 				chown $st->uid, $st->gid, $target;
 			} elsif (S_ISCHR($st->mode) || S_ISBLK($st->mode) || S_ISLNK($st->mode)) {
-				qx ( cp -a $path $target );
+				qxx (" cp -a $path $target ");
 			} else {
 				symlink ($rerooted, $target);
 			}
@@ -1330,8 +1331,8 @@ sub createImageSplit {
 					my $dest = $file;
 					$dest =~ s#$imageTree#$imageTreeTmp#;
 
-					qx ( rm -rf $dest );
-					qx ( cp -a $file $dest );
+					qxx (" rm -rf $dest ");
+					qxx (" cp -a $file $dest ");
 				}
 			}
 		}
@@ -1398,13 +1399,13 @@ sub createImageSplit {
 			my $rwroot = $file;
 			$rwroot =~ s#$imageTreeTmp#/read-write#;
 
-			qx ( rm -rf $dest );
-			qx ( mkdir -p `dirname $dest` );
+			qxx (" rm -rf $dest ");
+			qxx (" mkdir -p `dirname $dest` ");
 			if (-d $source) {
-				qx ( mv $source $dest );
+				qxx (" mv $source $dest ");
 				symlink ($rwroot, $source);
 			} else {
-				qx ( cp -a $rosource $dest );
+				qxx (" cp -a $rosource $dest ");
 				symlink ($rwroot, $source);
 			}
 		}
@@ -1412,7 +1413,7 @@ sub createImageSplit {
 	#==========================================
 	# Embed tmp extend into ro extend
 	#------------------------------------------
-	qx ( cd $imageTreeTmp && tar cvfj $imageTree/rootfs.tar.bz2 * 2>&1 );
+	qxx (" cd $imageTreeTmp && tar cvfj $imageTree/rootfs.tar.bz2 * 2>&1 ");
 
 	#==========================================
 	# Count disk space for extends
@@ -1540,23 +1541,23 @@ sub createImageSplit {
 		$kiwi -> info ("Checking file system: $type...");
 		SWITCH: for ($type) {
 			/ext2/       && do {
-				qx (/sbin/e2fsck -f -y $imageDest/$name 2>&1);
+				qxx ("/sbin/e2fsck -f -y $imageDest/$name 2>&1");
 				$kiwi -> done();
 				last SWITCH;
 			};
 			/ext3/       && do {
-				qx (/sbin/fsck.ext3 -f -y $imageDest/$name 2>&1);
-				qx (/sbin/tune2fs -j $imageDest/$name 2>&1);
+				qxx ("/sbin/fsck.ext3 -f -y $imageDest/$name 2>&1");
+				qxx ("/sbin/tune2fs -j $imageDest/$name 2>&1");
 				$kiwi -> done();
 				last SWITCH;
 			};
 			/reiserfs/   && do {
-				qx (/sbin/reiserfsck -y $imageDest/$name 2>&1);
+				qxx ("/sbin/reiserfsck -y $imageDest/$name 2>&1");
 				$kiwi -> done();
 				last SWITCH;
 			};
 			/cramfs/     && do {
-				qx (/sbin/fsck.cramfs -v $imageDest/$name 2>&1);
+				qxx ("/sbin/fsck.cramfs -v $imageDest/$name 2>&1");
 				$kiwi -> done();
 				last SWITCH;
 			};
@@ -1885,8 +1886,8 @@ sub postImage {
 		# Check EXT3 file system
 		#------------------------------------------
 		/ext3/i && do {
-			qx (/sbin/fsck.ext3 -f -y $imageDest/$name 2>&1);
-			qx (/sbin/tune2fs -j $imageDest/$name 2>&1);
+			qxx ("/sbin/fsck.ext3 -f -y $imageDest/$name 2>&1");
+			qxx ("/sbin/tune2fs -j $imageDest/$name 2>&1");
 			$kiwi -> done();
 			last SWITCH;
 		};
@@ -1894,7 +1895,7 @@ sub postImage {
 		# Check EXT2 file system
 		#------------------------------------------
 		/ext2/i && do {
-			qx (/sbin/e2fsck -f -y $imageDest/$name 2>&1);
+			qxx ("/sbin/e2fsck -f -y $imageDest/$name 2>&1");
 			$kiwi -> done();
 			last SWITCH;
 		};
@@ -1902,7 +1903,7 @@ sub postImage {
 		# Check ReiserFS file system
 		#------------------------------------------
 		/reiserfs/i && do {
-			qx (/sbin/reiserfsck -y $imageDest/$name 2>&1);
+			qxx ("/sbin/reiserfsck -y $imageDest/$name 2>&1");
 			$kiwi -> done();
 			last SWITCH;
 		};
@@ -1985,7 +1986,7 @@ sub buildLogicalExtend {
 	# Create logical extend storage and FS
 	#------------------------------------------
 	unlink ($out);
-	my $data = qx (dd if=/dev/zero of=$out bs=1 seek=$seek count=1 2>&1);
+	my $data = qxx ("dd if=/dev/zero of=$out bs=1 seek=$seek count=1 2>&1");
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> error  ("Couldn't create logical extend");
@@ -2013,7 +2014,7 @@ sub installLogicalExtend {
 	#------------------------------------------
 	my $name = basename ($source);
 	$kiwi -> info ("Copying physical to logical [$name]...");
-	my $data = qx (cp -a $source/* $extend 2>&1);
+	my $data = qxx ("cp -a $source/* $extend 2>&1");
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> failed ();
@@ -2037,42 +2038,11 @@ sub setupLogicalExtend {
 	my $imageTree = $this->{imageTree};
 	my $imageStrip= $this->{imageStrip};
 	#==========================================
-	# Call depmod
-	#------------------------------------------
-	my $depmod = "/sbin/depmod";
-	my $map    = "/boot/System.map*";
-	my @systemMaps = qx ( chroot $imageTree bash -c "ls -1 $map 2>/dev/null" );
-	if ( @systemMaps ) {
-		$kiwi -> info ("Calculating kernel module dependencies...");
-		foreach my $systemMap (@systemMaps) {
-			chomp $systemMap;
-			my $kernelVersion;
-			if ($systemMap =~ /System.map-(.*)/) {
-				$kernelVersion = $1;
-			} else {
-				$kiwi -> failed ();
-				$kiwi -> info ("Could not determine kernel version");
-				$this -> cleanMount ();
-				return undef;
-			}
-			my $call = "$depmod -F $systemMap $kernelVersion";
-			my $data = qx ( chroot $imageTree $call );
-			my $code = $? >> 8;
-			if ($code != 0) {
-				$kiwi -> failed ();
-				$kiwi -> info ($data);
-				$this -> cleanMount();
-				return undef;
-			}
-		}
-		$kiwi -> done ();
-	}
-	#==========================================
 	# Call images.sh script
 	#------------------------------------------
 	if (-x "$imageTree/image/images.sh") {
 		$kiwi -> info ("Calling image script: images.sh");
-		my $data = qx ( chroot $imageTree /image/images.sh 2>&1 );
+		my $data = qxx (" chroot $imageTree /image/images.sh 2>&1 ");
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
@@ -2082,7 +2052,7 @@ sub setupLogicalExtend {
 		} else {
 			$kiwi -> loginfo ("images.sh: $data");
 		}
-		qx ( rm -f $imageTree/image/images.sh );
+		qxx (" rm -f $imageTree/image/images.sh ");
 		$kiwi -> done ();
 	}
 	#==========================================
@@ -2133,7 +2103,7 @@ sub mountLogicalExtend {
 		$mount = "mount $opts";
 	}
 	for (my $id=0;$id<=7;$id++) {
-		$status = qx ( /sbin/losetup /dev/loop$id 2>&1 );
+		$status = qxx (" /sbin/losetup /dev/loop$id 2>&1 ");
 		$result = $? >> 8;
 		if ($result eq 1) {
 			$loopfound = 1;
@@ -2147,7 +2117,7 @@ sub mountLogicalExtend {
 		$kiwi -> failed ();
 		return undef;
 	}
-	my $data= qx ($mount -o loop=$loop $imageDest/$name $imageDest/mnt-$$ 2>&1);
+	my $data= qxx ("$mount -o loop=$loop $imageDest/$name $imageDest/mnt-$$ 2>&1");
 	my $code= $? >> 8;
 	if ($code != 0) {
 		chomp $data;
@@ -2210,15 +2180,15 @@ sub extractKernel {
 	}
 	if (-f "$imageTree/boot/vmlinux.gz") {
 		$kiwi -> info ("Extracting kernel...");
-		my $pwd = qx (pwd); chomp $pwd;
+		my $pwd = qxx ("pwd"); chomp $pwd;
 		my $file = "$imageDest/$name.kernel";
 		my $lx = '"^Linux version"';
 		my $sp = '-f3 -d" "';
 		if ($file !~ /^\//) {
 			$file = $pwd."/".$file;
 		}
-		qx (rm -f $file);
-		qx (cp $imageTree/boot/vmlinuz $file);
+		qxx ("rm -f $file");
+		qxx ("cp $imageTree/boot/vmlinuz $file");
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
@@ -2237,18 +2207,18 @@ sub extractKernel {
 			$kiwi -> failed ();
 			return undef;
 		}
-		my $kernel = qx (
-			$main::Gzip -dc $gzfile | strings | grep $lx | cut $sp
+		my $kernel = qxx (
+			"$main::Gzip -dc $gzfile | strings | grep $lx | cut $sp"
 		);
 		chomp $kernel;
-		qx (rm -f $file.$kernel);
-		qx (mv $file $file.$kernel && ln -s $file.$kernel $file );
+		qxx ("rm -f $file.$kernel");
+		qxx ("mv $file $file.$kernel && ln -s $file.$kernel $file ");
 		if (-f "$imageTree/boot/xen.gz") {
 			$file = "$imageDest/$name.kernel-xen";
-			qx (cp $imageTree/boot/xen.gz $file);
-			qx (mv $file $file.$kernel."gz");
+			qxx ("cp $imageTree/boot/xen.gz $file");
+			qxx ("mv $file $file.$kernel.'gz'");
 		}
-		qx (rm -rf $imageTree/boot/*);
+		qxx ("rm -rf $imageTree/boot/*");
 		$kiwi -> done();
 	}
 	return $name;
@@ -2269,14 +2239,14 @@ sub setupEXT2 {
 		$tree = $imageTree;
 	}
 	my $fsopts;
-	my $fileCount = int (qx (find $tree | wc -l));
+	my $fileCount = int ( qxx ("find $tree | wc -l") );
 	my $nodeCount = $fileCount * 2;
 	if (defined $journal) {
 		$fsopts = "-O dir_index -b 4096 -j -J size=4 -q -F -N $nodeCount";
 	} else {  
 		$fsopts = "-b 4096 -q -F -N $nodeCount";
 	}
-	my $data = qx (/sbin/mke2fs $fsopts $imageDest/$name 2>&1);
+	my $data = qxx ("/sbin/mke2fs $fsopts $imageDest/$name 2>&1");
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> error  ("Couldn't create EXT2 filesystem");
@@ -2295,7 +2265,7 @@ sub setupReiser {
 	my $name = shift;
 	my $kiwi = $this->{kiwi};
 	my $imageDest = $this->{imageDest};
-	my $data = qx (/sbin/mkreiserfs -q -f -s 513 -b 4096 $imageDest/$name 2>&1);
+	my $data = qxx ("/sbin/mkreiserfs -q -f -s 513 -b 4096 $imageDest/$name 2>&1");
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> error  ("Couldn't create Reiser filesystem");
@@ -2319,7 +2289,7 @@ sub setupCramFS {
 	if (! defined $tree) {
 		$tree = $imageTree;
 	}
-	my $data = qx (/sbin/mkfs.cramfs -b 4096 -v $tree $imageDest/$name 2>&1);
+	my $data = qxx ("/sbin/mkfs.cramfs -b 4096 -v $tree $imageDest/$name 2>&1");
 	my $code = $? >> 8; 
 	if ($code != 0) {
 		$kiwi -> error  ("Couldn't create CRam filesystem");
@@ -2344,7 +2314,7 @@ sub setupSquashFS {
 		$tree = $imageTree;
 	}
 	unlink ("$imageDest/$name");
-	my $data = qx (/usr/bin/mksquashfs $tree $imageDest/$name 2>&1);
+	my $data = qxx ("/usr/bin/mksquashfs $tree $imageDest/$name 2>&1");
 	my $code = $? >> 8; 
 	if ($code != 0) {
 		$kiwi -> failed ();
@@ -2353,7 +2323,7 @@ sub setupSquashFS {
 		$kiwi -> error  ($data);
 		return undef;
 	}
-	qx (chmod 644 $imageDest/$name);
+	qxx ("chmod 644 $imageDest/$name");
 	return $name;
 }
 
@@ -2475,19 +2445,19 @@ sub buildMD5Sum {
 	#------------------------------------------
 	$kiwi -> info ("Creating image MD5 sum...");
 	my $size = -s "$imageDest/$name";
-	my $primes = qx (factor $size); $primes =~ s/^.*: //;
+	my $primes = qxx ("factor $size"); $primes =~ s/^.*: //;
 	my $blocksize = 1;
 	for my $factor (split /\s/,$primes) {
 		last if ($blocksize * $factor > 8192);
 		$blocksize *= $factor;
 	}
 	my $blocks = $size / $blocksize;
-	my $sum  = qx (cat $imageDest/$name | md5sum - | cut -f 1 -d-);
+	my $sum  = qxx ("cat $imageDest/$name | md5sum - | cut -f 1 -d-");
 	chomp $sum;
 	if ($name =~ /\.gz$/) {
 		$name =~ s/\.gz//;
 	}
-	qx (echo "$sum $blocks $blocksize" > $imageDest/$name.md5);
+	qxx ("echo \"$sum $blocks $blocksize\" > $imageDest/$name.md5");
 	$kiwi -> done();
 	return $name;
 }
@@ -2506,7 +2476,7 @@ sub restoreSplitExtend {
 	$kiwi -> info ("Restoring physical extend...");
 	my @rodirs = qw (bin boot lib opt sbin usr);
 	foreach my $dir (@rodirs) {
-		my $data = qx (mv $imageTreeReadOnly/$dir $imageTree 2>&1);
+		my $data = qxx ("mv $imageTreeReadOnly/$dir $imageTree 2>&1");
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
@@ -2532,7 +2502,7 @@ sub compressImage {
 	# Compress image using gzip
 	#------------------------------------------
 	$kiwi -> info ("Compressing image...");
-	my $data = qx ($main::Gzip -f $imageDest/$name);
+	my $data = qxx ("$main::Gzip -f $imageDest/$name");
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> failed ();
@@ -2555,7 +2525,7 @@ sub getSize {
 	my $this   = shift;
 	my $extend = shift;
 	my $xml    = $this->{xml};
-	my $size = qx ( du -ks $extend ); chomp $size;
+	my $size = qxx (" du -ks $extend "); chomp $size;
 	if ($size =~ /(\d+)\s.*/) {
 		$size = $1;
 	}
@@ -2585,7 +2555,7 @@ sub getSize {
 sub cleanMount {
 	my $this = shift;
 	my $imageDest = $this->{imageDest};
-	qx (umount -l $imageDest/mnt-$$ 2>&1);
+	qxx ("umount -l $imageDest/mnt-$$ 2>&1");
 	if (defined $this->{loop}) {
 		system ("/sbin/losetup -d $this->{loop}");
 	}
@@ -2600,7 +2570,7 @@ sub cleanKernelFSMount {
 	my $imageDest = $this->{imageDest};
 	my @kfs  = ("/proc/sys/fs/binfmt_misc","/proc","/dev/pts","/sys");
 	foreach my $system (@kfs) {
-		qx (umount $imageDest/$system 2>&1);
+		qxx ("umount $imageDest/$system 2>&1");
 	}
 }
 

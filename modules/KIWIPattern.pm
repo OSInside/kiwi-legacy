@@ -21,6 +21,7 @@ use strict;
 use KIWILog;
 use KIWIURL;
 use File::Glob ':glob';
+use KIWIQX;
 
 #==========================================
 # Constructor
@@ -77,7 +78,7 @@ sub new {
 		kiwi -> failed ();
 		return undef;
 	}
-	my $arch = qx (uname -m); chomp $arch;
+	my $arch = qxx ("uname -m"); chomp $arch;
 	if ($arch =~ /^i.86/) {
 		$arch = 'i*86';
 	}
@@ -349,7 +350,7 @@ sub downloadPattern {
 		$response = $browser  -> request ( $request );
 		$content  = $response -> content ();
 		if ($this->{pzip}) {
-			my $tmpdir = qx ( mktemp -q -d /tmp/kiwipattern.XXXXXX );
+			my $tmpdir = qxx (" mktemp -q -d /tmp/kiwipattern.XXXXXX ");
 			my $result = $? >> 8;
 			chomp $tmpdir;
 			if ($result != 0) {

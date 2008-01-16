@@ -18,6 +18,7 @@ package KIWIUtil;
 # Modules
 #------------------------------------------
 use strict;
+use KIWIQX;
 
 #==========================================
 # Constructor

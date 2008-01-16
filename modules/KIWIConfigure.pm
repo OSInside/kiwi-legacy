@@ -19,6 +19,7 @@ package KIWIConfigure;
 #------------------------------------------
 use strict;
 use KIWILog;
+use KIWIQX;
 
 #==========================================
 # Constructor
@@ -104,11 +105,13 @@ sub setupUsersGroups {
 				$adduser .= " -m -d $home";
 			}
 			if (defined $group) {
-				my $data = qx ( chroot $root grep -q ^$group: /etc/group 2>&1 );
+				my $data = qxx (
+					"chroot $root grep -q ^$group: /etc/group 2>&1"
+				);
 				my $code = $? >> 8;
 				if ($code != 0) {
 					$kiwi -> info ("Adding group: $group");
-					my $data = qx ( chroot $root $addgroup $group );
+					my $data = qxx ( "chroot $root $addgroup $group" );
 					my $code = $? >> 8;
 					if ($code != 0) {
 						$kiwi -> failed ();
@@ -124,15 +127,15 @@ sub setupUsersGroups {
 				$adduser .= " -c '$realname'";
 				$moduser .= " -c '$realname'";
 			}
-			my $data = qx ( chroot $root grep -q ^$user: /etc/passwd 2>&1 );
+			my $data = qxx ( "chroot $root grep -q ^$user: /etc/passwd 2>&1" );
 			my $code = $? >> 8;
 			if ($code != 0) {
 				$kiwi -> info ("Adding user: $user [$group]");
-				$data = qx ( chroot $root $adduser $user 2>&1 );
+				$data = qxx ( "chroot $root $adduser $user 2>&1" );
 				$code = $? >> 8;
 			} else {
 				$kiwi -> info ("Modifying user: $user [$group]");
-				$data = qx ( chroot $root $moduser $user 2>&1 );
+				$data = qxx ( "chroot $root $moduser $user 2>&1" );
 				$code = $? >> 8;
 			}
 			if ($code != 0) {
@@ -144,7 +147,7 @@ sub setupUsersGroups {
 			$kiwi -> done ();
 			if (defined $home) {
 				$kiwi -> info("Setting owner/group permissions $user [$group]");
-				$data = qx ( chroot $root chown -R $user:$group $home );
+				$data = qxx ( "chroot $root chown -R $user:$group $home" );
 				$code = $? >> 8;
 				if ($code != 0) {
 					$kiwi -> failed ();
@@ -188,7 +191,9 @@ sub setupAutoYaST {
 		$kiwi -> failed ();
 		return "failed";
 	}
-	qx ( cp $imageDesc/config-yast-autoyast.xml $root/$autodir/$autocnf 2>&1 );
+	qxx (
+		"cp $imageDesc/config-yast-autoyast.xml $root/$autodir/$autocnf 2>&1"
+	);
 	if ( ! open (FD,">$root/etc/install.inf")) {
 		$kiwi -> failed ();
 		$kiwi -> error ("Failed to create install.inf: $!");
@@ -234,7 +239,7 @@ sub setupFirstBootYaST {
 		return "failed";
 	}
 	my $firstboot = "$root/etc/YaST2/firstboot.xml";
-	my $data = qx (cp $imageDesc/config-yast-firstboot.xml $firstboot 2>&1 );
+	my $data = qxx ("cp $imageDesc/config-yast-firstboot.xml $firstboot 2>&1");
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> failed ();
@@ -274,7 +279,7 @@ sub setupFirstBootYaST {
 		if (! -e "/etc/init.d/$service") {
 			next;
 		}
-		$data = qx ( chroot $root insserv /etc/init.d/$service 2>&1 );
+		$data = qxx ( "chroot $root insserv /etc/init.d/$service 2>&1" );
 		$code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();

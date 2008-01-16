@@ -25,6 +25,7 @@ package KIWISatSolver;
 #------------------------------------------
 use strict;
 use KIWILog;
+use KIWIQX;
 
 #==========================================
 # Plugins

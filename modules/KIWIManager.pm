@@ -22,6 +22,7 @@ use strict;
 use FileHandle;
 use File::Basename;
 use KIWILog;
+use KIWIQX;
 
 #==========================================
 # Exports
@@ -87,7 +88,7 @@ sub new {
 	}
 	my $dataDir = "/var/cache/kiwi/smart-$$";
 	if ($manager eq "smart") {
-		qx (mkdir -p $dataDir);
+		qxx ("mkdir -p $dataDir");
 	}
 	my @channelList = ();
 	#==========================================
@@ -196,7 +197,7 @@ sub setupScreenCall {
 			$fd -> close();
 		}
 	}
-	qx ( chmod 755 $screenCall );
+	qxx (" chmod 755 $screenCall ");
 	if ($logs) {
 		$kiwi -> closeRootChannel();
 	}
@@ -238,8 +239,8 @@ sub setupScreenCall {
 		#==========================================
 		# remove call and control files
 		#------------------------------------------
-		qx ( rm -f $screenCall* );
-		qx ( rm -f $screenCtrl );
+		qxx (" rm -f $screenCall* ");
+		qxx (" rm -f $screenCtrl ");
 	} else {
 		#==========================================
 		# do the job in the child process
@@ -296,7 +297,7 @@ sub setupSignatureCheck {
 	#------------------------------------------
 	if ($manager eq "smart") {
 		my $optionName  = "rpm-check-signatures";
-		my $curCheckSig = qx (@smart config --show $optionName|tr -d '\n');
+		my $curCheckSig = qxx ("@smart config --show $optionName|tr -d '\n'");
 		my $cmdstr = "smart config --set";
 		if (! $chroot) {
 			$cmdstr = "@smart config --set";
@@ -308,11 +309,11 @@ sub setupSignatureCheck {
 				$this -> checkExclusiveLock();
 				$kiwi -> info ("Setting RPM signature check to: $imgCheckSig");
 				$this -> setLock();
-				$data = qx ( bash -c "$cmdstr $option 2>&1" );
+				$data = qxx ("bash -c \"$cmdstr $option 2>&1\"");
 				$this -> freeLock();
 			} else {
 				$kiwi -> info ("Setting RPM signature check to: $imgCheckSig");
-				$data = qx ( chroot $root bash -c "$cmdstr $option 2>&1" );
+				$data = qxx ("chroot $root bash -c \"$cmdstr $option 2>&1\"");
 			}
 			$code = $? >> 8;
 			if ($code != 0) {
@@ -365,11 +366,11 @@ sub resetSignatureCheck {
 				$this -> checkExclusiveLock();
 				$kiwi -> info ("Reset RPM signature check to: $curCheckSig");
 				$this -> setLock();
-				$data = qx ( bash -c "$cmdstr $option 2>&1" );
+				$data = qxx ("bash -c \"$cmdstr $option 2>&1\"");
 				$this -> freeLock();
 			} else {
 				$kiwi -> info ("Reset RPM signature check to: $curCheckSig");
-				$data = qx ( chroot $root bash -c "$cmdstr $option 2>&1" );
+				$data = qxx ("chroot $root bash -c \"$cmdstr $option 2>&1\"");
 			}
 			$code = $? >> 8;
 			if ($code != 0) {
@@ -430,12 +431,12 @@ sub setupInstallationSource {
 				$this -> checkExclusiveLock();
 				$this -> setLock();
 				$kiwi -> info ("Adding local smart channel: $chl");
-				$data = qx ( bash -c "$cmds $chl @opts 2>&1" );
+				$data = qxx ("bash -c \"$cmds $chl @opts 2>&1\"");
 				$code = $? >> 8;
 				$this -> freeLock();
 			} else {
 				$kiwi -> info ("Adding image smart channel: $chl");
-				$data = qx ( chroot $root bash -c "$cmds $chl @opts 2>&1" );
+				$data = qxx ("chroot $root bash -c \"$cmds $chl @opts 2>&1\"");
 				$code = $? >> 8;
 			}
 			if ($code != 0) {
@@ -491,12 +492,12 @@ sub setupInstallationSource {
 				$this -> checkExclusiveLock();
 				$this -> setLock();
 				$kiwi -> info ("Adding local zypper service: $alias");
-				$data = qx (bash -c "@zypper --root $root $sadd 2>&1");
+				$data = qxx ("bash -c \"@zypper --root $root $sadd 2>&1\"");
 				$code = $? >> 8;
 				$this -> freeLock();
 			} else {
 				$kiwi -> info ("Adding image zypper service: $alias");
-				$data = qx (chroot $root bash -c "@zypper $sadd 2>&1");
+				$data = qxx ("chroot $root bash -c \"@zypper $sadd 2>&1\"");
 				$code = $? >> 8;
 			}
 			if ($code != 0) {
@@ -544,12 +545,12 @@ sub resetInstallationSource {
 			$this -> checkExclusiveLock();
 			$kiwi -> info ("Removing smart channel(s): @channelList");
 			$this -> setLock();
-			$data = qx ( bash -c "$cmds @list -y 2>&1" );
+			$data = qxx ("bash -c \"$cmds @list -y 2>&1\"");
 			$code = $? >> 8;
 			$this -> freeLock();
 		} else {
 			$kiwi -> info ("Removing smart channel(s): @channelList");
-			$data = qx ( chroot $root bash -c "$cmds @list -y 2>&1" );
+			$data = qxx ("chroot $root bash -c \"$cmds @list -y 2>&1\"");
 			$code = $? >> 8;
 		}
 		if ($code != 0) {
@@ -573,7 +574,7 @@ sub resetInstallationSource {
 			$kiwi -> info ("Removing zypper service(s): @channelList");
 			$this -> setLock();
 			foreach my $chl (@list) {
-				$data = qx ( bash -c "$cmds $chl 2>&1" );
+				$data = qxx ("bash -c \"$cmds $chl 2>&1\"");
 				$code = $? >> 8;
 				if ($code != 0) {
 					last;
@@ -583,7 +584,7 @@ sub resetInstallationSource {
 		} else {
 			$kiwi -> info ("Removing zypper service(s): @channelList");
 			foreach my $chl (@list) {
-				$data = qx ( chroot $root bash -c "$cmds $chl 2>&1" );
+				$data = qxx ("chroot $root bash -c \"$cmds $chl 2>&1\"");
 				$code = $? >> 8;
 				if ($code != 0) {
 					last;
@@ -818,7 +819,7 @@ sub setupRootSystem {
 		} else {
 			$kiwi -> info ("Checking for already installed packages...");
 			my $querypack = "smart query '*' --installed --hide-version";
-			my @installed = qx ( chroot $root $querypack 2>/dev/null);
+			my @installed = qxx (" chroot $root $querypack 2>/dev/null");
 			chomp ( @installed );
 			my @install   = ();
 			foreach my $need (@packs) {
@@ -912,7 +913,7 @@ sub setupRootSystem {
 		} else {
 			$kiwi -> info ("Checking for already Installed image packages...");
 			my $querypack = "rpm -qa --qf %'{NAME}\n'";
-			my @installed = qx ( chroot $root $querypack 2>/dev/null);
+			my @installed = qxx (" chroot $root $querypack 2>/dev/null");
 			chomp ( @installed );
 			my @install   = ();
 			my @newpatts  = ();
@@ -989,7 +990,7 @@ sub resetSource {
 	if ($manager eq "smart") {
 		foreach my $channel (keys %{$source{public}}) {
 			$kiwi -> info ("Removing smart channel: $channel\n");
-			qx ( @smart channel --remove $channel -y 2>&1 );
+			qxx (" @smart channel --remove $channel -y 2>&1 ");
 		}
 	}
 	#==========================================
@@ -998,7 +999,7 @@ sub resetSource {
 	if ($manager eq "zypper") {
 		foreach my $channel (keys %{$source{public}}) {
 			$kiwi -> info ("Removing zypper service: $channel\n");
-			qx ( bash -c "@zypper service-delete $channel 2>&1" );
+			qxx ("bash -c \"@zypper service-delete $channel 2>&1\"");
 		}
 	}
 	$this -> freeLock();
@@ -1032,12 +1033,12 @@ sub setupPackageInfo {
 			$this -> checkExclusiveLock();
 			$kiwi -> info ("Checking for package: $pack");
 			$this -> setLock();
-			$data = qx (@smart query --installed $pack 2>/dev/null);
+			$data = qxx ("@smart query --installed $pack 2>/dev/null");
 			$code = $? >> 8;
 			$this -> freeLock();
 		} else {
 			$kiwi -> info ("Checking for package: $pack");
-			$data = qx (chroot $root smart query --installed $pack 2>/dev/null);
+			$data = qxx ("chroot $root smart query --installed $pack 2>/dev/null");
 			$code = $? >> 8;
 		}
 		if ($code == 0) {
@@ -1063,12 +1064,12 @@ sub setupPackageInfo {
 			$this -> checkExclusiveLock();
 			$kiwi -> info ("Checking for package: $pack");
 			$this -> setLock();
-			$data = qx ( rpm -q $pack 2>&1 );
+			$data = qxx (" rpm -q $pack 2>&1 ");
 			$code = $? >> 8;
 			$this -> freeLock();
 		} else {
 			$kiwi -> info ("Checking for package: $pack");
-			$data= qx (chroot $root rpm -q $pack 2>&1 );
+			$data= qxx ("chroot $root rpm -q $pack 2>&1 ");
 			$code= $? >> 8;
 		}
 		if ($code != 0) {
@@ -1115,7 +1116,7 @@ sub setLock {
 	my $lock = $this->{lock};
 	my $kiwi = $this->{kiwi};
 	$kiwi -> loginfo ("Set package manager lock\n");
-	qx ( touch $lock );
+	qxx (" touch $lock ");
 }
 
 #==========================================
@@ -1126,7 +1127,7 @@ sub freeLock {
 	my $lock = $this->{lock};
 	my $kiwi = $this->{kiwi};
 	$kiwi -> loginfo ("Release package manager lock\n");
-	qx ( rm -f $lock );
+	qxx (" rm -f $lock ");
 }
 
 #==========================================
@@ -1142,8 +1143,8 @@ sub removeCacheDir {
 		kill 15,$this->{child};
 	}
 	$kiwi -> loginfo ("Removing cache directory: $dataDir\n");
-	qx (rm -rf $dataDir);
-	qx (rm -rf $config/config);
+	qxx ("rm -rf $dataDir");
+	qxx ("rm -rf $config/config");
 	return $this;
 }
 

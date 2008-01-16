@@ -23,6 +23,7 @@ use KIWIURL;
 use KIWILog;
 use KIWIManager;
 use KIWIConfigure;
+use KIWIQX;
 
 #==========================================
 # Constructor
@@ -242,11 +243,11 @@ sub init {
 	# Copy/touch some defaults files
 	#----------------------------------
 	$kiwi -> info ("Creating default template files for new root system");
-	qx ( mkdir -p $root/etc/sysconfig );
-	qx ( mkdir -p $root/var/log/YaST2 );
+	qxx (" mkdir -p $root/etc/sysconfig ");
+	qxx (" mkdir -p $root/var/log/YaST2 ");
 	# need mtab at least empty for mount calls
-	qx ( touch $root/etc/mtab );
-	qx ( touch $root/etc/sysconfig/bootloader );
+	qxx (" touch $root/etc/mtab ");
+	qxx (" touch $root/etc/sysconfig/bootloader ");
 	# need user/group files as template
 	my $groupTemplate = "/etc/group"; 
 	my $paswdTemplate = "/etc/passwd";
@@ -267,11 +268,11 @@ sub init {
 			$paswdTemplate = $paswd; last;
 		}
 	}
-	qx ( cp $groupTemplate $root/etc/group  2>&1 );
-	qx ( cp $paswdTemplate $root/etc/passwd 2>&1 );
+	qxx (" cp $groupTemplate $root/etc/group  2>&1 ");
+	qxx (" cp $paswdTemplate $root/etc/passwd 2>&1 ");
 	# need resolv.conf for internal chroot name resolution
-	qx ( cp /etc/resolv.conf $root/etc 2>&1 );
-	qx ( cp $main::KConfig $root/.kconfig 2>&1 );
+	qxx (" cp /etc/resolv.conf $root/etc 2>&1 ");
+	qxx (" cp $main::KConfig $root/.kconfig 2>&1 ");
 	$kiwi -> done();
 
 	#==========================================
@@ -466,22 +467,22 @@ sub setup {
 		$kiwi -> info ("Copying user defined files to image tree");
 		mkdir $root."/tmproot";
 		my $copy = "cp -LR --remove-destination";
-		my $data = qx ( $copy $imageDesc/root/* $root/tmproot 2>&1 );
+		my $data = qxx (" $copy $imageDesc/root/* $root/tmproot 2>&1 ");
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
 			$kiwi -> info   ($data);
 			return undef;
 		}
-		qx ( find $root/tmproot -type d | grep .svn\$ | xargs rm -rf 2>&1 );
-		$data = qx ( $copy $root/tmproot/* $root );
+		qxx (" find $root/tmproot -type d | grep .svn\$ | xargs rm -rf 2>&1 ");
+		$data = qxx (" $copy $root/tmproot/* $root ");
 		$code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
 			$kiwi -> info   ($data);
 			return undef;
 		}
-		qx ( rm -rf $root/tmproot );
+		qxx (" rm -rf $root/tmproot ");
 		$kiwi -> done();
 	}
 	#========================================
@@ -505,7 +506,7 @@ sub setup {
 	#----------------------------------------
 	if (-f "$root/linuxrc") {
 		$kiwi -> info ("Setting up linuxrc...");
-		my $data = qx ( cp $root/linuxrc $root/init 2>&1 );
+		my $data = qxx (" cp $root/linuxrc $root/init 2>&1 ");
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
@@ -519,8 +520,8 @@ sub setup {
 	#----------------------------------------
 	if (-d "$imageDesc/config") {
 		$kiwi -> info ("Preparing package setup scripts");
-		qx ( mkdir -p $root/image/config );
-		qx ( cp $imageDesc/config/* $root/image/config 2>&1 );
+		qxx (" mkdir -p $root/image/config ");
+		qxx (" cp $imageDesc/config/* $root/image/config 2>&1 ");
 		if (! opendir (FD,"$root/image/config")) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't open script directory: $!");
@@ -535,8 +536,8 @@ sub setup {
 					next;
 				}
 				$kiwi -> info ("Calling package setup script: $script");
-				qx ( chmod u+x $root/image/config/$script);
-				my $data = qx ( chroot $root /image/config/$script 2>&1 );
+				qxx (" chmod u+x $root/image/config/$script");
+				my $data = qxx (" chroot $root /image/config/$script 2>&1 ");
 				my $code = $? >> 8;
 				if ($code != 0) {
 					$kiwi -> failed ();
@@ -545,7 +546,7 @@ sub setup {
 				} else {
 					$kiwi -> loginfo ("$script: $data");
 				}
-				qx (rm -f $root/image/config/$script);
+				qxx ("rm -f $root/image/config/$script");
 				$kiwi -> done ();
 			}
 		}
@@ -555,15 +556,15 @@ sub setup {
 	#========================================
 	# copy image description to image tree
 	#----------------------------------------
-	qx ( mkdir -p $root/image );
-	qx ( cp $imageDesc/config.xml $root/image 2>&1 );
-	qx ( cp $imageDesc/images.sh $root/image 2>&1 );
-	qx ( cp $imageDesc/config-cdroot.tgz $root/image 2>&1 );
-	qx ( cp $imageDesc/config-cdroot.sh  $root/image 2>&1 );
-	qx ( cp $root/.profile $root/image 2>&1 );
+	qxx (" mkdir -p $root/image ");
+	qxx (" cp $imageDesc/config.xml $root/image 2>&1 ");
+	qxx (" cp $imageDesc/images.sh $root/image 2>&1 ");
+	qxx (" cp $imageDesc/config-cdroot.tgz $root/image 2>&1 ");
+	qxx (" cp $imageDesc/config-cdroot.sh  $root/image 2>&1 ");
+	qxx (" cp $root/.profile $root/image 2>&1 ");
 	if (open (FD,">$root/image/main::Prepare")) {
 		if ($imageDesc !~ /^\//) {
-			my $pwd = qx ( pwd ); chomp $pwd;
+			my $pwd = qxx (" pwd "); chomp $pwd;
 			print FD $pwd."/".$imageDesc; close FD;
 		} else {
 			print FD $imageDesc; close FD;
@@ -597,8 +598,8 @@ sub setup {
 	#----------------------------------------
 	if (-x "$imageDesc/config.sh") {
 		$kiwi -> info ("Calling image script: config.sh");
-		qx ( cp $imageDesc/config.sh $root/tmp );
-		my $data = qx ( chroot $root /tmp/config.sh 2>&1 );
+		qxx (" cp $imageDesc/config.sh $root/tmp ");
+		my $data = qxx (" chroot $root /tmp/config.sh 2>&1 ");
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
@@ -607,17 +608,17 @@ sub setup {
 		} else {
 			$kiwi -> loginfo ("config.sh: $data");
 		}
-		qx ( rm -f $root/tmp/config.sh );
+		qxx (" rm -f $root/tmp/config.sh ");
 		$kiwi -> done ();
 	}
 	#========================================
 	# cleanup temporary copy of resolv.conf
 	#----------------------------------------
-	my $data = qx (diff -q /etc/resolv.conf $root/etc/resolv.conf);
+	my $data = qxx ("diff -q /etc/resolv.conf $root/etc/resolv.conf");
 	my $code = $? >> 8;
 	if ($code == 0) {
 		$kiwi -> info ("Cleanup temporary copy of resolv.conf");
-		qx (rm -f $root/etc/resolv.conf);
+		qxx ("rm -f $root/etc/resolv.conf");
 		$kiwi -> done ();
 	}
 	return $this;
@@ -677,15 +678,15 @@ sub setupMount {
 		return undef;
 	}
 	if (! -f "$root/proc/mounts") {
-		qx (mkdir -p $root/proc);
-		qx (mount -t proc none $root/proc);
+		qxx ("mkdir -p $root/proc");
+		qxx ("mount -t proc none $root/proc");
 		push (@mountList,"$root/proc");
 	}
 	if (! -d "$root/sys/block") {
-		qx (mkdir -p $root/sys);
-		qx (mount -t sysfs  none $root/sys);
-		qx (mkdir -p $root/dev/pts);
-		qx (mount -t devpts none $root/dev/pts);
+		qxx ("mkdir -p $root/sys");
+		qxx ("mount -t sysfs  none $root/sys");
+		qxx ("mkdir -p $root/dev/pts");
+		qxx ("mount -t devpts none $root/dev/pts");
 		push (@mountList,"$root/sys");
 		push (@mountList,"$root/dev/pts");
 	}
@@ -705,10 +706,10 @@ sub setupMount {
 		my $mount = $prefix.$path;
 		push (@mountList,$mount);
 		if (! -d $cache) {
-			qx ( mkdir -p $cache );
+			qxx (" mkdir -p $cache ");
 		}
-		qx (mkdir -p $mount);
-		my $data = qx ( touch $path/bob 2>&1 );
+		qxx ("mkdir -p $mount");
+		my $data = qxx (" touch $path/bob 2>&1 ");
 		my $code = $? >> 8;
 		if ($code == 0) {
 			#==========================================
@@ -716,11 +717,11 @@ sub setupMount {
 			#------------------------------------------
 			$kiwi -> skipped ();
 			$kiwi -> warning ("Path $path is writable, trying read-only mount");
-			qx ( rm -f $path/bob 2>&1 );
-			$data = qx (mount -t aufs -o $auopt aufs $mount 2>&1);
+			qxx (" rm -f $path/bob 2>&1 ");
+			$data = qxx ("mount -t aufs -o $auopt aufs $mount 2>&1");
 			$code = $? >> 8;
 			if ($code != 0) {
-				$data = qx (mount -t unionfs -o $roopt unionfs $mount 2>&1);
+				$data = qxx ("mount -t unionfs -o $roopt unionfs $mount 2>&1");
 				$code = $? >> 8;
 			}
 			if ($code != 0) {
@@ -729,7 +730,7 @@ sub setupMount {
 			}
 		}
 		if ($code != 0) {
-			my $data = qx ( mount -o bind $path $mount 2>&1 );
+			my $data = qxx (" mount -o bind $path $mount 2>&1 ");
 			my $code = $? >> 8;
 			if ($code != 0) {
 				$kiwi -> failed();
@@ -766,15 +767,15 @@ sub cleanMount {
 	foreach my $item (reverse @mountList) {
 		$kiwi -> info ("Umounting path: $item\n");
 		if ($item =~ /^\/tmp\/kiwimount/) {
-			qx (umount $item 2>/dev/null);
+			qxx ("umount $item 2>/dev/null");
 		} else {
-			qx (umount -l $item 2>/dev/null);
+			qxx ("umount -l $item 2>/dev/null");
 		}
 		if ($item =~ /^$prefix/) {
-			qx ( rmdir -p $item 2>&1 );
+			qxx (" rmdir -p $item 2>&1 ");
 		}
 		if ($item =~ /^\/tmp\/kiwimount/) {
-			qx ( rmdir -p $item 2>&1 );
+			qxx (" rmdir -p $item 2>&1 ");
 		}
 	}
 	if (defined $this->{baseRoot}) {

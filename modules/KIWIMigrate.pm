@@ -24,6 +24,7 @@ use strict;
 use File::Find;
 use File::Basename;
 use KIWILog;
+use KIWIQX;
 
 #==========================================
 # Constructor
@@ -61,7 +62,7 @@ sub new {
 	}
 	my $code;
 	if (! defined $dest) {
-		$dest = qx ( mktemp -q -d /tmp/kiwi-migrate.XXXXXX );
+		$dest = qxx (" mktemp -q -d /tmp/kiwi-migrate.XXXXXX ");
 		$code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
@@ -330,7 +331,7 @@ sub getPackageList {
 	# the later image
 	# ---
 	my $this = shift;
-	my @list = qx (rpm -qa --qf '%{NAME}\n'); chomp @list;
+	my @list = qxx ("rpm -qa --qf '%{NAME}\n'"); chomp @list;
 	return sort @list;
 }
 
@@ -360,7 +361,7 @@ sub getRootDevice {
 	if (! $rootdev) {
 		return undef;
 	}
-	my $data = qx(df $rootdev | tail -n1);
+	my $data = qxx ("df $rootdev | tail -n1");
 	my $code = $? >> 8;
 	if ($code != 0) {
 		return undef;
@@ -399,7 +400,7 @@ sub setSystemConfiguration {
 		$kiwi -> failed ();
 		return undef;
 	}
-	my $data = qx(mount $rdev $mount 2>&1);
+	my $data = qxx ("mount $rdev $mount 2>&1");
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> error  ("Failed to mount root system: $data");
@@ -431,7 +432,7 @@ sub setSystemConfiguration {
 	$this -> cleanMount();
 	$kiwi -> done ();
 	$kiwi -> info ("Inspecting RPM database [installed files]...");
-	my @rpmlist = qx(rpm -qal);
+	my @rpmlist = qxx ("rpm -qal");
 	my @curlist = keys %result;
 	my $cursize = @curlist;
 	my $rpmsize = @rpmlist;
@@ -469,7 +470,7 @@ sub setSystemConfiguration {
 	# Find files packaged but changed
 	#------------------------------------------
 	$kiwi -> info ("Inspecting RPM database [verify]...");
-	my @rpmcheck = qx(rpm -Va); chomp @rpmcheck;
+	my @rpmcheck = qxx ("rpm -Va"); chomp @rpmcheck;
 	$rpmsize = @rpmcheck;
 	$spart = 100 / $rpmsize;
 	$count = 1;
@@ -517,7 +518,7 @@ sub setSystemConfiguration {
 		close FD;
 		my $file = "$dest/report-files";
 		my $prog = "du -ch --time --files0-from";
-		my $data = qx($prog $file 2>$dest/report-lost > $dest/report);
+		my $data = qxx ("$prog $file 2>$dest/report-lost > $dest/report");
 		my $code = $? >> 8;
 		if ($code == 0) {
 			unlink "$dest/report-lost";
@@ -534,9 +535,9 @@ sub setSystemConfiguration {
 			if (-e $file) {
 				my $dir = $result{$file};
 				if (! -d "$dest/root/$dir") {
-					qx(mkdir -p $dest/root/$dir);
+					qxx ("mkdir -p $dest/root/$dir");
 				}
-				qx(cp -a $file $dest/root/$file);
+				qxx ("cp -a $file $dest/root/$file");
 			}
 			$done = int ($count * $spart);
 			if ($done != $done_old) {
@@ -576,10 +577,10 @@ sub setInitialSetup {
 	#==========================================
 	# create xorg.conf [fbdev]
 	#------------------------------------------
-	qx(mkdir -p $dest/root/etc/X11);
-	qx(mkdir -p $dest/root/var/lib/YaST2);
+	qxx ("mkdir -p $dest/root/etc/X11");
+	qxx ("mkdir -p $dest/root/var/lib/YaST2");
 	if (-f "/etc/X11/xorg.conf.install") {
-		qx(cp /etc/X11/xorg.conf.install $dest/root/etc/X11/xorg.conf);
+		qxx ("cp /etc/X11/xorg.conf.install $dest/root/etc/X11/xorg.conf");
 	} else {
 		if (! open (FD,">$dest/root/etc/X11/xorg.conf")) {
 			$kiwi -> failed ();
@@ -680,7 +681,7 @@ sub setInitialSetup {
 	#==========================================
 	# Activate YaST on initial deployment
 	#------------------------------------------
-	qx(touch $dest/root/var/lib/YaST2/runme_at_boot);
+	qxx ("touch $dest/root/var/lib/YaST2/runme_at_boot");
 	return $this;
 }
 
@@ -691,7 +692,7 @@ sub cleanMount {
 	my $this = shift;
 	my $mount= $this->{mount};
 	if (defined $this->{mounted}) {
-		qx(umount $mount); undef $this->{mounted};
+		qxx ("umount $mount"); undef $this->{mounted};
 	}
 	if (-d $mount) {
 		rmdir $mount;

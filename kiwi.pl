@@ -37,6 +37,7 @@ use KIWIImage;
 use KIWIBoot;
 use KIWIMigrate;
 use KIWIOverlay;
+use KIWIQX;
 
 #============================================
 # Globals (Version)
@@ -92,6 +93,22 @@ our $Scheme  = $BasePath."/modules/KIWIScheme.rng";
 our $KConfig = $BasePath."/modules/KIWIConfig.sh";
 our $KMigrate= $BasePath."/modules/KIWIMigrate.txt";
 our $Revision= $BasePath."/.revision";
+
+#============================================
+# Create main log object
+#--------------------------------------------
+my $kiwi = new KIWILog();
+
+#============================================
+# Activate execution logging
+#--------------------------------------------
+BEGIN {
+	*CORE::GLOBAL::readpipe = sub($) {
+		$kiwi -> debuginfo ("Calling: $_[0]");
+		return CORE::readpipe($_[0]);
+	};
+}
+
 #============================================
 # Globals
 #--------------------------------------------
@@ -147,11 +164,11 @@ our $Compress;          # set compression level
 #============================================
 # Globals
 #--------------------------------------------
-my $kiwi;       # global logging handler object
 my $root;       # KIWIRoot  object for installations
 my $image;      # KIWIImage object for logical extends
 my $boot;       # KIWIBoot  object for logical extends
 my $migrate;    # KIWIMigrate object for system to image migration
+
 
 #==========================================
 # main
@@ -168,12 +185,6 @@ sub main {
 	# Initialize and check options
 	#------------------------------------------
 	init();
-	#==========================================
-	# Create logger object
-	#------------------------------------------
-	if (! defined $kiwi) {
-		$kiwi = new KIWILog();
-	}
 	#==========================================
 	# Check for nocolor option
 	#------------------------------------------
@@ -284,7 +295,7 @@ sub main {
 			$RootTree = $xml -> getImageDefaultRoot();
 			if ($RootTree) {
 				if ($RootTree !~ /^\//) {
-					my $workingDir = qx ( pwd ); chomp $workingDir;
+					my $workingDir = qxx ( "pwd" ); chomp $workingDir;
 					$RootTree = $workingDir."/".$RootTree;
 				}
 				$kiwi -> done();
@@ -365,7 +376,7 @@ sub main {
 		if (defined $PreChrootCall) {
 			$kiwi -> info ("Calling pre-chroot program: $PreChrootCall");
 			my $path = $root -> getRootPath();
-			my $data = qx ($PreChrootCall "$path" 2>&1);
+			my $data = qxx ("$PreChrootCall $path 2>&1");
 			my $code = $? >> 8;
 			if ($code != 0) {
 				$kiwi -> failed ();
@@ -733,7 +744,7 @@ sub main {
 			my $code = kiwiExit (1); return $code;
 		}
 		my $cmd  = "find -L -type f";
-		my $status = qx (cd $CreateHash && $cmd | xargs md5sum > .checksum.md5);
+		my $status = qxx ("cd $CreateHash&&$cmd|xargs md5sum > .checksum.md5");
 		my $result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> error  ("Failed creating md5 sum: $status: $!");
@@ -848,7 +859,7 @@ sub main {
 			my $code = kiwiExit (1);
 			return $code;
 		}
-		qx ( file $BootVMSystem | grep -q 'gzip compressed data' );
+		qxx ( "file $BootVMSystem | grep -q 'gzip compressed data'" );
 		my $code = $? >> 8;
 		if ($code == 0) {
 			$kiwi -> failed ();
@@ -938,7 +949,7 @@ sub init {
 		"help|h"                => \&usage,
 		"<>"                    => \&usage
 	);
-	my $user = qx (whoami);
+	my $user = qxx ("whoami");
 	if ($user !~ /root/i) {
 		$kiwi -> error ("Only root can do this");
 		$kiwi -> failed ();
@@ -967,7 +978,7 @@ sub init {
 		my $code = kiwiExit (1); return $code;
 	}
 	if ((defined $RootTree) && ($RootTree !~ /^\//)) {
-		my $workingDir = qx ( pwd ); chomp $workingDir;
+		my $workingDir = qxx ( "pwd" ); chomp $workingDir;
 		$RootTree = $workingDir."/".$RootTree;
 	}
 	if ((defined $Migrate) && (! defined $Destination)) {
@@ -1019,7 +1030,7 @@ sub init {
 	#==========================================
 	# remove pre-defined smart channels
 	#------------------------------------------
-	qx ( rm -f /etc/smart/channels/* );
+	qxx ( "rm -f /etc/smart/channels/*" );
 	#==========================================
 	# Handle ListProfiles option
 	#------------------------------------------
@@ -1043,7 +1054,7 @@ sub usage {
 	# image creation system
 	# ---
 	my $kiwi = new KIWILog("tiny");
-	my $date = qx ( LANG=POSIX date -I ); chomp $date;
+	my $date = qxx ( "LANG=POSIX date -I" ); chomp $date;
 	print "Linux KIWI setup  (image builder) ($date)\n";
 	print "Copyright (c) 2007 - SUSE LINUX Products GmbH\n";
 	print "\n";
@@ -1268,7 +1279,7 @@ sub kiwiExit {
 			my $logfile = $1;
 			$logfile = "$logfile.log";
 			$kiwi -> info ("Logfile available at: $logfile");
-			qx (mv $rootLog $logfile 2>&1);
+			qxx ("mv $rootLog $logfile 2>&1");
 			$kiwi -> done ();
 		}
 	}

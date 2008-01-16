@@ -22,6 +22,7 @@ package KIWISocket;
 use strict;
 use FileHandle;
 use Socket;
+use KIWIQX;
 
 #==========================================
 # Constructor

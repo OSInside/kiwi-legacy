@@ -737,6 +737,10 @@ function suseStripKernel {
 			#------------------------------------------
 			rm -rf /tmp/*
 			#==========================================
+			# run depmod
+			#------------------------------------------
+			/sbin/depmod -F /boot/System.map-$VERSION $VERSION
+			#==========================================
 			# create common kernel files, last wins !
 			#------------------------------------------
 			cd /boot

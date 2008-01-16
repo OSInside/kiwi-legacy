@@ -21,6 +21,7 @@ use strict;
 use File::Basename;
 use KIWILog;
 use LWP;
+use KIWIQX;
 
 #==========================================
 # Constructor
@@ -192,7 +193,7 @@ sub thisPath {
 		$thisPath = "$main::Prepare/$module";
 	}
 	if ($thisPath !~ /^\//) {
-		my $pwd = qx (pwd); chomp $pwd;
+		my $pwd = qxx ("pwd"); chomp $pwd;
 		$thisPath = $pwd."/".$thisPath;
 	}
 	return $thisPath;
@@ -221,7 +222,7 @@ sub isoPath {
 	}
 	$module =~ s/iso:\/\///;
 	if ($module !~ /^\//) {
-		my $pwd = qx (pwd); chomp $pwd;
+		my $pwd = qxx ("pwd"); chomp $pwd;
 		$module = $pwd."/".$module;
 	}
 	if (! -e $module) {
@@ -237,14 +238,14 @@ sub isoPath {
 	if (! defined $root) {
 		return $tmpdir;
 	}
-	$status = qx (mkdir -p $tmpdir 2>&1);
+	$status = qxx ("mkdir -p $tmpdir 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> warning ("Couldn't create tmp dir for iso mount: $status: $!");
 		$kiwi -> skipped ();
 		return undef;
 	}
-	$status = qx (mount -o loop $module $tmpdir 2>&1);
+	$status = qxx ("mount -o loop $module $tmpdir 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> warning ("Failed to loop mount ISO path: $status");

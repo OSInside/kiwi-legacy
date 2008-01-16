@@ -23,6 +23,7 @@ package KIWISharedMem;
 use strict;
 use IPC::SysV qw(IPC_PRIVATE IPC_RMID IPC_CREAT S_IRWXU);
 use IPC::Semaphore;
+use KIWIQX;
 sub MAXBUF() { 2000 }
 
 #==========================================

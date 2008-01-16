@@ -24,6 +24,7 @@ use Carp qw (cluck);
 use KIWISocket;
 use KIWISharedMem;
 use FileHandle;
+use KIWIQX;
 
 #==========================================
 # Plugins
@@ -201,7 +202,7 @@ sub getColumns {
 	# to put the status text at the end of the line
 	# ---
 	my $this = shift;
-	my $size = qx (stty size 2>/dev/null); chomp ($size);
+	my $size = qxx ("stty size 2>/dev/null"); chomp ($size);
 	if ($size eq "") {
 		return 80;
 	}
@@ -414,7 +415,7 @@ sub getPrefix {
 	my $this  = shift;
 	my $level = shift;
 	my $date;
-	$date = qx ( LANG=POSIX /bin/date "+%h-%d %H:%M:%S"); chomp $date;
+	$date = qxx ("LANG=POSIX /bin/date \"+%h-%d %H:%M:%S\""); chomp $date;
 	$this->{date} = $date;
 	$this->{level}= $level;
 	$date .= " <$level> : ";
@@ -544,6 +545,21 @@ sub saveInCache {
 }
 
 #==========================================
+# debuginfo
+#------------------------------------------
+sub debuginfo {
+	# ...
+	# print a debug message to channel <1>
+	# ---
+	my $this = shift;
+	my $data = shift;
+	my $rootEFD = $this->{rootefd};
+	if ($this->{errorOk}) {
+		print $rootEFD "\nEXEC: [$data]\n";
+	}
+}
+
+#==========================================
 # info
 #------------------------------------------
 sub loginfo {
@@ -552,7 +568,7 @@ sub loginfo {
 	# ---
 	my $this = shift;
 	my $data = shift;
-	printLog ( $this,1,$data,"loginfo" );
+	$this -> printLog ( 1,$data,"loginfo" );
 }
 
 #==========================================
@@ -564,7 +580,7 @@ sub info {
 	# ---
 	my $this = shift;
 	my $data = shift;
-	printLog ( $this,1,$data );
+	$this -> printLog ( 1,$data );
 }
 
 #==========================================
@@ -576,7 +592,7 @@ sub error {
 	# ---
 	my $this = shift;
 	my $data = shift;
-	printLog ( $this,3,$data );
+	$this -> printLog ( 3,$data );
 }
 
 #==========================================
@@ -588,7 +604,7 @@ sub warning {
 	# ---
 	my $this = shift;
 	my $data = shift;
-	printLog ( $this,2,$data );
+	$this -> printLog ( 2,$data );
 }
 
 #==========================================
@@ -602,7 +618,7 @@ sub note {
 	# ---
 	my $this = shift;
 	my $data = shift;
-	printLog ( $this,5,$data );
+	$this -> printLog ( 5,$data );
 }
 
 #==========================================

@@ -25,6 +25,7 @@ use FileHandle;
 use File::Basename;
 use File::Spec;
 use Math::BigFloat;
+use KIWIQX;
 
 #==========================================
 # Constructor
@@ -70,7 +71,7 @@ sub new {
 	}
 	if (defined $system) {
 		if (-f $system) {
-			my $status = qx ( file $system | grep -qi squashfs 2>&1 );
+			my $status = qxx ( "file $system | grep -qi squashfs 2>&1" );
 			my $result = $? >> 8;
 			if ($result == 0) {
 				$syszip = -s $system;
@@ -108,14 +109,14 @@ sub new {
 		$kiwi -> failed ();
 		return undef;
 	}
-	$tmpdir = qx ( mktemp -q -d /tmp/kiwiboot.XXXXXX ); chomp $tmpdir;
+	$tmpdir = qxx ( "mktemp -q -d /tmp/kiwiboot.XXXXXX" ); chomp $tmpdir;
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> error  ("Couldn't create tmp dir: $tmpdir: $!");
 		$kiwi -> failed ();
 		return undef;
 	}
-	$loopdir = qx ( mktemp -q -d /tmp/kiwiloop.XXXXXX ); chomp $loopdir;
+	$loopdir = qxx ( "mktemp -q -d /tmp/kiwiloop.XXXXXX" ); chomp $loopdir;
 	$result  = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> error  ("Couldn't create tmp dir: $loopdir: $!");
@@ -127,7 +128,7 @@ sub new {
 		my $initrdSize = -s $initrd; # the boot image
 		my $systemSize; # the system image
 		if (-d $system) {
-			$systemSize = qx (du -bs $system | cut -f1 2>&1);
+			$systemSize = qxx ("du -bs $system | cut -f1 2>&1");
 			chomp $systemSize;
 		} else {
 			$systemSize = -s $system;
@@ -147,7 +148,7 @@ sub new {
 		$syszip = $syszip / 1024 / 1024;
 		$syszip = int $syszip;
 	}
-	my $arch = qx (uname -m); chomp $arch;
+	my $arch = qxx ("uname -m"); chomp $arch;
 	#==========================================
 	# Store object data
 	#------------------------------------------
@@ -190,7 +191,7 @@ sub createBootStructure {
 		$zipped = 1;
 	}
 	$kiwi -> info ("Creating initial boot structure");
-	$status = qx ( mkdir -p $tmpdir/boot/grub 2>&1 );
+	$status = qxx ( "mkdir -p $tmpdir/boot/grub 2>&1" );
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -199,9 +200,9 @@ sub createBootStructure {
 		return undef;
 	}
 	if ($zipped) {
-		$status = qx ( cp $initrd $tmpdir/boot/$iname 2>&1 );
+		$status = qxx ( "cp $initrd $tmpdir/boot/$iname 2>&1" );
 	} else {
-		$status = qx ( cat $initrd | $main::Gzip > $tmpdir/boot/$iname );
+		$status = qxx ( "cat $initrd | $main::Gzip > $tmpdir/boot/$iname" );
 	}
 	$result = $? >> 8;
 	if ($result != 0) {
@@ -211,7 +212,7 @@ sub createBootStructure {
 		$this -> cleanTmp ();
 		return undef;
 	}
-	$status = qx ( cp $kernel $tmpdir/boot/$lname 2>&1 );
+	$status = qxx ( "cp $kernel $tmpdir/boot/$lname 2>&1" );
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -254,7 +255,7 @@ sub getRemovableUSBStorageDevices {
 					}
 					$isremovable = <FD>; close FD;
 					if ($isremovable == 1) {
-						my $status = qx (/sbin/sfdisk -s $description 2>&1);
+						my $status = qxx ("/sbin/sfdisk -s $description 2>&1");
 						my $result = $? >> 8;
 						if ($result == 0) {
 							$devices{$description} = $serial;
@@ -296,13 +297,13 @@ sub setupBootStick {
 	my $unzip  = "$main::Gzip -cd $initrd 2>&1";
 	$kiwi -> info ("Importing grub stages for stick boot");
 	if ($zipped) {
-		$status = qx ($unzip | (cd $tmpdir && cpio -di $stages 2>&1));
+		$status = qxx ("$unzip | (cd $tmpdir && cpio -di $stages 2>&1)");
 	} else {
-		$status = qx (cat $initrd | (cd $tmpdir && cpio -di $stages 2>&1));
+		$status = qxx ("cat $initrd | (cd $tmpdir && cpio -di $stages 2>&1)");
 	}
 	$result = $? >> 8;
 	if ($result == 0) {
-		$status = qx ( mv $tmpdir/usr/lib/grub/* $tmpdir/boot/grub 2>&1 );
+		$status = qxx ( "mv $tmpdir/usr/lib/grub/* $tmpdir/boot/grub 2>&1" );
 		$result = $? >> 8;
 	}
 	if ($result != 0) {
@@ -310,7 +311,7 @@ sub setupBootStick {
 		$kiwi -> error   ("Failed importing grub stages: $status");
 		$kiwi -> skipped ();
 		$kiwi -> info    ("Trying to use grub stages from local machine");
-		$status = qx ( cp /usr/lib/grub/* $tmpdir/boot/grub 2>&1 );
+		$status = qxx ( "cp /usr/lib/grub/* $tmpdir/boot/grub 2>&1" );
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -414,11 +415,11 @@ sub setupBootStick {
 	if ($zipped) {
 		$name = $initrd; $name =~ s/gz$/stickboot/;
 	}
-	my $size = qx (du -ms $tmpdir | cut -f1 2>&1);
+	my $size = qxx ("du -ms $tmpdir | cut -f1 2>&1");
 	my $ddev = "/dev/zero";
 	chomp ($size); $size += 1; # add 1M free space for filesystem
 	$sysird = $size;
-	$status = qx (dd if=$ddev of=$name bs=1M seek=$sysird count=1 2>&1);
+	$status = qxx ("dd if=$ddev of=$name bs=1M seek=$sysird count=1 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -428,7 +429,7 @@ sub setupBootStick {
 		return undef;
 	}
 	$sysird += 1; # add another 1M free space because of sparse seek
-	$status = qx (/sbin/mkfs.ext2 -b 4096 -F $name 2>&1);
+	$status = qxx ("/sbin/mkfs.ext2 -b 4096 -F $name 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -437,7 +438,7 @@ sub setupBootStick {
 		$this -> cleanTmp ();
 		return undef;
 	}
-	$status = qx (mount -o loop $name $loopdir 2>&1);
+	$status = qxx ("mount -o loop $name $loopdir 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -446,7 +447,7 @@ sub setupBootStick {
 		$this -> cleanTmp ();
 		return undef;
 	}
-	$status = qx (mv $tmpdir/boot $loopdir 2>&1);
+	$status = qxx ("mv $tmpdir/boot $loopdir 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -461,20 +462,20 @@ sub setupBootStick {
 	my $message = "'image/loader/message'";
 	$unzip = "$main::Gzip -cd $initrd 2>&1";
 	if ($zipped) {
-		$status = qx ($unzip | (cd $loopdir && cpio -d -i $message 2>&1));
+		$status = qxx ("$unzip | (cd $loopdir && cpio -d -i $message 2>&1)");
 	} else {
-		$status = qx (cat $initrd | (cd $loopdir && cpio -d -i $message 2>&1));
+		$status = qxx ("cat $initrd | (cd $loopdir&&cpio -d -i $message 2>&1)");
 	}
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't find message file: $status");
 		$kiwi -> failed ();
-		qx (umount $loopdir 2>&1);
+		qxx ("umount $loopdir 2>&1");
 		$this -> cleanTmp ();
 		return undef;
 	}
-	qx (umount $loopdir 2>&1);
+	qxx ("umount $loopdir 2>&1");
 	$kiwi -> done();
 	#==========================================
 	# Create new partition table on stick
@@ -504,9 +505,9 @@ sub setupBootStick {
 		print FD ",,L,*\n";
 	}
 	close FD;
-	$status = qx ( dd if=/dev/zero of=$stick bs=512 count=1 2>&1 );	
+	$status = qxx ( "dd if=/dev/zero of=$stick bs=512 count=1 2>&1" );	
 	$result = $? >> 8;
-	$status = qx ( /sbin/sfdisk -uM --force $stick < $pinfo 2>&1 );
+	$status = qxx ( "/sbin/sfdisk -uM --force $stick < $pinfo 2>&1" );
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -517,10 +518,10 @@ sub setupBootStick {
 	}
 	$kiwi -> done();
 	for (my $i=1;$i<=3;$i++) {
-		qx ( umount $stick$i 2>&1 );
+		qxx ( "umount $stick$i 2>&1" );
 	}
 	$kiwi -> info ("Rereading partition table on: $stick");
-	$status = qx ( /sbin/blockdev --rereadpt $stick 2>&1 );
+	$status = qxx ( "/sbin/blockdev --rereadpt $stick 2>&1" );
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -534,14 +535,14 @@ sub setupBootStick {
 	# Clean tmp
 	#------------------------------------------
 	unlink $pinfo;
-	qx ( rm -rf $tmpdir );
+	qxx ( "rm -rf $tmpdir" );
 
 	#==========================================
 	# Dump initrd image on stick
 	#------------------------------------------
 	$kiwi -> info ("Dumping initrd image to stick");
-	$status = qx ( umount $stick"1" 2>&1 );
-	$status = qx (dd if=$name of=$stick"1" bs=32k 2>&1);
+	$status = qxx ( "umount $stick'1' 2>&1" );
+	$status = qxx ("dd if=$name of=$stick'1' bs=32k 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -556,9 +557,9 @@ sub setupBootStick {
 	#------------------------------------------
 	if (defined $system) {
 		$kiwi -> info ("Dumping system image to stick");
-		$status = qx ( umount $stick"1" 2>&1 );
-		$status = qx ( umount $stick"2" 2>&1 );
-		$status = qx (dd if=$system of=$stick"2" bs=32k 2>&1);
+		$status = qxx ( "umount $stick'1' 2>&1" );
+		$status = qxx ( "umount $stick'2' 2>&1" );
+		$status = qxx ("dd if=$system of=$stick'2' bs=32k 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -577,7 +578,7 @@ sub setupBootStick {
 		# ---
 		if (! $syszip) {
 			$kiwi -> info ("Removing unused boot kernel/initrd from stick");
-			$status = qx (mount $stick"2" $loopdir 2>&1);
+			$status = qxx ("mount $stick'2' $loopdir 2>&1");
 			$result = $? >> 8;
 			if ($result != 0) {
 				$kiwi -> failed ();
@@ -586,7 +587,7 @@ sub setupBootStick {
 				return undef;
 			}
 			if (-d "/mnt/boot") {
-				$status = qx (rm -r /mnt/boot 2>&1);
+				$status = qxx ("rm -r /mnt/boot 2>&1");
 				$result = $? >> 8;
 				if ($result != 0) {
 					$kiwi -> skipped ();
@@ -598,7 +599,7 @@ sub setupBootStick {
 			} else {
 				$kiwi -> done();
 			}
-			qx (umount $loopdir 2>&1);
+			qxx ("umount $loopdir 2>&1");
 		}
 	}
 	#==========================================
@@ -695,23 +696,25 @@ sub setupInstallCD {
 	my $stage2 = "'usr/lib/grub/stage2_eltorito'";
 	my $message= "'image/loader/message'";
 	my $unzip  = "$main::Gzip -cd $initrd 2>&1";
-	$status = qx ($unzip | (cd $tmpdir && cpio -d -i $message 2>&1));
+	$status = qxx ("$unzip | (cd $tmpdir && cpio -d -i $message 2>&1)");
 	$result = $? >> 8;
 	if ($result == 0) {
-		$status = qx ($unzip | (cd $tmpdir && cpio -d -i $stage1 2>&1));
+		$status = qxx ("$unzip | (cd $tmpdir && cpio -d -i $stage1 2>&1)");
 		$result = $? >> 8;
 		if ($result == 0) {
-			$status = qx ($unzip | (cd $tmpdir && cpio -d -i $stage2 2>&1));
+			$status = qxx ("$unzip | (cd $tmpdir && cpio -d -i $stage2 2>&1)");
 		}
 	}
 	if ($result == 0) {
-		$status = qx (mv $tmpdir/$message $tmpdir/boot/message 2>&1);
+		$status = qxx ("mv $tmpdir/$message $tmpdir/boot/message 2>&1");
 		$result = $? >> 8;
 		if ($result == 0) {
-			$status = qx (mv $tmpdir/$stage1 $tmpdir/boot/grub/stage1 2>&1);
+			$status = qxx ("mv $tmpdir/$stage1 $tmpdir/boot/grub/stage1 2>&1");
 			$result = $? >> 8;
 			if ($result == 0) {
-				$status = qx (mv $tmpdir/$stage2 $tmpdir/boot/grub/stage2 2>&1);
+				$status = qxx (
+					"mv $tmpdir/$stage2 $tmpdir/boot/grub/stage2 2>&1"
+				);
 				$result = $? >> 8;
 			}
 		}
@@ -721,8 +724,8 @@ sub setupInstallCD {
 		$kiwi -> error   ("Failed importing grub stages: $status");
 		$kiwi -> skipped ();
 		$kiwi -> info    ("Trying to use grub stages from local machine");
-		$status = qx ( cp /$stage1 $tmpdir/boot/grub/stage1 2>&1 );
-		$status = qx ( cp /$stage2 $tmpdir/boot/grub/stage2 2>&1 );
+		$status = qxx ( "cp /$stage1 $tmpdir/boot/grub/stage1 2>&1" );
+		$status = qxx ( "cp /$stage2 $tmpdir/boot/grub/stage2 2>&1" );
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -734,8 +737,8 @@ sub setupInstallCD {
 		}
 		$kiwi -> done();
 	}
-	qx (rm -rf $tmpdir/usr 2>&1);
-	qx (rm -rf $tmpdir/image 2>&1);
+	qxx ("rm -rf $tmpdir/usr 2>&1");
+	qxx ("rm -rf $tmpdir/image 2>&1");
 	$this->{initrd} = $oldird;
 	$kiwi -> done ();
 
@@ -776,7 +779,7 @@ sub setupInstallCD {
 	#------------------------------------------
 	if ($gotsys) {
 		$kiwi -> info ("Importing system image: $system");
-		$status = qx (cp $system $tmpdir/$ibasename 2>&1);
+		$status = qxx ("cp $system $tmpdir/$ibasename 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -800,10 +803,10 @@ sub setupInstallCD {
 	my $base = "-R -b boot/grub/stage2";
 	my $opts = "-no-emul-boot -boot-load-size 4 -boot-info-table";
 	if ($name !~ /^\//) {
-		my $workingDir = qx ( pwd ); chomp $workingDir;
+		my $workingDir = qxx ( "pwd" ); chomp $workingDir;
 		$name = $workingDir."/".$name;
 	}
-	$status = qx (cd $tmpdir && mkisofs $base $opts -o $name . 2>&1);
+	$status = qxx ("cd $tmpdir && mkisofs $base $opts -o $name . 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -816,7 +819,7 @@ sub setupInstallCD {
 	#==========================================
 	# Clean tmp
 	#------------------------------------------
-	qx (rm -rf $tmpdir);
+	qxx ("rm -rf $tmpdir");
 	$kiwi -> info ("Created $name to be burned on CD");
 	$kiwi -> done ();
 	return $this;
@@ -865,7 +868,7 @@ sub setupInstallStick {
 	#------------------------------------------
 	$kiwi -> info ("Searching for free loop device...");
 	for (my $id=0;$id<=7;$id++) {
-		$status = qx ( /sbin/losetup /dev/loop$id 2>&1 );
+		$status = qxx ( "/sbin/losetup /dev/loop$id 2>&1" );
 		$result = $? >> 8;
 		if ($result eq 1) {
 			$loopfound = 1;
@@ -917,10 +920,10 @@ sub setupInstallStick {
 	my $stages = "'usr/lib/grub/*'";
 	my $unzip  = "$main::Gzip -cd $initrd 2>&1";
 	$kiwi -> info ("Importing grub stages for VM boot");
-	$status = qx ($unzip | (cd $tmpdir && cpio -di $stages 2>&1));
+	$status = qxx ("$unzip | (cd $tmpdir && cpio -di $stages 2>&1)");
 	$result = $? >> 8;
 	if ($result == 0) {
-		$status = qx ( mv $tmpdir/usr/lib/grub/* $tmpdir/boot/grub 2>&1 );
+		$status = qxx ( "mv $tmpdir/usr/lib/grub/* $tmpdir/boot/grub 2>&1" );
 		$result = $? >> 8;
 	}
 	if ($result != 0) {
@@ -928,7 +931,7 @@ sub setupInstallStick {
 		$kiwi -> error   ("Failed importing grub stages: $status");
 		$kiwi -> skipped ();
 		$kiwi -> info    ("Trying to use grub stages from local machine");
-		$status = qx ( cp /usr/lib/grub/* $tmpdir/boot/grub 2>&1 );
+		$status = qxx ( "cp /usr/lib/grub/* $tmpdir/boot/grub 2>&1" );
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -979,7 +982,7 @@ sub setupInstallStick {
 	# create virtual disk
 	#------------------------------------------
 	$kiwi -> info ("Creating virtual disk...");
-	$status = qx (qemu-img create $diskname $vmsize 2>&1);
+	$status = qxx ("qemu-img create $diskname $vmsize 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -990,7 +993,7 @@ sub setupInstallStick {
 	}
 	$kiwi -> done();
 	$kiwi -> info ("Binding virtual disk to loop device");
-	$status = qx ( /sbin/losetup $loop $diskname 2>&1 );
+	$status = qxx ( "/sbin/losetup $loop $diskname 2>&1" );
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -1028,7 +1031,7 @@ sub setupInstallStick {
 	# setup device mapper
 	#------------------------------------------
 	$kiwi -> info ("Setup device mapper for virtual partition access");
-	$status = qx ( /sbin/kpartx -a $loop 2>&1 );
+	$status = qxx ( "/sbin/kpartx -a $loop 2>&1" );
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -1046,7 +1049,7 @@ sub setupInstallStick {
 	#------------------------------------------
 	foreach my $root ($boot,$data) {
 		$kiwi -> info ("Creating filesystem on $root partition");
-		$status = qx ( /sbin/mke2fs -j -q $root 2>&1 );
+		$status = qxx ( "/sbin/mke2fs -j -q $root 2>&1" );
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -1061,7 +1064,7 @@ sub setupInstallStick {
 	# Copy boot data on first partition
 	#------------------------------------------
 	$kiwi -> info ("Installing boot data to virtual disk");
-	$status = qx (mount $boot $loopdir 2>&1);
+	$status = qxx ("mount $boot $loopdir 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -1070,7 +1073,7 @@ sub setupInstallStick {
 		$this -> cleanLoop ();
 		return undef;
 	}
-	$status = qx (cp -a $tmpdir/boot $loopdir 2>&1);
+	$status = qxx ("cp -a $tmpdir/boot $loopdir 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -1081,7 +1084,7 @@ sub setupInstallStick {
 	}
 	my $message = "'image/loader/message'";
 	$unzip  = "$main::Gzip -cd $initrd 2>&1";
-	$status = qx ($unzip | ( cd $loopdir && cpio -di $message 2>&1));
+	$status = qxx ("$unzip | ( cd $loopdir && cpio -di $message 2>&1)");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -1090,14 +1093,14 @@ sub setupInstallStick {
 		$this -> cleanLoop ();
 		return undef;
 	}
-	qx ( umount $loopdir 2>&1 );
+	qxx ( "umount $loopdir 2>&1" );
 	$kiwi -> done();
 	#==========================================
 	# Copy system image if defined
 	#------------------------------------------
 	if ($gotsys) {
 		$kiwi -> info ("Installing image data to virtual disk");
-		$status = qx (mount $data $loopdir 2>&1);
+		$status = qxx ("mount $data $loopdir 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -1106,7 +1109,7 @@ sub setupInstallStick {
 			$this -> cleanLoop ();
 			return undef;
 		}
-		$status = qx (cp $system /mnt/$ibasename 2>&1);
+		$status = qxx ("cp $system /mnt/$ibasename 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -1115,14 +1118,14 @@ sub setupInstallStick {
 			$this -> cleanLoop ();
 			return undef;
 		}
-		qx ( umount $loopdir 2>&1 );
+		qxx ( "umount $loopdir 2>&1" );
 		$kiwi -> done();
 	}
 	#==========================================
 	# cleanup device maps and part mount
 	#------------------------------------------
-	qx ( /sbin/kpartx  -d $loop );
-	qx (rm -rf $tmpdir);
+	qxx ( "/sbin/kpartx -d $loop" );
+	qxx ("rm -rf $tmpdir");
 	#==========================================
 	# Install grub on virtual disk
 	#------------------------------------------
@@ -1151,7 +1154,7 @@ sub setupInstallStick {
 	#==========================================
 	# cleanup loop setup and device mapper
 	#------------------------------------------
-	qx ( /sbin/losetup -d $loop );
+	qxx ( "/sbin/losetup -d $loop" );
 	$kiwi -> info ("Created $diskname to be dd'ed on Stick");
 	$kiwi -> done ();
 	return $this;
@@ -1227,7 +1230,7 @@ sub setupBootDisk {
 	$kiwi -> done ();
 	$kiwi -> info ("Searching for free loop device...");
 	for (my $id=0;$id<=7;$id++) {
-		$status = qx ( /sbin/losetup /dev/loop$id 2>&1 );
+		$status = qxx ( "/sbin/losetup /dev/loop$id 2>&1" );
 		$result = $? >> 8;
 		if ($result eq 1) {
 			$loopfound = 1;
@@ -1258,23 +1261,27 @@ sub setupBootDisk {
 	my $unzip  = "$main::Gzip -cd $initrd 2>&1";
 	$kiwi -> info ("Importing grub stages for VM boot");
 	if ($zipped) {
-		$status = qx ($unzip | (cd $tmpdir && cpio -di $message 2>&1));
+		$status = qxx ("$unzip | (cd $tmpdir && cpio -di $message 2>&1)");
 	} else {
-		$status = qx (cat $initrd | (cd $tmpdir && cpio -di $message 2>&1));
+		$status = qxx ("cat $initrd | (cd $tmpdir && cpio -di $message 2>&1)");
 	}
 	$result = $? >> 8;
 	if ($result == 0) {
-		$status = qx (mv $tmpdir/$message $tmpdir/boot/message 2>&1);
+		$status = qxx ("mv $tmpdir/$message $tmpdir/boot/message 2>&1");
 		$result = $? >> 8;
 		if ($result == 0) {
 			if ($zipped) {
-				$status= qx ($unzip | (cd $tmpdir && cpio -di $stages 2>&1));
+				$status= qxx ("$unzip | (cd $tmpdir && cpio -di $stages 2>&1)");
 			} else {
-				$status= qx (cat $initrd|(cd $tmpdir && cpio -di $stages 2>&1));
+				$status= qxx (
+					"cat $initrd|(cd $tmpdir && cpio -di $stages 2>&1)"
+				);
 			}
 			$result = $? >> 8;
 			if ($result == 0) {
-				$status = qx (mv $tmpdir/usr/lib/grub/* $tmpdir/boot/grub 2>&1);
+				$status = qxx (
+					"mv $tmpdir/usr/lib/grub/* $tmpdir/boot/grub 2>&1"
+				);
 				$result = $? >> 8;
 			}
 		}
@@ -1284,7 +1291,7 @@ sub setupBootDisk {
 		$kiwi -> error   ("Failed importing grub stages: $status");
 		$kiwi -> skipped ();
 		$kiwi -> info    ("Trying to use grub stages from local machine");
-		$status = qx ( cp /usr/lib/grub/* $tmpdir/boot/grub 2>&1 );
+		$status = qxx ( "cp /usr/lib/grub/* $tmpdir/boot/grub 2>&1" );
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -1336,10 +1343,12 @@ sub setupBootDisk {
 			$sysname = $sysname.".vmboot";
 		}
 		my $ddev = "/dev/zero";
-		my $size = qx (du -ms $tmpdir | cut -f1 2>&1);
+		my $size = qxx ("du -ms $tmpdir | cut -f1 2>&1");
 		chomp ($size); $size += 1; # add 1M free space for filesystem
 		$sysird = $size;
-		$status = qx (dd if=$ddev of=$sysname bs=1M seek=$sysird count=1 2>&1);
+		$status = qxx (
+			"dd if=$ddev of=$sysname bs=1M seek=$sysird count=1 2>&1"
+		);
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -1349,7 +1358,7 @@ sub setupBootDisk {
 			return undef;
 		}
 		$sysird += 1; # add another 1M free space because of sparse seek
-		$status = qx (/sbin/mkfs.ext2 -b 4096 -F $sysname 2>&1);
+		$status = qxx ("/sbin/mkfs.ext2 -b 4096 -F $sysname 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -1358,7 +1367,7 @@ sub setupBootDisk {
 			$this -> cleanTmp ();
 			return undef;
 		}
-		$status = qx (mount -o loop $sysname $loopdir 2>&1);
+		$status = qxx ("mount -o loop $sysname $loopdir 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -1367,16 +1376,16 @@ sub setupBootDisk {
 			$this -> cleanTmp ();
 			return undef;
 		}
-		$status = qx (mv $tmpdir/boot $loopdir 2>&1);
+		$status = qxx ("mv $tmpdir/boot $loopdir 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't install image: $status");
 			$kiwi -> failed ();
-			qx (rm -rf $tmpdir);
+			qxx ("rm -rf $tmpdir");
 			return undef;
 		}
-		qx (umount $loopdir 2>&1);
+		qxx ("umount $loopdir 2>&1");
 		$kiwi -> done();
 	}
 	#==========================================
@@ -1390,7 +1399,7 @@ sub setupBootDisk {
 		$this -> cleanTmp ();
 		return undef;
 	}	
-	$status = qx (qemu-img create $diskname $vmsize 2>&1);
+	$status = qxx ("qemu-img create $diskname $vmsize 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -1399,7 +1408,7 @@ sub setupBootDisk {
 		$this -> cleanTmp ();
 		return undef;
 	}
-	$status = qx ( /sbin/losetup $loop $diskname 2>&1 );
+	$status = qxx ( "/sbin/losetup $loop $diskname 2>&1" );
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -1441,7 +1450,7 @@ sub setupBootDisk {
 	#==========================================
 	# setup device mapper
 	#------------------------------------------
-	$status = qx ( /sbin/kpartx -a $loop 2>&1 );
+	$status = qxx ( "/sbin/kpartx -a $loop 2>&1" );
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -1461,7 +1470,7 @@ sub setupBootDisk {
 	$kiwi -> done();
 	if (! $haveTree) {
 		$kiwi -> info ("Dumping system image on virtual disk");
-		$status = qx (dd if=$system of=$root bs=32k 2>&1);
+		$status = qxx ("dd if=$system of=$root bs=32k 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -1479,20 +1488,22 @@ sub setupBootDisk {
 			/^ext2/     && do {
 				$kiwi -> info ("Creating ext2 root filesystem");
 				my $fsopts = "-q -F";
-				$status = qx (/sbin/mke2fs $fsopts $root 2>&1);
+				$status = qxx ("/sbin/mke2fs $fsopts $root 2>&1");
 				$result = $? >> 8;
 				last SWITCH;
 			};
 			/^ext3/     && do {
 				$kiwi -> info ("Creating ext3 root filesystem");
 				my $fsopts = "-O dir_index -b 4096 -j -J size=4 -q -F";
-				$status = qx (/sbin/mke2fs $fsopts $root 2>&1);
+				$status = qxx ("/sbin/mke2fs $fsopts $root 2>&1");
 				$result = $? >> 8;
 				last SWITCH;
 			};
 			/^reiserfs/ && do {
 				$kiwi -> info ("Creating reiserfs root filesystem");
-				$status = qx (/sbin/mkreiserfs -q -f -s 513 -b 4096 $root 2>&1);
+				$status = qxx (
+					"/sbin/mkreiserfs -q -f -s 513 -b 4096 $root 2>&1"
+				);
 				$result = $? >> 8;
 				last SWITCH;
 			};
@@ -1512,7 +1523,7 @@ sub setupBootDisk {
 		#==========================================
 		# Mount system image partition
 		#------------------------------------------
-		$status = qx (mount $root $loopdir 2>&1);
+		$status = qxx ("mount $root $loopdir 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -1525,7 +1536,7 @@ sub setupBootDisk {
 		# Copy root tree to virtual disk
 		#------------------------------------------
 		$kiwi -> info ("Copying system image tree on virtual disk");
-		$status = qx (cp -a $system/* $loopdir 2>&1);
+		$status = qxx ("cp -a $system/* $loopdir 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -1538,7 +1549,7 @@ sub setupBootDisk {
 		#==========================================
 		# Umount system image partition
 		#------------------------------------------
-		qx ( umount $loopdir 2>&1 );
+		qxx ( "umount $loopdir 2>&1" );
 	}
 	#==========================================
 	# Dump boot image on virtual disk
@@ -1546,7 +1557,7 @@ sub setupBootDisk {
 	$kiwi -> info ("Dumping boot image to virtual disk");
 	if ($syszip > 0) {
 		$root = "/dev/mapper".$dmap."p1";
-		$status = qx (dd if=$sysname of=$root bs=32k 2>&1);
+		$status = qxx ("dd if=$sysname of=$root bs=32k 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -1560,7 +1571,7 @@ sub setupBootDisk {
 		#==========================================
 		# Mount system image
 		#------------------------------------------
-		$status = qx (mount $root $loopdir 2>&1);
+		$status = qxx ("mount $root $loopdir 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -1572,7 +1583,7 @@ sub setupBootDisk {
 		#==========================================
 		# Copy boot data on system image
 		#------------------------------------------
-		$status = qx (cp -a $tmpdir/boot $loopdir 2>&1);
+		$status = qxx ("cp -a $tmpdir/boot $loopdir 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -1587,9 +1598,11 @@ sub setupBootDisk {
 		my $message = "'image/loader/message'";
 		my $unzip   = "$main::Gzip -cd $initrd 2>&1";
 		if ($zipped) {
-			$status = qx ($unzip | (cd $loopdir && cpio -di $message 2>&1));
+			$status = qxx ("$unzip | (cd $loopdir && cpio -di $message 2>&1)");
 		} else {
-			$status = qx (cat $initrd |(cd $loopdir && cpio -di $message 2>&1));
+			$status = qxx (
+				"cat $initrd | (cd $loopdir && cpio -di $message 2>&1)"
+			);
 		}
 		$result = $? >> 8;
 		if ($result != 0) {
@@ -1599,14 +1612,14 @@ sub setupBootDisk {
 			$this -> cleanLoop ();
 			return undef;
 		}
-		qx ( umount $loopdir 2>&1 );
+		qxx ( "umount $loopdir 2>&1" );
 	}
 	$kiwi -> done();
 	#==========================================
 	# cleanup device maps and part mount
 	#------------------------------------------
-	qx ( /sbin/kpartx  -d $loop );
-	qx (rm -rf $tmpdir);
+	qxx ( "/sbin/kpartx -d $loop" );
+	qxx ("rm -rf $tmpdir");
 
 	#==========================================
 	# Install grub on virtual disk
@@ -1641,14 +1654,14 @@ sub setupBootDisk {
 			$this -> {system} = $diskname;
 			$kiwi -> info ("Creating install ISO image\n");
 			$this -> buildMD5Sum ($diskname);
-			qx ( /sbin/losetup -d $loop );
+			qxx ( "/sbin/losetup -d $loop" );
 			if (! $this -> setupInstallCD()) {
 				return undef;
 			}
 		} elsif ($format eq "usb") {
 			$this -> {system} = $diskname;
 			$kiwi -> info ("Creating install USB Stick image\n");
-			qx ( /sbin/losetup -d $loop );
+			qxx ( "/sbin/losetup -d $loop" );
 			if (! $this -> setupInstallStick()) {
 				return undef;
 			}
@@ -1656,7 +1669,7 @@ sub setupBootDisk {
 			$kiwi -> info ("Creating $format image");
 			my $fname = $diskname;
 			$fname  =~ s/\.raw$/\.$format/;
-			$status = qx ( qemu-img convert -f raw $loop -O $format $fname );
+			$status = qxx ( "qemu-img convert -f raw $loop -O $format $fname" );
 			$result = $? >> 8;
 			if ($result != 0) {
 				$kiwi -> failed ();
@@ -1671,7 +1684,7 @@ sub setupBootDisk {
 	#==========================================
 	# cleanup loop setup and device mapper
 	#------------------------------------------
-	qx ( /sbin/losetup -d $loop 2>&1 );
+	qxx ( "/sbin/losetup -d $loop 2>&1" );
 	return $this;
 }
 
@@ -1748,12 +1761,12 @@ sub setupInstallFlags {
 	# unpack initrd files
 	#------------------------------------------
 	my $unzip  = "$main::Gzip -cd $initrd 2>&1";
-	my $status = qx ($unzip | (cd $irddir && cpio -di 2>&1));
+	my $status = qxx ("$unzip | (cd $irddir && cpio -di 2>&1)");
 	my $result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> error  ("Failed to extract initrd data: $!");
 		$kiwi -> failed ();
-		qx (rm -rf $irddir);
+		qxx ("rm -rf $irddir");
 		return undef;
 	}
 	#===========================================
@@ -1762,12 +1775,12 @@ sub setupInstallFlags {
 	if (defined $system) {
 		my $imd5 = $system;
 		$imd5 =~ s/\.raw/\.md5/;
-		my $status = qx (cp $imd5 $irddir/etc/image.md5 2>&1);
+		my $status = qxx ("cp $imd5 $irddir/etc/image.md5 2>&1");
 		my $result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> error  ("Failed importing md5 file: $status");
 			$kiwi -> failed ();
-			qx (rm -rf $irddir);
+			qxx ("rm -rf $irddir");
 			return undef;
 		}
 		if (! open (FD,">$irddir/config.vmxsystem")) {
@@ -1779,7 +1792,7 @@ sub setupInstallFlags {
 		if ($namecd !~ /(.*)-(\d+\.\d+\.\d+)\.raw$/) {
 			$kiwi -> error  ("Couldn't extract version information");
 			$kiwi -> failed ();
-			qx (rm -rf $irddir);
+			qxx ("rm -rf $irddir");
 			return undef;
 		}
 		$ibasename = $1;
@@ -1787,7 +1800,7 @@ sub setupInstallFlags {
 		if (! -f $imd5) {
 			$kiwi -> error  ("Couldn't find md5 file");
 			$kiwi -> failed ();
-			qx (rm -rf $irddir);
+			qxx ("rm -rf $irddir");
 			return undef;
 		}
 		print FD "IMAGE=nope;$ibasename;$iversion\n";
@@ -1798,17 +1811,17 @@ sub setupInstallFlags {
 	#------------------------------------------
 	$newird = $initrd;
 	$newird =~ s/\.gz/\.install\.gz/;
-	$status = qx (
-		(cd $irddir && find|cpio --quiet -oH newc | $main::Gzip) > $newird
+	$status = qxx (
+		"(cd $irddir && find|cpio --quiet -oH newc | $main::Gzip) > $newird"
 	);
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> error  ("Failed to re-create initrd: $status");
 		$kiwi -> failed ();
-		qx (rm -rf $irddir);
+		qxx ("rm -rf $irddir");
 		return undef;
 	}
-	qx (rm -rf $irddir);
+	qxx ("rm -rf $irddir");
 	return $newird;
 }
 
@@ -1848,28 +1861,28 @@ sub setupSplashForGrub {
 	#------------------------------------------
 	my $unzip  = "$main::Gzip -cd $initrd 2>&1";
 	if ($zipped) {
-		$status = qx ($unzip | (cd $irddir && cpio -di 2>&1));
+		$status = qxx ("$unzip | (cd $irddir && cpio -di 2>&1)");
 	} else {
-		$status = qx (cat $initrd | (cd $irddir && cpio -di 2>&1));
+		$status = qxx ("cat $initrd | (cd $irddir && cpio -di 2>&1)");
 	}
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> skipped ();
 		$kiwi -> warning ("Failed to extract data: $!");
 		$kiwi -> skipped ();
-		qx (rm -rf $spldir);
+		qxx ("rm -rf $spldir");
 		return $initrd;
 	}
 	#==========================================
 	# move splash files
 	#------------------------------------------
-	$status = qx (mv $irddir/image/loader/*.spl $newspl 2>&1);
+	$status = qxx ("mv $irddir/image/loader/*.spl $newspl 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> skipped ();
 		$kiwi -> warning ("No splash files found in initrd");
 		$kiwi -> skipped ();
-		qx (rm -rf $spldir);
+		qxx ("rm -rf $spldir");
 		return $initrd;
 	}
 	#==========================================
@@ -1877,36 +1890,40 @@ sub setupSplashForGrub {
 	#------------------------------------------
 	while (my $splash = glob("$newspl/*.spl")) {
 		mkdir "$splash.dir";
-		qx ($main::Gzip -cd $splash > $splash.bob);
+		qxx ("$main::Gzip -cd $splash > $splash.bob");
 		my $count = $this -> extractCPIO ( $splash.".bob" );
 		for (my $id=1; $id <= $count; $id++) {
-			qx (cat $splash.bob.$id |(cd $splash.dir && cpio -i 2>&1));
+			qxx ("cat $splash.bob.$id |(cd $splash.dir && cpio -i 2>&1)");
 		}
-		qx (cp -a $splash.dir/etc $newspl);
+		qxx ("cp -a $splash.dir/etc $newspl");
 		$result = 1;
 		if (-e "$splash.dir/bootsplash") {
-			qx (cat $splash.dir/bootsplash >> $newspl/bootsplash);
+			qxx ("cat $splash.dir/bootsplash >> $newspl/bootsplash");
 			$result = $? >> 8;
 		}
-		qx (rm -rf $splash.dir);
-		qx (rm -f $splash.bob*);
-		qx (rm -f $splash);
+		qxx ("rm -rf $splash.dir");
+		qxx ("rm -f $splash.bob*");
+		qxx ("rm -f $splash");
 		if ($result != 0) {
 			my $splfile = basename ($splash);
 			$kiwi -> skipped ();
 			$kiwi -> warning ("No bootsplash file found in $splfile cpio");
 			$kiwi -> skipped ();
-			qx (rm -rf $spldir);
+			qxx ("rm -rf $spldir");
 			return $initrd;
 		}
 	}
-	qx ((cd $newspl && find|cpio --quiet -oH newc|$main::Gzip)>$spldir/all.spl);
-	qx ((cd $irddir && find|cpio --quiet -oH newc|$main::Gzip)>$newird);
+	qxx ("
+		(cd $newspl && find|cpio --quiet -oH newc|$main::Gzip)>$spldir/all.spl"
+	);
+	qxx ("
+		(cd $irddir && find|cpio --quiet -oH newc|$main::Gzip)>$newird"
+	);
 	#==========================================
 	# create splash initrd
 	#------------------------------------------
-	qx (cat $spldir/all.spl >> $newird);
-	qx (rm -rf $spldir);
+	qxx ("cat $spldir/all.spl >> $newird");
+	qxx ("rm -rf $spldir");
 	$kiwi -> done();
 	return $newird;
 }
@@ -1918,8 +1935,8 @@ sub cleanTmp {
 	my $this = shift;
 	my $tmpdir = $this->{tmpdir};
 	my $loopdir= $this->{loopdir};
-	qx (rm -rf $tmpdir);
-	qx (rm -rf $loopdir);
+	qxx ("rm -rf $tmpdir");
+	qxx ("rm -rf $loopdir");
 	return $this;
 }
 
@@ -1932,13 +1949,13 @@ sub cleanLoop {
 	my $loop   = $this->{loop};
 	my $loopdir= $this->{loopdir};
 	if (defined $loop) {
-		qx ( umount $loopdir 2>&1 );
-		qx ( /sbin/kpartx  -d $loop 2>&1 );
-		qx ( /sbin/losetup -d $loop 2>&1 );
+		qxx ( "umount $loopdir 2>&1" );
+		qxx ( "/sbin/kpartx  -d $loop 2>&1" );
+		qxx ( "/sbin/losetup -d $loop 2>&1" );
 		undef $this->{loop};
 	}
-	qx (rm -rf $tmpdir);
-	qx (rm -rf $loopdir);
+	qxx ("rm -rf $tmpdir");
+	qxx ("rm -rf $loopdir");
 	return $this;
 }
 
@@ -1963,19 +1980,19 @@ sub buildMD5Sum {
 	my $kiwi = $this->{kiwi};
 	$kiwi -> info ("Creating image MD5 sum...");
 	my $size = -s $file;
-	my $primes = qx (factor $size); $primes =~ s/^.*: //;
+	my $primes = qxx ("factor $size"); $primes =~ s/^.*: //;
 	my $blocksize = 1;
 	for my $factor (split /\s/,$primes) {
 		last if ($blocksize * $factor > 8192);
 		$blocksize *= $factor;
 	}
 	my $blocks = $size / $blocksize;
-	my $sum  = qx (cat $file | md5sum - | cut -f 1 -d-);
+	my $sum  = qxx ("cat $file | md5sum - | cut -f 1 -d-");
 	chomp $sum;
 	if ($file =~ /\.raw$/) {
 		$file =~ s/raw$/md5/;
 	}
-	qx (echo "$sum $blocks $blocksize" > $file);
+	qxx ("echo \"$sum $blocks $blocksize\" > $file");
 	$kiwi -> done();
 	return $this;
 }

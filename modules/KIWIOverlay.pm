@@ -20,6 +20,7 @@ package KIWIOverlay;
 #------------------------------------------
 use strict;
 use KIWILog;
+use KIWIQX;
 
 #==========================================
 # Constructor
@@ -121,14 +122,14 @@ sub unionOverlay {
 	my $tmpdir;
 	my $inodir;
 	my $result;
-	$tmpdir = qx ( mktemp -q -d /tmp/kiwiRootOverlay.XXXXXX ); chomp $tmpdir;
+	$tmpdir = qxx (" mktemp -q -d /tmp/kiwiRootOverlay.XXXXXX "); chomp $tmpdir;
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> error  ("Failed to create overlay tmpdir");
 		$kiwi -> failed ();
 		return undef;
 	}
-	$inodir = qx ( mktemp -q -d /tmp/kiwiRootInode.XXXXXX ); chomp $inodir;
+	$inodir = qxx (" mktemp -q -d /tmp/kiwiRootInode.XXXXXX "); chomp $inodir;
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> error  ("Failed to create overlay inode tmpdir");
@@ -137,17 +138,17 @@ sub unionOverlay {
 	}
 	my $opts = "dirs=$rootRW=rw:$baseRO=ro";
 	my $xino = "$inodir/.aufs.xino";
-	my $data = qx ( mount -t tmpfs tmpfs $inodir );
+	my $data = qxx (" mount -t tmpfs tmpfs $inodir ");
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> error  ("tmpfs mount failed: $data");
 		$kiwi -> failed ();
 		return undef;
 	}
-	$data = qx ( mount -t aufs -o $opts,xino=$xino aufs $tmpdir 2>&1);
+	$data = qxx (" mount -t aufs -o $opts,xino=$xino aufs $tmpdir 2>&1");
 	$code = $? >> 8;
 	if ($code != 0) {
-		$data = qx (mount -t unionfs -o $opts unionfs $tmpdir 2>&1);
+		$data = qxx ("mount -t unionfs -o $opts unionfs $tmpdir 2>&1");
 		$code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> error  ("Overlay mount failed: $data");
@@ -170,7 +171,7 @@ sub copyOverlay {
 	my $rootRW = $this->{rootRW};
 	my $data;
 	my $code;
-	$data = qx (tar -C $baseRO -cz --to-stdout . | tar -C $rootRW -xz);
+	$data = qxx ("tar -C $baseRO -cz --to-stdout . | tar -C $rootRW -xz");
 	$code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> error  ("Failed to tar/untar base tree: $data");
@@ -204,13 +205,13 @@ sub resetOverlay {
 	if ($this->{mode} eq "recycle") {
 		return $this;
 	}
-	$data = qx (umount $tmpdir 2>&1);
+	$data = qxx ("umount $tmpdir 2>&1");
 	$code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> warning ("Failed to umount overlay: $data");
 		$kiwi -> skipped ();
 	}
-	$data = qx (umount $inodir 2>&1);
+	$data = qxx ("umount $inodir 2>&1");
 	$code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> warning ("Failed to umount tmpfs: $data");
