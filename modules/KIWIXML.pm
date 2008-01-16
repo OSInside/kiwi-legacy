@@ -175,7 +175,6 @@ sub new {
 				$opts -> removeChild ($node);
 			}
 			$opts -> appendChild ($addElement);
-			$kiwi -> done ();
 		}
 		if (defined $foreignRepo->{packagemanager}) {
 			my $manager = $foreignRepo->{packagemanager};
