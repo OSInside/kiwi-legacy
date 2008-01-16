@@ -121,5 +121,6 @@ modules/KIWIScheme.rng: modules/KIWIScheme.rnc
 	done; test -z "$$j" || false
 
 clean:
+	(cd system/boot && find -type f | grep -v .svn | xargs chmod u+w)
 	rm -f modules/KIWIScheme.rng
 	${MAKE} -C tools clean
