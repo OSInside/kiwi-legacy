@@ -47,7 +47,15 @@ sub new {
 # qxx
 #------------------------------------------
 sub qxx ($) {
+	# ...
+	# Activate execution logging
+	# ---
 	my $cmd = shift;
+	$cmd =~ s/^ +//g;
+	$cmd =~ s/ +$//g;
+	if (defined $main::kiwi) {
+		$main::kiwi -> loginfo ("EXEC [$cmd]\n");
+	}
 	my $eval = "qx ($cmd)";
 	return eval ($eval);
 }

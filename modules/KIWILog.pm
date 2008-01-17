@@ -202,7 +202,7 @@ sub getColumns {
 	# to put the status text at the end of the line
 	# ---
 	my $this = shift;
-	my $size = qxx ("stty size 2>/dev/null"); chomp ($size);
+	my $size = qx (stty size 2>/dev/null); chomp ($size);
 	if ($size eq "") {
 		return 80;
 	}
@@ -415,7 +415,7 @@ sub getPrefix {
 	my $this  = shift;
 	my $level = shift;
 	my $date;
-	$date = qxx ("LANG=POSIX /bin/date \"+%h-%d %H:%M:%S\""); chomp $date;
+	$date = qx (LANG=POSIX /bin/date "+%h-%d %H:%M:%S"); chomp $date;
 	$this->{date} = $date;
 	$this->{level}= $level;
 	$date .= " <$level> : ";
@@ -542,21 +542,6 @@ sub saveInCache {
 		$this->{mcache} = \@mcache;
 	}
 	return $this;
-}
-
-#==========================================
-# debuginfo
-#------------------------------------------
-sub debuginfo {
-	# ...
-	# print a debug message to channel <1>
-	# ---
-	my $this = shift;
-	my $data = shift;
-	my $rootEFD = $this->{rootefd};
-	if ($this->{errorOk}) {
-		print $rootEFD "\nEXEC: [$data]\n";
-	}
 }
 
 #==========================================

@@ -297,7 +297,7 @@ sub setupSignatureCheck {
 	#------------------------------------------
 	if ($manager eq "smart") {
 		my $optionName  = "rpm-check-signatures";
-		my $curCheckSig = qxx ("@smart config --show $optionName|tr -d '\n'");
+		my $curCheckSig = qxx ("@smart config --show $optionName|tr -d '\\n'");
 		my $cmdstr = "smart config --set";
 		if (! $chroot) {
 			$cmdstr = "@smart config --set";
@@ -912,8 +912,8 @@ sub setupRootSystem {
 			print $fd "rm -f $lock\n";
 		} else {
 			$kiwi -> info ("Checking for already Installed image packages...");
-			my $querypack = "rpm -qa --qf %'{NAME}\n'";
-			my @installed = qxx (" chroot $root $querypack 2>/dev/null");
+			my $querypack = "rpm -qa --qf %'{NAME}\\n'";
+			my @installed = qxx ("chroot $root $querypack 2>/dev/null");
 			chomp ( @installed );
 			my @install   = ();
 			my @newpatts  = ();

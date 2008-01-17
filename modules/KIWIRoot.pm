@@ -467,22 +467,22 @@ sub setup {
 		$kiwi -> info ("Copying user defined files to image tree");
 		mkdir $root."/tmproot";
 		my $copy = "cp -LR --remove-destination";
-		my $data = qxx (" $copy $imageDesc/root/* $root/tmproot 2>&1 ");
+		my $data = qxx ("$copy $imageDesc/root/* $root/tmproot 2>&1");
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
 			$kiwi -> info   ($data);
 			return undef;
 		}
-		qxx (" find $root/tmproot -type d | grep .svn\$ | xargs rm -rf 2>&1 ");
-		$data = qxx (" $copy $root/tmproot/* $root ");
+		qxx ("find $root/tmproot -type d | grep .svn\$ | xargs rm -rf 2>&1");
+		$data = qxx ("$copy $root/tmproot/* $root");
 		$code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
 			$kiwi -> info   ($data);
 			return undef;
 		}
-		qxx (" rm -rf $root/tmproot ");
+		qxx ("rm -rf $root/tmproot");
 		$kiwi -> done();
 	}
 	#========================================

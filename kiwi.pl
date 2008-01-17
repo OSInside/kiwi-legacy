@@ -95,21 +95,6 @@ our $KMigrate= $BasePath."/modules/KIWIMigrate.txt";
 our $Revision= $BasePath."/.revision";
 
 #============================================
-# Create main log object
-#--------------------------------------------
-my $kiwi = new KIWILog();
-
-#============================================
-# Activate execution logging
-#--------------------------------------------
-BEGIN {
-	*CORE::GLOBAL::readpipe = sub($) {
-		$kiwi -> debuginfo ("Calling: $_[0]");
-		return CORE::readpipe($_[0]);
-	};
-}
-
-#============================================
 # Globals
 #--------------------------------------------
 our $Prepare;           # control XML file for building chroot extend
@@ -160,6 +145,7 @@ our $PrebuiltBootImage; # directory where a prepared boot image may be found
 our $PreChrootCall;     # program name called before chroot switch
 our $listXMLInfo;       # list XML information for this operation
 our $Compress;          # set compression level
+our $kiwi;              # global logging handler object
 
 #============================================
 # Globals
@@ -168,7 +154,6 @@ my $root;       # KIWIRoot  object for installations
 my $image;      # KIWIImage object for logical extends
 my $boot;       # KIWIBoot  object for logical extends
 my $migrate;    # KIWIMigrate object for system to image migration
-
 
 #==========================================
 # main
@@ -185,6 +170,12 @@ sub main {
 	# Initialize and check options
 	#------------------------------------------
 	init();
+	#==========================================
+	# Create logger object
+	#------------------------------------------
+	if (! defined $kiwi) {
+		$kiwi = new KIWILog();
+	}
 	#==========================================
 	# Check for nocolor option
 	#------------------------------------------
