@@ -76,7 +76,7 @@ probeDevices
 #======================================
 # 6) Load USB storage modules
 #--------------------------------------
-for module in ehci-hcd uhci-hcd usb_storage sg sd_mod;do
+for module in ehci-hcd uhci-hcd usb_storage sg sd_mod BusLogic;do
 	modprobe $module &>/dev/null
 done
 

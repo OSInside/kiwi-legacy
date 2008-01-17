@@ -110,12 +110,12 @@ function importFile {
 	while read line;do
 		echo $line | grep -qi "^#" && continue
 		key=`echo "$line" | cut -d '=' -f1`
-		item=`echo "$line" | cut -d '=' -f2- | tr -d \' | tr -d \"`
+		item=`echo "$line" | cut -d '=' -f2- | tr -d "\'" | tr -d "\""`
 		if [ -z "$key" ] || [ -z "$item" ];then
 			continue
 		fi
 		Debug "$key=$item"
-		eval export $key\=\"$item\"
+		eval export "$key\=\"$item\""
 	done
 }
 #======================================
@@ -279,18 +279,11 @@ function udevStart {
 	echo "Creating device nodes with udev"
 	# disable hotplug helper, udevd listens to netlink
 	echo "" > /proc/sys/kernel/hotplug
-	# create min devices
-	copyDeviceNodes /lib/udev/devices /dev
+	# don't let udev load modules
+	rm /etc/udev/rules.d/*-drivers.rules
 	# start udevd
 	udevd --daemon udev_log="debug"
-	# cleanup some stuff
-	rm -f /var/run/sysconfig/network
-	# unlikely, but we may be faster than the first event
-	mkdir -p /dev/.udev
-	mkdir -p /dev/.udev/queue
-	# create devices
 	/sbin/udevtrigger
-	# 30 sec - just long enough
 	/sbin/udevsettle --timeout=30
 }
 #======================================
@@ -677,7 +670,7 @@ function setupKernelModules {
 function kernelCheck {
 	# /.../
 	# Check this running kernel against the kernel
-	# installed in the image. If the version doesn't
+	# installed in the image. If the version does not 
 	# match we need to reboot to activate the system
 	# image kernel.
 	# ----
@@ -753,91 +746,25 @@ function getSystemMD5Status {
 	echo $SYSTEM_MD5STATUS | cut -f$1 -d:
 }
 #======================================
-# probeDeviceAlias
-#--------------------------------------
-function probeDeviceAlias {
-	# /.../
-	# create the modalias information file from all
-	# registered devices of the kernel
-	# ----
-	modalias=/tmp/modalias
-	cat > $modalias < /dev/null
-	for i in `find /sys -name modalias`;do
-		alias=`cat $i | grep pci:`
-		if [ ! -z "$alias" ];then
-			echo $alias >> $modalias
-		fi
-	done
-	cat $modalias | sort | uniq > $modalias.new
-	mv $modalias.new $modalias
-}
-#======================================
-# probeDeviceInfo
-#--------------------------------------
-function probeDeviceInfo {
-	# /.../
-	# create the modinfo information file from all
-	# installed kernel drivers
-	# ----
-	modinfo=/tmp/modinfo
-	cat > $modinfo < /dev/null
-	for file in `find /lib/modules/*/kernel/drivers -type f`;do
-		/sbin/modinfo -F alias $file |\
-			sed -e s@*@.*@g -e s@.@$file%\&@ \
-		>> $modinfo
-	done
-	cat $modinfo | sort | uniq > $modinfo.new
-	mv $modinfo.new $modinfo
-}
-#======================================
-# probeDevicesForAlias
-#--------------------------------------
-function probeDevicesForAlias {
-	# /.../
-	# check the modalias with the modinfo file and load
-	# all matching kernel modules into the kernel
-	# ----
-	DRIVER_GENERIC=0
-	DRIVER_ATA_PIIX=0
-	Echo "Including required kernel modules..."
-	IFS=$IFS_ORIG
-	probeDeviceInfo
-	probeDeviceAlias
-	if [ ! -z "$kiwikernelmodule" ];then
-		for module in $kiwikernelmodule;do
-			INITRD_MODULES="$INITRD_MODULES $module"
-			Echo "Probing module (cmdline): $module"
-			modprobe $module >/dev/null
-		done
-	fi
-	IFS="%"; while read file info in;do
-		grep -q $info $modalias >/dev/null
-		if [ $? = 0 ];then
-			module=`basename $file`
-			module=`echo $module | sed -e s@.ko@@`
-			loadok=1
-			for broken in $kiwibrokenmodule;do
-				if [ $broken = $module ];then
-					loadok=0; break
-				fi
-			done
-			if [ $loadok = 1 ];then
-				INITRD_MODULES="$INITRD_MODULES $module"
-				Echo "Probing module: $module"
-				modprobe $module >/dev/null
-			fi
-		fi
-	done < $modinfo
-	IFS=$IFS_ORIG
-}
-#======================================
 # probeDevices
 #--------------------------------------
 function probeDevices {
 	Echo "Including required kernel modules..."
+	IFS="%"
+	local module=""
+	local stdevs=""
+	local hwicmd="/usr/sbin/hwinfo"
+	for i in \
+		`$hwicmd --storage | grep "Driver [IA]" | 
+		sed -es"@modprobe\(.*\)\"@\1%@" | tr -d "\n"`
+	do
+		if echo $i | grep -q "#0";then
+			module=`echo $i | cut -f2 -d"\"" | tr -d " "`
+			stdevs="$stdevs $module"
+		fi
+	done
 	IFS=$IFS_ORIG
-	stdevs=`/usr/sbin/hwinfo --storage | grep "Activation Cmd"| cut -f2 -d:`
-	stdevs=`echo $stdevs | tr -d \" | sed -e s"@modprobe@@g"`
+	stdevs=`echo $stdevs`
 	if [ ! -z "$kiwikernelmodule" ];then
 		for module in $kiwikernelmodule;do
 			Echo "Probing module (cmdline): $module"
@@ -858,6 +785,7 @@ function probeDevices {
 			modprobe $module >/dev/null
 		fi
 	done
+	hwinfo --block &>/dev/null
 }
 #======================================
 # CDDevice
@@ -1048,7 +976,7 @@ function probeNetworkCard {
 	IFS="
 	"
 	for i in `$hwnet --netcard | grep "$hwstr" | cut -f2 -d:`;do
-		hwmod=`echo $i | tr -d \" | cut -f3 -d" "`
+		hwmod=`echo $i | tr -d "\"" | cut -f3 -d" "`
 		hwcmd="$hwcmd:$hwmod"
 	done
 	if [ ! -z "$hwcmd" ];then

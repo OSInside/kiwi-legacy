@@ -65,12 +65,27 @@ export SYSTEM_MD5STATUS
 #======================================
 # Functions
 #--------------------------------------
-VMFindSystem () {
-	for module in BusLogic;do
-		modprobe $module >/dev/null 2>&1
-	done
-	sleep 5
-	for rdevice in /dev/hda2 /dev/sda2 /dev/hda1 /dev/sda1;do
+function VMFindSystem {
+	local haveSDA=0
+	local haveHDA=0
+	local devices=""
+	waitForStorageDevice /dev/sda
+	if [ ! -e /dev/sda ];then
+		waitForStorageDevice /dev/hda
+		if [ -e /dev/hda ];then
+			haveHDA=1
+			devices="/dev/hda2 /dev/hda1"
+		fi
+	else
+		haveSDA=1
+		devices="/dev/sda2 /dev/sda1"
+	fi
+	if [ $haveSDA = 0 ] && [ $haveHDA = 0 ];then
+		systemException \
+			"Couldn't find any storage device... abort" \
+		"reboot"
+	fi
+	for rdevice in $devices;do
 		imageRootDevice=$rdevice
 		imageDiskDevice=`echo $imageRootDevice | tr -d [0-9]`
 		if ! mount $imageRootDevice /mnt &>/dev/null;then
