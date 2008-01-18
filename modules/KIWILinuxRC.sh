@@ -280,7 +280,7 @@ function udevStart {
 	# disable hotplug helper, udevd listens to netlink
 	echo "" > /proc/sys/kernel/hotplug
 	# don't let udev load modules
-	rm /etc/udev/rules.d/*-drivers.rules
+	rm -f /etc/udev/rules.d/*-drivers.rules
 	# start udevd
 	udevd --daemon udev_log="debug"
 	/sbin/udevtrigger
@@ -776,6 +776,7 @@ function probeDevices {
 		loadok=1
 		for broken in $kiwibrokenmodule;do
 			if [ $broken = $module ];then
+				Echo "Prevent loading module: $module"
 				loadok=0; break
 			fi
 		done
@@ -786,6 +787,11 @@ function probeDevices {
 		fi
 	done
 	hwinfo --block &>/dev/null
+	# /.../
+	# older systems require ide-disk to be present at any time
+	# for details on this crappy call see bug: #250241
+	# ----
+	modprobe ide-disk
 }
 #======================================
 # CDDevice

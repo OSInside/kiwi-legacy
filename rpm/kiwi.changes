@@ -2,6 +2,7 @@
 Mon Jan 14 14:12:45 CET 2008 - ms@suse.de
 
 - v2.11
+- fixed storage device detection for SLES, related to (#250241)
 - fixed udevd setup and prevent udev from load modules which
   it shouldn't load, removing 80-drivers.rules while booting (#354278)
 - fixed KIWILinuxRC.sh probedevices function (#354278)
