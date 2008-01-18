@@ -141,15 +141,17 @@ fi
 # 8) get TFTP Server IP/name
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
-	checkTFTP
-	if [ -z $TSERVER ];then
-		TSERVER=tftp.$DOMAIN
+	checkServer
+	if [ -z $SERVER ];then
+		SERVER=tftp.$DOMAIN
 	fi
-	Echo "Checking TFTP Server name: $TSERVER"
-	if ! ping -c 1 $TSERVER >/dev/null 2>&1;then
-		Echo "TFTP Server: $TSERVER not found"
-		Echo "Using: $DHCPSIADDR from dhcpcd-info"
-		TSERVER=$DHCPSIADDR
+	Echo "Checking Server name: $SERVER"
+	if ! ping -c 1 $SERVER >/dev/null 2>&1;then
+		Echo "Server: $SERVER not found"
+		if test -z $SERVERTYPE || test "$SERVERTYPE" = "tftp"; then
+			Echo "Using: $DHCPSIADDR from dhcpcd-info"
+			SERVER=$DHCPSIADDR
+                fi
 	fi
 fi
 
@@ -159,25 +161,10 @@ fi
 if [ $LOCAL_BOOT = "no" ];then
 	CONFIG=/etc/config.netclient
 	#======================================
-	# Connection/access check for TSERVER
+	# Connection/access check for SERVER
 	#--------------------------------------
-	while true;do
-		Echo "Checking for config file: config.$DHCPCHADDR"
-		result=`atftp -g \
-			-r KIWI/config.$DHCPCHADDR -l $CONFIG $TSERVER 2>&1 | head -n 1`
-		status1=`echo $result | cut -f2 -d" "`
-		status2=`echo $result | cut -f6,7 -d" "`
-		if test "$status1" = "unknown";then
-			Echo -n "TFTP Server unknown, enter IP: " && read TSERVER
-		elif test "$status2" = "<Access violation>";then
-			Echo -n "TFTP access violation, enter IP: " && read TSERVER
-		else
-			break
-		fi
-		if test -z $TSERVER;then
-			TSERVER=$DHCPSIADDR
-		fi
-	done
+	Echo "Checking for config file: config.$DHCPCHADDR"
+	fetchFile KIWI/config.$DHCPCHADDR $CONFIG
 	#======================================
 	# Check alternative config names
 	#--------------------------------------
@@ -215,10 +202,8 @@ if [ $LOCAL_BOOT = "no" ];then
 			HWTYPE=`/sbin/posbios -ms`
 			echo "HWTYPE=$HWTYPE" >> hwtype.$DHCPCHADDR
 		fi
-		atftp -p -l hwtype.$DHCPCHADDR \
-			-r upload/hwtype.$DHCPCHADDR $TSERVER >/dev/null 2>&1
-		atftp -p -l hwinfo.$DHCPCHADDR \
-			-r upload/hwinfo.$DHCPCHADDR $TSERVER >/dev/null 2>&1
+		putFile hwtype.$DHCPCHADDR upload/hwtype.$DHCPCHADDR
+		putFile hwinfo.$DHCPCHADDR upload/hwinfo.$DHCPCHADDR
 		echo
 		Echo "Registered as: $DHCPCHADDR"
 		Echo "Waiting for configuration..."
@@ -231,9 +216,7 @@ if [ $LOCAL_BOOT = "no" ];then
 			Echo "Lookup network client config file again..."
 			Echo "Checking for config file: config.$DHCPCHADDR"
 			dhcpcd -n
-			atftp -g -r KIWI/config.$DHCPCHADDR \
-				-l $CONFIG $TSERVER \
-			>/dev/null 2>&1
+			fetchFile KIWI/config.$DHCPCHADDR $CONFIG
 			if test ! -s $CONFIG;then
 				searchAlternativeConfig
 			fi
@@ -305,6 +288,7 @@ if [ ! -z "$PART" ] && [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ];then
 	# Create partition table if needed
 	#--------------------------------------
 	if test $systemIntegrity = "clean";then
+		runHook prepartition
 		Echo "Creating partition table..."
 		partitionCount
 		createSwap
@@ -316,6 +300,7 @@ if [ ! -z "$PART" ] && [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ];then
 		fi
 		done
 		mkswap ${DISK}1 >/dev/null 2>&1
+		runHook postpartition
 	fi
 fi
 fi
@@ -355,16 +340,14 @@ if [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ];then
 		fi
 		imageName="image/$imageName-$imageVersion"
 		imageMD5s="$imageName.md5"
-		[ -z "$imageServer" ]  && imageServer=$TSERVER
+		[ -z "$imageServer" ]  && imageServer=$SERVER
 		[ -z "$imageBlkSize" ] && imageBlkSize=8192
 		while true;do
 			# /.../
 			# get image md5sum to be able to check for the size
 			# requirements if we are loading into RAM
 			# ---
-			loadStatus=`atftp -g \
-				-r $imageMD5s -l /etc/image.md5 $imageServer 2>&1`
-			if ! loadOK "$loadStatus";then
+			if ! fetchFile $imageMD5s /etc/image.md5 $imageServer; then
 				systemException \
 					"Failed to load image MD5: $imageName -> no such file" \
 				"reboot"
@@ -386,30 +369,11 @@ if [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ];then
 				multicast="off"
 			fi
 			Echo "Loading $imageName [$imageDevice BS:$imageBlkSize Byte]..."
-			if test "$imageZipped" = "compressed"; then
-				imageName_orig=$imageName
-				imageName="$imageName.gz"
-				atftp \
-					--option "multicast $multicast" \
-					--option "blksize $imageBlkSize" -g -r $imageName \
-					-l /dev/stdout $imageServer 2>/tmp/transfer.errors |\
-					gzip -d > $imageDevice 2>>/tmp/transfer.errors
-				loadCode=$?
-				loadStatus=`cat /tmp/transfer.errors`
-			else
-				loadStatus=`atftp \
-					--option "multicast $multicast"  \
-					--option "blksize $imageBlkSize" \
-					-g -r $imageName -l $imageDevice $imageServer 2>&1`
-				loadCode=$?
-			fi
+			fetchFile $imageName $imageDevice $imageServer
 			if test $loadCode != 0 || ! loadOK "$loadStatus";then
 				systemException \
-					"Download of $imageName failed: atftp output: $loadStatus" \
+					"Download of $imageName failed: $loadStatus" \
 				"reboot"
-			fi
-			if test "$imageZipped" = "compressed"; then
-				imageName=$imageName_orig
 			fi
 			# /.../
 			# check the md5sum of the downloaded data records
@@ -564,7 +528,6 @@ else
 	fi
 fi
 runHook postdownload
-
 #======================================
 # 13) Check for RELOAD_CONFIG
 #--------------------------------------
@@ -609,9 +572,7 @@ if [ $LOCAL_BOOT = "no" ];then
 			Echo "Import configuration file: $configDest"
 			dirs=`dirname  $configDest`
 			mkdir -p /config/$dirs
-			atftp --option "blksize $configBlkSize" -g \
-				-r $configSource -l /config/$configDest $configServer \
-			>/dev/null 2>&1
+			fetchFile $configSource /config/$configDest $configServer
 		done
 		#======================================
 		# Check for KIWI_INITRD
@@ -619,14 +580,10 @@ if [ $LOCAL_BOOT = "no" ];then
 		if [ ! -z $KIWI_INITRD ];then
 			Echo "Import KIWI initrd file: $KIWI_INITRD"
 			rm -f /mnt/boot/initrd* && mkdir -p /mnt/boot >/dev/null 2>&1
-			atftp -g -r $KIWI_INITRD -l /mnt/boot/initrd \
-				$TSERVER \
-			>/dev/null 2>&1
+			fetchFile $KIWI_INITRD /mnt/boot/initrd
 			if [ ! -z $KIWI_KERNEL ];then
 				Echo "Import KIWI kernel file: $KIWI_KERNEL"
-				atftp -g -r $KIWI_KERNEL -l /mnt/boot/vmlinuz \
-					$TSERVER \
-				>/dev/null 2>&1
+				fetchFile $KIWI_KERNEL /mnt/boot/vmlinuz
 			fi
 			KIWI_INITRD_PARAMS="IMAGE=\"$IMAGE\""
 			if [ ! -z $COMBINED_IMAGE ]; then
@@ -719,8 +676,7 @@ if [ $LOCAL_BOOT = "no" ];then
 			Echo "Notify of new image: image/$imageName"
 			echo "image/$imageName" > bootversion.$DHCPCHADDR
 			echo "$imageVersion"   >> bootversion.$DHCPCHADDR
-			atftp --option "blksize 1024" -p -l bootversion.$DHCPCHADDR \
-				-r upload/bootversion.$DHCPCHADDR $TSERVER >/dev/null 2>&1
+			putFile bootversion.$DHCPCHADDR upload/bootversion.$DHCPCHADDR
 			rm -f bootversion.$DHCPCHADDR
 		done
 	fi

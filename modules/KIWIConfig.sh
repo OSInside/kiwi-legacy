@@ -419,7 +419,7 @@ function suseStripInitrd {
 		/etc/ssl /etc/java /etc/default /etc/cron* /etc/dbus*
 		/etc/pam.d* /etc/DIR_COLORS /etc/rc* /usr/share/hal /usr/share/ssl
 		/usr/lib*/hal /usr/lib*/*.a /usr/lib*/*.la /usr/lib*/librpm*
-		/usr/lib*/libssl* /usr/lib*/libpanel* /usr/lib*/libncursesw*
+		/usr/lib*/libpanel* /usr/lib*/libncursesw*
 		/usr/lib*/libmenu* /usr/lib*/libx* /usr/src/packages/RPMS
 		/usr/X11R6 /usr/lib*/X11 /var/X11R6 /usr/share/X11 /etc/X11
 		/usr/lib*/libX* /usr/lib*/xorg /usr/lib*/libidn*
@@ -471,7 +471,7 @@ function suseStripInitrd {
 		blockdev posbios ping killall killall5 udevcontrol udevd
 		udevsettle udevtrigger mknod stat path_id hwup scsi_id scsi_tur
 		usb_id ata_id vol_id edd_id setctsid dumpe2fs debugreiserfs
-		fuser udevadm blogd showconsole killproc
+		fuser udevadm blogd showconsole killproc curl
 	"
 	tools="$tools $@"
 	for path in /sbin /usr/sbin /usr/bin /bin;do

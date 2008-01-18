@@ -129,6 +129,7 @@
 	</packages>
 	<packages type="image" profiles="default,xen">
 		<!-- PACKAGES START DEFAULT AND XEN -->
+		<package name="curl"/>
 		<package name="psmisc"/>
 		<package name="iputils"/>
 		<package name="atftp"/>

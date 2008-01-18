@@ -21,6 +21,7 @@
 export ELOG_CONSOLE=/dev/tty3
 export KLOG_CONSOLE=4
 export PARTITIONER=sfdisk
+export TRANSFER_ERRORS_FILE=/tmp/transfer.errors
 
 #======================================
 # Debug
@@ -1047,11 +1048,10 @@ function updateNeeded {
 			read installed sum2 < $versionFile
 		fi
 		imageMD5s="image/$imageName-$imageVersion.md5"
-		[ -z "$imageServer" ]  && imageServer=$TSERVER
+		[ -z "$imageServer" ]  && imageServer=$SERVER
 		[ -z "$imageBlkSize" ] && imageBlkSize=8192
 		if [ ! -f /etc/image.md5 ];then
-			atftp -g -r $imageMD5s \
-				-l /etc/image.md5 $imageServer >/dev/null
+			fetchFile $imageMD5s /etc/image.md5 $imageServer
 		fi
 		read sum1 blocks blocksize < /etc/image.md5
 		if [ ! -z "$sum1" ];then
@@ -1587,17 +1587,24 @@ function includeKernelParameters {
 	fi
 }
 #======================================
-# checkTFTP
+# checkServer
 #--------------------------------------
-function checkTFTP {
+function checkServer {
 	# /.../
-	# check the kernel commandline parameter kiwitftp.
-	# If it exists its contents will be used as tftp
-	# server address stored in the TSERVER variabe
+	# check the kernel commandline parameter kiwiserver.
+	# If it exists its contents will be used as
+	# server address stored in the SERVER variabe
 	# ----
-	if [ ! -z $kiwitftp ];then
-		Echo "Found TFTP server in kernel cmdline"
-		TSERVER=$kiwitftp
+	if [ ! -z $kiwiserver ];then
+		Echo "Found server in kernel cmdline"
+		SERVER=$kiwiserver
+	fi
+
+	if [ ! -z $kiwiservertype ]; then
+		Echo "Found server type in kernel cmdline"
+		SERVERTYPE=$kiwiservertype
+	else
+		SERVERTYPE=tftp
 	fi
 }
 #======================================
@@ -1803,8 +1810,7 @@ function searchAlternativeConfig {
 	while [ $STEP -gt 0 ]; do
 		hexippart=`echo $hexip | cut -b -$STEP`
 		Echo "Checking for config file: config.$hexippart"
-		result=`atftp -g \
-			-r KIWI/config.$hexippart -l $CONFIG $TSERVER | head -n 1`
+		fetchFile KIWI/config.$hexippart $CONFIG
 		if test -s $CONFIG;then
 			break
 		fi
@@ -1813,8 +1819,7 @@ function searchAlternativeConfig {
 	# Check config.default if no hex config was found
 	if test ! -s $CONFIG;then
 		Echo "Checking for config file: config.default"
-		result=`atftp -g \
-			-r KIWI/config.default -l $CONFIG $TSERVER | head -n 1`
+		fetchFile KIWI/config.default $CONFIG
 	fi
 }
 #======================================
@@ -1887,4 +1892,122 @@ function waitForStorageDevice {
 		check=`expr $check + 1`
 		sleep 2
 	done
+}
+
+#======================================
+# fetchFile
+#--------------------------------------
+function fetchFile {
+	# /.../
+	# the generic fetcher which is able to use different protocols
+	# tftp,ftp, http, https. fetchFile is used in the netboot linuxrc
+	# and uses curl and atftp to download files from the network
+	# ----
+	local path=$1
+	local dest=$2
+	local host=$3
+	local type=$4
+	if test -z "$path"; then
+		systemException "No path specified" "reboot"
+	fi
+	if test -z "$host"; then
+		if test -z "$SERVER"; then
+			systemException "No server specified" "reboot"
+		fi
+		host=$SERVER
+	fi
+	if test -z "$type"; then
+		if test -z "$SERVERTYPE"; then
+			type="tftp"
+		else
+			type="$SERVERTYPE"
+		fi
+	fi
+	case "$type" in
+		"http")
+			curl -f http://$host/$path > $dest 2> $TRANSFER_ERRORS_FILE
+			return $?
+			;;
+		"https")
+			curl -f -k https://$host/$path > $dest 2> $TRANSFER_ERRORS_FILE
+			return $?
+			;;
+		"ftp")
+			curl ftp://$host/$path > $dest 2> $TRANSFER_ERRORS_FILE
+			return $?
+			;;
+		"tftp")
+			if test "$imageZipped" = "compressed"; then
+				path="$path.gz"
+				atftp \
+					--option "multicast $multicast" \
+					--option "blksize $imageBlkSize" -g -r $path \
+					-l /dev/stdout $host 2>$TRANSFER_ERRORS_FILE |\
+					gzip -d > $dest 2>>$TRANSFER_ERRORS_FILE
+				loadCode=$?
+				loadStatus=`cat $TRANSFER_ERRORS_FILE`
+			else
+				loadStatus=`atftp \
+					--option "multicast $multicast"  \
+					--option "blksize $imageBlkSize" \
+					-g -r $path -l $dest $host 2>&1`
+				loadCode=$?
+			fi
+			return $loadCode
+			;;
+		*)
+			systemException "Unknown download type: $type" "reboot"
+			;;
+	esac
+}
+
+#======================================
+# putFile
+#--------------------------------------
+function putFile {
+	# /.../
+	# the generic putFile function is used to upload boot data on
+	# a server. Supported protocols are tftp, ftp, http, https
+	# ----
+	local path=$1
+	local dest=$2
+	local host=$3
+	local type=$4
+    if test -z "$path"; then
+		systemException "No path specified" "reboot"
+	fi
+	if test -z "$host"; then
+		if test -z "$SERVER"; then
+			systemException "No server specified" "reboot"
+		fi
+		host=$SERVER
+	fi
+	if test -z "$type"; then
+		if test -z "$SERVERTYPE"; then
+			type="tftp"
+		else
+			type="$SERVERTYPE"
+		fi
+	fi
+	case "$type" in
+		"http")
+			curl -f -T $path http://$host/$dest > $TRANSFER_ERRORS_FILE 2>&1
+			return $?
+			;;
+		"https")
+			curl -f -T $path https://$host/$dest > $TRANSFER_ERRORS_FILE 2>&1
+			return $?
+			;;
+		"ftp")
+			curl -T $path ftp://$host/$dest  > $TRANSFER_ERRORS_FILE 2>&1
+			return $?
+			;;
+		"tftp")
+            atftp -p -l $path -r $dest $host >/dev/null 2>&1
+            return $?
+			;;
+		*)
+			systemException "Unknown download type: $type" "reboot"
+			;;
+	esac
 }
