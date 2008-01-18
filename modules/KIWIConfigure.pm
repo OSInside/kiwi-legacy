@@ -276,7 +276,7 @@ sub setupFirstBootYaST {
 		"atd","syslog","cron","firstboot"
 	);
 	foreach my $service (@services) {
-		if (! -e "/etc/init.d/$service") {
+		if (! -e "$root/etc/init.d/$service") {
 			next;
 		}
 		$data = qxx ( "chroot $root insserv /etc/init.d/$service 2>&1" );
