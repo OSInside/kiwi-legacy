@@ -279,7 +279,7 @@ sub setupFirstBootYaST {
 		if (! -e "$root/etc/init.d/$service") {
 			next;
 		}
-		$data = qxx ( "chroot $root insserv /etc/init.d/$service 2>&1" );
+		$data = qxx ("chroot $root /sbin/insserv /etc/init.d/$service 2>&1");
 		$code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();

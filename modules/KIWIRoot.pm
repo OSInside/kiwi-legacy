@@ -474,7 +474,7 @@ sub setup {
 			$kiwi -> info   ($data);
 			return undef;
 		}
-		qxx ("find $root/tmproot -type d | grep .svn\$ | xargs rm -rf 2>&1");
+		qxx ("find $root/tmproot -type d | grep '.svn\$' | xargs rm -rf 2>&1");
 		$data = qxx ("$copy $root/tmproot/* $root");
 		$code = $? >> 8;
 		if ($code != 0) {

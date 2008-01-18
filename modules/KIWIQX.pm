@@ -56,8 +56,7 @@ sub qxx ($) {
 	if (defined $main::kiwi) {
 		$main::kiwi -> loginfo ("EXEC [$cmd]\n");
 	}
-	my $eval = "qx ($cmd)";
-	return eval ($eval);
+	return qx ($cmd);
 }
 
 1;
