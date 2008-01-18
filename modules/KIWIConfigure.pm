@@ -271,7 +271,7 @@ sub setupFirstBootYaST {
 	print FD "FIRSTBOOT_RELEASE_NOTES_PATH=\"\"\n";
 	close FD;
 	my @services = (
-		"boot.rootfsck","boot.cleanup","boot.localfs","boot.localnet",
+		"boot.rootfsck","boot.localfs","boot.cleanup","boot.localfs","boot.localnet",
 		"boot.clock","policykitd","dbus","consolekit","haldaemon","network",
 		"atd","syslog","cron","firstboot"
 	);
