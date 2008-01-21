@@ -168,6 +168,7 @@ umountSystemFilesystems
 #======================================
 # 15) copy initrd files to image
 #--------------------------------------
+importBranding
 cp /preinit /mnt
 cp /include /mnt
 

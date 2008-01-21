@@ -705,9 +705,7 @@ umountSystemFilesystems
 #======================================
 # 23) copy initrd files to image
 #--------------------------------------
-if [ -f /image/loader/message ];then
-	mv /image/loader/message /mnt/boot
-fi
+importBranding
 cp /preinit /mnt
 cp /include /mnt
 

@@ -546,6 +546,15 @@ function suseGFXBoot {
 	if [ ! $theme = "SuSE" ];then
 		theme="SuSE-$theme"
 	fi
+	mkdir /image/loader/branding
+	cp /etc/bootsplash/themes/$theme/images/logo.mng  /image/loader/branding
+	cp /etc/bootsplash/themes/$theme/images/logov.mng /image/loader/branding
+	for cfg in 800x600 1024x768 1280x1024;do
+		cp /etc/bootsplash/themes/$theme/images/bootsplash-$cfg.jpg \
+		/image/loader/branding
+		cp /etc/bootsplash/themes/$theme/config/bootsplash-$cfg.cfg \
+		/image/loader/branding
+	done
 	mkdir /image/loader/animations
 	cp /etc/bootsplash/themes/$theme/animations/* \
 		/image/loader/animations &>/dev/null

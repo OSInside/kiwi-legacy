@@ -2011,3 +2011,26 @@ function putFile {
 			;;
 	esac
 }
+
+#======================================
+# importBranding
+#--------------------------------------
+function importBranding {
+	# /.../
+	# include possible custom boot loader and bootsplash files
+	# to the system to allow to use them persistently
+	# ----
+	if [ -f /image/loader/message ];then
+		mv /image/loader/message /mnt/boot
+	fi
+	if [ -f /image/loader/branding/logo.mng ];then
+	if [ -d /etc/bootsplash/themes ];then
+		for theme in /etc/bootsplash/themes/*;do
+			cp /image/loader/branding/logo.mng  $theme/images
+			cp /image/loader/branding/logov.mng $theme/images
+			cp /image/loader/branding/*.jpg $theme/images
+			cp /image/loader/branding/*.cfg $theme/config
+		done	
+	fi
+	fi
+}
