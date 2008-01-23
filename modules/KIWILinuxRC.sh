@@ -1923,42 +1923,58 @@ function fetchFile {
 			type="$SERVERTYPE"
 		fi
 	fi
+	if test "$imageZipped" = "compressed"; then
+		path="$path.gz"
+	fi
 	case "$type" in
 		"http")
-			curl -f http://$host/$path > $dest 2> $TRANSFER_ERRORS_FILE
-			return $?
+			if test "$imageZipped" = "compressed"; then
+				curl -f http://$host/$path 2>$TRANSFER_ERRORS_FILE |\
+					gzip -d > $dest 2>>$TRANSFER_ERRORS_FILE
+			else
+				curl -f http://$host/$path > $dest 2> $TRANSFER_ERRORS_FILE
+			fi
+			loadCode=$?
 			;;
 		"https")
-			curl -f -k https://$host/$path > $dest 2> $TRANSFER_ERRORS_FILE
-			return $?
+			if test "$imageZipped" = "compressed"; then
+				curl -f -k https://$host/$path 2>$TRANSFER_ERRORS_FILE |\
+					gzip -d > $dest 2>>$TRANSFER_ERRORS_FILE
+			else
+				curl -f -k https://$host/$path > $dest 2> $TRANSFER_ERRORS_FILE
+			fi
+			loadCode=$?
 			;;
 		"ftp")
-			curl ftp://$host/$path > $dest 2> $TRANSFER_ERRORS_FILE
-			return $?
+			if test "$imageZipped" = "compressed"; then
+				curl ftp://$host/$path 2>$TRANSFER_ERRORS_FILE |\
+					gzip -d > $dest 2>>$TRANSFER_ERRORS_FILE
+			else
+				curl ftp://$host/$path > $dest 2> $TRANSFER_ERRORS_FILE
+			fi
+			loadCode=$?
 			;;
 		"tftp")
 			if test "$imageZipped" = "compressed"; then
-				path="$path.gz"
 				atftp \
 					--option "multicast $multicast" \
 					--option "blksize $imageBlkSize" -g -r $path \
 					-l /dev/stdout $host 2>$TRANSFER_ERRORS_FILE |\
 					gzip -d > $dest 2>>$TRANSFER_ERRORS_FILE
-				loadCode=$?
-				loadStatus=`cat $TRANSFER_ERRORS_FILE`
 			else
-				loadStatus=`atftp \
+				atftp \
 					--option "multicast $multicast"  \
 					--option "blksize $imageBlkSize" \
-					-g -r $path -l $dest $host 2>&1`
-				loadCode=$?
+					-g -r $path -l $dest $host 2>&1 > $TRANSFER_ERRORS_FILE
 			fi
-			return $loadCode
+			loadCode=$?
 			;;
 		*)
 			systemException "Unknown download type: $type" "reboot"
 			;;
 	esac
+	loadStatus=`cat $TRANSFER_ERRORS_FILE`
+	return $loadCode
 }
 
 #======================================
