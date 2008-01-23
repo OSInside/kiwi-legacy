@@ -36,6 +36,7 @@ our @EXPORT = qw (%packageManager);
 our %packageManager;
 $packageManager{smart}   = "/usr/bin/smart";
 $packageManager{zypper}  = "/usr/bin/zypper";
+$packageManager{ensconce}= "/usr/bin/ensconce";
 $packageManager{default} = "smart";
 
 #==========================================
@@ -111,6 +112,9 @@ sub new {
 	];
 	$this->{zypper}      = [
 		"zypper","--non-interactive","--no-gpg-checks"
+	];
+	$this->{ensconce}    = [
+		"ensconce", "-r /"
 	];
 	return $this;
 }
@@ -330,6 +334,12 @@ sub setupSignatureCheck {
 	if ($manager eq "zypper") {
 		# nothing to do for zypper here...
 	}
+	#==========================================
+	# ensconce
+	#------------------------------------------
+	if ($manager eq "ensconce") {
+		# nothing to do here for ensconce...
+	}
 	return $this;
 }
 
@@ -386,6 +396,12 @@ sub resetSignatureCheck {
 	#------------------------------------------
 	if ($manager eq "zypper") {
 		# nothing to do for zypper here...
+	}
+	#==========================================
+	# ensconce
+	#------------------------------------------
+	if ($manager eq "ensconce") {
+		# nothing to do here for ensconce...
 	}
 	return $this;
 }
@@ -509,6 +525,12 @@ sub setupInstallationSource {
 			$kiwi -> done ();
 		}
 	}
+	#==========================================
+	# ensconce
+	#------------------------------------------
+	if ($manager eq "ensconce") {
+		# Ignored for ensconce
+	}
 	$this->{channelList} = \@channelList;
 	return $this;
 }
@@ -598,6 +620,12 @@ sub resetInstallationSource {
 		}
 		$kiwi -> done ();
 	}
+	#==========================================
+	# ensconce
+	#------------------------------------------
+	if ($manager eq "ensconce") {
+		# Ignored for ensconce
+	}
 	return $this;
 }
 
@@ -657,6 +685,16 @@ sub setupDownload {
 		$kiwi -> failed ();
 		return undef;
 	}
+	#==========================================
+	# ensconce
+	#------------------------------------------
+	if ($manager eq "ensconce") {
+		# TODO
+		$kiwi -> failed ();
+		$kiwi -> error  ("*** not implemeted ***");
+		$kiwi -> failed ();
+		return undef;
+	}
 	return $this -> setupScreenCall();
 }
 
@@ -674,6 +712,7 @@ sub setupUpgrade {
 	my $root = $this->{root};
 	my $manager = $this->{manager};
 	my @zypper  = @{$this->{zypper}};
+	my @ensconce = @{$this->{ensconce}};
 	my $screenCall = $this->{screenCall};
 	#==========================================
 	# setup screen call
@@ -754,6 +793,16 @@ sub setupUpgrade {
 		print $fd "echo \$? > $screenCall.exit\n";
 		$fd -> close();
 	}
+	#==========================================
+	# ensconce
+	#------------------------------------------
+	if ($manager eq "ensconce") {
+		# TODO
+		$kiwi -> failed ();
+		$kiwi -> error  ("*** not implemeted ***");
+		$kiwi -> failed ();
+		return undef;
+	}
 	return $this -> setupScreenCall();
 }
 
@@ -774,6 +823,7 @@ sub setupRootSystem {
 	my $manager= $this->{manager};
 	my @zypper = @{$this->{zypper}};
 	my @smart  = @{$this->{smart}};
+	my @ensconce = @{$this->{ensconce}};
 	my $lock   = $this->{lock};
 	my @channelList = @{$this->{channelList}};
 	my $screenCall  = $this->{screenCall};
@@ -961,6 +1011,23 @@ sub setupRootSystem {
 		}
 		$fd -> close();
 	}
+	#==========================================
+	# ensconce
+	#------------------------------------------
+	if ($manager eq "ensconce") {
+		if (! $chroot) {
+			# Ignored for ensconce
+		} else {
+			$kiwi -> info ("Installing image packages...");
+			print $fd "function clean { kill \$SPID; ";
+			print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
+			print $fd "trap clean INT TERM\n";
+			print $fd "$root/ensconce &\n";
+			print $fd "SPID=\$!;wait \$SPID\n";
+			print $fd "echo \$? > $screenCall.exit\n";
+			$fd -> close();
+		}
+	}
 	return $this -> setupScreenCall();
 }
 
@@ -1002,6 +1069,12 @@ sub resetSource {
 			qxx ("bash -c \"@zypper service-delete $channel 2>&1\"");
 		}
 	}
+	#==========================================
+	# ensconce
+	#------------------------------------------
+	if ($manager eq "ensconce") {
+		# Ignored for ensconce
+	}
 	$this -> freeLock();
 	return $this;
 }
@@ -1038,7 +1111,9 @@ sub setupPackageInfo {
 			$this -> freeLock();
 		} else {
 			$kiwi -> info ("Checking for package: $pack");
-			$data = qxx ("chroot $root smart query --installed $pack 2>/dev/null");
+			$data = qxx (
+				"chroot $root smart query --installed $pack 2>/dev/null"
+			);
 			$code = $? >> 8;
 		}
 		if ($code == 0) {
@@ -1079,6 +1154,13 @@ sub setupPackageInfo {
 			return 1;
 		}
 		$kiwi -> done();
+		return 0;
+	}
+	#==========================================
+	# ensconce
+	#------------------------------------------
+	if ($manager eq "ensconce") {
+		# Ignored for ensconce, always report package as installed
 		return 0;
 	}
 	return 1;
