@@ -266,6 +266,8 @@ cat kiwi.loader
 %doc %{_defaultdocdir}/kiwi/ChangeLog
 %doc %{_defaultdocdir}/kiwi/kiwi.xsd.diag
 %doc %{_defaultdocdir}/kiwi/kiwi.xsd.html
+%doc %{_defaultdocdir}/kiwi/kiwi.rng.html
+%doc %{_defaultdocdir}/kiwi/kiwi.quick.pdf
 %{_datadir}/kiwi/.revision
 %{_datadir}/kiwi/modules
 %{_sbindir}/kiwi
