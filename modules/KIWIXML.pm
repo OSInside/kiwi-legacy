@@ -1351,9 +1351,9 @@ sub getInstSourcePackageAttributes {
 				my $value = $element -> getAttribute ($key);
 				if (defined $value) {
 					$result{$key} = $value;
-					return \%result;
 				}
 			}
+			return \%result;
 		}
 	}
 	return undef;
@@ -1859,6 +1859,7 @@ sub getInstSourceFile {
 		# local files, make them a file:// url
 		# ----
 		$url = "file://".$url;
+		$url =~ s{/{3,}}{//};
 	}
 	# /.../
 	# use lwp-download to manage the process.
