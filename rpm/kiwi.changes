@@ -3,6 +3,7 @@ Mon Jan 21 17:53:42 CET 2008 - ms@suse.de
 
 - v2.13
 - fixed branding data which wasn't copied completely (#354634)
+- added root tree consistency check for all types (#355715)
 - fixed netboot fetchfile to allow compression on all protocols 
 - added ensconce package manager support to kiwi.
 - added kiwi quickstart guide

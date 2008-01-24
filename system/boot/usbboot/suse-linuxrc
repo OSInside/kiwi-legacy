@@ -131,6 +131,7 @@ fi
 if ! mountSystem $stickDevice;then
 	systemException "Failed to mount root filesystem" "reboot"
 fi
+validateRootTree
 
 #======================================
 # 11) Create system dependant files

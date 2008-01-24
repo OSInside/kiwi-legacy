@@ -267,6 +267,7 @@ else
 		systemException "Failed to mount root filesystem" "reboot"
 	fi
 fi
+validateRootTree
 
 #======================================
 # 13) Create system dependant files

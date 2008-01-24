@@ -963,6 +963,11 @@ sub init {
 		$kiwi -> failed ();
 		my $code = kiwiExit (1); return $code;
 	}
+	if ((defined $IgnoreRepos) && (defined $SetRepository)) {
+		$kiwi -> error ("Can't use ignore repos together with set repos");
+		$kiwi -> failed ();
+		my $code = kiwiExit (1); return $code;
+	}
 	if ((defined @AddRepository) && (! defined @AddRepositoryType)) {
 		$kiwi -> error ("No repository type specified");
 		$kiwi -> failed ();

@@ -184,6 +184,7 @@ fi
 if ! mountSystem $imageRootDevice;then
 	systemException "Failed to mount root filesystem" "reboot"
 fi
+validateRootTree
 
 #======================================
 # 10) Get kernel list for local boot

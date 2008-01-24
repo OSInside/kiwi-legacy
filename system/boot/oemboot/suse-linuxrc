@@ -545,6 +545,7 @@ fi
 if ! mountSystem $deviceRoot;then
 	systemException "Failed to mount root filesystem" "reboot"
 fi
+validateRootTree
 
 #======================================
 # 13) get installed kernels

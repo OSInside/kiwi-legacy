@@ -2050,3 +2050,17 @@ function importBranding {
 	fi
 	fi
 }
+
+#======================================
+# validateRootTree
+#--------------------------------------
+function validateRootTree {
+	# /.../
+	# after the root of the system image has been mounted we should
+	# check whether that mount is a valid system tree or not. Therefore
+	# some sanity checks are made here
+	# ----
+	if [ ! -x /sbin/init ];then
+		systemException "/sbin/init no such file or not executable" "reboot"
+	fi
+}

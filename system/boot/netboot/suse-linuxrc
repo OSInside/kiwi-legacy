@@ -547,6 +547,7 @@ runHook premount
 if ! mountSystem;then
 	systemException "Failed to mount root filesystem" "reboot"
 fi
+validateRootTree
 runHook postmount
 
 #======================================
