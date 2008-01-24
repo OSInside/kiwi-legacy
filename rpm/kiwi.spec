@@ -67,7 +67,7 @@ Authors:
     Marcus Schäfer <ms@suse.de>
 
 %package -n kiwi-desc-isoboot
-Requires:     kiwi syslinux
+Requires:     kiwi syslinux mkisofs
 Summary:      OpenSuSE - KIWI image descriptions
 Group:        System
 
