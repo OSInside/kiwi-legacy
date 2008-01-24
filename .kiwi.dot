@@ -12,6 +12,7 @@ digraph kiwi {
 
 	"kiwi-desc-isoboot" -> "kiwi"
 	"kiwi-desc-isoboot" -> "syslinux"
+	"kiwi-desc-isoboot" -> "mkisofs"
 
 	"kiwi-desc-usbboot" -> "kiwi"
 
