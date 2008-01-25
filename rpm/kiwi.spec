@@ -15,7 +15,7 @@ BuildRequires: swig libsatsolver libsatsolver-devel db-devel gcc-c++ libexpat-de
 Requires:      perl perl-XML-LibXML perl-libwww-perl screen coreutils
 Summary:       OpenSuSE - KIWI Image System
 Provides:      kiwi = %version
-Obsoletes:     kiwi2
+Obsoletes:     kiwi2 <= 2.14
 Version:       2.14
 Release:       28
 Group:         System
@@ -36,7 +36,7 @@ Authors:
 Requires:     syslinux
 Summary:      OpenSuSE - KIWI TFTP boot structure
 Provides:     kiwi-pxeboot = %version
-Obsoletes:    kiwi2-pxeboot
+Obsoletes:    kiwi2-pxeboot <= 2.14
 Group:        System
 
 %description -n kiwi-pxeboot
@@ -49,7 +49,7 @@ Authors:
 %package -n kiwi-tools
 Summary:      OpenSuSE - KIWI tools collection
 Provides:     kiwi-tools = %version
-Obsoletes:    kiwi2-tools
+Obsoletes:    kiwi2-tools <= 2.14
 Group:        System
 
 %description -n kiwi-tools
@@ -64,7 +64,7 @@ Authors:
 Requires:     syslinux
 Summary:      OpenSuSE - KIWI TFTP prebuild boot images
 Provides:     kiwi-pxeboot-prebuild = %version
-Obsoletes:    kiwi2-pxeboot-prebuild
+Obsoletes:    kiwi2-pxeboot-prebuild <= 2.14
 Group:        System
 
 %description -n kiwi-pxeboot-prebuild
@@ -78,7 +78,7 @@ Authors:
 Requires:     kiwi syslinux mkisofs
 Summary:      OpenSuSE - KIWI image descriptions
 Provides:     kiwi-desc-isoboot = %version
-Obsoletes:    kiwi2-desc-isoboot
+Obsoletes:    kiwi2-desc-isoboot <= 2.14
 Group:        System
 
 %description -n kiwi-desc-isoboot
@@ -90,7 +90,7 @@ an isoboot image description
 Requires:     kiwi
 Summary:      OpenSuSE - KIWI image descriptions
 Provides:     kiwi-desc-usbboot = %version
-Obsoletes:    kiwi2-desc-usbboot
+Obsoletes:    kiwi2-desc-usbboot <= 2.14
 Group:        System
 
 %description -n kiwi-desc-usbboot
@@ -102,7 +102,7 @@ an usbboot image description
 Requires:     kiwi qemu multipath-tools
 Summary:      OpenSuSE - KIWI image descriptions
 Provides:     kiwi-desc-vmxboot = %version
-Obsoletes:    kiwi2-desc-vmxboot
+Obsoletes:    kiwi2-desc-vmxboot <= 2.14
 Group:        System
 
 %description -n kiwi-desc-vmxboot
@@ -114,7 +114,7 @@ a vmxboot image description
 Requires:     kiwi
 Summary:      OpenSuSE - KIWI image descriptions
 Provides:     kiwi-desc-netboot = %version
-Obsoletes:    kiwi2-desc-netboot
+Obsoletes:    kiwi2-desc-netboot <= 2.14
 Group:        System
 
 %description -n kiwi-desc-netboot
@@ -126,7 +126,7 @@ a netboot image description
 Requires:     kiwi
 Summary:      OpenSuSE - KIWI image descriptions
 Provides:     kiwi-desc-xenboot = %version
-Obsoletes:    kiwi2-desc-xenboot
+Obsoletes:    kiwi2-desc-xenboot <= 2.14
 Group:        System
 
 %description -n kiwi-desc-xenboot
@@ -142,7 +142,7 @@ Authors:
 Requires:     kiwi qemu multipath-tools
 Summary:      OpenSuSE - KIWI image descriptions
 Provides:     kiwi-desc-oemboot = %version
-Obsoletes:    kiwi2-desc-oemboot
+Obsoletes:    kiwi2-desc-oemboot <= 2.14
 Group:        System
 
 %description -n kiwi-desc-oemboot

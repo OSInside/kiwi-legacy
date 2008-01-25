@@ -2220,7 +2220,7 @@ Wed Jul 12 15:58:20 CEST 2006 - ms@suse.de
   3) as the same host as the DHCP server is
 
 -------------------------------------------------------------------
-Thu Jul  6 15:40:18 CEST 2006 - ms@suse.de
+Thu Jul  7 15:40:18 CEST 2006 - ms@suse.de
 
 - added support for LVM in initrd
 - added opensuse installation source in image descriptions
