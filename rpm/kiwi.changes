@@ -1,6 +1,9 @@
 -------------------------------------------------------------------
 Thu Jan 24 16:09:18 CET 2008 - ms@suse.de
 
+- v2.14
+- fixed usb hub detection (#348362)
+- umount USB stick partitions before deployment (#355938)
 - added mkisofs requirement for kiwi-desc-isoboot package
 
 -------------------------------------------------------------------

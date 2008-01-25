@@ -747,6 +747,43 @@ function getSystemMD5Status {
 	echo $SYSTEM_MD5STATUS | cut -f$1 -d:
 }
 #======================================
+# probeUSB
+#--------------------------------------
+function probeUSB {
+	IFS="%"
+	local module=""
+	local stdevs=""
+	local hwicmd="/usr/sbin/hwinfo"
+	for i in \
+        `$hwicmd --usb | grep "Driver [IA]" | 
+        sed -es"@modprobe\(.*\)\"@\1%@" | tr -d "\n"`
+    do
+        if echo $i | grep -q "#0";then
+            module=`echo $i | cut -f2 -d"\"" | tr -d " "`
+			if ! echo $stdevs | grep -q $module;then
+         	   stdevs="$stdevs $module"
+			fi
+        fi
+    done
+	for i in \
+		`$hwicmd --usb-ctrl | grep "Driver [IA]" | 
+		sed -es"@modprobe\(.*\)\"@\1%@" | tr -d "\n"`
+	do
+		if echo $i | grep -q "#0";then
+			module=`echo $i | cut -f2 -d"\"" | tr -d " "`
+			if ! echo $stdevs | grep -q $module;then
+				stdevs="$stdevs $module"
+			fi
+		fi
+	done
+	IFS=$IFS_ORIG
+	stdevs=`echo $stdevs`
+	for module in $stdevs;do
+		Echo "Probing module: $module"
+		modprobe $module >/dev/null
+	done
+}
+#======================================
 # probeDevices
 #--------------------------------------
 function probeDevices {
@@ -793,6 +830,7 @@ function probeDevices {
 	# for details on this crappy call see bug: #250241
 	# ----
 	modprobe ide-disk
+	probeUSB
 }
 #======================================
 # CDDevice

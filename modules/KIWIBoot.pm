@@ -478,6 +478,12 @@ sub setupBootStick {
 	qxx ("umount $loopdir 2>&1");
 	$kiwi -> done();
 	#==========================================
+	# umount stick if mounted by hal
+	#------------------------------------------
+	for (my $i=1;$i<=4;$i++) {
+		qxx ( "umount $stick$i 2>&1" );
+	}
+	#==========================================
 	# Create new partition table on stick
 	#------------------------------------------
 	$kiwi -> info ("Creating partition table on: $stick");
