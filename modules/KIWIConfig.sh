@@ -356,8 +356,14 @@ function baseSetupInPlaceGITRepository {
 	fi
 	pushd /
 	echo /proc > .gitignore
-	echo /sys >> .gitignore
-	echo /dev >> .gitignore
+	local files="
+		/sys /dev /var/log /home /media /var/run /etc/Image*
+		/var/tmp /tmp /var/lock *.lock /image /var/spool /var/cache
+		/var/lib /boot /root /var/adm
+	"
+	for entry in $files;do
+		echo $entry >> .gitignore
+	done
 	git init && git add . && \
 	git commit -m "deployed"
 	popd
