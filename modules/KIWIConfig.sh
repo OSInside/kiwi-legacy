@@ -350,7 +350,7 @@ function baseSetupInPlaceGITRepository {
 	# directory. This process may take some time and you
 	# may expect problems with binary data handling
 	# ----
-	if [ -x /usr/bin/git ];then
+	if [ ! -x /usr/bin/git ];then
 		echo "git not installed... skipped"
 		return
 	fi
