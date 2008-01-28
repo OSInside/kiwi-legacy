@@ -128,6 +128,7 @@ function systemException {
 	# by an action. Possible actions are reboot, wait
 	# and opening a shell
 	# ----
+	set +x
 	local what=$2
 	if [ $what = "reboot" ];then
 		if cat /proc/cmdline | grep -qi "kiwidebug=1";then
@@ -137,7 +138,8 @@ function systemException {
 	Echo "$1"
 	case "$what" in
 	"reboot")
-		Echo "rebootException: reboot in 60 sec..."; sleep 60
+		Echo "rebootException: error consoles at Alt-F3/F4"
+		Echo "rebootException: reboot in 120 sec..."; sleep 120
 		/sbin/reboot -f -i >/dev/null
 	;;
 	"wait")

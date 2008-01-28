@@ -3,6 +3,7 @@ Sun Jan 27 11:44:33 CET 2008 - ms@suse.de
 
 - v2.15
 - fixed git installed check and ignore list in KIWIConfig.sh
+- change XML schema to allow user defined order of elements
 
 -------------------------------------------------------------------
 Thu Jan 24 16:09:18 CET 2008 - ms@suse.de
