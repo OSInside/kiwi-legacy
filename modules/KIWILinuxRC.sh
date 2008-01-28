@@ -18,6 +18,7 @@
 #======================================
 # Exports (General)
 #--------------------------------------
+export ELOG_FILE=/var/log/boot.kiwi
 export ELOG_CONSOLE=/dev/tty3
 export KLOG_CONSOLE=4
 export PARTITIONER=sfdisk
@@ -268,8 +269,13 @@ function errorLogStart {
 	# Log all errors up to now to /dev/tty3
 	# ----
 	Echo "Error logging enabled on $ELOG_CONSOLE"
-	echo "Error Log:" >$ELOG_CONSOLE
-	exec 2>$ELOG_CONSOLE
+	if [ ! -f $ELOG_FILE ];then
+		echo "KIWI Log:" >$ELOG_FILE
+	else
+		echo "KIWI PreInit Log" >>$ELOG_FILE
+	fi
+	setctsid -f $ELOG_CONSOLE /bin/bash -c "tail -f $ELOG_FILE" &
+	exec 2>>$ELOG_FILE
 	set -x 1>&2
 }
 #======================================
@@ -298,6 +304,7 @@ function udevKill {
 	umount -t devpts /mnt/dev/pts
 	mkdir -p /mnt/var/log
 	cp /mnt/dev/shm/initrd.msg /mnt/var/log/boot.msg
+	cp -f /var/log/boot.kiwi /mnt/var/log/boot.kiwi
 }
 #======================================
 # startBlogD
