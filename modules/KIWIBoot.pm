@@ -75,7 +75,7 @@ sub new {
 			my $result = $? >> 8;
 			if ($result == 0) {
 				$syszip = -s $system;
-				$syszip+= 20 * 1024 * 1024;
+				$syszip+= 30 * 1024 * 1024;
 			} else {
 				$syszip = 0;
 			}

@@ -359,7 +359,7 @@ function baseSetupInPlaceGITRepository {
 	local files="
 		/sys /dev /var/log /home /media /var/run /etc/Image*
 		/var/tmp /tmp /var/lock *.lock /image /var/spool /var/cache
-		/var/lib /boot /root /var/adm
+		/var/lib /boot /root /var/adm /base-system
 	"
 	for entry in $files;do
 		echo $entry >> .gitignore
