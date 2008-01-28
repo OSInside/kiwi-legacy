@@ -450,6 +450,7 @@ if [ $LOCAL_BOOT = "no" ];then
 			# installed
 			# ----
 			swapsize=50
+			swapXMBytes=$swapsize
 			disk3MBytes=`expr $diskXMBytes - $disk1MBytes - $disk2MBytes`
 			disk3MBytes=`expr $disk3MBytes - $swapXMBytes`
 		fi

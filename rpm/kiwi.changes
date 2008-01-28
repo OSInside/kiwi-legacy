@@ -5,6 +5,7 @@ Sun Jan 27 11:44:33 CET 2008 - ms@suse.de
 - fixed git installed check and ignore list in KIWIConfig.sh
 - change XML schema to allow user defined order of elements
 - make /var/log/boot.kiwi available in system image
+- fixed oemboot for compressed images on small disks
 
 -------------------------------------------------------------------
 Thu Jan 24 16:09:18 CET 2008 - ms@suse.de
