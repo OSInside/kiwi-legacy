@@ -571,7 +571,7 @@ if [ $LOCAL_BOOT = "no" ];then
 	updateSwapDeviceFstab /config $deviceSwap
 	if [ -z "$UNIONFS_CONFIG" ]; then
 		echo "$deviceRoot /      $FSTYPE defaults 0 0" >> /config/etc/fstab
-		if [ `ls /mnt/home/ | wc -l` != 0]; then
+		if [ `ls /mnt/home/ | wc -l` != 0 ]; then
 			Echo "Found non empty home/ directory !"
 			Echo "Moving home/ data to newly created home partition $deviceHome"
 			mount $deviceHome /mnt/mnt && mv /mnt/home/* /mnt/mnt
