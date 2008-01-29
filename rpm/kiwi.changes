@@ -2,6 +2,7 @@
 Sun Jan 27 11:44:33 CET 2008 - ms@suse.de
 
 - v2.15
+- fixed cleanup function call when iso:// type is used (#356928)
 - fixed git installed check and ignore list in KIWIConfig.sh
 - change XML schema to allow user defined order of elements
 - make /var/log/boot.kiwi available in system image

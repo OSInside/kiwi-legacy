@@ -129,9 +129,25 @@ sub new {
 		$sourceChannel{public}{$channel}  = \@public_options;
 		$count++;
 	}
+	#==========================================
+	# Store object data
+	#------------------------------------------
+	$this->{kiwi}          = $kiwi;
+	$this->{sourceChannel} = \%sourceChannel;
+	$this->{xml}           = $xml;
+	$this->{imageDesc}     = $imageDesc;
+	$this->{selfRoot}      = $selfRoot;
+	$this->{baseSystem}    = $baseSystem;
+	$this->{useRoot}       = $useRoot;
+	$this->{addPacks}      = $addPacks;
+	$this->{baseRoot}      = $baseRoot;
+	#==========================================
+	# check channel count
+	#------------------------------------------
 	if ($count == 1) {
 		$kiwi -> error  ("No Channels left");
 		$kiwi -> failed ();
+		$this -> cleanMount();
 		return undef;
 	}
 	#==========================================
@@ -145,6 +161,7 @@ sub new {
 	if ( ! defined $root ) {
 		$kiwi -> error ("Couldn't create root directory: $!");
 		$kiwi -> failed ();
+		$this -> cleanMount();
 		return undef;
 	}
 	#==========================================
@@ -163,6 +180,7 @@ sub new {
 			$overlay -> resetOverlay();
 		}
 		rmdir $root[1];
+		$this -> cleanMount();
 		return undef;
 	}
 	$kiwi -> note ($pmgr);
@@ -178,22 +196,14 @@ sub new {
 			$overlay -> resetOverlay();
 		}
 		rmdir $root[1];
+		$this -> cleanMount();
 		return undef;
 	}
 	#==========================================
 	# Store object data
 	#------------------------------------------
-	$this->{kiwi}          = $kiwi;
-	$this->{sourceChannel} = \%sourceChannel;
-	$this->{xml}           = $xml;
-	$this->{imageDesc}     = $imageDesc;
-	$this->{selfRoot}      = $selfRoot;
-	$this->{baseSystem}    = $baseSystem;
-	$this->{useRoot}       = $useRoot;
 	$this->{root}          = $root;
 	$this->{manager}       = $manager;
-	$this->{addPacks}      = $addPacks;
-	$this->{baseRoot}      = $baseRoot;
 	$this->{overlay}       = $overlay;
 	return $this;
 }
