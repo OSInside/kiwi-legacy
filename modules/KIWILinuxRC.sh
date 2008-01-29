@@ -475,7 +475,7 @@ function setupBootLoaderGrub {
 	#======================================
 	# check for UNIONFS_CONFIG
 	#--------------------------------------
-	if [ ! -z "$UNIONFS_CONFIG" ]; then
+	if [ ! -z "$UNIONFS_CONFIG" ] && [ $gnum -gt 0 ]; then
 		rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
 		gnum=`echo $rwDevice | sed -e "s/\/dev.*\([0-9]\)/\\1/"`
 		gnum=`expr $gnum - 1`
@@ -546,9 +546,6 @@ function setupBootLoaderGrub {
 				echo -n " module /boot/$kernel"          >> $menu
 				echo -n " root=$rdev $console"           >> $menu
 				echo -n " vga=0x314 splash=silent"       >> $menu
-				if [ ! -z "$swap" ];then
-					echo -n " resume=$swap"              >> $menu
-				fi
 				echo -n " $KIWI_INITRD_PARAMS"           >> $menu
 				echo -n " $KIWI_KERNEL_OPTIONS showopts" >> $menu
 				echo -n " ide=nodma apm=off acpi=off"    >> $menu
@@ -559,9 +556,6 @@ function setupBootLoaderGrub {
 				echo -n " kernel $gdev/boot/$kernel"     >> $menu
 				echo -n " root=$rdev $console"           >> $menu
 				echo -n " vga=0x314 splash=silent"       >> $menu
-				if [ ! -z "$swap" ];then
-					echo -n " resume=$swap"              >> $menu
-				fi
 				echo -n " $KIWI_INITRD_PARAMS"           >> $menu
 				echo -n " $KIWI_KERNEL_OPTIONS showopts" >> $menu
 				echo -n " ide=nodma apm=off acpi=off"    >> $menu

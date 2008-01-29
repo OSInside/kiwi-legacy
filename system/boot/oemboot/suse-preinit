@@ -60,7 +60,8 @@ else
 		rm -f vmlinuz && ln -s linux.vmx  vmlinuz
 		rm -f initrd  && ln -s initrd.vmx initrd
 		popd &>/dev/null
-		setupBootLoaderGrub / / 0 ${deviceDisk}1 OEM
+		Echo "Creating grub configuration for unified system"
+		setupBootLoaderGrub / / 0 ${deviceDisk}2 OEM $deviceSwap
 	else
 		Echo "Failed to mount boot partition"
 		Echo "Can't create grub configuration"
@@ -73,6 +74,7 @@ fi
 #--------------------------------------
 if [ $grubOK = 1 ];then
 	installBootLoaderGrub
+	umount /kiwiboot 2>&1 >/dev/null
 fi
 
 #======================================

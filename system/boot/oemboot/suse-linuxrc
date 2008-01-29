@@ -112,43 +112,41 @@ if [ ! -f $VMX_SYSTEM ];then
 	# partition is a squashfs partition and change the root
 	# partition name accordingly
 	# ----
-	if [ $LOCAL_BOOT = "no" ];then
-		Echo "Searching for disk and root partition"
-		USBStickDevice
-		if [ $stickFound = 0 ];then
-			deviceFound=0
-			for deviceRoot in /dev/sda1 /dev/hda1;do
-				if mount $deviceRoot /mnt &>/dev/null;then
-					deviceFound=1
-					umount /mnt
-					break
-				fi
-			done
-			if [ $deviceFound = 0 ];then
-				systemException \
-					"Couldn't find any disk device... abort" \
-				"reboot"
+	Echo "Searching for disk and root partition"
+	USBStickDevice
+	if [ $stickFound = 0 ];then
+		deviceFound=0
+		for deviceRoot in /dev/sda1 /dev/hda1;do
+			if mount $deviceRoot /mnt &>/dev/null;then
+				deviceFound=1
+				umount /mnt
+				break
 			fi
-			export deviceDisk=`echo $deviceRoot | tr -d [0-9]`
-			export deviceSwap="$deviceDisk"2
-			export deviceHome="$deviceDisk"3
-		else
-			Echo "USB stick found, prefer root on stick"
-			export deviceDisk=$stickRoot
-			export deviceSwap="$deviceDisk"2
-			export deviceHome="$deviceDisk"3
+		done
+		if [ $deviceFound = 0 ];then
+			systemException \
+				"Couldn't find any disk device... abort" \
+			"reboot"
 		fi
-		probeFileSystem "$deviceDisk"2
-		if test "$FSTYPE" = "squashfs";then
-			Echo "Unified system detected, adapting root partition"
-			export UNIONFS_CONFIG="$deviceDisk"3,"$deviceDisk"2,aufs
-			export deviceRoot="$deviceDisk"2
-			export deviceSwap="$deviceDisk"4
-		else
-			export deviceRoot="$deviceDisk"1
-		fi
-		Echo "Using root partition $deviceRoot on disk $deviceDisk"
+		export deviceDisk=`echo $deviceRoot | tr -d [0-9]`
+		export deviceSwap="$deviceDisk"2
+		export deviceHome="$deviceDisk"3
+	else
+		Echo "USB stick found, prefer root on stick"
+		export deviceDisk=$stickRoot
+		export deviceSwap="$deviceDisk"2
+		export deviceHome="$deviceDisk"3
 	fi
+	probeFileSystem "$deviceDisk"2
+	if test "$FSTYPE" = "squashfs";then
+		Echo "Unified system detected, adapting root partition"
+		export UNIONFS_CONFIG="$deviceDisk"3,"$deviceDisk"2,aufs
+		export deviceRoot="$deviceDisk"2
+		export deviceSwap="$deviceDisk"4
+	else
+		export deviceRoot="$deviceDisk"1
+	fi
+	Echo "Using root partition $deviceRoot on disk $deviceDisk"
 else
 	# /.../
 	# installation mode: find a usable disk to install the image
@@ -487,6 +485,7 @@ if [ $LOCAL_BOOT = "no" ];then
 			fi
 			echo $cmd >> $input
 		done
+		Echo "Repartition the disk according to current geometry"
 		fdisk $deviceDisk < $input >/dev/null 2>&1
 		if test $? != 0; then
 			systemException "Failed to create partition table" "reboot"
@@ -497,6 +496,7 @@ if [ $LOCAL_BOOT = "no" ];then
 		export deviceBoot="$deviceDisk"1
 		export deviceRoot="$deviceDisk"2
 		export deviceSwap="$deviceDisk"4
+		export deviceIOWR="$deviceDisk"3
 
 		#======================================
 		# 10.5 Activate swap space
@@ -504,6 +504,14 @@ if [ $LOCAL_BOOT = "no" ];then
 		Echo "Activating swap space on $deviceSwap"
 		if ! mkswap $deviceSwap >/dev/null 2>&1;then
 			systemException "Failed to create swap signature" "reboot"
+		fi
+
+		#======================================
+		# 10.6 create filesystem for writing
+		#--------------------------------------
+		Echo "Creating filesystem for RW data on $deviceIOWR..."
+		if ! mke2fs $deviceIOWR >/dev/null;then
+			systemException "Failed to create ext2 filesystem" "reboot"
 		fi
 	fi
 fi
@@ -575,7 +583,10 @@ if [ $LOCAL_BOOT = "no" ];then
 		mkdir -p /config/kiwiboot
 		echo "$deviceBoot /kiwiboot ext2 defaults 0 0"  >> /config/etc/fstab
 	fi
-	setupBootLoaderGrub /mnt /config 1 ${deviceDisk}2 OEM $deviceSwap
+	if [ -z "$UNIONFS_CONFIG" ]; then
+		Echo "Creating grub configuration"
+		setupBootLoaderGrub /mnt /config 1 ${deviceDisk}2 OEM $deviceSwap
+	fi
 	setupKernelModules /config
 fi
 
@@ -603,9 +614,11 @@ umountSystemFilesystems
 #======================================
 # 18) copy initrd files to image
 #--------------------------------------
-importBranding
-cp /preinit /mnt
-cp /include /mnt
+if [ $LOCAL_BOOT = "no" ];then
+	importBranding
+	cp /preinit /mnt
+	cp /include /mnt
+fi
 
 #======================================
 # 19) kill boot shell
