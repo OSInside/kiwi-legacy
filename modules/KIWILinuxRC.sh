@@ -2006,7 +2006,7 @@ function fetchFile {
 				atftp \
 					--option "multicast $multicast"  \
 					--option "blksize $imageBlkSize" \
-					-g -r $path -l $dest $host 2>&1 > $TRANSFER_ERRORS_FILE
+					-g -r $path -l $dest $host &> $TRANSFER_ERRORS_FILE
 			fi
 			loadCode=$?
 			;;
