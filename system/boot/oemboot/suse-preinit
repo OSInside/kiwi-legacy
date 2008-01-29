@@ -75,7 +75,7 @@ fi
 if [ $grubOK = 1 ];then
 	installBootLoaderGrub
 	if [ -d /kiwiboot ];then
-		umount /kiwiboot &>/dev/null
+		umount -l $deviceBoot &>/dev/null
 	fi
 fi
 
