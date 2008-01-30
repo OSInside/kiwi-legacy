@@ -797,11 +797,8 @@ sub setupUpgrade {
 	# ensconce
 	#------------------------------------------
 	if ($manager eq "ensconce") {
-		# TODO
-		$kiwi -> failed ();
-		$kiwi -> error  ("*** not implemeted ***");
-		$kiwi -> failed ();
-		return undef;
+		# Ignored for ensconce, always report package as installed
+		return $this;
 	}
 	return $this -> setupScreenCall();
 }
