@@ -1511,7 +1511,7 @@ Thu Apr  5 00:35:36 CEST 2007 - ms@suse.de
   netboot/xennetboot and usbboot
 
 -------------------------------------------------------------------
-Tue Apr  3 17:14:05 CEST 2007 - ms@suse.de
+Tue Apr  4 17:14:05 CEST 2007 - ms@suse.de
 
 - v1.24
 - split image code from image descriptions
