@@ -119,6 +119,8 @@ sub new {
 			$srckey = "path";
 			$srcopt = "recursive=True";
 		}
+		$private_url = "'".$private_url."'";
+		$publics_url = "'".$publics_url."'";
 		my @private_options = ("type=$type","name=$channel",
 			"$srckey=$private_url",$srcopt,"-y"
 		);
@@ -704,7 +706,7 @@ sub setupMount {
 	foreach my $chl (keys %{$this->{sourceChannel}{private}}) {
 		my @opts = @{$this->{sourceChannel}{private}{$chl}};
 		my $path = $opts[2];
-		if ($path =~ /=$baseSystem\/(.*)$/) {
+		if ($path =~ /='$baseSystem\/(.*)'$/) {
 			$path = $1;
 		} else {
 			next;

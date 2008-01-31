@@ -447,12 +447,12 @@ sub setupInstallationSource {
 				$this -> checkExclusiveLock();
 				$this -> setLock();
 				$kiwi -> info ("Adding local smart channel: $chl");
-				$data = qxx ("bash -c \"$cmds $chl @opts 2>&1\"");
+				$data = qxx ("$cmds $chl @opts 2>&1");
 				$code = $? >> 8;
 				$this -> freeLock();
 			} else {
 				$kiwi -> info ("Adding image smart channel: $chl");
-				$data = qxx ("chroot $root bash -c \"$cmds $chl @opts 2>&1\"");
+				$data = qxx ("chroot $root $cmds $chl @opts 2>&1");
 				$code = $? >> 8;
 			}
 			if ($code != 0) {
@@ -508,12 +508,12 @@ sub setupInstallationSource {
 				$this -> checkExclusiveLock();
 				$this -> setLock();
 				$kiwi -> info ("Adding local zypper service: $alias");
-				$data = qxx ("bash -c \"@zypper --root $root $sadd 2>&1\"");
+				$data = qxx ("@zypper --root $root $sadd 2>&1");
 				$code = $? >> 8;
 				$this -> freeLock();
 			} else {
 				$kiwi -> info ("Adding image zypper service: $alias");
-				$data = qxx ("chroot $root bash -c \"@zypper $sadd 2>&1\"");
+				$data = qxx ("chroot $root @zypper $sadd 2>&1");
 				$code = $? >> 8;
 			}
 			if ($code != 0) {
@@ -735,13 +735,18 @@ sub setupUpgrade {
 		print $fd "chroot $root smart update\n";
 		if (defined $addPacks) {
 			my @addonPackages = @{$addPacks};
-			print $fd "chroot $root smart upgrade -y & ";
+			print $fd "chroot $root smart channel --show &\n";
+			print $fd "SPID=\$!;wait \$SPID\n";
+			print $fd "test \$? = 0 && chroot $root smart upgrade -y ";
+			print $fd "|| false &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
 			print $fd "test \$? = 0 && chroot $root smart install -y ";
-			print $fd "@addonPackages &\n";
+			print $fd "@addonPackages || false &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
 		} else {
-			print $fd "chroot $root smart upgrade -y &\n";
+			print $fd "chroot $root smart channel --show &\n";
+			print $fd "SPID=\$!;wait \$SPID\n";
+			print $fd "test \$? = 0 && chroot $root smart upgrade -y &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
 		}
 		print $fd "echo \$? > $screenCall.exit\n";
@@ -856,7 +861,9 @@ sub setupRootSystem {
 			print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 			print $fd "trap clean INT TERM\n";
 			print $fd "touch $lock\n";
-			print $fd "@smart update @channelList &\n";
+			print $fd "@smart channel --show &\n";
+			print $fd "SPID=\$!;wait \$SPID\n";
+			print $fd "test \$? = 0 && @smart update @channelList || false &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
 			print $fd "test \$? = 0 && @smart install @packs @installOpts &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
@@ -897,7 +904,9 @@ sub setupRootSystem {
 			print $fd "function clean { kill \$SPID;";
 			print $fd "echo 1 > $screenCall.exit;exit 1; }\n";
 			print $fd "trap clean INT TERM\n";
-			print $fd "chroot $root smart update &\n";
+			print $fd "chroot $root smart channel --show &\n";
+			print $fd "SPID=\$!;wait \$SPID\n";
+			print $fd "test \$? = 0 && chroot $root smart update || false &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
 			print $fd "test \$? = 0 && chroot $root smart install @install ";
 			print $fd "@installOpts &\n";
