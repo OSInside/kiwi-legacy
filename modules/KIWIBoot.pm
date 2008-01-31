@@ -1477,10 +1477,10 @@ sub setupBootDisk {
 	if ($syszip > 0) {
 		$root = "/dev/mapper".$dmap."p2";
 	}
+	$kiwi -> done();
 	#==========================================
 	# Dump system image on virtual disk
 	#------------------------------------------
-	$kiwi -> done();
 	if (! $haveTree) {
 		$kiwi -> info ("Dumping system image on virtual disk");
 		$status = qxx ("dd if=$system of=$root bs=32k 2>&1");
@@ -1493,6 +1493,30 @@ sub setupBootDisk {
 			return undef;
 		}
 		$kiwi -> done();
+		$result = 0;
+		SWITCH: for ($fstype) {
+			/^ext\d/    && do {
+				$kiwi -> info ("Resizing $fstype filesystem");
+				$status = qxx ("resize2fs -f -F -p $root 2>&1");
+				$result = $? >> 8;
+				$kiwi -> done();
+				last SWITCH;
+			};
+			/^reiserfs/ && do {
+				$kiwi -> info ("Resizing $fstype filesystem");
+				$status = qxx ("resize_reiserfs $root 2>&1");
+				$result = $? >> 8;
+				$kiwi -> done();
+				last SWITCH;
+			}
+		};
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't resize $fstype filesystem: $status");
+			$kiwi -> failed ();
+			$this -> cleanTmp ();
+			return undef;
+		}
 	} else {
 		#==========================================
 		# Create filesystem on system image part.

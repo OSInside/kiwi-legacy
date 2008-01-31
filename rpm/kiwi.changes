@@ -2,9 +2,11 @@
 Thu Jan 31 15:24:07 CET 2008 - ms@suse.de
 
 - v2.17
+- prevent resizing and checking of the root filesystem in case
+  of a vmx image type. These adaptions are now made in KIWIBoot.pm
 - fixed URL problems if special characters are used. The bash
   we use to add the channels evaluates the data which it shouldn't do 
-- add smart channel info to log file
+- add smart channel information to log file
 
 -------------------------------------------------------------------
 Wed Jan 30 14:30:09 CET 2008 - ms@suse.de
