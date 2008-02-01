@@ -2,6 +2,7 @@
 Fri Feb  1 14:28:30 CET 2008 - ms@suse.de
 
 - v2.18
+- fixed oemboot boot image descriptions for SLE10 (#355963)
 - added ISO boot catalog relocation function. It's important that
   the boot catalog is in one of the first sectors. Unfortunately
   mkisofs places it somewhere which may lead to boot problems on
