@@ -482,8 +482,8 @@ sub setupInstallationSource {
 				# Adapt URI parameter
 				#------------------------------------------
 				if (($key eq "baseurl") || ($key eq "path")) {
-					if ($val =~ /^\//) {
-						$val = "file://$val";
+					if ($val =~ /^'\//) {
+						$val =~ s/^'(.*)'$/'file:\/\/\1'/
 					}
 					push (@zopts,$val);
 				}
