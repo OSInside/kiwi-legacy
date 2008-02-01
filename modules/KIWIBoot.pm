@@ -75,7 +75,7 @@ sub new {
 			my $result = $? >> 8;
 			if ($result == 0) {
 				$syszip = -s $system;
-				$syszip+= 30 * 1024 * 1024;
+				$syszip+= 50 * 1024 * 1024;
 			} else {
 				$syszip = 0;
 			}
@@ -137,7 +137,7 @@ sub new {
 			$vmsize = $kernelSize + $initrdSize + $syszip;
 		} else {
 			$vmsize = $kernelSize + $initrdSize + $systemSize;
-			$vmsize+= $vmsize * 0.3 # and 30% free space
+			$vmsize+= $vmsize * 0.3; # and 30% free space
 		}
 		$vmsize = $vmsize / 1024 / 1024;
 		$vmsize = int $vmsize;
@@ -145,8 +145,8 @@ sub new {
 	}
 	#$kiwi -> done ();
 	if ($syszip) {
-		$syszip = $syszip / 1024 / 1024;
-		$syszip = int $syszip;
+		$syszip = $syszip / 1048576;
+		$syszip = sprintf ("%.0f", $syszip);
 	}
 	my $arch = qxx ("uname -m"); chomp $arch;
 	#==========================================
@@ -1405,77 +1405,122 @@ sub setupBootDisk {
 	# create virtual disk
 	#------------------------------------------
 	$kiwi -> info ("Creating virtual disk...");
-	if (! defined $system) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("No system image given");
-		$kiwi -> failed ();
-		$this -> cleanTmp ();
-		return undef;
-	}	
-	$status = qxx ("qemu-img create $diskname $vmsize 2>&1");
-	$result = $? >> 8;
-	if ($result != 0) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Failed creating virtual disk: $status");
-		$kiwi -> failed ();
-		$this -> cleanTmp ();
-		return undef;
-	}
-	$status = qxx ( "/sbin/losetup $loop $diskname 2>&1" );
-	$result = $? >> 8;
-	if ($result != 0) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Failed binding virtual disk: $status");
-		$kiwi -> failed ();
-		$this -> cleanTmp ();
-		return undef;
-	}
-	#==========================================
-	# create virtual disk partition
-	#------------------------------------------
-	if (! open (FD,"|/sbin/fdisk $loop &>/dev/null")) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Failed creating virtual partition");
-		$kiwi -> failed ();
-		$this -> cleanLoop ();
-		return undef;
-	}
-	my @commands;
-	if ($syszip > 0) {
-		# xda1 boot / xda2 ro / xda3 rw
-		@commands = (
-			"n","p","1",".","+".$sysird."M",
-			"n","p","2",".","+".$syszip."M",
-			"n","p","3",".",".","w","q"
-		);
-	} else {
-		# xda1 rw
-		@commands = ( "n","p","1",".",".","w","q");
-	}
-	foreach my $cmd (@commands) {
-		if ($cmd eq ".") {
-			print FD "\n";
-		} else {
-			print FD "$cmd\n";
+	my $dmap; # device map
+	my $root; # root device
+	while (1) {
+		if (! defined $system) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("No system image given");
+			$kiwi -> failed ();
+			$this -> cleanTmp ();
+			return undef;
+		}	
+		$status = qxx ("qemu-img create $diskname $vmsize 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Failed creating virtual disk: $status");
+			$kiwi -> failed ();
+			$this -> cleanTmp ();
+			return undef;
 		}
-	}
-	close FD;
-	#==========================================
-	# setup device mapper
-	#------------------------------------------
-	$status = qxx ( "/sbin/kpartx -a $loop 2>&1" );
-	$result = $? >> 8;
-	if ($result != 0) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Failed mapping virtual partition: $status");
-		$kiwi -> failed ();
-		$this -> cleanLoop ();
-		return undef;
-	}
-	my $dmap = $loop; $dmap =~ s/dev\///;
-	my $root = "/dev/mapper".$dmap."p1";
-	if ($syszip > 0) {
-		$root = "/dev/mapper".$dmap."p2";
+		#==========================================
+		# setup loop device for virtual disk
+		#------------------------------------------
+		$status = qxx ( "/sbin/losetup $loop $diskname 2>&1" );
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Failed binding virtual disk: $status");
+			$kiwi -> failed ();
+			$this -> cleanTmp ();
+			return undef;
+		}
+		#==========================================
+		# create virtual disk partition
+		#------------------------------------------
+		if (! open (FD,"|/sbin/fdisk $loop &>/dev/null")) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Failed creating virtual partition");
+			$kiwi -> failed ();
+			$this -> cleanLoop ();
+			return undef;
+		}
+		my @commands;
+		if ($syszip > 0) {
+			# xda1 boot / xda2 ro / xda3 rw
+			@commands = (
+				"n","p","1",".","+".$sysird."M",
+				"n","p","2",".","+".$syszip."M",
+				"n","p","3",".",".","w","q"
+			);
+		} else {
+			# xda1 rw
+			@commands = ( "n","p","1",".",".","w","q");
+		}
+		foreach my $cmd (@commands) {
+			if ($cmd eq ".") {
+				print FD "\n";
+			} else {
+				print FD "$cmd\n";
+			}
+		}
+		close FD;
+		#==========================================
+		# setup device mapper
+		#------------------------------------------
+		$status = qxx ( "/sbin/kpartx -a $loop 2>&1" );
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Failed mapping virtual partition: $status");
+			$kiwi -> failed ();
+			$this -> cleanLoop ();
+			return undef;
+		}
+		$dmap = $loop; $dmap =~ s/dev\///;
+		$root = "/dev/mapper".$dmap."p1";
+		if ($syszip > 0) {
+			$root = "/dev/mapper".$dmap."p2";
+		}
+		#==========================================
+		# check partition sizes
+		#------------------------------------------
+		if ($syszip > 0) {
+			my $sizeOK = 1;
+			my $systemPSize = qxx ("sfdisk -s /dev/mapper".$dmap."p2");
+			my $systemISize = -s $system; $systemISize /= 1024;
+			chomp $systemPSize;
+			if ($systemPSize < $systemISize) {
+				$syszip += 10;
+				$sizeOK = 0;
+			}
+			my $initrdPSize = qxx ("sfdisk -s /dev/mapper".$dmap."p1"); 
+			my $initrdISize = -s $sysname; $initrdISize /= 1024;
+			chomp $initrdPSize;
+			if ($initrdPSize < $initrdISize) {
+				$sysird += 1;
+				$sizeOK = 0;
+			}
+			if (! $sizeOK) {
+				#==========================================
+				# bad partition alignment try again
+				#------------------------------------------
+				sleep (1); qxx ("/sbin/kpartx  -d $loop");
+				sleep (1); qxx ("/sbin/losetup -d $loop"); 
+			} else {
+				#==========================================
+				# looks good go for it
+				#------------------------------------------
+				last;
+			}
+		} else {
+			#==========================================
+			# entire disk used
+			#------------------------------------------
+			last;
+		}
+		$kiwi -> note (".");
 	}
 	$kiwi -> done();
 	#==========================================

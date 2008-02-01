@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Fri Feb  1 14:28:30 CET 2008 - ms@suse.de
+
+- v2.18
+- added post partition size check for virtual disk images. Due to
+  alignment effects a partition may be smaller than the image it should
+  store. The added size check in KIWIBoot.pm repeats the partition
+  setup until the image fits in
+
+-------------------------------------------------------------------
 Thu Jan 31 15:24:07 CET 2008 - ms@suse.de
 
 - v2.17
