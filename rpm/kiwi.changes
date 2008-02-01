@@ -2,6 +2,11 @@
 Fri Feb  1 14:28:30 CET 2008 - ms@suse.de
 
 - v2.18
+- added ISO boot catalog relocation function. It's important that
+  the boot catalog is in one of the first sectors. Unfortunately
+  mkisofs places it somewhere which may lead to boot problems on
+  some (not all) hardware. The relocation code will move the boot
+  catalog to the first possible sector
 - added post partition size check for virtual disk images. Due to
   alignment effects a partition may be smaller than the image it should
   store. The added size check in KIWIBoot.pm repeats the partition

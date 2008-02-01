@@ -1220,6 +1220,10 @@ sub createImageLiveCD {
 		}
 		return undef;
 	}
+	$kiwi -> done();
+	if (! relocateCatalog ($this,$name)) {
+		return undef;
+	}
 	#==========================================
 	# remove tmpdir with boot tree
 	#------------------------------------------
@@ -1227,7 +1231,6 @@ sub createImageLiveCD {
 		qxx ("rm -rf $main::RootTree");
 		qxx ("rm -rf $tmpdir");
 	}
-	$kiwi -> done();
 	return $this;
 }
 

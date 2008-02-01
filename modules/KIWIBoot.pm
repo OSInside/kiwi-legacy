@@ -19,6 +19,11 @@ package KIWIBoot;
 #==========================================
 # Modules
 #------------------------------------------
+require Exporter;
+
+#==========================================
+# Modules
+#------------------------------------------
 use strict;
 use KIWILog;
 use FileHandle;
@@ -26,6 +31,12 @@ use File::Basename;
 use File::Spec;
 use Math::BigFloat;
 use KIWIQX;
+
+#==========================================
+# Exports
+#------------------------------------------
+our @ISA    = qw (Exporter);
+our @EXPORT = qw (relocateCatalog);
 
 #==========================================
 # Constructor
@@ -829,6 +840,9 @@ sub setupInstallCD {
 		return undef;
 	}
 	$kiwi -> done ();
+	if (! $this -> relocateCatalog ($name)) {
+		return undef;
+	}
 	#==========================================
 	# Clean tmp
 	#------------------------------------------
@@ -2075,6 +2089,113 @@ sub buildMD5Sum {
 		$file =~ s/raw$/md5/;
 	}
 	qxx ("echo \"$sum $blocks $blocksize\" > $file");
+	$kiwi -> done();
+	return $this;
+}
+
+#==========================================
+# relocateCatalog
+#------------------------------------------
+sub relocateCatalog {
+	# ...
+	# mkisofs/genisoimage leave one sector empty (or fill it with
+	# version info if the ISODEBUG environment variable is set) before
+	# starting the path table. We use this space to move the boot
+	# catalog there. It's important that the boot catalog is at the
+	# beginning of the media to be able to boot on any machine
+	# ---
+	my $this = shift;
+	my $iso  = shift;
+	my $kiwi = $this->{kiwi};
+	$kiwi -> info ("Relocating boot catalog from sector ");
+	sub read_sector {
+		my $buf;
+		if (! seek ISO, $_[0] * 0x800, 0) {
+			return undef;
+		}
+		if (sysread(ISO, $buf, 0x800) != 0x800) {
+			return undef;
+		}
+		return $buf;
+	}
+	sub write_sector {
+		if (! seek ISO, $_[0] * 0x800, 0) {
+			return undef;
+		}
+		if (syswrite(ISO, $_[1], 0x800) != 0x800) {
+			return undef;
+		}
+	}
+	if (! open ISO, "+<$iso") {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Failed opening iso file: $iso: $!");
+		$kiwi -> failed ();
+		return undef;
+	}
+	my $vol_descr = read_sector 0x10;
+	my $vol_id = substr($vol_descr, 0, 7);
+	if ($vol_id ne "\x01CD001\x01") {
+		$kiwi -> failed ();
+		$kiwi -> error  ("No iso9660 filesystem");
+		$kiwi -> failed ();
+		return undef;
+	}
+	my $path_table = unpack "V", substr($vol_descr, 0x08c, 4);
+	if ($path_table < 0x11) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Strange path table location: $path_table");
+		$kiwi -> failed ();
+		return undef;
+	}
+	my $eltorito_descr = read_sector 0x11;
+	my $eltorito_id = substr($eltorito_descr, 0, 0x1e);
+	if ($eltorito_id ne "\x00CD001\x01EL TORITO SPECIFICATION") {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Given iso is not bootable");
+		$kiwi -> failed ();
+		return undef;
+	}
+	my $boot_catalog = unpack "V", substr($eltorito_descr, 0x47, 4);
+	if ($boot_catalog < 0x12) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Strange boot catalog location: $boot_catalog");
+		$kiwi -> failed ();
+		return undef;
+	}
+	if ($boot_catalog == $path_table - 1) {
+		$kiwi -> skipped ();
+		$kiwi -> info ("Boot catalog already relocated");
+		$kiwi -> done ();
+		return $this;
+	}
+	my $vol_descr2 = read_sector $path_table - 2;
+	my $vol_id2 = substr($vol_descr2, 0, 7);
+	if ($vol_id2 ne "\xffCD001\x01") {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Unexpected layout");
+		$kiwi -> failed ();
+		return undef;
+	}
+	my $version_descr = read_sector $path_table - 1;
+	if (
+		($version_descr ne ("\x00" x 0x800)) &&
+		(substr($version_descr, 0, 4) ne "MKI ")
+	) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Unexpected layout");
+		$kiwi -> failed ();
+		return undef;
+	}
+	my $boot_catalog_data = read_sector $boot_catalog;
+	#==========================================
+	# now reloacte to $path_table - 1
+	#------------------------------------------
+	substr($eltorito_descr, 0x47, 4) = pack "V", $path_table - 1;
+	write_sector $path_table - 1, $boot_catalog_data;
+	write_sector 0x11, $eltorito_descr;
+	close ISO;
+	my $new_catalog = $path_table - 1;
+	$kiwi -> note ("$boot_catalog to $new_catalog");
 	$kiwi -> done();
 	return $this;
 }
