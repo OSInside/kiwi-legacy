@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Sat Feb  2 15:04:21 CET 2008 - ms@suse.de
+
+- v2.19
+- fixed missing device nodes in chroot system. When in the
+  second stage of the prepare step smart and zypper may require
+  access to the /dev device nodes.
+
+-------------------------------------------------------------------
 Fri Feb  1 14:28:30 CET 2008 - ms@suse.de
 
 - v2.18

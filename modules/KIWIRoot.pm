@@ -694,6 +694,10 @@ sub setupMount {
 		qxx ("mount -t proc none $root/proc");
 		push (@mountList,"$root/proc");
 	}
+	if (! -f "$root/dev/console") {
+		qxx ("mount --bind /dev $root/dev");
+		push (@mountList,"$root/dev");
+	}
 	if (! -d "$root/sys/block") {
 		qxx ("mkdir -p $root/sys");
 		qxx ("mount -t sysfs  none $root/sys");
