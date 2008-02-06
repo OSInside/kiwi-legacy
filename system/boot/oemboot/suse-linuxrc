@@ -162,14 +162,33 @@ else
 	# ---
 	sleep 5
 	hwinfo="/usr/sbin/hwinfo --disk"
-	export deviceDisk=`$hwinfo |\
-		grep "Device File:" | head -n 1 | cut -f2 -d: | cut -f1 -d"\("`
-	export deviceDisk=`echo $deviceDisk`
-	if [ -z $deviceDisk ];then
+	export deviceDisks=`$hwinfo |\
+		grep "Device File:" | cut -f2 -d: | cut -f1 -d"("`
+	export deviceDisks=`echo $deviceDisks`
+	if [ -z $deviceDisks ];then
 		systemException \
-			"No hard disk found... abort" \
+			"No hard disk device(s) found... abort" \
 		"reboot"
 	fi
+	Echo "Found following hard disk device(s)"
+	count=0
+	for i in $deviceDisks;do
+		Echo -b "Disk $count -> $i"
+		deviceArray[$count]=$i
+		count=`expr $count + 1`
+	done
+	while true;do
+		Echo -n "Enter device name to select disk for installation: "
+		read deviceInput
+		count=0
+		for deviceDisk in $deviceDisks;do
+			if [ ${deviceArray[$count]} = $deviceInput ];then
+				break 2
+			fi
+			count=`expr $count + 1`
+		done
+		Echo "Given device is not in the list !"
+	done
 	Echo "Entering installation mode for disk: $deviceDisk"
 fi
 

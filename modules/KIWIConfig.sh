@@ -503,7 +503,10 @@ function suseGFXBoot {
 	# create boot theme
 	#--------------------------------------
 	cd /usr/share/gfxboot
-	make -C themes/$theme prep
+	# check for new source layout
+	local newlayout=
+	[ -f themes/$theme/config ] && newlayout=1
+	[ "$newlayout" ] || make -C themes/$theme prep
 	if [ ! -z "$language" ];then
 		local l1=`echo $language | cut -f1 -d.`
 		local l2=`echo $language | cut -f1 -d_`
@@ -524,18 +527,25 @@ function suseGFXBoot {
 		make -C themes/$theme
 	fi
 	mkdir /image/loader
+	local gfximage=
+	local grubimage=
+	if [ "$newlayout" ] ; then
+		gfximage=themes/$theme/bootlogo
+		grubimage=themes/$theme/message
+	else
+		gfximage=themes/$theme/install/bootlogo
+		grubimage=themes/$theme/boot/message
+	fi
 	if [ $loader = "isolinux" ];then
 		cp themes/$theme/install/* /image/loader
+		cp $gfximage /image/loader
 		bin/unpack_bootlogo /image/loader
-		for i in init languages log;do
-			rm -f /image/loader/$i
-		done
 		mv /usr/share/syslinux/isolinux.bin /image/loader
 		mv /boot/memtest.bin /image/loader/memtest
 		echo "livecd=1" >> /image/loader/gfxboot.cfg
 	fi
 	if [ $loader = "grub" ];then
-		mv themes/$theme/boot/message /image/loader
+		mv $grubimage /image/loader
 	fi
 	make -C themes/$theme clean
 	#======================================

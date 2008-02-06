@@ -42,7 +42,7 @@ use KIWIQX;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "2.19";
+our $Version       = "2.20";
 our $openSUSE      = "http://download.opensuse.org/repositories/";
 our $ConfigFile    = "$ENV{'HOME'}/.kiwirc";
 our $ConfigStatus  = 0;

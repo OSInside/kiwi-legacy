@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Tue Feb  5 23:00:46 CET 2008 - ms@suse.de
+
+- v2.20
+- adapt suseGFXBoot function due to changes in suse-11.0
+- fixed grub setup in KIWIBoot.pm if the used kernel is a Xen kernel
+- added better disk detection for oemboot installation mode. We also
+  present the user a list of disk devices found and a selection must
+  be done at that point
+
+-------------------------------------------------------------------
 Sat Feb  2 15:04:21 CET 2008 - ms@suse.de
 
 - v2.19

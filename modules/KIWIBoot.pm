@@ -72,14 +72,22 @@ sub new {
 	my $tmpdir;
 	my $loopdir;
 	my $result;
+	my $isxen;
+	my $xengz;
 	if (! defined $kiwi) {
 		$kiwi = new KIWILog();
 	}
+	#==========================================
+	# check initrd file parameter
+	#------------------------------------------
 	if (! -f $initrd) {
 		$kiwi -> error  ("Couldn't find initrd file: $initrd");
 		$kiwi -> failed ();
 		return undef;
 	}
+	#==========================================
+	# check system image file parameter
+	#------------------------------------------
 	if (defined $system) {
 		if (-f $system) {
 			my $status = qxx ( "file $system | grep -qi squashfs 2>&1" );
@@ -96,9 +104,28 @@ sub new {
 			return undef;
 		}
 	}
+	#==========================================
+	# compressed initrd used...
+	#------------------------------------------
 	if ($initrd =~ /\.gz$/) {
 		$zipped = 1;
 	}
+	#==========================================
+	# xen kernel used...
+	#------------------------------------------
+	$isxen = 0;
+	$xengz = $initrd;
+	if ($zipped) {
+		$xengz =~ s/\.gz$//;
+	}
+	foreach my $xen (glob ("$xengz*xen.gz")) {
+		$isxen = 1;
+		$xengz = $xen;
+		last;
+	}
+	#==========================================
+	# find kernel file
+	#------------------------------------------
 	$kernel = $initrd;
 	if ($zipped) {
 		$kernel =~ s/gz$/kernel/;
@@ -120,6 +147,9 @@ sub new {
 		$kiwi -> failed ();
 		return undef;
 	}
+	#==========================================
+	# create tmp dir for operations
+	#------------------------------------------
 	$tmpdir = qxx ( "mktemp -q -d /tmp/kiwiboot.XXXXXX" ); chomp $tmpdir;
 	$result = $? >> 8;
 	if ($result != 0) {
@@ -174,6 +204,8 @@ sub new {
 	$this->{device} = $device;
 	$this->{format} = $format;
 	$this->{zipped} = $zipped;
+	$this->{isxen}  = $isxen;
+	$this->{xengz}  = $xengz;
 	$this->{arch}   = $arch;
 	return $this;
 }
@@ -189,13 +221,17 @@ sub createBootStructure {
 	my $tmpdir = $this->{tmpdir};
 	my $kernel = $this->{kernel};
 	my $zipped = $this->{zipped};
+	my $isxen  = $this->{isxen};
+	my $xengz  = $this->{xengz};
 	my $lname  = "linux";
 	my $iname  = "initrd";
+	my $xname  = "xen.gz";
 	my $status;
 	my $result;
 	if (defined $loc) {
 		$lname  = $lname.".".$loc;
 		$iname  = $iname.".".$loc;
+		$xname  = $xname.".".$loc;
 	}
 	if ($initrd !~ /splash\.gz$/) {
 		$initrd = $this -> setupSplashForGrub();
@@ -231,6 +267,17 @@ sub createBootStructure {
 		$kiwi -> failed ();
 		$this -> cleanTmp ();
 		return undef;
+	}
+	if ($isxen) {
+		$status = qxx ( "cp $xengz $tmpdir/boot/$xname 2>&1" );
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Failed importing Xen dom0 kernel: $!");
+			$kiwi -> failed ();
+			$this -> cleanTmp ();
+			return undef;
+		}
 	}
 	$kiwi -> done();
 	return $tmpdir;
@@ -292,6 +339,8 @@ sub setupBootStick {
 	my $device = $this->{device};
 	my $loopdir= $this->{loopdir};
 	my $zipped = $this->{zipped};
+	my $isxen  = $this->{isxen};
+	my $xengz  = $this->{xengz};
 	my $sysird;
 	my $status;
 	my $result;
@@ -407,15 +456,31 @@ sub setupBootStick {
 	print FD "gfxmenu (hd0,0)/image/loader/message\n";
 	print FD "\n";
 	print FD "title $label [ USB ]\n";
-	print FD " root (hd0,0)\n";
-	print FD " kernel /boot/linux vga=0x314 splash=silent showopts\n";
-	print FD " initrd /boot/initrd\n";
+	if (! $isxen) {
+		print FD " root (hd0,0)\n";
+		print FD " kernel /boot/linux vga=0x314 splash=silent showopts\n";
+		print FD " initrd /boot/initrd\n";
+	} else {
+		print FD " root (hd0,0)\n";
+		print FD " kernel /boot/xen.gz\n";
+		print FD " module /boot/linux vga=0x314 splash=silent showopts\n";
+		print FD " module /boot/initrd\n";
+	}
 	print FD "title Failsafe -- $label [ USB ]\n";
-	print FD " root (hd0,0)\n";
-	print FD " kernel /boot/linux vga=0x314 splash=silent showopts";
-	print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
-	print FD " noapic maxcpus=0 edd=off\n";
-	print FD " initrd /boot/initrd\n";
+	if (! $isxen) {
+		print FD " root (hd0,0)\n";
+		print FD " kernel /boot/linux vga=0x314 splash=silent showopts";
+		print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
+		print FD " noapic maxcpus=0 edd=off\n";
+		print FD " initrd /boot/initrd\n";
+	} else {
+		print FD " root (hd0,0)\n";
+		print FD " kernel /boot/xen.gz\n";
+		print FD " module /boot/linux vga=0x314 splash=silent showopts";
+		print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
+		print FD " noapic maxcpus=0 edd=off\n";
+		print FD " module /boot/initrd\n";
+	}
 	close FD;
 	$kiwi -> done();
 	#==========================================
@@ -663,6 +728,8 @@ sub setupInstallCD {
 	my $system  = $this->{system};
 	my $oldird  = $this->{initrd};
 	my $zipped  = $this->{zipped};
+	my $isxen  = $this->{isxen};
+	my $xengz  = $this->{xengz};
 	my $gotsys  = 1;
 	my $status;
 	my $result;
@@ -786,15 +853,31 @@ sub setupInstallCD {
 	print FD "timeout 10\n";
 	print FD "gfxmenu (cd)/boot/message\n";
 	print FD "title $title\n";
-	print FD " kernel (cd)/boot/linux vga=0x314 splash=silent";
-	print FD " ramdisk_size=512000 ramdisk_blocksize=4096 showopts\n";
-	print FD " initrd (cd)/boot/initrd\n";
+	if (! $isxen) {
+		print FD " kernel (cd)/boot/linux vga=0x314 splash=silent";
+		print FD " ramdisk_size=512000 ramdisk_blocksize=4096 showopts\n";
+		print FD " initrd (cd)/boot/initrd\n";
+	} else {
+		print FD " kernel (cd)/boot/xen.gz\n";
+		print FD " module /boot/linux vga=0x314 splash=silent";
+		print FD " ramdisk_size=512000 ramdisk_blocksize=4096 showopts\n";
+		print FD " module (cd)/boot/initrd\n" 
+	}
 	print FD "title Failsafe -- $title\n";
-	print FD " kernel (cd)/boot/linux vga=0x314 splash=silent";
-	print FD " ramdisk_size=512000 ramdisk_blocksize=4096 showopts";
-	print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
-	print FD " noapic maxcpus=0 edd=off\n";
-	print FD " initrd (cd)/boot/initrd\n";
+	if (! $isxen) {
+		print FD " kernel (cd)/boot/linux vga=0x314 splash=silent";
+		print FD " ramdisk_size=512000 ramdisk_blocksize=4096 showopts";
+		print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
+		print FD " noapic maxcpus=0 edd=off\n";
+		print FD " initrd (cd)/boot/initrd\n";
+	} else {
+		print FD " kernel (cd)/boot/xen.gz\n";
+		print FD " module /boot/linux vga=0x314 splash=silent";
+		print FD " ramdisk_size=512000 ramdisk_blocksize=4096 showopts";
+		print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
+		print FD " noapic maxcpus=0 edd=off\n";
+		print FD " module (cd)/boot/initrd\n"
+	}
 	close FD;
 	$kiwi -> done();
 
@@ -865,6 +948,8 @@ sub setupInstallStick {
 	my $vmsize    = $this->{vmsize};
 	my $loopdir   = $this->{loopdir};
 	my $zipped    = $this->{zipped};
+	my $isxen     = $this->{isxen};
+	my $xengz     = $this->{xengz};
 	my $diskname  = $system.".install.raw";
 	my $loop      = "/dev/loop0";
 	my $loopfound = 0;
@@ -993,15 +1078,31 @@ sub setupInstallStick {
 	print FD "gfxmenu (hd0,0)/image/loader/message\n";
 	print FD "\n";
 	print FD "title $title\n";
-	print FD " root (hd0,0)\n";
-	print FD " kernel /boot/linux.vmx vga=0x314 splash=silent showopts\n";
-	print FD " initrd /boot/initrd.vmx\n";
+	if (! $isxen) {
+		print FD " root (hd0,0)\n";
+		print FD " kernel /boot/linux.vmx vga=0x314 splash=silent showopts\n";
+		print FD " initrd /boot/initrd.vmx\n";
+	} else {
+		print FD " root (hd0,0)\n";
+		print FD " kernel /boot/xen.gz.vmx\n";
+		print FD " module /boot/linux.vmx vga=0x314 splash=silent showopts\n";
+		print FD " module /boot/initrd.vmx"
+	}
 	print FD "title Failsafe -- $title\n";
-	print FD " root (hd0,0)\n";
-	print FD " kernel /boot/linux.vmx vga=0x314 splash=silent showopts";
-	print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
-	print FD " noapic maxcpus=0 edd=off\n";
-	print FD " initrd /boot/initrd.vmx\n";
+	if (! $isxen) {
+		print FD " root (hd0,0)\n";
+		print FD " kernel /boot/linux.vmx vga=0x314 splash=silent showopts";
+		print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
+		print FD " noapic maxcpus=0 edd=off\n";
+		print FD " initrd /boot/initrd.vmx\n";
+	} else {
+		print FD " root (hd0,0)\n";
+		print FD " kernel /boot/xen.gz.vmx\n";
+		print FD " module /boot/linux.vmx vga=0x314 splash=silent showopts";
+		print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
+		print FD " noapic maxcpus=0 edd=off\n";
+		print FD " module /boot/initrd.vmx"
+	}
 	close FD;
 	$this->{initrd} = $oldird;
 	$kiwi -> done();
@@ -1202,6 +1303,8 @@ sub setupBootDisk {
 	my $initrd    = $this->{initrd};
 	my $loopdir   = $this->{loopdir};
 	my $zipped    = $this->{zipped};
+	my $isxen     = $this->{isxen};
+	my $xengz     = $this->{xengz};
 	my $diskname  = $system.".raw";
 	my $label     = $this -> getImageName();
 	my $loop      = "/dev/loop0";
@@ -1347,15 +1450,31 @@ sub setupBootDisk {
 	print FD "gfxmenu (hd0,0)/boot/message\n";
 	print FD "\n";
 	print FD "title $label [ VMX ]\n";
-	print FD " root (hd0,0)\n";
-	print FD " kernel /boot/linux.vmx vga=0x314 splash=silent showopts\n";
-	print FD " initrd /boot/initrd.vmx\n";
+	if (! $isxen) {
+		print FD " root (hd0,0)\n";
+		print FD " kernel /boot/linux.vmx vga=0x314 splash=silent showopts\n";
+		print FD " initrd /boot/initrd.vmx\n";
+	} else {
+		print FD " root (hd0,0)\n";
+		print FD " kernel /boot/xen.gz.vmx\n";
+		print FD " module /boot/linux.vmx vga=0x314 splash=silent showopts\n";
+		print FD " module /boot/initrd.vmx"
+	}
 	print FD "title Failsafe -- $label [ VMX ]\n";
-	print FD " root (hd0,0)\n";
-	print FD " kernel /boot/linux.vmx vga=0x314 splash=silent showopts";
-	print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
-	print FD " noapic maxcpus=0 edd=off\n";
-	print FD " initrd /boot/initrd.vmx\n";
+	if (! $isxen) {
+		print FD " root (hd0,0)\n";
+		print FD " kernel /boot/linux.vmx vga=0x314 splash=silent showopts";
+		print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
+		print FD " noapic maxcpus=0 edd=off\n";
+		print FD " initrd /boot/initrd.vmx\n";
+	} else {
+		print FD " root (hd0,0)\n";
+		print FD " kernel /boot/xen.gz.vmx\n";
+		print FD " module /boot/linux.vmx vga=0x314 splash=silent showopts";
+		print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
+		print FD " noapic maxcpus=0 edd=off\n";
+		print FD " module /boot/initrd.vmx"
+	}
 	close FD;
 	$kiwi -> done();
 	#==========================================
@@ -1765,7 +1884,9 @@ sub setupBootDisk {
 			$kiwi -> info ("Creating $format image");
 			my $fname = $diskname;
 			$fname  =~ s/\.raw$/\.$format/;
-			$status = qxx ( "qemu-img convert -f raw $loop -O $format $fname" );
+			$status = qxx (
+				"qemu-img convert -f raw $loop -O $format $fname 2>&1"
+			);
 			$result = $? >> 8;
 			if ($result != 0) {
 				$kiwi -> failed ();
