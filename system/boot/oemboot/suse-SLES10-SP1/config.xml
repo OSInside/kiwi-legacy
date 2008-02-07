@@ -76,6 +76,7 @@
 		<package name="bootsplash"/>
 		<package name="bootsplash-theme-SuSE-SLES"/>
 		<package name="eject"/>
+		<package name="tar"/>
 	</packages>
 	<packages type="boot">
 		<package name="filesystem"/>

@@ -69,6 +69,7 @@
 		<package name="make"/>
 		<package name="bootsplash"/>
 		<package name="bootsplash-theme-SuSE-NLD"/>
+		<package name="tar"/>
 	</packages>
 	<packages type="boot">
 		<package name="filesystem"/>

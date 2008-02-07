@@ -81,6 +81,7 @@
 		<package name="nbd"/>
 		<package name="bootsplash"/>
 		<package name="bootsplash-theme-SuSE-SLES"/>
+		<package name="tar"/>
 	</packages>
 	<packages type="boot">
 		<package name="filesystem"/>
