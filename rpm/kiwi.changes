@@ -9,6 +9,7 @@ Thu Feb  7 15:31:53 CET 2008 - ms@suse.de
   that big that we require the small compression improvement here.
 - cleaned up mountSystem function, use sub functions to
   be called according to the different root mount methods
+- add ramdisk module (rd) to netboot images and load the module
 - added support for split images in vmx/oem and usbboot (#359124)
 - increase CD/DVD drive test max probe count (#356571)
 - create very first smart cache inside the chroot (#359449)

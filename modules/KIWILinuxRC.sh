@@ -833,6 +833,7 @@ function probeDevices {
 	# for details on this crappy call see bug: #250241
 	# ----
 	modprobe ide-disk
+	modprobe rd &>/dev/null
 	probeUSB
 }
 #======================================
