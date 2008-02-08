@@ -1782,6 +1782,7 @@ function mountSystemCombined {
 	local roDevice=$mountDevice
 	local rwDevice=`getNextPartition $mountDevice`
 	mkdir /read-only >/dev/null
+	modprobe squashfs >/dev/null 2>&1
 	if ! mount -t auto $roDevice /read-only >/dev/null;then
 		return 1
 	fi
