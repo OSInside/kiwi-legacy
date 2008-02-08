@@ -78,11 +78,11 @@ openKernelConsole
 # 5) Include proc/cmdline information
 #--------------------------------------
 includeKernelParameters
-if [ ! -z $UNIONFS_CONFIG ];then
+if [ ! -z $UNIONFS_CONFIG ] || [ "$COMBINED_IMAGE" = "local" ];then
 	# /.../
-	# if the unionfs information is already in place at this stage
-	# it comes from the cmdline data which means we are not booting
-	# from CD/DVD USB stick but want to boot the local system
+	# if the unionfs/combined information is already in place at this
+	# stage it comes from the cmdline data which means we are not
+	# booting from CD/DVD USB stick but want to boot the local system
 	# ----
 	export LOCAL_BOOT="yes"   
 fi
@@ -139,8 +139,10 @@ if [ ! -f $VMX_SYSTEM ];then
 	fi
 	probeFileSystem "$deviceDisk"2
 	if test "$FSTYPE" = "squashfs";then
-		Echo "Unified system detected, adapting root partition"
-		export UNIONFS_CONFIG="$deviceDisk"3,"$deviceDisk"2,aufs
+		if [ -z "$COMBINED_IMAGE" ];then
+			Echo "Unified system detected, adapting root partition"
+			export UNIONFS_CONFIG="$deviceDisk"3,"$deviceDisk"2,aufs
+		fi
 		export deviceRoot="$deviceDisk"2
 		export deviceSwap="$deviceDisk"4
 	else
@@ -209,7 +211,7 @@ if [ -f $VMX_SYSTEM ];then
 		deviceRoot="$deviceDisk"1
 		probeFileSystem $deviceRoot
 	fi
-	if test "$FSTYPE" = "squashfs";then
+	if [ "$FSTYPE" = "squashfs" ] && [ -z "$COMBINED_IMAGE" ];then
 		export UNIONFS_CONFIG="$deviceDisk"3,"$deviceDisk"2,aufs
 	fi
 	Echo "Try mounting installed system to check version"
@@ -299,7 +301,7 @@ if [ -f $VMX_SYSTEM ];then
 		probeFileSystem $deviceRoot
 	fi
 	Echo "Filesystem of root system is: $FSTYPE -> $deviceRoot"
-	if test "$FSTYPE" = "squashfs";then
+	if [ "$FSTYPE" = "squashfs" ] && [ -z "$COMBINED_IMAGE" ];then
 		export UNIONFS_CONFIG="$deviceDisk"3,"$deviceDisk"2,aufs
 	fi
 	#======================================
@@ -360,94 +362,15 @@ if [ $LOCAL_BOOT = "no" ];then
 	mem_size=`grep MemTotal: /proc/meminfo | tr -dc '[0-9]'`
 	swapsize=$(( $mem_size *2 / 1024 ))
 	Echo "Filesystem of root system is: $FSTYPE -> $deviceRoot"
-	if ! test "$FSTYPE" = "squashfs";then
-		#======================================
-		# 10.2 write new partition table
+	if test ! -z $COMBINED_IMAGE;then
+		#====================================== 
+		# 10.2 check for read-write partition
 		#--------------------------------------
-		# /.../
-		# Explanation of the fdisk commands used within the
-		# here document below:
-		# ----
-		# d              # delete xda partition [ 1 ]
-		# n              # create xda partition at same place than xda1
-		# p              # primary
-		# 2              # [ 2 ]
-		# 1              # accept old xda1 start block for xda2
-		# +10240M        # accept new root device size of 10GB
-		# n              # create xda swap partition
-		# p              # primary
-		# 1              # [ 1 ]
-		#                # accept start block
-		# +"$swapsize"M  # accept new swapsize
-		# n              # create xda3 home partition
-		# p              # primary
-		# 3              # [ 3 ]
-		#                # accept start block
-		#                # accept end block, complete disk
-		# t              # change swap system id
-		# 1              # [ 1 ]
-		# 82             # Linux Swap
-		# w              # write partition table
-		# ----
-		input=/part.input
-		rm -f $input
-		disk1MBytes=10240
-		diskXMBytes=`sfdisk -s $deviceDisk`
-		diskXMBytes=`expr $diskXMBytes / 1024`
-		if [ $disk1MBytes -gt $diskXMBytes ];then
-			# /.../
-			# Very small disk, we use the size of the root partition (/)
-			# plus 200MB, we assume the rest is ok for /home and a
-			# 50MB swap space. All this could fail if the disk
-			# is so small that only / without any additional space
-			# fits on it
-			# ----
-			disk1MBytes=`sfdisk -s $deviceRoot`
-			disk1MBytes=`expr $disk1MBytes / 1024`
-			disk1MBytes=`expr $disk1MBytes + 200`
-			swapsize=50
-		fi
-		for cmd in \
-			d n p 2 1 +"$disk1MBytes"M \
-			n p 1 . +"$swapsize"M \
-			n p 3 . . \
-			t 1 82 w
-		do
-			if [ $cmd = "." ];then
-				echo >> $input
-				continue
-			fi
-			echo $cmd >> $input
-		done
-		Echo "Repartition the disk according to current geometry"
-		fdisk $deviceDisk < $input >/dev/null 2>&1
-		if test $? != 0; then
-			systemException "Failed to create partition table" "reboot"
+		if ! sfdisk -s "$deviceDisk"3 &>/dev/null;then
+			systemException "Can't find read-write partition" "reboot"
 		fi
 		#======================================
-		# 10.3 Update new device names
-		#--------------------------------------
-		export deviceRoot="$deviceDisk"2
-		export deviceSwap="$deviceDisk"1
-		export deviceHome="$deviceDisk"3
-
-		#======================================
-		# 10.4 Activate swap space
-		#--------------------------------------
-		Echo "Activating swap space on $deviceSwap"
-		if ! mkswap $deviceSwap >/dev/null 2>&1;then
-			systemException "Failed to create swap signature" "reboot"
-		fi
-		#======================================
-		# 10.5 Create home file system
-		#--------------------------------------
-		Echo "Creating Home filesystem on $deviceHome"
-		if ! mke2fs -j -q $deviceHome >/dev/null 2>&1;then
-			systemException "Failed to create home filesystem" "reboot"
-		fi
-	else
-		#======================================
-		# 10.2 calculate end block - swapspace
+		# 10.3 calculate new partition 3 size
 		#--------------------------------------
 		swapXMBytes=$swapsize
 		diskXMBytes=`sfdisk -s $deviceDisk`
@@ -456,23 +379,26 @@ if [ $LOCAL_BOOT = "no" ];then
 		disk1MBytes=`expr $disk1MBytes / 1024`
 		disk2MBytes=`sfdisk -s "$deviceDisk"2`
 		disk2MBytes=`expr $disk2MBytes / 1024`
-		disk3MBytes=`expr $diskXMBytes - $disk1MBytes - $disk2MBytes`
-		disk3MBytes=`expr $disk3MBytes - $swapXMBytes`
-		if [ $disk3MBytes -lt 100 ];then
+		disk3MBytes=`sfdisk -s "$deviceDisk"3`
+		disk3MBytes=`expr $disk3MBytes / 1024`
+		diskXLBytes=`expr $diskXMBytes - $disk1MBytes - $disk2MBytes`
+		diskXLBytes=`expr $diskXLBytes - $disk3MBytes`
+		diskXABytes=`expr $diskXLBytes - $swapXMBytes`
+		if [ $diskXABytes -lt 50 ];then
 			# /.../
-			# Very small disk, we use only 50MB of swap and assume
-			# that the rest disk space is big enough to create the
-			# RW and swap partition. All this could fail if the disk
-			# is not big enough compared to the system image already
-			# installed
+			# Very small disk, we use only 50MB of swap and hope
+			# this is ok. If not we can't re-partition this disk
 			# ----
 			swapsize=50
 			swapXMBytes=$swapsize
-			disk3MBytes=`expr $diskXMBytes - $disk1MBytes - $disk2MBytes`
-			disk3MBytes=`expr $disk3MBytes - $swapXMBytes`
+			diskXABytes=`expr $diskXLBytes - $swapXMBytes`
 		fi
+		if [ $diskXABytes -lt 0 ];then
+			systemException "Disk too smal, can't re-partition it" "reboot"
+		fi
+		disk3MBytes=`expr $disk3MBytes + $diskXABytes`
 		#======================================
-		# 10.3 write new partition table
+		# 10.4 write new partition table
 		#--------------------------------------
 		# /.../
 		# Explanation of the fdisk commands used within the
@@ -510,7 +436,7 @@ if [ $LOCAL_BOOT = "no" ];then
 			systemException "Failed to create partition table" "reboot"
 		fi
 		#======================================
-		# 10.4 Update new device names
+		# 10.5 Update new device names
 		#--------------------------------------
 		export deviceBoot="$deviceDisk"1
 		export deviceRoot="$deviceDisk"2
@@ -518,19 +444,185 @@ if [ $LOCAL_BOOT = "no" ];then
 		export deviceIOWR="$deviceDisk"3
 
 		#======================================
-		# 10.5 Activate swap space
+		# 10.6 Activate swap space
 		#--------------------------------------
 		Echo "Activating swap space on $deviceSwap"
 		if ! mkswap $deviceSwap >/dev/null 2>&1;then
 			systemException "Failed to create swap signature" "reboot"
 		fi
+	else
+		if ! test "$FSTYPE" = "squashfs";then
+			#======================================
+			# 10.2 write new partition table
+			#--------------------------------------
+			# /.../
+			# Explanation of the fdisk commands used within the
+			# here document below:
+			# ----
+			# d              # delete xda partition [ 1 ]
+			# n              # create xda partition at same place than xda1
+			# p              # primary
+			# 2              # [ 2 ]
+			# 1              # accept old xda1 start block for xda2
+			# +10240M        # accept new root device size of 10GB
+			# n              # create xda swap partition
+			# p              # primary
+			# 1              # [ 1 ]
+			#                # accept start block
+			# +"$swapsize"M  # accept new swapsize
+			# n              # create xda3 home partition
+			# p              # primary
+			# 3              # [ 3 ]
+			#                # accept start block
+			#                # accept end block, complete disk
+			# t              # change swap system id
+			# 1              # [ 1 ]
+			# 82             # Linux Swap
+			# w              # write partition table
+			# ----
+			input=/part.input
+			rm -f $input
+			disk1MBytes=10240
+			diskXMBytes=`sfdisk -s $deviceDisk`
+			diskXMBytes=`expr $diskXMBytes / 1024`
+			if [ $disk1MBytes -gt $diskXMBytes ];then
+				# /.../
+				# Very small disk, we use the size of the root partition (/)
+				# plus 200MB, we assume the rest is ok for /home and a
+				# 50MB swap space. All this could fail if the disk
+				# is so small that only / without any additional space
+				# fits on it
+				# ----
+				disk1MBytes=`sfdisk -s $deviceRoot`
+				disk1MBytes=`expr $disk1MBytes / 1024`
+				disk1MBytes=`expr $disk1MBytes + 200`
+				swapsize=50
+			fi
+			for cmd in \
+				d n p 2 1 +"$disk1MBytes"M \
+				n p 1 . +"$swapsize"M \
+				n p 3 . . \
+				t 1 82 w
+			do
+				if [ $cmd = "." ];then
+					echo >> $input
+					continue
+				fi
+				echo $cmd >> $input
+			done
+			Echo "Repartition the disk according to current geometry"
+			fdisk $deviceDisk < $input >/dev/null 2>&1
+			if test $? != 0; then
+				systemException "Failed to create partition table" "reboot"
+			fi
+			#======================================
+			# 10.3 Update new device names
+			#--------------------------------------
+			export deviceRoot="$deviceDisk"2
+			export deviceSwap="$deviceDisk"1
+			export deviceHome="$deviceDisk"3
 
-		#======================================
-		# 10.6 create filesystem for writing
-		#--------------------------------------
-		Echo "Creating filesystem for RW data on $deviceIOWR..."
-		if ! mke2fs $deviceIOWR >/dev/null;then
-			systemException "Failed to create ext2 filesystem" "reboot"
+			#======================================
+			# 10.4 Activate swap space
+			#--------------------------------------
+			Echo "Activating swap space on $deviceSwap"
+			if ! mkswap $deviceSwap >/dev/null 2>&1;then
+				systemException "Failed to create swap signature" "reboot"
+			fi
+			#======================================
+			# 10.5 Create home file system
+			#--------------------------------------
+			Echo "Creating Home filesystem on $deviceHome"
+			if ! mke2fs -j -q $deviceHome >/dev/null 2>&1;then
+				systemException "Failed to create home filesystem" "reboot"
+			fi
+		else
+			#======================================
+			# 10.2 calculate end block - swapspace
+			#--------------------------------------
+			swapXMBytes=$swapsize
+			diskXMBytes=`sfdisk -s $deviceDisk`
+			diskXMBytes=`expr $diskXMBytes / 1024`
+			disk1MBytes=`sfdisk -s "$deviceDisk"1`
+			disk1MBytes=`expr $disk1MBytes / 1024`
+			disk2MBytes=`sfdisk -s "$deviceDisk"2`
+			disk2MBytes=`expr $disk2MBytes / 1024`
+			disk3MBytes=`expr $diskXMBytes - $disk1MBytes - $disk2MBytes`
+			disk3MBytes=`expr $disk3MBytes - $swapXMBytes`
+			if [ $disk3MBytes -lt 100 ];then
+				# /.../
+				# Very small disk, we use only 50MB of swap and assume
+				# that the rest disk space is big enough to create the
+				# RW and swap partition. All this could fail if the disk
+				# is not big enough compared to the system image already
+				# installed
+				# ----
+				swapsize=50
+				swapXMBytes=$swapsize
+				disk3MBytes=`expr $diskXMBytes - $disk1MBytes - $disk2MBytes`
+				disk3MBytes=`expr $disk3MBytes - $swapXMBytes`
+			fi
+			#======================================
+			# 10.3 write new partition table
+			#--------------------------------------
+			# /.../
+			# Explanation of the fdisk commands used within the
+			# here document below:
+			# ----
+			# d               # delete xda partition
+			# 3               # [ 3 ]
+			# n               # create xda partition at same place than xda3
+			# p               # primary
+			# 3               # [ 3 ]
+			#                 # accept old xda3 start block
+			# +"disk3MBytes"M # accept new RW device size of disk blocks - swap
+			# n               # create xda swap partition
+			# p               # primary
+			# 4               # [ 4 ]
+			#                 # accept start block
+			#                 # accept end block
+			# t               # change swap system id
+			# 4               # [ 4 ]
+			# 82              # Linux Swap
+			# w               # write partition table
+			# ----
+			input=/part.input
+			rm -f $input
+			for cmd in d 3 n p 3 . +"$disk3MBytes"M n p 4 . . t 4 82 w;do
+				if [ $cmd = "." ];then
+					echo >> $input
+					continue
+				fi
+				echo $cmd >> $input
+			done
+			Echo "Repartition the disk according to current geometry"
+			fdisk $deviceDisk < $input >/dev/null 2>&1
+			if test $? != 0; then
+				systemException "Failed to create partition table" "reboot"
+			fi
+			#======================================
+			# 10.4 Update new device names
+			#--------------------------------------
+			export deviceBoot="$deviceDisk"1
+			export deviceRoot="$deviceDisk"2
+			export deviceSwap="$deviceDisk"4
+			export deviceIOWR="$deviceDisk"3
+
+			#======================================
+			# 10.5 Activate swap space
+			#--------------------------------------
+			Echo "Activating swap space on $deviceSwap"
+			if ! mkswap $deviceSwap >/dev/null 2>&1;then
+				systemException "Failed to create swap signature" "reboot"
+			fi
+	
+			#======================================
+			# 10.6 create filesystem for writing
+			#--------------------------------------
+			Echo "Creating filesystem for RW data on $deviceIOWR..."
+			if ! mke2fs $deviceIOWR >/dev/null;then
+				systemException "Failed to create ext2 filesystem" "reboot"
+			fi
 		fi
 	fi
 fi
@@ -539,29 +631,35 @@ fi
 # 11) Resize filesystem to full space
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
-	if test "$FSTYPE" = "squashfs";then
+	deviceResize=$deviceRoot
+	if [ ! -z $COMBINED_IMAGE ];then
+		deviceResize=$deviceIOWR
+		KIWI_INITRD_PARAMS="COMBINED_IMAGE=local"
+		export KIWI_INITRD_PARAMS
+	fi
+	if [ "$FSTYPE" = "squashfs" ] && [ -z "$COMBINED_IMAGE" ];then
 		export UNIONFS_CONFIG="$deviceDisk"3,"$deviceDisk"2,aufs
 		KIWI_INITRD_PARAMS="UNIONFS_CONFIG=\"$UNIONFS_CONFIG\""
 		KIWI_INITRD_PARAMS="$KIWI_INITRD_PARAMS deviceRoot=\"$deviceRoot\""
 		export KIWI_INITRD_PARAMS
 	else
-		if test "$FSTYPE" = "reiserfs";then
+		if [ "$FSTYPE" = "reiserfs" ];then
 			Echo "Resize Reiser filesystem to full partition space..."
-			resize_reiserfs -q $deviceRoot
+			resize_reiserfs -q $deviceResize
 			INITRD_MODULES="$INITRD_MODULES reiserfs"
 		fi
-		if test "$FSTYPE" = "ext2";then
+		if [ "$FSTYPE" = "ext2" ];then
 			Echo "Resize EXT2 filesystem to full partition space..."
-			resize2fs -f -F -p $deviceRoot
+			resize2fs -f -F -p $deviceResize
 			Echo "Checking EXT2 filesystem..."
-			e2fsck -y -f $deviceRoot
+			e2fsck -y -f $deviceResize
 			INITRD_MODULES="$INITRD_MODULES ext2"
 		fi
-		if test "$FSTYPE" = "ext3";then
+		if [ "$FSTYPE" = "ext3" ];then
 			Echo "Resize EXT3 filesystem to full partition space..."
-			resize2fs -f -F -p $deviceRoot
+			resize2fs -f -F -p $deviceResize
 			Echo "Checking EXT3 filesystem..."
-			e2fsck -y -f $deviceRoot
+			e2fsck -y -f $deviceResize
 			INITRD_MODULES="$INITRD_MODULES ext3"
 		fi
 	fi
@@ -588,8 +686,8 @@ fi
 if [ $LOCAL_BOOT = "no" ];then
 	setupDefaultFstab /config
 	updateSwapDeviceFstab /config $deviceSwap
-	if [ -z "$UNIONFS_CONFIG" ]; then
-		echo "$deviceRoot /      $FSTYPE defaults 0 0" >> /config/etc/fstab
+	if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ]; then
+		echo "$deviceRoot / $FSTYPE defaults 0 0" >> /config/etc/fstab
 		if [ `ls /mnt/home/ | wc -l` != 0 ]; then
 			Echo "Found non empty home/ directory !"
 			Echo "Moving home/ data to newly created home partition $deviceHome"
@@ -602,7 +700,7 @@ if [ $LOCAL_BOOT = "no" ];then
 		mkdir -p /config/kiwiboot
 		echo "$deviceBoot /kiwiboot ext2 defaults 0 0"  >> /config/etc/fstab
 	fi
-	if [ -z "$UNIONFS_CONFIG" ]; then
+	if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ]; then
 		Echo "Creating grub configuration"
 		setupBootLoaderGrub /mnt /config 1 ${deviceDisk}2 OEM $deviceSwap
 	fi

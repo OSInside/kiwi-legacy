@@ -42,7 +42,7 @@ use KIWIQX;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "2.20";
+our $Version       = "2.21";
 our $openSUSE      = "http://download.opensuse.org/repositories/";
 our $ConfigFile    = "$ENV{'HOME'}/.kiwirc";
 our $ConfigStatus  = 0;
@@ -402,6 +402,12 @@ sub main {
 	# Create image from chroot system
 	#------------------------------------------
 	if (defined $Create) {
+		#==========================================
+		# Cleanup the tree according to prev runs
+		#------------------------------------------
+		if (-f "$Create/rootfs.tar.gz") {
+			qxx ("rm -f $Create/rootfs.tar.gz");
+		}
 		#==========================================
 		# Check for overlay requirements
 		#------------------------------------------

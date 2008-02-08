@@ -999,7 +999,7 @@ sub createImageLiveCD {
 	my $cdrootData = $imageTree."/image/config-cdroot.tgz";
 	if (-f $cdrootData) {
 		$kiwi -> info ("Integrating CD root information...");
-		my $data = qxx (" tar -C $main::RootTree/CD -xvf $cdrootData ");
+		my $data = qxx ("tar -C $main::RootTree/CD -xvf $cdrootData");
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
@@ -1044,7 +1044,9 @@ sub createImageLiveCD {
 			$cdrootData = $pwd."/".$cdrootData;
 		}
 		my $CCD  = "$main::RootTree/CD";
-		my $data = qxx ("cd $CCD && bash -c '. $cdrootEnv && . $cdrootData' 2>&1");
+		my $data = qxx ("
+			cd $CCD && bash -c '. $cdrootEnv && . $cdrootData' 2>&1"
+		);
 		my $code = $? >> 8;
 		if ($code != 0) {
 			chomp $data;
@@ -1279,14 +1281,14 @@ sub createImageSplit {
 		return undef;
 	}
 	#==========================================
-	# split physical extend into RW / RO / tmp part
+	# split physical extend into RW/RO/tmp part
 	#------------------------------------------
 	$imageTreeTmp = $imageTree;
 	$imageTreeTmp =~ s/\/+$//;
 	$imageTreeTmp.= "-tmp/";
 	$this->{imageTreeTmp} = $imageTreeTmp;
 	if (! -d $imageTreeTmp) {
-		$kiwi -> info ("Creating tmp image part");
+		$kiwi -> info ("Creating temporary image part");
 		if (! mkdir $imageTreeTmp) {
 			$error = $!;
 			$kiwi -> failed ();
@@ -1295,32 +1297,29 @@ sub createImageSplit {
 			return undef;
 		}
 		my $createTmpTree = sub {
-			my $file = $_;
-			my $dir = $File::Find::dir;
-			my $path = "$dir/$file";
-
-			my $target = $path;
+			my $file  = $_;
+			my $dir   = $File::Find::dir;
+			my $path  = "$dir/$file";
+			my $target= $path;
 			$target =~ s#$imageTree#$imageTreeTmp#;
-
 			my $rerooted = $path;
 			$rerooted =~ s#$imageTree#/read-only#;
-
 			my $st = lstat($path);
-
 			if (S_ISDIR($st->mode)) {
 				mkdir $target;
-
 				chmod S_IMODE($st->mode), $target;
 				chown $st->uid, $st->gid, $target;
-			} elsif (S_ISCHR($st->mode) || S_ISBLK($st->mode) || S_ISLNK($st->mode)) {
-				qxx (" cp -a $path $target ");
+			} elsif (
+				S_ISCHR($st->mode)  ||
+				S_ISBLK($st->mode)  ||
+				S_ISLNK($st->mode)
+			) {
+				qxx ("cp -a $path $target");
 			} else {
 				symlink ($rerooted, $target);
 			}
 		};
-
 		find(\&$createTmpTree, $imageTree);
-
 		my @tempFiles = $xml -> getSplitTempFiles ();
 		if (@tempFiles) {
 			foreach my $temp (@tempFiles) {
@@ -1330,37 +1329,33 @@ sub createImageSplit {
 					if (! -e $file) {
 						next;
 					}
-					
 					my $dest = $file;
 					$dest =~ s#$imageTree#$imageTreeTmp#;
-
-					qxx (" rm -rf $dest ");
-					qxx (" cp -a $file $dest ");
+					qxx ("rm -rf $dest");
+					qxx ("cp -a $file $dest");
 				}
 			}
 		}
-			
 		$kiwi -> done();
 	}
-
+	#==========================================
+	# find persistent files for the read-write
+	#------------------------------------------
 	my @persistFiles = $xml -> getSplitPersistentFiles ();
-	
 	$imageTreeRW = $imageTree;
 	$imageTreeRW =~ s/\/+$//;
 	$imageTreeRW.= "-read-write";
 	if (! -d $imageTreeRW && @persistFiles) {
+		$kiwi -> info ("Creating read-write image part");
 		$this->{imageTreeRW} = $imageTreeRW;
-
-		$kiwi -> info ("Creating rw image part");
 		if (! mkdir $imageTreeRW) {
 			$error = $!;
 			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't create rw directory: $error");
+			$kiwi -> error  ("Couldn't create read-write directory: $error");
 			$kiwi -> failed ();
 			return undef;
 		}
 		my @expandedPersistFiles = ();
-
 		foreach my $persist (@persistFiles) {
 			my $globsource = "${imageTreeTmp}${persist}";
 			my @files = glob($globsource);
@@ -1368,12 +1363,10 @@ sub createImageSplit {
 				push @expandedPersistFiles, $file;
 			}
 		}
-
 		sub dirsort {
 			if (-d $a && -d $b) {
 				my $lena = length($a);
 				my $lenb = length($b);
-
 				if ($lena == $lenb) {
 					return 0;
 				} elsif ($lena < $lenb) {
@@ -1387,48 +1380,43 @@ sub createImageSplit {
 				return 1;
 			}
 		}
-
 		my @sortedPersistFiles = sort dirsort @expandedPersistFiles;
-
 		foreach my $file (@sortedPersistFiles) {
-			my $source = $file;
-			
-			my $rosource = $file;
-			$rosource =~ s#$imageTreeTmp#$imageTree#;
-
-			my $dest = $file;
-			$dest =~ s#$imageTreeTmp#$imageTreeRW#;
-
-			my $rwroot = $file;
-			$rwroot =~ s#$imageTreeTmp#/read-write#;
-
-			qxx (" rm -rf $dest ");
-			qxx (" mkdir -p `dirname $dest` ");
+			my $source  = $file;
+			my $rosource= $file;
+			my $dest    = $file;
+			my $rwroot  = $file;
+			$rosource   =~ s#$imageTreeTmp#$imageTree#;
+			$dest       =~ s#$imageTreeTmp#$imageTreeRW#;
+			$rwroot     =~ s#$imageTreeTmp#/read-write#;
+			my $destdir = dirname $dest;
+			qxx ("rm -rf $dest");
+			qxx ("mkdir -p $destdir");
 			if (-d $source) {
-				qxx (" mv $source $dest ");
+				qxx ("mv $source $dest");
 				symlink ($rwroot, $source);
 			} else {
-				qxx (" cp -a $rosource $dest ");
+				qxx ("cp -a $rosource $dest");
 				symlink ($rwroot, $source);
 			}
 		}
+		$kiwi -> done();
 	}
 	#==========================================
 	# Embed tmp extend into ro extend
 	#------------------------------------------
-	qxx (" cd $imageTreeTmp && tar cvfj $imageTree/rootfs.tar.bz2 * 2>&1 ");
+	qxx ("cd $imageTreeTmp && tar cvfz $imageTree/rootfs.tar.gz * 2>&1");
+	qxx ("rm -rf $imageTreeTmp");
 
 	#==========================================
 	# Count disk space for extends
 	#------------------------------------------
 	$kiwi -> info ("Computing disk space...");
 	($mbytesreal,$mbytesro,$xmlsize) = $this -> getSize ($imageTree);
-
 	if (defined $this->{imageTreeRW}) {
 		($mbytesreal,$mbytesrw,$xmlsize) = $this -> getSize ($imageTreeRW);
 	}
 	$kiwi -> done ();
-
 	if (defined $this->{imageTreeRW}) {
 		#==========================================
 		# Create RW logical extend
@@ -1579,12 +1567,17 @@ sub createImageSplit {
 			return undef;
 		}
 	}
-
+	#==========================================
+	# Create network boot configuration
+	#------------------------------------------
 	$kiwi -> info ("Creating boot configuration...");
 	if (! $this -> writeImageConfig ($namero)) {
 		return undef;
 	}
-	
+	#==========================================
+	# Cleanup and return
+	#------------------------------------------
+	qxx ("rm -rf $imageTreeRW");
 	return $this;
 }
 

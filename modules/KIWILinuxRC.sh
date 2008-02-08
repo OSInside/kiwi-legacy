@@ -849,12 +849,13 @@ function CDDevice {
 	done
 	while true;do
 		cddevs=`/usr/sbin/hwinfo --cdrom | grep "Device File:" | cut -f2 -d:`
+		cddevs=`echo $cddevs | sed -e "s@(.*)@@"`
 		for i in $cddevs;do
 			if [ -b $i ];then
 				test -z $cddev && cddev=$i || cddev=$cddev:$i
 			fi
 		done
-		if [ ! -z $cddev ] || [ $count -eq 4 ]; then
+		if [ ! -z $cddev ] || [ $count -eq 6 ]; then
 			break
 		else
 			Echo "Drive not ready yet... waiting"
@@ -959,8 +960,10 @@ function searchSwapSpace {
 	if [ ! -z $kiwinoswapsearch ];then
 		return
 	fi
-	hwapp=/usr/sbin/hwinfo
-	for diskdev in `$hwapp --disk | grep "Device File:" | cut -f2 -d:`;do
+	local hwapp=/usr/sbin/hwinfo
+	local diskdevs=`$hwapp --disk | grep "Device File:" | cut -f2 -d:`
+	diskdevs=`echo $diskdevs | sed -e "s@(.*)@@"`
+	for diskdev in $diskdevs;do
 		for disknr in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15;do
 			id=`/sbin/sfdisk --print-id $diskdev $disknr`
 			if [ "$id" = "82" ];then
@@ -980,8 +983,10 @@ function searchDiskSpace {
 	if [ ! -z $kiwinoswapsearch ];then
 		return
 	fi
-	hwapp=/usr/sbin/hwinfo
-	for diskdev in `$hwapp --disk | grep "Device File:" | cut -f2 -d:`;do
+	local hwapp=/usr/sbin/hwinfo
+	local diskdevs=`$hwapp --disk | grep "Device File:" | cut -f2 -d:`
+	diskdevs=`echo $diskdevs | sed -e "s@(.*)@@"`
+	for diskdev in $diskdevs;do
 		for disknr in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15;do
 			id=`/sbin/sfdisk --print-id $diskdev $disknr`
 			if [ -z $id ];then
@@ -1616,6 +1621,9 @@ function includeKernelParameters {
 	# ----
 	IFS=$IFS_ORIG
 	for i in `cat /proc/cmdline`;do
+		if ! echo $i | grep -q "=";then
+			continue
+		fi
 		kernelKey=`echo $i | cut -f1 -d=`
 		kernelVal=`echo $i | cut -f2 -d=`
 		eval $kernelKey=$kernelVal
@@ -1652,10 +1660,10 @@ function checkServer {
 # umountSystem
 #--------------------------------------
 function umountSystem {
-	retval=0
-	OLDIFS=$IFS
+	local retval=0
+	local OLDIFS=$IFS
+	local mountPath=/mnt
 	IFS=$IFS_ORIG
-	mountPath=/mnt
 	if test ! -z $UNIONFS_CONFIG;then
 		roDir=/read-only
 		rwDir=/read-write
@@ -1683,107 +1691,149 @@ function umountSystem {
 	return $retval
 }
 #======================================
-# mountSystem
+# mountSystemUnified
 #--------------------------------------
-function mountSystem {
-	retval=0
-	OLDIFS=$IFS
-	IFS=$IFS_ORIG
-	mountDevice=$imageRootDevice
-	if test ! -z $1;then
-		mountDevice=$1
-	fi
-	
-	if test ! -z $UNIONFS_CONFIG;then
-		roDir=/read-only
-		rwDir=/read-write
-		xiDir=/xino
-		for dir in $roDir $rwDir $xiDir;do
-			mkdir -p $dir
-		done
-		rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
-		roDevice=`echo $UNIONFS_CONFIG | cut -d , -f 2`
-		unionFST=`echo $UNIONFS_CONFIG | cut -d , -f 3`
-		echo $rwDevice | grep -q ram
-		if [ $? = 0 ];then
-			# /.../
-			# write part is a ram location, use tmpfs for ram
-			# disk data storage
-			# ----
-			mount -t tmpfs tmpfs $rwDir >/dev/null || retval=1
-		else
-			# /.../
-			# write part is not a ram disk, create ext2 filesystem on it
-			# check and mount the filesystem
-			# ----
-			if test $LOCAL_BOOT = "no" && test $systemIntegrity = "clean";then
-				if
-					test "$RELOAD_IMAGE" = "yes" || \
+function mountSystemUnified {
+	local roDir=/read-only
+	local rwDir=/read-write
+	local xiDir=/xino
+	for dir in $roDir $rwDir $xiDir;do
+		mkdir -p $dir
+	done
+	local rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
+	local roDevice=`echo $UNIONFS_CONFIG | cut -d , -f 2`
+	local unionFST=`echo $UNIONFS_CONFIG | cut -d , -f 3`
+	#======================================
+	# check read/write device location
+	#--------------------------------------
+	echo $rwDevice | grep -q ram
+	if [ $? = 0 ];then
+		# /.../
+		# write part is a ram location, use tmpfs for ram
+		# disk data storage
+		# ----
+		if ! mount -t tmpfs tmpfs $rwDir >/dev/null;then
+			return 1
+		fi
+	else
+		# /.../
+		# write part is not a ram disk, create ext2 filesystem on it
+		# check and mount the filesystem
+		# ----
+		if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
+			if [ "$RELOAD_IMAGE" = "yes" ] || \
+				! mount $rwDevice $rwDir >/dev/null
+			then
+				Echo "Checking filesystem for RW data on $rwDevice..."
+				e2fsck -y -f $rwDevice >/dev/null
+				if [ "$RELOAD_IMAGE" = "yes" ] || \
 					! mount $rwDevice $rwDir >/dev/null
 				then
-					Echo "Checking filesystem for RW data on $rwDevice..."
-					e2fsck -y -f $rwDevice >/dev/null
-					if
-						test "$RELOAD_IMAGE" = "yes" || \
-						! mount $rwDevice $rwDir >/dev/null
-					then
-						Echo "Creating filesystem for RW data on $rwDevice..."
-						if ! mke2fs $rwDevice >/dev/null;then
-							Echo "Failed to create ext2 filesystem"
-							retval=1; return $retval
-						fi
-						tune2fs -m 0 $rwDevice >/dev/null
-						Echo "Checking EXT2 write extend..."
-						e2fsck -y -f $rwDevice >/dev/null
+					Echo "Creating filesystem for RW data on $rwDevice..."
+					if ! mke2fs $rwDevice >/dev/null;then
+						Echo "Failed to create ext2 filesystem"
+						return 1
 					fi
-				else
-					umount $rwDevice
+					tune2fs -m 0 $rwDevice >/dev/null
+					Echo "Checking EXT2 write extend..."
+					e2fsck -y -f $rwDevice >/dev/null
 				fi
-			fi
-			if ! mount $rwDevice $rwDir >/dev/null;then
-				retval=1
-			fi
-		fi
-		if ! mount -t squashfs $roDevice $roDir >/dev/null;then
-			if ! mount $roDevice $roDir >/dev/null;then
-				retval=1
+			else
+				umount $rwDevice
 			fi
 		fi
-		if [ $unionFST = "aufs" ];then
-			mount -t tmpfs tmpfs $xiDir >/dev/null || retval=1
-			mount -t aufs \
-				-o dirs=$rwDir=rw:$roDir=ro,xino=$xiDir/.aufs.xino none /mnt \
-			>/dev/null || retval=1
-		else
-			mount -t unionfs \
-				-o dirs=$rwDir=rw:$roDir=ro none /mnt
-			>/dev/null || retval=1
+		if ! mount $rwDevice $rwDir >/dev/null;then
+			Echo "Failed to mount read/write filesystem"
+			return 1
 		fi
-		usleep 500000
-	elif test ! -z $COMBINED_IMAGE;then
-		roDevice=$mountDevice
-		rwDevice=`getNextPartition $mountDevice`
-
-		mkdir /read-only >/dev/null
-		if ! mount $roDevice /read-only >/dev/null;then
-			mount -t squashfs $roDevice /read-only >/dev/null||retval=1
-		fi
-		mount -t tmpfs none /mnt >/dev/null || retval=1
-		cd /mnt && tar xvfj /read-only/rootfs.tar.bz2 >/dev/null && cd /
-
-		mkdir /mnt/read-only >/dev/null
-		mount --move /read-only /mnt/read-only >/dev/null
-		rm -rf /read-only >/dev/null
-		ln -s /mnt/read-only /read-only >/dev/null || retval=1
-
+	fi
+	#======================================
+	# mount read only device
+	#--------------------------------------
+	if [ -z $FSTYPE ] || [ $FSTYPE = "unknown" ];then
+		FSTYPE="auto"
+	fi
+	if ! mount -t $FSTYPE $roDevice $roDir >/dev/null;then
+		Echo "Failed to mount read only filesystem"
+		return 1
+	fi
+	#======================================
+	# setup overlay mount
+	#--------------------------------------
+	if [ $unionFST = "aufs" ];then
+		mount -t tmpfs tmpfs $xiDir >/dev/null || retval=1
+		mount -t aufs \
+			-o dirs=$rwDir=rw:$roDir=ro,xino=$xiDir/.aufs.xino none /mnt \
+		>/dev/null || return 1
+	else
+		mount -t unionfs \
+			-o dirs=$rwDir=rw:$roDir=ro none /mnt
+		>/dev/null || return 1
+	fi
+	usleep 500000
+	return 0
+}
+#======================================
+# mountSystemCombined
+#--------------------------------------
+function mountSystemCombined {
+	local mountDevice=$1
+	local roDevice=$mountDevice
+	local rwDevice=`getNextPartition $mountDevice`
+	mkdir /read-only >/dev/null
+	if ! mount -t $FSTYPE $roDevice /read-only >/dev/null;then
+		return 1
+	fi
+	mount -t tmpfs none /mnt >/dev/null || return 1
+	cd /mnt && tar xvfz /read-only/rootfs.tar.gz >/dev/null && cd /
+	mkdir /mnt/read-only >/dev/null
+	mount --move /read-only /mnt/read-only >/dev/null
+	rm -rf /read-only >/dev/null
+	ln -s /mnt/read-only /read-only >/dev/null || return 1
+	if sfdisk -s $rwDevice &>/dev/null;then
 		mkdir /mnt/read-write >/dev/null
 		mount $rwDevice /mnt/read-write >/dev/null
 		rm -f /read-write >/dev/null
 		ln -s /mnt/read-write /read-write >/dev/null
+	fi
+}
+#======================================
+# mountSystemStandard
+#--------------------------------------
+function mountSystemStandard {
+	local mountDevice=$1
+	if [ ! -z $FSTYPE ] && [ ! $FSTYPE = "unknown" ];then
+		mount -t $FSTYPE $mountDevice /mnt >/dev/null
 	else
-		if ! mount $mountDevice /mnt >/dev/null;then
-			mount -t squashfs $mountDevice /mnt >/dev/null
-		fi
+		mount $mountDevice /mnt >/dev/null
+	fi
+	return $?
+}
+#======================================
+# mountSystem
+#--------------------------------------
+function mountSystem {
+	local retval=0
+	local OLDIFS=$IFS
+	IFS=$IFS_ORIG
+	#======================================
+	# set primary mount device
+	#--------------------------------------
+	local mountDevice=$imageRootDevice
+	if test ! -z $1;then
+		mountDevice=$1
+	fi
+	#======================================
+	# check root tree type
+	#--------------------------------------
+	if test ! -z $COMBINED_IMAGE;then
+		mountSystemCombined $mountDevice
+		retval=$?
+	elif test ! -z $UNIONFS_CONFIG;then
+		mountSystemUnified
+		retval=$?
+	else
+		mountSystemStandard $mountDevice
 		retval=$?
 	fi
 	IFS=$OLDIFS
@@ -1793,11 +1843,10 @@ function mountSystem {
 # cleanDirectory
 #--------------------------------------
 function cleanDirectory {
-	directory=$1
+	local directory=$1
 	shift 1
-	save=$@
-
-	tmpdir=`mktemp -d`
+	local save=$@
+	local tmpdir=`mktemp -d`
 	for saveItem in $save;do
 		mv $directory/$saveItem $tmpdir >/dev/null
 	done

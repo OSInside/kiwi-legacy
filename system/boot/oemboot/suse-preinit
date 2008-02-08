@@ -45,7 +45,7 @@ createFramebufferDevices
 #======================================
 # 5) create initrd on diskful
 #--------------------------------------
-if [ -z "$UNIONFS_CONFIG" ]; then
+if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ]; then
 	#======================================
 	# use distro initrd via mkinitrd
 	#--------------------------------------
@@ -54,19 +54,31 @@ else
 	#======================================
 	# use kiwi initrd from boot partition
 	#--------------------------------------
+	mount -t proc  proc  /proc >/dev/null
+	mount -t sysfs sysfs /sys  >/dev/null
+	probeFileSystem $deviceBoot
+	if [ ! "$FSTYPE" = "unknown" ];then
+		modprobe $FSTYPE
+	fi
 	if mount $deviceBoot /kiwiboot;then
 		rm -rf /boot && ln -s /kiwiboot/boot /boot
 		pushd /boot &>/dev/null
 		rm -f vmlinuz && ln -s linux.vmx  vmlinuz
 		rm -f initrd  && ln -s initrd.vmx initrd
 		popd &>/dev/null
-		Echo "Creating grub configuration for unified system"
+		if [ ! -z "$COMBINED_IMAGE" ];then
+			Echo "Creating grub configuration for split system"
+		else
+			Echo "Creating grub configuration for unified system"
+		fi
 		setupBootLoaderGrub / / 0 ${deviceDisk}2 OEM $deviceSwap
 	else
 		Echo "Failed to mount boot partition"
 		Echo "Can't create grub configuration"
 		grubOK=0
 	fi
+	umount /proc >/dev/null
+	umount /sys  >/dev/null
 fi
 
 #======================================

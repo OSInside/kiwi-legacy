@@ -67,6 +67,7 @@ sub new {
 	my $syszip = 0;
 	my $sysird = 0;
 	my $zipped = 0;
+	my $vmmbyte;
 	my $kernel;
 	my $knlink;
 	my $tmpdir;
@@ -180,9 +181,10 @@ sub new {
 			$vmsize = $kernelSize + $initrdSize + $systemSize;
 			$vmsize+= $vmsize * 0.3; # and 30% free space
 		}
-		$vmsize = $vmsize / 1024 / 1024;
-		$vmsize = int $vmsize;
-		$vmsize = $vmsize."M";
+		$vmsize  = $vmsize / 1024 / 1024;
+		$vmsize  = int $vmsize;
+		$vmmbyte = $vmsize;
+		$vmsize  = $vmsize."M";
 	}
 	#$kiwi -> done ();
 	if ($syszip) {
@@ -199,6 +201,7 @@ sub new {
 	$this->{kernel} = $kernel;
 	$this->{tmpdir} = $tmpdir;
 	$this->{loopdir}= $loopdir;
+	$this->{vmmbyte}= $vmmbyte;
 	$this->{vmsize} = $vmsize;
 	$this->{syszip} = $syszip;
 	$this->{device} = $device;
@@ -330,20 +333,78 @@ sub getRemovableUSBStorageDevices {
 # setupBootStick
 #------------------------------------------
 sub setupBootStick {
-	my $this   = shift;
-	my $kiwi   = $this->{kiwi};
-	my $tmpdir = $this->{tmpdir};
-	my $initrd = $this->{initrd};
-	my $system = $this->{system};
-	my $syszip = $this->{syszip};
-	my $device = $this->{device};
-	my $loopdir= $this->{loopdir};
-	my $zipped = $this->{zipped};
-	my $isxen  = $this->{isxen};
-	my $xengz  = $this->{xengz};
+	my $this      = shift;
+	my $kiwi      = $this->{kiwi};
+	my $arch      = $this->{arch};
+	my $tmpdir    = $this->{tmpdir};
+	my $initrd    = $this->{initrd};
+	my $system    = $this->{system};
+	my $syszip    = $this->{syszip};
+	my $device    = $this->{device};
+	my $loopdir   = $this->{loopdir};
+	my $zipped    = $this->{zipped};
+	my $isxen     = $this->{isxen};
+	my $xengz     = $this->{xengz};
+	my $imgtype   = "usb";
+	my $haveSplit = 0;
+	my $FSTypeRW;
+	my $FSTypeRO;
 	my $sysird;
 	my $status;
 	my $result;
+	my $xml;
+	#==========================================
+	# find image type
+	#------------------------------------------
+	if (defined $system) {
+		$status = qxx ("mount -o loop $system $tmpdir 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> error ("Failed to loop mount system image: $status");
+			$kiwi -> failed ();
+			$this -> cleanTmp ();
+			return undef;
+		}
+		if (-f "$tmpdir/rootfs.tar.gz") {
+			$imgtype = "split";
+		}
+		$xml = new KIWIXML ( $kiwi,$tmpdir."/image",undef,$imgtype );
+		$status = qxx ("umount $tmpdir 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> error ("Failed to umount system image: $status");
+			$kiwi -> failed ();
+			$this -> cleanTmp ();
+			return undef;
+		}
+		if (! defined $xml) {
+			$this -> cleanTmp ();
+			return undef;
+		}
+	}
+	#==========================================
+	# check image split portion
+	#------------------------------------------
+	my $destdir  = dirname ($initrd);
+	my $label    = $xml -> getImageName();
+	my $version  = $xml -> getImageVersion();
+	my $splitfile= $destdir."/".$label."-read-write.".$arch."-".$version;
+	if ($imgtype eq "split") {
+		if (-f $splitfile) {
+			$haveSplit = 1;
+		}
+	}
+	#==========================================
+	# obtain filesystem type from xml data
+	#------------------------------------------
+	my %type = %{$xml->getImageTypeAndAttributes()};
+	if ($type{filesystem} =~ /(.*),(.*)/) {
+		$FSTypeRW = $1;
+		$FSTypeRO = $2;
+	} else {
+		$FSTypeRW = $type{filesystem};
+		$FSTypeRO = $FSTypeRW;
+	}
 	#==========================================
 	# Create Stick boot structure
 	#------------------------------------------
@@ -449,7 +510,7 @@ sub setupBootStick {
 		$this -> cleanTmp ();
 		return undef;
 	}
-	my $label = $this -> getImageName();
+	$label = $this -> getImageName();
 	print FD "color cyan/blue white/blue\n";
 	print FD "default 0\n";
 	print FD "timeout 10\n";
@@ -458,25 +519,45 @@ sub setupBootStick {
 	print FD "title $label [ USB ]\n";
 	if (! $isxen) {
 		print FD " root (hd0,0)\n";
-		print FD " kernel /boot/linux vga=0x314 splash=silent showopts\n";
+		print FD " kernel /boot/linux vga=0x314 splash=silent";
+		if ($imgtype eq "split") {
+			print FD " COMBINED_IMAGE=yes showopts\n";
+		} else {
+			print FD " showopts\n";
+		}
 		print FD " initrd /boot/initrd\n";
 	} else {
 		print FD " root (hd0,0)\n";
 		print FD " kernel /boot/xen.gz\n";
-		print FD " module /boot/linux vga=0x314 splash=silent showopts\n";
+		print FD " module /boot/linux vga=0x314 splash=silent";
+		if ($imgtype eq "split") {
+			print FD " COMBINED_IMAGE=yes showopts\n";
+		} else {
+			print FD " showopts\n";
+		}
 		print FD " module /boot/initrd\n";
 	}
 	print FD "title Failsafe -- $label [ USB ]\n";
 	if (! $isxen) {
 		print FD " root (hd0,0)\n";
-		print FD " kernel /boot/linux vga=0x314 splash=silent showopts";
+		print FD " kernel /boot/linux vga=0x314 splash=silent";
+		if ($imgtype eq "split") {
+			print FD " COMBINED_IMAGE=yes showopts";
+		} else {
+			print FD " showopts";
+		}
 		print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
 		print FD " noapic maxcpus=0 edd=off\n";
 		print FD " initrd /boot/initrd\n";
 	} else {
 		print FD " root (hd0,0)\n";
 		print FD " kernel /boot/xen.gz\n";
-		print FD " module /boot/linux vga=0x314 splash=silent showopts";
+		print FD " module /boot/linux vga=0x314 splash=silent";
+		if ($imgtype eq "split") {
+			print FD " COMBINED_IMAGE=yes showopts";
+		} else {
+			print FD " showopts";
+		}
 		print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
 		print FD " noapic maxcpus=0 edd=off\n";
 		print FD " module /boot/initrd\n";
@@ -576,7 +657,7 @@ sub setupBootStick {
 	# Prepare sfdisk input file
 	#------------------------------------------
 	if (defined $system) {
-		if ($syszip > 0) {
+		if (($syszip) || ($haveSplit)) {
 			print FD ",$sysird,L,*\n"; # xda1  boot
 			print FD ",$syszip,L\n";   # xda2  ro
 			print FD ",,L\n";          # xda3  rw
@@ -657,6 +738,68 @@ sub setupBootStick {
 			return undef;
 		}
 		$kiwi -> done();
+		$result = 0;
+		undef $status;
+		SWITCH: for ($FSTypeRO) {
+			/^ext\d/    && do {
+				$kiwi -> info ("Resizing system $FSTypeRO filesystem");
+				$status = qxx ("/sbin/resize2fs -f -F -p $stick'2' 2>&1");
+				$result = $? >> 8;
+				last SWITCH;
+			};
+			/^reiserfs/ && do {
+				$kiwi -> info ("Resizing system $FSTypeRO filesystem");
+				$status = qxx ("/sbin/resize_reiserfs $stick'2' 2>&1");
+				$result = $? >> 8;
+				last SWITCH;
+			}
+		};
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't resize $FSTypeRO filesystem: $status");
+			$kiwi -> failed ();
+			return undef;
+		}
+		if ($status) {
+			$kiwi -> done();
+		}
+		if ($haveSplit) {
+			$kiwi -> info ("Dumping split read/write part to stick");
+			$status = qxx ("dd if=$splitfile of=$stick'3' bs=32k 2>&1");
+			$result = $? >> 8;
+			if ($result != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Couldn't dump split file: $status");
+				$kiwi -> failed ();
+				return undef;
+			}
+			$kiwi -> done();
+			$result = 0;
+			undef $status;
+			SWITCH: for ($FSTypeRW) {
+				/^ext\d/    && do {
+					$kiwi -> info ("Resizing split $FSTypeRW filesystem");
+					$status = qxx ("/sbin/resize2fs -f -F -p $stick'3' 2>&1");
+					$result = $? >> 8;
+					last SWITCH;
+				};
+				/^reiserfs/ && do {
+					$kiwi -> info ("Resizing split $FSTypeRW filesystem");
+					$status = qxx ("/sbin/resize_reiserfs $stick'3' 2>&1");
+					$result = $? >> 8;
+					last SWITCH;
+				}
+			};
+			if ($result != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error("Couldn't resize $FSTypeRW filesystem: $status");
+				$kiwi -> failed ();
+				return undef;
+			}
+			if ($status) {
+				$kiwi -> done();
+			}
+		}
 		#==========================================
 		# Mount system img for removal of boot data
 		#------------------------------------------
@@ -1308,50 +1451,106 @@ sub setupBootDisk {
 	my $diskname  = $system.".raw";
 	my $label     = $this -> getImageName();
 	my $loop      = "/dev/loop0";
+	my $imgtype   = "vmx";
 	my $loopfound = 0;
 	my $haveTree  = 0;
+	my $haveSplit = 0;
+	my $splitfile;
 	my $version;
-	my $fstype;
+	my $FSTypeRW;
+	my $FSTypeRO;
 	my $sysname;
 	my $sysird;
 	my $result;
 	my $status;
 	my $destdir;
+	my $xml;
 	#==========================================
 	# check if system is tree or image file
 	#------------------------------------------
 	if ( -d $system ) {
-		my $xml = new KIWIXML ( $kiwi,$system."/image",undef,"vmx" );
+		#==========================================
+		# check image type
+		#------------------------------------------
+		if (-f "$system/rootfs.tar.gz") {
+			$kiwi -> error ("Can't use split root tree, run create first");
+			$kiwi -> failed ();
+			return undef;
+		}
+		$xml = new KIWIXML ( $kiwi,$system."/image",undef,$imgtype );
 		if (! defined $xml) {
 			$this -> cleanTmp ();
 			return undef;
 		}
+		$haveTree = 1;
+	} else {
 		#==========================================
 		# build disk name and label from xml data
 		#------------------------------------------
-		$destdir  = dirname ($initrd);
-		$label    = $xml -> getImageName();
-		$version  = $xml -> getImageVersion();
-		$diskname = $label;
-		$diskname = $destdir."/".$diskname.".".$arch."-".$version.".raw";
-		$haveTree = 1;
+		$status = qxx ("mount -o loop $system $tmpdir 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> error ("Failed to loop mount system image: $status");
+			$kiwi -> failed ();
+			$this -> cleanTmp ();
+			return undef;
+		}
 		#==========================================
-		# obtain filesystem type from xml data
+		# check image type
 		#------------------------------------------
-		my %type = %{$xml->getImageTypeAndAttributes()};
-		$fstype  = $type{filesystem};
-		if (! $fstype) {
-			$kiwi -> error  ("Can't find filesystem type in image tree");
+		if (-f "$tmpdir/rootfs.tar.gz") {
+			$imgtype = "split";
+		}
+		$xml = new KIWIXML ( $kiwi,$tmpdir."/image",undef,$imgtype );
+		$status = qxx ("umount $tmpdir 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> error ("Failed to umount system image: $status");
 			$kiwi -> failed ();
 			$this -> cleanTmp ();
 			return undef;
 		}
-		if ($fstype eq "squashfs") {
-			$kiwi -> error ("Can't copy data into requested RO filesystem");
-			$kiwi -> failed ();
+		if (! defined $xml) {
 			$this -> cleanTmp ();
 			return undef;
 		}
+	}
+	#==========================================
+	# build disk name and label from xml data
+	#------------------------------------------
+	$destdir  = dirname ($initrd);
+	$label    = $xml -> getImageName();
+	$version  = $xml -> getImageVersion();
+	$diskname = $label;
+	$diskname = $destdir."/".$diskname.".".$arch."-".$version.".raw";
+	$splitfile= $destdir."/".$label."-read-write.".$arch."-".$version;
+	#==========================================
+	# check image split portion
+	#------------------------------------------
+	if ($imgtype eq "split") {
+		if (-f $splitfile) {
+			my $splitsize = -s $splitfile; $splitsize /= 1048576;
+			$vmsize = $this->{vmmbyte} + $splitsize + 50;
+			$vmsize = $vmsize."M";
+			$haveSplit = 1;
+		}
+	}
+	#==========================================
+	# obtain filesystem type from xml data
+	#------------------------------------------
+	my %type = %{$xml->getImageTypeAndAttributes()};
+	if ($type{filesystem} =~ /(.*),(.*)/) {
+		$FSTypeRW = $1;
+		$FSTypeRO = $2;
+	} else {
+		$FSTypeRW = $type{filesystem};
+		$FSTypeRO = $FSTypeRW;
+	}
+	if (($haveTree) && ($FSTypeRW eq "squashfs")) {
+		$kiwi -> error ("Can't copy data into requested RO filesystem");
+		$kiwi -> failed ();
+		$this -> cleanTmp ();
+		return undef;
 	}
 	#==========================================
 	# search free loop device
@@ -1362,7 +1561,7 @@ sub setupBootDisk {
 	for (my $id=0;$id<=7;$id++) {
 		$status = qxx ( "/sbin/losetup /dev/loop$id 2>&1" );
 		$result = $? >> 8;
-		if ($result eq 1) {
+		if ($result == 1) {
 			$loopfound = 1;
 			$loop = "/dev/loop".$id;
 			$this->{loop} = $loop;
@@ -1452,25 +1651,45 @@ sub setupBootDisk {
 	print FD "title $label [ VMX ]\n";
 	if (! $isxen) {
 		print FD " root (hd0,0)\n";
-		print FD " kernel /boot/linux.vmx vga=0x314 splash=silent showopts\n";
+		print FD " kernel /boot/linux.vmx vga=0x314 splash=silent";
+		if ($imgtype eq "split") {
+			print FD " COMBINED_IMAGE=yes showopts\n";
+		} else {
+			print FD " showopts\n";
+		}
 		print FD " initrd /boot/initrd.vmx\n";
 	} else {
 		print FD " root (hd0,0)\n";
 		print FD " kernel /boot/xen.gz.vmx\n";
-		print FD " module /boot/linux.vmx vga=0x314 splash=silent showopts\n";
+		print FD " module /boot/linux.vmx vga=0x314 splash=silent";
+		if ($imgtype eq "split") {
+			print FD " COMBINED_IMAGE=yes showopts\n";
+		} else {
+			print FD " showopts\n";
+		}
 		print FD " module /boot/initrd.vmx"
 	}
 	print FD "title Failsafe -- $label [ VMX ]\n";
 	if (! $isxen) {
 		print FD " root (hd0,0)\n";
-		print FD " kernel /boot/linux.vmx vga=0x314 splash=silent showopts";
+		print FD " kernel /boot/linux.vmx vga=0x314 splash=silent";
+		if ($imgtype eq "split") {
+			print FD " COMBINED_IMAGE=yes showopts";
+		} else {
+			print FD " showopts";
+		}
 		print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
 		print FD " noapic maxcpus=0 edd=off\n";
 		print FD " initrd /boot/initrd.vmx\n";
 	} else {
 		print FD " root (hd0,0)\n";
 		print FD " kernel /boot/xen.gz.vmx\n";
-		print FD " module /boot/linux.vmx vga=0x314 splash=silent showopts";
+		print FD " module /boot/linux.vmx vga=0x314 splash=silent";
+		if ($imgtype eq "split") {
+			print FD " COMBINED_IMAGE=yes showopts";
+		} else {
+			print FD " showopts";
+		}
 		print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
 		print FD " noapic maxcpus=0 edd=off\n";
 		print FD " module /boot/initrd.vmx"
@@ -1480,7 +1699,7 @@ sub setupBootDisk {
 	#==========================================
 	# Create ext2 image if syszip is active
 	#------------------------------------------
-	if ($syszip > 0) {
+	if (($syszip) || ($haveSplit)) {
 		$kiwi -> info ("Creating VM boot image");
 		$sysname= $initrd;
 		if ($zipped) {
@@ -1580,7 +1799,7 @@ sub setupBootDisk {
 			return undef;
 		}
 		my @commands;
-		if ($syszip > 0) {
+		if (($syszip) || ($haveSplit)) {
 			# xda1 boot / xda2 ro / xda3 rw
 			@commands = (
 				"n","p","1",".","+".$sysird."M",
@@ -1621,16 +1840,18 @@ sub setupBootDisk {
 		#------------------------------------------
 		if ($syszip > 0) {
 			my $sizeOK = 1;
-			my $systemPSize = qxx ("sfdisk -s /dev/mapper".$dmap."p2");
+			my $systemPSize = qxx ("/sbin/sfdisk -s /dev/mapper".$dmap."p2");
 			my $systemISize = -s $system; $systemISize /= 1024;
 			chomp $systemPSize;
+			#print "_______A $systemPSize : $systemISize\n";
 			if ($systemPSize < $systemISize) {
 				$syszip += 10;
 				$sizeOK = 0;
 			}
-			my $initrdPSize = qxx ("sfdisk -s /dev/mapper".$dmap."p1"); 
+			my $initrdPSize = qxx ("/sbin/sfdisk -s /dev/mapper".$dmap."p1"); 
 			my $initrdISize = -s $sysname; $initrdISize /= 1024;
 			chomp $initrdPSize;
+			#print "_______B $initrdPSize : $initrdISize\n";
 			if ($initrdPSize < $initrdISize) {
 				$sysird += 1;
 				$sizeOK = 0;
@@ -1672,34 +1893,76 @@ sub setupBootDisk {
 		}
 		$kiwi -> done();
 		$result = 0;
-		SWITCH: for ($fstype) {
+		undef $status;
+		SWITCH: for ($FSTypeRO) {
 			/^ext\d/    && do {
-				$kiwi -> info ("Resizing $fstype filesystem");
-				$status = qxx ("resize2fs -f -F -p $root 2>&1");
+				$kiwi -> info ("Resizing system $FSTypeRO filesystem");
+				$status = qxx ("/sbin/resize2fs -f -F -p $root 2>&1");
 				$result = $? >> 8;
-				$kiwi -> done();
 				last SWITCH;
 			};
 			/^reiserfs/ && do {
-				$kiwi -> info ("Resizing $fstype filesystem");
-				$status = qxx ("resize_reiserfs $root 2>&1");
+				$kiwi -> info ("Resizing system $FSTypeRO filesystem");
+				$status = qxx ("/sbin/resize_reiserfs $root 2>&1");
 				$result = $? >> 8;
-				$kiwi -> done();
 				last SWITCH;
 			}
 		};
 		if ($result != 0) {
 			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't resize $fstype filesystem: $status");
+			$kiwi -> error  ("Couldn't resize $FSTypeRO filesystem: $status");
 			$kiwi -> failed ();
 			$this -> cleanTmp ();
 			return undef;
 		}
+		if ($status) {
+			$kiwi -> done();
+		}
+		if ($haveSplit) {
+			$kiwi -> info ("Dumping split read/write part on virtual disk");
+			$root = "/dev/mapper".$dmap."p3";
+			$status = qxx ("dd if=$splitfile of=$root bs=32k 2>&1");
+			$result = $? >> 8;
+			if ($result != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Couldn't dump split file: $status");
+				$kiwi -> failed ();
+				$this -> cleanLoop ();
+				return undef;
+			}
+			$kiwi -> done();
+			$result = 0;
+			undef $status;
+			SWITCH: for ($FSTypeRW) {
+				/^ext\d/    && do {
+					$kiwi -> info ("Resizing split $FSTypeRW filesystem");
+					$status = qxx ("/sbin/resize2fs -f -F -p $root 2>&1");
+					$result = $? >> 8;
+					last SWITCH;
+				};
+				/^reiserfs/ && do {
+					$kiwi -> info ("Resizing split $FSTypeRW filesystem");
+					$status = qxx ("/sbin/resize_reiserfs $root 2>&1");
+					$result = $? >> 8;
+					last SWITCH;
+				}
+			};
+			if ($result != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error("Couldn't resize $FSTypeRW filesystem: $status");
+				$kiwi -> failed ();
+				$this -> cleanTmp ();
+				return undef;
+			}
+			if ($status) {
+				$kiwi -> done();
+			}
+		}
 	} else {
 		#==========================================
-		# Create filesystem on system image part.
+		# Create fs on system image partition
 		#------------------------------------------
-		SWITCH: for ($fstype) {
+		SWITCH: for ($FSTypeRO) {
 			/^ext2/     && do {
 				$kiwi -> info ("Creating ext2 root filesystem");
 				my $fsopts = "-q -F";
@@ -1722,14 +1985,14 @@ sub setupBootDisk {
 				$result = $? >> 8;
 				last SWITCH;
 			};
-			$kiwi -> error  ("Unsupported filesystem type: $fstype");
+			$kiwi -> error  ("Unsupported filesystem type: $FSTypeRO");
 			$kiwi -> failed ();
 			$this -> cleanTmp ();
 			return undef;
 		};
 		if ($result != 0) {
 			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't create $fstype filesystem: $status");
+			$kiwi -> error  ("Couldn't create $FSTypeRO filesystem: $status");
 			$kiwi -> failed ();
 			$this -> cleanTmp ();
 			return undef;
@@ -1770,7 +2033,7 @@ sub setupBootDisk {
 	# Dump boot image on virtual disk
 	#------------------------------------------
 	$kiwi -> info ("Dumping boot image to virtual disk");
-	if ($syszip > 0) {
+	if (($syszip) || ($haveSplit)) {
 		$root = "/dev/mapper".$dmap."p1";
 		$status = qxx ("dd if=$sysname of=$root bs=32k 2>&1");
 		$result = $? >> 8;

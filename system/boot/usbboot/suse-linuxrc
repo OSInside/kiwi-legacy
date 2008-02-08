@@ -106,23 +106,6 @@ fi
 Echo "Filesystem of stick system is: $FSTYPE -> $stickDevice"
 if test "$FSTYPE" = "squashfs";then
 	export UNIONFS_CONFIG="$stickRoot"3,"$stickRoot"2,aufs
-else
-	if test "$FSTYPE" = "reiserfs";then
-		Echo "Resize Reiser filesystem to full partition space..."
-		resize_reiserfs $stickDevice
-	fi
-	if test "$FSTYPE" = "ext2";then
-		Echo "Resize EXT2 filesystem to full partition space..."
-		resize2fs -f -F -p $stickDevice
-		Echo "Checking EXT2 filesystem..."
-		e2fsck -y -f $stickDevice
-	fi
-	if test "$FSTYPE" = "ext3";then
-		Echo "Resize EXT3 filesystem to full partition space..."
-		resize2fs -f -F -p $stickDevice
-		Echo "Checking EXT3 filesystem..."
-		e2fsck -y -f $stickDevice
-	fi
 fi
 
 #======================================

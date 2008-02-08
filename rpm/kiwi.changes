@@ -1,4 +1,19 @@
 -------------------------------------------------------------------
+Thu Feb  7 15:31:53 CET 2008 - ms@suse.de
+
+- v2.21
+- added tar program to be available in boot images
+- fixed /proc/cmdline processing
+- changed rootfs tarbal to use gzip instead of bzip2. We don't
+  have bzip2 in the boot images and the RAM part shouldn't be
+  that big that we require the small compression improvement here.
+- cleaned up mountSystem function, use sub functions to
+  be called according to the different root mount methods
+- added support for split images in vmx/oem and usbboot (#359124)
+- increase CD/DVD drive test max probe count (#356571)
+- fixed CD/DVD detection (#359511)
+
+-------------------------------------------------------------------
 Tue Feb  5 23:00:46 CET 2008 - ms@suse.de
 
 - v2.20
