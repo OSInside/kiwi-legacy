@@ -11,6 +11,7 @@ Thu Feb  7 15:31:53 CET 2008 - ms@suse.de
   be called according to the different root mount methods
 - added support for split images in vmx/oem and usbboot (#359124)
 - increase CD/DVD drive test max probe count (#356571)
+- create very first smart cache inside the chroot (#359449)
 - fixed CD/DVD detection (#359511)
 
 -------------------------------------------------------------------

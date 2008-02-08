@@ -1298,9 +1298,6 @@ sub kiwiExit {
 		$kiwi -> info ("KIWI exited successfully");
 		$kiwi -> done ();
 	}
-	if (defined $root) {
-		$root -> cleanManager ();
-	}
 	$kiwi -> cleanSweep();
 	exit $code;
 }
@@ -1325,7 +1322,6 @@ sub quit {
 	if (defined $root) {
 		$root  -> cleanLock   ();
 		$root  -> cleanSource ();
-		$root  -> cleanManager();
 		$root  -> cleanMount  ();
 	}
 	if (defined $image) {

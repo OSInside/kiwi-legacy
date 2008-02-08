@@ -87,7 +87,7 @@ sub new {
 	if (! defined $manager) {
 		$manager = "smart";
 	}
-	my $dataDir = "/var/cache/kiwi/smart-$$";
+	my $dataDir = "$root/var/lib/smart";
 	if ($manager eq "smart") {
 		qxx ("mkdir -p $dataDir");
 	}

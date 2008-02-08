@@ -1781,7 +1781,7 @@ function mountSystemCombined {
 	local roDevice=$mountDevice
 	local rwDevice=`getNextPartition $mountDevice`
 	mkdir /read-only >/dev/null
-	if ! mount -t $FSTYPE $roDevice /read-only >/dev/null;then
+	if ! mount -t auto $roDevice /read-only >/dev/null;then
 		return 1
 	fi
 	mount -t tmpfs none /mnt >/dev/null || return 1
