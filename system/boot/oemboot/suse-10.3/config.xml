@@ -5,13 +5,18 @@
 		<specification>boot/initrd image used on OEM VMX disk</specification>
 	</description>
 	<preferences>
-		<type>cpio</type>
+		<type bootprofile="default">cpio</type>
 		<version>2.7.1</version>
 		<size unit="M">60</size>
 		<compressed>yes</compressed>
 		<packagemanager>smart</packagemanager>
 		<rpm-check-signatures>False</rpm-check-signatures>
 	</preferences>
+	<profiles>
+		<profile name="default" description="Boot with default kernel"/>
+		<profile name="xen" description="Boot with xen kernel/mboot.c32"/>
+		<profile name="smp" description="Boot with smp kernel"/>
+	</profiles>
 	<drivers type="usbdrivers">
 		<file name="usb/host/usb-uhci.ko"/>
 		<file name="usb/host/usb-ohci.ko"/>
@@ -51,6 +56,19 @@
 	<repository type="yast2" status="replaceable">
         <source path="/image/CDs/full-10.3-i386"/>
 	</repository>
+	<packages type="image" profiles="default">
+		<package name="kernel-default"/>
+		<package name="aufs-kmp-default"/>
+	</packages>
+	<packages type="image" profiles="smp">
+		<package name="kernel-bigsmp"/>
+		<package name="aufs-kmp-bigsmp"/>
+	</packages>
+	<packages type="image" profiles="xen">
+		<package name="kernel-xen"/>
+		<package name="aufs-kmp-xen"/>
+		<package name="xen"/>
+	</packages>
 	<packages type="image">
 		<package name="psmisc"/>
 		<package name="bind-libs"/>
@@ -71,7 +89,6 @@
 		<package name="grub"/>
 		<package name="squashfs"/>
 		<package name="aufs"/>
-		<package name="aufs-kmp-default"/>
 		<package name="gfxboot"/>
 		<package name="fribidi"/>
 		<package name="make"/>
@@ -81,7 +98,6 @@
 		<package name="tar"/>
 	</packages>
 	<packages type="boot">
-		<package name="kernel-default"/>
 		<package name="filesystem"/>
 		<package name="glibc-locale"/>
 		<package name="diffutils"/>

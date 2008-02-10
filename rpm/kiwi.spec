@@ -1,5 +1,5 @@
 # /.../
-# spec file for package kiwi (Version 2.21
+# spec file for package kiwi (Version 2.22
 # Copyright (c) 2006 SUSE LINUX Products GmbH, Nuernberg, Germany.
 # Please submit bugfixes or comments via http://bugs.opensuse.org
 # ---
@@ -16,7 +16,7 @@ Requires:      perl perl-XML-LibXML perl-libwww-perl screen coreutils
 Summary:       OpenSuSE - KIWI Image System
 Provides:      kiwi = %version
 Obsoletes:     kiwi2 <= 2.14
-Version:       2.21
+Version:       2.22
 Release:       28
 Group:         System
 License:       GPL
@@ -182,10 +182,10 @@ if [ "$UID" = "$K_USER" ];then
 	echo "# ..."  >> $pxedefault
 	echo "DEFAULT Local-Boot" >> $pxedefault
 	images="
-		netboot/suse-SLES10 netboot/suse-SLED10
-		netboot/suse-SLES10-smp netboot/suse-SLED10-smp
-		netboot/suse-SLED10-SP1 netboot/suse-SLED10-SP1-smp
-		netboot/suse-SLES10-SP1 netboot/suse-SLES10-SP1-smp
+		netboot/suse-SLES10
+		netboot/suse-SLED10
+		netboot/suse-SLED10-SP1 
+		netboot/suse-SLES10-SP1
 	"
 	for i in $images;do
 		rootName=`echo $i | tr / -`

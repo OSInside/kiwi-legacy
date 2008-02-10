@@ -15,6 +15,7 @@
 	<profiles>
 		<profile name="default" description="Boot with default kernel"/>
 		<profile name="xen" description="Boot with xen kernel/mboot.c32"/>
+		<profile name="smp" description="Boot with smp kernel"/>
 	</profiles>
 	<drivers type="drivers">
 		<file name="drivers/ide/*"/>
@@ -50,6 +51,9 @@
 	</repository>
 	<packages type="image" profiles="default">
 		<package name="kernel-default"/>
+	</packages>
+	<packages type="image" profiles="smp">
+		<package name="kernel-smp"/>
 	</packages>
 	<packages type="image" profiles="xen">
 		<package name="kernel-xen"/>

@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Sun Feb 10 20:56:36 CET 2008 - ms@suse.de
+
+- v2.22
+- added bootprofiles xen, smp and default to all boot image
+  descriptions except xenboot which has no alternative and has to
+  use the xen kernel. Additionally removed all -smp boot descriptions
+  as they are now handled with a bootprofile="smp" attribute
+
+-------------------------------------------------------------------
 Thu Feb  7 15:31:53 CET 2008 - ms@suse.de
 
 - v2.21

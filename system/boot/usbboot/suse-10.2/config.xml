@@ -5,13 +5,18 @@
 		<specification>boot/initrd image for USB stick systems</specification>
 	</description>
 	<preferences>
-		<type>cpio</type>
+		<type bootprofile="default">cpio</type>
 		<version>2.1.1</version>
 		<size unit="M">60</size>
 		<compressed>yes</compressed>
 		<packagemanager>smart</packagemanager>
 		<rpm-check-signatures>False</rpm-check-signatures>
 	</preferences>
+	<profiles>
+		<profile name="default" description="Boot with default kernel"/>
+		<profile name="xen" description="Boot with xen kernel/mboot.c32"/>
+		<profile name="smp" description="Boot with smp kernel"/>
+	</profiles>
 	<drivers type="usbdrivers">
 		<file name="usb/host/usb-uhci.ko"/>
 		<file name="usb/host/usb-ohci.ko"/>
@@ -46,6 +51,16 @@
 		<source path="opensuse://openSUSE:10.2"/>
 		<!--<source path="/image/dist/full-10.2-i386"/>-->
 	</repository>
+	<packages type="image" profiles="default">
+		<package name="kernel-default"/>
+	</packages>
+	<packages type="image" profiles="smp">
+		<package name="kernel-bigsmp"/>
+	</packages>
+	<packages type="image" profiles="xen">
+		<package name="kernel-xen"/>
+		<package name="xen"/>
+	</packages>
 	<packages type="image">
 		<package name="psmisc"/>
 		<package name="e2fsprogs"/>
@@ -67,7 +82,6 @@
 		<package name="tar"/>
 	</packages>
 	<packages type="boot">
-		<package name="kernel-default"/>
 		<package name="filesystem"/>
 		<package name="glibc-locale"/>
 		<package name="procps"/>

@@ -16,8 +16,9 @@
 		<profile name="default" description="Boot with default kernel"/>
 		<profile name="xen" description="Boot with xen kernel/mboot.c32"/>
 		<profile name="diskless" description="Booting diskless thin clients"/>
+		<profile name="smp" description="Boot with smp kernel"/>
 	</profiles>
-	<drivers type="drivers" profiles="default,xen">
+	<drivers type="drivers" profiles="default,xen,smp">
 		<!-- DRIVERS START DEFAULT AND XEN -->
 		<file name="drivers/ide/*"/>
 		<file name="drivers/block/loop.ko"/>
@@ -118,6 +119,12 @@
 		<package name="aufs-kmp-default"/>
 		<!-- KERNEL AND MODULE PACKAGES END DEFAULT -->
 	</packages>
+	<packages type="image" profiles="smp">
+		<!-- KERNEL AND MODULE PACKAGES START SMP -->
+		<package name="kernel-bigsmp"/>
+		<package name="aufs-kmp-bigsmp"/>
+		<!-- KERNEL AND MODULE PACKAGES END SMP -->
+    </packages>
 	<packages type="image" profiles="xen">
 		<!-- KERNEL AND MODULE PACKAGES START XEN -->
 		<package name="kernel-xen"/>
@@ -131,7 +138,7 @@
 		<package name="aufs-kmp-default"/>
 		<!-- KERNEL AND MODULE PACKAGES END DISKLESS -->
 	</packages>
-	<packages type="image" profiles="default,xen">
+	<packages type="image" profiles="default,xen,smp">
 		<!-- PACKAGES START DEFAULT AND XEN -->
 		<package name="curl"/>
 		<package name="psmisc"/>
@@ -184,7 +191,7 @@
 		<package name="filesystem"/>
 		<package name="glibc-locale"/>
 	</packages>
-	<packages type="delete" profiles="default,xen,diskless">
+	<packages type="delete" profiles="default,xen,diskless,smp">
 		<!-- DELETE PACKAGES START DEFAULT, XEN AND DISKLESS -->
 		<package name="PolicyKit"/>
 		<package name="audit-libs"/>
