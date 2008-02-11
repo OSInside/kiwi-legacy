@@ -758,25 +758,34 @@ function probeUSB {
 	local stdevs=""
 	local hwicmd="/usr/sbin/hwinfo"
 	for i in \
-        `$hwicmd --usb | grep "Driver [IA]" | 
-        sed -es"@modprobe\(.*\)\"@\1%@" | tr -d "\n"`
-    do
-        if echo $i | grep -q "#0";then
-            module=`echo $i | cut -f2 -d"\"" | tr -d " "`
-			if ! echo $stdevs | grep -q $module;then
-         	   stdevs="$stdevs $module"
-			fi
-        fi
-    done
+		`$hwicmd --usb | grep "Driver [IA]" | 
+		sed -es"@modprobe\(.*\)\"@\1%@" | tr -d "\n"`
+	do
+		if echo $i | grep -q "#0";then
+			module=`echo $i | cut -f2 -d"\"" | tr -d " "`
+			module=`echo $module | sed -es"@modprobe@@g"`
+			IFS=";"
+			for m in $module;do
+				if ! echo $stdevs | grep -q $m;then
+					stdevs="$stdevs $m"
+				fi
+			done
+		fi
+	done
+	IFS="%"
 	for i in \
 		`$hwicmd --usb-ctrl | grep "Driver [IA]" | 
 		sed -es"@modprobe\(.*\)\"@\1%@" | tr -d "\n"`
 	do
 		if echo $i | grep -q "#0";then
 			module=`echo $i | cut -f2 -d"\"" | tr -d " "`
-			if ! echo $stdevs | grep -q $module;then
-				stdevs="$stdevs $module"
-			fi
+			module=`echo $module | sed -es"@modprobe@@g"`
+			IFS=";"
+			for m in $module;do
+				if ! echo $stdevs | grep -q $m;then
+					stdevs="$stdevs $m"
+				fi
+			done
 		fi
 	done
 	IFS=$IFS_ORIG
@@ -801,7 +810,13 @@ function probeDevices {
 	do
 		if echo $i | grep -q "#0";then
 			module=`echo $i | cut -f2 -d"\"" | tr -d " "`
-			stdevs="$stdevs $module"
+			module=`echo $module | sed -es"@modprobe@@g"`
+			IFS=";"
+			for m in $module;do
+				if ! echo $stdevs | grep -q $m;then
+					stdevs="$stdevs $m"
+				fi
+			done
 		fi
 	done
 	IFS=$IFS_ORIG

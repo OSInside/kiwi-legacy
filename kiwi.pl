@@ -42,7 +42,7 @@ use KIWIQX;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "2.22";
+our $Version       = "2.23";
 our $openSUSE      = "http://download.opensuse.org/repositories/";
 our $ConfigFile    = "$ENV{'HOME'}/.kiwirc";
 our $ConfigStatus  = 0;
@@ -454,6 +454,22 @@ sub main {
 				my $code = kiwiExit (1); return $code;
 			}
 			$kiwi -> done();
+		}
+		#==========================================
+		# Check if destdir exists or not 
+		#------------------------------------------
+		if (! -d $Destination) {
+			my $prefix = $kiwi -> getPrefix (1);
+			my $answer = "unknown";
+			$kiwi -> info ("Destination: $Destination doesn't exist\n");
+			while ($answer !~ /^yes$|^no$/) {
+				print STDERR $prefix,
+					"Would you like kiwi to create it [yes/no] ? ";
+				chomp ($answer = <>);
+			}
+			if ($answer eq "yes") {
+				qxx ("mkdir -p $Destination");
+			}
 		}
 		#==========================================
 		# Check for default base root in XML
