@@ -4,6 +4,7 @@ Mon Feb 11 11:20:20 CET 2008 - ms@suse.de
 - v2.23
 - fixed module probing code due to hwinfo changes (bnc #359788)
 - added interactive creation of destination directory (bnc #360487)
+- make split image type to create the specified boot image (bnc #359124)
 
 -------------------------------------------------------------------
 Sun Feb 10 20:56:36 CET 2008 - ms@suse.de

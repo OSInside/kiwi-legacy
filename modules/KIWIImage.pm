@@ -1240,12 +1240,22 @@ sub createImageLiveCD {
 # createImageSplit
 #------------------------------------------
 sub createImageSplit {
+	# ...
+	# Create all split images and the specified boot image which
+	# should be used in combination to this split image. The process
+	# requires a subsequent action which could be either a kiwi call
+	# to create a vmx/oemboot based virtual disk or an usbboot based
+	# USB stick or the created images needs to copied into a PXE boot
+	# structure for use with a netboot setup.
+	# ---
 	my $this = shift;
 	my $type = shift;
 	my $kiwi = $this->{kiwi};
+	my $arch = $this->{arch};
 	my $imageTree = $this->{imageTree};
 	my $imageDest = $this->{imageDest};
-	my $xml = $this->{xml};
+	my $baseSystem= $this->{baseSystem};
+	my $sxml = $this->{xml};
 	my $FSTypeRW;
 	my $FSTypeRO;
 	my $error;
@@ -1256,16 +1266,28 @@ sub createImageSplit {
 	my $mbytesro;
 	my $mbytesrw;
 	my $xmlsize;
+	my $boot;
+	my $plinux;
+	my $pinitrd;
+	my $data;
+	my $code;
+	my $name;
 	#==========================================
 	# Get filesystem info for split image
 	#------------------------------------------
-	if ($type =~ /(.*),(.*)/) {
+	if ($type =~ /(.*),(.*):(.*)/) {
 		$FSTypeRW = $1;
 		$FSTypeRO = $2;
+		$boot = $3;
 	} else {
-		$kiwi -> error ("Could not determine filesystem types");
+		$kiwi -> error ("Could not determine filesystem/boot types");
 		return undef;
 	}
+	#==========================================
+	# Get system image type information
+	#------------------------------------------
+	my %type = %{$sxml->getImageTypeAndAttributes()};
+	my $pblt = $type{checkprebuilt};
 	#==========================================
 	# Get image creation date and name
 	#------------------------------------------
@@ -1320,7 +1342,7 @@ sub createImageSplit {
 			}
 		};
 		find(\&$createTmpTree, $imageTree);
-		my @tempFiles = $xml -> getSplitTempFiles ();
+		my @tempFiles = $sxml -> getSplitTempFiles ();
 		if (@tempFiles) {
 			foreach my $temp (@tempFiles) {
 				my $globsource = "${imageTree}${temp}";
@@ -1341,7 +1363,7 @@ sub createImageSplit {
 	#==========================================
 	# find persistent files for the read-write
 	#------------------------------------------
-	my @persistFiles = $xml -> getSplitPersistentFiles ();
+	my @persistFiles = $sxml -> getSplitPersistentFiles ();
 	$imageTreeRW = $imageTree;
 	$imageTreeRW =~ s/\/+$//;
 	$imageTreeRW.= "-read-write";
@@ -1575,9 +1597,159 @@ sub createImageSplit {
 		return undef;
 	}
 	#==========================================
-	# Cleanup and return
+	# Cleanup temporary data
 	#------------------------------------------
 	qxx ("rm -rf $imageTreeRW");
+
+	$name->{systemImage} = $main::ImageName;
+	#==========================================
+	# Prepare and Create boot image
+	#------------------------------------------
+	$kiwi -> info ("Creating boot image: $boot...\n");
+	my $Prepare = $imageTree."/image";
+	my $xml = new KIWIXML ( $kiwi,$Prepare );
+	if (! defined $xml) {
+		return undef;
+	}
+	my $tmpdir = qxx ("mktemp -q -d /tmp/kiwi-splitboot.XXXXXX"); chomp $tmpdir;
+	my $result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> error  ("Couldn't create tmp dir: $tmpdir: $!");
+		$kiwi -> failed ();
+		return undef;
+	}
+	$main::Survive  = "yes";
+	$main::RootTree = "$tmpdir/kiwi-splitboot-$$";
+	$main::Prepare  = $boot;
+	$main::BaseRoot = $type{baseroot};
+	if (defined $main::BaseRoot) {
+		if (($main::BaseRoot !~ /^\//) && (! -d $main::BaseRoot)) {
+			$main::BaseRoot = $main::System."/".$main::BaseRoot;
+		}
+	}
+	if (($main::Prepare !~ /^\//) && (! -d $main::Prepare)) {
+		$main::Prepare = $main::System."/".$main::Prepare;
+	}
+	if ($type{bootprofile}) {
+		@main::Profiles = split (/,/,$type{bootprofile});
+	}
+	$main::ForeignRepo{xmlnode} = $xml -> getForeignNodeList();
+	$main::ForeignRepo{packagemanager} = $xml -> getPackageManager();
+	$main::ForeignRepo{locale}  = $xml -> getLocale();
+	$main::ForeignRepo{prepare} = $main::Prepare;
+	$main::ForeignRepo{create}  = $main::Create;
+	$main::Create = $main::RootTree;
+	$xml = new KIWIXML ( $kiwi,$main::Prepare );
+	my $iname = $xml -> getImageName();
+	undef $main::SetImageType;
+	$kiwi -> info ("Checking for pre-built boot image");
+
+	if ((! $pblt) || ($pblt eq "false") || ($pblt eq "0")) {
+		#==========================================
+		# don't want a prebuilt boot image
+		#------------------------------------------
+		$kiwi -> notset();
+		$pblt = 0;
+	} else {
+		#==========================================
+		# check if a prebuilt boot image exists
+		#------------------------------------------
+		my $lookup = $main::Prepare."-prebuilt";
+		if (defined $main::PrebuiltBootImage) {
+			$lookup = $main::PrebuiltBootImage;
+		}
+		$pinitrd = glob ("$lookup/$iname*$arch*.gz");
+		$plinux  = glob ("$lookup/$iname*$arch*.kernel");
+		if ((! -f $pinitrd) || (! -f $plinux)) {
+			$kiwi -> skipped();
+			$kiwi -> info ("Cant't find pre-built boot image in $lookup");
+			$kiwi -> skipped();
+			$pblt = 0;
+		} else {
+			$kiwi -> done();
+			$kiwi -> info ("Extracting pre-built boot image");
+			$data = qxx ("mkdir -p $main::Create");
+			$data = qxx (
+				"$main::Gzip -cd $pinitrd|(cd $main::Create && cpio -di 2>&1)"
+			);
+			$code = $? >> 8;
+			if ($code != 0) {
+				$kiwi -> failed();
+				$kiwi -> error ("Can't extract pre-built boot image: $data");
+				$kiwi -> failed();
+				$pblt = 0;
+			} else {
+				$kiwi -> done();
+				$pblt = 1;
+			}
+		}
+	}
+	if (! $pblt) {
+		#==========================================
+		# build the boot image
+		#------------------------------------------
+		if (! defined main::main()) {
+			$main::Survive = "default";
+			if (! -d $main::RootTree.$baseSystem) {
+				qxx ("rm -rf $main::RootTree");
+				qxx ("rm -rf $tmpdir");
+			}
+			return undef;
+		}
+	}
+	#==========================================
+	# remove tmpdir with boot tree
+	#------------------------------------------
+	if (! -d $main::RootTree.$baseSystem) {
+		qxx ("rm -rf $main::RootTree");
+		qxx ("rm -rf $tmpdir");
+	}
+	#==========================================
+	# Include splash screen to initrd
+	#------------------------------------------
+	my $initrd = $main::Destination."/".$main::ImageName.".gz";
+	if (! -f $initrd) {
+		$initrd = $main::Destination."/".$main::ImageName;
+	}
+	my $kboot  = new KIWIBoot ($kiwi,$initrd);
+	if (! defined $kboot) {
+		return undef;
+	}
+	$kboot -> setupSplashForGrub();
+	$kboot -> cleanTmp();
+	#==========================================
+	# Check further actions due to boot image
+	#------------------------------------------
+	$name->{bootImage} = $main::ImageName;
+	$name->{format} = $type{format};
+	undef %main::ForeignRepo;
+	undef $main::Prepare;
+	undef $main::Create;
+	if ($boot =~ /vmxboot|oemboot/) {
+		#==========================================
+		# Create virtual disk images if requested
+		#------------------------------------------
+		$main::BootVMDisk  = $main::Destination."/".$name->{bootImage};
+		$main::BootVMDisk  = $main::BootVMDisk.".splash.gz";
+		$main::BootVMSystem= $main::Destination."/".$name->{systemImage};
+		$main::BootVMFormat= $name->{format};
+		if (! defined main::main()) {
+			$main::Survive = "default";
+			return undef;
+		}
+		#==========================================
+		# Create virtual disk configuration
+		#------------------------------------------
+		if ((defined $main::BootVMFormat) && ($main::BootVMFormat eq "vmdk")) {
+			# VMware vmx file...
+			my %vmwc = $sxml -> getPackageAttributes ("vmware");
+			if (! $this-> buildVMwareConfig ($main::Destination,$name,\%vmwc)) {
+				$main::Survive = "default";
+				return undef;
+			}
+		}
+	}
+	$main::Survive = "default";
 	return $this;
 }
 

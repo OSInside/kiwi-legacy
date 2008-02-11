@@ -1415,7 +1415,12 @@ sub checkType {
 				$kiwi -> failed ();
 				return undef;
 			}
-			$para = $type{filesystem};
+			if (! defined $type{boot}) {
+				$kiwi -> error ("$type{type}: No boot image specified");
+				$kiwi -> failed ();
+				return undef;
+			}
+			$para = $type{filesystem}.":".$type{boot};
 			last SWITCH;
 		};
 		/^usb|vmx|oem|xen|pxe/ && do {
