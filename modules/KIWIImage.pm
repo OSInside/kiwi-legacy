@@ -371,11 +371,6 @@ sub createImageUSB {
 		$kiwi -> failed ();
 		return undef;
 	}
-	if (($type eq "squashfs") && ($text eq "Xen")) {
-		$kiwi -> error  ("Unsupported $text type: $type");
-		$kiwi -> failed ();
-		return undef;
-	}
 	SWITCH: for ($type) {
 		/^ext2/       && do {
 			$ok = 1;
@@ -1498,10 +1493,6 @@ sub createImageSplit {
 			$ok = $this -> setupReiser ( $namero );
 			last SWITCH;
 		};
-		/cramfs/     && do {
-			$ok = $this -> setupCramFS ( $namero,$imageTree );
-			last SWITCH;
-		};
 		/squashfs/   && do {
 			$ok = $this -> setupSquashFS ( $namero,$imageTree );
 			last SWITCH;
@@ -1532,7 +1523,8 @@ sub createImageSplit {
 		if (! -d $source) {
 			next;
 		}
-		if ($type ne "cramfs" && $type ne "squashfs") {
+		my %fsattr = main::checkFileSystem ($type);
+		if (! $fsattr{readonly}) {
 			#==========================================
 			# mount logical extend for data transfer
 			#------------------------------------------
@@ -1566,11 +1558,6 @@ sub createImageSplit {
 			};
 			/reiserfs/   && do {
 				qxx ("/sbin/reiserfsck -y $imageDest/$name 2>&1");
-				$kiwi -> done();
-				last SWITCH;
-			};
-			/cramfs/     && do {
-				qxx ("/sbin/fsck.cramfs -v $imageDest/$name 2>&1");
 				$kiwi -> done();
 				last SWITCH;
 			};
@@ -2285,7 +2272,9 @@ sub mountLogicalExtend {
 		$kiwi -> failed ();
 		return undef;
 	}
-	my $data= qxx ("$mount -o loop=$loop $imageDest/$name $imageDest/mnt-$$ 2>&1");
+	my $data= qxx (
+		"$mount -o loop=$loop $imageDest/$name $imageDest/mnt-$$ 2>&1"
+	);
 	my $code= $? >> 8;
 	if ($code != 0) {
 		chomp $data;
@@ -2433,34 +2422,12 @@ sub setupReiser {
 	my $name = shift;
 	my $kiwi = $this->{kiwi};
 	my $imageDest = $this->{imageDest};
-	my $data = qxx ("/sbin/mkreiserfs -q -f -s 513 -b 4096 $imageDest/$name 2>&1");
+	my $data = qxx (
+		"/sbin/mkreiserfs -q -f -s 513 -b 4096 $imageDest/$name 2>&1"
+	);
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> error  ("Couldn't create Reiser filesystem");
-		$kiwi -> failed ();
-		$kiwi -> error  ($data);
-		return undef;
-	}
-	return $name;
-}
-
-#==========================================
-# setupCramFS
-#------------------------------------------
-sub setupCramFS {
-	my $this = shift;
-	my $name = shift;
-	my $tree = shift;
-	my $kiwi = $this->{kiwi};
-	my $imageTree = $this->{imageTree};
-	my $imageDest = $this->{imageDest};
-	if (! defined $tree) {
-		$tree = $imageTree;
-	}
-	my $data = qxx ("/sbin/mkfs.cramfs -b 4096 -v $tree $imageDest/$name 2>&1");
-	my $code = $? >> 8; 
-	if ($code != 0) {
-		$kiwi -> error  ("Couldn't create CRam filesystem");
 		$kiwi -> failed ();
 		$kiwi -> error  ($data);
 		return undef;

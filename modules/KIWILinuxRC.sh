@@ -714,7 +714,6 @@ function probeFileSystem {
 		*ext3*)     FSTYPE=ext3 ;;
 		*ext2*)     FSTYPE=ext2 ;;
 		*ReiserFS*) FSTYPE=reiserfs ;;
-		*cramfs*)   FSTYPE=cramfs ;;
 		*Squashfs*) FSTYPE=squashfs ;;
 		*)
 			FSTYPE=unknown
@@ -938,14 +937,25 @@ function CDMount {
 	# search all CD/DVD drives and use the one we can find
 	# the CD configuration on
 	# ----
-	CDDevice
+	local count=0
 	mkdir -p /cdrom
-	IFS=":"; for i in $cddev;do
-		mount $i /cdrom >/dev/null
-		if [ -f $LIVECD_CONFIG ];then
-			cddev=$i; return
+	while true;do
+		CDDevice
+		IFS=":"; for i in $cddev;do
+			mount $i /cdrom >/dev/null
+			if [ -f $LIVECD_CONFIG ];then
+				cddev=$i; return
+			fi
+			umount $i >/dev/null
+		done
+		IFS=$IFS_ORIG
+		if [ $count -eq 6 ]; then
+			break
+		else
+			echo "Drive not ready yet... waiting"
+			sleep 1
 		fi
-		umount $i >/dev/null
+		count=`expr $count + 1`
 	done
 	systemException \
 		"Couldn't find CD image configuration file" \

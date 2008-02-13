@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Wed Feb 13 11:28:39 CET 2008 - ms@suse.de
+
+- v2.24
+- fixed CD/DVD detection if multiple devices appear lately (bnc #359511)
+- added main::checkFileSystem() method to get attributes of a fs
+- fixed missing md5sum creation for install USB Stick image
+- removed cramfs support because of its size limit. It doesn't apply
+  very well as compressed filesystem for system images.
+
+-------------------------------------------------------------------
 Mon Feb 11 11:20:20 CET 2008 - ms@suse.de
 
 - v2.23

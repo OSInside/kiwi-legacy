@@ -91,9 +91,8 @@ sub new {
 	#------------------------------------------
 	if (defined $system) {
 		if (-f $system) {
-			my $status = qxx ( "file $system | grep -qi squashfs 2>&1" );
-			my $result = $? >> 8;
-			if ($result == 0) {
+			my %fsattr = main::checkFileSystem ($system);
+			if ($fsattr{readonly}) {
 				$syszip = -s $system;
 				$syszip+= 50 * 1024 * 1024;
 			} else {
@@ -177,6 +176,7 @@ sub new {
 		}
 		if ($syszip) {
 			$vmsize = $kernelSize + $initrdSize + $syszip;
+			$vmsize+= $vmsize * 0.3; # and 30% free space
 		} else {
 			$vmsize = $kernelSize + $initrdSize + $systemSize;
 			$vmsize+= $vmsize * 0.3; # and 30% free space
@@ -236,7 +236,7 @@ sub createBootStructure {
 		$iname  = $iname.".".$loc;
 		$xname  = $xname.".".$loc;
 	}
-	if ($initrd !~ /splash\.gz$/) {
+	if ($initrd !~ /splash\.gz$|splash\.install\.gz/) {
 		$initrd = $this -> setupSplashForGrub();
 		$zipped = 1;
 	}
@@ -1546,11 +1546,14 @@ sub setupBootDisk {
 		$FSTypeRW = $type{filesystem};
 		$FSTypeRO = $FSTypeRW;
 	}
-	if (($haveTree) && ($FSTypeRW eq "squashfs")) {
-		$kiwi -> error ("Can't copy data into requested RO filesystem");
-		$kiwi -> failed ();
-		$this -> cleanTmp ();
-		return undef;
+	if ($haveTree) {
+		my %fsattr = main::checkFileSystem ($FSTypeRW);
+		if ($fsattr{readonly}) {
+			$kiwi -> error ("Can't copy data into requested RO filesystem");
+			$kiwi -> failed ();
+			$this -> cleanTmp ();
+			return undef;
+		}
 	}
 	#==========================================
 	# search free loop device
@@ -2139,6 +2142,7 @@ sub setupBootDisk {
 		} elsif ($format eq "usb") {
 			$this -> {system} = $diskname;
 			$kiwi -> info ("Creating install USB Stick image\n");
+			$this -> buildMD5Sum ($diskname);
 			qxx ( "/sbin/losetup -d $loop" );
 			if (! $this -> setupInstallStick()) {
 				return undef;

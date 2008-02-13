@@ -42,7 +42,7 @@ use KIWIQX;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "2.23";
+our $Version       = "2.24";
 our $openSUSE      = "http://download.opensuse.org/repositories/";
 our $ConfigFile    = "$ENV{'HOME'}/.kiwirc";
 our $ConfigStatus  = 0;
@@ -93,6 +93,25 @@ our $Scheme  = $BasePath."/modules/KIWIScheme.rng";
 our $KConfig = $BasePath."/modules/KIWIConfig.sh";
 our $KMigrate= $BasePath."/modules/KIWIMigrate.txt";
 our $Revision= $BasePath."/.revision";
+
+#==========================================
+# Globals (Supported filesystem names)
+#------------------------------------------
+our %KnownFS;
+$KnownFS{ext3}{tool}      = "/sbin/mkfs.ext3";
+$KnownFS{ext2}{tool}      = "/sbin/mkfs.ext2";
+$KnownFS{squashfs}{tool}  = "/usr/bin/mksquashfs";
+$KnownFS{unified}{tool}   = "/usr/bin/mksquashfs";
+$KnownFS{compressed}{tool}= "/usr/bin/mksquashfs";
+$KnownFS{reiserfs}{tool}  = "/sbin/mkreiserfs";
+$KnownFS{cpio}{tool}      = "/usr/bin/cpio";
+$KnownFS{ext3}{ro}        = 0;
+$KnownFS{ext2}{ro}        = 0;
+$KnownFS{squashfs}{ro}    = 1;
+$KnownFS{unified}{ro}     = 1;
+$KnownFS{compressed}{ro}  = 1;
+$KnownFS{reiserfs}{ro}    = 0;
+$KnownFS{cpio}{ro}        = 0;
 
 #============================================
 # Globals
@@ -1376,16 +1395,27 @@ sub checkType {
 	my (%type) = %{$_[0]};
 	my $para   = "ok";
 	#==========================================
-	# check filesystem tool
+	# check for required filesystem tool(s)
 	#------------------------------------------
 	if (defined $type{filesystem}) {
-		if ($type{filesystem} eq "squashfs") {
-			if (! -f "/usr/bin/mksquashfs") {
-				$kiwi -> warning ("missing mksquashfs: reset to ext3 !");
-				$type{filesystem} = "ext3";
-				$kiwi -> skipped ();
+		my @fs = split (/,/,$type{filesystem});
+		if ((defined $type{flags}) && ($type{flags} ne "")) {
+			push (@fs,$type{flags});
+		}
+		foreach my $fs (@fs) {
+			my %result = checkFileSystem ($fs);
+			if (%result) {
+				if (! $result{hastool}) {
+					$kiwi -> error ("Can't find mkfs tool for: $result{type}");
+					$kiwi -> failed ();
+					return undef;
+				}
+			} else {
+				$kiwi -> error ("Can't check filesystem attributes from: $fs");
+				$kiwi -> failed ();
+				return undef;
 			}
-		}	
+		}
 	}
 	#==========================================
 	# build and check KIWIImage method params
@@ -1399,13 +1429,7 @@ sub checkType {
 			}
 			$para = $type{boot};
 			if ((defined $type{flags}) && ($type{flags} ne "")) {
-				if (-f "/usr/bin/mksquashfs") {	
-					$para .= ",$type{flags}";
-				} else {
-					$kiwi -> error("missing mksquashfs for flag: $type{flags}");
-					$kiwi -> failed();
-					return undef;
-				}
+				$para .= ",$type{flags}";
 			} 
 			last SWITCH;
 		};
@@ -1440,5 +1464,74 @@ sub checkType {
 	}
 	return $para;
 }
+
+#==========================================
+# checkFileSystem
+#------------------------------------------
+sub checkFileSystem {
+	# /.../
+	# checks attributes of the given filesystem(s) and returns
+	# a summary hash containing the following information
+	# ---
+	# $filesystem{hastool}  --> has the tool to create the filesystem
+	# $filesystem{readonly} --> is a readonly filesystem
+	# $filesystem{type}     --> what filesystem type is this
+	# ---
+	my $fs     = shift;
+	my %result = ();
+	if (defined $KnownFS{$fs}) {
+		#==========================================
+		# got a known filesystem type
+		#------------------------------------------
+		$result{type}     = $fs;
+		$result{readonly} = $KnownFS{$fs}{ro};
+		$result{hastool}  = 0;
+		if (-x $KnownFS{$fs}{tool}) {
+			$result{hastool} = 1;
+		}
+	} else {
+		#==========================================
+		# got a file, block special or something
+		#------------------------------------------
+		if (-e $fs) {
+			my $data = qxx ("dd if=$fs bs=128k count=1 2>/dev/null | file -");
+			my $code = $? >> 8;
+			my $type;
+			if ($code != 0) {
+				return undef;
+			}
+			SWITCH: for ($data) {
+				/ext3/      && do {
+					$type = "ext3";
+					last SWITCH;
+				};
+				/ext2/      && do {
+					$type = "ext2";
+					last SWITCH;
+				};
+				/ReiserFS/  && do {
+					$type = "reiserfs";
+					last SWITCH;
+				};
+				/Squashfs/  && do {
+					$type = "squashfs";
+					last SWITCH;
+				};
+				# unknown filesystem type...
+				return undef;
+			};
+			$result{type}     = $type;
+			$result{readonly} = $KnownFS{$type}{ro};
+			$result{hastool}  = 0;
+			if (-x $KnownFS{$type}{tool}) {
+				$result{hastool} = 1;
+			}
+		} else {
+			return undef;
+		}
+	}
+	return %result;
+}
+
 
 main();
