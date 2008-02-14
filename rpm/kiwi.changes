@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Thu Feb 14 10:16:30 CET 2008 - ms@suse.de
+
+- v2.25
+- allow boot attribute to be optional for split images
+- changed ISO image type when flags="compressed" is set. The new
+  style will use the split system by James Willcox and therefore
+  require a split section to define the read-write data
+
+-------------------------------------------------------------------
 Wed Feb 13 11:28:39 CET 2008 - ms@suse.de
 
 - v2.24

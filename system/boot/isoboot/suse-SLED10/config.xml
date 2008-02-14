@@ -75,6 +75,7 @@
 		<package name="grub"/>
 		<package name="bootsplash"/>
 		<package name="bootsplash-theme-SuSE-NLD"/>
+		<package name="tar"/>
 	</packages>
 	<packages type="boot">
 		<package name="kernel-default"/>

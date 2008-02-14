@@ -745,7 +745,7 @@ sub createImageLiveCD {
 	#==========================================
 	# split physical extend into RW / RO part
 	#------------------------------------------
-	if ((! defined $gzip) || ($gzip eq "compressed")) {
+	if (! defined $gzip) {
 		$imageTreeReadOnly = $imageTree;
 		$imageTreeReadOnly =~ s/\/+$//;
 		$imageTreeReadOnly.= "-read-only/";
@@ -816,21 +816,24 @@ sub createImageLiveCD {
 	# Create compressed filesystem on RO extend
 	#------------------------------------------
 	if (defined $gzip) {
-		$kiwi -> info ("Creating compressed read only filesystem...");
-		my $systemTree = $imageTreeReadOnly;
-		if ($gzip eq "unified") {
-			$systemTree = $imageTree;
+		if ($gzip eq "compressed") {
+			if (! $this -> createImageSplit ("ext3,squashfs", 1)) {
+				return undef;
+			}
+			$namero = $namerw;
+		} else {
+			$kiwi -> info ("Creating compressed read only filesystem...");
+			if (! $this -> setupSquashFS ( $namero,$imageTree )) {
+				$this -> restoreSplitExtend ();
+				return undef;
+			}
+			$kiwi -> done();
 		}
-		if (! $this -> setupSquashFS ( $namero,$systemTree )) {
-			$this -> restoreSplitExtend ();
-			return undef;
-		}
-		$kiwi -> done();
 	}
 	#==========================================
 	# Check / build md5 sum of RW extend
 	#------------------------------------------
-	if ((! defined $gzip) || ($gzip eq "compressed")) {
+	if (! defined $gzip) {
 		#==========================================
 		# Checking RW file system
 		#------------------------------------------
@@ -1076,7 +1079,7 @@ sub createImageLiveCD {
 	# Installing second stage images
 	#------------------------------------------
 	$kiwi -> info ("Moving CD image data into boot structure");
-	if ((! defined $gzip) || ($gzip eq "compressed")) {
+	if (! defined $gzip) {
 		qxx ("mv $imageDest/$namerw.md5 $main::RootTree/CD");
 		qxx ("mv $imageDest/$namerw.gz $main::RootTree/CD");
 	}
@@ -1193,9 +1196,19 @@ sub createImageLiveCD {
 		}
 		return undef;
 	}
-	print FD "IMAGE=/dev/ram1;$namecd\n";
-	if ((defined $gzip) && ($gzip eq "unified")) {
-		print FD "UNIONFS_CONFIG=/dev/ram1,/dev/loop1,aufs\n";
+
+	if ((! defined $gzip) || ($gzip eq "unified")) {
+		print FD "IMAGE=/dev/ram1;$namecd\n";
+	} else {
+		print FD "IMAGE=/dev/loop1;$namecd\n";
+	}
+	
+	if (defined $gzip) {
+		if ($gzip eq "unified") {
+			print FD "UNIONFS_CONFIG=/dev/ram1,/dev/loop1,aufs\n";
+		} else {
+			print FD "COMBINED_IMAGE=yes\n";
+		}
 	}
 	close FD;
 
@@ -1245,6 +1258,7 @@ sub createImageSplit {
 	# ---
 	my $this = shift;
 	my $type = shift;
+	my $nopersistent = shift;
 	my $kiwi = $this->{kiwi};
 	my $arch = $this->{arch};
 	my $imageTree = $this->{imageTree};
@@ -1274,6 +1288,9 @@ sub createImageSplit {
 		$FSTypeRW = $1;
 		$FSTypeRO = $2;
 		$boot = $3;
+	} elsif ($type =~ /(.*),(.*)/) {
+		$FSTypeRW = $1;
+		$FSTypeRO = $2;
 	} else {
 		$kiwi -> error ("Could not determine filesystem/boot types");
 		return undef;
@@ -1304,6 +1321,7 @@ sub createImageSplit {
 	$imageTreeTmp =~ s/\/+$//;
 	$imageTreeTmp.= "-tmp/";
 	$this->{imageTreeTmp} = $imageTreeTmp;
+	my @persistFiles = $sxml -> getSplitPersistentFiles ();
 	if (! -d $imageTreeTmp) {
 		$kiwi -> info ("Creating temporary image part");
 		if (! mkdir $imageTreeTmp) {
@@ -1338,6 +1356,10 @@ sub createImageSplit {
 		};
 		find(\&$createTmpTree, $imageTree);
 		my @tempFiles = $sxml -> getSplitTempFiles ();
+		if ($nopersistent) {
+			push (@tempFiles, @persistFiles);
+			@persistFiles = ();
+		}
 		if (@tempFiles) {
 			foreach my $temp (@tempFiles) {
 				my $globsource = "${imageTree}${temp}";
@@ -1358,7 +1380,6 @@ sub createImageSplit {
 	#==========================================
 	# find persistent files for the read-write
 	#------------------------------------------
-	my @persistFiles = $sxml -> getSplitPersistentFiles ();
 	$imageTreeRW = $imageTree;
 	$imageTreeRW =~ s/\/+$//;
 	$imageTreeRW.= "-read-write";
@@ -1589,6 +1610,9 @@ sub createImageSplit {
 	qxx ("rm -rf $imageTreeRW");
 
 	$name->{systemImage} = $main::ImageName;
+        if (! defined $boot) {
+		return $this;
+	}
 	#==========================================
 	# Prepare and Create boot image
 	#------------------------------------------

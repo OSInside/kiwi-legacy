@@ -42,7 +42,7 @@ use KIWIQX;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "2.24";
+our $Version       = "2.25";
 our $openSUSE      = "http://download.opensuse.org/repositories/";
 our $ConfigFile    = "$ENV{'HOME'}/.kiwirc";
 our $ConfigStatus  = 0;
@@ -1439,12 +1439,10 @@ sub checkType {
 				$kiwi -> failed ();
 				return undef;
 			}
-			if (! defined $type{boot}) {
-				$kiwi -> error ("$type{type}: No boot image specified");
-				$kiwi -> failed ();
-				return undef;
+			$para = $type{filesystem};
+			if (defined $type{boot}) {
+				$para .= ":".$type{boot};
 			}
-			$para = $type{filesystem}.":".$type{boot};
 			last SWITCH;
 		};
 		/^usb|vmx|oem|xen|pxe/ && do {

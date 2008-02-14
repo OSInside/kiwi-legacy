@@ -81,10 +81,6 @@ openKernelConsole
 # 6) Including required kernel modules
 #--------------------------------------
 probeDevices
-if [ -z "$UNIONFS_CONFIG" ];then
-	Echo "Probing module: rd"
-	modprobe rd >/dev/null 2>&1
-fi
 
 #======================================
 # 7) Mount the CD device
@@ -114,7 +110,7 @@ IFS="," ; for i in $IMAGE;do
 	imageName="/cdrom/$imageName-$imageVersion"
 	gzippName=$imageName.gz
 	imageMD5s="$imageName.md5"
-	if [ ! -z "$UNIONFS_CONFIG" ];then
+	if [ ! -z "$UNIONFS_CONFIG" ] || [ ! -z "$COMBINED_IMAGE" ];then
 		continue
 	fi
 	while true;do
@@ -224,7 +220,8 @@ fi
 #======================================
 # 12) Mount OS image to /mnt
 #--------------------------------------
-if [ -z "$UNIONFS_CONFIG" ];then
+runHook premount
+if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ];then
 	#======================================
 	# 12.1) mount RW part and CD to /mnt
 	#--------------------------------------
@@ -260,7 +257,12 @@ else
 	#======================================
 	# 12.1) mount CD to /mnt and unify
 	#--------------------------------------
-	Echo "Mounting compressed unified tree..."
+	if [ ! -z "$COMBINED_IMAGE" ]; then
+		Echo "Mounting compressed split tree..."
+		imageReadOnly=`echo $imageReadOnly | sed -e "s/-read-only//"`
+	else
+		Echo "Mounting compressed unified tree..."
+	fi
 	mkdir -p /mnt/$LIVECD && mount $cddev /mnt/$LIVECD >/dev/null
 	losetup /dev/loop1 /mnt/$LIVECD/$imageReadOnly
 	if ! mountSystem /dev/loop1;then
@@ -268,6 +270,7 @@ else
 	fi
 fi
 validateRootTree
+runHook postmount
 
 #======================================
 # 13) Create system dependant files
