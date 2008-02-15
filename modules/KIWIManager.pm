@@ -483,7 +483,7 @@ sub setupInstallationSource {
 				#------------------------------------------
 				if (($key eq "baseurl") || ($key eq "path")) {
 					if ($val =~ /^'\//) {
-						$val =~ s/^'(.*)'$/'file:\/\/\1'/
+						$val =~ s/^'(.*)'$/'file:\/\/$1'/
 					}
 					push (@zopts,$val);
 				}
