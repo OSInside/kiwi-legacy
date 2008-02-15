@@ -1292,7 +1292,8 @@ sub createImageSplit {
 		$FSTypeRW = $1;
 		$FSTypeRO = $2;
 	} else {
-		$kiwi -> error ("Could not determine filesystem/boot types");
+		$kiwi -> error  ("Invalid filesystem setup for split type");
+		$kiwi -> failed ();
 		return undef;
 	}
 	#==========================================
