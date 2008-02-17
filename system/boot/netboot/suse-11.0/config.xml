@@ -185,6 +185,7 @@
 		<package name="fribidi"/>
 		<package name="nbd"/>
 		<package name="nfs-client"/>
+		<package name="tar"/>
 		<!-- PACKAGES STOP DISKLESS -->
 	</packages>
 	<packages type="boot">

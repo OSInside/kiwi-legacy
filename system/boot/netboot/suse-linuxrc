@@ -497,6 +497,10 @@ else
 		if [ -z "$nbdswapPort" ];then
 			nbdswapPort="9210"
 		fi
+		waitForBlockDevice $nbdDevice
+		if [ ! -b $nbdDevice ];then
+			systemException "Device $nbdDevice doesn't appear" "reboot"
+		fi
 		Echo "Mounting NBD root system: $nbdServer $nbdPort [$nbdDevice]..."
 		if ! /usr/sbin/nbd-client $nbdServer $nbdPort $nbdDevice;then
 			systemException "Failed to setup $nbdDevice device" "reboot"

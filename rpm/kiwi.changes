@@ -3,6 +3,8 @@ Fri Feb 15 10:35:08 CET 2008 - ms@suse.de
 
 - v2.26
 - fixed split image support on netboot if NBDROOT is used
+- added waitForBlockDevice function and call it with NBD
+- fixed invalid function call in boot stick creation (bnc #362239)
 
 -------------------------------------------------------------------
 Thu Feb 14 10:16:30 CET 2008 - ms@suse.de

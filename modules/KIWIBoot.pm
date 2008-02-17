@@ -347,6 +347,7 @@ sub setupBootStick {
 	my $xengz     = $this->{xengz};
 	my $imgtype   = "usb";
 	my $haveSplit = 0;
+	my $haveTree  = 0;
 	my $FSTypeRW;
 	my $FSTypeRO;
 	my $sysird;
@@ -354,9 +355,24 @@ sub setupBootStick {
 	my $result;
 	my $xml;
 	#==========================================
-	# find image type
+	# check if system is tree or image file
 	#------------------------------------------
-	if (defined $system) {
+	if ( -d $system ) {
+		#==========================================
+		# check image type
+		#------------------------------------------
+		if (-f "$system/rootfs.tar.gz") {
+			$kiwi -> error ("Can't use split root tree, run create first");
+			$kiwi -> failed ();
+			return undef;
+		}
+		$xml = new KIWIXML ( $kiwi,$system."/image",undef,$imgtype );
+		if (! defined $xml) {
+			$this -> cleanTmp ();
+			return undef;
+		}
+		$haveTree = 1;
+	} else {
 		$status = qxx ("mount -o loop $system $tmpdir 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
@@ -510,7 +526,6 @@ sub setupBootStick {
 		$this -> cleanTmp ();
 		return undef;
 	}
-	$label = $this -> getImageName();
 	print FD "color cyan/blue white/blue\n";
 	print FD "default 0\n";
 	print FD "timeout 10\n";
@@ -565,7 +580,7 @@ sub setupBootStick {
 	close FD;
 	$kiwi -> done();
 	#==========================================
-	# Create ext2 image
+	# Create ext2 image for boot image
 	#------------------------------------------
 	$kiwi -> info ("Creating stick image");
 	my $name = $initrd.".stickboot";
@@ -725,7 +740,7 @@ sub setupBootStick {
 	#==========================================
 	# Dump system image on stick
 	#------------------------------------------
-	if (defined $system) {
+	if (! $haveTree) {
 		$kiwi -> info ("Dumping system image to stick");
 		$status = qxx ( "umount $stick'1' 2>&1" );
 		$status = qxx ( "umount $stick'2' 2>&1" );
@@ -738,31 +753,6 @@ sub setupBootStick {
 			return undef;
 		}
 		$kiwi -> done();
-		$result = 0;
-		undef $status;
-		SWITCH: for ($FSTypeRO) {
-			/^ext\d/    && do {
-				$kiwi -> info ("Resizing system $FSTypeRO filesystem");
-				$status = qxx ("/sbin/resize2fs -f -F -p $stick'2' 2>&1");
-				$result = $? >> 8;
-				last SWITCH;
-			};
-			/^reiserfs/ && do {
-				$kiwi -> info ("Resizing system $FSTypeRO filesystem");
-				$status = qxx ("/sbin/resize_reiserfs $stick'2' 2>&1");
-				$result = $? >> 8;
-				last SWITCH;
-			}
-		};
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't resize $FSTypeRO filesystem: $status");
-			$kiwi -> failed ();
-			return undef;
-		}
-		if ($status) {
-			$kiwi -> done();
-		}
 		if ($haveSplit) {
 			$kiwi -> info ("Dumping split read/write part to stick");
 			$status = qxx ("dd if=$splitfile of=$stick'3' bs=32k 2>&1");
@@ -774,65 +764,165 @@ sub setupBootStick {
 				return undef;
 			}
 			$kiwi -> done();
-			$result = 0;
-			undef $status;
-			SWITCH: for ($FSTypeRW) {
-				/^ext\d/    && do {
-					$kiwi -> info ("Resizing split $FSTypeRW filesystem");
-					$status = qxx ("/sbin/resize2fs -f -F -p $stick'3' 2>&1");
-					$result = $? >> 8;
-					last SWITCH;
-				};
-				/^reiserfs/ && do {
-					$kiwi -> info ("Resizing split $FSTypeRW filesystem");
-					$status = qxx ("/sbin/resize_reiserfs $stick'3' 2>&1");
-					$result = $? >> 8;
-					last SWITCH;
-				}
+		}
+	} else {
+		#==========================================
+		# Create fs on system image partition
+		#------------------------------------------
+		SWITCH: for ($FSTypeRO) {
+			/^ext2/     && do {
+				$kiwi -> info ("Creating ext2 root filesystem");
+				my $fsopts = "-q -F";
+				$status = qxx ("/sbin/mke2fs $fsopts $stick'2' 2>&1");
+				$result = $? >> 8;
+				last SWITCH;
 			};
-			if ($result != 0) {
-				$kiwi -> failed ();
-				$kiwi -> error("Couldn't resize $FSTypeRW filesystem: $status");
-				$kiwi -> failed ();
-				return undef;
-			}
-			if ($status) {
-				$kiwi -> done();
-			}
+			/^ext3/     && do {
+				$kiwi -> info ("Creating ext3 root filesystem");
+				my $fsopts = "-O dir_index -b 4096 -j -J size=4 -q -F";
+				$status = qxx ("/sbin/mke2fs $fsopts $stick'2' 2>&1");
+				$result = $? >> 8;
+				last SWITCH;
+			};
+			/^reiserfs/ && do {
+				$kiwi -> info ("Creating reiserfs root filesystem");
+				$status = qxx (
+					"/sbin/mkreiserfs -q -f -s 513 -b 4096 $stick'2' 2>&1"
+				);
+				$result = $? >> 8;
+				last SWITCH;
+			};
+			$kiwi -> error  ("Unsupported filesystem type: $FSTypeRO");
+			$kiwi -> failed ();
+			$this -> cleanTmp ();
+			return undef;
+		};
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create $FSTypeRO filesystem: $status");
+			$kiwi -> failed ();
+			$this -> cleanTmp ();
+			return undef;
+		}
+		$kiwi -> done();
+		#==========================================
+		# Mount system image partition
+		#------------------------------------------
+		$status = qxx ("mount $stick'2' $loopdir 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't mount partition: $status");
+			$kiwi -> failed ();
+			$this -> cleanLoop ();
+			return undef;
 		}
 		#==========================================
-		# Mount system img for removal of boot data
+		# Copy root tree to virtual disk
 		#------------------------------------------
-		# Remove /boot from system image, we are booting from
-		# the kiwi initrd image and so the system image doesn't need
-		# any boot kernel/initrd. Problem is if the system image is
-		# a read-only image we can't remove data from it
-		# ---
-		if (! $syszip) {
-			$kiwi -> info ("Removing unused boot kernel/initrd from stick");
-			$status = qxx ("mount $stick'2' $loopdir 2>&1");
+		$kiwi -> info ("Copying system image tree on stick");
+		$status = qxx ("cp -a $system/* $loopdir 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Can't copy image tree on stick: $status");
+			$kiwi -> failed ();
+			$this -> cleanLoop ();
+			return undef;
+		}
+		$kiwi -> done();
+		#==========================================
+		# Umount system image partition
+		#------------------------------------------
+		qxx ( "umount $loopdir 2>&1" );
+	}
+	#==========================================
+	# Check and resize filesystems
+	#------------------------------------------
+	$result = 0;
+	undef $status;
+	SWITCH: for ($FSTypeRO) {
+		/^ext\d/    && do {
+			$kiwi -> info ("Resizing system $FSTypeRO filesystem");
+			$status = qxx ("/sbin/resize2fs -f -F -p $stick'2' 2>&1");
+			$result = $? >> 8;
+			last SWITCH;
+		};
+		/^reiserfs/ && do {
+			$kiwi -> info ("Resizing system $FSTypeRO filesystem");
+			$status = qxx ("/sbin/resize_reiserfs $stick'2' 2>&1");
+			$result = $? >> 8;
+			last SWITCH;
+		}
+	};
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't resize $FSTypeRO filesystem: $status");
+		$kiwi -> failed ();
+		return undef;
+	}
+	if ($status) {
+		$kiwi -> done();
+	}
+	if ($haveSplit) {
+		$result = 0;
+		undef $status;
+		SWITCH: for ($FSTypeRW) {
+			/^ext\d/    && do {
+				$kiwi -> info ("Resizing split $FSTypeRW filesystem");
+				$status = qxx ("/sbin/resize2fs -f -F -p $stick'3' 2>&1");
+				$result = $? >> 8;
+				last SWITCH;
+			};
+			/^reiserfs/ && do {
+				$kiwi -> info ("Resizing split $FSTypeRW filesystem");
+				$status = qxx ("/sbin/resize_reiserfs $stick'3' 2>&1");
+				$result = $? >> 8;
+				last SWITCH;
+			}
+		};
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error("Couldn't resize $FSTypeRW filesystem: $status");
+			$kiwi -> failed ();
+			return undef;
+		}
+		if ($status) {
+			$kiwi -> done();
+		}
+	}
+	#==========================================
+	# Mount system img for removal of boot data
+	#------------------------------------------
+	# Remove /boot from system image, we are booting from
+	# the kiwi initrd image and so the system image doesn't need
+	# any boot kernel/initrd. Problem is if the system image is
+	# a read-only image we can't remove data from it
+	# ---
+	if (! $syszip) {
+		$kiwi -> info ("Removing unused boot kernel/initrd from stick");
+		$status = qxx ("mount $stick'2' $loopdir 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't mount stick image: $status");
+			$kiwi -> failed ();
+			return undef;
+		}
+		if (-d "/mnt/boot") {
+			$status = qxx ("rm -r /mnt/boot 2>&1");
 			$result = $? >> 8;
 			if ($result != 0) {
-				$kiwi -> failed ();
-				$kiwi -> error  ("Couldn't mount stick image: $status");
-				$kiwi -> failed ();
-				return undef;
-			}
-			if (-d "/mnt/boot") {
-				$status = qxx ("rm -r /mnt/boot 2>&1");
-				$result = $? >> 8;
-				if ($result != 0) {
-					$kiwi -> skipped ();
-					$kiwi -> warning ("Couldn't remove data: $status");
-					$kiwi -> skipped ();
-				} else {
-					$kiwi -> done();
-				}
+				$kiwi -> skipped ();
+				$kiwi -> warning ("Couldn't remove data: $status");
+				$kiwi -> skipped ();
 			} else {
 				$kiwi -> done();
 			}
-			qxx ("umount $loopdir 2>&1");
+		} else {
+			$kiwi -> done();
 		}
+		qxx ("umount $loopdir 2>&1");
 	}
 	#==========================================
 	# Install grub on USB stick
@@ -1449,7 +1539,6 @@ sub setupBootDisk {
 	my $isxen     = $this->{isxen};
 	my $xengz     = $this->{xengz};
 	my $diskname  = $system.".raw";
-	my $label     = $this -> getImageName();
 	my $loop      = "/dev/loop0";
 	my $imgtype   = "vmx";
 	my $loopfound = 0;
@@ -1457,6 +1546,7 @@ sub setupBootDisk {
 	my $haveSplit = 0;
 	my $splitfile;
 	my $version;
+	my $label;
 	my $FSTypeRW;
 	my $FSTypeRO;
 	my $sysname;
@@ -2441,18 +2531,6 @@ sub cleanLoop {
 	qxx ("rm -rf $tmpdir");
 	qxx ("rm -rf $loopdir");
 	return $this;
-}
-
-#==========================================
-# getImageName
-#------------------------------------------
-sub getImageName {
-	my $this   = shift;
-	my $system = $this->{system};
-	my $arch   = $this->{arch};
-	my $label  = basename ($system);
-	$label =~ s/\.$arch.*$//;
-	return $label;
 }
 
 #==========================================

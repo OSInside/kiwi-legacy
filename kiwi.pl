@@ -1064,6 +1064,16 @@ sub init {
 		$kiwi -> error ("--> 2) and/or not in executable format\n");
 		my $code = kiwiExit (1); return $code;
 	}
+	if ((defined $BootStick) && (! defined $BootStickSystem)) {
+		$kiwi -> error ("USB stick setup must specify a bootstick-system");
+		$kiwi -> failed ();
+		my $code = kiwiExit (1); return $code;
+	}
+	if ((defined $BootVMDisk) && (! defined $BootVMSystem)) {
+		$kiwi -> error ("Virtual Disk setup must specify a bootvm-system");
+		$kiwi -> failed ();
+		my $code = kiwiExit (1); return $code;
+	}
 	#==========================================
 	# remove pre-defined smart channels
 	#------------------------------------------

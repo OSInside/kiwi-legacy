@@ -2012,6 +2012,27 @@ function waitForStorageDevice {
 }
 
 #======================================
+# waitForBlockDevice
+#--------------------------------------
+function waitForBlockDevice {
+	# /.../
+	# function to check if the given block device
+	# exists. If not the function will wait until the
+	# device appears or the check counter equals 4
+	# ----
+	local device=$1
+	local check=0
+	while true;do
+		if [ -b $device ] || [ $check -eq 4 ];then
+			break
+		fi
+		Echo "Waiting for device $device to settle..."
+		check=`expr $check + 1`
+		sleep 2
+	done
+}
+
+#======================================
 # fetchFile
 #--------------------------------------
 function fetchFile {
