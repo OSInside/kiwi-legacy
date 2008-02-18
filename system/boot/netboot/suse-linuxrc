@@ -133,9 +133,11 @@ fi
 #======================================
 # 7) Setup network interface and DNS
 #--------------------------------------
+runHook prenetwork
 if [ $LOCAL_BOOT = "no" ];then
 	setupNetwork
 fi
+runHook postnetwork
 
 #======================================
 # 8) get TFTP Server IP/name
