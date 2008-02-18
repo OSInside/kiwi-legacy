@@ -1470,7 +1470,7 @@ sub setupInstallStick {
 			$this -> cleanLoop ();
 			return undef;
 		}
-		$status = qxx ("cp $system /mnt/$ibasename 2>&1");
+		$status = qxx ("cp $system $loopdir/$ibasename 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
