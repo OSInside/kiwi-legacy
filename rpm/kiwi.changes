@@ -3,6 +3,7 @@ Mon Feb 18 18:29:23 CET 2008 - ms@suse.de
 
 - v2.27
 - fixed creation of install sticks, wrong target
+- fixed perl sat binding due to current version of libsatsolver
 
 -------------------------------------------------------------------
 Fri Feb 15 10:35:08 CET 2008 - ms@suse.de

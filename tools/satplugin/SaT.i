@@ -94,7 +94,7 @@ extern "C"
                 queue_push(&plist, i);
             }
         }
-        prune_best_version_arch(pool, &plist);
+        prune_to_best_arch (pool, &plist);
         if (plist.count == 0) {
             //printf("unknown package '%s'\n", name);
             return -1;
