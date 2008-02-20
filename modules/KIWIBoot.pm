@@ -373,7 +373,8 @@ sub setupBootStick {
 		}
 		$haveTree = 1;
 	} else {
-		$status = qxx ("mount -o loop $system $tmpdir 2>&1");
+		my %fsattr = main::checkFileSystem ($system);
+		$status = qxx ("mount -t $fsattr{type} -o loop $system $tmpdir 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> error ("Failed to loop mount system image: $status");
@@ -1556,6 +1557,12 @@ sub setupBootDisk {
 	my $destdir;
 	my $xml;
 	#==========================================
+	# check if image type is oem
+	#------------------------------------------
+	if ($initrd =~ /oemboot/) {
+		$imgtype = "oem";
+	}
+	#==========================================
 	# check if system is tree or image file
 	#------------------------------------------
 	if ( -d $system ) {
@@ -1577,7 +1584,8 @@ sub setupBootDisk {
 		#==========================================
 		# build disk name and label from xml data
 		#------------------------------------------
-		$status = qxx ("mount -o loop $system $tmpdir 2>&1");
+		my %fsattr = main::checkFileSystem ($system);
+		$status = qxx ("mount -t $fsattr{type} -o loop $system $tmpdir 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> error ("Failed to loop mount system image: $status");

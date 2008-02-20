@@ -42,7 +42,7 @@ use KIWIQX;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "2.27";
+our $Version       = "2.28";
 our $openSUSE      = "http://download.opensuse.org/repositories/";
 our $ConfigFile    = "$ENV{'HOME'}/.kiwirc";
 our $ConfigStatus  = 0;
@@ -775,8 +775,10 @@ sub main {
 			$kiwi -> failed ();
 			my $code = kiwiExit (1); return $code;
 		}
-		my $cmd  = "find -L -type f";
-		my $status = qxx ("cd $CreateHash&&$cmd|xargs md5sum > .checksum.md5");
+		my $cmd  = "find -L -type f | grep -v .svn | grep -v .checksum.md5";
+		my $status = qxx (
+			"cd $CreateHash && $cmd | xargs md5sum > .checksum.md5"
+		);
 		my $result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> error  ("Failed creating md5 sum: $status: $!");

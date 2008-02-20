@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Wed Feb 20 09:13:27 CET 2008 - ms@suse.de
+
+- v2.28
+- fixed loop mount if filesystem type is required by mount
+- fixed virtual disk boot type detection, could be oem or vmx
+- fixed image description md5 hash creation
+
+-------------------------------------------------------------------
 Mon Feb 18 18:29:23 CET 2008 - ms@suse.de
 
 - v2.27
