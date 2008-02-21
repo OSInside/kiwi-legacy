@@ -1,4 +1,18 @@
 -------------------------------------------------------------------
+Wed Feb 20 14:43:30 CET 2008 - ms@suse.de
+
+- v2.29
+- fixed suseActivateDefaultServices function
+- added support for config.oempartition in oemboot linuxrc.
+  This file allows to set the size of the swap partition,
+  system partition and can specify whether a /home partition should
+  be created or not. The following variables are allowed:
+  * OEM_SWAPSIZE=<number in MB>
+  * OEM_SYSTEMSIZE=<number in MB>
+  * OEM_WITHOUTHOME=1
+  don't specify OEM_WITHOUTHOME if you want a /home partition
+
+-------------------------------------------------------------------
 Wed Feb 20 09:13:27 CET 2008 - ms@suse.de
 
 - v2.28

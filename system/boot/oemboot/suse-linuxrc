@@ -36,6 +36,7 @@ export systemIntegrity="clean"
 #--------------------------------------
 export VMX_SYSTEM="/config.vmxsystem"
 export LIVECD_CONFIG=$VMX_SYSTEM
+export OEM_PARTITION_CONFIG="/config.oempartition"
 
 #======================================
 # Functions...
@@ -112,6 +113,10 @@ if [ ! -f $VMX_SYSTEM ];then
 	# partition is a squashfs partition and change the root
 	# partition name accordingly
 	# ----
+	if [ -f $OEM_PARTITION_CONFIG ];then
+		Echo "Including oem partition info file"
+		importFile < $OEM_PARTITION_CONFIG
+	fi
 	Echo "Searching for disk and root partition"
 	USBStickDevice
 	if [ $stickFound = 0 ];then
@@ -130,12 +135,16 @@ if [ ! -f $VMX_SYSTEM ];then
 		fi
 		export deviceDisk=`echo $deviceRoot | tr -d [0-9]`
 		export deviceSwap="$deviceDisk"2
-		export deviceHome="$deviceDisk"3
+		if [ -z "$OEM_WITHOUTHOME" ];then
+			export deviceHome="$deviceDisk"3
+		fi
 	else
 		Echo "USB stick found, prefer root on stick"
 		export deviceDisk=$stickRoot
 		export deviceSwap="$deviceDisk"2
-		export deviceHome="$deviceDisk"3
+		if [ -z "$OEM_WITHOUTHOME" ];then
+			export deviceHome="$deviceDisk"3
+		fi
 	fi
 	probeFileSystem "$deviceDisk"2
 	if test "$FSTYPE" = "squashfs";then
@@ -361,6 +370,9 @@ if [ $LOCAL_BOOT = "no" ];then
 	#--------------------------------------
 	mem_size=`grep MemTotal: /proc/meminfo | tr -dc '[0-9]'`
 	swapsize=$(( $mem_size *2 / 1024 ))
+	if [ ! -z "$OEM_SWAPSIZE" ];then
+		swapsize=$OEM_SWAPSIZE
+	fi
 	Echo "Filesystem of root system is: $FSTYPE -> $deviceRoot"
 	if test ! -z $COMBINED_IMAGE;then
 		#====================================== 
@@ -389,6 +401,12 @@ if [ $LOCAL_BOOT = "no" ];then
 			# Very small disk, we use only 50MB of swap and hope
 			# this is ok. If not we can't re-partition this disk
 			# ----
+			Echo "Very small disk detected"
+			echo
+			Echo -b "We try again with only 50MB of swap space and check"
+			Echo -b "if this is ok. If not we can't re-partition this disk"
+			Echo -b "The contents of OEM_SWAPSIZE will be ignored"
+			echo
 			swapsize=50
 			swapXMBytes=$swapsize
 			diskXABytes=`expr $diskXLBytes - $swapXMBytes`
@@ -482,9 +500,15 @@ if [ $LOCAL_BOOT = "no" ];then
 			# ----
 			input=/part.input
 			rm -f $input
-			disk1MBytes=10240
 			diskXMBytes=`sfdisk -s $deviceDisk`
 			diskXMBytes=`expr $diskXMBytes / 1024`
+			disk1MBytes=10240
+			if [ ! -z "$OEM_SYSTEMSIZE" ];then
+				disk1MBytes=$OEM_SYSTEMSIZE
+			fi
+			if [ ! -z "$OEM_WITHOUTHOME" ];then
+				disk1MBytes=`expr $diskXMBytes - $swapsize`
+			fi
 			if [ $disk1MBytes -gt $diskXMBytes ];then
 				# /.../
 				# Very small disk, we use the size of the root partition (/)
@@ -493,23 +517,54 @@ if [ $LOCAL_BOOT = "no" ];then
 				# is so small that only / without any additional space
 				# fits on it
 				# ----
+				Echo "Very small disk detected"
+				echo
+				Echo -b "We try again with only 50MB of swap space and use"
+				Echo -b "the original size of the root partition + 200MB"
+				Echo -b "The contents of OEM_SWAPSIZE and OEM_SYSTEMSIZE"
+				Echo -b "will be ignored"
+				echo
 				disk1MBytes=`sfdisk -s $deviceRoot`
 				disk1MBytes=`expr $disk1MBytes / 1024`
 				disk1MBytes=`expr $disk1MBytes + 200`
 				swapsize=50
 			fi
-			for cmd in \
-				d n p 2 1 +"$disk1MBytes"M \
-				n p 1 . +"$swapsize"M \
-				n p 3 . . \
-				t 1 82 w
-			do
-				if [ $cmd = "." ];then
-					echo >> $input
-					continue
-				fi
-				echo $cmd >> $input
-			done
+			diskTMBytes=`expr $swapsize + $disk1MBytes`
+			if [ $diskXMBytes < $diskTMBytes ];then
+				systemException "Disk too smal, can't re-partition it" "reboot"
+			fi
+			if [ ! -z "$OEM_WITHOUTHOME" ];then
+				#======================================
+				# 10.2.1 without /home partition
+				#--------------------------------------
+				for cmd in \
+					d n p 2 1 +"$disk1MBytes"M \
+					n p 1 . +"$swapsize"M \
+					t 1 82 w
+				do
+					if [ $cmd = "." ];then
+						echo >> $input
+						continue
+					fi
+					echo $cmd >> $input
+				done
+			else
+				#======================================
+				# 10.2.2 with /home partition
+				#--------------------------------------
+				for cmd in \
+					d n p 2 1 +"$disk1MBytes"M \
+					n p 1 . +"$swapsize"M \
+					n p 3 . . \
+					t 1 82 w
+				do
+					if [ $cmd = "." ];then
+						echo >> $input
+						continue
+					fi
+					echo $cmd >> $input
+				done
+			fi
 			Echo "Repartition the disk according to current geometry"
 			fdisk $deviceDisk < $input >/dev/null 2>&1
 			if test $? != 0; then
@@ -520,8 +575,9 @@ if [ $LOCAL_BOOT = "no" ];then
 			#--------------------------------------
 			export deviceRoot="$deviceDisk"2
 			export deviceSwap="$deviceDisk"1
-			export deviceHome="$deviceDisk"3
-
+			if [ -z "$OEM_WITHOUTHOME" ];then
+				export deviceHome="$deviceDisk"3
+			fi
 			#======================================
 			# 10.4 Activate swap space
 			#--------------------------------------
@@ -532,9 +588,11 @@ if [ $LOCAL_BOOT = "no" ];then
 			#======================================
 			# 10.5 Create home file system
 			#--------------------------------------
-			Echo "Creating Home filesystem on $deviceHome"
-			if ! mke2fs -j -q $deviceHome >/dev/null 2>&1;then
-				systemException "Failed to create home filesystem" "reboot"
+			if [ -z "$OEM_WITHOUTHOME" ];then
+				Echo "Creating Home filesystem on $deviceHome"
+				if ! mke2fs -j -q $deviceHome >/dev/null 2>&1;then
+					systemException "Failed to create home filesystem" "reboot"
+				fi
 			fi
 		else
 			#======================================
@@ -557,10 +615,19 @@ if [ $LOCAL_BOOT = "no" ];then
 				# is not big enough compared to the system image already
 				# installed
 				# ----
+				Echo "Very small disk detected"
+				echo
+				Echo -b "We try again with only 50MB of swap space and check"
+				Echo -b "if this is ok. If not we can't re-partition this disk"
+				Echo -b "The contents of OEM_SWAPSIZE will be ignored"
+				echo
 				swapsize=50
 				swapXMBytes=$swapsize
 				disk3MBytes=`expr $diskXMBytes - $disk1MBytes - $disk2MBytes`
 				disk3MBytes=`expr $disk3MBytes - $swapXMBytes`
+			fi
+			if [ $disk3MBytes -lt 0 ];then
+				systemException "Disk too smal, can't re-partition it" "reboot"
 			fi
 			#======================================
 			# 10.3 write new partition table
@@ -688,14 +755,16 @@ if [ $LOCAL_BOOT = "no" ];then
 	updateSwapDeviceFstab /config $deviceSwap
 	if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ]; then
 		echo "$deviceRoot / $FSTYPE defaults 0 0" >> /config/etc/fstab
-		if [ `ls /mnt/home/ | wc -l` != 0 ]; then
-			Echo "Found non empty home/ directory !"
-			Echo "Moving home/ data to newly created home partition $deviceHome"
-			mount $deviceHome /mnt/mnt && mv /mnt/home/* /mnt/mnt
-			umount /mnt/mnt
+		if [ -z "$OEM_WITHOUTHOME" ];then
+			if [ `ls /mnt/home/ | wc -l` != 0 ]; then
+				Echo "Found non empty home/ directory !"
+				Echo "Moving home/ data to home partition $deviceHome"
+				mount $deviceHome /mnt/mnt && mv /mnt/home/* /mnt/mnt
+				umount /mnt/mnt
+			fi
+			Echo "Activate home partition $deviceHome in fstab"
+			echo "$deviceHome /home  ext3    defaults 0 0"  >> /config/etc/fstab
 		fi
-		Echo "Activate home partition $deviceHome in fstab"
-		echo "$deviceHome /home  ext3    defaults 0 0"  >> /config/etc/fstab
 	else
 		mkdir -p /config/kiwiboot
 		echo "$deviceBoot /kiwiboot ext2 defaults 0 0"  >> /config/etc/fstab

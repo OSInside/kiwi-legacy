@@ -94,20 +94,51 @@ function suseActivateDefaultServices {
 	# Call all postin scriptlets which among other things activates
 	# all default services required using insserv
 	# -----
-	for p in `rpm -qa`;do
-		#echo "Creating post script for package: $p"
+	local ifss=$IFS
+	local file=kiwi-services.default
+	local name=""
+	local name1=$name
+	local name2=$name
+	rm -f $file
+	for p in `rpm -qa --qf "%{NAME}\n"`;do
 		rpm -q --qf \
 			"%|POSTIN?{%|POSTINPROG?{}|%{POSTIN}\n}:{%|POSTINPROG?{}|}|" \
 		$p > $p.sh
 		if [ -s "$p.sh" ];then
 			echo "Calling post script $p.sh"
-			need=`bash $p.sh 2>&1 | grep "for service" | cut -f10 -d " "`
-			if [ ! -z "$need" ];then
-				suseInsertService $need
-			fi
+			bash $p.sh 2>&1
+			cat $p.sh | sed -e s@\$SCRIPTNAME@$p@g | grep insserv >> $file
 		fi
 		rm -f $p.sh
 	done
+	IFS="
+	"
+	for i in \
+		`cat $file | grep -v ^.*# | cut -f2- -d"/" | grep ^insserv`
+	do
+		name=`echo $i | cut -f2 -d. | cut -f2 -d/`
+		if echo $name | grep -q insserv; then
+			name1=`echo $name | cut -f2 -d" "`
+			name2=`echo $name | cut -f3 -d" "`
+			if [ ! -z $name1 ];then
+				name=$name1
+			fi
+			if [ ! -z $name2 ];then
+				name=$name2
+			fi
+		else
+			name=`echo $name | tr -d " "`
+		fi
+		if [ -f /etc/init.d/$name ];then
+			echo $name >> kiwi-services.tmp
+		fi
+	done
+	for i in `cat kiwi-services.tmp | sort | uniq`;do
+		suseInsertService $i
+	done
+	rm -f kiwi-services.tmp
+	rm -f $file
+	IFS=$ifss
 }
 
 #======================================
