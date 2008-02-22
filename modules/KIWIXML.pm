@@ -317,6 +317,34 @@ sub getImageSize {
 }
 
 #==========================================
+# getImageSizeBytes
+#------------------------------------------
+sub getImageSizeBytes {
+	# ...
+	# Get the predefined size of the logical extend
+	# as byte value
+	# ---
+	my $this = shift;
+	my $node = $this->{optionsNodeList} -> get_node(1);
+	my $size = $node -> getElementsByTagName ("size");
+	if ($size) {
+		my $byte = int $size;
+		my $unit = $node -> getElementsByTagName ("size")
+			-> get_node(1) -> getAttribute("unit");
+		if ($unit eq "M") {
+			return $byte * 1024 * 1024;
+		}
+		if ($unit eq "G") {
+			return $byte * 1024 * 1024 * 1024;
+		}
+		# no unit specified assume MB...
+		return $byte * 1024 * 1024;
+	} else {
+		return "auto";
+	}
+}
+
+#==========================================
 # getImageDefaultDestination
 #------------------------------------------
 sub getImageDefaultDestination {

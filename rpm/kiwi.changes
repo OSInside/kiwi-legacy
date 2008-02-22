@@ -3,6 +3,9 @@ Wed Feb 20 14:43:30 CET 2008 - ms@suse.de
 
 - v2.29
 - fixed suseActivateDefaultServices function
+- change non privileged actions to work without root permissions
+- make sure the size value is used if a virtual disk image is
+  created from a given prepared root tree (bnc #363953)
 - added support for config.oempartition in oemboot linuxrc.
   This file allows to set the size of the swap partition,
   system partition and can specify whether a /home partition should

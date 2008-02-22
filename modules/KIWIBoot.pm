@@ -73,6 +73,7 @@ sub new {
 	my $tmpdir;
 	my $loopdir;
 	my $result;
+	my $status;
 	my $isxen;
 	my $xengz;
 	if (! defined $kiwi) {
@@ -167,19 +168,75 @@ sub new {
 	if ((! defined $vmsize) && (defined $system)) {
 		my $kernelSize = -s $kernel; # the kernel
 		my $initrdSize = -s $initrd; # the boot image
-		my $systemSize; # the system image
+		my $systemSXML = 1; # system size set by XML file
+		my $systemSize = 0; # the system image size in bytes
 		if (-d $system) {
+			my $xml = new KIWIXML ($kiwi,$system."/image");
+			if (! defined $xml) {
+				return undef;
+			}
+			$systemSXML = $xml -> getImageSizeBytes();
 			$systemSize = qxx ("du -bs $system | cut -f1 2>&1");
 			chomp $systemSize;
+			if ($systemSXML eq "auto") {
+				$systemSXML = 0;
+			}
 		} else {
+			my %fsattr = main::checkFileSystem ($system);
+			$status = qxx (
+				"mount -t $fsattr{type} -o loop $system $tmpdir 2>&1"
+			);
+			$result = $? >> 8;
+			if ($result != 0) {
+				$kiwi -> error ("Failed to loop mount system image: $status");
+				$kiwi -> failed ();
+				$this -> cleanTmp ();
+				return undef;
+			}
+			my $xml = new KIWIXML ( $kiwi,$tmpdir."/image");
+			$status = qxx ("umount $tmpdir 2>&1");
+			$result = $? >> 8;
+			if ($result != 0) {
+				$kiwi -> error ("Failed to umount system image: $status");
+				$kiwi -> failed ();
+				$this -> cleanTmp ();
+				return undef;
+			}
+			if (! defined $xml) {
+				$this -> cleanTmp ();
+				return undef;
+			}
+			$systemSXML = $xml -> getImageSizeBytes();
 			$systemSize = -s $system;
+			if ($systemSXML eq "auto") {
+				$systemSXML = 0;
+			}
 		}
 		if ($syszip) {
+			# /.../
+			# virtual disk size in case of a compressed image is the size
+			# of the kernel + the boot image + the size of the compressed
+			# system image plus 30% free space for read-write operations.
+			# If the system image size is set by config.xml we use this
+			# value on our own risk
+			# ----
 			$vmsize = $kernelSize + $initrdSize + $syszip;
 			$vmsize+= $vmsize * 0.3; # and 30% free space
+			if (($systemSXML) && ($systemSXML > $vmsize)) {
+				$vmsize = $systemSXML;
+			}
 		} else {
+			# /.../
+			# virtual disk size in case of an uncompressed system image
+			# is the size of the kernel + the boot image + the system image
+			# size plus 30% free space of that sum. If the system image size
+			# is set by config.xml we use this value on our own risk
+			# ----
 			$vmsize = $kernelSize + $initrdSize + $systemSize;
 			$vmsize+= $vmsize * 0.3; # and 30% free space
+			if (($systemSXML) && ($systemSXML > $vmsize)) {
+				$vmsize = $systemSXML;
+			}
 		}
 		$vmsize  = $vmsize / 1024 / 1024;
 		$vmsize  = int $vmsize;

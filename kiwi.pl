@@ -137,7 +137,6 @@ our $BootCD;            # Boot initrd booting from CD
 our $InstallStick;      # Installation initrd booting from USB stick
 our $InstallStickSystem;# virtual disk system image to be installed on disk
 our $StripImage;        # strip shared objects and binaries
-our $CreatePassword;    # create crypt password string
 our $CreateHash;        # create .checksum.md5 for given description
 our $SetupSplashForGrub;# setup splash screen(s) for grub
 our $ImageName;         # filename of current image, used in Modules
@@ -730,65 +729,6 @@ sub main {
 	}
 
 	#==========================================
-	# Create a crypted password and print it
-	#------------------------------------------
-	if (defined $CreatePassword) {
-		my $word2 = 2;
-		my $word1 = 1;
-		my $salt  = (getpwuid ($<))[1];
-		while ($word1 ne $word2) {
-			$kiwi -> info ("Enter Password: ");
-			system "stty -echo";
-			chomp ($word1 = <STDIN>);
-			system "stty echo";
-			$kiwi -> done ();
-			$kiwi -> info ("Reenter Password: ");
-			system "stty -echo";
-			chomp ($word2 = <STDIN>);
-			system "stty echo";
-			if ( $word1 ne $word2 ) {
-				$kiwi -> failed ();
-				$kiwi -> info ("*** Passwords differ, please try again ***");
-				$kiwi -> failed ();
-			}
-		}
-		$kiwi -> done ();
-		my $pwd = crypt ($word1, $salt);
-		$kiwi -> info ("Your password:\n\t$pwd\n");
-		my $code = kiwiExit (0); return $code;
-	}
-
-	#==========================================
-	# Create md5 hash for given description
-	#------------------------------------------
-	if (defined $CreateHash) {
-		$kiwi -> info ("Creating MD5 sum for $CreateHash...");
-		if (! -d $CreateHash) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Not a directory: $CreateHash: $!");
-			$kiwi -> failed ();
-			my $code = kiwiExit (1); return $code;
-		}
-		if (! -f "$CreateHash/config.xml") {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Not a kiwi description: no config.xml found");
-			$kiwi -> failed ();
-			my $code = kiwiExit (1); return $code;
-		}
-		my $cmd  = "find -L -type f | grep -v .svn | grep -v .checksum.md5";
-		my $status = qxx (
-			"cd $CreateHash && $cmd | xargs md5sum > .checksum.md5"
-		);
-		my $result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> error  ("Failed creating md5 sum: $status: $!");
-			$kiwi -> failed ();
-		}
-		$kiwi -> done();
-		my $code = kiwiExit (0); return $code;
-	}
-
-	#==========================================
 	# setup a splash initrd
 	#------------------------------------------
 	if (defined $SetupSplashForGrub) {
@@ -932,6 +872,9 @@ sub init {
 	$SIG{"TERM"}     = \&quit;
 	$SIG{"INT"}      = \&quit;
 	my $kiwi = new KIWILog("tiny");
+	#==========================================
+	# get options and call non-root tasks
+	#------------------------------------------
 	my $result = GetOptions(
 		"version"               => \&version,
 		"logfile=s"             => \$LogFile,
@@ -966,7 +909,7 @@ sub init {
 		"installstick=s"        => \$InstallStick,
 		"installstick-system=s" => \$InstallStickSystem,
 		"strip|s"               => \$StripImage,
-		"createpassword"        => \$CreatePassword,
+		"createpassword"        => \&createPassword,
 		"createhash=s"          => \$CreateHash,
 		"setup-grub-splash=s"   => \$SetupSplashForGrub,
 		"list-profiles|i=s"     => \$ListProfiles,
@@ -978,11 +921,32 @@ sub init {
 		"gzip-cmd=s"            => \$GzipCmd,
 		"prebuiltbootimage=s"   => \$PrebuiltBootImage,
 		"prechroot-call=s"      => \$PreChrootCall,
-		"listxmlinfo|x=s"       => \$listXMLInfo,
+		"list-xmlinfo|x=s"      => \$listXMLInfo,
 		"compress=s"            => \$Compress,
 		"help|h"                => \&usage,
 		"<>"                    => \&usage
 	);
+	#==========================================
+	# non root task: create md5 hash
+	#------------------------------------------
+	if (defined $CreateHash) {
+		createHash();
+	}
+	#==========================================
+	# non root task: Handle ListProfiles option 
+	#------------------------------------------
+	if (defined $ListProfiles) {
+		listProfiles();
+	}
+	#==========================================
+	# non root task: Handle listXMLInfo option
+	#------------------------------------------
+	if (defined $listXMLInfo) {
+		listXMLInfo();
+	}
+	#==========================================
+	# Check for root privileges
+	#------------------------------------------
 	my $user = qxx ("whoami");
 	if ($user !~ /root/i) {
 		$kiwi -> error ("Only root can do this");
@@ -992,15 +956,23 @@ sub init {
 	if ( $result != 1 ) {
 		usage();
 	}
+	#==========================================
+	# Check option combination/values
+	#------------------------------------------
 	if (
-		(! defined $Prepare) && (! defined $Create) &&
-		(! defined $BootStick) && (! defined $InstallCD) &&
-		(! defined $Upgrade) && (! defined $SetupSplashForGrub) &&
-		(! defined $BootVMDisk) && (! defined $CreatePassword) &&
-		(! defined $CreateInstSource) && (! defined $Migrate) &&
-		(! defined $ListProfiles) && (! defined $InstallStick) &&
-		(! defined $listXMLInfo) && (! defined $BootCD) &&
-		(! defined $CreateHash)
+		(! defined $Prepare)            &&
+		(! defined $Create)             &&
+		(! defined $BootStick)          &&
+		(! defined $InstallCD)          &&
+		(! defined $Upgrade)            &&
+		(! defined $SetupSplashForGrub) &&
+		(! defined $BootVMDisk)         &&
+		(! defined $CreateInstSource)   &&
+		(! defined $Migrate)            &&
+		(! defined $ListProfiles)       &&
+		(! defined $InstallStick)       &&
+		(! defined $listXMLInfo)        &&
+		(! defined $BootCD)
 	) {
 		$kiwi -> error ("No operation specified");
 		$kiwi -> failed ();
@@ -1080,18 +1052,6 @@ sub init {
 	# remove pre-defined smart channels
 	#------------------------------------------
 	qxx ( "rm -f /etc/smart/channels/*" );
-	#==========================================
-	# Handle ListProfiles option
-	#------------------------------------------
-	if (defined $ListProfiles) {
-		listProfiles();
-	}
-	#==========================================
-	# Handle listXMLInfo option
-	#------------------------------------------
-	if (defined $listXMLInfo) {
-		listXMLInfo();
-	}
 }
 
 #==========================================
@@ -1143,10 +1103,29 @@ sub usage {
 	print "Helper Tools:\n";
 	print "  kiwi --createpassword\n";
 	print "  kiwi --createhash <image-path>\n";
-	print "  kiwi --create-instsource <image-path>\n";
+	print "  kiwi --list-profiles <image-path>\n";
+	print "  kiwi --list-xmlinfo <image-path>\n";
 	print "  kiwi --setup-grub-splash <initrd>\n";
 	print "Options:\n";
 	print "--\n";
+	print "  [ --createpassword ]\n";
+	print "    Create a crypted password hash for use in config.xml\n";
+	print "\n";
+	print "  [ --createhash <image-path> ]\n";
+	print "    Sign your image description with a md5sum\n";
+	print "\n";
+	print "  [ -i | --list-profiles <image-path> ]\n";  
+	print "    List the profile names of the image description if any\n";
+	print "\n";
+	print "  [ -x | --list-xmlinfo <image-path> ]\n";
+	print "    List general information about the image description\n";
+	print "\n"; 
+	print "  [ --setup-grub-splash <initrd> ]\n";
+	print "    Create splash screen from the data inside the initrd\n";
+	print "    and re-create the initrd with the splash screen attached\n";
+	print "    to the initrd cpio archive. This enables the kernel\n";
+	print "    to load the splash screen at boot time\n";
+	print "\n";
 	print "  [ -d | --destdir <destination-path> ]\n";
 	print "    Specify destination directory to store the image file(s)\n";
 	print "    If not specified the the attribute <defaultdestination>\n";
@@ -1398,6 +1377,80 @@ sub version {
 	$kiwi -> info ("kiwi version v$Version SVN: Revision: $rev\n");
 	$kiwi -> cleanSweep();
 	exit 0;
+}
+
+#==========================================
+# createPassword
+#------------------------------------------
+sub createPassword {
+	# ...
+	# Create a crypted password which can be used in config.xml
+	# users sections
+	# ----
+	if (! defined $kiwi) {
+		$kiwi = new KIWILog("tiny");
+	}
+	my $word2 = 2;
+	my $word1 = 1;
+	my $salt  = (getpwuid ($<))[1];
+	while ($word1 ne $word2) {
+		$kiwi -> info ("Enter Password: ");
+		system "stty -echo";
+		chomp ($word1 = <STDIN>);
+		system "stty echo";
+		$kiwi -> done ();
+		$kiwi -> info ("Reenter Password: ");
+		system "stty -echo";
+		chomp ($word2 = <STDIN>);
+		system "stty echo";
+		if ( $word1 ne $word2 ) {
+			$kiwi -> failed ();
+			$kiwi -> info ("*** Passwords differ, please try again ***");
+			$kiwi -> failed ();
+		}
+	}
+	$kiwi -> done ();
+	my $pwd = crypt ($word1, $salt);
+	$kiwi -> info ("Your password:\n\t$pwd\n");
+	my $code = kiwiExit (0); return $code;
+}
+
+#==========================================
+# createHash
+#------------------------------------------
+sub createHash {
+	# ...
+	# Sign your image description with a md5 sum. The created
+	# file .checksum.md5 is clecked on runtime with the md5sum
+	# command
+	# ----
+	if (! defined $kiwi) {
+		$kiwi = new KIWILog("tiny");
+	}
+	$kiwi -> info ("Creating MD5 sum for $CreateHash...");
+	if (! -d $CreateHash) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Not a directory: $CreateHash: $!");
+		$kiwi -> failed ();
+		my $code = kiwiExit (1); return $code;
+	}
+	if (! -f "$CreateHash/config.xml") {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Not a kiwi description: no config.xml found");
+		$kiwi -> failed ();
+		my $code = kiwiExit (1); return $code;
+	}
+	my $cmd  = "find -L -type f | grep -v .svn | grep -v .checksum.md5";
+	my $status = qxx (
+		"cd $CreateHash && $cmd | xargs md5sum > .checksum.md5"
+	);
+	my $result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> error  ("Failed creating md5 sum: $status: $!");
+		$kiwi -> failed ();
+	}
+	$kiwi -> done();
+	my $code = kiwiExit (0); return $code;
 }
 
 #==========================================
