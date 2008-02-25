@@ -42,7 +42,7 @@ use KIWIQX;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "2.29";
+our $Version       = "2.30";
 our $openSUSE      = "http://download.opensuse.org/repositories/";
 our $ConfigFile    = "$ENV{'HOME'}/.kiwirc";
 our $ConfigStatus  = 0;
@@ -163,6 +163,7 @@ our $PrebuiltBootImage; # directory where a prepared boot image may be found
 our $PreChrootCall;     # program name called before chroot switch
 our $listXMLInfo;       # list XML information for this operation
 our $Compress;          # set compression level
+our $CreatePassword;    # create crypted password
 our $kiwi;              # global logging handler object
 
 #============================================
@@ -856,6 +857,13 @@ sub main {
 		$boot -> cleanTmp();
 		$code = kiwiExit (0); return $code;
 	}
+
+	#==========================================
+	# Create crypted password
+	#------------------------------------------
+	if (defined $CreatePassword) {
+		createPassword();
+	}
 	return 1;
 }
 
@@ -909,7 +917,7 @@ sub init {
 		"installstick=s"        => \$InstallStick,
 		"installstick-system=s" => \$InstallStickSystem,
 		"strip|s"               => \$StripImage,
-		"createpassword"        => \&createPassword,
+		"createpassword"        => \$CreatePassword,
 		"createhash=s"          => \$CreateHash,
 		"setup-grub-splash=s"   => \$SetupSplashForGrub,
 		"list-profiles|i=s"     => \$ListProfiles,
@@ -972,6 +980,7 @@ sub init {
 		(! defined $ListProfiles)       &&
 		(! defined $InstallStick)       &&
 		(! defined $listXMLInfo)        &&
+		(! defined $CreatePassword)     &&
 		(! defined $BootCD)
 	) {
 		$kiwi -> error ("No operation specified");
@@ -1342,6 +1351,9 @@ sub quit {
 	}
 	$kiwi -> note ("\n*** $$: Received signal $_[0] ***\n");
 	$kiwi -> cleanSweep();
+	if (defined $CreatePassword) {
+		system "stty echo";
+	}
 	if (defined $boot) {
 		$boot -> cleanLoop ();
 	}
@@ -1385,7 +1397,8 @@ sub version {
 sub createPassword {
 	# ...
 	# Create a crypted password which can be used in config.xml
-	# users sections
+	# users sections. The crypt() call requires root rights because
+	# dm-crypt is used to access the crypto pool
 	# ----
 	if (! defined $kiwi) {
 		$kiwi = new KIWILog("tiny");

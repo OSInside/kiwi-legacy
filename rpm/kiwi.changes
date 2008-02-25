@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Mon Feb 25 09:32:05 CET 2008 - ms@suse.de
+
+- v2.30
+- fixed relative path bug in createImageSplit()
+- cleanup installation source setup created by kiwi
+- fixed create password call, dm-crypt requires root permissions
+- fixed shell cleanup code for password input mode
+- added check for user/group commands (bnc #364494)
+
+-------------------------------------------------------------------
 Wed Feb 20 14:43:30 CET 2008 - ms@suse.de
 
 - v2.29

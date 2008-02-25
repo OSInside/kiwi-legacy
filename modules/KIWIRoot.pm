@@ -440,6 +440,12 @@ sub install {
 	if (! $manager -> setupRootSystem (@packList)) {
 		return undef;
 	}
+	#==========================================
+	# reset installation source
+	#------------------------------------------
+	if (! $manager -> resetInstallationSource()) {
+		return undef;
+	}
 	return $this;
 }
 

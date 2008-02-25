@@ -87,6 +87,21 @@ sub setupUsersGroups {
 		my $adduser  = "/usr/sbin/useradd";
 		my $moduser  = "/usr/sbin/usermod";
 		my $addgroup = "/usr/sbin/groupadd";
+		if (! -x "$root/$adduser") {
+			$kiwi -> error ("Missing useradd command");
+			$kiwi -> failed ();
+			return undef;
+		}
+		if (! -x "$root/$moduser") {
+			$kiwi -> error ("Missing usermod command");
+			$kiwi -> failed ();
+			return undef;
+		}
+		if (! -x "$root/$addgroup") {
+			$kiwi -> error ("Missing groupadd command");
+			$kiwi -> failed ();
+			return undef;
+		}
 		foreach my $user (keys %users) {
 			my $group = $users{$user}{group};
 			my $pwd   = $users{$user}{pwd};

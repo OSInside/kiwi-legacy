@@ -1282,6 +1282,13 @@ sub createImageSplit {
 	my $code;
 	my $name;
 	#==========================================
+	# turn image path into absolute path
+	#------------------------------------------
+	if ($imageTree !~ /^\//) {
+		my $pwd = qxx ("pwd"); chomp $pwd;
+		$imageTree = $pwd."/".$imageTree;
+	}
+	#==========================================
 	# Get filesystem info for split image
 	#------------------------------------------
 	if ($type =~ /(.*),(.*):(.*)/) {
@@ -1463,6 +1470,7 @@ sub createImageSplit {
 		if (defined $this->{imageTreeRW}) {
 			$kiwi -> info ("Image RW part requires $mbytesrw MB of disk space");
 			if (! $this -> buildLogicalExtend ($namerw,$mbytesrw."M")) {
+				qxx ("rm -rf $imageTreeRW");
 				return undef;
 			}
 			$kiwi -> done();
@@ -1485,9 +1493,11 @@ sub createImageSplit {
 			};
 			$kiwi -> error  ("Unsupported type: $FSTypeRW");
 			$kiwi -> failed ();
+			qxx ("rm -rf $imageTreeRW");
 			return undef;
 		}
 		if (! $ok) {
+			qxx ("rm -rf $imageTreeRW");
 			return undef;
 		}
 	}
@@ -1496,6 +1506,7 @@ sub createImageSplit {
 	#------------------------------------------
 	$kiwi -> info ("Image RO part requires $mbytesro MB of disk space");
 	if (! $this -> buildLogicalExtend ($namero,$mbytesro."M")) {
+		qxx ("rm -rf $imageTreeRW");
 		return undef;
 	}
 	$kiwi -> done();
@@ -1521,9 +1532,11 @@ sub createImageSplit {
 		};
 		$kiwi -> error  ("Unsupported type: $FSTypeRO");
 		$kiwi -> failed ();
+		qxx ("rm -rf $imageTreeRW");
 		return undef;
 	}
 	if (! $ok) {
+		qxx ("rm -rf $imageTreeRW");
 		return undef;
 	}
 	#==========================================
@@ -1552,12 +1565,14 @@ sub createImageSplit {
 			#------------------------------------------
 			my $extend = $this -> mountLogicalExtend ($name);
 			if (! defined $extend) {
+				qxx ("rm -rf $imageTreeRW");
 				return undef;
 			}
 			#==========================================
 			# copy physical to logical
 			#------------------------------------------
 			if (! $this -> installLogicalExtend ($extend,$source)) {
+				qxx ("rm -rf $imageTreeRW");
 				return undef;
 			}
 			$this -> cleanMount();
@@ -1589,12 +1604,14 @@ sub createImageSplit {
 			};
 			$kiwi -> error  ("Unsupported type: $type");
 			$kiwi -> failed ();
+			qxx ("rm -rf $imageTreeRW");
 			return undef;
 		}
 		#==========================================
 		# Create image md5sum
 		#------------------------------------------
 		if (! $this -> buildMD5Sum ($name)) {
+			qxx ("rm -rf $imageTreeRW");
 			return undef;
 		}
 	}
@@ -1603,15 +1620,18 @@ sub createImageSplit {
 	#------------------------------------------
 	$kiwi -> info ("Creating boot configuration...");
 	if (! $this -> writeImageConfig ($namero)) {
+		qxx ("rm -rf $imageTreeRW");
 		return undef;
 	}
 	#==========================================
 	# Cleanup temporary data
 	#------------------------------------------
 	qxx ("rm -rf $imageTreeRW");
-
+	#==========================================
+	# build boot image only if specified
+	#------------------------------------------
 	$name->{systemImage} = $main::ImageName;
-        if (! defined $boot) {
+	if (! defined $boot) {
 		return $this;
 	}
 	#==========================================
