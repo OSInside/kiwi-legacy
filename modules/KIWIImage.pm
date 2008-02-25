@@ -1346,7 +1346,7 @@ sub createImageSplit {
 			my $target= $path;
 			$target =~ s#$imageTree#$imageTreeTmp#;
 			my $rerooted = $path;
-			$rerooted =~ s#$imageTree#/read-only#;
+			$rerooted =~ s#$imageTree#/read-only/#;
 			my $st = lstat($path);
 			if (S_ISDIR($st->mode)) {
 				mkdir $target;

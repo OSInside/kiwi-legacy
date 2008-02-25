@@ -1808,16 +1808,35 @@ function mountSystemCombined {
 	local rwDevice=`getNextPartition $mountDevice`
 	mkdir /read-only >/dev/null
 	modprobe squashfs >/dev/null 2>&1
-	if ! mount -t auto $roDevice /read-only >/dev/null;then
+	# /.../
+	# mount the read-only partition to /read-only and use
+	# mount option -o ro for this filesystem
+	# ----
+	if ! mount -t auto -o ro $roDevice /read-only >/dev/null;then
 		return 1
 	fi
+	# /.../
+	# mount a tmpfs as /mnt which will become the root fs (/) later on
+	# and extract the rootfs tarball with the RAM data and the read-only
+	# and read-write links into the tmpfs.
+	# ----
 	mount -t tmpfs none /mnt >/dev/null || return 1
 	cd /mnt && tar xvfz /read-only/rootfs.tar.gz >/dev/null && cd /
+	# /.../
+	# create a /mnt/read-only mount point and move the /read-only
+	# mount into the /mnt root tree. After that remove the /read-only
+	# directory and create a link to /mnt/read-only instead
+	# /read-only -> /mnt/read-only
+	# ----
 	mkdir /mnt/read-only >/dev/null
 	mount --move /read-only /mnt/read-only >/dev/null
 	rm -rf /read-only >/dev/null
 	ln -s /mnt/read-only /read-only >/dev/null || return 1
 	if sfdisk -s $rwDevice &>/dev/null;then
+		# /.../
+		# mount the read-write partition to /mnt/read-write and create
+		# a link to it: /read-write -> /mnt/read-write 
+		# ----
 		mkdir /mnt/read-write >/dev/null
 		mount $rwDevice /mnt/read-write >/dev/null
 		rm -f /read-write >/dev/null

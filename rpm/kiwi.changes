@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Feb 25 18:27:57 CET 2008 - ms@suse.de
+
+- v2.31
+- yet another relative path fix for createImageSplit()
+- added -o ro option to read-only mount in combined mount
+
+-------------------------------------------------------------------
 Mon Feb 25 09:32:05 CET 2008 - ms@suse.de
 
 - v2.30
