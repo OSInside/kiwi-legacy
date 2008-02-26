@@ -85,8 +85,8 @@ sub new {
 	#==========================================
 	# Check/Transform due to XSL stylesheet(s)
 	#------------------------------------------
-	my $data = qxx ("
-		xsltproc -o $controlFile-v2.0 $main::S14to20 $controlFile 2>&1"
+	my $data = qxx (
+		"xsltproc -o $controlFile-v2.0 $main::S14to20 $controlFile 2>&1"
 	);
 	my $code = $? >> 8;
 	if (($code == 0) && (-f "$controlFile-v2.0")) {
