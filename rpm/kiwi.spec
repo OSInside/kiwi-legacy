@@ -7,12 +7,12 @@
 Name:          kiwi
 BuildRequires: perl smart perl-XML-LibXML perl-libwww-perl hal dbus-1
 BuildRequires: screen module-init-tools zlib-devel hal-devel dbus-1-devel
-BuildRequires: libqt4 libqt4-devel gcc-c++ libxslt
+BuildRequires: libqt4 libqt4-devel gcc-c++ libxslt swig
 %ifarch %ix86 x86_64
 BuildRequires: syslinux
 %endif
 %if %{suse_version} > 1030
-BuildRequires: swig libsatsolver libsatsolver-devel db-devel libexpat-devel
+BuildRequires: libsatsolver libsatsolver-devel db-devel libexpat-devel
 %endif
 Requires:      perl perl-XML-LibXML perl-libwww-perl screen coreutils libxslt
 Requires:      kiwi-tools
@@ -295,6 +295,8 @@ cat kiwi.loader
 %{_datadir}/kiwi/modules
 %{_datadir}/kiwi/xsl
 %{_sbindir}/kiwi
+%{perl_vendorarch}/dbusdevice.pm
+%{perl_vendorarch}/auto/dbusdevice
 %if %{suse_version} > 1030
 %{perl_vendorarch}/SaT.pm
 %{perl_vendorarch}/auto/SaT

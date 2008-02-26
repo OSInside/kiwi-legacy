@@ -1,0 +1,19 @@
+use ExtUtils::MakeMaker;
+use Env;
+
+$QTLIBS = `pkg-config --libs QtCore QtGui`;
+$QTINC = `pkg-config --cflags QtCore QtGui`;
+chomp $QTINC;
+$QTINC = $QTINC.'-I/usr/include/Qt';
+$CFLAGS = $ENV{RPM_OPT_FLAGS} ." $QTINC";
+$CFLAGS =~ s/-Wall//;
+
+WriteMakefile(
+  'NAME'     => 'dbusdevice',
+  'LIBS'     => ["$QTLIBS -lhal -ldbus-1"],
+  'OBJECT'   => 'dbusdevice_wrap.o dbusdevice.o',
+  'INC'      => "-I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include -I/usr/lib64/dbus-1.0/include -I/usr/include/g++ $QTINC",
+  'OPTIMIZE' => "-O2 $CFLAGS",
+  'CC'       => 'g++'
+);
+

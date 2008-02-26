@@ -12,9 +12,10 @@ Mon Feb 25 18:27:57 CET 2008 - ms@suse.de
   requires the attributes fsreadwrite/fsreadonly for the split
   image type instead of one filesystem attribute with comma
   separated filesystem names as content 
-- added dbuslock tool to send Lock message to hal via dbus.
-  This allows a storage device to be locked from automatic
-  mounts. The tool is used when kiwi creates USB
+- added dbusdevice perl binding to send Lock message to hal
+  via dbus. This allows a perl program to prevent a storage
+  device from being mounted automatically by the hal daemon
+  The module is used when kiwi creates USB
   sticks (bnc #355938)
 
 -------------------------------------------------------------------

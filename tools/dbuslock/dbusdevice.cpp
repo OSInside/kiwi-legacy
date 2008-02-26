@@ -1,59 +1,6 @@
-#include <dbus/dbus.h>
-#include <hal/libhal.h>
-#include <iostream>
-#include <string>
-#include <cstdlib>
-#include <cstring>
-#include <qobject.h>
-#include <qmap.h>
-#include <qstringlist.h>
-#include <qstring.h>
-#include <getopt.h>
+#include "dbusdevice.h"
 
-using namespace std;
-
-class HalConnection {
-	public:
-	HalConnection():
-		halContext(0),
-		bOpen(false) {
-		// empty constructor
-	}
-
-	public:
-	LibHalContext* halContext;
-	DBusConnection* connection;
-	QMap<QString, QString> udiDeviceMap;
-	QMap<QString, QString> deviceUdiMap;
-	QMap<QString, QString> deviceMediumUdiMap;
-	bool bOpen;
-
-	public:
-	enum ErrorCodes { 
-		org_freedesktop_Hal_Success = 0,
-		org_freedesktop_Hal_CommunicationError,
-		org_freedesktop_Hal_NoSuchDevice,
-		org_freedesktop_Hal_DeviceAlreadyLocked,
-		org_freedesktop_Hal_PermissionDenied,
-		org_freedesktop_Hal_Device_Volume_NoSuchDevice,
-		org_freedesktop_Hal_Device_Volume_PermissionDenied,
-		org_freedesktop_Hal_Device_Volume_AlreadyMounted,
-		org_freedesktop_Hal_Device_Volume_InvalidMountOption,
-		org_freedesktop_Hal_Device_Volume_UnknownFilesystemType,
-		org_freedesktop_Hal_Device_Volume_InvalidMountpoint,
-		org_freedesktop_Hal_Device_Volume_MountPointNotAvailable,
-		org_freedesktop_Hal_Device_Volume_PermissionDeniedByPolicy,
-		org_freedesktop_Hal_Device_Volume_InvalidUnmountOption,
-		org_freedesktop_Hal_Device_Volume_InvalidEjectOption
-	};
-
-	public:
-	void close (void);
-	bool open (void);
-	void addDevice ( const char*);
-	int lock ( const char*);
-	int unlock ( const char*);
-};
+//using namespace std;
 
 void HalConnection::close (void) {
 	if( halContext ) {
@@ -68,18 +15,19 @@ void HalConnection::close (void) {
 
 bool HalConnection::open (void) {
 	close();
-	cout << "initializing HAL >= 0.5" << endl;
+	//cout << "initializing HAL >= 0.5" << endl;
 
 	halContext = libhal_ctx_new();
 	if( ! halContext ) {
-		cout << "unable to create HAL context." << endl;
+		status = "unable to create HAL context";
 		return false;
 	}
 	DBusError error;
 	dbus_error_init( &error );
 	connection = dbus_bus_get( DBUS_BUS_SYSTEM, &error );
 	if ( dbus_error_is_set(&error) ) {
-		cout << "unable to connect to DBUS: " << error.message << endl;
+		status = "unable to connect to DBUS: ";
+		status+= error.message;
 		return false;
 	}
 
@@ -92,7 +40,7 @@ bool HalConnection::open (void) {
 	libhal_ctx_set_device_condition( halContext, 0 );
 
 	if (!libhal_ctx_init( halContext, 0 ) ) {
-		cout << "Failed to init HAL context!" << endl;
+		status = "Failed to init HAL context!";
 		return false;
 	}
 	bOpen = true;
@@ -118,8 +66,8 @@ void HalConnection::addDevice ( const char* udi ) {
 			QString s( dev );
 			libhal_free_string( dev );
 			if( !s.isEmpty() ) {
-				cout << "Mapping udi: " << udi << endl;
-				cout << "  to device: " << s.toLatin1().data() << endl;
+				//cout << "Mapping udi: " << udi << endl;
+				//cout << "  to device: " << s.toLatin1().data() << endl;
 				udiDeviceMap[udi] = s;
 				deviceUdiMap[s] = udi;
 			}
@@ -156,7 +104,8 @@ int HalConnection::lock ( const char* dev ) {
 	DBusError error;
 
 	if( ! deviceUdiMap.contains( dev ) ) {
-		cout << "Device doesn't exist: " << dev << endl;
+		status = "Device doesn't exist: ";
+		status+= dev;
 		return org_freedesktop_Hal_Device_Volume_NoSuchDevice;
 	}
 	QString udi = deviceUdiMap[dev];
@@ -166,14 +115,16 @@ int HalConnection::lock ( const char* dev ) {
 		"org.freedesktop.Hal.Device", "Lock"
 	))) {
 		// could not create dbus message
-		cout << "lock failed for " << udi.toLatin1().data();
+		status = "lock failed for ";
+		status+= udi;
 		return org_freedesktop_Hal_CommunicationError;
 	}
 	if( !dbus_message_append_args(
 		dmesg, DBUS_TYPE_STRING, &lockComment, DBUS_TYPE_INVALID
 	)) {
 		// could not append args to dbus message
-		cout << "lock failed for " << udi.toLatin1().data();
+		status = "lock failed for ";
+		status+= udi;
 		dbus_message_unref( dmesg );
 		return org_freedesktop_Hal_CommunicationError;
 	}
@@ -182,8 +133,8 @@ int HalConnection::lock ( const char* dev ) {
 		connection, dmesg, -1, &error
 	);
 	if( dbus_error_is_set( &error ) ) {
-		cout << "lock failed for " << udi.toLatin1().data() << ": "
-			 << error.name << " - " << error.message << endl;
+		status = "lock failed for ";
+		status+= udi + ": " + error.name + " - " + error.message;
 		if (!strcmp(error.name, "org.freedesktop.Hal.NoSuchDevice" )) {
 			ret = org_freedesktop_Hal_NoSuchDevice;
 		} else if (
@@ -197,8 +148,8 @@ int HalConnection::lock ( const char* dev ) {
 		}
 		dbus_error_free( &error );
 	} else {
-		cout << "(K3bDevice::HalConnection) lock queued for " 
-			 << udi.toLatin1().data() << endl;
+		status = "lock queued for ";
+		status+= udi;
 	}
 	dbus_message_unref( dmesg );
 	if( reply ) {
@@ -220,7 +171,8 @@ int HalConnection::unlock( const char* dev ) {
 	DBusError error;
 
 	if( ! deviceUdiMap.contains( dev ) ) {
-		cout << "Device doesn't exist: " << dev << endl;
+		status = "Device doesn't exist: ";
+		status+= dev;
 		return org_freedesktop_Hal_Device_Volume_NoSuchDevice;
 	}
 	QString udi = deviceUdiMap[dev];
@@ -230,13 +182,15 @@ int HalConnection::unlock( const char* dev ) {
 		"org.freedesktop.Hal.Device", "Unlock"
 	))) {
 		// could not create dbus message
-		cout << "unlock failed for " << udi.toLatin1().data();
+		status = "unlock failed for ";
+		status+= udi;
 		return org_freedesktop_Hal_CommunicationError;
 	}
 
 	if ( !dbus_message_append_args(dmesg, DBUS_TYPE_INVALID)) {
 		// could not append args to dbus message
-		cout << "unlock failed for " << udi.toLatin1().data();
+		status = "unlock failed for ";
+		status+= udi; 
 		dbus_message_unref( dmesg );
 		return org_freedesktop_Hal_CommunicationError;
 	}
@@ -246,8 +200,8 @@ int HalConnection::unlock( const char* dev ) {
 		connection, dmesg, -1, &error
 	);
 	if ( dbus_error_is_set( &error ) ) {
-		cout << "unlock failed for " << udi.toLatin1().data() << ": "
-			 << error.name << " - " << error.message << endl;
+		status = "unlock failed for ";
+		status+= udi + ": " + error.name + " - " + error.message;
 		if( !strcmp(error.name, "org.freedesktop.Hal.NoSuchDevice" )) {
 			ret = org_freedesktop_Hal_NoSuchDevice;
 		} else if (
@@ -261,8 +215,8 @@ int HalConnection::unlock( const char* dev ) {
 		}
 		dbus_error_free( &error );
 	} else {
-		cout << "(K3bDevice::HalConnection) unlock queued for " 
-			 << udi.toLatin1().data() << endl;
+		status = "unlock queued for ";
+		status+= udi;
 	}
 	dbus_message_unref( dmesg );
 	if( reply ) {
@@ -271,39 +225,6 @@ int HalConnection::unlock( const char* dev ) {
 	return ret;
 }
 
-int main (int argc,char*argv[]) {
-	//=====================================
-	// open hal/dbus connection...
-	//-------------------------------------
-	int status = 0;
-	HalConnection* d = new HalConnection();
-	d -> open();
-
-	//=====================================
-	// handle options...
-	//-------------------------------------
-	while (1) {
-		int option_index = 0;
-		static struct option long_options[] =
-		{
-			{"lock"       , 1 , 0 , 'l'},
-			{"unlock"     , 1 , 0 , 'u'}
-		};
-		int c = getopt_long (
-			argc, argv, "l:u:",long_options, &option_index
-		);
-		if (c == -1) {
-			return 1;
-		}
-		switch (c) {
-			case 'l':
-				status = d -> lock ( optarg );
-			break;
-			case 'u':
-				status = d -> unlock ( optarg );
-			break;
-		}
-	}
-	d -> close();
-	return status;
+char* HalConnection::state ( void ) {
+	return status.toLatin1().data();
 }
