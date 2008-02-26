@@ -1573,7 +1573,7 @@ function kernelList {
 		fi
 	done
 	if [ -z "$KERNEL_LIST" ];then
-		if [ -f /mnt/boot/vmlinuz ] && [ -f /mnt/boot/initrd ];then
+		if [ -e $prefix/boot/vmlinuz ] && [ -e $prefix/boot/initrd ];then
 			# /.../
 			# the system image doesn't provide the kernel and initrd but
 			# there is a downloaded kernel and initrd from the KIWI_INITRD
