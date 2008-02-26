@@ -69,12 +69,34 @@ sub new {
 		$imageDesc = $main::System."/".$imageDesc;
 	}
 	my $arch = qxx ("uname -m"); chomp $arch;
-	my $systemTree;
 	my $controlFile = $imageDesc."/config.xml";
 	my $checkmdFile = $imageDesc."/.checksum.md5";
 	my $havemd5File = 1;
-	my $systemXML   = new XML::LibXML;
-	my $systemRNG   = new XML::LibXML::RelaxNG ( location => $main::Scheme );
+	my $systemTree;
+	#==========================================
+	# Check if config.xml exist
+	#------------------------------------------
+	if (! -f $controlFile) {
+		$kiwi -> failed ();
+		$kiwi -> error ("Cannot open control file: $controlFile");
+		$kiwi -> failed ();
+		return undef;
+	}
+	#==========================================
+	# Check/Transform due to XSL stylesheet(s)
+	#------------------------------------------
+	my $data = qxx ("
+		xsltproc -o $controlFile-v2.0 $main::S14to20 $controlFile 2>&1"
+	);
+	my $code = $? >> 8;
+	if (($code == 0) && (-f "$controlFile-v2.0")) {
+		qxx ("mv $controlFile-v2.0 $controlFile");
+	} else {
+		$kiwi -> loginfo ("XSL: $data");
+	}
+	#==========================================
+	# Check image md5 sum
+	#------------------------------------------
 	if (-f $checkmdFile) {
 		my $data = qxx ("cd $imageDesc && md5sum -c .checksum.md5 2>&1");
 		my $code = $? >> 8;
@@ -88,12 +110,11 @@ sub new {
 	} else {
 		$havemd5File = 0;
 	}
-	if (! -f $controlFile) {
-		$kiwi -> failed ();
-		$kiwi -> error ("Cannot open control file: $controlFile");
-		$kiwi -> failed ();
-		return undef;
-	}
+	#==========================================
+	# Load XML objects and schema
+	#------------------------------------------
+	my $systemXML   = new XML::LibXML;
+	my $systemRNG   = new XML::LibXML::RelaxNG ( location => $main::Scheme );
 	my $optionsNodeList;
 	my $driversNodeList;
 	my $usrdataNodeList;
@@ -395,6 +416,7 @@ sub getImageTypeAndAttributes {
 	# able to create the appropriate logical extend
 	# ---
 	my $this   = shift;
+	my $kiwi   = $this->{kiwi};
 	my %result = ();
 	my $count  = 0;
 	my $first  = "";
@@ -418,9 +440,16 @@ sub getImageTypeAndAttributes {
 		$record{flags}  = $node -> getAttribute("flags");
 		$record{format} = $node -> getAttribute("format");
 		$record{checkprebuilt} = $node -> getAttribute("checkprebuilt");
-		$record{filesystem}    = $node -> getAttribute("filesystem");
 		$record{baseroot}      = $node -> getAttribute("baseroot");
 		$record{bootprofile}   = $node -> getAttribute("bootprofile");
+		$record{filesystem}    = $node -> getAttribute("filesystem");
+		if ($record{type} eq "split") {
+			my $filesystemRO = $node -> getAttribute("fsreadonly");
+			my $filesystemRW = $node -> getAttribute("fsreadwrite");
+			if ((defined $filesystemRO) && (defined $filesystemRW)) {
+				$record{filesystem} = "$filesystemRW,$filesystemRO";
+			}
+		}
 		$result{$prim} = \%record;
 		$count++;
 	}
@@ -1192,7 +1221,7 @@ sub addRepository {
 #------------------------------------------
 sub addImagePackages {
 	# ...
-	# Add the given package list to the type=boot packages
+	# Add the given package list to the type=bootstrap packages
 	# section of the config.xml parse tree.
 	# ----
 	my $this  = shift;
@@ -1202,7 +1231,7 @@ sub addImagePackages {
 	for (my $i=1;$i<= $nodes->size();$i++) {
 		my $node = $nodes -> get_node($i);
 		my $type = $node  -> getAttribute ("type");
-		if ($type eq "boot") {
+		if ($type eq "bootstrap") {
 			$nodeNumber = $i; last;
 		}
 	}
@@ -1611,7 +1640,7 @@ sub getBaseList {
 	# installed manually
 	# ---
 	my $this = shift;
-	return getList ($this,"boot");
+	return getList ($this,"bootstrap");
 }
 
 #==========================================

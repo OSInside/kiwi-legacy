@@ -25,6 +25,7 @@ man_prefix  = ${buildroot}/usr/share/man
 #--------------------------------------------
 KIWIBINVZ   = ${buildroot}/usr/sbin
 KIWIMODVZ   = ${kiwi_prefix}/modules
+KIWIXSLVZ   = ${kiwi_prefix}/xsl
 TOOLSVZ     = ${bin_prefix}
 INITVZ      = ${init_prefix}
 KIWIIMAGE   = ${kiwi_prefix}/image
@@ -53,7 +54,7 @@ install:
 	#============================================
 	# Install base directories
 	#--------------------------------------------
-	install -d -m 755 ${KIWIBINVZ} ${KIWIMODVZ} ${KIWIIMAGE}
+	install -d -m 755 ${KIWIBINVZ} ${KIWIMODVZ} ${KIWIIMAGE} ${KIWIXSLVZ}
 	install -d -m 755 ${TFTPKIWI} ${TFTPBOOT} ${TFTPBOOTCONF} ${TFTPIMAGE}
 	install -d -m 755 ${TFTPBOOTBOOT}
 	install -d -m 755 ${TFTPUPLOAD}
@@ -88,6 +89,7 @@ install:
 	#--------------------------------------------
 	install -m 755 ./kiwi.pl       ${KIWIBINVZ}/kiwi
 	install -m 644 ./modules/*     ${KIWIMODVZ}
+	install -m 644 ./xsl/*         ${KIWIXSLVZ}
 
 	#============================================
 	# Install TFTP netboot structure and loader
@@ -115,6 +117,7 @@ modules/KIWIScheme.rng: modules/KIWIScheme.rnc
 	# Check RNG Scheme...
 	#--------------------------------------------
 	for i in `find -name config.xml`;do \
+		xsltproc -o $$i.new xsl/convert14to20.xsl $$i && mv $$i.new $$i;\
 		echo $$i; j=`jing modules/KIWIScheme.rng $$i`;if test ! -z "$$j";then\
 			echo $$j; break;\
 		fi;\

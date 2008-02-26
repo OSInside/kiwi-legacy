@@ -1,4 +1,5 @@
-<image name="test1" schemeversion="1.4">
+<?xml version="1.0"?>
+<image schemeversion="2.0" name="test1">
 	<description type="system">
 		<author>Marcus Schaefer</author>
 		<contact>ms@novell.com</contact>
@@ -37,7 +38,7 @@
 	</packages>
 	<packages type="vmware" memory="512" disk="ide0">
 	</packages>
-	<packages type="boot">
+	<packages type="bootstrap">
 		<package name="filesystem"/> 
 		<package name="glibc-locale"/>
 	</packages>

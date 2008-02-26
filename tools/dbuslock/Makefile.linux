@@ -1,0 +1,10 @@
+all: Makefile
+
+Makefile:
+	test -d /usr/share/qt/mkspecs/linux-g++ && export QMAKESPEC=/usr/share/qt4/mkspecs/linux-g++ || export QMAKESPEC=/usr/share/qt4/mkspecs/linux-g++
+	`which qmake` -makefile -unix -o Makefile dbuslock.pro
+
+clean:
+	rm -f Makefile
+	rm -f dbuslock.o
+	rm -f dbuslock

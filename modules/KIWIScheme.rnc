@@ -65,7 +65,7 @@ namespace db  = "http://docbook.org/ns/docbook"
 
 db:info [
 	db:releaseinfo [ "$Id: kiwi.rnc 2957 2008-01-11 12:53:39Z thomas-schraitle $"]
-	db:releaseinfo [ "RNC Schema Version 1.4" ]
+	db:releaseinfo [ "RNC Schema Version 2.0" ]
 
 	db:pubdate [ "START" ]
 	db:pubdate [ "2008-01-08" ]
@@ -97,7 +97,7 @@ div {
 		attribute inherit { text }
 	k.image.schemeversion.attribute =
 		## The allowed Schema version (fixed value)
-		attribute schemeversion { "1.4" }
+		attribute schemeversion { "2.0" }
 	k.image.attlist = k.image.name.attribute 
 		& k.image.inherit.attribute?
 		& k.image.schemeversion.attribute
@@ -853,10 +853,15 @@ div {
 		## or unified and applies to the iso type only
 		attribute flags { "unified" | "compressed" }
 	k.type.filesystem.attribute = 
-		## Specifies the filesystem:
-		## ext2 | ext3 | reiserfs | squashfs | cpio. or a combination
-		## of two of these types with the split image type
-		attribute filesystem { text }
+		## Specifies the filesystem which can be one of:
+		## ext2 , ext3 , reiserfs or squashfs
+		attribute filesystem { "ext2" | "ext3" | "reiserfs" | "squashfs" }
+	k.type.fsreadonly.attribute =
+		## Specifies the filesystem for the read-only part of a split image
+		attribute fsreadonly { "squashfs" }
+	k.type.fsreadwrite.attribute =
+		## Specifies the filesystem for the read-write part of a split image
+		attribute fsreadwrite { "ext2" | "ext3" | "reiserfs" }
 	k.type.format.attribute =
 		## Specifies the format of the virtual disk. This applies to the
 		## vmx/oem types only.
@@ -873,6 +878,8 @@ div {
 		k.type.boot.attribute? &
 		k.type.flags.attribute? &
 		k.type.filesystem.attribute? &
+		k.type.fsreadonly.attribute? &
+		k.type.fsreadwrite.attribute? &
 		k.type.baseroot.attribute? &
 		k.type.format.attribute? &
 		k.type.primary.attribute?
@@ -1086,7 +1093,7 @@ div {
 #
 div {
 	k.packages.type.attribute = attribute type {
-		"image" | "boot" | "delete" | "xen" | "vmware"
+		"image" | "bootstrap" | "delete" | "xen" | "vmware"
 	}
 	k.packages.memory.attribute =
 		## The memory setup for the guest VM. Used only with the

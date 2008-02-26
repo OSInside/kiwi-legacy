@@ -1014,7 +1014,6 @@ sub setupBootStick {
 sub setupInstallCD {
 	my $this      = shift;
 	my $kiwi      = $this->{kiwi};
-	my $tmpdir    = $this->{tmpdir};
 	my $initrd    = $this->{initrd};
 	my $system    = $this->{system};
 	my $oldird    = $this->{initrd};
@@ -1028,6 +1027,18 @@ sub setupInstallCD {
 	my $status;
 	my $result;
 	my $ibasename;
+	my $tmpdir;
+	#==========================================
+	# create tmp directory
+	#------------------------------------------
+	$tmpdir = qxx ( "mktemp -q -d /tmp/kiwicdinst.XXXXXX" ); chomp $tmpdir;
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> error  ("Couldn't create tmp dir: $tmpdir: $!");
+		$kiwi -> failed ();
+		return undef;
+	}
+	$this->{tmpdir} = $tmpdir;
 	#==========================================
 	# check if initrd is zipped
 	#------------------------------------------
@@ -1097,6 +1108,7 @@ sub setupInstallCD {
 			$this -> cleanLoop ();
 			return undef;
 		}
+		$kiwi -> done();
 		#==========================================
 		# find partition to check
 		#------------------------------------------
@@ -1122,7 +1134,7 @@ sub setupInstallCD {
 		$status = qxx ("/sbin/losetup -d $loop 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
-			$kiwi -> error ("Failed to umount system image: $status");
+			$kiwi -> error ("Failed to umount system partition: $status");
 			$kiwi -> failed ();
 			$this -> cleanLoop ();
 			return undef;
@@ -1330,6 +1342,7 @@ sub setupInstallCD {
 	qxx ("rm -rf $tmpdir");
 	$kiwi -> info ("Created $name to be burned on CD");
 	$kiwi -> done ();
+	$this -> cleanTmp ();
 	return $this;
 }
 
@@ -1339,7 +1352,6 @@ sub setupInstallCD {
 sub setupInstallStick {
 	my $this      = shift;
 	my $kiwi      = $this->{kiwi};
-	my $tmpdir    = $this->{tmpdir};
 	my $initrd    = $this->{initrd};
 	my $system    = $this->{system};
 	my $oldird    = $this->{initrd};
@@ -1356,6 +1368,18 @@ sub setupInstallStick {
 	my $status;
 	my $result;
 	my $ibasename;
+	my $tmpdir;
+	#==========================================
+	# create tmp directory
+	#------------------------------------------
+	$tmpdir = qxx ( "mktemp -q -d /tmp/kiwistickinst.XXXXXX" ); chomp $tmpdir;
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> error  ("Couldn't create tmp dir: $tmpdir: $!");
+		$kiwi -> failed ();
+		return undef;
+	}
+	$this->{tmpdir} = $tmpdir;
 	#==========================================
 	# check if initrd is zipped
 	#------------------------------------------
@@ -1427,6 +1451,7 @@ sub setupInstallStick {
 			$this -> cleanLoop ();
 			return undef;
 		}
+		$kiwi -> done();
 		#==========================================
 		# find partition to check
 		#------------------------------------------
@@ -1439,7 +1464,7 @@ sub setupInstallStick {
 		$status = qxx ("mount -t $fsattr{type} $sdev $tmpdir 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
-			$kiwi -> error ("Failed to mount system partition: $status");
+			$kiwi -> error  ("Failed to mount system partition: $status");
 			$kiwi -> failed ();
 			$this -> cleanLoop ();
 			return undef;
@@ -1452,7 +1477,7 @@ sub setupInstallStick {
 		$status = qxx ("/sbin/losetup -d $loop 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
-			$kiwi -> error ("Failed to umount system image: $status");
+			$kiwi -> error  ("Failed to umount system partition: $status");
 			$kiwi -> failed ();
 			$this -> cleanLoop ();
 			return undef;

@@ -5,6 +5,16 @@ Mon Feb 25 18:27:57 CET 2008 - ms@suse.de
 - yet another relative path fix for createImageSplit()
 - added -o ro option to read-only mount in combined mount
 - fixed COMBINED_IMAGE setup for setupInstallCD / Stick
+- added xsl stylesheet to transform kiwi schema v1.4 to v2.0
+  switch to new 2.0 schema definition. The new schema changes
+  the packages type=boot into packages type=bootstrap and
+  requires the attributes fsreadwrite/fsreadonly for the split
+  image type instead of one filesystem attribute with comma
+  separated filesystem names as content 
+- added dbuslock tool to send Lock message to hal via dbus.
+  This allows a storage device to be locked from automatic
+  mounts. The tool is used when kiwi creates USB
+  sticks (bnc #355938)
 
 -------------------------------------------------------------------
 Mon Feb 25 09:32:05 CET 2008 - ms@suse.de

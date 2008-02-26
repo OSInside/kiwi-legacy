@@ -90,6 +90,7 @@ if ( ! defined $System ) {
 }
 our $Tools   = $BasePath."/tools";
 our $Scheme  = $BasePath."/modules/KIWIScheme.rng";
+our $S14to20 = $BasePath."/xsl/convert14to20.xsl";
 our $KConfig = $BasePath."/modules/KIWIConfig.sh";
 our $KMigrate= $BasePath."/modules/KIWIMigrate.txt";
 our $Revision= $BasePath."/.revision";

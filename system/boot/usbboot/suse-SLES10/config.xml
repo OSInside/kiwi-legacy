@@ -1,4 +1,5 @@
-<image name="initrd-usbboot-suse-SLES10" schemeversion="1.4">
+<?xml version="1.0"?>
+<image schemeversion="2.0" name="initrd-usbboot-suse-SLES10">
 	<description type="boot">
 		<author>Marcus Schaefer</author>
 		<contact>ms@novell.com</contact>
@@ -78,7 +79,7 @@
 		<package name="bootsplash-theme-SuSE-SLES"/>
 		<package name="tar"/>
 	</packages>
-	<packages type="boot">
+	<packages type="bootstrap">
 		<package name="filesystem"/>
 		<package name="glibc-locale"/>
 		<package name="procps"/>
