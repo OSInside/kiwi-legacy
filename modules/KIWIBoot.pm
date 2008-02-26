@@ -1012,16 +1012,19 @@ sub setupBootStick {
 # setupInstallCD
 #------------------------------------------
 sub setupInstallCD {
-	my $this    = shift;
-	my $kiwi    = $this->{kiwi};
-	my $tmpdir  = $this->{tmpdir};
-	my $initrd  = $this->{initrd};
-	my $system  = $this->{system};
-	my $oldird  = $this->{initrd};
-	my $zipped  = $this->{zipped};
-	my $isxen  = $this->{isxen};
-	my $xengz  = $this->{xengz};
-	my $gotsys  = 1;
+	my $this      = shift;
+	my $kiwi      = $this->{kiwi};
+	my $tmpdir    = $this->{tmpdir};
+	my $initrd    = $this->{initrd};
+	my $system    = $this->{system};
+	my $oldird    = $this->{initrd};
+	my $zipped    = $this->{zipped};
+	my $isxen     = $this->{isxen};
+	my $xengz     = $this->{xengz};
+	my $loop      = "/dev/loop0";
+	my $imgtype   = "oem";
+	my $gotsys    = 1;
+	my $loopfound = 0;
 	my $status;
 	my $result;
 	my $ibasename;
@@ -1040,6 +1043,90 @@ sub setupInstallCD {
 	if (! defined $system) {
 		$system = $initrd;
 		$gotsys = 0;
+	}
+	#==========================================
+	# check image type
+	#------------------------------------------
+	if ($gotsys) {
+		#==========================================
+		# search free loop device
+		#------------------------------------------
+		$kiwi -> info ("Searching for free loop device...");
+		for (my $id=0;$id<=7;$id++) {
+			$status = qxx ( "/sbin/losetup /dev/loop$id 2>&1" );
+			$result = $? >> 8;
+			if ($result eq 1) {
+				$loopfound = 1;
+				$loop = "/dev/loop".$id;
+				$this->{loop} = $loop;
+				last;
+			}
+		}
+		if (! $loopfound) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't find free loop device");
+			$kiwi -> failed ();
+			$this -> cleanTmp ();
+			return undef;
+		}
+		$kiwi -> done();
+		#==========================================
+		# bind $system to loop device
+		#------------------------------------------
+		$kiwi -> info ("Binding virtual disk to loop device");
+		$status = qxx ( "/sbin/losetup $loop $system 2>&1" );
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Failed binding virtual disk: $status");
+			$kiwi -> failed ();
+			$this -> cleanTmp ();
+			return undef;
+		}
+		$kiwi -> done();
+		#==========================================
+		# setup device mapper
+		#------------------------------------------
+		$kiwi -> info ("Setup device mapper for virtual partition access");
+		$status = qxx ( "/sbin/kpartx -a $loop 2>&1" );
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Failed mapping virtual partition: $status");
+			$kiwi -> failed ();
+			$this -> cleanLoop ();
+			return undef;
+		}
+		#==========================================
+		# find partition to check
+		#------------------------------------------
+		my $dmap = $loop; $dmap =~ s/dev\///;
+		my $sdev = "/dev/mapper".$dmap."p2";
+		if (! -e $sdev) {
+			$sdev = "/dev/mapper".$dmap."p1";
+		}
+		my %fsattr = main::checkFileSystem ($sdev);
+		$status = qxx ("mount -t $fsattr{type} $sdev $tmpdir 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> error ("Failed to mount system partition: $status");
+			$kiwi -> failed ();
+			$this -> cleanLoop ();
+			return undef;
+		}
+		if (-f "$tmpdir/rootfs.tar.gz") {
+			$imgtype = "split";
+		}
+		$status = qxx ("umount $tmpdir 2>&1");
+		$status = qxx ("/sbin/kpartx  -d $loop 2>&1");
+		$status = qxx ("/sbin/losetup -d $loop 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> error ("Failed to umount system image: $status");
+			$kiwi -> failed ();
+			$this -> cleanLoop ();
+			return undef;
+		}
 	}
 	#==========================================
 	# Setup image basename
@@ -1146,12 +1233,22 @@ sub setupInstallCD {
 	print FD "title $title\n";
 	if (! $isxen) {
 		print FD " kernel (cd)/boot/linux vga=0x314 splash=silent";
-		print FD " ramdisk_size=512000 ramdisk_blocksize=4096 showopts\n";
+		print FD " ramdisk_size=512000 ramdisk_blocksize=4096";
+		if ($imgtype eq "split") {
+			print FD " COMBINED_IMAGE=yes showopts\n";
+		} else {
+			print FD " showopts\n";
+		}
 		print FD " initrd (cd)/boot/initrd\n";
 	} else {
 		print FD " kernel (cd)/boot/xen.gz\n";
 		print FD " module /boot/linux vga=0x314 splash=silent";
-		print FD " ramdisk_size=512000 ramdisk_blocksize=4096 showopts\n";
+		print FD " ramdisk_size=512000 ramdisk_blocksize=4096";
+		if ($imgtype eq "split") {
+			print FD " COMBINED_IMAGE=yes showopts\n";
+		} else {
+			print FD " showopts\n";
+		}
 		print FD " module (cd)/boot/initrd\n" 
 	}
 	print FD "title Failsafe -- $title\n";
@@ -1159,14 +1256,24 @@ sub setupInstallCD {
 		print FD " kernel (cd)/boot/linux vga=0x314 splash=silent";
 		print FD " ramdisk_size=512000 ramdisk_blocksize=4096 showopts";
 		print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
-		print FD " noapic maxcpus=0 edd=off\n";
+		print FD " noapic maxcpus=0 edd=off";
+		if ($imgtype eq "split") {
+			print FD " COMBINED_IMAGE=yes\n";
+		} else {
+			print FD "\n";
+		}
 		print FD " initrd (cd)/boot/initrd\n";
 	} else {
 		print FD " kernel (cd)/boot/xen.gz\n";
 		print FD " module /boot/linux vga=0x314 splash=silent";
 		print FD " ramdisk_size=512000 ramdisk_blocksize=4096 showopts";
 		print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
-		print FD " noapic maxcpus=0 edd=off\n";
+		print FD " noapic maxcpus=0 edd=off";
+		if ($imgtype eq "split") {
+			print FD " COMBINED_IMAGE=yes\n";
+		} else {
+			print FD "\n";
+		}
 		print FD " module (cd)/boot/initrd\n"
 	}
 	close FD;
@@ -1243,6 +1350,7 @@ sub setupInstallStick {
 	my $xengz     = $this->{xengz};
 	my $diskname  = $system.".install.raw";
 	my $loop      = "/dev/loop0";
+	my $imgtype   = "oem";
 	my $loopfound = 0;
 	my $gotsys    = 1;
 	my $status;
@@ -1288,6 +1396,68 @@ sub setupInstallStick {
 		return undef;
 	}
 	$kiwi -> done();
+	#==========================================
+	# check image type
+	#------------------------------------------
+	if ($gotsys) {
+		#==========================================
+		# bind $system to loop device
+		#------------------------------------------
+		$kiwi -> info ("Binding virtual disk to loop device");
+		$status = qxx ( "/sbin/losetup $loop $system 2>&1" );
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Failed binding virtual disk: $status");
+			$kiwi -> failed ();
+			$this -> cleanTmp ();
+			return undef;
+		}
+		$kiwi -> done();
+		#==========================================
+		# setup device mapper
+		#------------------------------------------
+		$kiwi -> info ("Setup device mapper for virtual partition access");
+		$status = qxx ( "/sbin/kpartx -a $loop 2>&1" );
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Failed mapping virtual partition: $status");
+			$kiwi -> failed ();
+			$this -> cleanLoop ();
+			return undef;
+		}
+		#==========================================
+		# find partition to check
+		#------------------------------------------
+		my $dmap = $loop; $dmap =~ s/dev\///;
+		my $sdev = "/dev/mapper".$dmap."p2";
+		if (! -e $sdev) {
+			$sdev = "/dev/mapper".$dmap."p1";
+		}
+		my %fsattr = main::checkFileSystem ($sdev);
+		$status = qxx ("mount -t $fsattr{type} $sdev $tmpdir 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> error ("Failed to mount system partition: $status");
+			$kiwi -> failed ();
+			$this -> cleanLoop ();
+			return undef;
+		}
+		if (-f "$tmpdir/rootfs.tar.gz") {
+			$imgtype = "split";
+		}
+		$status = qxx ("umount $tmpdir 2>&1");
+		$status = qxx ("/sbin/kpartx  -d $loop 2>&1");
+		$status = qxx ("/sbin/losetup -d $loop 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> error ("Failed to umount system image: $status");
+			$kiwi -> failed ();
+			$this -> cleanLoop ();
+			return undef;
+		}
+	}
 	#==========================================
 	# Setup image basename
 	#------------------------------------------
@@ -1371,12 +1541,22 @@ sub setupInstallStick {
 	print FD "title $title\n";
 	if (! $isxen) {
 		print FD " root (hd0,0)\n";
-		print FD " kernel /boot/linux.vmx vga=0x314 splash=silent showopts\n";
+		print FD " kernel /boot/linux.vmx vga=0x314 splash=silent";
+		if ($imgtype eq "split") {
+			print FD " COMBINED_IMAGE=yes showopts\n";
+		} else {
+			print FD " showopts\n";
+		}
 		print FD " initrd /boot/initrd.vmx\n";
 	} else {
 		print FD " root (hd0,0)\n";
 		print FD " kernel /boot/xen.gz.vmx\n";
-		print FD " module /boot/linux.vmx vga=0x314 splash=silent showopts\n";
+		print FD " module /boot/linux.vmx vga=0x314 splash=silent";
+		if ($imgtype eq "split") {
+			print FD " COMBINED_IMAGE=yes showopts\n";
+		} else {
+			print FD " showopts\n";
+		}
 		print FD " module /boot/initrd.vmx"
 	}
 	print FD "title Failsafe -- $title\n";
@@ -1384,14 +1564,24 @@ sub setupInstallStick {
 		print FD " root (hd0,0)\n";
 		print FD " kernel /boot/linux.vmx vga=0x314 splash=silent showopts";
 		print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
-		print FD " noapic maxcpus=0 edd=off\n";
+		print FD " noapic maxcpus=0 edd=off";
+		if ($imgtype eq "split") {
+			print FD " COMBINED_IMAGE=yes\n";
+		} else {
+			print FD "\n";
+		}
 		print FD " initrd /boot/initrd.vmx\n";
 	} else {
 		print FD " root (hd0,0)\n";
 		print FD " kernel /boot/xen.gz.vmx\n";
 		print FD " module /boot/linux.vmx vga=0x314 splash=silent showopts";
 		print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
-		print FD " noapic maxcpus=0 edd=off\n";
+		print FD " noapic maxcpus=0 edd=off";
+		if ($imgtype eq "split") {
+			print FD " COMBINED_IMAGE=yes\n";
+		} else {
+			print FD "\n";
+		}
 		print FD " module /boot/initrd.vmx"
 	}
 	close FD;
