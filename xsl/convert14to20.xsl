@@ -72,6 +72,7 @@
           <xsl:value-of select="substring-after($fs, ',')"/>
         </xsl:attribute>
         <xsl:copy-of select="@boot"/>
+		<xsl:copy-of select="@format"/>
         <xsl:apply-templates mode="conv14to20"/>
       </xsl:when>
       <xsl:otherwise>
