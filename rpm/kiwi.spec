@@ -11,7 +11,7 @@ BuildRequires: gcc-c++ libxslt swig
 %if %{suse_version} > 1010
 BuildRequires: libqt4 libqt4-devel
 %else
-BuildRequires: qt qt-devel
+BuildRequires: qt qt-devel libpng-devel freetype2-devel
 %endif 
 %ifarch %ix86 x86_64
 BuildRequires: syslinux
@@ -175,6 +175,7 @@ make buildroot=$RPM_BUILD_ROOT CFLAGS="$RPM_OPT_FLAGS"
 
 if [ "$UID" = "$K_USER" ];then
 	# prepare and create boot images...
+	(cd tools/dbuslock && make install)
 	mkdir -p $RPM_BUILD_ROOT/srv/tftpboot/pxelinux.cfg
 	mkdir -p $RPM_BUILD_ROOT/srv/tftpboot/boot
 	mkdir -p /usr/share/kiwi/modules
