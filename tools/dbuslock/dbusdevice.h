@@ -21,6 +21,9 @@ STATUS        : Status: Development
 #ifndef DBUSLOCK_DEVICE_H
 #define DBUSLOCK_DEVICE_H 1
 
+// We acknowledge the the dbus API is unstable
+#define DBUS_API_SUBJECT_TO_CHANGE
+
 #include <dbus/dbus.h>
 #include <hal/libhal.h>
 #include <iostream>
