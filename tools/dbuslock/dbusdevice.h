@@ -1,3 +1,23 @@
+/**************
+FILE          : dbusdevice.h
+***************
+PROJECT       : KIWI 
+              :
+AUTHOR        : Marcus Schäfer <ms@suse.de>
+              :
+BELONGS TO    : KIWI - System Imaging 
+              : 
+              : 
+DESCRIPTION   : native C++ application which provides
+              : locking functions for hal devices via
+              : dbus
+              : - open / close
+              : - lock / unlock 
+              : ---
+              :
+              :
+STATUS        : Status: Development
+**************/
 #ifndef DBUSLOCK_DEVICE_H
 #define DBUSLOCK_DEVICE_H 1
 

@@ -2,7 +2,9 @@
 Mon Feb 25 18:27:57 CET 2008 - ms@suse.de
 
 - v2.31
-- fixed kernelList function in KIWILinuxRC.sh (bnc #364806)
+- fixed kernelList function in KIWILinuxRC.sh and make
+  sure it is called when required (bnc #364806)
+- fixed vmsize/vmmbyte calculation in KIWIBoot.pm
 - yet another relative path fix for createImageSplit()
 - added -o ro option to read-only mount in combined mount
 - fixed COMBINED_IMAGE setup for setupInstallCD / Stick

@@ -7,10 +7,18 @@ use dbusdevice;
 
 my $d = new dbusdevice::HalConnection;
 
-$d -> open();
+if (! $d -> open()) {
+	print $d->state()."\n";
+	exit 1;
+}
 
-$a = $d -> state();
+if ($d -> lock ("/dev/sda")) {
+	print $d->state()."\n";
+}
 
-print "$a\n";
+if ($d -> unlock ("/dev/sda")) {
+	print $d->state()."\n";
+}
+
 
 $d -> close();

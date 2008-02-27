@@ -1,7 +1,30 @@
+/**************
+FILE          : dbusdevice.cpp
+***************
+PROJECT       : KIWI
+              :
+AUTHOR        : Marcus Schäfer <ms@suse.de>
+              :
+BELONGS TO    : KIWI - System Imaging 
+              : 
+              :
+DESCRIPTION   : native C++ application which provides
+              : locking functions for hal devices via
+              : dbus
+              : - open / close
+              : - lock / unlock 
+              : ---
+              :
+              :
+STATUS        : Status: Development
+**************/
 #include "dbusdevice.h"
 
 //using namespace std;
 
+//====================================
+// close
+//------------------------------------
 void HalConnection::close (void) {
 	if( halContext ) {
 		if( bOpen ) {
@@ -13,6 +36,9 @@ void HalConnection::close (void) {
 	}
 }
 
+//====================================
+// open
+//------------------------------------
 bool HalConnection::open (void) {
 	close();
 	//cout << "initializing HAL >= 0.5" << endl;
@@ -54,6 +80,9 @@ bool HalConnection::open (void) {
 	return true;
 }
 
+//====================================
+// addDevice
+//------------------------------------
 void HalConnection::addDevice ( const char* udi ) {
 	if (!libhal_device_property_exists(halContext, udi,"info.capabilities",0)) {
 		return;
@@ -90,6 +119,9 @@ void HalConnection::addDevice ( const char* udi ) {
 	}
 }
 
+//====================================
+// lock
+//------------------------------------
 int HalConnection::lock ( const char* dev ) {
 	// ...
 	// The code below is based on the code from
@@ -158,6 +190,9 @@ int HalConnection::lock ( const char* dev ) {
 	return ret;
 }
 
+//====================================
+// unlock
+//------------------------------------
 int HalConnection::unlock( const char* dev ) {
 	// ...
 	// The code below is based on the code from
@@ -225,6 +260,9 @@ int HalConnection::unlock( const char* dev ) {
 	return ret;
 }
 
+//====================================
+// state
+//------------------------------------
 char* HalConnection::state ( void ) {
 	return status.toLatin1().data();
 }

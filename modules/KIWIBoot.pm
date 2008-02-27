@@ -25,6 +25,7 @@ require Exporter;
 # Modules
 #------------------------------------------
 use strict;
+use dbusdevice;
 use KIWILog;
 use FileHandle;
 use File::Basename;
@@ -76,6 +77,10 @@ sub new {
 	my $status;
 	my $isxen;
 	my $xengz;
+	my $xml;
+	#==========================================
+	# create log object if not done
+	#------------------------------------------
 	if (! defined $kiwi) {
 		$kiwi = new KIWILog();
 	}
@@ -95,7 +100,6 @@ sub new {
 			my %fsattr = main::checkFileSystem ($system);
 			if ($fsattr{readonly}) {
 				$syszip = -s $system;
-				$syszip+= 50 * 1024 * 1024;
 			} else {
 				$syszip = 0;
 			}
@@ -165,22 +169,12 @@ sub new {
 		$kiwi -> failed ();
 		return undef;
 	}
-	if ((! defined $vmsize) && (defined $system)) {
-		my $kernelSize = -s $kernel; # the kernel
-		my $initrdSize = -s $initrd; # the boot image
-		my $systemSXML = 1; # system size set by XML file
-		my $systemSize = 0; # the system image size in bytes
+	#==========================================
+	# setup pointer to XML configuration
+	#------------------------------------------
+	if (defined $system) {
 		if (-d $system) {
-			my $xml = new KIWIXML ($kiwi,$system."/image");
-			if (! defined $xml) {
-				return undef;
-			}
-			$systemSXML = $xml -> getImageSizeBytes();
-			$systemSize = qxx ("du -bs $system | cut -f1 2>&1");
-			chomp $systemSize;
-			if ($systemSXML eq "auto") {
-				$systemSXML = 0;
-			}
+			$xml = new KIWIXML ($kiwi,$system."/image");
 		} else {
 			my %fsattr = main::checkFileSystem ($system);
 			$status = qxx (
@@ -193,7 +187,7 @@ sub new {
 				$this -> cleanTmp ();
 				return undef;
 			}
-			my $xml = new KIWIXML ( $kiwi,$tmpdir."/image");
+			$xml = new KIWIXML ( $kiwi,$tmpdir."/image");
 			$status = qxx ("umount $tmpdir 2>&1");
 			$result = $? >> 8;
 			if ($result != 0) {
@@ -202,10 +196,34 @@ sub new {
 				$this -> cleanTmp ();
 				return undef;
 			}
-			if (! defined $xml) {
-				$this -> cleanTmp ();
-				return undef;
+		}
+		if (! defined $xml) {
+			$this -> cleanTmp ();
+			return undef;
+		}
+	}
+	#==========================================
+	# setup virtual disk size
+	#------------------------------------------
+	if ((! defined $vmsize) && (defined $system)) {
+		my $kernelSize = -s $kernel; # the kernel
+		my $initrdSize = -s $initrd; # the boot image
+		my $systemSXML = 1; # system size set by XML file
+		my $systemSize = 0; # the system image size in bytes
+		# /.../
+		# Note: In case of a split system the vmsize value will
+		# be increased according to the size of the split portion
+		# This happens within the function which requires it but
+		# not at the following code
+		# ----
+		if (-d $system) {
+			$systemSXML = $xml -> getImageSizeBytes();
+			$systemSize = qxx ("du -bs $system | cut -f1 2>&1");
+			chomp $systemSize;
+			if ($systemSXML eq "auto") {
+				$systemSXML = 0;
 			}
+		} else {
 			$systemSXML = $xml -> getImageSizeBytes();
 			$systemSize = -s $system;
 			if ($systemSXML eq "auto") {
@@ -213,41 +231,34 @@ sub new {
 			}
 		}
 		if ($syszip) {
-			# /.../
-			# virtual disk size in case of a compressed image is the size
-			# of the kernel + the boot image + the size of the compressed
-			# system image plus 30% free space for read-write operations.
-			# If the system image size is set by config.xml we use this
-			# value on our own risk
-			# ----
 			$vmsize = $kernelSize + $initrdSize + $syszip;
-			$vmsize+= $vmsize * 0.3; # and 30% free space
-			if (($systemSXML) && ($systemSXML > $vmsize)) {
-				$vmsize = $systemSXML;
-			}
 		} else {
-			# /.../
-			# virtual disk size in case of an uncompressed system image
-			# is the size of the kernel + the boot image + the system image
-			# size plus 30% free space of that sum. If the system image size
-			# is set by config.xml we use this value on our own risk
-			# ----
 			$vmsize = $kernelSize + $initrdSize + $systemSize;
-			$vmsize+= $vmsize * 0.3; # and 30% free space
-			if (($systemSXML) && ($systemSXML > $vmsize)) {
-				$vmsize = $systemSXML;
-			}
 		}
-		$vmsize  = $vmsize / 1024 / 1024;
-		$vmsize  = int $vmsize;
+		if (($systemSXML) && ($systemSXML > $vmsize)) {
+			# use the size information from the XML configuration
+			$vmsize = $systemSXML;
+		} else {
+			# use the calculated value plus 30% free space 
+			$vmsize+= $vmsize * 0.3;
+		}
+		$vmsize  = $vmsize / 1048576;
+		$vmsize  = sprintf ("%.0f", $vmsize);
 		$vmmbyte = $vmsize;
 		$vmsize  = $vmsize."M";
+	} elsif (defined $system) {
+		$vmmbyte = $xml -> getImageSizeBytes();
 	}
-	#$kiwi -> done ();
+	#==========================================
+	# round compressed image size
+	#------------------------------------------
 	if ($syszip) {
 		$syszip = $syszip / 1048576;
 		$syszip = sprintf ("%.0f", $syszip);
 	}
+	#==========================================
+	# find system architecture
+	#------------------------------------------
 	my $arch = qxx ("uname -m"); chomp $arch;
 	#==========================================
 	# Store object data
@@ -410,6 +421,7 @@ sub setupBootStick {
 	my $sysird;
 	my $status;
 	my $result;
+	my $hald;
 	my $xml;
 	#==========================================
 	# check if system is tree or image file
@@ -708,12 +720,36 @@ sub setupBootStick {
 	qxx ("umount $loopdir 2>&1");
 	$kiwi -> done();
 	#==========================================
-	# umount stick if mounted by hal
+	# umount stick mounted by hal before lock
 	#------------------------------------------
 	for (my $i=1;$i<=4;$i++) {
 		qxx ( "umount $stick$i 2>&1" );
 	}
+	#==========================================
+	# Wait for umount to settle
+	#------------------------------------------
 	sleep (1);
+	#==========================================
+	# Establish HAL lock for $stick
+	#------------------------------------------
+	$kiwi -> info ("Establish HAL lock for: $stick");
+	$hald = new dbusdevice::HalConnection;
+	if (! $hald -> open()) {
+		$kiwi -> failed  ();
+		$kiwi -> warning ($hald->state());
+		$kiwi -> skipped ();
+	} else {
+		$this -> {hald} = $hald;
+		if ($hald -> lock($stick)) {
+			$kiwi -> failed  ();
+			$kiwi -> warning ($hald->state());
+			$kiwi -> skipped ();
+		} else {
+			$this -> {stick} = $stick;
+			$kiwi -> loginfo ("HAL:".$hald->state());
+			$kiwi -> done();
+		}
+	}
 	#==========================================
 	# Create new partition table on stick
 	#------------------------------------------
@@ -723,6 +759,7 @@ sub setupBootStick {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't create temporary partition data: $!");
 		$kiwi -> failed ();
+		$this -> cleanDbus();
 		$this -> cleanTmp ();
 		return undef;
 	}
@@ -750,6 +787,7 @@ sub setupBootStick {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't create partition table: $!");
 		$kiwi -> failed ();
+		$this -> cleanDbus();
 		$this -> cleanTmp ();
 		return undef;
 	}
@@ -764,6 +802,7 @@ sub setupBootStick {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't reread partition table: $!");
 		$kiwi -> failed ();
+		$this -> cleanDbus();
 		$this -> cleanTmp ();
 		return undef;
 	}
@@ -774,12 +813,9 @@ sub setupBootStick {
 	unlink $pinfo;
 	qxx ( "rm -rf $tmpdir" );
 	#==========================================
-	# umount stick if mounted by hal
+	# Wait for new partition table to settle
 	#------------------------------------------
 	sleep (1);
-	for (my $i=1;$i<=4;$i++) {
-		qxx ("umount $stick$i 2>&1");
-	}
 	#==========================================
 	# Dump initrd image on stick
 	#------------------------------------------
@@ -791,6 +827,7 @@ sub setupBootStick {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't dump image to stick: $status");
 		$kiwi -> failed ();
+		$this -> cleanDbus();
 		return undef;
 	}
 	unlink $name;
@@ -808,6 +845,7 @@ sub setupBootStick {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't dump image to stick: $status");
 			$kiwi -> failed ();
+			$this -> cleanDbus();
 			return undef;
 		}
 		$kiwi -> done();
@@ -819,6 +857,7 @@ sub setupBootStick {
 				$kiwi -> failed ();
 				$kiwi -> error  ("Couldn't dump split file: $status");
 				$kiwi -> failed ();
+				$this -> cleanDbus();
 				return undef;
 			}
 			$kiwi -> done();
@@ -852,6 +891,7 @@ sub setupBootStick {
 			};
 			$kiwi -> error  ("Unsupported filesystem type: $FSTypeRO");
 			$kiwi -> failed ();
+			$this -> cleanDbus();
 			$this -> cleanTmp ();
 			return undef;
 		};
@@ -859,6 +899,7 @@ sub setupBootStick {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't create $FSTypeRO filesystem: $status");
 			$kiwi -> failed ();
+			$this -> cleanDbus();
 			$this -> cleanTmp ();
 			return undef;
 		}
@@ -872,6 +913,7 @@ sub setupBootStick {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't mount partition: $status");
 			$kiwi -> failed ();
+			$this -> cleanDbus();
 			$this -> cleanLoop ();
 			return undef;
 		}
@@ -885,6 +927,7 @@ sub setupBootStick {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Can't copy image tree on stick: $status");
 			$kiwi -> failed ();
+			$this -> cleanDbus();
 			$this -> cleanLoop ();
 			return undef;
 		}
@@ -917,6 +960,7 @@ sub setupBootStick {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't resize $FSTypeRO filesystem: $status");
 		$kiwi -> failed ();
+		$this -> cleanDbus();
 		return undef;
 	}
 	if ($status) {
@@ -943,6 +987,7 @@ sub setupBootStick {
 			$kiwi -> failed ();
 			$kiwi -> error("Couldn't resize $FSTypeRW filesystem: $status");
 			$kiwi -> failed ();
+			$this -> cleanDbus();
 			return undef;
 		}
 		if ($status) {
@@ -965,6 +1010,7 @@ sub setupBootStick {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't mount stick image: $status");
 			$kiwi -> failed ();
+			$this -> cleanDbus();
 			return undef;
 		}
 		if (-d "/mnt/boot") {
@@ -990,6 +1036,7 @@ sub setupBootStick {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't call grub: $!");
 		$kiwi -> failed ();
+		$this -> cleanDbus();
 		return undef;
 	}
 	print FD "device (hd0) $stick\n";
@@ -1002,9 +1049,14 @@ sub setupBootStick {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't install grub on USB stick: $!");
 		$kiwi -> failed ();
+		$this -> cleanDbus();
 		return undef;
 	}
 	$kiwi -> done ();
+	#==========================================
+	# Remove dbus lock for $stick
+	#------------------------------------------
+	$this -> cleanDbus();
 	return $this;
 }
 
@@ -1900,7 +1952,8 @@ sub setupBootDisk {
 	if ($imgtype eq "split") {
 		if (-f $splitfile) {
 			my $splitsize = -s $splitfile; $splitsize /= 1048576;
-			$vmsize = $this->{vmmbyte} + $splitsize + 50;
+			$vmsize = $this->{vmmbyte} + $splitsize * 1.3;
+			$vmsize = sprintf ("%.0f", $vmsize);
 			$vmsize = $vmsize."M";
 			$haveSplit = 1;
 		}
@@ -2780,6 +2833,23 @@ sub setupSplashForGrub {
 	qxx ("rm -rf $spldir");
 	$kiwi -> done();
 	return $newird;
+}
+
+#==========================================
+# cleanDbus
+#------------------------------------------
+sub cleanDbus {
+	my $this = shift;
+	my $stick= $this->{stick};
+	my $hald = $this->{hald};
+	if (! defined $hald) {
+		return $this;
+	}
+	if (defined $stick) {
+		$hald -> unlock ($stick);
+	}
+	$hald -> close();
+	return $this;
 }
 
 #==========================================

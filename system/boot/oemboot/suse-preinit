@@ -66,6 +66,7 @@ else
 		rm -f vmlinuz && ln -s linux.vmx  vmlinuz
 		rm -f initrd  && ln -s initrd.vmx initrd
 		popd &>/dev/null
+		kernelList
 		if [ ! -z "$COMBINED_IMAGE" ];then
 			Echo "Creating grub configuration for split system"
 		else
