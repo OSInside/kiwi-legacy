@@ -7,7 +7,12 @@
 Name:          kiwi
 BuildRequires: perl smart perl-XML-LibXML perl-libwww-perl hal dbus-1
 BuildRequires: screen module-init-tools zlib-devel hal-devel dbus-1-devel
-BuildRequires: libqt4 libqt4-devel gcc-c++ libxslt swig
+BuildRequires: gcc-c++ libxslt swig
+%if %{suse_version} > 1010
+BuildRequires: libqt4 libqt4-devel
+%else
+BuildRequires: qt qt-devel
+%endif 
 %ifarch %ix86 x86_64
 BuildRequires: syslinux
 %endif
