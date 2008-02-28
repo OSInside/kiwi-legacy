@@ -2,6 +2,7 @@
 Thu Feb 28 11:45:05 CET 2008 - ms@suse.de
 
 - v2.32
+- fixed packaging errors and rpmlint complains (bnc #365536)
 - added validateTarSize() function to check if the rootfs archive
   of a split system fits into the available tmpfs RAM space
 

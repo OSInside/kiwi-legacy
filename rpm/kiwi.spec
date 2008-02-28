@@ -5,25 +5,26 @@
 # ---
 # needsrootforbuild
 Name:          kiwi
-BuildRequires: perl smart perl-XML-LibXML perl-libwww-perl hal dbus-1
-BuildRequires: screen module-init-tools zlib-devel hal-devel dbus-1-devel
+BuildRequires: smart perl-XML-LibXML perl-libwww-perl
+BuildRequires: screen module-init-tools zlib-devel hal-devel
 BuildRequires: gcc-c++ libxslt swig
+%ifarch %ix86 x86_64
+BuildRequires: syslinux
+%endif
 %if %{suse_version} > 1010
 BuildRequires: libqt4 libqt4-devel
 %else
 BuildRequires: qt qt-devel libpng-devel freetype2-devel
 %endif 
-%ifarch %ix86 x86_64
-BuildRequires: syslinux
-%endif
 %if %{suse_version} > 1030
 BuildRequires: libsatsolver libsatsolver-devel db-devel libexpat-devel
 %endif
-Requires:      perl perl-XML-LibXML perl-libwww-perl screen coreutils libxslt
+Requires:      perl = %{perl_version}
+Requires:      perl-XML-LibXML perl-libwww-perl screen coreutils
 Requires:      kiwi-tools
 Summary:       OpenSuSE - KIWI Image System
-Provides:      kiwi = %version
-Obsoletes:     kiwi2 <= 2.14
+Provides:      kiwi2 = 2.14
+Obsoletes:     kiwi2 = 2.14
 Version:       2.32
 Release:       28
 Group:         System
@@ -43,50 +44,38 @@ Authors:
 %package -n kiwi-pxeboot
 Requires:     syslinux
 Summary:      OpenSuSE - KIWI TFTP boot structure
-Provides:     kiwi-pxeboot = %version
-Obsoletes:    kiwi2-pxeboot <= 2.14
+Obsoletes:    kiwi2-pxeboot = 2.14
+Provides:     kiwi2-pxeboot = 2.14
 Group:        System
 
 %description -n kiwi-pxeboot
 This package contains the OpenSuSE - KIWI TFTP boot structure
 
-Authors:
---------
-    Marcus Schäfer <ms@suse.de>
-
 %package -n kiwi-tools
 Summary:      OpenSuSE - KIWI tools collection
-Provides:     kiwi-tools = %version
-Obsoletes:    kiwi2-tools <= 2.14
+Obsoletes:    kiwi2-tools = 2.14
+Provides:     kiwi2-tools = 2.14
 Group:        System
 
 %description -n kiwi-tools
 This package contains the OpenSuSE - KIWI tools set usable in
 and outside of operating system images
 
-Authors:
---------
-    Marcus Schäfer <ms@suse.de>
-
 %package -n kiwi-pxeboot-prebuild
 Requires:     syslinux
 Summary:      OpenSuSE - KIWI TFTP prebuild boot images
-Provides:     kiwi-pxeboot-prebuild = %version
-Obsoletes:    kiwi2-pxeboot-prebuild <= 2.14
+Obsoletes:    kiwi2-pxeboot-prebuild = 2.14
+Provides:     kiwi2-pxeboot-prebuild = 2.14
 Group:        System
 
 %description -n kiwi-pxeboot-prebuild
 This package contains the OpenSuSE - KIWI TFTP prebuild boot images
 
-Authors:
---------
-    Marcus Schäfer <ms@suse.de>
-
 %package -n kiwi-desc-isoboot
 Requires:     kiwi syslinux mkisofs
 Summary:      OpenSuSE - KIWI image descriptions
-Provides:     kiwi-desc-isoboot = %version
-Obsoletes:    kiwi2-desc-isoboot <= 2.14
+Obsoletes:    kiwi2-desc-isoboot = 2.14
+Provides:     kiwi2-desc-isoboot = 2.14
 Group:        System
 
 %description -n kiwi-desc-isoboot
@@ -97,8 +86,8 @@ an isoboot image description
 %package -n kiwi-desc-usbboot
 Requires:     kiwi
 Summary:      OpenSuSE - KIWI image descriptions
-Provides:     kiwi-desc-usbboot = %version
-Obsoletes:    kiwi2-desc-usbboot <= 2.14
+Obsoletes:    kiwi2-desc-usbboot = 2.14
+Provides:     kiwi2-desc-usbboot = 2.14
 Group:        System
 
 %description -n kiwi-desc-usbboot
@@ -109,8 +98,8 @@ an usbboot image description
 %package -n kiwi-desc-vmxboot
 Requires:     kiwi qemu multipath-tools
 Summary:      OpenSuSE - KIWI image descriptions
-Provides:     kiwi-desc-vmxboot = %version
-Obsoletes:    kiwi2-desc-vmxboot <= 2.14
+Obsoletes:    kiwi2-desc-vmxboot = 2.14
+Provides:     kiwi2-desc-vmxboot = 2.14
 Group:        System
 
 %description -n kiwi-desc-vmxboot
@@ -121,8 +110,8 @@ a vmxboot image description
 %package -n kiwi-desc-netboot
 Requires:     kiwi
 Summary:      OpenSuSE - KIWI image descriptions
-Provides:     kiwi-desc-netboot = %version
-Obsoletes:    kiwi2-desc-netboot <= 2.14
+Obsoletes:    kiwi2-desc-netboot = 2.14
+Provides:     kiwi2-desc-netboot = 2.14
 Group:        System
 
 %description -n kiwi-desc-netboot
@@ -133,8 +122,8 @@ a netboot image description
 %package -n kiwi-desc-xenboot
 Requires:     kiwi
 Summary:      OpenSuSE - KIWI image descriptions
-Provides:     kiwi-desc-xenboot = %version
-Obsoletes:    kiwi2-desc-xenboot <= 2.14
+Obsoletes:    kiwi2-desc-xenboot = 2.14
+Provides:     kiwi2-desc-xenboot = 2.14
 Group:        System
 
 %description -n kiwi-desc-xenboot
@@ -142,15 +131,11 @@ This package contains the OpenSuSE - KIWI image descriptions.
 Each image description exists in a single directory and contains
 a xenboot image description
 
-Authors:
---------
-    Marcus Schäfer <ms@suse.de>
-
 %package -n kiwi-desc-oemboot
 Requires:     kiwi qemu multipath-tools
 Summary:      OpenSuSE - KIWI image descriptions
-Provides:     kiwi-desc-oemboot = %version
-Obsoletes:    kiwi2-desc-oemboot <= 2.14
+Obsoletes:    kiwi2-desc-oemboot = 2.14
+Provides:     kiwi2-desc-oemboot = 2.14
 Group:        System
 
 %description -n kiwi-desc-oemboot
@@ -158,13 +143,15 @@ This package contains the OpenSuSE - KIWI image descriptions.
 Each image description exists in a single directory and contains
 an oemboot image description
 
-Authors:
---------
-    Marcus Schäfer <ms@suse.de>
+%package -n kiwi-doc
+Summary:      OpenSuSE - KIWI image documentation
+Group:        System
+
+%description -n kiwi-doc
+This package contains the kiwi documentation
 
 %prep
 %setup -n kiwi
-# %patch
 
 %build
 export K_USER=0 # set value to -1 to prevent building boot images
@@ -274,6 +261,8 @@ rm -rf $RPM_BUILD_ROOT/usr/share/doc/packages/kiwi/kiwi-man
 %perl_process_packlist
 
 rm -f $RPM_BUILD_ROOT/%{perl_vendorarch}/example.pl
+rm -f $RPM_BUILD_ROOT/%{perl_vendorarch}/auto/SaT/SaT.bs
+rm -f $RPM_BUILD_ROOT/%{perl_vendorarch}/auto/dbusdevice/dbusdevice.bs
 rm -f $RPM_BUILD_ROOT/var/adm/perl-modules/kiwi
 ./.links
 cat kiwi.loader
@@ -283,9 +272,25 @@ cat kiwi.loader
 #-------------------------------------------------
 %files
 %defattr(-, root, root)
-%dir %{_defaultdocdir}/kiwi
 %dir %{_datadir}/kiwi
 %dir %{_datadir}/kiwi/image
+%{_datadir}/kiwi/.revision
+%{_datadir}/kiwi/modules
+%{_datadir}/kiwi/xsl
+%{_sbindir}/kiwi
+%{perl_vendorarch}/dbusdevice.pm
+%{perl_vendorarch}/auto/dbusdevice
+%if %{suse_version} > 1030
+%{perl_vendorarch}/SaT.pm
+%{perl_vendorarch}/auto/SaT
+%endif
+
+#=================================================
+# KIWI doc...      
+#-------------------------------------------------
+%files -n kiwi-doc
+%defattr(-, root, root)
+%dir %{_defaultdocdir}/kiwi
 %doc %{_mandir}/man1/kiwi.1.gz
 %doc %{_mandir}/man1/KIWI::images.sh.1.gz
 %doc %{_mandir}/man1/KIWI::config.sh.1.gz
@@ -297,16 +302,6 @@ cat kiwi.loader
 %doc %{_defaultdocdir}/kiwi/kiwi.xsd.html
 %doc %{_defaultdocdir}/kiwi/kiwi.rng.html
 %doc %{_defaultdocdir}/kiwi/kiwi.quick.pdf
-%{_datadir}/kiwi/.revision
-%{_datadir}/kiwi/modules
-%{_datadir}/kiwi/xsl
-%{_sbindir}/kiwi
-%{perl_vendorarch}/dbusdevice.pm
-%{perl_vendorarch}/auto/dbusdevice
-%if %{suse_version} > 1030
-%{perl_vendorarch}/SaT.pm
-%{perl_vendorarch}/auto/SaT
-%endif
 
 #=================================================
 # KIWI-pxeboot files...  
@@ -321,7 +316,7 @@ cat kiwi.loader
 %dir /srv/tftpboot/image
 %dir /srv/tftpboot/upload
 %dir /srv/tftpboot/boot
-%config /srv/tftpboot/pxelinux.cfg/default
+/srv/tftpboot/pxelinux.cfg/default
 
 #=================================================
 # KIWI-pxeboot-prebuild files...  
