@@ -1607,6 +1607,35 @@ function validateSize {
 	return 1
 }
 #======================================
+# validateTarSize
+#--------------------------------------
+function validateTarSize {
+	# /.../
+	# this function requires a destination directory which
+	# could be a tmpfs mount and a compressed tar source file.
+	# The function will then check if the tar file could be
+	# unpacked according to the size of the destination
+	# ----
+	local dest=$1
+	local tsrc=$2
+	local haveKByte=0
+	local haveMByte=0
+	local needBytes=0
+	local needMByte=0
+	haveKByte=`df -k $dest | tail -n 1 | column -t | cut -f3 -d " "`
+	haveMByte=`expr $haveKByte / 1024`
+	needBytes=`gzip -l $tsrc | tail -n 1 | column -t | cut -f3 -d " "`
+	needMByte=`expr $needBytes / 1048576`
+	needBytes=`gzip -l $tsrc | tail -n 1 | column -t | cut -f1 -d " "`
+	needMByte=`expr $needMByte + $needBytes / 1048576`
+	Echo "Have size: $dest -> $haveMByte MB"
+	Echo "Need size: $tsrc -> $needMByte MB [ uncompressed ]"
+	if test $haveMByte -gt $needMByte;then
+		return 0
+	fi
+	return 1
+}
+#======================================
 # validateBlockSize
 #--------------------------------------
 function validateBlockSize {
@@ -1821,6 +1850,11 @@ function mountSystemCombined {
 	# and read-write links into the tmpfs.
 	# ----
 	mount -t tmpfs none /mnt >/dev/null || return 1
+	if ! validateTarSize /mnt /read-only/rootfs.tar.gz;then
+		systemException \
+			"Not enough RAM space available for temporary data" \
+		"reboot"
+	fi
 	cd /mnt && tar xvfz /read-only/rootfs.tar.gz >/dev/null && cd /
 	# /.../
 	# create a /mnt/read-only mount point and move the /read-only
