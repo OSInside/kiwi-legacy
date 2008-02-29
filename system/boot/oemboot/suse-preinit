@@ -72,7 +72,11 @@ else
 		else
 			Echo "Creating grub configuration for unified system"
 		fi
-		setupBootLoaderGrub / / 0 ${deviceDisk}2 OEM $deviceSwap
+		if [ $HAVE_SWAP -eq 1 ];then
+			setupBootLoaderGrub / / 0 ${deviceDisk}2 OEM $deviceSwap
+		else
+			setupBootLoaderGrub / / 0 ${deviceDisk}2 OEM
+		fi
 		grubOK=1
 	else
 		Echo "Failed to mount boot partition"

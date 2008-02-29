@@ -1,5 +1,5 @@
 # /.../
-# spec file for package kiwi (Version 2.32
+# spec file for package kiwi (Version 2.33
 # Copyright (c) 2006 SUSE LINUX Products GmbH, Nuernberg, Germany.
 # Please submit bugfixes or comments via http://bugs.opensuse.org
 # ---
@@ -25,7 +25,7 @@ Requires:      kiwi-tools
 Summary:       OpenSuSE - KIWI Image System
 Provides:      kiwi2 = 2.14
 Obsoletes:     kiwi2 = 2.14
-Version:       2.32
+Version:       2.33
 Release:       28
 Group:         System
 License:       GPL
@@ -220,11 +220,11 @@ if [ "$UID" = "$K_USER" ];then
 			if [ -n "$xenkernel" ];then
 				echo "      kernel mboot.c32" >> $pxedefault
 				echo "      append boot/$xenloader --- boot/$xenkernel vga=0x314 ramdisk_size=512000 ramdisk_blocksize=4096 splash=silent showopts --- boot/$initrd" >> $pxedefault
-				echo "      IPAPPEND 1" >> $pxedefault
+				echo "      IPAPPEND 2" >> $pxedefault
 			else
 				echo "      kernel boot/$kernel" >> $pxedefault
 				echo "      append initrd=boot/$initrd vga=0x314 ramdisk_size=512000 ramdisk_blocksize=4096 splash=silent showopts" >> $pxedefault
-				echo "      IPAPPEND 1" >> $pxedefault
+				echo "      IPAPPEND 2" >> $pxedefault
 			fi
 			popd
 		)

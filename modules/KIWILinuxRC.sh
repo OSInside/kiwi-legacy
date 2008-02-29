@@ -1050,30 +1050,89 @@ function probeNetworkCard {
 	# to support the card and returns the information in
 	# the networkModule variable
 	# ----
-	hwnet=/usr/sbin/hwinfo
-	hwstr="Driver Activation Cmd:"
-	IFS="
-	"
-	for i in `$hwnet --netcard | grep "$hwstr" | cut -f2 -d:`;do
-		hwmod=`echo $i | tr -d "\"" | cut -f3 -d" "`
-		hwcmd="$hwcmd:$hwmod"
+	IFS="%"
+	local module=""
+	local hwicmd="/usr/sbin/hwinfo"
+	for i in \
+		`$hwicmd --netcard | grep "Driver [IA]" | 
+		sed -es"@modprobe\(.*\)\"@\1%@" | tr -d "\n"`
+	do
+		if echo $i | grep -q "#0";then
+			module=`echo $i | cut -f2 -d"\"" | tr -d " "`
+			module=`echo $module | sed -es"@modprobe@@g"`
+			IFS=";"
+			for m in $module;do
+				if ! echo $networkModule | grep -q $m;then
+					if [ ! -z "$networkModule" ];then
+						networkModule="$networkModule:$m"
+					else
+						networkModule=$m
+					fi
+				fi
+			done
+		fi
 	done
-	if [ ! -z "$hwcmd" ];then
-		networkModule=$hwcmd
-	fi
 	IFS=$IFS_ORIG
+	networkModule=`echo $networkModule`
 }
 #======================================
 # setupNetwork
 #--------------------------------------
 function setupNetwork {
 	# /.../
-	# setup the eth0 network interface using a dhcp
-	# request. On success the dhcp info file is imported
-	# into the current shell environment and the nameserver
-	# information is written to /etc/resolv.conf
+	# probe for the existing network interface names and
+	# hardware addresses. Match the BOOTIF address from PXE
+	# to the correct linux interface name. Setup the network
+	# interface using a dhcp request. On success the dhcp
+	# info file is imported into the current shell environment
+	# and the nameserver information is written to
+	# /etc/resolv.conf
 	# ----
-	dhcpcd eth0 >/dev/null
+	IFS="
+	"
+	local MAC=0
+	local DEV=0
+	local mac_list=0
+	local dev_list=0
+	local index=0
+	local hwicmd=/usr/sbin/hwinfo
+	local iface=eth0
+	for i in `$hwicmd --netcard`;do
+		IFS=$IFS_ORIG
+		if echo $i | grep -q "HW Address:";then
+			MAC=`echo $i | sed -e s"@HW Address:@@"`
+			MAC=`echo $MAC`
+			mac_list[$index]=$MAC
+			index=`expr $index + 1`
+		fi
+		if echo $i | grep -q "Device File:";then
+			DEV=`echo $i | sed -e s"@Device File:@@"`
+			DEV=`echo $DEV`
+			dev_list[$index]=$DEV
+		fi
+	done
+	if [ -z $BOOTIF ];then
+		# /.../
+		# there is no PXE boot interface information. We will use
+		# the first detected interface as fallback solution
+		# ----
+		iface=${dev_list[0]}
+	else
+		# /.../
+		# evaluate the information from the PXE boot interface
+		# if we found the MAC in the list the appropriate interface
+		# name is assigned. if not eth0 is used as fallback
+		# ----
+		index=0
+		BOOTIF=`echo $BOOTIF | cut -f2- -d - | tr "-" ":"`
+		for i in ${mac_list[*]};do
+			if [ $i = $BOOTIF ];then
+				iface=${dev_list[$index]}
+			fi
+			index=`expr $index + 1`
+		done
+	fi
+	dhcpcd $iface >/dev/null
 	if test $? != 0;then
 		systemException \
 			"Failed to setup DHCP network interface !" \
@@ -1081,10 +1140,10 @@ function setupNetwork {
 	fi
 	ifconfig lo 127.0.0.1 netmask 255.0.0.0 up
 	for i in 1 2 3 4 5 6 7 8 9 0;do
-		[ -s /var/lib/dhcpcd/dhcpcd-eth0.info ] && break
+		[ -s /var/lib/dhcpcd/dhcpcd-$iface.info ] && break
 		sleep 5
 	done
-	importFile < /var/lib/dhcpcd/dhcpcd-eth0.info
+	importFile < /var/lib/dhcpcd/dhcpcd-$iface.info
 	echo "search $DOMAIN" > /etc/resolv.conf
 	IFS="," ; for i in $DNS;do
 		echo "nameserver $i" >> /etc/resolv.conf

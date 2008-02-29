@@ -1,4 +1,16 @@
 -------------------------------------------------------------------
+Fri Feb 29 10:45:19 CET 2008 - ms@suse.de
+
+- v2.33
+- added speedup patch for the deletion of rpm packages
+- allow netboot linuxrc to evaluate the PXE BOOTIF information.
+  Along with this feature the setupNetwork and probeNetwork
+  function has been rewritten (bnc #365170)
+- allow all oemboot modes (standard,combined and unified) to
+  work without re-partition of the disk if this is not possible
+  due to not enough disk space (bnc #365504)
+
+-------------------------------------------------------------------
 Thu Feb 28 11:45:05 CET 2008 - ms@suse.de
 
 - v2.32

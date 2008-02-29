@@ -17,9 +17,8 @@ suseGFXBoot SuSE grub
 #==========================================
 # remove unneeded packages
 #------------------------------------------
-for i in `baseGetPackagesForDeletion`;do
-	rpm -q $i &> /dev/null && rpm -e $i --nodeps --noscripts
-done
+rpm -e --nodeps --noscripts \
+	$(rpm -q `baseGetPackagesForDeletion` | grep -v "is not installed")
 
 #==========================================
 # remove unneeded files
