@@ -1,5 +1,5 @@
 # /.../
-# spec file for package kiwi (Version 2.33
+# spec file for package kiwi (Version 2.34
 # Copyright (c) 2006 SUSE LINUX Products GmbH, Nuernberg, Germany.
 # Please submit bugfixes or comments via http://bugs.opensuse.org
 # ---
@@ -8,6 +8,7 @@ Name:          kiwi
 BuildRequires: smart perl-XML-LibXML perl-libwww-perl
 BuildRequires: screen module-init-tools zlib-devel hal-devel
 BuildRequires: gcc-c++ libxslt swig
+BuildRequires: fdupes
 %ifarch %ix86 x86_64
 BuildRequires: syslinux
 %endif
@@ -25,11 +26,12 @@ Requires:      kiwi-tools
 Summary:       OpenSuSE - KIWI Image System
 Provides:      kiwi2 = 2.14
 Obsoletes:     kiwi2 = 2.14
-Version:       2.33
+Version:       2.34
 Release:       28
 Group:         System
 License:       GPL
-Source:        kiwi.tar.bz2
+Source:        %{name}.tar.bz2
+Source1:       %{name}-rpmlintrc
 BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 ExcludeArch:   ia64 ppc64 s390x s390 ppc
 Recommends:    smart zypper
@@ -154,8 +156,11 @@ This package contains the kiwi documentation
 %setup -n kiwi
 
 %build
+# empty because of rpmlint warning rpm-buildroot-usage
+
+%install
+# build
 export K_USER=0 # set value to -1 to prevent building boot images
-rm -rf $RPM_BUILD_ROOT
 test -e /.buildenv || export K_USER=-1 # no buildenv, no boot image build
 test -e /.buildenv && . /.buildenv
 make buildroot=$RPM_BUILD_ROOT CFLAGS="$RPM_OPT_FLAGS"
@@ -237,7 +242,7 @@ else
 	true
 fi
 
-%install
+#install
 mkdir -p $RPM_BUILD_ROOT/etc/permissions.d
 echo "/srv/tftpboot/upload root:root 0755" \
 	> $RPM_BUILD_ROOT/etc/permissions.d/kiwi
@@ -265,7 +270,12 @@ rm -f $RPM_BUILD_ROOT/%{perl_vendorarch}/auto/SaT/SaT.bs
 rm -f $RPM_BUILD_ROOT/%{perl_vendorarch}/auto/dbusdevice/dbusdevice.bs
 rm -f $RPM_BUILD_ROOT/var/adm/perl-modules/kiwi
 ./.links
+%fdupes $RPM_BUILD_ROOT/usr/share/kiwi/image
+%fdupes $RPM_BUILD_ROOT/usr/share/doc/packages/kiwi/examples
 cat kiwi.loader
+
+%clean
+rm -rf $RPM_BUILD_ROOT
 
 #=================================================
 # KIWI files...      

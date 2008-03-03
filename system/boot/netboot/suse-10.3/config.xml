@@ -271,7 +271,6 @@
 		<package name="e2fsprogs"/>
 		<package name="make"/>
 		<package name="pciutils"/>
-		<package name="gzip"/>
 		<package name="krb5"/>
 		<package name="openldap2-client"/>
 		<package name="cyrus-sasl"/>

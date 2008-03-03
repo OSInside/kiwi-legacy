@@ -1,0 +1,2 @@
+addFilter(" hidden-file-or-dir /usr/share/kiwi/image/.*\/\.checksum.md5")
+addFilter(" hidden-file-or-dir /usr/share/kiwi/.revision")

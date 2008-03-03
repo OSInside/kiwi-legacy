@@ -88,6 +88,13 @@ sub main {
 		close LG;
 	}
 	#==============================================
+	# convert spec to utf8
+	#----------------------------------------------
+	qx (iconv -f ISO-8859-1 -t utf8 $pacdir/kiwi.spec > $pacdir/kiwi.spec.new);
+	qx (mv $pacdir/kiwi.spec.new $pacdir/kiwi.spec);
+	qx (iconv -f ISO-8859-1 -t utf8 $pacdir/kiwi.changes > $pacdir/kiwi.c.new);
+	qx (mv $pacdir/kiwi.c.new $pacdir/kiwi.changes);
+	#==============================================
 	# Cleanup
 	#----------------------------------------------
 	my $host = qx (hostname);
