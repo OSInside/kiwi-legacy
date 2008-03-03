@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<product xmlns="http://www.novell.com/metadata/zypp/xml-store" version="2.0" type="base">
+  <name>openSUSE</name>
+  <version ver="10.3" rel="" epoch="0"/>
+  <arch>i686</arch>
+  <provides>
+    <capability kind="product">@NAME@ == 10.3-0</capability>
+    <capability kind="product">openSUSE == 10.3</capability>
+  </provides>
+  <obsoletes>
+    <capability kind="product">SUSE_LINUX</capability>
+    <capability kind="package">openSUSE &lt; 10.3</capability>
+    <capability kind="product">openSUSE &lt; 10.3</capability>
+  </obsoletes>
+  <requires>
+    <capability kind="package">openSUSE-release == 10.3</capability>
+    <capability kind="pattern">basesystem</capability>
+  </requires>
+  <summary>openSUSE 10.3</summary>
+  <summary lang="de">openSUSE 10.3</summary>
+  <vendor>SUSE LINUX Products GmbH, Nuernberg, Germany</vendor>
+  <size>0</size>
+  <archive-size>0</archive-size>
+  <install-only>false</install-only>
+  <build-time>0</build-time>
+  <install-time>1190436075</install-time>
+  <shortname>oS 10.3</shortname>
+  <distribution-name>@NAME@</distribution-name>
+  <distribution-edition>10.3-0</distribution-edition>
+  <source>@NAME@ 10.3</source>
+  <release-notes-url>http://www.suse.com/relnotes/i386/openSUSE/10.3/release-notes.rpm</release-notes-url>
+  <update-urls>
+  </update-urls>
+  <extra-urls>
+  </extra-urls>
+  <optional-urls>
+  </optional-urls>
+  <product-flags>
+  </product-flags>
+</product>

@@ -58,6 +58,8 @@
 		<package name="gfxboot"/>
 		<package name="fribidi"/>
 		<package name="make"/>
+		<package name="bootsplash"/>
+		<package name="bootsplash-theme-SuSE"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="kernel-xen"/>

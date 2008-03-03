@@ -1,0 +1,31 @@
+#! /bin/sh
+
+# this script is called from the live installer once it finished copying the live
+# image. So the goal of this script is to fix whatever configs were changed for the
+# live system
+
+chkconfig boot.rootfsck on
+chkconfig sshd on
+chkconfig cron on
+
+#======================================
+# /etc/sudoers hack to fix #297695 
+# (Installation Live CD: no need to ask for password of root)
+#--------------------------------------
+sed -e "s/ALL ALL=(ALL) NOPASSWD: ALL/ALL ALL=(ALL) ALL/" /etc/sudoers > /tmp/sudoers && mv /tmp/sudoers /etc/sudoers
+chmod 0440 /etc/sudoers
+
+# remove live-cd user
+userdel linux
+
+# reset pam config
+pam-config -d --nullok
+
+# remove unneeded /license.tar.gz
+rm /license.tar.gz
+
+# remove langset stuff
+rm /etc/langset.pl
+rm -rf /etc/langset/
+grep -v ^perl /etc/init.d/boot.local > /etc/init.d/boot.local.1 && mv /etc/init.d/boot.local.1 /etc/init.d/boot.local
+chmod 0755 /etc/init.d/boot.local

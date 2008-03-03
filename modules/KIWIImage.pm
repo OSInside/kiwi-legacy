@@ -2517,7 +2517,7 @@ sub buildXenConfig {
 	my $xenref = shift;
 	my $kiwi   = $this->{kiwi};
 	my $file   = $dest."/".$name->{systemImage}.".xenconfig";
-	my $initrd = $dest."/".$name->{bootImage}.".gz";
+	my $initrd = $dest."/".$name->{bootImage}.".splash.gz";
 	my $kernel = $dest."/".$name->{bootImage}.".kernel";
 	$kernel    = glob ("$kernel\.*");
 	my %xenconfig = %{$xenref};

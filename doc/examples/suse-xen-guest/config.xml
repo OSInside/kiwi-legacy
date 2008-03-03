@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<image schemeversion="2.0" name="suse-10.3-xen-guest">
+	<description type="system">
+		<author>Marcus Schäfer</author>
+		<contact>ms@novell.com</contact>
+		<specification>openSUSE 10.3 xen guest system</specification>
+	</description>
+	<preferences>
+		<type filesystem="ext3" boot="xenboot/suse-10.3">xen</type>
+		<version>1.1.2</version>
+		<packagemanager>smart</packagemanager>
+		<rpm-check-signatures>False</rpm-check-signatures>
+		<rpm-force>True</rpm-force>
+		<locale>en_US</locale>
+		<keytable>us.map.gz</keytable>
+	</preferences>
+	<repository type="yast2">
+		<source path="/image/CDs/full-10.3-i386"/>
+		<!--<source path="opensuse://openSUSE:10.3/standard/"/>-->
+	</repository>
+	<packages type="image">
+		<package name="kernel-default"/>
+		<package name="bootsplash"/>
+		<package name="bootsplash-theme-SuSE"/>
+		<package name="resmgr"/>
+		<package name="vim"/>
+		<opensusePattern name="base-10.3"/>
+	</packages>
+	<packages type="xen" memory="512" disk="/dev/sda">
+		<package name="kernel-xen"/>
+		<package name="xen"/>
+	</packages>
+	<packages type="bootstrap">
+		<package name="filesystem"/> 
+		<package name="glibc-locale"/>
+	</packages>
+</image>

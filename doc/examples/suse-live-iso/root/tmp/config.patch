@@ -1,0 +1,96 @@
+--- /etc/inittab.orig	2007-08-10 19:54:25.000000000 +0200
++++ /etc/inittab	2007-08-02 17:42:32.000000000 +0200
+@@ -17,7 +17,7 @@
+ #
+ 
+ # The default runlevel is defined here
+-id:3:initdefault:
++id:5:initdefault:
+ 
+ # First script to be executed, if not booting in emergency (-b) mode
+ si::bootwait:/etc/init.d/boot
+--- /etc/sysconfig/displaymanager.orig	2007-08-11 10:04:13.000000000 +0200
++++ /etc/sysconfig/displaymanager	2007-08-11 12:26:53.000000000 +0200
+@@ -87,7 +87,7 @@
+ # Define the user whom should get logged in without request. If string
+ # is empty, display standard login dialog.
+ #
+-DISPLAYMANAGER_AUTOLOGIN=""
++DISPLAYMANAGER_AUTOLOGIN="linux"
+ 
+ ## Type:        yesno
+ ## Default:     no
+--- /etc/sysconfig/network/config.orig	2007-08-11 12:33:48.000000000 +0200
++++ /etc/sysconfig/network/config	2007-08-11 12:33:55.000000000 +0200
+@@ -215,7 +215,7 @@
+ # If you are used to SCPM then you might probably stay with NetControl. But at
+ # least try NetworkManager, because it can replace SCPM in some usage scenarios.
+ # 
+-NETWORKMANAGER=no
++NETWORKMANAGER=yes
+ 
+ ## Type:	int
+ ## Default:	0
+--- /etc/sysconfig/keyboard.orig	2007-09-17 16:41:34.000000000 +0200
++++ /etc/sysconfig/keyboard	2007-09-17 16:49:50.000000000 +0200
+@@ -10,7 +10,7 @@
+ # (/usr/share/kbd/keymaps/)
+ # e.g. KEYTABLE="de-latin1-nodeadkeys", "us" or empty for US settings
+ #
+-KEYTABLE=""
++KEYTABLE="us.map.gz"
+ 
+ ## Type:        integer
+ ## Default:
+@@ -91,3 +91,7 @@
+ #  COMPOSETABLE="winkeys shiftctrl"
+ # 
+ COMPOSETABLE="clear winkeys shiftctrl latin1.add"
++
++# The YaST-internal identifier of the attached keyboard.
++#
++YAST_KEYBOARD="english-us,pc104"
+--- /etc/init.d/earlyxdm.orig	2007-09-14 19:19:33.000000000 +0200
++++ /etc/init.d/earlyxdm	2007-09-18 21:36:27.000000000 +0200
+@@ -12,7 +12,7 @@
+ ### BEGIN INIT INFO
+ # Provides:          earlyxdm
+ # Required-Start:    earlysyslog $local_fs
+-# Should-Start:      gpm firstboot resmgr haldaemon
++# Should-Start:      gpm firstboot resmgr haldaemon create_xconf
+ # Required-Stop:
+ # Default-Start:     5
+ # Default-Stop:
+--- /etc/init.d/boot.local	2007-09-29 10:42:39.000000000 +0200
++++ /etc/init.d/boot.local	2007-10-06 17:22:18.000000000 +0200
+@@ -15 +15,2 @@
+ 
++perl -pi /etc/langset.pl /etc/sysconfig/{language,keyboard}
+--- usr/share/dist/desktop-files/live-installer.desktop.orig	2007-10-10 21:15:56.000000000 +0200
++++ usr/share/dist/desktop-files/live-installer.desktop	2007-10-10 21:16:04.000000000 +0200
+@@ -7,3 +7,5 @@
+ Name=Install
+ GenericName=Install running system to your hard drive
+ 
++X-KDE-SubstituteUID=true
++X-KDE-RootOnly=true
+--- etc/hosts.orig	2007-11-12 15:24:30.000000000 +0100
++++ etc/hosts	2007-11-12 15:24:51.000000000 +0100
+@@ -21,3 +21,4 @@
+ ff02::2         ipv6-allrouters
+ ff02::3         ipv6-allhosts
+ 
++127.0.0.2       linux.site linux
+--- sbin/yast2.orig	2007-10-10 19:49:43.000000000 +0200
++++ sbin/yast2	2007-10-10 19:51:48.000000000 +0200
+@@ -133,6 +133,10 @@
+ # Select which toolkit we want to use (F#301083)
+ select_gui_frontend()
+ {
++    if test "$module" = live-installer; then
++       WANTED_GUI=qt
++    fi
++
+     if [ "$WANTED_GUI" = "auto" ]; then
+ 	probe_desktop_gui
+ 	WANTED_GUI=$DESKTOP_GUI

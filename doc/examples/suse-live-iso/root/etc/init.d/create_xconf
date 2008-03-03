@@ -1,0 +1,73 @@
+#! /bin/sh
+# Copyright (c) 1995-2003 SuSE Linux AG, Nuernberg, Germany.
+# All rights reserved.
+#
+### BEGIN INIT INFO
+# Provides:       create_xconf
+# Required-Start: $local_fs
+# Required-Stop:  
+# Default-Start:  5
+# Default-Stop:   
+# X-Start-Before: earlyxdm
+# Description:    Call sax
+### END INIT INFO
+
+# First reset status of this service
+. /etc/rc.status
+rc_reset
+
+# Return values acc. to LSB for all commands but status:
+# 0 - success
+# 1 - generic or unspecified error
+# 2 - invalid or excess argument(s)
+# 3 - unimplemented feature (e.g. "reload")
+# 4 - insufficient privilege
+# 5 - program is not installed
+# 6 - program is not configured
+# 7 - program is not running
+
+case "$1" in
+    start)
+	echo -n "Creating X Config"
+	# create config file if not yet done
+	if [ "$RECONFIGURE" = yes -o "$RECONFIGURE" = 1 ]; then
+		rm /etc/X11/xorg.conf
+	fi
+	if [ ! -f /etc/X11/xorg.conf ];then
+		test -e /proc/splash && echo verbose > /proc/splash
+		/usr/sbin/sax2 -c 0 -a -i &>/dev/null
+		test -e /proc/splash && echo silent > /proc/splash
+	fi
+	rc_status -v
+	;;
+    stop)
+	;;
+    try-restart)
+        rc_status
+	;;
+    restart)
+	rc_status
+        ;;
+    try-restart-iburst)
+	rc_status
+        ;;
+    force-reload)
+	# Does not support signalling to reload
+        $0 try-restart
+	rc_status
+	;;
+    reload)
+	rc_status -v
+	;;
+    status)
+	rc_status -v
+	;;
+    probe)
+	rc_failed 3
+	;;
+    *)
+	echo "Usage: $0 {start|stop|status|try-restart|restart|try-restart-iburst|force-reload|reload|probe|ntptimeset}"
+	exit 1
+	;;
+esac
+rc_exit

@@ -1,0 +1,22 @@
+--- /etc/sysconfig/windowmanager	2007-08-10 19:49:32.000000000 +0200
++++ /etc/sysconfig/windowmanager	2007-08-02 16:52:26.000000000 +0200
+@@ -15,7 +15,7 @@
+ #
+ # Here you can set the default window manager (kde, fvwm, ...)
+ # changes here require at least a re-login
+-DEFAULT_WM="kde"
++DEFAULT_WM="kde"
+ 
+ ## Type:	yesno
+ ## Default:	yes
+--- /etc/sysconfig/displaymanager.orig	2007-08-11 10:04:13.000000000 +0200
++++ /etc/sysconfig/displaymanager	2007-08-11 12:26:53.000000000 +0200
+@@ -39,7 +39,7 @@
+ # Here you can set the default Display manager (kdm/xdm/gdm/wdm/console).
+ # all changes in this file require a restart of the displaymanager
+ #
+-DISPLAYMANAGER=""
++DISPLAYMANAGER="kdm"
+ 
+ ## Type:	yesno
+ ## Default:	no

@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<image name="openSUSE-10.3" schemeversion="1.4">
+  <description type="system">
+    <author>Stephan Kulow</author>
+    <contact>coolo@novell.com</contact>
+    <specification>openSUSE 10.3 Live system</specification>
+  </description>
+  <preferences>
+    <type primary="true" boot="isoboot/suse-10.3" flags="unified">iso</type>
+    <type boot="vmxboot/suse-10.3" filesystem="ext3" format="vmdk">vmx</type>
+    <type boot="xenboot/suse-10.3" filesystem="ext3">xen</type>
+    <type boot="usbboot/suse-10.3" filesystem="squashfs">usb</type>
+    <version>2.4</version>
+    <size unit="M">2000</size>
+    <packagemanager>smart</packagemanager>
+    <rpm-check-signatures>False</rpm-check-signatures>
+    <rpm-force>False</rpm-force>
+    <locale>en_US.UTF-8</locale>
+  </preferences>
+  <profiles>
+     <profile name="KDE"   description="KDE desktop system"/>
+     <profile name="GNOME" description="GNome desktop system"/>
+  </profiles>
+  <users group="users">
+    <user name="linux" pwd="" home="/home/linux" realname="Live-CD User"/>
+    <user name="root" pwd="" home="/root"/>
+  </users>
+  <repository type="yast2">
+    <source path="/mounts/dist/install/SLP/openSUSE-10.3-GM-DVD/i386/DVD1/"/>
+  </repository>
+  <repository type="rpm-md">
+    <source path="http://download.opensuse.org/repositories/openSUSE:/10.3:/Testing/openSUSE_10.3/"/>
+  </repository>
+  <repository type="rpm-md">
+    <source path="http://download.opensuse.org/update/10.3/"/>
+  </repository>
+  <packages type="image">
+    <package name="yast2-live-installer"/>
+    <package name="pam"/>
+    <package name="pam-config"/>
+    <package name="pam-modules"/>
+    <package name="udev"/>
+    <package name="aaa_base"/>
+    <package name="tar"/>
+    <package name="patch"/>
+    <package name="zypper"/>
+  </packages>
+   <packages type="image" patternType="onlyRequired" patternPackageType="plusRecommended" profiles="KDE">
+<!-- PACKAGES BEGIN KDE -->
+<!-- PACKAGES END KDE -->
+   </packages>
+ <packages type="image" patternType="onlyRequired" patternPackageType="plusRecommended" profiles="GNOME">
+<!-- PACKAGES BEGIN GNOME -->
+<!-- PACKAGES END GNOME -->
+  </packages>
+  <packages type="boot">
+    <package name="filesystem"/>
+    <package name="glibc-locale"/>
+    <package name="kernel-default"/>
+    <package name="udev"/>
+    <package name="bundle-lang-common-en"/>
+  </packages>
+</image>
