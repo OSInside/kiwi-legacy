@@ -135,6 +135,7 @@ our $BootVMSize;        # size of virtual disk
 our $InstallCD;         # Installation initrd booting from CD
 our $InstallCDSystem;   # virtual disk system image to be installed on disk
 our $BootCD;            # Boot initrd booting from CD
+our $BootUSB;           # Boot initrd booting from Stick
 our $InstallStick;      # Installation initrd booting from USB stick
 our $InstallStickSystem;# virtual disk system image to be installed on disk
 our $StripImage;        # strip shared objects and binaries
@@ -764,6 +765,21 @@ sub main {
 	}
 
 	#==========================================
+	# Create a boot Stick (USB)
+	#------------------------------------------
+	if (defined $BootUSB) {
+		$kiwi -> info ("Creating boot USB stick from: $BootUSB...\n");
+		$boot = new KIWIBoot ($kiwi,$BootUSB);
+		if (! defined $boot) {
+			my $code = kiwiExit (1); return $code;
+		}
+		if (! $boot -> setupInstallStick()) {
+			my $code = kiwiExit (1); return $code;
+		}
+		my $code = kiwiExit (0); return $code;
+	}
+
+	#==========================================
 	# Create a boot CD (ISO)
 	#------------------------------------------
 	if (defined $BootCD) {
@@ -915,6 +931,7 @@ sub init {
 		"installcd=s"           => \$InstallCD,
 		"installcd-system=s"    => \$InstallCDSystem,
 		"bootcd=s"              => \$BootCD,
+		"bootusb=s"             => \$BootUSB,
 		"installstick=s"        => \$InstallStick,
 		"installstick-system=s" => \$InstallStickSystem,
 		"strip|s"               => \$StripImage,
@@ -982,7 +999,8 @@ sub init {
 		(! defined $InstallStick)       &&
 		(! defined $listXMLInfo)        &&
 		(! defined $CreatePassword)     &&
-		(! defined $BootCD)
+		(! defined $BootCD)             &&
+		(! defined $BootUSB)
 	) {
 		$kiwi -> error ("No operation specified");
 		$kiwi -> failed ();
@@ -1104,7 +1122,8 @@ sub usage {
 	print "  kiwi --bootvm <initrd> --bootvm-system <systemImage>\n";
 	print "     [ --bootvm-disksize <size> ]\n";
 	print "     [ --bootvm-format <format> ]\n";
-	print "  kiwi --bootcd <initrd>\n";
+	print "  kiwi --bootcd  <initrd>\n";
+	print "  kiwi --bootusb <initrd>\n";
 	print "  kiwi --installcd <initrd>\n";
 	print "     [ --installcd-system <vmx-system-image> ]\n";
 	print "  kiwi --installstick <initrd>\n";

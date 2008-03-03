@@ -4,6 +4,7 @@ Mon Mar  3 09:43:42 CET 2008 - ms@suse.de
 - v2.34
 - fixed packaging errors and rpmlint complains (bnc #365536)
 - removed gzip program from beeing deleted in diskless profile
+- added --bootusb option which works like --bootcd but for sticks
 - added better image description examples
 
 -------------------------------------------------------------------

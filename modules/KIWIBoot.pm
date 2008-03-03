@@ -514,7 +514,7 @@ sub setupBootStick {
 		$result = $? >> 8;
 	}
 	if ($result != 0) {
-		$kiwi -> skipped ();
+		$kiwi -> skipped (); chomp $status;
 		$kiwi -> error   ("Failed importing grub stages: $status");
 		$kiwi -> skipped ();
 		$kiwi -> info    ("Trying to use grub stages from local machine");
@@ -527,7 +527,6 @@ sub setupBootStick {
 			$this -> cleanTmp ();
 			return undef;
 		}
-		$kiwi -> done();
 	}
 	$kiwi -> done ();
 	#==========================================
@@ -1253,7 +1252,7 @@ sub setupInstallCD {
 		}
 	}
 	if ($result != 0) {
-		$kiwi -> skipped ();
+		$kiwi -> skipped (); chomp $status;
 		$kiwi -> error   ("Failed importing grub stages: $status");
 		$kiwi -> skipped ();
 		$kiwi -> info    ("Trying to use grub stages from local machine");
@@ -1268,7 +1267,6 @@ sub setupInstallCD {
 			$this -> cleanTmp ();
 			return undef;
 		}
-		$kiwi -> done();
 	}
 	qxx ("rm -rf $tmpdir/usr 2>&1");
 	qxx ("rm -rf $tmpdir/image 2>&1");
@@ -1577,7 +1575,7 @@ sub setupInstallStick {
 		$result = $? >> 8;
 	}
 	if ($result != 0) {
-		$kiwi -> skipped ();
+		$kiwi -> skipped (); chomp $status;
 		$kiwi -> error   ("Failed importing grub stages: $status");
 		$kiwi -> skipped ();
 		$kiwi -> info    ("Trying to use grub stages from local machine");
@@ -1591,7 +1589,6 @@ sub setupInstallStick {
 			$this -> cleanTmp ();
 			return undef;
 		}
-		$kiwi -> done();
 	}
 	$kiwi -> done ();
 	#==========================================
@@ -1668,6 +1665,12 @@ sub setupInstallStick {
 	# create virtual disk
 	#------------------------------------------
 	$kiwi -> info ("Creating virtual disk...");
+	if (! $gotsys) {
+		$vmsize = -s $initrd;
+		$vmsize+= $vmsize * 1.3;
+		$vmsize/= 1024;
+		$vmsize = sprintf ("%.0f", $vmsize);
+	}
 	$status = qxx ("qemu-img create $diskname $vmsize 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
@@ -1700,10 +1703,17 @@ sub setupInstallStick {
 		$this -> cleanLoop ();
 		return undef;
 	}
-	my @commands = (
-		"n","p","1",".","+30M",
-		"n","p","2",".",".","w","q"
-	);
+	my @commands = ();
+	if ($gotsys) {
+		@commands = (
+			"n","p","1",".","+30M",
+			"n","p","2",".",".","w","q"
+		);
+	} else {
+		@commands = (
+			"n","p","1",".",".","w","q"
+		);
+	}
 	foreach my $cmd (@commands) {
 		if ($cmd eq ".") {
 			print FD "\n";
@@ -1728,12 +1738,16 @@ sub setupInstallStick {
 	}
 	my $dmap = $loop; $dmap =~ s/dev\///;
 	my $boot = "/dev/mapper".$dmap."p1";
-	my $data = "/dev/mapper".$dmap."p2";
+	my $data;
+	if ($gotsys) {
+		$data = "/dev/mapper".$dmap."p2";
+	}
 	$kiwi -> done();
 	#==========================================
 	# Create filesystem on virtual partitions
 	#------------------------------------------
 	foreach my $root ($boot,$data) {
+		next if ! defined $root;
 		$kiwi -> info ("Creating filesystem on $root partition");
 		$status = qxx ( "/sbin/mke2fs -j -q $root 2>&1" );
 		$result = $? >> 8;
@@ -2042,7 +2056,7 @@ sub setupBootDisk {
 		}
 	}
 	if ($result != 0) {
-		$kiwi -> skipped ();
+		$kiwi -> skipped (); chomp $status;
 		$kiwi -> error   ("Failed importing grub stages: $status");
 		$kiwi -> skipped ();
 		$kiwi -> info    ("Trying to use grub stages from local machine");
@@ -2055,7 +2069,6 @@ sub setupBootDisk {
 			$this -> cleanTmp ();
 			return undef;
 		}
-		$kiwi -> done();	
 	}
 	$kiwi -> done ();
 	#==========================================
