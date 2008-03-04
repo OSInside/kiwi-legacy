@@ -245,7 +245,7 @@ else
 fi
 
 #install
-cd $RPM_BUILD_DIR
+cd $RPM_BUILD_DIR/kiwi
 mkdir -p $RPM_BUILD_ROOT/etc/permissions.d
 echo "/srv/tftpboot/upload root:root 0755" \
 	> $RPM_BUILD_ROOT/etc/permissions.d/kiwi
