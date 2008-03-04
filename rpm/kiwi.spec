@@ -8,7 +8,9 @@ Name:          kiwi
 BuildRequires: smart perl-XML-LibXML perl-libwww-perl
 BuildRequires: screen module-init-tools zlib-devel hal-devel
 BuildRequires: gcc-c++ libxslt swig
+%if %{suse_version} > 1020
 BuildRequires: fdupes
+%endif
 %ifarch %ix86 x86_64
 BuildRequires: syslinux
 %endif
@@ -243,6 +245,7 @@ else
 fi
 
 #install
+cd $RPM_BUILD_DIR
 mkdir -p $RPM_BUILD_ROOT/etc/permissions.d
 echo "/srv/tftpboot/upload root:root 0755" \
 	> $RPM_BUILD_ROOT/etc/permissions.d/kiwi
@@ -264,14 +267,15 @@ install -m 644 tools/README \
 	$RPM_BUILD_ROOT/usr/share/doc/packages/kiwi/README.tools
 rm -rf $RPM_BUILD_ROOT/usr/share/doc/packages/kiwi/kiwi-man
 %perl_process_packlist
-
 rm -f $RPM_BUILD_ROOT/%{perl_vendorarch}/example.pl
 rm -f $RPM_BUILD_ROOT/%{perl_vendorarch}/auto/SaT/SaT.bs
 rm -f $RPM_BUILD_ROOT/%{perl_vendorarch}/auto/dbusdevice/dbusdevice.bs
 rm -f $RPM_BUILD_ROOT/var/adm/perl-modules/kiwi
 ./.links
+%if %{suse_version} > 1020
 %fdupes $RPM_BUILD_ROOT/usr/share/kiwi/image
 %fdupes $RPM_BUILD_ROOT/usr/share/doc/packages/kiwi/examples
+%endif
 cat kiwi.loader
 
 %clean
