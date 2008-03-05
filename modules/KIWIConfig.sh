@@ -772,21 +772,23 @@ function suseStripKernel {
 			for root in \
 				/tmp/scsi-used /tmp/net-used /tmp/usb-used /tmp/misc-used
 			do
-				cd $root
+				pushd $root
 				for dir in `find -type d`;do
 					if [ ! -d /lib/modules/$VERSION/kernel/$dir ];then
 						mkdir -p /lib/modules/$VERSION/kernel/$dir 2>/dev/null
 					fi
 				done
+				popd
 			done
 			for root in \
 				/tmp/scsi-used /tmp/net-used /tmp/usb-used /tmp/misc-used
 			do
-				cd $root
+				pushd $root
 				for file in `find -type f`;do
 					local path=`/usr/bin/dirname $file`
 					mv $file /lib/modules/$VERSION/kernel/$path;
 				done
+				popd
 			done
 			#==========================================
 			# Cleanup /tmp...
@@ -799,9 +801,10 @@ function suseStripKernel {
 			#==========================================
 			# create common kernel files, last wins !
 			#------------------------------------------
-			cd /boot
+			pushd /boot
 			mv vmlinux-$VERSION.gz vmlinux.gz
 			mv vmlinuz-$VERSION vmlinuz
+			popd
 		done
 	done
 }
