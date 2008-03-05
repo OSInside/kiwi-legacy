@@ -22,6 +22,9 @@ BuildRequires: qt qt-devel libpng-devel freetype2-devel
 %if %{suse_version} > 1030
 BuildRequires: libsatsolver libsatsolver-devel db-devel libexpat-devel
 %endif
+%if %{suse_version} <= 1010
+Requires:      qt
+%endif
 Requires:      perl = %{perl_version}
 Requires:      perl-XML-LibXML perl-libwww-perl screen coreutils
 Requires:      kiwi-tools

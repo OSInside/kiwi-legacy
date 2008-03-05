@@ -67,7 +67,6 @@
 	</packages>
 	<packages type="image" profiles="rt">
 		<package name="kernel-rt"/>
-		<package name="aufs-kmp-rt"/>
 	</packages>
 	<packages type="image">
 		<package name="psmisc"/>

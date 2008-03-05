@@ -1685,7 +1685,10 @@ function validateTarSize {
 	haveMByte=`expr $haveKByte / 1024`
 	needBytes=`gzip -l $tsrc | tail -n 1 | column -t | cut -f3 -d " "`
 	needMByte=`expr $needBytes / 1048576`
-	needMByte=`expr $needMByte \* 2`
+	needBytes=`gzip -l $tsrc | tail -n 1 | column -t | cut -f1 -d " "`
+	needBytes=`expr $needBytes / 1048576`
+	needBytes=`expr $needBytes \* 2`
+	needMByte=`expr $needMByte + $needBytes`
 	Echo "Have size: $dest -> $haveMByte MB"
 	Echo "Need size: $tsrc -> $needMByte MB [ uncompressed ]"
 	if test $haveMByte -gt $needMByte;then
