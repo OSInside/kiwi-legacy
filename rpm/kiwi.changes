@@ -5,6 +5,7 @@ Wed Mar  5 10:26:23 CET 2008 - ms@suse.de
 - added isoboot profiles to allow default, smp and rt (bnc #367263)
 - allow exceptions to be specified within split section (bnc #366510)
 - fixed suseStripKernel if multiple kernels are installed (bnc #367263)
+- fixed validateTarSize ram check
 
 -------------------------------------------------------------------
 Tue Mar  4 10:18:41 CET 2008 - ms@suse.de

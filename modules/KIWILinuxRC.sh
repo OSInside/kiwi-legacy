@@ -1681,12 +1681,11 @@ function validateTarSize {
 	local haveMByte=0
 	local needBytes=0
 	local needMByte=0
-	haveKByte=`df -k $dest | tail -n 1 | column -t | cut -f3 -d " "`
+	haveKByte=`cat /proc/meminfo | grep MemFree | cut -f2 -d: | cut -f1 -dk`
 	haveMByte=`expr $haveKByte / 1024`
 	needBytes=`gzip -l $tsrc | tail -n 1 | column -t | cut -f3 -d " "`
 	needMByte=`expr $needBytes / 1048576`
-	needBytes=`gzip -l $tsrc | tail -n 1 | column -t | cut -f1 -d " "`
-	needMByte=`expr $needMByte + $needBytes / 1048576`
+	needMByte=`expr $needMByte \* 2`
 	Echo "Have size: $dest -> $haveMByte MB"
 	Echo "Need size: $tsrc -> $needMByte MB [ uncompressed ]"
 	if test $haveMByte -gt $needMByte;then
@@ -1908,13 +1907,14 @@ function mountSystemCombined {
 	# and extract the rootfs tarball with the RAM data and the read-only
 	# and read-write links into the tmpfs.
 	# ----
-	mount -t tmpfs none /mnt >/dev/null || return 1
-	if ! validateTarSize /mnt /read-only/rootfs.tar.gz;then
+	local rootfs=/read-only/rootfs.tar.gz
+	mount -t tmpfs tmpfs -o size=512M /mnt >/dev/null || return 1
+	if ! validateTarSize /mnt $rootfs;then
 		systemException \
 			"Not enough RAM space available for temporary data" \
 		"reboot"
 	fi
-	cd /mnt && tar xvfz /read-only/rootfs.tar.gz >/dev/null && cd /
+	cd /mnt && tar xvfz $rootfs >/dev/null && cd /
 	# /.../
 	# create a /mnt/read-only mount point and move the /read-only
 	# mount into the /mnt root tree. After that remove the /read-only
