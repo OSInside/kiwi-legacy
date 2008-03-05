@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Mar  5 10:26:23 CET 2008 - ms@suse.de
+
+- v2.35
+- allow exceptions to be specified within split section (#366510)
+
+-------------------------------------------------------------------
 Tue Mar  4 10:18:41 CET 2008 - ms@suse.de
 
 - fixed build

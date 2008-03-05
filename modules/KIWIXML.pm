@@ -713,6 +713,42 @@ sub getSplitTempFiles {
 }
 
 #==========================================
+# getSplitExceptions
+#------------------------------------------
+sub getSplitExceptions {
+	# ...
+	# Get the exceptions defined for temporary and/or persistent
+	# split portions. If no exceptions defined return an empty list
+	# ----
+	my $this = shift;
+	my $node = $this->{splitNodeList} -> get_node(1);
+	my @result = ();
+	if (! defined $node) {
+		return @result;
+	}
+	my $tempNode = $node -> getElementsByTagName ("temporary") -> get_node(1);
+	if (! defined $tempNode) {
+		return @result;
+	}
+	my @fileNodeList = $tempNode -> getElementsByTagName ("except")
+		-> get_nodelist();
+	foreach my $fileNode (@fileNodeList) {
+		push @result, $fileNode -> getAttribute ("name");
+	}
+	my $persistNode = $node -> getElementsByTagName ("persistent")
+		-> get_node(1);
+	if (! defined $persistNode) {
+		return @result;
+	}
+	my @fileNodeList = $persistNode -> getElementsByTagName ("except")
+		-> get_nodelist();
+	foreach my $fileNode (@fileNodeList) {
+		push @result, $fileNode -> getAttribute ("name");
+	}
+	return @result;
+}
+
+#==========================================
 # getDeployInitrd
 #------------------------------------------
 sub getDeployInitrd {

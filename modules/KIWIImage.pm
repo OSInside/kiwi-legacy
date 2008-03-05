@@ -1330,6 +1330,70 @@ sub createImageSplit {
 	$imageTreeTmp.= "-tmp/";
 	$this->{imageTreeTmp} = $imageTreeTmp;
 	my @persistFiles = $sxml -> getSplitPersistentFiles ();
+	my @exceptFiles  = $sxml -> getSplitExceptions ();
+	my %exceptHash;
+	my %persistDir;
+	#==========================================
+	# walk through except files if any
+	#------------------------------------------
+	foreach my $except (@exceptFiles) {
+		my $globsource = "${imageTree}${except}";
+		my @files = glob($globsource);
+		foreach my $file (@files) {
+			#==========================================
+			# find except files to set read-only
+			#------------------------------------------
+			if (! -e $file) {
+				next;
+			}
+			my $rerooted = $file;
+			$rerooted =~ s#$imageTree#/read-only/#;
+			my $tmpdest = $file;
+			$tmpdest =~ s#$imageTree#$imageTreeTmp#;
+			$exceptHash{$tmpdest} = $rerooted;
+			#==========================================
+			# check file dirname in persistent list 
+			#------------------------------------------
+			my $tdir = dirname $tmpdest;
+			$tdir =~ s#$imageTreeTmp##;
+			foreach my $persist (@persistFiles) {
+				if (($persist eq $tdir) && (! $persistDir{$persist})) {
+					$persistDir{$persist} = $persist;
+					last;
+				}
+			}
+		}
+	}
+	#==========================================
+	# reordering persistent directory list
+	#------------------------------------------
+	foreach my $pdir (keys %persistDir) {
+		my $dir = "${imageTree}${pdir}";
+		my @res = ();
+		if (! opendir (FD,$dir)) {
+			$kiwi -> error  ("Can't open directory: $dir: $!");
+			$kiwi -> failed ();
+			return undef;
+		}
+		while (my $entry = readdir (FD)) {
+			next if ($entry =~ /^\.+$/);
+			if (-d $imageTree.$pdir."/".$entry) {
+				push @res,$pdir."/".$entry;
+			}
+		}
+		closedir (FD);
+		my @newlist = ();
+		push @persistFiles,@res;
+		foreach my $entry (@persistFiles) {
+			if ($entry ne $pdir) {
+				push @newlist,$entry;
+			}
+		}
+		@persistFiles = @newlist;
+	}
+	#==========================================
+	# run split tree creation
+	#------------------------------------------
 	if (! -d $imageTreeTmp) {
 		$kiwi -> info ("Creating temporary image part");
 		if (! mkdir $imageTreeTmp) {
@@ -1383,6 +1447,15 @@ sub createImageSplit {
 				}
 			}
 		}
+		#==========================================
+		# handle optional exceptions
+		#------------------------------------------
+		if (@exceptFiles) {
+			foreach my $except (keys %exceptHash) {
+				qxx ("rm -rf $except");
+				symlink ($exceptHash{$except},$except);
+			}
+		}
 		$kiwi -> done();
 	}
 	#==========================================
@@ -1428,13 +1501,20 @@ sub createImageSplit {
 		}
 		my @sortedPersistFiles = sort dirsort @expandedPersistFiles;
 		foreach my $file (@sortedPersistFiles) {
+			if ($exceptHash{$file}) {
+				# /.../
+				# don't handle this file for read-write
+				# because of an exception
+				# ----
+				next;
+			}
 			my $source  = $file;
 			my $rosource= $file;
 			my $dest    = $file;
 			my $rwroot  = $file;
 			$rosource   =~ s#$imageTreeTmp#$imageTree#;
 			$dest       =~ s#$imageTreeTmp#$imageTreeRW#;
-			$rwroot     =~ s#$imageTreeTmp#/read-write#;
+			$rwroot     =~ s#$imageTreeTmp#/read-write/#;
 			my $destdir = dirname $dest;
 			qxx ("rm -rf $dest");
 			qxx ("mkdir -p $destdir");
@@ -1443,6 +1523,7 @@ sub createImageSplit {
 				symlink ($rwroot, $source);
 			} else {
 				qxx ("cp -a $rosource $dest");
+				qxx ("rm -f $source");
 				symlink ($rwroot, $source);
 			}
 		}
