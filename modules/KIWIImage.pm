@@ -86,6 +86,7 @@ sub new {
 		return undef;
 	}
 	if (! defined $main::LogFile) {
+		$imageTree =~ s/\/$//;
 		if (defined $imageOrig) {
 			$kiwi -> setRootLog ($imageOrig.".".$$.".screenrc.log");
 		} else {
