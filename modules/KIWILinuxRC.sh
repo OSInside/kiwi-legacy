@@ -583,6 +583,22 @@ function setupBootLoaderGrub {
 	echo "(hd0) $rdisk" > $dmap
 }
 #======================================
+# setupDefaultPXENetwork
+#--------------------------------------
+function setupDefaultPXENetwork {
+	# /.../
+	# create the /sysconfig/network file according to the PXE
+	# boot interface.
+	# ----
+	local prefix=$1
+	local niface=$prefix/etc/sysconfig/network/ifcfg-$PXE_IFACE
+	mkdir -p $prefix/etc/sysconfig/network
+	cat > $niface < /dev/null
+	echo "BOOTPROTO='dhcp'"  >> $niface
+	echo "STARTMODE='auto'"  >> $niface    
+	echo "USERCONTROL='no'"  >> $niface
+}
+#======================================
 # setupDefaultFstab
 #--------------------------------------
 function setupDefaultFstab {
@@ -1132,7 +1148,8 @@ function setupNetwork {
 			index=`expr $index + 1`
 		done
 	fi
-	dhcpcd $iface >/dev/null
+	export PXE_IFACE=$iface
+	dhcpcd $PXE_IFACE >/dev/null
 	if test $? != 0;then
 		systemException \
 			"Failed to setup DHCP network interface !" \
@@ -1140,10 +1157,10 @@ function setupNetwork {
 	fi
 	ifconfig lo 127.0.0.1 netmask 255.0.0.0 up
 	for i in 1 2 3 4 5 6 7 8 9 0;do
-		[ -s /var/lib/dhcpcd/dhcpcd-$iface.info ] && break
+		[ -s /var/lib/dhcpcd/dhcpcd-$PXE_IFACE.info ] && break
 		sleep 5
 	done
-	importFile < /var/lib/dhcpcd/dhcpcd-$iface.info
+	importFile < /var/lib/dhcpcd/dhcpcd-$PXE_IFACE.info
 	echo "search $DOMAIN" > /etc/resolv.conf
 	IFS="," ; for i in $DNS;do
 		echo "nameserver $i" >> /etc/resolv.conf
