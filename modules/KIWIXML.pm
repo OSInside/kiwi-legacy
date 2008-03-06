@@ -740,7 +740,7 @@ sub getSplitExceptions {
 	if (! defined $persistNode) {
 		return @result;
 	}
-	my @fileNodeList = $persistNode -> getElementsByTagName ("except")
+	@fileNodeList = $persistNode -> getElementsByTagName ("except")
 		-> get_nodelist();
 	foreach my $fileNode (@fileNodeList) {
 		push @result, $fileNode -> getAttribute ("name");
@@ -2031,8 +2031,10 @@ sub getInstSourceSatSolvable {
 	#------------------------------------------
 	my $sdir = "/var/cache/kiwi/satsolver";
 	if (! -d $sdir) {
-		if (! mkdir $sdir) {
-			$kiwi -> error  ("--> Couldn't create cache dir: $!");
+		my $data = qxx ("mkdir -p $sdir 2>&1");
+		my $code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> error  ("--> Couldn't create cache dir: $data");
 			$kiwi -> failed ();
 			return undef;
 		}
