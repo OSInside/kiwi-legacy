@@ -108,7 +108,7 @@ sub new {
 	$this->{screenLogs}  = $kiwi -> getRootLog();
 	$this->{dataDir}     = $dataDir;
 	$this->{smart}       = [
-		"smart","--data-dir=$dataDir"
+		"smart","--data-dir=$dataDir","-o rpm-root=$root","-o deb-root=$root"
 	];
 	$this->{zypper}      = [
 		"zypper","--non-interactive","--no-gpg-checks"
@@ -301,11 +301,7 @@ sub setupSignatureCheck {
 	#------------------------------------------
 	if ($manager eq "smart") {
 		my $optionName  = "rpm-check-signatures";
-		my $curCheckSig = qxx ("@smart config --show $optionName|tr -d '\\n'");
-		my $cmdstr = "smart config --set";
-		if (! $chroot) {
-			$cmdstr = "@smart config --set";
-		}
+		my $curCheckSig = qxx ("smart config --show $optionName|tr -d '\\n'");
 		$this->{curCheckSig} = $curCheckSig;
 		if (defined $imgCheckSig) {
 			my $option = "$optionName=$imgCheckSig";
@@ -313,11 +309,11 @@ sub setupSignatureCheck {
 				$this -> checkExclusiveLock();
 				$kiwi -> info ("Setting RPM signature check to: $imgCheckSig");
 				$this -> setLock();
-				$data = qxx ("bash -c \"$cmdstr $option 2>&1\"");
+				$data = qxx ("@smart config --set $option 2>&1");
 				$this -> freeLock();
 			} else {
 				$kiwi -> info ("Setting RPM signature check to: $imgCheckSig");
-				$data = qxx ("chroot $root bash -c \"$cmdstr $option 2>&1\"");
+				$data = qxx ("chroot $root smart config --set $option 2>&1");
 			}
 			$code = $? >> 8;
 			if ($code != 0) {
@@ -368,19 +364,15 @@ sub resetSignatureCheck {
 		if (defined $this->{imgCheckSig}) {
 			my $optionName  = "rpm-check-signatures";
 			my $option = "$optionName=$curCheckSig";
-			my $cmdstr = "smart config --set";
-			if (! $chroot) {
-				$cmdstr = "@smart config --set";
-			}
 			if (! $chroot) {
 				$this -> checkExclusiveLock();
 				$kiwi -> info ("Reset RPM signature check to: $curCheckSig");
 				$this -> setLock();
-				$data = qxx ("bash -c \"$cmdstr $option 2>&1\"");
+				$data = qxx ("@smart config --set $option 2>&1");
 				$this -> freeLock();
 			} else {
 				$kiwi -> info ("Reset RPM signature check to: $curCheckSig");
-				$data = qxx ("chroot $root bash -c \"$cmdstr $option 2>&1\"");
+				$data = qxx ("chroot $root smart config --set $option 2>&1");
 			}
 			$code = $? >> 8;
 			if ($code != 0) {
@@ -567,12 +559,12 @@ sub resetInstallationSource {
 			$this -> checkExclusiveLock();
 			$kiwi -> info ("Removing smart channel(s): @channelList");
 			$this -> setLock();
-			$data = qxx ("bash -c \"$cmds @list -y 2>&1\"");
+			$data = qxx ("$cmds @list -y 2>&1");
 			$code = $? >> 8;
 			$this -> freeLock();
 		} else {
 			$kiwi -> info ("Removing smart channel(s): @channelList");
-			$data = qxx ("chroot $root bash -c \"$cmds @list -y 2>&1\"");
+			$data = qxx ("chroot $root $cmds @list -y 2>&1");
 			$code = $? >> 8;
 		}
 		if ($code != 0) {
@@ -844,7 +836,6 @@ sub setupRootSystem {
 			$this -> checkExclusiveLock();
 			$kiwi -> info ("Initializing image system on: $root...");
 			my @installOpts = (
-				"-o rpm-root=$root",
 				"--explain",
 				"--log-level=error",
 				"-y"
@@ -1052,6 +1043,7 @@ sub resetSource {
 	my @smart   = @{$this->{smart}};
 	my @zypper  = @{$this->{zypper}};
 	my $lock    = $this->{lock};
+	my $dataDir = $this->{dataDir};
 	#==========================================
 	# check lock
 	#------------------------------------------
@@ -1063,7 +1055,7 @@ sub resetSource {
 	if ($manager eq "smart") {
 		foreach my $channel (keys %{$source{public}}) {
 			$kiwi -> info ("Removing smart channel: $channel\n");
-			qxx (" @smart channel --remove $channel -y 2>&1 ");
+			qxx ("smart --data-dir=$dataDir channel --remove $channel -y 2>&1");
 		}
 	}
 	#==========================================
@@ -1072,7 +1064,7 @@ sub resetSource {
 	if ($manager eq "zypper") {
 		foreach my $channel (keys %{$source{public}}) {
 			$kiwi -> info ("Removing zypper service: $channel\n");
-			qxx ("bash -c \"@zypper service-delete $channel 2>&1\"");
+			qxx ("@zypper service-delete $channel 2>&1");
 		}
 	}
 	#==========================================
