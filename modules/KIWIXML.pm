@@ -39,11 +39,11 @@ our %inheritanceHash;
 sub new { 
 	# ...
 	# Create a new KIWIXML object which is used to access the
-	# configuration XML data saved as config.xml. The xml data
-	# is splitted into four major tags: preferences, drivers,
-	# repository and packages. While constructing an object of this
-	# type there will be a node list created for each of the
-	# major tags.
+	# configuration XML data saved as config.xml or *.kiwi.
+	# The xml data is splitted into four major tags: preferences,
+	# drivers, repository and packages. While constructing an
+	# object of this type there will be a node list created for
+	# each of the major tags.
 	# ---
 	#==========================================
 	# Object setup
@@ -77,10 +77,21 @@ sub new {
 	# Check if config.xml exist
 	#------------------------------------------
 	if (! -f $controlFile) {
-		$kiwi -> failed ();
-		$kiwi -> error ("Cannot open control file: $controlFile");
-		$kiwi -> failed ();
-		return undef;
+		my @globsearch = glob ($imageDesc."/*.kiwi");
+		my $globitems  = @globsearch;
+		if ($globitems == 0) {
+			$kiwi -> failed ();
+			$kiwi -> error ("Cannot open control file: $controlFile");
+			$kiwi -> failed ();
+			return undef;
+		} elsif ($globitems > 1) {
+			$kiwi -> failed ();
+			$kiwi -> error ("Found multiple *.kiwi control files");
+			$kiwi -> failed ();
+			return undef;
+		} else {
+			$controlFile = pop @globsearch;
+		}
 	}
 	#==========================================
 	# Check/Transform due to XSL stylesheet(s)

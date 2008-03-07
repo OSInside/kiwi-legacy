@@ -3,6 +3,7 @@ Fri Mar  7 12:57:52 CET 2008 - ms@suse.de
 
 - v2.36
 - fixed use of smart options rpm-root and deb-root (bnc #368120)
+- allow *.kiwi file as valid input beside config.xml (bnc #368129)
 
 -------------------------------------------------------------------
 Wed Mar  5 10:26:23 CET 2008 - ms@suse.de
