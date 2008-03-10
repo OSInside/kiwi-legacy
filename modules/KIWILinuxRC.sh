@@ -1919,7 +1919,7 @@ function mountSystemCombined {
 	# mount the read-only partition to /read-only and use
 	# mount option -o ro for this filesystem
 	# ----
-	if ! mount -t auto -o ro $roDevice /read-only >/dev/null;then
+	if ! mount -o ro $roDevice /read-only >/dev/null;then
 		return 1
 	fi
 	# /.../
@@ -1961,7 +1961,8 @@ function mountSystemCombined {
 #--------------------------------------
 function mountSystemStandard {
 	local mountDevice=$1
-	if [ ! -z $FSTYPE ] && [ ! $FSTYPE = "unknown" ];then
+	if [ ! -z $FSTYPE ] && [ ! $FSTYPE = "unknown" ] && [ ! $FSTYPE = "auto" ]
+	then
 		mount -t $FSTYPE $mountDevice /mnt >/dev/null
 	else
 		mount $mountDevice /mnt >/dev/null
@@ -1980,19 +1981,19 @@ function mountSystem {
 	#--------------------------------------
 	local mountDevice=$imageRootDevice
 	if test ! -z $1;then
-		mountDevice=$1
+		mountDevice=$@
 	fi
 	#======================================
 	# check root tree type
 	#--------------------------------------
 	if test ! -z $COMBINED_IMAGE;then
-		mountSystemCombined $mountDevice
+		mountSystemCombined "$mountDevice"
 		retval=$?
 	elif test ! -z $UNIONFS_CONFIG;then
 		mountSystemUnified
 		retval=$?
 	else
-		mountSystemStandard $mountDevice
+		mountSystemStandard "$mountDevice"
 		retval=$?
 	fi
 	IFS=$OLDIFS
