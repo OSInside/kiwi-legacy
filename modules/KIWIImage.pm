@@ -1282,6 +1282,7 @@ sub createImageSplit {
 	my $data;
 	my $code;
 	my $name;
+	my $treebase;
 	#==========================================
 	# turn image path into absolute path
 	#------------------------------------------
@@ -1324,8 +1325,27 @@ sub createImageSplit {
 		return undef;
 	}
 	#==========================================
+	# Create clone of prepared tree
+	#------------------------------------------
+	$kiwi -> info ("Creating root tree clone for split operations");
+	$treebase = basename $imageTree;
+	if (-d $imageDest."/".$treebase) {
+		qxx ("rm -rf $imageDest/$treebase");
+	}
+	$data = qxx ("cp -a $imageTree $imageDest");
+	$code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Can't create copy of image tree: $data");
+		$kiwi -> failed ();
+		qxx ("rm -rf $imageTree");
+		return undef;
+	}
+	$kiwi -> done();
+	#==========================================
 	# split physical extend into RW/RO/tmp part
 	#------------------------------------------
+	$imageTree    = $imageDest."/".$treebase;
 	$imageTreeTmp = $imageTree;
 	$imageTreeTmp =~ s/\/+$//;
 	$imageTreeTmp.= "-tmp/";
@@ -1372,9 +1392,9 @@ sub createImageSplit {
 		my $dir = "${imageTree}${pdir}";
 		my @res = ();
 		if (! opendir (FD,$dir)) {
-			$kiwi -> error  ("Can't open directory: $dir: $!");
-			$kiwi -> failed ();
-			return undef;
+			$kiwi -> warning ("Can't open directory: $dir: $!");
+			$kiwi -> skipped ();
+			next;
 		}
 		while (my $entry = readdir (FD)) {
 			next if ($entry =~ /^\.+$/);
@@ -1402,6 +1422,7 @@ sub createImageSplit {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't create tmp directory: $error");
 			$kiwi -> failed ();
+			qxx ("rm -rf $imageTree");
 			return undef;
 		}
 		my $createTmpTree = sub {
@@ -1444,7 +1465,7 @@ sub createImageSplit {
 					my $dest = $file;
 					$dest =~ s#$imageTree#$imageTreeTmp#;
 					qxx ("rm -rf $dest");
-					qxx ("cp -a $file $dest");
+					qxx ("mv $file $dest");
 				}
 			}
 		}
@@ -1473,6 +1494,7 @@ sub createImageSplit {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't create read-write directory: $error");
 			$kiwi -> failed ();
+			qxx ("rm -rf $imageTree");
 			return undef;
 		}
 		my @expandedPersistFiles = ();
@@ -1523,7 +1545,7 @@ sub createImageSplit {
 				qxx ("mv $source $dest");
 				symlink ($rwroot, $source);
 			} else {
-				qxx ("cp -a $rosource $dest");
+				qxx ("mv $rosource $dest");
 				qxx ("rm -f $source");
 				symlink ($rwroot, $source);
 			}
@@ -1553,6 +1575,7 @@ sub createImageSplit {
 			$kiwi -> info ("Image RW part requires $mbytesrw MB of disk space");
 			if (! $this -> buildLogicalExtend ($namerw,$mbytesrw."M")) {
 				qxx ("rm -rf $imageTreeRW");
+				qxx ("rm -rf $imageTree");
 				return undef;
 			}
 			$kiwi -> done();
@@ -1576,10 +1599,12 @@ sub createImageSplit {
 			$kiwi -> error  ("Unsupported type: $FSTypeRW");
 			$kiwi -> failed ();
 			qxx ("rm -rf $imageTreeRW");
+			qxx ("rm -rf $imageTree");
 			return undef;
 		}
 		if (! $ok) {
 			qxx ("rm -rf $imageTreeRW");
+			qxx ("rm -rf $imageTree");
 			return undef;
 		}
 	}
@@ -1589,6 +1614,7 @@ sub createImageSplit {
 	$kiwi -> info ("Image RO part requires $mbytesro MB of disk space");
 	if (! $this -> buildLogicalExtend ($namero,$mbytesro."M")) {
 		qxx ("rm -rf $imageTreeRW");
+		qxx ("rm -rf $imageTree");
 		return undef;
 	}
 	$kiwi -> done();
@@ -1615,10 +1641,12 @@ sub createImageSplit {
 		$kiwi -> error  ("Unsupported type: $FSTypeRO");
 		$kiwi -> failed ();
 		qxx ("rm -rf $imageTreeRW");
+		qxx ("rm -rf $imageTree");
 		return undef;
 	}
 	if (! $ok) {
 		qxx ("rm -rf $imageTreeRW");
+		qxx ("rm -rf $imageTree");
 		return undef;
 	}
 	#==========================================
@@ -1648,6 +1676,7 @@ sub createImageSplit {
 			my $extend = $this -> mountLogicalExtend ($name);
 			if (! defined $extend) {
 				qxx ("rm -rf $imageTreeRW");
+				qxx ("rm -rf $imageTree");
 				return undef;
 			}
 			#==========================================
@@ -1655,6 +1684,7 @@ sub createImageSplit {
 			#------------------------------------------
 			if (! $this -> installLogicalExtend ($extend,$source)) {
 				qxx ("rm -rf $imageTreeRW");
+				qxx ("rm -rf $imageTree");
 				return undef;
 			}
 			$this -> cleanMount();
@@ -1687,6 +1717,7 @@ sub createImageSplit {
 			$kiwi -> error  ("Unsupported type: $type");
 			$kiwi -> failed ();
 			qxx ("rm -rf $imageTreeRW");
+			qxx ("rm -rf $imageTree");
 			return undef;
 		}
 		#==========================================
@@ -1694,6 +1725,7 @@ sub createImageSplit {
 		#------------------------------------------
 		if (! $this -> buildMD5Sum ($name)) {
 			qxx ("rm -rf $imageTreeRW");
+			qxx ("rm -rf $imageTree");
 			return undef;
 		}
 	}
@@ -1703,12 +1735,14 @@ sub createImageSplit {
 	$kiwi -> info ("Creating boot configuration...");
 	if (! $this -> writeImageConfig ($namero)) {
 		qxx ("rm -rf $imageTreeRW");
+		qxx ("rm -rf $imageTree");
 		return undef;
 	}
 	#==========================================
 	# Cleanup temporary data
 	#------------------------------------------
 	qxx ("rm -rf $imageTreeRW");
+	qxx ("rm -rf $imageTree");
 	#==========================================
 	# build boot image only if specified
 	#------------------------------------------
@@ -1719,6 +1753,7 @@ sub createImageSplit {
 	#==========================================
 	# Prepare and Create boot image
 	#------------------------------------------
+	$imageTree = $this->{imageTree};
 	$kiwi -> info ("Creating boot image: $boot...\n");
 	my $Prepare = $imageTree."/image";
 	my $xml = new KIWIXML ( $kiwi,$Prepare );

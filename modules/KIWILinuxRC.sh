@@ -1945,15 +1945,17 @@ function mountSystemCombined {
 	mount --move /read-only /mnt/read-only >/dev/null
 	rm -rf /read-only >/dev/null
 	ln -s /mnt/read-only /read-only >/dev/null || return 1
-	if sfdisk -s $rwDevice &>/dev/null;then
-		# /.../
-		# mount the read-write partition to /mnt/read-write and create
-		# a link to it: /read-write -> /mnt/read-write 
-		# ----
-		mkdir /mnt/read-write >/dev/null
-		mount $rwDevice /mnt/read-write >/dev/null
-		rm -f /read-write >/dev/null
-		ln -s /mnt/read-write /read-write >/dev/null
+	if ! echo $rwDevice | grep -q loop;then
+		if sfdisk -s $rwDevice &>/dev/null;then
+			# /.../
+			# mount the read-write partition to /mnt/read-write and create
+			# a link to it: /read-write -> /mnt/read-write 
+			# ----
+			mkdir /mnt/read-write >/dev/null
+			mount $rwDevice /mnt/read-write >/dev/null
+			rm -f /read-write >/dev/null
+			ln -s /mnt/read-write /read-write >/dev/null
+		fi
 	fi
 }
 #======================================
