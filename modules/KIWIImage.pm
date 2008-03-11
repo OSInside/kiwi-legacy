@@ -1555,7 +1555,7 @@ sub createImageSplit {
 	#==========================================
 	# Embed tmp extend into ro extend
 	#------------------------------------------
-	qxx ("cd $imageTreeTmp && tar cvfz $imageTree/rootfs.tar.gz * 2>&1");
+	qxx ("cd $imageTreeTmp && tar cvf $imageTree/rootfs.tar * 2>&1");
 	qxx ("rm -rf $imageTreeTmp");
 
 	#==========================================

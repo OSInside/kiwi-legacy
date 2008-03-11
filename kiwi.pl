@@ -426,8 +426,8 @@ sub main {
 		#==========================================
 		# Cleanup the tree according to prev runs
 		#------------------------------------------
-		if (-f "$Create/rootfs.tar.gz") {
-			qxx ("rm -f $Create/rootfs.tar.gz");
+		if (-f "$Create/rootfs.tar") {
+			qxx ("rm -f $Create/rootfs.tar");
 		}
 		#==========================================
 		# Check for overlay requirements

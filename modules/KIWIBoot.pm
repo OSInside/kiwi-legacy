@@ -430,7 +430,7 @@ sub setupBootStick {
 		#==========================================
 		# check image type
 		#------------------------------------------
-		if (-f "$system/rootfs.tar.gz") {
+		if (-f "$system/rootfs.tar") {
 			$kiwi -> error ("Can't use split root tree, run create first");
 			$kiwi -> failed ();
 			return undef;
@@ -451,7 +451,7 @@ sub setupBootStick {
 			$this -> cleanTmp ();
 			return undef;
 		}
-		if (-f "$tmpdir/rootfs.tar.gz") {
+		if (-f "$tmpdir/rootfs.tar") {
 			$imgtype = "split";
 		}
 		$xml = new KIWIXML ( $kiwi,$tmpdir."/image",undef,$imgtype );
@@ -1177,7 +1177,7 @@ sub setupInstallCD {
 			$this -> cleanLoop ();
 			return undef;
 		}
-		if (-f "$tmpdir/rootfs.tar.gz") {
+		if (-f "$tmpdir/rootfs.tar") {
 			$imgtype = "split";
 		}
 		$status = qxx ("umount $tmpdir 2>&1");
@@ -1519,7 +1519,7 @@ sub setupInstallStick {
 			$this -> cleanLoop ();
 			return undef;
 		}
-		if (-f "$tmpdir/rootfs.tar.gz") {
+		if (-f "$tmpdir/rootfs.tar") {
 			$imgtype = "split";
 		}
 		$status = qxx ("umount $tmpdir 2>&1");
@@ -1907,7 +1907,7 @@ sub setupBootDisk {
 		#==========================================
 		# check image type
 		#------------------------------------------
-		if (-f "$system/rootfs.tar.gz") {
+		if (-f "$system/rootfs.tar") {
 			$kiwi -> error ("Can't use split root tree, run create first");
 			$kiwi -> failed ();
 			return undef;
@@ -1934,7 +1934,7 @@ sub setupBootDisk {
 		#==========================================
 		# check image type
 		#------------------------------------------
-		if (-f "$tmpdir/rootfs.tar.gz") {
+		if (-f "$tmpdir/rootfs.tar") {
 			$imgtype = "split";
 		}
 		$xml = new KIWIXML ( $kiwi,$tmpdir."/image",undef,$imgtype );

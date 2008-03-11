@@ -268,7 +268,7 @@ function errorLogStart {
 	# /.../
 	# Log all errors up to now to /dev/tty3
 	# ----
-	Echo "Error logging enabled on $ELOG_CONSOLE"
+	Echo "Boot-Logging enabled on $ELOG_CONSOLE"
 	if [ ! -f $ELOG_FILE ];then
 		echo "KIWI Log:" >$ELOG_FILE
 	else
@@ -1700,12 +1700,13 @@ function validateTarSize {
 	local needMByte=0
 	haveKByte=`cat /proc/meminfo | grep MemFree | cut -f2 -d: | cut -f1 -dk`
 	haveMByte=`expr $haveKByte / 1024`
-	needBytes=`gzip -l $tsrc | tail -n 1 | column -t | cut -f3 -d " "`
+	needBytes=`du --bytes $tsrc | cut -f1`
 	needMByte=`expr $needBytes / 1048576`
-	needBytes=`gzip -l $tsrc | tail -n 1 | column -t | cut -f1 -d " "`
-	needBytes=`expr $needBytes / 1048576`
-	needBytes=`expr $needBytes \* 2`
-	needMByte=`expr $needMByte + $needBytes`
+	# /.../
+	# if the tarball is part of a compressed filesystem we need approx.
+	# twice the size of the archive as free RAM space to extract it 
+	# ----
+	needMByte=`expr $needMByte \* 2`
 	Echo "Have size: $dest -> $haveMByte MB"
 	Echo "Need size: $tsrc -> $needMByte MB [ uncompressed ]"
 	if test $haveMByte -gt $needMByte;then
@@ -1927,14 +1928,14 @@ function mountSystemCombined {
 	# and extract the rootfs tarball with the RAM data and the read-only
 	# and read-write links into the tmpfs.
 	# ----
-	local rootfs=/read-only/rootfs.tar.gz
+	local rootfs=/read-only/rootfs.tar
 	mount -t tmpfs tmpfs -o size=512M /mnt >/dev/null || return 1
 	if ! validateTarSize /mnt $rootfs;then
 		systemException \
 			"Not enough RAM space available for temporary data" \
 		"reboot"
 	fi
-	cd /mnt && tar xvfz $rootfs >/dev/null && cd /
+	cd /mnt && tar xf $rootfs >/dev/null && cd /
 	# /.../
 	# create a /mnt/read-only mount point and move the /read-only
 	# mount into the /mnt root tree. After that remove the /read-only

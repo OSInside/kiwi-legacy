@@ -3,7 +3,10 @@ Mon Mar 10 16:37:48 CET 2008 - ms@suse.de
 
 - v2.37
 - prevent split system from duplicating files/dirs (bnc #368661)
-- fixed argument handling when mountSystem() is called
+- fixed argument handling when mountSystem() function is called
+- don't create a compressed rootfs tarball, it gets compressed
+  by the squashfs filesystem layer anyway and double compression
+  doesn't have any benefit
 
 -------------------------------------------------------------------
 Fri Mar  7 12:57:52 CET 2008 - ms@suse.de
