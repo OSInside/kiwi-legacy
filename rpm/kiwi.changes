@@ -1,7 +1,6 @@
 -------------------------------------------------------------------
 Wed Mar 12 16:34:14 CET 2008 - ms@suse.de
 
-- v2.38.29
 - removed smart from being part of the package list. The package
   manager is added automatically according to the xml setup
 - use --logfile terminal for prebuilding images
