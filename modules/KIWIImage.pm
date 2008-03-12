@@ -2384,7 +2384,6 @@ sub setupLogicalExtend {
 		} else {
 			$kiwi -> loginfo ("images.sh: $data");
 		}
-		qxx (" rm -f $imageTree/image/images.sh ");
 		$kiwi -> done ();
 	}
 	#==========================================

@@ -460,6 +460,25 @@ sub main {
 		}
 		$kiwi -> done();
 		#==========================================
+		# Update .profile environment
+		#------------------------------------------
+		$kiwi -> info ("Update .profile environment");
+		if (! open (FD,">$Create/.profile")) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create .profile: $!");
+			$kiwi -> failed ();
+			if (defined $BaseRoot) {
+				$overlay -> resetOverlay();
+			}
+			my $code = kiwiExit (1); return $code;
+		}
+		$kiwi -> done();
+		my %config = $xml -> getImageConfig();
+		foreach my $key (keys %config) {
+			print FD "$key=\"$config{$key}\"\n";
+		}
+		close FD;
+		#==========================================
 		# Check for default destination in XML
 		#------------------------------------------
 		if (! defined $Destination) {
