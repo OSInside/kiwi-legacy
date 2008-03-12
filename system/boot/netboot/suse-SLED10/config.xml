@@ -95,17 +95,12 @@
 		<package name="glibc-locale"/>
 		<package name="man"/>
 		<package name="info"/>
-		<package name="smart"/>
-		<package name="python"/>
-		<package name="python-xml"/>
-		<package name="python-elementtree"/>
 		<package name="perl-gettext"/>
 		<package name="perl-Bootloader"/>
 		<package name="pam-modules"/>
 		<package name="gawk"/>
 		<package name="gnome-filesystem"/>
 		<package name="openslp"/>
-		<package name="rpm-python"/>
 		<package name="suse-build-key"/>
 		<package name="permissions"/>
 		<package name="fillup"/>

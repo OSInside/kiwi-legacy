@@ -32,7 +32,7 @@ Summary:       OpenSuSE - KIWI Image System
 Provides:      kiwi2 = 2.14
 Obsoletes:     kiwi2 = 2.14
 Version:       2.38
-Release:       28
+Release:       29
 Group:         System
 License:       GPL
 Source:        %{name}.tar.bz2
@@ -202,9 +202,9 @@ if [ "$UID" = "$K_USER" ];then
 	echo "      localboot 0" >> $pxedefault
 	for i in $images;do
 		rootName=`echo $i | tr / -`
-		../kiwi.pl --root $RPM_BUILD_ROOT/root-$rootName --prepare ../system/boot/$i
+		../kiwi.pl --root $RPM_BUILD_ROOT/root-$rootName --prepare ../system/boot/$i --logfile terminal
 		../kiwi.pl --create $RPM_BUILD_ROOT/root-$rootName \
-			-d $RPM_BUILD_ROOT/srv/tftpboot/boot
+			-d $RPM_BUILD_ROOT/srv/tftpboot/boot --logfile terminal
 		rm -rf $RPM_BUILD_ROOT/root-$rootName*
 		echo >> $pxedefault
 		echo "LABEL $rootName" >> $pxedefault

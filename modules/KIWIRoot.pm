@@ -840,7 +840,7 @@ sub cleanManager {
 	# ---
 	my $this = shift;
 	my $manager = $this->{manager};
-	$manager -> removeCacheDir();
+	$manager -> cleanChild();
 	return $this;
 }
 

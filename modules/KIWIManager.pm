@@ -1211,6 +1211,18 @@ sub freeLock {
 }
 
 #==========================================
+# cleanChild
+#------------------------------------------
+sub cleanChild {
+	my $this = shift;
+	$this -> freeLock();
+	if (defined $this->{child}) {
+		kill 15,$this->{child};
+	}
+	return $this;
+}
+
+#==========================================
 # removeCacheDir
 #------------------------------------------
 sub removeCacheDir {
@@ -1218,10 +1230,7 @@ sub removeCacheDir {
 	my $dataDir = $this->{dataDir};
 	my $kiwi    = $this->{kiwi};
 	my $config  = dirname ($dataDir);
-	$this -> freeLock();
-	if (defined $this->{child}) {
-		kill 15,$this->{child};
-	}
+	$this -> cleanChild();
 	$kiwi -> loginfo ("Removing cache directory: $dataDir\n");
 	qxx ("rm -rf $dataDir");
 	qxx ("rm -rf $config/config");

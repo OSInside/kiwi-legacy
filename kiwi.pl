@@ -1378,6 +1378,7 @@ sub quit {
 	}
 	if (defined $root) {
 		$root  -> cleanLock   ();
+		$root  -> cleanManager();
 		$root  -> cleanSource ();
 		$root  -> cleanMount  ();
 	}

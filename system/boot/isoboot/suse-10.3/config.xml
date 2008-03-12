@@ -137,11 +137,7 @@
 		<package name="perl-gettext"/>
 		<package name="permissions"/>
 		<package name="pm-utils pmtools"/>
-		<package name="python"/>
-		<package name="python-xml"/>
 		<package name="resmgr"/>
-		<package name="rpm-python"/>
-		<package name="smart"/>
 		<package name="suse-build-key"/>
 		<package name="syslinux"/>
 		<package name="gfxboot"/>

@@ -132,11 +132,7 @@
 		<package name="permissions"/>
 		<package name="pm-utils"/>
 		<package name="pmtools"/>
-		<package name="python"/>
-		<package name="python-xml"/>
 		<package name="resmgr"/>
-		<package name="rpm-python"/>
-		<package name="smart"/>
 		<package name="suse-build-key"/>
 		<package name="gfxboot"/>
 		<package name="fribidi"/>
