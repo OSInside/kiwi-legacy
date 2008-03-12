@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Wed Mar 12 09:26:16 CET 2008 - ms@suse.de
+
+- v2.38
+- the image script images.sh is not called in case of vmx images
+  the function call: setupLogicalExtend() was missing (bnc #369394)
+- fixed image upgrade functionality and prevent the addon packages
+  to be passed into an eventually build boot image (bnc #369303)
+
+-------------------------------------------------------------------
 Mon Mar 10 16:37:48 CET 2008 - ms@suse.de
 
 - v2.37

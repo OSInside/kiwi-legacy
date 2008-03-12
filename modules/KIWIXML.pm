@@ -1408,13 +1408,10 @@ sub getPackageAttributes {
 		if (($type eq "xen") || ($type eq "vmware")) {
 			my $memory  = $node -> getAttribute ("memory");
 			my $disk    = $node -> getAttribute ("disk");
-			if ((! $memory) || (! $disk)) {
-				$kiwi -> warning ("Missing $type virtualisation config data");
-				$kiwi -> skipped ();
-				return undef;
+			if (($memory) && ($disk)) {
+				$result{memory}  = $memory;
+				$result{disk}    = $disk;
 			}
-			$result{memory}  = $memory;
-			$result{disk}    = $disk;
 		}
 	}
 	return %result;

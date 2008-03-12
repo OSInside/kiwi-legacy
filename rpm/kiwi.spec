@@ -1,5 +1,5 @@
 # /.../
-# spec file for package kiwi (Version 2.37
+# spec file for package kiwi (Version 2.38
 # Copyright (c) 2006 SUSE LINUX Products GmbH, Nuernberg, Germany.
 # Please submit bugfixes or comments via http://bugs.opensuse.org
 # ---
@@ -31,7 +31,7 @@ Requires:      kiwi-tools
 Summary:       OpenSuSE - KIWI Image System
 Provides:      kiwi2 = 2.14
 Obsoletes:     kiwi2 = 2.14
-Version:       2.37
+Version:       2.38
 Release:       28
 Group:         System
 License:       GPL

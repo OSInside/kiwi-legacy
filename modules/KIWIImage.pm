@@ -377,6 +377,8 @@ sub createImageUSB {
 			$ok = 1;
 			if ($text ne "VMX") {
 				$ok = $this -> createImageEXT2 ();
+			} else {
+				$ok = $this -> setupLogicalExtend();
 			}
 			$result{imageTree} = $imageTree;
 			last SWITCH;
@@ -385,6 +387,8 @@ sub createImageUSB {
 			$ok = 1;
 			if ($text ne "VMX") {
 				$ok = $this -> createImageEXT3 ();
+			} else {
+				$ok = $this -> setupLogicalExtend();
 			}
 			$result{imageTree} = $imageTree;
 			last SWITCH;
@@ -393,6 +397,8 @@ sub createImageUSB {
 			$ok = 1;
 			if ($text ne "VMX") {
 				$ok = $this -> createImageReiserFS ();
+			} else {
+				$ok = $this -> setupLogicalExtend();
 			}
 			$result{imageTree} = $imageTree;
 			last SWITCH;
@@ -508,6 +514,11 @@ sub createImageUSB {
 		}
 	}
 	if (! $pblt) {
+		#==========================================
+		# build the boot image
+		#------------------------------------------
+		undef @main::AddPackage;
+		undef $main::Upgrade;
 		if (! defined main::main()) {
 			$main::Survive = "default";
 			if (! -d $main::RootTree.$baseSystem) {
@@ -973,6 +984,8 @@ sub createImageLiveCD {
 		#==========================================
 		# build an isoboot boot image
 		#------------------------------------------
+		undef @main::AddPackage;
+		undef $main::Upgrade;
 		if (! defined main::main()) {
 			$main::Survive = "default";
 			if (! -d $main::RootTree.$baseSystem) {
@@ -1835,8 +1848,10 @@ sub createImageSplit {
 	}
 	if (! $pblt) {
 		#==========================================
-		# build the boot image
+		# build the split boot image
 		#------------------------------------------
+		undef @main::AddPackage;
+		undef $main::Upgrade;
 		if (! defined main::main()) {
 			$main::Survive = "default";
 			if (! -d $main::RootTree.$baseSystem) {
@@ -2675,57 +2690,61 @@ sub buildVMwareConfig {
 	my $kiwi   = $this->{kiwi};
 	my $file   = $dest."/".$name->{systemImage}.".vmx";
 	my %vmwconfig = %{$vmwref};
-	if (defined $vmwconfig{disk}) {
-		$kiwi -> info ("Creating image VMware configuration file...");
-		if (! open (FD,">$file")) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't create xenconfig file: $!");
-			$kiwi -> failed ();
-			return undef;
-		}
-		my $device = $vmwconfig{disk};
-		my $memory = $vmwconfig{memory};
-		my $image  = $dest."/".$name->{systemImage};
-		# General...
-		print FD '#!/usr/bin/vmware'."\n";
-		print FD 'config.version = "8"'."\n";
-		print FD 'virtualHW.version = "3"'."\n";
-		print FD 'memsize = "'.$memory.'"'."\n";
-		print FD 'guestOS = "Linux"'."\n";
-		print FD 'displayName = "'.$name->{systemImage}.'"'."\n";
-		if ($device =~ /^ide/) {
-			# IDE Interface...
-			print FD $device.':0.present = "true"'."\n";
-			print FD $device.':0.fileName= "'.$image.'.vmdk"'."\n";
-			print FD $device.':0.redo = ""'."\n";
-		} else {
-			# SCSI Interface...
-			print FD $device.'.present = "true"'."\n";
-			print FD $device.'.sharedBus = "none"'."\n";
-			print FD $device.'.virtualDev = "lsilogic"'."\n";
-			print FD $device.':0.present = "true"'."\n";
-			print FD $device.':0.fileName = "'.$image.'"'."\n";
-			print FD $device.':0.deviceType = "scsi-hardDisk"'."\n";
-		}
-		# Floppy...
-		print FD 'floppy0.fileName = "/dev/fd0"'."\n";
-		# Network...
-		print FD 'Ethernet0.present = "true"'."\n";
-		print FD 'ethernet0.addressType = "generated"'."\n";
-		print FD 'ethernet0.generatedAddress = "00:0c:29:13:ea:50"'."\n";
-		print FD 'ethernet0.generatedAddressOffset = "0"'."\n";
-		# USB...
-		print FD 'usb.present = "true"'."\n";
-		# Power management...
-		print FD 'priority.grabbed = "normal"'."\n";
-		print FD 'priority.ungrabbed = "normal"'."\n";
-		print FD 'powerType.powerOff = "hard"'."\n";
-		print FD 'powerType.powerOn  = "hard"'."\n";
-		print FD 'powerType.suspend  = "hard"'."\n";
-		print FD 'powerType.reset    = "hard"'."\n";
-		close FD;
-		$kiwi -> done();
+	$kiwi -> info ("Creating image VMware configuration file...");
+	if ((! $vmwconfig{disk}) || (! $vmwconfig{memory})) {
+		$kiwi -> skipped ();
+		$kiwi -> warning ("Missing VMware virtualisation config data");
+		$kiwi -> skipped ();
+		return $dest;
 	}
+	if (! open (FD,">$file")) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't create xenconfig file: $!");
+		$kiwi -> failed ();
+		return undef;
+	}
+	my $device = $vmwconfig{disk};
+	my $memory = $vmwconfig{memory};
+	my $image  = $dest."/".$name->{systemImage};
+	# General...
+	print FD '#!/usr/bin/vmware'."\n";
+	print FD 'config.version = "8"'."\n";
+	print FD 'virtualHW.version = "3"'."\n";
+	print FD 'memsize = "'.$memory.'"'."\n";
+	print FD 'guestOS = "Linux"'."\n";
+	print FD 'displayName = "'.$name->{systemImage}.'"'."\n";
+	if ($device =~ /^ide/) {
+		# IDE Interface...
+		print FD $device.':0.present = "true"'."\n";
+		print FD $device.':0.fileName= "'.$image.'.vmdk"'."\n";
+		print FD $device.':0.redo = ""'."\n";
+	} else {
+		# SCSI Interface...
+		print FD $device.'.present = "true"'."\n";
+		print FD $device.'.sharedBus = "none"'."\n";
+		print FD $device.'.virtualDev = "lsilogic"'."\n";
+		print FD $device.':0.present = "true"'."\n";
+		print FD $device.':0.fileName = "'.$image.'"'."\n";
+		print FD $device.':0.deviceType = "scsi-hardDisk"'."\n";
+	}
+	# Floppy...
+	print FD 'floppy0.fileName = "/dev/fd0"'."\n";
+	# Network...
+	print FD 'Ethernet0.present = "true"'."\n";
+	print FD 'ethernet0.addressType = "generated"'."\n";
+	print FD 'ethernet0.generatedAddress = "00:0c:29:13:ea:50"'."\n";
+	print FD 'ethernet0.generatedAddressOffset = "0"'."\n";
+	# USB...
+	print FD 'usb.present = "true"'."\n";
+	# Power management...
+	print FD 'priority.grabbed = "normal"'."\n";
+	print FD 'priority.ungrabbed = "normal"'."\n";
+	print FD 'powerType.powerOff = "hard"'."\n";
+	print FD 'powerType.powerOn  = "hard"'."\n";
+	print FD 'powerType.suspend  = "hard"'."\n";
+	print FD 'powerType.reset    = "hard"'."\n";
+	close FD;
+	$kiwi -> done();
 	return $dest;
 }
 

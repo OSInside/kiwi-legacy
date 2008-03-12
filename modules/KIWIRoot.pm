@@ -354,6 +354,7 @@ sub upgrade {
 	#==========================================
 	# Mount local and NFS directories
 	#------------------------------------------
+	$manager -> switchToChroot();
 	if (! $this -> setupMount ()) {
 		$kiwi -> error ("Couldn't mount base system");
 		$kiwi -> failed ();
@@ -362,7 +363,13 @@ sub upgrade {
 	#==========================================
 	# Upgrade system
 	#------------------------------------------
+	if (! $manager -> setupInstallationSource()) {
+		return undef;
+	}
 	if (! $manager -> setupUpgrade ($addPacks)) {
+		return undef;
+	}
+	if (! $manager -> resetInstallationSource()) {
 		return undef;
 	}
 	return $this;
