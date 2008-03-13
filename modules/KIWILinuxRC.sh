@@ -1149,7 +1149,7 @@ function setupNetwork {
 		done
 	fi
 	export PXE_IFACE=$iface
-	dhcpcd $PXE_IFACE >/dev/null
+	dhcpcd $PXE_IFACE 2>&1
 	if test $? != 0;then
 		systemException \
 			"Failed to setup DHCP network interface !" \

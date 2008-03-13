@@ -770,12 +770,19 @@ sub setupBootStick {
 			print FD ",$sysird,L,*\n"; # xda1  boot
 			print FD ",$syszip,L\n";   # xda2  ro
 			print FD ",,L\n";          # xda3  rw
+			$kiwi -> loginfo (
+				"USB sfdisk input: [,$sysird,L,*][,$syszip,L][,,L]"
+			);
 		} else {
 			print FD ",$sysird,L,*\n"; # xda1  boot
 			print FD ",,L\n";          # xda2  rw
+			$kiwi -> loginfo (
+				"USB sfdisk input: [,$sysird,L,*][,,L]"
+			);
 		}
 	} else {
 		print FD ",,L,*\n";
+		$kiwi -> loginfo ("USB sfdisk input: [,,L,*]");
 	}
 	close FD;
 	$status = qxx ( "dd if=/dev/zero of=$stick bs=512 count=1 2>&1" );	
@@ -791,6 +798,7 @@ sub setupBootStick {
 		return undef;
 	}
 	$kiwi -> done();
+	$kiwi -> loginfo ("USB Partitions: $status");
 	for (my $i=1;$i<=3;$i++) {
 		qxx ( "umount $stick$i 2>&1" );
 	}
@@ -824,7 +832,7 @@ sub setupBootStick {
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't dump image to stick: $status");
+		$kiwi -> error  ("Couldn't dump boot image to stick: $status");
 		$kiwi -> failed ();
 		$this -> cleanDbus();
 		return undef;
@@ -842,7 +850,7 @@ sub setupBootStick {
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't dump image to stick: $status");
+			$kiwi -> error  ("Couldn't dump system image to stick: $status");
 			$kiwi -> failed ();
 			$this -> cleanDbus();
 			return undef;
@@ -1055,7 +1063,9 @@ sub setupBootStick {
 	#==========================================
 	# Remove dbus lock for $stick
 	#------------------------------------------
+	$kiwi -> info ("Removing HAL lock");
 	$this -> cleanDbus();
+	$kiwi -> done ();
 	return $this;
 }
 

@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Mar 13 09:38:57 CET 2008 - ms@suse.de
+
+- added loginfo data about USB stick partitions
+- allow dhcpcd to log its output to the tty3 log console
+
+-------------------------------------------------------------------
 Wed Mar 12 18:24:04 CET 2008 - ms@suse.de
 
 - fixed update of .profile env according to type setup (bnc #369936)
