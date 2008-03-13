@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Mar 13 17:31:18 CET 2008 - ms@suse.de
+
+- update rng schema documentation
+
+-------------------------------------------------------------------
 Thu Mar 13 09:38:57 CET 2008 - ms@suse.de
 
 - added loginfo data about USB stick partitions

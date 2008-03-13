@@ -32,7 +32,7 @@ Summary:       OpenSuSE - KIWI Image System
 Provides:      kiwi2 = 2.14
 Obsoletes:     kiwi2 = 2.14
 Version:       2.38
-Release:       31
+Release:       32
 Group:         System
 License:       GPL
 Source:        %{name}.tar.bz2
