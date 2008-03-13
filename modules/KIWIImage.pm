@@ -2212,7 +2212,11 @@ sub postImage {
 	#------------------------------------------
 	my %type = %{$xml->getImageTypeAndAttributes()};
 	my $para = $type{type}.":".$type{filesystem};
-	$kiwi -> info ("Checking file system: $type{filesystem}...");
+	if ($type{filesystem}) {
+		$kiwi -> info ("Checking file system: $type{filesystem}...");
+	} else {
+		$kiwi -> info ("Checking file system: $type{type}...");
+	}
 	SWITCH: for ($para) {
 		#==========================================
 		# Check EXT3 file system
