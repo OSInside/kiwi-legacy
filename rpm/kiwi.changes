@@ -1,7 +1,11 @@
 -------------------------------------------------------------------
 Thu Mar 13 17:31:18 CET 2008 - ms@suse.de
 
+- use startmode ifplugd for pxe netconfig (bnc #365170)
+- allow ext2/3 and reiserfs for fsreadonly too
+- update kiwi qickstart guide, changes by Thomas Schraitle
 - update rng schema documentation
+- update xsd schema documentation
 
 -------------------------------------------------------------------
 Thu Mar 13 09:38:57 CET 2008 - ms@suse.de
