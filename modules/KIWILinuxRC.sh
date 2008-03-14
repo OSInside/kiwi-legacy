@@ -594,9 +594,9 @@ function setupDefaultPXENetwork {
 	local niface=$prefix/etc/sysconfig/network/ifcfg-$PXE_IFACE
 	mkdir -p $prefix/etc/sysconfig/network
 	cat > $niface < /dev/null
-	echo "BOOTPROTO='dhcp'"  >> $niface
-	echo "STARTMODE='auto'"  >> $niface    
-	echo "USERCONTROL='no'"  >> $niface
+	echo "BOOTPROTO='dhcp'"    >> $niface
+	echo "STARTMODE='ifplugd'" >> $niface
+	echo "USERCONTROL='no'"    >> $niface
 }
 #======================================
 # setupDefaultFstab
