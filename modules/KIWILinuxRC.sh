@@ -1915,7 +1915,6 @@ function mountSystemCombined {
 	local roDevice=$mountDevice
 	local rwDevice=`getNextPartition $mountDevice`
 	mkdir /read-only >/dev/null
-	modprobe squashfs >/dev/null 2>&1
 	# /.../
 	# mount the read-only partition to /read-only and use
 	# mount option -o ro for this filesystem
@@ -1929,6 +1928,11 @@ function mountSystemCombined {
 	# and read-write links into the tmpfs.
 	# ----
 	local rootfs=/read-only/rootfs.tar
+	if [ ! -f $rootfs ];then
+		systemException \
+			"Can't find rootfs tarball" \
+		"reboot"
+	fi
 	mount -t tmpfs tmpfs -o size=512M /mnt >/dev/null || return 1
 	if ! validateTarSize /mnt $rootfs;then
 		systemException \
@@ -1979,6 +1983,10 @@ function mountSystem {
 	local retval=0
 	local OLDIFS=$IFS
 	IFS=$IFS_ORIG
+	#======================================
+	# load not autoloadable fs modules
+	#--------------------------------------
+	modprobe squashfs >/dev/null 2>&1
 	#======================================
 	# set primary mount device
 	#--------------------------------------

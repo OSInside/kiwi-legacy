@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sun Mar 16 22:26:22 CET 2008 - ms@suse.de
+
+- added file check for rootfs tarball
+
+-------------------------------------------------------------------
 Thu Mar 13 17:31:18 CET 2008 - ms@suse.de
 
 - use startmode ifplugd for pxe netconfig (bnc #365170)
