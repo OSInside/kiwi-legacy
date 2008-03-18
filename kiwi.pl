@@ -223,7 +223,20 @@ sub main {
 	# Create instsource from meta packages
 	#----------------------------------------
 	if (defined $CreateInstSource) {
-		$kiwi -> info ("Reading image description...");
+		# This option requires the module "KIWICollect.pm".
+		# If it is not available, the option cannot be used.
+		# kiwi then issues a warning and exits.
+		eval "require KIWICollect";
+		if($@) {
+			$kiwi->error("Module KIWICollect is not available!");
+			my $code = kiwiExit (3);
+			return $code;
+		}
+		else {
+			$kiwi->info("Module KIWICollect loaded successfully...");
+			$kiwi->done();
+		}
+		$kiwi -> info ("Reading image description for insallation source...");
 		my $xml = new KIWIXML ( $kiwi,$CreateInstSource );
 		if (! defined $xml) {
 			my $code = kiwiExit (1); return $code;
@@ -232,46 +245,36 @@ sub main {
 		#==========================================
 		# Initialize installation source tree
 		#------------------------------------------
-		my @root = $xml -> createTmpDirectory ( $RootTree );
+		my @root = $xml -> createTmpDirectory ( undef, $RootTree );
 		my $root = $root[1];
 		if (! defined $root) {
 			$kiwi -> error ("Couldn't create instsource root");
 			$kiwi -> failed ();
 			my $code = kiwiExit (1); return $code;
 		}
-		# TODO
-		# test code only...
-		print "*** DIR = $root\n";
-		my %source = $xml -> getInstSourceRepository();
-		my @slist  = keys %source;
-		print "*** SOURCE = @slist\n";
-		my @arch = $xml -> getInstSourceArchList();
-		print "*** ARCH(S): @arch\n";
-		my %metapacks = $xml -> getInstSourceMetaPackageList();
-		my %metafiles = $xml -> getInstSourceMetaFiles();
-		my %pack = $xml -> getInstSourcePackageList();
-		foreach (keys %metapacks) {
-			my $p = $_;
-			my $a = $metapacks{$p};
-			print "$p -> ";
-			if (defined $a) {
-				print "$a\n";
-			} else {
-				print "undefined\n";
-			}
-		}
-		foreach (keys %metafiles) {
-			print "URL: $_\n";
-		}
-		my $surl=$source{other_repo}{source};
-		my $file="$surl/kiwi-desc-usbboot.*\.rpm";
-		if (! $xml->getInstSourceFile ($file,$root)) {
-			$kiwi -> error ("Couldn't download file");
+
+		#==========================================
+		# Create object...
+		#----------------------------------------
+		my $collect = new KIWICollect( $kiwi, $xml, $root );
+		if( !defined( $collect) )
+		{
+			$kiwi->error( "Unable to create KIWICollect module." );
 			$kiwi -> failed ();
+			my $code = kiwiExit( 1 ); return $code;
 		}
-		# TODO
-		# Hi Jan, this is your playground :-) Have fun
-		# ...
+		#==========================================
+		# from now $collect is defined. Call the *CENTRAL* method for it
+		# ...and work!
+		#----------------------------------------
+		if( !defined( $collect->mainTask() ) )
+		{
+			$kiwi->error( "KIWICollect could not be invoked successfully." );
+			$kiwi -> failed ();
+			my $code = kiwiExit ( 1 ); return $code;
+		}
+		$kiwi->info( "KIWICollect completed successfully." );
+		$kiwi->done();
 		kiwiExit (0);
 	}
 
