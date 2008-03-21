@@ -1,7 +1,8 @@
 -------------------------------------------------------------------
 Fri Mar 21 14:35:11 CET 2008 - ms@suse.de
 
-- call dhcpcd -k after upload notification (bnc #372894) 
+- call dhcpcd -k after upload notification (bnc #372894)
+- added inode number calculation for rootfs tarball (bnc #372648)
 
 -------------------------------------------------------------------
 Sun Mar 16 22:26:22 CET 2008 - ms@suse.de

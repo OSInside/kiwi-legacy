@@ -1692,8 +1692,7 @@ function validateTarSize {
 	# The function will then check if the tar file could be
 	# unpacked according to the size of the destination
 	# ----
-	local dest=$1
-	local tsrc=$2
+	local tsrc=$1
 	local haveKByte=0
 	local haveMByte=0
 	local needBytes=0
@@ -1702,12 +1701,7 @@ function validateTarSize {
 	haveMByte=`expr $haveKByte / 1024`
 	needBytes=`du --bytes $tsrc | cut -f1`
 	needMByte=`expr $needBytes / 1048576`
-	# /.../
-	# if the tarball is part of a compressed filesystem we need approx.
-	# twice the size of the archive as free RAM space to extract it 
-	# ----
-	needMByte=`expr $needMByte \* 2`
-	Echo "Have size: $dest -> $haveMByte MB"
+	Echo "Have size: proc/meminfo -> $haveMByte MB"
 	Echo "Need size: $tsrc -> $needMByte MB [ uncompressed ]"
 	if test $haveMByte -gt $needMByte;then
 		return 0
@@ -1933,8 +1927,17 @@ function mountSystemCombined {
 			"Can't find rootfs tarball" \
 		"reboot"
 	fi
-	mount -t tmpfs tmpfs -o size=512M /mnt >/dev/null || return 1
-	if ! validateTarSize /mnt $rootfs;then
+	# /.../
+	# count inode numbers for files in rootfs tarball
+	# ----
+	local inr=`tar -tf $rootfs | wc -l`
+	inr=`expr $inr \* 11 / 10 / 1024`
+	inr=$inr"k"
+	# /.../
+	# mount tmpfs, reserve max 512MB for the rootfs data
+	# ----
+	mount -t tmpfs tmpfs -o size=512M,nr_inodes=$inr /mnt >/dev/null || return 1
+	if ! validateTarSize $rootfs;then
 		systemException \
 			"Not enough RAM space available for temporary data" \
 		"reboot"
