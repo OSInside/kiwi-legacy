@@ -614,14 +614,7 @@ fi
 runHook postconfig
 
 #======================================
-# 16) send DHCP_RELEASE, reset cache
-#--------------------------------------
-if [ $LOCAL_BOOT = "no" ] && [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ];then
-	dhcpcd -k
-fi
-
-#======================================
-# 17) check filesystem and kernels
+# 16) check filesystem and kernels
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	if test $systemIntegrity = "clean";then
@@ -631,7 +624,7 @@ if [ $LOCAL_BOOT = "no" ];then
 fi
 
 #======================================
-# 18) make initrd available on unionfs
+# 17) make initrd available on unionfs
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	if test ! -z "$UNIONFS_CONFIG" && test $systemIntegrity = "clean";then
@@ -647,7 +640,7 @@ if [ $LOCAL_BOOT = "no" ];then
 fi
 
 #======================================
-# 19) Create system dependant files
+# 18) Create system dependant files
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	if test $systemIntegrity = "clean";then
@@ -671,7 +664,7 @@ if [ $LOCAL_BOOT = "no" ];then
 fi
 
 #======================================
-# 20) If image is new, notify
+# 19) If image is new, notify
 #--------------------------------------
 runHook prenotify
 if [ $LOCAL_BOOT = "no" ];then
@@ -698,6 +691,13 @@ if [ $LOCAL_BOOT = "no" ];then
 	fi
 fi
 runHook postnotify
+
+#======================================
+# 20) send DHCP_RELEASE, reset cache
+#--------------------------------------
+if [ $LOCAL_BOOT = "no" ] && [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ];then
+	dhcpcd -k
+fi
 
 #======================================
 # 21) copy system dependant files
