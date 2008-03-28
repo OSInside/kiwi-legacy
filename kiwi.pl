@@ -1198,6 +1198,11 @@ sub usage {
 	print "    If no root directory is known a mktmp directory\n";
 	print "    will be created and used as root directory\n";
 	print "\n";
+	print "  [ --base-root <base-path> ]\n";
+	print "    Refers to an already prepared root tree. Kiwi will use\n";
+	print "    this tree to skip the first stage of the prepare step\n"; 
+	print "    and run the second stage directly\n";
+	print "\n";
 	print "  [ -s | --strip ]\n";
 	print "    Strip shared objects and executables\n";
 	print "    makes only sense in combination with --create\n";
