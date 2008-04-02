@@ -463,11 +463,9 @@ sub main {
 			my %type = %{$xml->getImageTypeAndAttributes()};
 			if (($type{"type"} eq "cpio") && ($type{bootprofile})) {
 				@Profiles = split (/,/,$type{bootprofile});
-			} else {
-				@Profiles = ("default");
-			}
-			if (! $xml -> checkProfiles (\@Profiles)) {
-				my $code = kiwiExit (1); return $code;
+				if (! $xml -> checkProfiles (\@Profiles)) {
+					my $code = kiwiExit (1); return $code;
+				}
 			}
 		}
 		$kiwi -> info ("Reading image description...");

@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Apr  2 17:44:31 CEST 2008 - ms@suse.de
+
+- really fixed update of .profile env (bnc #369936)
+
+-------------------------------------------------------------------
 Fri Mar 28 12:43:51 CET 2008 - ms@suse.de
 
 - improved usage information for base-root option (bnc #374370)
