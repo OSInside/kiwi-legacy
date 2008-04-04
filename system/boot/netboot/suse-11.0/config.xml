@@ -52,6 +52,7 @@
 		<file name="drivers/block/nbd.ko"/>
 		<file name="drivers/parport/*"/>
 		<file name="drivers/char/lp.ko"/>
+		<file name="drivers/acpi/dock.ko"/>
 		<!-- DRIVERS END DEFAULT AND XEN -->
 	</drivers>
 	<drivers type="drivers" profiles="diskless">

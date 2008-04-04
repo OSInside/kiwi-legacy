@@ -53,6 +53,7 @@
 		<file name="drivers/cdrom/*"/>
 		<file name="drivers/parport/*"/>
 		<file name="drivers/char/lp.ko"/>
+		<file name="drivers/acpi/dock.ko"/>
 	</drivers>
 	<repository type="yast2" status="replaceable">
         <source path="/image/CDs/full-i386"/>
