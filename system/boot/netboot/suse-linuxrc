@@ -361,7 +361,6 @@ if [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ];then
 					"Not enough space available for this image" \
 				"reboot"
 			fi
-			validateBlockSize
 			# /.../
 			# now load the image into the imageDevice
 			# ---

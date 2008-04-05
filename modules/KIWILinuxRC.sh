@@ -1718,9 +1718,14 @@ function validateBlockSize {
 	# to the size of the image
 	# ----
 	isize=`expr $blocks \* $blocksize`
-	isize=`expr $isize / 32768`
+	isize=`expr $isize / 65535`
 	if [ $isize -gt $imageBlkSize ];then
 		imageBlkSize=`expr $isize + 1024`
+	fi
+	if [ $imageBlkSize -gt 65464 ];then
+		systemException \
+			"Maximum blocksize for atftp protocol exceeded" \
+		"reboot"
 	fi
 }
 #======================================
@@ -2240,6 +2245,7 @@ function fetchFile {
 			loadCode=$?
 			;;
 		"tftp")
+			validateBlockSize
 			if test "$imageZipped" = "compressed"; then
 				atftp \
 					--option "multicast $multicast" \

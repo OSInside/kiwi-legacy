@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Sat Apr  5 20:51:03 CEST 2008 - ms@suse.de
+
+- added check for maximum blocksize for atftp protocol (bnc #372918)
+- fixed maximum block count for atftp protocol (bnc #377034)
+
+-------------------------------------------------------------------
 Fri Apr  4 14:31:50 CEST 2008 - coolo@suse.de
 
 - libata needs dock.ko now - fixing live cd boot
