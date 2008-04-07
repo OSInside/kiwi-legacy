@@ -8,7 +8,7 @@ fi
 
 # spec file version update
 cat rpm/kiwi.spec | sed \
-	-e s"@Release:       .*@Release:       $version@" \
+	-e s"@Release:       .*@Release:        $version@" \
 > rpm/kiwi.spec.new && mv rpm/kiwi.spec.new rpm/kiwi.spec
 
 echo "update to release: $version... done"
