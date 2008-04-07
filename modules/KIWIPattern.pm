@@ -169,6 +169,7 @@ sub checkContentData {
 	#==========================================
 	# check content...
 	#------------------------------------------
+	$pattern = quotemeta $pattern;
 	if (! $content) {
 		return undef;
 	}
