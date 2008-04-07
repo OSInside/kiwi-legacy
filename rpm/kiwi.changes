@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Mon Apr  7 13:48:37 CEST 2008 - ms@suse.de
+
+- fixed Nested quantifiers in regex
+- oemboot: added support for OEM_REBOOT in config.oempartition
+  This allows to reboot the oem system after initial deployment.
+  * OEM_REBOOT=1
+  don't specify OEM_REBOOT if you want to boot directly into
+  the system (bnc #371744)
+
+-------------------------------------------------------------------
 Sat Apr  5 20:51:03 CEST 2008 - ms@suse.de
 
 - added check for maximum blocksize for atftp protocol (bnc #372918)

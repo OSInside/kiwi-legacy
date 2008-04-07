@@ -837,6 +837,10 @@ echo "Booting into final System..."
 echo "----------------------------"
 export IFS=$IFS_ORIG
 mount -n -o remount,rw / 2>/dev/null
+if [ ! -z "$OEM_REBOOT" ];then
+	Echo "Reboot requested... reboot now"
+	/sbin/reboot -f -i >/dev/null 2>&1
+fi
 if [ $PIVOT = "true" ];then
 	exec < dev/console >dev/console 2>&1
 	exec umount -n -l /mnt
