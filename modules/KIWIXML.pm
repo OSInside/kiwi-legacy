@@ -1167,6 +1167,32 @@ sub getInstSourceProductInfo {
 }
 
 #==========================================
+# getInstSourceChrootList
+#------------------------------------------
+sub getInstSourceChrootList {
+	# ...
+	# Get the list of packages necessary to
+	# run metafile shell scripts in chroot jail
+	# ---
+	# return a list of packages
+	# ---
+	my $this = shift;
+	my $base = $this->{instsrcNodeList} -> get_node(1);
+	my $elems = $base->getElementsByTagName("metadata");
+	my @result;
+
+	for(my $i=1; $i<=$elems->size(); $i++) {
+		my $node  = $elems->get_node($i);
+		my @flist = $node->getElementsByTagName("chroot");
+		foreach my $element(@flist) {
+			my $name = $element->getAttribute("requires");
+			push @result, $name if $name;
+		}
+	}
+	return @result;
+}
+
+#==========================================
 # getInstSourceMetaFiles
 #------------------------------------------
 sub getInstSourceMetaFiles {
