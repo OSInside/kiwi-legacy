@@ -108,7 +108,9 @@ sub new {
 	$this->{screenLogs}  = $kiwi -> getRootLog();
 	$this->{dataDir}     = $dataDir;
 	$this->{smart}       = [
-		"smart","--data-dir=$dataDir","-o rpm-root=$root","-o deb-root=$root"
+		"smart","--data-dir=$dataDir",
+		"-o rpm-root=$root","-o deb-root=$root",
+		"-o remove-packages=false"
 	];
 	$this->{zypper}      = [
 		"zypper","--non-interactive","--no-gpg-checks"

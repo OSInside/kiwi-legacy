@@ -1,11 +1,11 @@
 .\"     Title: kiwi
 .\"    Author: Marcus Schäfer <ms (AT) suse.de>
-.\" Generator: DocBook XSL Stylesheets v1.73.1 <http://docbook.sf.net/>
-.\"      Date: Created: 01/14/2008
+.\" Generator: DocBook XSL Stylesheets v1.73.2 <http://docbook.sf.net/>
+.\"      Date: Created: 04/08/2008
 .\"    Manual: KIWI Manualpage
 .\"    Source: KIWI v2.10, r938
 .\"
-.TH "KIWI" "1" "Created: 01/14/2008" "KIWI v2\.10, r938" "KIWI Manualpage"
+.TH "KIWI" "1" "Created: 04/08/2008" "KIWI v2\.10, r938" "KIWI Manualpage"
 .\" disable hyphenation
 .nh
 .\" disable justification (adjust text to left margin only)
@@ -31,11 +31,11 @@ representing a live system on CD or DVD\.
 .HP 5
 \fBkiwi\fR {\-p | \-\-prepare} \fIImagePath\fR \fIImagePath\fR
 .br
-[\-\-base\-root\ \fIBasePath\fR] [\-\-base\-root\-mode\ {copy\ |\ union\ |\ recycle}] [\-\-add\-profile\ \fIProfilename\fR]
+[\-r | \-\-root\fIRootPath\fR] [\-\-base\-root\ \fIBasePath\fR] [\-\-base\-root\-mode\ {copy\ |\ union\ |\ recycle}] [\-\-add\-profile\ \fIProfilename\fR]
 .HP 5
 \fBkiwi\fR {\-c | \-\-create} \fIImageRoot\fR
 .br
-[\-\-base\-root\ \fIBasePath\fR] [\-\-base\-root\-mode\ {copy\ |\ union\ |\ recycle}] [\-\-prebuiltbootimage\ \fIDirectory\fR]
+[\-d | \-\-destdir\fIDestinationPath\fR] [\-\-base\-root\ \fIBasePath\fR] [\-\-base\-root\-mode\ {copy\ |\ union\ |\ recycle}] [\-\-prebuiltbootimage\ \fIDirectory\fR]
 .SH "IMAGE UPGRADE"
 .PP
 If the image root tree is stored and not removed, it can be used for upgrading the image root tree according to the changes made in the repositories used for this image\. If a distributor provides an update channel for package updates and an image
@@ -112,6 +112,11 @@ option is given, KIWI will search for the attribute defaultroot in
 \fIconfig\.xml\fR\. If no root directory is known, a
 \fBmktmp\fR
 directory will be created and used as root directory
+.RE
+.PP
+[\fB\-\-base\-root\fR \fIBasePath\fR]
+.RS 4
+Refers to an already prepared root tree\. Kiwi will use this tree to skip the first stage of the prepare step and run the second stage directly\.
 .RE
 .PP
 [\fB\-s\fR | \fB\-\-strip\fR]

@@ -1118,18 +1118,19 @@ sub getInstSourceArchList {
 	my $elems = $base->getElementsByTagName("architectures");
 	my %result;
 	my @attr = ("id", "name", "fallback");
-
 	for(my $i=1; $i<= $elems->size(); $i++) {
 		my $node  = $elems->get_node($i);
 		my @flist = $node->getElementsByTagName("arch");
 		foreach my $element(@flist) {
 			my $id = $element->getAttribute($attr[0]);
-			next if(!$id);
-			my ($d,$n) = ($element->getAttribute($attr[1]), $element->getAttribute($attr[2]));
+			next if (!$id);
+			my ($d,$n) = (
+				$element->getAttribute($attr[1]),
+				$element->getAttribute($attr[2])
+			);
 			if($n) {
 				$result{$id} = [ $d, $n ];
-			}
-			else {
+			} else {
 				$result{$id} = [ $d, 0 ];
 			}
 		}

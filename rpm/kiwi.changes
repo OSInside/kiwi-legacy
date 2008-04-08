@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Tue Apr  8 10:19:02 CEST 2008 - ms@suse.de
+
+- fixed compiler warnings in pigz code
+- tell smart to keep the downloaded files after installation
+- added schema and XML changes for instsource setup by
+  Jan-Christoph Bornschlegel <jcborn@suse.de>
+
+-------------------------------------------------------------------
 Tue Apr  8 10:01:49 CEST 2008 - ms@suse.de
 
 - fixed build

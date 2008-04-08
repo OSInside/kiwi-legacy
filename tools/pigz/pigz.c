@@ -1405,10 +1405,11 @@ local void show_info(int method, unsigned long check, off_t len, int cont)
             (method == 8 && in_tot > (len + (len >> 10) + 12)) ||
             (method == 256 && in_tot > len + (len >> 1) + 3))
             printf("%10llu %10llu?  unk    %s\n",
-                   in_tot, len, name);
+                   (long long unsigned int)in_tot,
+                   (long long unsigned int)len, name);
         else
             printf("%10llu %10llu %6.1f%%  %s\n",
-                   in_tot, len,
+                   (long long unsigned int)in_tot, (long long unsigned int)len,
                    len == 0 ? 0 : 100 * (len - in_tot)/(double)len,
                    name);
     }
