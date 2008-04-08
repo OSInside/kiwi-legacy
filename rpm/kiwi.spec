@@ -45,7 +45,6 @@ Group:          System/Management
 License:        GPL v2 or later
 Source:         %{name}.tar.bz2
 Source1:        %{name}-rpmlintrc
-Patch0:         kiwi-fix-cd-detection.diff
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 ExcludeArch:    ia64 ppc64 s390x s390 ppc
 Recommends:     smart zypper
@@ -230,7 +229,6 @@ Authors:
 
 %prep
 %setup -n kiwi
-%patch0 -p1
 
 %build
 # empty because of rpmlint warning rpm-buildroot-usage
