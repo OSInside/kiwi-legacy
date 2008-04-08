@@ -1107,10 +1107,62 @@ sub getInstSourceArchList {
 	# Get the architecture list used for building up
 	# an installation source tree
 	# ---
+	# return a hash with the following structure:
+	# name  = [ description, follower ]
+	#   name is the key, given as "id" in the xml file
+	#   description is the alternative name given as "name" in the xml file
+	#   follower is the key value of the next arch in the fallback chain
+	# ---
 	my $this = shift;
-	my $base = $this->{instsrcNodeList} ->  get_node(1);
-	my $attr = $base->getAttribute ("arch");
-	return split (",",$attr);
+	my $base = $this->{instsrcNodeList}->get_node(1);
+	my $elems = $base->getElementsByTagName("architectures");
+	my %result;
+	my @attr = ("id", "name", "fallback");
+
+	for(my $i=1; $i<= $elems->size(); $i++) {
+		my $node  = $elems->get_node($i);
+		my @flist = $node->getElementsByTagName("arch");
+		foreach my $element(@flist) {
+			my $id = $element->getAttribute($attr[0]);
+			next if(!$id);
+			my ($d,$n) = ($element->getAttribute($attr[1]), $element->getAttribute($attr[2]));
+			if($n) {
+				$result{$id} = [ $d, $n ];
+			}
+			else {
+				$result{$id} = [ $d, 0 ];
+			}
+		}
+	}
+	return %result;
+}
+
+#==========================================
+# getInstSourceProductInfo
+#------------------------------------------
+sub getInstSourceProductInfo {
+	# ...
+	# Get the shell variable values needed for
+	# metadata creation
+	# ---
+	# return a hash with the following structure:
+	# varname = value (quoted, may contain space etc.)
+	# ---
+	my $this = shift;
+	my $base = $this->{instsrcNodeList} -> get_node(1);
+	my $elems = $base->getElementsByTagName("metadata");
+	my %result;
+
+	for(my $i=1; $i<=$elems->size(); $i++) {
+		my $node  = $elems->get_node($i);
+		my @flist = $node->getElementsByTagName("productinfo");
+		foreach my $element(@flist) {
+			my $name = $element->getAttribute("name");
+			my $value = $element ->textContent("name");
+			$result{$name} = $value;
+		}
+	}
+	return %result;
 }
 
 #==========================================
