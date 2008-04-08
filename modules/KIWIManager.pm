@@ -693,6 +693,172 @@ sub setupDownload {
 }
 
 #==========================================
+# installPackages
+#------------------------------------------
+sub installPackages {
+	# ...
+	# install packages in the previosly installed root
+	# system using the package manager install method
+	# ---
+	my $this = shift;
+	my $instPacks = shift;
+	my $kiwi = $this->{kiwi};
+	my $root = $this->{root};
+	my $manager = $this->{manager};
+	my @zypper  = @{$this->{zypper}};
+	my @ensconce = @{$this->{ensconce}};
+	my $screenCall = $this->{screenCall};
+	#==========================================
+	# check addon packages
+	#------------------------------------------
+	if (! defined $instPacks) {
+		return $this;
+	}
+	#==========================================
+	# setup screen call
+	#------------------------------------------
+	my @addonPackages = @{$instPacks};
+	my $fd = $this -> setupScreen();
+	if (! defined $fd) {
+		return undef;
+	}
+	#==========================================
+	# smart
+	#------------------------------------------
+	if ($manager eq "smart") {
+		#==========================================
+		# Create screen call file
+		#------------------------------------------
+		$kiwi -> info ("Installing addon packages...");
+		print $fd "function clean { kill \$SPID;";
+		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
+		print $fd "trap clean INT TERM\n";
+		print $fd "chroot $root smart update\n";
+		print $fd "chroot $root smart channel --show &\n";
+		print $fd "SPID=\$!;wait \$SPID\n";
+		print $fd "test \$? = 0 && chroot $root smart install -y ";
+		print $fd "@addonPackages || false &\n";
+		print $fd "SPID=\$!;wait \$SPID\n";
+		print $fd "echo \$? > $screenCall.exit\n";
+		$fd -> close();
+	}
+	#==========================================
+	# zypper
+	#------------------------------------------
+	if ($manager eq "zypper") {
+		#==========================================
+		# Create screen call file
+		#------------------------------------------
+		$kiwi -> info ("Installing addon packages...");
+		my @installOpts = (
+			"--auto-agree-with-licenses"
+		);
+		print $fd "function clean { kill \$SPID;";
+		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
+		print $fd "trap clean INT TERM\n";
+		print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
+		print $fd "chroot $root @zypper refresh & ";
+		print $fd "SPID=\$!;wait \$SPID\n";
+		print $fd "test \$? = 0 && chroot $root @zypper install ";
+		print $fd "@installOpts @addonPackages &\n";
+		print $fd "SPID=\$!;wait \$SPID\n";
+		print $fd "echo \$? > $screenCall.exit\n";
+		$fd -> close();
+	}
+	#==========================================
+	# ensconce
+	#------------------------------------------
+	if ($manager eq "ensconce") {
+		# Ignored for ensconce, always report package as installed
+		return $this;
+	}
+	return $this -> setupScreenCall();
+}
+
+#==========================================
+# removePackages
+#------------------------------------------
+sub removePackages {
+	# ...
+	# remove packages from the previosly installed root
+	# system using the package manager remove method
+	# ---
+	my $this = shift;
+	my $removePacks = shift;
+	my $kiwi = $this->{kiwi};
+	my $root = $this->{root};
+	my $manager = $this->{manager};
+	my @zypper  = @{$this->{zypper}};
+	my @ensconce = @{$this->{ensconce}};
+	my $screenCall = $this->{screenCall};
+	#==========================================
+	# check to be removed packages
+	#------------------------------------------
+	if (! defined $removePacks) {
+		return $this;
+	}
+	#==========================================
+	# setup screen call
+	#------------------------------------------
+	my @removePackages = @{$removePacks};
+	my $fd = $this -> setupScreen();
+	if (! defined $fd) {
+		return undef;
+	}
+	#==========================================
+	# smart
+	#------------------------------------------
+	if ($manager eq "smart") {
+		#==========================================
+		# Create screen call file
+		#------------------------------------------
+		$kiwi -> info ("Removing addon packages...");
+		print $fd "function clean { kill \$SPID;";
+		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
+		print $fd "trap clean INT TERM\n";
+		print $fd "chroot $root smart update\n";
+		print $fd "chroot $root smart channel --show &\n";
+		print $fd "SPID=\$!;wait \$SPID\n";
+		print $fd "test \$? = 0 && chroot $root smart remove -y ";
+		print $fd "@removePackages || false &\n";
+		print $fd "SPID=\$!;wait \$SPID\n";
+		print $fd "echo \$? > $screenCall.exit\n";
+		$fd -> close();
+	}
+	#==========================================
+	# zypper
+	#------------------------------------------
+	if ($manager eq "zypper") {
+		#==========================================
+		# Create screen call file
+		#------------------------------------------
+		$kiwi -> info ("Removing addon packages...");
+		my @installOpts = (
+			"--auto-agree-with-licenses"
+		);
+		print $fd "function clean { kill \$SPID;";
+		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
+		print $fd "trap clean INT TERM\n";
+		print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
+		print $fd "chroot $root @zypper refresh & ";
+		print $fd "SPID=\$!;wait \$SPID\n";
+		print $fd "test \$? = 0 && chroot $root @zypper remove ";
+		print $fd "@installOpts @removePackages &\n";
+		print $fd "SPID=\$!;wait \$SPID\n";
+		print $fd "echo \$? > $screenCall.exit\n";
+		$fd -> close();
+	}
+	#==========================================
+	# ensconce
+	#------------------------------------------
+	if ($manager eq "ensconce") {
+		# Ignored for ensconce, always report package as installed
+		return $this;
+	}
+	return $this -> setupScreenCall();
+}
+
+#==========================================
 # setupUpgrade
 #------------------------------------------
 sub setupUpgrade {

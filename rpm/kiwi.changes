@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Tue Apr  8 14:55:55 CEST 2008 - ms@suse.de
+
+- added installPackages/removePackages methods in KIWIManager
+  allow packages type=testing section. This is work in progress:
+  We want to be able to specify a testing section in config.xml
+  which is used to install/remove test packages in a new kiwi
+  test mode. The test mode checks the prepared tree according
+  to the LSB suite and our own tests. Related to (bnc #374477)
+
+-------------------------------------------------------------------
 Tue Apr  8 10:19:02 CEST 2008 - ms@suse.de
 
 - fixed compiler warnings in pigz code

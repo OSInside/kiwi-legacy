@@ -1363,11 +1363,15 @@ sub getImageConfig {
 	}
 	my %type = %{$this->getImageTypeAndAttributes()};
 	my @delp = $this -> getDeleteList();
+	my @tstp = $this -> getTestingList();
 	my $iver = getImageVersion ($this);
 	my $size = getImageSize    ($this);
 	my $name = getImageName    ($this);
 	if (@delp) {
 		$result{delete} = join(" ",@delp);
+	}
+	if (@tstp) {
+		$result{testing} = join(" ",@tstp);
 	}
 	if (%type) {
 		$result{type} = $type{type};
@@ -1754,6 +1758,20 @@ sub getDeleteList {
 	# ---
 	my $this = shift;
 	return getList ($this,"delete");
+}
+
+#==========================================
+# getTestingList
+#------------------------------------------
+sub getTestingList {
+	# ...
+	# Create package list with packages used for testing
+	# the image integrity. The packages here are installed
+	# temporary as long as the testsuite runs. After the
+	# test runs they should be removed again
+	# ---
+	my $this = shift;
+	return getList ($this,"testing");
 }
 
 #==========================================
