@@ -1,6 +1,8 @@
 -------------------------------------------------------------------
 Tue Apr  8 14:55:55 CEST 2008 - ms@suse.de
 
+- fixed netboot download of files if compressed (.gz) image
+  name is set in config.<MAC> (bnc #378321)
 - call smart clean at the end of the installation process
 - added installPackages/removePackages methods in KIWIManager
   allow packages type=testing section. Added new KIWITest module

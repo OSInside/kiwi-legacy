@@ -1199,7 +1199,7 @@ function updateNeeded {
 		[ -z "$imageServer" ]  && imageServer=$SERVER
 		[ -z "$imageBlkSize" ] && imageBlkSize=8192
 		if [ ! -f /etc/image.md5 ];then
-			fetchFile $imageMD5s /etc/image.md5 $imageServer
+			fetchFile $imageMD5s /etc/image.md5 uncomp $imageServer
 		fi
 		read sum1 blocks blocksize < /etc/image.md5
 		if [ ! -z "$sum1" ];then
@@ -2195,8 +2195,9 @@ function fetchFile {
 	# ----
 	local path=$1
 	local dest=$2
-	local host=$3
-	local type=$4
+	local izip=$3
+	local host=$4
+	local type=$5
 	if test -z "$path"; then
 		systemException "No path specified" "reboot"
 	fi
@@ -2213,12 +2214,12 @@ function fetchFile {
 			type="$SERVERTYPE"
 		fi
 	fi
-	if test "$imageZipped" = "compressed"; then
+	if test "$izip" = "compressed"; then
 		path="$path.gz"
 	fi
 	case "$type" in
 		"http")
-			if test "$imageZipped" = "compressed"; then
+			if test "$izip" = "compressed"; then
 				curl -f http://$host/$path 2>$TRANSFER_ERRORS_FILE |\
 					gzip -d > $dest 2>>$TRANSFER_ERRORS_FILE
 			else
@@ -2227,7 +2228,7 @@ function fetchFile {
 			loadCode=$?
 			;;
 		"https")
-			if test "$imageZipped" = "compressed"; then
+			if test "$izip" = "compressed"; then
 				curl -f -k https://$host/$path 2>$TRANSFER_ERRORS_FILE |\
 					gzip -d > $dest 2>>$TRANSFER_ERRORS_FILE
 			else
@@ -2236,7 +2237,7 @@ function fetchFile {
 			loadCode=$?
 			;;
 		"ftp")
-			if test "$imageZipped" = "compressed"; then
+			if test "$izip" = "compressed"; then
 				curl ftp://$host/$path 2>$TRANSFER_ERRORS_FILE |\
 					gzip -d > $dest 2>>$TRANSFER_ERRORS_FILE
 			else
@@ -2246,7 +2247,7 @@ function fetchFile {
 			;;
 		"tftp")
 			validateBlockSize
-			if test "$imageZipped" = "compressed"; then
+			if test "$izip" = "compressed"; then
 				atftp \
 					--option "multicast $multicast" \
 					--option "blksize $imageBlkSize" -g -r $path \

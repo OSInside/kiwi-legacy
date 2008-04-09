@@ -349,7 +349,7 @@ if [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ];then
 			# get image md5sum to be able to check for the size
 			# requirements if we are loading into RAM
 			# ---
-			if ! fetchFile $imageMD5s /etc/image.md5 $imageServer; then
+			if ! fetchFile $imageMD5s /etc/image.md5 uncomp $imageServer; then
 				systemException \
 					"Failed to load image MD5: $imageName -> no such file" \
 				"reboot"
@@ -370,7 +370,7 @@ if [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ];then
 				multicast="off"
 			fi
 			Echo "Loading $imageName [$imageDevice BS:$imageBlkSize Byte]..."
-			fetchFile $imageName $imageDevice $imageServer
+			fetchFile $imageName $imageDevice $imageZipped $imageServer
 			if test $loadCode != 0 || ! loadOK "$loadStatus";then
 				systemException \
 					"Download of $imageName failed: $loadStatus" \
@@ -585,7 +585,7 @@ if [ $LOCAL_BOOT = "no" ];then
 			Echo "Import configuration file: $configDest"
 			dirs=`dirname  $configDest`
 			mkdir -p /config/$dirs
-			fetchFile $configSource /config/$configDest $configServer
+			fetchFile $configSource /config/$configDest uncomp $configServer
 		done
 		#======================================
 		# Check for KIWI_INITRD
