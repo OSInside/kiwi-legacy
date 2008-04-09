@@ -83,6 +83,7 @@
 		<package name="sysfsutils"/>
 		<package name="file"/>
 		<package name="gfxboot"/>
+		<package name="gfxboot-devel"/>
 		<package name="syslinux"/>
 		<package name="make"/>
 		<package name="memtest86+"/>
@@ -142,6 +143,7 @@
 		<package name="suse-build-key"/>
 		<package name="syslinux"/>
 		<package name="gfxboot"/>
+		<package name="gfxboot-devel"/>
 		<package name="make"/>
 		<package name="memtest86+"/>
 		<package name="bootsplash-theme-SuSE"/>

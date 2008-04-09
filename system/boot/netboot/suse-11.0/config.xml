@@ -162,6 +162,7 @@
 		<package name="procps"/>
 		<package name="lvm2"/>
 		<package name="gfxboot"/>
+		<package name="gfxboot-devel"/>
 		<package name="fribidi"/>
 		<package name="make"/>
 		<package name="nbd"/>
@@ -239,6 +240,7 @@
 		<package name="resmgr"/>
 		<package name="suse-build-key"/>
 		<package name="gfxboot"/>
+		<package name="gfxboot-devel"/>
 		<package name="fribidi"/>
 		<package name="make"/>
 		<package name="bootsplash-theme-SuSE"/>
@@ -257,6 +259,7 @@
 		<package name="perl-HTML-Tagset"/>
 		<package name="perl"/>
 		<package name="gfxboot"/>
+		<package name="gfxboot-devel"/>
 		<package name="perl-gettext"/>
 		<package name="setserial"/>
 		<package name="bundle-lang-common-zh"/>

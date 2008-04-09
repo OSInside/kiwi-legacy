@@ -89,7 +89,9 @@ sub new {
 	}
 	my $dataDir = "$root/var/lib/smart";
 	if ($manager eq "smart") {
-		qxx ("mkdir -p $dataDir");
+		if (! -d $dataDir) {
+			qxx ("mkdir -p $dataDir");
+		}
 	}
 	my @channelList = ();
 	#==========================================
@@ -1071,7 +1073,6 @@ sub setupRootSystem {
 			print $fd "@installOpts &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
 			print $fd "echo \$? > $screenCall.exit\n";
-			print $fd "chroot $root smart clean\n";
 		}
 		$fd -> close();
 	}
@@ -1195,6 +1196,73 @@ sub setupRootSystem {
 		}
 	}
 	return $this -> setupScreenCall();
+}
+
+#==========================================
+# hidePackageManagerCache
+#------------------------------------------
+sub hidePackageManagerCache {
+	my $this = shift;
+	my $root = $this->{root};
+	my $manager = $this->{manager};
+	my $cache;
+	#==========================================
+	# smart
+	#------------------------------------------
+	if ($manager eq "smart") {	
+		$cache = $root."/var/lib/smart/packages";
+		if (-d $cache) {
+			if (-d "$root.cache") {
+				qxx ("rm -rf $root.cache");
+			}
+			qxx ("mv $cache $root.cache");
+		}
+	}
+	#==========================================
+	# zypper
+	#------------------------------------------
+	if ($manager eq "zypper") {
+		return $this;
+	}
+	#==========================================
+	# ensconce
+	#------------------------------------------
+	if ($manager eq "ensconce") {
+		return $this;
+	}
+}
+
+#==========================================
+# restorePackageManagerCache 
+#------------------------------------------
+sub restorePackageManagerCache {
+	my $this = shift;
+	my $root = $this->{root};
+	my $manager = $this->{manager};
+	my $cache;
+	#==========================================
+	# smart
+	#------------------------------------------
+	if ($manager eq "smart") {
+		$cache = $root.".cache";
+		if ((-d $cache) && (-d "$root/var/lib/smart")) {
+			qxx ("mv $cache $root/var/lib/smart/packages 2>&1");
+		} else {
+			qxx ("rm -rf $cache");
+		}
+	}
+	#==========================================
+	# zypper
+	#------------------------------------------
+	if ($manager eq "zypper") {
+		return $this;
+	}
+	#==========================================
+	# ensconce
+	#------------------------------------------
+	if ($manager eq "ensconce") {
+		return $this;
+	}
 }
 
 #==========================================

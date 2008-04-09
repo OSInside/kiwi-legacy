@@ -514,6 +514,10 @@ function suseStripInitrd {
 	for path in /sbin /usr/sbin /usr/bin /bin;do
 		baseStripTools "$path" "$tools"
 	done
+	#==========================================
+	# remove images.sh
+	#------------------------------------------
+	rm -f /image/images.sh
 }
 
 #======================================

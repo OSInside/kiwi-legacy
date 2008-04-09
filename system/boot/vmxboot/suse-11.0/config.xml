@@ -83,6 +83,7 @@
 		<package name="squashfs"/>
 		<package name="aufs"/>
 		<package name="gfxboot"/>
+		<package name="gfxboot-devel"/>
 		<package name="fribidi"/>
 		<package name="make"/>
 		<package name="bootsplash"/>
@@ -137,6 +138,7 @@
 		<package name="resmgr"/>
 		<package name="suse-build-key"/>
 		<package name="gfxboot"/>
+		<package name="gfxboot-devel"/>
 		<package name="fribidi"/>
 		<package name="make"/>
 		<package name="bootsplash-theme-SuSE"/>
