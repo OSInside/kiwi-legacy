@@ -361,6 +361,7 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_datadir}/kiwi/image
 %{_datadir}/kiwi/.revision
 %{_datadir}/kiwi/modules
+%{_datadir}/kiwi/tests
 %{_datadir}/kiwi/xsl
 %{_sbindir}/kiwi
 %{perl_vendorarch}/dbusdevice.pm

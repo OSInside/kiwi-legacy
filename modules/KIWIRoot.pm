@@ -376,6 +376,69 @@ sub upgrade {
 }
 
 #==========================================
+# prepareTestingEnvironment
+#------------------------------------------
+sub prepareTestingEnvironment {
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $manager  = $this->{manager};
+	#==========================================
+	# Mount local and NFS directories
+	#------------------------------------------
+	$manager -> switchToChroot();
+	if (! $this -> setupMount ()) {
+		$kiwi -> error ("Couldn't mount base system");
+		$kiwi -> failed ();
+		return undef;
+	}
+	#==========================================
+	# Setup sources
+	#------------------------------------------
+	if (! $manager -> setupInstallationSource()) {
+		return undef;
+	}
+	return $this;
+}
+
+#==========================================
+# cleanupTestingEnvironment
+#------------------------------------------
+sub cleanupTestingEnvironment {
+	my $this = shift;
+	my $manager = $this->{manager};
+	if (! $manager -> resetInstallationSource()) {
+		return undef;
+	}
+	return $this;
+}
+
+#==========================================
+# installTestingPackages
+#------------------------------------------
+sub installTestingPackages {
+	my $this = shift;
+	my $pack = shift;
+	my $manager  = $this->{manager};
+	if (! $manager -> installPackages ($pack)) {
+		return undef;
+	}
+	return $this;
+}
+
+#==========================================
+# uninstallTestingPackages
+#------------------------------------------
+sub uninstallTestingPackages {
+	my $this = shift;
+	my $pack = shift;
+	my $manager  = $this->{manager};
+	if (! $manager -> removePackages ($pack)) {
+		return undef;
+	}
+	return $this;
+}
+
+#==========================================
 # install
 #------------------------------------------
 sub install {
