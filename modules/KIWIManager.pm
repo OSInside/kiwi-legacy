@@ -1071,6 +1071,7 @@ sub setupRootSystem {
 			print $fd "@installOpts &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
 			print $fd "echo \$? > $screenCall.exit\n";
+			print $fd "chroot $root smart clean\n";
 		}
 		$fd -> close();
 	}
