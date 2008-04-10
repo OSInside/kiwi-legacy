@@ -758,7 +758,7 @@ if [ $LOCAL_BOOT = "no" ];then
 		if [ $HAVE_SWAP -eq 1 ];then
 			setupBootLoaderGrub /mnt /config 1 ${deviceDisk}2 OEM $deviceSwap
 		else
-			setupBootLoaderGrub /mnt /config 1 ${deviceDisk}2 OEM
+			setupBootLoaderGrub /mnt /config 0 ${deviceDisk}1 OEM
 		fi
 	fi
 	setupKernelModules /config
