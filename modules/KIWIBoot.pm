@@ -379,16 +379,20 @@ sub getRemovableUSBStorageDevices {
 				}
 				if ($description =~ /block:(.*)/) {
 					$description = "/dev/".$1;
-					if (! open (FD,$isremovable)) {
-						next;
-					}
-					$isremovable = <FD>; close FD;
-					if ($isremovable == 1) {
-						my $status = qxx ("/sbin/sfdisk -s $description 2>&1");
-						my $result = $? >> 8;
-						if ($result == 0) {
-							$devices{$description} = $serial;
-						}
+				} else {
+					my @bdevs = glob ($description);
+					$description = "/dev/".$bdevs[0];
+					$isremovable = $description."/".$bdevs[0]."/removable";
+				}
+				if (! open (FD,$isremovable)) {
+					next;
+				}
+				$isremovable = <FD>; close FD;
+				if ($isremovable == 1) {
+					my $status = qxx ("/sbin/sfdisk -s $description 2>&1");
+					my $result = $? >> 8;
+					if ($result == 0) {
+						$devices{$description} = $serial;
 					}
 				}
 			}

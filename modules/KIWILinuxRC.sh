@@ -915,6 +915,10 @@ function USBStickDevice {
 				isremovable=$description/removable
 				storageID=`echo $description | cut -f1 -d: | xargs basename`
 				devicebID=`basename $description | cut -f2 -d:`
+				if [ $devicebID = "block" ];then
+					devicebID=`ls -1 $description`
+					isremovable=$description/$devicebID/removable
+				fi
 				serial="/sys/bus/usb/devices/$storageID/serial"
 				device="/dev/$devicebID"
 				if [ ! -b $device ];then
