@@ -1307,6 +1307,7 @@ function sfdiskPartitionCount {
 	# calculate the number of partitions to create. If the
 	# number is more than 4 an extended partition needs to be
 	# created.
+	# ----
 	IFS="," ; for i in $PART;do
 		PART_NUMBER=`expr $PART_NUMBER + 1`
 	done
@@ -1316,6 +1317,31 @@ function sfdiskPartitionCount {
 	PART_NUMBER=`expr $PART_NUMBER + 1`
 	PART_NEED_FILL=`expr $PART_NUMBER / 8`
 	PART_NEED_FILL=`expr 8 - \( $PART_NUMBER - $PART_NEED_FILL \* 8 \)`
+}
+#======================================
+# checkExtended
+#--------------------------------------
+function checkExtended {
+	# /.../
+	# check the IMAGE system partition and adapt if the index
+	# was increased due to an extended partition
+	# ----
+	local iDevice=""
+	local iNumber=""
+	local iNewDev=""
+	local iPartNr=""
+	IFS="," ; for i in $PART;do
+		iPartNr=`expr $iPartNr + 1`
+	done
+	if [ $iPartNr -gt 4 ];then
+		iDevice=`echo $IMAGE | cut -f1 -d";" | cut -f2 -d=`
+		iNumber=`echo $iDevice | tr -d "a-zA-Z\/"`
+		if [ $iNumber -ge 4 ];then
+			iNumber=`expr $iNumber + 1`
+			iNewDev=$DISK$iNumber
+			IMAGE=`echo $IMAGE | sed -e s@$iDevice@$iNewDev@`
+		fi
+	fi
 }
 #======================================
 # sfdiskFillPartition

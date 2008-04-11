@@ -246,6 +246,10 @@ export systemIntegrity="unknown"
 if [ $LOCAL_BOOT = "no" ];then
 if [ ! -z "$PART" ] && [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ];then
 	#======================================
+	# Check for possible extended partition
+	#--------------------------------------
+	checkExtended
+	#======================================
 	# Check for installed system
 	#--------------------------------------
 	count=0
