@@ -1,8 +1,9 @@
 -------------------------------------------------------------------
 Fri Apr 11 15:15:35 CEST 2008 - ms@suse.de
 
-- netboot: fixed root partition index when extended
-  partition is required (bnc #378884) 
+- netboot: fixed typo fillPartition -> sfdiskFillPartition (bnc #379211)
+- netboot: fixed root partition index when extended partition
+  is required (bnc #378884) 
 
 -------------------------------------------------------------------
 Thu Apr 10 14:14:22 CEST 2008 - ms@suse.de

@@ -1434,7 +1434,7 @@ function sfdiskCreatePartition {
 		fi
 	done
 	if [ $PART_NEED_EXTENDED -eq 1 ];then
-		fillPartition
+		sfdiskFillPartition
 	fi
 	export PART_MOUNT
 	export PART_DEV
