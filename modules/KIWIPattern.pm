@@ -169,7 +169,6 @@ sub checkContentData {
 	#==========================================
 	# check content...
 	#------------------------------------------
-	$pattern = quotemeta $pattern;
 	if (! $content) {
 		return undef;
 	}
@@ -444,6 +443,7 @@ sub getRequiredPatterns {
 		}
 	}
 	foreach my $rpattern (@reqs) {
+		$rpattern = quotemeta $rpattern;
 		if (defined $this->{patdone}{$rpattern}) {
 			next;
 		}
