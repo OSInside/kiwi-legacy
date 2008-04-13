@@ -386,6 +386,7 @@ rm -rf $RPM_BUILD_ROOT
 %doc %{_defaultdocdir}/kiwi/kiwi.xsd.html
 %doc %{_defaultdocdir}/kiwi/kiwi.rng.html
 %doc %{_defaultdocdir}/kiwi/kiwi.quick.pdf
+%doc %{_defaultdocdir}/kiwi/testsuite.readme
 #=================================================
 # KIWI-pxeboot files...  
 # ------------------------------------------------
