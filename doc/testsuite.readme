@@ -1,0 +1,190 @@
+README for kiwi test suite
+Pavel Nemec <pnemec@suse.cz>
+----------------------------
+USAGE:
+Test suite is indented to do basic quality checks for created image. It use
+prepared chroot directory (see "kiwi -root" option) as test bed. Tests
+are normally located under "/usr/share/kiwi/tests". But using other location
+is also possible. After you create your image execute:
+
+  kiwi --testsuite PATHTOCHROOT 
+
+To run default test set on your image.
+
+CREATING NEW TEST:
+Test itself is defined by xml description "test-case.xml" and its template
+definition files /usr/share/kiwi/modules/KIWISchemeTest.rnc and
+/usr/share/kiwi/modules/KIWISchemeTest.rng 
+Example:
+
+<?xml version="1.0" encoding="UTF-8"?>
+<test_case name="rpm" 
+	summary="check rpm database and verify all rpms"
+	description="check if rpm db is present, run rpm`s build-in Verify method"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="/usr/share/kiwi/tests/test_case.xsd">
+	
+	<requirements>
+		<req type="directory">/var/lib/rpm</req>
+		<req type="file">/var/lib/rpm/__db.000</req>
+		<req type="file">/var/lib/rpm/Packages</req>
+	</requirements>
+	<test type="binary"  place="extern">
+		<file>rpm.sh</file>
+		<params>CHROOT</params>
+	</test>
+</test_case>
+
+There are basically two section. "requirements" and "test". 
+
+In requirements you define what files/directories or packages has to be
+present in your image to run test. For example if you need check rpm
+database in our example, the rpm database has to be present in image.
+All requirements are checked, and if any of them fail test is not
+executed and error message is printed. NOTE: type of requirement:
+file (any kind), directory, rpm-package
+
+Test section define script itself. It could be binary, shell script or
+whatever kind of executable you like. Scripts are expected to be in
+directory where definition for test is. There are ex tern and intern
+scripts.
+
+- external scripts are executed outside of image and are preferred.
+  Their first parameter should be CHROOT. This parameter is changed to
+  real path to image chroot directory. 
+
+- internal scripts are executed inside image using "chroot" command.
+  Files are copied into image and deleted after execution.
+
+Scripts should always return 0 in case of test pass, or 1 if any error
+occur. All messages printed to standard and error output are catch.
+They are printed if test fail.
+
+EXAMPLE:
+in our previous example we define rpm.sh script. It is extern script
+and it will be executed from outside. Here is the script
+(comment will be at the end of file:
+
+#! /bin/bash
+###################################################
+# run test on build kiwi images packed in rpm     #
+# Pavel Nemec <pnemec@suse.cz>                    #
+#                                                 #
+# Test which check for rpm, rpm db and verify all #
+# installed packages                              #
+#################################################### 
+# return 0 - if no broken rpm is found
+# return 1 - if any broken file is found
+# expect path to chroot as first parametr
+
+# todo: proper rpm parsing: http://itso.iu.edu/Post_Install_Package_Verification
+#       it is needed?
+
+#requires awk, rpm, mktemp
+
+CHROOT=$1
+if [ -z $CHROOT ]
+then
+	echo "expecting path to CHROOT as first parametr"
+	exit 1
+fi
+
+# first do the naive test for aaa_base
+TMP=$(
+	rpm --root $CHROOT -qv aaa_base | \
+	awk '\
+		$0 !~ /^aaa_base.*/ {print 1} 
+		$0 ~ /^aaa_base.*/ {print 0}'
+	)
+# this check should be done in xml description as prerequirement
+if [ "${TMP}" -ne 0 ]
+then
+	echo "base package not found rpm db missing?"
+	return 1;
+fi
+
+TMP=$(mktemp)
+rpm -V -a --root $CHROOT | awk -v tmp=$TMP '
+BEGIN{
+	miss="missing";
+	deps="Unsatisfied";
+	deps_string="Unsatisfied dependencies for"
+	other_counter=0
+	
+}
+$1 == miss {
+	for(i=0;i<NF;i++){
+		if(substr($i,1,1)=="/"){
+			missing_array[length(missing_array)]=$i
+			next;
+		}
+	}
+}
+$1 == deps{
+	package=$0
+	gsub(deps_string,"",package)
+	package=substr(package,1,index(package,":")-1)
+	deps_array[length(deps_array)]=package
+	next
+}
+{
+	other_counter++
+}
+	
+END{
+	if(length(missing_array)>0){
+		print "Missing file(s):" > tmp
+		for(i=0;i<length(missing_array);i++){
+			print "\t"missing_array[i] > tmp
+		}
+	}
+	if(length(deps_array)>0){
+		print deps_string":" > tmp
+		for(i=0;i<length(deps_array);i++){
+			print "\t"deps_array[i] > tmp
+		}
+	}
+	if(other_counter>0) 
+		print "Others " other_counter " errors ">tmp
+}
+'
+size=$(cat $TMP | wc -l)
+if [ $size -gt 0 ]
+then 
+	cat $TMP
+	rm $TMP
+	exit 1
+else 
+	rm $TMP
+	exit 0
+fi
+############ END OF rpm.sh SCRIPT #######################
+
+This is an external script, so you will find
+
+CHROOT=$1
+if [ -z $CHROOT ];then
+	echo "expecting path to CHROOT as first parameter"
+	exit 1
+fi
+
+To parse CHROOT variable. 
+In the body of script is test itself, it call "rpm --Verify" command
+and parse output. At the end of script you will find:
+
+if [ $size -gt 0 ]
+then 
+	cat $TMP
+	rm $TMP
+	exit 1
+else 
+	rm $TMP
+	exit 0
+fi
+
+This will print 0 or 1 as test pass or fail. 
+In this command we do not use any internal (image ) binary or executable,
+we require rpm database so we putted it in requirement section. From
+host system we using basic services. But if we need some advance programs,
+we should do checks for their availability in test script itself. 
+

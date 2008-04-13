@@ -235,7 +235,7 @@ Authors:
 
 %install
 # build
-export K_USER=-1 # set value to -1 to prevent building boot images
+export K_USER=0 # set value to -1 to prevent building boot images
 test -e /.buildenv || export K_USER=-1 # no buildenv, no boot image build
 test -e /.buildenv && . /.buildenv
 make buildroot=$RPM_BUILD_ROOT CFLAGS="$RPM_OPT_FLAGS"
@@ -258,8 +258,6 @@ if [ "$UID" = "$K_USER" ];then
 	echo "DEFAULT Local-Boot" >> $pxedefault
 	images="
 		netboot/suse-SLES10
-		netboot/suse-SLED10
-		netboot/suse-SLED10-SP1 
 		netboot/suse-SLES10-SP1
 	"
 	for i in $images;do

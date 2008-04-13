@@ -373,6 +373,96 @@ function baseSetupInPlaceSVNRepository {
 }
 
 #======================================
+# baseSetupPlainTextGITRepository
+#--------------------------------------
+function baseSetupPlainTextGITRepository {
+	# /.../
+	# create an in place git repository of the root
+	# directory containing all plain/text files.
+	# ----
+	if [ ! -x /usr/bin/git ];then
+		echo "git not installed... skipped"
+		return
+	fi
+	pushd /
+	local ignore=""
+	#======================================
+	# directories to ignore
+	#--------------------------------------
+	local dirs="
+		/sys /dev /var/log /home /media /var/run /var/tmp /tmp /var/lock
+		/image /var/spool /var/cache /var/lib /boot /root /var/adm
+		/usr/share/doc /base-system /usr/lib /usr/lib64 /usr/bin /usr/sbin
+		/usr/share/man /proc /bin /sbin /lib /lib64 /.git
+	"
+	#======================================
+	# files to ignore
+	#--------------------------------------
+	local files="
+		/etc/Image* *.lock /etc/resolv.conf *.gif *.png
+		*.jpg *.eps *.ps
+	"
+	#======================================
+	# creae .gitignore and find list
+	#--------------------------------------
+	for entry in $files;do
+		echo $entry >> .gitignore
+		if [ -z "$ignore" ];then
+			ignore="-name $entry"
+		else
+			ignore="$ignore -or -name $entry"
+		fi
+	done
+	for entry in $dirs;do
+		echo $entry >> .gitignore
+		if [ -z "$ignore" ];then
+			ignore="-path .$entry"
+		else
+			ignore="$ignore -or -path .$entry"
+		fi
+	done
+	#======================================
+	# init git base
+	#--------------------------------------
+	git init
+	#======================================
+	# find all text/plain files except ign
+	#--------------------------------------
+	for i in `find . \( $ignore \) -prune -o -print`;do
+		file=`echo $i | cut -f2 -d.`
+		if file -i $i | grep -q "text/*";then
+			git add $i
+		fi
+		if file -i $i | grep -q "application/x-shellscript";then
+			git add $i
+		fi
+		if file -i $i | grep -q "application/x-awk";then
+			git add $i
+		fi
+		if file -i $i | grep -q "application/x-c";then
+			git add $i
+		fi
+		if file -i $i | grep -q "application/x-c++";then
+			git add $i
+		fi
+		if file -i $i | grep -q "application/x-not-regular-file";then
+			echo $file >> .gitignore
+		fi
+		if file -i $i | grep -q "application/x-gzip";then
+			echo $file >> .gitignore
+		fi
+		if file -i $i | grep -q "application/x-empty";then
+			echo $file >> .gitignore
+		fi
+	done
+	#======================================
+	# commit the git
+	#--------------------------------------
+	git commit -m "deployed"
+	popd
+}
+
+#======================================
 # baseSetupInPlaceGITRepository
 #--------------------------------------
 function baseSetupInPlaceGITRepository {
