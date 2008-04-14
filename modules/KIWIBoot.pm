@@ -819,10 +819,9 @@ sub setupBootStick {
 	}
 	$kiwi -> done();
 	#==========================================
-	# Clean tmp
+	# Clean partition info file
 	#------------------------------------------
 	unlink $pinfo;
-	qxx ( "rm -rf $tmpdir" );
 	#==========================================
 	# Wait for new partition table to settle
 	#------------------------------------------
@@ -839,6 +838,7 @@ sub setupBootStick {
 		$kiwi -> error  ("Couldn't dump boot image to stick: $status");
 		$kiwi -> failed ();
 		$this -> cleanDbus();
+		$this -> cleanTmp ();
 		return undef;
 	}
 	unlink $name;
@@ -857,6 +857,7 @@ sub setupBootStick {
 			$kiwi -> error  ("Couldn't dump system image to stick: $status");
 			$kiwi -> failed ();
 			$this -> cleanDbus();
+			$this -> cleanTmp ();
 			return undef;
 		}
 		$kiwi -> done();
@@ -869,6 +870,7 @@ sub setupBootStick {
 				$kiwi -> error  ("Couldn't dump split file: $status");
 				$kiwi -> failed ();
 				$this -> cleanDbus();
+				$this -> cleanTmp ();
 				return undef;
 			}
 			$kiwi -> done();
@@ -972,6 +974,7 @@ sub setupBootStick {
 		$kiwi -> error  ("Couldn't resize $FSTypeRO filesystem: $status");
 		$kiwi -> failed ();
 		$this -> cleanDbus();
+		$this -> cleanTmp ();
 		return undef;
 	}
 	if ($status) {
@@ -999,6 +1002,7 @@ sub setupBootStick {
 			$kiwi -> error("Couldn't resize $FSTypeRW filesystem: $status");
 			$kiwi -> failed ();
 			$this -> cleanDbus();
+			$this -> cleanTmp ();
 			return undef;
 		}
 		if ($status) {
@@ -1022,6 +1026,7 @@ sub setupBootStick {
 			$kiwi -> error  ("Couldn't mount stick image: $status");
 			$kiwi -> failed ();
 			$this -> cleanDbus();
+			$this -> cleanTmp ();
 			return undef;
 		}
 		if (-d "/mnt/boot") {
@@ -1043,11 +1048,12 @@ sub setupBootStick {
 	# Install grub on USB stick
 	#------------------------------------------
 	$kiwi -> info ("Installing grub on USB stick");
-	if (! open (FD,"|/usr/sbin/grub --batch >/dev/null 2>&1")) {
+	if (! open (FD,"|/usr/sbin/grub --batch &> $tmpdir/grub.log")) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't call grub: $!");
 		$kiwi -> failed ();
 		$this -> cleanDbus();
+		$this -> cleanTmp ();
 		return undef;
 	}
 	print FD "device (hd0) $stick\n";
@@ -1055,10 +1061,24 @@ sub setupBootStick {
 	print FD "setup (hd0)\n";
 	print FD "quit\n";
 	close FD;
+	my $glog;
+	if (open (FD,"$tmpdir/grub.log")) {
+		my @glog = <FD>; close FD;
+		$glog = join ("\n",@glog);
+		$kiwi -> loginfo ("GRUB: $glog");
+	}
+	#==========================================
+	# cleanup temp directory
+	#------------------------------------------
+	qxx ("rm -rf $tmpdir");
+	#==========================================
+	# check grub installation
+	#------------------------------------------
+	qxx ("grep -q 'boot sector' $stick");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't install grub on USB stick: $!");
+		$kiwi -> error  ("Couldn't install grub on USB stick: $glog");
 		$kiwi -> failed ();
 		$this -> cleanDbus();
 		return undef;
@@ -1839,16 +1859,16 @@ sub setupInstallStick {
 	# cleanup device maps and part mount
 	#------------------------------------------
 	qxx ( "/sbin/kpartx -d $loop" );
-	qxx ("rm -rf $tmpdir");
 	#==========================================
 	# Install grub on virtual disk
 	#------------------------------------------
 	$kiwi -> info ("Installing grub on virtual disk");
-	if (! open (FD,"|/usr/sbin/grub --batch >/dev/null 2>&1")) {
+	if (! open (FD,"|/usr/sbin/grub --batch &> $tmpdir/grub.log")) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't call grub: $!");
 		$kiwi -> failed ();
 		$this -> cleanLoop ();
+		$this -> cleanTmp();
 		return undef;
 	}
 	print FD "device (hd0) $diskname\n";
@@ -1856,10 +1876,24 @@ sub setupInstallStick {
 	print FD "setup (hd0)\n";
 	print FD "quit\n";
 	close FD;
+	my $glog;
+	if (open (FD,"$tmpdir/grub.log")) {
+		my @glog = <FD>; close FD;
+		$glog = join ("\n",@glog);
+		$kiwi -> loginfo ("GRUB: $glog");
+	}
+	#==========================================
+	# cleanup temp directory
+	#------------------------------------------
+	qxx ("rm -rf $tmpdir");
+	#==========================================
+	# check grub installation
+	#------------------------------------------
+	qxx ("grep -q 'boot sector' $diskname");
 	$result = $? >> 8;
 	if ($result != 0) { 
 		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't install grub on virtual disk: $!");
+		$kiwi -> error  ("Couldn't install grub on virtual disk: $glog");
 		$kiwi -> failed ();
 		$this -> cleanLoop ();
 		return undef;
@@ -2550,13 +2584,12 @@ sub setupBootDisk {
 	# cleanup device maps and part mount
 	#------------------------------------------
 	qxx ( "/sbin/kpartx -d $loop" );
-	qxx ("rm -rf $tmpdir");
 
 	#==========================================
 	# Install grub on virtual disk
 	#------------------------------------------
 	$kiwi -> info ("Installing grub on virtual disk");
-	if (! open (FD,"|/usr/sbin/grub --batch >/dev/null 2>&1")) {
+	if (! open (FD,"|/usr/sbin/grub --batch &> $tmpdir/grub.log")) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't call grub: $!");
 		$kiwi -> failed ();
@@ -2568,10 +2601,24 @@ sub setupBootDisk {
 	print FD "setup (hd0)\n";
 	print FD "quit\n";
 	close FD;
+	my $glog;
+	if (open (FD,"$tmpdir/grub.log")) {
+		my @glog = <FD>; close FD;
+		$glog = join ("\n",@glog);
+		$kiwi -> loginfo ("GRUB: $glog");
+	}
+	#==========================================
+	# cleanup temp directory
+	#------------------------------------------
+	qxx ("rm -rf $tmpdir");
+	#==========================================
+	# check grub installation
+	#------------------------------------------
+	qxx ("grep -q 'boot sector' $diskname");
 	$result = $? >> 8;
 	if ($result != 0) { 
 		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't install grub on virtual disk: $!");
+		$kiwi -> error  ("Couldn't install grub on virtual disk: $glog");
 		$kiwi -> failed ();
 		$this -> cleanLoop ();
 		return undef;
