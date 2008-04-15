@@ -1,7 +1,12 @@
 -------------------------------------------------------------------
-Tue Apr 15 10:14:32 CEST 2008 - ms@suse.de
+Tue Apr 15 16:15:05 CEST 2008 - ms@suse.de
 
 - added grub information into logfile, check grub status
+
+-------------------------------------------------------------------
+Tue Apr 15 16:01:27 CEST 2008 - coolo@suse.de
+
+- adapt to some package renames in 11.0
 
 -------------------------------------------------------------------
 Fri Apr 11 15:15:35 CEST 2008 - ms@suse.de

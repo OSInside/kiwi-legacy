@@ -93,7 +93,7 @@
 		<package name="hdparm"/>
 		<package name="grub"/>
 		<package name="bootsplash"/>
-		<package name="bootsplash-theme-SuSE"/>
+		<package name="bootsplash-branding-openSUSE"/>
 		<package name="tar"/>
 	</packages>
 	<packages type="bootstrap">
@@ -146,6 +146,6 @@
 		<package name="gfxboot-devel"/>
 		<package name="make"/>
 		<package name="memtest86+"/>
-		<package name="bootsplash-theme-SuSE"/>
+		<package name="bootsplash-branding-openSUSE"/>
 	</packages>
 </image>

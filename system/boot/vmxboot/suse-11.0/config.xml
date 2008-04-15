@@ -70,7 +70,6 @@
 		<package name="e2fsprogs"/>
 		<package name="file"/>
 		<package name="hwinfo"/>
-		<package name="libcom_err"/>
 		<package name="module-init-tools"/>
 		<package name="net-tools"/>
 		<package name="netcfg"/>
@@ -87,7 +86,7 @@
 		<package name="fribidi"/>
 		<package name="make"/>
 		<package name="bootsplash"/>
-		<package name="bootsplash-theme-SuSE"/>
+		<package name="bootsplash-branding-openSUSE"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
@@ -141,6 +140,6 @@
 		<package name="gfxboot-devel"/>
 		<package name="fribidi"/>
 		<package name="make"/>
-		<package name="bootsplash-theme-SuSE"/>
+		<package name="bootsplash-branding-openSUSE"/>
 	</packages>
 </image>

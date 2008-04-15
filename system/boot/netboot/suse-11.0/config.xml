@@ -168,7 +168,7 @@
 		<package name="nbd"/>
 		<package name="nfs-client"/>
 		<package name="bootsplash"/>
-		<package name="bootsplash-theme-SuSE"/>
+		<package name="bootsplash-branding-openSUSE"/>
 		<package name="tar"/>
 		<!-- PACKAGES END DEFAULT AND XEN -->
 	</packages>
@@ -243,7 +243,7 @@
 		<package name="gfxboot-devel"/>
 		<package name="fribidi"/>
 		<package name="make"/>
-		<package name="bootsplash-theme-SuSE"/>
+		<package name="bootsplash-branding-openSUSE"/>
 		<!-- DELETE PACKAGES END DEFAULT, XEN AND DISKLESS -->
 	</packages>
 	<packages type="delete" profiles="diskless">
