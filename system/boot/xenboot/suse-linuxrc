@@ -35,10 +35,10 @@ VMFindSystem () {
 	local haveSDA=0
 	local haveHDA=0
 	local devices=""
-	waitForStorageDevice /dev/sda
-	if [ ! -e /dev/sda ];then
-		waitForStorageDevice /dev/hda
-		if [ -e /dev/hda ];then
+	waitForStorageDevice /dev/sda1
+	if [ ! -e /dev/sda1 ];then
+		waitForStorageDevice /dev/hda1
+		if [ -e /dev/hda1 ];then
 			haveHDA=1
 			devices="/dev/hda1 /dev/hda"
 		fi

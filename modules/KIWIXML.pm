@@ -1491,9 +1491,17 @@ sub getPackageAttributes {
 		if (($type eq "xen") || ($type eq "vmware")) {
 			my $memory  = $node -> getAttribute ("memory");
 			my $disk    = $node -> getAttribute ("disk");
+			my $hwver   = $node -> getAttribute ("HWversion");
+			my $guestos = $node -> getAttribute ("guestOS");
 			if (($memory) && ($disk)) {
 				$result{memory}  = $memory;
 				$result{disk}    = $disk;
+			}
+			if ($hwver) {
+				$result{hwver} = $hwver;
+			}
+			if ($guestos) {
+				$result{guestOS} = $guestos;
 			}
 		}
 	}
@@ -1797,7 +1805,7 @@ sub getTestingList {
 	# test runs they should be removed again
 	# ---
 	my $this = shift;
-	return getList ($this,"testing");
+	return getList ($this,"testsuite");
 }
 
 #==========================================

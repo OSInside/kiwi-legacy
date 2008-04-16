@@ -2,6 +2,25 @@
 Tue Apr 15 16:15:05 CEST 2008 - ms@suse.de
 
 - added grub information into logfile, check grub status
+- fixed VMware configuration setup:
+  * don't add image path to fileName variable
+  * fixed network setup use vmxnet driver
+  * added raw cdrom setup on ide controller
+  * make HWversion a config.xml attribute
+  * removed floppy controller
+  * make guestOS a config.xml attribute
+  * change to soft power options
+- fixed Xen configuration setup:
+  * don't add image path to file: variable
+  * fixed root setup pointing to the partition not the disk
+- fixed xen storage device detection if no disk but only
+  a partition device is present
+- fixed source repo setup for the testsuite if the config.xml
+  includes the this:// repository source path
+- added check for installed packages in kiwi testsuite
+  changed testing attribute to testsuite
+- removed xsd documentation as kiwi uses relaxNG schema
+  definitions. maintain kiwi.rng.html for the future
 
 -------------------------------------------------------------------
 Tue Apr 15 16:01:27 CEST 2008 - coolo@suse.de

@@ -741,6 +741,12 @@ sub main {
 			}
 		}
 		#==========================================
+		# create package manager for operations
+		#------------------------------------------
+		my $manager = new KIWIManager (
+			$kiwi,$xml,$xml,$RunTestSuite,$xml -> getPackageManager()
+		);
+		#==========================================
 		# set default tests if no names are set
 		#------------------------------------------
 		if (! @RunTestName) {
@@ -759,10 +765,12 @@ sub main {
 				# if test does not begin with '/' or './' add default path
 				$runtest = $TestBase."/".$run;
 			}
-			my $test = new KIWITest ( $runtest,$RunTestSuite,$SchemeTST );
+			my $test = new KIWITest (
+				$runtest,$RunTestSuite,$SchemeTST,$manager
+			);
 			my $testResult = $test -> run();
 			$kiwi -> info (
-				"Testcase ".$test->getName()." - ".$test->getDescription()
+				"Testcase ".$test->getName()." - ".$test->getSummary()
 			);
 			if ($testResult == 0) {
 				$kiwi -> done();

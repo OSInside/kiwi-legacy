@@ -189,6 +189,12 @@ sub thisPath {
 		}
 		$thisPath = <FD>; close FD;
 		$thisPath = "$thisPath/$module";
+	} elsif (defined $main::RunTestSuite) {
+		if (! open FD,"$main::RunTestSuite/image/main::Prepare") {
+			return undef;
+		}
+		$thisPath = <FD>; close FD;
+		$thisPath = "$thisPath/$module";
 	} else {
 		$thisPath = "$main::Prepare/$module";
 	}

@@ -2667,14 +2667,14 @@ sub buildXenConfig {
 		my $device = $xenconfig{disk};
 		my $part   = $device."1";
 		my $memory = $xenconfig{memory};
-		my $image  = $dest."/".$name->{systemImage};
+		my $image  = $name->{systemImage};
 		$part =~ s/\/dev\///;
 		print FD '#  -*- mode: python; -*-'."\n";
 		print FD 'kernel="'.$kernel.'"'."\n";
 		print FD 'ramdisk="'.$initrd.'"'."\n";
 		print FD 'memory='.$memory."\n";
 		print FD 'disk=[ "file:'.$image.','.$part.',w" ]'."\n";
-		print FD 'root="'.$device.' ro"'."\n";
+		print FD 'root="'.$part.' ro"'."\n";
 		print FD 'extra=" xencons=tty "'."\n";
 		close FD;
 		$kiwi -> done();
@@ -2691,6 +2691,7 @@ sub buildVMwareConfig {
 	my $name   = shift;
 	my $vmwref = shift;
 	my $kiwi   = $this->{kiwi};
+	my $arch   = $this->{arch};
 	my $file   = $dest."/".$name->{systemImage}.".vmx";
 	my %vmwconfig = %{$vmwref};
 	$kiwi -> info ("Creating image VMware configuration file...");
@@ -2708,13 +2709,30 @@ sub buildVMwareConfig {
 	}
 	my $device = $vmwconfig{disk};
 	my $memory = $vmwconfig{memory};
-	my $image  = $dest."/".$name->{systemImage};
+	my $image  = $name->{systemImage};
+	my $cdraw  = "ide1";
+	if ($device =~ /^ide/) {
+		my $id = chop $cdraw;
+		if ($id == 0) {
+			$cdraw.= 1;
+		} else {
+			$cdraw.= 0;
+		}
+	}
 	# General...
 	print FD '#!/usr/bin/vmware'."\n";
 	print FD 'config.version = "8"'."\n";
-	print FD 'virtualHW.version = "3"'."\n";
+	if ($vmwconfig{hwver}) {
+		print FD 'virtualHW.version = "'.$vmwconfig{hwver}.'"'."\n";
+	} else {
+		print FD 'virtualHW.version = "3"'."\n";
+	}
 	print FD 'memsize = "'.$memory.'"'."\n";
-	print FD 'guestOS = "Linux"'."\n";
+	if ($vmwconfig{guestOS}) {
+		print FD 'guestOS = "'.$vmwconfig{guestOS}.'"'."\n";
+	} else {
+		print FD 'guestOS = "Linux"'."\n";
+	}
 	print FD 'displayName = "'.$name->{systemImage}.'"'."\n";
 	if ($device =~ /^ide/) {
 		# IDE Interface...
@@ -2730,22 +2748,27 @@ sub buildVMwareConfig {
 		print FD $device.':0.fileName = "'.$image.'"'."\n";
 		print FD $device.':0.deviceType = "scsi-hardDisk"'."\n";
 	}
-	# Floppy...
-	print FD 'floppy0.fileName = "/dev/fd0"'."\n";
-	# Network...
-	print FD 'Ethernet0.present = "true"'."\n";
-	print FD 'ethernet0.addressType = "generated"'."\n";
-	print FD 'ethernet0.generatedAddress = "00:0c:29:13:ea:50"'."\n";
-	print FD 'ethernet0.generatedAddressOffset = "0"'."\n";
+	# CDrom...
+	print FD $cdraw.':0.present = "true"'."\n";
+	print FD $cdraw.':0.deviceType = "cdrom-raw"'."\n";
+	print FD $cdraw.':0.autodetect = "true"'."\n";
+	print FD $cdraw.':0.startConnected = "true"'."\n";
+	# Network / requires vmware tools to be installed...
+	print FD 'ethernet0.present = "true"'."\n";
+	print FD 'ethernet0.virtualDev = "vmxnet"'."\n";
+	if ($arch =~ /64$/) {
+		print FD 'ethernet0.allow64bitVmxnet = "true"'."\n";
+	}
+	print FD 'ethernet0.connectionType = "bridged"'."\n";
 	# USB...
 	print FD 'usb.present = "true"'."\n";
 	# Power management...
 	print FD 'priority.grabbed = "normal"'."\n";
 	print FD 'priority.ungrabbed = "normal"'."\n";
-	print FD 'powerType.powerOff = "hard"'."\n";
-	print FD 'powerType.powerOn  = "hard"'."\n";
-	print FD 'powerType.suspend  = "hard"'."\n";
-	print FD 'powerType.reset    = "hard"'."\n";
+	print FD 'powerType.powerOff = "soft"'."\n";
+	print FD 'powerType.powerOn  = "soft"'."\n";
+	print FD 'powerType.suspend  = "soft"'."\n";
+	print FD 'powerType.reset    = "soft"'."\n";
 	close FD;
 	$kiwi -> done();
 	return $dest;

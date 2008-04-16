@@ -48,7 +48,7 @@ sub new {
 	#==========================================
 	# Object setup
 	#------------------------------------------
-	my ($class,$testpathname,$chroot,$schema,$tmpdir)  = @_;
+	my ($class,$testpathname,$chroot,$schema,$manager,$tmpdir)  = @_;
 	my $self = {};
 	if (!defined $tmpdir) {
 		$tmpdir = "/tmp";
@@ -62,6 +62,11 @@ sub new {
 	if (!defined $chroot) {
 		return undef;
 	}
+	if (!defined $manager) {
+		return undef;
+	}
+	$manager -> switchToChroot();
+	$self->{MANAGER}=$manager;
 	$self->{CHROOT_TMP}=$tmpdir;
 	$self->{CHROOT}=$chroot;
 	$self->{TEST_PATH}=$testpathname;
@@ -207,12 +212,20 @@ sub checkRequirements {
 		my $reqpathname=$self->{CHROOT}.$reqrelpathname;
 		my $ok=0;
 		if  ($type eq 'file') {
-			#test file existence (link, file (bin or plain)
+			# test file existence (link, file (bin or plain)
 			if (-f $reqpathname) {$ok=1;}
 			if (-l $reqpathname) {$ok=2;}
 		} elsif ($type eq 'directory') {
+			# test directory existence
 			if (-d $reqpathname) {$ok=3;}
-		}  
+		} elsif ($type eq 'package') {
+			# test if rpm package is present in chroot
+			my $manager = $self->{MANAGER};
+			if (! $manager -> setupPackageInfo ( $reqrelpathname )) {
+				# package is installed...
+				$ok = 4;
+			}
+		}
 		if ($ok==0) {
 			my $result=KIWITestResult->new();
 			$result->setCommand("requirements test (in '$self->{CHROOT}')");
