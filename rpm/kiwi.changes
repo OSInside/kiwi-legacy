@@ -21,6 +21,7 @@ Tue Apr 15 16:15:05 CEST 2008 - ms@suse.de
   changed testing attribute to testsuite
 - removed xsd documentation as kiwi uses relaxNG schema
   definitions. maintain kiwi.rng.html for the future
+- added LSB check by Pavel Nemec <pnemec@suse.cz>
 
 -------------------------------------------------------------------
 Tue Apr 15 16:01:27 CEST 2008 - coolo@suse.de
