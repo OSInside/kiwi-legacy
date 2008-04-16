@@ -521,7 +521,7 @@ if [ $LOCAL_BOOT = "no" ];then
 					#--------------------------------------
 					for cmd in \
 						d n p 2 1 +"$disk1MBytes"M \
-						n p 1 . +"$swapsize"M \
+						n p 1 . . \
 						t 1 82 w
 					do
 						if [ $cmd = "." ];then

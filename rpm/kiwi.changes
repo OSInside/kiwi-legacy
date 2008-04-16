@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Apr 16 17:24:03 CEST 2008 - ms@suse.de
+
+- fixed unused space in repartition code (bnc #380063)
+
+-------------------------------------------------------------------
 Tue Apr 15 16:15:05 CEST 2008 - ms@suse.de
 
 - added grub information into logfile, check grub status
