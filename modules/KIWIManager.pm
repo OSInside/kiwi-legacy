@@ -265,7 +265,13 @@ sub setupScreenCall {
 	if ($code != 0) {
 		$kiwi -> failed ();
 		if (($logs) && ($data)) {
-			$kiwi -> error ($data);
+			my @lines = split ("\n",$data);
+			@lines = @lines[-10,-9,-8,-7,-6,-5,-4,-3,-2,-1];
+			unshift (@lines,"[*** log excerpt follows ***]");
+			push    (@lines,"[*** end ***]\n");
+			$data = join ("\n",@lines);
+			printf STDERR $data;
+			$kiwi -> doNorm();
 		}
 		$this -> resetInstallationSource();
 		return undef;
