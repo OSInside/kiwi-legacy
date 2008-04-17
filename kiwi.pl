@@ -464,7 +464,9 @@ sub main {
 		# Check for bootprofile in config.xml
 		#------------------------------------------
 		if (! @Profiles) {
-			my $xml = new KIWIXML ($kiwi,"$Create/image",undef,$SetImageType);
+			my $xml = new KIWIXML (
+				$kiwi,"$Create/image",\%ForeignRepo,$SetImageType
+			);
 			my %type = %{$xml->getImageTypeAndAttributes()};
 			if (($type{"type"} eq "cpio") && ($type{bootprofile})) {
 				@Profiles = split (/,/,$type{bootprofile});
