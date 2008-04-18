@@ -12,7 +12,7 @@ suseStripKernel
 #==========================================
 # setup gfxboot
 #------------------------------------------
-suseGFXBoot SuSE grub
+suseGFXBoot openSUSE grub
 
 #==========================================
 # remove unneeded packages

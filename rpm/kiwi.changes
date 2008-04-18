@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Apr 18 12:07:04 CEST 2008 - ms@suse.de
+
+- fixed initial environment setup (bnc #381232)
+- changed gfxboot theme name from SuSE to openSUSE (bnc #381152)
+
+-------------------------------------------------------------------
 Thu Apr 17 10:17:30 CEST 2008 - ms@suse.de
 
 - fixed missing %ForeignRepo information used for rebuilding

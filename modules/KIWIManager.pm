@@ -765,6 +765,7 @@ sub installPackages {
 		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 		print $fd "trap clean INT TERM\n";
 		print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
+		print $fd "export YAST_IS_RUNNING=true\n";
 		print $fd "chroot $root @zypper refresh & ";
 		print $fd "SPID=\$!;wait \$SPID\n";
 		print $fd "test \$? = 0 && chroot $root @zypper install ";
@@ -848,6 +849,7 @@ sub removePackages {
 		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 		print $fd "trap clean INT TERM\n";
 		print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
+		print $fd "export YAST_IS_RUNNING=true\n";
 		print $fd "chroot $root @zypper refresh & ";
 		print $fd "SPID=\$!;wait \$SPID\n";
 		print $fd "test \$? = 0 && chroot $root @zypper remove ";
@@ -935,6 +937,7 @@ sub setupUpgrade {
 		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 		print $fd "trap clean INT TERM\n";
 		print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
+		print $fd "export YAST_IS_RUNNING=true\n";
 		if (defined $addPacks) {
 			my @addonPackages = @{$addPacks};
 			my @newpatts = ();
@@ -1117,6 +1120,7 @@ sub setupRootSystem {
 			print $fd "echo 1 > $screenCall.exit; rm -f $lock; exit 1; }\n";
 			print $fd "trap clean INT TERM\n";
 			print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
+			print $fd "export YAST_IS_RUNNING=true\n";
 			print $fd "touch $lock\n";
 			if (@packs) {
 				print $fd "@zypper --root $root install ";
@@ -1167,6 +1171,7 @@ sub setupRootSystem {
 			print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 			print $fd "trap clean INT TERM\n";
 			print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
+			print $fd "export YAST_IS_RUNNING=true\n";
 			if (@install) {
 				print $fd "chroot $root @zypper install ";
 				print $fd "@installOpts @install &\n";
