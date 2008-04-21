@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Mon Apr 21 10:55:03 CEST 2008 - ms@suse.de
 
+- added libxslt requirement for use of xsltproc (bnc #381355)
 - fixed gfxboot setup for openSUSE 11.0 (bnc #381152)
 - added KIWITest patches from Pavel Sladek <psladek@suse.cz>
   * scripts are now made executable before they are run

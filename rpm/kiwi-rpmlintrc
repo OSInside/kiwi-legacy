@@ -1,2 +1,8 @@
+# kiwi needs xsltproc to convert older config.xml files to the current schema
+addFilter("explicit-lib-dependency libxslt")
+
+# kiwi includes hidden md5 sums for its boot images
 addFilter(" hidden-file-or-dir /usr/share/kiwi/image/.*\/\.checksum.md5")
+
+# kiwi includes the SVN revision of this build as hidden file
 addFilter(" hidden-file-or-dir /usr/share/kiwi/.revision")

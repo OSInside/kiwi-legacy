@@ -35,7 +35,7 @@ Requires:       qt
 %endif
 Requires:       perl = %{perl_version}
 Requires:       perl-XML-LibXML perl-libwww-perl screen coreutils
-Requires:       kiwi-tools
+Requires:       kiwi-tools libxslt
 Summary:        OpenSuSE - KIWI Image System
 Provides:       kiwi2 = 2.14
 Obsoletes:      kiwi2 = 2.14
