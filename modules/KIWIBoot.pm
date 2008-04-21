@@ -65,9 +65,11 @@ sub new {
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
-	my $syszip = 0;
-	my $sysird = 0;
-	my $zipped = 0;
+	my $syszip    = 0;
+	my $sysird    = 0;
+	my $zipped    = 0;
+	my $loopfound = 0;
+	my $loop      = "/dev/loop0";
 	my $vmmbyte;
 	my $kernel;
 	my $knlink;
@@ -170,6 +172,12 @@ sub new {
 		return undef;
 	}
 	#==========================================
+	# Store object data (1)
+	#------------------------------------------
+	$this->{tmpdir} = $tmpdir;
+	$this->{loopdir}= $loopdir;
+
+	#==========================================
 	# setup pointer to XML configuration
 	#------------------------------------------
 	if (defined $system) {
@@ -177,24 +185,106 @@ sub new {
 			$xml = new KIWIXML ($kiwi,$system."/image");
 		} else {
 			my %fsattr = main::checkFileSystem ($system);
-			$status = qxx (
-				"mount -t $fsattr{type} -o loop $system $tmpdir 2>&1"
-			);
-			$result = $? >> 8;
-			if ($result != 0) {
-				$kiwi -> error ("Failed to loop mount system image: $status");
-				$kiwi -> failed ();
-				$this -> cleanTmp ();
-				return undef;
-			}
-			$xml = new KIWIXML ( $kiwi,$tmpdir."/image");
-			$status = qxx ("umount $tmpdir 2>&1");
-			$result = $? >> 8;
-			if ($result != 0) {
-				$kiwi -> error ("Failed to umount system image: $status");
-				$kiwi -> failed ();
-				$this -> cleanTmp ();
-				return undef;
+			if (! $fsattr{type}) {
+				#==========================================
+				# search free loop device
+				#------------------------------------------
+				$kiwi -> info ("Searching for free loop device...");
+				for (my $id=0;$id<=7;$id++) {
+					$status = qxx ( "/sbin/losetup /dev/loop$id 2>&1" );
+					$result = $? >> 8;
+					if ($result eq 1) {
+						$loopfound = 1;
+						$loop = "/dev/loop".$id;
+						$this->{loop} = $loop;
+						last;
+					}
+				}
+				if (! $loopfound) {
+					$kiwi -> failed ();
+					$kiwi -> error  ("Couldn't find free loop device");
+					$kiwi -> failed ();
+					$this -> cleanTmp ();
+					return undef;
+				}
+				$kiwi -> done();
+				#==========================================
+				# bind $system to loop device
+				#------------------------------------------
+				$kiwi -> info ("Binding virtual disk to loop device");
+				$status = qxx ( "/sbin/losetup $loop $system 2>&1" );
+				$result = $? >> 8;
+				if ($result != 0) {
+					$kiwi -> failed ();
+					$kiwi -> error  ("Failed binding virtual disk: $status");
+					$kiwi -> failed ();
+					$this -> cleanTmp ();
+					return undef;
+				}
+				$kiwi -> done();
+				#==========================================
+				# setup device mapper
+				#------------------------------------------
+				$kiwi -> info ("Setup device mapper for ISO install image");
+				$status = qxx ( "/sbin/kpartx -a $loop 2>&1" );
+				$result = $? >> 8;
+				if ($result != 0) {
+					$kiwi -> failed ();
+					$kiwi -> error  ("Failed mapping vpartitions: $status");
+					$kiwi -> failed ();
+					$this -> cleanLoop ();
+					return undef;
+				}
+				$kiwi -> done();
+				#==========================================
+				# find partition and mount it
+				#------------------------------------------
+				my $dmap = $loop; $dmap =~ s/dev\///;
+				my $sdev = "/dev/mapper".$dmap."p2";
+				if (! -e $sdev) {
+					$sdev = "/dev/mapper".$dmap."p1";
+				}
+				%fsattr = main::checkFileSystem ($sdev);
+				$status = qxx ("mount -t $fsattr{type} $sdev $tmpdir 2>&1");
+				$result = $? >> 8;
+				if ($result != 0) {
+					$kiwi -> error ("System image mount failed: $status");
+					$kiwi -> failed ();
+					$this -> cleanLoop ();
+					return undef;
+				}
+				#==========================================
+				# read disk image XML description
+				#------------------------------------------
+				$xml = new KIWIXML ( $kiwi,$tmpdir."/image");
+				#==========================================
+				# clean up
+				#------------------------------------------
+				qxx ("umount $tmpdir 2>&1");
+				qxx ("kpartx -d $loop");
+				qxx ("losetup -d $loop");
+			} else {
+				#==========================================
+				# loop mount system image
+				#------------------------------------------
+				$status = qxx (
+					"mount -t $fsattr{type} -o loop $system $tmpdir 2>&1"
+				);
+				$result = $? >> 8;
+				if ($result != 0) {
+					$kiwi -> error ("Loop mount failed: $system : $status");
+					$kiwi -> failed ();
+					$this -> cleanTmp ();
+					return undef;
+				}
+				#==========================================
+				# read disk image XML description
+				#------------------------------------------
+				$xml = new KIWIXML ( $kiwi,$tmpdir."/image");
+				#==========================================
+				# clean up
+				#------------------------------------------
+				qxx ("umount $tmpdir 2>&1");
 			}
 		}
 		if (! defined $xml) {
@@ -261,14 +351,12 @@ sub new {
 	#------------------------------------------
 	my $arch = qxx ("uname -m"); chomp $arch;
 	#==========================================
-	# Store object data
+	# Store object data (2)
 	#------------------------------------------
 	$this->{kiwi}   = $kiwi;
 	$this->{initrd} = $initrd;
 	$this->{system} = $system;
 	$this->{kernel} = $kernel;
-	$this->{tmpdir} = $tmpdir;
-	$this->{loopdir}= $loopdir;
 	$this->{vmmbyte}= $vmmbyte;
 	$this->{vmsize} = $vmsize;
 	$this->{syszip} = $syszip;
