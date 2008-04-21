@@ -1584,6 +1584,7 @@ sub quit {
 	}
 	if (defined $image) {
 		$image -> cleanMount ();
+		$image -> restoreCDRootData ();
 		$image -> restoreSplitExtend ();
 	}
 	if (defined $migrate) {

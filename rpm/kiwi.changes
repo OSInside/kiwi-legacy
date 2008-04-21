@@ -1,6 +1,8 @@
 -------------------------------------------------------------------
 Mon Apr 21 10:55:03 CEST 2008 - ms@suse.de
 
+- fixed use of CD root script and tarball, don't let them to
+  be part of the resulting image file (bnc #381247)
 - added libxslt requirement for use of xsltproc (bnc #381355)
 - fixed gfxboot setup for openSUSE 11.0 (bnc #381152)
 - added KIWITest patches from Pavel Sladek <psladek@suse.cz>

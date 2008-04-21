@@ -755,6 +755,20 @@ sub createImageLiveCD {
 		return undef;
 	}
 	#==========================================
+	# Check for config-cdroot and move it
+	#------------------------------------------
+	my $cdrootData = "config-cdroot.tgz";
+	if (-f $imageTree."/image/".$cdrootData) {
+		qxx ("mv $imageTree/image/$cdrootData $imageDest");
+	}
+	#==========================================
+	# Check for config-cdroot.sh and move it
+	#------------------------------------------
+	my $cdrootScript = "config-cdroot.sh";
+	if (-x $imageTree."/image/".$cdrootScript) {
+		qxx ("mv $imageTree/image/$cdrootScript $imageDest");
+	}
+	#==========================================
 	# split physical extend into RW / RO part
 	#------------------------------------------
 	if (! defined $gzip) {
@@ -769,6 +783,7 @@ sub createImageLiveCD {
 				$kiwi -> failed ();
 				$kiwi -> error  ("Couldn't create ro directory: $error");
 				$kiwi -> failed ();
+				$this -> restoreCDRootData();
 				return undef;
 			}
 			my @rodirs = qw (bin boot lib opt sbin usr);
@@ -779,6 +794,7 @@ sub createImageLiveCD {
 					$kiwi -> failed ();
 					$kiwi -> error  ("Couldn't setup ro directory: $data");
 					$kiwi -> failed ();
+					$this -> restoreCDRootData();
 					return undef;
 				}
 			}
@@ -796,6 +812,7 @@ sub createImageLiveCD {
 		#------------------------------------------
 		$kiwi -> info ("Image RW part requires $mbytesrw MB of disk space");
 		if (! $this -> buildLogicalExtend ($namerw,$mbytesrw."M")) {
+			$this -> restoreCDRootData();
 			$this -> restoreSplitExtend ();
 			return undef;
 		}
@@ -804,6 +821,7 @@ sub createImageLiveCD {
 		# Create EXT2 filesystem on RW extend
 		#------------------------------------------
 		if (! $this -> setupEXT2 ( $namerw,$imageTree )) {
+			$this -> restoreCDRootData();
 			$this -> restoreSplitExtend ();
 			return undef;
 		}
@@ -812,6 +830,7 @@ sub createImageLiveCD {
 		#------------------------------------------
 		my $extend = $this -> mountLogicalExtend ($namerw);
 		if (! defined $extend) {
+			$this -> restoreCDRootData();
 			$this -> restoreSplitExtend ();
 			return undef;
 		}
@@ -819,6 +838,7 @@ sub createImageLiveCD {
 		# copy physical to logical
 		#------------------------------------------
 		if (! $this -> installLogicalExtend ($extend,$imageTree)) {
+			$this -> restoreCDRootData();
 			$this -> restoreSplitExtend ();
 			return undef;
 		}
@@ -830,12 +850,14 @@ sub createImageLiveCD {
 	if (defined $gzip) {
 		if ($gzip eq "compressed") {
 			if (! $this -> createImageSplit ("ext3,squashfs", 1)) {
+				$this -> restoreCDRootData();
 				return undef;
 			}
 			$namero = $namerw;
 		} else {
 			$kiwi -> info ("Creating compressed read only filesystem...");
 			if (! $this -> setupSquashFS ( $namero,$imageTree )) {
+				$this -> restoreCDRootData();
 				$this -> restoreSplitExtend ();
 				return undef;
 			}
@@ -855,6 +877,7 @@ sub createImageLiveCD {
 		# Create image md5sum
 		#------------------------------------------
 		if (! $this -> buildMD5Sum ($namerw)) {
+			$this -> restoreCDRootData();
 			$this -> restoreSplitExtend ();
 			return undef;
 		}
@@ -862,12 +885,14 @@ sub createImageLiveCD {
 		# Restoring physical extend
 		#------------------------------------------
 		if (! $this -> restoreSplitExtend ()) {
+			$this -> restoreCDRootData();
 			return undef;
 		}
 		#==========================================
 		# compress RW extend
 		#------------------------------------------
 		if (! $this -> compressImage ($namerw)) {
+			$this -> restoreCDRootData();
 			return undef;
 		}
 	}
@@ -883,6 +908,7 @@ sub createImageLiveCD {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't create ro directory: $error");
 			$kiwi -> failed ();
+			$this -> restoreCDRootData();
 			return undef;
 		}
 		my @rodirs = qw (bin boot lib opt sbin usr);
@@ -893,6 +919,7 @@ sub createImageLiveCD {
 				$kiwi -> failed ();
 				$kiwi -> error  ("Couldn't setup ro directory: $data");
 				$kiwi -> failed ();
+				$this -> restoreCDRootData();
 				return undef;
 			}
 		}
@@ -906,6 +933,7 @@ sub createImageLiveCD {
 	my $xml = new KIWIXML ( $kiwi,$Prepare );
 	if (! defined $xml) {
 		qxx ("rm -rf $imageTreeReadOnly");
+		$this -> restoreCDRootData();
 		return undef;
 	}
 	my $tmpdir = qxx (" mktemp -q -d /tmp/kiwi-cdboot.XXXXXX "); chomp $tmpdir;
@@ -913,6 +941,7 @@ sub createImageLiveCD {
 	if ($result != 0) {
 		$kiwi -> error  ("Couldn't create tmp dir: $tmpdir: $!");
 		$kiwi -> failed ();
+		$this -> restoreCDRootData();
 		return undef;
 	}
 	$main::Survive  = "yes";
@@ -993,6 +1022,7 @@ sub createImageLiveCD {
 				qxx ("rm -rf $tmpdir");
 				qxx ("rm -rf $imageTreeReadOnly");
 			}
+			$this -> restoreCDRootData();
 			return undef;
 		}
 	}
@@ -1008,11 +1038,10 @@ sub createImageLiveCD {
 	#==========================================
 	# Check for optional config-cdroot archive
 	#------------------------------------------
-	my $cdrootData = $imageTree."/image/config-cdroot.tgz";
-	if (-f $cdrootData) {
+	if (-f $imageDest."/".$cdrootData) {
 		$kiwi -> info ("Integrating CD root information...");
-		my $data = qxx ("tar -C $main::RootTree/CD -xvf $cdrootData");
-		my $code = $? >> 8;
+		my $data= qxx ("tar -C $main::RootTree/CD -xvf $imageDest/$cdrootData");
+		my $code= $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Failed to integrate CD root data: $data");
@@ -1022,21 +1051,7 @@ sub createImageLiveCD {
 				qxx ("rm -rf $tmpdir");
 				qxx ("rm -rf $imageTreeReadOnly");
 			}
-			return undef;
-		}
-		$kiwi -> done();
-		$kiwi -> info ("Removing CD root tarball from system image");
-		$data = qxx ("rm $cdrootData");
-		$code = $? >> 8;
-		if ($code != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ($data);
-			$kiwi -> failed ();
-			if (! -d $main::RootTree.$baseSystem) {
-				qxx ("rm -rf $main::RootTree");
-				qxx ("rm -rf $tmpdir");
-				qxx ("rm -rf $imageTreeReadOnly");
-			}
+			$this -> restoreCDRootData();
 			return undef;
 		}
 		$kiwi -> done();
@@ -1044,20 +1059,20 @@ sub createImageLiveCD {
 	#==========================================
 	# Check for optional config-cdroot.sh
 	#------------------------------------------
-	$cdrootData = $imageTree."/image/config-cdroot.sh";
-	if (-x $cdrootData) {
+	if (-x $imageDest."/".$cdrootScript) {
 		$kiwi -> info ("Calling CD root setup script...");
 		my $pwd = qxx ("pwd"); chomp $pwd;
 		my $cdrootEnv = $imageTree."/.profile";
 		if ($cdrootEnv !~ /^\//) {
 			$cdrootEnv = $pwd."/".$cdrootEnv;
 		}
-		if ($cdrootData !~ /^\//) {
-			$cdrootData = $pwd."/".$cdrootData;
+		my $script = $imageDest."/".$cdrootScript;
+		if ($script !~ /^\//) {
+			$script = $pwd."/".$script;
 		}
 		my $CCD  = "$main::RootTree/CD";
-		my $data = qxx ("
-			cd $CCD && bash -c '. $cdrootEnv && . $cdrootData' 2>&1"
+		my $data = qxx (
+			"cd $CCD && bash -c '. $cdrootEnv && . $script' 2>&1"
 		);
 		my $code = $? >> 8;
 		if ($code != 0) {
@@ -1070,25 +1085,18 @@ sub createImageLiveCD {
 				qxx ("rm -rf $tmpdir");
 				qxx ("rm -rf $imageTreeReadOnly");
 			}
+			$this -> restoreCDRootData();
 			return undef;
-		}
-		$kiwi -> done();
-		$kiwi -> info ("Removing CD root setup script from system image");
-		$data = qxx ("rm $cdrootData");
-		$code = $? >> 8;
-		if ($code != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ($data);
-			$kiwi -> failed ();
-			if (! -d $main::RootTree.$baseSystem) {
-				qxx ("rm -rf $main::RootTree");
-				qxx ("rm -rf $tmpdir");
-				qxx ("rm -rf $imageTreeReadOnly");
-			}
-			return undef;
+		} else {
+			$kiwi -> loginfo ("config-cdroot.sh: $data");
 		}
 		$kiwi -> done();
 	}
+	#==========================================
+	# Restore CD root data and script
+	#------------------------------------------
+	$this -> restoreCDRootData();
+
 	#==========================================
 	# Installing second stage images
 	#------------------------------------------
@@ -2802,6 +2810,23 @@ sub buildMD5Sum {
 	qxx ("echo \"$sum $blocks $blocksize\" > $imageDest/$name.md5");
 	$kiwi -> done();
 	return $name;
+}
+
+#==========================================
+# restoreCDRootData
+#------------------------------------------
+sub restoreCDRootData {
+	my $this = shift;
+	my $imageTree    = $this->{imageTree};
+	my $imageDest    = $this->{imageDest};
+	my $cdrootData   = "config-cdroot.tgz";
+	my $cdrootScript = "config-cdroot.sh";
+	if (-f $imageDest."/".$cdrootData) {
+		qxx ("mv $imageDest/$cdrootData $imageTree/image");
+	}
+	if (-f $imageDest."/".$cdrootScript) {
+		qxx ("mv $imageDest/$cdrootScript $imageTree/image");
+	}
 }
 
 #==========================================
