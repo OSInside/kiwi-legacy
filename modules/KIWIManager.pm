@@ -323,7 +323,7 @@ sub setupSignatureCheck {
 				$this -> freeLock();
 			} else {
 				$kiwi -> info ("Setting RPM signature check to: $imgCheckSig");
-				$data = qxx ("chroot $root smart config --set $option 2>&1");
+				$data = qxx ("chroot \"$root\" smart config --set $option 2>&1");
 			}
 			$code = $? >> 8;
 			if ($code != 0) {
@@ -382,7 +382,7 @@ sub resetSignatureCheck {
 				$this -> freeLock();
 			} else {
 				$kiwi -> info ("Reset RPM signature check to: $curCheckSig");
-				$data = qxx ("chroot $root smart config --set $option 2>&1");
+				$data = qxx ("chroot \"$root\" smart config --set $option 2>&1");
 			}
 			$code = $? >> 8;
 			if ($code != 0) {
@@ -454,7 +454,7 @@ sub setupInstallationSource {
 				$this -> freeLock();
 			} else {
 				$kiwi -> info ("Adding image smart channel: $chl");
-				$data = qxx ("chroot $root $cmds $chl @opts 2>&1");
+				$data = qxx ("chroot \"$root\" $cmds $chl @opts 2>&1");
 				$code = $? >> 8;
 			}
 			if ($code != 0) {
@@ -510,12 +510,12 @@ sub setupInstallationSource {
 				$this -> checkExclusiveLock();
 				$this -> setLock();
 				$kiwi -> info ("Adding local zypper service: $alias");
-				$data = qxx ("@zypper --root $root $sadd 2>&1");
+				$data = qxx ("@zypper --root \"$root\" $sadd 2>&1");
 				$code = $? >> 8;
 				$this -> freeLock();
 			} else {
 				$kiwi -> info ("Adding image zypper service: $alias");
-				$data = qxx ("chroot $root @zypper $sadd 2>&1");
+				$data = qxx ("chroot \"$root\" @zypper $sadd 2>&1");
 				$code = $? >> 8;
 			}
 			if ($code != 0) {
@@ -574,7 +574,7 @@ sub resetInstallationSource {
 			$this -> freeLock();
 		} else {
 			$kiwi -> info ("Removing smart channel(s): @channelList");
-			$data = qxx ("chroot $root $cmds @list -y 2>&1");
+			$data = qxx ("chroot \"$root\" $cmds @list -y 2>&1");
 			$code = $? >> 8;
 		}
 		if ($code != 0) {
@@ -608,7 +608,7 @@ sub resetInstallationSource {
 		} else {
 			$kiwi -> info ("Removing zypper service(s): @channelList");
 			foreach my $chl (@list) {
-				$data = qxx ("chroot $root bash -c \"$cmds $chl 2>&1\"");
+				$data = qxx ("chroot \"$root\" bash -c \"$cmds $chl 2>&1\"");
 				$code = $? >> 8;
 				if ($code != 0) {
 					last;
@@ -1043,7 +1043,7 @@ sub setupRootSystem {
 		} else {
 			$kiwi -> info ("Checking for already installed packages...");
 			my $querypack = "smart query '*' --installed --hide-version";
-			my @installed = qxx (" chroot $root $querypack 2>/dev/null");
+			my @installed = qxx (" chroot \"$root\" $querypack 2>/dev/null");
 			chomp ( @installed );
 			my @install   = ();
 			foreach my $need (@packs) {
@@ -1140,7 +1140,7 @@ sub setupRootSystem {
 		} else {
 			$kiwi -> info ("Checking for already Installed image packages...");
 			my $querypack = "rpm -qa --qf %'{NAME}\\n'";
-			my @installed = qxx ("chroot $root $querypack 2>/dev/null");
+			my @installed = qxx ("chroot \"$root\" $querypack 2>/dev/null");
 			chomp ( @installed );
 			my @install   = ();
 			my @newpatts  = ();
@@ -1257,7 +1257,7 @@ sub restorePackageManagerCache {
 	if ($manager eq "smart") {
 		$cache = $root.".cache";
 		if ((-d $cache) && (-d "$root/var/lib/smart")) {
-			qxx ("mv $cache $root/var/lib/smart/packages 2>&1");
+			qxx ("mv $cache \"$root/var/lib/smart/packages\" 2>&1");
 		} else {
 			qxx ("rm -rf $cache");
 		}
@@ -1358,7 +1358,7 @@ sub setupPackageInfo {
 		} else {
 			$kiwi -> info ("Checking for package: $pack");
 			$data = qxx (
-				"chroot $root smart query --installed $pack 2>/dev/null"
+				"chroot \"$root\" smart query --installed $pack 2>/dev/null"
 			);
 			$code = $? >> 8;
 		}
@@ -1385,12 +1385,12 @@ sub setupPackageInfo {
 			$this -> checkExclusiveLock();
 			$kiwi -> info ("Checking for package: $pack");
 			$this -> setLock();
-			$data = qxx (" rpm -q $pack 2>&1 ");
+			$data = qxx (" rpm -q \"$pack\" 2>&1 ");
 			$code = $? >> 8;
 			$this -> freeLock();
 		} else {
 			$kiwi -> info ("Checking for package: $pack");
-			$data= qxx ("chroot $root rpm -q $pack 2>&1 ");
+			$data= qxx ("chroot \"$root\" rpm -q \"$pack\" 2>&1 ");
 			$code= $? >> 8;
 		}
 		if ($code != 0) {

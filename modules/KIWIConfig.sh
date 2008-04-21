@@ -684,7 +684,7 @@ function suseGFXBoot {
 	sname[1]="10240768.spl"
 	sname[2]="12801024.spl"
 	index=0
-	if [ ! $theme = "SuSE" ];then
+	if [ ! -d /etc/bootsplash/themes/$theme ];then
 		theme="SuSE-$theme"
 	fi
 	mkdir /image/loader/branding

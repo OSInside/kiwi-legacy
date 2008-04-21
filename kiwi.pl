@@ -786,6 +786,7 @@ sub main {
 					my $cmd    = $scriptResult -> getCommand();
 					my $txtmsg = $scriptResult -> getMessage();
 					my $errno  = $scriptResult -> getErrorState();
+					$txtmsg    = "      ".$txtmsg."\n";
 					$kiwi -> note ($txtmsg);
 				}
 			}

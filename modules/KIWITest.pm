@@ -38,7 +38,7 @@ our @EXPORT	= (
 );
 
 #==========================================
-# onstructor
+# constructor
 #------------------------------------------
 sub new {
 	# ...
@@ -53,7 +53,7 @@ sub new {
 	if (!defined $tmpdir) {
 		$tmpdir = "/tmp";
 	}
-	if ((!defined $schema) || (! -f $schema)) {
+	if (!defined $schema) {
 		return undef;
 	}
 	if (!defined $testpathname)	{
@@ -67,9 +67,9 @@ sub new {
 	}
 	$manager -> switchToChroot();
 	$self->{MANAGER}=$manager;
-	$self->{CHROOT_TMP}=$tmpdir;
-	$self->{CHROOT}=$chroot;
-	$self->{TEST_PATH}=$testpathname;
+	$self->{CHROOT_TMP}=trimpath ($tmpdir);
+	$self->{CHROOT}=trimpath ($chroot);
+	$self->{TEST_PATH}=trimpath ($testpathname);
 	if ($self->{TEST_PATH}=~m@^(.*)/(.*?)$@) {
 		$self->{DNAME}=$2;
 		$self->{TEST_BASE_PATH}=$1;
@@ -98,6 +98,7 @@ sub new {
 #------------------------------------------
 sub trimpath {
 	my ($path)=@_;
+	$path=~s@"@@g;
 	$path=~s@/+@/@g;
 	$path=~s@/$@@g;
 	return $path;
@@ -202,22 +203,36 @@ sub checkRequirements {
 	# ---
 	my ($self) = @_;
 	my $output='';
+	my $cmd;
+	my $errvalue;	
 	my @results=();
 	my $result=KIWITestResult->new();  #one result for all requirements
 	my @reqs= $self->{XML_ROOT_NODE} -> getChildrenByTagName ('requirements')
 		-> get_node(1) -> getChildrenByTagName ('req');
 	foreach my $req (@reqs) {
 		my $type=$req->getAttribute('type');
+		my $place=$req->getAttribute('place');
 		my $reqrelpathname=$req->textContent;
-		my $reqpathname=$self->{CHROOT}.$reqrelpathname;
+		my $reqpathname;
+		my $manager = $self->{MANAGER};
+		if ($place eq 'extern') {
+			$manager -> switchToLocal();
+			$reqpathname=$reqrelpathname;
+			$errvalue=1;
+		} elsif ($place eq 'intern') { 
+			$manager -> switchToChroot();
+			$reqpathname=trimpath($self->{CHROOT}."/".$reqrelpathname);
+			$errvalue=2;
+		} 
 		my $ok=0;
 		if  ($type eq 'file') {
-			# test file existence (link, file (bin or plain)
+			#test file existence (link, file (bin or plain)
 			if (-f $reqpathname) {$ok=1;}
 			if (-l $reqpathname) {$ok=2;}
 		} elsif ($type eq 'directory') {
 			# test directory existence
 			if (-d $reqpathname) {$ok=3;}
+		
 		} elsif ($type eq 'package') {
 			# test if rpm package is present in chroot
 			my $manager = $self->{MANAGER};
@@ -226,12 +241,22 @@ sub checkRequirements {
 				$ok = 4;
 			}
 		}
+				
 		if ($ok==0) {
 			my $result=KIWITestResult->new();
-			$result->setCommand("requirements test (in '$self->{CHROOT}')");
-			$output=sprintf("missing %-10s  $reqrelpathname","$type");
+			$cmd="requirements test of '$reqpathname'"; 
+			$result->setCommand($cmd);
+			my $info;  #different message format for different requirement types
+			if ($type eq 'package') {
+				$info=sprintf("\"$reqrelpathname\"  ($place%s) ",
+					($place eq 'intern') ? ", in \"$self->{CHROOT}\"" : ''
+				);
+			} else {
+				$info=qq("$reqpathname");
+			}
+			$output=sprintf("missing %-10s  $info",$type );
 			$result->setMessage($output);
-			$result->setErrorState(1);
+			$result->setErrorState($errvalue);
 			$self->{TEST_RESULT_STATUS}=1;
 			@results=(@results,$result);
 		}
@@ -279,39 +304,53 @@ sub runTests {
 		$path=trimpath($path);
 		my $ok=0;
 		my $cmd;
-		if ($place eq 'extern') {  #run script directly
-			$cmd=$path."/".$file." $params 2>&1";
-			$output=`$cmd`;  #run the command
-			$returnvalue=$?;
-		}elsif ($place eq 'intern') { #copy and add chroot to cmd
-			$ok=1;
-			my $scrpathname=$path."/".$file;
-			my $chrootpath=trimpath($self->{CHROOT}.$self->{CHROOT_TMP});
-			my $chrootpathname=$chrootpath."/".$file;
-			my $o=`cp $scrpathname $chrootpath 2>&1`;
-			my $r=$?;
-			if ( $r ){ #couldn't copy 
-				$output=sprintf(
-					"error, copying of $scrpathname to $chrootpath failed:\n"
-				);
-				$output=$output.sprintf("$o\n");
-				$returnvalue=$r;
-			} else {
-				$cmd = "chroot ".$self->{CHROOT}." ".$self->{CHROOT_TMP}."/";
-				$cmd.= $file." ".$params." 2>&1";
-				$output=`$cmd`;
+		my $o;
+		my $r;
+		my $scrpathname="$path/$file";
+		$cmd = qq(chmod +x "$scrpathname" 2>&1);
+		$o=`$cmd`;
+		$r=$?;
+		if ( $r ){ #couldn't make test script executable
+			$output=sprintf(
+				"error, the '$scrpathname' cannot be set as executable:\n"
+			);
+			$output=$output.sprintf("$o\n");
+			$returnvalue=$r;
+		} else {
+			if ($place eq 'extern') {  #run script directly
+				$cmd=qq("$scrpathname" $params 2>&1);
+				$output=`$cmd`;  #run the command
 				$returnvalue=$?;
-			}
-			$o=`rm $chrootpathname 2>&1`;
-			$r=$?;
-			if ( $r ) { 
-				$output=$output.sprintf (
-					"\n%s can't delete file '$chrootpathname' afterwards: \n",
-					$returnvalue ? 'Also' : 'But'
-				);
-				$output=$output.sprintf("$o\n");
-				$output=$output.sprintf("=> failed.\n");
-				$returnvalue=$r;
+			}elsif ($place eq 'intern') { #copy and add chroot to cmd
+				$ok=1;
+				my $chrootpath=trimpath($self->{CHROOT}.$self->{CHROOT_TMP});
+				my $chrootpathname=trimpath($chrootpath."/".$file);
+				$cmd = qq(cp "$scrpathname" "$chrootpath" 2>&1);
+				$o=`$cmd`;
+				$r=$?;
+				if ( $r ){ #couldn't copy 
+					$output=sprintf(
+						"error, copying of $scrpathname to $chrootpath failed:\n"
+					);
+					$output=$output.sprintf("$o\n");
+					$returnvalue=$r;
+				} else {
+					$cmd = qq(chroot "$self->{CHROOT}" "$self->{CHROOT_TMP}/$file" $params 2>&1);
+					$output=`$cmd`;
+					$returnvalue=$?;
+				}
+				$cmd=qq(rm "$chrootpathname" 2>&1);
+				$o=`$cmd`;
+				$r=$?;
+				if ( $r ) { 
+					$output=$output.sprintf (
+						"\n%s can't delete file '$chrootpathname' afterwards: \n",
+						$returnvalue ? 'Also' : 'But'
+					);
+					$output=$output.sprintf("$o\n");
+					$output=$output.sprintf("=> failed.\n");
+					$returnvalue=$r;
+				}
 			}
 		}  
 		#process error status
@@ -319,9 +358,10 @@ sub runTests {
 			$output="failed to execute: $cmd\n";
 		} elsif ($returnvalue & 127) {
 			$output=sprintf(
-				"$cmd died with signal %d, %s coredump\n",
+				"$cmd died with signal %d, %s coredump: \n",
 				($returnvalue & 127), ($returnvalue & 128) ? 'with' : 'without'
 			);
+			$output=$output.sprintf("$o\n");
 		} else {
 			$returnvalue=$returnvalue>>8;
 		}
@@ -362,12 +402,12 @@ sub getOverallMessage {
 		$message.=$result->getMessage(); 
 		$message.="\n";
 	} elsif ($sta==2) {
-		# request failed
+		# requirements failed
 		my @results=@{$self->{TEST_RESULT}};
 		my $s="";
 		if (@results>1) {$s="s"};
 		$message="Test '$self->{TEST_PATH}' ($self->{XML_SUMM})";
-		$message.=" - requirement$s failed (in $self->{CHROOT})  :\n";
+		$message.=" - requirement$s failed  :\n";
 		foreach my $result (@results) {
 			$message.=" ";
 			$message.=$result->getMessage(); 
@@ -382,7 +422,7 @@ sub getOverallMessage {
 		$message.=" - test$s failed  :\n";
 		foreach my $result (@results) {
 			my $err=$result->getErrorState();
-			if ($err) {
+			if ($err) {#only print failed tests
 				$message.="--------,\n";
 				$message.="command : [".$result->getCommand()."]\n";
 				$message.="--------´\n";
