@@ -263,6 +263,53 @@ sub createImageSquashFS {
 }
 
 #==========================================
+# createImageCromFS
+#------------------------------------------
+sub createImageCromFS {
+	# ...
+	# create cromfs image from source tree
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $xml  = $this->{xml};
+	#==========================================
+	# PRE filesystem setup
+	#------------------------------------------
+	my $name = $this -> preImage ("haveExtend");
+	if (! defined $name) {
+		return undef;
+	}
+	#==========================================
+	# Create filesystem on extend
+	#------------------------------------------
+	if (! $this -> setupCromFS ( $name )) {
+		return undef;
+	}
+	#==========================================
+	# Create image md5sum
+	#------------------------------------------
+	if (! $this -> buildMD5Sum ($name)) {
+		return undef;
+	}
+	#==========================================
+	# Compress image using gzip
+	#------------------------------------------
+	if ($xml->getCompressed()) {
+	if (! $this -> compressImage ($name)) {
+		return undef;
+	}
+	}
+	#==========================================
+	# Create image boot configuration
+	#------------------------------------------
+	$kiwi -> info ("Creating boot configuration...");
+	if (! $this -> writeImageConfig ($name)) {
+		return undef;
+	}
+	return $this;
+}
+
+#==========================================
 # createImageCPIO
 #------------------------------------------
 sub createImageCPIO {
@@ -405,6 +452,10 @@ sub createImageUSB {
 		};
 		/^squashfs/   && do {
 			$ok = $this -> createImageSquashFS ();
+			last SWITCH;
+		};
+		/^cromfs/     && do {
+			$ok = $this -> createImageCromFS ();
 			last SWITCH;
 		};
 		$kiwi -> error  ("Unsupported $text type: $type");
@@ -848,20 +899,47 @@ sub createImageLiveCD {
 	# Create compressed filesystem on RO extend
 	#------------------------------------------
 	if (defined $gzip) {
-		if ($gzip eq "compressed") {
-			if (! $this -> createImageSplit ("ext3,squashfs", 1)) {
-				$this -> restoreCDRootData();
-				return undef;
-			}
-			$namero = $namerw;
-		} else {
-			$kiwi -> info ("Creating compressed read only filesystem...");
-			if (! $this -> setupSquashFS ( $namero,$imageTree )) {
-				$this -> restoreCDRootData();
-				$this -> restoreSplitExtend ();
-				return undef;
-			}
-			$kiwi -> done();
+		SWITCH: for ($gzip) {
+			/^compressed$/ && do {
+				if (! $this -> createImageSplit ("ext3,squashfs", 1)) {
+					$this -> restoreCDRootData();
+					return undef;
+				}
+				$namero = $namerw;
+				last SWITCH;
+			};
+			/^compressed-cromfs$/ && do {
+				if (! $this -> createImageSplit ("ext3,cromfs", 1)) {
+					$this -> restoreCDRootData();
+					return undef;
+				}
+				$namero = $namerw;
+				last SWITCH;
+			};
+			/^unified$/ && do {
+				$kiwi -> info ("Creating squashfs read only filesystem...");
+				if (! $this -> setupSquashFS ( $namero,$imageTree )) {
+					$this -> restoreCDRootData();
+					$this -> restoreSplitExtend ();
+					return undef;
+				}
+				$kiwi -> done();
+				last SWITCH;
+			};
+			/^unified-cromfs$/ && do {
+				$kiwi -> info ("Creating cromfs read only filesystem...");
+				if (! $this -> setupCromFS ( $namero,$imageTree )) {
+					$this -> restoreCDRootData();
+					$this -> restoreSplitExtend ();
+					return undef;
+				}
+				$kiwi -> done();
+				last SWITCH;
+			};
+			# invalid flag setup...
+			$kiwi -> error  ("Invalid iso flags: $gzip");
+			$kiwi -> failed ();
+			return undef;
 		}
 	}
 	#==========================================
@@ -1659,6 +1737,10 @@ sub createImageSplit {
 			$ok = $this -> setupSquashFS ( $namero,$imageTree );
 			last SWITCH;
 		};
+		/cromfs/     && do {
+			$ok = $this -> setupCromFS ( $namero,$imageTree );
+			last SWITCH;
+		};
 		$kiwi -> error  ("Unsupported type: $FSTypeRO");
 		$kiwi -> failed ();
 		qxx ("rm -rf $imageTreeRW");
@@ -1732,6 +1814,10 @@ sub createImageSplit {
 				last SWITCH;
 			};
 			/squashfs/   && do {
+				$kiwi -> done ();
+				last SWITCH;
+			};
+			/cromfs/     && do {
 				$kiwi -> done ();
 				last SWITCH;
 			};
@@ -2522,6 +2608,10 @@ sub extractKernel {
 			return $name;
 			last SWITCH;
 		};
+		/cromfs/i   && do {
+			return $name;
+			last SWITCH;
+		};
 	}
 	if (-f "$imageTree/boot/vmlinux.gz") {
 		$kiwi -> info ("Extracting kernel...");
@@ -2642,6 +2732,35 @@ sub setupSquashFS {
 	if ($code != 0) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't create squashfs filesystem");
+		$kiwi -> failed ();
+		$kiwi -> error  ($data);
+		return undef;
+	}
+	qxx ("chmod 644 $imageDest/$name");
+	return $name;
+}
+
+#==========================================
+# setupCromFS
+#------------------------------------------
+sub setupCromFS {
+	my $this = shift;
+	my $name = shift;
+	my $tree = shift;
+	my $kiwi = $this->{kiwi};
+	my $imageTree = $this->{imageTree};
+	my $imageDest = $this->{imageDest};
+	if (! defined $tree) {
+		$tree = $imageTree;
+	}
+	unlink ("$imageDest/$name");
+	my $data = qxx (
+		"/usr/bin/mkcromffs --lzmabits 0,0,8 $tree $imageDest/$name 2>&1"
+	);
+	my $code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't create cromfs filesystem");
 		$kiwi -> failed ();
 		$kiwi -> error  ($data);
 		return undef;

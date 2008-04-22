@@ -735,6 +735,7 @@ function probeFileSystem {
 		*ext2*)     FSTYPE=ext2 ;;
 		*ReiserFS*) FSTYPE=reiserfs ;;
 		*Squashfs*) FSTYPE=squashfs ;;
+		*CROMFS*)   FSTYPE=cromfs ;;
 		*)
 			FSTYPE=unknown
 		;;
@@ -1858,6 +1859,43 @@ function umountSystem {
 	return $retval
 }
 #======================================
+# isFSTypeReadOnly
+#--------------------------------------
+function isFSTypeReadOnly {
+	if [ "$FSTYPE" = "squashfs" ] || [ "$FSTYPE" = "cromfs" ];then
+		return 0
+	fi
+	return 1
+}
+#======================================
+# kiwiMount
+#--------------------------------------
+function kiwiMount {
+	local src=$1
+	local dst=$2
+	local opt=$3
+	if [ ! -z "$FSTYPE" ];then
+		FSTYPE_SAVE=$FSTYPE
+	fi
+	probeFileSystem $src
+	if [ -z $FSTYPE ] || [ $FSTYPE = "unknown" ];then
+		FSTYPE="auto"
+	fi
+	if [ $FSTYPE = "cromfs" ];then
+		if ! cromfs-driver $src $dst >/dev/null;then
+			return 1
+		fi
+	else
+		if ! mount -t $FSTYPE $opt $src $dst >/dev/null;then
+			return 1
+		fi
+	fi
+	if [ ! -z "$FSTYPE_SAVE" ];then
+		FSTYPE=$FSTYPE_SAVE
+	fi
+	return 0
+}
+#======================================
 # mountSystemUnified
 #--------------------------------------
 function mountSystemUnified {
@@ -1917,10 +1955,7 @@ function mountSystemUnified {
 	#======================================
 	# mount read only device
 	#--------------------------------------
-	if [ -z $FSTYPE ] || [ $FSTYPE = "unknown" ];then
-		FSTYPE="auto"
-	fi
-	if ! mount -t $FSTYPE $roDevice $roDir >/dev/null;then
+	if ! kiwiMount $roDevice $roDir;then
 		Echo "Failed to mount read only filesystem"
 		return 1
 	fi
@@ -1952,7 +1987,8 @@ function mountSystemCombined {
 	# mount the read-only partition to /read-only and use
 	# mount option -o ro for this filesystem
 	# ----
-	if ! mount -o ro $roDevice /read-only >/dev/null;then
+	if ! kiwiMount $roDevice "/read-only";then
+		Echo "Failed to mount read only filesystem"
 		return 1
 	fi
 	# /.../
@@ -2010,9 +2046,11 @@ function mountSystemCombined {
 #--------------------------------------
 function mountSystemStandard {
 	local mountDevice=$1
-	if [ ! -z $FSTYPE ] && [ ! $FSTYPE = "unknown" ] && [ ! $FSTYPE = "auto" ]
+	if [ ! -z $FSTYPE ]          && 
+	   [ ! $FSTYPE = "unknown" ] && 
+	   [ ! $FSTYPE = "auto" ]
 	then
-		mount -t $FSTYPE $mountDevice /mnt >/dev/null
+		kiwiMount $mountDevice "/mnt"
 	else
 		mount $mountDevice /mnt >/dev/null
 	fi
@@ -2029,6 +2067,7 @@ function mountSystem {
 	# load not autoloadable fs modules
 	#--------------------------------------
 	modprobe squashfs >/dev/null 2>&1
+	modprobe fuse     >/dev/null 2>&1
 	#======================================
 	# set primary mount device
 	#--------------------------------------

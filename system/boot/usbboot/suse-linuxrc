@@ -104,7 +104,7 @@ fi
 # 9) Resize filesystem to full space
 #--------------------------------------
 Echo "Filesystem of stick system is: $FSTYPE -> $stickDevice"
-if test "$FSTYPE" = "squashfs";then
+if isFSTypeReadOnly;then
 	export UNIONFS_CONFIG="$stickRoot"3,"$stickRoot"2,aufs
 fi
 

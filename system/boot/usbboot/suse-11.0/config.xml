@@ -46,6 +46,7 @@
 		<file name="fs/aufs.ko"/>
 		<file name="fs/reiserfs/*"/>
 		<file name="fs/nls/nls_utf8.ko"/>
+		<file name="fs/fuse/*"/>
 		<file name="net/ipv6/*"/>
 		<file name="drivers/cdrom/*"/>
 		<file name="drivers/scsi/*"/>
@@ -92,6 +93,7 @@
 		<package name="bootsplash"/>
 		<package name="bootsplash-branding-openSUSE"/>
 		<package name="tar"/>
+		<package name="cromfs"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>

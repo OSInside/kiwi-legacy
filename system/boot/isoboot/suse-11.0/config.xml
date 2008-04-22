@@ -41,6 +41,7 @@
 		<file name="fs/jbd/*"/>
 		<file name="fs/fat/*"/>
 		<file name="fs/vfat/*"/>
+		<file name="fs/fuse/*"/>
 		<file name="fs/squashfs/*"/>
 		<file name="fs/aufs.ko"/>
 		<file name="fs/reiserfs/*"/>
@@ -95,6 +96,7 @@
 		<package name="bootsplash"/>
 		<package name="bootsplash-branding-openSUSE"/>
 		<package name="tar"/>
+		<package name="cromfs"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>

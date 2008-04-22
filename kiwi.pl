@@ -105,6 +105,7 @@ our %KnownFS;
 $KnownFS{ext3}{tool}      = "/sbin/mkfs.ext3";
 $KnownFS{ext2}{tool}      = "/sbin/mkfs.ext2";
 $KnownFS{squashfs}{tool}  = "/usr/bin/mksquashfs";
+$KnownFS{cromfs}{tool}    = "/usr/bin/mkcromfs";
 $KnownFS{unified}{tool}   = "/usr/bin/mksquashfs";
 $KnownFS{compressed}{tool}= "/usr/bin/mksquashfs";
 $KnownFS{reiserfs}{tool}  = "/sbin/mkreiserfs";
@@ -112,6 +113,7 @@ $KnownFS{cpio}{tool}      = "/usr/bin/cpio";
 $KnownFS{ext3}{ro}        = 0;
 $KnownFS{ext2}{ro}        = 0;
 $KnownFS{squashfs}{ro}    = 1;
+$KnownFS{cromfs}{ro}      = 1;
 $KnownFS{unified}{ro}     = 1;
 $KnownFS{compressed}{ro}  = 1;
 $KnownFS{reiserfs}{ro}    = 0;
@@ -640,6 +642,10 @@ sub main {
 			};
 			/^squashfs/ && do {
 				$ok = $image -> createImageSquashFS ();
+				last SWITCH;
+			};
+			/^cromfs/   && do {
+				$ok = $image -> createImageCromFS ();
 				last SWITCH;
 			};
 			/^cpio/     && do {
@@ -1812,6 +1818,10 @@ sub checkFileSystem {
 				};
 				/Squashfs/  && do {
 					$type = "squashfs";
+					last SWITCH;
+				};
+				/CROMFS/    && do {
+					$type = "cromfs";
 					last SWITCH;
 				};
 				# unknown filesystem type...

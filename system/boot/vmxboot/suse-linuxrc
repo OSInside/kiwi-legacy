@@ -88,10 +88,7 @@ function VMFindSystem {
 	for rdevice in $devices;do
 		imageRootDevice=$rdevice
 		imageDiskDevice=`echo $imageRootDevice | tr -d [0-9]`
-		if ! mount $imageRootDevice /mnt &>/dev/null;then
-			mount -t squashfs $imageRootDevice /mnt &>/dev/null
-		fi
-		if [ $? = 0 ];then
+		if kiwiMount $imageRootDevice "/mnt" &>/dev/null;then
 			umount /mnt
 			break
 		fi
@@ -154,7 +151,7 @@ fi
 # 8) Check filesystem
 #--------------------------------------
 Echo "Filesystem of VMX system is: $FSTYPE -> $imageRootDevice"
-if test "$FSTYPE" = "squashfs";then
+if isFSTypeReadOnly;then
 	export UNIONFS_CONFIG="$imageDiskDevice"3,"$imageDiskDevice"2,aufs
 fi
 

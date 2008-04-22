@@ -53,10 +53,7 @@ VMFindSystem () {
 	fi
 	for rdevice in $devices;do
 		imageRootDevice=$rdevice
-		if ! mount $imageRootDevice /mnt &>/dev/null;then
-			mount -t squashfs $imageRootDevice /mnt &>/dev/null
-		fi
-		if [ $? = 0 ];then
+		if kiwiMount $imageRootDevice "/mnt" &>/dev/null;then
 			umount /mnt
 			break
 		fi

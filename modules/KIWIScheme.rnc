@@ -876,11 +876,11 @@ div {
 		attribute flags { "unified" | "compressed" }
 	k.type.filesystem.attribute = 
 		## Specifies the filesystem which can be one of:
-		## ext2 , ext3 , reiserfs or squashfs
-		attribute filesystem { "ext2" | "ext3" | "reiserfs" | "squashfs" }
+		## ext2 , ext3 , reiserfs ,squashfs or cromfs
+		attribute filesystem { "ext2" | "ext3" | "reiserfs" | "squashfs" | "cromfs" }
 	k.type.fsreadonly.attribute =
 		## Specifies the filesystem for the read-only part of a split image
-		attribute fsreadonly { "ext2" | "ext3" | "reiserfs" | "squashfs" }
+		attribute fsreadonly { "ext2" | "ext3" | "reiserfs" | "squashfs" | "cromfs" }
 	k.type.fsreadwrite.attribute =
 		## Specifies the filesystem for the read-write part of a split image
 		attribute fsreadwrite { "ext2" | "ext3" | "reiserfs" }
@@ -935,9 +935,9 @@ div {
 		db:para [
 			"As part of the network deploy configuration this section\x{a}"~
 			"specifies the overlay filesystem setup if required by the\x{a}"~
-			"filesystem type of the system image. An overlay setup is\x{a}"~
-			"only required if the system image uses a squashfs compressed\x{a}"~
-			"filesystem."
+			"filesystem type of the system image. An overlay setup is only\x{a}"~
+			"required if the system image uses a squashfs or cromfs\x{a}"~
+			"compressed filesystem."
 		]
 		]
 		element union {

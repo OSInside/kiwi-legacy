@@ -236,10 +236,10 @@ if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ];then
 	cd /mnt
 	if [ ! -d $LIVECD/read-only-system ];then
 		Echo "Mounting compressed read only tree..."
-		mkdir -p /mnt/read-only-system
-		mount -t squashfs -o loop /mnt/$LIVECD/$imageReadOnly \
-			/mnt/read-only-system
-		if [ ! $? = 0 ];then
+		rosys="/mnt/read-only-system"
+		rosrc="/mnt/$LIVECD/$imageReadOnly"
+		mkdir -p $rosys
+		if ! kiwiMount $rosrc $rosys "-o loop";then
 			systemException "Failed to mount RO root filesystem" "reboot"
 		fi
 		Echo "Creating live media links..."

@@ -41,6 +41,7 @@
 		<file name="fs/aufs.ko"/>
 		<file name="fs/reiserfs/*"/>
 		<file name="fs/nfs/*"/>
+		<file name="fs/fuse/*"/>
 		<file name="net/sunrpc/*"/>
 		<file name="fs/lockd/*"/>
 		<file name="fs/nfs_common/*"/>
@@ -170,6 +171,7 @@
 		<package name="bootsplash"/>
 		<package name="bootsplash-branding-openSUSE"/>
 		<package name="tar"/>
+		<package name="cromfs"/>
 		<!-- PACKAGES END DEFAULT AND XEN -->
 	</packages>
 	<packages type="image" profiles="diskless">

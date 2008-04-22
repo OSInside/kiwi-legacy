@@ -536,8 +536,10 @@ else
 		imageRootDevice=$nbdDevice
 		probeFileSystem $imageRootDevice
 		Echo "Filesystem of remote root system is: $FSTYPE"
-		if [ "$FSTYPE" = "squashfs" ] && [ -z "$COMBINED_IMAGE" ]; then
-			export UNIONFS_CONFIG="/dev/ram1,"$imageRootDevice",aufs"
+		if [ -z "$COMBINED_IMAGE" ];then
+			if isFSTypeReadOnly;then
+				export UNIONFS_CONFIG="/dev/ram1,"$imageRootDevice",aufs"
+			fi
 		fi
 		imageRootName="NBDRoot-System"
 		systemIntegrity="clean"
@@ -634,7 +636,7 @@ if [ $LOCAL_BOOT = "no" ];then
 		# /.../
 		# have to do this so that /boot gets copied to the
 		# ext2 partition, which is necessary for grub to find
-		# the stuff in there (it can't read squashfs)
+		# the stuff in there (it can't read squashfs or cromfs)
 		# ----
 		cp -a /mnt/boot /dev/shm/boot2
 		rm -rf /mnt/boot

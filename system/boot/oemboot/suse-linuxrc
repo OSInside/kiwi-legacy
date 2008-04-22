@@ -110,7 +110,7 @@ if [ ! -f $VMX_SYSTEM ];then
 	# kernel parameters of this initrd defines the missing
 	# information. Additionally the partition table is different
 	# for unified systems. Therefore we check if the second
-	# partition is a squashfs partition and change the root
+	# partition is a squashfs/cromfs partition and change the root
 	# partition name accordingly
 	# ----
 	if [ -f $OEM_PARTITION_CONFIG ];then
@@ -147,7 +147,7 @@ if [ ! -f $VMX_SYSTEM ];then
 		fi
 	fi
 	probeFileSystem "$deviceDisk"2
-	if test "$FSTYPE" = "squashfs";then
+	if isFSTypeReadOnly;then
 		if [ -z "$COMBINED_IMAGE" ];then
 			Echo "Unified system detected, adapting root partition"
 			export UNIONFS_CONFIG="$deviceDisk"3,"$deviceDisk"2,aufs
@@ -220,8 +220,10 @@ if [ -f $VMX_SYSTEM ];then
 		deviceRoot="$deviceDisk"1
 		probeFileSystem $deviceRoot
 	fi
-	if [ "$FSTYPE" = "squashfs" ] && [ -z "$COMBINED_IMAGE" ];then
-		export UNIONFS_CONFIG="$deviceDisk"3,"$deviceDisk"2,aufs
+	if [ -z "$COMBINED_IMAGE" ];then
+		if isFSTypeReadOnly;then
+			export UNIONFS_CONFIG="$deviceDisk"3,"$deviceDisk"2,aufs
+		fi
 	fi
 	Echo "Try mounting installed system to check version"
 	mountSystem $deviceRoot; updateNeeded
@@ -310,8 +312,10 @@ if [ -f $VMX_SYSTEM ];then
 		probeFileSystem $deviceRoot
 	fi
 	Echo "Filesystem of root system is: $FSTYPE -> $deviceRoot"
-	if [ "$FSTYPE" = "squashfs" ] && [ -z "$COMBINED_IMAGE" ];then
-		export UNIONFS_CONFIG="$deviceDisk"3,"$deviceDisk"2,aufs
+	if [ -z "$COMBINED_IMAGE" ];then
+		if isFSTypeReadOnly;then
+			export UNIONFS_CONFIG="$deviceDisk"3,"$deviceDisk"2,aufs
+		fi
 	fi
 	#======================================
 	# 8.8) Create md5 version info file
@@ -466,7 +470,7 @@ if [ $LOCAL_BOOT = "no" ];then
 			fi
 		fi
 	else
-		if ! test "$FSTYPE" = "squashfs";then
+		if isFSTypeReadOnly;then
 			#======================================
 			# 10.2 write new partition table
 			#--------------------------------------
@@ -682,7 +686,7 @@ if [ $LOCAL_BOOT = "no" ];then
 		KIWI_INITRD_PARAMS="COMBINED_IMAGE=local"
 		export KIWI_INITRD_PARAMS
 	fi
-	if [ "$FSTYPE" = "squashfs" ] && [ -z "$COMBINED_IMAGE" ];then
+	if isFSTypeReadOnly && [ -z "$COMBINED_IMAGE" ];then
 		export UNIONFS_CONFIG="$deviceDisk"3,"$deviceDisk"2,aufs
 		KIWI_INITRD_PARAMS="UNIONFS_CONFIG=\"$UNIONFS_CONFIG\""
 		KIWI_INITRD_PARAMS="$KIWI_INITRD_PARAMS deviceRoot=\"$deviceRoot\""

@@ -2,6 +2,7 @@
 Tue Apr 22 14:01:37 CEST 2008 - ms@suse.de
 
 - added support for creating VMware scsi disks (bnc #380065)
+- added support for creating cromfs images (bnc #379027)
 
 -------------------------------------------------------------------
 Mon Apr 21 17:02:37 CEST 2008 - ms@suse.de
