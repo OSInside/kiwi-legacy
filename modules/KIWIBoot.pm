@@ -338,6 +338,7 @@ sub new {
 		$vmsize  = $vmsize."M";
 	} elsif (defined $system) {
 		$vmmbyte = $xml -> getImageSizeBytes();
+		$vmmbyte = $vmsize / 1048576;
 	}
 	#==========================================
 	# round compressed image size
