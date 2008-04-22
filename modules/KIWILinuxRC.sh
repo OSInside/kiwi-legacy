@@ -382,7 +382,11 @@ function setupSUSEInitrd {
 		if [ -f /etc/init.d/boot.device-mapper ];then
 			/etc/init.d/boot.device-mapper start
 		fi
-		mkinitrd
+		if ! mkinitrd;then
+			Echo "Can't create initrd"
+			systemIntegrity=unknown
+			grubOK=0
+		fi
 		if [ -f /etc/init.d/boot.device-mapper ];then
 			/etc/init.d/boot.device-mapper stop
 		fi

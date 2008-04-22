@@ -2737,9 +2737,19 @@ sub setupBootDisk {
 			$kiwi -> info ("Creating $format image");
 			my $fname = $diskname;
 			$fname  =~ s/\.raw$/\.$format/;
-			$status = qxx (
-				"qemu-img convert -f raw $loop -O $format $fname 2>&1"
-			);
+			my %vmwc;
+			if ($format eq "vmdk") {
+				%vmwc   = $xml  -> getPackageAttributes ("vmware");
+			}
+			if (($vmwc{disk}) && ($vmwc{disk} =~ /^scsi/)) {
+				$status = qxx (
+					"qemu-img convert -f raw $loop -O $format -s $fname 2>&1"
+				);
+			} else {
+				$status = qxx (
+					"qemu-img convert -f raw $loop -O $format $fname 2>&1"
+				);
+			}
 			$result = $? >> 8;
 			if ($result != 0) {
 				$kiwi -> failed ();

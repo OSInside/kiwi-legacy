@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Apr 22 14:01:37 CEST 2008 - ms@suse.de
+
+- added support for creating VMware scsi disks (bnc #380065)
+
+-------------------------------------------------------------------
 Mon Apr 21 17:02:37 CEST 2008 - ms@suse.de
 
 - fixed creation of install CD/DVD (bnc #381953)
