@@ -466,9 +466,14 @@ sub main {
 		# Check for bootprofile in config.xml
 		#------------------------------------------
 		if (! @Profiles) {
+			$kiwi -> info ("Reading image description...");
 			my $xml = new KIWIXML (
 				$kiwi,"$Create/image",\%ForeignRepo,$SetImageType
 			);
+			if (! defined $xml) {
+				my $code = kiwiExit (1); return $code;
+			}
+			$kiwi -> done();
 			my %type = %{$xml->getImageTypeAndAttributes()};
 			if (($type{"type"} eq "cpio") && ($type{bootprofile})) {
 				@Profiles = split (/,/,$type{bootprofile});
@@ -1452,7 +1457,6 @@ sub listImage {
 			$kiwi -> info ("$image");
 			my $xml = new KIWIXML ( $kiwi,"$System/$image" );
 			if (! $xml) {
-				$kiwi -> failed();
 				next;
 			}
 			my $version = $xml -> getImageVersion();
@@ -1471,11 +1475,12 @@ sub listProfiles {
 	# list the available profiles in image
 	# ---
 	my $kiwi = new KIWILog("tiny");
+	$kiwi -> info ("Reading image description...");
 	my $xml  = new KIWIXML ($kiwi, $ListProfiles);
 	if (! defined $xml) {
-		$kiwi -> failed();
 		exit 1;
 	}
+	$kiwi -> done();
 	my @profiles = $xml -> getProfiles ();
 	if ((scalar @profiles) == 0) {
 		$kiwi -> info ("No profiles available");
@@ -1501,11 +1506,12 @@ sub listXMLInfo {
 	# not specified in its format
 	# ---
 	my $kiwi = new KIWILog("tiny");
+	$kiwi -> info ("Reading image description...");
 	my $xml  = new KIWIXML ($kiwi,$listXMLInfo,undef,$SetImageType);
 	if (! defined $xml) {
-		$kiwi -> failed();
 		exit 1;
 	}
+	$kiwi -> done();
 	my %type = %{$xml->getImageTypeAndAttributes()};
 	#==========================================
 	# print boot information of type section

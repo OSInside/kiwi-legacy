@@ -244,7 +244,19 @@ sub new {
 	$this->{reqProfiles}        = $reqProfiles;
 	$this->{havemd5File}        = $havemd5File;
 	$this->{arch}               = $arch;
-	
+
+	#==========================================
+	# Check image version format
+	#------------------------------------------
+	my $version = $this -> getImageVersion();
+	if ($version !~ /^\d+\.\d+\.\d+$/) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Invalid version format: $version");
+		$kiwi -> failed ();
+		$kiwi -> error  ("Expected 'Major.Minor.Release'");
+		$kiwi -> failed ();
+		return undef;
+	}
 	#==========================================
 	# Store object data (create URL list)
 	#------------------------------------------
