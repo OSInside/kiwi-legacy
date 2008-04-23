@@ -2552,23 +2552,25 @@ sub setupBootDisk {
 	# create read/write filesystem if needed
 	#------------------------------------------
 	if (($syszip) || ($haveSplit)) {
-		$kiwi -> info ("Creating ext2 read-write filesystem");
 		$root = "/dev/mapper".$dmap."p2";
-		$status = qxx ("/sbin/mke2fs -q -F $root 2>&1");
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't create filesystem: $status");
-			$kiwi -> failed ();
-			$this -> cleanLoop ();
-			return undef;
+		if (! $haveSplit) {
+			$kiwi -> info ("Creating ext2 read-write filesystem");
+			$status = qxx ("/sbin/mke2fs -q -F $root 2>&1");
+			$result = $? >> 8;
+			if ($result != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Couldn't create filesystem: $status");
+				$kiwi -> failed ();
+				$this -> cleanLoop ();
+				return undef;
+			}
+			$kiwi -> done();
 		}
-		$kiwi -> done();
 	}
 	#==========================================
 	# Dump boot image on virtual disk
 	#------------------------------------------
-	$kiwi -> info ("Dumping boot image to virtual disk");
+	$kiwi -> info ("Copying boot image to virtual disk");
 	#==========================================
 	# Mount system image / or rw partition
 	#------------------------------------------

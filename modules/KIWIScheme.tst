@@ -1,6 +1,6 @@
+<?xml version="1.0"?>
 <!-- TEST XML SCHEME FOR KIWI -->
-
-<image name="bob" schemeversion="1.4">
+<image schemeversion="2.0" name="bob">
 
 	<description type="boot">
 		<author>Marcus Schaefer</author>
@@ -15,7 +15,10 @@
 		<packagemanager>smart</packagemanager>
 	</preferences>
 
-	<instsource arch="i686">
+	<instsource>
+		<architectures>
+			<arch name="x86_64" id="lala"/>
+		</architectures>
 		<instrepo name="lala" priority="1">
 			<source path="...."/>
 		</instrepo>
@@ -63,7 +66,7 @@
 		<package name="xen"/>
 	</packages>
 
-	<packages type="boot">
+	<packages type="bootstrap">
 		<package name="filesystem"/>
 		<package name="glibc-locale"/>
 		<package name="devs"/>

@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Apr 23 16:31:29 CEST 2008 - ms@suse.de
+
+- don't create filesystem if read-write image exist
+- fixed kernelList call in oemboot/suse-preinit
+
+-------------------------------------------------------------------
 Wed Apr 23 14:15:17 CEST 2008 - ms@suse.de
 
 - added inst-source patch by Jan Bornschlegel <jcborn@novell.com>

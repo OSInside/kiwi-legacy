@@ -907,6 +907,7 @@ function CDDevice {
 }
 function USBStickDevice {
 	stickFound=0
+	Echo -n "Waiting for USB devices to settle..."
 	for redo in 1 2 3 4 5;do
 		for device in /sys/bus/usb/drivers/usb-storage/*;do
 			if [ ! -L $device ];then
@@ -950,9 +951,10 @@ function USBStickDevice {
 				fi
 			done
 		done
-		Echo "Waiting for USB devices to settle..."
+		echo -n .
 		sleep 2
 	done
+	echo .
 }
 #======================================
 # CDMount

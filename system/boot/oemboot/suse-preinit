@@ -54,11 +54,14 @@ else
 	#======================================
 	# use kiwi initrd from RW partition
 	#--------------------------------------
+	if [ -d /read-write/boot/grub ];then
+		rm -rf /boot && ln -s /read-write/boot /boot
+	fi
 	pushd /boot &>/dev/null
 	rm -f vmlinuz && ln -s linux.vmx  vmlinuz
 	rm -f initrd  && ln -s initrd.vmx initrd
 	popd &>/dev/null
-	kernelList
+	kernelList /
 	if [ ! -z "$COMBINED_IMAGE" ];then
 		Echo "Creating grub configuration for split system"
 	else
