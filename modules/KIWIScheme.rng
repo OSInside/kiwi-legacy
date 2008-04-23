@@ -705,6 +705,13 @@ given arch should be removed</a:documentation>
 the given arch should be used in any case</a:documentation>
       </attribute>
     </define>
+    <define name="k.repopackage.medium.attribute">
+      <attribute name="medium">
+        <a:documentation>Specifies that the package will be put
+to the specific medium number (CD1, DVD7, ...)</a:documentation>
+        <data type="nonNegativeInteger"/>
+      </attribute>
+    </define>
     <define name="k.repopackage.source.attribute">
       <ref name="k.source.attribute"/>
     </define>
@@ -734,6 +741,9 @@ the given arch should be used in any case</a:documentation>
         </optional>
         <optional>
           <ref name="k.repopackage.script.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.repopackage.medium.attribute"/>
         </optional>
       </interleave>
     </define>

@@ -527,6 +527,10 @@ div {
 		## Specifies that the package with
 		## the given arch should be used in any case
 		attribute forcearch { text }
+	k.repopackage.medium.attribute =
+		## Specifies that the package will be put
+		## to the specific medium number (CD1, DVD7, ...)
+		attribute medium { xsd:nonNegativeInteger }
 	k.repopackage.source.attribute = k.source.attribute
 	k.repopackage.script.attribute = k.script.attribute
 	k.repopackage.attlist =
@@ -537,7 +541,8 @@ div {
 		k.repopackage.removearch.attribute? &
 		k.repopackage.forcearch.attribute? &
 		k.repopackage.source.attribute? &
-		k.repopackage.script.attribute?
+		k.repopackage.script.attribute? &
+		k.repopackage.medium.attribute?
 	k.repopackage =
 		## Name of an instsource Package
 		element repopackage {

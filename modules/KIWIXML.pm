@@ -1541,7 +1541,7 @@ sub getInstSourcePackageAttributes {
 	my %result;
 	my @attrib = (
 		"priority" ,"addarch","removearch",
-		"forcearch","source" ,"script"
+		"forcearch","source" ,"script", "medium"
 	);
 	for (my $i=1;$i<= $nodes->size();$i++) {
 		my $node  = $nodes -> get_node($i);
