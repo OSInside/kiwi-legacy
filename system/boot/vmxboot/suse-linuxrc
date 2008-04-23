@@ -74,11 +74,11 @@ function VMFindSystem {
 		waitForStorageDevice /dev/hda
 		if [ -e /dev/hda ];then
 			haveHDA=1
-			devices="/dev/hda2 /dev/hda1"
+			devices="/dev/hda1 /dev/hda2"
 		fi
 	else
 		haveSDA=1
-		devices="/dev/sda2 /dev/sda1"
+		devices="/dev/sda1 /dev/sda2"
 	fi
 	if [ $haveSDA = 0 ] && [ $haveHDA = 0 ];then
 		systemException \
@@ -152,7 +152,7 @@ fi
 #--------------------------------------
 Echo "Filesystem of VMX system is: $FSTYPE -> $imageRootDevice"
 if isFSTypeReadOnly;then
-	export UNIONFS_CONFIG="$imageDiskDevice"3,"$imageDiskDevice"2,aufs
+	export UNIONFS_CONFIG="$imageDiskDevice"2,"$imageDiskDevice"1,aufs
 fi
 
 #======================================
@@ -173,7 +173,11 @@ kernelList /mnt
 #--------------------------------------
 setupDefaultFstab /config
 updateRootDeviceFstab /config $imageRootDevice
-setupBootLoaderGrub /mnt /config 0 $imageRootDevice VMX
+if [ -z "$UNIONFS_CONFIG" ]; then
+	setupBootLoaderGrub /mnt /config 1 $imageRootDevice VMX
+else
+	setupBootLoaderGrub /mnt /config 0 $imageRootDevice VMX
+fi
 setupKernelModules /config
 
 #======================================

@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Apr 23 14:15:17 CEST 2008 - ms@suse.de
+
+- added inst-source patch by Jan Bornschlegel <jcborn@novell.com>
+- removed use of single /boot partition on virtual disk
+  based images. Patch by James Willcox <james@ximian.com>
+
+-------------------------------------------------------------------
 Tue Apr 22 14:01:37 CEST 2008 - ms@suse.de
 
 - added support for creating VMware scsi disks (bnc #380065)

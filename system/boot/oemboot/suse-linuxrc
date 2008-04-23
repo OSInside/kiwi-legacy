@@ -146,14 +146,14 @@ if [ ! -f $VMX_SYSTEM ];then
 			export deviceHome="$deviceDisk"3
 		fi
 	fi
-	probeFileSystem "$deviceDisk"2
+	probeFileSystem "$deviceDisk"1
 	if isFSTypeReadOnly;then
 		if [ -z "$COMBINED_IMAGE" ];then
 			Echo "Unified system detected, adapting root partition"
-			export UNIONFS_CONFIG="$deviceDisk"3,"$deviceDisk"2,aufs
+			export UNIONFS_CONFIG="$deviceDisk"2,"$deviceDisk"1,aufs
 		fi
-		export deviceRoot="$deviceDisk"2
-		export deviceSwap="$deviceDisk"4
+		export deviceRoot="$deviceDisk"1
+		export deviceSwap="$deviceDisk"3
 	else
 		export deviceRoot="$deviceDisk"1
 	fi
@@ -222,7 +222,7 @@ if [ -f $VMX_SYSTEM ];then
 	fi
 	if [ -z "$COMBINED_IMAGE" ];then
 		if isFSTypeReadOnly;then
-			export UNIONFS_CONFIG="$deviceDisk"3,"$deviceDisk"2,aufs
+			export UNIONFS_CONFIG="$deviceDisk"2,"$deviceDisk"1,aufs
 		fi
 	fi
 	Echo "Try mounting installed system to check version"
@@ -305,21 +305,18 @@ if [ -f $VMX_SYSTEM ];then
 	# 8.7) find new root partition
 	#--------------------------------------
 	unset UNIONFS_CONFIG
-	deviceRoot="$deviceDisk"2
+	deviceRoot="$deviceDisk"1
 	probeFileSystem $deviceRoot
-	if test "$FSTYPE" = "unknown";then
-		deviceRoot="$deviceDisk"1
-		probeFileSystem $deviceRoot
-	fi
 	Echo "Filesystem of root system is: $FSTYPE -> $deviceRoot"
 	if [ -z "$COMBINED_IMAGE" ];then
 		if isFSTypeReadOnly;then
-			export UNIONFS_CONFIG="$deviceDisk"3,"$deviceDisk"2,aufs
+			export UNIONFS_CONFIG="$deviceDisk"2,"$deviceDisk"1,aufs
 		fi
 	fi
 	#======================================
 	# 8.8) Create md5 version info file
 	#--------------------------------------
+	unset RELOAD_IMAGE
 	if ! mountSystem $deviceRoot;then
 		systemException \
 			"Couldn't mount installed system... abort" \
@@ -382,7 +379,7 @@ if [ $LOCAL_BOOT = "no" ];then
 		#====================================== 
 		# 10.2 check for read-write partition
 		#--------------------------------------
-		if ! sfdisk -s "$deviceDisk"3 &>/dev/null;then
+		if ! sfdisk -s "$deviceDisk"2 &>/dev/null;then
 			Echo "No read-write partition in this split image"
 			DONT_PARTITION=1
 		fi
@@ -397,10 +394,7 @@ if [ $LOCAL_BOOT = "no" ];then
 			disk1MBytes=`expr $disk1MBytes / 1024`
 			disk2MBytes=`sfdisk -s "$deviceDisk"2`
 			disk2MBytes=`expr $disk2MBytes / 1024`
-			disk3MBytes=`sfdisk -s "$deviceDisk"3`
-			disk3MBytes=`expr $disk3MBytes / 1024`
 			diskXLBytes=`expr $diskXMBytes - $disk1MBytes - $disk2MBytes`
-			diskXLBytes=`expr $diskXLBytes - $disk3MBytes`
 			diskXABytes=`expr $diskXLBytes - $swapXMBytes`
 			if [ $diskXABytes -lt 50 ];then
 				# /.../
@@ -409,7 +403,7 @@ if [ $LOCAL_BOOT = "no" ];then
 				Echo "Disk is too small, will not re-partition it"
 				DONT_PARTITION=1
 			else
-				disk3MBytes=`expr $disk3MBytes + $diskXABytes`
+				disk2MBytes=`expr $disk2MBytes + $diskXABytes`
 			fi
 		fi
 		if [ -z "$DONT_PARTITION" ];then
@@ -421,25 +415,25 @@ if [ $LOCAL_BOOT = "no" ];then
 			# here document below:
 			# ----
 			# d               # delete xda partition
-			# 3               # [ 3 ]
-			# n               # create xda partition at same place than xda3
+			# 2               # [ 2 ]
+			# n               # create xda partition at same place than xda2
 			# p               # primary
-			# 3               # [ 3 ]
+			# 2               # [ 2 ]
 			#                 # accept old xda3 start block
-			# +"disk3MBytes"M # accept new RW device size of disk blocks - swap
+			# +"disk2MBytes"M # accept new RW device size of disk blocks - swap
 			# n               # create xda swap partition
 			# p               # primary
-			# 4               # [ 4 ]
+			# 3               # [ 3 ]
 			#                 # accept start block
 			#                 # accept end block
 			# t               # change swap system id
-			# 4               # [ 4 ]
+			# 3               # [ 3 ]
 			# 82              # Linux Swap
 			# w               # write partition table
 			# ----
 			input=/part.input
 			rm -f $input
-			for cmd in d 3 n p 3 . +"$disk3MBytes"M n p 4 . . t 4 82 w;do
+			for cmd in d 2 n p 2 . +"$disk2MBytes"M n p 3 . . t 3 82 w;do
 				if [ $cmd = "." ];then
 					echo >> $input
 					continue
@@ -455,10 +449,9 @@ if [ $LOCAL_BOOT = "no" ];then
 		#======================================
 		# 10.5 Update new device names
 		#--------------------------------------
-		export deviceBoot="$deviceDisk"1
-		export deviceRoot="$deviceDisk"2
-		export deviceSwap="$deviceDisk"4
-		export deviceIOWR="$deviceDisk"3
+		export deviceRoot="$deviceDisk"1
+		export deviceSwap="$deviceDisk"3
+		export deviceIOWR="$deviceDisk"2
 
 		#======================================
 		# 10.6 Activate swap space
@@ -596,11 +589,8 @@ if [ $LOCAL_BOOT = "no" ];then
 			diskXMBytes=`expr $diskXMBytes / 1024`
 			disk1MBytes=`sfdisk -s "$deviceDisk"1`
 			disk1MBytes=`expr $disk1MBytes / 1024`
-			disk2MBytes=`sfdisk -s "$deviceDisk"2`
-			disk2MBytes=`expr $disk2MBytes / 1024`
-			disk3MBytes=`expr $diskXMBytes - $disk1MBytes - $disk2MBytes`
-			disk3MBytes=`expr $disk3MBytes - $swapXMBytes`
-			if [ $disk3MBytes -lt 100 ];then
+			disk2MBytes=`expr $diskXMBytes - $disk1MBytes - $swapsize`
+			if [ $disk2MBytes -lt 100 ];then
 				# /.../
 				# Very small disk which we will not re-partition
 				# ----
@@ -616,25 +606,25 @@ if [ $LOCAL_BOOT = "no" ];then
 				# here document below:
 				# ----
 				# d               # delete xda partition
-				# 3               # [ 3 ]
-				# n               # create xda partition at same place than xda3
+				# 2               # [ 2 ]
+				# n               # create xda partition at same place than xda2
 				# p               # primary
-				# 3               # [ 3 ]
-				#                 # accept old xda3 start block
-				# +"disk3MBytes"M # accept new RW device size
+				# 2               # [ 2 ]
+				#                 # accept old xda2 start block
+				# +"disk2MBytes"M # accept new RW device size
 				# n               # create xda swap partition
 				# p               # primary
-				# 4               # [ 4 ]
+				# 3               # [ 3 ]
 				#                 # accept start block
 				#                 # accept end block
 				# t               # change swap system id
-				# 4               # [ 4 ]
+				# 3               # [ 3 ]
 				# 82              # Linux Swap
 				# w               # write partition table
 				# ----
 				input=/part.input
 				rm -f $input
-				for cmd in d 3 n p 3 . +"$disk3MBytes"M n p 4 . . t 4 82 w;do
+				for cmd in d 2 n p 2 . +"$disk2MBytes"M n p 3 . . t 3 82 w;do
 					if [ $cmd = "." ];then
 						echo >> $input
 						continue
@@ -650,10 +640,9 @@ if [ $LOCAL_BOOT = "no" ];then
 			#======================================
 			# 10.4 Update new device names
 			#--------------------------------------
-			export deviceBoot="$deviceDisk"1
-			export deviceRoot="$deviceDisk"2
-			export deviceSwap="$deviceDisk"4
-			export deviceIOWR="$deviceDisk"3
+			export deviceRoot="$deviceDisk"1
+			export deviceSwap="$deviceDisk"3
+			export deviceIOWR="$deviceDisk"2
 
 			#======================================
 			# 10.5 Activate swap space
@@ -663,14 +652,6 @@ if [ $LOCAL_BOOT = "no" ];then
 				if ! mkswap $deviceSwap >/dev/null 2>&1;then
 					systemException "Failed to create swap signature" "reboot"
 				fi
-			fi
-	
-			#======================================
-			# 10.6 create filesystem for writing
-			#--------------------------------------
-			Echo "Creating filesystem for RW data on $deviceIOWR..."
-			if ! mke2fs $deviceIOWR >/dev/null;then
-				systemException "Failed to create ext2 filesystem" "reboot"
 			fi
 		fi
 	fi
@@ -687,31 +668,31 @@ if [ $LOCAL_BOOT = "no" ];then
 		export KIWI_INITRD_PARAMS
 	fi
 	if isFSTypeReadOnly && [ -z "$COMBINED_IMAGE" ];then
-		export UNIONFS_CONFIG="$deviceDisk"3,"$deviceDisk"2,aufs
+		deviceResize=$deviceIOWR
+		export UNIONFS_CONFIG="$deviceDisk"2,"$deviceDisk"1,aufs
 		KIWI_INITRD_PARAMS="UNIONFS_CONFIG=\"$UNIONFS_CONFIG\""
 		KIWI_INITRD_PARAMS="$KIWI_INITRD_PARAMS deviceRoot=\"$deviceRoot\""
 		export KIWI_INITRD_PARAMS
-	else
-		if sfdisk -s $deviceResize &>/dev/null;then
-			if [ "$FSTYPE" = "reiserfs" ];then
-				Echo "Resize Reiser filesystem to full partition space..."
-				resize_reiserfs -q $deviceResize
-				INITRD_MODULES="$INITRD_MODULES reiserfs"
-			fi
-			if [ "$FSTYPE" = "ext2" ];then
-				Echo "Resize EXT2 filesystem to full partition space..."
-				resize2fs -f -F -p $deviceResize
-				Echo "Checking EXT2 filesystem..."
-				e2fsck -y -f $deviceResize
-				INITRD_MODULES="$INITRD_MODULES ext2"
-			fi
-			if [ "$FSTYPE" = "ext3" ];then
-				Echo "Resize EXT3 filesystem to full partition space..."
-				resize2fs -f -F -p $deviceResize
-				Echo "Checking EXT3 filesystem..."
-				e2fsck -y -f $deviceResize
-				INITRD_MODULES="$INITRD_MODULES ext3"
-			fi
+	fi
+	if [ ! -z "$deviceResize" ] && sfdisk -s $deviceResize &>/dev/null;then
+		if [ "$FSTYPE" = "reiserfs" ];then
+			Echo "Resize Reiser filesystem to full partition space..."
+			resize_reiserfs -q $deviceResize
+			INITRD_MODULES="$INITRD_MODULES reiserfs"
+		fi
+		if [ "$FSTYPE" = "ext2" ];then
+			Echo "Resize EXT2 filesystem to full partition space..."
+			resize2fs -f -F -p $deviceResize
+			Echo "Checking EXT2 filesystem..."
+			e2fsck -y -f $deviceResize
+			INITRD_MODULES="$INITRD_MODULES ext2"
+		fi
+		if [ "$FSTYPE" = "ext3" ];then
+			Echo "Resize EXT3 filesystem to full partition space..."
+			resize2fs -f -F -p $deviceResize
+			Echo "Checking EXT3 filesystem..."
+			e2fsck -y -f $deviceResize
+			INITRD_MODULES="$INITRD_MODULES ext3"
 		fi
 	fi
 fi
@@ -743,7 +724,7 @@ if [ $LOCAL_BOOT = "no" ];then
 	fi
 	if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ]; then
 		echo "$deviceRoot / $FSTYPE defaults 0 0" >> /config/etc/fstab
-		if [ -z "$OEM_WITHOUTHOME" ];then
+		if [ -z "$OEM_WITHOUTHOME" ] && [ -z "$DONT_PARTITION" ];then
 			if [ `ls /mnt/home/ | wc -l` != 0 ]; then
 				Echo "Found non empty home/ directory !"
 				Echo "Moving home/ data to home partition $deviceHome"
@@ -753,9 +734,6 @@ if [ $LOCAL_BOOT = "no" ];then
 			Echo "Activate home partition $deviceHome in fstab"
 			echo "$deviceHome /home ext3 defaults 0 0" >> /config/etc/fstab
 		fi
-	else
-		mkdir -p /config/kiwiboot
-		echo "$deviceBoot /kiwiboot ext2 defaults 0 0" >> /config/etc/fstab
 	fi
 	if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ]; then
 		Echo "Creating grub configuration"

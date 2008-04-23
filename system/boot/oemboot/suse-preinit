@@ -52,39 +52,24 @@ if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ]; then
 	setupSUSEInitrd
 else
 	#======================================
-	# use kiwi initrd from boot partition
+	# use kiwi initrd from RW partition
 	#--------------------------------------
-	mount -t proc  proc  /proc >/dev/null
-	mount -t sysfs sysfs /sys  >/dev/null
-	probeFileSystem $deviceBoot
-	if [ ! "$FSTYPE" = "unknown" ];then
-		modprobe $FSTYPE
-	fi
-	if mount $deviceBoot /kiwiboot;then
-		rm -rf /boot && ln -s /kiwiboot/boot /boot
-		pushd /boot &>/dev/null
-		rm -f vmlinuz && ln -s linux.vmx  vmlinuz
-		rm -f initrd  && ln -s initrd.vmx initrd
-		popd &>/dev/null
-		kernelList
-		if [ ! -z "$COMBINED_IMAGE" ];then
-			Echo "Creating grub configuration for split system"
-		else
-			Echo "Creating grub configuration for unified system"
-		fi
-		if [ $HAVE_SWAP -eq 1 ];then
-			setupBootLoaderGrub / / 0 ${deviceDisk}2 OEM $deviceSwap
-		else
-			setupBootLoaderGrub / / 0 ${deviceDisk}2 OEM
-		fi
-		grubOK=1
+	pushd /boot &>/dev/null
+	rm -f vmlinuz && ln -s linux.vmx  vmlinuz
+	rm -f initrd  && ln -s initrd.vmx initrd
+	popd &>/dev/null
+	kernelList
+	if [ ! -z "$COMBINED_IMAGE" ];then
+		Echo "Creating grub configuration for split system"
 	else
-		Echo "Failed to mount boot partition"
-		Echo "Can't create grub configuration"
-		grubOK=0
+		Echo "Creating grub configuration for unified system"
 	fi
-	umount /proc >/dev/null
-	umount /sys  >/dev/null
+	if [ $HAVE_SWAP -eq 1 ];then
+		setupBootLoaderGrub / / 1 ${deviceDisk}2 OEM $deviceSwap
+	else
+		setupBootLoaderGrub / / 1 ${deviceDisk}2 OEM
+	fi
+	grubOK=1
 fi
 
 #======================================
@@ -92,9 +77,6 @@ fi
 #--------------------------------------
 if [ $grubOK = 1 ];then
 	installBootLoaderGrub
-	if [ -d /kiwiboot ];then
-		umount -l $deviceBoot &>/dev/null
-	fi
 fi
 
 #======================================

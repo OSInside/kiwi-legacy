@@ -2219,14 +2219,18 @@ sub setupBootDisk {
 		$this -> cleanTmp ();
 		return undef;
 	}
+	my $bootpart = "0";
+	if (($syszip) || ($haveSplit)) {
+		$bootpart = "1";
+	}
 	print FD "color cyan/blue white/blue\n";
 	print FD "default 0\n";
 	print FD "timeout 10\n";
-	print FD "gfxmenu (hd0,0)/boot/message\n";
+	print FD "gfxmenu (hd0,$bootpart)/boot/message\n";
 	print FD "\n";
 	print FD "title $label [ VMX ]\n";
 	if (! $isxen) {
-		print FD " root (hd0,0)\n";
+		print FD " root (hd0,$bootpart)\n";
 		print FD " kernel /boot/linux.vmx vga=0x314 splash=silent";
 		if ($imgtype eq "split") {
 			print FD " COMBINED_IMAGE=yes showopts\n";
@@ -2235,7 +2239,7 @@ sub setupBootDisk {
 		}
 		print FD " initrd /boot/initrd.vmx\n";
 	} else {
-		print FD " root (hd0,0)\n";
+		print FD " root (hd0,$bootpart)\n";
 		print FD " kernel /boot/xen.gz.vmx\n";
 		print FD " module /boot/linux.vmx vga=0x314 splash=silent";
 		if ($imgtype eq "split") {
@@ -2247,7 +2251,7 @@ sub setupBootDisk {
 	}
 	print FD "title Failsafe -- $label [ VMX ]\n";
 	if (! $isxen) {
-		print FD " root (hd0,0)\n";
+		print FD " root (hd0,$bootpart)\n";
 		print FD " kernel /boot/linux.vmx vga=0x314 splash=silent";
 		if ($imgtype eq "split") {
 			print FD " COMBINED_IMAGE=yes showopts";
@@ -2258,7 +2262,7 @@ sub setupBootDisk {
 		print FD " noapic maxcpus=0 edd=off\n";
 		print FD " initrd /boot/initrd.vmx\n";
 	} else {
-		print FD " root (hd0,0)\n";
+		print FD " root (hd0,$bootpart)\n";
 		print FD " kernel /boot/xen.gz.vmx\n";
 		print FD " module /boot/linux.vmx vga=0x314 splash=silent";
 		if ($imgtype eq "split") {
@@ -2272,63 +2276,6 @@ sub setupBootDisk {
 	}
 	close FD;
 	$kiwi -> done();
-	#==========================================
-	# Create ext2 image if syszip is active
-	#------------------------------------------
-	if (($syszip) || ($haveSplit)) {
-		$kiwi -> info ("Creating VM boot image");
-		$sysname= $initrd;
-		if ($zipped) {
-			$sysname =~ s/gz$/vmboot/;
-		} else {
-			$sysname = $sysname.".vmboot";
-		}
-		my $ddev = "/dev/zero";
-		my $size = qxx ("du -ms $tmpdir | cut -f1 2>&1");
-		chomp ($size); $size += 1; # add 1M free space for filesystem
-		$sysird = $size;
-		$status = qxx (
-			"dd if=$ddev of=$sysname bs=1M seek=$sysird count=1 2>&1"
-		);
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't create image file: $status");
-			$kiwi -> failed ();
-			$this -> cleanTmp ();
-			return undef;
-		}
-		$sysird += 1; # add another 1M free space because of sparse seek
-		$status = qxx ("/sbin/mkfs.ext2 -b 4096 -F $sysname 2>&1");
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't create filesystem: $status");
-			$kiwi -> failed ();
-			$this -> cleanTmp ();
-			return undef;
-		}
-		$status = qxx ("mount -o loop $sysname $loopdir 2>&1");
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't mount image: $status");
-			$kiwi -> failed ();
-			$this -> cleanTmp ();
-			return undef;
-		}
-		$status = qxx ("mv $tmpdir/boot $loopdir 2>&1");
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't install image: $status");
-			$kiwi -> failed ();
-			qxx ("rm -rf $tmpdir");
-			return undef;
-		}
-		qxx ("umount $loopdir 2>&1");
-		$kiwi -> done();
-	}
 	#==========================================
 	# create virtual disk
 	#------------------------------------------
@@ -2376,11 +2323,10 @@ sub setupBootDisk {
 		}
 		my @commands;
 		if (($syszip) || ($haveSplit)) {
-			# xda1 boot / xda2 ro / xda3 rw
+			# xda1 ro / xda2 rw
 			@commands = (
-				"n","p","1",".","+".$sysird."M",
-				"n","p","2",".","+".$syszip."M",
-				"n","p","3",".",".","w","q"
+				"n","p","1",".","+".$syszip."M",
+				"n","p","2",".",".","w","q"
 			);
 		} else {
 			# xda1 rw
@@ -2408,15 +2354,12 @@ sub setupBootDisk {
 		}
 		$dmap = $loop; $dmap =~ s/dev\///;
 		$root = "/dev/mapper".$dmap."p1";
-		if ($syszip > 0) {
-			$root = "/dev/mapper".$dmap."p2";
-		}
 		#==========================================
 		# check partition sizes
 		#------------------------------------------
 		if ($syszip > 0) {
 			my $sizeOK = 1;
-			my $systemPSize = qxx ("/sbin/sfdisk -s /dev/mapper".$dmap."p2");
+			my $systemPSize = qxx ("/sbin/sfdisk -s /dev/mapper".$dmap."p1");
 			my $systemISize = -s $system; $systemISize /= 1024;
 			chomp $systemPSize;
 			#print "_______A $systemPSize : $systemISize\n";
@@ -2424,7 +2367,7 @@ sub setupBootDisk {
 				$syszip += 10;
 				$sizeOK = 0;
 			}
-			my $initrdPSize = qxx ("/sbin/sfdisk -s /dev/mapper".$dmap."p1"); 
+			my $initrdPSize = qxx ("/sbin/sfdisk -s /dev/mapper".$dmap."p2"); 
 			my $initrdISize = -s $sysname; $initrdISize /= 1024;
 			chomp $initrdPSize;
 			#print "_______B $initrdPSize : $initrdISize\n";
@@ -2496,7 +2439,7 @@ sub setupBootDisk {
 		}
 		if ($haveSplit) {
 			$kiwi -> info ("Dumping split read/write part on virtual disk");
-			$root = "/dev/mapper".$dmap."p3";
+			$root = "/dev/mapper".$dmap."p2";
 			$status = qxx ("dd if=$splitfile of=$root bs=32k 2>&1");
 			$result = $? >> 8;
 			if ($result != 0) {
@@ -2606,68 +2549,71 @@ sub setupBootDisk {
 		qxx ( "umount $loopdir 2>&1" );
 	}
 	#==========================================
+	# create read/write filesystem if needed
+	#------------------------------------------
+	if (($syszip) || ($haveSplit)) {
+		$kiwi -> info ("Creating ext2 read-write filesystem");
+		$root = "/dev/mapper".$dmap."p2";
+		$status = qxx ("/sbin/mke2fs -q -F $root 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create filesystem: $status");
+			$kiwi -> failed ();
+			$this -> cleanLoop ();
+			return undef;
+		}
+		$kiwi -> done();
+	}
+	#==========================================
 	# Dump boot image on virtual disk
 	#------------------------------------------
 	$kiwi -> info ("Dumping boot image to virtual disk");
-	if (($syszip) || ($haveSplit)) {
-		$root = "/dev/mapper".$dmap."p1";
-		$status = qxx ("dd if=$sysname of=$root bs=32k 2>&1");
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't dump image: $status");
-			$kiwi -> failed ();
-			$this -> cleanLoop ();
-			return undef;
-		}
-		unlink $sysname;
-	} else {
-		#==========================================
-		# Mount system image
-		#------------------------------------------
-		$status = qxx ("mount $root $loopdir 2>&1");
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't mount image: $status");
-			$kiwi -> failed ();
-			$this -> cleanLoop ();
-			return undef;
-		}
-		#==========================================
-		# Copy boot data on system image
-		#------------------------------------------
-		$status = qxx ("cp -a $tmpdir/boot $loopdir 2>&1");
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error ("Couldn't copy boot data to system image: $status");
-			$kiwi -> failed ();
-			$this -> cleanLoop ();
-			return undef;
-		}
-		#==========================================
-		# check for message file in initrd
-		#------------------------------------------
-		my $message = "'image/loader/message'";
-		my $unzip   = "$main::Gzip -cd $initrd 2>&1";
-		if ($zipped) {
-			$status = qxx ("$unzip | (cd $loopdir && cpio -di $message 2>&1)");
-		} else {
-			$status = qxx (
-				"cat $initrd | (cd $loopdir && cpio -di $message 2>&1)"
-			);
-		}
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't find message file: $status");
-			$kiwi -> failed ();
-			$this -> cleanLoop ();
-			return undef;
-		}
-		qxx ( "umount $loopdir 2>&1" );
+	#==========================================
+	# Mount system image / or rw partition
+	#------------------------------------------
+	$status = qxx ("mount $root $loopdir 2>&1");
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't mount image: $status");
+		$kiwi -> failed ();
+		$this -> cleanLoop ();
+		return undef;
 	}
+	#==========================================
+	# Copy boot data on system image
+	#------------------------------------------
+	$status = qxx ("cp -a $tmpdir/boot $loopdir 2>&1");
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error ("Couldn't copy boot data to system image: $status");
+		$kiwi -> failed ();
+		$this -> cleanLoop ();
+		return undef;
+	}
+	#==========================================
+	# check for message file in initrd
+	#------------------------------------------
+	$message = "'image/loader/message'";
+	$unzip   = "$main::Gzip -cd $initrd 2>&1";
+	if ($zipped) {
+		$status = qxx ("$unzip | (cd $loopdir && cpio -di $message 2>&1)");
+	} else {
+		$status = qxx (
+			"cat $initrd | (cd $loopdir && cpio -di $message 2>&1)"
+		);
+	}
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't find message file: $status");
+		$kiwi -> failed ();
+		$this -> cleanLoop ();
+		return undef;
+	}
+	qxx ( "umount $loopdir 2>&1" );
 	$kiwi -> done();
 	#==========================================
 	# cleanup device maps and part mount
@@ -2686,7 +2632,7 @@ sub setupBootDisk {
 		return undef;
 	}
 	print FD "device (hd0) $diskname\n";
-	print FD "root (hd0,0)\n";
+	print FD "root (hd0,$bootpart)\n";
 	print FD "setup (hd0)\n";
 	print FD "quit\n";
 	close FD;
