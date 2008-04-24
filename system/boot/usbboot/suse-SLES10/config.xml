@@ -47,7 +47,7 @@
 		<source path="/image/dist/full-sles10-i386"/>
 	</repository>
 	<repository type="rpm-dir">
-		<source path="/usr/share/kiwi/image/usbboot/suse-repo/suse-sles-repo"/>
+		<source path="/usr/share/kiwi/repo/suse-repo/suse-sles-repo"/>
 	</repository>
 	<packages type="image" profiles="default">
 		<package name="kernel-default"/>

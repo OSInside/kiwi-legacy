@@ -50,7 +50,7 @@
 		<source path="/image/dist/full-10.2-i386"/>
 	</repository>
 	<repository type="rpm-dir">
-		<source path="/usr/share/kiwi/image/netboot/suse-repo/suse-10.2-repo"/>
+		<source path="/usr/share/kiwi/repo/suse-repo/suse-10.2-repo"/>
 	</repository>
 	<packages type="image" profiles="default">
 		<package name="kernel-default"/>

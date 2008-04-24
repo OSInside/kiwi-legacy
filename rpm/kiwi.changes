@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Thu Apr 24 11:44:27 CEST 2008 - ms@suse.de
 
+- removed redundant package repositories
 - added kiwi-instsource sub-package for installation source
   creation. This code is maintained by jcborn@novell.com
 

@@ -30,6 +30,7 @@ KIWIXSLVZ   = ${kiwi_prefix}/xsl
 TOOLSVZ     = ${bin_prefix}
 INITVZ      = ${init_prefix}
 KIWIIMAGE   = ${kiwi_prefix}/image
+KIWIREPO    = ${kiwi_prefix}/repo
 TFTPKIWI    = ${tftp_prefix}/KIWI
 TFTPBOOT    = ${tftp_prefix}/
 TFTPBOOTBOOT= ${tftp_prefix}/boot
@@ -58,7 +59,7 @@ install:
 	install -d -m 755 ${KIWIBINVZ} ${KIWIMODVZ} ${KIWIIMAGE} ${KIWIXSLVZ}
 	install -d -m 755 ${TFTPKIWI} ${TFTPBOOT} ${TFTPBOOTCONF} ${TFTPIMAGE}
 	install -d -m 755 ${TFTPBOOTBOOT} ${KIWITSTVZ}
-	install -d -m 755 ${TFTPUPLOAD}
+	install -d -m 755 ${TFTPUPLOAD} ${KIWIREPO}
 	install -d -m 755 ${PACKDOCVZ} ${MANVZ}
 	install -d -m 755 ${TOOLSVZ} ${INITVZ}
 
@@ -111,6 +112,11 @@ install:
 	# Install image descriptions
 	#--------------------------------------------
 	cp -a system/boot/* ${KIWIIMAGE}
+
+	#============================================
+	# Install kiwi repo
+	#--------------------------------------------
+	cp -a system/suse-repo ${KIWIREPO}
 
 modules/KIWIScheme.rng: modules/KIWIScheme.rnc
 	#============================================

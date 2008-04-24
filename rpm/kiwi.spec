@@ -40,7 +40,7 @@ Summary:        OpenSuSE - KIWI Image System
 Provides:       kiwi2 = 2.14
 Obsoletes:      kiwi2 = 2.14
 Version:        2.38
-Release:        51
+Release:        52
 Group:          System/Management
 License:        GPL v2 or later
 Source:         %{name}.tar.bz2
@@ -265,10 +265,11 @@ if [ "$UID" = "$K_USER" ];then
 	mkdir -p $RPM_BUILD_ROOT/srv/tftpboot/pxelinux.cfg
 	mkdir -p $RPM_BUILD_ROOT/srv/tftpboot/boot
 	mkdir -p /usr/share/kiwi/modules
+	mkdir -p /usr/share/kiwi/repo
 	mkdir -p /usr/share/kiwi/image/netboot
 	rm -f /usr/share/kiwi/modules/*
 	cp -f modules/* /usr/share/kiwi/modules
-	cp -a system/boot/netboot/suse-repo /usr/share/kiwi/image/netboot
+	cp -a system/suse-repo /usr/share/kiwi/repo
 	cd modules
 	pxedefault=$RPM_BUILD_ROOT/srv/tftpboot/pxelinux.cfg/default
 	echo "# /.../" > $pxedefault
@@ -379,6 +380,7 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_datadir}/kiwi/image
 %{_datadir}/kiwi/.revision
 %{_datadir}/kiwi/modules
+%{_datadir}/kiwi/repo
 %exclude %{_datadir}/kiwi/modules/KIWICollect.pm
 %exclude %{_datadir}/kiwi/modules/KIWIUtil.pm
 %exclude %{_datadir}/kiwi/modules/KIWIRPMQ.pm
