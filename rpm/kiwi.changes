@@ -2,6 +2,8 @@
 Thu Apr 24 11:44:27 CEST 2008 - ms@suse.de
 
 - removed redundant package repositories
+- KIWIBoot constructor fix to setup vmmbyte correctly
+- KIWIBoot constructor fix to recognizes raw split images correctly
 - added kiwi-instsource sub-package for installation source
   creation. This code is maintained by jcborn@novell.com
 

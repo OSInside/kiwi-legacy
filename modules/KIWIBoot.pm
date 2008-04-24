@@ -240,10 +240,7 @@ sub new {
 				# find partition and mount it
 				#------------------------------------------
 				my $dmap = $loop; $dmap =~ s/dev\///;
-				my $sdev = "/dev/mapper".$dmap."p2";
-				if (! -e $sdev) {
-					$sdev = "/dev/mapper".$dmap."p1";
-				}
+				my $sdev = "/dev/mapper".$dmap."p1";
 				%fsattr = main::checkFileSystem ($sdev);
 				$status = qxx ("mount -t $fsattr{type} $sdev $tmpdir 2>&1");
 				$result = $? >> 8;
@@ -338,7 +335,7 @@ sub new {
 		$vmsize  = $vmsize."M";
 	} elsif (defined $system) {
 		$vmmbyte = $xml -> getImageSizeBytes();
-		$vmmbyte = $vmsize / 1048576;
+		$vmmbyte = $vmmbyte / 1048576;
 	}
 	#==========================================
 	# round compressed image size
