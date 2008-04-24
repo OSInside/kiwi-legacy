@@ -227,6 +227,26 @@ Authors:
     Thomas Schraitle
     Marcus Schaefer
 
+
+%package -n kiwi-instsource
+License:        GPL v2 only
+Requires:       kiwi inst-source-utils
+Summary:        Installation Source creation
+Group:          System/Management
+
+%description -n kiwi-instsource
+This package contains modules used for installation source creation.
+With those it is possible to create a valid installation repository
+from blank RPM file trees. The created tree can be used directly for
+the image creation process afterwards. This package allows using the
+--create-instsource <path-to-config.xml> switch.
+
+
+
+Authors:
+--------
+    Jan-Christoph Bornschlegel <jcborn@novell.com>
+
 %prep
 %setup -n kiwi
 
@@ -359,6 +379,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_datadir}/kiwi/image
 %{_datadir}/kiwi/.revision
 %{_datadir}/kiwi/modules
+%exclude %{_datadir}/kiwi/modules/KIWICollect.pm
+%exclude %{_datadir}/kiwi/modules/KIWIUtil.pm
+%exclude %{_datadir}/kiwi/modules/KIWIRPMQ.pm
 %{_datadir}/kiwi/tests
 %{_datadir}/kiwi/xsl
 %{_sbindir}/kiwi
@@ -385,6 +408,16 @@ rm -rf $RPM_BUILD_ROOT
 %doc %{_defaultdocdir}/kiwi/kiwi.rng.html
 %doc %{_defaultdocdir}/kiwi/kiwi.quick.pdf
 %doc %{_defaultdocdir}/kiwi/testsuite.readme
+#=================================================
+# KIWI instsource...      
+#-------------------------------------------------
+
+%files -n kiwi-instsource
+%defattr(-, root, root)
+%{_datadir}/kiwi/modules/KIWICollect.pm
+%{_datadir}/kiwi/modules/KIWIUtil.pm
+%{_datadir}/kiwi/modules/KIWIRPMQ.pm
+
 #=================================================
 # KIWI-pxeboot files...  
 # ------------------------------------------------
