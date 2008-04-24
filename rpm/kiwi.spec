@@ -28,7 +28,7 @@ BuildRequires:  libqt4 libqt4-devel
 BuildRequires:  freetype2-devel libpng-devel qt qt-devel
 %endif 
 %if %{suse_version} > 1030
-BuildRequires:  db-devel libexpat-devel libsatsolver libsatsolver-devel
+BuildRequires:  db43-devel libexpat-devel libsatsolver-devel
 %endif
 %if %{suse_version} <= 1010
 Requires:       qt
@@ -36,6 +36,9 @@ Requires:       qt
 Requires:       perl = %{perl_version}
 Requires:       perl-XML-LibXML perl-libwww-perl screen coreutils
 Requires:       kiwi-tools libxslt
+%if %{suse_version} > 1030
+Requires:       satsolver-tools
+%endif
 Summary:        OpenSuSE - KIWI Image System
 Provides:       kiwi2 = 2.14
 Obsoletes:      kiwi2 = 2.14
