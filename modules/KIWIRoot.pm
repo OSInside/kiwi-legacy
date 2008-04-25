@@ -274,6 +274,8 @@ sub init {
 	qxx ("mknod -m 640 $root/dev/loop3 b 7 3");
 	qxx ("mkdir -p $root/etc/sysconfig");
 	qxx ("mkdir -p $root/var/log/YaST2");
+	# for building in suse autobuild we need the following file
+	qxx ("touch $root/.buildenv");
 	# need mtab at least empty for mount calls
 	qxx ("touch $root/etc/mtab");
 	qxx ("touch $root/etc/sysconfig/bootloader");
