@@ -124,8 +124,8 @@
 	</packages>
 	<packages type="image" profiles="smp">
 		<!-- KERNEL AND MODULE PACKAGES START SMP -->
-		<package name="kernel-bigsmp"/>
-		<package name="aufs-kmp-bigsmp"/>
+		<package name="kernel-pae"/>
+		<package name="aufs-kmp-pae"/>
 		<!-- KERNEL AND MODULE PACKAGES END SMP -->
 	</packages>
 	<packages type="image" profiles="xen">

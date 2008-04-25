@@ -64,8 +64,8 @@
 		<package name="aufs-kmp-default"/>
 	</packages>
 	<packages type="image" profiles="smp">
-		<package name="kernel-bigsmp"/>
-		<package name="aufs-kmp-bigsmp"/>
+		<package name="kernel-pae"/>
+		<package name="aufs-kmp-pae"/>
 	</packages>
 	<packages type="image" profiles="xen">
 		<package name="kernel-xen"/>
