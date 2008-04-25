@@ -3,6 +3,8 @@ Thu Apr 24 17:39:07 CEST 2008 - ms@suse.de
 
 - fixed build of satsolver binding and requirements
 - changed bigsmp -> pae for SUSE 11.0 boot descriptions
+- added cracklib-dict-small to SUSE 11.0 boot image descriptions
+  this prevents the -full package to become installed
 
 -------------------------------------------------------------------
 Thu Apr 24 11:44:27 CEST 2008 - ms@suse.de
