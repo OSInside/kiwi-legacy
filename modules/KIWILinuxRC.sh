@@ -2008,6 +2008,7 @@ function mountSystemUnified {
 #--------------------------------------
 function mountSystemCombined {
 	local mountDevice=$1
+	local loopf=$2
 	local roDevice=$mountDevice
 	local rwDevice=`getNextPartition $mountDevice`
 	mkdir /read-only >/dev/null
@@ -2015,7 +2016,7 @@ function mountSystemCombined {
 	# mount the read-only partition to /read-only and use
 	# mount option -o ro for this filesystem
 	# ----
-	if ! kiwiMount $roDevice "/read-only";then
+	if ! kiwiMount $roDevice "/read-only" "" $loopf;then
 		Echo "Failed to mount read only filesystem"
 		return 1
 	fi
@@ -2102,7 +2103,7 @@ function mountSystem {
 	# check root tree type
 	#--------------------------------------
 	if test ! -z $COMBINED_IMAGE;then
-		mountSystemCombined "$mountDevice"
+		mountSystemCombined "$mountDevice" $2
 		retval=$?
 	elif test ! -z $UNIONFS_CONFIG;then
 		mountSystemUnified $2
