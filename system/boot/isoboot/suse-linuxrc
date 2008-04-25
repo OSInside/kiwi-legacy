@@ -264,8 +264,7 @@ else
 		Echo "Mounting compressed unified tree..."
 	fi
 	mkdir -p /mnt/$LIVECD && mount $cddev /mnt/$LIVECD >/dev/null
-	losetup /dev/loop1 /mnt/$LIVECD/$imageReadOnly
-	if ! mountSystem /dev/loop1;then
+	if ! mountSystem /dev/loop1 /mnt/$LIVECD/$imageReadOnly;then
 		systemException "Failed to mount root filesystem" "reboot"
 	fi
 fi

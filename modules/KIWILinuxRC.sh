@@ -1876,6 +1876,7 @@ function kiwiMount {
 	local src=$1
 	local dst=$2
 	local opt=$3
+	local lop=$4
 	#======================================
 	# load not autoloadable fs modules
 	#--------------------------------------
@@ -1898,10 +1899,16 @@ function kiwiMount {
 	# decide for a mount method
 	#--------------------------------------
 	if [ $FSTYPE = "cromfs" ];then
+		if [ ! -z "$lop" ];then
+			src=$lop
+		fi
 		if ! cromfs-driver $src $dst >/dev/null;then
 			return 1
 		fi
 	else
+		if [ ! -z "$lop" ];then
+			losetup /dev/loop1 $lop
+		fi
 		if ! mount -t $FSTYPE $opt $src $dst >/dev/null;then
 			return 1
 		fi
@@ -1915,6 +1922,7 @@ function kiwiMount {
 # mountSystemUnified
 #--------------------------------------
 function mountSystemUnified {
+	local loopf=$1
 	local roDir=/read-only
 	local rwDir=/read-write
 	local xiDir=/xino
@@ -1971,7 +1979,7 @@ function mountSystemUnified {
 	#======================================
 	# mount read only device
 	#--------------------------------------
-	if ! kiwiMount $roDevice $roDir;then
+	if ! kiwiMount $roDevice $roDir "" $loopf;then
 		Echo "Failed to mount read only filesystem"
 		return 1
 	fi
@@ -2093,7 +2101,7 @@ function mountSystem {
 		mountSystemCombined "$mountDevice"
 		retval=$?
 	elif test ! -z $UNIONFS_CONFIG;then
-		mountSystemUnified
+		mountSystemUnified $2
 		retval=$?
 	else
 		mountSystemStandard "$mountDevice"
