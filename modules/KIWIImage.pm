@@ -1297,14 +1297,14 @@ sub createImageLiveCD {
 		return undef;
 	}
 
-	if ((! defined $gzip) || ($gzip eq "unified")) {
+	if ((! defined $gzip) || ($gzip =~ /^unified/)) {
 		print FD "IMAGE=/dev/ram1;$namecd\n";
 	} else {
 		print FD "IMAGE=/dev/loop1;$namecd\n";
 	}
 	
 	if (defined $gzip) {
-		if ($gzip eq "unified") {
+		if ($gzip =~ /^unified/) {
 			print FD "UNIONFS_CONFIG=/dev/ram1,/dev/loop1,aufs\n";
 		} else {
 			print FD "COMBINED_IMAGE=yes\n";
