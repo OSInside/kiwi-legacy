@@ -945,7 +945,7 @@ function USBStickDevice {
 				if [ $removable -eq 1 ];then
 					stickFound=1
 					stickRoot=$device
-					stickDevice="$device"2
+					stickDevice="$device"1
 					stickSerial=$serial
 					return
 				fi
