@@ -878,7 +878,7 @@ div {
 	k.type.flags.attribute =
 		## Specifies flags for the image type. This could be compressed
 		## or unified and applies to the iso type only
-		attribute flags { "unified" | "compressed" }
+		attribute flags { "unified" | "compressed" | "unified-cromfs" | "compressed-cromfs"}
 	k.type.filesystem.attribute = 
 		## Specifies the filesystem which can be one of:
 		## ext2 , ext3 , reiserfs ,squashfs or cromfs

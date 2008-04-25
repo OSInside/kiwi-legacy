@@ -1202,6 +1202,8 @@ or unified and applies to the iso type only</a:documentation>
         <choice>
           <value>unified</value>
           <value>compressed</value>
+          <value>unified-cromfs</value>
+          <value>compressed-cromfs</value>
         </choice>
       </attribute>
     </define>
