@@ -1876,13 +1876,27 @@ function kiwiMount {
 	local src=$1
 	local dst=$2
 	local opt=$3
+	#======================================
+	# load not autoloadable fs modules
+	#--------------------------------------
+	modprobe squashfs &>/dev/null
+	modprobe fuse     &>/dev/null
+	#======================================
+	# store old FSTYPE value
+	#--------------------------------------
 	if [ ! -z "$FSTYPE" ];then
 		FSTYPE_SAVE=$FSTYPE
 	fi
+	#======================================
+	# probe filesystem
+	#--------------------------------------
 	probeFileSystem $src
 	if [ -z $FSTYPE ] || [ $FSTYPE = "unknown" ];then
 		FSTYPE="auto"
 	fi
+	#======================================
+	# decide for a mount method
+	#--------------------------------------
 	if [ $FSTYPE = "cromfs" ];then
 		if ! cromfs-driver $src $dst >/dev/null;then
 			return 1
@@ -2065,11 +2079,6 @@ function mountSystem {
 	local retval=0
 	local OLDIFS=$IFS
 	IFS=$IFS_ORIG
-	#======================================
-	# load not autoloadable fs modules
-	#--------------------------------------
-	modprobe squashfs >/dev/null 2>&1
-	modprobe fuse     >/dev/null 2>&1
 	#======================================
 	# set primary mount device
 	#--------------------------------------
