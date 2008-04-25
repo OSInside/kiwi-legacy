@@ -2098,7 +2098,7 @@ function mountSystem {
 	#--------------------------------------
 	local mountDevice=$imageRootDevice
 	if test ! -z $1;then
-		mountDevice=$@
+		mountDevice="$1"
 	fi
 	#======================================
 	# check root tree type
