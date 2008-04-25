@@ -2755,7 +2755,7 @@ sub setupCromFS {
 	}
 	unlink ("$imageDest/$name");
 	my $data = qxx (
-		"/usr/bin/mkcromffs --lzmabits 0,0,8 $tree $imageDest/$name 2>&1"
+		"/usr/bin/mkcromfs --lzmabits 0,0,8 $tree $imageDest/$name 2>&1"
 	);
 	my $code = $? >> 8;
 	if ($code != 0) {
