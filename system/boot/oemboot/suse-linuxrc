@@ -463,7 +463,7 @@ if [ $LOCAL_BOOT = "no" ];then
 			fi
 		fi
 	else
-		if isFSTypeReadOnly;then
+		if ! isFSTypeReadOnly;then
 			#======================================
 			# 10.2 write new partition table
 			#--------------------------------------
