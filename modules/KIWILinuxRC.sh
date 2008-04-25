@@ -947,6 +947,7 @@ function USBStickDevice {
 					stickRoot=$device
 					stickDevice="$device"1
 					stickSerial=$serial
+					echo .
 					return
 				fi
 			done
