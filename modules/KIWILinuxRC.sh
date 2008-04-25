@@ -1892,9 +1892,10 @@ function kiwiMount {
 	# probe filesystem
 	#--------------------------------------
 	if [ ! -z "$lop" ];then
-		src=$lop
+		probeFileSystem $lop
+	else
+		probeFileSystem $src
 	fi
-	probeFileSystem $src
 	if [ -z $FSTYPE ] || [ $FSTYPE = "unknown" ];then
 		FSTYPE="auto"
 	fi
@@ -1902,6 +1903,9 @@ function kiwiMount {
 	# decide for a mount method
 	#--------------------------------------
 	if [ $FSTYPE = "cromfs" ];then
+		if [ ! -z "$lop" ];then
+			src=$lop
+		fi
 		if ! cromfs-driver $src $dst >/dev/null;then
 			return 1
 		fi
