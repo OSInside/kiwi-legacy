@@ -172,7 +172,6 @@
 		<package name="bootsplash-branding-openSUSE"/>
 		<package name="tar"/>
 		<package name="cromfs"/>
-		<package name="cracklib-dict-small"/>
 		<!-- PACKAGES END DEFAULT AND XEN -->
 	</packages>
 	<packages type="image" profiles="diskless">
@@ -192,12 +191,12 @@
 		<package name="nbd"/>
 		<package name="nfs-client"/>
 		<package name="tar"/>
-		<package name="cracklib-dict-small"/>
 		<!-- PACKAGES STOP DISKLESS -->
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
 		<package name="glibc-locale"/>
+		<package name="cracklib-dict-small"/>
 	</packages>
 	<packages type="delete" profiles="default,xen,diskless,smp">
 		<!-- DELETE PACKAGES START DEFAULT, XEN AND DISKLESS -->

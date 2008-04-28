@@ -94,12 +94,12 @@
 		<package name="bootsplash-branding-openSUSE"/>
 		<package name="tar"/>
 		<package name="cromfs"/>
-		<package name="cracklib-dict-small"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
 		<package name="glibc-locale"/>
 		<package name="procps"/>
+		<package name="cracklib-dict-small"/>
 	</packages>
 	<packages type="delete">
 		<package name="PolicyKit"/>

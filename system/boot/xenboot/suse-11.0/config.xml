@@ -63,13 +63,13 @@
 		<package name="bootsplash"/>
 		<package name="bootsplash-branding-openSUSE"/>
 		<package name="cromfs"/>
-		<package name="cracklib-dict-small"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="kernel-xen"/>
 		<package name="filesystem"/>
 		<package name="glibc-locale"/>
 		<package name="procps"/>
+		<package name="cracklib-dict-small"/>
 	</packages>
 	<packages type="delete">
 		<package name="PolicyKit"/>
