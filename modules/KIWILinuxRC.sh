@@ -943,9 +943,16 @@ function USBStickDevice {
 				fi
 				removable=`cat $isremovable`
 				if [ $removable -eq 1 ];then
-					stickFound=1
 					stickRoot=$device
 					stickDevice="$device"1
+					if ! kiwiMount $stickDevice "/mnt";then
+						continue
+					fi
+					if [ ! -d /mnt/image ];then
+						continue
+					fi
+					umountSystem
+					stickFound=1
 					stickSerial=$serial
 					echo .
 					return

@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Apr 28 14:12:42 CEST 2008 - ms@suse.de
+
+- added image identification for USB sticks (bnc #383746)
+
+-------------------------------------------------------------------
 Mon Apr 28 09:32:00 CEST 2008 - ms@suse.de
 
 - fixed build of solver plugin, sat api has changed
