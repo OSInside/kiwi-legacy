@@ -194,10 +194,6 @@ extern "C"
         solver_solve(self, job);
     }
 
-    void printDecisions() {
-        printdecisions(self);
-    }
-
     SV* getInstallList (Pool *pool) {
         int b = 0;
         AV *myav = newAV();
