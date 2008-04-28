@@ -553,6 +553,7 @@ function suseStripInitrd {
 		/etc/ppp /etc/xdg /etc/NetworkManager /lib*/YaST /lib*/security
 		/lib*/mkinitrd /srv /var/adm /usr/lib/engines /usr/src/packages
 		/usr/src/linux* /usr/local /var/log/* /usr/share/pixmaps
+		/usr/share/gtk-doc
 		/lib/modules/*/kernel/drivers/net/wireless
 		/lib/modules/*/kernel/drivers/net/pcmcia
 		/lib/modules/*/kernel/drivers/net/tokenring
