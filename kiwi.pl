@@ -465,15 +465,15 @@ sub main {
 		#==========================================
 		# Check for bootprofile in config.xml
 		#------------------------------------------
+		my $xml;
 		if (! @Profiles) {
 			$kiwi -> info ("Reading image description...");
-			my $xml = new KIWIXML (
+			$xml = new KIWIXML (
 				$kiwi,"$Create/image",\%ForeignRepo,$SetImageType
 			);
 			if (! defined $xml) {
 				my $code = kiwiExit (1); return $code;
 			}
-			$kiwi -> done();
 			my %type = %{$xml->getImageTypeAndAttributes()};
 			if (($type{"type"} eq "cpio") && ($type{bootprofile})) {
 				@Profiles = split (/,/,$type{bootprofile});
@@ -482,10 +482,12 @@ sub main {
 				}
 			}
 		}
-		$kiwi -> info ("Reading image description...");
-		my $xml = new KIWIXML (
-			$kiwi,"$Create/image",undef,$SetImageType,\@Profiles
-		);
+		if (! defined $xml) {
+			$kiwi -> info ("Reading image description...");
+			$xml = new KIWIXML (
+				$kiwi,"$Create/image",undef,$SetImageType,\@Profiles
+			);
+		}
 		if (! defined $xml) {
 			if (defined $BaseRoot) {
 				$overlay -> resetOverlay();
@@ -683,6 +685,10 @@ sub main {
 			};
 			/^pxe/      && do {
 				$ok = $image -> createImagePXE ( $para );
+				last SWITCH;
+			};
+			/^ec2/      && do {
+				$ok = $image -> createImageEC2 ();
 				last SWITCH;
 			};
 			$kiwi -> error  ("Unsupported type: $type{type}");

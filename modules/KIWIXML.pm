@@ -466,6 +466,9 @@ sub getImageTypeAndAttributes {
 		$record{baseroot}      = $node -> getAttribute("baseroot");
 		$record{bootprofile}   = $node -> getAttribute("bootprofile");
 		$record{filesystem}    = $node -> getAttribute("filesystem");
+		$record{AWSAccountNr}  = $node -> getAttribute("ec2accountnr");
+		$record{EC2CertFile}   = $node -> getAttribute("ec2certfile");
+		$record{EC2PrivateKeyFile} = $node -> getAttribute("ec2privatekeyfile");
 		if ($record{type} eq "split") {
 			my $filesystemRO = $node -> getAttribute("fsreadonly");
 			my $filesystemRW = $node -> getAttribute("fsreadwrite");

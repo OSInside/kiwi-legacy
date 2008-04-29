@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Apr 29 17:17:29 CEST 2008 - ms@suse.de
+
+- added support for creating Amazon EC2 images (bnc #367138)
+- fixed "--bootvm-disksize" option
+
+-------------------------------------------------------------------
 Mon Apr 28 14:12:42 CEST 2008 - ms@suse.de
 
 - added image identification for USB sticks (bnc #383746)

@@ -186,6 +186,89 @@ sub createImageEXT3 {
 }
 
 #==========================================
+# createImageEC2
+#------------------------------------------
+sub createImageEC2 {
+	# ...
+	# create Amazon EC2 image from an ext3 based
+	# kiwi image
+	# ---
+	my $this      = shift;
+	my $imageTree = $this->{imageTree};
+	my $imageDest = $this->{imageDest};
+	my $xml       = $this->{xml};
+	my $arch      = $this->{arch};
+	my $kiwi      = $this->{kiwi};
+	#==========================================
+	# Check AWS account information
+	#------------------------------------------
+	my %type = %{$xml->getImageTypeAndAttributes()};
+	if (! defined $type{AWSAccountNr}) {
+		$kiwi -> error  ("Missing AWS account number not");
+		$kiwi -> failed ();
+		return undef;
+	}
+	if (! defined $type{EC2CertFile}) {
+		$kiwi -> error  ("Missing AWS user's PEM encoded RSA pubkey cert file");
+		$kiwi -> failed ();
+		return undef;
+	}
+	if (! defined $type{EC2PrivateKeyFile}) {
+		$kiwi -> error ("Missing AWS user's PEM encoded RSA private key file");
+		$kiwi -> failed ();
+		return undef;
+	}
+	if ($arch =~ /i.86/) {
+		$arch = "i386";
+	}
+	if (($arch ne "i386") && ($arch ne "x86_64")) {
+		$kiwi -> error  ("Unsupport AWS EC2 architecture: $arch");
+		$kiwi -> failed ();
+		return undef;
+	}
+	#==========================================
+	# PRE filesystem setup
+	#------------------------------------------
+	my $name = $this -> preImage ();
+	if (! defined $name) {
+		return undef;
+	}
+	#==========================================
+	# Create filesystem on extend
+	#------------------------------------------
+	if (! $this -> setupEXT2 ( $name,$imageTree,"journaled" )) {
+		return undef;
+	}
+	#==========================================
+	# POST filesystem setup
+	#------------------------------------------
+	if (! $this -> postImage ($name,"no_compress")) {
+		return undef;
+	}
+	#==========================================
+	# call ec2-bundle-image (Amazon toolkit)
+	#------------------------------------------
+	$kiwi -> info ("Creating EC2 bundle...");
+	my $pk = $type{EC2PrivateKeyFile};
+	my $ca = $type{EC2CertFile};
+	my $nr = $type{AWSAccountNr};
+	my $fi = $imageDest."/".$name;
+	my $to = $imageDest;
+	my $data = qxx (
+		"ec2-bundle-image -i $fi -k $pk -c $ca -u $nr -d $to -r $arch 2>&1"
+	);
+	my $code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("ec2-bundle-image: $data");
+		$kiwi -> failed ();
+		return undef;
+	}
+	$kiwi -> done();
+	return $this;
+}
+
+#==========================================
 # createImageReiserFS
 #------------------------------------------
 sub createImageReiserFS {
@@ -2283,6 +2366,7 @@ sub postImage {
 	# ---
 	my $this = shift;
 	my $name = shift;
+	my $nozip= shift;
 	my $kiwi = $this->{kiwi};
 	my $xml  = $this->{xml};
 	my $imageDest = $this->{imageDest};
@@ -2315,7 +2399,7 @@ sub postImage {
 		#==========================================
 		# Check EXT3 file system
 		#------------------------------------------
-		/ext3/i && do {
+		/ext3|ec2/i && do {
 			qxx ("/sbin/fsck.ext3 -f -y $imageDest/$name 2>&1");
 			qxx ("/sbin/tune2fs -j $imageDest/$name 2>&1");
 			$kiwi -> done();
@@ -2324,7 +2408,7 @@ sub postImage {
 		#==========================================
 		# Check EXT2 file system
 		#------------------------------------------
-		/ext2/i && do {
+		/ext2/i     && do {
 			qxx ("/sbin/e2fsck -f -y $imageDest/$name 2>&1");
 			$kiwi -> done();
 			last SWITCH;
@@ -2354,10 +2438,12 @@ sub postImage {
 	#==========================================
 	# Compress image using gzip
 	#------------------------------------------
-	if ($xml->getCompressed()) {
-	if (! $this -> compressImage ($name)) {
-		return undef;
-	}
+	if (! defined $nozip) {
+		if ($xml->getCompressed()) {
+			if (! $this -> compressImage ($name)) {
+				return undef;
+			}
+		}
 	}
 	#==========================================
 	# Create image boot configuration

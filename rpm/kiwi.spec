@@ -37,13 +37,13 @@ Requires:       perl = %{perl_version}
 Requires:       perl-XML-LibXML perl-libwww-perl screen coreutils
 Requires:       kiwi-tools libxslt
 %if %{suse_version} > 1030
-Requires:       satsolver-tools
+Requires:       satsolver-tools ec2-ami-tools
 %endif
 Summary:        OpenSuSE - KIWI Image System
 Provides:       kiwi2 = 2.14
 Obsoletes:      kiwi2 = 2.14
 Version:        2.38
-Release:        55
+Release:        56
 Group:          System/Management
 License:        GPL v2 or later
 Source:         %{name}.tar.bz2
