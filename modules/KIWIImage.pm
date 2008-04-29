@@ -207,10 +207,6 @@ sub createImageEC2 {
 		$kiwi -> error  ("Missing AWS account number");
 		$kiwi -> failed ();
 		return undef;
-	} elsif (! -f $type{AWSAccountNr}) {
-		$kiwi -> error  ("AWS file: $type{AWSAccountNr} does not exist");
-		$kiwi -> failed ();
-		return undef;
 	}
 	if (! defined $type{EC2CertFile}) {
 		$kiwi -> error  ("Missing AWS user's PEM encoded RSA pubkey cert file");
