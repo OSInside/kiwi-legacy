@@ -204,7 +204,11 @@ sub createImageEC2 {
 	#------------------------------------------
 	my %type = %{$xml->getImageTypeAndAttributes()};
 	if (! defined $type{AWSAccountNr}) {
-		$kiwi -> error  ("Missing AWS account number not");
+		$kiwi -> error  ("Missing AWS account number");
+		$kiwi -> failed ();
+		return undef;
+	} elsif (! -f $type{AWSAccountNr}) {
+		$kiwi -> error  ("AWS file: $type{AWSAccountNr} does not exist");
 		$kiwi -> failed ();
 		return undef;
 	}
@@ -212,9 +216,17 @@ sub createImageEC2 {
 		$kiwi -> error  ("Missing AWS user's PEM encoded RSA pubkey cert file");
 		$kiwi -> failed ();
 		return undef;
+	} elsif (! -f $type{EC2CertFile}) {
+		$kiwi -> error  ("EC2 file: $type{EC2CertFile} does not exist");
+		$kiwi -> failed ();
+		return undef;
 	}
 	if (! defined $type{EC2PrivateKeyFile}) {
 		$kiwi -> error ("Missing AWS user's PEM encoded RSA private key file");
+		$kiwi -> failed ();
+		return undef;
+	} elsif (! -f $type{EC2PrivateKeyFile}) {
+		$kiwi -> error  ("EC2 file: $type{EC2PrivateKeyFile} does not exist");
 		$kiwi -> failed ();
 		return undef;
 	}
