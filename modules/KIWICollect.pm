@@ -15,6 +15,11 @@
 #               :
 # STATUS        : Development
 #----------------
+
+BEGIN {
+  unshift @INC, "/usr/share/inst-source-utils/modules";
+}
+
 package KIWICollect;
 
 #==========================================
@@ -23,7 +28,7 @@ package KIWICollect;
 use strict;
 use KIWIXML;
 use KIWIUtil;
-use KIWIRPMQ;
+use RPMQ;
 
 use File::Find;
 use File::Path;
@@ -112,16 +117,8 @@ sub new {
   $this->Init();
 
   # create some default directories:
-  foreach my $n($this->getMediaNumbers()) {
-    $this->{m_dirlist}->{"$this->{m_basedir}/$this->{m_prodinfo}->{MEDIUM_NAME}$n"} = 1;
-    $this->{m_dirlist}->{"$this->{m_basedir}/$this->{m_prodinfo}->{MEDIUM_NAME}$n/suse"} = 1;
-  }
   # medium number 1 MUST exist, because it's the default for
   # packages that don't specify their own medium number
-  $this->{m_dirlist}->{"$this->{m_basedir}/$this->{m_prodinfo}->{MEDIUM_NAME}1/suse"} = 1;
-  $this->{m_dirlist}->{"$this->{m_basedir}/$this->{m_prodinfo}->{MEDIUM_NAME}1/script"} = 1;
-  $this->{m_dirlist}->{"$this->{m_basedir}/$this->{m_prodinfo}->{MEDIUM_NAME}1/temp"} = 1;
-  $this->createDirectoryStructure();
 
   return $this;
 }
@@ -231,9 +228,22 @@ sub Init
   }
 
   $this->{m_united} = "$this->{m_basedir}/main";
-  $this->{m_basesubdir} = "$this->{m_united}/$this->{m_prodinfo}->{MEDIUM_NAME}1/suse";
   $this->{m_dirlist}->{"$this->{m_united}"} = 1;
-  $this->{m_dirlist}->{"$this->{m_basesubdir}"} = 1;
+  foreach my $n($this->getMediaNumbers()) {
+    $this->{m_dirlist}->{"$this->{m_united}/$this->{m_prodinfo}->{MEDIUM_NAME}$n"} = 1;
+    $this->{m_dirlist}->{"$this->{m_united}/$this->{m_prodinfo}->{MEDIUM_NAME}$n/suse"} = 1;
+    $this->{m_dirlist}->{"$this->{m_united}/$this->{m_prodinfo}->{MEDIUM_NAME}$n/script"} = 1;
+    $this->{m_dirlist}->{"$this->{m_united}/$this->{m_prodinfo}->{MEDIUM_NAME}$n/temp"} = 1;
+    $this->{m_basesubdir}->{$n} = "$this->{m_united}/$this->{m_prodinfo}->{MEDIUM_NAME}$n";
+    $this->{m_dirlist}->{"$this->{m_basesubdir}->{$n}"} = 1;
+  }
+  
+  # we also need a basesubdir "0" for the metapackages that shall _not_ be put to the CD.
+  # Those specify medium number "0", which means we only need a dir to download scripts.
+  $this->{m_basesubdir}->{'0'} = "$this->{m_united}/$this->{m_prodinfo}->{MEDIUM_NAME}0";
+  $this->{m_dirlist}->{"$this->{m_united}/$this->{m_prodinfo}->{MEDIUM_NAME}0/temp"} = 1;
+  
+  $this->createDirectoryStructure();
 
   # for debugging:
   $this->dumpPackageList("$this->{m_basedir}/packagelist.txt");
@@ -400,7 +410,7 @@ sub getPackagesList
 sub getMetafileList
 {
   my $this = shift;
-  if(!$this->{m_basesubdir} or ! -d $this->{m_basesubdir}) {
+  if(!%{$this->{m_basesubdir}} or ! -d $this->{m_basesubdir}->{'1'}) {
     $this->{m_logger}->warning("[WARNING] getMetafileList called to early? basesubdir must be set!\n");
     return -1;
   }
@@ -409,7 +419,7 @@ sub getMetafileList
   
   foreach my $mf(keys(%{$this->{m_metafiles}})) {
     my $t = $this->{m_metafiles}->{$mf}->{'target'} || "";
-    $this->{m_xml}->getInstSourceFile($mf, "$this->{m_basesubdir}/$t"); # from, to
+    $this->{m_xml}->getInstSourceFile($mf, "$this->{m_basesubdir}->{'1'}/$t"); # from, to
     my $fname;
     $mf =~ m{.*/([^/]+)$};
     $fname = $1;
@@ -444,7 +454,7 @@ sub queryRpmHeaders
       my $dst = "$this->{'m_basesubdir'}/$tmp->{$a}->{'targetfile'}";
       if(defined($uri) and defined($dst)) {
 	# RPMQ query for arch/version/release
-	my %flags = KIWIRPMQ::rpmq_many($uri, 'NAME', 'VERSION', 'RELEASE', 'ARCH', 'SOURCE', 'SOURCERPM');
+	my %flags = RPMQ::rpmq_many($uri, 'NAME', 'VERSION', 'RELEASE', 'ARCH', 'SOURCE', 'SOURCERPM');
 	if(not(%flags
 	   and defined $flags{'NAME'}
 	   and defined $flags{'VERSION'}
@@ -471,14 +481,15 @@ sub queryRpmHeaders
 	else {
 	  $medium = 1;
 	}
-	my $dstfile = "$this->{'m_united'}/$this->{m_prodinfo}->{'MEDIUM_NAME'}$medium/$ad/$tmp->{$a}->{'targetfile'}";
+	#my $dstfile = "$this->{'m_united'}/$this->{m_prodinfo}->{'MEDIUM_NAME'}$medium/$ad/$tmp->{$a}->{'targetfile'}";
+	my $dstfile = "$this->{'m_basesubdir'}->{$medium}/suse/$ad/$tmp->{$a}->{'targetfile'}";
 	$dstfile =~ m{(.*/)(.*?/)(.*?/)(.*)[.]([rs]pm)$};
 	if(not(defined($1) and defined($2) and defined($3) and defined($4) and defined($5))) {
 	  $this->{m_logger}->error("[ERROR] [queryRpmHeaders] regexp didn't match path $tmp->{'source'}");
 	}
 	else {
 	  $tmp->{$a}->{'newfile'}  = "$pack-$flags{'VERSION'}->[0]-$flags{'RELEASE'}->[0].$ad.$5";
-	  $tmp->{$a}->{'newpath'} = "$this->{m_basesubdir}/$ad";
+	  $tmp->{$a}->{'newpath'} = "$this->{m_basesubdir}->{$medium}/suse/$ad";
 	  $tmp->{$a}->{'arch'}  = $ad;
 	  
 	  # move and rename:
@@ -524,7 +535,7 @@ sub queryRpmHeadersPack
     my $dst = "$this->{'m_basesubdir'}/$tmp->{$a}->{'targetfile'}";
     if(defined($uri) and defined($dst)) {
       # RPMQ query for arch/version/release
-      my %flags = KIWIRPMQ::rpmq_many($uri, 'NAME', 'VERSION', 'RELEASE', 'ARCH', 'SOURCE', 'SOURCERPM');
+      my %flags = RPMQ::rpmq_many($uri, 'NAME', 'VERSION', 'RELEASE', 'ARCH', 'SOURCE', 'SOURCERPM');
       if(not(%flags
 	 and defined $flags{'NAME'}
 	 and defined $flags{'VERSION'}
@@ -752,9 +763,14 @@ sub unpackMetapackages
   foreach my $metapack(@packlist) {
     my %tmp = %{$this->{m_metapackages}->{$metapack}};
 
+    my $medium = 1;
+    if($tmp{'medium'}) {
+      $medium = $tmp{'medium'};
+    }
+
     ## regular handling: unpack, put everything from CD1..CD<n> to cdroot {m_basedir}
     # ...
-    my $tmp = "$this->{m_united}/temp";
+    my $tmp = "$this->{m_basesubdir}->{$medium}/temp";
     if(-d $tmp) {
       qx(rm -rf $tmp);
       #rmdir -p $tmp; #no force available?
@@ -774,14 +790,14 @@ sub unpackMetapackages
 
     $this->{m_util}->unpac_package($this->{m_packages}->{$metapack}->{$dir}->{'source'}, "$tmp");
     ## all metapackages contain at least a CD1 dir and _may_ contain another /usr/share/<name> dir
-    qx(cp -r $tmp/CD1/* @{$this->{m_metasubdirs}}[0]);
+    qx(cp -r $tmp/CD1/* $this->{m_basesubdir}->{$medium});
     if(-d "$tmp/usr/share") {
-      qx(cp -r $tmp/usr/share/ $this->{m_united});
+      qx(cp -r $tmp/usr/share/ $this->{m_basesubdir}->{$medium});
     }
     ## copy content of CD2 ... CD<i> subdirs if exists:
     for(2..5) {
       if(-d "$tmp/CD$_") {
-	qx(cp -r $tmp/CD$_ @{$this->{m_metasubdirs}});
+	qx(cp -r $tmp/CD$_ $this->{m_basesubdir}->{$_});
       }
       ## add handling for "DVD<i>" subdirs if necessary FIXME
     }
@@ -801,6 +817,7 @@ sub unpackMetapackages
       foreach my $d(@themes) {
 	if($d =~ m{$thema}i) {
 	  $this->{m_logger}->info("Using thema $d\n");
+	  $thema = $d;	# changed after I saw that yast2-slideshow has a thema "SuSE-SLES" (matches "SuSE", but not in line 831)
 	  $found=1;
 	  last;
 	}
@@ -816,8 +833,8 @@ sub unpackMetapackages
       }
       ## $thema is now the thema to use:
       for my $i(1..3) {
-	if(-d "$tmp/SuSE/$thema/CD$i") {
-	  qx(cp -a $tmp/SuSE/$thema/CD$i/* @{$this->{m_metasubdirs}}[$i-1]);
+	if(-d "$tmp/SuSE/$thema/CD$i" and $this->{m_basesubdir}->{$i} and -d "$tmp/SuSE/$thema/CD$i") {
+	  qx(cp -a $tmp/SuSE/$thema/CD$i/* $this->{m_basesubdir}->{$i});
 	}
       }
     }
@@ -1070,7 +1087,7 @@ sub fetchFileFrom
       $r_tmp2->{'uri'} =~ m{.*/(.*)$};
       my $file = $1;
       $this->{m_xml}->getInstSourceFile($r_tmp2->{'uri'}, $fullpath);
-      my %flags = KIWIRPMQ::rpmq_many("$fullpath/$file", 'NAME', 'VERSION', 'RELEASE', 'ARCH', 'SOURCE', 'SOURCERPM');
+      my %flags = RPMQ::rpmq_many("$fullpath/$file", 'NAME', 'VERSION', 'RELEASE', 'ARCH', 'SOURCE', 'SOURCERPM');
 
       if(! %flags) {
 	$this->{m_logger}->warning("[WARNING] [fetchFileFrom] Package $pack seems to have an invalid header!");
@@ -1456,16 +1473,42 @@ sub createMetadata
 {
   my $this = shift;
 
-  my $path = $this->{m_basesubdir};
-  $this->{m_logger}->info("Calling create_package_descr for directory $path:");
+
+  ## step 1: create_package_descr
+  #==============================
+  my @paths = values(%{$this->{m_basesubdir}});
+  @paths = reverse map { $_."/suse" => "-d" if $_ !~ m{.*0}} @paths;
+  my $pathlist = join(' ', @paths);
+
+  $this->{m_logger}->info("Calling create_package_descr for directories @paths:");
   if(! (-f "/usr/bin/create_package_descr" or -x "/usr/bin/create_package_descr")) {
     $this->{m_logger}->warning("[WARNING] [createMetadata] excutable `/usr/bin/create_package_descr` not found. Maybe package `inst-source-utils` is not installed?");
     return;
   }
 
-  my $data = qx(cd $path && /usr/bin/create_package_descr -p /mounts/work/cd/data/pdb/stable -d $path -P -Z -C -K -M 3 -l german -l english -l french -l czech -l spanish -l hungarian);
+  my $data = qx(cd "$this->{m_basesubdir}->{'1'}/suse" && /usr/bin/create_package_descr -p /mounts/work/cd/data/pdb/stable $pathlist -P -Z -C -K -M 3 -l german -l english -l french -l czech -l spanish -l hungarian);
   my $status = $? >> 8;
+  
+  # just to keep it in sync with mach_cd
+  symlink "$this->{m_basesubdir}->{'1'}/suse/setup/descr/packages.cs", "$this->{m_basesubdir}->{'1'}/suse/setup/descr/packages.sk";
 
+
+  ## step 2: packages2eula:
+  $this->{m_logger}->info("Calling packages2eula:");
+  my $p2eula = "/usr/bin/packages2eula.pl";
+  if(! (-f $p2eula or -x $p2eula)) {
+    $this->{m_logger}->warning("[WARNING] [createMetadata] excutable `$p2eula` not found. Maybe package `inst-source-utils` is not installed?");
+    return;
+  }
+  if(-f "$this->{m_basesubdir}->{'1'}/EULA.txt" and -f "$this->{m_basesubdir}->{'1'}/suse/setup/descr/packages.en") {
+    my $data = qx($p2eula -i "$this->{m_basesubdir}->{'1'}/EULA.txt" -p $this->{m_basesubdir}->{'1'}/suse/setup/descr/packages.en -o "$this->{m_basesubdir}->{'1'}/EULA.txt.new");
+    #if(-f "$this->{m_basesubdir}->{'1'}/EULA.txt.new") {
+    #  link "$this->{m_basesubdir}->{'1'}/EULA.txt.new", 
+    #}
+  }
+  else {
+    $this->{m_logger}->warning("[WARNING] [createMetadata] files $this->{m_basesubdir}->{'1'}/EULA.txt and/or $this->{m_basesubdir}->{'1'}/suse/setup/descr/packages.en don't exist, skipping");
+  }
 }
 
 
@@ -1546,10 +1589,10 @@ sub createDirectoryStructure
 
 
 
-sub getDirStatus
-{
-  my $this = shift;
-}
+#sub getDirStatus
+#{
+#  my $this = shift;
+#}
 
 
 
