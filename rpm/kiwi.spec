@@ -421,7 +421,6 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-, root, root)
 %{_datadir}/kiwi/modules/KIWICollect.pm
 %{_datadir}/kiwi/modules/KIWIUtil.pm
-%{_datadir}/kiwi/modules/KIWIRPMQ.pm
 
 #=================================================
 # KIWI-pxeboot files...  
