@@ -386,7 +386,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/kiwi/repo
 %exclude %{_datadir}/kiwi/modules/KIWICollect.pm
 %exclude %{_datadir}/kiwi/modules/KIWIUtil.pm
-%exclude %{_datadir}/kiwi/modules/KIWIRPMQ.pm
 %{_datadir}/kiwi/tests
 %{_datadir}/kiwi/xsl
 %{_sbindir}/kiwi
