@@ -197,11 +197,11 @@ sub createImageEC2 {
 	my $imageTree = $this->{imageTree};
 	my $imageDest = $this->{imageDest};
 	my $xml       = $this->{xml};
-	my $arch      = $this->{arch};
 	my $kiwi      = $this->{kiwi};
 	#==========================================
 	# Check AWS account information
 	#------------------------------------------
+	my $arch = qxx ("uname -m"); chomp ( $arch );
 	my %type = %{$xml->getImageTypeAndAttributes()};
 	if (! defined $type{AWSAccountNr}) {
 		$kiwi -> error  ("Missing AWS account number");
