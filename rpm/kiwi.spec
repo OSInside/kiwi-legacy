@@ -37,7 +37,7 @@ Requires:       perl = %{perl_version}
 Requires:       perl-XML-LibXML perl-libwww-perl screen coreutils
 Requires:       kiwi-tools libxslt
 %if %{suse_version} > 1030
-Requires:       satsolver-tools ec2-ami-tools
+Requires:       satsolver-tools
 %endif
 Summary:        OpenSuSE - KIWI Image System
 Provides:       kiwi2 = 2.14
