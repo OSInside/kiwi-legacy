@@ -368,6 +368,7 @@ sub upgrade {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
+	my $root = $this->{root};
 	my $manager  = $this->{manager};
 	my $addPacks = $this->{addPacks};
 	#==========================================
@@ -380,17 +381,29 @@ sub upgrade {
 		return undef;
 	}
 	#==========================================
+	# make sure name resolution works
+	#------------------------------------------
+	$this->{needResolvConf} = 0;
+	if (! -f "$root/etc/resolv.conf") {
+		qxx ("cp /etc/resolv.conf $root/etc 2>&1");
+		$this->{needResolvConf} = 1;
+	}
+	#==========================================
 	# Upgrade system
 	#------------------------------------------
 	if (! $manager -> setupInstallationSource()) {
+		$this -> cleanupResolvConf();
 		return undef;
 	}
 	if (! $manager -> setupUpgrade ($addPacks)) {
+		$this -> cleanupResolvConf();
 		return undef;
 	}
 	if (! $manager -> resetInstallationSource()) {
+		$this -> cleanupResolvConf();
 		return undef;
 	}
+	$this -> cleanupResolvConf();
 	return $this;
 }
 
@@ -400,6 +413,7 @@ sub upgrade {
 sub prepareTestingEnvironment {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
+	my $root = $this->{root};
 	my $manager  = $this->{manager};
 	#==========================================
 	# Mount local and NFS directories
@@ -411,11 +425,21 @@ sub prepareTestingEnvironment {
 		return undef;
 	}
 	#==========================================
+	# make sure name resolution works
+	#------------------------------------------
+	$this->{needResolvConf} = 0;
+	if (! -f "$root/etc/resolv.conf") {
+		qxx ("cp /etc/resolv.conf $root/etc 2>&1");
+		$this->{needResolvConf} = 1;
+	}
+	#==========================================
 	# Setup sources
 	#------------------------------------------
 	if (! $manager -> setupInstallationSource()) {
+		$this -> cleanupResolvConf();
 		return undef;
 	}
+	$this -> cleanupResolvConf();
 	return $this;
 }
 
@@ -424,11 +448,26 @@ sub prepareTestingEnvironment {
 #------------------------------------------
 sub cleanupTestingEnvironment {
 	my $this = shift;
+	my $root = $this->{root};
 	my $manager = $this->{manager};
 	if (! $manager -> resetInstallationSource()) {
+		$this -> cleanupResolvConf();
 		return undef;
 	}
+	$this -> cleanupResolvConf();
 	return $this;
+}
+
+#==========================================
+# cleanupResolvConf
+#------------------------------------------
+sub cleanupResolvConf {
+	my $this = shift;
+	my $root = $this->{root};
+	my $needResolvConf = $this->{needResolvConf};
+	if ($needResolvConf) {
+		qxx ("rm -f $root/etc/resolv.conf");
+	}
 }
 
 #==========================================

@@ -2,6 +2,7 @@
 Tue Apr 29 17:17:29 CEST 2008 - ms@suse.de
 
 - added support for creating Amazon EC2 images (bnc #367138)
+- fixed name resolution in upgrade and testing mode
 - fixed "--bootvm-disksize" option
 
 -------------------------------------------------------------------
