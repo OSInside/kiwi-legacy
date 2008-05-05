@@ -248,8 +248,10 @@ if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ];then
 		done
 	else
 		Echo "Creating live media links..."
-		for dir in bin boot lib opt sbin usr;do
-			ln -s $LIVECD/read-only-system/$dir $dir
+		for dir in bin boot lib lib64 opt sbin usr;do
+			if [ -d $LIVECD/read-only-system/$dir ];then
+				ln -s $LIVECD/read-only-system/$dir $dir
+			fi
 		done
 	fi
 	cd /
