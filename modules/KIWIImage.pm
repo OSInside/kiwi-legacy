@@ -930,7 +930,7 @@ sub createImageLiveCD {
 			}
 			my @rodirs = qw (bin boot lib lib64 opt sbin usr);
 			foreach my $dir (@rodirs) {
-				if (! -d $imageTree/$dir) {
+				if (! -d "$imageTree/$dir") {
 					next;
 				}
 				$data = qxx ("mv $imageTree/$dir $imageTreeReadOnly 2>&1");
@@ -1085,7 +1085,7 @@ sub createImageLiveCD {
 		}
 		my @rodirs = qw (bin boot lib lib64 opt sbin usr);
 		foreach my $dir (@rodirs) {
-			if (! -d $imageTree/$dir) {
+			if (! -d "$imageTree/$dir") {
 				next;
 			}
 			$data = qxx ("cp -a $imageTree/$dir $imageTreeReadOnly 2>&1");
@@ -3062,7 +3062,7 @@ sub restoreSplitExtend {
 	$kiwi -> info ("Restoring physical extend...");
 	my @rodirs = qw (bin boot lib lib64 opt sbin usr);
 	foreach my $dir (@rodirs) {
-		if (! -d $imageTreeReadOnly/$dir) {
+		if (! -d "$imageTreeReadOnly/$dir") {
 			next;
 		}
 		my $data = qxx ("mv $imageTreeReadOnly/$dir $imageTree 2>&1");
