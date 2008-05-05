@@ -869,6 +869,7 @@ function probeDevices {
 	# ----
 	modprobe ide-disk
 	modprobe rd &>/dev/null
+	modprobe brd &>/dev/null
 	probeUSB
 }
 #======================================
