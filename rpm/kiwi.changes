@@ -2,6 +2,7 @@
 Mon May  5 12:01:45 CEST 2008 - ms@suse.de
 
 - lib64 fix for old-style link system for iso live systems
+- fixed version number of suse-live-iso example 
 
 -------------------------------------------------------------------
 Tue Apr 29 17:17:29 CEST 2008 - ms@suse.de
