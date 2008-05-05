@@ -1,2 +1,1 @@
-options rd rd_size=512000 rd_blocksize=4096
-options brd brd_size=512000 brd_blocksize=4096
+options brd rd_size=512000 rd_blocksize=4096
