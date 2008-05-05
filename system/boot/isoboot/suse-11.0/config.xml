@@ -29,7 +29,7 @@
 	<drivers type="drivers">
 		<file name="drivers/ide/*"/>
 		<file name="drivers/block/loop.ko"/>
-		<file name="drivers/block/rd.ko"/>
+		<file name="drivers/block/brd.ko"/>
 		<file name="net/packet/*"/>
 		<file name="fs/ext3/*"/>
 		<file name="fs/ext2/*"/>
