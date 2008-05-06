@@ -174,7 +174,7 @@ kernelList /mnt
 setupDefaultFstab /config
 updateRootDeviceFstab /config $imageRootDevice
 if [ -z "$UNIONFS_CONFIG" ]; then
-	setupBootLoaderGrub /mnt /config 1 $imageRootDevice VMX
+	setupBootLoaderGrub /mnt /config 0 $imageRootDevice VMX
 else
 	setupBootLoaderGrub /mnt /config 0 $imageRootDevice VMX
 fi
