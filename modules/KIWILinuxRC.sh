@@ -1760,8 +1760,9 @@ function validateTarSize {
 function validateBlockSize {
 	# /.../
 	# check the block size value. atftp limits to a maximum of
-	# 32768 blocks, so the block size must be checked according
-	# to the size of the image
+	# 65535 blocks, so the block size must be checked according
+	# to the size of the image. The block size itself is also
+	# limited to 65464 bytes
 	# ----
 	isize=`expr $blocks \* $blocksize`
 	isize=`expr $isize / 65535`
