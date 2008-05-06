@@ -1299,7 +1299,7 @@ sub setupInstallCD {
 		if (-f "$tmpdir/rootfs.tar") {
 			$imgtype = "split";
 		}
-		$status = qxx ("umount $tmpdir 2>&1");
+		$status = qxx ("umount $tmpdir 2>&1"); sleep (1);
 		$status = qxx ("/sbin/kpartx  -d $loop 2>&1");
 		$status = qxx ("/sbin/losetup -d $loop 2>&1");
 		$result = $? >> 8;
@@ -1641,7 +1641,7 @@ sub setupInstallStick {
 		if (-f "$tmpdir/rootfs.tar") {
 			$imgtype = "split";
 		}
-		$status = qxx ("umount $tmpdir 2>&1");
+		$status = qxx ("umount $tmpdir 2>&1"); sleep (1);
 		$status = qxx ("/sbin/kpartx  -d $loop 2>&1");
 		$status = qxx ("/sbin/losetup -d $loop 2>&1");
 		$result = $? >> 8;

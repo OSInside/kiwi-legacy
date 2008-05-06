@@ -495,21 +495,43 @@ if [ $LOCAL_BOOT = "no" ];then
 			input=/part.input
 			rm -f $input
 			diskXMBytes=`sfdisk -s $deviceDisk`
+			diskPMBytes=`sfdisk -s $deviceDisk"1"`
+			diskPMBytes=`expr $diskPMBytes / 1024`
 			diskXMBytes=`expr $diskXMBytes / 1024`
 			disk1MBytes=10240
+			# /.../
+			# set OEM_SYSTEMSIZE if available, else try to
+			# use 10GB system size
+			# ----
 			if [ ! -z "$OEM_SYSTEMSIZE" ];then
 				disk1MBytes=$OEM_SYSTEMSIZE
 			fi
+			# /.../
+			# prevent /home partition if requested system size
+			# is bigger than the whole disk
+			# ----
+			if [ $disk1MBytes -gt $diskXMBytes ];then
+				export OEM_WITHOUTHOME=1
+			fi
+			# /.../
+			# recalculate system size of no /home partition
+			# will be used. size is whole disk minus swap
+			# ----
 			if [ ! -z "$OEM_WITHOUTHOME" ];then
 				disk1MBytes=`expr $diskXMBytes - $swapsize`
 			fi
-			if [ $disk1MBytes -gt $diskXMBytes ];then
+			# /.../
+			# check if requested system size is bigger than
+			# the existing system partition
+			# ----
+			if [ $disk1MBytes -lt $diskPMBytes ];then
 				# /.../
-				# Very small disk which we will not re-partition
+				# Requested system partition size is smaller than
+				# existing partition, will not re-partition
 				# ----
 				Echo "Disk is too small, will not re-partition it"
 				OEM_WITHOUTHOME=1
-				DONT_PARTITION=1
+				DONT_PARTITION=1 
 			fi
 			if [ -z "$DONT_PARTITION" ];then
 				if [ ! -z "$OEM_WITHOUTHOME" ];then

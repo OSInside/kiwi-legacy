@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue May  6 14:03:17 CEST 2008 - ms@suse.de
+
+- fixed oemboot repartition check (bnc #386593)
+
+-------------------------------------------------------------------
 Mon May  5 12:01:45 CEST 2008 - ms@suse.de
 
 - lib64 fix for old-style link system for iso live systems
