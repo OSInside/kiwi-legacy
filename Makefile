@@ -76,6 +76,7 @@ install:
 	cp -a doc/schema/   ${PACKDOCVZ}
 	cp -a doc/*.pdf     ${PACKDOCVZ}
 	cp -a doc/COPYING   ${PACKDOCVZ}
+	cp -a doc/ChangeLog ${PACKDOCVZ}
 
 	#============================================
 	# kiwi manual pages
