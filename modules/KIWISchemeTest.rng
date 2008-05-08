@@ -61,19 +61,19 @@ Useful for xsi:noNamespaceSchemaLocation, for example</a:documentation>
     </define>
     <define name="t.test_case.name.attrib">
       <attribute name="name">
-        <a:documentation>The name of the testcases ???</a:documentation>
+        <a:documentation>The name of the testcase</a:documentation>
         <ref name="t.string-attrib.type"/>
       </attribute>
     </define>
     <define name="t.test_case.description.attrib">
       <attribute name="description">
-        <a:documentation>A short description ???</a:documentation>
+        <a:documentation>Description of what this testcase does</a:documentation>
         <ref name="t.string-attrib.type"/>
       </attribute>
     </define>
     <define name="t.test_case.summary.attrib">
       <attribute name="summary">
-        <a:documentation>A short summary ???</a:documentation>
+        <a:documentation>A short summary of the test</a:documentation>
         <ref name="t.string-attrib.type"/>
       </attribute>
     </define>
@@ -89,7 +89,7 @@ Useful for xsi:noNamespaceSchemaLocation, for example</a:documentation>
     </define>
     <define name="t.test_case">
       <element name="test_case">
-        <a:documentation>This schema specifies the format of the tests for kiwi  images.</a:documentation>
+        <a:documentation>This schema specifies the format of the tests for kiwi images.</a:documentation>
         <ref name="t.test_case.attlist"/>
         <ref name="t.requirements"/>
         <zeroOrMore>
@@ -110,7 +110,8 @@ Useful for xsi:noNamespaceSchemaLocation, for example</a:documentation>
     </define>
     <define name="t.requirements">
       <element name="requirements">
-        <a:documentation>A list of requirements</a:documentation>
+        <a:documentation>In requirements you define what files/directories or
+packages has to be present in your image to run the test.</a:documentation>
         <ref name="t.requirements.attlist"/>
         <oneOrMore>
           <ref name="t.req"/>
@@ -126,14 +127,16 @@ Useful for xsi:noNamespaceSchemaLocation, for example</a:documentation>
   -->
   <div>
     <define name="t.req.type.attrib">
+      <!-- type of data to check if present -->
       <attribute name="type">
-        <a:documentation>???</a:documentation>
         <ref name="t.string-attrib.type"/>
       </attribute>
     </define>
     <define name="t.req.place.attrib">
       <attribute name="place">
-        <a:documentation>???</a:documentation>
+        <a:documentation>There are two places for required data: extern and intern
+external data is searched outside of the image tree.
+internal date is searched inside the image tree</a:documentation>
         <ref name="t.string-attrib.type"/>
       </attribute>
     </define>
@@ -162,13 +165,16 @@ Useful for xsi:noNamespaceSchemaLocation, for example</a:documentation>
   <div>
     <define name="t.test.place.attrib">
       <attribute name="place">
-        <a:documentation>???</a:documentation>
+        <a:documentation>There are two places for test programs: extern and intern
+external programs are called outside of the image tree.
+internal programs are called inside of the image using the
+chroot command</a:documentation>
         <ref name="t.string-attrib.type"/>
       </attribute>
     </define>
     <define name="t.test.type.attrib">
       <attribute name="type">
-        <a:documentation>???</a:documentation>
+        <a:documentation>Program type can be either script or binary</a:documentation>
         <ref name="t.string-attrib.type"/>
       </attribute>
     </define>
@@ -240,7 +246,7 @@ Useful for xsi:noNamespaceSchemaLocation, for example</a:documentation>
     </define>
     <define name="t.params">
       <element name="params">
-        <a:documentation>???</a:documentation>
+        <a:documentation>Parameters to pass to the test program</a:documentation>
         <ref name="t.params.attlist"/>
         <ref name="t.string.type"/>
       </element>
@@ -258,7 +264,8 @@ Useful for xsi:noNamespaceSchemaLocation, for example</a:documentation>
     </define>
     <define name="t.type">
       <element name="type">
-        <a:documentation>???</a:documentation>
+        <a:documentation>There are three types of requirements: file, directory
+and rpm-package</a:documentation>
         <ref name="t.type.attlist"/>
         <ref name="t.string.type"/>
       </element>

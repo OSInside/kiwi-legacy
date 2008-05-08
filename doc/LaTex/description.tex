@@ -1,0 +1,658 @@
+\index{KIWI images!description|(}
+\chapter{KIWI image description}
+\label{chapter:description}
+\minitoc
+
+In order to be able to create an image with kiwi a so called
+image description must be created. The image description is
+represented by a directory which has to contain at least one
+file named \textbf{config.xml} or alternatively \textbf{*.kiwi}.
+A good start for such a description can be found in the examples
+provided in /usr/share/doc/packages/kiwi/examples.
+
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.5]{pictures/description.eps}
+\caption{Image description directory}
+\label{fig:description}
+\end{figure}
+
+The following additional information is optional for the process
+of building an image but most often mandatory for the functionality
+of the later operating system.
+
+\begin{itemize}
+\item \textbf{\underline{cdboot/}}\\
+      For ISO boot images only. The directory contains the configuration
+      files for setting up the isolinux boot loader. Additionally the
+      script isolinux.sh must exist which is called to create the
+      iso image by calling mkisofs. For SUSE systems isolinux.sh is
+      a link to the generic suse-isolinux script. 
+
+\item \textbf{\underline{images.sh}}\\
+      Optional configuration script while creating the logical extend.
+      This script is called at the beginning of the image creation process.
+      It is designed to clean-up the image system. Affected are all the
+      programs and files only needed while the physical extend exists.
+
+\item \textbf{\underline{config.sh}}\\
+      Optional configuration script while creating the physical extend. This
+      script is called at the end of the installation but \textbf{before}
+      the package scripts have run. It is designed to configure the image
+      system, such as the activation or deactivation of certain services
+      (insserv). The call is not made until after the switch to the image
+      has been made with \textbf{chroot}.
+
+\item \textbf{\underline{root/}}\\
+      Subdirectory that contains special files, directories, and scripts for
+      adapting the image environment \textbf{after} the installation of all the
+      image packages. The entire directory is copied into the root of the
+      image tree using \textit{cp -a}.
+
+\item \textbf{\underline{config-yast-firstboot.xml}}\\
+      Configuration file for the control of the yast2 firstboot service.
+      Similar to the autoyast approach yast also provides a boot time
+      service called firstboot. Unfortunately there is no GUI available
+      to setup the firstboot but a good documentation in
+      /usr/share/doc/packages/yast2-firstboot. Once you have 
+      created such a firstboot file in your image description directory KIWI
+      will process on the file and setup your image as follows:
+
+      \begin{enumerate}
+      \item KIWI enables the firstboot service
+      \item While booting the image YaST is started in firstboot mode
+      \item The firstboot service handles the instructions listed in the
+            config-yast-firstboot.xml
+      \item If the process finished successfully the environment is
+            cleaned and firstboot won't be called at next reboot.
+      \end{enumerate} 
+
+\item \textbf{\underline{config-yast-autoyast.xml}}\\
+      Configuration file which has been created by autoyast.
+      To be able to create such an autoyast profile you should first
+      call:
+
+      \begin{Command}{8cm}
+      yast2 autoyast
+      \end{Command}
+
+      Once you have saved the information from the autoyast UI as
+      config-yast-autoyast.xml file in your image description directory KIWI
+      will process on the file and setup your image as follows:
+      \begin{enumerate}
+      \item While booting the image YaST is started in autoyast mode
+            automatically
+      \item The autoyast description is parsed and the instructions are
+            handled by YaST. In other words the \textbf{system configuration}
+            is performed
+      \item If the process finished successfully the environment is
+            cleaned and autoyast won't be called at next reboot.
+      \end{enumerate}
+
+\item \textbf{\underline{config-cdroot.tgz}}\\
+      Archive which is used for ISO images only. The data in the archive is
+      uncompressed and stored in the CD/DVD root directory. This
+      archive can be used, for example, to integrate a license file or
+      readme information directly readable from the CD or DVD.
+
+\item \textbf{\underline{config-cdroot.sh}}\\
+      Along with the config-cdroot.tgz one can provide a script which allows
+      to manipulate the extracted data.
+
+\item \textbf{\underline{config/}}\\
+      Optional Subdirectory that contains Bash scripts that are called
+      after the installation of all the image packages, primarily in order
+      to remove the parts of a package that are not needed for the operating
+      system. The name of the Bash script must resemble the package name
+      listed in the config.xml
+\end{itemize}
+
+\section{config.xml}
+The mandatory image definition file is divided into different sections
+which describes information like the image name and type as well as
+the packages and patterns the image should consist of. The following
+information explains the basic structure of the XML document. When KIWI
+is called the XML structure is validated by a RelaxNG based schema.
+For details on attributes and values please refer to the schema 
+documentation file at /usr/share/doc/packages/ kiwi/kiwi.rng.html.
+
+\begin{Command}{12cm}
+<image schemeversion="2.0"\\
+\hspace*{1.9cm}name="iname" \textit{inherit="path">}\\
+\hspace*{1cm}...\\
+</image>
+\end{Command}
+
+The image definition starts with an image tag and requires the
+schema format at version 2.0. The attribute name specifies the
+name of the image which is also used for the file names created
+by KIWI. The optional attribute inherit allows to inherit the
+packages information from another image description. Inside the
+\textbf{image} section the following information applies.
+
+\begin{Command}{12cm}
+<description type="image">\\
+\hspace*{1cm}<author>an author</author>\\
+\hspace*{1cm}<contact>mail</contact>\\
+\hspace*{1cm}<specification>short info</specification>\\
+</description>
+\end{Command}
+
+The mandatory description section contains information about
+the creator of this image description. The attribute \textbf{type}
+could be either of the value ''image'' which indicates this is a
+system image description or at value ''boot'' for boot image
+descriptions.
+
+\begin{Command}{12cm}
+<profiles>\\
+\hspace*{1cm}<profile name="name" description="text"/>\\
+\hspace*{1cm}...\\
+</profiles>
+\end{Command}
+
+The optional profiles section lets you maintain one image description
+while allowing for variation of the sections packages and drivers that are
+included. A separate profile element must be specified for each variation.
+The profile child element, which has name and description attributes,
+specifies an alias name used to mark sections as belonging to a profile,
+and a short description explaining what this profile does.
+
+To mark a set of packages/drivers as belonging to a profile, simply
+annotate them with the \textbf{profiles} attribute. It is also possible
+to mark sections as belonging to multiple profiles by separating the
+names in the \textbf{profiles} attribute with a comma.
+If a packages/drivers tag does not have a profiles attribute, it is
+assumed to be present for all profiles.
+
+\begin{Command}{12cm}
+<preferences>\\
+\hspace*{1cm}<version>1.1.2</version>\\
+\hspace*{1cm}<packagemanager>smart</packagemanager>\\
+\hspace*{1cm}<type .../>\\
+</preferences>
+\end{Command}
+
+The mandatory preferences section contains information about the supported
+image type(s), the used packagemanager, the version of this image and
+optional attributes. The image version must be a three-part version number of
+the format: \textbf{Major}.\textbf{Minor}.\textbf{Release}. In case of
+changes to the image description the following rules should apply:
+
+\begin{itemize}
+\item For smaller image modifications that do not add or remove any
+      new packages, only the release number is incremented.
+      The \textbf{config.xml} file remains unchanged.
+\item For image changes that involve the addition or removal of packages
+      the minor number is incremented and the release number is reset.
+\item For image changes that change the size of the image file
+      the major number is incremented.
+\end{itemize}
+
+By default kiwi use the \textbf{smart} packagemanager but it is also possible
+to use the SUSE packagemanager called \textbf{zypper}.
+
+At least one type must be set to be able to build an image from
+this description. Multiple type lines are allowed whereas you can specify
+with the boolean attrbute named \textbf{primary} which should be the primary
+image if no type is requested on creation. The following list
+describes the possible types and their attributes:
+
+\begin{itemize}
+\item \textbf{usb}\\
+      Use this type to create a USB stick system along with the
+      attributes \textbf{filesystem} and \textbf{boot=''usbboot/suse-*''}
+\item \textbf{vmx}\\
+      Use this type to create a virtual disk system along with the
+      attributes \textbf{filesystem}, \textbf{boot=''vmxboot/suse-*''} and
+      optionally \textbf{format}. The format attribute spcifies one of
+      the qemu supported virtualisation formats, for example vmdk or qcow2.
+\item \textbf{oem}\\
+      Use this type to create a preload virtual disk system along with
+      the attributes \textbf{filesystem}, \textbf{boot=''oemboot/suse-*''} and
+      optionally \textbf{format}. If the format attribute is set to
+      ''iso'' or ''usb'' KIWI will additionally create an installation
+      media suitable for a CD/DVD or an USB stick. This installation media
+      takes over the task of deploying the preload system onto the
+      storage devices which it detects at boot time.
+\item \textbf{pxe}\\
+      Use this type to create a network boot image along with the
+      attributes \textbf{filesystem} and \textbf{boot=''netboot/suse-*''}
+\item \textbf{iso}\\
+      Use this type to create a live system on CD or DVD along with
+      the attributes \textbf{boot=''isoboot/suse-*''} and optionally
+      \textbf{flags}. If no flags are specified the filesystem will not
+      be compressed and no union filesystem is used. Allowed flags are:
+      \begin{itemize}
+      \item \textbf{unified}: Compress filesystem with squashfs and
+            mount the system read-write with an aufs based overlay mount
+      \item \textbf{compressed}: Compress filesystem with squashfs and
+            use a link list to mount the system read-write. An additional
+            split section controls the read-write information 
+      \item \textbf{unified-cromfs}: Same as unified but uses cromfs
+      \item \textbf{compressed-cromfs}: Same as compressed but uses cromfs
+      \end{itemize}
+      If no flags or the flags ''compressed'' or ''compressed-cromfs''
+      are set an additional \textbf{split} section is required.
+\item \textbf{xen}\\
+      Use this type to create a Xen enabled para-virtual gues image along
+      with the attributes \textbf{filesystem} and
+      \textbf{boot=''xenboot/suse-*''}
+\item \textbf{split}\\
+      Use this type if you want to use one of the types
+      \textbf{usb,vmx,oem or pxe} but as a split image. The split image
+      support allows to create the image as split files wheras one part
+      represents the read-write data and the other part represents the
+      read-only data. Different filesystems can be assigned to each portion.
+      According to this use this type together with the attributes
+      \textbf{fsreadwrite}, \textbf{fsreadonly} and\\
+      \textbf{boot=''usb|vmx|oem|netboot/suse-*''}
+\item \textbf{cpio}\\
+      Use this type if your image is a boot image (intrd). Additionally
+      the attribute \textbf{bootprofile=''default''} can be specified. In
+      a boot image it makes sense to have the different kernels/drivers
+      grouped in a namespace. Within a system image one can select the
+      group by also specifying a bootprofile attribute. If there are profiles
+      defined in a boot image there must be at least one namespace
+      called the \textbf{default} namespace. 
+\end{itemize}
+
+Within the preferences section there are the following optional
+attributes:
+
+\begin{itemize}
+\item \textbf{size}\\
+      Specifies the size of the image with a numerical value in
+      Megabytes or Gigabytes. Use the ''unit'' attribute to assign the
+      unit \textbf{M} for Megabytes or \textbf{G} for Gigabytes.
+      KIWI extends the image size automatically if the specified value
+      is too small. If the actual size is more than 100MB larger than
+      the specified size, KIWI aborts with an error
+      message. KIWI does not automatically reduce the image size if
+      the specified value is too large, because the extra space might
+      be needed to, for example, run custom scripts. If no size is
+      specified, KIWI uses the required size plus approximately
+      10\% free space.
+\item \textbf{compressed}\\
+      Specifies whether the image file should be compressed or not.
+      This is not the filesystem compression just the image file compression
+\item \textbf{rpm-check-signatures}\\
+      Specifies whether RPM should check the package signature or not
+\item \textbf{rpm-force}\\
+      Specifies whether RPM should be called with --force
+\item \textbf{keytable}\\
+      Specifies the name of the console keymap to use. The value corresponds
+      to a map file in /usr/share/kbd/keymaps. The KEYTABLE variable in
+      /etc/sysconfig/keyboard file is set according to the keyboard
+      mapping.
+\item \textbf{timezone}\\
+      Specifies the time zone. Available time zones are located in the
+      /usr/share/zoneinfo directory. Specify the attribute value relative to
+      /usr/share/zoneinfo. For example, specify Europe/Berlin for
+      /usr/share/zoneinfo/Europe/Berlin. KIWI uses this value to configure
+      the timezone in /etc/localtime for the image
+\item \textbf{locale}\\
+      Specifies the name of the locale to use, which defines the
+      contents of the RC\_LANG system environment variable in
+      /etc/sysconfig/language
+\item \textbf{defaultdestination}\\
+      Used if the --destdir option is not specified when calling KIWI
+\item \textbf{defaultroot}\\
+      Used if the option --root is not specified when calling KIWI
+\item \textbf{defaultbaseroot}\\
+      Used if the option --base-root is not specified when
+      calling KIWI. It's possible to prepare and create an image using a
+      predefined non empty root directory as base information.
+      This could speedup the build process a lot if the base root path
+      already contains most of the image data.
+\end{itemize}
+
+\begin{Command}{12cm}
+<users group="users">\\
+\hspace*{1cm}<user pwd=".." home="dir" name="user"/>\\
+\hspace*{1cm}...\\
+</users>
+...
+\end{Command}
+
+The optional users element specifies the users to be added to the image.
+The group attribute specifies the group the users belong to. If this group
+does not exist, it is created. A user element must be specified for
+each group. The user child element specifies the users belonging to that
+group, and the name, pwd and home attributes specifies the username,
+crypted password, and path to the home directory. The password can be
+created by the kiwi $--$createpassword tool.
+
+\begin{Command}{12cm}
+<drivers type="type" \textit{profiles="name"}>\\
+\hspace*{1cm}<file name="filename"/>\\
+\hspace*{1cm}...\\
+</drivers>
+\end{Command}
+
+The optional drivers element is only useful for boot images (initrd).
+As a boot image doesn't need to contain the complete kernel one can
+save a lot of space if only the required drivers are part of the image.
+Therefore the drivers section exists. If present only the drivers which
+matches the file names or glob patterns will be included into the
+boot image. The type attribute specifies one of the following driver
+types:
+
+\begin{itemize}
+\item \textbf{drivers}\\
+      Each file is specified relative to the
+      /lib/modules/<Version>/kernel directory.
+\item \textbf{netdrivers}\\
+      Each file is specified relative to the
+      /lib/modules/<Version>/kernel/drivers/net
+      directory.
+\item \textbf{scsidrivers}\\
+      Each file is specified relative to the
+      /lib/modules/<Version>/kernel/drivers/scsi
+\item \textbf{usbdrivers}\\
+      Each file is specified relative to the
+      /lib/modules/<Version>/kernel/drivers/usb directory.
+\end{itemize}
+
+According to the driver type the specified files are searched in
+the corresponding directory. The information about the drivernames
+is provided as environment variable named like the value of
+the type attribute and is processed by the function
+\textbf{suseStripKernel}. According to this along with a boot image
+description a script called \textbf{images.sh} must exist which
+calls this function in order to allow the driver information to
+have any effect.
+
+\newpage
+
+\begin{Command}{12cm}
+<repository type="type" \textit{status="replaceable"}>\\
+\hspace*{1cm}<source path="URL"/>\\
+</repository>\\
+...
+\end{Command}
+
+The mandatory repository section specifies the source URL and
+type used by the package manager. The type attribute specifies the
+repository type which must be supported by the package manager.
+At the moment KIWI supports the package managers smart and zypper
+whereas smart has support for more repository types compared to
+zypper. Therefore the possible values for the type attribute has
+beend copied from smart. The following table shows the possible
+repo types: 
+
+\begin{tabular}[h]{|p{4cm}|p{2cm}|p{2cm}|}
+\hline
+\textbf{type} & \textbf{smart} & \textbf{zypper} \\
+\hline
+apt-deb            & yes & no  \\
+apt-rpm            & yes & no  \\
+deb-dir            & yes & no  \\
+mirrors            & yes & no  \\
+red-carpet         & yes & yes \\
+rpm-dir            & yes & yes \\
+rpm-md             & yes & yes \\ 
+slack-site         & yes & no  \\
+up2date-mirrors    & yes & no  \\
+urpmi              & yes & no  \\
+yast2              & yes & yes \\
+\hline
+\end{tabular}\\
+
+The optional attribute \textbf{status=''replaceable''} makes only
+sense for boot image descriptions. This attribute indicates that
+the repository is allowed to become replaced by the repositories
+defined in the system image descriptions. Because kiwi automatically
+builds the boot image if required it should create that image from
+the same repositories which are used to build the system image to
+make sure both fit together. Therefore it is required to allow the
+repository to become overwritten which is indicated by the status
+attribute.
+
+The source child element contains the path attribute, which specifies
+the location (URL) of the repository. The path specification can be any
+of the following, and can include the \%arch macro which is expanded
+to the architecture of the image building host.
+
+\begin{itemize}
+\item \textbf{this://<path>}\\
+      A relative path name, which is relative to the image
+      description directory being referenced.
+\item \textbf{iso://<path/to/isofile}\\
+      A path to a local .iso file which is then loopback mounted
+      and used as a local path based repository. Alternatively one
+      can do the loop mount himself and point a standard local path
+      to the mounted directory
+\item \textbf{http://<url>}\\
+      A http protocol based network locaation
+\item \textbf{https://<url>}\\
+      A https protocol based network locaation
+\item \textbf{ftp://<url>}\\
+      A ftp protocol based network locaation
+\item \textbf{opensuse://<Project-Name>}\\
+      A special http based network location which is created from
+      the given openSUSE buildservice project name. The result is
+      pointing to an rpm-md repository on the openSUSE buildservice.
+      For example: path=''opensuse://openSUSE:10.3/standard''
+\item \textbf{local path}\\
+      A local path which should be an absolute path description
+\end{itemize}
+
+Multiple repository sections are allowed and combined by the
+used package manager. By default the package manager will always use
+the latest packages available.
+
+\begin{Command}{12cm}
+<packages type="type" \textit{profiles="name"}\\
+\hspace*{2.5cm}\textit{patternType="type"}\\
+\hspace*{2.5cm}\textit{patternPackageType="type"}\\
+\hspace*{2.5cm}\textit{memory="MB"}\\
+\hspace*{2.5cm}\textit{disk="/dev/device"}>\\
+\hspace*{1cm}<package name="name" arch="arch"/>\\
+\hspace*{1cm}<package .../>\\
+\hspace*{1cm}<opensusePattern name="name"/>\\
+\hspace*{1cm}<opensusePattern .../>\\
+\hspace*{1cm}<ignore name="name"/>\\
+\hspace*{1cm}<ignore .../>\\
+</packages>
+\end{Command}
+
+The mandatory packages element specifies the list of packages and
+pattern names to be used with the image. There are five different
+types of package sets or patterns, specified with the type attribute:
+
+\begin{itemize}
+\item \textbf{image}\\
+      Image packages, list of packages used to finish the image
+      installation. All packages which make up the image are listed here
+\item \textbf{bootstrap}\\
+      Bootstrap packages, list of packages used to start creating a
+      new operating system root tree. Basic components which are
+      required to chroot into that system, such as glibc, are listed here.
+
+\item \textbf{delete}\\
+      Delete packages, list of packages stored for later deletion.
+      The package names are available in the \$delete environment
+      variable of the /.profile file created by KIWI. The 
+      baseGetPackagesForDeletion() function returns the contents of this
+      environment variable, and can be used to delete the packages
+      while ignoring requirements or dependencies. According to this
+      a config.sh or images.sh script needs to be provided such as
+      the following code snippet shows:
+\begin{verbatim}
+rpm -e --nodeps --noscripts \
+   $(rpm -q `baseGetPackagesForDeletion` | grep -v "is not installed")
+\end{verbatim}
+\item \textbf{xen}\\
+      Xen required packages, list of packages used when the image
+      needs support for Xen-based virtualization. The memory and disk
+      attributes define how much memory the virtual system requires
+      and the kind of device the disk should appear as in the virtual
+      instance. This information is used to create the appropriate Xen
+      configuration (.xenconfig) file
+\item \textbf{vmware}\\
+      VMware required packages, list of packages used when the image
+      needs support for VMware- or generic based full virtualization. The
+      memory and disk attributes define how much memory the virtual
+      system requires and the kind of device the disk should appear
+      as in the virtual instance. This information is used to create
+      the appropriate VMware (.vmx) configuration file.
+\end{itemize}
+
+Using a pattern name enhances the package list with a number of
+additional packages belonging to this pattern. Support for patterns
+is SUSE-specific, and available with openSUSE 10.1 or later.
+The optional patternType and patternPackageType attributes specify
+which pattern references or packages should be used in a given pattern.
+The values of these attributes are only evaluated if the KIWI pattern
+solver is used. If the new (up to SUSE 11.0) satsolver pattern solver
+is used these values are ignored because the satsolver can't handle
+that at the moment. Allowed values for the pattern* attributes are:
+
+\begin{itemize}
+\item \textbf{onlyRequired}\\
+      Incorporates only patterns and packages that are required by the
+      given pattern
+\item \textbf{plusSuggested}\\
+      Incorporates patterns and packages that are required
+      and suggested by the given pattern
+\item \textbf{plusRecommended}\\
+      Incorporates patterns and packages that are required and
+      recommended by the given pattern.
+\end{itemize}
+
+By default, only required patterns and packages are used. The result
+list of packages is solved into a clean conflict free list of packages
+by the package manager. This for example means that including a suggested
+package may include required and recommended packages as well according
+to the dependencies. If a pattern contains unwanted packages, you can use
+the ignore element to specify an ignore list, with the name attribute
+containing the package name. Please note that you can't ignore a package
+if it is required by a package dependency of another package in your list.
+The packagemanager will automatically pull in the package even if you have
+ignored it. To restrict a package to a specific architecture, use
+the arch attribute to specify a comma separated list of allowed
+architectures.
+
+\begin{Command}{14cm}
+<deploy server="IP" blocksize="4096">\\
+\hspace*{1cm}<timeout>seconds</timeout>\\
+\hspace*{1cm}<commandline>kernel-options</commandline>\\
+\hspace*{1cm}<kernel>kernel-file</kernel>\\
+\hspace*{1cm}<initrd>initrd-file</initrd>\\
+\hspace*{1cm}<partitions device="/dev/sda">\\
+\hspace*{2cm}<partition type="swap" number="1" size="MB"/>\\
+\hspace*{2cm}<partition type="L" number="2" size="MB"\\
+\hspace*{4.5cm}mountpoint="/" target="true"/>\\
+\hspace*{2cm}<partition type="fd" number="3"/>\\
+\hspace*{1cm}</partitions>\\
+\hspace*{1cm}<union ro="dev" rw="dev" type="aufs|unionfs"/>\\
+\hspace*{1cm}<configuration source="/KIWI/../file" dest="/../file"/>\\
+\hspace*{1cm}<configuration .../>\\
+</deploy>
+\end{Command}
+
+The optional deploy section is only useful if you build the \textbf{pxe}
+image type. For this type an additional network boot infrastructure needs
+to be set up. To ease the process of setting up such a boot server kiwi
+provides a package called kiwi-pxeboot. This package sets up the basic
+pxe boot environment like kiwi expects it. The package will setup a
+directory structure in /srv/tftpboot. The result files of the kiwi
+image build process needs to be copied to that location. A detailed
+explanation of what file needs to be copied and where is provided in
+the PXE Image chapter later in this document. Among the image files itself
+it is required to provide an information how KIWI should handle the
+machine it should be install with the created image. Information like
+which image should be used or how to partition the machine needs to
+be provided in a file called config.<MAC-Address> below the directory
+/srv/tftpboot/KIWI. The reason for the deploy section is to allow KIWI
+to create that file according to the information provided in the image
+description.
+
+\begin {enumerate}
+\item The server and blocksize attributes specify the TFTP server which
+      controls the download of image files. KIWI also supports other protocols
+      than tftp but in order to do that the variables \textbf{kiwiserver} and
+      \textbf{kiwiservertype} must be set as kernel parameter when the client
+      boots.
+\item The optional timeout section specifies the grub timeout in seconds
+      which is used when the KIWI initrd configures and installs the grub boot
+      loader on the machine after the first deployment to allow standalone
+      boot.
+\item The optional commandline section specifies the kernel options which
+      should be passed to the kernel by the grub bootloader. the KIWI
+      initrd includes this kernel options when installing the grub for
+      standalone boot
+\item The optional kernel and initrd sections specifies the KIWI
+      kernel and initrd files on the boot server. In case of a special boot
+      method which is not supported by the distribution standard mkinitrd
+      the KIWI initrd needs to stay on the system and needs to be used for
+      local boot as well. So if your system image makes use of the split
+      type or your deploy section includes any union information the
+      kernel and initrd sections must be provided.
+\item The partitions section is required if you want to install the system
+      image on a disk or any other permanent storage device. Each partition is
+      specified by one partition subtag which defines the type (see
+      sfdisk -list-type), partition number, size, optional mountpoint, and
+      optional information on if this partition is the system image
+      target partition. With the KIWI netboot boot image, the first
+      partition is always the swap partition, while the second partition
+      is used, by default, for the system image. With the optional
+      target flag, you can specify a partition other than the second
+      partition to install the system image on. If size is set to ''image'',
+      KIWI calculates the required size for this partition in order to
+      have enough space for the later image.
+\item The optional union section is used if the system image is based
+      on a read-only filesystem such as squashfs and should be mounted
+      read-write by using an overlay filesystem like aufs or unionfs.
+      In this case, KIWI creates an additional write partition, then
+      combines both partitions with the given overlay filesystem.
+      Currently, there are two such filesystems: unionfs and aufs
+      (aufs is the preferred file system). The partition that holds the
+      read-only system image must be set as the ro attribute value, and the
+      partition that serves as the write partition must be set the rw
+      attribute value.
+\item The optional configuration section can be used to integrate a network
+      client's configuration files which are stored remotely on the server.
+      The source attribute specifies the path on the server used by a
+      TFTP client program to download the file, and the dest attribute
+      specifies the target relative to the root (/) of the network client.
+      Each file is specified by one configuration section.
+\end{enumerate}
+
+\begin{Command}{12cm}
+<split>\\
+\hspace*{1cm}<temporary>\\
+\hspace*{2cm}<!-- read/write access to: -->\\
+\hspace*{2cm}<file name="/var"/>\\
+\hspace*{2cm}<file name="/var/*"/>\\
+\hspace*{2cm}<!-- but not on this file: -->\\
+\hspace*{2cm}<except name="/etc/shadow"/>\\
+\hspace*{1cm}</temporary>\\
+\hspace*{1cm}<persistent>\\
+\hspace*{2cm}<!-- persistent read/write access to: -->\\
+\hspace*{2cm}<file name="/etc"/>\\
+\hspace*{2cm}<file name="/etc/*"/>\\
+\hspace*{2cm}<!-- but not on this file: -->\\
+\hspace*{2cm}<except name="/etc/passwd"/>\\
+\hspace*{1cm}</persistent>\\
+</split>
+\end{Command}
+
+The optional split section is used if your image type is split or iso
+combined with the attributes compressed or compressed-cromfs. The split
+section controls which files of your splitted image should be writable
+and whether they are persistantly writable or only temporarly. In case
+of an iso image all data specified can only be temporarly writable
+by design of the live system image type.
+
+The split section distinguishes between directory and files. The
+information of ''/etc'' would make /etc a writable directory however
+none of the files *within* /etc are affected. They remain symbolic
+links to the real files in the read-only area. The main advantage to
+putting just a directory in the read-write area is that any new
+files created there are stored on the disk instead of tmpfs. If all
+the files in /etc should also be part of the read-write area and
+according to this put a complete directory including all its files
+into the read-write area two lines are required as shown above.
+

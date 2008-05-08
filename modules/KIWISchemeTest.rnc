@@ -43,13 +43,13 @@ div {
 		## Useful for xsi:noNamespaceSchemaLocation, for example
 		attribute xsi:* { text }
 	t.test_case.name.attrib =
-		## The name of the testcases ???
+		## The name of the testcase
 		attribute name { t.string-attrib.type }
 	t.test_case.description.attrib =
-		## A short description ???
+		## Description of what this testcase does
 		attribute description { t.string-attrib.type }
 	t.test_case.summary.attrib =
-		## A short summary ???
+		## A short summary of the test
 		attribute summary { t.string-attrib.type }
 	t.test_case.attlist =
 		t.xsi.attribs* &
@@ -58,7 +58,7 @@ div {
 		t.test_case.summary.attrib
     
 	t.test_case =
-		## This schema specifies the format of the tests for kiwi  images.
+		## This schema specifies the format of the tests for kiwi images.
 		element test_case {
 			t.test_case.attlist,
 			t.requirements,
@@ -73,7 +73,8 @@ div {
 div {
 	t.requirements.attlist = empty
 	t.requirements =
-		## A list of requirements
+		## In requirements you define what files/directories or
+		## packages has to be present in your image to run the test.
 		element requirements {
 			t.requirements.attlist,
 			t.req+
@@ -86,10 +87,12 @@ div {
 #
 div {
 	t.req.type.attrib =
-		## ???
+		# type of data to check if present
 		attribute type { t.string-attrib.type }
 	t.req.place.attrib =
-		## ???
+		## There are two places for required data: extern and intern
+		## external data is searched outside of the image tree.
+		## internal date is searched inside the image tree
 		attribute place { t.string-attrib.type }
 	t.req.attlist = 
 		t.req.type.attrib &
@@ -109,11 +112,14 @@ div {
 #
 div {
 	t.test.place.attrib =
-		## ???
+		## There are two places for test programs: extern and intern
+		## external programs are called outside of the image tree.
+		## internal programs are called inside of the image using the
+		## chroot command
 		attribute place { t.string-attrib.type }
     
 	t.test.type.attrib =
-		## ???
+		## Program type can be either script or binary
 		attribute type { t.string-attrib.type }
 
 	t.test.attlist =
@@ -168,7 +174,7 @@ div {
 	t.params.attlist = empty
   
 	t.params =
-		## ???
+		## Parameters to pass to the test program
 		element params {
 			t.params.attlist,
 			t.string.type
@@ -183,7 +189,8 @@ div {
 	t.type.attlist = empty
   
 	t.type =
-		## ???
+		## There are three types of requirements: file, directory
+		## and rpm-package
 		element type {
 			t.type.attlist,
 			t.string.type

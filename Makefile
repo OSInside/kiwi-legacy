@@ -70,9 +70,12 @@ install:
 	install -m 644 ./.revision ${kiwi_prefix}
 
 	#============================================
-	# kiwi system draft and examples
+	# kiwi documentation and examples
 	#--------------------------------------------
-	cp -a doc/* ${PACKDOCVZ}
+	cp -a doc/examples/ ${PACKDOCVZ}
+	cp -a doc/schema/   ${PACKDOCVZ}
+	cp -a doc/*.pdf     ${PACKDOCVZ}
+	cp -a doc/COPYING   ${PACKDOCVZ}
 
 	#============================================
 	# kiwi manual pages

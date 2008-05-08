@@ -1,0 +1,63 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>RELAX-NG KIWI Schema Documentation</title><link rel="stylesheet" href="kiwi.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.73.2"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="reference" lang="en"><div class="titlepage"><div><div><h1 class="title"><a name="id2503802"></a>RELAX-NG KIWI Schema Documentation</h1></div><div><div class="authorgroup"><div class="author"><h3 class="author"><span class="firstname">Marcus</span> <span class="surname">Schäfer</span></h3><span class="contrib">Wrote original XSD Schema</span> <code class="email">&lt;<a class="email" href="mailto:ms%20(AT)%20suse.de">ms (AT) suse.de</a>&gt;</code></div><div class="othercredit"><h3 class="othercredit"><span class="firstname">Khalil</span> <span class="surname">Ahmed</span></h3><span class="contrib">Original Stylesheet</span> </div><div class="othercredit"><h3 class="othercredit"><span class="firstname">Thomas</span> <span class="surname">Schraitle</span></h3><span class="contrib">Rewrote XSD into RNC</span> <span class="contrib">Modified XSLT stylesheet to output DocBook refentry</span> <code class="email">&lt;<a class="email" href="mailto:thomas.schraitle%20(AT)%20suse.de">thomas.schraitle (AT) suse.de</a>&gt;</code></div></div></div><div><div class="legalnotice"><a name="id2538766"></a><p class="legalnotice-title"><b>Legal Notice</b></p><p>This product includes software developed by Khalil Ahmed
+              (<a class="ulink" href="http://www.techquila.com" target="_top">http://www.techquila.com</a>).</p></div></div><div><p class="pubdate">Published: 05/08/2008</p></div></div><hr></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="refentrytitle"><a href="#def.file">
+        <code class="sgmltag-element">file</code>
+      </a></span><span class="refpurpose"> &#8212; A filename</span></dt><dt><span class="refentrytitle"><a href="#def.params">
+        <code class="sgmltag-element">params</code>
+      </a></span><span class="refpurpose"> &#8212; Parameters to pass to the test program</span></dt><dt><span class="refentrytitle"><a href="#def.path">
+        <code class="sgmltag-element">path</code>
+      </a></span><span class="refpurpose"> &#8212; A path</span></dt><dt><span class="refentrytitle"><a href="#def.req">
+        <code class="sgmltag-element">req</code>
+      </a></span><span class="refpurpose"> &#8212; A single requirement</span></dt><dt><span class="refentrytitle"><a href="#def.requirements">
+        <code class="sgmltag-element">requirements</code>
+      </a></span><span class="refpurpose"> &#8212; In requirements you define what files/directories or
+packages has to be present in your image to run the test.</span></dt><dt><span class="refentrytitle"><a href="#def.test">
+        <code class="sgmltag-element">test</code>
+      </a></span><span class="refpurpose"> &#8212; A single test</span></dt><dt><span class="refentrytitle"><a href="#def.test_case">
+        <code class="sgmltag-element">test_case</code>
+      </a></span><span class="refpurpose"> &#8212; This schema specifies the format of the tests for kiwi images.</span></dt><dt><span class="refentrytitle"><a href="#def.type">
+        <code class="sgmltag-element">type</code>
+      </a></span><span class="refpurpose"> &#8212; There are three types of requirements: file, directory
+and rpm-package</span></dt></dl></div><div class="refentry" lang="en"><a name="def.file"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+        <code class="sgmltag-element">file</code>
+      </h2><p>
+        <code class="sgmltag-element">file</code>
+       &#8212; A filename</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">file ::= </pre></div><div class="refsect1" lang="en"><a name="id2516608"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.params"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+        <code class="sgmltag-element">params</code>
+      </h2><p>
+        <code class="sgmltag-element">params</code>
+       &#8212; Parameters to pass to the test program</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">params ::= </pre></div><div class="refsect1" lang="en"><a name="id2524436"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.path"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+        <code class="sgmltag-element">path</code>
+      </h2><p>
+        <code class="sgmltag-element">path</code>
+       &#8212; A path</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">path ::= </pre></div><div class="refsect1" lang="en"><a name="id2551495"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.req"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+        <code class="sgmltag-element">req</code>
+      </h2><p>
+        <code class="sgmltag-element">req</code>
+       &#8212; A single requirement</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">req ::= </pre></div><div class="refsect1" lang="en"><a name="id2529940"></a><h2>Attributes</h2><div class="informaltable"><table border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Attribute</th><th>Type</th><th>Use</th><th>Documentation</th></tr></thead><tbody><tr><td>type</td><td> TEXT </td><td>Required</td><td> </td></tr><tr><td>place</td><td> TEXT </td><td>Required</td><td>There are two places for required data: extern and intern
+external data is searched outside of the image tree.
+internal date is searched inside the image tree</td></tr></tbody></table></div></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.requirements"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+        <code class="sgmltag-element">requirements</code>
+      </h2><p>
+        <code class="sgmltag-element">requirements</code>
+       &#8212; In requirements you define what files/directories or
+packages has to be present in your image to run the test.</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">requirements ::= (<a class="link" href="#def.req" title="req">req</a>)+</pre></div><div class="refsect1" lang="en"><a name="id2552841"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.test"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+        <code class="sgmltag-element">test</code>
+      </h2><p>
+        <code class="sgmltag-element">test</code>
+       &#8212; A single test</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">test ::= <a class="link" href="#def.file" title="file">file</a>,
+  <a class="link" href="#def.path" title="path">path</a>?,
+  (<a class="link" href="#def.params" title="params">params</a>)*</pre></div><div class="refsect1" lang="en"><a name="id2538159"></a><h2>Attributes</h2><div class="informaltable"><table border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Attribute</th><th>Type</th><th>Use</th><th>Documentation</th></tr></thead><tbody><tr><td>type</td><td> TEXT </td><td>Required</td><td>Program type can be either script or binary</td></tr><tr><td>place</td><td> TEXT </td><td>Required</td><td>There are two places for test programs: extern and intern
+external programs are called outside of the image tree.
+internal programs are called inside of the image using the
+chroot command</td></tr></tbody></table></div></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.test_case"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+        <code class="sgmltag-element">test_case</code>
+      </h2><p>
+        <code class="sgmltag-element">test_case</code>
+       &#8212; This schema specifies the format of the tests for kiwi images.</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">test_case ::= <a class="link" href="#def.requirements" title="requirements">requirements</a>,
+  (<a class="link" href="#def.test" title="test">test</a>)*</pre></div><div class="refsect1" lang="en"><a name="id2556358"></a><h2>Attributes</h2><div class="informaltable"><table border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Attribute</th><th>Type</th><th>Use</th><th>Documentation</th></tr></thead><tbody><tr><td> </td><td> TEXT </td><td>Required</td><td>Any attributes from the xsi namespace
+Useful for xsi:noNamespaceSchemaLocation, for example</td></tr><tr><td>name</td><td> TEXT </td><td>Required</td><td>The name of the testcase</td></tr><tr><td>description</td><td> TEXT </td><td>Required</td><td>Description of what this testcase does</td></tr><tr><td>summary</td><td> TEXT </td><td>Required</td><td>A short summary of the test</td></tr></tbody></table></div></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.type"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+        <code class="sgmltag-element">type</code>
+      </h2><p>
+        <code class="sgmltag-element">type</code>
+       &#8212; There are three types of requirements: file, directory
+and rpm-package</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">type ::= </pre></div><div class="refsect1" lang="en"><a name="id2548106"></a><h2>Attributes</h2><p>No attributes available.</p></div></div></div></body></html>

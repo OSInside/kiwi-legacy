@@ -1,0 +1,142 @@
+\index{KIWI images!oem|(}
+\chapter{OEM image - Preload Systems}
+\label{chapter:oem}
+\minitoc
+
+An oem image is a virtual disk image representing all partitions
+and bootloader information like it exists on a real disk. The image
+format is the same compared to the VMX image type. All flavours
+explained in the VMX chapter also applies to the OEM type.
+
+The original idea of an oem image is to provide this virtual disk data
+to OEM vendors which now are able to deploy the system independently onto
+their storage media. The deployment can happen from any OS including
+Windows if a tool to dump data on a disk device exists. The oem image
+type is also used to deploy images on USB sticks because in principal
+it is the same workflow.
+
+\section{Building the suse-oem-preload example}
+
+The example provided with kiwi is based on openSUSE 10.3 and includes
+the patterns default plus x11. The image type is a split type whereas
+the read-write filesystem is ext3 and the read-only filesystem is
+squashfs. The additional format attribute also creates an installable
+ISO image for deploying the image from CD. The source repository is expected
+to be available below the path /image/CDs/full-10.3-i386. If you don't have
+a 10.3 repository there edit the config.xml file of the image description
+and change the path accordingly or use the suggested remote repository.
+
+\begin{Command}{12cm}
+\begin{verbatim}
+cd /usr/share/doc/packages/kiwi/examples
+kiwi --prepare ./suse-oem-preload \
+     --root /tmp/myoem
+\end{verbatim}
+\end{Command}
+
+\begin{Command}{12cm}
+\begin{verbatim}
+kiwi --create /tmp/myoem --type split \
+     -d /tmp/myoem-result
+\end{verbatim}
+\end{Command}
+
+\section{Using the image}
+
+Testing the oem virtual disk can be done with a virtualisation software
+like QEMU or VMware. The virtual disk is represented by the .raw extension
+whereas the .iso extension represents the installation disk for this oem
+image. The installation disk should be tested on a bare test system
+For the .raw test just call:
+
+\begin{Command}{12cm}
+\begin{verbatim}
+cd /tmp/myoem-result
+qemu suse-10.3-oem-preload.i686-1.1.2.raw \
+     -m 512
+\end{verbatim}
+\end{Command}
+
+or dump the image on a test hard disk and select it as boot device
+in the BIOS:
+
+\begin{Command}{12cm}
+\begin{verbatim}
+cd /tmp/myoem-result
+dd if=suse-10.3-oem-preload.i686-1.1.2.raw \
+   of=/dev/<device> bs=32k
+\end{verbatim}
+\end{Command}
+
+Please note if you test an oem image the virtual disk geometry of the
+image is the same as the disk geometry inside the host system. According
+to this the oem boot workflow will skip the re-partitioning which is
+performed if there would be a real disk
+
+\section{Flavours}
+
+An interesting part of an oem image is that it can be turned into
+an installation image too. This means it is possible to create an
+installation CD / DVD or USB stick which deploysthe oem based
+image onto the selected storage device. The installation process
+is a simply dd of the image onto the selected device so don't
+expect any user interaction or GUI here to pop up. KIWI supports
+two types of installation media:
+
+\begin{itemize}
+\item <type ... format=''iso''>...</type>\\
+      Creates a .iso file which can be burned in CD or DVD. This
+      represents an installation CD
+\item <type ... format=''usb''>...</type>\\
+      Creates a .raw.install file which can be dumped (dd) on a
+      USB stick. This represents an installation Stick
+\end{itemize}
+
+\subsection{Influencing the oem partitioning}
+
+By default the oemboot process will create/modify a swap, /home and /
+partition. When providing the file \textbf{/config.oempartition} as part
+of the oemboot boot image one can influence this partitioning process.
+The format of the file is a simple key=value format. Following variables
+can be set:
+
+\begin{itemize}
+\item \textbf{OEM\_REBOOT=1}\\
+      This allows to reboot the oem system after initial deployment.
+      Don't specify OEM\_REBOOT at all if you want to boot directly into
+      the system
+\item \textbf{OEM\_SWAPSIZE=<number in MB>}\\
+      Set the size of the swap partition
+\item \textbf{OEM\_SYSTEMSIZE=<number in MB>}\\
+      Set the size of the / partition
+\item \textbf{OEM\_WITHOUTHOME=1}\\
+      Specify if a home partition should be create. Don't specify
+      OEM\_WITHOUTHOME at all if you want a /home partition
+\end{itemize}
+
+If you plan to use a custom partition setup you also should consider
+to create a copy of the original oemboot boot image description. The following
+workflow should be used to integrate a custom config.oempartition:
+
+\begin{enumerate}
+\item Clone the used boot image description
+\begin{verbatim}
+cp -a /usr/share/kiwi/image/oemboot/suse-... \
+      /usr/share/kiwi/image/oemboot/suse-...-myoem
+\end{verbatim}
+\item Copy the config.oempartition file into the boot image description 
+\begin{verbatim}
+cp config.oempartition \
+   /usr/share/kiwi/image/oemboot/suse-...-myoem/root
+\end{verbatim}
+\item Sign your new boot image description
+\begin{verbatim}
+kiwi --createhash \
+     /usr/share/kiwi/image/oemboot/suse-...-myoem
+\end{verbatim}
+\item Make sure your system image use the new boot image
+\begin{verbatim}
+<type ... boot="oemboot/suse-...-myoem">...</type>
+\end{verbatim}
+\end{enumerate}
+

@@ -1,0 +1,170 @@
+\index{KIWI images!usb|(}
+\chapter{USB image - Live-Stick System}
+\label{chapter:usb}
+\minitoc
+
+A live USB stick image is a system on USB stick which allows you to
+boot and run from this device without using any other storage device of
+the computer. It is urgently required that the BIOS of the system which
+you plug the stick in supports booting from USB stick. Almost all
+new BIOS systems support that. The USB stick serves as OS system disk
+in this case and you can read and write data onto it.
+
+\section{Building the suse-live-stick example}
+
+The example provided with kiwi is based on openSUSE 10.3 and makes use
+of the default plus x11 pattern. The operating system is stored on a
+standard ext3 filesystem. The source repository is expected to be
+available below the path /image/CDs/full-10.3-i386. If you don't have
+a 10.3 repository there edit the config.xml file of the image description
+and change the path accordingly or use the suggested remote repositories.
+
+\begin{Command}{12cm}
+\begin{verbatim}
+cd /usr/share/doc/packages/kiwi/examples
+kiwi --prepare ./suse-live-stick \
+     --root /tmp/mystick
+\end{verbatim}
+\end{Command}
+
+There are two possible image types which allows you to drive the
+stick. Both are added into the config.xml of this example image
+description. If you already have access to the stick you want to
+run the image on the first approach should be preferred over the
+second one.
+
+\begin{itemize}
+\item The first image type named ''usb'' creates all required
+      images for booting the OS but requires you to plug in the stick
+      and let kiwi deploy the data onto this stick.
+
+      \begin{Command}{12cm}
+      \begin{verbatim}
+kiwi --create /tmp/mystick --type usb \
+     -d /tmp/mystick-result
+      \end{verbatim}
+      \end{Command}
+
+\item The second image type named ''oem'' allows you to create a
+      virtual disk which represents a virtual disk geometry including
+      all partitions and boot information in one file. You simply can ''dd''
+      this file on the stick.
+
+      \begin{Command}{12cm}
+      \begin{verbatim}
+kiwi --create /tmp/mystick --type oem \
+     -d /tmp/mystick-result
+      \end{verbatim}
+      \end{Command}
+\end{itemize}
+
+\section{Using the image}
+
+To make use of the created images they need to be deployed on the
+USB stick. For the first image type (usb) you need kiwi itself to
+be able to deploy the image on the stick. The reason for this is
+that the usb image type has created the boot and the system image
+but there is no disk geometry or partition table available. kiwi
+creates a new partition table on the stick and imports the created
+images as follows:
+
+\begin{Command}{13cm}
+\begin{verbatim}
+kiwi --bootstick \
+   /tmp/mystick-result/\
+   initrd-usbboot-suse-10.3.i686-2.1.1.splash.gz \
+   --bootstick-system \
+   /tmp/mystick-result/\
+   suse-10.3-live-stick.i686-1.1.2
+\end{verbatim}
+\end{Command}
+
+In case of the second image type (oem) you only need a tool which allows
+you to dump data onto a device. On Linux the most popular tool to do this
+is the \textbf{dd} command. The oem image is represented by the file
+with the .raw extension. As said this is a virtual disk which already
+includes partition information. But this partition information does
+not match the real USB stick geometry which means the kiwi boot image
+(oemboot) has to adapt the disk geometry on first boot. To deploy the
+image on the stick call:
+
+\begin{Command}{13cm}
+\begin{verbatim}
+dd if=/tmp/mystick-result/\
+   suse-10.3-live-stick.i686-1.1.2.raw \
+   of=/dev/<stick-device> bs=32k
+\end{verbatim}
+\end{Command}
+
+Testing of the live stick can be done with a test machine which boots from
+USB or with a virtualisation system. If you test with a virtualisation
+system for example qemu you should be aware that the USB stick looks like
+a normal disk to the system. The kiwi boot process searches for the USB
+stick to be able to mount the correct storage device but in a virtual
+environment the disk doesn't appear as a USB stick. So if your
+virtualisation solution doesn't provide a virtual BIOS which allows booting
+from USB stick you should test the stick on real hardware
+
+\section{Flavours}
+
+USB sticks weren't designed to serve as storage devices for
+operating systems. By design of these nice little gadgets their
+storage capacity is limited to only a few G-bytes. According to
+this KIWI supports compressed filesystems with USB sticks too:  
+
+\begin{itemize}
+\item \textbf{filesystem=''squashfs''}\\
+      This will compress the image using the squashfs filesystem. The
+      boot process will automatically use aufs as overlay filesystem to
+      mount the complete tree read-write. For the write part an additional
+      ext2 partition will be created on the stick. The support for this
+      compression layer requires squashfs and aufs to be present in
+      the distribution KIWI has used to build the image 
+\item \textbf{filesystem=''cromfs''}\\
+      The same as with squashfs but cromfs is used for compression
+\end{itemize}
+
+\subsection{Split stick}
+If there is no overlay filesystem available it is also possible to
+define a split section in config.xml and use the split support to
+split the image into a compressed read-only and a read-write portion.
+To create a split stick the types needs to be adapted as follows:
+
+\begin{itemize}
+\item \textbf{type setup for split usb type:}
+
+      \begin{Command}{12cm}
+      \begin{verbatim}
+<type fsreadwrite="ext3" fsreadonly="squashfs"
+      boot="usbboot/suse-10.3">split</type>
+      \end{verbatim}
+      \end{Command}
+\item \textbf{type setup for split oem type:}
+
+      \begin{Command}{12cm}
+      \begin{verbatim}
+<type fsreadwrite="ext3" fsreadonly="squashfs"
+      boot="oemboot/suse-10.3">split</type>
+      \end{verbatim}
+      \end{Command}
+\end{itemize}
+
+For both types a split section is required which defines the read-write
+data. A good starting point is to set /var, /home and /etc as writable
+data.
+
+\begin{Command}{12cm}
+\begin{verbatim}
+<split>
+   <persistent>
+      <!-- allow read/write access to: -->
+      <file name="/var"/>
+      <file name="/var/*"/>
+      <file name="/etc"/>
+      <file name="/etc/*"/>
+      <file name="/home"/>
+      <file name="/home/*"/>
+   </persistent>
+</split>
+\end{verbatim}
+\end{Command}

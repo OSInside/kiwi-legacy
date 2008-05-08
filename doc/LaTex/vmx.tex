@@ -1,0 +1,118 @@
+\index{KIWI images!vmx|(}
+\chapter{VMX image - Virtual Disks}
+\label{chapter:vmx}
+\minitoc
+
+A VMX image is a virtual disk image for use in full virtualisation
+systems like QEMU or VMware. The image represents a file which
+includes partition data and bootloader information. The size of
+this virtual disk can be influenced by either the <size> element
+in your config.xml file or by the parameter $--$bootvm-disksize
+
+\section{Building the suse-vm-guest example}
+
+The example provided with kiwi is based on openSUSE 10.3 and makes use
+of the base pattern. The operating system is stored on a
+standard ext3 filesystem. The source repository is expected to be
+available below the path /image/CDs/full-10.3-i386. If you don't have
+a 10.3 repository there edit the config.xml file of the image description
+and change the path accordingly or use the suggested remote repositories.
+
+\begin{Command}{12cm}
+\begin{verbatim}
+cd /usr/share/doc/packages/kiwi/examples
+kiwi --prepare ./suse-vm-guest \
+     --root /tmp/myvm
+\end{verbatim}
+\end{Command}
+
+\begin{Command}{12cm}
+\begin{verbatim}
+kiwi --create /tmp/myvm \
+     --type vmx -d /tmp/myvm-result
+\end{verbatim}
+\end{Command}
+
+\section{Using the image}
+
+The generated virtual disk image serves as the harddisk of the selected
+virtualisation system. The setup of the virtual hard disk differes from
+the variety of the virtualisation systems. A very simply to use system
+is the QEMU virtualisation software. To run your image in qemu call:
+
+\begin{Command}{12cm}
+\begin{verbatim}
+cd /tmp/myvm-result
+qemu suse-10.3-vm-guest.i686-1.1.2.raw -m 256
+\end{verbatim}
+\end{Command}
+
+\section{Flavours}
+
+Because there are many virtualisation systems available there are also
+many virtual disk formats. The .raw format KIWI always creates has the
+same structure as you can find on a real hard disk. For virtualisation
+software it makes sense to have specific formats to increase the
+I/O performance when reading or writing data onto the disk from within
+the virtual system. If you want to tell KIWI to create an additional
+disk format just extend the type information of the config.xml file
+by a format attribute.
+
+\begin{Command}{12cm}
+\begin{verbatim}
+<type ... format=''name''>vmx</type>
+\end{verbatim}
+\end{Command}
+
+The following table shows a list of supported virtual disk formats
+
+\begin{tabular}[h]{|p{4cm}|p{6cm}|}
+\hline
+\textbf{Name} & \textbf{Description} \\
+\hline
+vvfat       & Disk format DOS FAT32 \\
+vpc         & Virtual PC read only disk  \\
+bochs       & Disk format for Bochs emulator  \\
+dmg         & Disk format for Mac OS X \\
+cloop       & Compressed loop \\
+vmdk        & Disk format for VMware \\
+qcow        & QEMU virtual disk format  \\
+cow         & QEMU virtual disk format  \\
+\hline
+\end{tabular}
+
+\subsection{VMware support}
+
+VMware is a very popular and fast virtualisation platform which is
+the reason why KIWI has special support for it. VMware requires a
+so called guest configuration which includes information about what
+hardware should make up the guest and how much ressources should be
+provided to the guest. With KIWI you can provide the information
+required to create a guest configuration as part of the config.xml
+file. Additionally you can group special packages which you may only
+need in this virtual environment.
+
+\begin{Command}{13cm}
+\begin{verbatim}
+<packages type="vmware" memory="512" disk="ide0">
+   <!-- packages you need in VMware only -->
+</packages>
+\end{verbatim}
+\end{Command}
+
+If this information is present KIWI will create a VMware guest
+configuration with 512 MB of RAM and an IDE disk controller interface.
+Other information like bridged network, CD-ROM drive, power management, etc..
+are added as default values and can be changed easily by the native
+graphics user provided with VMware. The KIWI VMware guest configuration
+is stored in the file:
+
+\begin{Command}{13cm}
+\begin{verbatim}
+/tmp/myvm-result/suse-10.3-vm-guest.i686-1.1.2.vmx
+\end{verbatim}
+\end{Command}
+
+Together with the \textbf{format=''vmdk''} attribute KIWI creates
+a VMware based image (.vmdk file) and the required VMware guest
+configuration (.vmx)

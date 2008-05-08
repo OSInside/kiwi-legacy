@@ -1,0 +1,142 @@
+%%============================================================
+%% Preamble
+%%------------------------------------------------------------
+\documentclass[12pt, english, a4paper, headsepline, footsepline,
+BCOR1.5cm, DIV16, bigheadings, bibtotoc, idxtotoc, headinclude,
+footexclude, abstracton]{scrbook}
+
+%scrreprt
+
+\NeedsTeXFormat{LaTeX2e}
+%%==============================
+%% Packages
+%%------------------------------
+%\usepackage{german}
+%\usepackage{bibgerm}
+\usepackage{url}
+\usepackage{makeidx}
+\usepackage{epsfig}
+\usepackage{alltt}
+\usepackage{varioref}
+%\usepackage[dvips]{color}
+\usepackage{boxedminipage}
+\usepackage{minitoc}
+\usepackage{fancybox}
+\usepackage{vmargin}
+\usepackage{amsmath}
+\usepackage{longtable}
+\usepackage{verbatim}
+\usepackage{version}
+\usepackage{rotating}
+
+% TF:
+\usepackage[latin1]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[
+colorlinks=true,
+linkcolor=blue,
+urlcolor=blue,
+bookmarks=true,
+bookmarksopen=false,
+bookmarksnumbered=true,
+pdfpagemode=UseOutlines, % options are: None,UseThumbs,UseOutlines,FullScreen
+pdfstartview=FitV,       % options are: fit[ |h|v|b|bh|bv]
+hyperindex=true]{hyperref}
+
+
+%%==============================
+%% Definitions
+%%------------------------------
+\renewcommand{\rmdefault}{bch}
+\renewcommand*\descfont{\normalfont\bfseries}
+\renewcommand*\sectfont{\normalfont\bfseries}
+\renewcommand{\ttdefault}{cmtt}
+\DeclareFontShape{OT1}{cmtt}{bx}{n} {
+  <5><6><7><8>cmtt8
+  <9> cmbtt9
+  <10><10.95> <12><14.4><17.28><20.74><24.88> cmbtt10 }{}
+\parskip.5ex
+\parindent0cm
+\setcounter{tocdepth}{1}
+\renewcommand{\mtcSfont}{\normalfont\bfseries}
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\Code}[1]{{\ttfamily\bfseries #1}}
+\newcommand{\longcomment}[1]{}
+\pagestyle{headings}
+
+\setpapersize{A4}
+\setmarginsrb{3cm}{0cm}{3.8cm}{2cm}{2cm}{1cm}{2cm}{1cm}
+\newcommand{\bs}{$\backslash$}
+\newcommand{\ca}{\symbol{94}}
+\newcommand{\ti}{\symbol{126}}
+
+\includeversion{Yes}
+\excludeversion{No}
+
+%%==============================
+%% Titlepage
+%%------------------------------
+\subject{KIWI Project}
+
+\title{
+  openSUSE - KIWI Image System\\
+  Cookbook
+}
+
+\author{
+  Project, Design and Implementation\\
+  by Marcus Schaefer (ms@suse.de)\\
+  \thanks{
+  SUSE LINUX Products GmbH, Maxfeldstrasse 5, D-90409 Nuremberg
+  }
+}
+
+\date{
+ \vspace{1cm}
+ \epsfig{
+   file=pictures/logo.ps,width=4cm
+ }\\
+ \vspace{1.5cm}
+ \vspace{2cm}
+ \begin{tabbing}
+  \hspace{2.6cm} Author: \quad\= Marcus Schaefer\\
+  \hspace{2.6cm} Date:\>  \today\\
+  \hspace{2.6cm} Revision:\> \input {Revision.txt}
+ \end{tabbing}
+}
+
+\publishers{}
+
+%%============================================================
+%% Start document
+%%------------------------------------------------------------
+\makeindex
+\begin{document}
+\dominitoc
+
+\newenvironment{Command}%
+ {\begin{Sbox}\begin{large}\begin{minipage}}%
+ {\end{minipage}\end{large}\end{Sbox}%
+  %%\begin{center}\Large\shadowbox{\TheSbox}\end{center}}
+  \vspace{0.5cm}\shadowbox{\TheSbox}\vspace{0.5cm}}
+
+\maketitle
+\tableofcontents
+
+%%============================================================
+%% all input sources
+%%------------------------------------------------------------
+\input intro
+\input workflow
+\input description
+\input maintenance
+\input iso
+\input usb
+\input vmx
+\input pxe
+\input oem
+\input xen
+%\input ec2
+\input testing
+\printindex
+\end{document}
