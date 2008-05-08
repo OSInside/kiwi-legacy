@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu May  8 10:57:01 CEST 2008 - ms@suse.de
+
+- added support for file:// semantic in config.xml
+
+-------------------------------------------------------------------
 Tue May  6 14:03:17 CEST 2008 - ms@suse.de
 
 - fixed oemboot repartition check (bnc #386593)

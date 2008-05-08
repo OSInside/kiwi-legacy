@@ -95,6 +95,10 @@ sub normalizePath {
 	if (defined $path) {
 		return $path;
 	}
+	$path = $this -> filePath ($module);
+	if (defined $path) {
+		return $path;
+	}
 	return $module;
 }
 
@@ -206,7 +210,33 @@ sub thisPath {
 }
 
 #==========================================
-# isPath
+# filePath
+#------------------------------------------
+sub filePath {
+	my $this   = shift;
+	my $module = shift;
+	my $kiwi   = $this->{kiwi};
+	#==========================================
+	# normalize URL data
+	#------------------------------------------
+	if ($module !~ /^file:\/\//) {
+		return undef;
+	}
+	$module =~ s/file:\/\///;
+	if ($module !~ /^\//) {
+		my $pwd = qxx ("pwd"); chomp $pwd;
+		$module = $pwd."/".$module;
+	}
+	if (! -e $module) {
+		$kiwi -> warning ("file path: $module doesn't exist: $!");
+		$kiwi -> skipped ();
+		return undef;
+	}
+	return $module;
+}
+
+#==========================================
+# isoPath
 #------------------------------------------
 sub isoPath {
 	# ...
