@@ -2,6 +2,7 @@
 Thu May  8 10:57:01 CEST 2008 - ms@suse.de
 
 - added support for file:// semantic in config.xml
+- fixed scsi fileName setup in VMware .vmx creation
 
 -------------------------------------------------------------------
 Tue May  6 14:03:17 CEST 2008 - ms@suse.de
