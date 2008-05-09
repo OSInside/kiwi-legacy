@@ -2,6 +2,7 @@
 Fri May  9 13:45:30 CEST 2008 - ms@suse.de
 
 - fixed grub boot sector check for --bootstick workflow
+- removed /boot partition from --bootstick workflow
 
 -------------------------------------------------------------------
 Thu May  8 10:57:01 CEST 2008 - ms@suse.de

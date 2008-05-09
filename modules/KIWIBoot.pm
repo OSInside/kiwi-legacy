@@ -507,7 +507,6 @@ sub setupBootStick {
 	my $haveTree  = 0;
 	my $FSTypeRW;
 	my $FSTypeRO;
-	my $sysird;
 	my $status;
 	my $result;
 	my $hald;
@@ -568,6 +567,13 @@ sub setupBootStick {
 		if (-f $splitfile) {
 			$haveSplit = 1;
 		}
+	}
+	#==========================================
+	# set boot partition number
+	#------------------------------------------
+	my $bootpart = "0";
+	if (($syszip) || ($haveSplit)) {
+		$bootpart = "1";
 	}
 	#==========================================
 	# obtain filesystem type from xml data
@@ -687,11 +693,11 @@ sub setupBootStick {
 	print FD "color cyan/blue white/blue\n";
 	print FD "default 0\n";
 	print FD "timeout 10\n";
-	print FD "gfxmenu (hd0,0)/image/loader/message\n";
+	print FD "gfxmenu (hd0,$bootpart)/boot/message\n";
 	print FD "\n";
 	print FD "title $label [ USB ]\n";
 	if (! $isxen) {
-		print FD " root (hd0,0)\n";
+		print FD " root (hd0,$bootpart)\n";
 		print FD " kernel /boot/linux vga=0x314 splash=silent";
 		if ($imgtype eq "split") {
 			print FD " COMBINED_IMAGE=yes showopts\n";
@@ -700,7 +706,7 @@ sub setupBootStick {
 		}
 		print FD " initrd /boot/initrd\n";
 	} else {
-		print FD " root (hd0,0)\n";
+		print FD " root (hd0,$bootpart)\n";
 		print FD " kernel /boot/xen.gz\n";
 		print FD " module /boot/linux vga=0x314 splash=silent";
 		if ($imgtype eq "split") {
@@ -712,7 +718,7 @@ sub setupBootStick {
 	}
 	print FD "title Failsafe -- $label [ USB ]\n";
 	if (! $isxen) {
-		print FD " root (hd0,0)\n";
+		print FD " root (hd0,$bootpart)\n";
 		print FD " kernel /boot/linux vga=0x314 splash=silent";
 		if ($imgtype eq "split") {
 			print FD " COMBINED_IMAGE=yes showopts";
@@ -723,7 +729,7 @@ sub setupBootStick {
 		print FD " noapic maxcpus=0 edd=off\n";
 		print FD " initrd /boot/initrd\n";
 	} else {
-		print FD " root (hd0,0)\n";
+		print FD " root (hd0,$bootpart)\n";
 		print FD " kernel /boot/xen.gz\n";
 		print FD " module /boot/linux vga=0x314 splash=silent";
 		if ($imgtype eq "split") {
@@ -738,74 +744,24 @@ sub setupBootStick {
 	close FD;
 	$kiwi -> done();
 	#==========================================
-	# Create ext2 image for boot image
+	# extract message file from initrd
 	#------------------------------------------
-	$kiwi -> info ("Creating stick image");
-	my $name = $initrd.".stickboot";
-	if ($zipped) {
-		$name = $initrd; $name =~ s/gz$/stickboot/;
-	}
-	my $size = qxx ("du -ms $tmpdir | cut -f1 2>&1");
-	my $ddev = "/dev/zero";
-	chomp ($size); $size += 1; # add 1M free space for filesystem
-	$sysird = $size;
-	$status = qxx ("dd if=$ddev of=$name bs=1M seek=$sysird count=1 2>&1");
-	$result = $? >> 8;
-	if ($result != 0) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't create image file: $status");
-		$kiwi -> failed ();
-		$this -> cleanTmp ();
-		return undef;
-	}
-	$sysird += 1; # add another 1M free space because of sparse seek
-	$status = qxx ("/sbin/mkfs.ext2 -b 4096 -F $name 2>&1");
-	$result = $? >> 8;
-	if ($result != 0) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't create filesystem: $status");
-		$kiwi -> failed ();
-		$this -> cleanTmp ();
-		return undef;
-	}
-	$status = qxx ("mount -o loop $name $loopdir 2>&1");
-	$result = $? >> 8;
-	if ($result != 0) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't mount image: $status");
-		$kiwi -> failed ();
-		$this -> cleanTmp ();
-		return undef;
-	}
-	$status = qxx ("mv $tmpdir/boot $loopdir 2>&1");
-	$result = $? >> 8;
-	if ($result != 0) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't install image: $status");
-		$kiwi -> failed ();
-		$this -> cleanTmp ();
-		return undef;
-	}
-	#==========================================
-	# check for message file in initrd
-	#------------------------------------------
+	$kiwi -> info ("Checking for message file in boot image");
 	my $message = "'image/loader/message'";
 	$unzip = "$main::Gzip -cd $initrd 2>&1";
 	if ($zipped) {
-		$status = qxx ("$unzip | (cd $loopdir && cpio -d -i $message 2>&1)");
+		$status = qxx ("$unzip | (cd $tmpdir && cpio -d -i $message 2>&1)");
 	} else {
-		$status = qxx ("cat $initrd | (cd $loopdir&&cpio -d -i $message 2>&1)");
+		$status = qxx ("cat $initrd|(cd $tmpdir && cpio -d -i $message 2>&1)");
 	}
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't find message file: $status");
 		$kiwi -> failed ();
-		qxx ("umount $loopdir 2>&1");
-		$this -> cleanTmp ();
+		$this -> cleanLoop ();
 		return undef;
 	}
-	qxx ("umount $loopdir 2>&1");
 	$kiwi -> done();
 	#==========================================
 	# umount stick mounted by hal before lock
@@ -854,79 +810,86 @@ sub setupBootStick {
 	#==========================================
 	# Prepare sfdisk input file
 	#------------------------------------------
-	if (defined $system) {
-		if (($syszip) || ($haveSplit)) {
-			print FD ",$sysird,L,*\n"; # xda1  boot
-			print FD ",$syszip,L\n";   # xda2  ro
-			print FD ",,L\n";          # xda3  rw
-			$kiwi -> loginfo (
-				"USB sfdisk input: [,$sysird,L,*][,$syszip,L][,,L]"
-			);
+	while (1) {
+		if (defined $system) {
+			if (($syszip) || ($haveSplit)) {
+				print FD ",$syszip,L\n";   # xda1  ro
+				print FD ",,L,*\n";        # xda2  rw
+				$kiwi -> loginfo (
+					"USB sfdisk input: [,$syszip,L][,,L,*]"
+				);
+			} else {
+				print FD ",,L,*\n";        # xda1  rw
+				$kiwi -> loginfo (
+					"USB sfdisk input: [,,L,*]"
+				);
+			}
 		} else {
-			print FD ",$sysird,L,*\n"; # xda1  boot
-			print FD ",,L\n";          # xda2  rw
-			$kiwi -> loginfo (
-				"USB sfdisk input: [,$sysird,L,*][,,L]"
-			);
+			print FD ",,L,*\n";            # xda1  rw
+			$kiwi -> loginfo ("USB sfdisk input: [,,L,*]");
 		}
-	} else {
-		print FD ",,L,*\n";
-		$kiwi -> loginfo ("USB sfdisk input: [,,L,*]");
+		close FD;
+		$status = qxx ( "dd if=/dev/zero of=$stick bs=512 count=1 2>&1" );	
+		$result = $? >> 8;
+		$status = qxx ( "/sbin/sfdisk -uM --force $stick < $pinfo 2>&1" );
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create partition table: $!");
+			$kiwi -> failed ();
+			$this -> cleanDbus();
+			$this -> cleanTmp ();
+			return undef;
+		}
+		$kiwi -> loginfo ("USB Partitions: $status");
+		for (my $i=1;$i<=2;$i++) {
+			qxx ( "umount $stick$i 2>&1" );
+		}
+		$status = qxx ( "/sbin/blockdev --rereadpt $stick 2>&1" );
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't reread partition table: $!");
+			$kiwi -> failed ();
+			$this -> cleanDbus();
+			$this -> cleanTmp ();
+			return undef;
+		}
+		#==========================================
+		# Clean partition info file
+		#------------------------------------------
+		unlink $pinfo;
+		#==========================================
+		# Wait for new partition table to settle
+		#------------------------------------------
+		sleep (1);
+		#==========================================
+		# check partition sizes
+		#------------------------------------------
+		if ((defined $system) && (($syszip) || ($haveSplit))) {
+			my $sizeOK = 1;
+			my $systemPSize = qxx ("/sbin/sfdisk -s ".$stick."1");
+			my $systemISize = -s $system; $systemISize /= 1024;
+			chomp $systemPSize;
+			#print "_______A $systemPSize : $systemISize\n";
+			if ($systemPSize < $systemISize) {
+				$syszip += 10;
+				$sizeOK = 0;
+			}
+			if ($sizeOK) {
+				#==========================================
+				# looks good go for it
+				#------------------------------------------
+				last;
+			}
+		} else {
+			#==========================================
+			# entire disk used
+			#------------------------------------------
+			last;
+		}
+		$kiwi -> note (".");
 	}
-	close FD;
-	$status = qxx ( "dd if=/dev/zero of=$stick bs=512 count=1 2>&1" );	
-	$result = $? >> 8;
-	$status = qxx ( "/sbin/sfdisk -uM --force $stick < $pinfo 2>&1" );
-	$result = $? >> 8;
-	if ($result != 0) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't create partition table: $!");
-		$kiwi -> failed ();
-		$this -> cleanDbus();
-		$this -> cleanTmp ();
-		return undef;
-	}
-	$kiwi -> done();
-	$kiwi -> loginfo ("USB Partitions: $status");
-	for (my $i=1;$i<=3;$i++) {
-		qxx ( "umount $stick$i 2>&1" );
-	}
-	$kiwi -> info ("Rereading partition table on: $stick");
-	$status = qxx ( "/sbin/blockdev --rereadpt $stick 2>&1" );
-	$result = $? >> 8;
-	if ($result != 0) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't reread partition table: $!");
-		$kiwi -> failed ();
-		$this -> cleanDbus();
-		$this -> cleanTmp ();
-		return undef;
-	}
-	$kiwi -> done();
-	#==========================================
-	# Clean partition info file
-	#------------------------------------------
-	unlink $pinfo;
-	#==========================================
-	# Wait for new partition table to settle
-	#------------------------------------------
-	sleep (1);
-	#==========================================
-	# Dump initrd image on stick
-	#------------------------------------------
-	$kiwi -> info ("Dumping initrd image to stick");
-	$status = qxx ( "umount $stick'1' 2>&1" );
-	$status = qxx ("dd if=$name of=$stick'1' bs=32k 2>&1");
-	$result = $? >> 8;
-	if ($result != 0) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't dump boot image to stick: $status");
-		$kiwi -> failed ();
-		$this -> cleanDbus();
-		$this -> cleanTmp ();
-		return undef;
-	}
-	unlink $name;
 	$kiwi -> done();
 	#==========================================
 	# Dump system image on stick
@@ -935,7 +898,7 @@ sub setupBootStick {
 		$kiwi -> info ("Dumping system image to stick");
 		$status = qxx ( "umount $stick'1' 2>&1" );
 		$status = qxx ( "umount $stick'2' 2>&1" );
-		$status = qxx ("dd if=$system of=$stick'2' bs=32k 2>&1");
+		$status = qxx ("dd if=$system of=$stick'1' bs=32k 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -948,11 +911,25 @@ sub setupBootStick {
 		$kiwi -> done();
 		if ($haveSplit) {
 			$kiwi -> info ("Dumping split read/write part to stick");
-			$status = qxx ("dd if=$splitfile of=$stick'3' bs=32k 2>&1");
+			$status = qxx ("dd if=$splitfile of=$stick'2' bs=32k 2>&1");
 			$result = $? >> 8;
 			if ($result != 0) {
 				$kiwi -> failed ();
 				$kiwi -> error  ("Couldn't dump split file: $status");
+				$kiwi -> failed ();
+				$this -> cleanDbus();
+				$this -> cleanTmp ();
+				return undef;
+			}
+			$kiwi -> done();
+		} elsif ($syszip) {
+			$kiwi -> info ("Creating ext2 read/write filesystem");
+			my $fsopts = "-q -F";
+			$status = qxx ("/sbin/mke2fs $fsopts $stick'2' 2>&1");
+			$result = $? >> 8;
+			if ($result != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Couldn't create ext2 filesystem: $status");
 				$kiwi -> failed ();
 				$this -> cleanDbus();
 				$this -> cleanTmp ();
@@ -968,21 +945,21 @@ sub setupBootStick {
 			/^ext2/     && do {
 				$kiwi -> info ("Creating ext2 root filesystem");
 				my $fsopts = "-q -F";
-				$status = qxx ("/sbin/mke2fs $fsopts $stick'2' 2>&1");
+				$status = qxx ("/sbin/mke2fs $fsopts $stick'1' 2>&1");
 				$result = $? >> 8;
 				last SWITCH;
 			};
 			/^ext3/     && do {
 				$kiwi -> info ("Creating ext3 root filesystem");
 				my $fsopts = "-O dir_index -b 4096 -j -J size=4 -q -F";
-				$status = qxx ("/sbin/mke2fs $fsopts $stick'2' 2>&1");
+				$status = qxx ("/sbin/mke2fs $fsopts $stick'1' 2>&1");
 				$result = $? >> 8;
 				last SWITCH;
 			};
 			/^reiserfs/ && do {
 				$kiwi -> info ("Creating reiserfs root filesystem");
 				$status = qxx (
-					"/sbin/mkreiserfs -q -f -s 513 -b 4096 $stick'2' 2>&1"
+					"/sbin/mkreiserfs -q -f -s 513 -b 4096 $stick'1' 2>&1"
 				);
 				$result = $? >> 8;
 				last SWITCH;
@@ -1005,7 +982,7 @@ sub setupBootStick {
 		#==========================================
 		# Mount system image partition
 		#------------------------------------------
-		$status = qxx ("mount $stick'2' $loopdir 2>&1");
+		$status = qxx ("mount $stick'1' $loopdir 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -1043,13 +1020,13 @@ sub setupBootStick {
 	SWITCH: for ($FSTypeRO) {
 		/^ext\d/    && do {
 			$kiwi -> info ("Resizing system $FSTypeRO filesystem");
-			$status = qxx ("/sbin/resize2fs -f -F -p $stick'2' 2>&1");
+			$status = qxx ("/sbin/resize2fs -f -F -p $stick'1' 2>&1");
 			$result = $? >> 8;
 			last SWITCH;
 		};
 		/^reiserfs/ && do {
 			$kiwi -> info ("Resizing system $FSTypeRO filesystem");
-			$status = qxx ("/sbin/resize_reiserfs $stick'2' 2>&1");
+			$status = qxx ("/sbin/resize_reiserfs $stick'1' 2>&1");
 			$result = $? >> 8;
 			last SWITCH;
 		}
@@ -1071,13 +1048,13 @@ sub setupBootStick {
 		SWITCH: for ($FSTypeRW) {
 			/^ext\d/    && do {
 				$kiwi -> info ("Resizing split $FSTypeRW filesystem");
-				$status = qxx ("/sbin/resize2fs -f -F -p $stick'3' 2>&1");
+				$status = qxx ("/sbin/resize2fs -f -F -p $stick'2' 2>&1");
 				$result = $? >> 8;
 				last SWITCH;
 			};
 			/^reiserfs/ && do {
 				$kiwi -> info ("Resizing split $FSTypeRW filesystem");
-				$status = qxx ("/sbin/resize_reiserfs $stick'3' 2>&1");
+				$status = qxx ("/sbin/resize_reiserfs $stick'2' 2>&1");
 				$result = $? >> 8;
 				last SWITCH;
 			}
@@ -1095,40 +1072,42 @@ sub setupBootStick {
 		}
 	}
 	#==========================================
-	# Mount system img for removal of boot data
+	# Copy boot data to / or read-write part
 	#------------------------------------------
-	# Remove /boot from system image, we are booting from
-	# the kiwi initrd image and so the system image doesn't need
-	# any boot kernel/initrd. Problem is if the system image is
-	# a read-only image we can't remove data from it
-	# ---
-	if (! $syszip) {
-		$kiwi -> info ("Removing unused boot kernel/initrd from stick");
+	$kiwi -> info ("Copying boot data to stick");
+	if (($syszip) || ($haveSplit)) {
 		$status = qxx ("mount $stick'2' $loopdir 2>&1");
 		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't mount stick image: $status");
-			$kiwi -> failed ();
-			$this -> cleanDbus();
-			$this -> cleanTmp ();
-			return undef;
-		}
-		if (-d "/mnt/boot") {
-			$status = qxx ("rm -r /mnt/boot 2>&1");
-			$result = $? >> 8;
-			if ($result != 0) {
-				$kiwi -> skipped ();
-				$kiwi -> warning ("Couldn't remove data: $status");
-				$kiwi -> skipped ();
-			} else {
-				$kiwi -> done();
-			}
-		} else {
-			$kiwi -> done();
-		}
-		qxx ("umount $loopdir 2>&1");
+	} else {
+		$status = qxx ("mount $stick'1' $loopdir 2>&1");
+		$result = $? >> 8;
 	}
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't mount stick image: $status");
+		$kiwi -> failed ();
+		$this -> cleanDbus();
+		$this -> cleanLoop ();
+		return undef;
+	}
+	$status = qxx ("rm -rf $loopdir/boot");
+	$status = qxx ("cp -a $tmpdir/boot $loopdir 2>&1");
+	$result = $? >> 8;
+	if ($result == 0) {
+		$status = qxx ("cp $tmpdir/image/loader/message $loopdir/boot 2>&1");
+		$result = $? >> 8;
+	}
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't copy boot data to stick: $status");
+		$kiwi -> failed ();
+		$this -> cleanDbus();
+		$this -> cleanLoop ();
+		return undef;
+	}
+	qxx ("umount $loopdir");
+	$kiwi -> done();
 	#==========================================
 	# Install grub on USB stick
 	#------------------------------------------
@@ -1142,7 +1121,7 @@ sub setupBootStick {
 		return undef;
 	}
 	print FD "device (hd0) $stick\n";
-	print FD "root (hd0,0)\n";
+	print FD "root (hd0,$bootpart)\n";
 	print FD "setup (hd0)\n";
 	print FD "quit\n";
 	close FD;
@@ -2363,14 +2342,6 @@ sub setupBootDisk {
 				$syszip += 10;
 				$sizeOK = 0;
 			}
-			my $initrdPSize = qxx ("/sbin/sfdisk -s /dev/mapper".$dmap."p2"); 
-			my $initrdISize = -s $sysname; $initrdISize /= 1024;
-			chomp $initrdPSize;
-			#print "_______B $initrdPSize : $initrdISize\n";
-			if ($initrdPSize < $initrdISize) {
-				$sysird += 1;
-				$sizeOK = 0;
-			}
 			if (! $sizeOK) {
 				#==========================================
 				# bad partition alignment try again
@@ -2989,10 +2960,10 @@ sub cleanLoop {
 	my $tmpdir = $this->{tmpdir};
 	my $loop   = $this->{loop};
 	my $loopdir= $this->{loopdir};
+	qxx ("umount $loopdir 2>&1");
 	if (defined $loop) {
-		qxx ( "umount $loopdir 2>&1" );
-		qxx ( "/sbin/kpartx  -d $loop 2>&1" );
-		qxx ( "/sbin/losetup -d $loop 2>&1" );
+		qxx ("/sbin/kpartx  -d $loop 2>&1");
+		qxx ("/sbin/losetup -d $loop 2>&1");
 		undef $this->{loop};
 	}
 	qxx ("rm -rf $tmpdir");
