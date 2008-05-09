@@ -1159,7 +1159,7 @@ sub setupBootStick {
 	#==========================================
 	# check grub installation
 	#------------------------------------------
-	qxx ("head -n 10 $stick | file | grep -q 'boot sector'");
+	qxx ("head -n 10 $stick | file - | grep -q 'boot sector'");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
