@@ -125,6 +125,8 @@ sub quote {
 	my $part2;
 	my $part3;
 	my $part4;
+	$surl =~ s/^[ \t]+//g;
+	$surl =~ s/[ \t]+$//g;
 	if ($surl =~ /^(.*:\/\/)(.*):(.*)(\@.*)$/) {
 		$part1 = $1;
 		$part2 = $2;

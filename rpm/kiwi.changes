@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue May 13 10:06:19 CEST 2008 - ms@suse.de
+
+- make sure the source path doesn't contain spaces or
+  tabs at the beginning and/or at the end
+
+-------------------------------------------------------------------
 Fri May  9 13:45:30 CEST 2008 - ms@suse.de
 
 - fixed grub boot sector check for --bootstick workflow
