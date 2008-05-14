@@ -62,7 +62,6 @@ VMFindSystem () {
 #======================================
 # Beautify Startup
 #--------------------------------------
-clear
 echo "Loading KIWI Xen Boot-System..."
 echo "-------------------------------"
 

@@ -64,7 +64,6 @@ export SYSTEM_MD5STATUS
 #======================================
 # Beautify Startup
 #--------------------------------------
-clear
 echo "Loading KIWI Boot-System..."
 echo "---------------------------"
 

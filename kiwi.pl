@@ -472,8 +472,12 @@ sub main {
 				$kiwi,"$Create/image",\%ForeignRepo,$SetImageType
 			);
 			if (! defined $xml) {
+				if (defined $BaseRoot) {
+					$overlay -> resetOverlay();
+				}
 				my $code = kiwiExit (1); return $code;
 			}
+			$kiwi -> done();
 			my %type = %{$xml->getImageTypeAndAttributes()};
 			if (($type{"type"} eq "cpio") && ($type{bootprofile})) {
 				@Profiles = split (/,/,$type{bootprofile});
@@ -487,14 +491,14 @@ sub main {
 			$xml = new KIWIXML (
 				$kiwi,"$Create/image",undef,$SetImageType,\@Profiles
 			);
-		}
-		if (! defined $xml) {
-			if (defined $BaseRoot) {
-				$overlay -> resetOverlay();
+			if (! defined $xml) {
+				if (defined $BaseRoot) {
+					$overlay -> resetOverlay();
+				}
+				my $code = kiwiExit (1); return $code;
 			}
-			my $code = kiwiExit (1); return $code;
+			$kiwi -> done();
 		}
-		$kiwi -> done();
 		#==========================================
 		# Update .profile environment
 		#------------------------------------------

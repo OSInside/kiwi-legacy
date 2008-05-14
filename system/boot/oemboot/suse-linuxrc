@@ -46,7 +46,6 @@ export OEM_PARTITION_CONFIG="/config.oempartition"
 #======================================
 # Beautify Startup
 #--------------------------------------
-clear
 echo "Loading KIWI OEM Boot-System..."
 echo "-------------------------------"
 

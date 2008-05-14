@@ -40,7 +40,6 @@ export LOCAL_BOOT="no"
 #======================================
 # Beautify Startup
 #--------------------------------------
-clear
 echo "Loading KIWI CD Boot-System..."
 echo "------------------------------"
 

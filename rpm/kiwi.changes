@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Wed May 14 08:34:04 CEST 2008 - ms@suse.de
+
+- don't clear the screen when calling linuxrc
+- don't include unneeded /image data into the boot images
+- fixed local grub setup for vmxboot with UNIONFS_CONFIG
+- fixed import of loader/branding files
+- allow empty type=image packages
+
+-------------------------------------------------------------------
 Tue May 13 10:06:19 CEST 2008 - ms@suse.de
 
 - make sure the source path doesn't contain spaces or

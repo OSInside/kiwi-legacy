@@ -553,7 +553,9 @@ function suseStripInitrd {
 		/etc/ppp /etc/xdg /etc/NetworkManager /lib*/YaST /lib*/security
 		/lib*/mkinitrd /srv /var/adm /usr/lib/engines /usr/src/packages
 		/usr/src/linux* /usr/local /var/log/* /usr/share/pixmaps
-		/usr/share/gtk-doc
+		/usr/share/gtk-doc /var/lib /var/games /opt /var/spool /var/opt
+		/var/cache /var/tmp /etc/rpm /etc/cups /etc/opt /usr/share/terminfo
+		/home /media /lib/firmware /lib/lsb
 		/lib/modules/*/kernel/drivers/net/wireless
 		/lib/modules/*/kernel/drivers/net/pcmcia
 		/lib/modules/*/kernel/drivers/net/tokenring
@@ -590,7 +592,7 @@ function suseStripInitrd {
 		losetup ldconfig insmod init ifconfig fdisk e2fsck dhcpcd
 		depmod atftpd klogconsole hwinfo xargs wc tail tac readlink
 		mkfifo md5sum head expr file free find env du dirname cut
-		column chroot atftp clear tr host test printf mount dd uname umount
+		column chroot atftp tr host test printf mount dd uname umount
 		true touch sleep sh pidof sed rmdir rm pwd ps mv mkdir kill hostname
 		gzip grep false df cp cat bash basename arch sort ls uniq lsmod
 		usleep parted mke2fs pvcreate vgcreate lvm resize2fs ln hdparm

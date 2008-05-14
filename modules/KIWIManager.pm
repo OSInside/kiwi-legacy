@@ -980,6 +980,51 @@ sub setupUpgrade {
 }
 
 #==========================================
+# setupInstallPackages
+#------------------------------------------
+sub setupInstallPackages {
+	# ...
+	# create the install packages list from the information
+	# of the package types image, xen and vmware
+	# ---
+	my $this   = shift;
+	my $kiwi   = $this->{kiwi};
+	my $xml    = $this->{xml};
+	my %type;
+	#==========================================
+	# Get image package list
+	#------------------------------------------
+	my @packList = $xml -> getInstallList();
+	#==========================================
+	# Get Xen package if type is appropriate
+	#------------------------------------------
+	%type = %{$xml -> getImageTypeAndAttributes()};
+	if ("$type{type}" eq "xen") {
+		$kiwi -> info ("Creating Xen package list");
+		my @xenList = $xml -> getXenList();
+		if (! @xenList) {
+			$kiwi -> error ("Couldn't create xen package list");
+			$kiwi -> failed ();
+			return undef;
+		}
+		@packList = (@packList,@xenList);
+		$kiwi -> done ();
+	}
+	#==========================================
+	# Get VMware package if type is appropriate
+	#------------------------------------------
+	if (("$type{type}" eq "vmx") && ("$type{boot}" =~ /vmxboot/)) {
+		$kiwi -> info ("Creating VMware package list");
+		my @vmwareList = $xml -> getVMwareList();
+		if (@vmwareList) {
+			@packList = (@packList,@vmwareList);
+		}
+		$kiwi -> done ();
+	}
+	return @packList;
+}
+
+#==========================================
 # setupRootSystem
 #------------------------------------------
 sub setupRootSystem {
@@ -1022,7 +1067,9 @@ sub setupRootSystem {
 			#==========================================
 			# Add package manager to package list
 			#------------------------------------------
-			push (@packs,$manager);
+			if ($this -> setupInstallPackages()) {
+				push (@packs,$manager);
+			}
 			#==========================================
 			# Create screen call file
 			#------------------------------------------
@@ -1098,7 +1145,9 @@ sub setupRootSystem {
 			#==========================================
 			# Add package manager to package list
 			#------------------------------------------
-			push (@packs,$manager);
+			if ($this -> setupInstallPackages()) {
+				push (@packs,$manager);
+			}
 			#==========================================
 			# check input list for pattern names
 			#------------------------------------------

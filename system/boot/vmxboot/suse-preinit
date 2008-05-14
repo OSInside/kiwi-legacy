@@ -26,17 +26,24 @@ Echo "Calling pre-init stage in system image"
 errorLogStart
 
 #======================================
-# 2) update mount table
+# 2) check for LOCAL_BOOT
+#--------------------------------------
+if [ $LOCAL_BOOT = "yes" ];then
+	exit 0
+fi
+
+#======================================
+# 3) update mount table
 #--------------------------------------
 updateMTAB
 
 #======================================
-# 3) create framebuffer devices
+# 4) create framebuffer devices
 #--------------------------------------
 createFramebufferDevices
 
 #======================================
-# 4) check for union filesystem
+# 5) check for union filesystem
 #--------------------------------------
 if [ ! -z "$UNIONFS_CONFIG" ]; then
 	# /.../
@@ -45,23 +52,25 @@ if [ ! -z "$UNIONFS_CONFIG" ]; then
 	# kiwi boot system.
 	# ----
 	updateMTAB
+	rm -f /boot/initrd  && ln -s /boot/initrd.vmx /boot/initrd
+	rm -f /boot/vmlinuz && ln -s /boot/linux.vmx  /boot/vmlinuz
 	exit 0
 fi
 
 #======================================
-# 5) create initrd on diskful
+# 6) create initrd on diskful
 #--------------------------------------
 setupSUSEInitrd
 
 #======================================
-# 6) Install boot loader on diskful
+# 7) Install boot loader on diskful
 #--------------------------------------
 if [ $grubOK = 1 ];then
 	installBootLoaderGrub
 fi
 
 #======================================
-# 7) create /etc/ImagePackages
+# 8) create /etc/ImagePackages
 #--------------------------------------
 if [ -x /bin/rpm ];then
 	Echo "Creating initial image package info file"

@@ -512,37 +512,12 @@ sub install {
 	#==========================================
 	# Get image package list
 	#------------------------------------------
-	my @packList = $xml -> getInstallList();
+	my @packList = $manager -> setupInstallPackages;
+	#==========================================
+	# proceed if packlist is not empty
+	#------------------------------------------
 	if (! @packList) {
-		$kiwi -> error ("Couldn't create image package list");
-		$kiwi -> failed ();
-		return undef;
-	}
-	#==========================================
-	# Get Xen package if type is appropriate
-	#------------------------------------------
-	%type = %{$xml -> getImageTypeAndAttributes()};
-	if ("$type{type}" eq "xen") {
-		$kiwi -> info ("Creating Xen package list");
-		my @xenList = $xml -> getXenList();
-		if (! @xenList) {
-			$kiwi -> error ("Couldn't create xen package list");
-			$kiwi -> failed ();
-			return undef;
-		}
-		@packList = (@packList,@xenList);
-		$kiwi -> done ();
-	}
-	#==========================================
-	# Get VMware package if type is appropriate
-	#------------------------------------------
-	if (("$type{type}" eq "vmx") && ("$type{boot}" =~ /vmxboot/)) {
-		$kiwi -> info ("Creating VMware package list");
-		my @vmwareList = $xml -> getVMwareList();
-		if (@vmwareList) {
-			@packList = (@packList,@vmwareList);
-		}
-		$kiwi -> done ();
+		return $this;
 	}
 	#==========================================
 	# Mount local and NFS directories
