@@ -668,10 +668,14 @@ function suseGFXBoot {
 	if [ $loader = "isolinux" ];then
 		cp themes/$theme/install/* /image/loader
 		cp $gfximage /image/loader
+		if [ -x /usr/sbin/gfxboot ] ; then
+			gfxboot --archive /image/loader/bootlogo --change-config livecd=1
+		else
+			echo "livecd=1" >> /image/loader/gfxboot.cfg
+		fi
 		bin/unpack_bootlogo /image/loader
 		mv /usr/share/syslinux/isolinux.bin /image/loader
 		mv /boot/memtest.bin /image/loader/memtest
-		echo "livecd=1" >> /image/loader/gfxboot.cfg
 	fi
 	if [ $loader = "grub" ];then
 		mv $grubimage /image/loader
