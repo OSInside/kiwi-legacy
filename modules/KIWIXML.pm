@@ -1187,10 +1187,12 @@ sub getInstSourceProductOption {
 
 #==========================================
 # getInstSourceProductStuff
-#		generic function returning indentical data
-#		structures for different tags (of same type)
 #------------------------------------------
 sub getInstSourceProductStuff {
+	# ...
+	# generic function returning indentical data
+	# structures for different tags (of same type)
+	# ---
 	my $this = shift;
 	my $what = shift;
 	return undef if !$what;
