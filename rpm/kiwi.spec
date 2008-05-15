@@ -28,7 +28,7 @@ BuildRequires:  libqt4 libqt4-devel
 BuildRequires:  freetype2-devel libpng-devel qt qt-devel
 %endif 
 %if %{suse_version} > 1030
-BuildRequires:  db43-devel libexpat-devel libsatsolver-devel
+BuildRequires:  rpm-devel libexpat-devel libsatsolver-devel
 %endif
 %if %{suse_version} <= 1010
 Requires:       qt

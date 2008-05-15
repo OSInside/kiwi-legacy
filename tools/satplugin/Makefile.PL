@@ -6,7 +6,7 @@ $CFLAGS =~ s/-Wall//;
 
 WriteMakefile(
   'NAME'     => 'SaT',
-  'LIBS'     => ["-ldb-4.3 -lexpat -lsatsolver -lstdc++"],
+  'LIBS'     => ["-lrpmdb -lexpat -lsatsolver -lstdc++"],
   'OBJECT'   => 'SaT_wrap.o',
   'OPTIMIZE' => "-O2 $CFLAGS",
   'INC'      => "-I/usr/include/satsolver"
