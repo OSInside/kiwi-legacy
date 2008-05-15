@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu May 15 11:50:02 CEST 2008 - ms@suse.de
+
+- fixed virtual CD device setup for VMware
+
+-------------------------------------------------------------------
 Wed May 14 08:34:04 CEST 2008 - ms@suse.de
 
 - fixed import of loader/branding files (bnc #386674)

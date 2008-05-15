@@ -2952,7 +2952,7 @@ sub buildVMwareConfig {
 	my $device = $vmwconfig{disk};
 	my $memory = $vmwconfig{memory};
 	my $image  = $name->{systemImage};
-	my $cdraw  = "ide1";
+	my $cdraw  = $device;
 	if ($device =~ /^ide/) {
 		my $id = chop $cdraw;
 		if ($id == 0) {
@@ -2960,6 +2960,8 @@ sub buildVMwareConfig {
 		} else {
 			$cdraw.= 0;
 		}
+	} else {
+		$cdraw = "ide1";
 	}
 	# General...
 	print FD '#!/usr/bin/vmware'."\n";
