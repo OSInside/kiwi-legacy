@@ -1154,9 +1154,9 @@ sub getInstSourceArchList {
 }
 
 #==========================================
-# getInstSourceProductInfo
+# getInstSourceProductVar
 #------------------------------------------
-sub getInstSourceProductInfo {
+sub getInstSourceProductVar {
 	# ...
 	# Get the shell variable values needed for
 	# metadata creation
@@ -1165,17 +1165,76 @@ sub getInstSourceProductInfo {
 	# varname = value (quoted, may contain space etc.)
 	# ---
 	my $this = shift;
+	return $this->getInstSourceProductStuff("productvar");
+}
+
+
+#==========================================
+# getInstSourceProductOption
+#------------------------------------------
+sub getInstSourceProductOption {
+	# ...
+	# Get the shell variable values needed for
+	# metadata creation
+	# ---
+	# return a hash with the following structure:
+	# varname = value (quoted, may contain space etc.)
+	# ---
+	my $this = shift;
+	return $this->getInstSourceProductStuff("productoption");
+}
+
+
+#==========================================
+# getInstSourceProductStuff
+#		generic function returning indentical data
+#		structures for different tags (of same type)
+#------------------------------------------
+sub getInstSourceProductStuff {
+	my $this = shift;
+	my $what = shift;
+	return undef if !$what;
+
 	my $base = $this->{instsrcNodeList} -> get_node(1);
-	my $elems = $base->getElementsByTagName("metadata");
+	my $elems = $base->getElementsByTagName("productoptions");
+	my %result;
+
+	for(my $i=1; $i<=$elems->size(); $i++) {
+		my $node  = $elems->get_node($i);
+		my @flist = $node->getElementsByTagName($what);
+		foreach my $element(@flist) {
+			my $name = $element->getAttribute("name");
+			my $value = $element ->textContent("name");
+			$result{$name} = $value;
+		}
+	}
+	return %result;
+}
+
+#==========================================
+# getInstSourceProductInfo
+#------------------------------------------
+sub getInstSourceProductInfo {
+	# ...
+	# Get the shell variable values needed for
+	# content file generation
+	# ---
+	# return a hash with the following structure:
+	# index = (name, value)
+	# ---
+	my $this = shift;
+	my $base = $this->{instsrcNodeList} -> get_node(1);
+	my $elems = $base->getElementsByTagName("productoptions");
 	my %result;
 
 	for(my $i=1; $i<=$elems->size(); $i++) {
 		my $node  = $elems->get_node($i);
 		my @flist = $node->getElementsByTagName("productinfo");
-		foreach my $element(@flist) {
-			my $name = $element->getAttribute("name");
-			my $value = $element ->textContent("name");
-			$result{$name} = $value;
+		for(my $j=0; $j <= $#flist; $j++) {
+		#foreach my $element(@flist) {
+			my $name = $flist[$j]->getAttribute("name");
+			my $value = $flist[$j]->textContent("name");
+			$result{$j} = [$name, $value];
 		}
 	}
 	return %result;

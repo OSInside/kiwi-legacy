@@ -464,8 +464,7 @@ div {
 			k.metadata.attlist &
 			k.repopackage+ &
 			k.metafile* &
-			k.chroot* &
-			k.productinfo*
+			k.chroot*
 		}
 }
 
@@ -1103,6 +1102,7 @@ div {
 		element instsource {
 			k.instsource.attlist &
 			k.architectures &
+			k.productoptions &
 			k.instrepo+ &
 			k.metadata &
 			k.repopackages
@@ -1129,6 +1129,51 @@ div {
 		element architectures {
 			k.architectures.attlist &
 			k.arch+ 
+		}
+}
+
+#==========================================
+# main block: <productoptions>
+#
+div {
+	k.productoptions.attlist = empty
+	k.productoptions =
+		## Describe Packages and Metadata
+		[
+		db:para [
+			"The productoptions element contains a list of options\x{a}"~
+			"that influence the instsource creation process in a\x{a}"~
+			"general manner. For instance an option could specify\x{a}"~
+			"a default medium number for source packages and the like."
+		]
+		]
+		element productoptions {
+			k.productoptions.attlist &
+			k.productoption* &
+			k.productinfo* &
+			k.productvar*
+		}
+}
+
+#==========================================
+# main block: <productoption>
+#
+div {
+	k.productoption.attlist = k.name.attribute
+
+	k.productoption =
+		## Describe Packages and Metadata
+		[
+		db:para [
+			"The productoption element carries the information for an productoptionitecture,\x{a}"~
+			"its name and its fallback (productoptional)."
+		]
+		]
+		element productoption {
+			k.productoption.attlist &
+			text
+			#k.productinfo.text.content	
+			#xsd:normalizedString { maxLength = "2048" }
 		}
 }
 
@@ -1187,6 +1232,37 @@ div {
 			# text: workaround for the above mentioned problem
 			text
 			#k.productinfo.text.content	
+			#xsd:normalizedString { maxLength = "2048" }
+		}
+}
+
+#==========================================
+# main block: <productvar>
+#
+div {
+	k.productvar.attlist =
+		k.name.attribute 
+	#k.productvar = xsd:normalizedString {
+	#		maxLength = "2048"
+	#}
+	# FIXME (libxml guys, someone?) This does not work correctly with libxml2 v. 2.6.30-4.
+	# It validates with jing and msv but not with perl-XML-LibXML-1.62001-57/libxml2-2.6.30-4
+	
+
+	k.productvar =
+		## Describe Packages and Metadata
+		[
+		db:para [
+			"The productinfo element contains one particular environment\x{a}"~
+			"variable and its value. Shell rules for the names apply.\x{a}"~
+			"The value is used to create the content file."
+		]
+		]
+		element productvar {
+			k.productvar.attlist &
+			# text: workaround for the above mentioned problem
+			text
+			#k.productvar	
 			#xsd:normalizedString { maxLength = "2048" }
 		}
 }
