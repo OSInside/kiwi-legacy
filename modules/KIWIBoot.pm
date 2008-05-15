@@ -924,7 +924,7 @@ sub setupBootStick {
 			$kiwi -> done();
 		} elsif ($syszip) {
 			$kiwi -> info ("Creating ext2 read/write filesystem");
-			my $fsopts = "-q -F";
+			my $fsopts = "-I 128 -q -F";
 			$status = qxx ("/sbin/mke2fs $fsopts $stick'2' 2>&1");
 			$result = $? >> 8;
 			if ($result != 0) {
@@ -944,14 +944,14 @@ sub setupBootStick {
 		SWITCH: for ($FSTypeRO) {
 			/^ext2/     && do {
 				$kiwi -> info ("Creating ext2 root filesystem");
-				my $fsopts = "-q -F";
+				my $fsopts = "-I 128 -q -F";
 				$status = qxx ("/sbin/mke2fs $fsopts $stick'1' 2>&1");
 				$result = $? >> 8;
 				last SWITCH;
 			};
 			/^ext3/     && do {
 				$kiwi -> info ("Creating ext3 root filesystem");
-				my $fsopts = "-O dir_index -b 4096 -j -J size=4 -q -F";
+				my $fsopts = "-I 128 -O dir_index -b 4096 -j -J size=4 -q -F";
 				$status = qxx ("/sbin/mke2fs $fsopts $stick'1' 2>&1");
 				$result = $? >> 8;
 				last SWITCH;
@@ -1847,7 +1847,7 @@ sub setupInstallStick {
 	foreach my $root ($boot,$data) {
 		next if ! defined $root;
 		$kiwi -> info ("Creating filesystem on $root partition");
-		$status = qxx ( "/sbin/mke2fs -j -q $root 2>&1" );
+		$status = qxx ( "/sbin/mke2fs -I 128 -j -q $root 2>&1" );
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -2451,14 +2451,14 @@ sub setupBootDisk {
 		SWITCH: for ($FSTypeRO) {
 			/^ext2/     && do {
 				$kiwi -> info ("Creating ext2 root filesystem");
-				my $fsopts = "-q -F";
+				my $fsopts = "-I 128 -q -F";
 				$status = qxx ("/sbin/mke2fs $fsopts $root 2>&1");
 				$result = $? >> 8;
 				last SWITCH;
 			};
 			/^ext3/     && do {
 				$kiwi -> info ("Creating ext3 root filesystem");
-				my $fsopts = "-O dir_index -b 4096 -j -J size=4 -q -F";
+				my $fsopts = "-I 128 -O dir_index -b 4096 -j -J size=4 -q -F";
 				$status = qxx ("/sbin/mke2fs $fsopts $root 2>&1");
 				$result = $? >> 8;
 				last SWITCH;
@@ -2522,7 +2522,7 @@ sub setupBootDisk {
 		$root = "/dev/mapper".$dmap."p2";
 		if (! $haveSplit) {
 			$kiwi -> info ("Creating ext2 read-write filesystem");
-			$status = qxx ("/sbin/mke2fs -q -F $root 2>&1");
+			$status = qxx ("/sbin/mke2fs -I 128 -q -F $root 2>&1");
 			$result = $? >> 8;
 			if ($result != 0) {
 				$kiwi -> failed ();

@@ -2792,9 +2792,9 @@ sub setupEXT2 {
 	my $fileCount = int ( qxx ("find $tree | wc -l") );
 	my $nodeCount = $fileCount * 2;
 	if (defined $journal) {
-		$fsopts = "-O dir_index -b 4096 -j -J size=4 -q -F -N $nodeCount";
+		$fsopts="-I 128 -O dir_index -b 4096 -j -J size=4 -q -F -N $nodeCount";
 	} else {  
-		$fsopts = "-b 4096 -q -F -N $nodeCount";
+		$fsopts="-I 128 -b 4096 -q -F -N $nodeCount";
 	}
 	my $data = qxx ("/sbin/mke2fs $fsopts $imageDest/$name 2>&1");
 	my $code = $? >> 8;
