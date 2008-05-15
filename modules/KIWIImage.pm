@@ -2985,7 +2985,7 @@ sub buildVMwareConfig {
 		# SCSI Interface...
 		print FD $device.'.present = "true"'."\n";
 		print FD $device.'.sharedBus = "none"'."\n";
-		print FD $device.'.virtualDev = "lsilogic"'."\n";
+		print FD $device.'.virtualDev = "buslogic"'."\n";
 		print FD $device.':0.present = "true"'."\n";
 		print FD $device.':0.fileName = "'.$image.'.vmdk"'."\n";
 		print FD $device.':0.deviceType = "scsi-hardDisk"'."\n";
