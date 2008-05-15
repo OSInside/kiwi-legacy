@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Thu May 15 11:50:02 CEST 2008 - ms@suse.de
 
+- don't call pattern solver twice
 - fixed virtual CD device setup for VMware
 - fixed initrd and kernel setup in xenconfig
 - update documentation:

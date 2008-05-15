@@ -985,12 +985,19 @@ sub setupUpgrade {
 sub setupInstallPackages {
 	# ...
 	# create the install packages list from the information
-	# of the package types image, xen and vmware
+	# of the package types image, xen and vmware. Store
+	# the result in the object pointer
 	# ---
 	my $this   = shift;
 	my $kiwi   = $this->{kiwi};
 	my $xml    = $this->{xml};
 	my %type;
+	#==========================================
+	# check cached result
+	#------------------------------------------
+	if (defined $this->{packlist}) {
+		return @{$this->{packlist}};
+	}
 	#==========================================
 	# Get image package list
 	#------------------------------------------
@@ -1021,6 +1028,7 @@ sub setupInstallPackages {
 		}
 		$kiwi -> done ();
 	}
+	$this->{packlist} = \@packList;
 	return @packList;
 }
 
@@ -1058,7 +1066,6 @@ sub setupRootSystem {
 	if ($manager eq "smart") {
 		if (! $chroot) {
 			$this -> checkExclusiveLock();
-			$kiwi -> info ("Initializing image system on: $root...");
 			my @installOpts = (
 				"--explain",
 				"--log-level=error",
@@ -1070,6 +1077,7 @@ sub setupRootSystem {
 			if ($this -> setupInstallPackages()) {
 				push (@packs,$manager);
 			}
+			$kiwi -> info ("Initializing image system on: $root...");
 			#==========================================
 			# Create screen call file
 			#------------------------------------------
@@ -1138,7 +1146,6 @@ sub setupRootSystem {
 	if ($manager eq "zypper") {
 		if (! $chroot) {
 			$this -> checkExclusiveLock();
-			$kiwi -> info ("Initializing image system on: $root...");
 			my @installOpts = (
 				"--auto-agree-with-licenses"
 			);
@@ -1148,6 +1155,7 @@ sub setupRootSystem {
 			if ($this -> setupInstallPackages()) {
 				push (@packs,$manager);
 			}
+			$kiwi -> info ("Initializing image system on: $root...");
 			#==========================================
 			# check input list for pattern names
 			#------------------------------------------
