@@ -402,6 +402,36 @@ KIWI_KERNEL=/boot/name-of-kernel-file
 \end{verbatim}
 \end{itemize}
 
+\subsection{User another than tftp as download protocol}
+
+By default all downloads controlled by the kiwi linuxrc code
+are performed by an atftp call and therefore uses the tftp
+protocol. With PXE the download protocol is fixed and thus you
+can't change the way how the kernel and the boot image (initrd)
+is downloaded. As soon as linux takes over control the following
+download protocols http, https and ftp are supported too.
+KIWI makes use of the \textbf{curl} program to support the
+additional protocols.
+
+In order to select one of the additional download protocols
+the following kernel parameters needs to be setup:
+
+\begin{itemize}
+\item \textbf{kiwiserver}\\
+      Name or IP address of the server who implements the protocol
+\item \textbf{kiwiservertype}\\
+      Name of the download protocol which could be one of http, https 
+      or ftp
+\end{itemize}
+
+To setup this parameters edit the file
+\textbf{/srv/tftpboot/pxelinux.cfg/default} on your PXE boot server
+and change the \textbf{append} line accordingly. Please note all
+downloads except for kernel and initrd are now controlled by the given
+server and protocol. You need to make sure that this server provides
+the same directory and file structure as initially provided by
+the kiwi-pxeboot package.
+
 \subsection{RAM only image}
 
 If there is no local storage and no remote root mount setup
