@@ -2,6 +2,7 @@
 Thu May 15 18:09:34 CEST 2008 - ms@suse.de
 
 - replace db43 with rpmdb from rpm-devel (bnc #390832)
+- changed back to lsilogic, dont't ask :-)
 
 -------------------------------------------------------------------
 Thu May 15 15:47:20 CEST 2008 - ms@suse.de
