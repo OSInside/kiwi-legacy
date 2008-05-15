@@ -220,28 +220,43 @@ sub Init
     close(DUMP);
   }
 
+  %{$this->{m_prodvars}}      = $this->{m_xml}->getInstSourceProductVar();
+  if($this->{m_debug}) {
+    open(DUMP, ">", "$this->{m_basedir}/prodvars.dump.pl");
+    print DUMP Dumper($this->{m_prodvars});
+    close(DUMP);
+  }
+
+  %{$this->{m_prodopts}}      = $this->{m_xml}->getInstSourceProductOption();
+  if($this->{m_debug}) {
+    open(DUMP, ">", "$this->{m_basedir}/prodopts.dump.pl");
+    print DUMP Dumper($this->{m_prodopts});
+    close(DUMP);
+  }
+
 
   ### THIS IS ONLY FIRST SHOT! TODO FIXME
   ## set env vars according to "productinfo" elements:
-  while(my ($name,$value) = each(%{$this->{m_prodinfo}})) {
+  while(my ($name,$value) = each(%{$this->{m_prodvars}})) {
     $ENV{$name} = $value;
   }
 
   $this->{m_united} = "$this->{m_basedir}/main";
   $this->{m_dirlist}->{"$this->{m_united}"} = 1;
   foreach my $n($this->getMediaNumbers()) {
-    $this->{m_dirlist}->{"$this->{m_united}/$this->{m_prodinfo}->{MEDIUM_NAME}$n"} = 1;
-    $this->{m_dirlist}->{"$this->{m_united}/$this->{m_prodinfo}->{MEDIUM_NAME}$n/suse"} = 1;
-    $this->{m_dirlist}->{"$this->{m_united}/$this->{m_prodinfo}->{MEDIUM_NAME}$n/script"} = 1;
-    $this->{m_dirlist}->{"$this->{m_united}/$this->{m_prodinfo}->{MEDIUM_NAME}$n/temp"} = 1;
-    $this->{m_basesubdir}->{$n} = "$this->{m_united}/$this->{m_prodinfo}->{MEDIUM_NAME}$n";
+    $this->{m_dirlist}->{"$this->{m_united}/$this->{m_prodvars}->{MEDIUM_NAME}$n"} = 1;
+    $this->{m_dirlist}->{"$this->{m_united}/$this->{m_prodvars}->{MEDIUM_NAME}$n/suse"} = 1;
+    $this->{m_dirlist}->{"$this->{m_united}/$this->{m_prodvars}->{MEDIUM_NAME}$n/script"} = 1;
+    $this->{m_dirlist}->{"$this->{m_united}/$this->{m_prodvars}->{MEDIUM_NAME}$n/temp"} = 1;
+    $this->{m_dirlist}->{"$this->{m_united}/$this->{m_prodvars}->{MEDIUM_NAME}$n/media.$n"} = 1;
+    $this->{m_basesubdir}->{$n} = "$this->{m_united}/$this->{m_prodvars}->{MEDIUM_NAME}$n";
     $this->{m_dirlist}->{"$this->{m_basesubdir}->{$n}"} = 1;
   }
   
   # we also need a basesubdir "0" for the metapackages that shall _not_ be put to the CD.
   # Those specify medium number "0", which means we only need a dir to download scripts.
-  $this->{m_basesubdir}->{'0'} = "$this->{m_united}/$this->{m_prodinfo}->{MEDIUM_NAME}0";
-  $this->{m_dirlist}->{"$this->{m_united}/$this->{m_prodinfo}->{MEDIUM_NAME}0/temp"} = 1;
+  $this->{m_basesubdir}->{'0'} = "$this->{m_united}/$this->{m_prodvars}->{MEDIUM_NAME}0";
+  $this->{m_dirlist}->{"$this->{m_united}/$this->{m_prodvars}->{MEDIUM_NAME}0/temp"} = 1;
   
   $this->createDirectoryStructure();
 
@@ -464,16 +479,6 @@ sub queryRpmHeaders
 	  next;
 	}
 
-	my $ad;
-	if( !$flags{'SOURCERPM'} or $flags{'SOURCERPM'}->[0] eq 'none') {
-	  # we deal with a source rpm...
-	  $ad = "src";
-	}
-	else {
-	  # we deal with regular rpm file...
-	  $ad = $flags{'ARCH'}->[0];
-	}
-
 	my $medium;
 	if($tmp && $tmp->{'medium'}) {
 	  $medium = $tmp->{'medium'};
@@ -481,6 +486,22 @@ sub queryRpmHeaders
 	else {
 	  $medium = 1;
 	}
+
+	my $ad;
+	if( !$flags{'SOURCERPM'} or $flags{'SOURCERPM'}->[0] eq 'none') {
+	  # we deal with a source rpm...
+	  $ad = "src";
+	  ## if the user wants all sources onto a certain medium: specify "SOURCEMEDIUM" in config
+	  if($this->{m_prodopts} and $this->{m_prodopts}->{'SOURCEMEDIUM'}) {
+	    $medium = $this->{m_prodopts}->{'SOURCEMEDIUM'};
+	  }
+	}
+	else {
+	  # we deal with regular rpm file...
+	  $ad = $flags{'ARCH'}->[0];
+	}
+
+
 	#my $dstfile = "$this->{'m_united'}/$this->{m_prodinfo}->{'MEDIUM_NAME'}$medium/$ad/$tmp->{$a}->{'targetfile'}";
 	my $dstfile = "$this->{'m_basesubdir'}->{$medium}/suse/$ad/$tmp->{$a}->{'targetfile'}";
 	$dstfile =~ m{(.*/)(.*?/)(.*?/)(.*)[.]([rs]pm)$};
@@ -512,87 +533,6 @@ sub queryRpmHeaders
   return $retval;
 }
 # /queryRpmHeaders
-
-
-
-#==========================================
-# queryRpmHeadersPack
-#------------------------------------------
-sub queryRpmHeadersPack
-{
-  my $this  = shift;
-  my $p	    = shift;
-  my $tp    = shift or undef;  # unite path if already known
-
-  my $retval = 0;
-
-  my $tmp = $this->{m_packages}->{$p}; #optimisation
-  #my @archs = grep { $_ !~ m{(addarch|removearch|forcearch|priority)}} keys(%{$tmp});
-  my @archs = $this->checkArchitectureList($p);
-
-  foreach my $a(@archs) {
-    my $uri = "$tmp->{$a}->{'targetpath'}/$tmp->{$a}->{'targetfile'}";
-    my $dst = "$this->{'m_basesubdir'}/$tmp->{$a}->{'targetfile'}";
-    if(defined($uri) and defined($dst)) {
-      # RPMQ query for arch/version/release
-      my %flags = RPMQ::rpmq_many($uri, 'NAME', 'VERSION', 'RELEASE', 'ARCH', 'SOURCE', 'SOURCERPM');
-      if(not(%flags
-	 and defined $flags{'NAME'}
-	 and defined $flags{'VERSION'}
-	 and defined $flags{'RELEASE'}
-	 and defined $flags{'ARCH'})) {
-	$this->{m_logger}->warning("[WARNING] [queryRpmHeaders] RPM flags query failed for package $p at $uri!");
-	next;
-      }
-
-      my $ad;
-      if( !$flags{'SOURCERPM'} or $flags{'SOURCERPM'}->[0] eq 'none') {
-	# we deal with a source rpm...
-	# yet some more specialities may be necessary here...
-	$ad = "src";
-      }
-      else {
-	# we deal with regular rpm file...
-	$ad = $flags{'ARCH'}->[0];
-      }
-
-      my $dstfile = '';
-      if(defined($tp)) {
-	$dstfile = "$tp/$ad/$tmp->{$a}->{'targetfile'}";
-      }
-      else {
-	$dstfile = "$this->{m_basesubdir}/$ad/$tmp->{$a}->{'targetfile'}";
-      }
-
-      $dstfile =~ m{(.*/)(.*?/)(.*?/)(.*)[.]([rs]pm)$};
-      if(not(defined($1) and defined($2) and defined($3) and defined($4) and defined($5))) {
-	$this->{m_logger}->error("[ERROR] [queryRpmHeaders] regexp didn't match path $tmp->{'source'}");
-      }
-      else {
-	$tmp->{$a}->{'newfile'}  = "$p-$flags{'VERSION'}->[0]-$flags{'RELEASE'}->[0].$ad.$5";
-	$tmp->{$a}->{'newpath'} = "$this->{m_basesubdir}/$ad";
-	$tmp->{$a}->{'arch'}  = $ad;
-	
-	# move and rename:
-	if(!-d $tmp->{$a}->{'newpath'}) {
-	  if(!mkpath($tmp->{$a}->{'newpath'}, { mode => umask } )) {
-	    $this->{m_logger}->warning("[WARNING] [queryRpmHeaders] Couldn't create uniting directory $tmp->{$a}->{'newpath'}");
-	  }
-	}
-	if(!link $uri, "$tmp->{$a}->{'newpath'}/$tmp->{$a}->{'newfile'}") {
-	  $this->{m_logger}->warning("[WARNING] [queryRpmHeaders] linking file $tmp->{$a}->{'newpath'}/$tmp->{$a}->{'newfile'} failed");
-	}
-      }
-    }
-    else {
-      # this is only the case for unresolved packages!
-      $retval++;
-      $this->{m_logger}->error("[ERROR] [queryRpmHeaders] package $p has undefined hash entry");
-    }
-  }
-  return $retval;
-}
-# /queryRpmHeadersPack
 
 
 
@@ -791,21 +731,23 @@ sub unpackMetapackages
     $this->{m_util}->unpac_package($this->{m_packages}->{$metapack}->{$dir}->{'source'}, "$tmp");
     ## all metapackages contain at least a CD1 dir and _may_ contain another /usr/share/<name> dir
     qx(cp -r $tmp/CD1/* $this->{m_basesubdir}->{$medium});
-    if(-d "$tmp/usr/share") {
-      qx(cp -r $tmp/usr/share/ $this->{m_basesubdir}->{$medium});
+    for my $sub("usr", "etc") {
+      if(-d "$tmp/$sub") {
+	qx(cp -r $tmp/$sub $this->{m_basesubdir}->{$medium});
+      }
     }
     ## copy content of CD2 ... CD<i> subdirs if exists:
-    for(2..5) {
-      if(-d "$tmp/CD$_") {
-	qx(cp -r $tmp/CD$_ $this->{m_basesubdir}->{$_});
+    for(2..10) {
+      if(-d "$tmp/CD$_" and defined $this->{m_basesubdir}->{$_}) {
+	qx(cp -r $tmp/CD$_/* $this->{m_basesubdir}->{$_});
       }
       ## add handling for "DVD<i>" subdirs if necessary FIXME
     }
 
     ## THEMING
     $this->{m_logger}->info("[INFO] Handling theming for package $metapack\n");
-    $this->{m_logger}->info("\ttarget theme $this->{m_prodinfo}->{PRODUCT_THEME}\n");
-    my $thema = $this->{m_prodinfo}->{'PRODUCT_THEME'};
+    $this->{m_logger}->info("\ttarget theme $this->{m_prodvars}->{PRODUCT_THEME}\n");
+    my $thema = $this->{m_prodvars}->{'PRODUCT_THEME'};
     if(-d "$tmp/SuSE") { # and -d "$tmp/SuSE/$thema") {
       if(not opendir(TD, "$tmp/SuSE")) {
 	$this->{m_logger}->warning("[WARNING] [unpackMetapackages] Can't open theme directory for reading!\nSkipping themes for package $metapack\n");
@@ -833,6 +775,8 @@ sub unpackMetapackages
       }
       ## $thema is now the thema to use:
       for my $i(1..3) {
+	## @lars: wtf soll denn sein, wenn es CD2 gibt, aber die Konfig der Medien kein Medium "2" hat?
+	## Laut Rudi (tm) ist das zulässig!
 	if(-d "$tmp/SuSE/$thema/CD$i" and $this->{m_basesubdir}->{$i} and -d "$tmp/SuSE/$thema/CD$i") {
 	  qx(cp -a $tmp/SuSE/$thema/CD$i/* $this->{m_basesubdir}->{$i});
 	}
@@ -869,6 +813,16 @@ sub unpackMetapackages
     }
     else {
       $this->{m_logger}->info("No script defined for metapackage $metapack\n");
+    }
+  }
+
+  ## cleanup old files:
+  foreach my $index($this->getMediaNumbers()) {
+    if(-d "$this->{m_basesubdir}->{$index}/temp") {
+      qx(rm -rf $this->{m_basesubdir}->{$index}/temp);
+    }
+    if(-d "$this->{m_basesubdir}->{$index}/script") {
+      qx(rm -rf $this->{m_basesubdir}->{$index}/script);
     }
   }
 }
@@ -1502,14 +1456,134 @@ sub createMetadata
   }
   if(-f "$this->{m_basesubdir}->{'1'}/EULA.txt" and -f "$this->{m_basesubdir}->{'1'}/suse/setup/descr/packages.en") {
     my $data = qx($p2eula -i "$this->{m_basesubdir}->{'1'}/EULA.txt" -p $this->{m_basesubdir}->{'1'}/suse/setup/descr/packages.en -o "$this->{m_basesubdir}->{'1'}/EULA.txt.new");
-    #if(-f "$this->{m_basesubdir}->{'1'}/EULA.txt.new") {
-    #  link "$this->{m_basesubdir}->{'1'}/EULA.txt.new", 
-    #}
+    if(-f "$this->{m_basesubdir}->{'1'}/EULA.txt.new") {
+      link "$this->{m_basesubdir}->{'1'}/EULA.txt.new", "$this->{m_basesubdir}->{'1'}/EULA.txt";
+    }
   }
   else {
     $this->{m_logger}->warning("[WARNING] [createMetadata] files $this->{m_basesubdir}->{'1'}/EULA.txt and/or $this->{m_basesubdir}->{'1'}/suse/setup/descr/packages.en don't exist, skipping");
   }
-}
+
+
+  ## step 3: content file
+  $this->{m_logger}->info("Creating content file:");
+  my $contentfile = "$this->{m_basesubdir}->{'1'}/content";
+  if(not open(CONT, ">", $contentfile)) {
+    die "Cannot create $contentfile";
+  }
+  foreach my $i(sort {$a <=> $b } keys(%{$this->{m_prodinfo}})) {
+    print CONT "$this->{m_prodinfo}->{$i}->[0] $this->{m_prodinfo}->{$i}->[1]\n";
+  }
+  close(CONT);
+
+
+  ## step 4: media file
+  $this->{m_logger}->info("Creating media file in all media:");
+	if($this->{m_prodvars}->{'MANUFACTURER'}) {
+		my @media = $this->getMediaNumbers();
+		for my $n(@media) {
+			my $mediafile = "$this->{m_basesubdir}->{$n}/media.$n/media";
+			if(not open(MEDIA, ">", $mediafile)) {
+				die "Cannot create $mediafile";
+			}
+			print MEDIA "$this->{m_prodvars}->{'MANUFACTURER'}\n";
+			print MEDIA qx(date +%Y%m%d%H%M%S);
+			if($n == 1) {
+				# some specialities for medium number 1: contains a line with the number of media (? ask ma!)
+				print MEDIA scalar(@media)."\n";
+			}
+			close(MEDIA);
+		}
+	}
+	else {
+		$this->{m_logger}->error("[ERROR] [createMetadata] required variable \"MANUFACTURER\" not set");
+		$this->{m_logger}->info("[INFO] [createMetadata] skipping media file!");
+	}
+
+
+  ## step 5: products file
+  $this->{m_logger}->info("Creating products file in all media:");
+	if($this->{m_prodvars}->{'DISTRIBUTION_STRING'} and
+		 $this->{m_prodvars}->{'PRODUCT_STRING'} #and
+		 #$this->{m_prodvars}->{'PRODUCT_VERSION'}
+		) {
+		for my $n($this->getMediaNumbers()) {
+			my $productsfile = "$this->{m_basesubdir}->{$n}/media.$n/products";
+			if(not open(PRODUCT, ">", $productsfile)) {
+				die "Cannot create $productsfile";
+			}
+			print PRODUCT "/ $this->{m_prodvars}->{'DISTRIBUTION_STRING'}";
+			print PRODUCT " $this->{m_prodvars}->{'PRODUCT_STRING'}\n";
+			#print PRODUCT " $this->{m_prodvars}->{'PRODUCT_VERSION'}";
+			close(PRODUCT);
+		}
+	}
+	else {
+		$this->{m_logger}->error("[ERROR] [createMetadata] one or more of the following  variables are missing:");
+		$this->{m_logger}->error("\tDISTRIBUTION_STRING");
+		$this->{m_logger}->error("\tPRODUCT_STRING");
+		#$this->{m_logger}->error("\tPRODUCT_VERSION");
+		$this->{m_logger}->info("[INFO] [createMetadata] skipping products file!");
+	}
+
+
+  ## step 6: SHA1SUMS
+  $this->{m_logger}->info("Calling create_sha1sums:");
+  my $csha1sum = "/usr/bin/create_sha1sums";
+  my $s1sum_opts = "";
+  if($this->{m_prodvars}->{'SHA1OPT'}) {
+    $s1sum_opts = $this->{m_prodvars}->{'SHA1OPT'};
+  }
+  if(! (-f $csha1sum or -x $csha1sum)) {
+    $this->{m_logger}->warning("[WARNING] [createMetadata] excutable `$csha1sum` not found. Maybe package `inst-source-utils` is not installed?");
+    return;
+  }
+  for my $sd($this->getMediaNumbers()) {
+    my @data = qx($csha1sum $s1sum_opts $this->{m_basesubdir}->{$sd});
+    $this->{m_logger}->info("[INFO] [createMetadata] $csha1sum output:\n");
+    foreach(@data) {
+      chomp $_;
+      $this->{m_logger}->info("\t$_\n");
+    }
+  }
+
+
+  ## step 7: MD5SUMS
+  $this->{m_logger}->info("Calling create_md5sums:");
+  my $md5sums = "/usr/bin/create_md5sums";
+  my $md5opt = "";
+  # available option: '--meta'
+  if($this->{m_prodvars}->{'MD5OPT'}) {
+    $md5opt = $this->{m_prodvars}->{'MD5OPT'};
+  }
+  if(! (-f $md5sums or -x $md5sums)) {
+    $this->{m_logger}->warning("[WARNING] [createMetadata] excutable `$md5sums` not found. Maybe package `inst-source-utils` is not installed?");
+    return;
+  }
+  my @data = qx(cd $this->{m_basesubdir}->{'1'} && $md5sums $md5opt suse);
+  $this->{m_logger}->info("[INFO] [createMetadata] $csha1sum output:\n");
+  foreach(@data) {
+    chomp $_;
+    $this->{m_logger}->info("\t$_\n");
+  }
+  @data = (); # clear list
+
+
+  ## step 8: LISTINGS
+  $this->{m_logger}->info("Calling mk_listings:");
+  my $listings = "/usr/bin/mk_listings";
+  if(! (-f $listings or -x $listings)) {
+    $this->{m_logger}->warning("[WARNING] [createMetadata] excutable `$listings` not found. Maybe package `inst-source-utils` is not installed?");
+    return;
+  }
+  @data = qx(cd $this->{m_basesubdir}->{'1'} && $listings .);
+  $this->{m_logger}->info("[INFO] [createMetadata] $listings output:\n");
+  foreach(@data) {
+    chomp $_;
+    $this->{m_logger}->info("\t$_\n");
+  }
+  @data = (); # clear list
+} # createMetadata
 
 
 
@@ -1561,7 +1635,9 @@ sub createDirectoryStructure
   #for my $i(0..scalar(@dirs)-1) {
   foreach my $d(keys(%dirs)) {
     if(-d $d) {
-      $this->{m_logger}->info("[INFO] directory $d already exists, skipping");
+      #if($this->{m_debug}) {
+      #  $this->{m_logger}->info("[INFO] directory $d already exists, skipping");
+      #}
       $dirs{$d} = 0;
     }
     elsif(!mkpath($d, 0755)) {
