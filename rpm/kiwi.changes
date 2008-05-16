@@ -2,6 +2,8 @@
 Fri May 16 11:30:59 CEST 2008 - ms@suse.de
 
 - allow xenpae kernel to be used on ix86 systems (bnc #390809)
+- allow group/user ID's to be set in <users> section (bnc #384330)
+- allow 32bit and 64bit VMware guestOS setup (bnc #390889)
 
 -------------------------------------------------------------------
 Thu May 15 18:09:34 CEST 2008 - ms@suse.de

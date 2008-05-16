@@ -941,15 +941,19 @@ sub getUsers {
 	my @node   = $this->{usrdataNodeList} -> get_nodelist();
 	foreach my $element (@node) {
 		my $group = $element -> getAttribute("group");
+		my $gid   = $element -> getAttribute("id");
 		my @ntag  = $element -> getElementsByTagName ("user") -> get_nodelist();
 		foreach my $element (@ntag) {
 			my $name = $element -> getAttribute ("name");
+			my $uid  = $element -> getAttribute ("id");
 			my $pwd  = $element -> getAttribute ("pwd");
 			my $home = $element -> getAttribute ("home");
 			my $realname = $element -> getAttribute ("realname");
 			my $shell = $element -> getAttribute ("shell");
 			if (defined $name) {
 				$result{$name}{group} = $group;
+				$result{$name}{gid}   = $gid;
+				$result{$name}{uid}   = $uid;
 				$result{$name}{home}  = $home;
 				$result{$name}{pwd}   = $pwd;
 				$result{$name}{realname} = $realname;
@@ -1568,7 +1572,8 @@ sub getPackageAttributes {
 			my $memory  = $node -> getAttribute ("memory");
 			my $disk    = $node -> getAttribute ("disk");
 			my $hwver   = $node -> getAttribute ("HWversion");
-			my $guestos = $node -> getAttribute ("guestOS");
+			my $gos32bit= $node -> getAttribute ("guestOS_32Bit");
+			my $gos64bit= $node -> getAttribute ("guestOS_64Bit");
 			if (($memory) && ($disk)) {
 				$result{memory}  = $memory;
 				$result{disk}    = $disk;
@@ -1576,8 +1581,11 @@ sub getPackageAttributes {
 			if ($hwver) {
 				$result{hwver} = $hwver;
 			}
-			if ($guestos) {
-				$result{guestOS} = $guestos;
+			if ($gos32bit) {
+				$result{guestOS_32Bit} = $gos32bit;
+			}
+			if ($gos64bit) {
+				$result{guestOS_64Bit} = $gos64bit;
 			}
 		}
 	}

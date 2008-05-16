@@ -2971,13 +2971,24 @@ sub buildVMwareConfig {
 	} else {
 		print FD 'virtualHW.version = "3"'."\n";
 	}
-	print FD 'memsize = "'.$memory.'"'."\n";
-	if ($vmwconfig{guestOS}) {
-		print FD 'guestOS = "'.$vmwconfig{guestOS}.'"'."\n";
-	} else {
-		print FD 'guestOS = "Linux"'."\n";
-	}
 	print FD 'displayName = "'.$name->{systemImage}.'"'."\n";
+	# Memory setup...
+	print FD 'memsize = "'.$memory.'"'."\n";
+	# Guest Operating system identification...
+	if ($arch !~ /64$/) {
+		if ($vmwconfig{guestOS_32Bit}) {
+			print FD 'guestOS = "'.$vmwconfig{guestOS_32Bit}.'"'."\n";
+		} else {
+			print FD 'guestOS = "suse"'."\n";
+		}
+	} else {
+		if ($vmwconfig{guestOS_64Bit}) {
+			print FD 'guestOS = "'.$vmwconfig{guestOS_64Bit}.'"'."\n";
+		} else {
+			print FD 'guestOS = "suse-64"'."\n";
+		}
+	}
+	# Main storage device...
 	if ($device =~ /^ide/) {
 		# IDE Interface...
 		print FD $device.':0.present = "true"'."\n";

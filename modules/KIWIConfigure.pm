@@ -104,6 +104,8 @@ sub setupUsersGroups {
 		}
 		foreach my $user (keys %users) {
 			my $group = $users{$user}{group};
+			my $gid   = $users{$user}{gid};
+			my $uid   = $users{$user}{uid};
 			my $pwd   = $users{$user}{pwd};
 			my $home  = $users{$user}{home};
 			my $shell = $users{$user}{shell};
@@ -118,6 +120,13 @@ sub setupUsersGroups {
 			}
 			if (defined $home) {
 				$adduser .= " -m -d $home";
+			}
+			if (defined $gid) {
+				$adduser .= " -g $gid";
+				$moduser .= " -g $gid";
+			}
+			if (defined $uid) {
+				$adduser .= " -u $uid";
 			}
 			if (defined $group) {
 				my $data = qxx (
