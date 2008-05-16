@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri May 16 11:30:59 CEST 2008 - ms@suse.de
+
+- allow xenpae kernel to be used on ix86 systems (bnc #390809)
+
+-------------------------------------------------------------------
 Thu May 15 18:09:34 CEST 2008 - ms@suse.de
 
 - replace db43 with rpmdb from rpm-devel (bnc #390832)
