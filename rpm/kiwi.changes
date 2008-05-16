@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Fri May 16 16:01:36 CEST 2008 - ms@suse.de
+
+- create ext3 read/write partition in usb stick workflow
+- allow oemboot to set a custom title OEM_BOOT_TITLE (bnc #390652)
+- allow oemboot to prevent creating a swap partition with
+  OEM_WITHOUTSWAP=1 (bnc #390652)
+
+-------------------------------------------------------------------
 Fri May 16 11:30:59 CEST 2008 - ms@suse.de
 
 - allow xenpae kernel to be used on ix86 systems (bnc #390809)

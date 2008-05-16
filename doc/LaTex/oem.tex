@@ -112,6 +112,14 @@ can be set:
 \item \textbf{OEM\_WITHOUTHOME=1}\\
       Specify if a home partition should be create. Don't specify
       OEM\_WITHOUTHOME at all if you want a /home partition
+\item \textbf{OEM\_WITHOUTSWAP=1}\\
+      Specify if a spaw partition should be create. Don't specify
+      OEM\_WITHOUTSWAP at all if you want a swap partition
+\item \textbf{OEM\_BOOT\_TITLE=text}\\
+      By default the string \textbf{OEM} will be appended to the
+      boot manager menu when KIWI creates the grub configuration during
+      first deployment. The variable OEM\_BOOT\_TITLE allows to set
+      a custom name which is used instead of OEM.
 \end{itemize}
 
 If you plan to use a custom partition setup you also should consider

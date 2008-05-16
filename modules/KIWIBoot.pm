@@ -923,13 +923,13 @@ sub setupBootStick {
 			}
 			$kiwi -> done();
 		} elsif ($syszip) {
-			$kiwi -> info ("Creating ext2 read/write filesystem");
-			my $fsopts = "-I 128 -q -F";
+			$kiwi -> info ("Creating ext3 read/write filesystem");
+			my $fsopts = "-I 128 -O dir_index -b 4096 -j -J size=4 -q -F";
 			$status = qxx ("/sbin/mke2fs $fsopts $stick'2' 2>&1");
 			$result = $? >> 8;
 			if ($result != 0) {
 				$kiwi -> failed ();
-				$kiwi -> error  ("Couldn't create ext2 filesystem: $status");
+				$kiwi -> error  ("Couldn't create ext3 filesystem: $status");
 				$kiwi -> failed ();
 				$this -> cleanDbus();
 				$this -> cleanTmp ();

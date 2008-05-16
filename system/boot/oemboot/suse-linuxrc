@@ -537,33 +537,70 @@ if [ $LOCAL_BOOT = "no" ];then
 					#======================================
 					# 10.2.1 without /home partition
 					#--------------------------------------
-					for cmd in \
-						d n p 2 1 +"$disk1MBytes"M \
-						n p 1 . . \
-						t 1 82 w
-					do
-						if [ $cmd = "." ];then
-							echo >> $input
-							continue
-						fi
-						echo $cmd >> $input
-					done
+					if [ -z "$OEM_WITHOUTSWAP" ];then
+						#======================================
+						# 10.2.1 with swap partition
+						#--------------------------------------
+						for cmd in \
+							d n p 2 1 +"$disk1MBytes"M \
+							n p 1 . . \
+							t 1 82 w
+						do
+							if [ $cmd = "." ];then
+								echo >> $input
+								continue
+							fi
+							echo $cmd >> $input
+						done
+					else
+						#======================================
+						# 10.2.1 without swap partition
+						#--------------------------------------
+						for cmd in \
+							d n p 2 . .
+						do
+							if [ $cmd = "." ];then
+								echo >> $input
+								continue
+							fi
+							echo $cmd >> $input
+						done
+					fi
 				else
 					#======================================
 					# 10.2.2 with /home partition
 					#--------------------------------------
-					for cmd in \
-						d n p 2 1 +"$disk1MBytes"M \
-						n p 1 . +"$swapsize"M \
-						n p 3 . . \
-						t 1 82 w
-					do
-						if [ $cmd = "." ];then
-							echo >> $input
-							continue
-						fi
-						echo $cmd >> $input
-					done
+					if [ -z "$OEM_WITHOUTSWAP" ];then
+						#======================================
+						# 10.2.2 with swap partition
+						#--------------------------------------
+						for cmd in \
+							d n p 2 1 +"$disk1MBytes"M \
+							n p 1 . +"$swapsize"M \
+							n p 3 . . \
+							t 1 82 w
+						do
+							if [ $cmd = "." ];then
+								echo >> $input
+								continue
+							fi
+							echo $cmd >> $input
+						done
+					else
+						#======================================
+						# 10.2.2 without swap partition
+						#--------------------------------------
+						for cmd in \
+							d n p 2 1 +"$disk1MBytes"M \
+							n p 3 . .
+						do
+							if [ $cmd = "." ];then
+								echo >> $input
+								continue
+							fi
+							echo $cmd >> $input
+						done
+					fi
 				fi
 				Echo "Repartition the disk according to current geometry"
 				fdisk $deviceDisk < $input >/dev/null 2>&1
@@ -758,10 +795,15 @@ if [ $LOCAL_BOOT = "no" ];then
 	fi
 	if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ]; then
 		Echo "Creating grub configuration"
+		if [ -z "$OEM_BOOT_TITLE" ];then
+			OEM_BOOT_TITLE="OEM"
+		fi
 		if [ $HAVE_SWAP -eq 1 ];then
-			setupBootLoaderGrub /mnt /config 1 ${deviceDisk}2 OEM $deviceSwap
+			setupBootLoaderGrub \
+				/mnt /config 1 ${deviceDisk}2 $OEM_BOOT_TITLE $deviceSwap
 		else
-			setupBootLoaderGrub /mnt /config 0 ${deviceDisk}1 OEM
+			setupBootLoaderGrub \
+				/mnt /config 0 ${deviceDisk}1 $OEM_BOOT_TITLE
 		fi
 	fi
 	setupKernelModules /config

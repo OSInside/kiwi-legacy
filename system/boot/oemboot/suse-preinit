@@ -68,9 +68,9 @@ else
 		Echo "Creating grub configuration for unified system"
 	fi
 	if [ $HAVE_SWAP -eq 1 ];then
-		setupBootLoaderGrub / / 1 ${deviceDisk}2 OEM $deviceSwap
+		setupBootLoaderGrub / / 1 ${deviceDisk}2 $OEM_BOOT_TITLE $deviceSwap
 	else
-		setupBootLoaderGrub / / 1 ${deviceDisk}2 OEM
+		setupBootLoaderGrub / / 1 ${deviceDisk}2 $OEM_BOOT_TITLE
 	fi
 	grubOK=1
 fi
