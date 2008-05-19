@@ -507,6 +507,7 @@ sub main {
 		qxx (
 			"sed -i -e stype=#type=.*#type=$type# $Create/.profile 2>&1"
 		);
+		$kiwi -> done();
 		#==========================================
 		# Check for default destination in XML
 		#------------------------------------------
