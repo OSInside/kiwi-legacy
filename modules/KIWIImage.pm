@@ -608,11 +608,16 @@ sub createImageUSB {
 	if ($type{bootprofile}) {
 		@main::Profiles = split (/,/,$type{bootprofile});
 	}
-	$main::ForeignRepo{xmlnode} = $xml -> getForeignNodeList();
-	$main::ForeignRepo{packagemanager} = $xml -> getPackageManager();
-	$main::ForeignRepo{locale}  = $xml -> getLocale();
-	$main::ForeignRepo{prepare} = $main::Prepare;
-	$main::ForeignRepo{create}  = $main::Create;
+	$main::ForeignRepo{"xmlnode"} = $xml -> getForeignNodeList();
+	$main::ForeignRepo{"packagemanager"} = $xml -> getPackageManager();
+	$main::ForeignRepo{"oem-swap"}       = $xml -> getOEMSwap();
+	$main::ForeignRepo{"oem-swapsize"}   = $xml -> getOEMSwapSize();
+	$main::ForeignRepo{"oem-systemsize"} = $xml -> getOEMSystemSize();
+	$main::ForeignRepo{"oem-home"}       = $xml -> getOEMHome();
+	$main::ForeignRepo{"oem-boot-title"} = $xml -> getOEMBootTitle();
+	$main::ForeignRepo{"locale"}  = $xml -> getLocale();
+	$main::ForeignRepo{"prepare"} = $main::Prepare;
+	$main::ForeignRepo{"create"}  = $main::Create;
 	$main::Compress = "no";
 	$main::Create   = $main::RootTree;
 	undef $main::SetImageType;
@@ -1149,11 +1154,11 @@ sub createImageLiveCD {
 	if ($type{bootprofile}) {
 		@main::Profiles = split (/,/,$type{bootprofile});
 	}
-	$main::ForeignRepo{xmlnode} = $xml -> getForeignNodeList();
-	$main::ForeignRepo{packagemanager} = $xml -> getPackageManager();
-	$main::ForeignRepo{locale}  = $xml -> getLocale();
-	$main::ForeignRepo{prepare} = $main::Prepare;
-	$main::ForeignRepo{create}  = $main::Create;
+	$main::ForeignRepo{"xmlnode"} = $xml -> getForeignNodeList();
+	$main::ForeignRepo{"packagemanager"} = $xml -> getPackageManager();
+	$main::ForeignRepo{"locale"}  = $xml -> getLocale();
+	$main::ForeignRepo{"prepare"} = $main::Prepare;
+	$main::ForeignRepo{"create"}  = $main::Create;
 	$main::Create = $main::RootTree;
 	$xml = new KIWIXML ( $kiwi,$main::Prepare );
 	my $iso = $xml -> getImageName();
@@ -2001,11 +2006,16 @@ sub createImageSplit {
 	if ($type{bootprofile}) {
 		@main::Profiles = split (/,/,$type{bootprofile});
 	}
-	$main::ForeignRepo{xmlnode} = $xml -> getForeignNodeList();
-	$main::ForeignRepo{packagemanager} = $xml -> getPackageManager();
-	$main::ForeignRepo{locale}  = $xml -> getLocale();
-	$main::ForeignRepo{prepare} = $main::Prepare;
-	$main::ForeignRepo{create}  = $main::Create;
+	$main::ForeignRepo{"xmlnode"} = $xml -> getForeignNodeList();
+	$main::ForeignRepo{"packagemanager"} = $xml -> getPackageManager();
+	$main::ForeignRepo{"oem-swap"}       = $xml -> getOEMSwap();
+    $main::ForeignRepo{"oem-swapsize"}   = $xml -> getOEMSwapSize();
+    $main::ForeignRepo{"oem-systemsize"} = $xml -> getOEMSystemSize();
+    $main::ForeignRepo{"oem-home"}       = $xml -> getOEMHome();
+    $main::ForeignRepo{"oem-boot-title"} = $xml -> getOEMBootTitle();
+	$main::ForeignRepo{"locale"}  = $xml -> getLocale();
+	$main::ForeignRepo{"prepare"} = $main::Prepare;
+	$main::ForeignRepo{"create"}  = $main::Create;
 	$main::Create = $main::RootTree;
 	$xml = new KIWIXML ( $kiwi,$main::Prepare );
 	my $iname = $xml -> getImageName();

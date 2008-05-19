@@ -373,6 +373,9 @@ if [ $LOCAL_BOOT = "no" ];then
 	if [ ! -z "$OEM_SWAPSIZE" ];then
 		swapsize=$OEM_SWAPSIZE
 	fi
+	if [ ! -z "$OEM_WITHOUTSWAP" ];then
+		swapsize=0
+	fi
 	Echo "Filesystem of root system is: $FSTYPE -> $deviceRoot"
 	if test ! -z $COMBINED_IMAGE;then
 		#====================================== 
@@ -557,7 +560,7 @@ if [ $LOCAL_BOOT = "no" ];then
 						# 10.2.1 without swap partition
 						#--------------------------------------
 						for cmd in \
-							d n p 2 . .
+							d n p 2 . . w
 						do
 							if [ $cmd = "." ];then
 								echo >> $input
@@ -592,7 +595,7 @@ if [ $LOCAL_BOOT = "no" ];then
 						#--------------------------------------
 						for cmd in \
 							d n p 2 1 +"$disk1MBytes"M \
-							n p 3 . .
+							n p 3 . . w
 						do
 							if [ $cmd = "." ];then
 								echo >> $input

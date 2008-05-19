@@ -179,9 +179,19 @@ sub new {
 		return undef;
 	}
 	#==========================================
+	# Store object data
+	#------------------------------------------
+	$this->{kiwi}            = $kiwi;
+	$this->{foreignRepo}     = $foreignRepo;
+	$this->{optionsNodeList} = $optionsNodeList;
+
+	#==========================================
 	# setup foreign repository sections
 	#------------------------------------------
 	if ( defined $foreignRepo->{xmlnode} ) {
+		#==========================================
+		# foreign repositories
+		#------------------------------------------
 		$kiwi -> done ();
 		$kiwi -> info ("Including foreign repository node(s)");
 		my $need = new XML::LibXML::NodeList();
@@ -194,41 +204,37 @@ sub new {
 		}
 		$repositNodeList = $foreignRepo->{xmlnode};
 		$repositNodeList -> prepend ($need);
-		if (defined $foreignRepo->{locale}) {
-			my $lang = $foreignRepo->{locale};
-			$kiwi -> done ();
-			$kiwi -> info ("Including foreign locale: $lang");
-			my $addElement = new XML::LibXML::Element ("locale");
-			$addElement -> appendText ($lang);
-			my $opts = $optionsNodeList -> get_node(1);
-			my $node = $opts -> getElementsByTagName ("locale");
-			if ($node) {
-				$node = $node -> get_node(1);
-				$opts -> removeChild ($node);
-			}
-			$opts -> appendChild ($addElement);
+		$kiwi -> done();
+		#==========================================
+		# foreign preferences
+		#------------------------------------------
+		if (defined $foreignRepo->{"locale"}) {
+			$this -> setForeignOptionsElement ("locale");
 		}
-		if (defined $foreignRepo->{packagemanager}) {
-			my $manager = $foreignRepo->{packagemanager};
-			$kiwi -> done ();
-			$kiwi -> info ("Including foreign package manager: $manager");
-			my $addElement = new XML::LibXML::Element ("packagemanager");
-			$addElement -> appendText ($manager);
-			my $opts = $optionsNodeList -> get_node(1);
-			my $node = $opts -> getElementsByTagName ("packagemanager")
-				-> get_node(1);
-			$opts -> removeChild ($node);
-			$opts -> appendChild ($addElement);
+		if (defined $foreignRepo->{"packagemanager"}) {
+			$this -> setForeignOptionsElement ("packagemanager");
+		}
+		if (defined $foreignRepo->{"oem-swap"}) {
+			$this -> setForeignOptionsElement ("oem-swap");
+		}
+		if (defined $foreignRepo->{"oem-swapsize"}) {
+			$this -> setForeignOptionsElement ("oem-swapsize");
+		}
+		if (defined $foreignRepo->{"oem-home"}) {
+			$this -> setForeignOptionsElement ("oem-home");
+		}
+		if (defined $foreignRepo->{"oem-systemsize"}) {
+			$this -> setForeignOptionsElement ("oem-systemsize");
+		}
+		if (defined $foreignRepo->{"oem-boot-title"}) {
+			$this -> setForeignOptionsElement ("oem-boot-title");
 		}
 	}
 	#==========================================
 	# Store object data
 	#------------------------------------------
-	$this->{kiwi}               = $kiwi;
 	$this->{imageDesc}          = $imageDesc;
 	$this->{imageWhat}          = $imageWhat;
-	$this->{foreignRepo}        = $foreignRepo;
-	$this->{optionsNodeList}    = $optionsNodeList;
 	$this->{driversNodeList}    = $driversNodeList;
 	$this->{usrdataNodeList}    = $usrdataNodeList;
 	$this->{repositNodeList}    = $repositNodeList;
@@ -248,6 +254,8 @@ sub new {
 	#==========================================
 	# Check image version format
 	#------------------------------------------
+	$kiwi -> done ();
+	$kiwi -> info ("Checking image version format...");
 	my $version = $this -> getImageVersion();
 	if ($version !~ /^\d+\.\d+\.\d+$/) {
 		$kiwi -> failed ();
@@ -821,6 +829,34 @@ sub getCompressed {
 }
 
 #==========================================
+# setForeignOptionsElement
+#------------------------------------------
+sub setForeignOptionsElement {
+	# ...
+	# If given element exists in the foreign hash, set this
+	# element into the current preferences (options) XML tree
+	# ---
+	my $this = shift;
+	my $item = shift;
+	my $kiwi = $this->{kiwi};
+	my $foreignRepo     = $this->{foreignRepo};
+	my $optionsNodeList = $this->{optionsNodeList};
+	my $value = $foreignRepo->{$item};
+	$kiwi -> info ("Including foreign element $item: $value");
+	my $addElement = new XML::LibXML::Element ("$item");
+	$addElement -> appendText ($value);
+	my $opts = $optionsNodeList -> get_node(1);
+	my $node = $opts -> getElementsByTagName ("$item");
+	if ($node) {
+		$node = $node -> get_node(1);
+		$opts -> removeChild ($node);
+	}
+	$opts -> appendChild ($addElement);
+	$kiwi -> done ();
+	return $this;
+}
+
+#==========================================
 # setCompressed
 #------------------------------------------
 sub setCompressed {
@@ -875,6 +911,86 @@ sub getPackageManager {
 	$kiwi -> error  ("Invalid package manager: $pmgr");
 	$kiwi -> failed ();
 	return undef;
+}
+
+#==========================================
+# getOEMSwapSize
+#------------------------------------------
+sub getOEMSwapSize {
+	# ...
+	# Obtain the oem-swapsize value or return undef
+	# ---
+	my $this = shift;
+	my $node = $this->{optionsNodeList} -> get_node(1);
+	my $size = $node -> getElementsByTagName ("oem-swapsize");
+	if ((! defined $size) || ("$size" eq "")) {
+		return undef;
+	}
+	return $size;
+}
+
+#==========================================
+# getOEMSystemSize
+#------------------------------------------
+sub getOEMSystemSize {
+	# ...
+	# Obtain the oem-systemsize value or return undef
+	# ---
+	my $this = shift;
+	my $node = $this->{optionsNodeList} -> get_node(1);
+	my $size = $node -> getElementsByTagName ("oem-systemsize");
+	if ((! defined $size) || ("$size" eq "")) {
+		return undef;
+	}
+	return $size;
+}
+
+#==========================================
+# getOEMBootTitle
+#------------------------------------------
+sub getOEMBootTitle {
+	# ...
+	# Obtain the oem-boot-title value or return undef
+	# ---
+	my $this = shift;
+	my $node = $this->{optionsNodeList} -> get_node(1);
+	my $title= $node -> getElementsByTagName ("oem-boot-title");
+	if ((! defined $title) || ("$title" eq "")) {
+		return undef;
+	}
+	return $title;
+}
+
+#==========================================
+# getOEMSwap
+#------------------------------------------
+sub getOEMSwap {
+	# ...
+	# Obtain the oem-swap value or return undef
+	# ---
+	my $this = shift;
+	my $node = $this->{optionsNodeList} -> get_node(1);
+	my $swap = $node -> getElementsByTagName ("oem-swap");
+	if ((! defined $swap) || ("$swap" eq "")) {
+		return undef;
+	}
+	return $swap;
+}
+
+#==========================================
+# getOEMHome
+#------------------------------------------
+sub getOEMHome {
+	# ...
+	# Obtain the oem-home value or return undef
+	# ---
+	my $this = shift;
+	my $node = $this->{optionsNodeList} -> get_node(1);
+	my $home = $node -> getElementsByTagName ("oem-home");
+	if ((! defined $home) || ("$home" eq "")) {
+		return undef;
+	}
+	return $home;
 }
 
 #==========================================
@@ -1521,6 +1637,11 @@ sub getImageConfig {
 	my $keytable = $node -> getElementsByTagName ("keytable");
 	my $timezone = $node -> getElementsByTagName ("timezone");
 	my $language = $node -> getElementsByTagName ("locale");
+	my $oemswapMB= $node -> getElementsByTagName ("oem-swapsize");
+	my $oemrootMB= $node -> getElementsByTagName ("oem-systemsize");
+	my $oemswap  = $node -> getElementsByTagName ("oem-swap");
+	my $oemhome  = $node -> getElementsByTagName ("oem-home");
+	my $oemtitle = $node -> getElementsByTagName ("oem-boot-title");
 	if (defined $keytable) {
 		$result{keytable} = $keytable;
 	}
@@ -1529,6 +1650,20 @@ sub getImageConfig {
 	}
 	if (defined $language) {
 		$result{language} = $language;
+	}
+	if ((defined $oemswap) && ("$oemswap" eq "no")) {
+		$result{oemswap} = "no";
+	} elsif ((defined $oemswapMB) && ("$oemswapMB" > 0)) {
+		$result{oemswapMB} = $oemswapMB;
+	}
+	if ((defined $oemhome) && ("$oemhome" eq "no")) {
+		$result{oemhome} = "no";
+	}
+	if ((defined $oemrootMB) && ("$oemrootMB" > 0)) {
+		$result{oemrootMB} = $oemrootMB;
+	}
+	if ((defined $oemtitle) && ("$oemtitle" ne "")) {
+		$result{oemtitle} = $oemtitle;
 	}
 	#==========================================
 	# profiles
