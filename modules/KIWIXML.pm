@@ -850,7 +850,6 @@ sub setForeignOptionsElement {
 		$opts -> removeChild ($node);
 	}
 	$opts -> appendChild ($addElement);
-	$kiwi -> done ();
 	return $this;
 }
 
