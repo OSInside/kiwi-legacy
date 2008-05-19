@@ -1,7 +1,7 @@
 -------------------------------------------------------------------
 Mon May 19 11:26:13 CEST 2008 - ms@suse.de
 
-- don't remove /var/lib that's bad because of the dhcp info
+- don't remove /var/lib required for dhcp info (bnc #391317)
 - added support for OEM settings in system image (bnc #390652)
   <preferences>
      <oem-home>yes|no</oem-home>
