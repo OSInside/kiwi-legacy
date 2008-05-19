@@ -204,7 +204,6 @@ sub new {
 		}
 		$repositNodeList = $foreignRepo->{xmlnode};
 		$repositNodeList -> prepend ($need);
-		$kiwi -> done();
 		#==========================================
 		# foreign preferences
 		#------------------------------------------
@@ -254,8 +253,6 @@ sub new {
 	#==========================================
 	# Check image version format
 	#------------------------------------------
-	$kiwi -> done ();
-	$kiwi -> info ("Checking image version format...");
 	my $version = $this -> getImageVersion();
 	if ($version !~ /^\d+\.\d+\.\d+$/) {
 		$kiwi -> failed ();
@@ -842,6 +839,7 @@ sub setForeignOptionsElement {
 	my $foreignRepo     = $this->{foreignRepo};
 	my $optionsNodeList = $this->{optionsNodeList};
 	my $value = $foreignRepo->{$item};
+	$kiwi -> done ();
 	$kiwi -> info ("Including foreign element $item: $value");
 	my $addElement = new XML::LibXML::Element ("$item");
 	$addElement -> appendText ($value);
