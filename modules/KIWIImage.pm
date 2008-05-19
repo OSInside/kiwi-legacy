@@ -2907,8 +2907,9 @@ sub buildXenConfig {
 	my $kiwi   = $this->{kiwi};
 	my $file   = $dest."/".$name->{systemImage}.".xenconfig";
 	my $initrd = $name->{bootImage}.".splash.gz";
-	my $kernel = $name->{bootImage}.".kernel";
+	my $kernel = $dest."/".$name->{bootImage}.".kernel";
 	$kernel    = glob ("$kernel\.*");
+	$kernel    = basename ($kernel);
 	my %xenconfig = %{$xenref};
 	if (defined $xenconfig{disk}) {
 		$kiwi -> info ("Creating image Xen configuration file...");
