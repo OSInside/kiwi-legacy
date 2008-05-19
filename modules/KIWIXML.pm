@@ -228,6 +228,9 @@ sub new {
 		if (defined $foreignRepo->{"oem-boot-title"}) {
 			$this -> setForeignOptionsElement ("oem-boot-title");
 		}
+		if (defined $foreignRepo->{"oem-reboot"}) {
+			$this -> setForeignOptionsElement ("oem-reboot");
+		}
 	}
 	#==========================================
 	# Store object data
@@ -959,6 +962,22 @@ sub getOEMBootTitle {
 }
 
 #==========================================
+# getOEMReboot
+#------------------------------------------
+sub getOEMReboot {
+	# ...
+	# Obtain the oem-reboot value or return undef
+	# ---
+	my $this = shift;
+	my $node = $this->{optionsNodeList} -> get_node(1);
+	my $boot = $node -> getElementsByTagName ("oem-reboot");
+	if ((! defined $boot) || ("$boot" eq "")) {
+		return undef;
+	}
+	return $boot;
+}
+
+#==========================================
 # getOEMSwap
 #------------------------------------------
 sub getOEMSwap {
@@ -1639,6 +1658,7 @@ sub getImageConfig {
 	my $oemswap  = $node -> getElementsByTagName ("oem-swap");
 	my $oemhome  = $node -> getElementsByTagName ("oem-home");
 	my $oemtitle = $node -> getElementsByTagName ("oem-boot-title");
+	my $oemreboot= $node -> getElementsByTagName ("oem-reboot");
 	if (defined $keytable) {
 		$result{keytable} = $keytable;
 	}
@@ -1661,6 +1681,9 @@ sub getImageConfig {
 	}
 	if ((defined $oemtitle) && ("$oemtitle" ne "")) {
 		$result{oemtitle} = $oemtitle;
+	}
+	if ((defined $oemreboot) && ("$oemreboot" eq "yes")) {
+		$result{oemreboot} = $oemreboot;
 	}
 	#==========================================
 	# profiles

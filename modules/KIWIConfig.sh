@@ -191,6 +191,38 @@ function suseServiceDefaultOn {
 }
 
 #======================================
+# baseSetupOEMPartition
+#--------------------------------------
+function baseSetupOEMPartition {
+	local oemfile=/config.oempartition
+	rm -f $oemfile
+	if [ ! -z "$oemreboot" ];then
+		echo "Setting up OEM_REBOOT=1"
+		echo "OEM_REBOOT=1" >> $oemfile
+	fi
+	if [ ! -z "$oemswap" ];then
+		echo "Setting up OEM_WITHOUTSWAP=1"
+		echo "OEM_WITHOUTSWAP=1" >> $oemfile
+	fi
+	if [ ! -z "$oemswapMB" ];then
+		echo "Setting up OEM_SWAPSIZE=$oemswapMB"
+		echo "OEM_SWAPSIZE=$oemswapMB" >> $oemfile
+	fi
+	if [ ! -z "$oemhome" ];then
+		echo "Setting up OEM_WITHOUTHOME=1"
+		echo "OEM_WITHOUTHOME=1" >> $oemfile
+	fi
+	if [ ! -z "$oemrootMB" ];then
+		echo "Setting up OEM_SYSTEMSIZE=$oemrootMB"
+		echo "OEM_SYSTEMSIZE=$oemrootMB" >> $oemfile
+	fi
+	if [ ! -z "$oemtitle" ];then
+		echo "Setting up OEM_BOOT_TITLE=$oemtitle"
+		echo "OEM_BOOT_TITLE=$oemtitle" >> $oemfile
+	fi
+}
+
+#======================================
 # baseSetupUserPermissions
 #--------------------------------------
 function baseSetupUserPermissions {

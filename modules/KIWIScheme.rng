@@ -1090,6 +1090,24 @@ of the OEM image.</db:para>
   </div>
   <!--
     ==========================================
+    common element <oem-reboot>
+    
+  -->
+  <div>
+    <define name="k.oem-reboot.attlist">
+      <empty/>
+    </define>
+    <define name="k.oem-reboot">
+      <element name="oem-reboot">
+        <a:documentation>For oemboot driven images: reboot after first deployment yes/no</a:documentation>
+        <db:para>For oemboot driven images: reboot after first deployment yes/no.</db:para>
+        <ref name="k.oem-reboot.attlist"/>
+        <text/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
     common element <size>
     
   -->

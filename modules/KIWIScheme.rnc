@@ -806,6 +806,24 @@ div {
 }
 
 #==========================================
+# common element <oem-reboot>
+#
+div {
+	k.oem-reboot.attlist = empty
+	k.oem-reboot =
+		## For oemboot driven images: reboot after first deployment yes/no
+		[
+		db:para [
+			"For oemboot driven images: reboot after first deployment yes/no."
+		]
+		]
+		element oem-reboot {
+			k.oem-reboot.attlist,
+			text
+		}
+}
+
+#==========================================
 # common element <size>
 #
 div {

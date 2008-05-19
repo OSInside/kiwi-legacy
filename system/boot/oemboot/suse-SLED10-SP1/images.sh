@@ -5,6 +5,11 @@ test -f /.profile && . /.profile
 echo "Configure image: [$name]..."
 
 #==========================================
+# setup config.oempartition if required
+#------------------------------------------
+baseSetupOEMPartition
+
+#==========================================
 # remove unneded kernel files
 #------------------------------------------
 suseStripKernel
