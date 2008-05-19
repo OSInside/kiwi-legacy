@@ -500,25 +500,13 @@ sub main {
 			$kiwi -> done();
 		}
 		#==========================================
-		# Update .profile environment
+		# Update .profile env, current type
 		#------------------------------------------
-		$kiwi -> info ("Update .profile environment");
-		if (! open (FD,">$Create/.profile")) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't create .profile: $!");
-			$kiwi -> failed ();
-			if (defined $BaseRoot) {
-				$overlay -> resetOverlay();
-			}
-			my $code = kiwiExit (1); return $code;
-		}
-		$kiwi -> done();
-		my %config = $xml -> getImageConfig();
-		foreach my $key (keys %config) {
-			$kiwi -> loginfo ("[PROFILE]: $key=\"$config{$key}\"\n");
-			print FD "$key=\"$config{$key}\"\n";
-		}
-		close FD;
+		$kiwi -> info ("Updating type in .profile environment");
+		my $type = $xml -> getImageTypeAndAttributes() -> {type};
+		qxx (
+			"sed -i -e stype=#type=.*#type=$type# $Create/.profile 2>&1"
+		);
 		#==========================================
 		# Check for default destination in XML
 		#------------------------------------------
