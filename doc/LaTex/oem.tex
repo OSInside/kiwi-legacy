@@ -95,56 +95,63 @@ two types of installation media:
 \subsection{Influencing the oem partitioning}
 
 By default the oemboot process will create/modify a swap, /home and /
-partition. When providing the file \textbf{/config.oempartition} as part
-of the oemboot boot image one can influence this partitioning process.
-The format of the file is a simple key=value format. Following variables
-can be set:
+partition. It is possible to influence the behavior by the following
+oem-* elements which can be optionally specified within the
+\textbf{preferences} section of your system image XML description.
+KIWI uses this to create the file \textbf{/config.oempartition} as part
+of the automatically created oemboot boot image. The format of the
+file is a simple key=value format and created by the KIWIConfig.sh
+function named baseSetupOEMPartition. Following oem-* elements can
+be specified:
 
 \begin{itemize}
-\item \textbf{OEM\_REBOOT=1}\\
+\item \textbf{<oem-reboot>yes|no</oem-reboot>}\\
       This allows to reboot the oem system after initial deployment.
-      Don't specify OEM\_REBOOT at all if you want to boot directly into
-      the system
-\item \textbf{OEM\_SWAPSIZE=<number in MB>}\\
-      Set the size of the swap partition
-\item \textbf{OEM\_SYSTEMSIZE=<number in MB>}\\
-      Set the size of the / partition
-\item \textbf{OEM\_WITHOUTHOME=1}\\
-      Specify if a home partition should be create. Don't specify
-      OEM\_WITHOUTHOME at all if you want a /home partition
-\item \textbf{OEM\_WITHOUTSWAP=1}\\
-      Specify if a spaw partition should be create. Don't specify
-      OEM\_WITHOUTSWAP at all if you want a swap partition
-\item \textbf{OEM\_BOOT\_TITLE=text}\\
+      This value is represented by the variable OEM\_REBOOT in
+      config.oempartition
+\item \textbf{<oem-swapsize>number in MB</oem-swapsize>}\\
+      Set the size of the swap partition. This value is represented by
+      variable OEM\_SWAPSIZE in config.oempartition
+\item \textbf{<oem-systemsize>number in MB</oem-systemsize>}\\
+      Set the size of the / partition. This value is represented by the
+      variable OEM\_SYSTEMSIZE in config.oempartition
+\item \textbf{<oem-home>yes|no</oem-home>}\\
+      Specify if a home partition should be create. This value is represented
+      by the variable OEM\_WITHOUTHOME in config.oempartition.
+\item \textbf{<oem-swap>yes|no</oem-swap>}\\
+      Specify if a spaw partition should be create. This value is represented 
+      by the variable OEM\_WITHOUTSWAP in config.oempartition.
+\item \textbf{<oem-boot-title>text</oem-boot-title>}\\
       By default the string \textbf{OEM} will be appended to the
       boot manager menu when KIWI creates the grub configuration during
-      first deployment. The variable OEM\_BOOT\_TITLE allows to set
-      a custom name which is used instead of OEM.
+      first deployment. The oem-boot-title value allows to set a custom
+      name which is used instead of OEM. This value is represented
+      by the variable OEM\_BOOT\_TITLE in config.oempartition.
 \end{itemize}
 
-If you plan to use a custom partition setup you also should consider
-to create a copy of the original oemboot boot image description. The following
-workflow should be used to integrate a custom config.oempartition:
+%If you plan to use a custom partition setup you also should consider
+%to create a copy of the original oemboot boot image description. The following
+%workflow should be used to integrate a custom config.oempartition:
 
-\begin{enumerate}
-\item Clone the used boot image description
-\begin{verbatim}
-cp -a /usr/share/kiwi/image/oemboot/suse-... \
-      /usr/share/kiwi/image/oemboot/suse-...-myoem
-\end{verbatim}
-\item Copy the config.oempartition file into the boot image description 
-\begin{verbatim}
-cp config.oempartition \
-   /usr/share/kiwi/image/oemboot/suse-...-myoem/root
-\end{verbatim}
-\item Sign your new boot image description
-\begin{verbatim}
-kiwi --createhash \
-     /usr/share/kiwi/image/oemboot/suse-...-myoem
-\end{verbatim}
-\item Make sure your system image use the new boot image
-\begin{verbatim}
-<type ... boot="oemboot/suse-...-myoem">...</type>
-\end{verbatim}
-\end{enumerate}
+%\begin{enumerate}
+%\item Clone the used boot image description
+%\begin{verbatim}
+%cp -a /usr/share/kiwi/image/oemboot/suse-... \
+%      /usr/share/kiwi/image/oemboot/suse-...-myoem
+%\end{verbatim}
+%\item Copy the config.oempartition file into the boot image description 
+%\begin{verbatim}
+%cp config.oempartition \
+%   /usr/share/kiwi/image/oemboot/suse-...-myoem/root
+%\end{verbatim}
+%\item Sign your new boot image description
+%\begin{verbatim}
+%kiwi --createhash \
+%     /usr/share/kiwi/image/oemboot/suse-...-myoem
+%\end{verbatim}
+%\item Make sure your system image use the new boot image
+%\begin{verbatim}
+%<type ... boot="oemboot/suse-...-myoem">...</type>
+%\end{verbatim}
+%\end{enumerate}
 

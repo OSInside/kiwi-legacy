@@ -619,6 +619,7 @@ sub setup {
 	$kiwi -> done();
 	my %config = $xml -> getImageConfig();
 	foreach my $key (keys %config) {
+		$kiwi -> loginfo ("[PROFILE]: $key=\"$config{$key}\"\n");
 		print FD "$key=\"$config{$key}\"\n";
 	}
 	close FD;
