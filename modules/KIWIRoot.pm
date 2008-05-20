@@ -560,12 +560,16 @@ sub setup {
 	# Setup the installed system. This method will:
 	# 1) copy the user defined files to the root tree and
 	#    creates the .profile environment file.
-	# 2) calls the config.sh and package scripts within the
+	# 2) create .profile image environment source file
+	# 3) import linuxrc file if required
+	# 4) call package setup scripts from config directory
+	# 5) calls the config.sh and package scripts within the
 	#    chroot of the physical extend.
-	# 3) copy the complete image description tree to
+	# 6) copy the complete image description tree to
 	#    /image which contains information to create a logical
 	#    extend from the chroot.
-	# 4) configure the system with methods from KIWIConfigure
+	# 7) configure the system with methods from KIWIConfigure
+	# 8) cleanup temporary files
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
@@ -742,6 +746,12 @@ sub setup {
 		$kiwi -> info ("Cleanup temporary copy of resolv.conf");
 		qxx ("rm -f $root/etc/resolv.conf");
 		$kiwi -> done ();
+	}
+	#========================================
+	# cleanup temporary .buildenv
+	#----------------------------------------
+	if (-f "$root/.buildenv") {
+		qxx ("rm -f $root/.buildenv");
 	}
 	return $this;
 }

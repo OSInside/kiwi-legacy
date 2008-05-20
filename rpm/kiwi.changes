@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue May 20 10:32:53 CEST 2008 - ms@suse.de
+
+- remove temporary .buildenv file after prepare (bnc #392054)
+- fixed xenconfig creation, use kernel link file instead
+  of a glob match to setup the kernel=... variable
+
+-------------------------------------------------------------------
 Mon May 19 11:26:13 CEST 2008 - ms@suse.de
 
 - don't remove /var/lib required for dhcp info (bnc #391317)

@@ -2908,7 +2908,7 @@ sub buildXenConfig {
 	my $file   = $dest."/".$name->{systemImage}.".xenconfig";
 	my $initrd = $name->{bootImage}.".splash.gz";
 	my $kernel = $dest."/".$name->{bootImage}.".kernel";
-	$kernel    = glob ("$kernel\.*");
+	$kernel    = readlink ($kernel);
 	$kernel    = basename ($kernel);
 	my %xenconfig = %{$xenref};
 	if (defined $xenconfig{disk}) {
