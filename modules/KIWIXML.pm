@@ -366,6 +366,19 @@ sub getImageInherit {
 }
 
 #==========================================
+# getImageID
+#------------------------------------------
+sub getImageID {
+	my $this = shift;
+	my $node = $this->{imgnameNodeList} -> get_node(1);
+	my $code = $node -> getAttribute ("id");
+	if (defined $code) {
+		return $code;
+	}
+	return 0;
+}
+
+#==========================================
 # getImageSize
 #------------------------------------------
 sub getImageSize {

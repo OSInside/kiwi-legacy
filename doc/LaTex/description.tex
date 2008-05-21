@@ -118,7 +118,8 @@ documentation file at /usr/share/doc/packages/ kiwi/kiwi.rng.html.
 
 \begin{Command}{12cm}
 <image schemeversion="2.0" name="iname"\\
-\hspace*{1.9cm}\textit{inherit="path" kiwirevision="number">}\\
+\hspace*{1.9cm}\textit{inherit="path" kiwirevision="number"}\\
+\hspace*{1.9cm}\textit{id="10 digit number">}\\
 \hspace*{1cm}...\\
 </image>
 \end{Command}
@@ -137,6 +138,9 @@ by KIWI.
       revision is less than the specified value the
       process will exit. The currently used SVN revision can
       be queried by calling kiwi $--$version
+\item The optional attribute id allows to set an identification
+      number which appears as file /etc/ImageID within the
+      image.
 \end{itemize}
 
 Inside the \textbf{image} section the following mandatory and optional

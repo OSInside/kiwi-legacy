@@ -63,9 +63,14 @@ div {
 		## revision is less than the specified value the
 		## process will exit.
 		attribute kiwirevision { xsd:nonNegativeInteger }
+	k.image.id =
+		## An identification number which is represented in a file
+		## named /etc/ImageID
+		attribute id { xsd:string {length="10"} }
 	k.image.attlist = k.image.name.attribute 
 		& k.image.inherit.attribute?
 		& k.image.kiwirevision.attribute?
+		& k.image.id?
 		& k.image.schemeversion.attribute
 		& ( k.image.noNamespaceSchemaLocation.attribute?
 		  | k.image.schemaLocation.attribute? )?

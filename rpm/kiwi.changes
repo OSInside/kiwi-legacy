@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed May 21 14:11:38 CEST 2008 - ms@suse.de
+
+- added id attribute. The optional attribute id allows to
+  set an identification number which appears as file /etc/ImageID
+  within the image
+
+-------------------------------------------------------------------
 Wed May 21 07:26:55 CEST 2008 - ms@suse.de
 
 - added optional kiwirevision attribute. The optional attribute

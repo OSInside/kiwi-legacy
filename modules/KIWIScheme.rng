@@ -81,6 +81,15 @@ process will exit.</a:documentation>
         <data type="nonNegativeInteger"/>
       </attribute>
     </define>
+    <define name="k.image.id">
+      <attribute name="id">
+        <a:documentation>An identification number which is represented in a file
+named /etc/ImageID</a:documentation>
+        <data type="string">
+          <param name="length">10</param>
+        </data>
+      </attribute>
+    </define>
     <define name="k.image.attlist">
       <interleave>
         <ref name="k.image.name.attribute"/>
@@ -89,6 +98,9 @@ process will exit.</a:documentation>
         </optional>
         <optional>
           <ref name="k.image.kiwirevision.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.image.id"/>
         </optional>
         <ref name="k.image.schemeversion.attribute"/>
         <optional>

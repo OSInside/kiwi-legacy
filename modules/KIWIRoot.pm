@@ -738,6 +738,21 @@ sub setup {
 		$kiwi -> done ();
 	}
 	#========================================
+	# create /etc/ImageID file
+	#----------------------------------------
+	my $id = $xml -> getImageID();
+	if ($id) {
+		$kiwi -> info ("Creating image ID file: $id");
+		if ( ! open (FD,">$root/etc/ImageID")) {
+			$kiwi -> failed ();
+			$kiwi -> error ("Failed to create ID file: $!");
+			$kiwi -> failed ();
+			return undef;
+		}
+		print FD "$id\n"; close FD;
+		$kiwi -> done();
+	}
+	#========================================
 	# cleanup temporary copy of resolv.conf
 	#----------------------------------------
 	my $data = qxx ("diff -q /etc/resolv.conf $root/etc/resolv.conf");
