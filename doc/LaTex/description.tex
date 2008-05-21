@@ -117,8 +117,8 @@ For details on attributes and values please refer to the schema
 documentation file at /usr/share/doc/packages/ kiwi/kiwi.rng.html.
 
 \begin{Command}{12cm}
-<image schemeversion="2.0"\\
-\hspace*{1.9cm}name="iname" \textit{inherit="path">}\\
+<image schemeversion="2.0" name="iname"\\
+\hspace*{1.9cm}\textit{inherit="path" kiwirevision="number">}\\
 \hspace*{1cm}...\\
 </image>
 \end{Command}
@@ -126,9 +126,23 @@ documentation file at /usr/share/doc/packages/ kiwi/kiwi.rng.html.
 The image definition starts with an image tag and requires the
 schema format at version 2.0. The attribute name specifies the
 name of the image which is also used for the file names created
-by KIWI. The optional attribute inherit allows to inherit the
-packages information from another image description. Inside the
-\textbf{image} section the following information applies.
+by KIWI.
+
+\begin{itemize}
+\item The optional attribute inherit allows to inherit the
+      packages information from another image description.
+\item The optional attribute kiwirevision allows to specify
+      a kiwi SVN revision number which is known to build
+      a working image from this description. If the kiwi SVN
+      revision is less than the specified value the
+      process will exit. The currently used SVN revision can
+      be queried by calling kiwi $--$version
+\end{itemize}
+
+Inside the \textbf{image} section the following mandatory and optional
+subelements exists. The simplest image description must define the
+elements \textbf{description, preferences, repository and
+packages (at least one of type=''bootstrap'')}.
 
 \begin{Command}{12cm}
 <description type="image">\\
@@ -364,7 +378,7 @@ description a script called \textbf{images.sh} must exist which
 calls this function in order to allow the driver information to
 have any effect.
 
-\newpage
+%\newpage
 
 \begin{Command}{12cm}
 <repository type="type" \textit{status="replaceable"}>\\
@@ -434,9 +448,11 @@ to the architecture of the image building host.
       A special http based network location which is created from
       the given openSUSE buildservice project name. The result is
       pointing to an rpm-md repository on the openSUSE buildservice.
-      For example: path=''opensuse://openSUSE:10.3/standard''
-\item \textbf{local path}\\
-      A local path which should be an absolute path description
+      For example:\\
+      path=''opensuse://openSUSE:10.3/standard''
+\item \textbf{file:///local/path}\\
+      A local path which should be an absolute path description.
+      The file:// prefix is optional and could also be omitted.
 \end{itemize}
 
 Multiple repository sections are allowed and combined by the
@@ -570,7 +586,7 @@ be provided in a file called config.<MAC-Address> below the directory
 to create that file according to the information provided in the image
 description.
 
-\begin {enumerate}
+\begin {itemize}
 \item The server and blocksize attributes specify the TFTP server which
       controls the download of image files. KIWI also supports other protocols
       than tftp but in order to do that the variables \textbf{kiwiserver} and
@@ -619,7 +635,9 @@ description.
       TFTP client program to download the file, and the dest attribute
       specifies the target relative to the root (/) of the network client.
       Each file is specified by one configuration section.
-\end{enumerate}
+\end{itemize}
+
+\newpage
 
 \begin{Command}{12cm}
 <split>\\

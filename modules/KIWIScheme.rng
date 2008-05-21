@@ -72,11 +72,23 @@ the package Information is inherited</a:documentation>
         <value>2.0</value>
       </attribute>
     </define>
+    <define name="k.image.kiwirevision.attribute">
+      <attribute name="kiwirevision">
+        <a:documentation>A kiwi SVN revision number which is known to build
+a working image from this description. If the kiwi SVN
+revision is less than the specified value the
+process will exit.</a:documentation>
+        <data type="nonNegativeInteger"/>
+      </attribute>
+    </define>
     <define name="k.image.attlist">
       <interleave>
         <ref name="k.image.name.attribute"/>
         <optional>
           <ref name="k.image.inherit.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.image.kiwirevision.attribute"/>
         </optional>
         <ref name="k.image.schemeversion.attribute"/>
         <optional>

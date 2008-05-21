@@ -19,7 +19,7 @@ TEX=kiwi.tex           \
 	workflow.tex       \
 	xen.tex
 
-all: ps
+all: revision ps
 
 dvi: kiwi.dvi
 
@@ -40,7 +40,11 @@ ps: kiwi.dvi
 	dvipdf kiwi.dvi
 
 revision:
-	svn info kiwi.tex | grep Revision > Revision.txt
+	cat ../../rpm/kiwi.spec | grep Version: | cut -f2 -d: |\
+		 tr -d " " | tr -d "\n" > Revision.txt
+	#echo -n " \small{( SVN r" >> Revision.txt
+	#../../.version >> Revision.txt
+	#echo -n " )}" >> Revision.txt
 
 pdfimages:
 	cd pictures; for i in *.ps; do i=$${i%.ps} ; \
@@ -53,4 +57,4 @@ pdf: pdfimages $(TEX)
 
 clean:
 	rm -f *.dvi *.idx *.toc *.log *.ps *.mtc[0-9]*
-	rm -f *.aux *.mtc* *.out *.bmt  *.ind *.ilg
+	rm -f *.aux *.mtc* *.out *.bmt  *.ind *.ilg *.maf

@@ -179,6 +179,22 @@ sub new {
 		return undef;
 	}
 	#==========================================
+	# Check kiwirevision attribute
+	#------------------------------------------
+	if (open FD,$main::Revision) {
+		my $cur_rev = <FD>; close FD;
+		my $req_rev = $imgnameNodeList
+			-> get_node(1) -> getAttribute ("kiwirevision");
+		if ((defined $req_rev) && ($cur_rev < $req_rev)) {
+			$kiwi -> failed ();
+			$kiwi -> error  (
+				"KIWI revision too old, require r$req_rev got r$cur_rev"
+			);
+			$kiwi -> failed ();
+			return undef;
+		}
+	}
+	#==========================================
 	# Store object data
 	#------------------------------------------
 	$this->{kiwi}            = $kiwi;
