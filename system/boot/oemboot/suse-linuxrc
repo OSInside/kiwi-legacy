@@ -395,10 +395,14 @@ if [ $LOCAL_BOOT = "no" ];then
 		recoBytes=`du --bytes /reco-root/recovery.tar.bz2 | cut -f1`
 		recoMByte=`expr $recoBytes / 1048576`
 		recoMByte=`expr $recoMByte \* 15 / 10`
-		umount /reco-root
+		umount /reco-root && rmdir /reco-root
 	fi
 	Echo "Filesystem of root system is: $FSTYPE -> $deviceRoot"
 	if test ! -z $COMBINED_IMAGE;then
+		#====================================== 
+		# 10.2 no recovery support in this mode
+		#--------------------------------------
+		unset OEM_RECOVERY
 		#====================================== 
 		# 10.2 check for read-write partition
 		#--------------------------------------
@@ -765,6 +769,7 @@ if [ $LOCAL_BOOT = "no" ];then
 			#--------------------------------------
 			if [ ! -z "$OEM_RECOVERY" ];then
 				Echo "Setting up recovery archive..."
+				mkdir -p /reco-root
 				if ! mount $deviceRoot /reco-root >/dev/null;then
 					systemException "Failed to mount root device" "reboot"
 				fi
@@ -779,6 +784,10 @@ if [ $LOCAL_BOOT = "no" ];then
 				umount /reco-root && rmdir /reco-root
 			fi
 		else
+			#====================================== 
+			# 10.2 no recovery support in this mode
+			#--------------------------------------
+			unset OEM_RECOVERY
 			#======================================
 			# 10.2 calculate end block - swapspace
 			#--------------------------------------
