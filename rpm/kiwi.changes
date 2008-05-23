@@ -2,6 +2,8 @@
 Fri May 23 16:33:36 CEST 2008 - ms@suse.de
 
 - added baseStripUnusedLibs functions to reduce initrd size
+- removed unused network modules from vmxboot and oemboot
+- removed support for reiserfs up to suse-10.3 vmx/oemboot
 - added oem-recovery element to support recovery of a damaged
   root tree. This is still work in progress
 
