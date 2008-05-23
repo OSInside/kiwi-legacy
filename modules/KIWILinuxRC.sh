@@ -572,9 +572,9 @@ function setupBootLoaderGrub {
 			#--------------------------------------
 			if [ ! -z "$OEM_RECOVERY" ];then
 				if [ -z "$name" ];then
-					echo "title Recovery $kernel [ $gfix ]"  >> $menu
+					echo "title Recovery -- $kernel [ $gfix ]"  >> $menu
 				else
-					echo "title Recovery $name [ $gfix ]"    >> $menu
+					echo "title Recovery -- $name [ $gfix ]"    >> $menu
 				fi
 				if [ $kernel = "vmlinuz-xen" ];then
 					echo " root $gdev"                     >> $menu
