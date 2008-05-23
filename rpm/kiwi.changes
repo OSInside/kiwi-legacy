@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri May 23 17:34:13 CEST 2008 - ms@suse.de
+
+- fixed SaT solvable creation (bnc #393495)
+
+-------------------------------------------------------------------
 Fri May 23 16:33:36 CEST 2008 - ms@suse.de
 
 - added baseStripUnusedLibs functions to reduce initrd size

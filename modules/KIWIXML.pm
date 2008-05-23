@@ -2551,7 +2551,7 @@ sub getInstSourceSatSolvable {
 	#==========================================
 	# create solvable from suse tags data
 	#------------------------------------------
-	if (-f "$sdir/packages-1.gz") {
+	if (glob ("$sdir/packages-*.gz")) {
 		$destfile = $sdir."/primary-".$count;
 		$scommand = "gzip -cd $sdir/packages-*.gz; gzip -cd $sdir/*.pat.gz";
 		my $data = qxx ("($scommand) | susetags2solv > $destfile");
