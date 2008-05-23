@@ -45,7 +45,16 @@ createFramebufferDevices
 #======================================
 # 5) create initrd on diskful
 #--------------------------------------
-if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ]; then
+if [ ! -z "$OEM_RECOVERY" ];then
+	#======================================
+	# use kiwi initrd as it is right now
+	#--------------------------------------
+	pushd /boot &>/dev/null
+	rm -f vmlinuz && ln -s linux.vmx  vmlinuz
+	rm -f initrd  && ln -s initrd.vmx initrd
+	popd &>/dev/null
+	grubOK=1
+elif [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ]; then
 	#======================================
 	# use distro initrd via mkinitrd
 	#--------------------------------------

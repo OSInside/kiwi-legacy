@@ -616,6 +616,7 @@ sub createImageUSB {
 	$main::ForeignRepo{"oem-home"}       = $xml -> getOEMHome();
 	$main::ForeignRepo{"oem-boot-title"} = $xml -> getOEMBootTitle();
 	$main::ForeignRepo{"oem-reboot"}     = $xml -> getOEMReboot();
+	$main::ForeignRepo{"oem-recovery"}   = $xml -> getOEMRecovery();
 	$main::ForeignRepo{"locale"}  = $xml -> getLocale();
 	$main::ForeignRepo{"prepare"} = $main::Prepare;
 	$main::ForeignRepo{"create"}  = $main::Create;
@@ -2015,6 +2016,7 @@ sub createImageSplit {
     $main::ForeignRepo{"oem-home"}       = $xml -> getOEMHome();
     $main::ForeignRepo{"oem-boot-title"} = $xml -> getOEMBootTitle();
 	$main::ForeignRepo{"oem-reboot"}     = $xml -> getOEMReboot();
+	$main::ForeignRepo{"oem-recovery"}   = $xml -> getOEMRecovery();
 	$main::ForeignRepo{"locale"}  = $xml -> getLocale();
 	$main::ForeignRepo{"prepare"} = $main::Prepare;
 	$main::ForeignRepo{"create"}  = $main::Create;

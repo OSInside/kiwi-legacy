@@ -567,6 +567,41 @@ function setupBootLoaderGrub {
 				echo " noapic maxcpus=0 edd=off"         >> $menu
 				echo " initrd $gdev/boot/$initrd"        >> $menu
 			fi
+			#======================================
+			# create recovery entry
+			#--------------------------------------
+			if [ ! -z "$OEM_RECOVERY" ];then
+				if [ -z "$name" ];then
+					echo "title Recovery $kernel [ $gfix ]"  >> $menu
+				else
+					echo "title Recovery $name [ $gfix ]"    >> $menu
+				fi
+				if [ $kernel = "vmlinuz-xen" ];then
+					echo " root $gdev"                     >> $menu
+					echo " kernel /boot/xen.gz"            >> $menu
+					echo -n " module /boot/$kernel"        >> $menu
+					echo -n " root=$rdev $console"         >> $menu
+					echo -n " vga=0x314 splash=silent"     >> $menu
+					if [ ! -z "$swap" ];then
+						echo -n " resume=$swap"            >> $menu
+					fi
+					echo -n " $KIWI_INITRD_PARAMS"         >> $menu
+					echo -n " $KIWI_KERNEL_OPTIONS"        >> $menu
+					echo " showopts KIWI_RECOVERY=1"       >> $menu
+					echo " module /boot/$initrd"           >> $menu
+				else
+					echo -n " kernel $gdev/boot/$kernel"   >> $menu
+					echo -n " root=$rdev $console"         >> $menu
+					echo -n " vga=0x314 splash=silent"     >> $menu
+					if [ ! -z "$swap" ];then
+						echo -n " resume=$swap"            >> $menu
+					fi
+					echo -n " $KIWI_INITRD_PARAMS"         >> $menu
+					echo -n " $KIWI_KERNEL_OPTIONS"        >> $menu
+					echo " showopts KIWI_RECOVERY=1"       >> $menu
+					echo " initrd $gdev/boot/$initrd"      >> $menu
+				fi
+			fi
 		fi
 	done
 	#======================================
@@ -2109,6 +2144,10 @@ function mountSystem {
 	if test ! -z $1;then
 		mountDevice="$1"
 	fi
+	#======================================
+	# wait for storage device to appear
+	#--------------------------------------
+	waitForStorageDevice $mountDevice
 	#======================================
 	# check root tree type
 	#--------------------------------------

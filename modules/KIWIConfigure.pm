@@ -75,6 +75,33 @@ sub new {
 }
 
 #==========================================
+# setupRecoveryArchive
+#------------------------------------------
+sub setupRecoveryArchive {
+	my $this  = shift;
+	my $kiwi  = $this->{kiwi};
+	my $xml   = $this->{xml};
+	my $root  = $this->{root};
+	my $start = $xml -> getOEMRecovery();
+	if ((! defined $start) || ("$start" eq "no")) {
+		return $this;
+	}
+	$kiwi -> info ("Creating recovery archive...");
+	my $status = qxx (
+		"cd $root && tar -cjf $root.recovery.tar.bz2 . 2>&1 &&
+		mv $root.recovery.tar.bz2 $root/recovery.tar.bz2"
+	);
+	my $code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Failed to create recovery archive: $status");
+		return undef;
+	}
+	$kiwi -> done ();
+	return $this;
+}
+
+#==========================================
 # setupUsersGroups
 #------------------------------------------
 sub setupUsersGroups {

@@ -127,6 +127,16 @@ be specified:
       first deployment. The oem-boot-title value allows to set a custom
       name which is used instead of OEM. This value is represented
       by the variable OEM\_BOOT\_TITLE in config.oempartition.
+\item \textbf{<oem-recovery>yes|no</oem-recovery>}\\
+      If this element is set to yes KIWI will create a recovery archive
+      from the prepared root tree. The archive will appear as
+      \textit{/recovery.tar.bz2} within the initial image file. During
+      first boot of the image a single recovery partition will be
+      created and the recovery archive will be moved into that
+      partition. An additional boot menu entry will be created which
+      allows to restore the original root tree information. The
+      user information on the /home partition or in the /home directory
+      are not affected by that recovery process
 \end{itemize}
 
 %If you plan to use a custom partition setup you also should consider

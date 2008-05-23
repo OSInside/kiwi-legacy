@@ -20,7 +20,6 @@
 	</profiles>
 	<drivers type="drivers">
 		<file name="drivers/ide/*"/>
-		<file name="net/packet/*"/>
 		<file name="fs/ext3/*"/>
 		<file name="fs/ext2/*"/>
 		<file name="fs/binfmt_aout.ko"/>
@@ -29,21 +28,14 @@
 		<file name="fs/quota_v1.ko"/>
 		<file name="fs/quota_v2.ko"/>
 		<file name="fs/jbd/*"/>
-		<file name="fs/fat/*"/>
-		<file name="fs/vfat/*"/>
 		<file name="fs/hfs/*"/>
 		<file name="fs/exportfs/*"/>
 		<file name="fs/squashfs/*"/>
 		<file name="fs/aufs.ko"/>
-		<file name="fs/reiserfs/*"/>
 		<file name="fs/nls/nls_utf8.ko"/>
-		<file name="net/ipv6/*"/>
 		<file name="drivers/ata/*"/>
 		<file name="drivers/scsi/*"/>
 		<file name="drivers/message/fusion/*"/>
-		<file name="drivers/net/*"/>
-		<file name="drivers/parport/*"/>
-		<file name="drivers/char/lp.ko"/>
 	</drivers>
 	<repository type="yast2" status="replaceable">
         <source path="/image/CDs/full-10.3-i386"/>
@@ -74,7 +66,6 @@
 		<package name="net-tools"/>
 		<package name="netcfg"/>
 		<package name="pciutils"/>
-		<package name="reiserfs"/>
 		<package name="sysconfig"/>
 		<package name="sysfsutils"/>
 		<package name="util-linux"/>

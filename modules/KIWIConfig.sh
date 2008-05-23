@@ -220,6 +220,10 @@ function baseSetupOEMPartition {
 		echo "Setting up OEM_BOOT_TITLE=$oemtitle"
 		echo "OEM_BOOT_TITLE=$oemtitle" >> $oemfile
 	fi
+	if [ ! -z "$oemrecovery" ];then
+		echo "Setting up OEM_RECOVERY=1"
+		echo "OEM_RECOVERY=1" >> $oemfile
+	fi
 }
 
 #======================================
@@ -562,6 +566,77 @@ function baseSetupBusyBox {
 }
 
 #======================================
+# stripUnusedLibs
+#--------------------------------------
+function baseStripUnusedLibs {
+	# /.../
+	# remove libraries which are not directly linked
+	# against applications in the bin directories
+	# ----
+	local needlibs
+	local found
+	local dir
+	local lnk
+	local new
+	# /.../
+	# find directly used libraries, by calling ldd
+	# on files in *bin*
+	# ---
+	rm -f /tmp/needlibs
+	for i in /usr/bin/* /bin/* /sbin/* /usr/sbin/*;do
+		for n in `ldd $i 2>/dev/null`;do
+			if [ -e $n ];then
+				echo $n >> /tmp/needlibs
+			fi
+		done
+	done
+	count=0
+	for i in `cat /tmp/needlibs | sort | uniq`;do
+		needlibs[$count]=$i
+		count=`expr $count + 1`
+		if [ -L $i ];then
+			dir=`dirname $i`
+			lnk=`readlink $i`
+			new=$dir/$lnk
+			needlibs[$count]=$new
+			count=`expr $count + 1`
+		fi
+	done
+	# /.../
+	# add exceptions
+	# ----
+	while [ ! -z $1 ];do
+		for i in /lib*/$1* /usr/lib*/$1*;do
+			if [ -e $i ];then
+				needlibs[$count]=$i
+				count=`expr $count + 1`
+			fi
+		done
+		shift
+	done
+	# /.../
+	# find unused libs and remove it, dl loaded libs
+	# seems not to be that important within the initrd
+	# ----
+	rm -f /tmp/needlibs
+	for i in /lib/* /lib64/* /usr/lib/* /usr/lib64/*;do
+		found=0
+		if [ -d $i ];then
+			continue
+		fi
+		for n in ${needlibs[*]};do
+			if [ $i = $n ];then
+				found=1; break
+			fi
+		done
+		if [ $found -eq 0 ];then
+			echo "Removing: $i"
+			rm $i
+		fi
+	done
+}
+
+#======================================
 # suseStripInitrd
 #--------------------------------------
 function suseStripInitrd {
@@ -583,11 +658,26 @@ function suseStripInitrd {
 		/usr/X11R6 /usr/lib*/X11 /var/X11R6 /usr/share/X11 /etc/X11
 		/usr/lib*/libX* /usr/lib*/xorg /usr/lib*/libidn*
 		/etc/ppp /etc/xdg /etc/NetworkManager /lib*/YaST /lib*/security
-		/lib*/mkinitrd /srv /var/adm /usr/lib/engines /usr/src/packages
+		/lib*/mkinitrd /srv /var/adm /usr/lib*/engines /usr/src/packages
 		/usr/src/linux* /usr/local /var/log/* /usr/share/pixmaps
 		/usr/share/gtk-doc /var/games /opt /var/spool /var/opt
 		/var/cache /var/tmp /etc/rpm /etc/cups /etc/opt /usr/share/terminfo
-		/home /media /lib/firmware /lib/lsb
+		/home /media /lib/firmware /usr/lib*/lsb /usr/lib*/krb5
+		/usr/lib*/ldscripts /usr/lib*/getconf /usr/lib*/pwdutils
+		/usr/lib*/pkgconfig /usr/lib*/browser-plugins
+		/usr/share/omc /usr/share/tmac /usr/share/emacs /usr/share/idnkit
+		/usr/share/games /usr/share/PolicyKit /usr/share/tabset
+		/usr/share/mkinitrd /usr/share/xsessions /usr/share/pkgconfig
+		/usr/share/dbus-1 /usr/share/sounds /usr/share/dict /usr/share/et
+		/usr/share/ss /usr/share/java /usr/share/themes /usr/share/doc
+		/usr/share/applications /usr/share/mime /usr/share/icons
+		/usr/share/xml /usr/share/sgml /usr/share/fonts /usr/games
+		/usr/lib/mit /usr/lib/news /usr/lib/pkgconfig /usr/lib/smart
+		/usr/lib/browser-plugins /usr/lib/restricted /usr/x86_64-suse-linux
+		/etc/logrotate* /etc/susehelp* /etc/SuSEconfig /etc/permissions.d
+		/etc/aliases.d /etc/hal /etc/news /etc/pwdutils /etc/uucp
+		/etc/openldap /etc/xinetd /etc/depmod.d /etc/smart /etc/lvm
+		/etc/named* /etc/bash_completion*
 		/lib/modules/*/kernel/drivers/net/wireless
 		/lib/modules/*/kernel/drivers/net/pcmcia
 		/lib/modules/*/kernel/drivers/net/tokenring
@@ -634,16 +724,37 @@ function suseStripInitrd {
 		udevsettle udevtrigger mknod stat path_id hwup scsi_id scsi_tur
 		usb_id ata_id vol_id edd_id setctsid dumpe2fs debugreiserfs
 		fuser udevadm blogd showconsole killproc curl tar cromfs-driver
-		cvcromfs
+		cvcromfs ldd
 	"
 	tools="$tools $@"
 	for path in /sbin /usr/sbin /usr/bin /bin;do
 		baseStripTools "$path" "$tools"
 	done
 	#==========================================
-	# remove images.sh
+	# remove unused libs
+	#------------------------------------------
+	baseStripUnusedLibs librt libutil libsysfs libnss_files libnss_compat
+	#==========================================
+	# remove images.sh and /root
 	#------------------------------------------
 	rm -f /image/images.sh
+	rm -rf /root
+	#==========================================
+	# strip down configuration files
+	#------------------------------------------
+	rm -rf /tmp/*
+	rm -rf /tmp/.*
+	files="
+		/etc/modprobe.conf /etc/modprobe.conf.local /etc/mtab
+		/etc/protocols /etc/services /etc/termcap /etc/aliases
+		/etc/bash.bashrc /etc/filesystems /etc/ld.so.conf /etc/magic
+		/etc/group /etc/passwd /etc/nsswitch.conf
+	"
+	for i in $files;do
+		mv $i /tmp
+	done
+	rm -f /etc/*
+	mv /tmp/* /etc
 }
 
 #======================================

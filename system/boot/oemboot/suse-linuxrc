@@ -78,11 +78,16 @@ openKernelConsole
 # 5) Include proc/cmdline information
 #--------------------------------------
 includeKernelParameters
-if [ ! -z $UNIONFS_CONFIG ] || [ "$COMBINED_IMAGE" = "local" ];then
+if \
+	[ ! -z $UNIONFS_CONFIG ] || [ "$COMBINED_IMAGE" = "local" ] ||\
+	[ ! -z $KIWI_RECOVERY ]
+then
 	# /.../
 	# if the unionfs/combined information is already in place at this
 	# stage it comes from the cmdline data which means we are not
 	# booting from CD/DVD USB stick but want to boot the local system
+	# This also applies if we use an oem system with the recovery
+	# feature enabled
 	# ----
 	export LOCAL_BOOT="yes"   
 fi
@@ -98,114 +103,116 @@ done
 #======================================
 # 7) Search disks, prefer removable one
 #--------------------------------------
-if [ ! -f $VMX_SYSTEM ];then
-	# /.../
-	# installed system: Check for a root device to mount and
-	# prefer a USB stick if there is any. Otherwise check for
-	# first partition of a disk device. During first boot of
-	# the installed system there is only one partition and this
-	# initrd is going to be replaced by a later mkinitrd call
-	# for unified systems the kiwi initrd is used and the
-	# kernel parameters of this initrd defines the missing
-	# information. Additionally the partition table is different
-	# for unified systems. Therefore we check if the second
-	# partition is a squashfs/cromfs partition and change the root
-	# partition name accordingly
-	# ----
-	if [ -f $OEM_PARTITION_CONFIG ];then
-		Echo "Including oem partition info file"
-		importFile < $OEM_PARTITION_CONFIG
-	fi
-	Echo "Searching for disk and root partition"
-	USBStickDevice
-	if [ $stickFound = 0 ];then
-		deviceFound=0
-		for deviceRoot in /dev/sda1 /dev/hda1;do
-			if mount $deviceRoot /mnt &>/dev/null;then
-				deviceFound=1
-				umount /mnt
-				break
+if [ $LOCAL_BOOT = "no" ];then
+	if [ ! -f $VMX_SYSTEM ];then
+		# /.../
+		# installed system: Check for a root device to mount and
+		# prefer a USB stick if there is any. Otherwise check for
+		# first partition of a disk device. During first boot of
+		# the installed system there is only one partition and this
+		# initrd is going to be replaced by a later mkinitrd call
+		# for unified systems the kiwi initrd is used and the
+		# kernel parameters of this initrd defines the missing
+		# information. Additionally the partition table is different
+		# for unified systems. Therefore we check if the second
+		# partition is a squashfs/cromfs partition and change the root
+		# partition name accordingly
+		# ----
+		if [ -f $OEM_PARTITION_CONFIG ];then
+			Echo "Including oem partition info file"
+			importFile < $OEM_PARTITION_CONFIG
+		fi
+		Echo "Searching for disk and root partition"
+		USBStickDevice
+		if [ $stickFound = 0 ];then
+			deviceFound=0
+			for deviceRoot in /dev/sda1 /dev/hda1;do
+				if mount $deviceRoot /mnt &>/dev/null;then
+					deviceFound=1
+					umount /mnt
+					break
+				fi
+			done
+			if [ $deviceFound = 0 ];then
+				systemException \
+					"Couldn't find any disk device... abort" \
+				"reboot"
 			fi
-		done
-		if [ $deviceFound = 0 ];then
+			export deviceDisk=`echo $deviceRoot | tr -d [0-9]`
+			export deviceSwap="$deviceDisk"2
+			if [ -z "$OEM_WITHOUTHOME" ];then
+				export deviceHome="$deviceDisk"3
+			fi
+		else
+			Echo "USB stick found, prefer root on stick"
+			export deviceDisk=$stickRoot
+			export deviceSwap="$deviceDisk"2
+			if [ -z "$OEM_WITHOUTHOME" ];then
+				export deviceHome="$deviceDisk"3
+			fi
+		fi
+		probeFileSystem "$deviceDisk"1
+		if isFSTypeReadOnly;then
+			if [ -z "$COMBINED_IMAGE" ];then
+				Echo "Unified system detected, adapting root partition"
+				export UNIONFS_CONFIG="$deviceDisk"2,"$deviceDisk"1,aufs
+			fi
+			export deviceRoot="$deviceDisk"1
+			export deviceSwap="$deviceDisk"3
+		else
+			export deviceRoot="$deviceDisk"1
+		fi
+		Echo "Using root partition $deviceRoot on disk $deviceDisk"
+	else
+		# /.../
+		# installation mode: find a usable disk to install the image
+		# on. The image is a virtual disk with one partition
+		# ----
+		Echo "Searching harddrive for installation"
+		Echo "Waiting for devices to settle..."
+		# ...
+		# sleep for a while as I don't know a device to listen on
+		# I should be sure all possible devices exist. If there is
+		# a better way to make sure _now_ is the best time to search
+		# a disk please fixme
+		# ---
+		sleep 5
+		hwinfo="/usr/sbin/hwinfo --disk"
+		export deviceDisks=`$hwinfo |\
+			grep "Device File:" | cut -f2 -d: | cut -f1 -d"("`
+		export deviceDisks=`echo $deviceDisks`
+		if [ -z $deviceDisks ];then
 			systemException \
-				"Couldn't find any disk device... abort" \
+				"No hard disk device(s) found... abort" \
 			"reboot"
 		fi
-		export deviceDisk=`echo $deviceRoot | tr -d [0-9]`
-		export deviceSwap="$deviceDisk"2
-		if [ -z "$OEM_WITHOUTHOME" ];then
-			export deviceHome="$deviceDisk"3
-		fi
-	else
-		Echo "USB stick found, prefer root on stick"
-		export deviceDisk=$stickRoot
-		export deviceSwap="$deviceDisk"2
-		if [ -z "$OEM_WITHOUTHOME" ];then
-			export deviceHome="$deviceDisk"3
-		fi
-	fi
-	probeFileSystem "$deviceDisk"1
-	if isFSTypeReadOnly;then
-		if [ -z "$COMBINED_IMAGE" ];then
-			Echo "Unified system detected, adapting root partition"
-			export UNIONFS_CONFIG="$deviceDisk"2,"$deviceDisk"1,aufs
-		fi
-		export deviceRoot="$deviceDisk"1
-		export deviceSwap="$deviceDisk"3
-	else
-		export deviceRoot="$deviceDisk"1
-	fi
-	Echo "Using root partition $deviceRoot on disk $deviceDisk"
-else
-	# /.../
-	# installation mode: find a usable disk to install the image
-	# on. The image is a virtual disk with one partition
-	# ----
-	Echo "Searching harddrive for installation"
-	Echo "Waiting for devices to settle..."
-	# ...
-	# sleep for a while as I don't know a device to listen on
-	# I should be sure all possible devices exist. If there is
-	# a better way to make sure _now_ is the best time to search
-	# a disk please fixme
-	# ---
-	sleep 5
-	hwinfo="/usr/sbin/hwinfo --disk"
-	export deviceDisks=`$hwinfo |\
-		grep "Device File:" | cut -f2 -d: | cut -f1 -d"("`
-	export deviceDisks=`echo $deviceDisks`
-	if [ -z $deviceDisks ];then
-		systemException \
-			"No hard disk device(s) found... abort" \
-		"reboot"
-	fi
-	Echo "Found following hard disk device(s)"
-	count=0
-	for i in $deviceDisks;do
-		Echo -b "Disk $count -> $i"
-		deviceArray[$count]=$i
-		count=`expr $count + 1`
-	done
-	while true;do
-		Echo -n "Enter device name to select disk for installation: "
-		read deviceInput
+		Echo "Found following hard disk device(s)"
 		count=0
-		for deviceDisk in $deviceDisks;do
-			if [ ${deviceArray[$count]} = $deviceInput ];then
-				break 2
-			fi
+		for i in $deviceDisks;do
+			Echo -b "Disk $count -> $i"
+			deviceArray[$count]=$i
 			count=`expr $count + 1`
 		done
-		Echo "Given device is not in the list !"
-	done
-	Echo "Entering installation mode for disk: $deviceDisk"
+		while true;do
+			Echo -n "Enter device name to select disk for installation: "
+			read deviceInput
+			count=0
+			for deviceDisk in $deviceDisks;do
+				if [ ${deviceArray[$count]} = $deviceInput ];then
+					break 2
+				fi
+				count=`expr $count + 1`
+			done
+			Echo "Given device is not in the list !"
+		done
+		Echo "Entering installation mode for disk: $deviceDisk"
+	fi
 fi
 
 #======================================
 # 8) Check for vmx system
 #--------------------------------------
-if [ -f $VMX_SYSTEM ];then
+if [ -f $VMX_SYSTEM ] && [ $LOCAL_BOOT = "no" ];then
 	#======================================
 	# 8.1) import vmx configuration file
 	#--------------------------------------
@@ -370,11 +377,25 @@ if [ $LOCAL_BOOT = "no" ];then
 	#--------------------------------------
 	mem_size=`grep MemTotal: /proc/meminfo | tr -dc '[0-9]'`
 	swapsize=$(( $mem_size *2 / 1024 ))
+	recoMByte=0
 	if [ ! -z "$OEM_SWAPSIZE" ];then
 		swapsize=$OEM_SWAPSIZE
 	fi
 	if [ ! -z "$OEM_WITHOUTSWAP" ];then
 		swapsize=0
+	fi
+	if [ ! -z "$OEM_RECOVERY" ];then
+		mkdir -p /reco-root
+		if ! mount $deviceRoot /reco-root >/dev/null;then
+			systemException "Failed to mount root device" "reboot"
+		fi
+		if [ ! -f /reco-root/recovery.tar.bz2 ];then
+			systemException "Can't find recovery archive" "reboot"
+		fi
+		recoBytes=`du --bytes /reco-root/recovery.tar.bz2 | cut -f1`
+		recoMByte=`expr $recoBytes / 1048576`
+		recoMByte=`expr $recoMByte \* 15 / 10`
+		umount /reco-root
 	fi
 	Echo "Filesystem of root system is: $FSTYPE -> $deviceRoot"
 	if test ! -z $COMBINED_IMAGE;then
@@ -509,18 +530,21 @@ if [ $LOCAL_BOOT = "no" ];then
 				disk1MBytes=$OEM_SYSTEMSIZE
 			fi
 			# /.../
-			# prevent /home partition if requested system size
-			# is bigger than the whole disk
+			# prevent /home and recovery partition if requested
+			# system size is bigger than the whole disk
 			# ----
 			if [ $disk1MBytes -gt $diskXMBytes ];then
 				export OEM_WITHOUTHOME=1
+				unset OEM_RECOVERY
+				recoMByte=0
 			fi
 			# /.../
-			# recalculate system size of no /home partition
+			# recalculate system size if no /home partition
 			# will be used. size is whole disk minus swap
+			# minus recovery
 			# ----
 			if [ ! -z "$OEM_WITHOUTHOME" ];then
-				disk1MBytes=`expr $diskXMBytes - $swapsize`
+				disk1MBytes=`expr $diskXMBytes - $swapsize - $recoMByte`
 			fi
 			# /.../
 			# check if requested system size is bigger than
@@ -533,7 +557,8 @@ if [ $LOCAL_BOOT = "no" ];then
 				# ----
 				Echo "Disk is too small, will not re-partition it"
 				OEM_WITHOUTHOME=1
-				DONT_PARTITION=1 
+				DONT_PARTITION=1
+				unset OEM_RECOVERY
 			fi
 			if [ -z "$DONT_PARTITION" ];then
 				if [ ! -z "$OEM_WITHOUTHOME" ];then
@@ -542,32 +567,72 @@ if [ $LOCAL_BOOT = "no" ];then
 					#--------------------------------------
 					if [ -z "$OEM_WITHOUTSWAP" ];then
 						#======================================
-						# 10.2.1 with swap partition
+						# 10.2.1.1 with swap partition
 						#--------------------------------------
-						for cmd in \
-							d n p 2 1 +"$disk1MBytes"M \
-							n p 1 . . \
-							t 1 82 w
+						if [ -z "$OEM_RECOVERY" ];then
+							#======================================
+							# 10.2.1.1.1 without recovery partition
+							#--------------------------------------
+							for cmd in \
+								d n p 2 1 +"$disk1MBytes"M \
+								n p 1 . . \
+								t 1 82 w
+							do
+								if [ $cmd = "." ];then
+									echo >> $input
+									continue
+								fi
+								echo $cmd >> $input
+							done
+						else
+							#======================================
+							# 10.2.1.1.2 with recovery partition
+							#--------------------------------------
+							for cmd in \
+								d n p 2 1 +"$disk1MBytes"M \
+								n p 4 . +"$recoMByte"M \
+								n p 1 . . \
+								t 1 82 w
 						do
 							if [ $cmd = "." ];then
 								echo >> $input
-								continue
-							fi
-							echo $cmd >> $input
-						done
+									continue
+								fi
+								echo $cmd >> $input
+							done
+						fi
 					else
 						#======================================
-						# 10.2.1 without swap partition
+						# 10.2.1.2 without swap partition
 						#--------------------------------------
-						for cmd in \
-							d n p 2 . . w
-						do
-							if [ $cmd = "." ];then
-								echo >> $input
-								continue
-							fi
-							echo $cmd >> $input
-						done
+						if [ -z "$OEM_RECOVERY" ];then
+							#======================================
+							# 10.2.1.2.1 without recovery partition
+							#--------------------------------------
+							for cmd in \
+								d n p 2 . . w
+							do
+								if [ $cmd = "." ];then
+									echo >> $input
+									continue
+								fi
+								echo $cmd >> $input
+							done
+						else
+							#======================================
+							# 10.2.1.2.2 without recovery partition
+							#--------------------------------------
+							for cmd in \
+								d n p 4 . +"$recoMByte"M \
+								n p 2 . . w
+							do
+								if [ $cmd = "." ];then
+									echo >> $input
+									continue
+								fi
+								echo $cmd >> $input
+							done
+						fi
 					fi
 				else
 					#======================================
@@ -575,34 +640,76 @@ if [ $LOCAL_BOOT = "no" ];then
 					#--------------------------------------
 					if [ -z "$OEM_WITHOUTSWAP" ];then
 						#======================================
-						# 10.2.2 with swap partition
+						# 10.2.2.1 with swap partition
 						#--------------------------------------
-						for cmd in \
-							d n p 2 1 +"$disk1MBytes"M \
-							n p 1 . +"$swapsize"M \
-							n p 3 . . \
-							t 1 82 w
-						do
-							if [ $cmd = "." ];then
-								echo >> $input
-								continue
-							fi
-							echo $cmd >> $input
-						done
+						if [ -z "$OEM_RECOVERY" ];then
+							#======================================
+							# 10.2.2.1.1 without recovery partition
+							#--------------------------------------
+							for cmd in \
+								d n p 2 1 +"$disk1MBytes"M \
+								n p 1 . +"$swapsize"M \
+								n p 3 . . \
+								t 1 82 w
+							do
+								if [ $cmd = "." ];then
+									echo >> $input
+									continue
+								fi
+								echo $cmd >> $input
+							done
+						else
+							#======================================
+							# 10.2.2.1.2 with recovery partition
+							#--------------------------------------
+							for cmd in \
+								d n p 2 1 +"$disk1MBytes"M \
+								n p 1 . +"$swapsize"M \
+								n p 4 . +"$recoMByte"M \
+								n p 3 . . \
+								t 1 82 w
+							do
+								if [ $cmd = "." ];then
+									echo >> $input
+									continue
+								fi
+								echo $cmd >> $input
+							done
+						fi
 					else
 						#======================================
-						# 10.2.2 without swap partition
+						# 10.2.2.2 without swap partition
 						#--------------------------------------
-						for cmd in \
-							d n p 2 1 +"$disk1MBytes"M \
-							n p 3 . . w
-						do
-							if [ $cmd = "." ];then
-								echo >> $input
-								continue
-							fi
-							echo $cmd >> $input
-						done
+						if [ -z "$OEM_RECOVERY" ];then
+							#======================================
+							# 10.2.2.2.1 without recovery partition
+							#--------------------------------------
+							for cmd in \
+								d n p 2 1 +"$disk1MBytes"M \
+								n p 3 . . w
+							do
+								if [ $cmd = "." ];then
+									echo >> $input
+									continue
+								fi
+								echo $cmd >> $input
+							done
+						else
+							#======================================
+							# 10.2.2.2.2 with recovery partition
+							#--------------------------------------
+							for cmd in \
+								d n p 2 1 +"$disk1MBytes"M \
+								n p 4 . +"$recoMByte"M \
+								n p 3 . . w
+							do
+								if [ $cmd = "." ];then
+									echo >> $input
+									continue
+								fi
+								echo $cmd >> $input
+							done
+						fi
 					fi
 				fi
 				Echo "Repartition the disk according to current geometry"
@@ -623,6 +730,9 @@ if [ $LOCAL_BOOT = "no" ];then
 			if [ -z "$OEM_WITHOUTHOME" ];then
 				export deviceHome="$deviceDisk"3
 			fi
+			if [ ! -z "$OEM_RECOVERY" ];then
+				export deviceRecovery="$deviceDisk"4
+			fi
 			#======================================
 			# 10.4 Activate swap space
 			#--------------------------------------
@@ -638,8 +748,35 @@ if [ $LOCAL_BOOT = "no" ];then
 			if [ -z "$OEM_WITHOUTHOME" ];then
 				Echo "Creating Home filesystem on $deviceHome"
 				if ! mke2fs -j -q $deviceHome >/dev/null 2>&1;then
-					systemException "Failed to create home filesystem" "reboot"
+					systemException "Failed to create Home fs" "reboot"
 				fi
+			fi
+			#======================================
+			# 10.6 Create recovery file system
+			#--------------------------------------
+			if [ ! -z "$OEM_RECOVERY" ];then
+				Echo "Creating Recovery filesystem on $deviceRecovery"
+				if ! mke2fs -j -q $deviceRecovery >/dev/null 2>&1;then
+					systemException "Failed to create Recovery fs" "reboot"
+				fi
+			fi
+			#======================================
+			# 10.7 Setup recovery contents
+			#--------------------------------------
+			if [ ! -z "$OEM_RECOVERY" ];then
+				Echo "Setting up recovery archive..."
+				if ! mount $deviceRoot /reco-root >/dev/null;then
+					systemException "Failed to mount root device" "reboot"
+				fi
+				mkdir -p /reco-save
+				if ! mount $deviceRecovery /reco-save >/dev/null;then
+					systemException "Failed to mount recovery device" "reboot"
+				fi
+				if ! mv /reco-root/recovery.tar.bz2 /reco-save >/dev/null;then
+					systemException "Failed to move recovery archive" "reboot"
+				fi
+				umount /reco-save && rmdir /reco-save
+				umount /reco-root && rmdir /reco-root
 			fi
 		else
 			#======================================
@@ -736,6 +873,11 @@ if [ $LOCAL_BOOT = "no" ];then
 		export KIWI_INITRD_PARAMS
 	fi
 	if [ ! -z "$deviceResize" ] && sfdisk -s $deviceResize &>/dev/null;then
+		if [ ! -z "$OEM_RECOVERY" ];then
+			KIWI_INITRD_PARAMS="$KIWI_INITRD_PARAMS LOCAL_BOOT=yes"
+			KIWI_INITRD_PARAMS="$KIWI_INITRD_PARAMS deviceRoot=$deviceRoot"
+			export KIWI_INITRD_PARAMS
+		fi
 		if [ "$FSTYPE" = "reiserfs" ];then
 			Echo "Resize Reiser filesystem to full partition space..."
 			resize_reiserfs -q $deviceResize
@@ -767,14 +909,22 @@ fi
 validateRootTree
 
 #======================================
-# 13) get installed kernels
+# 13) Recover system if requested
+#--------------------------------------
+if [ ! -z "$KIWI_RECOVERY" ];then
+	# TODO restore recovery data
+	systemException "*** system restore not yet implemented ***" "reboot"
+fi
+
+#======================================
+# 14) get installed kernels
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	kernelList /mnt
 fi
 
 #======================================
-# 14) Create system dependant files
+# 15) Create system dependant files
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	export HAVE_SWAP=0
@@ -799,7 +949,7 @@ if [ $LOCAL_BOOT = "no" ];then
 	if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ]; then
 		Echo "Creating grub configuration"
 		if [ -z "$OEM_BOOT_TITLE" ];then
-			OEM_BOOT_TITLE="OEM"
+			export OEM_BOOT_TITLE="OEM"
 		fi
 		if [ $HAVE_SWAP -eq 1 ];then
 			setupBootLoaderGrub \
@@ -813,7 +963,7 @@ if [ $LOCAL_BOOT = "no" ];then
 fi
 
 #======================================
-# 15) copy system dependant files
+# 16) copy system dependant files
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	cd /config
@@ -824,17 +974,17 @@ if [ $LOCAL_BOOT = "no" ];then
 fi
 
 #======================================
-# 16) setup real root device
+# 17) setup real root device
 #--------------------------------------
 echo 256 > /proc/sys/kernel/real-root-dev
 
 #======================================
-# 17) umount system filesystems
+# 18) umount system filesystems
 #--------------------------------------
 umountSystemFilesystems
 
 #======================================
-# 18) copy initrd files to image
+# 19) copy initrd files to image
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	importBranding
@@ -843,13 +993,13 @@ if [ $LOCAL_BOOT = "no" ];then
 fi
 
 #======================================
-# 19) kill boot shell
+# 20) kill boot shell
 #--------------------------------------
 killShell
 killBlogD
 
 #======================================
-# 20) Activate new root
+# 21) Activate new root
 #--------------------------------------
 Echo "Activating Image: [$deviceDisk]"
 reopenKernelConsole
@@ -858,7 +1008,7 @@ mount --move /dev /mnt/dev
 udevKill
 
 #======================================
-# 21) call preinit phase
+# 22) call preinit phase
 #--------------------------------------
 Echo "Calling preinit phase..."
 cd /mnt
@@ -878,7 +1028,7 @@ else
 fi
 
 #======================================
-# 22 Unmount initrd / system init
+# 23 Unmount initrd / system init
 #--------------------------------------
 echo " "
 echo "Booting into final System..."

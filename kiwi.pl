@@ -441,6 +441,9 @@ sub main {
 		if (-f "$Create/rootfs.tar") {
 			qxx ("rm -f $Create/rootfs.tar");
 		}
+		if (-f "$Create/recovery.tar.bz2") {
+			qxx ("rm -f $Create/recovery.tar.bz2");
+		}
 		#==========================================
 		# Check for overlay requirements
 		#------------------------------------------
@@ -624,6 +627,26 @@ sub main {
 			$kiwi,$xml,$xml,$Create,$xml -> getPackageManager()
 		);
 		$manager -> hidePackageManagerCache();
+		#==========================================
+		# Create recovery archive if specified
+		#------------------------------------------
+		if ($type eq "oem") {
+			my $configure = new KIWIConfigure (
+				$kiwi,$xml,$Create,$Create."/image"
+			);
+			if (! defined $configure) {
+				if (defined $BaseRoot) {
+					$overlay -> resetOverlay();
+				}
+				return undef;
+			}
+			if (! $configure -> setupRecoveryArchive()) {
+				if (defined $BaseRoot) {
+					$overlay -> resetOverlay();
+				}
+				my $code = kiwiExit (1); return $code;
+			}
+		}
 		#==========================================
 		# Initialize logical image extend
 		#------------------------------------------
