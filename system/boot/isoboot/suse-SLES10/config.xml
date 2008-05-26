@@ -27,7 +27,6 @@
 	<drivers type="drivers">
 		<file name="drivers/ide/*"/>
 		<file name="drivers/block/loop.ko"/>
-		<file name="net/packet/*"/>
 		<file name="fs/ext3/*"/>
 		<file name="fs/ext2/*"/>
 		<file name="fs/binfmt_aout.ko"/>
@@ -36,15 +35,11 @@
 		<file name="fs/quota_v1.ko"/>
 		<file name="fs/quota_v2.ko"/>
 		<file name="fs/jbd/*"/>
-		<file name="fs/fat/*"/>
-		<file name="fs/vfat/*"/>
 		<file name="fs/reiserfs/*"/>
 		<file name="fs/nls/nls_utf8.ko"/>
-		<file name="net/ipv6/*"/>
 		<file name="drivers/cdrom/*"/>
 		<file name="drivers/scsi/*"/>
 		<file name="drivers/message/fusion/*"/>
-		<file name="drivers/net/*"/>
 	</drivers>
 	<repository type="yast2" status="replaceable">
 		<source path="ftp://dist.suse.de/install/SLP/SLES-10-GM/%arch/DVD1"/>

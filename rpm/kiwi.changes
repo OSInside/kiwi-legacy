@@ -2,6 +2,9 @@
 Fri May 23 17:34:13 CEST 2008 - ms@suse.de
 
 - added sense code checking for CD/DVD drives (bnc #390934)
+  The required driveready application is part of the kiwi-tools
+  packages. Therefore this fix applies to >= suse-11.0. For older
+  versions the wait counter has been increased.
 - fixed SaT solvable creation (bnc #393495)
 
 -------------------------------------------------------------------
