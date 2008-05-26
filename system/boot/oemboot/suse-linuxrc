@@ -784,8 +784,11 @@ if [ $LOCAL_BOOT = "no" ];then
 				if ! cp /reco-root/boot/initrd.vmx /reco-save/boot/initrd;then
 					systemException "Failed to copy recovery initrd" "reboot"
 				fi
-				if ! cp /reco-root//boot/linux.vmx /reco-save/boot/vmlinuz;then
+				if ! cp /reco-root/boot/linux.vmx /reco-save/boot/vmlinuz;then
 					systemException "Failed to copy recovery kernel" "reboot"
+				fi
+				if ! cp /reco-root/boot/message /reco-save/boot;then
+					systemException "Failed to copy grub message file" "reboot"
 				fi
 				umount /reco-save && rmdir /reco-save
 				umount /reco-root && rmdir /reco-root
@@ -993,7 +996,7 @@ if [ $LOCAL_BOOT = "no" ];then
 fi
 
 #======================================
-# 17) copy system dependant files
+# 17) copy recovery related files
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ] && [ ! -z "$OEM_RECOVERY" ];then
 	Echo "Setting up recovery configuration files..."
