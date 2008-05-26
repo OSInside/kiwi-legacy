@@ -618,8 +618,9 @@ function baseStripUnusedLibs {
 	# find unused libs and remove it, dl loaded libs
 	# seems not to be that important within the initrd
 	# ----
+	#mkdir /mylibs
 	rm -f /tmp/needlibs
-	for i in /lib/* /lib64/* /usr/lib/* /usr/lib64/*;do
+	for i in /lib/lib* /lib64/lib* /usr/lib/lib* /usr/lib64/lib*;do
 		found=0
 		if [ -d $i ];then
 			continue
@@ -631,6 +632,7 @@ function baseStripUnusedLibs {
 		done
 		if [ $found -eq 0 ];then
 			echo "Removing: $i"
+			#mv $i /mylibs
 			rm $i
 		fi
 	done
@@ -733,7 +735,8 @@ function suseStripInitrd {
 	#==========================================
 	# remove unused libs
 	#------------------------------------------
-	baseStripUnusedLibs librt libutil libsysfs libnss_files libnss_compat
+	baseStripUnusedLibs \
+		librt libutil libsysfs libnss_files libnss_compat libnsl
 	#==========================================
 	# remove images.sh and /root
 	#------------------------------------------
@@ -751,7 +754,9 @@ function suseStripInitrd {
 		/etc/group /etc/passwd /etc/nsswitch.conf
 	"
 	for i in $files;do
-		mv $i /tmp
+		if [ -e $i ];then
+			mv $i /tmp
+		fi
 	done
 	rm -f /etc/*
 	mv /tmp/* /etc
