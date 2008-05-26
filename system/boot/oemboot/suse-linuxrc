@@ -780,6 +780,13 @@ if [ $LOCAL_BOOT = "no" ];then
 				if ! mv /reco-root/recovery.tar.bz2 /reco-save >/dev/null;then
 					systemException "Failed to move recovery archive" "reboot"
 				fi
+				mkdir /reco-save/boot
+				if ! cp /reco-root/boot/initrd.vmx /reco-save/boot/initrd;then
+					systemException "Failed to copy recovery initrd" "reboot"
+				fi
+				if ! cp /reco-root//boot/linux.vmx /reco-save/boot/vmlinuz;then
+					systemException "Failed to copy recovery kernel" "reboot"
+				fi
 				umount /reco-save && rmdir /reco-save
 				umount /reco-root && rmdir /reco-root
 			fi
@@ -960,6 +967,9 @@ if [ $LOCAL_BOOT = "no" ];then
 		if [ -z "$OEM_BOOT_TITLE" ];then
 			export OEM_BOOT_TITLE="OEM"
 		fi
+		if [ ! -z $OEM_RECOVERY ];then
+			OEM_RECOVERY=${deviceDisk}4
+		fi
 		if [ $HAVE_SWAP -eq 1 ];then
 			setupBootLoaderGrub \
 				/mnt /config 1 ${deviceDisk}2 $OEM_BOOT_TITLE $deviceSwap
@@ -983,17 +993,40 @@ if [ $LOCAL_BOOT = "no" ];then
 fi
 
 #======================================
-# 17) setup real root device
+# 17) copy system dependant files
+#--------------------------------------
+if [ $LOCAL_BOOT = "no" ] && [ ! -z "$OEM_RECOVERY" ];then
+	Echo "Setting up recovery configuration files..."
+	mkdir /reco-save
+	if ! mount $deviceRecovery /reco-save >/dev/null;then
+		systemException "Failed to mount recovery device" "reboot"
+	fi
+	mkdir -p /reco-save/boot/grub
+	if ! cp /mnt/boot/grub/menu.lst /reco-save/boot/grub;then
+		systemException "Failed to copy recovery menu.lst" "reboot"
+	fi
+	mkdir -p /reco-save/etc
+	if ! cp /mnt/etc/grub.conf /reco-save/etc;then
+		systemException "Failed to copy recovery grub.conf" "reboot"
+	fi
+	if ! cp /mnt/etc/fstab /reco-save/etc;then
+		systemException "Failed to copy recovery fstab" "reboot"
+	fi
+	umount /reco-save && rmdir /reco-save
+fi
+
+#======================================
+# 18) setup real root device
 #--------------------------------------
 echo 256 > /proc/sys/kernel/real-root-dev
 
 #======================================
-# 18) umount system filesystems
+# 19) umount system filesystems
 #--------------------------------------
 umountSystemFilesystems
 
 #======================================
-# 19) copy initrd files to image
+# 20) copy initrd files to image
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	importBranding
@@ -1002,13 +1035,13 @@ if [ $LOCAL_BOOT = "no" ];then
 fi
 
 #======================================
-# 20) kill boot shell
+# 21) kill boot shell
 #--------------------------------------
 killShell
 killBlogD
 
 #======================================
-# 21) Activate new root
+# 22) Activate new root
 #--------------------------------------
 Echo "Activating Image: [$deviceDisk]"
 reopenKernelConsole
@@ -1017,7 +1050,7 @@ mount --move /dev /mnt/dev
 udevKill
 
 #======================================
-# 22) call preinit phase
+# 23) call preinit phase
 #--------------------------------------
 Echo "Calling preinit phase..."
 cd /mnt
@@ -1037,7 +1070,7 @@ else
 fi
 
 #======================================
-# 23 Unmount initrd / system init
+# 24 Unmount initrd / system init
 #--------------------------------------
 echo " "
 echo "Booting into final System..."

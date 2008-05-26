@@ -509,97 +509,93 @@ function setupBootLoaderGrub {
 			kernel=`echo $i | cut -f1 -d:`
 			initrd=`echo $i | cut -f2 -d:`
 			if [ -z "$name" ];then
-				echo "title $kernel [ $gfix ]"  >> $menu
+				echo "title $kernel [ $gfix ]"                 >> $menu
 			else
-				echo "title $name [ $gfix ]"    >> $menu
+				echo "title $name [ $gfix ]"                   >> $menu
 			fi
 			if [ $kernel = "vmlinuz-xen" ];then
-				echo " root $gdev"                     >> $menu
-				echo " kernel /boot/xen.gz"            >> $menu
-				echo -n " module /boot/$kernel"        >> $menu
-				echo -n " root=$rdev $console"         >> $menu
-				echo -n " vga=0x314 splash=silent"     >> $menu
+				echo " root $gdev"                                >> $menu
+				echo " kernel /boot/xen.gz"                       >> $menu
+				echo -n " module /boot/$kernel"                   >> $menu
+				echo -n " root=$rdev $console"                    >> $menu
+				echo -n " vga=0x314 splash=silent"                >> $menu
 				if [ ! -z "$swap" ];then
-					echo -n " resume=$swap"            >> $menu
+					echo -n " resume=$swap"                       >> $menu
 				fi
-				echo -n " $KIWI_INITRD_PARAMS"         >> $menu
-				echo " $KIWI_KERNEL_OPTIONS showopts"  >> $menu
-				echo " module /boot/$initrd"           >> $menu
+				echo -n " $KIWI_INITRD_PARAMS"                    >> $menu
+				echo " $KIWI_KERNEL_OPTIONS showopts"             >> $menu
+				echo " module /boot/$initrd"                      >> $menu
 			else
-				echo -n " kernel $gdev/boot/$kernel"   >> $menu
-				echo -n " root=$rdev $console"         >> $menu
-				echo -n " vga=0x314 splash=silent"     >> $menu
+				echo -n " kernel $gdev/boot/$kernel"              >> $menu
+				echo -n " root=$rdev $console"                    >> $menu
+				echo -n " vga=0x314 splash=silent"                >> $menu
 				if [ ! -z "$swap" ];then
-					echo -n " resume=$swap"            >> $menu
+					echo -n " resume=$swap"                       >> $menu
 				fi
-				echo -n " $KIWI_INITRD_PARAMS"         >> $menu
-				echo " $KIWI_KERNEL_OPTIONS showopts"  >> $menu
-				echo " initrd $gdev/boot/$initrd"      >> $menu
+				echo -n " $KIWI_INITRD_PARAMS"                    >> $menu
+				echo " $KIWI_KERNEL_OPTIONS showopts"             >> $menu
+				echo " initrd $gdev/boot/$initrd"                 >> $menu
 			fi
 			#======================================
 			# create failsafe entry
 			#--------------------------------------
 			if [ -z "$name" ];then
-				echo "title Failsafe -- $kernel [ $gfix ]"  >> $menu
+				echo "title Failsafe -- $kernel [ $gfix ]"     >> $menu
 			else
-				echo "title Failsafe -- $name [ $gfix ]"    >> $menu
+				echo "title Failsafe -- $name [ $gfix ]"       >> $menu
 			fi
 			if [ $kernel = "vmlinuz-xen" ];then
-				echo " root $gdev"                       >> $menu
-				echo " kernel /boot/xen.gz"              >> $menu
-				echo -n " module /boot/$kernel"          >> $menu
-				echo -n " root=$rdev $console"           >> $menu
-				echo -n " vga=0x314 splash=silent"       >> $menu
-				echo -n " $KIWI_INITRD_PARAMS"           >> $menu
-				echo -n " $KIWI_KERNEL_OPTIONS showopts" >> $menu
-				echo -n " ide=nodma apm=off acpi=off"    >> $menu
-				echo -n " noresume selinux=0 nosmp"      >> $menu
-				echo " noapic maxcpus=0 edd=off"         >> $menu
-				echo " module /boot/$initrd"             >> $menu
+				echo " root $gdev"                                >> $menu
+				echo " kernel /boot/xen.gz"                       >> $menu
+				echo -n " module /boot/$kernel"                   >> $menu
+				echo -n " root=$rdev $console"                    >> $menu
+				echo -n " vga=0x314 splash=silent"                >> $menu
+				echo -n " $KIWI_INITRD_PARAMS"                    >> $menu
+				echo -n " $KIWI_KERNEL_OPTIONS showopts"          >> $menu
+				echo -n " ide=nodma apm=off acpi=off"             >> $menu
+				echo -n " noresume selinux=0 nosmp"               >> $menu
+				echo " noapic maxcpus=0 edd=off"                  >> $menu
+				echo " module /boot/$initrd"                      >> $menu
 			else
-				echo -n " kernel $gdev/boot/$kernel"     >> $menu
-				echo -n " root=$rdev $console"           >> $menu
-				echo -n " vga=0x314 splash=silent"       >> $menu
-				echo -n " $KIWI_INITRD_PARAMS"           >> $menu
-				echo -n " $KIWI_KERNEL_OPTIONS showopts" >> $menu
-				echo -n " ide=nodma apm=off acpi=off"    >> $menu
-				echo -n " noresume selinux=0 nosmp"      >> $menu
-				echo " noapic maxcpus=0 edd=off"         >> $menu
-				echo " initrd $gdev/boot/$initrd"        >> $menu
+				echo -n " kernel $gdev/boot/$kernel"              >> $menu
+				echo -n " root=$rdev $console"                    >> $menu
+				echo -n " vga=0x314 splash=silent"                >> $menu
+				echo -n " $KIWI_INITRD_PARAMS"                    >> $menu
+				echo -n " $KIWI_KERNEL_OPTIONS showopts"          >> $menu
+				echo -n " ide=nodma apm=off acpi=off"             >> $menu
+				echo -n " noresume selinux=0 nosmp"               >> $menu
+				echo " noapic maxcpus=0 edd=off"                  >> $menu
+				echo " initrd $gdev/boot/$initrd"                 >> $menu
 			fi
 			#======================================
 			# create recovery entry
 			#--------------------------------------
 			if [ ! -z "$OEM_RECOVERY" ];then
 				if [ -z "$name" ];then
-					echo "title Recovery -- $kernel [ $gfix ]"  >> $menu
+					echo "title Recovery -- $kernel [ $gfix ]" >> $menu
 				else
-					echo "title Recovery -- $name [ $gfix ]"    >> $menu
+					echo "title Recovery -- $name [ $gfix ]"   >> $menu
 				fi
+				gdev_recovery="(hd0,3)"
+				rdev_recovery=$OEM_RECOVERY
 				if [ $kernel = "vmlinuz-xen" ];then
-					echo " root $gdev"                     >> $menu
-					echo " kernel /boot/xen.gz"            >> $menu
-					echo -n " module /boot/$kernel"        >> $menu
-					echo -n " root=$rdev $console"         >> $menu
-					echo -n " vga=0x314 splash=silent"     >> $menu
-					if [ ! -z "$swap" ];then
-						echo -n " resume=$swap"            >> $menu
-					fi
-					echo -n " $KIWI_INITRD_PARAMS"         >> $menu
-					echo -n " $KIWI_KERNEL_OPTIONS"        >> $menu
-					echo " showopts KIWI_RECOVERY=1"       >> $menu
-					echo " module /boot/$initrd"           >> $menu
+					echo " root $gdev_recovery"                   >> $menu
+					echo " kernel /boot/xen.gz"                   >> $menu
+					echo -n " module /boot/$kernel"               >> $menu
+					echo -n " root=$rdev_recovery $console"       >> $menu
+					echo -n " vga=0x314 splash=silent"            >> $menu
+					echo -n " $KIWI_INITRD_PARAMS"                >> $menu
+					echo -n " $KIWI_KERNEL_OPTIONS"               >> $menu
+					echo " showopts KIWI_RECOVERY=1"              >> $menu
+					echo " module /boot/$initrd"                  >> $menu
 				else
-					echo -n " kernel $gdev/boot/$kernel"   >> $menu
-					echo -n " root=$rdev $console"         >> $menu
-					echo -n " vga=0x314 splash=silent"     >> $menu
-					if [ ! -z "$swap" ];then
-						echo -n " resume=$swap"            >> $menu
-					fi
-					echo -n " $KIWI_INITRD_PARAMS"         >> $menu
-					echo -n " $KIWI_KERNEL_OPTIONS"        >> $menu
-					echo " showopts KIWI_RECOVERY=1"       >> $menu
-					echo " initrd $gdev/boot/$initrd"      >> $menu
+					echo -n " kernel $gdev_recovery/boot/$kernel" >> $menu
+					echo -n " root=$rdev_recovery $console"       >> $menu
+					echo -n " vga=0x314 splash=silent"            >> $menu
+					echo -n " $KIWI_INITRD_PARAMS"                >> $menu
+					echo -n " $KIWI_KERNEL_OPTIONS"               >> $menu
+					echo " showopts KIWI_RECOVERY=1"              >> $menu
+					echo " initrd $gdev_recovery/boot/$initrd"    >> $menu
 				fi
 			fi
 		fi
