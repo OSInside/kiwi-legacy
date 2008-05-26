@@ -16,3 +16,7 @@
 /usr/bin/createLiveCD
    * wrapper script for kiwi to create the current SuSE Linux
      live CD
+
+/usr/bin/driveready
+   * small tool to check the sense code of a CD/DVD drive. The tool
+     can be used to wait for the drive to be ready for mounting
