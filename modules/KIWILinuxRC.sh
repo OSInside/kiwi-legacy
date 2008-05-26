@@ -1012,7 +1012,7 @@ function CDMount {
 	while true;do
 		IFS=":"; for i in $cddev;do
 			if [ -x /usr/bin/driveready ];then
-				driveready $cddev && mount $i /cdrom >/dev/null
+				driveready $i && mount $i /cdrom >/dev/null
 			else
 				mount $i /cdrom >/dev/null
 			fi
