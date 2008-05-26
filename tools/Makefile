@@ -1,6 +1,7 @@
 all:
 	${MAKE} -C startshell all
 	${MAKE} -C pigz all
+	${MAKE} -C driveready all
 	${MAKE} -C dbuslock -f Makefile.swig all
 	${MAKE} -C dbuslock BINDLIB=${bindlib} all
 	( \
@@ -16,6 +17,7 @@ install:
 	#install -m 755 wrapper/* ${TOOLSVZ}
 	install -m 755 startshell/startshell ${TOOLSVZ}
 	install -m 755 pigz/pigz ${TOOLSVZ}
+	install -m 755 driveready/driveready ${TOOLSVZ}
 	${MAKE} -C dbuslock DESTDIR=${buildroot} install_vendor
 	( \
 		if test -d /usr/include/satsolver;then \
@@ -28,5 +30,6 @@ install:
 clean:
 	${MAKE} -C startshell clean
 	${MAKE} -C pigz clean
+	${MAKE} -C driveready clean
 	${MAKE} -C satplugin -f Makefile.swig clean
 	${MAKE} -C dbuslock -f Makefile.swig clean

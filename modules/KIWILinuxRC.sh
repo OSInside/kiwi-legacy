@@ -908,13 +908,14 @@ function probeDevices {
 #--------------------------------------
 function CDDevice {
 	# /.../
-	# detect CD/DVD device. The function use the information
-	# from hwinfo --cdrom to activate the drive
+	# detect CD/DVD device(s). The function use the information
+	# from hwinfo --cdrom to search for the block device
 	# ----
 	local count=0
 	for module in usb-storage sr_mod cdrom ide-cd BusLogic;do
 		/sbin/modprobe $module
 	done
+	Echo -n "Waiting for CD/DVD device(s) to appear..."
 	while true;do
 		cddevs=`/usr/sbin/hwinfo --cdrom | grep "Device File:" | cut -f2 -d:`
 		cddevs=`echo $cddevs | sed -e "s@(.*)@@"`
@@ -923,14 +924,15 @@ function CDDevice {
 				test -z $cddev && cddev=$i || cddev=$cddev:$i
 			fi
 		done
-		if [ ! -z $cddev ] || [ $count -eq 6 ]; then
+		if [ ! -z "$cddev" ] || [ $count -eq 12 ]; then
 			break
 		else
-			Echo "Drive not ready yet... waiting"
+			echo -n .
 			sleep 1
 		fi
 		count=`expr $count + 1`
 	done
+	echo
 	if [ -z $cddev ];then
 		systemException \
 			"Failed to detect CD drive !" \
@@ -1005,25 +1007,30 @@ function CDMount {
 	# the CD configuration on
 	# ----
 	local count=0
-	mkdir -p /cdrom
+	mkdir -p /cdrom && CDDevice
+	Echo -n "Mounting CD/DVD drive..."
 	while true;do
-		CDDevice
 		IFS=":"; for i in $cddev;do
-			mount $i /cdrom >/dev/null
-			if [ -f $LIVECD_CONFIG ];then
-				cddev=$i; return
+			if [ -x /usr/bin/driveready ];then
+				driveready $cddev && mount $i /cdrom >/dev/null
+			else
+				mount $i /cdrom >/dev/null
 			fi
-			umount $i >/dev/null
+			if [ -f $LIVECD_CONFIG ];then
+				cddev=$i; echo; return
+			fi
+			umount $i &>/dev/null
 		done
 		IFS=$IFS_ORIG
-		if [ $count -eq 6 ]; then
+		if [ $count -eq 12 ]; then
 			break
 		else
-			echo "Drive not ready yet... waiting"
+			echo -n .
 			sleep 1
 		fi
 		count=`expr $count + 1`
 	done
+	echo
 	systemException \
 		"Couldn't find CD image configuration file" \
 	"reboot"

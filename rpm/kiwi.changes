@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Fri May 23 17:34:13 CEST 2008 - ms@suse.de
 
+- added sense code checking for CD/DVD drives (bnc #390934)
 - fixed SaT solvable creation (bnc #393495)
 
 -------------------------------------------------------------------
