@@ -15,21 +15,21 @@ static void print_hex(const unsigned char *p, int len) {
 	int i;
 	for (i = 0; i < len; i++) {
 		if (i % 16 == 0) {
-			printf ("%04x: ", i);
+			fprintf (stderr,"%04x: ", i);
 		}
-		printf ("%02x", p[i]);
+		fprintf (stderr,"%02x", p[i]);
 		if (i % 4 == 3) {
 			if (i % 16 == 15) {
-				printf ("\n");
+				fprintf (stderr,"\n");
 			} else {
-				printf ("  ");
+				fprintf (stderr,"  ");
 			}
 		} else {
-			printf (" ");
+			fprintf (stderr," ");
 		}
 	}
 	if (len % 16) {
-		printf ("\n");
+		fprintf (stderr,"\n");
 	}
 }
 
@@ -64,7 +64,7 @@ int main(int argc, char **argv) {
 	}
 
 	if ((transport.masked_status & CHECK_CONDITION) && transport.sb_len_wr) {
-		printf("* check sense data:\n");
+		fprintf(stderr,"* check sense data:\n");
 		print_hex (sense_data, sizeof(sense_data));
 		fprintf (stderr,"SK=0x%02x ASC=0x%02x ASCQ=0x%02x\n",
 			sense_data[2], sense_data[12], sense_data[13]

@@ -918,7 +918,7 @@ function CDDevice {
 	Echo -n "Waiting for CD/DVD device(s) to appear..."
 	while true;do
 		cddevs=`/usr/sbin/hwinfo --cdrom | grep "Device File:" | cut -f2 -d:`
-		cddevs=`echo $cddevs | sed -e "s@(.*)@@"`
+		cddevs=`echo $cddevs`
 		for i in $cddevs;do
 			if [ -b $i ];then
 				test -z $cddev && cddev=$i || cddev=$cddev:$i
