@@ -1,6 +1,6 @@
 # /.../
 # Copyright (c) 2006 SUSE LINUX Products GmbH. All rights reserved.
-# Author: Marcus Schaefer <ms@suse.de>, 2006
+# Author: Marcus Schaefer <sax@suse.de>, 2006
 #
 # Makefile for OpenSuSE - KIWI Image System
 # ---
