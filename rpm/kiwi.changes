@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed May 28 18:25:19 CEST 2008 - ms@suse.de
+
+- don't call kiwiMount function if NFSROOT is used
+
+-------------------------------------------------------------------
 Wed May 28 11:42:16 CEST 2008 - ms@suse.de
 
 - fixed blocks/blocksize value used if the remote image is

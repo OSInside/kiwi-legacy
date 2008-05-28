@@ -655,9 +655,16 @@ function updateRootDeviceFstab {
 	# /.../
 	# add one line to the fstab file for the root device
 	# ----
+	IFS=$IFS_ORIG
 	local prefix=$1
 	local rdev=$2
 	local nfstab=$prefix/etc/fstab
+	if [ ! -z "$NFSROOT" ];then
+		local server=`echo $rdev | cut -f3 -d" "`
+		local option=`echo $rdev | cut -f2 -d" "`
+		echo "$server / nfs $option 0 0" >> $nfstab
+		return
+	fi
 	if [ -z "$UNIONFS_CONFIG" ]; then
 		echo "$rdev / $FSTYPE defaults 0 0" >> $nfstab
 	fi
@@ -1956,9 +1963,6 @@ function kiwiMount {
 	if [ -z $FSTYPE ] || [ $FSTYPE = "unknown" ];then
 		FSTYPE="auto"
 	fi
-	if [ ! -z "$NFSROOT" ];then
-		FSTYPE="nfs"
-	fi
 	#======================================
 	# decide for a mount method
 	#--------------------------------------
@@ -2137,7 +2141,8 @@ function mountSystemStandard {
 	local mountDevice=$1
 	if [ ! -z $FSTYPE ]          && 
 	   [ ! $FSTYPE = "unknown" ] && 
-	   [ ! $FSTYPE = "auto" ]
+	   [ ! $FSTYPE = "auto" ]    &&
+	   [ ! $FSTYPE = "nfs" ]
 	then
 		kiwiMount $mountDevice "/mnt"
 	else
@@ -2162,7 +2167,9 @@ function mountSystem {
 	#======================================
 	# wait for storage device to appear
 	#--------------------------------------
-	waitForStorageDevice $mountDevice
+	if echo $mountDevice | grep -q ^/;then
+		waitForStorageDevice $mountDevice
+	fi
 	#======================================
 	# check root tree type
 	#--------------------------------------

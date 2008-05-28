@@ -651,7 +651,7 @@ if [ $LOCAL_BOOT = "no" ];then
 	if test $systemIntegrity = "clean";then
 		setupDefaultPXENetwork /config
 		setupDefaultFstab /config
-		updateRootDeviceFstab /config $imageRootDevice
+		updateRootDeviceFstab /config "$imageRootDevice"
 		if test ! -z $DISK;then
 			updateSwapDeviceFstab /config ${DISK}1
 			updateOtherDeviceFstab /config
