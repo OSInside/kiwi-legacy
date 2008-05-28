@@ -1207,7 +1207,7 @@ function setupNetwork {
 		done
 	fi
 	export PXE_IFACE=$iface
-	dhcpcd $PXE_IFACE 2>&1
+	dhcpcd $PXE_IFACE 1>&2
 	if test $? != 0;then
 		systemException \
 			"Failed to setup DHCP network interface !" \
@@ -1244,7 +1244,8 @@ function updateNeeded {
 			1) imageName=$n   ; field=2 ;;
 			2) imageVersion=$n; field=3 ;;
 			3) imageServer=$n ; field=4 ;;
-			4) imageBlkSize=$n
+			4) imageBlkSize=$n; field=5 ;;
+			5) imageZipped=$n ;
 		esac
 		done
 		atversion="$imageName-$imageVersion"
@@ -1259,7 +1260,7 @@ function updateNeeded {
 		if [ ! -f /etc/image.md5 ];then
 			fetchFile $imageMD5s /etc/image.md5 uncomp $imageServer
 		fi
-		read sum1 blocks blocksize < /etc/image.md5
+		read sum1 blocks blocksize zblocks zblocksize < /etc/image.md5
 		if [ ! -z "$sum1" ];then
 			SYSTEM_MD5STATUS="$SYSTEM_MD5STATUS:$sum1"
 		else
@@ -1802,7 +1803,15 @@ function validateBlockSize {
 	# to the size of the image. The block size itself is also
 	# limited to 65464 bytes
 	# ----
-	isize=`expr $blocks \* $blocksize`
+	if [ -z "$zblocks" ] && [ -z "$blocks" ];then
+		# md5 file not yet read in... skip
+		return
+	fi
+	if [ ! -z "$zblocks" ];then
+		isize=`expr $zblocks \* $zblocksize`
+	else
+		isize=`expr $blocks \* $blocksize`
+	fi
 	isize=`expr $isize / 65535`
 	if [ $isize -gt $imageBlkSize ];then
 		imageBlkSize=`expr $isize + 1024`
@@ -1946,6 +1955,9 @@ function kiwiMount {
 	fi
 	if [ -z $FSTYPE ] || [ $FSTYPE = "unknown" ];then
 		FSTYPE="auto"
+	fi
+	if [ ! -z "$NFSROOT" ];then
+		FSTYPE="nfs"
 	fi
 	#======================================
 	# decide for a mount method
@@ -2396,6 +2408,9 @@ function fetchFile {
 			;;
 		"tftp")
 			validateBlockSize
+			if [ -z "$multicast" ];then
+				multicast=off
+			fi
 			if test "$izip" = "compressed"; then
 				atftp \
 					--option "multicast $multicast" \

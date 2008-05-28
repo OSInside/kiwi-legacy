@@ -3060,7 +3060,7 @@ sub buildMD5Sum {
 	my $primes = qxx ("factor $size"); $primes =~ s/^.*: //;
 	my $blocksize = 1;
 	for my $factor (split /\s/,$primes) {
-		last if ($blocksize * $factor > 8192);
+		last if ($blocksize * $factor > 65464);
 		$blocksize *= $factor;
 	}
 	my $blocks = $size / $blocksize;
@@ -3070,6 +3070,7 @@ sub buildMD5Sum {
 		$name =~ s/\.gz//;
 	}
 	qxx ("echo \"$sum $blocks $blocksize\" > $imageDest/$name.md5");
+	$this->{md5file} = $imageDest."/".$name.".md5";
 	$kiwi -> done();
 	return $name;
 }
@@ -3143,6 +3144,30 @@ sub compressImage {
 		return undef;
 	}
 	$kiwi -> done();
+	#==========================================
+	# Update md5file
+	#------------------------------------------
+	if (defined $this->{md5file}) {
+		$kiwi -> info ("Updating md5 file...");
+		if (! open (FD,$this->{md5file})) {
+			$kiwi -> failed ();
+			$kiwi -> error ("Failed to open md5 file: $!");
+			$kiwi -> failed ();
+			return undef;
+		}
+		my $line = <FD>; close FD; chomp $line;
+		my $size = -s "$imageDest/$name.gz";
+		my $primes = qxx ("factor $size"); $primes =~ s/^.*: //;
+		my $blocksize = 1;
+		for my $factor (split /\s/,$primes) {
+			last if ($blocksize * $factor > 65464);
+			$blocksize *= $factor;
+		}
+		my $blocks = $size / $blocksize;
+		my $md5file= $this->{md5file};
+		qxx ("echo \"$line $blocks $blocksize\" > $md5file");
+		$kiwi -> done();
+	}
 	return $name;
 }
 

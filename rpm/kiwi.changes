@@ -1,4 +1,16 @@
 -------------------------------------------------------------------
+Wed May 28 11:42:16 CEST 2008 - ms@suse.de
+
+- fixed blocks/blocksize value used if the remote image is
+  compressed. Normally this information was created from the
+  uncompressed image but if the download happens on a compressed
+  file the values should also be available for this file.
+  Detailed information can be found here: (bnc #387228)
+- fixed NFSROOT mount. NFS mount will fail if the -t auto mount
+  option is set. The fix makes sure FSTYPE=nfs is set before
+  mounting.  
+
+-------------------------------------------------------------------
 Fri May 23 17:34:13 CEST 2008 - ms@suse.de
 
 - added sense code checking for CD/DVD drives (bnc #390934)

@@ -109,7 +109,8 @@ if test ! -z $DISK;then
 			1) imageName=$n   ; field=2 ;;
 			2) imageVersion=$n; field=3 ;;
 			3) imageServer=$n ; field=4 ;;
-			4) imageBlkSize=$n
+			4) imageBlkSize=$n; field=5 ;;
+			5) imageZipped=$n ;
 		esac
 		done
 		atversion="$imageName-$imageVersion"

@@ -352,13 +352,14 @@ if [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ];then
 			# get image md5sum to be able to check for the size
 			# requirements if we are loading into RAM
 			# ---
-			if ! fetchFile $imageMD5s /etc/image.md5 uncomp $imageServer; then
+			fetchFile $imageMD5s /etc/image.md5 uncomp $imageServer
+			if test $loadCode != 0 || ! loadOK "$loadStatus"; then
 				systemException \
-					"Failed to load image MD5: $imageName -> no such file" \
+					"Download of $imageMD5s failed: $loadStatus" \
 				"reboot"
 			fi
 			IFS=" "
-			read sum1 blocks blocksize < /etc/image.md5
+			read sum1 blocks blocksize zblocks zblocksize < /etc/image.md5
 			if ! validateSize;then
 				systemException \
 					"Not enough space available for this image" \
@@ -367,7 +368,7 @@ if [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ];then
 			# /.../
 			# now load the image into the imageDevice
 			# ---
-			multicast="on"
+			multicast=on
 			if test "$imageZipped" = "compressed"; then
 				Echo "Compressed image found: Disable multicast download"
 				multicast="off"
@@ -683,7 +684,8 @@ if [ $LOCAL_BOOT = "no" ];then
 				1) imageName=$n   ; field=2 ;;
 				2) imageVersion=$n; field=3 ;;
 				3) imageServer=$n ; field=4 ;;
-				4) imageBlkSize=$n
+				4) imageBlkSize=$n; field=5 ;;
+				5) imageZipped=$n ;
 			esac
 			done
 			Echo "Notify of new image: image/$imageName"
