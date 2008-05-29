@@ -1,0 +1,150 @@
+\index{KIWI images!appliance|(}
+\chapter{Creating Appliances with KIWI}
+\label{chapter:appliance}
+\minitoc
+
+\section{History}
+Traditionally, many computing functions were written as software applications
+running on top of a general-purpose operating system. The consumer
+(whether home computer user or the IT department of a company) bought a
+computer, installed the operating system or configured a pre-installed
+operating system, and then installed one or more applications on top of
+the operating system. An e-mail server was just an e-mail application
+running on top of Linux, Unix, Microsoft Windows, or some other operating
+system, on a computer that was not designed specifically for that application.
+
+\section{The KIWI model}
+With KIWI we started to use a different model. Instead of installing
+firewall software on top of a general purpose computer/operating system,
+the designers/engineers built images that are designed specifically for
+the task. These are so called appliances.
+When building appliances with KIWI the following proceeding has proven
+to work reliably. Nevertheless the following is just a recommendation
+and can be adapted to special needs and environments.
+
+\begin{enumerate}
+\item First you should choose an appropriate image description template from
+      the provided kiwi examples and add/adapt repository and/or
+      package names according to the distribution you want to
+      build an image for
+\item Allow the image to create an in-place git repository to
+      allow tracking of non binary changes. This is done by adding
+      the following into your config.sh script
+ 
+      \begin{Command}{8cm}
+      baseSetupPlainTextGITRepository
+      \end{Command}
+
+\item Prepare the preliminary version of your new appliance by
+      calling \textbf{kiwi --prepare ...}. Refer to chapter \ref{chapter:usb}
+      (USB image - Live-Stick System) for details.
+\item Decide for a testing environment. In my opinion a real
+      hardware based test machine which allows to boot from USB
+      is a good and fast approach. According to this make sure
+      you have a usb type in your config.xml
+
+      \begin{Command}{12cm}
+      <type filesystem="ext3"\\
+      \hspace*{1.6cm}boot="usbboot/suse-...">usb</type>
+      \end{Command}
+
+\item Create the preliminary live stick image of your new appliance
+      by calling \textbf{kiwi --create ...}. After successful creation
+      of the image files find an USB stick which is able to store
+      your appliance and plug it into a free USB port on your image
+      build machine. Use the \textbf{kiwi --bootstick ...} call to deploy
+      the image on the stick. Refer to chapter \ref{chapter:usb}
+      (USB image - Live-Stick System) for details.
+\item Plug in the stick on your test machine and boot it
+\item After your test system has successfully booted from stick login
+      into your appliance and start to tweak the system according to
+      your needs. This includes all actions required to make the
+      appliance work as you wish. Before you start take care for
+      the following:
+      \begin{itemize}
+      \item Create an initial package list. This can be done by calling:
+
+            \begin{Command}{10cm}
+            rpm -qa | sort > /tmp/deployPackages
+            \end{Command}
+
+      \item Check the output of the command \textbf{git status} and
+            include everything which is unknown to git and surely
+            will not be changed by you and will not become part of the
+            image description overlay files to the \textit{/.gitignore}
+            files
+      \end{itemize}
+
+      After the initial package list exists and the git repository is
+      clean you can start to configure the system. You never should
+      install additional software just by installing an unmanaged archive
+      or build and install from source. It's very hard to find out
+      what binary files had been installed and it's also not architecture
+      safe. If there is really no other way for the software to become
+      part of the image you should address this issue directly in your
+      image description and the config.sh script but not after the initial
+      deployment has happened.
+\item As soon as your system works as expected your new appliance is
+      ready to enter the final stage. At this point you have done several
+      changes to the system but they are all tracked and should now become
+      part of your image description. To include the changes into your
+      image description the following process should be used:
+      \begin{itemize}
+      \item Check the differences between the currently installed packages
+            and the initial deployment list. This can be done by calling:
+
+            \begin{Command}{12cm}
+            rpm -qa | sort > /tmp/appliancePackages\\
+            diff -u /tmp/deployPackages /tmp/appliancePackages
+            \end{Command}
+
+            Add those packages which are labeled with (+) to the
+            \textbf{<packages type="image">} section of your config.xml
+            file and remove those packages which has been removed (-)
+            appropriately. If there are packages which has been removed
+            against the will of the package manager make sure you address
+            the uninstallation of these packages in your config.sh
+            script. If you have installed packages from repositories which
+            are not part of your config.xml file you should also add these
+            repositories in order to allow kiwi to install the packages
+      \item Check the differences made in the configuration files. This
+            can be easily done by calling:
+
+            \begin{Command}{8cm}
+            git diff > /tmp/appliancePatch
+            \end{Command}
+
+            The created patch should become part of your image description
+            and you should make sure the patch is applied when preparing the
+            image. According to this the command:
+
+            \begin{Command}{8cm}
+            patch -p0 < appliancePatch
+            \end{Command}
+
+            needs to be added as part of your config.sh script
+
+      \item Check for new non binary files added. This can be done by
+            calling:
+            
+            \begin{Command}{4cm}
+            git status
+            \end{Command}
+
+	        All files not under version control so far will be listed by
+            the command above. Check the contents of this list make sure
+            to add all files which are not created automatically to
+            become part of your image description. To do this simply
+            clone (copy) these files with respect to the filesystem
+            structure as overlay files in your image description \textit{root/}
+            directory
+      \end{itemize}
+\item All your valuable work is now stored in one image description
+      and can be re-used in all KIWI supported image types. Congratulation !
+      To make sure the appliance works as expected prepare a new image
+      tree and create an image from the new tree. If you like you can
+      deactivate the creation of the git repository which will save you
+      some space on the filesystem. If this appliance is a server I recommend
+      to leave the repository because it allows you to keep track of changes
+      during the live time of this appliance.
+\end{enumerate}

@@ -17,6 +17,7 @@ TEX=kiwi.tex           \
 	usb.tex            \
 	vmx.tex            \
 	workflow.tex       \
+	appliance.tex      \
 	xen.tex
 
 all: revision ps
