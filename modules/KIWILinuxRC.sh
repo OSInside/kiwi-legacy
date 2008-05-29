@@ -2003,6 +2003,12 @@ function mountSystemUnified {
 	local roDevice=`echo $UNIONFS_CONFIG | cut -d , -f 2`
 	local unionFST=`echo $UNIONFS_CONFIG | cut -d , -f 3`
 	#======================================
+	# check read/only device location
+	#--------------------------------------
+	if [ ! -z "$NFSROOT" ];then
+		roDevice="$imageRootDevice"
+	fi
+	#======================================
 	# check read/write device location
 	#--------------------------------------
 	echo $rwDevice | grep -q ram

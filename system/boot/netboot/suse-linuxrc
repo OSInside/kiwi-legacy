@@ -471,6 +471,9 @@ else
 		done
 		Echo "Mounting NFS root system: $nfsRootServer:$nfsRootDevice..."
 		imageRootDevice="-o nolock,rw $nfsRootServer:$nfsRootDevice"
+		if [ ! -z "$COMBINED_IMAGE" ] || [ ! -z "$UNIONFS_CONFIG" ];then
+			imageRootDevice="-o nolock,ro $nfsRootServer:$nfsRootDevice"
+		fi
 		imageRootName="NFSRoot-System"
 		systemIntegrity="clean"
 		export FSTYPE=nfs

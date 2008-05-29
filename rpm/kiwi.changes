@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Thu May 29 17:07:35 CEST 2008 - ms@suse.de
+
+- make NFSROOT work together with UNIONFS_CONFIG. The read-only
+  device in the UNIONFS_CONFIG setup will be replaced by the
+  nfs mount options. According to this the follwing UNIONFS_CONFIG
+  setup would be sufficient: UNIONFS_CONFIG=/dev/ram1,nfs,aufs
+- if NFSROOT is used in combination with UNIONFS_CONFIG or
+  COMBINED_IMAGE mount the remote root tree read-only
+
+-------------------------------------------------------------------
 Thu May 29 11:41:12 CEST 2008 - ms@suse.de
 
 - better NFSROOT fix which fixes kiwiMount to work
