@@ -1,6 +1,10 @@
 -------------------------------------------------------------------
 Thu May 29 11:41:12 CEST 2008 - ms@suse.de
 
+- better NFSROOT fix which fixes kiwiMount to work
+  when kiwiMount is set. This is required in case of a
+  non standard mount operation which also makes sense
+  for root over NFS (example COMBINED_IMAGE over nfs)
 - update documentation:
   * added a chapter how to build appliances with kiwi
 

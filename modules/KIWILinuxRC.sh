@@ -986,7 +986,7 @@ function USBStickDevice {
 				if [ $removable -eq 1 ];then
 					stickRoot=$device
 					stickDevice="$device"1
-					if ! kiwiMount $stickDevice "/mnt";then
+					if ! kiwiMount "$stickDevice" "/mnt";then
 						continue
 					fi
 					if [ ! -d /mnt/image ];then
@@ -1955,10 +1955,12 @@ function kiwiMount {
 	#======================================
 	# probe filesystem
 	#--------------------------------------
-	if [ ! -z "$lop" ];then
-		probeFileSystem $lop
-	else
-		probeFileSystem $src
+	if [ ! "$FSTYPE" = "nfs" ];then
+		if [ ! -z "$lop" ];then
+			probeFileSystem $lop
+		else
+			probeFileSystem $src
+		fi
 	fi
 	if [ -z $FSTYPE ] || [ $FSTYPE = "unknown" ];then
 		FSTYPE="auto"
@@ -2047,7 +2049,7 @@ function mountSystemUnified {
 	#======================================
 	# mount read only device
 	#--------------------------------------
-	if ! kiwiMount $roDevice $roDir "" $loopf;then
+	if ! kiwiMount "$roDevice" "$roDir" "" $loopf;then
 		Echo "Failed to mount read only filesystem"
 		return 1
 	fi
@@ -2080,7 +2082,7 @@ function mountSystemCombined {
 	# mount the read-only partition to /read-only and use
 	# mount option -o ro for this filesystem
 	# ----
-	if ! kiwiMount $roDevice "/read-only" "" $loopf;then
+	if ! kiwiMount "$roDevice" "/read-only" "" $loopf;then
 		Echo "Failed to mount read only filesystem"
 		return 1
 	fi
@@ -2141,10 +2143,9 @@ function mountSystemStandard {
 	local mountDevice=$1
 	if [ ! -z $FSTYPE ]          && 
 	   [ ! $FSTYPE = "unknown" ] && 
-	   [ ! $FSTYPE = "auto" ]    &&
-	   [ ! $FSTYPE = "nfs" ]
+	   [ ! $FSTYPE = "auto" ]
 	then
-		kiwiMount $mountDevice "/mnt"
+		kiwiMount "$mountDevice" "/mnt"
 	else
 		mount $mountDevice /mnt >/dev/null
 	fi
@@ -2160,7 +2161,7 @@ function mountSystem {
 	#======================================
 	# set primary mount device
 	#--------------------------------------
-	local mountDevice=$imageRootDevice
+	local mountDevice="$imageRootDevice"
 	if test ! -z $1;then
 		mountDevice="$1"
 	fi

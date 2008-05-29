@@ -473,6 +473,7 @@ else
 		imageRootDevice="-o nolock,rw $nfsRootServer:$nfsRootDevice"
 		imageRootName="NFSRoot-System"
 		systemIntegrity="clean"
+		export FSTYPE=nfs
 	fi
 	#======================================
 	# 12.2) Check for NBD root
