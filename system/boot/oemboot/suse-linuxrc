@@ -788,7 +788,7 @@ if [ $LOCAL_BOOT = "no" ];then
 					systemException "Failed to copy recovery kernel" "reboot"
 				fi
 				if ! cp /reco-root/boot/message /reco-save/boot;then
-					systemException "Failed to copy grub message file" "reboot"
+					systemException "Failed to copy message file" "reboot"
 				fi
 				umount /reco-save && rmdir /reco-save
 				umount /reco-root && rmdir /reco-root
@@ -966,7 +966,7 @@ if [ $LOCAL_BOOT = "no" ];then
 		fi
 	fi
 	if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ]; then
-		Echo "Creating grub configuration"
+		Echo "Creating boot loader configuration"
 		if [ -z "$OEM_BOOT_TITLE" ];then
 			export OEM_BOOT_TITLE="OEM"
 		fi
@@ -974,10 +974,10 @@ if [ $LOCAL_BOOT = "no" ];then
 			OEM_RECOVERY=${deviceDisk}4
 		fi
 		if [ $HAVE_SWAP -eq 1 ];then
-			setupBootLoaderGrub \
+			setupBootLoader \
 				/mnt /config 1 ${deviceDisk}2 $OEM_BOOT_TITLE $deviceSwap
 		else
-			setupBootLoaderGrub \
+			setupBootLoader \
 				/mnt /config 0 ${deviceDisk}1 $OEM_BOOT_TITLE
 		fi
 	fi
@@ -1004,17 +1004,15 @@ if [ $LOCAL_BOOT = "no" ] && [ ! -z "$OEM_RECOVERY" ];then
 	if ! mount $deviceRecovery /reco-save >/dev/null;then
 		systemException "Failed to mount recovery device" "reboot"
 	fi
-	mkdir -p /reco-save/boot/grub
-	if ! cp /mnt/boot/grub/menu.lst /reco-save/boot/grub;then
-		systemException "Failed to copy recovery menu.lst" "reboot"
-	fi
-	mkdir -p /reco-save/etc
-	if ! cp /mnt/etc/grub.conf /reco-save/etc;then
-		systemException "Failed to copy recovery grub.conf" "reboot"
-	fi
 	if ! cp /mnt/etc/fstab /reco-save/etc;then
 		systemException "Failed to copy recovery fstab" "reboot"
 	fi
+	for i in `setupBootLoaderFiles`;do
+		bootdir=`dirname $i` && mkdir -p /reco-save/$bootdir
+		if ! cp /mnt/$i /reco-save/$i;then
+			systemException "Failed to copy recovery $i" "reboot"
+		fi
+	done
 	umount /reco-save && rmdir /reco-save
 fi
 

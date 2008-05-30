@@ -49,7 +49,6 @@ License:        GPL v2 or later
 Source:         %{name}.tar.bz2
 Source1:        %{name}-rpmlintrc
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
-ExcludeArch:    ia64 ppc64 s390x s390 ppc
 Recommends:     smart zypper
 
 %description
@@ -63,6 +62,7 @@ Authors:
 --------
     Marcus Schaefer <ms@novell.com>
 
+%ifarch %ix86 x86_64
 %package -n kiwi-pxeboot
 License:        GPL v2 or later
 Requires:       syslinux
@@ -74,11 +74,10 @@ Group:          System/Management
 %description -n kiwi-pxeboot
 PXE basic directory structure and pre-build boot images
 
-
-
 Authors:
 --------
     Marcus Schaefer <ms@novell.com>
+%endif
 
 %package -n kiwi-tools
 License:        GPL v2 or later
@@ -97,6 +96,7 @@ Authors:
 --------
     Marcus Schaefer <ms@novell.com>
 
+%ifarch %ix86 x86_64
 %package -n kiwi-pxeboot-prebuild
 License:        GPL v2 only
 Requires:       syslinux
@@ -108,12 +108,12 @@ Group:          System/Management
 %description -n kiwi-pxeboot-prebuild
 This package contains the OpenSuSE - KIWI TFTP prebuild boot images
 
-
-
 Authors:
 --------
     Marcus Schaefer <ms@novell.com>
+%endif
 
+%ifarch %ix86 x86_64
 %package -n kiwi-desc-isoboot
 License:        GPL v2 or later
 Requires:       kiwi syslinux mkisofs
@@ -124,8 +124,6 @@ Group:          System/Management
 
 %description -n kiwi-desc-isoboot
 kiwi boot (initrd) image for activating system images on ISO media
-
-
 
 Authors:
 --------
@@ -142,8 +140,6 @@ Group:          System/Management
 %description -n kiwi-desc-usbboot
 kiwi boot (initrd) image for activating system images on USB stick
 
-
-
 Authors:
 --------
     Marcus Schaefer <ms@novell.com>
@@ -158,8 +154,6 @@ Group:          System/Management
 
 %description -n kiwi-desc-vmxboot
 kiwi boot (initrd) image for activating system images on virtual disk
-
-
 
 Authors:
 --------
@@ -176,8 +170,6 @@ Group:          System/Management
 %description -n kiwi-desc-netboot
 kiwi boot (initrd) image for activating system images via TFTP
 
-
-
 Authors:
 --------
     Marcus Schaefer <ms@novell.com>
@@ -192,8 +184,6 @@ Group:          System/Management
 
 %description -n kiwi-desc-xenboot
 kiwi boot (initrd) image for activating a Xen image by xm
-
-
 
 Authors:
 --------
@@ -211,8 +201,7 @@ Group:          System/Management
 This package contains the OpenSuSE - KIWI image descriptions. Each
 image description exists in a single directory and contains an oemboot
 image description
-
-
+%endif
 
 %package -n kiwi-doc
 License:        LGPL v2.0 or later
@@ -222,8 +211,6 @@ Group:          Documentation/Howto
 %description -n kiwi-doc
 This package contains the documentation and manual pages for the KIWI
 Image System
-
-
 
 Authors:
 --------
@@ -262,8 +249,9 @@ export K_USER=0 # set value to -1 to prevent building boot images
 test -e /.buildenv || export K_USER=-1 # no buildenv, no boot image build
 test -e /.buildenv && . /.buildenv
 make buildroot=$RPM_BUILD_ROOT CFLAGS="$RPM_OPT_FLAGS"
+%ifarch %ix86 x86_64
 if [ "$UID" = "$K_USER" ];then
-	# prepare and create boot images...
+	# prepare and create prebuilt PXE boot images...
 	(cd tools/dbuslock && make install)
 	mkdir -p $RPM_BUILD_ROOT/srv/tftpboot/pxelinux.cfg
 	mkdir -p $RPM_BUILD_ROOT/srv/tftpboot/boot
@@ -337,6 +325,7 @@ else
 	echo "cannot build prebuild images without root privileges"
 	true
 fi
+%endif
 #install
 cd $RPM_BUILD_DIR/kiwi
 mkdir -p $RPM_BUILD_ROOT/etc/permissions.d
@@ -347,10 +336,18 @@ make buildroot=$RPM_BUILD_ROOT \
      man_prefix=$RPM_BUILD_ROOT/%{_mandir} \
      install
 touch kiwi.loader
+%ifarch %ix86 x86_64
 if [ ! "$UID" = "$K_USER" ];then
 	install -m 644 pxeboot/pxelinux.0.config \
 		$RPM_BUILD_ROOT/srv/tftpboot/pxelinux.cfg/default
 fi
+%else
+	# no boot image descriptions for non x86 archs
+	rm -rf $RPM_BUILD_ROOT/%{_datadir}/kiwi/image/*
+	# no PXE boot setup for non x86 archs
+	rm -rf $RPM_BUILD_ROOT/srv/tftpboot
+	rm -rf $RPM_BUILD_ROOT/etc/permissions.d/kiwi
+%endif
 test -f $RPM_BUILD_ROOT/srv/tftpboot/pxelinux.0 && \
 	echo /srv/tftpboot/pxelinux.0 > kiwi.loader
 test -f $RPM_BUILD_ROOT/srv/tftpboot/mboot.c32 && \
@@ -423,7 +420,7 @@ rm -rf $RPM_BUILD_ROOT
 #=================================================
 # KIWI-pxeboot files...  
 # ------------------------------------------------
-
+%ifarch %ix86 x86_64
 %files -n kiwi-pxeboot -f kiwi.loader
 %defattr(-, root, root)
 %doc /srv/tftpboot/README
@@ -435,14 +432,16 @@ rm -rf $RPM_BUILD_ROOT
 %dir /srv/tftpboot/upload
 %dir /srv/tftpboot/boot
 /srv/tftpboot/pxelinux.cfg/default
+%endif
 #=================================================
 # KIWI-pxeboot-prebuild files...  
 # ------------------------------------------------
-
+%ifarch %ix86 x86_64
 %files -n kiwi-pxeboot-prebuild
 %defattr(-, root, root)
 %doc /srv/tftpboot/README.prebuild
 /srv/tftpboot/boot
+%endif
 #=================================================
 # KIWI-tools files...  
 # ------------------------------------------------
@@ -454,7 +453,7 @@ rm -rf $RPM_BUILD_ROOT
 #=================================================
 # KIWI-desc-*...
 # ------------------------------------------------
-
+%ifarch %ix86 x86_64
 %files -n kiwi-desc-isoboot
 %defattr(-, root, root)
 %dir %{_datadir}/kiwi/image/isoboot
@@ -490,3 +489,4 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_datadir}/kiwi/image/oemboot
 %doc %{_datadir}/kiwi/image/oemboot/README
 %{_datadir}/kiwi/image/oemboot/suse*
+%endif

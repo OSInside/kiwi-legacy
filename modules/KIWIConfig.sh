@@ -429,14 +429,15 @@ function baseSetupPlainTextGITRepository {
 		/sys /dev /var/log /home /media /var/run /var/tmp /tmp /var/lock
 		/image /var/spool /var/cache /var/lib /boot /root /var/adm
 		/usr/share/doc /base-system /usr/lib /usr/lib64 /usr/bin /usr/sbin
-		/usr/share/man /proc /bin /sbin /lib /lib64 /.git
+		/usr/share/man /proc /bin /sbin /lib /lib64 /opt
+		/usr/share/X11 /.git
 	"
 	#======================================
 	# files to ignore
 	#--------------------------------------
 	local files="
-		/etc/Image* *.lock /etc/resolv.conf *.gif *.png
-		*.jpg *.eps *.ps
+		./etc/Image* *.lock ./etc/resolv.conf *.gif *.png
+		*.jpg *.eps *.ps *.la *.so */lib */lib64 */doc */zoneinfo
 	"
 	#======================================
 	# creae .gitignore and find list
@@ -444,9 +445,9 @@ function baseSetupPlainTextGITRepository {
 	for entry in $files;do
 		echo $entry >> .gitignore
 		if [ -z "$ignore" ];then
-			ignore="-name $entry"
+			ignore="-wholename $entry"
 		else
-			ignore="$ignore -or -name $entry"
+			ignore="$ignore -or -wholename $entry"
 		fi
 	done
 	for entry in $dirs;do

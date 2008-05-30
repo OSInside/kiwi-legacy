@@ -337,7 +337,26 @@ function killBlogD {
 	fi
 }
 #======================================
-# installGrub
+# installBootLoader
+#--------------------------------------
+function installBootLoader {
+	# /.../
+	# generic function to install the boot loader.
+	# The selection of the bootloader happens according to
+	# the architecture of the system
+	# ----
+	local arch=`uname -m`
+	case $arch in
+		i*86)   installBootLoaderGrub ;;
+		x86_64) installBootLoaderGrub ;;
+		*)
+		systemException \
+			"*** boot loader setup for $arch not implemented ***" \
+		"reboot"
+	esac
+}
+#======================================
+# installBootLoaderGrub
 #--------------------------------------
 function installBootLoaderGrub {
 	# /.../
@@ -363,7 +382,7 @@ function setupSUSEInitrd {
 	# call mkinitrd on suse systems to create the distro initrd
 	# based on /etc/sysconfig/kernel
 	# ----
-	grubOK=1
+	bootLoaderOK=1
 	local umountProc=0
 	local umountSys=0
 	local systemMap=0
@@ -385,7 +404,7 @@ function setupSUSEInitrd {
 		if ! mkinitrd;then
 			Echo "Can't create initrd"
 			systemIntegrity=unknown
-			grubOK=0
+			bootLoaderOK=0
 		fi
 		if [ -f /etc/init.d/boot.device-mapper ];then
 			/etc/init.d/boot.device-mapper stop
@@ -400,7 +419,7 @@ function setupSUSEInitrd {
 		Echo "Image doesn't include kernel system map"
 		Echo "Can't create initrd"
 		systemIntegrity=unknown
-		grubOK=0
+		bootLoaderOK=0
 	fi
 }
 #======================================
@@ -435,7 +454,56 @@ function callSUSEInitrdScripts {
 	chroot . bash ./run_all.sh
 }
 #======================================
-# installGrub
+# setupBootLoaderFiles
+#--------------------------------------
+function setupBootLoaderFiles {
+	# /.../
+	# generic function which returns the files used for a
+	# specific bootloader. The selection of the bootloader
+	# happens according to the architecture of the system
+	# ----
+	local arch=`uname -m`
+	case $arch in
+		i*86)    setupBootLoaderFilesGrub ;;
+		x86_64)  setupBootLoaderFilesGrub ;;
+		*)
+		systemException \
+			"*** boot loader files for $arch not implemented ***" \
+		"reboot"
+	esac
+}
+#======================================
+# setupBootLoaderFilesGrub
+#--------------------------------------
+function setupBootLoaderFilesGrub {
+	echo "/boot/grub/menu.lst /etc/grub.conf"
+}
+#======================================
+# setupBootLoader
+#--------------------------------------
+function setupBootLoader {
+	# /.../
+	# generic function to setup the boot loader configuration.
+	# The selection of the bootloader happens according to
+	# the architecture of the system
+	# ----
+	local arch=`uname -m`
+	local para=""
+	while [ $# -gt 0 ];do
+		para="$para \"$1\""
+		shift
+	done
+	case $arch in
+		i*86)   eval setupBootLoaderGrub $para ;;
+		x86_64) eval setupBootLoaderGrub $para ;;
+		*)
+		systemException \
+			"*** boot loader setup for $arch not implemented ***" \
+		"reboot"
+	esac
+}
+#======================================
+# setupBootLoaderGrub
 #--------------------------------------
 function setupBootLoaderGrub {
 	# /.../
@@ -452,6 +520,9 @@ function setupBootLoaderGrub {
 	local conf=$destsPrefix/etc/grub.conf
 	local dmap=$destsPrefix/boot/grub/device.map
 	local console=""
+	local kname=""
+	local kernel=""
+	local initrd=""
 	#======================================
 	# check for system image .profile
 	#--------------------------------------
@@ -501,6 +572,7 @@ function setupBootLoaderGrub {
 	if [ -f /image/loader/message ] || [ -f /boot/message ];then
 		echo "gfxmenu $gdev/boot/message" >> $menu
 	fi
+	local count=1
 	IFS="," ; for i in $KERNEL_LIST;do
 		if test ! -z "$i";then
 			#======================================
@@ -508,10 +580,11 @@ function setupBootLoaderGrub {
 			#--------------------------------------
 			kernel=`echo $i | cut -f1 -d:`
 			initrd=`echo $i | cut -f2 -d:`
+			kname=${KERNEL_NAME[$count]}
 			if [ -z "$name" ];then
-				echo "title $kernel [ $gfix ]"                 >> $menu
+				echo "title $kname [ $gfix ]"                   >> $menu
 			else
-				echo "title $name [ $gfix ]"                   >> $menu
+				echo "title $name-$kname [ $gfix ]"             >> $menu
 			fi
 			if [ $kernel = "vmlinuz-xen" ];then
 				echo " root $gdev"                                >> $menu
@@ -540,9 +613,9 @@ function setupBootLoaderGrub {
 			# create failsafe entry
 			#--------------------------------------
 			if [ -z "$name" ];then
-				echo "title Failsafe -- $kernel [ $gfix ]"     >> $menu
+				echo "title Failsafe -- $kname [ $gfix ]"       >> $menu
 			else
-				echo "title Failsafe -- $name [ $gfix ]"       >> $menu
+				echo "title Failsafe -- $name-$kname [ $gfix ]" >> $menu
 			fi
 			if [ $kernel = "vmlinuz-xen" ];then
 				echo " root $gdev"                                >> $menu
@@ -572,9 +645,9 @@ function setupBootLoaderGrub {
 			#--------------------------------------
 			if [ ! -z "$OEM_RECOVERY" ];then
 				if [ -z "$name" ];then
-					echo "title Recovery -- $kernel [ $gfix ]" >> $menu
+					echo "title Recovery [ $gfix ]"             >> $menu
 				else
-					echo "title Recovery -- $name [ $gfix ]"   >> $menu
+					echo "title Recovery [ $gfix ]"             >> $menu
 				fi
 				gdev_recovery="(hd0,3)"
 				rdev_recovery=$OEM_RECOVERY
@@ -598,6 +671,7 @@ function setupBootLoaderGrub {
 					echo " initrd $gdev_recovery/boot/$initrd"    >> $menu
 				fi
 			fi
+			count=`expr $count + 1`
 		fi
 	done
 	#======================================
@@ -949,7 +1023,7 @@ function CDDevice {
 function USBStickDevice {
 	stickFound=0
 	Echo -n "Waiting for USB devices to settle..."
-	for redo in 1 2 3 4 5;do
+	for redo in 1 2 3 4 5 6 7 8 9 10;do
 		for device in /sys/bus/usb/drivers/usb-storage/*;do
 			if [ ! -L $device ];then
 				continue
@@ -1001,7 +1075,7 @@ function USBStickDevice {
 			done
 		done
 		echo -n .
-		sleep 2
+		sleep 3
 	done
 	echo .
 }
@@ -1710,6 +1784,7 @@ function kernelList {
 	# ----
 	prefix=$1
 	KERNEL_LIST=""
+	KERNEL_NAME=""
 	kcount=0
 	for i in $prefix/lib/modules/*;do
 		if [ ! -d $i ];then
@@ -1720,6 +1795,7 @@ function kernelList {
 			continue
 		fi
 		KERNEL_PAIR=""
+		local kname=`basename $i`
 		for n in $prefix/boot/*;do
 			if [ ! -L $n ];then
 				continue
@@ -1734,6 +1810,7 @@ function kernelList {
 			fi
 			KERNEL_PAIR=$kernel:$initrd
 		done
+		KERNEL_NAME[$kcount]=$kname
 		if [ $kcount = 1 ];then
 			KERNEL_LIST=$KERNEL_PAIR
 		elif [ $kcount -gt 1 ];then
@@ -1750,9 +1827,11 @@ function kernelList {
 			# gets added
 			# ----
 			KERNEL_LIST="vmlinuz:initrd"
+			KERNEL_NAME[1]=vmlinuz
 		fi
 	fi
 	export KERNEL_LIST
+	export KERNEL_NAME
 }
 #======================================
 # validateSize

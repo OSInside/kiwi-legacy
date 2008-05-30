@@ -188,10 +188,10 @@ if [ $LOCAL_BOOT = "no" ];then
 	setupDefaultFstab /config
 	updateRootDeviceFstab /config $imageRootDevice
 	if [ -z "$UNIONFS_CONFIG" ]; then
-		setupBootLoaderGrub /mnt /config 0 $imageRootDevice VMX
+		setupBootLoader /mnt /config 0 $imageRootDevice VMX
 	else
 		export KIWI_INITRD_PARAMS="UNIONFS_CONFIG=\"$UNIONFS_CONFIG\""
-		setupBootLoaderGrub /mnt /config 1 $imageRootDevice VMX
+		setupBootLoader /mnt /config 1 $imageRootDevice VMX
 	fi
 	setupKernelModules /config
 fi

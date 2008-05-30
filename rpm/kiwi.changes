@@ -1,4 +1,16 @@
 -------------------------------------------------------------------
+Fri May 30 11:23:39 CEST 2008 - ms@suse.de
+
+- make kiwi build on all archs. This does _not_ mean it
+  has full functionality on other archs than ix86 and x86_64
+  Support for other archs is still work in progress !
+- fixed find command in baseSetupPlainTextGITRepository 
+- create generic bootloader functions which calls specific
+  bootloader code according to the architecture. At the moment
+  only x*86 and x86_64 have code for it
+- fixed grub title setup if multiple kernels are installed
+
+-------------------------------------------------------------------
 Thu May 29 17:07:35 CEST 2008 - ms@suse.de
 
 - make NFSROOT work together with UNIONFS_CONFIG. The read-only

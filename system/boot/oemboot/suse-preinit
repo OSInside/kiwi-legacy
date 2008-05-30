@@ -53,7 +53,7 @@ if [ ! -z "$OEM_RECOVERY" ];then
 	rm -f vmlinuz && ln -s linux.vmx  vmlinuz
 	rm -f initrd  && ln -s initrd.vmx initrd
 	popd &>/dev/null
-	grubOK=1
+	bootLoaderOK=1
 elif [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ]; then
 	#======================================
 	# use distro initrd via mkinitrd
@@ -63,7 +63,7 @@ else
 	#======================================
 	# use kiwi initrd from RW partition
 	#--------------------------------------
-	if [ -d /read-write/boot/grub ];then
+	if [ -d /read-write/boot ];then
 		rm -rf /boot && ln -s /read-write/boot /boot
 	fi
 	pushd /boot &>/dev/null
@@ -72,23 +72,23 @@ else
 	popd &>/dev/null
 	kernelList /
 	if [ ! -z "$COMBINED_IMAGE" ];then
-		Echo "Creating grub configuration for split system"
+		Echo "Creating bootloader configuration: [ split system ]"
 	else
-		Echo "Creating grub configuration for unified system"
+		Echo "Creating bootloader configuration: [ unified system ]"
 	fi
 	if [ $HAVE_SWAP -eq 1 ];then
-		setupBootLoaderGrub / / 1 ${deviceDisk}2 $OEM_BOOT_TITLE $deviceSwap
+		setupBootLoader / / 1 ${deviceDisk}2 $OEM_BOOT_TITLE $deviceSwap
 	else
-		setupBootLoaderGrub / / 1 ${deviceDisk}2 $OEM_BOOT_TITLE
+		setupBootLoader / / 1 ${deviceDisk}2 $OEM_BOOT_TITLE
 	fi
-	grubOK=1
+	bootLoaderOK=1
 fi
 
 #======================================
 # 6) Install boot loader if ok
 #--------------------------------------
-if [ $grubOK = 1 ];then
-	installBootLoaderGrub
+if [ $bootLoaderOK = 1 ];then
+	installBootLoader
 fi
 
 #======================================

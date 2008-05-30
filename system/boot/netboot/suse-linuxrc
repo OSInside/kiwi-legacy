@@ -639,8 +639,9 @@ if [ $LOCAL_BOOT = "no" ];then
 	if test ! -z "$UNIONFS_CONFIG" && test $systemIntegrity = "clean";then
 		# /.../
 		# have to do this so that /boot gets copied to the
-		# ext2 partition, which is necessary for grub to find
-		# the stuff in there (it can't read squashfs or cromfs)
+		# ext2 partition, which is necessary for the bootloader to
+		# be able to find the data in there (it can't read squashfs
+		# or cromfs)
 		# ----
 		cp -a /mnt/boot /dev/shm/boot2
 		rm -rf /mnt/boot
@@ -662,10 +663,10 @@ if [ $LOCAL_BOOT = "no" ];then
 			if ! test -z $COMBINED_IMAGE; then
 				gnum=`echo $imageNextRootDevice | sed -e "s/.*\([0-9]\)/\1/"`
 				gnum=`expr $gnum - 1`
-				setupBootLoaderGrub \
+				setupBootLoader \
 					/mnt /config $gnum $imageNextRootDevice NET ${DISK}1
 			else
-				setupBootLoaderGrub /mnt /config 1 ${DISK}2 NET ${DISK}1
+				setupBootLoader /mnt /config 1 ${DISK}2 NET ${DISK}1
 			fi
 			setupKernelModules /config
 		fi

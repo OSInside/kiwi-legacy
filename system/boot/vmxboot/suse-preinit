@@ -65,8 +65,8 @@ setupSUSEInitrd
 #======================================
 # 7) Install boot loader on diskful
 #--------------------------------------
-if [ $grubOK = 1 ];then
-	installBootLoaderGrub
+if [ $bootLoaderOK = 1 ];then
+	installBootLoader
 fi
 
 #======================================

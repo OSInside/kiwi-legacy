@@ -58,7 +58,7 @@ fi
 #--------------------------------------
 if test ! -z $DISK;then
 	if test $systemIntegrity = "clean";then
-		installBootLoaderGrub
+		installBootLoader
 		echo "alias eth0 $networkModule" >> /etc/modules.conf
 	fi
 fi
