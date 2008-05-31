@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sat May 31 12:18:53 CEST 2008 - ms@suse.de
+
+- fixed USB stick identification code
+
+-------------------------------------------------------------------
 Fri May 30 11:23:39 CEST 2008 - ms@suse.de
 
 - make kiwi build on all archs. This does _not_ mean it

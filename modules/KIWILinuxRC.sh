@@ -1063,7 +1063,8 @@ function USBStickDevice {
 					if ! kiwiMount "$stickDevice" "/mnt";then
 						continue
 					fi
-					if [ ! -d /mnt/image ];then
+					if [ ! -e /mnt/etc/ImageVersion ];then
+						umountSystem
 						continue
 					fi
 					umountSystem
