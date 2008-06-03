@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Jun  3 14:35:01 CEST 2008 - ms@suse.de
+
+- added getDiskID function which is able to turn a given
+  standard device name into the udev ID based representation.
+  The function is currently not used but will be in the future
+
+-------------------------------------------------------------------
 Tue Jun  3 11:51:49 CEST 2008 - ms@suse.de
 
 - added checkmedia support for iso images. kiwi will sign each iso

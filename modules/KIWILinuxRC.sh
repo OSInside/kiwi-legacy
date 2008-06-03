@@ -2623,3 +2623,28 @@ function validateRootTree {
 		systemException "/sbin/init no such file or not executable" "reboot"
 	fi
 }
+
+#======================================
+# getDiskID
+#--------------------------------------
+function getDiskID {
+	# /.../
+	# this function is able to turn a given standard device
+	# name into the udev ID based representation
+	# ----
+	local device=$1
+	if [ -z "$device" ];then
+		echo $device
+		return
+	fi
+	for i in /dev/disk/by-id/*;do
+		local dev=`readlink $i`
+		dev=/dev/`basename $dev`
+		if [ $dev = $device ];then
+			echo $i
+			return
+		fi
+	done
+	echo $device
+}
+
