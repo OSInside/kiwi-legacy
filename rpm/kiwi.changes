@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Tue Jun  3 11:51:49 CEST 2008 - ms@suse.de
+
+- added checkmedia support for iso images. kiwi will sign each iso
+  with an md5sum using the tagmedia program. If the option --isocheck
+  is specified when calling the create step an additional boot 
+  menu entry is created which allows to check the media
+
+-------------------------------------------------------------------
 Sat May 31 12:18:53 CEST 2008 - ms@suse.de
 
 - fixed USB stick identification code

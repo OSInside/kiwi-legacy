@@ -1099,7 +1099,14 @@ function CDMount {
 				mount $i /cdrom >/dev/null
 			fi
 			if [ -f $LIVECD_CONFIG ];then
-				cddev=$i; echo; return
+				cddev=$i; echo;
+				if [ "$mediacheck" = 1 ]; then
+					test -e /proc/splash && echo verbose > /proc/splash
+					checkmedia $cddev
+					Echo -n "Press any key for reboot: "; read nope
+					systemException "CheckMedia" "reboot"
+				fi
+				return
 			fi
 			umount $i &>/dev/null
 		done

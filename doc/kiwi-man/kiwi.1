@@ -1,11 +1,11 @@
 .\"     Title: kiwi
 .\"    Author: Marcus Schäfer <ms (AT) suse.de>
 .\" Generator: DocBook XSL Stylesheets v1.73.2 <http://docbook.sf.net/>
-.\"      Date: Created: 04/08/2008
+.\"      Date: Created: 06/03/2008
 .\"    Manual: KIWI Manualpage
 .\"    Source: KIWI v2.10, r938
 .\"
-.TH "KIWI" "1" "Created: 04/08/2008" "KIWI v2\.10, r938" "KIWI Manualpage"
+.TH "KIWI" "1" "Created: 06/03/2008" "KIWI v2\.10, r938" "KIWI Manualpage"
 .\" disable hyphenation
 .nh
 .\" disable justification (adjust text to left margin only)
@@ -171,11 +171,16 @@ Force creation of new root directory\. If the directory already exists, it is de
 Set the log server port\. By default port 9000 is used\. If multiple KIWI processes runs on one system it\'s recommended to set the logging port per process
 .RE
 .PP
-[\fB\-\-rebuiltbootimage \fR\fB\fIDirectory\fR\fR]
+[\fB\-\-prebuiltbootimage \fR\fB\fIDirectory\fR\fR]
 .RS 4
 Search in
 \fIDirectory\fR
 for pre\-built boot images\.
+.RE
+.PP
+[\fB\-\-isocheck\fR]
+.RS 4
+in case of an iso image the checkmedia program generates a md5sum into the iso header\. If the \-\-isocheck option is specified a new boot menu entry will be generated which allows to check this media
 .RE
 .SH "FOR MORE INFORMATION"
 .PP

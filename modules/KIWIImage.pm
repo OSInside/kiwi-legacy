@@ -1393,6 +1393,26 @@ sub createImageLiveCD {
 	qxx ("sed -i -e \"s:Live-System:$label:\" $destination/isolinux.cfg");
 	qxx ("sed -i -e \"s:Live-Failsafe:$lsafe:\" $destination/isolinux.cfg");
 	#==========================================
+	# setup isolinux checkmedia boot entry
+	#------------------------------------------
+	if (defined $main::ISOCheck) {
+		if (! open (FD,">>$destination/isolinux.cfg")) {
+			$kiwi -> error  ("Couldn't open: $destination/isolinux.cfg: $!");
+			$kiwi -> failed ();
+			if (! -d $main::RootTree.$baseSystem) {
+				qxx ("rm -rf $main::RootTree");
+				qxx ("rm -rf $tmpdir");
+			}
+			return undef;
+		}
+		print FD "\n";
+		print FD "# mediacheck\n";
+		print FD "label mediachek\n";
+		print FD "  kernel linux\n";
+		print FD "  append initrd=initrd splash=silent mediacheck=1 showopts\n";
+		close FD;
+	}
+	#==========================================
 	# remove original kernel and initrd
 	#------------------------------------------
 	if (! $pblt) {
@@ -1451,7 +1471,30 @@ sub createImageLiveCD {
 	}
 	$kiwi -> done();
 	if (! relocateCatalog ($this,$name)) {
+		if (! -d $main::RootTree.$baseSystem) {
+			qxx ("rm -rf $main::RootTree");
+			qxx ("rm -rf $tmpdir");
+		}
 		return undef;
+	}
+	#==========================================
+	# tag ISO image with tagmedia
+	#------------------------------------------
+	if (-x "/usr/bin/tagmedia") {
+		$kiwi -> info ("Adding checkmedia tag...");
+		$data = qxx ("tagmedia --md5 $name 2>&1");
+		$code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Failed to tag ISO image: $data");
+			$kiwi -> failed ();
+			if (! -d $main::RootTree.$baseSystem) {
+				qxx ("rm -rf $main::RootTree");
+				qxx ("rm -rf $tmpdir");
+			}
+			return undef;
+		}
+		$kiwi -> done();
 	}
 	#==========================================
 	# remove tmpdir with boot tree

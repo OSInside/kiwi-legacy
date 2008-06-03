@@ -35,7 +35,7 @@ Requires:       qt
 %endif
 Requires:       perl = %{perl_version}
 Requires:       perl-XML-LibXML perl-libwww-perl screen coreutils
-Requires:       kiwi-tools libxslt
+Requires:       kiwi-tools libxslt checkmedia
 %if %{suse_version} > 1030
 Requires:       satsolver-tools
 %endif
@@ -43,7 +43,7 @@ Summary:        OpenSuSE - KIWI Image System
 Provides:       kiwi2 = 2.14
 Obsoletes:      kiwi2 = 2.14
 Version:        2.38
-Release:        75
+Release:        76
 Group:          System/Management
 License:        GPL v2 or later
 Source:         %{name}.tar.bz2

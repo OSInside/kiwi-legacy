@@ -95,6 +95,7 @@
 		<package name="cromfs"/>
 		<package name="rpm"/>
 		<package name="kiwi-tools"/>
+		<package name="checkmedia"/>
 	</packages>
 	<packages type="delete">
 		<package name="ConsoleKit"/>

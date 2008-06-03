@@ -173,6 +173,7 @@ our $PreChrootCall;     # program name called before chroot switch
 our $listXMLInfo;       # list XML information for this operation
 our $Compress;          # set compression level
 our $CreatePassword;    # create crypted password
+our $ISOCheck;          # create checkmedia boot entry
 our $kiwi;              # global logging handler object
 
 #============================================
@@ -1158,6 +1159,7 @@ sub init {
 		"installstick-system=s" => \$InstallStickSystem,
 		"strip|s"               => \$StripImage,
 		"createpassword"        => \$CreatePassword,
+		"isocheck"              => \$ISOCheck,
 		"createhash=s"          => \$CreateHash,
 		"setup-grub-splash=s"   => \$SetupSplashForGrub,
 		"list-profiles|i=s"     => \$ListProfiles,
@@ -1332,6 +1334,7 @@ sub usage {
 	print "     [ --base-root <base-path> ]\n";
 	print "     [ --base-root-mode <copy|union|recycle> ]\n";
 	print "     [ --prebuiltbootimage <directory>]\n";
+	print "     [ --isocheck ]\n";
 	print "Image Upgrade:\n";
 	print "  kiwi -u | --upgrade <image-root>\n";
 	print "     [ --base-root <base-path> ]\n";
@@ -1450,6 +1453,12 @@ sub usage {
 	print "\n";
 	print "  [ --prebuiltbootimage <directory> ]\n";
 	print "    search in <directory> for pre-built boot images\n";
+	print "\n";
+	print "  [ --isocheck ]\n";
+	print "    in case of an iso image the checkmedia program generates\n";
+	print "    a md5sum into the iso header. If the --isocheck option is\n";
+	print "    specified a new boot menu entry will be generated which\n";
+	print "    allows to check this media\n";
 	print "\n";
 	print "  [ --testsuite <image-root> [ --test name --test name ... ]\n";
 	print "    run test(s) on prepared image root tree.\n";

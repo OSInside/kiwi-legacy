@@ -82,6 +82,7 @@
 		<package name="bootsplash"/>
 		<package name="bootsplash-theme-SuSE-NLD"/>
 		<package name="tar"/>
+		<package name="checkmedia"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
