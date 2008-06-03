@@ -458,7 +458,7 @@ sub createImageCPIO {
 		);
 	} else {
 		$data = qxx (
-			"cd $dest.cpio && find . | cpio @cpio > $dest"
+			"rm -f $dest.gz && cd $dest.cpio && find . | cpio @cpio > $dest"
 		);
 	}
 	my $code = $? >> 8;
@@ -710,7 +710,7 @@ sub createImageUSB {
 	if (! defined $kboot) {
 		return undef;
 	}
-	$kboot -> setupSplashForGrub();
+	$kboot -> setupSplash();
 	$kboot -> cleanTmp();
 	#==========================================
 	# Store meta data for subsequent calls
@@ -2142,7 +2142,7 @@ sub createImageSplit {
 	if (! defined $kboot) {
 		return undef;
 	}
-	$kboot -> setupSplashForGrub();
+	$kboot -> setupSplash();
 	$kboot -> cleanTmp();
 	#==========================================
 	# Check further actions due to boot image

@@ -294,6 +294,7 @@ function udevStart {
 	udevd --daemon udev_log="debug"
 	/sbin/udevtrigger
 	/sbin/udevsettle --timeout=30
+	startSplashy
 }
 #======================================
 # udevKill
@@ -305,6 +306,14 @@ function udevKill {
 	mkdir -p /mnt/var/log
 	cp /mnt/dev/shm/initrd.msg /mnt/var/log/boot.msg
 	cp -f /var/log/boot.kiwi /mnt/var/log/boot.kiwi
+}
+#======================================
+# startSplashy
+#--------------------------------------
+function startSplashy {
+	if [ -x /usr/sbin/splashy ];then
+		splashy boot
+	fi
 }
 #======================================
 # startBlogD

@@ -390,7 +390,7 @@ sub createBootStructure {
 		$xname  = $xname.".".$loc;
 	}
 	if ($initrd !~ /splash\.gz$|splash\.install\.gz/) {
-		$initrd = $this -> setupSplashForGrub();
+		$initrd = $this -> setupSplash();
 		$zipped = 1;
 	}
 	$kiwi -> info ("Creating initial boot structure");
@@ -2821,19 +2821,26 @@ sub setupInstallFlags {
 }
 
 #==========================================
-# setupSplashForGrub
+# setupSplash
 #------------------------------------------
-sub setupSplashForGrub {
+sub setupSplash {
+	# ...
+	# we can either use bootsplash or splashy to display
+	# a splash screen. If /usr/sbin/splashy exists we will
+	# prefer splashy over bootsplash
+	# ---
 	my $this   = shift;
 	my $kiwi   = $this->{kiwi};
 	my $initrd = $this->{initrd};
 	my $spldir = $initrd."_".$$.".splash";
-	my $newspl = "$spldir/splash";
 	my $irddir = "$spldir/initrd";
 	my $zipped = 0;
 	my $newird;
 	my $status;
 	my $result;
+	#==========================================
+	# check if compressed and setup splash.gz
+	#------------------------------------------
 	if ($initrd =~ /\.gz$/) {
 		$zipped = 1;
 	}
@@ -2849,11 +2856,10 @@ sub setupSplashForGrub {
 		$kiwi -> skipped ();
 		return $initrd;
 	}
-	mkdir $newspl;
-	mkdir $irddir;
 	#==========================================
 	# unpack initrd files
 	#------------------------------------------
+	mkdir $irddir;
 	my $unzip  = "$main::Gzip -cd $initrd 2>&1";
 	if ($zipped) {
 		$status = qxx ("$unzip | (cd $irddir && cpio -di 2>&1)");
@@ -2869,16 +2875,81 @@ sub setupSplashForGrub {
 		return $initrd;
 	}
 	#==========================================
+	# check for splash system
+	#------------------------------------------
+	if (-x $irddir."/usr/sbin/splashy") {
+		$status = $this -> setupSplashy ($newird);
+	} else {
+		$status = $this -> setupSplashForGrub ($spldir,$newird);
+	}
+	#==========================================
+	# cleanup
+	#------------------------------------------
+	qxx ("rm -rf $spldir");
+	if ($status ne "ok") {
+		$kiwi -> skipped ();
+		$kiwi -> warning ($status);
+		$kiwi -> skipped ();
+		return $initrd;
+	}
+	$kiwi -> done();
+	return $newird;
+}
+
+#==========================================
+# setupSplashy
+#------------------------------------------
+sub setupSplashy {
+	# ...
+	# when booting with splashy no changes to the initrd are
+	# required. This function only makes sure the .splash.gz
+	# file exists. This is done by creating a link to the
+	# original initrd file
+	# ---
+	my $this   = shift;
+	my $newird = shift;
+	my $initrd = $this->{initrd};
+	my $status;
+	my $result;
+	if ($initrd !~ /.gz$/) {
+		$status = qxx ("$main::Gzip -f $initrd 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			return ("Failed to compress initrd: $status");
+		}
+		$initrd = $initrd.".gz";
+	}
+	$status = qxx ("rm -f $newird && ln -s $initrd $newird");
+	$result = $? >> 8;
+	if ($result != 0) {
+		return ("Failed to create splash link $!");
+	}
+	return "ok";
+}
+
+#==========================================
+# setupSplashForGrub
+#------------------------------------------
+sub setupSplashForGrub {
+	# ...
+	# when booting with grub it is required to append the splash
+	# files (cpio data) at the end of the boot image (initrd)
+	# --- 
+	my $this   = shift;
+	my $spldir = shift;
+	my $newird = shift;
+	my $newspl = "$spldir/splash";
+	my $irddir = "$spldir/initrd";
+	my $status;
+	my $result;
+	#==========================================
 	# move splash files
 	#------------------------------------------
+	mkdir $newspl;
 	$status = qxx ("mv $irddir/image/loader/*.spl $newspl 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
-		$kiwi -> skipped ();
-		$kiwi -> warning ("No splash files found in initrd");
-		$kiwi -> skipped ();
-		qxx ("rm -rf $spldir");
-		return $initrd;
+		return ("No splash files found in initrd");		
 	}
 	#==========================================
 	# create new splash with all pictures
@@ -2897,30 +2968,25 @@ sub setupSplashForGrub {
 			$result = $? >> 8;
 		}
 		qxx ("rm -rf $splash.dir");
-		qxx ("rm -f $splash.bob*");
-		qxx ("rm -f $splash");
+		qxx ("rm -f  $splash.bob*");
+		qxx ("rm -f  $splash");
 		if ($result != 0) {
 			my $splfile = basename ($splash);
-			$kiwi -> skipped ();
-			$kiwi -> warning ("No bootsplash file found in $splfile cpio");
-			$kiwi -> skipped ();
-			qxx ("rm -rf $spldir");
-			return $initrd;
+			return ("No bootsplash file found in $splfile cpio");
 		}
 	}
 	qxx ("
 		(cd $newspl && find|cpio --quiet -oH newc|$main::Gzip)>$spldir/all.spl"
 	);
 	qxx ("
-		(cd $irddir && find|cpio --quiet -oH newc|$main::Gzip)>$newird"
+		rm -f $newird &&\
+		(cd $irddir && find|cpio --quiet -oH newc|$main::Gzip) > $newird"
 	);
 	#==========================================
 	# create splash initrd
 	#------------------------------------------
 	qxx ("cat $spldir/all.spl >> $newird");
-	qxx ("rm -rf $spldir");
-	$kiwi -> done();
-	return $newird;
+	return "ok";
 }
 
 #==========================================

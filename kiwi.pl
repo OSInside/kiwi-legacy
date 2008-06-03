@@ -147,7 +147,7 @@ our $InstallStick;      # Installation initrd booting from USB stick
 our $InstallStickSystem;# virtual disk system image to be installed on disk
 our $StripImage;        # strip shared objects and binaries
 our $CreateHash;        # create .checksum.md5 for given description
-our $SetupSplashForGrub;# setup splash screen(s) for grub
+our $SetupSplash;       # setup splash screen (bootsplash or splashy)
 our $ImageName;         # filename of current image, used in Modules
 our %ForeignRepo;       # may contain XML::LibXML::Element objects
 our @AddRepository;     # add repository for building physical extend
@@ -955,12 +955,12 @@ sub main {
 	#==========================================
 	# setup a splash initrd
 	#------------------------------------------
-	if (defined $SetupSplashForGrub) {
-		$boot = new KIWIBoot ($kiwi,$SetupSplashForGrub);
+	if (defined $SetupSplash) {
+		$boot = new KIWIBoot ($kiwi,$SetupSplash);
 		if (! defined $boot) {
 			my $code = kiwiExit (1); return $code;
 		}
-		$boot -> setupSplashForGrub();
+		$boot -> setupSplash();
 		$boot -> cleanTmp();
 		my $code = kiwiExit (0); return $code;
 	}
@@ -1161,7 +1161,7 @@ sub init {
 		"createpassword"        => \$CreatePassword,
 		"isocheck"              => \$ISOCheck,
 		"createhash=s"          => \$CreateHash,
-		"setup-grub-splash=s"   => \$SetupSplashForGrub,
+		"setup-splash=s"        => \$SetupSplash,
 		"list-profiles|i=s"     => \$ListProfiles,
 		"force-new-root"        => \$ForceNewRoot,
 		"base-root=s"           => \$BaseRoot,
@@ -1215,7 +1215,7 @@ sub init {
 		(! defined $BootStick)          &&
 		(! defined $InstallCD)          &&
 		(! defined $Upgrade)            &&
-		(! defined $SetupSplashForGrub) &&
+		(! defined $SetupSplash)        &&
 		(! defined $BootVMDisk)         &&
 		(! defined $CreateInstSource)   &&
 		(! defined $Migrate)            &&
@@ -1360,7 +1360,7 @@ sub usage {
 	print "  kiwi --createhash <image-path>\n";
 	print "  kiwi --list-profiles <image-path>\n";
 	print "  kiwi --list-xmlinfo <image-path>\n";
-	print "  kiwi --setup-grub-splash <initrd>\n";
+	print "  kiwi --setup-splash <initrd>\n";
 	print "Options:\n";
 	print "--\n";
 	print "  [ --createpassword ]\n";
@@ -1375,11 +1375,12 @@ sub usage {
 	print "  [ -x | --list-xmlinfo <image-path> ]\n";
 	print "    List general information about the image description\n";
 	print "\n"; 
-	print "  [ --setup-grub-splash <initrd> ]\n";
+	print "  [ --setup-splash <initrd> ]\n";
 	print "    Create splash screen from the data inside the initrd\n";
 	print "    and re-create the initrd with the splash screen attached\n";
 	print "    to the initrd cpio archive. This enables the kernel\n";
-	print "    to load the splash screen at boot time\n";
+	print "    to load the splash screen at boot time. If splashy is used\n";
+	print "    only a link to the original initrd will be created\n";
 	print "\n";
 	print "  [ -d | --destdir <destination-path> ]\n";
 	print "    Specify destination directory to store the image file(s)\n";

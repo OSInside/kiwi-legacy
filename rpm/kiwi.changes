@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Tue Jun  3 15:23:11 CEST 2008 - ms@suse.de
+
+- added support for splashy. To activate it replace the
+  packages bootsplash and bootsplash-(branding|theme)-* with
+  the package: splashy in your boot image description. Also make
+  sure the package pcre stays in the boot image it's required
+  for splashy. At the moment we stick to the old bootsplash
+  system by default
+
+-------------------------------------------------------------------
 Tue Jun  3 14:35:01 CEST 2008 - ms@suse.de
 
 - added getDiskID function which is able to turn a given
