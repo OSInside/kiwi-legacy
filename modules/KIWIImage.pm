@@ -1407,7 +1407,7 @@ sub createImageLiveCD {
 		}
 		print FD "\n";
 		print FD "# mediacheck\n";
-		print FD "label mediachek\n";
+		print FD "label mediacheck\n";
 		print FD "  kernel linux\n";
 		print FD "  append initrd=initrd splash=silent mediacheck=1 showopts\n";
 		close FD;
