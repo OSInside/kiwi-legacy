@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Jun  4 14:32:01 CEST 2008 - ms@suse.de
+
+- fixed isolinux text boot message (bnc #396759)
+
+-------------------------------------------------------------------
 Tue Jun  3 15:23:11 CEST 2008 - ms@suse.de
 
 - added support for splashy. To activate it replace the

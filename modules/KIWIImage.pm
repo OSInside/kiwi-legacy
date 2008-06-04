@@ -1392,6 +1392,8 @@ sub createImageLiveCD {
 	my $lsafe = "Failsafe-$label";
 	qxx ("sed -i -e \"s:Live-System:$label:\" $destination/isolinux.cfg");
 	qxx ("sed -i -e \"s:Live-Failsafe:$lsafe:\" $destination/isolinux.cfg");
+	qxx ("sed -i -e \"s:Live-System:$label:\" $destination/isolinux.msg");
+	qxx ("sed -i -e \"s:Live-Failsafe:$lsafe:\" $destination/isolinux.msg");
 	#==========================================
 	# setup isolinux checkmedia boot entry
 	#------------------------------------------

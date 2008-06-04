@@ -1,18 +1,19 @@
 
 
-                           Welcome to KIWI !
+                           Welcome !
 
 
 
-0fTo start the live System enter 'Live-System' and press <return>.07
+0fTo start the system enter 'Live-System' and press <return>.07
 
 
 Available boot options:
 
-  Live-System - Live System
-  memtest     - Memory Test
-
-'noacpi' or 'failsafe' may be necessary on some tricky hardware.
+  Live-System   - Live System
+  Live-Failsafe - Live System failsafe mode
+  Hard-Disk     - Local boot from hard disk
+  mediacheck    - Media check
+  memtest       - Memory Test
 
 Have a lot of fun...
 
