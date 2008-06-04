@@ -28,6 +28,8 @@ package KIWICollect;
 use strict;
 use KIWIXML;
 use KIWIUtil;
+use KIWIURL;
+
 use RPMQ;
 
 use File::Find;
@@ -114,6 +116,17 @@ sub new {
     return undef;
   }
 
+  # create second logger object to log only the data relevant
+  # for repository creation:
+  $this->{m_logger} = new KIWILog("tiny");#$this->{m_kiwi};
+  $this->{m_logger}->setLogHumanReadable();
+  $this->{m_logger}->setLogFile("$this->{m_basedir}/packages.log");
+  $this->{m_kiwi}->info("Logging repository specific data to file $this->{m_basedir}/packages.log");
+
+  $this->{m_util} = new KIWIUtil($this->{m_logger});
+
+  $this->{m_urlparser} = new KIWIURL($this->{m_logger});
+
   $this->Init();
 
   # create some default directories:
@@ -148,15 +161,6 @@ sub Init
 {
   my $this = shift;
   my $debug = shift || 0;
-
-  # create second logger object to log only the data relevant
-  # for repository creation:
-  $this->{m_logger} = new KIWILog("tiny");#$this->{m_kiwi};
-  $this->{m_logger}->setLogHumanReadable();
-  $this->{m_logger}->setLogFile("$this->{m_basedir}/packages.log");
-  $this->{m_kiwi}->info("Logging repository specific data to file $this->{m_basedir}/packages.log");
-
-  $this->{m_util} = new KIWIUtil($this->{m_logger});
 
   if($this->{m_basedir} !~ m{.*/$}) {
     $this->{m_basedir} =~ s{(.*)$}{$1/};
@@ -220,6 +224,8 @@ sub Init
     close(DUMP);
   }
 
+  %{$this->{m_prodinfo_trans}} = map { $_->[0] => $_->[1] } values(%{$this->{m_prodinfo}});
+
   %{$this->{m_prodvars}}      = $this->{m_xml}->getInstSourceProductVar();
   if($this->{m_debug}) {
     open(DUMP, ">", "$this->{m_basedir}/prodvars.dump.pl");
@@ -272,6 +278,10 @@ sub Init
 
   # create local directories as download targets. Normalising special chars (slash, dot, ...) by replacing with second param.
   foreach my $r(keys(%{$this->{m_repos}})) {
+    if($this->{m_repos}->{$r}->{'source'} =~ m{^opensuse:.*}) {
+      $this->{m_logger}->info("[INFO] [Init] resolving opensuse:// URL $this->{m_repos}->{$r}->{'source'}...");
+      $this->{m_repos}->{$r}->{'source'} = $this->{m_urlparser}->normalizePath($this->{m_repos}->{$r}->{'source'});
+    }
     $this->{m_repos}->{$r}->{'basedir'} = $this->{m_basedir}.$this->normaliseDirname($this->{m_repos}->{$r}->{'source'}, '-');
 
     $this->{m_dirlist}->{"$this->{m_repos}->{$r}->{'basedir'}"} = 1;
@@ -704,8 +714,10 @@ sub unpackMetapackages
     my %tmp = %{$this->{m_metapackages}->{$metapack}};
 
     my $medium = 1;
-    if($tmp{'medium'}) {
-      $medium = $tmp{'medium'};
+    my $nokeep = 0;
+    if(defined($tmp{'medium'})) {
+      #$medium = $tmp{'medium'};
+			$nokeep = 1;
     }
 
     ## regular handling: unpack, put everything from CD1..CD<n> to cdroot {m_basedir}
@@ -814,6 +826,13 @@ sub unpackMetapackages
     else {
       $this->{m_logger}->info("No script defined for metapackage $metapack\n");
     }
+
+		if($nokeep == 1) {
+			foreach my $d(keys(%{$this->{m_packages}->{$metapack}})) {
+				unlink("$this->{m_packages}->{$metapack}->{$d}->{'newpath'}/$this->{m_packages}->{$metapack}->{$d}->{'newfile'}");
+			}
+			print "flonz.";
+		}
   }
 
   ## cleanup old files:
@@ -1428,7 +1447,25 @@ sub createMetadata
   my $this = shift;
 
 
-  ## step 1: create_package_descr
+  ## step 1: create pattern list (just a simple ls)
+  #=============================
+  $this->{m_logger}->info("Creating patterns file:");
+  if(!open(PAT, ">", "$this->{m_basesubdir}->{'1'}/suse/setup/descr/patterns")) {
+    die "Cannot create $this->{m_basesubdir}->{'1'}/suse/setup/descr/patterns!";
+  }
+  if(!opendir(PATDIR, "$this->{m_basesubdir}->{'1'}/suse/setup/descr/")) {
+    die "Cannot read $this->{m_basesubdir}->{'1'}/suse/setup/descr/!";
+  }
+  my @dirent = readdir(PATDIR);
+  foreach(@dirent) {
+    next if $_ !~ m{(.*[.]pat|.*[.]pat[.]gz)};
+    print PAT "$_\n";
+  }
+  close(PATDIR);	
+  close(PAT);	
+
+
+  ## step 2: create_package_descr
   #==============================
   my @paths = values(%{$this->{m_basesubdir}});
   @paths = reverse map { $_."/suse" => "-d" if $_ !~ m{.*0}} @paths;
@@ -1440,6 +1477,7 @@ sub createMetadata
     return;
   }
 
+  ## TODO make the path to pdb stuff available through hook!
   my $data = qx(cd "$this->{m_basesubdir}->{'1'}/suse" && /usr/bin/create_package_descr -p /mounts/work/cd/data/pdb/stable $pathlist -P -Z -C -K -M 3 -l german -l english -l french -l czech -l spanish -l hungarian);
   my $status = $? >> 8;
   
@@ -1447,7 +1485,7 @@ sub createMetadata
   symlink "$this->{m_basesubdir}->{'1'}/suse/setup/descr/packages.cs", "$this->{m_basesubdir}->{'1'}/suse/setup/descr/packages.sk";
 
 
-  ## step 2: packages2eula:
+  ## step 3: packages2eula:
   $this->{m_logger}->info("Calling packages2eula:");
   my $p2eula = "/usr/bin/packages2eula.pl";
   if(! (-f $p2eula or -x $p2eula)) {
@@ -1465,69 +1503,82 @@ sub createMetadata
   }
 
 
-  ## step 3: content file
+  ## step 4: content file
   $this->{m_logger}->info("Creating content file:");
   my $contentfile = "$this->{m_basesubdir}->{'1'}/content";
   if(not open(CONT, ">", $contentfile)) {
     die "Cannot create $contentfile";
   }
   foreach my $i(sort {$a <=> $b } keys(%{$this->{m_prodinfo}})) {
-    print CONT "$this->{m_prodinfo}->{$i}->[0] $this->{m_prodinfo}->{$i}->[1]\n";
+    my $line = "$this->{m_prodinfo}->{$i}->[0] $this->{m_prodinfo}->{$i}->[1]";
+    while( $line =~ m{\$(DISTNAME|DISTVERSION|MANUFACTURER)}) {
+      my $replace = $this->{m_prodvars}->{$1};
+      $line =~ s|\$$1|$replace|;  # '|' char is not allowed in vars anyway
+    }
+    print CONT "$line\n";
   }
   close(CONT);
 
 
-  ## step 4: media file
+  ## step 5: media file
   $this->{m_logger}->info("Creating media file in all media:");
-	if($this->{m_prodvars}->{'MANUFACTURER'}) {
-		my @media = $this->getMediaNumbers();
-		for my $n(@media) {
-			my $mediafile = "$this->{m_basesubdir}->{$n}/media.$n/media";
-			if(not open(MEDIA, ">", $mediafile)) {
-				die "Cannot create $mediafile";
-			}
-			print MEDIA "$this->{m_prodvars}->{'MANUFACTURER'}\n";
-			print MEDIA qx(date +%Y%m%d%H%M%S);
-			if($n == 1) {
-				# some specialities for medium number 1: contains a line with the number of media (? ask ma!)
-				print MEDIA scalar(@media)."\n";
-			}
-			close(MEDIA);
-		}
-	}
-	else {
-		$this->{m_logger}->error("[ERROR] [createMetadata] required variable \"MANUFACTURER\" not set");
-		$this->{m_logger}->info("[INFO] [createMetadata] skipping media file!");
-	}
+  if($this->{m_prodvars}->{'MANUFACTURER'}) {
+    my @media = $this->getMediaNumbers();
+    for my $n(@media) {
+      my $mediafile = "$this->{m_basesubdir}->{$n}/media.$n/media";
+      if(not open(MEDIA, ">", $mediafile)) {
+	die "Cannot create $mediafile";
+      }
+      print MEDIA "$this->{m_prodvars}->{'MANUFACTURER'}\n";
+      print MEDIA qx(date +%Y%m%d%H%M%S);
+      if($n == 1) {
+	# some specialities for medium number 1: contains a line with the number of media (? ask ma!)
+	print MEDIA scalar(@media)."\n";
+      }
+      close(MEDIA);
+    }
+  }
+  else {
+    $this->{m_logger}->error("[ERROR] [createMetadata] required variable \"MANUFACTURER\" not set");
+    $this->{m_logger}->info("[INFO] [createMetadata] skipping media file!");
+  }
 
 
-  ## step 5: products file
+  ## step 6: products file
   $this->{m_logger}->info("Creating products file in all media:");
-	if($this->{m_prodvars}->{'DISTRIBUTION_STRING'} and
-		 $this->{m_prodvars}->{'PRODUCT_STRING'} #and
-		 #$this->{m_prodvars}->{'PRODUCT_VERSION'}
-		) {
-		for my $n($this->getMediaNumbers()) {
-			my $productsfile = "$this->{m_basesubdir}->{$n}/media.$n/products";
-			if(not open(PRODUCT, ">", $productsfile)) {
-				die "Cannot create $productsfile";
-			}
-			print PRODUCT "/ $this->{m_prodvars}->{'DISTRIBUTION_STRING'}";
-			print PRODUCT " $this->{m_prodvars}->{'PRODUCT_STRING'}\n";
-			#print PRODUCT " $this->{m_prodvars}->{'PRODUCT_VERSION'}";
-			close(PRODUCT);
-		}
+  if($this->{m_prodvars}->{'PRODUCT_DIR'} and
+    $this->{m_prodvars}->{'PRODUCT_NAME'} and
+    $this->{m_prodvars}->{'PRODUCT_VERSION'}
+    ) {
+    for my $n($this->getMediaNumbers()) {
+      my $productsfile = "$this->{m_basesubdir}->{$n}/media.$n/products";
+      if(not open(PRODUCT, ">", $productsfile)) {
+	die "Cannot create $productsfile";
+      }
+      for my $v("PRODUCT_DIR", "PRODUCT_NAME", "PRODUCT_VERSION") {
+	my $line = $this->{m_prodvars}->{$v};
+	while($line =~ m{\$(DISTNAME|DISTVERSION|MANUFACTURER)}) {
+	  my $replace = $this->{m_prodvars}->{$1};
+	  $line =~ s|\$$1|$replace|;
 	}
-	else {
-		$this->{m_logger}->error("[ERROR] [createMetadata] one or more of the following  variables are missing:");
-		$this->{m_logger}->error("\tDISTRIBUTION_STRING");
-		$this->{m_logger}->error("\tPRODUCT_STRING");
-		#$this->{m_logger}->error("\tPRODUCT_VERSION");
-		$this->{m_logger}->info("[INFO] [createMetadata] skipping products file!");
-	}
+	$this->{m_prodvars}->{$v} = $line;
+      }
+      print PRODUCT "$this->{m_prodvars}->{'PRODUCT_DIR'}";
+      print PRODUCT " $this->{m_prodvars}->{'PRODUCT_NAME'}";
+      print PRODUCT " $this->{m_prodvars}->{'PRODUCT_VERSION'}\n";
+      close(PRODUCT);
+    }
+  }
+  else {
+    $this->{m_logger}->error("[ERROR] [createMetadata] one or more of the following  variables are missing:");
+    $this->{m_logger}->error("\tPRODUCT_DIR");
+    $this->{m_logger}->error("\tPRODUCT_NAME");
+    $this->{m_logger}->error("\tPRODUCT_VERSION");
+    $this->{m_logger}->info("[INFO] [createMetadata] skipping products file!");
+  }
 
 
-  ## step 6: SHA1SUMS
+  ## step 7: SHA1SUMS
   $this->{m_logger}->info("Calling create_sha1sums:");
   my $csha1sum = "/usr/bin/create_sha1sums";
   my $s1sum_opts = "";
@@ -1548,7 +1599,7 @@ sub createMetadata
   }
 
 
-  ## step 7: MD5SUMS
+  ## step 8: MD5SUMS
   $this->{m_logger}->info("Calling create_md5sums:");
   my $md5sums = "/usr/bin/create_md5sums";
   my $md5opt = "";
@@ -1569,7 +1620,7 @@ sub createMetadata
   @data = (); # clear list
 
 
-  ## step 8: LISTINGS
+  ## step 9: LISTINGS
   $this->{m_logger}->info("Calling mk_listings:");
   my $listings = "/usr/bin/mk_listings";
   if(! (-f $listings or -x $listings)) {
@@ -1583,7 +1634,41 @@ sub createMetadata
     $this->{m_logger}->info("\t$_\n");
   }
   @data = (); # clear list
-} # createMetadata
+
+
+  ## step 10: DIRECTORY.YAST FILES
+  $this->{m_logger}->info("Calling create_directory.yast:");
+  my $dy = "/usr/bin/create_directory.yast";
+  if(! (-f $dy or -x $dy)) {
+    $this->{m_logger}->warning("[WARNING] [createMetadata] excutable `$dy` not found. Maybe package `inst-source-utils` is not installed?");
+    return;
+  }
+  foreach my $d($this->getMediaNumbers()) {
+    my $dbase = $this->{m_basesubdir}->{$d};
+    my @dlist;
+    push @dlist, "$dbase";
+    push @dlist, "$dbase/boot";
+    push @dlist, glob("$dbase/boot/*");
+    push @dlist, glob("$dbase/boot/*/loader");
+    push @dlist, "$dbase/media.1";
+    push @dlist, "$dbase/media.1/license";
+    push @dlist, "$dbase/images";
+    push @dlist, "$dbase/$this->{m_prodinfo_trans}->{'DATADIR'}/setup/slide";
+    push @dlist, "$dbase/$this->{m_prodinfo_trans}->{'DESCRDIR'}";
+
+    foreach (@dlist) {
+      if(-d $_) {
+	@data = qx($dy $_);
+	$this->{m_logger}->info("[INFO] [createMetadata] $dy output for directory $_:\n");
+	foreach(@data) {
+	  chomp $_;
+	  $this->{m_logger}->info("\t$_\n");
+	}
+      }
+    }
+  }
+}
+# createMetadata
 
 
 
@@ -1634,7 +1719,8 @@ sub createDirectoryStructure
 
   #for my $i(0..scalar(@dirs)-1) {
   foreach my $d(keys(%dirs)) {
-    if(-d $d) {
+		next if $dirs{$d} == 0;
+    if(-e $d and -d $d) {
       #if($this->{m_debug}) {
       #  $this->{m_logger}->info("[INFO] directory $d already exists, skipping");
       #}
@@ -1647,8 +1733,8 @@ sub createDirectoryStructure
     }
     else {
       $this->{m_logger}->info("[INFO] created directory $d");
+			$dirs{$d} = 0;
     }
-    $dirs{$d} = 0;
   }
 
   #@{$this->{m_dirlist}} = grep { defined($_) } @dirs;
@@ -1684,7 +1770,10 @@ sub getMediaNumbers
   my $this = shift;
   return undef if not defined $this;
   
-  my @media;
+  my @media = (1);	# default medium is 1 (always)
+	if($this->{m_prodopts} and $this->{m_prodopts}->{'SOURCEMEDIUM'}) {
+		push @media, $this->{m_prodopts}->{'SOURCEMEDIUM'};
+	}
   foreach my $p(values(%{$this->{m_packages}}), values(%{$this->{m_metapackages}})) {
     if(defined($p->{'medium'}) and $p->{'medium'} != 0) {
       push @media, $p->{medium};
