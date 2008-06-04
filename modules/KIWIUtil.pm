@@ -23,6 +23,7 @@ use File::Glob ':glob';
 use File::Find;
 use File::Path;
 use KIWIQX;
+#use KIWIURL;
 
 #==========================================
 # Constructor
@@ -38,7 +39,8 @@ sub new
 {
   my $this =
   {
-    m_logger => undef,
+    m_logger  => undef,
+    m_url     => undef,
   };
   my $class = shift;
   bless $this, $class;
@@ -47,6 +49,7 @@ sub new
   # Module Parameters
   #------------------------------------------
   $this->{m_logger} = shift;
+  #$this->{m_url} = new KIWIURL($this->{m_logger});
   die "No logger defined\n" if(not defined $this->{m_logger});
 
   return $this;
@@ -103,8 +106,8 @@ sub splitPath
     $leafonly = 0;
   }
 
-  #if(defined($pat)) {
-  #  $path = $path.$pat;
+  #if($path =~ m{^opensuse://.*}) {
+  #  $path = $this->{m_url}->normalizePath($path);
   #}
 
   #==========================================
@@ -404,7 +407,7 @@ sub expandFilenameHTTP
   #------------------------------------------
   my @lines    = split (/\n/,$content);
   foreach my $line (@lines) {
-    next if($line !~ /<img.*href="(.*)">/);
+    next if($line !~ /<img.*?href="(.*?)">.*/);
     # skip "parent dir" to avoid cycles
     next if($line =~ /parent.+directory/i);
 
