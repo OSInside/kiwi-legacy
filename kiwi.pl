@@ -208,6 +208,12 @@ sub main {
 		$kiwi = new KIWILog();
 	}
 	#==========================================
+	# remove pre-defined smart channels
+	#------------------------------------------
+	if (glob ("/etc/smart/channels/*")) {
+		qxx ( "rm -f /etc/smart/channels/*" );
+	}
+	#==========================================
 	# Check for nocolor option
 	#------------------------------------------
 	if (defined $NoColor) {
@@ -1301,10 +1307,6 @@ sub init {
 		$kiwi -> failed ();
 		my $code = kiwiExit (1); return $code;
 	}
-	#==========================================
-	# remove pre-defined smart channels
-	#------------------------------------------
-	qxx ( "rm -f /etc/smart/channels/*" );
 }
 
 #==========================================

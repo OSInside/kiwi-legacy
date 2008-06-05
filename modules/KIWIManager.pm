@@ -120,6 +120,12 @@ sub new {
 	$this->{ensconce}    = [
 		"ensconce", "-r /"
 	];
+	#==========================================
+	# remove pre-defined smart channels
+	#------------------------------------------
+	if (glob ("$root//etc/smart/channels/*")) {
+		qxx ( "rm -f $root/etc/smart/channels/*" );
+	}
 	return $this;
 }
 
@@ -311,7 +317,7 @@ sub setupSignatureCheck {
 	#------------------------------------------
 	if ($manager eq "smart") {
 		my $optionName  = "rpm-check-signatures";
-		my $curCheckSig = qxx ("smart config --show $optionName|tr -d '\\n'");
+		my $curCheckSig = qxx ("@smart config --show $optionName|tr -d '\\n'");
 		$this->{curCheckSig} = $curCheckSig;
 		if (defined $imgCheckSig) {
 			my $option = "$optionName=$imgCheckSig";
@@ -323,7 +329,7 @@ sub setupSignatureCheck {
 				$this -> freeLock();
 			} else {
 				$kiwi -> info ("Setting RPM signature check to: $imgCheckSig");
-				$data = qxx ("chroot \"$root\" smart config --set $option 2>&1");
+				$data =qxx ("chroot \"$root\" smart config --set $option 2>&1");
 			}
 			$code = $? >> 8;
 			if ($code != 0) {
@@ -382,7 +388,7 @@ sub resetSignatureCheck {
 				$this -> freeLock();
 			} else {
 				$kiwi -> info ("Reset RPM signature check to: $curCheckSig");
-				$data = qxx ("chroot \"$root\" smart config --set $option 2>&1");
+				$data =qxx ("chroot \"$root\" smart config --set $option 2>&1");
 			}
 			$code = $? >> 8;
 			if ($code != 0) {
