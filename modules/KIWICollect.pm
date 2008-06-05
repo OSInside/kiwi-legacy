@@ -738,101 +738,103 @@ sub unpackMetapackages
       next;
       #return undef; # rock hard exit here, can't proceed without the proper input
     }
-    my $dir = (sort(keys(%dirs)))[0];	# experimental! TODO
 
-    $this->{m_util}->unpac_package($this->{m_packages}->{$metapack}->{$dir}->{'source'}, "$tmp");
-    ## all metapackages contain at least a CD1 dir and _may_ contain another /usr/share/<name> dir
-    qx(cp -r $tmp/CD1/* $this->{m_basesubdir}->{$medium});
-    for my $sub("usr", "etc") {
-      if(-d "$tmp/$sub") {
-	qx(cp -r $tmp/$sub $this->{m_basesubdir}->{$medium});
-      }
-    }
-    ## copy content of CD2 ... CD<i> subdirs if exists:
-    for(2..10) {
-      if(-d "$tmp/CD$_" and defined $this->{m_basesubdir}->{$_}) {
-	qx(cp -r $tmp/CD$_/* $this->{m_basesubdir}->{$_});
-      }
-      ## add handling for "DVD<i>" subdirs if necessary FIXME
-    }
+    foreach my $dir(keys(%dirs)) {
+    #my $dir = (sort(keys(%dirs)))[0];	# experimental! TODO
 
-    ## THEMING
-    $this->{m_logger}->info("[INFO] Handling theming for package $metapack\n");
-    $this->{m_logger}->info("\ttarget theme $this->{m_prodvars}->{PRODUCT_THEME}\n");
-    my $thema = $this->{m_prodvars}->{'PRODUCT_THEME'};
-    if(-d "$tmp/SuSE") { # and -d "$tmp/SuSE/$thema") {
-      if(not opendir(TD, "$tmp/SuSE")) {
-	$this->{m_logger}->warning("[WARNING] [unpackMetapackages] Can't open theme directory for reading!\nSkipping themes for package $metapack\n");
-	next;
-      }
-      my @themes = readdir(TD);
-      closedir(TD);
-      my $found=0;
-      foreach my $d(@themes) {
-	if($d =~ m{$thema}i) {
-	  $this->{m_logger}->info("Using thema $d\n");
-	  $thema = $d;	# changed after I saw that yast2-slideshow has a thema "SuSE-SLES" (matches "SuSE", but not in line 831)
-	  $found=1;
-	  last;
+      $this->{m_util}->unpac_package($this->{m_packages}->{$metapack}->{$dir}->{'source'}, "$tmp");
+      ## all metapackages contain at least a CD1 dir and _may_ contain another /usr/share/<name> dir
+      qx(cp -r $tmp/CD1/* $this->{m_basesubdir}->{$medium});
+      for my $sub("usr", "etc") {
+	if(-d "$tmp/$sub") {
+	  qx(cp -r $tmp/$sub $this->{m_basesubdir}->{$medium});
 	}
       }
-      if($found==0) {
+      ## copy content of CD2 ... CD<i> subdirs if exists:
+      for(2..10) {
+	if(-d "$tmp/CD$_" and defined $this->{m_basesubdir}->{$_}) {
+	  qx(cp -r $tmp/CD$_/* $this->{m_basesubdir}->{$_});
+	}
+	## add handling for "DVD<i>" subdirs if necessary FIXME
+      }
+
+      ## THEMING
+      $this->{m_logger}->info("[INFO] Handling theming for package $metapack\n");
+      $this->{m_logger}->info("\ttarget theme $this->{m_prodvars}->{PRODUCT_THEME}\n");
+      my $thema = $this->{m_prodvars}->{'PRODUCT_THEME'};
+      if(-d "$tmp/SuSE") { # and -d "$tmp/SuSE/$thema") {
+	if(not opendir(TD, "$tmp/SuSE")) {
+	  $this->{m_logger}->warning("[WARNING] [unpackMetapackages] Can't open theme directory for reading!\nSkipping themes for package $metapack\n");
+	  next;
+	}
+	my @themes = readdir(TD);
+	closedir(TD);
+	my $found=0;
 	foreach my $d(@themes) {
-	  if($d =~ m{Linux|SLES}i) {
-	    $this->{m_logger}->info("Using fallback theme $d instead of $thema\n");
-	    $thema = $d;
+	  if($d =~ m{$thema}i) {
+	    $this->{m_logger}->info("Using thema $d\n");
+	    $thema = $d;	# changed after I saw that yast2-slideshow has a thema "SuSE-SLES" (matches "SuSE", but not in line 831)
+	    $found=1;
 	    last;
 	  }
 	}
+	if($found==0) {
+	  foreach my $d(@themes) {
+	    if($d =~ m{Linux|SLES}i) {
+	      $this->{m_logger}->info("Using fallback theme $d instead of $thema\n");
+	      $thema = $d;
+	      last;
+	    }
+	  }
+	}
+	## $thema is now the thema to use:
+	for my $i(1..3) {
+	  ## @lars: wtf soll denn sein, wenn es CD2 gibt, aber die Konfig der Medien kein Medium "2" hat?
+	  ## Laut Rudi (tm) ist das zulässig!
+	  if(-d "$tmp/SuSE/$thema/CD$i" and $this->{m_basesubdir}->{$i} and -d "$tmp/SuSE/$thema/CD$i") {
+	    qx(cp -a $tmp/SuSE/$thema/CD$i/* $this->{m_basesubdir}->{$i});
+	  }
+	}
       }
-      ## $thema is now the thema to use:
-      for my $i(1..3) {
-	## @lars: wtf soll denn sein, wenn es CD2 gibt, aber die Konfig der Medien kein Medium "2" hat?
-	## Laut Rudi (tm) ist das zulässig!
-	if(-d "$tmp/SuSE/$thema/CD$i" and $this->{m_basesubdir}->{$i} and -d "$tmp/SuSE/$thema/CD$i") {
-	  qx(cp -a $tmp/SuSE/$thema/CD$i/* $this->{m_basesubdir}->{$i});
+
+      ## handling optional special scripts if given (``anchor of the last choice'')
+      if($tmp{'script'}) {
+	my $scriptfile;
+	$tmp{'script'} =~ m{.*/([^/]+)$};
+	if(defined($1)) {
+	  $scriptfile = $1;
+	}
+	else {
+	  $this->{m_logger}->warning("[WARNING] [executeScripts] malformed script name: $tmp{'script'}");
+	  next;
+	}
+
+	print "Downloading script $tmp{'script'} to $this->{m_scriptbase}:";
+	$this->{m_xml}->getInstSourceFile($tmp{'script'}, "$this->{m_scriptbase}/$scriptfile");
+
+	# TODO I don't like this. Not at all. use chroot in next version!
+	qx(chmod u+x "$this->{m_scriptbase}/$scriptfile");
+	$this->{m_logger}->info("[INFO] [executeScripts] Execute script $this->{m_scriptbase}/$scriptfile:\n");
+	if(-f "$this->{m_scriptbase}/$scriptfile" and -x "$this->{m_scriptbase}/$scriptfile") {
+	  my $status = qx($this->{m_scriptbase}/$scriptfile);
+	  my $retcode = $? >> 8;
+	  print "STATUS:\n$status\n";
+	  print "RETURNED:\n$retcode\n";
+	}
+	else {
+	  $this->{m_logger}->warning("[WARNING] [executeScripts] script $this->{m_scriptbase}/$scriptfile for metapackage $metapack could not be executed successfully!\n");
+	}
+      }
+      else {
+	$this->{m_logger}->info("No script defined for metapackage $metapack\n");
+      }
+
+      if($nokeep == 1) {
+	foreach my $d(keys(%{$this->{m_packages}->{$metapack}})) {
+	  unlink("$this->{m_packages}->{$metapack}->{$d}->{'newpath'}/$this->{m_packages}->{$metapack}->{$d}->{'newfile'}");
 	}
       }
     }
-
-    ## handling optional special scripts if given (``anchor of the last choice'')
-    if($tmp{'script'}) {
-      my $scriptfile;
-      $tmp{'script'} =~ m{.*/([^/]+)$};
-      if(defined($1)) {
-	$scriptfile = $1;
-      }
-      else {
-	$this->{m_logger}->warning("[WARNING] [executeScripts] malformed script name: $tmp{'script'}");
-	next;
-      }
-
-      print "Downloading script $tmp{'script'} to $this->{m_scriptbase}:";
-      $this->{m_xml}->getInstSourceFile($tmp{'script'}, "$this->{m_scriptbase}/$scriptfile");
-
-      # TODO I don't like this. Not at all. use chroot in next version!
-      qx(chmod u+x "$this->{m_scriptbase}/$scriptfile");
-      $this->{m_logger}->info("[INFO] [executeScripts] Execute script $this->{m_scriptbase}/$scriptfile:\n");
-      if(-f "$this->{m_scriptbase}/$scriptfile" and -x "$this->{m_scriptbase}/$scriptfile") {
-	my $status = qx($this->{m_scriptbase}/$scriptfile);
-	my $retcode = $? >> 8;
-	print "STATUS:\n$status\n";
-	print "RETURNED:\n$retcode\n";
-      }
-      else {
-	$this->{m_logger}->warning("[WARNING] [executeScripts] script $this->{m_scriptbase}/$scriptfile for metapackage $metapack could not be executed successfully!\n");
-      }
-    }
-    else {
-      $this->{m_logger}->info("No script defined for metapackage $metapack\n");
-    }
-
-		if($nokeep == 1) {
-			foreach my $d(keys(%{$this->{m_packages}->{$metapack}})) {
-				unlink("$this->{m_packages}->{$metapack}->{$d}->{'newpath'}/$this->{m_packages}->{$metapack}->{$d}->{'newfile'}");
-			}
-			print "flonz.";
-		}
   }
 
   ## cleanup old files:
@@ -1468,7 +1470,7 @@ sub createMetadata
   ## step 2: create_package_descr
   #==============================
   my @paths = values(%{$this->{m_basesubdir}});
-  @paths = reverse map { $_."/suse" => "-d" if $_ !~ m{.*0}} @paths;
+  @paths = reverse map { $_."/suse" => "-d" if $_ !~ m{.*0}} reverse @paths;
   my $pathlist = join(' ', @paths);
 
   $this->{m_logger}->info("Calling create_package_descr for directories @paths:");
