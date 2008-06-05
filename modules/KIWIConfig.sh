@@ -806,15 +806,16 @@ function suseGFXBoot {
 	fi
 	mkdir /image/loader
 	local gfximage=
-	local grubimage=
+	local bootimage=
 	if [ "$newlayout" ] ; then
 		gfximage=themes/$theme/bootlogo
-		grubimage=themes/$theme/message
+		bootimage=themes/$theme/message
 	else
 		gfximage=themes/$theme/install/bootlogo
-		grubimage=themes/$theme/boot/message
+		bootimage=themes/$theme/boot/message
 	fi
 	if [ $loader = "isolinux" ];then
+		# isolinux boot data...
 		cp themes/$theme/install/* /image/loader
 		cp $gfximage /image/loader
 		if [ -x /usr/sbin/gfxboot ] ; then
@@ -825,9 +826,9 @@ function suseGFXBoot {
 		bin/unpack_bootlogo /image/loader
 		mv /usr/share/syslinux/isolinux.bin /image/loader
 		mv /boot/memtest.bin /image/loader/memtest
-	fi
-	if [ $loader = "grub" ];then
-		mv $grubimage /image/loader
+	else
+		# boot loader graphics image file...
+		mv $bootimage /image/loader
 	fi
 	make -C themes/$theme clean
 	#======================================

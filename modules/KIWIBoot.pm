@@ -394,7 +394,7 @@ sub createBootStructure {
 		$zipped = 1;
 	}
 	$kiwi -> info ("Creating initial boot structure");
-	$status = qxx ( "mkdir -p $tmpdir/boot/grub 2>&1" );
+	$status = qxx ( "mkdir -p $tmpdir/boot 2>&1" );
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -556,6 +556,7 @@ sub setupBootStick {
 			return undef;
 		}
 	}
+	$this->{imgtype} = $imgtype;
 	#==========================================
 	# check image split portion
 	#------------------------------------------
@@ -575,6 +576,8 @@ sub setupBootStick {
 	if (($syszip) || ($haveSplit)) {
 		$bootpart = "1";
 	}
+	$this->{bootpart} = $bootpart;
+	$this->{bootlabel}= $label;
 	#==========================================
 	# obtain filesystem type from xml data
 	#------------------------------------------
@@ -590,40 +593,16 @@ sub setupBootStick {
 	# Create Stick boot structure
 	#------------------------------------------
 	if (! $this -> createBootStructure()) {
+		$this -> cleanTmp ();
 		return undef;
 	}
 	#==========================================
-	# Import grub stages
+	# Import boot loader stages
 	#------------------------------------------
-	my $stages = "'usr/lib/grub/*'";
-	my $unzip  = "$main::Gzip -cd $initrd 2>&1";
-	$kiwi -> info ("Importing grub stages for stick boot");
-	if ($zipped) {
-		$status = qxx ("$unzip | (cd $tmpdir && cpio -di $stages 2>&1)");
-	} else {
-		$status = qxx ("cat $initrd | (cd $tmpdir && cpio -di $stages 2>&1)");
+	if (! $this -> setupBootLoaderStages ("grub")) {
+		$this -> cleanTmp ();
+		return undef;
 	}
-	$result = $? >> 8;
-	if ($result == 0) {
-		$status = qxx ( "mv $tmpdir/usr/lib/grub/* $tmpdir/boot/grub 2>&1" );
-		$result = $? >> 8;
-	}
-	if ($result != 0) {
-		$kiwi -> skipped (); chomp $status;
-		$kiwi -> error   ("Failed importing grub stages: $status");
-		$kiwi -> skipped ();
-		$kiwi -> info    ("Trying to use grub stages from local machine");
-		$status = qxx ( "cp /usr/lib/grub/* $tmpdir/boot/grub 2>&1" );
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Failed importing grub stages: $status");
-			$kiwi -> failed ();
-			$this -> cleanTmp ();
-			return undef;
-		}
-	}
-	$kiwi -> done ();
 	#==========================================
 	# Find USB stick devices
 	#------------------------------------------
@@ -680,89 +659,11 @@ sub setupBootStick {
 		}
 	}
 	#==========================================
-	# Creating menu.lst for the grub
+	# Creating boot loader configuration
 	#------------------------------------------
-	$kiwi -> info ("Creating grub menu list file...");
-	if (! open (FD,">$tmpdir/boot/grub/menu.lst")) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't create menu.lst: $!");
-		$kiwi -> failed ();
-		$this -> cleanTmp ();
+	if (! $this -> setupBootLoaderConfiguration ("grub","USB")) {
 		return undef;
 	}
-	print FD "color cyan/blue white/blue\n";
-	print FD "default 0\n";
-	print FD "timeout 10\n";
-	print FD "gfxmenu (hd0,$bootpart)/boot/message\n";
-	print FD "\n";
-	print FD "title $label [ USB ]\n";
-	if (! $isxen) {
-		print FD " root (hd0,$bootpart)\n";
-		print FD " kernel /boot/linux vga=0x314 splash=silent";
-		if ($imgtype eq "split") {
-			print FD " COMBINED_IMAGE=yes showopts\n";
-		} else {
-			print FD " showopts\n";
-		}
-		print FD " initrd /boot/initrd\n";
-	} else {
-		print FD " root (hd0,$bootpart)\n";
-		print FD " kernel /boot/xen.gz\n";
-		print FD " module /boot/linux vga=0x314 splash=silent";
-		if ($imgtype eq "split") {
-			print FD " COMBINED_IMAGE=yes showopts\n";
-		} else {
-			print FD " showopts\n";
-		}
-		print FD " module /boot/initrd\n";
-	}
-	print FD "title Failsafe -- $label [ USB ]\n";
-	if (! $isxen) {
-		print FD " root (hd0,$bootpart)\n";
-		print FD " kernel /boot/linux vga=0x314 splash=silent";
-		if ($imgtype eq "split") {
-			print FD " COMBINED_IMAGE=yes showopts";
-		} else {
-			print FD " showopts";
-		}
-		print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
-		print FD " noapic maxcpus=0 edd=off\n";
-		print FD " initrd /boot/initrd\n";
-	} else {
-		print FD " root (hd0,$bootpart)\n";
-		print FD " kernel /boot/xen.gz\n";
-		print FD " module /boot/linux vga=0x314 splash=silent";
-		if ($imgtype eq "split") {
-			print FD " COMBINED_IMAGE=yes showopts";
-		} else {
-			print FD " showopts";
-		}
-		print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
-		print FD " noapic maxcpus=0 edd=off\n";
-		print FD " module /boot/initrd\n";
-	}
-	close FD;
-	$kiwi -> done();
-	#==========================================
-	# extract message file from initrd
-	#------------------------------------------
-	$kiwi -> info ("Checking for message file in boot image");
-	my $message = "'image/loader/message'";
-	$unzip = "$main::Gzip -cd $initrd 2>&1";
-	if ($zipped) {
-		$status = qxx ("$unzip | (cd $tmpdir && cpio -d -i $message 2>&1)");
-	} else {
-		$status = qxx ("cat $initrd|(cd $tmpdir && cpio -d -i $message 2>&1)");
-	}
-	$result = $? >> 8;
-	if ($result != 0) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't find message file: $status");
-		$kiwi -> failed ();
-		$this -> cleanLoop ();
-		return undef;
-	}
-	$kiwi -> done();
 	#==========================================
 	# umount stick mounted by hal before lock
 	#------------------------------------------
@@ -1109,45 +1010,16 @@ sub setupBootStick {
 	qxx ("umount $loopdir");
 	$kiwi -> done();
 	#==========================================
-	# Install grub on USB stick
+	# Install boot loader on USB stick
 	#------------------------------------------
-	$kiwi -> info ("Installing grub on USB stick");
-	if (! open (FD,"|/usr/sbin/grub --batch &> $tmpdir/grub.log")) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't call grub: $!");
-		$kiwi -> failed ();
+	if (! $this -> installBootLoader ("grub", $stick)) {
 		$this -> cleanDbus();
 		$this -> cleanTmp ();
-		return undef;
-	}
-	print FD "device (hd0) $stick\n";
-	print FD "root (hd0,$bootpart)\n";
-	print FD "setup (hd0)\n";
-	print FD "quit\n";
-	close FD;
-	my $glog;
-	if (open (FD,"$tmpdir/grub.log")) {
-		my @glog = <FD>; close FD;
-		$glog = join ("\n",@glog);
-		$kiwi -> loginfo ("GRUB: $glog");
 	}
 	#==========================================
 	# cleanup temp directory
 	#------------------------------------------
 	qxx ("rm -rf $tmpdir");
-	#==========================================
-	# check grub installation
-	#------------------------------------------
-	qxx ("head -n 10 $stick | file - | grep -q 'boot sector'");
-	$result = $? >> 8;
-	if ($result != 0) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't install grub on USB stick: $glog");
-		$kiwi -> failed ();
-		$this -> cleanDbus();
-		return undef;
-	}
-	$kiwi -> done ();
 	#==========================================
 	# Remove dbus lock for $stick
 	#------------------------------------------
@@ -1289,6 +1161,7 @@ sub setupInstallCD {
 			return undef;
 		}
 	}
+	$this->{imgtype} = $imgtype;
 	#==========================================
 	# Setup image basename
 	#------------------------------------------
@@ -1316,129 +1189,30 @@ sub setupInstallCD {
 	$this->{initrd} = $initrd;
 	if (! $this -> createBootStructure()) {
 		$this->{initrd} = $oldird;
+		$this -> cleanTmp ();
 		return undef;
 	}
 	#==========================================
-	# Import grub stages
+	# Import boot loader stages
 	#------------------------------------------
-	$kiwi -> info ("Importing grub stages for CD boot");
-	my $stage1 = "'usr/lib/grub/stage1'";
-	my $stage2 = "'usr/lib/grub/stage2_eltorito'";
-	my $message= "'image/loader/message'";
-	my $unzip  = "$main::Gzip -cd $initrd 2>&1";
-	$status = qxx ("$unzip | (cd $tmpdir && cpio -d -i $message 2>&1)");
-	$result = $? >> 8;
-	if ($result == 0) {
-		$status = qxx ("$unzip | (cd $tmpdir && cpio -d -i $stage1 2>&1)");
-		$result = $? >> 8;
-		if ($result == 0) {
-			$status = qxx ("$unzip | (cd $tmpdir && cpio -d -i $stage2 2>&1)");
-		}
-	}
-	if ($result == 0) {
-		$status = qxx ("mv $tmpdir/$message $tmpdir/boot/message 2>&1");
-		$result = $? >> 8;
-		if ($result == 0) {
-			$status = qxx ("mv $tmpdir/$stage1 $tmpdir/boot/grub/stage1 2>&1");
-			$result = $? >> 8;
-			if ($result == 0) {
-				$status = qxx (
-					"mv $tmpdir/$stage2 $tmpdir/boot/grub/stage2 2>&1"
-				);
-				$result = $? >> 8;
-			}
-		}
-	}
-	if ($result != 0) {
-		$kiwi -> skipped (); chomp $status;
-		$kiwi -> error   ("Failed importing grub stages: $status");
-		$kiwi -> skipped ();
-		$kiwi -> info    ("Trying to use grub stages from local machine");
-		$status = qxx ( "cp /$stage1 $tmpdir/boot/grub/stage1 2>&1" );
-		$status = qxx ( "cp /$stage2 $tmpdir/boot/grub/stage2 2>&1" );
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Failed importing grub stages: $status");
-			$kiwi -> failed ();
-			$this->{initrd} = $oldird;
-			$this -> cleanTmp ();
-			return undef;
-		}
+	if (! $this -> setupBootLoaderStages ("grub","iso")) {
+		$this -> cleanTmp ();
+		return undef;
 	}
 	qxx ("rm -rf $tmpdir/usr 2>&1");
 	qxx ("rm -rf $tmpdir/image 2>&1");
 	$this->{initrd} = $oldird;
-	$kiwi -> done ();
-
 	#==========================================
-	# Creating menu.lst for the grub
+	# Creating boot loader configuration
 	#------------------------------------------
-	$kiwi -> info ("Creating grub menu");
-	if (! open (FD,">$tmpdir/boot/grub/menu.lst")) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't create menu.lst: $!");
-		$kiwi -> failed ();
-		$this -> cleanTmp ();
-		return undef;
-	}
 	my $title = "KIWI CD Installation";
 	if (! $gotsys) {
 		$title = "KIWI CD Boot: $namecd";
 	}
-	print FD "color cyan/blue white/blue\n";
-	print FD "default 0\n";
-	print FD "timeout 10\n";
-	print FD "gfxmenu (cd)/boot/message\n";
-	print FD "title $title\n";
-	if (! $isxen) {
-		print FD " kernel (cd)/boot/linux vga=0x314 splash=silent";
-		print FD " ramdisk_size=512000 ramdisk_blocksize=4096";
-		if ($imgtype eq "split") {
-			print FD " COMBINED_IMAGE=yes showopts\n";
-		} else {
-			print FD " showopts\n";
-		}
-		print FD " initrd (cd)/boot/initrd\n";
-	} else {
-		print FD " kernel (cd)/boot/xen.gz\n";
-		print FD " module /boot/linux vga=0x314 splash=silent";
-		print FD " ramdisk_size=512000 ramdisk_blocksize=4096";
-		if ($imgtype eq "split") {
-			print FD " COMBINED_IMAGE=yes showopts\n";
-		} else {
-			print FD " showopts\n";
-		}
-		print FD " module (cd)/boot/initrd\n" 
+	if (! $this -> setupBootLoaderConfiguration ("grub",$title)) {
+		$this -> cleanTmp ();
+		return undef;
 	}
-	print FD "title Failsafe -- $title\n";
-	if (! $isxen) {
-		print FD " kernel (cd)/boot/linux vga=0x314 splash=silent";
-		print FD " ramdisk_size=512000 ramdisk_blocksize=4096 showopts";
-		print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
-		print FD " noapic maxcpus=0 edd=off";
-		if ($imgtype eq "split") {
-			print FD " COMBINED_IMAGE=yes\n";
-		} else {
-			print FD "\n";
-		}
-		print FD " initrd (cd)/boot/initrd\n";
-	} else {
-		print FD " kernel (cd)/boot/xen.gz\n";
-		print FD " module /boot/linux vga=0x314 splash=silent";
-		print FD " ramdisk_size=512000 ramdisk_blocksize=4096 showopts";
-		print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
-		print FD " noapic maxcpus=0 edd=off";
-		if ($imgtype eq "split") {
-			print FD " COMBINED_IMAGE=yes\n";
-		} else {
-			print FD "\n";
-		}
-		print FD " module (cd)/boot/initrd\n"
-	}
-	close FD;
-	$kiwi -> done();
-
 	#==========================================
 	# Copy system image if given
 	#------------------------------------------
@@ -1631,6 +1405,7 @@ sub setupInstallStick {
 			return undef;
 		}
 	}
+	$this->{imgtype} = $imgtype;
 	#==========================================
 	# Setup image basename
 	#------------------------------------------
@@ -1658,107 +1433,28 @@ sub setupInstallStick {
 	#------------------------------------------
 	if (! $this -> createBootStructure("vmx")) {
 		$this->{initrd} = $oldird;
-		return undef;
-	}
-	#==========================================
-	# Import grub stages
-	#------------------------------------------
-	my $stages = "'usr/lib/grub/*'";
-	my $unzip  = "$main::Gzip -cd $initrd 2>&1";
-	$kiwi -> info ("Importing grub stages for VM boot");
-	$status = qxx ("$unzip | (cd $tmpdir && cpio -di $stages 2>&1)");
-	$result = $? >> 8;
-	if ($result == 0) {
-		$status = qxx ( "mv $tmpdir/usr/lib/grub/* $tmpdir/boot/grub 2>&1" );
-		$result = $? >> 8;
-	}
-	if ($result != 0) {
-		$kiwi -> skipped (); chomp $status;
-		$kiwi -> error   ("Failed importing grub stages: $status");
-		$kiwi -> skipped ();
-		$kiwi -> info    ("Trying to use grub stages from local machine");
-		$status = qxx ( "cp /usr/lib/grub/* $tmpdir/boot/grub 2>&1" );
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Failed importing grub stages: $status");
-			$kiwi -> failed ();
-			$this->{initrd} = $oldird;
-			$this -> cleanTmp ();
-			return undef;
-		}
-	}
-	$kiwi -> done ();
-	#==========================================
-	# Creating menu.lst for the grub
-	#------------------------------------------
-	$kiwi -> info ("Creating grub menu and device map");
-	if (! open (FD,">$tmpdir/boot/grub/menu.lst")) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't create menu.lst: $!");
-		$kiwi -> failed ();
-		$this->{initrd} = $oldird;
 		$this -> cleanTmp ();
 		return undef;
 	}
+	#==========================================
+	# Import boot loader stages
+	#------------------------------------------
+	if (! $this -> setupBootLoaderStages ("grub")) {
+		$this -> cleanTmp ();
+		return undef;
+	}
+	#==========================================
+	# Creating boot loader configuration
+	#------------------------------------------
 	my $title = "KIWI USB-Stick Installation";
 	if (! $gotsys) {
 		$title = "KIWI USB Boot: $nameusb";
 	}
-	print FD "color cyan/blue white/blue\n";
-	print FD "default 0\n";
-	print FD "timeout 10\n";
-	print FD "gfxmenu (hd0,0)/image/loader/message\n";
-	print FD "\n";
-	print FD "title $title\n";
-	if (! $isxen) {
-		print FD " root (hd0,0)\n";
-		print FD " kernel /boot/linux.vmx vga=0x314 splash=silent";
-		if ($imgtype eq "split") {
-			print FD " COMBINED_IMAGE=yes showopts\n";
-		} else {
-			print FD " showopts\n";
-		}
-		print FD " initrd /boot/initrd.vmx\n";
-	} else {
-		print FD " root (hd0,0)\n";
-		print FD " kernel /boot/xen.gz.vmx\n";
-		print FD " module /boot/linux.vmx vga=0x314 splash=silent";
-		if ($imgtype eq "split") {
-			print FD " COMBINED_IMAGE=yes showopts\n";
-		} else {
-			print FD " showopts\n";
-		}
-		print FD " module /boot/initrd.vmx"
+	if (! $this -> setupBootLoaderConfiguration ("grub",$title)) {
+		$this -> cleanTmp ();
+		return undef;
 	}
-	print FD "title Failsafe -- $title\n";
-	if (! $isxen) {
-		print FD " root (hd0,0)\n";
-		print FD " kernel /boot/linux.vmx vga=0x314 splash=silent showopts";
-		print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
-		print FD " noapic maxcpus=0 edd=off";
-		if ($imgtype eq "split") {
-			print FD " COMBINED_IMAGE=yes\n";
-		} else {
-			print FD "\n";
-		}
-		print FD " initrd /boot/initrd.vmx\n";
-	} else {
-		print FD " root (hd0,0)\n";
-		print FD " kernel /boot/xen.gz.vmx\n";
-		print FD " module /boot/linux.vmx vga=0x314 splash=silent showopts";
-		print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
-		print FD " noapic maxcpus=0 edd=off";
-		if ($imgtype eq "split") {
-			print FD " COMBINED_IMAGE=yes\n";
-		} else {
-			print FD "\n";
-		}
-		print FD " module /boot/initrd.vmx"
-	}
-	close FD;
 	$this->{initrd} = $oldird;
-	$kiwi -> done();
 	#==========================================
 	# create virtual disk
 	#------------------------------------------
@@ -1880,17 +1576,6 @@ sub setupInstallStick {
 		$this -> cleanLoop ();
 		return undef;
 	}
-	my $message = "'image/loader/message'";
-	$unzip  = "$main::Gzip -cd $initrd 2>&1";
-	$status = qxx ("$unzip | ( cd $loopdir && cpio -di $message 2>&1)");
-	$result = $? >> 8;
-	if ($result != 0) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't find message file: $status");
-		$kiwi -> failed ();
-		$this -> cleanLoop ();
-		return undef;
-	}
 	qxx ( "umount $loopdir 2>&1" );
 	$kiwi -> done();
 	#==========================================
@@ -1924,45 +1609,16 @@ sub setupInstallStick {
 	#------------------------------------------
 	qxx ( "/sbin/kpartx -d $loop" );
 	#==========================================
-	# Install grub on virtual disk
+	# Install boot loader on virtual disk
 	#------------------------------------------
-	$kiwi -> info ("Installing grub on virtual disk");
-	if (! open (FD,"|/usr/sbin/grub --batch &> $tmpdir/grub.log")) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't call grub: $!");
-		$kiwi -> failed ();
+	if (! $this -> installBootLoader ("grub", $diskname)) {
 		$this -> cleanLoop ();
 		$this -> cleanTmp();
-		return undef;
-	}
-	print FD "device (hd0) $diskname\n";
-	print FD "root (hd0,0)\n";
-	print FD "setup (hd0)\n";
-	print FD "quit\n";
-	close FD;
-	my $glog;
-	if (open (FD,"$tmpdir/grub.log")) {
-		my @glog = <FD>; close FD;
-		$glog = join ("\n",@glog);
-		$kiwi -> loginfo ("GRUB: $glog");
 	}
 	#==========================================
 	# cleanup temp directory
 	#------------------------------------------
 	qxx ("rm -rf $tmpdir");
-	#==========================================
-	# check grub installation
-	#------------------------------------------
-	qxx ("file $diskname | grep -q 'boot sector'");
-	$result = $? >> 8;
-	if ($result != 0) { 
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't install grub on virtual disk: $glog");
-		$kiwi -> failed ();
-		$this -> cleanLoop ();
-		return undef;
-	}
-	$kiwi -> done ();
 	#==========================================
 	# cleanup loop setup and device mapper
 	#------------------------------------------
@@ -2072,6 +1728,8 @@ sub setupBootDisk {
 	$diskname = $label;
 	$diskname = $destdir."/".$diskname.".".$arch."-".$version.".raw";
 	$splitfile= $destdir."/".$label."-read-write.".$arch."-".$version;
+	$this->{imgtype}  = $imgtype;
+	$this->{bootlabel}= $label;
 	#==========================================
 	# check image split portion
 	#------------------------------------------
@@ -2132,125 +1790,31 @@ sub setupBootDisk {
 	# Create Virtual Disk boot structure
 	#------------------------------------------
 	if (! $this -> createBootStructure("vmx")) {
-		return undef;
-	}
-	#==========================================
-	# Import grub stages
-	#------------------------------------------
-	my $stages = "'usr/lib/grub/*'";
-	my $message= "'image/loader/message'";
-	my $unzip  = "$main::Gzip -cd $initrd 2>&1";
-	$kiwi -> info ("Importing grub stages for VM boot");
-	if ($zipped) {
-		$status = qxx ("$unzip | (cd $tmpdir && cpio -di $message 2>&1)");
-	} else {
-		$status = qxx ("cat $initrd | (cd $tmpdir && cpio -di $message 2>&1)");
-	}
-	$result = $? >> 8;
-	if ($result == 0) {
-		$status = qxx ("mv $tmpdir/$message $tmpdir/boot/message 2>&1");
-		$result = $? >> 8;
-		if ($result == 0) {
-			if ($zipped) {
-				$status= qxx ("$unzip | (cd $tmpdir && cpio -di $stages 2>&1)");
-			} else {
-				$status= qxx (
-					"cat $initrd|(cd $tmpdir && cpio -di $stages 2>&1)"
-				);
-			}
-			$result = $? >> 8;
-			if ($result == 0) {
-				$status = qxx (
-					"mv $tmpdir/usr/lib/grub/* $tmpdir/boot/grub 2>&1"
-				);
-				$result = $? >> 8;
-			}
-		}
-	}
-	if ($result != 0) {
-		$kiwi -> skipped (); chomp $status;
-		$kiwi -> error   ("Failed importing grub stages: $status");
-		$kiwi -> skipped ();
-		$kiwi -> info    ("Trying to use grub stages from local machine");
-		$status = qxx ( "cp /usr/lib/grub/* $tmpdir/boot/grub 2>&1" );
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Failed importing grub stages: $status");
-			$kiwi -> failed ();
-			$this -> cleanTmp ();
-			return undef;
-		}
-	}
-	$kiwi -> done ();
-	#==========================================
-	# Creating menu.lst for the grub
-	#------------------------------------------
-	$kiwi -> info ("Creating grub menu and device map");
-	if (! open (FD,">$tmpdir/boot/grub/menu.lst")) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't create menu.lst: $!");
-		$kiwi -> failed ();
 		$this -> cleanTmp ();
 		return undef;
 	}
+	#==========================================
+	# Setup boot partition ID
+	#------------------------------------------
 	my $bootpart = "0";
 	if (($syszip) || ($haveSplit)) {
 		$bootpart = "1";
 	}
-	print FD "color cyan/blue white/blue\n";
-	print FD "default 0\n";
-	print FD "timeout 10\n";
-	print FD "gfxmenu (hd0,$bootpart)/boot/message\n";
-	print FD "\n";
-	print FD "title $label [ VMX ]\n";
-	if (! $isxen) {
-		print FD " root (hd0,$bootpart)\n";
-		print FD " kernel /boot/linux.vmx vga=0x314 splash=silent";
-		if ($imgtype eq "split") {
-			print FD " COMBINED_IMAGE=yes showopts\n";
-		} else {
-			print FD " showopts\n";
-		}
-		print FD " initrd /boot/initrd.vmx\n";
-	} else {
-		print FD " root (hd0,$bootpart)\n";
-		print FD " kernel /boot/xen.gz.vmx\n";
-		print FD " module /boot/linux.vmx vga=0x314 splash=silent";
-		if ($imgtype eq "split") {
-			print FD " COMBINED_IMAGE=yes showopts\n";
-		} else {
-			print FD " showopts\n";
-		}
-		print FD " module /boot/initrd.vmx"
+	$this->{bootpart} = $bootpart;
+	#==========================================
+	# Import boot loader stages
+	#------------------------------------------
+	if (! $this -> setupBootLoaderStages ("grub")) {
+		$this -> cleanTmp ();
+		return undef;
 	}
-	print FD "title Failsafe -- $label [ VMX ]\n";
-	if (! $isxen) {
-		print FD " root (hd0,$bootpart)\n";
-		print FD " kernel /boot/linux.vmx vga=0x314 splash=silent";
-		if ($imgtype eq "split") {
-			print FD " COMBINED_IMAGE=yes showopts";
-		} else {
-			print FD " showopts";
-		}
-		print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
-		print FD " noapic maxcpus=0 edd=off\n";
-		print FD " initrd /boot/initrd.vmx\n";
-	} else {
-		print FD " root (hd0,$bootpart)\n";
-		print FD " kernel /boot/xen.gz.vmx\n";
-		print FD " module /boot/linux.vmx vga=0x314 splash=silent";
-		if ($imgtype eq "split") {
-			print FD " COMBINED_IMAGE=yes showopts";
-		} else {
-			print FD " showopts";
-		}
-		print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
-		print FD " noapic maxcpus=0 edd=off\n";
-		print FD " module /boot/initrd.vmx"
+	#==========================================
+	# Create boot loader configuration
+	#------------------------------------------
+	if (! $this -> setupBootLoaderConfiguration ("grub","VMX")) {
+		$this -> cleanTmp ();
+		return undef;
 	}
-	close FD;
-	$kiwi -> done();
 	#==========================================
 	# create virtual disk
 	#------------------------------------------
@@ -2562,72 +2126,22 @@ sub setupBootDisk {
 		$this -> cleanLoop ();
 		return undef;
 	}
-	#==========================================
-	# check for message file in initrd
-	#------------------------------------------
-	$message = "'image/loader/message'";
-	$unzip   = "$main::Gzip -cd $initrd 2>&1";
-	if ($zipped) {
-		$status = qxx ("$unzip | (cd $loopdir && cpio -di $message 2>&1)");
-	} else {
-		$status = qxx (
-			"cat $initrd | (cd $loopdir && cpio -di $message 2>&1)"
-		);
-	}
-	$result = $? >> 8;
-	if ($result != 0) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't find message file: $status");
-		$kiwi -> failed ();
-		$this -> cleanLoop ();
-		return undef;
-	}
 	qxx ( "umount $loopdir 2>&1" );
 	$kiwi -> done();
 	#==========================================
 	# cleanup device maps and part mount
 	#------------------------------------------
 	qxx ( "/sbin/kpartx -d $loop" );
-
 	#==========================================
-	# Install grub on virtual disk
+	# Install boot loader on virtual disk
 	#------------------------------------------
-	$kiwi -> info ("Installing grub on virtual disk");
-	if (! open (FD,"|/usr/sbin/grub --batch &> $tmpdir/grub.log")) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't call grub: $!");
-		$kiwi -> failed ();
+	if (! $this -> installBootLoader ("grub", $diskname)) {
 		$this -> cleanLoop ();
-		return undef;
-	}
-	print FD "device (hd0) $diskname\n";
-	print FD "root (hd0,$bootpart)\n";
-	print FD "setup (hd0)\n";
-	print FD "quit\n";
-	close FD;
-	my $glog;
-	if (open (FD,"$tmpdir/grub.log")) {
-		my @glog = <FD>; close FD;
-		$glog = join ("\n",@glog);
-		$kiwi -> loginfo ("GRUB: $glog");
 	}
 	#==========================================
 	# cleanup temp directory
 	#------------------------------------------
 	qxx ("rm -rf $tmpdir");
-	#==========================================
-	# check grub installation
-	#------------------------------------------
-	qxx ("file $diskname | grep -q 'boot sector'");
-	$result = $? >> 8;
-	if ($result != 0) { 
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't install grub on virtual disk: $glog");
-		$kiwi -> failed ();
-		$this -> cleanLoop ();
-		return undef;
-	}
-	$kiwi -> done ();
 	#==========================================
 	# Create image described by given format
 	#------------------------------------------
@@ -3167,6 +2681,330 @@ sub relocateCatalog {
 	my $new_catalog = $path_table - 1;
 	$kiwi -> note ("$boot_catalog to $new_catalog");
 	$kiwi -> done();
+	return $this;
+}
+
+#==========================================
+# setupBootLoaderStages
+#------------------------------------------
+sub setupBootLoaderStages {
+	my $this   = shift;
+	my $loader = shift;
+	my $type   = shift;
+	my $kiwi   = $this->{kiwi};
+	my $tmpdir = $this->{tmpdir};
+	my $initrd = $this->{initrd};
+	my $zipped = $this->{zipped};
+	my $status = 0;
+	my $result = 0;
+	#==========================================
+	# Grub
+	#------------------------------------------
+	if ($loader eq "grub") {
+		my $stages = "'usr/lib/grub/*'";
+		my $message= "'image/loader/message'";
+		my $unzip  = "$main::Gzip -cd $initrd 2>&1";
+		$status = qxx ( "mkdir -p $tmpdir/boot/grub 2>&1" );
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Failed creating boot manager directory: $status");
+			$kiwi -> failed ();
+			return undef;
+		}
+		$kiwi -> info ("Importing grub stages and graphics boot message");
+		if ($zipped) {
+			$status= qxx ("$unzip | (cd $tmpdir && cpio -di $message 2>&1)");
+		} else {
+			$status= qxx ("cat $initrd|(cd $tmpdir && cpio -di $message 2>&1)");
+		}
+		$result = $? >> 8;
+		if ($result == 0) {
+			$status = qxx ("mv $tmpdir/$message $tmpdir/boot/message 2>&1");
+			$result = $? >> 8;
+		}
+		if ($result == 0) {
+			if ($zipped) {
+				$status = qxx (
+					"$unzip | (cd $tmpdir && cpio -di $stages 2>&1)"
+				);
+			} else {
+				$status = qxx (
+					"cat $initrd | (cd $tmpdir && cpio -di $stages 2>&1)"
+				);
+			}
+			$result = $? >> 8;
+			if ($result == 0) {
+				$status = qxx (
+					"mv $tmpdir/usr/lib/grub/* $tmpdir/boot/grub 2>&1"
+				);
+				$result = $? >> 8;
+				if (($result == 0) && (defined $type) && ($type eq "iso")) {
+					my $src = "$tmpdir/boot/grub/stage2_eltorito";
+					my $dst = "$tmpdir/boot/grub/stage2";
+					$status = qxx ("mv $src $dst 2>&1");
+					$result = $? >> 8;
+				}
+			}
+		}
+		if ($result != 0) {
+			$kiwi -> skipped (); chomp $status;
+			$kiwi -> error   ("Failed importing grub stages: $status");
+			$kiwi -> skipped ();
+			$kiwi -> info    ("Trying to use grub stages from local machine");
+			$status = qxx ( "cp /usr/lib/grub/* $tmpdir/boot/grub 2>&1" );
+			$result = $? >> 8;
+			if (($result == 0) && (defined $type) && ($type eq "iso")) {
+				my $src = "$tmpdir/boot/grub/stage2_eltorito";
+				my $dst = "$tmpdir/boot/grub/stage2";
+				$status = qxx ("mv $src $dst 2>&1");
+				$result = $? >> 8;
+			}
+			if ($result != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Failed importing grub stages: $status");
+				$kiwi -> failed ();
+				return undef;
+			}
+		}
+		$kiwi -> done();
+	}
+	#==========================================
+	# more boot managers to come...
+	#------------------------------------------
+	return $this;
+}
+
+#==========================================
+# setupBootLoaderConfiguration
+#------------------------------------------
+sub setupBootLoaderConfiguration {
+	my $this     = shift;
+	my $loader   = shift;
+	my $type     = shift;
+	my $kiwi     = $this->{kiwi};
+	my $tmpdir   = $this->{tmpdir};
+	my $initrd   = $this->{initrd};
+	my $isxen    = $this->{isxen};
+	my $imgtype  = $this->{imgtype};
+	my $bootpart = $this->{bootpart};
+	my $label    = $this->{bootlabel};
+	#==========================================
+	# Check boot partition number
+	#------------------------------------------
+	if (! defined $bootpart) {
+		$bootpart = 0;
+	}
+	#==========================================
+	# Grub
+	#------------------------------------------
+	if ($loader eq "grub") {
+		$kiwi -> info ("Creating grub menu list file...");
+		if (! open (FD,">$tmpdir/boot/grub/menu.lst")) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create menu.lst: $!");
+			$kiwi -> failed ();
+			return undef;
+		}
+		#==========================================
+		# General grub setup
+		#------------------------------------------
+		print FD "color cyan/blue white/blue\n";
+		print FD "default 0\n";
+		print FD "timeout 10\n";
+		if ($type =~ /^KIWI CD/) {
+			print FD "gfxmenu (cd)/boot/message\n";
+			print FD "title $type\n";
+		} elsif ($type =~ /^KIWI USB/) {
+			print FD "gfxmenu (hd0,0)/image/loader/message\n";
+			print FD "title $type\n";
+		} else {
+			print FD "gfxmenu (hd0,$bootpart)/boot/message\n";
+			print FD "title $label [ $type ]\n";
+		}
+		#==========================================
+		# Standard boot
+		#------------------------------------------
+		if (! $isxen) {
+			if ($type =~ /^KIWI CD/) {
+				print FD " kernel (cd)/boot/linux vga=0x314 splash=silent";
+				print FD " ramdisk_size=512000 ramdisk_blocksize=4096";
+			} elsif (($type =~ /^KIWI USB/) || ($imgtype =~ /vmx|oem/)) {
+				print FD " root (hd0,$bootpart)\n";
+				print FD " kernel /boot/linux.vmx vga=0x314 splash=silent";
+			} else {
+				print FD " root (hd0,$bootpart)\n";
+				print FD " kernel /boot/linux vga=0x314 splash=silent";
+			}
+			if ($imgtype eq "split") {
+				print FD " COMBINED_IMAGE=yes showopts";
+			} else {
+				print FD " showopts";
+			}
+			print FD "\n";
+			if ($type =~ /^KIWI CD/) {
+				print FD " initrd (cd)/boot/initrd\n";
+			} elsif (($type =~ /^KIWI USB/) || ($imgtype =~ /vmx|oem/)) {
+				print FD " initrd /boot/initrd.vmx\n";
+			} else {
+				print FD " initrd /boot/initrd\n";
+			}
+		} else {
+			if ($type =~ /^KIWI CD/) {
+				print FD " kernel (cd)/boot/xen.gz\n";
+				print FD " module /boot/linux vga=0x314 splash=silent";
+				print FD " ramdisk_size=512000 ramdisk_blocksize=4096";
+			} elsif (($type =~ /^KIWI USB/) || ($imgtype =~ /vmx|oem/)) {
+				print FD " root (hd0,$bootpart)\n";
+				print FD " kernel /boot/xen.gz.vmx\n";
+				print FD " module /boot/linux.vmx vga=0x314 splash=silent";
+			} else {
+				print FD " root (hd0,$bootpart)\n";
+				print FD " kernel /boot/xen.gz\n";
+				print FD " module /boot/linux vga=0x314 splash=silent";
+			}
+			if ($imgtype eq "split") {
+				print FD " COMBINED_IMAGE=yes showopts";
+			} else {
+				print FD " showopts";
+			}
+			print FD "\n";
+			if ($type =~ /^KIWI CD/) {
+				print FD " module (cd)/boot/initrd\n";
+			} elsif (($type =~ /^KIWI USB/) || ($imgtype =~ /vmx|oem/)) {
+				print FD " module /boot/initrd.vmx\n";
+			} else {
+				print FD " module /boot/initrd\n";
+			}
+		}
+		#==========================================
+		# Failsafe boot
+		#------------------------------------------
+		if ($type =~ /^KIWI CD/) {
+			print FD "title Failsafe -- $type\n";
+		} elsif ($type =~ /^KIWI USB/) {
+			print FD "title Failsafe -- $type\n";
+		} else {
+			print FD "title Failsafe -- $label [ $type ]\n";
+		}
+		if (! $isxen) {
+			if ($type =~ /^KIWI CD/) {
+				print FD " kernel (cd)/boot/linux vga=0x314 splash=silent";
+				print FD " ramdisk_size=512000 ramdisk_blocksize=4096";
+			} elsif (($type =~ /^KIWI USB/) || ($imgtype =~ /vmx|oem/)) {
+				print FD " root (hd0,$bootpart)\n";
+				print FD " kernel /boot/linux.vmx vga=0x314 splash=silent";
+			} else {
+				print FD " root (hd0,$bootpart)\n";
+				print FD " kernel /boot/linux vga=0x314 splash=silent";
+			}
+			print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
+			print FD " noapic maxcpus=0 edd=off\n";
+			if ($imgtype eq "split") {
+				print FD " COMBINED_IMAGE=yes showopts";
+			} else {
+				print FD " showopts";
+			}
+			print FD "\n";
+			if ($type =~ /^KIWI CD/) {
+				print FD " initrd (cd)/boot/initrd\n";
+			} elsif (($type =~ /^KIWI USB/) || ($imgtype =~ /vmx|oem/)) {
+				print FD " initrd /boot/initrd.vmx\n";
+			} else {
+				print FD " initrd /boot/initrd\n";
+			}
+		} else {
+			if ($type =~ /^KIWI CD/) {
+				print FD " kernel (cd)/boot/xen.gz\n";
+				print FD " module (cd)/boot/linux vga=0x314 splash=silent";
+				print FD " ramdisk_size=512000 ramdisk_blocksize=4096";
+			} elsif (($type =~ /^KIWI USB/) || ($imgtype =~ /vmx|oem/)) {
+				print FD " root (hd0,$bootpart)\n";
+				print FD " kernel /boot/xen.gz.vmx\n";
+				print FD " module /boot/linux.vmx vga=0x314 splash=silent";
+			} else {
+				print FD " root (hd0,$bootpart)\n";
+				print FD " kernel /boot/xen.gz\n";
+				print FD " module /boot/linux vga=0x314 splash=silent";
+			}
+			print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
+			print FD " noapic maxcpus=0 edd=off";
+			if ($imgtype eq "split") {
+				print FD " COMBINED_IMAGE=yes showopts";
+			} else {
+				print FD " showopts";
+			}
+			print FD "\n";
+			if ($type =~ /^KIWI CD/) {
+				print FD " module (cd)/boot/initrd\n"
+			} elsif (($type =~ /^KIWI USB/) || ($imgtype =~ /vmx|oem/)) {
+				print FD " module /boot/initrd.vmx\n"
+			} else {
+				print FD " module /boot/initrd\n";
+			}
+		}
+		close FD;
+		$kiwi -> done();
+	}
+	#==========================================
+	# more boot managers to come...
+	#------------------------------------------
+	return $this;
+}
+
+#==========================================
+# installBootLoader
+#------------------------------------------
+sub installBootLoader {
+	my $this     = shift;
+	my $loader   = shift;
+	my $diskname = shift;
+	my $kiwi     = $this->{kiwi};
+	my $tmpdir   = $this->{tmpdir};
+	my $bootpart = $this->{bootpart};
+	my $result;
+	my $status;
+	#==========================================
+	# Check boot partition number
+	#------------------------------------------
+	if (! defined $bootpart) {
+		$bootpart = 0;
+	}
+	#==========================================
+	# Grub
+	#------------------------------------------
+	if ($loader eq "grub") {
+		$kiwi -> info ("Installing grub on virtual disk");
+		if (! open (FD,"|/usr/sbin/grub --batch &> $tmpdir/grub.log")) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't call grub: $!");
+			$kiwi -> failed ();
+			return undef;
+		}
+		print FD "device (hd0) $diskname\n";
+		print FD "root (hd0,$bootpart)\n";
+		print FD "setup (hd0)\n";
+		print FD "quit\n";
+		close FD;
+		my $glog;
+		if (open (FD,"$tmpdir/grub.log")) {
+			my @glog = <FD>; close FD;
+			$glog = join ("\n",@glog);
+			$kiwi -> loginfo ("GRUB: $glog");
+		}
+		$status = qxx ("head -n 10 $diskname | file - | grep -q 'boot sector'");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't install grub on $diskname: $glog");
+			$kiwi -> failed ();
+			return undef;
+		}
+		$kiwi -> done();
+	}
+	#==========================================
+	# more boot managers to come...
+	#------------------------------------------
 	return $this;
 }
 

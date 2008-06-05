@@ -2118,7 +2118,7 @@ function mountSystemUnified {
 		fi
 	else
 		# /.../
-		# write part is not a ram disk, create ext2 filesystem on it
+		# write part is not a ram disk, create ext3 filesystem on it
 		# check and mount the filesystem
 		# ----
 		if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
@@ -2126,18 +2126,17 @@ function mountSystemUnified {
 				! mount $rwDevice $rwDir >/dev/null
 			then
 				Echo "Checking filesystem for RW data on $rwDevice..."
-				e2fsck -y -f $rwDevice >/dev/null
+				e2fsck -f $rwDevice -y
 				if [ "$RELOAD_IMAGE" = "yes" ] || \
 					! mount $rwDevice $rwDir >/dev/null
 				then
 					Echo "Creating filesystem for RW data on $rwDevice..."
-					if ! mke2fs $rwDevice >/dev/null;then
-						Echo "Failed to create ext2 filesystem"
+					fsopts="-I 128 -O dir_index -b 4096 -j -J size=4 -q -F"
+					if ! mke2fs $fsopts $rwDevice >/dev/null;then
+						Echo "Failed to create ext3 filesystem"
 						return 1
 					fi
-					tune2fs -m 0 $rwDevice >/dev/null
-					Echo "Checking EXT2 write extend..."
-					e2fsck -y -f $rwDevice >/dev/null
+					e2fsck -f $rwDevice -y >/dev/null
 				fi
 			else
 				umount $rwDevice
