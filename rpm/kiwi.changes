@@ -1,8 +1,10 @@
 -------------------------------------------------------------------
 Mon Jun  9 11:11:53 CEST 2008 - ms@suse.de
 
-- fixed getRemovableUSBStorageDevices function to work on 11.0
-- fixed detection of System.map file in setupSUSEInitrd
+- fixed getRemovableUSBStorageDevices function to work on
+  SUSE 11.0 due to /sys layer changes (bnc #398513)
+- fixed detection of System.map file when setting up the bootloader
+  during netboot deployment in setupSUSEInitrd (bnc #398515)
 
 -------------------------------------------------------------------
 Thu Jun  5 16:01:09 CEST 2008 - ms@suse.de
