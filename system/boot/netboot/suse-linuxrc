@@ -272,12 +272,18 @@ if [ ! -z "$PART" ] && [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ];then
 		fi
 		updateNeeded initialize
 		if linuxPartition $DISK;then
-			mountSystem $imageDevice
-			updateNeeded
-			umountSystem
-			systemIntegrity=`getSystemIntegrity 1`
-			if [ $systemIntegrity = "fine" ];then
-				Echo "Base system is up to date, activating disk system..."
+			if mountSystem $imageDevice;then
+				updateNeeded
+				umountSystem
+				systemIntegrity=`getSystemIntegrity 1`
+				if [ $systemIntegrity = "fine" ];then
+					Echo "Base system is up to date, activating disk system..."
+				fi
+			else
+				Echo -b "Image Update for image [ $imageName ] needed"
+				Echo -b "Image mount failed"
+				RELOAD_IMAGE="yes"
+				systemIntegrity="clean"
 			fi
 		else
 			systemIntegrity="clean"

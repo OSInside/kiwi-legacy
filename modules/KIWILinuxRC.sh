@@ -1333,7 +1333,7 @@ function updateNeeded {
 	# ----
 	SYSTEM_INTEGRITY=""
 	SYSTEM_MD5STATUS=""
-	count=0
+	local count=0
 	IFS="," ; for i in $IMAGE;do
 		field=0
 		IFS=";" ; for n in $i;do
@@ -2194,9 +2194,9 @@ function mountSystemCombined {
 	# ----
 	local rootfs=/read-only/rootfs.tar
 	if [ ! -f $rootfs ];then
-		systemException \
-			"Can't find rootfs tarball" \
-		"reboot"
+		Echo "Can't find rootfs tarball"
+		umount "$roDevice" &>/dev/null
+		return 1
 	fi
 	# /.../
 	# count inode numbers for files in rootfs tarball

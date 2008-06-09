@@ -45,11 +45,17 @@ createFramebufferDevices
 #======================================
 # 5) create initrd on diskful
 #--------------------------------------
-if test -z $KIWI_INITRD;then
-	if test ! -z $DISK;then
-		if test $systemIntegrity = "clean";then
-			setupSUSEInitrd
-		fi
+if [ ! -z $DISK ] && [ $systemIntegrity = "clean" ]; then
+	if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ]; then
+		#======================================
+		# use distro initrd via mkinitrd
+		#--------------------------------------
+		setupSUSEInitrd
+	else
+		#======================================
+		# use kiwi initrd downloaded before
+		#--------------------------------------
+		bootLoaderOK=1
 	fi
 fi
 
