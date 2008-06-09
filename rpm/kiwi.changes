@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Jun  9 11:11:53 CEST 2008 - ms@suse.de
+
+- fixed getRemovableUSBStorageDevices function to work on 11.0
+
+-------------------------------------------------------------------
 Thu Jun  5 16:01:09 CEST 2008 - ms@suse.de
 
 - fixed mountSystemUnified: read/write part is ext3 now

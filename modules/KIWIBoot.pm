@@ -465,9 +465,10 @@ sub getRemovableUSBStorageDevices {
 				if ($description =~ /block:(.*)/) {
 					$description = "/dev/".$1;
 				} else {
-					my @bdevs = glob ($description);
-					$description = "/dev/".$bdevs[0];
-					$isremovable = $description."/".$bdevs[0]."/removable";
+					my @bdevs = glob ("$description/*");	
+					my $bdev = basename ($bdevs[0]);
+					$isremovable = $description."/".$bdev."/removable";
+					$description = "/dev/".$bdev;
 				}
 				if (! open (FD,$isremovable)) {
 					next;
