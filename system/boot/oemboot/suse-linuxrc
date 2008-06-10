@@ -1031,6 +1031,7 @@ fi
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ] && [ ! -z "$OEM_RECOVERY" ];then
 	Echo "Setting up recovery configuration files..."
+	mkdir -p /reco-save
 	if ! mount $deviceRecovery /reco-save >/dev/null;then
 		systemException "Failed to mount recovery device" "reboot"
 	fi
