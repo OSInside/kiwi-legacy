@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Tue Jun 10 17:04:32 CEST 2008 - ms@suse.de
+
+- v2.39
+- added creation of /etc/sysconfig/bootloader
+- fixed oemboot repartition code if no swap, no home and a
+  recovery partition was specified
+
+-------------------------------------------------------------------
 Mon Jun  9 16:56:28 CEST 2008 - ms@suse.de
 
 - fixed update check for split images (bnc #398515)

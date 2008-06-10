@@ -528,6 +528,7 @@ function setupBootLoaderGrub {
 	local menu=$destsPrefix/boot/grub/menu.lst
 	local conf=$destsPrefix/etc/grub.conf
 	local dmap=$destsPrefix/boot/grub/device.map
+	local sysb=$destsPrefix/etc/sysconfig/bootloader
 	local console=""
 	local kname=""
 	local kernel=""
@@ -699,6 +700,11 @@ function setupBootLoaderGrub {
 	#--------------------------------------
 	rdisk=`echo $rdev | sed -e s"@[0-9]@@g"`
 	echo "(hd0) $rdisk" > $dmap
+	#======================================
+	# create sysconfig/bootloader
+	#--------------------------------------
+	echo "LOADER_TYPE=\"grub\""     > $sysb
+	echo "LOADER_LOCATION=\"mbr\"" >> $sysb
 }
 #======================================
 # setupDefaultPXENetwork

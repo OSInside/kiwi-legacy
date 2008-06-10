@@ -624,11 +624,11 @@ if [ $LOCAL_BOOT = "no" ];then
 							done
 						else
 							#======================================
-							# 10.2.1.2.2 without recovery partition
+							# 10.2.1.2.2 with recovery partition
 							#--------------------------------------
 							for cmd in \
-								d n p 4 . +"$recoMByte"M \
-								n p 2 . . w
+								d n p 2 1 +"$disk1MBytes"M \
+								n p 4 . . w
 							do
 								if [ $cmd = "." ];then
 									echo >> $input
@@ -787,9 +787,6 @@ if [ $LOCAL_BOOT = "no" ];then
 				if ! cp /reco-root/boot/linux.vmx /reco-save/boot/vmlinuz;then
 					systemException "Failed to copy recovery kernel" "reboot"
 				fi
-				if ! cp /reco-root/boot/message /reco-save/boot;then
-					systemException "Failed to copy message file" "reboot"
-				fi
 				umount /reco-save && rmdir /reco-save
 				umount /reco-root && rmdir /reco-root
 			fi
@@ -895,6 +892,8 @@ if [ $LOCAL_BOOT = "no" ];then
 		if [ ! -z "$OEM_RECOVERY" ];then
 			KIWI_INITRD_PARAMS="$KIWI_INITRD_PARAMS LOCAL_BOOT=yes"
 			KIWI_INITRD_PARAMS="$KIWI_INITRD_PARAMS deviceRoot=$deviceRoot"
+			KIWI_INITRD_PARAMS=\
+				"$KIWI_INITRD_PARAMS deviceRecovery=$deviceRecovery"
 			export KIWI_INITRD_PARAMS
 		fi
 		if [ "$FSTYPE" = "reiserfs" ];then
@@ -931,8 +930,40 @@ validateRootTree
 # 13) Recover system if requested
 #--------------------------------------
 if [ ! -z "$KIWI_RECOVERY" ];then
-	# TODO restore recovery data
-	systemException "*** system restore not yet implemented ***" "reboot"
+	Echo -n "Do you want to start the System-Recovery ? [y/n]"; read runReco
+	if [ ! $runReco = "y" ];then
+		systemException "System-Recovery not started" "reboot"
+	fi
+	Echo "Starting System-Recovery..."
+	#======================================
+	# 13.1) mount recovery partition
+	#--------------------------------------
+	mkdir -p /reco-save
+	if ! mount $deviceRecovery /reco-save >/dev/null;then
+		systemException "Failed to mount recovery device" "reboot"
+	fi
+	#TODO
+	#======================================
+	# 13.2) restore root archive
+	#--------------------------------------
+	#recovery.tar.bz2
+	echo "BREAK"
+	/bin/sh
+
+	#======================================
+	# 13.3) restore boot files
+	#--------------------------------------
+	#/reco-save/etc/fstab
+	#/reco-save/etc/sysconfig/kernel
+	#/reco-save/etc/sysconfig/bootloader
+	#for i in `setupBootLoaderFiles`;do
+	#	/reco-save/$i
+	#done
+
+	#======================================
+	# 13.4) umount recovery and boot
+	#--------------------------------------
+	umount $deviceRecovery
 fi
 
 #======================================
@@ -1000,12 +1031,18 @@ fi
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ] && [ ! -z "$OEM_RECOVERY" ];then
 	Echo "Setting up recovery configuration files..."
-	mkdir /reco-save
 	if ! mount $deviceRecovery /reco-save >/dev/null;then
 		systemException "Failed to mount recovery device" "reboot"
 	fi
+	mkdir -p /reco-save/etc/sysconfig
 	if ! cp /mnt/etc/fstab /reco-save/etc;then
 		systemException "Failed to copy recovery fstab" "reboot"
+	fi
+	if ! cp /mnt/etc/sysconfig/kernel /reco-save/etc/sysconfig;then
+		systemException "Failed to copy recovery sysconfig/kernel" "reboot"
+	fi
+	if ! cp /mnt/etc/sysconfig/bootloader /reco-save/etc/sysconfig;then
+		systemException "Failed to copy recovery sysconfig/bootloader" "reboot"
 	fi
 	for i in `setupBootLoaderFiles`;do
 		bootdir=`dirname $i` && mkdir -p /reco-save/$bootdir
@@ -1031,9 +1068,9 @@ umountSystemFilesystems
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	importBranding
-	cp /preinit /mnt
-	cp /include /mnt
 fi
+cp /preinit /mnt
+cp /include /mnt
 
 #======================================
 # 21) kill boot shell

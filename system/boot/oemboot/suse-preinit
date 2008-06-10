@@ -28,7 +28,7 @@ errorLogStart
 #======================================
 # 2) check for LOCAL_BOOT
 #--------------------------------------
-if [ $LOCAL_BOOT = "yes" ];then
+if [ $LOCAL_BOOT = "yes" ] && [ -z "$KIWI_RECOVERY" ];then
 	exit 0
 fi
 
@@ -45,16 +45,7 @@ createFramebufferDevices
 #======================================
 # 5) create initrd on diskful
 #--------------------------------------
-if [ ! -z "$OEM_RECOVERY" ];then
-	#======================================
-	# use kiwi initrd as it is right now
-	#--------------------------------------
-	pushd /boot &>/dev/null
-	rm -f vmlinuz && ln -s linux.vmx  vmlinuz
-	rm -f initrd  && ln -s initrd.vmx initrd
-	popd &>/dev/null
-	bootLoaderOK=1
-elif [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ]; then
+if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ]; then
 	#======================================
 	# use distro initrd via mkinitrd
 	#--------------------------------------
@@ -94,7 +85,9 @@ fi
 #======================================
 # 7) create /etc/ImagePackages
 #--------------------------------------
-if [ -x /bin/rpm ];then
-	Echo "Creating initial image package info file"
-	rpm -qa --last > /etc/ImagePackages
+if [ $LOCAL_BOOT = "no" ];then
+	if [ -x /bin/rpm ];then
+		Echo "Creating initial image package info file"
+		rpm -qa --last > /etc/ImagePackages
+	fi
 fi
