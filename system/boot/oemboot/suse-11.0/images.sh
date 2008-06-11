@@ -2,7 +2,7 @@
 test -f /.kconfig && . /.kconfig
 test -f /.profile && . /.profile
 
-echo "Configure image: [$name]..."
+echo "Configure image: [$kiwi_iname]..."
 
 #==========================================
 # setup config.oempartition if required
