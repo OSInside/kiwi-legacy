@@ -1163,6 +1163,9 @@ sub createImageLiveCD {
 	$main::ForeignRepo{"create"}  = $main::Create;
 	$main::Create = $main::RootTree;
 	$xml = new KIWIXML ( $kiwi,$main::Prepare );
+	if (! defined $xml) {
+		return undef;
+	}
 	my $iso = $xml -> getImageName();
 	undef $main::SetImageType;
 	$kiwi -> info ("Checking for pre-built boot image");
@@ -2067,6 +2070,9 @@ sub createImageSplit {
 	$main::ForeignRepo{"create"}  = $main::Create;
 	$main::Create = $main::RootTree;
 	$xml = new KIWIXML ( $kiwi,$main::Prepare );
+	if (! defined $xml) {
+		return undef;
+	}
 	my $iname = $xml -> getImageName();
 	undef $main::SetImageType;
 	$kiwi -> info ("Checking for pre-built boot image");

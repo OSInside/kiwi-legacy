@@ -182,6 +182,7 @@ function suseServiceDefaultOn {
 		atd
 		syslog
 		cron
+		kbd
 	)
 	for i in "${services[@]}";do
 		if [ -x /etc/init.d/$i ] && [ -f /etc/init.d/$i ];then
@@ -196,31 +197,31 @@ function suseServiceDefaultOn {
 function baseSetupOEMPartition {
 	local oemfile=/config.oempartition
 	rm -f $oemfile
-	if [ ! -z "$oemreboot" ];then
+	if [ ! -z "$kiwi_oemreboot" ];then
 		echo "Setting up OEM_REBOOT=1"
 		echo "OEM_REBOOT=1" >> $oemfile
 	fi
-	if [ ! -z "$oemswap" ];then
+	if [ ! -z "$kiwi_oemswap" ];then
 		echo "Setting up OEM_WITHOUTSWAP=1"
 		echo "OEM_WITHOUTSWAP=1" >> $oemfile
 	fi
-	if [ ! -z "$oemswapMB" ];then
-		echo "Setting up OEM_SWAPSIZE=$oemswapMB"
-		echo "OEM_SWAPSIZE=$oemswapMB" >> $oemfile
+	if [ ! -z "$kiwi_oemswapMB" ];then
+		echo "Setting up OEM_SWAPSIZE=$kiwi_oemswapMB"
+		echo "OEM_SWAPSIZE=$kiwi_oemswapMB" >> $oemfile
 	fi
-	if [ ! -z "$oemhome" ];then
+	if [ ! -z "$kiwi_oemhome" ];then
 		echo "Setting up OEM_WITHOUTHOME=1"
 		echo "OEM_WITHOUTHOME=1" >> $oemfile
 	fi
-	if [ ! -z "$oemrootMB" ];then
-		echo "Setting up OEM_SYSTEMSIZE=$oemrootMB"
-		echo "OEM_SYSTEMSIZE=$oemrootMB" >> $oemfile
+	if [ ! -z "$kiwi_oemrootMB" ];then
+		echo "Setting up OEM_SYSTEMSIZE=$kiwi_oemrootMB"
+		echo "OEM_SYSTEMSIZE=$kiwi_oemrootMB" >> $oemfile
 	fi
-	if [ ! -z "$oemtitle" ];then
-		echo "Setting up OEM_BOOT_TITLE=$oemtitle"
-		echo "OEM_BOOT_TITLE=$oemtitle" >> $oemfile
+	if [ ! -z "$kiwi_oemtitle" ];then
+		echo "Setting up OEM_BOOT_TITLE=$kiwi_oemtitle"
+		echo "OEM_BOOT_TITLE=$kiwi_oemtitle" >> $oemfile
 	fi
-	if [ ! -z "$oemrecovery" ];then
+	if [ ! -z "$kiwi_oemrecovery" ];then
 		echo "Setting up OEM_RECOVERY=1"
 		echo "OEM_RECOVERY=1" >> $oemfile
 	fi
@@ -259,29 +260,29 @@ function suseConfig {
 	#======================================
 	# keytable
 	#--------------------------------------
-	if [ ! -z "$keytable" ];then
+	if [ ! -z "$kiwi_keytable" ];then
 		cat etc/sysconfig/keyboard |\
-			sed -e s"@KEYTABLE=\".*\"@KEYTABLE=\"$keytable\"@" \
+			sed -e s"@KEYTABLE=\".*\"@KEYTABLE=\"$kiwi_keytable\"@" \
 		> etc/sysconfig/keyboard.new
 		mv etc/sysconfig/keyboard.new etc/sysconfig/keyboard
 	fi
 	#======================================
 	# locale
 	#--------------------------------------
-	if [ ! -z "$language" ];then
+	if [ ! -z "$kiwi_language" ];then
 		cat /etc/sysconfig/language |\
-			sed -e s"@RC_LANG=\".*\"@RC_LANG=\"$language\"@" \
+			sed -e s"@RC_LANG=\".*\"@RC_LANG=\"$kiwi_language\"@" \
 		> etc/sysconfig/language.new
 		mv etc/sysconfig/language.new etc/sysconfig/language
 	fi
 	#======================================
 	# timezone
 	#--------------------------------------
-	if [ ! -z "$timezone" ];then
-		if [ -f /usr/share/zoneinfo/$timezone ];then
-			mv /usr/share/zoneinfo/$timezone /etc/localtime
+	if [ ! -z "$kiwi_timezone" ];then
+		if [ -f /usr/share/zoneinfo/$kiwi_timezone ];then
+			mv /usr/share/zoneinfo/$kiwi_timezone /etc/localtime
 		else
-			echo "timezone: $timezone not found"
+			echo "timezone: $kiwi_timezone not found"
 		fi
 	fi
 	#======================================
@@ -294,14 +295,14 @@ function suseConfig {
 # baseGetPackagesForDeletion
 #--------------------------------------
 function baseGetPackagesForDeletion {
-	echo $delete
+	echo $kiwi_delete
 }
 
 #======================================
 # baseGetProfilesUsed
 #--------------------------------------
 function baseGetProfilesUsed {
-	echo $profiles
+	echo $kiwi_profiles
 }
 
 #======================================
@@ -331,7 +332,6 @@ function baseStripLocales {
 			if test $locale = $dir;then
 				continue
 			fi
-			
 			local baseLocale=`/usr/bin/basename $locale`
 			local found="no"
 			for keep in $imageLocales;do
@@ -340,7 +340,6 @@ function baseStripLocales {
 					break
 				fi
 			done
-
 			if test $found = "no";then
 				rm -rf $locale
 			fi
@@ -539,14 +538,14 @@ function baseSetupBusyBox {
 	# example: baseSetupBusyBox -f /bin/zcat /bin/vi
 	# ---
 	local applets=""
-	local force="no"
-	local busyboxlinks="/usr/share/busybox/busybox.links"
+	local force=no
+	local busyboxlinks=/usr/share/busybox/busybox.links
 	if ! rpm -q --quiet busybox; then
 		echo "Busybox not installed... skipped"
-		return 0;
+		return 0
 	fi
 	if [ $# -gt 0 ] && [ "$1" = "-f" ]; then
-		force="yes"
+		force=yes
 		shift
 	fi
 	if [ $# -gt 0 ]; then
@@ -967,7 +966,7 @@ function suseStripKernel {
 			#==========================================
 			# handle USB drivers...
 			#------------------------------------------
-			test ! -z "$usbdrivers";for i in $usbdrivers;do
+			test ! -z "$kiwi_usbdrivers";for i in $kiwi_usbdrivers;do
 				local path=`dirname $i`
 				test -f /tmp/drivers/$i && \
 				mkdir -p /tmp/usb-used/drivers/$path && \
@@ -976,7 +975,7 @@ function suseStripKernel {
 			#==========================================
 			# handle SCSI drivers...
 			#------------------------------------------
-			test ! -z "$scsidrivers";for i in $scsidrivers;do
+			test ! -z "$kiwi_scsidrivers";for i in $kiwi_scsidrivers;do
 				local path=`dirname $i`
 				if [ $path = "." ];then
 					test -f /tmp/drivers/scsi/$i && \
@@ -990,7 +989,7 @@ function suseStripKernel {
 			#==========================================
 			# handle Network drivers...
 			#------------------------------------------
-			test ! -z "$netdrivers";for i in $netdrivers;do
+			test ! -z "$kiwi_netdrivers";for i in $kiwi_netdrivers;do
 				local path=`dirname $i`
 				if [ $path = "." ];then
 					test -f /tmp/drivers/net/$i && \
@@ -1004,7 +1003,7 @@ function suseStripKernel {
 			#==========================================
 			# handle misc drivers...
 			#------------------------------------------
-			test ! -z "$drivers";for i in $drivers;do
+			test ! -z "$kiwi_drivers";for i in $kiwi_drivers;do
 				local path=`/usr/bin/dirname $i`
 				local base=`/usr/bin/basename $i`
 				if [ "$base" = "*" ];then

@@ -202,6 +202,12 @@ sub new {
 	$this->{optionsNodeList} = $optionsNodeList;
 
 	#==========================================
+	# Set packagemanager if set on commandline
+	#------------------------------------------
+	if (defined $main::PackageManager) {
+		$this -> setPackageManager ($main::PackageManager);
+	}
+	#==========================================
 	# setup foreign repository sections
 	#------------------------------------------
 	if ( defined $foreignRepo->{xmlnode} ) {
@@ -912,6 +918,24 @@ sub setCompressed {
 }
 
 #==========================================
+# setPackageManager
+#------------------------------------------
+sub setPackageManager {
+	# ...
+	# set packagemanager to use for this image
+	# ---
+	my $this  = shift;
+	my $value = shift;
+	my $addElement = new XML::LibXML::Element ("packagemanager");
+	$addElement -> appendText ($value);
+	my $opts = $this->{optionsNodeList} -> get_node(1);
+	my $node = $opts -> getElementsByTagName ("packagemanager") -> get_node(1);
+	$opts -> removeChild ($node);
+	$opts -> appendChild ($addElement);
+	return $this;
+}
+
+#==========================================
 # getPackageManager
 #------------------------------------------
 sub getPackageManager {
@@ -931,17 +955,13 @@ sub getPackageManager {
 		if ("$pmgr" eq "$manager") {
 			my $file = $packageManager{$manager};
 			if (! -f $file) {
-				$kiwi -> failed ();
-				$kiwi -> error  ("Package manager $file doesn't exist");
-				$kiwi -> failed ();
+				$kiwi -> loginfo ("Package manager $file doesn't exist");
 				return undef;
 			}
 			return $manager;
 		}
 	}
-	$kiwi -> failed ();
-	$kiwi -> error  ("Invalid package manager: $pmgr");
-	$kiwi -> failed ();
+	$kiwi -> loginfo ("Invalid package manager: $pmgr");
 	return undef;
 }
 
@@ -1642,10 +1662,18 @@ sub getImageConfig {
 	my $this = shift;
 	my %result;
 	#==========================================
+	# revision information
+	#------------------------------------------
+	my $rev  = "unknown";
+	if (open FD,$main::Revision) {
+		$rev = <FD>; close FD;
+	}
+	$result{kiwi_revision} = $rev;
+	#==========================================
 	# preferences
 	#------------------------------------------
 	if (getCompressed ($this,"quiet")) {
-		$result{compressed} = "yes";
+		$result{kiwi_compressed} = "yes";
 	}
 	my %type = %{$this->getImageTypeAndAttributes()};
 	my @delp = $this -> getDeleteList();
@@ -1654,22 +1682,22 @@ sub getImageConfig {
 	my $size = getImageSize    ($this);
 	my $name = getImageName    ($this);
 	if (@delp) {
-		$result{delete} = join(" ",@delp);
+		$result{kiwi_delete} = join(" ",@delp);
 	}
 	if (@tstp) {
-		$result{testing} = join(" ",@tstp);
+		$result{kiwi_testing} = join(" ",@tstp);
 	}
 	if (%type) {
-		$result{type} = $type{type};
+		$result{kiwi_type} = $type{type};
 	}
 	if ($size) {
-		$result{size} = $size;
+		$result{kiwi_size} = $size;
 	}
 	if ($name) {
-		$result{name} = $name;
+		$result{kiwi_iname} = $name;
 	}
 	if ($iver) {
-		$result{version} = $iver;
+		$result{kiwi_iversion} = $iver;
 	}
 	#==========================================
 	# drivers
@@ -1677,6 +1705,7 @@ sub getImageConfig {
 	my @node = $this->{driversNodeList} -> get_nodelist();
 	foreach my $element (@node) {
 		my $type = $element -> getAttribute("type");
+		$type = "kiwi_".$type;
 		if (! $this -> requestedProfile ($element)) {
 			next;
 		}
@@ -1709,39 +1738,39 @@ sub getImageConfig {
 	my $oemreboot= $node -> getElementsByTagName ("oem-reboot");
 	my $oemreco  = $node -> getElementsByTagName ("oem-recovery");
 	if (defined $keytable) {
-		$result{keytable} = $keytable;
+		$result{kiwi_keytable} = $keytable;
 	}
 	if (defined $timezone) {
-		$result{timezone} = $timezone;
+		$result{kiwi_timezone} = $timezone;
 	}
 	if (defined $language) {
-		$result{language} = $language;
+		$result{kiwi_language} = $language;
 	}
 	if ((defined $oemswap) && ("$oemswap" eq "no")) {
-		$result{oemswap} = "no";
+		$result{kiwi_oemswap} = "no";
 	} elsif ((defined $oemswapMB) && ("$oemswapMB" > 0)) {
-		$result{oemswapMB} = $oemswapMB;
+		$result{kiwi_oemswapMB} = $oemswapMB;
 	}
 	if ((defined $oemhome) && ("$oemhome" eq "no")) {
-		$result{oemhome} = "no";
+		$result{kiwi_oemhome} = "no";
 	}
 	if ((defined $oemrootMB) && ("$oemrootMB" > 0)) {
-		$result{oemrootMB} = $oemrootMB;
+		$result{kiwi_oemrootMB} = $oemrootMB;
 	}
 	if ((defined $oemtitle) && ("$oemtitle" ne "")) {
-		$result{oemtitle} = $oemtitle;
+		$result{kiwi_oemtitle} = $oemtitle;
 	}
 	if ((defined $oemreboot) && ("$oemreboot" eq "yes")) {
-		$result{oemreboot} = $oemreboot;
+		$result{kiwi_oemreboot} = $oemreboot;
 	}
 	if ((defined $oemreco) && ("$oemreco" eq "yes")) {
-		$result{oemrecovery} = $oemreco;
+		$result{kiwi_oemrecovery} = $oemreco;
 	}
 	#==========================================
 	# profiles
 	#------------------------------------------
 	if (defined $this->{reqProfiles}) {
-		$result{profiles} = join ",", @{$this->{reqProfiles}};
+		$result{kiwi_profiles} = join ",", @{$this->{reqProfiles}};
 	}
 	return %result;
 }

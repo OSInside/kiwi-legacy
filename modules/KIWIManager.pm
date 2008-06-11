@@ -785,6 +785,8 @@ sub installPackages {
 	#------------------------------------------
 	if ($manager eq "ensconce") {
 		# Ignored for ensconce, always report package as installed
+		print $fd "echo 0 > $screenCall.exit; exit 0\n";
+		$fd -> close();
 		return $this;
 	}
 	return $this -> setupScreenCall();
@@ -869,6 +871,8 @@ sub removePackages {
 	#------------------------------------------
 	if ($manager eq "ensconce") {
 		# Ignored for ensconce, always report package as installed
+		print $fd "echo 0 > $screenCall.exit; exit 0\n";
+		$fd -> close();
 		return $this;
 	}
 	return $this -> setupScreenCall();
@@ -980,6 +984,8 @@ sub setupUpgrade {
 	#------------------------------------------
 	if ($manager eq "ensconce") {
 		# Ignored for ensconce, always report package as installed
+		print $fd "echo 0 > $screenCall.exit; exit 0\n";
+		$fd -> close();
 		return $this;
 	}
 	return $this -> setupScreenCall();
@@ -1257,7 +1263,8 @@ sub setupRootSystem {
 	#------------------------------------------
 	if ($manager eq "ensconce") {
 		if (! $chroot) {
-			# Ignored for ensconce
+			print $fd "echo 0 > $screenCall.exit; exit 0 \n";
+			$fd -> close();
 		} else {
 			$kiwi -> info ("Installing image packages...");
 			print $fd "function clean { kill \$SPID; ";

@@ -174,6 +174,7 @@ our $listXMLInfo;       # list XML information for this operation
 our $Compress;          # set compression level
 our $CreatePassword;    # create crypted password
 our $ISOCheck;          # create checkmedia boot entry
+our $PackageManager;    # package manager to use for this image
 our $kiwi;              # global logging handler object
 
 #============================================
@@ -515,7 +516,7 @@ sub main {
 		$kiwi -> info ("Updating type in .profile environment");
 		my $type = $xml -> getImageTypeAndAttributes() -> {type};
 		qxx (
-			"sed -i -e stype=#type=.*#type=$type# $Create/.profile 2>&1"
+			"sed -i -e s#kiwi_type=$type=.*#kiwi_type=$type# $Create/.profile"
 		);
 		$kiwi -> done();
 		#==========================================
@@ -1175,6 +1176,7 @@ sub init {
 		"nocolor"               => \$NoColor,
 		"log-port=i"            => \$LogPort,
 		"gzip-cmd=s"            => \$GzipCmd,
+		"package-manager=s"     => \$PackageManager,
 		"prebuiltbootimage=s"   => \$PrebuiltBootImage,
 		"prechroot-call=s"      => \$PreChrootCall,
 		"list-xmlinfo|x=s"      => \$listXMLInfo,
@@ -1467,6 +1469,10 @@ sub usage {
 	print "    run test(s) on prepared image root tree.\n";
 	print "    If additional name is omitted default set of tests will be\n";
 	print "    used. Otherwise only provided tests will be executed\n";
+	print "\n";
+	print "  [ --package-manager <smart|zypper>\n";
+	print "    set the package manager to use for this image. If set it\n";
+	print "    will temporarly overwrite the value set in config.xml\n";
 	print "--\n";
 	version();
 }
@@ -1865,14 +1871,16 @@ sub checkFileSystem {
 					$type = "cromfs";
 					last SWITCH;
 				};
-				# unknown filesystem type...
-				return undef;
+				# unknown filesystem type use auto...
+				$type = "auto";
 			};
 			$result{type}     = $type;
 			$result{readonly} = $KnownFS{$type}{ro};
 			$result{hastool}  = 0;
-			if (-x $KnownFS{$type}{tool}) {
-				$result{hastool} = 1;
+			if (defined $KnownFS{$type}{tool}) {
+				if (-x $KnownFS{$type}{tool}) {
+					$result{hastool} = 1;
+				}
 			}
 		} else {
 			return undef;

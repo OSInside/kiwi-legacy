@@ -178,6 +178,7 @@ sub new {
 	$kiwi -> info ("Setting up package manager: ");
 	my $pmgr = $xml -> getPackageManager();
 	if (! defined $pmgr) {
+		$kiwi -> failed();
 		if (defined $overlay) {
 			$overlay -> resetOverlay();
 		}
@@ -859,7 +860,7 @@ sub setupMount {
 		if (! -d $cache) {
 			qxx (" mkdir -p $cache ");
 		}
-		qxx ("mkdir -p $mount");
+		qxx ("mkdir -p \"$mount\"");
 		my $data = qxx (" touch $path/bob 2>&1 ");
 		my $code = $? >> 8;
 		if ($code == 0) {
@@ -881,7 +882,7 @@ sub setupMount {
 			}
 		}
 		if ($code != 0) {
-			my $data = qxx (" mount -o bind $path $mount 2>&1 ");
+			my $data = qxx (" mount -o bind \"$path\" \"$mount\" 2>&1 ");
 			my $code = $? >> 8;
 			if ($code != 0) {
 				$kiwi -> failed();
@@ -918,15 +919,15 @@ sub cleanMount {
 	foreach my $item (reverse @mountList) {
 		$kiwi -> info ("Umounting path: $item\n");
 		if ($item =~ /^\/tmp\/kiwimount/) {
-			qxx ("umount $item 2>/dev/null");
+			qxx ("umount \"$item\" 2>/dev/null");
 		} else {
-			qxx ("umount -l $item 2>/dev/null");
+			qxx ("umount -l \"$item\" 2>/dev/null");
 		}
 		if ($item =~ /^$prefix/) {
-			qxx (" rmdir -p $item 2>&1 ");
+			qxx (" rmdir -p \"$item\" 2>&1 ");
 		}
 		if ($item =~ /^\/tmp\/kiwimount/) {
-			qxx (" rmdir -p $item 2>&1 ");
+			qxx (" rmdir -p \"$item\" 2>&1 ");
 		}
 	}
 	if (defined $this->{baseRoot}) {

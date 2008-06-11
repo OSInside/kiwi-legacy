@@ -2,6 +2,13 @@
 Tue Jun 10 17:04:32 CEST 2008 - ms@suse.de
 
 - v2.39
+- added kiwi_ prefix to all .profile variables
+- fixed checkFileSystem function to use type=auto if the
+  filesystem couldn't be detected by the file util (bnc #398381)
+- added svn revision information to .profile and let it
+  appear in /var/log/boot.kiwi during first deployment
+- allow package manager to be set on the commandline
+- fixed missing file close, patch by Nat Friedman
 - added creation of /etc/sysconfig/bootloader
 - fixed oemboot repartition code if no swap, no home and a
   recovery partition was specified
