@@ -17,6 +17,7 @@
 		<profile name="default" description="Boot with default kernel"/>
 		<profile name="smp" description="Boot with smp kernel"/>
 		<profile name="rt" description="Boot with real time kernel"/>
+		<profile name="xen" description="Boot with xen kernel/mboot.c32"/>
 	</profiles>
 	<drivers type="usbdrivers">
 		<file name="usb/host/usb-uhci.ko"/>
@@ -62,6 +63,10 @@
 	</packages>
 	<packages type="bootstrap" profiles="rt">
 		<package name="kernel-rt"/>
+	</packages>
+	<packages type="bootstrap" profiles="xen">
+		<package name="kernel-xen"/>
+		<package name="aufs-kmp-xen"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
