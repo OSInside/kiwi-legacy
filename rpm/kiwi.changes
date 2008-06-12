@@ -2,6 +2,7 @@
 Tue Jun 10 17:04:32 CEST 2008 - ms@suse.de
 
 - v2.39
+- fixed semaphore array cleanup code
 - added kiwi_ prefix to all .profile variables
 - fixed checkFileSystem function to use type=auto if the
   filesystem couldn't be detected by the file util (bnc #398381)

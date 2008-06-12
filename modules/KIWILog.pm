@@ -807,6 +807,7 @@ sub setLogServer {
 	if (! defined $child) {
 		$this -> warning ("Can't fork logserver process: $!");
 		$this -> skipped ();
+		$this -> {smem} -> closeSegment();
 		return undef;
 	}
 	if ($child) {
@@ -826,6 +827,7 @@ sub setLogServer {
 		if (! defined $logServer) {
 			$this -> warning ("Can't open log port: $main::LogServerPort");
 			$this -> skipped ();
+			$sharedMem -> closeSegment();
 			exit 1;
 		}
 		$SIG{TERM} = sub {
@@ -921,6 +923,7 @@ sub cleanSweep {
 		waitpid ($logchild,0);
 		undef $this->{logchild};
 	}
+	$this -> {smem} -> closeSegment();
 	return $this;
 }
 
