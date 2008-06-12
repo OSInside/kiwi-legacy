@@ -24,7 +24,7 @@ test -f /.profile && . /.profile
 #======================================
 # Greeting...
 #--------------------------------------
-echo "Configure image: [$name]..."
+echo "Configure image: [$kiwi_iname]..."
 
 #======================================
 # Activate services
