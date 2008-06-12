@@ -1030,6 +1030,7 @@ fi
 # 17) copy recovery related files
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ] && [ ! -z "$OEM_RECOVERY" ];then
+	IFS=$IFS_ORIG
 	Echo "Setting up recovery configuration files..."
 	mkdir -p /reco-save
 	if ! mount $deviceRecovery /reco-save >/dev/null;then
