@@ -941,28 +941,33 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 	if ! mount $deviceRecovery /reco-save >/dev/null;then
 		systemException "Failed to mount recovery device" "reboot"
 	fi
-	#TODO
 	#======================================
 	# 13.2) restore root archive
 	#--------------------------------------
-	#recovery.tar.bz2
-	echo "BREAK"
-	/bin/sh
-
+	Echo "Restoring base operating system..."
+	cd /mnt
+	if ! tar -xvf /reco-save/recovery.tar.bz2 2>&1;then
+		systemException "Failed to restore recovery archive" "reboot"
+	fi
 	#======================================
 	# 13.3) restore boot files
 	#--------------------------------------
-	#/reco-save/etc/fstab
-	#/reco-save/etc/sysconfig/kernel
-	#/reco-save/etc/sysconfig/bootloader
-	#for i in `setupBootLoaderFiles`;do
-	#	/reco-save/$i
-	#done
-
+	Echo "Restoring boot files..."
+	for i in etc/fstab etc/sysconfig/kernel etc/sysconfig/bootloader;do
+		if ! cp /reco-save/$i /mnt/$i;then
+			systemException "Failed to restore $i" "reboot"
+		fi
+	done
+	for i in `setupBootLoaderFiles`;do
+		if ! cp /reco-save/$i /mnt/$i;then
+			systemException "Failed to restore $i" "reboot"
+		fi
+	done
 	#======================================
 	# 13.4) umount recovery and boot
 	#--------------------------------------
 	umount $deviceRecovery
+	deviceDisk=`echo $deviceRoot | tr -d "[:digit:]"`
 fi
 
 #======================================

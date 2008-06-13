@@ -3,6 +3,8 @@ Thu Jun 12 17:11:35 CEST 2008 - ms@suse.de
 
 - v2.40
 - allow xen bootprofile for isoboot images (bnc #399600)
+- added bzip2 application as part of the boot images
+- added experimental system recovery implementation
 - expect ensconce package manager to be part of the image
   description. This change is only important for studio
 

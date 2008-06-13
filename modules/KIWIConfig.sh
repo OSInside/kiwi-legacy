@@ -645,7 +645,7 @@ function suseStripInitrd {
 	#==========================================
 	# remove unneeded files
 	#------------------------------------------
-	rpm -e popt bzip2 --nodeps --noscripts &>/dev/null
+	rpm -e popt --nodeps --noscripts &>/dev/null
 	rm -rf `find -type d | grep .svn`
 	local files="
 		/usr/share/info /usr/share/man /usr/share/cracklib /usr/lib*/python*
@@ -726,7 +726,7 @@ function suseStripInitrd {
 		udevsettle udevtrigger mknod stat path_id hwup scsi_id scsi_tur
 		usb_id ata_id vol_id edd_id setctsid dumpe2fs debugreiserfs
 		fuser udevadm blogd showconsole killproc curl tar cromfs-driver
-		cvcromfs ldd driveready checkmedia splashy
+		cvcromfs ldd driveready checkmedia splashy bzip2
 	"
 	tools="$tools $@"
 	for path in /sbin /usr/sbin /usr/bin /bin;do
