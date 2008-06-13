@@ -29,6 +29,7 @@ use strict;
 use KIWIXML;
 use KIWIUtil;
 use KIWIURL;
+use KIWIRepoMetaHandler;
 
 use RPMQ;
 
@@ -72,6 +73,7 @@ sub new {
   my $class = shift;
 
   my $this  = {
+    m_metacreator   => undef, # object handling the various metadata types
     m_archlist	    => undef,
     m_srclist	    => undef,
     m_basedir	    => undef,
@@ -87,16 +89,6 @@ sub new {
     m_fpacks	    => [],
     m_fmpacks	    => [],
     m_debug	    => undef,
-    #m_fpath => {
-    #  'intel' => ['i686', 'i586', 'i486', 'i386', 'noarch'],
-    #  'amd'   => ['x86_64', 'noarch'],
-    #  'ppc64' => ['ppc64', 'noarch'],
-    #  'ppc'   => ['ppc', 'noarch'],
-    #  'hp'    => ['hppa', 'noarch'],
-    #  'ia'    => ['ia64', 'noarch'],
-    #  's390'  => ['s390x', 's390', 'noarch'],
-    #  #'none'  => ['noarch'],
-    #  },
   };
 
   bless $this, $class;
@@ -136,6 +128,51 @@ sub new {
   return $this;
 }
 # /constructor
+
+
+
+sub logger
+{
+  my $this = shift;
+  if(not ref($this)) {
+    return undef;
+  }
+  my $oldlog = $this->{m_logger};
+  if(@_) {
+    $this->{m_logger} = shift;
+  }
+  return $oldlog;
+}
+
+
+
+sub debugflag
+{
+  my $this = shift;
+  if(not ref($this)) {
+    return undef;
+  }
+  my $olddeb = $this->{m_debug};
+  if(@_) {
+    $this->{m_debug} = shift;
+  }
+  return $olddeb;
+}
+
+
+
+sub unitedDir
+{
+  my $this = shift;
+  if(not ref($this)) {
+    return undef;
+  }
+  my $oldunited = $this->{m_united};
+  if(@_) {
+    $this->{m_united} = shift;
+  }
+  return $oldunited;
+}
 
 
 
@@ -282,7 +319,7 @@ sub Init
       $this->{m_logger}->info("[INFO] [Init] resolving opensuse:// URL $this->{m_repos}->{$r}->{'source'}...");
       $this->{m_repos}->{$r}->{'source'} = $this->{m_urlparser}->normalizePath($this->{m_repos}->{$r}->{'source'});
     }
-    $this->{m_repos}->{$r}->{'basedir'} = $this->{m_basedir}.$this->normaliseDirname($this->{m_repos}->{$r}->{'source'}, '-');
+    $this->{m_repos}->{$r}->{'basedir'} = $this->{m_basedir}.$this->{m_util}->normaliseDirname($this->{m_repos}->{$r}->{'source'}, '-');
 
     $this->{m_dirlist}->{"$this->{m_repos}->{$r}->{'basedir'}"} = 1;
 
@@ -312,52 +349,10 @@ sub Init
       $this->{m_repos}->{$r}->{'srcdirs'} = undef;
     }
   }
+  $this->{m_metacreator} = new KIWIRepoMetaHandler($this);
+  $this->{m_metacreator}->baseurl($this->{m_united});
 }
 # /Init
-
-
-
-#==========================================
-# normaliseDirname
-#------------------------------------------
-# Create a name without slashes, colons et cetera, replace
-# all funny characters by dots and thus create a string which
-# can be used as directory name.
-#------------------------------------------
-# Parameters:
-#   $this - reference to the object for which it is called
-#   $dirname - the RAW name, in the usual case an URL
-#   $sepchar - the character that shall be used for token separation
-#	Defaults to `.' if omitted.
-# Returns:
-#   a string consisting of letter tokens separated by dots
-#------------------------------------------
-sub normaliseDirname
-{
-  my $this    = shift;
-  my $dirname = shift;
-  my $sepchar = shift;
-  if(!defined($sepchar)
-      or $sepchar =~ m{[\w\s:\(\)\[\]\$]}) {
-    $sepchar = "-";
-  }
-
-  # remove leading protocol name:
-  $dirname =~ s{^(http|https|file|ftp)[:]/*}{};
-  # remove some annoying chars:
-  $dirname =~ s{[\/:]}{$sepchar}g;
-  # remove double sep chars:
-  $dirname =~ s{[$sepchar]+}{$sepchar}g;
-  # remove leading and trailing sepchars:
-  $dirname =~ s{^[$sepchar]}{}g;
-  $dirname =~ s{[$sepchar]$}{}g;
-  # remove trailing slashes:
-  $dirname =~ s{/+$}{}g;
-
-  return $dirname;
-}
-# /normaliseDirname
-
 
 
 
@@ -381,10 +376,26 @@ sub mainTask
 
   return $retval if not defined($this);
 
-  if(defined($this->collectPackages())) {
-    $retval = 0;
-  }
+  my ($collectret, $initmphandlers, $metadatacreate);
 
+  $collectret = $this->collectPackages();
+  if($collectret != 0) {
+    $this->{m_logger}->error("collecting packages failed!");
+    $retval = 1;
+  }
+  ## continue only in case of success
+  else {
+    $initmphandlers = $this->{m_metacreator}->initialiseHandlers();
+    if($initmphandlers == 0) {
+      $metadatacreate = $this->{m_metacreator}->createMetadata();
+      # handle return value here
+    }
+    else {
+      $this->{m_logger}->error("Initialisation of metadata handlers failed!");
+      $retval = 10;
+    }
+  }
+  
   return $retval;
 }
 # /mainTask
@@ -1449,22 +1460,33 @@ sub createMetadata
   my $this = shift;
 
 
-  ## step 1: create pattern list (just a simple ls)
-  #=============================
-  $this->{m_logger}->info("Creating patterns file:");
-  if(!open(PAT, ">", "$this->{m_basesubdir}->{'1'}/suse/setup/descr/patterns")) {
-    die "Cannot create $this->{m_basesubdir}->{'1'}/suse/setup/descr/patterns!";
+  ### step 1: create pattern list (just a simple ls)
+  ##=============================
+  #$this->{m_logger}->info("Creating patterns file:");
+  #if(!open(PAT, ">", "$this->{m_basesubdir}->{'1'}/suse/setup/descr/patterns")) {
+  #  die "Cannot create $this->{m_basesubdir}->{'1'}/suse/setup/descr/patterns!";
+  #}
+  #if(!opendir(PATDIR, "$this->{m_basesubdir}->{'1'}/suse/setup/descr/")) {
+  #  die "Cannot read $this->{m_basesubdir}->{'1'}/suse/setup/descr/!";
+  #}
+  #my @dirent = readdir(PATDIR);
+  #foreach(@dirent) {
+  #  next if $_ !~ m{(.*[.]pat|.*[.]pat[.]gz)};
+  #  print PAT "$_\n";
+  #}
+  #close(PATDIR);	
+  #close(PAT);	
+  $this->{m_metacreator}->loadPlugins("/usr/share/kiwi/modules/plugins/");
+  $this->{m_metacreator}->mediaName($this->{m_prodvars}->{'MEDIUM_NAME'});
+  # testhack: set the plugin ready:
+  my $p = $this->{m_metacreator}->getPlugin(1);
+  if(defined($p)) {
+    $p->ready(1);
+    $this->{m_metacreator}->createMetadata();
   }
-  if(!opendir(PATDIR, "$this->{m_basesubdir}->{'1'}/suse/setup/descr/")) {
-    die "Cannot read $this->{m_basesubdir}->{'1'}/suse/setup/descr/!";
+  else {
+    $this->{m_logger}->error("Metadata plugin not avalable");
   }
-  my @dirent = readdir(PATDIR);
-  foreach(@dirent) {
-    next if $_ !~ m{(.*[.]pat|.*[.]pat[.]gz)};
-    print PAT "$_\n";
-  }
-  close(PATDIR);	
-  close(PAT);	
 
 
   ## step 2: create_package_descr

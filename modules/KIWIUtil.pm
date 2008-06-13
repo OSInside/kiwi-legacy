@@ -23,34 +23,32 @@ use File::Glob ':glob';
 use File::Find;
 use File::Path;
 use KIWIQX;
-#use KIWIURL;
 
 #==========================================
 # Constructor
 #------------------------------------------
-# Create a new KIWIXML object which is used to access the
-# configuration XML data saved as config.xml. The xml data
-# is splitted into four major tags: preferences, drivers,
-# repository and packages. While constructing an object of this
-# type there will be a node list created for each of the
-# major tags.
+# Create a new KIWIUtil object. It is used to perform
+# some utility methods that are not really bound to
+# a certain problem area class.
 #------------------------------------------
 sub new
 {
+  my $class = shift;
   my $this =
   {
     m_logger  => undef,
     m_url     => undef,
   };
-  my $class = shift;
-  bless $this, $class;
+  bless ($this, $class);
 
   #==========================================
   # Module Parameters
   #------------------------------------------
   $this->{m_logger} = shift;
-  #$this->{m_url} = new KIWIURL($this->{m_logger});
-  die "No logger defined\n" if(not defined $this->{m_logger});
+  if(not defined $this->{m_logger}) {
+    print "No logger defined!";
+    return undef;
+  }
 
   return $this;
 }
@@ -560,6 +558,49 @@ sub unpac_package
     $this->{m_logger}->warning("[WARNING] cannot process file $p_uri\n");
   }
 }
+
+
+
+#==========================================
+# normaliseDirname
+#------------------------------------------
+# Create a name without slashes, colons et cetera, replace
+# all funny characters by dots and thus create a string which
+# can be used as directory name.
+#------------------------------------------
+# Parameters:
+#   $this - reference to the object for which it is called
+#   $dirname - the RAW name, in the usual case an URL
+#   $sepchar - the character that shall be used for token separation
+#	Defaults to `.' if omitted.
+# Returns:
+#   a string consisting of letter tokens separated by dots
+#------------------------------------------
+sub normaliseDirname
+{
+  my $this    = shift;
+  my $dirname = shift;
+  my $sepchar = shift;
+  if(!defined($sepchar)
+      or $sepchar =~ m{[\w\s:\(\)\[\]\$]}) {
+    $sepchar = "-";
+  }
+
+  # remove leading protocol name:
+  $dirname =~ s{^(http|https|file|ftp)[:]/*}{};
+  # remove some annoying chars:
+  $dirname =~ s{[\/:]}{$sepchar}g;
+  # remove double sep chars:
+  $dirname =~ s{[$sepchar]+}{$sepchar}g;
+  # remove leading and trailing sepchars:
+  $dirname =~ s{^[$sepchar]}{}g;
+  $dirname =~ s{[$sepchar]$}{}g;
+  # remove trailing slashes:
+  $dirname =~ s{/+$}{}g;
+
+  return $dirname;
+}
+# /normaliseDirname
 
 
 
