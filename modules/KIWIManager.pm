@@ -1270,7 +1270,7 @@ sub setupRootSystem {
 			print $fd "function clean { kill \$SPID; ";
 			print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 			print $fd "trap clean INT TERM\n";
-			print $fd "$root/ensconce &\n";
+			print $fd "$main::Prepare/ensconce &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
 			print $fd "echo \$? > $screenCall.exit\n";
 			$fd -> close();

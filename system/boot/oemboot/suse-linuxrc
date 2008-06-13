@@ -892,8 +892,7 @@ if [ $LOCAL_BOOT = "no" ];then
 		if [ ! -z "$OEM_RECOVERY" ];then
 			KIWI_INITRD_PARAMS="$KIWI_INITRD_PARAMS LOCAL_BOOT=yes"
 			KIWI_INITRD_PARAMS="$KIWI_INITRD_PARAMS deviceRoot=$deviceRoot"
-			KIWI_INITRD_PARAMS=\
-				"$KIWI_INITRD_PARAMS deviceRecovery=$deviceRecovery"
+			KIWI_INITRD_PARAMS="$KIWI_INITRD_PARAMS deviceRecovery=$deviceRecovery"
 			export KIWI_INITRD_PARAMS
 		fi
 		if [ "$FSTYPE" = "reiserfs" ];then
@@ -930,7 +929,7 @@ validateRootTree
 # 13) Recover system if requested
 #--------------------------------------
 if [ ! -z "$KIWI_RECOVERY" ];then
-	Echo -n "Do you want to start the System-Recovery ? [y/n]"; read runReco
+	Echo -n "Do you want to start the System-Recovery ? [y/n]: "; read runReco
 	if [ ! $runReco = "y" ];then
 		systemException "System-Recovery not started" "reboot"
 	fi
@@ -1004,13 +1003,10 @@ if [ $LOCAL_BOOT = "no" ];then
 		if [ ! -z $OEM_RECOVERY ];then
 			OEM_RECOVERY=${deviceDisk}4
 		fi
-		if [ $HAVE_SWAP -eq 1 ];then
-			setupBootLoader \
-				/mnt /config 1 ${deviceDisk}2 $OEM_BOOT_TITLE $deviceSwap
-		else
-			setupBootLoader \
-				/mnt /config 0 ${deviceDisk}1 $OEM_BOOT_TITLE
-		fi
+		bootid=`echo $deviceRoot | tr -d "[:alpha:]//"`
+		bootid=`expr $bootid - 1`
+		setupBootLoader \
+			/mnt /config $bootid $deviceRoot $OEM_BOOT_TITLE $deviceSwap
 	fi
 	setupKernelModules /config
 fi

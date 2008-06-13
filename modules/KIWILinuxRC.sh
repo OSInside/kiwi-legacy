@@ -376,7 +376,7 @@ function installBootLoaderGrub {
 	# ----
 	if [ -x /usr/sbin/grub ];then
 		Echo "Installing boot loader..."
-		/usr/sbin/grub --batch --no-floppy < /etc/grub.conf >/dev/null
+		/usr/sbin/grub --batch --no-floppy < /etc/grub.conf 1>&2
 		if [ ! $? = 0 ];then
 			Echo "Failed to install boot loader"
 		fi
@@ -593,10 +593,10 @@ function setupBootLoaderGrub {
 			kernel=`echo $i | cut -f1 -d:`
 			initrd=`echo $i | cut -f2 -d:`
 			kname=${KERNEL_NAME[$count]}
-			if [ -z "$name" ];then
-				echo "title $kname [ $gfix ]"                   >> $menu
+			if [ -z "$kiwi_iname" ];then
+				echo "title $kname [ $gfix ]"                     >> $menu
 			else
-				echo "title $name-$kname [ $gfix ]"             >> $menu
+				echo "title $kiwi_iname-$kname [ $gfix ]"         >> $menu
 			fi
 			if [ $kernel = "vmlinuz-xen" ];then
 				echo " root $gdev"                                >> $menu
@@ -624,10 +624,10 @@ function setupBootLoaderGrub {
 			#======================================
 			# create failsafe entry
 			#--------------------------------------
-			if [ -z "$name" ];then
-				echo "title Failsafe -- $kname [ $gfix ]"       >> $menu
+			if [ -z "$kiwi_iname" ];then
+				echo "title Failsafe -- $kname [ $gfix ]"         >> $menu
 			else
-				echo "title Failsafe -- $name-$kname [ $gfix ]" >> $menu
+				echo "title Failsafe -- $kiwi_iname-$kname [ $gfix ]" >> $menu
 			fi
 			if [ $kernel = "vmlinuz-xen" ];then
 				echo " root $gdev"                                >> $menu
@@ -657,9 +657,9 @@ function setupBootLoaderGrub {
 			#--------------------------------------
 			if [ ! -z "$OEM_RECOVERY" ];then
 				if [ -z "$name" ];then
-					echo "title Recovery [ $gfix ]"             >> $menu
+					echo "title Recovery [ $gfix ]"               >> $menu
 				else
-					echo "title Recovery [ $gfix ]"             >> $menu
+					echo "title Recovery [ $gfix ]"               >> $menu
 				fi
 				gdev_recovery="(hd0,3)"
 				rdev_recovery=$OEM_RECOVERY
@@ -1807,10 +1807,11 @@ function kernelList {
 	# links to the initrd and kernel files. The function will
 	# save the valid linknames in the variable KERNEL_LIST
 	# ----
-	prefix=$1
+	local prefix=$1
+	local kcount=0
+	local name=""
 	KERNEL_LIST=""
 	KERNEL_NAME=""
-	kcount=0
 	for i in $prefix/lib/modules/*;do
 		if [ ! -d $i ];then
 			continue
