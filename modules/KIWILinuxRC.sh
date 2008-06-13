@@ -570,7 +570,7 @@ function setupBootLoaderGrub {
 	#======================================
 	# create directory structure
 	#--------------------------------------
-	for dir in $menu $conf $dmap;do
+	for dir in $menu $conf $dmap $sysb;do
 		dir=`dirname $dir`; mkdir -p $dir
 	done
 	#======================================
