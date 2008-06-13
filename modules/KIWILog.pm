@@ -91,7 +91,7 @@ sub new {
 		$this -> skipped ();
 		return $this;
 	}
-	$this->{smem}   = $smem;
+	$this->{smem} = $smem;
 	#==========================================
 	# Create Log Server on $LogServerPort
 	#------------------------------------------
@@ -432,7 +432,6 @@ sub printLog {
 	# channels or a previosly opened file
 	# ---
 	my $this    = shift;
-	my $smem    = $this->{smem};
 	my $rootEFD = $this->{rootefd};
 	my $lglevel = $_[0];
 	my $logdata = $_[1];
@@ -808,6 +807,7 @@ sub setLogServer {
 		$this -> warning ("Can't fork logserver process: $!");
 		$this -> skipped ();
 		$this -> {smem} -> closeSegment();
+		undef $this -> {smem};
 		return undef;
 	}
 	if ($child) {
@@ -828,6 +828,7 @@ sub setLogServer {
 			$this -> warning ("Can't open log port: $main::LogServerPort");
 			$this -> skipped ();
 			$sharedMem -> closeSegment();
+			undef $this-> {smem};
 			exit 1;
 		}
 		$SIG{TERM} = sub {
@@ -865,6 +866,7 @@ sub setLogServer {
 					$logServer -> write ( $this -> getLogServerMessage() );
 					$logServer -> closeConnection();
 					$sharedMem -> closeSegment();
+					undef $this-> {smem};
 					exit 1;
 				};
 				while (my $command = $logServer -> read()) {
@@ -924,6 +926,7 @@ sub cleanSweep {
 		undef $this->{logchild};
 	}
 	$this -> {smem} -> closeSegment();
+	undef  $this -> {smem};
 	return $this;
 }
 
