@@ -995,11 +995,6 @@ sub setupBootStick {
 	$status = qxx ("rm -rf $loopdir/boot");
 	$status = qxx ("cp -a $tmpdir/boot $loopdir 2>&1");
 	$result = $? >> 8;
-	if ($result == 0) {
-		$status = qxx ("cp $tmpdir/image/loader/message $loopdir/boot 2>&1");
-		$result = $? >> 8;
-	}
-	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't copy boot data to stick: $status");

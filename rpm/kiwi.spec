@@ -259,7 +259,7 @@ if [ "$UID" = "$K_USER" ];then
 	mkdir -p /usr/share/kiwi/repo
 	mkdir -p /usr/share/kiwi/image/netboot
 	rm -f /usr/share/kiwi/modules/*
-	cp -f modules/* /usr/share/kiwi/modules
+	for i in `find modules/ -type f`;do cp $i /usr/share/kiwi/modules;done
 	cp -a system/suse-repo /usr/share/kiwi/repo
 	cd modules
 	pxedefault=$RPM_BUILD_ROOT/srv/tftpboot/pxelinux.cfg/default
