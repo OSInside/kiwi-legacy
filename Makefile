@@ -94,8 +94,10 @@ install:
 	# Install KIWI base and modules
 	#--------------------------------------------
 	install -m 755 ./kiwi.pl       ${KIWIBINVZ}/kiwi
-	install -m 644 ./modules/*     ${KIWIMODVZ}
 	install -m 644 ./xsl/*         ${KIWIXSLVZ}
+	for i in `find modules -type f | grep -v .svn`;do \
+		install -m 644 $$i ${KIWIMODVZ} ;\
+	done
 
 	#============================================
 	# Install KIWI tests
