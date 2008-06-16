@@ -671,7 +671,7 @@ function setupBootLoaderGrub {
 					echo -n " vga=0x314 splash=silent"            >> $menu
 					echo -n " $KIWI_INITRD_PARAMS"                >> $menu
 					echo -n " $KIWI_KERNEL_OPTIONS"               >> $menu
-					echo " showopts KIWI_RECOVERY=1"              >> $menu
+					echo " KIWI_RECOVERY=1 showopts"              >> $menu
 					echo " module /boot/$initrd"                  >> $menu
 				else
 					echo -n " kernel $gdev_recovery/boot/$kernel" >> $menu
@@ -679,7 +679,7 @@ function setupBootLoaderGrub {
 					echo -n " vga=0x314 splash=silent"            >> $menu
 					echo -n " $KIWI_INITRD_PARAMS"                >> $menu
 					echo -n " $KIWI_KERNEL_OPTIONS"               >> $menu
-					echo " showopts KIWI_RECOVERY=1"              >> $menu
+					echo " KIWI_RECOVERY=1 showopts"              >> $menu
 					echo " initrd $gdev_recovery/boot/$initrd"    >> $menu
 				fi
 			fi

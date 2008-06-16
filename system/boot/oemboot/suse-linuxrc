@@ -946,7 +946,7 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 	#--------------------------------------
 	Echo "Restoring base operating system..."
 	cd /mnt
-	if ! tar -xvf /reco-save/recovery.tar.bz2 2>&1;then
+	if ! tar -xvf /reco-save/recovery.tar.bz2 1>&2;then
 		systemException "Failed to restore recovery archive" "reboot"
 	fi
 	#======================================

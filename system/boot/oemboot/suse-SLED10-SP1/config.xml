@@ -82,6 +82,7 @@
 		<package name="bootsplash-theme-SuSE-NLD"/>
 		<package name="eject"/>
 		<package name="tar"/>
+		<package name="bzip2"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>

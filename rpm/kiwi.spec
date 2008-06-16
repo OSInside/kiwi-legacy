@@ -359,7 +359,7 @@ rm -rf $RPM_BUILD_ROOT/usr/share/doc/packages/kiwi/kiwi-man
 rm -f $RPM_BUILD_ROOT/%{perl_vendorarch}/example.pl
 rm -f $RPM_BUILD_ROOT/%{perl_vendorarch}/auto/SaT/SaT.bs
 rm -f $RPM_BUILD_ROOT/%{perl_vendorarch}/auto/dbusdevice/dbusdevice.bs
-rm -f $RPM_BUILD_ROOT/var/adm/perl-modules/kiwi
+rm -f $RPM_BUILD_ROOT/var/adm/perl-modules/%{name}
 ./.links
 %if %{suse_version} > 1020
 %fdupes $RPM_BUILD_ROOT/srv/tftpboot

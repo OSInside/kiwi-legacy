@@ -92,6 +92,7 @@
 		<package name="bootsplash-branding-openSUSE"/>
 		<package name="eject"/>
 		<package name="tar"/>
+		<package name="bzip2"/>
 		<package name="cromfs"/>
 		<package name="kiwi-tools"/>
 	</packages>
