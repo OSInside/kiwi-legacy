@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Mon Jun 16 16:35:55 CEST 2008 - jcborn@suse.de
+
+- v2.40
+  * instsource creation:
+   - extracted loadable plugins for metadata creations
+     those reside now in the modules/plugins subdirectory
+   - implemented new metadata plugin controller class
+   - reorganized methods from KIWICollect to KIWIUtil
+
+-------------------------------------------------------------------
 Thu Jun 12 17:11:35 CEST 2008 - ms@suse.de
 
 - v2.40
