@@ -163,3 +163,6 @@ clean:
 	(cd system/boot && find -type f | grep -v .svn | xargs chmod u+w)
 	rm -f modules/KIWIScheme.rng
 	${MAKE} -C tools clean
+
+build:
+	./.doit -p --local
