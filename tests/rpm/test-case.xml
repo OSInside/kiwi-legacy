@@ -6,9 +6,9 @@
 	xsi:noNamespaceSchemaLocation="/usr/share/kiwi/tests/test_case.xsd">
 	
 	<requirements>
-		<req type="directory">/var/lib/rpm</req>
-		<req type="file">/var/lib/rpm/__db.000</req>
-		<req type="file">/var/lib/rpm/Packages</req>
+		<req type="directory" place="intern">/var/lib/rpm</req>
+		<req type="file"      place="intern">/var/lib/rpm/__db.000</req>
+		<req type="file"      place="intern">/var/lib/rpm/Packages</req>
 	</requirements>
 	<test type="binary"  place="extern">
 		<file>rpm.sh</file>

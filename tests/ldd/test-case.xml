@@ -6,7 +6,7 @@
 	xsi:noNamespaceSchemaLocation="/usr/share/kiwi/tests/test_case.xsd">
 	
 	<requirements>
-		<req type="file">/usr/bin/ldd</req>
+		<req type="file" place="intern">/usr/bin/ldd</req>
 	</requirements>
 	<test type="binary" place="intern">
 		<file>ldd_check.sh</file>

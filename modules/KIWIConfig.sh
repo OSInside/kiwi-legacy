@@ -815,7 +815,6 @@ function suseGFXBoot {
 	fi
 	if [ $loader = "isolinux" ];then
 		# isolinux boot data...
-		cp themes/$theme/install/* /image/loader
 		cp $gfximage /image/loader
 		if [ -x /usr/sbin/gfxboot ] ; then
 			gfxboot --archive /image/loader/bootlogo --change-config livecd=1

@@ -206,56 +206,61 @@ sub checkRequirements {
 	my $cmd;
 	my $errvalue;	
 	my @results=();
+	my $errorMessage="";
 	my $result=KIWITestResult->new();  #one result for all requirements
 	my @reqs= $self->{XML_ROOT_NODE} -> getChildrenByTagName ('requirements')
 		-> get_node(1) -> getChildrenByTagName ('req');
 	foreach my $req (@reqs) {
 		my $type=$req->getAttribute('type');
 		my $place=$req->getAttribute('place');
-		my $reqrelpathname=$req->textContent;
-		my $reqpathname;
+		my $reqRelPathName=$req->textContent;
+		my $reqPathName;
+		my $isOK="true"; # true if test pass, false if not
 		my $manager = $self->{MANAGER};
 		if ($place eq 'extern') {
 			$manager -> switchToLocal();
-			$reqpathname=$reqrelpathname;
+			$reqPathName=$reqRelPathName;
 			$errvalue=1;
 		} elsif ($place eq 'intern') { 
 			$manager -> switchToChroot();
-			$reqpathname=trimpath($self->{CHROOT}."/".$reqrelpathname);
+			$reqPathName=trimpath($self->{CHROOT}."/".$reqRelPathName);
 			$errvalue=2;
 		} 
-		my $ok=0;
-		if  ($type eq 'file') {
-			#test file existence (link, file (bin or plain)
-			if (-f $reqpathname) {$ok=1;}
-			if (-l $reqpathname) {$ok=2;}
-		} elsif ($type eq 'directory') {
-			# test directory existence
-			if (-d $reqpathname) {$ok=3;}
-		
-		} elsif ($type eq 'package') {
-			# test if rpm package is present in chroot
-			my $manager = $self->{MANAGER};
-			if (! $manager -> setupPackageInfo ( $reqrelpathname )) {
-				# package is installed...
-				$ok = 4;
+		else{
+			$errorMessage="unknown place: ".$place.", check test description: ".$self->{XML_FILE};
+			$isOK="false";
+		}
+		if($isOK eq "true"){
+			if  ($type eq 'file') {
+				#test file existence (link, file (bin or plain)
+				if ((!-f $reqPathName) || (! -l $reqPathName)) {
+					$errorMessage="file is missing: ".$reqPathName;
+					$isOK="false";
+				}
+			} elsif ($type eq 'directory') {
+				# test directory existence
+				if ( ! -d $reqPathName) {
+					$errorMessage="directory is missing: ".$reqPathName;
+					$isOK="false";
+				}
+			} elsif ($type eq 'package') {
+				# test if rpm package is present in chroot
+				my $manager = $self->{MANAGER};
+				if ($manager -> setupPackageInfo ( $reqRelPathName )) {
+					$errorMessage="rpm package is missing: ".$reqRelPathName;
+					$isOK="false";
+				}
+			}
+			else{
+				$errorMessage="wrong type of requirements: ".$type.", check test description: ".$self->{XML_FILE};
+				$isOK="false";
 			}
 		}
 				
-		if ($ok==0) {
+		if ($isOK eq "false") {
 			my $result=KIWITestResult->new();
-			$cmd="requirements test of '$reqpathname'"; 
-			$result->setCommand($cmd);
-			my $info;  #different message format for different requirement types
-			if ($type eq 'package') {
-				$info=sprintf("\"$reqrelpathname\"  ($place%s) ",
-					($place eq 'intern') ? ", in \"$self->{CHROOT}\"" : ''
-				);
-			} else {
-				$info=qq("$reqpathname");
-			}
-			$output=sprintf("missing %-10s  $info",$type );
-			$result->setMessage($output);
+			$result->setCommand("requirements test of ".$reqRelPathName);
+			$result->setMessage($errorMessage);
 			$result->setErrorState($errvalue);
 			$self->{TEST_RESULT_STATUS}=1;
 			@results=(@results,$result);

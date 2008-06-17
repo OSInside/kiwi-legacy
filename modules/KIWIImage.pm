@@ -433,7 +433,6 @@ sub createImageCPIO {
 	#------------------------------------------
 	my $pwd  = qxx ("pwd"); chomp $pwd;
 	my @cpio = ("--create", "--format=newc", "--quiet");
-	my $tree = $imageTree;
 	my $dest = $imageDest."/".$name.".gz";
 	my $data;
 	if (! $compress) {
@@ -442,27 +441,16 @@ sub createImageCPIO {
 	if ($dest !~ /^\//) {
 		$dest = $pwd."/".$dest;
 	}
-	$data = qxx ("cp -a  $tree $dest.cpio 2>&1");
-	$data = qxx ("mv $dest.cpio/image/loader/*.spl $dest.cpio/image 2>&1");
-	$data = qxx ("rm -f  $dest.cpio/image/loader/*.* 2>&1");
-	$data = qxx ("mv $dest.cpio/image/*.spl $dest.cpio/image/loader 2>&1");
-	$data = qxx ("rm -rf $dest.cpio/image/loader/log 2>&1");
-	$data = qxx ("rm -rf $dest.cpio/image/loader/memtest* 2>&1");
-	$data = qxx ("rm -rf $dest.cpio/image/loader/languages 2>&1");
-	$data = qxx ("rm -rf $dest.cpio/image/loader/animations 2>&1");
-	$data = qxx ("rm -f  $dest.cpio/image/loader/init 2>&1");
-	$data = qxx ("rm -f  $dest.cpio/image/loader/bootlogo 2>&1");
 	if ($compress) {
 		$data = qxx (
-			"cd $dest.cpio && find . | cpio @cpio | $main::Gzip -f > $dest"
+			"cd $imageTree && find . | cpio @cpio | $main::Gzip -f > $dest"
 		);
 	} else {
 		$data = qxx (
-			"rm -f $dest.gz && cd $dest.cpio && find . | cpio @cpio > $dest"
+			"rm -f $dest && cd $imageTree && find . | cpio @cpio > $dest"
 		);
 	}
 	my $code = $? >> 8;
-	$data = qxx ("rm -rf $dest.cpio");
 	if ($code != 0) {
 		$kiwi -> error  ("Couldn't create cpio archive");
 		$kiwi -> failed ();

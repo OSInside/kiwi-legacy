@@ -6,7 +6,7 @@
 	xsi:noNamespaceSchemaLocation="/usr/share/kiwi/tests/test_case.xsd">
 	
 	<requirements>
-		<req type="package">lsb-cmdchk</req>
+		<req type="package" place="intern">lsb-cmdchk</req>
 	</requirements>
 	<test type="binary" place="intern">
 		<file>lsb-cmdchk.sh</file>

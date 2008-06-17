@@ -914,6 +914,7 @@ sub cleanSweep {
 	my $jclient  = $this->{jclient};
 	my $logchild = $this->{logchild};
 	my $rootEFD  = $this->{rootefd};
+	my $sharedMem= $this->{smem};
 	if ($this->{errorOk}) {
 		close $rootEFD;
 	}
@@ -925,7 +926,9 @@ sub cleanSweep {
 		waitpid ($logchild,0);
 		undef $this->{logchild};
 	}
-	$this -> {smem} -> closeSegment();
+	if (defined $sharedMem) {
+		$sharedMem -> closeSegment();
+	}
 	undef  $this -> {smem};
 	return $this;
 }

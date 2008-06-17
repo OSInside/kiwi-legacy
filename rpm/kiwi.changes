@@ -2,8 +2,12 @@
 Tue Jun 17 11:25:35 CEST 2008 - ms@suse.de
 
 - v2.41
+- added testsuite patches by Pavel Nemec (bnc #400817)
+- fixed iso images if built with prebuild boot image. The isoboot
+  boot images build standalone are missing important isolinux
+  files because they were removed in createImageCPIO()
 - fixed setupFirstBootYaST() to work on SUSE 11.0
-- added configuration details suggest by VMware
+- added configuration details suggested by VMware
 
 -------------------------------------------------------------------
 Mon Jun 16 16:35:55 CEST 2008 - jcborn@suse.de

@@ -824,13 +824,8 @@ sub main {
 				$result_failed +=1;
 				my @outputArray = @{$test -> getAllResults()};
 				$kiwi -> warning ("Error message : \n");
-				foreach my $scriptResult (@outputArray) {
-					my $cmd    = $scriptResult -> getCommand();
-					my $txtmsg = $scriptResult -> getMessage();
-					my $errno  = $scriptResult -> getErrorState();
-					$txtmsg    = "      ".$txtmsg."\n";
-					$kiwi -> note ($txtmsg);
-				}
+				my $txtmsg=$test->getOverallMessage();
+				$kiwi -> note($txtmsg);
 			}
 		}
 		#==========================================
