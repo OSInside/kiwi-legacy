@@ -784,10 +784,14 @@ sub installPackages {
 	# ensconce
 	#------------------------------------------
 	if ($manager eq "ensconce") {
-		# Ignored for ensconce, always report package as installed
-		print $fd "echo 0 > $screenCall.exit; exit 0\n";
+		$kiwi -> info ("Installing addon packages...");
+		print $fd "function clean { kill \$SPID; ";
+		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
+		print $fd "trap clean INT TERM\n";
+		print $fd "$main::Prepare/ensconce &\n";
+		print $fd "SPID=\$!;wait \$SPID\n";
+		print $fd "echo \$? > $screenCall.exit\n";
 		$fd -> close();
-		return $this;
 	}
 	return $this -> setupScreenCall();
 }
@@ -870,10 +874,14 @@ sub removePackages {
 	# ensconce
 	#------------------------------------------
 	if ($manager eq "ensconce") {
-		# Ignored for ensconce, always report package as installed
-		print $fd "echo 0 > $screenCall.exit; exit 0\n";
+		$kiwi -> info ("Installing addon packages...");
+		print $fd "function clean { kill \$SPID; ";
+		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
+		print $fd "trap clean INT TERM\n";
+		print $fd "$main::Prepare/ensconce &\n";
+		print $fd "SPID=\$!;wait \$SPID\n";
+		print $fd "echo \$? > $screenCall.exit\n";
 		$fd -> close();
-		return $this;
 	}
 	return $this -> setupScreenCall();
 }
@@ -1262,19 +1270,18 @@ sub setupRootSystem {
 	# ensconce
 	#------------------------------------------
 	if ($manager eq "ensconce") {
+		my $ensconce_args = "";
 		if (! $chroot) {
-			print $fd "echo 0 > $screenCall.exit; exit 0 \n";
-			$fd -> close();
-		} else {
-			$kiwi -> info ("Installing image packages...");
-			print $fd "function clean { kill \$SPID; ";
-			print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
-			print $fd "trap clean INT TERM\n";
-			print $fd "$main::Prepare/ensconce &\n";
-			print $fd "SPID=\$!;wait \$SPID\n";
-			print $fd "echo \$? > $screenCall.exit\n";
-			$fd -> close();
-		}
+			$ensconce_args = "bootstrap";
+		} 
+		$kiwi -> info ("Installing bootstrap packages...");
+		print $fd "function clean { kill \$SPID; ";
+		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
+		print $fd "trap clean INT TERM\n";
+		print $fd "$main::Prepare/ensconce $ensconce_args &\n";
+		print $fd "SPID=\$!;wait \$SPID\n";
+		print $fd "echo \$? > $screenCall.exit\n";
+		$fd -> close();
 	}
 	return $this -> setupScreenCall();
 }
