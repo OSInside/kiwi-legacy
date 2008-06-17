@@ -3032,6 +3032,8 @@ sub buildVMwareConfig {
 	# General...
 	print FD '#!/usr/bin/vmware'."\n";
 	print FD 'config.version = "8"'."\n";
+	print FD 'tools.syncTime = "true"'."\n";
+	print FD 'uuid.action = "create"'."\n";
 	if ($vmwconfig{hwver}) {
 		print FD 'virtualHW.version = "'.$vmwconfig{hwver}.'"'."\n";
 	} else {
@@ -3077,6 +3079,7 @@ sub buildVMwareConfig {
 	# Network / requires vmware tools to be installed...
 	print FD 'ethernet0.present = "true"'."\n";
 	print FD 'ethernet0.virtualDev = "vmxnet"'."\n";
+	print FD 'ethernet0.addressType = "generated"'."\n";
 	if ($arch =~ /64$/) {
 		print FD 'ethernet0.allow64bitVmxnet = "true"'."\n";
 	}

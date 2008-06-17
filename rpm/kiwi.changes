@@ -3,6 +3,7 @@ Tue Jun 17 11:25:35 CEST 2008 - ms@suse.de
 
 - v2.41
 - fixed setupFirstBootYaST() to work on SUSE 11.0
+- added configuration details suggest by VMware
 
 -------------------------------------------------------------------
 Mon Jun 16 16:35:55 CEST 2008 - jcborn@suse.de
