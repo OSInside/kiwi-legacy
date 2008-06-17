@@ -283,9 +283,12 @@ sub setupFirstBootYaST {
 		return "skipped";
 	}
 	$kiwi -> info ("Setting up YaST firstboot service...");
-	if (! -f "$root/etc/init.d/firstboot") {
+	if (
+		(! -f "$root/etc/init.d/firstboot") &&
+		(! -f "$root/usr/share/YaST2/clients/firstboot.ycp")
+	) {
 		$kiwi -> failed ();
-		$kiwi -> error  ("yast2-firstboot seems not be installed");
+		$kiwi -> error  ("yast2-firstboot is not installed");
 		$kiwi -> failed ();
 		return "failed";
 	}
@@ -321,20 +324,43 @@ sub setupFirstBootYaST {
 	print FD "FIRSTBOOT_FINISH_FILE=\"/usr/share/firstboot/congrats.txt\"\n";
 	print FD "FIRSTBOOT_RELEASE_NOTES_PATH=\"\"\n";
 	close FD;
-	my @services = (
-		"boot.rootfsck","boot.localfs","boot.cleanup","boot.localfs","boot.localnet",
-		"boot.clock","policykitd","dbus","consolekit","haldaemon","network",
-		"atd","syslog","cron","firstboot"
-	);
-	foreach my $service (@services) {
-		if (! -e "$root/etc/init.d/$service") {
-			next;
+	if (-f "$root/etc/init.d/firstboot") {
+		# /.../
+		# old service script based firstboot service. requires some
+		# default services to run
+		# ----
+		my @services = (
+			"boot.rootfsck","boot.localfs",
+			"boot.cleanup","boot.localfs","boot.localnet",
+			"boot.clock","policykitd","dbus","consolekit",
+			"haldaemon","network","atd","syslog","cron",
+			"firstboot"
+		);
+		foreach my $service (@services) {
+			if (! -e "$root/etc/init.d/$service") {
+				next;
+			}
+			$data = qxx (
+				"chroot $root /sbin/insserv /etc/init.d/$service 2>&1"
+			);
+			$code = $? >> 8;
+			if ($code != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error ("Failed to activate service(s): $data");
+				$kiwi -> failed ();
+				return "failed";
+			}
 		}
-		$data = qxx ("chroot $root /sbin/insserv /etc/init.d/$service 2>&1");
+	} else {
+		# /.../
+		# current firstboot service works like yast second stage and
+		# is activated by touching /var/lib/YaST2/reconfig_system
+		# ----
+		$data = qxx ("touch $root/var/lib/YaST2/reconfig_system 2>&1");
 		$code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
-			$kiwi -> error ("Failed to activate firstboot service(s): $data");
+			$kiwi -> error ("Failed to activate firstboot: $data");
 			$kiwi -> failed ();
 			return "failed";
 		}
