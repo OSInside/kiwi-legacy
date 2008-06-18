@@ -300,7 +300,7 @@ if [ "$UID" = "$K_USER" ];then
 				echo $n | grep -q kernel    && kernel=$n    || true
 			done
 			popd
-			../kiwi.pl --setup-grub-splash \
+			../kiwi.pl --setup-splash \
 				$RPM_BUILD_ROOT/srv/tftpboot/boot/$initrd   && \
 			rm -f $RPM_BUILD_ROOT/srv/tftpboot/boot/$initrd && \
 			initrd=`echo $initrd | sed -e "s@.gz@.splash.gz@"`
