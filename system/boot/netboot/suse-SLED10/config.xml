@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<image schemeversion="2.0" name="initrd-netboot-suse-SLED10-SP1">
+<image schemeversion="2.0" name="initrd-netboot-suse-SLED10">
 	<description type="boot">
 		<author>Marcus Schaefer</author>
 		<contact>ms@novell.com</contact>
@@ -45,7 +45,7 @@
 		<file name="drivers/block/nbd.ko"/>
 	</drivers>
 	<repository type="yast2" status="replaceable">
-		<source path="ftp://dist.suse.de/install/SLP/SLED-10-SP1-GM/%arch/DVD1"/>
+		<source path="ftp://dist.suse.de/install/SLP/SLED-10-SP2-GMC/%arch/DVD1"/>
 	</repository>
 	<repository type="rpm-dir">
 		<source path="/usr/share/kiwi/repo/suse-repo/suse-sles-repo"/>
