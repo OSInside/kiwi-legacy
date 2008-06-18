@@ -233,7 +233,7 @@ sub checkRequirements {
 		if($isOK eq "true"){
 			if  ($type eq 'file') {
 				#test file existence (link, file (bin or plain)
-				if ((!-f $reqPathName) || (! -l $reqPathName)) {
+				if ((!-f $reqPathName) && (! -l $reqPathName)) {
 					$errorMessage="file is missing: ".$reqPathName;
 					$isOK="false";
 				}
