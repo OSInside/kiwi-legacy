@@ -4,6 +4,7 @@ Wed Jun 18 10:36:13 CEST 2008 - ms@suse.de
 - v2.42
 - call grub with a device map to avoid probing
 - create a generic boot image description for SLE
+- update documentation, some words about checkprebuilt
 
 -------------------------------------------------------------------
 Tue Jun 17 11:25:35 CEST 2008 - ms@suse.de

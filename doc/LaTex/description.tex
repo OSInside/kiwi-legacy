@@ -275,6 +275,20 @@ describes the possible types and their attributes:
       called the \textbf{default} namespace. 
 \end{itemize}
 
+All of the mentioned types can specify the \textbf{boot} attribute
+which tells kiwi to call itself to build the requested boot image (initrd).
+It is possible to tell kiwi to check for an already built boot image
+which is a so called \textbf{prebuilt boot image}. To activate searching
+for an appropriate prebuilt boot image the type section also provides the
+attribute \textbf{checkprebuilt=''true|false''}. If specified kiwi will
+search for a prebuilt boot image in a directory named
+\textit{/usr/share/kiwi/image/*boot/*-prebuilt}. Example: If the boot
+attribute was set to isoboot/suse-10.3 and checkprebuilt is set to true
+kiwi will search the prebuilt boot image in
+/usr/share/kiwi/image/isoboot/suse-10.3-prebuilt. The directory kiwi
+searches for the prebuilt boot images can also be specified at the
+commandline with the \textbf{$--$prebuiltbootimage} parameter.
+
 Within the preferences section there are the following optional
 attributes:
 
