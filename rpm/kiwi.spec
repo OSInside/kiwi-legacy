@@ -270,7 +270,6 @@ if [ "$UID" = "$K_USER" ];then
 	echo "DEFAULT Local-Boot" >> $pxedefault
 	images="
 		netboot/suse-SLES10
-		netboot/suse-SLES10-SP1
 	"
 	for i in $images;do
 		rootName=`echo $i | tr / -`
