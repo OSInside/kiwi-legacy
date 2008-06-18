@@ -2971,7 +2971,24 @@ sub installBootLoader {
 	#------------------------------------------
 	if ($loader eq "grub") {
 		$kiwi -> info ("Installing grub on virtual disk");
-		if (! open (FD,"|/usr/sbin/grub --batch &> $tmpdir/grub.log")) {
+		#==========================================
+		# Create device map for the virtual disk
+		#------------------------------------------
+		my $dmfile = "$tmpdir/grub-device.map";
+		my $dmfd = new FileHandle;
+		if (! $dmfd -> open(">$dmfile")) {
+			$kiwi -> failed ();
+			$kiwi -> error ("Couldn't create grub device map: $!");
+			$kiwi -> failed ();
+			return undef;
+		}
+		print $dmfd "(hd0) $diskname\n";
+		$dmfd -> close();
+		#==========================================
+		# Install grub in batch mode
+		#------------------------------------------
+		my $grubOptions = "--device-map $dmfile --no-floppy --batch";
+		if (! open (FD,"|/usr/sbin/grub $grubOptions &> $tmpdir/grub.log")) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't call grub: $!");
 			$kiwi -> failed ();
