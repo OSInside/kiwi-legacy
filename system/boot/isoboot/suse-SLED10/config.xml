@@ -43,7 +43,7 @@
 		<file name="drivers/message/fusion/*"/>
 	</drivers>
 	<repository type="yast2" status="replaceable">
-		<source path="/mounts/machcd2/dists/full-sle10-sp-%arch"/>
+		<source path="/mounts/machcd2/dists/full-sle10-sp2-%arch"/>
 	</repository>
 	<repository type="rpm-dir">
 		<source path="/usr/share/kiwi/repo/suse-repo/suse-sles-repo"/>
