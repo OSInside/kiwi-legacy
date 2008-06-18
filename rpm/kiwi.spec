@@ -273,7 +273,7 @@ if [ "$UID" = "$K_USER" ];then
 	"
 	for i in $images;do
 		rootName=`echo $i | tr / -`
-		rootName=`echo $rootName (latest service pack)`
+		rootName=`echo $rootName \(latest service pack\)`
 		echo "#DEFAULT $rootName" >> $pxedefault
 	done
 	echo >> $pxedefault
