@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<image schemeversion="2.0" name="initrd-usbboot-suse-SLES10-SP1">
+<image schemeversion="2.0" name="initrd-usbboot-suse-SLES10">
 	<description type="boot">
 		<author>Marcus Schaefer</author>
 		<contact>ms@novell.com</contact>
@@ -44,7 +44,7 @@
 		<file name="drivers/usb/storage/*"/>
 	</drivers>
 	<repository type="yast2" status="replaceable">
-		<source path="/image/dist/full-sles10-sp1-i386"/>
+		<source path="/mounts/machcd2/dists/full-sle10-sp2-%arch"/>
 	</repository>
 	<repository type="rpm-dir">
 		<source path="/usr/share/kiwi/repo/suse-repo/suse-sles-repo"/>
