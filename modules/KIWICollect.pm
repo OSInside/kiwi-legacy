@@ -110,20 +110,16 @@ sub new {
 
   # create second logger object to log only the data relevant
   # for repository creation:
-  $this->{m_logger} = new KIWILog("tiny");#$this->{m_kiwi};
+  $this->{m_logger} = new KIWILog("tiny");
   $this->{m_logger}->setLogHumanReadable();
-  $this->{m_logger}->setLogFile("$this->{m_basedir}/packages.log");
-  $this->{m_kiwi}->info("Logging repository specific data to file $this->{m_basedir}/packages.log");
+  $this->{m_logger}->setLogFile("$this->{m_basedir}/collect.log");
+  $this->{m_kiwi}->info("Logging repository specific data to file $this->{m_basedir}/collect.log");
 
   $this->{m_util} = new KIWIUtil($this->{m_logger});
 
   $this->{m_urlparser} = new KIWIURL($this->{m_logger});
 
-  $this->Init();
-
-  # create some default directories:
-  # medium number 1 MUST exist, because it's the default for
-  # packages that don't specify their own medium number
+  #$this->Init(); # let the caller do this
 
   return $this;
 }
@@ -131,6 +127,9 @@ sub new {
 
 
 
+#=================
+# access methods:
+#-----------------
 sub logger
 {
   my $this = shift;
@@ -176,6 +175,20 @@ sub unitedDir
 
 
 
+sub archlist
+{
+  my $this = shift;
+  if(not ref($this)) {
+    return undef;
+  }
+  return $this->{m_archlist};
+}
+
+
+
+#=================
+# other methods:
+#-----------------
 #==========================================
 # Init
 #------------------------------------------
@@ -1460,22 +1473,6 @@ sub createMetadata
   my $this = shift;
 
 
-  ### step 1: create pattern list (just a simple ls)
-  ##=============================
-  #$this->{m_logger}->info("Creating patterns file:");
-  #if(!open(PAT, ">", "$this->{m_basesubdir}->{'1'}/suse/setup/descr/patterns")) {
-  #  die "Cannot create $this->{m_basesubdir}->{'1'}/suse/setup/descr/patterns!";
-  #}
-  #if(!opendir(PATDIR, "$this->{m_basesubdir}->{'1'}/suse/setup/descr/")) {
-  #  die "Cannot read $this->{m_basesubdir}->{'1'}/suse/setup/descr/!";
-  #}
-  #my @dirent = readdir(PATDIR);
-  #foreach(@dirent) {
-  #  next if $_ !~ m{(.*[.]pat|.*[.]pat[.]gz)};
-  #  print PAT "$_\n";
-  #}
-  #close(PATDIR);	
-  #close(PAT);	
   $this->{m_metacreator}->loadPlugins("/usr/share/kiwi/modules/plugins/");
   $this->{m_metacreator}->mediaName($this->{m_prodvars}->{'MEDIUM_NAME'});
   # testhack: set the plugin ready:
