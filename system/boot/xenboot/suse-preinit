@@ -38,7 +38,7 @@ createFramebufferDevices
 #======================================
 # 4) create /etc/ImagePackages
 #--------------------------------------
-if test $systemIntegrity = "clean";then
+if test "$systemIntegrity" = "clean";then
 	if [ -x /bin/rpm ];then
 		Echo "Creating initial image package info file"
 		rpm -qa --last > /etc/ImagePackages

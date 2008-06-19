@@ -26,6 +26,19 @@ rpm -e --nodeps --noscripts \
 suseStripInitrd
 
 #==========================================
+# remove unneeded files in case of Xen
+#------------------------------------------
+rm -rf /var
+rm -rf /usr/lib/ConsoleKit
+rm -rf /usr/share/getopt
+rm -rf /usr/share/hwinfo
+rm -rf /usr/share/nls
+rm -rf /usr/i586-suse-linux
+rm -rf /etc/bootsplash
+rm -rf /etc/ConsoleKit
+rm -rf /image/loader
+
+#==========================================
 # umount /proc
 #------------------------------------------
 umount /proc &>/dev/null

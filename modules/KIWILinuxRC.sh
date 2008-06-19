@@ -276,8 +276,10 @@ function errorLogStart {
 	fi
 	setctsid -f $ELOG_CONSOLE /bin/bash -c "tail -f $ELOG_FILE" &
 	exec 2>>$ELOG_FILE
-	echo "KIWI .profile contents:" 1>&2
-	cat .profile 1>&2
+	if [ -f .profile ];then
+		echo "KIWI .profile contents:" 1>&2
+		cat .profile 1>&2
+	fi
 	set -x 1>&2
 }
 #======================================

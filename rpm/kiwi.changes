@@ -3,7 +3,8 @@ Thu Jun 19 10:25:36 CEST 2008 - ms@suse.de
 
 - v2.43
 - fixed partition size calculation in oemboot
-- fixed xenboot, make it smaller
+- fixed xenboot, make it smaller, remove unused kernel
+  modules (network,scsi,cdrom,reiserfs,fat,vfat)
 
 -------------------------------------------------------------------
 Wed Jun 18 10:36:13 CEST 2008 - ms@suse.de

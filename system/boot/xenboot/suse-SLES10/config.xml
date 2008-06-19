@@ -19,7 +19,6 @@
 	<drivers type="drivers">
 		<file name="drivers/ide/*"/>
 		<file name="drivers/block/loop.ko"/>
-		<file name="net/packet/*"/>
 		<file name="fs/ext3/*"/>
 		<file name="fs/ext2/*"/>
 		<file name="fs/binfmt_aout.ko"/>
@@ -28,17 +27,8 @@
 		<file name="fs/quota_v1.ko"/>
 		<file name="fs/quota_v2.ko"/>
 		<file name="fs/jbd/*"/>
-		<file name="fs/fat/*"/>
-		<file name="fs/vfat/*"/>
-		<file name="fs/reiserfs/*"/>
-		<file name="fs/nls/nls_utf8.ko"/>
-		<file name="net/ipv6/*"/>
-		<file name="drivers/cdrom/*"/>
 		<file name="drivers/xen/*"/>
 		<file name="drivers/ata/*"/>
-		<file name="drivers/scsi/*"/>
-		<file name="drivers/message/fusion/*"/>
-		<file name="drivers/net/*"/>
 	</drivers>
 	<repository type="yast2" status="replaceable">
 		<source path="/mounts/machcd2/dists/full-sle10-sp2-%arch"/>
@@ -65,10 +55,10 @@
 		<package name="bootsplash"/>
 		<package name="bootsplash-theme-SuSE-SLES"/>
 	</packages>
-        <packages type="bootstrap" profiles="default">
-                <package name="kernel-xen" arch="x86_64"/>
-                <package name="kernel-xenpae" arch="i386"/>
-        </packages>
+	<packages type="bootstrap" profiles="default">
+		<package name="kernel-xen" arch="x86_64"/>
+		<package name="kernel-xenpae" arch="i386"/>
+	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
 		<package name="glibc-locale"/>
@@ -122,5 +112,6 @@
 		<package name="gfxboot"/>
 		<package name="fribidi"/>
 		<package name="make"/>
+		<package name="bootsplash-theme-SuSE-SLES"/>
 	</packages>
 </image>
