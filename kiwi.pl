@@ -278,6 +278,7 @@ sub main {
 			$kiwi -> failed ();
 			my $code = kiwiExit( 1 ); return $code;
 		}
+		$collect->Init();
 		#==========================================
 		# from now $collect is defined. Call the *CENTRAL* method for it
 		# ...and work!
