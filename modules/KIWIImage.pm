@@ -854,7 +854,7 @@ sub createImageLiveCD {
 	# 3) Prepare and Create the given iso <$boot> boot image
 	# 4) Setup the CD structure and copy all files
 	#    including the syslinux isolinux data
-	# 5) Create the iso image using isolinux.sh
+	# 5) Create the iso image using isolinux shell script
 	# ---
 	my $this = shift;
 	my $para = shift;
@@ -870,6 +870,7 @@ sub createImageLiveCD {
 	my $imageTreeReadOnly;
 	my $plinux;
 	my $pinitrd;
+	my $pxboot;
 	#==========================================
 	# Get system image name
 	#------------------------------------------
@@ -1155,6 +1156,7 @@ sub createImageLiveCD {
 		return undef;
 	}
 	my $iso = $xml -> getImageName();
+	my $ver = $xml -> getImageVersion();
 	undef $main::SetImageType;
 	$kiwi -> info ("Checking for pre-built boot image");
 	if ((! $pblt) || ($pblt eq "false") || ($pblt eq "0")) {
@@ -1173,6 +1175,7 @@ sub createImageLiveCD {
 		}
 		$pinitrd = glob ("$lookup/$iso*$arch*.gz");
 		$plinux  = glob ("$lookup/$iso*$arch*.kernel");
+		$pxboot  = glob ("$lookup/$iso*$arch*.xen.gz");
 		if ((! -f $pinitrd) || (! -f $plinux)) {
 			$kiwi -> skipped();
 			$kiwi -> info ("Cant't find pre-built boot image in $lookup");
@@ -1301,11 +1304,10 @@ sub createImageLiveCD {
 		rmdir $imageTreeReadOnly;
 	}
 	$kiwi -> done ();
-
 	#==========================================
-	# copy boot files for isolinux
+	# check for graphics boot files
 	#------------------------------------------
-	my $CD  = $main::Prepare."/cdboot";
+	my $CD  = $main::Prepare."/root/";
 	my $gfx = $main::RootTree."/image/loader";
 	my $isoarch = qxx ("uname -m"); chomp $isoarch;
 	if ($isoarch =~ /i.86/) {
@@ -1321,28 +1323,50 @@ sub createImageLiveCD {
 		return undef;
 	}
 	#==========================================
-	# copy kernel and initrd
+	# check if Xen kernel is used
+	#------------------------------------------
+	my $isxen = 0;
+	my $xboot = glob ("$imageDest/$iso$arch-$ver*xen.gz");
+	if (-f $xboot) {
+		$isxen = 1;
+	}
+	#==========================================
+	# copy boot kernel and initrd
 	#------------------------------------------
 	$kiwi -> info ("Copying boot image and kernel [$isoarch]");
 	my $destination = "$main::RootTree/CD/boot/$isoarch/loader";
 	qxx ("mkdir -p $destination");
 	if ($pblt) {
-		$data = qxx ("cp $pinitrd $destination/initrd");
+		$data = qxx ("cp $pinitrd $destination/initrd 2>&1");
 	} else {
-		$data = qxx ("cp $imageDest/$iso*$arch*.gz $destination/initrd");
+		$data = qxx (
+			"cp $imageDest/$iso$arch-$ver.gz $destination/initrd 2>&1"
+		);
 	}
 	$code = $? >> 8;
 	if ($code == 0) {
 		if ($pblt) {
-			$data = qxx ("cp $plinux $destination/linux");
+			$data = qxx ("cp $plinux $destination/linux 2>&1");
 		} else {
-			$data = qxx ("cp $imageDest/$iso*$arch*.kernel $destination/linux");
+			$data = qxx (
+				"cp $imageDest/$iso$arch-$ver.kernel $destination/linux 2>&1"
+			);
+		}
+		$code = $? >> 8;
+	}
+	if (($code == 0) && ($isxen)) {
+		if ($pblt) {
+			$data = qxx ("cp $pxboot $destination/xen.gz 2>&1");
+		} else {
+			$data = qxx (
+				"cp $xboot $destination/xen.gz 2>&1"
+			);
 		}
 		$code = $? >> 8;
 	}
 	if ($code != 0) {
 		$kiwi -> failed ();
-		$kiwi -> error  ("Copy failed: $data");
+		$kiwi -> error  ("Copy of isolinux boot files failed: $data");
 		$kiwi -> failed ();
 		if (! -d $main::RootTree.$baseSystem) {
 			qxx ("rm -rf $main::RootTree");
@@ -1352,19 +1376,11 @@ sub createImageLiveCD {
 	}
 	$kiwi -> done ();
 	#==========================================
-	# copy base CD files
+	# copy base graphics boot CD files
 	#------------------------------------------
 	$kiwi -> info ("Setting up isolinux boot CD [$isoarch]");
 	$data = qxx ("cp -a $gfx/* $destination");
 	$code = $? >> 8;
-	if ($code == 0) {
-		$data = qxx ("cp $CD/isolinux.cfg $destination");
-		$code = $? >> 8;
-		if ($code == 0) {
-			$data = qxx ("cp $CD/isolinux.msg $destination");
-			$code = $? >> 8;
-		}
-	}
 	if ($code != 0) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Copy failed: $data");
@@ -1374,37 +1390,114 @@ sub createImageLiveCD {
 			qxx ("rm -rf $tmpdir");
 		}
 		return undef;
-    }
+	}
 	$kiwi -> done ();
 	#==========================================
 	# setup isolinux boot label name
 	#------------------------------------------
 	my $label = "$systemName [ ISO ]";
 	my $lsafe = "Failsafe-$label";
-	qxx ("sed -i -e \"s:Live-System:$label:\" $destination/isolinux.cfg");
-	qxx ("sed -i -e \"s:Live-Failsafe:$lsafe:\" $destination/isolinux.cfg");
-	qxx ("sed -i -e \"s:Live-System:$label:\" $destination/isolinux.msg");
-	qxx ("sed -i -e \"s:Live-Failsafe:$lsafe:\" $destination/isolinux.msg");
+	#==========================================
+	# setup isolinux.cfg file
+	#------------------------------------------
+	$kiwi -> info ("Creating isolinux configuration...");
+	if (! open (FD, ">$destination/isolinux.cfg")) {
+		$kiwi -> failed();
+		$kiwi -> error  ("Failed to create $destination/isolinux.cfg: $!");
+		$kiwi -> failed ();
+		if (! -d $main::RootTree.$baseSystem) {
+			qxx ("rm -rf $main::RootTree");
+			qxx ("rm -rf $tmpdir");
+		}
+		return undef;
+	}
+	print FD "default $label"."\n";
+	print FD "implicit 1"."\n";
+	print FD "gfxboot  bootlogo"."\n";
+	print FD "display  isolinux.msg"."\n";
+	print FD "prompt   1"."\n";
+	print FD "timeout  200"."\n";
+	if (! $isxen) {
+		print FD "label $label"."\n";
+		print FD "  kernel linux"."\n";
+		print FD "  append initrd=initrd ramdisk_size=512000 ";
+		print FD "ramdisk_blocksize=4096 splash=silent showopts"."\n";
+		print FD "\n";
+		print FD "label $lsafe"."\n";
+		print FD "  kernel linux"."\n";
+		print FD "  append initrd=initrd ramdisk_size=512000 ";
+		print FD "ramdisk_blocksize=4096 splash=silent showopts ";
+		print FD "ide=nodma apm=off acpi=off noresume selinux=0 nosmp ";
+		print FD "noapic maxcpus=0 edd=off"."\n";
+	} else {
+		print FD "label $label"."\n";
+		print FD "  kernel mboot.c32"."\n";
+		print FD "  append xen.gz --- linux ramdisk_size=512000 ";
+		print FD "ramdisk_blocksize=4096 splash=silent ";
+		print FD "--- initrd showopts"."\n";
+		print FD "\n";
+		print FD "label $lsafe"."\n";
+		print FD "  kernel mboot.c32"."\n";
+		print FD "  append xen.gz --- linux ramdisk_size=512000 ";
+		print FD "ramdisk_blocksize=4096 splash=silent ";
+		print FD "ide=nodma apm=off acpi=off noresume selinux=0 nosmp ";
+		print FD "noapic maxcpus=0 edd=off ";
+		print FD "--- initrd showopts"."\n";
+	}
 	#==========================================
 	# setup isolinux checkmedia boot entry
 	#------------------------------------------
 	if (defined $main::ISOCheck) {
-		if (! open (FD,">>$destination/isolinux.cfg")) {
-			$kiwi -> error  ("Couldn't open: $destination/isolinux.cfg: $!");
-			$kiwi -> failed ();
-			if (! -d $main::RootTree.$baseSystem) {
-				qxx ("rm -rf $main::RootTree");
-				qxx ("rm -rf $tmpdir");
-			}
-			return undef;
-		}
 		print FD "\n";
-		print FD "# mediacheck\n";
-		print FD "label mediacheck\n";
-		print FD "  kernel linux\n";
-		print FD "  append initrd=initrd splash=silent mediacheck=1 showopts\n";
-		close FD;
+		if (! $isxen) {
+			print FD "label mediacheck"."\n";
+			print FD "  kernel linux"."\n";
+			print FD "  append initrd=initrd splash=silent mediacheck=1 ";
+			print FD "showopts"."\n";
+		} else {
+			print FD "label mediacheck"."\n";
+			print FD "  kernel mboot.c32"."\n";
+			print FD "  append xen.gz --- linux splash=silent mediacheck=1 ";
+			print FD "--- initrd showopts"."\n";
+		}
 	}
+	#==========================================
+	# setup default harddisk/memtest entries
+	#------------------------------------------
+	print FD "\n";
+	print FD "label Hard-Disk"."\n";
+	print FD "  localboot 0x80"."\n";
+	print FD "\n";
+	print FD "label memtest"."\n";
+	print FD "  kernel memtest"."\n";
+	print FD "\n";
+	close FD;
+	#==========================================
+	# setup isolinux.msg file
+	#------------------------------------------
+	if (! open (FD,">$destination/isolinux.msg")) {
+		$kiwi -> failed();
+		$kiwi -> error  ("Failed to create isolinux.msg: $!");
+		$kiwi -> failed ();
+		if (! -d $main::RootTree.$baseSystem) {
+			qxx ("rm -rf $main::RootTree");
+			qxx ("rm -rf $tmpdir");
+		}
+		return undef;
+	}
+	print FD "\n"."Welcome !"."\n\n";
+	print FD "To start the system enter '".$label."' and press <return>"."\n";
+	print FD "\n\n";
+	print FD "Available boot options:\n";
+	print FD "$label     - Live System"."\n";
+	print FD "$lsafe     - Live System failsafe mode"."\n";
+	print FD "Hard-Disk  - Local boot from hard disk"."\n";
+	print FD "mediacheck - Media check"."\n";
+	print FD "memtest    - Memory Test"."\n";
+	print FD "\n";
+	print FD "Have a lot of fun..."."\n";
+	close FD;
+	$kiwi -> done();
 	#==========================================
 	# remove original kernel and initrd
 	#------------------------------------------
@@ -1428,13 +1521,11 @@ sub createImageLiveCD {
 		}
 		return undef;
 	}
-
 	if ((! defined $gzip) || ($gzip =~ /^unified/)) {
 		print FD "IMAGE=/dev/ram1;$namecd\n";
 	} else {
 		print FD "IMAGE=/dev/loop1;$namecd\n";
 	}
-	
 	if (defined $gzip) {
 		if ($gzip =~ /^unified/) {
 			print FD "UNIONFS_CONFIG=/dev/ram1,/dev/loop1,aufs\n";
@@ -1443,14 +1534,13 @@ sub createImageLiveCD {
 		}
 	}
 	close FD;
-
 	#==========================================
 	# create ISO image
 	#------------------------------------------
 	$kiwi -> info ("Calling mkisofs...");
 	my $name = $imageDest."/".$namerw.".iso";
-	$kiwi -> loginfo ("Calling: $CD/isolinux.sh $main::RootTree/CD $name");
-	$data = qxx ("$CD/isolinux.sh $main::RootTree/CD $name 2>&1");
+	$kiwi -> loginfo ("Calling: $CD/isolinux $main::RootTree/CD $name");
+	$data = qxx ("$CD/isolinux $main::RootTree/CD $name 2>&1");
 	$code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> failed ();
@@ -3239,9 +3329,10 @@ sub getSize {
 	$orig /= 1024;
 	$orig = int ($orig);
 	$size += $spare;
+	$size += $xml -> getImageSizeAdditiveBytes() / 1024;
 	$size /= 1024;
 	$size = int ($size);
-	my $xmlsize = $xml->getImageSize();
+	my $xmlsize = $xml -> getImageSize();
 	if ($xmlsize eq "auto") {
 		$xmlsize = $size;
 	}

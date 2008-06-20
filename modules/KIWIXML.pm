@@ -398,11 +398,59 @@ sub getImageSize {
 	my $node = $this->{optionsNodeList} -> get_node(1);
 	my $size = $node -> getElementsByTagName ("size");
 	if ($size) {
-		my $unit = $node -> getElementsByTagName ("size")
-			-> get_node(1) -> getAttribute("unit");
-		return $size.$unit;
+		my $plus = $node -> getElementsByTagName ("size")
+			-> get_node(1) -> getAttribute("additive");
+		if ((! defined $plus) || ($plus eq "false") || ($plus eq "0")) {
+			my $unit = $node -> getElementsByTagName ("size")
+				-> get_node(1) -> getAttribute("unit");
+			# /.../
+			# the fixed size value was set, we will use this value
+			# connected with the unit string
+			# ----
+			return $size.$unit;
+		} else {
+			# /.../
+			# the size is setup as additive value to the required
+			# size. The real size is calculated later and the additive
+			# value is added at that point
+			# ---
+			return "auto";
+		}
 	} else {
 		return "auto";
+	}
+}
+
+#==========================================
+# getImageSizeAdditiveBytes
+#------------------------------------------
+sub getImageSizeAdditiveBytes {
+	# ...
+	# Get the predefined size if the attribute additive
+	# was set to true
+	# ---
+	my $this = shift;
+	my $node = $this->{optionsNodeList} -> get_node(1);
+	my $size = $node -> getElementsByTagName ("size");
+	my $plus = $node -> getElementsByTagName ("size")
+		-> get_node(1) -> getAttribute("additive");
+	if ((! defined $plus) || ($plus eq "false") || ($plus eq "0")) {
+		return 0;
+	}
+	if ($size) {
+		my $byte = int $size;
+		my $unit = $node -> getElementsByTagName ("size")
+			-> get_node(1) -> getAttribute("unit");
+		if ($unit eq "M") {
+			return $byte * 1024 * 1024;
+		}
+		if ($unit eq "G") {
+			return $byte * 1024 * 1024 * 1024;
+		}
+		# no unit specified assume MB...
+		return $byte * 1024 * 1024;
+	} else {
+		return 0;
 	}
 }
 
@@ -419,16 +467,31 @@ sub getImageSizeBytes {
 	my $size = $node -> getElementsByTagName ("size");
 	if ($size) {
 		my $byte = int $size;
-		my $unit = $node -> getElementsByTagName ("size")
-			-> get_node(1) -> getAttribute("unit");
-		if ($unit eq "M") {
+		my $plus = $node -> getElementsByTagName ("size")
+			-> get_node(1) -> getAttribute("additive");
+		if ((! defined $plus) || ($plus eq "false") || ($plus eq "0")) {
+			# /.../
+			# the fixed size value was set, we will use this value
+			# and return a byte number
+			# ----
+			my $unit = $node -> getElementsByTagName ("size")
+				-> get_node(1) -> getAttribute("unit");
+			if ($unit eq "M") {
+				return $byte * 1024 * 1024;
+			}
+			if ($unit eq "G") {
+				return $byte * 1024 * 1024 * 1024;
+			}
+			# no unit specified assume MB...
 			return $byte * 1024 * 1024;
+		} else {
+			# /.../
+			# the size is setup as additive value to the required
+			# size. The real size is calculated later and the additive
+			# value is added at that point
+			# ---
+			return "auto";
 		}
-		if ($unit eq "G") {
-			return $byte * 1024 * 1024 * 1024;
-		}
-		# no unit specified assume MB...
-		return $byte * 1024 * 1024;
 	} else {
 		return "auto";
 	}

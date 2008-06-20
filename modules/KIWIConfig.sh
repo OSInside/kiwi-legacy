@@ -823,6 +823,7 @@ function suseGFXBoot {
 		fi
 		bin/unpack_bootlogo /image/loader
 		mv /usr/share/syslinux/isolinux.bin /image/loader
+		mv /usr/share/syslinux/mboot.c32 /image/loader
 		mv /boot/memtest.bin /image/loader/memtest
 	else
 		# boot loader graphics image file...

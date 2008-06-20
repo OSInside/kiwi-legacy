@@ -2,6 +2,9 @@
 Thu Jun 19 10:25:36 CEST 2008 - ms@suse.de
 
 - v2.43
+- added support for additive size setup (bnc #401747)
+- removed cdboot directory from isoboot descriptions. kiwi
+  creates the isolinux configuration files now in KIWIImage.pm
 - fixed partition size calculation in oemboot
 - fixed xenboot, make it smaller, remove unused kernel
   modules (network,scsi,cdrom,reiserfs,fat,vfat)

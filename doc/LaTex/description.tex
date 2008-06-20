@@ -22,13 +22,6 @@ of building an image but most often mandatory for the functionality
 of the later operating system.
 
 \begin{itemize}
-\item \textbf{\underline{cdboot/}}\\
-      For ISO boot images only. The directory contains the configuration
-      files for setting up the isolinux boot loader. Additionally the
-      script isolinux.sh must exist which is called to create the
-      iso image by calling mkisofs. For SUSE systems isolinux.sh is
-      a link to the generic suse-isolinux script. 
-
 \item \textbf{\underline{images.sh}}\\
       Optional configuration script while creating the logical extend.
       This script is called at the beginning of the image creation process.
@@ -304,7 +297,10 @@ attributes:
       the specified value is too large, because the extra space might
       be needed to, for example, run custom scripts. If no size is
       specified, KIWI uses the required size plus approximately
-      10\% free space.
+      30\% free space. The optional ''additive'' attribute can be set
+      to tell kiwi to use the required size for the image plus the
+      given size as additional free space. The ''additive'' attribute is
+      a bool attribute and can be set to either true or false.
 \item \textbf{compressed}\\
       Specifies whether the image file should be compressed or not.
       This is not the filesystem compression just the image file compression

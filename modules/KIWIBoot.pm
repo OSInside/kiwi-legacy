@@ -328,6 +328,8 @@ sub new {
 		} else {
 			# use the calculated value plus 30% free space 
 			$vmsize+= $vmsize * 0.3;
+			# check if additive size was specified
+			$vmsize+= $xml -> getImageSizeAdditiveBytes();
 		}
 		$vmsize  = $vmsize / 1048576;
 		$vmsize  = sprintf ("%.0f", $vmsize);
