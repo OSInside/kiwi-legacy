@@ -159,11 +159,11 @@ sub getVar
 {
   my $this = shift;
   if(not ref($this)) {
-    return "";
+    return undef;
   }
   my $var = shift;
   if(not defined($var)) {
-    return "";
+    return undef;
   }
   else {
     if(defined($this->{prodvars}->{$var})) {
@@ -171,11 +171,36 @@ sub getVar
     }
     else {
       $this->{m_collect}->logger()->warning("ProductData:getVar($var) is not set");
-      return "";
+      return undef;
     }
   }
 }
 # /getVar
+
+
+
+#==========================================
+# getVarSafe
+#------------------------------------------
+# retrieve a specific variable by name
+# returns defined strings in case getVar
+# returns undef
+#------------------------------------------
+sub getVarSafe
+{
+  my $this = shift;
+  if(not ref($this)) {
+    return undef;
+  }
+  my $retval = $this->getVar(@_);
+  if(not defined($retval)) {
+    return "--UNDEFINED--";
+  }
+  else {
+    return $retval;
+  }
+}
+# /getVarSafe
 
 
 
@@ -188,11 +213,11 @@ sub getInfo
 {
   my $this = shift;
   if(not ref($this)) {
-    return "";
+    return undef;
   }
   my $info = shift;
   if(not defined($info)) {
-    return "";
+    return undef;
   }
   else {
     if(defined($this->{'prodinfo'}->{$this->{'prodinfo-indices'}->{$info}})) {
@@ -200,11 +225,36 @@ sub getInfo
     }
     else {
       $this->{m_collect}->logger()->warning("ProductData:getInfo($info) is not set");
-      return "";
+      return undef;
     }
   }
 }
 # /getInfo
+
+
+
+#==========================================
+# getInfoSafe
+#------------------------------------------
+# retrieve a specific productinfo by name
+# returns defined strings in case getInfo
+# returns undef
+#------------------------------------------
+sub getInfoSafe
+{
+  my $this = shift;
+  if(not ref($this)) {
+    return "";
+  }
+  my $retval = $this->getInfo(@_);
+  if(not defined($retval)) {
+    return "--UNDEFINED--";
+  }
+  else {
+    return $retval;
+  }
+}
+# /getInfoSafe
 
 
 
@@ -217,11 +267,11 @@ sub getOpt
 {
   my $this = shift;
   if(not ref($this)) {
-    return "";
+    return undef;
   }
   my $opt = shift;
   if(not defined($opt)) {
-    return "";
+    return undef;
   }
   else {
     if(defined($this->{prodopts}->{$opt})) {
@@ -229,11 +279,36 @@ sub getOpt
     }
     else {
       $this->{m_collect}->logger()->warning("ProductData:getOpt($opt) is not set");
-      return "";
+      return undef;
     }
   }
 }
 # /getOpt
+
+
+
+#==========================================
+# getOptSafe
+#------------------------------------------
+# retrieve a specific productopt by name
+# returns defined strings in case getOpt
+# returns undef
+#------------------------------------------
+sub getOptSafe
+{
+  my $this = shift;
+  if(not ref($this)) {
+    return "";
+  }
+  my $retval = $this->getOpt(@_);
+  if(not defined($retval)) {
+    return "--UNDEFINED--";
+  }
+  else {
+    return $retval;
+  }
+}
+# /getOptSafe
 
 
 
@@ -347,8 +422,8 @@ sub _substitute
       $string =~ s{\$$2}{$repl};
     }
     else {
-      $this->{m_collect}->logger()->warning("ProductData::_substitute: pattern $1 is not in the translation hash!");
-      $string =~ s{\$$2}{--NOTDEFINED--};
+      $this->{m_collect}->logger()->warning("ProductData::_substitute: pattern $1 is not in the translation hash!\n");
+      $string =~ s{\$$2}{NOTSET};
       next;
     }
   }
