@@ -1,5 +1,8 @@
 #!/usr/bin/perl -wd
 
+BEGIN {
+  unshift @INC, '..';
+}
 
 use KIWICollect;
 use KIWIProductData;
@@ -20,10 +23,12 @@ my $xml = new KIWIXML($log, "/suse/jcborn/Work/KIWI/JeOS-svn/instsource/");
 my $collect = new KIWICollect($log, $xml, $bd, 1);
 if(not defined($collect)) {
   print "Failed to create KIWICollect object\n";
-  exit 1;
+  exit 12;
 }
 
 my $testresult = performTest($collect);
+print "\n\nResults\n=======\n\n$testresult tests failed\n\n";
+exit $testresult;
 
 
 #===========================================
@@ -31,50 +36,83 @@ my $testresult = performTest($collect);
 # - KIWICollect object
 sub performTest
 {
-  my $testresult = 0;
+  # run eleven stage test; the number of unsuccessful tests is returned
+  my $testresult = 11;
   my $collect = shift;
 
-  # constructor sanity check (expect: undef):
+  # TEST 1: constructor sanity check (expect: undef):
   my $module = new KIWIProductData();
   if(not defined($module)) {
     print "Constructor sane\n";
+    $testresult--;
   }
   else {
     print "Construct 1 should have failed but didn't\n";
-    return undef;
+    return $testresult;
   }
 
+  # TEST 2: constructor sanity part two: expect success
   $module = new KIWIProductData($collect);
   if(defined($module)) {
     print "Creation 2: module is a ".ref($module)."...\n";
+    $testresult--;
   }
   else {
     print "Creation with parameter $collect failed. [".ref($collect)."]\n";
-    return undef;
+    return $testresult;
   }
 
   print "Setting prodvars content: A->Bla, B->Blubb, C->A--B\n";
+  print "expect expanded C: Bla--Blubb\n";
   $module->addSet("Some crappy variables", { 'A' => 'Bla', 'B' => 'Blubb', 'C' => '$A--$B' }, "prodvars");
   $module->_expand();
-  print $module->getVar("A")."\n";
-  print $module->getVar("B")."\n";
-  print "expect expanded C: Bla--Blubb\n";
-  print $module->getVar("C")."\n";
 
-  print "Setting prodinfo content: D->Gobble, E->Wobble, F->D--A\n";
+  # TEST 3..5: retrieve some data:
+  my $reply;
+  for my $i('A', 'B', 'C') {
+    $reply = $module->getVar($i);
+    if(defined($reply)) {
+      $testresult--;
+      print "Fetch value of $i: $reply\n";
+    }
+    else {
+      print "reply is undef\n";
+    }
+  }
+
+  print "Setting prodinfo content: D->Gobble, E->Wobble, F->D--HUBBLE (which isn't set yet)\n";
+  print "expect expanded F: Gobble--[undef-case]\n";
   $module->addSet("Some slutty variables", { '1' => ['D','Gobble'], '2' => ['E', 'Wobble'], '3' => ['F', '$D--$HUBBLE'] }, "prodinfo");
   $module->_expand();
-  print $module->getInfo("D")."\n";
-  print $module->getInfo("E")."\n";
-  print "expect expanded F: Gobble--Bla\n";
-  print $module->getInfo("F")."\n";
+
+  # TEST 6..8: retrieve some data:
+  for my $i('D', 'E', 'F') {
+    $reply = $module->getInfo($i);
+    if(defined($reply)) {
+      $testresult--;
+      print "Fetch value of $i: $reply\n";
+    }
+    else {
+      print "reply is undef\n";
+    }
+  }
 
   print "Setting prodopts content: GLOB->Gobble, HUBBLE->Wobble, INDY->D--A\n";
+  print "expect expanded INDY: Bla--Blubb Gobble--Bla Hallelujah!-bagga\n";
   $module->addSet("Some stupid options", { 'GLOB' => 'Hallelujah!', 'HUBBLE' => 'Telescope', 'INDY' => '$C $F $GLOB-bagga' }, "prodopts");
   $module->_expand();
-  print $module->getOpt("GLOB")."\n";
-  print $module->getOpt("HUBBLE")."\n";
-  print "expect expanded INDY: Bla--Blubb Gobble--Bla Hallelujah!-bagga\n";
-  print $module->getOpt("INDY")."\n";
 
+  # TEST 9..11: retrieve some data:
+  for my $i('GLOB', 'HUBBLE', 'INDY') {
+    $reply = $module->getOpt($i);
+    if(defined($reply)) {
+      $testresult--;
+      print "Fetch value of $i: $reply\n";
+    }
+    else {
+      print "reply is undef\n";
+    }
+  }
+
+  return $testresult;
 }
