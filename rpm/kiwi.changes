@@ -3,6 +3,7 @@ Thu Jun 19 10:25:36 CEST 2008 - ms@suse.de
 
 - v2.43
 - added support for additive size setup (bnc #401747)
+- fixed race condition when searching for free loop (bnc #402848)
 - removed cdboot directory from isoboot descriptions. kiwi
   creates the isolinux configuration files now in KIWIImage.pm
 - fixed partition size calculation in oemboot

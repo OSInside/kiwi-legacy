@@ -68,8 +68,6 @@ sub new {
 	my $syszip    = 0;
 	my $sysird    = 0;
 	my $zipped    = 0;
-	my $loopfound = 0;
-	my $loop      = "/dev/loop0";
 	my $vmmbyte;
 	my $kernel;
 	my $knlink;
@@ -157,14 +155,14 @@ sub new {
 	#==========================================
 	# create tmp dir for operations
 	#------------------------------------------
-	$tmpdir = qxx ( "mktemp -q -d /tmp/kiwiboot.XXXXXX" ); chomp $tmpdir;
+	$tmpdir = qxx ("mktemp -q -d /tmp/kiwiboot.XXXXXX"); chomp $tmpdir;
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> error  ("Couldn't create tmp dir: $tmpdir: $!");
 		$kiwi -> failed ();
 		return undef;
 	}
-	$loopdir = qxx ( "mktemp -q -d /tmp/kiwiloop.XXXXXX" ); chomp $loopdir;
+	$loopdir = qxx ("mktemp -q -d /tmp/kiwiloop.XXXXXX"); chomp $loopdir;
 	$result  = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> error  ("Couldn't create tmp dir: $loopdir: $!");
@@ -187,36 +185,10 @@ sub new {
 			my %fsattr = main::checkFileSystem ($system);
 			if (! $fsattr{type}) {
 				#==========================================
-				# search free loop device
-				#------------------------------------------
-				$kiwi -> info ("Searching for free loop device...");
-				for (my $id=0;$id<=7;$id++) {
-					$status = qxx ( "/sbin/losetup /dev/loop$id 2>&1" );
-					$result = $? >> 8;
-					if ($result eq 1) {
-						$loopfound = 1;
-						$loop = "/dev/loop".$id;
-						$this->{loop} = $loop;
-						last;
-					}
-				}
-				if (! $loopfound) {
-					$kiwi -> failed ();
-					$kiwi -> error  ("Couldn't find free loop device");
-					$kiwi -> failed ();
-					$this -> cleanTmp ();
-					return undef;
-				}
-				$kiwi -> done();
-				#==========================================
 				# bind $system to loop device
 				#------------------------------------------
 				$kiwi -> info ("Binding virtual disk to loop device");
-				$status = qxx ( "/sbin/losetup $loop $system 2>&1" );
-				$result = $? >> 8;
-				if ($result != 0) {
-					$kiwi -> failed ();
-					$kiwi -> error  ("Failed binding virtual disk: $status");
+				if (! $this -> bindLoopDevice($system)) {
 					$kiwi -> failed ();
 					$this -> cleanTmp ();
 					return undef;
@@ -226,7 +198,7 @@ sub new {
 				# setup device mapper
 				#------------------------------------------
 				$kiwi -> info ("Setup device mapper for ISO install image");
-				$status = qxx ( "/sbin/kpartx -a $loop 2>&1" );
+				$status = qxx ( "/sbin/kpartx -a $this->{loop} 2>&1" );
 				$result = $? >> 8;
 				if ($result != 0) {
 					$kiwi -> failed ();
@@ -239,7 +211,7 @@ sub new {
 				#==========================================
 				# find partition and mount it
 				#------------------------------------------
-				my $dmap = $loop; $dmap =~ s/dev\///;
+				my $dmap = $this->{loop}; $dmap =~ s/dev\///;
 				my $sdev = "/dev/mapper".$dmap."p1";
 				%fsattr = main::checkFileSystem ($sdev);
 				$status = qxx ("mount -t $fsattr{type} $sdev $tmpdir 2>&1");
@@ -258,8 +230,8 @@ sub new {
 				# clean up
 				#------------------------------------------
 				qxx ("umount $tmpdir 2>&1");
-				qxx ("kpartx -d $loop");
-				qxx ("losetup -d $loop");
+				qxx ("kpartx -d $this->{loop}");
+				qxx ("losetup -d $this->{loop}");
 			} else {
 				#==========================================
 				# loop mount system image
@@ -1039,10 +1011,8 @@ sub setupInstallCD {
 	my $zipped    = $this->{zipped};
 	my $isxen     = $this->{isxen};
 	my $xengz     = $this->{xengz};
-	my $loop      = "/dev/loop0";
 	my $imgtype   = "oem";
 	my $gotsys    = 1;
-	my $loopfound = 0;
 	my $status;
 	my $result;
 	my $ibasename;
@@ -1079,36 +1049,10 @@ sub setupInstallCD {
 	#------------------------------------------
 	if ($gotsys) {
 		#==========================================
-		# search free loop device
-		#------------------------------------------
-		$kiwi -> info ("Searching for free loop device...");
-		for (my $id=0;$id<=7;$id++) {
-			$status = qxx ( "/sbin/losetup /dev/loop$id 2>&1" );
-			$result = $? >> 8;
-			if ($result eq 1) {
-				$loopfound = 1;
-				$loop = "/dev/loop".$id;
-				$this->{loop} = $loop;
-				last;
-			}
-		}
-		if (! $loopfound) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't find free loop device");
-			$kiwi -> failed ();
-			$this -> cleanTmp ();
-			return undef;
-		}
-		$kiwi -> done();
-		#==========================================
 		# bind $system to loop device
 		#------------------------------------------
 		$kiwi -> info ("Binding virtual disk to loop device");
-		$status = qxx ( "/sbin/losetup $loop $system 2>&1" );
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Failed binding virtual disk: $status");
+		if (! $this -> bindLoopDevice($system)) {
 			$kiwi -> failed ();
 			$this -> cleanTmp ();
 			return undef;
@@ -1118,7 +1062,7 @@ sub setupInstallCD {
 		# setup device mapper
 		#------------------------------------------
 		$kiwi -> info ("Setup device mapper for virtual partition access");
-		$status = qxx ( "/sbin/kpartx -a $loop 2>&1" );
+		$status = qxx ( "/sbin/kpartx -a $this->{loop} 2>&1" );
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -1131,7 +1075,7 @@ sub setupInstallCD {
 		#==========================================
 		# find partition to check
 		#------------------------------------------
-		my $dmap = $loop; $dmap =~ s/dev\///;
+		my $dmap = $this->{loop}; $dmap =~ s/dev\///;
 		my $sdev = "/dev/mapper".$dmap."p2";
 		if (! -e $sdev) {
 			$sdev = "/dev/mapper".$dmap."p1";
@@ -1149,8 +1093,8 @@ sub setupInstallCD {
 			$imgtype = "split";
 		}
 		$status = qxx ("umount $tmpdir 2>&1"); sleep (1);
-		$status = qxx ("/sbin/kpartx  -d $loop 2>&1");
-		$status = qxx ("/sbin/losetup -d $loop 2>&1");
+		$status = qxx ("/sbin/kpartx  -d $this->{loop} 2>&1");
+		$status = qxx ("/sbin/losetup -d $this->{loop} 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> error ("Failed to umount system partition: $status");
@@ -1281,9 +1225,7 @@ sub setupInstallStick {
 	my $isxen     = $this->{isxen};
 	my $xengz     = $this->{xengz};
 	my $diskname  = $system.".install.raw";
-	my $loop      = "/dev/loop0";
 	my $imgtype   = "oem";
-	my $loopfound = 0;
 	my $gotsys    = 1;
 	my $status;
 	my $result;
@@ -1319,28 +1261,6 @@ sub setupInstallStick {
 		$gotsys   = 0;
 	}
 	#==========================================
-	# search free loop device
-	#------------------------------------------
-	$kiwi -> info ("Searching for free loop device...");
-	for (my $id=0;$id<=7;$id++) {
-		$status = qxx ( "/sbin/losetup /dev/loop$id 2>&1" );
-		$result = $? >> 8;
-		if ($result eq 1) {
-			$loopfound = 1;
-			$loop = "/dev/loop".$id;
-			$this->{loop} = $loop;
-			last;
-		}
-	}
-	if (! $loopfound) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't find free loop device");
-		$kiwi -> failed ();
-		$this -> cleanTmp ();
-		return undef;
-	}
-	$kiwi -> done();
-	#==========================================
 	# check image type
 	#------------------------------------------
 	if ($gotsys) {
@@ -1348,11 +1268,7 @@ sub setupInstallStick {
 		# bind $system to loop device
 		#------------------------------------------
 		$kiwi -> info ("Binding virtual disk to loop device");
-		$status = qxx ( "/sbin/losetup $loop $system 2>&1" );
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Failed binding virtual disk: $status");
+		if (! $this -> bindLoopDevice ($system)) {
 			$kiwi -> failed ();
 			$this -> cleanTmp ();
 			return undef;
@@ -1362,7 +1278,7 @@ sub setupInstallStick {
 		# setup device mapper
 		#------------------------------------------
 		$kiwi -> info ("Setup device mapper for virtual partition access");
-		$status = qxx ( "/sbin/kpartx -a $loop 2>&1" );
+		$status = qxx ( "/sbin/kpartx -a $this->{loop} 2>&1" );
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -1375,7 +1291,7 @@ sub setupInstallStick {
 		#==========================================
 		# find partition to check
 		#------------------------------------------
-		my $dmap = $loop; $dmap =~ s/dev\///;
+		my $dmap = $this->{loop}; $dmap =~ s/dev\///;
 		my $sdev = "/dev/mapper".$dmap."p2";
 		if (! -e $sdev) {
 			$sdev = "/dev/mapper".$dmap."p1";
@@ -1393,8 +1309,8 @@ sub setupInstallStick {
 			$imgtype = "split";
 		}
 		$status = qxx ("umount $tmpdir 2>&1"); sleep (1);
-		$status = qxx ("/sbin/kpartx  -d $loop 2>&1");
-		$status = qxx ("/sbin/losetup -d $loop 2>&1");
+		$status = qxx ("/sbin/kpartx  -d $this->{loop} 2>&1");
+		$status = qxx ("/sbin/losetup -d $this->{loop} 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> error  ("Failed to umount system partition: $status");
@@ -1474,11 +1390,7 @@ sub setupInstallStick {
 	}
 	$kiwi -> done();
 	$kiwi -> info ("Binding virtual disk to loop device");
-	$status = qxx ( "/sbin/losetup $loop $diskname 2>&1" );
-	$result = $? >> 8;
-	if ($result != 0) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Failed binding virtual disk: $status");
+	if (! $this -> bindLoopDevice ($diskname)) {
 		$kiwi -> failed ();
 		$this -> cleanTmp ();
 		return undef;
@@ -1488,7 +1400,7 @@ sub setupInstallStick {
 	# create virtual disk partitions
 	#------------------------------------------
 	$kiwi -> info ("Create partition table for virtual disk");
-	if (! open (FD,"|/sbin/fdisk $loop &>/dev/null")) {
+	if (! open (FD,"|/sbin/fdisk $this->{loop} &>/dev/null")) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Failed creating virtual partition");
 		$kiwi -> failed ();
@@ -1519,7 +1431,7 @@ sub setupInstallStick {
 	# setup device mapper
 	#------------------------------------------
 	$kiwi -> info ("Setup device mapper for virtual partition access");
-	$status = qxx ( "/sbin/kpartx -a $loop 2>&1" );
+	$status = qxx ( "/sbin/kpartx -a $this->{loop} 2>&1" );
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -1528,7 +1440,7 @@ sub setupInstallStick {
 		$this -> cleanLoop ();
 		return undef;
 	}
-	my $dmap = $loop; $dmap =~ s/dev\///;
+	my $dmap = $this->{loop}; $dmap =~ s/dev\///;
 	my $boot = "/dev/mapper".$dmap."p1";
 	my $data;
 	if ($gotsys) {
@@ -1605,7 +1517,7 @@ sub setupInstallStick {
 	#==========================================
 	# cleanup device maps and part mount
 	#------------------------------------------
-	qxx ( "/sbin/kpartx -d $loop" );
+	qxx ( "/sbin/kpartx -d $this->{loop}" );
 	#==========================================
 	# Install boot loader on virtual disk
 	#------------------------------------------
@@ -1620,7 +1532,7 @@ sub setupInstallStick {
 	#==========================================
 	# cleanup loop setup and device mapper
 	#------------------------------------------
-	qxx ( "/sbin/losetup -d $loop" );
+	qxx ("/sbin/losetup -d $this->{loop}");
 	$kiwi -> info ("Created $diskname to be dd'ed on Stick");
 	$kiwi -> done ();
 	return $this;
@@ -1644,9 +1556,7 @@ sub setupBootDisk {
 	my $isxen     = $this->{isxen};
 	my $xengz     = $this->{xengz};
 	my $diskname  = $system.".raw";
-	my $loop      = "/dev/loop0";
 	my $imgtype   = "vmx";
-	my $loopfound = 0;
 	my $haveTree  = 0;
 	my $haveSplit = 0;
 	my $splitfile;
@@ -1761,30 +1671,6 @@ sub setupBootDisk {
 		}
 	}
 	#==========================================
-	# search free loop device
-	#------------------------------------------
-	$kiwi -> info ("Using virtual disk size of: $vmsize");
-	$kiwi -> done ();
-	$kiwi -> info ("Searching for free loop device...");
-	for (my $id=0;$id<=7;$id++) {
-		$status = qxx ( "/sbin/losetup /dev/loop$id 2>&1" );
-		$result = $? >> 8;
-		if ($result == 1) {
-			$loopfound = 1;
-			$loop = "/dev/loop".$id;
-			$this->{loop} = $loop;
-			last;
-		}
-	}
-	if (! $loopfound) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't find free loop device");
-		$kiwi -> failed ();
-		$this -> cleanTmp ();
-		return undef;
-	}
-	$kiwi -> done();
-	#==========================================
 	# Create Virtual Disk boot structure
 	#------------------------------------------
 	if (! $this -> createBootStructure("vmx")) {
@@ -1839,19 +1725,14 @@ sub setupBootDisk {
 		#==========================================
 		# setup loop device for virtual disk
 		#------------------------------------------
-		$status = qxx ( "/sbin/losetup $loop $diskname 2>&1" );
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Failed binding virtual disk: $status");
-			$kiwi -> failed ();
+		if (! $this -> bindLoopDevice($diskname)) {
 			$this -> cleanTmp ();
 			return undef;
 		}
 		#==========================================
 		# create virtual disk partition
 		#------------------------------------------
-		if (! open (FD,"|/sbin/fdisk $loop &>/dev/null")) {
+		if (! open (FD,"|/sbin/fdisk $this->{loop} &>/dev/null")) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Failed creating virtual partition");
 			$kiwi -> failed ();
@@ -1880,7 +1761,7 @@ sub setupBootDisk {
 		#==========================================
 		# setup device mapper
 		#------------------------------------------
-		$status = qxx ( "/sbin/kpartx -a $loop 2>&1" );
+		$status = qxx ( "/sbin/kpartx -a $this->{loop} 2>&1" );
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -1889,7 +1770,7 @@ sub setupBootDisk {
 			$this -> cleanLoop ();
 			return undef;
 		}
-		$dmap = $loop; $dmap =~ s/dev\///;
+		$dmap = $this->{loop}; $dmap =~ s/dev\///;
 		$root = "/dev/mapper".$dmap."p1";
 		#==========================================
 		# check partition sizes
@@ -1908,8 +1789,8 @@ sub setupBootDisk {
 				#==========================================
 				# bad partition alignment try again
 				#------------------------------------------
-				sleep (1); qxx ("/sbin/kpartx  -d $loop");
-				sleep (1); qxx ("/sbin/losetup -d $loop"); 
+				sleep (1); qxx ("/sbin/kpartx  -d $this->{loop}");
+				sleep (1); qxx ("/sbin/losetup -d $this->{loop}"); 
 			} else {
 				#==========================================
 				# looks good go for it
@@ -2129,7 +2010,7 @@ sub setupBootDisk {
 	#==========================================
 	# cleanup device maps and part mount
 	#------------------------------------------
-	qxx ( "/sbin/kpartx -d $loop" );
+	qxx ("/sbin/kpartx -d $this->{loop}");
 	#==========================================
 	# Install boot loader on virtual disk
 	#------------------------------------------
@@ -2148,7 +2029,7 @@ sub setupBootDisk {
 			$this -> {system} = $diskname;
 			$kiwi -> info ("Creating install ISO image\n");
 			$this -> buildMD5Sum ($diskname);
-			qxx ( "/sbin/losetup -d $loop" );
+			qxx ("/sbin/losetup -d $this->{loop}");
 			if (! $this -> setupInstallCD()) {
 				return undef;
 			}
@@ -2156,7 +2037,7 @@ sub setupBootDisk {
 			$this -> {system} = $diskname;
 			$kiwi -> info ("Creating install USB Stick image\n");
 			$this -> buildMD5Sum ($diskname);
-			qxx ( "/sbin/losetup -d $loop" );
+			qxx ("/sbin/losetup -d $this->{loop}");
 			if (! $this -> setupInstallStick()) {
 				return undef;
 			}
@@ -2170,11 +2051,11 @@ sub setupBootDisk {
 			}
 			if (($vmwc{disk}) && ($vmwc{disk} =~ /^scsi/)) {
 				$status = qxx (
-					"qemu-img convert -f raw $loop -O $format -s $fname 2>&1"
+					"qemu-img convert -f raw $this->{loop} -O $format -s $fname 2>&1"
 				);
 			} else {
 				$status = qxx (
-					"qemu-img convert -f raw $loop -O $format $fname 2>&1"
+					"qemu-img convert -f raw $this->{loop} -O $format $fname 2>&1"
 				);
 			}
 			$result = $? >> 8;
@@ -2191,7 +2072,7 @@ sub setupBootDisk {
 	#==========================================
 	# cleanup loop setup and device mapper
 	#------------------------------------------
-	qxx ( "/sbin/losetup -d $loop 2>&1" );
+	qxx ( "/sbin/losetup -d $this->{loop} 2>&1" );
 	return $this;
 }
 
@@ -2814,7 +2695,7 @@ sub setupBootLoaderConfiguration {
 			print FD "gfxmenu (cd)/boot/message\n";
 			print FD "title $type\n";
 		} elsif ($type =~ /^KIWI USB/) {
-			print FD "gfxmenu (hd0,0)/image/loader/message\n";
+			print FD "gfxmenu (hd0,0)/boot/message\n";
 			print FD "title $type\n";
 		} else {
 			print FD "gfxmenu (hd0,$bootpart)/boot/message\n";
@@ -3021,6 +2902,32 @@ sub installBootLoader {
 	# more boot managers to come...
 	#------------------------------------------
 	return $this;
+}
+
+#==========================================
+# bindLoopDevice
+#------------------------------------------
+sub bindLoopDevice {
+	my $this   = shift;
+	my $system = shift;
+	my $kiwi   = $this->{kiwi};
+	my $status;
+	my $result;
+	my $loop;
+	#==========================================
+	# bind file to loop device
+	#------------------------------------------
+	for (my $id=0;$id<=7;$id++) {
+		$status = qxx ("/sbin/losetup /dev/loop$id $system 2>&1");
+		$result = $? >> 8;
+		if ($result == 0) {
+			$loop = "/dev/loop".$id;
+			$this->{loop} = $loop;
+			return $this;
+		}
+	}
+	$kiwi -> loginfo ("Failed binding file to loop: $status");
+	return undef;
 }
 
 1; 

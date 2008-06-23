@@ -749,7 +749,7 @@ sub createImageVMX {
 	# Create virtual machine disks. By default a raw disk image will
 	# created from which other types can be converted. The output
 	# format is specified by the format attribute in the type section.
-	# Supported formats are: vvfat vpc bochs dmg cloop vmdk qcow cow raw
+	# Supported formats are: vvfat vpc bochs dmg vmdk qcow cow raw
 	# The process will create the system image and the appropriate vmx
 	# boot image plus a .raw and an optional format specific image.
 	# The boot image description must exist in /usr/share/kiwi/image.
@@ -2777,10 +2777,6 @@ sub mountLogicalExtend {
 	my $opts = shift;
 	my $kiwi = $this->{kiwi};
 	my $imageDest = $this->{imageDest};
-	my $loopfound = 0;
-	my $status;
-	my $result;
-	my $loop;
 	#==========================================
 	# mount logical extend for data transfer
 	#------------------------------------------
@@ -2789,23 +2785,8 @@ sub mountLogicalExtend {
 	if (defined $opts) {
 		$mount = "mount $opts";
 	}
-	for (my $id=0;$id<=7;$id++) {
-		$status = qxx (" /sbin/losetup /dev/loop$id 2>&1 ");
-		$result = $? >> 8;
-		if ($result eq 1) {
-			$loopfound = 1;
-			$loop = "/dev/loop".$id;
-			$this->{loop} = $loop;
-			last;
-		}
-	}
-	if (! $loopfound) {
-		$kiwi -> error  ("Couldn't find free loop device");
-		$kiwi -> failed ();
-		return undef;
-	}
 	my $data= qxx (
-		"$mount -o loop=$loop $imageDest/$name $imageDest/mnt-$$ 2>&1"
+		"$mount -o loop $imageDest/$name $imageDest/mnt-$$ 2>&1"
 	);
 	my $code= $? >> 8;
 	if ($code != 0) {
@@ -3346,9 +3327,6 @@ sub cleanMount {
 	my $this = shift;
 	my $imageDest = $this->{imageDest};
 	qxx ("umount -l $imageDest/mnt-$$ 2>&1");
-	if (defined $this->{loop}) {
-		system ("/sbin/losetup -d $this->{loop}");
-	}
 	rmdir "$imageDest/mnt-$$";
 }
 
