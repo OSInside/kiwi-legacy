@@ -183,7 +183,7 @@ sub new {
 			$xml = new KIWIXML ($kiwi,$system."/image");
 		} else {
 			my %fsattr = main::checkFileSystem ($system);
-			if (! $fsattr{type}) {
+			if ((! $fsattr{type}) || ($fsattr{type} eq "auto")) {
 				#==========================================
 				# bind $system to loop device
 				#------------------------------------------
