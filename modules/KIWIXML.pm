@@ -432,10 +432,12 @@ sub getImageSizeAdditiveBytes {
 	my $this = shift;
 	my $node = $this->{optionsNodeList} -> get_node(1);
 	my $size = $node -> getElementsByTagName ("size");
-	my $plus = $node -> getElementsByTagName ("size")
-		-> get_node(1) -> getAttribute("additive");
-	if ((! defined $plus) || ($plus eq "false") || ($plus eq "0")) {
-		return 0;
+	if ($size) {
+		my $plus = $node -> getElementsByTagName ("size")
+			-> get_node(1) -> getAttribute("additive");
+		if ((! defined $plus) || ($plus eq "false") || ($plus eq "0")) {
+			return 0;
+		}
 	}
 	if ($size) {
 		my $byte = int $size;
