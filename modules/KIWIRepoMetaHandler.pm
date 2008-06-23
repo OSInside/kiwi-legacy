@@ -55,21 +55,33 @@ sub new
 
 
 
+#==================
+# access methods
+#------------------
+
+
+
+#==================
+# media name
+#------------------
 sub mediaName
 {
   my $this = shift;
   if(not ref($this)) {
     return undef;
   }
-  my $oldorder = $this->{m_order};
+  my $oldname = $this->{m_medianame};
   if(@_) {
-    $this->{m_order} = shift;
+    $this->{m_medianame} = shift;
   }
-  return $oldorder;
+  return $oldname;
 }
 
 
 
+#==================
+# collect object (ro)
+#------------------
 sub collect
 {
   my $this = shift;
@@ -81,6 +93,9 @@ sub collect
 
 
 
+#==================
+# base url
+#------------------
 sub baseurl
 {
   my $this = shift;
@@ -121,6 +136,18 @@ sub baseurl
 
 
 
+#==================
+# regular methods
+#------------------
+
+
+
+#==================
+# gossip
+#------------------
+# report a message back through collect->logger
+# if the debug flag was set
+#------------------
 sub gossip
 {
   my $this = shift;
@@ -132,11 +159,11 @@ sub gossip
 
 
 
-#...
+#==================
 # loadPlugins(DIR)
 # - load all plugins available in directory DIR
 # return number of loaded plugins, 0 in case of error
-#---
+#------------------
 sub loadPlugins
 {
   my $this = shift;
