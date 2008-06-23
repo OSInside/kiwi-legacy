@@ -1,4 +1,8 @@
-
+#================
+# FILE          : KIWIPatternsPlugin.pm
+#----------------
+# PROJECT       : OpenSUSE Build-Service
+# COPYRIGHT     : (c) 2006 SUSE LINUX Products GmbH, Germany
 #               :
 # AUTHOR        : Jan-Christoph Bornschlegel <jcborn@suse.de>
 #               :
@@ -23,22 +27,14 @@ sub new
   # ---
   my $class = shift;
 
-  #my $this  = {
-  #  m_name	  => "PatternsPlugin",
-  #  m_order	  => 1,
-  #  m_requireddirs => ["suse/setup/descr"],
-  #  m_media	  => [1],
-  #  m_descr	  => ["Creates patterns file",
-  #      	      "This is basicallly a ls listing"],
-  #  m_requires	  => [],
-  #  m_ready	  => 0,
-  #};
   my $this = new KIWIInstSourceBasePlugin(shift);
   bless ($this, $class);
 
   $this->name("PatternsPlugin");
   $this->order(1);
-  $this->requiredDirs("suse/setup/descr");
+### baustelle ###
+  my $dir = $this->handler()->collect()->productData()->getInfo("DESCRDIR");
+  $this->requiredDirs($dir);
   $this->description("Creates patterns file",
         	      "This is basicallly a ls listing");
   #$this->requires();
@@ -64,10 +60,10 @@ sub execute
 
   my $dirname = $this->{m_handler}->baseurl()."/".$this->{m_handler}->mediaName().$this->{m_media}->[0]."/".$this->{m_requireddirs}->[0];
   if(!open(PAT, ">", "$dirname/patterns")) {
-    die "Cannot create $this->{m_basesubdir}->{'1'}/suse/setup/descr/patterns!";
+    die "Cannot create $dirname/patterns!";
   }
   if(!opendir(PATDIR, "$dirname")) {
-    die "Cannot read $this->{m_basesubdir}->{'1'}/suse/setup/descr/!";
+    die "Cannot read $dirname!";
   }
   my @dirent = readdir(PATDIR);
   foreach(@dirent) {
