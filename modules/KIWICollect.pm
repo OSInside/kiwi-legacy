@@ -30,6 +30,7 @@ use KIWIXML;
 use KIWIUtil;
 use KIWIURL;
 use KIWIRepoMetaHandler;
+use KIWIProductData;
 
 use RPMQ;
 
@@ -119,6 +120,9 @@ sub new {
 
   $this->{m_urlparser} = new KIWIURL($this->{m_logger});
 
+  # create the product variables administrator object.
+  # This must be incubated with the respective data in the Init() method
+  $this->{m_proddata} = new KIWIProductData($this);
   #$this->Init(); # let the caller do this
 
   return $this;
@@ -182,6 +186,17 @@ sub archlist
     return undef;
   }
   return $this->{m_archlist};
+}
+
+
+
+sub productData
+{
+  my $this = shift;
+  if(not ref($this)) {
+    return undef;
+  }
+  return $this->{m_proddata};
 }
 
 
@@ -266,58 +281,58 @@ sub Init
     close(DUMP);
   }
 
-  ## hash of varname=value pairs necessary for scripts (ENV)
-  %{$this->{m_prodinfo}}      = $this->{m_xml}->getInstSourceProductInfo();
+  $this->{m_proddata}->addSet("ProductInfo stuff", {$this->{m_xml}->getInstSourceProductInfo()}, "prodinfo");
+  $this->{m_proddata}->addSet("ProductVar stuff", {$this->{m_xml}->getInstSourceProductVar()}, "prodvars");
+  $this->{m_proddata}->addSet("ProductOption stuff", {$this->{m_xml}->getInstSourceProductOption()}, "prodopts");
+  $this->{m_proddata}->_expand(); #once should be it, now--
+
+  # this breaks "private" access, only used for DEBUG! This is not an example!!!
   if($this->{m_debug}) {
-    open(DUMP, ">", "$this->{m_basedir}/prodinfo.dump.pl");
-    print DUMP Dumper($this->{m_prodinfo});
+    open(DUMP, ">", "$this->{m_basedir}/productdata.pl");
+    print DUMP "# PRODUCTINFO:";
+    print DUMP Dumper($this->{m_proddata}->{m_prodinfo});
+    print DUMP "# PRODUCTVARS:";
+    print DUMP Dumper($this->{m_proddata}->{m_prodvars});
+    print DUMP "# PRODUCTOPTIONS:";
+    print DUMP Dumper($this->{m_proddata}->{m_prodopts});
     close(DUMP);
   }
-
-  %{$this->{m_prodinfo_trans}} = map { $_->[0] => $_->[1] } values(%{$this->{m_prodinfo}});
-
-  %{$this->{m_prodvars}}      = $this->{m_xml}->getInstSourceProductVar();
-  if($this->{m_debug}) {
-    open(DUMP, ">", "$this->{m_basedir}/prodvars.dump.pl");
-    print DUMP Dumper($this->{m_prodvars});
-    close(DUMP);
-  }
-
-  %{$this->{m_prodopts}}      = $this->{m_xml}->getInstSourceProductOption();
-  if($this->{m_debug}) {
-    open(DUMP, ">", "$this->{m_basedir}/prodopts.dump.pl");
-    print DUMP Dumper($this->{m_prodopts});
-    close(DUMP);
-  }
-
 
   ### THIS IS ONLY FIRST SHOT! TODO FIXME
   ## set env vars according to "productinfo" elements:
-  while(my ($name,$value) = each(%{$this->{m_prodvars}})) {
-    $ENV{$name} = $value;
-  }
+  #while(my ($name,$value) = each(%{$this->{m_prodvars}})) {
+  #  $ENV{$name} = $value;
+  #}
 
   $this->{m_united} = "$this->{m_basedir}/main";
   $this->{m_dirlist}->{"$this->{m_united}"} = 1;
+  my $mediumname = $this->{m_proddata}->getVar("MEDIUM_NAME");
+  if(not defined($mediumname)) {
+    $this->{m_logger}->error("[ERROR] Variable MEDIUM_NAME is not specified correctly!");
+    return undef;
+  }
+
   foreach my $n($this->getMediaNumbers()) {
-    $this->{m_dirlist}->{"$this->{m_united}/$this->{m_prodvars}->{MEDIUM_NAME}$n"} = 1;
-    $this->{m_dirlist}->{"$this->{m_united}/$this->{m_prodvars}->{MEDIUM_NAME}$n/suse"} = 1;
-    $this->{m_dirlist}->{"$this->{m_united}/$this->{m_prodvars}->{MEDIUM_NAME}$n/script"} = 1;
-    $this->{m_dirlist}->{"$this->{m_united}/$this->{m_prodvars}->{MEDIUM_NAME}$n/temp"} = 1;
-    $this->{m_dirlist}->{"$this->{m_united}/$this->{m_prodvars}->{MEDIUM_NAME}$n/media.$n"} = 1;
-    $this->{m_basesubdir}->{$n} = "$this->{m_united}/$this->{m_prodvars}->{MEDIUM_NAME}$n";
+    $this->{m_dirlist}->{"$this->{m_united}/$mediumname$n"} = 1;
+    $this->{m_dirlist}->{"$this->{m_united}/$mediumname$n/suse"} = 1;
+    $this->{m_dirlist}->{"$this->{m_united}/$mediumname$n/script"} = 1;
+    $this->{m_dirlist}->{"$this->{m_united}/$mediumname$n/temp"} = 1;
+    $this->{m_dirlist}->{"$this->{m_united}/$mediumname$n/media.$n"} = 1;
+    $this->{m_basesubdir}->{$n} = "$this->{m_united}/$mediumname$n";
     $this->{m_dirlist}->{"$this->{m_basesubdir}->{$n}"} = 1;
   }
   
   # we also need a basesubdir "0" for the metapackages that shall _not_ be put to the CD.
   # Those specify medium number "0", which means we only need a dir to download scripts.
-  $this->{m_basesubdir}->{'0'} = "$this->{m_united}/$this->{m_prodvars}->{MEDIUM_NAME}0";
-  $this->{m_dirlist}->{"$this->{m_united}/$this->{m_prodvars}->{MEDIUM_NAME}0/temp"} = 1;
+  $this->{m_basesubdir}->{'0'} = "$this->{m_united}/".$mediumname."0";
+  $this->{m_dirlist}->{"$this->{m_united}/".$mediumname."0/temp"} = 1;
   
   $this->createDirectoryStructure();
 
   # for debugging:
-  $this->dumpPackageList("$this->{m_basedir}/packagelist.txt");
+  if($this->{m_debug}) {
+    $this->dumpPackageList("$this->{m_basedir}/packagelist.txt");
+  }
 
   $this->{m_browser} = new LWP::UserAgent;
 
@@ -491,6 +506,11 @@ sub queryRpmHeaders
 
   my $retval = 0;
 
+  my $base_on_cd = $this->{m_proddata}->getInfo("DATADIR");
+  if(not defined($base_on_cd)) {
+    $this->{m_logger}->error("[ERROR] queryRpmHeaders: variable DATADIR must be set!");
+    return $retval;
+  }
 
   foreach my $pack(sort(keys(%{$this->{m_packages}}))) {
     my $tmp = $this->{m_packages}->{$pack}; #optimisation
@@ -536,7 +556,6 @@ sub queryRpmHeaders
 	}
 
 
-	#my $dstfile = "$this->{'m_united'}/$this->{m_prodinfo}->{'MEDIUM_NAME'}$medium/$ad/$tmp->{$a}->{'targetfile'}";
 	my $dstfile = "$this->{'m_basesubdir'}->{$medium}/suse/$ad/$tmp->{$a}->{'targetfile'}";
 	$dstfile =~ m{(.*/)(.*?/)(.*?/)(.*)[.]([rs]pm)$};
 	if(not(defined($1) and defined($2) and defined($3) and defined($4) and defined($5))) {
@@ -544,7 +563,7 @@ sub queryRpmHeaders
 	}
 	else {
 	  $tmp->{$a}->{'newfile'}  = "$pack-$flags{'VERSION'}->[0]-$flags{'RELEASE'}->[0].$ad.$5";
-	  $tmp->{$a}->{'newpath'} = "$this->{m_basesubdir}->{$medium}/suse/$ad";
+	  $tmp->{$a}->{'newpath'} = "$this->{m_basesubdir}->{$medium}/$base_on_cd/$ad";
 	  $tmp->{$a}->{'arch'}  = $ad;
 	  
 	  # move and rename:
@@ -785,8 +804,12 @@ sub unpackMetapackages
       ## THEMING
       $this->{m_logger}->info("[INFO] Handling theming for package $metapack\n");
       $this->{m_logger}->info("\ttarget theme $this->{m_prodvars}->{PRODUCT_THEME}\n");
-      my $thema = $this->{m_prodvars}->{'PRODUCT_THEME'};
-      if(-d "$tmp/SuSE") { # and -d "$tmp/SuSE/$thema") {
+      my $thema = $this->{m_proddata}->getVar("PRODUCT_THEME");
+      if(not defined($thema)) {
+	$this->{m_logger}->error("[ERROR] unpackMetapackages: PRODUCT_THEME undefined!");
+	die;# TODO clean solution
+      }
+      if(-d "$tmp/SuSE") {
 	if(not opendir(TD, "$tmp/SuSE")) {
 	  $this->{m_logger}->warning("[WARNING] [unpackMetapackages] Can't open theme directory for reading!\nSkipping themes for package $metapack\n");
 	  next;
@@ -1489,7 +1512,7 @@ sub createMetadata
   ## step 2: create_package_descr
   #==============================
   my @paths = values(%{$this->{m_basesubdir}});
-  @paths = reverse map { $_."/suse" => "-d" if $_ !~ m{.*0}} reverse @paths;
+  @paths = reverse map { $_."/".$this->{m_proddata}->getInfo("DATADIR") => "-d" if $_ !~ m{.*0}} reverse @paths;
   my $pathlist = join(' ', @paths);
 
   $this->{m_logger}->info("Calling create_package_descr for directories @paths:");
@@ -1530,27 +1553,33 @@ sub createMetadata
   if(not open(CONT, ">", $contentfile)) {
     die "Cannot create $contentfile";
   }
-  foreach my $i(sort {$a <=> $b } keys(%{$this->{m_prodinfo}})) {
-    my $line = "$this->{m_prodinfo}->{$i}->[0] $this->{m_prodinfo}->{$i}->[1]";
-    while( $line =~ m{\$(DISTNAME|DISTVERSION|MANUFACTURER)}) {
-      my $replace = $this->{m_prodvars}->{$1};
-      $line =~ s|\$$1|$replace|;  # '|' char is not allowed in vars anyway
-    }
-    print CONT "$line\n";
+  #foreach my $i(sort {$a <=> $b } keys(%{$this->{m_prodinfo}})) {
+  #  my $line = "$this->{m_prodinfo}->{$i}->[0] $this->{m_prodinfo}->{$i}->[1]";
+  #  while( $line =~ m{\$(DISTNAME|DISTVERSION|MANUFACTURER)}) {
+  #    my $replace = $this->{m_prodvars}->{$1};
+  #    $line =~ s|\$$1|$replace|;  # '|' char is not allowed in vars anyway
+  #  }
+  #  print CONT "$line\n";
+  #}
+  my $info = $this->{m_proddata}->getSet("prodinfo");
+  foreach my $i(sort { $a <=> $b } keys(%{$info})) {
+    print CONT "$info->{$i}->[0] $info->{$i}->[1]\n";
   }
   close(CONT);
 
 
   ## step 5: media file
   $this->{m_logger}->info("Creating media file in all media:");
-  if($this->{m_prodvars}->{'MANUFACTURER'}) {
+  my $manufacturer = $this->{m_proddata}->getVar("MANUFACTURER");
+  #if($this->{m_prodvars}->{'MANUFACTURER'}) {
+  if($manufacturer) {
     my @media = $this->getMediaNumbers();
     for my $n(@media) {
       my $mediafile = "$this->{m_basesubdir}->{$n}/media.$n/media";
       if(not open(MEDIA, ">", $mediafile)) {
 	die "Cannot create $mediafile";
       }
-      print MEDIA "$this->{m_prodvars}->{'MANUFACTURER'}\n";
+      print MEDIA "$manufacturer\n";
       print MEDIA qx(date +%Y%m%d%H%M%S);
       if($n == 1) {
 	# some specialities for medium number 1: contains a line with the number of media (? ask ma!)
@@ -1567,26 +1596,30 @@ sub createMetadata
 
   ## step 6: products file
   $this->{m_logger}->info("Creating products file in all media:");
-  if($this->{m_prodvars}->{'PRODUCT_DIR'} and
-    $this->{m_prodvars}->{'PRODUCT_NAME'} and
-    $this->{m_prodvars}->{'PRODUCT_VERSION'}
-    ) {
+  my $proddir = $this->{m_proddata}->getVar("PRODUCT_DIR");
+  my $prodname = $this->{m_proddata}->getVar("PRODUCT_NAME");
+  my $prodver = $this->{m_proddata}->getVar("PRODUCT_VERSION");
+  #if($this->{m_prodvars}->{'PRODUCT_DIR'} and
+  #  $this->{m_prodvars}->{'PRODUCT_NAME'} and
+  #  $this->{m_prodvars}->{'PRODUCT_VERSION'}
+  #  ) {
+  if(defined($proddir) and defined($prodname) and defined($prodver)) {
     for my $n($this->getMediaNumbers()) {
       my $productsfile = "$this->{m_basesubdir}->{$n}/media.$n/products";
       if(not open(PRODUCT, ">", $productsfile)) {
 	die "Cannot create $productsfile";
       }
-      for my $v("PRODUCT_DIR", "PRODUCT_NAME", "PRODUCT_VERSION") {
-	my $line = $this->{m_prodvars}->{$v};
-	while($line =~ m{\$(DISTNAME|DISTVERSION|MANUFACTURER)}) {
-	  my $replace = $this->{m_prodvars}->{$1};
-	  $line =~ s|\$$1|$replace|;
-	}
-	$this->{m_prodvars}->{$v} = $line;
-      }
-      print PRODUCT "$this->{m_prodvars}->{'PRODUCT_DIR'}";
-      print PRODUCT " $this->{m_prodvars}->{'PRODUCT_NAME'}";
-      print PRODUCT " $this->{m_prodvars}->{'PRODUCT_VERSION'}\n";
+      #for my $v("PRODUCT_DIR", "PRODUCT_NAME", "PRODUCT_VERSION") {
+      #  my $line = $this->{m_prodvars}->{$v};
+      #  while($line =~ m{\$(DISTNAME|DISTVERSION|MANUFACTURER)}) {
+      #    my $replace = $this->{m_prodvars}->{$1};
+      #    $line =~ s|\$$1|$replace|;
+      #  }
+      #  $this->{m_prodvars}->{$v} = $line;
+      #}
+      print PRODUCT "$proddir $prodname $prodver\n";
+      #print PRODUCT " $this->{m_prodvars}->{'PRODUCT_NAME'}";
+      #print PRODUCT " $this->{m_prodvars}->{'PRODUCT_VERSION'}\n";
       close(PRODUCT);
     }
   }
@@ -1602,9 +1635,9 @@ sub createMetadata
   ## step 7: SHA1SUMS
   $this->{m_logger}->info("Calling create_sha1sums:");
   my $csha1sum = "/usr/bin/create_sha1sums";
-  my $s1sum_opts = "";
-  if($this->{m_prodvars}->{'SHA1OPT'}) {
-    $s1sum_opts = $this->{m_prodvars}->{'SHA1OPT'};
+  my $s1sum_opts = $this->{m_proddata}->getVar("SHA1OPT");
+  if(not defined($s1sum_opts)) {
+    $s1sum_opts = "";
   }
   if(! (-f $csha1sum or -x $csha1sum)) {
     $this->{m_logger}->warning("[WARNING] [createMetadata] excutable `$csha1sum` not found. Maybe package `inst-source-utils` is not installed?");
@@ -1623,10 +1656,10 @@ sub createMetadata
   ## step 8: MD5SUMS
   $this->{m_logger}->info("Calling create_md5sums:");
   my $md5sums = "/usr/bin/create_md5sums";
-  my $md5opt = "";
+  my $md5opt = $this->{m_proddata}->getVar("MD5OPT");
   # available option: '--meta'
-  if($this->{m_prodvars}->{'MD5OPT'}) {
-    $md5opt = $this->{m_prodvars}->{'MD5OPT'};
+  if(not defined($md5opt)) {
+    $md5opt = "";
   }
   if(! (-f $md5sums or -x $md5sums)) {
     $this->{m_logger}->warning("[WARNING] [createMetadata] excutable `$md5sums` not found. Maybe package `inst-source-utils` is not installed?");
@@ -1664,6 +1697,13 @@ sub createMetadata
     $this->{m_logger}->warning("[WARNING] [createMetadata] excutable `$dy` not found. Maybe package `inst-source-utils` is not installed?");
     return;
   }
+
+  my $datadir = $this->{m_proddata}->getInfo("DATADIR");
+  my $descrdir = $this->{m_proddata}->getInfo("DESCRDIR");
+  if(not defined($datadir) or not defined($descrdir)) {
+    $this->{m_logger}->error("[ERROR] variables DATADIR and/or DESCRDIR are missing");
+    die "MISSING VARIABLES!";
+  }
   foreach my $d($this->getMediaNumbers()) {
     my $dbase = $this->{m_basesubdir}->{$d};
     my @dlist;
@@ -1674,8 +1714,8 @@ sub createMetadata
     push @dlist, "$dbase/media.1";
     push @dlist, "$dbase/media.1/license";
     push @dlist, "$dbase/images";
-    push @dlist, "$dbase/$this->{m_prodinfo_trans}->{'DATADIR'}/setup/slide";
-    push @dlist, "$dbase/$this->{m_prodinfo_trans}->{'DESCRDIR'}";
+    push @dlist, "$dbase/$datadir/setup/slide";
+    push @dlist, "$dbase/$descrdir";
 
     foreach (@dlist) {
       if(-d $_) {
@@ -1732,13 +1772,9 @@ sub createDirectoryStructure
 {
   my $this = shift;
   my %dirs = %{$this->{m_dirlist}};
-  #if(!%dirs) {
-  #  $this->{m_logger}->info("[INFO] createDirectoryStructure: nothing to do at the moment.");
-  #  return 0;
-  #}
+
   my $errors = 0;
 
-  #for my $i(0..scalar(@dirs)-1) {
   foreach my $d(keys(%dirs)) {
 		next if $dirs{$d} == 0;
     if(-e $d and -d $d) {
@@ -1754,11 +1790,9 @@ sub createDirectoryStructure
     }
     else {
       $this->{m_logger}->info("[INFO] created directory $d");
-			$dirs{$d} = 0;
+      $dirs{$d} = 0;
     }
   }
-
-  #@{$this->{m_dirlist}} = grep { defined($_) } @dirs;
 
   if($errors) {
     $this->{m_logger}->error("[ERROR] createDirectoryStructure failed. Abort recommended.");
@@ -1769,13 +1803,6 @@ sub createDirectoryStructure
     return 0;
   }
 }
-
-
-
-#sub getDirStatus
-#{
-#  my $this = shift;
-#}
 
 
 
@@ -1792,9 +1819,13 @@ sub getMediaNumbers
   return undef if not defined $this;
   
   my @media = (1);	# default medium is 1 (always)
-	if($this->{m_prodopts} and $this->{m_prodopts}->{'SOURCEMEDIUM'}) {
-		push @media, $this->{m_prodopts}->{'SOURCEMEDIUM'};
-	}
+  my $srcmedium = $this->{m_proddata}->getOpt("SOURCEMEDIUM");
+  if(not defined($srcmedium)) {
+    $this->{m_kiwi}->error("[ERROR] getMediaNumbers: SOURCEMEDIUM is undefined!");
+    return undef;
+  }
+
+  push @media, $srcmedium;
   foreach my $p(values(%{$this->{m_packages}}), values(%{$this->{m_metapackages}})) {
     if(defined($p->{'medium'}) and $p->{'medium'} != 0) {
       push @media, $p->{medium};
