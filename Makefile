@@ -95,7 +95,7 @@ install:
 	#--------------------------------------------
 	install -m 755 ./kiwi.pl       ${KIWIBINVZ}/kiwi
 	install -m 644 ./xsl/*         ${KIWIXSLVZ}
-	for i in `find modules -type f | grep -v .svn`;do \
+	for i in `find modules -type f | grep -v -E ".svn|.test"`;do \
 		install -m 644 $$i ${KIWIMODVZ} ;\
 	done
 
