@@ -1173,8 +1173,8 @@ sub createImageLiveCD {
 		if (defined $main::PrebuiltBootImage) {
 			$lookup = $main::PrebuiltBootImage;
 		}
-		$pinitrd = glob ("$lookup/$iso$arch.gz");
-		$plinux  = glob ("$lookup/$iso$arch.kernel");
+		$pinitrd = glob ("$lookup/$iso$arch-$ver.gz");
+		$plinux  = glob ("$lookup/$iso$arch-$ver.kernel");
 		$pxboot  = glob ("$lookup/$iso$arch-$ver*xen.gz");
 		if ((! -f $pinitrd) || (! -f $plinux)) {
 			$kiwi -> skipped();
