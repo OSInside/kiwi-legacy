@@ -2043,20 +2043,27 @@ sub setupBootDisk {
 			}
 		} else {
 			$kiwi -> info ("Creating $format image");
+			my %vmwc = ();
+			my $ovf  = 0;
+			if ($format eq "ovf") {
+				# /.../
+				# in case of the ovf format we need to call the ovftool from
+				# VMware. The tool is able to convert from a vmdk into an ovf
+				# therefore we convert to vmdk first
+				# ----
+				$format = "vmdk";
+				$ovf = 1;
+			}
 			my $fname = $diskname;
-			$fname  =~ s/\.raw$/\.$format/;
-			my %vmwc;
+			$fname =~ s/\.raw$/\.$format/;
 			if ($format eq "vmdk") {
 				%vmwc   = $xml  -> getPackageAttributes ("vmware");
 			}
+			my $convert = "convert -f raw $this->{loop} -O $format";
 			if (($vmwc{disk}) && ($vmwc{disk} =~ /^scsi/)) {
-				$status = qxx (
-					"qemu-img convert -f raw $this->{loop} -O $format -s $fname 2>&1"
-				);
+				$status = qxx ("qemu-img $convert -s $fname 2>&1");
 			} else {
-				$status = qxx (
-					"qemu-img convert -f raw $this->{loop} -O $format $fname 2>&1"
-				);
+				$status = qxx ("qemu-img $convert $fname 2>&1");
 			}
 			$result = $? >> 8;
 			if ($result != 0) {
@@ -2065,6 +2072,18 @@ sub setupBootDisk {
 				$kiwi -> failed ();
 				$this -> cleanLoop ();
 				return undef;
+			}
+			if ($ovf) {
+				my $oname  =~ s/\.vmdk$/\.ovf/;
+				$status = qxx ("ovftool -o $fname $oname");
+				$result = $? >> 8;
+				if ($result != 0) {
+					$kiwi -> failed ();
+					$kiwi -> error  ("Couldn't create OVF image: $status");
+					$kiwi -> failed ();
+					$this -> cleanLoop ();
+					return undef;
+				}
 			}
 			$kiwi -> done ();
 		}

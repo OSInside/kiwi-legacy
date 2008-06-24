@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Tue Jun 24 14:36:20 CEST 2008 - ms@suse.de
+
+- v2.44
+- added support for creating the open virtual file format. The
+  support is limited to the capabilities of the ovtool provided
+  by VMware. At the moment kiwi expects the program "ovtool" to
+  be present in the root execution path (bnc #399558)
+
+-------------------------------------------------------------------
 Thu Jun 19 10:25:36 CEST 2008 - ms@suse.de
 
 - v2.43
