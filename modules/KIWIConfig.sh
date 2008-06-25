@@ -850,6 +850,8 @@ function suseGFXBoot {
 	for cfg in 800x600 1024x768 1280x1024;do
 		cp /etc/bootsplash/themes/$theme/images/bootsplash-$cfg.jpg \
 		/image/loader/branding
+		cp /etc/bootsplash/themes/$theme/images/silent-$cfg.jpg \
+		/image/loader/branding
 		cp /etc/bootsplash/themes/$theme/config/bootsplash-$cfg.cfg \
 		/image/loader/branding
 	done
