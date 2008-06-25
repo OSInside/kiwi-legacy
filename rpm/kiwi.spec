@@ -116,7 +116,8 @@ Authors:
 %ifarch %ix86 x86_64
 %package -n kiwi-desc-isoboot
 License:        GPL v2 or later
-Requires:       kiwi syslinux mkisofs
+Requires:       kiwi = %{version}
+Requires:       syslinux mkisofs
 Summary:        OpenSuSE - KIWI Image System ISO boot
 Obsoletes:      kiwi2-desc-isoboot <= 2.14
 Provides:       kiwi2-desc-isoboot <= 2.14
@@ -131,7 +132,7 @@ Authors:
 
 %package -n kiwi-desc-usbboot
 License:        GPL v2 or later
-Requires:       kiwi
+Requires:       kiwi = %{version}
 Summary:        OpenSuSE - KIWI Image System USB boot
 Obsoletes:      kiwi2-desc-usbboot <= 2.14
 Provides:       kiwi2-desc-usbboot <= 2.14
@@ -146,7 +147,8 @@ Authors:
 
 %package -n kiwi-desc-vmxboot
 License:        GPL v2 or later
-Requires:       kiwi qemu multipath-tools
+Requires:       kiwi = %{version}
+Requires:       qemu multipath-tools
 Summary:        OpenSuSE - KIWI Image System Virtual Machine boot
 Obsoletes:      kiwi2-desc-vmxboot <= 2.14
 Provides:       kiwi2-desc-vmxboot <= 2.14
@@ -161,7 +163,7 @@ Authors:
 
 %package -n kiwi-desc-netboot
 License:        GPL v2 or later
-Requires:       kiwi
+Requires:       kiwi = %{version}
 Summary:        OpenSuSE - KIWI Image System PXE network boot
 Obsoletes:      kiwi2-desc-netboot <= 2.14
 Provides:       kiwi2-desc-netboot <= 2.14
@@ -176,7 +178,7 @@ Authors:
 
 %package -n kiwi-desc-xenboot
 License:        GPL v2 or later
-Requires:       kiwi
+Requires:       kiwi = %{version}
 Summary:        OpenSuSE - KIWI Image System Xen Virtual Machine boot
 Obsoletes:      kiwi2-desc-xenboot <= 2.14
 Provides:       kiwi2-desc-xenboot <= 2.14
@@ -191,7 +193,8 @@ Authors:
 
 %package -n kiwi-desc-oemboot
 License:        GPL v2 only
-Requires:       kiwi qemu multipath-tools
+Requires:       kiwi = %{version}
+Requires:       qemu multipath-tools
 Summary:        OpenSuSE - KIWI image descriptions
 Obsoletes:      kiwi2-desc-oemboot <= 2.14
 Provides:       kiwi2-desc-oemboot <= 2.14

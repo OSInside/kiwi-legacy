@@ -5,6 +5,7 @@ Wed Jun 25 10:41:39 CEST 2008 - ms@suse.de
 - update documentation: new vmx format 'ovf' added to table
 - fixed branding import, silent-* pictures were missing
 - added patch by Adrian to fix the config.xml lookup
+- add versioned requires for kiwi-desc-* packages
 
 -------------------------------------------------------------------
 Tue Jun 24 14:36:20 CEST 2008 - ms@suse.de
