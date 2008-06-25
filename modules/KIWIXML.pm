@@ -277,6 +277,7 @@ sub new {
 	$this->{reqProfiles}        = $reqProfiles;
 	$this->{havemd5File}        = $havemd5File;
 	$this->{arch}               = $arch;
+	$this->{controlFile}        = $controlFile;
 
 	#==========================================
 	# Check image version format
@@ -1673,7 +1674,7 @@ sub addRepository {
 		}
 		my $tempXML  = new XML::LibXML;
 		my $xaddXML  = new XML::LibXML::NodeList;
-		my $tempFile = $this->{imageDesc}."/config.xml";
+		my $tempFile = $this->{controlFile};
 		my $tempTree = $tempXML -> parse_file ( $tempFile );
 		my $temprepositNodeList = $tempTree->getElementsByTagName("repository");
 		my $element = $temprepositNodeList->get_node(1);

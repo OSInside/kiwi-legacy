@@ -4,6 +4,7 @@ Wed Jun 25 10:41:39 CEST 2008 - ms@suse.de
 - v2.45
 - update documentation: new vmx format 'ovf' added to table
 - fixed branding import, silent-* pictures were missing
+- added patch by Adrian to fix the config.xml lookup
 
 -------------------------------------------------------------------
 Tue Jun 24 14:36:20 CEST 2008 - ms@suse.de
