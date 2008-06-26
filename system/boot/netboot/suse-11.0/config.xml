@@ -114,7 +114,7 @@
 		<!-- DRIVERS END DISKLESS -->
 	</drivers>
 	<repository type="yast2" status="replaceable">
-		<source path="/image/CDs/full-i386"/>
+		<source path="/image/CDs/full-11.0-i386"/>
 	</repository>
 	<packages type="image" profiles="default">
 		<!-- KERNEL AND MODULE PACKAGES START DEFAULT -->
