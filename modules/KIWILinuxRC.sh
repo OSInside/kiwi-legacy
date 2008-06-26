@@ -1041,6 +1041,17 @@ function CDDevice {
 }
 function USBStickDevice {
 	stickFound=0
+	#======================================
+	# check virtual environments
+	#--------------------------------------
+	diskmodels=`getDiskModels`
+	if echo $diskmodels | grep -q "QEMU HARDDISK";then
+		Echo "QEMU system, skipping USB stick search"
+		return
+	fi
+	#======================================
+	# search for USB removable devices
+	#--------------------------------------
 	Echo -n "Waiting for USB devices to settle..."
 	for redo in 1 2 3 4 5 6 7 8 9 10;do
 		for device in /sys/bus/usb/drivers/usb-storage/*;do
@@ -2667,3 +2678,17 @@ function getDiskID {
 	echo $device
 }
 
+#======================================
+# getDiskModel
+#--------------------------------------
+function getDiskModels {
+	# /.../
+	# this function returns the disk identifier as
+	# registered in the sysfs layer
+	# ----
+	local models=`cat /sys/block/*/device/model 2>/dev/null`
+	if [ ! -z "$models" ];then
+		echo $models; return
+	fi
+	echo "unknown"
+}
