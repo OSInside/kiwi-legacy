@@ -187,7 +187,7 @@ sub loadPlugins
   foreach my $p(@plugins) {
     chomp $p;
     next if(-d "$p");
-    next if($p !~ m{.*[.]pm});
+    next if($p !~ m{.*Plugin[.]pm});
 
     my $loadsuccess = $this->loadPlugin("$dir/$p");
     if($loadsuccess == 1) {
@@ -224,7 +224,7 @@ sub loadPlugin
   $file =~ m{(.*)/(.*)([.]pm)$};
   my $plugin = $2;
   if(not defined($plugin)) {
-    $this->{m_collect}->error("loadPlugin: something in regexp broken: $file =~ m{(.*)/(.*)([.]pm)$}...?");
+    $this->{m_collect}->logger()->error("loadPlugin: something in regexp broken: $file =~ m{(.*)/(.*)([.]pm)$}...?");
     return $retval;
   }
 

@@ -290,19 +290,13 @@ sub Init
   if($this->{m_debug}) {
     open(DUMP, ">", "$this->{m_basedir}/productdata.pl");
     print DUMP "# PRODUCTINFO:";
-    print DUMP Dumper($this->{m_proddata}->{m_prodinfo});
+    print DUMP Dumper($this->{m_proddata}->getSet('prodinfo'));
     print DUMP "# PRODUCTVARS:";
-    print DUMP Dumper($this->{m_proddata}->{m_prodvars});
+    print DUMP Dumper($this->{m_proddata}->getSet('prodvars'));
     print DUMP "# PRODUCTOPTIONS:";
-    print DUMP Dumper($this->{m_proddata}->{m_prodopts});
+    print DUMP Dumper($this->{m_proddata}->getSet('prodopts'));
     close(DUMP);
   }
-
-  ### THIS IS ONLY FIRST SHOT! TODO FIXME
-  ## set env vars according to "productinfo" elements:
-  #while(my ($name,$value) = each(%{$this->{m_prodvars}})) {
-  #  $ENV{$name} = $value;
-  #}
 
   $this->{m_united} = "$this->{m_basedir}/main";
   $this->{m_dirlist}->{"$this->{m_united}"} = 1;
@@ -1496,8 +1490,8 @@ sub createMetadata
   my $this = shift;
 
 
-  $this->{m_metacreator}->loadPlugins("/usr/share/kiwi/modules/plugins/");
-  $this->{m_metacreator}->mediaName($this->{m_prodvars}->{'MEDIUM_NAME'});
+  $this->{m_metacreator}->loadPlugins("/usr/share/kiwi/modules");
+  $this->{m_metacreator}->mediaName($this->{m_proddata}->getVar('MEDIUM_NAME'));
   # testhack: set the plugin ready:
   my $p = $this->{m_metacreator}->getPlugin(1);
   if(defined($p)) {
