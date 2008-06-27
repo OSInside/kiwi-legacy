@@ -79,6 +79,7 @@ sub new {
 	#==========================================
 	# Store data to segment
 	#------------------------------------------
+	$this -> unlock;
 	$this -> put ($value);
 	return $this;
 }

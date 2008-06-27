@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Jun 27 14:11:20 CEST 2008 - ms@suse.de
+
+- v2.47
+- fixed xenboot images.sh, don't remove mandatory files
+- fixed initial semaphore locking state
+
+-------------------------------------------------------------------
 Thu Jun 26 17:00:09 CEST 2008 - ms@suse.de
 
 - v2.46

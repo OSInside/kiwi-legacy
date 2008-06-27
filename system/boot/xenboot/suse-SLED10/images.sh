@@ -34,9 +34,7 @@ rm -rf /usr/share/getopt
 rm -rf /usr/share/hwinfo
 rm -rf /usr/share/nls
 rm -rf /usr/i586-suse-linux
-rm -rf /etc/bootsplash
 rm -rf /etc/ConsoleKit
-rm -rf /image/loader
 
 #==========================================
 # umount /proc
