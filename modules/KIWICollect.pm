@@ -47,7 +47,7 @@ use Data::Dumper;
 #   Instance of KIWILog for feedback
 # m_xml:
 #   Instance of KIWIXML for retrieving the data contained
-#   in the config.xml file
+#   in the xml description file
 # m_util:
 #   Instance of KIWIUtil which provides several methods to
 #   analyse directories locally and via http(s)
@@ -1363,9 +1363,9 @@ sub checkArchitectureList
   return undef if !$pack;
   
   my @ret = ();
-  # the required architectures as specified in config.xml:
+  # the required architectures as specified in the xml description:
   # mapped to 0 means "removed"	(removearch)
-  #	      1 means "original from config.xml"
+  #	      1 means "original from xml"
   #	      2 means "added" (addarch)
   #	      3 means "force" (forcearch)
   # for ADDED (=2) archs no fallback expansion is done!

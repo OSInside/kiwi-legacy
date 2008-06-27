@@ -46,6 +46,7 @@ use KIWITest;
 our $Version       = "2.46";
 our $openSUSE      = "http://download.opensuse.org/repositories/";
 our $ConfigFile    = "$ENV{'HOME'}/.kiwirc";
+our $ConfigName    = "config.xml";
 our $ConfigStatus  = 0;
 #============================================
 # Read $HOME/.kiwirc
@@ -309,7 +310,7 @@ sub main {
 			$kiwi -> skipped ();
 		}
 		#==========================================
-		# Check for bootprofile in config.xml
+		# Check for bootprofile in xml descr.
 		#------------------------------------------
 		if (! @Profiles) {
 			my %type = %{$xml->getImageTypeAndAttributes()};
@@ -475,7 +476,7 @@ sub main {
 			}
 		}
 		#==========================================
-		# Check for bootprofile in config.xml
+		# Check for bootprofile in xml descr
 		#------------------------------------------
 		my $xml;
 		if (! @Profiles) {
@@ -1364,7 +1365,7 @@ sub usage {
 	print "Options:\n";
 	print "--\n";
 	print "  [ --createpassword ]\n";
-	print "    Create a crypted password hash for use in config.xml\n";
+	print "    Create a crypted password hash\n";
 	print "\n";
 	print "  [ --createhash <image-path> ]\n";
 	print "    Sign your image description with a md5sum\n";
@@ -1389,7 +1390,7 @@ sub usage {
 	print "\n";
 	print "  [ -t | --type <image-type> ]\n";
 	print "    Specify the output image type to use for this image\n";
-	print "    The type must exist in the config.xml description\n";
+	print "    The type must exist in the xml description\n";
 	print "    By the default the primary type will be used. If there is\n";
 	print "    no primary attribute set the first type entry of the\n";
 	print "    preferences section is the primary type\n"; 
@@ -1398,8 +1399,8 @@ sub usage {
 	print "  [ -r | --root <root-path> ]\n";
 	print "    Setup the physical extend, chroot system below the\n";
 	print "    given root-path path. If no --root option is given kiwi\n";
-	print "    will search for the attribute defaultroot in config.xml\n";
-	print "    If no root directory is known a mktmp directory\n";
+	print "    will search for the attribute defaultroot in the xml\n";
+	print "    description. If no root directory is known a mktmp directory\n";
 	print "    will be created and used as root directory\n";
 	print "\n";
 	print "  [ --base-root <base-path> ]\n";
@@ -1415,7 +1416,7 @@ sub usage {
 	print "    Add the given repository and type for this run of an\n";
 	print "    image prepare or upgrade process.\n";
 	print "    Multiple --add-repo/--add-repotype options are possible\n";
-	print "    The change will not be written to the config.xml file\n";
+	print "    The change will not be written to the xml description\n";
 	print "\n";
 	print "  [ --ignore-repos ]\n";
 	print "    Ignore all repositories specified so-far, in XML or\n";
@@ -1426,14 +1427,14 @@ sub usage {
 	print "\n";
 	print "  [ --set-repo <repo-path> [ --set-repotype <type> ]]\n";
 	print "    set the given repository and optional type for the first\n";
-	print "    repository entry within the config.xml. The change will not\n";
+	print "    repository entry within the xml description. The change will not\n";
 	print "    be written to the xml file and is valid for this run of\n";
 	print "    image prepare or upgrade process.\n";
 	print "\n";
 	print "  [ --add-package <package> ]\n";
 	print "    Add the given package name to the list of image packages\n";
 	print "    multiple --add-package options are possible. The change\n";
-	print "    will not be written to the config.xml file\n";
+	print "    will not be written to the xml description\n";
 	print "\n";
 	print "  [ --logfile <filename> | terminal ]\n";
 	print "    Write to the log file \`<filename>' instead of\n";
@@ -1468,7 +1469,8 @@ sub usage {
 	print "\n";
 	print "  [ --package-manager <smart|zypper>\n";
 	print "    set the package manager to use for this image. If set it\n";
-	print "    will temporarly overwrite the value set in config.xml\n";
+	print "    will temporarly overwrite the value set in the xml\n";
+	print "    description\n";
 	print "--\n";
 	version();
 }
@@ -1490,9 +1492,9 @@ sub listImage {
 		if (-l "$System/$image") {
 			next;
 		}
-		if (-f "$System/$image/config.xml") {
-			$kiwi -> info ("$image");
-			my $xml = new KIWIXML ( $kiwi,"$System/$image" );
+		if (getControlFile ($System."/".$image)) {
+			$kiwi -> info ($image);
+			my $xml = new KIWIXML ( $kiwi,$System."/".$image);
 			if (! $xml) {
 				next;
 			}
@@ -1666,7 +1668,7 @@ sub version {
 #------------------------------------------
 sub createPassword {
 	# ...
-	# Create a crypted password which can be used in config.xml
+	# Create a crypted password which can be used in the xml descr.
 	# users sections. The crypt() call requires root rights because
 	# dm-crypt is used to access the crypto pool
 	# ----
@@ -1717,9 +1719,9 @@ sub createHash {
 		$kiwi -> failed ();
 		my $code = kiwiExit (1); return $code;
 	}
-	if (! -f "$CreateHash/config.xml") {
+	if (! getControlFile ($CreateHash)) {
 		$kiwi -> failed ();
-		$kiwi -> error  ("Not a kiwi description: no config.xml found");
+		$kiwi -> error  ("Not a kiwi description: no xml description found");
 		$kiwi -> failed ();
 		my $code = kiwiExit (1); return $code;
 	}
@@ -1885,5 +1887,32 @@ sub checkFileSystem {
 	return %result;
 }
 
+#==========================================
+# getControlFile
+#------------------------------------------
+sub getControlFile {
+	# /.../
+	# This function receives a directory as parameter
+	# and searches for a kiwi xml description in it.
+	# ----
+	my $dir    = shift;
+	my $config = "$dir/$ConfigName";
+	if (! -d $dir) {
+		return undef;
+	}
+	if (-f $config) {
+		return $config;
+	}
+	my @globsearch = glob ($dir."/*.kiwi");
+	my $globitems  = @globsearch;
+	if ($globitems == 0) {
+		return undef;
+	} elsif ($globitems > 1) {
+		return undef;
+	} else {
+		$config = pop @globsearch;
+	}
+	return $config;
+}
 
 main();

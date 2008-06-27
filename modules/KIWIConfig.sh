@@ -908,7 +908,7 @@ function suseSetupProductInformation {
 function suseStripKernel {
 	# /.../
 	# this function will strip the kernel according to the
-	# drivers information in config.xml. It also will create
+	# drivers information in the xml descr. It also will create
 	# the vmlinux.gz and vmlinuz files which are required
 	# for the kernel extraction in case of kiwi boot images
 	# ----

@@ -54,6 +54,7 @@ sub new {
 	my $imageStrip = shift;
 	my $baseSystem = shift;
 	my $imageOrig  = shift;
+	my $configFile = $xml -> getConfigName();
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
@@ -75,7 +76,7 @@ sub new {
 		$kiwi -> failed ();
 		return undef;
 	}
-	if (! -f "$imageTree/image/config.xml") {
+	if (! -f "$imageTree/image/$configFile") {
 		$kiwi -> error  ("Validation of $imageTree failed");
 		$kiwi -> failed ();
 		return undef;

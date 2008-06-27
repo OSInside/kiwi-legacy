@@ -195,9 +195,9 @@ sub setTemplate {
 	#------------------------------------------
 	mkdir "$dest/root";
 	#==========================================
-	# create config.xml
+	# create xml description
 	#------------------------------------------
-	if (! open (FD,">$dest/config.xml")) {
+	if (! open (FD,">$dest/$main::ConfigName")) {
 		return undef;
 	}
 	#==========================================
@@ -259,8 +259,8 @@ sub setTemplate {
 sub getOperatingSystemVersion {
 	# ...
 	# Find the version information of this system an create
-	# a config.xml comment in order to allow to choose the correct
-	# installation source
+	# a xml description comment in order to allow to choose the
+	# correct installation source
 	# ---
 	my $this = shift;
 	if (! open (FD,"/etc/SuSE-release")) {
@@ -301,7 +301,7 @@ sub setServiceList {
 		}
 	}
 	#==========================================
-	# create config.xml
+	# create config script
 	#------------------------------------------
 	if (! open (FD,">$dest/config.sh")) {
 		return undef;

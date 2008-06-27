@@ -3,6 +3,7 @@ Thu Jun 26 17:00:09 CEST 2008 - ms@suse.de
 
 - v2.46
 - skip USB stick detection in QEMU environment (bnc #402851)
+- fixed kiwi processing if *.kiwi file is used as xml description
 
 -------------------------------------------------------------------
 Wed Jun 25 10:41:39 CEST 2008 - ms@suse.de

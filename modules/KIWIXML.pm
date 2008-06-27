@@ -26,6 +26,7 @@ use KIWIOverlay;
 use KIWISatSolver;
 use KIWIManager qw (%packageManager);
 use File::Glob ':glob';
+use File::Basename;
 use KIWIQX;
 
 #==========================================
@@ -39,7 +40,7 @@ our %inheritanceHash;
 sub new { 
 	# ...
 	# Create a new KIWIXML object which is used to access the
-	# configuration XML data saved as config.xml or *.kiwi.
+	# configuration XML data stored as description file.
 	# The xml data is splitted into four major tags: preferences,
 	# drivers, repository and packages. While constructing an
 	# object of this type there will be a node list created for
@@ -69,12 +70,12 @@ sub new {
 		$imageDesc = $main::System."/".$imageDesc;
 	}
 	my $arch = qxx ("uname -m"); chomp $arch;
-	my $controlFile = $imageDesc."/config.xml";
+	my $controlFile = $imageDesc."/".$main::ConfigName;
 	my $checkmdFile = $imageDesc."/.checksum.md5";
 	my $havemd5File = 1;
 	my $systemTree;
 	#==========================================
-	# Check if config.xml exist
+	# Check all xml alternatives
 	#------------------------------------------
 	if (! -f $controlFile) {
 		my @globsearch = glob ($imageDesc."/*.kiwi");
@@ -304,7 +305,7 @@ sub new {
 	}
 	if (! $this -> getImageTypeAndAttributes()) {
 		$kiwi -> failed ();
-		$kiwi -> error  ("Boot type: $imageWhat not specified in config.xml");
+		$kiwi -> error  ("Boot type: $imageWhat not specified in xml");
 		$kiwi -> failed ();
 		return undef;
 	}
@@ -315,6 +316,15 @@ sub new {
 		return undef;
 	}
 	return $this;
+}
+
+#==========================================
+# getConfigName
+#------------------------------------------
+sub getConfigName {
+	my $this = shift;
+	my $name = $this->{controlFile};
+	return basename ($name);
 }
 
 #==========================================
@@ -507,7 +517,7 @@ sub getImageDefaultDestination {
 	# ...
 	# Get the default destination to store the images below
 	# normally this is given by the --destination option but if
-	# not and defaultdestination is specified in config.xml we
+	# not and defaultdestination is specified in xml descr. we
 	# will use this path as destination
 	# ---
 	my $this = shift;
@@ -533,7 +543,7 @@ sub getImageDefaultRoot {
 	# ...
 	# Get the default root directory name to build up a new image
 	# normally this is given by the --root option but if
-	# not and defaultroot is specified in config.xml we
+	# not and defaultroot is specified in xml descr. we
 	# will use this path as root path.
 	# ---
 	my $this = shift;
@@ -1655,7 +1665,7 @@ sub setRepository {
 sub addRepository {
 	# ...
 	# Add a repository node to the current list of repos
-	# this is done by reading the config.xml file again and
+	# this is done by reading the xml description file again and
 	# overwriting the first repository node with the new data
 	# A new object XML::LibXML::NodeList is created which
 	# contains the changed element. The element is then appended
@@ -1694,7 +1704,7 @@ sub addRepository {
 sub addImagePackages {
 	# ...
 	# Add the given package list to the type=bootstrap packages
-	# section of the config.xml parse tree.
+	# section of the xml description parse tree.
 	# ----
 	my $this  = shift;
 	my @packs = @_;
