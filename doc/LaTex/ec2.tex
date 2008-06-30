@@ -2,3 +2,43 @@
 \chapter{EC2 image - Amazon Elastic Compute Cloud}
 \label{chapter:ec2}
 \minitoc
+
+% <type ec2accountnr="720220196365" ec2privatekeyfile="/suse/ms/.ec2/pk-cambrian-aws.pem" ec2certfile="/suse/ms/.ec2/cert-cambrian-aws.pem">ec2</type>
+
+% ec2privatekeyfile: AWS user's PEM encoded RSA private key file
+% ec2accountnr: The user's EC2 user ID (Note: AWS account number, NOT Access Key ID)
+% ec2certfile: AWS user's PEM encoded RSA pubkey certificate file
+
+%What I have done so far:
+%========================
+
+%1) created a ec2-ami-tools package and submit it to beta. I hope
+%   to get that package on SUSE 11.0 too. This package contains the
+%   Amazon tools to create what they call a bundle
+
+%2) add a new image type to kiwi which I call ec2. All you need
+%   to do is:
+%
+%   <type
+%      ec2accountnr="AWS account Nr"
+%      ec2privatekeyfile="AWS Private Key file"
+%      ec2certfile="AWS certificate"
+%   >ec2</type>
+%
+%   All the information about the AWS service is given when
+%   you create your Amazon AWS acccount and sign up for the EC2
+%   service
+%
+%   kiwi --create ... -d ... --type ec2
+%
+%3) The generated image must be transfered over to Amazon which is
+%   done by ec2-upload-bundle. I would like to write some documentation
+%   about the upload and the activation of an instance as soon as we
+%   can use at least one of our SUSE kernels
+
+% ec2-upload-bundle -b <your-s3-bucket> -m /mnt/image.manifest.xml -a <aws-access-key-id> -s <aws-secret-access-key>
+
+%ec2-register <your-s3-bucket>/image.manifest.xml
+%IMAGE ami-5bae4b32 
+
+%ec2-run-instances ami-5bae4b32
