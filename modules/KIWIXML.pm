@@ -566,6 +566,7 @@ sub getImageTypeAndAttributes {
 	my $count  = 0;
 	my $first  = "";
 	my $ptype  = "";
+	my $urlhd  = new KIWIURL ($kiwi,undef);
 	my @node   = $this->{optionsNodeList} -> get_node(1)
 		-> getElementsByTagName ("type");
 	foreach my $node (@node) {
@@ -597,6 +598,10 @@ sub getImageTypeAndAttributes {
 			if ((defined $filesystemRO) && (defined $filesystemRW)) {
 				$record{filesystem} = "$filesystemRW,$filesystemRO";
 			}
+		}
+		my $bootpath = $urlhd -> thisPath ($record{boot});
+		if (defined $bootpath) {
+			$record{boot} = $bootpath;
 		}
 		$result{$prim} = \%record;
 		$count++;
