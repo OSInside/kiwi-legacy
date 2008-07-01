@@ -111,31 +111,6 @@ sub baseurl
 
 
 
-#sub initialiseHandlers
-#{
-#  #...
-#  # read all pm files from a given directory, try to load the handlers
-#  # and create a respective object for each (store in a list)
-#  #---
-#  my $this = shift;
-#
-#  my $retval = undef;
-#
-#  if(not defined($this->{m_plugindir})) {
-#    $this->{m_logger}->error("[ERROR] [RepoMetaHandler::initialiseHandlers] plugin directory not set!");
-#    return $retval;
-#  }
-#
-#  if(not opendiri(PLUGINDIR, $this->{m_plugindir})) {
-#    $this->{m_logger}->error("[ERROR] [RepoMetaHandler::initialiseHandlers] cannot open $this->{m_plugindir}");
-#    return $retval;
-#  }
-#  my @plugins = readdir(PLUGINDIR);
-#  closedir(PLUGINDIR);
-#}
-
-
-
 #==================
 # regular methods
 #------------------
