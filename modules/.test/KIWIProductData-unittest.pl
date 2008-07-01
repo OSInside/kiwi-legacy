@@ -1,5 +1,11 @@
 #!/usr/bin/perl -wd
 
+# This is a unittest script for the ProductData module (KIWIProductData.pm)
+# written by Jan-Christoph Bornschlegel <jcborn@suse.de>
+# The module must be run from the .test subfolder and requires two parameters.
+# first, the directory where the configuration file resides
+# second, the name of this file
+
 BEGIN {
   unshift @INC, '..';
 }
@@ -9,7 +15,14 @@ use KIWIProductData;
 use KIWILog;
 use KIWIXML;
 
+# some globals:
 $DB::inhibit_exit = 0;
+
+my $pathtoconfig = shift;
+exit 1 if not defined($pathtoconfig);
+
+our $ConfigName = shift; #"config.xml";
+exit 2 if not defined($ConfigName);
 
 print "\nUnit test for KIWIProductData.pm module";
 print "\n=======================================\n\n";
@@ -17,7 +30,7 @@ print "\n=======================================\n\n";
 my $bd = "/tmp/testkiwi";
 my $log  =new KIWILog();
 $main::Scheme = "/usr/share/kiwi/modules/KIWIScheme.rng";
-my $xml = new KIWIXML($log, "/suse/jcborn/Work/KIWI/JeOS-svn/instsource/");
+my $xml = new KIWIXML($log, $pathtoconfig);
 
 
 my $collect = new KIWICollect($log, $xml, $bd, 1);
