@@ -8,7 +8,8 @@
 #               :
 # BELONGS TO    : Operating System images
 #               :
-# DESCRIPTION   : 
+# DESCRIPTION   : Encapsulates an architecture object with access methods.
+#		: Provides a single ended queue mechanism
 #               :
 # STATUS        : Development
 #----------------
