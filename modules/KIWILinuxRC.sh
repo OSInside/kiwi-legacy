@@ -119,6 +119,9 @@ function importFile {
 		Debug "$key=$item"
 		eval export "$key\=\"$item\""
 	done
+	if [ ! -z "$ERROR_INTERRUPT" ];then
+		systemException "$ERROR_INTERRUPT" "shell"
+	fi
 }
 #======================================
 # systemException

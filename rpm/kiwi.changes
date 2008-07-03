@@ -2,6 +2,7 @@
 Wed Jul  2 11:25:53 CEST 2008 - ms@suse.de
 
 - v2.49
+- added support for netboot interrupt (bnc #397949)
 - removed guest configuration attributes from <packages> section
   and add new main sections for VMware -> <vmareconfig> and
   for Xen -> <xenconfig>. This change requires a new scheme

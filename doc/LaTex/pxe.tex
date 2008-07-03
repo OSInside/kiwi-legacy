@@ -400,6 +400,12 @@ KIWI_INITRD=/boot/name-of-initrd-file
 \begin{verbatim}
 KIWI_KERNEL=/boot/name-of-kernel-file
 \end{verbatim}
+	\item \textbf{ERROR\_INTERRUPT}\\
+         Specifies a message which is displayed during first deployment.
+         Along with the message a shell is provided. This functionality
+         should be used to send the user a message if it's clear the
+         boot process will fail because the boot environment or something
+         else influences the pxe boot process in a bad way.
 \end{itemize}
 
 \subsection{User another than tftp as download protocol}
