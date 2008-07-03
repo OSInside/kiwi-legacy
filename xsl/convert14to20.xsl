@@ -23,6 +23,11 @@
         <xsl:text>Already at version 2.0... skipped</xsl:text>
       </xsl:message>
     </xsl:when>
+	<xsl:when test="image[@schemeversion='2.4']">
+		<xsl:message terminate="yes">
+			<xsl:text>Already at version > 2.0... skipped</xsl:text>
+		</xsl:message>
+	</xsl:when>
     <xsl:otherwise>
       <xsl:message terminate="yes">
         <xsl:text>ERROR: The Schema version is not correct.&#10;</xsl:text>
