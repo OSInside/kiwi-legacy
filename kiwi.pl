@@ -100,7 +100,7 @@ our $TestBase = $BasePath."/tests";
 our @SchemeCVT= (
 	$BasePath."/xsl/convert14to20.xsl",
 	$BasePath."/xsl/convert20to24.xsl"
-)
+);
 
 #==========================================
 # Globals (Supported filesystem names)
