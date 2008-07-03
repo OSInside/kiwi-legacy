@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<image schemeversion="2.0" name="suse-10.3-xen-guest">
+<image schemeversion="2.4" name="suse-10.3-xen-guest">
 	<description type="system">
 		<author>Marcus Schäfer</author>
 		<contact>ms@novell.com</contact>
@@ -26,10 +26,13 @@
 		<package name="vim"/>
 		<opensusePattern name="base-10.3"/>
 	</packages>
-	<packages type="xen" memory="512" disk="/dev/sda">
+	<packages type="xen">
 		<package name="kernel-xen"/>
 		<package name="xen"/>
 	</packages>
+	<xenconfig memory="512">
+		<xendisk device="/dev/sda"/> 
+	</xenconfig>
 	<packages type="bootstrap">
 		<package name="filesystem"/> 
 		<package name="glibc-locale"/>

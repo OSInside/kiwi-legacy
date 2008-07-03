@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<image schemeversion="2.0" name="initrd-xenboot-suse-10.1">
+<image schemeversion="2.4" name="initrd-xenboot-suse-10.1">
 	<description type="boot">
 		<author>Marcus Schaefer</author>
 		<contact>ms@novell.com</contact>

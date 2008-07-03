@@ -1,5 +1,5 @@
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>RELAX-NG KIWI Schema Documentation</title><link rel="stylesheet" href="kiwi.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.73.2"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="reference" lang="en"><div class="titlepage"><div><div><h1 class="title"><a name="id281550"></a>RELAX-NG KIWI Schema Documentation</h1></div><div><div class="authorgroup"><div class="author"><h3 class="author"><span class="firstname">Marcus</span> <span class="surname">Schäfer</span></h3><span class="contrib">Wrote original XSD Schema</span> <code class="email">&lt;<a class="email" href="mailto:ms%20(AT)%20suse.de">ms (AT) suse.de</a>&gt;</code></div><div class="othercredit"><h3 class="othercredit"><span class="firstname">Khalil</span> <span class="surname">Ahmed</span></h3><span class="contrib">Original Stylesheet</span> </div><div class="othercredit"><h3 class="othercredit"><span class="firstname">Thomas</span> <span class="surname">Schraitle</span></h3><span class="contrib">Rewrote XSD into RNC</span> <span class="contrib">Modified XSLT stylesheet to output DocBook refentry</span> <code class="email">&lt;<a class="email" href="mailto:thomas.schraitle%20(AT)%20suse.de">thomas.schraitle (AT) suse.de</a>&gt;</code></div></div></div><div><p class="releaseinfo">$Id: kiwi.rnc 2957 2008-01-11 12:53:39Z thomas-schraitle $</p></div><div><p class="releaseinfo">RNC Schema Version 2.0</p></div><div><div class="legalnotice"><a name="id282365"></a><p class="legalnotice-title"><b>Legal Notice</b></p><p>This product includes software developed by Khalil Ahmed
-              (<a class="ulink" href="http://www.techquila.com" target="_top">http://www.techquila.com</a>).</p></div></div><div><p class="pubdate">Published: 06/24/2008</p></div></div><hr></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="refentrytitle"><a href="#def.arch">
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>RELAX-NG KIWI Schema Documentation</title><link rel="stylesheet" href="kiwi.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.73.2"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="reference" lang="en"><div class="titlepage"><div><div><h1 class="title"><a name="id2475552"></a>RELAX-NG KIWI Schema Documentation</h1></div><div><div class="authorgroup"><div class="author"><h3 class="author"><span class="firstname">Marcus</span> <span class="surname">Schäfer</span></h3><span class="contrib">Wrote original XSD Schema</span> <code class="email">&lt;<a class="email" href="mailto:ms%20(AT)%20suse.de">ms (AT) suse.de</a>&gt;</code></div><div class="othercredit"><h3 class="othercredit"><span class="firstname">Khalil</span> <span class="surname">Ahmed</span></h3><span class="contrib">Original Stylesheet</span> </div><div class="othercredit"><h3 class="othercredit"><span class="firstname">Thomas</span> <span class="surname">Schraitle</span></h3><span class="contrib">Rewrote XSD into RNC</span> <span class="contrib">Modified XSLT stylesheet to output DocBook refentry</span> <code class="email">&lt;<a class="email" href="mailto:thomas.schraitle%20(AT)%20suse.de">thomas.schraitle (AT) suse.de</a>&gt;</code></div></div></div><div><p class="releaseinfo">$Id: kiwi.rnc 2957 2008-01-11 12:53:39Z thomas-schraitle $</p></div><div><p class="releaseinfo">RNC Schema Version 2.4</p></div><div><div class="legalnotice"><a name="id2498983"></a><p class="legalnotice-title"><b>Legal Notice</b></p><p>This product includes software developed by Khalil Ahmed
+              (<a class="ulink" href="http://www.techquila.com" target="_top">http://www.techquila.com</a>).</p></div></div><div><p class="pubdate">Published: 07/03/2008</p></div></div><hr></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="refentrytitle"><a href="#def.arch">
         <code class="sgmltag-element">arch</code>
       </a></span><span class="refpurpose"> &#8212; Describe Packages and Metadata</span></dt><dt><span class="refentrytitle"><a href="#def.architectures">
         <code class="sgmltag-element">architectures</code>
@@ -133,71 +133,80 @@ to the required size of the image</span></dt><dt><span class="refentrytitle"><a 
         <code class="sgmltag-element">users</code>
       </a></span><span class="refpurpose"> &#8212; A List of Users</span></dt><dt><span class="refentrytitle"><a href="#def.version">
         <code class="sgmltag-element">version</code>
-      </a></span><span class="refpurpose"> &#8212; A Version Number for the Image, Consists of Major.Minor.Release </span></dt></dl></div><div class="refentry" lang="en"><a name="def.arch"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+      </a></span><span class="refpurpose"> &#8212; A Version Number for the Image, Consists of Major.Minor.Release </span></dt><dt><span class="refentrytitle"><a href="#def.vmwarecdrom">
+        <code class="sgmltag-element">vmwarecdrom</code>
+      </a></span><span class="refpurpose"> &#8212; The VMware CD/DVD drive definition. You can setup either a
+scsi CD or an ide CD drive</span></dt><dt><span class="refentrytitle"><a href="#def.vmwareconfig">
+        <code class="sgmltag-element">vmwareconfig</code>
+      </a></span><span class="refpurpose"> &#8212; specifies the VMware configuration sections</span></dt><dt><span class="refentrytitle"><a href="#def.vmwaredisk">
+        <code class="sgmltag-element">vmwaredisk</code>
+      </a></span><span class="refpurpose"> &#8212; The VMware disk definition. You can setup either a
+scsi disk or an ide disk</span></dt><dt><span class="refentrytitle"><a href="#def.vmwarenic">
+        <code class="sgmltag-element">vmwarenic</code>
+      </a></span><span class="refpurpose"> &#8212; The VMware network interface definition</span></dt><dt><span class="refentrytitle"><a href="#def.xenconfig">
+        <code class="sgmltag-element">xenconfig</code>
+      </a></span><span class="refpurpose"> &#8212; specifies the Xen configuration sections</span></dt><dt><span class="refentrytitle"><a href="#def.xendisk">
+        <code class="sgmltag-element">xendisk</code>
+      </a></span><span class="refpurpose"> &#8212; The Xen disk device definition.</span></dt></dl></div><div class="refentry" lang="en"><a name="def.arch"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">arch</code>
       </h2><p>
         <code class="sgmltag-element">arch</code>
-       &#8212; Describe Packages and Metadata</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">arch ::=  EMPTY</pre></div><div class="refsect1" lang="en"><a name="id306095"></a><h2>Description</h2><p>The arch element carries the information for an architecture,
-its name and its fallback (optional).</p></div><div class="refsect1" lang="en"><a name="id307281"></a><h2>Attributes</h2><div class="informaltable"><table border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Attribute</th><th>Type</th><th>Use</th><th>Documentation</th></tr></thead><tbody><tr><td>id</td><td>
-                <span class="type">xsd:ID</span>
-              </td><td>Required</td><td>An ID</td></tr><tr><td>name</td><td> TEXT </td><td>Required</td><td>A name</td></tr><tr><td>fallback</td><td>
-                <span class="type">xsd:IDREF</span>
-              </td><td>Required</td><td> </td></tr></tbody></table></div></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.architectures"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+       &#8212; Describe Packages and Metadata</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">arch ::=  EMPTY</pre></div><div class="refsect1" lang="en"><a name="id2491074"></a><h2>Description</h2><p>The arch element providdes the information for an arch,
+its name and its fallback (optional).</p></div><div class="refsect1" lang="en"><a name="id2526340"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.architectures"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">architectures</code>
       </h2><p>
         <code class="sgmltag-element">architectures</code>
-       &#8212; Describe Packages and Metadata</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">architectures ::= (<a class="link" href="#def.arch" title="arch">arch</a>)+</pre></div><div class="refsect1" lang="en"><a name="id282061"></a><h2>Description</h2><p>The architectures element contains a list of architectures
+       &#8212; Describe Packages and Metadata</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">architectures ::= (<a class="link" href="#def.arch" title="arch">arch</a>)+</pre></div><div class="refsect1" lang="en"><a name="id2517121"></a><h2>Description</h2><p>The architectures element contains a list of architectures
 for which the installation source is designed. At least one
 architecture must be defined. Fallback mecahnisms apply.
 Each arch element has an optional attribute &lt;fallback&gt;
 which is the next in the chain. An omitted value results in
-undefined value thus terminating the chain.</p></div><div class="refsect1" lang="en"><a name="id282075"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.author"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+undefined value thus terminating the chain.</p></div><div class="refsect1" lang="en"><a name="id2497735"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.author"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">author</code>
       </h2><p>
         <code class="sgmltag-element">author</code>
-       &#8212; Author of the image</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">author ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id281728"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.chroot"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+       &#8212; Author of the image</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">author ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id2514645"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.chroot"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">chroot</code>
       </h2><p>
         <code class="sgmltag-element">chroot</code>
-       &#8212; Describe Packages and Metadata</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">chroot ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id281774"></a><h2>Description</h2><p>The chroot element contains one particular environment
+       &#8212; Describe Packages and Metadata</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">chroot ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id2529314"></a><h2>Description</h2><p>The chroot element contains one particular environment
 variable and its value. Shell rules for the names apply.
-The value must not exceed a certain length for sanity reasons.
-Any funny characters like tabs, line break, carriage return or
-combinations are converted to spaces (one each) which may lead
-to unexpected contents.</p></div><div class="refsect1" lang="en"><a name="id281787"></a><h2>Attributes</h2><div class="informaltable"><table border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Attribute</th><th>Type</th><th>Use</th><th>Documentation</th></tr></thead><tbody><tr><td>requires</td><td> TEXT </td><td>Required</td><td> </td></tr></tbody></table></div></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.commandline"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+The value must not exceed a certain length for sanity.
+reasons Any funny characters like tabs, line break, 
+carriage return or combinations are converted to spaces
+(one each) which may lead to unexpected contents.</p></div><div class="refsect1" lang="en"><a name="id2532327"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.commandline"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">commandline</code>
       </h2><p>
         <code class="sgmltag-element">commandline</code>
-       &#8212; Specifies the Kernel Boot Commandline</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">commandline ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id327238"></a><h2>Description</h2><p>As part of the network deploy configuration this section
+       &#8212; Specifies the Kernel Boot Commandline</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">commandline ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id2517565"></a><h2>Description</h2><p>As part of the network deploy configuration this section
 specifies the kernel boot commandline used when the image
-gets deployed.</p></div><div class="refsect1" lang="en"><a name="id327249"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.compressed"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+gets deployed.</p></div><div class="refsect1" lang="en"><a name="id2499610"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.compressed"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">compressed</code>
       </h2><p>
         <code class="sgmltag-element">compressed</code>
-       &#8212; Compress image. </p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">compressed ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id327292"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.configuration"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+       &#8212; Compress image. </p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">compressed ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id2500854"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.configuration"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">configuration</code>
       </h2><p>
         <code class="sgmltag-element">configuration</code>
-       &#8212; Specifies Configuration files</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">configuration ::=  EMPTY</pre></div><div class="refsect1" lang="en"><a name="id327336"></a><h2>Description</h2><p>As part of the network deploy configuration this section
+       &#8212; Specifies Configuration files</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">configuration ::=  EMPTY</pre></div><div class="refsect1" lang="en"><a name="id2518375"></a><h2>Description</h2><p>As part of the network deploy configuration this section
 specifies the configuration files which should be included
-into the image after deployment.</p></div><div class="refsect1" lang="en"><a name="id327346"></a><h2>Attributes</h2><div class="informaltable"><table border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Attribute</th><th>Type</th><th>Use</th><th>Documentation</th></tr></thead><tbody><tr><td>source</td><td> TEXT </td><td>Required</td><td>A location where packages can be found to build an
-installation source from</td></tr><tr><td>dest</td><td> TEXT </td><td>Required</td><td>Destination of a ressource</td></tr></tbody></table></div></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.contact"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+into the image after deployment.</p></div><div class="refsect1" lang="en"><a name="id2513936"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.contact"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">contact</code>
       </h2><p>
         <code class="sgmltag-element">contact</code>
-       &#8212; Contact Information from the Author, like Email etc.</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">contact ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id327449"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.defaultbaseroot"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+       &#8212; Contact Information from the Author, like Email etc.</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">contact ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id2507901"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.defaultbaseroot"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">defaultbaseroot</code>
       </h2><p>
         <code class="sgmltag-element">defaultbaseroot</code>
-       &#8212; Default Path if baseroot Option is not Specified</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">defaultbaseroot ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id327492"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.defaultdestination"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+       &#8212; Default Path if baseroot Option is not Specified</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">defaultbaseroot ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id2530966"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.defaultdestination"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">defaultdestination</code>
       </h2><p>
         <code class="sgmltag-element">defaultdestination</code>
-       &#8212; Default Path if destdir Otion is Not Specified</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">defaultdestination ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id327536"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.defaultroot"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+       &#8212; Default Path if destdir Otion is Not Specified</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">defaultdestination ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id2534553"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.defaultroot"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">defaultroot</code>
       </h2><p>
         <code class="sgmltag-element">defaultroot</code>
-       &#8212; Default Root Directory Name if root Option is Not Specified</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">defaultroot ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id327579"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.deploy"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+       &#8212; Default Root Directory Name if root Option is Not Specified</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">defaultroot ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id2508044"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.deploy"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">deploy</code>
       </h2><p>
         <code class="sgmltag-element">deploy</code>
@@ -207,36 +216,31 @@ installation source from</td></tr><tr><td>dest</td><td> TEXT </td><td>Required</
   <a class="link" href="#def.initrd" title="initrd">initrd</a>? &amp;
   <a class="link" href="#def.partitions" title="partitions">partitions</a>? &amp;
   <a class="link" href="#def.union" title="union">union</a>? &amp;
-  (<a class="link" href="#def.configuration" title="configuration">configuration</a>)*</pre></div><div class="refsect1" lang="en"><a name="id327658"></a><h2>Description</h2><p>The deploy section is used to allow kiwi to create the
+  (<a class="link" href="#def.configuration" title="configuration">configuration</a>)*</pre></div><div class="refsect1" lang="en"><a name="id2528926"></a><h2>Description</h2><p>The deploy section is used to allow kiwi to create the
 config.&lt;MAC&gt; file required by PXE based network images.
-the contents of this file controls the image deploy process.</p></div><div class="refsect1" lang="en"><a name="id327672"></a><h2>Attributes</h2><div class="informaltable"><table border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Attribute</th><th>Type</th><th>Use</th><th>Documentation</th></tr></thead><tbody><tr><td>server</td><td> TEXT </td><td>Required</td><td>Name or IP Address of server for downloading the data</td></tr><tr><td>blocksize</td><td> TEXT </td><td>Required</td><td>Blocksize value used for atftp downloads</td></tr></tbody></table></div></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.description"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+the contents of this file controls the image deploy process.</p></div><div class="refsect1" lang="en"><a name="id2495003"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.description"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">description</code>
       </h2><p>
         <code class="sgmltag-element">description</code>
        &#8212; A Short Description</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">description ::= <a class="link" href="#def.author" title="author">author</a> &amp;
   (<a class="link" href="#def.contact" title="contact">contact</a>)+ &amp;
-  <a class="link" href="#def.specification" title="specification">specification</a></pre></div><div class="refsect1" lang="en"><a name="id327789"></a><h2>Attributes</h2><div class="informaltable"><table border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Attribute</th><th>Type</th><th>Use</th><th>Documentation</th></tr></thead><tbody><tr><td>type</td><td> Enumeration: "<code class="sgmltag-attvalue">boot</code>" | "<code class="sgmltag-attvalue">system</code>"</td><td>Required</td><td>Kiwi distinguishes between two basic image description types
-which uses the same format but one is created and provided by
-the kiwi developers and the other is created by the users of
-kiwi. The type=boot specifies a boot image (initrd) which should
-be provided by the kiwi developers wheras type=system specifies
-a standard image description created by a kiwi user.</td></tr></tbody></table></div></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.drivers"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+  <a class="link" href="#def.specification" title="specification">specification</a></pre></div><div class="refsect1" lang="en"><a name="id2514648"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.drivers"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">drivers</code>
       </h2><p>
         <code class="sgmltag-element">drivers</code>
-       &#8212; A Collection of Driver Files </p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">drivers ::= (<a class="link" href="#def.file" title="file">file</a>)+</pre></div><div class="refsect1" lang="en"><a name="id327895"></a><h2>Attributes</h2><div class="informaltable"><table border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Attribute</th><th>Type</th><th>Use</th><th>Documentation</th></tr></thead><tbody><tr><td>type</td><td> Enumeration: "<code class="sgmltag-attvalue">drivers</code>" | "<code class="sgmltag-attvalue">usbdrivers</code>" | "<code class="sgmltag-attvalue">scsidrivers</code>" | "<code class="sgmltag-attvalue">netdrivers</code>"</td><td>Required</td><td> </td></tr><tr><td>profiles</td><td> TEXT </td><td>Required</td><td>A profile name which binds the section to this name</td></tr></tbody></table></div></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.except"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+       &#8212; A Collection of Driver Files </p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">drivers ::= (<a class="link" href="#def.file" title="file">file</a>)+</pre></div><div class="refsect1" lang="en"><a name="id2532325"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.except"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">except</code>
       </h2><p>
         <code class="sgmltag-element">except</code>
-       &#8212; A Pointer to a File which should be excluded</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">except ::=  EMPTY</pre></div><div class="refsect1" lang="en"><a name="id328018"></a><h2>Attributes</h2><div class="informaltable"><table border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Attribute</th><th>Type</th><th>Use</th><th>Documentation</th></tr></thead><tbody><tr><td>name</td><td> TEXT </td><td>Required</td><td>A name</td></tr></tbody></table></div></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.file"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+       &#8212; A Pointer to a File which should be excluded</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">except ::=  EMPTY</pre></div><div class="refsect1" lang="en"><a name="id2516493"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.file"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">file</code>
       </h2><p>
         <code class="sgmltag-element">file</code>
-       &#8212; A Pointer to a File</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">file ::=  EMPTY</pre></div><div class="refsect1" lang="en"><a name="id328104"></a><h2>Attributes</h2><div class="informaltable"><table border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Attribute</th><th>Type</th><th>Use</th><th>Documentation</th></tr></thead><tbody><tr><td>name</td><td> TEXT </td><td>Required</td><td>A name</td></tr><tr><td>arch</td><td> TEXT </td><td>Required</td><td>An architecture</td></tr></tbody></table></div></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.ignore"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+       &#8212; A Pointer to a File</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">file ::=  EMPTY</pre></div><div class="refsect1" lang="en"><a name="id2515093"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.ignore"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">ignore</code>
       </h2><p>
         <code class="sgmltag-element">ignore</code>
-       &#8212; Ignores a Package</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">ignore ::=  EMPTY</pre></div><div class="refsect1" lang="en"><a name="id328207"></a><h2>Attributes</h2><div class="informaltable"><table border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Attribute</th><th>Type</th><th>Use</th><th>Documentation</th></tr></thead><tbody><tr><td>name</td><td> TEXT </td><td>Required</td><td>A name</td></tr></tbody></table></div></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.image"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+       &#8212; Ignores a Package</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">ignore ::=  EMPTY</pre></div><div class="refsect1" lang="en"><a name="id2512257"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.image"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">image</code>
       </h2><p>
         <code class="sgmltag-element">image</code>
@@ -249,33 +253,20 @@ a standard image description created by a kiwi user.</td></tr></tbody></table></
   (<a class="link" href="#def.repository" title="repository">repository</a>)+ &amp;
   <a class="link" href="#def.deploy" title="deploy">deploy</a>? &amp;
   <a class="link" href="#def.split" title="split">split</a>? &amp;
-  (<a class="link" href="#def.packages" title="packages">packages</a>)*</pre></div><div class="refsect1" lang="en"><a name="id328346"></a><h2>Description</h2><p>Each KIWI configuration file consists of a root element
-        image.</p></div><div class="refsect1" lang="en"><a name="id328356"></a><h2>Attributes</h2><div class="informaltable"><table border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Attribute</th><th>Type</th><th>Use</th><th>Documentation</th></tr></thead><tbody><tr><td>name</td><td> TEXT </td><td>Required</td><td>A name</td></tr><tr><td>inherit</td><td> TEXT </td><td>Required</td><td>Path to an image description directory from which
-the package Information is inherited</td></tr><tr><td>kiwirevision</td><td>
-                <span class="type">xsd:nonNegativeInteger</span>
-              </td><td>Required</td><td>A kiwi SVN revision number which is known to build
-a working image from this description. If the kiwi SVN
-revision is less than the specified value the
-process will exit.</td></tr><tr><td>id</td><td>
-                <span class="type">xsd:string</span>
-              </td><td>Required</td><td>An identification number which is represented in a file
-named /etc/ImageID</td></tr><tr><td>schemeversion</td><td> TEXT </td><td>Required</td><td>The allowed Schema version (fixed value)</td></tr><tr><td>xsi:noNamespaceSchemaLocation</td><td>
-                <span class="type">xsd:anyURI</span>
-              </td><td>Required</td><td>The location of the XSD Schema (not relevant for RELAX NG or DTD)</td></tr><tr><td>xsi:schemaLocation</td><td>
-                <span class="type">xsd:anyURI</span>
-              </td><td>Required</td><td>A pair of URI references: First is a namespace name,
-second the location of the XSD Schema
-(not relevant for RELAX NG or DTD)</td></tr></tbody></table></div></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.initrd"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+  (<a class="link" href="#def.packages" title="packages">packages</a>)* &amp;
+  <a class="link" href="#def.vmwareconfig" title="vmwareconfig">vmwareconfig</a>? &amp;
+  <a class="link" href="#def.xenconfig" title="xenconfig">xenconfig</a>?</pre></div><div class="refsect1" lang="en"><a name="id2508172"></a><h2>Description</h2><p>Each KIWI configuration file consists of a root element
+        image.</p></div><div class="refsect1" lang="en"><a name="id2525356"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.initrd"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">initrd</code>
       </h2><p>
         <code class="sgmltag-element">initrd</code>
-       &#8212; Specifies where the Boot Image can be Found</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">initrd ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id328555"></a><h2>Description</h2><p>As part of the network deploy configuration this element
-specifies where the boot image (initrd) can be found.</p></div><div class="refsect1" lang="en"><a name="id328565"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.instrepo"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+       &#8212; Specifies where the Boot Image can be Found</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">initrd ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id2531701"></a><h2>Description</h2><p>As part of the network deploy configuration this element
+specifies where the boot image (initrd) can be found.</p></div><div class="refsect1" lang="en"><a name="id2534467"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.instrepo"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">instrepo</code>
       </h2><p>
         <code class="sgmltag-element">instrepo</code>
-       &#8212; Name of a Installation Repository</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">instrepo ::= <a class="link" href="#def.source" title="source">source</a></pre></div><div class="refsect1" lang="en"><a name="id328613"></a><h2>Description</h2><p>Name of a repository which is used to create an
-installation source</p></div><div class="refsect1" lang="en"><a name="id328622"></a><h2>Attributes</h2><div class="informaltable"><table border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Attribute</th><th>Type</th><th>Use</th><th>Documentation</th></tr></thead><tbody><tr><td>name</td><td> TEXT </td><td>Required</td><td>A name</td></tr><tr><td>priority</td><td> TEXT </td><td>Required</td><td>Search priority for packages in this repo</td></tr><tr><td>username</td><td> TEXT </td><td>Required</td><td>A name of a user</td></tr><tr><td>pwd</td><td> TEXT </td><td>Required</td><td>The password</td></tr></tbody></table></div></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.instsource"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+       &#8212; Name of a Installation Repository</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">instrepo ::= <a class="link" href="#def.source" title="source">source</a></pre></div><div class="refsect1" lang="en"><a name="id2502782"></a><h2>Description</h2><p>Name of a repository which is used to create an
+installation source</p></div><div class="refsect1" lang="en"><a name="id2534726"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.instsource"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">instsource</code>
       </h2><p>
         <code class="sgmltag-element">instsource</code>
@@ -283,125 +274,111 @@ installation source</p></div><div class="refsect1" lang="en"><a name="id328622">
   <a class="link" href="#def.productoptions" title="productoptions">productoptions</a> &amp;
   (<a class="link" href="#def.instrepo" title="instrepo">instrepo</a>)+ &amp;
   <a class="link" href="#def.metadata" title="metadata">metadata</a> &amp;
-  <a class="link" href="#def.repopackages" title="repopackages">repopackages</a></pre></div><div class="refsect1" lang="en"><a name="id328782"></a><h2>Description</h2><p>The instsource element is used to describe the packages
+  <a class="link" href="#def.repopackages" title="repopackages">repopackages</a></pre></div><div class="refsect1" lang="en"><a name="id2527430"></a><h2>Description</h2><p>The instsource element is used to describe the packages
 and the metadata which is required to build an installation
 source suitable for Novell SUSE Linux installation media.
 From such a source it should be possible to create the
 standard SUSE CDs and DVDs as well as use this source as
-repository for image building.</p></div><div class="refsect1" lang="en"><a name="id328794"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.kernel"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+repository for image building.</p></div><div class="refsect1" lang="en"><a name="id2535769"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.kernel"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">kernel</code>
       </h2><p>
         <code class="sgmltag-element">kernel</code>
-       &#8212; Specifies Where to Find the Boot Kernel</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">kernel ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id328838"></a><h2>Description</h2><p>As part of the network deploy configuration this section
-specifies the where to find the boot kernel.</p></div><div class="refsect1" lang="en"><a name="id328848"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.keytable"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+       &#8212; Specifies Where to Find the Boot Kernel</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">kernel ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id2518514"></a><h2>Description</h2><p>As part of the network deploy configuration this section
+specifies the where to find the boot kernel.</p></div><div class="refsect1" lang="en"><a name="id2533841"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.keytable"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">keytable</code>
       </h2><p>
         <code class="sgmltag-element">keytable</code>
-       &#8212; Image keytable setup.</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">keytable ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id328891"></a><h2>Description</h2><p>The value will be part of /etc/sysconfig/keyboard</p></div><div class="refsect1" lang="en"><a name="id328901"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.locale"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+       &#8212; Image keytable setup.</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">keytable ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id2515432"></a><h2>Description</h2><p>The value will be part of /etc/sysconfig/keyboard</p></div><div class="refsect1" lang="en"><a name="id2533061"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.locale"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">locale</code>
       </h2><p>
         <code class="sgmltag-element">locale</code>
-       &#8212; Image locale setup.</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">locale ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id328944"></a><h2>Description</h2><p>The value will be part of /etc/sysconfig/keyboard</p></div><div class="refsect1" lang="en"><a name="id328954"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.metadata"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+       &#8212; Image locale setup.</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">locale ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id2511921"></a><h2>Description</h2><p>The value will be part of /etc/sysconfig/keyboard</p></div><div class="refsect1" lang="en"><a name="id2534706"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.metadata"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">metadata</code>
       </h2><p>
         <code class="sgmltag-element">metadata</code>
        &#8212; Contains Metadata</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">metadata ::= (<a class="link" href="#def.repopackage" title="repopackage">repopackage</a>)+ &amp;
   (<a class="link" href="#def.metafile" title="metafile">metafile</a>)* &amp;
-  (<a class="link" href="#def.chroot" title="chroot">chroot</a>)*</pre></div><div class="refsect1" lang="en"><a name="id329013"></a><h2>Description</h2><p>When building an installation source not only packages are
+  (<a class="link" href="#def.chroot" title="chroot">chroot</a>)*</pre></div><div class="refsect1" lang="en"><a name="id2511497"></a><h2>Description</h2><p>When building an installation source not only packages are
 relevant but also metadata. metadata are files or packages
 combined with script calls. If a package is specified as
 metadata it will not be installed by rpm but its cpio
-archive is extracted in a specific way.</p></div><div class="refsect1" lang="en"><a name="id329025"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.metafile"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+archive is extracted in a specific way.</p></div><div class="refsect1" lang="en"><a name="id2524245"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.metafile"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">metafile</code>
       </h2><p>
         <code class="sgmltag-element">metafile</code>
-       &#8212; A file Pointer Optionally Bundled With a Script</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">metafile ::=  EMPTY</pre></div><div class="refsect1" lang="en"><a name="id329068"></a><h2>Attributes</h2><div class="informaltable"><table border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Attribute</th><th>Type</th><th>Use</th><th>Documentation</th></tr></thead><tbody><tr><td>url</td><td> TEXT </td><td>Required</td><td>URL where to find the metafile</td></tr><tr><td>script</td><td> TEXT </td><td>Required</td><td>A script hook for meta files to be called after the
-file was fetched</td></tr><tr><td>target</td><td> TEXT </td><td>Required</td><td>Destination path where to download the file</td></tr></tbody></table></div></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.oem-boot-title"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+       &#8212; A file Pointer Optionally Bundled With a Script</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">metafile ::=  EMPTY</pre></div><div class="refsect1" lang="en"><a name="id2533521"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.oem-boot-title"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">oem-boot-title</code>
       </h2><p>
         <code class="sgmltag-element">oem-boot-title</code>
        &#8212; For oemboot driven images: setup of the boot menu text
 displayed within the square brackets after first reboot
-of the OEM image </p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">oem-boot-title ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id329188"></a><h2>Description</h2><p>For oemboot driven images: setup of the boot menu text
+of the OEM image </p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">oem-boot-title ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id2530152"></a><h2>Description</h2><p>For oemboot driven images: setup of the boot menu text
 displayed within the square brackets after first reboot
-of the OEM image.</p></div><div class="refsect1" lang="en"><a name="id329199"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.oem-home"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+of the OEM image.</p></div><div class="refsect1" lang="en"><a name="id2524689"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.oem-home"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">oem-home</code>
       </h2><p>
         <code class="sgmltag-element">oem-home</code>
-       &#8212; For oemboot driven images: use a home partition yes/no</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">oem-home ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id329242"></a><h2>Description</h2><p>For oemboot driven images: use a home partition yes/no.</p></div><div class="refsect1" lang="en"><a name="id329251"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.oem-reboot"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+       &#8212; For oemboot driven images: use a home partition yes/no</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">oem-home ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id2515428"></a><h2>Description</h2><p>For oemboot driven images: use a home partition yes/no.</p></div><div class="refsect1" lang="en"><a name="id2520184"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.oem-reboot"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">oem-reboot</code>
       </h2><p>
         <code class="sgmltag-element">oem-reboot</code>
-       &#8212; For oemboot driven images: reboot after first deployment yes/no</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">oem-reboot ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id329295"></a><h2>Description</h2><p>For oemboot driven images: reboot after first deployment yes/no.</p></div><div class="refsect1" lang="en"><a name="id329304"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.oem-recovery"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+       &#8212; For oemboot driven images: reboot after first deployment yes/no</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">oem-reboot ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id2514872"></a><h2>Description</h2><p>For oemboot driven images: reboot after first deployment yes/no.</p></div><div class="refsect1" lang="en"><a name="id2517975"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.oem-recovery"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">oem-recovery</code>
       </h2><p>
         <code class="sgmltag-element">oem-recovery</code>
-       &#8212; For oemboot driven images: create a recovery archive yes/no</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">oem-recovery ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id329347"></a><h2>Description</h2><p>For oemboot driven images: create a recovery archive yes/no</p></div><div class="refsect1" lang="en"><a name="id329358"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.oem-swap"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+       &#8212; For oemboot driven images: create a recovery archive yes/no</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">oem-recovery ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id2491698"></a><h2>Description</h2><p>For oemboot driven images: create a recovery archive yes/no</p></div><div class="refsect1" lang="en"><a name="id2513377"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.oem-swap"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">oem-swap</code>
       </h2><p>
         <code class="sgmltag-element">oem-swap</code>
-       &#8212; For oemboot driven images: use a swap partition yes/no</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">oem-swap ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id329401"></a><h2>Description</h2><p>For oemboot driven images: use a swap partition yes/no.</p></div><div class="refsect1" lang="en"><a name="id329410"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.oem-swapsize"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+       &#8212; For oemboot driven images: use a swap partition yes/no</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">oem-swap ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id2499018"></a><h2>Description</h2><p>For oemboot driven images: use a swap partition yes/no.</p></div><div class="refsect1" lang="en"><a name="id2529466"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.oem-swapsize"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">oem-swapsize</code>
       </h2><p>
         <code class="sgmltag-element">oem-swapsize</code>
        &#8212; For oemboot driven images: Set the size of the swap
-partition in MB</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">oem-swapsize ::=  xsd:nonNegativeInteger</pre></div><div class="refsect1" lang="en"><a name="id329454"></a><h2>Description</h2><p>For oemboot driven images: Set the size of the swap
-partition in MB. No swapspace with oem-swap set to false.</p></div><div class="refsect1" lang="en"><a name="id329465"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.oem-systemsize"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+partition in MB</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">oem-swapsize ::=  xsd:nonNegativeInteger</pre></div><div class="refsect1" lang="en"><a name="id2500252"></a><h2>Description</h2><p>For oemboot driven images: Set the size of the swap
+partition in MB. No swapspace with oem-swap set to false.</p></div><div class="refsect1" lang="en"><a name="id2511990"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.oem-systemsize"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">oem-systemsize</code>
       </h2><p>
         <code class="sgmltag-element">oem-systemsize</code>
        &#8212; For oemboot driven images: Set the size of the system
-(root) partition in MB</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">oem-systemsize ::=  xsd:nonNegativeInteger</pre></div><div class="refsect1" lang="en"><a name="id329509"></a><h2>Description</h2><p>For oemboot driven images: Set the size of the system
-(root) partition in MB.</p></div><div class="refsect1" lang="en"><a name="id329519"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.opensusePattern"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+(root) partition in MB</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">oem-systemsize ::=  xsd:nonNegativeInteger</pre></div><div class="refsect1" lang="en"><a name="id2518761"></a><h2>Description</h2><p>For oemboot driven images: Set the size of the system
+(root) partition in MB.</p></div><div class="refsect1" lang="en"><a name="id2499038"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.opensusePattern"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">opensusePattern</code>
       </h2><p>
         <code class="sgmltag-element">opensusePattern</code>
-       &#8212; Name of a Pattern From openSUSE</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">opensusePattern ::=  EMPTY</pre></div><div class="refsect1" lang="en"><a name="id329563"></a><h2>Attributes</h2><div class="informaltable"><table border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Attribute</th><th>Type</th><th>Use</th><th>Documentation</th></tr></thead><tbody><tr><td>name</td><td> TEXT </td><td>Required</td><td>A name</td></tr></tbody></table></div></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.package"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+       &#8212; Name of a Pattern From openSUSE</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">opensusePattern ::=  EMPTY</pre></div><div class="refsect1" lang="en"><a name="id2476008"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.package"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">package</code>
       </h2><p>
         <code class="sgmltag-element">package</code>
-       &#8212; Name of an image Package</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">package ::=  EMPTY</pre></div><div class="refsect1" lang="en"><a name="id329649"></a><h2>Attributes</h2><div class="informaltable"><table border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Attribute</th><th>Type</th><th>Use</th><th>Documentation</th></tr></thead><tbody><tr><td>name</td><td> TEXT </td><td>Required</td><td>A name</td></tr><tr><td>arch</td><td> TEXT </td><td>Required</td><td>An architecture</td></tr></tbody></table></div></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.packagemanager"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+       &#8212; Name of an image Package</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">package ::=  EMPTY</pre></div><div class="refsect1" lang="en"><a name="id2476055"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.packagemanager"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">packagemanager</code>
       </h2><p>
         <code class="sgmltag-element">packagemanager</code>
-       &#8212; Name of the Package Manager</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">packagemanager ::= ( TEXT )</pre></div><div class="refsect1" lang="en"><a name="id329752"></a><h2>Description</h2><p>The package manager used for package installation
-could be either zypper or smart</p></div><div class="refsect1" lang="en"><a name="id329763"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.packages"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+       &#8212; Name of the Package Manager</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">packagemanager ::= ( TEXT )</pre></div><div class="refsect1" lang="en"><a name="id2535650"></a><h2>Description</h2><p>The package manager used for package installation
+could be either zypper or smart</p></div><div class="refsect1" lang="en"><a name="id2508892"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.packages"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">packages</code>
       </h2><p>
         <code class="sgmltag-element">packages</code>
        &#8212; Specifies Packages/Patterns Used in Different Stages</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">packages ::= (<a class="link" href="#def.package" title="package">package</a>)* &amp;
   (<a class="link" href="#def.opensusePattern" title="opensusePattern">opensusePattern</a>)* &amp;
-  (<a class="link" href="#def.ignore" title="ignore">ignore</a>)*</pre></div><div class="refsect1" lang="en"><a name="id329821"></a><h2>Description</h2><p>The packages elements specifies a set of packages
+  (<a class="link" href="#def.ignore" title="ignore">ignore</a>)*</pre></div><div class="refsect1" lang="en"><a name="id2488004"></a><h2>Description</h2><p>The packages elements specifies a set of packages
 and/or patterns which are used in different stages of the
 image building process
-and also depends of the selected image output type.</p></div><div class="refsect1" lang="en"><a name="id329833"></a><h2>Attributes</h2><div class="informaltable"><table border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Attribute</th><th>Type</th><th>Use</th><th>Documentation</th></tr></thead><tbody><tr><td>type</td><td> Enumeration: "<code class="sgmltag-attvalue">image</code>" | "<code class="sgmltag-attvalue">bootstrap</code>" | "<code class="sgmltag-attvalue">delete</code>" | "<code class="sgmltag-attvalue">testsuite</code>" | "<code class="sgmltag-attvalue">xen</code>" | "<code class="sgmltag-attvalue">vmware</code>"</td><td>Required</td><td> </td></tr><tr><td>memory</td><td> TEXT </td><td>Required</td><td>The memory setup for the guest VM. Used only with the
-packages types xen and vmware</td></tr><tr><td>disk</td><td> TEXT </td><td>Required</td><td>The virtual disk device name of the guest VM. Used only
-with the packages types xen and vmware</td></tr><tr><td>HWversion</td><td>
-                <span class="type">xsd:integer</span>
-              </td><td>Required</td><td>The virtual HW version number for the VMware configuration</td></tr><tr><td>guestOS_32Bit</td><td> TEXT </td><td>Required</td><td>the virtual guestOS identification string for VMware for 
-32bit guest systems</td></tr><tr><td>guestOS_64Bit</td><td> TEXT </td><td>Required</td><td>the virtual guestOS identification string for VMware for 
-64bit guest systems</td></tr><tr><td>profiles</td><td> TEXT </td><td>Required</td><td>Namespace this section applies to. If not specified it
-applies to all namespaces</td></tr><tr><td>patternType</td><td> Enumeration: "<code class="sgmltag-attvalue">onlyRequired</code>" | "<code class="sgmltag-attvalue">plusSuggested</code>" | "<code class="sgmltag-attvalue">plusRecommended</code>"</td><td>Required</td><td>Selection type for patterns. Could be onlyRequired
-plusSuggested or plusRecommended</td></tr><tr><td>patternPackageType</td><td> Enumeration: "<code class="sgmltag-attvalue">onlyRequired</code>" | "<code class="sgmltag-attvalue">plusSuggested</code>" | "<code class="sgmltag-attvalue">plusRecommended</code>"</td><td>Required</td><td>Selection type for packages in patterns. Could be
-onlyRequired, plusSuggested or plusRecommended</td></tr></tbody></table></div></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.partition"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+and also depends of the selected image output type.</p></div><div class="refsect1" lang="en"><a name="id2488017"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.partition"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">partition</code>
       </h2><p>
         <code class="sgmltag-element">partition</code>
-       &#8212; A Partition</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">partition ::=  EMPTY</pre></div><div class="refsect1" lang="en"><a name="id330118"></a><h2>Attributes</h2><div class="informaltable"><table border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Attribute</th><th>Type</th><th>Use</th><th>Documentation</th></tr></thead><tbody><tr><td>type</td><td> TEXT </td><td>Required</td><td>Partition Type identifier, see fdisk for details</td></tr><tr><td>number</td><td> TEXT </td><td>Required</td><td>Partition ID</td></tr><tr><td>size</td><td> TEXT </td><td>Required</td><td>A partition size or optional image size</td></tr><tr><td>mountpoint</td><td> TEXT </td><td>Required</td><td>Mount path for this partition</td></tr><tr><td>target</td><td>
-                <span class="type">xsd:boolean</span>
-              </td><td>Required</td><td>Is a real target or not which means is part of
-the /etc/fstab file or not</td></tr></tbody></table></div></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.partitions"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+       &#8212; A Partition</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">partition ::=  EMPTY</pre></div><div class="refsect1" lang="en"><a name="id2488063"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.partitions"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">partitions</code>
       </h2><p>
         <code class="sgmltag-element">partitions</code>
-       &#8212; A List of Partitions</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">partitions ::= (<a class="link" href="#def.partition" title="partition">partition</a>)+</pre></div><div class="refsect1" lang="en"><a name="id330278"></a><h2>Attributes</h2><div class="informaltable"><table border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Attribute</th><th>Type</th><th>Use</th><th>Documentation</th></tr></thead><tbody><tr><td>device</td><td> TEXT </td><td>Required</td><td>As part of the network deploy configuration this section
-specifies the disk device name</td></tr></tbody></table></div></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.persistent"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+       &#8212; A List of Partitions</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">partitions ::= (<a class="link" href="#def.partition" title="partition">partition</a>)+</pre></div><div class="refsect1" lang="en"><a name="id2488118"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.persistent"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">persistent</code>
       </h2><p>
         <code class="sgmltag-element">persistent</code>
        &#8212; Specifies Filenames in the Read-Write Disk Area</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">persistent ::= (<a class="link" href="#def.except" title="except">except</a>)* &amp;
-  (<a class="link" href="#def.file" title="file">file</a>)+</pre></div><div class="refsect1" lang="en"><a name="id330376"></a><h2>Description</h2><p>As part of the split section the persistent element
-specifies filenames which are in the read-write disk area</p></div><div class="refsect1" lang="en"><a name="id330387"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.preferences"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+  (<a class="link" href="#def.file" title="file">file</a>)+</pre></div><div class="refsect1" lang="en"><a name="id2488179"></a><h2>Description</h2><p>As part of the split section the persistent element
+specifies filenames which are in the read-write disk area</p></div><div class="refsect1" lang="en"><a name="id2488191"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.preferences"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">preferences</code>
       </h2><p>
         <code class="sgmltag-element">preferences</code>
@@ -423,161 +400,166 @@ specifies filenames which are in the read-write disk area</p></div><div class="r
   <a class="link" href="#def.locale" title="locale">locale</a>? &amp;
   <a class="link" href="#def.defaultdestination" title="defaultdestination">defaultdestination</a>? &amp;
   <a class="link" href="#def.defaultroot" title="defaultroot">defaultroot</a>? &amp;
-  <a class="link" href="#def.defaultbaseroot" title="defaultbaseroot">defaultbaseroot</a>?</pre></div><div class="refsect1" lang="en"><a name="id330529"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.productinfo"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+  <a class="link" href="#def.defaultbaseroot" title="defaultbaseroot">defaultbaseroot</a>?</pre></div><div class="refsect1" lang="en"><a name="id2476342"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.productinfo"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">productinfo</code>
       </h2><p>
         <code class="sgmltag-element">productinfo</code>
-       &#8212; Describe Packages and Metadata</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">productinfo ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id330572"></a><h2>Description</h2><p>The productinfo element contains one particular environment
+       &#8212; Describe Packages and Metadata</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">productinfo ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id2476388"></a><h2>Description</h2><p>The productinfo element contains one particular environment
 variable and its value. Shell rules for the names apply.
-The value must not exceed a certain length for sanity reasons.
-Any funny characters like tabs, line break, carriage return or
-combinations are converted to spaces (one each) which may lead
-to unexpected contents.</p></div><div class="refsect1" lang="en"><a name="id330585"></a><h2>Attributes</h2><div class="informaltable"><table border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Attribute</th><th>Type</th><th>Use</th><th>Documentation</th></tr></thead><tbody><tr><td>name</td><td> TEXT </td><td>Required</td><td>A name</td></tr></tbody></table></div></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.productoption"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+The value must not exceed a certain length for sanity.
+reasons Any funny characters like tabs, line break,
+carriage return or combinations are converted to spaces
+(one each) which may lead to unexpected contents.</p></div><div class="refsect1" lang="en"><a name="id2476404"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.productoption"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">productoption</code>
       </h2><p>
         <code class="sgmltag-element">productoption</code>
-       &#8212; Describe Packages and Metadata</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">productoption ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id330672"></a><h2>Description</h2><p>The productoption element carries the information for an productoptionitecture,
-its name and its fallback (productoptional).</p></div><div class="refsect1" lang="en"><a name="id330682"></a><h2>Attributes</h2><div class="informaltable"><table border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Attribute</th><th>Type</th><th>Use</th><th>Documentation</th></tr></thead><tbody><tr><td>name</td><td> TEXT </td><td>Required</td><td>A name</td></tr></tbody></table></div></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.productoptions"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+       &#8212; Describe Packages and Metadata</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">productoption ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id2476450"></a><h2>Description</h2><p>The productoption element carries the information for a
+product option its name and its fallback (productoptional).</p></div><div class="refsect1" lang="en"><a name="id2476462"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.productoptions"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">productoptions</code>
       </h2><p>
         <code class="sgmltag-element">productoptions</code>
        &#8212; Describe Packages and Metadata</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">productoptions ::= (<a class="link" href="#def.productoption" title="productoption">productoption</a>)* &amp;
   (<a class="link" href="#def.productinfo" title="productinfo">productinfo</a>)* &amp;
-  (<a class="link" href="#def.productvar" title="productvar">productvar</a>)*</pre></div><div class="refsect1" lang="en"><a name="id330785"></a><h2>Description</h2><p>The productoptions element contains a list of options
+  (<a class="link" href="#def.productvar" title="productvar">productvar</a>)*</pre></div><div class="refsect1" lang="en"><a name="id2492363"></a><h2>Description</h2><p>The productoptions element contains a list of options
 that influence the instsource creation process in a
 general manner. For instance an option could specify
-a default medium number for source packages and the like.</p></div><div class="refsect1" lang="en"><a name="id330796"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.productvar"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+a default medium number for source packages and the like.</p></div><div class="refsect1" lang="en"><a name="id2492376"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.productvar"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">productvar</code>
       </h2><p>
         <code class="sgmltag-element">productvar</code>
-       &#8212; Describe Packages and Metadata</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">productvar ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id330840"></a><h2>Description</h2><p>The productinfo element contains one particular environment
+       &#8212; Describe Packages and Metadata</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">productvar ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id2492422"></a><h2>Description</h2><p>The productinfo element contains one particular environment
 variable and its value. Shell rules for the names apply.
-The value is used to create the content file.</p></div><div class="refsect1" lang="en"><a name="id330851"></a><h2>Attributes</h2><div class="informaltable"><table border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Attribute</th><th>Type</th><th>Use</th><th>Documentation</th></tr></thead><tbody><tr><td>name</td><td> TEXT </td><td>Required</td><td>A name</td></tr></tbody></table></div></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.profile"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+The value is used to create the content file.</p></div><div class="refsect1" lang="en"><a name="id2492435"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.profile"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">profile</code>
       </h2><p>
         <code class="sgmltag-element">profile</code>
-       &#8212; Creates Profiles</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">profile ::=  EMPTY</pre></div><div class="refsect1" lang="en"><a name="id330938"></a><h2>Description</h2><p>Profiles creates a namespace on an image description and
+       &#8212; Creates Profiles</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">profile ::=  EMPTY</pre></div><div class="refsect1" lang="en"><a name="id2492482"></a><h2>Description</h2><p>Profiles creates a namespace on an image description and
 thus can be used to have one description with different
 profiles for example KDE and GNOME including different
-packages.</p></div><div class="refsect1" lang="en"><a name="id330949"></a><h2>Attributes</h2><div class="informaltable"><table border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Attribute</th><th>Type</th><th>Use</th><th>Documentation</th></tr></thead><tbody><tr><td>name</td><td> TEXT </td><td>Required</td><td>A name</td></tr><tr><td>description</td><td> TEXT </td><td>Required</td><td>Description of how this profiles influences the image</td></tr></tbody></table></div></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.profiles"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+packages.</p></div><div class="refsect1" lang="en"><a name="id2492495"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.profiles"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">profiles</code>
       </h2><p>
         <code class="sgmltag-element">profiles</code>
-       &#8212; Creates Namespace Section for Drivers</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">profiles ::= (<a class="link" href="#def.profile" title="profile">profile</a>)+</pre></div><div class="refsect1" lang="en"><a name="id331057"></a><h2>Description</h2><p>Namespace section which creates a namespace and the
-drivers can bind itself to one of the listed namespaces.</p></div><div class="refsect1" lang="en"><a name="id331067"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.repopackage"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+       &#8212; Creates Namespace Section for Drivers</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">profiles ::= (<a class="link" href="#def.profile" title="profile">profile</a>)+</pre></div><div class="refsect1" lang="en"><a name="id2492549"></a><h2>Description</h2><p>Namespace section which creates a namespace and the
+drivers can bind itself to one of the listed namespaces.</p></div><div class="refsect1" lang="en"><a name="id2492561"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.repopackage"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">repopackage</code>
       </h2><p>
         <code class="sgmltag-element">repopackage</code>
-       &#8212; Name of an instsource Package</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">repopackage ::=  EMPTY</pre></div><div class="refsect1" lang="en"><a name="id331111"></a><h2>Attributes</h2><div class="informaltable"><table border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Attribute</th><th>Type</th><th>Use</th><th>Documentation</th></tr></thead><tbody><tr><td>name</td><td> TEXT </td><td>Required</td><td>A name</td></tr><tr><td>arch</td><td> TEXT </td><td>Required</td><td>An architecture</td></tr><tr><td>priority</td><td> TEXT </td><td>Required</td><td>Specifies the search priority</td></tr><tr><td>addarch</td><td> TEXT </td><td>Required</td><td>Specifies that this package should
-additionally add the same package from the given arch</td></tr><tr><td>removearch</td><td> TEXT </td><td>Required</td><td>Specifies that the package with the
-given arch should be removed</td></tr><tr><td>forcearch</td><td> TEXT </td><td>Required</td><td>Specifies that the package with
-the given arch should be used in any case</td></tr><tr><td>source</td><td> TEXT </td><td>Required</td><td>A location where packages can be found to build an
-installation source from</td></tr><tr><td>script</td><td> TEXT </td><td>Required</td><td>A script hook for meta files to be called after the
-file was fetched</td></tr><tr><td>medium</td><td>
-                <span class="type">xsd:nonNegativeInteger</span>
-              </td><td>Required</td><td>Specifies that the package will be put
-to the specific medium number (CD1, DVD7, ...)</td></tr></tbody></table></div></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.repopackages"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+       &#8212; Name of an instsource Package</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">repopackage ::=  EMPTY</pre></div><div class="refsect1" lang="en"><a name="id2492608"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.repopackages"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">repopackages</code>
       </h2><p>
         <code class="sgmltag-element">repopackages</code>
-       &#8212; Specifies Packages for Installation Source</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">repopackages ::= (<a class="link" href="#def.repopackage" title="repopackage">repopackage</a>)*</pre></div><div class="refsect1" lang="en"><a name="id331338"></a><h2>Description</h2><p>The repopackages elements specifies a set of packages which
-are used for creating a Novell SUSE installation source.</p></div><div class="refsect1" lang="en"><a name="id331349"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.repository"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+       &#8212; Specifies Packages for Installation Source</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">repopackages ::= (<a class="link" href="#def.repopackage" title="repopackage">repopackage</a>)*</pre></div><div class="refsect1" lang="en"><a name="id2492663"></a><h2>Description</h2><p>The repopackages elements specifies a set of packages which
+are used for creating a Novell SUSE installation source.</p></div><div class="refsect1" lang="en"><a name="id2492675"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.repository"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">repository</code>
       </h2><p>
         <code class="sgmltag-element">repository</code>
-       &#8212; The Name of the Repository</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">repository ::= <a class="link" href="#def.source" title="source">source</a></pre></div><div class="refsect1" lang="en"><a name="id331396"></a><h2>Attributes</h2><div class="informaltable"><table border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Attribute</th><th>Type</th><th>Use</th><th>Documentation</th></tr></thead><tbody><tr><td>type</td><td> Enumeration: "<code class="sgmltag-attvalue">apt-deb</code>" | "<code class="sgmltag-attvalue">apt-rpm</code>" | "<code class="sgmltag-attvalue">deb-dir</code>" | "<code class="sgmltag-attvalue">mirrors</code>" | "<code class="sgmltag-attvalue">red-carpet</code>" | "<code class="sgmltag-attvalue">rpm-dir</code>" | "<code class="sgmltag-attvalue">rpm-md</code>" | "<code class="sgmltag-attvalue">slack-site</code>" | "<code class="sgmltag-attvalue">up2date-mirrors</code>" | "<code class="sgmltag-attvalue">urpmi</code>" | "<code class="sgmltag-attvalue">yast2</code>"</td><td>Required</td><td>Type of repository</td></tr><tr><td>status</td><td> Enumeration: "<code class="sgmltag-attvalue">replaceable</code>" | "<code class="sgmltag-attvalue">fixed</code>"</td><td>Required</td><td>Specifies the status of the repository. This can be
-replacable or if not specified it's a must have repository</td></tr></tbody></table></div></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.rpm-check-signatures"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+       &#8212; The Name of the Repository</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">repository ::= <a class="link" href="#def.source" title="source">source</a></pre></div><div class="refsect1" lang="en"><a name="id2492726"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.rpm-check-signatures"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">rpm-check-signatures</code>
       </h2><p>
         <code class="sgmltag-element">rpm-check-signatures</code>
-       &#8212; Setup a Package Signature</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">rpm-check-signatures ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id331568"></a><h2>Description</h2><p>Setup if the package manager should check the package
+       &#8212; Setup a Package Signature</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">rpm-check-signatures ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id2492772"></a><h2>Description</h2><p>Setup if the package manager should check the package
 signature or not. This option could be ignored according
-to the used package manager.</p></div><div class="refsect1" lang="en"><a name="id331579"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.rpm-force"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+to the used package manager.</p></div><div class="refsect1" lang="en"><a name="id2492784"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.rpm-force"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">rpm-force</code>
       </h2><p>
         <code class="sgmltag-element">rpm-force</code>
-       &#8212; Force the Installation of a Package</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">rpm-force ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id331622"></a><h2>Description</h2><p>Setup if the package manager should force the install of the
+       &#8212; Force the Installation of a Package</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">rpm-force ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id2492831"></a><h2>Description</h2><p>Setup if the package manager should force the install of the
 package or not. This option could be ignored according
-to the used package manager.</p></div><div class="refsect1" lang="en"><a name="id331633"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.size"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+to the used package manager.</p></div><div class="refsect1" lang="en"><a name="id2492843"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.size"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">size</code>
       </h2><p>
         <code class="sgmltag-element">size</code>
        &#8212; Specifies the Size of an Image in (M)egabyte or (G)igabyte
 If the attribute additive is set the value will be added
-to the required size of the image</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">size ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id331678"></a><h2>Attributes</h2><div class="informaltable"><table border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Attribute</th><th>Type</th><th>Use</th><th>Documentation</th></tr></thead><tbody><tr><td>unit</td><td> Enumeration: "<code class="sgmltag-attvalue">M</code>" | "<code class="sgmltag-attvalue">G</code>"</td><td>Required</td><td>The unit of the image</td></tr><tr><td>additive</td><td>
-                <span class="type">xsd:boolean</span>
-              </td><td>Required</td><td> </td></tr></tbody></table></div></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.source"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+to the required size of the image</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">size ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id2492892"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.source"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">source</code>
       </h2><p>
         <code class="sgmltag-element">source</code>
-       &#8212; A Pointer to a Repository/Package Source</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">source ::=  EMPTY</pre></div><div class="refsect1" lang="en"><a name="id331793"></a><h2>Attributes</h2><div class="informaltable"><table border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Attribute</th><th>Type</th><th>Use</th><th>Documentation</th></tr></thead><tbody><tr><td>path</td><td> TEXT </td><td>Required</td><td>A path</td></tr></tbody></table></div></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.specification"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+       &#8212; A Pointer to a Repository/Package Source</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">source ::=  EMPTY</pre></div><div class="refsect1" lang="en"><a name="id2492939"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.specification"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">specification</code>
       </h2><p>
         <code class="sgmltag-element">specification</code>
-       &#8212; A Detailed Description</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">specification ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id331880"></a><h2>Description</h2><p>A detailed description of this image and what it can be
-used for.</p></div><div class="refsect1" lang="en"><a name="id331890"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.split"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+       &#8212; A Detailed Description</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">specification ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id2492985"></a><h2>Description</h2><p>A detailed description of this image and what it can be
+used for.</p></div><div class="refsect1" lang="en"><a name="id2492996"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.split"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">split</code>
       </h2><p>
         <code class="sgmltag-element">split</code>
        &#8212; Describes Images in Read-Only and Read-Write Portions</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">split ::= <a class="link" href="#def.temporary" title="temporary">temporary</a>? &amp;
-  <a class="link" href="#def.persistent" title="persistent">persistent</a>?</pre></div><div class="refsect1" lang="en"><a name="id331944"></a><h2>Description</h2><p>When the image type split is requested the image will be
+  <a class="link" href="#def.persistent" title="persistent">persistent</a>?</pre></div><div class="refsect1" lang="en"><a name="id2535930"></a><h2>Description</h2><p>When the image type split is requested the image will be
 splitted into a read-only and a read-write image portion.
 Each portion can have different filesystems and the split
 section describes which files/directories should go in
-what portion.</p></div><div class="refsect1" lang="en"><a name="id331955"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.temporary"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+what portion.</p></div><div class="refsect1" lang="en"><a name="id2535943"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.temporary"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">temporary</code>
       </h2><p>
         <code class="sgmltag-element">temporary</code>
        &#8212; Specifies Files in RAM</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">temporary ::= (<a class="link" href="#def.except" title="except">except</a>)* &amp;
-  (<a class="link" href="#def.file" title="file">file</a>)+</pre></div><div class="refsect1" lang="en"><a name="id332009"></a><h2>Description</h2><p>As part of the split section the temporary element
-specifies file names which are in the RAM disk area.</p></div><div class="refsect1" lang="en"><a name="id332019"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.timeout"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+  (<a class="link" href="#def.file" title="file">file</a>)+</pre></div><div class="refsect1" lang="en"><a name="id2535997"></a><h2>Description</h2><p>As part of the split section the temporary element
+specifies file names which are in the RAM disk area.</p></div><div class="refsect1" lang="en"><a name="id2536008"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.timeout"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">timeout</code>
       </h2><p>
         <code class="sgmltag-element">timeout</code>
-       &#8212; Specifies an ATFTP Download Timeout</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">timeout ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id332063"></a><h2>Description</h2><p>As part of the network deploy configuration this section 
-specifies an ATFTP download timeout</p></div><div class="refsect1" lang="en"><a name="id332073"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.timezone"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+       &#8212; Specifies an ATFTP Download Timeout</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">timeout ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id2536052"></a><h2>Description</h2><p>As part of the network deploy configuration this section 
+specifies an ATFTP download timeout</p></div><div class="refsect1" lang="en"><a name="id2536064"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.timezone"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">timezone</code>
       </h2><p>
         <code class="sgmltag-element">timezone</code>
-       &#8212; Setup Image Timezone setup</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">timezone ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id332116"></a><h2>Description</h2><p>Image timezone setup. The value will be used to search
-the correct timezone and copy it to /etc/localtime.</p></div><div class="refsect1" lang="en"><a name="id332127"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.type"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+       &#8212; Setup Image Timezone setup</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">timezone ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id2536107"></a><h2>Description</h2><p>Image timezone setup. The value will be used to search
+the correct timezone and copy it to /etc/localtime.</p></div><div class="refsect1" lang="en"><a name="id2536118"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.type"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">type</code>
       </h2><p>
         <code class="sgmltag-element">type</code>
-       &#8212; The Image Type of the Logical Extend</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">type ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id332170"></a><h2>Attributes</h2><div class="informaltable"><table border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Attribute</th><th>Type</th><th>Use</th><th>Documentation</th></tr></thead><tbody><tr><td>checkprebuilt</td><td>
-                <span class="type">xsd:boolean</span>
-              </td><td>Required</td><td>Activates whether KIWI should search for a prebuild boot
-image or not</td></tr><tr><td>bootprofile</td><td> TEXT </td><td>Required</td><td>Specifies the boot profile if defined in the boot image
-description. Used when KIWI option add-profile is used</td></tr><tr><td>boot</td><td> TEXT </td><td>Required</td><td>Specifies the path of the boot image (initrd), relative
-to /usr/share/kiwi/image</td></tr><tr><td>flags</td><td> Enumeration: "<code class="sgmltag-attvalue">unified</code>" | "<code class="sgmltag-attvalue">compressed</code>" | "<code class="sgmltag-attvalue">unified-cromfs</code>" | "<code class="sgmltag-attvalue">compressed-cromfs</code>"</td><td>Required</td><td>Specifies flags for the image type. This could be compressed
-or unified and applies to the iso type only</td></tr><tr><td>filesystem</td><td> Enumeration: "<code class="sgmltag-attvalue">ext2</code>" | "<code class="sgmltag-attvalue">ext3</code>" | "<code class="sgmltag-attvalue">reiserfs</code>" | "<code class="sgmltag-attvalue">squashfs</code>" | "<code class="sgmltag-attvalue">cromfs</code>"</td><td>Required</td><td>Specifies the filesystem which can be one of:
-ext2 , ext3 , reiserfs ,squashfs or cromfs</td></tr><tr><td>fsreadonly</td><td> Enumeration: "<code class="sgmltag-attvalue">ext2</code>" | "<code class="sgmltag-attvalue">ext3</code>" | "<code class="sgmltag-attvalue">reiserfs</code>" | "<code class="sgmltag-attvalue">squashfs</code>" | "<code class="sgmltag-attvalue">cromfs</code>"</td><td>Required</td><td>Specifies the filesystem for the read-only part of a split image</td></tr><tr><td>fsreadwrite</td><td> Enumeration: "<code class="sgmltag-attvalue">ext2</code>" | "<code class="sgmltag-attvalue">ext3</code>" | "<code class="sgmltag-attvalue">reiserfs</code>"</td><td>Required</td><td>Specifies the filesystem for the read-write part of a split image</td></tr><tr><td>ec2privatekeyfile</td><td> TEXT </td><td>Required</td><td>AWS user's PEM encoded RSA private key file</td></tr><tr><td>ec2certfile</td><td> TEXT </td><td>Required</td><td>AWS user's PEM encoded RSA pubkey certificate file</td></tr><tr><td>ec2accountnr</td><td>
-                <span class="type">xsd:nonNegativeInteger</span>
-              </td><td>Required</td><td>The user's EC2 user ID (Note: AWS account number, NOT Access Key ID)</td></tr><tr><td>baseroot</td><td> TEXT </td><td>Required</td><td>Specify the path to a pre created base root system.</td></tr><tr><td>format</td><td> Enumeration: "<code class="sgmltag-attvalue">vvfat</code>" | "<code class="sgmltag-attvalue">vpc</code>" | "<code class="sgmltag-attvalue">bochs</code>" | "<code class="sgmltag-attvalue">dmg</code>" | "<code class="sgmltag-attvalue">cloop</code>" | "<code class="sgmltag-attvalue">vmdk</code>" | "<code class="sgmltag-attvalue">qcow</code>" | "<code class="sgmltag-attvalue">cow</code>" | "<code class="sgmltag-attvalue">iso</code>" | "<code class="sgmltag-attvalue">usb</code>" | "<code class="sgmltag-attvalue">ovf</code>"</td><td>Required</td><td>Specifies the format of the virtual disk. This applies to the
-vmx/oem types only.</td></tr><tr><td>primary</td><td>
-                <span class="type">xsd:boolean</span>
-              </td><td>Required</td><td>Specifies the primary type (choose KIWI option type)</td></tr></tbody></table></div></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.union"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+       &#8212; The Image Type of the Logical Extend</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">type ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id2536162"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.union"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">union</code>
       </h2><p>
         <code class="sgmltag-element">union</code>
-       &#8212; Specifies the Overlay Filesystem</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">union ::=  EMPTY</pre></div><div class="refsect1" lang="en"><a name="id332612"></a><h2>Description</h2><p>As part of the network deploy configuration this section
+       &#8212; Specifies the Overlay Filesystem</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">union ::=  EMPTY</pre></div><div class="refsect1" lang="en"><a name="id2536206"></a><h2>Description</h2><p>As part of the network deploy configuration this section
 specifies the overlay filesystem setup if required by the
-filesystem type of the system image. An overlay setup is only
+filesystem type of the system image.An overlay setup is only
 required if the system image uses a squashfs or cromfs
-compressed filesystem.</p></div><div class="refsect1" lang="en"><a name="id332623"></a><h2>Attributes</h2><div class="informaltable"><table border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Attribute</th><th>Type</th><th>Use</th><th>Documentation</th></tr></thead><tbody><tr><td>ro</td><td> TEXT </td><td>Required</td><td>Device only for read-only </td></tr><tr><td>rw</td><td> TEXT </td><td>Required</td><td>Device for Read-Write</td></tr><tr><td>type</td><td> Enumeration: "<code class="sgmltag-attvalue">aufs</code>" | "<code class="sgmltag-attvalue">unionfs</code>"</td><td>Required</td><td> </td></tr></tbody></table></div></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.user"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+compressed filesystem.</p></div><div class="refsect1" lang="en"><a name="id2536220"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.user"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">user</code>
       </h2><p>
         <code class="sgmltag-element">user</code>
-       &#8212; A User with Name, Password, Path to Its Home And Shell</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">user ::=  EMPTY</pre></div><div class="refsect1" lang="en"><a name="id332752"></a><h2>Attributes</h2><div class="informaltable"><table border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Attribute</th><th>Type</th><th>Use</th><th>Documentation</th></tr></thead><tbody><tr><td>name</td><td> TEXT </td><td>Required</td><td>A name</td></tr><tr><td>id</td><td>
-                <span class="type">xsd:nonNegativeInteger</span>
-              </td><td>Required</td><td>The user ID for this user</td></tr><tr><td>realname</td><td> TEXT </td><td>Required</td><td>The name of an user</td></tr><tr><td>pwd</td><td> TEXT </td><td>Required</td><td>The password</td></tr><tr><td>home</td><td> TEXT </td><td>Required</td><td>The home directory for this user</td></tr><tr><td>shell</td><td> TEXT </td><td>Required</td><td>The shell for this user</td></tr></tbody></table></div></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.users"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+       &#8212; A User with Name, Password, Path to Its Home And Shell</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">user ::=  EMPTY</pre></div><div class="refsect1" lang="en"><a name="id2536264"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.users"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">users</code>
       </h2><p>
         <code class="sgmltag-element">users</code>
-       &#8212; A List of Users</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">users ::= (<a class="link" href="#def.user" title="user">user</a>)+</pre></div><div class="refsect1" lang="en"><a name="id332927"></a><h2>Attributes</h2><div class="informaltable"><table border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Attribute</th><th>Type</th><th>Use</th><th>Documentation</th></tr></thead><tbody><tr><td>group</td><td> TEXT </td><td>Required</td><td>Contains the group to which the user belongs</td></tr><tr><td>id</td><td>
-                <span class="type">xsd:nonNegativeInteger</span>
-              </td><td>Required</td><td>Contains the group ID to which the user belongs</td></tr></tbody></table></div></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.version"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+       &#8212; A List of Users</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">users ::= (<a class="link" href="#def.user" title="user">user</a>)+</pre></div><div class="refsect1" lang="en"><a name="id2536313"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.version"></a><div class="titlepage"></div><div class="refnamediv"><h2>
         <code class="sgmltag-element">version</code>
       </h2><p>
         <code class="sgmltag-element">version</code>
-       &#8212; A Version Number for the Image, Consists of Major.Minor.Release </p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">version ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id333033"></a><h2>Attributes</h2><p>No attributes available.</p></div></div></div></body></html>
+       &#8212; A Version Number for the Image, Consists of Major.Minor.Release </p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">version ::=  TEXT </pre></div><div class="refsect1" lang="en"><a name="id2536357"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.vmwarecdrom"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+        <code class="sgmltag-element">vmwarecdrom</code>
+      </h2><p>
+        <code class="sgmltag-element">vmwarecdrom</code>
+       &#8212; The VMware CD/DVD drive definition. You can setup either a
+scsi CD or an ide CD drive</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">vmwarecdrom ::=  EMPTY</pre></div><div class="refsect1" lang="en"><a name="id2536402"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.vmwareconfig"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+        <code class="sgmltag-element">vmwareconfig</code>
+      </h2><p>
+        <code class="sgmltag-element">vmwareconfig</code>
+       &#8212; specifies the VMware configuration sections</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">vmwareconfig ::= <a class="link" href="#def.vmwarenic" title="vmwarenic">vmwarenic</a>? &amp;
+  <a class="link" href="#def.vmwaredisk" title="vmwaredisk">vmwaredisk</a>? &amp;
+  <a class="link" href="#def.vmwarecdrom" title="vmwarecdrom">vmwarecdrom</a>?</pre></div><div class="refsect1" lang="en"><a name="id2536462"></a><h2>Description</h2><p>The vmwareconfig element specifies the VMware guest
+configuration options which are used by the VMware
+virtual machine when running the image.</p></div><div class="refsect1" lang="en"><a name="id2536474"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.vmwaredisk"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+        <code class="sgmltag-element">vmwaredisk</code>
+      </h2><p>
+        <code class="sgmltag-element">vmwaredisk</code>
+       &#8212; The VMware disk definition. You can setup either a
+scsi disk or an ide disk</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">vmwaredisk ::=  EMPTY</pre></div><div class="refsect1" lang="en"><a name="id2536518"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.vmwarenic"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+        <code class="sgmltag-element">vmwarenic</code>
+      </h2><p>
+        <code class="sgmltag-element">vmwarenic</code>
+       &#8212; The VMware network interface definition</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">vmwarenic ::=  EMPTY</pre></div><div class="refsect1" lang="en"><a name="id2536562"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.xenconfig"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+        <code class="sgmltag-element">xenconfig</code>
+      </h2><p>
+        <code class="sgmltag-element">xenconfig</code>
+       &#8212; specifies the Xen configuration sections</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">xenconfig ::= <a class="link" href="#def.xendisk" title="xendisk">xendisk</a>?</pre></div><div class="refsect1" lang="en"><a name="id2536611"></a><h2>Description</h2><p>The xenconfig element specifies the Xen guest
+configuration options which are used by the Xen
+para virtual machine when running the image.</p></div><div class="refsect1" lang="en"><a name="id2536623"></a><h2>Attributes</h2><p>No attributes available.</p></div></div><div class="refentry" lang="en"><div class="refentry.separator"><hr></div><a name="def.xendisk"></a><div class="titlepage"></div><div class="refnamediv"><h2>
+        <code class="sgmltag-element">xendisk</code>
+      </h2><p>
+        <code class="sgmltag-element">xendisk</code>
+       &#8212; The Xen disk device definition.</p></div><div class="refsynopsisdiv"><h2>Content Model</h2><pre class="screen">xendisk ::=  EMPTY</pre></div><div class="refsect1" lang="en"><a name="id2536667"></a><h2>Attributes</h2><p>No attributes available.</p></div></div></div></body></html>

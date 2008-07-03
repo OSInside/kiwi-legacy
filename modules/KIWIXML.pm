@@ -97,14 +97,16 @@ sub new {
 	#==========================================
 	# Check/Transform due to XSL stylesheet(s)
 	#------------------------------------------
-	my $data = qxx (
-		"xsltproc -o $controlFile-v2.0 $main::S14to20 $controlFile 2>&1"
-	);
-	my $code = $? >> 8;
-	if (($code == 0) && (-f "$controlFile-v2.0")) {
-		qxx ("mv $controlFile-v2.0 $controlFile");
-	} else {
-		$kiwi -> loginfo ("XSL: $data");
+	foreach my $template (@main::SchemeCVT) {
+		my $data = qxx (
+			"xsltproc -o $controlFile-next $template $controlFile 2>&1"
+		);
+		my $code = $? >> 8;
+		if (($code == 0) && (-f "$controlFile-next")) {
+			qxx ("mv $controlFile-next $controlFile");
+		} else {
+			$kiwi -> loginfo ("XSL: $data");
+		}
 	}
 	#==========================================
 	# Check image md5 sum
@@ -140,6 +142,8 @@ sub new {
 	my $configfileNodeList;
 	my $unionNodeList;
 	my $profilesNodeList;
+	my $vmwarecNodeList;
+	my $xenconfNodeList;
 	eval {
 		$systemTree = $systemXML
 			-> parse_file ( $controlFile );
@@ -152,6 +156,8 @@ sub new {
 		$deploysNodeList = $systemTree -> getElementsByTagName ("deploy");
 		$splitNodeList   = $systemTree -> getElementsByTagName ("split");
 		$instsrcNodeList = $systemTree -> getElementsByTagName ("instsource");
+		$vmwarecNodeList = $systemTree -> getElementsByTagName ("vmwareconfig");
+		$xenconfNodeList = $systemTree -> getElementsByTagName ("xenconfig");
 		$partitionsNodeList = $systemTree 
 			-> getElementsByTagName ("partitions");
 		$configfileNodeList = $systemTree 
@@ -275,6 +281,8 @@ sub new {
 	$this->{configfileNodeList} = $configfileNodeList;
 	$this->{unionNodeList}      = $unionNodeList;
 	$this->{profilesNodeList}   = $profilesNodeList;
+	$this->{vmwarecNodeList}    = $vmwarecNodeList;
+	$this->{xenconfNodeList}    = $xenconfNodeList;
 	$this->{reqProfiles}        = $reqProfiles;
 	$this->{havemd5File}        = $havemd5File;
 	$this->{arch}               = $arch;
@@ -1885,26 +1893,138 @@ sub getPackageAttributes {
 		$result{patternType} = $ptype;
 		$result{patternPackageType} = $ppactype;
 		$result{type} = $type;
-		if (($type eq "xen") || ($type eq "vmware")) {
-			my $memory  = $node -> getAttribute ("memory");
-			my $disk    = $node -> getAttribute ("disk");
-			my $hwver   = $node -> getAttribute ("HWversion");
-			my $gos32bit= $node -> getAttribute ("guestOS_32Bit");
-			my $gos64bit= $node -> getAttribute ("guestOS_64Bit");
-			if (($memory) && ($disk)) {
-				$result{memory}  = $memory;
-				$result{disk}    = $disk;
-			}
-			if ($hwver) {
-				$result{hwver} = $hwver;
-			}
-			if ($gos32bit) {
-				$result{guestOS_32Bit} = $gos32bit;
-			}
-			if ($gos64bit) {
-				$result{guestOS_64Bit} = $gos64bit;
-			}
+	}
+	return %result;
+}
+
+#==========================================
+# getVMwareConfig
+#------------------------------------------
+sub getVMwareConfig {
+	# ...
+	# Create an Attribute hash from the <vmwareconfig>
+	# section if it exists
+	# ---
+	my $this = shift;
+	my $node = $this->{vmwarecNodeList} -> get_node(1);
+	my %result = ();
+	if (! defined $node) {
+		return %result;
+	}
+	#==========================================
+	# global setup
+	#------------------------------------------
+	my $arch = $node -> getAttribute ("arch");
+	if (! defined $arch) {
+		$arch = "ix86";
+	} elsif ($arch eq "%arch") {
+		my $sysarch = qxx ("uname -m"); chomp $sysarch;
+		if ($sysarch =~ /i.86/) {
+			$arch = "ix86";
+		} else {
+			$arch = $sysarch;
 		}
+	}
+	my $hwver= $node -> getAttribute ("HWversion");
+	if (! defined $hwver) {
+		$hwver = 3;
+	}
+	my $guest= $node -> getAttribute ("guestOS");
+	if (! defined $guest) {
+		if ($arch eq "ix86") {
+			$guest = "suse";
+		} else {
+			$guest = "suse-64";
+		}
+	}
+	my $memory = $node -> getAttribute ("memory");
+	#==========================================
+	# storage setup disk
+	#------------------------------------------
+	my $disk = $node -> getElementsByTagName ("vmwaredisk");
+	my ($type,$id);
+	if ($disk) {
+		my $node = $disk -> get_node(1);
+		$type = $node -> getAttribute ("controller");
+		$id   = $node -> getAttribute ("id");
+	}
+	#==========================================
+	# storage setup CD rom
+	#------------------------------------------
+	my $cd = $node -> getElementsByTagName ("vmwarecdrom");
+	my ($cdtype,$cdid);
+	if ($cd) {
+		my $node = $cd -> get_node(1);
+		$cdtype = $node -> getAttribute ("controller");
+		$cdid   = $node -> getAttribute ("id");
+	}
+	#==========================================
+	# network setup
+	#------------------------------------------
+	my $nic  = $node -> getElementsByTagName ("vmwarenic");
+	my ($drv,$iface,$mode);
+	if ($nic) {
+		my $node = $nic  -> get_node(1);
+		$drv  = $node -> getAttribute ("driver");
+		$iface= $node -> getAttribute ("interface");
+		$mode = $node -> getAttribute ("mode");
+	}
+	#==========================================
+	# save hash
+	#------------------------------------------
+	$result{vmware_arch}  = $arch;
+	$result{vmware_hwver} = $hwver;
+	$result{vmware_guest} = $guest;
+	$result{vmware_memory}= $memory;
+	if ($disk) {
+		$result{vmware_disktype} = $type;
+		$result{vmware_diskid}   = $id;
+	}
+	if ($cd) {
+		$result{vmware_cdtype} = $cdtype;
+		$result{vmware_cdid}   = $cdid;
+	}
+	if ($nic) {
+		$result{vmware_nicdriver}= $drv;
+		$result{vmware_niciface} = $iface;
+		$result{vmware_nicmode}  = $mode;
+	}
+	return %result;
+}
+
+#==========================================
+# getXenConfig
+#------------------------------------------
+sub getXenConfig {
+	# ...
+	# Create an Attribute hash from the <xenconfig>
+	# section if it exists
+	# ---
+	my $this = shift;
+	my $node = $this->{xenconfNodeList} -> get_node(1);
+	my %result = ();
+	if (! defined $node) {
+		return %result;
+	}
+	#==========================================
+	# global setup
+	#------------------------------------------
+	my $memory = $node -> getAttribute ("memory");
+	#==========================================
+	# storage setup
+	#------------------------------------------
+	my $disk = $node -> getElementsByTagName ("xendisk");
+	my ($device);
+	if ($disk) {
+		my $node  = $disk -> get_node(1);
+		$device= $node -> getAttribute ("device");
+	}
+	#==========================================
+	# save hash
+	#------------------------------------------
+	$result{xen_memory}= $memory;
+	if ($disk) {
+		$result{xen_diskdevice} = $device;
 	}
 	return %result;
 }

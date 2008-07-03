@@ -477,8 +477,6 @@ the latest packages available.
 <packages type="type" \textit{profiles="name"}\\
 \hspace*{2.5cm}\textit{patternType="type"}\\
 \hspace*{2.5cm}\textit{patternPackageType="type"}\\
-\hspace*{2.5cm}\textit{memory="MB"}\\
-\hspace*{2.5cm}\textit{disk="/dev/device"}>\\
 \hspace*{1cm}<package name="name" arch="arch"/>\\
 \hspace*{1cm}<package .../>\\
 \hspace*{1cm}<opensusePattern name="name"/>\\
@@ -516,18 +514,10 @@ rpm -e --nodeps --noscripts \
 \end{verbatim}
 \item \textbf{xen}\\
       Xen required packages, list of packages used when the image
-      needs support for Xen-based virtualization. The memory and disk
-      attributes define how much memory the virtual system requires
-      and the kind of device the disk should appear as in the virtual
-      instance. This information is used to create the appropriate Xen
-      configuration (.xenconfig) file
+      needs support for Xen-based virtualization.
 \item \textbf{vmware}\\
       VMware required packages, list of packages used when the image
-      needs support for VMware- or generic based full virtualization. The
-      memory and disk attributes define how much memory the virtual
-      system requires and the kind of device the disk should appear
-      as in the virtual instance. This information is used to create
-      the appropriate VMware (.vmx) configuration file.
+      needs support for VMware- or generic based full virtualization.
 \end{itemize}
 
 Using a pattern name enhances the package list with a number of
@@ -564,6 +554,97 @@ The packagemanager will automatically pull in the package even if you have
 ignored it. To restrict a package to a specific architecture, use
 the arch attribute to specify a comma separated list of allowed
 architectures.
+
+\begin{Command}{12cm}
+<vmwareconfig arch="arch" memory="MB"\\
+\hspace*{2.5cm}HWversion="number"\\
+\hspace*{2.5cm}guestOS="name"/>\\
+\hspace*{1cm}<vmwarenic driver="name"\\
+\hspace*{2.5cm}interface="number" mode="mode"/>\\
+\hspace*{1cm}<vmwaredisk controller="ide|scsi"\\
+\hspace*{2.5cm}id="number"/>\\
+\hspace*{1cm}<vmwarecdrom controller="ide|scsi"\\
+\hspace*{2.5cm}id="number"/>\\
+</vmwareconfig>
+\end{Command}
+
+The optional vmwareconfig section is used if the image description
+includes a packages section of type \textbf{vmware}. In this case kiwi
+is able to create the guest configuration file required to run the
+image within VMware. The guest configuration file can also be created
+by the VMware toolkit itself but with the pre-created guest configuration
+created by kiwi it is possible to provide an all in one bundle ready
+to run in VMware. The following general information can be provided to
+create the VMware (.vmx) configuration file:
+
+\begin{itemize}
+\item \textbf{arch}\\
+      The virtualized architecture. Can be one of ix86 or x86\_64
+      Bydefault ix86 is used.
+\item \textbf{memory}\\
+      The mandatory memory attribute specified how much memory in MB
+      should be allocated for the virtual machine
+\item \textbf{HWversion}\\
+      The VMware hardware version number. By default version 3 is used
+\item \textbf{guestOS}\\
+      The guestOS identifier. By default suse is used on ix86 and suse-64
+      for x86\_64
+\end{itemize}
+
+The following information can be provided to setup the VMware virtual
+main storage device and CD/DVD drive connection.
+
+\begin{itemize}
+\item \textbf{controller}\\
+      The mandatory controller attribute can be either ide or scsi disk
+\item \textbf{id}\\
+      The mandatory id attribute specifies the disk id. If only one
+      disk is set the id value should be set to 0 
+\end{itemize}
+
+The following information can be provided to setup the VMware virtual
+network interface
+
+\begin{itemize}
+\item \textbf{driver}\\
+      The mandatory driver to use for the virtual network card. Possible
+      values are vlance, e1000 or vmxnet. vmxnet requires the vmware tools to be
+      part of the image
+\item \textbf{interface}\\
+      The mandatory network interface number. If only one interface is
+      set the value should be set to 0
+\item \textbf{mode}\\
+      The network mode used to communicate outside the VM. In many cases
+      the bridged mode is used.
+\end{itemize}
+
+\begin{Command}{12cm}
+<xenconfig memory="MB"\\
+\hspace*{1cm}<xendisk device="/dev/..."/>\\
+</vmwareconfig>
+\end{Command}
+
+The optional xenconfig section is used if the image description
+includes a packages section of type \textbf{xen}. In this case kiwi
+is able to create the guest configuration file required to run the
+image within Xen. According to this it's possible to provide an all
+in one bundle ready to run in Xen. The following general information
+can be provided to create the Xen (.xenconfig) configuration file:
+
+\begin{itemize}
+\item \textbf{memory}\\
+      The mandatory memory attribute specified how much memory in MB
+      should be allocated for the para virtual machine    
+\end{itemize}
+
+The following information can be provided to setup the Xen para virtual
+main storage device
+
+\begin{itemize}
+\item \textbf{device}\\
+      The mandatory device which should appear in the para virtual
+      instance
+\end{itemize}
 
 \begin{Command}{14cm}
 <deploy server="IP" blocksize="4096">\\

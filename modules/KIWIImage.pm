@@ -766,7 +766,7 @@ sub createImageVMX {
 	my $this = shift;
 	my $para = shift;
 	my $xml  = $this->{xml};
-	my %vmwc = $xml  -> getPackageAttributes ("vmware");
+	my %vmwc = $xml  -> getVMwareConfig ();
 	my $name = $this -> createImageUSB ($para,"VMX");
 	if (! defined $name) {
 		return undef;
@@ -821,7 +821,7 @@ sub createImageXen {
 	my $this = shift;
 	my $para = shift;
 	my $xml  = $this->{xml};
-	my %xenc = $xml  -> getPackageAttributes ("xen");
+	my %xenc = $xml  -> getXenConfig();
 	my $name = $this -> createImageUSB ($para,"Xen");
 	if (! defined $name) {
 		return undef;
@@ -2256,7 +2256,7 @@ sub createImageSplit {
 		#------------------------------------------
 		if ((defined $main::BootVMFormat) && ($main::BootVMFormat eq "vmdk")) {
 			# VMware vmx file...
-			my %vmwc = $sxml -> getPackageAttributes ("vmware");
+			my %vmwc = $sxml -> getVMwareConfig ();
 			if (! $this-> buildVMwareConfig ($main::Destination,$name,\%vmwc)) {
 				$main::Survive = "default";
 				return undef;
@@ -3024,29 +3024,36 @@ sub buildXenConfig {
 	$kernel    = readlink ($kernel);
 	$kernel    = basename ($kernel);
 	my %xenconfig = %{$xenref};
-	if (defined $xenconfig{disk}) {
-		$kiwi -> info ("Creating image Xen configuration file...");
-		if (! open (FD,">$file")) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't create xenconfig file: $!");
-			$kiwi -> failed ();
-			return undef;
-		}
-		my $device = $xenconfig{disk};
-		my $part   = $device."1";
-		my $memory = $xenconfig{memory};
-		my $image  = $name->{systemImage};
-		$part =~ s/\/dev\///;
-		print FD '#  -*- mode: python; -*-'."\n";
-		print FD 'kernel="'.$kernel.'"'."\n";
-		print FD 'ramdisk="'.$initrd.'"'."\n";
-		print FD 'memory='.$memory."\n";
-		print FD 'disk=[ "file:'.$image.','.$part.',w" ]'."\n";
-		print FD 'root="'.$part.' ro"'."\n";
-		print FD 'extra=" xencons=tty "'."\n";
-		close FD;
-		$kiwi -> done();
+	$kiwi -> info ("Creating image Xen configuration file...");
+	if (! %xenconfig) {
+		$kiwi -> skipped ();
+		$kiwi -> warning ("Missing Xen virtualisation config data");
+		$kiwi -> skipped ();
+		return $dest;
 	}
+	if (! open (FD,">$file")) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't create xenconfig file: $!");
+		$kiwi -> failed ();
+		return undef;
+	}
+	#==========================================
+	# global setup
+	#------------------------------------------
+	my $device = $xenconfig{xen_diskdevice};
+	my $part   = $device."1";
+	my $memory = $xenconfig{xen_memory};
+	my $image  = $name->{systemImage};
+	$part =~ s/\/dev\///;
+	print FD '#  -*- mode: python; -*-'."\n";
+	print FD 'kernel="'.$kernel.'"'."\n";
+	print FD 'ramdisk="'.$initrd.'"'."\n";
+	print FD 'memory='.$memory."\n";
+	print FD 'disk=[ "file:'.$image.','.$part.',w" ]'."\n";
+	print FD 'root="'.$part.' ro"'."\n";
+	print FD 'extra=" xencons=tty "'."\n";
+	close FD;
+	$kiwi -> done();
 	return $dest;
 }
 
@@ -3061,9 +3068,10 @@ sub buildVMwareConfig {
 	my $kiwi   = $this->{kiwi};
 	my $arch   = $this->{arch};
 	my $file   = $dest."/".$name->{systemImage}.".vmx";
+	my $image  = $name->{systemImage};
 	my %vmwconfig = %{$vmwref};
 	$kiwi -> info ("Creating image VMware configuration file...");
-	if ((! $vmwconfig{disk}) || (! $vmwconfig{memory})) {
+	if (! %vmwconfig) {
 		$kiwi -> skipped ();
 		$kiwi -> warning ("Missing VMware virtualisation config data");
 		$kiwi -> skipped ();
@@ -3075,78 +3083,74 @@ sub buildVMwareConfig {
 		$kiwi -> failed ();
 		return undef;
 	}
-	my $device = $vmwconfig{disk};
-	my $memory = $vmwconfig{memory};
-	my $image  = $name->{systemImage};
-	my $cdraw  = $device;
-	if ($device =~ /^ide/) {
-		my $id = chop $cdraw;
-		if ($id == 0) {
-			$cdraw.= 1;
-		} else {
-			$cdraw.= 0;
-		}
-	} else {
-		$cdraw = "ide1";
-	}
-	# General...
+	#==========================================
+	# global setup
+	#------------------------------------------
 	print FD '#!/usr/bin/vmware'."\n";
 	print FD 'config.version = "8"'."\n";
 	print FD 'tools.syncTime = "true"'."\n";
 	print FD 'uuid.action = "create"'."\n";
-	if ($vmwconfig{hwver}) {
-		print FD 'virtualHW.version = "'.$vmwconfig{hwver}.'"'."\n";
+	if ($vmwconfig{vmware_hwver}) {
+		print FD 'virtualHW.version = "'.$vmwconfig{vmware_hwver}.'"'."\n";
 	} else {
 		print FD 'virtualHW.version = "3"'."\n";
 	}
 	print FD 'displayName = "'.$name->{systemImage}.'"'."\n";
-	# Memory setup...
-	print FD 'memsize = "'.$memory.'"'."\n";
-	# Guest Operating system identification...
-	if ($arch !~ /64$/) {
-		if ($vmwconfig{guestOS_32Bit}) {
-			print FD 'guestOS = "'.$vmwconfig{guestOS_32Bit}.'"'."\n";
+	print FD 'memsize = "'.$vmwconfig{vmware_memory}.'"'."\n";
+	print FD 'guestOS = "'.$vmwconfig{vmware_guest}.'"'."\n";
+	#==========================================
+	# storage setup
+	#------------------------------------------
+	if (defined $vmwconfig{vmware_disktype}) {
+		my $type   = $vmwconfig{vmware_disktype};
+		my $device = $vmwconfig{vmware_disktype}.$vmwconfig{vmware_diskid};
+		if ($type eq "ide") {
+			# IDE Interface...
+			print FD $device.':0.present = "true"'."\n";
+			print FD $device.':0.fileName= "'.$image.'.vmdk"'."\n";
+			print FD $device.':0.redo = ""'."\n";
 		} else {
-			print FD 'guestOS = "suse"'."\n";
+			# SCSI Interface...
+			print FD $device.'.present = "true"'."\n";
+			print FD $device.'.sharedBus = "none"'."\n";
+			print FD $device.'.virtualDev = "lsilogic"'."\n";
+			print FD $device.':0.present = "true"'."\n";
+			print FD $device.':0.fileName = "'.$image.'.vmdk"'."\n";
+			print FD $device.':0.deviceType = "scsi-hardDisk"'."\n";
 		}
-	} else {
-		if ($vmwconfig{guestOS_64Bit}) {
-			print FD 'guestOS = "'.$vmwconfig{guestOS_64Bit}.'"'."\n";
-		} else {
-			print FD 'guestOS = "suse-64"'."\n";
+	}
+	#==========================================
+	# network setup
+	#------------------------------------------
+	if (defined $vmwconfig{vmware_niciface}) {
+		my $driver = $vmwconfig{vmware_nicdriver};
+		my $mode   = $vmwconfig{vmware_nicmode};
+		my $nic    = "ethernet".$vmwconfig{vmware_niciface};
+		print FD $nic.'.present = "true"'."\n";
+		print FD $nic.'.virtualDev = "'.$driver.'"'."\n";
+		print FD $nic.'.addressType = "generated"'."\n";
+		print FD $nic.'.connectionType = "'.$mode.'"'."\n";
+		if ($vmwconfig{vmware_arch} =~ /64$/) {
+			print FD $nic.'.allow64bitVmxnet = "true"'."\n";
 		}
 	}
-	# Main storage device...
-	if ($device =~ /^ide/) {
-		# IDE Interface...
+	#==========================================
+	# CD/DVD drive setup
+	#------------------------------------------
+	if (defined $vmwconfig{vmware_cdtype}) {
+		my $device = $vmwconfig{vmware_cdtype}.$vmwconfig{vmware_cdid};
 		print FD $device.':0.present = "true"'."\n";
-		print FD $device.':0.fileName= "'.$image.'.vmdk"'."\n";
-		print FD $device.':0.redo = ""'."\n";
-	} else {
-		# SCSI Interface...
-		print FD $device.'.present = "true"'."\n";
-		print FD $device.'.sharedBus = "none"'."\n";
-		print FD $device.'.virtualDev = "lsilogic"'."\n";
-		print FD $device.':0.present = "true"'."\n";
-		print FD $device.':0.fileName = "'.$image.'.vmdk"'."\n";
-		print FD $device.':0.deviceType = "scsi-hardDisk"'."\n";
+		print FD $device.':0.deviceType = "cdrom-raw"'."\n";
+		print FD $device.':0.autodetect = "true"'."\n";
+		print FD $device.':0.startConnected = "true"'."\n";
 	}
-	# CDrom...
-	print FD $cdraw.':0.present = "true"'."\n";
-	print FD $cdraw.':0.deviceType = "cdrom-raw"'."\n";
-	print FD $cdraw.':0.autodetect = "true"'."\n";
-	print FD $cdraw.':0.startConnected = "true"'."\n";
-	# Network / requires vmware tools to be installed...
-	print FD 'ethernet0.present = "true"'."\n";
-	print FD 'ethernet0.virtualDev = "vmxnet"'."\n";
-	print FD 'ethernet0.addressType = "generated"'."\n";
-	if ($arch =~ /64$/) {
-		print FD 'ethernet0.allow64bitVmxnet = "true"'."\n";
-	}
-	print FD 'ethernet0.connectionType = "bridged"'."\n";
-	# USB...
+	#==========================================
+	# USB setup
+	#------------------------------------------
 	print FD 'usb.present = "true"'."\n";
-	# Power management...
+	#==========================================
+	# Power Management setup
+	#------------------------------------------
 	print FD 'priority.grabbed = "normal"'."\n";
 	print FD 'priority.ungrabbed = "normal"'."\n";
 	print FD 'powerType.powerOff = "soft"'."\n";

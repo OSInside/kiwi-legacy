@@ -559,7 +559,8 @@ if [ $LOCAL_BOOT = "no" ];then
 				# Requested system partition size is smaller than
 				# existing partition, will not re-partition
 				# ----
-				Echo "Disk is too small, will not re-partition it"
+				Echo "Current system partition is bigger than requested size"
+				Echo "Disk won't be re-partitioned"
 				OEM_WITHOUTHOME=1
 				DONT_PARTITION=1
 				unset OEM_RECOVERY

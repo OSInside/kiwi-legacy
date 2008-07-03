@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<image schemeversion="2.0" name="suse-10.3-vm-guest">
+<image schemeversion="2.4" name="suse-10.3-vm-guest">
 	<description type="system">
 		<author>Marcus Schäfer</author>
 		<contact>ms@novell.com</contact>
@@ -26,8 +26,11 @@
 		<package name="vim"/>
 		<opensusePattern name="base-10.3"/>
 	</packages>
-	<packages type="vmware" memory="512" disk="ide0">
+	<packages type="vmware">
 	</packages>
+	<vmwareconfig memory="512">
+		<vmwaredisk controller="ide" id="0"/>
+	</vmwareconfig>
 	<packages type="bootstrap">
 		<package name="filesystem"/> 
 		<package name="glibc-locale"/>

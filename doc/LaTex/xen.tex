@@ -67,19 +67,22 @@ need in this para virtual environment.
 
 \begin{Command}{13cm}
 \begin{verbatim}
-<packages type="xen" memory="512" disk="/dev/sda">
+<packages type="xen">
    <!-- packages you need in Xen only -->
    <package name="kernel-xen"/>
    <package name="xen"/>
 </packages>
+<xenconfig memory="512">
+   <xendisk device="/dev/sda"/>
+</xenconfig>
 \end{verbatim}
 \end{Command}
 
 If this information is present KIWI will create a Xen domain U
 configuration with 512 MB of RAM and expects the disk at /dev/sda.
-Other information like bridged network, power management, etc..
-needs to be added manually at the moment. The KIWI Xen
-domain U configuration is stored in the file:
+Additional information to setup the Xen guest machine properties are
+explained in the \textbf{xenconfig} section. The KIWI Xen domain U
+configuration is stored in the file:
 
 \begin{Command}{13cm}
 \begin{verbatim}

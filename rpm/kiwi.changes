@@ -1,4 +1,16 @@
 -------------------------------------------------------------------
+Wed Jul  2 11:25:53 CEST 2008 - ms@suse.de
+
+- v2.49
+- removed guest configuration attributes from <packages> section
+  and add new main sections for VMware -> <vmareconfig> and
+  for Xen -> <xenconfig>. This change requires a new scheme
+  version 2.4 and the xsl stylesheet convert20to24.xsl. The
+  conversion will _not_ add one of the new xen|vmareconfig
+  sections but removes the invalid VM configuration related
+  attributes from the packages sections (bnc #397528)
+
+-------------------------------------------------------------------
 Mon Jun 30 15:42:45 CEST 2008 - ms@suse.de
 
 - v2.48

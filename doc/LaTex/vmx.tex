@@ -95,16 +95,20 @@ need in this virtual environment.
 
 \begin{Command}{13cm}
 \begin{verbatim}
-<packages type="vmware" memory="512" disk="ide0">
+<packages type="vmware">
    <!-- packages you need in VMware only -->
 </packages>
+<vmwareconfig memory="512">
+   <vmwaredisk controller="ide" id="0"/>
+</vmwareconfig>
 \end{verbatim}
 \end{Command}
 
 If this information is present KIWI will create a VMware guest
 configuration with 512 MB of RAM and an IDE disk controller interface.
-Other information like bridged network, CD-ROM drive, power management, etc..
-are added as default values and can be changed easily by the native
+Additional information to setup the VMware guest machine properties are
+explained in the \textbf{vmwareconfig} section. The written guest
+configuration file can be easily loaded and changed by the native
 graphics user provided with VMware. The KIWI VMware guest configuration
 is stored in the file:
 

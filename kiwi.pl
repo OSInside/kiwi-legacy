@@ -43,7 +43,7 @@ use KIWITest;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "2.48";
+our $Version       = "2.49";
 our $openSUSE      = "http://download.opensuse.org/repositories/";
 our $ConfigFile    = "$ENV{'HOME'}/.kiwirc";
 our $ConfigName    = "config.xml";
@@ -93,11 +93,14 @@ if ( ! defined $System ) {
 our $Tools    = $BasePath."/tools";
 our $Scheme   = $BasePath."/modules/KIWIScheme.rng";
 our $SchemeTST= $BasePath."/modules/KIWISchemeTest.rng";
-our $S14to20  = $BasePath."/xsl/convert14to20.xsl";
 our $KConfig  = $BasePath."/modules/KIWIConfig.sh";
 our $KMigrate = $BasePath."/modules/KIWIMigrate.txt";
 our $Revision = $BasePath."/.revision";
 our $TestBase = $BasePath."/tests";
+our @SchemeCVT= (
+	$BasePath."/xsl/convert14to20.xsl",
+	$BasePath."/xsl/convert20to24.xsl"
+)
 
 #==========================================
 # Globals (Supported filesystem names)
