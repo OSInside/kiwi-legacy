@@ -31,6 +31,7 @@ use KIWIUtil;
 use KIWIURL;
 use KIWIRepoMetaHandler;
 use KIWIProductData;
+use KIWIArchList;
 
 use RPMQ;
 
@@ -241,10 +242,12 @@ sub Init
   }
 
   ## architectures information (hash with name|desrc|next, next may be 0 which means "no fallback")
-  %{$this->{m_archlist}}      = $this->{m_xml}->getInstSourceArchList();
+  #%{$this->{m_archlist}}      = $this->{m_xml}->getInstSourceArchList();
+  $this->{m_archlist} = new KIWIArchList($this);
+  $this->{m_archlist}->addArchs( { $this->{m_xml}->getInstSourceArchList() } );
   if($this->{m_debug}) {
     open(DUMP, ">", "$this->{m_basedir}/archlist.dump.pl");
-    print DUMP Dumper($this->{m_archlist});
+    print DUMP $this->{m_archlist}->dumpList();
     close(DUMP);
   }
 
@@ -1219,85 +1222,85 @@ sub dumpRepoData
 #==========================================
 # getArchList
 #------------------------------------------
-sub getArchList
-{
-  my $this = shift;
-  
-  my @erg = ();
-  #my @archs = @{$this->{m_archlist}};
-
-  foreach(@{$this->{m_archlist}}) {
-    if(m{i\d+}) {
-      push @erg, $this->getArchListByName('intel', $_);
-    }
-    elsif(m{ia.+}) {
-      push @erg, $this->getArchListByName('ia', $_);
-    }
-    elsif(m{ppc}) {
-      push @erg, $this->getArchListByName('ppc', $_);
-    }
-    elsif(m{ppc64}) {
-      push @erg, $this->getArchListByName('ppc64', $_);
-    }
-    elsif(m{hppa}) {
-      push @erg, $this->getArchListByName('hp', $_);
-    }
-    elsif(m{x\d+}) {
-      push @erg, $this->getArchListByName('amd', $_);
-    }
-    elsif(m{s\d+.*}) {
-      push @erg, $this->getArchListByName('s390', $_);
-    }
-  }
-  return KIWIUtil::unify(@erg);
-}
-# /getArchList
+#sub getArchList
+#{
+#  my $this = shift;
+#  
+#  my @erg = ();
+#  #my @archs = @{$this->{m_archlist}};
+#
+#  foreach(@{$this->{m_archlist}}) {
+#    if(m{i\d+}) {
+#      push @erg, $this->getArchListByName('intel', $_);
+#    }
+#    elsif(m{ia.+}) {
+#      push @erg, $this->getArchListByName('ia', $_);
+#    }
+#    elsif(m{ppc}) {
+#      push @erg, $this->getArchListByName('ppc', $_);
+#    }
+#    elsif(m{ppc64}) {
+#      push @erg, $this->getArchListByName('ppc64', $_);
+#    }
+#    elsif(m{hppa}) {
+#      push @erg, $this->getArchListByName('hp', $_);
+#    }
+#    elsif(m{x\d+}) {
+#      push @erg, $this->getArchListByName('amd', $_);
+#    }
+#    elsif(m{s\d+.*}) {
+#      push @erg, $this->getArchListByName('s390', $_);
+#    }
+#  }
+#  return KIWIUtil::unify(@erg);
+#}
+## /getArchList
 
 
 
 #
-sub getArchListByName
-{
-  my $this = shift;
-  my $arch = shift;# or die("No arch given!");
-  # missing pars warning hook:
-  if(not defined($arch)) {
-    $this->{m_logger}->warning("[WARNING] [getArchByName] undefined parameter \$arch");
-    return undef; # no harm, but also no result
-  }
-
-  my @orig;
-  if($arch =~ m{i\d+}) {
-    @orig = @{$this->{m_fpath}->{'intel'}};
-  }
-  elsif($arch =~ m{ia.+}) {
-    @orig = @{$this->{m_fpath}->{'ia'}};
-  }
-  elsif($arch =~ m{ppc}) {
-   @orig = @{$this->{m_fpath}->{'ppc'}};
-  }
-  elsif($arch =~ m{ppc64}) {
-   @orig = @{$this->{m_fpath}->{'ppc64'}};
-  }
-  elsif($arch =~ m{hppa}) {
-   @orig = @{$this->{m_fpath}->{'hp'}};
-  }
-  elsif($arch =~ m{x\d+}) {
-   @orig = @{$this->{m_fpath}->{'amd'}};
-  }
-  elsif($arch =~ m{s\d+.*}) {
-   @orig = @{$this->{m_fpath}->{'s390'}};
-  }
-
-  my $index = 0;
-  for($index=0; $index<$#orig; $index++) {
-    if($orig[$index] eq $arch) {
-      last;
-    }
-  }
-  return @orig[$index .. $#orig];
-}
-# /getArchListByName
+#sub getArchListByName
+#{
+#  my $this = shift;
+#  my $arch = shift;# or die("No arch given!");
+#  # missing pars warning hook:
+#  if(not defined($arch)) {
+#    $this->{m_logger}->warning("[WARNING] [getArchByName] undefined parameter \$arch");
+#    return undef; # no harm, but also no result
+#  }
+#
+#  my @orig;
+#  if($arch =~ m{i\d+}) {
+#    @orig = @{$this->{m_fpath}->{'intel'}};
+#  }
+#  elsif($arch =~ m{ia.+}) {
+#    @orig = @{$this->{m_fpath}->{'ia'}};
+#  }
+#  elsif($arch =~ m{ppc}) {
+#   @orig = @{$this->{m_fpath}->{'ppc'}};
+#  }
+#  elsif($arch =~ m{ppc64}) {
+#   @orig = @{$this->{m_fpath}->{'ppc64'}};
+#  }
+#  elsif($arch =~ m{hppa}) {
+#   @orig = @{$this->{m_fpath}->{'hp'}};
+#  }
+#  elsif($arch =~ m{x\d+}) {
+#   @orig = @{$this->{m_fpath}->{'amd'}};
+#  }
+#  elsif($arch =~ m{s\d+.*}) {
+#   @orig = @{$this->{m_fpath}->{'s390'}};
+#  }
+#
+#  my $index = 0;
+#  for($index=0; $index<$#orig; $index++) {
+#    if($orig[$index] eq $arch) {
+#      last;
+#    }
+#  }
+#  return @orig[$index .. $#orig];
+#}
+## /getArchListByName
 
 
 
@@ -1403,7 +1406,7 @@ sub checkArchitectureList
     }
     elsif($requiredarch{$a} == 1) {
       $this->{m_logger}->info("\tarch $a as per global list");
-      push @ret, $this->getArchListByName($a);
+# BAUSTELLE #      push @ret, $this->getArchListByName($a);
     }
     elsif($requiredarch{$a} == 2) {
       $this->{m_logger}->info("\tarch $a added explicitely");
@@ -1547,14 +1550,6 @@ sub createMetadata
   if(not open(CONT, ">", $contentfile)) {
     die "Cannot create $contentfile";
   }
-  #foreach my $i(sort {$a <=> $b } keys(%{$this->{m_prodinfo}})) {
-  #  my $line = "$this->{m_prodinfo}->{$i}->[0] $this->{m_prodinfo}->{$i}->[1]";
-  #  while( $line =~ m{\$(DISTNAME|DISTVERSION|MANUFACTURER)}) {
-  #    my $replace = $this->{m_prodvars}->{$1};
-  #    $line =~ s|\$$1|$replace|;  # '|' char is not allowed in vars anyway
-  #  }
-  #  print CONT "$line\n";
-  #}
   my $info = $this->{m_proddata}->getSet("prodinfo");
   foreach my $i(sort { $a <=> $b } keys(%{$info})) {
     print CONT "$info->{$i}->[0] $info->{$i}->[1]\n";
@@ -1593,27 +1588,13 @@ sub createMetadata
   my $proddir = $this->{m_proddata}->getVar("PRODUCT_DIR");
   my $prodname = $this->{m_proddata}->getVar("PRODUCT_NAME");
   my $prodver = $this->{m_proddata}->getVar("PRODUCT_VERSION");
-  #if($this->{m_prodvars}->{'PRODUCT_DIR'} and
-  #  $this->{m_prodvars}->{'PRODUCT_NAME'} and
-  #  $this->{m_prodvars}->{'PRODUCT_VERSION'}
-  #  ) {
   if(defined($proddir) and defined($prodname) and defined($prodver)) {
     for my $n($this->getMediaNumbers()) {
       my $productsfile = "$this->{m_basesubdir}->{$n}/media.$n/products";
       if(not open(PRODUCT, ">", $productsfile)) {
 	die "Cannot create $productsfile";
       }
-      #for my $v("PRODUCT_DIR", "PRODUCT_NAME", "PRODUCT_VERSION") {
-      #  my $line = $this->{m_prodvars}->{$v};
-      #  while($line =~ m{\$(DISTNAME|DISTVERSION|MANUFACTURER)}) {
-      #    my $replace = $this->{m_prodvars}->{$1};
-      #    $line =~ s|\$$1|$replace|;
-      #  }
-      #  $this->{m_prodvars}->{$v} = $line;
-      #}
       print PRODUCT "$proddir $prodname $prodver\n";
-      #print PRODUCT " $this->{m_prodvars}->{'PRODUCT_NAME'}";
-      #print PRODUCT " $this->{m_prodvars}->{'PRODUCT_VERSION'}\n";
       close(PRODUCT);
     }
   }

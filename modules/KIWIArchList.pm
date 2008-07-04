@@ -19,6 +19,7 @@ package KIWIArchList;
 use strict;
 
 use KIWIArch;
+use Data::Dumper;
 
 
 #==================
@@ -85,6 +86,28 @@ sub arch
 #==================
 # other methods
 #------------------
+
+
+
+#==================
+# dumpList
+#------------------
+sub dumpList
+{
+  my $this = shift;
+  if(not ref($this)) {
+    return undef;
+  }
+
+  eval "require Data::Dumper";
+  if($@) {
+    $this->{m_collect}->logger()->error("Cannot load Data::Dumper!");
+    return undef;
+  }
+  else {
+    return Dumper($this->{m_archs});
+  }
+}
 
 
 
