@@ -2041,6 +2041,7 @@ sub getInstSourcePackageAttributes {
 	my $what = shift;
 	my $pack = shift;
 	my $nodes;
+
 	my $base = $this->{instsrcNodeList} -> get_node(1);
 	if ($what eq "metapackages") {
 		$nodes = $base -> getElementsByTagName ("metadata");
@@ -2052,24 +2053,27 @@ sub getInstSourcePackageAttributes {
 		"priority" ,"addarch","removearch",
 		"forcearch","source" ,"script", "medium"
 	);
-	for (my $i=1;$i<= $nodes->size();$i++) {
-		my $node  = $nodes -> get_node($i);
-		my @plist = $node  -> getElementsByTagName ("repopackage");
-		foreach my $element (@plist) {
-			my $package = $element -> getAttribute ("name");
-			if ($package ne $pack) {
-				next;
+
+	if(not defined($this->{m_rpacks})) {
+		my @nodes = ();
+		for (my $i=1;$i<= $nodes->size();$i++) {
+			my $node  = $nodes -> get_node($i);
+			my @plist = $node  -> getElementsByTagName ("repopackage");
+			push @nodes, @plist;
+		}
+		%{$this->{m_rpacks}} = map {$_->getAttribute("name") => $_} @nodes;
+	}
+		
+	my $elem = $this->{m_rpacks}->{$pack};
+	if(defined($elem)) {
+		foreach my $key (@attrib) {
+			my $value = $elem -> getAttribute ($key);
+			if (defined $value) {
+				$result{$key} = $value;
 			}
-			foreach my $key (@attrib) {
-				my $value = $element -> getAttribute ($key);
-				if (defined $value) {
-					$result{$key} = $value;
-				}
-			}
-			return \%result;
 		}
 	}
-	return undef;
+	return \%result;
 }
 
 #==========================================
