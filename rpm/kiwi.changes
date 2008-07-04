@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Jul  4 10:40:42 CEST 2008 - ms@suse.de
+
+- v2.50
+- added SUSE 11.1 (base SLE11) boot image descriptions
+- use zypper as packagemanager for 11.1 descriptions
+
+-------------------------------------------------------------------
 Wed Jul  2 11:25:53 CEST 2008 - ms@suse.de
 
 - v2.49
