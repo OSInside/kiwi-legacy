@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Jul  7 10:55:12 CEST 2008 - ms@suse.de
+
+- v2.51
+- allow Echo function to use escape sequences (bnc #397949)
+- instsource cleanup fixes by Jan Bornschlegel
+
+-------------------------------------------------------------------
 Fri Jul  4 10:40:42 CEST 2008 - ms@suse.de
 
 - v2.50

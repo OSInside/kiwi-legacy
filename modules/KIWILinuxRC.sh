@@ -42,13 +42,18 @@ function Echo {
 	# /.../
 	# print a message to the controling terminal
 	# ----
-	if test "$1" = "-n";then
-		echo $1 "-----> $2"
-	elif test "$1" = "-b";then
-		echo "       $2"
-	else
-		echo "-----> $1"
+	local option=""
+	local prefix="----->"
+	if test "$1" = "-b";then
+		prefix="      "; shift
 	fi
+	if test "$1" = "-n";then
+		option="$option $1"; shift
+	fi
+	if test "$1" = "-e";then
+		option="$option $1"; shift
+	fi
+	echo $option "$prefix $1"
 }
 #======================================
 # WaitKey
@@ -120,7 +125,8 @@ function importFile {
 		eval export "$key\=\"$item\""
 	done
 	if [ ! -z "$ERROR_INTERRUPT" ];then
-		systemException "$ERROR_INTERRUPT" "shell"
+		Echo -e "$ERROR_INTERRUPT"
+		systemException "*** interrupted ****" "shell"
 	fi
 }
 #======================================
