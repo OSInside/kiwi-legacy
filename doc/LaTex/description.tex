@@ -453,11 +453,11 @@ to the architecture of the image building host.
       can do the loop mount himself and point a standard local path
       to the mounted directory
 \item \textbf{http://<url>}\\
-      A http protocol based network locaation
+      A http protocol based network location
 \item \textbf{https://<url>}\\
-      A https protocol based network locaation
+      A https protocol based network location
 \item \textbf{ftp://<url>}\\
-      A ftp protocol based network locaation
+      A ftp protocol based network location
 \item \textbf{opensuse://<Project-Name>}\\
       A special http based network location which is created from
       the given openSUSE buildservice project name. The result is
@@ -467,6 +467,12 @@ to the architecture of the image building host.
 \item \textbf{file:///local/path}\\
       A local path which should be an absolute path description.
       The file:// prefix is optional and could also be omitted.
+\item \textbf{obs://\$dir1/\$dir2}\\
+      A special buildservice path whereas \$dir1 and \$dir2
+      represents the buildservice project location. If this type is
+      used as part of a boot attribute kiwi evaluates it to
+      this://images/\$dir1/\$dir2 and if used as part of a repository
+      source path attribute it evaluates to this://repos/\$dir1/\$dir2
 \end{itemize}
 
 Multiple repository sections are allowed and combined by the

@@ -87,6 +87,10 @@ sub normalizePath {
 	if (defined $path) {
 		return $path;
 	}
+	$path = $this -> obsPath ($module);
+	if (defined $path) {
+		return $path;
+	}
 	$path = $this -> openSUSEpath ($module);
 	if (defined $path) {
 		return $path;
@@ -170,11 +174,16 @@ sub thisPath {
 	# ---
 	my $this   = shift;
 	my $module = shift;
-	my $kiwi   = $this->{kiwi};
+	my $kiwi;
+	if (! defined $this->{kiwi}) {
+		$kiwi = new KIWILog("tiny");
+	} else {
+		$kiwi = $this->{kiwi};
+	}
 	#==========================================
 	# normalize URL data
 	#------------------------------------------
-	if ($module !~ /^this:\/\//) {
+	if ((! defined $module) || ($module !~ /^this:\/\//)) {
 		return undef;
 	}
 	$module =~ s/this:\/\///;
@@ -235,6 +244,40 @@ sub filePath {
 		return undef;
 	}
 	return $module;
+}
+
+#==========================================
+# obsPath
+#------------------------------------------
+sub obsPath {
+	# ...
+	# This method will create an openSUSE buildservice
+	# path as this:// url with the predefined subdirectories
+	# images/ if called as part of a boot attribute or
+	# repos if called as part of a repository source path
+	# attribute
+	# ---
+	my $this   = shift;
+	my $module = shift;
+	my $boot   = shift;
+	#==========================================
+	# normalize URL data
+	#------------------------------------------
+	if ($module !~ /^obs:\/\//) {
+		return undef;
+	}
+	$module =~ s/obs:\/\///;
+	$module =~ s/:/:\//g;
+	if ((! defined $module) || ($module eq "/")) {
+		return undef;
+	}
+	if (defined $boot) {
+		$module = "this://images/$module"
+	} else {
+		$module = "this://repos/$module"
+	}
+	my $path = $this -> thisPath ($module);
+	return $path;
 }
 
 #==========================================

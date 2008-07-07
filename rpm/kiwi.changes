@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Mon Jul  7 18:24:36 CEST 2008 - ms@suse.de
+
+- v2.53
+- added support for the openSUSE buildservice internal
+  obs:// type. This is a follow up for bug (bnc #404460)
+- fixed use of uninitialized values in instsource creation
+- fixed xsltproc output in case of an error message
+
+-------------------------------------------------------------------
 Mon Jul  7 16:51:10 CEST 2008 - jcborn@suse.de
 
 - v2.52

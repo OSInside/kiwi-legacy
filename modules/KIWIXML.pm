@@ -104,6 +104,11 @@ sub new {
 		my $code = $? >> 8;
 		if (($code == 0) && (-f "$controlFile-next")) {
 			qxx ("mv $controlFile-next $controlFile");
+		} elsif ($code > 10) {
+			$kiwi -> failed ();
+			$kiwi -> error ("XSL: $data");
+			$kiwi -> failed ();
+			return undef;
 		} else {
 			$kiwi -> loginfo ("XSL: $data");
 		}
@@ -607,7 +612,7 @@ sub getImageTypeAndAttributes {
 				$record{filesystem} = "$filesystemRW,$filesystemRO";
 			}
 		}
-		my $bootpath = $urlhd -> thisPath ($record{boot});
+		my $bootpath = $urlhd -> obsPath ($record{boot},"boot");
 		if (defined $bootpath) {
 			$record{boot} = $bootpath;
 		}
