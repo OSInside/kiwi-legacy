@@ -1888,7 +1888,9 @@ repository for image building.</db:para>
             <ref name="k.instrepo"/>
           </oneOrMore>
           <ref name="k.metadata"/>
-          <ref name="k.repopackages"/>
+          <oneOrMore>
+            <ref name="k.repopackages"/>
+          </oneOrMore>
         </interleave>
       </element>
     </define>
