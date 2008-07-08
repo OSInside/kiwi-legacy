@@ -43,7 +43,7 @@ use KIWITest;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "2.53";
+our $Version       = "2.54";
 our $openSUSE      = "http://download.opensuse.org/repositories/";
 our $ConfigFile    = "$ENV{'HOME'}/.kiwirc";
 our $ConfigName    = "config.xml";

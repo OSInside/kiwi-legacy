@@ -53,33 +53,28 @@
 	<tag class="element">vmwareconfig</tag> or
 	<tag class="element">xenconfig</tag> element
 </para>
-<xsl:template match="packages[@type='vmware']" mode="conv20to24">
+<xsl:template match="packages" mode="conv20to24">
+	<packages>
+	<xsl:if test="@memory or 
+		@disk or 
+		@HWversion or 
+		@guestOS_32Bit or 
+		@guestOS_64Bit">
 	<xsl:message>
-		<xsl:text>NOTE: You need to setup a vmwareconfig section&#10;</xsl:text>
-		<xsl:text>      Details in the 'KIWI image description'&#10;</xsl:text>
-		<xsl:text>      chapter of the kiwi cookbook</xsl:text>
-    </xsl:message>
-	<xsl:copy>
-		<xsl:copy-of select="@*[name() = 'type']"/>
-		<xsl:copy-of select="@*[name() = 'profiles']"/>
-		<xsl:copy-of select="@*[name() = 'patternType']"/>
-		<xsl:copy-of select="@*[name() = 'patternPackageType']"/>
-		<xsl:apply-templates mode="conv20to24"/>
-	</xsl:copy>
-</xsl:template>
-<xsl:template match="packages[@type='xen']" mode="conv20to24">
-	<xsl:message>
-		<xsl:text>NOTE: You need to setup a xenconfig section&#10;</xsl:text>
-		<xsl:text>      Details in the 'KIWI image description'&#10;</xsl:text>
+		<xsl:text>NOTE: You need to setup a vmwareconfig and/or&#10;</xsl:text>
+		<xsl:text>      xenconfig section in order to setup an&#10;</xsl:text>
+		<xsl:text>      appropriate guest configuration. For&#10;</xsl:text>
+		<xsl:text>      details see the 'KIWI image description'&#10;</xsl:text>
 		<xsl:text>      chapter of the kiwi cookbook</xsl:text>
 	</xsl:message>
-	<xsl:copy>
-		<xsl:copy-of select="@*[name() = 'type']"/>
-		<xsl:copy-of select="@*[name() = 'profiles']"/>
-		<xsl:copy-of select="@*[name() = 'patternType']"/>
-		<xsl:copy-of select="@*[name() = 'patternPackageType']"/>
-		<xsl:apply-templates mode="conv20to24"/>
-	</xsl:copy>
+	</xsl:if>
+	<xsl:copy-of select="@*[not(local-name(.) = 'memory' or
+		local-name(.) = 'disk' or
+		local-name(.) = 'HWversion' or
+		local-name(.) = 'guestOS_32Bit' or
+		local-name(.) = 'guestOS_64Bit')]"/>
+	<xsl:apply-templates mode="conv20to24"/>
+	</packages>
 </xsl:template>
 
 </xsl:stylesheet>
