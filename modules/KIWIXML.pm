@@ -1940,14 +1940,14 @@ sub getVMwareConfig {
 	$guestos{sles}{ix86}   = "sles";
 	$guestos{sles}{x86_64} = "sles-64";
 	my $guest= $node -> getAttribute ("guestOS");
-	if (! defined $guestos{$arch}{$guest}) {
+	if (! defined $guestos{$guest}{$arch}) {
 		if ($arch eq "ix86") {
 			$guest = "suse";
 		} else {
 			$guest = "suse-64";
 		}
 	} else {
-		$guest = $guestos{$arch}{$guest};
+		$guest = $guestos{$guest}{$arch};
 	}
 	my $memory = $node -> getAttribute ("memory");
 	#==========================================
