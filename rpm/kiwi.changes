@@ -2,7 +2,8 @@
 Tue Jul  8 11:03:55 CEST 2008 - ms@suse.de
 
 - v2.54
-- better stylesheet convert20to24.xsl with help from Tom 
+- added sles option in guestOS setup of <vmwareconfig>
+- better stylesheet convert20to24.xsl with help from Tom
 - fixed copy of files in netboot linuxrc
 
 -------------------------------------------------------------------

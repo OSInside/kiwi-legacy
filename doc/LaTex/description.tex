@@ -564,7 +564,7 @@ architectures.
 \begin{Command}{12cm}
 <vmwareconfig arch="arch" memory="MB"\\
 \hspace*{2.5cm}HWversion="number"\\
-\hspace*{2.5cm}guestOS="name"/>\\
+\hspace*{2.5cm}guestOS="suse|sles"/>\\
 \hspace*{1cm}<vmwarenic driver="name"\\
 \hspace*{2.5cm}interface="number" mode="mode"/>\\
 \hspace*{1cm}<vmwaredisk controller="ide|scsi"\\
@@ -594,7 +594,8 @@ create the VMware (.vmx) configuration file:
       The VMware hardware version number. By default version 3 is used
 \item \textbf{guestOS}\\
       The guestOS identifier. By default suse is used on ix86 and suse-64
-      for x86\_64
+      for x86\_64. At the moment only the suse and sles guestOS types
+      are supported
 \end{itemize}
 
 The following information can be provided to setup the VMware virtual

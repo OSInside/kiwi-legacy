@@ -1913,6 +1913,7 @@ sub getVMwareConfig {
 	my $this = shift;
 	my $node = $this->{vmwarecNodeList} -> get_node(1);
 	my %result = ();
+	my %guestos= ();
 	if (! defined $node) {
 		return %result;
 	}
@@ -1934,13 +1935,19 @@ sub getVMwareConfig {
 	if (! defined $hwver) {
 		$hwver = 3;
 	}
+	$guestos{suse}{ix86}   = "suse";
+	$guestos{suse}{x86_64} = "suse-64";
+	$guestos{sles}{ix86}   = "sles";
+	$guestos{sles}{x86_64} = "sles-64";
 	my $guest= $node -> getAttribute ("guestOS");
-	if (! defined $guest) {
+	if (! defined $guestos{$arch}{$guest}) {
 		if ($arch eq "ix86") {
 			$guest = "suse";
 		} else {
 			$guest = "suse-64";
 		}
+	} else {
+		$guest = $guestos{$arch}{$guest};
 	}
 	my $memory = $node -> getAttribute ("memory");
 	#==========================================
