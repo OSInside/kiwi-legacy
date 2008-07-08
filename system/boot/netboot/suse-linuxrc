@@ -723,7 +723,7 @@ if [ $LOCAL_BOOT = "no" ];then
 	if test $systemIntegrity = "clean";then
 		cd /config
 		find . -type d | while read d ; do  mkdir -p /mnt/$d ; done
-		find . -type f | while read f ; do  cp $f /mnt/$f ; done
+		find . -type f | while read f ; do  cp -a $f /mnt/$f ; done
 		cd /
 		rm -rf /config
 	fi
