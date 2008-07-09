@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Jul  9 19:24:07 CEST 2008 - jcborn@suse.de
+
+- added new element to <architectures> group to specify not only
+  the fallback list but also the head elements
+  Integration in KIWIArchList follows.
+
+-------------------------------------------------------------------
 Wed Jul  9 14:30:17 CEST 2008 - ms@suse.de
 
 - v2.55

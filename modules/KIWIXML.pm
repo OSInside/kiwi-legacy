@@ -1434,17 +1434,22 @@ sub getInstSourceArchList {
 	for(my $i=1; $i<= $elems->size(); $i++) {
 		my $node  = $elems->get_node($i);
 		my @flist = $node->getElementsByTagName("arch");
+		my %rlist = map { $_->getAttribute("ref") => $_ } $node->getElementsByTagName("requiredarch");
 		foreach my $element(@flist) {
 			my $id = $element->getAttribute($attr[0]);
 			next if (!$id);
+			my $ra = 0;
+			if($rlist{$id}) {
+			  $ra = 1;
+			}
 			my ($d,$n) = (
 				$element->getAttribute($attr[1]),
 				$element->getAttribute($attr[2])
 			);
 			if($n) {
-				$result{$id} = [ $d, $n ];
+				$result{$id} = [ $d, $n, $ra ];
 			} else {
-				$result{$id} = [ $d, 0 ];
+				$result{$id} = [ $d, 0, $ra ];
 			}
 		}
 	}
@@ -2091,6 +2096,13 @@ sub getInstSourcePackageAttributes {
 	}
 	return \%result;
 }
+
+sub clearPackageAttributes
+{
+	my $this = shift;
+	$this->{m_rpacks} = undef;
+}
+
 
 #==========================================
 # getList
