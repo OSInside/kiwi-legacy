@@ -3147,7 +3147,9 @@ sub buildVMwareConfig {
 	#==========================================
 	# USB setup
 	#------------------------------------------
-	print FD 'usb.present = "true"'."\n";
+	if (defined $vmwconfig{vmware_usb}) {
+		print FD 'usb.present = "true"'."\n";
+	}
 	#==========================================
 	# Power Management setup
 	#------------------------------------------

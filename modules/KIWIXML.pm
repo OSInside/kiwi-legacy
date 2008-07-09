@@ -1950,6 +1950,7 @@ sub getVMwareConfig {
 		$guest = $guestos{$guest}{$arch};
 	}
 	my $memory = $node -> getAttribute ("memory");
+	my $usb = $node -> getAttribute ("usb");
 	#==========================================
 	# storage setup disk
 	#------------------------------------------
@@ -2000,6 +2001,9 @@ sub getVMwareConfig {
 		$result{vmware_nicdriver}= $drv;
 		$result{vmware_niciface} = $iface;
 		$result{vmware_nicmode}  = $mode;
+	}
+	if (($usb) && ($usb eq "yes")) {
+		$result{vmware_usb} = $usb;
 	}
 	return %result;
 }
