@@ -35,6 +35,7 @@
 		<file name="fs/quota_v1.ko"/>
 		<file name="fs/quota_v2.ko"/>
 		<file name="fs/jbd/*"/>
+		<file name="fs/udf/*"/>
 		<file name="fs/reiserfs/*"/>
 		<file name="drivers/cdrom/*"/>
 		<file name="drivers/ata/*"/>

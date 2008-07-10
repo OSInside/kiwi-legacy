@@ -42,6 +42,7 @@
 		<file name="fs/aufs.ko"/>
 		<file name="fs/nls/nls_utf8.ko"/>
 		<file name="fs/fuse/*"/>
+		<file name="fs/udf/*"/>
 		<file name="drivers/ata/*"/>
 		<file name="drivers/scsi/*"/>
 		<file name="drivers/message/fusion/*"/>

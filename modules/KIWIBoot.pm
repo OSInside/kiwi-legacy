@@ -1181,8 +1181,8 @@ sub setupInstallCD {
 	} else {
 		$name =~ s/gz$/iso/;
 	}
-	my $base = "-R -b boot/grub/stage2";
-	my $opts = "-no-emul-boot -boot-load-size 4 -boot-info-table";
+	my $base = "-R -b boot/grub/stage2 -no-emul-boot";
+	my $opts = "-boot-load-size 4 -boot-info-table -udf -allow-limited-size";
 	if ($name !~ /^\//) {
 		my $workingDir = qxx ( "pwd" ); chomp $workingDir;
 		$name = $workingDir."/".$name;
@@ -2489,7 +2489,7 @@ sub relocateCatalog {
 	my $this = shift;
 	my $iso  = shift;
 	my $kiwi = $this->{kiwi};
-	$kiwi -> info ("Relocating boot catalog from sector ");
+	$kiwi -> info ("Relocating boot catalog ");
 	sub read_sector {
 		my $buf;
 		if (! seek ISO, $_[0] * 0x800, 0) {
@@ -2553,20 +2553,20 @@ sub relocateCatalog {
 	my $vol_descr2 = read_sector $path_table - 2;
 	my $vol_id2 = substr($vol_descr2, 0, 7);
 	if ($vol_id2 ne "\xffCD001\x01") {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Unexpected layout");
-		$kiwi -> failed ();
-		return undef;
+		$kiwi -> skipped ();
+		$kiwi -> info  ("Unexpected iso layout");
+		$kiwi -> skipped ();
+		return $this;
 	}
 	my $version_descr = read_sector $path_table - 1;
 	if (
 		($version_descr ne ("\x00" x 0x800)) &&
 		(substr($version_descr, 0, 4) ne "MKI ")
 	) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Unexpected layout");
-		$kiwi -> failed ();
-		return undef;
+		$kiwi -> skipped ();
+		$kiwi -> info  ("Unexpected iso layout");
+		$kiwi -> skipped ();
+		return $this;
 	}
 	my $boot_catalog_data = read_sector $boot_catalog;
 	#==========================================
@@ -2577,7 +2577,7 @@ sub relocateCatalog {
 	write_sector 0x11, $eltorito_descr;
 	close ISO;
 	my $new_catalog = $path_table - 1;
-	$kiwi -> note ("$boot_catalog to $new_catalog");
+	$kiwi -> note ("from sector $boot_catalog to $new_catalog");
 	$kiwi -> done();
 	return $this;
 }
