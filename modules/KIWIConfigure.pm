@@ -88,8 +88,8 @@ sub setupRecoveryArchive {
 	}
 	$kiwi -> info ("Creating recovery archive...");
 	my $status = qxx (
-		"cd $root && tar -cjf $root.recovery.tar.bz2 . 2>&1 &&
-		mv $root.recovery.tar.bz2 $root/recovery.tar.bz2"
+		"cd $root && tar -czf $root.recovery.tar.gz . 2>&1 &&
+		mv $root.recovery.tar.gz $root/recovery.tar.gz"
 	);
 	my $code = $? >> 8;
 	if ($code != 0) {

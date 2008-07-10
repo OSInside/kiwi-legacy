@@ -43,7 +43,7 @@ use KIWITest;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "2.56";
+our $Version       = "2.57";
 our $openSUSE      = "http://download.opensuse.org/repositories/";
 our $ConfigFile    = "$ENV{'HOME'}/.kiwirc";
 our $ConfigName    = "config.xml";
@@ -454,8 +454,8 @@ sub main {
 		if (-f "$Create/rootfs.tar") {
 			qxx ("rm -f $Create/rootfs.tar");
 		}
-		if (-f "$Create/recovery.tar.bz2") {
-			qxx ("rm -f $Create/recovery.tar.bz2");
+		if (-f "$Create/recovery.tar.gz") {
+			qxx ("rm -f $Create/recovery.tar.gz");
 		}
 		#==========================================
 		# Check for overlay requirements

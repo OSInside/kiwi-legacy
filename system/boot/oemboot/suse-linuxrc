@@ -389,10 +389,10 @@ if [ $LOCAL_BOOT = "no" ];then
 		if ! mount $deviceRoot /reco-root >/dev/null;then
 			systemException "Failed to mount root device" "reboot"
 		fi
-		if [ ! -f /reco-root/recovery.tar.bz2 ];then
+		if [ ! -f /reco-root/recovery.tar.gz ];then
 			systemException "Can't find recovery archive" "reboot"
 		fi
-		recoBytes=`du --bytes /reco-root/recovery.tar.bz2 | cut -f1`
+		recoBytes=`du --bytes /reco-root/recovery.tar.gz | cut -f1`
 		recoMByte=`expr $recoBytes / 1048576`
 		recoMByte=`expr $recoMByte \* 15 / 10`
 		umount /reco-root && rmdir /reco-root
@@ -778,7 +778,7 @@ if [ $LOCAL_BOOT = "no" ];then
 				if ! mount $deviceRecovery /reco-save >/dev/null;then
 					systemException "Failed to mount recovery device" "reboot"
 				fi
-				if ! mv /reco-root/recovery.tar.bz2 /reco-save >/dev/null;then
+				if ! mv /reco-root/recovery.tar.gz /reco-save >/dev/null;then
 					systemException "Failed to move recovery archive" "reboot"
 				fi
 				mkdir /reco-save/boot
@@ -947,7 +947,7 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 	#--------------------------------------
 	Echo "Restoring base operating system..."
 	cd /mnt
-	if ! tar -xvf /reco-save/recovery.tar.bz2 1>&2;then
+	if ! tar -xvf /reco-save/recovery.tar.gz 1>&2;then
 		systemException "Failed to restore recovery archive" "reboot"
 	fi
 	#======================================
