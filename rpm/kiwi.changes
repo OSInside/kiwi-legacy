@@ -3,6 +3,7 @@ Wed Jul  9 14:30:17 CEST 2008 - ms@suse.de
 
 - v2.55
 - use udf mount for installable iso images
+- use getopts build in function to parse Echo options
 - make the USB controller configurable in <vmwareconfig>
 - added new element to <architectures> group to specify not only
   the fallback list but also the head elements Integration

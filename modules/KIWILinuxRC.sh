@@ -44,16 +44,19 @@ function Echo {
 	# ----
 	local option=""
 	local prefix="----->"
-	if test "$1" = "-b";then
-		prefix="      "; shift
-	fi
-	if test "$1" = "-n";then
-		option="$option $1"; shift
-	fi
-	if test "$1" = "-e";then
-		option="$option $1"; shift
-	fi
-	echo $option "$prefix $1"
+	local optn=""
+	local opte=""
+	while getopts "bne" option
+	do
+		case $option in
+			b) prefix="      " ;;
+			n) optn="-n" ;;
+			e) opte="-e" ;;
+			*) echo "Invalid argument: $option" ;;
+		esac
+	done
+	shift $(($OPTIND - 1))
+	echo $optn $opte "$prefix $1"
 }
 #======================================
 # WaitKey
