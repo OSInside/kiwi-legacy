@@ -2529,6 +2529,7 @@ sub relocateCatalog {
 		$kiwi -> failed ();
 		return undef;
 	}
+	my $new_location = $path_table - 1;
 	my $eltorito_descr = read_sector 0x11;
 	my $eltorito_id = substr($eltorito_descr, 0, 0x1e);
 	if ($eltorito_id ne "\x00CD001\x01EL TORITO SPECIFICATION") {
@@ -2544,21 +2545,32 @@ sub relocateCatalog {
 		$kiwi -> failed ();
 		return undef;
 	}
-	if ($boot_catalog == $path_table - 1) {
+	my $vol_descr2 = read_sector $new_location - 1;
+	my $vol_id2 = substr($vol_descr2, 0, 7);
+	if($vol_id2 ne "\xffCD001\x01") {
+		undef $new_location;
+		for (my $i = 0x12; $i < 0x40; $i++) {
+			$vol_descr2 = read_sector $i;
+			$vol_id2 = substr($vol_descr2, 0, 7);
+			if ($vol_id2 eq "\x00TEA01\x01" || $boot_catalog == $i + 1) {
+				$new_location = $i + 1;
+				last;
+			}
+		}
+	}
+	if (! defined $new_location) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Unexpected iso layout");
+		$kiwi -> failed ();
+		return undef;
+	}
+	if ($boot_catalog == $new_location) {
 		$kiwi -> skipped ();
 		$kiwi -> info ("Boot catalog already relocated");
 		$kiwi -> done ();
 		return $this;
 	}
-	my $vol_descr2 = read_sector $path_table - 2;
-	my $vol_id2 = substr($vol_descr2, 0, 7);
-	if ($vol_id2 ne "\xffCD001\x01") {
-		$kiwi -> skipped ();
-		$kiwi -> info  ("Unexpected iso layout");
-		$kiwi -> skipped ();
-		return $this;
-	}
-	my $version_descr = read_sector $path_table - 1;
+	my $version_descr = read_sector $new_location;
 	if (
 		($version_descr ne ("\x00" x 0x800)) &&
 		(substr($version_descr, 0, 4) ne "MKI ")
@@ -2572,12 +2584,11 @@ sub relocateCatalog {
 	#==========================================
 	# now reloacte to $path_table - 1
 	#------------------------------------------
-	substr($eltorito_descr, 0x47, 4) = pack "V", $path_table - 1;
-	write_sector $path_table - 1, $boot_catalog_data;
+	substr($eltorito_descr, 0x47, 4) = pack "V", $new_location;
+	write_sector $new_location, $boot_catalog_data;
 	write_sector 0x11, $eltorito_descr;
 	close ISO;
-	my $new_catalog = $path_table - 1;
-	$kiwi -> note ("from sector $boot_catalog to $new_catalog");
+	$kiwi -> note ("from sector $boot_catalog to $new_location");
 	$kiwi -> done();
 	return $this;
 }
