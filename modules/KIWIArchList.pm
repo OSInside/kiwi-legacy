@@ -73,7 +73,7 @@ sub arch
   }
   my $name = shift;
 
-  if(defined($this->{m_archs}->{$name})) {
+  if(defined($name) and defined($this->{m_archs}->{$name})) {
     return $this->{m_archs}->{$name};
   }
   else {
@@ -127,12 +127,12 @@ sub _addArch
     $this->{m_collect}->logger()->error("_addArch: wrong number of arguments!\n");
     return undef;
   }
-  my ($name, $desc, $next) = @_;
+  my ($name, $desc, $next, $head) = @_;
   if(defined($this->{m_archs}->{$name})) {
     $this->{m_collect}->logger()->error("_addArch: arch=$name already in list, skipping\n");
     return 0;
   }
-  my $arch = new KIWIArch($name, $desc, $next);
+  my $arch = new KIWIArch($name, $desc, $next, $head);
   $this->{m_archs}->{$name} = $arch;
   return 1;
 }
@@ -145,7 +145,7 @@ sub _addArch
 # add all architectures from a hash
 # The hash has the following structure
 # (see KIWIXML::getInstSourceArchList):
-# - name => [descr, nextname]
+# - name => [descr, nextname, ishead]
 # nextname is verified through xml validation:
 # there must be an entry with the referred name
 #------------------
@@ -162,7 +162,8 @@ sub addArchs
   }
   foreach my $a(keys(%{$hashref})) {
     my $n = $hashref->{$a}->[1] eq "0"?"":$hashref->{$a}->[1];
-    $this->_addArch($a, $hashref->{$a}->[0], $hashref->{$a}->[1]);
+    my $head = $hashref->{$a}->[2] eq "0"?"":$hashref->{$a}->[2];
+    $this->_addArch($a, $hashref->{$a}->[0], $n, $head);
   }
 }
 
@@ -200,7 +201,6 @@ sub fallbacks
     %omits = map { $_ => 1 } @_;
   }
   # loop the whole chain following "$name":
-  #for(my $a = $this->{m_archs}->{$name}; $a->follower();) {
   my $a = $this->arch($name);
   while(1) {
     if(not($omits{$a->name()})) {
@@ -210,6 +210,33 @@ sub fallbacks
     last if not defined($a);
   }
   return @al;
+}
+
+
+
+#==================
+# headList
+#------------------
+# Returns a list of architecture object
+# references that are marked as "head"
+# These are specified in config.xml as:
+#   <architecures>
+#     <arch id=".." .../>
+#     ...
+#     <requiredarch ref="name"/>
+# whereby the element "name" must match an
+# arch's id="..." otherwise validation fails
+# -> therefore I don't check for existence
+#------------------
+sub headList
+{
+  my $this = shift;
+  my @al;
+  if(not ref($this)) {
+    return @al;
+  }
+
+  @al = grep { $this->{m_archs}->{$_}->isHead()  } keys(%{$this->{m_archs}});
 }
 
 

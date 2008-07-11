@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Jul 11 14:28:00 CEST 2008 - jcborn@suse.de
+
+- Integration of head functionality in KIWIArch.pm,
+   KIWIArchList.pm and respective unittest
+
+-------------------------------------------------------------------
 Thu Jul 10 16:49:00 CEST 2008 - ms@suse.de
 
 - v2.57

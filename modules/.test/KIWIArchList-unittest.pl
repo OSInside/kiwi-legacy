@@ -117,6 +117,25 @@ sub performTest
   print "please verify those results against $pathtoconfig/$ConfigName!\n";
   $res--;
   
+  # TEST 6: get head list now:
+  my @headlist = $module->headList();
+  if(not @headlist) {
+    print "E: head architectures list is empty!\n";
+    return $res;
+  }
+  # sanity check: verify if all "head" archs have the "isHead()" return true
+  foreach(@headlist) {
+    my $ha = $module->arch($_);
+    if(defined($ha) and $ha->isHead()) {
+      print "I: ".$ha->name()." is a head architecture\n";
+    }
+    else {
+      print "W: ".$ha->name()." is not marked as head architecture!\n";
+    }
+  }
+  print "I: you must compare this output manually, the test does not know how many head archs are in the config file\n";
+
+
   return $res;
 }
 

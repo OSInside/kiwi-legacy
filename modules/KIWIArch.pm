@@ -44,13 +44,15 @@ sub new
     m_name	=> undef,
     m_desc	=> undef,
     m_next	=> undef,
+    m_head	=> undef,
   };
   bless ($this, $class);
 
   $this->{m_name} = shift;
   $this->{m_desc} = shift;
   $this->{m_next} = shift;
-  if(not(defined($this->{m_name}) and defined($this->{m_desc}) and defined($this->{m_next}))) {
+  $this->{m_head} = shift;
+  if(not(defined($this->{m_name}) and defined($this->{m_desc}) and defined($this->{m_next}) and defined($this->{m_head}))) {
     return undef; # rock hard get outta here: caller must check retval anyway
   }
 
@@ -95,7 +97,7 @@ sub desc
 
 
 #==================
-# next
+# follower
 #------------------
 sub follower
 {
@@ -108,6 +110,31 @@ sub follower
   }
   else {
     return $this->{m_next};
+  }
+}
+
+
+
+#==================
+# Other methods
+#------------------
+
+
+
+#==================
+# isHead
+#------------------
+sub isHead
+{
+  my $this = shift;
+  if(not ref($this)) {
+    return undef;
+  }
+  if($this->{m_head} eq "") {
+    return 0;
+  }
+  else {
+    return 1;
   }
 }
 
