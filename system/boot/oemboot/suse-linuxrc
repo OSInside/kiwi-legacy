@@ -960,13 +960,13 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 		fi
 	done
 	for i in `setupBootLoaderFiles`;do
-		if [ -f $i.system ];then
-			i=$i.system
-		fi
 		if ! cp /reco-save/$i /mnt/$i;then
 			systemException "Failed to restore $i" "reboot"
 		fi
 	done
+	if [ -f /reco-save/boot/grub/menu.lst.system ];then
+		cp /reco-save/boot/grub/menu.lst.system /reco-save/boot/grub/menu.lst
+	fi
 	#======================================
 	# 13.4) umount recovery and boot
 	#--------------------------------------
