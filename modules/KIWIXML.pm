@@ -1434,7 +1434,8 @@ sub getInstSourceArchList {
 	for(my $i=1; $i<= $elems->size(); $i++) {
 		my $node  = $elems->get_node($i);
 		my @flist = $node->getElementsByTagName("arch");
-		my %rlist = map { $_->getAttribute("ref") => $_ } $node->getElementsByTagName("requiredarch");
+		my %rlist = map { $_->getAttribute("ref") => $_ }
+			$node->getElementsByTagName("requiredarch");
 		foreach my $element(@flist) {
 			my $id = $element->getAttribute($attr[0]);
 			next if (!$id);

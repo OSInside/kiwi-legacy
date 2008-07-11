@@ -3,6 +3,8 @@ Thu Jul 10 16:49:00 CEST 2008 - ms@suse.de
 
 - v2.57
 - moved from bzip2 to gzip for the recovery archive (bnc #401749)
+- install grub into recovery partition if present (bnc #407983)
+- fixed OPTIND initial value for getopts shell builtin
 
 -------------------------------------------------------------------
 Thu Jul 10 11:51:45 CEST 2008 - ms@suse.de

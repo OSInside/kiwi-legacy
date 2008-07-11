@@ -960,6 +960,9 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 		fi
 	done
 	for i in `setupBootLoaderFiles`;do
+		if [ -f $i.system ];then
+			i=$i.system
+		fi
 		if ! cp /reco-save/$i /mnt/$i;then
 			systemException "Failed to restore $i" "reboot"
 		fi
@@ -1054,7 +1057,31 @@ if [ $LOCAL_BOOT = "no" ] && [ ! -z "$OEM_RECOVERY" ];then
 			systemException "Failed to copy recovery $i" "reboot"
 		fi
 	done
+	Echo "Installing grub boot loader into recovery partition"
+	cp /mnt/boot/grub/stage1 /reco-save/boot/grub
+	cp /mnt/boot/grub/stage2 /reco-save/boot/grub
+	menu=/reco-save/boot/grub/menu.lst
+	mv $menu $menu.system
+	echo "timeout 0"                            > $menu
+	echo "title Recovery"                      >> $menu
+	echo -n " kernel (hd0,3)/boot/vmlinuz"     >> $menu
+	echo -n " root=$deviceRecovery"            >> $menu
+	echo -n " vga=normal splash=silent"        >> $menu
+	echo -n " $KIWI_INITRD_PARAMS"             >> $menu
+	echo -n " $KIWI_KERNEL_OPTIONS"            >> $menu
+	echo " KIWI_RECOVERY=1 showopts"           >> $menu
+	echo " initrd (hd0,3)/boot/initrd"         >> $menu
 	umount /reco-save && rmdir /reco-save
+	ginput=/grub.input
+	echo "device (hd0) $deviceDisk"             > $ginput
+	echo "root (hd0,3)"                        >> $ginput
+	echo "setup (hd0,3)"                       >> $ginput
+	echo "quit"                                >> $ginput
+	if [ -x /mnt/usr/sbin/grub ];then
+		/mnt/usr/sbin/grub --batch < $ginput 1>&2
+	else
+		systemException "grub is not part of the system image" "reboot"
+	fi
 fi
 
 #======================================

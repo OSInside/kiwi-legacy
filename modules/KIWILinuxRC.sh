@@ -46,8 +46,7 @@ function Echo {
 	local prefix="----->"
 	local optn=""
 	local opte=""
-	while getopts "bne" option
-	do
+	while getopts "bne" option;do
 		case $option in
 			b) prefix="      " ;;
 			n) optn="-n" ;;
@@ -57,6 +56,7 @@ function Echo {
 	done
 	shift $(($OPTIND - 1))
 	echo $optn $opte "$prefix $1"
+	OPTIND=1
 }
 #======================================
 # WaitKey
