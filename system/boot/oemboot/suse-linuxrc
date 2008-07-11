@@ -967,7 +967,8 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 	for i in /reco-save/boot/grub/*;do
 		if echo $i | grep -q .system;then
 			sysbase=`echo ${i%%.system}`
-			cp /reco-save/boot/$i /mnt/boot/$sysbase
+			sysbase=`echo $sysbase | cut -f3- -d/`
+			cp $i /mnt/$sysbase
 		fi
 	done
 	#======================================
