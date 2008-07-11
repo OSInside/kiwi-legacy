@@ -381,6 +381,25 @@ function installBootLoader {
 	esac
 }
 #======================================
+# installBootLoaderRecovery
+#--------------------------------------
+function installBootLoaderRecovery {
+	# /.../
+	# generic function to install the boot loader into
+	# the recovery partition. The selection of the bootloader
+	# happens according to the architecture of the system
+	# ----
+	local arch=`uname -m`
+	case $arch in
+		i*86)   installBootLoaderGrubRecovery ;;
+		x86_64) installBootLoaderGrubRecovery ;;
+		*)
+		systemException \
+			"*** boot loader setup for $arch not implemented ***" \
+		"reboot"
+	esac
+}
+#======================================
 # installBootLoaderGrub
 #--------------------------------------
 function installBootLoaderGrub {
@@ -397,6 +416,30 @@ function installBootLoaderGrub {
 	else
 		Echo "Image doesn't have grub installed"
 		Echo "Can't install boot loader"
+	fi
+}
+#======================================
+# installBootLoaderGrubRecovery
+#--------------------------------------
+function installBootLoaderGrubRecovery {
+	# /.../
+	# install the grub into the recovery partition.
+	# By design the recovery partition is always the
+	# fourth primary partition of the disk
+	# ----
+	local input=/grub.input
+	echo "device (hd0) $deviceDisk" > $input
+	echo "root (hd0,3)"  >> $input
+	echo "setup (hd0,3)" >> $input
+	echo "quit"          >> $input
+	if [ -x /mnt/usr/sbin/grub ];then
+		/mnt/usr/sbin/grub --batch < $input 1>&2
+	else
+		Echo "Image doesn't have grub installed"
+		Echo "Can't install boot loader"
+		systemException \
+			"recovery grub setup failed" \
+		"reboot"
 	fi
 }
 #======================================
@@ -526,6 +569,92 @@ function setupBootLoader {
 			"*** boot loader setup for $arch not implemented ***" \
 		"reboot"
 	esac
+}
+#======================================
+# setupBootLoaderRecovery
+#--------------------------------------
+function setupBootLoaderRecovery {
+	# /.../
+	# generic function to setup the boot loader configuration
+	# for the recovery partition. The selection of the bootloader
+	# happens according to the architecture of the system
+	# ----
+	local arch=`uname -m`
+	local para=""
+	while [ $# -gt 0 ];do
+		para="$para \"$1\""
+		shift
+	done
+	case $arch in
+		i*86)   eval setupBootLoaderGrubRecovery $para ;;
+		x86_64) eval setupBootLoaderGrubRecovery $para ;;
+		*)
+		systemException \
+			"*** boot loader setup for $arch not implemented ***" \
+		"reboot"
+	esac
+}
+#======================================
+# setupBootLoaderGrubRecovery
+#--------------------------------------
+function setupBootLoaderGrubRecovery {
+	# /.../
+	# create menu.lst file for the recovery boot system
+	# ----
+	local mountPrefix=$1  # mount path of the image
+	local destsPrefix=$2  # base dir for the config files
+	local gfix=$3         # grub title postfix
+	local menu=$destsPrefix/boot/grub/menu.lst
+	local kernel=""
+	local initrd=""
+	#======================================
+	# import grub stages into recovery
+	#--------------------------------------
+	cp $mountPrefix/boot/grub/stage1 $destsPrefix/boot/grub
+	cp $mountPrefix/boot/grub/stage2 $destsPrefix/boot/grub
+	#======================================
+	# backup current menu.lst
+	#--------------------------------------
+	mv $menu $menu.system
+	#======================================
+	# create recovery menu.lst
+	#--------------------------------------
+	echo "timeout 0" > $menu
+	local count=1
+	IFS="," ; for i in $KERNEL_LIST;do
+		if test ! -z "$i";then
+			kernel=`echo $i | cut -f1 -d:`
+			initrd=`echo $i | cut -f2 -d:`
+			#======================================
+			# create recovery entry
+			#--------------------------------------
+			if [ ! -z "$OEM_RECOVERY" ];then
+				echo "title Recovery [ $gfix ]"               >> $menu
+				gdev_recovery="(hd0,3)"
+				rdev_recovery=$OEM_RECOVERY
+				if [ $kernel = "vmlinuz-xen" ];then
+					echo " root $gdev_recovery"                   >> $menu
+					echo " kernel /boot/xen.gz"                   >> $menu
+					echo -n " module /boot/$kernel"               >> $menu
+					echo -n " root=$rdev_recovery $console"       >> $menu
+					echo -n " vga=0x314 splash=silent"            >> $menu
+					echo -n " $KIWI_INITRD_PARAMS"                >> $menu
+					echo -n " $KIWI_KERNEL_OPTIONS"               >> $menu
+					echo " KIWI_RECOVERY=1 showopts"              >> $menu
+					echo " module /boot/$initrd"                  >> $menu
+				else
+					echo -n " kernel $gdev_recovery/boot/$kernel" >> $menu
+					echo -n " root=$rdev_recovery $console"       >> $menu
+					echo -n " vga=0x314 splash=silent"            >> $menu
+					echo -n " $KIWI_INITRD_PARAMS"                >> $menu
+					echo -n " $KIWI_KERNEL_OPTIONS"               >> $menu
+					echo " KIWI_RECOVERY=1 showopts"              >> $menu
+					echo " initrd $gdev_recovery/boot/$initrd"    >> $menu
+				fi
+			fi
+			count=`expr $count + 1`
+		fi
+	done
 }
 #======================================
 # setupBootLoaderGrub
@@ -670,32 +799,10 @@ function setupBootLoaderGrub {
 			# create recovery entry
 			#--------------------------------------
 			if [ ! -z "$OEM_RECOVERY" ];then
-				if [ -z "$name" ];then
-					echo "title Recovery [ $gfix ]"               >> $menu
-				else
-					echo "title Recovery [ $gfix ]"               >> $menu
-				fi
-				gdev_recovery="(hd0,3)"
-				rdev_recovery=$OEM_RECOVERY
-				if [ $kernel = "vmlinuz-xen" ];then
-					echo " root $gdev_recovery"                   >> $menu
-					echo " kernel /boot/xen.gz"                   >> $menu
-					echo -n " module /boot/$kernel"               >> $menu
-					echo -n " root=$rdev_recovery $console"       >> $menu
-					echo -n " vga=0x314 splash=silent"            >> $menu
-					echo -n " $KIWI_INITRD_PARAMS"                >> $menu
-					echo -n " $KIWI_KERNEL_OPTIONS"               >> $menu
-					echo " KIWI_RECOVERY=1 showopts"              >> $menu
-					echo " module /boot/$initrd"                  >> $menu
-				else
-					echo -n " kernel $gdev_recovery/boot/$kernel" >> $menu
-					echo -n " root=$rdev_recovery $console"       >> $menu
-					echo -n " vga=0x314 splash=silent"            >> $menu
-					echo -n " $KIWI_INITRD_PARAMS"                >> $menu
-					echo -n " $KIWI_KERNEL_OPTIONS"               >> $menu
-					echo " KIWI_RECOVERY=1 showopts"              >> $menu
-					echo " initrd $gdev_recovery/boot/$initrd"    >> $menu
-				fi
+				echo "title Recovery [ $gfix ]"                   >> $menu
+				echo " rootnoverify (hd0,3)"                      >> $menu
+				echo " makeactive"                                >> $menu
+				echo " chainloader +1"                            >> $menu
 			fi
 			count=`expr $count + 1`
 		fi
