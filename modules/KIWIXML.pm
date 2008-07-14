@@ -294,6 +294,12 @@ sub new {
 	$this->{controlFile}        = $controlFile;
 
 	#==========================================
+	# Check profile names
+	#------------------------------------------
+	if (! $this -> checkProfiles()) {
+		return undef;
+	}
+	#==========================================
 	# Check image version format
 	#------------------------------------------
 	my $version = $this -> getImageVersion();
@@ -320,12 +326,6 @@ sub new {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Boot type: $imageWhat not specified in xml");
 		$kiwi -> failed ();
-		return undef;
-	}
-	#==========================================
-	# Check profile names
-	#------------------------------------------
-	if (! $this -> checkProfiles()) {
 		return undef;
 	}
 	return $this;
@@ -412,6 +412,31 @@ sub getImageID {
 }
 
 #==========================================
+# getPreferencesNodeByTagName
+#------------------------------------------
+sub getPreferencesNodeByTagName {
+	# ...
+	# Searches in all nodes of the preferences sections
+	# and returns the first occurenc of the specified
+	# tag name. If the tag can't be found the function
+	# returns the first node reference
+	# ---
+	my $this = shift;
+	my $name = shift;
+	my @node = $this->{optionsNodeList} -> get_nodelist();
+	foreach my $element (@node) {
+		if (! $this -> requestedProfile ($element)) {
+			next;
+		}
+		my $tag = $element -> getElementsByTagName ("$name");
+		if ($tag) {
+			return $element;
+		}
+	}
+	return $node[0];
+}
+
+#==========================================
 # getImageSize
 #------------------------------------------
 sub getImageSize {
@@ -419,7 +444,7 @@ sub getImageSize {
 	# Get the predefined size of the logical extend
 	# ---
 	my $this = shift;
-	my $node = $this->{optionsNodeList} -> get_node(1);
+	my $node = $this -> getPreferencesNodeByTagName ("size");
 	my $size = $node -> getElementsByTagName ("size");
 	if ($size) {
 		my $plus = $node -> getElementsByTagName ("size")
@@ -454,7 +479,7 @@ sub getImageSizeAdditiveBytes {
 	# was set to true
 	# ---
 	my $this = shift;
-	my $node = $this->{optionsNodeList} -> get_node(1);
+	my $node = $this -> getPreferencesNodeByTagName ("size");
 	my $size = $node -> getElementsByTagName ("size");
 	if ($size) {
 		my $plus = $node -> getElementsByTagName ("size")
@@ -489,7 +514,7 @@ sub getImageSizeBytes {
 	# as byte value
 	# ---
 	my $this = shift;
-	my $node = $this->{optionsNodeList} -> get_node(1);
+	my $node = $this -> getPreferencesNodeByTagName ("size");
 	my $size = $node -> getElementsByTagName ("size");
 	if ($size) {
 		my $byte = int $size;
@@ -534,7 +559,7 @@ sub getImageDefaultDestination {
 	# will use this path as destination
 	# ---
 	my $this = shift;
-	my $node = $this->{optionsNodeList} -> get_node(1);
+	my $node = $this -> getPreferencesNodeByTagName ("defaultdestination");
 	my $dest = $node -> getElementsByTagName ("defaultdestination");
 	return $dest;
 }
@@ -560,7 +585,7 @@ sub getImageDefaultRoot {
 	# will use this path as root path.
 	# ---
 	my $this = shift;
-	my $node = $this->{optionsNodeList} -> get_node(1);
+	my $node = $this -> getPreferencesNodeByTagName ("defaultroot");
 	my $root = $node -> getElementsByTagName ("defaultroot");
 	return $root;
 }
@@ -580,9 +605,16 @@ sub getImageTypeAndAttributes {
 	my $first  = "";
 	my $ptype  = "";
 	my $urlhd  = new KIWIURL ($kiwi,undef);
-	my @node   = $this->{optionsNodeList} -> get_node(1)
-		-> getElementsByTagName ("type");
-	foreach my $node (@node) {
+	my @tnodes = ();
+	my @node = $this->{optionsNodeList} -> get_nodelist();
+	foreach my $element (@node) {
+		if (! $this -> requestedProfile ($element)) {
+			next;
+		}
+		my @types = $element -> getElementsByTagName ("type");
+		push (@tnodes,@types);
+	}
+	foreach my $node (@tnodes) {
 		my %record = ();
 		my $prim = $node -> getAttribute("primary");
 		if ((! defined $prim) || ($prim eq "false") || ($prim eq "0")) {
@@ -641,7 +673,7 @@ sub getImageVersion {
 	# Get the version of the logical extend
 	# ---
 	my $this = shift;
-	my $node = $this->{optionsNodeList} -> get_node(1);
+	my $node = $this -> getPreferencesNodeByTagName ("version");
 	my $version = $node -> getElementsByTagName ("version");
 	return $version;
 }
@@ -952,7 +984,7 @@ sub getCompressed {
 		$kiwi -> done ();
 		return 0;
 	}
-	my $node = $this->{optionsNodeList} -> get_node(1);
+	my $node = $this -> getPreferencesNodeByTagName ("compressed");
 	my $gzip = $node -> getElementsByTagName ("compressed");
 	if ((defined $gzip) && ("$gzip" eq "yes")) {
 		return 1;
@@ -971,14 +1003,13 @@ sub setForeignOptionsElement {
 	my $this = shift;
 	my $item = shift;
 	my $kiwi = $this->{kiwi};
-	my $foreignRepo     = $this->{foreignRepo};
-	my $optionsNodeList = $this->{optionsNodeList};
+	my $foreignRepo = $this->{foreignRepo};
 	my $value = $foreignRepo->{$item};
 	$kiwi -> done ();
 	$kiwi -> info ("Including foreign element $item: $value");
 	my $addElement = new XML::LibXML::Element ("$item");
 	$addElement -> appendText ($value);
-	my $opts = $optionsNodeList -> get_node(1);
+	my $opts = $this -> getPreferencesNodeByTagName ("$item");
 	my $node = $opts -> getElementsByTagName ("$item");
 	if ($node) {
 		$node = $node -> get_node(1);
@@ -1004,7 +1035,7 @@ sub setCompressed {
 	}
 	my $addElement = new XML::LibXML::Element ("compressed");
 	$addElement -> appendText ($value);
-	my $opts = $this->{optionsNodeList} -> get_node(1);
+	my $opts = $this -> getPreferencesNodeByTagName ("compressed");
 	my $node = $opts -> getElementsByTagName ("compressed") -> get_node(1);
 	$opts -> removeChild ($node);
 	$opts -> appendChild ($addElement);
@@ -1022,7 +1053,7 @@ sub setPackageManager {
 	my $value = shift;
 	my $addElement = new XML::LibXML::Element ("packagemanager");
 	$addElement -> appendText ($value);
-	my $opts = $this->{optionsNodeList} -> get_node(1);
+	my $opts = $this -> getPreferencesNodeByTagName ("packagemanager");
 	my $node = $opts -> getElementsByTagName ("packagemanager") -> get_node(1);
 	$opts -> removeChild ($node);
 	$opts -> appendChild ($addElement);
@@ -1040,7 +1071,7 @@ sub getPackageManager {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $node = $this->{optionsNodeList} -> get_node(1);
+	my $node = $this -> getPreferencesNodeByTagName ("packagemanager");
 	my $pmgr = $node -> getElementsByTagName ("packagemanager");
 	if (! $pmgr) {
 		return $packageManager{default};
@@ -1067,7 +1098,7 @@ sub getOEMSwapSize {
 	# Obtain the oem-swapsize value or return undef
 	# ---
 	my $this = shift;
-	my $node = $this->{optionsNodeList} -> get_node(1);
+	my $node = $this -> getPreferencesNodeByTagName ("oem-swapsize");
 	my $size = $node -> getElementsByTagName ("oem-swapsize");
 	if ((! defined $size) || ("$size" eq "")) {
 		return undef;
@@ -1083,7 +1114,7 @@ sub getOEMSystemSize {
 	# Obtain the oem-systemsize value or return undef
 	# ---
 	my $this = shift;
-	my $node = $this->{optionsNodeList} -> get_node(1);
+	my $node = $this -> getPreferencesNodeByTagName ("oem-systemsize");
 	my $size = $node -> getElementsByTagName ("oem-systemsize");
 	if ((! defined $size) || ("$size" eq "")) {
 		return undef;
@@ -1099,7 +1130,7 @@ sub getOEMBootTitle {
 	# Obtain the oem-boot-title value or return undef
 	# ---
 	my $this = shift;
-	my $node = $this->{optionsNodeList} -> get_node(1);
+	my $node = $this -> getPreferencesNodeByTagName ("oem-boot-title");
 	my $title= $node -> getElementsByTagName ("oem-boot-title");
 	if ((! defined $title) || ("$title" eq "")) {
 		return undef;
@@ -1115,7 +1146,7 @@ sub getOEMReboot {
 	# Obtain the oem-reboot value or return undef
 	# ---
 	my $this = shift;
-	my $node = $this->{optionsNodeList} -> get_node(1);
+	my $node = $this -> getPreferencesNodeByTagName ("oem-reboot");
 	my $boot = $node -> getElementsByTagName ("oem-reboot");
 	if ((! defined $boot) || ("$boot" eq "")) {
 		return undef;
@@ -1131,7 +1162,7 @@ sub getOEMSwap {
 	# Obtain the oem-swap value or return undef
 	# ---
 	my $this = shift;
-	my $node = $this->{optionsNodeList} -> get_node(1);
+	my $node = $this -> getPreferencesNodeByTagName ("oem-swap");
 	my $swap = $node -> getElementsByTagName ("oem-swap");
 	if ((! defined $swap) || ("$swap" eq "")) {
 		return undef;
@@ -1147,7 +1178,7 @@ sub getOEMRecovery {
 	# Obtain the oem-recovery value or return undef
 	# ---
 	my $this = shift;
-	my $node = $this->{optionsNodeList} -> get_node(1);
+	my $node = $this -> getPreferencesNodeByTagName ("oem-recovery");
 	my $reco = $node -> getElementsByTagName ("oem-recovery");
 	if ((! defined $reco) || ("$reco" eq "")) {
 		return undef;
@@ -1163,7 +1194,7 @@ sub getOEMHome {
 	# Obtain the oem-home value or return undef
 	# ---
 	my $this = shift;
-	my $node = $this->{optionsNodeList} -> get_node(1);
+	my $node = $this -> getPreferencesNodeByTagName ("oem-home");
 	my $home = $node -> getElementsByTagName ("oem-home");
 	if ((! defined $home) || ("$home" eq "")) {
 		return undef;
@@ -1179,7 +1210,7 @@ sub getLocale {
 	# Obtain the locale value or return undef
 	# ---
 	my $this = shift;
-	my $node = $this->{optionsNodeList} -> get_node(1);
+	my $node = $this -> getPreferencesNodeByTagName ("locale");
 	my $lang = $node -> getElementsByTagName ("locale");
 	if ((! defined $lang) || ("$lang" eq "")) {
 		return undef;
@@ -1196,7 +1227,7 @@ sub getRPMCheckSignatures {
 	# RPM signatures or not
 	# ---
 	my $this = shift;
-	my $node = $this->{optionsNodeList} -> get_node(1);
+	my $node = $this -> getPreferencesNodeByTagName ("rpm-check-signatures");
 	my $sigs = $node -> getElementsByTagName ("rpm-check-signatures");
 	if ((! defined $sigs) || ("$sigs" eq "")) {
 		return undef;
@@ -1213,7 +1244,7 @@ sub getRPMForce {
 	# installing packages
 	# ---
 	my $this = shift;
-	my $node = $this->{optionsNodeList} -> get_node(1);
+	my $node = $this -> getPreferencesNodeByTagName ("rpm-force");
 	my $frpm = $node -> getElementsByTagName ("rpm-force");
 	if ((! defined $frpm) || ("$frpm" eq "")) {
 		return undef;
@@ -1472,7 +1503,6 @@ sub getInstSourceProductVar {
 	return $this->getInstSourceProductStuff("productvar");
 }
 
-
 #==========================================
 # getInstSourceProductOption
 #------------------------------------------
@@ -1487,7 +1517,6 @@ sub getInstSourceProductOption {
 	my $this = shift;
 	return $this->getInstSourceProductStuff("productoption");
 }
-
 
 #==========================================
 # getInstSourceProductStuff
@@ -1826,45 +1855,50 @@ sub getImageConfig {
 	#==========================================
 	# preferences options
 	#------------------------------------------
-	my $node = $this->{optionsNodeList} -> get_node(1);
-	my $keytable = $node -> getElementsByTagName ("keytable");
-	my $timezone = $node -> getElementsByTagName ("timezone");
-	my $language = $node -> getElementsByTagName ("locale");
-	my $oemswapMB= $node -> getElementsByTagName ("oem-swapsize");
-	my $oemrootMB= $node -> getElementsByTagName ("oem-systemsize");
-	my $oemswap  = $node -> getElementsByTagName ("oem-swap");
-	my $oemhome  = $node -> getElementsByTagName ("oem-home");
-	my $oemtitle = $node -> getElementsByTagName ("oem-boot-title");
-	my $oemreboot= $node -> getElementsByTagName ("oem-reboot");
-	my $oemreco  = $node -> getElementsByTagName ("oem-recovery");
-	if (defined $keytable) {
-		$result{kiwi_keytable} = $keytable;
-	}
-	if (defined $timezone) {
-		$result{kiwi_timezone} = $timezone;
-	}
-	if (defined $language) {
-		$result{kiwi_language} = $language;
-	}
-	if ((defined $oemswap) && ("$oemswap" eq "no")) {
-		$result{kiwi_oemswap} = "no";
-	} elsif ((defined $oemswapMB) && ("$oemswapMB" > 0)) {
-		$result{kiwi_oemswapMB} = $oemswapMB;
-	}
-	if ((defined $oemhome) && ("$oemhome" eq "no")) {
-		$result{kiwi_oemhome} = "no";
-	}
-	if ((defined $oemrootMB) && ("$oemrootMB" > 0)) {
-		$result{kiwi_oemrootMB} = $oemrootMB;
-	}
-	if ((defined $oemtitle) && ("$oemtitle" ne "")) {
-		$result{kiwi_oemtitle} = $oemtitle;
-	}
-	if ((defined $oemreboot) && ("$oemreboot" eq "yes")) {
-		$result{kiwi_oemreboot} = $oemreboot;
-	}
-	if ((defined $oemreco) && ("$oemreco" eq "yes")) {
-		$result{kiwi_oemrecovery} = $oemreco;
+	@node = $this->{optionsNodeList} -> get_nodelist();
+	foreach my $element (@node) {
+		if (! $this -> requestedProfile ($element)) {
+			next;
+		}
+		my $keytable = $element -> getElementsByTagName ("keytable");
+		my $timezone = $element -> getElementsByTagName ("timezone");
+		my $language = $element -> getElementsByTagName ("locale");
+		my $oemswapMB= $element -> getElementsByTagName ("oem-swapsize");
+		my $oemrootMB= $element -> getElementsByTagName ("oem-systemsize");
+		my $oemswap  = $element -> getElementsByTagName ("oem-swap");
+		my $oemhome  = $element -> getElementsByTagName ("oem-home");
+		my $oemtitle = $element -> getElementsByTagName ("oem-boot-title");
+		my $oemreboot= $element -> getElementsByTagName ("oem-reboot");
+		my $oemreco  = $element -> getElementsByTagName ("oem-recovery");
+		if (defined $keytable) {
+			$result{kiwi_keytable} = $keytable;
+		}
+		if (defined $timezone) {
+			$result{kiwi_timezone} = $timezone;
+		}
+		if (defined $language) {
+			$result{kiwi_language} = $language;
+		}
+		if ((defined $oemswap) && ("$oemswap" eq "no")) {
+			$result{kiwi_oemswap} = "no";
+		} elsif ((defined $oemswapMB) && ("$oemswapMB" > 0)) {
+			$result{kiwi_oemswapMB} = $oemswapMB;
+		}
+		if ((defined $oemhome) && ("$oemhome" eq "no")) {
+			$result{kiwi_oemhome} = "no";
+		}
+		if ((defined $oemrootMB) && ("$oemrootMB" > 0)) {
+			$result{kiwi_oemrootMB} = $oemrootMB;
+		}
+		if ((defined $oemtitle) && ("$oemtitle" ne "")) {
+			$result{kiwi_oemtitle} = $oemtitle;
+		}
+		if ((defined $oemreboot) && ("$oemreboot" eq "yes")) {
+			$result{kiwi_oemreboot} = $oemreboot;
+		}
+		if ((defined $oemreco) && ("$oemreco" eq "yes")) {
+			$result{kiwi_oemrecovery} = $oemreco;
+		}
 	}
 	#==========================================
 	# profiles
@@ -2098,12 +2132,13 @@ sub getInstSourcePackageAttributes {
 	return \%result;
 }
 
-sub clearPackageAttributes
-{
+#==========================================
+# clearPackageAttributes
+#------------------------------------------
+sub clearPackageAttributes {
 	my $this = shift;
 	$this->{m_rpacks} = undef;
 }
-
 
 #==========================================
 # getList
