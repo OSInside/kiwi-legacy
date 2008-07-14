@@ -3,6 +3,9 @@ Mon Jul 14 11:30:50 CEST 2008 - ms@suse.de
 
 - v2.58
 - check for DHCPSID value too (bnc #408668)
+- fixed importBranding for usbboot, it should be called
+  at first boot only and allow users to change their boot
+  data persistently
 
 -------------------------------------------------------------------
 Thu Jul 10 16:49:00 CEST 2008 - ms@suse.de

@@ -151,7 +151,10 @@ umountSystemFilesystems
 #======================================
 # 15) copy initrd files to image
 #--------------------------------------
-importBranding
+if [ ! -f /mnt/boot/deployed ];then
+	touch /mnt/boot/deployed
+	importBranding
+fi
 cp /preinit /mnt
 cp /include /mnt
 
