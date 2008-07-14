@@ -2119,7 +2119,6 @@ function checkServer {
 		Echo "Found server in kernel cmdline"
 		SERVER=$kiwiserver
 	fi
-
 	if [ ! -z $kiwiservertype ]; then
 		Echo "Found server type in kernel cmdline"
 		SERVERTYPE=$kiwiservertype
