@@ -150,8 +150,17 @@ if [ $LOCAL_BOOT = "no" ];then
 	if ! ping -c 1 $SERVER >/dev/null 2>&1;then
 		Echo "Server: $SERVER not found"
 		if [ -z "$SERVERTYPE" ] || [ "$SERVERTYPE" = "tftp" ]; then
-			Echo "Using: $DHCPSIADDR from dhcpcd-info"
-			SERVER=$DHCPSIADDR
+			if [ ! -z "$DHCPSIADDR" ];then
+				Echo "Using: $DHCPSIADDR from dhcpcd-info"
+				SERVER=$DHCPSIADDR
+			elif [ ! -z "$DHCPSID" ];then
+				Echo "Using: $DHCPSID from dhcpcd-info"
+				SERVER=$DHCPSID
+			else
+				systemException \
+					"Can't assign SERVER IP/name... fatal !" \
+				"reboot"
+			fi
 		fi
 	fi
 fi
