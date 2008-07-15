@@ -1429,6 +1429,7 @@ sub getInstSourceRepository {
 		my $name = $element -> getAttribute("name");
 		my $user = $element -> getAttribute("username");
 		my $pwd  = $element -> getAttribute("pwd");
+		my $islocal  = $element -> getAttribute("local");
 		my $stag = $element -> getElementsByTagName ("source") -> get_node(1);
 		my $source = $this -> resolveLink ( $stag -> getAttribute ("path") );
 		if (! defined $name) {
@@ -1436,6 +1437,7 @@ sub getInstSourceRepository {
 		}
 		$result{$name}{source}   = $source;
 		$result{$name}{priority} = $prio;
+		$result{$name}{islocal} = $islocal;
 		if (defined $user) {
 			$result{$name}{user} = $user.":".$pwd;
 		}

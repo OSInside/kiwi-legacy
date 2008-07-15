@@ -57,8 +57,13 @@ sub execute
     return $retval;
   }
 
+  my $dirname = $this->{m_handler}->baseurl()."/".$this->{m_handler}->mediaName();
+  my $mult = $this->handler()->collect()->productData()->getVar("MULTIPLE_MEDIA");
+  if( $mult ne "no") {
+    $dirname .= $this->{m_media}->[0];
+  }
+  $dirname .= "/".$this->{m_requireddirs}->[0];
 
-  my $dirname = $this->{m_handler}->baseurl()."/".$this->{m_handler}->mediaName().$this->{m_media}->[0]."/".$this->{m_requireddirs}->[0];
   if(!open(PAT, ">", "$dirname/patterns")) {
     die "Cannot create $dirname/patterns!";
   }

@@ -250,6 +250,8 @@ sub Init
     print DUMP $this->{m_archlist}->dumpList();
     close(DUMP);
   }
+  #cleanup the wasted memory in KIWIXML:
+  $this->{m_xml}->clearPackageAttributes();
 
   ## repository information
   %{$this->{m_repos}}	      = $this->{m_xml}->getInstSourceRepository();
@@ -289,7 +291,6 @@ sub Init
   $this->{m_proddata}->addSet("ProductOption stuff", {$this->{m_xml}->getInstSourceProductOption()}, "prodopts");
   $this->{m_proddata}->_expand(); #once should be it, now--
 
-  # this breaks "private" access, only used for DEBUG! This is not an example!!!
   if($this->{m_debug}) {
     open(DUMP, ">", "$this->{m_basedir}/productdata.pl");
     print DUMP "# PRODUCTINFO:";
@@ -309,13 +310,27 @@ sub Init
     return undef;
   }
 
-  foreach my $n($this->getMediaNumbers()) {
-    $this->{m_dirlist}->{"$this->{m_united}/$mediumname$n"} = 1;
-    $this->{m_dirlist}->{"$this->{m_united}/$mediumname$n/suse"} = 1;
-    $this->{m_dirlist}->{"$this->{m_united}/$mediumname$n/script"} = 1;
-    $this->{m_dirlist}->{"$this->{m_united}/$mediumname$n/temp"} = 1;
-    $this->{m_dirlist}->{"$this->{m_united}/$mediumname$n/media.$n"} = 1;
-    $this->{m_basesubdir}->{$n} = "$this->{m_united}/$mediumname$n";
+  my @media = $this->getMediaNumbers();
+  my $mult = $this->{m_proddata}->getVar("MULTIPLE_MEDIA");
+  my $dirext = undef;
+  if($mult eq "no") {
+    if(scalar(@media) == 1) { 
+      $dirext = 1;#"$this->{m_united}/$mediumname";
+    }
+    else {
+      # this means the config says multiple_media=no BUT defines a "medium=<number>" somewhere!
+      $this->{m_logger}->warning("[ERROR] You want a single medium distro but specified medium=... for some packages\n\tIgnoring the MULTIPLE_MEDIA=no flag!");
+    }
+  }
+  foreach my $n(@media) {
+    my $dirbase = "$this->{m_united}/$mediumname";
+    $dirbase .= "$n" if not defined($dirext);
+    $this->{m_dirlist}->{"$dirbase"} = 1;
+    $this->{m_dirlist}->{"$dirbase/suse"} = 1;
+    $this->{m_dirlist}->{"$dirbase/script"} = 1;
+    $this->{m_dirlist}->{"$dirbase/temp"} = 1;
+    $this->{m_dirlist}->{"$dirbase/media.$n"} = 1;
+    $this->{m_basesubdir}->{$n} = "$dirbase";
     $this->{m_dirlist}->{"$this->{m_basesubdir}->{$n}"} = 1;
   }
   
@@ -800,12 +815,13 @@ sub unpackMetapackages
 
       ## THEMING
       $this->{m_logger}->info("[INFO] Handling theming for package $metapack\n");
-      $this->{m_logger}->info("\ttarget theme $this->{m_prodvars}->{PRODUCT_THEME}\n");
       my $thema = $this->{m_proddata}->getVar("PRODUCT_THEME");
       if(not defined($thema)) {
 	$this->{m_logger}->error("[ERROR] unpackMetapackages: PRODUCT_THEME undefined!");
 	die;# TODO clean solution
       }
+      $this->{m_logger}->info("\ttarget theme $thema\n");
+
       if(-d "$tmp/SuSE") {
 	if(not opendir(TD, "$tmp/SuSE")) {
 	  $this->{m_logger}->warning("[WARNING] [unpackMetapackages] Can't open theme directory for reading!\nSkipping themes for package $metapack\n");
@@ -1085,8 +1101,8 @@ sub fetchFileFrom
 
   # step1: download all and query headers!
   # sort by prio??
-  #REPO:foreach my $repo(keys(%list)) {
   REPO:foreach my $repo(sort {$this->{m_repos}->{$a}->{priority} < $this->{m_repos}->{$b}->{priority}} keys(%list)) {
+    my $localrepo = $this->{m_repos}->{$repo}->{islocal};
     my $r_tmp = $list{$repo};
     DIR:foreach my $dir(keys(%{$r_tmp})) {
       my $r_tmp2 = $r_tmp->{$dir};
@@ -1095,17 +1111,16 @@ sub fetchFileFrom
       my $fullpath = "$this->{m_repos}->{$repo}->{'basedir'}/$r_tmp2->{'subdir'}";
       $this->{m_dirlist}->{"$fullpath"} = 1;
       $this->createDirectoryStructure();
-      #if(! -d $fullpath) {
-      #  if(!mkpath($fullpath, { mode => umask })) {
-      #    $this->{m_logger}->error("[ERROR] [fetchFileFrom] cannot create subdirectory $fullpath\n");
-      #    die "Cannot create subdirectories, something's broken!";
-      #  }
-      #}
 
       $this->{m_logger}->info("[INFO] [fetchFileFrom] downloading $pack from $r_tmp2->{'uri'} to dir $fullpath");
       $r_tmp2->{'uri'} =~ m{.*/(.*)$};
       my $file = $1;
-      $this->{m_xml}->getInstSourceFile($r_tmp2->{'uri'}, $fullpath);
+      if(defined($localrepo) and ($localrepo eq "true" or $localrepo eq "1")) {
+	link $r_tmp2->{'uri'}, "$fullpath/$file";
+      }
+      else{
+	$this->{m_xml}->getInstSourceFile($r_tmp2->{'uri'}, $fullpath);
+      }
       my %flags = RPMQ::rpmq_many("$fullpath/$file", 'NAME', 'VERSION', 'RELEASE', 'ARCH', 'SOURCE', 'SOURCERPM');
 
       if(! %flags) {
@@ -1119,7 +1134,6 @@ sub fetchFileFrom
 	#   SOURCE contains (none) for regular rpms and the name of the tarball file for source rpms
 	#   SOURCERPM contains the name of the resp. source rpm or (none) for source rpms themselves.
 	#---------------------------------
-	#my $ext = "$tmppath/$flags{'NAME'}->[0]-$flags{'VERSION'}->[0]-$flags{'RELEASE'}->[0]";
 	my $ext;
 	if( !$flags{'SOURCERPM'} or $flags{'SOURCERPM'}->[0] eq 'none') {
 	  # we deal with a source rpm...
@@ -1138,11 +1152,6 @@ sub fetchFileFrom
 	if(! -d $tmppath) {
 	  $this->{m_dirlist}->{"$tmppath"} = 1;
 	  $this->createDirectoryStructure();
-	  #if(!mkpath($tmppath, { mode => umask } )) {
-	  #  $this->{m_logger}->error("[ERROR] [fetchFileFrom] cannot create subdirectory $tmppath\n");
-	  #  # TODO clean exit (code 3); continuing doesn't make sense
-	  #  die "Cannot create subdirectories, something's broken!";
-	  #}
 	}
 
 	my $newname = "$tmppath/$flags{'NAME'}->[0]-$flags{'VERSION'}->[0]-$flags{'RELEASE'}->[0].$ext";
@@ -1216,91 +1225,6 @@ sub dumpRepoData
   return;
 }
 # /dumpRepoData
-
-
-
-#==========================================
-# getArchList
-#------------------------------------------
-#sub getArchList
-#{
-#  my $this = shift;
-#  
-#  my @erg = ();
-#  #my @archs = @{$this->{m_archlist}};
-#
-#  foreach(@{$this->{m_archlist}}) {
-#    if(m{i\d+}) {
-#      push @erg, $this->getArchListByName('intel', $_);
-#    }
-#    elsif(m{ia.+}) {
-#      push @erg, $this->getArchListByName('ia', $_);
-#    }
-#    elsif(m{ppc}) {
-#      push @erg, $this->getArchListByName('ppc', $_);
-#    }
-#    elsif(m{ppc64}) {
-#      push @erg, $this->getArchListByName('ppc64', $_);
-#    }
-#    elsif(m{hppa}) {
-#      push @erg, $this->getArchListByName('hp', $_);
-#    }
-#    elsif(m{x\d+}) {
-#      push @erg, $this->getArchListByName('amd', $_);
-#    }
-#    elsif(m{s\d+.*}) {
-#      push @erg, $this->getArchListByName('s390', $_);
-#    }
-#  }
-#  return KIWIUtil::unify(@erg);
-#}
-## /getArchList
-
-
-
-#
-#sub getArchListByName
-#{
-#  my $this = shift;
-#  my $arch = shift;# or die("No arch given!");
-#  # missing pars warning hook:
-#  if(not defined($arch)) {
-#    $this->{m_logger}->warning("[WARNING] [getArchByName] undefined parameter \$arch");
-#    return undef; # no harm, but also no result
-#  }
-#
-#  my @orig;
-#  if($arch =~ m{i\d+}) {
-#    @orig = @{$this->{m_fpath}->{'intel'}};
-#  }
-#  elsif($arch =~ m{ia.+}) {
-#    @orig = @{$this->{m_fpath}->{'ia'}};
-#  }
-#  elsif($arch =~ m{ppc}) {
-#   @orig = @{$this->{m_fpath}->{'ppc'}};
-#  }
-#  elsif($arch =~ m{ppc64}) {
-#   @orig = @{$this->{m_fpath}->{'ppc64'}};
-#  }
-#  elsif($arch =~ m{hppa}) {
-#   @orig = @{$this->{m_fpath}->{'hp'}};
-#  }
-#  elsif($arch =~ m{x\d+}) {
-#   @orig = @{$this->{m_fpath}->{'amd'}};
-#  }
-#  elsif($arch =~ m{s\d+.*}) {
-#   @orig = @{$this->{m_fpath}->{'s390'}};
-#  }
-#
-#  my $index = 0;
-#  for($index=0; $index<$#orig; $index++) {
-#    if($orig[$index] eq $arch) {
-#      last;
-#    }
-#  }
-#  return @orig[$index .. $#orig];
-#}
-## /getArchListByName
 
 
 
@@ -1453,32 +1377,33 @@ sub failedPackagesWarning
 # returns:
 #   list of available architectures
 #------------------------------------------
-sub hasArch
-{
-  my $this = shift;
-  my $p = shift;
-
-  my @r = ();
-  my $pinfo = $this->{m_packages}->{$p};
-  if(!$pinfo) {
-    $pinfo = $this->{m_metapackages}->{$p};
-    if(!$pinfo) {
-      $this->{m_logger}->warning("[WARNING] [hasArch] package $p not found in any package list");
-      return undef;
-    }
-  }
-
-  # figure out the reqired architectures:
-  if(!@{$pinfo}) { # if the ref is an empty list
-    @r = $this->{m_archlist};
-  }
-  else {
-    
-  }
-
-  return @r;
-}
-
+## TODO move this functionality to the KIWIPackage class TODO
+#sub hasArch
+#{
+#  my $this = shift;
+#  my $p = shift;
+#
+#  my @r = ();
+#  my $pinfo = $this->{m_packages}->{$p};
+#  if(!$pinfo) {
+#    $pinfo = $this->{m_metapackages}->{$p};
+#    if(!$pinfo) {
+#      $this->{m_logger}->warning("[WARNING] [hasArch] package $p not found in any package list");
+#      return undef;
+#    }
+#  }
+#
+#  # figure out the reqired architectures:
+#  if(!@{$pinfo}) { # if the ref is an empty list
+#    @r = $this->{m_archlist};
+#  }
+#  else {
+#    
+#  }
+#
+#  return @r;
+#}
+#
 
 
 #==========================================
