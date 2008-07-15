@@ -1,13 +1,4 @@
 -------------------------------------------------------------------
-Tue Jul 15 15:38:58 CEST 2008
-
-- introduction of new attribute "local" (values boolean) in <instrepo>
-  element. Tells kiwi to use link instead of lwp-download (much faster)
-  For OBS scenario local trees will be used.
-- fixed KIWIPatternsPlugin: use the correct subdir name in case of single
-  subdir trees
-
--------------------------------------------------------------------
 Mon Jul 14 11:30:50 CEST 2008 - ms@suse.de
 
 - v2.58
@@ -17,6 +8,11 @@ Mon Jul 14 11:30:50 CEST 2008 - ms@suse.de
 - fixed importBranding for usbboot, it should be called
   at first boot only and allow users to change their boot
   data persistently
+- introduction of new attribute "local" (values boolean) in <instrepo>
+  element. Tells kiwi to use link instead of lwp-download (much faster)
+  For OBS scenario local trees will be used. Patch by Jan Bornschlegel
+- fixed KIWIPatternsPlugin: use the correct subdir name in case
+  of single subdir trees. Patch by Jan Bornschlegel
 
 -------------------------------------------------------------------
 Thu Jul 10 16:49:00 CEST 2008 - ms@suse.de
