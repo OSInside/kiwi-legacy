@@ -718,7 +718,7 @@ sub main {
 				last SWITCH;
 			};
 			/^ec2/      && do {
-				$ok = $image -> createImageEC2 ();
+				$ok = $image -> createImageEC2 ( $para );
 				last SWITCH;
 			};
 			$kiwi -> error  ("Unsupported type: $type{type}");
@@ -1810,6 +1810,12 @@ sub checkType {
 				return undef;
 			}
 			$para = $type{filesystem}.":".$type{boot};
+			last SWITCH;
+		};
+		/^ec2/ && do {
+			if (defined $type{boot}) {
+				$para = $type{boot};
+			}
 			last SWITCH;
 		};
 	}

@@ -195,15 +195,21 @@ sub createImageEC2 {
 	# kiwi image
 	# ---
 	my $this      = shift;
+	my $boot      = shift;
 	my $imageTree = $this->{imageTree};
 	my $imageDest = $this->{imageDest};
-	my $xml       = $this->{xml};
+	my $baseSystem= $this->{baseSystem};
+	my $sxml      = $this->{xml};
 	my $kiwi      = $this->{kiwi};
+	my $type;
+	my $plinux;
+	my $pinitrd;
 	#==========================================
 	# Check AWS account information
 	#------------------------------------------
 	my $arch = qxx ("uname -m"); chomp ( $arch );
-	my %type = %{$xml->getImageTypeAndAttributes()};
+	my %type = %{$sxml->getImageTypeAndAttributes()};
+	my $pblt = $type{checkprebuilt};
 	if (! defined $type{AWSAccountNr}) {
 		$kiwi -> error  ("Missing AWS account number");
 		$kiwi -> failed ();
@@ -262,14 +268,174 @@ sub createImageEC2 {
 	my $ca = $type{EC2CertFile};
 	my $nr = $type{AWSAccountNr};
 	my $fi = $imageDest."/".$name;
-	my $to = $imageDest;
+	my $amiopts = "-i $fi -k $pk -c $ca -u $nr -p $name.ami";
 	my $data = qxx (
-		"ec2-bundle-image -i $fi -k $pk -c $ca -u $nr -d $to -r $arch 2>&1"
+		"ec2-bundle-image $amiopts -d $imageDest -r $arch 2>&1"
 	);
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("ec2-bundle-image: $data");
+		$kiwi -> failed ();
+		return undef;
+	}
+	$kiwi -> done();
+	#==========================================
+	# build boot image only if specified
+	#------------------------------------------
+	if (! defined $boot) {
+		return $this;
+	}
+	#==========================================
+	# Prepare and Create boot image
+	#------------------------------------------
+	$imageTree = $this->{imageTree};
+	$kiwi -> info ("Creating boot image: $boot...\n");
+	my $Prepare = $imageTree."/image";
+	my $xml = new KIWIXML ( $kiwi,$Prepare );
+	if (! defined $xml) {
+		return undef;
+	}
+	my $tmpdir = qxx ("mktemp -q -d /tmp/kiwi-ec2boot.XXXXXX"); chomp $tmpdir;
+	my $result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> error  ("Couldn't create tmp dir: $tmpdir: $!");
+		$kiwi -> failed ();
+		return undef;
+	}
+	$main::Survive  = "yes";
+	$main::RootTree = "$tmpdir/kiwi-ec2boot-$$";
+	$main::Prepare  = $boot;
+	$main::BaseRoot = $type{baseroot};
+	if (defined $main::BaseRoot) {
+		if (($main::BaseRoot !~ /^\//) && (! -d $main::BaseRoot)) {
+			$main::BaseRoot = $main::System."/".$main::BaseRoot;
+		}
+	}
+	if (($main::Prepare !~ /^\//) && (! -d $main::Prepare)) {
+		$main::Prepare = $main::System."/".$main::Prepare;
+	}
+	if ($type{bootprofile}) {
+		@main::Profiles = split (/,/,$type{bootprofile});
+	}
+	$main::ForeignRepo{"xmlnode"} = $xml -> getForeignNodeList();
+	$main::ForeignRepo{"packagemanager"} = $xml -> getPackageManager();
+	$main::ForeignRepo{"locale"}  = $xml -> getLocale();
+	$main::ForeignRepo{"prepare"} = $main::Prepare;
+	$main::ForeignRepo{"create"}  = $main::Create;
+	$main::Create = $main::RootTree;
+	$xml = new KIWIXML ( $kiwi,$main::Prepare );
+	if (! defined $xml) {
+		return undef;
+	}
+	my $iname = $xml -> getImageName();
+	undef $main::SetImageType;
+	$kiwi -> info ("Checking for pre-built boot image");
+	if ((! $pblt) || ($pblt eq "false") || ($pblt eq "0")) {
+		#==========================================
+		# don't want a prebuilt boot image
+		#------------------------------------------
+		$kiwi -> notset();
+		$pblt = 0;
+	} else {
+		#==========================================
+		# check if a prebuilt boot image exists
+		#------------------------------------------
+		my $lookup = $main::Prepare."-prebuilt";
+		if (defined $main::PrebuiltBootImage) {
+			$lookup = $main::PrebuiltBootImage;
+		}
+		$pinitrd = glob ("$lookup/$iname*$arch*.gz");
+		$plinux  = glob ("$lookup/$iname*$arch*.kernel");
+		if ((! -f $pinitrd) || (! -f $plinux)) {
+			$kiwi -> skipped();
+			$kiwi -> info ("Cant't find pre-built boot image in $lookup");
+			$kiwi -> skipped();
+			$pblt = 0;
+		} else {
+			$kiwi -> done();
+			$kiwi -> info ("Extracting pre-built boot image");
+			$data = qxx ("mkdir -p $main::Create");
+			$data = qxx (
+				"$main::Gzip -cd $pinitrd|(cd $main::Create && cpio -di 2>&1)"
+			);
+			$code = $? >> 8;
+			if ($code != 0) {
+				$kiwi -> failed();
+				$kiwi -> error ("Can't extract pre-built boot image: $data");
+				$kiwi -> failed();
+				$pblt = 0;
+			} else {
+				$kiwi -> done();
+				$pblt = 1;
+			}
+		}
+	}
+	if (! $pblt) {
+		#==========================================
+		# build the split boot image
+		#------------------------------------------
+		undef @main::AddPackage;
+		undef $main::Upgrade;
+		if (! defined main::main()) {
+			$main::Survive = "default";
+			if (! -d $main::RootTree.$baseSystem) {
+				qxx ("rm -rf $main::RootTree");
+				qxx ("rm -rf $tmpdir");
+			}
+			return undef;
+		}
+	}
+	#==========================================
+	# remove tmpdir with boot tree
+	#------------------------------------------
+	$main::Survive = "default";
+	if (! -d $main::RootTree.$baseSystem) {
+		qxx ("rm -rf $main::RootTree");
+		qxx ("rm -rf $tmpdir");
+	}
+	#==========================================
+	# Include splash screen to initrd
+	#------------------------------------------
+	my $kernel = $main::Destination."/".$main::ImageName.".kernel";
+	my $initrd = $main::Destination."/".$main::ImageName.".gz";
+	if (! -f $initrd) {
+		$initrd = $main::Destination."/".$main::ImageName;
+	}
+	my $kboot  = new KIWIBoot ($kiwi,$initrd);
+	if (! defined $kboot) {
+		return undef;
+	}
+	$kboot -> setupSplash();
+	$kboot -> cleanTmp();
+	#==========================================
+	# call ec2-bundle-ramdisk (Amazon toolkit)
+	#------------------------------------------
+	$kiwi -> info ("Creating EC2 bundle (ramdisk)...");
+	my $ariopts = "-i $initrd -k $pk -c $ca -u $nr -p $main::ImageName.ari";
+	$data = qxx (
+		"ec2-bundle-ramdisk $ariopts -d $imageDest -r $arch 2>&1"
+	);
+	$code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("ec2-bundle-ramdisk: $data");
+		$kiwi -> failed ();
+		return undef;
+	}
+	$kiwi -> done();
+	#==========================================
+	# call ec2-bundle-kernel (Amazon toolkit)
+	#------------------------------------------
+	$kiwi -> info ("Creating EC2 bundle (kernel)...");
+	my $akiopts = "-K $kernel -k $pk -c $ca -u $nr -p $main::ImageName.aki";
+	$data = qxx (
+		"ec2-bundle-kernel $akiopts -d $imageDest -r $arch 2>&1"
+	);
+	$code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("ec2-bundle-kernel: $data");
 		$kiwi -> failed ();
 		return undef;
 	}
@@ -2138,10 +2304,10 @@ sub createImageSplit {
 	$main::ForeignRepo{"xmlnode"} = $xml -> getForeignNodeList();
 	$main::ForeignRepo{"packagemanager"} = $xml -> getPackageManager();
 	$main::ForeignRepo{"oem-swap"}       = $xml -> getOEMSwap();
-    $main::ForeignRepo{"oem-swapsize"}   = $xml -> getOEMSwapSize();
-    $main::ForeignRepo{"oem-systemsize"} = $xml -> getOEMSystemSize();
-    $main::ForeignRepo{"oem-home"}       = $xml -> getOEMHome();
-    $main::ForeignRepo{"oem-boot-title"} = $xml -> getOEMBootTitle();
+	$main::ForeignRepo{"oem-swapsize"}   = $xml -> getOEMSwapSize();
+	$main::ForeignRepo{"oem-systemsize"} = $xml -> getOEMSystemSize();
+	$main::ForeignRepo{"oem-home"}       = $xml -> getOEMHome();
+	$main::ForeignRepo{"oem-boot-title"} = $xml -> getOEMBootTitle();
 	$main::ForeignRepo{"oem-reboot"}     = $xml -> getOEMReboot();
 	$main::ForeignRepo{"oem-recovery"}   = $xml -> getOEMRecovery();
 	$main::ForeignRepo{"locale"}  = $xml -> getLocale();
