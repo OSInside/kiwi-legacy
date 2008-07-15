@@ -412,7 +412,8 @@ sub createImageEC2 {
 	# call ec2-bundle-ramdisk (Amazon toolkit)
 	#------------------------------------------
 	$kiwi -> info ("Creating EC2 bundle (ramdisk)...");
-	my $ariopts = "-i $initrd -k $pk -c $ca -u $nr -p $main::ImageName.ari";
+	my $ariopts = "-i $initrd -k $pk -c $ca -u $nr ";
+	$ariopts.= "-p $main::ImageName.ari";
 	$data = qxx (
 		"ec2-bundle-ramdisk $ariopts -d $imageDest -r $arch 2>&1"
 	);
@@ -428,7 +429,8 @@ sub createImageEC2 {
 	# call ec2-bundle-kernel (Amazon toolkit)
 	#------------------------------------------
 	$kiwi -> info ("Creating EC2 bundle (kernel)...");
-	my $akiopts = "-K $kernel -k $pk -c $ca -u $nr -p $main::ImageName.aki";
+	my $akiopts = "-K $kernel -k $pk -c $ca -u $nr ";
+	$akiopts.= "-p $main::ImageName.kernel.aki";
 	$data = qxx (
 		"ec2-bundle-kernel $akiopts -d $imageDest -r $arch 2>&1"
 	);
