@@ -230,7 +230,7 @@ sub filePath {
 	#==========================================
 	# normalize URL data
 	#------------------------------------------
-	if ($module !~ /^file:\/\//) {
+	if ((! defined $module) || ($module !~ /^file:\/\//)) {
 		return undef;
 	}
 	$module =~ s/file:\/\///;
@@ -263,7 +263,7 @@ sub obsPath {
 	#==========================================
 	# normalize URL data
 	#------------------------------------------
-	if ($module !~ /^obs:\/\//) {
+	if ((! defined $module) || ($module !~ /^obs:\/\//)) {
 		return undef;
 	}
 	$module =~ s/obs:\/\///;
@@ -298,7 +298,7 @@ sub isoPath {
 	#==========================================
 	# normalize URL data
 	#------------------------------------------
-	if ($module !~ /^iso:\/\//) {
+	if ((! defined $module) || ($module !~ /^iso:\/\//)) {
 		return undef;
 	}
 	$module =~ s/iso:\/\///;
