@@ -931,7 +931,7 @@ function suseStripKernel {
 				continue
 			fi
 			VERSION=$(/usr/bin/basename $i)
-			echo "Stripping kernel $p: Image [$name]..."
+			echo "Stripping kernel $p: Image [$kiwi_iname]..."
 			#==========================================
 			# move interesting stuff to /tmp
 			#------------------------------------------
@@ -1055,8 +1055,13 @@ function suseStripKernel {
 			# create common kernel files, last wins !
 			#------------------------------------------
 			pushd /boot
-			mv vmlinux-$VERSION.gz vmlinux.gz
-			mv vmlinuz-$VERSION vmlinuz
+			if [ -f vmlinux-$VERSION.gz ];then
+				mv vmlinux-$VERSION.gz vmlinux.gz
+				mv vmlinuz-$VERSION vmlinuz
+			else
+				cp vmlinux-$VERSION vmlinux
+				mv vmlinux-$VERSION vmlinuz
+			fi
 			popd
 		done
 	done

@@ -2982,7 +2982,7 @@ sub extractKernel {
 	# extract kernel from physical extend
 	#------------------------------------------
 	# This is done for boot images only. Therefore we check
-	# if the file vmlinux.gz exists which was created by the
+	# if the file vmlinux[.gz] exists which was created by the
 	# suseStripKernel() function
 	# ---
 	if (! defined $name) {
@@ -3021,7 +3021,7 @@ sub extractKernel {
 			last SWITCH;
 		};
 	}
-	if (-f "$imageTree/boot/vmlinux.gz") {
+	if ((-f "$imageTree/boot/vmlinux.gz") || (-f "$imageTree/boot/vmlinux")) {
 		$kiwi -> info ("Extracting kernel...");
 		my $pwd = qxx ("pwd"); chomp $pwd;
 		my $file = "$imageDest/$name.kernel";
@@ -3039,20 +3039,27 @@ sub extractKernel {
 			$kiwi -> failed ();
 			return undef;
 		}
-		my $gzfile;
+		my $kfile;
+		my $zipped = 1;
 		if (-f "$imageTree/boot/vmlinux.gz") {
-			$gzfile = "$imageTree/boot/vmlinux.gz";
+			$kfile = "$imageTree/boot/vmlinux.gz";
 		} elsif (-f "$imageTree/boot/xen.gz") {
-			$gzfile = "$imageTree/boot/xen.gz";
+			$kfile = "$imageTree/boot/xen.gz";
+		} elsif (-f "$imageTree/boot/vmlinux") {
+			$kfile = "$imageTree/boot/vmlinux";
+			$zipped= 0;
 		} else {
 			$kiwi -> failed ();
-			$kiwi -> info   ("Couldn't find compressed kernel");
+			$kiwi -> info   ("Couldn't find kernel file");
 			$kiwi -> failed ();
 			return undef;
 		}
-		my $kernel = qxx (
-			"$main::Gzip -dc $gzfile | strings | grep $lx | cut $sp"
-		);
+		my $kernel;
+		if ($zipped) {
+			$kernel = qxx ("$main::Gzip -dc $kfile| strings| grep $lx|cut $sp");
+		} else {
+			$kernel = qxx ("cat $kfile| strings| grep $lx| cut $sp");
+		}
 		chomp $kernel;
 		qxx ("rm -f $file.$kernel");
 		qxx ("mv $file $file.$kernel && ln -s $file.$kernel $file ");
