@@ -1059,7 +1059,7 @@ function suseStripKernel {
 				mv vmlinux-$VERSION.gz vmlinux.gz
 				mv vmlinuz-$VERSION vmlinuz
 			else
-				cp vmlinux-$VERSION vmlinux
+				cp -f vmlinux-$VERSION vmlinux
 				mv vmlinux-$VERSION vmlinuz
 			fi
 			popd
