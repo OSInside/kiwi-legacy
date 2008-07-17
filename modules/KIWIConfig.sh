@@ -192,6 +192,30 @@ function suseServiceDefaultOn {
 }
 
 #======================================
+# suseCloneRunlevel
+#--------------------------------------
+function suseCloneRunlevel {
+	# /.../
+	# Clone the given runlevel to work in the same way
+	# as the default runlevel 3.
+	# ----
+	local clone=$1
+	if [ -z "$clone" ];then
+		echo "suseCloneRunlevel: no runlevel given... abort"
+		return 1
+	fi
+	if [ $clone = 3 ];then
+		echo "suseCloneRunlevel: can't clone myself... abort"
+		return 1
+	fi
+	if [ -d /etc/init.d/rc$clone.d ];then
+		rm -rf /etc/init.d/rc$clone.d
+	fi
+	cp -a /etc/init.d/rc3.d /etc/init.d/rc$clone.d
+	sed -i -e s"@#l$clone@l4@" /etc/inittab
+}
+
+#======================================
 # baseSetupOEMPartition
 #--------------------------------------
 function baseSetupOEMPartition {

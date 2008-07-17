@@ -3,6 +3,11 @@ Wed Jul 16 10:58:08 CEST 2008 - ms@suse.de
 
 - v2.59
 - fixed suseStripKernel function to work with ppc
+- added suseCloneRunlevel function which allows to
+  clone the runlevel 3 links into the given runlevel. The
+  function also activates the runlevel in /etc/inittab if
+  not yet done. This function is relevant for systems booting
+  into non standard runlevels like (4)
 
 -------------------------------------------------------------------
 Mon Jul 14 11:30:50 CEST 2008 - ms@suse.de
