@@ -3,42 +3,78 @@
 \label{chapter:ec2}
 \minitoc
 
-% <type ec2accountnr="720220196365" ec2privatekeyfile="/suse/ms/.ec2/pk-cambrian-aws.pem" ec2certfile="/suse/ms/.ec2/cert-cambrian-aws.pem" boot="xenboot/suse-11.0">ec2</type>
-
-% ec2privatekeyfile: AWS user's PEM encoded RSA private key file
-% ec2accountnr: The user's EC2 user ID (Note: AWS account number, NOT Access Key ID)
-% ec2certfile: AWS user's PEM encoded RSA pubkey certificate file
-
-%What I have done so far:
-%========================
-
-%1) created a ec2-ami-tools package and submit it to beta. I hope
-%   to get that package on SUSE 11.0 too. This package contains the
-%   Amazon tools to create what they call a bundle
-
-%2) add a new image type to kiwi which I call ec2. All you need
-%   to do is:
+%1) read documentation how to setup an Account for AWS and the EC2 service
+%   http://docs.amazonwebservices.com/AmazonEC2/gsg/2006-06-26/
 %
-%   <type
-%      ec2accountnr="AWS account Nr"
-%      ec2privatekeyfile="AWS Private Key file"
-%      ec2certfile="AWS certificate"
-%   >ec2</type>
+%2) setup the example image doc/examples/suse-xen-guest for ec2
+%   make sure the config.sh includes the line
+%  
+%       suseCloneRunlevel 4
 %
-%   All the information about the AWS service is given when
-%   you create your Amazon AWS acccount and sign up for the EC2
-%   service
+%   this is required on Amazon because it runs in runlevel 4 which
+%   is not used at all on suse systems
 %
-%   kiwi --create ... -d ... --type ec2
+%  <type ec2accountnr="720220196365"
+%        ec2privatekeyfile="/suse/ms/.ec2/pk-cambrian-aws.pem"
+%        ec2certfile="/suse/ms/.ec2/cert-cambrian-aws.pem"
+%        boot="xenboot/suse-11.0"
+%  >ec2</type>
 %
-%3) The generated image must be transfered over to Amazon which is
-%   done by ec2-upload-bundle. I would like to write some documentation
-%   about the upload and the activation of an instance as soon as we
-%   can use at least one of our SUSE kernels
-
-% ec2-upload-bundle -b <your-s3-bucket> -m /mnt/image.manifest.xml -a <aws-access-key-id> -s <aws-secret-access-key>
-
-%ec2-register <your-s3-bucket>/image.manifest.xml
-%IMAGE ami-5bae4b32 
-
-%ec2-run-instances ami-5bae4b32
+%  boot attribute makes only sense if you are an Amazon partner and
+%  allowed to create and upload Amazon kernel and initrd images. If
+%  not the kiwi create step will fail
+%
+%  ec2privatekeyfile: AWS user's PEM encoded RSA private key file
+%  ec2accountnr: The user's EC2 user ID (Note: AWS account number, NOT Access Key ID)
+%  ec2certfile: AWS user's PEM encoded RSA pubkey certificate file
+%
+%3) prepare and create the image 
+%
+%4) The generated image must be transfered over to Amazon which is
+%   done by ec2-upload-bundle.
+%
+%   with boot image and kernel
+%
+%   ec2-upload-bundle -b suse -a <AWS Key ID> -s <AWS secret Key ID> \
+%    -m /tmp/mytest/<initrd>.ari.manifest.xml     
+%
+%   ec2-upload-bundle -b suse -a <AWS Key ID> -s <AWS secret Key ID> \
+%    -m /tmp/mytest/<initrd.kernel>.aki.manifest.xml
+% 
+%   the system image
+%
+%   ec2-upload-bundle -b suse -a <AWS Key ID> -s <AWS secret Key ID> \
+%	-m /tmp/mytest/<image>.ami.manifest.xml 
+%
+%5) Register the uploaded images
+%
+%   with boot image and kernel
+%
+%   ec2-register suse/<initrd>.ari.manifest.xml
+%   ec2-register suse/<initrd.kernel>.aki.manifest.xml
+%
+%   the system image
+%
+%   ec2-register suse/<image>.ami.manifest.xml
+%
+%   Each registration provides an identifier which is an ami-... for the system
+%   image an aki-... for the kernel image and an ari-... for the initrd image.
+%   If you are not able to build and upload kernel/initrd images you need to
+%   select an appropriate one provided by Amazon. This can be done checking
+%   the list with
+%  
+%   ec2-describe-images -a
+%
+%6) Run an ec2 instance
+%
+%   ec2-add-keypair ms-gsg-keypair
+%   The private key returned needs to be saved in a local file so that you can use it later.
+%   Using your favorite text editor, create a file named id_rsa-ms-gsg-keypair and paste everything between
+%   (and including) the "-----BEGIN RSA PRIVATE KEY-----" and "-----END RSA PRIVATE KEY-----" lines into it.
+%
+%   ec2-describe-keypairs
+%
+%   ec2-run-instances ami-... --kernel aki-... --ramdisk ari-.... -k ms-gsg-keypair
+%   ec2-describe-instances
+%
+%   ec2-authorize default -p 22
