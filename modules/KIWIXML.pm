@@ -2853,7 +2853,10 @@ sub getInstSourceSatSolvable {
 	#------------------------------------------
 	if (glob ("$sdir/packages-*.gz")) {
 		$destfile = $sdir."/primary-".$count;
-		$scommand = "gzip -cd $sdir/packages-*.gz; gzip -cd $sdir/*.pat.gz";
+		$scommand = "gzip -cd $sdir/packages-*.gz";
+		if (glob ("$sdir/*.pat.gz")) {
+			$scommand .= ";gzip -cd $sdir/*.pat.gz";
+		}
 		my $data = qxx ("($scommand) | susetags2solv > $destfile");
 		my $code = $? >> 8;
 		if ($code != 0) {
