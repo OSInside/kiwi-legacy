@@ -5,4 +5,6 @@
 SUSE-Linux-Enterprise-Server-10-SP1 = suse-SLES10-SP1,***SELECT***
 SUSE-Linux-Enterprise-Server-10=suse-SLES10,***SELECT***
 openSUSE-10.2=suse-10.2,opensuse://10.2
-openSUSE-10.3=suse-10.3,opensuse://SL-OSS-factory
+openSUSE-10.3=suse-10.3,opensuse://10.3
+openSUSE-11.0=suse-11.0,opensuse://11.0
+openSUSE-11.1=suse-11.1,opensuse://SL-OSS-factory
