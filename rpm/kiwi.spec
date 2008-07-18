@@ -35,6 +35,7 @@ Requires:       qt
 %endif
 Requires:       perl = %{perl_version}
 Requires:       perl-XML-LibXML perl-libwww-perl screen coreutils
+Requires:       perl-XML-LibXML-Common perl-XML-SAX
 Requires:       kiwi-tools libxslt checkmedia
 %if %{suse_version} > 1030
 Requires:       satsolver-tools

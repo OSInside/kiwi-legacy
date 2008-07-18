@@ -9,6 +9,9 @@ Wed Jul 16 10:58:08 CEST 2008 - ms@suse.de
   function also activates the runlevel in /etc/inittab if
   not yet done. This function is relevant for systems booting
   into non standard runlevels like (4)
+- added missing package requirements:
+  * perl-XML-LibXML-Common
+  * perl-XML-SAX
 
 -------------------------------------------------------------------
 Mon Jul 14 11:30:50 CEST 2008 - ms@suse.de
