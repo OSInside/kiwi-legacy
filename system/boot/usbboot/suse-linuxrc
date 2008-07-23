@@ -57,6 +57,7 @@ touch /lib/modules/*/modules.dep
 # 3) run udevd
 #--------------------------------------
 udevStart
+includeKernelParameters
 
 #======================================
 # 4) start boot shell
@@ -69,7 +70,6 @@ openKernelConsole
 #======================================
 # 5) Including required kernel modules
 #--------------------------------------
-includeKernelParameters
 probeDevices
 
 #======================================

@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Jul 23 11:49:05 CEST 2008 - ms@suse.de
+
+- v2.60
+- allow redirection of the log messages to a console set
+  by the kernel parameter kiwistderr=... (bnc #411304)
+
+-------------------------------------------------------------------
 Wed Jul 16 10:58:08 CEST 2008 - ms@suse.de
 
 - v2.59

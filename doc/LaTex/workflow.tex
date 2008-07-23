@@ -119,6 +119,33 @@ The boot image descriptions are stores in /usr/share/kiwi/image/*boot
 and can be build in the same way as the system image. The boot image
 without a corresponding system image doesn't make sense though.
 
+\section{Boot parameters}
+When booting an image created by kiwi using one of the provided
+boot images there are some useful kernel parameters mainly meant
+for debugging purposes. Please note the following parameters are
+only useful if the kiwi initrd is used. In case of any other
+initrd code written by yourself or simply because kiwi replaced
+itself with the distribution specfic mkinitrd tool the parameters
+might not have any effect.
+
+\begin{itemize}
+\item \textbf{kiwidebug=1}\\
+      If the boot process encounters a fatal error the system normally
+      reacts with a reboot after 120 secconds. This so called exception
+      can be influenced by the kiwidebug parameter. If set to 1 the system
+      will stop and provide the user with a shell prompt instead of a
+      reboot. Within that shell some basic standard commands are
+      available which could help to find the cause of the problem
+\item \textbf{kiwistderr=/dev/...}\\
+      While the system boots kiwi writes messages to tty1 and tty3. The
+      tty1 messages are highlevel information whereas the tty3 messages
+      represents the shell debug output and any error messages from
+      the commands called. With the kiwistderr parameter one can combine
+      both message sets and specify where to write them to. It's very
+      common to set /dev/console as possible alternative to the default
+      logging behaviour
+\end{itemize}
+
 \section{Common and Distribution specific code}
 KIWI has been developed to be usable for any Linux distribution.
 By design of a Linux distribution there are differences between

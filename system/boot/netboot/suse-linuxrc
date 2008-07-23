@@ -86,15 +86,7 @@ runHook init
 udevStart
 
 #======================================
-# 4) start boot shell
-#--------------------------------------
-startBlogD
-startShell
-errorLogStart
-openKernelConsole
-
-#======================================
-# 5) Include proc/cmdline information
+# 4) Include proc/cmdline information
 #--------------------------------------
 includeKernelParameters
 if [ ! -z $IMAGE ];then
@@ -105,6 +97,14 @@ if [ ! -z $IMAGE ];then
 	# ----
 	LOCAL_BOOT="yes"
 fi
+
+#======================================
+# 5) start boot shell
+#--------------------------------------
+startBlogD
+startShell
+errorLogStart
+openKernelConsole
 
 #======================================
 # 6) Obtain/load network module

@@ -67,15 +67,7 @@ touch /lib/modules/*/modules.dep
 udevStart
 
 #======================================
-# 4) start boot shell
-#--------------------------------------
-startBlogD
-startShell
-errorLogStart
-openKernelConsole
-
-#======================================
-# 5) Include proc/cmdline information
+# 4) Include proc/cmdline information
 #--------------------------------------
 includeKernelParameters
 if \
@@ -91,6 +83,14 @@ then
 	# ----
 	export LOCAL_BOOT="yes"   
 fi
+
+#======================================
+# 5) start boot shell
+#--------------------------------------
+startBlogD
+startShell
+errorLogStart
+openKernelConsole
 
 #======================================
 # 6) Including required kernel modules

@@ -20,7 +20,10 @@
 #--------------------------------------
 export ELOG_FILE=/var/log/boot.kiwi
 export ELOG_CONSOLE=/dev/tty3
+export ELOG_BOOTSHELL=/dev/tty2
+export ELOG_EXCEPTION=/dev/tty1
 export KLOG_CONSOLE=4
+export KLOG_DEFAULT=1
 export PARTITIONER=sfdisk
 export TRANSFER_ERRORS_FILE=/tmp/transfer.errors
 
@@ -84,7 +87,7 @@ function closeKernelConsole {
 #--------------------------------------
 function openKernelConsole {
 	# /.../
-	# move the kernel console to tty3 as you can't see the messages
+	# move the kernel console to terminal 3 as you can't see the messages
 	# now directly it looks like the kernel console is switched off
 	# but it isn't really. If DEBUG is set the logging remains on
 	# the first console
@@ -103,8 +106,8 @@ function reopenKernelConsole {
 	# reopen kernel console to be able to see kernel messages
 	# while the system is booting
 	# ----
-	Echo "Kernel logging enabled on: /dev/tty1"
-	klogconsole -l 7 -r1
+	Echo "Kernel logging enabled on: /dev/tty$KLOG_DEFAULT"
+	klogconsole -l 7 -r$KLOG_DEFAULT
 }
 #======================================
 # importFile
@@ -161,7 +164,7 @@ function systemException {
 	;;
 	"shell")
 		Echo "shellException: providing shell..."
-		setctsid /dev/tty1 /bin/bash
+		setctsid $ELOG_EXCEPTION /bin/bash
 	;;
 	*)
 		Echo "unknownException..."
@@ -278,7 +281,8 @@ function createFramebufferDevices {
 #--------------------------------------
 function errorLogStart {
 	# /.../
-	# Log all errors up to now to /dev/tty3
+	# Log all errors up to now to the terminal specified
+	# by ELOG_CONSOLE
 	# ----
 	Echo "Boot-Logging enabled on $ELOG_CONSOLE"
 	if [ ! -f $ELOG_FILE ];then
@@ -2105,6 +2109,10 @@ function includeKernelParameters {
 	if [ ! -z "$kiwibrokenmodule" ];then
 		kiwibrokenmodule=`echo $kiwibrokenmodule | tr , " "`
 	fi
+	if [ ! -z "$kiwistderr" ];then
+		export ELOG_CONSOLE=$kiwistderr
+		export ELOG_EXCEPTION=$kiwistderr
+	fi
 }
 #======================================
 # checkServer
@@ -2526,17 +2534,17 @@ function getNextPartition {
 #--------------------------------------
 function startShell {
 	# /.../
-	# start a debugging shell on tty2
+	# start a debugging shell on ELOG_BOOTSHELL
 	# ----
-	Echo "Starting boot shell on tty2"
-	setctsid -f /dev/tty2 /bin/bash
+	Echo "Starting boot shell on $ELOG_BOOTSHELL"
+	setctsid -f $ELOG_BOOTSHELL /bin/bash
 }
 #======================================
 # killShell
 #--------------------------------------
 function killShell {
 	# /.../
-	# kill debugging shell on tty2
+	# kill debugging shell on ELOG_BOOTSHELL
 	# ----
 	local umountProc=0
 	if [ ! -e /proc/mounts ];then
@@ -2544,7 +2552,7 @@ function killShell {
 		umountProc=1
 	fi
 	Echo "Stopping boot shell"
-	fuser -k /dev/tty2 >/dev/null
+	fuser -k $ELOG_BOOTSHELL >/dev/null
 	if [ $umountProc -eq 1 ];then
 		umount /proc
 	fi
