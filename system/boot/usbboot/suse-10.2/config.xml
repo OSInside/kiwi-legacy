@@ -66,7 +66,6 @@
 		<package name="psmisc"/>
 		<package name="e2fsprogs"/>
 		<package name="file"/>
-		<package name="libcom_err"/>
 		<package name="module-init-tools"/>
 		<package name="pciutils"/>
 		<package name="reiserfs"/>

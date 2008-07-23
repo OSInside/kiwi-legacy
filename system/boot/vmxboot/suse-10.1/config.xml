@@ -58,7 +58,6 @@
 		<package name="e2fsprogs"/>
 		<package name="file"/>
 		<package name="hwinfo"/>
-		<package name="libcom_err"/>
 		<package name="module-init-tools"/>
 		<package name="net-tools"/>
 		<package name="netcfg"/>

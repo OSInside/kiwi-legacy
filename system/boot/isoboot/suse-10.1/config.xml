@@ -61,7 +61,6 @@
 		<package name="gawk"/>
 		<package name="hwinfo"/>
 		<package name="iproute2"/>
-		<package name="libcom_err"/>
 		<package name="lvm2"/>
 		<package name="module-init-tools"/>
 		<package name="net-tools"/>
