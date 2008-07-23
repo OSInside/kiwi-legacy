@@ -2,6 +2,7 @@
 Wed Jul 23 11:49:05 CEST 2008 - ms@suse.de
 
 - v2.60
+- added ec2 example for suse 11.0: suse-ec2-guest (bnc #367138)
 - fixed KIWIMigrate according to current scheme (bnc #411088)
 - allow redirection of the log messages to a console set
   by the kernel parameter kiwistderr=... (bnc #411304)
