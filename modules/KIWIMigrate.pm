@@ -203,7 +203,7 @@ sub setTemplate {
 	#==========================================
     # <description>
     #------------------------------------------
-	print FD '<image name="'.$name.'">'."\n";
+	print FD '<image schemeversion="2.4" name="'.$name.'">'."\n";
 	print FD "\t".'<description type="system">'."\n";
 	print FD "\t\t".'<author>***AUTHOR***</author>'."\n";
 	print FD "\t\t".'<contact>***MAIL***</contact>'."\n";
@@ -222,7 +222,7 @@ sub setTemplate {
 	print FD "\t\t".'<type boot="netboot/'.$boot.'"';
 	print FD ' filesystem="ext3">pxe</type>'."\n";
 	print FD "\t\t".'<version>1.1.2</version>'."\n";
-	print FD "\t\t".'<packagemanager>smart</packagemanager>'."\n";
+	print FD "\t\t".'<packagemanager>zypper</packagemanager>'."\n";
 	print FD "\t\t".'<rpm-check-signatures>False</rpm-check-signatures>'."\n";
 	print FD "\t".'</preferences>'."\n";
 	#==========================================
@@ -234,19 +234,41 @@ sub setTemplate {
 	#==========================================
 	# <packages>
 	#------------------------------------------
-	print FD "\t".'<packages type="image" patternType="plusRecommended">'."\n";
+	print FD "\t".'<packages type="image">'."\n";
 	foreach my $pac (@pacs) {
 		print FD "\t\t".'<package name="'.$pac.'"/>'."\n";
 	}
 	print FD "\t".'</packages>'."\n";
-	print FD "\t".'<packages type="xen" memory="512" disk="/dev/sda">'."\n";
+	#==========================================
+	# <packages type="xen">
+	#------------------------------------------
+	print FD "\t".'<packages type="xen">'."\n";
 	print FD "\t\t".'<package name="kernel-xen"/>'."\n";
 	print FD "\t\t".'<package name="xen"/>'."\n";
 	print FD "\t".'</packages>'."\n";
-	print FD "\t".'<packages type="boot">'."\n";
+	#==========================================
+	# <xenconfig>
+	#------------------------------------------
+	print FD "\t".'<xenconfig memory="512">'."\n";
+	print FD "\t\t".'<xendisk device="/dev/sda"/>'."\n";
+	print FD "\t".'</xenconfig>'."\n";
+	#==========================================
+	# <packages type="vmware">
+	#------------------------------------------
+	print FD "\t".'<packages type="vmware">'."\n";
+	print FD "\t".'</packages>'."\n";
+	#==========================================
+	# <vmwareconfig>
+	#------------------------------------------
+	print FD "\t".'<vmwareconfig memory="512">'."\n";
+	print FD "\t\t".'<vmwaredisk controller="ide" id="0"/>'."\n";
+	print FD "\t".'</vmwareconfig>'."\n";
+	#==========================================
+	# <packages type="bootstrap">
+	#------------------------------------------
+	print FD "\t".'<packages type="bootstrap">'."\n";
 	print FD "\t\t".'<package name="filesystem"/>'."\n";
 	print FD "\t\t".'<package name="glibc-locale"/>'."\n";
-	print FD "\t\t".'<package name="devs"/>'."\n";
 	print FD "\t".'</packages>'."\n";
 	print FD '</image>'."\n";
 	close FD;
