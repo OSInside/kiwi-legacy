@@ -537,7 +537,7 @@ sub setSystemConfiguration {
 				if (! -d "$dest/root/$dir") {
 					qxx ("mkdir -p $dest/root/$dir");
 				}
-				qxx ("cp -a $file $dest/root/$file");
+				qxx ("cp -a \"$file\" $dest/root/$file");
 			}
 			$done = int ($count * $spart);
 			if ($done != $done_old) {

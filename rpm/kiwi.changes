@@ -2,6 +2,7 @@
 Wed Jul 16 10:58:08 CEST 2008 - ms@suse.de
 
 - v2.59
+- fixed KIWIMigrate copy of files with spaces (bnc #410295)
 - update migration table for openSUSE 11.0 
 - fixed suseStripKernel function to work with ppc
 - added suseCloneRunlevel function which allows to
