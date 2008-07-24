@@ -11,16 +11,17 @@ in your config.xml file or by the parameter $--$bootvm-disksize
 
 \section{Building the suse-vm-guest example}
 
-The example provided with kiwi is based on openSUSE 10.3 and makes use
+The latest example provided with kiwi is based on openSUSE 11.0 and makes use
 of the base pattern. The operating system is stored on a
 standard ext3 filesystem. The source repository is expected to be
-available below the path /image/CDs/full-10.3-i386. If you don't have
-a 10.3 repository there edit the config.xml file of the image description
+available below the path /image/CDs/full-11.0-i386. If you don't have
+a 11.0 repository there edit the config.xml file of the image description
 and change the path accordingly or use the suggested remote repositories.
 
 \begin{Command}{12cm}
 \begin{verbatim}
 cd /usr/share/doc/packages/kiwi/examples
+cd suse-11.0
 kiwi --prepare ./suse-vm-guest \
      --root /tmp/myvm
 \end{verbatim}
@@ -43,7 +44,7 @@ is the QEMU virtualisation software. To run your image in qemu call:
 \begin{Command}{12cm}
 \begin{verbatim}
 cd /tmp/myvm-result
-qemu suse-10.3-vm-guest.i686-1.1.2.raw -m 256
+qemu suse-11.0-vm-guest.i686-1.1.2.raw -m 256
 \end{verbatim}
 \end{Command}
 
@@ -114,7 +115,7 @@ is stored in the file:
 
 \begin{Command}{13cm}
 \begin{verbatim}
-/tmp/myvm-result/suse-10.3-vm-guest.i686-1.1.2.vmx
+/tmp/myvm-result/suse-11.0-vm-guest.i686-1.1.2.vmx
 \end{verbatim}
 \end{Command}
 

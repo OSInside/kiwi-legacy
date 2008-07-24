@@ -77,18 +77,19 @@ subnet 192.168.100.0 netmask 255.255.255.0 {
 
 \section{Building the suse-pxe-client example}
 
-The example provided with kiwi is based on openSUSE 10.3 and creates an
+The latest example provided with kiwi is based on openSUSE 11.0 and creates an
 image for a Wyse VX0 terminal with a 128MB flash card and 512MB of RAM.
 The image makes use of the squashfs compressed filesystem and its
 root tree is deployed as unified (aufs) based system. 
 The source repository is expected to be available below the path
-/image/CDs/full-10.3-i386. If you don't have a 10.3 repository there
+/image/CDs/full-11.0-i386. If you don't have a 11.0 repository there
 edit the config.xml file of the image description and change the
 path accordingly or use the suggested remote repository.
 
 \begin{Command}{12cm}
 \begin{verbatim}
 cd /usr/share/doc/packages/kiwi/examples
+cd suse-11.0
 kiwi --prepare ./suse-pxe-client \
      --root /tmp/mypxe
 \end{verbatim}
@@ -114,16 +115,16 @@ cd /tmp/mypxe-result
 \end{verbatim}
 \item Copy of the boot and kernel image
 \begin{verbatim}
-cp initrd-netboot-suse-10.3.i686-2.1.1.splash.gz \
+cp initrd-netboot-suse-11.0.i686-2.1.1.splash.gz \
    /srv/tftpboot/boot/initrd
-cp initrd-netboot-suse-10.3.i686-2.1.1.kernel \
+cp initrd-netboot-suse-11.0.i686-2.1.1.kernel \
    /srv/tftpboot/boot/linux
 \end{verbatim}
 \item Copy of the system image and md5 sum
 \begin{verbatim}
-cp suse-10.3-pxe-client.i686-1.2.8 \
+cp suse-11.0-pxe-client.i686-1.2.8 \
    /srv/tftpboot/image
-cp suse-10.3-pxe-client.i686-1.2.8.md5 \
+cp suse-11.0-pxe-client.i686-1.2.8.md5 \
    /srv/tftpboot/image
 \end{verbatim}
 \item Copy of the image boot configuration\\
@@ -132,7 +133,7 @@ cp suse-10.3-pxe-client.i686-1.2.8.md5 \
       If the boot configuration should be used globaly the KIWI
       generated file can be copied as config.default
 \begin{verbatim}
-cp suse-10.3-pxe-client.i686-1.2.8.config \
+cp suse-11.0-pxe-client.i686-1.2.8.config \
    /srv/tftpboot/KIWI/config.<MAC>
 \end{verbatim}
 \item Check the PXE configuration file\\
@@ -202,7 +203,7 @@ Below, find an example to cover this case.
 \begin{verbatim}
 DISK=/dev/sda
 PART=5;S;x,x;L;/
-IMAGE=/dev/sda2;suse-10.3-pxe-client.i686;1.2.8;192.168.100.2;4096
+IMAGE=/dev/sda2;suse-11.0-pxe-client.i686;1.2.8;192.168.100.2;4096
 \end{verbatim}
 
 The following format is used:
@@ -453,7 +454,7 @@ deployed into RAM. Below, find an example:
 
 \begin{Command}{12cm}
 \begin{verbatim}
-IMAGE=/dev/ram1;suse-10.3-pxe-client.i686;\
+IMAGE=/dev/ram1;suse-11.0-pxe-client.i686;\
       1.2.8;192.168.100.2;4096
 \end{verbatim}
 \end{Command}
@@ -473,7 +474,7 @@ is a solution for this problem. Below, find an example:
 \begin{verbatim}
 DISK=/dev/sda
 PART=5;S;x,62;L;/,x;L;x,
-IMAGE=/dev/sda2;suse-10.3-pxe-client.i386;\
+IMAGE=/dev/sda2;suse-11.0-pxe-client.i386;\
       1.2.8;192.168.100.2;4096
 UNIONFS_CONFIG=/dev/sda3,/dev/sda2,aufs
 KIWI_INITRD=/boot/initrd
@@ -491,7 +492,7 @@ them together. Below find an example:
 \begin{itemize}
 \item add a split type in config.xml, for example\\
       \textbf{<type fsreadonly=''squashfs'' fsreadwrite=''ext3''
-      boot=''netboot/suse-10.3''>split</type>}
+      boot=''netboot/suse-11.0''>split</type>}
 \item add a split section to describe the writable portion,
       for example:
 \begin{verbatim}
@@ -511,9 +512,9 @@ them together. Below find an example:
      
 \begin{Command}{14cm}
 \begin{verbatim}
-IMAGE=/dev/sda2;suse-10.3-pxe-client.i686;\
+IMAGE=/dev/sda2;suse-11.0-pxe-client.i686;\
       1.2.8;192.168.100.2;4096,\
-      /dev/sda3;suse-10.3-pxe-client-read-write.i686;\
+      /dev/sda3;suse-11.0-pxe-client-read-write.i686;\
       1.2.8;192.168.100.2;4096
 PART=200;S;x,500;L;/,x;L;
 DISK=/dev/sda
