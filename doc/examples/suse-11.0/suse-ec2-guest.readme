@@ -14,7 +14,7 @@ How to build this Example
 ==============================
 * Open the file:
 
-     /usr/share/doc/packages/kiwi/examples/suse-ec2-guest/config.xml
+     /usr/share/doc/packages/kiwi/examples/suse-11.0/suse-ec2-guest/config.xml
 
   and fill in your Amazon account information for:
 
@@ -25,7 +25,7 @@ How to build this Example
   If you are not sure how to get that information please refer
   to the EC2 documentation at Amazon as shown in the link above
 
-  kiwi --prepare /usr/share/doc/packages/kiwi/examples/suse-ec2-guest \
+  kiwi -p /usr/share/doc/packages/kiwi/examples/suse-11.0/suse-ec2-guest \
        --root /tmp/myec2
 
   kiwi --create /tmp/myec2 --type ec2 -d /tmp/myec2-result

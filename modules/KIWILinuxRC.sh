@@ -312,7 +312,9 @@ function udevStart {
 	rm -f /etc/udev/rules.d/*-drivers.rules
 	# start udevd
 	udevd --daemon udev_log="debug"
-	/sbin/udevtrigger
+	if [ -x /sbin/udevtrigger ];then
+		/sbin/udevtrigger
+	fi
 	/sbin/udevsettle --timeout=30
 	startSplashy
 }

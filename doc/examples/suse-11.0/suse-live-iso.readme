@@ -11,10 +11,10 @@ KIWI Image Description Example
 How to build this Example
 ==============================
 
-    kiwi --prepare /usr/share/doc/packages/kiwi/examples/suse-live-iso \
-         --root /tmp/myiso
+   kiwi -p /usr/share/doc/packages/kiwi/examples/suse-11.0/suse-live-iso \
+        --root /tmp/myiso
 
-    kiwi --create /tmp/myiso --type iso -d /tmp/myiso-result
+   kiwi --create /tmp/myiso --type iso -d /tmp/myiso-result
 
 How to test this Example
 ==============================

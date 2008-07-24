@@ -283,7 +283,7 @@ sub createImageEC2 {
 	#==========================================
 	# build boot image only if specified
 	#------------------------------------------
-	if (! defined $boot) {
+	if ((! defined $boot) || ($boot eq "ok")) {
 		return $this;
 	}
 	#==========================================
