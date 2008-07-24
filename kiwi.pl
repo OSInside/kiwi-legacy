@@ -1205,8 +1205,7 @@ sub init {
 	#==========================================
 	# Check for root privileges
 	#------------------------------------------
-	my $user = qxx ("whoami");
-	if ($user !~ /root/i) {
+	if ($< != 0) {
 		$kiwi -> error ("Only root can do this");
 		$kiwi -> failed ();
 		usage();
