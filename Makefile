@@ -4,6 +4,7 @@
 #
 # Makefile for OpenSuSE - KIWI Image System
 # ---
+arch      = `uname -m | grep -q ^i && echo ix86 || uname -m`
 buildroot = /
 syslinux  = /usr/share/syslinux
 bindlib   = lib
@@ -44,8 +45,8 @@ all: modules/KIWIScheme.rng modules/KIWISchemeTest.rng
 	#============================================
 	# create checksum files for boot images...
 	#--------------------------------------------
-	(cd system/boot && ./.md5)
-	(cd system/boot && find -type f | grep -v -E ".svn|.test" | xargs chmod u-w)
+	(cd system/boot/${arch} && ./.md5)
+	(cd system/boot/${arch} && find -type f | grep -v -E ".svn|.test" | xargs chmod u-w)
 
 	#============================================
 	# build tools
@@ -118,7 +119,7 @@ install:
 	#============================================
 	# Install image descriptions
 	#--------------------------------------------
-	cp -a system/boot/* ${KIWIIMAGE}
+	cp -a system/boot/${arch}/* ${KIWIIMAGE}
 
 	#============================================
 	# Install kiwi repo

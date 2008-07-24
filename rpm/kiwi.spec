@@ -346,8 +346,6 @@ if [ ! "$UID" = "$K_USER" ];then
 		$RPM_BUILD_ROOT/srv/tftpboot/pxelinux.cfg/default
 fi
 %else
-	# no boot image descriptions for non x86 archs
-	rm -rf $RPM_BUILD_ROOT/%{_datadir}/kiwi/image/*
 	# no PXE boot setup for non x86 archs
 	rm -rf $RPM_BUILD_ROOT/srv/tftpboot
 	rm -rf $RPM_BUILD_ROOT/etc/permissions.d/kiwi
