@@ -1,0 +1,818 @@
+#!/bin/bash
+#================
+# FILE          : linuxrc
+#----------------
+# PROJECT       : OpenSuSE KIWI Image System
+# COPYRIGHT     : (c) 2006 SUSE LINUX Products GmbH. All rights reserved
+#               :
+# AUTHOR        : Marcus Schaefer <ms@suse.de>
+#               :
+# BELONGS TO    : Operating System images
+#               :
+# DESCRIPTION   : This file is changed to become the real
+#               : linuxrc script which is used to prepare the
+#               : operating system for the main image
+#               :
+#               :
+# STATUS        : BETA
+#----------------
+#======================================
+# Exports (General)
+#--------------------------------------
+export PATH="/sbin:/bin:/usr/sbin:/usr/bin"
+export IFS_ORIG=$IFS
+export ARCH=`arch`
+export DEBUG=0
+
+#======================================
+# Exports (Booting)
+#--------------------------------------
+export DOMURD_MODULES="xennet xenblk"
+export INITRD_MODULES="reiserfs"
+export LOCAL_BOOT="no"
+export KERNEL_LIST
+
+#======================================
+# Exports (Alias)
+#--------------------------------------
+export SYSALIAS="undefined"
+export NAME=0
+
+#======================================
+# Exports (Partitioning)
+#--------------------------------------
+export PART_FILE="/etc/partition.table"
+export PART_MOUNT
+export PART_DEV
+export PART_COUNT=0
+export PART_NUMBER=0
+export PART_NEED_EXTENDED=0
+export PART_NEED_FILL=0
+export NO_FILE_SYSTEM=0
+
+#======================================
+# Exports (Status)
+#--------------------------------------
+export SYSTEM_INTEGRITY
+export SYSTEM_MD5STATUS
+
+#======================================
+# Functions
+#--------------------------------------
+. /include
+
+#======================================
+# Beautify Startup
+#--------------------------------------
+echo "Loading KIWI Boot-System..."
+echo "---------------------------"
+
+#======================================
+# 1) Mounting local file systems
+#--------------------------------------
+mountSystemFilesystems &>/dev/null
+closeKernelConsole
+
+#======================================
+# 2) Prepare module load support 
+#--------------------------------------
+touch /etc/modules.conf
+touch /lib/modules/*/modules.dep
+runHook init
+
+#======================================
+# 3) run udevd
+#--------------------------------------
+udevStart
+
+#======================================
+# 4) Include proc/cmdline information
+#--------------------------------------
+includeKernelParameters
+if [ ! -z $IMAGE ];then
+	# /.../
+	# if the image information is already in place at this stage
+	# it comes from the cmdline data which means we are not booting
+	# from the network but want to boot the local system
+	# ----
+	LOCAL_BOOT="yes"
+fi
+
+#======================================
+# 5) start boot shell
+#--------------------------------------
+startBlogD
+startShell
+errorLogStart
+openKernelConsole
+
+#======================================
+# 6) Obtain/load network module
+#--------------------------------------
+if [ $LOCAL_BOOT = "no" ];then
+	loaded=0
+	probeNetworkCard
+	IFS=":"
+	for i in $networkModule;do
+		if [ ! -z $i ];then
+			modprobe $i 2>/dev/null
+			if test $? = 0;then
+				loaded=1
+			fi
+		fi
+	done
+	IFS=$IFS_ORIG
+	if test $loaded = 0;then
+		systemException \
+			"Network module: Failed to load network module !" \
+		"reboot"
+	fi
+fi
+
+#======================================
+# 7) Setup network interface and DNS
+#--------------------------------------
+runHook prenetwork
+if [ $LOCAL_BOOT = "no" ];then
+	setupNetwork
+fi
+runHook postnetwork
+
+#======================================
+# 8) get TFTP Server IP/name
+#--------------------------------------
+if [ $LOCAL_BOOT = "no" ];then
+	checkServer
+	if [ -z $SERVER ];then
+		SERVER=tftp.$DOMAIN
+	fi
+	Echo "Checking Server name: $SERVER"
+	if ! ping -c 1 $SERVER >/dev/null 2>&1;then
+		Echo "Server: $SERVER not found"
+		if [ -z "$SERVERTYPE" ] || [ "$SERVERTYPE" = "tftp" ]; then
+			if [ ! -z "$DHCPSIADDR" ];then
+				Echo "Using: $DHCPSIADDR from dhcpcd-info"
+				SERVER=$DHCPSIADDR
+			elif [ ! -z "$DHCPSID" ];then
+				Echo "Using: $DHCPSID from dhcpcd-info"
+				SERVER=$DHCPSID
+			else
+				systemException \
+					"Can't assign SERVER IP/name... fatal !" \
+				"reboot"
+			fi
+		fi
+	fi
+fi
+
+#======================================
+# 9) Load configuration
+#--------------------------------------
+if [ $LOCAL_BOOT = "no" ];then
+	CONFIG=/etc/config.netclient
+	#======================================
+	# Connection/access check for SERVER
+	#--------------------------------------
+	Echo "Checking for config file: config.$DHCPCHADDR"
+	fetchFile KIWI/config.$DHCPCHADDR $CONFIG
+	#======================================
+	# Check alternative config names
+	#--------------------------------------
+	if test ! -s $CONFIG;then
+		searchAlternativeConfig
+	fi
+	#======================================
+	# No config found register new client
+	#--------------------------------------
+	if test ! -s $CONFIG;then
+		#======================================
+		# Register new network client
+		#--------------------------------------
+		Echo "Registering new network client..."
+		if test $NAME -ne 0;then
+		if test $NAME -eq -1;then
+			Echo -n "Enter Alias Name for this system: " && \
+			read SYSALIAS
+		else
+			Echo -n "Enter Alias Name [timeout in $NAME sec]: " && \
+			read -t $NAME SYSALIAS
+		fi
+		fi
+		hwinfo --all --log=hwinfo.$DHCPCHADDR >/dev/null
+		echo "NCNAME=$SYSALIAS"   >> hwtype.$DHCPCHADDR
+		echo "CRNAME=$SYSALIAS"   >> hwtype.$DHCPCHADDR
+		echo "IPADDR=$IPADDR"     >> hwtype.$DHCPCHADDR
+		echo "ARCHITECTURE=$ARCH" >> hwtype.$DHCPCHADDR
+		#========================================
+		# Try to get BIOS data if tools are there
+		#----------------------------------------
+		if [ -f /sbin/posbios ];then
+			HWBIOS=`/sbin/posbios -b`
+			echo "HWBIOS=$HWBIOS" >> hwtype.$DHCPCHADDR
+			HWTYPE=`/sbin/posbios -ms`
+			echo "HWTYPE=$HWTYPE" >> hwtype.$DHCPCHADDR
+		fi
+		putFile hwtype.$DHCPCHADDR upload/hwtype.$DHCPCHADDR
+		putFile hwinfo.$DHCPCHADDR upload/hwinfo.$DHCPCHADDR
+		echo
+		Echo "Registered as: $DHCPCHADDR"
+		Echo "Waiting for configuration..."
+		sleep 60
+
+		#======================================
+		# Try to get config again
+		#--------------------------------------
+		while test ! -s $CONFIG;do
+			Echo "Lookup network client config file again..."
+			Echo "Checking for config file: config.$DHCPCHADDR"
+			dhcpcd -n
+			fetchFile KIWI/config.$DHCPCHADDR $CONFIG
+			if test ! -s $CONFIG;then
+				searchAlternativeConfig
+			fi
+			test -s $CONFIG || {
+				Echo "Couldn't get image configuration"
+				Echo "sleeping [60 sec]..."
+				sleep 60
+			}
+		done
+	fi
+	importFile < $CONFIG
+fi
+
+#======================================
+# 10) Load Device modules
+#--------------------------------------
+runHook preprobe
+probeDevices
+runHook postprobe
+
+export systemIntegrity="unknown"
+#======================================
+# 11) Is this a diskful station
+#--------------------------------------
+if [ $LOCAL_BOOT = "no" ];then
+if [ ! -z "$PART" ] && [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ];then
+	#======================================
+	# Check for possible extended partition
+	#--------------------------------------
+	checkExtended
+	#======================================
+	# Check for installed system
+	#--------------------------------------
+	count=0
+	IFS="," ; for i in $IMAGE;do
+	case $count in
+	0) {
+		field=0
+		IFS=";" ; for n in $i;do
+		case $field in
+			0) imageDevice=$n ; field=1 ;;
+			1) imageName=$n   ; field=2 ;;
+			2) imageVersion=$n; field=3
+		esac
+		done
+		count=1
+		waitForStorageDevice $DISK
+		if ! sfdisk -s $DISK &>/dev/null;then
+			systemException \
+				"Disk $DISK doesn't appear... fatal !" \
+			"reboot"
+		fi
+		updateNeeded initialize
+		if linuxPartition $DISK;then
+			if mountSystem $imageDevice;then
+				updateNeeded
+				umountSystem
+				systemIntegrity=`getSystemIntegrity 1`
+				if [ $systemIntegrity = "fine" ];then
+					Echo "Base system is up to date, activating disk system..."
+				fi
+			else
+				Echo -b "Image Update for image [ $imageName ] needed"
+				Echo -b "Image mount failed"
+				RELOAD_IMAGE="yes"
+				systemIntegrity="clean"
+			fi
+		else
+			systemIntegrity="clean"
+		fi
+	}
+	;;
+	*)
+		# handle other images here...
+	;;
+	esac
+	done
+	#======================================
+	# Create partition table if needed
+	#--------------------------------------
+	if test $systemIntegrity = "clean";then
+		runHook prepartition
+		Echo "Creating partition table..."
+		partitionCount
+		createSwap
+		createPartition
+		writePartitionTable $DISK
+		IFS=":" ; for i in $PART_DEV;do
+		if test ! -z "$i";then
+			createFileSystem $i
+		fi
+		done
+		mkswap ${DISK}1 >/dev/null 2>&1
+		runHook postpartition
+	fi
+fi
+fi
+
+#======================================
+# 12) Download network client image
+#--------------------------------------
+runHook predownload
+if [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ];then
+	count=0
+	IFS="," ; for i in $IMAGE;do
+		imageZipped="uncompressed"
+		count=$(($count + 1))
+		field=0
+		IFS=";" ; for n in $i;do
+		case $field in
+			0) imageDevice=$n ; field=1 ;;
+			1) imageName=$n   ; field=2 ;;
+			2) imageVersion=$n; field=3 ;;
+			3) imageServer=$n ; field=4 ;;
+			4) imageBlkSize=$n; field=5 ;;
+			5) imageZipped=$n ;
+		esac
+		done
+		if [ $count = 1 ];then
+			imageRootDevice=$imageDevice
+			imageRootName=$imageName
+		fi
+		if [ $count = 2 ];then
+			imageNextRootDevice=$imageDevice
+		fi
+		if [ $LOCAL_BOOT = "yes" ];then
+			continue
+		fi
+		if test `getSystemIntegrity $count` = "fine";then
+			continue
+		fi
+		imageName="image/$imageName-$imageVersion"
+		imageMD5s="$imageName.md5"
+		[ -z "$imageServer" ]  && imageServer=$SERVER
+		[ -z "$imageBlkSize" ] && imageBlkSize=8192
+		while true;do
+			# /.../
+			# get image md5sum to be able to check for the size
+			# requirements if we are loading into RAM
+			# ---
+			fetchFile $imageMD5s /etc/image.md5 uncomp $imageServer
+			if test $loadCode != 0 || ! loadOK "$loadStatus"; then
+				systemException \
+					"Download of $imageMD5s failed: $loadStatus" \
+				"reboot"
+			fi
+			IFS=" "
+			read sum1 blocks blocksize zblocks zblocksize < /etc/image.md5
+			if ! validateSize;then
+				systemException \
+					"Not enough space available for this image" \
+				"reboot"
+			fi
+			# /.../
+			# now load the image into the imageDevice
+			# ---
+			multicast=on
+			if test "$imageZipped" = "compressed"; then
+				Echo "Compressed image found: Disable multicast download"
+				multicast="off"
+			fi
+			Echo "Loading $imageName [$imageDevice BS:$imageBlkSize Byte]..."
+			fetchFile $imageName $imageDevice $imageZipped $imageServer
+			if test $loadCode != 0 || ! loadOK "$loadStatus";then
+				systemException \
+					"Download of $imageName failed: $loadStatus" \
+				"reboot"
+			fi
+			# /.../
+			# check the md5sum of the downloaded data records
+			# ----
+			Echo "Download complete, checking data..."
+			dd if=$imageDevice bs=1024 2>/dev/null |\
+				head --bytes=$((blocks * blocksize)) |\
+				md5sum - > /etc/ireal.md5
+			read sum2 dumy < /etc/ireal.md5
+			if test $sum1 = $sum2;then
+				Echo "Image checksum test: fine :-)"
+				break
+			fi
+			Echo "Image checksum test failed:"
+			Echo "Possible reasons:"
+			echo 
+			Echo -b "1) Physical ethernet connection lost:"
+			Echo -b "   please check cable"
+			echo
+			Echo -b "2) Data corruption while loading the image:"
+			Echo -b "   will give it a new try..."
+			echo
+			Echo -b "3) wrong checksum file created for the image:"
+			Echo -b "   check with the md5sum command if the image on the"
+			Echo -b "   TFTP server provides the same md5 sum as included"
+			Echo -b "   within the appropriate .md5 file for this image"
+			echo
+			if test -z $DISK;then
+			Echo -b "4) ramdisk size is too small for the image:"
+			Echo -b "   check the ramdisk_size parameter of the PXE"
+			Echo -b "   configuration file on the TFTP server"
+			else
+			Echo -b "4) partition size is too small for the image:"
+			Echo -b "   check the PART line in the image config file on the"
+			Echo -b "   TFTP server"
+			fi
+			echo
+			Echo "Retry to load image..."
+			sleep 15
+		done
+		echo $imageDevice | grep -q ram
+		haveDataInRam=$?
+		if test ! -z $DISK && test $haveDataInRam != 0;then
+			probeFileSystem $imageDevice
+			if test "$FSTYPE" = "reiserfs";then
+				Echo "Resize Reiser filesystem to full partition space..."
+				resize_reiserfs $imageDevice
+				INITRD_MODULES="$INITRD_MODULES reiserfs"
+			fi
+			if test "$FSTYPE" = "ext2";then
+				Echo "Resize EXT2 filesystem to full partition space..."
+				resize2fs -f -F -p $imageDevice
+				Echo "Checking EXT2 filesystem..."
+				e2fsck -f $imageDevice -y
+				INITRD_MODULES="$INITRD_MODULES ext2"
+			fi
+			if test "$FSTYPE" = "ext3";then
+				Echo "Resize EXT3 filesystem to full partition space..."
+				resize2fs -f -F -p $imageDevice
+				Echo "Checking EXT3 filesystem..."
+				e2fsck -f $imageDevice -y
+				INITRD_MODULES="$INITRD_MODULES ext3"
+			fi
+		fi
+		if test ! -z $DISK && test $haveDataInRam = 0;then
+			Echo "Including RAM device data to disk..."
+			RELOAD_CONFIG="yes"
+			mkdir -p /config
+			mountSystem
+			rm -rf /mnt/lost+found
+			cp -a /mnt/* /config && rm -f /mnt/*
+			umountSystem
+		fi
+		rm -f /etc/ireal.md5
+		rm -f /etc/image.md5
+	done
+else
+	#======================================
+	# 12.1) Check for NFS root
+	#--------------------------------------
+	if [ ! -z "$NFSROOT" ];then
+		IFS="," ; for i in $NFSROOT;do
+			field=0
+			IFS=";" ; for n in $i;do
+			case $field in
+				0) nfsRootServer=$n ; field=1 ;;
+				1) nfsRootDevice=$n ; field=2
+			esac
+			done
+		done
+		Echo "Mounting NFS root system: $nfsRootServer:$nfsRootDevice..."
+		imageRootDevice="-o nolock,rw $nfsRootServer:$nfsRootDevice"
+		if [ ! -z "$COMBINED_IMAGE" ] || [ ! -z "$UNIONFS_CONFIG" ];then
+			imageRootDevice="-o nolock,ro $nfsRootServer:$nfsRootDevice"
+		fi
+		imageRootName="NFSRoot-System"
+		systemIntegrity="clean"
+		export FSTYPE=nfs
+	fi
+	#======================================
+	# 12.2) Check for NBD root
+	#--------------------------------------
+	if [ ! -z "$NBDROOT" ];then
+		if ! modprobe nbd;then
+			systemException "Failed to load network blk device module" "reboot"
+		fi
+		IFS="," ; for i in $NBDROOT;do
+			field=0
+			IFS=";" ; for n in $i;do
+			case $field in
+				0) nbdServer=$n     ; field=1 ;;
+				1) nbdPort=$n       ; field=2 ;;
+				2) nbdDevice=$n     ; field=3 ;;
+				3) nbdswapPort=$n   ; field=4 ;;
+				4) nbdswapDevice=$n ; field=5
+			esac
+			done
+		done
+		if [ -z "$nbdDevice" ];then
+			nbdDevice="/dev/nbd0"
+		fi
+		if [ -z "$nbdswapDevice" ];then
+			nbdswapDevice="/dev/nbd1"
+		fi
+		if [ -z "$nbdPort" ];then
+			nbdPort="2000"
+		fi
+		if [ -z "$nbdswapPort" ];then
+			nbdswapPort="9210"
+		fi
+		waitForBlockDevice $nbdDevice
+		if [ ! -b $nbdDevice ];then
+			systemException "Device $nbdDevice doesn't appear" "reboot"
+		fi
+		# /.../
+		# try to get swap from the server if we dont have
+		# enough ram (less than 62MB)
+		# ----
+		min_ram=63488
+		real_ram=$(cat /proc/meminfo |grep MemTotal|tr -d " [a-z][A-Z]:")
+		if [ ${real_ram} -lt ${min_ram} ];then
+			Echo "NBD: memory is below required 62M"
+			Echo "NBD: Mounting swap: $nbdServer $nbdswapPort [$nbdswapDevice]"
+			if [ ! -b $nbdswapDevice ];then
+				systemException "Device $nbdswapDevice doesn't appear" "reboot"
+			fi
+			if ! /usr/sbin/nbd-client $nbdServer $nbdswapPort $nbdswapDevice
+			then
+				systemException "Failed to setup $nbdswapDevice device" "reboot"
+			fi
+			Echo "NBD: Waiting for server to create swap space..."
+			sleep 3
+			/sbin/swapon $nbdswapDevice || true
+		fi
+		Echo "Mounting NBD root system: $nbdServer $nbdPort [$nbdDevice]..."
+		if ! /usr/sbin/nbd-client $nbdServer $nbdPort $nbdDevice;then
+			systemException "Failed to setup $nbdDevice device" "reboot"
+		fi
+		imageRootDevice=$nbdDevice
+		probeFileSystem $imageRootDevice
+		Echo "Filesystem of remote root system is: $FSTYPE"
+		if [ -z "$COMBINED_IMAGE" ];then
+			if isFSTypeReadOnly;then
+				export UNIONFS_CONFIG="/dev/ram1,"$imageRootDevice",aufs"
+			fi
+		fi
+		imageRootName="NBDRoot-System"
+		systemIntegrity="clean"
+	fi
+fi
+runHook postdownload
+#======================================
+# 13) Check for RELOAD_CONFIG
+#--------------------------------------
+if [ $LOCAL_BOOT = "no" ];then
+	if test ! -z $DISK;then
+	if test ! -z $RELOAD_CONFIG;then
+		systemIntegrity_save=$systemIntegrity
+		systemIntegrity="clean"
+	fi
+	fi
+fi
+
+#======================================
+# 14) Mount OS image to /mnt
+#--------------------------------------
+runHook premount
+if ! mountSystem;then
+	systemException "Failed to mount root filesystem" "reboot"
+fi
+validateRootTree
+runHook postmount
+
+#======================================
+# 15) Import fixed configuration files
+#--------------------------------------
+runHook preconfig
+if [ $LOCAL_BOOT = "no" ];then
+	if test $systemIntegrity = "clean";then
+		mkdir -p /config
+		#======================================
+		# Get files from CONF value
+		#--------------------------------------
+		IFS="," ; for i in $CONF;do
+			field=0
+			IFS=";" ; for n in $i;do
+			case $field in
+				0) configSource=$n ; field=1 ;;
+				1) configDest=$n   ; field=2 ;;
+				2) configServer=$n ; field=3 ;;
+				3) configBlkSize=$n;
+			esac
+			done
+			Echo "Import configuration file: $configDest"
+			dirs=`dirname  $configDest`
+			mkdir -p /config/$dirs
+			fetchFile $configSource /config/$configDest uncomp $configServer
+		done
+		#======================================
+		# Check for KIWI_INITRD
+		#--------------------------------------
+		if [ ! -z $KIWI_INITRD ];then
+			Echo "Import KIWI initrd file: $KIWI_INITRD"
+			rm -f /mnt/boot/initrd* && mkdir -p /mnt/boot >/dev/null 2>&1
+			fetchFile $KIWI_INITRD /mnt/boot/initrd
+			if [ ! -z $KIWI_KERNEL ];then
+				Echo "Import KIWI kernel file: $KIWI_KERNEL"
+				fetchFile $KIWI_KERNEL /mnt/boot/vmlinuz
+			fi
+			KIWI_INITRD_PARAMS="IMAGE=\"$IMAGE\""
+			if [ ! -z $COMBINED_IMAGE ]; then
+				SPLIT="COMBINED_IMAGE=$COMBINED_IMAGE"
+				KIWI_INITRD_PARAMS="$KIWI_INITRD_PARAMS $SPLIT"
+			fi
+			if [ ! -z "$UNIONFS_CONFIG" ]; then
+				UNIONED="UNIONFS_CONFIG=$UNIONFS_CONFIG"
+				KIWI_INITRD_PARAMS="$KIWI_INITRD_PARAMS $UNIONED"
+			fi
+		fi
+	fi
+fi
+runHook postconfig
+
+#======================================
+# 16) check filesystem and kernels
+#--------------------------------------
+if [ $LOCAL_BOOT = "no" ];then
+	if test $systemIntegrity = "clean";then
+		probeFileSystem $imageRootDevice
+		kernelList /mnt
+	fi
+fi
+
+#======================================
+# 17) make initrd available on unionfs
+#--------------------------------------
+if [ $LOCAL_BOOT = "no" ];then
+	if test ! -z "$UNIONFS_CONFIG" && test $systemIntegrity = "clean";then
+		# /.../
+		# have to do this so that /boot gets copied to the
+		# ext2 partition, which is necessary for the bootloader to
+		# be able to find the data in there (it can't read squashfs
+		# or cromfs)
+		# ----
+		cp -a /mnt/boot /dev/shm/boot2
+		rm -rf /mnt/boot
+		mv /dev/shm/boot2 /mnt/boot
+	fi
+fi
+
+#======================================
+# 18) Create system dependant files
+#--------------------------------------
+if [ $LOCAL_BOOT = "no" ];then
+	if test $systemIntegrity = "clean";then
+		setupDefaultPXENetwork /config
+		setupDefaultFstab /config
+		updateRootDeviceFstab /config "$imageRootDevice"
+		if test ! -z $DISK;then
+			updateSwapDeviceFstab /config ${DISK}1
+			updateOtherDeviceFstab /config
+			if ! test -z $COMBINED_IMAGE; then
+				gnum=`echo $imageNextRootDevice | sed -e "s/.*\([0-9]\)/\1/"`
+				gnum=`expr $gnum - 1`
+				setupBootLoader \
+					/mnt /config $gnum $imageNextRootDevice NET ${DISK}1
+			else
+				setupBootLoader /mnt /config 1 ${DISK}2 NET ${DISK}1
+			fi
+			setupKernelModules /config
+		fi
+	fi
+fi
+
+#======================================
+# 19) If image is new, notify
+#--------------------------------------
+runHook prenotify
+if [ $LOCAL_BOOT = "no" ];then
+	if test $systemIntegrity = "clean"; then
+		count=0
+		IFS="," ; for i in $IMAGE;do
+			count=$(($count + 1))
+			field=0
+			IFS=";" ; for n in $i;do
+			case $field in
+				0) field=1 ;;
+				1) imageName=$n   ; field=2 ;;
+				2) imageVersion=$n; field=3 ;;
+				3) imageServer=$n ; field=4 ;;
+				4) imageBlkSize=$n; field=5 ;;
+				5) imageZipped=$n ;
+			esac
+			done
+			Echo "Notify of new image: image/$imageName"
+			echo "image/$imageName" > bootversion.$DHCPCHADDR
+			echo "$imageVersion"   >> bootversion.$DHCPCHADDR
+			putFile bootversion.$DHCPCHADDR upload/bootversion.$DHCPCHADDR
+			rm -f bootversion.$DHCPCHADDR
+		done
+	fi
+fi
+runHook postnotify
+
+#======================================
+# 20) send DHCP_RELEASE, reset cache
+#--------------------------------------
+if [ $LOCAL_BOOT = "no" ] && [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ];then
+	dhcpcd -k
+fi
+
+#======================================
+# 21) copy system dependant files
+#--------------------------------------
+if [ $LOCAL_BOOT = "no" ];then
+	if test $systemIntegrity = "clean";then
+		cd /config
+		find . -type d | while read d ; do  mkdir -p /mnt/$d ; done
+		find . -type f | while read f ; do  cp -a $f /mnt/$f ; done
+		cd /
+		rm -rf /config
+	fi
+fi
+
+echo 256 > /proc/sys/kernel/real-root-dev
+#======================================
+# 22) umount system filesystems
+#--------------------------------------
+umountSystemFilesystems
+
+#======================================
+# 23) copy initrd files to image
+#--------------------------------------
+importBranding
+cp /preinit /mnt
+cp /include /mnt
+
+#======================================
+# 24) check if reboot is required
+#--------------------------------------
+kernelCheck /mnt
+
+#======================================
+# 25 kill boot shell
+#--------------------------------------
+killShell
+killBlogD
+
+#======================================
+# 26 Activate new root
+#--------------------------------------
+runHook preactivate
+Echo "Activating Image: [$imageRootName]"
+reopenKernelConsole
+/sbin/udevsettle --timeout=30
+mount --move /dev /mnt/dev
+udevKill
+
+#======================================
+# 27) call preinit phase
+#--------------------------------------
+Echo "Calling preinit phase..."
+cd /mnt
+/mnt/sbin/pivot_root . mnt >/dev/null 2>&1
+if test $? != 0;then
+	PIVOT=false
+	cleanInitrd && mount --move . / && chroot . ./preinit
+	chroot . rm -f  ./preinit
+	chroot . rm -f  ./include
+	chroot . rm -rf ./image
+else
+	PIVOT=true
+	./preinit
+	rm -f  ./preinit
+	rm -f  ./include
+	rm -rf ./image
+fi
+#======================================
+# 28) reboot system if specified
+#--------------------------------------
+if [ $LOCAL_BOOT = "no" ];then
+	if test ! -z $REBOOT_IMAGE;then
+		Echo "Rebooting System to activate new kernel..."
+		reboot -f -i >/dev/null 2>&1
+	fi
+fi
+
+#======================================
+# 29) Unmount initrd / system init
+#--------------------------------------
+echo " "
+echo "Booting into final System..."
+echo "----------------------------"
+export IFS=$IFS_ORIG
+mount -n -o remount,rw / 2>/dev/null
+if [ $PIVOT = "true" ];then
+	exec < dev/console >dev/console 2>&1
+	exec umount -n -l /mnt
+else
+	exec < dev/console >dev/console 2>&1
+	exec chroot . /sbin/init $@
+fi

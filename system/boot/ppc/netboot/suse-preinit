@@ -1,0 +1,139 @@
+#!/bin/bash
+#================
+# FILE          : preinit
+#----------------
+# PROJECT       : OpenSuSE KIWI Image System
+# COPYRIGHT     : (c) 2006 SUSE LINUX Products GmbH. All rights reserved
+#               :
+# AUTHOR        : Marcus Schaefer <ms@suse.de>
+#               :
+# BELONGS TO    : Operating System images
+#               :
+# DESCRIPTION   : This file is called after the image root
+#               : has changed by the linuxrc script
+#               :
+# STATUS        : BETA
+#----------------
+#======================================
+# Functions
+#--------------------------------------
+. /include
+
+#======================================
+# 1) start error log
+#--------------------------------------
+Echo "Calling pre-init stage in system image"
+errorLogStart
+
+#======================================
+# 2) check for LOCAL_BOOT
+#--------------------------------------
+if [ $LOCAL_BOOT = "yes" ];then
+	exit 0
+fi
+
+#======================================
+# 3) update mount table
+#--------------------------------------
+updateMTAB
+
+#======================================
+# 4) create framebuffer devices
+#--------------------------------------
+createFramebufferDevices
+
+#======================================
+# 5) create initrd on diskful
+#--------------------------------------
+if [ ! -z $DISK ] && [ $systemIntegrity = "clean" ]; then
+	if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ]; then
+		#======================================
+		# use distro initrd via mkinitrd
+		#--------------------------------------
+		setupSUSEInitrd
+	else
+		#======================================
+		# use kiwi initrd downloaded before
+		#--------------------------------------
+		bootLoaderOK=1
+	fi
+fi
+
+#======================================
+# 6) Install boot loader on diskful
+#--------------------------------------
+if test ! -z $DISK;then
+	if test $systemIntegrity = "clean";then
+		installBootLoader
+		echo "alias eth0 $networkModule" >> /etc/modules.conf
+	fi
+fi
+
+#======================================
+# 7) create /etc/ImagePackages
+#--------------------------------------
+if test $systemIntegrity = "clean";then
+	if [ -x /bin/rpm ];then
+		Echo "Creating initial image package info file"
+		rpm -qa --last > /etc/ImagePackages
+	fi
+fi
+
+#======================================
+# 8) Reset systemIntegrity
+#--------------------------------------
+if test ! -z $DISK;then
+	if test ! -z $RELOAD_CONFIG;then
+		systemIntegrity=$systemIntegrity_save
+	fi
+fi
+
+#======================================
+# 9) check for valid mount points 
+#--------------------------------------
+if test ! -z $DISK;then
+	IFS=":" ; for i in $PART_MOUNT;do
+	if test ! -z "$i";then
+	if test ! -f "$i";then
+		mkdir -p $i
+	fi
+	fi
+	done
+fi
+
+#======================================
+# 10) Update /etc/ImageVersion files
+#--------------------------------------
+if test ! -z $DISK;then
+	count=0
+	IFS="," ; for i in $IMAGE;do
+		count=$(($count + 1))
+		field=0
+		IFS=";" ; for n in $i;do
+		case $field in
+			0) field=1 ;;
+			1) imageName=$n   ; field=2 ;;
+			2) imageVersion=$n; field=3 ;;
+			3) imageServer=$n ; field=4 ;;
+			4) imageBlkSize=$n; field=5 ;;
+			5) imageZipped=$n ;
+		esac
+		done
+		atversion="$imageName-$imageVersion"
+		versionFile="/etc/ImageVersion-$atversion"
+		md5sum=`getSystemMD5Status $count`
+		if test `getSystemIntegrity $count` = "clean";then
+			echo "$atversion $md5sum" > $versionFile
+		fi
+	done
+fi
+
+#======================================
+# 11) setup network for nfs boot
+#--------------------------------------
+if test ! -z $NFSROOT;then
+	mount -o nolock -t proc  proc    /proc
+	mount -o nolock -t sysfs sysfs   /sys
+	mount -o nolock -t devpts devpts /dev/pts
+	/etc/init.d/portmap start
+fi

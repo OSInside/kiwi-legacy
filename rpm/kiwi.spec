@@ -468,31 +468,41 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_datadir}/kiwi/image/isoboot
 %doc %{_datadir}/kiwi/image/isoboot/README
 %{_datadir}/kiwi/image/isoboot/suse*
+%endif
 
+%ifarch %ix86 x86_64
 %files -n kiwi-desc-vmxboot
 %defattr(-, root, root)
 %dir %{_datadir}/kiwi/image/vmxboot
 %doc %{_datadir}/kiwi/image/vmxboot/README
 %{_datadir}/kiwi/image/vmxboot/suse*
+%endif
 
+%ifarch %ix86 x86_64
 %files -n kiwi-desc-usbboot
 %defattr(-, root, root)
 %dir %{_datadir}/kiwi/image/usbboot
 %doc %{_datadir}/kiwi/image/usbboot/README
 %{_datadir}/kiwi/image/usbboot/suse*
+%endif
 
+%ifarch %ix86 x86_64 ppc ppc64
 %files -n kiwi-desc-netboot
 %defattr(-, root, root)
 %dir %{_datadir}/kiwi/image/netboot
 %doc %{_datadir}/kiwi/image/netboot/README
 %{_datadir}/kiwi/image/netboot/suse*
+%endif
 
+%ifarch %ix86 x86_64
 %files -n kiwi-desc-xenboot
 %defattr(-, root, root)
 %dir %{_datadir}/kiwi/image/xenboot
 %doc %{_datadir}/kiwi/image/xenboot/README
 %{_datadir}/kiwi/image/xenboot/suse*
+%endif
 
+%ifarch %ix86 x86_64
 %files -n kiwi-desc-oemboot
 %defattr(-, root, root)
 %dir %{_datadir}/kiwi/image/oemboot
