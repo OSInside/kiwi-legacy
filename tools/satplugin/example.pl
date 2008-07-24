@@ -27,12 +27,13 @@ my $job = new SaT::Queue;
 
 # Push jobs on Queue
 $job -> queuePush ( $SaT::SOLVER_INSTALL_SOLVABLE );
-if (! $job -> queuePush ( $pool -> selectSolvable ($repo,"pattern:default"))) {
+if (! $pool -> selectSolvable ($repo,$job,"pattern:default")) {
 	die "failed to push job";
 }
 
 # Solve the jobs
 $solver -> solve ($job);
+$job -> queue_free();
 
 # Print packages to install
 $a = $solver -> getInstallList($pool);

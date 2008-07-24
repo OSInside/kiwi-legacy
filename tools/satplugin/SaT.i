@@ -74,15 +74,13 @@ extern "C"
         return pool_id2solvable(self, p);
     }
 
-    Id selectSolvable (Repo *repo, char *name) {
+    bool selectSolvable (Repo *repo, Queue plist, char *name) {
         Id id;
-        Queue plist;
         int i, end;
         Solvable *s;
         Pool *pool;
         pool = self;
         id = str2id(pool, name, 1);
-        queue_init( &plist);
         i = repo ? repo->start : 1;
         end = repo ? repo->start + repo->nsolvables : pool->nsolvables;
         for (; i < end; i++) {
@@ -97,11 +95,9 @@ extern "C"
         prune_to_best_arch (pool, &plist);
         if (plist.count == 0) {
             //printf("unknown package '%s'\n", name);
-            return -1;
+            return 0;
         }
-        id = plist.elements[0];
-        queue_free(&plist);
-        return id;
+        return 1;
     }
 
     Repo* createRepo(const char *reponame) {

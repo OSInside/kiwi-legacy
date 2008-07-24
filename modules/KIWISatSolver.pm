@@ -125,7 +125,7 @@ sub new {
 	$job -> queuePush ( $SaT::SOLVER_INSTALL_SOLVABLE );
 	foreach my $p (@{$pref}) {
 		my $name = "pattern:".$p;
-		if (! $job -> queuePush ( $pool -> selectSolvable ($repo,$name))) {
+		if (! $pool -> selectSolvable ($repo,$job,$name)) {
 			$kiwi -> error ("--> Failed to queue job: $name");
 			$kiwi -> failed ();
 			return undef;
@@ -135,6 +135,7 @@ sub new {
 	# Solve the job(s)
 	#------------------------------------------
 	$solver -> solve ($job);
+	$job -> queue_free();
 	my $list = $solver -> getInstallList ($pool);
 	foreach my $name (@{$list}) {
 		if ($name =~ /^pattern:(.*)/) {
