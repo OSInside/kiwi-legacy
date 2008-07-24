@@ -130,7 +130,9 @@ kiwi boot (initrd) image for activating system images on ISO media
 Authors:
 --------
     Marcus Schaefer <ms@novell.com>
+%endif
 
+%ifarch %ix86 x86_64
 %package -n kiwi-desc-usbboot
 License:        GPL v2 or later
 Requires:       kiwi = %{version}
@@ -145,7 +147,9 @@ kiwi boot (initrd) image for activating system images on USB stick
 Authors:
 --------
     Marcus Schaefer <ms@novell.com>
+%endif
 
+%ifarch %ix86 x86_64
 %package -n kiwi-desc-vmxboot
 License:        GPL v2 or later
 Requires:       kiwi = %{version}
@@ -161,7 +165,9 @@ kiwi boot (initrd) image for activating system images on virtual disk
 Authors:
 --------
     Marcus Schaefer <ms@novell.com>
+%endif
 
+%ifarch %ix86 x86_64 ppc ppc64
 %package -n kiwi-desc-netboot
 License:        GPL v2 or later
 Requires:       kiwi = %{version}
@@ -176,7 +182,9 @@ kiwi boot (initrd) image for activating system images via TFTP
 Authors:
 --------
     Marcus Schaefer <ms@novell.com>
+%endif
 
+%ifarch %ix86 x86_64
 %package -n kiwi-desc-xenboot
 License:        GPL v2 or later
 Requires:       kiwi = %{version}
@@ -191,7 +199,9 @@ kiwi boot (initrd) image for activating a Xen image by xm
 Authors:
 --------
     Marcus Schaefer <ms@novell.com>
+%endif
 
+%ifarch %ix86 x86_64
 %package -n kiwi-desc-oemboot
 License:        GPL v2 only
 Requires:       kiwi = %{version}
