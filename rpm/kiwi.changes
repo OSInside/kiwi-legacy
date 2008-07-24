@@ -7,6 +7,8 @@ Wed Jul 23 11:49:05 CEST 2008 - ms@suse.de
 - allow redirection of the log messages to a console set
   by the kernel parameter kiwistderr=... (bnc #411304)
 - added suse-11.0 examples and reorganized the doc tree
+- added suse-11.0 netboot description for ppc and reorganized
+  the boot tree to allow different architectures
 - fixed KIWISatSolver queue code and binding
 
 -------------------------------------------------------------------
