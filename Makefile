@@ -46,7 +46,9 @@ all: modules/KIWIScheme.rng modules/KIWISchemeTest.rng
 	# create checksum files for boot images...
 	#--------------------------------------------
 	(cd system/boot/${arch} && ./.md5)
-	(cd system/boot/${arch} && find -type f | grep -v -E ".svn|.test" | xargs chmod u-w)
+	(cd system/boot/${arch} && \
+		find -type f | grep -v -E ".svn|.test|.md5" |\
+		xargs chmod u-w &>/dev/null || true)
 
 	#============================================
 	# build tools
@@ -119,7 +121,7 @@ install:
 	#============================================
 	# Install image descriptions
 	#--------------------------------------------
-	cp -a system/boot/${arch}/* ${KIWIIMAGE}
+	cp -a system/boot/${arch}/* ${KIWIIMAGE} &>/dev/null || true
 
 	#============================================
 	# Install kiwi repo
