@@ -250,6 +250,7 @@ Authors:
 %install
 # build
 export K_USER=0 # set value to -1 to prevent building boot images
+export K_ARCH=`uname -m | grep -q ^i && echo ix86 || uname -m`
 test -e /.buildenv || export K_USER=-1 # no buildenv, no boot image build
 test -e /.buildenv && . /.buildenv
 make buildroot=$RPM_BUILD_ROOT CFLAGS="$RPM_OPT_FLAGS"
@@ -285,7 +286,7 @@ if [ "$UID" = "$K_USER" ];then
 	echo "      localboot 0" >> $pxedefault
 	for i in $images;do
 		rootName=`echo $i | tr / -`
-		../kiwi.pl --root $RPM_BUILD_ROOT/root-$rootName --prepare ../system/boot/$i --logfile terminal
+		../kiwi.pl --root $RPM_BUILD_ROOT/root-$rootName --prepare ../system/boot/$K_ARCH/$i --logfile terminal
 		../kiwi.pl --create $RPM_BUILD_ROOT/root-$rootName \
 			-d $RPM_BUILD_ROOT/srv/tftpboot/boot --logfile terminal
 		rm -rf $RPM_BUILD_ROOT/root-$rootName*
