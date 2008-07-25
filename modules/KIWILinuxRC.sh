@@ -302,20 +302,34 @@ function errorLogStart {
 # udevStart
 #--------------------------------------
 function udevStart {
-	#======================================
-	# start udev
-	#--------------------------------------
+	# /.../
+	# start the udev daemon.
+	# ----
+	local timeout=30
 	echo "Creating device nodes with udev"
 	# disable hotplug helper, udevd listens to netlink
 	echo "" > /proc/sys/kernel/hotplug
-	# don't let udev load modules
+	# /.../
+	# At the moment we prevent udev from loading the storage
+	# modules because it does not make a propper choice if
+	# there are multiple possible modules available. Example
+	# udev prefers ata_generic over ata_piix but the hwinfo
+	# order is ata_piix first which also seems to make more
+	# sense. I would love to let udev load the modules but
+	# at the moment I don't see how I could solve that
+	# problem in another way than:
+	# -----
 	rm -f /etc/udev/rules.d/*-drivers.rules
-	# start udevd
+	# start the udev daemon
 	udevd --daemon udev_log="debug"
-	if [ -x /sbin/udevtrigger ];then
+	# wait for pending triggered udev events.
+	if [ -x /sbin/udevadm ];then
+		/sbin/udevadm trigger
+		/sbin/udevadm settle --timeout=$timeout
+	else
 		/sbin/udevtrigger
+		/sbin/udevsettle --timeout=$timeout
 	fi
-	/sbin/udevsettle --timeout=30
 	startSplashy
 }
 #======================================

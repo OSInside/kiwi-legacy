@@ -114,7 +114,7 @@ IFS="," ; for i in $IMAGE;do
 	fi
 	while true;do
 		IFS=" "
-		read sum1 blocks blocksize < $imageMD5s
+		read sum1 blocks blocksize zblocks zblocksize < $imageMD5s
 		if ! validateSize;then
 			systemException \
 				"Not enough RAM available for this image" \
