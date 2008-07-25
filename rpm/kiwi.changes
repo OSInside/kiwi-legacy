@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Jul 24 16:08:06 CEST 2008 - ms@suse.de
+
+- v2.61
+- added Amazon EC2 chapter in kiwi cookbook
+- fixed reading md5 file in isoboot suse-linuxrc (bnc #411673)
+
+-------------------------------------------------------------------
 Wed Jul 23 11:49:05 CEST 2008 - ms@suse.de
 
 - v2.60

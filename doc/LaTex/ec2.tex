@@ -3,78 +3,223 @@
 \label{chapter:ec2}
 \minitoc
 
-%1) read documentation how to setup an Account for AWS and the EC2 service
-%   http://docs.amazonwebservices.com/AmazonEC2/gsg/2006-06-26/
-%
-%2) setup the example image doc/examples/suse-xen-guest for ec2
-%   make sure the config.sh includes the line
-%  
-%       suseCloneRunlevel 4
-%
-%   this is required on Amazon because it runs in runlevel 4 which
-%   is not used at all on suse systems
-%
-%  <type ec2accountnr="720220196365"
-%        ec2privatekeyfile="/suse/ms/.ec2/pk-cambrian-aws.pem"
-%        ec2certfile="/suse/ms/.ec2/cert-cambrian-aws.pem"
-%        boot="xenboot/suse-11.0"
-%  >ec2</type>
-%
-%  boot attribute makes only sense if you are an Amazon partner and
-%  allowed to create and upload Amazon kernel and initrd images. If
-%  not the kiwi create step will fail
-%
-%  ec2privatekeyfile: AWS user's PEM encoded RSA private key file
-%  ec2accountnr: The user's EC2 user ID (Note: AWS account number, NOT Access Key ID)
-%  ec2certfile: AWS user's PEM encoded RSA pubkey certificate file
-%
-%3) prepare and create the image 
-%
-%4) The generated image must be transfered over to Amazon which is
-%   done by ec2-upload-bundle.
-%
-%   with boot image and kernel
-%
-%   ec2-upload-bundle -b suse -a <AWS Key ID> -s <AWS secret Key ID> \
-%    -m /tmp/mytest/<initrd>.ari.manifest.xml     
-%
-%   ec2-upload-bundle -b suse -a <AWS Key ID> -s <AWS secret Key ID> \
-%    -m /tmp/mytest/<initrd.kernel>.aki.manifest.xml
-% 
-%   the system image
-%
-%   ec2-upload-bundle -b suse -a <AWS Key ID> -s <AWS secret Key ID> \
-%	-m /tmp/mytest/<image>.ami.manifest.xml 
-%
-%5) Register the uploaded images
-%
-%   with boot image and kernel
-%
-%   ec2-register suse/<initrd>.ari.manifest.xml
-%   ec2-register suse/<initrd.kernel>.aki.manifest.xml
-%
-%   the system image
-%
-%   ec2-register suse/<image>.ami.manifest.xml
-%
-%   Each registration provides an identifier which is an ami-... for the system
-%   image an aki-... for the kernel image and an ari-... for the initrd image.
-%   If you are not able to build and upload kernel/initrd images you need to
-%   select an appropriate one provided by Amazon. This can be done checking
-%   the list with
-%  
-%   ec2-describe-images -a
-%
-%6) Run an ec2 instance
-%
-%   ec2-add-keypair ms-gsg-keypair
-%   The private key returned needs to be saved in a local file so that you can use it later.
-%   Using your favorite text editor, create a file named id_rsa-ms-gsg-keypair and paste everything between
-%   (and including) the "-----BEGIN RSA PRIVATE KEY-----" and "-----END RSA PRIVATE KEY-----" lines into it.
-%
-%   ec2-describe-keypairs
-%
-%   ec2-run-instances ami-... --kernel aki-... --ramdisk ari-.... -k ms-gsg-keypair
-%   ec2-describe-instances
-%
-%   ec2-authorize default -p 22
+The Amazon Elastic Compute Cloud (Amazon EC2) web service provides you
+with the ability to execute arbitrary applications in our computing
+environment. To use Amazon EC2 you simply:
+
+\begin{enumerate}
+\item Create an Amazon Machine Image (AMI) containing all your software,
+      including your operating system and associated configuration settings,
+      applications, libraries, etc. Such an AMI can be created by the kiwi
+      ec2 image type. In order to do that kiwi makes use of the tools
+      provided by Amazon. Your build system should have these tools
+      installed. An appropriate \textbf{ec2-ami-tools} package can be
+      found here:\\
+      \url{http://download.opensuse.org/repositories/openSUSE:/Tools}
+\item Upload this AMI to the Amazon S3 (Amazon Simple Storage Service)
+      service. This gives us reliable, secure access to your AMI.
+\item Register your AMI with Amazon EC2. This allows us to verify that your
+      AMI has been uploaded correctly and to allocate a unique identifier
+      for it.
+\item Use this AMI ID and the Amazon EC2 web service APIs to run, monitor,
+      and terminate as many instances of this AMI as required. Currently,
+      Amazon provides command line tools and Java libraries but you may also
+      directly access the SOAP-based API.
+\end{enumerate}
+
+Please note while instances are running, you are billed for the
+computing and network resources that they consume. Before creating an
+ec2 with kiwi you should have read the instructions from here:\\
+\url{http://docs.amazonwebservices.com/AmazonEC2/gsg/2006-06-26}
+You should start creating an ec2 with kiwi after you can make sure
+your system is prepared for ec2 which means if you call the command
+\textbf{ec2-describe-images -a} you will get a valid output.
+
+\section{Building the suse-ec2-guest example}
+
+The latest example provided with kiwi is based on openSUSE 11.0 and
+includes the base pattern plus the vim editor. The source repository
+is expected to be available below the path /image/CDs/full-11.0-i386.
+If you don't have a 11.0 repository there edit the config.xml file of
+the image description and change the path accordingly or use the
+suggested remote repository.
+
+Before you run kiwi you need to include some of your ec2 account
+information into the image description config.xml file. The box
+below shows the values you need to adapt:
+
+\begin{Command}{13cm}
+\begin{verbatim}
+<type primary="true"
+  ec2accountnr="12345678911"
+  ec2privatekeyfile="Path to EC2 private key file"
+  ec2certfile="Path to EC2 public certificate file"
+>ec2</type>
+\end{verbatim}
+\end{Command}
+
+After that call kiwi as follows:
+
+\begin{Command}{13cm}
+\begin{verbatim}
+cd /usr/share/doc/packages/kiwi/examples
+cd suse-11.0
+kiwi --prepare ./suse-ec2-guest \
+     --root /tmp/myec2
+\end{verbatim}
+\end{Command}
+
+\begin{Command}{13cm}
+\begin{verbatim}
+kiwi --create /tmp/myec2 \
+     --type ec2 -d /tmp/myec2-result
+\end{verbatim}
+\end{Command}
+
+\section{Using the image}
+The generated image needs to be transfered over to Amazon which is
+done by the ec2-upload-bundle tool. You can do this by calling:
+
+\begin{Command}{13cm}
+\begin{verbatim}
+ec2-upload-bundle -b myImages \
+ -a <AWS Key ID> -s <AWS secret Key ID> \
+ -m /tmp/myec2/\
+    suse-11.0-ec2-guest.i686-1.1.2.ami.manifest.xml
+\end{verbatim}
+\end{Command}
+
+After this is done the image needs to be registered in order to
+receive a so called AMI id which starts with \textbf{ami-} followed
+by a random key sequence. To register call:
+
+\begin{Command}{13cm}
+\begin{verbatim}
+ec2-register myImages/\
+    suse-11.0-ec2-guest.i686-1.1.2.ami.manifest.xml
+\end{verbatim}
+\end{Command}
+
+The result is the AMI id which you need to run an instance from
+your image. The command ec2-describe-images allows you to review your
+registered images. Since you will be running an instance of a public AMI,
+you will need to use a public/private keypair to ensure that only you
+will have access. One half of this keypair will be embedded into your
+instance, allowing you to login securely without a password using the
+other half of the keypair. Every keypair you generate requires a name.
+Be sure to choose a name that is easy to remember, perhaps one that
+describes the image's content. For our example we'll use the name
+gsg-keypair.
+
+\begin{Command}{10cm}
+\begin{verbatim}
+ec2-add-keypair gsg-keypair
+\end{verbatim}
+\end{Command}
+
+The private key returned needs to be saved in a local file so that
+you can use it later. Using your favorite text editor, create a file
+named \textbf{id\_rsa-gsg-keypair} and paste everything between
+(and including) the \textit{-----BEGIN RSA PRIVATE KEY-----} and
+\textit{-----END RSA PRIVATE KEY-----} lines into it. To review
+your keypairs call:
+
+\begin{Command}{10cm}
+\begin{verbatim}
+ec2-describe-keypairs
+\end{verbatim}
+\end{Command}
+
+We are almost done now but to be able to run an instances you also need
+to specifiy which kernel and boot image (initrd) should be used to run
+the instance. Kernels are registered as aki-... images and initrd's
+are registered as ari-... images at Amazon. If you are not an Amazon
+partner you won't be able to build and upload kernel/initrd images
+yourself even though kiwi supports creating them for you. According
+to this you need to select one of the aki/ari images we have registered
+at Amazon already. The following table shows which Distributions are
+supported at the moment:\\
+
+\begin{tabular}[h]{|p{2cm}|p{2.6cm}|p{2.6cm}|p{1cm}|p{4cm}|p{1.5cm}|}
+\hline
+\textbf{Distro} & \textbf{ARI id} & \textbf{AKI id} & \textbf{Arch} &
+\textbf{Kernel} & \textbf{Public} \\
+\hline
+SUSE 11.0 & ari-fc8e6a95 & aki-fe8e6a97 & ix86 & 2.6.25.9-0.2-xen & yes\\
+SLES10    & ari-968f6bff & aki-69886c00 & ix86 & 2.6.16.60-0.23\_xtp-xen & no\\
+\hline
+\end{tabular}\\
+
+For this example we need the id's provided for openSUSE 11.0. According
+to this call the following command to fire up your new ec2 instance:
+
+\begin{Command}{13cm}
+\begin{verbatim}
+ec2-run-instances ami-... \
+  --kernel aki-fe8e6a97 --ramdisk ari-fc8e6a95 \
+  -k gsg-keypair
+\end{verbatim}
+\end{Command}
+
+To check the state of your instance(s) call the following command:
+
+\begin{Command}{10cm}
+\begin{verbatim}
+ec2-describe-instances
+\end{verbatim}
+\end{Command}
+
+If you see your instance at the status: \textbf{running} you can login
+into it. If you can't make sure you have allowed port 22 to be available
+
+\begin{Command}{10cm}
+\begin{verbatim}
+ec2-authorize default -p 22
+\end{verbatim}
+\end{Command}
+
+Congratulations ! You made it and can now use Amazons storage and
+computing power.
+
+\section{Flavours}
+
+As already said a normal user can't upload and register kernel and/or
+initrd images at Amazon. Amazon prefers to have these in the hands of
+trusted parties only. Novell partners with Amazon in a way which allows
+us to create all types of bundles as listed in the table above so you
+are on the right side of live to be with Novell/SUSE. Considering the
+possibility you also have an Amazon account and the tools which allows
+you to upload and register kernel and initrd bundles too the following
+section describes how to create them with kiwi.
+
+\subsection{Amazon boot/kernel images}
+
+To instruct kiwi to create a boot image and the corresponding
+Amazon aki- and ari- bundles you only need to specify the \textbf{boot}
+attribute along with the ec2 image type. For our example this
+would look like the following:
+
+\begin{Command}{12cm}
+\begin{verbatim}
+<type ... boot="xenboot/suse-11.0">ec2</type>
+\end{verbatim}
+\end{Command} 
+
+As you know the ec2 service is based on Xen we need to create a
+xenboot boot image with kiwi. Any other boot image will not work.
+Given that information the kiwi create step will automatically
+build the xenboot boot image and uses the Amazon provided tools
+to create the aki/ari bundles from it. As result you will see
+two additional manifest files with the prefixes
+
+\begin{itemize}
+\item <initrd-name>.ari.manifest.xml
+\item <initrd-name>.kernel.aki.manifest.xml
+\end{itemize}
+
+These images can be uploaded and registered in the same way than
+it was described for the system image (ami). To use your instance
+with your own kernel and initrd you only need to specify the
+registered ari/aki ID's along with the ec2-run-instances call.
+Please always have in mind that the kernel version of the ami must
+match the kernel version of the corresponding aki and ari image.
