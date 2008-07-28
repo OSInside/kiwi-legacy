@@ -14,7 +14,7 @@
 		<rpm-check-signatures>False</rpm-check-signatures>
 	</preferences>
 	<profiles>
-		<profile name="default" description="Boot with xen or xenpae kernel"/>
+		<profile name="default" description="Boot with xen kernel"/>
 	</profiles>
 	<drivers type="drivers">
 		<file name="drivers/ide/*"/>
@@ -54,8 +54,7 @@
 		<package name="bootsplash-branding-openSUSE"/>
 	</packages>
 	<packages type="bootstrap" profiles="default">
-		<package name="kernel-xen" arch="x86_64"/>
-		<package name="kernel-xenpae" arch="i386"/>
+		<package name="kernel-xen"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>

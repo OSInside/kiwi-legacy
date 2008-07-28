@@ -3,6 +3,9 @@ Thu Jul 24 16:08:06 CEST 2008 - ms@suse.de
 
 - v2.61
 - added Amazon EC2 chapter in kiwi cookbook
+- removed use of kernel-xenpae for >= 11.0, doesn't exist there
+- fixed suseStripKernel() function to include module dependency
+  checking. Patch by Olaf Hering <olh@novell.com>. Thanks Olaf
 - fixed reading md5 file in isoboot suse-linuxrc (bnc #411673)
 
 -------------------------------------------------------------------

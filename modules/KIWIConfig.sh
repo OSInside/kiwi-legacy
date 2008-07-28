@@ -937,10 +937,15 @@ function suseStripKernel {
 	# for the kernel extraction in case of kiwi boot images
 	# ----
 	local ifss=$IFS
-	for i in /lib/modules/*;do
+	local kversion
+	local i
+	local d
+	local mod
+	local stripdir
+	for kversion in /lib/modules/*;do
 		IFS="
 		"
-		for p in `rpm -qf $i`;do
+		for p in `rpm -qf $kversion`;do
 			#==========================================
 			# get kernel VERSION information
 			#------------------------------------------
@@ -954,123 +959,64 @@ function suseStripKernel {
 				IFS=$ifss
 				continue
 			fi
-			VERSION=$(/usr/bin/basename $i)
+			VERSION=$(/usr/bin/basename $kversion)
 			echo "Stripping kernel $p: Image [$kiwi_iname]..."
 			#==========================================
-			# move interesting stuff to /tmp
+			# run depmod, deps should be up to date
 			#------------------------------------------
-			if [ -d lib/modules/$VERSION/updates ];then
-				mv lib/modules/$VERSION/updates /tmp
-			fi
-			if [ -d lib/modules/$VERSION/weak-updates ];then
-				mv lib/modules/$VERSION/weak-updates /tmp
-			fi
-			mv lib/modules/$VERSION/kernel/*  /tmp
-			mv lib/modules/$VERSION/modules.* /tmp
+			/sbin/depmod -F /boot/System.map-$VERSION $VERSION
 			#==========================================
-			# remove unneeded stuff
+			# strip the modules but take care for deps
 			#------------------------------------------
-			rm -r lib/modules/$VERSION/*
-			#==========================================
-			# insert modules.* files
-			#------------------------------------------
-			mv /tmp/modules.* /lib/modules/$VERSION/
-			if [ -d /tmp/updates ];then
-				mv /tmp/updates /lib/modules/$VERSION/
-			fi
-			if [ -d /tmp/weak-updates ];then
-				mv /tmp/weak-updates /lib/modules/$VERSION/
-			fi
-			#==========================================
-			# create driver-used dirs with .o's to use
-			#------------------------------------------
-			mkdir -p /tmp/usb-used
-			mkdir -p /tmp/scsi-used/drivers/scsi
-			mkdir -p /tmp/net-used/drivers/net
-			mkdir -p /tmp/misc-used
-			IFS=","
-			#==========================================
-			# handle USB drivers...
-			#------------------------------------------
-			test ! -z "$kiwi_usbdrivers";for i in $kiwi_usbdrivers;do
-				local path=`dirname $i`
-				test -f /tmp/drivers/$i && \
-				mkdir -p /tmp/usb-used/drivers/$path && \
-				mv /tmp/drivers/$i /tmp/usb-used/drivers/$path
-			done
-			#==========================================
-			# handle SCSI drivers...
-			#------------------------------------------
-			test ! -z "$kiwi_scsidrivers";for i in $kiwi_scsidrivers;do
-				local path=`dirname $i`
-				if [ $path = "." ];then
-					test -f /tmp/drivers/scsi/$i && \
-					mv /tmp/drivers/scsi/$i /tmp/scsi-used/drivers/scsi
-				else
-					test -f /tmp/drivers/scsi/$i && \
-					mkdir -p /tmp/scsi-used/drivers/scsi/$path && \
-					mv /tmp/drivers/scsi/$i /tmp/scsi-used/drivers/scsi/$path
-				fi
-			done
-			#==========================================
-			# handle Network drivers...
-			#------------------------------------------
-			test ! -z "$kiwi_netdrivers";for i in $kiwi_netdrivers;do
-				local path=`dirname $i`
-				if [ $path = "." ];then
-					test -f /tmp/drivers/net/$i && \
-					mv /tmp/drivers/net/$i /tmp/net-used/drivers/net
-				else
-					test -f /tmp/drivers/net/$i && \
-					mkdir -p /tmp/net-used/drivers/net/$path && \
-					mv /tmp/drivers/net/$i /tmp/net-used/drivers/net/$path
-				fi
-			done
-			#==========================================
-			# handle misc drivers...
-			#------------------------------------------
-			test ! -z "$kiwi_drivers";for i in $kiwi_drivers;do
-				local path=`/usr/bin/dirname $i`
-				local base=`/usr/bin/basename $i`
-				if [ "$base" = "*" ];then
-					test -d /tmp/$path && \
-					mkdir -p /tmp/misc-used/$path && \
-					mv /tmp/$path/* /tmp/misc-used/$path
-				else
-					test -f /tmp/$i && \
-					mkdir -p /tmp/misc-used/$path && \
-					mv /tmp/$i /tmp/misc-used/$path
-				fi
-			done
-			#==========================================
-			# Save all needed drivers...
-			#------------------------------------------
-			IFS=$ifss
-			for root in \
-				/tmp/scsi-used /tmp/net-used /tmp/usb-used /tmp/misc-used
+			stripdir=/tmp/stripped_modules
+			IFS=,
+			for mod in \
+				$kiwi_usbdrivers $kiwi_scsidrivers \
+				$kiwi_netdrivers $kiwi_drivers
 			do
-				pushd $root
-				for dir in `find -type d`;do
-					if [ ! -d /lib/modules/$VERSION/kernel/$dir ];then
-						mkdir -p /lib/modules/$VERSION/kernel/$dir 2>/dev/null
+				local path=`/usr/bin/dirname $mod`
+				local base=`/usr/bin/basename $mod`
+				for d in kernel updates weak-updates;do
+					if [ "$base" = "*" ];then
+						if test -d $kversion/$d/$path ; then
+							mkdir -pv $stripdir$kversion/$d/$path
+							cp -avl $kversion/$d/$path/* \
+								$stripdir$kversion/$d/$path
+						fi
+					else
+						if test -f $kversion/$d/$mod ; then
+							mkdir -pv $stripdir$kversion/$d/$path
+							cp -avl $kversion/$d/$mod \
+								$stripdir$kversion/$d/$mod
+						fi
 					fi
 				done
-				popd
 			done
-			for root in \
-				/tmp/scsi-used /tmp/net-used /tmp/usb-used /tmp/misc-used
-			do
-				pushd $root
-				for file in `find -type f`;do
-					local path=`/usr/bin/dirname $file`
-					mv $file /lib/modules/$VERSION/kernel/$path;
+			IFS=$ifss
+			for mod in `find $stripdir -name "*.ko"`;do
+				d=`/usr/bin/basename $mod`
+				i=`/sbin/modprobe \
+					-C /etc/modprobe.conf \
+					--set-version $VERSION \
+					--ignore-install \
+					--show-depends \
+					${d%.ko} | sed -ne 's:.*insmod /\?::p'`
+				for d in $i; do
+					case "$d" in
+						*=*) ;;
+						*)
+						if ! test -f $stripdir/$d ; then
+							echo "Fixing kernel module Dependency: $d"
+							mkdir -vp `/usr/bin/dirname $stripdir/$d`
+							cp -flav $d $stripdir/$d
+						fi
+						;;
+					esac
 				done
-				popd
 			done
-			#==========================================
-			# Cleanup /tmp...
-			#------------------------------------------
-			rm -rf /tmp/*
+			rm -rf $kversion
+			mv -v $stripdir/$kversion $kversion
+			rm -rf $stripdir
 			#==========================================
 			# run depmod
 			#------------------------------------------
