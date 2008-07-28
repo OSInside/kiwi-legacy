@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Mon Jul 28 17:28:59 CEST 2008 - ms@suse.de
+
+- v2.62
+- added ppc related lilo boot functions and rewrote the
+  kernelList function. Hopefully this doesn't break other
+  bootloader configurations
+- fixed build for ia64
+
+-------------------------------------------------------------------
 Thu Jul 24 16:08:06 CEST 2008 - ms@suse.de
 
 - v2.61

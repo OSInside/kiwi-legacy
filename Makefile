@@ -4,7 +4,7 @@
 #
 # Makefile for OpenSuSE - KIWI Image System
 # ---
-arch      = `uname -m | grep -q ^i && echo ix86 || uname -m`
+arch      = `uname -m | grep -q ^i[3-6] && echo ix86 || uname -m`
 buildroot = /
 syslinux  = /usr/share/syslinux
 bindlib   = lib

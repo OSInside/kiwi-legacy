@@ -621,6 +621,7 @@ if [ $LOCAL_BOOT = "no" ];then
 			fetchFile $KIWI_INITRD /mnt/boot/initrd
 			if [ ! -z $KIWI_KERNEL ];then
 				Echo "Import KIWI kernel file: $KIWI_KERNEL"
+				rm -f /mnt/boot/vmlinuz*
 				fetchFile $KIWI_KERNEL /mnt/boot/vmlinuz
 			fi
 			KIWI_INITRD_PARAMS="IMAGE=\"$IMAGE\""
