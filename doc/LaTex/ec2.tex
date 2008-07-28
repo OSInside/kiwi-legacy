@@ -133,12 +133,9 @@ ec2-describe-keypairs
 We are almost done now but to be able to run an instances you also need
 to specifiy which kernel and boot image (initrd) should be used to run
 the instance. Kernels are registered as aki-... images and initrd's
-are registered as ari-... images at Amazon. If you are not an Amazon
-partner you won't be able to build and upload kernel/initrd images
-yourself even though kiwi supports creating them for you. According
-to this you need to select one of the aki/ari images we have registered
-at Amazon already. The following table shows which Distributions are
-supported at the moment:\\
+are registered as ari-... images at Amazon. You will need to select a
+aki/ari image that matches your ami. The following table shows which
+Distributions are supported at the moment:\\
 
 \begin{tabular}[h]{|p{2cm}|p{2.6cm}|p{2.6cm}|p{1cm}|p{4cm}|p{1.5cm}|}
 \hline
@@ -181,45 +178,45 @@ ec2-authorize default -p 22
 Congratulations ! You made it and can now use Amazons storage and
 computing power.
 
-\section{Flavours}
-
-As already said a normal user can't upload and register kernel and/or
-initrd images at Amazon. Amazon prefers to have these in the hands of
-trusted parties only. Novell partners with Amazon in a way which allows
-us to create all types of bundles as listed in the table above so you
-are on the right side of live to be with Novell/SUSE. Considering the
-possibility you also have an Amazon account and the tools which allows
-you to upload and register kernel and initrd bundles too the following
-section describes how to create them with kiwi.
-
-\subsection{Amazon boot/kernel images}
-
-To instruct kiwi to create a boot image and the corresponding
-Amazon aki- and ari- bundles you only need to specify the \textbf{boot}
-attribute along with the ec2 image type. For our example this
-would look like the following:
-
-\begin{Command}{12cm}
-\begin{verbatim}
-<type ... boot="xenboot/suse-11.0">ec2</type>
-\end{verbatim}
-\end{Command} 
-
-As you know the ec2 service is based on Xen we need to create a
-xenboot boot image with kiwi. Any other boot image will not work.
-Given that information the kiwi create step will automatically
-build the xenboot boot image and uses the Amazon provided tools
-to create the aki/ari bundles from it. As result you will see
-two additional manifest files with the prefixes
-
-\begin{itemize}
-\item <initrd-name>.ari.manifest.xml
-\item <initrd-name>.kernel.aki.manifest.xml
-\end{itemize}
-
-These images can be uploaded and registered in the same way than
-it was described for the system image (ami). To use your instance
-with your own kernel and initrd you only need to specify the
-registered ari/aki ID's along with the ec2-run-instances call.
-Please always have in mind that the kernel version of the ami must
-match the kernel version of the corresponding aki and ari image.
+%\section{Flavours}
+%
+%As already said a normal user can't upload and register kernel and/or
+%initrd images at Amazon. Amazon prefers to have these in the hands of
+%trusted parties only. Novell partners with Amazon in a way which allows
+%us to create all types of bundles as listed in the table above so you
+%are on the right side of live to be with Novell/SUSE. Considering the
+%possibility you also have an Amazon account and the tools which allows
+%you to upload and register kernel and initrd bundles too the following
+%section describes how to create them with kiwi.
+%
+%\subsection{Amazon boot/kernel images}
+%
+%To instruct kiwi to create a boot image and the corresponding
+%Amazon aki- and ari- bundles you only need to specify the \textbf{boot}
+%attribute along with the ec2 image type. For our example this
+%would look like the following:
+%
+%\begin{Command}{12cm}
+%\begin{verbatim}
+%<type ... boot="xenboot/suse-11.0">ec2</type>
+%\end{verbatim}
+%\end{Command} 
+%
+%As you know the ec2 service is based on Xen we need to create a
+%xenboot boot image with kiwi. Any other boot image will not work.
+%Given that information the kiwi create step will automatically
+%build the xenboot boot image and uses the Amazon provided tools
+%to create the aki/ari bundles from it. As result you will see
+%two additional manifest files with the prefixes
+%
+%\begin{itemize}
+%\item <initrd-name>.ari.manifest.xml
+%\item <initrd-name>.kernel.aki.manifest.xml
+%\end{itemize}
+%
+%These images can be uploaded and registered in the same way than
+%it was described for the system image (ami). To use your instance
+%with your own kernel and initrd you only need to specify the
+%registered ari/aki ID's along with the ec2-run-instances call.
+%Please always have in mind that the kernel version of the ami must
+%match the kernel version of the corresponding aki and ari image.
