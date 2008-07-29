@@ -14,7 +14,7 @@ int main (void) {
 	FILE   *fp     = 0;
 	int b;
 	Queue  queue;
-	int fd = open ("tmp/primary", O_RDONLY);
+	int fd = open ("/var/cache/kiwi/satsolver/b3f8141972e5f21eed2392c2ee8f581b", O_RDONLY);
 	if (fd == -1) {
 		return 1;
 	}
@@ -33,8 +33,11 @@ int main (void) {
 
 	queue_init (&queue);
 	queue_push (&queue, SOLVER_INSTALL_SOLVABLE);
-	queue_push (&queue, select_solvable(new_repo,pool,"pattern:default"));
-
+	queue_push (&queue, select_solvable(new_repo,pool,"pattern:apparmor"));
+	queue_push (&queue, select_solvable(new_repo,pool,"pattern:apparmor_opt"));
+	queue_push (&queue, select_solvable(new_repo,pool,"pattern:base"));
+	queue_push (&queue, select_solvable(new_repo,pool,"pattern:devel_C_C++"));
+	queue_push (&queue, select_solvable(new_repo,pool,"pattern:devel_qt4"));
 
 	solver = solver_create (pool,empty_installed);
 
@@ -77,7 +80,7 @@ Id select_solvable (Repo *repo, Pool* pool,char *name) {
 			queue_push(&plist, i);
 		}
 	}
-	prune_best_version_arch(pool, &plist);
+	prune_to_best_arch (pool, &plist);
 	if (plist.count == 0) {
 		printf("unknown package '%s'\n", name);
 		exit(1);

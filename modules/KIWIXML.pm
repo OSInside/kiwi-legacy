@@ -17,6 +17,7 @@ package KIWIXML;
 #==========================================
 # Modules
 #------------------------------------------
+require Exporter;
 use strict;
 use XML::LibXML;
 use LWP;
@@ -28,6 +29,12 @@ use KIWIManager qw (%packageManager);
 use File::Glob ':glob';
 use File::Basename;
 use KIWIQX;
+
+#==========================================
+# Exports
+#------------------------------------------
+our @ISA    = qw (Exporter);
+our @EXPORT = qw (getInstSourceFile getInstSourceSatSolvable);
 
 #==========================================
 # Globals
@@ -2241,7 +2248,7 @@ sub getList {
 					#------------------------------------------
 					# 1) try to use libsatsolver...
 					my $psolve = new KIWISatSolver (
-						$kiwi,$this,\@pattlist,$this->{urllist}
+						$kiwi,\@pattlist,$this->{urllist}
 					);
 					if (! defined $psolve) {
 						# 2) use generic pattern module
@@ -2711,9 +2718,8 @@ sub getInstSourceSatSolvable {
 	# the satsolver toolkit is used and therefore required in
 	# order to allow this function to work correctly
 	# ----
-	my $this     = shift;
+	my $kiwi     = shift;
 	my $repos    = shift;
-	my $kiwi     = $this->{kiwi};
 	my $patternd = "/suse/setup/descr/";
 	my $patterns = "/suse/setup/descr/patterns";
 	my $packages = "/suse/setup/descr/packages.gz";
@@ -2751,7 +2757,7 @@ sub getInstSourceSatSolvable {
 		# create directory listing for each repo
 		#------------------------------------------
 		my $destfile = $sdir."/listing";
-		if (! $this -> getInstSourceFile ($repo.$patternd,$destfile)) {
+		if (! KIWIXML::getInstSourceFile ($kiwi,$repo.$patternd,$destfile)) {
 			next;
 		}
 		#==========================================
@@ -2801,14 +2807,14 @@ sub getInstSourceSatSolvable {
 		# check for pre-created solvable first
 		#------------------------------------------
 		$destfile = $sdir."/primary-".$count.".gz";
-		if ($this -> getInstSourceFile ($repo.$solvable,$destfile)) {
+		if (KIWIXML::getInstSourceFile ($kiwi,$repo.$solvable,$destfile)) {
 			next;
 		}
 		#==========================================
 		# get patterns file next
 		#------------------------------------------
 		$destfile = $sdir."/patterns-".$count;
-		if (! $this -> getInstSourceFile ($repo.$patterns,$destfile)) {
+		if (! KIWIXML::getInstSourceFile ($kiwi,$repo.$patterns,$destfile)) {
 			$kiwi -> warning ("--> No patterns file on repo: $repo");
 			$kiwi -> skipped ();
 			next;
@@ -2829,7 +2835,7 @@ sub getInstSourceSatSolvable {
 				next;
 			}
 			my $file = $repo.$patternd.$line;
-			if (! $this -> getInstSourceFile($file,$destfile)) {
+			if (! KIWIXML::getInstSourceFile($kiwi,$file,$destfile)) {
 				$kiwi -> warning ("--> Pattern file $line not found");
 				$kiwi -> skipped ();
 				next;
@@ -2841,7 +2847,7 @@ sub getInstSourceSatSolvable {
 		# get packages.gz file next
 		#------------------------------------------
 		$destfile = $sdir."/packages-".$count.".gz";
-		if (! $this -> getInstSourceFile ($repo.$packages,$destfile)) {
+		if (! KIWIXML::getInstSourceFile ($kiwi,$repo.$packages,$destfile)) {
 			$kiwi -> warning ("--> No packages.gz file on repo: $repo");
 			$kiwi -> skipped ();
 			next;

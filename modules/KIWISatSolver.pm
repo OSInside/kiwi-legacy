@@ -65,7 +65,6 @@ sub new {
 	# Module Parameters
 	#------------------------------------------
 	my $kiwi    = shift;
-	my $xml     = shift;
 	my $pref    = shift;
 	my $urlref  = shift;
 	#==========================================
@@ -81,11 +80,6 @@ sub new {
 		$kiwi = new KIWILog("tiny");
 	}
 	$kiwi -> info ("Setting up SaT solver...\n");
-	if (! defined $xml) {
-		$kiwi -> error ("--> No XML reference specified");
-		$kiwi -> failed ();
-		return undef;
-	}
 	if (! $KIWISatSolver::haveSaT) {
 		$kiwi -> error ("--> No SaT plugin installed");
 		$kiwi -> failed ();
@@ -104,7 +98,7 @@ sub new {
 	#==========================================
 	# Create and cache sat solvable
 	#------------------------------------------
-	$solvable = $xml -> getInstSourceSatSolvable ($urlref);
+	$solvable = KIWIXML::getInstSourceSatSolvable ($kiwi,$urlref);
 	if (! defined $solvable) {
 		return undef;
 	}
@@ -149,7 +143,6 @@ sub new {
 	# Store object data
 	#------------------------------------------
 	$this->{kiwi}    = $kiwi;
-	$this->{xml}     = $xml;
 	$this->{urllist} = $urlref;
 	$this->{plist}   = $pref;
 	$this->{job}     = $job;
