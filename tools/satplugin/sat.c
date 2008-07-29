@@ -34,9 +34,13 @@ int main (void) {
 	queue_init (&queue);
 	queue_push (&queue, SOLVER_INSTALL_SOLVABLE);
 	queue_push (&queue, select_solvable(new_repo,pool,"pattern:apparmor"));
+	queue_push (&queue, SOLVER_INSTALL_SOLVABLE);
 	queue_push (&queue, select_solvable(new_repo,pool,"pattern:apparmor_opt"));
+	queue_push (&queue, SOLVER_INSTALL_SOLVABLE);
 	queue_push (&queue, select_solvable(new_repo,pool,"pattern:base"));
+	queue_push (&queue, SOLVER_INSTALL_SOLVABLE);
 	queue_push (&queue, select_solvable(new_repo,pool,"pattern:devel_C_C++"));
+	queue_push (&queue, SOLVER_INSTALL_SOLVABLE);
 	queue_push (&queue, select_solvable(new_repo,pool,"pattern:devel_qt4"));
 
 	solver = solver_create (pool,empty_installed);

@@ -74,7 +74,7 @@ sub new {
 	my $pool;     # sat pool object
 	my $repo;     # sat repo object
 	my $solver;   # sat solver object
-	my $job;      # sat job queue
+	my $queue;    # sat job queue
 	my @solved;   # solve result
 	if (! defined $kiwi) {
 		$kiwi = new KIWILog("tiny");
@@ -115,21 +115,22 @@ sub new {
 	$repo -> addSolvable (*FD); close FD;
 	$solver = new SaT::Solver ($pool);
 	$pool -> createWhatProvides();
-	$job = new SaT::Queue;
-	$job -> queuePush ( $SaT::SOLVER_INSTALL_SOLVABLE );
+	$queue = new SaT::Queue;
 	foreach my $p (@{$pref}) {
 		my $name = "pattern:".$p;
-		if (! $pool -> selectSolvable ($repo,$job,$name)) {
-			$kiwi -> error ("--> Failed to queue job: $name");
-			$kiwi -> failed ();
-			return undef;
+		my $id = $pool -> selectSolvable ($repo,$name);
+		if (! $id) {
+			$kiwi -> warning ("--> Failed to queue job: $name");
+			$kiwi -> skipped ();
+			next;
 		}
+		$queue -> queuePush ( $SaT::SOLVER_INSTALL_SOLVABLE );
+		$queue -> queuePush ( $id );
 	}
 	#==========================================
 	# Solve the job(s)
 	#------------------------------------------
-	$solver -> solve ($job);
-	$job -> queue_free();
+	$solver -> solve ($queue);
 	my $list = $solver -> getInstallList ($pool);
 	foreach my $name (@{$list}) {
 		if ($name =~ /^pattern:(.*)/) {
@@ -145,7 +146,7 @@ sub new {
 	$this->{kiwi}    = $kiwi;
 	$this->{urllist} = $urlref;
 	$this->{plist}   = $pref;
-	$this->{job}     = $job;
+	$this->{queue}   = $queue;
 	$this->{repo}    = $repo;
 	$this->{solver}  = $solver;
 	$this->{result}  = \@solved;
