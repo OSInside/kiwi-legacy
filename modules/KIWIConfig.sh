@@ -798,62 +798,63 @@ function suseGFXBoot {
 	#--------------------------------------
 	if [ ! -d /usr/share/gfxboot ];then
 		echo "gfxboot not installed... skipped"
-		return
-	fi
-	#======================================
-	# create boot theme
-	#--------------------------------------
-	cd /usr/share/gfxboot
-	# check for new source layout
-	local newlayout=
-	[ -f themes/$theme/config ] && newlayout=1
-	[ "$newlayout" ] || make -C themes/$theme prep
-	if [ ! -z "$language" ];then
-		local l1=`echo $language | cut -f1 -d.`
-		local l2=`echo $language | cut -f1 -d_`
-		local found=0
-		for lang in $l1 $l2;do
-			if [ -f themes/$theme/po/$lang.po ];then
-				echo "Found language default: $lang"
-				make -C themes/$theme DEFAULT_LANG=$lang
-				found=1
-				break
+	else
+		#======================================
+		# create boot theme
+		#--------------------------------------
+		cd /usr/share/gfxboot
+		# check for new source layout
+		local newlayout=
+		[ -f themes/$theme/config ] && newlayout=1
+		[ "$newlayout" ] || make -C themes/$theme prep
+		if [ ! -z "$language" ];then
+			local l1=`echo $language | cut -f1 -d.`
+			local l2=`echo $language | cut -f1 -d_`
+			local found=0
+			for lang in $l1 $l2;do
+				if [ -f themes/$theme/po/$lang.po ];then
+					echo "Found language default: $lang"
+					make -C themes/$theme DEFAULT_LANG=$lang
+					found=1
+					break
+				fi
+			done
+			if [ $found -eq 0 ];then
+				echo "Language $language not found, skipped"
+				make -C themes/$theme
 			fi
-		done
-		if [ $found -eq 0 ];then
-			echo "Language $language not found, skipped"
+		else
 			make -C themes/$theme
 		fi
-	else
-		make -C themes/$theme
-	fi
-	mkdir /image/loader
-	local gfximage=
-	local bootimage=
-	if [ "$newlayout" ] ; then
-		gfximage=themes/$theme/bootlogo
-		bootimage=themes/$theme/message
-	else
-		gfximage=themes/$theme/install/bootlogo
-		bootimage=themes/$theme/boot/message
-	fi
-	if [ $loader = "isolinux" ];then
-		# isolinux boot data...
-		cp $gfximage /image/loader
-		if [ -x /usr/sbin/gfxboot ] ; then
-			gfxboot --archive /image/loader/bootlogo --change-config livecd=1
+		mkdir /image/loader
+		local gfximage=
+		local bootimage=
+		if [ "$newlayout" ] ; then
+			gfximage=themes/$theme/bootlogo
+			bootimage=themes/$theme/message
 		else
-			echo "livecd=1" >> /image/loader/gfxboot.cfg
+			gfximage=themes/$theme/install/bootlogo
+			bootimage=themes/$theme/boot/message
 		fi
-		bin/unpack_bootlogo /image/loader
-		mv /usr/share/syslinux/isolinux.bin /image/loader
-		mv /usr/share/syslinux/mboot.c32 /image/loader
-		mv /boot/memtest.bin /image/loader/memtest
-	else
-		# boot loader graphics image file...
-		mv $bootimage /image/loader
+		if [ $loader = "isolinux" ];then
+			# isolinux boot data...
+			cp $gfximage /image/loader
+			if [ -x /usr/sbin/gfxboot ] ; then
+				gfxboot --archive /image/loader/bootlogo \
+					--change-config livecd=1
+			else
+				echo "livecd=1" >> /image/loader/gfxboot.cfg
+			fi
+			bin/unpack_bootlogo /image/loader
+			mv /usr/share/syslinux/isolinux.bin /image/loader
+			mv /usr/share/syslinux/mboot.c32 /image/loader
+			mv /boot/memtest.bin /image/loader/memtest
+		else
+			# boot loader graphics image file...
+			mv $bootimage /image/loader
+		fi
+		make -C themes/$theme clean
 	fi
-	make -C themes/$theme clean
 	#======================================
 	# create splash screen
 	#--------------------------------------
@@ -868,7 +869,7 @@ function suseGFXBoot {
 	if [ ! -d /etc/bootsplash/themes/$theme ];then
 		theme="SuSE-$theme"
 	fi
-	mkdir /image/loader/branding
+	mkdir -p /image/loader/branding
 	cp /etc/bootsplash/themes/$theme/images/logo.mng  /image/loader/branding
 	cp /etc/bootsplash/themes/$theme/images/logov.mng /image/loader/branding
 	for cfg in 800x600 1024x768 1280x1024;do
@@ -879,7 +880,7 @@ function suseGFXBoot {
 		cp /etc/bootsplash/themes/$theme/config/bootsplash-$cfg.cfg \
 		/image/loader/branding
 	done
-	mkdir /image/loader/animations
+	mkdir -p /image/loader/animations
 	cp /etc/bootsplash/themes/$theme/animations/* \
 		/image/loader/animations &>/dev/null
 	for cfg in 800x600 1024x768 1280x1024;do

@@ -12,8 +12,7 @@ suseStripKernel
 #==========================================
 # setup gfxboot
 #------------------------------------------
-# no gfxboot on ppc
-# suseGFXBoot openSUSE grub
+suseGFXBoot openSUSE lilo
 
 #==========================================
 # remove unneeded packages
