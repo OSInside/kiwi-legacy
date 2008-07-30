@@ -3,6 +3,7 @@ Tue Jul 29 18:03:24 CEST 2008 - ms@suse.de
 
 - v2.63
 - don't use umount -l (bnc #413122)
+- add arch attribute to <configuration> section (bnc #412869)
 - fixed automatic boot image building if the type setup
   is part of a profiled preferences section
 - fixed KIWITest and KIWITestResult modules which uses

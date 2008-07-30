@@ -810,7 +810,23 @@ sub getDeployConfiguration {
 	foreach my $element (@node) {
 		my $source = $element -> getAttribute("source");
 		my $dest   = $element -> getAttribute("dest");
-		$result{$source} = $dest;
+		my $forarch= $element -> getAttribute("arch");
+		my $allowed= 1;
+		if (defined $forarch) {
+			my @archlst = split (/,/,$forarch);
+			my $foundit = 0;
+			foreach my $archok (@archlst) {
+				if ($archok eq $this->{arch}) {
+					$foundit = 1; last;
+				}
+			}
+			if (! $foundit) {
+				$allowed = 0;
+			}
+		}
+		if ($allowed) {
+			$result{$source} = $dest;
+		}
 	}
 	return %result;
 }

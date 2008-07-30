@@ -676,7 +676,8 @@ main storage device
 \hspace*{2cm}<partition type="fd" number="3"/>\\
 \hspace*{1cm}</partitions>\\
 \hspace*{1cm}<union ro="dev" rw="dev" type="aufs|unionfs"/>\\
-\hspace*{1cm}<configuration source="/KIWI/../file" dest="/../file"/>\\
+\hspace*{1cm}<configuration source="/KIWI/../file" dest="/../file"\\
+\hspace*{4.5cm}arch="..."/>\\
 \hspace*{1cm}<configuration .../>\\
 </deploy>
 \end{Command}
@@ -746,7 +747,8 @@ description.
       The source attribute specifies the path on the server used by a
       TFTP client program to download the file, and the dest attribute
       specifies the target relative to the root (/) of the network client.
-      Each file is specified by one configuration section.
+      Each file is specified by one configuration section and can be
+      bound to a specific set of architectures separated by comma.
 \end{itemize}
 
 \newpage
