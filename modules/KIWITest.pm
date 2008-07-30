@@ -19,23 +19,9 @@ package KIWITest;
 #==========================================
 # Modules
 #------------------------------------------
-require Exporter;
 use strict;
 use XML::LibXML;
 use KIWITestResult;
-
-#==========================================
-# Exports
-#------------------------------------------
-our @ISA    = qw (Exporter);
-our @EXPORT	= (
-	'run',
-	'getOverallMessage',
-	'getName','getDescription','getSummary',
-	'getAllResults','getResultStatus','getResultState',
-	'getResultCommand','getResultMessage',
-	'getResultErrorState','getResultCount'
-);
 
 #==========================================
 # constructor
@@ -48,8 +34,13 @@ sub new {
 	#==========================================
 	# Object setup
 	#------------------------------------------
-	my ($class,$testpathname,$chroot,$schema,$manager,$tmpdir)  = @_;
+	my $class = shift;
+	my ($testpathname,$chroot,$schema,$manager,$tmpdir)  = @_;
 	my $self = {};
+	bless $self,$class;
+	#==========================================
+	# Constructor setup
+	#------------------------------------------
 	if (!defined $tmpdir) {
 		$tmpdir = "/tmp";
 	}
@@ -89,7 +80,6 @@ sub new {
 	#1 failed xml, 2 - failed reqs, 3 - failed tests 
 	$self->{TEST_RESULT_STATE} = 0;
 	undef $self->{TEST_OVERALL_MESSAGE};
-	bless $self;
 	return $self;
 }
 
@@ -98,9 +88,9 @@ sub new {
 #------------------------------------------
 sub trimpath {
 	my ($path)=@_;
-	$path=~s@"@@g;
-	$path=~s@/+@/@g;
-	$path=~s@/$@@g;
+	$path =~ s/\"//g;
+	$path =~ s/\/+/\//g;
+	$path =~ s/\/$//g;
 	return $path;
 }
 
@@ -115,11 +105,11 @@ sub run {
 	my ($self) = @_;
 	my $tr=KIWITestResult->new();
 	$self->{TEST_RESULT_STATUS}=0;  # assume all ok
-	$self->KIWITest::loadXML();
+	$self->loadXML();
 	unless ($self->{TEST_RESULT_STATUS}) {
-		$self->KIWITest::checkRequirements();
+		$self->checkRequirements();
 		unless ($self->{TEST_RESULT_STATUS}) {
-			$self->KIWITest::runTests();	
+			$self->runTests();	
 		}	
 	}
 	return $self->{TEST_RESULT_STATUS};
@@ -227,7 +217,8 @@ sub checkRequirements {
 			$errvalue=2;
 		} 
 		else{
-			$errorMessage="unknown place: ".$place.", check test description: ".$self->{XML_FILE};
+			$errorMessage = "unknown place: ".$place;
+			$errorMessage.= ", check test description: ".$self->{XML_FILE};
 			$isOK="false";
 		}
 		if($isOK eq "true"){
@@ -252,11 +243,12 @@ sub checkRequirements {
 				}
 			}
 			else{
-				$errorMessage="wrong type of requirements: ".$type.", check test description: ".$self->{XML_FILE};
+				$errorMessage = "wrong type of requirements: ";
+				$errorMessage.= $type.", check test description: ";
+				$errorMessage.= $self->{XML_FILE};
 				$isOK="false";
 			}
 		}
-				
 		if ($isOK eq "false") {
 			my $result=KIWITestResult->new();
 			$result->setCommand("requirements test of ".$reqRelPathName);
@@ -335,12 +327,14 @@ sub runTests {
 				$r=$?;
 				if ( $r ){ #couldn't copy 
 					$output=sprintf(
-						"error, copying of $scrpathname to $chrootpath failed:\n"
+						"error,copying of $scrpathname to $chrootpath failed:\n"
 					);
 					$output=$output.sprintf("$o\n");
 					$returnvalue=$r;
 				} else {
-					$cmd = qq(chroot "$self->{CHROOT}" "$self->{CHROOT_TMP}/$file" $params 2>&1);
+					my $root = $self->{CHROOT};
+					my $root_tmp = $self->{CHROOT_TMP}."/".$file;
+					$cmd = qq(chroot "$root" "$root_tmp" $params 2>&1);
 					$output=`$cmd`;
 					$returnvalue=$?;
 				}
@@ -349,7 +343,7 @@ sub runTests {
 				$r=$?;
 				if ( $r ) { 
 					$output=$output.sprintf (
-						"\n%s can't delete file '$chrootpathname' afterwards: \n",
+						"\n%s can't delete file '$chrootpathname'\n",
 						$returnvalue ? 'Also' : 'But'
 					);
 					$output=$output.sprintf("$o\n");

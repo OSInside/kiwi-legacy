@@ -19,18 +19,8 @@ package KIWITestResult;
 #==========================================
 # Modules
 #------------------------------------------
-require Exporter;
 use strict;
 use XML::LibXML;
-
-#==========================================
-# Exports
-#------------------------------------------
-our @EXPORT  = (
-	'setMessage','setErrorState',
-	'setCommand','getMessage',
-	'getErrorState','getCommand'
-);
 
 #==========================================
 # Constructor
@@ -44,12 +34,12 @@ sub new {
 	#==========================================
 	# Object setup
 	#------------------------------------------
-	my ($class)   = @_;
-	my $self      = {};
+	my $class = shift;
+	my $self  = {};
+	bless $self,$class;
 	undef $self->{CMD};
 	undef $self->{MSG};
 	undef $self->{ERR};
-	bless $self; 
 	return $self;
 }
 

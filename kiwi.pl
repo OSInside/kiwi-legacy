@@ -748,7 +748,9 @@ sub main {
 		# install testing packages if any
 		#------------------------------------------
 		$kiwi -> info ("Reading image description...");
-		my $xml = new KIWIXML ( $kiwi,"$RunTestSuite/image" );
+		my $xml = new KIWIXML (
+			$kiwi,"$RunTestSuite/image",undef,undef,\@Profiles
+		);
 		if (! defined $xml) {
 			my $code = kiwiExit (1); return $code;
 		}

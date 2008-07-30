@@ -737,7 +737,9 @@ sub createImageUSB {
 	#------------------------------------------
 	$kiwi -> info ("Creating $text boot image: $boot...\n");
 	my $Prepare = $imageTree."/image";
-	my $xml = new KIWIXML ( $kiwi,$Prepare,undef,$main::SetImageType );
+	my $xml = new KIWIXML (
+		$kiwi,$Prepare,undef,$main::SetImageType,\@main::Profiles
+	);
 	if (! defined $xml) {
 		return undef;
 	}
@@ -3508,7 +3510,7 @@ sub getSize {
 sub cleanMount {
 	my $this = shift;
 	my $imageDest = $this->{imageDest};
-	qxx ("umount -l $imageDest/mnt-$$ 2>&1");
+	qxx ("umount $imageDest/mnt-$$ 2>&1");
 	rmdir "$imageDest/mnt-$$";
 }
 
