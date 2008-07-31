@@ -236,7 +236,7 @@ sub _addPlugin
   #my @desc  = $plugin->description();
 
   if(not defined($order)) {
-    $this->{m_collect}->logger()->info("Undefined order of plugin $plugin->name()");
+    $this->{m_collect}->logger()->info("Undefined order of plugin ".$plugin->name());
   }
   else {
     if(defined($this->{m_handlers}->{$order})) {
@@ -291,7 +291,7 @@ sub createMetadata
       $this->{m_handlers}->{$order}->execute();
     }
     else {
-      $this->gossip("Plugin $this->{m_handlers}->{$order}->name() is not activated yet!");
+      $this->gossip("Plugin ".$this->{m_handlers}->{$order}->name()." is not activated yet!");
     }
   }
 }
