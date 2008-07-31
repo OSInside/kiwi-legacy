@@ -67,19 +67,22 @@ sub new {
 	my $kiwi    = shift;
 	my $pref    = shift;
 	my $urlref  = shift;
+	my $solvep  = shift;
+	my $repo    = shift;
+	my $pool    = shift;
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
 	my $solvable; # sat solvable file name
-	my $pool;     # sat pool object
-	my $repo;     # sat repo object
 	my $solver;   # sat solver object
 	my $queue;    # sat job queue
 	my @solved;   # solve result
 	if (! defined $kiwi) {
 		$kiwi = new KIWILog("tiny");
 	}
-	$kiwi -> info ("Setting up SaT solver...\n");
+	if ((! defined $repo) || (! defined $pool)) {
+		$kiwi -> info ("Setting up SaT solver...\n");
+	}
 	if (! $KIWISatSolver::haveSaT) {
 		$kiwi -> error ("--> No SaT plugin installed");
 		$kiwi -> failed ();
@@ -98,26 +101,31 @@ sub new {
 	#==========================================
 	# Create and cache sat solvable
 	#------------------------------------------
-	$solvable = KIWIXML::getInstSourceSatSolvable ($kiwi,$urlref);
-	if (! defined $solvable) {
-		return undef;
+	if ((! defined $repo) || (! defined $pool)) {
+		$solvable = KIWIXML::getInstSourceSatSolvable ($kiwi,$urlref);
+		if (! defined $solvable) {
+			return undef;
+		}
+		#==========================================
+		# Create SaT repository and job queue
+		#------------------------------------------
+		if (! open (FD,$solvable)) {
+			$kiwi -> error  ("--> Couldn't open solvable: $!");
+			$kiwi -> failed ();
+			return undef;
+		}
+		$pool = new SaT::_Pool;
+		$repo = $pool -> createRepo('repo');
+		$repo -> addSolvable (*FD); close FD;
 	}
-	#==========================================
-	# Create SaT repository and job queue
-	#------------------------------------------
-	if (! open (FD,$solvable)) {
-		$kiwi -> error  ("--> Couldn't open solvable: $!");
-		$kiwi -> failed ();
-		return undef;
-	}
-	$pool = new SaT::_Pool;
-	$repo = $pool -> createRepo('repo');
-	$repo -> addSolvable (*FD); close FD;
 	$solver = new SaT::Solver ($pool);
 	$pool -> createWhatProvides();
 	$queue = new SaT::Queue;
 	foreach my $p (@{$pref}) {
-		my $name = "pattern:".$p;
+		my $name = $p;
+		if (! defined $solvep) {
+			$name = "pattern:".$p;
+		}
 		my $id = $pool -> selectSolvable ($repo,$name);
 		if (! $id) {
 			$kiwi -> warning ("--> Failed to queue job: $name");
@@ -148,9 +156,32 @@ sub new {
 	$this->{plist}   = $pref;
 	$this->{queue}   = $queue;
 	$this->{repo}    = $repo;
+	$this->{pool}    = $pool;
 	$this->{solver}  = $solver;
 	$this->{result}  = \@solved;
 	return $this;
+}
+
+#==========================================
+# getRepo
+#------------------------------------------
+sub getRepo {
+	# /.../
+	# return satsolver repo object
+	# ----
+	my $this = shift;
+	return $this->{repo};
+}
+
+#==========================================
+# getPool
+#------------------------------------------
+sub getPool {
+	# /.../
+	# return satsolver pool object
+	# ----
+	my $this = shift;
+	return $this->{pool};
 }
 
 #==========================================

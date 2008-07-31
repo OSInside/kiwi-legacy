@@ -944,7 +944,8 @@ sub main {
 	if (defined $Migrate) {
 		$kiwi -> info ("Starting system to image migration");
 		$migrate = new KIWIMigrate (
-			$kiwi,$Destination,$Migrate,\@Exclude,$Report
+			$kiwi,$Destination,$Migrate,\@Exclude,$Report,
+			\@AddRepository,\@AddRepositoryType
 		);
 		if (! defined $migrate) {
 			my $code = kiwiExit (1); return $code;
@@ -1345,7 +1346,8 @@ sub usage {
 	print "     [ --base-root <base-path> ]\n";
 	print "System to Image migration:\n";
 	print "  kiwi -m | --migrate <name> --destdir <destination-path>\n";
-	print "     [ --exclude <directory> --exclude ... ]\n";
+	print "     [ --exclude <directory> --exclude <...> ]\n";
+	print "     [ --add-repo <repo-path> --add-repotype <type> ]\n";
 	print "     [ --report ]\n";
 	print "Image postprocessing modes:\n";
 	print "  kiwi --bootstick <initrd> --bootstick-system <systemImage>\n";

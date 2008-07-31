@@ -3,6 +3,10 @@ Thu Jul 31 09:36:01 CEST 2008 - ms@suse.de
 
 - v2.64
 - increased boot timeout for lilo configuration
+- improved migration code, makes use of patterns now and
+  checks with SaTSolver whether the package exists in the
+  solvables or not. I also added the possibility to add
+  repositories while calling kiwi --migrate (bnc #412215)
 
 -------------------------------------------------------------------
 Tue Jul 29 18:03:24 CEST 2008 - ms@suse.de

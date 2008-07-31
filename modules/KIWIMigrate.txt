@@ -2,7 +2,8 @@
 # migration table for distribution name to boot image name
 # and possible source repository
 # ----
-SUSE-Linux-Enterprise-Server-10-SP1 = suse-SLES10-SP1,***SELECT***
+SUSE-Linux-Enterprise-Server-10-SP1=suse-SLES10,***SELECT***
+SUSE-Linux-Enterprise-Server-10-SP2=suse-SLES10,***SELECT***
 SUSE-Linux-Enterprise-Server-10=suse-SLES10,***SELECT***
 openSUSE-10.2=suse-10.2,http://download.opensuse.org/repositories/openSUSE:10.2/standard
 openSUSE-10.3=suse-10.3,http://download.opensuse.org/repositories/openSUSE:10.3/standard

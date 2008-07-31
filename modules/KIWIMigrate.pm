@@ -48,6 +48,8 @@ sub new {
 	my $name = shift;
 	my $excl = shift;
 	my $demo = shift;
+	my $addr = shift;
+	my $addt = shift;
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
@@ -102,8 +104,21 @@ sub new {
 	while (my $line = <FD>) {
 		next if $line =~ /^#/;
 		if ($line =~ /(.*)\s*=\s*(.*),(.*)/) {
-			$OSSource{$1}{boot} = $2;
-			$OSSource{$1}{src}  = $3;
+			my $source = $3;
+			my $product= $1;
+			my $boot = $2;
+			$OSSource{$product}{$source}{boot} = $boot;
+			$OSSource{$product}{$source}{type} = "yast2";
+			if ((defined $addr) && (defined $addt)) {
+				my @addrepo     = @{$addr};
+				my @addrepotype = @{$addt};
+				foreach (my $count=0;$count <@addrepo; $count++) {
+					my $source= $addrepo[$count];
+					my $type  = $addrepotype[$count];
+					$OSSource{$product}{$source}{boot} = "none";
+					$OSSource{$product}{$source}{type} = $type;
+				}
+			}
 		}
 	}
 	close FD;
@@ -167,28 +182,36 @@ sub setTemplate {
 	my $dest = $this->{dest};
 	my $name = $this->{name};
 	my $kiwi = $this->{kiwi};
+	my %osc  = %{$this->{source}};
 	#==========================================
 	# get operating system version
 	#------------------------------------------
-	my $spec = $this -> getOperatingSystemVersion();
-	my @pacs = $this -> getPackageList();
-	my $boot = $this -> {source} -> {$spec} -> {boot};
-	my $src  = $this -> {source} -> {$spec} -> {src};
-	if (! defined $spec) {
+	my $product = $this -> getOperatingSystemVersion();
+	if (! defined $product) {
 		$kiwi -> error  ("Couldn't find system version information");
 		$kiwi -> failed ();
 		return undef;
 	}
+	if (! defined $osc{$product}) {
+		$kiwi -> error  ("Couldn't find OS version: $product in migrate list");
+		$kiwi -> failed ();
+		return undef;
+	}
+	#==========================================
+	# find boot attribute value in OSSource
+	#------------------------------------------
+	my $boot;
+	foreach my $source (keys %{$osc{$product}} ) {
+		if ($osc{$product}{$source}{boot} ne "none") {
+			$boot = $osc{$product}{$source}{boot};
+		}
+	}
+	my @pacs = $this -> getPackageList ($product);
+	my $pats = $this -> {patterns};
 	if (! @pacs) {
 		$kiwi -> error  ("Couldn't find installed packages");
 		$kiwi -> failed ();
 		return undef;
-	}
-	if (! defined $boot) {
-		$kiwi -> warning ("Couldn't find OS version: $spec in source list");
-		$kiwi -> skipped ();
-		$boot = "***UNKNOWN-PLEASE-SELECT***";
-		$src  = "***UNKNOWN-PLEASE-SELECT***";
 	}
 	#==========================================
 	# create root directory
@@ -207,7 +230,7 @@ sub setTemplate {
 	print FD "\t".'<description type="system">'."\n";
 	print FD "\t\t".'<author>***AUTHOR***</author>'."\n";
 	print FD "\t\t".'<contact>***MAIL***</contact>'."\n";
-	print FD "\t\t".'<specification>'.$spec.'</specification>'."\n";
+	print FD "\t\t".'<specification>'.$product.'</specification>'."\n";
 	print FD "\t".'</description>'."\n";
 	#==========================================
 	# <preferences>
@@ -228,13 +251,21 @@ sub setTemplate {
 	#==========================================
 	# <repository>
 	#------------------------------------------
-	print FD "\t".'<repository type="yast2">'."\n";
-	print FD "\t\t".'<source path="'.$src.'"/>'."\n";
-	print FD "\t".'</repository>'."\n";
+	foreach my $source (keys %{$osc{$product}} ) {
+		my $type = $osc{$product}{$source}{type};
+		print FD "\t".'<repository type="'.$type.'">'."\n";
+		print FD "\t\t".'<source path="'.$source.'"/>'."\n";
+		print FD "\t".'</repository>'."\n";
+	}
 	#==========================================
 	# <packages>
 	#------------------------------------------
 	print FD "\t".'<packages type="image">'."\n";
+	if (defined $pats) {
+		foreach my $pattern (@{$pats}) {
+			print FD "\t\t".'<opensusePattern name="'.$pattern.'"/>'."\n";
+		}
+	}
 	foreach my $pac (@pacs) {
 		print FD "\t\t".'<package name="'.$pac.'"/>'."\n";
 	}
@@ -331,7 +362,7 @@ sub setServiceList {
 	print FD '#!/bin/bash'."\n";
 	print FD 'test -f /.kconfig && . /.kconfig'."\n";
 	print FD 'test -f /.profile && . /.profile'."\n";
-	print FD 'echo "Configure image: [$name]..."'."\n";
+	print FD 'echo "Configure image: [$kiwi_iname]..."'."\n";
 	foreach my $service (@result) {
 		print FD 'suseInsertService '.$service."\n";
 	}
@@ -348,12 +379,98 @@ sub setServiceList {
 #------------------------------------------
 sub getPackageList {
 	# ...
-	# Find all packages installed on the system. This method
-	# assume an RPM based system to build the package list for
-	# the later image
+	# Find all packages installed on the system which doesn't
+	# belong to any of the installed patterns. This method
+	# requires a SUSE system based on zypper and rpm to work
+	# correctly
 	# ---
-	my $this = shift;
+	my $this    = shift;
+	my $product = shift;
+	my $kiwi    = $this->{kiwi};
+	my %osc     = %{$this->{source}};
+	my @urllist = ();
+	#==========================================
+	# find all rpm's installed
+	#------------------------------------------
+	undef $this->{patterns};
 	my @list = qxx ("rpm -qa --qf '%{NAME}\n'"); chomp @list;
+	#==========================================
+	# create URL list to lookup solvables
+	#------------------------------------------
+	foreach my $source (keys %{$osc{$product}}) {
+		push (@urllist,$source);
+	}
+	#==========================================
+	# find all patterns and packs of patterns 
+	#------------------------------------------
+	if (@urllist) {
+		my @patlist = qxx ("zypper patterns|grep ^i|cut -f2 -d'|'| tr -d ' '");
+		my $code = $? >> 8;
+		if ($code != 0) {
+			# /.../
+			# no installed patterns found, use at least the base
+			# pattern for the migration
+			# ----
+			push (@patlist,"base");
+		}
+		chomp @patlist;
+		my $psolve = new KIWISatSolver (
+			$kiwi,\@patlist,\@urllist
+		);
+		my @result = ();
+		if (! defined $psolve) {
+			return sort @list;
+		}
+		# /.../
+		# solve the zypper pattern list into a package list and
+		# create a package list with packages _not_ part of the
+		# pattern list. patterns which does not exist in the base
+		# repository will be ignored.
+		# ----
+		my @packageList = $psolve -> getPackages();
+		foreach my $installed (@list) {
+			my $inpattern = 0;
+			foreach my $p (@packageList) {
+				if ($installed eq $p) {
+					$inpattern = 1; last;
+				}
+			}
+			if (! $inpattern) {
+				push (@result,$installed);
+			}
+		}
+		# /.../
+		# store the pattern names for the later config.xml
+		# ----
+		$this->{patterns} = \@patlist;
+		# /.../
+		# walk through the non pattern based packages and solve
+		# them again. packages which are not part of the base
+		# repository will be ignored. This might be a problem
+		# if the package comes from a non base repository.
+		# The solved list is again checked with the pattern
+		# package list and the result is returned
+		# ----
+		my @rest = ();
+		my $repo = $psolve -> getRepo();
+		my $pool = $psolve -> getPool();
+		my $xsolve = new KIWISatSolver (
+			$kiwi,\@result,\@urllist,"solve-packages",$repo,$pool
+		);
+		@result = $xsolve -> getPackages();
+		foreach my $p (@result) {
+			my $inpattern = 0;
+			foreach my $tobeinstalled (@packageList) {
+				if ($tobeinstalled eq $p) {
+					$inpattern = 1; last;
+				}
+			}
+			if (! $inpattern) {
+				push (@rest,$p);
+			}
+		}
+		return sort @rest;
+	}
 	return sort @list;
 }
 
