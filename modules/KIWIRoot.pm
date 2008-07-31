@@ -635,13 +635,14 @@ sub setup {
 	#----------------------------------------
 	if (-f "$root/linuxrc") {
 		$kiwi -> info ("Setting up linuxrc...");
-		my $data = qxx (" cp $root/linuxrc $root/init 2>&1 ");
+		my $data = qxx ("cp $root/linuxrc $root/init 2>&1");
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
 			$kiwi -> info   ($data);
 			return undef;
 		}
+		qxx ("chmod u+x $root/linuxrc $root/init 2>&1");
 		$kiwi -> done ();
 	}
 	#========================================
