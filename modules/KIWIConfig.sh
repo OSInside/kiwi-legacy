@@ -1029,6 +1029,8 @@ function suseStripKernel {
 			if [ -f vmlinux-$VERSION.gz ];then
 				mv vmlinux-$VERSION.gz vmlinux.gz
 				mv vmlinuz-$VERSION vmlinuz
+			elif [ -f vmlinuz-$VERSION ];then
+				mv vmlinuz-$VERSION vmlinuz
 			else
 				rm -f vmlinux
 				cp vmlinux-$VERSION vmlinux

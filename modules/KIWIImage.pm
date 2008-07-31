@@ -3023,12 +3023,14 @@ sub extractKernel {
 			last SWITCH;
 		};
 	}
-	if ((-f "$imageTree/boot/vmlinux.gz") || (-f "$imageTree/boot/vmlinux")) {
+	if ((-f "$imageTree/boot/vmlinux.gz") ||
+		(-f "$imageTree/boot/vmlinux")    ||
+		(-f "$imageTree/boot/vmlinuz")
+	) {
 		$kiwi -> info ("Extracting kernel...");
 		my $pwd = qxx ("pwd"); chomp $pwd;
-		my $file = "$imageDest/$name.kernel";
-		my $lx = '"^Linux version"';
-		my $sp = '-f3 -d" "';
+		my $shortfile = "$name.kernel";
+		my $file = "$imageDest/$shortfile";
 		if ($file !~ /^\//) {
 			$file = $pwd."/".$file;
 		}
@@ -3042,14 +3044,14 @@ sub extractKernel {
 			return undef;
 		}
 		my $kfile;
-		my $zipped = 1;
 		if (-f "$imageTree/boot/vmlinux.gz") {
 			$kfile = "$imageTree/boot/vmlinux.gz";
 		} elsif (-f "$imageTree/boot/xen.gz") {
 			$kfile = "$imageTree/boot/xen.gz";
 		} elsif (-f "$imageTree/boot/vmlinux") {
 			$kfile = "$imageTree/boot/vmlinux";
-			$zipped= 0;
+		} elsif (-f "$imageTree/boot/vmlinuz") {
+			$kfile = "$imageTree/boot/vmlinuz";
 		} else {
 			$kiwi -> failed ();
 			$kiwi -> info   ("Couldn't find kernel file");
@@ -3057,14 +3059,8 @@ sub extractKernel {
 			return undef;
 		}
 		my $kernel;
-		if ($zipped) {
-			$kernel = qxx ("$main::Gzip -dc $kfile| strings| grep $lx|cut $sp");
-		} else {
-			$kernel = qxx ("cat $kfile| strings| grep $lx| cut $sp");
-		}
-		chomp $kernel;
-		qxx ("rm -f $file.$kernel");
-		qxx ("mv $file $file.$kernel && ln -s $file.$kernel $file ");
+		$kernel = qxx ("/sbin/get_kernel_version $kfile"); chomp $kernel;
+		qxx ("mv -f $file $file.$kernel && ln -s $shortfile.$kernel $file ");
 		if (-f "$imageTree/boot/xen.gz") {
 			$file = "$imageDest/$name.kernel-xen";
 			qxx ("cp $imageTree/boot/xen.gz $file");

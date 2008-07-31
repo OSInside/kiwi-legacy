@@ -2,6 +2,7 @@
 Thu Jul 31 09:36:01 CEST 2008 - ms@suse.de
 
 - v2.64
+- fixed shell exception on /dev/console (bnc #413474)
 - added x bits on /init script (bnc #413610)
 - increased boot timeout for lilo configuration
 - improved migration code, makes use of patterns now and
