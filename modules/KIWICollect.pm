@@ -1540,7 +1540,10 @@ sub createMetadata
   my $status = $? >> 8;
   
   # just to keep it in sync with mach_cd
-  symlink "$this->{m_basesubdir}->{'1'}/suse/setup/descr/packages.cs", "$this->{m_basesubdir}->{'1'}/suse/setup/descr/packages.sk";
+  my $returndir = $ENV{'PWD'};
+  chdir "$this->{m_basesubdir}->{'1'}/".$this->{m_proddata}->getInfo("DESCRDIR");
+  symlink "packages.cs", "packages.sk";
+  chdir $returndir;
 
 
   ## step 3: packages2eula:
