@@ -164,11 +164,7 @@ function systemException {
 	;;
 	"shell")
 		Echo "shellException: providing shell..."
-		if [ ! $ELOG_EXCEPTION = "/dev/console" ];then
-			setctsid $ELOG_EXCEPTION /bin/bash
-		else
-			/bin/bash < $ELOG_EXCEPTION > /dev/console 2>&1
-		fi
+		setctsid $ELOG_EXCEPTION /bin/bash -i
 	;;
 	*)
 		Echo "unknownException..."
@@ -293,10 +289,8 @@ function errorLogStart {
 	else
 		echo "KIWI PreInit Log" >>$ELOG_FILE
 	fi
-	if [ ! $ELOG_CONSOLE = "/dev/console" ];then
-		Echo "Boot-Logging enabled on $ELOG_CONSOLE"
-		setctsid -f $ELOG_CONSOLE /bin/bash -c "tail -f $ELOG_FILE" &
-	fi
+	Echo "Boot-Logging enabled on $ELOG_CONSOLE"
+	setctsid -f $ELOG_CONSOLE /bin/bash -i -c "tail -f $ELOG_FILE" &
 	exec 2>>$ELOG_FILE
 	if [ -f .profile ];then
 		echo "KIWI .profile contents:" 1>&2
@@ -2665,9 +2659,9 @@ function startShell {
 	# /.../
 	# start a debugging shell on ELOG_BOOTSHELL
 	# ----
-	if [ ! $ELOG_BOOTSHELL = "/dev/console" ];then
+	if [ -z "$kiwistderr" ];then
 		Echo "Starting boot shell on $ELOG_BOOTSHELL"
-		setctsid -f $ELOG_BOOTSHELL /bin/bash
+		setctsid -f $ELOG_BOOTSHELL /bin/bash -i
 	fi
 }
 #======================================
@@ -2682,7 +2676,7 @@ function killShell {
 		mount -t proc proc /proc
 		umountProc=1
 	fi
-	if [ ! $ELOG_BOOTSHELL = "/dev/console" ];then
+	if [ -z "$kiwistderr" ];then
 		Echo "Stopping boot shell"
 		fuser -k $ELOG_BOOTSHELL >/dev/null
 	fi
