@@ -111,6 +111,9 @@
 		<file name="drivers/net/via-rhine.ko"/>
 		<file name="drivers/net/via-velocity.ko"/>
 		<file name="drivers/net/yellowfin.ko"/>
+		<file name="atl2.ko"/>
+		<file name="asus_acpi.ko"/>
+		<file name="asus_eee.ko"/>
 		<!-- DRIVERS END DISKLESS -->
 	</drivers>
 	<repository type="yast2" status="replaceable">
@@ -139,6 +142,9 @@
 		<!-- KERNEL AND MODULE PACKAGES START DISKLESS -->
 		<package name="kernel-default"/>
 		<package name="aufs-kmp-default"/>
+		<package name="asus_acpi-kmp-default"/>
+		<package name="asus_eee-kmp-default"/>
+		<package name="atl2-kmp-default"/>
 		<!-- KERNEL AND MODULE PACKAGES END DISKLESS -->
 	</packages>
 	<packages type="image" profiles="default,xen,smp">
@@ -191,6 +197,10 @@
 		<package name="nbd"/>
 		<package name="nfs-client"/>
 		<package name="tar"/>
+		<package name="gfxboot"/>
+		<package name="gfxboot-devel"/>
+		<package name="bootsplash"/>
+		<package name="bootsplash-branding-openSUSE"/>
 		<!-- PACKAGES STOP DISKLESS -->
 	</packages>
 	<packages type="bootstrap">

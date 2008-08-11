@@ -2,6 +2,7 @@
 Mon Aug 11 09:53:52 CEST 2008 - ms@suse.de
 
 - v2.65
+- added diskless drivers and bootsplash support (bnc #415662)
 - removed unused X11 library requirement (bnc #413311)
 - removed unused tools suse-instsource and createLiveCD
   Please refer to the kiwi documentation or the wiki page
