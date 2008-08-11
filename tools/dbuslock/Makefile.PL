@@ -1,8 +1,8 @@
 use ExtUtils::MakeMaker;
 use Env;
 
-$QTLIBS = `pkg-config --libs QtCore QtGui`;
-$QTINC = `pkg-config --cflags QtCore QtGui`;
+$QTLIBS = `pkg-config --libs QtCore`;
+$QTINC = `pkg-config --cflags QtCore`;
 chomp $QTINC;
 $QTINC = $QTINC.'-I/usr/include/Qt';
 $CFLAGS = $ENV{RPM_OPT_FLAGS} ." $QTINC";

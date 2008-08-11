@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Mon Aug 11 09:53:52 CEST 2008 - ms@suse.de
+
+- v2.65
+- removed unused X11 library requirement (bnc #413311)
+- removed unused tools suse-instsource and createLiveCD
+  Please refer to the kiwi documentation or the wiki page
+  for a howto to build an example iso image
+
+-------------------------------------------------------------------
 Thu Jul 31 09:36:01 CEST 2008 - ms@suse.de
 
 - v2.64
