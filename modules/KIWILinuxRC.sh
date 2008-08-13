@@ -2236,6 +2236,12 @@ function includeKernelParameters {
 		export ELOG_CONSOLE=$kiwistderr
 		export ELOG_EXCEPTION=$kiwistderr
 	fi
+	if [ ! -z "$ramdisk_size" ];then
+		local modfile=/etc/modprobe.conf.local
+		if [ -f $modfile ];then
+			sed -i -e s"@rd_size=.*@rd_size=$ramdisk_size@" $modfile
+		fi
+	fi
 }
 #======================================
 # checkServer
