@@ -2,6 +2,9 @@
 Mon Aug 11 09:53:52 CEST 2008 - ms@suse.de
 
 - v2.65
+- code cleanup, introduce partition table functions:
+  getStorageSize and setStoragePartition to encapsulate
+  disk partitioning. This is related to (bnc #413637)
 - allow ramdisk size setup via kernel parameter (bnc #412457)
 - added diskless drivers and bootsplash support (bnc #415662)
 - removed unused X11 library requirement (bnc #413311)

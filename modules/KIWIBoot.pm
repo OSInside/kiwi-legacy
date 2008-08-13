@@ -417,6 +417,7 @@ sub createBootStructure {
 # getRemovableUSBStorageDevices
 #------------------------------------------
 sub getRemovableUSBStorageDevices {
+	my $this    = shift;
 	my %devices = ();
 	my @storage = glob ("/sys/bus/usb/drivers/usb-storage/*");
 	foreach my $device (@storage) {
@@ -449,9 +450,8 @@ sub getRemovableUSBStorageDevices {
 				}
 				$isremovable = <FD>; close FD;
 				if ($isremovable == 1) {
-					my $status = qxx ("/sbin/sfdisk -s $description 2>&1");
-					my $result = $? >> 8;
-					if ($result == 0) {
+					my $result = $this -> getStorageSize ($description);
+					if ($result > 0) {
 						$devices{$description} = $serial;
 					}
 				}
@@ -477,6 +477,7 @@ sub setupBootStick {
 	my $zipped    = $this->{zipped};
 	my $isxen     = $this->{isxen};
 	my $xengz     = $this->{xengz};
+	my @commands  = ();
 	my $imgtype   = "usb";
 	my $haveSplit = 0;
 	my $haveTree  = 0;
@@ -581,7 +582,7 @@ sub setupBootStick {
 	#==========================================
 	# Find USB stick devices
 	#------------------------------------------
-	my %storage = getRemovableUSBStorageDevices();
+	my %storage = $this -> getRemovableUSBStorageDevices();
 	if (! %storage) {
 		$kiwi -> error  ("Couldn't find any removable USB storage devices");
 		$kiwi -> failed ();
@@ -674,50 +675,34 @@ sub setupBootStick {
 	# Create new partition table on stick
 	#------------------------------------------
 	$kiwi -> info ("Creating partition table on: $stick");
-	my $pinfo = "$tmpdir/sfdisk.input";
-	if (! open (FD,">$pinfo")) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't create temporary partition data: $!");
-		$kiwi -> failed ();
-		$this -> cleanDbus();
-		$this -> cleanTmp ();
-		return undef;
-	}
-	#==========================================
-	# Prepare sfdisk input file
-	#------------------------------------------
 	while (1) {
 		if (defined $system) {
 			if (($syszip) || ($haveSplit)) {
-				print FD ",$syszip,L\n";   # xda1  ro
-				print FD ",,L,*\n";        # xda2  rw
-				$kiwi -> loginfo (
-					"USB sfdisk input: [,$syszip,L][,,L,*]"
+				@commands = (
+					"n","p","1",".","+".$syszip."M",
+					"n","p","2",".",".",
+					"a","2","w","q"
 				);
 			} else {
-				print FD ",,L,*\n";        # xda1  rw
-				$kiwi -> loginfo (
-					"USB sfdisk input: [,,L,*]"
+				@commands = (
+					"n","p","1",".",".",
+					"a","1","w","q"
 				);
 			}
 		} else {
-			print FD ",,L,*\n";            # xda1  rw
-			$kiwi -> loginfo ("USB sfdisk input: [,,L,*]");
+			@commands = (
+				"n","p","1",".",".",
+				"a","1","w","q"
+			);
 		}
-		close FD;
-		$status = qxx ( "dd if=/dev/zero of=$stick bs=512 count=1 2>&1" );	
-		$result = $? >> 8;
-		$status = qxx ( "/sbin/sfdisk -uM --force $stick < $pinfo 2>&1" );
-		$result = $? >> 8;
-		if ($result != 0) {
+		if (! $this -> setStoragePartition ($stick,\@commands)) {
 			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't create partition table: $!");
+			$kiwi -> error  ("Couldn't create partition table");
 			$kiwi -> failed ();
 			$this -> cleanDbus();
 			$this -> cleanTmp ();
 			return undef;
 		}
-		$kiwi -> loginfo ("USB Partitions: $status");
 		for (my $i=1;$i<=2;$i++) {
 			qxx ( "umount $stick$i 2>&1" );
 		}
@@ -732,10 +717,6 @@ sub setupBootStick {
 			return undef;
 		}
 		#==========================================
-		# Clean partition info file
-		#------------------------------------------
-		unlink $pinfo;
-		#==========================================
 		# Wait for new partition table to settle
 		#------------------------------------------
 		sleep (1);
@@ -744,7 +725,7 @@ sub setupBootStick {
 		#------------------------------------------
 		if ((defined $system) && (($syszip) || ($haveSplit))) {
 			my $sizeOK = 1;
-			my $systemPSize = qxx ("/sbin/sfdisk -s ".$stick."1");
+			my $systemPSize = $this -> getStorageSize ($stick."1");
 			my $systemISize = -s $system; $systemISize /= 1024;
 			chomp $systemPSize;
 			#print "_______A $systemPSize : $systemISize\n";
@@ -1225,6 +1206,7 @@ sub setupInstallStick {
 	my $isxen     = $this->{isxen};
 	my $xengz     = $this->{xengz};
 	my $diskname  = $system.".install.raw";
+	my @commands  = ();
 	my $imgtype   = "oem";
 	my $gotsys    = 1;
 	my $status;
@@ -1400,14 +1382,6 @@ sub setupInstallStick {
 	# create virtual disk partitions
 	#------------------------------------------
 	$kiwi -> info ("Create partition table for virtual disk");
-	if (! open (FD,"|/sbin/fdisk $this->{loop} &>/dev/null")) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Failed creating virtual partition");
-		$kiwi -> failed ();
-		$this -> cleanLoop ();
-		return undef;
-	}
-	my @commands = ();
 	if ($gotsys) {
 		@commands = (
 			"n","p","1",".","+30M",
@@ -1418,14 +1392,13 @@ sub setupInstallStick {
 			"n","p","1",".",".","w","q"
 		);
 	}
-	foreach my $cmd (@commands) {
-		if ($cmd eq ".") {
-			print FD "\n";
-		} else {
-			print FD "$cmd\n";
-		}
+	if (! $this -> setStoragePartition ($this->{loop},\@commands)) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't create partition table");
+		$kiwi -> failed ();
+		$this -> cleanLoop();
+		return undef;
 	}
-	close FD;
 	$kiwi -> done();
 	#==========================================
 	# setup device mapper
@@ -1556,6 +1529,7 @@ sub setupBootDisk {
 	my $isxen     = $this->{isxen};
 	my $xengz     = $this->{xengz};
 	my $diskname  = $system.".raw";
+	my @commands  = ();
 	my $imgtype   = "vmx";
 	my $haveTree  = 0;
 	my $haveSplit = 0;
@@ -1732,14 +1706,6 @@ sub setupBootDisk {
 		#==========================================
 		# create virtual disk partition
 		#------------------------------------------
-		if (! open (FD,"|/sbin/fdisk $this->{loop} &>/dev/null")) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Failed creating virtual partition");
-			$kiwi -> failed ();
-			$this -> cleanLoop ();
-			return undef;
-		}
-		my @commands;
 		if (($syszip) || ($haveSplit)) {
 			# xda1 ro / xda2 rw
 			@commands = (
@@ -1750,14 +1716,13 @@ sub setupBootDisk {
 			# xda1 rw
 			@commands = ( "n","p","1",".",".","w","q");
 		}
-		foreach my $cmd (@commands) {
-			if ($cmd eq ".") {
-				print FD "\n";
-			} else {
-				print FD "$cmd\n";
-			}
+		if (! $this -> setStoragePartition ($this->{loop},\@commands)) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create partition table");
+			$kiwi -> failed ();
+			$this -> cleanLoop();
+			return undef;
 		}
-		close FD;
 		#==========================================
 		# setup device mapper
 		#------------------------------------------
@@ -1777,7 +1742,7 @@ sub setupBootDisk {
 		#------------------------------------------
 		if ($syszip > 0) {
 			my $sizeOK = 1;
-			my $systemPSize = qxx ("/sbin/sfdisk -s /dev/mapper".$dmap."p1");
+			my $systemPSize = $this->getStorageSize ("/dev/mapper".$dmap."p1");
 			my $systemISize = -s $system; $systemISize /= 1024;
 			chomp $systemPSize;
 			#print "_______A $systemPSize : $systemISize\n";
@@ -2958,6 +2923,71 @@ sub bindLoopDevice {
 	}
 	$kiwi -> loginfo ("Failed binding file to loop: $status");
 	return undef;
+}
+
+#==========================================
+# setStoragePartition
+#------------------------------------------
+sub setStoragePartition {
+	# ...
+	# creates the partition table on the given device
+	# according to the command argument list
+	# ---
+	my $this     = shift;
+	my $device   = shift;
+	my $cmdref   = shift;
+	my $kiwi     = $this->{kiwi};
+	my $tmpdir   = $this->{tmpdir};
+	my @commands = @{$cmdref};
+	$kiwi -> loginfo (
+		"FDISK input: $device [@commands]"
+	);
+	if (! open (FD,"|/sbin/fdisk $device &> $tmpdir/fdisk.log")) {
+		return undef;
+	}
+	foreach my $cmd (@commands) {
+		if ($cmd eq ".") {
+			print FD "\n";
+		} else {
+			print FD "$cmd\n";
+		}
+	}
+	close FD;
+	my $result = $? >> 8;
+	my $flog;
+	if (open (FD,"$tmpdir/fdisk.log")) {
+		my @flog = <FD>; close FD;
+		$flog = join ("\n",@flog);
+		$kiwi -> loginfo ("FDISK: $flog");
+	}
+	if ($result != 0) {
+		# /.../
+		# fdisk will complain about not being able to re-read
+		# the partition table and will exit != 0 but the table
+		# was written correctly so we will return success here
+		# ---
+		return $this;
+	}
+	return $this;
+}
+
+#==========================================
+# getStorageSize
+#------------------------------------------
+sub getStorageSize {
+	# ...
+	# return the size of the given disk or disk
+	# partition in Kb. If the call fails the function
+	# returns 0
+	# --- 
+	my $this = shift;
+	my $pdev = shift;
+	my $status = qxx ("/sbin/sfdisk -s $pdev 2>&1");
+	my $result = $? >> 8;
+	if ($result == 0) {
+		return $status;
+	}
+	return 0;
 }
 
 1; 
