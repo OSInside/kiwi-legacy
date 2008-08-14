@@ -8,6 +8,7 @@ Mon Aug 11 09:53:52 CEST 2008 - ms@suse.de
 - allow ramdisk size setup via kernel parameter (bnc #412457)
 - added diskless drivers and bootsplash support (bnc #415662)
 - removed unused X11 library requirement (bnc #413311)
+- added migration chapter to the cookbook (bnc #412215)
 - removed unused tools suse-instsource and createLiveCD
   Please refer to the kiwi documentation or the wiki page
   for a howto to build an example iso image

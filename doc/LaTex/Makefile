@@ -18,7 +18,8 @@ TEX=kiwi.tex           \
 	vmx.tex            \
 	workflow.tex       \
 	appliance.tex      \
-	xen.tex
+	xen.tex            \
+	migrate.tex
 
 all: revision ps
 
