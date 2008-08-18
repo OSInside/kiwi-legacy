@@ -2026,10 +2026,10 @@ sub setupBootDisk {
 			my $fname = $diskname;
 			$fname =~ s/\.raw$/\.$format/;
 			if ($format eq "vmdk") {
-				%vmwc   = $xml  -> getPackageAttributes ("vmware");
+				%vmwc = $xml -> getVMwareConfig();
 			}
 			my $convert = "convert -f raw $this->{loop} -O $format";
-			if (($vmwc{disk}) && ($vmwc{disk} =~ /^scsi/)) {
+			if (($vmwc{vmware_disktype}) && ($vmwc{vmware_disktype}=~/^scsi/)) {
 				$status = qxx ("qemu-img $convert -s $fname 2>&1");
 			} else {
 				$status = qxx ("qemu-img $convert $fname 2>&1");
