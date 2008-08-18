@@ -634,13 +634,6 @@ sub main {
 			undef $main::Upgrade;
 		}
 		#==========================================
-		# Hide package manager cache
-		#------------------------------------------
-		my $manager = new KIWIManager (
-			$kiwi,$xml,$xml,$Create,$xml -> getPackageManager()
-		);
-		$manager -> hidePackageManagerCache();
-		#==========================================
 		# Create recovery archive if specified
 		#------------------------------------------
 		if ($type eq "oem") {
@@ -726,13 +719,11 @@ sub main {
 			if (defined $BaseRoot) {
 				$overlay -> resetOverlay();
 			}
-			$manager -> restorePackageManagerCache();
 			my $code = kiwiExit (1); return $code;
 		}
 		if (defined $BaseRoot) {
 			$overlay -> resetOverlay();
 		}
-		$manager -> restorePackageManagerCache();
 		if ($ok) {
 			my $code = kiwiExit (0); return $code;
 		} else {

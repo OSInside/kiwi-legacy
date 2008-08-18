@@ -275,6 +275,9 @@ sub init {
 	qxx ("mknod -m 640 $root/dev/loop3 b 7 3");
 	qxx ("mkdir -p $root/etc/sysconfig");
 	qxx ("mkdir -p $root/var/log/YaST2");
+	# for smart we need the dpkg default file
+	qxx ("mkdir -p $root/var/lib/dpkg");
+	qxx ("touch $root/var/lib/dpkg/status");
 	# for building in suse autobuild we need the following file
 	qxx ("touch $root/.buildenv");
 	# need mtab at least empty for mount calls
@@ -392,6 +395,9 @@ sub upgrade {
 	#==========================================
 	# Upgrade system
 	#------------------------------------------
+	if (! $manager -> setupSignatureCheck()) {
+		return undef;
+	}
 	if (! $manager -> setupInstallationSource()) {
 		$this -> cleanupResolvConf();
 		return undef;
@@ -807,7 +813,8 @@ sub setupMount {
 	my $kiwi   = $this->{kiwi};
 	my $root   = $this->{root};
 	my $baseSystem = $this->{baseSystem};
-	my $prefix     = $root."/".$baseSystem;
+	my $prefix = $root."/".$baseSystem;
+	my $cache  = "/var/cache/kiwi";
 	my @mountList;
 	if (defined $this->{mountList}) {
 		@mountList = @{$this->{mountList}};
@@ -815,6 +822,9 @@ sub setupMount {
 		@mountList = ();
 	}
 	$kiwi -> info ("Mounting required file systems");
+	if (! -d $cache) {
+		qxx ("mkdir -p $cache");
+	}
 	if (! -d $prefix) {
 	if (! mkdir $prefix) {
 		$kiwi -> failed ();
@@ -845,6 +855,11 @@ sub setupMount {
 		push (@mountList,"$root/sys");
 		push (@mountList,"$root/dev/pts");
 	}
+	if (! -d "$root/$cache") {
+		qxx ("mkdir -p $root/$cache 2>&1");
+	}
+	qxx ("mount --bind $cache $root/$cache 2>&1");
+	push (@mountList,"$root/$cache");
 	$kiwi -> done();
 	foreach my $chl (keys %{$this->{sourceChannel}{private}}) {
 		my @opts = @{$this->{sourceChannel}{private}{$chl}};
@@ -855,16 +870,12 @@ sub setupMount {
 			next;
 		}
 		$kiwi -> info ("Mounting local channel: $chl");
-		my $cache = "/var/cache/kiwi";
 		my $roopt = "dirs=$cache=rw:$path=ro,ro";
 		my $auopt = "dirs=$path=ro";
 		my $mount = $prefix.$path;
 		push (@mountList,$mount);
-		if (! -d $cache) {
-			qxx (" mkdir -p $cache ");
-		}
 		qxx ("mkdir -p \"$mount\"");
-		my $data = qxx (" touch $path/bob 2>&1 ");
+		my $data = qxx ("touch $path/bob 2>&1");
 		my $code = $? >> 8;
 		if ($code == 0) {
 			#==========================================

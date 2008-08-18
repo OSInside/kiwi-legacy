@@ -87,11 +87,9 @@ sub new {
 	if (! defined $manager) {
 		$manager = "smart";
 	}
-	my $dataDir = "$root/var/lib/smart";
-	if ($manager eq "smart") {
-		if (! -d $dataDir) {
-			qxx ("mkdir -p $dataDir");
-		}
+	my $dataDir = "/var/cache/kiwi/$manager";
+	if (! -d $dataDir) {
+		qxx ("mkdir -p $dataDir");
 	}
 	my @channelList = ();
 	#==========================================
@@ -110,12 +108,16 @@ sub new {
 	$this->{screenLogs}  = $kiwi -> getRootLog();
 	$this->{dataDir}     = $dataDir;
 	$this->{smart}       = [
-		"smart","--data-dir=$dataDir",
-		"-o rpm-root=$root","-o deb-root=$root",
-		"-o remove-packages=false"
+		"smart","--data-dir=$dataDir","-o remove-packages=false"
+	];
+	$this->{smartroot}   = [
+		"-o rpm-root=$root",
+		"-o deb-root=$root",
 	];
 	$this->{zypper}      = [
-		"zypper","--non-interactive","--no-gpg-checks"
+		"zypper","--non-interactive","--no-gpg-checks",
+		"--reposd-dir $dataDir","--cache-dir $dataDir",
+		"--raw-cache-dir $dataDir"
 	];
 	$this->{ensconce}    = [
 		"ensconce", "-r /"
@@ -329,7 +331,7 @@ sub setupSignatureCheck {
 				$this -> freeLock();
 			} else {
 				$kiwi -> info ("Setting RPM signature check to: $imgCheckSig");
-				$data =qxx ("chroot \"$root\" smart config --set $option 2>&1");
+				$data=qxx ("chroot \"$root\" @smart config --set $option 2>&1");
 			}
 			$code = $? >> 8;
 			if ($code != 0) {
@@ -388,7 +390,7 @@ sub resetSignatureCheck {
 				$this -> freeLock();
 			} else {
 				$kiwi -> info ("Reset RPM signature check to: $curCheckSig");
-				$data =qxx ("chroot \"$root\" smart config --set $option 2>&1");
+				$data=qxx ("chroot \"$root\" @smart config --set $option 2>&1");
 			}
 			$code = $? >> 8;
 			if ($code != 0) {
@@ -430,6 +432,8 @@ sub setupInstallationSource {
 	my $manager= $this->{manager};
 	my @zypper = @{$this->{zypper}};
 	my @smart  = @{$this->{smart}};
+	my @rootdir= @{$this->{smartroot}};
+	my $dataDir= $this->{dataDir};
 	my $lock   = $this->{lock};
 	my $data;
 	my $code;
@@ -442,11 +446,12 @@ sub setupInstallationSource {
 	# smart
 	#------------------------------------------
 	if ($manager eq "smart") {
-		my $stype = "private";
-		my $cmds  = "smart channel --add";
+		my $stype  = "private";
+		my $cmds   = "@smart channel --add";
+		qxx ("rm -f $dataDir/channels/*");
 		if (! $chroot) {
 			$stype = "public";
-			$cmds  = "@smart channel --add";
+			$cmds  = "@smart @rootdir channel --add";
 		}
 		foreach my $chl (keys %{$source{$stype}}) {
 			my @opts = @{$source{$stype}{$chl}};
@@ -477,6 +482,7 @@ sub setupInstallationSource {
 	#------------------------------------------
 	if ($manager eq "zypper") {
 		my $stype = "private";
+		qxx ("rm -f $dataDir/*.repo");
 		if (! $chroot) {
 			$stype = "public";
 		}
@@ -558,6 +564,7 @@ sub resetInstallationSource {
 	my $root   = $this->{root};
 	my @zypper = @{$this->{zypper}};
 	my @smart  = @{$this->{smart}};
+	my @rootdir= @{$this->{smartroot}};
 	my $lock   = $this->{lock};
 	my @channelList = @{$this->{channelList}};
 	my $data;
@@ -566,10 +573,10 @@ sub resetInstallationSource {
 	# smart
 	#------------------------------------------
 	if ($manager eq "smart") {
-		my @list = @channelList;
-		my $cmds = "smart channel --remove";
+		my @list   = @channelList;
+		my $cmds   = "@smart channel --remove";
 		if (! $chroot) {
-			$cmds = "@smart channel --remove";
+			$cmds="@smart @rootdir channel --remove";
 		}
 		if (! $chroot) {
 			$this -> checkExclusiveLock();
@@ -719,6 +726,7 @@ sub installPackages {
 	my $kiwi = $this->{kiwi};
 	my $root = $this->{root};
 	my $manager = $this->{manager};
+	my @smart   = @{$this->{smart}};
 	my @zypper  = @{$this->{zypper}};
 	my @ensconce = @{$this->{ensconce}};
 	my $screenCall = $this->{screenCall};
@@ -747,10 +755,10 @@ sub installPackages {
 		print $fd "function clean { kill \$SPID;";
 		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 		print $fd "trap clean INT TERM\n";
-		print $fd "chroot $root smart update\n";
-		print $fd "chroot $root smart channel --show &\n";
+		print $fd "chroot $root @smart update\n";
+		print $fd "chroot $root @smart channel --show &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
-		print $fd "test \$? = 0 && chroot $root smart install -y ";
+		print $fd "test \$? = 0 && chroot $root @smart install -y ";
 		print $fd "@addonPackages || false &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
 		print $fd "echo \$? > $screenCall.exit\n";
@@ -809,6 +817,7 @@ sub removePackages {
 	my $kiwi = $this->{kiwi};
 	my $root = $this->{root};
 	my $manager = $this->{manager};
+	my @smart   = @{$this->{smart}};
 	my @zypper  = @{$this->{zypper}};
 	my @ensconce = @{$this->{ensconce}};
 	my $screenCall = $this->{screenCall};
@@ -837,10 +846,10 @@ sub removePackages {
 		print $fd "function clean { kill \$SPID;";
 		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 		print $fd "trap clean INT TERM\n";
-		print $fd "chroot $root smart update\n";
-		print $fd "chroot $root smart channel --show &\n";
+		print $fd "chroot $root @smart update\n";
+		print $fd "chroot $root @smart channel --show &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
-		print $fd "test \$? = 0 && chroot $root smart remove -y ";
+		print $fd "test \$? = 0 && chroot $root @smart remove -y ";
 		print $fd "@removePackages || false &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
 		print $fd "echo \$? > $screenCall.exit\n";
@@ -898,7 +907,9 @@ sub setupUpgrade {
 	my $addPacks = shift;
 	my $kiwi = $this->{kiwi};
 	my $root = $this->{root};
+	my $xml  = $this->{xml};
 	my $manager = $this->{manager};
+	my @smart   = @{$this->{smart}};
 	my @zypper  = @{$this->{zypper}};
 	my @ensconce = @{$this->{ensconce}};
 	my $screenCall = $this->{screenCall};
@@ -913,6 +924,14 @@ sub setupUpgrade {
 	# smart
 	#------------------------------------------
 	if ($manager eq "smart") {
+		my @opts = (
+			"--log-level=error",
+			"-y"
+		);
+		my $force = $xml -> getRPMForce();
+		if (defined $force) {
+			push (@opts,"-o rpm-force=yes");
+		}
 		#==========================================
 		# Create screen call file
 		#------------------------------------------
@@ -920,21 +939,21 @@ sub setupUpgrade {
 		print $fd "function clean { kill \$SPID;";
 		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 		print $fd "trap clean INT TERM\n";
-		print $fd "chroot $root smart update\n";
+		print $fd "chroot $root @smart update\n";
 		if (defined $addPacks) {
 			my @addonPackages = @{$addPacks};
-			print $fd "chroot $root smart channel --show &\n";
+			print $fd "chroot $root @smart channel --show &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
-			print $fd "test \$? = 0 && chroot $root smart upgrade -y ";
+			print $fd "test \$? = 0 && chroot $root @smart upgrade @opts ";
 			print $fd "|| false &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
-			print $fd "test \$? = 0 && chroot $root smart install -y ";
+			print $fd "test \$? = 0 && chroot $root @smart install @opts ";
 			print $fd "@addonPackages || false &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
 		} else {
-			print $fd "chroot $root smart channel --show &\n";
+			print $fd "chroot $root @smart channel --show &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
-			print $fd "test \$? = 0 && chroot $root smart upgrade -y &\n";
+			print $fd "test \$? = 0 && chroot $root @smart upgrade @opts &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
 		}
 		print $fd "echo \$? > $screenCall.exit\n";
@@ -1069,6 +1088,7 @@ sub setupRootSystem {
 	my $manager= $this->{manager};
 	my @zypper = @{$this->{zypper}};
 	my @smart  = @{$this->{smart}};
+	my @rootdir= @{$this->{smartroot}};
 	my @ensconce = @{$this->{ensconce}};
 	my $lock   = $this->{lock};
 	my @channelList = @{$this->{channelList}};
@@ -1106,32 +1126,19 @@ sub setupRootSystem {
 			print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 			print $fd "trap clean INT TERM\n";
 			print $fd "touch $lock\n";
-			print $fd "@smart channel --show &\n";
+			print $fd "@smart @rootdir channel --show &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
-			print $fd "test \$? = 0 && @smart update @channelList || false &\n";
+			print $fd "test \$? = 0 && @smart @rootdir update ";
+			print $fd "@channelList || false &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
-			print $fd "test \$? = 0 && @smart install @packs @installOpts &\n";
+			print $fd "test \$? = 0 && @smart @rootdir install ";
+			print $fd "@packs @installOpts &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
 			print $fd "echo \$? > $screenCall.exit\n";
 			print $fd "rm -f $root/etc/smart/channels/*\n";
 			print $fd "rm -f $lock\n";
 		} else {
-			$kiwi -> info ("Checking for already installed packages...");
-			my $querypack = "smart query '*' --installed --hide-version";
-			my @installed = qxx (" chroot \"$root\" $querypack 2>/dev/null");
-			chomp ( @installed );
-			my @install   = ();
-			foreach my $need (@packs) {
-				my $found = 0;
-				foreach my $have (@installed) {
-					if ($have eq $need) {
-						$found = 1; last;
-					}
-				}
-				if (! $found) {
-					push @install,$need;
-				}
-			}
+			my @install = @packs;
 			my @installOpts = (
 				"--explain",
 				"--log-level=error",
@@ -1141,7 +1148,6 @@ sub setupRootSystem {
 			if (defined $force) {
 				push (@installOpts,"-o rpm-force=yes");
 			}
-			$kiwi -> done();
 			#==========================================
 			# Create screen call file
 			#------------------------------------------
@@ -1149,11 +1155,9 @@ sub setupRootSystem {
 			print $fd "function clean { kill \$SPID;";
 			print $fd "echo 1 > $screenCall.exit;exit 1; }\n";
 			print $fd "trap clean INT TERM\n";
-			print $fd "chroot $root smart channel --show &\n";
+			print $fd "chroot $root @smart channel --show &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
-			print $fd "test \$? = 0 && chroot $root smart update || false &\n";
-			print $fd "SPID=\$!;wait \$SPID\n";
-			print $fd "test \$? = 0 && chroot $root smart install @install ";
+			print $fd "chroot $root @smart install @install ";
 			print $fd "@installOpts &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
 			print $fd "echo \$? > $screenCall.exit\n";
@@ -1215,10 +1219,6 @@ sub setupRootSystem {
 			print $fd "echo \$? > $screenCall.exit\n";
 			print $fd "rm -f $lock\n";
 		} else {
-			$kiwi -> info ("Checking for already Installed image packages...");
-			my $querypack = "rpm -qa --qf %'{NAME}\\n'";
-			my @installed = qxx ("chroot \"$root\" $querypack 2>/dev/null");
-			chomp ( @installed );
 			my @install   = ();
 			my @newpatts  = ();
 			foreach my $need (@packs) {
@@ -1226,20 +1226,11 @@ sub setupRootSystem {
 					push @newpatts,$1;
 					next;
 				}
-				my $found = 0;
-				foreach my $have (@installed) {
-					if ($have eq $need) {
-						$found = 1; last;
-					}
-				}
-				if (! $found) {
-					push @install,$need;
-				}
+				push @install,$need;
 			}
 			my @installOpts = (
 				"--auto-agree-with-licenses"
 			);
-			$kiwi -> done();
 			#==========================================
 			# Create screen call file
 			#------------------------------------------
@@ -1287,73 +1278,6 @@ sub setupRootSystem {
 }
 
 #==========================================
-# hidePackageManagerCache
-#------------------------------------------
-sub hidePackageManagerCache {
-	my $this = shift;
-	my $root = $this->{root};
-	my $manager = $this->{manager};
-	my $cache;
-	#==========================================
-	# smart
-	#------------------------------------------
-	if ($manager eq "smart") {	
-		$cache = $root."/var/lib/smart/packages";
-		if (-d $cache) {
-			if (-d "$root.cache") {
-				qxx ("rm -rf $root.cache");
-			}
-			qxx ("mv $cache $root.cache");
-		}
-	}
-	#==========================================
-	# zypper
-	#------------------------------------------
-	if ($manager eq "zypper") {
-		return $this;
-	}
-	#==========================================
-	# ensconce
-	#------------------------------------------
-	if ($manager eq "ensconce") {
-		return $this;
-	}
-}
-
-#==========================================
-# restorePackageManagerCache 
-#------------------------------------------
-sub restorePackageManagerCache {
-	my $this = shift;
-	my $root = $this->{root};
-	my $manager = $this->{manager};
-	my $cache;
-	#==========================================
-	# smart
-	#------------------------------------------
-	if ($manager eq "smart") {
-		$cache = $root.".cache";
-		if ((-d $cache) && (-d "$root/var/lib/smart")) {
-			qxx ("mv $cache \"$root/var/lib/smart/packages\" 2>&1");
-		} else {
-			qxx ("rm -rf $cache");
-		}
-	}
-	#==========================================
-	# zypper
-	#------------------------------------------
-	if ($manager eq "zypper") {
-		return $this;
-	}
-	#==========================================
-	# ensconce
-	#------------------------------------------
-	if ($manager eq "ensconce") {
-		return $this;
-	}
-}
-
-#==========================================
 # resetSource
 #------------------------------------------
 sub resetSource {
@@ -1380,7 +1304,7 @@ sub resetSource {
 	if ($manager eq "smart") {
 		foreach my $channel (keys %{$source{public}}) {
 			$kiwi -> info ("Removing smart channel: $channel\n");
-			qxx ("smart --data-dir=$dataDir channel --remove $channel -y 2>&1");
+			qxx ("@smart channel --remove $channel -y 2>&1");
 		}
 	}
 	#==========================================
@@ -1418,6 +1342,7 @@ sub setupPackageInfo {
 	my $manager= $this->{manager};
 	my @zypper = @{$this->{zypper}};
 	my @smart  = @{$this->{smart}};
+	my @rootdir= @{$this->{smartroot}};
 	my $lock   = $this->{lock};
 	my $data;
 	my $code;
@@ -1429,13 +1354,13 @@ sub setupPackageInfo {
 			$this -> checkExclusiveLock();
 			$kiwi -> info ("Checking for package: $pack");
 			$this -> setLock();
-			$data = qxx ("@smart query --installed $pack 2>/dev/null");
+			$data = qxx ("@smart @rootdir query --installed $pack 2>/dev/null");
 			$code = $? >> 8;
 			$this -> freeLock();
 		} else {
 			$kiwi -> info ("Checking for package: $pack");
 			$data = qxx (
-				"chroot \"$root\" smart query --installed $pack 2>/dev/null"
+				"chroot \"$root\" @smart query --installed $pack 2>/dev/null"
 			);
 			$code = $? >> 8;
 		}

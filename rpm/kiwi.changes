@@ -3,6 +3,13 @@ Mon Aug 18 10:29:55 CEST 2008 - ms@suse.de
 
 - v2.66
 - fixed adapter type detection in KIWIBoot (bnc #417461)
+- fixed use of package manager cache. kiwi uses a global cache
+  for building now. This is below /var/cache/kiwi/<manager>.
+  The package manager data is temporarly bind mounted into the
+  image root system for any package manager operation.
+  This allows a faster processing within the second stage of
+  the image preparation and also alows re-use of already
+  downloaded remote packages (bnc #417457)
 
 -------------------------------------------------------------------
 Mon Aug 11 09:53:52 CEST 2008 - ms@suse.de
