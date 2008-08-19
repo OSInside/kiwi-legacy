@@ -733,8 +733,9 @@ sub installPackages {
 		print $fd "function clean { kill \$SPID;";
 		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 		print $fd "trap clean INT TERM\n";
-		print $fd "chroot $root @smart update\n";
-		print $fd "chroot $root @smart channel --show &\n";
+		print $fd "chroot $root @smart update &\n";
+		print $fd "SPID=\$!;wait \$SPID\n";
+		print $fd "test \$? = 0 && chroot $root @smart channel --show &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
 		print $fd "test \$? = 0 && chroot $root @smart install -y ";
 		print $fd "@addonPackages || false &\n";
@@ -758,7 +759,7 @@ sub installPackages {
 		print $fd "trap clean INT TERM\n";
 		print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
 		print $fd "export YAST_IS_RUNNING=true\n";
-		print $fd "chroot $root @zypper refresh & ";
+		print $fd "chroot $root @zypper refresh &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
 		print $fd "test \$? = 0 && chroot $root @zypper install ";
 		print $fd "@installOpts @addonPackages &\n";
@@ -824,8 +825,9 @@ sub removePackages {
 		print $fd "function clean { kill \$SPID;";
 		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 		print $fd "trap clean INT TERM\n";
-		print $fd "chroot $root @smart update\n";
-		print $fd "chroot $root @smart channel --show &\n";
+		print $fd "chroot $root @smart update &\n";
+		print $fd "SPID=\$!;wait \$SPID\n";
+		print $fd "test \$? = 0 && chroot $root @smart channel --show &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
 		print $fd "test \$? = 0 && chroot $root @smart remove -y ";
 		print $fd "@removePackages || false &\n";
@@ -849,7 +851,7 @@ sub removePackages {
 		print $fd "trap clean INT TERM\n";
 		print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
 		print $fd "export YAST_IS_RUNNING=true\n";
-		print $fd "chroot $root @zypper refresh & ";
+		print $fd "chroot $root @zypper refresh &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
 		print $fd "test \$? = 0 && chroot $root @zypper remove ";
 		print $fd "@installOpts @removePackages &\n";
@@ -917,7 +919,9 @@ sub setupUpgrade {
 		print $fd "function clean { kill \$SPID;";
 		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 		print $fd "trap clean INT TERM\n";
-		print $fd "chroot $root @smart update\n";
+		print $fd "chroot $root @smart update &\n";
+		print $fd "SPID=\$!;wait \$SPID\n";
+		print $fd "test \$? = 0 && ";
 		if (defined $addPacks) {
 			my @addonPackages = @{$addPacks};
 			print $fd "chroot $root @smart channel --show &\n";
@@ -953,6 +957,9 @@ sub setupUpgrade {
 		print $fd "trap clean INT TERM\n";
 		print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
 		print $fd "export YAST_IS_RUNNING=true\n";
+		print $fd "chroot $root @zypper refresh &\n";
+		print $fd "SPID=\$!;wait \$SPID\n";
+		print $fd "test \$? = 0 && ";
 		if (defined $addPacks) {
 			my @addonPackages = @{$addPacks};
 			my @newpatts = ();
@@ -965,7 +972,7 @@ sub setupUpgrade {
 				}
 			}
 			@addonPackages = @newpacks;
-			print $fd "chroot $root @zypper update & ";
+			print $fd "chroot $root @zypper dist-upgrade &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
 			if (@addonPackages) {
 				print $fd "test \$? = 0 && chroot $root @zypper install ";
@@ -978,7 +985,7 @@ sub setupUpgrade {
 				print $fd "SPID=\$!;wait \$SPID\n";
 			}
 		} else {
-			print $fd "chroot $root @zypper update &\n";
+			print $fd "chroot $root @zypper dist-upgrade &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
 		}
 		print $fd "echo \$? > $screenCall.exit\n";
@@ -1175,6 +1182,9 @@ sub setupRootSystem {
 			print $fd "trap clean INT TERM\n";
 			print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
 			print $fd "export YAST_IS_RUNNING=true\n";
+			print $fd "@zypper --root $root refresh &\n";
+			print $fd "SPID=\$!;wait \$SPID\n";
+			print $fd "test \$? = 0 && ";
 			if (@packs) {
 				print $fd "@zypper --root $root install ";
 				print $fd "@installOpts @packs &\n";
