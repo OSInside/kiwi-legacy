@@ -259,7 +259,7 @@ Authors:
 
 %install
 # build
-export K_USER=0 # set value to -1 to prevent building boot images
+export K_USER=-1 # set to -1 to prevent building boot images, set to 0 to enable
 export K_ARCH=`uname -m | grep -q ^i && echo ix86 || uname -m`
 test -e /.buildenv || export K_USER=-1 # no buildenv, no boot image build
 test -e /.buildenv && . /.buildenv
