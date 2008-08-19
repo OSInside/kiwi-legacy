@@ -246,6 +246,11 @@ sub init {
 		return undef;
 	}
 	#==========================================
+	# Check and set lock
+	#------------------------------------------
+	$manager -> checkExclusiveLock();
+	$manager -> setLock();
+	#==========================================
 	# Setup preperation checks
 	#------------------------------------------
 	$manager -> switchToLocal();
@@ -309,29 +314,33 @@ sub init {
 	qxx (" cp /etc/resolv.conf $root/etc 2>&1 ");
 	qxx (" cp $main::KConfig $root/.kconfig 2>&1 ");
 	$kiwi -> done();
-
 	#==========================================
 	# Add source, install and clean source
 	#------------------------------------------
 	if (! $manager -> setupInstallationSource()) {
+		$manager -> freeLock();
 		return undef;
 	}
 	if (! $manager -> setupRootSystem(@initPacs)) {
 		$manager -> resetInstallationSource();
+		$manager -> freeLock();
 		return undef;
 	}
 	#==========================================
 	# reset installation source
 	#------------------------------------------
 	if (! $manager -> resetInstallationSource()) {
+		$manager -> freeLock();
 		return undef;
 	}
 	#==========================================
 	# Reset preperation checks
 	#------------------------------------------
 	if (! $manager -> resetSignatureCheck()) {
+		$manager -> freeLock();
 		return undef;
 	}
+	$manager -> freeLock();
 	#==================================
 	# Create default fstab file
 	#----------------------------------
@@ -393,24 +402,34 @@ sub upgrade {
 		$this->{needResolvConf} = 1;
 	}
 	#==========================================
+	# Check and set lock
+	#------------------------------------------
+	$manager -> checkExclusiveLock();
+	$manager -> setLock();
+	#==========================================
 	# Upgrade system
 	#------------------------------------------
 	if (! $manager -> setupSignatureCheck()) {
+		$manager -> freeLock();
 		return undef;
 	}
 	if (! $manager -> setupInstallationSource()) {
 		$this -> cleanupResolvConf();
+		$manager -> freeLock();
 		return undef;
 	}
 	if (! $manager -> setupUpgrade ($addPacks)) {
 		$this -> cleanupResolvConf();
+		$manager -> freeLock();
 		return undef;
 	}
 	if (! $manager -> resetInstallationSource()) {
 		$this -> cleanupResolvConf();
+		$manager -> freeLock();
 		return undef;
 	}
 	$this -> cleanupResolvConf();
+	$manager -> freeLock();
 	return $this;
 }
 
@@ -440,10 +459,16 @@ sub prepareTestingEnvironment {
 		$this->{needResolvConf} = 1;
 	}
 	#==========================================
+	# Check and set lock
+	#------------------------------------------
+	$manager -> checkExclusiveLock();
+	$manager -> setLock();
+	#==========================================
 	# Setup sources
 	#------------------------------------------
 	if (! $manager -> setupInstallationSource()) {
 		$this -> cleanupResolvConf();
+		$manager -> freeLock();
 		return undef;
 	}
 	$this -> cleanupResolvConf();
@@ -459,9 +484,11 @@ sub cleanupTestingEnvironment {
 	my $manager = $this->{manager};
 	if (! $manager -> resetInstallationSource()) {
 		$this -> cleanupResolvConf();
+		$manager -> freeLock();
 		return undef;
 	}
 	$this -> cleanupResolvConf();
+	$manager -> freeLock();
 	return $this;
 }
 
@@ -485,6 +512,7 @@ sub installTestingPackages {
 	my $pack = shift;
 	my $manager  = $this->{manager};
 	if (! $manager -> installPackages ($pack)) {
+		$manager -> freeLock();
 		return undef;
 	}
 	return $this;
@@ -498,6 +526,7 @@ sub uninstallTestingPackages {
 	my $pack = shift;
 	my $manager  = $this->{manager};
 	if (! $manager -> removePackages ($pack)) {
+		$manager -> freeLock();
 		return undef;
 	}
 	return $this;
@@ -536,27 +565,37 @@ sub install {
 		return undef;
 	}
 	#==========================================
+	# Check and set lock
+	#------------------------------------------
+	$manager -> checkExclusiveLock();
+	$manager -> setLock();
+	#==========================================
 	# Setup signature check
 	#------------------------------------------
 	$manager -> switchToChroot();
 	if (! $manager -> setupSignatureCheck()) {
+		$manager -> freeLock();
 		return undef;
 	}
 	#==========================================
 	# Add source(s) and install
 	#------------------------------------------
 	if (! $manager -> setupInstallationSource()) {
+		$manager -> freeLock();
 		return undef;
 	}
 	if (! $manager -> setupRootSystem (@packList)) {
+		$manager -> freeLock();
 		return undef;
 	}
 	#==========================================
 	# reset installation source
 	#------------------------------------------
 	if (! $manager -> resetInstallationSource()) {
+		$manager -> freeLock();
 		return undef;
 	}
+	$manager -> freeLock();
 	return $this;
 }
 

@@ -304,7 +304,6 @@ sub setupSignatureCheck {
 	my $manager = $this->{manager};
 	my $chroot  = $this->{chroot};
 	my $root    = $this->{root};
-	my $lock    = $this->{lock};
 	my $data;
 	my $code;
 
@@ -324,11 +323,8 @@ sub setupSignatureCheck {
 		if (defined $imgCheckSig) {
 			my $option = "$optionName=$imgCheckSig";
 			if (! $chroot) {
-				$this -> checkExclusiveLock();
 				$kiwi -> info ("Setting RPM signature check to: $imgCheckSig");
-				$this -> setLock();
 				$data = qxx ("@smart config --set $option 2>&1");
-				$this -> freeLock();
 			} else {
 				$kiwi -> info ("Setting RPM signature check to: $imgCheckSig");
 				$data=qxx ("chroot \"$root\" @smart config --set $option 2>&1");
@@ -370,7 +366,6 @@ sub resetSignatureCheck {
 	my $chroot = $this->{chroot};
 	my $manager= $this->{manager};
 	my $root   = $this->{root};
-	my $lock   = $this->{lock};
 	my @smart  = @{$this->{smart}};
 	my $curCheckSig = $this->{curCheckSig};
 	my $data;
@@ -383,11 +378,8 @@ sub resetSignatureCheck {
 			my $optionName  = "rpm-check-signatures";
 			my $option = "$optionName=$curCheckSig";
 			if (! $chroot) {
-				$this -> checkExclusiveLock();
 				$kiwi -> info ("Reset RPM signature check to: $curCheckSig");
-				$this -> setLock();
 				$data = qxx ("@smart config --set $option 2>&1");
-				$this -> freeLock();
 			} else {
 				$kiwi -> info ("Reset RPM signature check to: $curCheckSig");
 				$data=qxx ("chroot \"$root\" @smart config --set $option 2>&1");
@@ -434,7 +426,6 @@ sub setupInstallationSource {
 	my @smart  = @{$this->{smart}};
 	my @rootdir= @{$this->{smartroot}};
 	my $dataDir= $this->{dataDir};
-	my $lock   = $this->{lock};
 	my $data;
 	my $code;
 	#==========================================
@@ -457,12 +448,9 @@ sub setupInstallationSource {
 			my @opts = @{$source{$stype}{$chl}};
 			@opts = map { if (defined $_) { $_ }  } @opts;
 			if (! $chroot) {
-				$this -> checkExclusiveLock();
-				$this -> setLock();
 				$kiwi -> info ("Adding local smart channel: $chl");
 				$data = qxx ("$cmds $chl @opts 2>&1");
 				$code = $? >> 8;
-				$this -> freeLock();
 			} else {
 				$kiwi -> info ("Adding image smart channel: $chl");
 				$data = qxx ("chroot \"$root\" $cmds $chl @opts 2>&1");
@@ -519,12 +507,9 @@ sub setupInstallationSource {
 			}
 			my $sadd = "service-add @zopts $alias";
 			if (! $chroot) {
-				$this -> checkExclusiveLock();
-				$this -> setLock();
 				$kiwi -> info ("Adding local zypper service: $alias");
 				$data = qxx ("@zypper --root \"$root\" $sadd 2>&1");
 				$code = $? >> 8;
-				$this -> freeLock();
 			} else {
 				$kiwi -> info ("Adding image zypper service: $alias");
 				$data = qxx ("chroot \"$root\" @zypper $sadd 2>&1");
@@ -565,7 +550,6 @@ sub resetInstallationSource {
 	my @zypper = @{$this->{zypper}};
 	my @smart  = @{$this->{smart}};
 	my @rootdir= @{$this->{smartroot}};
-	my $lock   = $this->{lock};
 	my @channelList = @{$this->{channelList}};
 	my $data;
 	my $code;
@@ -579,12 +563,9 @@ sub resetInstallationSource {
 			$cmds="@smart @rootdir channel --remove";
 		}
 		if (! $chroot) {
-			$this -> checkExclusiveLock();
 			$kiwi -> info ("Removing smart channel(s): @channelList");
-			$this -> setLock();
 			$data = qxx ("$cmds @list -y 2>&1");
 			$code = $? >> 8;
-			$this -> freeLock();
 		} else {
 			$kiwi -> info ("Removing smart channel(s): @channelList");
 			$data = qxx ("chroot \"$root\" $cmds @list -y 2>&1");
@@ -607,9 +588,7 @@ sub resetInstallationSource {
 			$cmds = "@zypper --root $root service-delete";
 		}
 		if (! $chroot) {
-			$this -> checkExclusiveLock();
 			$kiwi -> info ("Removing zypper service(s): @channelList");
-			$this -> setLock();
 			foreach my $chl (@list) {
 				$data = qxx ("bash -c \"$cmds $chl 2>&1\"");
 				$code = $? >> 8;
@@ -617,7 +596,6 @@ sub resetInstallationSource {
 					last;
 				}
 			}
-			$this -> freeLock();
 		} else {
 			$kiwi -> info ("Removing zypper service(s): @channelList");
 			foreach my $chl (@list) {
@@ -1090,7 +1068,6 @@ sub setupRootSystem {
 	my @smart  = @{$this->{smart}};
 	my @rootdir= @{$this->{smartroot}};
 	my @ensconce = @{$this->{ensconce}};
-	my $lock   = $this->{lock};
 	my @channelList = @{$this->{channelList}};
 	my $screenCall  = $this->{screenCall};
 	#==========================================
@@ -1105,7 +1082,6 @@ sub setupRootSystem {
 	#------------------------------------------
 	if ($manager eq "smart") {
 		if (! $chroot) {
-			$this -> checkExclusiveLock();
 			my @installOpts = (
 				"--explain",
 				"--log-level=error",
@@ -1122,10 +1098,9 @@ sub setupRootSystem {
 			# Create screen call file
 			#------------------------------------------
 			print $fd "function clean { kill \$SPID;";
-			print $fd "rm -f $root/etc/smart/channels/*;rm -f $lock;";
+			print $fd "rm -f $root/etc/smart/channels/*";
 			print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 			print $fd "trap clean INT TERM\n";
-			print $fd "touch $lock\n";
 			print $fd "@smart @rootdir channel --show &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
 			print $fd "test \$? = 0 && @smart @rootdir update ";
@@ -1136,7 +1111,6 @@ sub setupRootSystem {
 			print $fd "SPID=\$!;wait \$SPID\n";
 			print $fd "echo \$? > $screenCall.exit\n";
 			print $fd "rm -f $root/etc/smart/channels/*\n";
-			print $fd "rm -f $lock\n";
 		} else {
 			my @install = @packs;
 			my @installOpts = (
@@ -1169,7 +1143,6 @@ sub setupRootSystem {
 	#------------------------------------------
 	if ($manager eq "zypper") {
 		if (! $chroot) {
-			$this -> checkExclusiveLock();
 			my @installOpts = (
 				"--auto-agree-with-licenses"
 			);
@@ -1198,11 +1171,10 @@ sub setupRootSystem {
 			#------------------------------------------
 			mkdir "$root/tmp";
 			print $fd "function clean { kill \$SPID;";
-			print $fd "echo 1 > $screenCall.exit; rm -f $lock; exit 1; }\n";
+			print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 			print $fd "trap clean INT TERM\n";
 			print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
 			print $fd "export YAST_IS_RUNNING=true\n";
-			print $fd "touch $lock\n";
 			if (@packs) {
 				print $fd "@zypper --root $root install ";
 				print $fd "@installOpts @packs &\n";
@@ -1217,7 +1189,6 @@ sub setupRootSystem {
 				print $fd "SPID=\$!;wait \$SPID\n";
 			}
 			print $fd "echo \$? > $screenCall.exit\n";
-			print $fd "rm -f $lock\n";
 		} else {
 			my @install   = ();
 			my @newpatts  = ();
@@ -1291,13 +1262,7 @@ sub resetSource {
 	my $manager = $this->{manager};
 	my @smart   = @{$this->{smart}};
 	my @zypper  = @{$this->{zypper}};
-	my $lock    = $this->{lock};
 	my $dataDir = $this->{dataDir};
-	#==========================================
-	# check lock
-	#------------------------------------------
-	$this -> checkExclusiveLock();
-	$this -> setLock();
 	#==========================================
 	# smart
 	#------------------------------------------
@@ -1322,7 +1287,6 @@ sub resetSource {
 	if ($manager eq "ensconce") {
 		# Ignored for ensconce
 	}
-	$this -> freeLock();
 	return $this;
 }
 
@@ -1343,7 +1307,6 @@ sub setupPackageInfo {
 	my @zypper = @{$this->{zypper}};
 	my @smart  = @{$this->{smart}};
 	my @rootdir= @{$this->{smartroot}};
-	my $lock   = $this->{lock};
 	my $data;
 	my $code;
 	#==========================================
@@ -1351,12 +1314,9 @@ sub setupPackageInfo {
 	#------------------------------------------
 	if ($manager eq "smart") {
 		if (! $chroot) {
-			$this -> checkExclusiveLock();
 			$kiwi -> info ("Checking for package: $pack");
-			$this -> setLock();
 			$data = qxx ("@smart @rootdir query --installed $pack 2>/dev/null");
 			$code = $? >> 8;
-			$this -> freeLock();
 		} else {
 			$kiwi -> info ("Checking for package: $pack");
 			$data = qxx (
@@ -1384,12 +1344,9 @@ sub setupPackageInfo {
 	if ($manager eq "zypper") {
 		my $str = "not installed";
 		if (! $chroot) {
-			$this -> checkExclusiveLock();
 			$kiwi -> info ("Checking for package: $pack");
-			$this -> setLock();
 			$data = qxx (" rpm -q \"$pack\" 2>&1 ");
 			$code = $? >> 8;
-			$this -> freeLock();
 		} else {
 			$kiwi -> info ("Checking for package: $pack");
 			$data= qxx ("chroot \"$root\" rpm -q \"$pack\" 2>&1 ");

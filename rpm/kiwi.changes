@@ -10,6 +10,8 @@ Mon Aug 18 10:29:55 CEST 2008 - ms@suse.de
   This allows a faster processing within the second stage of
   the image preparation and also alows re-use of already
   downloaded remote packages (bnc #417457)
+- changed locking process due to cache handling changes.
+  This is related to (bnc #417457)
 
 -------------------------------------------------------------------
 Mon Aug 11 09:53:52 CEST 2008 - ms@suse.de

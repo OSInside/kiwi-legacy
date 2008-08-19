@@ -830,8 +830,7 @@ sub setLogServer {
 		our $logServer = new KIWISocket ( $this,$main::LogServerPort );
 		our $sharedMem = $this->{smem};
 		if (! defined $logServer) {
-			$this -> warning ("Can't open log port: $main::LogServerPort");
-			$this -> skipped ();
+			$this -> warning ("Can't open log port: $main::LogServerPort\n");
 			$sharedMem -> closeSegment();
 			undef $this-> {smem};
 			exit 1;
