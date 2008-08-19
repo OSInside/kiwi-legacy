@@ -262,9 +262,13 @@ sub setupScreenCall {
 		# do the job in the child process
 		#------------------------------------------
 		if ($logs) {
-			exec ( "screen -L -D -m -c $screenCtrl $screenCall" );
+			if (! exec ("screen -L -D -m -c $screenCtrl $screenCall")) {
+				die ("\n*** Couldn't exec screen: $! ***\n");
+			}
 		} else {
-			exec ( $screenCall );
+			if (! exec ( $screenCall )) {
+				die ("\n*** Couldn't exec shell: $! ***\n");
+			}
 		}
 	}
 	#==========================================
