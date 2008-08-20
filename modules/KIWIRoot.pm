@@ -971,12 +971,24 @@ sub cleanMount {
 	my $prefix = $root."/".$baseSystem;
 	foreach my $item (reverse @mountList) {
 		$kiwi -> info ("Umounting path: $item\n");
-		qxx ("umount \"$item\" 2>/dev/null");
+		my $data = qxx ("umount \"$item\" 2>&1");
+		my $code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> loginfo ("Umount failed: $data");
+			$kiwi -> warning ("Umount failed: calling lazy umount");
+			my $data = qxx ("umount -l \"$item\" 2>&1");
+			my $code = $? >> 8;
+			if ($code != 0) {
+				$kiwi -> failed();
+			} else {
+				$kiwi -> done();
+			}
+		}
 		if ($item =~ /^$prefix/) {
-			qxx (" rmdir -p \"$item\" 2>&1 ");
+			qxx ("rmdir -p \"$item\" 2>&1");
 		}
 		if ($item =~ /^\/tmp\/kiwimount/) {
-			qxx (" rmdir -p \"$item\" 2>&1 ");
+			qxx ("rmdir -p \"$item\" 2>&1");
 		}
 	}
 	if (defined $this->{baseRoot}) {

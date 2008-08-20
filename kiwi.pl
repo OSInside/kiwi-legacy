@@ -1571,8 +1571,21 @@ sub kiwiExit {
 	# private Exit function, exit safely
 	# ---
 	my $code = $_[0];
+	if ((defined $Survive) && ($Survive eq "yes")) {
+		if ($code != 0) {
+			return undef;
+		}
+		return $code;
+	}
 	if (! defined $kiwi) {
 		$kiwi = new KIWILog("tiny");
+	}
+	if ($code != 0) {
+		$kiwi -> error  ("KIWI exited with error(s)");
+		$kiwi -> done ();
+	} else {
+		$kiwi -> info ("KIWI exited successfully");
+		$kiwi -> done ();
 	}
 	$kiwi -> setLogHumanReadable();
 	if (! defined $LogFile) {
@@ -1586,19 +1599,6 @@ sub kiwiExit {
 			qxx ("mv $rootLog $logfile 2>&1");
 			$kiwi -> done ();
 		}
-	}
-	if ((defined $Survive) && ($Survive eq "yes")) {
-		if ($code != 0) {
-			return undef;
-		}
-		return $code;
-	}
-	if ($code != 0) {
-		$kiwi -> error  ("KIWI exited with error(s)");
-		$kiwi -> done ();
-	} else {
-		$kiwi -> info ("KIWI exited successfully");
-		$kiwi -> done ();
 	}
 	$kiwi -> cleanSweep();
 	exit $code;

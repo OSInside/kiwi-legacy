@@ -632,6 +632,7 @@ sub setLogFile {
 	my $this = shift;
 	my $file = $_[0];
 	if ($file eq "terminal") {
+		$this->{fileLog} = 1;
 		return $this;
 	}
 	if (! (open FD,">$file")) {
