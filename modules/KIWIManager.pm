@@ -443,7 +443,16 @@ sub setupInstallationSource {
 	if ($manager eq "smart") {
 		my $stype  = "private";
 		my $cmds   = "@smart channel --add";
-		qxx ("rm -f $dataDir/channels/*");
+		#==========================================
+		# make sure channel list is clean
+		#------------------------------------------
+		my @chls = qxx ("@smart channel --show | grep ^\'\\[\'|tr -d [] 2>&1");
+		foreach my $c (@chls) {
+			chomp $c; qxx ("@smart channel --remove $c -y 2>&1");
+		}
+		#==========================================
+		# re-add new channels
+		#------------------------------------------
 		if (! $chroot) {
 			$stype = "public";
 			$cmds  = "@smart @rootdir channel --add";
@@ -1140,10 +1149,12 @@ sub setupRootSystem {
 			print $fd "function clean { kill \$SPID;";
 			print $fd "echo 1 > $screenCall.exit;exit 1; }\n";
 			print $fd "trap clean INT TERM\n";
-			print $fd "chroot $root @smart channel --show &\n";
+			print $fd "chroot $root @smart update &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
-			print $fd "chroot $root @smart install @install ";
-			print $fd "@installOpts &\n";
+			print $fd "test \$? = 0 && chroot $root @smart channel --show &\n";
+			print $fd "SPID=\$!;wait \$SPID\n";
+			print $fd "test \$? = 0 && chroot $root @smart install ";
+			print $fd "@install @installOpts &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
 			print $fd "echo \$? > $screenCall.exit\n";
 		}
@@ -1225,6 +1236,9 @@ sub setupRootSystem {
 			print $fd "trap clean INT TERM\n";
 			print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
 			print $fd "export YAST_IS_RUNNING=true\n";
+			print $fd "chroot $root @zypper refresh &\n";
+			print $fd "SPID=\$!;wait \$SPID\n";
+			print $fd "test \$? = 0 && ";
 			if (@install) {
 				print $fd "chroot $root @zypper install ";
 				print $fd "@installOpts @install &\n";
