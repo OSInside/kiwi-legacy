@@ -489,7 +489,7 @@ sub setupInstallationSource {
 		}
 		foreach my $alias (keys %{$source{$stype}}) {
 			my @sopts = @{$source{$stype}{$alias}};
-			my @zopts = ();
+			my @zopts = ("--keep-packages");
 			foreach my $opt (@sopts) {
 				next if ! defined $opt;
 				my ($key,$val) = split (/=/,$opt);
