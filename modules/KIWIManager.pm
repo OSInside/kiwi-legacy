@@ -518,7 +518,7 @@ sub setupInstallationSource {
 					push (@zopts,"--type $val");
 				}
 			}
-			my $sadd = "service-add @zopts $alias";
+			my $sadd = "addrepo @zopts $alias";
 			if (! $chroot) {
 				$kiwi -> info ("Adding local zypper service: $alias");
 				$data = qxx ("@zypper --root \"$root\" $sadd 2>&1");
@@ -596,9 +596,9 @@ sub resetInstallationSource {
 	#------------------------------------------
 	if ($manager eq "zypper") {
 		my @list = @channelList;
-		my $cmds = "@zypper service-delete";
+		my $cmds = "@zypper removerepo";
 		if (! $chroot) {
-			$cmds = "@zypper --root $root service-delete";
+			$cmds = "@zypper --root $root removerepo";
 		}
 		if (! $chroot) {
 			$kiwi -> info ("Removing zypper service(s): @channelList");
@@ -993,6 +993,12 @@ sub setupUpgrade {
 				print $fd "SPID=\$!;wait \$SPID\n";
 			}
 			if (@newpatts) {
+				my %pattr = $xml -> getPackageAttributes();
+				if (($pattr{patternType} ne "plusRecommended") &&
+					($pattr{patternPackageType} ne "plusRecommended")
+				) {
+					push (@installOpts,"--no-recommends");
+				}
 				print $fd "test \$? = 0 && chroot $root @zypper install ";
 				print $fd "@installOpts -t pattern @newpatts &\n";
 				print $fd "SPID=\$!;wait \$SPID\n";
@@ -1206,6 +1212,12 @@ sub setupRootSystem {
 				print $fd "SPID=\$!;wait \$SPID\n";
 			}
 			if (@newpatts) {
+				my %pattr = $xml -> getPackageAttributes();
+				if (($pattr{patternType} ne "plusRecommended") &&
+					($pattr{patternPackageType} ne "plusRecommended")
+				) {
+					push (@installOpts,"--no-recommends");
+				}
 				if (@packs) {
 					print $fd "test \$? = 0 && ";
 				}
@@ -1245,6 +1257,12 @@ sub setupRootSystem {
 				print $fd "SPID=\$!;wait \$SPID\n";
 			}
 			if (@newpatts) {
+				my %pattr = $xml -> getPackageAttributes();
+				if (($pattr{patternType} ne "plusRecommended") &&
+					($pattr{patternPackageType} ne "plusRecommended")
+				) {
+					push (@installOpts,"--no-recommends");
+				}
 				if (@install) {
 					print $fd "test \$? = 0 && ";
 				}
@@ -1306,7 +1324,7 @@ sub resetSource {
 	if ($manager eq "zypper") {
 		foreach my $channel (keys %{$source{public}}) {
 			$kiwi -> info ("Removing zypper service: $channel\n");
-			qxx ("@zypper service-delete $channel 2>&1");
+			qxx ("@zypper removerepo $channel 2>&1");
 		}
 	}
 	#==========================================

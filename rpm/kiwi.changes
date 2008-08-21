@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Thu Aug 21 10:45:59 CEST 2008 - ms@suse.de
+
+- v2.68
+- don't use the zypper service-* commands (bnc #418994)
+- added recommends handling for zypper according to the
+  value of the patternType/patternPackageType (bnc #418817)
+
+-------------------------------------------------------------------
 Wed Aug 20 17:09:36 CEST 2008 - ms@suse.de
 
 - v2.67
