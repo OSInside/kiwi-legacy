@@ -306,7 +306,7 @@ sub Init
   $this->{m_dirlist}->{"$this->{m_united}"} = 1;
   my $mediumname = $this->{m_proddata}->getVar("MEDIUM_NAME");
   if(not defined($mediumname)) {
-    $this->{m_logger}->error("[ERROR] Variable MEDIUM_NAME is not specified correctly!");
+    $this->{m_logger}->error("[E] Variable MEDIUM_NAME is not specified correctly!");
     return undef;
   }
 
@@ -319,7 +319,7 @@ sub Init
     }
     else {
       # this means the config says multiple_media=no BUT defines a "medium=<number>" somewhere!
-      $this->{m_logger}->warning("[ERROR] You want a single medium distro but specified medium=... for some packages\n\tIgnoring the MULTIPLE_MEDIA=no flag!");
+      $this->{m_logger}->warning("[E] You want a single medium distro but specified medium=... for some packages\n\tIgnoring the MULTIPLE_MEDIA=no flag!");
     }
   }
   foreach my $n(@media) {
@@ -351,21 +351,21 @@ sub Init
   ## second level initialisation done, now start work:
   if($this->{m_debug}) {
     $this->{m_logger}->info("");
-    $this->{m_logger}->info("STEP 0 (initialise) -- Examining repository structure");
-    $this->{m_logger}->info("STEP 0.1 (initialise) -- Create local paths");
+    $this->{m_logger}->info("[I] STEP 0 (initialise) -- Examining repository structure");
+    $this->{m_logger}->info("[I] STEP 0.1 (initialise) -- Create local paths") if $this->{m_debug};
   }
 
   # create local directories as download targets. Normalising special chars (slash, dot, ...) by replacing with second param.
   foreach my $r(keys(%{$this->{m_repos}})) {
     if($this->{m_repos}->{$r}->{'source'} =~ m{^opensuse:.*}) {
-      $this->{m_logger}->info("[INFO] [Init] resolving opensuse:// URL $this->{m_repos}->{$r}->{'source'}...") if $this->{m_debug};
+      $this->{m_logger}->info("[I] [Init] resolving opensuse:// URL $this->{m_repos}->{$r}->{'source'}...") if $this->{m_debug};
       $this->{m_repos}->{$r}->{'source'} = $this->{m_urlparser}->normalizePath($this->{m_repos}->{$r}->{'source'});
     }
     $this->{m_repos}->{$r}->{'basedir'} = $this->{m_basedir}.$this->{m_util}->normaliseDirname($this->{m_repos}->{$r}->{'source'}, '-');
 
     $this->{m_dirlist}->{"$this->{m_repos}->{$r}->{'basedir'}"} = 1;
 
-    $this->{m_logger}->info("STEP 1.2 -- Expand path names for all repositories") if $this->{m_debug};
+    $this->{m_logger}->info("[I] STEP 1.2 -- Expand path names for all repositories") if $this->{m_debug};
     $this->{m_repos}->{$r}->{'source'} =~ s{(.*)/$}{$1};  # strip off trailing slash in each repo (robust++)
     my @tmp;
 
@@ -563,7 +563,6 @@ sub queryRpmHeaders
     else {
       push @archs, $this->{m_archlist}->headList();
     }
-    #my @archs = $this->checkArchitectureList($pack); # <- des gehoert eh ned an die Stelle! Das muss ganz am Ende gemacht werden, wenn alle Pakete zusammenkopiert sind.
 
     ARCH:foreach my $a(@archs) {
       my @fallbacklist;
@@ -584,10 +583,10 @@ sub queryRpmHeaders
 	  }
 	  my $follow = $this->{m_archlist}->arch($fa)->follower();
 	  if(defined($follow)) { 
-	    $this->{m_logger}->warning("[I] falling back to $follow instead");# if $this->{m_debug};
+	    $this->{m_logger}->warning("[W] falling back to $follow instead");# if $this->{m_debug};
 	  }
 	  else {
-	    $this->{m_logger}->error("[I] no more fallback available for $fa") if $this->{m_debug};
+	    $this->{m_logger}->error("[E] no more fallback available for $fa") if $this->{m_debug};
 	  }
 	  next FA;
 	}
@@ -612,7 +611,7 @@ sub queryRpmHeaders
 	     and defined $flags{'VERSION'}
 	     and defined $flags{'RELEASE'}
 	     and defined $flags{'ARCH'})) {
-	    $this->{m_logger}->warning("[W] [queryRpmHeaders] RPM flags query failed for package $pack at $uri!");
+	    $this->{m_logger}->error("[E] [queryRpmHeaders] RPM flags query failed for package $pack at $uri!");
 	    next;
 	  }
 
@@ -647,7 +646,7 @@ sub queryRpmHeaders
 	      $this->createDirectoryStructure();
 	    }
 	    if(!-e "$tmp->{$fa}->{'newpath'}/$tmp->{$fa}->{'newfile'}" and !link $uri, "$tmp->{$fa}->{'newpath'}/$tmp->{$fa}->{'newfile'}") {
-	      $this->{m_logger}->warning("[W] [queryRpmHeaders] linking file $tmp->{$fa}->{'newpath'}/$tmp->{$fa}->{'newfile'} failed");
+	      $this->{m_logger}->error("[E] [queryRpmHeaders] linking file $tmp->{$fa}->{'newpath'}/$tmp->{$fa}->{'newfile'} failed");
 	    }
 	  }
 	}
@@ -657,7 +656,7 @@ sub queryRpmHeaders
 	  $this->{m_logger}->error("[E] [queryRpmHeaders] package $pack has undefined hash entry");
 	}
 	if($fb_available == 1) {
-	  $this->{m_logger}->info("[I] package $pack found for architecture $fa (fallback of $a)") if $this->{m_debug};
+	  $this->{m_logger}->info("[I] package $pack found for architecture $fa (fallback of $a)");# if $this->{m_debug};
 	  next ARCH;
 	}
 	elsif($fb_available == 0) {
@@ -705,8 +704,8 @@ sub collectPackages
   # expand dir lists (setup in constructor for each repo) to filenames
   if($this->{m_debug}) {
     $this->{m_logger}->info("");
-    $this->{m_logger}->info("STEP 1 [collectPackages]");
-    $this->{m_logger}->info("expand dir lists for all repositories");
+    $this->{m_logger}->info("[I] STEP 1 [collectPackages]");
+    $this->{m_logger}->info("[I] expand dir lists for all repositories");
   }
   #foreach my $r(keys(%{$this->{m_repos}})) {
   foreach my $r(@{$this->{m_srclist}}) {
@@ -722,7 +721,7 @@ sub collectPackages
   $this->dumpRepoData("$this->{m_basedir}/repolist.txt");
 
 
-  $this->{m_logger}->info("retrieve package lists for regular packages") if $this->{m_debug};
+  $this->{m_logger}->info("[I] retrieve package lists for regular packages") if $this->{m_debug};
   my $result = $this->getPackagesList("norm", keys(%{$this->{m_packages}}));
   if( $result == -1) {
     $this->{m_logger}->error("[E] getPackagesList for regular packages called with invalid parameter");
@@ -732,10 +731,10 @@ sub collectPackages
     $rfailed += $result;
   }
 
-  $this->{m_logger}->info("retrieve package lists for metapackages") if $this->{m_debug};
+  $this->{m_logger}->info("[I] retrieve package lists for metapackages") if $this->{m_debug};
   $result += $this->getPackagesList("meta", keys(%{$this->{m_metapackages}}));
   if( $result == -1) {
-    $this->{m_logger}->error("getPackagesList for metapackages called with invalid parameter");
+    $this->{m_logger}->error("[E] getPackagesList for metapackages called with invalid parameter");
   }
   else {
     # continue: check arch list
@@ -761,8 +760,8 @@ sub collectPackages
   ### step 2:
   if($this->{m_debug}) {
     $this->{m_logger}->info("");
-    $this->{m_logger}->info("STEP 2 [collectPackages]");
-    $this->{m_logger}->info("Query RPM archive headers for undecided archives");
+    $this->{m_logger}->info("[I] STEP 2 [collectPackages]");
+    $this->{m_logger}->info("[I] Query RPM archive headers for undecided archives");
   }
 
   # query all package headers for "undecided/unknown" packages and decide them!
@@ -776,8 +775,8 @@ sub collectPackages
   ### step 3: NOW I know where you live...
   if($this->{m_debug}) {
     $this->{m_logger}->info("");
-    $this->{m_logger}->info("STEP 3 [collectPackages]");
-    $this->{m_logger}->info("Handle scripts for metafiles and metapackages");
+    $this->{m_logger}->info("[I] STEP 3 [collectPackages]");
+    $this->{m_logger}->info("[I] Handle scripts for metafiles and metapackages");
   }
   # unpack metapackages and download metafiles to the {m_united} path
   # (or relative path from there if specified) <- according to rnc file
@@ -919,7 +918,7 @@ sub unpackMetapackages
 	my $found=0;
 	foreach my $d(@themes) {
 	  if($d =~ m{$thema}i) {
-	    $this->{m_logger}->info("Using thema $d\n");
+	    $this->{m_logger}->info("[I] Using thema $d\n");
 	    $thema = $d;	# changed after I saw that yast2-slideshow has a thema "SuSE-SLES" (matches "SuSE", but not in line 831)
 	    $found=1;
 	    last;
@@ -928,7 +927,7 @@ sub unpackMetapackages
 	if($found==0) {
 	  foreach my $d(@themes) {
 	    if($d =~ m{Linux|SLES}i) {
-	      $this->{m_logger}->info("Using fallback theme $d instead of $thema\n");
+	      $this->{m_logger}->info("[I] Using fallback theme $d instead of $thema\n");
 	      $thema = $d;
 	      last;
 	    }
@@ -1074,9 +1073,19 @@ sub bestBet
   my $found_in_repo;
   my $undecided = 0;
   my $tmp;
-  #my @fallbackarchs;
 
-  REPO:foreach my $r(keys(%{$this->{m_repos}})) {
+  my @repos = ();
+  # if for a package the "priority=<reponame>" is set, only look for package there:
+  if(defined($this->{m_packages}->{$pack}) and defined($this->{m_packages}->{$pack}->{'priority'})) {
+    $this->{m_logger}->info("[I] forcing repo ".$this->{m_packages}->{$pack}." for package $pack");
+    push @repos, $this->{m_packages}->{$pack}->{'priority'};
+  }
+  else {
+    @repos = keys(%{$this->{m_repos}});
+  }
+
+  #REPO:foreach my $r(keys(%{$this->{m_repos}})) {
+  REPO:foreach my $r(@repos) {
     DIR:foreach my $d(keys(%{$this->{m_repos}->{$r}->{'srcdirs'}})) {
       next DIR  if(! $this->{m_repos}->{$r}->{'srcdirs'}->{$d}->[0]);
       #next DIR if($d ne "/" and $d !~ m{$fa});
@@ -1124,7 +1133,7 @@ sub bestBet
 	}
 	else {
 	  # Error
-	  $this->{m_logger}->info("[W] [bestBet] URI doesn't match directory convention\n");
+	  $this->{m_logger}->warning("[W] [bestBet] URI doesn't match directory convention\n");
 	  next URI;
 	}
 
@@ -1204,7 +1213,7 @@ sub fetchFileFrom
       $this->{m_dirlist}->{"$fullpath"} = 1;
       $this->createDirectoryStructure();
 
-      $this->{m_logger}->info("[I] [fetchFileFrom] downloading $pack from $r_tmp2->{'uri'} to dir $fullpath") if $this->{m_debug};
+      $this->{m_logger}->info("[I] $pack from repo $repo/dir $dir, uri=".$uri."\n") if $this->{m_debug};
       $r_tmp2->{'uri'} =~ m{.*/(.*)$};
       my $file = $1;
       if(defined($localrepo) and ($localrepo eq "true" or $localrepo eq "1")) {
@@ -1577,6 +1586,30 @@ sub createMetadata
     print CONT "$info->{$i}->[0] $info->{$i}->[1]\n";
   }
   close(CONT);
+
+
+  ## step 4b FIXME: openSUSE-release.prod file
+  ## 5minuteHACK of the day
+  ### discussed with Klaus: this will come from an rpm in the future
+  $this->{m_logger}->info("[I] Creating openSUSE-release.prod file:");
+  my $release_prodfile = "$this->{m_basesubdir}->{'1'}/openSUSE-release.prod";
+  if(not open(INSTPROD, ">", $release_prodfile )) {
+    die "Cannot create $release_prodfile ";
+  }
+  my $dname = $this->{m_proddata}->getVar("DISTNAME");
+  my $dvers = $this->{m_proddata}->getVar("VERSION");
+  my $dflav = $this->{m_proddata}->getVar("FLAVOUR");
+  my $drele = $this->{m_proddata}->getVar("RELEASE");
+
+  if(not defined($dname) or not defined($dvers) or not defined($dflav) or not defined($drele)) {
+    $this->{m_logger}->error("[E] can't create openSUSE-release.prod because data is missing!");
+  }
+  else {
+    print INSTPROD "[$dname-$dflav $dvers %arch]\n";
+    print INSTPROD "distproduct=$dname-$dflav\n";
+    print INSTPROD "distversion=$dvers-$drele\n";
+  }
+  close(INSTPROD);
 
 
   ## step 5: media file
