@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Fri Aug 22 11:27:22 CEST 2008 - ms@suse.de
+
+- v2.69
+- fixed cache usage, need bind mount in early prepare (bnc #417457)
+- fixed channel names, don't use PID here (bnc #417457)
+- zypper: keep packages from remote repos only (bnc #419380)
+
+-------------------------------------------------------------------
 Thu Aug 21 10:45:59 CEST 2008 - ms@suse.de
 
 - v2.68

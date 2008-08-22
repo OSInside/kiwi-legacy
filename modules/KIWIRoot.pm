@@ -112,7 +112,16 @@ sub new {
 			$kiwi -> done();
 			$type = $publics_type;
 		}
-		my $channel = "kiwi".$count."-".$$;
+		#==========================================
+		# build channel name/alias...
+		#------------------------------------------
+		my $channel = $publics_url;
+		$channel =~ s/\//_/g;
+		$channel =~ s/^_//;
+		$channel =~ s/_$//;
+		#==========================================
+		# build source key...
+		#------------------------------------------
 		my $srckey  = "baseurl";
 		my $srcopt;
 		if ($type eq "rpm-dir") {
@@ -315,14 +324,20 @@ sub init {
 	qxx (" cp $main::KConfig $root/.kconfig 2>&1 ");
 	$kiwi -> done();
 	#==========================================
+	# Setup shared cache directory
+	#------------------------------------------
+	$this -> setupCacheMount();
+	#==========================================
 	# Add source, install and clean source
 	#------------------------------------------
 	if (! $manager -> setupInstallationSource()) {
+		$this -> cleanMount();
 		$manager -> freeLock();
 		return undef;
 	}
 	if (! $manager -> setupRootSystem(@initPacs)) {
 		$manager -> resetInstallationSource();
+		$this -> cleanMount();
 		$manager -> freeLock();
 		return undef;
 	}
@@ -330,6 +345,7 @@ sub init {
 	# reset installation source
 	#------------------------------------------
 	if (! $manager -> resetInstallationSource()) {
+		$this -> cleanMount();
 		$manager -> freeLock();
 		return undef;
 	}
@@ -337,9 +353,11 @@ sub init {
 	# Reset preperation checks
 	#------------------------------------------
 	if (! $manager -> resetSignatureCheck()) {
+		$this -> cleanMount();
 		$manager -> freeLock();
 		return undef;
 	}
+	$this -> cleanMount();
 	$manager -> freeLock();
 	#==================================
 	# Create default fstab file
@@ -841,6 +859,36 @@ sub addToMountList {
 }
 
 #==========================================
+# setupCacheMount
+#------------------------------------------
+sub setupCacheMount {
+	# ...
+	# bind mount the specified cache directory into
+	# the chroot system. This is used to establish
+	# a shared cache over multiple prepare processes
+	# ---
+	my $this  = shift;
+	my $root  = $this->{root};
+	my $cache = "/var/cache";
+	my @mountList;
+	if (defined $this->{mountList}) {
+		@mountList = @{$this->{mountList}};
+	} else {
+		@mountList = ();
+	}
+	if (! -d $cache) {
+		qxx ("mkdir -p $cache");
+	}
+	if (! -d "$root/$cache") {
+		qxx ("mkdir -p $root/$cache 2>&1");
+	}
+	qxx ("mount --bind $cache $root/$cache 2>&1");
+	push (@mountList,"$root/$cache");
+	$this->{mountList} = \@mountList;
+	return @mountList;
+}
+
+#==========================================
 # setupMount
 #------------------------------------------
 sub setupMount {
@@ -853,7 +901,7 @@ sub setupMount {
 	my $root   = $this->{root};
 	my $baseSystem = $this->{baseSystem};
 	my $prefix = $root."/".$baseSystem;
-	my $cache  = "/var/cache/kiwi";
+	my $cache  = "/var/cache";
 	my @mountList;
 	if (defined $this->{mountList}) {
 		@mountList = @{$this->{mountList}};
@@ -861,9 +909,6 @@ sub setupMount {
 		@mountList = ();
 	}
 	$kiwi -> info ("Mounting required file systems");
-	if (! -d $cache) {
-		qxx ("mkdir -p $cache");
-	}
 	if (! -d $prefix) {
 	if (! mkdir $prefix) {
 		$kiwi -> failed ();
@@ -894,11 +939,8 @@ sub setupMount {
 		push (@mountList,"$root/sys");
 		push (@mountList,"$root/dev/pts");
 	}
-	if (! -d "$root/$cache") {
-		qxx ("mkdir -p $root/$cache 2>&1");
-	}
-	qxx ("mount --bind $cache $root/$cache 2>&1");
-	push (@mountList,"$root/$cache");
+	$this->{mountList} = \@mountList;
+	@mountList = $this -> setupCacheMount();
 	$kiwi -> done();
 	foreach my $chl (keys %{$this->{sourceChannel}{private}}) {
 		my @opts = @{$this->{sourceChannel}{private}{$chl}};

@@ -489,10 +489,16 @@ sub setupInstallationSource {
 		}
 		foreach my $alias (keys %{$source{$stype}}) {
 			my @sopts = @{$source{$stype}{$alias}};
-			my @zopts = ("--keep-packages");
+			my @zopts = ();
 			foreach my $opt (@sopts) {
 				next if ! defined $opt;
 				my ($key,$val) = split (/=/,$opt);
+				#==========================================
+				# keep packages on remote repos
+				#------------------------------------------
+				if ($val =~ /^'ftp:\/\/|http:\/\/|https:\/\/|opensuse:\/\//) {
+					push (@zopts,"--keep-packages");
+				}
 				#==========================================
 				# Adapt URI parameter
 				#------------------------------------------
