@@ -1706,16 +1706,24 @@ function createFileSystem {
 		vgcreate systemvg $diskPartition >/dev/null
 	else
 		# .../
-		# There is no need to create a filesystem on the partition
-		# because the image itself contains the filesystem
+		# Create partition in case it is not root system and
+		# there is no system  already created There is no need to
+		# create a filesystem on the root partition
 		# ----
-		# mke2fs $diskPartition >/dev/null
-		# if test $? != 0;then
-		#   systemException \
-		#       "Failed to create filesystem on: $diskPartition !" \
-		#   "reboot"
-		# fi
-		:
+		if test $diskID -gt 2; then
+			if ! mount $diskPartition; then
+				Echo "Partition $diskPartition is not valid, formating..."
+				mke2fs -j $diskPartition 1>&2
+				if test $? != 0; then
+					systemException \
+						"Failed to create filesystem on: $diskPartition !" \
+					"reboot"
+				fi
+			else
+				Echo "Partition $diskPartition is valid, leave it untouched"
+				umount $diskPartition 1>&2
+			fi
+		fi
 	fi
 }
 #======================================
