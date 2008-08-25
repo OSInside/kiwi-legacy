@@ -523,6 +523,12 @@ sub setupInstallationSource {
 					}
 					push (@zopts,"--type $val");
 				}
+				#==========================================
+				# Adapt priority parameter
+				#------------------------------------------
+				if ($key eq "priority") {
+					# next versions of zypper knows about it
+				}
 			}
 			my $sadd = "addrepo @zopts $alias";
 			if (! $chroot) {

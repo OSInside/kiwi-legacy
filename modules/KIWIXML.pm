@@ -1675,9 +1675,11 @@ sub getRepository {
 	my %result;
 	foreach my $element (@node) {
 		my $type = $element -> getAttribute("type");
+		my $alias= $element -> getAttribute("alias");
+		my $prio = $element -> getAttribute("priority");
 		my $stag = $element -> getElementsByTagName ("source") -> get_node(1);
 		my $source = $this -> resolveLink ( $stag -> getAttribute ("path") );
-		$result{$source} = $type;
+		$result{$source} = [$type,$alias,$prio];
 	}
 	return %result;
 }

@@ -20,7 +20,7 @@
   STATUS        : Development
   ****************
 -->
-<grammar xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" xmlns:db="http://docbook.org/ns/docbook" xmlns:rng="http://relaxng.org/ns/structure/1.0" xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+<grammar xmlns:db="http://docbook.org/ns/docbook" xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" xmlns:rng="http://relaxng.org/ns/structure/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
   <db:info>
     <db:releaseinfo>$Id: kiwi.rnc 2957 2008-01-11 12:53:39Z thomas-schraitle $</db:releaseinfo>
     <db:releaseinfo>RNC Schema Version 2.4</db:releaseinfo>
@@ -986,11 +986,36 @@ replacable or if not specified it's a must have repository</a:documentation>
         </choice>
       </attribute>
     </define>
+    <define name="k.repository.alias.attribute">
+      <attribute name="alias">
+        <a:documentation>Alias name to be used for this repository. This is an
+optional free form text. If not set the source attribute
+value is used and builds the alias name by replacing
+each '/' with a '_'. An alias name should be set if the
+source argument doesn't really explain what this repository
+contains</a:documentation>
+      </attribute>
+    </define>
+    <define name="k.repository.priority.attribute">
+      <attribute name="priority">
+        <a:documentation>Channel priority assigned to all packages available in
+this channel (0 if not set). If the exact same package
+is available in more than one channel, the highest
+priority is used</a:documentation>
+        <data type="integer"/>
+      </attribute>
+    </define>
     <define name="k.repository.attlist">
       <interleave>
         <ref name="k.repository.type.attribute"/>
         <optional>
           <ref name="k.repository.status.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.repository.alias.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.repository.priority.attribute"/>
         </optional>
       </interleave>
     </define>

@@ -401,8 +401,11 @@ have any effect.
 %\newpage
 
 \begin{Command}{12cm}
-<repository type="type" \textit{status="replaceable"}>\\
-\hspace*{1cm}<source path="URL"/>\\
+<repository type="type"\\
+\hspace*{1cm}\textit{status="replaceable"}\\
+\hspace*{1cm}\textit{alias="name"}\\
+\hspace*{1cm}\textit{priority="number"}>\\
+\hspace*{2cm}<source path="URL"/>\\
 </repository>\\
 ...
 \end{Command}
@@ -434,15 +437,31 @@ yast2              & yes & yes \\
 \hline
 \end{tabular}\\
 
-The optional attribute \textbf{status=''replaceable''} makes only
-sense for boot image descriptions. This attribute indicates that
-the repository is allowed to become replaced by the repositories
-defined in the system image descriptions. Because kiwi automatically
-builds the boot image if required it should create that image from
-the same repositories which are used to build the system image to
-make sure both fit together. Therefore it is required to allow the
-repository to become overwritten which is indicated by the status
-attribute.
+Within the repository section there are the following optional
+attributes:
+
+\begin{itemize}
+\item \textbf{status=''replaceable''}\\
+      This attribute makes only sense for boot image descriptions.
+      It indicates that the repository is allowed to become replaced by
+      the repositories defined in the system image descriptions. Because kiwi
+      automatically builds the boot image if required it should create that
+      image from the same repositories which are used to build the system
+      image to make sure both fit together. Therefore it is required to allow
+      the repository to become overwritten which is indicated by the status
+      attribute.
+\item \textbf{alias=''name''}\\
+      Specifies an alternative name used to identify the source channel.
+      If not set the source attribute value is used and builds the alias name
+      by replacing each ''/'' with a ''\_''. An alias name should be set if
+      the source argument doesn't really explain what this repository
+      contains 
+\item \textbf{priority=''number''}\\
+      Specifies the channel priority assigned to all packages available in
+      this channel (0 if not set). If the exact same package
+      is available in more than one channel, the highest priority is used.
+      At the moment this only works for the smart package manager.
+\end{itemize}
 
 The source child element contains the path attribute, which specifies
 the location (URL) of the repository. The path specification can be any

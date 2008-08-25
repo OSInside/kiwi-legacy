@@ -90,7 +90,9 @@ sub new {
 	# Create sourceChannel hash
 	#------------------------------------------
 	foreach my $source (keys %repository) {
-		my $type = $repository{$source};
+		my $type = $repository{$source}[0];
+		my $alias= $repository{$source}[1];
+		my $prio = $repository{$source}[2];
 		my $urlHandler  = new KIWIURL ($kiwi,$this);
 		my $publics_url = $urlHandler -> normalizePath ($source);
 		if ($publics_url =~ /^\//) {
@@ -115,10 +117,13 @@ sub new {
 		#==========================================
 		# build channel name/alias...
 		#------------------------------------------
-		my $channel = $publics_url;
-		$channel =~ s/\//_/g;
-		$channel =~ s/^_//;
-		$channel =~ s/_$//;
+		my $channel = $alias;
+		if (! $channel) {
+			$channel = $publics_url;
+			$channel =~ s/\//_/g;
+			$channel =~ s/^_//;
+			$channel =~ s/_$//;
+		}
 		#==========================================
 		# build source key...
 		#------------------------------------------
@@ -131,11 +136,17 @@ sub new {
 		$private_url = "'".$private_url."'";
 		$publics_url = "'".$publics_url."'";
 		my @private_options = ("type=$type","name=$channel",
-			"$srckey=$private_url",$srcopt,"-y"
+			"$srckey=$private_url",$srcopt
 		);
 		my @public_options  = ("type=$type","name=$channel",
-			"$srckey=$publics_url",$srcopt,"-y"
+			"$srckey=$publics_url",$srcopt
 		);
+		if (($prio) && ($prio != 0)) {
+			push (@private_options,"priority=$prio");
+			push (@public_options ,"priority=$prio");
+		}
+		push (@private_options,"-y");
+		push (@public_options ,"-y");
 		$sourceChannel{private}{$channel} = \@private_options;
 		$sourceChannel{public}{$channel}  = \@public_options;
 		$count++;

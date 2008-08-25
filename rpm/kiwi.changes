@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Mon Aug 25 16:49:57 CEST 2008 - ms@suse.de
+
+- v2.70
+- added support for repository alias name
+- added support for repository priority (smart only)
+- added better schema documentation
+
+-------------------------------------------------------------------
 Fri Aug 22 11:27:22 CEST 2008 - ms@suse.de
 
 - v2.69
