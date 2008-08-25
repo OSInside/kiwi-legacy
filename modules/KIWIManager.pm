@@ -971,6 +971,12 @@ sub setupUpgrade {
 		my @installOpts = (
 			"--auto-agree-with-licenses"
 		);
+		my %pattr = $xml -> getPackageAttributes();
+		if (($pattr{patternType} ne "plusRecommended") &&
+			($pattr{patternPackageType} ne "plusRecommended")
+		) {
+			push (@installOpts,"--no-recommends");
+		}
 		print $fd "function clean { kill \$SPID;";
 		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 		print $fd "trap clean INT TERM\n";
@@ -999,12 +1005,6 @@ sub setupUpgrade {
 				print $fd "SPID=\$!;wait \$SPID\n";
 			}
 			if (@newpatts) {
-				my %pattr = $xml -> getPackageAttributes();
-				if (($pattr{patternType} ne "plusRecommended") &&
-					($pattr{patternPackageType} ne "plusRecommended")
-				) {
-					push (@installOpts,"--no-recommends");
-				}
 				print $fd "test \$? = 0 && chroot $root @zypper install ";
 				print $fd "@installOpts -t pattern @newpatts &\n";
 				print $fd "SPID=\$!;wait \$SPID\n";
@@ -1114,6 +1114,9 @@ sub setupRootSystem {
 	#------------------------------------------
 	if ($manager eq "smart") {
 		if (! $chroot) {
+			#==========================================
+			# setup install options outside of chroot
+			#------------------------------------------
 			my @installOpts = (
 				"--explain",
 				"--log-level=error",
@@ -1144,6 +1147,9 @@ sub setupRootSystem {
 			print $fd "echo \$? > $screenCall.exit\n";
 			print $fd "rm -f $root/etc/smart/channels/*\n";
 		} else {
+			#==========================================
+			# setup install options inside of chroot
+			#------------------------------------------
 			my @install = @packs;
 			my @installOpts = (
 				"--explain",
@@ -1177,9 +1183,18 @@ sub setupRootSystem {
 	#------------------------------------------
 	if ($manager eq "zypper") {
 		if (! $chroot) {
+			#==========================================
+			# setup install options outside of chroot
+			#------------------------------------------
 			my @installOpts = (
 				"--auto-agree-with-licenses"
 			);
+			my %pattr = $xml -> getPackageAttributes();
+			if (($pattr{patternType} ne "plusRecommended") &&
+				($pattr{patternPackageType} ne "plusRecommended")
+			) {
+				push (@installOpts,"--no-recommends");
+			}
 			#==========================================
 			# Add package manager to package list
 			#------------------------------------------
@@ -1218,12 +1233,6 @@ sub setupRootSystem {
 				print $fd "SPID=\$!;wait \$SPID\n";
 			}
 			if (@newpatts) {
-				my %pattr = $xml -> getPackageAttributes();
-				if (($pattr{patternType} ne "plusRecommended") &&
-					($pattr{patternPackageType} ne "plusRecommended")
-				) {
-					push (@installOpts,"--no-recommends");
-				}
 				if (@packs) {
 					print $fd "test \$? = 0 && ";
 				}
@@ -1233,6 +1242,9 @@ sub setupRootSystem {
 			}
 			print $fd "echo \$? > $screenCall.exit\n";
 		} else {
+			#==========================================
+			# select patterns and packages
+			#------------------------------------------
 			my @install   = ();
 			my @newpatts  = ();
 			foreach my $need (@packs) {
@@ -1242,9 +1254,18 @@ sub setupRootSystem {
 				}
 				push @install,$need;
 			}
+			#==========================================
+			# setup install options inside of chroot
+			#------------------------------------------
 			my @installOpts = (
 				"--auto-agree-with-licenses"
 			);
+			my %pattr = $xml -> getPackageAttributes();
+			if (($pattr{patternType} ne "plusRecommended") &&
+				($pattr{patternPackageType} ne "plusRecommended")
+			) {
+				push (@installOpts,"--no-recommends");
+			}
 			#==========================================
 			# Create screen call file
 			#------------------------------------------
@@ -1263,12 +1284,6 @@ sub setupRootSystem {
 				print $fd "SPID=\$!;wait \$SPID\n";
 			}
 			if (@newpatts) {
-				my %pattr = $xml -> getPackageAttributes();
-				if (($pattr{patternType} ne "plusRecommended") &&
-					($pattr{patternPackageType} ne "plusRecommended")
-				) {
-					push (@installOpts,"--no-recommends");
-				}
 				if (@install) {
 					print $fd "test \$? = 0 && ";
 				}
