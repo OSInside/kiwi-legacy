@@ -357,7 +357,7 @@ sub init {
 		$manager -> freeLock();
 		return undef;
 	}
-	$this -> cleanMount();
+	$this -> cleanMount('cache$');
 	$manager -> freeLock();
 	#==================================
 	# Create default fstab file
@@ -1001,6 +1001,7 @@ sub cleanMount {
 	# umount all mountList registered devices
 	# ---
 	my $this = shift;
+	my $expr = shift;
 	my $kiwi = $this->{kiwi};
 	my $root = $this->{root};
 	my $xml  = $this->{xml};
@@ -1011,7 +1012,14 @@ sub cleanMount {
 	my @mountList  = @{$this->{mountList}};
 	my $baseSystem = $this->{baseSystem};
 	my $prefix = $root."/".$baseSystem;
+	my @newList= ();
 	foreach my $item (reverse @mountList) {
+		if (defined $expr) {
+			if ($item !~ /$expr/) {
+				push (@newList,$item);
+				next;
+			}
+		}
 		$kiwi -> info ("Umounting path: $item\n");
 		my $data = qxx ("umount \"$item\" 2>&1");
 		my $code = $? >> 8;
@@ -1032,6 +1040,7 @@ sub cleanMount {
 		if ($item =~ /^\/tmp\/kiwimount/) {
 			qxx ("rmdir -p \"$item\" 2>&1");
 		}
+		
 	}
 	if (defined $this->{baseRoot}) {
 		$overlay -> resetOverlay();
@@ -1039,7 +1048,7 @@ sub cleanMount {
 	if (-d $prefix) {
 		rmdir $prefix;
 	}
-	undef $this->{mountList};
+	$this->{mountList} = \@newList;
 	return $this;
 }
 
