@@ -936,7 +936,8 @@ sub main {
 		$kiwi -> info ("Starting system to image migration");
 		$migrate = new KIWIMigrate (
 			$kiwi,$Destination,$Migrate,\@Exclude,$Report,
-			\@AddRepository,\@AddRepositoryType
+			\@AddRepository,\@AddRepositoryType,
+			$SetRepository,$SetRepositoryType
 		);
 		if (! defined $migrate) {
 			my $code = kiwiExit (1); return $code;

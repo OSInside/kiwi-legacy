@@ -50,6 +50,8 @@ sub new {
 	my $demo = shift;
 	my $addr = shift;
 	my $addt = shift;
+	my $setr = shift;
+	my $sett = shift;
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
@@ -106,9 +108,14 @@ sub new {
 		if ($line =~ /(.*)\s*=\s*(.*),(.*)/) {
 			my $source = $3;
 			my $product= $1;
-			my $boot = $2;
+			my $boot   = $2;
+			my $type   = "yast2";
+			if ((defined $setr) && (defined $sett)) {
+				$source= $setr;
+				$type  = $sett;
+			}
 			$OSSource{$product}{$source}{boot} = $boot;
-			$OSSource{$product}{$source}{type} = "yast2";
+			$OSSource{$product}{$source}{type} = $type;
 			if ((defined $addr) && (defined $addt)) {
 				my @addrepo     = @{$addr};
 				my @addrepotype = @{$addt};

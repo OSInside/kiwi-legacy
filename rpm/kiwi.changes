@@ -5,6 +5,7 @@ Fri Aug 22 11:27:22 CEST 2008 - ms@suse.de
 - fixed cache usage, need bind mount in early prepare (bnc #417457)
 - fixed channel names, don't use PID here (bnc #417457)
 - zypper: keep packages from remote repos only (bnc #419380)
+- allow --set-repo/--set-repotype for migrate mode (bnc #419219) 
 - added partition format patch for netboot by SLEPOS team
 
 -------------------------------------------------------------------
