@@ -126,60 +126,64 @@ $KnownFS{cpio}{ro}        = 0;
 #============================================
 # Globals
 #--------------------------------------------
-our $Prepare;           # control XML file for building chroot extend
-our $Create;            # image description for building image extend
-our $CreateInstSource;  # create installation source from meta packages
-our $Upgrade;           # upgrade physical extend
-our $Destination;       # destination directory for logical extends
-our $RunTestSuite;      # run tests on prepared tree
-our @RunTestName;       # run specified tests
-our $LogFile;           # optional file name for logging
-our $RootTree;          # optional root tree destination
-our $Survive;           # if set to "yes" don't exit kiwi
-our $BootStick;         # deploy initrd booting from USB stick
-our $BootStickSystem;   # system image to be copied on an USB stick
-our $BootStickDevice;   # device to install stick image on
-our $BootVMSystem;      # system image to be copied on a VM disk
-our $BootVMFormat;      # virtual disk format supported by qemu-img
-our $BootVMDisk;        # deploy initrd booting from a VM 
-our $BootVMSize;        # size of virtual disk
-our $InstallCD;         # Installation initrd booting from CD
-our $InstallCDSystem;   # virtual disk system image to be installed on disk
-our $BootCD;            # Boot initrd booting from CD
-our $BootUSB;           # Boot initrd booting from Stick
-our $InstallStick;      # Installation initrd booting from USB stick
-our $InstallStickSystem;# virtual disk system image to be installed on disk
-our $StripImage;        # strip shared objects and binaries
-our $CreateHash;        # create .checksum.md5 for given description
-our $SetupSplash;       # setup splash screen (bootsplash or splashy)
-our $ImageName;         # filename of current image, used in Modules
-our %ForeignRepo;       # may contain XML::LibXML::Element objects
-our @AddRepository;     # add repository for building physical extend
-our @AddRepositoryType; # add repository type
-our @AddPackage;        # add packages to the image package list
-our $IgnoreRepos;       # ignore repositories specified so far
-our $SetRepository;     # set first repository for building physical extend
-our $SetRepositoryType; # set firt repository type
-our $SetImageType;      # set image type to use, default is primary type
-our $Migrate;           # migrate running system to image description
-our @Exclude;           # exclude directories in migrate search
-our $Report;            # create report on root/ tree migration only
-our @Profiles;          # list of profiles to include in image
-our $ListProfiles;      # lists the available profiles in image
-our $ForceNewRoot;      # force creation of new root directory
-our $BaseRoot;          # use given path as base system
-our $BaseRootMode;      # specify base-root mode copy | union
-our $NoColor;           # do not used colored output (done/failed messages)
-our $LogPort;           # specify alternative log server port
-our $GzipCmd;           # command to run to gzip things
-our $PrebuiltBootImage; # directory where a prepared boot image may be found
-our $PreChrootCall;     # program name called before chroot switch
-our $listXMLInfo;       # list XML information for this operation
-our $Compress;          # set compression level
-our $CreatePassword;    # create crypted password
-our $ISOCheck;          # create checkmedia boot entry
-our $PackageManager;    # package manager to use for this image
-our $kiwi;              # global logging handler object
+our $Prepare;               # control XML file for building chroot extend
+our $Create;                # image description for building image extend
+our $CreateInstSource;      # create installation source from meta packages
+our $Upgrade;               # upgrade physical extend
+our $Destination;           # destination directory for logical extends
+our $RunTestSuite;          # run tests on prepared tree
+our @RunTestName;           # run specified tests
+our $LogFile;               # optional file name for logging
+our $RootTree;              # optional root tree destination
+our $Survive;               # if set to "yes" don't exit kiwi
+our $BootStick;             # deploy initrd booting from USB stick
+our $BootStickSystem;       # system image to be copied on an USB stick
+our $BootStickDevice;       # device to install stick image on
+our $BootVMSystem;          # system image to be copied on a VM disk
+our $BootVMFormat;          # virtual disk format supported by qemu-img
+our $BootVMDisk;            # deploy initrd booting from a VM 
+our $BootVMSize;            # size of virtual disk
+our $InstallCD;             # Installation initrd booting from CD
+our $InstallCDSystem;       # virtual disk system image to be installed on disk
+our $BootCD;                # Boot initrd booting from CD
+our $BootUSB;               # Boot initrd booting from Stick
+our $InstallStick;          # Installation initrd booting from USB stick
+our $InstallStickSystem;    # virtual disk system image to be installed on disk
+our $StripImage;            # strip shared objects and binaries
+our $CreateHash;            # create .checksum.md5 for given description
+our $SetupSplash;           # setup splash screen (bootsplash or splashy)
+our $ImageName;             # filename of current image, used in Modules
+our %ForeignRepo;           # may contain XML::LibXML::Element objects
+our @AddRepository;         # add repository for building physical extend
+our @AddRepositoryType;     # add repository type
+our @AddRepositoryAlias;    # alias name for the repository
+our @AddRepositoryPriority; # priority for the repository
+our @AddPackage;            # add packages to the image package list
+our $IgnoreRepos;           # ignore repositories specified so far
+our $SetRepository;         # set first repository for building physical extend
+our $SetRepositoryType;     # set firt repository type
+our $SetRepositoryAlias;    # alias name for the repository
+our $SetRepositoryPriority; # priority for the repository
+our $SetImageType;          # set image type to use, default is primary type
+our $Migrate;               # migrate running system to image description
+our @Exclude;               # exclude directories in migrate search
+our $Report;                # create report on root/ tree migration only
+our @Profiles;              # list of profiles to include in image
+our $ListProfiles;          # lists the available profiles in image
+our $ForceNewRoot;          # force creation of new root directory
+our $BaseRoot;              # use given path as base system
+our $BaseRootMode;          # specify base-root mode copy | union
+our $NoColor;               # do not used colored output (done/failed messages)
+our $LogPort;               # specify alternative log server port
+our $GzipCmd;               # command to run to gzip things
+our $PrebuiltBootImage;     # directory where a prepared boot image may be found
+our $PreChrootCall;         # program name called before chroot switch
+our $listXMLInfo;           # list XML information for this operation
+our $Compress;              # set compression level
+our $CreatePassword;        # create crypted password
+our $ISOCheck;              # create checkmedia boot entry
+our $PackageManager;        # package manager to use for this image
+our $kiwi;                  # global logging handler object
 
 #============================================
 # Globals
@@ -364,13 +368,19 @@ sub main {
 		# Check for set-repo option
 		#------------------------------------------
 		if (defined $SetRepository) {
-			$xml -> setRepository ($SetRepositoryType,$SetRepository);
+			$xml -> setRepository (
+				$SetRepositoryType,$SetRepository,
+				$SetRepositoryAlias,$SetRepositoryPriority
+			);
 		}
 		#==========================================
 		# Check for add-repo option
 		#------------------------------------------
 		if (defined @AddRepository) {
-			$xml -> addRepository (\@AddRepositoryType,\@AddRepository);
+			$xml -> addRepository (
+				\@AddRepositoryType,\@AddRepository,
+				\@AddRepositoryAlias,\@AddRepositoryPriority
+			);
 		}
 		#==========================================
 		# Validate repo types
@@ -892,13 +902,19 @@ sub main {
 		# Check for set-repo option
 		#------------------------------------------
 		if (defined $SetRepository) {
-			$xml -> setRepository ($SetRepositoryType,$SetRepository);
+			$xml -> setRepository (
+				$SetRepositoryType,$SetRepository,
+				$SetRepositoryAlias,$SetRepositoryPriority
+			);
 		}
 		#==========================================
 		# Check for add-repo option
 		#------------------------------------------
 		if (defined @AddRepository) {
-			$xml -> addRepository (\@AddRepositoryType,\@AddRepository);
+			$xml -> addRepository (
+				\@AddRepositoryType,\@AddRepository,
+				\@AddRepositoryAlias,\@AddRepositoryPriority
+			);
 		}
 		#==========================================
 		# Validate repo types
@@ -937,7 +953,9 @@ sub main {
 		$migrate = new KIWIMigrate (
 			$kiwi,$Destination,$Migrate,\@Exclude,$Report,
 			\@AddRepository,\@AddRepositoryType,
-			$SetRepository,$SetRepositoryType
+			\@AddRepositoryAlias,\@AddRepositoryPriority,
+			$SetRepository,$SetRepositoryType,
+			$SetRepositoryAlias,$SetRepositoryPriority
 		);
 		if (! defined $migrate) {
 			my $code = kiwiExit (1); return $code;
@@ -1139,9 +1157,13 @@ sub init {
 		"ignore-repos"          => \$IgnoreRepos,
 		"add-repo=s"            => \@AddRepository,
 		"add-repotype=s"        => \@AddRepositoryType,
+		"add-repoalias=s"       => \@AddRepositoryAlias,
+		"add-repopriority=i"    => \@AddRepositoryPriority,
 		"add-package=s"         => \@AddPackage,
 		"set-repo=s"            => \$SetRepository,
 		"set-repotype=s"        => \$SetRepositoryType,
+		"set-repoalias=s"       => \$SetRepositoryAlias,
+		"set-repopriority=i"    => \$SetRepositoryPriority,
 		"type|t=s"              => \$SetImageType,
 		"upgrade|u=s"           => \$Upgrade,
 		"destdir|d=s"           => \$Destination,
@@ -1339,7 +1361,6 @@ sub usage {
 	print "System to Image migration:\n";
 	print "  kiwi -m | --migrate <name> --destdir <destination-path>\n";
 	print "     [ --exclude <directory> --exclude <...> ]\n";
-	print "     [ --add-repo <repo-path> --add-repotype <type> ]\n";
 	print "     [ --report ]\n";
 	print "Image postprocessing modes:\n";
 	print "  kiwi --bootstick <initrd> --bootstick-system <systemImage>\n";
@@ -1412,9 +1433,23 @@ sub usage {
 	print "\n";
 	print "  [ --add-repo <repo-path> --add-repotype <type> ]\n";
 	print "    Add the given repository and type for this run of an\n";
-	print "    image prepare or upgrade process.\n";
+	print "    image prepare/upgrade or migrate process.\n";
 	print "    Multiple --add-repo/--add-repotype options are possible\n";
 	print "    The change will not be written to the xml description\n";
+	print "\n";
+	print "  [ --(add|set)-repoalias <alias name> ]\n";
+	print "    Alias name to be used for this repository. This is an\n";
+	print "    optional free form text. If not set the source attribute\n";
+	print "    value is used and builds the alias name by replacing\n";
+	print "    each '/' with a '_'. An alias name should be set if the\n";
+	print "    source argument doesn't really explain what this repository\n";
+	print "    contains\n";
+	print "\n";
+	print "  [ --(add|set)-repoprio <number> ]\n";
+	print "    Channel priority assigned to all packages available in\n";
+	print "    this channel (0 if not set). If the exact same package\n";
+	print "    is available in more than one channel, the highest\n";
+	print "    priority is used\n";
 	print "\n";
 	print "  [ --ignore-repos ]\n";
 	print "    Ignore all repositories specified so-far, in XML or\n";
@@ -1425,9 +1460,9 @@ sub usage {
 	print "\n";
 	print "  [ --set-repo <repo-path> [ --set-repotype <type> ]]\n";
 	print "    set the given repository and optional type for the first\n";
-	print "    repository entry within the xml description. The change will not\n";
-	print "    be written to the xml file and is valid for this run of\n";
-	print "    image prepare or upgrade process.\n";
+	print "    repository entry within the xml description. The change\n";
+	print "    will not be written to the xml file and is valid for this\n";
+	print "    run of image prepare/upgrade or migrate process.\n";
 	print "\n";
 	print "  [ --add-package <package> ]\n";
 	print "    Add the given package name to the list of image packages\n";

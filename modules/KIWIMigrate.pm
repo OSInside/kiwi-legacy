@@ -50,8 +50,12 @@ sub new {
 	my $demo = shift;
 	my $addr = shift;
 	my $addt = shift;
+	my $adda = shift;
+	my $addp = shift;
 	my $setr = shift;
 	my $sett = shift;
+	my $seta = shift;
+	my $setp = shift;
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
@@ -110,20 +114,36 @@ sub new {
 			my $product= $1;
 			my $boot   = $2;
 			my $type   = "yast2";
+			my $alias;
+			my $prio;
 			if ((defined $setr) && (defined $sett)) {
 				$source= $setr;
 				$type  = $sett;
 			}
+			if (defined $seta) {
+				$alias = $seta;
+			}
+			if (defined $setp) {
+				$prio = $setp;
+			}
 			$OSSource{$product}{$source}{boot} = $boot;
 			$OSSource{$product}{$source}{type} = $type;
+			$OSSource{$product}{$source}{alias}= $alias;
+			$OSSource{$product}{$source}{prio} = $prio;
 			if ((defined $addr) && (defined $addt)) {
 				my @addrepo     = @{$addr};
 				my @addrepotype = @{$addt};
+				my @addrepoalias= @{$adda};
+				my @addrepoprio = @{$addp};
 				foreach (my $count=0;$count <@addrepo; $count++) {
 					my $source= $addrepo[$count];
 					my $type  = $addrepotype[$count];
+					my $alias = $addrepoalias[$count];
+					my $prio  = $addrepoprio[$count];
 					$OSSource{$product}{$source}{boot} = "none";
 					$OSSource{$product}{$source}{type} = $type;
+					$OSSource{$product}{$source}{alias}= $alias;
+					$OSSource{$product}{$source}{prio} = $prio;
 				}
 			}
 		}
@@ -260,7 +280,16 @@ sub setTemplate {
 	#------------------------------------------
 	foreach my $source (keys %{$osc{$product}} ) {
 		my $type = $osc{$product}{$source}{type};
-		print FD "\t".'<repository type="'.$type.'">'."\n";
+		my $alias= $osc{$product}{$source}{alias};
+		my $prio = $osc{$product}{$source}{prio};
+		print FD "\t".'<repository type="'.$type.'"';
+		if (defined $alias) {
+			print FD ' "alias="'.$alias.'"';
+		}
+		if ((defined $prio) && ($prio != 0)) {
+			print FD ' "priority="'.$prio.'"';
+		}
+		print FD '>'."\n";
 		print FD "\t\t".'<source path="'.$source.'"/>'."\n";
 		print FD "\t".'</repository>'."\n";
 	}

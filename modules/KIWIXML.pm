@@ -1727,6 +1727,8 @@ sub setRepository {
 	my $this = shift;
 	my $type = shift;
 	my $path = shift;
+	my $alias= shift;
+	my $prio = shift;
 	my $element = $this->{repositNodeList} -> get_node(1);
 	if (defined $type) {
 		$element -> setAttribute ("type",$type);
@@ -1734,6 +1736,12 @@ sub setRepository {
 	if (defined $path) {
 		$element -> getElementsByTagName ("source")
 			-> get_node (1) -> setAttribute ("path",$path);
+	}
+	if (defined $alias) {
+		$element -> setAttribute ("alias",$alias);
+	}
+	if ((defined $prio) && ($prio != 0)) {
+		$element -> setAttribute ("priority",$prio);
 	}
 	$this -> createURLList();
 	return $this;
@@ -1755,8 +1763,12 @@ sub addRepository {
 	my $kiwi = $this->{kiwi};
 	my @type = @{$_[0]};
 	my @path = @{$_[1]};
+	my @alias= @{$_[2]};
+	my @prio = @{$_[3]};
 	foreach my $path (@path) {
 		my $type = shift @type;
+		my $alias= shift @alias;
+		my $prio = shift @prio;
 		if (! defined $type) {
 			$kiwi -> error   ("No type for repo [$path] specified");
 			$kiwi -> skipped ();
@@ -1772,6 +1784,12 @@ sub addRepository {
 		$element -> setAttribute ("status","fixed");
 		$element -> getElementsByTagName ("source") -> get_node (1)
 			 -> setAttribute ("path",$path);
+		if (defined $alias) {
+			$element -> setAttribute ("alias",$alias);
+		}
+		if ((defined $prio) && ($prio != 0)) {
+			$element -> setAttribute ("priority",$prio);
+		}
 		$xaddXML -> push ( $element );
 		$this->{repositNodeList} -> append ( $xaddXML );
 	}
