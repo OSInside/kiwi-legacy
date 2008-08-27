@@ -368,7 +368,7 @@ sub init {
 		$manager -> freeLock();
 		return undef;
 	}
-	$this -> cleanMount('cache$');
+	$this -> cleanMount('cache\/(kiwi|zypp)$');
 	$manager -> freeLock();
 	#==================================
 	# Create default fstab file
@@ -880,21 +880,23 @@ sub setupCacheMount {
 	# ---
 	my $this  = shift;
 	my $root  = $this->{root};
-	my $cache = "/var/cache";
+	my @cache = ("/var/cache/zypp","/var/cache/kiwi");
 	my @mountList;
 	if (defined $this->{mountList}) {
 		@mountList = @{$this->{mountList}};
 	} else {
 		@mountList = ();
 	}
-	if (! -d $cache) {
-		qxx ("mkdir -p $cache");
+	foreach my $cache (@cache) {
+		if (! -d $cache) {
+			qxx ("mkdir -p $cache");
+		}
+		if (! -d "$root/$cache") {
+			qxx ("mkdir -p $root/$cache 2>&1");
+		}
+		qxx ("mount --bind $cache $root/$cache 2>&1");
+		push (@mountList,"$root/$cache");
 	}
-	if (! -d "$root/$cache") {
-		qxx ("mkdir -p $root/$cache 2>&1");
-	}
-	qxx ("mount --bind $cache $root/$cache 2>&1");
-	push (@mountList,"$root/$cache");
 	$this->{mountList} = \@mountList;
 	return @mountList;
 }
@@ -1081,8 +1083,8 @@ sub cleanSource {
 #------------------------------------------
 sub cleanManager {
 	# ...
-	# remove data dir(s) of the packagemanager created
-	# for kiwi in /var/cache/kiwi/<packagemanager>
+	# remove data and cache dir(s) of the packagemanager
+	# created for building the new root system
 	# ---
 	my $this = shift;
 	my $manager = $this->{manager};

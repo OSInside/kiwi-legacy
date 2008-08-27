@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Aug 27 18:04:12 CEST 2008 - ms@suse.de
+
+- v2.71
+- fixed cache bind mount, only bind mount kiwi and package
+  manager cache directories to avoid conflicts with others 
+
+-------------------------------------------------------------------
 Mon Aug 25 16:49:57 CEST 2008 - ms@suse.de
 
 - v2.70
