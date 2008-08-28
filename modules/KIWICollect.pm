@@ -1661,6 +1661,7 @@ sub createMetadata
     $this->{m_logger}->info("[I] [createMetadata] skipping products file due to missing vars!");
   }
 
+  $this->createBootPackageLinks();
 
   ## step 7: SHA1SUMS
   $this->{m_logger}->info("[I] Calling create_sha1sums:");
@@ -1781,7 +1782,6 @@ sub createMetadata
   }
   @data = (); # clear list
 
-  $this->createBootPackageLinks();
 
 }
 # createMetadata
