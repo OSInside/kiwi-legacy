@@ -2416,8 +2416,7 @@ function mountSystemUnified {
 					! mount $rwDevice $rwDir >/dev/null
 				then
 					Echo "Creating filesystem for RW data on $rwDevice..."
-					fsopts="-I 128 -O dir_index -b 4096 -j -J size=4 -q -F"
-					if ! mke2fs $fsopts $rwDevice >/dev/null;then
+					if ! mke2fs -j $rwDevice >/dev/null;then
 						Echo "Failed to create ext3 filesystem"
 						return 1
 					fi

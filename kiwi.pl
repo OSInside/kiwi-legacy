@@ -43,7 +43,7 @@ use KIWITest;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "2.71";
+our $Version       = "2.72";
 our $openSUSE      = "http://download.opensuse.org/repositories/";
 our $ConfigFile    = "$ENV{'HOME'}/.kiwirc";
 our $ConfigName    = "config.xml";
@@ -76,7 +76,7 @@ our $JabberComponent;  # configurable jabber component
 our $LogServerPort;    # configurable log server port
 our $Gzip;             # configurable gzip command
 if (! defined $LogServerPort) {
-	$LogServerPort = 9000;
+	$LogServerPort = "off";
 }
 if (! defined $Gzip) {
 	$Gzip = "gzip -9";
@@ -183,6 +183,9 @@ our $Compress;              # set compression level
 our $CreatePassword;        # create crypted password
 our $ISOCheck;              # create checkmedia boot entry
 our $PackageManager;        # package manager to use for this image
+our $FSBlockSize;           # filesystem block size
+our $FSInodeSize;           # filesystem inode size
+our $FSJournalSize;         # filesystem journal size
 our $kiwi;                  # global logging handler object
 
 #============================================
@@ -1198,6 +1201,9 @@ sub init {
 		"prechroot-call=s"      => \$PreChrootCall,
 		"list-xmlinfo|x=s"      => \$listXMLInfo,
 		"compress=s"            => \$Compress,
+		"fs-blocksize=i"        => \$FSBlockSize,
+		"fs-journalsize=i"      => \$FSJournalSize,
+		"fs-inodesize=i"        => \$FSInodeSize,
 		"help|h"                => \&usage,
 		"<>"                    => \&usage
 	);
@@ -1500,10 +1506,25 @@ sub usage {
 	print "    If additional name is omitted default set of tests will be\n";
 	print "    used. Otherwise only provided tests will be executed\n";
 	print "\n";
-	print "  [ --package-manager <smart|zypper>\n";
+	print "  [ --package-manager <smart|zypper> ]\n";
 	print "    set the package manager to use for this image. If set it\n";
 	print "    will temporarly overwrite the value set in the xml\n";
 	print "    description\n";
+	print "\n";
+	print "  [ --fs-blocksize <number> ]\n";
+	print "    When calling kiwi in creation mode this option will set\n";
+	print "    the block size in bytes. For ISO images with the old style\n";
+	print "    ramdisk setup a blocksize of 4096 bytes is required\n";
+	print "\n";
+	print "  [ --fs-journalsize <number> ]\n";
+	print "    When calling kiwi in creation mode this option will set\n";
+	print "    the journal size in mega bytes for ext[23] based filesystems\n";
+	print "    and in blocks if the reiser filesystem is used\n"; 
+	print "\n";
+	print "  [ --fs-inodesize <number> ]\n";
+	print "    When calling kiwi in creation mode this option will set\n";
+	print "    the inode size in bytes. This option has no effect if the\n";
+	print "    reiser filesystem is used\n";
 	print "--\n";
 	version();
 }
@@ -1850,6 +1871,52 @@ sub checkType {
 		};
 	}
 	return $para;
+}
+
+#==========================================
+# checkFSOptions
+#------------------------------------------
+sub checkFSOptions {
+	# /.../
+	# checks the $FS* option values and build an option
+	# string for the relevant filesystems
+	# ---
+	my %result = ();
+	foreach my $fs (keys %KnownFS) {
+		my $blocksize;   # block size in bytes
+		my $journalsize; # journal size in MB (ext) or blocks (reiser)
+		my $inodesize;   # inode size in bytes (ext only)
+		SWITCH: for ($fs) {
+			#==========================================
+			# EXT2 and EXT3
+			#------------------------------------------
+			/ext[32]/   && do {
+				if ($FSBlockSize)   {$blocksize   = "-b $FSBlockSize"}
+				if ($FSInodeSize)   {$inodesize   = "-I $FSInodeSize"}
+				if ($FSJournalSize) {$journalsize = "-J size=$FSJournalSize"}
+				last SWITCH;
+			};
+			#==========================================
+			# reiserfs
+			#------------------------------------------
+			/reiserfs/  && do {
+				if ($FSBlockSize)   {$blocksize   = "-b $FSBlockSize"}
+				if ($FSJournalSize) {$journalsize = "-s $FSJournalSize"}
+				last SWITCH;
+			};
+			# no options for this filesystem...
+		};
+		if (defined $inodesize) {
+			$result{$fs} .= $inodesize." ";
+		}
+		if (defined $blocksize) {
+			$result{$fs} .= $blocksize." ";
+		}
+		if (defined $journalsize) {
+			$result{$fs} .= $journalsize." ";
+		}
+	}
+	return %result;
 }
 
 #==========================================

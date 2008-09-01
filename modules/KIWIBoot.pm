@@ -785,7 +785,9 @@ sub setupBootStick {
 			$kiwi -> done();
 		} elsif ($syszip) {
 			$kiwi -> info ("Creating ext3 read/write filesystem");
-			my $fsopts = "-I 128 -O dir_index -b 4096 -j -J size=4 -q -F";
+			my %FSopts = main::checkFSOptions();
+			my $fsopts = $FSopts{ext3};
+			$fsopts.= "-j -F";
 			$status = qxx ("/sbin/mke2fs $fsopts $stick'2' 2>&1");
 			$result = $? >> 8;
 			if ($result != 0) {
@@ -802,25 +804,30 @@ sub setupBootStick {
 		#==========================================
 		# Create fs on system image partition
 		#------------------------------------------
+		my %FSopts = main::checkFSOptions();
 		SWITCH: for ($FSTypeRO) {
 			/^ext2/     && do {
 				$kiwi -> info ("Creating ext2 root filesystem");
-				my $fsopts = "-I 128 -q -F";
+				my $fsopts = $FSopts{ext2};
+				$fsopts.= "-F";
 				$status = qxx ("/sbin/mke2fs $fsopts $stick'1' 2>&1");
 				$result = $? >> 8;
 				last SWITCH;
 			};
 			/^ext3/     && do {
 				$kiwi -> info ("Creating ext3 root filesystem");
-				my $fsopts = "-I 128 -O dir_index -b 4096 -j -J size=4 -q -F";
+				my $fsopts = $FSopts{ext3};
+				$fsopts.= "-j -F";
 				$status = qxx ("/sbin/mke2fs $fsopts $stick'1' 2>&1");
 				$result = $? >> 8;
 				last SWITCH;
 			};
 			/^reiserfs/ && do {
 				$kiwi -> info ("Creating reiserfs root filesystem");
+				my $fsopts = $FSopts{reiserfs};
+				$fsopts.= "-f";
 				$status = qxx (
-					"/sbin/mkreiserfs -q -f -s 513 -b 4096 $stick'1' 2>&1"
+					"/sbin/mkreiserfs $fsopts $stick'1' 2>&1"
 				);
 				$result = $? >> 8;
 				last SWITCH;
@@ -1429,8 +1436,11 @@ sub setupInstallStick {
 	#------------------------------------------
 	foreach my $root ($boot,$data) {
 		next if ! defined $root;
-		$kiwi -> info ("Creating filesystem on $root partition");
-		$status = qxx ( "/sbin/mke2fs -I 128 -j -q $root 2>&1" );
+		$kiwi -> info ("Creating ext3 filesystem on $root partition");
+		my %FSopts = main::checkFSOptions();
+		my $fsopts = $FSopts{ext3};
+		$fsopts.= "-j";
+		$status = qxx ( "/sbin/mke2fs $fsopts $root 2>&1" );
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -1860,25 +1870,30 @@ sub setupBootDisk {
 		#==========================================
 		# Create fs on system image partition
 		#------------------------------------------
+		my %FSopts = main::checkFSOptions();
 		SWITCH: for ($FSTypeRO) {
 			/^ext2/     && do {
 				$kiwi -> info ("Creating ext2 root filesystem");
-				my $fsopts = "-I 128 -q -F";
+				my $fsopts = $FSopts{ext2};
+				$fsopts.= "-F";
 				$status = qxx ("/sbin/mke2fs $fsopts $root 2>&1");
 				$result = $? >> 8;
 				last SWITCH;
 			};
 			/^ext3/     && do {
 				$kiwi -> info ("Creating ext3 root filesystem");
-				my $fsopts = "-I 128 -O dir_index -b 4096 -j -J size=4 -q -F";
+				my $fsopts = $FSopts{ext3};
+				$fsopts.= "-j -F";
 				$status = qxx ("/sbin/mke2fs $fsopts $root 2>&1");
 				$result = $? >> 8;
 				last SWITCH;
 			};
 			/^reiserfs/ && do {
 				$kiwi -> info ("Creating reiserfs root filesystem");
+				my $fsopts = $FSopts{reiserfs};
+				$fsopts.= "-f";
 				$status = qxx (
-					"/sbin/mkreiserfs -q -f -s 513 -b 4096 $root 2>&1"
+					"/sbin/mkreiserfs $fsopts $root 2>&1"
 				);
 				$result = $? >> 8;
 				last SWITCH;
@@ -1934,7 +1949,10 @@ sub setupBootDisk {
 		$root = "/dev/mapper".$dmap."p2";
 		if (! $haveSplit) {
 			$kiwi -> info ("Creating ext2 read-write filesystem");
-			$status = qxx ("/sbin/mke2fs -I 128 -q -F $root 2>&1");
+			my %FSopts = main::checkFSOptions();
+			my $fsopts = $FSopts{ext2};
+			$fsopts.= "-F";
+			$status = qxx ("/sbin/mke2fs $fsopts $root 2>&1");
 			$result = $? >> 8;
 			if ($result != 0) {
 				$kiwi -> failed ();

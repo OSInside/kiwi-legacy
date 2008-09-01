@@ -95,7 +95,9 @@ sub new {
 	#==========================================
 	# Create Log Server on $LogServerPort
 	#------------------------------------------
-	$this -> setLogServer();
+	if ($main::LogServerPort ne "off") {
+		$this -> setLogServer();
+	}
 	return $this;
 }
 

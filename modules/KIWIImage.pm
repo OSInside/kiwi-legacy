@@ -3083,16 +3083,16 @@ sub setupEXT2 {
 	my $kiwi    = $this->{kiwi};
 	my $imageTree = $this->{imageTree};
 	my $imageDest = $this->{imageDest};
+	my $fsopts;
 	if (! defined $tree) {
 		$tree = $imageTree;
 	}
-	my $fsopts;
-	my $fileCount = int ( qxx ("find $tree | wc -l") );
-	my $nodeCount = $fileCount * 2;
+	my %FSopts = main::checkFSOptions();
 	if (defined $journal) {
-		$fsopts="-I 128 -O dir_index -b 4096 -j -J size=4 -q -F -N $nodeCount";
-	} else {  
-		$fsopts="-I 128 -b 4096 -q -F -N $nodeCount";
+		$fsopts = $FSopts{ext3};
+		$fsopts.="-j";
+	} else {
+		$fsopts = $FSopts{ext2};
 	}
 	my $data = qxx ("/sbin/mke2fs $fsopts $imageDest/$name 2>&1");
 	my $code = $? >> 8;

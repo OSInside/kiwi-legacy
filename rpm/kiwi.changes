@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Aug 29 18:08:59 CEST 2008 - ms@suse.de
+
+- v2.72
+- don't open a network log port by default, option required
+- don't use filesystem options by default, provided options
+
+-------------------------------------------------------------------
 Wed Aug 27 18:04:12 CEST 2008 - ms@suse.de
 
 - v2.71
