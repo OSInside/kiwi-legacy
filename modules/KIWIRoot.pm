@@ -129,7 +129,7 @@ sub new {
 		#------------------------------------------
 		my $srckey  = "baseurl";
 		my $srcopt;
-		if ($type eq "rpm-dir") {
+		if (($type eq "rpm-dir") || ($type eq "deb-dir")) {
 			$srckey = "path";
 			$srcopt = "recursive=True";
 		}

@@ -5,6 +5,7 @@ Fri Aug 29 18:08:59 CEST 2008 - ms@suse.de
 - don't open a network log port by default, option required
 - don't use filesystem options by default, provided options
 - fixed handling of other than name="drivers" sections
+- fixed deb-dir repo type for smart (bnc #421958)
 - added product support by Peter Bowen along with the
   existing packages / pattern support (bnc #422018)
 
