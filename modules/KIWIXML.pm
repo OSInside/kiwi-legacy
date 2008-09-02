@@ -2270,15 +2270,23 @@ sub getList {
 		# Check for pattern descriptions
 		#------------------------------------------
 		if ($type ne "metapackages") {
-			my @slist = $node -> getElementsByTagName ("opensusePattern");
 			my @pattlist = ();
 			my $manager  = $this -> getPackageManager();
+			my @slist = $node -> getElementsByTagName ("opensuseProduct");
+			foreach my $element (@slist) {
+				my $product = $element -> getAttribute ("name");
+				if (! defined $product) {
+					next;
+				}
+				push @pattlist,"product:".$product;
+			}
+			my @slist = $node -> getElementsByTagName ("opensusePattern");
 			foreach my $element (@slist) {
 				my $pattern = $element -> getAttribute ("name");
 				if (! defined $pattern) {
 					next;
 				}
-				push @pattlist,$pattern;
+				push @pattlist,"pattern:".$pattern;
 			}
 			if (@pattlist) {
 				if ($manager ne "zypper") {
@@ -2287,7 +2295,7 @@ sub getList {
 					#------------------------------------------
 					# 1) try to use libsatsolver...
 					my $psolve = new KIWISatSolver (
-						$kiwi,\@pattlist,$this->{urllist}
+						$kiwi,\@pattlist,$this->{urllist},"solve-patterns"
 					);
 					if (! defined $psolve) {
 						# 2) use generic pattern module
@@ -2301,8 +2309,8 @@ sub getList {
 						);
 					}
 					if (! defined $psolve) {
-						my $e1 ="Pattern match failed for arch: $this->{arch}";
-						my $e2 ="Check if the pattern is written correctly?";
+						my $e1 ="Pattern or product match failed for arch: $this->{arch}";
+						my $e2 ="Check if the pattern or product is written correctly?";
 						my $e3 ="Check if the arch is provided by the repo(s)?";
 						$kiwi -> warning ("$e1\n");
 						$kiwi -> warning ("    a) $e2\n");
@@ -2316,8 +2324,8 @@ sub getList {
 					# zypper knows about patterns
 					#------------------------------------------
 					foreach my $pname (@pattlist) {
-						$kiwi -> info ("--> Requesting pattern: $pname");
-						push @result,"pattern:".$pname;
+						$kiwi -> info ("--> Requesting $pname");
+						push @result,$pname;
 						$kiwi -> done();
 					}
 				}

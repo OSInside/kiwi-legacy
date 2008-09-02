@@ -58,10 +58,21 @@ sub new {
 		$kiwi -> failed ();
 		return undef;
 	}
-	my @pattern = ();
+	my @products = ();
+	my @patterns = ();
+	my @packages = ();
 	foreach my $p (@{$pattref}) {
-		my $pname = quotemeta $p;
-		push (@pattern,$pname);
+		if ($p =~ /^product:(.*)/) {
+			$p = $1;
+			my $pname = "product:" . quotemeta $p;
+			push(@products, $pname);
+		} elsif ($p =~ /^pattern:(.*)/) {
+			$p = $1;
+			my $pname = "pattern:" . quotemeta $p;
+			push(@patterns, $pname);
+		} else {
+			push (@packages,$p);
+		}
 	}
 	if (! defined $urlref) {
 		$kiwi -> error ("No URL list for pattern search");
@@ -90,18 +101,37 @@ sub new {
 	$this->{infomessage} = $this->{infodefault};
 	$this->{kiwi}        = $kiwi;
 	$this->{urllist}     = \@urllist;
-	$this->{pattern}     = \@pattern;
+	$this->{patterns}     = \@patterns;
+	$this->{products}     = \@products;
+	$this->{packages}     = \@packages;
 	$this->{pattype}     = $pattype;
 	$this->{patpactype}  = $patpactype;
 	$this->{arch}        = $arch;
 	#==========================================
 	# Initial check for pattern contents
 	#------------------------------------------
-	my @patdata = $this -> getPatternContents (\@pattern);
-	if (! @patdata) {
+	my $nothing = 1;
+	if (@products) {
+		$nothing = 0;
+		my @proddata = $this -> getProductContents (\@products);
+		if (! @proddata) {
+			return undef;
+		}
+	}
+	if (@patterns) {
+		$nothing = 0;
+		my @patdata = $this -> getPatternContents (\@patterns);
+		if (! @patdata) {
+			return undef;
+		}
+		push ( @data,@patdata );
+	}
+	if (@packages) {
+		$nothing = 0;
+	}
+	if ($nothing) {
 		return undef;
 	}
-	push ( @data,@patdata );
 	#==========================================
 	# Store object data
 	#------------------------------------------
@@ -117,12 +147,15 @@ sub getPatternContents {
 	my $pattref = shift;
 	my $kiwi    = $this->{kiwi};
 	my @urllist = @{$this->{urllist}};
-	my @pattern = @{$pattref};
+	my @patterns = @{$pattref};
 	my $content;
-	foreach my $pat (@pattern) {
+	foreach my $pat (@patterns) {
 		my $result;
 		my @errors;
 		my $printinfo = 0;
+		if ($pat =~ /^pattern:(.*)/) {
+			$pat = $1;
+		}
 		if (! defined $this->{cache}{$pat}) {
 			$printinfo = 1;
 		}
@@ -421,8 +454,8 @@ sub getRequiredPatterns {
 	my $pattref = shift;
 	my $kiwi    = $this->{kiwi};
 	my $pattype = $this->{pattype};
-	my @pattern = @{$pattref};
-	my @patdata = $this -> getPatternContents (\@pattern);
+	my @patterns = @{$pattref};
+	my @patdata = $this -> getPatternContents (\@patterns);
 	my @reqs;
 	if ($pattype eq "onlyRequired") {
 		@reqs = $this -> getSection (
@@ -430,7 +463,7 @@ sub getRequiredPatterns {
 		);
 	} elsif ($pattype eq "plusSuggested") {
 		@reqs = $this -> getSection (
-			'^(\+Req:|\+Sug:)','^(\-Req:|\-Sug:)',\@patdata
+			'^\+(Re[qc]:|Sug:)','^\-(Re[qc]:|Sug:)',\@patdata
 		);
 	} else {
 		@reqs = $this -> getSection (
@@ -464,13 +497,286 @@ sub getRequiredPatterns {
 }
 
 #==========================================
+# getProductContents
+#------------------------------------------
+sub getProductContents {
+	my $this    = shift;
+	my $prodref = shift;
+	my $kiwi    = $this->{kiwi};
+	my @urllist = @{$this->{urllist}};
+	my @product = @{$prodref};
+	my $content;
+	foreach my $prd (@product) {
+		my $result;
+		my @errors;
+		my $printinfo = 0;
+		if (! defined $this->{cache}{$prd}) {
+			$printinfo = 1;
+		}
+		if ($printinfo) {
+			$kiwi -> info ("$this->{infomessage}: $prd");
+		}
+		foreach my $url (@urllist) {
+			my @load = $this -> downloadProduct ( $url,$prd );
+			if ($load[0]) {
+				$result .= $load[0];
+			}
+			push (@errors,"[$url] -> $load[1]");
+		}
+		if (! $result) {
+			if ($printinfo) {
+				$kiwi -> failed ();
+				my $count = 1;
+				foreach my $error (@errors) {
+					$kiwi -> error  ("    $count) $error");
+					$kiwi -> failed ();
+					$count++;
+				}
+			}
+			return ();
+		}
+		$content .= $result;
+		if ($printinfo) {
+			$kiwi -> done ();
+		}
+	}
+	my @prddata = split (/\n/,$content);
+	return @prddata;
+}
+
+#==========================================
+# downloadProduct
+#------------------------------------------
+sub downloadProduct {
+	my $this    = shift;
+	my $url     = shift;
+	my $product = shift;
+	my $arch    = $this->{arch};
+	my $kiwi    = $this->{kiwi};
+	my $content;
+	my $pfile;
+	my $message;
+	if (defined $this->{cache}{$product}) {
+		return $this->{cache}{$product};
+	}
+	if ($url =~ /^\//) {
+		#==========================================
+		# local product check
+		#------------------------------------------
+		my $cfile = $url."/content";
+		if (! open (FD,$cfile)) {
+			$message = "couldn't open \$url/content file";
+			return (undef,"local[content]: $message: $!");
+		}
+		local $/; $content .= <FD>; close FD;
+	} else {
+		#==========================================
+		# remote product check
+		#------------------------------------------
+		my $urlHandler  = new KIWIURL ($kiwi,undef);
+		my $publics_url = $url;
+		my $highlvl_url = $urlHandler -> openSUSEpath ($publics_url);
+		if (defined $highlvl_url) {
+			$publics_url = $highlvl_url;
+		}
+		my $browser  = LWP::UserAgent->new;
+		my $location = $publics_url."/content";
+		my $request  = HTTP::Request->new (GET => $location);
+		my $response = $browser  -> request ( $request );
+		$content     = $response -> content ();
+	}
+	$pfile = $this->providesProduct($content,$product);
+	if (! defined $pfile) {
+		$message = "product match in content failed";
+		return (undef, "local[content]: $message: $product");
+	}
+	$this->{cache}{$product} = $content;
+	return ($content,$this);
+}
+
+
+#==========================================
+# providesProduct
+#------------------------------------------
+sub providesProduct {
+	my $this    = shift;
+	my $content = shift;
+	my $product = shift;
+	#==========================================
+	# check content...
+	#------------------------------------------
+	if (! $content) {
+		return undef;
+	}
+	# are we or do we provide the product?
+	#==========================================
+	# check content: PRODUCT...
+	#------------------------------------------
+	my $perr   = 1;
+	my $result;
+	my @plines = split (/\n/,$content);
+	my $prodname;
+	foreach my $line (@plines) {
+		$prodname = $line; $prodname =~ s/^product://;
+		if ($line =~ /PRODUCT (.*)/) {
+			if ($1 eq $prodname) {
+				$result = $1;
+				$perr = 0;
+				last;
+			}
+		}
+		if ($line =~ /PROVIDES (.*)/) {
+			foreach my $prv ($this->parseRelString($1)) {
+				if ($prv eq $product) {
+					$result = $prv;
+					$perr = 0;
+					last;
+				}
+			}
+		}
+	}
+	if ($perr) {
+		return undef;
+	}
+	return $result;
+}
+
+
+#==========================================
+# parseRelString
+#------------------------------------------
+sub parseRelString {
+	my $this = shift;
+	my $str = shift;
+	my $skipnext = 0;
+	my @reqs = ();
+	foreach my $tok (split (/\s+/,$str)) {
+		if ($skipnext) {
+			$skipnext = 0;
+			next;
+		}
+		if ($tok =~ /^[<>=]+$/) {
+			$skipnext = 1;
+			next;
+		}
+		push(@reqs,$tok);
+	}
+	return @reqs;
+}
+
+
+#==========================================
+# getProductRequirements
+#------------------------------------------
+sub getProductRequirements {
+	my $this    = shift;
+	my $location= shift;
+	my $content = shift;
+	my $product = shift;
+	my $arch    = $this->{arch};
+	#==========================================
+	# check content...
+	#------------------------------------------
+	if (! $content) {
+		return undef;
+	}
+	#==========================================
+	# check content: REQUIRES...
+	#------------------------------------------
+	my $perr   = 1;
+	my $result;
+	my @reqs = ();
+	my @plines = split (/\n/,$content);
+	foreach my $line (@plines) {
+		if ($line =~ /REQUIRES (.*)/) {
+			$result = $1;
+			$perr = 0;
+			my @r = $this->parseRelString($result);
+			push(@reqs,@r);
+		}
+	}
+	if ($perr) {
+		return undef;
+	}
+	return @reqs;
+}
+
+#==========================================
+# getRequiredProducts
+#------------------------------------------
+sub getRequiredProducts {
+	my $this    = shift;
+	my $prodref = shift;
+	my $kiwi    = $this->{kiwi};
+	my $pattype = $this->{pattype};
+	my @products = @{$prodref};
+	my @prddata = $this -> getProductContents (\@products);
+	my @reqs = $this -> getProductRequirements (\@prddata);
+	my @prdreqs = ();
+	my @patreqs = ();
+	my @pkgreqs = ();
+	foreach my $r (@reqs) {
+		if ($r =~ /^product:(.*)/) {
+			$r = $1;
+			my $pname = "product:" . quotemeta $r;
+			push(@prdreqs, $pname);
+		} elsif ($r =~ /^pattern:(.*)/) {
+			$r = $1;
+			my $pname = "pattern:" . quotemeta $r;
+			push(@patreqs, $pname);
+		} else {
+			push (@pkgreqs,$r);
+		}
+	}
+	foreach my $rproduct (@prdreqs) {
+		if (defined $this->{prddone}{$rproduct}) {
+			next;
+		}
+		$this->{infomessage} = "--> Including required product";
+		my @prddata = $this -> getProductContents ([$rproduct]);
+		$this->{infomessage} = $this->{infodefault};
+		if (! @prddata) {
+			$kiwi -> warning ("Couldn't find required product: $rproduct");
+			$kiwi -> skipped ();
+			$this->{patdone}{$rproduct} = $rproduct;
+			next;
+		}
+		$this->{prddone}{$rproduct} = $rproduct;
+		$this -> getRequiredProducts ([$rproduct]);
+	}
+	foreach my $rpattern (@patreqs) {
+		if (defined $this->{patdone}{$rpattern}) {
+			next;
+		}
+		$this->{infomessage} = "--> Including required pattern";
+		my @patdata = $this -> getPatternContents ([$rpattern]);
+		$this->{infomessage} = $this->{infodefault};
+		if (! @patdata) {
+			$kiwi -> warning ("Couldn't find required pattern: $rpattern");
+			$kiwi -> skipped ();
+			$this->{patdone}{$rpattern} = $rpattern;
+			next;
+		}
+		push ( @{$this->{data}} , @patdata );
+		$this->{patdone}{$rpattern} = $rpattern;
+		$this -> getRequiredPatterns ([$rpattern]);
+	}
+	return @pkgreqs;
+}
+
+#==========================================
 # getPackages
 #------------------------------------------
 sub getPackages {
 	my $this = shift;
 	my $pattype = $this->{patpactype};
 	my %result;
-	my @reqs = $this -> getRequiredPatterns ($this->{pattern});
+	my @packages = $this->{packages};
+
+	my @prodpkgreqs = $this -> getRequiredProducts ($this->{products});
+	push (@packages, @prodpkgreqs);
+
+	my @reqs = $this -> getRequiredPatterns ($this->{patterns});
 	my @pacs;
 	if ($pattype eq "onlyRequired") {
 		@pacs = $this -> getSection (
@@ -478,14 +784,18 @@ sub getPackages {
 		);
 	} elsif ($pattype eq "plusSuggested") {
 		@pacs = $this -> getSection (
-			'^(\+Prq:|\+Psg:)','^(\-Prq:|\-Psg:)'
+			'^\+(Pr[qc]:|Psg:)','^\-(Pr[qc]:|Psg:)'
 		);
 	} else {
 		@pacs = $this -> getSection (
 			'^\+Pr[qc]:','^\-Pr[qc]:'
 		);
 	}
-	return @pacs;
+	push(@packages, @pacs);
+
+	@packages = sort @packages;
+	my $prev = '__none__';
+	return grep($_ ne $prev && (($prev) = $_), @packages);
 }
 
 1;

@@ -50,7 +50,7 @@ BEGIN {
 sub new {
 	# ...
 	# Construct a new KIWISatSolver object if satsolver is present.
-	# The solver object is used to queue pattern and package solve
+	# The solver object is used to queue product, pattern, and package solve
 	# requests which gets solved by the contents of a sat solvable
 	# which is either created by the repository metadata contents
 	# or used directly from the repository if it is provided
@@ -89,7 +89,7 @@ sub new {
 		return undef;
 	}
 	if (! defined $pref) {
-		$kiwi -> error ("--> Invalid package/pattern reference");
+		$kiwi -> error ("--> Invalid package/pattern/product reference");
 		$kiwi -> failed ();
 		return undef;
 	}
@@ -141,8 +141,8 @@ sub new {
 	$solver -> solve ($queue);
 	my $list = $solver -> getInstallList ($pool);
 	foreach my $name (@{$list}) {
-		if ($name =~ /^pattern:(.*)/) {
-			$kiwi -> info ("Including pattern: $1");
+		if ($name =~ /^((pattern|product):.*)/) {
+			$kiwi -> info ("Including $1");
 			$kiwi -> done ();
 		} else {
 			push (@solved,$name);

@@ -994,10 +994,13 @@ sub setupUpgrade {
 		if (defined $addPacks) {
 			my @addonPackages = @{$addPacks};
 			my @newpatts = ();
+			my @newprods = ();
 			my @newpacks = ();
 			foreach my $pac (@addonPackages) {
 				if ($pac =~ /^pattern:(.*)/) {
 					push @newpatts,$1;
+				} elsif ($pac =~ /^product:(.*)/) {
+					push @newprods,$1;
 				} else {
 					push @newpacks,$pac;
 				}
@@ -1005,14 +1008,19 @@ sub setupUpgrade {
 			@addonPackages = @newpacks;
 			print $fd "chroot $root @zypper dist-upgrade &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
-			if (@addonPackages) {
+			if (@newprods) {
 				print $fd "test \$? = 0 && chroot $root @zypper install ";
-				print $fd "@installOpts @addonPackages &\n";
+				print $fd "@installOpts -t product @newprods &\n";
 				print $fd "SPID=\$!;wait \$SPID\n";
 			}
 			if (@newpatts) {
 				print $fd "test \$? = 0 && chroot $root @zypper install ";
 				print $fd "@installOpts -t pattern @newpatts &\n";
+				print $fd "SPID=\$!;wait \$SPID\n";
+			}
+			if (@addonPackages) {
+				print $fd "test \$? = 0 && chroot $root @zypper install ";
+				print $fd "@installOpts @addonPackages &\n";
 				print $fd "SPID=\$!;wait \$SPID\n";
 			}
 		} else {
@@ -1213,9 +1221,12 @@ sub setupRootSystem {
 			#------------------------------------------
 			my @newpacks = ();
 			my @newpatts = ();
+			my @newprods = ();
 			foreach my $pac (@packs) {
 				if ($pac =~ /^pattern:(.*)/) {
 					push @newpatts,$1;
+				} elsif ($pac =~ /^product:(.*)/) {
+					push @newprods,$1;
 				} else {
 					push @newpacks,$pac;
 				}
@@ -1233,17 +1244,25 @@ sub setupRootSystem {
 			print $fd "@zypper --root $root refresh &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
 			print $fd "test \$? = 0 && ";
-			if (@packs) {
+			if (@newprods) {
 				print $fd "@zypper --root $root install ";
-				print $fd "@installOpts @packs &\n";
+				print $fd "@installOpts -t product @newprods &\n";
 				print $fd "SPID=\$!;wait \$SPID\n";
 			}
 			if (@newpatts) {
-				if (@packs) {
+				if (@newprods) {
 					print $fd "test \$? = 0 && ";
 				}
 				print $fd "@zypper --root $root install ";
 				print $fd "@installOpts -t pattern @newpatts &\n";
+				print $fd "SPID=\$!;wait \$SPID\n";
+			}
+			if (@packs) {
+				if (@newpatts || @newprods) {
+					print $fd "test \$? = 0 && ";
+				}
+				print $fd "@zypper --root $root install ";
+				print $fd "@installOpts @packs &\n";
 				print $fd "SPID=\$!;wait \$SPID\n";
 			}
 			print $fd "echo \$? > $screenCall.exit\n";
@@ -1253,9 +1272,13 @@ sub setupRootSystem {
 			#------------------------------------------
 			my @install   = ();
 			my @newpatts  = ();
+			my @newprods  = ();
 			foreach my $need (@packs) {
 				if ($need =~ /^pattern:(.*)/) {
 					push @newpatts,$1;
+					next;
+				} elsif ($need =~ /^product:(.*)/) {
+					push @newprods,$1;
 					next;
 				}
 				push @install,$need;
@@ -1284,17 +1307,25 @@ sub setupRootSystem {
 			print $fd "chroot $root @zypper refresh &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
 			print $fd "test \$? = 0 && ";
-			if (@install) {
+			if (@newprods) {
 				print $fd "chroot $root @zypper install ";
-				print $fd "@installOpts @install &\n";
+				print $fd "@installOpts -t product @newprods &\n";
 				print $fd "SPID=\$!;wait \$SPID\n";
 			}
 			if (@newpatts) {
-				if (@install) {
+				if (@newprods) {
 					print $fd "test \$? = 0 && ";
 				}
 				print $fd "chroot $root @zypper install ";
 				print $fd "@installOpts -t pattern @newpatts &\n";
+				print $fd "SPID=\$!;wait \$SPID\n";
+			}
+			if (@install) {
+				if (@newpatts || @newprods) {
+					print $fd "test \$? = 0 && ";
+				}
+				print $fd "chroot $root @zypper install ";
+				print $fd "@installOpts @install &\n";
 				print $fd "SPID=\$!;wait \$SPID\n";
 			}
 			print $fd "echo \$? > $screenCall.exit\n";

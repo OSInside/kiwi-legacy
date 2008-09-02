@@ -937,7 +937,7 @@ sub setupMount {
 	}
 	if (! -f "$root/proc/mounts") {
 		qxx ("mkdir -p $root/proc");
-		qxx ("mount -t proc none $root/proc");
+		qxx ("mount -t proc proc $root/proc");
 		push (@mountList,"$root/proc");
 	}
 	if (! -f "$root/dev/console") {
@@ -946,9 +946,9 @@ sub setupMount {
 	}
 	if (! -d "$root/sys/block") {
 		qxx ("mkdir -p $root/sys");
-		qxx ("mount -t sysfs  none $root/sys");
+		qxx ("mount -t sysfs sysfs $root/sys");
 		qxx ("mkdir -p $root/dev/pts");
-		qxx ("mount -t devpts none $root/dev/pts");
+		qxx ("mount -t devpts devpts $root/dev/pts");
 		push (@mountList,"$root/sys");
 		push (@mountList,"$root/dev/pts");
 	}
@@ -1036,7 +1036,7 @@ sub cleanMount {
 		$kiwi -> info ("Umounting path: $item\n");
 		my $data = qxx ("umount \"$item\" 2>&1");
 		my $code = $? >> 8;
-		if ($code != 0) {
+		if (($code != 0) && ($data !~ "not mounted")) {
 			$kiwi -> loginfo ("Umount failed: $data");
 			$kiwi -> warning ("Umount failed: calling lazy umount");
 			my $data = qxx ("umount -l \"$item\" 2>&1");

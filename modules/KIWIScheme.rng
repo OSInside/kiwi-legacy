@@ -680,6 +680,26 @@ archive is extracted in a specific way.</db:para>
   </div>
   <!--
     ==========================================
+    common element <opensuseProduct>
+    
+  -->
+  <div>
+    <define name="k.opensuseproduct.name.attribute">
+      <ref name="k.name.attribute"/>
+    </define>
+    <define name="k.opensuseproduct.attlist">
+      <ref name="k.opensuseproduct.name.attribute"/>
+    </define>
+    <define name="k.opensuseproduct">
+      <element name="opensuseProduct">
+        <a:documentation>Name of a Product From openSUSE</a:documentation>
+        <ref name="k.opensuseproduct.attlist"/>
+        <empty/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
     common element <repopackage>
     
   -->
@@ -2378,6 +2398,9 @@ and also depends of the selected image output type.</db:para>
           </zeroOrMore>
           <zeroOrMore>
             <ref name="k.opensusepattern"/>
+          </zeroOrMore>
+          <zeroOrMore>
+            <ref name="k.opensuseproduct"/>
           </zeroOrMore>
           <zeroOrMore>
             <ref name="k.ignore"/>
