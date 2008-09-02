@@ -3090,9 +3090,10 @@ sub setupEXT2 {
 	my %FSopts = main::checkFSOptions();
 	if (defined $journal) {
 		$fsopts = $FSopts{ext3};
-		$fsopts.="-j";
+		$fsopts.="-j -F";
 	} else {
 		$fsopts = $FSopts{ext2};
+		$fsopts.= "-F";
 	}
 	my $data = qxx ("/sbin/mke2fs $fsopts $imageDest/$name 2>&1");
 	my $code = $? >> 8;
@@ -3113,8 +3114,11 @@ sub setupReiser {
 	my $name = shift;
 	my $kiwi = $this->{kiwi};
 	my $imageDest = $this->{imageDest};
+	my %FSopts = main::checkFSOptions();
+	my $fsopts = $FSopts{reiserfs};
+	$fsopts.= "-f";
 	my $data = qxx (
-		"/sbin/mkreiserfs -q -f -s 513 -b 4096 $imageDest/$name 2>&1"
+		"/sbin/mkreiserfs $fsopts $imageDest/$name 2>&1"
 	);
 	my $code = $? >> 8;
 	if ($code != 0) {
