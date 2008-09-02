@@ -1885,12 +1885,15 @@ sub getImageConfig {
 		}
 		my @ntag = $element -> getElementsByTagName ("file") -> get_nodelist();
 		my $data = "";
+		my $prefix = "";
+		if ($type ne "kiwi_drivers") {
+			$prefix = "drivers/";
+		}
 		foreach my $element (@ntag) {
 			my $name =  $element -> getAttribute ("name");
-			$data = $data.",".$name
+			$data = $data.",".$prefix.$name;
 		}
 		$data =~ s/^,+//;
-
 		if (defined $result{$type}) {
 			$result{$type} .= ",".$data;
 		} else {
