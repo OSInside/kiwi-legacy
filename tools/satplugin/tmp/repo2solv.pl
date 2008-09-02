@@ -7,6 +7,7 @@ use KIWIXML;
 
 our $BasePath = "/usr/share/kiwi";
 our $Scheme   = $BasePath."/modules/KIWIScheme.rng";
+our $ConfigName = "config.xml";
 
 my $kiwi = new KIWILog ("tiny");
 my $xml  = new KIWIXML ($kiwi,"/usr/share/kiwi/image/isoboot/suse-10.3");

@@ -2309,8 +2309,9 @@ sub getList {
 						);
 					}
 					if (! defined $psolve) {
-						my $e1 ="Pattern or product match failed for arch: $this->{arch}";
-						my $e2 ="Check if the pattern or product is written correctly?";
+						my $pp ="Pattern or product";
+						my $e1 ="$pp match failed for arch: $this->{arch}";
+						my $e2 ="Check if the $pp is written correctly?";
 						my $e3 ="Check if the arch is provided by the repo(s)?";
 						$kiwi -> warning ("$e1\n");
 						$kiwi -> warning ("    a) $e2\n");
@@ -2910,7 +2911,7 @@ sub getInstSourceSatSolvable {
 		if (glob ("$sdir/*.pat.gz")) {
 			$scommand .= ";gzip -cd $sdir/*.pat.gz";
 		}
-		my $data = qxx ("($scommand) | susetags2solv > $destfile");
+		my $data = qxx ("($scommand) | susetags2solv > $destfile 2>/dev/null");
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> error  ("--> Can't create SaT solvable file");
