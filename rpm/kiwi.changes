@@ -2,7 +2,7 @@
 Wed Sep  3 11:13:51 CEST 2008 - ms@suse.de
 
 - v2.73
-- fixed weak-updates handling
+- fixed weak-updates handling (bnc #419988)
 - fixed bindLoopDevice to look for free loop device by
   using losetup -f, thanks to Till for the hint
 - added baseUpdateSysConfig function to KIWIConfig.sh
