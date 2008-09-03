@@ -663,6 +663,19 @@ function baseStripUnusedLibs {
 }
 
 #======================================
+# baseSysConfig
+#--------------------------------------
+function baseUpdateSysConfig {
+	# /.../
+	# update sysconfig variable contents
+	# ----
+	local FILE=$1
+	local VAR=$2
+	local VAL=$3
+	sed -i "s/^\($VAR=\).*$/\1\"$VAL\"/" $FILE
+}
+
+#======================================
 # suseStripInitrd
 #--------------------------------------
 function suseStripInitrd {

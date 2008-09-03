@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Wed Sep  3 11:13:51 CEST 2008 - ms@suse.de
+
+- v2.73
+- fixed bindLoopDevice to look for free loop device by
+  using losetup -f, thanks to Till for the hint
+- added baseUpdateSysConfig function to KIWIConfig.sh
+  which allows updating /etc/sysconfig/.. variables
+
+-------------------------------------------------------------------
 Fri Aug 29 18:08:59 CEST 2008 - ms@suse.de
 
 - v2.72

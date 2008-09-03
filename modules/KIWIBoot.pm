@@ -2934,17 +2934,21 @@ sub bindLoopDevice {
 	#==========================================
 	# bind file to loop device
 	#------------------------------------------
-	for (my $id=0;$id<=7;$id++) {
-		$status = qxx ("/sbin/losetup /dev/loop$id $system 2>&1");
-		$result = $? >> 8;
-		if ($result == 0) {
-			$loop = "/dev/loop".$id;
-			$this->{loop} = $loop;
-			return $this;
-		}
+	$status = qxx ("/sbin/losetup -f 2>&1"); chomp $status;
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> loginfo ("No free loop device found: $status");
+		return undef;
 	}
-	$kiwi -> loginfo ("Failed binding file to loop: $status");
-	return undef;
+	$loop = $status;
+	$status = qxx ("/sbin/losetup $loop $system 2>&1");
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> loginfo ("Failed binding file to loop: $status");
+		return undef;
+	}
+	$this->{loop} = $loop;
+	return $this;
 }
 
 #==========================================
