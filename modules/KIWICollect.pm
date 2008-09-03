@@ -322,11 +322,26 @@ sub Init
       $this->{m_logger}->warning("[E] You want a single medium distro but specified medium=... for some packages\n\tIgnoring the MULTIPLE_MEDIA=no flag!");
     }
   }
+  my $descrdir = $this->{m_proddata}->getInfo("DESCRDIR");
+  if(not defined($descrdir) or $descrdir =~ m{notset}i) {
+    $this->{m_logger}->error("Variable DESCRDIR missing!");
+    die;
+  }
+  my $datadir = $this->{m_proddata}->getInfo("DATADIR");
+  if(not defined($datadir) or $datadir =~ m{notset}i) {
+    $this->{m_logger}->error("Variable DATADIR missing!");
+    die;
+  }
+  $descrdir =~ s{^/(.*)/$}{$1};
+  my @descrdirs = split('/', $descrdir);
   foreach my $n(@media) {
     my $dirbase = "$this->{m_united}/$mediumname";
     $dirbase .= "$n" if not defined($dirext);
     $this->{m_dirlist}->{"$dirbase"} = 1;
-    $this->{m_dirlist}->{"$dirbase/suse"} = 1;
+    $this->{m_dirlist}->{"$dirbase/$datadir"} = 1;
+    ## HACK ALERT !!
+    $this->{m_dirlist}->{"$dirbase/$datadir/$descrdirs[1]"} = 1;
+    $this->{m_dirlist}->{"$dirbase/$datadir/$descrdirs[1]/$descrdirs[2]"} = 1;
     $this->{m_dirlist}->{"$dirbase/script"} = 1;
     $this->{m_dirlist}->{"$dirbase/temp"} = 1;
     $this->{m_dirlist}->{"$dirbase/media.$n"} = 1;
@@ -428,18 +443,18 @@ sub mainTask
     $retval = 1;
   }
   ## continue only in case of success
-  else {
-    $initmphandlers = $this->{m_metacreator}->initialiseHandlers();
-    if($initmphandlers == 0) {
-      $metadatacreate = $this->{m_metacreator}->createMetadata();
-      # handle return value here
-    }
-    else {
-      $this->{m_logger}->error("[E] Initialisation of metadata handlers failed!");
-      $retval = 10;
-    }
-  }
-  
+#  else {
+#    $initmphandlers = $this->{m_metacreator}->initialiseHandlers();
+#    if($initmphandlers == 0) {
+#      $metadatacreate = $this->{m_metacreator}->createMetadata();
+#      # handle return value here
+#    }
+#    else {
+#      $this->{m_logger}->error("[E] Initialisation of metadata handlers failed!");
+#      $retval = 10;
+#    }
+#  }
+#  
   return $retval;
 }
 # /mainTask
