@@ -1069,6 +1069,26 @@ to the used package manager.</db:para>
   </div>
   <!--
     ==========================================
+    common element <rpm-excludedocs>
+    
+  -->
+  <div>
+    <define name="k.rpm-excludedocs.attlist">
+      <empty/>
+    </define>
+    <define name="k.rpm-excludedocs">
+      <element name="rpm-excludedocs">
+        <a:documentation>Setup a Package Signature</a:documentation>
+        <db:para>Setup if the package manager should exclude docs files
+during package installation. This option could be ignored
+according to the used package manager.</db:para>
+        <ref name="k.rpm-excludedocs.attlist"/>
+        <text/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
     common element <rpm-force>
     
   -->
@@ -2463,6 +2483,9 @@ and also depends of the selected image output type.</db:para>
           </optional>
           <optional>
             <ref name="k.rpm-check-signatures"/>
+          </optional>
+          <optional>
+            <ref name="k.rpm-excludedocs"/>
           </optional>
           <optional>
             <ref name="k.rpm-force"/>

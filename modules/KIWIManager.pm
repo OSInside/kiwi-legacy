@@ -21,6 +21,7 @@ require Exporter;
 use strict;
 use FileHandle;
 use File::Basename;
+use Config::IniFiles;
 use KIWILog;
 use KIWIQX;
 
@@ -85,12 +86,20 @@ sub new {
 		return undef;
 	}
 	if (! defined $manager) {
-		$manager = "smart";
+		$manager = $packageManager{default};
 	}
 	my $dataDir = "/var/cache/kiwi/$manager";
 	if (! -d $dataDir) {
 		qxx ("mkdir -p $dataDir");
 	}
+	my $zyppConf = "/var/cache/kiwi/zypp.conf";
+	if (! -f $zyppConf) {
+		qxx ("echo '[main]' > $zyppConf");
+	}
+	$ENV{ZYPP_CONF} = $zyppConf;	
+	my $zconfig = new Config::IniFiles (
+		-file => $zyppConf, -allowedcommentchars => '#'
+	);
 	my @channelList = ();
 	#==========================================
 	# Store object data
@@ -107,20 +116,27 @@ sub new {
 	$this->{screenCtrl}  = $root."/screenrc.ctrls";
 	$this->{screenLogs}  = $kiwi -> getRootLog();
 	$this->{dataDir}     = $dataDir;
+	$this->{zconfig}     = $zconfig;
 	$this->{smart}       = [
-		"smart","--data-dir=$dataDir","-o remove-packages=false"
+		$packageManager{smart},
+		"--data-dir=$dataDir",
+		"-o remove-packages=false"
 	];
 	$this->{smartroot}   = [
 		"-o rpm-root=$root",
 		"-o deb-root=$root",
 	];
 	$this->{zypper}      = [
-		"zypper","--non-interactive","--no-gpg-checks",
-		"--reposd-dir $dataDir","--cache-dir $dataDir",
+		$packageManager{zypper},
+		"--non-interactive",
+		"--no-gpg-checks",
+		"--reposd-dir $dataDir",
+		"--cache-dir $dataDir",
 		"--raw-cache-dir $dataDir"
 	];
 	$this->{ensconce}    = [
-		"ensconce", "-r /"
+		$packageManager{ensconce},
+		"-r /"
 	];
 	#==========================================
 	# remove pre-defined smart channels
@@ -403,6 +419,150 @@ sub resetSignatureCheck {
 	if ($manager eq "zypper") {
 		# nothing to do for zypper here...
 	}
+	#==========================================
+	# ensconce
+	#------------------------------------------
+	if ($manager eq "ensconce") {
+		# nothing to do here for ensconce...
+	}
+	return $this;
+}
+
+#==========================================
+# setupExcludeDocs
+#------------------------------------------
+sub setupExcludeDocs {
+	# ...
+	# Check if the image description contains the exclude
+	# docs option or not. If yes activate or deactivate it
+	# according to the used package manager
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $xml  = $this->{xml};
+	my @smart   = @{$this->{smart}};
+	my $manager = $this->{manager};
+	my $chroot  = $this->{chroot};
+	my $root    = $this->{root};
+	my $data;
+	my $code;
+	#==========================================
+	# Get docs information
+	#------------------------------------------
+	my $imgExclDocs = $xml -> getRPMExcludeDocs();
+	$this->{imgExclDocs} = $imgExclDocs;
+
+	#==========================================
+	# smart
+	#------------------------------------------
+	if ($manager eq "smart") {
+		my $optionName  = "rpm-excludedocs";
+		my $curExclDocs = qxx ("@smart config --show $optionName|tr -d '\\n'");
+		$this->{curExclDocs} = $curExclDocs;
+		if (defined $imgExclDocs) {
+			my $option = "$optionName=$imgExclDocs";
+			if (! $chroot) {
+				$kiwi -> info ("Setting RPM doc exclusion to: $imgExclDocs");
+				$data = qxx ("@smart config --set $option 2>&1");
+			} else {
+				$kiwi -> info ("Setting RPM doc exclusion to: $imgExclDocs");
+				$data=qxx ("chroot \"$root\" @smart config --set $option 2>&1");
+			}
+			$code = $? >> 8;
+			if ($code != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error  ($data);
+				return undef;
+			}
+			$kiwi -> done ();
+		}
+	}
+	#==========================================
+	# zypper
+	#------------------------------------------
+	if ($manager eq "zypper") {
+		my $zconfig = $this->{zconfig};
+		my $optionParam = 'rpm.install.excludedocs';
+		my $curExclDocs = $zconfig->val('main', $optionParam);
+		$this->{curExclDocs} = $curExclDocs;
+		if (defined $imgExclDocs) {
+			$kiwi -> info ("Setting RPM doc exclusion to: $imgExclDocs");
+			if (defined $curExclDocs) {
+				$zconfig->setval('main', $optionParam, 'yes');
+			} else {
+				$zconfig->newval('main', $optionParam, 'yes');
+			}
+			$zconfig->RewriteConfig;
+		}
+	}
+
+	#==========================================
+	# ensconce
+	#------------------------------------------
+	if ($manager eq "ensconce") {
+		# nothing to do here for ensconce...
+	}
+	return $this;
+}
+
+#==========================================
+# resetExcludeDocs
+#------------------------------------------
+sub resetExcludeDocs {
+	# ...
+	# reset the signature check option to the previos
+	# value of the package manager
+	# ---
+	my $this   = shift;
+	my $kiwi   = $this->{kiwi};
+	my $chroot = $this->{chroot};
+	my $manager= $this->{manager};
+	my $root   = $this->{root};
+	my @smart  = @{$this->{smart}};
+	my $curExclDocs = $this->{curExclDocs};
+	my $data;
+	my $code;
+	#==========================================
+	# smart
+	#------------------------------------------
+	if ($manager eq "smart") {
+		if (defined $this->{imgExclDocs}) {
+			my $optionName  = "rpm-excludedocs";
+			my $option = "$optionName=$curExclDocs";
+			if (! $chroot) {
+				$kiwi -> info ("Resetting RPM doc exclusion to: $curExclDocs");
+				$data = qxx ("@smart config --set $option 2>&1");
+			} else {
+				$kiwi -> info ("Resetting RPM doc exclusion to: $curExclDocs");
+				$data=qxx ("chroot \"$root\" @smart config --set $option 2>&1");
+			}
+			$code = $? >> 8;
+			if ($code != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error  ($data);
+				return undef;
+			}
+			$kiwi -> done ();
+		}
+	}
+	#==========================================
+	# zypper
+	#------------------------------------------
+	if ($manager eq "zypper") {
+		if (defined $this->{imgExclDocs}) {
+			my $zconfig = $this->{zconfig};
+			my $optionParam = 'rpm.install.excludedocs';
+			if (defined $curExclDocs) {
+				$kiwi -> info ("Resetting RPM doc exclusion to: $curExclDocs");
+				$zconfig->setval('main', $optionParam, $curExclDocs);
+			} else {
+				$kiwi -> info ("Unsetting RPM doc exclusion");
+				$zconfig->delval('main', $optionParam);
+			}
+			$zconfig->RewriteConfig;
+		}
+	}
+	
 	#==========================================
 	# ensconce
 	#------------------------------------------

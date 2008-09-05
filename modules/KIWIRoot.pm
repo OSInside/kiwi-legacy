@@ -277,6 +277,9 @@ sub init {
 	if (! $manager -> setupSignatureCheck()) {
 		return undef;
 	}
+	if (! $manager -> setupExcludeDocs()) {
+		return undef;
+	}
 	#==================================
 	# Copy/touch some defaults files
 	#----------------------------------
@@ -603,6 +606,10 @@ sub install {
 	#------------------------------------------
 	$manager -> switchToChroot();
 	if (! $manager -> setupSignatureCheck()) {
+		$manager -> freeLock();
+		return undef;
+	}
+	if (! $manager -> setupExcludeDocs()) {
 		$manager -> freeLock();
 		return undef;
 	}

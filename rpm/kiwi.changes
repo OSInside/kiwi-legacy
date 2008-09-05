@@ -1,4 +1,17 @@
 -------------------------------------------------------------------
+Fri Sep  5 12:13:44 CEST 2008 - ms@suse.de
+
+- v2.74
+- Patch by Peter Bowen which causes zypper to use a private
+  copy of zypp.conf (rather than the host system copy) and
+  provides an interface to modify the config file.
+- Patch by Peter Bowen which allows automatic exclusion of
+  documentation during install. Smart and zypper both support
+  setting options that pass the right flag to rpm on the
+  backend.
+- update documentation plus scheme documentation
+
+-------------------------------------------------------------------
 Wed Sep  3 11:13:51 CEST 2008 - ms@suse.de
 
 - v2.73

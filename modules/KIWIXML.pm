@@ -1259,6 +1259,23 @@ sub getRPMCheckSignatures {
 }
 
 #==========================================
+# getRPMExcludeDocs
+#------------------------------------------
+sub getRPMExcludeDocs {
+	# ...
+	# Check if the package manager should exclude docs
+	# from installed files or not
+	# ---
+	my $this = shift;
+	my $node = $this-> getPreferencesNodeByTagName ("rpm-excludedocs");
+	my $xdoc = $node -> getElementsByTagName ("rpm-excludedocs");
+	if ((! defined $xdoc) || ("$xdoc" eq "")) {
+		return undef;
+	}
+	return $xdoc;
+}
+
+#==========================================
 # getRPMForce
 #------------------------------------------
 sub getRPMForce {
