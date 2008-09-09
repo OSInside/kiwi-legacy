@@ -43,7 +43,7 @@ use KIWITest;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "2.74";
+our $Version       = "2.75";
 our $openSUSE      = "http://download.opensuse.org/repositories/";
 our $ConfigFile    = "$ENV{'HOME'}/.kiwirc";
 our $ConfigName    = "config.xml";
@@ -244,65 +244,6 @@ sub main {
 				my $code = kiwiExit (1); return $code;
 			}
 		}
-	}
-	#========================================
-	# Create instsource from meta packages
-	#----------------------------------------
-	if (defined $CreateInstSource) {
-		# This option requires the module "KIWICollect.pm".
-		# If it is not available, the option cannot be used.
-		# kiwi then issues a warning and exits.
-		eval "require KIWICollect";
-		if($@) {
-			$kiwi->error("Module KIWICollect is not available!");
-			my $code = kiwiExit (3);
-			return $code;
-		}
-		else {
-			$kiwi->info("Module KIWICollect loaded successfully...");
-			$kiwi->done();
-		}
-		$kiwi -> info ("Reading image description for insallation source...");
-		my $xml = new KIWIXML ( $kiwi,$CreateInstSource );
-		if (! defined $xml) {
-			my $code = kiwiExit (1); return $code;
-		}
-		$kiwi -> done();
-		#==========================================
-		# Initialize installation source tree
-		#------------------------------------------
-		my @root = $xml -> createTmpDirectory ( undef, $RootTree );
-		my $root = $root[1];
-		if (! defined $root) {
-			$kiwi -> error ("Couldn't create instsource root");
-			$kiwi -> failed ();
-			my $code = kiwiExit (1); return $code;
-		}
-
-		#==========================================
-		# Create object...
-		#----------------------------------------
-		my $collect = new KIWICollect( $kiwi, $xml, $root );
-		if( !defined( $collect) )
-		{
-			$kiwi->error( "Unable to create KIWICollect module." );
-			$kiwi -> failed ();
-			my $code = kiwiExit( 1 ); return $code;
-		}
-		$collect->Init();
-		#==========================================
-		# from now $collect is defined. Call the *CENTRAL* method for it
-		# ...and work!
-		#----------------------------------------
-		if( !defined( $collect->mainTask() ) )
-		{
-			$kiwi->error( "KIWICollect could not be invoked successfully." );
-			$kiwi -> failed ();
-			my $code = kiwiExit ( 1 ); return $code;
-		}
-		$kiwi->info( "KIWICollect completed successfully." );
-		$kiwi->done();
-		kiwiExit (0);
 	}
 
 	#========================================
@@ -1207,6 +1148,12 @@ sub init {
 		"help|h"                => \&usage,
 		"<>"                    => \&usage
 	);
+	#========================================
+	# non root task: create inst source
+	#----------------------------------------
+	if (defined $CreateInstSource) {
+		createInstSource();
+	}
 	#==========================================
 	# non root task: create md5 hash
 	#------------------------------------------
@@ -1247,7 +1194,6 @@ sub init {
 		(! defined $Upgrade)            &&
 		(! defined $SetupSplash)        &&
 		(! defined $BootVMDisk)         &&
-		(! defined $CreateInstSource)   &&
 		(! defined $Migrate)            &&
 		(! defined $ListProfiles)       &&
 		(! defined $InstallStick)       &&
@@ -2019,6 +1965,64 @@ sub getControlFile {
 		$config = pop @globsearch;
 	}
 	return $config;
+}
+
+#==========================================
+# createInstSource
+#------------------------------------------
+sub createInstSource {
+	# /.../
+	# create instsource requires the module "KIWICollect.pm".
+	# If it is not available, the option cannot be used.
+	# kiwi then issues a warning and exits.
+	# ----
+	eval "require KIWICollect";
+	if($@) {
+		$kiwi->error("Module KIWICollect is not available!");
+		my $code = kiwiExit (3);
+		return $code;
+	}
+	else {
+		$kiwi->info("Module KIWICollect loaded successfully...");
+		$kiwi->done();
+	}
+	$kiwi -> info ("Reading image description for insallation source...");
+	my $xml = new KIWIXML ( $kiwi,$CreateInstSource );
+	if (! defined $xml) {
+		my $code = kiwiExit (1); return $code;
+	}
+	$kiwi -> done();
+	#==========================================
+	# Initialize installation source tree
+	#------------------------------------------
+	my @root = $xml -> createTmpDirectory ( undef, $RootTree );
+	my $root = $root[1];
+	if (! defined $root) {
+		$kiwi -> error ("Couldn't create instsource root");
+		$kiwi -> failed ();
+		my $code = kiwiExit (1); return $code;
+	}
+	#==========================================
+	# Create object...
+	#----------------------------------------
+	my $collect = new KIWICollect( $kiwi, $xml, $root );
+	if (! defined( $collect) ) {
+		$kiwi->error( "Unable to create KIWICollect module." );
+		$kiwi -> failed ();
+		my $code = kiwiExit( 1 ); return $code;
+	}
+	$collect->Init();
+	#==========================================
+	# Call the *CENTRAL* method for it...
+	#----------------------------------------
+	if (! defined( $collect->mainTask() ) ) {
+		$kiwi->error( "KIWICollect could not be invoked successfully." );
+		$kiwi -> failed ();
+		my $code = kiwiExit ( 1 ); return $code;
+	}
+	$kiwi->info( "KIWICollect completed successfully." );
+	$kiwi->done();
+	kiwiExit (0);
 }
 
 main();
