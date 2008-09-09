@@ -486,8 +486,11 @@ specifies where the boot image (initrd) can be found.</db:para>
     
   -->
   <div>
+    <!-- k.instrepo.name.attribute = k.id.attribute -->
     <define name="k.instrepo.name.attribute">
-      <ref name="k.name.attribute"/>
+      <attribute name="name">
+        <data type="ID"/>
+      </attribute>
     </define>
     <define name="k.instrepo.priority.attribute">
       <attribute name="priority">
@@ -710,9 +713,10 @@ archive is extracted in a specific way.</db:para>
     <define name="k.repopackage.arch.attribute">
       <ref name="k.arch.attribute"/>
     </define>
-    <define name="k.repopackage.priority.attribute">
-      <attribute name="priority">
+    <define name="k.repopackage.forcerepo.attribute">
+      <attribute name="forcerepo">
         <a:documentation>Specifies the search priority</a:documentation>
+        <data type="IDREF"/>
       </attribute>
     </define>
     <define name="k.repopackage.addarch.attribute">
@@ -727,8 +731,8 @@ additionally add the same package from the given arch</a:documentation>
 given arch should be removed</a:documentation>
       </attribute>
     </define>
-    <define name="k.repopackage.forcearch.attribute">
-      <attribute name="forcearch">
+    <define name="k.repopackage.onlyarch.attribute">
+      <attribute name="onlyarch">
         <a:documentation>Specifies that the package with
 the given arch should be used in any case</a:documentation>
       </attribute>
@@ -753,7 +757,7 @@ to the specific medium number (CD1, DVD7, ...)</a:documentation>
           <ref name="k.repopackage.arch.attribute"/>
         </optional>
         <optional>
-          <ref name="k.repopackage.priority.attribute"/>
+          <ref name="k.repopackage.forcerepo.attribute"/>
         </optional>
         <optional>
           <ref name="k.repopackage.addarch.attribute"/>
@@ -762,7 +766,7 @@ to the specific medium number (CD1, DVD7, ...)</a:documentation>
           <ref name="k.repopackage.removearch.attribute"/>
         </optional>
         <optional>
-          <ref name="k.repopackage.forcearch.attribute"/>
+          <ref name="k.repopackage.onlyarch.attribute"/>
         </optional>
         <optional>
           <ref name="k.repopackage.source.attribute"/>

@@ -546,13 +546,13 @@ sub queryRpmHeaders
   PACK:foreach my $pack(sort(keys(%{$this->{m_packages}}))) {
     my $tmp = $this->{m_packages}->{$pack}; #optimisation
     #my $arch = $tmp->{'arch'};
-    #my @archs = grep { $_ !~ m{(addarch|removearch|forcearch|priority|medium)}} keys(%{$tmp});
+    #my @archs = grep { $_ !~ m{(addarch|removearch|onlyarch|priority|medium)}} keys(%{$tmp});
     my @omits = ();
     my @archs = ();
     my $nofallback = 0;
-    if(defined($tmp->{'forcearch'})) {
-      # allow 'forcearch="x86_64,i586"'
-      push @archs, split(',', $tmp->{'forcearch'});
+    if(defined($tmp->{'onlyarch'})) {
+      # allow 'onlyarch="x86_64,i586"'
+      push @archs, split(',', $tmp->{'onlyarch'});
       $nofallback = 1;
     }
     elsif(defined($tmp->{'addarch'})) {
@@ -645,7 +645,7 @@ sub queryRpmHeaders
 	  }
 
 
-	  my $dstfile = "$this->{'m_basesubdir'}->{$medium}/suse/$ad/$tmp->{$fa}->{'targetfile'}";
+	  my $dstfile = "$this->{'m_basesubdir'}->{$medium}/$base_on_cd/$ad/$tmp->{$fa}->{'targetfile'}";
 	  $dstfile =~ m{(.*/)(.*?/)(.*?/)(.*)[.]([rs]pm)$};
 	  if(not(defined($1) and defined($2) and defined($3) and defined($4) and defined($5))) {
 	    $this->{m_logger}->error("[E] [queryRpmHeaders] regexp didn't match path $tmp->{'source'}");
@@ -1091,9 +1091,9 @@ sub bestBet
 
   my @repos = ();
   # if for a package the "priority=<reponame>" is set, only look for package there:
-  if(defined($this->{m_packages}->{$pack}) and defined($this->{m_packages}->{$pack}->{'priority'})) {
+  if(defined($this->{m_packages}->{$pack}) and defined($this->{m_packages}->{$pack}->{'forcerepo'})) {
     $this->{m_logger}->info("[I] forcing repo ".$this->{m_packages}->{$pack}." for package $pack");
-    push @repos, $this->{m_packages}->{$pack}->{'priority'};
+    push @repos, $this->{m_packages}->{$pack}->{'forcerepo'};
   }
   else {
     @repos = keys(%{$this->{m_repos}});
@@ -1404,15 +1404,15 @@ sub checkArchitectureList
   # mapped to 0 means "removed"	(removearch)
   #	      1 means "original from xml"
   #	      2 means "added" (addarch)
-  #	      3 means "force" (forcearch)
+  #	      3 means "force" (onlyarch)
   # for ADDED (=2) archs no fallback expansion is done!
   my %requiredarch = map { $_ => 1 } @{$this->{m_archlist}};
 
   my @addarchs = ();
   my @remarchs = ();
 
-  if(defined($this->{m_packages}->{$pack}) and $this->{m_packages}->{$pack}->{'forcearch'}) {
-    $requiredarch{$this->{m_packages}->{$pack}->{'forcearch'}} = 3;
+  if(defined($this->{m_packages}->{$pack}) and $this->{m_packages}->{$pack}->{'onlyarch'}) {
+    $requiredarch{$this->{m_packages}->{$pack}->{'onlyarch'}} = 3;
   }
   else {
     # step 1 - sort out the one and only definite architecture list:
@@ -1880,6 +1880,7 @@ sub getSrcList
 
   my %src;
   foreach my $a(keys(%{$this->{m_packages}->{$p}})) {
+    next if($a =~ m{addarch|removearch|onlyarch|source|script|medium});
     if(!$this->{m_packages}->{$p}->{$a}->{'source'}) {
       # pack without source is bäh!
       goto error;

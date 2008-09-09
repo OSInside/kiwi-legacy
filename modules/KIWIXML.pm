@@ -2171,8 +2171,8 @@ sub getInstSourcePackageAttributes {
 	}
 	my %result;
 	my @attrib = (
-		"priority" ,"addarch","removearch",
-		"forcearch","source" ,"script", "medium"
+		"forcerepo" ,"addarch","removearch",
+		"onlyarch","source" ,"script", "medium"
 	);
 
 	if(not defined($this->{m_rpacks})) {
