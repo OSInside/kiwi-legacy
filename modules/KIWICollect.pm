@@ -992,6 +992,7 @@ sub unpackMetapackages
 
       if($nokeep == 1) {
 	foreach my $d(keys(%{$this->{m_packages}->{$metapack}})) {
+	  next if($d =~ m{(addarch|removearch|onlyarch|source|script|medium)});
 	  if(defined($this->{m_packages}->{$metapack}->{$d}->{'newpath'}) and defined($this->{m_packages}->{$metapack}->{$d}->{'newfile'})) {
 	    unlink("$this->{m_packages}->{$metapack}->{$d}->{'newpath'}/$this->{m_packages}->{$metapack}->{$d}->{'newfile'}");
 	  }
@@ -1880,7 +1881,7 @@ sub getSrcList
 
   my %src;
   foreach my $a(keys(%{$this->{m_packages}->{$p}})) {
-    next if($a =~ m{addarch|removearch|onlyarch|source|script|medium});
+    next if($a =~ m{(addarch|removearch|onlyarch|source|script|medium)});
     if(!$this->{m_packages}->{$p}->{$a}->{'source'}) {
       # pack without source is bäh!
       goto error;
