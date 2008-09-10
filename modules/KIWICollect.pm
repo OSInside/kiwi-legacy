@@ -4,7 +4,7 @@
 # PROJECT       : OpenSUSE Build-Service
 # COPYRIGHT     : (c) 2006 SUSE LINUX Products GmbH, Germany
 #               :
-# AUTHOR        : Jan-Christoph Bornschlegel <jcbornschlegel@suse.de>
+# AUTHOR        : Jan-Christoph Bornschlegel <jcborn@suse.de>
 #               :
 # BELONGS TO    : Operating System images
 #               :
@@ -1111,7 +1111,8 @@ sub bestBet
       URI:foreach my $uri(@{$this->{m_repos}->{$r}->{'srcdirs'}->{$d}}) {
 	#$this->{m_logger}->info("current uri: $uri ");
 	if($d eq "/") {
-	  if($uri =~ m{^.*/$pack_safe-[\d.]+.*[.]([^.]+)[.][rs]pm$}) {
+	  #if($uri =~ m{^.*/$pack_safe-[\d.]+.*[.]([^.]+)[.][rs]pm$}) {
+	  if($uri =~ m{^.*/$pack_safe-[^-]+-[^-]+\.([a-zA-Z][^\.\-]*)\.[rs]pm$}) {
 	    # case 1: dir is "/", vers.nr. in name, arch is $1:
 	    $subdirname = "$1/";
 	    # don't use $fa here because the pack is found in the first subdir in this case
@@ -1129,7 +1130,7 @@ sub bestBet
 	  $found_in_repo++;
 	}
 	elsif($d =~ m{.*/([^/]+)/$}) {
-	  if($uri =~ m{^.*/$pack_safe-[\d.]+.*[.]([^.]+)[.][rs]pm$}) {
+	  if($uri =~ m{^.*/$pack_safe-[^-]+-[^-]+\.([a-zA-Z][^\.\-]*)\.[rs]pm$}) {
 	    # case 3: dir is like "/suse/x86_64/", vers.nr. in name, arch is $1:
 	    $subdirname = "$1/";
 	    $archinfo = $1;
