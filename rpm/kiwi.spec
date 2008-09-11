@@ -13,7 +13,7 @@
 Url:            http://kiwi.berlios.de
 
 Name:           kiwi
-BuildRequires:  perl-XML-LibXML perl-libwww-perl smart
+BuildRequires:  perl-XML-LibXML perl-libwww-perl smart perl-Config-IniFiles
 BuildRequires:  hal-devel module-init-tools screen zlib-devel
 BuildRequires:  gcc-c++ libxslt swig
 %if %{suse_version} > 1020
