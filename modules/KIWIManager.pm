@@ -458,7 +458,7 @@ sub setupExcludeDocs {
 	if ($manager eq "smart") {
 		my $optionName  = "rpm-excludedocs";
 		my $curExclDocs = qxx (
-			"@smart config --show $optionName|tr -d '\\n' 2>&1"
+			"@smart config --show $optionName 2>/dev/null | tr -d '\\n'"
 		);
 		$this->{curExclDocs} = $curExclDocs;
 		if (defined $imgExclDocs) {
