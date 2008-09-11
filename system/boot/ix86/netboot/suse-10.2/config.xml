@@ -92,6 +92,7 @@
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
+		<package name="glibc@i586" arch="i686"/>
 		<package name="glibc-locale"/>
 	</packages>
 	<packages type="delete">

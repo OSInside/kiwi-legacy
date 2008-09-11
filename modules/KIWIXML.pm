@@ -2233,6 +2233,7 @@ sub getList {
 		$nodes = $this->{packageNodeList};
 	}
 	my @result;
+	my $manager = $this -> getPackageManager();
 	for (my $i=1;$i<= $nodes->size();$i++) {
 		#==========================================
 		# Get type and packages
@@ -2281,6 +2282,11 @@ sub getList {
 			if (! defined $package) {
 				next;
 			}
+			if ($type ne "metapackages") {
+				if (($package =~ /@/) && ($manager eq "zypper")) {
+					$package =~ s/@/\./;
+				}
+			}
 			push @result,$package;
 		}
 		#==========================================
@@ -2288,7 +2294,6 @@ sub getList {
 		#------------------------------------------
 		if ($type ne "metapackages") {
 			my @pattlist = ();
-			my $manager  = $this -> getPackageManager();
 			my @slist = $node -> getElementsByTagName ("opensuseProduct");
 			foreach my $element (@slist) {
 				my $product = $element -> getAttribute ("name");
@@ -2297,7 +2302,7 @@ sub getList {
 				}
 				push @pattlist,"product:".$product;
 			}
-			my @slist = $node -> getElementsByTagName ("opensusePattern");
+			@slist = $node -> getElementsByTagName ("opensusePattern");
 			foreach my $element (@slist) {
 				my $pattern = $element -> getAttribute ("name");
 				if (! defined $pattern) {
@@ -2358,6 +2363,9 @@ sub getList {
 			my $ignore = $element -> getAttribute ("name");
 			if (! defined $ignore) {
 				next;
+			}
+			if (($ignore =~ /@/) && ($manager eq "zypper")) {
+				$ignore =~ s/@/\./;
 			}
 			push @ignorelist,$ignore;
 		}

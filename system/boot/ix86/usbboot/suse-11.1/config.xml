@@ -97,6 +97,7 @@
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
+		<package name="glibc@i586" arch="i686"/>
 		<package name="glibc-locale"/>
 		<package name="procps"/>
 		<package name="cracklib-dict-small"/>
