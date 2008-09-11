@@ -2584,10 +2584,11 @@ sub resolveLink {
 sub resolveArchitectur {
 	my $this = shift;
 	my $path = shift;
-	if ($this->{arch} =~ /i.86/) {
-		$this->{arch} = "i386";
+	my $arch = $this->{arch};
+	if ($arch =~ /i.86/) {
+		$arch = "i386";
 	}
-	$path =~ s/\%arch/$this->{arch}/;
+	$path =~ s/\%arch/$arch/;
 	return $path;
 }
 
