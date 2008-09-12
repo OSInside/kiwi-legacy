@@ -2,8 +2,9 @@
 Tue Sep  9 10:40:54 CEST 2008 - ms@suse.de
 
 - v2.75
-- don't use i686 glibc for boot images, it could cause init
-  to hang and therefore locks the boot process completely
+- don't use i686 glibc for the boot images, it could cause
+  the init process to hang and therefore locks the boot process
+  completely (bnc #310001)
 - added schema adaptions for instsource creation
 - make create instsource a non root task, requested
   by autobuild team (mls,jcborn)
