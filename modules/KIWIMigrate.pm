@@ -184,6 +184,7 @@ sub new {
 	);
 	if (defined $excl) {
 		my @exclude = @{$excl};
+		foreach (@exclude) { $_ = quotemeta; };
 		push @denyFiles,@exclude;
 	}
 	#==========================================
@@ -590,7 +591,7 @@ sub setSystemConfiguration {
 		my $filehash = shift;
 		my $mount    = shift;
 		return sub {
-			if (-f $File::Find::name) {
+			if (! -d $File::Find::name) {
 				my $expr = quotemeta $mount;
 				my $file = $File::Find::name; $file =~ s/$expr//;
 				my $dirn = $File::Find::dir;  $dirn =~ s/$expr//;
@@ -712,7 +713,7 @@ sub setSystemConfiguration {
 				if (! -d "$dest/root/$dir") {
 					qxx ("mkdir -p $dest/root/$dir");
 				}
-				qxx ("cp -a \"$file\" $dest/root/$file");
+				qxx ("cp -a \"$file\" \"$dest/root/$file\"");
 			}
 			$done = int ($count * $spart);
 			if ($done != $done_old) {
