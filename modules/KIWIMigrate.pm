@@ -725,6 +725,9 @@ sub setSystemConfiguration {
 		$kiwi -> note ("\n");
 		$kiwi -> doNorm ();
 		$kiwi -> cursorON();
+		$kiwi -> info ("Checking for broken links in custom root tree...");
+		$this -> checkBrokenLinks();
+		$kiwi -> done();
 		$kiwi -> info ("Setting up initial deployment workflow...");
 		if (! $this -> setInitialSetup()) {
 			return undef;
@@ -874,6 +877,48 @@ sub cleanMount {
 		rmdir $mount;
 	}
 	return $this;
+}
+
+#==========================================
+# checkBrokenLinks
+#------------------------------------------
+sub checkBrokenLinks {
+	# ...
+	# the tree could contain broken symbolic links because
+	# the target is unmodified and part of a package. The
+	# broken links will be removed in this function and it
+	# is assumed that a post install script of the package
+	# creates this links when the package gets installed
+	# in the kiwi prepare mode. If the links are created
+	# manually or by an application at system installation
+	# for example the links needs to be created in a
+	# separate image description config.sh script 
+	# ---	
+	my $this = shift;
+	my $dest = $this->{dest};
+	my $kiwi = $this->{kiwi};
+	my @link = qxx ("find $dest/root -type l");
+	my $returnok = 1;
+	my $dir;
+	foreach my $linkfile (@link) {
+		chomp $linkfile;
+		my $ref = readlink ($linkfile);
+		if ($ref !~ /^\//) {
+			$dir = dirname ($linkfile);
+			$dir.= "/";
+		} else {
+			$dir = $dest."/root";
+		}
+		if (! -e $dir.$ref) {
+			$kiwi -> loginfo ("Broken link: $linkfile -> $ref [ REMOVED ]");
+			unlink $linkfile;
+			$returnok = 0;
+		}
+	}
+	if ($returnok) {
+		return $this;
+	}
+	checkBrokenLinks();
 }
 
 1;

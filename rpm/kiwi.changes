@@ -4,6 +4,7 @@ Mon Sep 15 12:00:17 CEST 2008 - ms@suse.de
 - v2.76
 - fixed files (-f) check in migration mode (bnc #419219)
 - added quoting for excluded param values (bnc #419219)
+- added checkBrokenLinks() function (bnc #419219)
 
 -------------------------------------------------------------------
 Tue Sep  9 10:40:54 CEST 2008 - ms@suse.de
