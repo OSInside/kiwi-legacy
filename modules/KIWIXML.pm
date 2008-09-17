@@ -233,7 +233,6 @@ sub new {
 		#==========================================
 		# foreign repositories
 		#------------------------------------------
-		$kiwi -> done ();
 		$kiwi -> info ("Including foreign repository node(s)");
 		my $need = new XML::LibXML::NodeList();
 		my @node = $repositNodeList -> get_nodelist();
@@ -245,6 +244,7 @@ sub new {
 		}
 		$repositNodeList = $foreignRepo->{xmlnode};
 		$repositNodeList -> prepend ($need);
+		$kiwi -> done ();
 		#==========================================
 		# foreign preferences
 		#------------------------------------------
@@ -1028,7 +1028,6 @@ sub setForeignOptionsElement {
 	my $kiwi = $this->{kiwi};
 	my $foreignRepo = $this->{foreignRepo};
 	my $value = $foreignRepo->{$item};
-	$kiwi -> done ();
 	$kiwi -> info ("Including foreign element $item: $value");
 	my $addElement = new XML::LibXML::Element ("$item");
 	$addElement -> appendText ($value);
@@ -1039,6 +1038,7 @@ sub setForeignOptionsElement {
 		$opts -> removeChild ($node);
 	}
 	$opts -> appendChild ($addElement);
+	$kiwi -> done ();
 	return $this;
 }
 
@@ -1401,9 +1401,7 @@ sub checkProfiles {
 			$kiwi -> done ();
 		}
 		$kiwi -> info ("Using profile(s): @prequest");
-		if (defined $pref) {
-			$kiwi -> done ();
-		}
+		$kiwi -> done ();
 	}
 	return $this;
 }
