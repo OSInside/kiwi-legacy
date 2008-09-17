@@ -1999,18 +1999,22 @@ sub createInstSource {
 	#==========================================
 	# Create object...
 	#----------------------------------------
-	my $collect = new KIWICollect( $kiwi, $xml, $root );
+	my $collect = new KIWICollect ( $kiwi, $xml, $root );
 	if (! defined( $collect) ) {
-		$kiwi->error( "Unable to create KIWICollect module." );
+		$kiwi -> error( "Unable to create KIWICollect module." );
 		$kiwi -> failed ();
 		my $code = kiwiExit( 1 ); return $code;
 	}
-	$collect->Init();
+	if (! defined( $collect -> Init () ) ) {
+		$kiwi -> error( "Object initialisation failed!" );
+		$kiwi -> failed ();
+		my $code = kiwiExit( 1 ); return $code;
+	}
 	#==========================================
 	# Call the *CENTRAL* method for it...
 	#----------------------------------------
-	if (! defined( $collect->mainTask() ) ) {
-		$kiwi->error( "KIWICollect could not be invoked successfully." );
+	if (! defined( $collect -> mainTask () ) ) {
+		$kiwi -> error( "KIWICollect could not be invoked successfully." );
 		$kiwi -> failed ();
 		my $code = kiwiExit ( 1 ); return $code;
 	}
