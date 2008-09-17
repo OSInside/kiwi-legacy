@@ -1397,9 +1397,6 @@ sub checkProfiles {
 		}
 	}
 	if (@prequest) {
-		if (! defined $pref) {
-			$kiwi -> done ();
-		}
 		$kiwi -> info ("Using profile(s): @prequest");
 		$kiwi -> done ();
 	}
