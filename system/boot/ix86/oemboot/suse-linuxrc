@@ -301,8 +301,7 @@ if [ -f $VMX_SYSTEM ] && [ $LOCAL_BOOT = "no" ];then
 	#--------------------------------------
 	blockdev --rereadpt $deviceDisk
 	deviceTest="$deviceDisk"1
-	waitForStorageDevice $deviceTest
-	if ! sfdisk -s $deviceTest &>/dev/null;then
+	if ! waitForStorageDevice $deviceTest:then
 		systemException \
 			"Partition $deviceTest doesn't appear... fatal !" \
 		"reboot"
@@ -406,7 +405,7 @@ if [ $LOCAL_BOOT = "no" ];then
 		#====================================== 
 		# 10.2 check for read-write partition
 		#--------------------------------------
-		if ! sfdisk -s "$deviceDisk"2 &>/dev/null;then
+		if ! partitionSize "$deviceDisk"2 &>/dev/null;then
 			Echo "No read-write partition in this split image"
 			DONT_PARTITION=1
 		fi
@@ -415,11 +414,11 @@ if [ $LOCAL_BOOT = "no" ];then
 		#--------------------------------------
 		if [ -z "$DONT_PARTITION" ];then
 			swapXMBytes=$swapsize
-			diskXMBytes=`sfdisk -s $deviceDisk`
+			diskXMBytes=`partitionSize $deviceDisk`
 			diskXMBytes=`expr $diskXMBytes / 1000`
-			disk1MBytes=`sfdisk -s "$deviceDisk"1`
+			disk1MBytes=`partitionSize "$deviceDisk"1`
 			disk1MBytes=`expr $disk1MBytes / 1000`
-			disk2MBytes=`sfdisk -s "$deviceDisk"2`
+			disk2MBytes=`partitionSize "$deviceDisk"2`
 			disk2MBytes=`expr $disk2MBytes / 1000`
 			diskXLBytes=`expr $diskXMBytes - $disk1MBytes - $disk2MBytes`
 			diskXABytes=`expr $diskXLBytes - $swapXMBytes`
@@ -483,7 +482,7 @@ if [ $LOCAL_BOOT = "no" ];then
 		#======================================
 		# 10.6 Activate swap space
 		#--------------------------------------
-		if sfdisk -s $deviceSwap &>/dev/null;then
+		if partitionSize $deviceSwap &>/dev/null;then
 			Echo "Activating swap space on $deviceSwap"
 			if ! mkswap $deviceSwap >/dev/null 2>&1;then
 				systemException "Failed to create swap signature" "reboot"
@@ -521,8 +520,8 @@ if [ $LOCAL_BOOT = "no" ];then
 			# ----
 			input=/part.input
 			rm -f $input
-			diskXMBytes=`sfdisk -s $deviceDisk`
-			diskPMBytes=`sfdisk -s $deviceDisk"1"`
+			diskXMBytes=`partitionSize $deviceDisk`
+			diskPMBytes=`partitionSize $deviceDisk"1"`
 			diskPMBytes=`expr $diskPMBytes / 1000`
 			diskXMBytes=`expr $diskXMBytes / 1000`
 			disk1MBytes=10240
@@ -741,7 +740,7 @@ if [ $LOCAL_BOOT = "no" ];then
 			#======================================
 			# 10.4 Activate swap space
 			#--------------------------------------
-			if sfdisk -s $deviceSwap &>/dev/null;then
+			if partitionSize $deviceSwap &>/dev/null;then
 				Echo "Activating swap space on $deviceSwap"
 				if ! mkswap $deviceSwap >/dev/null 2>&1;then
 					systemException "Failed to create swap signature" "reboot"
@@ -800,9 +799,9 @@ if [ $LOCAL_BOOT = "no" ];then
 			# 10.2 calculate end block - swapspace
 			#--------------------------------------
 			swapXMBytes=$swapsize
-			diskXMBytes=`sfdisk -s $deviceDisk`
+			diskXMBytes=`partitionSize $deviceDisk`
 			diskXMBytes=`expr $diskXMBytes / 1000`
-			disk1MBytes=`sfdisk -s "$deviceDisk"1`
+			disk1MBytes=`partitionSize "$deviceDisk"1`
 			disk1MBytes=`expr $disk1MBytes / 1000`
 			disk2MBytes=`expr $diskXMBytes - $disk1MBytes - $swapsize`
 			if [ $disk2MBytes -lt 100 ];then
@@ -862,7 +861,7 @@ if [ $LOCAL_BOOT = "no" ];then
 			#======================================
 			# 10.5 Activate swap space
 			#--------------------------------------
-			if sfdisk -s $deviceSwap &>/dev/null;then
+			if partitionSize $deviceSwap &>/dev/null;then
 				Echo "Activating swap space on $deviceSwap"
 				if ! mkswap $deviceSwap >/dev/null 2>&1;then
 					systemException "Failed to create swap signature" "reboot"
@@ -889,7 +888,7 @@ if [ $LOCAL_BOOT = "no" ];then
 		KIWI_INITRD_PARAMS="$KIWI_INITRD_PARAMS deviceRoot=\"$deviceRoot\""
 		export KIWI_INITRD_PARAMS
 	fi
-	if [ ! -z "$deviceResize" ] && sfdisk -s $deviceResize &>/dev/null;then
+	if [ ! -z "$deviceResize" ] && partitionSize $deviceResize &>/dev/null;then
 		if [ ! -z "$OEM_RECOVERY" ];then
 			KIWI_INITRD_PARAMS="$KIWI_INITRD_PARAMS LOCAL_BOOT=yes"
 			KIWI_INITRD_PARAMS="$KIWI_INITRD_PARAMS deviceRoot=$deviceRoot"
@@ -991,7 +990,7 @@ fi
 if [ $LOCAL_BOOT = "no" ];then
 	export HAVE_SWAP=0
 	setupDefaultFstab /config
-	if sfdisk -s $deviceSwap &>/dev/null;then
+	if partitionSize $deviceSwap &>/dev/null;then
 		updateSwapDeviceFstab /config $deviceSwap
 		HAVE_SWAP=1
 	fi

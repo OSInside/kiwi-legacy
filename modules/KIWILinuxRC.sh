@@ -1323,7 +1323,7 @@ function USBStickDevice {
 				if [ ! -f $isremovable ];then
 					continue;
 				fi
-				if ! sfdisk -s $device >/dev/null;then
+				if ! partitionSize $device >/dev/null;then
 					continue;
 				fi
 				if [ ! -f $serial ];then
@@ -1429,7 +1429,7 @@ function searchSwapSpace {
 	diskdevs=`echo $diskdevs | sed -e "s@(.*)@@"`
 	for diskdev in $diskdevs;do
 		for disknr in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15;do
-			id=`/sbin/sfdisk --print-id $diskdev $disknr`
+			id=`partitionID $diskdev $disknr`
 			if [ "$id" = "82" ];then
 				echo $diskdev$disknr
 				return
@@ -1452,7 +1452,7 @@ function searchDiskSpace {
 	diskdevs=`echo $diskdevs | sed -e "s@(.*)@@"`
 	for diskdev in $diskdevs;do
 		for disknr in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15;do
-			id=`/sbin/sfdisk --print-id $diskdev $disknr`
+			id=`partitionID $diskdev $disknr`
 			if [ -z $id ];then
 				id=0
 			fi
@@ -1699,7 +1699,7 @@ function createFileSystem {
 	diskPartition=$1
 	diskID=`echo $diskPartition | sed -e s@[^0-9]@@g`
 	diskPD=`echo $diskPartition | sed -e s@[0-9]@@g`
-	diskPartitionType=`sfdisk -c $diskPD $diskID`
+	diskPartitionType=`partitionID $diskPD $diskID`
 	if test "$diskPartitionType" = "8e";then
 		Echo "Creating Volume group [systemvg]"
 		pvcreate $diskPartition >/dev/null
@@ -1727,25 +1727,6 @@ function createFileSystem {
 	fi
 }
 #======================================
-# sfdiskPartitionCount
-#--------------------------------------
-function sfdiskPartitionCount {
-	# /.../
-	# calculate the number of partitions to create. If the
-	# number is more than 4 an extended partition needs to be
-	# created.
-	# ----
-	IFS="," ; for i in $PART;do
-		PART_NUMBER=`expr $PART_NUMBER + 1`
-	done
-	if [ $PART_NUMBER -gt 4 ];then
-		PART_NEED_EXTENDED=1
-	fi
-	PART_NUMBER=`expr $PART_NUMBER + 1`
-	PART_NEED_FILL=`expr $PART_NUMBER / 8`
-	PART_NEED_FILL=`expr 8 - \( $PART_NUMBER - $PART_NEED_FILL \* 8 \)`
-}
-#======================================
 # checkExtended
 #--------------------------------------
 function checkExtended {
@@ -1769,6 +1750,43 @@ function checkExtended {
 			IMAGE=`echo $IMAGE | sed -e s@$iDevice@$iNewDev@`
 		fi
 	fi
+}
+#======================================
+# sfdiskGetPartitionID
+#--------------------------------------
+function sfdiskGetPartitionID {
+	# /.../
+	# prints the partition ID for the given device and number
+	# ----
+	sfdisk -c $1 $2
+}
+#======================================
+# sfdiskGetPartitionSize
+#--------------------------------------
+function sfdiskGetPartitionSize {
+	# /.../
+	# prints the partition or disk size in kB
+	# ----
+	sfdisk -s $1
+}
+#======================================
+# sfdiskPartitionCount
+#--------------------------------------
+function sfdiskPartitionCount {
+	# /.../
+	# calculate the number of partitions to create. If the
+	# number is more than 4 an extended partition needs to be
+	# created.
+	# ----
+	IFS="," ; for i in $PART;do
+		PART_NUMBER=`expr $PART_NUMBER + 1`
+	done
+	if [ $PART_NUMBER -gt 4 ];then
+		PART_NEED_EXTENDED=1
+	fi
+	PART_NUMBER=`expr $PART_NUMBER + 1`
+	PART_NEED_FILL=`expr $PART_NUMBER / 8`
+	PART_NEED_FILL=`expr 8 - \( $PART_NUMBER - $PART_NEED_FILL \* 8 \)`
 }
 #======================================
 # sfdiskFillPartition
@@ -1867,6 +1885,48 @@ function sfdiskCreatePartition {
 	export PART_DEV
 }
 #======================================
+# sfdiskWritePartitionTable
+#--------------------------------------
+function sfdiskWritePartitionTable {
+	# /.../
+	# write the partition table using PART_FILE as
+	# input for sfdisk
+	# ----
+	diskDevice=$1
+	dd if=/dev/zero of=$diskDevice bs=512 count=1 >/dev/null
+	sfdisk -uM --force $diskDevice < $PART_FILE >/dev/null
+	if test $? != 0;then
+		systemException \
+			"Failed to create partition table on: $diskDevice !" \
+		"reboot"
+	fi
+	verifyOutput=`sfdisk -V $diskDevice`
+	if test $? != 0;then
+		systemException \
+			"Failed to verify partition table on $diskDevice: $verifyOutput" \
+		"reboot"
+	fi
+	rm -f $PART_FILE
+}
+#======================================
+# partedGetPartitionID
+#--------------------------------------
+function partedGetPartitionID {
+	# /.../
+	# prints the partition ID for the given device and number
+	# ----
+	parted -m -s $1 print | grep ^$2: | cut -f10 -d, | cut -f2 -d=
+}
+#======================================
+# partedGetPartitionSize
+#--------------------------------------
+function partedGetPartitionSize {
+	# /.../
+	# prints the partition or disk size in kB
+	# ----
+	parted -m -s $1 unit kB | grep ^$1 | cut -f2 -d: | tr -d kB
+}
+#======================================
 # partedCreatePartition
 #--------------------------------------
 function partedCreatePartition {
@@ -1887,8 +1947,6 @@ function partedCreatePartition {
 	p_size=`echo $p_size`
 	p_size=`expr $p_size - 1`
 	p_cmd="/usr/sbin/parted -s $DISK unit s"
-	p_idc="/sbin/sfdisk -c $DISK"
-	p_ids="true"
 	IFS="," ; for i in $PART;do
 		field=0
 		IFS=";" ; for n in $i;do
@@ -1917,17 +1975,17 @@ function partedCreatePartition {
 		partedGetSectors $p_stopp $partSize
 		if [ $PART_COUNT -le 3 ];then
 			p_cmd="$p_cmd mkpart primary $p_start $p_stopp"
-			p_ids="$p_ids && $p_idc $PART_COUNT $partID"
+			p_cmd="$p_cmd set $PART_COUNT type $partID"
 		else
 			if [ $PART_COUNT -eq 4 ];then
 				p_cmd="$p_cmd mkpart extended $p_start $p_size"
-				p_ids="$p_ids && $p_idc $PART_COUNT 85"
+				p_cmd="$p_cmd set $PART_COUNT type 85"
 				PART_COUNT=`expr $PART_COUNT + 1`
 				NO_FILE_SYSTEM=1
 			fi
 			p_start=`expr $p_start + 1`
 			p_cmd="$p_cmd mkpart logical $p_start $p_stopp"
-			p_ids="$p_ids && $p_idc $PART_COUNT $partID"
+			p_cmd="$p_cmd set $PART_COUNT type $partID"
 		fi
 		if test -z "$PART_MOUNT";then
 			PART_MOUNT="$partMount"
@@ -1972,46 +2030,32 @@ function partedWritePartitionTable {
 	# write the partition table using parted
 	# ----
 	diskDevice=$1
-
 	eval $p_cmd
 	if test $? != 0;then
 		systemException \
 			"Failed to create partition table on: $diskDevice !" \
-			"reboot"
-	fi
-	eval $p_ids >/dev/null
-	if test $? != 0;then
-		systemException \
-			"Failed to setup partition IDs on: $diskDevice !" \
-			"reboot"
+		"reboot"
 	fi
 }
 #======================================
-# sfdiskWritePartitionTable
+# partitionID
 #--------------------------------------
-function sfdiskWritePartitionTable {
-	# /.../
-	# write the partition table using PART_FILE as
-	# input for sfdisk
-	# ----
-	diskDevice=$1
-
-	dd if=/dev/zero of=$diskDevice bs=512 count=1 >/dev/null
-	sfdisk -uM --force $diskDevice < $PART_FILE >/dev/null
-	if test $? != 0;then
-		systemException \
-			"Failed to create partition table on: $diskDevice !" \
-			"reboot"
+function partitionID {
+	if [ $PARTITIONER = "sfdisk" ];then
+		sfdiskGetPartitionID
+	else
+		partedGetPartitionID
 	fi
-
-	verifyOutput=`sfdisk -V $diskDevice`
-	if test $? != 0;then
-		systemException \
-			"Failed to verify partition table on $diskDevice: $verifyOutput" \
-			"reboot"
+}
+#======================================
+# partitionSize
+#--------------------------------------
+function partitionSize {
+	if [ $PARTITIONER = "sfdisk" ];then
+		sfdiskGetPartitionSize
+	else
+		partedGetPartitionSize
 	fi
-	
-	rm -f $PART_FILE
 }
 #======================================
 # partitionCount
@@ -2058,7 +2102,7 @@ function linuxPartition {
 	# using the given disk device. On success return 0
 	# ----
 	diskDevice=$1
-	diskPartitionType=`sfdisk -c $diskDevice 2`
+	diskPartitionType=`partitionID $diskDevice 2`
 	if test "$diskPartitionType" = "83";then
 		return 0
 	fi
@@ -2134,7 +2178,7 @@ function validateSize {
 	# check if the image fits into the requested partition.
 	# An information about the sizes is printed out
 	# ----
-	haveBytes=`sfdisk -s $imageDevice`
+	haveBytes=`partitionSize $imageDevice`
 	haveBytes=`expr $haveBytes \* 1024`
 	haveMByte=`expr $haveBytes / 1048576`
 	needBytes=`expr $blocks \* $blocksize`
@@ -2509,7 +2553,7 @@ function mountSystemCombined {
 	rm -rf /read-only >/dev/null
 	ln -s /mnt/read-only /read-only >/dev/null || return 1
 	if ! echo $rwDevice | grep -q loop;then
-		if sfdisk -s $rwDevice &>/dev/null;then
+		if partitionSize $rwDevice &>/dev/null;then
 			# /.../
 			# mount the read-write partition to /mnt/read-write and create
 			# a link to it: /read-write -> /mnt/read-write 
@@ -2711,9 +2755,12 @@ function waitForStorageDevice {
 	local device=$1
 	local check=0
 	while true;do
-		sfdisk -s $device &>/dev/null
-		if [ $? = 0 ] || [ $check -eq 4 ];then
-			break
+		partitionSize $device &>/dev/null
+		if [ $? = 0 ];then
+			return 0
+		fi
+		if [ $check -eq 4 ];then
+			return 1
 		fi
 		Echo "Waiting for device $device to settle..."
 		check=`expr $check + 1`

@@ -353,6 +353,7 @@ sub openSUSEpath {
 	# ---
 	my $this     = shift;
 	my $module   = shift;
+	my $quiet    = shift;
 	my $browser  = LWP::UserAgent->new;
 	my $location = $main::openSUSE;
 	my @dists    = qw (standard);
@@ -362,47 +363,61 @@ sub openSUSEpath {
 	# normalize URL data
 	#------------------------------------------
 	if ((! defined $module) || ($module !~ /^opensuse:\/\//)) {
-		return ( undef,undef );
+		return undef;
 	}
 	$module =~ s/opensuse:\/\///;
 	$module =~ s/\/$//;
 	$module =~ s/^\///;
 	if ((! defined $module) || ($module eq "")) {
-		return ( undef,undef );
+		return undef;
 	}
 	#==========================================
 	# Create urllist for later testing
 	#------------------------------------------
 	foreach my $dist (@dists) {
 		my $url1 = $location.$module."/";
-		my $url2 = $location.$module."/".$dist."/";
 		push @urllist,$url1;
-		push @urllist,$url2;
+		if ($url1 !~ /\/$dist/) {
+			my $url2 = $location.$module."/".$dist."/";
+			push @urllist,$url2;
+		}
 	}
 	#==========================================
 	# Check url entries in urllist
 	#------------------------------------------
+	my @responses = ();
 	foreach my $url (@urllist) {
 		my $request = HTTP::Request->new (GET => $url);
-		my $response = $browser -> request  ( $request );
-		my $title = $response -> title ();
+		my $response= $browser -> request  ( $request );
+		my $title   = $response-> title ();
 		if ((defined $title) && ($title !~ /not found/i)) {
 			my $repourl = $url;
-			my $request = HTTP::Request->new (GET => $repourl."/repodata");
-			my $answer  = $browser -> request  ( $request );
-			my $title = $answer -> title ();
+			$request = HTTP::Request->new (GET => $repourl."/repodata");
+			$response= $browser -> request  ( $request );
+			$title   = $response-> title ();
 			if ((defined $title) && ($title !~ /not found/i)) {
 				$this->{type} = "rpm-md";
-				return ( $response,$url );
+				return $url;
+			} else {
+				push (@responses,"$repourl/repodata -> $title");
 			}
 			$request = HTTP::Request->new (GET => $repourl."/media.1");
-			$answer  = $browser -> request  ( $request );
-			$title = $answer -> title ();
+			$response= $browser -> request  ( $request );
+			$title   = $response-> title ();
 			if ((defined $title) && ($title !~ /not found/i)) {
 				$this->{type} = "yast2";
-				return ( $response,$url );
+				return $url;
+			} else {
+				push (@responses,"$repourl//media.1 -> $title");
 			}
+		} else {
+			push (@responses,"$url -> $title");
 		}
+	}
+	if (! defined $quiet) {
+		my $response = join ("\n",@responses);
+		$kiwi -> warning ("Couldn't resolve opensuse URL: $response");
+		$kiwi -> skipped ();
 	}
 	return undef;
 }

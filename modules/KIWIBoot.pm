@@ -337,6 +337,7 @@ sub new {
 	$this->{isxen}  = $isxen;
 	$this->{xengz}  = $xengz;
 	$this->{arch}   = $arch;
+	$this->{ptool}  = "fdisk";
 	return $this;
 }
 
@@ -2952,6 +2953,88 @@ sub bindLoopDevice {
 }
 
 #==========================================
+# resetSectors
+#------------------------------------------
+sub resetSectors {
+	# ...
+	# reset global sector and disk marks
+	# ---
+	my $this = shift;
+	undef $this->{pDiskSectors};
+	undef $this->{pDiskFactor};
+	undef $this->{pStart};
+	undef $this->{pStopp};
+	return $this;
+}
+
+#==========================================
+# initSectors
+#------------------------------------------
+sub initSectors {
+	# ...
+	# calculate start/end sector values for parted to create
+	# the appropriate partition. On success the sector count
+	# will be returned, on error zero is returned
+	# ---
+	my $this    = shift;
+	my $device  = shift;
+	my $size    = shift;
+	my $kiwi    = $this->{kiwi};
+	my $sectors = 0;
+	my $status;
+	my $result;
+	if (! defined $this->{pDiskSectors}) {
+		$status = qxx ("dd if=/dev/zero of=$device bs=512 count=1 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> loginfo ($status);
+			return 0;
+		}
+		$status = qxx ("/usr/sbin/parted -s $device mklabel msdos 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> loginfo ($status);
+			return 0;
+		}
+		my $unit   = "s";
+		my $parted = "/usr/sbin/parted -m -s $device unit $unit print 2>&1";
+		$status = qxx ("$parted | grep ^$device | cut -f2 -d: | tr -d $unit");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> loginfo ($status);
+			return 0;
+		}
+		chomp $status;
+		$this->{pDiskSectors} = $status - 1;
+		$unit   = "MB";
+		$parted = "/usr/sbin/parted -m -s $device unit $unit print 2>&1";
+		$status = qxx ("$parted | grep ^$device | cut -f2 -d: | tr -d $unit");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> loginfo ($status);
+			return 0;
+		}
+		$this->{pDiskFactor} = $this->{pDiskSectors} / $status;
+		$this->{pDiskFactor} = int $this->{pDiskFactor};
+	}
+	if ($size =~ /\+(.*)M$/) {
+		$sectors = $1 * $this->{pDiskFactor};
+	} else {
+		$sectors = $this->{pDiskSectors};
+	}
+	if (! defined $this->{pStart}) {
+		$this->{pStart} = 64;
+	} else {
+		$this->{pStart} = $this->{pStopp} + 1;
+	}
+	$this->{pStopp} = $this->{pStart} + $sectors;
+	if ($this->{pStopp} > $this->{pDiskSectors}) {
+		$this->{pStopp} = $this->{pDiskSectors}
+	}
+	return $sectors;
+}
+
+#==========================================
 # setStoragePartition
 #------------------------------------------
 sub setStoragePartition {
@@ -2962,37 +3045,78 @@ sub setStoragePartition {
 	my $this     = shift;
 	my $device   = shift;
 	my $cmdref   = shift;
+	my $tool     = $this->{ptool};
 	my $kiwi     = $this->{kiwi};
 	my $tmpdir   = $this->{tmpdir};
 	my @commands = @{$cmdref};
-	$kiwi -> loginfo (
-		"FDISK input: $device [@commands]"
-	);
-	if (! open (FD,"|/sbin/fdisk $device &> $tmpdir/fdisk.log")) {
-		return undef;
+	my $result;
+	my $status;
+	if (! defined $tool) {
+		$tool = "fdisk";
 	}
-	foreach my $cmd (@commands) {
-		if ($cmd eq ".") {
-			print FD "\n";
-		} else {
-			print FD "$cmd\n";
+	SWITCH: for ($tool) {
+		#==========================================
+		# fdisk
+		#------------------------------------------
+		/^fdisk/  && do {
+			$kiwi -> loginfo (
+				"FDISK input: $device [@commands]"
+			);
+			if (! open (FD,"|/sbin/fdisk $device &> $tmpdir/fdisk.log")) {
+				return undef;
+			}
+			foreach my $cmd (@commands) {
+				if ($cmd eq ".") {
+					print FD "\n";
+				} else {
+					print FD "$cmd\n";
+				}
+			}
+			close FD;
+			$result = $? >> 8;
+			my $flog;
+			if (open (FD,"$tmpdir/fdisk.log")) {
+				my @flog = <FD>; close FD;
+				$flog = join ("\n",@flog);
+				$kiwi -> loginfo ("FDISK: $flog");
+			}
+			last SWITCH;
+		};
+		#==========================================
+		# parted
+		#------------------------------------------
+		/^parted/  && do {
+			my @p_cmd = ();
+			$this -> resetSectors();
+			for (my $count=0;$count<@commands;$count++) {
+				my $cmd = $commands[$count];
+				if ($cmd eq "n") {
+					my $size = $commands[$count+4];
+					$this -> initSectors ($device,$size);
+					push (@p_cmd,
+						"mkpart primary $this->{pStart} $this->{pStopp}"
+					);
+				}
+				if ($cmd eq "t") {
+					my $index= $commands[$count+1];
+					my $type = $commands[$count+2];
+					push (@p_cmd,"set $index type $type");
+				}
+				if ($cmd eq "a") {
+					my $index= $commands[$count+1];
+					push (@p_cmd,"set $index boot on");
+				}
+			}
+			$kiwi -> loginfo (
+				"PARTED input: $device [@p_cmd]"
+			);
+			foreach my $p_cmd (@p_cmd) {
+				$status= qxx ("/usr/sbin/parted -s $device unit s $p_cmd 2>&1");
+				$result= $? >> 8;
+				$kiwi -> loginfo ($status);
+			}
+			last SWITCH;
 		}
-	}
-	close FD;
-	my $result = $? >> 8;
-	my $flog;
-	if (open (FD,"$tmpdir/fdisk.log")) {
-		my @flog = <FD>; close FD;
-		$flog = join ("\n",@flog);
-		$kiwi -> loginfo ("FDISK: $flog");
-	}
-	if ($result != 0) {
-		# /.../
-		# fdisk will complain about not being able to re-read
-		# the partition table and will exit != 0 but the table
-		# was written correctly so we will return success here
-		# ---
-		return $this;
 	}
 	return $this;
 }
@@ -3008,8 +3132,37 @@ sub getStorageSize {
 	# --- 
 	my $this = shift;
 	my $pdev = shift;
-	my $status = qxx ("/sbin/sfdisk -s $pdev 2>&1");
-	my $result = $? >> 8;
+	my $tool = $this->{ptool};
+	my $result;
+	my $status;
+	if (! defined $tool) {
+		$tool = "fdisk";
+	}
+	SWITCH: for ($tool) {
+		#==========================================
+		# fdisk
+		#------------------------------------------
+		/^fdisk/  && do {
+			$status = qxx ("/sbin/sfdisk -s $pdev 2>&1");
+			$result = $? >> 8;
+			last SWITCH;
+		};
+		#==========================================
+		# parted
+		#------------------------------------------
+		/^parted/  && do {
+			my $parted = "/usr/sbin/parted -m -s $pdev unit kB print 2>&1";
+			$status = qxx ("$parted | grep ^$pdev | cut -f2 -d: | tr -d kB");
+			$result = $? >> 8;
+			$status = int $status;
+			if ((! $status) && ($pdev =~ /loop/)) {
+				$status= qxx ("/usr/sbin/parted -s $pdev mklabel msdos 2>&1");
+				$status= qxx ("$parted | grep ^$pdev | cut -f2 -d: | tr -d kB");
+				$result = $? >> 8;
+			}
+			last SWITCH;
+		}
+	}
 	if ($result == 0) {
 		return $status;
 	}

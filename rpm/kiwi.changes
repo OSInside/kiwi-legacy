@@ -1,4 +1,17 @@
 -------------------------------------------------------------------
+Tue Sep 16 17:22:41 CEST 2008 - ms@suse.de
+
+- v2.77
+- added support for parted in kiwi. All partition tasks inside
+  KIWIBoot.pm and in linuxrc are now possible with parted. Even
+  though there is one exception which is the oemboot linuxrc.
+  the repartition code in this boot code is still based on fdisk.
+  All changes required due to bug (bnc #413637)
+- added log excerpt information and fixed exit code handling
+  if kiwi operation doesn't take place in a screen session. Last
+  part of the fix is related to (bnc #420320)
+
+-------------------------------------------------------------------
 Mon Sep 15 12:00:17 CEST 2008 - ms@suse.de
 
 - v2.76

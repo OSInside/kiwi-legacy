@@ -273,8 +273,7 @@ if [ ! -z "$PART" ] && [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ];then
 		esac
 		done
 		count=1
-		waitForStorageDevice $DISK
-		if ! sfdisk -s $DISK &>/dev/null;then
+		if ! waitForStorageDevice $DISK;then
 			systemException \
 				"Disk $DISK doesn't appear... fatal !" \
 			"reboot"

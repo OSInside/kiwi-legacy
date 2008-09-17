@@ -295,7 +295,7 @@ sub setupScreenCall {
 		if (($logs) && ($data)) {
 			my @lines = split ("\n",$data);
 			@lines = @lines[-10,-9,-8,-7,-6,-5,-4,-3,-2,-1];
-			unshift (@lines,"[*** log excerpt follows ***]");
+			unshift (@lines,"[*** log excerpt follows, screen ***]");
 			push    (@lines,"[*** end ***]\n");
 			$data = join ("\n",@lines);
 			printf STDERR $data;
@@ -623,17 +623,17 @@ sub setupInstallationSource {
 			my @opts = @{$source{$stype}{$chl}};
 			@opts = map { if (defined $_) { $_ }  } @opts;
 			if (! $chroot) {
-				$kiwi -> info ("Adding local smart channel: $chl");
+				$kiwi -> info ("Adding bootstrap smart channel: $chl");
 				$data = qxx ("$cmds $chl @opts 2>&1");
 				$code = $? >> 8;
 			} else {
-				$kiwi -> info ("Adding image smart channel: $chl");
+				$kiwi -> info ("Adding chroot smart channel: $chl");
 				$data = qxx ("chroot \"$root\" $cmds $chl @opts 2>&1");
 				$code = $? >> 8;
 			}
 			if ($code != 0) {
 				$kiwi -> failed ();
-				$kiwi -> error  ($data);
+				$kiwi -> error  ("smart: $data");
 				return undef;
 			}
 			push (@channelList,$chl);
@@ -694,17 +694,17 @@ sub setupInstallationSource {
 			}
 			my $sadd = "addrepo @zopts $alias";
 			if (! $chroot) {
-				$kiwi -> info ("Adding local zypper service: $alias");
+				$kiwi -> info ("Adding bootstrap zypper service: $alias");
 				$data = qxx ("@zypper --root \"$root\" $sadd 2>&1");
 				$code = $? >> 8;
 			} else {
-				$kiwi -> info ("Adding image zypper service: $alias");
+				$kiwi -> info ("Adding chroot zypper service: $alias");
 				$data = qxx ("chroot \"$root\" @zypper $sadd 2>&1");
 				$code = $? >> 8;
 			}
 			if ($code != 0) {
 				$kiwi -> failed ();
-				$kiwi -> error  ($data);
+				$kiwi -> error  ("zypper: $data");
 				return undef;
 			}
 			push (@channelList,$alias);
@@ -851,8 +851,10 @@ sub setupDownload {
 		print $fd "SPID=\$!;wait \$SPID\n";
 		print $fd "test \$? = 0 && @smart download @pacs @loadOpts &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
-		print $fd "echo \$? > $screenCall.exit\n";
+		print $fd "ECODE=\$?\n";
+		print $fd "echo \$ECODE > $screenCall.exit\n";
 		print $fd "rm -f $root/etc/smart/channels/*\n";
+		print $fd "exit \$ECODE\n";
 		$fd -> close();
 	}
 	#==========================================
@@ -927,7 +929,9 @@ sub installPackages {
 		print $fd "test \$? = 0 && chroot $root @smart install -y ";
 		print $fd "@addonPackages || false &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
-		print $fd "echo \$? > $screenCall.exit\n";
+		print $fd "ECODE=\$?\n";
+		print $fd "echo \$ECODE > $screenCall.exit\n";
+		print $fd "exit \$ECODE\n";
 		$fd -> close();
 	}
 	#==========================================
@@ -951,7 +955,9 @@ sub installPackages {
 		print $fd "test \$? = 0 && chroot $root @zypper install ";
 		print $fd "@installOpts @addonPackages &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
-		print $fd "echo \$? > $screenCall.exit\n";
+		print $fd "ECODE=\$?\n";
+		print $fd "echo \$ECODE > $screenCall.exit\n";
+		print $fd "exit \$ECODE\n";
 		$fd -> close();
 	}
 	#==========================================
@@ -964,7 +970,9 @@ sub installPackages {
 		print $fd "trap clean INT TERM\n";
 		print $fd "$main::Prepare/ensconce &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
-		print $fd "echo \$? > $screenCall.exit\n";
+		print $fd "ECODE=\$?\n";
+		print $fd "echo \$ECODE > $screenCall.exit\n";
+		print $fd "exit \$ECODE\n";
 		$fd -> close();
 	}
 	return $this -> setupScreenCall();
@@ -1019,7 +1027,9 @@ sub removePackages {
 		print $fd "test \$? = 0 && chroot $root @smart remove -y ";
 		print $fd "@removePackages || false &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
-		print $fd "echo \$? > $screenCall.exit\n";
+		print $fd "ECODE=\$?\n";
+		print $fd "echo \$ECODE > $screenCall.exit\n";
+		print $fd "exit \$ECODE\n";
 		$fd -> close();
 	}
 	#==========================================
@@ -1043,7 +1053,9 @@ sub removePackages {
 		print $fd "test \$? = 0 && chroot $root @zypper remove ";
 		print $fd "@installOpts @removePackages &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
-		print $fd "echo \$? > $screenCall.exit\n";
+		print $fd "ECODE=\$?\n";
+		print $fd "echo \$ECODE > $screenCall.exit\n";
+		print $fd "exit \$ECODE\n";
 		$fd -> close();
 	}
 	#==========================================
@@ -1056,7 +1068,9 @@ sub removePackages {
 		print $fd "trap clean INT TERM\n";
 		print $fd "$main::Prepare/ensconce &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
-		print $fd "echo \$? > $screenCall.exit\n";
+		print $fd "ECODE=\$?\n";
+		print $fd "echo \$ECODE > $screenCall.exit\n";
+		print $fd "exit \$ECODE\n";
 		$fd -> close();
 	}
 	return $this -> setupScreenCall();
@@ -1125,7 +1139,9 @@ sub setupUpgrade {
 			print $fd "test \$? = 0 && chroot $root @smart upgrade @opts &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
 		}
-		print $fd "echo \$? > $screenCall.exit\n";
+		print $fd "ECODE=\$?\n";
+		print $fd "echo \$ECODE > $screenCall.exit\n";
+		print $fd "exit \$ECODE\n";
 		$fd -> close();
 	}
 	#==========================================
@@ -1189,7 +1205,9 @@ sub setupUpgrade {
 			print $fd "chroot $root @zypper dist-upgrade &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
 		}
-		print $fd "echo \$? > $screenCall.exit\n";
+		print $fd "ECODE=\$?\n";
+		print $fd "echo \$ECODE > $screenCall.exit\n";
+		print $fd "exit \$ECODE\n";
 		$fd -> close();
 	}
 	#==========================================
@@ -1320,8 +1338,10 @@ sub setupRootSystem {
 			print $fd "test \$? = 0 && @smart @rootdir install ";
 			print $fd "@packs @installOpts &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
-			print $fd "echo \$? > $screenCall.exit\n";
+			print $fd "ECODE=\$?\n";
+			print $fd "echo \$ECODE > $screenCall.exit\n";
 			print $fd "rm -f $root/etc/smart/channels/*\n";
+			print $fd "exit \$ECODE\n";
 		} else {
 			#==========================================
 			# setup install options inside of chroot
@@ -1350,7 +1370,9 @@ sub setupRootSystem {
 			print $fd "test \$? = 0 && chroot $root @smart install ";
 			print $fd "@install @installOpts &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
-			print $fd "echo \$? > $screenCall.exit\n";
+			print $fd "ECODE=\$?\n";
+			print $fd "echo \$ECODE > $screenCall.exit\n";
+			print $fd "exit \$ECODE\n";
 		}
 		$fd -> close();
 	}
@@ -1427,7 +1449,9 @@ sub setupRootSystem {
 				print $fd "@installOpts @packs &\n";
 				print $fd "SPID=\$!;wait \$SPID\n";
 			}
-			print $fd "echo \$? > $screenCall.exit\n";
+			print $fd "ECODE=\$?\n";
+			print $fd "echo \$ECODE > $screenCall.exit\n";
+			print $fd "exit \$ECODE\n";
 		} else {
 			#==========================================
 			# select patterns and packages
@@ -1490,7 +1514,9 @@ sub setupRootSystem {
 				print $fd "@installOpts @install &\n";
 				print $fd "SPID=\$!;wait \$SPID\n";
 			}
-			print $fd "echo \$? > $screenCall.exit\n";
+			print $fd "ECODE=\$?\n";
+			print $fd "echo \$ECODE > $screenCall.exit\n";
+			print $fd "exit \$ECODE\n";
 		}
 		$fd -> close();
 	}
@@ -1508,7 +1534,9 @@ sub setupRootSystem {
 		print $fd "trap clean INT TERM\n";
 		print $fd "$main::Prepare/ensconce $ensconce_args &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
-		print $fd "echo \$? > $screenCall.exit\n";
+		print $fd "ECODE=\$?\n";
+		print $fd "echo \$ECODE > $screenCall.exit\n";
+		print $fd "exit \$ECODE\n";
 		$fd -> close();
 	}
 	return $this -> setupScreenCall();

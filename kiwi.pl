@@ -43,7 +43,7 @@ use KIWITest;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "2.76";
+our $Version       = "2.77";
 our $openSUSE      = "http://download.opensuse.org/repositories/";
 our $ConfigFile    = "$ENV{'HOME'}/.kiwirc";
 our $ConfigName    = "config.xml";
@@ -250,12 +250,11 @@ sub main {
 	# Prepare image and build chroot system
 	#----------------------------------------
 	if (defined $Prepare) {
-		$kiwi -> info ("Reading image description...");
+		$kiwi -> info ("Reading image description [Prepare]...\n");
 		my $xml = new KIWIXML ( $kiwi,$Prepare,\%ForeignRepo,undef,\@Profiles );
 		if (! defined $xml) {
 			my $code = kiwiExit (1); return $code;
 		}
-		$kiwi -> done();
 		if (! $xml -> haveMD5File()) {
 			$kiwi -> warning ("Description provides no MD5 hash, check");
 			$kiwi -> skipped ();
@@ -437,7 +436,7 @@ sub main {
 		#------------------------------------------
 		my $xml;
 		if (! @Profiles) {
-			$kiwi -> info ("Reading image description...");
+			$kiwi -> info ("Reading image description [Create]...\n");
 			$xml = new KIWIXML (
 				$kiwi,"$Create/image",\%ForeignRepo,$SetImageType
 			);
@@ -447,7 +446,6 @@ sub main {
 				}
 				my $code = kiwiExit (1); return $code;
 			}
-			$kiwi -> done();
 			my %type = %{$xml->getImageTypeAndAttributes()};
 			if (($type{"type"} eq "cpio") && ($type{bootprofile})) {
 				@Profiles = split (/,/,$type{bootprofile});
@@ -457,7 +455,7 @@ sub main {
 			}
 		}
 		if (! defined $xml) {
-			$kiwi -> info ("Reading image description...");
+			$kiwi -> info ("Reading image description [Create]...\n");
 			$xml = new KIWIXML (
 				$kiwi,"$Create/image",undef,$SetImageType,\@Profiles
 			);
@@ -467,7 +465,6 @@ sub main {
 				}
 				my $code = kiwiExit (1); return $code;
 			}
-			$kiwi -> done();
 		}
 		#==========================================
 		# Update .profile env, current type
@@ -692,14 +689,13 @@ sub main {
 		#==========================================
 		# install testing packages if any
 		#------------------------------------------
-		$kiwi -> info ("Reading image description...");
+		$kiwi -> info ("Reading image description [TestSuite]...\n");
 		my $xml = new KIWIXML (
 			$kiwi,"$RunTestSuite/image",undef,undef,\@Profiles
 		);
 		if (! defined $xml) {
 			my $code = kiwiExit (1); return $code;
 		}
-		$kiwi -> done();
 		my @testingPackages = $xml -> getTestingList();
 		if (@testingPackages) {
 			#==========================================
@@ -817,12 +813,11 @@ sub main {
 	# Upgrade image in chroot system
 	#------------------------------------------
 	if (defined $Upgrade) {
-		$kiwi -> info ("Reading image description...");
+		$kiwi -> info ("Reading image description [Upgrade]...\n");
 		my $xml = new KIWIXML ( $kiwi,"$Upgrade/image" );
 		if (! defined $xml) {
 			my $code = kiwiExit (1); return $code;
 		}
-		$kiwi -> done();
 		#==========================================
 		# Check for default base root in XML
 		#------------------------------------------
@@ -1514,12 +1509,11 @@ sub listProfiles {
 	# list the available profiles in image
 	# ---
 	my $kiwi = new KIWILog("tiny");
-	$kiwi -> info ("Reading image description...");
+	$kiwi -> info ("Reading image description [ListProfiles]...\n");
 	my $xml  = new KIWIXML ($kiwi, $ListProfiles);
 	if (! defined $xml) {
 		exit 1;
 	}
-	$kiwi -> done();
 	my @profiles = $xml -> getProfiles ();
 	if ((scalar @profiles) == 0) {
 		$kiwi -> info ("No profiles available");
@@ -1545,12 +1539,11 @@ sub listXMLInfo {
 	# not specified in its format
 	# ---
 	my $kiwi = new KIWILog("tiny");
-	$kiwi -> info ("Reading image description...");
+	$kiwi -> info ("Reading image description [ListXMLInfo]...\n");
 	my $xml  = new KIWIXML ($kiwi,$listXMLInfo,undef,$SetImageType);
 	if (! defined $xml) {
 		exit 1;
 	}
-	$kiwi -> done();
 	my %type = %{$xml->getImageTypeAndAttributes()};
 	#==========================================
 	# print boot information of type section
@@ -1583,14 +1576,15 @@ sub kiwiExit {
 	if (! defined $kiwi) {
 		$kiwi = new KIWILog("tiny");
 	}
+	$kiwi -> setLogHumanReadable();
 	if ($code != 0) {
+		$kiwi -> printLogExcerpt();
 		$kiwi -> error  ("KIWI exited with error(s)");
 		$kiwi -> done ();
 	} else {
 		$kiwi -> info ("KIWI exited successfully");
 		$kiwi -> done ();
 	}
-	$kiwi -> setLogHumanReadable();
 	if (! defined $LogFile) {
 		my $rootLog = $kiwi -> getRootLog();
 		if ((defined $rootLog) &&
@@ -1598,7 +1592,7 @@ sub kiwiExit {
 		) {
 			my $logfile = $1;
 			$logfile = "$logfile.log";
-			$kiwi -> info ("Logfile available at: $logfile");
+			$kiwi -> info ("Complete logfile at: $logfile");
 			qxx ("mv $rootLog $logfile 2>&1");
 			$kiwi -> done ();
 		}
@@ -1987,12 +1981,11 @@ sub createInstSource {
 		$kiwi->info("Module KIWICollect loaded successfully...");
 		$kiwi->done();
 	}
-	$kiwi -> info ("Reading image description for insallation source...");
+	$kiwi -> info ("Reading image description [InstSource]...\n");
 	my $xml = new KIWIXML ( $kiwi,$CreateInstSource );
 	if (! defined $xml) {
 		my $code = kiwiExit (1); return $code;
 	}
-	$kiwi -> done();
 	#==========================================
 	# Initialize installation source tree
 	#------------------------------------------

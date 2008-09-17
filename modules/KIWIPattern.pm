@@ -316,7 +316,7 @@ sub downloadPattern {
 		#------------------------------------------
 		my $urlHandler  = new KIWIURL ($kiwi,undef);
 		my $publics_url = $url;
-		my $highlvl_url = $urlHandler -> openSUSEpath ($publics_url);
+		my $highlvl_url = $urlHandler -> openSUSEpath ($publics_url,"quiet");
 		if (defined $highlvl_url) {
 			$publics_url = $highlvl_url;
 		}
@@ -575,7 +575,7 @@ sub downloadProduct {
 		#------------------------------------------
 		my $urlHandler  = new KIWIURL ($kiwi,undef);
 		my $publics_url = $url;
-		my $highlvl_url = $urlHandler -> openSUSEpath ($publics_url);
+		my $highlvl_url = $urlHandler -> openSUSEpath ($publics_url,"quiet");
 		if (defined $highlvl_url) {
 			$publics_url = $highlvl_url;
 		}

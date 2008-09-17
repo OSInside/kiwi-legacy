@@ -650,6 +650,22 @@ sub setLogFile {
 }
 
 #==========================================
+# printLogExcerpt
+#------------------------------------------
+sub printLogExcerpt {
+	my $this    = shift;
+	my $rootLog = $this->{rootLog};
+	if ((! defined $rootLog) || (! open (FD, $rootLog))) {
+		return undef;
+	}
+	seek (FD,-1000,2);
+	my @lines = <FD>; close FD;
+	unshift (@lines,"[*** log excerpt follows, last 1 Kbyte ***]\n");
+	push    (@lines,"[*** end ***]\n");
+	print STDERR @lines;
+}
+
+#==========================================
 # setLogHumanReadable
 #------------------------------------------
 sub setLogHumanReadable {
