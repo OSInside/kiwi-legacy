@@ -41,6 +41,7 @@
 		<file name="drivers/ata/*"/>
 		<file name="drivers/scsi/*"/>
 		<file name="drivers/message/fusion/*"/>
+		<file name="drivers/firmware/edd.ko"/>
 	</drivers>
 	<repository type="yast2" status="replaceable">
 		<source path="ftp://dist.suse.de/install/SLP/SLES-10-SP2-GMC/%arch/DVD1"/>   

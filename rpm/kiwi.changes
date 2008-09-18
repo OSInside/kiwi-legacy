@@ -10,6 +10,14 @@ Tue Sep 16 17:22:41 CEST 2008 - ms@suse.de
 - added log excerpt information and fixed exit code handling
   if kiwi operation doesn't take place in a screen session. Last
   part of the fix is related to (bnc #420320)
+- fixed detection of boot device in oemboot by using the BIOS
+  id value 0x80. This fixes the detection of the wrong storage
+  device when oemboot starts the repartitioning of the device
+  on first boot. The change requires the edd module to be present
+  in the boot image (initrd)
+- added custom MBR ID for virtual disks. If the BIOS 0x80 check
+  fails we still have the chance to find the correct boot device
+  by the /boot/grub/mbrid file written by kiwi itself
 
 -------------------------------------------------------------------
 Mon Sep 15 12:00:17 CEST 2008 - ms@suse.de

@@ -318,6 +318,10 @@ sub new {
 		$syszip = sprintf ("%.0f", $syszip);
 	}
 	#==========================================
+	# Store a disk label ID for this object
+	#------------------------------------------
+	$this -> getMBRDiskLabel();
+	#==========================================
 	# find system architecture
 	#------------------------------------------
 	my $arch = qxx ("uname -m"); chomp $arch;
@@ -2464,6 +2468,66 @@ sub buildMD5Sum {
 }
 
 #==========================================
+# getMBRDiskLabel
+#------------------------------------------
+sub getMBRDiskLabel {
+	# ...
+	# create a random 4byte MBR disk label ID
+	# ---
+	my $this  = shift;
+	my $range = 0xff;
+	my @bytes;
+	undef $this->{mbrid};
+	for (my $i=0;$i<4;$i++) {
+		$bytes[$i] = int(rand($range));
+	}
+	my $nid = sprintf ("0x%02x%02x%02x%02x",
+		$bytes[0],$bytes[1],$bytes[2],$bytes[3]
+	);
+	$this->{mbrid} = $nid;
+	return $this;
+}
+
+#==========================================
+# writeMBRDiskLabel
+#------------------------------------------
+sub writeMBRDiskLabel {
+	# ...
+	# writes a 4byte random ID into the MBR of the
+	# previosly installed boot manager. The function
+	# returns the written ID or undef on error
+	# ---
+	my $this  = shift;
+	my $file  = shift;
+	my $kiwi  = $this->{kiwi};
+	my $nid   = $this->{mbrid};
+	if (! defined $nid) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("MBR: don't have a mbr id");
+		$kiwi -> failed ();
+		return undef;
+	}
+	my $pid = pack "V", eval $nid;
+	if (! open (FD,"+<$file")) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("MBR: failed to open file: $file: $!");
+		$kiwi -> failed ();
+		return undef;
+	}
+	seek FD,440,0;
+	my $done = syswrite (FD,$pid,4);
+	if ($done != 4) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("MBR: only $done bytes written");
+		$kiwi -> failed ();
+		seek FD,0,2; close FD;
+		return undef;
+	}
+	seek FD,0,2; close FD;
+	return $this;
+}
+
+#==========================================
 # relocateCatalog
 #------------------------------------------
 sub relocateCatalog {
@@ -2696,6 +2760,22 @@ sub setupBootLoaderConfiguration {
 	# Grub
 	#------------------------------------------
 	if ($loader eq "grub") {
+		#==========================================
+		# Create MBR id file for boot device check
+		#------------------------------------------
+		$kiwi -> info ("Saving disk label on disk: $this->{mbrid}...");
+		if (! open (FD,">$tmpdir/boot/grub/mbrid")) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create mbrid file: $!");
+			$kiwi -> failed ();
+			return undef;
+		}
+		print FD "$this->{mbrid}";
+		close FD;
+		$kiwi -> done();
+		#==========================================
+		# Create menu.lst file
+		#------------------------------------------
 		$kiwi -> info ("Creating grub menu list file...");
 		if (! open (FD,">$tmpdir/boot/grub/menu.lst")) {
 			$kiwi -> failed ();
@@ -2919,6 +2999,15 @@ sub installBootLoader {
 	#==========================================
 	# more boot managers to come...
 	#------------------------------------------
+	# ...
+	#==========================================
+	# Write custom disk label ID to MBR
+	#------------------------------------------
+	$kiwi -> info ("Saving disk label in MBR: $this->{mbrid}...");
+	if (! $this -> writeMBRDiskLabel ($diskname)) {
+		return undef;
+	}
+	$kiwi -> done();
 	return $this;
 }
 

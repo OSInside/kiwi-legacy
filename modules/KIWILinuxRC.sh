@@ -1246,6 +1246,7 @@ function probeDevices {
 	modprobe ide-disk
 	modprobe rd &>/dev/null
 	modprobe brd &>/dev/null
+	modprobe edd &>/dev/null
 	probeUSB
 }
 #======================================
@@ -1413,6 +1414,41 @@ function CDUmount {
 #--------------------------------------
 function CDEject {
 	eject $cddev
+}
+#======================================
+# searchBIOSBootDevice
+#--------------------------------------
+function searchBIOSBootDevice {
+	# /.../
+	# search for the BIOS boot device which is the device
+	# with the BIOS id 0x80. The test may fail if the boot
+	# device is a CD/DVD drive. If the test fails we search
+	# for the MBR disk label and compare it with the kiw
+	# written mbrid file in /boot/grub/ of the system image
+	# ----
+	local h=/usr/sbin/hwinfo
+	local c="Device File:|BIOS id"
+	local ddevs=`$h --disk|grep -E "$c"|sed -e"s@(.*)@@"|cut -f2 -d:|tr -d " "`
+	local pred
+	for curd in $ddevs;do
+		if [ $curd = "0x80" ];then
+			echo $pred; return
+		fi
+		pred=$curd
+	done
+	for curd in $ddevs;do
+		mbrM=`dd if=$curd bs=1 count=4 skip=$((0x1b8))|hexdump -n4 -e '"0x%x"'`
+		mbrI=0
+		if mount $curd"1" /mnt;then
+			if [ -f /mnt/boot/grub/mbrid ];then
+				read mbrI < /mnt/boot/grub/mbrid
+			fi
+			umount /mnt
+		fi
+		if [ "$mbrM" = "$mbrI" ];then
+			echo $curd; return
+		fi
+	done
 }
 #======================================
 # searchSwapSpace
@@ -2041,20 +2077,23 @@ function partedWritePartitionTable {
 # partitionID
 #--------------------------------------
 function partitionID {
+	diskDevice=$1
+	diskNumber=$2
 	if [ $PARTITIONER = "sfdisk" ];then
-		sfdiskGetPartitionID
+		sfdiskGetPartitionID $diskDevice $diskNumber
 	else
-		partedGetPartitionID
+		partedGetPartitionID $diskDevice $diskNumber
 	fi
 }
 #======================================
 # partitionSize
 #--------------------------------------
 function partitionSize {
+	diskDevice=$1
 	if [ $PARTITIONER = "sfdisk" ];then
-		sfdiskGetPartitionSize
+		sfdiskGetPartitionSize $diskDevice
 	else
-		partedGetPartitionSize
+		partedGetPartitionSize $diskDevice
 	fi
 }
 #======================================
