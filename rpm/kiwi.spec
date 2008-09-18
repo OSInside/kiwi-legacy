@@ -1,5 +1,5 @@
 #
-# spec file for package kiwi (Version 2.77
+# spec file for package kiwi (Version 2.78
 #
 # Copyright (c) 2008 SUSE LINUX Products GmbH, Nuernberg, Germany.
 # This file and all modifications and additions to the pristine
@@ -13,7 +13,7 @@
 Url:            http://kiwi.berlios.de
 
 Name:           kiwi
-BuildRequires:  perl-XML-LibXML perl-libwww-perl smart perl-Config-IniFiles
+BuildRequires:  perl-XML-LibXML perl-libwww-perl perl-Config-IniFiles
 BuildRequires:  hal-devel module-init-tools screen zlib-devel
 BuildRequires:  gcc-c++ libxslt swig
 %if %{suse_version} > 1020
@@ -43,7 +43,7 @@ Requires:       satsolver-tools
 Summary:        OpenSuSE - KIWI Image System
 Provides:       kiwi2 <= 2.14
 Obsoletes:      kiwi2 <= 2.14
-Version:        2.77
+Version:        2.78
 Release:        80
 Group:          System/Management
 License:        GPL v2 or later
