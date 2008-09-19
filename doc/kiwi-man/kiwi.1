@@ -1,11 +1,11 @@
 .\"     Title: kiwi
-.\"    Author: Marcus Schäfer <ms (AT) suse.de>
+.\"    Author: Marcus Schaefer <ms (AT) suse.de>
 .\" Generator: DocBook XSL Stylesheets v1.73.2 <http://docbook.sf.net/>
-.\"      Date: Created: 06/03/2008
+.\"      Date: Created: 09/19/2008
 .\"    Manual: KIWI Manualpage
 .\"    Source: KIWI v2.10, r938
 .\"
-.TH "KIWI" "1" "Created: 06/03/2008" "KIWI v2\.10, r938" "KIWI Manualpage"
+.TH "KIWI" "1" "Created: 09/19/2008" "KIWI v2\.10, r938" "KIWI Manualpage"
 .\" disable hyphenation
 .nh
 .\" disable justification (adjust text to left margin only)
@@ -15,10 +15,6 @@ kiwi - Creating Operating System Images
 .SH "SYNOPSIS"
 .HP 5
 \fBkiwi\fR {\-l | \-\-list}
-.HP 5
-\fBkiwi\fR {\-i | \-\-list\-profiles} \fIImagePath\fR
-.HP 5
-\fBkiwi\fR {\-x | \-\-listxmlinfo} \fIImagePath\fR [\-\-type\ \fIImageType\fR]
 .SH "IMAGE PREPARATION AND CREATION"
 .PP
 KIWI is a complete imaging solution that is based on image description\. Such a description is represented by a directory which includes at least one
@@ -66,16 +62,47 @@ and if possible, KIWI calls them automatically depending on the specified output
 .PP
 The helper tools provide optional functions like creating a crypted password string for the users section of the
 \fIconfig\.xml\fR
-file or signing the image description with an md5sum hash as well as adding splash data to the boot image used by the bootloader\.
+file or signing the image description with an md5sum hash as well as adding splash data to the boot image used by the bootloader and the testsuite mode which allows testing the integrity of the new root tree\.
+.HP 5
+\fBkiwi\fR \-\-testsuite\ \fIimage\-root\fR [\-\-test\ \fIname\fR...]
 .HP 5
 \fBkiwi\fR \-\-createpassword
 .HP 5
-\fBkiwi\fR \-\-createhash\ \fIImagepath\fR
+\fBkiwi\fR \-\-createhash\ \fIimage\-path\fR
 .HP 5
-\fBkiwi\fR \-\-setup\-grub\-splash\ \fIInitrd\fR
+\fBkiwi\fR {\-i | \-\-list\-profiles} \fIImagePath\fR
+.HP 5
+\fBkiwi\fR {\-x | \-\-list\-xmlinfo} \fIImagePath\fR [\-\-type\ \fIImageType\fR]
+.HP 5
+\fBkiwi\fR \-\-setup\-splash\ \fIinitrd\fR
 .SH "OPTIONS"
 .PP
 KIWI has the following options:
+.PP
+[\fB\-\-createpassword\fR]
+.RS 4
+Create a crypted password hash
+.RE
+.PP
+[\fB\-\-createhash \fR\fB\fIimage\-path\fR\fR ]
+.RS 4
+Sign your image description with a md5sum
+.RE
+.PP
+[\fB\-i\fR | \fB\-\-list\-profiles \fR\fB\fIimage\-path\fR\fR ]
+.RS 4
+List the profile names of the image description if any
+.RE
+.PP
+[\fB\-x\fR | \fB\-\-list\-xmlinfo \fR\fB\fIimage\-path\fR\fR ]
+.RS 4
+List general information about the image description
+.RE
+.PP
+[\fB\-\-setup\-splash \fR\fB\fIinitrd\fR\fR ]
+.RS 4
+Create splash screen from the data inside the initrd and re\-create the initrd with the splash screen attached to the initrd cpio archive\. This enables the kernel to load the splash screen at boot time\. If splashy is used only a link to the original initrd will be created
+.RE
 .PP
 [\fB\-d\fR | \fB\-\-destdir \fR\fB\fIDestinationPath\fR\fR]
 .RS 4
@@ -134,6 +161,16 @@ options are possible\. The change will not be written to the
 file
 .RE
 .PP
+[\fB\-\-(add|set)\-repoalias \fR\fB\fIalias name\fR\fR ]
+.RS 4
+Alias name to be used for this repository\. This is an optional free form text\. If not set the source attribute value is used and builds the alias name by replacing each \'/\' with a \'_\'\. An alias name should be set if the source argument doesn\'t really explain what this repository contains
+.RE
+.PP
+[\fB\-\-(add|set)\-repoprio \fR\fB\fInumber\fR\fR ]
+.RS 4
+Channel priority assigned to all packages available in this channel (0 if not set)\. If the exact same package is available in more than one channel, the highest priority is used
+.RE
+.PP
 [\fB\-\-ignore\-repos\fR]
 .RS 4
 Ignore all repositories specified so far, in XML or elsewhere\. This option should be used in conjunction with subsequent calls to
@@ -145,6 +182,11 @@ to specify repositories at the commandline that override previous specifications
 .RS 4
 Set the given repository and optional type for the first repository entry within the
 \fIconfig\.xml\fR\. The change will not be written to the XML file and is valid for the subsequent image preparation or upgrade process\.
+.RE
+.PP
+[\fB\-\-add\-package\fR \fIpackage\fR ]
+.RS 4
+Add the given package name to the list of image packages multiple \-\-add\-package options are possible\. The change will not be written to the xml description
 .RE
 .PP
 [\fB\-\-logfile \fR\fB\fIFilename\fR\fR | \fBterminal\fR]
@@ -182,6 +224,31 @@ for pre\-built boot images\.
 .RS 4
 in case of an iso image the checkmedia program generates a md5sum into the iso header\. If the \-\-isocheck option is specified a new boot menu entry will be generated which allows to check this media
 .RE
+.PP
+[\fB\-\-testsuite \fR\fB\fIimage\-root\fR\fR \fB\-\-test \fR\fB\fIname\fR\fR ]
+.RS 4
+run test(s) on prepared image root tree\. If additional name is omitted default set of tests will be used\. Otherwise only provided tests will be executed
+.RE
+.PP
+[\fB\-\-package\-manager \fR\fB\fIsmart|zypper\fR\fR ]
+.RS 4
+Set the package manager to use for this image\. If set it will temporarly overwrite the value set in the xml description
+.RE
+.PP
+[\fB\-\-fs\-blocksize \fR\fB\fInumber\fR\fR ]
+.RS 4
+When calling kiwi in creation mode this option will set the block size in bytes\. For ISO images with the old style ramdisk setup a blocksize of 4096 bytes is required
+.RE
+.PP
+[\fB\-\-fs\-journalsize \fR\fB\fInumber\fR\fR ]
+.RS 4
+When calling kiwi in creation mode this option will set the journal size in mega bytes for ext[23] based filesystems and in blocks if the reiser filesystem is used
+.RE
+.PP
+[\fB\-\-fs\-inodesize \fR\fB\fInumber\fR\fR ]
+.RS 4
+When calling kiwi in creation mode this option will set the inode size in bytes\. This option has no effect if the reiser filesystem is used
+.RE
 .SH "FOR MORE INFORMATION"
 .PP
 More information about KIWI, its files can be found at:
@@ -201,15 +268,22 @@ The configuration XML file that contains every aspect for the image creation\.
 The system design document which describes some details about the building process\.
 .RE
 .PP
-\fI\%file:///usr/share/kiwi/modules/KIWIScheme.xsd\fR
+\fI\%file:///usr/share/kiwi/modules/KIWIScheme.rnc\fR
 .RS 4
-The KIWI W3C XML Schema file\. This file, and with the help of a XML editor, you can create any
+The KIWI RelaxNG XML Schema file\. This file, and with the help of a XML editor, you can create any
 \fIconfig\.xml\fR
+file manually\.
+.RE
+.PP
+\fI\%file:///usr/share/kiwi/modules/KIWISchemeTest.rnc\fR
+.RS 4
+The KIWI RelaxNG XML Schema file\. This file, and with the help of a XML editor, you can create any
+\fI(testsuite\-name)\.xml\fR
 file manually\.
 .RE
 .SH "AUTHORS"
 .PP
-\fBMarcus Schäfer\fR <\&ms (AT) suse\.de\&>
+\fBMarcus Schaefer\fR <\&ms (AT) suse\.de\&>
 .sp -1n
 .IP "" 4
 Developer

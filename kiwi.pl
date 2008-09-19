@@ -1290,8 +1290,6 @@ sub usage {
 
 	print "Usage:\n";
 	print "  kiwi -l | --list\n";
-	print "  kiwi -i | --list-profiles <image-path>\n";
-	print "  kiwi -x | --listxmlinfo <image-path> [--type <image-type>]\n";
 	print "Image Preparation/Creation:\n";
 	print "  kiwi -p | --prepare <image-path>\n";
 	print "     [ --base-root <base-path> ]\n";
@@ -1326,7 +1324,7 @@ sub usage {
 	print "  kiwi --createpassword\n";
 	print "  kiwi --createhash <image-path>\n";
 	print "  kiwi --list-profiles <image-path>\n";
-	print "  kiwi --list-xmlinfo <image-path>\n";
+	print "  kiwi --list-xmlinfo <image-path> [--type <image-type>]\n";
 	print "  kiwi --setup-splash <initrd>\n";
 	print "Options:\n";
 	print "--\n";
