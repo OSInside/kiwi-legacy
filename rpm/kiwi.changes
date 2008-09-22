@@ -2,6 +2,7 @@
 Thu Sep 18 19:18:49 CEST 2008 - ms@suse.de
 
 - v2.78
+- adapted new location of aufs module in 11.1 (bnc #428232)
 - update kiwi manual pages, fixed usage message 
 - removed smart from BuildRequires, as it will be removed
   from the internal build service
