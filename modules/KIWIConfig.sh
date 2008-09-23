@@ -1006,6 +1006,10 @@ function suseStripKernel {
 							mkdir -pv $stripdir$kversion/$d
 							cp -avl $kversion/$d/$base \
 								$stripdir$kversion/$d
+						elif test -f $kversion/$d/$base ; then
+							mkdir -pv $stripdir$kversion/$d
+							cp -avl $kversion/$d/$base \
+								$stripdir$kversion/$d
 						fi
 					fi
 				done
