@@ -41,6 +41,8 @@
 		<file name="fs/jbd/*"/>
 		<file name="fs/squashfs/*"/>
 		<file name="fs/aufs.ko"/>
+		<file name="updates/aufs.ko"/>
+		<file name="weak-updates/aufs.ko"/>
 		<file name="fs/nls/nls_utf8.ko"/>
 		<file name="drivers/cdrom/*"/>
 		<file name="drivers/scsi/*"/>

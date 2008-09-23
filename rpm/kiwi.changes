@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Sep 23 16:22:09 CEST 2008 - ms@suse.de
+
+- v2.80
+- included updates and weak-updates path for aufs into
+  boot image descriptions, related to (bnc #428232)
+
+-------------------------------------------------------------------
 Tue Sep 23 15:37:59 CEST 2008 - ms@suse.de
 
 - v2.79
