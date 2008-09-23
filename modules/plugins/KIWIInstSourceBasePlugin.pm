@@ -29,7 +29,7 @@ sub new
   
   my $this  = {
     m_handler	  => undef, # know the handler object
-    m_name	  => undef, # name of the plugin (just sound nice)
+    m_name	  => "KIWIInstSourceBasePlugin", # name of the plugin (just sound nice)
     m_order	  => undef, # order number, selects execution time
     m_requireddirs => [],    # list of directories required before execution
     m_descr	  => [],    # plaintext description of what the plugin does
@@ -101,7 +101,7 @@ sub requiredDirs
   if(not ref($this)) {
     return undef;
   }
-  my @oldrd = $this->{m_requireddirs};
+  my @oldrd = @{$this->{m_requireddirs}};
   foreach my $entry(@_) {
     push @{$this->{m_requireddirs}}, $entry;
   }
