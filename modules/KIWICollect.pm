@@ -37,6 +37,8 @@ use RPMQ;
 
 use File::Find;
 use File::Path;
+use Cwd 'abs_path';
+use IO::Compress::Gzip qw(gzip $GzipError); # temporarily: as soon as plugins extracted, scratch here
 
 # remove if not longer necessary:
 use Data::Dumper;
@@ -110,6 +112,9 @@ sub new {
     return undef;
   }
 
+  # work with absolute paths from here.
+  $this->{m_basedir} = abs_path($this->{m_basedir});
+
   # create second logger object to log only the data relevant
   # for repository creation:
   $this->{m_logger} = new KIWILog("tiny");
@@ -124,7 +129,6 @@ sub new {
   # create the product variables administrator object.
   # This must be incubated with the respective data in the Init() method
   $this->{m_proddata} = new KIWIProductData($this);
-  #$this->Init(); # let the caller do this
 
   return $this;
 }
@@ -202,6 +206,28 @@ sub productData
 
 
 
+sub basedir
+{
+  my $this = shift;
+  if(not ref($this)) {
+    return undef;
+  }
+  return $this->{m_basedir};
+}
+
+
+
+sub basesubdirs
+{
+  my $this = shift;
+  if(not ref($this)) {
+    return undef;
+  }
+  return $this->{m_basesubdir};
+}
+
+
+
 #=================
 # other methods:
 #-----------------
@@ -217,8 +243,6 @@ sub productData
 # - create LWP client object
 # - calls "normaliseDirname for each repo's sourcedirs
 #   (stores the result in repo->[name]->'basedir')
-# - creates the respective basedir beneath the current dir
-#   [FIXME: use global base here to avoid problems]
 # - creates path list for each repo
 #   (stored in repos->[name]->'srcdirs')
 # - initialises failed packs lists (empty)
@@ -227,10 +251,6 @@ sub Init
 {
   my $this = shift;
   my $debug = shift || 0;
-
-  if($this->{m_basedir} !~ m{.*/$}) {
-    $this->{m_basedir} =~ s{(.*)$}{$1/};
-  }
 
   # retrieve data from xml file:
   ## packages list (regular packages)
@@ -315,23 +335,25 @@ sub Init
   my $dirext = undef;
   if($mult eq "no") {
     if(scalar(@media) == 1) { 
-      $dirext = 1;#"$this->{m_united}/$mediumname";
+      $dirext = 1;
     }
     else {
       # this means the config says multiple_media=no BUT defines a "medium=<number>" somewhere!
-      $this->{m_logger}->warning("[E] You want a single medium distro but specified medium=... for some packages\n\tIgnoring the MULTIPLE_MEDIA=no flag!");
+      $this->{m_logger}->warning("[W] You want a single medium distro but specified medium=... for some packages\n\tIgnoring the MULTIPLE_MEDIA=no flag!");
     }
   }
   my $descrdir = $this->{m_proddata}->getInfo("DESCRDIR");
   if(not defined($descrdir) or $descrdir =~ m{notset}i) {
     $this->{m_logger}->error("Variable DESCRDIR missing!");
-    die;
+    return undef;
   }
   my $datadir = $this->{m_proddata}->getInfo("DATADIR");
   if(not defined($datadir) or $datadir =~ m{notset}i) {
     $this->{m_logger}->error("Variable DATADIR missing!");
-    die;
+    return undef;
   }
+  ### FIXME: remove later checks on those vars
+
   $descrdir =~ s{^/(.*)/$}{$1};
   my @descrdirs = split('/', $descrdir);
   foreach my $n(@media) {
@@ -339,11 +361,13 @@ sub Init
     $dirbase .= "$n" if not defined($dirext);
     $this->{m_dirlist}->{"$dirbase"} = 1;
     $this->{m_dirlist}->{"$dirbase/$datadir"} = 1;
-    ## HACK ALERT !!
-    $this->{m_dirlist}->{"$dirbase/$datadir/$descrdirs[1]"} = 1;
-    $this->{m_dirlist}->{"$dirbase/$datadir/$descrdirs[1]/$descrdirs[2]"} = 1;
-    $this->{m_dirlist}->{"$dirbase/script"} = 1;
-    $this->{m_dirlist}->{"$dirbase/temp"} = 1;
+    my $curdir = "$dirbase/";
+    foreach my $part(@descrdirs) {
+      $curdir .= "$part/";
+      $this->{m_dirlist}->{"$curdir"} = 1;
+    }
+    #$this->{m_dirlist}->{"$dirbase/script"} = 1; # who needs that?
+    #$this->{m_dirlist}->{"$dirbase/temp"} = 1;	# who needs that?
     $this->{m_dirlist}->{"$dirbase/media.$n"} = 1;
     $this->{m_basesubdir}->{$n} = "$dirbase";
     $this->{m_dirlist}->{"$this->{m_basesubdir}->{$n}"} = 1;
@@ -363,6 +387,18 @@ sub Init
 
   $this->{m_browser} = new LWP::UserAgent;
 
+  ## create the metadata handler and load (+verify) all available plugins:
+  # the required variables are MEDIUM_NAME, PLUGIN_DIR, INI_DIR
+  # should be set by now.
+  $this->{m_metacreator} = new KIWIRepoMetaHandler($this);
+  $this->{m_metacreator}->baseurl($this->{m_united});
+  $this->{m_metacreator}->mediaName($this->{m_proddata}->getVar('MEDIUM_NAME'));
+  $this->{m_logger}->info("[I] Loading plugins from <".$this->{m_proddata}->getOpt("PLUGIN_DIR").">");
+  my $num_loaded = $this->{m_metacreator}->loadPlugins();
+  $this->{m_logger}->info("[I] Loaded $num_loaded plugins successfully.\n");
+
+  ### object is set up so far; next step is the repository scan analysis (TODO: create an own method for that bit)
+
   ## second level initialisation done, now start work:
   if($this->{m_debug}) {
     $this->{m_logger}->info("");
@@ -372,11 +408,12 @@ sub Init
 
   # create local directories as download targets. Normalising special chars (slash, dot, ...) by replacing with second param.
   foreach my $r(keys(%{$this->{m_repos}})) {
-    if($this->{m_repos}->{$r}->{'source'} =~ m{^opensuse:.*}) {
-      $this->{m_logger}->info("[I] [Init] resolving opensuse:// URL $this->{m_repos}->{$r}->{'source'}...") if $this->{m_debug};
+    #if($this->{m_repos}->{$r}->{'source'} =~ m{^opensuse:.*}) {
+      $this->{m_logger}->info("[I] [Init] resolving URL $this->{m_repos}->{$r}->{'source'}...") if $this->{m_debug};
       $this->{m_repos}->{$r}->{'source'} = $this->{m_urlparser}->normalizePath($this->{m_repos}->{$r}->{'source'});
-    }
-    $this->{m_repos}->{$r}->{'basedir'} = $this->{m_basedir}.$this->{m_util}->normaliseDirname($this->{m_repos}->{$r}->{'source'}, '-');
+      $this->{m_logger}->info("[I] [Init] resolved URL: $this->{m_repos}->{$r}->{'source'}") if $this->{m_debug};
+    #}
+    $this->{m_repos}->{$r}->{'basedir'} = $this->{m_basedir}."/".$this->{m_util}->normaliseDirname($this->{m_repos}->{$r}->{'source'}, '-');
 
     $this->{m_dirlist}->{"$this->{m_repos}->{$r}->{'basedir'}"} = 1;
 
@@ -408,8 +445,6 @@ sub Init
       $this->{m_repos}->{$r}->{'srcdirs'} = undef;
     }
   }
-  $this->{m_metacreator} = new KIWIRepoMetaHandler($this);
-  $this->{m_metacreator}->baseurl($this->{m_united});
 }
 # /Init
 
@@ -1535,42 +1570,35 @@ sub createMetadata
 {
   my $this = shift;
 
+  my %plugins = $this->{m_metacreator}->getPluginList(); # retrieve a complete list of all loaded plugins
 
-  $this->{m_metacreator}->loadPlugins("/usr/share/kiwi/modules");
-  $this->{m_metacreator}->mediaName($this->{m_proddata}->getVar('MEDIUM_NAME'));
-  # testhack: set the plugin ready:
-  my $p = $this->{m_metacreator}->getPlugin(1);
-  if(defined($p)) {
-    $p->ready(1);
-    $this->{m_metacreator}->createMetadata();
+  # create required directories if necessary:
+  foreach my $i(keys(%plugins)) {
+    my $p = $plugins{$i};
+    $this->{m_logger}->info("[I] Processing plugin ".$p->name()."\n");
+    my @requireddirs = $p->requiredDirs();
+    # this may be a list and each entry may look like "/foo/bar/baz/" in the worst case.
+    foreach my $dir(@requireddirs) {
+      $dir =~ s{^/(.*)/$}{$1}; # just to be on the safe side: split leading and trailing slashes
+      my @sublist = split('/', $dir);
+      my $curdir = $this->{m_basesubdir}->{1};
+      foreach my $part_dir(@sublist) {
+	$curdir .= "/$part_dir";
+	$this->{m_dirlist}->{"$curdir"} = 1;
+      }
+    }
   }
-  else {
-    $this->{m_logger}->error("Metadata plugin not avalable");
-  }
+  # that should be all, bit by bit and in order ;)
+  $this->createDirectoryStructure();
+  #$this->{m_logger}->info("[I] Enabling all plugins...\n");
+  #$this->{m_metacreator}->enableAllPlugins();
 
+  $this->{m_logger}->info("[I] Executing all plugins...\n");
+  $this->{m_metacreator}->createMetadata();
+  # creates the patters file. Rest will follow later
 
-  ## step 2: create_package_descr
-  #==============================
-  my @paths = values(%{$this->{m_basesubdir}});
-  @paths = reverse map { $_."/".$this->{m_proddata}->getInfo("DATADIR") => "-d" if $_ !~ m{.*0}} reverse @paths;
-  my $pathlist = join(' ', @paths);
-
-  $this->{m_logger}->info("[I] Calling create_package_descr for directories @paths:");
-  if(! (-f "/usr/bin/create_package_descr" or -x "/usr/bin/create_package_descr")) {
-    $this->{m_logger}->warning("[W] [createMetadata] excutable `/usr/bin/create_package_descr` not found. Maybe package `inst-source-utils` is not installed?");
-    return;
-  }
-
-  ## TODO make the path to pdb stuff available through hook!
-  my $data = qx(cd "$this->{m_basesubdir}->{'1'}/suse" && /usr/bin/create_package_descr -p /mounts/work/cd/data/pdb/stable $pathlist -P -Z -C -K -M 3 -l german -l english -l french -l czech -l spanish -l hungarian);
-  my $status = $? >> 8;
-  
-  # just to keep it in sync with mach_cd
-  my $returndir = $ENV{'PWD'};
-  chdir "$this->{m_basesubdir}->{'1'}/".$this->{m_proddata}->getInfo("DESCRDIR");
-  symlink "packages.cs", "packages.sk";
-  chdir $returndir;
-
+### ALTLASTEN ###
+### TODO more plugins
 
   ## step 3: packages2eula:
   $this->{m_logger}->info("[I] Calling packages2eula:");
@@ -1579,8 +1607,12 @@ sub createMetadata
     $this->{m_logger}->warning("[W] [createMetadata] excutable `$p2eula` not found. Maybe package `inst-source-utils` is not installed?");
     return;
   }
-  if(-f "$this->{m_basesubdir}->{'1'}/EULA.txt" and -f "$this->{m_basesubdir}->{'1'}/suse/setup/descr/packages.en") {
-    my $data = qx($p2eula -i "$this->{m_basesubdir}->{'1'}/EULA.txt" -p $this->{m_basesubdir}->{'1'}/suse/setup/descr/packages.en -o "$this->{m_basesubdir}->{'1'}/EULA.txt.new");
+  my $pfilename = "$this->{m_basesubdir}->{'1'}/suse/setup/descr/packages.en";
+  if(not -f $pfilename) {
+    $pfilename .= ".gz";
+  }
+  if(-f "$this->{m_basesubdir}->{'1'}/EULA.txt" and -f $pfilename) {
+    my $data = qx($p2eula -i "$this->{m_basesubdir}->{'1'}/EULA.txt" -p $pfilename -o "$this->{m_basesubdir}->{'1'}/EULA.txt.new");
     if(-f "$this->{m_basesubdir}->{'1'}/EULA.txt.new") {
       link "$this->{m_basesubdir}->{'1'}/EULA.txt.new", "$this->{m_basesubdir}->{'1'}/EULA.txt";
       # cleanup the old file
@@ -1605,7 +1637,7 @@ sub createMetadata
   close(CONT);
 
 
-  ## step 4b FIXME: openSUSE-release.prod file
+  ## step 4b FIXME: openSUSE-release.prod file -> PLUGIN!
   ## 5minuteHACK of the day
   ### discussed with Klaus: this will come from an rpm in the future
   $this->{m_logger}->info("[I] Creating openSUSE-release.prod file:");
@@ -1680,6 +1712,7 @@ sub createMetadata
 
   $this->createBootPackageLinks();
 
+
   ## step 7: SHA1SUMS
   $this->{m_logger}->info("[I] Calling create_sha1sums:");
   my $csha1sum = "/usr/bin/create_sha1sums";
@@ -1713,8 +1746,11 @@ sub createMetadata
     $this->{m_logger}->warning("[W] [createMetadata] excutable `$md5sums` not found. Maybe package `inst-source-utils` is not installed?");
     return;
   }
-  my @data = qx(cd $this->{m_basesubdir}->{'1'} && $md5sums $md5opt suse);
-  $this->{m_logger}->info("[I] [createMetadata] $csha1sum output:\n");
+  my $cmd = "$md5sums $md5opt ";
+  $cmd .= $this->{m_basesubdir}->{1}."/".$this->{m_proddata}->getInfo("DATADIR");
+  my @data = qx($cmd);
+  undef $cmd;
+  $this->{m_logger}->info("[I] [createMetadata] $md5sums output:\n");
   foreach(@data) {
     chomp $_;
     $this->{m_logger}->info("\t$_\n");
@@ -1729,7 +1765,10 @@ sub createMetadata
     $this->{m_logger}->warning("[W] [createMetadata] excutable `$listings` not found. Maybe package `inst-source-utils` is not installed?");
     return;
   }
-  @data = qx(cd $this->{m_basesubdir}->{'1'} && $listings .);
+  $cmd = "$listings ".$this->{m_basesubdir}->{'1'};
+  @data = qx($cmd);
+  #@data = qx(cd $ENV{'PWD'}/$this->{m_basesubdir}->{'1'} && $listings .);
+  undef $cmd;
   $this->{m_logger}->info("[I] [createMetadata] $listings output:\n");
   foreach(@data) {
     chomp $_;
@@ -1754,6 +1793,7 @@ sub createMetadata
   }
   foreach my $d($this->getMediaNumbers()) {
     my $dbase = $this->{m_basesubdir}->{$d};
+    #my $dbase = $ENV{'PWD'}.$this->{m_basesubdir}->{$d};
     my @dlist;
     push @dlist, "$dbase";
     push @dlist, "$dbase/boot";
@@ -1784,7 +1824,7 @@ sub createMetadata
     $this->{m_logger}->warning("[W] [createMetadata] excutable `$mk_cl` not found. Maybe package `inst-source-utils` is not installed?");
     return;
   }
-  @data = qx(cd $this->{m_basesubdir}->{'1'} && $mk_cl .);
+  @data = qx($mk_cl $this->{m_basesubdir}->{'1'});
   my $res = $? >> 8;
   if($res == 0) {
     $this->{m_logger}->info("[I] $mk_cl finished successfully.");
@@ -1810,17 +1850,11 @@ sub createBootPackageLinks
   my $this = shift;
   return undef if not ref($this);
 
-  my $workdir = $ENV{'PWD'};
-  if(not defined($workdir)) {
-    $workdir = $this->{m_basedir};
-  }
   my $base = $this->{m_basesubdir}->{'1'};
-  chdir $base;
-
   my $datadir = $this->{m_proddata}->getInfo('DATADIR');
 
   my %rpmlist_files;
-  find( sub { _findcallback($this, \%rpmlist_files) }, "$base/boot");
+  find( sub { rpmlist_find_cb($this, \%rpmlist_files) }, "$base/boot");
 
   foreach my $arch(keys(%rpmlist_files)) {
     if(not open(RPMLIST, $rpmlist_files{$arch})) {
@@ -1828,7 +1862,7 @@ sub createBootPackageLinks
       return undef;
     }
     else {
-      chdir "boot/$arch";
+      #chdir "$workdir/$base/boot/$arch";
       RPM:foreach my $rpmname(<RPMLIST>) {
 	chomp $rpmname;
 	if(not defined($rpmname) or not defined($this->{m_packages}->{$rpmname})) {
@@ -1845,20 +1879,18 @@ sub createBootPackageLinks
 	    if(not defined($tmp{$fa})) {
 	      next FARCH;
 	    }
-	    symlink("../../$datadir/$fa/".$tmp{$fa}->{'newfile'}, "$rpmname.rpm");
+	    symlink("../../$datadir/$fa/".$tmp{$fa}->{'newfile'}, "$base/boot/$arch/$rpmname.rpm");
 	    next RPM;
 	  }
 	}
       }
-      chdir $base;
     }
   }
-  chdir $workdir;
 }
 
 
 
-sub _findcallback
+sub rpmlist_find_cb
 {
   my $this = shift;
   return undef if not ref($this);
