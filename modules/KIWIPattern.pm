@@ -101,9 +101,9 @@ sub new {
 	$this->{infomessage} = $this->{infodefault};
 	$this->{kiwi}        = $kiwi;
 	$this->{urllist}     = \@urllist;
-	$this->{patterns}     = \@patterns;
-	$this->{products}     = \@products;
-	$this->{packages}     = \@packages;
+	$this->{patterns}    = \@patterns;
+	$this->{products}    = \@products;
+	$this->{packages}    = \@packages;
 	$this->{pattype}     = $pattype;
 	$this->{patpactype}  = $patpactype;
 	$this->{arch}        = $arch;
@@ -771,7 +771,7 @@ sub getPackages {
 	my $this = shift;
 	my $pattype = $this->{patpactype};
 	my %result;
-	my @packages = $this->{packages};
+	my @packages = @{$this->{packages}};
 
 	my @prodpkgreqs = $this -> getRequiredProducts ($this->{products});
 	push (@packages, @prodpkgreqs);
