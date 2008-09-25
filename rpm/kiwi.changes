@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Thu Sep 25 12:39:08 CEST 2008 - ms@suse.de
+
+- v2.82
+- removed plugins from svn.berlios.de: moved to
+  https://forgesvn1.novell.com/svn/opensuse/trunk/distribution/\
+  instsource-plugins/suse-110
+- also the plugins will be moved from the kiwi-instsource package to the
+  packages kiwi-instsource-plugins-<distro>-<version>
+
+-------------------------------------------------------------------
 Tue Sep 23 21:36:50 CEST 2008 - ms@suse.de
 
 - v2.81
