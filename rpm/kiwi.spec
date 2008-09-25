@@ -397,8 +397,6 @@ rm -rf $RPM_BUILD_ROOT
 %exclude %{_datadir}/kiwi/modules/KIWICollect.pm
 %exclude %{_datadir}/kiwi/modules/KIWIRepoMetaHandler.pm
 %exclude %{_datadir}/kiwi/modules/KIWIUtil.pm
-%exclude %{_datadir}/kiwi/modules/KIWIInstSourceBasePlugin.pm
-%exclude %{_datadir}/kiwi/modules/KIWIPatternsPlugin.pm
 %{_datadir}/kiwi/tests
 %{_datadir}/kiwi/xsl
 %{_sbindir}/kiwi
@@ -433,8 +431,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/kiwi/modules/KIWICollect.pm
 %{_datadir}/kiwi/modules/KIWIUtil.pm
 %{_datadir}/kiwi/modules/KIWIRepoMetaHandler.pm
-%{_datadir}/kiwi/modules/KIWIInstSourceBasePlugin.pm
-%{_datadir}/kiwi/modules/KIWIPatternsPlugin.pm
 
 #=================================================
 # KIWI-pxeboot files...  
