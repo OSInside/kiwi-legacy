@@ -238,9 +238,14 @@ sub loadPlugin
     }
     else {
       my $object = ($plugin)->new($this, $inifile);
-      my $addsuccess = $this->_addPlugin($object);
-      if($addsuccess) {
-	$retval = 1;
+      if(not defined($object)) {
+	$this->{m_collect}->logger()->error("[E] Unable to create object of <$plugin>: constructor failed!");
+      }
+      else {
+	my $addsuccess = $this->_addPlugin($object);
+	if($addsuccess) {
+	  $retval = 1;
+	}
       }
     }
   }

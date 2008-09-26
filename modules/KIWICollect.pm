@@ -1600,30 +1600,6 @@ sub createMetadata
 ### ALTLASTEN ###
 ### TODO more plugins
 
-  ## step 3: packages2eula:
-  $this->{m_logger}->info("[I] Calling packages2eula:");
-  my $p2eula = "/usr/bin/packages2eula.pl";
-  if(! (-f $p2eula or -x $p2eula)) {
-    $this->{m_logger}->warning("[W] [createMetadata] excutable `$p2eula` not found. Maybe package `inst-source-utils` is not installed?");
-    return;
-  }
-  my $pfilename = "$this->{m_basesubdir}->{'1'}/suse/setup/descr/packages.en";
-  if(not -f $pfilename) {
-    $pfilename .= ".gz";
-  }
-  if(-f "$this->{m_basesubdir}->{'1'}/EULA.txt" and -f $pfilename) {
-    my $data = qx($p2eula -i "$this->{m_basesubdir}->{'1'}/EULA.txt" -p $pfilename -o "$this->{m_basesubdir}->{'1'}/EULA.txt.new");
-    if(-f "$this->{m_basesubdir}->{'1'}/EULA.txt.new") {
-      link "$this->{m_basesubdir}->{'1'}/EULA.txt.new", "$this->{m_basesubdir}->{'1'}/EULA.txt";
-      # cleanup the old file
-      unlink "$this->{m_basesubdir}->{'1'}/EULA.txt.new";
-    }
-  }
-  else {
-    $this->{m_logger}->warning("[W] [createMetadata] files $this->{m_basesubdir}->{'1'}/EULA.txt and/or $this->{m_basesubdir}->{'1'}/suse/setup/descr/packages.en don't exist, skipping");
-  }
-
-
   ## step 4: content file
   $this->{m_logger}->info("[I] Creating content file:");
   my $contentfile = "$this->{m_basesubdir}->{'1'}/content";
