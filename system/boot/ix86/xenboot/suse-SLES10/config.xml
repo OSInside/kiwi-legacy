@@ -56,7 +56,7 @@
 	</packages>
 	<packages type="bootstrap" profiles="default">
 		<package name="kernel-xen" arch="x86_64"/>
-		<package name="kernel-xenpae" arch="i386"/>
+		<package name="kernel-xenpae" arch="i686"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
