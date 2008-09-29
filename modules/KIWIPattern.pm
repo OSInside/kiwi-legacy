@@ -670,10 +670,7 @@ sub parseRelString {
 #------------------------------------------
 sub getProductRequirements {
 	my $this    = shift;
-	my $location= shift;
 	my $content = shift;
-	my $product = shift;
-	my $arch    = $this->{arch};
 	#==========================================
 	# check content...
 	#------------------------------------------
@@ -686,8 +683,8 @@ sub getProductRequirements {
 	my $perr   = 1;
 	my $result;
 	my @reqs = ();
-	my @plines = split (/\n/,$content);
-	foreach my $line (@plines) {
+	my @plist = @{$content};
+	foreach my $line (@plist) {
 		if ($line =~ /REQUIRES (.*)/) {
 			$result = $1;
 			$perr = 0;
@@ -745,6 +742,9 @@ sub getRequiredProducts {
 		$this -> getRequiredProducts ([$rproduct]);
 	}
 	foreach my $rpattern (@patreqs) {
+		if ($rpattern eq "pattern:basesystem") {
+			$rpattern = "pattern:base";
+		}
 		if (defined $this->{patdone}{$rpattern}) {
 			next;
 		}

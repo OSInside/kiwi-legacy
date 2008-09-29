@@ -3,6 +3,7 @@ Fri Sep 26 17:43:48 CEST 2008 - ms@suse.de
 
 - v2.83
 - fixed xenboot arch setup for kernel package
+- fixed product parsing
 
 -------------------------------------------------------------------
 Thu Sep 25 12:39:08 CEST 2008 - ms@suse.de
