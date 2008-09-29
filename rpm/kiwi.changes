@@ -2,6 +2,7 @@
 Fri Sep 26 17:43:48 CEST 2008 - ms@suse.de
 
 - v2.83
+- added examples/suse-11.1/suse-xen-guest
 - fixed xenboot arch setup for kernel package
 - fixed product parsing
 
