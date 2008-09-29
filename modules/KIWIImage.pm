@@ -3220,7 +3220,7 @@ sub buildXenConfig {
 	my $device = $xenconfig{xen_diskdevice};
 	my $part   = $device."1";
 	my $memory = $xenconfig{xen_memory};
-	my $image  = $name->{systemImage};
+	my $image  = $dest."/".$name->{systemImage};
 	$part =~ s/\/dev\///;
 	print FD '#  -*- mode: python; -*-'."\n";
 	print FD 'kernel="'.$kernel.'"'."\n";
