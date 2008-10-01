@@ -3230,13 +3230,22 @@ sub buildXenConfig {
 	#==========================================
 	# network setup
 	#------------------------------------------
+	my $vifcount = -1;
 	foreach my $bname (keys %{$xenconfig{xen_bridge}}) {
+		$vifcount++;
 		my $mac = $xenconfig{xen_bridge}{$bname};
-		if (! $mac) {
-			print FD 'vif=[ "bridge='.$bname.'" ]'."\n";
-		} else {
-			print FD 'vif=[ "mac='.$mac.',bridge='.$bname.'" ]'."\n";
+		my $vif = '"bridge='.$bname.'"';
+		if ($mac) {
+			$vif = '"mac='.$mac.',bridge='.$bname.'"';
 		}
+		if ($vifcount == 0) {
+			print FD "vif=[ ".$vif;
+		} else {
+			print FD ", ".$vif;
+		}
+	}
+	if ($vifcount >= 0) {
+		print FD " ]"."\n";
 	}
 	#==========================================
 	# xen console
