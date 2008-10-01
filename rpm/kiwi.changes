@@ -3,6 +3,7 @@ Fri Sep 26 17:43:48 CEST 2008 - ms@suse.de
 
 - v2.83
 - added examples/suse-11.1/suse-xen-guest
+- added architecture information for sat solv cache
 - added xenbridge element to setup Xen bridge networking
 - fixed file:// usage in xenconfig, this setup requires
   a full qualified path name according to the Xen docs

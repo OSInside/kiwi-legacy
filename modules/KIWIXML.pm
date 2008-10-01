@@ -2811,6 +2811,7 @@ sub getInstSourceSatSolvable {
 	my $patterns = "/suse/setup/descr/patterns";
 	my $packages = "/suse/setup/descr/packages.gz";
 	my $solvable = "/suse/setup/descr/primary.gz";
+	my $arch     = qxx ("uname -m"); chomp $arch;
 	my $count    = 0;
 	my $index    = 0;
 	my @index    = ();
@@ -2871,6 +2872,7 @@ sub getInstSourceSatSolvable {
 		close FD;
 		unlink $destfile;
 	}
+	push (@index,$arch);
 	@index = sort (@index);
 	$index = join (":",@index);
 	$index = qxx ("echo $index | md5sum | cut -f1 -d-");
