@@ -3227,6 +3227,20 @@ sub buildXenConfig {
 	print FD 'ramdisk="'.$initrd.'"'."\n";
 	print FD 'memory='.$memory."\n";
 	print FD 'disk=[ "file:'.$image.','.$part.',w" ]'."\n";
+	#==========================================
+	# network setup
+	#------------------------------------------
+	foreach my $bname (keys %{$xenconfig{xen_bridge}}) {
+		my $mac = $xenconfig{xen_bridge}{$bname};
+		if (! $mac) {
+			print FD 'vif=[ "bridge='.$bname.'" ]'."\n";
+		} else {
+			print FD 'vif=[ "mac='.$mac.',bridge='.$bname.'" ]'."\n";
+		}
+	}
+	#==========================================
+	# xen console
+	#------------------------------------------
 	print FD 'root="'.$part.' ro"'."\n";
 	print FD 'extra=" xencons=tty "'."\n";
 	close FD;

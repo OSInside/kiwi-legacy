@@ -2136,11 +2136,29 @@ sub getXenConfig {
 		$device= $node -> getAttribute ("device");
 	}
 	#==========================================
+	# network setup (bridge)
+	#------------------------------------------
+	my $bridges = $node -> getElementsByTagName ("xenbridge");
+	my %vifs = ();
+	for (my $i=1;$i<= $bridges->size();$i++) {
+		my $bridge = $bridges -> get_node($i);
+		if ($bridge) {
+			my $mac   = $bridge -> getAttribute ("mac");
+			my $bname = $bridge -> getAttribute ("name");
+			if ($bname) {
+				$vifs{$bname} = $mac;
+			}
+		}
+	}
+	#==========================================
 	# save hash
 	#------------------------------------------
 	$result{xen_memory}= $memory;
 	if ($disk) {
 		$result{xen_diskdevice} = $device;
+	}
+	foreach my $bname (keys %vifs) {
+		$result{xen_bridge}{$bname} = $vifs{$bname};
 	}
 	return %result;
 }

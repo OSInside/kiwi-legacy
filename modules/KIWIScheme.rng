@@ -1820,6 +1820,40 @@ scsi CD or an ide CD drive</a:documentation>
   </div>
   <!--
     ==========================================
+    common element <xenbridge>
+    
+  -->
+  <div>
+    <define name="k.xenbridge.mac.attribute">
+      <attribute name="mac">
+        <a:documentation>The Mac address to assign to the virtual interface</a:documentation>
+      </attribute>
+    </define>
+    <define name="k.xenbridge.name.attribute">
+      <attribute name="name">
+        <a:documentation>The Xen bridged interface name</a:documentation>
+      </attribute>
+    </define>
+    <define name="k.xenbridge.attlist">
+      <interleave>
+        <optional>
+          <ref name="k.xenbridge.mac.attribute"/>
+        </optional>
+        <ref name="k.xenbridge.name.attribute"/>
+      </interleave>
+    </define>
+    <define name="k.xenbridge">
+      <element name="xenbridge">
+        <a:documentation>The VMware network interface definition</a:documentation>
+        <interleave>
+          <ref name="k.xenbridge.attlist"/>
+          <empty/>
+        </interleave>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
     main block: <deploy>
     
   -->
@@ -2344,6 +2378,9 @@ para virtual machine when running the image.</db:para>
           <optional>
             <ref name="k.xendisk"/>
           </optional>
+          <zeroOrMore>
+            <ref name="k.xenbridge"/>
+          </zeroOrMore>
         </interleave>
       </element>
     </define>

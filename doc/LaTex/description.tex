@@ -661,6 +661,7 @@ network interface
 \begin{Command}{12cm}
 <xenconfig memory="MB"\\
 \hspace*{1cm}<xendisk device="/dev/..."/>\\
+\hspace*{1cm}<xenbridge name="eth0" mac="addr"/>\\
 </vmwareconfig>
 \end{Command}
 
@@ -678,12 +679,39 @@ can be provided to create the Xen (.xenconfig) configuration file:
 \end{itemize}
 
 The following information can be provided to setup the Xen para virtual
-main storage device
+main storage device as part of a \textbf{xendisk} section
 
 \begin{itemize}
 \item \textbf{device}\\
       The mandatory device which should appear in the para virtual
       instance
+\end{itemize}
+
+The default Xen configuration uses bridging within domain 0 to allow all
+domains to appear on the network as individual hosts. In order to create
+the bridge which can be used by the Xen virtual network interface(s) the
+script ''/etc/xen/scripts/network-bridge start'' can be called to create
+a bridge as shown in the following picture:
+
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.5]{pictures/xenbridge.eps}
+\caption{Illustration on network-bridge and vif-bridge}
+\label{fig:architecture}
+\end{figure}
+
+Additional information on how to setup networking with Xen can be
+found here: \url{http://wiki.xensource.com/xenwiki/XenNetworking}
+The following information can be provided to setup the Xen network
+bridge as part of one ore more \textbf{xenbridge} section(s).
+
+\begin{itemize}
+\item \textbf{name}\\
+      The name of the network interface which is the bridge between
+      the physical device (peth) and the virtual device(s) (vif).
+\item \textbf{mac}\\
+      The optional mac address value for the virtual interface inside
+      the DOM(x).
 \end{itemize}
 
 \begin{Command}{14cm}
