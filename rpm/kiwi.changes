@@ -8,6 +8,8 @@ Fri Sep 26 17:43:48 CEST 2008 - ms@suse.de
   a full qualified path name according to the Xen docs
 - fixed xenboot arch setup for kernel package
 - fixed product parsing
+- moved suse-isolinux (m_cd) code into KIWIIsoLinux.pm
+  perl based module.
 
 -------------------------------------------------------------------
 Thu Sep 25 12:39:08 CEST 2008 - ms@suse.de

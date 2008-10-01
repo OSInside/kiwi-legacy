@@ -44,6 +44,8 @@ use KIWITest;
 # Globals (Version)
 #--------------------------------------------
 our $Version       = "2.83";
+our $Publisher     = "SUSE LINUX Products GmbH";
+our $Preparer      = "KIWI - http://kiwi.berlios.de";
 our $openSUSE      = "http://download.opensuse.org/repositories/";
 our $ConfigFile    = "$ENV{'HOME'}/.kiwirc";
 our $ConfigName    = "config.xml";

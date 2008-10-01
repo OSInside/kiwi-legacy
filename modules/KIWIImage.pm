@@ -22,6 +22,7 @@ package KIWIImage;
 use strict;
 use KIWILog;
 use KIWIBoot;
+use KIWIIsoLinux;
 use Math::BigFloat;
 use File::Basename;
 use File::Find qw(find);
@@ -1708,22 +1709,36 @@ sub createImageLiveCD {
 	#==========================================
 	# create ISO image
 	#------------------------------------------
-	$kiwi -> info ("Calling mkisofs...");
+	$kiwi -> info ("Calling mkisofs...\n");
+	my $isoerror = 1;
 	my $name = $imageDest."/".$namerw.".iso";
-	$kiwi -> loginfo ("Calling: $CD/isolinux $main::RootTree/CD $name");
-	$data = qxx ("$CD/isolinux $main::RootTree/CD $name 2>&1");
-	$code = $? >> 8;
-	if ($code != 0) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Failed to create ISO image: $data");
-		$kiwi -> failed ();
+	my $isolinux = new KIWIIsoLinux (
+		$kiwi,$main::RootTree."/CD",$name,
+		$main::Publisher,$main::Preparer,
+		"-R -J -pad -joliet-long"
+	);
+	if (defined $isolinux) {
+		$isoerror = 0;
+		if (! $isolinux -> createSortFile()) {
+			$isoerror = 1;
+		}
+		if (! $isolinux -> createISOLinuxConfig()) {
+			$isoerror = 1;
+		}
+		if (! $isolinux -> createISO()) {
+			$isoerror = 1;
+		}
+	}
+	if ($isoerror) {
 		if (! -d $main::RootTree.$baseSystem) {
 			qxx ("rm -rf $main::RootTree");
 			qxx ("rm -rf $tmpdir");
 		}
 		return undef;
 	}
-	$kiwi -> done();
+	#==========================================
+	# relocate boot catalog
+	#------------------------------------------
 	if (! relocateCatalog ($this,$name)) {
 		if (! -d $main::RootTree.$baseSystem) {
 			qxx ("rm -rf $main::RootTree");
