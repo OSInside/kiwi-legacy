@@ -29,7 +29,15 @@ use KIWIQX;
 sub new {
 	# ...
 	# Create a new KIWIIsoLinux object which is used to wrap
-	# around the major mkisofs call
+	# around the major mkisofs call. This code requires a
+	# specific source directory structure which is:
+	# ---
+	# $source/boot/<arch>/loader
+	# ---
+	# Below the loader path the initrd and kernel as well as
+	# all isolinux related binaries and files must be stored
+	# Given that structure this module creates a bootable
+	# ISO file from the data below $source
 	# ---
 	#==========================================
 	# Object setup
