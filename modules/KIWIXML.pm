@@ -88,12 +88,10 @@ sub new {
 		my @globsearch = glob ($imageDesc."/*.kiwi");
 		my $globitems  = @globsearch;
 		if ($globitems == 0) {
-			$kiwi -> failed ();
 			$kiwi -> error ("Cannot open control file: $controlFile");
 			$kiwi -> failed ();
 			return undef;
 		} elsif ($globitems > 1) {
-			$kiwi -> failed ();
 			$kiwi -> error ("Found multiple *.kiwi control files");
 			$kiwi -> failed ();
 			return undef;
@@ -112,7 +110,6 @@ sub new {
 		if (($code == 0) && (-f "$controlFile-next")) {
 			qxx ("mv $controlFile-next $controlFile");
 		} elsif ($code > 10) {
-			$kiwi -> failed ();
 			$kiwi -> error ("XSL: $data");
 			$kiwi -> failed ();
 			return undef;
@@ -128,7 +125,6 @@ sub new {
 		my $code = $? >> 8;
 		if ($code != 0) {
 			chomp $data;
-			$kiwi -> failed ();
 			$kiwi -> error ("Integrity check for $imageDesc failed:\n$data");
 			$kiwi -> failed ();
 			return undef;
@@ -178,7 +174,6 @@ sub new {
 		$profilesNodeList = $systemTree -> getElementsByTagName ("profiles");
 	};
 	if ($@) {
-		$kiwi -> failed ();
 		$kiwi -> error  ("Problem reading control file");
 		$kiwi -> failed ();
 		$kiwi -> error  ("$@\n");
@@ -191,7 +186,6 @@ sub new {
 		$systemRNG ->validate ( $systemTree );
 	};
 	if ($@) {
-		$kiwi -> failed ();
 		$kiwi -> error  ("Scheme validation failed");
 		$kiwi -> failed ();
 		$kiwi -> error  ("$@\n");
@@ -311,7 +305,6 @@ sub new {
 	#------------------------------------------
 	my $version = $this -> getImageVersion();
 	if ($version !~ /^\d+\.\d+\.\d+$/) {
-		$kiwi -> failed ();
 		$kiwi -> error  ("Invalid version format: $version");
 		$kiwi -> failed ();
 		$kiwi -> error  ("Expected 'Major.Minor.Release'");
@@ -330,7 +323,6 @@ sub new {
 		return $this;
 	}
 	if (! $this -> getImageTypeAndAttributes()) {
-		$kiwi -> failed ();
 		$kiwi -> error  ("Boot type: $imageWhat not specified in xml");
 		$kiwi -> failed ();
 		return undef;

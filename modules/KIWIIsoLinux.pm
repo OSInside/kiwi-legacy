@@ -57,19 +57,23 @@ sub new {
 	# create log object if not done
 	#------------------------------------------
 	if (! defined $kiwi) {
-		$kiwi = new KIWILog("tiny");
+		$kiwi = new KIWILog ("tiny");
 	}
-	if (! defined $source) {
+	if (! -d $source) {
+		$kiwi -> error  ("No such file or directory: $source");
+		$kiwi -> failed (); 
 		return undef;
 	}
 	if (! defined $dest) {
+		$kiwi -> error  ("No destination file specified");
+		$kiwi -> failed ();
 		return undef;
 	}
 	if (! defined $preparer) {
-		$preparer = 'KIWI-Team - http://kiwi.berlios.de';
+		$preparer = $main::Preparer;
 	}
 	if (! defined $publisher) {
-		$publisher = 'SUSE LINUX Products GmbH, suse@novell.com'
+		$publisher = $main::Publisher;
 	}
 	if (! defined $params) {
 		$params = '-R -J -pad -joliet-long';
@@ -90,6 +94,8 @@ sub new {
 	} elsif (-d "$source/$bootbase/ia64") {
 		$bootbase  = $bootbase."/ia64";
 	} else {
+		$kiwi -> error  ("No $source/$bootbase/<arch>/ layout found");
+		$kiwi -> failed ();
 		return undef;
 	}
 	$bootimage    = $bootbase."/image";

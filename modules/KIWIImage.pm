@@ -1713,9 +1713,7 @@ sub createImageLiveCD {
 	my $isoerror = 1;
 	my $name = $imageDest."/".$namerw.".iso";
 	my $isolinux = new KIWIIsoLinux (
-		$kiwi,$main::RootTree."/CD",$name,
-		$main::Publisher,$main::Preparer,
-		"-R -J -pad -joliet-long"
+		$kiwi,$main::RootTree."/CD",$name
 	);
 	if (defined $isolinux) {
 		$isoerror = 0;
