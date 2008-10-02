@@ -22,15 +22,16 @@
 		<source path="/image/CDs/full-i386"/>
 		<!--<source path="opensuse://openSUSE:11.1/standard/"/>-->
 	</repository>
-	<packages type="image">
+	<packages type="image" patternType="plusRecommended">
 		<package name="kernel-default"/>
 		<package name="bootsplash"/>
 		<package name="bootsplash-branding-openSUSE"/>
 		<package name="vim"/>
-		<opensusePattern name="default"/>
+		<package name="MozillaFirefox"/>
+		<opensusePattern name="base"/>
 		<opensusePattern name="kde4"/>
 	</packages>
-	<packages type="bootstrap">
+	<packages type="bootstrap" patternType="plusRecommended">
 		<package name="filesystem"/> 
 		<package name="glibc-locale"/>
 	</packages>

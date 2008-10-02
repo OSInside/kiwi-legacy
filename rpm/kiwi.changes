@@ -3,6 +3,8 @@ Fri Sep 26 17:43:48 CEST 2008 - ms@suse.de
 
 - v2.83
 - added suse 11.1 / SLES11 examples
+- fixed patternType evaluation for zypper
+- fixed USB stick partitioning, clean table first
 - added architecture information for sat solv cache
 - added xenbridge element to setup Xen bridge networking
 - fixed file:// usage in xenconfig, this setup requires

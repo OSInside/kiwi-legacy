@@ -1155,7 +1155,7 @@ sub setupUpgrade {
 		my @installOpts = (
 			"--auto-agree-with-licenses"
 		);
-		my %pattr = $xml -> getPackageAttributes();
+		my %pattr = $xml -> getPackageAttributes("image");
 		if (($pattr{patternType} ne "plusRecommended") &&
 			($pattr{patternPackageType} ne "plusRecommended")
 		) {
@@ -1387,7 +1387,7 @@ sub setupRootSystem {
 			my @installOpts = (
 				"--auto-agree-with-licenses"
 			);
-			my %pattr = $xml -> getPackageAttributes();
+			my %pattr = $xml -> getPackageAttributes("bootstrap");
 			if (($pattr{patternType} ne "plusRecommended") &&
 				($pattr{patternPackageType} ne "plusRecommended")
 			) {
@@ -1475,7 +1475,7 @@ sub setupRootSystem {
 			my @installOpts = (
 				"--auto-agree-with-licenses"
 			);
-			my %pattr = $xml -> getPackageAttributes();
+			my %pattr = $xml -> getPackageAttributes("image");
 			if (($pattr{patternType} ne "plusRecommended") &&
 				($pattr{patternPackageType} ne "plusRecommended")
 			) {

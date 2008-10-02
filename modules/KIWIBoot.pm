@@ -3151,6 +3151,12 @@ sub setStoragePartition {
 			$kiwi -> loginfo (
 				"FDISK input: $device [@commands]"
 			);
+			$status = qxx ("dd if=/dev/zero of=$device bs=512 count=1 2>&1");
+			$result = $? >> 8;
+			if ($result != 0) {
+				$kiwi -> loginfo ($status);
+				return undef;
+			}
 			if (! open (FD,"|/sbin/fdisk $device &> $tmpdir/fdisk.log")) {
 				return undef;
 			}
