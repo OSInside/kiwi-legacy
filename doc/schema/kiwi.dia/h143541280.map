@@ -2,13 +2,19 @@
  <area
   shape='rect'
   alt='h223636987'
-  coords='269,0,370,40'
+  coords='255,0,356,25'
   href='kiwi.xsd.html#h223636987'/>
 
  <area
   shape='rect'
+  alt='h117531751'
+  coords='255,35,370,60'
+  href='kiwi.xsd.html#h117531751'/>
+
+ <area
+  shape='rect'
   alt='h-2093494859'
-  coords='183,50,364,76'
+  coords='183,70,364,96'
   href='kiwi.xsd.html#h-2093494859'/>
 
 </map>
