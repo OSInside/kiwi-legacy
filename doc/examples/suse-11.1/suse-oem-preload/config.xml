@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<image schemeversion="2.4" name="suse-11.1-oem-preload">
+	<description type="system">
+		<author>Marcus Schäfer</author>
+		<contact>ms@novell.com</contact>
+		<specification>openSUSE 11.1 oem preload system</specification>
+	</description>
+	<preferences>
+		<type fsreadwrite="ext3" fsreadonly="squashfs" boot="oemboot/suse-11.1" format="iso">split</type>
+		<version>1.1.2</version>
+		<packagemanager>zypper</packagemanager>
+		<rpm-check-signatures>False</rpm-check-signatures>
+		<rpm-force>True</rpm-force>
+		<locale>en_US</locale>
+		<keytable>us.map.gz</keytable>
+	</preferences>
+	<users group="users">
+		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/home/tux" name="tux"/>
+	</users>
+	<repository type="yast2">
+		<source path="/image/CDs/full-i386"/>
+		<!--<source path="opensuse://openSUSE:11.1/standard/"/>-->
+	</repository>
+	<packages type="image">
+		<package name="kernel-default"/>
+		<package name="bootsplash"/>
+		<package name="bootsplash-branding-openSUSE"/>
+		<package name="vim"/>
+		<opensusePattern name="default"/>
+		<opensusePattern name="x11"/>
+	</packages>
+	<packages type="bootstrap">
+		<package name="filesystem"/> 
+		<package name="glibc-locale"/>
+	</packages>
+	<split>
+		<persistent>
+			<file name="/var"/>
+			<file name="/var/*"/>
+		</persistent>
+	</split>
+</image>

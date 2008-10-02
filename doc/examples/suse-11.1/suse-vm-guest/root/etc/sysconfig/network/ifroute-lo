@@ -1,0 +1,4 @@
+# Set an explicit route to the localnet, because there was a report (bug 34872)
+# about performance problems in an oracle installation without that route.
+# Normally it should not be necessary since kernel 2.4, but it does not harm.
+127/8

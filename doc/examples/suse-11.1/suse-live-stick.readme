@@ -1,0 +1,59 @@
+KIWI Image Description Example
+==============================
+* A live USB stick image is a system on USB stick which allows you to
+  boot and run from this device without using any other storage device of
+  the computer. It is urgently required that the BIOS of the system which
+  you plug the stick in supports booting from USB stick. Almost all
+  new BIOS systems support that. The USB stick serves as OS system disk
+  in this case and you can read and write data onto it
+
+How to build this Example
+==============================
+
+    kiwi -p /usr/share/doc/packages/kiwi/examples/suse-11.1/suse-live-stick \
+         --root /tmp/mystick
+
+* There are two options to create an image from the prepared tree in
+  /tmp/mystick: The first image type named "usb" creates all required
+  images for booting and the OS but requires you to plug in the stick
+  and let kiwi deploy the data onto this stick. The second image type
+  called "oem" allows you to create a virtual disk which represents
+  a virtual disk geometry including all partitions and boot information
+  in one file. You simply can "dd" this file on the stick. During first
+  boot of the stick the virtual disk geomtry has to be adapted to the
+  real disk geometry by kiwi.
+
+1) with usb type
+==============================
+
+    kiwi --create /tmp/mystick --type usb -d /tmp/mystick-result
+    ---> plug in the stick now
+
+    kiwi --bootstick \
+         /tmp/mystick-result/initrd-usbboot-suse-11.1.i686-2.1.1.splash.gz \
+         --bootstick-system \
+         /tmp/mystick-result/suse-11.1-live-stick.i686-1.1.2
+
+2) with oem type
+==============================
+
+    kiwi --create /tmp/mystick --type oem -d /tmp/mystick-result
+    ---> plug in the stick now
+    ---> call dd if=/tmp/mystick-result/suse-11.1-live-stick.i686-1.1.2.raw \
+                 of=/dev/... bs=32k
+
+How to test this Example
+==============================
+* Testing of live sticks can be done with a test machine which boots from
+  USB stick or with a virtualisation system. If you test with a virtualisation
+  system for example qemu you should be aware that the USB stick looks like
+  a normal disk to the system. The kiwi boot process searches for the USB
+  stick to be able to mount the correct storage device but in a virtual
+  environment the disk doesn't appear as a USB stick. So if your
+  virtualisation solution doesn't provide a virtual BIOS which allows booting
+  from USB stick you should test the stick on real hardware
+
+Login Details
+==============================
+* User root pwd: linux
+* User tux  pwd: linux

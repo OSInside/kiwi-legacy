@@ -31,18 +31,11 @@ echo "Configure image: [$kiwi_iname]..."
 #--------------------------------------
 suseActivateDefaultServices
 suseInsertService boot.device-mapper
-suseInsertService amazon
-suseInsertService sshd
 
 #======================================
 # SuSEconfig
 #--------------------------------------
 suseConfig
-
-#======================================
-# clone runlevel 3 to 4
-#--------------------------------------
-suseCloneRunlevel 4
 
 #======================================
 # Umount kernel filesystems
