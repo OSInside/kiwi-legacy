@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Oct  6 12:09:15 CEST 2008 - ms@suse.de
+
+- v2.85
+- added required kernel packages -base, -extras according
+  to kernel split for SUSE 11.1 (bnc #432482)
+
+-------------------------------------------------------------------
 Mon Oct  6 10:05:18 CEST 2008 - ms@suse.de
 
 - v2.84

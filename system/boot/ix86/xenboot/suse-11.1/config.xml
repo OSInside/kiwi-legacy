@@ -55,6 +55,8 @@
 	</packages>
 	<packages type="bootstrap" profiles="default">
 		<package name="kernel-xen"/>
+		<package name="kernel-xen-base"/>
+		<package name="kernel-xen-extras"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>

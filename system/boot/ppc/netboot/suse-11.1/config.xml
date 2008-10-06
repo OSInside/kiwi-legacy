@@ -8,19 +8,18 @@
 	<preferences>
 		<type bootprofile="default">cpio</type>
 		<version>2.1.1</version>
-		<size unit="M">60</size>
 		<compressed>yes</compressed>
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>False</rpm-check-signatures>
 	</preferences>
 	<profiles>
 		<profile name="default" description="Boot with default kernel"/>
-		<profile name="xen" description="Boot with xen kernel/mboot.c32"/>
 		<profile name="diskless" description="Booting diskless thin clients"/>
 		<profile name="smp" description="Boot with smp kernel"/>
+		<profile name="ppc64" description="Boot with ppc64 kernel"/>
 	</profiles>
-	<drivers type="drivers" profiles="default,xen,smp">
-		<!-- DRIVERS START DEFAULT AND XEN -->
+	<drivers type="drivers" profiles="default,smp,ppc64">
+		<!-- DRIVERS START DEFAULT AND SMP -->
 		<file name="drivers/ide/*"/>
 		<file name="drivers/block/loop.ko"/>
 		<file name="drivers/block/brd.ko"/>
@@ -38,8 +37,9 @@
 		<file name="fs/hfs/*"/>
 		<file name="fs/exportfs/*"/>
 		<file name="fs/squashfs/*"/>
+		<file name="fs/aufs.ko"/>
 		<file name="updates/aufs.ko"/>
-		<file name="fs/reiserfs/*"/>
+		<file name="weak-updates/aufs.ko"/>
 		<file name="fs/nfs/*"/>
 		<file name="fs/fuse/*"/>
 		<file name="net/sunrpc/*"/>
@@ -54,7 +54,7 @@
 		<file name="drivers/parport/*"/>
 		<file name="drivers/char/lp.ko"/>
 		<file name="drivers/acpi/dock.ko"/>
-		<!-- DRIVERS END DEFAULT AND XEN -->
+		<!-- DRIVERS END DEFAULT AND SMP -->
 	</drivers>
 	<drivers type="drivers" profiles="diskless">
 		<!-- DRIVERS START DISKLESS -->
@@ -65,8 +65,7 @@
 		<file name="fs/mbcache.ko"/>
 		<file name="fs/exportfs/*"/>
 		<file name="fs/squashfs/*"/>
-		<file name="updates/aufs.ko"/>
-		<file name="weak-updates/aufs.ko"/>
+		<file name="fs/aufs.ko"/>
 		<file name="fs/nfs/*"/>
 		<file name="fs/lockd/*"/>
 		<file name="net/sunrpc/*"/>
@@ -112,13 +111,10 @@
 		<file name="drivers/net/via-rhine.ko"/>
 		<file name="drivers/net/via-velocity.ko"/>
 		<file name="drivers/net/yellowfin.ko"/>
-		<file name="atl2.ko"/>
-		<file name="asus_acpi.ko"/>
-		<file name="asus_eee.ko"/>
 		<!-- DRIVERS END DISKLESS -->
 	</drivers>
 	<repository type="yast2" status="replaceable">
-		<source path="/image/CDs/full-i386"/>
+		<source path="/mounts/dist/install/SLP/openSUSE-11.1-LATEST-DVD/ppc/DVD1"/>
 	</repository>
 	<packages type="image" profiles="default">
 		<!-- KERNEL AND MODULE PACKAGES START DEFAULT -->
@@ -136,28 +132,24 @@
 		<package name="aufs-kmp-pae"/>
 		<!-- KERNEL AND MODULE PACKAGES END SMP -->
 	</packages>
-	<packages type="image" profiles="xen">
-		<!-- KERNEL AND MODULE PACKAGES START XEN -->
-		<package name="kernel-xen"/>
-		<package name="kernel-xen-base"/>
-		<package name="kernel-xen-extras"/>
-		<package name="aufs-kmp-xen"/>
-		<package name="xen"/>
-		<!-- KERNEL AND MODULE PACKAGES END XEN -->
-	</packages>
 	<packages type="image" profiles="diskless">
 		<!-- KERNEL AND MODULE PACKAGES START DISKLESS -->
 		<package name="kernel-default"/>
 		<package name="kernel-default-base"/>
 		<package name="kernel-default-extras"/>
 		<package name="aufs-kmp-default"/>
-		<package name="asus_acpi-kmp-default"/>
-		<package name="asus_eee-kmp-default"/>
-		<package name="atl2-kmp-default"/>
 		<!-- KERNEL AND MODULE PACKAGES END DISKLESS -->
 	</packages>
-	<packages type="image" profiles="default,xen,smp">
-		<!-- PACKAGES START DEFAULT AND XEN -->
+	<packages type="image" profiles="ppc64">
+		<!-- KERNEL AND MODULE PACKAGES START PPC64 -->
+		<package name="kernel-ppc64"/>
+		<package name="kernel-ppc64-base"/>
+		<package name="kernel-ppc64-extras"/>
+		<package name="aufs-kmp-ppc64"/>
+		<!-- KERNEL AND MODULE PACKAGES END PPC64 -->
+	</packages>
+	<packages type="image" profiles="default,smp,ppc64">
+		<!-- PACKAGES START DEFAULT AND SMP -->
 		<package name="curl"/>
 		<package name="psmisc"/>
 		<package name="iputils"/>
@@ -172,14 +164,10 @@
 		<package name="net-tools"/>
 		<package name="netcfg"/>
 		<package name="parted"/>
-		<package name="reiserfs"/>
 		<package name="util-linux"/>
 		<package name="diffutils"/>
 		<package name="procps"/>
 		<package name="lvm2"/>
-		<package name="gfxboot"/>
-		<package name="gfxboot-devel"/>
-		<package name="fribidi"/>
 		<package name="make"/>
 		<package name="nbd"/>
 		<package name="nfs-client"/>
@@ -187,7 +175,7 @@
 		<package name="bootsplash-branding-openSUSE"/>
 		<package name="tar"/>
 		<package name="cromfs"/>
-		<!-- PACKAGES END DEFAULT AND XEN -->
+		<!-- PACKAGES END DEFAULT AND SMP -->
 	</packages>
 	<packages type="image" profiles="diskless">
 		<!-- PACKAGES START DISKLESS -->
@@ -202,24 +190,18 @@
 		<package name="util-linux"/>
 		<package name="diffutils"/>
 		<package name="procps"/>
-		<package name="fribidi"/>
 		<package name="nbd"/>
 		<package name="nfs-client"/>
 		<package name="tar"/>
-		<package name="gfxboot"/>
-		<package name="gfxboot-devel"/>
-		<package name="bootsplash"/>
-		<package name="bootsplash-branding-openSUSE"/>
 		<!-- PACKAGES STOP DISKLESS -->
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
-		<package name="glibc@i586" arch="i686"/>
 		<package name="glibc-locale"/>
 		<package name="cracklib-dict-small"/>
 	</packages>
-	<packages type="delete" profiles="default,xen,diskless,smp">
-		<!-- DELETE PACKAGES START DEFAULT, XEN AND DISKLESS -->
+	<packages type="delete" profiles="default,diskless,smp,ppc64">
+		<!-- DELETE PACKAGES START DEFAULT AND DISKLESS -->
 		<package name="PolicyKit"/>
 		<package name="audit-libs"/>
 		<package name="blocxx"/>
@@ -262,12 +244,10 @@
 		<package name="pmtools"/>
 		<package name="resmgr"/>
 		<package name="suse-build-key"/>
-		<package name="gfxboot"/>
-		<package name="gfxboot-devel"/>
 		<package name="fribidi"/>
 		<package name="make"/>
 		<package name="bootsplash-branding-openSUSE"/>
-		<!-- DELETE PACKAGES END DEFAULT, XEN AND DISKLESS -->
+		<!-- DELETE PACKAGES END DEFAULT AND DISKLESS -->
 	</packages>
 	<packages type="delete" profiles="diskless">
 		<!-- DELETE PACKAGES START DISKLESS -->
@@ -281,8 +261,6 @@
 		<package name="openslp"/>
 		<package name="perl-HTML-Tagset"/>
 		<package name="perl"/>
-		<package name="gfxboot"/>
-		<package name="gfxboot-devel"/>
 		<package name="perl-gettext"/>
 		<package name="setserial"/>
 		<package name="bundle-lang-common-zh"/>
