@@ -1979,7 +1979,6 @@ sub getPackageAttributes {
 			next;
 		}
 		my $type = $element -> getAttribute ("type");
-		print "+++++ $type\n";
 		if ($type ne $what) {
 			next;
 		}
