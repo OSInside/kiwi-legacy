@@ -38,7 +38,8 @@ use RPMQ;
 use File::Find;
 use File::Path;
 use Cwd 'abs_path';
-use IO::Compress::Gzip qw(gzip $GzipError); # temporarily: as soon as plugins extracted, scratch here
+#use IO::Compress::Gzip qw(gzip $GzipError); # temporarily: as soon as plugins extracted, scratch here
+use PerlIO::gzip qw(gzip $GzipError); # temporarily: as soon as plugins extracted, scratch here
 
 # remove if not longer necessary:
 use Data::Dumper;
@@ -614,6 +615,7 @@ sub queryRpmHeaders
       push @archs, $this->{m_archlist}->headList();
     }
 
+    push @archs, 'src', 'nosrc';
     ARCH:foreach my $a(@archs) {
       my @fallbacklist;
       if($nofallback==0) {
@@ -622,6 +624,7 @@ sub queryRpmHeaders
       else {
 	@fallbacklist = ($a);
       }
+      push @fallbacklist, $a if $a eq 'src' || $a eq 'nosrc';
       my $fb_available = 0;
       FA:foreach my $fa(@fallbacklist) {
 	if(not defined($tmp->{$fa})) {
@@ -652,8 +655,7 @@ sub queryRpmHeaders
 	}
 
 	my $uri = "$tmp->{$fa}->{'targetpath'}/$tmp->{$fa}->{'targetfile'}";
-	my $dst = "$this->{'m_basesubdir'}->{$medium}/$tmp->{$fa}->{'targetfile'}";
-	if(defined($uri) and defined($dst)) {
+	if(defined($uri)) {
 	  # RPMQ query for arch/version/release
 	  my %flags = RPMQ::rpmq_many($uri, 'NAME', 'VERSION', 'RELEASE', 'ARCH', 'SOURCE', 'SOURCERPM');
 	  if(not(%flags
@@ -666,15 +668,16 @@ sub queryRpmHeaders
 	  }
 
 	  my $ad;
-	  if( !$flags{'SOURCERPM'} or $flags{'SOURCERPM'}->[0] eq 'none') {
+	  if( !$flags{'SOURCERPM'} ) {
 	    # we deal with a source rpm...
 	    $ad = "src";
 	    ## if the user wants all sources onto a certain medium: specify "SOURCEMEDIUM" in config
-	    if($this->{m_prodopts} and $this->{m_prodopts}->{'SOURCEMEDIUM'}) {
-	      $medium = $this->{m_prodopts}->{'SOURCEMEDIUM'};
+	    my $srcmedium = $this->{m_proddata}->getOpt("SOURCEMEDIUM");
+	    if($srcmedium) {
+	      $medium = $srcmedium;
 	    }
-	  }
-	  else {
+	  }else
+	   {
 	    # we deal with regular rpm file...
 	    $ad = $flags{'ARCH'}->[0];
 	  }
@@ -1204,13 +1207,13 @@ sub bestBet
 	  $result{$r} = $tmp;
 	}
 
-	$tmp->{$d} = {};
-	$tmp->{$d}->{'arch'} = $archinfo;
-	$tmp->{$d}->{'subdir'} = $subdirname;
-	$tmp->{$d}->{'uri'} = $uri;
+	$tmp->{"$d.$archinfo"} = {};
+	$tmp->{"$d.$archinfo"}->{'arch'} = $archinfo;
+	$tmp->{"$d.$archinfo"}->{'subdir'} = $subdirname;
+	$tmp->{"$d.$archinfo"}->{'uri'} = $uri;
 
 	# pull the BIG next lever:
-	next DIR; # look in other dirs in same repo please (a repo might contain the same package for multiple architectures
+	#next DIR; # look in other dirs in same repo please (a repo might contain the same package for multiple architectures
       }
     }
   }	# $r (repository, sorted by priority)
@@ -1252,6 +1255,8 @@ sub fetchFileFrom
   my %list = $this->bestBet($pack);
   return $retval if(! %list);
 
+#print Dumper(\%list);
+
   # step1: download all and query headers!
   # sort by prio??
   REPO:foreach my $repo(sort {$this->{m_repos}->{$a}->{priority} < $this->{m_repos}->{$b}->{priority}} keys(%list)) {
@@ -1274,7 +1279,7 @@ sub fetchFileFrom
       else{
 	$this->{m_xml}->getInstSourceFile($r_tmp2->{'uri'}, $fullpath);
       }
-      my %flags = RPMQ::rpmq_many("$fullpath/$file", 'NAME', 'VERSION', 'RELEASE', 'ARCH', 'SOURCE', 'SOURCERPM');
+      my %flags = RPMQ::rpmq_many("$fullpath/$file", 'NAME', 'VERSION', 'RELEASE', 'ARCH', 'SOURCE', 'SOURCERPM', 'NOSOURCE', 'NOPATCH');
 
       if(! %flags) {
 	$this->{m_logger}->warning("[W] [fetchFileFrom] Package $pack seems to have an invalid header!");
@@ -1288,10 +1293,13 @@ sub fetchFileFrom
 	#   SOURCERPM contains the name of the resp. source rpm or (none) for source rpms themselves.
 	#---------------------------------
 	my $ext;
-	if( !$flags{'SOURCERPM'} or $flags{'SOURCERPM'}->[0] eq 'none') {
+	if( !$flags{'SOURCERPM'} ) {
 	  # we deal with a source rpm...
-	  $ext .= "$arch.src.rpm";
-	  $r_tmp2->{'subdir'} = "src";
+	  my $srcarch = 'src';
+	  $srcarch = 'nosrc' if $flags{'NOSOURCE'} || $flags{'NOPATCH'};
+	  $ext .= "$srcarch.rpm";
+	  $r_tmp2->{'subdir'} = $srcarch;
+	  $arch = $srcarch;
 	}
 	else {
 	  # we deal with regular rpm file...
@@ -1662,19 +1670,38 @@ sub createMetadata
     $this->{m_logger}->info("[I] [createMetadata] skipping media file due to error!");
   }
 
+  ## step 5b: create info.txt for Beta releases.
+  $this->{m_logger}->info("[I] Handling Beta information on media:");
+  my $beta_version = $this->{m_proddata}->getOpt("BETA_VERSION");
+  if (defined($beta_version)) {
+    my $dist_string = $this->{m_proddata}->getVar("DISTNAME")." ".$this->{m_proddata}->getVar("PRODUCT_VERSION")." ".${beta_version};
+    if (system("sed","-i","s/BETA_DIST_VERSION/$dist_string/","$this->{m_basesubdir}->{'1'}/README.BETA") == 0 ) {
+      if (system("ln", "-sf", "../README.BETA", "$this->{m_basesubdir}->{'1'}/media.1/info.txt") != 0 ) {
+        $this->{m_logger}->info("[E] Failed to symlink README.BETA file!");
+      };
+    }else{
+      $this->{m_logger}->info("[E] Failed to replace beta version in README.BETA file!");
+    };
+  }else{
+    if (system("rm", "-f", "$this->{m_basesubdir}->{'1'}/README.BETA") != 0 ) {
+      $this->{m_logger}->info("[E] Failed to remove README.BETA file!");
+    };
+  };
 
   ## step 6: products file
   $this->{m_logger}->info("[I] Creating products file in all media:");
-  my $proddir = $this->{m_proddata}->getVar("PRODUCT_DIR");
+  my $proddir  = $this->{m_proddata}->getVar("PRODUCT_DIR");
   my $prodname = $this->{m_proddata}->getVar("PRODUCT_NAME");
-  my $prodver = $this->{m_proddata}->getVar("PRODUCT_VERSION");
+  my $prodver  = $this->{m_proddata}->getVar("PRODUCT_VERSION");
+  my $prodrel  = $this->{m_proddata}->getVar("RELEASE");
+  $prodname =~ s/\ /-/g;
   if(defined($proddir) and defined($prodname) and defined($prodver)) {
     for my $n($this->getMediaNumbers()) {
       my $productsfile = "$this->{m_basesubdir}->{$n}/media.$n/products";
       if(not open(PRODUCT, ">", $productsfile)) {
 	die "Cannot create $productsfile";
       }
-      print PRODUCT "$proddir $prodname $prodver\n";
+      print PRODUCT "$proddir $prodname $prodver-$prodrel\n";
       close(PRODUCT);
     }
   }
@@ -1850,7 +1877,13 @@ sub createBootPackageLinks
 	  $this->{m_logger}->warning("[W] No package hash entry for package $rpmname in packages hash! Package missing?");
 	}
 	else {
-	  my @fallb = $this->{m_archlist}->fallbacks($arch);
+          # FIXME: This is just a hack, where do we get the upper architecture from ?
+          my $targetarch = $arch;
+          if ( $arch eq 'i386' ) {
+             $targetarch = "i586";
+          }
+          # End of hack
+	  my @fallb = $this->{m_archlist}->fallbacks($targetarch);
 	  FARCH:foreach my $fa(@fallb) {
 	    if(not defined($tmp{$fa})) {
 	      next FARCH;

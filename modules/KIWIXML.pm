@@ -2876,7 +2876,6 @@ sub getInstSourceSatSolvable {
 	#==========================================
 	# find system architecture
 	#------------------------------------------
-	my $arch = qxx ("uname -m"); chomp $arch;
 	if ($arch =~ /^i.86/) {
 		$arch = 'i.86';
 	}

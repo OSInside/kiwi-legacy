@@ -191,7 +191,7 @@ sub loadPlugins
       $retval++;
     }
     else {
-      $this->collect()->logger()->error("[E] loadPlugins: failed to load plugin <$p> from url <$dir>!");
+      $this->collect()->logger()->error("[E] loadPlugins: failed to load plugin <$p> from url <$dir>: $@");
     }
   }
 

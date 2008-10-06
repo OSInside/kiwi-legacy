@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Mon Oct  6 10:05:18 CEST 2008 - ms@suse.de
+
+- v2.84
+- fixed instsource support for SLES10 (gzip problems)
+- fixed instsource rpm handling for i686 arch
+- added i586 <> i386 loader directory hack
+- fixed creation of content file
+- added support for Beta version handling
+- added debug output for module loader
+
+-------------------------------------------------------------------
 Fri Sep 26 17:43:48 CEST 2008 - ms@suse.de
 
 - v2.83
