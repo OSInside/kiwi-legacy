@@ -1972,18 +1972,22 @@ sub getPackageAttributes {
 	my $this = shift;
 	my $what = shift;
 	my $kiwi = $this->{kiwi};
+	my @node = $this->{packageNodeList} -> get_nodelist();
 	my %result;
-	for (my $i=1;$i<= $this->{packageNodeList}->size();$i++) {
-		my $node = $this->{packageNodeList} -> get_node($i);
-		my $type = $node -> getAttribute ("type");
+	foreach my $element (@node) {
+		if (! $this -> requestedProfile ($element)) {
+			next;
+		}
+		my $type = $element -> getAttribute ("type");
+		print "+++++ $type\n";
 		if ($type ne $what) {
 			next;
 		}
-		my $ptype = $node -> getAttribute ("patternType");
+		my $ptype = $element -> getAttribute ("patternType");
 		if (! defined $ptype) {
 			$ptype = "onlyRequired";
 		}
-		my $ppactype = $node -> getAttribute ("patternPackageType");
+		my $ppactype = $element -> getAttribute ("patternPackageType");
 		if (! defined $ppactype) {
 			$ppactype = "onlyRequired";
 		}
