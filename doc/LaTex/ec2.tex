@@ -137,14 +137,12 @@ are registered as ari-... images at Amazon. You will need to select a
 aki/ari image that matches your ami. The following table shows which
 Distributions are supported at the moment:\\
 
-\begin{tabular}[h]{|p{2cm}|p{2.6cm}|p{2.6cm}|p{1cm}|p{4cm}|p{1.5cm}|}
+\begin{tabular}[h]{|p{2cm}|p{2.6cm}|p{2.6cm}|p{2cm}|}
 \hline
-\textbf{Distro} & \textbf{ARI id} & \textbf{AKI id} & \textbf{Arch} &
-\textbf{Kernel} & \textbf{Public} \\
+\textbf{Distro} & \textbf{ARI id} & \textbf{AKI id} & \textbf{Arch} \\
 \hline
-SUSE 11.0 & ari-fc8e6a95 & aki-fe8e6a97 & ix86    & 2.6.25.5-1.1-xen & yes\\
-%SUSE 11.0 & ari-5f907436 & aki-5e907437 & x86\_64 & 2.6.25.5-1.1-xen & yes\\
-SLES10    & ari-968f6bff & aki-69886c00 & ix86 & 2.6.16.60-0.23\_xtp-xen & no\\
+SUSE 11.0 & ari-49db3f20 & aki-4adb3f23 & ix86    \\
+SUSE 11.0 & ari-48db3f21 & aki-4ddb3f24 & x86\_64 \\
 \hline
 \end{tabular}\\
 
@@ -154,7 +152,7 @@ to this call the following command to fire up your new ec2 instance:
 \begin{Command}{13cm}
 \begin{verbatim}
 ec2-run-instances ami-... \
-  --kernel aki-fe8e6a97 --ramdisk ari-fc8e6a95 \
+  --kernel aki-4adb3f23 --ramdisk ari-49db3f20 \
   -k gsg-keypair
 \end{verbatim}
 \end{Command}
