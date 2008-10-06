@@ -66,11 +66,6 @@
 		<package name="kernel-pae-extras"/>
 		<package name="aufs-kmp-pae"/>
 	</packages>
-	<packages type="bootstrap" profiles="rt">
-		<package name="kernel-rt"/>
-		<package name="kernel-rt-base"/>
-		<package name="kernel-rt-extras"/>
-	</packages>
 	<packages type="bootstrap" profiles="xen">
 		<package name="kernel-xen"/>
 		<package name="kernel-xen-base"/>
