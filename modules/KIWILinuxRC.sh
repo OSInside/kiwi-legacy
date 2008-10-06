@@ -320,6 +320,7 @@ function udevStart {
 	# problem in another way than:
 	# -----
 	rm -f /etc/udev/rules.d/*-drivers.rules
+	rm -f /lib/udev/rules.d/*-drivers.rules
 	# start the udev daemon
 	udevd --daemon udev_log="debug"
 	# wait for pending triggered udev events.
