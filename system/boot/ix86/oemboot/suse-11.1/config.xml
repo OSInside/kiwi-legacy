@@ -59,19 +59,19 @@
 	<packages type="image" profiles="default">
 		<package name="kernel-default"/>
 		<package name="kernel-default-base"/>
-		<package name="kernel-default-extras"/>
+		<package name="kernel-default-extra"/>
 		<package name="aufs-kmp-default"/>
 	</packages>
 	<packages type="image" profiles="smp">
 		<package name="kernel-pae"/>
 		<package name="kernel-pae-base"/>
-		<package name="kernel-pae-extras"/>
+		<package name="kernel-pae-extra"/>
 		<package name="aufs-kmp-pae"/>
 	</packages>
 	<packages type="image" profiles="xen">
 		<package name="kernel-xen"/>
 		<package name="kernel-xen-base"/>
-		<package name="kernel-xen-extras"/>
+		<package name="kernel-xen-extra"/>
 		<package name="aufs-kmp-xen"/>
 		<package name="xen"/>
 	</packages>

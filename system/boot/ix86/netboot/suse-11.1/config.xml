@@ -124,7 +124,7 @@
 		<!-- KERNEL AND MODULE PACKAGES START DEFAULT -->
 		<package name="kernel-default"/>
 		<package name="kernel-default-base"/>
-		<package name="kernel-default-extras"/>
+		<package name="kernel-default-extra"/>
 		<package name="aufs-kmp-default"/>
 		<!-- KERNEL AND MODULE PACKAGES END DEFAULT -->
 	</packages>
@@ -132,7 +132,7 @@
 		<!-- KERNEL AND MODULE PACKAGES START SMP -->
 		<package name="kernel-pae"/>
 		<package name="kernel-pae-base"/>
-		<package name="kernel-pae-extras"/>
+		<package name="kernel-pae-extra"/>
 		<package name="aufs-kmp-pae"/>
 		<!-- KERNEL AND MODULE PACKAGES END SMP -->
 	</packages>
@@ -140,7 +140,7 @@
 		<!-- KERNEL AND MODULE PACKAGES START XEN -->
 		<package name="kernel-xen"/>
 		<package name="kernel-xen-base"/>
-		<package name="kernel-xen-extras"/>
+		<package name="kernel-xen-extra"/>
 		<package name="aufs-kmp-xen"/>
 		<package name="xen"/>
 		<!-- KERNEL AND MODULE PACKAGES END XEN -->
@@ -149,7 +149,7 @@
 		<!-- KERNEL AND MODULE PACKAGES START DISKLESS -->
 		<package name="kernel-default"/>
 		<package name="kernel-default-base"/>
-		<package name="kernel-default-extras"/>
+		<package name="kernel-default-extra"/>
 		<package name="aufs-kmp-default"/>
 		<package name="asus_acpi-kmp-default"/>
 		<package name="asus_eee-kmp-default"/>

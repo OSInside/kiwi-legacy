@@ -120,7 +120,7 @@
 		<!-- KERNEL AND MODULE PACKAGES START DEFAULT -->
 		<package name="kernel-default"/>
 		<package name="kernel-default-base"/>
-		<package name="kernel-default-extras"/>
+		<package name="kernel-default-extra"/>
 		<package name="aufs-kmp-default"/>
 		<!-- KERNEL AND MODULE PACKAGES END DEFAULT -->
 	</packages>
@@ -128,7 +128,7 @@
 		<!-- KERNEL AND MODULE PACKAGES START SMP -->
 		<package name="kernel-pae"/>
 		<package name="kernel-pae-base"/>
-		<package name="kernel-pae-extras"/>
+		<package name="kernel-pae-extra"/>
 		<package name="aufs-kmp-pae"/>
 		<!-- KERNEL AND MODULE PACKAGES END SMP -->
 	</packages>
@@ -136,7 +136,7 @@
 		<!-- KERNEL AND MODULE PACKAGES START DISKLESS -->
 		<package name="kernel-default"/>
 		<package name="kernel-default-base"/>
-		<package name="kernel-default-extras"/>
+		<package name="kernel-default-extra"/>
 		<package name="aufs-kmp-default"/>
 		<!-- KERNEL AND MODULE PACKAGES END DISKLESS -->
 	</packages>
@@ -144,7 +144,7 @@
 		<!-- KERNEL AND MODULE PACKAGES START PPC64 -->
 		<package name="kernel-ppc64"/>
 		<package name="kernel-ppc64-base"/>
-		<package name="kernel-ppc64-extras"/>
+		<package name="kernel-ppc64-extra"/>
 		<package name="aufs-kmp-ppc64"/>
 		<!-- KERNEL AND MODULE PACKAGES END PPC64 -->
 	</packages>
