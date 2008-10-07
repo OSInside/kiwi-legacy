@@ -162,6 +162,7 @@ sub createSortFile {
 		$this -> cleanISO();
 		return undef;
 	}
+	qxx ("chmod 755 $sdir");
 	#==========================================
 	# store tmp files/directories 
 	#------------------------------------------
