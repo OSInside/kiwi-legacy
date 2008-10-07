@@ -273,4 +273,21 @@ sub cleanISO {
 	return $this;
 }
 
+#==========================================
+# checkImage
+#------------------------------------------
+sub checkImage {
+	my $this = shift;
+	my $dest = $this -> {dest};
+	my $tool = "/usr/bin/tagmedia";
+	my $data = qxx("$tool $dest");
+	my $code = $? >> 8;
+	if($code != 0) {
+		$kiwi -> error  ("Failed to call mkisofs binary: $data");
+		$kiwi -> failed ();
+		return undef;
+	}
+	return $this;
+}
+
 1;
