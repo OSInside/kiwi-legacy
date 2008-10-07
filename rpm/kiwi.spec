@@ -1,5 +1,5 @@
 #
-# spec file for package kiwi (Version 2.85
+# spec file for package kiwi (Version 2.86
 #
 # Copyright (c) 2008 SUSE LINUX Products GmbH, Nuernberg, Germany.
 # This file and all modifications and additions to the pristine
@@ -43,7 +43,7 @@ Requires:       satsolver-tools
 Summary:        OpenSuSE - KIWI Image System
 Provides:       kiwi2 <= 2.14
 Obsoletes:      kiwi2 <= 2.14
-Version:        2.85
+Version:        2.86
 Release:        80
 Group:          System/Management
 License:        GPL v2 or later
@@ -419,7 +419,6 @@ rm -rf $RPM_BUILD_ROOT
 %doc %{_defaultdocdir}/kiwi/COPYING
 %doc %{_defaultdocdir}/kiwi/examples
 %doc %{_defaultdocdir}/kiwi/kiwi.pdf
-%doc %{_defaultdocdir}/kiwi/kiwi.quick.pdf
 %doc %{_defaultdocdir}/kiwi/ChangeLog
 %doc %{_defaultdocdir}/kiwi/schema
 #=================================================

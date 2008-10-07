@@ -283,7 +283,7 @@ sub checkImage {
 	my $data = qxx("$tool $dest");
 	my $code = $? >> 8;
 	if($code != 0) {
-		$kiwi -> error  ("Failed to call mkisofs binary: $data");
+		$kiwi -> error  ("Failed to call tagmedia: $data");
 		$kiwi -> failed ();
 		return undef;
 	}
