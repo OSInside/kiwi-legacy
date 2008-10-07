@@ -2774,7 +2774,6 @@ sub getInstSourceFile {
 			my $link = $1;
 			if ($link =~ /$search/) {
 				$url  = $location.$link;
-				print ("NEXT\n");
 				$data = qxx ("lwp-download $url $dest 2>&1");
 				$code = $? >> 8;
 				if ($code == 0) {
@@ -2802,10 +2801,11 @@ sub getInstSourceSatSolvable {
 	# ----
 	my $kiwi     = shift;
 	my $repos    = shift;
-	my $patternd = "/suse/setup/descr/";
+	my @patternd = ("/suse/setup/descr/","/repodata");
 	my $patterns = "/suse/setup/descr/patterns";
 	my $packages = "/suse/setup/descr/packages.gz";
 	my $solvable = "/suse/setup/descr/primary.gz";
+	my $project  = "/repodata/patterns.xml.gz";
 	my $arch     = qxx ("uname -m"); chomp $arch;
 	my $count    = 0;
 	my $index    = 0;
@@ -2814,7 +2814,10 @@ sub getInstSourceSatSolvable {
 	#==========================================
 	# check for sat tools
 	#------------------------------------------
-	if ((! -x "/usr/bin/mergesolv") || (! -x "/usr/bin/susetags2solv")) {
+	if ((! -x "/usr/bin/mergesolv") ||
+		(! -x "/usr/bin/susetags2solv") ||
+		(! -x "/usr/bin/rpmmd2solv")
+	) {
 		$kiwi -> error  ("--> Can't find satsolver tools");
 		$kiwi -> failed ();
 		return undef;
@@ -2840,7 +2843,13 @@ sub getInstSourceSatSolvable {
 		# create directory listing for each repo
 		#------------------------------------------
 		my $destfile = $sdir."/listing";
-		if (! KIWIXML::getInstSourceFile ($kiwi,$repo.$patternd,$destfile)) {
+		my $foundDir = 0;
+		foreach my $patternd (@patternd) {
+			if (KIWIXML::getInstSourceFile ($kiwi,$repo.$patternd,$destfile)) {
+				$foundDir = 1; last;
+			}
+		}
+		if (! $foundDir) {
 			next;
 		}
 		#==========================================
@@ -2851,14 +2860,13 @@ sub getInstSourceSatSolvable {
 		}
 		my $repoOK = -1;
 		foreach my $line (<FD>) {
-			if ($line =~ /\"primary.gz\"/) {
+			# opensuse rpm-md project repo
+			if ($line =~ /\"patterns\.xml\.gz\"/) {
 				$repoOK = 1; last;
 			}
-			if ($line =~ /\"packages.gz\"/) {
-				$repoOK++;
-			}
+			# standard yast2 distribution repo
 			if ($line =~ /\"patterns\"/) {
-				$repoOK++;
+				$repoOK++; last;
 			}
 		}
 		if ($repoOK) {
@@ -2889,8 +2897,22 @@ sub getInstSourceSatSolvable {
 		#==========================================
 		# check for pre-created solvable first
 		#------------------------------------------
+		my $foundFile = 0;
 		$destfile = $sdir."/primary-".$count.".gz";
 		if (KIWIXML::getInstSourceFile ($kiwi,$repo.$solvable,$destfile)) {
+			$foundFile = 1;
+		}
+		#==========================================
+		# check for opensuse project pattern
+		#------------------------------------------
+		$destfile = $sdir."/projectxml-".$count.".gz";
+		if (KIWIXML::getInstSourceFile ($kiwi,$repo.$project,$destfile)) {
+			$foundFile = 1;
+		}
+		#==========================================
+		# skip if we already have solvable
+		#------------------------------------------
+		if ($foundFile) {
 			next;
 		}
 		#==========================================
@@ -2917,7 +2939,7 @@ sub getInstSourceSatSolvable {
 			if ($line !~ /\.$arch\./) {
 				next;
 			}
-			my $file = $repo.$patternd.$line;
+			my $file = $repo.$patternd[0].$line;
 			if (! KIWIXML::getInstSourceFile($kiwi,$file,$destfile)) {
 				$kiwi -> warning ("--> Pattern file $line not found");
 				$kiwi -> skipped ();
@@ -2947,6 +2969,21 @@ sub getInstSourceSatSolvable {
 			$scommand .= ";gzip -cd $sdir/*.pat.gz";
 		}
 		my $data = qxx ("($scommand) | susetags2solv > $destfile 2>/dev/null");
+		my $code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> error  ("--> Can't create SaT solvable file");
+			$kiwi -> failed ();
+			$error = 1;
+		}
+	}
+	$count++;
+	#==========================================
+	# create solvable from opensuse xml pattern
+	#------------------------------------------
+	if (glob ("$sdir/projectxml-*.gz")) {
+		$destfile = $sdir."/primary-".$count;
+		$scommand = "gzip -cd $sdir/projectxml-*.gz";
+		my $data = qxx ("($scommand) | rpmmd2solv > $destfile 2>/dev/null");
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> error  ("--> Can't create SaT solvable file");
@@ -2990,6 +3027,7 @@ sub getInstSourceSatSolvable {
 	# cleanup cache dir
 	#------------------------------------------
 	qxx ("rm -f $sdir/primary-*");
+	qxx ("rm -f $sdir/projectxml-*.gz");
 	qxx ("rm -f $sdir/packages-*.gz");
 	qxx ("rm -f $sdir/*.pat.gz");
 	if (! $error) {
