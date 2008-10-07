@@ -278,11 +278,11 @@ sub cleanISO {
 #------------------------------------------
 sub checkImage {
 	my $this = shift;
+	my $kiwi = $this -> {kiwi};
 	my $dest = $this -> {dest};
-	my $tool = "/usr/bin/tagmedia";
-	my $data = qxx("$tool $dest");
+	my $data = qxx ("tagmedia --md5 $dest 2>&1");
 	my $code = $? >> 8;
-	if($code != 0) {
+	if ($code != 0) {
 		$kiwi -> error  ("Failed to call tagmedia: $data");
 		$kiwi -> failed ();
 		return undef;
