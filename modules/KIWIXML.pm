@@ -2801,10 +2801,9 @@ sub getInstSourceSatSolvable {
 	# ----
 	my $kiwi     = shift;
 	my $repos    = shift;
-	my @patternd = ("/suse/setup/descr/","/repodata");
 	my $patterns = "/suse/setup/descr/patterns";
 	my $packages = "/suse/setup/descr/packages.gz";
-	my $solvable = "/suse/setup/descr/primary.gz";
+	my $solvable = "/suse/repodata/primary.xml.gz";
 	my $project  = "/repodata/patterns.xml.gz";
 	my $arch     = qxx ("uname -m"); chomp $arch;
 	my $count    = 0;
@@ -2840,39 +2839,19 @@ sub getInstSourceSatSolvable {
 	#------------------------------------------
 	foreach my $repo (@{$repos}) {
 		#==========================================
-		# create directory listing for each repo
-		#------------------------------------------
-		my $destfile = $sdir."/listing";
-		my $foundDir = 0;
-		foreach my $patternd (@patternd) {
-			if (KIWIXML::getInstSourceFile ($kiwi,$repo.$patternd,$destfile)) {
-				$foundDir = 1; last;
-			}
-		}
-		if (! $foundDir) {
-			next;
-		}
-		#==========================================
 		# check if this is a valid suse repo
 		#------------------------------------------
-		if (! open (FD,$destfile)) {
-			unlink $destfile; next;
-		}
-		my $repoOK = -1;
-		foreach my $line (<FD>) {
-			# opensuse rpm-md project repo
-			if ($line =~ /\"patterns\.xml\.gz\"/) {
-				$repoOK = 1; last;
-			}
-			# standard yast2 distribution repo
-			if ($line =~ /\"patterns\"/) {
-				$repoOK++; last;
+		my $destfile = $sdir."/listing";
+		my @testfile = ($repo.$patterns,$repo.$project);
+		my $isValid  = 0;
+		foreach my $test (@testfile) {
+			if (KIWIXML::getInstSourceFile ($kiwi,$test,$destfile)) {
+				$isValid = 1; last;
 			}
 		}
-		if ($repoOK) {
+		if ($isValid) {
 			push (@index,$repo);
 		}
-		close FD;
 		unlink $destfile;
 	}
 	push (@index,$arch);
@@ -2898,7 +2877,7 @@ sub getInstSourceSatSolvable {
 		# check for pre-created solvable first
 		#------------------------------------------
 		my $foundFile = 0;
-		$destfile = $sdir."/primary-".$count.".gz";
+		$destfile = $sdir."/distxml-".$count.".gz";
 		if (KIWIXML::getInstSourceFile ($kiwi,$repo.$solvable,$destfile)) {
 			$foundFile = 1;
 		}
@@ -2939,7 +2918,8 @@ sub getInstSourceSatSolvable {
 			if ($line !~ /\.$arch\./) {
 				next;
 			}
-			my $file = $repo.$patternd[0].$line;
+			my $base = dirname $patterns;
+			my $file = $repo."/".$base."/".$line;
 			if (! KIWIXML::getInstSourceFile($kiwi,$file,$destfile)) {
 				$kiwi -> warning ("--> Pattern file $line not found");
 				$kiwi -> skipped ();
@@ -2959,6 +2939,20 @@ sub getInstSourceSatSolvable {
 		}
 	}
 	$count++;
+	#==========================================
+	# create solvable from opensuse dist pat
+	#------------------------------------------
+	if (glob ("$sdir/distxml-*.gz")) {
+		$destfile = $sdir."/primary-".$count;
+		$scommand = "gzip -cd $sdir/distxml-*.gz";
+		my $data = qxx ("($scommand) | rpmmd2solv > $destfile 2>/dev/null");
+		my $code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> error  ("--> Can't create SaT solvable file");
+			$kiwi -> failed ();
+			$error = 1;
+		}
+	}
 	#==========================================
 	# create solvable from suse tags data
 	#------------------------------------------
@@ -2992,20 +2986,6 @@ sub getInstSourceSatSolvable {
 		}
 	}
 	#==========================================
-	# uncompress all pre-created solvables
-	#------------------------------------------
-	if (! $error) {
-		foreach my $solvables (glob ("$sdir/primary-*.gz")) {
-			my $data = qxx ("gzip -d $sdir/primary-*.gz");
-			my $code = $? >> 8;
-			if ($code != 0) {
-				$kiwi -> error  ("--> Couldn't uncompress solve files");
-				$kiwi -> failed ();
-				$error = 1;
-			}
-		}
-	}
-	#==========================================
 	# merge all solvables into one
 	#------------------------------------------
 	if (! $error) {
@@ -3028,6 +3008,7 @@ sub getInstSourceSatSolvable {
 	#------------------------------------------
 	qxx ("rm -f $sdir/primary-*");
 	qxx ("rm -f $sdir/projectxml-*.gz");
+	qxx ("rm -f $sdir/distxml-*.gz");
 	qxx ("rm -f $sdir/packages-*.gz");
 	qxx ("rm -f $sdir/*.pat.gz");
 	if (! $error) {

@@ -3,6 +3,7 @@ Tue Oct  7 16:13:22 CEST 2008 - ms@suse.de
 
 - v2.86
 - fixed build, quick install guide was removed
+- fixed getInstSourceSatSolvable() for online repos 
 
 -------------------------------------------------------------------
 Mon Oct  6 12:09:15 CEST 2008 - ms@suse.de
