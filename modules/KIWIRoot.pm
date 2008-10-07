@@ -585,7 +585,7 @@ sub install {
 	# proceed if packlist is not empty
 	#------------------------------------------
 	if (! @packList) {
-		$kiwi -> loginfo ("Packlist is empty, skipping install");
+		$kiwi -> loginfo ("Packlist is empty, skipping install\n");
 		return $this;
 	}
 	#==========================================
