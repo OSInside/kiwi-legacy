@@ -1321,9 +1321,6 @@ sub fetchFileFrom
 	# We can now sort out the required architectures once and for all.
 	my $store;
 	my $subdir = $r_tmp2->{'subdir'};
-	### FIXME: differentiate metapackages here?
-	# because here's the reason why metapacks show up in the m_packages list
-	#if($this->{m_packages}->{$pack}) {
 	if($targethash->{$pack}) {
 	  $store = $targethash->{$pack};
 	}
