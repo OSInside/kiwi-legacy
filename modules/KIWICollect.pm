@@ -1646,8 +1646,7 @@ sub createMetadata
 
   ## step 5: media file
   $this->{m_logger}->info("[I] Creating media file in all media:");
-  my $manufacturer = $this->{m_proddata}->getVar("MANUFACTURER");
-  #if($this->{m_prodvars}->{'MANUFACTURER'}) {
+  my $manufacturer = $this->{m_proddata}->getVar("VENDOR");
   if($manufacturer) {
     my @media = $this->getMediaNumbers();
     for my $n(@media) {
@@ -1664,8 +1663,8 @@ sub createMetadata
       close(MEDIA);
     }
   }
-  else {
-    $this->{m_logger}->error("[E] [createMetadata] required variable \"MANUFACTURER\" not set");
+  else 
+    $this->{m_logger}->error("[E] [createMetadata] required variable \"VENDOR\" not set");
     $this->{m_logger}->info("[I] [createMetadata] skipping media file due to error!");
   }
 
