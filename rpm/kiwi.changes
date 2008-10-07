@@ -21,6 +21,11 @@ Mon Oct  6 10:05:18 CEST 2008 - ms@suse.de
 - added debug output for module loader
 
 -------------------------------------------------------------------
+Fri Oct  3 11:33:35 CEST 2008 - cthiel@suse.de
+
+- fix with latests kernel split
+
+-------------------------------------------------------------------
 Fri Sep 26 17:43:48 CEST 2008 - ms@suse.de
 
 - v2.83
