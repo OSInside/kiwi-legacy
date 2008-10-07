@@ -588,18 +588,30 @@ sub queryRpmHeaders
     my $nofallback = 0;
     if(defined($tmp->{'onlyarch'})) {
       # allow 'onlyarch="x86_64,i586"'
-      push @archs, split(',', $tmp->{'onlyarch'});
+      $tmp->{'onlyarch'} =~ s{,\s*,}{,}g;
+      $tmp->{'onlyarch'} =~ s{,\s*}{,}g;
+      $tmp->{'onlyarch'} =~ s{,\s*$}{};
+      $tmp->{'onlyarch'} =~ s{^\s*,}{};
+      push @archs, split(/,\s/, $tmp->{'onlyarch'});
       $nofallback = 1;
     }
     elsif(defined($tmp->{'addarch'})) {
       push @archs, $this->{m_archlist}->headList();
       if(not(grep(/$tmp->{'addarch'}/, @archs))) {
-	push @archs, split(',', $tmp->{'addarch'});
+      $tmp->{'addarch'} =~ s{,\s*,}{,}g;
+      $tmp->{'addarch'} =~ s{,\s*}{,}g;
+      $tmp->{'addarch'} =~ s{,\s*$}{};
+      $tmp->{'addarch'} =~ s{^\s*,}{};
+	push @archs, split(/,\s/, $tmp->{'addarch'});
       }
     }
     elsif(defined($tmp->{'removearch'})) {
+      $tmp->{'removearch'} =~ s{,\s*,}{,}g;
+      $tmp->{'removearch'} =~ s{,\s*}{,}g;
+      $tmp->{'removearch'} =~ s{,\s*$}{};
+      $tmp->{'removearch'} =~ s{^\s*,}{};
       push @archs, $this->{m_archlist}->headList();
-      @omits = split(',', $tmp->{'removearch'});
+      @omits = split(/,\s/, $tmp->{'removearch'});
       my @rl;
       foreach my $x(@omits) {
 	push @rl, grep(/$x/, @archs);
@@ -1138,11 +1150,9 @@ sub bestBet
     @repos = keys(%{$this->{m_repos}});
   }
 
-  #REPO:foreach my $r(keys(%{$this->{m_repos}})) {
   REPO:foreach my $r(@repos) {
     DIR:foreach my $d(keys(%{$this->{m_repos}->{$r}->{'srcdirs'}})) {
       next DIR  if(! $this->{m_repos}->{$r}->{'srcdirs'}->{$d}->[0]);
-      #next DIR if($d ne "/" and $d !~ m{$fa});
 
       my $subdirname = undef;
       my $archinfo;
