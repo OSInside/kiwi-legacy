@@ -1621,18 +1621,17 @@ sub createMetadata
   close(CONT);
 
 
-  ## step 4b FIXME: openSUSE-release.prod file -> PLUGIN!
-  ## 5minuteHACK of the day
+  ## step 4b
   ### discussed with Klaus: this will come from an rpm in the future
-  $this->{m_logger}->info("[I] Creating openSUSE-release.prod file:");
-  my $release_prodfile = "$this->{m_basesubdir}->{'1'}/openSUSE-release.prod";
-  if(not open(INSTPROD, ">", $release_prodfile )) {
-    die "Cannot create $release_prodfile ";
-  }
   my $dname = $this->{m_proddata}->getVar("DISTNAME");
   my $dvers = $this->{m_proddata}->getVar("VERSION");
   my $dflav = $this->{m_proddata}->getVar("FLAVOUR");
   my $drele = $this->{m_proddata}->getVar("RELEASE");
+  $this->{m_logger}->info("[I] Creating $dname-release.prod file:");
+  my $release_prodfile = "$this->{m_basesubdir}->{'1'}/$dname-release.prod";
+  if(not open(INSTPROD, ">", $release_prodfile )) {
+    die "Cannot create $release_prodfile ";
+  }
 
   if(not defined($dname) or not defined($dvers) or not defined($dflav) or not defined($drele)) {
     $this->{m_logger}->error("[E] can't create openSUSE-release.prod because data is missing!");
