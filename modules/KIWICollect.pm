@@ -1672,19 +1672,6 @@ sub createMetadata
 ### ALTLASTEN ###
 ### TODO more plugins
 
-  ## step 4: content file
-  $this->{m_logger}->info("[I] Creating content file:");
-  my $contentfile = "$this->{m_basesubdir}->{'1'}/content";
-  if(not open(CONT, ">", $contentfile)) {
-    die "Cannot create $contentfile";
-  }
-  my $info = $this->{m_proddata}->getSet("prodinfo");
-  foreach my $i(sort { $a <=> $b } keys(%{$info})) {
-    print CONT "$info->{$i}->[0] $info->{$i}->[1]\n";
-  }
-  close(CONT);
-
-
   ## step 4b
   ### discussed with Klaus: this will come from an rpm in the future
   my $dname = $this->{m_proddata}->getVar("DISTNAME");
