@@ -136,9 +136,19 @@ sub new {
 		$queue -> queuePush ( $id );
 	}
 	#==========================================
+	# Store object data
+	#------------------------------------------
+	$this->{kiwi}    = $kiwi;
+	$this->{queue}   = $queue;
+	$this->{solver}  = $solver;
+	#==========================================
 	# Solve the job(s)
 	#------------------------------------------
 	$solver -> solve ($queue);
+	if ($this -> getProblemsCount()) {
+		my $solution = $this -> getSolutions();
+		$kiwi -> warning ("--> Solver Problems:\n$solution");
+	}
 	my $list = $solver -> getInstallList ($pool);
 	foreach my $name (@{$list}) {
 		if ($name =~ /^((pattern|product):.*)/) {
@@ -151,13 +161,10 @@ sub new {
 	#==========================================
 	# Store object data
 	#------------------------------------------
-	$this->{kiwi}    = $kiwi;
 	$this->{urllist} = $urlref;
 	$this->{plist}   = $pref;
-	$this->{queue}   = $queue;
 	$this->{repo}    = $repo;
 	$this->{pool}    = $pool;
-	$this->{solver}  = $solver;
 	$this->{result}  = \@solved;
 	return $this;
 }
@@ -182,6 +189,40 @@ sub getPool {
 	# ----
 	my $this = shift;
 	return $this->{pool};
+}
+
+#==========================================
+# getProblemsCount
+#------------------------------------------
+sub getProblemsCount {
+	my $this   = shift;
+	my $solver = $this->{solver};
+	return $solver->getProblemsCount();
+}
+
+#==========================================
+# getSolutions
+#------------------------------------------
+sub getSolutions {
+	my $this   = shift;
+	my $kiwi   = $this->{kiwi};
+	my $solver = $this->{solver};
+	my $queue  = $this->{queue};
+	my $oldout;
+	if (! $solver->getProblemsCount()) {
+		return undef;
+	}
+	my $solution = $solver->getSolutions ($queue);
+	local $/;
+	if (! open (FD, "<$solution")) {
+		$kiwi -> error  ("Can't open $solution for reading: $!");
+		$kiwi -> failed ();
+		unlink $solution;
+		return undef;
+	}
+	my $result = <FD>; close FD;
+	unlink $solution;
+	return $result;
 }
 
 #==========================================

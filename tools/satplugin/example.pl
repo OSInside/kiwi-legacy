@@ -43,6 +43,17 @@ foreach my $p (@pats) {
 # Solve the jobs
 $solver -> solve ($queue);
 
+if ($solver->getProblemsCount()) {
+	$a = $solver->getSolutions ($queue);
+	open FD,$a;
+	while (<FD>) {
+		print $_;
+	}
+	close FD;
+	unlink $a;
+}
+
+
 # Print packages to install
 $a = $solver -> getInstallList($pool);
 foreach my $c (@{$a}) {

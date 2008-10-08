@@ -3,6 +3,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <satsolver/solver.h>
+#include <satsolver/solverdebug.h>
 #include <satsolver/repo_solv.h>
 #include <satsolver/policy.h>
 
@@ -47,6 +48,9 @@ int main (void) {
 
 	solver_solve (solver, &queue);
 	
+	if (solver->problems.count) {
+		solver_printsolutions(solver, &queue);
+	}
 
 	for (b = 0; b < solver->decisionq.count; b++) {
 		Id p = solver->decisionq.elements[b];

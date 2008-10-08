@@ -3,6 +3,7 @@ Tue Oct  7 18:00:51 CEST 2008 - ms@suse.de
 
 - v2.87
 - fixed permissions of live iso root (bnc #432971)
+- fixed creation of sat solvable (bnc #32477)
 
 -------------------------------------------------------------------
 Tue Oct  7 16:13:22 CEST 2008 - ms@suse.de

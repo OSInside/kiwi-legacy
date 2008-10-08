@@ -2801,10 +2801,28 @@ sub getInstSourceSatSolvable {
 	# ----
 	my $kiwi     = shift;
 	my $repos    = shift;
-	my $patterns = "/suse/setup/descr/patterns";
-	my $packages = "/suse/setup/descr/packages.gz";
-	my $solvable = "/suse/repodata/primary.xml.gz";
-	my $project  = "/repodata/patterns.xml.gz";
+	#==========================================
+	# one of the following to match...
+	#------------------------------------------
+	my @valid    = (
+		"/suse/setup/descr/patterns",
+		"/repodata/patterns.xml.gz"
+	);
+	#==========================================
+	# one of the following for a base solvable
+	#------------------------------------------
+	my %distro;
+	$distro{"/suse/setup/descr/packages.gz"} = "packages";
+	$distro{"/suse/repodata/primary.xml.gz"} = "distxml";
+	#==========================================
+	# all existing pattern files
+	#------------------------------------------
+	my %patterns;
+	$patterns{"/suse/setup/descr/patterns"} = "patterns";
+	$patterns{"/repodata/patterns.xml.gz"}  = "projectxml";
+	#==========================================
+	# common data variables
+	#------------------------------------------
 	my $arch     = qxx ("uname -m"); chomp $arch;
 	my $count    = 0;
 	my $index    = 0;
@@ -2842,9 +2860,9 @@ sub getInstSourceSatSolvable {
 		# check if this is a valid suse repo
 		#------------------------------------------
 		my $destfile = $sdir."/listing";
-		my @testfile = ($repo.$patterns,$repo.$project);
 		my $isValid  = 0;
-		foreach my $test (@testfile) {
+		foreach my $valid (@valid) {
+			my $test = $repo.$valid;
 			if (KIWIXML::getInstSourceFile ($kiwi,$test,$destfile)) {
 				$isValid = 1; last;
 			}
@@ -2871,71 +2889,61 @@ sub getInstSourceSatSolvable {
 	}
 	my $destfile;
 	my $scommand;
+	#==========================================
+	# download distro solvable(s)
+	#------------------------------------------
+	my $foundDist = 0;
 	foreach my $repo (@{$repos}) {
 		$count++;
-		#==========================================
-		# check for pre-created solvable first
-		#------------------------------------------
-		my $foundFile = 0;
-		$destfile = $sdir."/distxml-".$count.".gz";
-		if (KIWIXML::getInstSourceFile ($kiwi,$repo.$solvable,$destfile)) {
-			$foundFile = 1;
-		}
-		#==========================================
-		# check for opensuse project pattern
-		#------------------------------------------
-		$destfile = $sdir."/projectxml-".$count.".gz";
-		if (KIWIXML::getInstSourceFile ($kiwi,$repo.$project,$destfile)) {
-			$foundFile = 1;
-		}
-		#==========================================
-		# skip if we already have solvable
-		#------------------------------------------
-		if ($foundFile) {
-			next;
-		}
-		#==========================================
-		# get patterns file next
-		#------------------------------------------
-		$destfile = $sdir."/patterns-".$count;
-		if (! KIWIXML::getInstSourceFile ($kiwi,$repo.$patterns,$destfile)) {
-			$kiwi -> warning ("--> No patterns file on repo: $repo");
-			$kiwi -> skipped ();
-			next;
-		}
-		#==========================================
-		# get files listed in patterns
-		#------------------------------------------
-		my $patfile = $destfile;
-		if (! open (FD,$patfile)) {
-			$kiwi -> warning ("--> Couldn't open patterns file: $!");
-			$kiwi -> skipped ();
-			unlink $patfile;
-			next;
-		}
-		foreach my $line (<FD>) {
-			chomp $line; $destfile = $sdir."/".$line;
-			if ($line !~ /\.$arch\./) {
-				next;
-			}
-			my $base = dirname $patterns;
-			my $file = $repo."/".$base."/".$line;
-			if (! KIWIXML::getInstSourceFile($kiwi,$file,$destfile)) {
-				$kiwi -> warning ("--> Pattern file $line not found");
-				$kiwi -> skipped ();
-				next;
+		foreach my $dist (keys %distro) {
+			my $name = $distro{$dist};
+			$destfile = $sdir."/$name-".$count.".gz";
+			if (KIWIXML::getInstSourceFile ($kiwi,$repo.$dist,$destfile)) {
+				$foundDist = 1; last;
 			}
 		}
-		close FD;
-		unlink $patfile;
-		#==========================================
-		# get packages.gz file next
-		#------------------------------------------
-		$destfile = $sdir."/packages-".$count.".gz";
-		if (! KIWIXML::getInstSourceFile ($kiwi,$repo.$packages,$destfile)) {
-			$kiwi -> warning ("--> No packages.gz file on repo: $repo");
-			$kiwi -> skipped ();
-			next;
+	}
+	if (! $foundDist) {
+		$kiwi -> error  ("--> Can't find a distribution solvable");
+		$kiwi -> failed ();
+		return undef;
+	}
+	#==========================================
+	# download pattern solvable(s)
+	#------------------------------------------
+	foreach my $repo (@{$repos}) {
+		$count++;
+		foreach my $patt (keys %patterns) {
+			my $name = $patterns{$patt};
+			$destfile = $sdir."/$name-".$count.".gz";
+			my $ok = KIWIXML::getInstSourceFile ($kiwi,$repo.$patt,$destfile);
+			if (($ok) && ($name eq "patterns")) {
+				#==========================================
+				# get files listed in patterns
+				#------------------------------------------
+				my $patfile = $destfile;
+				if (! open (FD,$patfile)) {
+					$kiwi -> warning ("--> Couldn't open patterns file: $!");
+					$kiwi -> skipped ();
+					unlink $patfile;
+					next;
+				}
+				foreach my $line (<FD>) {
+					chomp $line; $destfile = $sdir."/".$line;
+					if ($line !~ /\.$arch\./) {
+						next;
+					}
+					my $base = dirname $patt;
+					my $file = $repo."/".$base."/".$line;
+					if (! KIWIXML::getInstSourceFile($kiwi,$file,$destfile)) {
+						$kiwi -> warning ("--> Pattern file $line not found");
+						$kiwi -> skipped ();
+						next;
+					}
+				}
+				close FD;
+				unlink $patfile;
+			}
 		}
 	}
 	$count++;
@@ -2953,6 +2961,7 @@ sub getInstSourceSatSolvable {
 			$error = 1;
 		}
 	}
+	$count++;
 	#==========================================
 	# create solvable from suse tags data
 	#------------------------------------------

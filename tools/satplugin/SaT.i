@@ -15,6 +15,7 @@ extern "C"
 #include "pooltypes.h"
 #include "queue.h"
 #include "solvable.h"
+#include "solverdebug.h"
 #include "solver.h"
 #include "repo.h"
 #include "repo_solv.h"
@@ -42,6 +43,7 @@ extern "C"
 %include "pooltypes.h"
 %include "pool.h"
 %include "queue.h"
+%include "solverdebug.h"
 %include "solvable.h"
 %include "solver.h"
 %include "repo.h"
@@ -219,6 +221,26 @@ extern "C"
         res = newRV((SV*)myav);
         sv_2mortal (res);
         return res;
+    }
+
+    int getProblemsCount (void) {
+        Solver* solv = self;
+        return solv->problems.count;
+    }
+
+    char* getSolutions (Queue *job) {
+        Solver* solv = self;
+        char name[]  = "/tmp/sat-XXXXXX";
+        char* result = (char*)malloc(strlen(name));
+        int origout;
+        mkstemp (name);
+        origout = dup2 (1,origout);
+        FILE* fp = freopen(name,"w",stdout);
+        solver_printsolutions(solv, job);
+        fclose (fp);
+        dup2 (origout,1);
+        strcpy (result,name);   
+        return result;
     }
 };
 
