@@ -585,13 +585,16 @@ sub queryRpmHeaders
     return $retval;
   }
 
+  my $srcmedium = $this->{m_proddata}->getOpt("SOURCEMEDIUM");
   PACK:foreach my $pack(sort(keys(%{$this->{m_packages}}))) {
     my $tmp = $this->{m_packages}->{$pack}; #optimisation
     my $nofallback = 0;
     my @archs = $this->getArchList($pack, \$nofallback);
 
     ## mls hack:
-    push @archs, 'src', 'nosrc';
+    if ( defined($srcmedium) && $srcmedium > 0 ) {
+      push @archs, 'src', 'nosrc';
+    };
     ARCH:foreach my $a(@archs) {
       my @fallbacklist;
       if($nofallback==0) {
