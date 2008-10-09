@@ -1277,7 +1277,7 @@ sub init {
 		my $code = kiwiExit (1); return $code;
 	}
 	if (defined $Partitioner) {
-		if (($Partitioner ne "fdisk") || ($Partitioner ne "parted")) {
+		if (($Partitioner ne "fdisk") && ($Partitioner ne "parted")) {
 			$kiwi -> error ("Invalid partitioner, expected fdisk|parted");
 			$kiwi -> failed ();
 			my $code = kiwiExit (1); return $code;
