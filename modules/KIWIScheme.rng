@@ -2013,9 +2013,9 @@ repository for image building.</db:para>
             <ref name="k.instrepo"/>
           </oneOrMore>
           <ref name="k.metadata"/>
-          <oneOrMore>
+          <zeroOrMore>
             <ref name="k.repopackages"/>
-          </oneOrMore>
+          </zeroOrMore>
         </interleave>
       </element>
     </define>
