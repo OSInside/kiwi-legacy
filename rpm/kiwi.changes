@@ -3,6 +3,7 @@ Thu Oct  9 10:05:47 CEST 2008 - ms@suse.de
 
 - v2.89
 - fixed typo in cookbook, thanks to nick://descriptor
+- added option to select between fdisk and parted
 - update scheme documentation according to last change
   by Adrian
 

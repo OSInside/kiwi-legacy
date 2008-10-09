@@ -341,7 +341,7 @@ sub new {
 	$this->{isxen}  = $isxen;
 	$this->{xengz}  = $xengz;
 	$this->{arch}   = $arch;
-	$this->{ptool}  = "fdisk";
+	$this->{ptool}  = $main::Partitioner;
 	return $this;
 }
 

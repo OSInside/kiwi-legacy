@@ -49,6 +49,7 @@ our $Preparer      = "KIWI - http://kiwi.berlios.de";
 our $openSUSE      = "http://download.opensuse.org/repositories/";
 our $ConfigFile    = "$ENV{'HOME'}/.kiwirc";
 our $ConfigName    = "config.xml";
+our $Partitioner   = "fdisk";
 our $ConfigStatus  = 0;
 #============================================
 # Read $HOME/.kiwirc
@@ -1142,6 +1143,7 @@ sub init {
 		"fs-blocksize=i"        => \$FSBlockSize,
 		"fs-journalsize=i"      => \$FSJournalSize,
 		"fs-inodesize=i"        => \$FSInodeSize,
+		"partitioner=s"         => \$Partitioner,
 		"help|h"                => \&usage,
 		"<>"                    => \&usage
 	);
@@ -1273,6 +1275,13 @@ sub init {
 		$kiwi -> error ("Virtual Disk setup must specify a bootvm-system");
 		$kiwi -> failed ();
 		my $code = kiwiExit (1); return $code;
+	}
+	if (defined $Partitioner) {
+		if (($Partitioner ne "fdisk") || ($Partitioner ne "parted")) {
+			$kiwi -> error ("Invalid partitioner, expected fdisk|parted");
+			$kiwi -> failed ();
+			my $code = kiwiExit (1); return $code;
+		}
 	}
 }
 
@@ -1466,6 +1475,10 @@ sub usage {
 	print "    When calling kiwi in creation mode this option will set\n";
 	print "    the inode size in bytes. This option has no effect if the\n";
 	print "    reiser filesystem is used\n";
+	print "\n";
+	print "  [ --partitioner <fdisk|parted ]\n";
+	print "    Select the tool to create partition tables. Supported are\n";
+	print "    fdisk (sfdisk) and parted. By default fdisk is used\n";
 	print "--\n";
 	version();
 }
