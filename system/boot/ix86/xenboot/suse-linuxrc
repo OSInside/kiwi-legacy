@@ -132,76 +132,42 @@ updateRootDeviceFstab /config $imageRootDevice
 #======================================
 # 10) copy system dependant files
 #--------------------------------------
-cd /config
-find . -type d | while read d ; do  mkdir -p /mnt/$d ; done
-find . -type f | while read f ; do  cp $f /mnt/$f ; done
-cd /
-rm -rf /config
+setupConfigFiles
 
 #======================================
-# 11) setup real root device
+# 11) update system dependant files
+#--------------------------------------
+setupInittab /mnt
+
+#======================================
+# 12) setup real root device
 #--------------------------------------
 echo 256 > /proc/sys/kernel/real-root-dev
 
 #======================================
-# 12) umount system filesystems
+# 13) umount system filesystems
 #--------------------------------------
 umountSystemFilesystems
 
 #======================================
-# 13) copy initrd files to image
+# 14) copy initrd files to image
 #--------------------------------------
 importBranding
 cp /preinit /mnt
 cp /include /mnt
 
 #======================================
-# 14) kill boot shell
+# 15) kill boot shell
 #--------------------------------------
 killShell
 killBlogD
 
 #======================================
-# 15) Activate new root
+# 16) Activate new root
 #--------------------------------------
-Echo "Activating Image: [$imageRootDevice]"
-reopenKernelConsole
-/sbin/udevsettle --timeout=30
-mount --move /dev /mnt/dev
-udevKill
-
-#======================================
-# 16) call preinit phase
-#--------------------------------------
-Echo "Calling preinit phase..."
-cd /mnt
-/mnt/sbin/pivot_root . mnt >/dev/null 2>&1
-if test $? != 0;then
-	PIVOT=false
-	cleanInitrd && mount --move . / && chroot . ./preinit
-	chroot . rm -f  ./preinit
-	chroot . rm -f  ./include
-	chroot . rm -rf ./image
-else
-	PIVOT=true
-	./preinit
-	rm -f  ./preinit
-	rm -f  ./include
-	rm -rf ./image
-fi
+activateImage
 
 #======================================
 # 17) Unmount initrd / system init
 #--------------------------------------
-echo " "
-echo "Booting into Xen System..."
-echo "--------------------------"
-export IFS=$IFS_ORIG
-mount -n -o remount,rw / &>/dev/null
-if [ $PIVOT = "true" ];then
-	exec < dev/console >dev/console 2>&1
-	exec umount -n -l /mnt
-else
-	exec < dev/console >dev/console 2>&1
-	exec chroot . /sbin/init $@
-fi
+bootImage $@

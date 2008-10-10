@@ -299,13 +299,25 @@ function errorLogStart {
 	set -x 1>&2
 }
 #======================================
+# udevPending
+#--------------------------------------
+function udevPending {
+	local timeout=30
+	if [ -x /sbin/udevadm ];then
+		/sbin/udevadm trigger
+		/sbin/udevadm settle --timeout=$timeout
+	else
+		/sbin/udevtrigger
+		/sbin/udevsettle --timeout=$timeout
+	fi
+}
+#======================================
 # udevStart
 #--------------------------------------
 function udevStart {
 	# /.../
 	# start the udev daemon.
 	# ----
-	local timeout=30
 	echo "Creating device nodes with udev"
 	# disable hotplug helper, udevd listens to netlink
 	echo "" > /proc/sys/kernel/hotplug
@@ -324,13 +336,8 @@ function udevStart {
 	# start the udev daemon
 	udevd --daemon udev_log="debug"
 	# wait for pending triggered udev events.
-	if [ -x /sbin/udevadm ];then
-		/sbin/udevadm trigger
-		/sbin/udevadm settle --timeout=$timeout
-	else
-		/sbin/udevtrigger
-		/sbin/udevsettle --timeout=$timeout
-	fi
+	udevPending
+	# start splashy if configured
 	startSplashy
 }
 #======================================
@@ -3030,7 +3037,6 @@ function getDiskID {
 	done
 	echo $device
 }
-
 #======================================
 # getDiskModel
 #--------------------------------------
@@ -3044,4 +3050,127 @@ function getDiskModels {
 		echo $models; return
 	fi
 	echo "unknown"
+}
+#======================================
+# setupInittab
+#--------------------------------------
+function setupInittab {
+	# /.../
+	# setup default runlevel according to /proc/cmdline
+	# information. If textmode is set to 1 we will boot into
+	# runlevel 3
+	# ----
+	local prefix=$1
+	if cat /proc/cmdline | grep -qi "textmode=1";then
+		sed -i -e s"@id:.*:initdefault:@id:3:initdefault:@" $prefix/etc/inittab
+	fi
+}
+#======================================
+# setupConfigFiles
+#--------------------------------------
+function setupConfigFiles {
+	# /.../
+	# all files created below /config inside the initrd are
+	# now copied into the system image
+	# ----
+	cd /config
+	find . -type d | while read d ; do  mkdir -p /mnt/$d ; done
+	find . -type f | while read f ; do  cp $f /mnt/$f ; done
+	cd /
+	rm -rf /config
+}
+#======================================
+# activateImage
+#--------------------------------------
+function activateImage {
+	# /.../
+	# move the udev created nodes from the initrd into
+	# the system root tree call the pre-init phase which
+	# already runs in the new tree and finaly switch the
+	# new tree to be the new root (/) 
+	# ----
+	#======================================
+	# setup image name
+	#--------------------------------------
+	local name
+	if [ ! -z "$stickSerial" ];then
+		name="$stickSerial on -> $stickDevice"
+	elif [ ! -z "$imageName" ];then
+		name=$imageName
+	elif [ ! -z "$imageRootName" ];then
+		name=$imageRootName
+	elif [ ! -z "$imageRootDevice" ];then
+		name=$imageRootDevice
+	elif [ ! -z "$deviceDisk" ];then
+		name=$deviceDisk
+	else
+		name="unknown"
+	fi
+	#======================================
+	# move device nodes
+	#--------------------------------------
+	Echo "Activating Image: [$name]"
+	reopenKernelConsole
+	udevPending
+	mount --move /dev /mnt/dev
+	udevKill
+	#======================================
+	# run preinit stage
+	#--------------------------------------
+	Echo "Calling preinit phase..."
+	cd /mnt
+	/mnt/sbin/pivot_root . mnt >/dev/null 2>&1
+	if test $? != 0;then
+		PIVOT=false
+		cleanInitrd && mount --move . / && chroot . ./preinit
+		chroot . rm -f  ./preinit
+		chroot . rm -f  ./include
+		chroot . rm -rf ./image
+	else
+		PIVOT=true
+		./preinit
+		rm -f  ./preinit
+		rm -f  ./include
+		rm -rf ./image
+	fi
+}
+#======================================
+# bootImage
+#--------------------------------------
+function bootImage {
+	# /.../
+	# call the system image init process and therefore
+	# boot into the operating system
+	# ----
+	local reboot=no
+	echo && Echo "Booting System: $@"
+	export IFS=$IFS_ORIG
+	#======================================
+	# check for reboot request
+	#--------------------------------------
+	if [ ! -z "$OEM_REBOOT" ];then
+		reboot=yes
+	fi
+	if [ $LOCAL_BOOT = "no" ] && [ ! -z "$REBOOT_IMAGE" ];then
+		reboot=yes
+	fi
+	#======================================
+	# reboot if requested
+	#--------------------------------------
+	if [ $reboot = "yes" ];then
+		mount -n -o remount,ro / 2>/dev/null
+		Echo "Reboot requested... rebooting now"
+		/sbin/reboot -f -i >/dev/null 2>&1
+	fi
+	#======================================
+	# directly boot
+	#--------------------------------------
+	mount -n -o remount,rw / &>/dev/null
+	if [ $PIVOT = "true" ];then
+		exec < dev/console >dev/console 2>&1
+		exec umount -n -l /mnt
+	else
+		exec < dev/console >dev/console 2>&1
+		exec chroot . /sbin/init $@
+	fi
 }

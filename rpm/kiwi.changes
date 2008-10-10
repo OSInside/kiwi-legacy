@@ -2,6 +2,8 @@
 Thu Oct  9 10:05:47 CEST 2008 - ms@suse.de
 
 - v2.89
+- added support for F3 -> textmode at boot time (bnc #391313)
+- moved activate/boot code into common functions 
 - fixed typo in cookbook, thanks to nick://descriptor
 - added option to select between fdisk and parted
 - update scheme documentation according to last change
