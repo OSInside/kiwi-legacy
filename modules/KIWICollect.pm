@@ -1675,29 +1675,6 @@ sub createMetadata
 ### ALTLASTEN ###
 ### TODO more plugins
 
-  ## step 4b
-  ### discussed with Klaus: this will come from an rpm in the future
-  my $dname = $this->{m_proddata}->getVar("DISTNAME");
-  my $dvers = $this->{m_proddata}->getVar("VERSION");
-  my $dflav = $this->{m_proddata}->getVar("FLAVOUR");
-  my $drele = $this->{m_proddata}->getVar("RELEASE");
-  $this->{m_logger}->info("[I] Creating $dname-release.prod file:");
-  my $release_prodfile = "$this->{m_basesubdir}->{'1'}/$dname-release.prod";
-  if(not open(INSTPROD, ">", $release_prodfile )) {
-    die "Cannot create $release_prodfile ";
-  }
-
-  if(not defined($dname) or not defined($dvers) or not defined($dflav) or not defined($drele)) {
-    $this->{m_logger}->error("[E] can't create openSUSE-release.prod because data is missing!");
-  }
-  else {
-    print INSTPROD "[$dname-$dflav $dvers %arch]\n";
-    print INSTPROD "distproduct=$dname-$dflav\n";
-    print INSTPROD "distversion=$dvers-$drele\n";
-  }
-  close(INSTPROD);
-
-
   ## step 5: media file
   $this->{m_logger}->info("[I] Creating media file in all media:");
   my $manufacturer = $this->{m_proddata}->getVar("VENDOR");
