@@ -1,5 +1,5 @@
 #
-# spec file for package kiwi (Version 2.89
+# spec file for package kiwi (Version 2.90
 #
 # Copyright (c) 2008 SUSE LINUX Products GmbH, Nuernberg, Germany.
 # This file and all modifications and additions to the pristine
@@ -36,14 +36,14 @@ Requires:       qt
 Requires:       perl = %{perl_version}
 Requires:       perl-XML-LibXML perl-libwww-perl screen coreutils
 Requires:       perl-XML-LibXML-Common perl-XML-SAX perl-Config-IniFiles
-Requires:       kiwi-tools libxslt checkmedia
+Requires:       kiwi-tools libxslt checkmedia genisoimage
 %if %{suse_version} > 1030
 Requires:       satsolver-tools
 %endif
 Summary:        OpenSuSE - KIWI Image System
 Provides:       kiwi2 <= 2.14
 Obsoletes:      kiwi2 <= 2.14
-Version:        2.89
+Version:        2.90
 Release:        80
 Group:          System/Management
 License:        GPL v2 or later
