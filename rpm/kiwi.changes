@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Oct 13 17:32:09 CEST 2008 - ms@suse.de
+
+- v2.90
+- changed grub and fstab setup to use disk ID labels (bnc #434806)
+- added check media label via genisoimage -A (bnc #434104)
+
+-------------------------------------------------------------------
 Thu Oct  9 10:05:47 CEST 2008 - ms@suse.de
 
 - v2.89

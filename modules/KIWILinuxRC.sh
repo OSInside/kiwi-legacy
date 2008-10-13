@@ -688,11 +688,12 @@ function setupBootLoaderGrubRecovery {
 				echo "title Recovery [ $gfix ]"               >> $menu
 				gdev_recovery="(hd0,3)"
 				rdev_recovery=$OEM_RECOVERY
+				diskByID=`getDiskID $rdev_recovery`
 				if [ $kernel = "vmlinuz-xen" ];then
 					echo " root $gdev_recovery"                   >> $menu
 					echo " kernel /boot/xen.gz"                   >> $menu
 					echo -n " module /boot/$kernel"               >> $menu
-					echo -n " root=$rdev_recovery $console"       >> $menu
+					echo -n " root=$diskByID $console"            >> $menu
 					echo -n " vga=0x314 splash=silent"            >> $menu
 					echo -n " $KIWI_INITRD_PARAMS"                >> $menu
 					echo -n " $KIWI_KERNEL_OPTIONS"               >> $menu
@@ -700,7 +701,7 @@ function setupBootLoaderGrubRecovery {
 					echo " module /boot/$initrd"                  >> $menu
 				else
 					echo -n " kernel $gdev_recovery/boot/$kernel" >> $menu
-					echo -n " root=$rdev_recovery $console"       >> $menu
+					echo -n " root=$diskByID $console"            >> $menu
 					echo -n " vga=0x314 splash=silent"            >> $menu
 					echo -n " $KIWI_INITRD_PARAMS"                >> $menu
 					echo -n " $KIWI_KERNEL_OPTIONS"               >> $menu
@@ -734,6 +735,10 @@ function setupBootLoaderGrub {
 	local kname=""
 	local kernel=""
 	local initrd=""
+	#======================================
+	# check for device by ID
+	#--------------------------------------
+	local diskByID=`getDiskID $rdev`
 	#======================================
 	# check for system image .profile
 	#--------------------------------------
@@ -801,7 +806,7 @@ function setupBootLoaderGrub {
 				echo " root $gdev"                                >> $menu
 				echo " kernel /boot/xen.gz"                       >> $menu
 				echo -n " module /boot/$kernel"                   >> $menu
-				echo -n " root=$rdev $console"                    >> $menu
+				echo -n " root=$diskByID $console"                >> $menu
 				echo -n " vga=0x314 splash=silent"                >> $menu
 				if [ ! -z "$swap" ];then
 					echo -n " resume=$swap"                       >> $menu
@@ -811,7 +816,7 @@ function setupBootLoaderGrub {
 				echo " module /boot/$initrd"                      >> $menu
 			else
 				echo -n " kernel $gdev/boot/$kernel"              >> $menu
-				echo -n " root=$rdev $console"                    >> $menu
+				echo -n " root=$diskByID $console"                >> $menu
 				echo -n " vga=0x314 splash=silent"                >> $menu
 				if [ ! -z "$swap" ];then
 					echo -n " resume=$swap"                       >> $menu
@@ -832,7 +837,7 @@ function setupBootLoaderGrub {
 				echo " root $gdev"                                >> $menu
 				echo " kernel /boot/xen.gz"                       >> $menu
 				echo -n " module /boot/$kernel"                   >> $menu
-				echo -n " root=$rdev $console"                    >> $menu
+				echo -n " root=$diskByID $console"                >> $menu
 				echo -n " vga=0x314 splash=silent"                >> $menu
 				echo -n " $KIWI_INITRD_PARAMS"                    >> $menu
 				echo -n " $KIWI_KERNEL_OPTIONS showopts"          >> $menu
@@ -842,7 +847,7 @@ function setupBootLoaderGrub {
 				echo " module /boot/$initrd"                      >> $menu
 			else
 				echo -n " kernel $gdev/boot/$kernel"              >> $menu
-				echo -n " root=$rdev $console"                    >> $menu
+				echo -n " root=$diskByID $console"                >> $menu
 				echo -n " vga=0x314 splash=silent"                >> $menu
 				echo -n " $KIWI_INITRD_PARAMS"                    >> $menu
 				echo -n " $KIWI_KERNEL_OPTIONS showopts"          >> $menu
@@ -1005,14 +1010,18 @@ function updateRootDeviceFstab {
 	local prefix=$1
 	local rdev=$2
 	local nfstab=$prefix/etc/fstab
+	local diskByID=`getDiskID $rdev`
 	if [ ! -z "$NFSROOT" ];then
 		local server=`echo $rdev | cut -f3 -d" "`
 		local option=`echo $rdev | cut -f2 -d" "`
 		echo "$server / nfs $option 0 0" >> $nfstab
 		return
 	fi
+	#======================================
+	# check for device by ID
+	#--------------------------------------
 	if [ -z "$UNIONFS_CONFIG" ]; then
-		echo "$rdev / $FSTYPE defaults 0 0" >> $nfstab
+		echo "$diskByID / $FSTYPE defaults 0 0" >> $nfstab
 	fi
 }
 #======================================
