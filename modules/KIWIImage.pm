@@ -1749,7 +1749,7 @@ sub createImageLiveCD {
 	#------------------------------------------
 	if (-x "/usr/bin/tagmedia") {
 		$kiwi -> info ("Adding checkmedia tag...");
-		$data = qxx ("tagmedia --md5 $name 2>&1");
+		$data = qxx ("tagmedia --md5 --check $name 2>&1");
 		$code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
