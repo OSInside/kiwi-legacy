@@ -67,7 +67,30 @@ touch /lib/modules/*/modules.dep
 udevStart
 
 #======================================
-# 4) Include proc/cmdline information
+# 4) start boot shell
+#--------------------------------------
+startBlogD
+startShell
+errorLogStart
+openKernelConsole
+
+#======================================
+# 5) Including required kernel modules
+#--------------------------------------
+# sleep for a while as I don't know a device to listen on
+# I should be sure all possible devices exist. If there is
+# a better way to make sure _now_ is the best time to search
+# a disk please fixme
+# ---
+probeDevices
+for module in ehci-hcd uhci-hcd usb_storage sg sd_mod BusLogic;do
+	modprobe $module >/dev/null 2>&1
+done
+Echo "Waiting for devices to settle..."
+sleep 5
+
+#======================================
+# 6) Include proc/cmdline information
 #--------------------------------------
 includeKernelParameters
 if \
@@ -81,24 +104,18 @@ then
 	# This also applies if we use an oem system with the recovery
 	# feature enabled
 	# ----
-	export LOCAL_BOOT="yes"   
+	export LOCAL_BOOT="yes"
 fi
-
-#======================================
-# 5) start boot shell
-#--------------------------------------
-startBlogD
-startShell
-errorLogStart
-openKernelConsole
-
-#======================================
-# 6) Including required kernel modules
-#--------------------------------------
-probeDevices
-for module in ehci-hcd uhci-hcd usb_storage sg sd_mod BusLogic;do
-	modprobe $module >/dev/null 2>&1
-done
+if [ $LOCAL_BOOT = "yes" ];then
+	export deviceRoot=$root
+	export deviceDisk=`getDiskDevice $deviceRoot | sed -e s"@[0-9]@@g"`
+	if [ ! -z "$UNIONFS_CONFIG" ];then
+		setupUnionFS "$deviceDisk"2 "$deviceDisk"1 aufs
+	fi
+	if [ ! -z "$deviceRecovery" ];then
+		export deviceRecovery=$deviceDisk"4"
+	fi
+fi
 
 #======================================
 # 7) Search disks, prefer removable one
@@ -125,8 +142,7 @@ if [ $LOCAL_BOOT = "no" ];then
 			importFile < $OEM_PARTITION_CONFIG
 		fi
 		Echo "Searching for boot device..."
-		sleep 5
-		deviceDisk=`searchBIOSBootDevice`
+		export deviceDisk=`searchBIOSBootDevice`
 		if [ -z "$deviceDisk" ];then
 			systemException \
 				"Couldn't find any boot device... abort" \
@@ -140,7 +156,7 @@ if [ $LOCAL_BOOT = "no" ];then
 		if isFSTypeReadOnly;then
 			if [ -z "$COMBINED_IMAGE" ];then
 				Echo "Unified system detected, adapting root partition"
-				export UNIONFS_CONFIG=$deviceDisk"2,"$deviceDisk"1,aufs"
+				setupUnionFS "$deviceDisk"2 "$deviceDisk"1 aufs
 			fi
 			export deviceRoot=$deviceDisk"1"
 			export deviceSwap=$deviceDisk"3"
@@ -154,14 +170,6 @@ if [ $LOCAL_BOOT = "no" ];then
 		# on. The image is a virtual disk with one partition
 		# ----
 		Echo "Searching harddrive for installation"
-		Echo "Waiting for devices to settle..."
-		# ...
-		# sleep for a while as I don't know a device to listen on
-		# I should be sure all possible devices exist. If there is
-		# a better way to make sure _now_ is the best time to search
-		# a disk please fixme
-		# ---
-		sleep 5
 		hwinfo=/usr/sbin/hwinfo
 		export deviceDisks=`$hwinfo --disk |\
 			grep "Device File:" | cut -f2 -d: | cut -f1 -d"("`
@@ -213,7 +221,7 @@ if [ -f $VMX_SYSTEM ] && [ $LOCAL_BOOT = "no" ];then
 	fi
 	if [ -z "$COMBINED_IMAGE" ];then
 		if isFSTypeReadOnly;then
-			export UNIONFS_CONFIG=$deviceDisk"2,"$deviceDisk"1,aufs"
+			setupUnionFS "$deviceDisk"2 "$deviceDisk"1 aufs
 		fi
 	fi
 	Echo "Try mounting installed system to check version"
@@ -300,7 +308,7 @@ if [ -f $VMX_SYSTEM ] && [ $LOCAL_BOOT = "no" ];then
 	Echo "Filesystem of root system is: $FSTYPE -> $deviceRoot"
 	if [ -z "$COMBINED_IMAGE" ];then
 		if isFSTypeReadOnly;then
-			export UNIONFS_CONFIG=$deviceDisk"2,"$deviceDisk"1,aufs"
+			setupUnionFS "$deviceDisk"2 "$deviceDisk"1 aufs
 		fi
 	fi
 	#======================================
@@ -868,16 +876,14 @@ if [ $LOCAL_BOOT = "no" ];then
 	fi
 	if isFSTypeReadOnly && [ -z "$COMBINED_IMAGE" ];then
 		deviceResize=$deviceIOWR
-		export UNIONFS_CONFIG=$deviceDisk"2,"$deviceDisk"1,aufs"
-		KIWI_INITRD_PARAMS="UNIONFS_CONFIG=\"$UNIONFS_CONFIG\""
-		KIWI_INITRD_PARAMS="$KIWI_INITRD_PARAMS deviceRoot=\"$deviceRoot\""
+		setupUnionFS "$deviceDisk"2 "$deviceDisk"1 aufs
+		KIWI_INITRD_PARAMS="UNIONFS_CONFIG=yes"
 		export KIWI_INITRD_PARAMS
 	fi
 	if [ ! -z "$deviceResize" ] && partitionSize $deviceResize &>/dev/null;then
 		if [ ! -z "$OEM_RECOVERY" ];then
 			KIWI_INITRD_PARAMS="$KIWI_INITRD_PARAMS LOCAL_BOOT=yes"
-			KIWI_INITRD_PARAMS="$KIWI_INITRD_PARAMS deviceRoot=$deviceRoot"
-			KIWI_INITRD_PARAMS="$KIWI_INITRD_PARAMS deviceRecovery=$deviceRecovery"
+			KIWI_INITRD_PARAMS="$KIWI_INITRD_PARAMS deviceRecovery=yes"
 			export KIWI_INITRD_PARAMS
 		fi
 		if [ "$FSTYPE" = "reiserfs" ];then
@@ -959,7 +965,7 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 	# 13.4) umount recovery and boot
 	#--------------------------------------
 	umount $deviceRecovery
-	deviceDisk=`echo $deviceRoot | tr -d "[:digit:]"`
+	export deviceDisk=`echo $deviceRoot | tr -d "[:digit:]"`
 fi
 
 #======================================
@@ -970,7 +976,33 @@ if [ $LOCAL_BOOT = "no" ];then
 fi
 
 #======================================
-# 15) Create system dependant files
+# 15) setup ird/kernel links for union
+#--------------------------------------
+if [ $LOCAL_BOOT = "no" ] && isFSTypeReadOnly;then
+	# /.../
+	# we are using a special root setup with aufs. In this case
+	# we can't use the SuSE Linux initrd but must stick to the
+	# kiwi boot system.
+	# ----
+	kiwiMount "$deviceDisk"2 "/mnt"
+	pushd /mnt/boot >/dev/null
+	IFS="," ; for i in $KERNEL_LIST;do
+		if test -z "$i";then
+			continue
+		fi
+		kernel=`echo $i | cut -f1 -d:`
+		initrd=`echo $i | cut -f2 -d:`
+		rm -f $initrd && ln -s initrd.vmx $initrd
+		rm -f $kernel && ln -s linux.vmx  $kernel
+		break
+	done
+	IFS=$IFS_ORIG
+	popd >/dev/null
+	umount /mnt
+fi
+
+#======================================
+# 16) Create system dependant files
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	export HAVE_SWAP=0
@@ -1009,14 +1041,14 @@ if [ $LOCAL_BOOT = "no" ];then
 fi
 
 #======================================
-# 16) copy system dependant files
+# 17) copy system dependant files
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	setupConfigFiles
 fi
 
 #======================================
-# 17) copy recovery related files
+# 18) copy recovery related files
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ] && [ ! -z "$OEM_RECOVERY" ];then
 	IFS=$IFS_ORIG
@@ -1048,22 +1080,22 @@ if [ $LOCAL_BOOT = "no" ] && [ ! -z "$OEM_RECOVERY" ];then
 fi
 
 #======================================
-# 18) update system dependant files
+# 19) update system dependant files
 #--------------------------------------
 setupInittab /mnt
 
 #======================================
-# 19) setup real root device
+# 20) setup real root device
 #--------------------------------------
 echo 256 > /proc/sys/kernel/real-root-dev
 
 #======================================
-# 20) umount system filesystems
+# 21) umount system filesystems
 #--------------------------------------
 umountSystemFilesystems
 
 #======================================
-# 21) copy initrd files to image
+# 22) copy initrd files to image
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	importBranding
@@ -1072,17 +1104,17 @@ cp /preinit /mnt
 cp /include /mnt
 
 #======================================
-# 22) kill boot shell
+# 23) kill boot shell
 #--------------------------------------
 killShell
 killBlogD
 
 #======================================
-# 23) Activate new root
+# 24) Activate new root
 #--------------------------------------
 activateImage
 
 #======================================
-# 24 Unmount initrd / system init
+# 25 Unmount initrd / system init
 #--------------------------------------
 bootImage $@

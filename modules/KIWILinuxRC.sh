@@ -739,6 +739,7 @@ function setupBootLoaderGrub {
 	# check for device by ID
 	#--------------------------------------
 	local diskByID=`getDiskID $rdev`
+	local swapByID=`getDiskID $swap`
 	#======================================
 	# check for system image .profile
 	#--------------------------------------
@@ -809,7 +810,7 @@ function setupBootLoaderGrub {
 				echo -n " root=$diskByID $console"                >> $menu
 				echo -n " vga=0x314 splash=silent"                >> $menu
 				if [ ! -z "$swap" ];then
-					echo -n " resume=$swap"                       >> $menu
+					echo -n " resume=$swapByID"                   >> $menu
 				fi
 				echo -n " $KIWI_INITRD_PARAMS"                    >> $menu
 				echo " $KIWI_KERNEL_OPTIONS showopts"             >> $menu
@@ -819,7 +820,7 @@ function setupBootLoaderGrub {
 				echo -n " root=$diskByID $console"                >> $menu
 				echo -n " vga=0x314 splash=silent"                >> $menu
 				if [ ! -z "$swap" ];then
-					echo -n " resume=$swap"                       >> $menu
+					echo -n " resume=$swapByID"                   >> $menu
 				fi
 				echo -n " $KIWI_INITRD_PARAMS"                    >> $menu
 				echo " $KIWI_KERNEL_OPTIONS showopts"             >> $menu
@@ -1033,8 +1034,9 @@ function updateSwapDeviceFstab {
 	# ----
 	local prefix=$1
 	local sdev=$2
+	local diskByID=`getDiskID $sdev`
 	local nfstab=$prefix/etc/fstab
-	echo "$sdev swap swap pri=42 0 0" >> $nfstab
+	echo "$diskByID swap swap pri=42 0 0" >> $nfstab
 }
 #======================================
 # updateOtherDeviceFstab
@@ -1076,10 +1078,21 @@ function setupKernelModules {
 	# if created by the distro mkinitrd tool
 	# ----
 	local prefix=$1
+	local ktempl=/mnt/var/adm/fillup-templates/sysconfig.kernel
+	local syskernel=$prefix/etc/sysconfig/kernel
 	mkdir -p $prefix/etc/sysconfig
-	syskernel=$prefix/etc/sysconfig/kernel
-	echo "INITRD_MODULES=\"$INITRD_MODULES\""       > $syskernel
-	echo "DOMU_INITRD_MODULES=\"$DOMURD_MODULES\"" >> $syskernel
+	if [ ! -f $ktempl ];then
+		systemException \
+			"Can't find kernel sysconfig template in system image !" \
+		"reboot"
+	fi
+	cp $ktempl $syskernel
+	sed -i -e \
+		s"@^INITRD_MODULES=.*@INITRD_MODULES=\"$INITRD_MODULES\"@" \
+	$syskernel
+	sed -i -e \
+		s"@^DOMU_INITRD_MODULES=.*@DOMU_INITRD_MODULES=\"$DOMURD_MODULES\"@" \
+	$syskernel
 }
 #======================================
 # kernelCheck
@@ -1456,12 +1469,16 @@ function searchBIOSBootDevice {
 	for curd in $ddevs;do
 		mbrM=`dd if=$curd bs=1 count=4 skip=$((0x1b8))|hexdump -n4 -e '"0x%x"'`
 		mbrI=0
-		if mount $curd"1" /mnt;then
-			if [ -f /mnt/boot/grub/mbrid ];then
-				read mbrI < /mnt/boot/grub/mbrid
+		for id in 1 2;do
+			if mount $curd$id /mnt;then
+				if [ -f /mnt/boot/grub/mbrid ];then
+					read mbrI < /mnt/boot/grub/mbrid
+					umount /mnt
+					break
+				fi
+				umount /mnt
 			fi
-			umount /mnt
-		fi
+		done
 		if [ "$mbrM" = "$mbrI" ];then
 			echo $curd; return
 		fi
@@ -3047,6 +3064,23 @@ function getDiskID {
 	echo $device
 }
 #======================================
+# getDiskDevice
+#--------------------------------------
+function getDiskDevice {
+	# /.../
+	# this function is able to turn the given udev disk
+	# ID label into the /dev/ device name
+	# ----
+	local device=`readlink $1`
+	if [ -z $device ];then
+		echo $1
+		return
+	fi
+	device=`basename $device`
+	device=/dev/$device
+	echo $device
+}
+#======================================
 # getDiskModel
 #--------------------------------------
 function getDiskModels {
@@ -3182,4 +3216,19 @@ function bootImage {
 		exec < dev/console >dev/console 2>&1
 		exec chroot . /sbin/init $@
 	fi
+}
+#======================================
+# setupUnionFS
+#--------------------------------------
+function setupUnionFS {
+	# /.../
+	# export the UNIONFS_CONFIG environment variable
+	# which contains a three part coma separated list of the
+	# following style: rwDevice,roDevice,unionType. The
+	# devices are stores by disk ID if possible
+	# ----
+	local rwDevice=`getDiskID $1`
+	local roDevice=`getDiskID $2`
+	local unionFST=$3
+	export UNIONFS_CONFIG="$rwDevice,$roDevice,$unionFST"
 }

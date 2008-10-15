@@ -57,10 +57,6 @@ else
 	if [ -d /read-write/boot ];then
 		rm -rf /boot && ln -s /read-write/boot /boot
 	fi
-	pushd /boot &>/dev/null
-	rm -f vmlinuz && ln -s linux.vmx  vmlinuz
-	rm -f initrd  && ln -s initrd.vmx initrd
-	popd &>/dev/null
 	kernelList /
 	if [ ! -z "$COMBINED_IMAGE" ];then
 		Echo "Creating bootloader configuration: [ split system ]"
@@ -68,9 +64,9 @@ else
 		Echo "Creating bootloader configuration: [ unified system ]"
 	fi
 	if [ $HAVE_SWAP -eq 1 ];then
-		setupBootLoader / / 1 ${deviceDisk}2 $OEM_BOOT_TITLE $deviceSwap
+		setupBootLoader / / 1 "$deviceDisk"2 $OEM_BOOT_TITLE $deviceSwap
 	else
-		setupBootLoader / / 1 ${deviceDisk}2 $OEM_BOOT_TITLE
+		setupBootLoader / / 1 "$deviceDisk"2 $OEM_BOOT_TITLE
 	fi
 	bootLoaderOK=1
 fi

@@ -43,36 +43,28 @@ updateMTAB
 createFramebufferDevices
 
 #======================================
-# 5) check for union filesystem
-#--------------------------------------
-if [ ! -z "$UNIONFS_CONFIG" ]; then
-	# /.../
-	# we are using a special root setup with aufs. In this case
-	# we can't use the SuSE Linux initrd but must stick to the
-	# kiwi boot system.
-	# ----
-	updateMTAB
-	rm -f /boot/initrd  && ln -s /boot/initrd.vmx /boot/initrd
-	rm -f /boot/vmlinuz && ln -s /boot/linux.vmx  /boot/vmlinuz
-	exit 0
-fi
-
-#======================================
-# 6) create initrd on diskful
-#--------------------------------------
-setupSUSEInitrd
-
-#======================================
-# 7) Install boot loader on diskful
-#--------------------------------------
-if [ $bootLoaderOK = 1 ];then
-	installBootLoader
-fi
-
-#======================================
-# 8) create /etc/ImagePackages
+# 5) create /etc/ImagePackages
 #--------------------------------------
 if [ -x /bin/rpm ];then
 	Echo "Creating initial image package info file"
 	rpm -qa --last > /etc/ImagePackages
+fi
+
+#======================================
+# 6) check for union filesystem
+#--------------------------------------
+if [ ! -z "$UNIONFS_CONFIG" ]; then
+	exit 0
+fi
+
+#======================================
+# 7) create initrd on diskful
+#--------------------------------------
+setupSUSEInitrd
+
+#======================================
+# 8) Install boot loader on diskful
+#--------------------------------------
+if [ $bootLoaderOK = 1 ];then
+	installBootLoader
 fi

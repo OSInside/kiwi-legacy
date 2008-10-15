@@ -63,38 +63,6 @@ export SYSTEM_MD5STATUS
 . /include
 
 #======================================
-# Functions
-#--------------------------------------
-function VMFindSystem {
-	local haveSDA=0
-	local haveHDA=0
-	local devices=""
-	waitForStorageDevice /dev/sda
-	if [ ! -e /dev/sda ];then
-		waitForStorageDevice /dev/hda
-		if [ -e /dev/hda ];then
-			haveHDA=1
-			devices="/dev/hda1 /dev/hda2"
-		fi
-	else
-		haveSDA=1
-		devices="/dev/sda1 /dev/sda2"
-	fi
-	if [ $haveSDA = 0 ] && [ $haveHDA = 0 ];then
-		systemException \
-			"Couldn't find any storage device... abort" \
-		"reboot"
-	fi
-	for rdevice in $devices;do
-		imageRootDevice=$rdevice
-		imageDiskDevice=`echo $imageRootDevice | tr -d [0-9]`
-		if kiwiMount $imageRootDevice "/mnt" &>/dev/null;then
-			umount /mnt
-			break
-		fi
-	done
-}
-#======================================
 # Beautify Startup
 #--------------------------------------
 echo "Loading KIWI VMX Boot-System..."
@@ -146,7 +114,14 @@ probeDevices
 #======================================
 # 7) Mount VM (boot)
 #--------------------------------------
-VMFindSystem
+Echo "Searching for boot device..."
+export imageDiskDevice=`searchBIOSBootDevice`
+export imageRootDevice=$imageDiskDevice"1"
+if [ -z "$imageDiskDevice" ];then
+	systemException \
+		"Couldn't find any boot device... abort" \
+	"reboot"
+fi
 
 #======================================
 # 8) Get filesystem type
@@ -163,7 +138,7 @@ fi
 #--------------------------------------
 Echo "Filesystem of VMX system is: $FSTYPE -> $imageRootDevice"
 if isFSTypeReadOnly;then
-	export UNIONFS_CONFIG="$imageDiskDevice"2,"$imageDiskDevice"1,aufs
+	setupUnionFS "$imageDiskDevice"2 "$imageDiskDevice"1 aufs
 fi
 
 #======================================
@@ -182,7 +157,33 @@ if [ $LOCAL_BOOT = "no" ];then
 fi
 
 #======================================
-# 11) Create system dependant files
+# 12) setup ird/kernel links for union
+#--------------------------------------
+if [ $LOCAL_BOOT = "no" ] && isFSTypeReadOnly;then
+	# /.../
+	# we are using a special root setup with aufs. In this case
+	# we can't use the SuSE Linux initrd but must stick to the
+	# kiwi boot system.
+	# ----
+	kiwiMount "$imageDiskDevice"2 "/mnt"
+	pushd /mnt/boot >/dev/null
+	IFS="," ; for i in $KERNEL_LIST;do
+		if test -z "$i";then
+			continue
+		fi
+		kernel=`echo $i | cut -f1 -d:`
+		initrd=`echo $i | cut -f2 -d:`
+		rm -f $initrd && ln -s initrd.vmx $initrd
+		rm -f $kernel && ln -s linux.vmx  $kernel
+		break
+	done
+	IFS=$IFS_ORIG
+	popd >/dev/null
+	umount /mnt
+fi
+
+#======================================
+# 13) Create system dependant files
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	setupDefaultFstab /config
@@ -190,36 +191,36 @@ if [ $LOCAL_BOOT = "no" ];then
 	if [ -z "$UNIONFS_CONFIG" ]; then
 		setupBootLoader /mnt /config 0 $imageRootDevice VMX
 	else
-		export KIWI_INITRD_PARAMS="UNIONFS_CONFIG=\"$UNIONFS_CONFIG\""
+		export KIWI_INITRD_PARAMS="UNIONFS_CONFIG=yes"
 		setupBootLoader /mnt /config 1 $imageRootDevice VMX
 	fi
 	setupKernelModules /config
 fi
 
 #======================================
-# 12) copy system dependant files
+# 14) copy system dependant files
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	setupConfigFiles
 fi
 
 #======================================
-# 13) update system dependant files
+# 15) update system dependant files
 #--------------------------------------
 setupInittab /mnt
 
 #======================================
-# 14) setup real root device
+# 16) setup real root device
 #--------------------------------------
 echo 256 > /proc/sys/kernel/real-root-dev
 
 #======================================
-# 15) umount system filesystems
+# 17) umount system filesystems
 #--------------------------------------
 umountSystemFilesystems
 
 #======================================
-# 16) copy initrd files to image
+# 18) copy initrd files to image
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	importBranding
@@ -228,17 +229,17 @@ cp /preinit /mnt
 cp /include /mnt
 
 #======================================
-# 17) kill boot shell
+# 19) kill boot shell
 #--------------------------------------
 killShell
 killBlogD
 
 #======================================
-# 18) Activate new root
+# 20) Activate new root
 #--------------------------------------
 activateImage
 
 #======================================
-# 19) Unmount initrd / system init
+# 21) Unmount initrd / system init
 #--------------------------------------
 bootImage $@

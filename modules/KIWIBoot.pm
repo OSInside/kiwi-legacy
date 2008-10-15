@@ -2475,11 +2475,11 @@ sub getMBRDiskLabel {
 	# create a random 4byte MBR disk label ID
 	# ---
 	my $this  = shift;
-	my $range = 0xff;
+	my $range = 0xfe;
 	my @bytes;
 	undef $this->{mbrid};
 	for (my $i=0;$i<4;$i++) {
-		$bytes[$i] = int(rand($range));
+		$bytes[$i] = 1 + int(rand($range));
 	}
 	my $nid = sprintf ("0x%02x%02x%02x%02x",
 		$bytes[0],$bytes[1],$bytes[2],$bytes[3]

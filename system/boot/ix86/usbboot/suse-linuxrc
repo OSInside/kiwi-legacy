@@ -104,7 +104,7 @@ fi
 #--------------------------------------
 Echo "Filesystem of stick system is: $FSTYPE -> $stickDevice"
 if isFSTypeReadOnly;then
-	export UNIONFS_CONFIG="$stickRoot"2,"$stickRoot"1,aufs
+	setupUnionFS "$stickRoot"2 "$stickRoot"1 aufs
 fi
 
 #======================================

@@ -557,7 +557,7 @@ else
 		Echo "Filesystem of remote root system is: $FSTYPE"
 		if [ -z "$COMBINED_IMAGE" ];then
 			if isFSTypeReadOnly;then
-				export UNIONFS_CONFIG="/dev/ram1,"$imageRootDevice",aufs"
+				setupUnionFS /dev/ram1 "$imageRootDevice" aufs
 			fi
 		fi
 		imageRootName="NBDRoot-System"

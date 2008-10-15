@@ -3,7 +3,12 @@ Mon Oct 13 17:32:09 CEST 2008 - ms@suse.de
 
 - v2.90
 - changed grub and fstab setup to use disk ID labels (bnc #434806)
+- use diskID labels for UNION mounts and INITRD params (bnc #434806)
 - added check media label via genisoimage -A (bnc #434104)
+- fixed setupKernel to change the sysconfig.kernel template file
+  instead of creating a new one (bnc #435060)
+- fixed kernel/initrd links for unified oem|vmx boot
+- fixed mbrid detection for unified systems
 
 -------------------------------------------------------------------
 Thu Oct  9 10:05:47 CEST 2008 - ms@suse.de
