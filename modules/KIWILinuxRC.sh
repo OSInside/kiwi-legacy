@@ -1992,7 +1992,7 @@ function partedGetPartitionSize {
 	# /.../
 	# prints the partition or disk size in kB
 	# ----
-	parted -m -s $1 unit kB | grep ^$1 | cut -f2 -d: | tr -d kB
+	parted -m -s $1 unit kB print | grep ^$1 | cut -f2 -d: | tr -d kB
 }
 #======================================
 # partedCreatePartition
