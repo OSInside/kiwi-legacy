@@ -872,9 +872,7 @@ function setupBootLoaderGrub {
 	#======================================
 	# create grub.conf file
 	#--------------------------------------
-	gnum=`echo $rdev | sed -e "s/\/dev.*\([0-9]\)/\\1/"`
-	gnum=`expr $gnum - 1`
-	echo -en "root (hd0,$gnum)\ninstall"     > $conf
+	echo -en "root $gdev\ninstall"           > $conf
 	echo -n " --stage2=/boot/grub/stage2"   >> $conf
 	echo -n " /boot/grub/stage1 d (hd0)"    >> $conf
 	echo -n " /boot/grub/stage2 0x8000"     >> $conf
@@ -2045,17 +2043,17 @@ function partedCreatePartition {
 		partedGetSectors $p_stopp $partSize
 		if [ $PART_COUNT -le 3 ];then
 			p_cmd="$p_cmd mkpart primary $p_start $p_stopp"
-			p_cmd="$p_cmd set $PART_COUNT type $partID"
+			p_cmd="$p_cmd set $PART_COUNT type 0x$partID"
 		else
 			if [ $PART_COUNT -eq 4 ];then
 				p_cmd="$p_cmd mkpart extended $p_start $p_size"
-				p_cmd="$p_cmd set $PART_COUNT type 85"
+				p_cmd="$p_cmd set $PART_COUNT type 0x85"
 				PART_COUNT=`expr $PART_COUNT + 1`
 				NO_FILE_SYSTEM=1
 			fi
 			p_start=`expr $p_start + 1`
 			p_cmd="$p_cmd mkpart logical $p_start $p_stopp"
-			p_cmd="$p_cmd set $PART_COUNT type $partID"
+			p_cmd="$p_cmd set $PART_COUNT type 0x$partID"
 		fi
 		if test -z "$PART_MOUNT";then
 			PART_MOUNT="$partMount"

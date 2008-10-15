@@ -55,17 +55,16 @@ if [ ! -z $DISK ] && [ $systemIntegrity = "clean" ]; then
 		#======================================
 		# use kiwi initrd downloaded before
 		#--------------------------------------
-		bootLoaderOK=1
+		:
 	fi
 fi
 
 #======================================
 # 6) Install boot loader on diskful
 #--------------------------------------
-if test ! -z $DISK;then
+if [ ! -z $DISK ] && [ $bootLoaderOK = 1 ];then
 	if test $systemIntegrity = "clean";then
 		installBootLoader
-		echo "alias eth0 $networkModule" >> /etc/modules.conf
 	fi
 fi
 
