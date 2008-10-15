@@ -1995,7 +1995,7 @@ function partedGetPartitionSize {
 	# ----
 	local disk=`echo $1 | sed -e s"@[0-9]@@g"`
 	local size=`parted -m -s $disk unit B print |\
-		sed -e "s@^\([0-4]\):@$disk\1:@" | grep ^$1: | cut -f2 -d: | tr -d B`
+		sed -e "s@^\([0-4]\):@$disk\1:@" | grep ^$1: | cut -f4 -d: | tr -d B`
 	expr $size / 1000
 }
 #======================================
