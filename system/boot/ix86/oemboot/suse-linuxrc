@@ -452,13 +452,23 @@ if [ $LOCAL_BOOT = "no" ];then
 			# ----
 			input=/part.input
 			rm -f $input
-			for cmd in d 2 n p 2 . +"$disk2MBytes"M n p 3 . . t 3 82 w;do
-				if [ $cmd = "." ];then
-					echo >> $input
-					continue
-				fi
-				echo $cmd >> $input
-			done
+			if [ $swapsize = 0 ];then
+				for cmd in d 2 n p 2 . +"$disk2MBytes"M w;do
+					if [ $cmd = "." ];then
+						echo >> $input
+						continue
+					fi
+					echo $cmd >> $input
+				done
+			else
+				for cmd in d 2 n p 2 . +"$disk2MBytes"M n p 3 . . t 3 82 w;do
+					if [ $cmd = "." ];then
+						echo >> $input
+						continue
+					fi
+					echo $cmd >> $input
+				done
+			fi
 			Echo "Repartition the disk according to current geometry"
 			fdisk $deviceDisk < $input >/dev/null 2>&1
 			if test $? != 0; then
@@ -831,13 +841,24 @@ if [ $LOCAL_BOOT = "no" ];then
 				# ----
 				input=/part.input
 				rm -f $input
-				for cmd in d 2 n p 2 . +"$disk2MBytes"M n p 3 . . t 3 82 w;do
-					if [ $cmd = "." ];then
-						echo >> $input
-						continue
-					fi
-					echo $cmd >> $input
-				done
+				if [ $swapsize = 0 ];then
+					for cmd in d 2 n p 2 . +"$disk2MBytes"M w; do
+						if [ $cmd = "." ];then
+							echo >> $input
+							continue
+						fi
+						echo $cmd >> $input
+					done
+				else
+					for cmd in d 2 n p 2 . +"$disk2MBytes"M n p 3 . . t 3 82 w
+					do
+						if [ $cmd = "." ];then
+							echo >> $input
+							continue
+						fi
+						echo $cmd >> $input
+					done
+				fi
 				Echo "Repartition the disk according to current geometry"
 				fdisk $deviceDisk < $input >/dev/null 2>&1
 				if test $? != 0; then

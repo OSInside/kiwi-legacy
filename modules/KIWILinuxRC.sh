@@ -1983,7 +1983,8 @@ function partedGetPartitionID {
 	# /.../
 	# prints the partition ID for the given device and number
 	# ----
-	parted -m -s $1 print | grep ^$2: | cut -f10 -d, | cut -f2 -d=
+	local disk=`echo $1 | sed -e s"@[0-9]@@g"`
+	parted -m -s $disk print | grep ^$2: | cut -f10 -d, | cut -f2 -d=
 }
 #======================================
 # partedGetPartitionSize
@@ -1992,7 +1993,10 @@ function partedGetPartitionSize {
 	# /.../
 	# prints the partition or disk size in kB
 	# ----
-	parted -m -s $1 unit kB print | grep ^$1 | cut -f2 -d: | tr -d kB
+	local disk=`echo $1 | sed -e s"@[0-9]@@g"`
+	local size=`parted -m -s $disk unit B print |\
+		sed -e "s@^\([0-4]\):@$disk\1:@" | grep ^$1: | cut -f2 -d: | tr -d B`
+	expr $size / 1000
 }
 #======================================
 # partedCreatePartition
