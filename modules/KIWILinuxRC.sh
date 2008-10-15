@@ -1994,8 +1994,12 @@ function partedGetPartitionSize {
 	# prints the partition or disk size in kB
 	# ----
 	local disk=`echo $1 | sed -e s"@[0-9]@@g"`
+	local step=2
+	if echo $1 | grep -q [0-9];then
+		step=4
+	fi
 	local size=`parted -m -s $disk unit B print |\
-		sed -e "s@^\([0-4]\):@$disk\1:@" | grep ^$1: | cut -f4 -d: | tr -d B`
+		sed -e "s@^\([0-4]\):@$disk\1:@" | grep ^$1:|cut -f$step -d: | tr -d B`
 	expr $size / 1000
 }
 #======================================
