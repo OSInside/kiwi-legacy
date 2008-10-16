@@ -18,6 +18,9 @@
 	<users group="users">
 		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/home/tux" name="tux"/>
 	</users>
+	<users group="root">
+		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+	</users>
 	<repository type="yast2">
 		<source path="/image/CDs/full-i386"/>
 		<!--<source path="opensuse://openSUSE:11.1/standard/"/>-->
@@ -27,11 +30,10 @@
 		<package name="bootsplash"/>
 		<package name="bootsplash-branding-openSUSE"/>
 		<package name="vim"/>
-		<package name="MozillaFirefox"/>
-		<opensusePattern name="base"/>
+		<opensusePattern name="minimal"/>
 		<opensusePattern name="kde4"/>
 	</packages>
-	<packages type="bootstrap" patternType="plusRecommended">
+	<packages type="bootstrap">
 		<package name="filesystem"/> 
 		<package name="glibc-locale"/>
 	</packages>

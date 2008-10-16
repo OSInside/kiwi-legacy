@@ -292,9 +292,17 @@ fi
 stty $otty
 
 # create config file if not yet done
-if [ ! -f /etc/X11/xorg.conf ];then
+xconf=0
+if [ -f /etc/dmidecode.md5 ];then
+	dmidecode | md5sum --check /etc/dmidecode.md5 || xconf=1
+fi
+if [ ! -f /etc/X11/xorg.conf ] ;then
+	xconf=1
+fi
+if [ $xconf = 1 ] ;then
 	/usr/sbin/sax2 -c 0 -a -i &>/dev/null
 fi
+dmidecode | md5sum > /etc/dmidecode.md5
 
 #
 # Let YaST2 finish its installation, if you installed with YaST2
