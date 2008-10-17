@@ -30,7 +30,7 @@
 		<package name="bootsplash"/>
 		<package name="bootsplash-branding-openSUSE"/>
 		<package name="vim"/>
-		<opensusePattern name="minimal"/>
+		<opensusePattern name="base"/>
 		<opensusePattern name="kde4"/>
 	</packages>
 	<packages type="bootstrap">
