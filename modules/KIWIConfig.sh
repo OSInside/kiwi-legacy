@@ -220,7 +220,11 @@ function suseCloneRunlevel {
 #--------------------------------------
 function baseSetupOEMPartition {
 	local oemfile=/config.oempartition
-	rm -f $oemfile
+	if [ -e $oemfile ];then
+		echo "config.oempartition already defined:"
+		cat $oemfile
+		return
+	fi
 	if [ ! -z "$kiwi_oemreboot" ];then
 		echo "Setting up OEM_REBOOT=1"
 		echo "OEM_REBOOT=1" >> $oemfile
