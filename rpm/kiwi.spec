@@ -361,6 +361,7 @@ fi
 	rm -rf $RPM_BUILD_ROOT/srv/tftpboot
 	rm -rf $RPM_BUILD_ROOT/etc/permissions.d/kiwi
 %endif
+
 test -f $RPM_BUILD_ROOT/srv/tftpboot/pxelinux.0 && \
 	echo /srv/tftpboot/pxelinux.0 > kiwi.loader
 test -f $RPM_BUILD_ROOT/srv/tftpboot/mboot.c32 && \
@@ -369,15 +370,13 @@ install -m 644 tools/README \
 	$RPM_BUILD_ROOT/usr/share/doc/packages/kiwi/README.tools
 rm -rf $RPM_BUILD_ROOT/usr/share/doc/packages/kiwi/kiwi-man
 %perl_process_packlist
-rm -f $RPM_BUILD_ROOT/%{perl_vendorarch}/example.pl
-rm -f $RPM_BUILD_ROOT/%{perl_vendorarch}/auto/SaT/SaT.bs
-rm -f $RPM_BUILD_ROOT/%{perl_vendorarch}/auto/dbusdevice/dbusdevice.bs
-rm -f $RPM_BUILD_ROOT/var/adm/perl-modules/%{name}
+rm -f $RPM_BUILD_ROOT/%{perl_vendorarch}/KIWI/example.pl
 ./.links
 %if %{suse_version} > 1020
 %fdupes $RPM_BUILD_ROOT/srv/tftpboot
 %fdupes $RPM_BUILD_ROOT/usr/share/kiwi/image
 %fdupes $RPM_BUILD_ROOT/usr/share/doc/packages/kiwi/examples
+%fdupes $RPM_BUILD_ROOT/usr/share/doc/packages/kiwi/schema
 %endif
 cat kiwi.loader
 
@@ -400,12 +399,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/kiwi/tests
 %{_datadir}/kiwi/xsl
 %{_sbindir}/kiwi
-%{perl_vendorarch}/dbusdevice.pm
-%{perl_vendorarch}/auto/dbusdevice
-%if %{suse_version} > 1030
-%{perl_vendorarch}/SaT.pm
-%{perl_vendorarch}/auto/SaT
-%endif
+%{perl_vendorarch}/KIWI
+%{perl_vendorarch}/auto/KIWI
+/var/adm/perl-modules/kiwi
 #=================================================
 # KIWI doc...      
 #-------------------------------------------------

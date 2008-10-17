@@ -34,14 +34,14 @@ use KIWIQX;
 BEGIN {
 	$KIWISatSolver::haveSaT = 1;
 	eval {
-		require SaT;
-		SaT -> import;
+		require KIWI::SaT;
+		KIWI::SaT -> import;
 	};
 	if ($@) {
 		$KIWISatSolver::haveSaT = 0;
 	}
 	if (! $KIWISatSolver::haveSaT) {
-		package SaT;
+		package KIWI::SaT;
 	}
 }
 
@@ -115,13 +115,13 @@ sub new {
 			$kiwi -> failed ();
 			return undef;
 		}
-		$pool = new SaT::_Pool;
+		$pool = new KIWI::SaT::_Pool;
 		$repo = $pool -> createRepo('repo');
 		$repo -> addSolvable (*FD); close FD;
 	}
-	$solver = new SaT::Solver ($pool);
+	$solver = new KIWI::SaT::Solver ($pool);
 	$pool -> createWhatProvides();
-	$queue = new SaT::Queue;
+	$queue = new KIWI::SaT::Queue;
 	foreach my $p (@{$pref}) {
 		my $name = $p;
 		if (! defined $solvep) {
@@ -133,7 +133,7 @@ sub new {
 			$kiwi -> skipped ();
 			next;
 		}
-		$queue -> queuePush ( $SaT::SOLVER_INSTALL_SOLVABLE );
+		$queue -> queuePush ( $KIWI::SaT::SOLVER_INSTALL_SOLVABLE );
 		$queue -> queuePush ( $id );
 	}
 	#==========================================

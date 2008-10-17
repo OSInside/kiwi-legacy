@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-use lib './blib/arch/auto/SaT';
+use lib './blib/arch/auto/KIWI/SaT';
 
 use strict;
 use SaT;

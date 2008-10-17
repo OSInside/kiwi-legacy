@@ -1,7 +1,7 @@
 //=======================================
 // Interface definition for libsatsolver
 //---------------------------------------
-%module SaT
+%module "KIWI::SaT"
 %{
 extern "C"
 {

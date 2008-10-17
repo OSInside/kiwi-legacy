@@ -26,7 +26,7 @@ require Exporter;
 #------------------------------------------
 use strict;
 use Carp qw (cluck);
-use dbusdevice;
+use KIWI::dbusdevice;
 use KIWILog;
 use FileHandle;
 use File::Basename;
@@ -660,7 +660,7 @@ sub setupBootStick {
 	# Establish HAL lock for $stick
 	#------------------------------------------
 	$kiwi -> info ("Establish HAL lock for: $stick");
-	$hald = new dbusdevice::HalConnection;
+	$hald = new KIWI::dbusdevice::HalConnection;
 	if (! $hald -> open()) {
 		$kiwi -> failed  ();
 		$kiwi -> warning ($hald->state());

@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-use lib './blib/arch/auto/dbusdevice';
+use lib './blib/arch/auto/KIWI/dbusdevice';
 
 use strict;
 use dbusdevice;

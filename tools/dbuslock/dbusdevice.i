@@ -1,7 +1,7 @@
 //====================================
 // Interface definition for dbusdevice
 //------------------------------------
-%module dbusdevice
+%module "KIWI::dbusdevice"
 %{
 #include "dbusdevice.h"
 %}

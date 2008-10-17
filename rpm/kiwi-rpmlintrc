@@ -9,3 +9,6 @@ addFilter("hidden-file-or-dir /usr/share/kiwi/.revision")
 
 # don't apply perl naming policy on kiwi
 addFilter("kiwi.* perl5-naming-policy-not-applied")
+
+# don't care for zero length .bs files
+addFilter(".*zero-length.*.bs")
