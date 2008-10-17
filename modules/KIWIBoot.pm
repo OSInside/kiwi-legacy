@@ -25,6 +25,7 @@ require Exporter;
 # Modules
 #------------------------------------------
 use strict;
+use Carp qw (cluck);
 use dbusdevice;
 use KIWILog;
 use FileHandle;

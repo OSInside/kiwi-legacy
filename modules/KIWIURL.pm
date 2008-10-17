@@ -18,6 +18,7 @@ package KIWIURL;
 # Modules
 #------------------------------------------
 use strict;
+use Carp qw (cluck);
 use File::Basename;
 use KIWILog;
 use LWP;

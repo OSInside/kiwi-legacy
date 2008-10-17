@@ -21,6 +21,7 @@ package KIWIMigrate;
 # Modules
 #------------------------------------------
 use strict;
+use Carp qw (cluck);
 use File::Find;
 use File::Basename;
 use KIWILog;

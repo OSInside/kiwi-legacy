@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Thu Oct 16 18:59:05 CEST 2008 - ms@suse.de
+
+- v2.92
+- added backtrace in case of error (bnc #435991)
+- make the suse-11.1/suse-live-stick example more robust
+- added check for possibly existing oem partition file
+
+-------------------------------------------------------------------
 Thu Oct 16 12:02:43 CEST 2008 - ms@suse.de
 
 - v2.91

@@ -18,6 +18,7 @@ package KIWIPattern;
 # Modules
 #------------------------------------------
 use strict;
+use Carp qw (cluck);
 use KIWILog;
 use KIWIURL;
 use File::Glob ':glob';

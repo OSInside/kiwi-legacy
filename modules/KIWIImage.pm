@@ -20,6 +20,7 @@ package KIWIImage;
 # Modules
 #------------------------------------------
 use strict;
+use Carp qw (cluck);
 use KIWILog;
 use KIWIBoot;
 use KIWIIsoLinux;

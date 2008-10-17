@@ -20,6 +20,7 @@ package KIWITestResult;
 # Modules
 #------------------------------------------
 use strict;
+use Carp qw (cluck);
 use XML::LibXML;
 
 #==========================================

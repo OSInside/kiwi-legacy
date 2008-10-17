@@ -20,6 +20,7 @@ package KIWISocket;
 # Modules
 #------------------------------------------
 use strict;
+use Carp qw (cluck);
 use FileHandle;
 use Socket;
 use KIWIQX;

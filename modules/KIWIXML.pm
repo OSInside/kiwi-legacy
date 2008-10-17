@@ -19,6 +19,7 @@ package KIWIXML;
 #------------------------------------------
 require Exporter;
 use strict;
+use Carp qw (cluck);
 use XML::LibXML;
 use LWP;
 use KIWILog;
@@ -2657,6 +2658,7 @@ sub createTmpDirectory {
 		}
 	}
 	if ( $rootError ) {
+		$main::BT.=cluck ($main::TT.$main::TL++);
 		return undef;
 	}
 	my $origroot = $root;

@@ -26,9 +26,17 @@ use strict;
 $DB::inhibit_exit = 0;
 
 #============================================
+# Overwrite
+#--------------------------------------------
+BEGIN {
+	*CORE::GLOBAL::warn = sub { return $_[0]; };
+}
+
+#============================================
 # Modules
 #--------------------------------------------
 use warnings;
+use Carp qw (cluck);
 use Getopt::Long;
 use KIWIRoot;
 use KIWIXML;
@@ -43,14 +51,17 @@ use KIWITest;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "2.91";
+our $Version       = "2.92";
 our $Publisher     = "SUSE LINUX Products GmbH";
 our $Preparer      = "KIWI - http://kiwi.berlios.de";
 our $openSUSE      = "http://download.opensuse.org/repositories/";
 our $ConfigFile    = "$ENV{'HOME'}/.kiwirc";
 our $ConfigName    = "config.xml";
 our $Partitioner   = "fdisk";
+our $TT            = "Trace Level ";
 our $ConfigStatus  = 0;
+our $TL            = 1;
+our $BT;
 #============================================
 # Read $HOME/.kiwirc
 #--------------------------------------------
@@ -598,7 +609,7 @@ sub main {
 				if (defined $BaseRoot) {
 					$overlay -> resetOverlay();
 				}
-				return undef;
+				my $code = kiwiExit (1); return $code;
 			}
 			if (! $configure -> setupRecoveryArchive()) {
 				if (defined $BaseRoot) {
@@ -1591,6 +1602,7 @@ sub kiwiExit {
 	}
 	$kiwi -> setLogHumanReadable();
 	if ($code != 0) {
+		$kiwi -> printBackTrace();
 		$kiwi -> printLogExcerpt();
 		$kiwi -> error  ("KIWI exited with error(s)");
 		$kiwi -> done ();
@@ -1905,6 +1917,7 @@ sub checkFileSystem {
 			my $code = $? >> 8;
 			my $type;
 			if ($code != 0) {
+				$main::BT.=cluck ($main::TT.$main::TL++);
 				return undef;
 			}
 			SWITCH: for ($data) {
@@ -1940,6 +1953,7 @@ sub checkFileSystem {
 				}
 			}
 		} else {
+			$main::BT.=cluck ($main::TT.$main::TL++);
 			return undef;
 		}
 	}
@@ -1957,6 +1971,7 @@ sub getControlFile {
 	my $dir    = shift;
 	my $config = "$dir/$ConfigName";
 	if (! -d $dir) {
+		$main::BT.=cluck ($main::TT.$main::TL++);
 		return undef;
 	}
 	if (-f $config) {
@@ -1965,8 +1980,10 @@ sub getControlFile {
 	my @globsearch = glob ($dir."/*.kiwi");
 	my $globitems  = @globsearch;
 	if ($globitems == 0) {
+		$main::BT.=cluck ($main::TT.$main::TL++);
 		return undef;
 	} elsif ($globitems > 1) {
+		$main::BT.=cluck ($main::TT.$main::TL++);
 		return undef;
 	} else {
 		$config = pop @globsearch;

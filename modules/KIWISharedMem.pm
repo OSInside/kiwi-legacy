@@ -21,6 +21,7 @@ package KIWISharedMem;
 # Modules
 #------------------------------------------
 use strict;
+use Carp qw (cluck);
 use IPC::SysV qw(IPC_PRIVATE IPC_RMID IPC_CREAT S_IRWXU);
 use IPC::Semaphore;
 use KIWIQX;

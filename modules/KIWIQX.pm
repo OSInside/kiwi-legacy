@@ -19,6 +19,7 @@ package KIWIQX;
 # Modules
 #------------------------------------------
 require Exporter;
+use Carp qw (cluck);
 use strict;
 
 #==========================================

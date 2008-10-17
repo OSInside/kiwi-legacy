@@ -19,6 +19,7 @@ package KIWIManager;
 #------------------------------------------
 require Exporter;
 use strict;
+use Carp qw (cluck);
 use FileHandle;
 use File::Basename;
 use Config::IniFiles;
@@ -302,6 +303,7 @@ sub setupScreenCall {
 			$kiwi -> doNorm();
 		}
 		$this -> resetInstallationSource();
+		$main::BT.=cluck ($main::TT.$main::TL++);
 		return undef;
 	}
 	$kiwi -> done ();

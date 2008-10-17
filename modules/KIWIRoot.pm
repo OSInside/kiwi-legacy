@@ -19,6 +19,7 @@ package KIWIRoot;
 # Modules
 #------------------------------------------
 use strict;
+use Carp qw (cluck);
 use KIWIURL;
 use KIWILog;
 use KIWIManager;

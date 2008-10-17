@@ -19,6 +19,7 @@ package KIWIIsoLinux;
 # Modules
 #------------------------------------------
 use strict;
+use Carp qw (cluck);
 use File::Find;
 use KIWILog;
 use KIWIQX;

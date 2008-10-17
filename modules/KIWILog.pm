@@ -19,12 +19,17 @@ package KIWILog;
 # Modules
 #------------------------------------------
 use strict;
-use POSIX ":sys_wait_h";
 use Carp qw (cluck);
+use POSIX ":sys_wait_h";
 use KIWISocket;
 use KIWISharedMem;
 use FileHandle;
 use KIWIQX;
+
+#==========================================
+# Tracing
+#------------------------------------------
+$Carp::Internal{KIWILog}++;
 
 #==========================================
 # Plugins
@@ -139,6 +144,7 @@ sub sendLogServerMessage {
 	my $level   = $this->{level};
 	my $date    = $this->{date};
 	if (! defined $smem) {
+		$main::BT.=cluck ($main::TT.$main::TL++);
 		return undef;
 	}
 	my $data;
@@ -175,6 +181,7 @@ sub getLogServerMessage {
 	my $this = shift;
 	my $smem = $this->{smem};
 	if (! defined $smem) {
+		$main::BT.=cluck ($main::TT.$main::TL++);
 		return undef;
 	}
 	return $smem -> get();
@@ -400,6 +407,7 @@ sub reopenRootChannel {
 		return $this;
 	}
 	if (! (open EFD,">>$file")) {
+		$main::BT.=cluck ($main::TT.$main::TL++);
 		return undef;
 	}
 	binmode(EFD,':unix');
@@ -483,10 +491,13 @@ sub printLog {
 		if ($level != $lglevel) {
 			next;
 		}
-		if (($lglevel == 1) || ($lglevel == 2) || ($lglevel == 3)) {
+		if (($lglevel == 1) || ($lglevel == 2)) {
 			$result = $needcr.$date.$logdata;
 		} elsif ($lglevel == 5) {
 			$result = $needcr.$logdata;
+		} elsif ($lglevel == 3) {
+			$result = $needcr.$date.$logdata;
+			$main::BT.=cluck ($main::TT.$main::TL++);
 		} else {
 			$result = Carp::longmess($needcr.$logdata);
 		}
@@ -526,6 +537,33 @@ sub printLog {
 	#------------------------------------------
 	$this -> saveInCache ($result);
 	return $lglevel;
+}
+
+#==========================================
+# getBackTrace
+#------------------------------------------
+sub printBackTrace {
+	# ...
+	# return currently saved backtrace information
+	# if no information is present an empty string
+	# is returned
+	# ---
+	my $this = shift;
+	my $FD   = $this->{channel};
+	if (! $main::BT) {
+		return $this;
+	}
+	if (! defined $this->{nocolor}) {
+		print STDERR "\033[1;31m[*** back trace follows ***]\n";
+		print STDERR "\033[1;31m$main::BT";
+		print STDERR "\033[1;31m[*** end ***]\n";
+		$this -> doNorm();
+	} else {
+		print STDERR ("[*** back trace follows ***]\n");
+		print STDERR $main::BT;
+		print STDERR "[*** end ***]\n";
+	}
+	return $this;
 }
 
 #==========================================
@@ -639,6 +677,7 @@ sub setLogFile {
 	}
 	if (! (open FD,">$file")) {
 		$this -> warning ("Couldn't open log channel: $!\n");
+		$main::BT.=cluck ($main::TT.$main::TL++);
 		return undef;
 	}
 	binmode(FD,':unix');
@@ -662,7 +701,13 @@ sub printLogExcerpt {
 	my @lines = <FD>; close FD;
 	unshift (@lines,"[*** log excerpt follows, last 1 Kbyte ***]\n");
 	push    (@lines,"[*** end ***]\n");
-	print STDERR @lines;
+	if (! defined $this->{nocolor}) {
+		print STDERR "\033[1;31m@lines";
+		$this -> doNorm();
+	} else {
+		print STDERR @lines;
+	}
+	return $this;
 }
 
 #==========================================
@@ -680,6 +725,7 @@ sub setLogHumanReadable {
 	my $line = "";
 	my $cr   = 0;
 	if (! open (FD, ">$rootLog")) {
+		$main::BT.=cluck ($main::TT.$main::TL++);
 		return undef;
 	}
 	foreach my $l (@stream) {
@@ -832,6 +878,7 @@ sub setLogServer {
 		$this -> skipped ();
 		$this -> {smem} -> closeSegment();
 		undef $this -> {smem};
+		$main::BT.=cluck ($main::TT.$main::TL++);
 		return undef;
 	}
 	if ($child) {
