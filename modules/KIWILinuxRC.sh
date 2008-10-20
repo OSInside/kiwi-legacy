@@ -2515,7 +2515,7 @@ function mountSystemUnified {
 	#======================================
 	# check read/write device location
 	#--------------------------------------
-	echo $rwDevice | grep -q ram
+	getDiskDevice $rwDevice | grep -q ram
 	if [ $? = 0 ];then
 		# /.../
 		# write part is a ram location, use tmpfs for ram

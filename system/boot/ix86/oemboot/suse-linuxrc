@@ -470,7 +470,7 @@ if [ $LOCAL_BOOT = "no" ];then
 				done
 			fi
 			Echo "Repartition the disk according to current geometry"
-			fdisk $deviceDisk < $input >/dev/null 2>&1
+			fdisk $deviceDisk < $input
 			if test $? != 0; then
 				systemException "Failed to create partition table" "reboot"
 			fi
@@ -720,7 +720,7 @@ if [ $LOCAL_BOOT = "no" ];then
 					fi
 				fi
 				Echo "Repartition the disk according to current geometry"
-				fdisk $deviceDisk < $input >/dev/null 2>&1
+				fdisk $deviceDisk < $input
 				if test $? != 0; then
 					systemException "Failed to create partition table" "reboot"
 				fi
@@ -860,7 +860,7 @@ if [ $LOCAL_BOOT = "no" ];then
 					done
 				fi
 				Echo "Repartition the disk according to current geometry"
-				fdisk $deviceDisk < $input >/dev/null 2>&1
+				fdisk $deviceDisk < $input
 				if test $? != 0; then
 					systemException "Failed to create partition table" "reboot"
 				fi
@@ -890,15 +890,18 @@ fi
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	deviceResize=$deviceRoot
+	fstypeRootFS=$FSTYPE
 	if [ ! -z $COMBINED_IMAGE ];then
 		deviceResize=$deviceIOWR
 		KIWI_INITRD_PARAMS="COMBINED_IMAGE=local"
+		probeFileSystem $deviceResize
 		export KIWI_INITRD_PARAMS
 	fi
 	if isFSTypeReadOnly && [ -z "$COMBINED_IMAGE" ];then
 		deviceResize=$deviceIOWR
 		setupUnionFS "$deviceDisk"2 "$deviceDisk"1 aufs
 		KIWI_INITRD_PARAMS="UNIONFS_CONFIG=yes"
+		probeFileSystem $deviceResize
 		export KIWI_INITRD_PARAMS
 	fi
 	if [ ! -z "$deviceResize" ] && partitionSize $deviceResize &>/dev/null;then
@@ -927,6 +930,7 @@ if [ $LOCAL_BOOT = "no" ];then
 			INITRD_MODULES="$INITRD_MODULES ext3"
 		fi
 	fi
+	FSTYPE=$fstypeRootFS
 fi
 
 #======================================

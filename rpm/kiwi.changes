@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Mon Oct 20 17:43:21 CEST 2008 - ms@suse.de
+
+- v2.94
+- fixed oemboot to log fdisk output when re-partitioning
+- fixed KIWILinuxRC /dev/ram* check in mountSystemUnified
+- fixed oemboot to resize read-write filesystem
+
+-------------------------------------------------------------------
 Fri Oct 17 17:55:11 CEST 2008 - ms@suse.de
 
 - v2.93
