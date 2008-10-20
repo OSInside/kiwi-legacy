@@ -58,37 +58,38 @@ sub qxx ($) {
 	# ---
 	my $cmd = shift;
 	my @prg = "";
+	my $prog= "";
+	#==========================================
+	# Extract command name from command string
+	#------------------------------------------
 	$cmd =~ s/^\n//g;
-	$cmd =~ s/^ +//g;
-	$cmd =~ s/ +$//g;
+	$cmd =~ s/^\s+//g;
+	$cmd =~ s/\s+$//g;
 	@prg = split (/[\s|&]+/,"$cmd");
+	$prog= $prg[0];
+	$prog=~ s/^\(//g;
+	#==========================================
+	# write command line to logfile
+	#------------------------------------------
+	if (defined $main::kiwi) {
+		$main::kiwi -> loginfo ("EXEC [$cmd]\n");
+	}
 	#==========================================
 	# Try to find program name in PATH
 	#------------------------------------------
-	my $prog = qx (/usr/bin/which $prg[0]); chomp ($prog);
+	$prog = qx (bash -c "type $prog" 2>&1);
 	my $exit = $?;
 	my $code = $exit >> 8;
-	if ($exit == -1) {
-		$main::kiwi -> loginfo ("EXEC [Failed to call /usr/bin/which: $!]\n");
-		$main::BT.=cluck ($main::TT.$main::TL++);
-		return $exit;
-	}
-	if ($code != 0) {
-		$main::kiwi -> loginfo ("EXEC [Can't find ".$prg[0]."]\n");
-		$main::BT.=cluck ($main::TT.$main::TL++);
-		return $exit;
-	}
-	if (! -x $prog) {
-		$main::kiwi -> loginfo ("EXEC [Program $prog not an executable]\n");
+	if (($code != 0) || ($exit == -1)) {
+		if (defined $main::kiwi) {
+			$main::kiwi->loginfo ("EXEC [Failed: $prog]\n");
+		}
 		$main::BT.=cluck ($main::TT.$main::TL++);
 		return 0xffff;
 	}
 	#==========================================
 	# Call command line
 	#------------------------------------------
-	if (defined $main::kiwi) {
-		$main::kiwi -> loginfo ("EXEC [$cmd]\n");
-	}
 	return qx ($cmd);
 }
 

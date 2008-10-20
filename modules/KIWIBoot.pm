@@ -2380,12 +2380,13 @@ sub setupSplashForGrub {
 			return ("No bootsplash file found in $splfile cpio");
 		}
 	}
-	qxx ("
-		(cd $newspl && find|cpio --quiet -oH newc|$main::Gzip)>$spldir/all.spl"
+	qxx (
+		"(cd $newspl && \
+		find|cpio --quiet -oH newc | $main::Gzip) > $spldir/all.spl"
 	);
-	qxx ("
-		rm -f $newird &&\
-		(cd $irddir && find|cpio --quiet -oH newc|$main::Gzip) > $newird"
+	qxx (
+		"rm -f $newird && \
+		(cd $irddir && find | cpio --quiet -oH newc | $main::Gzip) > $newird"
 	);
 	#==========================================
 	# create splash initrd
