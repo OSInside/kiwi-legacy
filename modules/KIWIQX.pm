@@ -58,15 +58,16 @@ sub qxx ($) {
 	# ---
 	my $cmd = shift;
 	my @prg = "";
+	$cmd =~ s/^\n//g;
 	$cmd =~ s/^ +//g;
 	$cmd =~ s/ +$//g;
-	@prg = split (/\s+/,$cmd);
+	@prg = split (/[\s|&]+/,"$cmd");
 	#==========================================
 	# Try to find program name in PATH
 	#------------------------------------------
 	my $prog = qx (/usr/bin/which $prg[0]); chomp ($prog);
 	my $exit = $?;
-	my $code = $? >> 8;
+	my $code = $exit >> 8;
 	if ($exit == -1) {
 		$main::kiwi -> loginfo ("EXEC [Failed to call /usr/bin/which: $!]\n");
 		$main::BT.=cluck ($main::TT.$main::TL++);
