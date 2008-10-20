@@ -3,6 +3,7 @@ Fri Oct 17 17:55:11 CEST 2008 - ms@suse.de
 
 - v2.93
 - fixed suse-11.1/suse-live-stick example, wrong pattern
+- added file check before calling commands with qxx
 
 -------------------------------------------------------------------
 Thu Oct 16 18:59:05 CEST 2008 - ms@suse.de
