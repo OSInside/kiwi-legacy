@@ -12,8 +12,10 @@
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>False</rpm-check-signatures>
 		<rpm-force>True</rpm-force>
-		<locale>en_US</locale>
-		<keytable>us.map.gz</keytable>
+		<rpm-excludedocs>True</rpm-excludedocs>
+		<locale>en_US.UTF-8</locale>
+		<keytable>de-latin1-nodeadkeys.map.gz</keytable>
+		<timezone>Europe/Berlin</timezone>
 	</preferences>
 	<users group="users">
 		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/home/tux" name="tux"/>
@@ -22,8 +24,8 @@
 		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
 	<repository type="yast2">
-		<source path="/image/CDs/full-i386"/>
-		<!--<source path="opensuse://openSUSE:11.1/standard/"/>-->
+		<!--<source path="/image/CDs/full-i386"/>-->
+		<source path="ftp://dist.suse.de/install/SLP/openSUSE-11.1-Beta3/i386/DVD1"/>
 	</repository>
 	<packages type="image" patternType="plusRecommended">
 		<package name="kernel-default"/>
@@ -36,5 +38,30 @@
 	<packages type="bootstrap">
 		<package name="filesystem"/> 
 		<package name="glibc-locale"/>
+	</packages>
+	<packages type="delete">
+		<package name="MozillaFirefox"/>
+		<package name="OpenOffice_org-branding-openSUSE"/>
+		<package name="OpenOffice_org-templates-labels-a4"/>
+		<package name="OpenOffice_org-calc"/>
+		<package name="OpenOffice_org-thesaurus-en"/>
+		<package name="OpenOffice_org-pyuno"/>
+		<package name="OpenOffice_org-templates-presentation-layouts"/>
+		<package name="OpenOffice_org-icon-themes"/>
+		<package name="OpenOffice_org-writer"/>
+		<package name="OpenOffice_org-impress"/>
+		<package name="OpenOffice_org-Quickstarter"/>
+		<package name="OpenOffice_org-filters"/>
+		<package name="OpenOffice_org-templates-labels-letter"/>
+		<package name="OpenOffice_org-kde"/>
+		<package name="OpenOffice_org-base"/>
+		<package name="OpenOffice_org-mailmerge"/>
+		<package name="OpenOffice_org-hyphen"/>
+		<package name="OpenOffice_org-math"/>
+		<package name="OpenOffice_org-templates-en"/>
+		<package name="OpenOffice_org"/>
+		<package name="OpenOffice_org-draw"/>
+		<package name="koffice"/>
+		<package name="koffice-illustration"/>
 	</packages>
 </image>

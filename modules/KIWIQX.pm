@@ -84,7 +84,7 @@ sub qxx ($) {
 		if (defined $main::kiwi) {
 			$main::kiwi->loginfo ("EXEC [Failed: $prog]\n");
 		}
-		$main::BT.=cluck ($main::TT.$main::TL++);
+		$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
 		return 0xffff;
 	}
 	#==========================================

@@ -29,8 +29,24 @@ echo "Configure image: [$kiwi_iname]..."
 #======================================
 # Activate services
 #--------------------------------------
-suseActivateDefaultServices
+#suseActivateDefaultServices
+suseInsertService sshd
 suseInsertService boot.device-mapper
+suseInsertService sax
+suseRemoveService avahi-dnsconfd
+suseRemoveService avahi-daemon
+
+#==========================================
+# remove unneeded packages
+#------------------------------------------
+rpm -e --nodeps --noscripts \
+	$(rpm -q `baseGetPackagesForDeletion` | grep -v "is not installed")
+
+#==========================================
+# remove package docs
+#------------------------------------------
+rm -rf /usr/share/doc/packages/*
+rm -rf /opt/kde3
 
 #======================================
 # SuSEconfig

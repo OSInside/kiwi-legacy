@@ -2658,7 +2658,7 @@ sub createTmpDirectory {
 		}
 	}
 	if ( $rootError ) {
-		$main::BT.=cluck ($main::TT.$main::TL++);
+		$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
 		return undef;
 	}
 	my $origroot = $root;

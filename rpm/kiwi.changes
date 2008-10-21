@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Tue Oct 21 10:13:10 CEST 2008 - ms@suse.de
+
+- v2.95
+- export ZYPP_CONF to point to /var/cache/kiwi/zypp.conf
+- removed warn overwrite, use eval { Carp::longmess ... }
+- update suse-11.1/suse-live-stick example to serve as
+  1GB stick with KDE4 + dmidecoded X11 setup
+
+-------------------------------------------------------------------
 Mon Oct 20 17:43:21 CEST 2008 - ms@suse.de
 
 - v2.94

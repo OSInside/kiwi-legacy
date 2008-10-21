@@ -303,7 +303,7 @@ sub setupScreenCall {
 			$kiwi -> doNorm();
 		}
 		$this -> resetInstallationSource();
-		$main::BT.=cluck ($main::TT.$main::TL++);
+		$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
 		return undef;
 	}
 	$kiwi -> done ();
@@ -497,6 +497,7 @@ sub setupExcludeDocs {
 				$zconfig->newval('main', $optionParam, 'yes');
 			}
 			$zconfig->RewriteConfig;
+			$kiwi -> done ();
 		}
 	}
 
@@ -564,6 +565,7 @@ sub resetExcludeDocs {
 				$zconfig->delval('main', $optionParam);
 			}
 			$zconfig->RewriteConfig;
+			$kiwi -> done ();
 		}
 	}
 	
@@ -952,6 +954,7 @@ sub installPackages {
 		print $fd "trap clean INT TERM\n";
 		print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
 		print $fd "export YAST_IS_RUNNING=true\n";
+		print $fd "export ZYPP_CONF=/var/cache/kiwi/zypp.conf\n";
 		print $fd "chroot $root @zypper refresh &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
 		print $fd "test \$? = 0 && chroot $root @zypper install ";
@@ -1050,6 +1053,7 @@ sub removePackages {
 		print $fd "trap clean INT TERM\n";
 		print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
 		print $fd "export YAST_IS_RUNNING=true\n";
+		print $fd "export ZYPP_CONF=/var/cache/kiwi/zypp.conf\n";
 		print $fd "chroot $root @zypper refresh &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
 		print $fd "test \$? = 0 && chroot $root @zypper remove ";
@@ -1168,6 +1172,7 @@ sub setupUpgrade {
 		print $fd "trap clean INT TERM\n";
 		print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
 		print $fd "export YAST_IS_RUNNING=true\n";
+		print $fd "export ZYPP_CONF=/var/cache/kiwi/zypp.conf\n";
 		print $fd "chroot $root @zypper refresh &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
 		print $fd "test \$? = 0 && ";
@@ -1427,6 +1432,7 @@ sub setupRootSystem {
 			print $fd "trap clean INT TERM\n";
 			print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
 			print $fd "export YAST_IS_RUNNING=true\n";
+			print $fd "export ZYPP_CONF=$root/var/cache/kiwi/zypp.conf\n";
 			print $fd "@zypper --root $root refresh &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
 			print $fd "test \$? = 0 && ";
@@ -1492,6 +1498,7 @@ sub setupRootSystem {
 			print $fd "trap clean INT TERM\n";
 			print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
 			print $fd "export YAST_IS_RUNNING=true\n";
+			print $fd "export ZYPP_CONF=/var/cache/kiwi/zypp.conf\n";
 			print $fd "chroot $root @zypper refresh &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
 			print $fd "test \$? = 0 && ";

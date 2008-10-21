@@ -26,13 +26,6 @@ use strict;
 $DB::inhibit_exit = 0;
 
 #============================================
-# Overwrite
-#--------------------------------------------
-BEGIN {
-	*CORE::GLOBAL::warn = sub { return $_[0]; };
-}
-
-#============================================
 # Modules
 #--------------------------------------------
 use warnings;
@@ -51,7 +44,7 @@ use KIWITest;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "2.94";
+our $Version       = "2.95";
 our $Publisher     = "SUSE LINUX Products GmbH";
 our $Preparer      = "KIWI - http://kiwi.berlios.de";
 our $openSUSE      = "http://download.opensuse.org/repositories/";
@@ -1917,7 +1910,7 @@ sub checkFileSystem {
 			my $code = $? >> 8;
 			my $type;
 			if ($code != 0) {
-				$main::BT.=cluck ($main::TT.$main::TL++);
+				$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
 				return undef;
 			}
 			SWITCH: for ($data) {
@@ -1953,7 +1946,7 @@ sub checkFileSystem {
 				}
 			}
 		} else {
-			$main::BT.=cluck ($main::TT.$main::TL++);
+			$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
 			return undef;
 		}
 	}
@@ -1971,7 +1964,7 @@ sub getControlFile {
 	my $dir    = shift;
 	my $config = "$dir/$ConfigName";
 	if (! -d $dir) {
-		$main::BT.=cluck ($main::TT.$main::TL++);
+		$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
 		return undef;
 	}
 	if (-f $config) {
@@ -1980,10 +1973,10 @@ sub getControlFile {
 	my @globsearch = glob ($dir."/*.kiwi");
 	my $globitems  = @globsearch;
 	if ($globitems == 0) {
-		$main::BT.=cluck ($main::TT.$main::TL++);
+		$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
 		return undef;
 	} elsif ($globitems > 1) {
-		$main::BT.=cluck ($main::TT.$main::TL++);
+		$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
 		return undef;
 	} else {
 		$config = pop @globsearch;
