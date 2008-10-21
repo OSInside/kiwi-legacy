@@ -1993,7 +1993,7 @@ sub createInstSource {
 	# If it is not available, the option cannot be used.
 	# kiwi then issues a warning and exits.
 	# ----
-	my $kiwi = new KIWILog("tiny");
+	$kiwi = new KIWILog("tiny");
 	eval "require KIWICollect";
 	if($@) {
 		$kiwi->error("Module KIWICollect is not available!");

@@ -293,12 +293,14 @@ sub checkImage {
 		$kiwi -> failed ();
 		return undef;
 	}
-	$data = qxx ("genisoimage -A $appid 2>&1");
-	$code = $? >> 8;
-	if ($code != 0) {
-		$kiwi -> error  ("Failed to setup application ID: $data");
-		$kiwi -> failed ();
-		return undef;
+	if (-x "/usr/bin/genisoimage") {
+		$data = qxx ("genisoimage -A $appid 2>&1");
+		$code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> error  ("Failed to setup application ID: $data");
+			$kiwi -> failed ();
+			return undef;
+		}
 	}
 	return $this;
 }

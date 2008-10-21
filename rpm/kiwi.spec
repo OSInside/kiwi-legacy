@@ -36,9 +36,9 @@ Requires:       qt
 Requires:       perl = %{perl_version}
 Requires:       perl-XML-LibXML perl-libwww-perl screen coreutils
 Requires:       perl-XML-LibXML-Common perl-XML-SAX perl-Config-IniFiles
-Requires:       kiwi-tools libxslt checkmedia genisoimage
+Requires:       kiwi-tools libxslt checkmedia
 %if %{suse_version} > 1030
-Requires:       satsolver-tools
+Requires:       satsolver-tools genisoimage
 %endif
 Summary:        OpenSuSE - KIWI Image System
 Provides:       kiwi2 <= 2.14

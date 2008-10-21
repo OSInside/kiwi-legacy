@@ -85,7 +85,8 @@ sub qxx ($) {
 			$main::kiwi->loginfo ("EXEC [Failed: $prog]\n");
 		}
 		$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
-		return 0xffff;
+		$? = 0xffff;
+		return "$prog: command not found";
 	}
 	#==========================================
 	# Call command line

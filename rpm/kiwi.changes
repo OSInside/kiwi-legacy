@@ -3,6 +3,7 @@ Tue Oct 21 10:13:10 CEST 2008 - ms@suse.de
 
 - v2.95
 - run boot shell only in debug mode (bnc #403207)
+- test for genisoimage before calling it, fixed spec file
 - export ZYPP_CONF to point to /var/cache/kiwi/zypp.conf
 - removed warn overwrite, use eval { Carp::longmess ... }
 - update suse-11.1/suse-live-stick example to serve as
