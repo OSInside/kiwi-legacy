@@ -13,6 +13,8 @@
 		<rpm-check-signatures>False</rpm-check-signatures>
 		<rpm-force>True</rpm-force>
 		<rpm-excludedocs>True</rpm-excludedocs>
+		<oem-swap>no</oem-swap>
+		<oem-boot-title>USB</oem-boot-title>
 		<locale>en_US.UTF-8</locale>
 		<keytable>de-latin1-nodeadkeys.map.gz</keytable>
 		<timezone>Europe/Berlin</timezone>
