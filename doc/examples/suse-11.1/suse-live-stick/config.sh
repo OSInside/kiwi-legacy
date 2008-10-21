@@ -46,6 +46,7 @@ rpm -e --nodeps --noscripts \
 # remove package docs
 #------------------------------------------
 rm -rf /usr/share/doc/packages/*
+rm -rf /usr/share/doc/manual/*
 rm -rf /opt/kde3
 
 #======================================

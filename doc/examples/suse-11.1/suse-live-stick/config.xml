@@ -61,7 +61,30 @@
 		<package name="OpenOffice_org-templates-en"/>
 		<package name="OpenOffice_org"/>
 		<package name="OpenOffice_org-draw"/>
+		<package name="OpenOffice_org-ure"/>
+		<package name="OpenOffice_org-l10n-extras"/>
+		<package name="OpenOffice_org-writer-extensions"/>
+		<package name="OpenOffice_org-components"/>
+		<package name="OpenOffice_org-base-extensions"/>
+		<package name="OpenOffice_org-filters-optional"/>
+		<package name="OpenOffice_org-converter"/>
+		<package name="OpenOffice_org-libs-extern"/>
+		<package name="OpenOffice_org-libs-gui"/>
+		<package name="OpenOffice_org-libs-core"/>
+		<package name="OpenOffice_org-draw-extensions"/>
+		<package name="OpenOffice_org-calc-extensions"/>
+		<package name="OpenOffice_org-help-en-US"/>
+		<package name="OpenOffice_org-impress-extensions"/>
+		<package name="kdegames4-carddecks-other"/>
+		<package name="kdegames4-carddecks-default"/>
+		<package name="libkdegames4"/>
+		<package name="kde4-ksudoku"/>
+		<package name="kde4-kreversi"/>
+		<package name="kde4-kpat"/>
+		<package name="kde4-kmines"/>
+		<package name="kde4-kmahjongg"/>
 		<package name="koffice"/>
 		<package name="koffice-illustration"/>
+		<package name="MozillaFirefox-branding-openSUSE"/>
 	</packages>
 </image>
