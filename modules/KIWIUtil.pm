@@ -534,29 +534,46 @@ sub unpac_package
   my $this = shift;
   my $p_uri = shift;
   my $dir = shift;
-  return if !($this and $p_uri and $dir);
+
+  my $retval = 0;
+
+  if(!($this and $p_uri and $dir)) {
+    $retval = 1;
+    goto up_failed;
+  }
 
   if(! -d $dir) {
-    return if ! mkpath("$dir", { mode => umask });
+    if(!mkpath("$dir", { mode => umask })) {
+      $this->{m_logger}->error("[E] unpac_package: cannot create directory <$dir>");
+      $retval = 2;
+      goto up_failed;
+    }
   }
 
   if($p_uri =~ m{(.*\.tgz|.*\.tar\.gz|.*\.taz|.*\.tar\.Z)}) {
     my $out = qx(cd $dir && tar -zxvfp $p_uri);
     my $status = $?>>8;
     if($status != 0) {
-      $this->{m_logger}->error("[ERROR] command cp $dir && tar xvzfp $p_uri failed!\n");
+      $this->{m_logger}->error("[E] command cp $dir && tar xvzfp $p_uri failed!\n");
       $this->{m_logger}->error("\t$out\n");
+      $retval = 5;
+      goto up_failed;
     }
     else {
-      $this->{m_logger}->info("[INFO] unpacked $p_uri in directory $dir\n");
+      $this->{m_logger}->info("[I] unpacked $p_uri in directory $dir\n");
     }
   }
   elsif($p_uri =~ m{.*\.rpm}i) {
     my $out = qx(cd $dir && unrpm -q $p_uri);
   }
   else {
-    $this->{m_logger}->warning("[WARNING] cannot process file $p_uri\n");
+    $this->{m_logger}->error("[E] cannot process file $p_uri\n");
+    $retval = 4;
+    goto up_failed;
   }
+
+  up_failed:
+  return $retval;
 }
 
 

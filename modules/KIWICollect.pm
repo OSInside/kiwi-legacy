@@ -124,13 +124,39 @@ sub new {
   $this->{m_kiwi}->info("Logging repository specific data to file $this->{m_basedir}/collect.log");
 
   $this->{m_util} = new KIWIUtil($this->{m_logger});
+  if(!$this->{m_util}) {
+    $this->{m_logger}->error("[E] Can't create KIWIUtil object!");
+    return undef;
+  }
+  else {
+    $this->{m_logger}->info("[I] Created new KIWIUtil object\n");
+    $this->{m_kiwi}->info("[I] Created new KIWIUtil object\n");
+  }
 
   $this->{m_urlparser} = new KIWIURL($this->{m_logger});
+  if(!$this->{m_urlparser}) {
+    $this->{m_logger}->error("[E] Can't create KIWIURL object!");
+    return undef;
+  }
+  else {
+    $this->{m_logger}->info("[I] Created new KIWIURL object\n");
+    $this->{m_kiwi}->info("[I] Created new KIWIURL object\n");
+  }
+
 
   # create the product variables administrator object.
   # This must be incubated with the respective data in the Init() method
   $this->{m_proddata} = new KIWIProductData($this);
+  if(!$this->{m_proddata}) {
+    $this->{m_logger}->error("[E] Can't create KIWIProductData object!");
+    return undef;
+  }
+  else {
+    $this->{m_logger}->info("[I] Created new KIWIProductData object\n");
+    $this->{m_kiwi}->info("[I] Created new KIWIProductData object\n");
+  }
 
+  $this->{m_kiwi}->info("KIWICollect object initialisation finished.\n");
   return $this;
 }
 # /constructor
@@ -255,61 +281,108 @@ sub Init
 
   # retrieve data from xml file:
   ## packages list (regular packages)
+  $this->{m_kiwi}->info("KIWICollect::Init: querying instsource package list");
   %{$this->{m_packages}}      = $this->{m_xml}->getInstSourcePackageList();
-  if($this->{m_debug}) {
+  # this list may be empty!
+  $this->{m_kiwi}->info("KIWICollect::Init: queried package list. See packages.dump.pl");
+  #if($this->{m_debug}) {
     open(DUMP, ">", "$this->{m_basedir}/packages.dump.pl");
     print DUMP Dumper($this->{m_packages});
     close(DUMP);
-  }
+  #}
 
   ## architectures information (hash with name|desrc|next, next may be 0 which means "no fallback")
-  #%{$this->{m_archlist}}      = $this->{m_xml}->getInstSourceArchList();
+  # this element is mandatory. Empty = Error
+  $this->{m_kiwi}->info("KIWICollect::Init: querying instsource architecture list");
   $this->{m_archlist} = new KIWIArchList($this);
-  $this->{m_archlist}->addArchs( { $this->{m_xml}->getInstSourceArchList() } );
-  if($this->{m_debug}) {
-    open(DUMP, ">", "$this->{m_basedir}/archlist.dump.pl");
-    print DUMP $this->{m_archlist}->dumpList();
-    close(DUMP);
+  my $archadd = $this->{m_archlist}->addArchs( { $this->{m_xml}->getInstSourceArchList() } );
+  if(not defined($archadd)) {
+    $this->{m_kiwi}->error("KIWICollect::Init: addArchs returned undef");
+    $this->{m_kiwi}->info( Dumper($this->{m_xml}->getInstSourceArchList()));
+    return undef;
   }
+  else {
+    $this->{m_kiwi}->info("KIWICollect::Init: queried archlist. See archlist.dump.pl");
+    #if($this->{m_debug}) {
+      open(DUMP, ">", "$this->{m_basedir}/archlist.dump.pl");
+      print DUMP $this->{m_archlist}->dumpList();
+      close(DUMP);
+    #}
+  }
+
   #cleanup the wasted memory in KIWIXML:
   $this->{m_xml}->clearPackageAttributes();
 
   ## repository information
+  # mandatory. Missing = Error
   %{$this->{m_repos}}	      = $this->{m_xml}->getInstSourceRepository();
-  if($this->{m_debug}) {
-    open(DUMP, ">", "$this->{m_basedir}/repos.dump.pl");
-    print DUMP Dumper($this->{m_repos});
-    close(DUMP);
+  if(!$this->{m_repos}) {
+    $this->{m_kiwi}->error("KIWICollect::Init: getInstSourceRepository returned empty hash");
+    return undef;
+  }
+  else {
+    $this->{m_kiwi}->info("KIWICollect::Init: retrieved repository list. See repos.dump.pl");
+    #if($this->{m_debug}) {
+      open(DUMP, ">", "$this->{m_basedir}/repos.dump.pl");
+      print DUMP Dumper($this->{m_repos});
+      close(DUMP);
+    #}
   }
 
-  @{$this->{m_srclist}}	      = keys %{$this->{m_repos}}; # do we really need this optimisation?
+  #@{$this->{m_srclist}}	      = keys %{$this->{m_repos}}; # do we really need this optimisation?
+
   ## package list (metapackages with extra effort by scripts)
+  # mandatory. Empty = Error
   %{$this->{m_metapackages}}  = $this->{m_xml}->getInstSourceMetaPackageList();
-  if($this->{m_debug}) {
-    open(DUMP, ">", "$this->{m_basedir}/metapackages.dump.pl");
-    print DUMP Dumper($this->{m_metapackages});
-    close(DUMP);
+  if(!$this->{m_metapackages}) {
+    $this->{m_kiwi}->error("KIWICollect::Init: getInstSourceMetaPackageList returned empty hash");
+    return undef;
+  }
+  else {
+    $this->{m_kiwi}->info("KIWICollect::Init: retrieved metapackage list. See metapackages.dump.pl");
+    #if($this->{m_debug}) {
+      open(DUMP, ">", "$this->{m_basedir}/metapackages.dump.pl");
+      print DUMP Dumper($this->{m_metapackages});
+      close(DUMP);
+    #}
   }
 
   ## metafiles: different handling
+  # may be omitted
   %{$this->{m_metafiles}}     = $this->{m_xml}->getInstSourceMetaFiles();
-  if($this->{m_debug}) {
-    open(DUMP, ">", "$this->{m_basedir}/metafiles.dump.pl");
-    print DUMP Dumper($this->{m_metafiles});
-    close(DUMP);
+  if(!$this->{m_metapackages}) {
+    $this->{m_kiwi}->info("KIWICollect::Init: getInstSourceMetaPackageList returned empty hash, no metafiles specified.");
+  }
+  else {
+    $this->{m_kiwi}->info("KIWICollect::Init: retrieved metafile list. See metafiles.dump.pl");
+    #if($this->{m_debug}) {
+      open(DUMP, ">", "$this->{m_basedir}/metafiles.dump.pl");
+      print DUMP Dumper($this->{m_metafiles});
+      close(DUMP);
+    #}
   }
 
   ## info about requirements for chroot env to run metadata scripts
+  # may be empty
   @{$this->{m_chroot}}	      = $this->{m_xml}->getInstSourceChrootList();
-  if($this->{m_debug}) {
+  if(!$this->{m_chroot}) {
+    $this->{m_kiwi}->info("KIWICollect::Init: chroot list is empty hash, no chroot requirements specified");
+  }
+  else {
+  #if($this->{m_debug}) {
     open(DUMP, ">", "$this->{m_basedir}/chroot.dump.pl");
     print DUMP Dumper($this->{m_chroot});
     close(DUMP);
   }
 
-  $this->{m_proddata}->addSet("ProductInfo stuff", {$this->{m_xml}->getInstSourceProductInfo()}, "prodinfo");
-  $this->{m_proddata}->addSet("ProductVar stuff", {$this->{m_xml}->getInstSourceProductVar()}, "prodvars");
-  $this->{m_proddata}->addSet("ProductOption stuff", {$this->{m_xml}->getInstSourceProductOption()}, "prodopts");
+  my ($iadded, $vadded, $oadded);
+  $iadded = $this->{m_proddata}->addSet("ProductInfo stuff", {$this->{m_xml}->getInstSourceProductInfo()}, "prodinfo");
+  $vadded = $this->{m_proddata}->addSet("ProductVar stuff", {$this->{m_xml}->getInstSourceProductVar()}, "prodvars");
+  $oadded = $this->{m_proddata}->addSet("ProductOption stuff", {$this->{m_xml}->getInstSourceProductOption()}, "prodopts");
+  if(not defined($iadded) or not defined($vadded) or not defined($oadded)) {
+    $this->{m_kiwi}->error("KIWICollect::Init: something wrong in the productoptions section"); 
+    return undef;
+  }
   $this->{m_proddata}->_expand(); #once should be it, now--
 
   if($this->{m_debug}) {
@@ -474,14 +547,60 @@ sub mainTask
   my ($collectret, $initmphandlers, $metadatacreate);
 
   $collectret = $this->collectPackages();
-  if($collectret != 0) {
-    $this->{m_logger}->error("[E] collecting packages failed!");
-    $retval = 1;
-  }
-  ## continue only in case of success
-#  else {
-#    $initmphandlers = $this->{m_metacreator}->initialiseHandlers();
-#    if($initmphandlers == 0) {
+  ## HACK: continue anyway, some are false positives
+  #if($collectret != 0) {
+  #  $this->{m_logger}->error("[E] collecting packages failed!");
+  #  $retval = 1;
+  #}
+
+  #else {
+    $this->createMetadata();
+    
+
+    ## Q&D HACK for Adrian: set KIWI_ISO to enable ISO creation
+    if(!$ENV{'KIWI_ISO'}) {
+      return;
+    }
+
+    ## HACK
+    # create ISO using KIWIIsoLinux.pm
+    eval "require KIWIIsoLinux";
+    if($@) {
+      $this->{m_logger}->warning("[W] Module KIWIIsoLinux not loadable: $@\n");
+    }
+    else {
+      my $iso;
+      foreach my $cd($this->getMediaNumbers()) {
+	next if($cd == 0);
+	my $cdname = $this->{m_basesubdir}->{$cd};
+	$cdname =~ s{.*/(.*)/*$}{$1};
+	$iso = new KIWIIsoLinux($this->{m_logger}, $this->{m_basesubdir}->{$cd}, $this->{m_united}."/$cdname.iso");
+	if(!$iso->createSortFile()) {
+	  $this->{m_logger}->error("[E] Cannot create sortfile");
+	}
+	else {
+	  $this->{m_logger}->info("[I] Created sortfile");
+	}
+	if(!$iso->createISOLinuxConfig()) {
+	  $this->{m_logger}->error("[E] Cannot create IsoLinuxConfig");
+	}
+	else {
+	  $this->{m_logger}->info("[I] Created IsoLinux Config");
+	}
+	if(!$iso->createISO()) {
+	  $this->{m_logger}->error("[E] Cannot create Iso image");
+	}
+	else {
+	  $this->{m_logger}->info("[I] Created Iso image <$cdname.iso>");
+	}
+	if(!$iso->checkImage()) {
+	  $this->{m_logger}->error("[E] Tagmedia call failed");
+	}
+	else {
+	  $this->{m_logger}->info("[I] Tagmedia call successful");
+	}
+      }
+    }
 #      $metadatacreate = $this->{m_metacreator}->createMetadata();
 #      # handle return value here
 #    }
@@ -489,8 +608,8 @@ sub mainTask
 #      $this->{m_logger}->error("[E] Initialisation of metadata handlers failed!");
 #      $retval = 10;
 #    }
-#  }
-#  
+  #}
+  
   return $retval;
 }
 # /mainTask
@@ -739,8 +858,8 @@ sub collectPackages
     $this->{m_logger}->info("[I] STEP 1 [collectPackages]");
     $this->{m_logger}->info("[I] expand dir lists for all repositories");
   }
-  #foreach my $r(keys(%{$this->{m_repos}})) {
-  foreach my $r(@{$this->{m_srclist}}) {
+  foreach my $r(keys(%{$this->{m_repos}})) {
+  #foreach my $r(@{$this->{m_srclist}}) {
     my $tmp_ref = \%{$this->{m_repos}->{$r}->{'srcdirs'}};
     foreach my $dir(keys(%{$this->{m_repos}->{$r}->{'srcdirs'}})) {
       # directories are scanned during Init()
@@ -854,10 +973,6 @@ sub collectPackages
   ### step 4: run scripts for other (non-meta) packages
   # TODO (copy/paste?)
   
-
-  ### step 5: create metadata
-  $this->createMetadata();
-
   return $retval;
 }
 # /collectPackages
@@ -975,7 +1090,7 @@ sub unpackMetapackages
 	}
 	if($found==0) {
 	  foreach my $d(@themes) {
-	    if($d =~ m{Linux|SLES}i) {
+	    if($d =~ m{linux|sles|suse}i) {
 	      $this->{m_logger}->info("[I] Using fallback theme $d instead of $thema\n");
 	      $thema = $d;
 	      last;
@@ -1532,7 +1647,7 @@ sub getArchList
       $tmp->{'onlyarch'} =~ s{,\s*}{,}g;
       $tmp->{'onlyarch'} =~ s{,\s*$}{};
       $tmp->{'onlyarch'} =~ s{^\s*,}{};
-      push @archs, split(/,\s/, $tmp->{'onlyarch'});
+      push @archs, split(/,\s*/, $tmp->{'onlyarch'});
       $nofallback = 1;
     }
     else {
@@ -1543,7 +1658,7 @@ sub getArchList
 	$tmp->{'addarch'} =~ s{,\s*}{,}g;
 	$tmp->{'addarch'} =~ s{,\s*$}{};
 	$tmp->{'addarch'} =~ s{^\s*,}{};
-	  push @archs, split(/,\s/, $tmp->{'addarch'});
+	  push @archs, split(/,\s*/, $tmp->{'addarch'});
 	}
       }
       elsif(defined($tmp->{'removearch'})) {
@@ -1552,7 +1667,7 @@ sub getArchList
 	$tmp->{'removearch'} =~ s{,\s*$}{};
 	$tmp->{'removearch'} =~ s{^\s*,}{};
 	push @archs, $this->{m_archlist}->headList();
-	@omits = split(/,\s/, $tmp->{'removearch'});
+	@omits = split(/,\s*/, $tmp->{'removearch'});
 	my @rl;
 	foreach my $x(@omits) {
 	  push @rl, grep(/$x/, @archs);
@@ -1799,7 +1914,6 @@ sub createMetadata
   }
   $cmd = "$listings ".$this->{m_basesubdir}->{'1'};
   @data = qx($cmd);
-  #@data = qx(cd $ENV{'PWD'}/$this->{m_basesubdir}->{'1'} && $listings .);
   undef $cmd;
   $this->{m_logger}->info("[I] [createMetadata] $listings output:\n");
   foreach(@data) {

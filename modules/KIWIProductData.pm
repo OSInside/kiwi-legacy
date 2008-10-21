@@ -74,6 +74,8 @@ sub new
 #------------------------------------------
 # add a set of information to the respective
 # data structure
+# returns the number of elements added
+# ret=0 means all specified vars were already set
 #------------------------------------------
 sub addSet
 {
@@ -83,6 +85,7 @@ sub addSet
   }
   my $name = shift;
   my $hashref = shift;
+  my $num_added = 0;
 
   if(not(defined($name) and defined($hashref))) {
     $this->{m_collect}->logger()->error("Name and hashref must be defined!");
@@ -98,6 +101,7 @@ sub addSet
 	  $this->{$what}->{$index} = \@list;
 	  $this->{$what."-indices"}->{$list[0]} = $index;
 	  $this->{m_prodinfo_updated} = 1;
+	  $num_added++;
 	}
 	else {
 	  $this->{m_collect}->logger()->error("ProductData::addSet(): element with index $index already exists in m_inforef hash!");
@@ -111,6 +115,7 @@ sub addSet
 	if(not defined($this->{$what}->{$name})) {
 	  $this->{$what}->{$name} = $value;
 	  $this->{"m_".$what."_updated"} = 1;
+	  $num_added++;
 	}
 	else {
 	  $this->{m_collect}->logger()->error("ProductData::addSet(): element with index $name already exists in $what hash!");
@@ -122,6 +127,7 @@ sub addSet
 	  $this->{m_collect}->logger()->error("ProductData::addSet(): $what is not a valid element!");
     }
   }
+  return $num_added;
 }
 # /addSet
 

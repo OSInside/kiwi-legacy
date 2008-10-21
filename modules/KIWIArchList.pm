@@ -165,6 +165,7 @@ sub addArchs
     my $head = $hashref->{$a}->[2] eq "0"?"":$hashref->{$a}->[2];
     $this->_addArch($a, $hashref->{$a}->[0], $n, $head);
   }
+  return 0;
 }
 
 
