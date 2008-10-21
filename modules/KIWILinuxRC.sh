@@ -2795,7 +2795,7 @@ function startShell {
 	# /.../
 	# start a debugging shell on ELOG_BOOTSHELL
 	# ----
-	if [ -z "$kiwistderr" ];then
+	if [ -z "$kiwistderr" ] && [ ! -z $kiwidebug ];then
 		Echo "Starting boot shell on $ELOG_BOOTSHELL"
 		setctsid -f $ELOG_BOOTSHELL /bin/bash -i
 	fi
