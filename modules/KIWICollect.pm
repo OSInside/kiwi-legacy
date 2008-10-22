@@ -39,7 +39,7 @@ use File::Find;
 use File::Path;
 use Cwd 'abs_path';
 #use IO::Compress::Gzip qw(gzip $GzipError); # temporarily: as soon as plugins extracted, scratch here
-use PerlIO::gzip qw(gzip $GzipError); # temporarily: as soon as plugins extracted, scratch here
+#use PerlIO::gzip qw(gzip $GzipError); # temporarily: as soon as plugins extracted, scratch here
 
 # remove if not longer necessary:
 use Data::Dumper;
@@ -1798,7 +1798,8 @@ sub createMetadata
     for my $n(@media) {
       my $mediafile = "$this->{m_basesubdir}->{$n}/media.$n/media";
       if(not open(MEDIA, ">", $mediafile)) {
-	die "Cannot create $mediafile";
+	$this->{m_logger}->error("[E] Cannot create file <$mediafile>");
+	return undef;
       }
       print MEDIA "$manufacturer\n";
       print MEDIA qx(date +%Y%m%d%H%M%S);
@@ -1807,6 +1808,14 @@ sub createMetadata
 	print MEDIA scalar(@media)."\n";
       }
       close(MEDIA);
+      ## Q&D patch: create build file:
+      my $bfile = "$this->{m_basesubdir}->{$n}/media.$n/build";
+      if(not open(BUILD, ">", $bfile)) {
+	$this->{m_logger}->error("[E] Cannot create file <$bfile>!");
+	return undef;
+      }
+      print BUILD $this->{m_proddata}->getVar("BUILD_ID");
+      close(BUILD);
     }
   }
   else { 
@@ -1937,6 +1946,10 @@ sub createMetadata
     $this->{m_logger}->error("[E] variables DATADIR and/or DESCRDIR are missing");
     die "MISSING VARIABLES!";
   }
+
+
+## TODO skip /boot if it's empty (should be created by metapackage(s)
+
   foreach my $d($this->getMediaNumbers()) {
     my $dbase = $this->{m_basesubdir}->{$d};
     #my $dbase = $ENV{'PWD'}.$this->{m_basesubdir}->{$d};
