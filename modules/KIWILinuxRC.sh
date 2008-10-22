@@ -3192,7 +3192,12 @@ function bootImage {
 	# boot into the operating system
 	# ----
 	local reboot=no
-	echo && Echo "Booting System: $@"
+	local option=$@
+	#======================================
+	# turn runlevel 4 to 5 if found
+	#--------------------------------------
+	option=$(echo $@ | sed -e s@4@5@)
+	echo && Echo "Booting System: $option"
 	export IFS=$IFS_ORIG
 	#======================================
 	# check for reboot request
@@ -3215,13 +3220,11 @@ function bootImage {
 	# directly boot
 	#--------------------------------------
 	mount -n -o remount,rw / &>/dev/null
+	exec < dev/console >dev/console 2>&1
 	if [ $PIVOT = "true" ];then
-		exec < dev/console >dev/console 2>&1
-		exec umount -n -l /mnt
-	else
-		exec < dev/console >dev/console 2>&1
-		exec chroot . /sbin/init $@
+		umount -n -l /mnt
 	fi
+	exec chroot . /sbin/init $option
 }
 #======================================
 # setupUnionFS
