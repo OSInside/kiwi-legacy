@@ -80,7 +80,6 @@ sub new {
   my $this  = {
     m_metacreator   => undef, # object handling the various metadata types
     m_archlist	    => undef,
-    m_srclist	    => undef,
     m_basedir	    => undef,
     m_repos	    => undef,
     m_xml	    => undef,
@@ -118,10 +117,15 @@ sub new {
 
   # create second logger object to log only the data relevant
   # for repository creation:
-  $this->{m_logger} = new KIWILog("tiny");
-  $this->{m_logger}->setLogHumanReadable();
-  $this->{m_logger}->setLogFile("$this->{m_basedir}/collect.log");
-  $this->{m_kiwi}->info("Logging repository specific data to file $this->{m_basedir}/collect.log");
+  if($this->{m_debug} >= 2) {
+    $this->{m_logger} = $this->{m_kiwi};
+  }
+  else {
+    $this->{m_logger} = new KIWILog("tiny");
+    $this->{m_logger}->setLogHumanReadable();
+    $this->{m_logger}->setLogFile("$this->{m_basedir}/collect.log");
+    $this->{m_kiwi}->info("Logging repository specific data to file $this->{m_basedir}/collect.log");
+  }
 
   $this->{m_util} = new KIWIUtil($this->{m_logger});
   if(!$this->{m_util}) {
@@ -284,12 +288,13 @@ sub Init
   $this->{m_kiwi}->info("KIWICollect::Init: querying instsource package list");
   %{$this->{m_packages}}      = $this->{m_xml}->getInstSourcePackageList();
   # this list may be empty!
-  $this->{m_kiwi}->info("KIWICollect::Init: queried package list. See packages.dump.pl");
-  #if($this->{m_debug}) {
+  $this->{m_kiwi}->info("KIWICollect::Init: queried package list.");
+  if($this->{m_debug}) {
+    $this->{m_kiwi}->info("See packages.dump.pl");
     open(DUMP, ">", "$this->{m_basedir}/packages.dump.pl");
     print DUMP Dumper($this->{m_packages});
     close(DUMP);
-  #}
+  }
 
   ## architectures information (hash with name|desrc|next, next may be 0 which means "no fallback")
   # this element is mandatory. Empty = Error
@@ -302,12 +307,13 @@ sub Init
     return undef;
   }
   else {
-    $this->{m_kiwi}->info("KIWICollect::Init: queried archlist. See archlist.dump.pl");
-    #if($this->{m_debug}) {
+    $this->{m_kiwi}->info("KIWICollect::Init: queried archlist.");
+    if($this->{m_debug}) {
+      $this->{m_kiwi}->info("See archlist.dump.pl");
       open(DUMP, ">", "$this->{m_basedir}/archlist.dump.pl");
       print DUMP $this->{m_archlist}->dumpList();
       close(DUMP);
-    #}
+    }
   }
 
   #cleanup the wasted memory in KIWIXML:
@@ -321,15 +327,14 @@ sub Init
     return undef;
   }
   else {
-    $this->{m_kiwi}->info("KIWICollect::Init: retrieved repository list. See repos.dump.pl");
-    #if($this->{m_debug}) {
+    $this->{m_kiwi}->info("KIWICollect::Init: retrieved repository list.");
+    if($this->{m_debug}) {
+      $this->{m_kiwi}->info("See repos.dump.pl");
       open(DUMP, ">", "$this->{m_basedir}/repos.dump.pl");
       print DUMP Dumper($this->{m_repos});
       close(DUMP);
-    #}
+    }
   }
-
-  #@{$this->{m_srclist}}	      = keys %{$this->{m_repos}}; # do we really need this optimisation?
 
   ## package list (metapackages with extra effort by scripts)
   # mandatory. Empty = Error
@@ -339,12 +344,13 @@ sub Init
     return undef;
   }
   else {
-    $this->{m_kiwi}->info("KIWICollect::Init: retrieved metapackage list. See metapackages.dump.pl");
-    #if($this->{m_debug}) {
+    $this->{m_kiwi}->info("KIWICollect::Init: retrieved metapackage list.");
+    if($this->{m_debug}) {
+      $this->{m_kiwi}->info("See metapackages.dump.pl");
       open(DUMP, ">", "$this->{m_basedir}/metapackages.dump.pl");
       print DUMP Dumper($this->{m_metapackages});
       close(DUMP);
-    #}
+    }
   }
 
   ## metafiles: different handling
@@ -354,12 +360,13 @@ sub Init
     $this->{m_kiwi}->info("KIWICollect::Init: getInstSourceMetaPackageList returned empty hash, no metafiles specified.");
   }
   else {
-    $this->{m_kiwi}->info("KIWICollect::Init: retrieved metafile list. See metafiles.dump.pl");
-    #if($this->{m_debug}) {
+    $this->{m_kiwi}->info("KIWICollect::Init: retrieved metafile list.");
+    if($this->{m_debug}) {
+      $this->{m_kiwi}->info("See metafiles.dump.pl");
       open(DUMP, ">", "$this->{m_basedir}/metafiles.dump.pl");
       print DUMP Dumper($this->{m_metafiles});
       close(DUMP);
-    #}
+    }
   }
 
   ## info about requirements for chroot env to run metadata scripts
@@ -369,10 +376,13 @@ sub Init
     $this->{m_kiwi}->info("KIWICollect::Init: chroot list is empty hash, no chroot requirements specified");
   }
   else {
-  #if($this->{m_debug}) {
-    open(DUMP, ">", "$this->{m_basedir}/chroot.dump.pl");
-    print DUMP Dumper($this->{m_chroot});
-    close(DUMP);
+    $this->{m_kiwi}->info("KIWICollect::Init: retrieved chroot list.");
+    if($this->{m_debug}) {
+      $this->{m_kiwi}->info("See chroot.dump.pl");
+      open(DUMP, ">", "$this->{m_basedir}/chroot.dump.pl");
+      print DUMP Dumper($this->{m_chroot});
+      close(DUMP);
+    }
   }
 
   my ($iadded, $vadded, $oadded);
@@ -440,8 +450,6 @@ sub Init
       $curdir .= "$part/";
       $this->{m_dirlist}->{"$curdir"} = 1;
     }
-    #$this->{m_dirlist}->{"$dirbase/script"} = 1; # who needs that?
-    #$this->{m_dirlist}->{"$dirbase/temp"} = 1;	# who needs that?
     $this->{m_dirlist}->{"$dirbase/media.$n"} = 1;
     $this->{m_basesubdir}->{$n} = "$dirbase";
     $this->{m_dirlist}->{"$this->{m_basesubdir}->{$n}"} = 1;
@@ -452,18 +460,25 @@ sub Init
   $this->{m_basesubdir}->{'0'} = "$this->{m_united}/".$mediumname."0";
   $this->{m_dirlist}->{"$this->{m_united}/".$mediumname."0/temp"} = 1;
   
-  $this->createDirectoryStructure();
+  my $dircreate = $this->createDirectoryStructure();
+  if(not defined($dircreate)) {
+    $this->{m_kiwi}->error("KIWICollect::Init: calling createDirectoryStructure failed");
+    return undef;
+  }
 
   # for debugging:
   if($this->{m_debug}) {
+    $this->{m_kiwi}->info("Debug: dumping packages lsit to <packagelist.txt>");
     $this->dumpPackageList("$this->{m_basedir}/packagelist.txt");
   }
 
+  $this->{m_kiwi}->info("KIWICollect::Init: create LWP module");
   $this->{m_browser} = new LWP::UserAgent;
 
   ## create the metadata handler and load (+verify) all available plugins:
   # the required variables are MEDIUM_NAME, PLUGIN_DIR, INI_DIR
   # should be set by now.
+  $this->{m_kiwi}->info("KIWICollect::Init: create KIWIRepoMetaHandler module");
   $this->{m_metacreator} = new KIWIRepoMetaHandler($this);
   $this->{m_metacreator}->baseurl($this->{m_united});
   $this->{m_metacreator}->mediaName($this->{m_proddata}->getVar('MEDIUM_NAME'));
@@ -859,7 +874,6 @@ sub collectPackages
     $this->{m_logger}->info("[I] expand dir lists for all repositories");
   }
   foreach my $r(keys(%{$this->{m_repos}})) {
-  #foreach my $r(@{$this->{m_srclist}}) {
     my $tmp_ref = \%{$this->{m_repos}->{$r}->{'srcdirs'}};
     foreach my $dir(keys(%{$this->{m_repos}->{$r}->{'srcdirs'}})) {
       # directories are scanned during Init()
@@ -1814,7 +1828,7 @@ sub createMetadata
 	$this->{m_logger}->error("[E] Cannot create file <$bfile>!");
 	return undef;
       }
-      print BUILD $this->{m_proddata}->getVar("BUILD_ID");
+      print BUILD $this->{m_proddata}->getVar("BUILD_ID")."\n";
       close(BUILD);
     }
   }

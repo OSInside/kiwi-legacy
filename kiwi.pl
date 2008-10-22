@@ -55,6 +55,7 @@ our $TT            = "Trace Level ";
 our $ConfigStatus  = 0;
 our $TL            = 1;
 our $BT;
+our $Verbosity     = 0; # control the verbosity level
 #============================================
 # Read $HOME/.kiwirc
 #--------------------------------------------
@@ -1089,6 +1090,7 @@ sub init {
 	#------------------------------------------
 	my $result = GetOptions(
 		"version"               => \&version,
+		"v|verbose+"            => \$Verbosity,
 		"logfile=s"             => \$LogFile,
 		"prepare|p=s"           => \$Prepare,
 		"add-profile=s"         => \@Profiles,
@@ -2022,7 +2024,7 @@ sub createInstSource {
 	#==========================================
 	# Create object...
 	#----------------------------------------
-	my $collect = new KIWICollect ( $kiwi, $xml, $root );
+	my $collect = new KIWICollect ( $kiwi, $xml, $root, $Verbosity );
 	if (! defined( $collect) ) {
 		$kiwi -> error( "Unable to create KIWICollect module." );
 		$kiwi -> failed ();
