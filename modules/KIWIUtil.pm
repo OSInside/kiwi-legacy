@@ -234,7 +234,7 @@ sub splitPathHTTP
       else {
 	# if the path is finished the leaves are stored
 	push @{$targets}, $basepath."/".$link;
-	$this->{m_logger}->info("Storing directory $basepath."/".$link");
+	$this->{m_logger}->info("Storing directory $basepath/$link");
       }
     }
   }
