@@ -1562,85 +1562,6 @@ sub dumpPackageList
 
 
 
-#==========================================
-# checkArchitectureList
-#------------------------------------------
-# As all available RPMs have been downloaded successfully,
-# the big required architecture list must be checked and 
-# the user must be flooded with info/warnings/errors.
-# It is necessary to download _all_ RPM files first to sort
-# out cases where the filename provides no usable information
-#------------------------------------------
-# 
-#sub checkArchitectureList
-#{
-#  my $this = shift;
-#  return undef if !$this;
-#
-#  my $pack = shift;
-#  return undef if !$pack;
-#  
-#  my @ret = ();
-#  # the required architectures as specified in the xml description:
-#  # mapped to 0 means "removed"	(removearch)
-#  #	      1 means "original from xml"
-#  #	      2 means "added" (addarch)
-#  #	      3 means "force" (onlyarch)
-#  # for ADDED (=2) archs no fallback expansion is done!
-#  my %requiredarch = map { $_ => 1 } @{$this->{m_archlist}};
-#
-#  my @addarchs = ();
-#  my @remarchs = ();
-#
-#  if(defined($this->{m_packages}->{$pack}) and $this->{m_packages}->{$pack}->{'onlyarch'}) {
-#    $requiredarch{$this->{m_packages}->{$pack}->{'onlyarch'}} = 3;
-#  }
-#  else {
-#    # step 1 - sort out the one and only definite architecture list:
-#    if(defined($this->{m_packages}->{$pack}) and $this->{m_packages}->{$pack}->{'addarch'}) {
-#      @addarchs = split(',', $this->{m_packages}->{$pack}->{'addarch'});
-#      if(@addarchs) {
-#	$this->{m_logger}->info("[I] Additional architecture(s) for package $pack: ") if $this->{m_debug};
-#	foreach(@addarchs) {
-#	  $this->{m_logger}->info("\t$_");
-#	  $requiredarch{$_} = 2;
-#	}
-#      }
-#    }
-#
-#    if(defined($this->{m_packages}->{$pack}) and $this->{m_packages}->{$pack}->{'removearch'}) {
-#      @remarchs = split(',', $this->{m_packages}->{$pack}->{'removearch'});
-#      if(@remarchs) {
-#	foreach(@remarchs) {
-#	  $requiredarch{$_} = 0;
-#	}
-#      }
-#    }
-#  }
-#
-#  $this->{m_logger}->info("[I] Architectures for package $pack:") if $this->{m_debug};
-#  foreach my $a(keys(%requiredarch)) {
-#    if($requiredarch{$a} == 3) {
-#      $this->{m_logger}->info("\tarch $a forced");
-#      push @ret, $a;
-#      last;
-#    }
-#    elsif($requiredarch{$a} == 1) {
-#      $this->{m_logger}->info("\tarch $a as per global list");
-## BAUSTELLE #      push @ret, $this->getArchListByName($a);
-#    }
-#    elsif($requiredarch{$a} == 2) {
-#      $this->{m_logger}->info("\tarch $a added explicitely");
-#      push @ret, $a;
-#    }
-#    elsif($requiredarch{$a} == 0) {
-#      $this->{m_logger}->info("\tarch $a removed.");
-#    }
-#  }
-#  return @ret;
-#}
-
-
 sub getArchList
 {
   my $this = shift;
@@ -1720,47 +1641,6 @@ sub failedPackagesWarning
   return;
 }
 
-
-
-
-#==========================================
-# hasArch
-#------------------------------------------
-# query a single package for its available
-# architectures
-#------------------------------------------
-# params:
-#   package name
-# returns:
-#   list of available architectures
-#------------------------------------------
-## TODO move this functionality to the KIWIPackage class TODO
-#sub hasArch
-#{
-#  my $this = shift;
-#  my $p = shift;
-#
-#  my @r = ();
-#  my $pinfo = $this->{m_packages}->{$p};
-#  if(!$pinfo) {
-#    $pinfo = $this->{m_metapackages}->{$p};
-#    if(!$pinfo) {
-#      $this->{m_logger}->warning("[WARNING] [hasArch] package $p not found in any package list");
-#      return undef;
-#    }
-#  }
-#
-#  # figure out the reqired architectures:
-#  if(!@{$pinfo}) { # if the ref is an empty list
-#    @r = $this->{m_archlist};
-#  }
-#  else {
-#    
-#  }
-#
-#  return @r;
-#}
-#
 
 
 #==========================================
