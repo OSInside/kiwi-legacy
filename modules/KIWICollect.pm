@@ -1784,28 +1784,28 @@ sub createMetadata
   }
 
 
-  ## step 8: MD5SUMS
-  $this->{m_logger}->info("[I] Calling create_md5sums:");
-  my $md5sums = "/usr/bin/create_md5sums";
-  my $md5opt = $this->{m_proddata}->getVar("MD5OPT");
-  # available option: '--meta'
-  if(not defined($md5opt)) {
-    $md5opt = "";
-  }
-  if(! (-f $md5sums or -x $md5sums)) {
-    $this->{m_logger}->warning("[W] [createMetadata] excutable `$md5sums` not found. Maybe package `inst-source-utils` is not installed?");
-    return;
-  }
-  my $cmd = "$md5sums $md5opt ";
-  $cmd .= $this->{m_basesubdir}->{1}."/".$this->{m_proddata}->getInfo("DATADIR");
-  my @data = qx($cmd);
-  undef $cmd;
-  $this->{m_logger}->info("[I] [createMetadata] $md5sums output:\n");
-  foreach(@data) {
-    chomp $_;
-    $this->{m_logger}->info("\t$_\n");
-  }
-  @data = (); # clear list
+  ### step 8: MD5SUMS
+  #$this->{m_logger}->info("[I] Calling create_md5sums:");
+  #my $md5sums = "/usr/bin/create_md5sums";
+  #my $md5opt = $this->{m_proddata}->getVar("MD5OPT");
+  ## available option: '--meta'
+  #if(not defined($md5opt)) {
+  #  $md5opt = "";
+  #}
+  #if(! (-f $md5sums or -x $md5sums)) {
+  #  $this->{m_logger}->warning("[W] [createMetadata] excutable `$md5sums` not found. Maybe package `inst-source-utils` is not installed?");
+  #  return;
+  #}
+  #my $cmd = "$md5sums $md5opt ";
+  #$cmd .= $this->{m_basesubdir}->{1}."/".$this->{m_proddata}->getInfo("DATADIR");
+  #my @data = qx($cmd);
+  #undef $cmd;
+  #$this->{m_logger}->info("[I] [createMetadata] $md5sums output:\n");
+  #foreach(@data) {
+  #  chomp $_;
+  #  $this->{m_logger}->info("\t$_\n");
+  #}
+  #@data = (); # clear list
 
 
   ## step 9: LISTINGS
