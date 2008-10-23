@@ -425,7 +425,7 @@ sub getPrefix {
 	my $this  = shift;
 	my $level = shift;
 	my $date;
-	#$date = qx (LANG=POSIX /bin/date "+%h-%d %H:%M:%S"); chomp $date;
+	#$date = qx (bash -c 'LANG=POSIX /bin/date "+%h-%d %H:%M:%S'"); chomp $date;
 	my @lt= localtime(time());
 	$date = sprintf ("%s-%02d %02d:%02d:%02d",
 		(qw{Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec})[$lt[4]],

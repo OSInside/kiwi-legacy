@@ -3,6 +3,8 @@ Wed Oct 22 15:43:26 CEST 2008 - ms@suse.de
 
 - v2.96
 - turn runlevel 4 requests into runlevel 5 for suse
+- added usage message for --verbose option
+- fixed POSIX based date call
 
 -------------------------------------------------------------------
 Tue Oct 21 10:13:10 CEST 2008 - ms@suse.de

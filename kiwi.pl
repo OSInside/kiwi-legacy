@@ -55,7 +55,6 @@ our $TT            = "Trace Level ";
 our $ConfigStatus  = 0;
 our $TL            = 1;
 our $BT;
-our $Verbosity     = 0; # control the verbosity level
 #============================================
 # Read $HOME/.kiwirc
 #--------------------------------------------
@@ -194,6 +193,7 @@ our $PackageManager;        # package manager to use for this image
 our $FSBlockSize;           # filesystem block size
 our $FSInodeSize;           # filesystem inode size
 our $FSJournalSize;         # filesystem journal size
+our $Verbosity = 0;         # control the verbosity level
 our $kiwi;                  # global logging handler object
 
 #============================================
@@ -1300,7 +1300,7 @@ sub usage {
 	# image creation system
 	# ---
 	my $kiwi = new KIWILog("tiny");
-	my $date = qxx ( "LANG=POSIX date -I" ); chomp $date;
+	my $date = qxx ( "bash -c 'LANG=POSIX date -I'" ); chomp $date;
 	print "Linux KIWI setup  (image builder) ($date)\n";
 	print "Copyright (c) 2007 - SUSE LINUX Products GmbH\n";
 	print "\n";
@@ -1485,6 +1485,10 @@ sub usage {
 	print "  [ --partitioner <fdisk|parted ]\n";
 	print "    Select the tool to create partition tables. Supported are\n";
 	print "    fdisk (sfdisk) and parted. By default fdisk is used\n";
+	print "\n";
+	print "  [ -v | --verbose <1|2|3> ]\n";
+	print "    Control the verbosity level. At the moment this option\n";
+	print "    has an effect on the create-instsource module only\n";
 	print "--\n";
 	version();
 }
