@@ -1684,6 +1684,31 @@ sub createMetadata
 ### ALTLASTEN ###
 ### TODO more plugins
 
+# moved to beginnig after diffing with autobuild:
+  ## STEP 11: ChangeLog file
+  $this->{m_logger}->info("[I] Running mk_changelog for base directory");
+  my $mk_cl = "/usr/bin/mk_changelog";
+  if(! (-f $mk_cl or -x $mk_cl)) {
+    $this->{m_logger}->warning("[W] [createMetadata] excutable `$mk_cl` not found. Maybe package `inst-source-utils` is not installed?");
+    return;
+  }
+  my @data = qx($mk_cl $this->{m_basesubdir}->{'1'});
+  my $res = $? >> 8;
+  if($res == 0) {
+    $this->{m_logger}->info("[I] $mk_cl finished successfully.");
+  }
+  else {
+    $this->{m_logger}->warning("[W] $mk_cl finished with errors: returncode was $res");
+  }
+  $this->{m_logger}->info("[I] [createMetadata] $mk_cl output:\n");
+  foreach(@data) {
+    chomp $_;
+    $this->{m_logger}->info("\t$_\n");
+  }
+  @data = (); # clear list
+
+
+
   ## step 5: media file
   $this->{m_logger}->info("[I] Creating media file in all media:");
   my $manufacturer = $this->{m_proddata}->getVar("VENDOR");
@@ -1739,16 +1764,20 @@ sub createMetadata
   $this->{m_logger}->info("[I] Creating products file in all media:");
   my $proddir  = $this->{m_proddata}->getVar("PRODUCT_DIR");
   my $prodname = $this->{m_proddata}->getVar("PRODUCT_NAME");
+  my $summary = $this->{m_proddata}->getVar("SUMMARY");
+  my $sp_ver = $this->{m_proddata}->getVar("SP_VERSION");
   my $prodver  = $this->{m_proddata}->getVar("PRODUCT_VERSION");
   my $prodrel  = $this->{m_proddata}->getVar("RELEASE");
   $prodname =~ s/\ /-/g;
-  if(defined($proddir) and defined($prodname) and defined($prodver)) {
+  $prodver .= ".$sp_ver" if defined($sp_ver);
+  if(defined($proddir) and defined($prodname) and defined($prodver) and defined($summary)) {
+    $summary =~ s{\s+}{-}g; # replace space(s) by a single dash
     for my $n($this->getMediaNumbers()) {
       my $productsfile = "$this->{m_basesubdir}->{$n}/media.$n/products";
       if(not open(PRODUCT, ">", $productsfile)) {
 	die "Cannot create $productsfile";
       }
-      print PRODUCT "$proddir $prodname $prodver-$prodrel\n";
+      print PRODUCT "$proddir $summary $prodver-$prodrel\n";
       close(PRODUCT);
     }
   }
@@ -1761,6 +1790,24 @@ sub createMetadata
   }
 
   $this->createBootPackageLinks();
+
+  ## step 9: LISTINGS
+  $this->{m_logger}->info("[I] Calling mk_listings:");
+  my $listings = "/usr/bin/mk_listings";
+  if(! (-f $listings or -x $listings)) {
+    $this->{m_logger}->warning("[W] [createMetadata] excutable `$listings` not found. Maybe package `inst-source-utils` is not installed?");
+    return;
+  }
+  my $cmd = "$listings ".$this->{m_basesubdir}->{'1'};
+  @data = qx($cmd);
+  undef $cmd;
+  $this->{m_logger}->info("[I] [createMetadata] $listings output:\n");
+  foreach(@data) {
+    chomp $_;
+    $this->{m_logger}->info("\t$_\n");
+  }
+  @data = (); # clear list
+
 
 
   ## step 7: SHA1SUMS
@@ -1808,24 +1855,6 @@ sub createMetadata
   #@data = (); # clear list
 
 
-  ## step 9: LISTINGS
-  $this->{m_logger}->info("[I] Calling mk_listings:");
-  my $listings = "/usr/bin/mk_listings";
-  if(! (-f $listings or -x $listings)) {
-    $this->{m_logger}->warning("[W] [createMetadata] excutable `$listings` not found. Maybe package `inst-source-utils` is not installed?");
-    return;
-  }
-  $cmd = "$listings ".$this->{m_basesubdir}->{'1'};
-  @data = qx($cmd);
-  undef $cmd;
-  $this->{m_logger}->info("[I] [createMetadata] $listings output:\n");
-  foreach(@data) {
-    chomp $_;
-    $this->{m_logger}->info("\t$_\n");
-  }
-  @data = (); # clear list
-
-
   ## step 10: DIRECTORY.YAST FILES
   $this->{m_logger}->info("[I] Calling create_directory.yast:");
   my $dy = "/usr/bin/create_directory.yast";
@@ -1841,17 +1870,17 @@ sub createMetadata
     die "MISSING VARIABLES!";
   }
 
-
-## TODO skip /boot if it's empty (should be created by metapackage(s)
-
   foreach my $d($this->getMediaNumbers()) {
     my $dbase = $this->{m_basesubdir}->{$d};
     #my $dbase = $ENV{'PWD'}.$this->{m_basesubdir}->{$d};
     my @dlist;
     push @dlist, "$dbase";
-    push @dlist, "$dbase/boot";
-    push @dlist, glob("$dbase/boot/*");
-    push @dlist, glob("$dbase/boot/*/loader");
+    # boot may be nonexistent if no metapack creates it
+    if(-d "$dbase/boot") {
+      push @dlist, "$dbase/boot" ;
+      push @dlist, glob("$dbase/boot/*");
+      push @dlist, glob("$dbase/boot/*/loader");
+    }
     push @dlist, "$dbase/media.1";
     push @dlist, "$dbase/media.1/license";
     push @dlist, "$dbase/images";
@@ -1869,35 +1898,12 @@ sub createMetadata
       }
     }
   }
-
-  ## STEP 11: ChangeLog file
-  $this->{m_logger}->info("[I] Running mk_changelog for base directory");
-  my $mk_cl = "/usr/bin/mk_changelog";
-  if(! (-f $mk_cl or -x $mk_cl)) {
-    $this->{m_logger}->warning("[W] [createMetadata] excutable `$mk_cl` not found. Maybe package `inst-source-utils` is not installed?");
-    return;
-  }
-  @data = qx($mk_cl $this->{m_basesubdir}->{'1'});
-  my $res = $? >> 8;
-  if($res == 0) {
-    $this->{m_logger}->info("[I] $mk_cl finished successfully.");
-  }
-  else {
-    $this->{m_logger}->warning("[W] $mk_cl finished with errors: returncode was $res");
-  }
-  $this->{m_logger}->info("[I] [createMetadata] $mk_cl output:\n");
-  foreach(@data) {
-    chomp $_;
-    $this->{m_logger}->info("\t$_\n");
-  }
-  @data = (); # clear list
-
-
 }
 # createMetadata
 
 
 
+# returns the number of links created
 sub createBootPackageLinks
 {
   my $this = shift;
@@ -1906,16 +1912,21 @@ sub createBootPackageLinks
   my $base = $this->{m_basesubdir}->{'1'};
   my $datadir = $this->{m_proddata}->getInfo('DATADIR');
 
+  my $retval = 0;
+  if(! -d "$base/boot") {
+    $this->{m_logger}->warning("[W] There is no /boot subdirectory. This may be ok for some media, but might indicate errors in metapackages!");
+    return $retval;
+  }
+
   my %rpmlist_files;
   find( sub { rpmlist_find_cb($this, \%rpmlist_files) }, "$base/boot");
 
   foreach my $arch(keys(%rpmlist_files)) {
     if(not open(RPMLIST, $rpmlist_files{$arch})) {
       $this->{m_logger}->warning("[W] cannot open file $base/boot/$arch/$rpmlist_files{$arch}!");
-      return undef;
+      return -1;
     }
     else {
-      #chdir "$workdir/$base/boot/$arch";
       RPM:foreach my $rpmname(<RPMLIST>) {
 	chomp $rpmname;
 	if(not defined($rpmname) or not defined($this->{m_packages}->{$rpmname})) {
@@ -1939,12 +1950,14 @@ sub createBootPackageLinks
 	      next FARCH;
 	    }
 	    symlink("../../$datadir/$fa/".$tmp{$fa}->{'newfile'}, "$base/boot/$arch/$rpmname.rpm");
+	    $retval++;
 	    next RPM;
 	  }
 	}
       }
     }
   }
+  return $retval;
 }
 
 
