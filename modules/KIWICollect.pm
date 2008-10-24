@@ -468,7 +468,7 @@ sub Init
 
   # for debugging:
   if($this->{m_debug}) {
-    $this->{m_kiwi}->info("Debug: dumping packages lsit to <packagelist.txt>");
+    $this->{m_kiwi}->info("Debug: dumping packages list to <packagelist.txt>");
     $this->dumpPackageList("$this->{m_basedir}/packagelist.txt");
   }
 

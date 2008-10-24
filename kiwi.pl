@@ -2000,6 +2000,7 @@ sub createInstSource {
 	# kiwi then issues a warning and exits.
 	# ----
 	$kiwi = new KIWILog("tiny");
+	$kiwi -> deactivateBackTraceOutput();
 	eval "require KIWICollect";
 	if($@) {
 		$kiwi->error("Module KIWICollect is not available!");
