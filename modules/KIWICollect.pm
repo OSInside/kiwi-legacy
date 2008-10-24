@@ -1015,6 +1015,8 @@ sub unpackMetapackages
   # the second (first explicit) parameter is a list of packages
   my @packlist = @_;
 
+  my $retval = 0;
+
   foreach my $metapack(@packlist) {
     my %tmp = %{$this->{m_metapackages}->{$metapack}};
 
@@ -1036,22 +1038,13 @@ sub unpackMetapackages
     my $tmp = "$this->{m_basesubdir}->{$medium}/temp";
     if(-d $tmp) {
       qx(rm -rf $tmp);
-      #rmdir -p $tmp; #no force available?
     }
     if(!mkpath("$tmp", { mode => umask } )) {
-      $this->{m_logger}->error("[E] can't create dir $tmp\n");
-      die;
+      $this->{m_logger}->error("[E] can't create dir <$tmp>\n");
+      return $retval;;
     }
     
-    #my %dirs = $this->getSrcList($metapack);
-    #if(!%dirs) {
-    #  $this->{m_logger}->error("[E] [unpackMetapackages] dirs not defined!\n");
-    #  next;
-    #  #return undef; # rock hard exit here, can't proceed without the proper input
-    #}
-
     foreach my $arch($this->getArchList($metapack, \$nofallback)) {
-    #foreach my $dir(keys(%dirs)) {
       next if($arch =~ m{(src|nosrc)});
       if(!$this->{m_metapackages}->{$metapack}->{$arch}) {
 	$this->{m_logger}->warning("[W] Metapackage <$metapack> not available for architecure <$arch>!");
@@ -1061,6 +1054,7 @@ sub unpackMetapackages
 	$this->{m_logger}->error("[E] Metapackage <$metapack> has no source defined!");
 	next;
       }
+
       $this->{m_util}->unpac_package($this->{m_metapackages}->{$metapack}->{$arch}->{'source'}, "$tmp");
       ## all metapackages contain at least a CD1 dir and _may_ contain another /usr/share/<name> dir
       qx(cp -r $tmp/CD1/* $this->{m_basesubdir}->{$medium});
@@ -1161,6 +1155,7 @@ sub unpackMetapackages
 	  }
 	  else {
 	    $this->{m_logger}->warning("[W] Undefined values in hash for package $metapack");
+	    #$this->{m_logger}->warning( Dumper($this->{$metapack}));
 	  }
 	}
       }
@@ -1176,6 +1171,7 @@ sub unpackMetapackages
       qx(rm -rf $this->{m_basesubdir}->{$index}/script);
     }
   }
+  return $retval;
 }
 # /executeScripts
 
