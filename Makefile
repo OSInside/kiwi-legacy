@@ -9,6 +9,8 @@ buildroot = /
 syslinux  = /usr/share/syslinux
 bindlib   = lib
 
+XML_CATALOG_FILES = .catalog.xml
+
 export
 
 #============================================
