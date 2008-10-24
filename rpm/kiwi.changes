@@ -2,6 +2,7 @@
 Wed Oct 22 15:43:26 CEST 2008 - ms@suse.de
 
 - v2.96
+- fixed shell exception if redirected to /dev/console (bnc #413474)
 - added XML catalog for XSL stylesheets
 - added functions to activate/deactivate trace output
 - turn runlevel 4 requests into runlevel 5 for suse

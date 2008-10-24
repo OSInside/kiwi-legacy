@@ -164,7 +164,7 @@ function systemException {
 	;;
 	"shell")
 		Echo "shellException: providing shell..."
-		setctsid $ELOG_EXCEPTION /bin/bash -i
+		setctsid $ELOG_EXCEPTION /bin/bash -i || /bin/bash -i
 	;;
 	*)
 		Echo "unknownException..."
@@ -2355,7 +2355,7 @@ function includeKernelParameters {
 		fi
 		kernelKey=`echo $i | cut -f1 -d=`
 		kernelVal=`echo $i | cut -f2 -d=`
-		eval $kernelKey=$kernelVal
+		eval export $kernelKey=$kernelVal
 	done
 	if [ ! -z "$kiwikernelmodule" ];then
 		kiwikernelmodule=`echo $kiwikernelmodule | tr , " "`
