@@ -75,6 +75,7 @@ sub new {
 	$this->{errorOk}   = 0;
 	$this->{state}     = "O";
 	$this->{message}   = "initialize";
+	$this->{used}      = 1;
 	$this -> getPrefix (1);
 	#==========================================
 	# Check for tiny object
@@ -540,7 +541,7 @@ sub printLog {
 }
 
 #==========================================
-# getBackTrace
+# printBackTrace
 #------------------------------------------
 sub printBackTrace {
 	# ...
@@ -549,7 +550,11 @@ sub printBackTrace {
 	# is returned
 	# ---
 	my $this = shift;
+	my $used = $this->{used};
 	my $FD   = $this->{channel};
+	if (! $used) {
+		return $this;
+	}
 	if (! $main::BT) {
 		return $this;
 	}
@@ -564,6 +569,22 @@ sub printBackTrace {
 		print STDERR "[*** end ***]\n";
 	}
 	return $this;
+}
+
+#==========================================
+# activateBackTraceOutput
+#------------------------------------------
+sub activateBackTraceOutput {
+	my $this = shift;
+	$this->{used} = 1;
+}
+
+#==========================================
+# deactivateBackTraceOutput
+#------------------------------------------
+sub deactivateBackTraceOutput {
+	my $this = shift;
+	$this->{used} = 0;
 }
 
 #==========================================
