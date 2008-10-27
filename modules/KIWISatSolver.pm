@@ -120,7 +120,7 @@ sub new {
 		$repo -> addSolvable (*FD); close FD;
 	}
 	$solver = new KIWI::SaT::Solver ($pool);
-	$pool -> createWhatProvides();
+	$pool -> initializeLookupTable();
 	$queue = new KIWI::SaT::Queue;
 	foreach my $p (@{$pref}) {
 		my $name = $p;

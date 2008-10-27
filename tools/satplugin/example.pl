@@ -3,13 +3,13 @@
 use lib './blib/arch/auto/KIWI/SaT';
 
 use strict;
-use SaT;
+use KIWI::SaT;
 
 # Open Solvable file
-open(F, "cat /var/cache/kiwi/satsolver/35e8a611a8c39fc131f9b9b0ec07cd22 |") || die;
+open(F, "cat /var/cache/kiwi/satsolver/12e185e932ba137e4535d33ae2b97db4 |") || die;
 
 # Create Pool and Repository 
-my $pool = new SaT::_Pool;
+my $pool = new KIWI::SaT::_Pool;
 my $repo = $pool -> createRepo('repo');
 
 # Add Solvable to Repository
@@ -17,13 +17,13 @@ $repo -> addSolvable (*F);
 close(F) || die;
 
 # Create Solver
-my $solver = new SaT::Solver ($pool);
+my $solver = new KIWI::SaT::Solver ($pool);
 
 # Create dependencies to provides table
-$pool -> createWhatProvides();
+$pool -> initializeLookupTable();
 
 # Create Queue
-my $queue = new SaT::Queue;
+my $queue = new KIWI::SaT::Queue;
 
 my @pats = qw(apparmor apparmor_opt base devel_C_C++ devel_qt4);
 #my @pats = qw(mono_everything);
@@ -36,7 +36,7 @@ foreach my $p (@pats) {
 		print ("failed to push job: $p\n");
 		next;
 	}
-	$queue -> queuePush ( $SaT::SOLVER_INSTALL_SOLVABLE );
+	$queue -> queuePush ( $KIWI::SaT::SOLVER_INSTALL_SOLVABLE );
 	$queue -> queuePush ( $id );
 }
 

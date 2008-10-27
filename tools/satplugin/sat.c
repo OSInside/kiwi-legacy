@@ -15,7 +15,7 @@ int main (void) {
 	FILE   *fp     = 0;
 	int b;
 	Queue  queue;
-	int fd = open ("/var/cache/kiwi/satsolver/b3f8141972e5f21eed2392c2ee8f581b", O_RDONLY);
+	int fd = open ("/var/cache/kiwi/satsolver/12e185e932ba137e4535d33ae2b97db4", O_RDONLY);
 	if (fd == -1) {
 		return 1;
 	}
@@ -30,6 +30,10 @@ int main (void) {
 
 	Repo *empty_installed = repo_create(pool, "empty");
 
+	#ifdef SOLV_VERSION_8
+	pool_set_installed (pool, empty_installed);
+	pool_addfileprovides (pool);
+	#endif
 	pool_createwhatprovides(pool);
 
 	queue_init (&queue);
@@ -44,7 +48,11 @@ int main (void) {
 	queue_push (&queue, SOLVER_INSTALL_SOLVABLE);
 	queue_push (&queue, select_solvable(new_repo,pool,"pattern:devel_qt4"));
 
+	#ifdef SOLV_VERSION_8
+	solver = solver_create (pool);
+	#else
 	solver = solver_create (pool,empty_installed);
+	#endif
 
 	solver_solve (solver, &queue);
 	

@@ -72,6 +72,14 @@ extern "C"
         pool_createwhatprovides(self);
     }
 
+    void initializeLookupTable (Repo *installed = 0) {
+        #ifdef SOLV_VERSION_8
+        pool_set_installed (self, installed);
+        pool_addfileprovides (self);
+        #endif
+        pool_createwhatprovides (self);
+    }
+
     Solvable *id2solvable(Id p) {
         return pool_id2solvable(self, p);
     }
@@ -187,7 +195,11 @@ extern "C"
 //----------------------------------
 %extend Solver {
     Solver ( Pool *pool, Repo *installed = 0 ) {
+        #ifdef SOLV_VERSION_8
+        return solver_create(pool);
+        #else
         return solver_create(pool, installed);
+        #endif
     }
 
     ~Solver() { solver_free(self); }
