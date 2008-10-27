@@ -343,9 +343,9 @@ fi
 %endif
 #install
 cd $RPM_BUILD_DIR/kiwi
-mkdir -p $RPM_BUILD_ROOT/etc/permissions.d
-echo "/srv/tftpboot/upload root:root 0755" \
-	> $RPM_BUILD_ROOT/etc/permissions.d/kiwi
+#mkdir -p $RPM_BUILD_ROOT/etc/permissions.d
+#echo "/srv/tftpboot/upload/ root:root 0755" \
+#	> $RPM_BUILD_ROOT/etc/permissions.d/kiwi
 make buildroot=$RPM_BUILD_ROOT \
      doc_prefix=$RPM_BUILD_ROOT/%{_defaultdocdir} \
      man_prefix=$RPM_BUILD_ROOT/%{_mandir} \
@@ -434,7 +434,7 @@ rm -rf $RPM_BUILD_ROOT
 %files -n kiwi-pxeboot -f kiwi.loader
 %defattr(-, root, root)
 %doc /srv/tftpboot/README
-%config /etc/permissions.d/kiwi
+#%config /etc/permissions.d/kiwi
 %dir /srv/tftpboot
 %dir /srv/tftpboot/KIWI
 %dir /srv/tftpboot/pxelinux.cfg

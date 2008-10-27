@@ -244,8 +244,12 @@ extern "C"
         Solver* solv = self;
         char name[]  = "/tmp/sat-XXXXXX";
         char* result = (char*)malloc(strlen(name));
+        memset (result,'\0',strlen(name));
         int origout;
-        mkstemp (name);
+        int status = mkstemp (name);
+        if (status == -1) {
+            return result;
+        }
         origout = dup2 (1,origout);
         FILE* fp = freopen(name,"w",stdout);
         solver_printsolutions(solv, job);

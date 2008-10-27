@@ -5,6 +5,7 @@ Mon Oct 27 10:47:35 CET 2008 - ms@suse.de
 - fixed SaT plugin due to API changes (bnc #436249)
 - added the same padding to tagmedia as used with mkisofs
   by default this are 150 sectors (bnc #434563)
+- fixed build and warnings
 
 -------------------------------------------------------------------
 Wed Oct 22 15:43:26 CEST 2008 - ms@suse.de
