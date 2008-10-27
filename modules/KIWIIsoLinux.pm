@@ -286,7 +286,7 @@ sub checkImage {
 	if (! defined $appid) {
 		$appid="undefined";
 	}
-	my $data = qxx ("tagmedia --md5 --check $dest 2>&1");
+	my $data = qxx ("tagmedia --pad 150 --md5 --check $dest 2>&1");
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> error  ("Failed to call tagmedia: $data");
