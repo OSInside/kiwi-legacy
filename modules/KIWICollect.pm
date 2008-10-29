@@ -1562,7 +1562,7 @@ sub getArchList
 {
   my $this = shift;
   my $pack = shift;
-  my $nofallback = shift;
+  my $nofallbackref = shift;
 
   my @archs = ();
   my $ret = 0;
@@ -1579,7 +1579,7 @@ sub getArchList
       $tmp->{'onlyarch'} =~ s{,\s*$}{};
       $tmp->{'onlyarch'} =~ s{^\s*,}{};
       push @archs, split(/,\s*/, $tmp->{'onlyarch'});
-      $nofallback = 1;
+      $$nofallbackref = 1;
     }
     else {
       if(defined($tmp->{'addarch'})) {
