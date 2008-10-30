@@ -2,6 +2,7 @@
 Thu Oct 30 12:18:23 CET 2008 - ms@suse.de
 
 - v2.98
+- use option -A in mkisofs instead of genisoimage -A
 - added support for zypper's target architecture. kiwi allows
   to set the option --target-arch to one of the following
   values: i586, x86_64, armv5tel or ppc. This option should be

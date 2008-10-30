@@ -55,6 +55,7 @@ sub new {
 	my $publisher    = shift;  # publisher string
 	my $preparer     = shift;  # preparer string
 	my $params       = shift;  # mkisofs parameters
+	my $appid        = shift;  # application_id
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
@@ -87,6 +88,13 @@ sub new {
 	if (! defined $params) {
 		$params = '-R -J -pad -joliet-long';
 	}
+	if (! defined $appid) {
+		$appid = "undefined";
+	}
+	#=======================================
+	# set application ID
+	#---------------------------------------
+	$params .= " -A $appid";
 	#=======================================
 	# check /boot/<arch>/loader layout
 	#---------------------------------------
@@ -280,30 +288,14 @@ sub cleanISO {
 #------------------------------------------
 sub checkImage {
 	my $this = shift;
-	my $appid= shift;
 	my $kiwi = $this -> {kiwi};
 	my $dest = $this -> {dest};
-	if (! defined $appid) {
-		$appid="undefined";
-	}
-	my $data = qxx ("tagmedia --md5 $dest 2>&1");
-        if ( defined($this->{m_proddata}->getOpt("RUN_MEDIA_CHECK")) && $this->{m_proddata}->getOpt("RUN_MEDIA_CHECK") eq "true" ){
-	  $data = qxx ("tagmedia --pad 150 --md5 --check $dest 2>&1");
-        };
+	my $data = qxx ("tagmedia --pad 150 --md5 --check $dest 2>&1");
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> error  ("Failed to call tagmedia: $data");
 		$kiwi -> failed ();
 		return undef;
-	}
-	if (-x "/usr/bin/genisoimage") {
-		$data = qxx ("genisoimage -A $appid 2>&1");
-		$code = $? >> 8;
-		if ($code != 0) {
-			$kiwi -> error  ("Failed to setup application ID: $data");
-			$kiwi -> failed ();
-			return undef;
-		}
 	}
 	return $this;
 }
