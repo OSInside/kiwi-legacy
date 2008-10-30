@@ -1149,7 +1149,7 @@ sub unpackMetapackages
 
       if($nokeep == 1) {
 	foreach my $d(keys(%{$this->{m_packages}->{$metapack}})) {
-	  next if($d =~ m{(addarch|removearch|onlyarch|source|script|medium)});
+	  next if($d =~ m{(arch|addarch|removearch|onlyarch|source|script|medium)});
 	  if(defined($this->{m_packages}->{$metapack}->{$d}->{'newpath'}) and defined($this->{m_packages}->{$metapack}->{$d}->{'newfile'})) {
 	    unlink("$this->{m_packages}->{$metapack}->{$d}->{'newpath'}/$this->{m_packages}->{$metapack}->{$d}->{'newfile'}");
 	  }
@@ -1572,6 +1572,23 @@ sub getArchList
   else {
     my $tmp = $this->{m_packages}->{$pack}; #optimisation
     my @omits = ();
+    if(defined($tmp->{'arch'})) {
+      # Check if this is a rule for this platform
+      $tmp->{'arch'} =~ s{,\s*,}{,}g;
+      $tmp->{'arch'} =~ s{,\s*}{,}g;
+      $tmp->{'arch'} =~ s{,\s*$}{};
+      $tmp->{'arch'} =~ s{^\s*,}{};
+      my $found = 0;
+      foreach my $plattform (split(/,\s*/, $tmp->{'arch'})) {
+        foreach my $reqArch ($this->{m_archlist}->headList()) {
+          $found = 1 if ( $reqArch eq $plattform );
+        };
+      };
+      if ( "$found" eq "0" ) {
+        # not our plattform
+        return $ret;
+      }
+    }
     if(defined($tmp->{'onlyarch'})) {
       # allow 'onlyarch="x86_64,i586"'
       $tmp->{'onlyarch'} =~ s{,\s*,}{,}g;
@@ -1982,7 +1999,7 @@ sub getSrcList
 
   my %src;
   foreach my $a(keys(%{$this->{m_packages}->{$p}})) {
-    next if($a =~ m{(addarch|removearch|onlyarch|source|script|medium)});
+    next if($a =~ m{(arch|addarch|removearch|onlyarch|source|script|medium)});
     if(!$this->{m_packages}->{$p}->{$a}->{'source'}) {
       # pack without source is bäh!
       goto error;
