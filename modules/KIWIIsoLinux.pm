@@ -286,7 +286,10 @@ sub checkImage {
 	if (! defined $appid) {
 		$appid="undefined";
 	}
-	my $data = qxx ("tagmedia --pad 150 --md5 --check $dest 2>&1");
+	my $data = qxx ("tagmedia --md5 $dest 2>&1");
+        if ( defined($this->{m_proddata}->getOpt("RUN_MEDIA_CHECK")) && $this->{m_proddata}->getOpt("RUN_MEDIA_CHECK") eq "true" ){
+	  $data = qxx ("tagmedia --pad 150 --md5 --check $dest 2>&1");
+        };
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> error  ("Failed to call tagmedia: $data");
