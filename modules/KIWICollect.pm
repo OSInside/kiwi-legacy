@@ -720,6 +720,7 @@ sub queryRpmHeaders
   }
 
   my $srcmedium = $this->{m_proddata}->getOpt("SOURCEMEDIUM");
+  my $debugmedium = $this->{m_proddata}->getOpt("DEBUGMEDIUM");
   PACK:foreach my $pack(sort(keys(%{$this->{m_packages}}))) {
     my $tmp = $this->{m_packages}->{$pack}; #optimisation
     my $nofallback = 0;
@@ -759,13 +760,6 @@ sub queryRpmHeaders
 	else {
 	  $fb_available = 1;
 	}
-	my $medium;
-	if($tmp && $tmp->{'medium'}) {
-	  $medium = $tmp->{'medium'};
-	}
-	else {
-	  $medium = 1;
-	}
 
 	my $uri = "$tmp->{$fa}->{'targetpath'}/$tmp->{$fa}->{'targetfile'}";
 	if(defined($uri)) {
@@ -781,20 +775,20 @@ sub queryRpmHeaders
 	  }
 
 	  my $ad;
+ 	  my $medium = 1;
+	  $medium = $tmp->{'medium'} if($tmp && $tmp->{'medium'});
 	  if( !$flags{'SOURCERPM'} ) {
 	    # we deal with a source rpm...
 	    $ad = "src";
 	    ## if the user wants all sources onto a certain medium: specify "SOURCEMEDIUM" in config
 	    my $srcmedium = $this->{m_proddata}->getOpt("SOURCEMEDIUM");
-	    if($srcmedium) {
-	      $medium = $srcmedium;
-	    }
-	  }else
-	   {
+	    $medium = $srcmedium if($srcmedium);
+	  }else{
 	    # we deal with regular rpm file...
 	    $ad = $flags{'ARCH'}->[0];
+	    $medium = $debugmedium if ( defined($debugmedium) && $debugmedium > 0
+                                        && ($flags{'NAME'}[0]  =~ /-debuginfo$/ || $flags{'NAME'}[0]  =~ /-debugsource$/) );
 	  }
-
 
 	  my $dstfile = "$this->{'m_basesubdir'}->{$medium}/$base_on_cd/$ad/$tmp->{$fa}->{'targetfile'}";
 	  $dstfile =~ m{(.*/)(.*?/)(.*?/)(.*)[.]([rs]pm)$};
@@ -2083,6 +2077,15 @@ sub getMediaNumbers
   foreach my $p(values(%{$this->{m_packages}}), values(%{$this->{m_metapackages}})) {
     if(defined($p->{'medium'}) and $p->{'medium'} != 0) {
       push @media, $p->{medium};
+    }
+  }
+  my $debugmedium = $this->{m_proddata}->getOpt("DEBUGMEDIUM");
+  if( defined($debugmedium)) {
+    push @media, $debugmedium;
+    foreach my $p(values(%{$this->{m_packages}}), values(%{$this->{m_metapackages}})) {
+      if(defined($p->{'medium'}) and $p->{'medium'} != 0) {
+        push @media, $p->{medium};
+      }
     }
   }
   return sort(KIWIUtil::unify(@media));
