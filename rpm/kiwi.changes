@@ -1,4 +1,25 @@
 -------------------------------------------------------------------
+Thu Oct 30 12:18:23 CET 2008 - ms@suse.de
+
+- v2.98
+- added support for zypper's target architecture. kiwi allows
+  to set the option --target-arch to one of the following
+  values: i586, x86_64, armv5tel or ppc. This option should be
+  used for building cross arch images. Please note:
+  --
+  * Installing packages for another than the build machines
+    architecture additionally requires an environment setup which
+    allows running binaries of that architecture.
+  * One approach to do this is to use QEMU in user mode. Just copy
+    the static qemu binaries from /usr/bin/qemu* into the root/usr/bin
+    directory of your image description. Last step before calling
+    qemu is to run the /usr/sbin/qemu-binfmt-conf.sh script to
+    prepare the environment
+  --
+  Thanks to Jan-Simon Möller, Martin Mohring and Michael Andres
+  for their effort
+
+-------------------------------------------------------------------
 Mon Oct 27 10:47:35 CET 2008 - ms@suse.de
 
 - v2.97

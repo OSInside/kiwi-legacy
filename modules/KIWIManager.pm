@@ -59,11 +59,12 @@ sub new {
 	#==========================================
 	# Module Parameters
 	#------------------------------------------
-	my $kiwi      = shift;
-	my $xml       = shift;
-	my $sourceRef = shift;
-	my $root      = shift;
-	my $manager   = shift;
+	my $kiwi       = shift;
+	my $xml        = shift;
+	my $sourceRef  = shift;
+	my $root       = shift;
+	my $manager    = shift;
+	my $targetArch = shift;
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
@@ -93,14 +94,24 @@ sub new {
 	if (! -d $dataDir) {
 		qxx ("mkdir -p $dataDir");
 	}
-	my $zyppConf = "/var/cache/kiwi/zypp.conf";
-	if (! -f $zyppConf) {
-		qxx ("echo '[main]' > $zyppConf");
-	}
+	my $zyppConf = "/var/cache/kiwi/zypp.conf.$$";
+	qxx ("rm -f /var/cache/kiwi/zypp.conf*");
+	qxx ("echo '[main]' > $zyppConf");
 	$ENV{ZYPP_CONF} = $zyppConf;	
 	my $zconfig = new Config::IniFiles (
 		-file => $zyppConf, -allowedcommentchars => '#'
 	);
+	if (defined $targetArch) {
+		if ($manager eq "zypper") {
+			$kiwi -> info ("Setting target architecture to: $targetArch");
+			$zconfig->setval('main', 'arch', $targetArch);
+			$zconfig->RewriteConfig;
+			$kiwi -> done ();
+		} else {
+			$kiwi -> warning ("Target architecture not supported for $manager");
+			$kiwi -> skipped ();
+		}
+	}
 	my @channelList = ();
 	#==========================================
 	# Store object data
@@ -117,6 +128,7 @@ sub new {
 	$this->{screenCtrl}  = $root."/screenrc.ctrls";
 	$this->{screenLogs}  = $kiwi -> getRootLog();
 	$this->{dataDir}     = $dataDir;
+	$this->{zyppconf}    = $zyppConf;
 	$this->{zconfig}     = $zconfig;
 	$this->{smart}       = [
 		$packageManager{smart},
@@ -954,7 +966,7 @@ sub installPackages {
 		print $fd "trap clean INT TERM\n";
 		print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
 		print $fd "export YAST_IS_RUNNING=true\n";
-		print $fd "export ZYPP_CONF=/var/cache/kiwi/zypp.conf\n";
+		print $fd "export ZYPP_CONF=".$this->{zyppconf}."\n";
 		print $fd "chroot $root @zypper refresh &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
 		print $fd "test \$? = 0 && chroot $root @zypper install ";
@@ -1053,7 +1065,7 @@ sub removePackages {
 		print $fd "trap clean INT TERM\n";
 		print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
 		print $fd "export YAST_IS_RUNNING=true\n";
-		print $fd "export ZYPP_CONF=/var/cache/kiwi/zypp.conf\n";
+		print $fd "export ZYPP_CONF=".$this->{zyppconf}."\n";
 		print $fd "chroot $root @zypper refresh &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
 		print $fd "test \$? = 0 && chroot $root @zypper remove ";
@@ -1172,7 +1184,7 @@ sub setupUpgrade {
 		print $fd "trap clean INT TERM\n";
 		print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
 		print $fd "export YAST_IS_RUNNING=true\n";
-		print $fd "export ZYPP_CONF=/var/cache/kiwi/zypp.conf\n";
+		print $fd "export ZYPP_CONF=".$this->{zyppconf}."\n";
 		print $fd "chroot $root @zypper refresh &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
 		print $fd "test \$? = 0 && ";
@@ -1432,7 +1444,7 @@ sub setupRootSystem {
 			print $fd "trap clean INT TERM\n";
 			print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
 			print $fd "export YAST_IS_RUNNING=true\n";
-			print $fd "export ZYPP_CONF=$root/var/cache/kiwi/zypp.conf\n";
+			print $fd "export ZYPP_CONF=".$root."/".$this->{zyppconf}."\n";
 			print $fd "@zypper --root $root refresh &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
 			print $fd "test \$? = 0 && ";
@@ -1498,7 +1510,7 @@ sub setupRootSystem {
 			print $fd "trap clean INT TERM\n";
 			print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
 			print $fd "export YAST_IS_RUNNING=true\n";
-			print $fd "export ZYPP_CONF=/var/cache/kiwi/zypp.conf\n";
+			print $fd "export ZYPP_CONF=".$this->{zyppconf}."\n";
 			print $fd "chroot $root @zypper refresh &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
 			print $fd "test \$? = 0 && ";

@@ -54,6 +54,7 @@ sub new {
 	my $addPacks     = shift;
 	my $baseRoot     = shift;
 	my $baseRootMode = shift;
+	my $targetArch   = shift;
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
@@ -213,7 +214,7 @@ sub new {
 	# Create package manager object
 	#------------------------------------------
 	my $manager = new KIWIManager (
-		$kiwi,$xml,\%sourceChannel,$root,$pmgr
+		$kiwi,$xml,\%sourceChannel,$root,$pmgr,$targetArch
 	);
 	if (! defined $manager) {
 		if (defined $overlay) {
@@ -307,6 +308,8 @@ sub init {
 	# for smart we need the dpkg default file
 	qxx ("mkdir -p $root/var/lib/dpkg");
 	qxx ("touch $root/var/lib/dpkg/status");
+	qxx ("mkdir -p $root/var/lib/dpkg/updates");
+	qxx ("touch $root/var/lib/dpkg/available");
 	# for building in suse autobuild we need the following file
 	qxx ("touch $root/.buildenv");
 	# need mtab at least empty for mount calls

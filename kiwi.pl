@@ -44,7 +44,7 @@ use KIWITest;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "2.97";
+our $Version       = "2.98";
 our $Publisher     = "SUSE LINUX Products GmbH";
 our $Preparer      = "KIWI - http://kiwi.berlios.de";
 our $openSUSE      = "http://download.opensuse.org/repositories/";
@@ -194,6 +194,7 @@ our $FSBlockSize;           # filesystem block size
 our $FSInodeSize;           # filesystem inode size
 our $FSJournalSize;         # filesystem journal size
 our $Verbosity = 0;         # control the verbosity level
+our $TargetArch;            # target architecture -> writes zypp.conf
 our $kiwi;                  # global logging handler object
 
 #============================================
@@ -354,7 +355,8 @@ sub main {
 		#------------------------------------------
 		$root = new KIWIRoot (
 			$kiwi,$xml,$Prepare,$RootTree,
-			"/base-system",undef,undef,$BaseRoot,$BaseRootMode
+			"/base-system",undef,undef,$BaseRoot,
+			$BaseRootMode,$TargetArch
 		);
 		if (! defined $root) {
 			$kiwi -> error ("Couldn't create root object");
@@ -724,7 +726,8 @@ sub main {
 			#------------------------------------------
 			$root = new KIWIRoot (
 				$kiwi,$xml,$RunTestSuite,undef,
-				"/base-system",$RunTestSuite,undef,$BaseRoot,$BaseRootMode
+				"/base-system",$RunTestSuite,undef,$BaseRoot,
+				$BaseRootMode,$TargetArch
 			);
 			if (! defined $root) {
 				$kiwi -> error ("Couldn't create root object");
@@ -744,7 +747,8 @@ sub main {
 		# create package manager for operations
 		#------------------------------------------
 		my $manager = new KIWIManager (
-			$kiwi,$xml,$xml,$RunTestSuite,$xml -> getPackageManager()
+			$kiwi,$xml,$xml,$RunTestSuite,
+			$xml->getPackageManager(),$TargetArch
 		);
 		#==========================================
 		# set default tests if no names are set
@@ -872,7 +876,8 @@ sub main {
 		#------------------------------------------
 		$root = new KIWIRoot (
 			$kiwi,$xml,$Upgrade,undef,
-			"/base-system",$Upgrade,\@AddPackage,$BaseRoot,$BaseRootMode
+			"/base-system",$Upgrade,\@AddPackage,$BaseRoot,
+			$BaseRootMode,$TargetArch
 		);
 		if (! defined $root) {
 			$kiwi -> error ("Couldn't create root object");
@@ -1150,6 +1155,7 @@ sub init {
 		"fs-journalsize=i"      => \$FSJournalSize,
 		"fs-inodesize=i"        => \$FSInodeSize,
 		"partitioner=s"         => \$Partitioner,
+		"target-arch=s"         => \$TargetArch,
 		"help|h"                => \&usage,
 		"<>"                    => \&usage
 	);
@@ -1482,9 +1488,14 @@ sub usage {
 	print "    the inode size in bytes. This option has no effect if the\n";
 	print "    reiser filesystem is used\n";
 	print "\n";
-	print "  [ --partitioner <fdisk|parted ]\n";
+	print "  [ --partitioner <fdisk|parted> ]\n";
 	print "    Select the tool to create partition tables. Supported are\n";
 	print "    fdisk (sfdisk) and parted. By default fdisk is used\n";
+	print "\n";
+	print "  [ -A | --target-arch <i586|x86_64|armv5tel|ppc> ]\n";
+	print "    Set a special target-architecture. This overrides the \n";
+	print "    used architecture for the image-packages in zypp.conf.\n";
+	print "    When used with smart this option doesn't have any effect.\n";
 	print "\n";
 	print "  [ -v | --verbose <1|2|3> ]\n";
 	print "    Control the verbosity level. At the moment this option\n";
