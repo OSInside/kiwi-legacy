@@ -783,11 +783,18 @@ sub queryRpmHeaders
 	    ## if the user wants all sources onto a certain medium: specify "SOURCEMEDIUM" in config
 	    my $srcmedium = $this->{m_proddata}->getOpt("SOURCEMEDIUM");
 	    $medium = $srcmedium if($srcmedium);
-	  }else{
+	  }
+	  else {
 	    # we deal with regular rpm file...
 	    $ad = $flags{'ARCH'}->[0];
-	    $medium = $debugmedium if ( defined($debugmedium) && $debugmedium > 0
-                                        && ($flags{'NAME'}[0]  =~ /-debuginfo$/ || $flags{'NAME'}[0]  =~ /-debugsource$/) );
+	    if(defined($debugmedium)
+		&& $debugmedium > 0
+		&& ($flags{'NAME'}[0]  =~ /-debuginfo$/
+		    || $flags{'NAME'}[0]  =~ /-debugsource$/
+		    )
+	      ) {
+	      $medium = $debugmedium;
+	    }
 	  }
 
 	  my $dstfile = "$this->{'m_basesubdir'}->{$medium}/$base_on_cd/$ad/$tmp->{$fa}->{'targetfile'}";
@@ -2072,20 +2079,16 @@ sub getMediaNumbers
     $this->{m_kiwi}->error("[E] getMediaNumbers: SOURCEMEDIUM is undefined!");
     return undef;
   }
-
   push @media, $srcmedium;
+
+  my $debugmedium = $this->{m_proddata}->getOpt("DEBUGMEDIUM");
+  if(defined($debugmedium)) {
+    push @media, $debugmedium;
+  }
+
   foreach my $p(values(%{$this->{m_packages}}), values(%{$this->{m_metapackages}})) {
     if(defined($p->{'medium'}) and $p->{'medium'} != 0) {
       push @media, $p->{medium};
-    }
-  }
-  my $debugmedium = $this->{m_proddata}->getOpt("DEBUGMEDIUM");
-  if( defined($debugmedium)) {
-    push @media, $debugmedium;
-    foreach my $p(values(%{$this->{m_packages}}), values(%{$this->{m_metapackages}})) {
-      if(defined($p->{'medium'}) and $p->{'medium'} != 0) {
-        push @media, $p->{medium};
-      }
     }
   }
   return sort(KIWIUtil::unify(@media));
