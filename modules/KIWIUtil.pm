@@ -212,11 +212,11 @@ sub splitPathHTTP
   foreach my $line(@lines) {
     # skip "parent dir" to avoid cycles
     next if($line =~ m{parent.+directory}i);
-    next if($line !~ m{<img.*href="(.*)\/">});
+    next if($line !~ m{<(img|a).*href="(.*)\/">});
 
     $atleastonce++; # at least ONE match means the dir contains subdirs!
 
-    my $link = $1;
+    my $link = $2;
     $link =~ s{^[./]+}{}g;
     # remove leading path. This only happens once: if the root dir is read
     # In that case the server puts the whole path into the link
@@ -405,11 +405,11 @@ sub expandFilenameHTTP
   #------------------------------------------
   my @lines    = split (/\n/,$content);
   foreach my $line (@lines) {
-    next if($line !~ /<img.*?href="(.*?)">.*/);
+    next if($line !~ /<(img|a).*?href="(.*?)">.*/);
     # skip "parent dir" to avoid cycles
     next if($line =~ /parent.+directory/i);
 
-    my $link = $1;
+    my $link = $2;
     $link =~ s{^[./]+}{}g;
     # /.../
     # remove leading path. This only happens once: if the root dir is read
