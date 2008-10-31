@@ -19,7 +19,7 @@ Thu Oct 30 12:18:23 CET 2008 - ms@suse.de
     qemu is to run the /usr/sbin/qemu-binfmt-conf.sh script to
     prepare the environment
   --
-  Thanks to Jan-Simon Möller, Martin Mohring and Michael Andres
+  Thanks to Jan-Simon Moeller, Martin Mohring and Michael Andres
   for their effort
 
 -------------------------------------------------------------------
