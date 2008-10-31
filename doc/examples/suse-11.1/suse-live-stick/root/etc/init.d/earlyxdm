@@ -10,8 +10,8 @@
 # /etc/init.d/earlyxdm
 #
 ### BEGIN INIT INFO
-# Provides:          earlyxdm sax
-# Required-Start:    earlysyslog $local_fs
+# Provides:          earlyxdm
+# Required-Start:    earlysyslog $local_fs sax
 # Should-Start:      gpm firstboot resmgr haldaemon
 # Required-Stop:
 # Default-Start:     5

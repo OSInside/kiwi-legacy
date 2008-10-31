@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Oct 31 17:39:57 CET 2008 - ms@suse.de
+
+- v2.99
+- fixed usbboot to check for LOCAL_BOOT correctly
+- fixed suse-11.1/suse-live-stick earlyxdm meta data
+
+-------------------------------------------------------------------
 Thu Oct 30 12:18:23 CET 2008 - ms@suse.de
 
 - v2.98

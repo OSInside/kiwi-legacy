@@ -100,7 +100,7 @@ if [ $FSTYPE = "unknown" ];then
 fi
 
 #======================================
-# 9) Resize filesystem to full space
+# 9) Setup union on compressed root
 #--------------------------------------
 Echo "Filesystem of stick system is: $FSTYPE -> $stickDevice"
 if isFSTypeReadOnly;then
@@ -116,28 +116,33 @@ fi
 validateRootTree
 
 #======================================
-# 11) Create system dependant files
+# 11) check for local boot
+#--------------------------------------
+if [ -e /mnt/etc/ImagePackages ];then
+	export LOCAL_BOOT=yes
+fi
+
+#======================================
+# 12) Create system dependant files
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
-	if test $systemIntegrity = "clean";then
-		setupDefaultFstab /config
-		updateRootDeviceFstab /config $stickDevice
-	fi
+	setupDefaultFstab /config
+	updateRootDeviceFstab /config $stickDevice
 fi
 
 #======================================
 # 12) copy system dependant files
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
-	if test $systemIntegrity = "clean";then
-		setupConfigFiles
-	fi
+	setupConfigFiles
 fi
 
 #======================================
 # 13) update system dependant files
 #--------------------------------------
-setupInittab /mnt
+if [ $LOCAL_BOOT = "no" ];then
+	setupInittab /mnt
+fi
 
 #======================================
 # 14) setup real root device

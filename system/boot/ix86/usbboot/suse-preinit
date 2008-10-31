@@ -26,21 +26,26 @@ Echo "Calling pre-init stage in system image"
 errorLogStart
 
 #======================================
-# 2) update mount table
+# 2) check for LOCAL_BOOT
+#--------------------------------------
+if [ $LOCAL_BOOT = "yes" ];then
+	exit 0
+fi
+
+#======================================
+# 3) update mount table
 #--------------------------------------
 updateMTAB
 
 #======================================
-# 3) create framebuffer devices
+# 4) create framebuffer devices
 #--------------------------------------
 createFramebufferDevices
 
 #======================================
 # 4) create /etc/ImagePackages
 #--------------------------------------
-if test $systemIntegrity = "clean";then
-	if [ -x /bin/rpm ];then
-		Echo "Creating initial image package info file"
-		rpm -qa --last > /etc/ImagePackages
-	fi
+if [ -x /bin/rpm ];then
+	Echo "Creating initial image package info file"
+	rpm -qa --last > /etc/ImagePackages
 fi
