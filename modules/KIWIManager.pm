@@ -104,7 +104,7 @@ sub new {
 	if (defined $targetArch) {
 		if ($manager eq "zypper") {
 			$kiwi -> info ("Setting target architecture to: $targetArch");
-			$zconfig->setval('main', 'arch', $targetArch);
+			$zconfig->newval('main', 'arch', $targetArch);
 			$zconfig->RewriteConfig;
 			$kiwi -> done ();
 		} else {
@@ -504,7 +504,7 @@ sub setupExcludeDocs {
 		if (defined $imgExclDocs) {
 			$kiwi -> info ("Setting RPM doc exclusion to: $imgExclDocs");
 			if (defined $curExclDocs) {
-				$zconfig->setval('main', $optionParam, 'yes');
+				$zconfig->newval('main', $optionParam, 'yes');
 			} else {
 				$zconfig->newval('main', $optionParam, 'yes');
 			}
@@ -571,7 +571,7 @@ sub resetExcludeDocs {
 			my $optionParam = 'rpm.install.excludedocs';
 			if (defined $curExclDocs) {
 				$kiwi -> info ("Resetting RPM doc exclusion to: $curExclDocs");
-				$zconfig->setval('main', $optionParam, $curExclDocs);
+				$zconfig->newval('main', $optionParam, $curExclDocs);
 			} else {
 				$kiwi -> info ("Unsetting RPM doc exclusion");
 				$zconfig->delval('main', $optionParam);
