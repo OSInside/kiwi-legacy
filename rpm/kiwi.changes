@@ -2,6 +2,8 @@
 Thu Oct 30 12:18:23 CET 2008 - ms@suse.de
 
 - v2.98
+- enhanced suse-11.1/suse-live-stick example to make use
+  of the yast2-firstboot configuration step
 - use option -A in mkisofs instead of genisoimage -A
 - added support for zypper's target architecture. kiwi allows
   to set the option --target-arch to one of the following
