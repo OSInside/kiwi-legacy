@@ -1080,128 +1080,135 @@ sub unpackMetapackages
       return $retval;;
     }
 
-    ARCH:foreach my $arch($this->getArchList($this->{m_metaPacks}, $metapack, \$nofallback)) {
-      next if($arch =~ m{(src|nosrc)});
-      PACKKEY:foreach my $packKey(keys(%{$poolPackages})) {
-        my $packPointer = $poolPackages->{$packKey};
-        next PACKKEY if(!$packPointer->{'localfile'}); # should not be needed
-        next PACKKEY if($packPointer->{arch} ne $arch);
+    my $nofallback = 0;
+    ARCH:foreach my $reqArch($this->getArchList($this->{m_metaPacks}, $metapack, \$nofallback)) {
+      next if($reqArch =~ m{(src|nosrc)});
+      my @archs;
+      push @archs, $reqArch;
+      push @archs, $this->{m_archlist}->fallbacks($reqArch) if ($nofallback==0);
 
-        $this->{m_logger}->info("[I] unpack $packPointer->{'localfile'} \n");
-        $this->{m_util}->unpac_package($packPointer->{'localfile'}, "$tmp");
-        ## all metapackages contain at least a CD1 dir and _may_ contain another /usr/share/<name> dir
-        if ( -d "$tmp/CD1") {
-          qx(cp -r $tmp/CD1/* $this->{m_basesubdir}->{$medium}) if ( -d "$tmp/CD1")
-        }else{
-          $this->{m_logger}->info("[I] No CD1 directory on $packPointer->{name} \n");
-        }
-        for my $sub("usr", "etc") {
-          if(-d "$tmp/$sub") {
-            qx(cp -r $tmp/$sub $this->{m_basesubdir}->{$medium});
-          }
-        }
-        ## copy content of CD2 ... CD<i> subdirs if exists:
-        for(2..10) {
-          if(-d "$tmp/CD$_" and defined $this->{m_basesubdir}->{$_}) {
-            qx(cp -r $tmp/CD$_/* $this->{m_basesubdir}->{$_});
-            $this->{m_logger}->info("[I] Unpack CD$_ for $packPointer->{name} \n");
-          }
-          ## add handling for "DVD<i>" subdirs if necessary FIXME
-        }
+      FARCH:foreach my $arch(@archs) {
+        PACKKEY:foreach my $packKey(keys(%{$poolPackages})) {
+          my $packPointer = $poolPackages->{$packKey};
+          next PACKKEY if(!$packPointer->{'localfile'}); # should not be needed
+          next PACKKEY if($packPointer->{arch} ne $arch);
 
-        ## THEMING
-        $this->{m_logger}->info("[I] Handling theming for package $metapack\n") if $this->{m_debug};
-        my $thema = $this->{m_proddata}->getVar("PRODUCT_THEME");
-        if(not defined($thema)) {
-          $this->{m_logger}->error("[E] unpackMetapackages: PRODUCT_THEME undefined!");
-          die;# TODO clean solution
-        }
-        $this->{m_logger}->info("\ttarget theme $thema\n");
-
-        if(-d "$tmp/SuSE") {
-          if(not opendir(TD, "$tmp/SuSE")) {
-            $this->{m_logger}->warning("[W] [unpackMetapackages] Can't open theme directory for reading!\nSkipping themes for package $metapack\n");
-            next;
+          $this->{m_logger}->info("[I] unpack $packPointer->{'localfile'} \n");
+          $this->{m_util}->unpac_package($packPointer->{'localfile'}, "$tmp");
+          ## all metapackages contain at least a CD1 dir and _may_ contain another /usr/share/<name> dir
+          if ( -d "$tmp/CD1") {
+            qx(cp -r $tmp/CD1/* $this->{m_basesubdir}->{$medium}) if ( -d "$tmp/CD1")
+          }else{
+            $this->{m_logger}->info("[I] No CD1 directory on $packPointer->{name} \n");
           }
-          my @themes = readdir(TD);
-          closedir(TD);
-          my $found=0;
-          foreach my $d(@themes) {
-            if($d =~ m{$thema}i) {
-              $this->{m_logger}->info("[I] Using thema $d\n");
-              $thema = $d;	# changed after I saw that yast2-slideshow has a thema "SuSE-SLES" (matches "SuSE", but not in line 831)
-              $found=1;
-              last;
+          for my $sub("usr", "etc") {
+            if(-d "$tmp/$sub") {
+              qx(cp -r $tmp/$sub $this->{m_basesubdir}->{$medium});
             }
           }
-          if($found==0) {
+          ## copy content of CD2 ... CD<i> subdirs if exists:
+          for(2..10) {
+            if(-d "$tmp/CD$_" and defined $this->{m_basesubdir}->{$_}) {
+              qx(cp -r $tmp/CD$_/* $this->{m_basesubdir}->{$_});
+              $this->{m_logger}->info("[I] Unpack CD$_ for $packPointer->{name} \n");
+            }
+            ## add handling for "DVD<i>" subdirs if necessary FIXME
+          }
+
+          ## THEMING
+          $this->{m_logger}->info("[I] Handling theming for package $metapack\n") if $this->{m_debug};
+          my $thema = $this->{m_proddata}->getVar("PRODUCT_THEME");
+          if(not defined($thema)) {
+            $this->{m_logger}->error("[E] unpackMetapackages: PRODUCT_THEME undefined!");
+            die;# TODO clean solution
+          }
+          $this->{m_logger}->info("\ttarget theme $thema\n");
+
+          if(-d "$tmp/SuSE") {
+            if(not opendir(TD, "$tmp/SuSE")) {
+              $this->{m_logger}->warning("[W] [unpackMetapackages] Can't open theme directory for reading!\nSkipping themes for package $metapack\n");
+              next;
+            }
+            my @themes = readdir(TD);
+            closedir(TD);
+            my $found=0;
             foreach my $d(@themes) {
-              if($d =~ m{linux|sles|suse}i) {
-                $this->{m_logger}->info("[I] Using fallback theme $d instead of $thema\n");
-                $thema = $d;
+              if($d =~ m{$thema}i) {
+                $this->{m_logger}->info("[I] Using thema $d\n");
+                $thema = $d;	# changed after I saw that yast2-slideshow has a thema "SuSE-SLES" (matches "SuSE", but not in line 831)
+                $found=1;
                 last;
               }
             }
-          }
-          ## $thema is now the thema to use:
-          for my $i(1..3) {
-            ## @lars: wtf soll denn sein, wenn es CD2 gibt, aber die Konfig der Medien kein Medium "2" hat?
-            ## Laut Rudi (tm) ist das zulässig!
-            if(-d "$tmp/SuSE/$thema/CD$i" and $this->{m_basesubdir}->{$i} and -d "$tmp/SuSE/$thema/CD$i") {
-              qx(cp -a $tmp/SuSE/$thema/CD$i/* $this->{m_basesubdir}->{$i});
+            if($found==0) {
+              foreach my $d(@themes) {
+                if($d =~ m{linux|sles|suse}i) {
+                  $this->{m_logger}->info("[I] Using fallback theme $d instead of $thema\n");
+                  $thema = $d;
+                  last;
+                }
+              }
+            }
+            ## $thema is now the thema to use:
+            for my $i(1..3) {
+              ## @lars: wtf soll denn sein, wenn es CD2 gibt, aber die Konfig der Medien kein Medium "2" hat?
+              ## Laut Rudi (tm) ist das zulässig!
+              if(-d "$tmp/SuSE/$thema/CD$i" and $this->{m_basesubdir}->{$i} and -d "$tmp/SuSE/$thema/CD$i") {
+                qx(cp -a $tmp/SuSE/$thema/CD$i/* $this->{m_basesubdir}->{$i});
+              }
             }
           }
-        }
 
-        ## handling optional special scripts if given (``anchor of the last choice'')
-        if($packOptions{'script'}) {
-          my $scriptfile;
-          $packOptions{'script'} =~ m{.*/([^/]+)$};
-          if(defined($1)) {
-            $scriptfile = $1;
+          ## handling optional special scripts if given (``anchor of the last choice'')
+          if($packOptions{'script'}) {
+            my $scriptfile;
+            $packOptions{'script'} =~ m{.*/([^/]+)$};
+            if(defined($1)) {
+              $scriptfile = $1;
+            }
+            else {
+              $this->{m_logger}->warning("[W] [executeScripts] malformed script name: $packOptions{'script'}");
+              next;
+            }
+
+            print "Downloading script $packOptions{'script'} to $this->{m_scriptbase}:";
+            $this->{m_xml}->getInstSourceFile($packOptions{'script'}, "$this->{m_scriptbase}/$scriptfile");
+
+            # TODO I don't like this. Not at all. use chroot in next version!
+            qx(chmod u+x "$this->{m_scriptbase}/$scriptfile");
+            $this->{m_logger}->info("[I] [executeScripts] Execute script $this->{m_scriptbase}/$scriptfile:\n");
+            if(-f "$this->{m_scriptbase}/$scriptfile" and -x "$this->{m_scriptbase}/$scriptfile") {
+              my $status = qx($this->{m_scriptbase}/$scriptfile);
+              my $retcode = $? >> 8;
+              print "STATUS:\n$status\n";
+              print "RETURNED:\n$retcode\n";
+            }
+            else {
+              $this->{m_logger}->warning("[W] [executeScripts] script ".$this->{m_scriptbase}."/$scriptfile for metapackage $metapack could not be executed successfully!\n");
+            }
           }
           else {
-            $this->{m_logger}->warning("[W] [executeScripts] malformed script name: $packOptions{'script'}");
-            next;
+            $this->{m_logger}->info("[I] No script defined for metapackage $metapack\n");
           }
 
-          print "Downloading script $packOptions{'script'} to $this->{m_scriptbase}:";
-          $this->{m_xml}->getInstSourceFile($packOptions{'script'}, "$this->{m_scriptbase}/$scriptfile");
-
-          # TODO I don't like this. Not at all. use chroot in next version!
-          qx(chmod u+x "$this->{m_scriptbase}/$scriptfile");
-          $this->{m_logger}->info("[I] [executeScripts] Execute script $this->{m_scriptbase}/$scriptfile:\n");
-          if(-f "$this->{m_scriptbase}/$scriptfile" and -x "$this->{m_scriptbase}/$scriptfile") {
-            my $status = qx($this->{m_scriptbase}/$scriptfile);
-            my $retcode = $? >> 8;
-            print "STATUS:\n$status\n";
-            print "RETURNED:\n$retcode\n";
-          }
-          else {
-            $this->{m_logger}->warning("[W] [executeScripts] script ".$this->{m_scriptbase}."/$scriptfile for metapackage $metapack could not be executed successfully!\n");
-          }
-        }
-        else {
-          $this->{m_logger}->info("[I] No script defined for metapackage $metapack\n");
-        }
-
-#        if($nokeep == 1) {
-#          foreach my $d(keys(%{$this->{m_repoPacks}->{$metapack}})) {
-#            next if($d =~ m{(arch|addarch|removearch|onlyarch|source|script|medium)});
-#            if(defined($this->{m_repoPacks}->{$metapack}->{$d}->{'newpath'}) and defined($this->{m_repoPacks}->{$metapack}->{$d}->{'newfile'})) {
-#              unlink("$this->{m_repoPacks}->{$metapack}->{$d}->{'newpath'}/$this->{m_packages}->{$metapack}->{$d}->{'newfile'}");
-#            }
-#            else {
-#              $this->{m_logger}->warning("[W] Undefined values in hash for package $metapack");
-#              #$this->{m_logger}->warning( Dumper($this->{$metapack}));
+#          if($nokeep == 1) {
+#            foreach my $d(keys(%{$this->{m_repoPacks}->{$metapack}})) {
+#              next if($d =~ m{(arch|addarch|removearch|onlyarch|source|script|medium)});
+#              if(defined($this->{m_repoPacks}->{$metapack}->{$d}->{'newpath'}) and defined($this->{m_repoPacks}->{$metapack}->{$d}->{'newfile'})) {
+#                unlink("$this->{m_repoPacks}->{$metapack}->{$d}->{'newpath'}/$this->{m_packages}->{$metapack}->{$d}->{'newfile'}");
+#              }
+#              else {
+#                $this->{m_logger}->warning("[W] Undefined values in hash for package $metapack");
+#                #$this->{m_logger}->warning( Dumper($this->{$metapack}));
+#              }
 #            }
 #          }
-#        }
-        # success, found package for arch
-        next ARCH;
+          # success, found package for arch
+          next ARCH;
+        }
       }
       # we should not reach this ...
-      $this->{m_logger}->warning("[W] Metapackage <$metapack> not available for architecure <$arch>!");
+      $this->{m_logger}->warning("[W] Metapackage <$metapack> not available for architecure <$reqArch>!");
     }
   }
 
@@ -1474,7 +1481,7 @@ sub getArchList
 
   my @archs = ();
   my $ret = 0;
-  
+
   return $ret if(not defined($packName));
 
   my @omits = ();
