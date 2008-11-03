@@ -753,17 +753,29 @@ sub setupPackageFiles
     return $retval;
   }
 
+  my $last_progress_time = 0;
+  my $count_packs = 0;
+  my $num_packs = keys %{$usedPackages};
+
   PACK:foreach my $packName(keys(%{$usedPackages})) {
+    next if $packName eq "_name";
     my $packOptions = $usedPackages->{$packName}; #input options from kiwi files
     my $poolPackages = $this->{m_packagePool}->{$packName}; #pointer to local package pool hash
     my $nofallback = 0;
     my @archs;
+    $count_packs++;
     if ( $mode eq 2 ) {
       push @archs, 'src', 'nosrc';
     }else{
       @archs = $this->getArchList($packOptions, $packName, \$nofallback);
     }
-    $this->{m_logger}->info("[I] Evaluate package $packName for @archs\n") if $this->{m_debug} >= 4;
+    if ( $this->{m_debug} >= 1 ) {
+      if ( $last_progress_time < time() ){
+  	$this->{m_logger}->info("  process $usedPackages->{_name}->{label} package links: ($count_packs/$num_packs)");
+        $last_progress_time = time() + 5;
+      }
+      $this->{m_logger}->info("[I] Evaluate package $packName for @archs\n") if $this->{m_debug} >= 4;
+    }
 
 #    if ( $packOptions->{pointers} ) {
 #      # A package has been found in former runs, do not evaluate, just take it
@@ -827,7 +839,13 @@ sub setupPackageFiles
           if(!-e "$packOptions->{'newpath'}/$packOptions->{'newfile'}" and !link $packPointer->{'localfile'}, "$packOptions->{'newpath'}/$packOptions->{'newfile'}") {
             $this->{m_logger}->error("[E]   linking file $packPointer->{'localfile'} to $packOptions->{'newpath'}/$packOptions->{'newfile'} failed");
           } else {
-            $this->{m_logger}->info("[I]   package $packName found for architecture $arch (fallback of $requestedArch) in repo ") if $this->{m_debug} >= 2;
+            if ($this->{m_debug} >= 2) {
+              if ($arch eq $requestedArch) {
+                $this->{m_logger}->info("[I]   package $packName found for architecture $arch as $packKey");
+              }else{
+                $this->{m_logger}->info("[I]   package $packName found for architecture $arch (fallback of $requestedArch) as $packKey");
+              }
+            }
             if ( $mode eq 1 && $packPointer->{sourcepackage} ) {
               my $srcname = $packPointer->{sourcepackage};
               $srcname =~ s/-[^-]*-[^-]*\.[^\.]*\.[^\.]*\.rpm$//; # this strips everything, except main name
@@ -866,7 +884,7 @@ sub setupPackageFiles
               };
             }
           }
-	  next PACKKEY if ( $packOptions->{requireVersion} );
+	  next PACKKEY if ( scalar(keys %{$packOptions->{requireVersion}}) > 0 );
 	  next ARCH; # package processed, jump to the next request arch or package
 	}
 	$this->{m_logger}->warning("[I]     => package $packName not available for arch $arch in any repo") if $this->{m_debug} >= 3;
@@ -927,13 +945,16 @@ sub collectPackages
     $this->{m_logger}->error("[E] lookUpAllPackages failed !");
     die("[E] lookUpAllPackages failed !");
   }
-
+  # Just for nicer output
+  $this->{m_repoPacks}->{_name}   = { label => "main" };
+  $this->{m_sourcePacks}->{_name} = { label => "source" };
+  $this->{m_debugPacks}->{_name}  = { label => "debug" };
 
   ### step 2:
   if($this->{m_debug}) {
     $this->{m_logger}->info("");
     $this->{m_logger}->info("[I] STEP 2 [collectPackages]" );
-    $this->{m_logger}->info("[I] Query RPM archive headers for undecided archives");
+    $this->{m_logger}->info("[I] Select packages and create links");
   }
 
   # Setup the package FS layout
@@ -1164,18 +1185,18 @@ sub unpackMetapackages
           $this->{m_logger}->info("[I] No script defined for metapackage $metapack\n");
         }
 
-        if($nokeep == 1) {
-          foreach my $d(keys(%{$this->{m_repoPacks}->{$metapack}})) {
-            next if($d =~ m{(arch|addarch|removearch|onlyarch|source|script|medium)});
-            if(defined($this->{m_repoPacks}->{$metapack}->{$d}->{'newpath'}) and defined($this->{m_repoPacks}->{$metapack}->{$d}->{'newfile'})) {
-              unlink("$this->{m_repoPacks}->{$metapack}->{$d}->{'newpath'}/$this->{m_packages}->{$metapack}->{$d}->{'newfile'}");
-            }
-            else {
-              $this->{m_logger}->warning("[W] Undefined values in hash for package $metapack");
-              #$this->{m_logger}->warning( Dumper($this->{$metapack}));
-            }
-          }
-        }
+#        if($nokeep == 1) {
+#          foreach my $d(keys(%{$this->{m_repoPacks}->{$metapack}})) {
+#            next if($d =~ m{(arch|addarch|removearch|onlyarch|source|script|medium)});
+#            if(defined($this->{m_repoPacks}->{$metapack}->{$d}->{'newpath'}) and defined($this->{m_repoPacks}->{$metapack}->{$d}->{'newfile'})) {
+#              unlink("$this->{m_repoPacks}->{$metapack}->{$d}->{'newpath'}/$this->{m_packages}->{$metapack}->{$d}->{'newfile'}");
+#            }
+#            else {
+#              $this->{m_logger}->warning("[W] Undefined values in hash for package $metapack");
+#              #$this->{m_logger}->warning( Dumper($this->{$metapack}));
+#            }
+#          }
+#        }
         # success, found package for arch
         next ARCH;
       }
@@ -1269,19 +1290,38 @@ sub lookUpAllPackages
   my $this = shift;
 
   my $retval = 0;
-
   my $packPool = {};
+  my $num_repos = keys %{$this->{m_repos}};
+  my $count_repos = 0;
+  my $last_progress_time = 0;
 
   REPO:foreach my $r(keys(%{$this->{m_repos}})) { # FIXME priority !
+    my $num_dirs = keys %{$this->{m_repos}->{$r}->{'srcdirs'}};
+    my $count_dirs = 0;
+    $count_repos++;
+
     DIR:foreach my $d(keys(%{$this->{m_repos}->{$r}->{'srcdirs'}})) {
+      my $num_files = @{$this->{m_repos}->{$r}->{'srcdirs'}->{$d}};
+      my $count_files = 0;
+      $count_dirs++;
       next DIR if(! $this->{m_repos}->{$r}->{'srcdirs'}->{$d}->[0]);
 
       URI:foreach my $uri(@{$this->{m_repos}->{$r}->{'srcdirs'}->{$d}}) {
+        $count_files++;
         next URI  unless( $uri =~ /\.rpm$/); # skip all files without rpm suffix
-	$this->{m_logger}->info("read package: $uri ") if $this->{m_debug} >= 3;
+
+	if ($this->{m_debug} >= 1) {
+          if ( $last_progress_time < time() ){ # show progress every 30 seconds
+  	    $this->{m_logger}->info("read package progress: ($count_repos/$num_repos | $count_dirs/$num_dirs | $count_files/$num_files) ");
+            $last_progress_time = time() + 5;
+          }
+	  if ($this->{m_debug} >= 3) {
+  	    $this->{m_logger}->info("read package: $uri ");
+          }
+        }
 
         my %flags = RPMQ::rpmq_many("$uri", 'NAME', 'VERSION', 'RELEASE', 'ARCH', 'SOURCE', 'SOURCERPM', 'NOSOURCE', 'NOPATCH');
-        if(! %flags || !$flags{'NAME'} || !$flags{'NAME'}[0] || !$flags{'VERSION'}[0] || !$flags{'RELEASE'}[0] ) {
+        if(!%flags || !$flags{'NAME'} || !$flags{'RELEASE'} || !$flags{'VERSION'} || !$flags{'RELEASE'} ) {
   	  $this->{m_logger}->warning("[W] [lookUpAllPakcges] Package $uri seems to have an invalid header or is no rpm at all!");
         }
         else {
@@ -1819,8 +1859,7 @@ sub createBootPackageLinks
 	  $this->{m_logger}->warning("[W] something wrong with rpmlist: undefined value $rpmname");
 	  next RPM;
 	}
-	my %tmp = %{$this->{m_repoPacks}->{$rpmname}};
-	if(!%tmp) {
+	if(!%{$this->{m_packagePool}->{$rpmname}}) {
 	  $this->{m_logger}->warning("[W] No package hash entry for package $rpmname in packages hash! Package missing?");
 	}
 	else {
@@ -1832,12 +1871,14 @@ sub createBootPackageLinks
           # End of hack
 	  my @fallb = $this->{m_archlist}->fallbacks($targetarch);
 	  FARCH:foreach my $fa(@fallb) {
-	    if(not defined($tmp{$fa})) {
-	      next FARCH;
+	    PACKKEY:foreach my $p(keys %{$this->{m_packagePool}->{$rpmname}}) {
+              my $pPointer = $this->{m_packagePool}->{$rpmname}->{$p};
+  	      next PACKKEY unless $pPointer->{'arch'} eq $fa;
+  	      next PACKKEY unless (-e $pPointer->{'localfile'});
+	      link($pPointer->{'localfile'}, "$base/boot/$arch/$rpmname.rpm");
+	      $retval++;
+	      next RPM;
 	    }
-	    symlink("../../$datadir/$fa/".$tmp{$fa}->{'newfile'}, "$base/boot/$arch/$rpmname.rpm");
-	    $retval++;
-	    next RPM;
 	  }
 	}
       }
