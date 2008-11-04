@@ -1367,7 +1367,7 @@ sub lookUpAllPackages
 # nice idea, but it does not work for baselibs packages, since they have a different name inside: 
 #          my $name = $flags{'NAME'}[0];
           my $name = $uri;
-          $name =~ s/\/+/\//g; # this strips the path
+          $name =~ s/^.*\///g; # this strips the path
           $name =~ s/-[^-]*-[^-]*\.rpm$//; # this strips everything, except main name
 
           if( !$flags{'SOURCERPM'} ) {
