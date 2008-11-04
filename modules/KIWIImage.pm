@@ -3117,6 +3117,12 @@ sub setupEXT2 {
 		$kiwi -> error  ($data);
 		return undef;
 	}
+	if (defined $journal) {
+		$data = qxx ("cd $imageDest && ln -vs $name $name.ext3 2>&1");
+	} else {
+		$data = qxx ("cd $imageDest && ln -vs $name $name.ext2 2>&1");
+	}
+	$kiwi -> loginfo ($data);
 	return $name;
 }
 
@@ -3141,6 +3147,8 @@ sub setupReiser {
 		$kiwi -> error  ($data);
 		return undef;
 	}
+	$data = qxx ("cd $imageDest && ln -vs $name $name.reiserfs 2>&1");
+	$kiwi -> loginfo ($data);
 	return $name;
 }
 
@@ -3167,7 +3175,9 @@ sub setupSquashFS {
 		$kiwi -> error  ($data);
 		return undef;
 	}
-	qxx ("chmod 644 $imageDest/$name");
+	$data = qxx ("chmod 644 $imageDest/$name");
+	$data = qxx ("cd $imageDest && ln -vs $name $name.squashfs 2>&1");
+	$kiwi -> loginfo ($data);
 	return $name;
 }
 
@@ -3196,7 +3206,9 @@ sub setupCromFS {
 		$kiwi -> error  ($data);
 		return undef;
 	}
-	qxx ("chmod 644 $imageDest/$name");
+	$data = qxx ("chmod 644 $imageDest/$name");
+	$data = qxx ("cd $imageDest && ln -vs $name $name.cromfs 2>&1");
+	$kiwi -> loginfo ($data);
 	return $name;
 }
 
