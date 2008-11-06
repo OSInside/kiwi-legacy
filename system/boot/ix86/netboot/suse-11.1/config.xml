@@ -112,9 +112,6 @@
 		<file name="drivers/net/via-rhine.ko"/>
 		<file name="drivers/net/via-velocity.ko"/>
 		<file name="drivers/net/yellowfin.ko"/>
-		<file name="atl2.ko"/>
-		<file name="asus_acpi.ko"/>
-		<file name="asus_eee.ko"/>
 		<!-- DRIVERS END DISKLESS -->
 	</drivers>
 	<repository type="yast2" status="replaceable">
@@ -151,9 +148,6 @@
 		<package name="kernel-default-base"/>
 		<package name="kernel-default-extra"/>
 		<package name="aufs-kmp-default"/>
-		<package name="asus_acpi-kmp-default"/>
-		<package name="asus_eee-kmp-default"/>
-		<package name="atl2-kmp-default"/>
 		<!-- KERNEL AND MODULE PACKAGES END DISKLESS -->
 	</packages>
 	<packages type="image" profiles="default,xen,smp">
