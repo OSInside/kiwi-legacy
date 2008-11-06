@@ -661,7 +661,7 @@ fi
 #======================================
 # 17) make initrd available on unionfs
 #--------------------------------------
-if [ $LOCAL_BOOT = "no" ];then
+if [ $LOCAL_BOOT = "no" ] && [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ];then
 	if test ! -z "$UNIONFS_CONFIG" && test $systemIntegrity = "clean";then
 		# /.../
 		# have to do this so that /boot gets copied to the
