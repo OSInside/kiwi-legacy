@@ -2273,16 +2273,18 @@ sub getList {
 			my $package = $element -> getAttribute ("name");
 			my $forarch = $element -> getAttribute ("arch");
 			my $allowed = 1;
-			if (defined $forarch) {
-				my @archlst = split (/,/,$forarch);
-				my $foundit = 0;
-				foreach my $archok (@archlst) {
-					if ($archok eq $this->{arch}) {
-						$foundit = 1; last;
+			if (($what ne "metapackages") && ($what ne "instpackages")) {
+				if (defined $forarch) {
+					my @archlst = split (/,/,$forarch);
+					my $foundit = 0;
+					foreach my $archok (@archlst) {
+						if ($archok eq $this->{arch}) {
+							$foundit = 1; last;
+						}
 					}
-				}
-				if (! $foundit) {
-					$allowed = 0;
+					if (! $foundit) {
+						$allowed = 0;
+					}
 				}
 			}
 			if (! $allowed) {
