@@ -251,8 +251,8 @@ export systemIntegrity="unknown"
 #======================================
 # 11) Is this a diskful station
 #--------------------------------------
-if [ $LOCAL_BOOT = "no" ];then
-if [ ! -z "$PART" ] && [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ];then
+if [ ! -z "$PART" ] && [ -z "$NFSROOT" ] && \
+   [ -z "$NBDROOT" ] && [ $LOCAL_BOOT = "no" ];then
 	#======================================
 	# Check for possible extended partition
 	#--------------------------------------
@@ -273,8 +273,7 @@ if [ ! -z "$PART" ] && [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ];then
 		esac
 		done
 		count=1
-		waitForStorageDevice $DISK
-		if ! sfdisk -s $DISK &>/dev/null;then
+		if ! waitForStorageDevice $DISK;then
 			systemException \
 				"Disk $DISK doesn't appear... fatal !" \
 			"reboot"
@@ -323,13 +322,12 @@ if [ ! -z "$PART" ] && [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ];then
 		runHook postpartition
 	fi
 fi
-fi
 
 #======================================
 # 12) Download network client image
 #--------------------------------------
 runHook predownload
-if [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ];then
+if [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ] && [ $LOCAL_BOOT = "no" ];then
 	count=0
 	IFS="," ; for i in $IMAGE;do
 		imageZipped="uncompressed"
@@ -351,9 +349,6 @@ if [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ];then
 		fi
 		if [ $count = 2 ];then
 			imageNextRootDevice=$imageDevice
-		fi
-		if [ $LOCAL_BOOT = "yes" ];then
-			continue
 		fi
 		if test `getSystemIntegrity $count` = "fine";then
 			continue
@@ -472,7 +467,22 @@ if [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ];then
 	done
 else
 	#======================================
-	# 12.1) Check for NFS root
+	# 12.1) Check for local boot
+	#--------------------------------------
+	if [ $LOCAL_BOOT = "yes" ];then
+		imageDisk=`getDiskDevice $root | sed -e s"@[0-9]@@g"`
+		imageDevice=$imageDisk"2"
+		imageRootDevice=$imageDevice
+		imageRootName="Local-System"
+		if [ ! -z "$UNIONFS_CONFIG" ];then
+			setupUnionFS $imageDisk"3" $imageDisk"2" aufs
+		fi
+		if [ ! -z "$COMBINED_IMAGE" ];then
+			imageNextRootDevice=$imageDisk"3"
+		fi
+	fi
+	#======================================
+	# 12.2) Check for NFS root
 	#--------------------------------------
 	if [ ! -z "$NFSROOT" ];then
 		IFS="," ; for i in $NFSROOT;do
@@ -494,7 +504,7 @@ else
 		export FSTYPE=nfs
 	fi
 	#======================================
-	# 12.2) Check for NBD root
+	# 12.3) Check for NBD root
 	#--------------------------------------
 	if [ ! -z "$NBDROOT" ];then
 		if ! modprobe nbd;then
@@ -618,18 +628,19 @@ if [ $LOCAL_BOOT = "no" ];then
 		if [ ! -z $KIWI_INITRD ];then
 			Echo "Import KIWI initrd file: $KIWI_INITRD"
 			rm -f /mnt/boot/initrd* && mkdir -p /mnt/boot >/dev/null 2>&1
-			fetchFile $KIWI_INITRD /mnt/boot/initrd
+			fetchFile $KIWI_INITRD /mnt/boot/initrd.kiwi
 			if [ ! -z $KIWI_KERNEL ];then
 				Echo "Import KIWI kernel file: $KIWI_KERNEL"
-				fetchFile $KIWI_KERNEL /mnt/boot/vmlinuz
+				rm -f /mnt/boot/linux*
+				fetchFile $KIWI_KERNEL /mnt/boot/linux.kiwi
 			fi
-			KIWI_INITRD_PARAMS="IMAGE=\"$IMAGE\""
+			KIWI_INITRD_PARAMS="IMAGE=local"
 			if [ ! -z $COMBINED_IMAGE ]; then
 				SPLIT="COMBINED_IMAGE=$COMBINED_IMAGE"
 				KIWI_INITRD_PARAMS="$KIWI_INITRD_PARAMS $SPLIT"
 			fi
 			if [ ! -z "$UNIONFS_CONFIG" ]; then
-				UNIONED="UNIONFS_CONFIG=$UNIONFS_CONFIG"
+				UNIONED="UNIONFS_CONFIG=yes"
 				KIWI_INITRD_PARAMS="$KIWI_INITRD_PARAMS $UNIONED"
 			fi
 		fi
@@ -650,7 +661,7 @@ fi
 #======================================
 # 17) make initrd available on unionfs
 #--------------------------------------
-if [ $LOCAL_BOOT = "no" ];then
+if [ $LOCAL_BOOT = "no" ] && [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ];then
 	if test ! -z "$UNIONFS_CONFIG" && test $systemIntegrity = "clean";then
 		# /.../
 		# have to do this so that /boot gets copied to the
@@ -658,9 +669,35 @@ if [ $LOCAL_BOOT = "no" ];then
 		# be able to find the data in there (it can't read squashfs
 		# or cromfs)
 		# ----
-		cp -a /mnt/boot /dev/shm/boot2
-		rm -rf /mnt/boot
+		cp -a /mnt/boot /dev/shm/boot2 && rm -rf /mnt/boot
 		mv /dev/shm/boot2 /mnt/boot
+		# /.../
+		# we are using a special root setup with aufs. In this case
+		# we can't use the SuSE Linux initrd but must stick to the
+		# kiwi boot system.
+		# ----
+		kiwiMount "$DISK"3 "/mnt"
+		pushd /mnt/boot >/dev/null
+		IFS="," ; for i in $KERNEL_LIST;do
+			if test -z "$i";then
+				continue
+			fi
+			kernel=`echo $i | cut -f1 -d:`
+			initrd=`echo $i | cut -f2 -d:`
+			if [ ! -f initrd.kiwi ] && [ ! -f linux.kiwi ];then
+				Echo "WARNING: can't find kiwi initrd/linux !"
+				Echo -b "local boot will not work, maybe you forgot"
+				Echo -b "to add KIWI_INITRD and KIWI_KERNEL in config.<MAC> ?"
+				break
+			fi
+			rm -f $initrd && ln -s initrd.kiwi $initrd
+			rm -f $kernel && ln -s linux.kiwi  $kernel
+			export bootLoaderOK=1
+			break
+		done
+		IFS=$IFS_ORIG
+		popd >/dev/null
+		umount /mnt
 	fi
 fi
 
@@ -770,6 +807,6 @@ runHook preactivate
 activateImage
 
 #======================================
-# 29) Unmount initrd / system init
+# 28) Unmount initrd / system init
 #--------------------------------------
 bootImage $@
