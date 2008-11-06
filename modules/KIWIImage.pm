@@ -1468,9 +1468,11 @@ sub createImageLiveCD {
 	if (! defined $gzip) {
 		qxx ("mv $imageDest/$namerw.md5 $main::RootTree/CD");
 		qxx ("mv $imageDest/$namerw.gz $main::RootTree/CD");
+		qxx ("rm $imageDest/$namerw.*");
 	}
 	if (defined $gzip) {
 		qxx ("mv $imageDest/$namero $main::RootTree/CD");
+		qxx ("rm $imageDest/$namero.*");
 	} else {
 		qxx ("mkdir -p $main::RootTree/CD/read-only-system");
 		qxx ("mv $imageTreeReadOnly/* $main::RootTree/CD/read-only-system");

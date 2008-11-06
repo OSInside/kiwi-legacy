@@ -151,6 +151,9 @@ sub new {
 		$packageManager{ensconce},
 		"-r /"
 	];
+	$this->{kchroot}     = [
+		"export TMPDIR=/tmp;","chroot \"$root\""
+	];
 	#==========================================
 	# remove pre-defined smart channels
 	#------------------------------------------
@@ -338,6 +341,7 @@ sub setupSignatureCheck {
 	my $manager = $this->{manager};
 	my $chroot  = $this->{chroot};
 	my $root    = $this->{root};
+	my @kchroot = @{$this->{kchroot}};
 	my $data;
 	my $code;
 
@@ -361,7 +365,7 @@ sub setupSignatureCheck {
 				$data = qxx ("@smart config --set $option 2>&1");
 			} else {
 				$kiwi -> info ("Setting RPM signature check to: $imgCheckSig");
-				$data=qxx ("chroot \"$root\" @smart config --set $option 2>&1");
+				$data=qxx ("@kchroot @smart config --set $option 2>&1");
 			}
 			$code = $? >> 8;
 			if ($code != 0) {
@@ -401,6 +405,7 @@ sub resetSignatureCheck {
 	my $manager= $this->{manager};
 	my $root   = $this->{root};
 	my @smart  = @{$this->{smart}};
+	my @kchroot = @{$this->{kchroot}};
 	my $curCheckSig = $this->{curCheckSig};
 	my $data;
 	my $code;
@@ -416,7 +421,7 @@ sub resetSignatureCheck {
 				$data = qxx ("@smart config --set $option 2>&1");
 			} else {
 				$kiwi -> info ("Reset RPM signature check to: $curCheckSig");
-				$data=qxx ("chroot \"$root\" @smart config --set $option 2>&1");
+				$data=qxx ("@kchroot @smart config --set $option 2>&1");
 			}
 			$code = $? >> 8;
 			if ($code != 0) {
@@ -457,6 +462,7 @@ sub setupExcludeDocs {
 	my @smart   = @{$this->{smart}};
 	my $manager = $this->{manager};
 	my $chroot  = $this->{chroot};
+	my @kchroot = @{$this->{kchroot}};
 	my $root    = $this->{root};
 	my $data;
 	my $code;
@@ -482,7 +488,7 @@ sub setupExcludeDocs {
 				$data = qxx ("@smart config --set $option 2>&1");
 			} else {
 				$kiwi -> info ("Setting RPM doc exclusion to: $imgExclDocs");
-				$data=qxx ("chroot \"$root\" @smart config --set $option 2>&1");
+				$data=qxx ("@kchroot @smart config --set $option 2>&1");
 			}
 			$code = $? >> 8;
 			if ($code != 0) {
@@ -533,6 +539,7 @@ sub resetExcludeDocs {
 	my $this   = shift;
 	my $kiwi   = $this->{kiwi};
 	my $chroot = $this->{chroot};
+	my @kchroot= @{$this->{kchroot}};
 	my $manager= $this->{manager};
 	my $root   = $this->{root};
 	my @smart  = @{$this->{smart}};
@@ -551,7 +558,7 @@ sub resetExcludeDocs {
 				$data = qxx ("@smart config --set $option 2>&1");
 			} else {
 				$kiwi -> info ("Resetting RPM doc exclusion to: $curExclDocs");
-				$data=qxx ("chroot \"$root\" @smart config --set $option 2>&1");
+				$data=qxx ("@kchroot @smart config --set $option 2>&1");
 			}
 			$code = $? >> 8;
 			if ($code != 0) {
@@ -601,6 +608,7 @@ sub setupInstallationSource {
 	my $this   = shift;
 	my $kiwi   = $this->{kiwi};
 	my $chroot = $this->{chroot};
+	my @kchroot= @{$this->{kchroot}};
 	my %source = %{$this->{source}};
 	my $root   = $this->{root};
 	my $manager= $this->{manager};
@@ -644,7 +652,7 @@ sub setupInstallationSource {
 				$code = $? >> 8;
 			} else {
 				$kiwi -> info ("Adding chroot smart channel: $chl");
-				$data = qxx ("chroot \"$root\" $cmds $chl @opts 2>&1");
+				$data = qxx ("@kchroot $cmds $chl @opts 2>&1");
 				$code = $? >> 8;
 			}
 			if ($code != 0) {
@@ -715,7 +723,7 @@ sub setupInstallationSource {
 				$code = $? >> 8;
 			} else {
 				$kiwi -> info ("Adding chroot zypper service: $alias");
-				$data = qxx ("chroot \"$root\" @zypper $sadd 2>&1");
+				$data = qxx ("@kchroot @zypper $sadd 2>&1");
 				$code = $? >> 8;
 			}
 			if ($code != 0) {
@@ -748,6 +756,7 @@ sub resetInstallationSource {
 	my $this   = shift;
 	my $kiwi   = $this->{kiwi};
 	my $chroot = $this->{chroot};
+	my @kchroot= @{$this->{kchroot}};
 	my $manager= $this->{manager};
 	my $root   = $this->{root};
 	my @zypper = @{$this->{zypper}};
@@ -771,7 +780,7 @@ sub resetInstallationSource {
 			$code = $? >> 8;
 		} else {
 			$kiwi -> info ("Removing smart channel(s): @channelList");
-			$data = qxx ("chroot \"$root\" $cmds @list -y 2>&1");
+			$data = qxx ("@kchroot $cmds @list -y 2>&1");
 			$code = $? >> 8;
 		}
 		if ($code != 0) {
@@ -802,7 +811,7 @@ sub resetInstallationSource {
 		} else {
 			$kiwi -> info ("Removing zypper service(s): @channelList");
 			foreach my $chl (@list) {
-				$data = qxx ("chroot \"$root\" bash -c \"$cmds $chl 2>&1\"");
+				$data = qxx ("@kchroot bash -c \"$cmds $chl 2>&1\"");
 				$code = $? >> 8;
 				if ($code != 0) {
 					last;
@@ -908,6 +917,7 @@ sub installPackages {
 	my $instPacks = shift;
 	my $kiwi = $this->{kiwi};
 	my $root = $this->{root};
+	my @kchroot = @{$this->{kchroot}};
 	my $manager = $this->{manager};
 	my @smart   = @{$this->{smart}};
 	my @zypper  = @{$this->{zypper}};
@@ -938,11 +948,11 @@ sub installPackages {
 		print $fd "function clean { kill \$SPID;";
 		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 		print $fd "trap clean INT TERM\n";
-		print $fd "chroot $root @smart update &\n";
+		print $fd "@kchroot @smart update &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
-		print $fd "test \$? = 0 && chroot $root @smart channel --show &\n";
+		print $fd "test \$? = 0 && @kchroot @smart channel --show &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
-		print $fd "test \$? = 0 && chroot $root @smart install -y ";
+		print $fd "test \$? = 0 && @kchroot @smart install -y ";
 		print $fd "@addonPackages || false &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
 		print $fd "ECODE=\$?\n";
@@ -967,9 +977,9 @@ sub installPackages {
 		print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
 		print $fd "export YAST_IS_RUNNING=true\n";
 		print $fd "export ZYPP_CONF=".$this->{zyppconf}."\n";
-		print $fd "chroot $root @zypper refresh &\n";
+		print $fd "@kchroot @zypper refresh &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
-		print $fd "test \$? = 0 && chroot $root @zypper install ";
+		print $fd "test \$? = 0 && @kchroot @zypper install ";
 		print $fd "@installOpts @addonPackages &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
 		print $fd "ECODE=\$?\n";
@@ -1007,6 +1017,7 @@ sub removePackages {
 	my $removePacks = shift;
 	my $kiwi = $this->{kiwi};
 	my $root = $this->{root};
+	my @kchroot = @{$this->{kchroot}};
 	my $manager = $this->{manager};
 	my @smart   = @{$this->{smart}};
 	my @zypper  = @{$this->{zypper}};
@@ -1037,11 +1048,11 @@ sub removePackages {
 		print $fd "function clean { kill \$SPID;";
 		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 		print $fd "trap clean INT TERM\n";
-		print $fd "chroot $root @smart update &\n";
+		print $fd "@kchroot @smart update &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
-		print $fd "test \$? = 0 && chroot $root @smart channel --show &\n";
+		print $fd "test \$? = 0 && @kchroot @smart channel --show &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
-		print $fd "test \$? = 0 && chroot $root @smart remove -y ";
+		print $fd "test \$? = 0 && @kchroot @smart remove -y ";
 		print $fd "@removePackages || false &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
 		print $fd "ECODE=\$?\n";
@@ -1066,9 +1077,9 @@ sub removePackages {
 		print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
 		print $fd "export YAST_IS_RUNNING=true\n";
 		print $fd "export ZYPP_CONF=".$this->{zyppconf}."\n";
-		print $fd "chroot $root @zypper refresh &\n";
+		print $fd "@kchroot @zypper refresh &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
-		print $fd "test \$? = 0 && chroot $root @zypper remove ";
+		print $fd "test \$? = 0 && @kchroot @zypper remove ";
 		print $fd "@installOpts @removePackages &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
 		print $fd "ECODE=\$?\n";
@@ -1107,6 +1118,7 @@ sub setupUpgrade {
 	my $kiwi = $this->{kiwi};
 	my $root = $this->{root};
 	my $xml  = $this->{xml};
+	my @kchroot = @{$this->{kchroot}};
 	my $manager = $this->{manager};
 	my @smart   = @{$this->{smart}};
 	my @zypper  = @{$this->{zypper}};
@@ -1138,23 +1150,23 @@ sub setupUpgrade {
 		print $fd "function clean { kill \$SPID;";
 		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 		print $fd "trap clean INT TERM\n";
-		print $fd "chroot $root @smart update &\n";
+		print $fd "@kchroot @smart update &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
 		print $fd "test \$? = 0 && ";
 		if (defined $addPacks) {
 			my @addonPackages = @{$addPacks};
-			print $fd "chroot $root @smart channel --show &\n";
+			print $fd "@kchroot @smart channel --show &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
-			print $fd "test \$? = 0 && chroot $root @smart upgrade @opts ";
+			print $fd "test \$? = 0 && @kchroot @smart upgrade @opts ";
 			print $fd "|| false &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
-			print $fd "test \$? = 0 && chroot $root @smart install @opts ";
+			print $fd "test \$? = 0 && @kchroot @smart install @opts ";
 			print $fd "@addonPackages || false &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
 		} else {
-			print $fd "chroot $root @smart channel --show &\n";
+			print $fd "@kchroot @smart channel --show &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
-			print $fd "test \$? = 0 && chroot $root @smart upgrade @opts &\n";
+			print $fd "test \$? = 0 && @kchroot @smart upgrade @opts &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
 		}
 		print $fd "ECODE=\$?\n";
@@ -1185,7 +1197,7 @@ sub setupUpgrade {
 		print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
 		print $fd "export YAST_IS_RUNNING=true\n";
 		print $fd "export ZYPP_CONF=".$this->{zyppconf}."\n";
-		print $fd "chroot $root @zypper refresh &\n";
+		print $fd "@kchroot @zypper refresh &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
 		print $fd "test \$? = 0 && ";
 		if (defined $addPacks) {
@@ -1203,25 +1215,25 @@ sub setupUpgrade {
 				}
 			}
 			@addonPackages = @newpacks;
-			print $fd "chroot $root @zypper dist-upgrade &\n";
+			print $fd "@kchroot @zypper dist-upgrade &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
 			if (@newprods) {
-				print $fd "test \$? = 0 && chroot $root @zypper install ";
+				print $fd "test \$? = 0 && @kchroot @zypper install ";
 				print $fd "@installOpts -t product @newprods &\n";
 				print $fd "SPID=\$!;wait \$SPID\n";
 			}
 			if (@newpatts) {
-				print $fd "test \$? = 0 && chroot $root @zypper install ";
+				print $fd "test \$? = 0 && @kchroot @zypper install ";
 				print $fd "@installOpts -t pattern @newpatts &\n";
 				print $fd "SPID=\$!;wait \$SPID\n";
 			}
 			if (@addonPackages) {
-				print $fd "test \$? = 0 && chroot $root @zypper install ";
+				print $fd "test \$? = 0 && @kchroot @zypper install ";
 				print $fd "@installOpts @addonPackages &\n";
 				print $fd "SPID=\$!;wait \$SPID\n";
 			}
 		} else {
-			print $fd "chroot $root @zypper dist-upgrade &\n";
+			print $fd "@kchroot @zypper dist-upgrade &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
 		}
 		print $fd "ECODE=\$?\n";
@@ -1306,6 +1318,7 @@ sub setupRootSystem {
 	my @packs  = @_;
 	my $kiwi   = $this->{kiwi};
 	my $chroot = $this->{chroot};
+	my @kchroot= @{$this->{kchroot}};
 	my $root   = $this->{root};
 	my $xml    = $this->{xml};
 	my $manager= $this->{manager};
@@ -1382,11 +1395,11 @@ sub setupRootSystem {
 			print $fd "function clean { kill \$SPID;";
 			print $fd "echo 1 > $screenCall.exit;exit 1; }\n";
 			print $fd "trap clean INT TERM\n";
-			print $fd "chroot $root @smart update &\n";
+			print $fd "@kchroot @smart update &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
-			print $fd "test \$? = 0 && chroot $root @smart channel --show &\n";
+			print $fd "test \$? = 0 && @kchroot @smart channel --show &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
-			print $fd "test \$? = 0 && chroot $root @smart install ";
+			print $fd "test \$? = 0 && @kchroot @smart install ";
 			print $fd "@install @installOpts &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
 			print $fd "ECODE=\$?\n";
@@ -1511,11 +1524,11 @@ sub setupRootSystem {
 			print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
 			print $fd "export YAST_IS_RUNNING=true\n";
 			print $fd "export ZYPP_CONF=".$this->{zyppconf}."\n";
-			print $fd "chroot $root @zypper refresh &\n";
+			print $fd "@kchroot @zypper refresh &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
 			print $fd "test \$? = 0 && ";
 			if (@newprods) {
-				print $fd "chroot $root @zypper install ";
+				print $fd "@kchroot @zypper install ";
 				print $fd "@installOpts -t product @newprods &\n";
 				print $fd "SPID=\$!;wait \$SPID\n";
 			}
@@ -1523,7 +1536,7 @@ sub setupRootSystem {
 				if (@newprods) {
 					print $fd "test \$? = 0 && ";
 				}
-				print $fd "chroot $root @zypper install ";
+				print $fd "@kchroot @zypper install ";
 				print $fd "@installOpts -t pattern @newpatts &\n";
 				print $fd "SPID=\$!;wait \$SPID\n";
 			}
@@ -1531,7 +1544,7 @@ sub setupRootSystem {
 				if (@newpatts || @newprods) {
 					print $fd "test \$? = 0 && ";
 				}
-				print $fd "chroot $root @zypper install ";
+				print $fd "@kchroot @zypper install ";
 				print $fd "@installOpts @install &\n";
 				print $fd "SPID=\$!;wait \$SPID\n";
 			}
@@ -1617,6 +1630,7 @@ sub setupPackageInfo {
 	my $pack   = shift;
 	my $kiwi   = $this->{kiwi};
 	my $chroot = $this->{chroot};
+	my @kchroot= @{$this->{kchroot}};
 	my $root   = $this->{root};
 	my $manager= $this->{manager};
 	my @zypper = @{$this->{zypper}};
@@ -1635,7 +1649,7 @@ sub setupPackageInfo {
 		} else {
 			$kiwi -> info ("Checking for package: $pack");
 			$data = qxx (
-				"chroot \"$root\" @smart query --installed $pack 2>/dev/null"
+				"@kchroot @smart query --installed $pack 2>/dev/null"
 			);
 			$code = $? >> 8;
 		}
@@ -1664,7 +1678,7 @@ sub setupPackageInfo {
 			$code = $? >> 8;
 		} else {
 			$kiwi -> info ("Checking for package: $pack");
-			$data= qxx ("chroot \"$root\" rpm -q \"$pack\" 2>&1 ");
+			$data= qxx ("@kchroot rpm -q \"$pack\" 2>&1 ");
 			$code= $? >> 8;
 		}
 		if ($code != 0) {
