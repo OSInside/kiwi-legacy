@@ -29,6 +29,8 @@
 		<file name="drivers/block/loop.ko"/>
 		<file name="fs/ext3/*"/>
 		<file name="fs/ext2/*"/>
+		<file name="fs/fat/*"/>
+		<file name="fs/vfat/*"/>
 		<file name="fs/binfmt_aout.ko"/>
 		<file name="fs/binfmt_misc.ko"/>
 		<file name="fs/mbcache.ko"/>
@@ -37,6 +39,8 @@
 		<file name="fs/jbd/*"/>
 		<file name="fs/reiserfs/*"/>
 		<file name="fs/nls/nls_utf8.ko"/>
+		<file name="fs/nls/nls_cp437.ko"/>
+		<file name="fs/nls/nls_iso8859-1.ko"/>
 		<file name="drivers/ata/*"/>
 		<file name="drivers/cdrom/*"/>
 		<file name="drivers/scsi/*"/>

@@ -2,6 +2,7 @@
 Tue Nov  4 16:37:42 CET 2008 - ms@suse.de
 
 - v3.00
+- adapt iso live image to allow boot from stick (bnc #441278)
 - added image file link with filesystem extension
 
 -------------------------------------------------------------------

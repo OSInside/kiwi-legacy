@@ -33,6 +33,8 @@
 		<file name="drivers/block/rd.ko"/>
 		<file name="fs/ext3/*"/>
 		<file name="fs/ext2/*"/>
+		<file name="fs/fat/*"/>
+		<file name="fs/vfat/*"/>
 		<file name="fs/binfmt_aout.ko"/>
 		<file name="fs/binfmt_misc.ko"/>
 		<file name="fs/mbcache.ko"/>
@@ -44,6 +46,8 @@
 		<file name="updates/aufs.ko"/>
 		<file name="weak-updates/aufs.ko"/>
 		<file name="fs/nls/nls_utf8.ko"/>
+		<file name="fs/nls/nls_cp437.ko"/>
+		<file name="fs/nls/nls_iso8859-1.ko"/>
 		<file name="drivers/cdrom/*"/>
 		<file name="drivers/scsi/*"/>
 		<file name="drivers/message/fusion/*"/>

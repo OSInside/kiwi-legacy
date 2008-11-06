@@ -1286,7 +1286,10 @@ function CDDevice {
 	# from hwinfo --cdrom to search for the block device
 	# ----
 	local count=0
-	for module in usb-storage sr_mod cdrom ide-cd BusLogic;do
+	for module in \
+		ehci-hcd uhci-hcd usb-storage sg sd_mod sr_mod \
+		cdrom ide-cd BusLogic vfat
+	do
 		/sbin/modprobe $module
 	done
 	Echo -n "Waiting for CD/DVD device(s) to appear..."
@@ -1308,9 +1311,13 @@ function CDDevice {
 	done
 	echo
 	if [ -z $cddev ];then
-		systemException \
-			"Failed to detect CD drive !" \
-		"reboot"
+		USBStickDevice
+		if [ $stickFound = 0 ];then
+			systemException \
+				"Failed to detect CD/DVD or USB drive !" \
+			"reboot"
+		fi
+		cddev=$stickDevice
 	fi
 }
 function USBStickDevice {
@@ -1394,7 +1401,7 @@ function CDMount {
 	# ----
 	local count=0
 	mkdir -p /cdrom && CDDevice
-	Echo -n "Mounting CD/DVD drive..."
+	Echo -n "Mounting live boot drive..."
 	while true;do
 		IFS=":"; for i in $cddev;do
 			if [ -x /usr/bin/driveready ];then
@@ -1425,7 +1432,7 @@ function CDMount {
 	done
 	echo
 	systemException \
-		"Couldn't find CD image configuration file" \
+		"Couldn't find Live image configuration file" \
 	"reboot"
 }
 #======================================
