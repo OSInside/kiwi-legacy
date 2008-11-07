@@ -22,8 +22,8 @@
 #======================================
 # 1) start error log
 #--------------------------------------
-Echo "Calling pre-init stage in system image"
 errorLogStart
+Echo "Calling pre-init stage in system image"
 
 #======================================
 # 2) check for LOCAL_BOOT
@@ -33,17 +33,23 @@ if [ $LOCAL_BOOT = "yes" ];then
 fi
 
 #======================================
-# 3) update mount table
+# 3) start udev
+#--------------------------------------
+mountSystemFilesystems
+udevSystemStart
+
+#======================================
+# 4) update mount table
 #--------------------------------------
 updateMTAB
 
 #======================================
-# 4) create framebuffer devices
+# 5) create framebuffer devices
 #--------------------------------------
 createFramebufferDevices
 
 #======================================
-# 5) create /etc/ImagePackages
+# 6) create /etc/ImagePackages
 #--------------------------------------
 if [ -x /bin/rpm ];then
 	Echo "Creating initial image package info file"
@@ -51,20 +57,26 @@ if [ -x /bin/rpm ];then
 fi
 
 #======================================
-# 6) check for union filesystem
+# 7) check for union filesystem
 #--------------------------------------
 if [ ! -z "$UNIONFS_CONFIG" ]; then
 	exit 0
 fi
 
 #======================================
-# 7) create initrd on diskful
+# 8) create initrd on diskful
 #--------------------------------------
 setupSUSEInitrd
 
 #======================================
-# 8) Install boot loader on diskful
+# 9) Install boot loader on diskful
 #--------------------------------------
 if [ $bootLoaderOK = 1 ];then
 	installBootLoader
 fi
+
+#======================================
+# 10) kill udev
+#--------------------------------------
+udevKill
+umountSystemFilesystems

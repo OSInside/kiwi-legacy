@@ -285,9 +285,10 @@ function errorLogStart {
 	# by ELOG_CONSOLE
 	# ----
 	if [ ! -f $ELOG_FILE ];then
-		echo "KIWI Log:" >$ELOG_FILE
+		echo "KIWI Log:" >> $ELOG_FILE
 	else
-		echo "KIWI PreInit Log" >>$ELOG_FILE
+		killproc tail
+		echo "KIWI PreInit Log" >> $ELOG_FILE
 	fi
 	Echo "Boot-Logging enabled on $ELOG_CONSOLE"
 	setctsid -f $ELOG_CONSOLE /bin/bash -i -c "tail -f $ELOG_FILE" &
@@ -312,6 +313,17 @@ function udevPending {
 	fi
 }
 #======================================
+# udevSystemStart
+#--------------------------------------
+function udevSystemStart {
+	# /.../
+	# start udev while in pre-init phase. This means we can
+	# run udev from the standard runlevel script
+	# ----
+	/etc/init.d/boot.udev start
+	echo
+}
+#======================================
 # udevStart
 #--------------------------------------
 function udevStart {
@@ -320,7 +332,9 @@ function udevStart {
 	# ----
 	echo "Creating device nodes with udev"
 	# disable hotplug helper, udevd listens to netlink
-	echo "" > /proc/sys/kernel/hotplug
+	if [ -e /proc/sys/kernel/hotplug ];then
+		echo "" > /proc/sys/kernel/hotplug
+	fi
 	# /.../
 	# At the moment we prevent udev from loading the storage
 	# modules because it does not make a propper choice if
@@ -345,11 +359,6 @@ function udevStart {
 #--------------------------------------
 function udevKill {
 	killproc /sbin/udevd
-	rm -f /var/log/boot.msg
-	umount -t devpts /mnt/dev/pts
-	mkdir -p /mnt/var/log
-	cp /mnt/dev/shm/initrd.msg /mnt/var/log/boot.msg
-	cp -f /var/log/boot.kiwi /mnt/var/log/boot.kiwi
 }
 #======================================
 # startSplashy
@@ -3169,7 +3178,14 @@ function activateImage {
 	reopenKernelConsole
 	udevPending
 	mount --move /dev /mnt/dev
+	umount -t devpts /mnt/dev/pts
 	udevKill
+	udevPending
+	#======================================
+	# copy boot log file into system image
+	#--------------------------------------
+	mkdir -p /mnt/var/log
+	cp /var/log/boot.kiwi /mnt/var/log/boot.kiwi
 	#======================================
 	# run preinit stage
 	#--------------------------------------

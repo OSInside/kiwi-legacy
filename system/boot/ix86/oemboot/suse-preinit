@@ -22,8 +22,8 @@
 #======================================
 # 1) start error log
 #--------------------------------------
-Echo "Calling pre-init stage in system image"
 errorLogStart
+Echo "Calling pre-init stage in system image"
 
 #======================================
 # 2) check for LOCAL_BOOT
@@ -33,17 +33,23 @@ if [ $LOCAL_BOOT = "yes" ] && [ -z "$KIWI_RECOVERY" ];then
 fi
 
 #======================================
-# 3) update mount table
+# 3) start udev
+#--------------------------------------
+mountSystemFilesystems
+udevSystemStart
+
+#======================================
+# 4) update mount table
 #--------------------------------------
 updateMTAB
 
 #======================================
-# 4) create framebuffer devices
+# 5) create framebuffer devices
 #--------------------------------------
 createFramebufferDevices
 
 #======================================
-# 5) create initrd on diskful
+# 6) create initrd on diskful
 #--------------------------------------
 if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ]; then
 	#======================================
@@ -72,14 +78,14 @@ else
 fi
 
 #======================================
-# 6) Install boot loader if ok
+# 7) Install boot loader if ok
 #--------------------------------------
 if [ $bootLoaderOK = 1 ];then
 	installBootLoader
 fi
 
 #======================================
-# 7) create /etc/ImagePackages
+# 8) create /etc/ImagePackages
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	if [ -x /bin/rpm ];then
@@ -87,3 +93,9 @@ if [ $LOCAL_BOOT = "no" ];then
 		rpm -qa --last > /etc/ImagePackages
 	fi
 fi
+
+#======================================
+# 9) kill udev
+#--------------------------------------
+udevKill
+umountSystemFilesystems

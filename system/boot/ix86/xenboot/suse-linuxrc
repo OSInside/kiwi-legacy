@@ -22,6 +22,11 @@
 export PATH="/sbin:/bin:/usr/sbin:/usr/bin"
 export IFS_ORIG=$IFS
 export DEBUG=0
+
+#======================================
+# Exports (Booting)
+#--------------------------------------
+export LOCAL_BOOT=no
 export systemIntegrity=clean
 
 #======================================
@@ -124,50 +129,66 @@ fi
 validateRootTree
 
 #======================================
-# 9) Create system dependant files
+# 9) check for local boot
 #--------------------------------------
-setupDefaultFstab /config
-updateRootDeviceFstab /config $imageRootDevice
+if [ -e /mnt/etc/ImagePackages ];then
+	export LOCAL_BOOT=yes
+fi
 
 #======================================
-# 10) copy system dependant files
+# 10) Create system dependant files
 #--------------------------------------
-setupConfigFiles
+if [ $LOCAL_BOOT = "no" ];then
+	setupDefaultFstab /config
+	updateRootDeviceFstab /config $imageRootDevice
+fi
 
 #======================================
-# 11) update system dependant files
+# 11) copy system dependant files
 #--------------------------------------
-setupInittab /mnt
+if [ $LOCAL_BOOT = "no" ];then
+	setupConfigFiles
+fi
 
 #======================================
-# 12) setup real root device
+# 12) update system dependant files
+#--------------------------------------
+if [ $LOCAL_BOOT = "no" ];then
+	setupInittab /mnt
+fi
+
+#======================================
+# 13) setup real root device
 #--------------------------------------
 echo 256 > /proc/sys/kernel/real-root-dev
 
 #======================================
-# 13) umount system filesystems
+# 14) umount system filesystems
 #--------------------------------------
 umountSystemFilesystems
 
 #======================================
-# 14) copy initrd files to image
+# 15) copy initrd files to image
 #--------------------------------------
-importBranding
+if [ ! -f /mnt/boot/deployed ];then
+	touch /mnt/boot/deployed
+	importBranding
+fi
 cp /preinit /mnt
 cp /include /mnt
 
 #======================================
-# 15) kill boot shell
+# 16) kill boot shell
 #--------------------------------------
 killShell
 killBlogD
 
 #======================================
-# 16) Activate new root
+# 17) Activate new root
 #--------------------------------------
 activateImage
 
 #======================================
-# 17) Unmount initrd / system init
+# 18) Unmount initrd / system init
 #--------------------------------------
 bootImage $@

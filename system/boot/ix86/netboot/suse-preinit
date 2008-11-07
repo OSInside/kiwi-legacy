@@ -22,8 +22,8 @@
 #======================================
 # 1) start error log
 #--------------------------------------
-Echo "Calling pre-init stage in system image"
 errorLogStart
+Echo "Calling pre-init stage in system image"
 
 #======================================
 # 2) check for LOCAL_BOOT
@@ -33,17 +33,27 @@ if [ $LOCAL_BOOT = "yes" ];then
 fi
 
 #======================================
-# 3) update mount table
+# 3) start udev
+#--------------------------------------
+if [ ! -z $DISK ] && [ $systemIntegrity = "clean" ]; then
+	if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ]; then
+		mountSystemFilesystems
+		udevSystemStart
+	fi
+fi
+
+#======================================
+# 4) update mount table
 #--------------------------------------
 updateMTAB
 
 #======================================
-# 4) create framebuffer devices
+# 5) create framebuffer devices
 #--------------------------------------
 createFramebufferDevices
 
 #======================================
-# 5) create initrd on diskful
+# 6) create initrd on diskful
 #--------------------------------------
 if [ ! -z $DISK ] && [ $systemIntegrity = "clean" ]; then
 	if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ]; then
@@ -60,7 +70,7 @@ if [ ! -z $DISK ] && [ $systemIntegrity = "clean" ]; then
 fi
 
 #======================================
-# 6) Install boot loader on diskful
+# 7) Install boot loader on diskful
 #--------------------------------------
 if [ ! -z $DISK ] && [ $bootLoaderOK = 1 ];then
 	if test $systemIntegrity = "clean";then
@@ -69,7 +79,7 @@ if [ ! -z $DISK ] && [ $bootLoaderOK = 1 ];then
 fi
 
 #======================================
-# 7) create /etc/ImagePackages
+# 8) create /etc/ImagePackages
 #--------------------------------------
 if test $systemIntegrity = "clean";then
 	if [ -x /bin/rpm ];then
@@ -79,7 +89,7 @@ if test $systemIntegrity = "clean";then
 fi
 
 #======================================
-# 8) Reset systemIntegrity
+# 9) Reset systemIntegrity
 #--------------------------------------
 if test ! -z $DISK;then
 	if test ! -z $RELOAD_CONFIG;then
@@ -88,7 +98,7 @@ if test ! -z $DISK;then
 fi
 
 #======================================
-# 9) check for valid mount points 
+# 10) check for valid mount points 
 #--------------------------------------
 if test ! -z $DISK;then
 	IFS=":" ; for i in $PART_MOUNT;do
@@ -101,7 +111,7 @@ if test ! -z $DISK;then
 fi
 
 #======================================
-# 10) Update /etc/ImageVersion files
+# 11) Update /etc/ImageVersion files
 #--------------------------------------
 if test ! -z $DISK;then
 	count=0
@@ -128,11 +138,21 @@ if test ! -z $DISK;then
 fi
 
 #======================================
-# 11) setup network for nfs boot
+# 12) setup network for nfs boot
 #--------------------------------------
 if test ! -z $NFSROOT;then
 	mount -o nolock -t proc  proc    /proc
 	mount -o nolock -t sysfs sysfs   /sys
 	mount -o nolock -t devpts devpts /dev/pts
 	/etc/init.d/portmap start
+fi
+
+#======================================
+# 13) kill udev
+#--------------------------------------
+if [ ! -z $DISK ] && [ $systemIntegrity = "clean" ]; then
+	if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ]; then
+		udevKill
+		umountSystemFilesystems
+	fi
 fi
