@@ -1551,6 +1551,7 @@ sub setupBootDisk {
 	my $diskname  = $system.".raw";
 	my @commands  = ();
 	my $imgtype   = "vmx";
+	my $bootfix   = "VMX";
 	my $haveTree  = 0;
 	my $haveSplit = 0;
 	my $splitfile;
@@ -1622,6 +1623,15 @@ sub setupBootDisk {
 		}
 	}
 	#==========================================
+	# build bootfix for the bootloader on oem
+	#------------------------------------------
+	if ($initrd =~ /oemboot/) {
+		my $oemtitle = $xml -> getOEMBootTitle();
+		if ($oemtitle) {
+			$bootfix = $oemtitle;
+		}
+	}
+	#==========================================
 	# build disk name and label from xml data
 	#------------------------------------------
 	$destdir  = dirname ($initrd);
@@ -1689,7 +1699,7 @@ sub setupBootDisk {
 	#==========================================
 	# Create boot loader configuration
 	#------------------------------------------
-	if (! $this -> setupBootLoaderConfiguration ("grub","VMX")) {
+	if (! $this -> setupBootLoaderConfiguration ("grub",$bootfix)) {
 		$this -> cleanTmp ();
 		return undef;
 	}

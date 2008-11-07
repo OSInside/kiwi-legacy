@@ -3,6 +3,8 @@ Thu Nov  6 15:55:34 CET 2008 - ms@suse.de
 
 - v3.01
 - start udevd in preinit stage (bnc #442302)
+- evaluate value for oem-boot-title in initial bootloader
+  configuration too (bnc #442361)
 
 -------------------------------------------------------------------
 Tue Nov  4 16:37:42 CET 2008 - ms@suse.de
