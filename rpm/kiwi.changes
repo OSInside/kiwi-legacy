@@ -1,4 +1,20 @@
 -------------------------------------------------------------------
+Wed Nov 12 08:23:35 CET 2008 - ms@suse.de
+
+- kiwi version freeze for SUSE 11.1 => v3.01
+- include inst-source branch changes from autobuild team:
+  * moved suse-isolinux script to cdtool tools directory
+  * install suse-isolinux along with kiwi-instsource
+  * removed an unneccesary hash parameter
+  * changed the return value of KIWICollect::createBootPackageLinks
+    (verbose debugging plus failed exit)
+  * changed return value of KIWIRepoMetaHandler::loadPlugins:
+    return a pair of numbers showing discrepancies between available
+    and loaded plugins (todo: implement exceptions for disabled pl.)
+  * fixed a bug in HTTP access: accessing repos.suse.de failed due
+    to a wrong regex 
+
+-------------------------------------------------------------------
 Thu Nov  6 15:55:34 CET 2008 - ms@suse.de
 
 - v3.01

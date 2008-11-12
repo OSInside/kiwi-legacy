@@ -86,13 +86,14 @@ sub new {
     m_util	    => undef,
     m_kiwi	    => undef,
     m_packages	    => undef,
-    m_metapackages  => undef,
+    m_metaPackages  => undef,
     m_metafiles	    => undef,
     m_browser	    => undef,
     m_logger	    => undef,
     m_fpacks	    => [],
     m_fmpacks	    => [],
     m_debug	    => undef,
+    m_rmlists       => undef,
   };
 
   bless $this, $class;
@@ -260,6 +261,50 @@ sub basesubdirs
 
 
 #=================
+# logMsg
+#-----------------
+# Primitive log mechanism skipping
+# beautification (this is not useful for
+# automated builds)
+#-----------------
+# prints to stdout if $this->{m_logStdOut}
+# is set, otherwise the usual logging
+# mechanism is used.
+#-----------------
+sub logMsg
+{
+  my $this = shift;
+  my $mode = shift;
+  my $string = shift;
+
+  if(!ref($this)) {
+    return undef;
+  }
+
+  my $out = "[".$mode."] ".$string."\n";
+
+  if ($this->{m_logStdOut} == 1) {
+    print $out;
+  }
+  else {
+    if( $mode == "E" ) {
+      $this->{m_kiwi}->error($out);
+    }
+    elsif( $mode == "W" ) {
+      $this->{m_kiwi}->warning($out);
+    }
+    elsif( $mode == "I" ) {
+      $this->{m_kiwi}->info($out);
+    }
+    else {
+      $this->{m_kiwi}->info($out);
+    }
+  }
+}
+
+
+
+#=================
 # other methods:
 #-----------------
 #==========================================
@@ -338,17 +383,17 @@ sub Init
 
   ## package list (metapackages with extra effort by scripts)
   # mandatory. Empty = Error
-  %{$this->{m_metapackages}}  = $this->{m_xml}->getInstSourceMetaPackageList();
-  if(!$this->{m_metapackages}) {
+  %{$this->{m_metaPackages}}  = $this->{m_xml}->getInstSourceMetaPackageList();
+  if(!$this->{m_metaPackages}) {
     $this->{m_kiwi}->error("KIWICollect::Init: getInstSourceMetaPackageList returned empty hash");
     return undef;
   }
   else {
     $this->{m_kiwi}->info("KIWICollect::Init: retrieved metapackage list.");
     if($this->{m_debug}) {
-      $this->{m_kiwi}->info("See metapackages.dump.pl");
-      open(DUMP, ">", "$this->{m_basedir}/metapackages.dump.pl");
-      print DUMP Dumper($this->{m_metapackages});
+      $this->{m_kiwi}->info("See metaPackages.dump.pl");
+      open(DUMP, ">", "$this->{m_basedir}/metaPackages.dump.pl");
+      print DUMP Dumper($this->{m_metaPackages});
       close(DUMP);
     }
   }
@@ -356,7 +401,7 @@ sub Init
   ## metafiles: different handling
   # may be omitted
   %{$this->{m_metafiles}}     = $this->{m_xml}->getInstSourceMetaFiles();
-  if(!$this->{m_metapackages}) {
+  if(!$this->{m_metafiles}) {
     $this->{m_kiwi}->info("KIWICollect::Init: getInstSourceMetaPackageList returned empty hash, no metafiles specified.");
   }
   else {
@@ -461,7 +506,7 @@ sub Init
   $this->{m_dirlist}->{"$this->{m_united}/".$mediumname."0/temp"} = 1;
   
   my $dircreate = $this->createDirectoryStructure();
-  if(not defined($dircreate)) {
+  if($dircreate != 0) {
     $this->{m_kiwi}->error("KIWICollect::Init: calling createDirectoryStructure failed");
     return undef;
   }
@@ -483,8 +528,12 @@ sub Init
   $this->{m_metacreator}->baseurl($this->{m_united});
   $this->{m_metacreator}->mediaName($this->{m_proddata}->getVar('MEDIUM_NAME'));
   $this->{m_logger}->info("[I] Loading plugins from <".$this->{m_proddata}->getOpt("PLUGIN_DIR").">");
-  my $num_loaded = $this->{m_metacreator}->loadPlugins();
-  $this->{m_logger}->info("[I] Loaded $num_loaded plugins successfully.\n");
+  my ($loaded, $avail) = $this->{m_metacreator}->loadPlugins();
+  if($loaded < $avail) {
+    $this->{m_logger}->error("[E] could not load all plugins! <$loaded/$avail>!");
+    return undef;
+  }
+  $this->{m_logger}->info("[I] Loaded <$loaded> plugins successfully.\n");
 
   ### object is set up so far; next step is the repository scan analysis (TODO: create an own method for that bit)
 
@@ -569,7 +618,12 @@ sub mainTask
   #}
 
   #else {
-    $this->createMetadata();
+    $metadatacreate = $this->createMetadata();
+    if($metadatacreate != 0) {
+      $this->{m_logger}->error("[E] Creating metadata failed!");
+      $retval = 2;
+      return $retval;
+    }
     
 
     ## Q&D HACK for Adrian: set KIWI_ISO to enable ISO creation
@@ -647,7 +701,8 @@ sub getPackagesList
   }
   
   foreach my $pack(@_) {
-    my $numfail = $this->fetchFileFrom($pack, $this->{m_repos}, $type);
+    #my $numfail = $this->fetchFileFrom($pack, $this->{m_repos}, $type);
+    my $numfail = $this->fetchFileFrom($pack, $type);
     if( $numfail == 0) {
       $this->{m_logger}->warning("[W] Package $pack not found in any repository!");
       if($type =~ m{meta}) {
@@ -904,7 +959,7 @@ sub collectPackages
 
   $this->{m_logger}->info("[I] retrieve package lists for metapackages") if $this->{m_debug};
   ## metapackages must not be empty according to current scheme
-  my $result += $this->getPackagesList("meta", keys(%{$this->{m_metapackages}}));
+  my $result += $this->getPackagesList("meta", keys(%{$this->{m_metaPackages}}));
   if( $result == -1) {
     $this->{m_logger}->error("[E] getPackagesList for metapackages called with invalid parameter");
   }
@@ -913,12 +968,6 @@ sub collectPackages
     $this->failedPackagesWarning("[metapackages]", $result, $this->{m_fmpacks});
     $mfailed += $result;
   }
-
-  ## verify if the architecture requirements are met:
-  # TEST code only: later move to fetchFileFrom!
-  #foreach my $pack(keys(%{$this->{m_packages}})) {
-  #  $this->checkArchitectureList($pack);
-  #}
 
   if(!($mfailed or $rfailed)) {
     $this->{m_logger}->info("[I] [collectPackages] All packages resolved successfully.\n") if $this->{m_debug};
@@ -978,7 +1027,7 @@ sub collectPackages
   #@{$this->{m_metasubdirs}} = @mfsubdirs;
 
 
-  my @packagelist = sort(keys(%{$this->{m_metapackages}}));
+  my @packagelist = sort(keys(%{$this->{m_metaPackages}}));
   if(!$this->unpackMetapackages(@packagelist)) {
     $this->{m_logger}->error("[E] [collectPackages] executing scripts failed!");
     $retval++;
@@ -1019,7 +1068,7 @@ sub unpackMetapackages
   my $retval = 0;
 
   foreach my $metapack(@packlist) {
-    my %tmp = %{$this->{m_metapackages}->{$metapack}};
+    my %tmp = %{$this->{m_metaPackages}->{$metapack}};
 
     my $nofallback;
     my $medium = 1;
@@ -1047,22 +1096,33 @@ sub unpackMetapackages
     
     foreach my $arch($this->getArchList($metapack, \$nofallback)) {
       next if($arch =~ m{(src|nosrc)});
-      if(!$this->{m_metapackages}->{$metapack}->{$arch}) {
+      if(!$this->{m_metaPackages}->{$metapack}->{$arch}) {
 	$this->{m_logger}->warning("[W] Metapackage <$metapack> not available for architecure <$arch>!");
 	next;
       }
-      if(!$this->{m_metapackages}->{$metapack}->{$arch}->{'source'}) {
+      if(!$this->{m_metaPackages}->{$metapack}->{$arch}->{'source'}) {
 	$this->{m_logger}->error("[E] Metapackage <$metapack> has no source defined!");
 	next;
       }
 
-      $this->{m_util}->unpac_package($this->{m_metapackages}->{$metapack}->{$arch}->{'source'}, "$tmp");
+      $this->{m_util}->unpac_package($this->{m_metaPackages}->{$metapack}->{$arch}->{'source'}, "$tmp");
       ## all metapackages contain at least a CD1 dir and _may_ contain another /usr/share/<name> dir
       qx(cp -r $tmp/CD1/* $this->{m_basesubdir}->{$medium});
       for my $sub("usr", "etc") {
 	if(-d "$tmp/$sub") {
 	  qx(cp -r $tmp/$sub $this->{m_basesubdir}->{$medium});
 	}
+	if(-f "$tmp/usr/share/mini-iso-rmlist") {
+	  if(!open(RMLIST, "$tmp/usr/share/mini-iso-rmlist")) {
+	    $this->logMsg("W", "cant open <$tmp/usr/share/mini-iso-rmlist>");
+	  }
+          else {
+	    my @rmfiles = <RMLIST>;
+	    chomp(@rmfiles);
+	    $this->{m_rmlists}->{$arch} = [@rmfiles];
+	    close RMLIST;
+	  }
+        }
       }
       ## copy content of CD2 ... CD<i> subdirs if exists:
       for(2..10) {
@@ -1358,8 +1418,6 @@ sub bestBet
 #   reference to the object for which it is called
 # $pack:
 #   package to acquire
-# $repref:
-#   reference to the hash of available repositories
 #------------------------------------------
 # Returns the number of resolved files, or 0 for bad list
 #------------------------------------------
@@ -1367,15 +1425,15 @@ sub fetchFileFrom
 {
   my $this   = shift;
   my $pack   = shift;
-  my $repref = shift;
+  #my $repref = shift;
   my $type   = shift; # meta or other
   my $force  = shift; # may be omitted
 
   my $retval = 0;
 
   my $targethash;
-  if($type =~ m{meta}) {
-    $targethash = $this->{m_metapackages};
+  if($type =~ m{meta}i) {
+    $targethash = $this->{m_metaPackages};
   }
   else {
     $targethash = $this->{m_packages};
@@ -1493,26 +1551,26 @@ sub dumpRepoData
     $this->{m_logger}->warning("[W] [dumpRepoData] Dumping data to file $target failed: file could not be created!");
     $this->{m_logger}->failed();
   }
+  else {
+    print DUMP "Dumped data from KIWICollect object\n\n";
 
-  print DUMP "Dumped data from KIWICollect object\n\n";
-
-  print DUMP "\n\nKNOWN REPOSITORIES:\n";
-  foreach my $repo(keys(%{$this->{m_repos}})) {
-    print DUMP "\nNAME:\t\"$repo\"\t[HASHREF]\n";
-    print DUMP "\tBASEDIR:\t\"$this->{m_repos}->{$repo}->{'basedir'}\"\n";
-    print DUMP "\tPRIORITY:\t\"$this->{m_repos}->{$repo}->{'priority'}\"\n";
-    print DUMP "\tSOURCEDIR:\t\"$this->{m_repos}->{$repo}->{'source'}\"\n";
-    print DUMP "\tSUBDIRECTORIES:\n";
-    foreach my $srcdir(keys(%{$this->{m_repos}->{$repo}->{'srcdirs'}})) {
-      print DUMP "\t\"$srcdir\"\t[URI LIST]\n";
-      foreach my $file(@{$this->{m_repos}->{$repo}->{'srcdirs'}->{$srcdir}}) {
-	print DUMP "\t\t\"$file\"\n";
+    print DUMP "\n\nKNOWN REPOSITORIES:\n";
+    foreach my $repo(keys(%{$this->{m_repos}})) {
+      print DUMP "\nNAME:\t\"$repo\"\t[HASHREF]\n";
+      print DUMP "\tBASEDIR:\t\"$this->{m_repos}->{$repo}->{'basedir'}\"\n";
+      print DUMP "\tPRIORITY:\t\"$this->{m_repos}->{$repo}->{'priority'}\"\n";
+      print DUMP "\tSOURCEDIR:\t\"$this->{m_repos}->{$repo}->{'source'}\"\n";
+      print DUMP "\tSUBDIRECTORIES:\n";
+      foreach my $srcdir(keys(%{$this->{m_repos}->{$repo}->{'srcdirs'}})) {
+	print DUMP "\t\"$srcdir\"\t[URI LIST]\n";
+	foreach my $file(@{$this->{m_repos}->{$repo}->{'srcdirs'}->{$srcdir}}) {
+	  print DUMP "\t\t\"$file\"\n";
+	}
       }
     }
+    close(DUMP);
   }
-
-  close(DUMP);
-  return;
+  return 0;
 }
 # /dumpRepoData
 
@@ -1804,7 +1862,18 @@ sub createMetadata
     $this->{m_logger}->info("[I] [createMetadata] skipping products file due to missing vars!");
   }
 
-  $this->createBootPackageLinks();
+  my %bplink = $this->createBootPackageLinks();
+  if($bplink{'status'} != 0) {
+    $this->{m_logger}->error("[E] Creating boot package links failed:");
+    foreach my $list(keys(%bplink)) {
+      next if $list =~ m{status}i;
+      $this->{m_logger}->error("\tMissing files for rpmlist file <$list>:");
+      foreach my $file(@{$bplink{$list}}) {
+	$this->{m_logger}->error("\t\t$file");
+      }
+    }
+    return $bplink{'status'};
+  }
 
   ## step 9: LISTINGS
   $this->{m_logger}->info("[I] Calling mk_listings:");
@@ -1918,7 +1987,18 @@ sub createMetadata
 
 
 
-# returns the number of links created
+#===========================
+# createBootPackageLinks
+#---------------------------
+# reads a list of files named "rpmlist"
+# for each of those files all rpms listed
+# in the resp file for one arch must be linked
+# under ./boot/<arch>
+#---------------------------
+# returns a hash containing the following info:
+# status => 0 (ok) / not 0 = error
+# rpmlistname => [ list of missing packages ]
+#---------------------------
 sub createBootPackageLinks
 {
   my $this = shift;
@@ -1927,52 +2007,59 @@ sub createBootPackageLinks
   my $base = $this->{m_basesubdir}->{'1'};
   my $datadir = $this->{m_proddata}->getInfo('DATADIR');
 
-  my $retval = 0;
+  my %retval;
   if(! -d "$base/boot") {
     $this->{m_logger}->warning("[W] There is no /boot subdirectory. This may be ok for some media, but might indicate errors in metapackages!");
-    return $retval;
+    $retval{'status'} = 1;
+    return %retval;
   }
 
   my %rpmlist_files;
   find( sub { rpmlist_find_cb($this, \%rpmlist_files) }, "$base/boot");
 
   foreach my $arch(keys(%rpmlist_files)) {
-    if(not open(RPMLIST, $rpmlist_files{$arch})) {
-      $this->{m_logger}->warning("[W] cannot open file $base/boot/$arch/$rpmlist_files{$arch}!");
-      return -1;
+    my $filename = $rpmlist_files{$arch};
+    if(not open(RPMLIST, $filename)) {
+      $this->{m_logger}->warning("[W] cannot open file $base/boot/$arch/$filename!");
+      $retval{'status'} = 2;
+      return %retval;
     }
-    else {
-      RPM:foreach my $rpmname(<RPMLIST>) {
-	chomp $rpmname;
-	if(not defined($rpmname) or not defined($this->{m_packages}->{$rpmname})) {
-	  $this->{m_logger}->warning("[W] something wrong with rpmlist: undefined value \$rpmname");
-	  next RPM;
+
+    $retval{$filename} = []; # new empty list
+    RPM:foreach my $rpmname(<RPMLIST>) {
+      chomp $rpmname;
+      if(not defined($rpmname) or not defined($this->{m_packages}->{$rpmname})) {
+	$this->{m_logger}->error("[E] broken repo: rpmlist=<$filename> file=<$rpmname> is missing in repo!");
+	$retval{'status'} = 3;
+	push @{$retval{$filename}}, $rpmname;
+	next RPM;
+      }
+      if(defined($this->{m_packages}->{$rpmname}->{'medium'}) and $this->{m_packages}->{$rpmname}->{'medium'} != 1) {
+	$this->{m_logger}->error("[E] broken repo: file <$rpmname> is on wrong medium!");
+	push @{$retval{$filename}}, $rpmname;
+	next RPM;
+      }
+      my %tmp = %{$this->{m_packages}->{$rpmname}};
+
+      # FIXME: This is just a hack, where do we get the upper architecture from ?
+      my $targetarch = $arch;
+      if ( $arch eq 'i386' ) {
+	 $targetarch = "i586";
+      }
+      # End of hack
+      my @fallb = $this->{m_archlist}->fallbacks($targetarch);
+      FARCH:foreach my $fa(@fallb) {
+	if(not defined($this->{m_packages}->{$rpmname}->{$fa})) {
+	#if(not defined($tmp{$fa})) {
+	  next FARCH;
 	}
-	my %tmp = %{$this->{m_packages}->{$rpmname}};
-	if(!%tmp) {
-	  $this->{m_logger}->warning("[W] No package hash entry for package $rpmname in packages hash! Package missing?");
-	}
-	else {
-          # FIXME: This is just a hack, where do we get the upper architecture from ?
-          my $targetarch = $arch;
-          if ( $arch eq 'i386' ) {
-             $targetarch = "i586";
-          }
-          # End of hack
-	  my @fallb = $this->{m_archlist}->fallbacks($targetarch);
-	  FARCH:foreach my $fa(@fallb) {
-	    if(not defined($tmp{$fa})) {
-	      next FARCH;
-	    }
-	    symlink("../../$datadir/$fa/".$tmp{$fa}->{'newfile'}, "$base/boot/$arch/$rpmname.rpm");
-	    $retval++;
-	    next RPM;
-	  }
-	}
+	symlink("../../$datadir/$fa/".$this->{m_packages}->{$rpmname}->{$fa}->{'newfile'}, "$base/boot/$arch/$rpmname.rpm");
+	#symlink("../../$datadir/$fa/".$tmp{$fa}->{'newfile'}, "$base/boot/$arch/$rpmname.rpm");
+	next RPM;
       }
     }
   }
-  return $retval;
+  return %retval;
 }
 
 
@@ -2053,11 +2140,8 @@ sub createDirectoryStructure
 
   if($errors) {
     $this->{m_logger}->error("[E] createDirectoryStructure failed. Abort recommended.");
-    return undef;
   }
-  else {
-    return 0;
-  }
+  return $errors;
 }
 
 
@@ -2087,7 +2171,7 @@ sub getMediaNumbers
     push @media, $debugmedium;
   }
 
-  foreach my $p(values(%{$this->{m_packages}}), values(%{$this->{m_metapackages}})) {
+  foreach my $p(values(%{$this->{m_packages}}), values(%{$this->{m_metaPackages}})) {
     if(defined($p->{'medium'}) and $p->{'medium'} != 0) {
       push @media, $p->{medium};
     }

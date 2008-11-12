@@ -143,12 +143,13 @@ sub loadPlugins
 {
   my $this = shift;
 
-  my $retval = 0;
+  my $loaded = 0;
+  my $avail = 0;
   my $dir = shift;
   if(not defined($dir)) {
     $dir = $this->collect()->productData()->getOpt("PLUGIN_DIR");
     if(not defined($dir)) {
-      return $retval;
+      return $loaded;
     }
   }
 
@@ -156,7 +157,7 @@ sub loadPlugins
   unshift @INC, $dir;
   if(not opendir(PLUGINDIR, "$dir")) {
     $this->gossip("loadPlugins: cannot open directory $dir");
-    return $retval;
+    return $loaded;
   }
 
   my @plugins = readdir(PLUGINDIR);
@@ -186,16 +187,17 @@ sub loadPlugins
 
   foreach my $p(keys(%plugins)) {
     my $loadsuccess = $this->loadPlugin("$dir/$p", $plugins{$p});
+    $avail++;
     if($loadsuccess == 1) {
       $this->gossip("loadPlugins: loaded plugin $p from url $dir successfully.");
-      $retval++;
+      $loaded++;
     }
     else {
       $this->collect()->logger()->error("[E] loadPlugins: failed to load plugin <$p> from url <$dir>: $@");
     }
   }
 
-  return $retval;
+  return ($loaded, $avail);
 }
 
 

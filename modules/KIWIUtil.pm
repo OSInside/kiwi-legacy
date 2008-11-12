@@ -104,10 +104,6 @@ sub splitPath
     $leafonly = 0;
   }
 
-  #if($path =~ m{^opensuse://.*}) {
-  #  $path = $this->{m_url}->normalizePath($path);
-  #}
-
   #==========================================
   # now decide which method to call:
   #------------------------------------------
@@ -174,7 +170,7 @@ sub splitPathHTTP
   # catch 3xx error codes from HTTP server
   # is_error handles 400-599 http replies (according to "PERL in a nutshell")
   if($response->is_error()) {
-    $this->{m_logger}->error("[MAJOR ERROR] HTTP request failed! Server down?");
+    $this->{m_logger}->error("[E] HTTP request failed! Server down?");
     $this->{m_logger}->error("\tThis repository can not be resolved at present.");
     $this->{m_logger}->error("\tI recommend you try again later unless you know what you're doing.");
     return undef;

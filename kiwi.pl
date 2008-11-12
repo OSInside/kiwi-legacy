@@ -195,6 +195,7 @@ our $FSInodeSize;           # filesystem inode size
 our $FSJournalSize;         # filesystem journal size
 our $Verbosity = 0;         # control the verbosity level
 our $TargetArch;            # target architecture -> writes zypp.conf
+our $InstSourceLocal;       # create installation source from local metadata
 our $kiwi;                  # global logging handler object
 
 #============================================
@@ -1155,6 +1156,7 @@ sub init {
 		"fs-journalsize=i"      => \$FSJournalSize,
 		"fs-inodesize=i"        => \$FSInodeSize,
 		"partitioner=s"         => \$Partitioner,
+		"instsource-local"      => \$InstSourceLocal,
 		"target-arch=s"         => \$TargetArch,
 		"help|h"                => \&usage,
 		"<>"                    => \&usage
@@ -1342,6 +1344,8 @@ sub usage {
 	print "     [ --installcd-system <vmx-system-image> ]\n";
 	print "  kiwi --installstick <initrd>\n";
 	print "     [ --installstick-system <vmx-system-image> ]\n";
+	print "Installation source creation:\n";
+	print "  kiwi --root <targetpath> --create-instsource <config> [ --local ] [ -v|--verbose <1|2|3> ]\n";
 	print "Helper Tools:\n";
 	print "  kiwi --testsuite <image-root> [ --test name --test name ... ]\n";
 	print "  kiwi --createpassword\n";
@@ -1500,6 +1504,10 @@ sub usage {
 	print "  [ -v | --verbose <1|2|3> ]\n";
 	print "    Control the verbosity level. At the moment this option\n";
 	print "    has an effect on the create-instsource module only\n";
+	print "  [ --instsource-local ]\n";
+	print "    Loads the module KIWICollect_local instead of KIWICollect when\n";
+	print "    in --create-instsource mode. Parsing local repos works much faster\n";
+	print "    but remote repositories don't work at all\n";
 	print "--\n";
 	version();
 }
@@ -2012,9 +2020,14 @@ sub createInstSource {
 	# ----
 	$kiwi = new KIWILog("tiny");
 	$kiwi -> deactivateBackTraceOutput();
-	eval "require KIWICollect";
+	my $mod = "KIWICollect";
+	if ($InstSourceLocal) {
+		$kiwi->info("Using KIWICollect-local.pm instead of KIWICollect");
+		$mod = "KIWICollect_local";
+	}
+	eval "require $mod";
 	if($@) {
-		$kiwi->error("Module KIWICollect is not available!");
+		$kiwi->error("Module <$mod> is not available!");
 		my $code = kiwiExit (3);
 		return $code;
 	}
@@ -2055,9 +2068,9 @@ sub createInstSource {
 	# Call the *CENTRAL* method for it...
 	#----------------------------------------
 	if (! defined( $collect -> mainTask () ) ) {
-		$kiwi -> error( "KIWICollect could not be invoked successfully." );
-		$kiwi -> failed ();
-		my $code = kiwiExit ( 1 ); return $code;
+		$kiwi -> warning( "KIWICollect could not be invoked successfully." );
+		$kiwi -> skipped ();
+		my $code = kiwiExit ( 0 ); return $code;
 	}
 	$kiwi->info( "KIWICollect completed successfully." );
 	$kiwi->done();
