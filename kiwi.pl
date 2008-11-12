@@ -1504,10 +1504,11 @@ sub usage {
 	print "  [ -v | --verbose <1|2|3> ]\n";
 	print "    Control the verbosity level. At the moment this option\n";
 	print "    has an effect on the create-instsource module only\n";
+	print "\n";
 	print "  [ --instsource-local ]\n";
-	print "    Loads the module KIWICollect_local instead of KIWICollect when\n";
-	print "    in --create-instsource mode. Parsing local repos works much faster\n";
-	print "    but remote repositories don't work at all\n";
+	print "    Loads the module KIWICollect_local instead of KIWICollect\n";
+	print "    when in --create-instsource mode. Parsing local repos works\n";
+	print "    much faster but remote repositories don't work at all\n";
 	print "--\n";
 	version();
 }
