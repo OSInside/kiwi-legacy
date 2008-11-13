@@ -2,7 +2,7 @@
 Wed Nov 12 08:23:35 CET 2008 - ms@suse.de
 
 - kiwi version freeze for SUSE 11.1 => v3.01
-- include inst-source branch changes from autobuild team:
+- include inst-source branch changes from autobuild team (r1750):
   * moved suse-isolinux script to cdtool tools directory
   * install suse-isolinux along with kiwi-instsource
   * removed an unneccesary hash parameter
