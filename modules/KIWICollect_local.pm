@@ -695,44 +695,6 @@ sub mainTask
 
 
 #==========================================
-# getPackagesList OBSOLETE REMOVE ME
-#------------------------------------------
-sub getPackagesList
-{
-  my $this = shift;
-  my $type = shift;
-
-  my $failed = 0;
-  if(!@_) {
-    $this->logMsg("E", "getPackagesList called with empty arguments!");
-    return -1;
-  }
-  
-  foreach my $pack(@_) {
-    my $numfail = $this->fetchFileFrom($pack, $this->{m_repos}, $type);
-    if( $numfail == 0) {
-      $this->logMsg("W", "Package $pack not found in any repository!");
-      if($type =~ m{meta}) {
-	push @{$this->{m_fmpacks}}, "$pack";
-      }
-      elsif($type =~ m{debug}) {
-	push @{$this->{m_fdebugpacks}}, "$pack";
-      }
-      elsif($type =~ m{src}) {
-	push @{$this->{m_fsrcpacks}}, "$pack";
-      }
-      else {
-	push @{$this->{m_fpacks}}, "$pack";
-      }
-      $failed++;
-    }
-  }
-  return $failed;
-} # getPackagesList
-
-
-
-#==========================================
 # getMetafileList
 #------------------------------------------
 # returns:
@@ -828,11 +790,14 @@ sub setupPackageFiles
       my @fallbacklist;
       if($nofallback==0 && $mode ne 2) {
 	@fallbacklist = $this->{m_archlist}->fallbacks($requestedArch);
+        $this->logMsg("W", " Look for fallbacks fallbacks") if $this->{m_debug} >= 6;
       }
-      else {
+      if ( ! @fallbacklist ) {
+        $nofallback = 1;
 	@fallbacklist = ($requestedArch);
+        $this->logMsg("W", "    Run without fallbacks") if $this->{m_debug} >= 6;
       }
-#      push @fallbacklist, $a; # if $a eq 'src' || $a eq 'nosrc';
+      $this->logMsg("W", "    Use as expanded architectures >".join(" ", @fallbacklist)."<") if $this->{m_debug} >= 5;
       my $fb_available = 0;
       FA:foreach my $arch(@fallbacklist) {
         $this->logMsg("W", "    check architecture $arch ") if $this->{m_debug} >= 5;
@@ -854,7 +819,7 @@ sub setupPackageFiles
 	  if ( $packOptions->{requireVersion}
                && $packOptions->{requireVersion}->{ $packPointer->{version}."-".$packPointer->{release} } )
           {
-	    $this->logMsg("W", "     => package ".$packName-$packPointer->{version}."-".$packPointer->{release}." not available for arch $arch in repo $packKey") if $this->{m_debug} >= 4;
+	    $this->logMsg("W", "     => package ".$packName-$packPointer->{version}."-".$packPointer->{release}." not available for arch $arch in repo $packKey in this version") if $this->{m_debug} >= 4;
             next PACKKEY;
           }else{
             # success, but remove key to avoid error message later
@@ -877,6 +842,7 @@ sub setupPackageFiles
           if(!-e "$packOptions->{'newpath'}/$packOptions->{'newfile'}" and !link $packPointer->{'localfile'}, "$packOptions->{'newpath'}/$packOptions->{'newfile'}") {
             $this->logMsg("E", "  linking file $packPointer->{'localfile'} to $packOptions->{'newpath'}/$packOptions->{'newfile'} failed");
           } else {
+            $this->logMsg("I", "  linked file $packPointer->{'localfile'} to $packOptions->{'newpath'}/$packOptions->{'newfile'}") if $this->{m_debug} >= 4;
             if ($this->{m_debug} >= 2) {
               if ($arch eq $requestedArch) {
                 $this->logMsg("W", "  package $packName found for architecture $arch as $packKey");
@@ -896,8 +862,8 @@ sub setupPackageFiles
                     'onlyarch' => 'src,nosrc'
                   };
                 }
-                $this->{m_sourcePacks}->{$srcname}->{'requireVersion'} =
-                     { $packPointer->{'version'}."-".$packPointer->{'release'} => 1 };
+#                $this->{m_sourcePacks}->{$srcname}->{'requireVersion'} =
+#                     { $packPointer->{'version'}."-".$packPointer->{'release'} => 1 };
               }
               if ( defined($this->{m_debugmedium}) && $this->{m_debugmedium} > 0 ) {
                 # Add debug packages, we do not know, if they exist at all
@@ -918,10 +884,10 @@ sub setupPackageFiles
                     'onlyarch' => $arch
                   };
                 };
-                $this->{m_debugPacks}->{$srcname."-debuginfo".$suffix}->{'requireVersion'} =
-                     { $packPointer->{'version'}."-".$packPointer->{'release'} => 1 };
-                $this->{m_debugPacks}->{$srcname."-debugsource".$suffix}->{'requireVersion'} =
-                     { $packPointer->{'version'}."-".$packPointer->{'release'} => 1 };
+#                $this->{m_debugPacks}->{$srcname."-debuginfo".$suffix}->{'requireVersion'} =
+#                     { $packPointer->{'version'}."-".$packPointer->{'release'} => 1 };
+#                $this->{m_debugPacks}->{$srcname."-debugsource".$suffix}->{'requireVersion'} =
+#                     { $packPointer->{'version'}."-".$packPointer->{'release'} => 1 };
               };
             }
           }

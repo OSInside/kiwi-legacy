@@ -58,6 +58,7 @@ if test -d $SOURCE/$BOOT_BASE_DIR \
 then
 	if test -f $SOURCE/$BOOT_IMAGE -o -f $SOURCE/.boot \
 		-o -d $SOURCE/$BOOT_ISOLINUX \
+		-o -f $SOURCE/ppc/bootinfo.txt -o -d $SOURCE/suseboot \
 		-o -d $SOURCE/etc -o -f $SOURCE/boot/silo.conf
 	then
 		mkdir -p $SOURCE2 || { echo "can't create tmpdir $SOURCE2" ; exit 1 ; }
@@ -105,6 +106,36 @@ then
 				-hide-joliet $BOOT_BASE_DIR/boot.catalog"
 			echo found boot image. Making CD bootable.
 			mkdir -p $SOURCE2/$BOOT_BASE_DIR || exit 1
+		elif [ -d $SOURCE/ppc ]; then
+		  if [ -f $SOURCE/ppc/bootinfo.txt ] ; then
+		  # assume thats a pSeries/iSeries CD
+			  echo "adding -chrp-boot for CHRP boot"
+			  PARAMS="$PARAMS -chrp-boot"
+		  fi
+		  # check if a PReP install file is available
+		  if [ -f $SOURCE/boot/zImage.prep.initrd ] ; then
+			  PARAMS="$PARAMS -prep-boot boot/zImage.prep.initrd"
+			  echo using boot/zImage.prep.initrd for PReP boot
+		  elif [ -f $SOURCE/suse/images/zImage.prep.initrd ] ; then
+			  PARAMS="$PARAMS -prep-boot suse/images/zImage.prep.initrd"
+			  echo using suse/images/zImage.prep.initrd for PReP boot
+		  fi
+		  # check if a pmac kernel is available
+		  if [ -d $SOURCE/suseboot ] ; then
+			  # create a mac partition table
+			  # use netatalk and macbinary filename translation
+			  # bless a directory named suseboot, mark it bootable
+			  echo using suseboot for hfs boot
+			  PARAMS="$PARAMS -part --netatalk --macbin -hfs-bless $SOURCE/suseboot"
+			  if [ -f /work/cd/lib/m_cd/apple.filemapping.txt ] ; then
+			  echo using /work/cd/lib/m_cd/apple.filemapping.txt for hfs mapping
+			  PARAMS="$PARAMS -map /work/cd/lib/m_cd/apple.filemapping.txt"
+			  else
+			  echo /work/cd/lib/m_cd/apple.filemapping.txt not found
+			  echo not a blocker but should be fixed
+			  fi
+		  fi
+		  PARAMS="$PARAMS -hfs-volid -"
 		else
 			if [ -d $SOURCE/etc ] ; then
 				echo found $SOURCE/etc. put it at the beginning of iso image.
@@ -208,6 +239,13 @@ if [ -f $SOURCE/$BOOT_ISOLINUX/isolinux.bin ] ; then
   /usr/bin/isolinux-config \
 	--base $BOOT_ISOLINUX $SOURCE/$BOOT_ISOLINUX/isolinux.bin
 fi
+
+echo "Calling mkisofs with the following parameters:"
+echo "-p $CD_PREPARER -A -"
+echo "-publisher $CD_PUBLISHER"
+echo "PARAMS=$PARAMS"
+echo "XPARAMS=$XPARAMS"
+
 mkisofs \
 	-p "$CD_PREPARER" -A "-" \
 	-publisher "$CD_PUBLISHER" \

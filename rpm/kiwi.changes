@@ -1,4 +1,18 @@
 -------------------------------------------------------------------
+Thu Nov 13 16:24:40 CET 2008 - jcborn@suse.de
+
+- suse-isolinux: call parameters appear in logfile now
+- suse-isolinux: fixed missing test for ppc specialities
+
+-------------------------------------------------------------------
+Thu Nov 13 16:24:21 CET 2008 - adrian@suse.de
+
+- fix handling of additional architectures not part of fallback list.
+- Disable version require handling until bugs are solved.
+- remove obsolete code
+- a bit more debug output
+
+-------------------------------------------------------------------
 Wed Nov 12 08:23:35 CET 2008 - ms@suse.de
 
 - kiwi version freeze for SUSE 11.1 => v3.01
