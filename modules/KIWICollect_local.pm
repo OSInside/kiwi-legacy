@@ -1108,12 +1108,13 @@ sub unpackMetapackages
 	  else {
             $this->logMsg("W", "No CD1 directory on $packPointer->{name}");
           }
-          for my $sub("usr", "etc") {
-            if(-d "$tmp/$sub") {
-              qx(cp -r $tmp/$sub $this->{m_basesubdir}->{$medium});
-            }
+          #for my $sub("usr", "etc") {
+            #if(-d "$tmp/$sub") {
+            #  qx(cp -r $tmp/$sub $this->{m_basesubdir}->{$medium});
+            #}
 	    if(-f "$tmp/usr/share/mini-iso-rmlist") {
 	      if(!open(RMLIST, "$tmp/usr/share/mini-iso-rmlist")) {
+		$this->logMsg("W", "cant open <$tmp/usr/share/mini-iso-rmlist>");
 	      }
 	      else {
 		my @rmfiles = <RMLIST>;
@@ -1122,7 +1123,7 @@ sub unpackMetapackages
 		close RMLIST;
 	      }
 	    }
-          }
+          #}
           ## copy content of CD2 ... CD<i> subdirs if exists:
           for(2..10) {
             if(-d "$tmp/CD$_" and defined $this->{m_basesubdir}->{$_}) {
@@ -1499,8 +1500,6 @@ sub getArchList
   my $ret = 0;
 
   return $ret if(not defined($packName));
-
-  my @omits = ();
   if(defined($packOptions->{'arch'})) {
     # Check if this is a rule for this platform
     $packOptions->{'arch'} =~ s{,\s*,}{,}g;
@@ -1536,7 +1535,7 @@ sub getArchList
   push @archs, $this->{m_archlist}->headList();
 
   if(defined($packOptions->{'addarch'})) {
-    if(not(grep(/$packOptions->{'addarch'}/, @archs))) {
+    if(not(grep($packOptions->{'addarch'} eq $_, @archs))) {
       $packOptions->{'addarch'} =~ s{,\s*,}{,}g;
       $packOptions->{'addarch'} =~ s{,\s*}{,}g;
       $packOptions->{'addarch'} =~ s{,\s*$}{};
@@ -1544,23 +1543,13 @@ sub getArchList
       push @archs, split(/,\s*/, $packOptions->{'addarch'});
     }
   }
-
   if(defined($packOptions->{'removearch'})) {
     $packOptions->{'removearch'} =~ s{,\s*,}{,}g;
     $packOptions->{'removearch'} =~ s{,\s*}{,}g;
     $packOptions->{'removearch'} =~ s{,\s*$}{};
     $packOptions->{'removearch'} =~ s{^\s*,}{};
-    @omits = split(/,\s*/, $packOptions->{'removearch'});
-    my @rl;
-    foreach my $x(@omits) {
-      push @rl, grep(/$x/, @archs);
-    }
-    if(@rl) {
-      my %h = map { $_ => 1 } @archs;
-      my @cleared = grep delete($h{$_}), @rl;
-      @archs = ();
-      @archs = keys(%h);
-    }
+    my %omits = map {$_ => 1} split(/,\s*/, $packOptions->{'removearch'});
+    @archs = grep {!$omits{$_}} @archs;
   }
   
   return @archs;

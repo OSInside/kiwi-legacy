@@ -135,7 +135,43 @@ then
 			  echo not a blocker but should be fixed
 			  fi
 		  fi
-		  PARAMS="$PARAMS -hfs-volid -"
+		  if test -f $SOURCE/content ; then
+			for i in $SOURCE/media.? ; do
+			  if test -d $i ; then
+				number=${i##*.}
+			  fi
+			  break
+			done
+			name="`awk '/^(NAME|PRODUCT)[[:blank:]]/ { print $2 }' $SOURCE/content`"
+			version="`awk '/^VERSION[[:blank:]]/ { print $2 }' $SOURCE/content`"
+			if test -n "$name" ; then
+			  hfsvolid="$name"
+			fi
+			if test -n "$version" ; then
+			  hfsvolid="$hfsvolid $version"
+			fi
+			if test -n "$hfsvolid" ; then
+			  if test -n "$number" ; then
+				hfsvolid="`echo $hfsvolid | cut -b -25` $number"
+			  fi
+			else
+			  i=$SOURCE/media.1/build
+			  if test -f $i ; then
+				hfsvolid="`awk '{
+			  l=length($0);
+			  if (l>27)
+				l=l-27;
+			  else
+				l=0;
+				printf("%s", substr($0,l))
+				}' $i`"
+			  else
+				hfsvolid=${SOURCE##*/}
+			  fi
+			fi
+		  fi
+		  hfsvolid=`echo $hfsvolid | tr ' ' '-'`
+		  PARAMS="$PARAMS -hfs-volid $hfsvolid"
 		else
 			if [ -d $SOURCE/etc ] ; then
 				echo found $SOURCE/etc. put it at the beginning of iso image.
@@ -178,7 +214,6 @@ then
 		APPID="$APPID.0#0"
 	fi
 	APPID=`echo $APPID | tr " " -`
-	test -n "$APPID" && PARAMS="$PARAMS -A $APPID"
 
 	if test -f $SOURCE/content ; then
 		MEDIANUMBER=1
@@ -188,6 +223,7 @@ then
 			MEDIANUMBER=${MEDIADIR##$SOURCE/media.}
 		done
 		VOL="0$MEDIANUMBER"
+                APPID=`sed -n -e "s/^LABEL[ ]*\(.*\)/\1/p" "$SOURCE/content" | sed -e "s/ /-/g"`
 	elif test -f $SOURCE/.S.u.S.E-disk-* ; then
 		BASE=`basename $SOURCE/.S.u.S.E-disk-*`
 		VOL=`echo $BASE | cut -c 16-17`
@@ -229,6 +265,7 @@ FIXME="1110"
 			PARAMS="$PARAMS -V $VOL"
 		fi
 	fi
+	test -n "$APPID" && PARAMS="$PARAMS -A $APPID"
 fi
 
 if [ -f $SOURCE/$BOOT_ISOLINUX/isolinux.bin ] ; then
