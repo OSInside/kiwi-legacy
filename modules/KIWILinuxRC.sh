@@ -1383,7 +1383,10 @@ function USBStickDevice {
 					if ! kiwiMount "$stickDevice" "/mnt";then
 						continue
 					fi
-					if [ ! -e /mnt/etc/ImageVersion ];then
+					if \
+						[ ! -e /mnt/etc/ImageVersion ] && \
+						[ ! -e /mnt/config.isoclient ]
+					then
 						umountSystem
 						continue
 					fi

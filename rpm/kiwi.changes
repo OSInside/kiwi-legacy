@@ -1,6 +1,11 @@
 -------------------------------------------------------------------
 Mon Nov 17 10:46:09 CET 2008 - ms@suse.de
 
+- fixed evaluation of bool value (bnc #444996)
+- fixed USBStickDevice() to check for config.isoclient too.
+  This is needed if a live iso was converted to boot from USB
+  stick as described in Bug (bnc #441278) 
+- fixed grub default language setup in suseGFXBoot
 - changed examples default source path to point to network
 - update documentation, added chapter how to create a local
   SUSE installation source and reference it for the examples

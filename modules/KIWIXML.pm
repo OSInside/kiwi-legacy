@@ -1002,7 +1002,7 @@ sub getCompressed {
 	}
 	my $node = $this -> getPreferencesNodeByTagName ("compressed");
 	my $gzip = $node -> getElementsByTagName ("compressed");
-	if ((defined $gzip) && ("$gzip" eq "yes")) {
+	if ((defined $gzip) && ("$gzip" =~ /yes|true/i)) {
 		return 1;
 	}
 	return 0;

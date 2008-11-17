@@ -824,9 +824,9 @@ function suseGFXBoot {
 		local newlayout=
 		[ -f themes/$theme/config ] && newlayout=1
 		[ "$newlayout" ] || make -C themes/$theme prep
-		if [ ! -z "$language" ];then
-			local l1=`echo $language | cut -f1 -d.`
-			local l2=`echo $language | cut -f1 -d_`
+		if [ ! -z "$kiwi_language" ];then
+			local l1=`echo $kiwi_language | cut -f1 -d.`
+			local l2=`echo $kiwi_language | cut -f1 -d_`
 			local found=0
 			for lang in $l1 $l2;do
 				if [ -f themes/$theme/po/$lang.po ];then
@@ -837,7 +837,7 @@ function suseGFXBoot {
 				fi
 			done
 			if [ $found -eq 0 ];then
-				echo "Language $language not found, skipped"
+				echo "Language $kiwi_language not found, skipped"
 				make -C themes/$theme
 			fi
 		else
