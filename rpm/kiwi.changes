@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Mon Nov 17 18:02:28 CET 2008 - jcborn@suse.de
+
+- create volid string (patch by Olaf Hering <olh@novell.com>
+- fixed quoting in tools/cdtool/suse-isolinux for hfs-volid string
+  (fixes bnc#444304)
+- added options for EFI boot
+
+-------------------------------------------------------------------
 Mon Nov 17 10:46:09 CET 2008 - ms@suse.de
 
 - fixed mountSystemUnified() to move the union mount points

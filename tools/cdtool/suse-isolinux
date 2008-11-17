@@ -46,7 +46,7 @@ elif [ -d $SOURCE/$BOOT_BASE_DIR/x86_64 ] ; then
 	BOOT_ISOLINUX=$BOOT_BASE_DIR/loader
 elif [ -d $SOURCE/$BOOT_BASE_DIR/ia64 ] ; then
 	BOOT_BASE_DIR=$BOOT_BASE_DIR/ia64
-	BOOT_IMAGE=$BOOT_BASE_DIR/image
+	BOOT_IMAGE=$BOOT_BASE_DIR/efi
 fi
 
 #=======================================
@@ -69,16 +69,7 @@ then
 			mkdir -p $SOURCE2/$BOOT_BASE_DIR || exit 1
 		elif [ -f $SOURCE/$BOOT_IMAGE ] ; then
 			# needed for ia64
-			xx=`filesize $SOURCE/$BOOT_IMAGE`
-			if [ \( "$xx" -ne 1474560 \) -a \( "$xx" -ne 2949120 \) ] ; then
-			if head -c 200 $SOURCE/$BOOT_IMAGE | \
-				grep -a -q 'Sorry, didn.t find boot loader, stopped.'
-			then
-				PARAMS="$PARAMS -hard-disk-boot"
-			else
-				PARAMS="$PARAMS -no-emul-boot"
-			fi
-			fi
+			PARAMS="$PARAMS -no-emul-boot -boot-load-size 1"
 			echo "$SOURCE2/$BOOT_BASE_DIR/boot.catalog 2" >$SORTFILE
 			echo "$SOURCE/$BOOT_IMAGE 1" >>$SORTFILE
 			PARAMS="$PARAMS -sort $SORTFILE -b $BOOT_IMAGE \
@@ -106,6 +97,9 @@ then
 				-hide-joliet $BOOT_BASE_DIR/boot.catalog"
 			echo found boot image. Making CD bootable.
 			mkdir -p $SOURCE2/$BOOT_BASE_DIR || exit 1
+			if [ -f $SOURCE/$BOOT_BASE_DIR/efi ]; then
+				PARAMS="$PARAMS -eltorito-alt-boot -no-emul-boot -boot-load-size 1 -b $BOOT_BASE_DIR/efi"
+			fi
 		elif [ -d $SOURCE/ppc ]; then
 		  if [ -f $SOURCE/ppc/bootinfo.txt ] ; then
 		  # assume thats a pSeries/iSeries CD
@@ -170,8 +164,8 @@ then
 			  fi
 			fi
 		  fi
-		  hfsvolid=`echo $hfsvolid | tr ' ' '-'`
-		  PARAMS="$PARAMS -hfs-volid $hfsvolid"
+		  #hfsvolid=`echo $hfsvolid | tr ' ' '-'`
+		  PARAMS="$PARAMS -hfs-volid '$hfsvolid'"
 		else
 			if [ -d $SOURCE/etc ] ; then
 				echo found $SOURCE/etc. put it at the beginning of iso image.
@@ -283,9 +277,9 @@ echo "-publisher $CD_PUBLISHER"
 echo "PARAMS=$PARAMS"
 echo "XPARAMS=$XPARAMS"
 
-mkisofs \
-	-p "$CD_PREPARER" -A "-" \
-	-publisher "$CD_PUBLISHER" \
+eval mkisofs \
+	-p "'$CD_PREPARER'" -A "-" \
+	-publisher "'$CD_PUBLISHER'" \
 	$PARAMS -o $DEST $XPARAMS $SOURCE
 code=$?
 
