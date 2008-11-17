@@ -2594,6 +2594,12 @@ function mountSystemUnified {
 		>/dev/null || return 1
 	fi
 	usleep 500000
+	#======================================
+	# move union mount points to system
+	#--------------------------------------
+	mkdir -p /mnt/$roDir && mount --move /$roDir /mnt/$roDir
+	mkdir -p /mnt/$rwDir && mount --move /$rwDir /mnt/$rwDir
+	mkdir -p /mnt/$xiDir && mount --move /$xiDir /mnt/$xiDir
 	return 0
 }
 #======================================
