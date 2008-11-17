@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Nov 17 10:46:09 CET 2008 - ms@suse.de
+
+- changed examples default source path to point to network
+- update documentation, added chapter how to create a local
+  SUSE installation source and reference it for the examples
+
+-------------------------------------------------------------------
 Thu Nov 13 16:24:40 CET 2008 - jcborn@suse.de
 
 - suse-isolinux: call parameters appear in logfile now

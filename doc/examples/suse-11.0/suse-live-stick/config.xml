@@ -19,8 +19,8 @@
 		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/home/tux" name="tux"/>
 	</users>
 	<repository type="yast2">
-		<source path="/image/CDs/full-11.0-i386"/>
-		<!--<source path="opensuse://openSUSE:11.0/standard/"/>-->
+		<!--<source path="/image/CDs/full-11.0-i386"/>-->
+		<source path="opensuse://openSUSE:11.0/standard/"/>
 	</repository>
 	<packages type="image">
 		<package name="kernel-default"/>

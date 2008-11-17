@@ -15,8 +15,8 @@
 		<keytable>us.map.gz</keytable>
 	</preferences>
 	<repository type="yast2">
-		<source path="/image/CDs/full-10.3-i386"/>
-		<!--<source path="opensuse://openSUSE:10.3/standard/"/>-->
+		<!--<source path="/image/CDs/full-10.3-i386"/>-->
+		<source path="opensuse://openSUSE:10.3/standard/"/>
 	</repository>
 	<packages type="image">
 		<package name="kernel-default"/>

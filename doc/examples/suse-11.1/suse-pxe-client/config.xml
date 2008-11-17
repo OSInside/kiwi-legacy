@@ -16,8 +16,8 @@
 		<user name="linux" pwd="$2a$10$90AjhfXU2YIwTRrIftBauecvWXVuaNZ6JLM2IpWi0svu2kO16le9e" home="/home/linux"/>
 	</users>
 	<repository type="yast2">
-		<source path="/image/CDs/full-i386"/>
-		<!--<source path="opensuse://openSUSE:11.1/standard/"/>-->
+		<!--<source path="/image/CDs/full-11.1-i386"/>-->
+		<source path="opensuse://openSUSE:11.1/standard/"/>
 	</repository>
 	<deploy server="192.168.100.2" blocksize="4096">
 		<partitions device="/dev/sda">

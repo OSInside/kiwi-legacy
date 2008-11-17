@@ -25,17 +25,18 @@
   <users group="root">
     <user name="root" pwd="" home="/root"/>
   </users>
-  <!-- use this repos if you have www access
+  <!-- use this repos if you have www access -->
   <repository type="yast2">
     <source path="http://download.opensuse.org/distribution/10.3/repo/oss"/>
   </repository>
   <repository type="yast2">
     <source path="http://download.opensuse.org/distribution/10.3/repo/non-oss"/>
   </repository>
-  -->
+  <!-- local repo, should also provide non-oss software 
   <repository type="yast2">
     <source path="/image/CDs/full-10.3-i386/"/>
   </repository>
+  -->
   <packages type="image">
     <package name="yast2-live-installer"/>
     <package name="pam"/>

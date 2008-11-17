@@ -19,7 +19,8 @@ TEX=kiwi.tex           \
 	workflow.tex       \
 	appliance.tex      \
 	xen.tex            \
-	migrate.tex
+	migrate.tex        \
+    source.tex
 
 all: revision ps
 
