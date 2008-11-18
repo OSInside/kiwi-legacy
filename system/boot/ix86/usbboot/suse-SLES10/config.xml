@@ -47,7 +47,7 @@
 		<source path="/mounts/machcd2/dists/full-sle10-sp2-%arch"/>
 	</repository>
 	<repository type="rpm-dir">
-		<source path="/usr/share/kiwi/repo/suse-repo/suse-sles-repo"/>
+		<source path="/usr/share/kiwi/repo/suse-repo/suse-sle10-repo"/>
 	</repository>
 	<packages type="image" profiles="default">
 		<package name="kernel-default"/>
