@@ -3207,7 +3207,7 @@ sub setStoragePartition {
 				if ($cmd eq "t") {
 					my $index= $commands[$count+1];
 					my $type = $commands[$count+2];
-					push (@p_cmd,"set $index type $type");
+					push (@p_cmd,"set $index type 0x$type");
 				}
 				if ($cmd eq "a") {
 					my $index= $commands[$count+1];
@@ -3221,6 +3221,7 @@ sub setStoragePartition {
 				$status= qxx ("/usr/sbin/parted -s $device unit s $p_cmd 2>&1");
 				$result= $? >> 8;
 				$kiwi -> loginfo ($status);
+				sleep (1);
 			}
 			last SWITCH;
 		}
@@ -3258,19 +3259,29 @@ sub getStorageSize {
 		# parted
 		#------------------------------------------
 		/^parted/  && do {
-			my $parted = "/usr/sbin/parted -m -s $pdev unit kB print 2>&1";
-			$status = qxx ("$parted | grep ^$pdev | cut -f2 -d: | tr -d kB");
+			my $parted = "/usr/sbin/parted -m ";
+			my $disk   = $pdev;
+			my $step   = 2;
+			if ($pdev =~ /(.*)(\d+)/) {
+				$disk = $1;
+				$step = 4;
+			}
+			$parted .= '-s '.$disk.' unit B print |';
+			$parted .= 'sed -e "s@^\([0-4]\):@'.$disk.'\1:@" |';
+			$parted .= 'grep ^'.$pdev.':|cut -f'.$step.' -d: | tr -d B';
+			$status = qxx ($parted);
 			$result = $? >> 8;
-			$status = int $status;
 			if ((! $status) && ($pdev =~ /loop/)) {
-				$status= qxx ("/usr/sbin/parted -s $pdev mklabel msdos 2>&1");
-				$status= qxx ("$parted | grep ^$pdev | cut -f2 -d: | tr -d kB");
+				$status = qxx ("/usr/sbin/parted -s $pdev mklabel msdos 2>&1");
+				$status = qxx ($parted);
 				$result = $? >> 8;
 			}
 			last SWITCH;
 		}
 	}
 	if ($result == 0) {
+		$status /= 1000;
+		$status = int $status;
 		return $status;
 	}
 	return 0;

@@ -1,10 +1,15 @@
 -------------------------------------------------------------------
+Tue Nov 18 10:57:30 CET 2008 - ms@suse.de
+
+- fixed parted type setup and storage size function
+
+-------------------------------------------------------------------
 Mon Nov 17 18:02:28 CET 2008 - jcborn@suse.de
 
+- added options for EFI boot
 - create volid string (patch by Olaf Hering <olh@novell.com>
 - fixed quoting in tools/cdtool/suse-isolinux for hfs-volid string
   (fixes bnc#444304)
-- added options for EFI boot
 
 -------------------------------------------------------------------
 Mon Nov 17 10:46:09 CET 2008 - ms@suse.de
