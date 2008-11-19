@@ -7,6 +7,8 @@ Wed Nov 19 17:59:37 CET 2008 - jcborn@suse.de
 -------------------------------------------------------------------
 Tue Nov 18 18:57:44 CET 2008 - ms@suse.de
 
+- added kernel consistency check (bnc #445309)
+- set framebuffer to verbose mode in sax init script
 - added SLE[SD]11 boot image templates used by JeOS
 
 -------------------------------------------------------------------

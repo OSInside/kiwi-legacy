@@ -960,10 +960,16 @@ function suseStripKernel {
 	local d
 	local mod
 	local stripdir
+	local kdata
 	for kversion in /lib/modules/*;do
 		IFS="
 		"
-		for p in `rpm -qf $kversion`;do
+		if [ -x /bin/rpm ];then
+			kdata=$(rpm -qf $kversion)
+		else
+			kdata=$kversion
+		fi
+		for p in $kdata;do
 			#==========================================
 			# get kernel VERSION information
 			#------------------------------------------

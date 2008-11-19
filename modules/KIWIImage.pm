@@ -23,6 +23,7 @@ use strict;
 use Carp qw (cluck);
 use KIWILog;
 use KIWIBoot;
+use KIWIXML;
 use KIWIIsoLinux;
 use Math::BigFloat;
 use File::Basename;
@@ -375,7 +376,7 @@ sub createImageEC2 {
 	}
 	if (! $pblt) {
 		#==========================================
-		# build the split boot image
+		# build the ec2 boot image
 		#------------------------------------------
 		undef @main::AddPackage;
 		undef $main::Upgrade;
@@ -397,13 +398,24 @@ sub createImageEC2 {
 		qxx ("rm -rf $tmpdir");
 	}
 	#==========================================
-	# Include splash screen to initrd
+	# setup initrd name 
 	#------------------------------------------
 	my $kernel = $main::Destination."/".$main::ImageName.".kernel";
 	my $initrd = $main::Destination."/".$main::ImageName.".gz";
 	if (! -f $initrd) {
 		$initrd = $main::Destination."/".$main::ImageName;
 	}
+	#==========================================
+	# Check boot and system image kernel
+	#------------------------------------------
+	if (defined $main::CheckKernel) {
+		if (! $this -> checkKernel ($initrd,$imageTree)) {
+			return undef;
+		}
+	}
+	#==========================================
+	# Include splash screen to initrd
+	#------------------------------------------
 	my $kboot  = new KIWIBoot ($kiwi,$initrd);
 	if (! defined $kboot) {
 		return undef;
@@ -653,14 +665,13 @@ sub createImageUSB {
 	# call kiwi with the --bootstick option after the image creation
 	# process is finished
 	#
-	# Note: Virtual machine images requires the same steps than USB
-	# images. The only difference is that there is no real disk
-	# (USB-storage) the images are deployed to. Because of this we
-	# are using the same code for creating the system and boot image
-	# in the createImageVMX() method
+	# Note: vmx|xen|pxe images requires the same steps than USB
+	# images. Therefore this function is used inside the
+	# createImageVMX(), createImagePXE() and createImageXen()
+	# functions too 
 	# ---
 	#==========================================
-	# Create USB boot and system image
+	# Create usb|vmx|xen|pxe system image
 	#------------------------------------------
 	my $this = shift;
 	my $para = shift;
@@ -735,7 +746,7 @@ sub createImageUSB {
 	}
 	$result{systemImage} = $main::ImageName;
 	#==========================================
-	# Prepare and Create USB boot image
+	# Prepare usb|vmx|xen|pxe boot image
 	#------------------------------------------
 	$kiwi -> info ("Creating $text boot image: $boot...\n");
 	my $Prepare = $imageTree."/image";
@@ -840,7 +851,7 @@ sub createImageUSB {
 	}
 	if (! $pblt) {
 		#==========================================
-		# build the boot image
+		# build the usb|vmx|xen|pxe boot image
 		#------------------------------------------
 		undef @main::AddPackage;
 		undef $main::Upgrade;
@@ -861,12 +872,23 @@ sub createImageUSB {
 		qxx ("rm -rf $tmpdir");
 	}
 	#==========================================
-	# Include splash screen to initrd
+	# setup initrd name
 	#------------------------------------------
 	my $initrd = $main::Destination."/".$main::ImageName.".gz";
 	if (! -f $initrd) {
 		$initrd = $main::Destination."/".$main::ImageName;
 	}
+	#==========================================
+	# Check boot and system image kernel
+	#------------------------------------------
+	if (defined $main::CheckKernel) {
+		if (! $this -> checkKernel ($initrd,$imageTree)) {
+			return undef;
+		}
+	}
+	#==========================================
+	# Include splash screen to initrd
+	#------------------------------------------
 	my $kboot  = new KIWIBoot ($kiwi,$initrd);
 	if (! defined $kboot) {
 		return undef;
@@ -1375,7 +1397,7 @@ sub createImageLiveCD {
 	}
 	if (! $pblt) {
 		#==========================================
-		# build an isoboot boot image
+		# build the isoboot boot image
 		#------------------------------------------
 		undef @main::AddPackage;
 		undef $main::Upgrade;
@@ -1392,6 +1414,24 @@ sub createImageLiveCD {
 	}
 	$main::Survive = "default";
 	undef %main::ForeignRepo;
+	#==========================================
+	# Check boot and system image kernel
+	#------------------------------------------
+	if (defined $main::CheckKernel) {
+		my $initrd = $pinitrd;
+		if (! $pblt) {
+			$initrd = "$imageDest/$iso$arch-$ver.gz";
+		}
+		if (! $this -> checkKernel ($initrd,$imageTree)) {
+			if (! -d $main::RootTree.$baseSystem) {
+				qxx ("rm -rf $main::RootTree");
+				qxx ("rm -rf $tmpdir");
+				qxx ("rm -rf $imageTreeReadOnly");
+			}
+			$this -> restoreCDRootData();
+			return undef;
+		}
+	}
 	#==========================================
 	# Prepare for CD ISO image
 	#------------------------------------------
@@ -2405,12 +2445,23 @@ sub createImageSplit {
 		qxx ("rm -rf $tmpdir");
 	}
 	#==========================================
-	# Include splash screen to initrd
+	# setup initrd name
 	#------------------------------------------
 	my $initrd = $main::Destination."/".$main::ImageName.".gz";
 	if (! -f $initrd) {
 		$initrd = $main::Destination."/".$main::ImageName;
 	}
+	#==========================================
+	# Check boot and system image kernel
+	#------------------------------------------
+	if (defined $main::CheckKernel) {
+		if (! $this -> checkKernel ($initrd,$imageTree)) {
+			return undef;
+		}
+	}
+	#==========================================
+	# Include splash screen to initrd
+	#------------------------------------------
 	my $kboot  = new KIWIBoot ($kiwi,$initrd);
 	if (! defined $kboot) {
 		return undef;
@@ -3039,6 +3090,23 @@ sub extractKernel {
 			last SWITCH;
 		};
 	}
+	#==========================================
+	# this is a boot image, extract kernel
+	#------------------------------------------
+	return $this -> extractLinux (
+		$name,$imageTree,$imageDest
+	);
+}
+
+#==========================================
+# extractLinux
+#------------------------------------------
+sub extractLinux {
+	my $this      = shift;
+	my $name      = shift;
+	my $imageTree = shift;
+	my $imageDest = shift;
+	my $kiwi      = $this->{kiwi};
 	if ((-f "$imageTree/boot/vmlinux.gz") ||
 		(-f "$imageTree/boot/vmlinux")    ||
 		(-f "$imageTree/boot/vmlinuz")
@@ -3553,6 +3621,191 @@ sub getSize {
 		$xmlsize = $size;
 	}
 	return ($orig,$size,$xmlsize);
+}
+
+#==========================================
+# checkKernel
+#------------------------------------------
+sub checkKernel {
+	# ...
+	# this function receives two parameters. The initrd image
+	# file and the system image tree directory path. It checks
+	# whether at least one kernel matches both, the initrd and
+	# the system image. If not the function tries to copy the
+	# kernel from the system image into the initrd. If the
+	# system image specifies more than one kernel an error
+	# is printed pointing out that the boot image needs to
+	# specify one of the found system image kernels
+	# ---
+	my $this    = shift;
+	my $initrd  = shift;
+	my $systree = shift;
+	my $kiwi    = $this->{kiwi};
+	my $arch    = $this->{arch};
+	my %sysk    = ();
+	my %bootk   = ();
+	my $status;
+	my $tmpdir;
+	#==========================================
+	# find system image kernel(s)
+	#------------------------------------------
+	foreach my $dir (glob ("$systree/lib/modules/*")) {
+		if ($dir =~ /-debug$/) {
+			next;
+		}
+		$dir =~ s/$systree\///;
+		$sysk{$dir} = "system-kernel";
+	}
+	if (! %sysk) {
+		$kiwi -> error  ("Can't find any system image kernel");
+		$kiwi -> failed ();
+		return undef;
+	}
+	#==========================================
+	# find boot image kernel
+	#------------------------------------------
+	my $cmd = "cat $initrd";
+	my $zip = 0;
+	if ($initrd =~ /\.gz$/) {
+		$cmd = "$main::Gzip -cd $initrd";
+		$zip = 1;
+	}
+	my @status = qxx ("$cmd|cpio -it --quiet 'lib/modules/*'|cut -f1-3 -d/");
+	my $result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> error  ("Can't find any boot image kernel");
+		$kiwi -> failed ();
+		return undef;
+	}
+	foreach my $module (@status) {
+		chomp $module;
+		$bootk{$module} = "boot-kernel";
+	}
+	if (! %bootk) {
+		$kiwi -> error  ("Can't find any boot image kernel");
+		$kiwi -> failed ();
+		return undef;
+	}
+	#==========================================
+	# search system image kernel in initrd 
+	#------------------------------------------
+	foreach my $system (keys %sysk) {
+		if ($bootk{$system}) {
+			# found system image kernel in initrd, ok
+			return $this;
+		}
+	}
+	#==========================================
+	# check system image kernel count
+	#------------------------------------------
+	if (keys %sysk > 1) {
+		$kiwi -> error  ("*** kernel check failed ***");
+		$kiwi -> failed ();
+		$kiwi -> note ("Can't find a system kernel matching the initrd\n");
+		$kiwi -> note ("multiple system kernels were found, make sure your\n");
+		$kiwi -> note ("boot image includes the intended kernel\n");
+		return undef;
+	}
+	#==========================================
+	# fix kernel inconsistency:
+	#------------------------------------------
+	$kiwi -> info ("Fixing kernel inconsistency...");
+	$tmpdir = qxx ("mktemp -q -d /tmp/kiwi-fixboot.XXXXXX"); chomp $tmpdir;
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't create tmp dir: $tmpdir: $!");
+		$kiwi -> failed ();
+		return undef;
+	}
+	#==========================================
+    # 1) unpack initrd...
+    #------------------------------------------
+	$status = qxx ("cd $tmpdir && $cmd|cpio -i --quiet");
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't unpack initrd: $status");
+		$kiwi -> failed ();
+		qxx ("rm -rf $tmpdir");
+		return undef;
+	}
+	#==========================================
+	# 2) create images.sh script...
+	#------------------------------------------
+	if (! open (FD,">$tmpdir/images.sh")) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't create image.sh file: $!");
+		$kiwi -> failed ();
+		qxx ("rm -rf $tmpdir");
+		return undef;
+	}
+	print FD '#!/bin/sh'."\n";
+	print FD 'test -f /.kconfig && . /.kconfig'."\n";
+	print FD 'test -f /.profile && . /.profile'."\n";
+	print FD 'echo "*** Fixing kernel inconsistency ***"'."\n";
+	print FD 'suseStripKernel'."\n";
+	print FD 'exit 0'."\n";
+	close FD;
+	#==========================================
+	# 3) copy system kernel to initrd...
+	#------------------------------------------
+	qxx ("rm -rf $tmpdir/boot");
+	qxx ("cp -a  $systree/boot $tmpdir");
+	qxx ("rm -rf $tmpdir/lib/modules");
+	qxx ("cp -a  $systree/lib/modules $tmpdir/lib");
+	qxx ("cp $main::BasePath/modules/KIWIConfig.sh $tmpdir/.kconfig");
+	qxx ("chmod u+x $tmpdir/images.sh");
+	#==========================================
+	# 4) call images.sh script...
+	#------------------------------------------
+	$status = qxx ("chroot $tmpdir /images.sh 2>&1");
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> info   ($status);
+		qxx ("rm -rf $tmpdir");
+		return undef;
+	} else {
+		$kiwi -> loginfo ("images.sh: $status");
+	}
+	$kiwi -> done();
+	#==========================================
+	# 5) extract kernel files...
+	#------------------------------------------
+	my $xml  = new KIWIXML ($kiwi,$tmpdir."/image");
+	my $name = $xml -> getImageName();
+	my $iver = $xml -> getImageVersion();
+	my $dest = dirname $initrd;
+	$name = $name.$arch."-".$iver;
+	qxx ("rm -f $dest/$name*");
+	if (! $this -> extractLinux ($name,$tmpdir,$dest)) {
+		qxx ("rm -rf $tmpdir");
+		return undef;
+	}
+	#==========================================
+	# 6) rebundle initrd...
+	#------------------------------------------
+	my @cpio = ("--create", "--format=newc", "--quiet");
+	$status = qxx ( "cd $tmpdir && find . | cpio @cpio > $dest/$name");
+	if ($zip) {
+		$status = qxx (
+			"cd $tmpdir && cat $dest/$name | $main::Gzip -f > $initrd"
+		);
+	} 
+	#==========================================
+	# 7) recreate md5 file...
+	#------------------------------------------
+	my $origDest = $this->{imageDest};
+	$this->{imageDest} = $dest;
+	if (! $this -> buildMD5Sum ($name)) {
+		$this->{imageDest} = $origDest;
+		qxx ("rm -rf $tmpdir");
+		return undef;
+	}
+	$this->{imageDest} = $origDest;
+	qxx ("rm -rf $tmpdir");
+	return $this;
 }
 
 #==========================================

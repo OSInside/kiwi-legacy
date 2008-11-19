@@ -196,6 +196,7 @@ our $FSJournalSize;         # filesystem journal size
 our $Verbosity = 0;         # control the verbosity level
 our $TargetArch;            # target architecture -> writes zypp.conf
 our $InstSourceLocal;       # create installation source from local metadata
+our $CheckKernel;           # check for kernel matches in boot and system image
 our $kiwi;                  # global logging handler object
 
 #============================================
@@ -1158,6 +1159,7 @@ sub init {
 		"partitioner=s"         => \$Partitioner,
 		"instsource-local"      => \$InstSourceLocal,
 		"target-arch=s"         => \$TargetArch,
+		"check-kernel"          => \$CheckKernel,
 		"help|h"                => \&usage,
 		"<>"                    => \&usage
 	);
@@ -1500,6 +1502,11 @@ sub usage {
 	print "    Set a special target-architecture. This overrides the \n";
 	print "    used architecture for the image-packages in zypp.conf.\n";
 	print "    When used with smart this option doesn't have any effect.\n";
+	print "\n";
+	print "  [ --check-kernel ]\n";
+	print "    Activates check for matching kernels between boot and\n";
+	print "    system image. The kernel check also tries to fix the boot\n";
+	print "    image if no matching kernel was found.\n";
 	print "\n";
 	print "  [ -v | --verbose <1|2|3> ]\n";
 	print "    Control the verbosity level. At the moment this option\n";
