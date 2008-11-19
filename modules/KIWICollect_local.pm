@@ -1103,7 +1103,7 @@ sub unpackMetapackages
           $this->{m_util}->unpac_package($packPointer->{'localfile'}, "$tmp");
           ## all metapackages contain at least a CD1 dir and _may_ contain another /usr/share/<name> dir
           if ( -d "$tmp/CD1") {
-            qx(cp -r $tmp/CD1/* $this->{m_basesubdir}->{$medium});
+            qx(cp -a $tmp/CD1/* $this->{m_basesubdir}->{$medium});
           }
 	  else {
             $this->logMsg("W", "No CD1 directory on $packPointer->{name}");
@@ -1127,7 +1127,7 @@ sub unpackMetapackages
           ## copy content of CD2 ... CD<i> subdirs if exists:
           for(2..10) {
             if(-d "$tmp/CD$_" and defined $this->{m_basesubdir}->{$_}) {
-              qx(cp -r $tmp/CD$_/* $this->{m_basesubdir}->{$_});
+              qx(cp -a $tmp/CD$_/* $this->{m_basesubdir}->{$_});
               $this->logMsg("W", "Unpack CD$_ for $packPointer->{name} ");
             }
             ## add handling for "DVD<i>" subdirs if necessary FIXME

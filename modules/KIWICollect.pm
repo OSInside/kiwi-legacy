@@ -1107,11 +1107,11 @@ sub unpackMetapackages
 
       $this->{m_util}->unpac_package($this->{m_metaPackages}->{$metapack}->{$arch}->{'source'}, "$tmp");
       ## all metapackages contain at least a CD1 dir and _may_ contain another /usr/share/<name> dir
-      qx(cp -r $tmp/CD1/* $this->{m_basesubdir}->{$medium});
-      for my $sub("usr", "etc") {
-	if(-d "$tmp/$sub") {
-	  qx(cp -r $tmp/$sub $this->{m_basesubdir}->{$medium});
-	}
+      qx(cp -a $tmp/CD1/* $this->{m_basesubdir}->{$medium});
+      #for my $sub("usr", "etc") {
+	#if(-d "$tmp/$sub") {
+	#  qx(cp -a $tmp/$sub $this->{m_basesubdir}->{$medium});
+	#}
 	if(-f "$tmp/usr/share/mini-iso-rmlist") {
 	  if(!open(RMLIST, "$tmp/usr/share/mini-iso-rmlist")) {
 	    $this->logMsg("W", "cant open <$tmp/usr/share/mini-iso-rmlist>");
@@ -1123,11 +1123,11 @@ sub unpackMetapackages
 	    close RMLIST;
 	  }
         }
-      }
+      #}
       ## copy content of CD2 ... CD<i> subdirs if exists:
       for(2..10) {
 	if(-d "$tmp/CD$_" and defined $this->{m_basesubdir}->{$_}) {
-	  qx(cp -r $tmp/CD$_/* $this->{m_basesubdir}->{$_});
+	  qx(cp -a $tmp/CD$_/* $this->{m_basesubdir}->{$_});
 	}
 	## add handling for "DVD<i>" subdirs if necessary FIXME
       }
