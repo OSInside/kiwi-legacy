@@ -38,7 +38,9 @@ case "$1" in
 			xconf=1
 		fi
 		if [ $xconf = 1 ] ;then
+			test -e /proc/splash && echo verbose > /proc/splash
 			/usr/sbin/sax2 -c 0 -a &>/dev/null
+			test -e /proc/splash && echo silent > /proc/splash
 		else
 			rc_status -s
 			rc_exit
