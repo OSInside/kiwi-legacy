@@ -152,7 +152,7 @@ sub new {
 		"-r /"
 	];
 	$this->{kchroot}     = [
-		"export TMPDIR=/tmp;","chroot \"$root\""
+		"chroot \"$root\""
 	];
 	#==========================================
 	# remove pre-defined smart channels
