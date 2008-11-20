@@ -3276,11 +3276,11 @@ sub getStorageSize {
 				$status = qxx ($parted);
 				$result = $? >> 8;
 			}
+			$status /= 1000;
 			last SWITCH;
 		}
 	}
 	if ($result == 0) {
-		$status /= 1000;
 		$status = int $status;
 		return $status;
 	}

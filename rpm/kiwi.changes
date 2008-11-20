@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Tue Nov 18 18:57:44 CET 2008 - ms@suse.de
 
+- fixed getStorageSize() [fdisk] return value (bnc #446812)
 - added kernel consistency check (bnc #445309)
 - set framebuffer to verbose mode in sax init script
 - added SLE[SD]11 boot image templates used by JeOS
