@@ -402,6 +402,11 @@ sub init {
 	}
 	print FD $imageName."-".$imageVersion; close FD;
 	#==================================
+	# Create package keys before chroot
+	#----------------------------------
+	$manager -> setupPackageKeys();
+
+	#==================================
 	# Return object reference
 	#----------------------------------
 	return $this;

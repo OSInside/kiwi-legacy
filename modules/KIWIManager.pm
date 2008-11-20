@@ -1701,6 +1701,67 @@ sub setupPackageInfo {
 }
 
 #==========================================
+# setupPackageKeys
+#------------------------------------------
+sub setupPackageKeys {
+	# ...
+	# import package keys to avoid warnings on installation
+	# of packages. This is an rpm only task and needs to be
+	# enhanced for non rpm based packages
+	# ---
+	my $this = shift;
+	my $root = $this->{root};
+	my $kiwi = $this->{kiwi};
+	my $data;
+	my $code;
+	#==========================================
+	# check for rpm binary
+	#------------------------------------------
+	if (! -x "/bin/rpm") {
+		# operates on rpm only
+		return $this;
+	}
+	#==========================================
+	# check build key and gpg
+	#------------------------------------------	
+	$kiwi -> info ("Importing build keys...");
+	if (! -x "/usr/lib/rpm/gnupg/dumpsigs") {
+		$kiwi -> skipped ();
+		$kiwi -> warning ("Can't find dumpsigs on host system");
+		$kiwi -> skipped ();
+		return $this;
+	}
+	if (! -f "/usr/lib/rpm/gnupg/pubring.gpg") {
+		$kiwi -> skipped ();
+		$kiwi -> warning ("Can't find build keys on host system");
+		$kiwi -> skipped ();
+		return $this;
+	}
+	my $dump = "/usr/lib/rpm/gnupg/dumpsigs /usr/lib/rpm/gnupg/pubring.gpg";
+	my $sigs = "$root/rpm-sigs";
+	$data = qxx ("mkdir -p $sigs && cd $sigs && $dump 2>&1");
+	$code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> skipped ();
+		$kiwi -> error  ("Can't dump pubkeys: $data");
+		$kiwi -> failed ();
+		qxx ("rm -rf $sigs");
+		return $this;
+	}
+	$data.= qxx ("rpm -r $root --import $sigs/gpg-pubke* 2>&1");
+	$code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> skipped ();
+		$kiwi -> error  ("Can't import pubkeys: $data");
+		$kiwi -> failed ();
+		qxx ("rm -rf $sigs");
+	}
+	$kiwi -> done();
+	qxx ("rm -rf $sigs");
+	return $this;
+}
+
+#==========================================
 # checkExclusiveLock
 #------------------------------------------
 sub checkExclusiveLock {
