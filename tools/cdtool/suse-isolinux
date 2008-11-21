@@ -101,71 +101,75 @@ then
 				PARAMS="$PARAMS -eltorito-alt-boot -no-emul-boot -boot-load-size 1 -b $BOOT_BASE_DIR/efi"
 			fi
 		elif [ -d $SOURCE/ppc ]; then
-		  if [ -f $SOURCE/ppc/bootinfo.txt ] ; then
-		  # assume thats a pSeries/iSeries CD
-			  echo "adding -chrp-boot for CHRP boot"
-			  PARAMS="$PARAMS -chrp-boot"
-		  fi
-		  # check if a PReP install file is available
-		  if [ -f $SOURCE/boot/zImage.prep.initrd ] ; then
-			  PARAMS="$PARAMS -prep-boot boot/zImage.prep.initrd"
-			  echo using boot/zImage.prep.initrd for PReP boot
-		  elif [ -f $SOURCE/suse/images/zImage.prep.initrd ] ; then
-			  PARAMS="$PARAMS -prep-boot suse/images/zImage.prep.initrd"
-			  echo using suse/images/zImage.prep.initrd for PReP boot
-		  fi
-		  # check if a pmac kernel is available
-		  if [ -d $SOURCE/suseboot ] ; then
-			  # create a mac partition table
-			  # use netatalk and macbinary filename translation
-			  # bless a directory named suseboot, mark it bootable
-			  echo using suseboot for hfs boot
-			  PARAMS="$PARAMS -part --netatalk --macbin -hfs-bless $SOURCE/suseboot"
-			  if [ -f /work/cd/lib/m_cd/apple.filemapping.txt ] ; then
-			  echo using /work/cd/lib/m_cd/apple.filemapping.txt for hfs mapping
-			  PARAMS="$PARAMS -map /work/cd/lib/m_cd/apple.filemapping.txt"
-			  else
-			  echo /work/cd/lib/m_cd/apple.filemapping.txt not found
-			  echo not a blocker but should be fixed
-			  fi
-		  fi
-		  if test -f $SOURCE/content ; then
+		if [ -f $SOURCE/ppc/bootinfo.txt ] ; then
+		# assume thats a pSeries/iSeries CD
+		  echo "adding -chrp-boot for CHRP boot"
+		  PARAMS="$PARAMS -chrp-boot"
+		fi
+		# check if a PReP install file is available
+		if [ -f $SOURCE/boot/zImage.prep.initrd ] ; then
+			PARAMS="$PARAMS -prep-boot boot/zImage.prep.initrd"
+			echo using boot/zImage.prep.initrd for PReP boot
+		elif [ -f $SOURCE/suse/images/zImage.prep.initrd ] ; then
+			PARAMS="$PARAMS -prep-boot suse/images/zImage.prep.initrd"
+			echo using suse/images/zImage.prep.initrd for PReP boot
+		fi
+		# check if a pmac kernel is available
+		if [ -d $SOURCE/suseboot ] ; then
+			# create a mac partition table
+			# use netatalk and macbinary filename translation
+			# bless a directory named suseboot, mark it bootable
+			echo using suseboot for hfs boot
+			PARAMS="`echo $PARAMS | sed 's/-f//g'`"
+			PARAMS="`echo $PARAMS | sed 's/-joliet-long//g'`"
+			PARAMS="`echo $PARAMS | sed 's/-R//g'`"
+			PARAMS="`echo $PARAMS | sed 's/-J//g'` -U -T"
+			PARAMS="$PARAMS -part --netatalk --macbin -hfs-bless $SOURCE/suseboot"
+			if [ -f /work/cd/lib/m_cd/apple.filemapping.txt ] ; then
+				echo using /work/cd/lib/m_cd/apple.filemapping.txt for hfs mapping
+				PARAMS="$PARAMS -map /work/cd/lib/m_cd/apple.filemapping.txt"
+			else
+				echo /work/cd/lib/m_cd/apple.filemapping.txt not found
+				echo not a blocker but should be fixed
+			fi
+		fi
+		if test -f $SOURCE/content ; then
 			for i in $SOURCE/media.? ; do
-			  if test -d $i ; then
-				number=${i##*.}
-			  fi
-			  break
+				if test -d $i ; then
+					number=${i##*.}
+				fi
+				break
 			done
 			name="`awk '/^(NAME|PRODUCT)[[:blank:]]/ { print $2 }' $SOURCE/content`"
 			version="`awk '/^VERSION[[:blank:]]/ { print $2 }' $SOURCE/content`"
 			if test -n "$name" ; then
-			  hfsvolid="$name"
+				hfsvolid="$name"
 			fi
 			if test -n "$version" ; then
-			  hfsvolid="$hfsvolid $version"
+				hfsvolid="$hfsvolid $version"
 			fi
 			if test -n "$hfsvolid" ; then
-			  if test -n "$number" ; then
-				hfsvolid="`echo $hfsvolid | cut -b -25` $number"
-			  fi
+				if test -n "$number" ; then
+					hfsvolid="`echo $hfsvolid | cut -b -25` $number"
+				fi
 			else
-			  i=$SOURCE/media.1/build
-			  if test -f $i ; then
-				hfsvolid="`awk '{
-			  l=length($0);
-			  if (l>27)
-				l=l-27;
-			  else
-				l=0;
-				printf("%s", substr($0,l))
-				}' $i`"
-			  else
-				hfsvolid=${SOURCE##*/}
-			  fi
+				i=$SOURCE/media.1/build
+				if test -f $i ; then
+					hfsvolid="`awk '{
+					l=length($0);
+					if (l>27)
+						l=l-27;
+					else
+						l=0;
+					printf("%s", substr($0,l))
+					}' $i`"
+				else
+					hfsvolid=${SOURCE##*/}
+				fi
 			fi
-		  fi
-		  #hfsvolid=`echo $hfsvolid | tr ' ' '-'`
-		  PARAMS="$PARAMS -hfs-volid '$hfsvolid'"
+		fi
+		#hfsvolid=`echo $hfsvolid | tr ' ' '-'`
+		PARAMS="$PARAMS -hfs-volid '$hfsvolid'"
 		else
 			if [ -d $SOURCE/etc ] ; then
 				echo found $SOURCE/etc. put it at the beginning of iso image.
