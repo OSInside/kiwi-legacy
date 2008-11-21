@@ -1798,7 +1798,7 @@ function createFileSystem {
 		# create a filesystem on the root partition
 		# ----
 		if test $diskID -gt 2; then
-			if ! mount $diskPartition; then
+			if ! mount $diskPartition /mnt; then
 				Echo "Partition $diskPartition is not valid, formating..."
 				mke2fs -j $diskPartition 1>&2
 				if test $? != 0; then
@@ -1808,7 +1808,7 @@ function createFileSystem {
 				fi
 			else
 				Echo "Partition $diskPartition is valid, leave it untouched"
-				umount $diskPartition 1>&2
+				umount /mnt 1>&2
 			fi
 		fi
 	fi

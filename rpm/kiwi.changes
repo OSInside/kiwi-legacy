@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Nov 21 13:24:28 CET 2008 - ms@suse.de
+
+- fixed filesystem setup for netboot partitions (bnc #415402)
+
+-------------------------------------------------------------------
 Fri Nov 21 12:07:31 CET 2008 - jcborn@suse.de
 
 - removed some mkisofs options for ppc (bnc #446416) 
