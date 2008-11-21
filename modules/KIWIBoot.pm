@@ -678,6 +678,22 @@ sub setupBootStick {
 		}
 	}
 	#==========================================
+	# Check if system fits on storage device
+	#------------------------------------------
+	my $hardSize = $this -> getStorageSize ($stick);
+	my $softSize = -s $system;
+	if (-f $splitfile) {
+		$softSize += -s $splitfile;
+	}
+	$softSize /= 1024;
+	if ($hardSize < $softSize) {
+		$kiwi -> error  ("Stick too small: got $hardSize kB need $softSize kB");
+		$kiwi -> failed ();
+		$this -> cleanDbus();
+		$this -> cleanTmp ();
+		return undef;
+	}
+	#==========================================
 	# Create new partition table on stick
 	#------------------------------------------
 	$kiwi -> info ("Creating partition table on: $stick");
@@ -3036,19 +3052,13 @@ sub bindLoopDevice {
 	#==========================================
 	# bind file to loop device
 	#------------------------------------------
-	$status = qxx ("/sbin/losetup -f 2>&1"); chomp $status;
+	$status = qxx ("/sbin/losetup -s -f $system 2>&1"); chomp $status;
 	$result = $? >> 8;
 	if ($result != 0) {
-		$kiwi -> loginfo ("No free loop device found: $status");
+		$kiwi -> loginfo ("Failed binding loop device: $status");
 		return undef;
 	}
 	$loop = $status;
-	$status = qxx ("/sbin/losetup $loop $system 2>&1");
-	$result = $? >> 8;
-	if ($result != 0) {
-		$kiwi -> loginfo ("Failed binding file to loop: $status");
-		return undef;
-	}
 	$this->{loop} = $loop;
 	return $this;
 }
@@ -3281,8 +3291,7 @@ sub getStorageSize {
 		}
 	}
 	if ($result == 0) {
-		$status = int $status;
-		return $status;
+		return int $status;
 	}
 	return 0;
 }

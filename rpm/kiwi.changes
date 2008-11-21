@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Nov 21 17:26:05 CET 2008 - ms@suse.de
+
+- added check for USB stick size before deployment (bnc #446450)
+- fixed bindLoopDevice(), possible race condition 
+
+-------------------------------------------------------------------
 Fri Nov 21 13:24:28 CET 2008 - ms@suse.de
 
 - fixed filesystem setup for netboot partitions (bnc #415402)

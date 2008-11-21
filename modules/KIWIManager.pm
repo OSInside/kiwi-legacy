@@ -1755,6 +1755,7 @@ sub setupPackageKeys {
 		$kiwi -> error  ("Can't import pubkeys: $data");
 		$kiwi -> failed ();
 		qxx ("rm -rf $sigs");
+		return $this;
 	}
 	$kiwi -> done();
 	qxx ("rm -rf $sigs");
