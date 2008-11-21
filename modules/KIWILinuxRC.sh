@@ -2957,17 +2957,18 @@ function fetchFile {
 		"tftp")
 			validateBlockSize
 			if [ -z "$multicast" ];then
-				multicast=off
+				multicast="disable"
 			fi
 			if test "$izip" = "compressed"; then
+				# mutlicast is disabled because you can't seek in a pipe
 				atftp \
-					--option "multicast $multicast" \
+					--option "disable multicast" \
 					--option "blksize $imageBlkSize" -g -r $path \
 					-l /dev/stdout $host 2>$TRANSFER_ERRORS_FILE |\
 					gzip -d > $dest 2>>$TRANSFER_ERRORS_FILE
 			else
 				atftp \
-					--option "multicast $multicast"  \
+					--option "$multicast multicast"  \
 					--option "blksize $imageBlkSize" \
 					-g -r $path -l $dest $host &> $TRANSFER_ERRORS_FILE
 			fi

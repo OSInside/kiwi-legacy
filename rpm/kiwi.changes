@@ -2,6 +2,8 @@
 Fri Nov 21 13:24:28 CET 2008 - ms@suse.de
 
 - fixed filesystem setup for netboot partitions (bnc #415402)
+- fixed atftp multicast handling, disabled for compressed
+  images because you can't seek in a pipe (bnc #356974)
 
 -------------------------------------------------------------------
 Fri Nov 21 12:07:31 CET 2008 - jcborn@suse.de

@@ -378,10 +378,10 @@ if [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ] && [ $LOCAL_BOOT = "no" ];then
 			# /.../
 			# now load the image into the imageDevice
 			# ---
-			multicast=on
+			multicast="enable"
 			if test "$imageZipped" = "compressed"; then
 				Echo "Compressed image found: Disable multicast download"
-				multicast="off"
+				multicast="disable"
 			fi
 			Echo "Loading $imageName [$imageDevice BS:$imageBlkSize Byte]..."
 			fetchFile $imageName $imageDevice $imageZipped $imageServer
