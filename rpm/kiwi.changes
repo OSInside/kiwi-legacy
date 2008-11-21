@@ -2,6 +2,7 @@
 Fri Nov 21 12:07:31 CET 2008 - jcborn@suse.de
 
 - removed some mkisofs options for ppc (bnc #446416) 
+- added docu dir to directory.yast create list (bnc #447486)
 
 -------------------------------------------------------------------
 Tue Nov 18 18:57:44 CET 2008 - ms@suse.de
