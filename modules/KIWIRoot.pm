@@ -849,12 +849,14 @@ sub setup {
 	#========================================
 	# cleanup temporary copy of resolv.conf
 	#----------------------------------------
-	my $data = qxx ("diff -q /etc/resolv.conf $root/etc/resolv.conf");
-	my $code = $? >> 8;
-	if ($code == 0) {
-		$kiwi -> info ("Cleanup temporary copy of resolv.conf");
-		qxx ("rm -f $root/etc/resolv.conf");
-		$kiwi -> done ();
+	if ((-f "$root/etc/resolv.conf") && (-f "/etc/resolv.conf")) {
+		my $data = qxx ("diff -q /etc/resolv.conf $root/etc/resolv.conf");
+		my $code = $? >> 8;
+		if ($code == 0) {
+			$kiwi -> info ("Cleanup temporary copy of resolv.conf");
+			qxx ("rm -f $root/etc/resolv.conf");
+			$kiwi -> done ();
+		}
 	}
 	#========================================
 	# cleanup temporary .buildenv
