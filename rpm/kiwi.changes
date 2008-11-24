@@ -2,6 +2,9 @@
 Fri Nov 21 17:26:05 CET 2008 - ms@suse.de
 
 - added check for USB stick size before deployment (bnc #446450)
+- fixed documentation about usbdrivers section (bnc #448085)
+- added usb hid modules to iso|oem and usbboot (bnc #448085)
+- fixed CDDevice() function to report devices correctly
 - fixed bindLoopDevice(), possible race condition 
 
 -------------------------------------------------------------------

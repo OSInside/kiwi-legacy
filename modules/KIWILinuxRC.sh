@@ -1295,6 +1295,7 @@ function CDDevice {
 	# from hwinfo --cdrom to search for the block device
 	# ----
 	local count=0
+	local h=/usr/sbin/hwinfo
 	for module in \
 		ehci-hcd uhci-hcd usb-storage sg sd_mod sr_mod \
 		cdrom ide-cd BusLogic vfat
@@ -1303,7 +1304,7 @@ function CDDevice {
 	done
 	Echo -n "Waiting for CD/DVD device(s) to appear..."
 	while true;do
-		cddevs=`/usr/sbin/hwinfo --cdrom | grep "Device File:" | cut -f2 -d:`
+		cddevs=`$h --cdrom | grep "Device File:"|sed -e"s@(.*)@@" | cut -f2 -d:`
 		cddevs=`echo $cddevs`
 		for i in $cddevs;do
 			if [ -b $i ];then

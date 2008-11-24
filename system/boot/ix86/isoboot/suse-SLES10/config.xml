@@ -21,8 +21,10 @@
 		<file name="usb/host/usb-uhci.ko"/>
 		<file name="usb/host/usb-ohci.ko"/>
 		<file name="usb/host/ehci-hcd.ko"/>
+		<file name="usb/host/uhci-hcd.ko"/>
 		<file name="usb/core/usbcore.ko"/>
 		<file name="usb/storage/usb-storage.ko"/>
+		<file name="usb/input/usbhid.ko"/>
 	</drivers>
 	<drivers type="drivers">
 		<file name="drivers/ide/*"/>
