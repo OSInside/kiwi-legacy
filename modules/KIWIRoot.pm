@@ -341,6 +341,10 @@ sub init {
 	qxx (" cp /etc/resolv.conf $root/etc 2>&1 ");
 	qxx (" cp $main::KConfig $root/.kconfig 2>&1 ");
 	$kiwi -> done();
+	#==================================
+	# Create package keys
+	#----------------------------------
+	$manager -> setupPackageKeys();
 	#==========================================
 	# Setup shared cache directory
 	#------------------------------------------
@@ -401,11 +405,6 @@ sub init {
 		return undef;
 	}
 	print FD $imageName."-".$imageVersion; close FD;
-	#==================================
-	# Create package keys before chroot
-	#----------------------------------
-	$manager -> setupPackageKeys();
-
 	#==================================
 	# Return object reference
 	#----------------------------------
