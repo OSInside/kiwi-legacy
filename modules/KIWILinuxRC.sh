@@ -1227,6 +1227,10 @@ function probeUSB {
 		Echo "Probing module: $module"
 		modprobe $module >/dev/null
 	done
+	# /.../
+	# load hid driver manually
+	# ----
+	modprobe usbhid &>/dev/null
 }
 #======================================
 # probeDevices
@@ -2595,12 +2599,6 @@ function mountSystemUnified {
 		>/dev/null || return 1
 	fi
 	usleep 500000
-	#======================================
-	# move union mount points to system
-	#--------------------------------------
-	mkdir -p /mnt/$roDir && mount --move /$roDir /mnt/$roDir
-	mkdir -p /mnt/$rwDir && mount --move /$rwDir /mnt/$rwDir
-	mkdir -p /mnt/$xiDir && mount --move /$xiDir /mnt/$xiDir
 	return 0
 }
 #======================================
@@ -3183,6 +3181,21 @@ function activateImage {
 		name="unknown"
 	fi
 	#======================================
+	# move union mount points to system
+	#--------------------------------------
+	local roDir=/read-only
+	local rwDir=/read-write
+	local xiDir=/xino
+	if [ -d $roDir ];then
+		mkdir -p /mnt/$roDir && mount --move /$roDir /mnt/$roDir
+	fi
+	if [ -d $rwDir ];then
+		mkdir -p /mnt/$rwDir && mount --move /$rwDir /mnt/$rwDir
+	fi
+	if [ -d $xiDir ];then
+		mkdir -p /mnt/$xiDir && mount --move /$xiDir /mnt/$xiDir
+	fi
+	#======================================
 	# move device nodes
 	#--------------------------------------
 	Echo "Activating Image: [$name]"
@@ -3258,6 +3271,8 @@ function bootImage {
 	if [ $PIVOT = "true" ];then
 		umount -n -l /mnt
 	fi
+	umount proc
+	umount proc
 	exec chroot . /sbin/init $option
 }
 #======================================

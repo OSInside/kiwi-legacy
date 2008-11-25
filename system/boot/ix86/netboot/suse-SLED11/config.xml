@@ -19,8 +19,15 @@
 		<profile name="diskless" description="Booting diskless thin clients"/>
 		<profile name="smp" description="Boot with smp kernel"/>
 	</profiles>
+	<drivers type="usbdrivers" profiles="default,xen,smp">
+		<file name="usb/host/ehci-hcd.ko"/>
+		<file name="usb/host/uhci-hcd.ko"/>
+		<file name="usb/core/usbcore.ko"/>
+		<file name="usb/storage/usb-storage.ko"/>
+	</drivers>
 	<drivers type="drivers" profiles="default,xen,smp">
 		<!-- DRIVERS START DEFAULT AND XEN -->
+		<file name="drivers/hid/*"/>
 		<file name="drivers/ide/*"/>
 		<file name="drivers/block/loop.ko"/>
 		<file name="drivers/block/brd.ko"/>

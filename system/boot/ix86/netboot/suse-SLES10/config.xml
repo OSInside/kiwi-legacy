@@ -18,6 +18,15 @@
 		<profile name="xen" description="Boot with xen kernel/mboot.c32"/>
 		<profile name="smp" description="Boot with smp kernel"/>
 	</profiles>
+	<drivers type="usbdrivers">
+		<file name="usb/host/usb-uhci.ko"/>
+		<file name="usb/host/usb-ohci.ko"/>
+		<file name="usb/host/ehci-hcd.ko"/>
+		<file name="usb/host/uhci-hcd.ko"/>
+		<file name="usb/core/usbcore.ko"/>
+		<file name="usb/storage/usb-storage.ko"/>
+		<file name="usb/input/usbhid.ko"/>
+	</drivers>
 	<drivers type="drivers">
 		<file name="drivers/ide/*"/>
 		<file name="drivers/cdrom/*"/>

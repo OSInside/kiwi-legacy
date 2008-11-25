@@ -3055,8 +3055,29 @@ sub bindLoopDevice {
 	$status = qxx ("/sbin/losetup -s -f $system 2>&1"); chomp $status;
 	$result = $? >> 8;
 	if ($result != 0) {
-		$kiwi -> loginfo ("Failed binding loop device: $status");
-		return undef;
+		# /.../
+		# first losetup call has failed, try to find free loop
+		# device manually even though it's most likely that this
+		# search will fail too. The following is only useful for
+		# older version of losetup which doesn't understand the
+		# option combination -s -f
+		# ----
+		my $loopfound = 0;
+		for (my $id=0;$id<=7;$id++) {
+			$status.= qxx ( "/sbin/losetup /dev/loop$id $system 2>&1" );
+			$result = $? >> 8;
+			if ($result == 0) {
+				$loopfound = 1;
+				$loop = "/dev/loop".$id;
+				$this->{loop} = $loop;
+				last;
+			}
+		}
+		if (! $loopfound) {
+			$kiwi -> loginfo ("Failed binding loop device: $status");
+			return undef;
+		}
+		return $this;
 	}
 	$loop = $status;
 	$this->{loop} = $loop;
