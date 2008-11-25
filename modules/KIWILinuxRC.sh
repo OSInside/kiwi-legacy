@@ -3271,8 +3271,8 @@ function bootImage {
 	if [ $PIVOT = "true" ];then
 		umount -n -l /mnt
 	fi
-	umount proc
-	umount proc
+	umount proc &>/dev/null && \
+	umount proc &>/dev/null
 	exec chroot . /sbin/init $option
 }
 #======================================
