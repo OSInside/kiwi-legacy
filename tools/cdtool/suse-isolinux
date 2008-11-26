@@ -9,7 +9,7 @@ CD_PUBLISHER="Novell, Inc."
 #=======================================
 # Globals
 #---------------------------------------
-PARAMS="-R -J -pad -joliet-long"
+PARAMS="-r -J -pad -joliet-long"
 SORTFILE=`mktemp /var/tmp/m_cd-XXXXXX`
 SOURCE2=`mktemp -d /var/tmp/m_cd-XXXXXX`
 ROOT_ON_CD=suse
@@ -122,8 +122,7 @@ then
 			echo using suseboot for hfs boot
 			PARAMS="`echo $PARAMS | sed 's/-f//g'`"
 			PARAMS="`echo $PARAMS | sed 's/-joliet-long//g'`"
-			PARAMS="`echo $PARAMS | sed 's/-R//g'`"
-			PARAMS="`echo $PARAMS | sed 's/-J//g'` -U -T"
+			PARAMS="`echo $PARAMS | sed 's/-J//g'` -U -T -l"
 			PARAMS="$PARAMS -part --netatalk --macbin -hfs-bless $SOURCE/suseboot"
 			if [ -f /work/cd/lib/m_cd/apple.filemapping.txt ] ; then
 				echo using /work/cd/lib/m_cd/apple.filemapping.txt for hfs mapping
