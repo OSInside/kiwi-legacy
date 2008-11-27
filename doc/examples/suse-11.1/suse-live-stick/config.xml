@@ -35,6 +35,7 @@
 		<package name="bootsplash"/>
 		<package name="bootsplash-branding-openSUSE"/>
 		<package name="yast2-firstboot"/>
+		<package name="ifplugd"/>
 		<package name="vim"/>
 		<opensusePattern name="base"/>
 		<opensusePattern name="kde4"/>

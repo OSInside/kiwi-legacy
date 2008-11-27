@@ -2508,6 +2508,7 @@ sub getMBRDiskLabel {
 	undef $this->{mbrid};
 	for (my $i=0;$i<4;$i++) {
 		$bytes[$i] = 1 + int(rand($range));
+		redo if $bytes[0] <= 0xf;
 	}
 	my $nid = sprintf ("0x%02x%02x%02x%02x",
 		$bytes[0],$bytes[1],$bytes[2],$bytes[3]

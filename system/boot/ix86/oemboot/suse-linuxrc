@@ -430,7 +430,7 @@ if [ $LOCAL_BOOT = "no" ];then
 			# 10.4 write new partition table
 			#--------------------------------------
 			# /.../
-			# Explanation of the fdisk commands used within the
+			# Explanation of the partition commands used within the
 			# here document below:
 			# ----
 			# d               # delete xda partition
@@ -470,7 +470,7 @@ if [ $LOCAL_BOOT = "no" ];then
 				done
 			fi
 			Echo "Repartition the disk according to current geometry"
-			fdisk $deviceDisk < $input
+			fdisk $deviceDisk < $input 1>&2
 			if test $? != 0; then
 				systemException "Failed to create partition table" "reboot"
 			fi
@@ -497,7 +497,7 @@ if [ $LOCAL_BOOT = "no" ];then
 			# 10.2 write new partition table
 			#--------------------------------------
 			# /.../
-			# Explanation of the fdisk commands used within the
+			# Explanation of the partition commands used within the
 			# here document below:
 			# ----
 			# d              # delete xda partition [ 1 ]
@@ -720,7 +720,7 @@ if [ $LOCAL_BOOT = "no" ];then
 					fi
 				fi
 				Echo "Repartition the disk according to current geometry"
-				fdisk $deviceDisk < $input
+				fdisk $deviceDisk < $input 1>&2
 				if test $? != 0; then
 					systemException "Failed to create partition table" "reboot"
 				fi
@@ -819,7 +819,7 @@ if [ $LOCAL_BOOT = "no" ];then
 				# 10.3 write new partition table
 				#--------------------------------------
 				# /.../
-				# Explanation of the fdisk commands used within the
+				# Explanation of the partition commands used within the
 				# here document below:
 				# ----
 				# d               # delete xda partition
@@ -860,7 +860,7 @@ if [ $LOCAL_BOOT = "no" ];then
 					done
 				fi
 				Echo "Repartition the disk according to current geometry"
-				fdisk $deviceDisk < $input
+				fdisk $deviceDisk < $input 1>&2
 				if test $? != 0; then
 					systemException "Failed to create partition table" "reboot"
 				fi

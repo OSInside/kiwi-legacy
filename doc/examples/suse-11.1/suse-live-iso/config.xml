@@ -22,6 +22,7 @@
 		<package name="kernel-default"/>
 		<package name="bootsplash"/>
 		<package name="bootsplash-branding-openSUSE"/>
+		<package name="ifplugd"/>
 		<package name="vim"/>
 		<opensusePattern name="default"/>
 		<opensusePattern name="kde4"/>

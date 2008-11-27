@@ -59,6 +59,7 @@
 		<package name="bootsplash"/>
 		<package name="bootsplash-branding-openSUSE"/>
 		<package name="acpid"/>
+		<package name="ifplugd"/>
 		<package name="vim"/>
 		<!-- PLUS: Sound -->
 		<package name="alsa"/>

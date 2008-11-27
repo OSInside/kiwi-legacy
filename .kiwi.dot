@@ -2,9 +2,17 @@ digraph kiwi {
 	"kiwi" -> "perl"
 	"kiwi" -> "perl-XML-LibXML"
 	"kiwi" -> "perl-libwww-perl"
+	"kiwi" -> "perl-XML-LibXML-Common"
+	"kiwi" -> "perl-XML-SAX"
+	"kiwi" -> "perl-Config-IniFiles"
 	"kiwi" -> "screen"
 	"kiwi" -> "coreutils"
-    "kiwi" -> "[RECOMMENDS] smart zypper"
+	"kiwi" -> "satsolver-tools > 10.3"
+	"kiwi" -> "qt <= 10.1"
+	"kiwi" -> "libxslt"
+	"kiwi" -> "checkmedia"
+	"kiwi" -> "kiwi-tools"
+	"kiwi" -> "[RECOMMENDS] smart zypper"
 
 	"kiwi-pxeboot" -> "syslinux"
 
@@ -26,5 +34,11 @@ digraph kiwi {
 
 	"kiwi-desc-oemboot" -> "kiwi"
 	"kiwi-desc-oemboot" -> "qemu"
-    "kiwi-desc-oemboot" -> "multipath-tools"
+	"kiwi-desc-oemboot" -> "multipath-tools"
+
+	"kiwi-doc"
+
+	"kiwi-instsource" -> "kiwi"
+	"kiwi-instsource" -> "inst-source-utils"
+	"kiwi-instsource" -> "createrepo"
 }

@@ -234,7 +234,8 @@ Authors:
 
 %package -n kiwi-instsource
 License:        GPL v2 only
-Requires:       kiwi inst-source-utils createrepo
+Requires:       kiwi = %{version}
+Requires:       inst-source-utils createrepo
 Summary:        Installation Source creation
 Group:          System/Management
 
