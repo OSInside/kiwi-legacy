@@ -2,9 +2,12 @@
 Thu Nov 27 10:31:27 CET 2008 - ms@suse.de
 
 - added ifplugd to suse-11.1 examples
+- fixed setup of kiwi_type when in creation mode
 - added versioned requires for kiwi-instsource
 - updated dotty dependency graph
 - make sure MBR disk labels starts with first byte > 0xf
+- allow prebuilt boot image path to be the same as the
+  destination directory for the final image
 - make fdisk output part of the log file when oemboot
   repartitions the disk
 

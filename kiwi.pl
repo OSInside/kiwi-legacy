@@ -484,7 +484,7 @@ sub main {
 		$kiwi -> info ("Updating type in .profile environment");
 		my $type = $xml -> getImageTypeAndAttributes() -> {type};
 		qxx (
-			"sed -i -e s#kiwi_type=$type=.*#kiwi_type=$type# $Create/.profile"
+			"sed -i -e 's#kiwi_type=.*#kiwi_type=\"$type\"#' $Create/.profile"
 		);
 		$kiwi -> done();
 		#==========================================

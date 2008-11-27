@@ -827,24 +827,31 @@ sub createImageUSB {
 		} else {
 			$kiwi -> done();
 			$kiwi -> info ("Copying pre-built boot image to destination");
-			my $data = qxx ("cp -a $pinitrd $main::Destination 2>&1");
-			my $code = $? >> 8;
-			if ($code != 0) {
-				$kiwi -> failed();
-				$kiwi -> error ("Can't copy pre-built initrd: $data");
-				$kiwi -> failed();
-				$pblt = 0;
+			my $lookup = basename $pinitrd;
+			if (-f "$main::Destination/$lookup") {
+				# prebuilt boot image already exists in destination dir...
+				$kiwi -> done();
+				$pblt = 1;
 			} else {
-				$data = qxx ("cp -a $plinux* $main::Destination 2>&1");
-				$code = $? >> 8;
+				my $data = qxx ("cp -a $pinitrd $main::Destination 2>&1");
+				my $code = $? >> 8;
 				if ($code != 0) {
 					$kiwi -> failed();
-					$kiwi -> error ("Can't copy pre-built kernel: $data");
+					$kiwi -> error ("Can't copy pre-built initrd: $data");
 					$kiwi -> failed();
 					$pblt = 0;
 				} else {
-					$kiwi -> done();
-					$pblt = 1;
+					$data = qxx ("cp -a $plinux* $main::Destination 2>&1");
+					$code = $? >> 8;
+					if ($code != 0) {
+						$kiwi -> failed();
+						$kiwi -> error ("Can't copy pre-built kernel: $data");
+						$kiwi -> failed();
+						$pblt = 0;
+					} else {
+						$kiwi -> done();
+						$pblt = 1;
+					}
 				}
 			}
 		}
