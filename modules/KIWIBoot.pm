@@ -3086,85 +3086,131 @@ sub bindLoopDevice {
 }
 
 #==========================================
-# resetSectors
+# getCylinderSizeAndCount
 #------------------------------------------
-sub resetSectors {
+sub getCylinderSizeAndCount {
 	# ...
-	# reset global sector and disk marks
+	# obtain cylinder size and count for the specified disk.
+	# The function returns the size in kB or zero on error
 	# ---
 	my $this = shift;
-	undef $this->{pDiskSectors};
-	undef $this->{pDiskFactor};
+	my $disk = shift;
+	my $kiwi = $this->{kiwi};
+	my $status;
+	my $result;
+	my $parted;
+	$status = qxx ("dd if=/dev/zero of=$disk bs=512 count=1 2>&1");
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> loginfo ($status);
+		return 0;
+	}
+	$status = qxx ("/usr/sbin/parted -s $disk mklabel msdos 2>&1");
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> loginfo ($status);
+		return 0;
+	}
+	$parted = "/usr/sbin/parted -m $disk unit cyl print";
+	$status = qxx (
+		"$parted | head -n 3 | tail -n 1 | cut -f4 -d: | tr -d 'kB;'"
+	);
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> loginfo ($status);
+		return 0;
+	}
+	chomp $status;
+	$this->{pDiskCylinderSize} = $status;
+	$status = qxx (
+		"$parted | head -n 3 | tail -n 1 | cut -f1 -d:"
+	);
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> loginfo ($status);
+		return 0;
+	}
+	chomp $status;
+	$this->{pDiskCylinders} = $status;
+	return $status;
+}
+
+#==========================================
+# getCylinder
+#------------------------------------------
+sub getCylinder {
+	# ...
+	# given a size in MB this function calculates the
+	# aligned cylinder count according to the used disk
+	# if no size is given the maximum value is used
+	# ---
+	my $this  = shift;
+	my $size  = shift;
+	my $csize = $this->{pDiskCylinderSize};
+	my $count = $this->{pDiskCylinders};
+	my $cyls;
+	if (! defined $csize) {
+		return 0;
+	}
+	if ($size =~ /\+(.*)M$/) {
+		$cyls = sprintf ("%.0f",($size * 1024) / $csize);
+	} else {
+		$cyls = $count;
+	}
+	return $cyls;
+}
+
+#==========================================
+# resetCylinder
+#------------------------------------------
+sub resetCylinder {
+	# ...
+	# reset global cylinder size and count
+	# ---
+	my $this = shift;
+	undef $this->{pDiskCylinders};
+	undef $this->{pDiskCylinderSize};
 	undef $this->{pStart};
 	undef $this->{pStopp};
 	return $this;
 }
 
 #==========================================
-# initSectors
+# initCylinders
 #------------------------------------------
-sub initSectors {
+sub initCylinders {
 	# ...
-	# calculate start/end sector values for parted to create
-	# the appropriate partition. On success the sector count
+	# calculate cylinder size and count for parted to create
+	# the appropriate partition. On success the cylinder count
 	# will be returned, on error zero is returned
 	# ---
-	my $this    = shift;
-	my $device  = shift;
-	my $size    = shift;
-	my $kiwi    = $this->{kiwi};
-	my $sectors = 0;
+	my $this   = shift;
+	my $device = shift;
+	my $size   = shift;
+	my $kiwi   = $this->{kiwi};
+	my $cyls   = 0;
 	my $status;
 	my $result;
-	if (! defined $this->{pDiskSectors}) {
-		$status = qxx ("dd if=/dev/zero of=$device bs=512 count=1 2>&1");
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> loginfo ($status);
+	if (! defined $this->{pDiskCylinders}) {
+		my $cylsize = $this -> getCylinderSizeAndCount($device);
+		if ($cylsize == 0) {
 			return 0;
 		}
-		$status = qxx ("/usr/sbin/parted -s $device mklabel msdos 2>&1");
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> loginfo ($status);
-			return 0;
-		}
-		my $unit   = "s";
-		my $parted = "/usr/sbin/parted -m -s $device unit $unit print 2>&1";
-		$status = qxx ("$parted | grep ^$device | cut -f2 -d: | tr -d $unit");
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> loginfo ($status);
-			return 0;
-		}
-		chomp $status;
-		$this->{pDiskSectors} = $status - 1;
-		$unit   = "MB";
-		$parted = "/usr/sbin/parted -m -s $device unit $unit print 2>&1";
-		$status = qxx ("$parted | grep ^$device | cut -f2 -d: | tr -d $unit");
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> loginfo ($status);
-			return 0;
-		}
-		$this->{pDiskFactor} = $this->{pDiskSectors} / $status;
-		$this->{pDiskFactor} = int $this->{pDiskFactor};
 	}
-	if ($size =~ /\+(.*)M$/) {
-		$sectors = $1 * $this->{pDiskFactor};
-	} else {
-		$sectors = $this->{pDiskSectors};
+	$cyls = $this -> getCylinder ($size);
+	if ($cyls == 0) {
+		return 0;
 	}
 	if (! defined $this->{pStart}) {
-		$this->{pStart} = 64;
+		$this->{pStart} = 0;
 	} else {
 		$this->{pStart} = $this->{pStopp} + 1;
 	}
-	$this->{pStopp} = $this->{pStart} + $sectors;
-	if ($this->{pStopp} > $this->{pDiskSectors}) {
-		$this->{pStopp} = $this->{pDiskSectors}
+	$this->{pStopp} = $this->{pStart} + $cyls;
+	if ($this->{pStopp} > $this->{pDiskCylinders}) {
+		$this->{pStopp} = $this->{pDiskCylinders}
 	}
-	return $sectors;
+	return $cyls;
 }
 
 #==========================================
@@ -3226,12 +3272,12 @@ sub setStoragePartition {
 		#------------------------------------------
 		/^parted/  && do {
 			my @p_cmd = ();
-			$this -> resetSectors();
+			$this -> resetCylinder();
 			for (my $count=0;$count<@commands;$count++) {
 				my $cmd = $commands[$count];
 				if ($cmd eq "n") {
 					my $size = $commands[$count+4];
-					$this -> initSectors ($device,$size);
+					$this -> initCylinders ($device,$size);
 					push (@p_cmd,
 						"mkpart primary $this->{pStart} $this->{pStopp}"
 					);
@@ -3250,7 +3296,9 @@ sub setStoragePartition {
 				"PARTED input: $device [@p_cmd]"
 			);
 			foreach my $p_cmd (@p_cmd) {
-				$status= qxx ("/usr/sbin/parted -s $device unit s $p_cmd 2>&1");
+				$status= qxx (
+					"/usr/sbin/parted -s $device unit cyl $p_cmd 2>&1"
+				);
 				$result= $? >> 8;
 				$kiwi -> loginfo ($status);
 				sleep (1);
@@ -3294,9 +3342,17 @@ sub getStorageSize {
 			my $parted = "/usr/sbin/parted -m ";
 			my $disk   = $pdev;
 			my $step   = 2;
-			if ($pdev =~ /(.*)(\d+)/) {
-				$disk = $1;
-				$step = 4;
+			if ($pdev =~ /mapper/) {
+				if ($pdev =~ /mapper\/(.*)\/p(\d+)/) {
+					$disk = "/dev/".$1;
+					$pdev = "/dev/".$1.$2;
+					$step = 4;
+				}
+			} else {
+				if ($pdev =~ /(.*)(\d+)/) {
+					$disk = $1;
+					$step = 4;
+				}
 			}
 			$parted .= '-s '.$disk.' unit B print |';
 			$parted .= 'sed -e "s@^\([0-4]\):@'.$disk.'\1:@" |';

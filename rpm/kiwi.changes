@@ -1,6 +1,8 @@
 -------------------------------------------------------------------
 Thu Nov 27 10:31:27 CET 2008 - ms@suse.de
 
+- changed from sector based calculation to cylinder based
+  calculation for partitions created with parted
 - added ifplugd to suse-11.1 examples
 - fixed setup of kiwi_type when in creation mode
 - added versioned requires for kiwi-instsource
