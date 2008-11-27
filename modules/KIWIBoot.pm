@@ -3204,7 +3204,7 @@ sub initCylinders {
 	if (! defined $this->{pStart}) {
 		$this->{pStart} = 0;
 	} else {
-		$this->{pStart} = $this->{pStopp} + 1;
+		$this->{pStart} = $this->{pStopp};
 	}
 	$this->{pStopp} = $this->{pStart} + $cyls;
 	if ($this->{pStopp} > $this->{pDiskCylinders}) {
