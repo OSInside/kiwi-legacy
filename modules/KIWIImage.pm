@@ -1178,10 +1178,18 @@ sub createImageLiveCD {
 		#==========================================
 		# Create EXT2 filesystem on RW extend
 		#------------------------------------------
+		my $setBlockSize = 0;
+		if (! defined $main::FSBlockSize) {
+			$main::FSBlockSize = 4096;
+			$setBlockSize = 1;
+		}
 		if (! $this -> setupEXT2 ( $namerw,$imageTree )) {
 			$this -> restoreCDRootData();
 			$this -> restoreSplitExtend ();
 			return undef;
+		}
+		if ($setBlockSize) {
+			undef $main::FSBlockSize;
 		}
 		#==========================================
 		# mount logical extend for data transfer
