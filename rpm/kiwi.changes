@@ -1,6 +1,8 @@
 -------------------------------------------------------------------
 Fri Nov 28 11:54:03 CET 2008 - ms@suse.de
 
+- don't evaluate bios edd disk-by-id links (bnc #449757)
+- fixed disk partition size calculation in oemboot (bnc #449757)
 - update pigz tool, used in suse studio only
 
 -------------------------------------------------------------------

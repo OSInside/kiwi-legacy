@@ -408,11 +408,11 @@ if [ $LOCAL_BOOT = "no" ];then
 		if [ -z "$DONT_PARTITION" ];then
 			swapXMBytes=$swapsize
 			diskXMBytes=`partitionSize $deviceDisk`
-			diskXMBytes=`expr $diskXMBytes / 1000`
+			diskXMBytes=`expr $diskXMBytes / 1024`
 			disk1MBytes=`partitionSize "$deviceDisk"1`
-			disk1MBytes=`expr $disk1MBytes / 1000`
+			disk1MBytes=`expr $disk1MBytes / 1024`
 			disk2MBytes=`partitionSize "$deviceDisk"2`
-			disk2MBytes=`expr $disk2MBytes / 1000`
+			disk2MBytes=`expr $disk2MBytes / 1024`
 			diskXLBytes=`expr $diskXMBytes - $disk1MBytes - $disk2MBytes`
 			diskXABytes=`expr $diskXLBytes - $swapXMBytes`
 			if [ $diskXABytes -lt 50 ];then
@@ -525,8 +525,8 @@ if [ $LOCAL_BOOT = "no" ];then
 			rm -f $input
 			diskXMBytes=`partitionSize $deviceDisk`
 			diskPMBytes=`partitionSize $deviceDisk"1"`
-			diskPMBytes=`expr $diskPMBytes / 1000`
-			diskXMBytes=`expr $diskXMBytes / 1000`
+			diskPMBytes=`expr $diskPMBytes / 1024`
+			diskXMBytes=`expr $diskXMBytes / 1024`
 			disk1MBytes=10240
 			# /.../
 			# set OEM_SYSTEMSIZE if available, else try to
@@ -803,9 +803,9 @@ if [ $LOCAL_BOOT = "no" ];then
 			#--------------------------------------
 			swapXMBytes=$swapsize
 			diskXMBytes=`partitionSize $deviceDisk`
-			diskXMBytes=`expr $diskXMBytes / 1000`
+			diskXMBytes=`expr $diskXMBytes / 1024`
 			disk1MBytes=`partitionSize "$deviceDisk"1`
-			disk1MBytes=`expr $disk1MBytes / 1000`
+			disk1MBytes=`expr $disk1MBytes / 1024`
 			disk2MBytes=`expr $diskXMBytes - $disk1MBytes - $swapsize`
 			if [ $disk2MBytes -lt 100 ];then
 				# /.../

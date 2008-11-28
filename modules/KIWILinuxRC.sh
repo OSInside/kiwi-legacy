@@ -3085,6 +3085,9 @@ function getDiskID {
 		return
 	fi
 	for i in /dev/disk/by-id/*;do
+		if echo $i | grep -q edd-;then
+			continue
+		fi
 		local dev=`readlink $i`
 		dev=/dev/`basename $dev`
 		if [ $dev = $device ];then
