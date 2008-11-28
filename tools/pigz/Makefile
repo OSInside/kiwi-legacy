@@ -1,5 +1,7 @@
 CFLAGS=-Wall -O2
 
+all: pigz
+
 pigz: pigz.o yarn.o
 	cc -o pigz pigz.o yarn.o -lpthread -lz
 
