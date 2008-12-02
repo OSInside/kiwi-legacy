@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Dec  2 19:38:33 CET 2008 - ms@suse.de
+
+- fixed split based boot configuration (bnc #450780)
+
+-------------------------------------------------------------------
 Tue Dec  2 12:38:57 CET 2008 - ms@suse.de
 
 - added deviceMap to allow custom partition device names by id 
