@@ -483,6 +483,7 @@ sub setupBootStick {
 	my $zipped    = $this->{zipped};
 	my $isxen     = $this->{isxen};
 	my $xengz     = $this->{xengz};
+	my %deviceMap = ();
 	my @commands  = ();
 	my $imgtype   = "usb";
 	my $haveSplit = 0;
@@ -729,8 +730,15 @@ sub setupBootStick {
 			$this -> cleanTmp ();
 			return undef;
 		}
+		#==========================================
+		# Create default device mapping table
+		#------------------------------------------
+		%deviceMap = $this -> setDefaultDeviceMap ($stick);
+		#==========================================
+		# Umount possible mounted stick partitions
+		#------------------------------------------
 		for (my $i=1;$i<=2;$i++) {
-			qxx ( "umount $stick$i 2>&1" );
+			qxx ( "umount $deviceMap{$i} 2>&1" );
 		}
 		$status = qxx ( "/sbin/blockdev --rereadpt $stick 2>&1" );
 		$result = $? >> 8;
@@ -751,7 +759,7 @@ sub setupBootStick {
 		#------------------------------------------
 		if ((defined $system) && (($syszip) || ($haveSplit))) {
 			my $sizeOK = 1;
-			my $systemPSize = $this -> getStorageSize ($stick."1");
+			my $systemPSize = $this -> getStorageSize ($deviceMap{1});
 			my $systemISize = -s $system; $systemISize /= 1024;
 			chomp $systemPSize;
 			#print "_______A $systemPSize : $systemISize\n";
@@ -779,9 +787,9 @@ sub setupBootStick {
 	#------------------------------------------
 	if (! $haveTree) {
 		$kiwi -> info ("Dumping system image to stick");
-		$status = qxx ( "umount $stick'1' 2>&1" );
-		$status = qxx ( "umount $stick'2' 2>&1" );
-		$status = qxx ("dd if=$system of=$stick'1' bs=32k 2>&1");
+		$status = qxx ( "umount $deviceMap{1} 2>&1" );
+		$status = qxx ( "umount $deviceMap{2} 2>&1" );
+		$status = qxx ("dd if=$system of=$deviceMap{1} bs=32k 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -794,7 +802,7 @@ sub setupBootStick {
 		$kiwi -> done();
 		if ($haveSplit) {
 			$kiwi -> info ("Dumping split read/write part to stick");
-			$status = qxx ("dd if=$splitfile of=$stick'2' bs=32k 2>&1");
+			$status = qxx ("dd if=$splitfile of=$deviceMap{2} bs=32k 2>&1");
 			$result = $? >> 8;
 			if ($result != 0) {
 				$kiwi -> failed ();
@@ -810,7 +818,7 @@ sub setupBootStick {
 			my %FSopts = main::checkFSOptions();
 			my $fsopts = $FSopts{ext3};
 			$fsopts.= "-j -F";
-			$status = qxx ("/sbin/mke2fs $fsopts $stick'2' 2>&1");
+			$status = qxx ("/sbin/mke2fs $fsopts $deviceMap{2} 2>&1");
 			$result = $? >> 8;
 			if ($result != 0) {
 				$kiwi -> failed ();
@@ -832,7 +840,7 @@ sub setupBootStick {
 				$kiwi -> info ("Creating ext2 root filesystem");
 				my $fsopts = $FSopts{ext2};
 				$fsopts.= "-F";
-				$status = qxx ("/sbin/mke2fs $fsopts $stick'1' 2>&1");
+				$status = qxx ("/sbin/mke2fs $fsopts $deviceMap{1} 2>&1");
 				$result = $? >> 8;
 				last SWITCH;
 			};
@@ -840,7 +848,7 @@ sub setupBootStick {
 				$kiwi -> info ("Creating ext3 root filesystem");
 				my $fsopts = $FSopts{ext3};
 				$fsopts.= "-j -F";
-				$status = qxx ("/sbin/mke2fs $fsopts $stick'1' 2>&1");
+				$status = qxx ("/sbin/mke2fs $fsopts $deviceMap{1} 2>&1");
 				$result = $? >> 8;
 				last SWITCH;
 			};
@@ -849,7 +857,7 @@ sub setupBootStick {
 				my $fsopts = $FSopts{reiserfs};
 				$fsopts.= "-f";
 				$status = qxx (
-					"/sbin/mkreiserfs $fsopts $stick'1' 2>&1"
+					"/sbin/mkreiserfs $fsopts $deviceMap{1} 2>&1"
 				);
 				$result = $? >> 8;
 				last SWITCH;
@@ -872,7 +880,7 @@ sub setupBootStick {
 		#==========================================
 		# Mount system image partition
 		#------------------------------------------
-		$status = qxx ("mount $stick'1' $loopdir 2>&1");
+		$status = qxx ("mount $deviceMap{1} $loopdir 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -910,13 +918,13 @@ sub setupBootStick {
 	SWITCH: for ($FSTypeRO) {
 		/^ext\d/    && do {
 			$kiwi -> info ("Resizing system $FSTypeRO filesystem");
-			$status = qxx ("/sbin/resize2fs -f -F -p $stick'1' 2>&1");
+			$status = qxx ("/sbin/resize2fs -f -F -p $deviceMap{1} 2>&1");
 			$result = $? >> 8;
 			last SWITCH;
 		};
 		/^reiserfs/ && do {
 			$kiwi -> info ("Resizing system $FSTypeRO filesystem");
-			$status = qxx ("/sbin/resize_reiserfs $stick'1' 2>&1");
+			$status = qxx ("/sbin/resize_reiserfs $deviceMap{1} 2>&1");
 			$result = $? >> 8;
 			last SWITCH;
 		}
@@ -938,13 +946,13 @@ sub setupBootStick {
 		SWITCH: for ($FSTypeRW) {
 			/^ext\d/    && do {
 				$kiwi -> info ("Resizing split $FSTypeRW filesystem");
-				$status = qxx ("/sbin/resize2fs -f -F -p $stick'2' 2>&1");
+				$status = qxx ("/sbin/resize2fs -f -F -p $deviceMap{2} 2>&1");
 				$result = $? >> 8;
 				last SWITCH;
 			};
 			/^reiserfs/ && do {
 				$kiwi -> info ("Resizing split $FSTypeRW filesystem");
-				$status = qxx ("/sbin/resize_reiserfs $stick'2' 2>&1");
+				$status = qxx ("/sbin/resize_reiserfs $deviceMap{2} 2>&1");
 				$result = $? >> 8;
 				last SWITCH;
 			}
@@ -966,10 +974,10 @@ sub setupBootStick {
 	#------------------------------------------
 	$kiwi -> info ("Copying boot data to stick");
 	if (($syszip) || ($haveSplit)) {
-		$status = qxx ("mount $stick'2' $loopdir 2>&1");
+		$status = qxx ("mount $deviceMap{2} $loopdir 2>&1");
 		$result = $? >> 8;
 	} else {
-		$status = qxx ("mount $stick'1' $loopdir 2>&1");
+		$status = qxx ("mount $deviceMap{1} $loopdir 2>&1");
 		$result = $? >> 8;
 	}
 	if ($result != 0) {
@@ -1005,7 +1013,7 @@ sub setupBootStick {
 	#------------------------------------------
 	qxx ("rm -rf $tmpdir");
 	#==========================================
-	# Remove dbus lock for $stick
+	# Remove dbus lock on stick
 	#------------------------------------------
 	$kiwi -> info ("Removing HAL lock");
 	$this -> cleanDbus();
@@ -1239,6 +1247,7 @@ sub setupInstallStick {
 	my $isxen     = $this->{isxen};
 	my $xengz     = $this->{xengz};
 	my $diskname  = $system.".install.raw";
+	my %deviceMap = ();
 	my @commands  = ();
 	my $imgtype   = "oem";
 	my $gotsys    = 1;
@@ -1434,6 +1443,10 @@ sub setupInstallStick {
 	}
 	$kiwi -> done();
 	#==========================================
+	# Create loop device mapping table
+	#------------------------------------------
+	%deviceMap = $this -> setLoopDeviceMap ($this->{loop});
+	#==========================================
 	# setup device mapper
 	#------------------------------------------
 	$kiwi -> info ("Setup device mapper for virtual partition access");
@@ -1446,11 +1459,10 @@ sub setupInstallStick {
 		$this -> cleanLoop ();
 		return undef;
 	}
-	my $dmap = $this->{loop}; $dmap =~ s/dev\///;
-	my $boot = "/dev/mapper".$dmap."p1";
+	my $boot = $deviceMap{1};
 	my $data;
 	if ($gotsys) {
-		$data = "/dev/mapper".$dmap."p2";
+		$data = $deviceMap{2};
 	}
 	$kiwi -> done();
 	#==========================================
@@ -1565,6 +1577,7 @@ sub setupBootDisk {
 	my $isxen     = $this->{isxen};
 	my $xengz     = $this->{xengz};
 	my $diskname  = $system.".raw";
+	my %deviceMap = ();
 	my @commands  = ();
 	my $imgtype   = "vmx";
 	my $bootfix   = "VMX";
@@ -1770,6 +1783,10 @@ sub setupBootDisk {
 			return undef;
 		}
 		#==========================================
+		# Create loop device mapping table
+		#------------------------------------------
+		%deviceMap = $this -> setLoopDeviceMap ($this->{loop});
+		#==========================================
 		# setup device mapper
 		#------------------------------------------
 		$status = qxx ( "/sbin/kpartx -a $this->{loop} 2>&1" );
@@ -1781,14 +1798,13 @@ sub setupBootDisk {
 			$this -> cleanLoop ();
 			return undef;
 		}
-		$dmap = $this->{loop}; $dmap =~ s/dev\///;
-		$root = "/dev/mapper".$dmap."p1";
+		$root = $deviceMap{1};
 		#==========================================
 		# check partition sizes
 		#------------------------------------------
 		if ($syszip > 0) {
 			my $sizeOK = 1;
-			my $systemPSize = $this->getStorageSize ("/dev/mapper".$dmap."p1");
+			my $systemPSize = $this->getStorageSize ($deviceMap{1});
 			my $systemISize = -s $system; $systemISize /= 1024;
 			chomp $systemPSize;
 			#print "_______A $systemPSize : $systemISize\n";
@@ -1860,7 +1876,7 @@ sub setupBootDisk {
 		}
 		if ($haveSplit) {
 			$kiwi -> info ("Dumping split read/write part on virtual disk");
-			$root = "/dev/mapper".$dmap."p2";
+			$root = $deviceMap{2};
 			$status = qxx ("dd if=$splitfile of=$root bs=32k 2>&1");
 			$result = $? >> 8;
 			if ($result != 0) {
@@ -1978,7 +1994,7 @@ sub setupBootDisk {
 	# create read/write filesystem if needed
 	#------------------------------------------
 	if (($syszip) || ($haveSplit)) {
-		$root = "/dev/mapper".$dmap."p2";
+		$root = $deviceMap{2};
 		if (! $haveSplit) {
 			$kiwi -> info ("Creating ext2 read-write filesystem");
 			my %FSopts = main::checkFSOptions();
@@ -3372,6 +3388,47 @@ sub getStorageSize {
 		return int $status;
 	}
 	return 0;
+}
+
+#==========================================
+# setDefaultDeviceMap
+#------------------------------------------
+sub setDefaultDeviceMap {
+	# ...
+	# set default device map which creates a mapping for
+	# device names to a number
+	# ---
+	my $this   = shift;
+	my $device = shift;
+	my %result;
+	if (! defined $device) {
+		return undef;
+	}
+	for (my $i=1;$i<=2;$i++) {
+		$result{$i} = $device.$i;
+	}
+	return %result;
+}
+
+#==========================================
+# setLoopDeviceMap
+#------------------------------------------
+sub setLoopDeviceMap {
+	# ...
+	# set loop device map which creates a mapping for
+	# /dev/mapper loop device names to a number
+	# ---
+	my $this   = shift;
+	my $device = shift;
+	my %result;
+	if (! defined $device) {
+		return undef;
+	}
+	my $dmap = $device; $dmap =~ s/dev\///;
+	for (my $i=1;$i<=2;$i++) {
+		$result{$i} = "/dev/mapper".$dmap."p$i";
+	}
+	return %result;
 }
 
 1; 

@@ -1859,7 +1859,13 @@ function sfdiskGetPartitionSize {
 	# /.../
 	# prints the partition or disk size in kB
 	# ----
-	sfdisk -s $1
+	local cyl_count=`sfdisk -g $1 2>&1 | cut -f2 -d: | cut -f2 -d" "`
+	local cyl_bsize=`sfdisk -l $1 2>&1 | grep Units | cut -f5 -d" "`
+	if [ ! -z "$cyl_bsize" ];then
+		expr $cyl_count \* $cyl_bsize / 1024
+	else
+		sfdisk -s $1
+	fi
 }
 #======================================
 # sfdiskPartitionCount
