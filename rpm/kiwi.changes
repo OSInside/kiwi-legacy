@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Dec  3 15:49:46 CET 2008 - ms@suse.de
+
+- fixed unified/split based oem second boot phase (bnc #450780)
+- added usb-storage device scan detection (bnc #455993)
+
+-------------------------------------------------------------------
 Wed Dec  3 11:50:17 CET 2008 - ms@suse.de
 
 - added slepos functions (bnc #349181)

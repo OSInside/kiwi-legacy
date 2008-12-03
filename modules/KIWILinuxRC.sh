@@ -1295,7 +1295,7 @@ function probeDevices {
 #--------------------------------------
 function CDDevice {
 	# /.../
-	# detect CD/DVD device(s). The function use the information
+	# detect CD/DVD/USB device(s). The function use the information
 	# from hwinfo --cdrom to search for the block device
 	# ----
 	local count=0
@@ -1306,6 +1306,25 @@ function CDDevice {
 	do
 		/sbin/modprobe $module
 	done
+	Echo -n "Waiting for USB devices to settle..."
+	while ! [ -d /sys/bus/usb/drivers/usb-storage ] && [ $count -lt 5 ]; do
+		echo -n .
+		sleep 1
+		count=`expr $count + 1`
+	done
+	count=0
+	if [ -d /sys/bus/usb/drivers/usb-storage ]; then
+		while \
+			[ $(dmesg|grep -c 'usb-storage: device scan complete') -lt 1 ] && \
+			[ $count -lt 15 ]
+		do
+			echo -n .
+			sleep 1
+			count=`expr $count + 1`
+		done
+		count=0
+	fi
+	echo
 	Echo -n "Waiting for CD/DVD device(s) to appear..."
 	while true;do
 		cddevs=`$h --cdrom | grep "Device File:"|sed -e"s@(.*)@@" | cut -f2 -d:`

@@ -109,6 +109,9 @@ fi
 if [ $LOCAL_BOOT = "yes" ];then
 	export deviceRoot=$root
 	export deviceDisk=`getDiskDevice $deviceRoot | sed -e s"@[0-9]@@g"`
+	if [ ! -z "$UNIONFS_CONFIG" ] || [ ! -z "$COMBINED_IMAGE" ];then
+		deviceRoot="$deviceDisk"1
+	fi
 	if [ ! -z "$UNIONFS_CONFIG" ];then
 		setupUnionFS "$deviceDisk"2 "$deviceDisk"1 aufs
 	fi
