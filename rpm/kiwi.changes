@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Dec  3 11:50:17 CET 2008 - ms@suse.de
+
+- added slepos functions (bnc #349181)
+- changed sfdiskGetPartitionSize to calculate the entire
+  disk size based on max cylinders -1 
+
+-------------------------------------------------------------------
 Tue Dec  2 19:38:33 CET 2008 - ms@suse.de
 
 - fixed split based boot configuration (bnc #450780)

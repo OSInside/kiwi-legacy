@@ -344,7 +344,51 @@ function baseCleanMount {
 }
 
 #======================================
-# stripLocales
+# baseStripMans 
+#--------------------------------------
+function baseStripMans {
+	# /..,/
+	# remove all manual pages, except 
+	# one given as parametr
+	#
+	# params - name of keep man pages
+	# example baseStripMans less
+	# ----
+	local keepMans="$@"
+	local directories="
+		/opt/gnome/share/man
+		/usr/local/man
+		/usr/share/man
+		/opt/kde3/share/man/packages
+	"
+	find $directories -mindepth 1 -maxdepth 2 -type f 2>/dev/null |\
+		baseStripAndKeep ${keepMans}
+}
+
+#======================================
+# baseStripDocs 
+#--------------------------------------
+function baseStripDocs {
+	# /.../
+	# remove all documentation, except 
+	# one given as parametr
+	#
+	# params - name of package of which 
+	# doc to keep
+	# ----
+	local keepDocs="$@"
+	local directories="
+		/opt/gnome/share/doc/packages
+		/usr/share/doc/packages
+		/opt/kde3/share/doc/packages
+	"
+	for dir in $directories; do
+		find $dir -mindepth 1 -maxdepth 1 -type d 2>/dev/null |\
+			baseStripAndKeep "${keepDocs}"
+	done
+}
+#======================================
+# baseStripLocales
 #--------------------------------------
 function baseStripLocales {
 	local imageLocales="$@"
@@ -354,27 +398,52 @@ function baseStripLocales {
 		/opt/kde3/share/locale
 		/usr/lib/locale
 	"
-	for dir in $directories; do
-		locales=`find $dir -type d -maxdepth 1 2>/dev/null`
-		for locale in $locales;do
-			if test $locale = $dir;then
-				continue
-			fi
-			local baseLocale=`/usr/bin/basename $locale`
-			local found="no"
-			for keep in $imageLocales;do
-				if echo $baseLocale | grep $keep;then
-					found="yes"
-					break
-				fi
-			done
-			if test $found = "no";then
-				rm -rf $locale
-			fi
-		done
-	done
+	find $directories -mindepth 1 -maxdepth 1 -type d 2>/dev/null |\
+		baseStripAndKeep ${keepLocale}
 }
 
+#======================================
+# baseStripInfos 
+#--------------------------------------
+function baseStripInfos {
+	# /.../
+	# remove all info files, 
+	# except one given as parametr
+	#
+	# params - name of keep info files
+	# ----
+	local keepInfos="$@"
+	local directories="
+		/usr/share/info
+	"
+	find $directories -mindepth 1 -maxdepth 1 -type f 2>/dev/null |\
+		baseStripAndKeep "${keepInfos}"
+}
+#======================================
+# baseStripAndKeep
+#--------------------------------------
+function baseStripAndKeep {
+	# /.../
+	# helper function for strip* functions
+	# read stdin lines of files to check 
+	# for removing
+	# - params - files which should be keep
+	# ----
+	local keepFiles="$@"
+	while read file; do
+			local baseFile=`/usr/bin/basename $file`
+			local found="no"
+			for keep in $keepFiles;do
+					if echo $baseFile | grep -q $keep; then
+							found="yes"
+							break
+					fi
+			done
+			if test $found = "no";then
+				   Rm -rf $file
+			fi
+	done
+}
 #======================================
 # baseStripTools
 #--------------------------------------
@@ -391,11 +460,52 @@ function baseStripTools {
 			fi
 		done
 		if [ $found = 0 ] && [ ! -d $file ];then
-			rm -f $file
+			Rm -f $file
 		fi
 	done
 }
-
+#======================================
+# suseStripPackager 
+#--------------------------------------
+function suseStripPackager {
+	# /.../ 
+	# remove smart o zypper packages and db 
+	# files. Also remove rpm package and db 
+	# if "-a" given
+	#
+	# params [-a]
+	# ----
+	local removerpm=falseq
+	if [ ! -z ${1} ] && [ $1 = "-a" ]; then
+		removerpm=true
+	fi
+	
+	#zypper#
+	Rpm -e --nodeps zypper libzypp satsolver-tools
+	Rm -rf /var/lib/zypp
+	
+	#smart
+	Rpm -e --nodeps smart smart-gui
+	Rm -rf /var/lib/smart
+	
+	if [ $removerpm = true ]; then
+		Rpm -e --nodeps rpm 
+		Rm -rf /var/lib/rpm
+	fi
+}
+#======================================
+# suseStripRPM
+#--------------------------------------
+function baseStripRPM {
+	# /.../
+	# remove rpms defined in config.xml 
+	# under image=delete section
+	# ----
+	for i in `baseGetPackagesForDeletion`
+	do
+		Rpm -e --nodeps $i
+	done
+}
 #======================================
 # baseSetupInPlaceSVNRepository
 #--------------------------------------
@@ -553,7 +663,61 @@ function baseSetupInPlaceGITRepository {
 	git commit -m "deployed"
 	popd
 }
+#======================================
+# Rm  
+#--------------------------------------
+function Rm {
+	# /.../
+	# delete files & anounce it to log
+	# ----
+	Debug "rm $@"
+	rm $@
+}
 
+#======================================
+# Rpm  
+#--------------------------------------
+function Rpm {
+	# /.../
+	# all rpm function & anounce it to log
+	# ----
+	Debug "rpm $@"
+	rpm $@
+}
+#======================================
+# Echo
+#--------------------------------------
+function Echo {
+	# /.../
+	# print a message to the controling terminal
+	# ----
+	local option=""
+	local prefix="----->"
+	local optn=""
+	local opte=""
+	while getopts "bne" option;do
+		case $option in
+			b) prefix="      " ;;
+			n) optn="-n" ;;
+			e) opte="-e" ;;
+			*) echo "Invalid argument: $option" ;;
+		esac
+	done
+	shift $(($OPTIND - 1))
+	echo $optn $opte "$prefix $1"
+	OPTIND=1
+}
+#======================================
+# Debug
+#--------------------------------------
+function Debug {
+	# /.../
+	# print message if variable DEBUG is set to 1
+	# -----
+	if test "$DEBUG" = 1;then
+		echo "+++++> (caller:${FUNCNAME[1]}:${FUNCNAME[2]} )  $@"
+	fi
+}
 #======================================
 # baseSetupBusyBox
 #--------------------------------------
