@@ -1190,6 +1190,9 @@ function probeUSB {
 	local module=""
 	local stdevs=""
 	local hwicmd="/usr/sbin/hwinfo"
+	#======================================
+	# load host controller modules
+	#--------------------------------------
 	for i in \
 		`$hwicmd --usb | grep "Driver [IA]" | 
 		sed -es"@modprobe\(.*\)\"@\1%@" | tr -d "\n"`
@@ -1227,10 +1230,41 @@ function probeUSB {
 		Echo "Probing module: $module"
 		modprobe $module >/dev/null
 	done
-	# /.../
-	# load hid driver manually
-	# ----
-	modprobe usbhid &>/dev/null
+	#======================================
+	# check load status for host controller
+	#--------------------------------------
+	if [ -z $stdevs ];then
+		return
+	fi
+	#======================================
+	# manually load storage/input drivers
+	#--------------------------------------
+	for i in usbhid usb-storage;do
+		modprobe $i &>/dev/null
+	done
+	#======================================
+	# wait for device scan to complete
+	#--------------------------------------
+	Echo -n "Waiting for USB devices to settle..."
+	local storage=/sys/bus/usb/drivers/usb-storage
+	while ! [ -d $storage ] && [ $count -lt 5 ]; do
+		echo -n .
+		sleep 1
+		count=`expr $count + 1`
+	done
+	count=0
+	if [ -d $storage ]; then
+		while \
+			[ $(dmesg|grep -c 'usb-storage: device scan complete') -lt 1 ] && \
+			[ $count -lt 15 ]
+		do
+			echo -n .
+			sleep 1
+			count=`expr $count + 1`
+		done
+		count=0
+	fi
+	echo
 }
 #======================================
 # probeDevices
@@ -1300,31 +1334,9 @@ function CDDevice {
 	# ----
 	local count=0
 	local h=/usr/sbin/hwinfo
-	for module in \
-		ehci-hcd uhci-hcd usb-storage sg sd_mod sr_mod \
-		cdrom ide-cd BusLogic vfat
-	do
+	for module in sg sd_mod sr_mod cdrom ide-cd BusLogic vfat; do
 		/sbin/modprobe $module
 	done
-	Echo -n "Waiting for USB devices to settle..."
-	while ! [ -d /sys/bus/usb/drivers/usb-storage ] && [ $count -lt 5 ]; do
-		echo -n .
-		sleep 1
-		count=`expr $count + 1`
-	done
-	count=0
-	if [ -d /sys/bus/usb/drivers/usb-storage ]; then
-		while \
-			[ $(dmesg|grep -c 'usb-storage: device scan complete') -lt 1 ] && \
-			[ $count -lt 15 ]
-		do
-			echo -n .
-			sleep 1
-			count=`expr $count + 1`
-		done
-		count=0
-	fi
-	echo
 	Echo -n "Waiting for CD/DVD device(s) to appear..."
 	while true;do
 		cddevs=`$h --cdrom | grep "Device File:"|sed -e"s@(.*)@@" | cut -f2 -d:`
