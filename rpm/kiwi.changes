@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Dec  9 20:46:57 CET 2008 - snorp@novell.com
+
+- fix pigz so that it can decompress .spl files (bnc #457633) 
+
+-------------------------------------------------------------------
 Thu Dec  4 11:47:00 CET 2008 - ms@suse.de
 
 - move usb device scan to probeUSB function (bnc #455993)
