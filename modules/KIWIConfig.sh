@@ -1147,11 +1147,22 @@ function suseStripKernel {
 				IFS=$ifss
 				continue
 			fi
+			if echo $p | grep -q "\-source\-";then
+				# a kernel source package...
+				IFS=$ifss
+				continue
+			fi
 			VERSION=$(/usr/bin/basename $kversion)
 			echo "Stripping kernel $p: Image [$kiwi_iname]..."
 			#==========================================
 			# run depmod, deps should be up to date
 			#------------------------------------------
+			if [ ! -f /boot/System.map-$VERSION ];then
+				# no system map for kernel
+				echo "no system map for kernel: $p found... skip it"
+				IFS=$ifss
+				continue
+			fi
 			/sbin/depmod -F /boot/System.map-$VERSION $VERSION
 			#==========================================
 			# strip the modules but take care for deps
