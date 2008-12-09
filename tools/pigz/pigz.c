@@ -1751,7 +1751,7 @@ local size_t compressed_suffix(char *nm)
     if (len > 4) {
         nm += len - 4;
         len = 4;
-        if (strcmp(nm, ".zip") == 0 || strcmp(nm, ".ZIP") == 0)
+        if (strcmp(nm, ".zip") == 0 || strcmp(nm, ".ZIP") == 0 || strcmp(nm, ".spli") == 0)
             return 4;
     }
     if (len > 3) {
