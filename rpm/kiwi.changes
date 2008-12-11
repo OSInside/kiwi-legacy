@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Dec 11 10:17:31 CET 2008 - jcborn@suse.de
+
+- fixed missing S/390 eltorito entry
+
+-------------------------------------------------------------------
 Tue Dec  9 23:27:08 CET 2008 - ms@novell.com
 
 - added check for system map when stripping kernels

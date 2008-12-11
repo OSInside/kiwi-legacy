@@ -100,6 +100,19 @@ then
 			if [ -f $SOURCE/$BOOT_BASE_DIR/efi ]; then
 				PARAMS="$PARAMS -eltorito-alt-boot -no-emul-boot -boot-load-size 1 -b $BOOT_BASE_DIR/efi"
 			fi
+			echo "is it an S/390...?"
+			echo "Looking for <$SOURCE>/<$BOOT_BASE_DIR_Z>/<vmrdr.ikr>"
+			if [ -f $SOURCE/$BOOT_BASE_DIR_Z/vmrdr.ikr ]; then
+				echo "found <vmrdr.ikr>"
+				PARAMS="$PARAMS -eltorito-alt-boot -no-emul-boot"
+				SOURCE2=`mktemp -d /var/tmp/m_cd-XXXXXX`
+				mkdir -p $SOURCE2/$BOOT_BASE_DIR_Z
+				PARMFILE_NAME=$SOURCE/$BOOT_BASE_DIR_Z/parmfile
+				test -e ${PARMFILE_NAME}.cd && PARMFILE_NAME=${PARMFILE_NAME}.cd
+				gen-s390-cd-kernel.pl --initrd=$SOURCE/$BOOT_BASE_DIR_Z/initrd --parmfile=$PARMFILE_NAME \
+				--kernel=$SOURCE/$BOOT_BASE_DIR_Z/vmrdr.ikr --outfile=$SOURCE2/$BOOT_BASE_DIR_Z/cd.ikr
+				PARAMS="$PARAMS -b $BOOT_BASE_DIR_Z/cd.ikr"
+			fi
 		elif [ -d $SOURCE/ppc ]; then
 		if [ -f $SOURCE/ppc/bootinfo.txt ] ; then
 		# assume thats a pSeries/iSeries CD
