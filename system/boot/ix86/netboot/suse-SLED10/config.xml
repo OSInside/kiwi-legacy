@@ -23,6 +23,7 @@
 		<file name="usb/host/usb-ohci.ko"/>
 		<file name="usb/host/ehci-hcd.ko"/>
 		<file name="usb/host/uhci-hcd.ko"/>
+		<file name="usb/host/ohci-hcd.ko"/>
 		<file name="usb/core/usbcore.ko"/>
 		<file name="usb/storage/usb-storage.ko"/>
 		<file name="usb/input/usbhid.ko"/>

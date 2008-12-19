@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Dec 19 19:07:12 CET 2008 - ms@suse.de
+
+- added ohci-hcd.ko to SLE10 usbdrivers section
+
+-------------------------------------------------------------------
 Thu Dec 11 10:17:31 CET 2008 - jcborn@suse.de
 
 - fixed missing S/390 eltorito entry (bnc #439907)
