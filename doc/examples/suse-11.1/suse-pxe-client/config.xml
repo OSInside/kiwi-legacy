@@ -33,10 +33,8 @@
         <package name="gawk"/>
         <package name="kernel-default"/>
         <package name="module-init-tools"/>
-        <package name="net-tools"/>
         <package name="netcfg"/>
         <package name="openssh"/>
-        <package name="pam-modules"/>
         <package name="procinfo"/>
         <package name="sysconfig"/>
         <package name="syslinux"/>
@@ -47,14 +45,9 @@
         <package name="less"/>
         <package name="initviocons"/>
         <package name="iputils"/>
-        <package name="procps"/>
-        <package name="psmisc"/>
-        <package name="pwdutils"/>
         <package name="portmap"/>
         <package name="dhcpcd"/>
 		<package name="dbus-1"/>
-		<package name="resmgr"/>
-		<package name="hal"/>
 		<package name="grub"/>
 		<package name="bootsplash"/>
 		<package name="bootsplash-branding-openSUSE"/>

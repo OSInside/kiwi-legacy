@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Dec 23 18:59:41 CET 2008 - ms@suse.de
+
+- fixed 11.1 pxe example package list
+
+-------------------------------------------------------------------
 Fri Dec 19 19:07:12 CET 2008 - ms@suse.de
 
 - added ohci-hcd.ko to SLE10 usbdrivers section
