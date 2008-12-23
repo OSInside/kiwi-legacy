@@ -494,6 +494,9 @@ else
 			esac
 			done
 		done
+		for m in nfs lockd sunrpc;do
+			modprobe -i $m
+		done
 		Echo "Mounting NFS root system: $nfsRootServer:$nfsRootDevice..."
 		imageRootDevice="-o nolock,rw $nfsRootServer:$nfsRootDevice"
 		if [ ! -z "$COMBINED_IMAGE" ] || [ ! -z "$UNIONFS_CONFIG" ];then

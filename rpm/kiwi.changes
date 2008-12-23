@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Tue Dec 23 18:59:41 CET 2008 - ms@suse.de
 
+- fixed NFS mount install command problem (bnc #455963)
 - fixed 11.1 pxe example package list
 
 -------------------------------------------------------------------
