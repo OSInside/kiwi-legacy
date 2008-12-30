@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Dec 30 19:45:45 CET 2008 - ms@suse.de
+
+- v3.02
+- fixed remote repo paths for kiwi examples
+- fixed documentation for ec2
+
+-------------------------------------------------------------------
 Tue Dec 23 18:59:41 CET 2008 - ms@suse.de
 
 - fixed NFS mount install command problem (bnc #455963)

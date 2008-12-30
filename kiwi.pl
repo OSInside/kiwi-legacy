@@ -44,10 +44,11 @@ use KIWITest;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "3.01";
+our $Version       = "3.02";
 our $Publisher     = "SUSE LINUX Products GmbH";
 our $Preparer      = "KIWI - http://kiwi.berlios.de";
-our $openSUSE      = "http://download.opensuse.org/repositories/";
+our $openSUSE      = "http://download.opensuse.org";
+our @openSUSE      = ("distribution","repositories");
 our $ConfigFile    = "$ENV{'HOME'}/.kiwirc";
 our $ConfigName    = "config.xml";
 our $Partitioner   = "fdisk";

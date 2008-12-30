@@ -20,7 +20,7 @@
 	</users>
 	<repository type="yast2">
 		<!--<source path="/image/CDs/full-10.3-i386"/>-->
-		<source path="opensuse://openSUSE:10.3/standard/"/>
+		<source path="opensuse://10.3/repo/oss/"/>
 	</repository>
 	<packages type="image" patternType="plusRecommended" patternPackageType="plusRecommended">
 		<package name="kernel-default"/>

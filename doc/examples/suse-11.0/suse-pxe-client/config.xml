@@ -17,7 +17,7 @@
 	</users>
 	<repository type="yast2">
 		<!--<source path="/image/CDs/full-11.0-i386"/>-->
-		<source path="opensuse://openSUSE:11.0/standard/"/>
+		<source path="opensuse://11.0/repo/oss/"/>
 	</repository>
 	<deploy server="192.168.100.2" blocksize="4096">
 		<partitions device="/dev/sda">

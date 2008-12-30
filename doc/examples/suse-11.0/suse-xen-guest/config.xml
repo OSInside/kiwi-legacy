@@ -16,7 +16,7 @@
 	</preferences>
 	<repository type="yast2">
 		<!--<source path="/image/CDs/full-11.0-i386"/>-->
-		<source path="opensuse://openSUSE:11.0/standard/"/>
+		<source path="opensuse://11.0/repo/oss/"/>
 	</repository>
 	<packages type="image">
 		<package name="kernel-default"/>

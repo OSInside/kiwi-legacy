@@ -376,11 +376,13 @@ sub openSUSEpath {
 	# Create urllist for later testing
 	#------------------------------------------
 	foreach my $dist (@dists) {
-		my $url1 = $location.$module."/";
-		push @urllist,$url1;
-		if ($url1 !~ /\/$dist/) {
-			my $url2 = $location.$module."/".$dist."/";
-			push @urllist,$url2;
+		foreach my $subdir (@main::openSUSE) {
+			my $url1 = $location."/".$subdir."/".$module."/";
+			push @urllist,$url1;
+			if ($url1 !~ /\/$dist/) {
+				my $url2 = $location."/".$subdir."/".$module."/".$dist."/";
+				push @urllist,$url2;
+			}
 		}
 	}
 	#==========================================

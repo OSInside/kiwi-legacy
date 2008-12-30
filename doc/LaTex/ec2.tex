@@ -13,9 +13,9 @@ environment. To use Amazon EC2 you simply:
       applications, libraries, etc. Such an AMI can be created by the kiwi
       ec2 image type. In order to do that kiwi makes use of the tools
       provided by Amazon. Your build system should have these tools
-      installed. An appropriate \textbf{ec2-ami-tools} package can be
-      found here:\\
-      \url{http://download.opensuse.org/repositories/openSUSE:/Tools}
+      installed. Due to license issues we are not allowed to distribute
+      the tools which means you need to download, install and setup
+      them from here: \url{http://docs.amazonwebservices.com/AmazonEC2/gsg/2006-06-26}
 \item Upload this AMI to the Amazon S3 (Amazon Simple Storage Service)
       service. This gives us reliable, secure access to your AMI.
 \item Register your AMI with Amazon EC2. This allows us to verify that your
@@ -28,9 +28,7 @@ environment. To use Amazon EC2 you simply:
 \end{enumerate}
 
 Please note while instances are running, you are billed for the
-computing and network resources that they consume. Before creating an
-ec2 with kiwi you should have read the instructions from here:\\
-\url{http://docs.amazonwebservices.com/AmazonEC2/gsg/2006-06-26}
+computing and network resources that they consume.
 You should start creating an ec2 with kiwi after you can make sure
 your system is prepared for ec2 which means if you call the command
 \textbf{ec2-describe-images -a} you will get a valid output.
