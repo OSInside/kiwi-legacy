@@ -202,7 +202,6 @@
 		<package name="pmtools"/>
 		<package name="popt"/>
 		<package name="pwdutils"/>
-		<package name="resmgr"/>
 		<package name="setserial"/>
 		<package name="suse-build-key"/>
 		<package name="sysconfig"/>

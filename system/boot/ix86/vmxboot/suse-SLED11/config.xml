@@ -87,7 +87,7 @@
 		<package name="glibc-locale"/>
 		<package name="diffutils"/>
 		<package name="procps"/>
-		<package name="cracklib-dict-small"/>
+		<package name="cracklib-dict-full"/>
 	</packages>
 	<packages type="delete">
 		<package name="PolicyKit"/>
@@ -102,7 +102,6 @@
 		<package name="gdbm"/>
 		<package name="glib2"/>
 		<package name="glibc-locale"/>
-		<package name="gnome-filesystem"/>
 		<package name="gpg"/>
 		<package name="info"/>
 		<package name="insserv"/>
@@ -112,12 +111,10 @@
 		<package name="libxml2"/>
 		<package name="libzio"/>
 		<package name="limal"/>
-		<package name="limal-bootloader"/>
 		<package name="limal-perl"/>
 		<package name="logrotate"/>
 		<package name="mdadm"/>
 		<package name="mingetty"/>
-		<package name="openSUSE-release"/>
 		<package name="openldap2-client"/>
 		<package name="openslp"/>
 		<package name="pam"/>
@@ -129,7 +126,6 @@
 		<package name="permissions"/>
 		<package name="pm-utils"/>
 		<package name="pmtools"/>
-		<package name="resmgr"/>
 		<package name="suse-build-key"/>
 		<package name="gfxboot"/>
 		<package name="gfxboot-devel"/>

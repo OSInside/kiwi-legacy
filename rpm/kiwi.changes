@@ -2,6 +2,7 @@
 Tue Dec 30 19:45:45 CET 2008 - ms@suse.de
 
 - v3.02
+- fixed package setup for 11.1/SLE11 boot images (bnc #457229)
 - fixed remote repo paths for kiwi examples
 - fixed documentation for ec2
 

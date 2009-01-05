@@ -152,7 +152,6 @@
 		<package name="permissions"/>
 		<package name="pm-utils"/>
 		<package name="pmtools"/>
-		<package name="resmgr"/>
 		<package name="suse-build-key"/>
 		<package name="gfxboot"/>
 		<package name="gfxboot-devel"/>

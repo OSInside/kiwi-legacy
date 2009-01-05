@@ -74,7 +74,7 @@
 		<package name="filesystem"/>
 		<package name="glibc@i586" arch="i686"/>
 		<package name="glibc-locale"/>
-		<package name="cracklib-dict-small"/>
+		<package name="cracklib-dict-full"/>
 		<package name="psmisc"/>
 		<package name="bind-libs"/>
 		<package name="bind-utils"/>
@@ -133,7 +133,6 @@
 		<package name="glib2"/>
 		<package name="glib2-lang"/>
 		<package name="glibc-locale"/>
-		<package name="gnome-filesystem"/>
 		<package name="gpg"/>
 		<package name="grub"/>
 		<package name="hdparm"/>
@@ -158,7 +157,6 @@
 		<package name="libxml2"/>
 		<package name="libzio"/>
 		<package name="limal"/>
-		<package name="limal-bootloader"/>
 		<package name="limal-perl"/>
 		<package name="logrotate"/>
 		<package name="lvm2"/>
@@ -171,7 +169,6 @@
 		<package name="mtools"/>
 		<package name="net-tools"/>
 		<package name="netcfg"/>
-		<package name="openSUSE-release"/>
 		<package name="openldap2-client"/>
 		<package name="openslp"/>
 		<package name="openssl-certs"/>
@@ -194,7 +191,6 @@
 		<package name="pmtools"/>
 		<package name="popt"/>
 		<package name="pwdutils"/>
-		<package name="resmgr"/>
 		<package name="setserial"/>
 		<package name="suse-build-key"/>
 		<package name="sysconfig"/>
