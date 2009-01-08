@@ -2940,7 +2940,7 @@ sub setupBootLoaderConfiguration {
 			if ($type =~ /^KIWI CD/) {
 				print FD " kernel (cd)/boot/linux vga=0x314 splash=silent";
 				print FD " ramdisk_size=512000 ramdisk_blocksize=4096";
-			} elsif (($type =~ /^KIWI USB/) || ($imgtype =~ /vmx|oem|split/)) {
+			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
 				print FD " root (hd0,$bootpart)\n";
 				print FD " kernel /boot/linux.vmx vga=0x314 splash=silent";
 			} else {
@@ -2955,7 +2955,7 @@ sub setupBootLoaderConfiguration {
 			print FD "\n";
 			if ($type =~ /^KIWI CD/) {
 				print FD " initrd (cd)/boot/initrd\n";
-			} elsif (($type =~ /^KIWI USB/) || ($imgtype =~ /vmx|oem|split/)) {
+			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
 				print FD " initrd /boot/initrd.vmx\n";
 			} else {
 				print FD " initrd /boot/initrd\n";
@@ -2965,7 +2965,7 @@ sub setupBootLoaderConfiguration {
 				print FD " kernel (cd)/boot/xen.gz\n";
 				print FD " module /boot/linux vga=0x314 splash=silent";
 				print FD " ramdisk_size=512000 ramdisk_blocksize=4096";
-			} elsif (($type =~ /^KIWI USB/) || ($imgtype =~ /vmx|oem|split/)) {
+			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
 				print FD " root (hd0,$bootpart)\n";
 				print FD " kernel /boot/xen.gz.vmx\n";
 				print FD " module /boot/linux.vmx vga=0x314 splash=silent";
@@ -2982,7 +2982,7 @@ sub setupBootLoaderConfiguration {
 			print FD "\n";
 			if ($type =~ /^KIWI CD/) {
 				print FD " module (cd)/boot/initrd\n";
-			} elsif (($type =~ /^KIWI USB/) || ($imgtype =~ /vmx|oem|split/)) {
+			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
 				print FD " module /boot/initrd.vmx\n";
 			} else {
 				print FD " module /boot/initrd\n";
@@ -3002,7 +3002,7 @@ sub setupBootLoaderConfiguration {
 			if ($type =~ /^KIWI CD/) {
 				print FD " kernel (cd)/boot/linux vga=0x314 splash=silent";
 				print FD " ramdisk_size=512000 ramdisk_blocksize=4096";
-			} elsif (($type =~ /^KIWI USB/) || ($imgtype =~ /vmx|oem|split/)) {
+			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
 				print FD " root (hd0,$bootpart)\n";
 				print FD " kernel /boot/linux.vmx vga=0x314 splash=silent";
 			} else {
@@ -3019,7 +3019,7 @@ sub setupBootLoaderConfiguration {
 			print FD "\n";
 			if ($type =~ /^KIWI CD/) {
 				print FD " initrd (cd)/boot/initrd\n";
-			} elsif (($type =~ /^KIWI USB/) || ($imgtype =~ /vmx|oem|split/)) {
+			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
 				print FD " initrd /boot/initrd.vmx\n";
 			} else {
 				print FD " initrd /boot/initrd\n";
@@ -3029,7 +3029,7 @@ sub setupBootLoaderConfiguration {
 				print FD " kernel (cd)/boot/xen.gz\n";
 				print FD " module (cd)/boot/linux vga=0x314 splash=silent";
 				print FD " ramdisk_size=512000 ramdisk_blocksize=4096";
-			} elsif (($type =~ /^KIWI USB/) || ($imgtype =~ /vmx|oem|split/)) {
+			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
 				print FD " root (hd0,$bootpart)\n";
 				print FD " kernel /boot/xen.gz.vmx\n";
 				print FD " module /boot/linux.vmx vga=0x314 splash=silent";
@@ -3048,7 +3048,7 @@ sub setupBootLoaderConfiguration {
 			print FD "\n";
 			if ($type =~ /^KIWI CD/) {
 				print FD " module (cd)/boot/initrd\n"
-			} elsif (($type =~ /^KIWI USB/) || ($imgtype =~ /vmx|oem|split/)) {
+			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
 				print FD " module /boot/initrd.vmx\n"
 			} else {
 				print FD " module /boot/initrd\n";

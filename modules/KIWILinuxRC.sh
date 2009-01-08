@@ -1433,21 +1433,21 @@ function USBStickDevice {
 					stickRoot=$device
 					stickDevice=$device"1"
 					for dev in $stickRoot"1" $stickRoot"2";do
-						stickFound=0
 						if ! kiwiMount "$dev" "/mnt";then
 							continue
 						fi
+						stickFound=1
 						if \
 							[ ! -e /mnt/etc/ImageVersion ] && \
 							[ ! -e /mnt/config.isoclient ]
 						then
 							umountSystem
-							stickFound=1
-							break
+							continue
 						fi
 						umountSystem
+						break
 					done
-					if [ $stickFound = 0 ];then
+					if [ "$stickFound" = 0 ];then
 						continue
 					fi
 					stickSerial=$serial
