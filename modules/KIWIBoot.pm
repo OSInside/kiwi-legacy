@@ -577,7 +577,7 @@ sub setupBootStick {
 	#==========================================
 	# Create Stick boot structure
 	#------------------------------------------
-	if (! $this -> createBootStructure()) {
+	if (! $this -> createBootStructure("vmx")) {
 		$this -> cleanTmp ();
 		return undef;
 	}
