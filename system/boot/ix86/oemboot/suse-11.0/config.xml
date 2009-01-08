@@ -25,6 +25,7 @@
 		<file name="usb/storage/usb-storage.ko"/>
 	</drivers>
 	<drivers type="drivers">
+		<file name="drivers/md/dm-mod.ko"/>
 		<file name="drivers/hid/*"/>
 		<file name="drivers/ide/*"/>
 		<file name="fs/ext3/*"/>
@@ -95,6 +96,7 @@
 		<package name="bootsplash-branding-openSUSE"/>
 		<package name="eject"/>
 		<package name="tar"/>
+		<package name="lvm2"/>
 		<package name="bzip2"/>
 		<package name="cromfs"/>
 		<package name="kiwi-tools"/>

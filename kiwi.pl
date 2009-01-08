@@ -44,7 +44,7 @@ use KIWITest;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "3.02";
+our $Version       = "3.03";
 our $Publisher     = "SUSE LINUX Products GmbH";
 our $Preparer      = "KIWI - http://kiwi.berlios.de";
 our $openSUSE      = "http://download.opensuse.org";
@@ -198,6 +198,7 @@ our $Verbosity = 0;         # control the verbosity level
 our $TargetArch;            # target architecture -> writes zypp.conf
 our $InstSourceLocal;       # create installation source from local metadata
 our $CheckKernel;           # check for kernel matches in boot and system image
+our $LVM;                   # use LVM partition setup for virtual disk
 our $kiwi;                  # global logging handler object
 
 #============================================
@@ -1058,7 +1059,7 @@ sub main {
 		}
 		$boot = new KIWIBoot (
 			$kiwi,$BootVMDisk,$BootVMSystem,
-			$BootVMSize,undef,$BootVMFormat
+			$BootVMSize,undef,$BootVMFormat,$LVM
 		);
 		if (! defined $boot) {
 			my $code = kiwiExit (1); return $code;
@@ -1161,6 +1162,7 @@ sub init {
 		"instsource-local"      => \$InstSourceLocal,
 		"target-arch=s"         => \$TargetArch,
 		"check-kernel"          => \$CheckKernel,
+		"lvm"                   => \$LVM,
 		"help|h"                => \&usage,
 		"<>"                    => \&usage
 	);
@@ -1479,6 +1481,13 @@ sub usage {
 	print "    set the package manager to use for this image. If set it\n";
 	print "    will temporarly overwrite the value set in the xml\n";
 	print "    description\n";
+	print "\n";
+	print "  [ --lvm ]\n";
+	print "    use the logical volume manager to control the disk\n";
+	print "    the partition table will include one lvm partition and\n";
+	print "    one standard ext2 boot partition. Use of this option\n";
+	print "    makes sense for the create step only and also only for\n";
+	print "    the image types: vmx, oem and usb\n";
 	print "\n";
 	print "  [ --fs-blocksize <number> ]\n";
 	print "    When calling kiwi in creation mode this option will set\n";

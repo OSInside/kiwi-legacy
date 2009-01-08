@@ -1,0 +1,590 @@
+#!/bin/bash
+#================
+# FILE          : linuxrc
+#----------------
+# PROJECT       : OpenSuSE KIWI Image System
+# COPYRIGHT     : (c) 2006 SUSE LINUX Products GmbH. All rights reserved
+#               :
+# AUTHOR        : Marcus Schaefer <ms@suse.de>
+#               :
+# BELONGS TO    : Operating System images
+#               :
+# DESCRIPTION   : OEM repartition code functions. This file is used
+#               : to setup the partition table according to the OEM
+#               : specifications
+#               :
+# STATUS        : BETA
+#----------------
+#======================================
+# OEMRepartInit 
+#--------------------------------------
+function OEMRepartInit {
+	# /.../
+	# calculate memory based swapsize amount and initialize
+	# size of recovery archive
+	# ----
+	mem_size=`grep MemTotal: /proc/meminfo | tr -dc '[0-9]'`
+	swapsize=$(( $mem_size *2 / 1024 ))
+	recoMByte=0
+	if [ ! -z "$OEM_SWAPSIZE" ];then
+		swapsize=$OEM_SWAPSIZE
+	fi
+	if [ ! -z "$OEM_WITHOUTSWAP" ];then
+		swapsize=0
+	fi
+	if [ ! -z "$OEM_RECOVERY" ];then
+		mkdir -p /reco-root
+		if ! mount $imageRootDevice /reco-root >/dev/null;then
+			systemException "Failed to mount root device" "reboot"
+		fi
+		if [ ! -f /reco-root/recovery.tar.gz ];then
+			systemException "Can't find recovery archive" "reboot"
+		fi
+		recoBytes=`du --bytes /reco-root/recovery.tar.gz | cut -f1`
+		recoMByte=`expr $recoBytes / 1048576`
+		recoMByte=`expr $recoMByte \* 15 / 10`
+		umount /reco-root && rmdir /reco-root
+	fi
+}
+
+#======================================
+# OEMRepartStandard
+#--------------------------------------
+function OEMRepartStandard {
+	# /.../
+	# repartition disk with read/write root filesystem
+	# ----
+	#======================================
+	# write new partition table
+	#--------------------------------------
+	# /.../
+	# Explanation of the partition commands used within the
+	# here document below:
+	# ----
+	# d              # delete xda partition [ 1 ]
+	# n              # create xda partition at same place than xda1
+	# p              # primary
+	# 2              # [ 2 ]
+	# 1              # accept old xda1 start block for xda2
+	# +10240M        # accept new root device size of 10GB
+	# n              # create xda swap partition
+	# p              # primary
+	# 1              # [ 1 ]
+	#                # accept start block
+	# +"$swapsize"M  # accept new swapsize
+	# n              # create xda3 home partition
+	# p              # primary
+	# 3              # [ 3 ]
+	#                # accept start block
+	#                # accept end block, complete disk
+	# t              # change swap system id
+	# 1              # [ 1 ]
+	# 82             # Linux Swap
+	# w              # write partition table
+	# ----
+	input=/part.input
+	rm -f $input
+	diskXMBytes=`partitionSize $imageDiskDevice`
+	diskPMBytes=`partitionSize $imageDiskDevice"1"`
+	diskPMBytes=`expr $diskPMBytes / 1024`
+	diskXMBytes=`expr $diskXMBytes / 1024`
+	disk1MBytes=10240
+	# /.../
+	# set OEM_SYSTEMSIZE if available, else try to
+	# use 10GB system size
+	# ----
+	if [ ! -z "$OEM_SYSTEMSIZE" ];then
+		disk1MBytes=$OEM_SYSTEMSIZE
+	fi
+	# /.../
+	# prevent /home and recovery partition if requested
+	# system size is bigger than the whole disk
+	# ----
+	if [ $disk1MBytes -gt $diskXMBytes ];then
+		export OEM_WITHOUTHOME=1
+		unset OEM_RECOVERY
+		recoMByte=0
+	fi
+	# /.../
+	# recalculate system size if no /home partition
+	# will be used. size is whole disk minus swap
+	# minus recovery
+	# ----
+	if [ ! -z "$OEM_WITHOUTHOME" ];then
+		disk1MBytes=`expr $diskXMBytes - $swapsize - $recoMByte`
+	fi
+	# /.../
+	# check if requested system size is bigger than
+	# the existing system partition
+	# ----
+	if [ $disk1MBytes -lt $diskPMBytes ];then
+		# /.../
+		# Requested system partition size is smaller than
+		# existing partition, will not re-partition
+		# ----
+		Echo "Current system partition is bigger than requested size"
+		Echo "Disk won't be re-partitioned"
+		OEM_WITHOUTHOME=1
+		DONT_PARTITION=1
+		unset OEM_RECOVERY
+	fi
+	if [ -z "$DONT_PARTITION" ];then
+		if [ ! -z "$OEM_WITHOUTHOME" ];then
+			#======================================
+			# -home
+			#--------------------------------------
+			if [ -z "$OEM_WITHOUTSWAP" ];then
+				#======================================
+				# -home +swap
+				#--------------------------------------
+				if [ -z "$OEM_RECOVERY" ];then
+					#======================================
+					# -home +swap -recovery
+					#--------------------------------------
+					for cmd in \
+						d n p 2 1 +"$disk1MBytes"M \
+						n p 1 . . \
+						t 1 82 w
+					do
+						if [ $cmd = "." ];then
+							echo >> $input
+							continue
+						fi
+						echo $cmd >> $input
+					done
+				else
+					#======================================
+					# -home +swap +recovery
+					#--------------------------------------
+					for cmd in \
+						d n p 2 1 +"$disk1MBytes"M \
+						n p 4 . +"$recoMByte"M \
+						n p 1 . . \
+						t 1 82 w
+					do
+					if [ $cmd = "." ];then
+						echo >> $input
+							continue
+						fi
+						echo $cmd >> $input
+					done
+				fi
+			else
+				#======================================
+				# -home -swap
+				#--------------------------------------
+				if [ -z "$OEM_RECOVERY" ];then
+					#======================================
+					# -home -swap -recovery
+					#--------------------------------------
+					for cmd in \
+						d n p 2 . . w
+					do
+						if [ $cmd = "." ];then
+							echo >> $input
+							continue
+						fi
+						echo $cmd >> $input
+					done
+				else
+					#======================================
+					# -home -swap +recovery
+					#--------------------------------------
+					for cmd in \
+						d n p 2 1 +"$disk1MBytes"M \
+						n p 4 . . w
+					do
+						if [ $cmd = "." ];then
+							echo >> $input
+							continue
+						fi
+						echo $cmd >> $input
+					done
+				fi
+			fi
+		else
+			#======================================
+			# +home
+			#--------------------------------------
+			if [ -z "$OEM_WITHOUTSWAP" ];then
+				#======================================
+				# +home +swap
+				#--------------------------------------
+				if [ -z "$OEM_RECOVERY" ];then
+					#======================================
+					# +home +swap -recovery
+					#--------------------------------------
+					for cmd in \
+						d n p 2 1 +"$disk1MBytes"M \
+						n p 1 . +"$swapsize"M \
+						n p 3 . . \
+						t 1 82 w
+					do
+						if [ $cmd = "." ];then
+							echo >> $input
+							continue
+						fi
+						echo $cmd >> $input
+					done
+				else
+					#======================================
+					# +home +swap +recovery
+					#--------------------------------------
+					for cmd in \
+						d n p 2 1 +"$disk1MBytes"M \
+						n p 1 . +"$swapsize"M \
+						n p 4 . +"$recoMByte"M \
+						n p 3 . . \
+						t 1 82 w
+					do
+						if [ $cmd = "." ];then
+							echo >> $input
+							continue
+						fi
+						echo $cmd >> $input
+					done
+				fi
+			else
+				#======================================
+				# +home -swap
+				#--------------------------------------
+				if [ -z "$OEM_RECOVERY" ];then
+					#======================================
+					# +home -swap -recovery
+					#--------------------------------------
+					for cmd in \
+						d n p 2 1 +"$disk1MBytes"M \
+						n p 3 . . w
+					do
+						if [ $cmd = "." ];then
+							echo >> $input
+							continue
+						fi
+						echo $cmd >> $input
+					done
+				else
+					#======================================
+					# +home -swap +recovery
+					#--------------------------------------
+					for cmd in \
+						d n p 2 1 +"$disk1MBytes"M \
+						n p 4 . +"$recoMByte"M \
+						n p 3 . . w
+					do
+						if [ $cmd = "." ];then
+							echo >> $input
+							continue
+						fi
+						echo $cmd >> $input
+					done
+				fi
+			fi
+		fi
+		Echo "Repartition the disk according to current geometry"
+		fdisk $imageDiskDevice < $input 1>&2
+		if test $? != 0; then
+			systemException "Failed to create partition table" "reboot"
+		fi
+	fi
+	#======================================
+	# Update new device names
+	#--------------------------------------
+	if [ -z "$DONT_PARTITION" ];then
+		export imageRootDevice=$imageDiskDevice"2"
+		export imageSwapDevice=$imageDiskDevice"1"
+		bootid=1
+	else
+		export imageRootDevice=$imageDiskDevice"1"
+		bootid=0
+	fi
+	if [ -z "$OEM_WITHOUTHOME" ];then
+		export imageHomeDevice=$imageDiskDevice"3"
+	fi
+	if [ ! -z "$OEM_RECOVERY" ];then
+		export imageRecoveryDevice=$imageDiskDevice"4"
+	fi
+}
+
+#======================================
+# OEMRepartOverlayed
+#--------------------------------------
+function OEMRepartOverlayed {
+	# /.../
+	# repartition disk if overlay system via aufs is used
+	# ---- 
+	#====================================== 
+	# no recovery support in union mode
+	#--------------------------------------
+	unset OEM_RECOVERY
+	#====================================== 
+	# no homepart support for union mode
+	#--------------------------------------
+	export OEM_WITHOUTHOME=1
+	#======================================
+	# calculate end block - swapspace
+	#--------------------------------------
+	swapXMBytes=$swapsize
+	diskXMBytes=`partitionSize $imageDiskDevice`
+	diskXMBytes=`expr $diskXMBytes / 1024`
+	disk1MBytes=`partitionSize $imageDiskDevice"1"`
+	disk1MBytes=`expr $disk1MBytes / 1024`
+	disk2MBytes=`expr $diskXMBytes - $disk1MBytes - $swapsize`
+	if [ $disk2MBytes -lt 100 ];then
+		# /.../
+		# Very small disk which we will not re-partition
+		# ----
+		Echo "Disk is too small, will not re-partition it"
+		DONT_PARTITION=1
+	fi
+	if [ -z "$DONT_PARTITION" ];then
+		#======================================
+		# write new partition table
+		#--------------------------------------
+		# /.../
+		# Explanation of the partition commands used within the
+		# here document below:
+		# ----
+		# d               # delete xda partition
+		# 2               # [ 2 ]
+		# n               # create xda partition at same place than xda2
+		# p               # primary
+		# 2               # [ 2 ]
+		#                 # accept old xda2 start block
+		# +"disk2MBytes"M # accept new RW device size
+		# n               # create xda swap partition
+		# p               # primary
+		# 3               # [ 3 ]
+		#                 # accept start block
+		#                 # accept end block
+		# t               # change swap system id
+		# 3               # [ 3 ]
+		# 82              # Linux Swap
+		# w               # write partition table
+		# ----
+		input=/part.input
+		rm -f $input
+		if [ $swapsize = 0 ];then
+			for cmd in d 2 n p 2 . +"$disk2MBytes"M w; do
+				if [ $cmd = "." ];then
+					echo >> $input
+					continue
+				fi
+				echo $cmd >> $input
+			done
+		else
+			for cmd in d 2 n p 2 . +"$disk2MBytes"M n p 3 . . t 3 82 w
+			do
+				if [ $cmd = "." ];then
+					echo >> $input
+					continue
+				fi
+				echo $cmd >> $input
+			done
+		fi
+		Echo "Repartition the disk according to current geometry"
+		fdisk $imageDiskDevice < $input 1>&2
+		if test $? != 0; then
+			systemException "Failed to create partition table" "reboot"
+		fi
+	fi
+	#======================================
+	# Update new device names
+	#--------------------------------------
+	export imageRootDevice=$imageDiskDevice"1"
+	export imageSwapDevice=$imageDiskDevice"3"
+	export imageIOWRDevice=$imageDiskDevice"2"
+	bootid=1
+}
+
+#======================================
+# OEMRepartCombined
+#--------------------------------------
+function OEMRepartCombined {
+	# /.../
+	# repartition disk if split system is used
+	# ----
+	#====================================== 
+	# no recovery support for combined mode
+	#--------------------------------------
+	unset OEM_RECOVERY
+	#====================================== 
+	# no homepart support for combined mode
+	#--------------------------------------
+	export OEM_WITHOUTHOME=1
+	#====================================== 
+	# check for read-write partition
+	#--------------------------------------
+	if ! partitionSize $imageDiskDevice"2" &>/dev/null;then
+		Echo "No read-write partition in this split image"
+		DONT_PARTITION=1
+	fi
+	#======================================
+	# calculate new partition 3 size
+	#--------------------------------------
+	if [ -z "$DONT_PARTITION" ];then
+		swapXMBytes=$swapsize
+		diskXMBytes=`partitionSize $imageDiskDevice`
+		diskXMBytes=`expr $diskXMBytes / 1024`
+		disk1MBytes=`partitionSize $imageDiskDevice"1"`
+		disk1MBytes=`expr $disk1MBytes / 1024`
+		disk2MBytes=`partitionSize $imageDiskDevice"2"`
+		disk2MBytes=`expr $disk2MBytes / 1024`
+		diskXLBytes=`expr $diskXMBytes - $disk1MBytes - $disk2MBytes`
+		diskXABytes=`expr $diskXLBytes - $swapXMBytes`
+		if [ $diskXABytes -lt 50 ];then
+			# /.../
+			# Very small disk which we will not re-partition
+			# ----
+			Echo "Disk is too small, will not re-partition it"
+			DONT_PARTITION=1
+		else
+			disk2MBytes=`expr $disk2MBytes + $diskXABytes`
+		fi
+	fi
+	if [ -z "$DONT_PARTITION" ];then
+		#======================================
+		# write new partition table
+		#--------------------------------------
+		# /.../
+		# Explanation of the partition commands used within the
+		# here document below:
+		# ----
+		# d               # delete xda partition
+		# 2               # [ 2 ]
+		# n               # create xda partition at same place than xda2
+		# p               # primary
+		# 2               # [ 2 ]
+		#                 # accept old xda3 start block
+		# +"disk2MBytes"M # accept new RW device size of disk blocks - swap
+		# n               # create xda swap partition
+		# p               # primary
+		# 3               # [ 3 ]
+		#                 # accept start block
+		#                 # accept end block
+		# t               # change swap system id
+		# 3               # [ 3 ]
+		# 82              # Linux Swap
+		# w               # write partition table
+		# ----
+		input=/part.input
+		rm -f $input
+		if [ $swapsize = 0 ];then
+			for cmd in d 2 n p 2 . +"$disk2MBytes"M w;do
+				if [ $cmd = "." ];then
+					echo >> $input
+					continue
+				fi
+				echo $cmd >> $input
+			done
+		else
+			for cmd in d 2 n p 2 . +"$disk2MBytes"M n p 3 . . t 3 82 w;do
+				if [ $cmd = "." ];then
+					echo >> $input
+					continue
+				fi
+				echo $cmd >> $input
+			done
+		fi
+		Echo "Repartition the disk according to current geometry"
+		fdisk $imageDiskDevice < $input 1>&2
+		if test $? != 0; then
+			systemException "Failed to create partition table" "reboot"
+		fi
+	fi
+	#======================================
+	# Update new device names
+	#--------------------------------------
+	export imageRootDevice=$imageDiskDevice"1"
+	export imageSwapDevice=$imageDiskDevice"3"
+	export imageIOWRDevice=$imageDiskDevice"2"
+	bootid=1
+}
+
+#======================================
+# OEMRepartLVM
+#--------------------------------------
+function OEMRepartLVM {
+	# TODO
+	return
+}
+
+#======================================
+# OEMRepart
+#--------------------------------------
+function OEMRepart {
+	# /.../
+	# call the appropriate repartition functions
+	# ----
+	if [ ! $LOCAL_BOOT = "no" ];then
+		return
+	fi
+	#======================================
+	# Initialize
+	#--------------------------------------
+	OEMRepartInit
+	#======================================
+	# Do the repartitioning
+	#--------------------------------------
+	if [ ! -z "$haveLVM" ];then
+		OEMRepartLVM
+	elif [ ! -z "$COMBINED_IMAGE" ];then
+		OEMRepartCombined
+	elif [ ! -z "$UNIONFS_CONFIG" ];then
+		OEMRepartOverlayed
+	else
+		OEMRepartStandard
+	fi
+	#======================================
+	# Activate swap space
+	#--------------------------------------
+	if partitionSize $imageSwapDevice &>/dev/null;then
+		Echo "Activating swap space on $imageSwapDevice"
+		if ! mkswap $imageSwapDevice >/dev/null 2>&1;then
+			systemException "Failed to create swap signature" "reboot"
+		fi
+	fi
+	#======================================
+	# Create home file system
+	#--------------------------------------
+	if [ -z "$OEM_WITHOUTHOME" ];then
+		Echo "Creating Home filesystem on $imageHomeDevice"
+		if ! mke2fs -j -q $imageHomeDevice >/dev/null 2>&1;then
+			systemException "Failed to create Home fs" "reboot"
+		fi
+	fi
+	#======================================
+	# Create recovery file system
+	#--------------------------------------
+	if [ ! -z "$OEM_RECOVERY" ];then
+		Echo "Creating Recovery filesystem on $imageRecoveryDevice"
+		if ! mke2fs -j -q $imageRecoveryDevice >/dev/null 2>&1;then
+			systemException "Failed to create Recovery fs" "reboot"
+		fi
+	fi
+	#======================================
+	# Setup recovery contents
+	#--------------------------------------
+	if [ ! -z "$OEM_RECOVERY" ];then
+		Echo "Setting up recovery archive..."
+		mkdir -p /reco-root
+		if ! mount $imageRootDevice /reco-root >/dev/null;then
+			systemException "Failed to mount root device" "reboot"
+		fi
+		mkdir -p /reco-save
+		if ! mount $imageRecoveryDevice /reco-save >/dev/null;then
+			systemException "Failed to mount recovery device" "reboot"
+		fi
+		if ! mv /reco-root/recovery.tar.gz /reco-save >/dev/null;then
+			systemException "Failed to move recovery archive" "reboot"
+		fi
+		mkdir /reco-save/boot
+		if ! cp /reco-root/boot/initrd.vmx /reco-save/boot/initrd;then
+			systemException "Failed to copy recovery initrd" "reboot"
+		fi
+		if ! cp /reco-root/boot/linux.vmx /reco-save/boot/vmlinuz;then
+			systemException "Failed to copy recovery kernel" "reboot"
+		fi
+		umount /reco-save && rmdir /reco-save
+		umount /reco-root && rmdir /reco-root
+	fi
+}

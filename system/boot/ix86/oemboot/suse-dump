@@ -1,0 +1,160 @@
+#!/bin/bash
+#================
+# FILE          : linuxrc
+#----------------
+# PROJECT       : OpenSuSE KIWI Image System
+# COPYRIGHT     : (c) 2006 SUSE LINUX Products GmbH. All rights reserved
+#               :
+# AUTHOR        : Marcus Schaefer <ms@suse.de>
+#               :
+# BELONGS TO    : Operating System images
+#               :
+# DESCRIPTION   : This file includes functions for the OEM
+#               : installation mode. Installation means a dump of
+#               : the virtual disk file onto a preselected disk
+#               :
+#               :
+# STATUS        : BETA
+#----------------
+#
+#======================================
+# OEMInstall
+#--------------------------------------
+function OEMInstall {
+	# /.../
+	# Installation mode: find a usable disk to install the image
+	# on. The install image is a virtual disk. The system will be
+	# rebooted at the end of this function
+	# ----
+	#======================================
+	# Check for install mode indicator file
+	#--------------------------------------
+	if [ ! -f $VMX_SYSTEM ];then
+		return
+	fi
+	#======================================
+	# Search and ask for the install device
+	#--------------------------------------
+	Echo "Searching harddrive for installation"
+	hwinfo=/usr/sbin/hwinfo
+	export deviceDisks=`$hwinfo --disk |\
+		grep "Device File:" | cut -f2 -d: |\
+		cut -f1 -d"(" | sed -e s"@$imageDiskDevice@@"`
+	export deviceDisks=`echo $deviceDisks`
+	if [ -z $deviceDisks ];then
+		systemException \
+			"No device(s) for installation found... abort" \
+		"reboot"
+	fi
+	Echo "Found following disk device(s)"
+	count=0
+	for i in $deviceDisks;do
+		Echo -b "Disk $count -> $i"
+		deviceArray[$count]=$i
+		count=`expr $count + 1`
+	done
+	while true;do
+		Echo -n "Enter device name to select disk for installation: "
+		read deviceInput
+		count=0
+		for instDisk in $deviceDisks;do
+			if [ ${deviceArray[$count]} = $deviceInput ];then
+				break 2
+			fi
+			count=`expr $count + 1`
+		done
+		Echo "Given device is not in the list !"
+	done
+	Echo "Entering installation mode for disk: $instDisk"
+	#======================================
+	# Import vmx configuration file
+	#--------------------------------------
+	importFile < $VMX_SYSTEM
+	#======================================
+	# Check MBR ID of installed OS
+	#--------------------------------------
+	mbrM=`dd if=$instDisk bs=1 count=4 skip=$((0x1b8))|hexdump -n4 -e '"0x%x"'`
+	if [ "$mbrM" = "$mbrI" ];then
+		Echo "Base system already installed... reboot"
+		/sbin/reboot -f -i >/dev/null 2>&1
+	fi
+	#======================================
+	# Search CD/DVD/USB stick and mount it
+	#--------------------------------------
+	USBStickDevice
+	if [ $stickFound = 0 ];then
+		Echo "Search for USB stick failed, checking CD/DVD drive"
+		CDMount
+	else
+		Echo "Found Stick: $stickDevice -> $stickSerial"
+		mkdir -p /cdrom && mount $stickDevice /cdrom
+	fi
+	#======================================
+	# Install disk system
+	#--------------------------------------
+	# install virtual disk image from the CD/DVD onto the
+	# real disk. All data on the disk will be lost
+	# ----
+	imageZipped="uncompressed"
+	imageDevice=$instDisk
+	field=0
+	IFS=";" ; for n in $IMAGE;do
+	case $field in
+		0) field=1 ;; 
+		1) imageName=$n   ; field=2 ;;
+		2) imageVersion=$n;
+	esac
+	done
+	imageName="/cdrom/$imageName"
+	echo $imageName | grep -qE ".gz$"
+	if [ $? = 0 ];then
+		imageZipped="compressed"
+	fi
+	IFS=" "
+	if test "$imageZipped" = "compressed"; then
+		Echo "Compressed image found"
+		test ! -p /dev/compressed_image && mkfifo /dev/compressed_image
+		cat /dev/compressed_image | gzip -d > $imageDevice 2>/dev/null &
+		imageDevice_orig=$imageDevice
+		imageName_orig=$imageName
+		imageDevice="/dev/compressed_image"
+		imageName="$imageName.gz"
+	fi
+	Echo "Loading $imageName [$imageDevice]..."
+	if ! dd bs=32k if=$imageName of=$imageDevice >/dev/null 2>&1; then
+		systemException \
+			"Failed to install image: $imageName -> $imageDevice" \
+		"reboot"
+	fi
+	if test "$imageZipped" = "compressed"; then
+		imageDevice=$imageDevice_orig
+		imageName=$imageName_orig
+		rm -f /dev/compressed_image
+	fi
+	#======================================
+	# Umount CD/DVD USB
+	#--------------------------------------
+	umount /cdrom
+	#======================================
+	# Reread partition table
+	#--------------------------------------
+	blockdev --rereadpt $imageDevice
+	deviceTest=$imageDevice"1"
+	if ! waitForStorageDevice $deviceTest;then
+		systemException \
+			"Partition $deviceTest doesn't appear... fatal !" \
+		"reboot"
+	fi
+	#======================================
+	# Reboot system
+	#--------------------------------------
+	if [ $stickFound = 0 ];then
+		Echo "NOTE: Please remove the installation CD before reboot !"
+		CDEject
+	else
+		Echo "NOTE: Please unplug the USB stick before reboot !"
+	fi
+	systemException \
+		"System installation has finished" \
+	"reboot"
+}

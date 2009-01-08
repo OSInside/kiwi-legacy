@@ -9,4 +9,4 @@
 # All this is done within the oemboot image
 #
 # Note:
-# Do not use this boot image with another image type then vmx or oem !
+# Do not use this boot image with another image type than vmx or oem !

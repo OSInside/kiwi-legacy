@@ -19,6 +19,7 @@
 		<profile name="smp" description="Boot with smp kernel"/>
 	</profiles>
 	<drivers type="drivers">
+		<file name="drivers/md/dm-mod.ko"/>
 		<file name="drivers/ide/*"/>
 		<file name="fs/ext3/*"/>
 		<file name="fs/ext2/*"/>
@@ -80,6 +81,7 @@
 		<package name="bootsplash"/>
 		<package name="bootsplash-branding-SLES"/>
 		<package name="tar"/>
+		<package name="lvm2"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>

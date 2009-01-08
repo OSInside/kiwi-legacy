@@ -932,6 +932,7 @@ function suseStripInitrd {
 		usb_id ata_id vol_id edd_id setctsid dumpe2fs debugreiserfs
 		fuser udevadm blogd showconsole killproc curl tar cromfs-driver
 		cvcromfs ldd driveready checkmedia splashy bzip2 hexdump
+		pvchange pvresize pvscan vgscan vgchange vgextend
 	"
 	tools="$tools $@"
 	for path in /sbin /usr/sbin /usr/bin /bin;do

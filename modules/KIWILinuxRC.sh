@@ -46,7 +46,7 @@ function Echo {
 	# print a message to the controling terminal
 	# ----
 	local option=""
-	local prefix="----->"
+	local prefix="===>"
 	local optn=""
 	local opte=""
 	while getopts "bne" option;do
@@ -485,7 +485,7 @@ function installBootLoaderGrubRecovery {
 	# fourth primary partition of the disk
 	# ----
 	local input=/grub.input
-	echo "device (hd0) $deviceDisk" > $input
+	echo "device (hd0) $imageDiskDevice" > $input
 	echo "root (hd0,3)"  >> $input
 	echo "setup (hd0,3)" >> $input
 	echo "quit"          >> $input
@@ -685,42 +685,36 @@ function setupBootLoaderGrubRecovery {
 	# create recovery menu.lst
 	#--------------------------------------
 	echo "timeout 0" > $menu
-	local count=1
-	IFS="," ; for i in $KERNEL_LIST;do
-		if test ! -z "$i";then
-			kernel=`echo $i | cut -f1 -d:`
-			initrd=`echo $i | cut -f2 -d:`
-			#======================================
-			# create recovery entry
-			#--------------------------------------
-			if [ ! -z "$OEM_RECOVERY" ];then
-				echo "title Recovery [ $gfix ]"               >> $menu
-				gdev_recovery="(hd0,3)"
-				rdev_recovery=$OEM_RECOVERY
-				diskByID=`getDiskID $rdev_recovery`
-				if [ $kernel = "vmlinuz-xen" ];then
-					echo " root $gdev_recovery"                   >> $menu
-					echo " kernel /boot/xen.gz"                   >> $menu
-					echo -n " module /boot/$kernel"               >> $menu
-					echo -n " root=$diskByID $console"            >> $menu
-					echo -n " vga=0x314 splash=silent"            >> $menu
-					echo -n " $KIWI_INITRD_PARAMS"                >> $menu
-					echo -n " $KIWI_KERNEL_OPTIONS"               >> $menu
-					echo " KIWI_RECOVERY=1 showopts"              >> $menu
-					echo " module /boot/$initrd"                  >> $menu
-				else
-					echo -n " kernel $gdev_recovery/boot/$kernel" >> $menu
-					echo -n " root=$diskByID $console"            >> $menu
-					echo -n " vga=0x314 splash=silent"            >> $menu
-					echo -n " $KIWI_INITRD_PARAMS"                >> $menu
-					echo -n " $KIWI_KERNEL_OPTIONS"               >> $menu
-					echo " KIWI_RECOVERY=1 showopts"              >> $menu
-					echo " initrd $gdev_recovery/boot/$initrd"    >> $menu
-				fi
-			fi
-			count=`expr $count + 1`
+	kernel=vmlinuz # this is a copy of the kiwi linux.vmx file
+	initrd=initrd  # this is a copy of the kiwi initrd.vmx file
+	#======================================
+	# create recovery entry
+	#--------------------------------------
+	if [ ! -z "$OEM_RECOVERY" ];then
+		echo "title Recovery [ $gfix ]"               >> $menu
+		gdev_recovery="(hd0,3)"
+		rdev_recovery=$OEM_RECOVERY
+		diskByID=`getDiskID $rdev_recovery`
+		if [ $kernel = "vmlinuz-xen" ];then
+			echo " root $gdev_recovery"                   >> $menu
+			echo " kernel /boot/xen.gz"                   >> $menu
+			echo -n " module /boot/$kernel"               >> $menu
+			echo -n " root=$diskByID $console"            >> $menu
+			echo -n " vga=0x314 splash=silent"            >> $menu
+			echo -n " $KIWI_INITRD_PARAMS"                >> $menu
+			echo -n " $KIWI_KERNEL_OPTIONS"               >> $menu
+			echo " KIWI_RECOVERY=1 showopts"              >> $menu
+			echo " module /boot/$initrd"                  >> $menu
+		else
+			echo -n " kernel $gdev_recovery/boot/$kernel" >> $menu
+			echo -n " root=$diskByID $console"            >> $menu
+			echo -n " vga=0x314 splash=silent"            >> $menu
+			echo -n " $KIWI_INITRD_PARAMS"                >> $menu
+			echo -n " $KIWI_KERNEL_OPTIONS"               >> $menu
+			echo " KIWI_RECOVERY=1 showopts"              >> $menu
+			echo " initrd $gdev_recovery/boot/$initrd"    >> $menu
 		fi
-	done
+	fi
 }
 #======================================
 # setupBootLoaderGrub
@@ -776,7 +770,9 @@ function setupBootLoaderGrub {
 	#======================================
 	# check for UNIONFS_CONFIG
 	#--------------------------------------
-	if [ ! -z "$UNIONFS_CONFIG" ] && [ $gnum -gt 0 ]; then
+	if [ "$haveLVM" = "yes" ]; then
+		gnum=1
+	elif [ ! -z "$UNIONFS_CONFIG" ] && [ $gnum -gt 0 ]; then
 		rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
 		gnum=`echo $rwDevice | sed -e "s/\/dev.*\([0-9]\)/\\1/"`
 		gnum=`expr $gnum - 1`
@@ -891,6 +887,9 @@ function setupBootLoaderGrub {
 	# create grub device map
 	#--------------------------------------
 	rdisk=`echo $rdev | sed -e s"@[0-9]@@g"`
+	if [ ! -z "$imageDiskDevice" ];then
+		rdisk=$imageDiskDevice
+	fi
 	echo "(hd0) $rdisk" > $dmap
 	#======================================
 	# create sysconfig/bootloader
@@ -1044,6 +1043,20 @@ function updateSwapDeviceFstab {
 	local diskByID=`getDiskID $sdev`
 	local nfstab=$prefix/etc/fstab
 	echo "$diskByID swap swap pri=42 0 0" >> $nfstab
+}
+#======================================
+# updateLVMBootDeviceFstab
+#--------------------------------------
+function updateLVMBootDeviceFstab {
+	# /.../
+	# add one line to the fstab file for the /lvmboot
+	# device partition
+	# ----
+	local prefix=$1
+	local sdev=$2
+	local diskByID=`getDiskID $sdev`
+	local nfstab=$prefix/etc/fstab
+	echo "$diskByID /lvmboot ext2 defaults 0 0" >> $nfstab
 }
 #======================================
 # updateOtherDeviceFstab
@@ -1365,6 +1378,9 @@ function CDDevice {
 		cddev=$stickDevice
 	fi
 }
+#======================================
+# USBStickDevice
+#--------------------------------------
 function USBStickDevice {
 	stickFound=0
 	#======================================
@@ -1506,7 +1522,7 @@ function searchBIOSBootDevice {
 	# search for the BIOS boot device which is the device
 	# with the BIOS id 0x80. The test may fail if the boot
 	# device is a CD/DVD drive. If the test fails we search
-	# for the MBR disk label and compare it with the kiw
+	# for the MBR disk label and compare it with the kiwi
 	# written mbrid file in /boot/grub/ of the system image
 	# ----
 	local h=/usr/sbin/hwinfo
@@ -1536,6 +1552,23 @@ function searchBIOSBootDevice {
 			echo $curd; return
 		fi
 	done
+}
+#======================================
+# searchVolumeGroup
+#--------------------------------------
+function searchVolumeGroup {
+	# /.../
+	# search for a volume group named kiwiVG and if it can be
+	# found activate it while creating appropriate device nodes:
+	# /dev/kiwiVG/LVRoot and/or /dev/kiwiVG/LVComp
+	# return zero on success
+	# ----
+	modprobe dm-mod
+	if vgscan 2>&1 | grep -q "kiwiVG"; then
+		vgchange -a y kiwiVG
+		return $?
+	fi
+	return 1
 }
 #======================================
 # searchSwapSpace
@@ -1807,7 +1840,7 @@ function cleanSweep {
 	# /.../
 	# zero out a the given disk device
 	# ----
-	diskDevice=$1
+	local diskDevice=$1
 	dd if=/dev/zero of=$diskDevice bs=32M >/dev/null
 }
 #======================================
@@ -2021,7 +2054,7 @@ function sfdiskWritePartitionTable {
 	# write the partition table using PART_FILE as
 	# input for sfdisk
 	# ----
-	diskDevice=$1
+	local diskDevice=$1
 	dd if=/dev/zero of=$diskDevice bs=512 count=1 >/dev/null
 	sfdisk -uM --force $diskDevice < $PART_FILE >/dev/null
 	if test $? != 0;then
@@ -2166,7 +2199,7 @@ function partedWritePartitionTable {
 	# /.../
 	# write the partition table using parted
 	# ----
-	diskDevice=$1
+	local diskDevice=$1
 	eval $p_cmd
 	if test $? != 0;then
 		systemException \
@@ -2178,8 +2211,8 @@ function partedWritePartitionTable {
 # partitionID
 #--------------------------------------
 function partitionID {
-	diskDevice=$1
-	diskNumber=$2
+	local diskDevice=$1
+	local diskNumber=$2
 	if [ $PARTITIONER = "sfdisk" ];then
 		sfdiskGetPartitionID $diskDevice $diskNumber
 	else
@@ -2190,7 +2223,10 @@ function partitionID {
 # partitionSize
 #--------------------------------------
 function partitionSize {
-	diskDevice=$1
+	local diskDevice=$1
+	if [ -z $diskDevice ];then
+		return 1
+	fi
 	if [ $PARTITIONER = "sfdisk" ];then
 		sfdiskGetPartitionSize $diskDevice
 	else
@@ -2241,8 +2277,8 @@ function linuxPartition {
 	# check for a linux partition on partition number 2
 	# using the given disk device. On success return 0
 	# ----
-	diskDevice=$1
-	diskPartitionType=`partitionID $diskDevice 2`
+	local diskDevice=$1
+	local diskPartitionType=`partitionID $diskDevice 2`
 	if test "$diskPartitionType" = "83";then
 		return 0
 	fi
@@ -2594,8 +2630,26 @@ function mountSystemUnified {
 			if [ "$RELOAD_IMAGE" = "yes" ] || \
 				! mount $rwDevice $rwDir >/dev/null
 			then
-				Echo "Checking filesystem for RW data on $rwDevice..."
-				e2fsck -f $rwDevice -y
+				#======================================
+				# store old FSTYPE value
+				#--------------------------------------
+				if [ ! -z "$FSTYPE" ];then
+					FSTYPE_SAVE=$FSTYPE
+				fi
+				#======================================
+				# probe filesystem
+				#--------------------------------------
+				probeFileSystem $rwDevice
+				if [ ! "$FSTYPE" = "unknown" ];then
+					Echo "Checking filesystem for RW data on $rwDevice..."
+					e2fsck -f $rwDevice -y
+				fi
+				#======================================
+				# restore FSTYPE
+				#--------------------------------------
+				if [ ! -z "$FSTYPE_SAVE" ];then
+					FSTYPE=$FSTYPE_SAVE
+				fi
 				if [ "$RELOAD_IMAGE" = "yes" ] || \
 					! mount $rwDevice $rwDir >/dev/null
 				then
@@ -2645,7 +2699,11 @@ function mountSystemCombined {
 	local mountDevice=$1
 	local loopf=$2
 	local roDevice=$mountDevice
-	local rwDevice=`getNextPartition $mountDevice`
+	if [ "$haveLVM" = "yes" ]; then
+		local rwDevice="/dev/kiwiVG/LVRoot"
+	else
+		local rwDevice=`getNextPartition $mountDevice`
+	fi
 	mkdir /read-only >/dev/null
 	# /.../
 	# mount the read-only partition to /read-only and use
@@ -3118,6 +3176,9 @@ function getDiskID {
 	# ----
 	local device=$1
 	if [ -z "$device" ];then
+		return
+	fi
+	if echo $device | grep -q "kiwiVG"; then
 		echo $device
 		return
 	fi
@@ -3215,8 +3276,8 @@ function activateImage {
 		name=$imageRootName
 	elif [ ! -z "$imageRootDevice" ];then
 		name=$imageRootDevice
-	elif [ ! -z "$deviceDisk" ];then
-		name=$deviceDisk
+	elif [ ! -z "$imageDiskDevice" ];then
+		name=$imageDiskDevice
 	else
 		name="unknown"
 	fi

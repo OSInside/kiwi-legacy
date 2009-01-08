@@ -35,8 +35,12 @@
 	</packages>
 	<split>
 		<persistent>
+			<file name="/etc"/>
+			<file name="/etc/*"/>
 			<file name="/var"/>
 			<file name="/var/*"/>
+			<file name="/boot"/>
+			<file name="/boot/*"/>
 		</persistent>
 	</split>
 </image>
