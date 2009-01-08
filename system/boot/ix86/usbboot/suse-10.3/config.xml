@@ -25,6 +25,7 @@
 		<file name="usb/storage/usb-storage.ko"/>
 	</drivers>
 	<drivers type="drivers">
+		<file name="drivers/md/dm-mod.ko"/>
 		<file name="drivers/hid/*"/>
 		<file name="drivers/ide/*"/>
 		<file name="drivers/block/loop.ko"/>
@@ -91,6 +92,7 @@
 		<package name="bootsplash"/>
 		<package name="bootsplash-theme-SuSE"/>
 		<package name="tar"/>
+		<package name="lvm2"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>

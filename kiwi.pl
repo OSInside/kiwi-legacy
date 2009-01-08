@@ -199,6 +199,7 @@ our $TargetArch;            # target architecture -> writes zypp.conf
 our $InstSourceLocal;       # create installation source from local metadata
 our $CheckKernel;           # check for kernel matches in boot and system image
 our $LVM;                   # use LVM partition setup for virtual disk
+our $Debug;                 # activates the internal stack trace output
 our $kiwi;                  # global logging handler object
 
 #============================================
@@ -1163,6 +1164,7 @@ sub init {
 		"target-arch=s"         => \$TargetArch,
 		"check-kernel"          => \$CheckKernel,
 		"lvm"                   => \$LVM,
+		"debug"                 => \$Debug,
 		"help|h"                => \&usage,
 		"<>"                    => \&usage
 	);
@@ -1350,7 +1352,8 @@ sub usage {
 	print "  kiwi --installstick <initrd>\n";
 	print "     [ --installstick-system <vmx-system-image> ]\n";
 	print "Installation source creation:\n";
-	print "  kiwi --root <targetpath> --create-instsource <config> [ --local ] [ -v|--verbose <1|2|3> ]\n";
+	print "  kiwi --root <targetpath> --create-instsource <config>\n";
+	print "     [ --local ] [ -v|--verbose <1|2|3> ]\n";
 	print "Helper Tools:\n";
 	print "  kiwi --testsuite <image-root> [ --test name --test name ... ]\n";
 	print "  kiwi --createpassword\n";
@@ -1518,9 +1521,11 @@ sub usage {
 	print "    system image. The kernel check also tries to fix the boot\n";
 	print "    image if no matching kernel was found.\n";
 	print "\n";
+	print "  [ --debug ]\n";
+	print "    Prints a stack trace in case of internal errors\n";
+	print "\n";
 	print "  [ -v | --verbose <1|2|3> ]\n";
-	print "    Control the verbosity level. At the moment this option\n";
-	print "    has an effect on the create-instsource module only\n";
+	print "    Controls the verbosity level for the instsource module\n";
 	print "\n";
 	print "  [ --instsource-local ]\n";
 	print "    Loads the module KIWICollect_local instead of KIWICollect\n";
@@ -1638,7 +1643,9 @@ sub kiwiExit {
 	}
 	$kiwi -> setLogHumanReadable();
 	if ($code != 0) {
-		$kiwi -> printBackTrace();
+		if (defined $Debug) {
+			$kiwi -> printBackTrace();
+		}
 		$kiwi -> printLogExcerpt();
 		$kiwi -> error  ("KIWI exited with error(s)");
 		$kiwi -> done ();

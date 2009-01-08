@@ -73,14 +73,7 @@ openKernelConsole
 probeDevices
 
 #======================================
-# 6) Load USB storage modules
-#--------------------------------------
-for module in ehci-hcd uhci-hcd usb_storage sg sd_mod BusLogic;do
-	modprobe $module &>/dev/null
-done
-
-#======================================
-# 7) Search USB stick device
+# 6) Setup device names...
 #--------------------------------------
 USBStickDevice
 if [ $stickFound = 0 ];then
@@ -88,9 +81,23 @@ if [ $stickFound = 0 ];then
 		"No USB stick found... abort" \
 	"reboot"
 fi
+Echo "Searching for kiwiVG volume group..."
+export stickRWDevice=$stickRoot"2"
+export stickRODevice=$stickRoot"1"
+if searchVolumeGroup; then
+	export haveLVM=yes
+	if [ -e /dev/kiwiVG/LVComp ];then
+		export stickDevice=/dev/kiwiVG/LVComp
+	else
+		export stickDevice=/dev/kiwiVG/LVRoot
+	fi
+	export stickRWDevice=/dev/kiwiVG/LVRoot
+	export stickRODevice=/dev/kiwiVG/LVComp
+	export stickBootDevice=$stickRoot"2"
+fi
 
 #======================================
-# 8) Probe filesystem of stick system
+# 7) Probe filesystem of stick system
 #--------------------------------------
 probeFileSystem $stickDevice
 if [ $FSTYPE = "unknown" ];then
@@ -100,15 +107,15 @@ if [ $FSTYPE = "unknown" ];then
 fi
 
 #======================================
-# 9) Setup union on compressed root
+# 8) Setup union on compressed root
 #--------------------------------------
 Echo "Filesystem of stick system is: $FSTYPE -> $stickDevice"
 if isFSTypeReadOnly;then
-	setupUnionFS "$stickRoot"2 "$stickRoot"1 aufs
+	setupUnionFS $stickRWDevice $stickRODevice aufs
 fi
 
 #======================================
-# 10) Mount USB stick (system)
+# 9) Mount USB stick (system)
 #--------------------------------------
 if ! mountSystem $stickDevice;then
 	systemException "Failed to mount root filesystem" "reboot"
@@ -116,10 +123,23 @@ fi
 validateRootTree
 
 #======================================
-# 11) check for local boot
+# 10) check for local boot
 #--------------------------------------
 if [ -e /mnt/etc/ImagePackages ];then
 	export LOCAL_BOOT=yes
+fi
+
+#======================================
+# 11) setup /lvmboot
+#--------------------------------------
+if [ $LOCAL_BOOT = "no" ] && [ "$haveLVM" = "yes" ];then
+	mkdir /mnt/lvmboot
+	mount $stickBootDevice /mnt/lvmboot
+	if [ -z $UNIONFS_CONFIG ];then
+		cp -a /mnt/boot/* /mnt/lvmboot/boot
+	fi
+	rm -rf /mnt/boot
+	( cd /mnt && ln -s lvmboot/boot boot )
 fi
 
 #======================================
@@ -128,34 +148,37 @@ fi
 if [ $LOCAL_BOOT = "no" ];then
 	setupDefaultFstab /config
 	updateRootDeviceFstab /config $stickDevice
+	if [ "$haveLVM" = "yes" ];then
+		updateLVMBootDeviceFstab /config $imageBootDevice
+	fi
 fi
 
 #======================================
-# 12) copy system dependant files
+# 13) copy system dependant files
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	setupConfigFiles
 fi
 
 #======================================
-# 13) update system dependant files
+# 14) update system dependant files
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	setupInittab /mnt
 fi
 
 #======================================
-# 14) setup real root device
+# 15) setup real root device
 #--------------------------------------
 echo 256 > /proc/sys/kernel/real-root-dev
 
 #======================================
-# 15) umount system filesystems
+# 16) umount system filesystems
 #--------------------------------------
 umountSystemFilesystems
 
 #======================================
-# 16) copy initrd files to image
+# 17) copy initrd files to image
 #--------------------------------------
 if [ ! -f /mnt/boot/deployed ];then
 	touch /mnt/boot/deployed
@@ -165,17 +188,17 @@ cp /preinit /mnt
 cp /include /mnt
 
 #======================================
-# 17) kill boot shell
+# 18) kill boot shell
 #--------------------------------------
 killShell
 killBlogD
 
 #======================================
-# 18) Activate new root
+# 19) Activate new root
 #--------------------------------------
 activateImage
 
 #======================================
-# 19) Unmount initrd / system init
+# 20) Unmount initrd / system init
 #--------------------------------------
 bootImage $@

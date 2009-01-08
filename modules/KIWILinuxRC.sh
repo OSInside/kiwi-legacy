@@ -1431,19 +1431,25 @@ function USBStickDevice {
 				removable=`cat $isremovable`
 				if [ $removable -eq 1 ];then
 					stickRoot=$device
-					stickDevice="$device"1
-					if ! kiwiMount "$stickDevice" "/mnt";then
-						continue
-					fi
-					if \
-						[ ! -e /mnt/etc/ImageVersion ] && \
-						[ ! -e /mnt/config.isoclient ]
-					then
+					stickDevice=$device"1"
+					for dev in $stickRoot"1" $stickRoot"2";do
+						stickFound=0
+						if ! kiwiMount "$dev" "/mnt";then
+							continue
+						fi
+						if \
+							[ ! -e /mnt/etc/ImageVersion ] && \
+							[ ! -e /mnt/config.isoclient ]
+						then
+							umountSystem
+							stickFound=1
+							break
+						fi
 						umountSystem
+					done
+					if [ $stickFound = 0 ];then
 						continue
 					fi
-					umountSystem
-					stickFound=1
 					stickSerial=$serial
 					echo .
 					return

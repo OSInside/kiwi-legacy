@@ -119,7 +119,6 @@ export imageDiskDevice=`searchBIOSBootDevice`
 export imageRootDevice=$imageDiskDevice"1"
 export imageRWDevice=$imageDiskDevice"2"
 export imageRODevice=$imageDiskDevice"1"
-export imageBootDevice=$imageDiskDevice"1"
 if [ -z "$imageDiskDevice" ];then
 	systemException \
 		"Couldn't find any boot device... abort" \

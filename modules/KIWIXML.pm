@@ -175,9 +175,10 @@ sub new {
 		$profilesNodeList = $systemTree -> getElementsByTagName ("profiles");
 	};
 	if ($@) {
+		my $evaldata=$@;
 		$kiwi -> error  ("Problem reading control file");
 		$kiwi -> failed ();
-		$kiwi -> error  ("$@\n");
+		$kiwi -> error  ("$evaldata\n");
 		return undef;
 	}
 	#==========================================
@@ -187,9 +188,10 @@ sub new {
 		$systemRNG ->validate ( $systemTree );
 	};
 	if ($@) {
+		my $evaldata=$@;
 		$kiwi -> error  ("Scheme validation failed");
 		$kiwi -> failed ();
-		$kiwi -> error  ("$@\n");
+		$kiwi -> error  ("$evaldata\n");
 		return undef;
 	}
 	#==========================================

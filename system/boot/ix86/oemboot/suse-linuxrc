@@ -108,7 +108,6 @@ export imageDiskDevice=`searchBIOSBootDevice`
 export imageRootDevice=$imageDiskDevice"1"
 export imageRWDevice=$imageDiskDevice"2"
 export imageRODevice=$imageDiskDevice"1"
-export imageBootDevice=$imageDiskDevice"1"
 if [ ! -z "$RECOVERY" ];then
 	export imageRecoveryDevice=$imageDiskDevice"4"
 	export imageRootDevice=$imageDiskDevice"2"
