@@ -503,7 +503,7 @@ sub setupBootStick {
 	# add boot space if lvm based
 	#------------------------------------------
 	if ($lvm) {
-		$lvmbootMB = 30;
+		$lvmbootMB = 10;
 	}
 	#==========================================
 	# check if system is tree or image file
@@ -730,9 +730,9 @@ sub setupBootStick {
 				}
 			} else {
 				$lvmsize = $hardSize;
-				$lvmsize /= 1024;
+				$lvmsize /= 1000;
 				$lvmsize -= $lvmbootMB;
-				$lvmsize = int $lvmsize;
+				$lvmsize = sprintf ("%.f",$lvmsize);
 				@commands = (
 					"n","p","1",".","+".$lvmsize."M",
 					"n","p","2",".",".",
