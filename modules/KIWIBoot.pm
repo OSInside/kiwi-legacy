@@ -500,6 +500,12 @@ sub setupBootStick {
 	my $hald;
 	my $xml;
 	#==========================================
+	# use lvm together with system image only
+	#------------------------------------------
+	if (! defined $system) {
+		undef $lvm;
+	}
+	#==========================================
 	# add boot space if lvm based
 	#------------------------------------------
 	if ($lvm) {
