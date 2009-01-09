@@ -505,7 +505,7 @@ function OEMRepartCombined {
 #--------------------------------------
 function OEMRepartLVM {
 	# TODO
-	return
+	systemException "*** not implemented ***" "reboot"
 }
 
 #======================================
