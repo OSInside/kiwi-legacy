@@ -149,7 +149,7 @@ if [ $LOCAL_BOOT = "no" ];then
 	setupDefaultFstab /config
 	updateRootDeviceFstab /config $stickDevice
 	if [ "$haveLVM" = "yes" ];then
-		updateLVMBootDeviceFstab /config $imageBootDevice
+		updateLVMBootDeviceFstab /config $stickBootDevice
 	fi
 fi
 

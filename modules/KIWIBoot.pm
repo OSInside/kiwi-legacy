@@ -485,17 +485,26 @@ sub setupBootStick {
 	my $zipped    = $this->{zipped};
 	my $isxen     = $this->{isxen};
 	my $xengz     = $this->{xengz};
+	my $lvm       = $this->{lvm};
 	my %deviceMap = ();
 	my @commands  = ();
 	my $imgtype   = "usb";
 	my $haveSplit = 0;
 	my $haveTree  = 0;
+	my $lvmbootMB = 0;
+	my $lvmsize;
 	my $FSTypeRW;
 	my $FSTypeRO;
 	my $status;
 	my $result;
 	my $hald;
 	my $xml;
+	#==========================================
+	# add boot space if lvm based
+	#------------------------------------------
+	if ($lvm) {
+		$lvmbootMB = 30;
+	}
 	#==========================================
 	# check if system is tree or image file
 	#------------------------------------------
@@ -558,7 +567,7 @@ sub setupBootStick {
 	# set boot partition number
 	#------------------------------------------
 	my $bootpart = "0";
-	if (($syszip) || ($haveSplit)) {
+	if (($syszip) || ($haveSplit) || ($lvm)) {
 		$bootpart = "1";
 	}
 	$this->{bootpart} = $bootpart;
@@ -689,6 +698,7 @@ sub setupBootStick {
 		$softSize += -s $splitfile;
 	}
 	$softSize /= 1024;
+	$softSize += $lvmbootMB;
 	if ($hardSize < $softSize) {
 		$kiwi -> error  ("Stick too small: got $hardSize kB need $softSize kB");
 		$kiwi -> failed ();
@@ -702,19 +712,33 @@ sub setupBootStick {
 	$kiwi -> info ("Creating partition table on: $stick");
 	while (1) {
 		if (defined $system) {
-			if (($syszip) || ($haveSplit)) {
+			if (! $lvm) {
+				if (($syszip) || ($haveSplit)) {
+					@commands = (
+						"n","p","1",".","+".$syszip."M",
+						"n","p","2",".",".",
+						"t","1","83",
+						"t","2","83",
+						"a","2","w","q"
+					);
+				} else {
+					@commands = (
+						"n","p","1",".",".",
+						"t","83",
+						"a","1","w","q"
+					);
+				}
+			} else {
+				$lvmsize = $hardSize;
+				$lvmsize /= 1024;
+				$lvmsize -= $lvmbootMB;
+				$lvmsize = int $lvmsize;
 				@commands = (
-					"n","p","1",".","+".$syszip."M",
+					"n","p","1",".","+".$lvmsize."M",
 					"n","p","2",".",".",
-					"t","1","83",
+					"t","1","8e",
 					"t","2","83",
 					"a","2","w","q"
-				);
-			} else {
-				@commands = (
-					"n","p","1",".",".",
-					"t","83",
-					"a","1","w","q"
 				);
 			}
 		} else {
@@ -757,6 +781,25 @@ sub setupBootStick {
 		#------------------------------------------
 		sleep (1);
 		#==========================================
+		# Umount possible mounted stick partitions
+		#------------------------------------------
+		for (my $i=1;$i<=2;$i++) {
+			qxx ( "umount $deviceMap{$i} 2>&1" );
+		}
+		#==========================================
+		# setup volume group if requested
+		#------------------------------------------
+		if ($lvm) {
+			%deviceMap = $this -> setVolumeGroup (
+				\%deviceMap,$stick,$syszip,$haveSplit
+			);
+			if (! %deviceMap) {
+				$this -> cleanDbus();
+				$this -> cleanTmp ();
+				return undef;
+			}
+		}
+		#==========================================
 		# check partition sizes
 		#------------------------------------------
 		if ((defined $system) && (($syszip) || ($haveSplit))) {
@@ -769,7 +812,13 @@ sub setupBootStick {
 				$syszip += 10;
 				$sizeOK = 0;
 			}
-			if ($sizeOK) {
+			if (! $sizeOK) {
+				#==========================================
+				# bad partition alignment try again
+				#------------------------------------------
+				sleep (1);
+				$this -> deleteVolumeGroup();
+			} else {
 				#==========================================
 				# looks good go for it
 				#------------------------------------------
@@ -972,10 +1021,23 @@ sub setupBootStick {
 		}
 	}
 	#==========================================
-	# Copy boot data to / or read-write part
+	# Dump boot image on virtual disk
 	#------------------------------------------
 	$kiwi -> info ("Copying boot data to stick");
-	if (($syszip) || ($haveSplit)) {
+	#==========================================
+	# Mount system image / or rw partition
+	#------------------------------------------
+	if ($lvm) {
+		my %FSopts = main::checkFSOptions();
+		my $fsopts = $FSopts{ext2};
+		$fsopts.= "-F";
+		$status = qxx ("/sbin/mke2fs $fsopts $deviceMap{0} 2>&1");
+		$result = $? >> 8;
+		if ($result == 0) {
+			$status = qxx ("mount $deviceMap{0} $loopdir 2>&1");
+			$result = $? >> 8;
+		}
+	} elsif (($syszip) || ($haveSplit)) {
 		$status = qxx ("mount $deviceMap{2} $loopdir 2>&1");
 		$result = $? >> 8;
 	} else {
@@ -990,6 +1052,9 @@ sub setupBootStick {
 		$this -> cleanLoop ();
 		return undef;
 	}
+	#==========================================
+	# Copy boot data on system image
+	#------------------------------------------
 	$status = qxx ("rm -rf $loopdir/boot");
 	$status = qxx ("cp -a $tmpdir/boot $loopdir 2>&1");
 	$result = $? >> 8;
@@ -1003,6 +1068,12 @@ sub setupBootStick {
 	}
 	qxx ("umount $loopdir");
 	$kiwi -> done();
+	#==========================================
+	# deactivate volume group
+	#------------------------------------------
+	if ($lvm) {
+		qxx ("vgchange -an 2>&1");
+	}
 	#==========================================
 	# Install boot loader on USB stick
 	#------------------------------------------
@@ -1582,7 +1653,6 @@ sub setupBootDisk {
 	my $diskname  = $system.".raw";
 	my %deviceMap = ();
 	my @commands  = ();
-	my $VGroup    = "kiwiVG";
 	my $imgtype   = "vmx";
 	my $bootfix   = "VMX";
 	my $haveTree  = 0;
@@ -1824,53 +1894,12 @@ sub setupBootDisk {
 		# setup volume group if requested
 		#------------------------------------------
 		if ($lvm) {
-			$status = qxx ("vgremove --force $VGroup 2>&1");
-			$status = qxx ("pvcreate $deviceMap{1} 2>&1");
-			$result = $? >> 8;
-			if ($result != 0) {
-				$kiwi -> failed ();
-				$kiwi -> error  ("Failed creating physical extends: $status");
-				$kiwi -> failed ();
+			%deviceMap = $this -> setVolumeGroup (
+				\%deviceMap,$this->{loop},$syszip,$haveSplit
+			);
+			if (! %deviceMap) {
 				$this -> cleanLoop ();
 				return undef;
-			}
-			$status = qxx ("vgcreate kiwiVG $deviceMap{1} 2>&1");
-			$result = $? >> 8;
-			if ($result != 0) {
-				$kiwi -> failed ();
-				$kiwi -> error  ("Failed creating volume group: $status");
-				$kiwi -> failed ();
-				$this -> cleanLoop ();
-				return undef;
-			}
-			if (($syszip) || ($haveSplit)) {
-				$status = qxx ("lvcreate -L $syszip -n LVComp $VGroup 2>&1");
-				$result = $? >> 8;
-				$status.= qxx ("lvcreate -l 100%FREE -n LVRoot $VGroup 2>&1");
-				$result+= $? >> 8;
-				if ($result != 0) {
-					$kiwi -> failed ();
-					$kiwi -> error  ("Logical volume(s) setup failed: $status");
-					$kiwi -> failed ();
-					$this -> cleanLoop ();
-					return undef;
-				}
-				%deviceMap = $this -> setLVMDeviceMap (
-					$VGroup,$this->{loop},["LVComp","LVRoot"]
-				);
-			} else {
-				$status = qxx ("lvcreate -l 100%FREE -n LVRoot $VGroup 2>&1");
-				$result = $? >> 8;
-				if ($result != 0) {
-					$kiwi -> failed ();
-					$kiwi -> error  ("Logical volume(s) setup failed: $status");
-					$kiwi -> failed ();
-					$this -> cleanLoop ();
-					return undef;
-				}
-				%deviceMap = $this -> setLVMDeviceMap (
-					$VGroup,$this->{loop},["LVRoot"]
-				);
 			}
 		}
 		#==========================================
@@ -1895,9 +1924,7 @@ sub setupBootDisk {
 				# bad partition alignment try again
 				#------------------------------------------
 				sleep (1);
-				if ($lvm) {
-					qxx ("vgremove --force $VGroup 2>&1");
-				}
+				$this -> deleteVolumeGroup();
 				qxx ("/sbin/kpartx  -d $this->{loop}");
 				qxx ("/sbin/losetup -d $this->{loop}");
 			} else {
@@ -2547,6 +2574,9 @@ sub cleanDbus {
 #------------------------------------------
 sub cleanTmp {
 	my $this = shift;
+	if ($this->{lvm}) {
+		qxx ("vgchange -an 2>&1");
+	}
 	my $tmpdir = $this->{tmpdir};
 	my $loopdir= $this->{loopdir};
 	qxx ("rm -rf $tmpdir");
@@ -2564,7 +2594,9 @@ sub cleanLoop {
 	my $loopdir= $this->{loopdir};
 	qxx ("umount $loopdir 2>&1");
 	if (defined $loop) {
-		qxx ("vgchange -an 2>&1");
+		if ($this->{lvm}) {
+			qxx ("vgchange -an 2>&1");
+		}
 		qxx ("/sbin/kpartx  -d $loop 2>&1");
 		qxx ("/sbin/losetup -d $loop 2>&1");
 		undef $this->{loop};
@@ -3537,12 +3569,100 @@ sub setLVMDeviceMap {
 	if (! defined $group) {
 		return undef;
 	}
-	my $dmap = $device; $dmap =~ s/dev\///;
-	$result{0} = "/dev/mapper".$dmap."p2";
+	if ($device =~ /loop/) {
+		my $dmap = $device; $dmap =~ s/dev\///;
+		$result{0} = "/dev/mapper".$dmap."p2";
+	} else {
+		$result{0} = $device."2";
+	}
 	for (my $i=0;$i<@names;$i++) {
 		$result{$i+1} = "/dev/$group/".$names[$i];
 	}
 	return %result;
+}
+
+#==========================================
+# setVolumeGroup
+#------------------------------------------
+sub setVolumeGroup {
+	# ...
+	# create kiwiVG volume group and required logical 
+	# volumes. The function returns a new device map
+	# including the volume device names
+	# ---
+	my $this      = shift;
+	my $map       = shift;
+	my $device    = shift;
+	my $syszip    = shift;
+	my $haveSplit = shift;
+	my $kiwi      = $this->{kiwi};
+	my %deviceMap = %{$map};
+	my $VGroup    = "kiwiVG";
+	my %newmap;
+	my $status;
+	my $result;
+	$status = qxx ("vgremove --force $VGroup 2>&1");
+	$status = qxx ("pvcreate $deviceMap{1} 2>&1");
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Failed creating physical extends: $status");
+		$kiwi -> failed ();
+		$this -> cleanLoop ();
+		return undef;
+	}
+	$status = qxx ("vgcreate $VGroup $deviceMap{1} 2>&1");
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Failed creating volume group: $status");
+		$kiwi -> failed ();
+		$this -> cleanLoop ();
+		return undef;
+	}
+	if (($syszip) || ($haveSplit)) {
+		$status = qxx ("lvcreate -L $syszip -n LVComp $VGroup 2>&1");
+		$result = $? >> 8;
+		$status.= qxx ("lvcreate -l 100%FREE -n LVRoot $VGroup 2>&1");
+		$result+= $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Logical volume(s) setup failed: $status");
+			$kiwi -> failed ();
+			$this -> cleanLoop ();
+			return undef;
+		}
+		%newmap = $this -> setLVMDeviceMap (
+			$VGroup,$device,["LVComp","LVRoot"]
+		);
+	} else {
+		$status = qxx ("lvcreate -l 100%FREE -n LVRoot $VGroup 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Logical volume(s) setup failed: $status");
+			$kiwi -> failed ();
+			$this -> cleanLoop ();
+			return undef;
+		}
+		%newmap = $this -> setLVMDeviceMap (
+			$VGroup,$device,["LVRoot"]
+		);
+	}
+	return %newmap;
+}
+
+#==========================================
+# deleteVolumeGroup
+#------------------------------------------
+sub deleteVolumeGroup {
+	my $this   = shift;
+	my $lvm    = $this->{lvm};
+	my $VGroup = "kiwiVG";
+	if ($lvm) {
+		qxx ("vgremove --force $VGroup 2>&1");
+	}
+	return $this;
 }
 
 1; 

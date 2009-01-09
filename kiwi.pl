@@ -949,7 +949,7 @@ sub main {
 		$kiwi -> info ("Creating boot USB stick from: $BootStick...\n");
 		$boot = new KIWIBoot (
 			$kiwi,$BootStick,$BootStickSystem,undef,
-			$BootStickDevice
+			$BootStickDevice,undef,$LVM
 		);
 		if (! defined $boot) {
 			my $code = kiwiExit (1); return $code;
