@@ -504,8 +504,94 @@ function OEMRepartCombined {
 # OEMRepartLVM
 #--------------------------------------
 function OEMRepartLVM {
-	# TODO
-	systemException "*** not implemented ***" "reboot"
+	#======================================
+	# Variable setup...
+	#--------------------------------------
+	local VGFreeMBytes
+	local VGNeedMBytes
+	local VGSwapMBytes=0
+	local VGRecoveryMBytes=0
+	local VGSpareMBytes=100
+	local VGSystemMBytes=10240
+	if [ ! -z "$OEM_SYSTEMSIZE" ];then
+		VGSystemMBytes=$OEM_SYSTEMSIZE
+	fi
+	if [ ! -z "$OEM_RECOVERY" ];then
+		VGRecoveryMBytes=$recoMByte
+	fi
+	if [ -z "$OEM_WITHOUTSWAP" ];then
+		VGSwapMBytes=$swapsize
+	fi
+	#======================================
+	# Extend vgroup to max physical space
+	#--------------------------------------
+	vgchange -an
+	input=/part.input
+	rm -f $input
+	for cmd in n p 3 . . t 3 8e w q;do
+		if [ $cmd = "." ];then
+			echo >> $input
+			continue
+		fi
+		echo $cmd >> $input
+	done
+	Echo "Extending volume group according to current geometry"
+	fdisk $imageDiskDevice < $input 1>&2
+	if test $? != 0; then
+		systemException "Failed to create partition table" "reboot"
+	fi
+	vgchange -a y kiwiVG
+	pvcreate $imageDiskDevice"3"
+	vgextend kiwiVG $imageDiskDevice"3"
+	VGFreeMBytes=`vgdisplay --short --unit B | cut -f2 -d/ | cut -f1 -dB`
+	VGFreeMBytes=`expr $VGFreeMBytes / 1000`
+	VGFreeMBytes=`expr $VGFreeMBytes / 1000`
+	VGNeedMBytes=`expr $VGSwapMBytes + $VGRecoveryMBytes + $VGSystemMBytes`
+	VGNeedMBytes=`expr $VGNeedMBytes + $VGSpareMBytes`
+	#======================================
+	# Check if we have enough space left
+	#--------------------------------------
+	if [ $VGNeedMBytes -gt $VGFreeMBytes ];then
+		Echo "Not enough space left, will not extend logical volumes"
+		export OEM_WITHOUTHOME=1
+		export OEM_WITHOUTSWAP=1
+		unset  OEM_RECOVERY
+		DONT_PARTITION=1
+	fi
+	#======================================
+	# Setup logical volumes for free space
+	#--------------------------------------
+	if [ -z "$DONT_PARTITION" ];then
+		#======================================
+		# Extend LVRoot to requested size
+		#--------------------------------------
+		lvextend --size $VGSystemMBytes"M" /dev/kiwiVG/LVRoot
+		#======================================
+		# Add LVSwap if requested.
+		#--------------------------------------
+		if [ -z "$OEM_WITHOUTSWAP" ];then
+			lvcreate --size $VGSwapMBytes"M" -n LVSwap kiwiVG
+			export imageSwapDevice=/dev/kiwiVG/LVSwap
+		fi
+		#======================================
+		# Add LVRecovery if requested
+		#--------------------------------------
+		if [ ! -z "$OEM_RECOVERY" ];then
+			lvcreate --size $VGRecoveryMBytes"M" -n LVRecovery kiwiVG
+			export imageRecoveryDevice=/dev/kiwiVG/LVRecovery
+		fi
+		#======================================
+		# Add LVHome if requested
+		#--------------------------------------
+		if [ -z "$OEM_WITHOUTHOME" ];then
+			lvcreate -l 100%FREE -n LVHome kiwiVG
+			export imageHomeDevice=/dev/kiwiVG/LVHome
+		fi
+	fi
+	#======================================
+	# Set boot id
+	#--------------------------------------
+	bootid=1
 }
 
 #======================================

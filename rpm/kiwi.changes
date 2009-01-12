@@ -2,6 +2,7 @@
 Thu Jan  8 16:26:29 CET 2009 - ms@suse.de
 
 - v3.03
+- added LVM support for oemboot (bnc #447059)
 - added LVM support for vmxboot (bnc #447059)
 - added LVM support for usbboot (bnc #447059)
 - added support for a custom displayname which can be

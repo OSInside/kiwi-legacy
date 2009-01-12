@@ -933,7 +933,7 @@ function suseStripInitrd {
 		fuser udevadm blogd showconsole killproc curl tar cromfs-driver
 		cvcromfs ldd driveready checkmedia splashy bzip2 hexdump
 		pvchange pvresize pvscan vgscan vgchange vgextend vgdisplay
-		lvchange lvresize lvextend
+		lvchange lvresize lvextend lvcreate
 	"
 	tools="$tools $@"
 	for path in /sbin /usr/sbin /usr/bin /bin;do

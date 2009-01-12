@@ -108,6 +108,7 @@ export imageDiskDevice=`searchBIOSBootDevice`
 export imageRootDevice=$imageDiskDevice"1"
 export imageRWDevice=$imageDiskDevice"2"
 export imageRODevice=$imageDiskDevice"1"
+export imageIOWRDevice=$imageDiskDevice"2"
 if [ ! -z "$RECOVERY" ];then
 	export imageRecoveryDevice=$imageDiskDevice"4"
 	export imageRootDevice=$imageDiskDevice"2"
@@ -127,6 +128,7 @@ if searchVolumeGroup; then
 	fi
 	export imageRWDevice=/dev/kiwiVG/LVRoot
 	export imageRODevice=/dev/kiwiVG/LVComp
+	export imageIOWRDevice=/dev/kiwiVG/LVRoot
 	export imageBootDevice=$imageDiskDevice"2"
 	if [ ! -z "$RECOVERY" ];then
 		export imageRecoveryDevice=/dev/kiwiVG/LVRecovery
