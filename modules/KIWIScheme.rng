@@ -46,6 +46,9 @@
     <define name="k.image.name.attribute">
       <ref name="k.name.attribute"/>
     </define>
+    <define name="k.image.displayname.attribute">
+      <ref name="k.displayname.attribute"/>
+    </define>
     <define name="k.image.noNamespaceSchemaLocation.attribute">
       <attribute name="xsi:noNamespaceSchemaLocation">
         <a:documentation>The location of the XSD Schema (not relevant for RELAX NG or DTD)</a:documentation>
@@ -93,6 +96,9 @@ named /etc/ImageID</a:documentation>
     <define name="k.image.attlist">
       <interleave>
         <ref name="k.image.name.attribute"/>
+        <optional>
+          <ref name="k.image.displayname.attribute"/>
+        </optional>
         <optional>
           <ref name="k.image.inherit.attribute"/>
         </optional>
@@ -174,6 +180,12 @@ named /etc/ImageID</a:documentation>
   <define name="k.name.attribute">
     <attribute name="name">
       <a:documentation>A name</a:documentation>
+    </attribute>
+  </define>
+  <define name="k.displayname.attribute">
+    <attribute name="displayname">
+      <a:documentation>A friendly display name. Used in the boot menu
+for isolinux and grub</a:documentation>
     </attribute>
   </define>
   <define name="k.arch.attribute">

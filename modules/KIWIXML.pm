@@ -391,6 +391,22 @@ sub getImageName {
 }
 
 #==========================================
+# getImageDisplayName
+#------------------------------------------
+sub getImageDisplayName {
+	# ...
+	# Get the display name of the logical extend
+	# ---
+	my $this = shift;
+	my $node = $this->{imgnameNodeList} -> get_node(1);
+	my $name = $node -> getAttribute ("displayname");
+	if (! defined $name) {
+		return $this->getImageName();
+	}
+	return $name;
+}
+
+#==========================================
 # getImageInherit
 #------------------------------------------
 sub getImageInherit {

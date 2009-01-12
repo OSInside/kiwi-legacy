@@ -561,9 +561,10 @@ sub setupBootStick {
 	# check image split portion
 	#------------------------------------------
 	my $destdir  = dirname ($initrd);
-	my $label    = $xml -> getImageName();
+	my $label    = $xml -> getImageDisplayName();
 	my $version  = $xml -> getImageVersion();
-	my $splitfile= $destdir."/".$label."-read-write.".$arch."-".$version;
+	my $diskname = $xml -> getImageName();
+	my $splitfile= $destdir."/".$diskname."-read-write.".$arch."-".$version;
 	if ($imgtype eq "split") {
 		if (-f $splitfile) {
 			$haveSplit = 1;
@@ -1751,9 +1752,9 @@ sub setupBootDisk {
 	# build disk name and label from xml data
 	#------------------------------------------
 	$destdir  = dirname ($initrd);
-	$label    = $xml -> getImageName();
+	$label    = $xml -> getImageDisplayName();
 	$version  = $xml -> getImageVersion();
-	$diskname = $label;
+	$diskname = $xml -> getImageName();
 	$diskname = $destdir."/".$diskname.".".$arch."-".$version.".raw";
 	$splitfile= $destdir."/".$label."-read-write.".$arch."-".$version;
 	$this->{imgtype}  = $imgtype;

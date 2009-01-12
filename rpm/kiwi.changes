@@ -4,6 +4,9 @@ Thu Jan  8 16:26:29 CET 2009 - ms@suse.de
 - v3.03
 - added LVM support for vmxboot (bnc #447059)
 - added LVM support for usbboot (bnc #447059)
+- added support for a custom displayname which can be
+  specified in config.xml and is used the boot menu for
+  isolinux and grub (bnc #446455)
 - restructured/cleaned up oemboot boot code and prepared
   it for use with LVM, related to (bnc #447059)
 - fixed integration of the OVF image format created

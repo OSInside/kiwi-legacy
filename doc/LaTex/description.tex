@@ -111,6 +111,7 @@ documentation file at /usr/share/doc/packages/ kiwi/kiwi.rng.html.
 
 \begin{Command}{12cm}
 <image schemeversion="2.0" name="iname"\\
+\hspace*{1.9cm}\textit{displayname="text"}\\
 \hspace*{1.9cm}\textit{inherit="path" kiwirevision="number"}\\
 \hspace*{1.9cm}\textit{id="10 digit number">}\\
 \hspace*{1cm}...\\
@@ -123,6 +124,10 @@ name of the image which is also used for the file names created
 by KIWI.
 
 \begin{itemize}
+\item The optional attribute displayname allows setup of the boot
+      menu title for isolinux and grub. So you can have
+      \textit{suse-SLED-foo} as the image name but something like
+      \textit{my cool Image} as the boot display name.
 \item The optional attribute inherit allows to inherit the
       packages information from another image description.
 \item The optional attribute kiwirevision allows to specify

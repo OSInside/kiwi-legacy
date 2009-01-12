@@ -1081,6 +1081,20 @@ sub createImageXen {
 }
 
 #==========================================
+# makeLabel
+#------------------------------------------
+sub makeLabel {
+	my $this = shift;
+	my $label = shift;
+
+	# isolinux does not handle spaces, so we replace it with this
+	# unicode non-breaking space
+	$label =~ s/ /\x{00a0}/g;
+	return $label;
+}
+
+
+#==========================================
 # createImageLiveCD
 #------------------------------------------
 sub createImageLiveCD {
@@ -1117,6 +1131,7 @@ sub createImageLiveCD {
 	# Get system image name
 	#------------------------------------------
 	my $systemName = $sxml -> getImageName();
+	my $systemDisplayName = $sxml -> getImageDisplayName();
 	#==========================================
 	# Get system image type information
 	#------------------------------------------
@@ -1665,8 +1680,8 @@ sub createImageLiveCD {
 	#==========================================
 	# setup isolinux boot label name
 	#------------------------------------------
-	my $label = "$systemName [ ISO ]";
-	my $lsafe = "Failsafe-$label";
+	my $label = $this->makeLabel ("$systemDisplayName");
+	my $lsafe = $this->makeLabel ("Failsafe -- $label");
 	#==========================================
 	# setup isolinux.cfg file
 	#------------------------------------------
@@ -1681,6 +1696,7 @@ sub createImageLiveCD {
 		}
 		return undef;
 	}
+	binmode(FD, ":utf8");
 	print FD "default $label"."\n";
 	print FD "implicit 1"."\n";
 	print FD "gfxboot  bootlogo"."\n";
@@ -1735,7 +1751,7 @@ sub createImageLiveCD {
 	# setup default harddisk/memtest entries
 	#------------------------------------------
 	print FD "\n";
-	print FD "label Hard-Disk"."\n";
+	print FD "label " . $this->makeLabel ("Boot From Hard Disk") . "\n";
 	print FD "  localboot 0x80"."\n";
 	print FD "\n";
 	print FD "label memtest"."\n";
