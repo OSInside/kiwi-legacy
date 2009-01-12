@@ -966,6 +966,7 @@ sub createImageVMX {
 	#------------------------------------------
 	my $this = shift;
 	my $para = shift;
+	my $kiwi = $this->{kiwi};
 	my $xml  = $this->{xml};
 	my %vmwc = $xml  -> getVMwareConfig ();
 	my $name = $this -> createImageUSB ($para,"VMX");
@@ -990,12 +991,51 @@ sub createImageVMX {
 	#==========================================
 	# Create virtual disk configuration
 	#------------------------------------------
-	if ((defined $main::BootVMFormat) && ($main::BootVMFormat eq "vmdk")) {
-		# VMware vmx file...
-		if (! $this -> buildVMwareConfig ($main::Destination,$name,\%vmwc)) {
-			$main::Survive = "default";
-			return undef;
-		}	
+	if (defined $main::BootVMFormat) {
+		#==========================================
+		# VMware virtual disk description
+		#------------------------------------------
+		my $vmxfile; 
+		if ($main::BootVMFormat =~ "vmdk|ovf") {
+			# VMware vmx file...
+			$vmxfile = $this -> buildVMwareConfig (
+				$main::Destination,$name,\%vmwc
+			);
+			if (! $vmxfile) {
+				$main::Survive = "default";
+				return undef;
+			}
+		}
+		#==========================================
+		# VMware open virtual format image
+		#------------------------------------------
+		if ($main::BootVMFormat eq "ovf") {
+			# VMware ovf file...
+			# in case of the ovf format we need to call the ovftool from
+			# VMware. The tool is able to convert from a vmx into an ovf
+			# ----
+			$kiwi -> info ("Creating OVF image...");
+			my $ovffile = $vmxfile;
+			my $ovflog  = $kiwi -> getRootLog();
+			my $ovftool = "/usr/bin/ovftool";
+			if (! -x $ovftool) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Can't find $ovftool, is it installed ?");
+				$kiwi -> failed ();
+				$main::Survive = "default";
+				return undef;
+			}
+			$ovffile =~ s/\.vmx$/\.ovf/;
+			my $status = qxx ("$ovftool -f -l $ovflog $vmxfile $ovffile 2>&1");
+			my $result = $? >> 8;
+			if ($result != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Couldn't create OVF image: $status");
+				$kiwi -> failed ();
+				$main::Survive = "default";
+				return undef;
+			}
+		}
 	}
 	$main::Survive = "default";
 	return $this;
@@ -3404,7 +3444,7 @@ sub buildVMwareConfig {
 	if ($vmwconfig{vmware_hwver}) {
 		print FD 'virtualHW.version = "'.$vmwconfig{vmware_hwver}.'"'."\n";
 	} else {
-		print FD 'virtualHW.version = "3"'."\n";
+		print FD 'virtualHW.version = "4"'."\n";
 	}
 	print FD 'displayName = "'.$name->{systemImage}.'"'."\n";
 	print FD 'memsize = "'.$vmwconfig{vmware_memory}.'"'."\n";
@@ -3472,7 +3512,7 @@ sub buildVMwareConfig {
 	print FD 'powerType.reset    = "soft"'."\n";
 	close FD;
 	$kiwi -> done();
-	return $dest;
+	return $file;
 }
 
 #==========================================

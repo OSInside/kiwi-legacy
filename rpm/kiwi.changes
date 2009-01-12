@@ -6,6 +6,8 @@ Thu Jan  8 16:26:29 CET 2009 - ms@suse.de
 - added LVM support for usbboot (bnc #447059)
 - restructured/cleaned up oemboot boot code and prepared
   it for use with LVM, related to (bnc #447059)
+- fixed integration of the OVF image format created
+  by the ovftool from VMware (bnc #464810)
 - fixed missing eval output in case of wrong eval call
 - print internal backtrace only if --debug is set
 

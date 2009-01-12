@@ -2031,7 +2031,7 @@ sub getVMwareConfig {
 	}
 	my $hwver= $node -> getAttribute ("HWversion");
 	if (! defined $hwver) {
-		$hwver = 3;
+		$hwver = 4;
 	}
 	$guestos{suse}{ix86}   = "suse";
 	$guestos{suse}{x86_64} = "suse-64";
