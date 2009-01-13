@@ -189,6 +189,10 @@ sub new {
 		return undef;
 	}
 	#==========================================
+	# Mark new root directory as broken
+	#------------------------------------------
+	qxx ("touch $root/.broken 2>&1");
+	#==========================================
 	# Set root log file
 	#------------------------------------------
 	if (! defined $main::LogFile) {
@@ -242,6 +246,40 @@ sub getRootPath {
 	# ---
 	my $this = shift;
 	return $this->{root};
+}
+
+#==========================================
+# cleanBroken
+#------------------------------------------
+sub cleanBroken {
+	# ...
+	# Remove the .broken indicator to allow
+	# use of this root path for image creation
+	# ---
+	my $this = shift;
+	my $root = $this->{root};
+	unlink $root."/.broken";
+	return $this;
+}
+
+#==========================================
+# copyBroken
+#------------------------------------------
+sub copyBroken {
+	# ...
+	# copy the current logfile contents into
+	# the .broken file below the root tree which
+	# is indicated to be broken for some reason
+	# mentioned in the log file
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $root = $this->{root};
+	my $log  = $kiwi->getRootLog();	
+	if (-f $log) {
+		qxx ("cp $log $root/.broken 2>&1");
+	}
+	return $this;
 }
 
 #==========================================

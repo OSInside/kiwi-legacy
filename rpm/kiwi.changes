@@ -14,6 +14,10 @@ Thu Jan  8 16:26:29 CET 2009 - ms@suse.de
   by the ovftool from VMware (bnc #464810)
 - fixed missing eval output in case of wrong eval call
 - print internal backtrace only if --debug is set
+- added check for broken root trees. While setting up the
+  root tree kiwi marks it as broken and after a successful
+  preparation the tree looses the broken mark
+- removed jabber log functions, never used
 
 -------------------------------------------------------------------
 Tue Dec 30 19:45:45 CET 2008 - ms@suse.de

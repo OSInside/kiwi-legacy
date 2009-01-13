@@ -75,12 +75,6 @@ if ( -f $ConfigFile) {
 #--------------------------------------------
 our $BasePath;         # configurable base kiwi path
 our $System;           # configurable baes kiwi image desc. path
-our $JabberServer;     # configurable jabber server
-our $JabberPort;       # configurable jabber port
-our $JabberUserName;   # configurable jabber user name
-our $JabberPassword;   # configurable jabber password
-our $JabberRessource;  # configurable jabber ressource
-our $JabberComponent;  # configurable jabber component
 our $LogServerPort;    # configurable log server port
 our $Gzip;             # configurable gzip command
 if (! defined $LogServerPort) {
@@ -88,9 +82,6 @@ if (! defined $LogServerPort) {
 }
 if (! defined $Gzip) {
 	$Gzip = "gzip -9";
-}
-if (! defined $JabberPort) {
-	$JabberPort = 5223;
 }
 if ( ! defined $BasePath ) {
 	$BasePath = "/usr/share/kiwi";
@@ -416,6 +407,14 @@ sub main {
 	# Create image from chroot system
 	#------------------------------------------
 	if (defined $Create) {
+		#==========================================
+		# Check the tree first...
+		#------------------------------------------
+		if (-f "$Create/.broken") {
+			$kiwi -> error  ("Image root tree $Create is broken");
+			$kiwi -> failed ();
+			my $code = kiwiExit (1); return $code;
+		}
 		#==========================================
 		# Cleanup the tree according to prev runs
 		#------------------------------------------
@@ -1632,12 +1631,21 @@ sub kiwiExit {
 	# private Exit function, exit safely
 	# ---
 	my $code = $_[0];
+	#==========================================
+	# Survive because kiwi called itself
+	#------------------------------------------
 	if ((defined $Survive) && ($Survive eq "yes")) {
 		if ($code != 0) {
 			return undef;
 		}
+		if ($root) {
+			$root -> cleanBroken();
+		}
 		return $code;
 	}
+	#==========================================
+	# Really exit kiwi now...
+	#------------------------------------------
 	if (! defined $kiwi) {
 		$kiwi = new KIWILog("tiny");
 	}
@@ -1646,10 +1654,16 @@ sub kiwiExit {
 		if (defined $Debug) {
 			$kiwi -> printBackTrace();
 		}
+		if ($root) {
+			$root -> copyBroken();
+		}
 		$kiwi -> printLogExcerpt();
 		$kiwi -> error  ("KIWI exited with error(s)");
 		$kiwi -> done ();
 	} else {
+		if ($root) {
+			$root -> cleanBroken();
+		}
 		$kiwi -> info ("KIWI exited successfully");
 		$kiwi -> done ();
 	}
@@ -1682,6 +1696,7 @@ sub quit {
 		$kiwi -> reopenRootChannel();
 	}
 	$kiwi -> note ("\n*** $$: Received signal $_[0] ***\n");
+	$kiwi -> setLogHumanReadable();
 	$kiwi -> cleanSweep();
 	if (defined $CreatePassword) {
 		system "stty echo";
@@ -1690,6 +1705,7 @@ sub quit {
 		$boot -> cleanLoop ();
 	}
 	if (defined $root) {
+		$root  -> copyBroken  ();
 		$root  -> cleanLock   ();
 		$root  -> cleanManager();
 		$root  -> cleanSource ();

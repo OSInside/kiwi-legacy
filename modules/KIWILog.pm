@@ -32,23 +32,6 @@ use KIWIQX;
 $Carp::Internal{KIWILog}++;
 
 #==========================================
-# Plugins
-#------------------------------------------
-BEGIN {
-	$KIWILog::haveJabberSupport = 1;
-	eval {
-		require Net::Jabber;
-		Net::Jabber->import qw(Client);
-	};
-	if ($@) {
-		$KIWILog::haveJabberSupport = 0;
-	}
-	if (! $KIWILog::haveJabberSupport) {
-		package Net::Jabber::Client;
-	}
-}
-
-#==========================================
 # Constructor
 #------------------------------------------
 sub new {
@@ -84,11 +67,6 @@ sub new {
 		return $this;
 	}
 	#==========================================
-	# Setup jabber connection
-	#------------------------------------------
-	$this -> setJabberConnection();
-
-	#==========================================
 	# Create shmem segment for log messages
 	#------------------------------------------
 	my $smem = new KIWISharedMem ( $this,$this->{message} );
@@ -103,29 +81,6 @@ sub new {
 	#------------------------------------------
 	if ($main::LogServerPort ne "off") {
 		$this -> setLogServer();
-	}
-	return $this;
-}
-
-#==========================================
-# sendJabberMessage
-#------------------------------------------
-sub sendJabberMessage {
-	# ...
-	# send a jabber message to the jabber server with the
-	# given component. The same information which one can see
-	# on the command line will be send
-	# ---
-	my $this       = shift;
-	my $message    = shift;
-	my $jclient    = $this->{jclient};
-	my $jcomponent = $this->{jcomponent};
-	if (defined $jclient) {
-		$jclient -> MessageSend (
-			to   => $jcomponent,
-			body => $message
-		);
-		$jclient->Process();
 	}
 	return $this;
 }
@@ -518,10 +473,6 @@ sub printLog {
 	$this -> {message} = $logdata;
 	$this -> sendLogServerMessage ();
 	#==========================================
-	# send message to jabber server if con
-	#------------------------------------------
-	$this -> sendJabberMessage ("$needcr,$date,$logdata");
-	#==========================================
 	# print message to root file
 	#------------------------------------------
 	if ($this->{errorOk}) {
@@ -823,68 +774,6 @@ sub getRootLog {
 }
 
 #==========================================
-# setJabberConnection
-#------------------------------------------
-sub setJabberConnection {
-	# ...
-	# Setup jabber connection if possible. This requires the
-	# package perl-Net-Jabber to be installed
-	# ---
-	my $this = shift;
-	my $jclient;
-	my @jresult;
-	my $jstatus;
-	if (! $main::ConfigStatus) {
-		return undef;
-	}
-	if (
-		(! defined $main::JabberServer)    ||
-		(! defined $main::JabberUserName)  ||
-		(! defined $main::JabberPassword)  ||
-		(! defined $main::JabberRessource) ||
-		(! defined $main::JabberComponent)
-	) {
-		#$this -> warning ("Jabber setup skipped: Missing login data");
-		#$this -> skipped ();
-		return undef;
-	}
-	if (! $KIWILog::haveJabberSupport) {
-		return undef;
-	}
-	$this -> info ("Connecting to Jabber server: $main::JabberServer");
-	$jclient = new Net::Jabber::Client;
-	$jstatus = $jclient -> Connect (
-		hostname => $main::JabberServer,
-		port     => $main::JabberPort
-	);
-	if (! defined $jstatus) {
-		$this -> failed ();
-		$this -> error  ("Server is not answering: $!");
-		$this -> skipped ();
-		return $this;
-	}
-	$this -> done();
-	$this -> info ("Login to Jabber server: $main::JabberUserName");
-	@jresult = $jclient -> AuthSend (
-		username => $main::JabberUserName,
-		password => $main::JabberPassword,
-		resource => $main::JabberRessource
-	);
-	if ($jresult[0] ne "ok") {
-		$this -> error   ("Failed: $jresult[0] $jresult[1]");
-		$this -> skipped ();
-		return $this;
-	}
-	$this -> done ();
-	#==========================================
-	# Store object data
-	#------------------------------------------
-	$this->{jcomponent}= $main::JabberComponent;
-	$this->{jclient}   = $jclient;
-	return $this;
-}
-
-#==========================================
 # setLogServer
 #------------------------------------------
 sub setLogServer {
@@ -1002,15 +891,11 @@ sub setLogServer {
 #------------------------------------------
 sub cleanSweep {
 	my $this     = shift;
-	my $jclient  = $this->{jclient};
 	my $logchild = $this->{logchild};
 	my $rootEFD  = $this->{rootefd};
 	my $sharedMem= $this->{smem};
 	if ($this->{errorOk}) {
 		close $rootEFD;
-	}
-	if (defined $jclient) {
-		$jclient -> Disconnect();
 	}
 	if (defined $logchild) {
 		kill (15, $logchild);
