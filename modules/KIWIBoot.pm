@@ -278,11 +278,87 @@ sub new {
 		# not at the following code
 		# ----
 		if (-d $system) {
+			#==========================================
+			# Find size on a per file basis first
+			#------------------------------------------
 			$systemSXML = $xml -> getImageSizeBytes();
-			$systemSize = qxx ("du -bs $system | cut -f1 2>&1");
-			chomp $systemSize;
+			$systemSize = qxx ("du -bs $system | cut -f1"); chomp $systemSize;
 			if ($systemSXML eq "auto") {
 				$systemSXML = 0;
+			}
+			#==========================================
+			# Calculate required size for this tree
+			#------------------------------------------
+			my %type   = %{$xml->getImageTypeAndAttributes()};
+			my %FSopts = main::checkFSOptions();
+			my $size   = $systemSize * 1.2;
+			my $size   = int ($size / 1024);
+			my $fstype = $type{filesystem};
+			if ($fstype =~ /(.*),(.*)/) {
+				$fstype = $1;
+			}
+			while (1) {
+				my $file   = $tmpdir."/fstest";
+				my $status = qxx ("qemu-img create $file $size 2>&1");
+				my $result = $? >> 8;
+				if ($result != 0) {
+					$kiwi -> error  ("Failed creating test disk: $status");
+					$kiwi -> failed ();
+					$this -> cleanTmp ();
+					return undef;
+				}
+				SWITCH: for ($fstype) {
+					/^ext2/     && do {
+						my $fsopts = $FSopts{ext2};
+						$fsopts.= "-F";
+						$status = qxx ("/sbin/mke2fs $fsopts $file 2>&1");
+						$result = $? >> 8;
+						last SWITCH;
+					};
+					/^ext3/     && do {
+						my $fsopts = $FSopts{ext3};
+						$fsopts.= "-j -F";
+						$status = qxx ("/sbin/mke2fs $fsopts $file 2>&1");
+						$result = $? >> 8;
+						last SWITCH;
+					};
+					/^reiserfs/ && do {
+						my $fsopts = $FSopts{reiserfs};
+						$fsopts.= "-f";
+						$status = qxx ("/sbin/mkreiserfs $fsopts $file 2>&1");
+						$result = $? >> 8;
+						last SWITCH;
+					};
+					$kiwi -> error  ("Unsupported filesystem type: $fstype");
+					$kiwi -> failed ();
+					$this -> cleanTmp ();
+					return undef;
+				};
+				$status = qxx ("mount -o loop $file $tmpdir 2>&1");
+				$result = $? >> 8;
+				if ($result != 0) {
+					$kiwi -> error ("test disk mount failed: $status");
+					$kiwi -> failed ();
+					$this -> cleanTmp ();
+					return undef;
+				}
+				if (! open (PIPE,"df -k $tmpdir | tail -n1|")) {
+					$kiwi -> error ("test disk df call failed: $!");
+					$kiwi -> failed ();
+					$this -> cleanTmp ();
+					return undef;
+				}
+				my @line   = split (/ +/,<PIPE>); close PIPE;
+				my $freeKB = $line[3];
+				qxx ("umount $tmpdir 2>&1");
+				unlink $file;
+				# print "++++++++ FREE: $freeKB Kb NEED: $systemSize Byte\n";
+				if ($freeKB > $systemSize / 1024) {
+					$systemSize = $freeKB * 1024;
+					last;
+				}
+				# next try with 5 MB more...
+				$size += 5120;
 			}
 		} else {
 			$systemSXML = $xml -> getImageSizeBytes();

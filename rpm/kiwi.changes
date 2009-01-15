@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Jan 15 09:58:23 CET 2009 - ms@suse.de
+
+- v3.04
+- fixed size calculation for data plus filesystem overhead
+  if only the root tree is present.
+
+-------------------------------------------------------------------
 Thu Jan  8 16:26:29 CET 2009 - ms@suse.de
 
 - v3.03
