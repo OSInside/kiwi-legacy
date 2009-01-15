@@ -2,6 +2,8 @@
 Thu Jan 15 09:58:23 CET 2009 - ms@suse.de
 
 - v3.04
+- fixed md5 output naming if .raw is part of the dir (bnc #459415)
+- fixed bootloader setup to use the grub binary from the initrd
 - fixed size calculation for data plus filesystem overhead
   if only the root tree is present.
 
