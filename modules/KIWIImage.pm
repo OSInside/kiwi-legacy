@@ -1026,7 +1026,7 @@ sub createImageVMX {
 				return undef;
 			}
 			$ovffile =~ s/\.vmx$/\.ovf/;
-			my $status = qxx ("$ovftool -f -l $ovflog $vmxfile $ovffile 2>&1");
+			my $status = qxx ("$ovftool -bf $vmxfile $ovffile -l $ovflog 2>&1");
 			my $result = $? >> 8;
 			if ($result != 0) {
 				$kiwi -> failed ();
