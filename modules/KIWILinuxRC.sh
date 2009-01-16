@@ -1246,7 +1246,7 @@ function probeUSB {
 	#======================================
 	# check load status for host controller
 	#--------------------------------------
-	if [ -z $stdevs ];then
+	if [ -z "$stdevs" ];then
 		return
 	fi
 	#======================================
