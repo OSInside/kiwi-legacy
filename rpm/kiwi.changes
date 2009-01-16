@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Jan 16 18:11:47 CET 2009 - ms@suse.de
+
+- v3.06
+- fixed installation mode. wrong partition was mounted.
+  According to this the install image file wasn't found
+
+-------------------------------------------------------------------
 Fri Jan 16 17:22:25 CET 2009 - ms@suse.de
 
 - v3.05

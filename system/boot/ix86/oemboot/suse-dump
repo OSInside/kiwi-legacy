@@ -86,8 +86,8 @@ function OEMInstall {
 		Echo "Search for USB stick failed, checking CD/DVD drive"
 		CDMount
 	else
-		Echo "Found Stick: $stickDevice -> $stickSerial"
-		mkdir -p /cdrom && mount $stickDevice /cdrom
+		Echo "Found Stick: $stickRoot -> $stickSerial"
+		mkdir -p /cdrom && mount $stickRoot"2" /cdrom
 	fi
 	#======================================
 	# Install disk system
