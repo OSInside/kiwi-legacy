@@ -510,7 +510,7 @@ sub Init
       $this->{m_dirlist}->{"$curdir"} = 1;
     }
     my $num = $n;
-    $num = 1 if ( $this->{m_proddata}->getInfo("FLAVOR") eq "ftp" );
+    $num = 1 if ( $this->{m_proddata}->getVar("FLAVOR") eq "ftp" );
     $this->{m_dirlist}->{"$dirbase/media.$num"} = 1;
     $this->{m_basesubdir}->{$n} = "$dirbase";
     $this->{m_dirlist}->{"$this->{m_basesubdir}->{$n}"} = 1;
@@ -1649,7 +1649,7 @@ sub createMetadata
     my @media = $this->getMediaNumbers();
     for my $n(@media) {
       my $num = $n;
-      $num = 1 if ( $this->{m_proddata}->getInfo("FLAVOR") eq "ftp" );
+      $num = 1 if ( $this->{m_proddata}->getVar("FLAVOR") eq "ftp" );
       my $mediafile = "$this->{m_basesubdir}->{$n}/media.$num/media";
       if(not open(MEDIA, ">", $mediafile)) {
 	$this->logMsg("E", "Cannot create file <$mediafile>");
@@ -1659,7 +1659,7 @@ sub createMetadata
       print MEDIA qx(date +%Y%m%d%H%M%S);
       if($num == 1) {
 	# some specialities for medium number 1: contains a line with the number of media
-        if ( $this->{m_proddata}->getInfo("FLAVOR") eq "ftp" ) {
+        if ( $this->{m_proddata}->getVar("FLAVOR") eq "ftp" ) {
           print MEDIA "1\n";
         } else {
           print MEDIA @media."\n";
@@ -1713,7 +1713,7 @@ sub createMetadata
     $summary =~ s{\s+}{-}g; # replace space(s) by a single dash
     for my $n($this->getMediaNumbers()) {
       my $num = $n;
-      $num = 1 if ( $this->{m_proddata}->getInfo("FLAVOR") eq "ftp" );
+      $num = 1 if ( $this->{m_proddata}->getVar("FLAVOR") eq "ftp" );
       my $productsfile = "$this->{m_basesubdir}->{$n}/media.$num/products";
       if(not open(PRODUCT, ">", $productsfile)) {
 	die "Cannot create $productsfile";
