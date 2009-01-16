@@ -794,6 +794,7 @@ sub createImageUSB {
 	$main::ForeignRepo{"create"}  = $main::Create;
 	$main::Compress = "no";
 	$main::Create   = $main::RootTree;
+	my $imageTypeSaved = $main::SetImageType;
 	undef $main::SetImageType;
 	$kiwi -> info ("Checking for pre-built boot image");
 	if ((! $pblt) || ($pblt eq "false") || ($pblt eq "0")) {
@@ -905,6 +906,7 @@ sub createImageUSB {
 	#==========================================
 	# Store meta data for subsequent calls
 	#------------------------------------------
+	$main::SetImageType = $imageTypeSaved;
 	$result{bootImage} = $main::ImageName;
 	if ($text eq "VMX") {
 		$result{format} = $type{format};
@@ -2450,6 +2452,7 @@ sub createImageSplit {
 		return undef;
 	}
 	my $iname = $xml -> getImageName();
+	my $imageTypeSaved = $main::SetImageType;
 	undef $main::SetImageType;
 	$kiwi -> info ("Checking for pre-built boot image");
 
@@ -2542,6 +2545,7 @@ sub createImageSplit {
 	#==========================================
 	# Check further actions due to boot image
 	#------------------------------------------
+	$main::SetImageType = $imageTypeSaved;
 	$name->{bootImage} = $main::ImageName;
 	$name->{format} = $type{format};
 	undef %main::ForeignRepo;

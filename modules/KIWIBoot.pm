@@ -182,7 +182,9 @@ sub new {
 	#------------------------------------------
 	if (defined $system) {
 		if (-d $system) {
-			$xml = new KIWIXML ($kiwi,$system."/image");
+			$xml = new KIWIXML (
+				$kiwi,$system."/image",undef,$main::SetImageType
+			);
 		} else {
 			my %fsattr = main::checkFileSystem ($system);
 			if ((! $fsattr{type}) || ($fsattr{type} eq "auto")) {
@@ -227,7 +229,9 @@ sub new {
 				#==========================================
 				# read disk image XML description
 				#------------------------------------------
-				$xml = new KIWIXML ( $kiwi,$tmpdir."/image");
+				$xml = new KIWIXML (
+					$kiwi,$tmpdir."/image",undef,$main::SetImageType
+				);
 				#==========================================
 				# clean up
 				#------------------------------------------
@@ -251,7 +255,9 @@ sub new {
 				#==========================================
 				# read disk image XML description
 				#------------------------------------------
-				$xml = new KIWIXML ( $kiwi,$tmpdir."/image");
+				$xml = new KIWIXML (
+					$kiwi,$tmpdir."/image",undef,$main::SetImageType
+				);
 				#==========================================
 				# clean up
 				#------------------------------------------

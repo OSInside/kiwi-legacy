@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Fri Jan 16 17:22:25 CET 2009 - ms@suse.de
+
+- v3.05
+- fixed KIWIXML object construction in KIWIBoot.pm. The image
+  type parameter was unknown to the xml instances
+- added Documentation for inst-source creation by Jan
+- KIWICollect_local fix: FLAVOR became a variable instead of
+  info. Patch by Adrian
+
+-------------------------------------------------------------------
 Thu Jan 15 09:58:23 CET 2009 - ms@suse.de
 
 - v3.04
