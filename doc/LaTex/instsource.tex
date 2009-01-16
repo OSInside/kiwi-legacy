@@ -1,0 +1,89 @@
+\chapter{Installation Sources and Products}
+\label{chapter:instsrc}
+\minitoc
+
+A \textbf{Product} or \textbf{Installation Source} is what you find on an
+installation disk or in an online repository. In contrast to a live disk the
+media contain plain RPM archives and YaST metadata for installation. Furthermore
+there is an installation system and kernel which will be booted from the medium
+in case it is a disk. For remote installation sources (e.g. a FTP tree) the user
+can download the \textit{initrd} and \textit{kernel} and add a boot menu entry
+manually to boot the installation system.
+
+TODO Add link/reference how this is done.
+
+
+\section{Prerequisites}
+
+First of all the installation source creation requires the optional packages
+\textit{kiwi-instsource} plus supplementing plugins from the packages
+\textit{kiwi-instsource-plugins-openSUSE-<VERSION>-<RELEASE>}
+which are all configured to \textit{supplement} the kiwi-instsource
+package. This means that multiple repositories might be necessary if the plugin
+packages reside elsewhere than the other kiwi packages. The plugins are packaged
+in extra packages for some reasons. First of all, the YaST metadata is no fixed
+standard but tends to change from release to release, so the code creating the
+metadata is version specific. Finally the concept allows users to make their own
+custom plugins for special purposes. This mechanism will be explained in more
+detail in ref:TODO
+
+
+\section{Interface}
+
+The interface for installation source creation is implemented in two steps. The
+first one is an extension of the existing config syntax as described in
+\vref{subsec:config-extend}, the second one is the implementation of easily
+configurable plugins for the metadata creation as described in
+\vref{subsec:plugins}.
+
+
+\subsection{Configuration File Extension}
+\label{subsec:config-extend}
+
+The config.xml file now supports a new optional element called
+\textbf{instsource}. Its purpose is to specify the things that are significant
+for an installation repository:
+\begin{itemize}
+  \item{metadata}
+  \item{media structure}
+  \item{additional iso information for disc media}
+  \item{package signing keys}
+\end{itemize}
+
+Furthermore the installation source needs some information for architectures. It
+is easily possible to create an installation DVD that boots on 32\,bit and
+64\,bit Intel and also PowerPC architecture. In such a case several conditions
+must be met:
+\begin{itemize}
+  \item{the packages must be available for each architecture}
+  \item{the disc must boot on each architecture}
+  \item{YaST metadata must be available for each architecture}
+\end{itemize}
+Additionally multiple boot catalog entries must be made in the iso filesystem.
+
+
+\subsection{Metadata Creation Plugins}
+\label{subsec:plugins}
+
+Blah.
+
+
+\section{Calling Options}
+
+TODO
+
+
+\section{Directory Layout}
+
+TODO
+
+
+\section{Logfile Analysis}
+
+TODO
+
+
+%\section{ISO Generation}
+
+
+
