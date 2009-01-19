@@ -1543,7 +1543,8 @@ function searchBIOSBootDevice {
 	done
 	for curd in $ddevs;do
 		mbrM=`dd if=$curd bs=1 count=4 skip=$((0x1b8))|hexdump -n4 -e '"0x%x"'`
-		mbrI=0
+		export mbrI=0
+		export mbrM
 		for id in 1 2;do
 			if mount $curd$id /mnt;then
 				if [ -f /mnt/boot/grub/mbrid ];then
@@ -1554,7 +1555,7 @@ function searchBIOSBootDevice {
 				umount /mnt
 			fi
 		done
-		if [ "$mbrM" = "$mbrI" ];then
+		if [ $mbrM = $mbrI ];then
 			echo $curd; return
 		fi
 	done

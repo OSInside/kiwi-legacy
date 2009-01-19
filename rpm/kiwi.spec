@@ -1,5 +1,5 @@
 #
-# spec file for package kiwi (Version 3.07
+# spec file for package kiwi (Version 3.08
 #
 # Copyright (c) 2008 SUSE LINUX Products GmbH, Nuernberg, Germany.
 # This file and all modifications and additions to the pristine
@@ -43,7 +43,7 @@ Requires:       satsolver-tools
 Summary:        OpenSuSE - KIWI Image System
 Provides:       kiwi2 <= 2.14
 Obsoletes:      kiwi2 <= 2.14
-Version:        3.07
+Version:        3.08
 Release:        80
 Group:          System/Management
 License:        GPL v2 or later

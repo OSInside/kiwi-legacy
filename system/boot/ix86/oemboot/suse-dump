@@ -48,14 +48,15 @@ function OEMInstall {
 	#======================================
 	# Search and ask for the install device
 	#--------------------------------------
+	IFS=$IFS_ORIG
 	Echo "Searching harddrive for $OEMInstallType installation"
 	hwinfo=/usr/sbin/hwinfo
 	if [ "$OEMInstallType" = "USB" ];then
-		export deviceDisks=`$hwinfo --disk |\
+		deviceDisks=`$hwinfo --disk |\
 			grep "Device File:" | cut -f2 -d: |\
 			cut -f1 -d"(" | sed -e s"@$imageDiskDevice@@"`
 	else
-		export deviceDisks=`$hwinfo --disk |\
+		deviceDisks=`$hwinfo --disk |\
 			grep "Device File:" | cut -f2 -d: |\
 			cut -f1 -d"("`
 	fi
@@ -93,9 +94,10 @@ function OEMInstall {
 	# Check MBR ID of installed OS
 	#--------------------------------------
 	mbrM=`dd if=$instDisk bs=1 count=4 skip=$((0x1b8))|hexdump -n4 -e '"0x%x"'`
-	if [ "$mbrM" = "$mbrI" ];then
-		Echo "Base system already installed... reboot"
-		/sbin/reboot -f -i >/dev/null 2>&1
+	if [ $mbrM = $mbrI ];then
+		systemException \
+			"Base system already installed" \
+		"reboot"
 	fi
 	#======================================
 	# Install disk system
