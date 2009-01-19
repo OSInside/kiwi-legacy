@@ -33,13 +33,32 @@ function OEMInstall {
 		return
 	fi
 	#======================================
+	# Search CD/DVD/USB stick and mount it
+	#--------------------------------------
+	USBStickDevice
+	if [ $stickFound = 0 ];then
+		Echo "Search for USB stick failed, checking CD/DVD drive"
+		CDMount
+		export OEMInstallType=CD
+	else
+		Echo "Found Stick: $stickRoot -> $stickSerial"
+		mkdir -p /cdrom && mount $stickRoot"2" /cdrom
+		export OEMInstallType=USB
+	fi
+	#======================================
 	# Search and ask for the install device
 	#--------------------------------------
-	Echo "Searching harddrive for installation"
+	Echo "Searching harddrive for $OEMInstallType installation"
 	hwinfo=/usr/sbin/hwinfo
-	export deviceDisks=`$hwinfo --disk |\
-		grep "Device File:" | cut -f2 -d: |\
-		cut -f1 -d"(" | sed -e s"@$imageDiskDevice@@"`
+	if [ "$OEMInstallType" = "USB" ];then
+		export deviceDisks=`$hwinfo --disk |\
+			grep "Device File:" | cut -f2 -d: |\
+			cut -f1 -d"(" | sed -e s"@$imageDiskDevice@@"`
+	else
+		export deviceDisks=`$hwinfo --disk |\
+			grep "Device File:" | cut -f2 -d: |\
+			cut -f1 -d"("`
+	fi
 	export deviceDisks=`echo $deviceDisks`
 	if [ -z $deviceDisks ];then
 		systemException \
@@ -79,17 +98,6 @@ function OEMInstall {
 		/sbin/reboot -f -i >/dev/null 2>&1
 	fi
 	#======================================
-	# Search CD/DVD/USB stick and mount it
-	#--------------------------------------
-	USBStickDevice
-	if [ $stickFound = 0 ];then
-		Echo "Search for USB stick failed, checking CD/DVD drive"
-		CDMount
-	else
-		Echo "Found Stick: $stickRoot -> $stickSerial"
-		mkdir -p /cdrom && mount $stickRoot"2" /cdrom
-	fi
-	#======================================
 	# Install disk system
 	#--------------------------------------
 	# install virtual disk image from the CD/DVD onto the
@@ -98,6 +106,9 @@ function OEMInstall {
 	imageZipped="uncompressed"
 	imageDevice=$instDisk
 	field=0
+	#======================================
+	# Evaluate OEM install file
+	#--------------------------------------
 	IFS=";" ; for n in $IMAGE;do
 	case $field in
 		0) field=1 ;; 
@@ -111,15 +122,42 @@ function OEMInstall {
 		imageZipped="compressed"
 	fi
 	IFS=" "
+	#======================================
+	# Get available disk space
+	#--------------------------------------
+	haveKByte=`partitionSize $imageDevice`
+	#======================================
+	# Get required disk space
+	#--------------------------------------
+	needBytes=`du --bytes $imageName | cut -f1`
+	needKByte=`expr $needBytes / 1024`
 	if test "$imageZipped" = "compressed"; then
-		Echo "Compressed image found"
+		Echo "Compressed image found, creating FIFO pipe"
 		test ! -p /dev/compressed_image && mkfifo /dev/compressed_image
 		cat /dev/compressed_image | gzip -d > $imageDevice 2>/dev/null &
 		imageDevice_orig=$imageDevice
 		imageName_orig=$imageName
 		imageDevice="/dev/compressed_image"
 		imageName="$imageName.gz"
+		needBytes=`gzip -l $imageName \|
+			tail -n1 | sed -e "s@ \+@:@g" | cut -f3 -d:`
+		needKByte=`expr $needBytes / 1024`
 	fi
+	#======================================
+	# Check disk space...
+	#--------------------------------------
+	haveMByte=`expr $haveKByte / 1024`
+	needMByte=`expr $needKByte / 1024`
+	Echo "Have size: $imageDevice -> $haveMByte MB"
+	Echo "Need size: $imageName -> $needMByte MB [ uncompressed ]"
+	if [ $needMByte -gt $haveMByte ];then
+		systemException \
+			"Not enough space available for this image" \
+		"reboot"
+	fi
+	#======================================
+	# Dump image on disk
+	#--------------------------------------
 	Echo "Loading $imageName [$imageDevice]..."
 	if ! dd bs=32k if=$imageName of=$imageDevice >/dev/null 2>&1; then
 		systemException \
@@ -148,7 +186,7 @@ function OEMInstall {
 	#======================================
 	# Reboot system
 	#--------------------------------------
-	if [ $stickFound = 0 ];then
+	if [ "$OEMInstallType" = "CD" ];then
 		Echo "NOTE: Please remove the installation CD before reboot !"
 		CDEject
 	else

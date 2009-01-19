@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Jan 19 11:45:35 CET 2009 - ms@suse.de
+
+- v3.07
+- fixed installation mode from CD, wrong disk check happened
+- fixed installation mode, added size check before dump
+
+-------------------------------------------------------------------
 Fri Jan 16 18:11:47 CET 2009 - ms@suse.de
 
 - v3.06
