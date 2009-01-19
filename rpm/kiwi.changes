@@ -2,7 +2,7 @@
 Mon Jan 19 17:03:24 CET 2009 - ms@suse.de
 
 - v3.08
-- fixed installation mode from CD, mbrid check not applicable
+- fixed installation mode, incomplete MBR ID check
 
 -------------------------------------------------------------------
 Mon Jan 19 11:45:35 CET 2009 - ms@suse.de

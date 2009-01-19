@@ -91,15 +91,6 @@ function OEMInstall {
 	#--------------------------------------
 	importFile < $VMX_SYSTEM
 	#======================================
-	# Check MBR ID of installed OS
-	#--------------------------------------
-	mbrM=`dd if=$instDisk bs=1 count=4 skip=$((0x1b8))|hexdump -n4 -e '"0x%x"'`
-	if [ $mbrM = $mbrI ];then
-		systemException \
-			"Base system already installed" \
-		"reboot"
-	fi
-	#======================================
 	# Install disk system
 	#--------------------------------------
 	# install virtual disk image from the CD/DVD onto the
@@ -145,6 +136,16 @@ function OEMInstall {
 			tail -n1 | sed -e "s@ \+@:@g" | cut -f3 -d:`
 		needKByte=`expr $needBytes / 1024`
 	fi
+	#======================================
+	# Check MBR ID's...
+	#--------------------------------------
+	mbrM=`dd if=$instDisk  bs=1 count=4 skip=$((0x1b8))|hexdump -n4 -e '"0x%x"'`
+	mbrI=`dd if=$imageName bs=1 count=4 skip=$((0x1b8))|hexdump -n4 -e '"0x%x"'`
+	if [ $mbrM = $mbrI ];then
+		systemException \
+			"Base system already installed" \
+		"reboot"
+	fi	
 	#======================================
 	# Check disk space...
 	#--------------------------------------
