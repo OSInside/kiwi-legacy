@@ -816,16 +816,12 @@ sub setupPackageFiles
 	      $this->logMsg("W", "     => falling back to $follow from $packKey instead") if $this->{m_debug} >= 3;
 	    }
 	  }
-	  if ( $packOptions->{requireVersion}
-               && $packOptions->{requireVersion}->{ $packPointer->{version}."-".$packPointer->{release} } )
+	  if ( scalar(keys %{$packOptions->{requireVersion}}) > 0
+               && ! defined( $packOptions->{requireVersion}->{$packPointer->{version}."-".$packPointer->{release}} ) )
           {
 	    $this->logMsg("W", "     => package ".$packName-$packPointer->{version}."-".$packPointer->{release}." not available for arch $arch in repo $packKey in this version") if $this->{m_debug} >= 4;
             next PACKKEY;
-          }else{
-            # success, but remove key to avoid error message later
-            delete( $packOptions->{requireVersion}->{$packPointer->{version}."-".$packPointer->{release}} );
           }
-
           # Success, found a package !
           my $medium = 1;
           $medium = $packOptions->{'medium'} if( $packOptions->{'medium'});
@@ -862,8 +858,7 @@ sub setupPackageFiles
                     'onlyarch' => 'src,nosrc'
                   };
                 }
-#                $this->{m_sourcePacks}->{$srcname}->{'requireVersion'} =
-#                     { $packPointer->{'version'}."-".$packPointer->{'release'} => 1 };
+                $this->{m_sourcePacks}->{$srcname}->{'requireVersion'}->{ $packPointer->{'version'}."-".$packPointer->{'release'} } = 1;
               }
               if ( defined($this->{m_debugmedium}) && $this->{m_debugmedium} > 0 ) {
                 # Add debug packages, we do not know, if they exist at all
@@ -884,10 +879,8 @@ sub setupPackageFiles
                     'onlyarch' => $arch
                   };
                 };
-#                $this->{m_debugPacks}->{$srcname."-debuginfo".$suffix}->{'requireVersion'} =
-#                     { $packPointer->{'version'}."-".$packPointer->{'release'} => 1 };
-#                $this->{m_debugPacks}->{$srcname."-debugsource".$suffix}->{'requireVersion'} =
-#                     { $packPointer->{'version'}."-".$packPointer->{'release'} => 1 };
+                $this->{m_debugPacks}->{$srcname."-debuginfo".$suffix}->{'requireVersion'}->{ $packPointer->{'version'}."-".$packPointer->{'release'} } = 1;
+                $this->{m_debugPacks}->{$srcname."-debugsource".$suffix}->{'requireVersion'}->{ $packPointer->{'version'}."-".$packPointer->{'release'} } = 1;
               };
             }
           }
