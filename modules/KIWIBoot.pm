@@ -2606,13 +2606,19 @@ sub setupSplashForGrub {
 			return ("No bootsplash file found in $splfile cpio");
 		}
 	}
+	# /.../
+	# pack splash files with standard gzip level 1. Xen for
+	# example doesn't like better compression. The value
+	# for the gzip-cmd option is ignored here
+	# ----
+	my $gzip = "gzip -1";
 	qxx (
 		"(cd $newspl && \
-		find|cpio --quiet -oH newc | $main::Gzip) > $spldir/all.spl"
+		find|cpio --quiet -oH newc | $gzip) > $spldir/all.spl"
 	);
 	qxx (
 		"rm -f $newird && \
-		(cd $irddir && find | cpio --quiet -oH newc | $main::Gzip) > $newird"
+		(cd $irddir && find | cpio --quiet -oH newc | $gzip) > $newird"
 	);
 	#==========================================
 	# create splash initrd

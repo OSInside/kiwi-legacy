@@ -1754,6 +1754,7 @@ div {
 			k.oem-swapsize? &
 			k.oem-systemsize? &
 			k.oem-recovery? &
+			k.oem-reboot? &
 			k.packagemanager? &
 			k.rpm-check-signatures? &
 			k.rpm-excludedocs? &

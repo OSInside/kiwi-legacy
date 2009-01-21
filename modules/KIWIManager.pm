@@ -1215,7 +1215,7 @@ sub setupUpgrade {
 				}
 			}
 			@addonPackages = @newpacks;
-			print $fd "@kchroot @zypper dist-upgrade &\n";
+			print $fd "@kchroot @zypper dist-upgrade @installOpts &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
 			if (@newprods) {
 				print $fd "test \$? = 0 && @kchroot @zypper install ";
@@ -1233,7 +1233,7 @@ sub setupUpgrade {
 				print $fd "SPID=\$!;wait \$SPID\n";
 			}
 		} else {
-			print $fd "@kchroot @zypper dist-upgrade &\n";
+			print $fd "@kchroot @zypper dist-upgrade @installOpts &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
 		}
 		print $fd "ECODE=\$?\n";

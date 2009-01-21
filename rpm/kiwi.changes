@@ -2,7 +2,11 @@
 Tue Jan 20 17:51:57 CET 2009 - ms@suse.de
 
 - v3.09
-- added gfxboot and kiwi-tools  required for SLE11 images
+- added gfxboot and kiwi-tools required for SLE11 images
+- fixed missing oem-reboot reference in KIWIScheme.rnc
+- added non interactive option when calling zypper dist-upgrade
+- fixed setup of splash cpio, use compression level 1 to
+  avoid problems when Xen uncompresses the initrd
 
 -------------------------------------------------------------------
 Mon Jan 19 17:03:24 CET 2009 - ms@suse.de
