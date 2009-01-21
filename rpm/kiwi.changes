@@ -2,7 +2,7 @@
 Tue Jan 20 17:51:57 CET 2009 - ms@suse.de
 
 - v3.09
-- added gfxboot package required for SLE11 images
+- added gfxboot and kiwi-tools  required for SLE11 images
 
 -------------------------------------------------------------------
 Mon Jan 19 17:03:24 CET 2009 - ms@suse.de
