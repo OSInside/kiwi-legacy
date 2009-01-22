@@ -233,7 +233,7 @@ then
 			MEDIANUMBER=${MEDIADIR##$SOURCE/media.}
 		done
 		VOL="0$MEDIANUMBER"
-                APPID=`sed -n -e "s/^LABEL[ ]*\(.*\)/\1/p" "$SOURCE/content" | sed -e "s/ /-/g"`
+                APPID=`sed -n -e "s/^LABEL[^.][ ]*\(.*\)/\1/p" "$SOURCE/content" | sed -e "s/ /-/g"`
 	elif test -f $SOURCE/.S.u.S.E-disk-* ; then
 		BASE=`basename $SOURCE/.S.u.S.E-disk-*`
 		VOL=`echo $BASE | cut -c 16-17`
