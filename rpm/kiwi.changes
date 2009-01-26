@@ -7,15 +7,14 @@ Tue Jan 20 17:51:57 CET 2009 - ms@suse.de
 - added non interactive option when calling zypper dist-upgrade
 - fixed setup of splash cpio, use compression level 1 to
   avoid problems when Xen uncompresses the initrd
-For kiwi-instsource module:
-- cosmetics
-- changed return value handling, fixed missing retvalues
-- fixed unclear "die" exits
-- enhanced plugin progress log
-- handle debugmedium as separate medium with media.1 subdir and separate
-  create_package_descr call (bnc #458645)
-- fixed createBootPackageLinks which looped infintely in certain
-  conditions (no bug reported, fixed as found)
+- Fixes for the kiwi-instsource module:
+  * changed return value handling, fixed missing retvalues
+  * fixed unclear "die" exits
+  * enhanced plugin progress log
+  * handle debugmedium as separate medium with media.1 subdir and separate
+    create_package_descr call (bnc #458645)
+  * fixed createBootPackageLinks which looped infintely in certain
+    conditions (no bug reported, fixed as found)
 
 -------------------------------------------------------------------
 Mon Jan 19 17:03:24 CET 2009 - ms@suse.de
