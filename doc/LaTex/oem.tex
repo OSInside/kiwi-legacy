@@ -135,6 +135,13 @@ be specified:
       allows to restore the original root tree information. The
       user information on the /home partition or in the /home directory
       are not affected by that recovery process
+\item \textbf{<oem-kiwi-initrd>yes|no</oem-kiwi-initrd>}\\
+      If this element is set to yes the initial oemboot boot image (initrd)
+      will \textbf{not} be replaced by the system (mkinitrd) created initrd.
+      This option makes sense if the target storage device for the image
+      is not a fixed disk but for example an USB stick. In that case it
+      might be required to re-detect the storage location on first boot which
+      is done as part of the oemboot boot image  
 \end{itemize}
 
 %If you plan to use a custom partition setup you also should consider

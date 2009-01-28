@@ -249,6 +249,10 @@ function baseSetupOEMPartition {
 		echo "Setting up OEM_BOOT_TITLE=$kiwi_oemtitle"
 		echo "OEM_BOOT_TITLE=$kiwi_oemtitle" >> $oemfile
 	fi
+	if [ ! -z "$kiwi_oemkboot" ];then
+		echo "Setting up OEM_KIWI_INITRD=$kiwi_oemkboot"
+		echo "OEM_KIWI_INITRD=$kiwi_oemkboot" >> $oemfile
+	fi
 	if [ ! -z "$kiwi_oemrecovery" ];then
 		echo "Setting up OEM_RECOVERY=1"
 		echo "OEM_RECOVERY=1" >> $oemfile

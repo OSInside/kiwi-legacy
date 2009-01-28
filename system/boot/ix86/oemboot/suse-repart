@@ -364,7 +364,7 @@ function OEMRepartOverlayed {
 		input=/part.input
 		rm -f $input
 		if [ $swapsize = 0 ];then
-			for cmd in d 2 n p 2 . +"$disk2MBytes"M w; do
+			for cmd in d 2 n p 2 . . w; do
 				if [ $cmd = "." ];then
 					echo >> $input
 					continue
@@ -469,7 +469,7 @@ function OEMRepartCombined {
 		input=/part.input
 		rm -f $input
 		if [ $swapsize = 0 ];then
-			for cmd in d 2 n p 2 . +"$disk2MBytes"M w;do
+			for cmd in d 2 n p 2 . . w;do
 				if [ $cmd = "." ];then
 					echo >> $input
 					continue

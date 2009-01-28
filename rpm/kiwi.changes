@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Tue Jan 27 12:27:02 CET 2009 - ms@suse.de
+
+- v3.10
+- added optional bool element: <oem-kiwi-initrd> which
+  allows to use the kiwi initrd persistently for OEM
+  based images (bnc #467947)
+
+-------------------------------------------------------------------
 Tue Jan 20 17:51:57 CET 2009 - ms@suse.de
 
 - v3.09

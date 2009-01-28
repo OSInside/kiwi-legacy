@@ -266,6 +266,9 @@ sub new {
 		if (defined $foreignRepo->{"oem-boot-title"}) {
 			$this -> setForeignOptionsElement ("oem-boot-title");
 		}
+		if (defined $foreignRepo->{"oem-kiwi-initrd"}) {
+			$this -> setForeignOptionsElement ("oem-kiwi-initrd");
+		}
 		if (defined $foreignRepo->{"oem-reboot"}) {
 			$this -> setForeignOptionsElement ("oem-reboot");
 		}
@@ -1173,6 +1176,22 @@ sub getOEMBootTitle {
 }
 
 #==========================================
+# getOEMKiwiInitrd
+#------------------------------------------
+sub getOEMKiwiInitrd {
+	# ...
+	# Obtain the oem-kiwi-initrd value or return undef
+	# ---
+	my $this = shift;
+	my $node = $this -> getPreferencesNodeByTagName ("oem-kiwi-initrd");
+	my $kboot= $node -> getElementsByTagName ("oem-kiwi-initrd");
+	if ((! defined $kboot) || ("$kboot" eq "")) {
+		return undef;
+	}
+	return $kboot;
+}
+
+#==========================================
 # getOEMReboot
 #------------------------------------------
 sub getOEMReboot {
@@ -1939,6 +1958,7 @@ sub getImageConfig {
 		my $oemswap  = $element -> getElementsByTagName ("oem-swap");
 		my $oemhome  = $element -> getElementsByTagName ("oem-home");
 		my $oemtitle = $element -> getElementsByTagName ("oem-boot-title");
+		my $oemkboot = $element -> getElementsByTagName ("oem-kiwi-initrd");
 		my $oemreboot= $element -> getElementsByTagName ("oem-reboot");
 		my $oemreco  = $element -> getElementsByTagName ("oem-recovery");
 		if (defined $keytable) {
@@ -1963,6 +1983,9 @@ sub getImageConfig {
 		}
 		if ((defined $oemtitle) && ("$oemtitle" ne "")) {
 			$result{kiwi_oemtitle} = $oemtitle;
+		}
+		if ((defined $oemkboot) && ("$oemkboot" ne "")) {
+			$result{kiwi_oemkboot} = $oemkboot;
 		}
 		if ((defined $oemreboot) && ("$oemreboot" eq "yes")) {
 			$result{kiwi_oemreboot} = $oemreboot;

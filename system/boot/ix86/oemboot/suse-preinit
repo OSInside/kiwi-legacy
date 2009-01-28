@@ -51,7 +51,10 @@ createFramebufferDevices
 #======================================
 # 6) create initrd on diskful
 #--------------------------------------
-if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ]; then
+if \
+	[ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ] && \
+	[ ! "$OEM_KIWI_INITRD" = "yes" ]
+then
 	#======================================
 	# use distro initrd via mkinitrd
 	#--------------------------------------

@@ -20,7 +20,7 @@
   STATUS        : Development
   ****************
 -->
-<grammar xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" xmlns:db="http://docbook.org/ns/docbook" xmlns:rng="http://relaxng.org/ns/structure/1.0" xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+<grammar xmlns:db="http://docbook.org/ns/docbook" xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" xmlns:rng="http://relaxng.org/ns/structure/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
   <db:info>
     <db:releaseinfo>$Id: kiwi.rnc 2957 2008-01-11 12:53:39Z thomas-schraitle $</db:releaseinfo>
     <db:releaseinfo>RNC Schema Version 2.4</db:releaseinfo>
@@ -1235,6 +1235,26 @@ of the OEM image </a:documentation>
 displayed within the square brackets after first reboot
 of the OEM image.</db:para>
         <ref name="k.oem-boot-title.attlist"/>
+        <text/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
+    common element <oem-kiwi-initrd>
+    
+  -->
+  <div>
+    <define name="k.oem-kiwi-initrd.attlist">
+      <empty/>
+    </define>
+    <define name="k.oem-kiwi-initrd">
+      <element name="oem-kiwi-initrd">
+        <a:documentation>For oemboot driven images: use kiwi initrd in any case
+and don't replace it with mkinitrd created initrd</a:documentation>
+        <db:para>For oemboot driven images: use kiwi initrd in any case
+and don't replace it with mkinitrd created initrd</db:para>
+        <ref name="k.oem-kiwi-initrd.attlist"/>
         <text/>
       </element>
     </define>
@@ -2521,6 +2541,9 @@ and also depends of the selected image output type.</db:para>
           </optional>
           <optional>
             <ref name="k.oem-boot-title"/>
+          </optional>
+          <optional>
+            <ref name="k.oem-kiwi-initrd"/>
           </optional>
           <optional>
             <ref name="k.oem-swapsize"/>

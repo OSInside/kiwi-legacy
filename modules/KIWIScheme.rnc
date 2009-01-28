@@ -908,6 +908,26 @@ div {
 }
 
 #==========================================
+# common element <oem-kiwi-initrd>
+#
+div {
+	k.oem-kiwi-initrd.attlist = empty
+	k.oem-kiwi-initrd =
+		## For oemboot driven images: use kiwi initrd in any case
+		## and don't replace it with mkinitrd created initrd
+		[
+		db:para [
+			"For oemboot driven images: use kiwi initrd in any case\x{a}"~
+            "and don't replace it with mkinitrd created initrd"
+		]
+		]
+		element oem-kiwi-initrd {
+			k.oem-kiwi-initrd.attlist,
+			text
+		}
+}
+
+#==========================================
 # common element <oem-reboot>
 #
 div {
@@ -1751,6 +1771,7 @@ div {
 			k.oem-swap? &
 			k.oem-home? &
 			k.oem-boot-title? &
+			k.oem-kiwi-initrd? &
 			k.oem-swapsize? &
 			k.oem-systemsize? &
 			k.oem-recovery? &

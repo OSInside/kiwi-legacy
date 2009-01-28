@@ -101,11 +101,30 @@ openKernelConsole
 probeDevices
 
 #======================================
-# 7) Setup device names...
+# 7) Search boot device...
 #--------------------------------------
 Echo "Searching for boot device..."
 export imageDiskDevice=`searchBIOSBootDevice`
-export imageRootDevice=$imageDiskDevice"1"
+
+#======================================
+# 8) Get filesystem type and boot ID
+#--------------------------------------
+export imageBootID=1
+probeFileSystem $imageDiskDevice$imageBootID
+if [ $FSTYPE = "unknown" ];then
+	imageBootID=2
+	probeFileSystem $imageDiskDevice$imageBootID
+	if [ $FSTYPE = "unknown" ];then
+		systemException \
+			"Couldn't determine filesystem type... abort" \
+		"reboot"
+	fi
+fi
+
+#======================================
+# 9) Setup device names...
+#--------------------------------------
+export imageRootDevice=$imageDiskDevice$imageBootID
 export imageRWDevice=$imageDiskDevice"2"
 export imageRODevice=$imageDiskDevice"1"
 export imageIOWRDevice=$imageDiskDevice"2"
@@ -136,24 +155,14 @@ if searchVolumeGroup; then
 fi
 
 #======================================
-# 8) Check for installation mode...
+# 10) Check for installation mode...
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	OEMInstall
 fi
 
 #======================================
-# 9) Get filesystem type
-#--------------------------------------
-probeFileSystem $imageRootDevice
-if [ $FSTYPE = "unknown" ];then
-	systemException \
-		"Couldn't determine filesystem type... abort" \
-	"reboot"
-fi
-
-#======================================
-# 10) Check filesystem
+# 11) Check filesystem
 #--------------------------------------
 Echo "Filesystem of OEM system is: $FSTYPE -> $imageRootDevice"
 if isFSTypeReadOnly;then
@@ -162,7 +171,7 @@ if isFSTypeReadOnly;then
 fi
 
 #======================================
-# 11) Import OEM partition config
+# 12) Import OEM partition config
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ] && [ -f $OEM_PARTITION_CONFIG ];then
 	Echo "Including oem partition info file"
@@ -170,14 +179,14 @@ if [ $LOCAL_BOOT = "no" ] && [ -f $OEM_PARTITION_CONFIG ];then
 fi
 
 #======================================
-# 12) repartition the disk device
+# 13) repartition the disk device
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	OEMRepart
 fi
 
 #======================================
-# 13) Resize filesystem to full space
+# 14) Resize filesystem to full space
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	deviceResize=$imageRootDevice
@@ -222,11 +231,16 @@ if [ $LOCAL_BOOT = "no" ];then
 			fi
 		fi
 	fi
+	if [ "$OEM_KIWI_INITRD" = "yes" ];then
+		if ! echo $KIWI_INITRD_PARAMS | grep -qi LOCAL_BOOT;then
+			KIWI_INITRD_PARAMS="$KIWI_INITRD_PARAMS LOCAL_BOOT=yes"
+		fi
+	fi
 	FSTYPE=$fstypeRootFS
 fi
 
 #======================================
-# 14) Mount system
+# 15) Mount system
 #--------------------------------------
 if ! mountSystem $imageRootDevice;then
 	systemException "Failed to mount root filesystem" "reboot"
@@ -234,7 +248,7 @@ fi
 validateRootTree
 
 #======================================
-# 15) Recover system if requested
+# 16) Recover system if requested
 #--------------------------------------
 if [ ! -z "$KIWI_RECOVERY" ];then
 	Echo -n "Do you want to start the System-Recovery ? [y/n]: "; read runReco
@@ -243,14 +257,14 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 	fi
 	Echo "Starting System-Recovery..."
 	#======================================
-	# 15.1) mount recovery partition
+	# 16.1) mount recovery partition
 	#--------------------------------------
 	mkdir -p /reco-save
 	if ! mount $imageRecoveryDevice /reco-save >/dev/null;then
 		systemException "Failed to mount recovery device" "reboot"
 	fi
 	#======================================
-	# 15.2) restore root archive
+	# 16.2) restore root archive
 	#--------------------------------------
 	Echo "Restoring base operating system..."
 	cd /mnt
@@ -258,7 +272,7 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 		systemException "Failed to restore recovery archive" "reboot"
 	fi
 	#======================================
-	# 15.3) restore boot files
+	# 16.3) restore boot files
 	#--------------------------------------
 	Echo "Restoring boot files..."
 	for i in etc/fstab etc/sysconfig/kernel etc/sysconfig/bootloader;do
@@ -279,20 +293,20 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 		fi
 	done
 	#======================================
-	# 15.4) umount recovery and boot
+	# 16.4) umount recovery and boot
 	#--------------------------------------
 	umount $imageRecoveryDevice
 fi
 
 #======================================
-# 16) get installed kernels
+# 17) get installed kernels
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	kernelList /mnt
 fi
 
 #======================================
-# 17) setup /lvmboot
+# 18) setup /lvmboot
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ] && [ "$haveLVM" = "yes" ];then
 	mkdir /mnt/lvmboot
@@ -305,39 +319,45 @@ if [ $LOCAL_BOOT = "no" ] && [ "$haveLVM" = "yes" ];then
 fi
 
 #======================================
-# 18) setup ird/kernel links for union
+# 19) setup ird/kernel links for union
 #--------------------------------------
-if [ $LOCAL_BOOT = "no" ] && isFSTypeReadOnly;then
-	# /.../
-	# we are using a special root setup with aufs. In this case
-	# we can't use the SuSE Linux initrd but must stick to the
-	# kiwi boot system.
-	# ----
-	if [ "$haveLVM" = "yes" ];then
-		pushd /mnt/lvmboot/boot >/dev/null
-	else
-		kiwiMount $imageRWDevice "/mnt"
-		pushd /mnt/boot >/dev/null
-	fi
-	IFS="," ; for i in $KERNEL_LIST;do
-		if test -z "$i";then
-			continue
+if [ $LOCAL_BOOT = "no" ];then 
+	if [ "$OEM_KIWI_INITRD" = "yes" ] || isFSTypeReadOnly;then
+		# /.../
+		# we are using a special root setup with aufs. In this case
+		# we can't use the SuSE Linux initrd but must stick to the
+		# kiwi boot system.
+		# ----
+		mountCalled=no
+		if [ "$haveLVM" = "yes" ];then
+			pushd /mnt/lvmboot/boot >/dev/null
+		elif [ "$OEM_KIWI_INITRD" = "yes" ];then
+			pushd /mnt/boot >/dev/null
+		else
+			kiwiMount $imageRWDevice "/mnt"
+			pushd /mnt/boot >/dev/null
+			mountCalled=yes
 		fi
-		kernel=`echo $i | cut -f1 -d:`
-		initrd=`echo $i | cut -f2 -d:`
-		rm -f $initrd && ln -s initrd.vmx $initrd
-		rm -f $kernel && ln -s linux.vmx  $kernel
-		break
-	done
-	IFS=$IFS_ORIG
-	popd >/dev/null
-	if [ ! "$haveLVM" = "yes" ];then
-		umount /mnt
+		IFS="," ; for i in $KERNEL_LIST;do
+			if test -z "$i";then
+				continue
+			fi
+			kernel=`echo $i | cut -f1 -d:`
+			initrd=`echo $i | cut -f2 -d:`
+			rm -f $initrd && ln -s initrd.vmx $initrd
+			rm -f $kernel && ln -s linux.vmx  $kernel
+			break
+		done
+		IFS=$IFS_ORIG
+		popd >/dev/null
+		if [ "$mountCalled" = "yes" ];then
+			umount /mnt
+		fi
 	fi
 fi
 
 #======================================
-# 19) Create system dependant files
+# 20) Create system dependant files
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	#======================================
@@ -380,14 +400,14 @@ if [ $LOCAL_BOOT = "no" ];then
 fi
 
 #======================================
-# 20) copy system dependant files
+# 21) copy system dependant files
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	setupConfigFiles
 fi
 
 #======================================
-# 21) copy recovery related files
+# 22) copy recovery related files
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ] && [ ! -z "$OEM_RECOVERY" ];then
 	IFS=$IFS_ORIG
@@ -419,22 +439,22 @@ if [ $LOCAL_BOOT = "no" ] && [ ! -z "$OEM_RECOVERY" ];then
 fi
 
 #======================================
-# 22) update system dependant files
+# 23) update system dependant files
 #--------------------------------------
 setupInittab /mnt
 
 #======================================
-# 23) setup real root device
+# 24) setup real root device
 #--------------------------------------
 echo 256 > /proc/sys/kernel/real-root-dev
 
 #======================================
-# 24) umount system filesystems
+# 25) umount system filesystems
 #--------------------------------------
 umountSystemFilesystems
 
 #======================================
-# 25) copy initrd files to image
+# 26) copy initrd files to image
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	importBranding
@@ -443,17 +463,17 @@ cp /preinit /mnt
 cp /include /mnt
 
 #======================================
-# 26) kill boot shell
+# 27) kill boot shell
 #--------------------------------------
 killShell
 killBlogD
 
 #======================================
-# 27) Activate new root
+# 28) Activate new root
 #--------------------------------------
 activateImage
 
 #======================================
-# 28 Unmount initrd / system init
+# 29 Unmount initrd / system init
 #--------------------------------------
 bootImage $@
