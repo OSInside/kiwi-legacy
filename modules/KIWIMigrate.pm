@@ -111,15 +111,15 @@ sub new {
 	while (my $line = <FD>) {
 		next if $line =~ /^#/;
 		if ($line =~ /(.*)\s*=\s*(.*),(.*)/) {
-			my $source = $3;
+			my @source = split (/;/,$3);
 			my $product= $1;
 			my $boot   = $2;
 			my $type   = "yast2";
 			my $alias;
 			my $prio;
 			if ((defined $setr) && (defined $sett)) {
-				$source= $setr;
-				$type  = $sett;
+				@source = ($setr);
+				$type   = $sett;
 			}
 			if (defined $seta) {
 				$alias = $seta;
@@ -127,10 +127,12 @@ sub new {
 			if (defined $setp) {
 				$prio = $setp;
 			}
-			$OSSource{$product}{$source}{boot} = $boot;
-			$OSSource{$product}{$source}{type} = $type;
-			$OSSource{$product}{$source}{alias}= $alias;
-			$OSSource{$product}{$source}{prio} = $prio;
+			foreach my $source (@source) {
+				$OSSource{$product}{$source}{boot} = $boot;
+				$OSSource{$product}{$source}{type} = $type;
+				$OSSource{$product}{$source}{alias}= $alias;
+				$OSSource{$product}{$source}{prio} = $prio;
+			}
 			if ((defined $addr) && (defined $addt)) {
 				my @addrepo     = @{$addr};
 				my @addrepotype = @{$addt};
@@ -452,6 +454,8 @@ sub getPackageList {
 			push (@patlist,"base");
 		}
 		chomp @patlist;
+		print "+++ @patlist\n";
+		print "+++ @urllist\n";
 		my $psolve = new KIWISatSolver (
 			$kiwi,\@patlist,\@urllist
 		);
@@ -919,7 +923,7 @@ sub checkBrokenLinks {
 	if ($returnok) {
 		return $this;
 	}
-	checkBrokenLinks();
+	checkBrokenLinks ($this);
 }
 
 1;

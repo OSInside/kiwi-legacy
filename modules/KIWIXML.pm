@@ -2851,7 +2851,8 @@ sub getInstSourceSatSolvable {
 	#------------------------------------------
 	my @valid    = (
 		"/suse/setup/descr/patterns",
-		"/repodata/patterns.xml.gz"
+		"/repodata/patterns.xml.gz",
+		"/repodata/primary.xml.gz"
 	);
 	#==========================================
 	# one of the following for a base solvable
@@ -2859,6 +2860,7 @@ sub getInstSourceSatSolvable {
 	my %distro;
 	$distro{"/suse/setup/descr/packages.gz"} = "packages";
 	$distro{"/suse/repodata/primary.xml.gz"} = "distxml";
+	$distro{"/repodata/primary.xml.gz"}      = "distxml";
 	#==========================================
 	# all existing pattern files
 	#------------------------------------------

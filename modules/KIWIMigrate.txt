@@ -5,7 +5,6 @@
 SUSE-Linux-Enterprise-Server-10-SP1=suse-SLES10,***SELECT***
 SUSE-Linux-Enterprise-Server-10-SP2=suse-SLES10,***SELECT***
 SUSE-Linux-Enterprise-Server-10=suse-SLES10,***SELECT***
-openSUSE-10.2=suse-10.2,http://download.opensuse.org/repositories/openSUSE:10.2/standard
-openSUSE-10.3=suse-10.3,http://download.opensuse.org/repositories/openSUSE:10.3/standard
-openSUSE-11.0=suse-11.0,http://download.opensuse.org/repositories/openSUSE:11.0/standard
-openSUSE-11.1=suse-11.1,http://download.opensuse.org/repositories/openSUSE:11.1/standard
+openSUSE-10.3=suse-10.3,http://download.opensuse.org/distribution/10.3/repo/oss;http://download.opensuse.org/distribution/10.3/repo/non-oss
+openSUSE-11.0=suse-11.0,http://download.opensuse.org/distribution/11.0/repo/oss;http://download.opensuse.org/distribution/11.0/repo/non-oss
+openSUSE-11.1=suse-11.1,http://download.opensuse.org/distribution/11.1/repo/oss;http://download.opensuse.org/distribution/11.1/repo/non-oss
