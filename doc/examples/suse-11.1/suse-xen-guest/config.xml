@@ -29,7 +29,7 @@
 		<package name="kernel-xen"/>
 		<package name="xen"/>
 	</packages>
-	<xenconfig memory="512">
+	<xenconfig memory="128">
 		<xendisk device="/dev/sda"/> 
 	</xenconfig>
 	<packages type="bootstrap">
