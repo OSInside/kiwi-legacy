@@ -1965,9 +1965,6 @@ sub createMetadata
       push @dlist, glob("$dbase/boot/*");
       push @dlist, glob("$dbase/boot/*/loader");
     }
-    if(-d "$dbase/docu") {
-      push @dlist, "$dbase/docu";
-    }
     push @dlist, "$dbase/media.1";
     push @dlist, "$dbase/media.1/license";
     push @dlist, "$dbase/images";

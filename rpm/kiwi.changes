@@ -2,6 +2,9 @@
 Tue Jan 27 12:27:02 CET 2009 - ms@suse.de
 
 - v3.10
+- include inst-source branch changes from abuild team (r1875):
+  * fixed KIWICollect_local handling of baselibs packages in
+    debug and source package collection. Fixed collector code
 - fixed migration table and repo solver (bnc #469372)
 - fixed log call on undefined value in recursion (bnc #469366)
 - added optional bool element: <oem-kiwi-initrd> which
