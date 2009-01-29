@@ -3370,6 +3370,7 @@ sub buildXenConfig {
 	my $kiwi   = $this->{kiwi};
 	my $file   = $dest."/".$name->{systemImage}.".xenconfig";
 	my $initrd = $name->{bootImage}.".splash.gz";
+	my $irdunc = $name->{bootImage}.".splash";
 	my $kernel = $dest."/".$name->{bootImage}.".kernel";
 	$kernel    = readlink ($kernel);
 	$kernel    = basename ($kernel);
@@ -3387,6 +3388,10 @@ sub buildXenConfig {
 		$kiwi -> failed ();
 		return undef;
 	}
+	#==========================================
+	# inflate/deflate initrd to make xm happy
+	#------------------------------------------
+	qxx ("$main::Gzip -d $dest/$initrd && $main::Gzip $dest/$irdunc");
 	#==========================================
 	# global setup
 	#------------------------------------------

@@ -32,6 +32,7 @@ echo "Configure image: [$kiwi_iname]..."
 suseActivateDefaultServices
 suseInsertService boot.device-mapper
 suseInsertService sshd
+suseInsertService boot.xen
 
 #======================================
 # SuSEconfig

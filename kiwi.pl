@@ -577,12 +577,6 @@ sub main {
 			$kiwi -> info ("Creating Xen package list");
 			@addonList = $xml -> getXenList();
 			$kiwi -> done();
-			# /.../
-			# pack files with standard gzip level 1. Xen
-			# doesn't like better compression. The value
-			# for the gzip-cmd option is ignored here
-			# ----
-			$Gzip = "gzip -1";
 		}
 		if (@addonList) {
 			$kiwi -> info ("Installing packages: @addonList...\n");
