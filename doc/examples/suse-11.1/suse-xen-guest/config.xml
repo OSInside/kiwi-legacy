@@ -31,7 +31,7 @@
 	</packages>
 	<xenconfig memory="128">
 		<xendisk device="/dev/sda"/> 
-		<!--<xenbridge mac="00:0C:6E:AA:57:2F" name="eth0"/>-->
+		<xenbridge mac="00:0C:6E:AA:57:2F" name="br0"/>
 	</xenconfig>
 	<packages type="bootstrap">
 		<package name="filesystem"/> 
