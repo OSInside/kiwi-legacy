@@ -251,8 +251,13 @@ export systemIntegrity="unknown"
 #======================================
 # 11) Is this a diskful station
 #--------------------------------------
-if [ ! -z "$PART" ] && [ -z "$NFSROOT" ] && \
-   [ -z "$NBDROOT" ] && [ $LOCAL_BOOT = "no" ];then
+if \
+	[ $LOCAL_BOOT = "no" ] && \
+	[ ! -z "$PART" ]       && \
+	[ -z "$NFSROOT" ]      && \
+	[ -z "$NBDROOT" ]      && \
+	[ -z "$AOEROOT" ]
+then
 	#======================================
 	# Check for possible extended partition
 	#--------------------------------------
@@ -327,7 +332,12 @@ fi
 # 12) Download network client image
 #--------------------------------------
 runHook predownload
-if [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ] && [ $LOCAL_BOOT = "no" ];then
+if \
+	[ $LOCAL_BOOT = "no" ] && \
+	[ -z "$NFSROOT" ]      && \
+	[ -z "$NBDROOT" ]      && \
+	[ -z "$AOEROOT" ]
+then
 	count=0
 	IFS="," ; for i in $IMAGE;do
 		imageZipped="uncompressed"
@@ -576,6 +586,39 @@ else
 		imageRootName="NBDRoot-System"
 		systemIntegrity="clean"
 	fi
+	#======================================
+	# 12.4) Check for AOE root
+	#--------------------------------------
+	if [ ! -z "$AOEROOT" ];then
+		if ! modprobe aoe;then
+			systemException "Failed to load AoE module" "reboot"
+		fi
+		waitForBlockDevice $AOEROOT
+		if [ ! -b $AOEROOT ];then
+			systemException "Device $AOEROOT doesn't appear" "reboot"
+		fi
+		# /.../
+		# check ram space, if we don't have more than 62MB
+		# we can't use Ata over Ethernet and reboot
+		# ----
+		min_ram=63488
+		real_ram=$(cat /proc/meminfo |grep MemTotal|tr -d " [a-z][A-Z]:")
+		if [ ${real_ram} -lt ${min_ram} ];then
+			Echo "AoE: memory is below required 62M"
+			systemException "Not enough ram" "reboot"
+		fi
+		Echo "Mounting AoE root system: $AOEROOT..."
+		imageRootDevice=$AOEROOT
+		probeFileSystem $imageRootDevice
+		Echo "Filesystem of remote root system is: $FSTYPE"
+		if [ -z "$COMBINED_IMAGE" ];then
+			if isFSTypeReadOnly;then
+				setupUnionFS /dev/ram1 "$imageRootDevice" aufs
+			fi
+		fi
+		imageRootName="AOERoot-System"
+		systemIntegrity="clean"
+	fi
 fi
 runHook postdownload
 #======================================
@@ -664,7 +707,12 @@ fi
 #======================================
 # 17) make initrd available on unionfs
 #--------------------------------------
-if [ $LOCAL_BOOT = "no" ] && [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ];then
+if \
+	[ $LOCAL_BOOT = "no" ] && \
+	[ -z "$NFSROOT" ]      && \
+	[ -z "$NBDROOT" ]      && \
+	[ -z "$AOEROOT" ]
+then
 	if test ! -z "$UNIONFS_CONFIG" && test $systemIntegrity = "clean";then
 		# /.../
 		# have to do this so that /boot gets copied to the
@@ -761,7 +809,12 @@ runHook postnotify
 #======================================
 # 20) send DHCP_RELEASE, reset cache
 #--------------------------------------
-if [ $LOCAL_BOOT = "no" ] && [ -z "$NFSROOT" ] && [ -z "$NBDROOT" ];then
+if \
+	[ $LOCAL_BOOT = "no" ] && \
+	[ -z "$NFSROOT" ]      && \
+	[ -z "$NBDROOT" ]      && \
+	[ -z "$AOEROOT" ]
+then
 	dhcpcd -k
 fi
 

@@ -367,6 +367,35 @@ NBDROOT=NBD.Server.IP.address;\
         NBD-Swap-Port-Number, and /dev/nb1 for the NBD-Swap-Device).
         The swap space over the network using a network block device
         is only established if the client has less than 48 MB of RAM.
+    \item \textbf{AOEROOT}\\
+        Mount the system image root filesystem remotely via AoE
+        (ATA over Ethernet). This means there is a server which
+        exports a block device representing the the root directory of
+        the system image via the AoE subsystem. The block device
+        could be a partition of a real or a virtual disk. In order to
+        use the AoE subsystem I recommend to install the \textit{aoetools}
+        and \textit{vblade} packages from here first:\\
+        \url{http://download.opensuse.org/repositories/system:/aoetools}\\
+        Once installed the following example shows how to export
+        the local /dev/sdb1 partition via AoE:
+\begin{verbatim}
+vbladed 0 1 eth0 /dev/sdb1
+\end{verbatim}
+        Some explanation about this command, each AoE device is identified
+        by a couple Major/Minor, with major between 0-65535 and minor
+        between 0-255. AoE is based just over Ethernet on the OSI models
+        so we need to indicate which ethernet card we'll use. 
+        In this example we export /dev/sdb1 with a major value of 0 and
+        minor of 1 on the eth0 interface. We are ready to use our partition
+        on the network! To be able to use the device kiwi needs the
+        information which AoE device contains the root filesystem. In
+        our example this is the device \textit{/dev/etherd/e0.1}.
+        According to this the AOEROOT variable must be set as follows:
+\begin{verbatim}
+AOEROOT=/dev/etherd/e0.1
+\end{verbatim}
+        kiwi is now able to mount and use the specified AoE device
+        as the remote root filesystem.
     \item \textbf{NFSROOT}\\
          Mount the system image root filesystem remotely via NFS
          (Network File System). This means there is a server which
@@ -553,3 +582,28 @@ NBDROOT=192.168.100.7;2000;/dev/nbd0
 \end{verbatim}
 \end{Command}
 \end{itemize}
+
+\subsection{root tree over AoE}
+
+As an alternative for root over NBD it is also possible to
+let the client mount the root device via a special ATA over
+Ethernet network block device. Below find an example:
+
+\begin{itemize}
+\item Use the vbladed command to bind a block device to an
+      ethernet interface. The block device can be a disk
+      partition or a loop device (losetup) but not a directory 
+      like with NBD
+\item sample config.<MAC>
+
+\begin{Command}{12cm}
+\begin{verbatim}
+AOEROOT=/dev/etherd/e0.1
+\end{verbatim}
+\end{Command}
+
+      This would require the command
+      \textbf{''vbladed 0 1 eth0 blockdevice''}
+      to be called first
+\end{itemize}
+

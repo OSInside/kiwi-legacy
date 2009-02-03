@@ -59,6 +59,7 @@
 		<file name="drivers/message/fusion/*"/>
 		<file name="drivers/net/*"/>
 		<file name="drivers/block/nbd.ko"/>
+		<file name="drivers/block/aoe/aoe.ko"/>
 		<file name="drivers/parport/*"/>
 		<file name="drivers/char/lp.ko"/>
 		<!-- DRIVERS END DEFAULT AND XEN -->
@@ -79,6 +80,7 @@
 		<file name="fs/nfs_common/*"/>
 		<file name="drivers/message/fusion/*"/>
 		<file name="drivers/block/nbd.ko"/>
+		<file name="drivers/block/aoe/aoe.ko"/>
 		<file name="drivers/net/3c59x.ko"/>
 		<file name="drivers/net/8139cp.ko"/>
 		<file name="drivers/net/8139too.ko"/>
