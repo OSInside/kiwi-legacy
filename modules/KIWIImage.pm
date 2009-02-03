@@ -1029,7 +1029,12 @@ sub createImageVMX {
 				return undef;
 			}
 			$ovffile =~ s/\.vmx$/\.ovf/;
-			my $status = qxx ("$ovftool -bf $vmxfile $ovffile -l $ovflog 2>&1");
+			my $status;
+			if (! $ovflog) {
+				$status= qxx ("$ovftool -bf $vmxfile $ovffile 2>&1");
+			} else {
+				$status= qxx ("$ovftool -bf $vmxfile $ovffile -l $ovflog 2>&1");
+			}
 			my $result = $? >> 8;
 			if ($result != 0) {
 				$kiwi -> failed ();
@@ -3398,7 +3403,7 @@ sub buildXenConfig {
 	my $device = $xenconfig{xen_diskdevice};
 	my $part   = $device."1";
 	my $memory = $xenconfig{xen_memory};
-	my $image  = $dest."/".$name->{systemImage};
+	my $image  = $name->{systemImage};
 	$part =~ s/\/dev\///;
 	print FD '#  -*- mode: python; -*-'."\n";
 	print FD 'kernel="'.$kernel.'"'."\n";

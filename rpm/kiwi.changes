@@ -3,6 +3,8 @@ Tue Feb  3 11:01:53 CET 2009 - ms@suse.de
 
 - v3.11
 - implemented support for ATA over Ethernet (bnc #441832)
+- fixed ovftool call in case of terminal logging (bnc #472009)
+- fixed xenconfig to avoid absolute paths (bnc #472010) 
 
 -------------------------------------------------------------------
 Tue Jan 27 12:27:02 CET 2009 - ms@suse.de
