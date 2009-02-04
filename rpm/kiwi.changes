@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Feb  4 14:25:15 CET 2009 - jcborn@suse.de
+
+- added the -f option to mkisofs call in cd mastering script
+  (bnc #465820)
+
+-------------------------------------------------------------------
 Tue Feb  3 11:01:53 CET 2009 - ms@suse.de
 
 - v3.11
