@@ -1092,15 +1092,15 @@ sub createImageXen {
 # makeLabel
 #------------------------------------------
 sub makeLabel {
+	# ...
+	# isolinux does not handle spaces, so we replace it
+	# with this unicode non-breaking space
+	# ----
 	my $this = shift;
 	my $label = shift;
-
-	# isolinux does not handle spaces, so we replace it with this
-	# unicode non-breaking space
 	$label =~ s/ /\x{00a0}/g;
 	return $label;
 }
-
 
 #==========================================
 # createImageLiveCD
