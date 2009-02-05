@@ -44,7 +44,7 @@ use KIWITest;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "3.12";
+our $Version       = "3.13";
 our $Publisher     = "SUSE LINUX Products GmbH";
 our $Preparer      = "KIWI - http://kiwi.berlios.de";
 our $openSUSE      = "http://download.opensuse.org";
@@ -185,6 +185,7 @@ our $PackageManager;        # package manager to use for this image
 our $FSBlockSize;           # filesystem block size
 our $FSInodeSize;           # filesystem inode size
 our $FSJournalSize;         # filesystem journal size
+our $FSNumInodes;           # filesystem max inodes
 our $Verbosity = 0;         # control the verbosity level
 our $TargetArch;            # target architecture -> writes zypp.conf
 our $InstSourceLocal;       # create installation source from local metadata
@@ -1158,6 +1159,7 @@ sub init {
 		"fs-blocksize=i"        => \$FSBlockSize,
 		"fs-journalsize=i"      => \$FSJournalSize,
 		"fs-inodesize=i"        => \$FSInodeSize,
+		"fs-maxinodes=i"        => \$FSNumInodes,
 		"partitioner=s"         => \$Partitioner,
 		"instsource-local"      => \$InstSourceLocal,
 		"target-arch=s"         => \$TargetArch,
@@ -1505,6 +1507,11 @@ sub usage {
 	print "    When calling kiwi in creation mode this option will set\n";
 	print "    the inode size in bytes. This option has no effect if the\n";
 	print "    reiser filesystem is used\n";
+	print "\n";
+	print "  [ --fs-maxinodes <number> ]\n";
+	print "    When calling kiwi in creation mode this option will set\n";
+	print "    the maximum number of inodes. This option has no effect if\n";
+	print "    the reiser filesystem is used\n";
 	print "\n";
 	print "  [ --partitioner <fdisk|parted> ]\n";
 	print "    Select the tool to create partition tables. Supported are\n";
@@ -1910,6 +1917,7 @@ sub checkFSOptions {
 		my $blocksize;   # block size in bytes
 		my $journalsize; # journal size in MB (ext) or blocks (reiser)
 		my $inodesize;   # inode size in bytes (ext only)
+		my $numinodes;   # maximum number of inodes (ext only)
 		SWITCH: for ($fs) {
 			#==========================================
 			# EXT2 and EXT3
@@ -1918,6 +1926,7 @@ sub checkFSOptions {
 				if ($FSBlockSize)   {$blocksize   = "-b $FSBlockSize"}
 				if ($FSInodeSize)   {$inodesize   = "-I $FSInodeSize"}
 				if ($FSJournalSize) {$journalsize = "-J size=$FSJournalSize"}
+ 				if ($FSNumInodes)   {$numinodes   = "-N $FSNumInodes"}
 				last SWITCH;
 			};
 			#==========================================
@@ -1938,6 +1947,9 @@ sub checkFSOptions {
 		}
 		if (defined $journalsize) {
 			$result{$fs} .= $journalsize." ";
+		}
+		if (defined $numinodes) {
+			$result{$fs} .= $numinodes." ";
 		}
 	}
 	return %result;

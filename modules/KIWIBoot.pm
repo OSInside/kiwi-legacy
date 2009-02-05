@@ -273,10 +273,11 @@ sub new {
 	# setup virtual disk size
 	#------------------------------------------
 	if ((! defined $vmsize) && (defined $system)) {
-		my $kernelSize = -s $kernel; # the kernel
-		my $initrdSize = -s $initrd; # the boot image
-		my $systemSXML = 1; # system size set by XML file
-		my $systemSize = 0; # the system image size in bytes
+		my $kernelSize  = -s $kernel; # the kernel
+		my $initrdSize  = -s $initrd; # the boot image
+		my $systemSXML  = 1; # system size set by XML file
+		my $systemSize  = 0; # the system image size in bytes
+		my $systemInodes= 0; # the number of inodes the system uses
 		# /.../
 		# Note: In case of a split system the vmsize value will
 		# be increased according to the size of the split portion
@@ -288,82 +289,26 @@ sub new {
 			# Find size on a per file basis first
 			#------------------------------------------
 			$systemSXML = $xml -> getImageSizeBytes();
-			$systemSize = qxx ("du -bs $system | cut -f1"); chomp $systemSize;
+			$systemSize = qxx (
+				"du -s --block-size=1 $system | cut -f1"
+			);
+			chomp $systemSize;
+			#==========================================
+			# Calculate required inode count
+			#------------------------------------------
+			$systemInodes = qxx ("find $system | wc -l");
+			$systemInodes *= 2;
+			if ((defined $main::FSNumInodes) &&
+				($main::FSNumInodes < $systemInodes)
+			) {
+				$kiwi -> warning ("Specified Inode count might be too small\n");
+				$kiwi -> warning ("Copying of files to image could fail !\n");
+			}
+			if (! defined $main::FSNumInodes) {
+				$main::FSNumInodes = $systemInodes;
+			}
 			if ($systemSXML eq "auto") {
 				$systemSXML = 0;
-			}
-			#==========================================
-			# Calculate required size for this tree
-			#------------------------------------------
-			my %type   = %{$xml->getImageTypeAndAttributes()};
-			my %FSopts = main::checkFSOptions();
-			my $size   = int (($systemSize * 1.2) / 1024);
-			my $fstype = $type{filesystem};
-			if ($fstype =~ /(.*),(.*)/) {
-				$fstype = $1;
-			}
-			while (1) {
-				my $file   = $tmpdir."/fstest";
-				my $status = qxx ("qemu-img create $file $size 2>&1");
-				my $result = $? >> 8;
-				if ($result != 0) {
-					$kiwi -> error  ("Failed creating test disk: $status");
-					$kiwi -> failed ();
-					$this -> cleanTmp ();
-					return undef;
-				}
-				SWITCH: for ($fstype) {
-					/^ext2/     && do {
-						my $fsopts = $FSopts{ext2};
-						$fsopts.= "-F";
-						$status = qxx ("/sbin/mke2fs $fsopts $file 2>&1");
-						$result = $? >> 8;
-						last SWITCH;
-					};
-					/^ext3/     && do {
-						my $fsopts = $FSopts{ext3};
-						$fsopts.= "-j -F";
-						$status = qxx ("/sbin/mke2fs $fsopts $file 2>&1");
-						$result = $? >> 8;
-						last SWITCH;
-					};
-					/^reiserfs/ && do {
-						my $fsopts = $FSopts{reiserfs};
-						$fsopts.= "-f";
-						$status = qxx ("/sbin/mkreiserfs $fsopts $file 2>&1");
-						$result = $? >> 8;
-						last SWITCH;
-					};
-					$kiwi -> error  ("Unsupported filesystem type: $fstype");
-					$kiwi -> failed ();
-					$this -> cleanTmp ();
-					return undef;
-				};
-				$status = qxx ("mount -o loop $file $tmpdir 2>&1");
-				$result = $? >> 8;
-				if ($result != 0) {
-					$kiwi -> error ("test disk mount failed: $status");
-					$kiwi -> failed ();
-					$this -> cleanTmp ();
-					return undef;
-				}
-				if (! open (PIPE,"df -k $tmpdir | tail -n1|")) {
-					$kiwi -> error ("test disk df call failed: $!");
-					$kiwi -> failed ();
-					$this -> cleanTmp ();
-					return undef;
-				}
-				my @line   = split (/ +/,<PIPE>); close PIPE;
-				my $freeKB = $line[3];
-				qxx ("umount $tmpdir 2>&1");
-				unlink $file;
-				# print "++++++++ FREE: $freeKB Kb NEED: $systemSize Byte\n";
-				if ($freeKB > $systemSize / 1024) {
-					$systemSize = $freeKB * 1024;
-					last;
-				}
-				# next try with 5 MB more...
-				$size += 5120;
 			}
 		} else {
 			$systemSXML = $xml -> getImageSizeBytes();
@@ -381,8 +326,8 @@ sub new {
 			# use the size information from the XML configuration
 			$vmsize = $systemSXML;
 		} else {
-			# use the calculated value plus 30% free space 
-			$vmsize+= $vmsize * 0.3;
+			# use the calculated value plus 10% free space 
+			$vmsize+= $vmsize * 0.10;
 			# check if additive size was specified
 			$vmsize+= $xml -> getImageSizeAdditiveBytes();
 		}
@@ -811,8 +756,7 @@ sub setupBootStick {
 					);
 				} else {
 					@commands = (
-						"n","p","1",".",".",
-						"t","83",
+						"n","p","1",".",".","t","83",
 						"a","1","w","q"
 					);
 				}
@@ -1588,11 +1532,13 @@ sub setupInstallStick {
 	if ($gotsys) {
 		@commands = (
 			"n","p","1",".","+30M",
-			"n","p","2",".",".","w","q"
+			"n","p","2",".",".",
+			"a","1","w","q"
 		);
 	} else {
 		@commands = (
-			"n","p","1",".",".","w","q"
+			"n","p","1",".",".",
+			"a","1","w","q"
 		);
 	}
 	if (! $this -> setStoragePartition ($this->{loop},\@commands)) {
@@ -1941,18 +1887,23 @@ sub setupBootDisk {
 				# xda1 ro / xda2 rw
 				@commands = (
 					"n","p","1",".","+".$syszip."M",
-					"n","p","2",".",".","w","q"
+					"n","p","2",".",".",
+					"a","2","w","q"
 				);
 			} else {
 				# xda1 rw
-				@commands = ( "n","p","1",".",".","w","q");
+				@commands = (
+					"n","p","1",".",".",
+					"a","1","w","q"
+				);
 			}
 		} else {
 			my $lvmsize = $this->{vmmbyte} - $lvmbootMB;
 			@commands = (
 				"n","p","1",".","+".$lvmsize."M",
 				"n","p","2",".",".",
-				"t","1","8e","w","q"
+				"t","1","8e",
+				"a","2","w","q"
 			);
 		}
 		if (! $this -> setStoragePartition ($this->{loop},\@commands)) {
@@ -3048,13 +2999,13 @@ sub setupBootLoaderConfiguration {
 		print FD "timeout 10\n";
 		if ($type =~ /^KIWI CD/) {
 			print FD "gfxmenu (cd)/boot/message\n";
-			print FD "title $type\n";
+			print FD "title _".$type."_\n";
 		} elsif ($type =~ /^KIWI USB/) {
 			print FD "gfxmenu (hd0,0)/boot/message\n";
-			print FD "title $type\n";
+			print FD "title _".$type."_\n";
 		} else {
 			print FD "gfxmenu (hd0,$bootpart)/boot/message\n";
-			print FD "title $label [ $type ]\n";
+			print FD "title _".$label." [ ".$type." ]_\n";
 		}
 		#==========================================
 		# Standard boot
@@ -3115,11 +3066,11 @@ sub setupBootLoaderConfiguration {
 		# Failsafe boot
 		#------------------------------------------
 		if ($type =~ /^KIWI CD/) {
-			print FD "title Failsafe -- $type\n";
+			print FD "title _Failsafe -- ".$type."_\n";
 		} elsif ($type =~ /^KIWI USB/) {
-			print FD "title Failsafe -- $type\n";
+			print FD "title _Failsafe -- ".$type."_\n";
 		} else {
-			print FD "title Failsafe -- $label [ $type ]\n";
+			print FD "title _Failsafe -- ".$label." [ ".$type." ]_\n";
 		}
 		if (! $isxen) {
 			if ($type =~ /^KIWI CD/) {

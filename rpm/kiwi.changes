@@ -1,4 +1,17 @@
 -------------------------------------------------------------------
+Thu Feb  5 14:00:29 CET 2009 - ms@suse.de
+
+- v3.13
+- fixed partition commands to always set an active (boot)
+  partition. This is required by some BIOS's (bnc #472218)
+- fixed virtual disk size calculation:
+  * don't use du --apparent-size it's not the real size used
+  * setup a safe inode count to ensure all files fits in for ext2/3
+- fixed grub title setup, embed title string in a pair of 
+  underscores which are not displayed by grub but avoid
+  menu title display problems
+
+-------------------------------------------------------------------
 Wed Feb  4 14:25:15 CET 2009 - jcborn@suse.de
 
 - v3.12
