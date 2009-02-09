@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Feb  6 14:13:55 CET 2009 - ms@suse.de
+
+- v3.14
+- don't dereference symbolic links when copying the overlay
+  tree. Copy call changed to: cp -dR --remove-destination
+
+-------------------------------------------------------------------
 Thu Feb  5 14:00:29 CET 2009 - ms@suse.de
 
 - v3.13

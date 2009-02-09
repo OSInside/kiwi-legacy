@@ -721,7 +721,7 @@ sub setup {
 	if (-d "$imageDesc/root") {
 		$kiwi -> info ("Copying user defined files to image tree");
 		mkdir $root."/tmproot";
-		my $copy = "cp -LR --remove-destination";
+		my $copy = "cp -dR --remove-destination";
 		my $data = qxx ("$copy $imageDesc/root/* $root/tmproot 2>&1");
 		my $code = $? >> 8;
 		if ($code != 0) {
