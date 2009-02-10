@@ -2,6 +2,17 @@
 Fri Feb  6 14:13:55 CET 2009 - ms@suse.de
 
 - v3.14
+- netboot: added patch when creating a filesystem on the root
+  partition. The validity is checked by fsck now instead of trying
+  to mount the device (bnc #473355)
+- netboot: implement address notification if DHCP setup has
+  changed according to the IP data stored in the ldap directory
+  for the client (bnc #473329)
+- fixed system hangup when moving data from shared memory
+  into boot partition. Fixed that by copying boot data before
+  overlayed mountSystem() is called, looks like a aufs bug
+- pass the -p option to fsck instead of -y to prevent
+  interaction with the splash screen
 - don't dereference symbolic links when copying the overlay
   tree. Copy call changed to: cp -dR --remove-destination
 

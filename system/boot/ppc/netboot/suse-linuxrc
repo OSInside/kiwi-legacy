@@ -62,6 +62,65 @@ export SYSTEM_MD5STATUS
 . /include
 
 #======================================
+# setupSystemAliasName
+#--------------------------------------
+function setupSystemAliasName {
+	# /.../
+	# Ask for an alias name if NAME from config.<MAC> 
+	# contains a number. If the number is -1 the system will
+	# ask for ever for this name otherwhise the number sets
+	# a timeout how long to wait for input of this data
+	# ----
+	if test $NAME -ne 0;then
+		if test $NAME -eq -1;then
+			Echo -n "Enter Alias Name for this system: " && \
+			read SYSALIAS
+		else
+			Echo -n "Enter Alias Name [timeout in $NAME sec]: " && \
+			read -t $NAME SYSALIAS
+		fi
+	fi
+}
+
+#======================================
+# setupSystemHWInfoFile
+#--------------------------------------
+function setupSystemHWInfoFile {
+	# /.../
+	# calls hwinfo and stores the information into a file
+	# suffixed by the hardware address of the network card
+	# ----
+	hwinfo --all --log=hwinfo.$DHCPCHADDR >/dev/null
+}
+
+#======================================
+# setupSystemHWTypeFile
+#--------------------------------------
+function setupSystemHWTypeFile {
+	# /.../
+	# collects information about the alias name the
+	# architecture the BIOS version and more and stores
+	# that into a file suffixed by the hardware address of the
+	# network card. The information is uploaded to the pxe
+	# boot server and used to create a machine config.<MAC> 
+	# from the ldap directory
+	# ----
+	echo "NCNAME=$SYSALIAS"   >> hwtype.$DHCPCHADDR
+	echo "CRNAME=$SYSALIAS"   >> hwtype.$DHCPCHADDR
+	echo "IPADDR=$IPADDR"     >> hwtype.$DHCPCHADDR
+	echo "ARCHITECTURE=$ARCH" >> hwtype.$DHCPCHADDR
+	#========================================
+	# Try to get BIOS data if tools are there
+	#----------------------------------------
+	if [ -f /sbin/posbios ];then
+		HWBIOS=`/sbin/posbios -b`
+		echo "HWBIOS=$HWBIOS" >> hwtype.$DHCPCHADDR
+		HWTYPE=`/sbin/posbios -ms`
+		echo "HWTYPE=$HWTYPE" >> hwtype.$DHCPCHADDR
+	fi
+}
+
+#======================================
 # Beautify Startup
 #--------------------------------------
 echo "Loading KIWI Boot-System..."
@@ -181,46 +240,40 @@ if [ $LOCAL_BOOT = "no" ];then
 	if test ! -s $CONFIG;then
 		searchAlternativeConfig
 	fi
+	#========================================
+	# Compare current IP and IP from config 
+	#----------------------------------------
+	NEWIP=0
+	if [ -s $CONFIG ] && [ ! -z "$WORKSTATION_LDAP_IP" ]; then
+		importFile < $CONFIG
+		WSNR=`echo $WORKSTATION_LDAP_IP | sed -r -e 's/(^|\.)0*/\1/g'`
+		IPNR=`echo $IPADDR | sed -r -e 's/(^|\.)0*/\1/g'`
+		if [ "$WSNR" != "$IPNR" ];then 
+			NEWIP=1
+		fi
+	fi
 	#======================================
 	# No config found register new client
 	#--------------------------------------
-	if test ! -s $CONFIG;then
+	if [ ! -s $CONFIG ];then
 		#======================================
 		# Register new network client
 		#--------------------------------------
 		Echo "Registering new network client..."
-		if test $NAME -ne 0;then
-		if test $NAME -eq -1;then
-			Echo -n "Enter Alias Name for this system: " && \
-			read SYSALIAS
-		else
-			Echo -n "Enter Alias Name [timeout in $NAME sec]: " && \
-			read -t $NAME SYSALIAS
-		fi
-		fi
-		hwinfo --all --log=hwinfo.$DHCPCHADDR >/dev/null
-		echo "NCNAME=$SYSALIAS"   >> hwtype.$DHCPCHADDR
-		echo "CRNAME=$SYSALIAS"   >> hwtype.$DHCPCHADDR
-		echo "IPADDR=$IPADDR"     >> hwtype.$DHCPCHADDR
-		echo "ARCHITECTURE=$ARCH" >> hwtype.$DHCPCHADDR
-		#========================================
-		# Try to get BIOS data if tools are there
-		#----------------------------------------
-		if [ -f /sbin/posbios ];then
-			HWBIOS=`/sbin/posbios -b`
-			echo "HWBIOS=$HWBIOS" >> hwtype.$DHCPCHADDR
-			HWTYPE=`/sbin/posbios -ms`
-			echo "HWTYPE=$HWTYPE" >> hwtype.$DHCPCHADDR
-		fi
+		setupSystemAliasName
+		setupSystemHWInfoFile
+		setupSystemHWTypeFile
+		#======================================
+		# Put files on the boot server
+		#--------------------------------------
 		putFile hwtype.$DHCPCHADDR upload/hwtype.$DHCPCHADDR
 		putFile hwinfo.$DHCPCHADDR upload/hwinfo.$DHCPCHADDR
 		echo
 		Echo "Registered as: $DHCPCHADDR"
 		Echo "Waiting for configuration..."
 		sleep 60
-
 		#======================================
-		# Try to get config again
+		# Wait for configuration (reload)
 		#--------------------------------------
 		while test ! -s $CONFIG;do
 			Echo "Lookup network client config file again..."
@@ -237,6 +290,20 @@ if [ $LOCAL_BOOT = "no" ];then
 			}
 		done
 	fi
+	#======================================
+	# Config found but DHCP IP setup change
+	#--------------------------------------
+	if [ $NEWIP -eq '1' ];then
+		Echo "Outdated IP address, notify new client setup..."
+		setupSystemAliasName
+		setupSystemHWTypeFile
+		putFile hwtype.$DHCPCHADDR upload/hwtype.$DHCPCHADDR
+		echo
+		Echo "Notified: $DHCPCHADDR"
+	fi
+	#======================================
+	# import latest configuration
+	#--------------------------------------
 	importFile < $CONFIG
 fi
 
@@ -452,14 +519,14 @@ then
 				Echo "Resize EXT2 filesystem to full partition space..."
 				resize2fs -f -F -p $imageDevice
 				Echo "Checking EXT2 filesystem..."
-				e2fsck -f $imageDevice -y
+				e2fsck -f -p $imageDevice
 				INITRD_MODULES="$INITRD_MODULES ext2"
 			fi
 			if test "$FSTYPE" = "ext3";then
 				Echo "Resize EXT3 filesystem to full partition space..."
 				resize2fs -f -F -p $imageDevice
 				Echo "Checking EXT3 filesystem..."
-				e2fsck -f $imageDevice -y
+				e2fsck -f -p $imageDevice
 				INITRD_MODULES="$INITRD_MODULES ext3"
 			fi
 		fi
@@ -634,7 +701,47 @@ if [ $LOCAL_BOOT = "no" ];then
 fi
 
 #======================================
-# 14) Mount OS image to /mnt
+# 14) Make boot data available on union
+#--------------------------------------
+if [ $LOCAL_BOOT = "no" ];then
+	if [ ! -z "$UNIONFS_CONFIG" ] && [ "$systemIntegrity" = "clean" ];then
+		# /.../
+		# have to do this so that /boot gets copied to the
+		# ext3 partition, which is necessary for the bootloader to
+		# be able to find the data in there (it can't read squashfs
+		# or cromfs)
+		# ----
+		rwDir=/read-write
+		roDir=/read-only
+		for dir in $roDir $rwDir;do
+			mkdir -p $dir
+		done
+		rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
+		roDevice=`echo $UNIONFS_CONFIG | cut -d , -f 2`
+		if ! setupReadWrite; then
+			systemException \
+				"Failed to setup read-write filesystem" \
+			"reboot"
+		fi
+		if ! mount $rwDevice $rwDir >/dev/null;then
+			systemException \
+				"Failed to mount read/write filesystem" \
+			"reboot"
+		fi
+		if ! mount $roDevice $roDir >/dev/null;then
+			systemException \
+				"Failed to mount read/only filesystem" \
+			"reboot"
+		fi
+		unset RELOAD_IMAGE
+		cp -a $roDir/boot $rwDir
+		umount $rwDir
+		umount $roDir
+	fi
+fi
+
+#======================================
+# 15) Mount OS image to /mnt
 #--------------------------------------
 runHook premount
 if ! mountSystem;then
@@ -644,7 +751,7 @@ validateRootTree
 runHook postmount
 
 #======================================
-# 15) Import fixed configuration files
+# 16) Import fixed configuration files
 #--------------------------------------
 runHook preconfig
 if [ $LOCAL_BOOT = "no" ];then
@@ -695,7 +802,7 @@ fi
 runHook postconfig
 
 #======================================
-# 16) check filesystem and kernels
+# 17) check filesystem and kernels
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	if test $systemIntegrity = "clean";then
@@ -705,7 +812,7 @@ if [ $LOCAL_BOOT = "no" ];then
 fi
 
 #======================================
-# 17) make initrd available on unionfs
+# 18) make initrd available on unionfs
 #--------------------------------------
 if \
 	[ $LOCAL_BOOT = "no" ] && \
@@ -714,14 +821,6 @@ if \
 	[ -z "$AOEROOT" ]
 then
 	if test ! -z "$UNIONFS_CONFIG" && test $systemIntegrity = "clean";then
-		# /.../
-		# have to do this so that /boot gets copied to the
-		# ext2 partition, which is necessary for the bootloader to
-		# be able to find the data in there (it can't read squashfs
-		# or cromfs)
-		# ----
-		cp -a /mnt/boot /dev/shm/boot2 && rm -rf /mnt/boot
-		mv /dev/shm/boot2 /mnt/boot
 		# /.../
 		# we are using a special root setup with aufs. In this case
 		# we can't use the SuSE Linux initrd but must stick to the
@@ -753,7 +852,7 @@ then
 fi
 
 #======================================
-# 18) Create system dependant files
+# 19) Create system dependant files
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	if test $systemIntegrity = "clean";then
@@ -777,7 +876,7 @@ if [ $LOCAL_BOOT = "no" ];then
 fi
 
 #======================================
-# 19) If image is new, notify
+# 20) If image is new, notify
 #--------------------------------------
 runHook prenotify
 if [ $LOCAL_BOOT = "no" ];then
@@ -807,7 +906,7 @@ fi
 runHook postnotify
 
 #======================================
-# 20) send DHCP_RELEASE, reset cache
+# 21) send DHCP_RELEASE, reset cache
 #--------------------------------------
 if \
 	[ $LOCAL_BOOT = "no" ] && \
@@ -819,7 +918,7 @@ then
 fi
 
 #======================================
-# 21) copy system dependant files
+# 22) copy system dependant files
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	if test $systemIntegrity = "clean";then
@@ -828,41 +927,41 @@ if [ $LOCAL_BOOT = "no" ];then
 fi
 
 #======================================
-# 22) update system dependant files
+# 23) update system dependant files
 #--------------------------------------
 setupInittab /mnt
 
 echo 256 > /proc/sys/kernel/real-root-dev
 #======================================
-# 23) umount system filesystems
+# 24) umount system filesystems
 #--------------------------------------
 umountSystemFilesystems
 
 #======================================
-# 24) copy initrd files to image
+# 25) copy initrd files to image
 #--------------------------------------
 importBranding
 cp /preinit /mnt
 cp /include /mnt
 
 #======================================
-# 25) check if reboot is required
+# 26) check if reboot is required
 #--------------------------------------
 kernelCheck /mnt
 
 #======================================
-# 26 kill boot shell
+# 27 kill boot shell
 #--------------------------------------
 killShell
 killBlogD
 
 #======================================
-# 27 Activate new root
+# 28 Activate new root
 #--------------------------------------
 runHook preactivate
 activateImage
 
 #======================================
-# 28) Unmount initrd / system init
+# 29) Unmount initrd / system init
 #--------------------------------------
 bootImage $@

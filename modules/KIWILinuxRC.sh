@@ -1873,7 +1873,7 @@ function createFileSystem {
 		# create a filesystem on the root partition
 		# ----
 		if test $diskID -gt 2; then
-			if ! mount $diskPartition /mnt; then
+			if ! fsck -f -p $diskPartition 1>&2; then
 				Echo "Partition $diskPartition is not valid, formating..."
 				mke2fs -j $diskPartition 1>&2
 				if test $? != 0; then
@@ -1883,7 +1883,6 @@ function createFileSystem {
 				fi
 			else
 				Echo "Partition $diskPartition is valid, leave it untouched"
-				umount /mnt 1>&2
 			fi
 		fi
 	fi
@@ -2596,6 +2595,57 @@ function kiwiMount {
 	return 0
 }
 #======================================
+# setupReadWrite
+#--------------------------------------
+function setupReadWrite {
+	# /.../
+	# check/create read-write filesystem used for
+	# overlay data
+	# ----
+	local rwDir=/read-write
+	local rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
+	mkdir -p $rwDir
+	if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
+		if [ "$RELOAD_IMAGE" = "yes" ] || \
+			! mount $rwDevice $rwDir >/dev/null
+		then
+			#======================================
+			# store old FSTYPE value
+			#--------------------------------------
+			if [ ! -z "$FSTYPE" ];then
+				FSTYPE_SAVE=$FSTYPE
+			fi
+			#======================================
+			# probe filesystem
+			#--------------------------------------
+			probeFileSystem $rwDevice
+			if [ ! "$FSTYPE" = "unknown" ];then
+				Echo "Checking filesystem for RW data on $rwDevice..."
+				e2fsck -f -p $rwDevice
+			fi
+			#======================================
+			# restore FSTYPE
+			#--------------------------------------
+			if [ ! -z "$FSTYPE_SAVE" ];then
+				FSTYPE=$FSTYPE_SAVE
+			fi
+			if [ "$RELOAD_IMAGE" = "yes" ] || \
+				! mount $rwDevice $rwDir >/dev/null
+			then
+				Echo "Creating filesystem for RW data on $rwDevice..."
+				if ! mke2fs -j $rwDevice >/dev/null;then
+					Echo "Failed to create ext3 filesystem"
+					return 1
+				fi
+				e2fsck -f -p $rwDevice >/dev/null
+			fi
+		else
+			umount $rwDevice
+		fi
+	fi
+	return 0
+}
+#======================================
 # mountSystemUnified
 #--------------------------------------
 function mountSystemUnified {
@@ -2632,43 +2682,8 @@ function mountSystemUnified {
 		# write part is not a ram disk, create ext3 filesystem on it
 		# check and mount the filesystem
 		# ----
-		if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
-			if [ "$RELOAD_IMAGE" = "yes" ] || \
-				! mount $rwDevice $rwDir >/dev/null
-			then
-				#======================================
-				# store old FSTYPE value
-				#--------------------------------------
-				if [ ! -z "$FSTYPE" ];then
-					FSTYPE_SAVE=$FSTYPE
-				fi
-				#======================================
-				# probe filesystem
-				#--------------------------------------
-				probeFileSystem $rwDevice
-				if [ ! "$FSTYPE" = "unknown" ];then
-					Echo "Checking filesystem for RW data on $rwDevice..."
-					e2fsck -f $rwDevice -y
-				fi
-				#======================================
-				# restore FSTYPE
-				#--------------------------------------
-				if [ ! -z "$FSTYPE_SAVE" ];then
-					FSTYPE=$FSTYPE_SAVE
-				fi
-				if [ "$RELOAD_IMAGE" = "yes" ] || \
-					! mount $rwDevice $rwDir >/dev/null
-				then
-					Echo "Creating filesystem for RW data on $rwDevice..."
-					if ! mke2fs -j $rwDevice >/dev/null;then
-						Echo "Failed to create ext3 filesystem"
-						return 1
-					fi
-					e2fsck -f $rwDevice -y >/dev/null
-				fi
-			else
-				umount $rwDevice
-			fi
+		if ! setupReadWrite; then
+			return 1
 		fi
 		if ! mount $rwDevice $rwDir >/dev/null;then
 			Echo "Failed to mount read/write filesystem"

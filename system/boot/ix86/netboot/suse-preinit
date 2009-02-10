@@ -55,7 +55,7 @@ createFramebufferDevices
 #======================================
 # 6) create initrd on diskful
 #--------------------------------------
-if [ ! -z $DISK ] && [ $systemIntegrity = "clean" ]; then
+if [ ! -z "$DISK" ] && [ "$systemIntegrity" = "clean" ]; then
 	if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ]; then
 		#======================================
 		# use distro initrd via mkinitrd
@@ -72,7 +72,7 @@ fi
 #======================================
 # 7) Install boot loader on diskful
 #--------------------------------------
-if [ ! -z $DISK ] && [ $bootLoaderOK = 1 ];then
+if [ ! -z "$DISK" ] && [ "$bootLoaderOK" = 1 ];then
 	if test $systemIntegrity = "clean";then
 		installBootLoader
 	fi
@@ -81,7 +81,7 @@ fi
 #======================================
 # 8) create /etc/ImagePackages
 #--------------------------------------
-if test $systemIntegrity = "clean";then
+if [ "$systemIntegrity" = "clean" ];then
 	if [ -x /bin/rpm ];then
 		Echo "Creating initial image package info file"
 		rpm -qa --last > /etc/ImagePackages
@@ -91,7 +91,7 @@ fi
 #======================================
 # 9) Reset systemIntegrity
 #--------------------------------------
-if test ! -z $DISK;then
+if [ ! -z "$DISK" ];then
 	if test ! -z $RELOAD_CONFIG;then
 		systemIntegrity=$systemIntegrity_save
 	fi
@@ -100,7 +100,7 @@ fi
 #======================================
 # 10) check for valid mount points 
 #--------------------------------------
-if test ! -z $DISK;then
+if [ ! -z "$DISK" ];then
 	IFS=":" ; for i in $PART_MOUNT;do
 	if test ! -z "$i";then
 	if test ! -f "$i";then
@@ -113,7 +113,7 @@ fi
 #======================================
 # 11) Update /etc/ImageVersion files
 #--------------------------------------
-if test ! -z $DISK;then
+if [ ! -z "$DISK" ];then
 	count=0
 	IFS="," ; for i in $IMAGE;do
 		count=$(($count + 1))
@@ -140,7 +140,7 @@ fi
 #======================================
 # 12) setup network for nfs boot
 #--------------------------------------
-if test ! -z $NFSROOT;then
+if [ ! -z "$NFSROOT" ];then
 	mount -o nolock -t proc  proc    /proc
 	mount -o nolock -t sysfs sysfs   /sys
 	mount -o nolock -t devpts devpts /dev/pts
@@ -150,7 +150,7 @@ fi
 #======================================
 # 13) kill udev
 #--------------------------------------
-if [ ! -z $DISK ] && [ $systemIntegrity = "clean" ]; then
+if [ ! -z "$DISK" ] && [ "$systemIntegrity" = "clean" ]; then
 	if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ]; then
 		udevKill
 		umountSystemFilesystems
