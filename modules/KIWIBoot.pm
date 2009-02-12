@@ -1147,7 +1147,8 @@ sub setupInstallCD {
 	#==========================================
 	# create tmp directory
 	#------------------------------------------
-	$tmpdir = qxx ( "mktemp -q -d /tmp/kiwicdinst.XXXXXX" ); chomp $tmpdir;
+	my $basedir = dirname ($system);
+	$tmpdir = qxx ( "mktemp -q -d $basedir/kiwicdinst.XXXXXX" ); chomp $tmpdir;
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> error  ("Couldn't create tmp dir: $tmpdir: $!");

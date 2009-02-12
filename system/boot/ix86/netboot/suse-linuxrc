@@ -237,15 +237,22 @@ if [ $LOCAL_BOOT = "no" ];then
 	#======================================
 	# Check alternative config names
 	#--------------------------------------
-	if test ! -s $CONFIG;then
+	if [ ! -s $CONFIG ];then
 		searchAlternativeConfig
+	fi
+	#======================================
+	# try to import configuration
+	#--------------------------------------
+	IMPORTED=0
+	if [ -s $CONFIG ] ;then
+		importFile < $CONFIG
+		IMPORTED=1
 	fi
 	#========================================
 	# Compare current IP and IP from config 
 	#----------------------------------------
 	NEWIP=0
-	if [ -s $CONFIG ] && [ ! -z "$WORKSTATION_LDAP_IP" ]; then
-		importFile < $CONFIG
+	if [ ! -z "$WORKSTATION_LDAP_IP" ]; then
 		WSNR=`echo $WORKSTATION_LDAP_IP | sed -r -e 's/(^|\.)0*/\1/g'`
 		IPNR=`echo $IPADDR | sed -r -e 's/(^|\.)0*/\1/g'`
 		if [ "$WSNR" != "$IPNR" ];then 
@@ -293,7 +300,7 @@ if [ $LOCAL_BOOT = "no" ];then
 	#======================================
 	# Config found but DHCP IP setup change
 	#--------------------------------------
-	if [ $NEWIP -eq '1' ];then
+	if [ $NEWIP -eq 1 ];then
 		Echo "Outdated IP address, notify new client setup..."
 		setupSystemAliasName
 		setupSystemHWTypeFile
@@ -304,7 +311,10 @@ if [ $LOCAL_BOOT = "no" ];then
 	#======================================
 	# import latest configuration
 	#--------------------------------------
-	importFile < $CONFIG
+	if [ $IMPORTED -eq 0 ];then
+		importFile < $CONFIG
+		IMPORTED=1
+	fi
 fi
 
 #======================================

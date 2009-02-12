@@ -1834,8 +1834,12 @@ sub createImageLiveCD {
 	$kiwi -> info ("Calling mkisofs...\n");
 	my $isoerror = 1;
 	my $name = $imageDest."/".$namerw.".iso";
+	my $attr = "-R -J -pad -joliet-long";
+	if (! defined $gzip) {
+		$attr .= " -iso-level 4"; 
+	}
 	my $isolinux = new KIWIIsoLinux (
-		$kiwi,$main::RootTree."/CD",$name
+		$kiwi,$main::RootTree."/CD",$name,undef,undef,$attr
 	);
 	if (defined $isolinux) {
 		$isoerror = 0;
