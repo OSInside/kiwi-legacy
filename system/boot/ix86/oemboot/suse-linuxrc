@@ -101,13 +101,20 @@ openKernelConsole
 probeDevices
 
 #======================================
-# 7) Search boot device...
+# 7) Check for installation mode...
+#--------------------------------------
+if [ $LOCAL_BOOT = "no" ];then
+	OEMInstall
+fi
+
+#======================================
+# 8) Search boot device...
 #--------------------------------------
 Echo "Searching for boot device..."
 export imageDiskDevice=`searchBIOSBootDevice`
 
 #======================================
-# 8) Get filesystem type and boot ID
+# 9) Get filesystem type and boot ID
 #--------------------------------------
 export imageBootID=1
 probeFileSystem $imageDiskDevice$imageBootID
@@ -122,7 +129,7 @@ if [ $FSTYPE = "unknown" ];then
 fi
 
 #======================================
-# 9) Setup device names...
+# 10) Setup device names...
 #--------------------------------------
 export imageRootDevice=$imageDiskDevice$imageBootID
 export imageRWDevice=$imageDiskDevice"2"
@@ -152,13 +159,6 @@ if searchVolumeGroup; then
 	if [ ! -z "$RECOVERY" ];then
 		export imageRecoveryDevice=/dev/kiwiVG/LVRecovery
 	fi
-fi
-
-#======================================
-# 10) Check for installation mode...
-#--------------------------------------
-if [ $LOCAL_BOOT = "no" ];then
-	OEMInstall
 fi
 
 #======================================

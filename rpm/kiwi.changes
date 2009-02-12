@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Feb 12 12:30:49 CET 2009 - ms@suse.de
+
+- v3.16
+- fixed OEM install mode, don't check for a filesystem on the
+  install disk it might not have one (bnc #475162)
+
+-------------------------------------------------------------------
 Wed Feb 11 12:20:42 CET 2009 - ms@suse.de
 
 - v3.15

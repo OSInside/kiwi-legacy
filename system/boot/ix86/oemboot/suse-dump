@@ -33,6 +33,12 @@ function OEMInstall {
 		return
 	fi
 	#======================================
+	# Search boot device...
+	#--------------------------------------
+	Echo "Searching for boot device..."
+	imageDiskDevice=`searchBIOSBootDevice`
+
+	#======================================
 	# Search CD/DVD/USB stick and mount it
 	#--------------------------------------
 	USBStickDevice
