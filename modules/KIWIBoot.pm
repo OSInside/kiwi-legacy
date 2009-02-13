@@ -1352,6 +1352,7 @@ sub setupInstallStick {
 	my $zipped    = $this->{zipped};
 	my $isxen     = $this->{isxen};
 	my $xengz     = $this->{xengz};
+	my $irdsize   = -s $initrd;
 	my $diskname  = $system.".install.raw";
 	my %deviceMap = ();
 	my @commands  = ();
@@ -1361,6 +1362,14 @@ sub setupInstallStick {
 	my $result;
 	my $ibasename;
 	my $tmpdir;
+	#==========================================
+	# setup required disk size
+	#------------------------------------------
+	$irdsize= ($irdsize / 1e6) + 10;
+	$irdsize= sprintf ("%.0f", $irdsize);
+	$vmsize = $this->{vmmbyte} + $irdsize;
+	$vmsize = sprintf ("%.0f", $vmsize);
+	$vmsize = $vmsize."M";
 	#==========================================
 	# create tmp directory
 	#------------------------------------------
@@ -1503,12 +1512,6 @@ sub setupInstallStick {
 	# create virtual disk
 	#------------------------------------------
 	$kiwi -> info ("Creating virtual disk...");
-	if (! $gotsys) {
-		$vmsize = -s $initrd;
-		$vmsize+= $vmsize * 1.3;
-		$vmsize/= 1024;
-		$vmsize = sprintf ("%.0f", $vmsize);
-	}
 	$status = qxx ("qemu-img create $diskname $vmsize 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
@@ -1532,7 +1535,7 @@ sub setupInstallStick {
 	$kiwi -> info ("Create partition table for virtual disk");
 	if ($gotsys) {
 		@commands = (
-			"n","p","1",".","+30M",
+			"n","p","1",".","+".$irdsize."M",
 			"n","p","2",".",".",
 			"a","1","w","q"
 		);
