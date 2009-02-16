@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Mon Feb 16 10:27:00 CET 2009 - ms@suse.de
+
+- v3.18
+- make sure the OEM repartition code leaves an active flaged
+  boot partition at the end. This might be required for some BIOS
+  implementation to be able to boot from the device (bnc #475664)
+
+-------------------------------------------------------------------
 Fri Feb 13 13:48:30 CET 2009 - ms@suse.de
 
 - v3.17

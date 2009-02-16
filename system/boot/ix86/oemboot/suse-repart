@@ -144,7 +144,8 @@ function OEMRepartStandard {
 					for cmd in \
 						d n p 2 1 +"$disk1MBytes"M \
 						n p 1 . . \
-						t 1 82 w
+						t 1 82 \
+						a 2 w q
 					do
 						if [ $cmd = "." ];then
 							echo >> $input
@@ -160,7 +161,8 @@ function OEMRepartStandard {
 						d n p 2 1 +"$disk1MBytes"M \
 						n p 4 . +"$recoMByte"M \
 						n p 1 . . \
-						t 1 82 w
+						t 1 82 \
+						a 2 w q
 					do
 					if [ $cmd = "." ];then
 						echo >> $input
@@ -178,7 +180,8 @@ function OEMRepartStandard {
 					# -home -swap -recovery
 					#--------------------------------------
 					for cmd in \
-						d n p 2 . . w
+						d n p 2 . . \
+						a 2 w q
 					do
 						if [ $cmd = "." ];then
 							echo >> $input
@@ -192,7 +195,8 @@ function OEMRepartStandard {
 					#--------------------------------------
 					for cmd in \
 						d n p 2 1 +"$disk1MBytes"M \
-						n p 4 . . w
+						n p 4 . . \
+						a 2 w q
 					do
 						if [ $cmd = "." ];then
 							echo >> $input
@@ -218,7 +222,8 @@ function OEMRepartStandard {
 						d n p 2 1 +"$disk1MBytes"M \
 						n p 1 . +"$swapsize"M \
 						n p 3 . . \
-						t 1 82 w
+						t 1 82 \
+						a 2 w q
 					do
 						if [ $cmd = "." ];then
 							echo >> $input
@@ -235,7 +240,8 @@ function OEMRepartStandard {
 						n p 1 . +"$swapsize"M \
 						n p 4 . +"$recoMByte"M \
 						n p 3 . . \
-						t 1 82 w
+						t 1 82 \
+						a 2 w q
 					do
 						if [ $cmd = "." ];then
 							echo >> $input
@@ -254,7 +260,8 @@ function OEMRepartStandard {
 					#--------------------------------------
 					for cmd in \
 						d n p 2 1 +"$disk1MBytes"M \
-						n p 3 . . w
+						n p 3 . . \
+						a 2 w q
 					do
 						if [ $cmd = "." ];then
 							echo >> $input
@@ -269,7 +276,8 @@ function OEMRepartStandard {
 					for cmd in \
 						d n p 2 1 +"$disk1MBytes"M \
 						n p 4 . +"$recoMByte"M \
-						n p 3 . . w
+						n p 3 . . \
+						a 2 w q
 					do
 						if [ $cmd = "." ];then
 							echo >> $input
@@ -364,7 +372,7 @@ function OEMRepartOverlayed {
 		input=/part.input
 		rm -f $input
 		if [ $swapsize = 0 ];then
-			for cmd in d 2 n p 2 . . w; do
+			for cmd in d 2 n p 2 . . a 2 w q; do
 				if [ $cmd = "." ];then
 					echo >> $input
 					continue
@@ -372,7 +380,7 @@ function OEMRepartOverlayed {
 				echo $cmd >> $input
 			done
 		else
-			for cmd in d 2 n p 2 . +"$disk2MBytes"M n p 3 . . t 3 82 w
+			for cmd in d 2 n p 2 . +"$disk2MBytes"M n p 3 . . t 3 82 a 2 w q
 			do
 				if [ $cmd = "." ];then
 					echo >> $input
@@ -469,7 +477,7 @@ function OEMRepartCombined {
 		input=/part.input
 		rm -f $input
 		if [ $swapsize = 0 ];then
-			for cmd in d 2 n p 2 . . w;do
+			for cmd in d 2 n p 2 . . a 2 w q;do
 				if [ $cmd = "." ];then
 					echo >> $input
 					continue
@@ -477,7 +485,7 @@ function OEMRepartCombined {
 				echo $cmd >> $input
 			done
 		else
-			for cmd in d 2 n p 2 . +"$disk2MBytes"M n p 3 . . t 3 82 w;do
+			for cmd in d 2 n p 2 . +"$disk2MBytes"M n p 3 . . t 3 82 a 2 w q;do
 				if [ $cmd = "." ];then
 					echo >> $input
 					continue
@@ -528,7 +536,7 @@ function OEMRepartLVM {
 	vgchange -an
 	input=/part.input
 	rm -f $input
-	for cmd in n p 3 . . t 3 8e w q;do
+	for cmd in n p 3 . . t 3 8e a 2 w q;do
 		if [ $cmd = "." ];then
 			echo >> $input
 			continue
