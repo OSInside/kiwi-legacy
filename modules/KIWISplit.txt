@@ -1,0 +1,8 @@
+<split>
+   <temporary>
+      <file name="/var"/>
+      <file name="/var/*"/>
+      <file name="/boot"/>
+      <file name="/boot/*"/>
+   </temporary>
+</split>

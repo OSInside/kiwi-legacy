@@ -44,7 +44,7 @@ use KIWITest;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "3.18";
+our $Version       = "3.19";
 our $Publisher     = "SUSE LINUX Products GmbH";
 our $Preparer      = "KIWI - http://kiwi.berlios.de";
 our $openSUSE      = "http://download.opensuse.org";
@@ -94,6 +94,7 @@ our $Scheme   = $BasePath."/modules/KIWIScheme.rng";
 our $SchemeTST= $BasePath."/modules/KIWISchemeTest.rng";
 our $KConfig  = $BasePath."/modules/KIWIConfig.sh";
 our $KMigrate = $BasePath."/modules/KIWIMigrate.txt";
+our $KSplit   = $BasePath."/modules/KIWISplit.txt";
 our $Revision = $BasePath."/.revision";
 our $TestBase = $BasePath."/tests";
 our @SchemeCVT= (

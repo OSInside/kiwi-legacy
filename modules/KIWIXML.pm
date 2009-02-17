@@ -182,6 +182,18 @@ sub new {
 		return undef;
 	}
 	#==========================================
+	# Store object data
+	#------------------------------------------
+	$this->{kiwi}            = $kiwi;
+	$this->{foreignRepo}     = $foreignRepo;
+	$this->{optionsNodeList} = $optionsNodeList;
+	#==========================================
+	# Add default split section of not defined
+	#------------------------------------------
+	if (! $splitNodeList) {
+		$splitNodeList = $this -> addDefaultSplitNode();
+	}
+	#==========================================
 	# Validate xml input with current scheme
 	#------------------------------------------
 	eval {
@@ -210,13 +222,6 @@ sub new {
 			return undef;
 		}
 	}
-	#==========================================
-	# Store object data
-	#------------------------------------------
-	$this->{kiwi}            = $kiwi;
-	$this->{foreignRepo}     = $foreignRepo;
-	$this->{optionsNodeList} = $optionsNodeList;
-
 	#==========================================
 	# Set packagemanager if set on commandline
 	#------------------------------------------
@@ -3071,6 +3076,33 @@ sub getInstSourceSatSolvable {
 		return $index;
 	}
 	return undef;
+}
+
+#==========================================
+# addDefaultSplitNode
+#------------------------------------------
+sub addDefaultSplitNode {
+    # ...
+	# if no split section is setup we add a default section
+	# from the contents of the KIWISplit.txt file and use it
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $splitTree;
+	my $splitXML = new XML::LibXML;
+	eval {
+		$splitTree = $splitXML
+			-> parse_file ( $main::KSplit );
+	};
+	if ($@) {
+		my $evaldata=$@;
+		$kiwi -> error  ("Problem reading split file: $main::KSplit");
+		$kiwi -> failed ();
+		$kiwi -> error  ("$evaldata\n");
+		return undef;
+	}
+	return $splitTree
+		-> getElementsByTagName ("split");
 }
 
 1;
