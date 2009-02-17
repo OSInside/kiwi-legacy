@@ -5,7 +5,7 @@ Tue Feb 17 14:42:28 CET 2009 - ms@suse.de
 - added default split section if no split section is set in
   config.xml. The contents of the default section are stored
   in /usr/share/kiwi/modules/KIWISplit.txt. At the moment we
-  use /var and /boot in a temporary location (bnc #473826)
+  use /var in a temporary location (bnc #473826)
 
 -------------------------------------------------------------------
 Mon Feb 16 10:27:00 CET 2009 - ms@suse.de
