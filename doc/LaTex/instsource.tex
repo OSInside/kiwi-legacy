@@ -2,6 +2,7 @@
 \label{chapter:instsrc}
 \minitoc
 
+
 A \textbf{Product} or \textbf{Installation Source} is what you find on an
 installation disk or in an online repository. In contrast to a live disk the
 media contain plain RPM archives and YaST metadata for installation. Furthermore
@@ -10,25 +11,42 @@ in case it is a disk. For remote installation sources (e.g. a FTP tree) the user
 can download the \textit{initrd} and \textit{kernel} and add a boot menu entry
 manually to boot the installation system.
 
-TODO Add link/reference how this is done.
+This is described nicely in the openSUSE Wiki\footnote{
+\href{http://en.opensuse.org/Network\_Install}{http://en.opensuse.org/Network\_Install}}.
 
 
 \section{Prerequisites}
+\label{sec:prereq}
 
-First of all the installation source creation requires the optional packages
-\textit{kiwi-instsource} plus supplementing plugins from the packages
-\textit{kiwi-instsource-plugins-openSUSE-<VERSION>-<RELEASE>}
-which are all configured to \textit{supplement} the kiwi-instsource
-package. This means that multiple repositories might be necessary if the plugin
-packages reside elsewhere than the other kiwi packages. The plugins are packaged
-in extra packages for some reasons. First of all, the YaST metadata is no fixed
-standard but tends to change from release to release, so the code creating the
-metadata is version specific. Finally the concept allows users to make their own
+First of all the installation source creation requires the packages
+\textit{kiwi-instsource} and supplementing plugins from the packages
+\textit{kiwi-inst\-source-plugins-open\-SU\-SE-<VERSION>-<RELEASE>}.
+They are configured to \textit{supplement} the kiwi-inst\-source
+package through RPM magic. This means that it may be necessary to subscribe to
+multiple repositories if the plugin packages reside elsewhere than the other
+kiwi packages. The plugins are packaged in extra packages for two reasons.
+First of all, the YaST metadata is no fixed standard but tends to change from
+release to release, so the code creating the metadata is version specific.
+Finally the concept allows users to make their own
 custom plugins for special purposes. This mechanism will be explained in more
-detail in ref:TODO
+detail in \vref{subsec:plugins}.
+
+You need some source directories containing the available RPM files on the very
+same harddisk where you want to create the installation sources. The reason for
+that is the fact that hard links are used to speed up the installation source
+creation. There are plans to integrate support for mixed environments, but those
+have been delayed due to more important issues. If you use a \textit{full
+tree\footnote{a tree containing only RPM files which have been built using no
+other RPMs then those available in the same tree}} be prepared to use 10--10\,GB
+per full tree, so if you build installation sources for multiple architectures
+this may easily sum up to 120\,GB. I recommend at least a 300\,GB harddisk.
+
+It is possible to use a mounted DVD as ``full tree'', but in that case you have
+to get the \textit{meta\-packages} from some other source.
 
 
 \section{Interface}
+\label{sec:interface}
 
 The interface for installation source creation is implemented in two steps. The
 first one is an extension of the existing config syntax as described in
@@ -70,7 +88,50 @@ Blah.
 
 \section{Calling Options}
 
-TODO
+\begin{lstlisting}[language=Bash, caption={Calling kiwi-isntsource},
+label={lst:nstsource-call}]
+kiwi --root <rootdir> \
+     --instsource-local \
+     --create-instsource <configdir>
+\end{lstlisting}
+
+The most simple call of kiwi-inst\-source is shown in \vref{lst:nstsource-call}.
+Hereby \texttt{root\-dir} refers to the base directory where all operations
+happen. This directory will be created by kiwi. The config directory
+\texttt{con\-fig\-dir} is just the same as in the other kiwi modes, the directory
+where the config.xml file resides.
+
+The option \textit{instsource-local}  has been added to distinguish between the
+local only mode and the remote repository mode. However, as mentioned in
+\vref{sec:prereq} the remote mode is not supported in this version.
+
+There are some more options available, such as the \texttt{-v} switch to
+increase verbosity and the logfile option. % as described in (AI Marcus).
+During development I typically used something like \vref{lst:instsource-call2}.
+
+\begin{lstlisting}[language=Bash, caption={Typical kiwi-isntsource call during
+development},
+label={lst:nstsource-call}]
+kiwi --root 19.01 \
+     -vvv \
+     --logfile terminal \
+     --instsource-local \
+     --create-instsource \
+/space/config/openSUSE\:Factory/_product\:openSUSE-11.2-dvd5-dvd-i586/ \
+     | tee 19.01.log
+\end{lstlisting}
+
+The logfile options effect is that all logging output is written to the shell
+and can be captured easily using the \texttt{tee} command. For debugging it is
+helpful to have a file containing all output for analysis with \texttt{grep} and
+to see the output passing for progress.
+
+The switch \texttt{-v} which can be used multiple times increases logging
+verbosity but slows progress at the same time. Three or more times prints log
+information for each resolved package which is sometimes necessary to identify
+problems in the used repositories. For most purposes two times \texttt{-v} is
+just fine. In this particular example the DVD5 flavour of openSUSE factory was
+built.
 
 
 \section{Directory Layout}
