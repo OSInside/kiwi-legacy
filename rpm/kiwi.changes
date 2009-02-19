@@ -2,6 +2,13 @@
 Tue Feb 17 14:42:28 CET 2009 - ms@suse.de
 
 - v3.19
+- add function canWrite() to check if we can write to
+  the destination before copying config / branding files
+- fixed atftp option handling for the multicast setup
+  use "multicast enable/disable" notation
+- fixed dhcpcd calls to use PXE_IFACE as parameter
+- use DNSDOMAIN for DOMAIN if DOMAIN is not set
+- use DNSSERVERS for DNS if DNS is not set
 - added default split section if no split section is set in
   config.xml. The contents of the default section are stored
   in /usr/share/kiwi/modules/KIWISplit.txt. At the moment we

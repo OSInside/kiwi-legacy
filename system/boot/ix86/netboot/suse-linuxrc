@@ -28,7 +28,7 @@ export DEBUG=0
 # Exports (Booting)
 #--------------------------------------
 export DOMURD_MODULES="xennet xenblk"
-export INITRD_MODULES="reiserfs"
+export INITRD_MODULES=""
 export LOCAL_BOOT="no"
 export KERNEL_LIST
 
@@ -285,7 +285,7 @@ if [ $LOCAL_BOOT = "no" ];then
 		while test ! -s $CONFIG;do
 			Echo "Lookup network client config file again..."
 			Echo "Checking for config file: config.$DHCPCHADDR"
-			dhcpcd -n
+			dhcpcd -n $PXE_IFACE
 			fetchFile KIWI/config.$DHCPCHADDR $CONFIG
 			if test ! -s $CONFIG;then
 				searchAlternativeConfig
@@ -370,8 +370,8 @@ then
 					Echo "Base system is up to date, activating disk system..."
 				fi
 			else
+				Echo -b "On-disk Image mount attempt failed,"
 				Echo -b "Image Update for image [ $imageName ] needed"
-				Echo -b "Image mount failed"
 				RELOAD_IMAGE="yes"
 				systemIntegrity="clean"
 			fi
@@ -465,7 +465,7 @@ then
 			# /.../
 			# now load the image into the imageDevice
 			# ---
-			multicast=""
+			multicast="enable"
 			if test "$imageZipped" = "compressed"; then
 				Echo "Compressed image found: Disable multicast download"
 				multicast="disable"
@@ -516,9 +516,7 @@ then
 			Echo "Retry to load image..."
 			sleep 15
 		done
-		echo $imageDevice | grep -q ram
-		haveDataInRam=$?
-		if test ! -z $DISK && test $haveDataInRam != 0;then
+		if test ! -z $DISK;then
 			probeFileSystem $imageDevice
 			if test "$FSTYPE" = "reiserfs";then
 				Echo "Resize Reiser filesystem to full partition space..."
@@ -539,15 +537,6 @@ then
 				e2fsck -f -p $imageDevice
 				INITRD_MODULES="$INITRD_MODULES ext3"
 			fi
-		fi
-		if test ! -z $DISK && test $haveDataInRam = 0;then
-			Echo "Including RAM device data to disk..."
-			RELOAD_CONFIG="yes"
-			mkdir -p /config
-			mountSystem
-			rm -rf /mnt/lost+found
-			cp -a /mnt/* /config && rm -f /mnt/*
-			umountSystem
 		fi
 		rm -f /etc/ireal.md5
 		rm -f /etc/image.md5
@@ -924,7 +913,7 @@ if \
 	[ -z "$NBDROOT" ]      && \
 	[ -z "$AOEROOT" ]
 then
-	dhcpcd -k
+	dhcpcd -p -k $PXE_IFACE
 fi
 
 #======================================
@@ -951,8 +940,10 @@ umountSystemFilesystems
 # 25) copy initrd files to image
 #--------------------------------------
 importBranding
-cp /preinit /mnt
-cp /include /mnt
+if canWrite /mnt;then
+	cp /preinit /mnt
+	cp /include /mnt
+fi
 
 #======================================
 # 26) check if reboot is required

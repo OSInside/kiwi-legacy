@@ -43,6 +43,15 @@ pdfpagemode=UseOutlines, % options are: None,UseThumbs,UseOutlines,FullScreen
 pdfstartview=FitV,       % options are: fit[ |h|v|b|bh|bv]
 hyperindex=true]{hyperref}
 
+% Environment for code listings
+\usepackage{listings}
+
+\lstset{language=Bash} % C++ als Programmiersprache im listings package
+\lstset{extendedchars, breaklines, basicstyle=\ttfamily\normalsize}
+\lstset{keywordstyle=\color[rgb]{0.00,0.00,0.50}{}\bfseries,commentstyle=\color[rgb]{0.00,0.50,0.25}{}}
+\lstset{numbers=left, stepnumber=1, numberstyle=\tiny, xleftmargin=1em, numbersep=10pt}
+\lstset{basewidth={0.5em,0.45em}, captionpos=b}
+\lstset{frame=tblr, framerule=0.5pt}
 
 %%==============================
 %% Definitions
@@ -140,6 +149,7 @@ hyperindex=true]{hyperref}
 \input oem
 \input xen
 \input ec2
+%\input instsource
 \input testing
 \printindex
 \end{document}

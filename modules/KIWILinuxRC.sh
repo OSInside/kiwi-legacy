@@ -1733,7 +1733,7 @@ function setupNetwork {
 		done
 	fi
 	export PXE_IFACE=$iface
-	dhcpcd $PXE_IFACE 1>&2
+	dhcpcd -p $PXE_IFACE 1>&2
 	if test $? != 0;then
 		systemException \
 			"Failed to setup DHCP network interface !" \
@@ -1742,10 +1742,16 @@ function setupNetwork {
 	ifconfig lo 127.0.0.1 netmask 255.0.0.0 up
 	for i in 1 2 3 4 5 6 7 8 9 0;do
 		[ -s /var/lib/dhcpcd/dhcpcd-$PXE_IFACE.info ] && break
-		sleep 5
+		sleep 2
 	done
 	importFile < /var/lib/dhcpcd/dhcpcd-$PXE_IFACE.info
+	if [ -z "$DOMAIN" ] && [ -n "$DNSDOMAIN" ];then
+		export DOMAIN=$DNSDOMAIN
+	fi
 	echo "search $DOMAIN" > /etc/resolv.conf
+	if [ -z "$DNS" ] && [ -n "$DNSSERVERS" ];then
+		export DNS=$DNSSERVERS
+	fi
 	IFS="," ; for i in $DNS;do
 		echo "nameserver $i" >> /etc/resolv.conf
 	done
@@ -3077,13 +3083,13 @@ function fetchFile {
 			if test "$izip" = "compressed"; then
 				# mutlicast is disabled because you can't seek in a pipe
 				atftp \
-					--option "disable multicast" \
+					--option "multicast disable" \
 					--option "blksize $imageBlkSize" -g -r $path \
 					-l /dev/stdout $host 2>$TRANSFER_ERRORS_FILE |\
 					gzip -d > $dest 2>>$TRANSFER_ERRORS_FILE
 			else
 				atftp \
-					--option "$multicast multicast"  \
+					--option "multicast $multicast"  \
 					--option "blksize $imageBlkSize" \
 					-g -r $path -l $dest $host &> $TRANSFER_ERRORS_FILE
 			fi
@@ -3157,12 +3163,20 @@ function importBranding {
 	# to the system to allow to use them persistently
 	# ----
 	if [ -f /image/loader/message ];then
-		mv /image/loader/message /mnt/boot
+		if ! canWrite /mnt/boot;then
+			Echo "Can't write to boot, import of boot message skipped"
+		else
+			mv /image/loader/message /mnt/boot
+		fi
 	fi
 	if [ -f /image/loader/branding/logo.mng ];then
 	if [ -d /mnt/etc/bootsplash/themes ];then
 		for theme in /mnt/etc/bootsplash/themes/*;do
 			if [ -d $theme/images ];then
+				if ! canWrite $theme;then
+					Echo "Can't write to $theme, import of boot theme skipped"
+					continue
+				fi
 				cp /image/loader/branding/logo.mng  $theme/images
 				cp /image/loader/branding/logov.mng $theme/images
 				cp /image/loader/branding/*.jpg $theme/images
@@ -3269,9 +3283,20 @@ function setupConfigFiles {
 	# all files created below /config inside the initrd are
 	# now copied into the system image
 	# ----
+	local file
+	local dir
 	cd /config
-	find . -type d | while read d ; do  mkdir -p /mnt/$d ; done
-	find . -type f | while read f ; do  cp $f /mnt/$f ; done
+	find . -type f | while read file;do
+		dir=$(dirname $file)
+		if ! canWrite /mnt/$dir;then
+			Echo "Can't write to $dir, read-only filesystem... skipped"
+			continue
+		fi
+		if [ ! -d /mnt/$dir ];then
+			mkdir -p /mnt/$dir
+		fi
+		cp $file /mnt/$file
+	done
 	cd /
 	rm -rf /config
 }
@@ -3324,14 +3349,16 @@ function activateImage {
 	reopenKernelConsole
 	udevPending
 	mount --move /dev /mnt/dev
-	umount -t devpts /mnt/dev/pts
 	udevKill
+	umount -t devpts /mnt/dev/pts
 	udevPending
 	#======================================
 	# copy boot log file into system image
 	#--------------------------------------
 	mkdir -p /mnt/var/log
-	cp /var/log/boot.kiwi /mnt/var/log/boot.kiwi
+	rm -f /var/log/boot.msg
+	cp -f /mnt/dev/shm/initrd.msg /mnt/var/log/boot.msg
+	cp -f /var/log/boot.kiwi /mnt/var/log/boot.kiwi
 	#======================================
 	# run preinit stage
 	#--------------------------------------
@@ -3411,4 +3438,27 @@ function setupUnionFS {
 	local roDevice=`getDiskID $2`
 	local unionFST=$3
 	export UNIONFS_CONFIG="$rwDevice,$roDevice,$unionFST"
+}
+#======================================
+# canWrite
+#--------------------------------------
+function canWrite {
+	# /.../
+	# check if we can write to the given location
+	# If no location is given the function test
+	# for write permissions in /mnt.
+	# returns zero on success.
+	# ---
+	local dest=$1
+	if [ -z "$dest" ];then
+		dest=/mnt
+	fi
+	if [ ! -d $dest ];then
+		return 1
+	fi
+	if touch $dest/can-write &>/dev/null;then
+		rm $dest/can-write
+		return 0
+	fi
+	return 1
 }
