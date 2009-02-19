@@ -58,7 +58,7 @@ configurable plugins for the metadata creation as described in
 \subsection{Configuration File Extension}
 \label{subsec:config-extend}
 
-The config.xml file now supports a new optional element called
+The \textit{config.xml} file now supports a new optional element called
 \textbf{instsource}. Its purpose is to specify the things that are significant
 for an installation repository:
 \begin{itemize}
@@ -77,7 +77,94 @@ must be met:
   \item{the disc must boot on each architecture}
   \item{YaST metadata must be available for each architecture}
 \end{itemize}
+
 Additionally multiple boot catalog entries must be made in the iso filesystem.
+
+In the following \vref{lst:configmin} only the element \texttt{inst\-source} is
+shown and it is limited to an absolute minimum. A complete list of required
+variables is shown in \vref{tab:variables}.
+This example shows the basic structure of the extension.
+
+\begin{lstlisting}[language=xml, caption={Installation source extensions},
+label={lst:configmin}]
+<instsource>
+  <architectures>
+    <arch id="i386" name="dummy" fallback="noarch" />
+    <arch id="noarch" name="dummy" />
+    <requiredarch ref="i586" />
+  </architectures>
+  <productoptions>
+    <productvar name="DISTNAME">openSUSE</productvar>
+
+    <productinfo name="CONTENTSTYLE">11</productinfo>
+
+    <productoption name="BETA_VERSION">Alpha 0</productoption>
+  </productoptions>
+  <instrepo name="repository_1" priority="1" local="true">
+    <source path="obs://openSUSE:Factory/standard" />
+  </instrepo>
+  <metadata>
+    <repopackage name="installation-images" medium="0" removearch="src,nosrc" onlyarch="i586," />
+  </metadata>
+  <repopackages>
+    <repopackage name="vim"/>
+  </repopackages>
+</instsource>
+\end{lstlisting}
+
+So basically the \texttt{instsource} section consists of five types of information.
+
+\begin{description}
+
+  \item[architectures]{%
+
+    Contains a list of architectures defining a fallback chain. The specified fallback must be an
+    existing id to pass validation. Omitting the optional fallback means ``no fallback''.
+  }
+
+  \item[productoptions]{%
+
+    Contains three types of subattributes with different impact.
+    An expansion mechanism is implemented allowing sharing information. You can specify VERSION=\dots
+    and refer to the content using \texttt{\$VERSION} in the variable's string.
+    The syntax is the same for all, and the arguments may contain whitespace.
+    \begin{description}
+      \item[productvar]{%
+
+	Used for theming metapackages, specifying variables to be used as descibed above and for creating
+	the \texttt{media.<n>} files and the \texttt{products} file.
+      }
+      \item[productoption]{%
+
+	Global settings like debugmedium number and plugin location. No effect on created files but on the structure.
+      }
+      \item[productinfo]{%
+
+	All tags listed here are put into the \textit{content file\footnote{\href{http://en.opensuse.org/Standards/YaST2\_Repository\_Metadata/media\#The\_content\_file}{http://en.opensuse.org/Standards/YaST2\_Repository\_Metadata/media\#The\_content\_file}}} directly.
+      }
+    \end{description}
+  }
+
+  \item[metadata]{%
+    Contains a set of metapackages specified as repopackage. Metapackages are explained in more detail in \vref{sec:metapacks}.
+  }
+
+  \item[instrepo]{%
+    Specifies a location where packages are taken from. In the most basic form this can be one plain directory containing
+    plain rpm files without any naming convention besides \texttt{name.rpm} or \texttt{name.spm}. Of course it is also
+    possible to use a mounted DVD. The metadata of that is ignored.
+    Any number of repositories can be used. The priority must be unique, smaller number means higher priority. The name attribute
+    can be used as reference for the \textit{force\-repo} attribute in the \texttt{repopackage} element. Referring to an undefined
+    repo results in validation error.
+  }
+
+  \item[repopackages]{%
+    Contains a list of \texttt{repopackage} elements. This element can be specified multiple times to reflect groups
+    for better readability.
+  }
+
+\end{description}
+
 
 
 \subsection{Metadata Creation Plugins}
@@ -87,15 +174,16 @@ Blah.
 
 
 \section{Calling Options}
+\label{sec:options}
 
-\begin{lstlisting}[language=Bash, caption={Calling kiwi-isntsource},
-label={lst:nstsource-call}]
+\begin{lstlisting}[language=Bash, caption={Calling kiwi-instsource},
+label={lst:instsource-call}]
 kiwi --root <rootdir> \
      --instsource-local \
      --create-instsource <configdir>
 \end{lstlisting}
 
-The most simple call of kiwi-inst\-source is shown in \vref{lst:nstsource-call}.
+The most simple call of kiwi-inst\-source is shown in \vref{lst:instsource-call}.
 Hereby \texttt{root\-dir} refers to the base directory where all operations
 happen. This directory will be created by kiwi. The config directory
 \texttt{con\-fig\-dir} is just the same as in the other kiwi modes, the directory
@@ -109,11 +197,11 @@ There are some more options available, such as the \texttt{-v} switch to
 increase verbosity and the logfile option. % as described in (AI Marcus).
 During development I typically used something like \vref{lst:instsource-call2}.
 
-\begin{lstlisting}[language=Bash, caption={Typical kiwi-isntsource call during
+\begin{lstlisting}[language=Bash, caption={Typical kiwi-instsource call during
 development},
-label={lst:nstsource-call}]
+label={lst:instsource-call2}]
 kiwi --root 19.01 \
-     -vvv \
+     -vv \
      --logfile terminal \
      --instsource-local \
      --create-instsource \
@@ -121,7 +209,7 @@ kiwi --root 19.01 \
      | tee 19.01.log
 \end{lstlisting}
 
-The logfile options effect is that all logging output is written to the shell
+The logfile option's effect is that all logging output is written to the shell
 and can be captured easily using the \texttt{tee} command. For debugging it is
 helpful to have a file containing all output for analysis with \texttt{grep} and
 to see the output passing for progress.
@@ -133,6 +221,11 @@ problems in the used repositories. For most purposes two times \texttt{-v} is
 just fine. In this particular example the DVD5 flavour of openSUSE factory was
 built.
 
+
+\section{Metapackages}
+\label{sec:metapacks}
+
+TODO
 
 \section{Directory Layout}
 
