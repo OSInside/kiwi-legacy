@@ -2,6 +2,9 @@
 Tue Feb 17 14:42:28 CET 2009 - ms@suse.de
 
 - v3.19
+- fixed netboot to call e2fsck instead of fsck which doesn't
+  exist. Also fixed e2fsck calls to use -p only instead
+  of -f -p (bnc #473355)
 - add function canWrite() to check if we can write to
   the destination before copying config / branding files
 - fixed atftp option handling for the multicast setup

@@ -1879,7 +1879,7 @@ function createFileSystem {
 		# create a filesystem on the root partition
 		# ----
 		if test $diskID -gt 2; then
-			if ! fsck -f -p $diskPartition 1>&2; then
+			if ! e2fsck -p $diskPartition 1>&2; then
 				Echo "Partition $diskPartition is not valid, formating..."
 				mke2fs -j $diskPartition 1>&2
 				if test $? != 0; then
@@ -2627,7 +2627,7 @@ function setupReadWrite {
 			probeFileSystem $rwDevice
 			if [ ! "$FSTYPE" = "unknown" ];then
 				Echo "Checking filesystem for RW data on $rwDevice..."
-				e2fsck -f -p $rwDevice
+				e2fsck -p $rwDevice
 			fi
 			#======================================
 			# restore FSTYPE
@@ -2643,7 +2643,7 @@ function setupReadWrite {
 					Echo "Failed to create ext3 filesystem"
 					return 1
 				fi
-				e2fsck -f -p $rwDevice >/dev/null
+				e2fsck -p $rwDevice >/dev/null
 			fi
 		else
 			umount $rwDevice

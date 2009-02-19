@@ -527,14 +527,14 @@ then
 				Echo "Resize EXT2 filesystem to full partition space..."
 				resize2fs -f -F -p $imageDevice
 				Echo "Checking EXT2 filesystem..."
-				e2fsck -f -p $imageDevice
+				e2fsck -p $imageDevice
 				INITRD_MODULES="$INITRD_MODULES ext2"
 			fi
 			if test "$FSTYPE" = "ext3";then
 				Echo "Resize EXT3 filesystem to full partition space..."
 				resize2fs -f -F -p $imageDevice
 				Echo "Checking EXT3 filesystem..."
-				e2fsck -f -p $imageDevice
+				e2fsck -p $imageDevice
 				INITRD_MODULES="$INITRD_MODULES ext3"
 			fi
 		fi
