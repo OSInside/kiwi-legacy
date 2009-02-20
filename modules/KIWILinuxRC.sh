@@ -3435,6 +3435,9 @@ function bootImage {
 	#======================================
 	# directly boot/reboot
 	#--------------------------------------
+
+	# we already fscked, no reason for boot.rootfsck to try again
+	export ROOTFS_FSCK="0"
 	mount -n -o remount,rw / &>/dev/null
 	exec < dev/console >dev/console 2>&1
 	if [ $PIVOT = "true" ];then
