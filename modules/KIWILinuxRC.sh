@@ -1534,30 +1534,59 @@ function searchBIOSBootDevice {
 	local h=/usr/sbin/hwinfo
 	local c="Device File:|BIOS id"
 	local ddevs=`$h --disk|grep -E "$c"|sed -e"s@(.*)@@"|cut -f2 -d:|tr -d " "`
+	local cmpd=/tmp/mbrids
+	local ifix=0
+	local file
 	local pred
+	#======================================
+	# Check for BIOS id 0x80
+	#--------------------------------------
 	for curd in $ddevs;do
 		if [ $curd = "0x80" ];then
 			echo $pred; return
 		fi
 		pred=$curd
 	done
+	#======================================
+	# Search and copy all mbrid files 
+	#--------------------------------------
+	mkdir -p $cmpd
+	for curd in $ddevs;do
+		for id in 1 2;do
+			if ! mount $curd$id /mnt;then
+				continue
+			fi
+			if [ -f /mnt/boot/grub/mbrid ];then
+				cp -a /mnt/boot/grub/mbrid $cmpd/mbrid$ifix
+				ifix=$(expr $ifix + 1)
+				umount /mnt
+				break
+			fi
+			umount /mnt
+		done
+	done
+	#======================================
+	# Read mbrid from the newest mbrid file 
+	#--------------------------------------
+	file=$(ls -1t $cmpd 2>/dev/null | head -n 1)
+	if [ -z "$file" ];then
+		systemException \
+			"Failed to find MBR identifier !" \
+		"reboot"
+	fi
+	read mbrI < $cmpd/$file
+	#======================================
+	# Compare ID with MBR entry 
+	#--------------------------------------
 	for curd in $ddevs;do
 		mbrM=`dd if=$curd bs=1 count=4 skip=$((0x1b8))|hexdump -n4 -e '"0x%x"'`
-		mbrI=0
-		for id in 1 2;do
-			if mount $curd$id /mnt;then
-				if [ -f /mnt/boot/grub/mbrid ];then
-					read mbrI < /mnt/boot/grub/mbrid
-					umount /mnt
-					break
-				fi
-				umount /mnt
-			fi
-		done
 		if [ $mbrM = $mbrI ];then
 			echo $curd; return
 		fi
 	done
+	systemException \
+		"No devices matches MBR identifier: $mbrI !" \
+	"reboot"
 }
 #======================================
 # searchVolumeGroup
@@ -3398,22 +3427,13 @@ function bootImage {
 	#======================================
 	# check for reboot request
 	#--------------------------------------
-	if [ ! -z "$OEM_REBOOT" ];then
-		reboot=yes
-	fi
-	if [ $LOCAL_BOOT = "no" ] && [ ! -z "$REBOOT_IMAGE" ];then
-		reboot=yes
-	fi
-	#======================================
-	# reboot if requested
-	#--------------------------------------
-	if [ $reboot = "yes" ];then
-		mount -n -o remount,ro / 2>/dev/null
-		Echo "Reboot requested... rebooting now"
-		/sbin/reboot -f -i >/dev/null 2>&1
+	if [ $LOCAL_BOOT = "no" ];then
+		if [ ! -z "$OEM_REBOOT" ] || [ ! -z "$REBOOT_IMAGE" ];then
+			reboot=yes
+		fi
 	fi
 	#======================================
-	# directly boot
+	# directly boot/reboot
 	#--------------------------------------
 	mount -n -o remount,rw / &>/dev/null
 	exec < dev/console >dev/console 2>&1
@@ -3422,7 +3442,12 @@ function bootImage {
 	fi
 	umount proc &>/dev/null && \
 	umount proc &>/dev/null
-	exec chroot . /sbin/init $option
+	if [ $reboot = "yes" ];then
+		Echo "Reboot requested... rebooting now"
+		exec chroot . /sbin/reboot -f -i
+	else
+		exec chroot . /sbin/init $option
+	fi
 }
 #======================================
 # setupUnionFS

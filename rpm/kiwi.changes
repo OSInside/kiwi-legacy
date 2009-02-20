@@ -2,6 +2,10 @@
 Tue Feb 17 14:42:28 CET 2009 - ms@suse.de
 
 - v3.19
+- fixed oem-reboot feature in KIWILinuxRC.sh (bnc #474043)
+- fixed searchBIOSBootDevice() to use the latest mbrid found
+  on all available disks. Also added a system exception if
+  no boot device could be found. Related to (bnc #474043)
 - fixed netboot to call e2fsck instead of fsck which doesn't
   exist. Also fixed e2fsck calls to use -p only instead
   of -f -p (bnc #473355)
