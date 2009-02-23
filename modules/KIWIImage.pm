@@ -629,8 +629,9 @@ sub createImageCPIO {
 			"cd $imageTree && find . | cpio @cpio | $main::Gzip -f > $dest"
 		);
 	} else {
+		$data = qxx ("rm -f $dest && rm -f $dest.gz");
 		$data = qxx (
-			"rm -f $dest && cd $imageTree && find . | cpio @cpio > $dest"
+			"cd $imageTree && find . | cpio @cpio > $dest"
 		);
 	}
 	my $code = $? >> 8;
@@ -1093,12 +1094,12 @@ sub createImageXen {
 #------------------------------------------
 sub makeLabel {
 	# ...
-	# isolinux does not handle spaces, so we replace it
-	# with this unicode non-breaking space
+	# create label text for isolinux text mode
+	# interface. Special letters needs unicode
+	# code points
 	# ----
-	my $this = shift;
+	my $this  = shift;
 	my $label = shift;
-	$label =~ s/ /\x{00a0}/g;
 	return $label;
 }
 
@@ -1783,11 +1784,11 @@ sub createImageLiveCD {
 	print FD "To start the system enter '".$label."' and press <return>"."\n";
 	print FD "\n\n";
 	print FD "Available boot options:\n";
-	print FD "$label     - Live System"."\n";
-	print FD "$lsafe     - Live System failsafe mode"."\n";
-	print FD "Hard-Disk  - Local boot from hard disk"."\n";
-	print FD "mediacheck - Media check"."\n";
-	print FD "memtest    - Memory Test"."\n";
+	printf (FD "%-20s - %s\n",$label,"Live System");
+	printf (FD "%-20s - %s\n",$lsafe,"Live System failsafe mode");
+	printf (FD "%-20s - %s\n","Hard-Disk","Local boot from hard disk");
+	printf (FD "%-20s - %s\n","mediacheck","Media check");
+	printf (FD "%-20s - %s\n","memtest","Memory Test");
 	print FD "\n";
 	print FD "Have a lot of fun..."."\n";
 	close FD;

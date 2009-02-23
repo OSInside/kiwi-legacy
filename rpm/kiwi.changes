@@ -1,4 +1,17 @@
 -------------------------------------------------------------------
+Mon Feb 23 10:55:22 CET 2009 - ms@suse.de
+
+- v3.20
+- allow use without any graphics boot data, also fixed text
+  based screen showed when isolinux has no graphics screen
+- allow use of gfxboot-branding package as alternative to
+  the recommended gfxboot and gfxboot-devel packages in the
+  boot image description. If the devel package for gfxboot
+  is installed custom boot screen brandings are possible. If the
+  gfxboot-branding package is installed only the branding
+  provided by this package can be used.
+
+-------------------------------------------------------------------
 Tue Feb 17 14:42:28 CET 2009 - ms@suse.de
 
 - v3.19

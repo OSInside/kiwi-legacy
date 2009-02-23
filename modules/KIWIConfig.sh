@@ -980,14 +980,9 @@ function suseGFXBoot {
 	local theme=$1
 	local loader=$2
 	export PATH=$PATH:/usr/sbin
-	#======================================
-	# check for gfxboot package
-	#--------------------------------------
-	if [ ! -d /usr/share/gfxboot ];then
-		echo "gfxboot not installed... skipped"
-	else
+	if [ -d /usr/share/gfxboot ];then
 		#======================================
-		# create boot theme
+		# create boot theme with gfxboot-devel
 		#--------------------------------------
 		cd /usr/share/gfxboot
 		# check for new source layout
@@ -1033,14 +1028,46 @@ function suseGFXBoot {
 				echo "livecd=1" >> /image/loader/gfxboot.cfg
 			fi
 			bin/unpack_bootlogo /image/loader
-			mv /usr/share/syslinux/isolinux.bin /image/loader
-			mv /usr/share/syslinux/mboot.c32 /image/loader
-			mv /boot/memtest.bin /image/loader/memtest
 		else
 			# boot loader graphics image file...
 			mv $bootimage /image/loader
 		fi
 		make -C themes/$theme clean
+	elif [ -f /etc/bootsplash/themes/$theme/bootloader/message ];then
+		#======================================
+		# use boot theme from gfxboot-branding
+		#--------------------------------------
+		echo "gfxboot devel not installed, custom branding skipped !"
+		echo "using gfxboot branding package"
+		mkdir /image/loader
+		if [ $loader = "isolinux" ];then
+			# isolinux boot data...
+			mv /etc/bootsplash/themes/$theme/cdrom/* /image/loader
+		else
+			# boot loader graphics image file...
+			bootimage=/etc/bootsplash/themes/$theme/bootloader/message
+			mv $bootimage /image/loader
+		fi
+	else
+		#======================================
+		# no graphics boot possible
+		#--------------------------------------
+		echo "gfxboot devel not installed"
+		echo "gfxboot branding not installed"
+		echo "graphics boot skipped !"
+		mkdir /image/loader
+	fi
+	#======================================
+	# copy bootloader binaries of required
+	#--------------------------------------
+	if [ $loader = "isolinux" ];then
+		# isolinux boot code...
+		mv /usr/share/syslinux/isolinux.bin /image/loader
+		mv /usr/share/syslinux/mboot.c32 /image/loader
+		mv /boot/memtest.bin /image/loader/memtest
+	else
+		# boot loader binary part of MBR
+		:
 	fi
 	#======================================
 	# create splash screen
@@ -1055,6 +1082,10 @@ function suseGFXBoot {
 	index=0
 	if [ ! -d /etc/bootsplash/themes/$theme ];then
 		theme="SuSE-$theme"
+	fi
+	if [ ! -d /etc/bootsplash/themes/$theme ];then
+		echo "bootsplash branding not installed... skipped"
+		return
 	fi
 	mkdir -p /image/loader/branding
 	cp /etc/bootsplash/themes/$theme/images/logo.mng  /image/loader/branding

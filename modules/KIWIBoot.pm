@@ -2476,6 +2476,15 @@ sub setupSplash {
 		$kiwi -> skipped ();
 		$kiwi -> warning ($status);
 		$kiwi -> skipped ();
+		$kiwi -> info ("Creating compat splash link...");
+		$status = $this -> setupSplashLink ($newird);
+		if ($status ne "ok") {
+			$kiwi -> failed();
+			$kiwi -> error ($status);
+			$kiwi -> failed();
+		} else {
+			$kiwi -> done();
+		}
 		return $initrd;
 	}
 	$kiwi -> done();
@@ -2483,12 +2492,11 @@ sub setupSplash {
 }
 
 #==========================================
-# setupSplashy
+# setupSplashLink
 #------------------------------------------
-sub setupSplashy {
+sub setupSplashLink {
 	# ...
-	# when booting with splashy no changes to the initrd are
-	# required. This function only makes sure the .splash.gz
+	# This function only makes sure the .splash.gz
 	# file exists. This is done by creating a link to the
 	# original initrd file
 	# ---
@@ -2505,12 +2513,33 @@ sub setupSplashy {
 		}
 		$initrd = $initrd.".gz";
 	}
-	$status = qxx ("rm -f $newird && ln -s $initrd $newird");
+	my $dirname = dirname  $initrd;
+	my $curfile = basename $initrd;
+	my $newfile = basename $newird;
+	$status = qxx (
+		"cd $dirname && rm -f $newfile && ln -s $curfile $newfile"
+	);
 	$result = $? >> 8;
 	if ($result != 0) {
 		return ("Failed to create splash link $!");
 	}
 	return "ok";
+}
+
+#==========================================
+# setupSplashy
+#------------------------------------------
+sub setupSplashy {
+	# ...
+	# when booting with splashy no changes to the initrd are
+	# required. This function only makes sure the .splash.gz
+	# file exists. This is done by creating a link to the
+	# original initrd file
+	# ---
+	my $this   = shift;
+	my $newird = shift;
+	my $status = $this -> setupSplashLink ($newird);
+	return $status;
 }
 
 #==========================================
