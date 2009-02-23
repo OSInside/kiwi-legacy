@@ -3,6 +3,8 @@ Mon Feb 23 10:55:22 CET 2009 - ms@suse.de
 
 - v3.20
 - added suse-11.2 boot image description (bnc #478461)
+- prevent boot.rootfsck from being called, the tree was
+  already checked at image creation time
 - allow use without any graphics boot data, also fixed text
   based screen showed when isolinux has no graphics screen
 - allow use of gfxboot-branding package as alternative to
