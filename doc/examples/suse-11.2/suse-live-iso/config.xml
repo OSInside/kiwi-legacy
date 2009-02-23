@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<image schemeversion="2.4" name="suse-11.2-live-iso">
+	<description type="system">
+		<author>Marcus Schäfer</author>
+		<contact>ms@novell.com</contact>
+		<specification>openSUSE 11.2 Live system</specification>
+	</description>
+	<preferences>
+		<type primary="true" boot="isoboot/suse-11.2" flags="unified">iso</type>
+		<version>2.5.1</version>
+		<packagemanager>zypper</packagemanager>
+		<rpm-check-signatures>False</rpm-check-signatures>
+		<rpm-force>True</rpm-force>
+		<locale>en_US.UTF-8</locale>
+		<keytable>us.map.gz</keytable>
+	</preferences>
+	<repository type="yast2">
+		<!--<source path="/image/CDs/full-11.2-i386"/>-->
+		<source path="opensuse://11.2/repo/oss/"/>
+	</repository>
+	<packages type="image">
+		<package name="kernel-default"/>
+		<package name="bootsplash"/>
+		<package name="bootsplash-branding-openSUSE"/>
+		<package name="ifplugd"/>
+		<package name="vim"/>
+		<opensusePattern name="default"/>
+		<opensusePattern name="kde4"/>
+	</packages>
+	<packages type="bootstrap">
+		<package name="filesystem"/> 
+		<package name="glibc-locale"/>
+	</packages>
+</image>

@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<image schemeversion="2.4" name="suse-11.2-xen-guest">
+	<description type="system">
+		<author>Marcus Schäfer</author>
+		<contact>ms@novell.com</contact>
+		<specification>openSUSE 11.2 xen guest system</specification>
+	</description>
+	<preferences>
+		<type filesystem="ext3" boot="xenboot/suse-11.2">xen</type>
+		<version>1.1.2</version>
+		<packagemanager>zypper</packagemanager>
+		<rpm-check-signatures>False</rpm-check-signatures>
+		<rpm-force>True</rpm-force>
+		<locale>en_US</locale>
+		<keytable>us.map.gz</keytable>
+	</preferences>
+	<repository type="yast2">
+		<!--<source path="/image/CDs/full-11.2-i386"/>-->
+		<source path="opensuse://11.2/repo/oss/"/>
+	</repository>
+	<packages type="image">
+		<package name="bootsplash"/>
+		<package name="bootsplash-branding-openSUSE"/>
+		<package name="ifplugd"/>
+		<package name="vim"/>
+		<opensusePattern name="base"/>
+	</packages>
+	<packages type="xen">
+		<package name="kernel-xen"/>
+		<package name="xen"/>
+	</packages>
+	<xenconfig memory="128">
+		<xendisk device="/dev/sda"/> 
+		<xenbridge mac="00:0C:6E:AA:57:2F" name="br0"/>
+	</xenconfig>
+	<packages type="bootstrap">
+		<package name="filesystem"/> 
+		<package name="glibc-locale"/>
+	</packages>
+</image>

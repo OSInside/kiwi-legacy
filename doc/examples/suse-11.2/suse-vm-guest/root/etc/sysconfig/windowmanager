@@ -1,0 +1,107 @@
+## Path: Desktop
+## Description: default mouse cursor theme
+## Type:    string
+## Default:
+#
+# Name of mouse cursor theme for X11. Possible themes can be found
+# in /usr/X11R6/lib/X11/icons/
+#
+X_MOUSE_CURSOR="blueprint-cursor-theme"
+## Path:	Desktop/Window manager
+## Description:	
+## Type:	string(kde,fvwm,gnome,windowmaker)
+## Default:	kde
+## Config:      profiles,kde,susewm
+#
+# Here you can set the default window manager (kde, fvwm, ...)
+# changes here require at least a re-login
+DEFAULT_WM="kde"
+
+## Type:	yesno
+## Default:	yes
+#
+# install the SuSE extension for new users
+# (theme and additional functions)
+#
+INSTALL_DESKTOP_EXTENSIONS="yes"
+## Path:	Desktop/KDE/Lisa
+## Description:	KDE network client configuration
+## Type:	list(none,smb:/,local,"")
+## Default:	smb:/
+## Config:      kdenetwork-lan
+## ServiceRestart: lisa
+#
+# Defines how to use the default network browser
+# "none"    = do not create a Network icon on desktop
+# "smb:/"   = use plain smb only client, without lisa
+# "local"   = use local installed reslisa
+# "$SERVER" = any server where a lisa daemon is running and allows
+#             remote connections
+#
+USE_LAN_SERVER="smb:/"
+## Path:        Desktop/SuSEWM
+## Description: Handle behaviour os susewm
+## Type:        yesno
+## Default:     yes
+#
+# SuSEconfig.wm can create a system.fvwm2rc, .fvwmrc, .bowmanrc, .fvwm2rc95,
+# .mwmrc, .ctwmrc, depending on the installed packages. If
+# you want your systemwide wm config files to be updated after install
+# / removal of packages set SUSEWM_UPDATE to "yes", otherwise to "no"
+#
+SUSEWM_UPDATE="yes"
+
+## Type:        string
+## Default:     all
+#
+# This is the (space separated) list of window managers for which you 
+# want to generate the config file. Valid values are: 
+#  "kde", "gnome", "windowmaker", "blackbox", "fvwm", "fvwm2", 
+#  "fvwm95", "bowman", "mwm", "ctwm", "all".
+# Default setting is "all" which is for generating files for all wms.
+#
+SUSEWM_WM="all"
+
+## Type:        yesno
+## Default:     yes
+#
+# Your fvwm2/95 is slow? Don't want small pixmaps in menus? So set 
+# SUSEWM_XPM to "no", if pixmaps in menus are wanted set it to "yes", 
+# which is the default value. The package 3dpixms has to be installed.
+#
+SUSEWM_XPM="yes"
+## Path:        Desktop
+## Description: prepare global sycoca database for faster first startup
+## Type:        list(yes,initial,no)
+## Default:     initial
+#
+# building a global sycoca database, which can be used at first user
+# login in KDE
+#
+KDE_BUILD_GLOBAL_SYCOCA="initial"
+
+## Type:        yesno
+## Default:     yes
+#
+# IPv6 support is disabled by default, since too many internet
+# servers claim to have IPv6 support, but do not respond.
+#
+KDE_USE_IPV6="no"
+## Path: Desktop
+## Description: create XDG menus for other windowmanagers
+## (black, flux, openbox)
+## Type:   boolean
+## Default: true
+#
+# Should SuSEconfig create XDG menus for other windowmanagers
+# like blackbox, fluxbox, openbox?
+# Possible values are lowercase "true" or "false".
+#
+CREATE_XDG_MENUS="true"
+
+## Type:        yesno
+## Default:     yes
+#
+# IDN support can get disabled to avoid DNS phishing for example.
+#
+KDE_USE_IDN="yes"

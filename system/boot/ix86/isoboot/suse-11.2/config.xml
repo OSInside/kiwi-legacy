@@ -1,0 +1,219 @@
+<?xml version="1.0"?>
+<image schemeversion="2.4" name="initrd-isoboot-suse-11.2">
+	<description type="boot">
+		<author>Marcus Schaefer</author>
+		<contact>ms@novell.com</contact>
+		<specification>boot/initrd image used for LiveDVD media</specification>
+	</description>
+	<preferences>
+		<type bootprofile="default">cpio</type>
+		<version>2.1.2</version>
+		<size unit="M">60</size>
+		<compressed>yes</compressed>
+		<packagemanager>zypper</packagemanager>
+		<rpm-check-signatures>False</rpm-check-signatures>
+	</preferences>
+	<profiles>
+		<profile name="default" description="Boot with default kernel"/>
+		<profile name="smp" description="Boot with smp kernel"/>
+		<profile name="rt" description="Boot with real time kernel"/>
+		<profile name="xen" description="Boot with xen kernel/mboot.c32"/>
+	</profiles>
+	<drivers type="usbdrivers">
+		<file name="usb/host/ehci-hcd.ko"/>
+		<file name="usb/host/uhci-hcd.ko"/>
+		<file name="usb/core/usbcore.ko"/>
+		<file name="usb/storage/usb-storage.ko"/>
+	</drivers>
+	<drivers type="drivers">
+		<file name="drivers/hid/*"/>
+		<file name="drivers/ide/*"/>
+		<file name="drivers/block/loop.ko"/>
+		<file name="drivers/block/brd.ko"/>
+		<file name="fs/ext3/*"/>
+		<file name="fs/ext2/*"/>
+		<file name="fs/fat/*"/>
+		<file name="fs/vfat/*"/>
+		<file name="fs/binfmt_aout.ko"/>
+		<file name="fs/binfmt_misc.ko"/>
+		<file name="fs/mbcache.ko"/>
+		<file name="fs/quota_v1.ko"/>
+		<file name="fs/quota_v2.ko"/>
+		<file name="fs/jbd/*"/>
+		<file name="fs/fuse/*"/>
+		<file name="fs/squashfs/*"/>
+		<file name="updates/aufs.ko"/>
+		<file name="weak-updates/aufs.ko"/>
+		<file name="fs/nls/nls_utf8.ko"/>
+		<file name="fs/nls/nls_cp437.ko"/>
+		<file name="fs/nls/nls_iso8859-1.ko"/>
+		<file name="drivers/cdrom/*"/>
+		<file name="drivers/scsi/*"/>
+		<file name="drivers/message/fusion/*"/>
+		<file name="drivers/ata/*"/>
+		<file name="drivers/parport/*"/>
+		<file name="drivers/acpi/dock.ko"/>
+	</drivers>
+	<repository type="yast2" status="replaceable">
+		<source path="/image/CDs/full-i386"/>
+	</repository>
+	<packages type="bootstrap" profiles="default">
+		<package name="kernel-default"/>
+		<package name="kernel-default-base"/>
+		<package name="kernel-default-extra"/>
+		<package name="aufs-kmp-default"/>
+	</packages>
+	<packages type="bootstrap" profiles="smp">
+		<package name="kernel-pae"/>
+		<package name="kernel-pae-base"/>
+		<package name="kernel-pae-extra"/>
+		<package name="aufs-kmp-pae"/>
+	</packages>
+	<packages type="bootstrap" profiles="xen">
+		<package name="kernel-xen"/>
+		<package name="kernel-xen-base"/>
+		<package name="kernel-xen-extra"/>
+		<package name="aufs-kmp-xen"/>
+	</packages>
+	<packages type="bootstrap">
+		<package name="filesystem"/>
+		<package name="glibc@i586" arch="i686"/>
+		<package name="glibc-locale"/>
+		<package name="cracklib-dict-small"/>
+		<package name="psmisc"/>
+		<package name="bind-libs"/>
+		<package name="bind-utils"/>
+		<package name="dhcpcd"/>
+		<package name="gawk"/>
+		<package name="hwinfo"/>
+		<package name="iproute2"/>
+		<package name="lvm2"/>
+		<package name="netcfg"/>
+		<package name="sysconfig"/>
+		<package name="sysfsutils"/>
+		<package name="file"/>
+		<package name="gfxboot"/>
+		<package name="gfxboot-devel"/>
+		<package name="syslinux"/>
+		<package name="make"/>
+		<package name="memtest86+"/>
+		<package name="squashfs"/>
+		<package name="aufs"/>
+		<package name="fribidi"/>
+		<package name="hdparm"/>
+		<package name="grub"/>
+		<package name="bootsplash"/>
+		<package name="bootsplash-branding-openSUSE"/>
+		<package name="tar"/>
+		<package name="cromfs"/>
+		<package name="rpm"/>
+		<package name="kiwi-tools"/>
+		<package name="checkmedia"/>
+	</packages>
+	<packages type="delete">
+		<package name="ConsoleKit"/>
+		<package name="ConsoleKit-32bit"/>
+		<package name="PolicyKit"/>
+		<package name="aaa_skel"/>
+		<package name="audit-libs"/>
+		<package name="audit-libs-32bit"/>
+		<package name="bind-libs"/>
+		<package name="bind-utils"/>
+		<package name="binutils"/>
+		<package name="blocxx"/>
+		<package name="bootsplash"/>
+		<package name="bootsplash-branding-openSUSE"/>
+		<package name="cpio"/>
+		<package name="cyrus-sasl"/>
+		<package name="db"/>
+		<package name="dbus-1-glib"/>
+		<package name="device-mapper"/>
+		<package name="dhcpcd"/>
+		<package name="diffutils"/>
+		<package name="expat"/>
+		<package name="fillup"/>
+		<package name="freetype2"/>
+		<package name="fribidi"/>
+		<package name="gawk"/>
+		<package name="gdbm"/>
+		<package name="gfxboot"/>
+		<package name="gfxboot-devel"/>
+		<package name="glib2"/>
+		<package name="glib2-lang"/>
+		<package name="glibc-locale"/>
+		<package name="gnome-filesystem"/>
+		<package name="gpg"/>
+		<package name="grub"/>
+		<package name="hdparm"/>
+		<package name="info"/>
+		<package name="insserv"/>
+		<package name="iproute2"/>
+		<package name="irqbalance"/>
+		<package name="libblkid1"/>
+		<package name="libbz2-1"/>
+		<package name="libcom_err2"/>
+		<package name="libexpat1"/>
+		<package name="libext2fs2"/>
+		<package name="libjpeg"/>
+		<package name="liblcms"/>
+		<package name="libmng"/>
+		<package name="libnscd"/>
+		<package name="libopenssl0_9_8"/>
+		<package name="libsmbios-libs"/>
+		<package name="libtiff3"/>
+		<package name="libxcrypt"/>
+		<package name="libxcrypt-32bit"/>
+		<package name="libxml2"/>
+		<package name="libzio"/>
+		<package name="limal"/>
+		<package name="limal-bootloader"/>
+		<package name="limal-perl"/>
+		<package name="logrotate"/>
+		<package name="lvm2"/>
+		<package name="make"/>
+		<package name="mdadm"/>
+		<package name="memtest86+"/>
+		<package name="mingetty"/>
+		<package name="mkinitrd"/>
+		<package name="mktemp"/>
+		<package name="mtools"/>
+		<package name="net-tools"/>
+		<package name="netcfg"/>
+		<package name="openSUSE-release"/>
+		<package name="openldap2-client"/>
+		<package name="openslp"/>
+		<package name="openssl-certs"/>
+		<package name="pam"/>
+		<package name="pam-32bit"/>
+		<package name="pam-config"/>
+		<package name="pam-modules"/>
+		<package name="parted"/>
+		<package name="pcre"/>
+		<package name="perl"/>
+		<package name="perl-Bootloader"/>
+		<package name="perl-HTML-Parser"/>
+		<package name="perl-HTML-Tagset"/>
+		<package name="perl-base"/>
+		<package name="perl-gettext"/>
+		<package name="permissions"/>
+		<package name="pm-utils"/>
+		<package name="pmtools"/>
+		<package name="pm-utils"/>
+		<package name="pmtools"/>
+		<package name="popt"/>
+		<package name="pwdutils"/>
+		<package name="setserial"/>
+		<package name="suse-build-key"/>
+		<package name="sysconfig"/>
+		<package name="syslinux"/>
+		<package name="xorg-x11-libX11"/>
+		<package name="xorg-x11-libXau"/>
+		<package name="xorg-x11-libxcb"/>
+		<package name="postfix"/>
+		<package name="gpg2"/>
+		<package name="cron"/>
+		<package name="keyutils-libs"/>
+		<package name="satsolver-tools"/>
+		<package name="syslog-ng"/>
+	</packages>
+</image>
