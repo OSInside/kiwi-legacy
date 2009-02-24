@@ -678,7 +678,9 @@ sub setupInstallationSource {
 			my @zopts = ();
 			foreach my $opt (@sopts) {
 				next if ! defined $opt;
-				my ($key,$val) = split (/=/,$opt);
+				$opt =~ /(.*?)=(.*)/;
+				my $key = $1;
+				my $val = $2;
 				#==========================================
 				# keep packages on remote repos
 				#------------------------------------------

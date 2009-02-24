@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Tue Feb 24 10:57:26 CET 2009 - ms@suse.de
+
+- v3.21
+- fixed KIWIManager key/value parsing when zypper is used.
+  If the URL itself contains the "=" sign the key=value
+  regular expression returns the wrong result and the URL
+  was broken (bnc #478673)
+
+-------------------------------------------------------------------
 Mon Feb 23 10:55:22 CET 2009 - ms@suse.de
 
 - v3.20
