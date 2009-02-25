@@ -518,7 +518,10 @@ sub setupBootStick {
 	my $haveSplit = 0;
 	my $haveTree  = 0;
 	my $lvmbootMB = 0;
+	my $syslbootMB= 0;
+	my $bootloader= "grub";
 	my $lvmsize;
+	my $syslsize;
 	my $FSTypeRW;
 	my $FSTypeRO;
 	my $status;
@@ -535,7 +538,7 @@ sub setupBootStick {
 	# add boot space if lvm based
 	#------------------------------------------
 	if ($lvm) {
-		$lvmbootMB = 10;
+		$lvmbootMB = 20;
 	}
 	#==========================================
 	# check if system is tree or image file
@@ -582,7 +585,24 @@ sub setupBootStick {
 			return undef;
 		}
 	}
-	$this->{imgtype} = $imgtype;
+	#==========================================
+	# load type attributes...
+	#------------------------------------------
+	my %type = %{$xml->getImageTypeAndAttributes()};
+	#==========================================
+	# setup boot loader type
+	#------------------------------------------
+	if ($type{bootloader}) {
+		$bootloader = $type{bootloader};
+	}
+	$this->{bootloader} = $bootloader;
+	$this->{imgtype}    = $imgtype;
+	#==========================================
+	# add boot space if syslinux based
+	#------------------------------------------
+	if ($bootloader eq "syslinux") {
+		$syslbootMB= 20;
+	}
 	#==========================================
 	# check image split portion
 	#------------------------------------------
@@ -608,7 +628,6 @@ sub setupBootStick {
 	#==========================================
 	# obtain filesystem type from xml data
 	#------------------------------------------
-	my %type = %{$xml->getImageTypeAndAttributes()};
 	if ($type{filesystem} =~ /(.*),(.*)/) {
 		$FSTypeRW = $1;
 		$FSTypeRO = $2;
@@ -626,7 +645,7 @@ sub setupBootStick {
 	#==========================================
 	# Import boot loader stages
 	#------------------------------------------
-	if (! $this -> setupBootLoaderStages ("grub")) {
+	if (! $this -> setupBootLoaderStages ($bootloader)) {
 		$this -> cleanTmp ();
 		return undef;
 	}
@@ -688,14 +707,14 @@ sub setupBootStick {
 	#==========================================
 	# Creating boot loader configuration
 	#------------------------------------------
-	if (! $this -> setupBootLoaderConfiguration ("grub","USB")) {
+	if (! $this -> setupBootLoaderConfiguration ($bootloader,"USB")) {
 		return undef;
 	}
 	#==========================================
 	# umount stick mounted by hal before lock
 	#------------------------------------------
 	for (my $i=1;$i<=4;$i++) {
-		qxx ( "umount $stick$i 2>&1" );
+		qxx ("umount $stick$i 2>&1");
 	}
 	#==========================================
 	# Wait for umount to settle
@@ -747,38 +766,88 @@ sub setupBootStick {
 		if (defined $system) {
 			if (! $lvm) {
 				if (($syszip) || ($haveSplit)) {
-					@commands = (
-						"n","p","1",".","+".$syszip."M",
-						"n","p","2",".",".",
-						"t","1","83",
-						"t","2","83",
-						"a","2","w","q"
-					);
+					if ($bootloader eq "syslinux") {
+						$syslsize = $hardSize;
+						$syslsize /= 1000;
+						$syslsize -= $syszip;
+						$syslsize -= $syslbootMB;
+						$syslsize = sprintf ("%.f",$syslsize);
+						@commands = (
+							"n","p","1",".","+".$syszip."M",
+							"n","p","2",".","+".$syslsize."M",
+							"n","p","3",".",".",
+							"t","1","83",
+							"t","2","83",
+							"t","3","6",
+							"a","3","w","q"
+						);
+					} else {
+						@commands = (
+							"n","p","1",".","+".$syszip."M",
+							"n","p","2",".",".",
+							"t","1","83",
+							"t","2","83",
+							"a","2","w","q"
+						);
+					}
 				} else {
-					@commands = (
-						"n","p","1",".",".","t","83",
-						"a","1","w","q"
-					);
+					if ($bootloader eq "syslinux") {
+						$syslsize = $hardSize;
+						$syslsize /= 1000;
+						$syslsize -= $syslbootMB;
+						$syslsize = sprintf ("%.f",$syslsize);
+						@commands = (
+							"n","p","1",".","+".$syslsize."M","t","83",
+							"n","p","2",".",".","t","2","6",
+							"a","2","w","q"
+						);
+					} else {
+						@commands = (
+							"n","p","1",".",".","t","83",
+							"a","1","w","q"
+						);
+					}
 				}
 			} else {
 				$lvmsize = $hardSize;
 				$lvmsize /= 1000;
 				$lvmsize -= $lvmbootMB;
 				$lvmsize = sprintf ("%.f",$lvmsize);
-				@commands = (
-					"n","p","1",".","+".$lvmsize."M",
-					"n","p","2",".",".",
-					"t","1","8e",
-					"t","2","83",
-					"a","2","w","q"
-				);
+				if ($bootloader eq "syslinux") {
+					@commands = (
+						"n","p","1",".","+".$lvmsize."M",
+						"n","p","2",".",".",
+						"t","1","8e",
+						"t","2","6",
+						"a","2","w","q"
+					);
+				} else {
+					@commands = (
+						"n","p","1",".","+".$lvmsize."M",
+						"n","p","2",".",".",
+						"t","1","8e",
+						"t","2","83",
+						"a","2","w","q"
+					);
+				}
 			}
 		} else {
-			@commands = (
-				"n","p","1",".",".",
-				"t","83",
-				"a","1","w","q"
-			);
+			if ($bootloader eq "syslinux") {
+				$syslsize = $hardSize;
+				$syslsize /= 1000;
+				$syslsize -= $syslbootMB;
+				$syslsize = sprintf ("%.f",$syslsize);
+				@commands = (
+					"n","p","1",".","+".$syslsize."M","t","83",
+					"n","p","2",".",".","t","2","6",
+					"a","2","w","q"
+				);
+			} else {
+				@commands = (
+					"n","p","1",".",".","t","83",
+					"a","1","w","q"
+				);
+			}
 		}
 		if (! $this -> setStoragePartition ($stick,\@commands)) {
 			$kiwi -> failed ();
@@ -796,7 +865,10 @@ sub setupBootStick {
 		# Umount possible mounted stick partitions
 		#------------------------------------------
 		for (my $i=1;$i<=2;$i++) {
-			qxx ( "umount $deviceMap{$i} 2>&1" );
+			qxx ("umount $deviceMap{$i} 2>&1");
+			if ($deviceMap{fat}) {
+				qxx ("umount $deviceMap{fat} 2>&1");
+			}
 		}
 		$status = qxx ( "/sbin/blockdev --rereadpt $stick 2>&1" );
 		$result = $? >> 8;
@@ -816,7 +888,10 @@ sub setupBootStick {
 		# Umount possible mounted stick partitions
 		#------------------------------------------
 		for (my $i=1;$i<=2;$i++) {
-			qxx ( "umount $deviceMap{$i} 2>&1" );
+			qxx ("umount $deviceMap{$i} 2>&1");
+			if ($deviceMap{fat}) {
+				qxx ("umount $deviceMap{fat} 2>&1");
+			}
 		}
 		#==========================================
 		# setup volume group if requested
@@ -1059,7 +1134,14 @@ sub setupBootStick {
 	#==========================================
 	# Mount system image / or rw partition
 	#------------------------------------------
-	if ($lvm) {
+	if ($bootloader eq "syslinux") {
+		$status = qxx ("/sbin/mkdosfs $deviceMap{fat} 2>&1");
+		$result = $? >> 8;
+		if ($result == 0) {
+			$status = qxx ("mount $deviceMap{fat} $loopdir 2>&1");
+			$result = $? >> 8;
+		}
+	} elsif ($lvm) {
 		my %FSopts = main::checkFSOptions();
 		my $fsopts = $FSopts{ext2};
 		$fsopts.= "-F";
@@ -1088,7 +1170,7 @@ sub setupBootStick {
 	# Copy boot data on system image
 	#------------------------------------------
 	$status = qxx ("rm -rf $loopdir/boot");
-	$status = qxx ("cp -a $tmpdir/boot $loopdir 2>&1");
+	$status = qxx ("cp -dR $tmpdir/boot $loopdir 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -1109,7 +1191,7 @@ sub setupBootStick {
 	#==========================================
 	# Install boot loader on USB stick
 	#------------------------------------------
-	if (! $this -> installBootLoader ("grub", $stick)) {
+	if (! $this -> installBootLoader ($bootloader, $stick, \%deviceMap)) {
 		$this -> cleanDbus();
 		$this -> cleanTmp ();
 	}
@@ -1653,7 +1735,7 @@ sub setupInstallStick {
 	#==========================================
 	# Install boot loader on virtual disk
 	#------------------------------------------
-	if (! $this -> installBootLoader ("grub", $diskname)) {
+	if (! $this -> installBootLoader ("grub", $diskname, \%deviceMap)) {
 		$this -> cleanLoop ();
 		$this -> cleanTmp();
 	}
@@ -1696,6 +1778,8 @@ sub setupBootDisk {
 	my $haveTree  = 0;
 	my $haveSplit = 0;
 	my $lvmbootMB = 0;
+	my $syslbootMB= 0;
+	my $bootloader= "grub";
 	my $splitfile;
 	my $version;
 	my $label;
@@ -1711,7 +1795,7 @@ sub setupBootDisk {
 	# add boot space if lvm based
 	#------------------------------------------
 	if ($lvm) {
-		$lvmbootMB = 30;
+		$lvmbootMB = 20;
 	}
 	#==========================================
 	# check if image type is oem
@@ -1771,6 +1855,23 @@ sub setupBootDisk {
 		}
 	}
 	#==========================================
+	# load type attributes...
+	#------------------------------------------
+	my %type = %{$xml->getImageTypeAndAttributes()};
+	#==========================================
+	# setup boot loader type
+	#------------------------------------------
+	if ($type{bootloader}) {
+		$bootloader = $type{bootloader};
+	}
+	$this->{bootloader} = $bootloader;
+	#==========================================
+	# add boot space if syslinux based
+	#------------------------------------------
+	if ($bootloader eq "syslinux") {
+		$syslbootMB = 20;
+	}
+	#==========================================
 	# build bootfix for the bootloader on oem
 	#------------------------------------------
 	if ($initrd =~ /oemboot/) {
@@ -1807,7 +1908,6 @@ sub setupBootDisk {
 	#==========================================
 	# obtain filesystem type from xml data
 	#------------------------------------------
-	my %type = %{$xml->getImageTypeAndAttributes()};
 	if ($type{filesystem} =~ /(.*),(.*)/) {
 		$FSTypeRW = $1;
 		$FSTypeRO = $2;
@@ -1842,14 +1942,14 @@ sub setupBootDisk {
 	#==========================================
 	# Import boot loader stages
 	#------------------------------------------
-	if (! $this -> setupBootLoaderStages ("grub")) {
+	if (! $this -> setupBootLoaderStages ($bootloader)) {
 		$this -> cleanTmp ();
 		return undef;
 	}
 	#==========================================
 	# Create boot loader configuration
 	#------------------------------------------
-	if (! $this -> setupBootLoaderConfiguration ("grub",$bootfix)) {
+	if (! $this -> setupBootLoaderConfiguration ($bootloader,$bootfix)) {
 		$this -> cleanTmp ();
 		return undef;
 	}
@@ -1889,26 +1989,58 @@ sub setupBootDisk {
 		if (! $lvm) {
 			if (($syszip) || ($haveSplit)) {
 				# xda1 ro / xda2 rw
+				if ($bootloader eq "syslinux") {
+					my $syslsize = $this->{vmmbyte} - $syslbootMB - $syszip;
+					@commands = (
+						"n","p","1",".","+".$syszip."M",
+						"n","p","2",".","+".$syslsize."M",
+						"n","p","3",".",".",
+						"t","3","6",
+						"a","3","w","q"
+					);
+				} else {
+					@commands = (
+						"n","p","1",".","+".$syszip."M",
+						"n","p","2",".",".",
+						"a","2","w","q"
+					);
+				}
+			} else {
+				# xda1 rw
+				if ($bootloader eq "syslinux") {
+					my $syslsize = $this->{vmmbyte} - $syslbootMB;
+					@commands = (
+						"n","p","1",".","+".$syslsize."M",
+						"n","p","2",".",".",
+						"t","2","6",
+						"a","2","w","q"
+					);
+				} else {
+					@commands = (
+						"n","p","1",".",".",
+						"a","1","w","q"
+					);
+				}
+			}
+		} else {
+			if ($bootloader eq "syslinux") {
+				my $lvmsize = $this->{vmmbyte} - $syslbootMB;
 				@commands = (
-					"n","p","1",".","+".$syszip."M",
+					"n","p","1",".","+".$lvmsize."M",
 					"n","p","2",".",".",
+					"t","2","6",
+					"t","1","8e",
 					"a","2","w","q"
 				);
 			} else {
-				# xda1 rw
+				my $lvmsize = $this->{vmmbyte} - $lvmbootMB;
 				@commands = (
-					"n","p","1",".",".",
-					"a","1","w","q"
+					"n","p","1",".","+".$lvmsize."M",
+					"n","p","2",".",".",
+					"t","1","8e",
+					"a","2","w","q"
 				);
 			}
-		} else {
-			my $lvmsize = $this->{vmmbyte} - $lvmbootMB;
-			@commands = (
-				"n","p","1",".","+".$lvmsize."M",
-				"n","p","2",".",".",
-				"t","1","8e",
-				"a","2","w","q"
-			);
 		}
 		if (! $this -> setStoragePartition ($this->{loop},\@commands)) {
 			$kiwi -> failed ();
@@ -2151,9 +2283,9 @@ sub setupBootDisk {
 			$root = $deviceMap{0};
 		}
 		if ((! $haveSplit) || ($lvm)) {
-			$kiwi -> info ("Creating ext2 read-write filesystem");
+			$kiwi -> info ("Creating ext3 read-write filesystem");
 			my %FSopts = main::checkFSOptions();
-			my $fsopts = $FSopts{ext2};
+			my $fsopts = $FSopts{ext3};
 			$fsopts.= "-F";
 			$status = qxx ("/sbin/mke2fs $fsopts $root 2>&1");
 			$result = $? >> 8;
@@ -2165,6 +2297,17 @@ sub setupBootDisk {
 				return undef;
 			}
 			$kiwi -> done();
+		}
+	}
+	if ($bootloader eq "syslinux") {
+		$root = $deviceMap{fat};
+		$status = qxx ("/sbin/mkdosfs $root 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> error  ("Couldn't create DOS filesystem: $status");
+			$kiwi -> failed ();
+			$this -> cleanLoop ();
+			return undef;
 		}
 	}
 	#==========================================
@@ -2207,7 +2350,7 @@ sub setupBootDisk {
 	#==========================================
 	# Install boot loader on virtual disk
 	#------------------------------------------
-	if (! $this -> installBootLoader ("grub", $diskname)) {
+	if (! $this -> installBootLoader ($bootloader, $diskname, \%deviceMap)) {
 		$this -> cleanLoop ();
 	}
 	#==========================================
@@ -2972,8 +3115,43 @@ sub setupBootLoaderStages {
 		$kiwi -> done();
 	}
 	#==========================================
+	# syslinux
+	#------------------------------------------
+	if ($loader eq "syslinux") {
+		my $message= "'image/loader/message'";
+		my $unzip  = "$main::Gzip -cd $initrd 2>&1";
+		#==========================================
+		# Get syslinux graphics boot message
+		#------------------------------------------
+		$kiwi -> info ("Importing graphics boot message");
+		if ($zipped) {
+			$status= qxx ("$unzip | (cd $tmpdir && cpio -di $message 2>&1)");
+		} else {
+			$status= qxx ("cat $initrd|(cd $tmpdir && cpio -di $message 2>&1)");
+		}
+		if (-e $tmpdir."/image/loader/message") {
+			$status = qxx ("mv $tmpdir/$message $tmpdir/boot/message 2>&1");
+			$result = $? >> 8;
+			$kiwi -> done();
+		} else {
+			$kiwi -> skipped();
+		}
+		#==========================================
+		# Get syslinux vesamenu extension
+		#------------------------------------------
+		$kiwi -> info ("Importing graphics boot message");
+		qxx ("mkdir -p $tmpdir/boot/syslinux 2>&1");
+		qxx ("cp /usr/share/syslinux/vesamenu.c32 $tmpdir/boot/syslinux 2>&1");
+		if (-e $tmpdir."/boot/syslinux/vesamenu.c32") {
+			$kiwi -> done();
+		} else {
+			$kiwi -> skipped();
+		}
+	}
+	#==========================================
 	# more boot managers to come...
 	#------------------------------------------
+	# ...
 	return $this;
 }
 
@@ -3165,8 +3343,135 @@ sub setupBootLoaderConfiguration {
 		$kiwi -> done();
 	}
 	#==========================================
+	# syslinux
+	#------------------------------------------
+	if ($loader eq "syslinux") {
+		#==========================================
+		# Create MBR id file for boot device check
+		#------------------------------------------
+		$kiwi -> info ("Saving disk label on disk: $this->{mbrid}...");
+		qxx ("mkdir -p $tmpdir/boot/grub");
+		if (! open (FD,">$tmpdir/boot/grub/mbrid")) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create mbrid file: $!");
+			$kiwi -> failed ();
+			return undef;
+		}
+		print FD "$this->{mbrid}";
+		close FD;
+		$kiwi -> done();
+		#==========================================
+		# Create syslinux.cfg file
+		#------------------------------------------
+		$kiwi -> info ("Creating syslinux config file...");
+		if (! open (FD,">$tmpdir/boot/syslinux/syslinux.cfg")) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create syslinux.cfg: $!");
+			$kiwi -> failed ();
+			return undef;
+		}
+		#==========================================
+		# General syslinux setup
+		#------------------------------------------
+		print FD "DEFAULT vesamenu.c32\n";
+		print FD "TIMEOUT 100\n";
+		if ($type =~ /^KIWI CD/) {
+			# not supported yet..
+		} elsif ($type =~ /^KIWI USB/) {
+			print FD "LABEL Linux\n";
+			print FD "MENU LABEL ".$type."\n";
+		} else {
+			print FD "LABEL Linux\n";
+			print FD "MENU LABEL ".$label." [ ".$type." ]\n";
+		}
+		#==========================================
+		# Standard boot
+		#------------------------------------------
+		if (! $isxen) {
+			if ($type =~ /^KIWI CD/) {
+				# not supported yet..
+			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
+				print FD "KERNEL /boot/linux.vmx\n";
+				print FD "APPEND ro initrd=/boot/initrd.vmx ";
+				print FD "vga=0x314 splash=silent";
+			} else {
+				print FD "KERNEL /boot/linux\n";
+				print FD "APPEND ro initrd=/boot/initrd ";
+				print FD "vga=0x314 splash=silent";
+			}
+			if ($imgtype eq "split") {
+				print FD " COMBINED_IMAGE=yes showopts\n";
+			} else {
+				print FD " showopts\n";
+			}
+		} else {
+			if ($type =~ /^KIWI CD/) {
+				# not supported yet..
+			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
+				# not supported yet..
+			} else {
+				# not supported yet..
+			}
+			if ($imgtype eq "split") {
+				print FD " COMBINED_IMAGE=yes showopts\n";
+			} else {
+				print FD " showopts\n";
+			}
+		}
+		#==========================================
+		# Failsafe boot
+		#------------------------------------------
+		if ($type =~ /^KIWI CD/) {
+			# not supported yet..
+		} elsif ($type =~ /^KIWI USB/) {
+			print FD "LABEL Failsafe\n";
+			print FD "MENU LABEL Failsafe -- ".$type."\n";
+		} else {
+			print FD "LABEL Failsafe\n";
+			print FD "MENU LABEL Failsafe -- ".$label." [ ".$type." ]\n";
+		}
+		if (! $isxen) {
+			if ($type =~ /^KIWI CD/) {
+				# not supported yet..
+			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
+				print FD "KERNEL /boot/linux.vmx\n";
+				print FD "APPEND ro initrd=/boot/initrd.vmx ";
+				print FD "vga=0x314 splash=silent";
+			} else {
+				print FD "KERNEL /boot/linux\n";
+				print FD "APPEND ro initrd=/boot/initrd ";
+				print FD "vga=0x314 splash=silent";
+			}
+			print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
+			print FD " noapic maxcpus=0 edd=off";
+			if ($imgtype eq "split") {
+				print FD " COMBINED_IMAGE=yes showopts\n";
+			} else {
+				print FD " showopts\n";
+			}
+		} else {
+			if ($type =~ /^KIWI CD/) {
+				# not supported yet..
+			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
+				# not supported yet..
+			} else {
+				# not supported yet..
+			}
+			print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
+			print FD " noapic maxcpus=0 edd=off";
+			if ($imgtype eq "split") {
+				print FD " COMBINED_IMAGE=yes showopts\n";
+			} else {
+				print FD " showopts\n";
+			}
+		}
+		close FD;
+		$kiwi -> done();
+	}
+	#==========================================
 	# more boot managers to come...
 	#------------------------------------------
+	# ...
 	return $this;
 }
 
@@ -3177,6 +3482,7 @@ sub installBootLoader {
 	my $this     = shift;
 	my $loader   = shift;
 	my $diskname = shift;
+	my $deviceMap= shift;
 	my $kiwi     = $this->{kiwi};
 	my $tmpdir   = $this->{tmpdir};
 	my $bootpart = $this->{bootpart};
@@ -3192,7 +3498,7 @@ sub installBootLoader {
 	# Grub
 	#------------------------------------------
 	if ($loader eq "grub") {
-		$kiwi -> info ("Installing grub on virtual disk");
+		$kiwi -> info ("Installing grub on device: $diskname");
 		#==========================================
 		# Create device map for the virtual disk
 		#------------------------------------------
@@ -3241,6 +3547,46 @@ sub installBootLoader {
 		if ($result != 0) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't install grub on $diskname: $glog");
+			$kiwi -> failed ();
+			return undef;
+		}
+		$kiwi -> done();
+	}
+	#==========================================
+	# syslinux
+	#------------------------------------------
+	if ($loader eq "syslinux") {
+		if (! $deviceMap) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("No device map available");
+			$kiwi -> failed ();
+			return undef;
+		}
+		my %deviceMap = %{$deviceMap};
+		my $device = $deviceMap{fat};
+		if ($device =~ /mapper/) {
+			qxx ("kpartx -a $diskname");
+		}
+		$kiwi -> info ("Installing syslinux on device: $device");
+		$status = qxx ("syslinux $device 2>&1");
+		$result = $? >> 8;
+		if ($device =~ /mapper/) {
+			qxx ("kpartx -d $diskname");
+		}
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't install syslinux on $device: $status");
+			$kiwi -> failed ();
+			return undef;
+		}
+		my $syslmbr = "/usr/share/syslinux/mbr.bin";
+		$status = qxx (
+			"dd if=$syslmbr of=$diskname bs=512 count=1 conv=notrunc 2>&1"
+		);
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't install syslinux MBR on $diskname");
 			$kiwi -> failed ();
 			return undef;
 		}
@@ -3531,6 +3877,80 @@ sub setStoragePartition {
 }
 
 #==========================================
+# getStorageID
+#------------------------------------------
+sub getStorageID {
+	# ...
+	# return the partition id of the given
+	# partition. If the call fails the function
+	# returns 0
+	# ---
+	my $this = shift;
+	my $pdev = shift;
+	my $tool = $this->{ptool};
+	my $result;
+	my $status;
+	if (! defined $tool) {
+		$tool = "fdisk";
+	}
+	SWITCH: for ($tool) {
+		#==========================================
+		# fdisk
+		#------------------------------------------
+		/^fdisk/  && do {
+			my $disk;
+			my $devnr= -1;
+			if ($pdev =~ /mapper/) {
+				if ($pdev =~ /mapper\/(.*)p(\d+)/) {
+					$disk = "/dev/".$1;
+					$devnr= $2;
+				}
+			} else {
+				if ($pdev =~ /(.*)(\d+)/) {
+					$disk = $1;
+					$devnr= $2;
+				}
+			}
+			$status = qxx ("/sbin/sfdisk -c $disk $devnr 2>&1");
+			$result = $? >> 8;
+			last SWITCH;
+		};
+		#==========================================
+		# parted
+		#------------------------------------------
+		/^parted/  && do {
+			my $parted = "/usr/sbin/parted -m ";
+			my $disk   = $pdev;
+			if ($pdev =~ /mapper/) {
+				if ($pdev =~ /mapper\/(.*)p(\d+)/) {
+					$disk = "/dev/".$1;
+					$pdev = "/dev/".$1.$2;
+				}
+			} else {
+				if ($pdev =~ /(.*)(\d+)/) {
+					$disk = $1;
+				}
+			}
+			$parted .= '-s '.$disk.' print |';
+			$parted .= 'sed -e "s@^\([0-4]\):@'.$disk.'\1:@" |';
+			$parted .= 'grep ^'.$pdev.':|cut -f2 -d= | cut -f1 -d,';
+			$status = qxx ($parted);
+			$result = $? >> 8;
+			if ((! $status) && ($pdev =~ /loop/)) {
+				$status = qxx ("/usr/sbin/parted -s $pdev mklabel msdos 2>&1");
+				$status = qxx ($parted);
+				$result = $? >> 8;
+			}
+			last SWITCH;
+		};
+	}
+	if ($result == 0) {
+		return int $status;
+	}
+	return 0;
+}
+
+#==========================================
 # getStorageSize
 #------------------------------------------
 sub getStorageSize {
@@ -3564,7 +3984,7 @@ sub getStorageSize {
 			my $disk   = $pdev;
 			my $step   = 2;
 			if ($pdev =~ /mapper/) {
-				if ($pdev =~ /mapper\/(.*)\/p(\d+)/) {
+				if ($pdev =~ /mapper\/(.*)p(\d+)/) {
 					$disk = "/dev/".$1;
 					$pdev = "/dev/".$1.$2;
 					$step = 4;
@@ -3605,12 +4025,22 @@ sub setDefaultDeviceMap {
 	# ---
 	my $this   = shift;
 	my $device = shift;
+	my $loader = $this->{bootloader};
 	my %result;
 	if (! defined $device) {
 		return undef;
 	}
 	for (my $i=1;$i<=2;$i++) {
 		$result{$i} = $device.$i;
+	}
+	if ($loader eq "syslinux") {
+		for (my $i=1;$i<=3;$i++) {
+			my $type = $this -> getStorageID ($device.$i);
+			if ($type == 6) {
+				$result{fat} = $device.$i;
+				last;
+			}
+		}
 	}
 	return %result;
 }
@@ -3625,6 +4055,7 @@ sub setLoopDeviceMap {
 	# ---
 	my $this   = shift;
 	my $device = shift;
+	my $loader = $this->{bootloader};
 	my %result;
 	if (! defined $device) {
 		return undef;
@@ -3632,6 +4063,15 @@ sub setLoopDeviceMap {
 	my $dmap = $device; $dmap =~ s/dev\///;
 	for (my $i=1;$i<=2;$i++) {
 		$result{$i} = "/dev/mapper".$dmap."p$i";
+	}
+	if ($loader eq "syslinux") {
+		for (my $i=1;$i<=3;$i++) {
+			my $type = $this -> getStorageID ("/dev/mapper".$dmap."p$i");
+			if ($type == 6) {
+				$result{fat} = "/dev/mapper".$dmap."p$i";
+				last;
+			}
+		}
 	}
 	return %result;
 }
@@ -3649,6 +4089,7 @@ sub setLVMDeviceMap {
 	my $device = shift;
 	my $names  = shift;
 	my @names  = @{$names};
+	my $loader = $this->{bootloader};
 	my %result;
 	if (! defined $group) {
 		return undef;
@@ -3661,6 +4102,26 @@ sub setLVMDeviceMap {
 	}
 	for (my $i=0;$i<@names;$i++) {
 		$result{$i+1} = "/dev/$group/".$names[$i];
+	}
+	if ($loader eq "syslinux") {
+		if ($device =~ /loop/) {
+			my $dmap = $device; $dmap =~ s/dev\///;
+			for (my $i=1;$i<=3;$i++) {
+				my $type = $this -> getStorageID ("/dev/mapper".$dmap."p$i");
+				if ($type == 6) {
+					$result{fat} = "/dev/mapper".$dmap."p$i";
+					last;
+				}
+			}
+		} else {
+			for (my $i=1;$i<=3;$i++) {
+				my $type = $this -> getStorageID ($device.$i);
+				if ($type == 6) {
+					$result{fat} = $device.$i;
+					last;
+				}
+			}
+		}
 	}
 	return %result;
 }

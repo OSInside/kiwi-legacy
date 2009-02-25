@@ -656,6 +656,7 @@ sub getImageTypeAndAttributes {
 		$record{boot}   = $node -> getAttribute("boot");
 		$record{flags}  = $node -> getAttribute("flags");
 		$record{format} = $node -> getAttribute("format");
+		$record{bootloader}    = $node -> getAttribute("bootloader");
 		$record{checkprebuilt} = $node -> getAttribute("checkprebuilt");
 		$record{baseroot}      = $node -> getAttribute("baseroot");
 		$record{bootprofile}   = $node -> getAttribute("bootprofile");

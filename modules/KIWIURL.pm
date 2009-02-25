@@ -188,7 +188,6 @@ sub thisPath {
 		return undef;
 	}
 	$module =~ s/this:\/\///;
-	$module =~ s/:/:\//g;
 	if ((! defined $module) || ($module eq "/")) {
 		return undef;
 	}
@@ -200,6 +199,12 @@ sub thisPath {
 		$thisPath = <FD>; close FD;
 		$thisPath = "$thisPath/$module";
 	} elsif (defined $main::Create) {
+		if (! open FD,"$main::Create/image/main::Prepare") {
+			return undef;
+		}
+		$thisPath = <FD>; close FD;
+		$thisPath = "$thisPath/$module";
+	} elsif (defined $main::Upgrade) {
 		if (! open FD,"$main::Create/image/main::Prepare") {
 			return undef;
 		}

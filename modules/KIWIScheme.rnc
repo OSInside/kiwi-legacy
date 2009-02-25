@@ -1083,6 +1083,12 @@ div {
 		attribute flags {
 			"unified" | "compressed" | "unified-cromfs" | "compressed-cromfs"
 		}
+	k.type.bootloader.attribute =
+		## Specified the bootloader used for booting the image."
+		## At the moment only grub and syslinux are supported
+		attribute bootloader {
+			"grub" | "syslinux"
+		}
 	k.type.filesystem.attribute = 
 		## Specifies the filesystem which can be one of:
 		## ext2 , ext3 , reiserfs ,squashfs or cromfs
@@ -1122,6 +1128,7 @@ div {
 		k.type.bootprofile.attribute? &
 		k.type.boot.attribute? &
 		k.type.flags.attribute? &
+		k.type.bootloader.attribute? &
 		k.type.filesystem.attribute? &
 		k.type.fsreadonly.attribute? &
 		k.type.fsreadwrite.attribute? &

@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Wed Feb 25 14:08:16 CET 2009 - ms@suse.de
+
+- v3.22
+- fixed this path evaluation in upgrade mode
+- added support for an alternative bootloader [syslinux].
+  You can specify bootloader="syslinux" as part of the type
+  setup and kiwi uses syslinux instead of grub. This works
+  for the _usb_ image type
+
+-------------------------------------------------------------------
 Tue Feb 24 10:57:26 CET 2009 - ms@suse.de
 
 - v3.21

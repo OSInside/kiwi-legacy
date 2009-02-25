@@ -224,11 +224,14 @@ describes the possible types and their attributes:
 \item \textbf{usb}\\
       Use this type to create a USB stick system along with the
       attributes \textbf{filesystem} and \textbf{boot=''usbboot/suse-*''}
+      In addition to that type you can specify which bootloader to use.
+      The optional attribute \textbf{bootloader} is used to setup
+      either grub or syslinux as bootloader types.
 \item \textbf{vmx}\\
       Use this type to create a virtual disk system along with the
       attributes \textbf{filesystem}, \textbf{boot=''vmxboot/suse-*''} and
       optionally \textbf{format}. The format attribute spcifies one of
-      the qemu supported virtualisation formats, for example vmdk or qcow2.
+      the qemu supported virtualization formats, for example vmdk or qcow2.
 \item \textbf{oem}\\
       Use this type to create a preload virtual disk system along with
       the attributes \textbf{filesystem}, \textbf{boot=''oemboot/suse-*''} and

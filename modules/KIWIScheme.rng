@@ -20,7 +20,7 @@
   STATUS        : Development
   ****************
 -->
-<grammar xmlns:db="http://docbook.org/ns/docbook" xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" xmlns:rng="http://relaxng.org/ns/structure/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+<grammar xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" xmlns:db="http://docbook.org/ns/docbook" xmlns:rng="http://relaxng.org/ns/structure/1.0" xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
   <db:info>
     <db:releaseinfo>$Id: kiwi.rnc 2957 2008-01-11 12:53:39Z thomas-schraitle $</db:releaseinfo>
     <db:releaseinfo>RNC Schema Version 2.4</db:releaseinfo>
@@ -1462,6 +1462,16 @@ or unified and applies to the iso type only</a:documentation>
         </choice>
       </attribute>
     </define>
+    <define name="k.type.bootloader.attribute">
+      <attribute name="bootloader">
+        <a:documentation>Specified the bootloader used for booting the image."
+At the moment only grub and syslinux are supported</a:documentation>
+        <choice>
+          <value>grub</value>
+          <value>syslinux</value>
+        </choice>
+      </attribute>
+    </define>
     <define name="k.type.filesystem.attribute">
       <attribute name="filesystem">
         <a:documentation>Specifies the filesystem which can be one of:
@@ -1551,6 +1561,9 @@ vmx/oem types only.</a:documentation>
         </optional>
         <optional>
           <ref name="k.type.flags.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.type.bootloader.attribute"/>
         </optional>
         <optional>
           <ref name="k.type.filesystem.attribute"/>

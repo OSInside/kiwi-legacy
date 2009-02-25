@@ -1056,7 +1056,22 @@ function updateLVMBootDeviceFstab {
 	local sdev=$2
 	local diskByID=`getDiskID $sdev`
 	local nfstab=$prefix/etc/fstab
-	echo "$diskByID /lvmboot ext2 defaults 0 0" >> $nfstab
+
+
+	if [ ! -z "$FSTYPE" ];then
+		FSTYPE_SAVE=$FSTYPE
+	fi
+	#======================================
+	# probe filesystem
+	#--------------------------------------
+	probeFileSystem $sdev
+	if [ -z $FSTYPE ] || [ $FSTYPE = "unknown" ];then
+		FSTYPE="auto"
+	fi
+	echo "$diskByID /lvmboot $FSTYPE defaults 0 0" >> $nfstab
+	if [ ! -z "$FSTYPE_SAVE" ];then
+		FSTYPE=$FSTYPE_SAVE
+	fi
 }
 #======================================
 # updateOtherDeviceFstab
@@ -1155,7 +1170,7 @@ function probeFileSystem {
 	# ----
 	FSTYPE=unknown
 	dd if=$1 of=/tmp/filesystem-$$ bs=128k count=1 >/dev/null
-	data=$(file /tmp/filesystem-$$) && rm -f /tmp/filesystem-$$
+	data=$(file /tmp/filesystem-$$)
 	case $data in
 		*ext3*)     FSTYPE=ext3 ;;
 		*ext2*)     FSTYPE=ext2 ;;
@@ -1166,6 +1181,12 @@ function probeFileSystem {
 			FSTYPE=unknown
 		;;
 	esac
+	if [ $FSTYPE = "unknown" ];then
+		if grep -q mkdosfs /tmp/filesystem-$$;then
+			FSTYPE=vfat
+		fi
+	fi
+	rm -f /tmp/filesystem-$$
 	export FSTYPE
 }
 #======================================
