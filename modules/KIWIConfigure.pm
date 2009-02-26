@@ -98,6 +98,15 @@ sub setupRecoveryArchive {
 		$kiwi -> error  ("Failed to create recovery archive: $status");
 		return undef;
 	}
+	$status = qxx (
+		"tar -tf $root/recovery.tar.gz | wc -l > $root/recovery.tar.files"
+	);
+	$code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Failed to create file count: $status");
+		return undef;
+	}
 	$kiwi -> done ();
 	return $this;
 }

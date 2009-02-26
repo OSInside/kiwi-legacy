@@ -123,12 +123,15 @@ function importFile {
 	while read line;do
 		echo $line | grep -qi "^#" && continue
 		key=`echo "$line" | cut -d '=' -f1`
-		item=`echo "$line" | cut -d '=' -f2- | tr -d "\'" | tr -d "\""`
+		item=`echo "$line" | cut -d '=' -f2-`
 		if [ -z "$key" ] || [ -z "$item" ];then
 			continue
 		fi
+		if ! echo $item | grep -E -q "^(\"|')";then
+			item="'"$item"'"
+		fi
 		Debug "$key=$item"
-		eval export "$key\=\"$item\""
+		eval export "$key\=$item"
 	done
 	if [ ! -z "$ERROR_INTERRUPT" ];then
 		Echo -e "$ERROR_INTERRUPT"
@@ -668,7 +671,7 @@ function setupBootLoaderGrubRecovery {
 	# ----
 	local mountPrefix=$1  # mount path of the image
 	local destsPrefix=$2  # base dir for the config files
-	local gfix=$3         # grub title postfix
+	local gfix=$3         # grub title
 	local menu=$destsPrefix/boot/grub/menu.lst
 	local kernel=""
 	local initrd=""
@@ -691,7 +694,7 @@ function setupBootLoaderGrubRecovery {
 	# create recovery entry
 	#--------------------------------------
 	if [ ! -z "$OEM_RECOVERY" ];then
-		echo "title Recovery [ $gfix ]"               >> $menu
+		echo "title _Recovery_"                           >> $menu
 		gdev_recovery="(hd0,3)"
 		rdev_recovery=$OEM_RECOVERY
 		diskByID=`getDiskID $rdev_recovery`
@@ -728,7 +731,7 @@ function setupBootLoaderGrub {
 	local destsPrefix=$2  # base dir for the config files
 	local gnum=$3         # grub boot partition ID
 	local rdev=$4         # grub root partition
-	local gfix=$5         # grub title postfix
+	local gfix=$5         # grub title
 	local swap=$6         # optional swap partition
 	local menu=$destsPrefix/boot/grub/menu.lst
 	local conf=$destsPrefix/etc/grub.conf
@@ -752,19 +755,19 @@ function setupBootLoaderGrub {
 	#======================================
 	# check for grub device
 	#--------------------------------------
-	if test -z $gnum;then
+	if [ -z "$gnum" ];then
 		gnum=1
 	fi
 	#======================================
 	# check for grub title postfix
 	#--------------------------------------
-	if test -z $gfix;then
+	if [ -z "$gfix" ];then
 		gfix="unknown"
 	fi
 	#======================================
 	# check for boot TIMEOUT
 	#--------------------------------------
-	if test -z $KIWI_BOOT_TIMEOUT;then
+	if [ -z "$KIWI_BOOT_TIMEOUT" ];then
 		KIWI_BOOT_TIMEOUT=10;
 	fi
 	#======================================
@@ -803,10 +806,13 @@ function setupBootLoaderGrub {
 			kernel=`echo $i | cut -f1 -d:`
 			initrd=`echo $i | cut -f2 -d:`
 			kname=${KERNEL_NAME[$count]}
-			if [ -z "$kiwi_iname" ];then
-				echo "title $kname [ $gfix ]"                     >> $menu
+			if ! echo $gfix | grep -E -q "OEM|USB|VMX|unknown";then
+				echo "title _""$gfix""_"                          >> $menu
+			elif [ -z "$kiwi_iname" ];then
+				echo "title _""$kname"" [ "$gfix" ]_"             >> $menu
 			else
-				echo "title $kiwi_iname-$kname [ $gfix ]"         >> $menu
+				echo -n "title _""$kiwi_iname"                    >> $menu
+				echo "-""$kname"" [ ""$gfix"" ]_"                 >> $menu
 			fi
 			if [ $kernel = "vmlinuz-xen" ];then
 				echo " root $gdev"                                >> $menu
@@ -834,10 +840,14 @@ function setupBootLoaderGrub {
 			#======================================
 			# create failsafe entry
 			#--------------------------------------
-			if [ -z "$kiwi_iname" ];then
-				echo "title Failsafe -- $kname [ $gfix ]"         >> $menu
+			if ! echo $gfix | grep -E -q "OEM|USB|VMX|unknown";then
+				echo "title _Failsafe -- ""$gfix""_"             >> $menu
+			elif [ -z "$kiwi_iname" ];then
+				echo -n "title _Failsafe -- "                    >> $menu
+				echo "$kname"" [ ""$gfix"" ]_"                   >> $menu
 			else
-				echo "title Failsafe -- $kiwi_iname-$kname [ $gfix ]" >> $menu
+				echo -n "title _Failsafe -- ""$kiwi_iname"       >> $menu
+				echo "-""$kname"" [ ""$gfix"" ]_"                >> $menu
 			fi
 			if [ $kernel = "vmlinuz-xen" ];then
 				echo " root $gdev"                                >> $menu
@@ -866,9 +876,8 @@ function setupBootLoaderGrub {
 			# create recovery entry
 			#--------------------------------------
 			if [ ! -z "$OEM_RECOVERY" ];then
-				echo "title Recovery [ $gfix ]"                   >> $menu
+				echo "title _Recovery_"                           >> $menu
 				echo " rootnoverify (hd0,3)"                      >> $menu
-				echo " makeactive"                                >> $menu
 				echo " chainloader +1"                            >> $menu
 			fi
 			count=`expr $count + 1`
@@ -909,7 +918,7 @@ function setupBootLoaderLilo {
 	local destsPrefix=$2  # base dir for the config files
 	local gnum=$3         # lilo boot partition ID
 	local bdev=$4         # lilo root partition
-	local gfix=$5         # lilo title postfix
+	local gfix=$5         # lilo title
 	local swap=$6         # optional swap partition
 	local conf=$destsPrefix/etc/lilo.conf
 	local sysb=$destsPrefix/etc/sysconfig/bootloader
@@ -927,9 +936,15 @@ function setupBootLoaderLilo {
 		importFile < $mountPrefix/image/.profile
 	fi
 	#======================================
+	# check for grub title postfix
+	#--------------------------------------
+	if [ -z "$gfix" ];then
+		gfix="unknown"
+	fi
+	#======================================
 	# check for boot TIMEOUT
 	#--------------------------------------
-	if test -z $KIWI_BOOT_TIMEOUT;then
+	if [ -z "$KIWI_BOOT_TIMEOUT" ];then
 		KIWI_BOOT_TIMEOUT=10;
 	fi
 	#======================================
@@ -962,10 +977,16 @@ function setupBootLoaderLilo {
 			echo -n "###Don't change this comment - YaST2 identifier:"
 			echo " Original name: linux###"
 			echo "# kiwi_iname $kiwi_iname"
-			echo "    label=kiwi$count"
+			if ! echo $gfix | grep -E -q "OEM|USB|VMX|unknown";then
+				echo "label=\"$gfix\""
+			elif [ -z "$kiwi_iname" ];then
+				echo "label=\"$kname [ $gfix ]\""
+			else
+				echo "label=\"$kiwi_iname-$kname [ $gfix ]\""
+			fi
 			echo "    initrd=/boot/$initrd"
 			echo "    append=\"quiet sysrq=1 panic=9 $KIWI_INITRD_PARAMS\""
-			echo ""
+			echo
 			count=`expr $count + 1`
 		fi
 	done

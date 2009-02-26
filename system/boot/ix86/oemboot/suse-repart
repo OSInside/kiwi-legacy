@@ -671,6 +671,9 @@ function OEMRepart {
 		if ! mv /reco-root/recovery.tar.gz /reco-save >/dev/null;then
 			systemException "Failed to move recovery archive" "reboot"
 		fi
+		if ! mv /reco-root/recovery.tar.files /reco-save >/dev/null;then
+			systemException "Failed to move recovery file count" "reboot"
+		fi
 		mkdir /reco-save/boot
 		if ! cp /reco-root/boot/initrd.vmx /reco-save/boot/initrd;then
 			systemException "Failed to copy recovery initrd" "reboot"
