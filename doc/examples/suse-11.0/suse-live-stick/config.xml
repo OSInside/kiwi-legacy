@@ -18,6 +18,9 @@
 	<users group="users">
 		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/home/tux" name="tux"/>
 	</users>
+	<users group="root">
+		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+	</users>
 	<repository type="yast2">
 		<!--<source path="/image/CDs/full-11.0-i386"/>-->
 		<source path="opensuse://11.0/repo/oss/"/>

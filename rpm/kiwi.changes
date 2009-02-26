@@ -3,6 +3,7 @@ Wed Feb 25 14:08:16 CET 2009 - ms@suse.de
 
 - v3.22
 - fixed this path evaluation in upgrade mode
+- removed static passwd/shadow and group files from examples
 - added md5 checksum test in OEM install mode (bnc #479842)
 - added progress information in recovery mode (bnc #479844)
 - fixed handling of oem-boot-title. If the title is set it

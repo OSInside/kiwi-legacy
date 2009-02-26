@@ -14,6 +14,9 @@
 		<locale>en_US</locale>
 		<keytable>us.map.gz</keytable>
 	</preferences>
+	<users group="root">
+		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+	</users>
 	<repository type="yast2">
 		<!--<source path="/image/CDs/full-11.2-i386"/>-->
 		<source path="opensuse://11.2/repo/oss/"/>

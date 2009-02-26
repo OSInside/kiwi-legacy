@@ -17,6 +17,9 @@
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>False</rpm-check-signatures>
 	</preferences>
+	<users group="root">
+		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+	</users>
 	<repository type="yast2">
 		<!--<source path="/image/CDs/full-11.1-i386"/>-->
 		<source path="opensuse://11.1/repo/oss/"/>
