@@ -59,14 +59,14 @@ fi
 #======================================
 # 8) create initrd on diskful
 #--------------------------------------
-if [ -z "$UNIONFS_CONFIG" ]; then
+if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ]; then
 	setupSUSEInitrd
 fi
 
 #======================================
 # 7) Check FAT requires on syslinux
 #--------------------------------------
-if [ -z "$UNIONFS_CONFIG" ] && [ "$loader" = "syslinux" ];then
+if [ "$loader" = "syslinux" ];then
 	# /.../
 	# if syslinux is used we need to make sure that the
 	# filename on the boot partition is correct 8+3
