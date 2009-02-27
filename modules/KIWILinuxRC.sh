@@ -830,7 +830,7 @@ function setupBootLoaderSyslinux {
 				"reboot"
 			else
 				echo "KERNEL /boot/$kernel"                  >> $conf
-				echo -n "APPEND initrd=/boot/$initrd"     >> $conf
+				echo -n "APPEND initrd=/boot/$initrd"        >> $conf
 				echo -n " root=$diskByID $console vga=0x314" >> $conf
 				echo -n " loader=$loader splash=silent"      >> $conf
 				if [ ! -z "$swap" ];then
@@ -865,7 +865,7 @@ function setupBootLoaderSyslinux {
 				"reboot"
 			else
 				echo "KERNEL /boot/$kernel"                  >> $conf
-				echo -n "APPEND initrd=/boot/$initrd"     >> $conf
+				echo -n "APPEND initrd=/boot/$initrd"        >> $conf
 				echo -n " root=$diskByID $console vga=0x314" >> $conf
 				echo -n " loader=$loader splash=silent"      >> $conf
 				if [ ! -z "$swap" ];then
@@ -997,7 +997,7 @@ function setupBootLoaderGrub {
 					echo " [ ""$gfix"" ]_"                        >> $menu
 				else
 					echo -n "title _""$kiwi_oemtitle""-""$kname"  >> $menu
-					echo " [ ""$gfix"" ]_"
+					echo " [ ""$gfix"" ]_"                        >> $menu
 				fi
 			fi
 			if [ $kernel = "vmlinuz-xen" ];then
@@ -1034,7 +1034,7 @@ function setupBootLoaderGrub {
 			else
 				if [ "$count" = "1" ];then
 					echo -n "title _Failsafe -- ""$kiwi_oemtitle" >> $menu
-					echo " [ ""$gfix"" ]_"
+					echo " [ ""$gfix"" ]_"                        >> $menu
 				else
 					echo -n "title _Failsafe -- ""$kiwi_oemtitle" >> $menu
 					echo "-""$kname"" [ ""$gfix"" ]_"             >> $menu

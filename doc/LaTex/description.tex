@@ -226,7 +226,10 @@ describes the possible types and their attributes:
       attributes \textbf{filesystem} and \textbf{boot=''usbboot/suse-*''}
       In addition to that type you can specify which bootloader to use.
       The optional attribute \textbf{bootloader} is used to setup
-      either grub or syslinux as bootloader types.
+      either grub or syslinux as bootloader types. Setting the bootloader
+      also works for vmx images but not for oem images. In case of an
+      oem image only the distribution supported bootloader (grub) is
+      allowed.
 \item \textbf{vmx}\\
       Use this type to create a virtual disk system along with the
       attributes \textbf{filesystem}, \textbf{boot=''vmxboot/suse-*''} and
