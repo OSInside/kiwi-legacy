@@ -2416,7 +2416,7 @@ sub setupBootDisk {
 	#==========================================
 	# Copy boot data on system image
 	#------------------------------------------
-	$status = qxx ("cp -a $tmpdir/boot $loopdir 2>&1");
+	$status = qxx ("cp -dR $tmpdir/boot $loopdir 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -3321,10 +3321,12 @@ sub setupBootLoaderConfiguration {
 				print FD " ramdisk_size=512000 ramdisk_blocksize=4096";
 			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
 				print FD " root (hd0,$bootpart)\n";
-				print FD " kernel /boot/linux.vmx vga=0x314 splash=silent";
+				print FD " kernel /boot/linux.vmx vga=0x314";
+				print FD " loader=$loader splash=silent";
 			} else {
 				print FD " root (hd0,$bootpart)\n";
-				print FD " kernel /boot/linux vga=0x314 splash=silent";
+				print FD " kernel /boot/linux vga=0x314";
+				print FD " loader=$loader splash=silent";
 			}
 			if ($imgtype eq "split") {
 				print FD " COMBINED_IMAGE=yes showopts";
@@ -3347,11 +3349,13 @@ sub setupBootLoaderConfiguration {
 			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
 				print FD " root (hd0,$bootpart)\n";
 				print FD " kernel /boot/xen.gz.vmx\n";
-				print FD " module /boot/linux.vmx vga=0x314 splash=silent";
+				print FD " module /boot/linux.vmx vga=0x314";
+				print FD " loader=$loader splash=silent";
 			} else {
 				print FD " root (hd0,$bootpart)\n";
 				print FD " kernel /boot/xen.gz\n";
-				print FD " module /boot/linux vga=0x314 splash=silent";
+				print FD " module /boot/linux vga=0x314";
+				print FD " loader=$loader splash=silent";
 			}
 			if ($imgtype eq "split") {
 				print FD " COMBINED_IMAGE=yes showopts";
@@ -3383,10 +3387,12 @@ sub setupBootLoaderConfiguration {
 				print FD " ramdisk_size=512000 ramdisk_blocksize=4096";
 			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
 				print FD " root (hd0,$bootpart)\n";
-				print FD " kernel /boot/linux.vmx vga=0x314 splash=silent";
+				print FD " kernel /boot/linux.vmx vga=0x314";
+				print FD " loader=$loader splash=silent";
 			} else {
 				print FD " root (hd0,$bootpart)\n";
-				print FD " kernel /boot/linux vga=0x314 splash=silent";
+				print FD " kernel /boot/linux vga=0x314";
+				print FD " loader=$loader splash=silent";
 			}
 			print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
 			print FD " noapic maxcpus=0 edd=off\n";
@@ -3411,11 +3417,13 @@ sub setupBootLoaderConfiguration {
 			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
 				print FD " root (hd0,$bootpart)\n";
 				print FD " kernel /boot/xen.gz.vmx\n";
-				print FD " module /boot/linux.vmx vga=0x314 splash=silent";
+				print FD " module /boot/linux.vmx vga=0x314";
+				print FD " loader=$loader splash=silent";
 			} else {
 				print FD " root (hd0,$bootpart)\n";
 				print FD " kernel /boot/xen.gz\n";
-				print FD " module /boot/linux vga=0x314 splash=silent";
+				print FD " module /boot/linux vga=0x314";
+				print FD " loader=$loader splash=silent";
 			}
 			print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
 			print FD " noapic maxcpus=0 edd=off";
@@ -3486,12 +3494,12 @@ sub setupBootLoaderConfiguration {
 				# not supported yet..
 			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
 				print FD "KERNEL /boot/linux.vmx\n";
-				print FD "APPEND ro initrd=/boot/initrd.vmx ";
-				print FD "vga=0x314 splash=silent";
+				print FD "APPEND initrd=/boot/initrd.vmx ";
+				print FD "vga=0x314 loader=$loader splash=silent";
 			} else {
 				print FD "KERNEL /boot/linux\n";
-				print FD "APPEND ro initrd=/boot/initrd ";
-				print FD "vga=0x314 splash=silent";
+				print FD "APPEND initrd=/boot/initrd ";
+				print FD "vga=0x314 loader=$loader splash=silent";
 			}
 			if ($imgtype eq "split") {
 				print FD " COMBINED_IMAGE=yes showopts\n";
@@ -3529,12 +3537,12 @@ sub setupBootLoaderConfiguration {
 				# not supported yet..
 			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
 				print FD "KERNEL /boot/linux.vmx\n";
-				print FD "APPEND ro initrd=/boot/initrd.vmx ";
-				print FD "vga=0x314 splash=silent";
+				print FD "APPEND initrd=/boot/initrd.vmx ";
+				print FD "vga=0x314 loader=$loader splash=silent";
 			} else {
 				print FD "KERNEL /boot/linux\n";
-				print FD "APPEND ro initrd=/boot/initrd ";
-				print FD "vga=0x314 splash=silent";
+				print FD "APPEND initrd=/boot/initrd ";
+				print FD "vga=0x314 loader=$loader splash=silent";
 			}
 			print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
 			print FD " noapic maxcpus=0 edd=off";

@@ -1176,7 +1176,10 @@ sub getOEMBootTitle {
 	my $node = $this -> getPreferencesNodeByTagName ("oem-boot-title");
 	my $title= $node -> getElementsByTagName ("oem-boot-title");
 	if ((! defined $title) || ("$title" eq "")) {
-		return undef;
+		$title = $this -> getImageDisplayName();
+		if ((! defined $title) || ("$title" eq "")) {
+			return undef;
+		}
 	}
 	return $title;
 }

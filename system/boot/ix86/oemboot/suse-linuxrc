@@ -86,7 +86,11 @@ then
 	# ----
 	export LOCAL_BOOT="yes"
 fi
-
+if [ "$loader" = "syslinux" ];then
+	systemException \
+		"syslinux boot not supported for OEM systems... abort" \
+	"reboot"
+fi
 #======================================
 # 5) start boot shell
 #--------------------------------------

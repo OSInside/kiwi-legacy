@@ -411,13 +411,16 @@ function installBootLoader {
 	# the architecture of the system
 	# ----
 	local arch=`uname -m`
-	case $arch in
-		i*86)   installBootLoaderGrub ;;
-		x86_64) installBootLoaderGrub ;;
-		ppc*)   installBootLoaderLilo ;;
+	if [ -z "$loader" ];then
+		loader="grub"
+	fi
+	case $arch-$loader in
+		i*86-grub)   installBootLoaderGrub ;;
+		x86_64-grub) installBootLoaderGrub ;;
+		ppc*)        installBootLoaderLilo ;;
 		*)
 		systemException \
-			"*** boot loader setup for $arch not implemented ***" \
+			"*** boot loader install for $arch-$loader not implemented ***" \
 		"reboot"
 	esac
 }
@@ -431,12 +434,15 @@ function installBootLoaderRecovery {
 	# happens according to the architecture of the system
 	# ----
 	local arch=`uname -m`
-	case $arch in
-		i*86)   installBootLoaderGrubRecovery ;;
-		x86_64) installBootLoaderGrubRecovery ;;
+	if [ -z "$loader" ];then
+		loader="grub"
+	fi
+	case $arch-$loader in
+		i*86-grub)   installBootLoaderGrubRecovery ;;
+		x86_64-grub) installBootLoaderGrubRecovery ;;
 		*)
 		systemException \
-			"*** boot loader setup for $arch not implemented ***" \
+			"*** boot loader setup for $arch-$loader not implemented ***" \
 		"reboot"
 	esac
 }
@@ -591,13 +597,16 @@ function setupBootLoaderFiles {
 	# happens according to the architecture of the system
 	# ----
 	local arch=`uname -m`
-	case $arch in
-		i*86)    setupBootLoaderFilesGrub ;;
-		x86_64)  setupBootLoaderFilesGrub ;;
-		ppc*)    setupBootLoaderFilesLilo ;;
+	if [ -z "$loader" ];then
+		loader="grub"
+	fi
+	case $arch-$loader in
+		i*86-grub)    setupBootLoaderFilesGrub ;;
+		x86_64-grub)  setupBootLoaderFilesGrub ;;
+		ppc*)         setupBootLoaderFilesLilo ;;
 		*)
 		systemException \
-			"*** boot loader files for $arch not implemented ***" \
+			"*** boot loader files for $arch-$loader not implemented ***" \
 		"reboot"
 	esac
 }
@@ -628,13 +637,18 @@ function setupBootLoader {
 		para="$para \"$1\""
 		shift
 	done
-	case $arch in
-		i*86)   eval setupBootLoaderGrub $para ;;
-		x86_64) eval setupBootLoaderGrub $para ;;
-		ppc*)   eval setupBootLoaderLilo $para ;;
+	if [ -z "$loader" ];then
+		loader="grub"
+	fi
+	case $arch-$loader in
+		i*86-grub)       eval setupBootLoaderGrub $para ;;
+		x86_64-grub)     eval setupBootLoaderGrub $para ;;
+		i*86-syslinux)   eval setupBootLoaderSyslinux $para ;;
+		x86_64-syslinux) eval setupBootLoaderSyslinux $para ;;
+		ppc*)            eval setupBootLoaderLilo $para ;;
 		*)
 		systemException \
-			"*** boot loader setup for $arch not implemented ***" \
+			"*** boot loader setup for $arch-$loader not implemented ***" \
 		"reboot"
 	esac
 }
@@ -653,12 +667,15 @@ function setupBootLoaderRecovery {
 		para="$para \"$1\""
 		shift
 	done
-	case $arch in
-		i*86)   eval setupBootLoaderGrubRecovery $para ;;
-		x86_64) eval setupBootLoaderGrubRecovery $para ;;
+	if [ -z "$loader" ];then
+		loader="grub"
+	fi
+	case $arch-$loader in
+		i*86-grub)   eval setupBootLoaderGrubRecovery $para ;;
+		x86_64-grub) eval setupBootLoaderGrubRecovery $para ;;
 		*)
 		systemException \
-			"*** boot loader setup for $arch not implemented ***" \
+			"*** boot loader setup for $arch-$loader not implemented ***" \
 		"reboot"
 	esac
 }
@@ -720,6 +737,164 @@ function setupBootLoaderGrubRecovery {
 	fi
 }
 #======================================
+# setupBootLoaderSyslinux
+#--------------------------------------
+function setupBootLoaderSyslinux {
+	# /.../
+	# create syslinux.cfg used for the
+	# syslinux bootloader
+	# ----
+	local mountPrefix=$1  # mount path of the image
+	local destsPrefix=$2  # base dir for the config files
+	local gnum=$3         # boot partition ID
+	local rdev=$4         # root partition
+	local gfix=$5         # syslinux title
+	local swap=$6         # optional swap partition
+	local conf=$destsPrefix/boot/syslinux/syslinux.cfg
+	local sysb=$destsPrefix/etc/sysconfig/bootloader
+	local console=""
+	local kname=""
+	local kernel=""
+	local initrd=""
+	#======================================
+	# check for device by ID
+	#--------------------------------------
+	local diskByID=`getDiskID $rdev`
+	local swapByID=`getDiskID $swap`
+	#======================================
+	# check for boot image .profile
+	#--------------------------------------
+	if [ -f /.profile ];then
+		importFile < /.profile
+	fi
+	#======================================
+	# check for system image .profile
+	#--------------------------------------
+	if [ -f $mountPrefix/image/.profile ];then
+		importFile < $mountPrefix/image/.profile
+	fi
+	#======================================
+	# check for syslinux title postfix
+	#--------------------------------------
+	if [ -z "$gfix" ];then
+		gfix="unknown"
+	fi
+	#======================================
+	# check for boot TIMEOUT
+	#--------------------------------------
+	if [ -z "$KIWI_BOOT_TIMEOUT" ];then
+		KIWI_BOOT_TIMEOUT=100;
+	fi
+	#======================================
+	# create directory structure
+	#--------------------------------------
+	for dir in $conf $sysb;do
+		dir=`dirname $dir`; mkdir -p $dir
+	done
+	#======================================
+	# create syslinux.cfg file
+	#--------------------------------------
+	echo "DEFAULT vesamenu.c32"         > $conf
+	echo "TIMEOUT $KIWI_BOOT_TIMEOUT"  >> $conf
+	local count=1
+	IFS="," ; for i in $KERNEL_LIST;do
+		if test ! -z "$i";then
+			#======================================
+			# create standard entry
+			#--------------------------------------
+			kernel=`echo $i | cut -f1 -d:`
+			initrd=`echo $i | cut -f2 -d:`
+			kname=${KERNEL_NAME[$count]}
+			#======================================
+			# move to FAT requirements 8+3
+			#--------------------------------------
+			kernel="linux.$count"
+			initrd="initrd.$count"
+			echo "LABEL Linux" >> $conf
+			if ! echo $gfix | grep -E -q "OEM|USB|VMX|unknown";then
+				echo "MENU LABEL ""$gfix"                    >> $conf
+			elif [ -z "$kiwi_oemtitle" ];then
+				echo "MENU LABEL ""$kname"" [ "$gfix" ]"     >> $conf
+			else
+				if [ "$count" = "1" ];then
+					echo -n "MENU LABEL ""$kiwi_oemtitle"    >> $conf
+					echo " [ ""$gfix"" ]"                    >> $conf
+				else
+					echo -n "MENU LABEL ""$kiwi_oemtitle"    >> $conf
+					echo "-""$kname"" [ ""$gfix"" ]"         >> $conf
+				fi
+			fi
+			if [ $kernel = "vmlinuz-xen" ];then
+				systemException \
+					"*** syslinux xen boot not implemented ***" \
+				"reboot"
+			else
+				echo "KERNEL /boot/$kernel"                  >> $conf
+				echo -n "APPEND initrd=/boot/$initrd"     >> $conf
+				echo -n " root=$diskByID $console vga=0x314" >> $conf
+				echo -n " loader=$loader splash=silent"      >> $conf
+				if [ ! -z "$swap" ];then
+					echo -n " resume=$swapByID"              >> $conf
+				fi
+				echo -n " $KIWI_INITRD_PARAMS"               >> $conf
+				echo " $KIWI_KERNEL_OPTIONS showopts"        >> $conf
+			fi
+			#======================================
+			# create Failsafe entry
+			#--------------------------------------
+			echo "LABEL Failsafe" >> $conf
+			if ! echo $gfix | grep -E -q "OEM|USB|VMX|unknown";then
+				echo "MENU LABEL Failsafe -- ""$gfix"        >> $conf
+			elif [ -z "$kiwi_oemtitle" ];then
+				echo -n "MENU LABEL Failsafe -- ""$kname"    >> $conf
+				echo " [ "$gfix" ]"                          >> $conf
+			else
+				if [ "$count" = "1" ];then
+					echo -n "MENU LABEL Failsafe -- "        >> $conf
+					echo -n "$kiwi_oemtitle"" [ "            >> $conf
+					echo "$gfix"" ]"                         >> $conf
+				else
+					echo -n "MENU LABEL Failsafe -- "        >> $conf
+					echo -n "$kiwi_oemtitle""-""$kname"" [ " >> $conf
+					echo "$gfix"" ]"                         >> $conf
+				fi
+			fi
+			if [ $kernel = "vmlinuz-xen" ];then
+				systemException \
+					"*** syslinux xen boot not implemented ***" \
+				"reboot"
+			else
+				echo "KERNEL /boot/$kernel"                  >> $conf
+				echo -n "APPEND initrd=/boot/$initrd"     >> $conf
+				echo -n " root=$diskByID $console vga=0x314" >> $conf
+				echo -n " loader=$loader splash=silent"      >> $conf
+				if [ ! -z "$swap" ];then
+					echo -n " resume=$swapByID"              >> $conf
+				fi
+				echo -n " $KIWI_INITRD_PARAMS"               >> $conf
+				echo " $KIWI_KERNEL_OPTIONS showopts"        >> $conf
+				echo -n " ide=nodma apm=off acpi=off"        >> $conf
+				echo -n " noresume selinux=0 nosmp"          >> $conf
+				echo " noapic maxcpus=0 edd=off"             >> $conf
+			fi
+			#======================================
+			# create recovery entry
+			#--------------------------------------
+			if [ ! -z "$OEM_RECOVERY" ];then
+				systemException \
+					"*** syslinux recovery chain loading not implemented ***" \
+				"reboot"
+			fi
+			count=`expr $count + 1`
+		fi
+	done
+	#======================================
+	# create sysconfig/bootloader
+	#--------------------------------------
+	echo "LOADER_TYPE=\"syslinux\""   > $sysb
+	echo "LOADER_LOCATION=\"mbr\""   >> $sysb
+}
+#======================================
 # setupBootLoaderGrub
 #--------------------------------------
 function setupBootLoaderGrub {
@@ -746,6 +921,12 @@ function setupBootLoaderGrub {
 	#--------------------------------------
 	local diskByID=`getDiskID $rdev`
 	local swapByID=`getDiskID $swap`
+	#======================================
+	# check for boot image .profile
+	#--------------------------------------
+	if [ -f /.profile ];then
+		importFile < /.profile
+	fi
 	#======================================
 	# check for system image .profile
 	#--------------------------------------
@@ -808,11 +989,16 @@ function setupBootLoaderGrub {
 			kname=${KERNEL_NAME[$count]}
 			if ! echo $gfix | grep -E -q "OEM|USB|VMX|unknown";then
 				echo "title _""$gfix""_"                          >> $menu
-			elif [ -z "$kiwi_iname" ];then
+			elif [ -z "$kiwi_oemtitle" ];then
 				echo "title _""$kname"" [ "$gfix" ]_"             >> $menu
 			else
-				echo -n "title _""$kiwi_iname"                    >> $menu
-				echo "-""$kname"" [ ""$gfix"" ]_"                 >> $menu
+				if [ "$count" = "1" ];then
+					echo -n "title _""$kiwi_oemtitle"             >> $menu
+					echo " [ ""$gfix"" ]_"                        >> $menu
+				else
+					echo -n "title _""$kiwi_oemtitle""-""$kname"  >> $menu
+					echo " [ ""$gfix"" ]_"
+				fi
 			fi
 			if [ $kernel = "vmlinuz-xen" ];then
 				echo " root $gdev"                                >> $menu
@@ -841,13 +1027,18 @@ function setupBootLoaderGrub {
 			# create failsafe entry
 			#--------------------------------------
 			if ! echo $gfix | grep -E -q "OEM|USB|VMX|unknown";then
-				echo "title _Failsafe -- ""$gfix""_"             >> $menu
-			elif [ -z "$kiwi_iname" ];then
-				echo -n "title _Failsafe -- "                    >> $menu
-				echo "$kname"" [ ""$gfix"" ]_"                   >> $menu
+				echo "title _Failsafe -- ""$gfix""_"              >> $menu
+			elif [ -z "$kiwi_oemtitle" ];then
+				echo -n "title _Failsafe -- "                     >> $menu
+				echo "$kname"" [ ""$gfix"" ]_"                    >> $menu
 			else
-				echo -n "title _Failsafe -- ""$kiwi_iname"       >> $menu
-				echo "-""$kname"" [ ""$gfix"" ]_"                >> $menu
+				if [ "$count" = "1" ];then
+					echo -n "title _Failsafe -- ""$kiwi_oemtitle" >> $menu
+					echo " [ ""$gfix"" ]_"
+				else
+					echo -n "title _Failsafe -- ""$kiwi_oemtitle" >> $menu
+					echo "-""$kname"" [ ""$gfix"" ]_"             >> $menu
+				fi
 			fi
 			if [ $kernel = "vmlinuz-xen" ];then
 				echo " root $gdev"                                >> $menu
@@ -930,6 +1121,12 @@ function setupBootLoaderLilo {
 		"setupBootLoaderLilo $# called with '$1' '$2' '$3' '$4' '$5' '$6' '$7'"\
 	>&2
 	#======================================
+	# check for boot image .profile
+	#--------------------------------------
+	if [ -f /.profile ];then
+		importFile < /.profile
+	fi
+	#======================================
 	# check for system image .profile
 	#--------------------------------------
 	if [ -f $mountPrefix/image/.profile ];then
@@ -976,13 +1173,17 @@ function setupBootLoaderLilo {
 			echo "image=/boot/$kernel"
 			echo -n "###Don't change this comment - YaST2 identifier:"
 			echo " Original name: linux###"
-			echo "# kiwi_iname $kiwi_iname"
+			echo "# kiwi_oemtitle $kiwi_oemtitle"
 			if ! echo $gfix | grep -E -q "OEM|USB|VMX|unknown";then
 				echo "label=\"$gfix\""
-			elif [ -z "$kiwi_iname" ];then
+			elif [ -z "$kiwi_oemtitle" ];then
 				echo "label=\"$kname [ $gfix ]\""
 			else
-				echo "label=\"$kiwi_iname-$kname [ $gfix ]\""
+				if [ "$count" = "1" ];then
+					echo "label=\"$kiwi_oemtitle [ $gfix ]\""
+				else
+					echo "label=\"$kiwi_oemtitle-$kname [ $gfix ]\""
+				fi
 			fi
 			echo "    initrd=/boot/$initrd"
 			echo "    append=\"quiet sysrq=1 panic=9 $KIWI_INITRD_PARAMS\""
@@ -1077,8 +1278,6 @@ function updateLVMBootDeviceFstab {
 	local sdev=$2
 	local diskByID=`getDiskID $sdev`
 	local nfstab=$prefix/etc/fstab
-
-
 	if [ ! -z "$FSTYPE" ];then
 		FSTYPE_SAVE=$FSTYPE
 	fi
@@ -1093,6 +1292,20 @@ function updateLVMBootDeviceFstab {
 	if [ ! -z "$FSTYPE_SAVE" ];then
 		FSTYPE=$FSTYPE_SAVE
 	fi
+}
+#======================================
+# updateSyslinuxBootDeviceFstab
+#--------------------------------------
+function updateSyslinuxBootDeviceFstab {
+	# /.../
+	# add one line to the fstab file for the /syslboot
+	# device partition
+	# ----
+	local prefix=$1
+	local sdev=$2
+	local diskByID=`getDiskID $sdev`
+	local nfstab=$prefix/etc/fstab
+	echo "$diskByID /syslboot vfat defaults 0 0" >> $nfstab
 }
 #======================================
 # updateOtherDeviceFstab
@@ -1133,10 +1346,14 @@ function setupKernelModules {
 	# kernel modules to become integrated into the initrd
 	# if created by the distro mkinitrd tool
 	# ----
-	local prefix=$1
-	local ktempl=/mnt/var/adm/fillup-templates/sysconfig.kernel
-	local syskernel=$prefix/etc/sysconfig/kernel
-	mkdir -p $prefix/etc/sysconfig
+	local destprefix=$1
+	local srcprefix=$2
+	if [ -z "$srcprefix" ];then
+		srcprefix=/mnt
+	fi
+	local ktempl=$srcprefix/var/adm/fillup-templates/sysconfig.kernel
+	local syskernel=$destprefix/etc/sysconfig/kernel
+	mkdir -p $destprefix/etc/sysconfig
 	if [ ! -f $ktempl ];then
 		systemException \
 			"Can't find kernel sysconfig template in system image !" \

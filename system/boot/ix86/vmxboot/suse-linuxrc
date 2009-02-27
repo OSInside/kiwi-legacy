@@ -171,16 +171,42 @@ if [ $LOCAL_BOOT = "no" ];then
 fi
 
 #======================================
-# 12) setup /lvmboot
+# 12) setup /lvmboot or /syslboot
 #--------------------------------------
-if [ $LOCAL_BOOT = "no" ] && [ "$haveLVM" = "yes" ];then
-	mkdir /mnt/lvmboot
-	mount $imageBootDevice /mnt/lvmboot
-	if [ -z $UNIONFS_CONFIG ];then
-		cp -a /mnt/boot/* /mnt/lvmboot/boot
+if [ $LOCAL_BOOT = "no" ];then
+	if [ "$haveLVM" = "yes" ];then
+		#======================================
+		# LVM use first partition as boot
+		#--------------------------------------
+		mkdir /mnt/lvmboot
+		mount $imageBootDevice /mnt/lvmboot
+		if [ -z $UNIONFS_CONFIG ];then
+			cp -a /mnt/boot/* /mnt/lvmboot/boot
+		fi
+		rm -rf /mnt/boot
+		( cd /mnt && ln -s lvmboot/boot boot )
+	elif [ "$loader" = "syslinux" ];then
+		#======================================
+		# Syslinux search FAT and use as boot
+		#--------------------------------------
+		for i in 1 2 3;do
+			pType=`partitionID $imageDiskDevice $i`
+			if [ "$pType" = "6" ];then
+				imageFatDevice=$imageDiskDevice$i
+				break
+			fi 
+		done
+		if [ -z "$imageFatDevice" ];then
+			systemException "Can't find FAT partition" "reboot"
+		fi
+		mkdir /mnt/syslboot
+		mount $imageFatDevice /mnt/syslboot
+		if [ -z $UNIONFS_CONFIG ];then
+			cp -a /mnt/boot/* /mnt/syslboot/boot
+		fi
+		rm -rf /mnt/boot
+		( cd /mnt && ln -s syslboot/boot boot )
 	fi
-	rm -rf /mnt/boot
-	( cd /mnt && ln -s lvmboot/boot boot )
 fi
 
 #======================================
@@ -223,6 +249,8 @@ if [ $LOCAL_BOOT = "no" ];then
 	updateRootDeviceFstab /config $imageRootDevice
 	if [ "$haveLVM" = "yes" ];then
 		updateLVMBootDeviceFstab /config $imageBootDevice
+	elif [ "$loader" = "syslinux" ];then
+		updateSyslinuxBootDeviceFstab /config $imageFatDevice
 	fi
 	if [ ! -z "$UNIONFS_CONFIG" ]; then
 		export KIWI_INITRD_PARAMS="UNIONFS_CONFIG=yes"

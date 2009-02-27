@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Fri Feb 27 13:38:54 CET 2009 - ms@suse.de
+
+- v3.23
+- fixed syslinux setup for vmx image types
+- add system exception for syslinux on oem image types.
+  This is because we don't support OEMs with syslinux
+
+-------------------------------------------------------------------
 Wed Feb 25 14:08:16 CET 2009 - ms@suse.de
 
 - v3.22

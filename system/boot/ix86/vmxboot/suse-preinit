@@ -57,26 +57,36 @@ if [ -x /bin/rpm ];then
 fi
 
 #======================================
-# 7) check for union filesystem
-#--------------------------------------
-if [ ! -z "$UNIONFS_CONFIG" ]; then
-	exit 0
-fi
-
-#======================================
 # 8) create initrd on diskful
 #--------------------------------------
-setupSUSEInitrd
-
-#======================================
-# 9) Install boot loader on diskful
-#--------------------------------------
-if [ $bootLoaderOK = 1 ];then
-	installBootLoader
+if [ -z "$UNIONFS_CONFIG" ]; then
+	setupSUSEInitrd
 fi
 
 #======================================
-# 10) kill udev
+# 7) Check FAT requires on syslinux
+#--------------------------------------
+if [ -z "$UNIONFS_CONFIG" ] && [ "$loader" = "syslinux" ];then
+	# /.../
+	# if syslinux is used we need to make sure that the
+	# filename on the boot partition is correct 8+3
+	# ----
+	count=1
+	IFS="," ; for i in $KERNEL_LIST;do
+		if test -z "$i";then
+			continue
+		fi
+		kernel=`echo $i | cut -f1 -d:`
+		initrd=`echo $i | cut -f2 -d:`
+		mv /boot/$kernel /boot/linux.$count
+		mv /boot/$initrd /boot/initrd.$count
+		count=`expr $count + 1`
+	done
+	IFS=$IFS_ORIG
+fi
+
+#======================================
+# 9) kill udev
 #--------------------------------------
 udevKill
 umountSystemFilesystems
