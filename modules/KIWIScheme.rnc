@@ -112,6 +112,9 @@ k.id.attribute          =
 k.name.attribute        =
 	## A name
 	attribute name { text }
+k.replaces.attribute    =
+	## Replace package with some other package
+	attribute replaces { text }
 k.displayname.attribute =
 	## A friendly display name. Used in the boot menu
 	## for isolinux and grub
@@ -563,9 +566,11 @@ div {
 div {
 	k.package.name.attribute = k.name.attribute
 	k.package.arch.attribute = k.arch.attribute
-    k.package.attlist =
+	k.package.replaces.attribute = k.replaces.attribute
+	k.package.attlist =
 		k.package.name.attribute &
-		k.package.arch.attribute?
+		k.package.arch.attribute? &
+		k.replaces.attribute?
 	k.package =
 		## Name of an image Package
 		element package {

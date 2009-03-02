@@ -1035,6 +1035,9 @@ sub removePackages {
 	# setup screen call
 	#------------------------------------------
 	my @removePackages = @{$removePacks};
+	if (! @removePackages) {
+		return $this;
+	}
 	my $fd = $this -> setupScreen();
 	if (! defined $fd) {
 		return undef;
@@ -1071,7 +1074,7 @@ sub removePackages {
 		#------------------------------------------
 		$kiwi -> info ("Removing addon packages...");
 		my @installOpts = (
-			"--auto-agree-with-licenses"
+			"--force-resolution"
 		);
 		print $fd "function clean { kill \$SPID;";
 		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
@@ -1117,6 +1120,7 @@ sub setupUpgrade {
 	# ---
 	my $this = shift;
 	my $addPacks = shift;
+	my $delPacks = shift;
 	my $kiwi = $this->{kiwi};
 	my $root = $this->{root};
 	my $xml  = $this->{xml};
@@ -1155,19 +1159,27 @@ sub setupUpgrade {
 		print $fd "@kchroot @smart update &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
 		print $fd "test \$? = 0 && ";
+		print $fd "@kchroot @smart channel --show &\n";
+		print $fd "SPID=\$!;wait \$SPID\n";
+		if (defined $delPacks) {
+			my @removePackages = @{$delPacks};
+			if (@removePackages) {
+				print $fd "test \$? = 0 && @kchroot @smart remove -y ";
+				print $fd "@removePackages || false &\n";
+				print $fd "SPID=\$!;wait \$SPID\n";
+			}
+		}
 		if (defined $addPacks) {
 			my @addonPackages = @{$addPacks};
-			print $fd "@kchroot @smart channel --show &\n";
-			print $fd "SPID=\$!;wait \$SPID\n";
-			print $fd "test \$? = 0 && @kchroot @smart upgrade @opts ";
-			print $fd "|| false &\n";
-			print $fd "SPID=\$!;wait \$SPID\n";
-			print $fd "test \$? = 0 && @kchroot @smart install @opts ";
-			print $fd "@addonPackages || false &\n";
-			print $fd "SPID=\$!;wait \$SPID\n";
+			if (@addonPackages) {
+				print $fd "test \$? = 0 && @kchroot @smart upgrade @opts ";
+				print $fd "|| false &\n";
+				print $fd "SPID=\$!;wait \$SPID\n";
+				print $fd "test \$? = 0 && @kchroot @smart install @opts ";
+				print $fd "@addonPackages || false &\n";
+				print $fd "SPID=\$!;wait \$SPID\n";
+			}
 		} else {
-			print $fd "@kchroot @smart channel --show &\n";
-			print $fd "SPID=\$!;wait \$SPID\n";
 			print $fd "test \$? = 0 && @kchroot @smart upgrade @opts &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
 		}
@@ -1202,6 +1214,15 @@ sub setupUpgrade {
 		print $fd "@kchroot @zypper refresh &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
 		print $fd "test \$? = 0 && ";
+		if (defined $delPacks) {
+			my @removePackages = @{$delPacks};
+			if (@removePackages) {
+				print $fd "@kchroot @zypper remove ";
+				print $fd "--force-resolution @removePackages &\n";
+				print $fd "SPID=\$!;wait \$SPID\n";
+				print $fd "test \$? = 0 && ";
+			}
+		}
 		if (defined $addPacks) {
 			my @addonPackages = @{$addPacks};
 			my @newpatts = ();

@@ -430,7 +430,7 @@ At the moment KIWI supports the package managers smart and zypper
 whereas smart has support for more repository types compared to
 zypper. Therefore the possible values for the type attribute has
 beend copied from smart. The following table shows the possible
-repo types: 
+repo types:\\ 
 
 \begin{tabular}[h]{|p{4cm}|p{2cm}|p{2cm}|}
 \hline
@@ -522,6 +522,7 @@ the latest packages available.
 \hspace*{2.5cm}\textit{patternType="type"}\\
 \hspace*{2.5cm}\textit{patternPackageType="type"}\\
 \hspace*{1cm}<package name="name" arch="arch"/>\\
+\hspace*{1cm}<package name="name" replaces="name"/>\\
 \hspace*{1cm}<package .../>\\
 \hspace*{1cm}<opensusePattern name="name"/>\\
 \hspace*{1cm}<opensusePattern .../>\\
@@ -597,9 +598,31 @@ the ignore element to specify an ignore list, with the name attribute
 containing the package name. Please note that you can't ignore a package
 if it is required by a package dependency of another package in your list.
 The packagemanager will automatically pull in the package even if you have
-ignored it. To restrict a package to a specific architecture, use
-the arch attribute to specify a comma separated list of allowed
-architectures.
+ignored it.
+
+To restrict a package to a specific architecture, use
+the \textbf{arch} attribute to specify a comma separated list of allowed
+architectures. Such a package is only installed if the build systems
+architecture (uname -m) matches one of the specified values of the arch
+attribute.
+
+If a package is only required for a specific type of image
+and replaces another package you can use the \textbf{replaces} attribute
+to tell kiwi to install the package by replacing another one. For example
+you can specify the kernel package in the type=image section as
+
+\begin{lstlisting}[language=xml]
+<package name="kernel-default" replaces="kernel-xen"/>
+\end{lstlisting}
+
+and in the type=xen section as
+
+\begin{lstlisting}[language=xml]
+<package name="kernel-xen" replaces="kernel-default"/>
+\end{lstlisting}
+
+The result is the xen kernel if you request a xen
+image and the default kernel in any other case.
 
 \begin{Command}{12cm}
 <vmwareconfig arch="arch" memory="MB"\\

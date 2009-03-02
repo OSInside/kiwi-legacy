@@ -1848,21 +1848,22 @@ sub addRepository {
 }
 
 #==========================================
-# addImagePackages
+# addPackages
 #------------------------------------------
-sub addImagePackages {
+sub addPackages {
 	# ...
-	# Add the given package list to the type=bootstrap packages
-	# section of the xml description parse tree.
+	# Add the given package list to the specified packages
+	# type section of the xml description parse tree.
 	# ----
 	my $this  = shift;
+	my $ptype = shift;
 	my @packs = @_;
 	my $nodes = $this->{packageNodeList};
 	my $nodeNumber = 1;
 	for (my $i=1;$i<= $nodes->size();$i++) {
 		my $node = $nodes -> get_node($i);
 		my $type = $node  -> getAttribute ("type");
-		if ($type eq "bootstrap") {
+		if ($type eq $ptype) {
 			$nodeNumber = $i; last;
 		}
 	}
@@ -1873,6 +1874,30 @@ sub addImagePackages {
 			-> addChild ($addElement);
 	}
 	return $this;
+}
+
+#==========================================
+# addImagePackages
+#------------------------------------------
+sub addImagePackages {
+	# ...
+	# Add the given package list to the type=bootstrap packages
+	# section of the xml description parse tree.
+	# ----
+	my $this  = shift;
+	return $this -> addPackages ("bootstrap",@_);
+}
+
+#==========================================
+# addRemovePackages
+#------------------------------------------
+sub addRemovePackages {
+	# ...
+	# Add the given package list to the type=delete packages
+	# section of the xml description parse tree.
+	# ----
+	my $this  = shift;
+	return $this -> addPackages ("delete",@_);
 }
 
 #==========================================
@@ -2322,6 +2347,7 @@ sub getList {
 		foreach my $element (@plist) {
 			my $package = $element -> getAttribute ("name");
 			my $forarch = $element -> getAttribute ("arch");
+			my $replaces= $element -> getAttribute ("replaces");
 			my $allowed = 1;
 			if (($what ne "metapackages") && ($what ne "instpackages")) {
 				if (defined $forarch) {
@@ -2347,6 +2373,9 @@ sub getList {
 				if (($package =~ /@/) && ($manager eq "zypper")) {
 					$package =~ s/@/\./;
 				}
+			}
+			if (defined $replaces) {
+				push @result,[$package,$replaces];
 			}
 			push @result,$package;
 		}
@@ -2451,10 +2480,31 @@ sub getList {
 	# Create unique list
 	#------------------------------------------
 	my %packHash = ();
+	my %replHash = ();
 	foreach my $package (@result) {
-		$packHash{$package} = $package;
+		if (ref $package) {
+			$replHash{$package->[0]} = $package->[1];
+		} else {
+			$packHash{$package} = $package;
+		}
 	}
+	$this->{replHash} = \%replHash;
 	return sort keys %packHash;
+}
+
+#==========================================
+# getReplacePackageHash
+#------------------------------------------
+sub getReplacePackageHash {
+	# ...
+	# Returns the packages to be deleted according to the
+	# replace information in config.xml. The call uses the
+	# information stored in the last getList call and therefore
+	# references always the data from this last call
+	# ---
+	my $this = shift;
+	my %pacs = %{$this->{replHash}};
+	return %pacs;
 }
 
 #==========================================

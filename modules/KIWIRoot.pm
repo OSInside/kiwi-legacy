@@ -52,6 +52,7 @@ sub new {
 	my $baseSystem   = shift;
 	my $useRoot      = shift;
 	my $addPacks     = shift;
+	my $delPacks     = shift;
 	my $baseRoot     = shift;
 	my $baseRootMode = shift;
 	my $targetArch   = shift;
@@ -164,6 +165,7 @@ sub new {
 	$this->{baseSystem}    = $baseSystem;
 	$this->{useRoot}       = $useRoot;
 	$this->{addPacks}      = $addPacks;
+	$this->{delPacks}      = $delPacks;
 	$this->{baseRoot}      = $baseRoot;
 	#==========================================
 	# check channel count
@@ -462,6 +464,7 @@ sub upgrade {
 	my $root = $this->{root};
 	my $manager  = $this->{manager};
 	my $addPacks = $this->{addPacks};
+	my $delPacks = $this->{delPacks};
 	#==========================================
 	# Mount local and NFS directories
 	#------------------------------------------
@@ -496,7 +499,7 @@ sub upgrade {
 		$manager -> freeLock();
 		return undef;
 	}
-	if (! $manager -> setupUpgrade ($addPacks)) {
+	if (! $manager -> setupUpgrade ($addPacks,$delPacks)) {
 		$this -> cleanupResolvConf();
 		$manager -> freeLock();
 		return undef;

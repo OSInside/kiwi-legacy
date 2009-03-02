@@ -182,6 +182,11 @@ named /etc/ImageID</a:documentation>
       <a:documentation>A name</a:documentation>
     </attribute>
   </define>
+  <define name="k.replaces.attribute">
+    <attribute name="replaces">
+      <a:documentation>Replace package with some other package</a:documentation>
+    </attribute>
+  </define>
   <define name="k.displayname.attribute">
     <attribute name="displayname">
       <a:documentation>A friendly display name. Used in the boot menu
@@ -811,11 +816,17 @@ to the specific medium number (CD1, DVD7, ...)</a:documentation>
     <define name="k.package.arch.attribute">
       <ref name="k.arch.attribute"/>
     </define>
+    <define name="k.package.replaces.attribute">
+      <ref name="k.replaces.attribute"/>
+    </define>
     <define name="k.package.attlist">
       <interleave>
         <ref name="k.package.name.attribute"/>
         <optional>
           <ref name="k.package.arch.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.replaces.attribute"/>
         </optional>
       </interleave>
     </define>

@@ -159,6 +159,7 @@ our @AddRepositoryType;     # add repository type
 our @AddRepositoryAlias;    # alias name for the repository
 our @AddRepositoryPriority; # priority for the repository
 our @AddPackage;            # add packages to the image package list
+our @RemovePackage;         # remove package by adding them to the remove list
 our $IgnoreRepos;           # ignore repositories specified so far
 our $SetRepository;         # set first repository for building physical extend
 our $SetRepositoryType;     # set firt repository type
@@ -343,6 +344,12 @@ sub main {
 			$xml -> addImagePackages (@AddPackage);
 		}
 		#==========================================
+		# Check for del-package option
+		#------------------------------------------
+		if (defined @RemovePackage) {
+			$xml -> addRemovePackages (@RemovePackage);
+		}
+		#==========================================
 		# Check for inheritance
 		#------------------------------------------
 		if (! $xml -> setupImageInheritance()) {
@@ -353,7 +360,7 @@ sub main {
 		#------------------------------------------
 		$root = new KIWIRoot (
 			$kiwi,$xml,$Prepare,$RootTree,
-			"/base-system",undef,undef,$BaseRoot,
+			"/base-system",undef,undef,undef,$BaseRoot,
 			$BaseRootMode,$TargetArch
 		);
 		if (! defined $root) {
@@ -567,27 +574,61 @@ sub main {
 			my $code = kiwiExit (1); return $code;
 		}
 		#==========================================
-		# Check for type packages if any
+		# Check for packages updates if needed
 		#------------------------------------------
-		my @addonList;
+		my @addonList;   # install this packages
+		my @deleteList;  # remove this packages
+		my %replace;
+		my %replids;
+		$xml -> getBaseList();
+		%replace = $xml -> getReplacePackageHash();
+		%replids = getReplaceIDHash (\%replace,\%replids);
+		$xml -> getInstallList();
+		%replace = $xml -> getReplacePackageHash();
+		%replids = getReplaceIDHash (\%replace,\%replids);
 		if ($type{type} eq "vmx") {
 			$kiwi -> info ("Creating VMware package list");
 			@addonList = $xml -> getVMwareList();
+			%replace = $xml -> getReplacePackageHash();
+			%replids = getReplaceIDHash (\%replace,\%replids);
 			$kiwi -> done();
 		}
 		if ($type{type} eq "xen") {
 			$kiwi -> info ("Creating Xen package list");
 			@addonList = $xml -> getXenList();
+			%replace = $xml -> getReplacePackageHash();
+			%replids = getReplaceIDHash (\%replace,\%replids);
 			$kiwi -> done();
 		}
-		if (@addonList) {
-			$kiwi -> info ("Installing packages: @addonList...\n");
-			$kiwi -> warning (
-				"*** Packages installed here won't be removed later ***\n"
-			);
+		if (%replids) {
+			my %add = ();
+			my %del = ();
+			foreach my $id (keys %replids) {
+				foreach my $new (keys %{$replids{$id}}) {
+					$del{$replids{$id}{$new}} = 1;
+					$add{$new} = 1;
+				}
+			}
+			foreach my $del (keys %del) {
+				if (defined $add{$del}) {
+					undef $add{$del};
+				}
+			}
+			push @addonList, keys %add;
+			push @deleteList,keys %del;
+		}
+		if ((@addonList) || (@deleteList)) {
+			$kiwi -> info ("Image update:");
+			if (@addonList) {
+				$kiwi -> info ("--> Install/Update: @addonList\n");
+			}
+			if (@deleteList) {
+				$kiwi -> info ("--> Remove: @deleteList\n");
+			}
 			$main::Survive = "yes";
 			$main::Upgrade = $Create;
-			@main::AddPackage = @addonList;
+			@main::AddPackage    = @addonList;
+			@main::RemovePackage = @deleteList;
 			undef $main::Create;
 			if (! defined main::main()) {
 				$main::Survive = "default";
@@ -732,7 +773,7 @@ sub main {
 			#------------------------------------------
 			$root = new KIWIRoot (
 				$kiwi,$xml,$RunTestSuite,undef,
-				"/base-system",$RunTestSuite,undef,$BaseRoot,
+				"/base-system",$RunTestSuite,undef,undef,$BaseRoot,
 				$BaseRootMode,$TargetArch
 			);
 			if (! defined $root) {
@@ -882,8 +923,8 @@ sub main {
 		#------------------------------------------
 		$root = new KIWIRoot (
 			$kiwi,$xml,$Upgrade,undef,
-			"/base-system",$Upgrade,\@AddPackage,$BaseRoot,
-			$BaseRootMode,$TargetArch
+			"/base-system",$Upgrade,\@AddPackage,\@RemovePackage,
+			$BaseRoot,$BaseRootMode,$TargetArch
 		);
 		if (! defined $root) {
 			$kiwi -> error ("Couldn't create root object");
@@ -1119,6 +1160,7 @@ sub init {
 		"add-repoalias=s"       => \@AddRepositoryAlias,
 		"add-repopriority=i"    => \@AddRepositoryPriority,
 		"add-package=s"         => \@AddPackage,
+		"del-package=s"         => \@RemovePackage,
 		"set-repo=s"            => \$SetRepository,
 		"set-repotype=s"        => \$SetRepositoryType,
 		"set-repoalias=s"       => \$SetRepositoryAlias,
@@ -1447,10 +1489,16 @@ sub usage {
 	print "    run of image prepare/upgrade or migrate process.\n";
 	print "\n";
 	print "  [ --add-package <package> ]\n";
-	print "    Add the given package name to the list of image packages\n";
+	print "    Adds the given package name to the list of image packages\n";
 	print "    multiple --add-package options are possible. The change\n";
 	print "    will not be written to the xml description\n";
 	print "\n";
+	print "  [ --del-package <package> ]\n";
+	print "    Removes the given package by adding it the list of packages\n";
+	print "    to become removed. multiple --del-package options are\n";
+	print "    possible. The change will not be written to the xml\n";
+	print "    description\n";
+    print "\n";
 	print "  [ --logfile <filename> | terminal ]\n";
 	print "    Write to the log file \`<filename>' instead of\n";
 	print "    the terminal.\n";
@@ -1822,6 +1870,26 @@ sub createHash {
 	}
 	$kiwi -> done();
 	my $code = kiwiExit (0); return $code;
+}
+
+#==========================================
+# getReplaceIDHash
+#------------------------------------------
+sub getReplaceIDHash {
+	# ...
+	# takes the result of getReplacePackageHash() hash and
+	# turns it into a new hash. The function appends
+	# the new data to an optionally given hash variable
+	# as second argument and returns the result hash
+	# ---
+	my %hash   = %{$_[0]};
+	my %result = %{$_[1]};
+	foreach my $key (keys %hash) {
+		my @id = ($key,$hash{$key});
+		my $id = join (".",sort @id);
+		$result{$id}{$key} = $hash{$key};
+	}
+	return %result;
 }
 
 #==========================================

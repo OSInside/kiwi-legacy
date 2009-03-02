@@ -2,6 +2,11 @@
 Mon Mar  2 10:19:09 CET 2009 - ms@suse.de
 
 - v3.24
+- added replaces="name" attribute to the package element.
+  This allows you to install/upgrade a package by replacing
+  it with another one. Along with this change it's now also
+  possible to use --del-package to remove a package from an
+  existing root directory 
 - added diskless profile patch which needs brd driver
   and the atlx network card driver (bnc #480740)
 
