@@ -1094,6 +1094,11 @@ div {
 		attribute bootloader {
 			"grub" | "syslinux"
 		}
+	k.type.vga.attribute =
+		## Specifies the kernel framebuffer mode. More information
+		## about the possible values can be found by calling
+		## hwinfo --framebuffer or in /usr/src/linux/Documentation/fb/vesafb.txt
+		attribute vga { text }
 	k.type.filesystem.attribute = 
 		## Specifies the filesystem which can be one of:
 		## ext2 , ext3 , reiserfs ,squashfs or cromfs
@@ -1134,6 +1139,7 @@ div {
 		k.type.boot.attribute? &
 		k.type.flags.attribute? &
 		k.type.bootloader.attribute? &
+		k.type.vga.attribute? &
 		k.type.filesystem.attribute? &
 		k.type.fsreadonly.attribute? &
 		k.type.fsreadwrite.attribute? &

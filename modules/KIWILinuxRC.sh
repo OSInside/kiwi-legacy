@@ -26,6 +26,7 @@ export KLOG_CONSOLE=4
 export KLOG_DEFAULT=1
 export PARTITIONER=sfdisk
 export TRANSFER_ERRORS_FILE=/tmp/transfer.errors
+export DEFAULT_VGA=0x314
 
 #======================================
 # Debug
@@ -692,6 +693,10 @@ function setupBootLoaderGrubRecovery {
 	local menu=$destsPrefix/boot/grub/menu.lst
 	local kernel=""
 	local initrd=""
+	local fbmode=$vga
+	if [ -z "$fbmode" ];then
+		fbmode=$DEFAULT_VGA
+	fi
 	#======================================
 	# import grub stages into recovery
 	#--------------------------------------
@@ -720,7 +725,7 @@ function setupBootLoaderGrubRecovery {
 			echo " kernel /boot/xen.gz"                   >> $menu
 			echo -n " module /boot/$kernel"               >> $menu
 			echo -n " root=$diskByID $console"            >> $menu
-			echo -n " vga=0x314 splash=silent"            >> $menu
+			echo -n " vga=$fbmode splash=silent"          >> $menu
 			echo -n " $KIWI_INITRD_PARAMS"                >> $menu
 			echo -n " $KIWI_KERNEL_OPTIONS"               >> $menu
 			echo " KIWI_RECOVERY=1 showopts"              >> $menu
@@ -728,7 +733,7 @@ function setupBootLoaderGrubRecovery {
 		else
 			echo -n " kernel $gdev_recovery/boot/$kernel" >> $menu
 			echo -n " root=$diskByID $console"            >> $menu
-			echo -n " vga=0x314 splash=silent"            >> $menu
+			echo -n " vga=$fbmode splash=silent"          >> $menu
 			echo -n " $KIWI_INITRD_PARAMS"                >> $menu
 			echo -n " $KIWI_KERNEL_OPTIONS"               >> $menu
 			echo " KIWI_RECOVERY=1 showopts"              >> $menu
@@ -756,6 +761,10 @@ function setupBootLoaderSyslinux {
 	local kname=""
 	local kernel=""
 	local initrd=""
+	local fbmode=$vga
+	if [ -z "$fbmode" ];then
+		fbmode=$DEFAULT_VGA
+	fi
 	#======================================
 	# check for device by ID
 	#--------------------------------------
@@ -812,16 +821,16 @@ function setupBootLoaderSyslinux {
 			initrd="initrd.$count"
 			echo "LABEL Linux" >> $conf
 			if ! echo $gfix | grep -E -q "OEM|USB|VMX|unknown";then
-				echo "MENU LABEL ""$gfix"                    >> $conf
+				echo "MENU LABEL ""$gfix"                      >> $conf
 			elif [ -z "$kiwi_oemtitle" ];then
-				echo "MENU LABEL ""$kname"" [ "$gfix" ]"     >> $conf
+				echo "MENU LABEL ""$kname"" [ "$gfix" ]"       >> $conf
 			else
 				if [ "$count" = "1" ];then
-					echo -n "MENU LABEL ""$kiwi_oemtitle"    >> $conf
-					echo " [ ""$gfix"" ]"                    >> $conf
+					echo -n "MENU LABEL ""$kiwi_oemtitle"      >> $conf
+					echo " [ ""$gfix"" ]"                      >> $conf
 				else
-					echo -n "MENU LABEL ""$kiwi_oemtitle"    >> $conf
-					echo "-""$kname"" [ ""$gfix"" ]"         >> $conf
+					echo -n "MENU LABEL ""$kiwi_oemtitle"      >> $conf
+					echo "-""$kname"" [ ""$gfix"" ]"           >> $conf
 				fi
 			fi
 			if [ $kernel = "vmlinuz-xen" ];then
@@ -829,34 +838,34 @@ function setupBootLoaderSyslinux {
 					"*** syslinux xen boot not implemented ***" \
 				"reboot"
 			else
-				echo "KERNEL /boot/$kernel"                  >> $conf
-				echo -n "APPEND initrd=/boot/$initrd"        >> $conf
-				echo -n " root=$diskByID $console vga=0x314" >> $conf
-				echo -n " loader=$loader splash=silent"      >> $conf
+				echo "KERNEL /boot/$kernel"                    >> $conf
+				echo -n "APPEND initrd=/boot/$initrd"          >> $conf
+				echo -n " root=$diskByID $console vga=$fbmode" >> $conf
+				echo -n " loader=$loader splash=silent"        >> $conf
 				if [ ! -z "$swap" ];then
-					echo -n " resume=$swapByID"              >> $conf
+					echo -n " resume=$swapByID"                >> $conf
 				fi
-				echo -n " $KIWI_INITRD_PARAMS"               >> $conf
-				echo " $KIWI_KERNEL_OPTIONS showopts"        >> $conf
+				echo -n " $KIWI_INITRD_PARAMS"                 >> $conf
+				echo " $KIWI_KERNEL_OPTIONS showopts"          >> $conf
 			fi
 			#======================================
 			# create Failsafe entry
 			#--------------------------------------
 			echo "LABEL Failsafe" >> $conf
 			if ! echo $gfix | grep -E -q "OEM|USB|VMX|unknown";then
-				echo "MENU LABEL Failsafe -- ""$gfix"        >> $conf
+				echo "MENU LABEL Failsafe -- ""$gfix"          >> $conf
 			elif [ -z "$kiwi_oemtitle" ];then
-				echo -n "MENU LABEL Failsafe -- ""$kname"    >> $conf
-				echo " [ "$gfix" ]"                          >> $conf
+				echo -n "MENU LABEL Failsafe -- ""$kname"      >> $conf
+				echo " [ "$gfix" ]"                            >> $conf
 			else
 				if [ "$count" = "1" ];then
-					echo -n "MENU LABEL Failsafe -- "        >> $conf
-					echo -n "$kiwi_oemtitle"" [ "            >> $conf
-					echo "$gfix"" ]"                         >> $conf
+					echo -n "MENU LABEL Failsafe -- "          >> $conf
+					echo -n "$kiwi_oemtitle"" [ "              >> $conf
+					echo "$gfix"" ]"                           >> $conf
 				else
-					echo -n "MENU LABEL Failsafe -- "        >> $conf
-					echo -n "$kiwi_oemtitle""-""$kname"" [ " >> $conf
-					echo "$gfix"" ]"                         >> $conf
+					echo -n "MENU LABEL Failsafe -- "          >> $conf
+					echo -n "$kiwi_oemtitle""-""$kname"" [ "   >> $conf
+					echo "$gfix"" ]"                           >> $conf
 				fi
 			fi
 			if [ $kernel = "vmlinuz-xen" ];then
@@ -864,18 +873,18 @@ function setupBootLoaderSyslinux {
 					"*** syslinux xen boot not implemented ***" \
 				"reboot"
 			else
-				echo "KERNEL /boot/$kernel"                  >> $conf
-				echo -n "APPEND initrd=/boot/$initrd"        >> $conf
-				echo -n " root=$diskByID $console vga=0x314" >> $conf
-				echo -n " loader=$loader splash=silent"      >> $conf
+				echo "KERNEL /boot/$kernel"                    >> $conf
+				echo -n "APPEND initrd=/boot/$initrd"          >> $conf
+				echo -n " root=$diskByID $console vga=$fbmode" >> $conf
+				echo -n " loader=$loader splash=silent"        >> $conf
 				if [ ! -z "$swap" ];then
-					echo -n " resume=$swapByID"              >> $conf
+					echo -n " resume=$swapByID"                >> $conf
 				fi
-				echo -n " $KIWI_INITRD_PARAMS"               >> $conf
-				echo " $KIWI_KERNEL_OPTIONS showopts"        >> $conf
-				echo -n " ide=nodma apm=off acpi=off"        >> $conf
-				echo -n " noresume selinux=0 nosmp"          >> $conf
-				echo " noapic maxcpus=0 edd=off"             >> $conf
+				echo -n " $KIWI_INITRD_PARAMS"                 >> $conf
+				echo " $KIWI_KERNEL_OPTIONS showopts"          >> $conf
+				echo -n " ide=nodma apm=off acpi=off"          >> $conf
+				echo -n " noresume selinux=0 nosmp"            >> $conf
+				echo " noapic maxcpus=0 edd=off"               >> $conf
 			fi
 			#======================================
 			# create recovery entry
@@ -916,6 +925,10 @@ function setupBootLoaderGrub {
 	local kname=""
 	local kernel=""
 	local initrd=""
+	local fbmode=$vga
+	if [ -z "$fbmode" ];then
+		fbmode=$DEFAULT_VGA
+	fi
 	#======================================
 	# check for device by ID
 	#--------------------------------------
@@ -1005,7 +1018,7 @@ function setupBootLoaderGrub {
 				echo " kernel /boot/xen.gz"                       >> $menu
 				echo -n " module /boot/$kernel"                   >> $menu
 				echo -n " root=$diskByID $console"                >> $menu
-				echo -n " vga=0x314 splash=silent"                >> $menu
+				echo -n " vga=$fbmode splash=silent"              >> $menu
 				if [ ! -z "$swap" ];then
 					echo -n " resume=$swapByID"                   >> $menu
 				fi
@@ -1015,7 +1028,7 @@ function setupBootLoaderGrub {
 			else
 				echo -n " kernel $gdev/boot/$kernel"              >> $menu
 				echo -n " root=$diskByID $console"                >> $menu
-				echo -n " vga=0x314 splash=silent"                >> $menu
+				echo -n " vga=$fbmode splash=silent"              >> $menu
 				if [ ! -z "$swap" ];then
 					echo -n " resume=$swapByID"                   >> $menu
 				fi
@@ -1045,7 +1058,7 @@ function setupBootLoaderGrub {
 				echo " kernel /boot/xen.gz"                       >> $menu
 				echo -n " module /boot/$kernel"                   >> $menu
 				echo -n " root=$diskByID $console"                >> $menu
-				echo -n " vga=0x314 splash=silent"                >> $menu
+				echo -n " vga=$fbmode splash=silent"              >> $menu
 				echo -n " $KIWI_INITRD_PARAMS"                    >> $menu
 				echo -n " $KIWI_KERNEL_OPTIONS showopts"          >> $menu
 				echo -n " ide=nodma apm=off acpi=off"             >> $menu
@@ -1055,7 +1068,7 @@ function setupBootLoaderGrub {
 			else
 				echo -n " kernel $gdev/boot/$kernel"              >> $menu
 				echo -n " root=$diskByID $console"                >> $menu
-				echo -n " vga=0x314 splash=silent"                >> $menu
+				echo -n " vga=$fbmode splash=silent"              >> $menu
 				echo -n " $KIWI_INITRD_PARAMS"                    >> $menu
 				echo -n " $KIWI_KERNEL_OPTIONS showopts"          >> $menu
 				echo -n " ide=nodma apm=off acpi=off"             >> $menu

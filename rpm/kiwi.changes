@@ -2,6 +2,7 @@
 Mon Mar  2 10:19:09 CET 2009 - ms@suse.de
 
 - v3.24
+- allow setting up the kernel vga value (bnc #480336)
 - added replaces="name" attribute to the package element.
   This allows you to install/upgrade a package by replacing
   it with another one. Along with this change it's now also
