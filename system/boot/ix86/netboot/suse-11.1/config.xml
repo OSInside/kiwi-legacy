@@ -67,6 +67,7 @@
 	<drivers type="drivers" profiles="diskless">
 		<!-- DRIVERS START DISKLESS -->
 		<file name="drivers/ide/*"/>
+		<file name="drivers/block/brd.ko"/>
 		<file name="net/packet/*"/>
 		<file name="fs/ext3/*"/>
 		<file name="fs/ext2/*"/>
@@ -86,6 +87,7 @@
 		<file name="drivers/net/8139cp.ko"/>
 		<file name="drivers/net/8139too.ko"/>
 		<file name="drivers/net/8390.ko"/>
+		<file name="drivers/net/atlx/atl2.ko"/>
 		<file name="drivers/net/b44.ko"/>
 		<file name="drivers/net/bnx2.ko"/>
 		<file name="drivers/net/defxx.ko"/>
@@ -273,7 +275,6 @@
 	</packages>
 	<packages type="delete" profiles="diskless">
 		<!-- DELETE PACKAGES START DISKLESS -->
-		<package name="e2fsprogs"/>
 		<package name="mkinitrd"/>
 		<package name="xorg-x11-libxcb"/>
 		<package name="xorg-x11-libX11"/>
@@ -293,7 +294,6 @@
 		<package name="libmng"/>
 		<package name="liblcms"/>
 		<package name="parted"/>
-		<package name="e2fsprogs"/>
 		<package name="make"/>
 		<package name="pciutils"/>
 		<package name="krb5"/>
