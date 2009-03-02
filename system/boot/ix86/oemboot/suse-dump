@@ -67,7 +67,7 @@ function OEMInstall {
 			cut -f1 -d"("`
 	fi
 	export deviceDisks=`echo $deviceDisks`
-	if [ -z $deviceDisks ];then
+	if [ -z "$deviceDisks" ];then
 		systemException \
 			"No device(s) for installation found... abort" \
 		"reboot"
@@ -79,18 +79,28 @@ function OEMInstall {
 		deviceArray[$count]=$i
 		count=`expr $count + 1`
 	done
-	while true;do
-		Echo -n "Enter device name to select disk for installation: "
-		read deviceInput
-		count=0
-		for instDisk in $deviceDisks;do
-			if [ ${deviceArray[$count]} = $deviceInput ];then
-				break 2
-			fi
-			count=`expr $count + 1`
+	if [ "$count" = "1" ];then
+		#======================================
+		# Found one single disk... use it
+		#--------------------------------------
+		instDisk=${deviceArray[0]}
+	else
+		#======================================
+		# Found multiple disks... ask for it
+		#--------------------------------------
+		while true;do
+			Echo -n "Enter device name to select disk for installation: "
+			read deviceInput
+			count=0
+			for instDisk in $deviceDisks;do
+				if [ ${deviceArray[$count]} = $deviceInput ];then
+					break 2
+				fi
+				count=`expr $count + 1`
+			done
+			Echo "Given device is not in the list !"
 		done
-		Echo "Given device is not in the list !"
-	done
+	fi
 	Echo "Entering installation mode for disk: $instDisk"
 	#======================================
 	# Import vmx configuration file

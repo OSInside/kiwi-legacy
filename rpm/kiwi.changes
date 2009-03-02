@@ -2,6 +2,8 @@
 Mon Mar  2 10:19:09 CET 2009 - ms@suse.de
 
 - v3.24
+- if only one disk is available let the oem install code
+  use this disk without asking further questions (bnc #479842)
 - allow setting up the kernel vga value (bnc #480336)
 - added replaces="name" attribute to the package element.
   This allows you to install/upgrade a package by replacing
