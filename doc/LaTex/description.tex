@@ -235,6 +235,10 @@ describes the possible types and their attributes:
       attributes \textbf{filesystem}, \textbf{boot=''vmxboot/suse-*''} and
       optionally \textbf{format}. The format attribute spcifies one of
       the qemu supported virtualization formats, for example vmdk or qcow2.
+      The optional attribute \textbf{vga} can be specified to configure the
+      kernel framebuffer mode. Detailed information about the possible
+      values can be found in /usr/src/linux/Documentation/fb/vesafb.txt.
+      The vga attribute also works for the image types usb and oem.
 \item \textbf{oem}\\
       Use this type to create a preload virtual disk system along with
       the attributes \textbf{filesystem}, \textbf{boot=''oemboot/suse-*''} and
