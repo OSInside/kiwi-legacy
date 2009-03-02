@@ -327,8 +327,8 @@ sub new {
 			# use the size information from the XML configuration
 			$vmsize = $systemSXML;
 		} else {
-			# use the calculated value plus 10% free space 
-			$vmsize+= $vmsize * 0.10;
+			# use the calculated value plus 20% free space 
+			$vmsize+= $vmsize * 0.20;
 			# check if additive size was specified
 			$vmsize+= $xml -> getImageSizeAdditiveBytes();
 		}
