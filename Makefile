@@ -121,9 +121,14 @@ install:
 	#install -m 755 pxeboot/pxelinux.0.config ${TFTPBOOTCONF}/default
 
 	#============================================
-	# Install image descriptions
+	# Install boot image descriptions
 	#--------------------------------------------
 	cp -a system/boot/${arch}/* ${KIWIIMAGE} &>/dev/null || true
+
+	#============================================
+	# Install system image template descriptions
+	#--------------------------------------------
+	cp -a template/* ${KIWIIMAGE}
 
 	#============================================
 	# Install kiwi repo

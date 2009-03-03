@@ -1,0 +1,18 @@
+In order to compile, run
+qmake 
+to create the make file and then 
+
+make
+
+In order to compile in the kiosk hack (ignores hard disks > 100GB in order to avoid flashing the kiosk's hard disk, unknown usb sticks as "SUSE Studio"), run
+qmake DEFINES+=KIOSKHACK
+to create the make file and then
+
+make
+
+in order to start burner with sudo, do the following:
+
+xhost +SI:localuser:root
+
+to allow root access to the current screen and then start the program with:
+sudo DISPLAY=:0 burner

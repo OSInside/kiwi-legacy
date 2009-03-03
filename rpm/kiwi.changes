@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Tue Mar  3 12:12:28 CET 2009 - ms@suse.de
+
+- v3.25
+- added package kiwi-templates, JeOS templates. Wrote
+  one template so far which is: suse-11.1-JeOS
+- added package kiwi-tools-burner, Matt's burner tool
+- added option --build which allows prepare and create
+  in one step, useful for building templates
+
+-------------------------------------------------------------------
 Mon Mar  2 10:19:09 CET 2009 - ms@suse.de
 
 - v3.24

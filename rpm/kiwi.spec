@@ -1,5 +1,5 @@
 #
-# spec file for package kiwi (Version 3.24
+# spec file for package kiwi (Version 3.25)
 #
 # Copyright (c) 2008 SUSE LINUX Products GmbH, Nuernberg, Germany.
 # This file and all modifications and additions to the pristine
@@ -43,7 +43,7 @@ Requires:       satsolver-tools
 Summary:        OpenSuSE - KIWI Image System
 Provides:       kiwi2 <= 2.14
 Obsoletes:      kiwi2 <= 2.14
-Version:        3.24
+Version:        3.25
 Release:        80
 Group:          System/Management
 License:        GPL v2 or later
@@ -57,11 +57,72 @@ The OpenSuSE KIWI Image System provides a complete operating system
 image solution for Linux supported hardware platforms as well as for
 virtualization systems like Xen.
 
+Authors:
+--------
+    Marcus Schaefer <ms@novell.com>
 
+%package -n kiwi-instsource
+License:        GPL v2 only
+Requires:       kiwi = %{version}
+Requires:       inst-source-utils createrepo
+Summary:        Installation Source creation
+Group:          System/Management
+
+%description -n kiwi-instsource
+This package contains modules used for installation source creation.
+With those it is possible to create a valid installation repository
+from blank RPM file trees. The created tree can be used directly for
+the image creation process afterwards. This package allows using the
+--create-instsource <path-to-config.xml> switch.
+
+Authors:
+--------
+	Adrian Schroeter <adrian@novell.com>
+	Jan Bornschlegel <jcborn@novell.com>
+
+%package -n kiwi-doc
+License:        LGPL v2.0 or later
+Summary:        OpenSuSE - KIWI Image System Documentation
+Group:          Documentation/Howto
+
+%description -n kiwi-doc
+This package contains the documentation and manual pages for the KIWI
+Image System
+
+Authors:
+--------
+    Thomas Schraitle
+    Marcus Schaefer
+
+%package -n kiwi-tools
+License:        GPL v2 or later
+Summary:        OpenSuSE - KIWI tools collection
+Obsoletes:      kiwi2-tools <= 2.14
+Provides:       kiwi2-tools <= 2.14
+Group:          System/Management
+
+%description -n kiwi-tools
+This package contains the OpenSuSE - KIWI tools set usable in and
+outside of operating system images
 
 Authors:
 --------
     Marcus Schaefer <ms@novell.com>
+
+
+%package -n kiwi-tools-imagewriter
+License:        GPL v2 or later
+Summary:        OpenSuSE - KIWI tools graphical image writer application
+Group:          System/Management
+
+%description -n kiwi-tools-imagewriter
+This package contains the OpenSuSE - KIWI graphical image writer
+application
+
+Authors:
+--------
+    Matt Barringer <mbaringer@novell.com>
+
 
 %ifarch %ix86 x86_64
 %package -n kiwi-pxeboot
@@ -79,23 +140,6 @@ Authors:
 --------
     Marcus Schaefer <ms@novell.com>
 %endif
-
-%package -n kiwi-tools
-License:        GPL v2 or later
-Summary:        OpenSuSE - KIWI tools collection
-Obsoletes:      kiwi2-tools <= 2.14
-Provides:       kiwi2-tools <= 2.14
-Group:          System/Management
-
-%description -n kiwi-tools
-This package contains the OpenSuSE - KIWI tools set usable in and
-outside of operating system images
-
-
-
-Authors:
---------
-    Marcus Schaefer <ms@novell.com>
 
 %ifarch %ix86 x86_64
 %package -n kiwi-pxeboot-prebuild
@@ -215,42 +259,27 @@ Group:          System/Management
 This package contains the OpenSuSE - KIWI image descriptions. Each
 image description exists in a single directory and contains an oemboot
 image description
+
+Authors:
+--------
+    Marcus Schaefer <ms@novell.com>
 %endif
 
-%package -n kiwi-doc
-License:        LGPL v2.0 or later
-Summary:        OpenSuSE - KIWI Image System Documentation
-Group:          Documentation/Howto
-
-%description -n kiwi-doc
-This package contains the documentation and manual pages for the KIWI
-Image System
-
-Authors:
---------
-    Thomas Schraitle
-    Marcus Schaefer
-
-
-%package -n kiwi-instsource
-License:        GPL v2 only
-Requires:       kiwi = %{version}
-Requires:       inst-source-utils createrepo
-Summary:        Installation Source creation
+%ifarch %ix86 x86_64
+%package -n kiwi-templates
+License:        GPL v2.0 or later
+Requires:       kiwi-desc-vmxboot = %{version}
+Summary:        OpenSuSE - KIWI JeOS system image templates
 Group:          System/Management
 
-%description -n kiwi-instsource
-This package contains modules used for installation source creation.
-With those it is possible to create a valid installation repository
-from blank RPM file trees. The created tree can be used directly for
-the image creation process afterwards. This package allows using the
---create-instsource <path-to-config.xml> switch.
-
-
+%description -n kiwi-templates
+This package contains system image templates to easily build
+a JeOS based operating system image with kiwi 
 
 Authors:
 --------
-    Jan-Christoph Bornschlegel <jcborn@novell.com>
+    Marcus Schaefer
+%endif
 
 %prep
 %setup -n kiwi
@@ -367,9 +396,6 @@ test -f $RPM_BUILD_ROOT/srv/tftpboot/pxelinux.0 && \
 	echo /srv/tftpboot/pxelinux.0 > kiwi.loader
 test -f $RPM_BUILD_ROOT/srv/tftpboot/mboot.c32 && \
 	echo /srv/tftpboot/mboot.c32 >> kiwi.loader
-install -m 644 tools/README \
-	$RPM_BUILD_ROOT/usr/share/doc/packages/kiwi/README.tools
-rm -rf $RPM_BUILD_ROOT/usr/share/doc/packages/kiwi/kiwi-man
 %perl_process_packlist
 rm -f $RPM_BUILD_ROOT/%{perl_vendorarch}/KIWI/example.pl
 ./.links
@@ -391,6 +417,7 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-, root, root)
 %dir %{_datadir}/kiwi
 %dir %{_datadir}/kiwi/image
+%exclude %{_datadir}/kiwi/image/suse-11.1-JeOS
 %{_datadir}/kiwi/.revision
 %{_datadir}/kiwi/modules
 %{_datadir}/kiwi/repo
@@ -459,14 +486,21 @@ rm -rf $RPM_BUILD_ROOT
 #=================================================
 # KIWI-tools files...  
 # ------------------------------------------------
-
 %files -n kiwi-tools
 %defattr(-, root, root)
 %doc %{_defaultdocdir}/kiwi/README.tools
 %exclude /usr/bin/suse-isolinux
+%exclude /usr/bin/imagewriter
 /usr/bin/*
 #=================================================
-# KIWI-desc-*...
+# KIWI-tools-imagewriter files...  
+# ------------------------------------------------
+%files -n kiwi-tools-imagewriter
+%defattr(-, root, root)
+%doc %{_defaultdocdir}/kiwi/README.imagewriter
+/usr/bin/imagewriter
+#=================================================
+# KIWI-desc-* and templates...
 # ------------------------------------------------
 %ifarch %ix86 x86_64
 %files -n kiwi-desc-isoboot
@@ -514,4 +548,11 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_datadir}/kiwi/image/oemboot
 %doc %{_datadir}/kiwi/image/oemboot/README
 %{_datadir}/kiwi/image/oemboot/suse*
+%endif
+
+%ifarch %ix86 x86_64
+%files -n kiwi-templates
+%defattr(-, root, root)
+%dir %{_datadir}/kiwi/image/suse-11.1-JeOS
+%{_datadir}/kiwi/image/suse-11.1-JeOS
 %endif

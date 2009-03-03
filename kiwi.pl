@@ -44,7 +44,7 @@ use KIWITest;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "3.24";
+our $Version       = "3.25";
 our $Publisher     = "SUSE LINUX Products GmbH";
 our $Preparer      = "KIWI - http://kiwi.berlios.de";
 our $openSUSE      = "http://download.opensuse.org";
@@ -126,6 +126,7 @@ $KnownFS{cpio}{ro}        = 0;
 #============================================
 # Globals
 #--------------------------------------------
+our $Build;                 # run prepare and create in one step
 our $Prepare;               # control XML file for building chroot extend
 our $Create;                # image description for building image extend
 our $CreateInstSource;      # create installation source from meta packages
@@ -253,7 +254,25 @@ sub main {
 			}
 		}
 	}
-
+	#========================================
+	# Prepare and Create in one step
+	#----------------------------------------
+	if (defined $Build) {
+		$main::Prepare = $Build;
+		$main::RootTree= $Destination."/image-root";
+		$main::Survive = "yes";
+		$main::ForceNewRoot = 1;
+		undef $main::Build;
+		if (! defined main::main()) {
+			$main::Survive = "default";
+			my $code = kiwiExit (1); return $code;
+		}
+		undef $main::Prepare;
+		undef $main::ForceNewRoot;
+		$main::Survive = "default";
+		$main::Create = $RootTree;
+		main::main();
+	}
 	#========================================
 	# Prepare image and build chroot system
 	#----------------------------------------
@@ -1144,6 +1163,7 @@ sub init {
 		"version"               => \&version,
 		"v|verbose+"            => \$Verbosity,
 		"logfile=s"             => \$LogFile,
+		"build|b=s"             => \$Build,
 		"prepare|p=s"           => \$Prepare,
 		"add-profile=s"         => \@Profiles,
 		"migrate|m=s"           => \$Migrate,
@@ -1251,6 +1271,7 @@ sub init {
 	# Check option combination/values
 	#------------------------------------------
 	if (
+		(! defined $Build)              &&
 		(! defined $Prepare)            &&
 		(! defined $Create)             &&
 		(! defined $BootStick)          &&
@@ -1348,6 +1369,11 @@ sub init {
 			my $code = kiwiExit (1); return $code;
 		}
 	}
+	if ((defined $Build) && (! defined $Destination)) {
+		$kiwi -> error  ("No destination directory specified");
+		$kiwi -> failed ();
+		my $code = kiwiExit (1); return $code;
+	}
 }
 
 #==========================================
@@ -1366,12 +1392,14 @@ sub usage {
 
 	print "Usage:\n";
 	print "  kiwi -l | --list\n";
-	print "Image Preparation/Creation:\n";
+	print "Image Creation in one step:\n";
+	print "  kiwi -b | --build <image-path> -d <destination>\n";
+	print "Image Preparation/Creation in two steps:\n";
 	print "  kiwi -p | --prepare <image-path>\n";
 	print "     [ --base-root <base-path> ]\n";
 	print "     [ --base-root-mode <copy|union|recycle> ]\n";
 	print "     [ --add-profile <profile-name> ]\n";
-	print "  kiwi -c | --create  <image-root>\n";
+	print "  kiwi -c | --create  <image-root> -d <destination>\n";
 	print "     [ --base-root <base-path> ]\n";
 	print "     [ --base-root-mode <copy|union|recycle> ]\n";
 	print "     [ --prebuiltbootimage <directory>]\n";

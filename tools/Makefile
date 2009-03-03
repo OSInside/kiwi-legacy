@@ -11,9 +11,14 @@ all:
 			true;\
 		fi\
 	)
+	( cd burner && .make )
+	${MAKE} -C burner all
 
 install:
+	install -m 644 README ${PACKDOCVZ}/README.tools
+	install -m 644 burner/README ${PACKDOCVZ}/README.imagewriter
 	#install -m 755 init/* ${INITVZ}
+	install -m 755 burner/imagewriter ${bin_prefix}
 	install -m 755 startshell/startshell ${TOOLSVZ}
 	install -m 755 pigz/pigz ${TOOLSVZ}
 	install -m 755 driveready/driveready ${TOOLSVZ}
@@ -28,6 +33,7 @@ install:
 	)
 
 clean:
+	${MAKE} -C burner clean
 	${MAKE} -C startshell clean
 	${MAKE} -C pigz clean
 	${MAKE} -C driveready clean
