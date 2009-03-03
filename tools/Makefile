@@ -11,7 +11,7 @@ all:
 			true;\
 		fi\
 	)
-	( cd burner && .make )
+	( cd burner && ./.make )
 	${MAKE} -C burner all
 
 install:
