@@ -2,6 +2,7 @@
 Tue Mar  3 12:12:28 CET 2009 - ms@suse.de
 
 - v3.25
+- set /etc/sysconfig/clock if timezone is set (bnc #481832)
 - use displayName for install iso/usb images while prepending
   the word Restore in front of the label text (bnc #481843)
 - update manual page and kiwi help output
