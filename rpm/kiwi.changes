@@ -2,6 +2,8 @@
 Tue Mar  3 12:12:28 CET 2009 - ms@suse.de
 
 - v3.25
+- use displayName for install iso/usb images while prepending
+  the word Restore in front of the label text (bnc #481843)
 - update manual page and kiwi help output
 - added package kiwi-templates, JeOS templates. Wrote
   one template so far which is: suse-11.1-JeOS

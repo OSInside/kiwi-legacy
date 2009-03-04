@@ -3316,10 +3316,10 @@ sub setupBootLoaderConfiguration {
 		print FD "timeout 10\n";
 		if ($type =~ /^KIWI CD/) {
 			print FD "gfxmenu (cd)/boot/message\n";
-			print FD "title _".$type."_\n";
+			print FD "title _Restore ".$label."_\n";
 		} elsif ($type =~ /^KIWI USB/) {
 			print FD "gfxmenu (hd0,0)/boot/message\n";
-			print FD "title _".$type."_\n";
+			print FD "title _Restore ".$label."_\n";
 		} else {
 			print FD "gfxmenu (hd0,$bootpart)/boot/message\n";
 			print FD "title _".$label." [ ".$type." ]_\n";
@@ -3387,9 +3387,9 @@ sub setupBootLoaderConfiguration {
 		# Failsafe boot
 		#------------------------------------------
 		if ($type =~ /^KIWI CD/) {
-			print FD "title _Failsafe -- ".$type."_\n";
+			print FD "title _Failsafe -- Restore ".$label."_\n";
 		} elsif ($type =~ /^KIWI USB/) {
-			print FD "title _Failsafe -- ".$type."_\n";
+			print FD "title _Failsafe -- Restore ".$label."_\n";
 		} else {
 			print FD "title _Failsafe -- ".$label." [ ".$type." ]_\n";
 		}
@@ -3493,7 +3493,7 @@ sub setupBootLoaderConfiguration {
 			# not supported yet..
 		} elsif ($type =~ /^KIWI USB/) {
 			print FD "LABEL Linux\n";
-			print FD "MENU LABEL ".$type."\n";
+			print FD "MENU LABEL Restore ".$label."\n";
 		} else {
 			print FD "LABEL Linux\n";
 			print FD "MENU LABEL ".$label." [ ".$type." ]\n";
@@ -3539,7 +3539,7 @@ sub setupBootLoaderConfiguration {
 			# not supported yet..
 		} elsif ($type =~ /^KIWI USB/) {
 			print FD "LABEL Failsafe\n";
-			print FD "MENU LABEL Failsafe -- ".$type."\n";
+			print FD "MENU LABEL Failsafe -- Restore ".$label."\n";
 		} else {
 			print FD "LABEL Failsafe\n";
 			print FD "MENU LABEL Failsafe -- ".$label." [ ".$type." ]\n";
