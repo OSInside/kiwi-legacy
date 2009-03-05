@@ -1,5 +1,6 @@
 all:
 	${MAKE} -C startshell all
+	${MAKE} -C dcounter all
 	${MAKE} -C pigz all
 	${MAKE} -C driveready all
 	${MAKE} -C dbuslock -f Makefile.swig all
@@ -19,6 +20,7 @@ install:
 	install -m 644 burner/README ${PACKDOCVZ}/README.imagewriter
 	#install -m 755 init/* ${INITVZ}
 	install -m 755 burner/imagewriter ${bin_prefix}
+	install -m 755 dcounter/dcounter ${TOOLSVZ}
 	install -m 755 startshell/startshell ${TOOLSVZ}
 	install -m 755 pigz/pigz ${TOOLSVZ}
 	install -m 755 driveready/driveready ${TOOLSVZ}
@@ -33,6 +35,7 @@ install:
 	)
 
 clean:
+	${MAKE} -C dcounter clean
 	${MAKE} -C burner clean
 	${MAKE} -C startshell clean
 	${MAKE} -C pigz clean

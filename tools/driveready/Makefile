@@ -3,7 +3,7 @@ CC  = gcc -Wall -fpic -O2
 
 all:${OBJ}
 
-pigz: driveready.c
+driveready: driveready.c
 	${CC} ${CFLAGS} driveready.c -o driveready
 
 clean:
