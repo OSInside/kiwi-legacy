@@ -57,6 +57,7 @@
 		<package name="bootsplash-branding-openSUSE"/>
 		<package name="ifplugd"/>
 		<package name="vim"/>
+		<package name="grub"/>
 		<opensusePattern name="base"/>
 	</packages>
 	<packages type="xen">
