@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Mar  5 12:02:09 CET 2009 - mbarringer@suse.de
+
+- Fixed email address in imageburner subpackage in the spec file
+- Added GPLv2 preamble to the source code
+
+-------------------------------------------------------------------
 Tue Mar  3 12:12:28 CET 2009 - ms@suse.de
 
 - v3.25

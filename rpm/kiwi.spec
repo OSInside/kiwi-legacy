@@ -121,7 +121,7 @@ application
 
 Authors:
 --------
-    Matt Barringer <mbaringer@novell.com>
+    Matt Barringer <mbarringer@suse.de>
 
 
 %ifarch %ix86 x86_64
