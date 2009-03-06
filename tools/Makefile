@@ -13,13 +13,11 @@ all:
 		fi\
 	)
 	( cd burner && ./.make )
-	${MAKE} -C burner all
+	${MAKE} -C burner all || true
 
 install:
 	install -m 644 README ${PACKDOCVZ}/README.tools
-	install -m 644 burner/README ${PACKDOCVZ}/README.imagewriter
 	#install -m 755 init/* ${INITVZ}
-	install -m 755 burner/imagewriter ${bin_prefix}
 	install -m 755 dcounter/dcounter ${TOOLSVZ}
 	install -m 755 startshell/startshell ${TOOLSVZ}
 	install -m 755 pigz/pigz ${TOOLSVZ}
@@ -33,6 +31,10 @@ install:
 			true;\
 		fi\
 	)
+	if [ -f ./burner/imagewriter ];then \
+		install -m 644 burner/README ${PACKDOCVZ}/README.imagewriter ;\
+		install -m 755 burner/imagewriter ${bin_prefix} ;\
+	fi
 
 clean:
 	${MAKE} -C dcounter clean

@@ -109,7 +109,7 @@ Authors:
 --------
     Marcus Schaefer <ms@novell.com>
 
-
+%if %{suse_version} > 1010
 %package -n kiwi-tools-imagewriter
 License:        GPL v2 or later
 Summary:        OpenSuSE - KIWI tools graphical image writer application
@@ -122,7 +122,7 @@ application
 Authors:
 --------
     Matt Barringer <mbarringer@suse.de>
-
+%endif
 
 %ifarch %ix86 x86_64
 %package -n kiwi-pxeboot
@@ -491,15 +491,19 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-, root, root)
 %doc %{_defaultdocdir}/kiwi/README.tools
 %exclude /usr/bin/suse-isolinux
+%if %{suse_version} > 1010
 %exclude /usr/bin/imagewriter
+%endif
 /usr/bin/*
 #=================================================
 # KIWI-tools-imagewriter files...  
 # ------------------------------------------------
+%if %{suse_version} > 1010
 %files -n kiwi-tools-imagewriter
 %defattr(-, root, root)
 %doc %{_defaultdocdir}/kiwi/README.imagewriter
 /usr/bin/imagewriter
+%endif
 #=================================================
 # KIWI-desc-* and templates...
 # ------------------------------------------------
