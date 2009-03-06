@@ -281,6 +281,20 @@ function createFramebufferDevices {
 	fi
 }
 #======================================
+# errorLogStop
+#--------------------------------------
+function errorLogStop {
+	set +x
+	exec 2>$ELOG_EXCEPTION
+}
+#======================================
+# errorLogContinue
+#--------------------------------------
+function errorLogContinue {
+	exec 2>>$ELOG_FILE
+	set -x
+}
+#======================================
 # errorLogStart
 #--------------------------------------
 function errorLogStart {

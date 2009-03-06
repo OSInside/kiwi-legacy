@@ -128,74 +128,83 @@ function OEMInstall {
 	done
 	if [ "$imageZipped" = "compressed" ];then
 		imageName="/cdrom/$imageName.gz"
-		imageMD5="/cdrom/$imageName.gz.md5"
+		imageMD5="$imageName.md5"
 	else
 		imageName="/cdrom/$imageName"
-		imageMD5="/cdrom/$imageName.md5"
+		imageMD5="$imageName.md5"
 	fi
 	IFS=" "
 	#======================================
-	# Get available disk space
-	#--------------------------------------
-	haveKByte=`partitionSize $imageDevice`
-	#======================================
-	# Get required disk space
-	#--------------------------------------
-	needBytes=`du --bytes $imageName | cut -f1`
-	needKByte=`expr $needBytes / 1024`
-	if test "$imageZipped" = "compressed"; then
-		Echo "Compressed image found, creating FIFO pipe"
-		test ! -p /dev/compressed_image && mkfifo /dev/compressed_image
-		cat /dev/compressed_image | gzip -d > $imageDevice 2>/dev/null &
-		imageDevice_orig=$imageDevice
-		imageDevice="/dev/compressed_image"
-		needBytes=`gzip -l $imageName|tail -n1|sed -e "s@ \+@:@g"|cut -f3 -d:`
-		needKByte=`expr $needBytes / 1024`
-	fi
-	#======================================
 	# Check MBR ID's...
 	#--------------------------------------
+	mbrI="cat $imageName"
+	if [ "$imageZipped" = "compressed" ];then
+		mbrI="gzip -cd $imageName"
+	fi
 	mbrM=`dd if=$instDisk  bs=1 count=4 skip=$((0x1b8))|hexdump -n4 -e '"0x%x"'`
-	mbrI=`dd if=$imageName bs=1 count=4 skip=$((0x1b8))|hexdump -n4 -e '"0x%x"'`
+	mbrI=`$mbrI | dd bs=1 count=4 skip=$((0x1b8))|hexdump -n4 -e '"0x%x"'`
 	if [ $mbrM = $mbrI ];then
 		systemException \
 			"Base system already installed" \
 		"reboot"
 	fi	
 	#======================================
+	# read MD5 information...
+	#--------------------------------------
+	read sum1 blocks blocksize zblocks zblocksize < $imageMD5
+	#======================================
+	# Get available disk space
+	#--------------------------------------
+	haveKByte=`partitionSize $imageDevice`
+	#======================================
+	# Get required disk space, setup I/O
+	#--------------------------------------
+	needBytes=`du --bytes $imageName | cut -f1`
+	needKByte=`expr $needBytes / 1024`
+	needMByte=`expr $needKByte / 1024`
+	if test "$imageZipped" = "compressed"; then
+		needBytes=`gzip -l $imageName|tail -n1|sed -e "s@ \+@:@g"|cut -f3 -d:`
+		needKByte=`expr $needBytes / 1024`
+		needMByte=`expr $needKByte / 1024`
+	fi
+	#======================================
 	# Check disk space...
 	#--------------------------------------
 	haveMByte=`expr $haveKByte / 1024`
 	needMByte=`expr $needKByte / 1024`
 	Echo "Have size: $imageDevice -> $haveMByte MB"
-	Echo "Need size: $imageName -> $needMByte MB [ $imageZipped ]"
+	Echo "Need size: $imageName -> $needMByte MB"
 	if [ $needMByte -gt $haveMByte ];then
 		systemException \
 			"Not enough space available for this image" \
 		"reboot"
 	fi
 	#======================================
-	# read MD5 information...
-	#--------------------------------------
-	read sum1 blocks blocksize zblocks zblocksize < $imageMD5
-	#======================================
 	# Dump image on disk
 	#--------------------------------------
-	Echo "Loading $imageName [$imageDevice]..."
-	if ! dd bs=32k if=$imageName of=$imageDevice >/dev/null 2>&1; then
+	dump="cat $imageName"
+	if test "$imageZipped" = "compressed"; then
+		dump="gzip -cd $imageName"
+	fi
+	if [ -x /usr/bin/dcounter ];then
+		errorLogStop
+		dump="$dump | dcounter -s $needMByte"
+	fi
+	Echo -n "Loading $imageName [$imageDevice] "
+	if ! eval $dump | dd bs=32k of=$imageDevice &>/dev/null; then
 		systemException \
 			"Failed to install image: $imageName -> $imageDevice" \
 		"reboot"
 	fi
-	if [ "$imageZipped" = "compressed" ]; then
-		imageDevice=$imageDevice_orig
-		rm -f /dev/compressed_image
+	echo
+	if [ -x /usr/bin/dcounter ];then
+		errorLogContinue
 	fi
 	#======================================
 	# Check the md5sum of the raw disk
 	#--------------------------------------
 	Echo "Download complete, checking data..."
-	dd if=$imageDevice bs=1024 2>/dev/null |\
+	dd if=$imageDevice bs=1024 |\
 		head --bytes=$((blocks * blocksize)) |\
 		md5sum - > /etc/ireal.md5
 	read sum2 dumy < /etc/ireal.md5

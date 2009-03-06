@@ -1610,7 +1610,7 @@ sub setupInstallStick {
 	$irdsize= ($irdsize / 1e6) + 10;
 	$irdsize= sprintf ("%.0f", $irdsize);
 	$vmsize = -s $system;
-	$vmsize = ($vmsize / 1e6) * 1.1 + $irdsize;
+	$vmsize = ($vmsize / 1e6) * 1.2 + $irdsize;
 	$vmsize = sprintf ("%.0f", $vmsize);
 	$vmsize = $vmsize."M";
 	#==========================================

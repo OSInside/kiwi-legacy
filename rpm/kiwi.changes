@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Fri Mar  6 12:38:16 CET 2009 - ms@suse.de
+
+- v3.26
+- added support for progress information when oem
+  install mode is active, SLE11 HP preload (bnc #479844)
+- added suse-SLE11-JeOS template
+
+-------------------------------------------------------------------
 Thu Mar  5 12:02:09 CET 2009 - mbarringer@suse.de
 
 - Fixed email address in imageburner subpackage in the spec file

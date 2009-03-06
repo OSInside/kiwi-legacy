@@ -941,7 +941,7 @@ function suseStripInitrd {
 		fuser udevadm blogd showconsole killproc curl tar cromfs-driver
 		cvcromfs ldd driveready checkmedia splashy bzip2 hexdump
 		pvchange pvresize pvscan vgscan vgchange vgextend vgdisplay
-		lvchange lvresize lvextend lvcreate grub
+		lvchange lvresize lvextend lvcreate grub dcounter tty
 	"
 	tools="$tools $@"
 	for path in /sbin /usr/sbin /usr/bin /bin;do
