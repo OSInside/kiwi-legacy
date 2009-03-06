@@ -1699,7 +1699,8 @@ sub createMetadata
   $this->logMsg("W", "Creating products file in all media:");
   my $proddir  = $this->{m_proddata}->getVar("PRODUCT_DIR");
   my $prodname = $this->{m_proddata}->getVar("PRODUCT_NAME");
-  my $summary = $this->{m_proddata}->getInfo("SUMMARY");
+  my $summary = $this->{m_proddata}->getInfo("LABEL");
+  $summary = $this->{m_proddata}->getInfo("SUMMARY") unless $summary;
   my $sp_ver = $this->{m_proddata}->getVar("SP_VERSION");
   my $prodver  = $this->{m_proddata}->getVar("PRODUCT_VERSION");
   my $prodrel  = $this->{m_proddata}->getVar("RELEASE");
@@ -1723,7 +1724,7 @@ sub createMetadata
     $this->logMsg("E","\tPRODUCT_DIR");
     $this->logMsg("E","\tPRODUCT_NAME");
     $this->logMsg("E","\tPRODUCT_VERSION");
-    $this->logMsg("E","\tSUMMARY");
+    $this->logMsg("E","\tLABEL");
     $this->logMsg("W", "[createMetadata] skipping products file due to missing vars!");
   }
 
