@@ -31,64 +31,18 @@ MainWindow::MainWindow (const char *cmddevice, const char *cmdfile, bool unsafe,
  : QWidget(parent)
 {
     int dev = -1;
-
-    QVBoxLayout *mainLayout;
-    QStackedLayout *logoLayout;
-    QGridLayout *bottomLayout;
-
-    QHBoxLayout *pathSizeLayout;
-    QPushButton *writeButton;
-    
-
     file = QString();
-
-    // Set the background colour
-    QPalette pal = palette();
-    pal.setColor(QPalette::Window, Qt::white);
-    setPalette(pal);
-
-    // The upper left studio logo
-    imageLabel = new CustomLabel(this);
-    imageLabel->setBackgroundRole(QPalette::Base);
-    imageLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    imageLabel->setScaledContents(false);
-    QImage image(":logo-empty.png");
-    imageLabel->setPixmap(QPixmap::fromImage(image));
-    imageLabel->setAlignment(Qt::AlignCenter);
 
     fileSize = new QLabel("      ");
     fileLabel = new QLabel("     ");
-    directive = new CustomLabel(this);
-    directive->setText(tr("Drag appliance image here\n or click to select."));
-    directive->setAlignment(Qt::AlignCenter);
-    deviceComboBox = new QComboBox;
 
-    writeButton = new QPushButton(tr("Copy"));
-    connect(writeButton, SIGNAL(clicked()), this, SLOT(write()));
+// The "new" UI won't compile on 10.3 or SLE10, so fallback in that case to the older, uglier one
+#if (QT_VERSION >= 0x040400)
+    useNewUI();
+#else
+    useOldUI();
+#endif
 
-    // These layouts are kind of a mess
-    logoLayout = new QStackedLayout;
-    logoLayout->setStackingMode(QStackedLayout::StackAll);
-    logoLayout->addWidget(directive);
-    logoLayout->addWidget(imageLabel);
-
-    pathSizeLayout = new QHBoxLayout;
-    pathSizeLayout->addWidget(fileLabel, Qt::AlignLeft);
-    pathSizeLayout->addWidget(fileSize, Qt::AlignLeft);
-
-    bottomLayout = new QGridLayout;
-    bottomLayout->addLayout(pathSizeLayout, 0, 0);
-
-    mainLayout = new QVBoxLayout;
-    mainLayout->addLayout(logoLayout, Qt::AlignHCenter);
-
-    QGridLayout *comboLayout = new QGridLayout;
-    comboLayout->addLayout(bottomLayout, 0, 0, Qt::AlignBottom);
-    comboLayout->addWidget(deviceComboBox, 1,0);
-    comboLayout->addWidget(writeButton, 1, 1, Qt::AlignRight);
-    mainLayout->addLayout(comboLayout);
-
-    setLayout(mainLayout);
     setWindowTitle(tr(VERSION));
 
     // Setup the platform-specific bits
@@ -130,11 +84,119 @@ MainWindow::MainWindow (const char *cmddevice, const char *cmdfile, bool unsafe,
           setSizeLabel(cmdfile);
         }
     }
+    centerWindow();
 
+}
 
+void
+MainWindow::useNewUI()
+{
+#if (QT_VERSION >= 0x040400)
+    QVBoxLayout *mainLayout;
+    QStackedLayout *logoLayout;
+    QGridLayout *bottomLayout;
+
+    QHBoxLayout *pathSizeLayout;
+    QPushButton *writeButton;
+    
+    // Set the background colour
+    QPalette pal = palette();
+    pal.setColor(QPalette::Window, Qt::white);
+    setPalette(pal);
+
+    // The upper left studio logo
+    imageLabel = new CustomLabel(this);
+    imageLabel->setBackgroundRole(QPalette::Base);
+    imageLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    imageLabel->setScaledContents(false);
+    QImage image(":logo-empty.png");
+    imageLabel->setPixmap(QPixmap::fromImage(image));
+    imageLabel->setAlignment(Qt::AlignCenter);
+
+    directive = new CustomLabel(this);
+    directive->setText(tr("Drag appliance image here\n or click to select."));
+    directive->setAlignment(Qt::AlignCenter);
+    deviceComboBox = new QComboBox;
+
+    writeButton = new QPushButton(tr("Copy"));
+    connect(writeButton, SIGNAL(clicked()), this, SLOT(write()));
+
+    // These layouts are kind of a mess
+    logoLayout = new QStackedLayout;
+    logoLayout->setStackingMode(QStackedLayout::StackAll);
+    logoLayout->addWidget(directive);
+    logoLayout->addWidget(imageLabel);
+
+    pathSizeLayout = new QHBoxLayout;
+    pathSizeLayout->addWidget(fileLabel, Qt::AlignLeft);
+    pathSizeLayout->addWidget(fileSize, Qt::AlignLeft);
+
+    bottomLayout = new QGridLayout;
+    bottomLayout->addLayout(pathSizeLayout, 0, 0);
+
+    mainLayout = new QVBoxLayout;
+    mainLayout->addLayout(logoLayout, Qt::AlignHCenter);
+
+    QGridLayout *comboLayout = new QGridLayout;
+    comboLayout->addLayout(bottomLayout, 0, 0, Qt::AlignBottom);
+    comboLayout->addWidget(deviceComboBox, 1,0);
+    comboLayout->addWidget(writeButton, 1, 1, Qt::AlignRight);
+    mainLayout->addLayout(comboLayout);
+
+    setLayout(mainLayout);
     resize(600, 400);
     setAcceptDrops(true);
-    centerWindow();
+#endif
+
+    return;
+}
+
+void
+MainWindow::useOldUI()
+{
+#if (QT_VERSION < 0x040400)
+    QGridLayout *mainLayout;
+    QHBoxLayout *fileSelectLayout, *buttonLayout;
+
+    QLabel *file, *device, *version;
+    QPushButton *fileSelectButton, *exitButton, *writeButton;
+
+    fileLine = new QLineEdit;
+    deviceComboBox = new QComboBox;
+
+    fileSelectButton = new QPushButton(tr("Select"));
+    connect(fileSelectButton, SIGNAL(clicked()), this, SLOT(selectImage()));
+
+    exitButton = new QPushButton(tr("Exit"));
+    connect(exitButton, SIGNAL(clicked()), qApp, SLOT(quit()));
+
+    writeButton = new QPushButton(tr("Write"));
+    connect(writeButton, SIGNAL(clicked()), this, SLOT(write()));
+
+    file = new QLabel(tr("File"));
+    device = new QLabel(tr("Device"));
+    version = new QLabel(VERSION);
+
+    buttonLayout = new QHBoxLayout;
+    buttonLayout->addWidget(exitButton);
+    buttonLayout->addWidget(writeButton);
+
+    fileSelectLayout = new QHBoxLayout;
+    fileSelectLayout->addWidget(fileLine);
+    fileSelectLayout->addWidget(fileSelectButton);
+
+    mainLayout = new QGridLayout;
+    mainLayout->addWidget(file, 0, 0);
+    mainLayout->addLayout(fileSelectLayout, 0, 1);
+    mainLayout->addWidget(device, 1, 0);
+    mainLayout->addWidget(deviceComboBox, 1, 1);
+
+    mainLayout->addLayout(buttonLayout, 2, 0, Qt::AlignRight);
+    setLayout(mainLayout);
+    resize(600,170);
+#endif
+
+    return;
 }
 
 void
@@ -212,10 +274,15 @@ void MainWindow::dropEvent(QDropEvent *event)
 void MainWindow::setFile(QString newFile)
 {
     file = newFile;
+#if (QT_VERSION >= 0x040400)
     QImage image(":logo-mini.png");
     imageLabel->setPixmap(QPixmap::fromImage(image));
-    fileLabel->setText("<b>Selected:</b> " + file);
     directive->setText("");
+#else
+    fileLine->setText(file);
+#endif
+
+    fileLabel->setText("<b>Selected:</b> " + file);
 }
 
 void
@@ -246,8 +313,14 @@ MainWindow::write()
             // We won't let them nuke a mounted device
             QMessageBox msgBox;
             msgBox.setText(tr("This device is already mounted.  Would you like me to attempt to unmount it?"));
+#if (QT_VERSION >= 0x040400)
             msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
             msgBox.setDefaultButton(QMessageBox::No);
+#else
+            msgBox.setButtonText(QMessageBox::Yes, tr("Yes"));
+            msgBox.setButtonText(QMessageBox::No, tr("No"));
+#endif
+
             switch (msgBox.exec())
             {
                 case QMessageBox::Yes:
@@ -275,8 +348,16 @@ MainWindow::write()
         else
             messageString = item->getPath() + tr(" is a non-removable hard drive, and this will overwrite the contents.  Are you <b>sure</b> you want to continue?");
         msgBox.setText(messageString);
+
+#if (QT_VERSION >= 0x040400)
         msgBox.setStandardButtons(QMessageBox::Cancel | QMessageBox::Ok);
         msgBox.setDefaultButton(QMessageBox::Cancel);
+#else
+        msgBox.setButtonText(QMessageBox::Cancel, tr("Cancel"));
+        msgBox.setButtonText(QMessageBox::Ok, tr("Ok"));
+#endif
+
+
         switch (msgBox.exec())
         {
             case QMessageBox::Ok:

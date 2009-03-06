@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Mar  6 18:32:24 CET 2009 - mbarringer@suse.de
+
+- Fixing a build problem with the imagewriter on 10.3, it will now
+  fall back to a simple UI if the Qt version is < 4.4.0.
+
+-------------------------------------------------------------------
 Fri Mar  6 12:38:16 CET 2009 - ms@suse.de
 
 - v3.26

@@ -42,7 +42,7 @@
 #endif
 
 #include "DeviceItem.h"
-#define VERSION "SUSE Studio Image Writer 1.0"
+#define VERSION "SUSE Studio Image Writer 1.1"
 
 class MainWindow : public QWidget
 {
@@ -50,6 +50,8 @@ class MainWindow : public QWidget
 
 public:
     MainWindow(const char *cmddevice, const char *cmdfile, bool unsafe = false, QWidget *parent = 0);
+
+public slots:
     void selectImage();
 
 private slots:
@@ -68,6 +70,12 @@ private:
     bool isMounted(QString path);
     void writeData(QString path);
     void centerWindow();
+    void useNewUI();
+    void useOldUI();
+
+#if (QT_VERSION < 0x040400)
+    QLineEdit* fileLine;
+#endif
 
     QLabel *imageLabel, *directive;
     QString file;
