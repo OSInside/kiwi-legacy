@@ -1760,7 +1760,7 @@ sub version {
 	if (open FD,$Revision) {
 		$rev = <FD>; close FD;
 	}
-	$kiwi -> info ("kiwi version v$Version SVN: Revision: $rev\n");
+	$kiwi -> info ("kiwi version v$Version\n");
 	$kiwi -> cleanSweep();
 	exit 0;
 }

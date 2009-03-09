@@ -12,7 +12,7 @@
 # make tarball from the current source tree
 #-------------------------------------------
 ./.version > .revision
-find -type d | grep .svn | xargs rm -rf
+find -type d | grep .git | xargs rm -rf
 find -name "*.swp" | xargs rm -f
 mv rpm/kiwi.changes doc/ChangeLog
 rm -rf rpm/

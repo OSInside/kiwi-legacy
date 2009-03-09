@@ -41,4 +41,6 @@ digraph kiwi {
 	"kiwi-instsource" -> "kiwi"
 	"kiwi-instsource" -> "inst-source-utils"
 	"kiwi-instsource" -> "createrepo"
+
+	"kiwi-templates"  -> "kiwi-desc-vmxboot"
 }
