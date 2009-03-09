@@ -411,6 +411,7 @@ fi
 runHook predownload
 if \
 	[ $LOCAL_BOOT = "no" ] && \
+	[ ! -z "$PART" ]       && \
 	[ -z "$NFSROOT" ]      && \
 	[ -z "$NBDROOT" ]      && \
 	[ -z "$AOEROOT" ]
@@ -702,7 +703,12 @@ fi
 #======================================
 # 14) Make boot data available on union
 #--------------------------------------
-if [ $LOCAL_BOOT = "no" ];then
+if [ $LOCAL_BOOT = "no" ] && \
+	[ ! -z "$PART" ]      && \
+	[ -z "$NFSROOT" ]     && \
+	[ -z "$NBDROOT" ]     && \
+	[ -z "$AOEROOT" ]
+then
 	if [ ! -z "$UNIONFS_CONFIG" ] && [ "$systemIntegrity" = "clean" ];then
 		# /.../
 		# have to do this so that /boot gets copied to the
@@ -727,7 +733,7 @@ if [ $LOCAL_BOOT = "no" ];then
 				"Failed to mount read/write filesystem" \
 			"reboot"
 		fi
-		if ! mount $roDevice $roDir >/dev/null;then
+		if ! kiwiMount "$roDevice" "$roDir";then
 			systemException \
 				"Failed to mount read/only filesystem" \
 			"reboot"
@@ -815,6 +821,7 @@ fi
 #--------------------------------------
 if \
 	[ $LOCAL_BOOT = "no" ] && \
+	[ ! -z "$PART" ]       && \
 	[ -z "$NFSROOT" ]      && \
 	[ -z "$NBDROOT" ]      && \
 	[ -z "$AOEROOT" ]

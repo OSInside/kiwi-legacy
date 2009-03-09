@@ -3131,7 +3131,7 @@ function mountSystem {
 	# set primary mount device
 	#--------------------------------------
 	local mountDevice="$imageRootDevice"
-	if test ! -z $1;then
+	if [ ! -z "$1" ];then
 		mountDevice="$1"
 	fi
 	#======================================
@@ -3143,10 +3143,10 @@ function mountSystem {
 	#======================================
 	# check root tree type
 	#--------------------------------------
-	if test ! -z $COMBINED_IMAGE;then
+	if [ ! -z "$COMBINED_IMAGE" ];then
 		mountSystemCombined "$mountDevice" $2
 		retval=$?
-	elif test ! -z $UNIONFS_CONFIG;then
+	elif [ ! -z "$UNIONFS_CONFIG" ];then
 		mountSystemUnified $2
 		retval=$?
 	else

@@ -273,7 +273,6 @@ sub obsPath {
 		return undef;
 	}
 	$module =~ s/obs:\/\///;
-	$module =~ s/:/:\//g;
 	if ((! defined $module) || ($module eq "/")) {
 		return undef;
 	}
