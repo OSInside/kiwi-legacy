@@ -2,15 +2,12 @@
 # Copyright (c) 2000 SuSE GmbH Nuernberg, Germany.  All rights reserved.
 #
 # Author: Marcus Schaefer <ms@suse.de>, 2005
-# Build script for kiwi with SVN access
+# Build script for kiwi RPM package(s)
 #
 # Syntax:
 # -------
-#   doit --prepare [ --tag <tag> ] [ --branch <branch> ]
-#				   [ --sourcelevel <n> ]
+#   doit -p | --prepare --local
 #
-# tag or branch specifiy the subversion location where a tag
-# or a branch source is stored.
 # ---
 #
 use strict;
@@ -21,11 +18,7 @@ use Env;
 # Globals...
 #-------------------------------------
 my $Prepare;
-my $Tag;
-my $Branch;
-my $SourceList;
 my $LocalSource;
-my $Clean;
 
 #----[ main ]-----------------#
 sub main {
@@ -34,12 +27,8 @@ sub main {
 # package and version stuff
 #
 	my $result = GetOptions(
-		"tag|t=s"         => \$Tag,  
-		"branch|r=s"      => \$Branch,
 		"prepare|p"       => \$Prepare,
-		"sourcelevel=i"   => \$SourceList,
 		"local|L"         => \$LocalSource,
-		"clean|c"         => \$Clean,
 		"help|h"          => \&usage,
 		"<>"              => \&usage
 	);
@@ -53,24 +42,9 @@ sub main {
 		usage();
 	}
 	#==============================================
-	# Setup subversion path for checkout...
-	#----------------------------------------------
-	my $tagsID;
-	my $treeID;
-	if (defined $Branch) {
-		$tagsID = $Branch;
-		$treeID = "kiwi-branches";
-	}
-	if (defined $Tag) {
-		$tagsID = $Tag;
-		$treeID = "kiwi-tags";
-	}
-	#==============================================
 	# Checkout source
 	#----------------------------------------------
-	my $pacdir = checkout (
-		$tagsID,$treeID,$SourceList,$LocalSource
-	);
+	my $pacdir = checkout ( $LocalSource );
 	#==============================================
 	# Add %changelog
 	#----------------------------------------------
@@ -109,7 +83,7 @@ sub checkout {
 # checkout sources and create a package directory
 # ready to go to /work/src/done
 #
-	my $pacdir = svnup (@_);
+	my $pacdir = repoup (@_);
 	chdir $pacdir;
 	qx( cp kiwi/rpm/* . );
 	chdir "./kiwi";
@@ -120,69 +94,33 @@ sub checkout {
 	return $pacdir;
 }
 
-#----[ svnup ]----------------#
-sub svnup {
+#----[ repoup ]----------------#
+sub repoup {
 #-----------------------------------------------
 # checkout kiwi source according to an optional
 # tag and return the pathname of the temp directory
 # where the new sources are located
 #
-	my $tagName = $_[0];
-	my $treeID  = $_[1];
-	my $slevel  = $_[2];
-	my $local   = $_[3];
-
-	#===========================================
-	# set SVN path to repository and branch/tag
-	#-------------------------------------------
-	my $svnPath = "svn.berlios.de/svnroot/repos/kiwi/kiwi-head";
-	if (defined $tagName) {
-		$svnPath = "svn.berlios.de/svnroot/repos/kiwi/".$treeID."/".$tagName;
-	}
 	#===========================================
 	# create tmp directory and change into it
 	#-------------------------------------------
 	my $parent = qx ( pwd );
 	my $tmpdir = qx (
-		mktemp -q -d /tmp/svnkiwi.XXXXXX
+		mktemp -q -d /tmp/gitkiwi.XXXXXX
 	);
 	chomp $parent;
 	chomp $tmpdir;
 	chdir $tmpdir
 		|| die "Could not create temp dir: $!";
 	#===========================================
-	# use local source if defined
+	# pack up local source
 	#-------------------------------------------
-	if (defined $local) {
-		print "Checkout source level [local]...\n";
-		chdir $parent
-			|| die "Could not change dir: $parent:$!";
-		qx (mkdir -p $tmpdir/kiwi && cp -a . $tmpdir/kiwi);
-		chdir $tmpdir
-			|| die "Could not create temp dir: $!";
-		return $tmpdir;
-	}
-	#===========================================
-	# checkout source at given level or HEAD
-	#-------------------------------------------
-	if (defined $slevel) {
-		print "Checkout source level [$slevel]...\n";
-		qx (svn co -r $slevel http://$svnPath kiwi 2>&1 );
-	} else {
-		my $location = "HEAD";
-		if ( defined $Branch ) {
-			$location = "BRANCH: $Branch";
-		}
-		if ( defined $Tag ) {
-			$location = "TAG: $Tag";
-		}
-		print "Checkout source level [$location]...\n";
-		qx ( svn co http://$svnPath kiwi 2>&1 );
-	}
-	my $error = $? >> 8;
-	if ($error > 0) {
-		die "checkout failed: $!";
-	}
+	print "Checkout source level [local]...\n";
+	chdir $parent
+		|| die "Could not change dir: $parent:$!";
+	qx (mkdir -p $tmpdir/kiwi && cp -a . $tmpdir/kiwi);
+	chdir $tmpdir
+		|| die "Could not create temp dir: $!";
 	return $tmpdir;
 }
 
@@ -191,12 +129,7 @@ sub usage {
 #----------------------------------------
 # give me a usage message
 #	
-	print "usage: doit [ options ]\n";
-	print "options:\n";
-	print "[ -p | --prepare [ --tag | --branch <name> ] ]\n";
-	print "   prepare package for build. Use sources as specified\n";
-	print "   by tag or branch. If no tag is given the head will\n";
-	print "   be used\n";
+	print "usage: doit -p --local\n";
 	print "--\n";
 	exit (0);
 }
