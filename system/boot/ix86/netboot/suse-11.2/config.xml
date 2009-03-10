@@ -62,6 +62,7 @@
 		<file name="drivers/parport/*"/>
 		<file name="drivers/char/lp.ko"/>
 		<file name="drivers/acpi/dock.ko"/>
+		<file name="lib/crc-t10dif.ko"/>
 		<!-- DRIVERS END DEFAULT AND XEN -->
 	</drivers>
 	<drivers type="drivers" profiles="diskless">
@@ -80,6 +81,7 @@
 		<file name="fs/lockd/*"/>
 		<file name="net/sunrpc/*"/>
 		<file name="fs/nfs_common/*"/>
+		<file name="lib/crc-t10dif.ko"/>
 		<file name="drivers/message/fusion/*"/>
 		<file name="drivers/block/nbd.ko"/>
 		<file name="drivers/block/aoe/aoe.ko"/>
@@ -219,12 +221,13 @@
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
-		<package name="glibc@i586" arch="i686"/>
+		<package name="glibc"/>
 		<package name="glibc-locale"/>
-		<package name="cracklib-dict-small"/>
 	</packages>
 	<packages type="delete" profiles="default,xen,diskless,smp">
 		<!-- DELETE PACKAGES START DEFAULT, XEN AND DISKLESS -->
+		<package name="cracklib-dict-small"/>
+		<package name="cracklib-dict-full"/>
 		<package name="PolicyKit"/>
 		<package name="audit-libs"/>
 		<package name="blocxx"/>
@@ -275,6 +278,8 @@
 	</packages>
 	<packages type="delete" profiles="diskless">
 		<!-- DELETE PACKAGES START DISKLESS -->
+		<package name="cracklib-dict-small"/>
+		<package name="cracklib-dict-full"/>
 		<package name="mkinitrd"/>
 		<package name="xorg-x11-libxcb"/>
 		<package name="xorg-x11-libX11"/>

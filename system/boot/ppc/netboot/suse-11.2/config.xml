@@ -54,6 +54,7 @@
 		<file name="drivers/parport/*"/>
 		<file name="drivers/char/lp.ko"/>
 		<file name="drivers/acpi/dock.ko"/>
+		<file name="lib/crc-t10dif.ko"/>
 		<!-- DRIVERS END DEFAULT AND SMP -->
 	</drivers>
 	<drivers type="drivers" profiles="diskless">
@@ -70,6 +71,7 @@
 		<file name="fs/lockd/*"/>
 		<file name="net/sunrpc/*"/>
 		<file name="fs/nfs_common/*"/>
+		<file name="lib/crc-t10dif.ko"/>
 		<file name="drivers/message/fusion/*"/>
 		<file name="drivers/block/nbd.ko"/>
 		<file name="drivers/net/3c59x.ko"/>
@@ -198,10 +200,11 @@
 	<packages type="bootstrap">
 		<package name="filesystem"/>
 		<package name="glibc-locale"/>
-		<package name="cracklib-dict-small"/>
 	</packages>
 	<packages type="delete" profiles="default,diskless,smp,ppc64">
 		<!-- DELETE PACKAGES START DEFAULT AND DISKLESS -->
+		<package name="cracklib-dict-small"/>
+		<package name="cracklib-dict-full"/>
 		<package name="PolicyKit"/>
 		<package name="audit-libs"/>
 		<package name="blocxx"/>
@@ -251,6 +254,8 @@
 	</packages>
 	<packages type="delete" profiles="diskless">
 		<!-- DELETE PACKAGES START DISKLESS -->
+		<package name="cracklib-dict-small"/>
+		<package name="cracklib-dict-full"/>
 		<package name="e2fsprogs"/>
 		<package name="mkinitrd"/>
 		<package name="xorg-x11-libxcb"/>

@@ -75,9 +75,8 @@
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
-		<package name="glibc@i586" arch="i686"/>
+		<package name="glibc"/>
 		<package name="glibc-locale"/>
-		<package name="cracklib-dict-small"/>
 		<package name="psmisc"/>
 		<package name="bind-libs"/>
 		<package name="bind-utils"/>
@@ -109,6 +108,8 @@
 		<package name="checkmedia"/>
 	</packages>
 	<packages type="delete">
+		<package name="cracklib-dict-small"/>
+		<package name="cracklib-dict-full"/>
 		<package name="ConsoleKit"/>
 		<package name="ConsoleKit-32bit"/>
 		<package name="PolicyKit"/>

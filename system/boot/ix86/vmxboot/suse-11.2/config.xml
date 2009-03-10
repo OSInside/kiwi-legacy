@@ -44,6 +44,7 @@
 		<file name="drivers/scsi/*"/>
 		<file name="drivers/message/fusion/*"/>
 		<file name="drivers/acpi/dock.ko"/>
+		<file name="lib/crc-t10dif.ko"/>
 	</drivers>
 	<repository type="yast2" status="replaceable">
         <source path="/image/CDs/full-i386"/>
@@ -97,13 +98,14 @@
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
-		<package name="glibc@i586" arch="i686"/>
+		<package name="glibc"/>
 		<package name="glibc-locale"/>
 		<package name="diffutils"/>
 		<package name="procps"/>
-		<package name="cracklib-dict-small"/>
 	</packages>
 	<packages type="delete">
+		<package name="cracklib-dict-small"/>
+		<package name="cracklib-dict-full"/>
 		<package name="PolicyKit"/>
 		<package name="audit-libs"/>
 		<package name="blocxx"/>

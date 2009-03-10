@@ -204,11 +204,13 @@
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
-		<package name="glibc@i586" arch="i686"/>
+		<package name="glibc"/>
 		<package name="glibc-locale"/>
 	</packages>
 	<packages type="delete" profiles="default,xen,diskless,smp">
 		<!-- DELETE PACKAGES START DEFAULT, XEN AND DISKLESS -->
+		<package name="cracklib-dict-small"/>
+		<package name="cracklib-dict-full"/>
 		<package name="PolicyKit"/>
 		<package name="audit-libs"/>
 		<package name="blocxx"/>
@@ -259,6 +261,8 @@
 	</packages>
 	<packages type="delete" profiles="diskless">
 		<!-- DELETE PACKAGES START DISKLESS -->
+		<package name="cracklib-dict-small"/>
+		<package name="cracklib-dict-full"/>
 		<package name="mkinitrd"/>
 		<package name="xorg-x11-libxcb"/>
 		<package name="xorg-x11-libX11"/>

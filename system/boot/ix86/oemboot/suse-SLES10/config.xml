@@ -97,10 +97,12 @@
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
-		<package name="glibc@i586" arch="i686"/>
+		<package name="glibc"/>
 		<package name="glibc-locale"/>
 	</packages>
 	<packages type="delete">
+		<package name="cracklib-dict-small"/>
+		<package name="cracklib-dict-full"/>
 		<package name="perl"/>
 		<package name="glibc-locale"/>
 		<package name="man"/>

@@ -198,10 +198,11 @@
 	<packages type="bootstrap">
 		<package name="filesystem"/>
 		<package name="glibc-locale"/>
-		<package name="cracklib-dict-small"/>
 	</packages>
 	<packages type="delete" profiles="default,diskless,smp,ppc64">
 		<!-- DELETE PACKAGES START DEFAULT AND DISKLESS -->
+		<package name="cracklib-dict-small"/>
+		<package name="cracklib-dict-full"/>
 		<package name="PolicyKit"/>
 		<package name="audit-libs"/>
 		<package name="blocxx"/>
@@ -251,6 +252,8 @@
 	</packages>
 	<packages type="delete" profiles="diskless">
 		<!-- DELETE PACKAGES START DISKLESS -->
+		<package name="cracklib-dict-small"/>
+		<package name="cracklib-dict-full"/>
 		<package name="e2fsprogs"/>
 		<package name="mkinitrd"/>
 		<package name="xorg-x11-libxcb"/>

@@ -3548,6 +3548,7 @@ sub buildVMwareConfig {
 	print FD 'powerType.suspend  = "soft"'."\n";
 	print FD 'powerType.reset    = "soft"'."\n";
 	close FD;
+	chmod 0755,$file;
 	$kiwi -> done();
 	return $file;
 }
