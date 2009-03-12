@@ -1464,12 +1464,14 @@ image or not</a:documentation>
     <define name="k.type.flags.attribute">
       <attribute name="flags">
         <a:documentation>Specifies flags for the image type. This could be compressed
-or unified and applies to the iso type only</a:documentation>
+unified, unified-cromfs , compressed-cromfs or dmsquash and
+applies to the iso type only</a:documentation>
         <choice>
           <value>unified</value>
           <value>compressed</value>
           <value>unified-cromfs</value>
           <value>compressed-cromfs</value>
+          <value>dmsquash</value>
         </choice>
       </attribute>
     </define>
@@ -1493,13 +1495,16 @@ hwinfo --framebuffer or in /usr/src/linux/Documentation/fb/vesafb.txt</a:documen
     <define name="k.type.filesystem.attribute">
       <attribute name="filesystem">
         <a:documentation>Specifies the filesystem which can be one of:
-ext2 , ext3 , reiserfs ,squashfs or cromfs</a:documentation>
+ext2 , ext3 , reiserfs ,squashfs, cromfs or dmsquash.
+dmsquash is an ext3 filesystem packed into a squashfs
+and used later with a device mapper snapshot</a:documentation>
         <choice>
           <value>ext2</value>
           <value>ext3</value>
           <value>reiserfs</value>
           <value>squashfs</value>
           <value>cromfs</value>
+          <value>dmsquash</value>
         </choice>
       </attribute>
     </define>

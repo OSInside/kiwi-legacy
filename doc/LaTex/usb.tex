@@ -120,6 +120,11 @@ this KIWI supports compressed filesystems with USB sticks too:
       the distribution KIWI has used to build the image 
 \item \textbf{filesystem=''cromfs''}\\
       The same as with squashfs but cromfs is used for compression
+\item \textbf{filesystem=''dmsquash''}\\
+      Creates an ext3 image file and puts that
+      into a squashfs filesystem. On boot the root tree is mounted
+      via a device mapper snapshot device to allow full write
+      access over the complete tree.
 \end{itemize}
 
 \subsection{Split stick}

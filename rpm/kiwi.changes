@@ -1,4 +1,17 @@
 -------------------------------------------------------------------
+Wed Mar 11 12:11:24 CET 2009 - ms@suse.de
+
+- v3.29
+- added cdrkit-cdrtools-compat required for kiwi-desc-oemboot
+- added experimental support for dmsquash filesystem type which is
+  a squashfs filesystem containing an ext3 filesystem. The mount of
+  the data happens via a device-mapper snapshot and allows
+  copy-on-write access (bnc #483444)
+- fixed install image size calculation in case of a compressed
+  image. gzip -l was used but we ran into the >4GB bug mentioned
+  in the gzip manpage (bnc #484247)
+
+-------------------------------------------------------------------
 Tue Mar 10 11:19:21 CET 2009 - ms@suse.de
 
 - v3.28

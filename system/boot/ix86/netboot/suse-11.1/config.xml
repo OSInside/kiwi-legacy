@@ -27,6 +27,7 @@
 	</drivers>
 	<drivers type="drivers" profiles="default,xen,smp">
 		<!-- DRIVERS START DEFAULT AND XEN -->
+		<file name="drivers/md/*"/>
 		<file name="drivers/hid/*"/>
 		<file name="drivers/ide/*"/>
 		<file name="drivers/block/loop.ko"/>
@@ -66,6 +67,7 @@
 	</drivers>
 	<drivers type="drivers" profiles="diskless">
 		<!-- DRIVERS START DISKLESS -->
+		<file name="drivers/md/*"/>
 		<file name="drivers/ide/*"/>
 		<file name="drivers/block/brd.ko"/>
 		<file name="net/packet/*"/>

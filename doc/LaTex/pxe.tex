@@ -77,7 +77,7 @@ subnet 192.168.100.0 netmask 255.255.255.0 {
 
 \section{Building the suse-pxe-client example}
 
-The latest example provided with kiwi is based on openSUSE 11.0 and creates an
+The example provided with kiwi is based on openSUSE 11.0 and creates an
 image for a Wyse VX0 terminal with a 128MB flash card and 512MB of RAM.
 The image makes use of the squashfs compressed filesystem and its
 root tree is deployed as unified (aufs) based system. 
@@ -493,7 +493,9 @@ into one. In case of thin clients there is often the need for
 a compressed filesystem due to space limitations. Unfortunately
 all common compressed filesystems provides only read-only access.
 Combining a read-only filesystem with a read-write filesystem
-is a solution for this problem. Below, find an example:
+is a solution for this problem. In order to use a compressed
+root filesystem make sure your config.xml's filesystem attribute
+contains either squashfs or dmsquash. Below, find an example:
 
 \begin{Command}{12cm}
 \begin{verbatim}

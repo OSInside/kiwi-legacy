@@ -29,6 +29,7 @@
 		<file name="usb/input/usbhid.ko"/>
 	</drivers>
 	<drivers type="drivers">
+		<file name="drivers/md/*"/>
 		<file name="drivers/ide/*"/>
 		<file name="drivers/cdrom/*"/>
 		<file name="net/packet/*"/>

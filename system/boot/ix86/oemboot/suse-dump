@@ -159,14 +159,9 @@ function OEMInstall {
 	#======================================
 	# Get required disk space, setup I/O
 	#--------------------------------------
-	needBytes=`du --bytes $imageName | cut -f1`
+	needBytes=$(expr $blocks \* $blocksize)
 	needKByte=`expr $needBytes / 1024`
 	needMByte=`expr $needKByte / 1024`
-	if test "$imageZipped" = "compressed"; then
-		needBytes=`gzip -l $imageName|tail -n1|sed -e "s@ \+@:@g"|cut -f3 -d:`
-		needKByte=`expr $needBytes / 1024`
-		needMByte=`expr $needKByte / 1024`
-	fi
 	#======================================
 	# Check disk space...
 	#--------------------------------------

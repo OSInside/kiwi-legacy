@@ -25,7 +25,7 @@
 		<file name="usb/storage/usb-storage.ko"/>
 	</drivers>
 	<drivers type="drivers">
-		<file name="drivers/md/dm-mod.ko"/>
+		<file name="drivers/md/*"/>
 		<file name="drivers/hid/*"/>
 		<file name="drivers/ide/*"/>
 		<file name="drivers/block/loop.ko"/>
@@ -43,8 +43,6 @@
 		<file name="fs/hfs/*"/>
 		<file name="fs/exportfs/*"/>
 		<file name="fs/squashfs/*"/>
-		<file name="updates/aufs.ko"/>
-		<file name="weak-updates/aufs.ko"/>
 		<file name="fs/reiserfs/*"/>
 		<file name="fs/nls/nls_utf8.ko"/>
 		<file name="fs/nls/nls_cp437.ko"/>
@@ -67,19 +65,16 @@
 		<package name="kernel-default"/>
 		<package name="kernel-default-base"/>
 		<package name="kernel-default-extra"/>
-		<package name="aufs-kmp-default"/>
 	</packages>
 	<packages type="image" profiles="smp">
 		<package name="kernel-pae"/>
 		<package name="kernel-pae-base"/>
 		<package name="kernel-pae-extra"/>
-		<package name="aufs-kmp-pae"/>
 	</packages>
 	<packages type="image" profiles="xen">
 		<package name="kernel-xen"/>
 		<package name="kernel-xen-base"/>
 		<package name="kernel-xen-extra"/>
-		<package name="aufs-kmp-xen"/>
 		<package name="xen"/>
 	</packages>
 	<packages type="image">
@@ -93,7 +88,6 @@
 		<package name="sysfsutils"/>
 		<package name="util-linux"/>
 		<package name="squashfs"/>
-		<package name="aufs"/>
 		<package name="gfxboot"/>
 		<package name="gfxboot-devel"/>
 		<package name="fribidi"/>

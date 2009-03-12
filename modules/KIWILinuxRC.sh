@@ -1621,6 +1621,7 @@ function probeDevices {
 	modprobe rd &>/dev/null
 	modprobe brd &>/dev/null
 	modprobe edd &>/dev/null
+	modprobe dm-mod &>/dev/null
 	probeUSB
 }
 #======================================
@@ -1884,7 +1885,6 @@ function searchVolumeGroup {
 	# /dev/kiwiVG/LVRoot and/or /dev/kiwiVG/LVComp
 	# return zero on success
 	# ----
-	modprobe dm-mod
 	if vgscan 2>&1 | grep -q "kiwiVG"; then
 		vgchange -a y kiwiVG
 		return $?
@@ -2972,20 +2972,82 @@ function setupReadWrite {
 function mountSystemUnified {
 	local loopf=$1
 	local roDir=/read-only
-	local rwDir=/read-write
-	local xiDir=/xino
-	for dir in $roDir $rwDir $xiDir;do
-		mkdir -p $dir
-	done
-	local rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
 	local roDevice=`echo $UNIONFS_CONFIG | cut -d , -f 2`
-	local unionFST=`echo $UNIONFS_CONFIG | cut -d , -f 3`
+	#======================================
+	# create read only mount point
+	#--------------------------------------
+	mkdir -p $roDir
 	#======================================
 	# check read/only device location
 	#--------------------------------------
 	if [ ! -z "$NFSROOT" ];then
 		roDevice="$imageRootDevice"
 	fi
+	#======================================
+	# mount read only device
+	#--------------------------------------
+	if ! kiwiMount "$roDevice" "$roDir" "" $loopf;then
+		Echo "Failed to mount read only filesystem"
+		return 1
+	fi
+	#======================================
+	# check union mount method
+	#--------------------------------------
+	if [ -f $roDir/fsdata.ext3 ];then
+		mountSystemDMSquash
+	else
+		mountSystemOverlay
+	fi
+}
+
+#======================================
+# mountSystemDMSquash
+#--------------------------------------
+function mountSystemDMSquash {
+	local roDir=/read-only
+	local rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
+	local roDevice=`echo $UNIONFS_CONFIG | cut -d , -f 2`
+	local orig_loop=$(losetup -r -s -f $roDir/fsdata.ext3)
+	local orig_sectors=$(blockdev --getsize $orig_loop)
+	local chunk=8
+	local flags=p
+	#======================================
+	# check read-write persistency
+	#--------------------------------------
+	if getDiskDevice $rwDevice | grep -q ram;then
+		flags=n
+	fi
+	#======================================
+	# create snapshot device
+	#--------------------------------------
+	dmsetup create sys_snap --notable
+	echo "0 $orig_sectors snapshot $orig_loop $rwDevice $flags $chunk" |\
+		dmsetup load sys_snap
+	#======================================
+	# resume snapshot and origin devices
+	#--------------------------------------
+	dmsetup resume sys_snap
+	#======================================
+	# mount snapshot as root to /mnt
+	#--------------------------------------
+	mount /dev/mapper/sys_snap /mnt
+}
+
+#======================================
+# mountSystemOverlay
+#--------------------------------------
+function mountSystemOverlay {
+	local roDir=/read-only
+	local rwDir=/read-write
+	local xiDir=/xino
+	local rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
+	local unionFST=`echo $UNIONFS_CONFIG | cut -d , -f 3`
+	#======================================
+	# create read write mount points
+	#--------------------------------------
+	for dir in $rwDir $xiDir;do
+		mkdir -p $dir
+	done
 	#======================================
 	# check read/write device location
 	#--------------------------------------
@@ -3010,13 +3072,6 @@ function mountSystemUnified {
 			Echo "Failed to mount read/write filesystem"
 			return 1
 		fi
-	fi
-	#======================================
-	# mount read only device
-	#--------------------------------------
-	if ! kiwiMount "$roDevice" "$roDir" "" $loopf;then
-		Echo "Failed to mount read only filesystem"
-		return 1
 	fi
 	#======================================
 	# setup overlay mount

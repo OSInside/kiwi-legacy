@@ -27,6 +27,7 @@
 	</drivers>
 	<drivers type="drivers" profiles="default,xen,smp">
 		<!-- DRIVERS START DEFAULT AND XEN -->
+		<file name="drivers/md/*"/>
 		<file name="drivers/hid/*"/>
 		<file name="drivers/ide/*"/>
 		<file name="drivers/block/loop.ko"/>
@@ -45,7 +46,6 @@
 		<file name="fs/hfs/*"/>
 		<file name="fs/exportfs/*"/>
 		<file name="fs/squashfs/*"/>
-		<file name="updates/aufs.ko"/>
 		<file name="fs/reiserfs/*"/>
 		<file name="fs/nfs/*"/>
 		<file name="fs/fuse/*"/>
@@ -67,6 +67,7 @@
 	</drivers>
 	<drivers type="drivers" profiles="diskless">
 		<!-- DRIVERS START DISKLESS -->
+		<file name="drivers/md/*"/>
 		<file name="drivers/ide/*"/>
 		<file name="drivers/block/brd.ko"/>
 		<file name="net/packet/*"/>
@@ -75,8 +76,6 @@
 		<file name="fs/mbcache.ko"/>
 		<file name="fs/exportfs/*"/>
 		<file name="fs/squashfs/*"/>
-		<file name="updates/aufs.ko"/>
-		<file name="weak-updates/aufs.ko"/>
 		<file name="fs/nfs/*"/>
 		<file name="fs/lockd/*"/>
 		<file name="net/sunrpc/*"/>
@@ -135,7 +134,6 @@
 		<package name="kernel-default"/>
 		<package name="kernel-default-base"/>
 		<package name="kernel-default-extra"/>
-		<package name="aufs-kmp-default"/>
 		<!-- KERNEL AND MODULE PACKAGES END DEFAULT -->
 	</packages>
 	<packages type="image" profiles="smp">
@@ -143,7 +141,6 @@
 		<package name="kernel-pae"/>
 		<package name="kernel-pae-base"/>
 		<package name="kernel-pae-extra"/>
-		<package name="aufs-kmp-pae"/>
 		<!-- KERNEL AND MODULE PACKAGES END SMP -->
 	</packages>
 	<packages type="image" profiles="xen">
@@ -151,7 +148,6 @@
 		<package name="kernel-xen"/>
 		<package name="kernel-xen-base"/>
 		<package name="kernel-xen-extra"/>
-		<package name="aufs-kmp-xen"/>
 		<package name="xen"/>
 		<!-- KERNEL AND MODULE PACKAGES END XEN -->
 	</packages>
@@ -160,7 +156,6 @@
 		<package name="kernel-default"/>
 		<package name="kernel-default-base"/>
 		<package name="kernel-default-extra"/>
-		<package name="aufs-kmp-default"/>
 		<!-- KERNEL AND MODULE PACKAGES END DISKLESS -->
 	</packages>
 	<packages type="image" profiles="default,xen,smp">

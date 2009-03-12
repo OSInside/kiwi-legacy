@@ -44,7 +44,7 @@ use KIWITest;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "3.28";
+our $Version       = "3.29";
 our $Publisher     = "SUSE LINUX Products GmbH";
 our $Preparer      = "KIWI - http://kiwi.berlios.de";
 our $openSUSE      = "http://download.opensuse.org";
@@ -109,6 +109,7 @@ our %KnownFS;
 $KnownFS{ext3}{tool}      = "/sbin/mkfs.ext3";
 $KnownFS{ext2}{tool}      = "/sbin/mkfs.ext2";
 $KnownFS{squashfs}{tool}  = "/usr/bin/mksquashfs";
+$KnownFS{dmsquash}{tool}  = "/usr/bin/mksquashfs";
 $KnownFS{cromfs}{tool}    = "/usr/bin/mkcromfs";
 $KnownFS{unified}{tool}   = "/usr/bin/mksquashfs";
 $KnownFS{compressed}{tool}= "/usr/bin/mksquashfs";
@@ -117,6 +118,7 @@ $KnownFS{cpio}{tool}      = "/usr/bin/cpio";
 $KnownFS{ext3}{ro}        = 0;
 $KnownFS{ext2}{ro}        = 0;
 $KnownFS{squashfs}{ro}    = 1;
+$KnownFS{dmsquash}{ro}    = 1;
 $KnownFS{cromfs}{ro}      = 1;
 $KnownFS{unified}{ro}     = 1;
 $KnownFS{compressed}{ro}  = 1;
@@ -699,6 +701,10 @@ sub main {
 			};
 			/^squashfs/ && do {
 				$ok = $image -> createImageSquashFS ();
+				last SWITCH;
+			};
+			/^dmsquash/ && do {
+				$ok = $image -> createImageDMSquashExt3 ();
 				last SWITCH;
 			};
 			/^cromfs/   && do {
@@ -1990,6 +1996,52 @@ sub checkFSOptions {
 		}
 	}
 	return %result;
+}
+
+#==========================================
+# mountLoop
+#------------------------------------------
+sub mountLoop {
+	# /.../
+	# implements a loop mount function for all supported
+	# file system types
+	# ---
+	my $file = shift;
+	my $dest = shift;
+	my $type = shift;
+	my $status = qxx ("mount -t $type -o loop $file $dest 2>&1");
+	my $result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> error ("Failed to loop mount $file to: $dest: $status");
+		$kiwi -> failed ();
+		return undef;
+	}
+	if (-f $dest."/fsdata.ext3") {
+		$type = "ext3";
+		$file = $dest."/fsdata.ext3";
+		$status = qxx ("mount -t $type -o loop $file $dest 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> error ("Failed to loop mount $file to: $dest: $status");
+			$kiwi -> failed ();
+			return undef;
+		}
+	}
+	return $dest;
+}
+
+#==========================================
+# umountLoop
+#------------------------------------------
+sub umountLoop {
+	# /.../
+	# implements an umount function for filesystems mounted
+	# via mountFileSystemLoop. The same mount point could be
+	# used twice therefore we umount two times to be safe
+	# ---
+	my $dest = shift;
+	my $status = qxx ("umount $dest && umount $dest 2>&1");
+	return $dest;
 }
 
 #==========================================

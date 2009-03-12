@@ -82,6 +82,12 @@ alternative solutions:
 \item \textbf{flags=''compressed-cromfs''}\\
       Same as compressed but uses the cromfs filesystem instead of
       the squashfs filesystem.
+\item \textbf{flags=''dmsquash''}\\
+      Creates an ext3 image file and puts that
+      into a squashfs filesystem. On boot the root tree is mounted
+      via a device mapper snapshot device to allow full write
+      access over the complete tree. No other overlay filesystem
+      is required.
 \item \textbf{flags not set}\\
       If no flags attribute is set no compressed filesystem and no overlay
       filesystem will be used. The root tree will be directly part of

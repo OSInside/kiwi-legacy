@@ -19,7 +19,8 @@
 		<profile name="smp" description="Boot with smp kernel"/>
 	</profiles>
 	<drivers type="drivers">
-		<file name="drivers/md/dm-mod.ko"/>
+		<file name="drivers/md/*"/>
+		<file name="drivers/block/loop.ko"/>
 		<file name="drivers/ide/*"/>
 		<file name="drivers/cdrom/*"/>
 		<file name="net/packet/*"/>

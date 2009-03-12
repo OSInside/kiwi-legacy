@@ -1,5 +1,5 @@
 #
-# spec file for package kiwi (Version 3.28)
+# spec file for package kiwi (Version 3.29)
 #
 # Copyright (c) 2008 SUSE LINUX Products GmbH, Nuernberg, Germany.
 # This file and all modifications and additions to the pristine
@@ -43,7 +43,7 @@ Requires:       satsolver-tools
 Summary:        OpenSuSE - KIWI Image System
 Provides:       kiwi2 <= 2.14
 Obsoletes:      kiwi2 <= 2.14
-Version:        3.28
+Version:        3.29
 Release:        80
 Group:          System/Management
 License:        GPL v2 or later
@@ -162,7 +162,7 @@ Authors:
 %package -n kiwi-desc-isoboot
 License:        GPL v2 or later
 Requires:       kiwi = %{version}
-Requires:       syslinux mkisofs
+Requires:       syslinux cdrkit-cdrtools-compat
 Summary:        OpenSuSE - KIWI Image System ISO boot
 Obsoletes:      kiwi2-desc-isoboot <= 2.14
 Provides:       kiwi2-desc-isoboot <= 2.14
@@ -249,7 +249,7 @@ Authors:
 %package -n kiwi-desc-oemboot
 License:        GPL v2 only
 Requires:       kiwi = %{version}
-Requires:       qemu multipath-tools
+Requires:       qemu multipath-tools cdrkit-cdrtools-compat
 Summary:        OpenSuSE - KIWI image descriptions
 Obsoletes:      kiwi2-desc-oemboot <= 2.14
 Provides:       kiwi2-desc-oemboot <= 2.14

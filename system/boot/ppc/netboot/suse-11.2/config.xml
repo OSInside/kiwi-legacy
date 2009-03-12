@@ -20,6 +20,7 @@
 	</profiles>
 	<drivers type="drivers" profiles="default,smp,ppc64">
 		<!-- DRIVERS START DEFAULT AND SMP -->
+		<file name="drivers/md/*"/>
 		<file name="drivers/ide/*"/>
 		<file name="drivers/block/loop.ko"/>
 		<file name="drivers/block/brd.ko"/>
@@ -59,6 +60,7 @@
 	</drivers>
 	<drivers type="drivers" profiles="diskless">
 		<!-- DRIVERS START DISKLESS -->
+		<file name="drivers/md/*"/>
 		<file name="drivers/ide/*"/>
 		<file name="net/packet/*"/>
 		<file name="fs/ext3/*"/>

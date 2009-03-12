@@ -263,6 +263,10 @@ describes the possible types and their attributes:
             split section controls the read-write information 
       \item \textbf{unified-cromfs}: Same as unified but uses cromfs
       \item \textbf{compressed-cromfs}: Same as compressed but uses cromfs
+      \item \textbf{dmsquash}: Creates an ext3 image file and puts that
+            into a squashfs filesystem. On boot the root tree is mounted
+            via a device mapper snapshot device to allow full write
+            access over the complete tree.
       \end{itemize}
       If no flags or the flags ''compressed'' or ''compressed-cromfs''
       are set an additional \textbf{split} section is required.
@@ -823,9 +827,10 @@ description.
       have enough space for the later image.
 \item The optional union section is used if the system image is based
       on a read-only filesystem such as squashfs and should be mounted
-      read-write by using an overlay filesystem like aufs or unionfs.
-      In this case, KIWI creates an additional write partition, then
-      combines both partitions with the given overlay filesystem.
+      read-write by using an overlay filesystem like aufs or by a device.
+      mapper setup with the dmsquash type. In this case, KIWI creates an
+      additional write partition, then
+      combines both partitions with the given overlay filesystem or device map.
       Currently, there are two such filesystems: unionfs and aufs
       (aufs is the preferred file system). The partition that holds the
       read-only system image must be set as the ro attribute value, and the

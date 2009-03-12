@@ -25,7 +25,8 @@
 		<file name="usb/storage/usb-storage.ko"/>
 	</drivers>
 	<drivers type="drivers">
-		<file name="drivers/md/dm-mod.ko"/>
+		<file name="drivers/md/*"/>
+		<file name="drivers/block/loop.ko"/>
 		<file name="drivers/hid/*"/>
 		<file name="drivers/ide/*"/>
 		<file name="fs/ext3/*"/>

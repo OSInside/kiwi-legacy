@@ -29,7 +29,7 @@
 		<file name="usb/input/usbhid.ko"/>
 	</drivers>
 	<drivers type="drivers">
-		<file name="drivers/md/dm-mod.ko"/>
+		<file name="drivers/md/*"/>
 		<file name="drivers/ide/*"/>
 		<file name="drivers/block/loop.ko"/>
 		<file name="net/packet/*"/>

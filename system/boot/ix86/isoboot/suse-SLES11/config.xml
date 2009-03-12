@@ -26,6 +26,7 @@
 		<file name="usb/storage/usb-storage.ko"/>
 	</drivers>
 	<drivers type="drivers">
+		<file name="drivers/md/*"/>
 		<file name="drivers/hid/*"/>
 		<file name="drivers/ide/*"/>
 		<file name="drivers/block/loop.ko"/>
@@ -120,7 +121,6 @@
 		<package name="cyrus-sasl"/>
 		<package name="db"/>
 		<package name="dbus-1-glib"/>
-		<package name="device-mapper"/>
 		<package name="dhcpcd"/>
 		<package name="diffutils"/>
 		<package name="expat"/>

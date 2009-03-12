@@ -147,6 +147,79 @@ sub stripImage {
 }
 
 #==========================================
+# createImageDMSquashExt3
+#------------------------------------------
+sub createImageDMSquashExt3 {
+	# ...
+	# Create squashfs image with an ext3 image file
+	# as content.
+	# ---
+	my $this    = shift;
+	my $rename  = shift;
+	my $tree    = shift;
+	my $journal = "journaled";
+	my $kiwi    = $this->{kiwi};
+	my $dest    = $this->{imageDest};
+	my $data;
+	my $code;
+	if (! defined $tree) {
+		$tree = $this->{imageTree};
+	}
+	#==========================================
+	# PRE filesystem setup
+	#------------------------------------------
+	my $name = $this -> preImage ();
+	if (! defined $name) {
+		return undef;
+	}
+	if (defined $rename) {
+		$data = qxx ("mv $dest/$name $dest/$rename 2>&1");
+		$code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> error  ("Can't rename image file");
+			$kiwi -> failed ();
+			$kiwi -> error  ($data);
+			return undef;
+		}
+		$name = $rename;
+	}
+	#==========================================
+	# Create ext3 filesystem on extend
+	#------------------------------------------
+	if (! $this -> setupEXT2 ( $name,$tree,$journal )) {
+		return undef;
+	}
+	#==========================================
+	# POST filesystem setup
+	#------------------------------------------
+	if (! $this -> postImage ($name,"nozip","dmsquash")) {
+		return undef;
+	}
+	#==========================================
+	# Rename filesystem file
+	#------------------------------------------
+	$data = qxx ("mv $dest/$name $dest/fsdata.ext3 2>&1");
+	$code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> error  ("Can't move file to fsdata.ext3");
+		$kiwi -> failed ();
+		$kiwi -> error  ($data);
+		return undef;
+	}
+	#==========================================
+	# Create squashfs filesystem from ext3
+	#------------------------------------------
+	$kiwi -> info ("Creating squashfs container...");
+	if (! $this -> setupSquashFS ( $name,$dest."/fsdata.ext3" )) {
+		return undef;
+	}
+	qxx ("mv -f $dest/$name.ext3 $dest/$name.squashfs");
+	qxx ("rm -f $dest/fsdata.ext3");
+	$kiwi -> done();
+	return $this;
+}
+
+#==========================================
 # createImageEXT2
 #------------------------------------------
 sub createImageEXT2 {
@@ -731,6 +804,10 @@ sub createImageUSB {
 			$ok = $this -> createImageSquashFS ();
 			last SWITCH;
 		};
+		/^dmsquash/   && do {
+			$ok = $this -> createImageDMSquashExt3 ();
+			last SWITCH;
+		};
 		/^cromfs/     && do {
 			$ok = $this -> createImageCromFS ();
 			last SWITCH;
@@ -1094,12 +1171,12 @@ sub createImageXen {
 #------------------------------------------
 sub makeLabel {
 	# ...
-	# create label text for isolinux text mode
-	# interface. Special letters needs unicode
-	# code points
+	# isolinux handles spaces as "_", so we replace
+	# each space with an underscore
 	# ----
-	my $this  = shift;
+	my $this = shift;
 	my $label = shift;
+	$label =~ s/ /_/g;
 	return $label;
 }
 
@@ -1280,6 +1357,7 @@ sub createImageLiveCD {
 	if (defined $gzip) {
 		SWITCH: for ($gzip) {
 			/^compressed$/ && do {
+				$kiwi -> info ("Creating split ext3 + squashfs...\n");
 				if (! $this -> createImageSplit ("ext3,squashfs", 1)) {
 					$this -> restoreCDRootData();
 					return undef;
@@ -1288,6 +1366,7 @@ sub createImageLiveCD {
 				last SWITCH;
 			};
 			/^compressed-cromfs$/ && do {
+				$kiwi -> info ("Creating split ext3 + cromfs...\n");
 				if (! $this -> createImageSplit ("ext3,cromfs", 1)) {
 					$this -> restoreCDRootData();
 					return undef;
@@ -1296,23 +1375,30 @@ sub createImageLiveCD {
 				last SWITCH;
 			};
 			/^unified$/ && do {
-				$kiwi -> info ("Creating squashfs read only filesystem...");
+				$kiwi -> info ("Creating squashfs read only filesystem...\n");
 				if (! $this -> setupSquashFS ( $namero,$imageTree )) {
 					$this -> restoreCDRootData();
 					$this -> restoreSplitExtend ();
 					return undef;
 				}
-				$kiwi -> done();
 				last SWITCH;
 			};
 			/^unified-cromfs$/ && do {
-				$kiwi -> info ("Creating cromfs read only filesystem...");
+				$kiwi -> info ("Creating cromfs read only filesystem...\n");
 				if (! $this -> setupCromFS ( $namero,$imageTree )) {
 					$this -> restoreCDRootData();
 					$this -> restoreSplitExtend ();
 					return undef;
 				}
-				$kiwi -> done();
+				last SWITCH;
+			};
+			/^dmsquash$/       && do {
+				$kiwi -> info ("Creating dmsquash read only filesystem...\n");
+				if (! $this -> createImageDMSquashExt3 ( $namero,$imageTree )) {
+					$this -> restoreCDRootData();
+					$this -> restoreSplitExtend ();
+					return undef;
+				}
 				last SWITCH;
 			};
 			# invalid flag setup...
@@ -1689,8 +1775,8 @@ sub createImageLiveCD {
 	#==========================================
 	# setup isolinux boot label name
 	#------------------------------------------
-	my $label = $this->makeLabel ("$systemDisplayName");
-	my $lsafe = $this->makeLabel ("Failsafe -- $label");
+	my $label = $this->makeLabel ($systemDisplayName);
+	my $lsafe = $this->makeLabel ("Failsafe -- ".$label);
 	#==========================================
 	# setup isolinux.cfg file
 	#------------------------------------------
@@ -1760,7 +1846,7 @@ sub createImageLiveCD {
 	# setup default harddisk/memtest entries
 	#------------------------------------------
 	print FD "\n";
-	print FD "label " . $this->makeLabel ("Boot From Hard Disk") . "\n";
+	print FD "label harddisk\n";
 	print FD "  localboot 0x80"."\n";
 	print FD "\n";
 	print FD "label memtest"."\n";
@@ -1786,7 +1872,7 @@ sub createImageLiveCD {
 	print FD "Available boot options:\n";
 	printf (FD "%-20s - %s\n",$label,"Live System");
 	printf (FD "%-20s - %s\n",$lsafe,"Live System failsafe mode");
-	printf (FD "%-20s - %s\n","Hard-Disk","Local boot from hard disk");
+	printf (FD "%-20s - %s\n","harddisk","Local boot from hard disk");
 	printf (FD "%-20s - %s\n","mediacheck","Media check");
 	printf (FD "%-20s - %s\n","memtest","Memory Test");
 	print FD "\n";
@@ -1816,13 +1902,13 @@ sub createImageLiveCD {
 		}
 		return undef;
 	}
-	if ((! defined $gzip) || ($gzip =~ /^unified/)) {
+	if ((! defined $gzip) || ($gzip =~ /^(unified|dmsquash)/)) {
 		print FD "IMAGE=/dev/ram1;$namecd\n";
 	} else {
 		print FD "IMAGE=/dev/loop1;$namecd\n";
 	}
 	if (defined $gzip) {
-		if ($gzip =~ /^unified/) {
+		if ($gzip =~ /^(unified|dmsquash)/) {
 			print FD "UNIONFS_CONFIG=/dev/ram1,/dev/loop1,aufs\n";
 		} else {
 			print FD "COMBINED_IMAGE=yes\n";
@@ -2698,6 +2784,7 @@ sub writeImageConfig {
 	# create .config for types which needs it
 	#------------------------------------------
 	if (defined $device) {
+		$kiwi -> info ("Creating boot configuration...");
 		if (! open (FD,">$imageDest/$configName")) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't create image boot configuration");
@@ -2843,8 +2930,6 @@ sub writeImageConfig {
 		#------------------------------------------
 		close FD;
 		$kiwi -> done ();
-	} else {
-		$kiwi -> skipped ();
 	}
 	# Reset main::ImageName...
 	$this -> buildImageName();
@@ -2861,11 +2946,12 @@ sub postImage {
 	# dependant tasks after the logical extend has
 	# been created
 	# ---
-	my $this = shift;
-	my $name = shift;
-	my $nozip= shift;
-	my $kiwi = $this->{kiwi};
-	my $xml  = $this->{xml};
+	my $this  = shift;
+	my $name  = shift;
+	my $nozip = shift;
+	my $fstype= shift;
+	my $kiwi  = $this->{kiwi};
+	my $xml   = $this->{xml};
 	my $imageDest = $this->{imageDest};
 	#==========================================
 	# mount logical extend for data transfer
@@ -2881,11 +2967,13 @@ sub postImage {
 		return undef;
 	}
 	$this -> cleanMount();
-
 	#==========================================
 	# Check image file system
 	#------------------------------------------
 	my %type = %{$xml->getImageTypeAndAttributes()};
+	if ((! $type{filesystem}) && ($fstype)) {
+		$type{filesystem} = $fstype;
+	}
 	my $para = $type{type}.":".$type{filesystem};
 	if ($type{filesystem}) {
 		$kiwi -> info ("Checking file system: $type{filesystem}...");
@@ -2896,7 +2984,7 @@ sub postImage {
 		#==========================================
 		# Check EXT3 file system
 		#------------------------------------------
-		/ext3|ec2/i && do {
+		/ext3|ec2|dmsquash/i && do {
 			qxx ("/sbin/fsck.ext3 -f -y $imageDest/$name 2>&1");
 			qxx ("/sbin/tune2fs -j $imageDest/$name 2>&1");
 			$kiwi -> done();
@@ -2945,7 +3033,6 @@ sub postImage {
 	#==========================================
 	# Create image boot configuration
 	#------------------------------------------
-	$kiwi -> info ("Creating boot configuration...");
 	if (! $this -> writeImageConfig ($name)) {
 		return undef;
 	}
@@ -3169,6 +3256,10 @@ sub extractKernel {
 			last SWITCH;
 		};
 		/squashfs/i && do {
+			return $name;
+			last SWITCH;
+		};
+		/dmsquash/i && do {
 			return $name;
 			last SWITCH;
 		};

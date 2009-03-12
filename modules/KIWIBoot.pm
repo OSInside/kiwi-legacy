@@ -243,13 +243,7 @@ sub new {
 				#==========================================
 				# loop mount system image
 				#------------------------------------------
-				$status = qxx (
-					"mount -t $fsattr{type} -o loop $system $tmpdir 2>&1"
-				);
-				$result = $? >> 8;
-				if ($result != 0) {
-					$kiwi -> error ("Loop mount failed: $system : $status");
-					$kiwi -> failed ();
+				if (! main::mountLoop ($system,$tmpdir,$fsattr{type})) {
 					$this -> cleanTmp ();
 					return undef;
 				}
@@ -262,7 +256,7 @@ sub new {
 				#==========================================
 				# clean up
 				#------------------------------------------
-				qxx ("umount $tmpdir 2>&1");
+				main::umountLoop ($tmpdir);
 			}
 		}
 		if (! defined $xml) {
@@ -571,11 +565,7 @@ sub setupBootStick {
 		$haveTree = 1;
 	} else {
 		my %fsattr = main::checkFileSystem ($system);
-		$status = qxx ("mount -t $fsattr{type} -o loop $system $tmpdir 2>&1");
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> error ("Failed to loop mount system image: $status");
-			$kiwi -> failed ();
+		if (! main::mountLoop ($system,$tmpdir,$fsattr{type})) {
 			$this -> cleanTmp ();
 			return undef;
 		}
@@ -583,11 +573,7 @@ sub setupBootStick {
 			$imgtype = "split";
 		}
 		$xml = new KIWIXML ( $kiwi,$tmpdir."/image",undef,$imgtype );
-		$status = qxx ("umount $tmpdir 2>&1");
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> error ("Failed to umount system image: $status");
-			$kiwi -> failed ();
+		if (! main::umountLoop ($tmpdir)) {
 			$this -> cleanTmp ();
 			return undef;
 		}
@@ -1923,11 +1909,7 @@ sub setupBootDisk {
 		# build disk name and label from xml data
 		#------------------------------------------
 		my %fsattr = main::checkFileSystem ($system);
-		$status = qxx ("mount -t $fsattr{type} -o loop $system $tmpdir 2>&1");
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> error ("Failed to loop mount system image: $status");
-			$kiwi -> failed ();
+		if (! main::mountLoop ($system,$tmpdir,$fsattr{type})) {
 			$this -> cleanTmp ();
 			return undef;
 		}
@@ -1938,11 +1920,7 @@ sub setupBootDisk {
 			$imgtype = "split";
 		}
 		$xml = new KIWIXML ( $kiwi,$tmpdir."/image",undef,$imgtype );
-		$status = qxx ("umount $tmpdir 2>&1");
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> error ("Failed to umount system image: $status");
-			$kiwi -> failed ();
+		if (! main::umountLoop ($tmpdir)) {
 			$this -> cleanTmp ();
 			return undef;
 		}
