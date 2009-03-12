@@ -102,6 +102,18 @@ function OEMInstall {
 		done
 	fi
 	Echo "Entering installation mode for disk: $instDisk"
+	while true;do
+		Echo -n "This will destroy ALL data on $instDisk, continue [y/n]: "
+		read startInstall
+		if [ "$startInstall" = "y" ];then
+			break
+		fi
+		if [ "$startInstall" = "n" ];then
+			systemException \
+				"System installation canceled" \
+			"reboot"
+		fi
+	done
 	#======================================
 	# Import vmx configuration file
 	#--------------------------------------
