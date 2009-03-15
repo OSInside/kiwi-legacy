@@ -524,6 +524,8 @@ sub setupBootStick {
 	my $haveTree  = 0;
 	my $lvmbootMB = 0;
 	my $syslbootMB= 0;
+	my $dmbootMB  = 0;
+	my $dmapper   = 0;
 	my $bootloader= "grub";
 	my $lvmsize;
 	my $syslsize;
@@ -587,6 +589,14 @@ sub setupBootStick {
 	#------------------------------------------
 	my %type = %{$xml->getImageTypeAndAttributes()};
 	#==========================================
+	# check for device mapper snapshot
+	#------------------------------------------
+	if ($type{filesystem} == "dmsquash") {
+		$this->{dmapper} = 1;
+		$dmapper  = 1;
+		$dmbootMB = 40;
+	}
+	#==========================================
 	# setup boot loader type
 	#------------------------------------------
 	if ($type{bootloader}) {
@@ -619,6 +629,11 @@ sub setupBootStick {
 	my $bootpart = "0";
 	if (($syszip) || ($haveSplit) || ($lvm)) {
 		$bootpart = "1";
+	}
+	if (($dmapper) && ($lvm)) {
+		$bootpart = "1";
+	} elsif ($dmapper) {
+		$bootpart = "2"
 	}
 	$this->{bootpart} = $bootpart;
 	$this->{bootlabel}= $label;
@@ -778,6 +793,8 @@ sub setupBootStick {
 							"t","3","6",
 							"a","3","w","q"
 						);
+					} elsif ($dmapper) {
+						# TODO
 					} else {
 						@commands = (
 							"n","p","1",".","+".$syszip."M",
@@ -1138,6 +1155,8 @@ sub setupBootStick {
 			$status = qxx ("mount $deviceMap{fat} $loopdir 2>&1");
 			$result = $? >> 8;
 		}
+	} elsif ($dmapper) {
+		# TODO
 	} elsif ($lvm) {
 		my %FSopts = main::checkFSOptions();
 		my $fsopts = $FSopts{ext2};
@@ -1862,6 +1881,8 @@ sub setupBootDisk {
 	my $haveSplit = 0;
 	my $lvmbootMB = 0;
 	my $syslbootMB= 0;
+	my $dmbootMB  = 0;
+	my $dmapper   = 0;
 	my $bootloader= "grub";
 	my $splitfile;
 	my $version;
@@ -1934,6 +1955,14 @@ sub setupBootDisk {
 	#------------------------------------------
 	my %type = %{$xml->getImageTypeAndAttributes()};
 	#==========================================
+	# check for device mapper snapshot
+	#------------------------------------------
+	if ($type{filesystem} eq "dmsquash") {
+		$this->{dmapper} = 1;
+		$dmapper  = 1;
+		$dmbootMB = 40;
+	}
+	#==========================================
 	# setup boot loader type
 	#------------------------------------------
 	if ($type{bootloader}) {
@@ -1968,18 +1997,26 @@ sub setupBootDisk {
 		}
 	}
 	#==========================================
-	# check image split portion
+	# increase vmsize if image split portion
 	#------------------------------------------
-	if ($imgtype eq "split") {
-		if (-f $splitfile) {
-			my $splitsize = -s $splitfile; $splitsize /= 1048576;
-			$vmsize = $this->{vmmbyte} + ($splitsize * 1.3) + $lvmbootMB;
-			$vmsize = sprintf ("%.0f", $vmsize);
-			$this->{vmmbyte} = $vmsize;
-			$vmsize = $vmsize."M";
-			$this->{vmsize}  = $vmsize;
-			$haveSplit = 1;
-		}
+	if (($imgtype eq "split") && (-f $splitfile)) {
+		my $splitsize = -s $splitfile; $splitsize /= 1048576;
+		$vmsize = $this->{vmmbyte} + ($splitsize * 1.3) + $lvmbootMB;
+		$vmsize = sprintf ("%.0f", $vmsize);
+		$this->{vmmbyte} = $vmsize;
+		$vmsize = $vmsize."M";
+		$this->{vmsize}  = $vmsize;
+		$haveSplit = 1;
+	}
+	#==========================================
+	# increase vmsize if single boot partition
+	#------------------------------------------
+	if (($dmbootMB) || ($syslbootMB)) {
+		$vmsize = $this->{vmmbyte} + (($dmbootMB + $syslbootMB) * 1.3);
+		$vmsize = sprintf ("%.0f", $vmsize);
+		$this->{vmmbyte} = $vmsize;
+		$vmsize = $vmsize."M";
+		$this->{vmsize}  = $vmsize;
 	}
 	#==========================================
 	# obtain filesystem type from xml data
@@ -2013,6 +2050,11 @@ sub setupBootDisk {
 	my $bootpart = "0";
 	if (($syszip) || ($haveSplit) || ($lvm)) {
 		$bootpart = "1";
+	}
+	if (($dmapper) && ($lvm)) {
+		$bootpart = "1";
+	} elsif ($dmapper) {
+		$bootpart = "2"
 	}
 	$this->{bootpart} = $bootpart;
 	#==========================================
@@ -2063,7 +2105,7 @@ sub setupBootDisk {
 		# create virtual disk partition
 		#------------------------------------------
 		if (! $lvm) {
-			if (($syszip) || ($haveSplit)) {
+			if (($syszip) || ($haveSplit) || ($dmapper)) {
 				# xda1 ro / xda2 rw
 				if ($bootloader eq "syslinux") {
 					my $syslsize = $this->{vmmbyte} - $syslbootMB - $syszip;
@@ -2072,6 +2114,14 @@ sub setupBootDisk {
 						"n","p","2",".","+".$syslsize."M",
 						"n","p","3",".",".",
 						"t","3","6",
+						"a","3","w","q"
+					);
+				} elsif ($dmapper) {
+					my $dmsize = $this->{vmmbyte} - $dmbootMB - $syszip;
+					@commands = (
+						"n","p","1",".","+".$syszip."M",
+						"n","p","2",".","+".$dmsize."M",
+						"n","p","3",".",".",
 						"a","3","w","q"
 					);
 				} else {
@@ -2353,7 +2403,7 @@ sub setupBootDisk {
 	#==========================================
 	# create read/write filesystem if needed
 	#------------------------------------------
-	if (($syszip) || ($haveSplit) || ($lvm)) {
+	if ((($syszip) || ($haveSplit) || ($lvm)) && (! $dmapper)) {
 		$root = $deviceMap{2};
 		if ($lvm) {
 			$root = $deviceMap{0};
@@ -2375,12 +2425,28 @@ sub setupBootDisk {
 			$kiwi -> done();
 		}
 	}
+	#==========================================
+	# create bootloader filesystem if needed
+	#------------------------------------------
 	if ($bootloader eq "syslinux") {
 		$root = $deviceMap{fat};
 		$status = qxx ("/sbin/mkdosfs $root 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> error  ("Couldn't create DOS filesystem: $status");
+			$kiwi -> failed ();
+			$this -> cleanLoop ();
+			return undef;
+		}
+	} elsif ($dmapper) {
+		$root = $deviceMap{dmapper};
+		my %FSopts = main::checkFSOptions();
+		my $fsopts = $FSopts{ext2};
+		$status = qxx ("/sbin/mke2fs $fsopts $root 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create filesystem: $status");
 			$kiwi -> failed ();
 			$this -> cleanLoop ();
 			return undef;
@@ -4118,6 +4184,7 @@ sub setDefaultDeviceMap {
 	my $this   = shift;
 	my $device = shift;
 	my $loader = $this->{bootloader};
+	my $dmapper= $this->{dmapper};
 	my %result;
 	if (! defined $device) {
 		return undef;
@@ -4133,6 +4200,8 @@ sub setDefaultDeviceMap {
 				last;
 			}
 		}
+	} elsif ($dmapper) {
+		$result{dmapper} = $device."3";
 	}
 	return %result;
 }
@@ -4148,6 +4217,7 @@ sub setLoopDeviceMap {
 	my $this   = shift;
 	my $device = shift;
 	my $loader = $this->{bootloader};
+	my $dmapper= $this->{dmapper};
 	my %result;
 	if (! defined $device) {
 		return undef;
@@ -4164,6 +4234,8 @@ sub setLoopDeviceMap {
 				last;
 			}
 		}
+	} elsif ($dmapper) {
+		$result{dmapper} = "/dev/mapper".$dmap."p3";
 	}
 	return %result;
 }
@@ -4182,6 +4254,7 @@ sub setLVMDeviceMap {
 	my $names  = shift;
 	my @names  = @{$names};
 	my $loader = $this->{bootloader};
+	my $dmapper= $this->{dmapper};
 	my %result;
 	if (! defined $group) {
 		return undef;
@@ -4214,6 +4287,8 @@ sub setLVMDeviceMap {
 				}
 			}
 		}
+	} elsif ($dmapper) {
+		$result{dmapper} = $device."2";
 	}
 	return %result;
 }

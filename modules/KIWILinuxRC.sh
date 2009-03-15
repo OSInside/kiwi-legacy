@@ -983,6 +983,8 @@ function setupBootLoaderGrub {
 	#--------------------------------------
 	if [ "$haveLVM" = "yes" ]; then
 		gnum=1
+	elif [ "$haveDMSquash" = "yes" ];then
+		gnum=2
 	elif [ ! -z "$UNIONFS_CONFIG" ] && [ $gnum -gt 0 ]; then
 		rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
 		gnum=`echo $rwDevice | sed -e "s/\/dev.*\([0-9]\)/\\1/"`
@@ -1303,6 +1305,10 @@ function updateLVMBootDeviceFstab {
 	# ----
 	local prefix=$1
 	local sdev=$2
+	local mount=$3
+	if [ -z "$mount" ];then
+		mount=/lvmboot
+	fi
 	local diskByID=`getDiskID $sdev`
 	local nfstab=$prefix/etc/fstab
 	if [ ! -z "$FSTYPE" ];then
@@ -1315,10 +1321,16 @@ function updateLVMBootDeviceFstab {
 	if [ -z $FSTYPE ] || [ $FSTYPE = "unknown" ];then
 		FSTYPE="auto"
 	fi
-	echo "$diskByID /lvmboot $FSTYPE defaults 0 0" >> $nfstab
+	echo "$diskByID $mount $FSTYPE defaults 0 0" >> $nfstab
 	if [ ! -z "$FSTYPE_SAVE" ];then
 		FSTYPE=$FSTYPE_SAVE
 	fi
+}
+#======================================
+# updateDMBootDeviceFstab
+#--------------------------------------
+function updateDMBootDeviceFstab {
+	updateLVMBootDeviceFstab $1 $2 "/dmboot"
 }
 #======================================
 # updateSyslinuxBootDeviceFstab
@@ -2994,6 +3006,7 @@ function mountSystemUnified {
 	# check union mount method
 	#--------------------------------------
 	if [ -f $roDir/fsdata.ext3 ];then
+		export haveDMSquash=yes
 		mountSystemDMSquash
 	else
 		mountSystemOverlay
@@ -3005,12 +3018,17 @@ function mountSystemUnified {
 #--------------------------------------
 function mountSystemDMSquash {
 	local roDir=/read-only
+	local snDevice=/dev/mapper/sys_snap
 	local rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
 	local roDevice=`echo $UNIONFS_CONFIG | cut -d , -f 2`
 	local orig_loop=$(losetup -r -s -f $roDir/fsdata.ext3)
 	local orig_sectors=$(blockdev --getsize $orig_loop)
+	local snap_sectors=$(blockdev --getsz $rwDevice)
+	local free_sectors=0
+	local used_sectors=0
 	local chunk=8
 	local flags=p
+	local count=0
 	#======================================
 	# check read-write persistency
 	#--------------------------------------
@@ -3030,7 +3048,31 @@ function mountSystemDMSquash {
 	#======================================
 	# mount snapshot as root to /mnt
 	#--------------------------------------
-	mount /dev/mapper/sys_snap /mnt
+	mount $snDevice /mnt
+	#======================================
+	# check free size and snapshot size
+	#--------------------------------------
+	#snap_sectors=$(($snap_sectors * 80 / 100))
+	#for i in $(df --block-size 512 /mnt | tail -n1);do
+	#	count=`expr $count + 1`
+	#	if [ $count = 3 ];then
+	#		used_sectors=$i
+	#	fi
+	#	if [ $count = 4 ];then
+	#		free_sectors=$i
+	#	fi
+	#done
+	#if [ $snap_sectors -lt $free_sectors ];then
+	#	# /.../
+	#	# the snapshot space if less than the free space
+	#	# of the filesystem. Therefore we need to resize
+	#	# the filesystem to the free space of the snapshot
+	#	# ----
+	#	umount /mnt
+	#	snap_sectors=$(($snap_sectors + $used_sectors))
+	#	resize2fs -f -p $snDevice "$snap_sectors"s
+	#	mount $snDevice /mnt
+	#fi
 }
 
 #======================================
@@ -3711,6 +3753,13 @@ function activateImage {
 	fi
 	if [ -d $xiDir ];then
 		mkdir -p /mnt/$xiDir && mount --move /$xiDir /mnt/$xiDir
+	fi
+	#======================================
+	# move live CD mount points to system
+	#--------------------------------------
+	local cdDir=/livecd
+	if [ -d $cdDir ];then
+		mkdir -p /mnt/$cdDir && mount --move /$cdDir /mnt/$cdDir
 	fi
 	#======================================
 	# move device nodes

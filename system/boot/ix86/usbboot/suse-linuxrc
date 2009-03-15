@@ -132,38 +132,80 @@ fi
 #======================================
 # 11) setup /lvmboot
 #--------------------------------------
-if [ $LOCAL_BOOT = "no" ] && [ "$haveLVM" = "yes" ];then
-	mkdir /mnt/lvmboot
-	mount $stickBootDevice /mnt/lvmboot
-	if [ -z $UNIONFS_CONFIG ];then
-		cp -a /mnt/boot/* /mnt/lvmboot/boot
+if [ "$LOCAL_BOOT" = "no" ];then
+	if [ "$haveLVM" = "yes" ];then
+		#======================================
+		# LVM use second partition as boot
+		#--------------------------------------
+		mkdir /mnt/lvmboot
+		mount $stickBootDevice /mnt/lvmboot
+		if [ -z "$UNIONFS_CONFIG" ];then
+			cp -a /mnt/boot/* /mnt/lvmboot/boot
+		fi
+		rm -rf /mnt/boot
+		( cd /mnt && ln -s lvmboot/boot boot )
+	elif [ "$haveDMSquash" = "yes" ];then
+		#======================================
+		# DM use third partition as boot
+		#--------------------------------------
+		mkdir /mnt/dmboot
+		export imageBootDevice=$stickRoot"3"
+		mount $imageBootDevice /mnt/dmboot
+		if [ -z "$UNIONFS_CONFIG" ];then
+			cp -a /mnt/boot/* /mnt/dmboot/boot
+		fi
+		rm -rf /mnt/boot
+		( cd /mnt && ln -s dmboot/boot boot )
+	elif [ "$loader" = "syslinux" ];then
+		#======================================
+		# Syslinux search FAT and use as boot
+		#--------------------------------------
+		for i in 1 2 3;do
+			pType=`partitionID $stickRoot $i`
+			if [ "$pType" = "6" ];then
+				imageFatDevice=$stickRoot$i
+				break
+			fi
+		done
+		if [ -z "$imageFatDevice" ];then
+			systemException "Can't find FAT partition" "reboot"
+		fi
+		mkdir /mnt/syslboot
+		mount $imageFatDevice /mnt/syslboot
+		if [ -z "$UNIONFS_CONFIG" ];then
+			cp -a /mnt/boot/* /mnt/syslboot/boot
+		fi
+		rm -rf /mnt/boot
+		( cd /mnt && ln -s syslboot/boot boot )
 	fi
-	rm -rf /mnt/boot
-	( cd /mnt && ln -s lvmboot/boot boot )
 fi
 
 #======================================
 # 12) Create system dependant files
 #--------------------------------------
-if [ $LOCAL_BOOT = "no" ];then
+if [ "$LOCAL_BOOT" = "no" ];then
 	setupDefaultFstab /config
 	updateRootDeviceFstab /config $stickDevice
 	if [ "$haveLVM" = "yes" ];then
 		updateLVMBootDeviceFstab /config $stickBootDevice
+	elif [ "$haveDMSquash" = "yes" ];then
+		updateDMBootDeviceFstab /config $imageBootDevice
+	elif [ "$loader" = "syslinux" ];then
+		updateSyslinuxBootDeviceFstab /config $imageFatDevice
 	fi
 fi
 
 #======================================
 # 13) copy system dependant files
 #--------------------------------------
-if [ $LOCAL_BOOT = "no" ];then
+if [ "$LOCAL_BOOT" = "no" ];then
 	setupConfigFiles
 fi
 
 #======================================
 # 14) update system dependant files
 #--------------------------------------
-if [ $LOCAL_BOOT = "no" ];then
+if [ "$LOCAL_BOOT" = "no" ];then
 	setupInittab /mnt
 fi
 

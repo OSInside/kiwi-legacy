@@ -107,7 +107,7 @@ probeDevices
 #======================================
 # 7) Check for installation mode...
 #--------------------------------------
-if [ $LOCAL_BOOT = "no" ];then
+if [ "$LOCAL_BOOT" = "no" ];then
 	OEMInstall
 fi
 
@@ -177,7 +177,7 @@ fi
 #======================================
 # 12) Import OEM partition config
 #--------------------------------------
-if [ $LOCAL_BOOT = "no" ] && [ -f $OEM_PARTITION_CONFIG ];then
+if [ "$LOCAL_BOOT" = "no" ] && [ -f $OEM_PARTITION_CONFIG ];then
 	Echo "Including oem partition info file"
 	importFile < $OEM_PARTITION_CONFIG
 fi
@@ -185,14 +185,14 @@ fi
 #======================================
 # 13) repartition the disk device
 #--------------------------------------
-if [ $LOCAL_BOOT = "no" ];then
+if [ "$LOCAL_BOOT" = "no" ];then
 	OEMRepart
 fi
 
 #======================================
 # 14) Resize filesystem to full space
 #--------------------------------------
-if [ $LOCAL_BOOT = "no" ];then
+if [ "$LOCAL_BOOT" = "no" ];then
 	deviceResize=$imageRootDevice
 	fstypeRootFS=$FSTYPE
 	if [ ! -z $COMBINED_IMAGE ];then
@@ -311,27 +311,45 @@ fi
 #======================================
 # 17) get installed kernels
 #--------------------------------------
-if [ $LOCAL_BOOT = "no" ];then
+if [ "$LOCAL_BOOT" = "no" ];then
 	kernelList /mnt
 fi
 
 #======================================
 # 18) setup /lvmboot
 #--------------------------------------
-if [ $LOCAL_BOOT = "no" ] && [ "$haveLVM" = "yes" ];then
-	mkdir /mnt/lvmboot
-	mount $imageBootDevice /mnt/lvmboot
-	if [ -z $UNIONFS_CONFIG ];then
-		cp -a /mnt/boot/* /mnt/lvmboot/boot
+if [ "$LOCAL_BOOT" = "no" ]; then
+	if [ "$haveLVM" = "yes" ];then
+		#======================================
+		# LVM use second partition as boot
+		#--------------------------------------
+		mkdir /mnt/lvmboot
+		mount $imageBootDevice /mnt/lvmboot
+		if [ -z $UNIONFS_CONFIG ];then
+			cp -a /mnt/boot/* /mnt/lvmboot/boot
+		fi
+		rm -rf /mnt/boot
+		( cd /mnt && ln -s lvmboot/boot boot )
+	elif [ "$haveDMSquash" = "yes" ];then
+		#======================================
+		# DM use third partition as boot
+		#--------------------------------------
+		mkdir /mnt/dmboot
+		bootid=2
+		export imageBootDevice=$imageDiskDevice"3"
+		mount $imageBootDevice /mnt/dmboot
+		if [ -z "$UNIONFS_CONFIG" ];then
+			cp -a /mnt/boot/* /mnt/dmboot/boot
+		fi
+		rm -rf /mnt/boot
+		( cd /mnt && ln -s dmboot/boot boot )
 	fi
-	rm -rf /mnt/boot
-	( cd /mnt && ln -s lvmboot/boot boot )
 fi
 
 #======================================
 # 19) setup ird/kernel links for union
 #--------------------------------------
-if [ $LOCAL_BOOT = "no" ];then 
+if [ "$LOCAL_BOOT" = "no" ];then 
 	if [ "$OEM_KIWI_INITRD" = "yes" ] || isFSTypeReadOnly;then
 		# /.../
 		# we are using a special root setup with aufs. In this case
@@ -341,6 +359,8 @@ if [ $LOCAL_BOOT = "no" ];then
 		mountCalled=no
 		if [ "$haveLVM" = "yes" ];then
 			pushd /mnt/lvmboot/boot >/dev/null
+		elif [ "$haveDMSquash" = "yes" ];then
+			pushd /mnt/dmboot/boot >/dev/null
 		elif [ "$OEM_KIWI_INITRD" = "yes" ];then
 			pushd /mnt/boot >/dev/null
 		else
@@ -369,7 +389,7 @@ fi
 #======================================
 # 20) Create system dependant files
 #--------------------------------------
-if [ $LOCAL_BOOT = "no" ];then
+if [ "$LOCAL_BOOT" = "no" ];then
 	#======================================
 	# setup: /etc/fstab
 	#--------------------------------------
@@ -377,6 +397,8 @@ if [ $LOCAL_BOOT = "no" ];then
 	updateRootDeviceFstab /config $imageRootDevice
 	if [ "$haveLVM" = "yes" ];then
 		updateLVMBootDeviceFstab /config $imageBootDevice
+	elif [ "$haveDMSquash" = "yes" ];then
+		updateDMBootDeviceFstab /config $imageBootDevice
 	fi
 	if partitionSize $imageSwapDevice &>/dev/null;then
 		updateSwapDeviceFstab /config $imageSwapDevice
@@ -412,14 +434,14 @@ fi
 #======================================
 # 21) copy system dependant files
 #--------------------------------------
-if [ $LOCAL_BOOT = "no" ];then
+if [ "$LOCAL_BOOT" = "no" ];then
 	setupConfigFiles
 fi
 
 #======================================
 # 22) copy recovery related files
 #--------------------------------------
-if [ $LOCAL_BOOT = "no" ] && [ ! -z "$OEM_RECOVERY" ];then
+if [ "$LOCAL_BOOT" = "no" ] && [ ! -z "$OEM_RECOVERY" ];then
 	IFS=$IFS_ORIG
 	Echo "Setting up recovery configuration files..."
 	mkdir -p /reco-save
@@ -466,7 +488,7 @@ umountSystemFilesystems
 #======================================
 # 26) copy initrd files to image
 #--------------------------------------
-if [ $LOCAL_BOOT = "no" ];then
+if [ "$LOCAL_BOOT" = "no" ];then
 	importBranding
 fi
 cp /preinit /mnt

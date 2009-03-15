@@ -176,15 +176,27 @@ fi
 if [ $LOCAL_BOOT = "no" ];then
 	if [ "$haveLVM" = "yes" ];then
 		#======================================
-		# LVM use first partition as boot
+		# LVM use second partition as boot
 		#--------------------------------------
 		mkdir /mnt/lvmboot
 		mount $imageBootDevice /mnt/lvmboot
-		if [ -z $UNIONFS_CONFIG ];then
+		if [ -z "$UNIONFS_CONFIG" ];then
 			cp -a /mnt/boot/* /mnt/lvmboot/boot
 		fi
 		rm -rf /mnt/boot
 		( cd /mnt && ln -s lvmboot/boot boot )
+	elif [ "$haveDMSquash" = "yes" ];then
+		#======================================
+		# DM use third partition as boot
+		#--------------------------------------
+		mkdir /mnt/dmboot
+		export imageBootDevice=$imageDiskDevice"3"
+		mount $imageBootDevice /mnt/dmboot
+		if [ -z "$UNIONFS_CONFIG" ];then
+			cp -a /mnt/boot/* /mnt/dmboot/boot
+		fi
+		rm -rf /mnt/boot
+		( cd /mnt && ln -s dmboot/boot boot )
 	elif [ "$loader" = "syslinux" ];then
 		#======================================
 		# Syslinux search FAT and use as boot
@@ -201,7 +213,7 @@ if [ $LOCAL_BOOT = "no" ];then
 		fi
 		mkdir /mnt/syslboot
 		mount $imageFatDevice /mnt/syslboot
-		if [ -z $UNIONFS_CONFIG ];then
+		if [ -z "$UNIONFS_CONFIG" ];then
 			cp -a /mnt/boot/* /mnt/syslboot/boot
 		fi
 		rm -rf /mnt/boot
@@ -212,43 +224,51 @@ fi
 #======================================
 # 13) setup ird/kernel links for union
 #--------------------------------------
-if [ $LOCAL_BOOT = "no" ] && isFSTypeReadOnly;then
-	# /.../
-	# we are using a special root setup with aufs. In this case
-	# we can't use the SuSE Linux initrd but must stick to the
-	# kiwi boot system.
-	# ----
-	if [ "$haveLVM" = "yes" ];then
-		pushd /mnt/lvmboot/boot >/dev/null
-	else
-		kiwiMount $imageRWDevice "/mnt"
-		pushd /mnt/boot >/dev/null
-	fi
-	IFS="," ; for i in $KERNEL_LIST;do
-		if test -z "$i";then
-			continue
+if [ "$LOCAL_BOOT" = "no" ];then
+	if isFSTypeReadOnly;then
+		# /.../
+		# we are using a special root setup with aufs. In this case
+		# we can't use the SuSE Linux initrd but must stick to the
+		# kiwi boot system.
+		# ----
+		mountCalled=no
+		if [ "$haveLVM" = "yes" ];then
+			pushd /mnt/lvmboot/boot >/dev/null
+		elif [ "$haveDMSquash" = "yes" ];then
+			pushd /mnt/dmboot/boot >/dev/null
+		else
+			kiwiMount $imageRWDevice "/mnt"
+			pushd /mnt/boot >/dev/null
+			mountCalled=yes
 		fi
-		kernel=`echo $i | cut -f1 -d:`
-		initrd=`echo $i | cut -f2 -d:`
-		rm -f $initrd && ln -s initrd.vmx $initrd
-		rm -f $kernel && ln -s linux.vmx  $kernel
-		break
-	done
-	IFS=$IFS_ORIG
-	popd >/dev/null
-	if [ ! "$haveLVM" = "yes" ];then
-		umount /mnt
+		IFS="," ; for i in $KERNEL_LIST;do
+			if test -z "$i";then
+				continue
+			fi
+			kernel=`echo $i | cut -f1 -d:`
+			initrd=`echo $i | cut -f2 -d:`
+			rm -f $initrd && ln -s initrd.vmx $initrd
+			rm -f $kernel && ln -s linux.vmx  $kernel
+			break
+		done
+		IFS=$IFS_ORIG
+		popd >/dev/null
+		if [ "$mountCalled" = "yes" ];then
+			umount /mnt
+		fi
 	fi
 fi
 
 #======================================
 # 14) Create system dependant files
 #--------------------------------------
-if [ $LOCAL_BOOT = "no" ];then
+if [ "$LOCAL_BOOT" = "no" ];then
 	setupDefaultFstab /config
 	updateRootDeviceFstab /config $imageRootDevice
 	if [ "$haveLVM" = "yes" ];then
 		updateLVMBootDeviceFstab /config $imageBootDevice
+	elif [ "$haveDMSquash" = "yes" ];then
+		updateDMBootDeviceFstab /config $imageBootDevice
 	elif [ "$loader" = "syslinux" ];then
 		updateSyslinuxBootDeviceFstab /config $imageFatDevice
 	fi
@@ -258,18 +278,21 @@ if [ $LOCAL_BOOT = "no" ];then
 	if [ ! -z "$COMBINED_IMAGE" ]; then
 		export KIWI_INITRD_PARAMS="COMBINED_IMAGE=local"
 	fi
-	if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ]; then
-		setupBootLoader /mnt /config 0 $imageRootDevice VMX
-	else
-		setupBootLoader /mnt /config 1 $imageRootDevice VMX
+	bootid=0
+	if [ ! -z "$UNIONFS_CONFIG" ] || [ ! -z "$COMBINED_IMAGE" ]; then
+		bootid=1
 	fi
+	if [ "$loader" = "syslinux" ] || [ "$haveDMSquash" = "yes" ]; then
+		bootid=$(($bootid + 1))
+	fi
+	setupBootLoader /mnt /config $bootid $imageRootDevice VMX
 	setupKernelModules /config
 fi
 
 #======================================
 # 15) copy system dependant files
 #--------------------------------------
-if [ $LOCAL_BOOT = "no" ];then
+if [ "$LOCAL_BOOT" = "no" ];then
 	setupConfigFiles
 fi
 
@@ -291,7 +314,7 @@ umountSystemFilesystems
 #======================================
 # 19) copy initrd files to image
 #--------------------------------------
-if [ $LOCAL_BOOT = "no" ];then
+if [ "$LOCAL_BOOT" = "no" ];then
 	importBranding
 fi
 cp /preinit /mnt

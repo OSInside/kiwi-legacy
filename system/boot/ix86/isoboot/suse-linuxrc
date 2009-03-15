@@ -29,7 +29,7 @@ export ARCH=`arch`
 #--------------------------------------
 export systemIntegrity=clean
 export LIVECD_CONFIG="/cdrom/config.isoclient"
-export LIVECD="livecd"
+export LIVECD="/livecd"
 export LOCAL_BOOT="no"
 
 #======================================
@@ -205,8 +205,10 @@ else
 			if [ $SWSIZE -lt 64 ];then
 				SWSIZE=64
 			fi
-			SWFILE=/mnt/kiwiswap
-			if ! mount -t $SWTYPE $swapDevice /mnt;then
+			SWDIR=/liveswap
+			SWFILE=$SWDIR/kiwiswap
+			mkdir -p $SWDIR
+			if ! mount -t $SWTYPE $swapDevice $SWDIR;then
 				Echo "Failed to mount swap device on: $swapDevice"
 				unset swapDevice
 			fi
@@ -222,7 +224,7 @@ else
 				fi
 			fi
 			Echo "Created swap file: kiwiswap [ $SWSIZE MB ]"
-			umount /mnt
+			umount $SWDIR
 		fi
 	fi
 fi
@@ -238,23 +240,22 @@ if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ];then
 	if ! mount $imageDevice /mnt >/dev/null;then
 		systemException "Failed to mount RW root filesystem" "reboot"
 	fi
-	mkdir -p /mnt/$LIVECD && mount $cddev /mnt/$LIVECD >/dev/null
-
+	mkdir -p $LIVECD && mount $cddev $LIVECD
 	#======================================
 	# 12.2) Create RO Link list
 	#--------------------------------------
 	cd /mnt
 	if [ ! -d $LIVECD/read-only-system ];then
 		Echo "Mounting compressed read only tree..."
-		rosys="/mnt/read-only-system"
-		rosrc="/mnt/$LIVECD/$imageReadOnly"
+		rosys="/read-only"
+		rosrc="$LIVECD/$imageReadOnly"
 		mkdir -p $rosys
 		if ! kiwiMount $rosrc $rosys "-o loop";then
 			systemException "Failed to mount RO root filesystem" "reboot"
 		fi
 		Echo "Creating live media links..."
-		for dir in bin boot lib opt sbin usr;do
-			ln -s read-only-system/$dir $dir
+		for dir in bin boot lib lib64 opt sbin usr;do
+			ln -s read-only/$dir $dir
 		done
 	else
 		Echo "Creating live media links..."
@@ -275,8 +276,8 @@ else
 	else
 		Echo "Mounting compressed unified tree..."
 	fi
-	mkdir -p /mnt/$LIVECD && mount $cddev /mnt/$LIVECD >/dev/null
-	if ! mountSystem /dev/loop1 /mnt/$LIVECD/$imageReadOnly;then
+	mkdir -p $LIVECD && mount $cddev $LIVECD
+	if ! mountSystem /dev/loop1 $LIVECD/$imageReadOnly;then
 		systemException "Failed to mount root filesystem" "reboot"
 	fi
 fi
@@ -290,11 +291,10 @@ setupDefaultFstab /config
 updateRootDeviceFstab /config $imageDevice
 if [ ! -z "$swapSpace" ];then
 	updateSwapDeviceFstab /config $swapSpace
-fi
-if [ ! -z "$swapDevice" ];then
-	mkdir -p /mnt/swap
-	echo "$swapDevice /swap $SWTYPE defaults 1 1"   >> /config/etc/fstab
-	echo "/swap/kiwiswap none swap sw 0 0"          >> /config/etc/fstab
+elif [ ! -z "$swapDevice" ];then
+	mkdir -p /mnt/liveswap
+	echo "$swapDevice /liveswap $SWTYPE defaults 1 1"  >> /config/etc/fstab
+	echo "/liveswap/kiwiswap swap swap prio=42 0 0"    >> /config/etc/fstab
 fi
 
 #======================================

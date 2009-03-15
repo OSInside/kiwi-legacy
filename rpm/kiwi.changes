@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Fri Mar 13 14:46:49 CET 2009 - ms@suse.de
+
+- v3.31
+- fixed broken CD/DVD mount path in isoboot workflow
+- fixed vmxboot workflow for dmsquash setup
+- fixed oemboot workflow for dmsquash setup
+- fixed usbboot workflow for dmsquash setup
+
+-------------------------------------------------------------------
 Thu Mar 12 17:27:20 CET 2009 - ms@suse.de
 
 - v3.30

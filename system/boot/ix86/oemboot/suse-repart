@@ -332,11 +332,15 @@ function OEMRepartOverlayed {
 	# calculate end block - swapspace
 	#--------------------------------------
 	swapXMBytes=$swapsize
+	bootXMBytes=0
+	if [ "$haveDMSquash" = "yes" ];then
+		bootXMBytes=40
+	fi
 	diskXMBytes=`partitionSize $imageDiskDevice`
 	diskXMBytes=`expr $diskXMBytes / 1024`
 	disk1MBytes=`partitionSize $imageDiskDevice"1"`
 	disk1MBytes=`expr $disk1MBytes / 1024`
-	disk2MBytes=`expr $diskXMBytes - $disk1MBytes - $swapsize`
+	disk2MBytes=`expr $diskXMBytes - $disk1MBytes - $swapsize - $bootXMBytes`
 	if [ $disk2MBytes -lt 100 ];then
 		# /.../
 		# Very small disk which we will not re-partition
@@ -372,22 +376,48 @@ function OEMRepartOverlayed {
 		input=/part.input
 		rm -f $input
 		if [ $swapsize = 0 ];then
-			for cmd in d 2 n p 2 . . a 2 w q; do
-				if [ $cmd = "." ];then
-					echo >> $input
-					continue
-				fi
-				echo $cmd >> $input
-			done
+			if [ "$haveDMSquash" = "yes" ];then
+				for cmd in d 2 n p 2 . +"$disk2MBytes"M n p 3 . . a 3 w q; do
+					if [ $cmd = "." ];then
+						echo >> $input
+						continue
+					fi
+					echo $cmd >> $input
+				done
+			else
+				for cmd in d 2 n p 2 . . a 2 w q; do
+					if [ $cmd = "." ];then
+						echo >> $input
+						continue
+					fi
+					echo $cmd >> $input
+				done
+			fi
 		else
-			for cmd in d 2 n p 2 . +"$disk2MBytes"M n p 3 . . t 3 82 a 2 w q
-			do
-				if [ $cmd = "." ];then
-					echo >> $input
-					continue
-				fi
-				echo $cmd >> $input
-			done
+			if [ "$haveDMSquash" = "yes" ];then
+				for cmd in \
+					d 2 n p 2 . +"$disk2MBytes"M \
+					n p 3 . +"$bootXMBytes"M n p 4 . . \
+					t 4 82 a 3 w q
+				do
+					if [ $cmd = "." ];then
+						echo >> $input
+						continue
+					fi
+					echo $cmd >> $input
+				done
+			else
+				for cmd in \
+					d 2 n p 2 . +"$disk2MBytes"M n p 3 . . \
+					t 3 82 a 2 w q
+				do
+					if [ $cmd = "." ];then
+						echo >> $input
+						continue
+					fi
+					echo $cmd >> $input
+				done
+			fi
 		fi
 		Echo "Repartition the disk according to current geometry"
 		fdisk $imageDiskDevice < $input 1>&2
@@ -399,9 +429,19 @@ function OEMRepartOverlayed {
 	# Update new device names
 	#--------------------------------------
 	export imageRootDevice=$imageDiskDevice"1"
-	export imageSwapDevice=$imageDiskDevice"3"
 	export imageIOWRDevice=$imageDiskDevice"2"
-	bootid=1
+	if [ ! $swapsize = 0 ];then
+		if [ "$haveDMSquash" = "yes" ];then
+			export imageSwapDevice=$imageDiskDevice"4"
+		else
+			export imageSwapDevice=$imageDiskDevice"3"
+		fi
+	fi
+	if [ "$haveDMSquash" = "yes" ];then
+		bootid=2
+	else
+		bootid=1
+	fi
 }
 
 #======================================
@@ -631,10 +671,12 @@ function OEMRepart {
 	#======================================
 	# Activate swap space
 	#--------------------------------------
-	if partitionSize $imageSwapDevice &>/dev/null;then
-		Echo "Activating swap space on $imageSwapDevice"
-		if ! mkswap $imageSwapDevice >/dev/null 2>&1;then
-			systemException "Failed to create swap signature" "reboot"
+	if [ -z "$DONT_PARTITION" ] && [ $swapsize -gt 0 ]; then
+		if partitionSize $imageSwapDevice &>/dev/null;then
+			Echo "Activating swap space on $imageSwapDevice"
+			if ! mkswap $imageSwapDevice >/dev/null 2>&1;then
+				systemException "Failed to create swap signature" "reboot"
+			fi
 		fi
 	fi
 	#======================================
