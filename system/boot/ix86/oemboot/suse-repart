@@ -328,6 +328,15 @@ function OEMRepartOverlayed {
 	# no homepart support for union mode
 	#--------------------------------------
 	export OEM_WITHOUTHOME=1
+	#====================================== 
+	# check for DM squash setup
+	#--------------------------------------
+	if mount $imageDiskDevice"1" /mnt &>/dev/null;then
+		if [ -f /mnt/fsdata.ext3 ];then
+			export haveDMSquash=yes
+		fi
+		umount /mnt
+	fi
 	#======================================
 	# calculate end block - swapspace
 	#--------------------------------------
@@ -441,6 +450,15 @@ function OEMRepartOverlayed {
 		bootid=2
 	else
 		bootid=1
+	fi
+	#======================================
+	# Create bootfs if DM squash setup
+	#--------------------------------------
+	if [ "$haveDMSquash" = "yes" ];then
+		export imageBootDevice=$imageDiskDevice"3"
+		if ! mke2fs -q $imageBootDevice >/dev/null 2>&1;then
+			systemException "Failed to create Boot fs" "reboot"
+		fi
 	fi
 }
 
