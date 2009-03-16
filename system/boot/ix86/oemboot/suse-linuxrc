@@ -316,7 +316,7 @@ if [ "$LOCAL_BOOT" = "no" ];then
 fi
 
 #======================================
-# 18) setup /lvmboot
+# 18) setup boot partition
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ]; then
 	if [ "$haveLVM" = "yes" ];then
@@ -338,9 +338,10 @@ if [ "$LOCAL_BOOT" = "no" ]; then
 		bootid=2
 		export imageBootDevice=$imageDiskDevice"3"
 		mount $imageBootDevice /mnt/dmboot
-		if [ -z "$UNIONFS_CONFIG" ];then
-			cp -a /mnt/boot/* /mnt/dmboot/boot
-		fi
+		cp -a  /mnt/boot /mnt/dmboot
+		test -f /tmp/linux.vmx  && mv /tmp/linux.vmx  /mnt/dmboot/boot
+		test -f /tmp/initrd.vmx && mv /tmp/initrd.vmx /mnt/dmboot/boot
+		test -f /tmp/mbrid && mv /tmp/mbrid /mnt/dmboot/boot/grub
 		rm -rf /mnt/boot
 		( cd /mnt && ln -s dmboot/boot boot )
 	fi

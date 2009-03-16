@@ -192,9 +192,7 @@ if [ $LOCAL_BOOT = "no" ];then
 		mkdir /mnt/dmboot
 		export imageBootDevice=$imageDiskDevice"3"
 		mount $imageBootDevice /mnt/dmboot
-		if [ -z "$UNIONFS_CONFIG" ];then
-			cp -a /mnt/boot/* /mnt/dmboot/boot
-		fi
+		cp -a  /mnt/boot /mnt/dmboot
 		rm -rf /mnt/boot
 		( cd /mnt && ln -s dmboot/boot boot )
 	elif [ "$loader" = "syslinux" ];then

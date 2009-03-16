@@ -1851,7 +1851,7 @@ function searchBIOSBootDevice {
 	#--------------------------------------
 	mkdir -p $cmpd
 	for curd in $ddevs;do
-		for id in 1 2;do
+		for id in 1 2 3;do
 			if ! mount $curd$id /mnt;then
 				continue
 			fi
@@ -3052,27 +3052,31 @@ function mountSystemDMSquash {
 	#======================================
 	# check free size and snapshot size
 	#--------------------------------------
-	#snap_sectors=$(($snap_sectors * 80 / 100))
-	#for i in $(df --block-size 512 /mnt | tail -n1);do
-	#	count=`expr $count + 1`
-	#	if [ $count = 3 ];then
-	#		used_sectors=$i
-	#	fi
-	#	if [ $count = 4 ];then
-	#		free_sectors=$i
-	#	fi
-	#done
-	#if [ $snap_sectors -lt $free_sectors ];then
-	#	# /.../
-	#	# the snapshot space if less than the free space
-	#	# of the filesystem. Therefore we need to resize
-	#	# the filesystem to the free space of the snapshot
-	#	# ----
-	#	umount /mnt
-	#	snap_sectors=$(($snap_sectors + $used_sectors))
-	#	resize2fs -f -p $snDevice "$snap_sectors"s
-	#	mount $snDevice /mnt
-	#fi
+	snap_sectors=$(($snap_sectors * 80 / 100))
+	for i in $(df --block-size 512 /mnt | tail -n1);do
+		count=`expr $count + 1`
+		if [ $count = 3 ];then
+			used_sectors=$i
+		fi
+		if [ $count = 4 ];then
+			free_sectors=$i
+		fi
+	done
+	if [ $snap_sectors -lt $free_sectors ];then
+		# /.../
+		# the snapshot space if less than the free space
+		# of the filesystem. Therefore we need to resize
+		# the filesystem to the free space of the snapshot
+		# ----
+		Echo "*** WARNING ***"
+		Echo "The snapshot space is: $snap_sectors 512B sectors"
+		Echo "which is smaller than the filesystem reported"
+		Echo "free sectors of: $free_sectors"
+		#umount /mnt
+		#snap_sectors=$(($snap_sectors + $used_sectors))
+		#resize2fs -f -p $snDevice "$snap_sectors"s
+		#mount $snDevice /mnt
+	fi
 }
 
 #======================================

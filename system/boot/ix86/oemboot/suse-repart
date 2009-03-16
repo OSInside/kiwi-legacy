@@ -333,9 +333,16 @@ function OEMRepartOverlayed {
 	#--------------------------------------
 	if mount $imageDiskDevice"1" /mnt &>/dev/null;then
 		if [ -f /mnt/fsdata.ext3 ];then
+			umount /mnt
+			mount $imageDiskDevice"3" /mnt
+			cp /mnt/boot/linux.vmx  /tmp
+			cp /mnt/boot/initrd.vmx /tmp
+			cp /mnt/boot/grub/mbrid /tmp
+			umount /mnt
 			export haveDMSquash=yes
+		else
+			umount /mnt
 		fi
-		umount /mnt
 	fi
 	#======================================
 	# calculate end block - swapspace
