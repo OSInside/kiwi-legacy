@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Mon Mar 16 17:29:59 CET 2009 - ms@suse.de
+
+- v3.32
+- changed netboot descriptions >= 11.1 to provide diskless
+  kernel profiles named diskless-kdefault and diskless-kpae.
+  The standard diskless profile will no longer include a
+  kernel
+
+-------------------------------------------------------------------
 Fri Mar 13 14:46:49 CET 2009 - ms@suse.de
 
 - v3.31

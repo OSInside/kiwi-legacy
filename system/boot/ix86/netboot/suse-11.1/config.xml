@@ -17,15 +17,17 @@
 		<profile name="default" description="Boot with default kernel"/>
 		<profile name="xen" description="Boot with xen kernel/mboot.c32"/>
 		<profile name="diskless" description="Booting diskless thin clients"/>
-		<profile name="smp" description="Boot with smp kernel"/>
+		<profile name="pae" description="Boot with pae kernel"/>
+		<profile name="diskless-kpae" description="Diskless with pae kernel"/>
+		<profile name="diskless-kdefault" description="Diskless with default kernel"/>
 	</profiles>
-	<drivers type="usbdrivers" profiles="default,xen,smp">
+	<drivers type="usbdrivers" profiles="default,xen,pae">
 		<file name="usb/host/ehci-hcd.ko"/>
 		<file name="usb/host/uhci-hcd.ko"/>
 		<file name="usb/core/usbcore.ko"/>
 		<file name="usb/storage/usb-storage.ko"/>
 	</drivers>
-	<drivers type="drivers" profiles="default,xen,smp">
+	<drivers type="drivers" profiles="default,xen,pae">
 		<!-- DRIVERS START DEFAULT AND XEN -->
 		<file name="drivers/md/*"/>
 		<file name="drivers/hid/*"/>
@@ -138,13 +140,13 @@
 		<package name="aufs-kmp-default"/>
 		<!-- KERNEL AND MODULE PACKAGES END DEFAULT -->
 	</packages>
-	<packages type="image" profiles="smp">
-		<!-- KERNEL AND MODULE PACKAGES START SMP -->
+	<packages type="image" profiles="pae">
+		<!-- KERNEL AND MODULE PACKAGES START PAE -->
 		<package name="kernel-pae"/>
 		<package name="kernel-pae-base"/>
 		<package name="kernel-pae-extra"/>
 		<package name="aufs-kmp-pae"/>
-		<!-- KERNEL AND MODULE PACKAGES END SMP -->
+		<!-- KERNEL AND MODULE PACKAGES END PAE -->
 	</packages>
 	<packages type="image" profiles="xen">
 		<!-- KERNEL AND MODULE PACKAGES START XEN -->
@@ -155,15 +157,23 @@
 		<package name="xen"/>
 		<!-- KERNEL AND MODULE PACKAGES END XEN -->
 	</packages>
-	<packages type="image" profiles="diskless">
-		<!-- KERNEL AND MODULE PACKAGES START DISKLESS -->
+	<packages type="image" profiles="diskless-kdefault">
+		<!-- KERNEL AND MODULE PACKAGES START DISKLESS-KDEFAULT -->
 		<package name="kernel-default"/>
 		<package name="kernel-default-base"/>
 		<package name="kernel-default-extra"/>
 		<package name="aufs-kmp-default"/>
-		<!-- KERNEL AND MODULE PACKAGES END DISKLESS -->
+		<!-- KERNEL AND MODULE PACKAGES END DISKLESS-KDEFAULT -->
 	</packages>
-	<packages type="image" profiles="default,xen,smp">
+	<packages type="image" profiles="diskless-kpae">
+		<!-- KERNEL AND MODULE PACKAGES START DISKLESS-KPAE -->
+		<package name="kernel-pae"/>
+		<package name="kernel-pae-base"/>
+		<package name="kernel-pae-extra"/>
+		<package name="aufs-kmp-pae"/>
+		<!-- KERNEL AND MODULE PACKAGES END DISKLESS-KPAE -->
+	</packages>
+	<packages type="image" profiles="default,xen,pae">
 		<!-- PACKAGES START DEFAULT AND XEN -->
 		<package name="curl"/>
 		<package name="psmisc"/>
@@ -224,7 +234,7 @@
 		<package name="glibc"/>
 		<package name="glibc-locale"/>
 	</packages>
-	<packages type="delete" profiles="default,xen,diskless,smp">
+	<packages type="delete" profiles="default,xen,diskless,pae">
 		<!-- DELETE PACKAGES START DEFAULT, XEN AND DISKLESS -->
 		<package name="cracklib-dict-small"/>
 		<package name="cracklib-dict-full"/>
