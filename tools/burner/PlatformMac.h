@@ -31,8 +31,9 @@ class PlatformMacintosh : public Platform
 public:
     PlatformMacintosh() { };
     // Override the Platform functions
-    void findDevices();
+    void findDevices(bool unsafe = false);
     bool isMounted(QString path);
+    bool unmountDevice(QString path);
     void writeData(QString path, QString fileName, qint64 deviceSize);
 };
 

@@ -31,6 +31,8 @@
 
 #include <QtGui>
 #include <CoreFoundation/CoreFoundation.h>
+#include <CoreServices/CoreServices.h>
+
 #include <IOKit/IOKitLib.h>
 #include <IOKit/IOCFPlugIn.h> 
 #include <IOKit/IOBSD.h> 
@@ -41,7 +43,7 @@
 #define BLOCKSIZE 1048576
 
 void
-PlatformMacintosh::findDevices()
+PlatformMacintosh::findDevices(bool unsafe)
 {
     kern_return_t ret;
     io_registry_entry_t entry;
@@ -52,6 +54,7 @@ PlatformMacintosh::findDevices()
     SInt64 capacity = 0;
 
     // Search for USB devices
+    // TODO: Pay attention to the unsafe flag
     CFMutableDictionaryRef dict = NULL;
     dict = IOServiceMatching("IOUSBDevice");
 
@@ -76,6 +79,7 @@ PlatformMacintosh::findDevices()
 
             QString newDevString = QString("/dev/%1").arg(CFStringGetCStringPtr(bsdname, kCFStringEncodingMacRoman));
             devItem->setPath(newDevString);
+            devItem->setUDI(newDevString);
 
             QString newDisplayString = QString("%1 - %2 (%3 MB)").arg(devItem->getVendorString()).arg(devItem->getPath()).arg(devItem->getSize() / 1048576);
             devItem->setDisplayString(newDisplayString);
@@ -88,13 +92,46 @@ PlatformMacintosh::findDevices()
 bool
 PlatformMacintosh::isMounted(QString path)
 {
-    // This doesn't actually work
-    // TODO: Figure out how to make it work
+    unsigned int mounts = 0;
+    struct statfs *fsStats=NULL;
 
-    if (unmount(path.toLatin1().data(), 0) == -1)
-        return true;
+    mounts = getmntinfo(&fsStats, MNT_NOWAIT);
+    if (mounts)
+        return(true);
+    return(false);
+}
 
-    return false;
+bool
+PlatformMacintosh::unmountDevice(QString path)
+{
+    int mounts = 0;
+    int i;
+    int len = path.length();
+    struct statfs *fsStats=NULL;
+    FSRef volFSRef;
+    FSCatalogInfo volumeInfo;
+
+    mounts = getmntinfo(&fsStats, MNT_NOWAIT);
+    if (mounts)
+    {
+        for (i = 0; i < mounts; i++)
+        {
+            if ((!memcmp(path.toLocal8Bit().data(), &fsStats[i].f_mntfromname[0], len)) // First check the path
+                && (!isdigit(fsStats[i].f_mntfromname[len]))) // Then make sure we're not going to really mess things up
+            {
+                qDebug() << "Will try to unmount " << &fsStats[i].f_mntfromname[0];
+                if (FSPathMakeRef((UInt8 *) fsStats[i].f_mntonname, &volFSRef, NULL) != noErr)
+                    return(false);
+
+                if (FSGetCatalogInfo(&volFSRef, kFSCatInfoVolume, &volumeInfo, NULL, NULL, NULL) != noErr)
+                    return(false);
+
+                if (FSUnmountVolumeSync(volumeInfo.volume, 0, NULL) != noErr)
+                    return(false);
+            }
+        }
+    }
+    return(true);
 }
 
 void
