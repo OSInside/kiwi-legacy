@@ -6,20 +6,22 @@
 		<specification>boot/initrd image used for PXE</specification>
 	</description>
 	<preferences>
-		<type bootprofile="default">cpio</type>
+		<type bootprofile="default" bootkernel="std">cpio</type>
 		<version>2.1.1</version>
 		<compressed>yes</compressed>
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>False</rpm-check-signatures>
 	</preferences>
 	<profiles>
-		<profile name="default" description="Boot with default kernel"/>
+		<profile name="default"  description="Boot with default kernel"/>
 		<profile name="diskless" description="Booting diskless thin clients"/>
-		<profile name="smp" description="Boot with smp kernel"/>
-		<profile name="ppc64" description="Boot with ppc64 kernel"/>
+		<profile name="std" description="KERNEL: Default"/>
+		<profile name="xen" description="KERNEL: Xen kernel/mboot.c32"/>
+		<profile name="pae" description="KERNEL: pae"/>
+		<profile name="ppc64" description="KERNEL: ppc64"/>
 	</profiles>
-	<drivers type="drivers" profiles="default,smp,ppc64">
-		<!-- DRIVERS START DEFAULT AND SMP -->
+	<drivers type="drivers" profiles="default,pae,ppc64">
+		<!-- DRIVERS START DEFAULT AND PAE -->
 		<file name="drivers/md/*"/>
 		<file name="drivers/ide/*"/>
 		<file name="drivers/block/loop.ko"/>
@@ -55,7 +57,7 @@
 		<file name="drivers/parport/*"/>
 		<file name="drivers/char/lp.ko"/>
 		<file name="drivers/acpi/dock.ko"/>
-		<!-- DRIVERS END DEFAULT AND SMP -->
+		<!-- DRIVERS END DEFAULT AND PAE -->
 	</drivers>
 	<drivers type="drivers" profiles="diskless">
 		<!-- DRIVERS START DISKLESS -->
@@ -118,23 +120,17 @@
 	<repository type="yast2" status="replaceable">
 		<source path="/mounts/dist/install/SLP/openSUSE-11.0-RC4-DVD/ppc/DVD1"/>
 	</repository>
-	<packages type="image" profiles="default">
-		<!-- KERNEL AND MODULE PACKAGES START DEFAULT -->
+	<packages type="image" profiles="std">
+		<!-- KERNEL AND MODULE PACKAGES START STD -->
 		<package name="kernel-default"/>
 		<package name="aufs-kmp-default"/>
-		<!-- KERNEL AND MODULE PACKAGES END DEFAULT -->
+		<!-- KERNEL AND MODULE PACKAGES END STD -->
 	</packages>
-	<packages type="image" profiles="smp">
-		<!-- KERNEL AND MODULE PACKAGES START SMP -->
+	<packages type="image" profiles="pae">
+		<!-- KERNEL AND MODULE PACKAGES START PAE -->
 		<package name="kernel-pae"/>
 		<package name="aufs-kmp-pae"/>
-		<!-- KERNEL AND MODULE PACKAGES END SMP -->
-	</packages>
-	<packages type="image" profiles="diskless">
-		<!-- KERNEL AND MODULE PACKAGES START DISKLESS -->
-		<package name="kernel-default"/>
-		<package name="aufs-kmp-default"/>
-		<!-- KERNEL AND MODULE PACKAGES END DISKLESS -->
+		<!-- KERNEL AND MODULE PACKAGES END PAE -->
 	</packages>
 	<packages type="image" profiles="ppc64">
 		<!-- KERNEL AND MODULE PACKAGES START PPC64 -->
@@ -142,8 +138,8 @@
 		<package name="aufs-kmp-ppc64"/>
 		<!-- KERNEL AND MODULE PACKAGES END PPC64 -->
 	</packages>
-	<packages type="image" profiles="default,smp,ppc64">
-		<!-- PACKAGES START DEFAULT AND SMP -->
+	<packages type="image" profiles="default,pae,ppc64">
+		<!-- PACKAGES START DEFAULT AND PAE -->
 		<package name="curl"/>
 		<package name="psmisc"/>
 		<package name="iputils"/>
@@ -169,7 +165,7 @@
 		<package name="bootsplash-branding-openSUSE"/>
 		<package name="tar"/>
 		<package name="cromfs"/>
-		<!-- PACKAGES END DEFAULT AND SMP -->
+		<!-- PACKAGES END DEFAULT AND PAE -->
 	</packages>
 	<packages type="image" profiles="diskless">
 		<!-- PACKAGES START DISKLESS -->
@@ -193,7 +189,7 @@
 		<package name="filesystem"/>
 		<package name="glibc-locale"/>
 	</packages>
-	<packages type="delete" profiles="default,diskless,smp,ppc64">
+	<packages type="delete" profiles="default,diskless,pae,ppc64">
 		<!-- DELETE PACKAGES START DEFAULT AND DISKLESS -->
 		<package name="cracklib-dict-small"/>
 		<package name="cracklib-dict-full"/>

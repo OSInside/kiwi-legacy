@@ -14,12 +14,11 @@
 		<rpm-check-signatures>False</rpm-check-signatures>
 	</preferences>
 	<profiles>
-		<profile name="default" description="Boot with default kernel"/>
-		<profile name="xen" description="Boot with xen kernel/mboot.c32"/>
+		<profile name="default"  description="Boot with default kernel"/>
 		<profile name="diskless" description="Booting diskless thin clients"/>
-		<profile name="pae" description="Boot with pae kernel"/>
-		<profile name="diskless-kpae" description="Diskless with pae kernel"/>
-		<profile name="diskless-kdefault" description="Diskless with default kernel"/>
+		<profile name="std" description="KERNEL: Default"/>
+		<profile name="xen" description="KERNEL: Xen kernel/mboot.c32"/>
+		<profile name="pae" description="KERNEL: pae"/>
 	</profiles>
 	<drivers type="usbdrivers" profiles="default,xen,pae">
 		<file name="usb/host/ehci-hcd.ko"/>
@@ -132,13 +131,13 @@
 	<repository type="yast2" status="replaceable">
 		<source path="/image/CDs/full-i386"/>
 	</repository>
-	<packages type="image" profiles="default">
-		<!-- KERNEL AND MODULE PACKAGES START DEFAULT -->
+	<packages type="image" profiles="std">
+		<!-- KERNEL AND MODULE PACKAGES START STD -->
 		<package name="kernel-default"/>
 		<package name="kernel-default-base"/>
 		<package name="kernel-default-extra"/>
 		<package name="aufs-kmp-default"/>
-		<!-- KERNEL AND MODULE PACKAGES END DEFAULT -->
+		<!-- KERNEL AND MODULE PACKAGES END STD -->
 	</packages>
 	<packages type="image" profiles="pae">
 		<!-- KERNEL AND MODULE PACKAGES START PAE -->
@@ -156,22 +155,6 @@
 		<package name="aufs-kmp-xen"/>
 		<package name="xen"/>
 		<!-- KERNEL AND MODULE PACKAGES END XEN -->
-	</packages>
-	<packages type="image" profiles="diskless-kdefault">
-		<!-- KERNEL AND MODULE PACKAGES START DISKLESS-KDEFAULT -->
-		<package name="kernel-default"/>
-		<package name="kernel-default-base"/>
-		<package name="kernel-default-extra"/>
-		<package name="aufs-kmp-default"/>
-		<!-- KERNEL AND MODULE PACKAGES END DISKLESS-KDEFAULT -->
-	</packages>
-	<packages type="image" profiles="diskless-kpae">
-		<!-- KERNEL AND MODULE PACKAGES START DISKLESS-KPAE -->
-		<package name="kernel-pae"/>
-		<package name="kernel-pae-base"/>
-		<package name="kernel-pae-extra"/>
-		<package name="aufs-kmp-pae"/>
-		<!-- KERNEL AND MODULE PACKAGES END DISKLESS-KPAE -->
 	</packages>
 	<packages type="image" profiles="default,xen,pae">
 		<!-- PACKAGES START DEFAULT AND XEN -->
