@@ -687,8 +687,16 @@ archive is extracted in a specific way.</db:para>
     <define name="k.opensusepattern.name.attribute">
       <ref name="k.name.attribute"/>
     </define>
+    <define name="k.opensusepattern.arch.attribute">
+      <ref name="k.arch.attribute"/>
+    </define>
     <define name="k.opensusepattern.attlist">
-      <ref name="k.opensusepattern.name.attribute"/>
+      <interleave>
+        <ref name="k.opensusepattern.name.attribute"/>
+        <optional>
+          <ref name="k.opensusepattern.arch.attribute"/>
+        </optional>
+      </interleave>
     </define>
     <define name="k.opensusepattern">
       <element name="opensusePattern">
@@ -707,8 +715,16 @@ archive is extracted in a specific way.</db:para>
     <define name="k.opensuseproduct.name.attribute">
       <ref name="k.name.attribute"/>
     </define>
+    <define name="k.opensuseproduct.arch.attribute">
+      <ref name="k.arch.attribute"/>
+    </define>
     <define name="k.opensuseproduct.attlist">
-      <ref name="k.opensuseproduct.name.attribute"/>
+      <interleave>
+        <ref name="k.opensuseproduct.name.attribute"/>
+        <optional>
+          <ref name="k.opensuseproduct.arch.attribute"/>
+        </optional>
+      </interleave>
     </define>
     <define name="k.opensuseproduct">
       <element name="opensuseProduct">

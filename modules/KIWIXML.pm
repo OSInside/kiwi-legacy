@@ -2293,6 +2293,36 @@ sub clearPackageAttributes {
 }
 
 #==========================================
+# isArchAllowed
+#------------------------------------------
+sub isArchAllowed {
+	my $this    = shift;
+	my $element = shift;
+	my $what    = shift;
+	my $forarch = $element -> getAttribute ("arch");
+	if (($what eq "metapackages") || ($what eq "instpackages")) {
+		# /.../
+		# arch setup is differently handled
+		# in inst-source mode
+		# ----
+		return $this;
+	}
+	if (defined $forarch) {
+		my @archlst = split (/,/,$forarch);
+		my $foundit = 0;
+		foreach my $archok (@archlst) {
+			if ($archok eq $this->{arch}) {
+				$foundit = 1; last;
+			}
+		}
+		if (! $foundit) {
+			return undef;
+		}
+	}
+	return $this;
+}
+
+#==========================================
 # getList
 #------------------------------------------
 sub getList {
@@ -2341,6 +2371,9 @@ sub getList {
 		if (! $this -> requestedProfile ($node)) {
 			next;
 		}
+		#==========================================
+		# Check for package descriptions
+		#------------------------------------------
 		my @plist = ();
 		if (($what ne "metapackages") && ($what ne "instpackages")) {
 			@plist = $node -> getElementsByTagName ("package");
@@ -2351,22 +2384,7 @@ sub getList {
 			my $package = $element -> getAttribute ("name");
 			my $forarch = $element -> getAttribute ("arch");
 			my $replaces= $element -> getAttribute ("replaces");
-			my $allowed = 1;
-			if (($what ne "metapackages") && ($what ne "instpackages")) {
-				if (defined $forarch) {
-					my @archlst = split (/,/,$forarch);
-					my $foundit = 0;
-					foreach my $archok (@archlst) {
-						if ($archok eq $this->{arch}) {
-							$foundit = 1; last;
-						}
-					}
-					if (! $foundit) {
-						$allowed = 0;
-					}
-				}
-			}
-			if (! $allowed) {
+			if (! $this -> isArchAllowed ($element,$what)) {
 				next;
 			}
 			if (! defined $package) {
@@ -2389,6 +2407,9 @@ sub getList {
 			my @pattlist = ();
 			my @slist = $node -> getElementsByTagName ("opensuseProduct");
 			foreach my $element (@slist) {
+				if (! $this -> isArchAllowed ($element,$type)) {
+					next;
+				}
 				my $product = $element -> getAttribute ("name");
 				if (! defined $product) {
 					next;
@@ -2397,6 +2418,9 @@ sub getList {
 			}
 			@slist = $node -> getElementsByTagName ("opensusePattern");
 			foreach my $element (@slist) {
+				if (! $this -> isArchAllowed ($element,$type)) {
+					next;
+				}
 				my $pattern = $element -> getAttribute ("name");
 				if (! defined $pattern) {
 					next;

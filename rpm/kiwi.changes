@@ -9,6 +9,7 @@ Tue Mar 17 18:05:05 CET 2009 - matt@suse.de
 Tue Mar 17 10:54:49 CET 2009 - ms@suse.de
 
 - v3.33
+- added support for arch attribute in pattern names
 - removed support for cromfs; dead and unmaintained fs
 - added bootkernel attribute which allows to select a kernel
   profile defined in the boot image description

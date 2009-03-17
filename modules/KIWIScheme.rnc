@@ -492,7 +492,10 @@ div {
 #
 div {
 	k.opensusepattern.name.attribute = k.name.attribute
-	k.opensusepattern.attlist = k.opensusepattern.name.attribute
+	k.opensusepattern.arch.attribute = k.arch.attribute
+	k.opensusepattern.attlist =
+		k.opensusepattern.name.attribute &
+		k.opensusepattern.arch.attribute?
 	k.opensusepattern =
 		## Name of a Pattern From openSUSE
 		element opensusePattern {
@@ -506,7 +509,10 @@ div {
 #
 div {
 	k.opensuseproduct.name.attribute = k.name.attribute
-	k.opensuseproduct.attlist = k.opensuseproduct.name.attribute
+	k.opensuseproduct.arch.attribute = k.arch.attribute
+	k.opensuseproduct.attlist =
+		k.opensuseproduct.name.attribute &
+		k.opensuseproduct.arch.attribute?
 	k.opensuseproduct =
 		## Name of a Product From openSUSE
 		element opensuseProduct {
