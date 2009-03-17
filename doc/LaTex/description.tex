@@ -284,13 +284,18 @@ describes the possible types and their attributes:
       \textbf{fsreadwrite}, \textbf{fsreadonly} and\\
       \textbf{boot=''usb|vmx|oem|netboot/suse-*''}
 \item \textbf{cpio}\\
-      Use this type if your image is a boot image (intrd). Additionally
-      the attribute \textbf{bootprofile=''default''} can be specified. In
-      a boot image it makes sense to have the different kernels/drivers
-      grouped in a namespace. Within a system image one can select the
-      group by also specifying a bootprofile attribute. If there are profiles
-      defined in a boot image there must be at least one namespace
-      called the \textbf{default} namespace. 
+      Use this type if your image is a boot image (intrd). Along with
+      this type the optional attributes \textbf{bootprofile=''default''} and/or
+      \textbf{bootkernel=''std''} exists. A boot image should group 
+      the different kernels it supports in profiles. It's mandatory to have
+      one profile named \textbf{std} which is used if no other bootkernel
+      is specified. Profiles which leaves only a subset of drivers or
+      packages should also be grouped in profiles. It's mandatory to have
+      one profile named \textbf{default} which is used if no other bootprofile
+      is specified. Within the system image one can select the
+      group by also specifying a bootprofile and/or bootkernel attribute.
+      These information is passed automatically to kiwi when it builds
+      the boot image.
 \end{itemize}
 
 All of the mentioned types can specify the \textbf{boot} attribute

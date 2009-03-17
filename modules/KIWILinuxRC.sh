@@ -1453,7 +1453,6 @@ function probeFileSystem {
 		*ext2*)     FSTYPE=ext2 ;;
 		*ReiserFS*) FSTYPE=reiserfs ;;
 		*Squashfs*) FSTYPE=squashfs ;;
-		*CROMFS*)   FSTYPE=cromfs ;;
 		*)
 			FSTYPE=unknown
 		;;
@@ -2867,7 +2866,7 @@ function umountSystem {
 # isFSTypeReadOnly
 #--------------------------------------
 function isFSTypeReadOnly {
-	if [ "$FSTYPE" = "squashfs" ] || [ "$FSTYPE" = "cromfs" ];then
+	if [ "$FSTYPE" = "squashfs" ];then
 		return 0
 	fi
 	return 1
@@ -2901,26 +2900,22 @@ function kiwiMount {
 			probeFileSystem $src
 		fi
 	fi
-	if [ -z $FSTYPE ] || [ $FSTYPE = "unknown" ];then
+	if [ -z "$FSTYPE" ] || [ "$FSTYPE" = "unknown" ];then
 		FSTYPE="auto"
 	fi
 	#======================================
 	# decide for a mount method
 	#--------------------------------------
-	if [ $FSTYPE = "cromfs" ];then
-		if [ ! -z "$lop" ];then
-			src=$lop
-		fi
-		if ! cromfs-driver $src $dst >/dev/null;then
-			return 1
-		fi
-	else
-		if [ ! -z "$lop" ];then
-			losetup /dev/loop1 $lop
-		fi
-		if ! mount -t $FSTYPE $opt $src $dst >/dev/null;then
-			return 1
-		fi
+	if [ ! -z "$lop" ];then
+		# /.../
+		# if loop mount is requested a fixed loop1 device
+		# was set as src parameter. Because this fixed loop
+		# name is used later too we stick to this device name
+		# ----
+		losetup /dev/loop1 $lop
+	fi
+	if ! mount -t $FSTYPE $opt $src $dst >/dev/null;then
+		return 1
 	fi
 	if [ ! -z "$FSTYPE_SAVE" ];then
 		FSTYPE=$FSTYPE_SAVE

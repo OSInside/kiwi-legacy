@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Tue Mar 17 10:54:49 CET 2009 - ms@suse.de
+
+- v3.33
+- removed support for cromfs; dead and unmaintained fs
+- added bootkernel attribute which allows to select a kernel
+  profile defined in the boot image description
+
+-------------------------------------------------------------------
 Mon Mar 16 17:29:59 CET 2009 - ms@suse.de
 
 - v3.32

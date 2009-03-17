@@ -6,7 +6,7 @@
 		<specification>boot/initrd image for Xen VM systems</specification>
 	</description>
 	<preferences>
-		<type bootprofile="default">cpio</type>
+		<type bootprofile="default" bootkernel="std">cpio</type>
 		<version>2.1.1</version>
 		<size unit="M">60</size>
 		<compressed>yes</compressed>
@@ -15,6 +15,7 @@
 	</preferences>
 	<profiles>
 		<profile name="default" description="Boot with xen or xenpae kernel"/>
+		<profile name="std" description="KERNEL: Xen"/>
 	</profiles>
 	<drivers type="drivers">
 		<file name="drivers/ide/*"/>
@@ -54,7 +55,7 @@
 		<package name="bootsplash"/>
 		<package name="bootsplash-theme-SuSE-NLD"/>
 	</packages>
-	<packages type="bootstrap" profiles="default">
+	<packages type="bootstrap" profiles="std">
 		<package name="kernel-xen" arch="x86_64"/>
 		<package name="kernel-xenpae" arch="i686"/>
 	</packages>

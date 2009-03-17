@@ -44,7 +44,7 @@ use KIWITest;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "3.32";
+our $Version       = "3.33";
 our $Publisher     = "SUSE LINUX Products GmbH";
 our $Preparer      = "KIWI - http://kiwi.berlios.de";
 our $openSUSE      = "http://download.opensuse.org";
@@ -110,7 +110,6 @@ $KnownFS{ext3}{tool}      = "/sbin/mkfs.ext3";
 $KnownFS{ext2}{tool}      = "/sbin/mkfs.ext2";
 $KnownFS{squashfs}{tool}  = "/usr/bin/mksquashfs";
 $KnownFS{dmsquash}{tool}  = "/usr/bin/mksquashfs";
-$KnownFS{cromfs}{tool}    = "/usr/bin/mkcromfs";
 $KnownFS{unified}{tool}   = "/usr/bin/mksquashfs";
 $KnownFS{compressed}{tool}= "/usr/bin/mksquashfs";
 $KnownFS{reiserfs}{tool}  = "/sbin/mkreiserfs";
@@ -119,7 +118,6 @@ $KnownFS{ext3}{ro}        = 0;
 $KnownFS{ext2}{ro}        = 0;
 $KnownFS{squashfs}{ro}    = 1;
 $KnownFS{dmsquash}{ro}    = 1;
-$KnownFS{cromfs}{ro}      = 1;
 $KnownFS{unified}{ro}     = 1;
 $KnownFS{compressed}{ro}  = 1;
 $KnownFS{reiserfs}{ro}    = 0;
@@ -291,13 +289,51 @@ sub main {
 		#==========================================
 		# Check for bootprofile in xml descr.
 		#------------------------------------------
+		my %type = %{$xml->getImageTypeAndAttributes()};
 		if (! @Profiles) {
-			my %type = %{$xml->getImageTypeAndAttributes()};
-			if (($type{"type"} eq "cpio") && ($type{bootprofile})) {
-				@Profiles = split (/,/,$type{bootprofile});
-				if (! $xml -> checkProfiles (\@Profiles)) {
-					my $code = kiwiExit (1); return $code;
+			if ($type{"type"} eq "cpio") {
+				if ($type{bootprofile}) {
+					push @Profiles, split (/,/,$type{bootprofile});
 				}
+				if ($type{bootkernel}) {
+					push @Profiles, split (/,/,$type{bootkernel});
+				}
+			}
+		}
+		#==========================================
+		# Check for bootkernel in xml descr.
+		#------------------------------------------		
+		if ($type{"type"} eq "cpio") {
+			my %phash = ();
+			my $found = 0;
+			my @pname = $xml -> getProfiles();
+			foreach my $profile (@pname) {
+				my $name = $profile -> {name};
+				my $descr= $profile -> {description};
+				if ($descr =~ /KERNEL:/) {
+					$phash{$name} = $profile -> {description};
+				}
+			}
+			foreach my $profile (@Profiles) {
+				if ($phash{$profile}) {
+					# /.../
+					# ok, a kernel from the profile list is
+					# already selected
+					# ----
+					$found = 1;
+					last;
+				}
+			}
+			if (! $found) {
+				# /.../
+				# no kernel profile selected use standard (std)
+				# profile which is defined in each boot image
+				# description
+				# ----
+				push @Profiles, "std";
+			}
+			if (! $xml -> checkProfiles (\@Profiles)) {
+				my $code = kiwiExit (1); return $code;
 			}
 		}
 		#==========================================
@@ -705,10 +741,6 @@ sub main {
 			};
 			/^dmsquash/ && do {
 				$ok = $image -> createImageDMSquashExt3 ();
-				last SWITCH;
-			};
-			/^cromfs/   && do {
-				$ok = $image -> createImageCromFS ();
 				last SWITCH;
 			};
 			/^cpio/     && do {
@@ -2095,10 +2127,6 @@ sub checkFileSystem {
 				};
 				/Squashfs/  && do {
 					$type = "squashfs";
-					last SWITCH;
-				};
-				/CROMFS/    && do {
-					$type = "cromfs";
 					last SWITCH;
 				};
 				# unknown filesystem type use auto...

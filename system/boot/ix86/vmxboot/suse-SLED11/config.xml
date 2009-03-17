@@ -6,7 +6,7 @@
 		<specification>boot/initrd image for virtual machines</specification>
 	</description>
 	<preferences>
-		<type bootprofile="default">cpio</type>
+		<type bootprofile="default" bootkernel="std">cpio</type>
 		<version>2.7.1</version>
 		<size unit="M">60</size>
 		<compressed>yes</compressed>
@@ -15,8 +15,9 @@
 	</preferences>
 	<profiles>
 		<profile name="default" description="Boot with default kernel"/>
-		<profile name="xen" description="Boot with xen kernel/mboot.c32"/>
-		<profile name="smp" description="Boot with smp kernel"/>
+		<profile name="std" description="KERNEL: Default"/>
+		<profile name="xen" description="KERNEL: Xen kernel/mboot.c32"/>
+		<profile name="pae" description="KERNEL: pae kernel"/>
 	</profiles>
 	<drivers type="drivers">
 		<file name="drivers/md/*"/>
@@ -50,11 +51,11 @@
 	<repository type="rpm-dir">
 		<source path="/usr/share/kiwi/repo/suse-repo/suse-sle11-repo"/>
 	</repository>
-	<packages type="image" profiles="default">
+	<packages type="image" profiles="std">
 		<package name="kernel-default"/>
 		<package name="kernel-default-base"/>
 	</packages>
-	<packages type="image" profiles="smp">
+	<packages type="image" profiles="pae">
 		<package name="kernel-pae"/>
 		<package name="kernel-pae-base"/>
 	</packages>

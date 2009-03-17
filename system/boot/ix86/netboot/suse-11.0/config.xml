@@ -6,7 +6,7 @@
 		<specification>boot/initrd image used for PXE</specification>
 	</description>
 	<preferences>
-		<type bootprofile="default">cpio</type>
+		<type bootprofile="default" bootkernel="std">cpio</type>
 		<version>2.1.1</version>
 		<size unit="M">60</size>
 		<compressed>yes</compressed>
@@ -15,17 +15,18 @@
 	</preferences>
 	<profiles>
 		<profile name="default" description="Boot with default kernel"/>
-		<profile name="xen" description="Boot with xen kernel/mboot.c32"/>
 		<profile name="diskless" description="Booting diskless thin clients"/>
-		<profile name="smp" description="Boot with smp kernel"/>
+		<profile name="std" description="KERNEL: Default"/>
+		<profile name="xen" description="KERNEL: Xen kernel/mboot.c32"/>
+		<profile name="pae" description="KERNEL: pae kernel"/>
 	</profiles>
-	<drivers type="usbdrivers" profiles="default,xen,smp">
+	<drivers type="usbdrivers" profiles="default,xen,pae">
 		<file name="usb/host/ehci-hcd.ko"/>
 		<file name="usb/host/uhci-hcd.ko"/>
 		<file name="usb/core/usbcore.ko"/>
 		<file name="usb/storage/usb-storage.ko"/>
 	</drivers>
-	<drivers type="drivers" profiles="default,xen,smp">
+	<drivers type="drivers" profiles="default,xen,pae">
 		<!-- DRIVERS START DEFAULT AND XEN -->
 		<file name="drivers/md/*"/>
 		<file name="drivers/hid/*"/>
@@ -131,17 +132,17 @@
 	<repository type="yast2" status="replaceable">
 		<source path="/image/CDs/full-11.0-i386"/>
 	</repository>
-	<packages type="image" profiles="default">
-		<!-- KERNEL AND MODULE PACKAGES START DEFAULT -->
+	<packages type="image" profiles="std">
+		<!-- KERNEL AND MODULE PACKAGES START STD -->
 		<package name="kernel-default"/>
 		<package name="aufs-kmp-default"/>
-		<!-- KERNEL AND MODULE PACKAGES END DEFAULT -->
+		<!-- KERNEL AND MODULE PACKAGES END STD -->
 	</packages>
-	<packages type="image" profiles="smp">
-		<!-- KERNEL AND MODULE PACKAGES START SMP -->
+	<packages type="image" profiles="pae">
+		<!-- KERNEL AND MODULE PACKAGES START PAE -->
 		<package name="kernel-pae"/>
 		<package name="aufs-kmp-pae"/>
-		<!-- KERNEL AND MODULE PACKAGES END SMP -->
+		<!-- KERNEL AND MODULE PACKAGES END PAE -->
 	</packages>
 	<packages type="image" profiles="xen">
 		<!-- KERNEL AND MODULE PACKAGES START XEN -->
@@ -150,13 +151,7 @@
 		<package name="xen"/>
 		<!-- KERNEL AND MODULE PACKAGES END XEN -->
 	</packages>
-	<packages type="image" profiles="diskless">
-		<!-- KERNEL AND MODULE PACKAGES START DISKLESS -->
-		<package name="kernel-default"/>
-		<package name="aufs-kmp-default"/>
-		<!-- KERNEL AND MODULE PACKAGES END DISKLESS -->
-	</packages>
-	<packages type="image" profiles="default,xen,smp">
+	<packages type="image" profiles="default,xen,pae">
 		<!-- PACKAGES START DEFAULT AND XEN -->
 		<package name="curl"/>
 		<package name="psmisc"/>
@@ -217,7 +212,7 @@
 		<package name="glibc"/>
 		<package name="glibc-locale"/>
 	</packages>
-	<packages type="delete" profiles="default,xen,diskless,smp">
+	<packages type="delete" profiles="default,xen,diskless,pae">
 		<!-- DELETE PACKAGES START DEFAULT, XEN AND DISKLESS -->
 		<package name="cracklib-dict-small"/>
 		<package name="cracklib-dict-full"/>

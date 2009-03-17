@@ -391,8 +391,12 @@ sub createImageEC2 {
 	if (($main::Prepare !~ /^\//) && (! -d $main::Prepare)) {
 		$main::Prepare = $main::System."/".$main::Prepare;
 	}
+	@main::Profiles = ();
 	if ($type{bootprofile}) {
-		@main::Profiles = split (/,/,$type{bootprofile});
+		push @main::Profiles ,split (/,/,$type{bootprofile});
+	}
+	if ($type{bootkernel}) {
+		push @main::Profiles ,split (/,/,$type{bootkernel});
 	}
 	$main::ForeignRepo{"xmlnode"} = $xml -> getForeignNodeList();
 	$main::ForeignRepo{"packagemanager"} = $xml -> getPackageManager();
@@ -610,53 +614,6 @@ sub createImageSquashFS {
 }
 
 #==========================================
-# createImageCromFS
-#------------------------------------------
-sub createImageCromFS {
-	# ...
-	# create cromfs image from source tree
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $xml  = $this->{xml};
-	#==========================================
-	# PRE filesystem setup
-	#------------------------------------------
-	my $name = $this -> preImage ("haveExtend");
-	if (! defined $name) {
-		return undef;
-	}
-	#==========================================
-	# Create filesystem on extend
-	#------------------------------------------
-	if (! $this -> setupCromFS ( $name )) {
-		return undef;
-	}
-	#==========================================
-	# Create image md5sum
-	#------------------------------------------
-	if (! $this -> buildMD5Sum ($name)) {
-		return undef;
-	}
-	#==========================================
-	# Compress image using gzip
-	#------------------------------------------
-	if ($xml->getCompressed()) {
-	if (! $this -> compressImage ($name)) {
-		return undef;
-	}
-	}
-	#==========================================
-	# Create image boot configuration
-	#------------------------------------------
-	$kiwi -> info ("Creating boot configuration...");
-	if (! $this -> writeImageConfig ($name)) {
-		return undef;
-	}
-	return $this;
-}
-
-#==========================================
 # createImageCPIO
 #------------------------------------------
 sub createImageCPIO {
@@ -808,10 +765,6 @@ sub createImageUSB {
 			$ok = $this -> createImageDMSquashExt3 ();
 			last SWITCH;
 		};
-		/^cromfs/     && do {
-			$ok = $this -> createImageCromFS ();
-			last SWITCH;
-		};
 		$kiwi -> error  ("Unsupported $text type: $type");
 		$kiwi -> failed ();
 		return undef;
@@ -855,8 +808,12 @@ sub createImageUSB {
 	if (($main::Prepare !~ /^\//) && (! -d $main::Prepare)) {
 		$main::Prepare = $main::System."/".$main::Prepare;
 	}
+	@main::Profiles = ();
 	if ($type{bootprofile}) {
-		@main::Profiles = split (/,/,$type{bootprofile});
+		push @main::Profiles ,split (/,/,$type{bootprofile});
+	}
+	if ($type{bootkernel}) {
+		push @main::Profiles ,split (/,/,$type{bootkernel});
 	}
 	$main::ForeignRepo{"xmlnode"} = $xml -> getForeignNodeList();
 	$main::ForeignRepo{"packagemanager"} = $xml -> getPackageManager();
@@ -1365,27 +1322,9 @@ sub createImageLiveCD {
 				$namero = $namerw;
 				last SWITCH;
 			};
-			/^compressed-cromfs$/ && do {
-				$kiwi -> info ("Creating split ext3 + cromfs...\n");
-				if (! $this -> createImageSplit ("ext3,cromfs", 1)) {
-					$this -> restoreCDRootData();
-					return undef;
-				}
-				$namero = $namerw;
-				last SWITCH;
-			};
 			/^unified$/ && do {
 				$kiwi -> info ("Creating squashfs read only filesystem...\n");
 				if (! $this -> setupSquashFS ( $namero,$imageTree )) {
-					$this -> restoreCDRootData();
-					$this -> restoreSplitExtend ();
-					return undef;
-				}
-				last SWITCH;
-			};
-			/^unified-cromfs$/ && do {
-				$kiwi -> info ("Creating cromfs read only filesystem...\n");
-				if (! $this -> setupCromFS ( $namero,$imageTree )) {
 					$this -> restoreCDRootData();
 					$this -> restoreSplitExtend ();
 					return undef;
@@ -1502,8 +1441,12 @@ sub createImageLiveCD {
 	if (($main::Prepare !~ /^\//) && (! -d $main::Prepare)) {
 		$main::Prepare = $main::System."/".$main::Prepare;
 	}
+	@main::Profiles = ();
 	if ($type{bootprofile}) {
-		@main::Profiles = split (/,/,$type{bootprofile});
+		push @main::Profiles ,split (/,/,$type{bootprofile});
+	}
+	if ($type{bootkernel}) {
+		push @main::Profiles ,split (/,/,$type{bootkernel});
 	}
 	$main::ForeignRepo{"xmlnode"} = $xml -> getForeignNodeList();
 	$main::ForeignRepo{"packagemanager"} = $xml -> getPackageManager();
@@ -2379,10 +2322,6 @@ sub createImageSplit {
 			$ok = $this -> setupSquashFS ( $namero,$imageTree );
 			last SWITCH;
 		};
-		/cromfs/     && do {
-			$ok = $this -> setupCromFS ( $namero,$imageTree );
-			last SWITCH;
-		};
 		$kiwi -> error  ("Unsupported type: $FSTypeRO");
 		$kiwi -> failed ();
 		qxx ("rm -rf $imageTreeRW");
@@ -2459,10 +2398,6 @@ sub createImageSplit {
 				$kiwi -> done ();
 				last SWITCH;
 			};
-			/cromfs/     && do {
-				$kiwi -> done ();
-				last SWITCH;
-			};
 			$kiwi -> error  ("Unsupported type: $type");
 			$kiwi -> failed ();
 			qxx ("rm -rf $imageTreeRW");
@@ -2528,8 +2463,12 @@ sub createImageSplit {
 	if (($main::Prepare !~ /^\//) && (! -d $main::Prepare)) {
 		$main::Prepare = $main::System."/".$main::Prepare;
 	}
+	@main::Profiles = ();
 	if ($type{bootprofile}) {
-		@main::Profiles = split (/,/,$type{bootprofile});
+		push @main::Profiles ,split (/,/,$type{bootprofile});
+	}
+	if ($type{bootkernel}) {
+		push @main::Profiles ,split (/,/,$type{bootkernel});
 	}
 	$main::ForeignRepo{"xmlnode"} = $xml -> getForeignNodeList();
 	$main::ForeignRepo{"packagemanager"} = $xml -> getPackageManager();
@@ -3263,10 +3202,6 @@ sub extractKernel {
 			return $name;
 			last SWITCH;
 		};
-		/cromfs/i   && do {
-			return $name;
-			last SWITCH;
-		};
 	}
 	#==========================================
 	# this is a boot image, extract kernel
@@ -3425,37 +3360,6 @@ sub setupSquashFS {
 	}
 	$data = qxx ("chmod 644 $imageDest/$name");
 	$data = qxx ("cd $imageDest && ln -vs $name $name.squashfs 2>&1");
-	$kiwi -> loginfo ($data);
-	return $name;
-}
-
-#==========================================
-# setupCromFS
-#------------------------------------------
-sub setupCromFS {
-	my $this = shift;
-	my $name = shift;
-	my $tree = shift;
-	my $kiwi = $this->{kiwi};
-	my $imageTree = $this->{imageTree};
-	my $imageDest = $this->{imageDest};
-	if (! defined $tree) {
-		$tree = $imageTree;
-	}
-	unlink ("$imageDest/$name");
-	my $data = qxx (
-		"/usr/bin/mkcromfs --lzmabits 0,0,8 $tree $imageDest/$name 2>&1"
-	);
-	my $code = $? >> 8;
-	if ($code != 0) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't create cromfs filesystem");
-		$kiwi -> failed ();
-		$kiwi -> error  ($data);
-		return undef;
-	}
-	$data = qxx ("chmod 644 $imageDest/$name");
-	$data = qxx ("cd $imageDest && ln -vs $name $name.cromfs 2>&1");
 	$kiwi -> loginfo ($data);
 	return $name;
 }

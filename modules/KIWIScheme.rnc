@@ -1071,9 +1071,15 @@ div {
 		## Specify the path to a pre created base root system.
 		attribute baseroot { text }
 	k.type.bootprofile.attribute =
-		## Specifies the boot profile if defined in the boot image
-		## description. Used when KIWI option add-profile is used
+		## Specifies the boot profile defined in the boot image
+		## description. When kiwi builds the boot image the
+		## information is passed as add-profile option
 		attribute bootprofile { text }
+	k.type.bootkernel.attribute =
+		## Specifies the kernel boot profile defined in the boot
+		## image description. When kiwi builds the boot image the
+		## information is passed as add-profile option
+		attribute bootkernel { text }
 	k.type.boot.attribute =
 		## Specifies the path of the boot image (initrd), relative
 		## to /usr/share/kiwi/image
@@ -1084,11 +1090,9 @@ div {
 		attribute checkprebuilt { xsd:boolean }
 	k.type.flags.attribute =
 		## Specifies flags for the image type. This could be compressed
-		## unified, unified-cromfs , compressed-cromfs or dmsquash and
-		## applies to the iso type only
+		## unified or dmsquash and applies to the iso type only
 		attribute flags {
-			"unified" | "compressed" | "unified-cromfs" |
-			"compressed-cromfs" | "dmsquash"
+			"unified" | "compressed" | "dmsquash"
 		}
 	k.type.bootloader.attribute =
 		## Specified the bootloader used for booting the image."
@@ -1103,16 +1107,16 @@ div {
 		attribute vga { text }
 	k.type.filesystem.attribute = 
 		## Specifies the filesystem which can be one of:
-		## ext2 , ext3 , reiserfs ,squashfs, cromfs or dmsquash.
+		## ext2 , ext3 , reiserfs ,squashfs or dmsquash.
 		## dmsquash is an ext3 filesystem packed into a squashfs
 		## and used later with a device mapper snapshot
 		attribute filesystem {
-			"ext2" | "ext3" | "reiserfs" | "squashfs" | "cromfs" | "dmsquash"
+			"ext2" | "ext3" | "reiserfs" | "squashfs" | "dmsquash"
 		}
 	k.type.fsreadonly.attribute =
 		## Specifies the filesystem for the read-only part of a split image
 		attribute fsreadonly {
-			"ext2" | "ext3" | "reiserfs" | "squashfs" | "cromfs"
+			"ext2" | "ext3" | "reiserfs" | "squashfs"
 		}
 	k.type.fsreadwrite.attribute =
 		## Specifies the filesystem for the read-write part of a split image
@@ -1140,6 +1144,7 @@ div {
 	k.type.attlist =
 		k.type.checkprebuilt.attribute? &
 		k.type.bootprofile.attribute? &
+		k.type.bootkernel.attribute? &
 		k.type.boot.attribute? &
 		k.type.flags.attribute? &
 		k.type.bootloader.attribute? &
@@ -1184,7 +1189,7 @@ div {
 			"As part of the network deploy configuration this section\x{a}"~
 			"specifies the overlay filesystem setup if required by the\x{a}"~
 			"filesystem type of the system image.An overlay setup is only\x{a}"~
-			"required if the system image uses a squashfs or cromfs\x{a}"~
+			"required if the system image uses a squashfs\x{a}"~
 			"compressed filesystem."
 		]
 		]

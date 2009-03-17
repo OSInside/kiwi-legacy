@@ -661,6 +661,7 @@ sub getImageTypeAndAttributes {
 		$record{checkprebuilt} = $node -> getAttribute("checkprebuilt");
 		$record{baseroot}      = $node -> getAttribute("baseroot");
 		$record{bootprofile}   = $node -> getAttribute("bootprofile");
+		$record{bootkernel}    = $node -> getAttribute("bootkernel");
 		$record{filesystem}    = $node -> getAttribute("filesystem");
 		$record{AWSAccountNr}  = $node -> getAttribute("ec2accountnr");
 		$record{EC2CertFile}   = $node -> getAttribute("ec2certfile");
@@ -1437,7 +1438,8 @@ sub checkProfiles {
 		}
 	}
 	if (@prequest) {
-		$kiwi -> info ("Using profile(s): @prequest");
+		my $info = join (",",@prequest);
+		$kiwi -> info ("Using profile(s): $info");
 		$kiwi -> done ();
 	}
 	return $this;
