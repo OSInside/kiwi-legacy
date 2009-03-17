@@ -1,5 +1,5 @@
 -------------------------------------------------------------------
-Tue Mar 17 18:05:05 CET 2009 - matt@suse.de
+Tue Mar 17 18:05:05 CET 2009 - mbarringer@suse.de
 
 - Ported the new imagewriter UI to MacOS
 - MacOS USB key writing is now functional.  "Unsafe mode" coming

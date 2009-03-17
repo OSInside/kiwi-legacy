@@ -26,7 +26,6 @@
 
 #include "Platform.h"
 
-
 class PlatformMacintosh : public Platform
 {
 public:

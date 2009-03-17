@@ -23,11 +23,13 @@ win32 {
 	LIBS += user32.lib
 	LIBPATH += $$quote($$SDKDIR\..\v6.0A\Lib)
 }
+
 macx {
 	SOURCES += PlatformMac.cpp
 	CONFIG += x86 ppc
 	LIBS += -framework IOKit
 }
+
 unix:!macx {
 	exists ("/usr/include/hal/libhal.h")
 	{
