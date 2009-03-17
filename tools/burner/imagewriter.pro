@@ -15,6 +15,7 @@ HEADERS += DeviceItem.h \
            PlatformWindows.h \
            PlatformMac.h
 SOURCES += main.cpp MainWindow.cpp Platform.cpp
+
 win32 {
 	SOURCES += PlatformWindows.cpp
 	SDKDIR = $$(WindowsSdkDir)

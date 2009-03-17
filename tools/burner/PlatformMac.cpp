@@ -174,6 +174,7 @@ PlatformMacintosh::writeData(QString path, QString fileName, qint64 deviceSize)
         return;
     }
 
+
     QProgressDialog progress(" ", "Cancel", 0, 100);
     progress.setMinimumDuration(0);
     progress.setWindowModality(Qt::WindowModal);
