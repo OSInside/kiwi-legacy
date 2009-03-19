@@ -51,11 +51,10 @@ sub main {
 	# Add %changelog
 	#----------------------------------------------
 	if (open (FD,">>$pacdir/kiwi.spec")) {
-		my $log = convert_changes_to_rpm_changelog ("$pacdir/kiwi.changes",*FD);
 		print FD "\n";
 		print FD '%changelog -n kiwi';
 		print FD "\n";
-		print FD $log;
+		convert_changes_to_rpm_changelog ("$pacdir/kiwi.changes",*FD);
 		close FD;
 	}
 	#==============================================
