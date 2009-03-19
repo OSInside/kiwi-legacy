@@ -1,0 +1,135 @@
+<?xml version="1.0"?>
+<image schemeversion="2.4" name="LimeJeOS-SLE10">
+	<!-- Base Information -->
+	<description type="system">
+		<author>Marcus Schäfer</author>
+		<contact>ms@novell.com</contact>
+		<specification>
+			SUSE SLE10 JeOS, is a small text based image which
+			allows editing of files as well as upgrading to a full
+			distro by using zypper with the pre-defined repository 
+		</specification>
+	</description>
+	<!-- Image Type and Preferences -->
+	<preferences>
+		<type 
+			primary="true"
+			filesystem="reiserfs"
+			boot="vmxboot/suse-SLES10"
+		>vmx</type>
+		<type 
+			filesystem="reiserfs"
+			boot="oemboot/suse-SLES10"
+			format="iso"
+		>oem</type>
+		<type 
+			boot="isoboot/suse-SLES10"
+		>iso</type>
+		<type 
+			filesystem="reiserfs"
+			boot="xenboot/suse-SLES10"
+		>xen</type>
+		<version>1.10.1</version>
+		<packagemanager>smart</packagemanager>
+		<locale>en_US.UTF-8</locale>
+		<keytable>de-latin1-nodeadkeys.map.gz</keytable>
+		<timezone>Europe/Berlin</timezone>
+		<rpm-excludedocs>yes</rpm-excludedocs>
+	</preferences>
+	<!-- Users setup -->
+	<users group="root">
+		<user 
+			pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0"
+			home="/root"
+			name="root"
+		/>
+	</users>
+	<!-- Package Repositories -->
+	<repository type="yast2">
+		<!-- you need to setup your SLE10 source here -->
+		<source path="/image/CDs/full-sles10-sp2-i386"/>
+	</repository>
+	<repository type="rpm-dir">
+		<source path="/usr/share/kiwi/repo/suse-repo/suse-sle10-repo"/>
+	</repository>
+	<!-- Packages and Patterns -->
+	<packages type="image" patternType="plusRecommended" patternPackageType="plusRecommended">
+		<package name="kernel-default" replaces="kernel-xen"/>
+		<package name="bootsplash"/>
+		<package name="bootsplash-theme-SuSE-SLES"/>
+		<package name="ifplugd"/>
+		<package name="dhcp-client"/>
+		<package name="vim"/>
+		<package name="grub"/>
+		<opensusePattern name="base"/>
+		<ignore name="855resolution"/>
+		<ignore name="xbsql"/>
+		<ignore name="xbase"/>
+		<ignore name="wv2-devel"/>
+		<ignore name="thinkfinger"/>
+		<ignore name="steak"/>
+		<ignore name="sles-release"/>
+		<ignore name="release-notes-sles"/>
+		<ignore name="raptor"/>
+		<ignore name="raptor-devel"/>
+		<ignore name="qtc"/>
+		<ignore name="mpg321"/>
+		<ignore name="libyaz-devel"/>
+		<ignore name="libpqxx-devel"/>
+		<ignore name="liblrdf-devel"/>
+		<ignore name="libdar-devel"/>
+		<ignore name="libchipcard-devel"/>
+		<ignore name="lib3ds"/>
+		<ignore name="lame"/>
+		<ignore name="krpmbuilder"/>
+		<ignore name="kdbg"/>
+		<ignore name="hk_classes"/>
+		<ignore name="hk_classes-devel"/>
+		<ignore name="gambas"/>
+		<ignore name="ffmpeg-devel"/>
+		<ignore name="eric"/>
+		<ignore name="dclib-devel"/>
+		<ignore name="colorgcc"/>
+		<ignore name="bootsplash-theme-SuSE-SLES"/>
+		<ignore name="amarok-helix"/>
+		<ignore name="agg-devel"/>
+		<ignore name="smtp_daemon"/>
+		<ignore name="pdisk"/>
+		<ignore name="pfmon"/>
+		<ignore name="powerpc32"/>
+		<ignore name="s390-32"/>
+		<ignore name="s390-tools"/>
+		<ignore name="salinfo"/>
+		<ignore name="sles-preparation-power_en"/>
+		<ignore name="sles-preparation-zseries_en"/>
+		<ignore name="libpfm"/>
+		<ignore name="gnome2-SLES"/>
+		<ignore name="mcelog"/>
+		<ignore name="numactl"/>
+		<ignore name="bootloader-theme-NLD"/>
+		<ignore name="evolution-caldav"/>
+		<ignore name="gstreamer010-plugins-good-oil"/>
+		<ignore name="linux32"/>
+		<ignore name="mDNSResponder"/>
+		<ignore name="neo"/>
+		<ignore name="novfs-kmp"/>
+		<ignore name="openh323-devel"/>
+		<ignore name="texinfo"/>
+	</packages>
+	<packages type="xen">
+		<package name="kernel-xen" replaces="kernel-default"/>
+		<package name="xen"/>
+	</packages>
+	<packages type="bootstrap">
+		<package name="filesystem"/>
+		<package name="glibc-locale"/>
+	</packages>
+	<!-- Virtual Machine configurations -->
+	<vmwareconfig memory="256" guestOS="suse" HWversion="4">
+		<vmwaredisk controller="scsi" id="0"/>
+		<vmwarenic driver="e1000" interface="0" mode="bridged"/>
+	</vmwareconfig>
+	<xenconfig memory="256">
+		<xendisk device="/dev/sda"/>
+	</xenconfig>
+</image>
