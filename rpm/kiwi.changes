@@ -2,6 +2,7 @@
 Wed Mar 18 12:28:01 CET 2009 - ms@suse.de
 
 - v3.34
+- really fixed this path handling in upgrade mode
 - fixed ignore element validation
 - added suse-SLE10-JeOS template
 

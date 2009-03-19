@@ -205,7 +205,7 @@ sub thisPath {
 		$thisPath = <FD>; close FD;
 		$thisPath = "$thisPath/$module";
 	} elsif (defined $main::Upgrade) {
-		if (! open FD,"$main::Create/image/main::Prepare") {
+		if (! open FD,"$main::Upgrade/image/main::Prepare") {
 			return undef;
 		}
 		$thisPath = <FD>; close FD;
