@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Mar 18 12:28:01 CET 2009 - ms@suse.de
+
+- v3.34
+- fixed ignore element validation
+- added suse-SLE10-JeOS template
+
+-------------------------------------------------------------------
 Tue Mar 17 18:05:05 CET 2009 - mbarringer@suse.de
 
 - Ported the new imagewriter UI to MacOS

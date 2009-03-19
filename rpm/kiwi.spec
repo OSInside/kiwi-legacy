@@ -1,5 +1,5 @@
 #
-# spec file for package kiwi (Version 3.33)
+# spec file for package kiwi (Version 3.34)
 #
 # Copyright (c) 2008 SUSE LINUX Products GmbH, Nuernberg, Germany.
 # This file and all modifications and additions to the pristine
@@ -43,7 +43,7 @@ Requires:       satsolver-tools
 Summary:        OpenSuSE - KIWI Image System
 Provides:       kiwi2 <= 2.14
 Obsoletes:      kiwi2 <= 2.14
-Version:        3.33
+Version:        3.34
 Release:        80
 Group:          System/Management
 License:        GPL v2 or later
@@ -418,6 +418,7 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_datadir}/kiwi
 %dir %{_datadir}/kiwi/image
 %exclude %{_datadir}/kiwi/image/suse-11.1-JeOS
+%exclude %{_datadir}/kiwi/image/suse-SLE10-JeOS
 %exclude %{_datadir}/kiwi/image/suse-SLE11-JeOS
 %{_datadir}/kiwi/.revision
 %{_datadir}/kiwi/modules
@@ -559,7 +560,9 @@ rm -rf $RPM_BUILD_ROOT
 %files -n kiwi-templates
 %defattr(-, root, root)
 %dir %{_datadir}/kiwi/image/suse-11.1-JeOS
+%dir %{_datadir}/kiwi/image/suse-SLE10-JeOS
 %dir %{_datadir}/kiwi/image/suse-SLE11-JeOS
 %{_datadir}/kiwi/image/suse-11.1-JeOS
+%{_datadir}/kiwi/image/suse-SLE10-JeOS
 %{_datadir}/kiwi/image/suse-SLE11-JeOS
 %endif

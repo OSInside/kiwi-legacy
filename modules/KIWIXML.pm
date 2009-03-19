@@ -2487,7 +2487,7 @@ sub getList {
 			push @ignorelist,$ignore;
 		}
 		if (@ignorelist) {
-			my %keylist = ();
+			my @newlist = ();
 			foreach my $element (@result) {
 				my $pass = 1;
 				foreach my $ignore (@ignorelist) {
@@ -2498,9 +2498,9 @@ sub getList {
 				if (! $pass) {
 					next;
 				}
-				$keylist{$element} = $element;
+				push @newlist,$element;
 			}
-			@result = keys %keylist;
+			@result = @newlist;
 		}
 	}
 	#==========================================

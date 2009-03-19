@@ -942,7 +942,7 @@ function suseStripInitrd {
 		ldd driveready checkmedia splashy bzip2 hexdump
 		pvchange pvresize pvscan vgscan vgchange vgextend vgdisplay
 		lvchange lvresize lvextend lvcreate grub dcounter tty
-		dmsetup
+		dmsetup dialog
 	"
 	tools="$tools $@"
 	for path in /sbin /usr/sbin /usr/bin /bin;do
