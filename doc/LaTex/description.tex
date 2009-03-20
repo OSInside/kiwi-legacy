@@ -23,13 +23,13 @@ of the later operating system.
 
 \begin{itemize}
 \item \textbf{\underline{images.sh}}\\
-      Optional configuration script while creating the logical extend.
+      Optional configuration script while creating the packed image.
       This script is called at the beginning of the image creation process.
       It is designed to clean-up the image system. Affected are all the
-      programs and files only needed while the physical extend exists.
+      programs and files only needed while the unpacked image exists.
 
 \item \textbf{\underline{config.sh}}\\
-      Optional configuration script while creating the physical extend. This
+      Optional configuration script while creating the unpacked image. This
       script is called at the end of the installation but \textbf{before}
       the package scripts have run. It is designed to configure the image
       system, such as the activation or deactivation of certain services
