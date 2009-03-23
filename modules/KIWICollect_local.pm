@@ -777,13 +777,6 @@ sub setupPackageFiles
       $this->logMsg("W", "Evaluate package $packName for @archs") if $this->{m_debug} >= 4;
     }
 
-#    if ( $packOptions->{pointers} ) {
-#      # A package has been found in former runs, do not evaluate, just take it
-#      ELEMENTS:foreach my $p(@{$packOptions->{pointers}}) {
-#      };
-#      next PACK;
-#    };
-
     ARCH:foreach my $requestedArch(@archs) {
       $this->logMsg("W", "  Evaluate package $packName for requested arch $requestedArch") if $this->{m_debug} >= 5;
 
@@ -801,7 +794,7 @@ sub setupPackageFiles
       my $fb_available = 0;
       FA:foreach my $arch(@fallbacklist) {
         $this->logMsg("W", "    check architecture $arch ") if $this->{m_debug} >= 5;
-        PACKKEY:foreach my $packKey(keys(%{$poolPackages})) {
+        PACKKEY:foreach my $packKey( sort{$poolPackages->{$a}->{priority} <=> $poolPackages->{$b}->{priority}} keys(%{$poolPackages})) {
         # FIXME: check for forcerepo
           $this->logMsg("W", "    check $packKey ") if $this->{m_debug} >= 5;
 
@@ -1088,7 +1081,7 @@ sub unpackMetapackages
       push @archs, $this->{m_archlist}->fallbacks($reqArch) if ($nofallback==0);
 
       FARCH:foreach my $arch(@archs) {
-        PACKKEY:foreach my $packKey(keys(%{$poolPackages})) {
+        PACKKEY:foreach my $packKey( sort{$poolPackages->{$a}->{priority} <=> $poolPackages->{$b}->{priority}} keys(%{$poolPackages})) {
           my $packPointer = $poolPackages->{$packKey};
           next PACKKEY if(!$packPointer->{'localfile'}); # should not be needed
           next PACKKEY if($packPointer->{arch} ne $arch);
@@ -1311,7 +1304,7 @@ sub lookUpAllPackages
   my $count_repos = 0;
   my $last_progress_time = 0;
 
-  REPO:foreach my $r(keys(%{$this->{m_repos}})) { # FIXME priority !
+  REPO:foreach my $r(sort {$this->{m_repos}->{$a}->{priority} <=> $this->{m_repos}->{$b}->{priority}} keys(%{$this->{m_repos}})) {
     my $num_dirs = keys %{$this->{m_repos}->{$r}->{'srcdirs'}};
     my $count_dirs = 0;
     $count_repos++;
@@ -1361,6 +1354,7 @@ sub lookUpAllPackages
           $package->{'localfile'} = $uri;
           $package->{'version'} = $flags{'VERSION'}[0];
           $package->{'release'} = $flags{'RELEASE'}[0];
+          $package->{'priority'} = "$this->{m_repos}->{$r}->{priority}"; # needs to be a string or sort breaks later
 
           # We can have a package only once per architecture and in one repo
           my $repokey = $r."@".$arch;
