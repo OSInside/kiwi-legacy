@@ -5,6 +5,9 @@ Mon Mar 23 10:28:31 CET 2009 - ms@suse.de
 - Add support for repository ordering
   * For KIWI system image builds with zypper (requires openSUSE 11.1 zypper)
   * For installation images generation [bnc #487712]
+- removed KIWICollect_local.pm and also the --instsource-local
+  option from the code base. This module is no longer maintained
+  and all code related to this path went into KIWICollect.pm
 
 -------------------------------------------------------------------
 Wed Mar 18 12:28:01 CET 2009 - ms@suse.de

@@ -191,7 +191,6 @@ our $FSJournalSize;         # filesystem journal size
 our $FSNumInodes;           # filesystem max inodes
 our $Verbosity = 0;         # control the verbosity level
 our $TargetArch;            # target architecture -> writes zypp.conf
-our $InstSourceLocal;       # create installation source from local metadata
 our $CheckKernel;           # check for kernel matches in boot and system image
 our $LVM;                   # use LVM partition setup for virtual disk
 our $Debug;                 # activates the internal stack trace output
@@ -1262,7 +1261,6 @@ sub init {
 		"fs-inodesize=i"        => \$FSInodeSize,
 		"fs-maxinodes=i"        => \$FSNumInodes,
 		"partitioner=s"         => \$Partitioner,
-		"instsource-local"      => \$InstSourceLocal,
 		"target-arch=s"         => \$TargetArch,
 		"check-kernel"          => \$CheckKernel,
 		"lvm"                   => \$LVM,
@@ -1458,7 +1456,7 @@ sub usage {
 	print "       [ --installstick-system <vmx-system-image> ]\n";
 	print "Installation source creation:\n";
 	print "    kiwi --root <targetpath> --create-instsource <config>\n";
-	print "       [ --instsource-local ] [ -v|--verbose <1|2|3> ]\n";
+	print "       [ -v|--verbose <1|2|3> ]\n";
 	print "Testsuite:\n";
 	print "    kiwi --testsuite <image-root> \n";
 	print "       [ --test name --test name ... ]\n";
@@ -2191,10 +2189,6 @@ sub createInstSource {
 	$kiwi = new KIWILog("tiny");
 	$kiwi -> deactivateBackTraceOutput();
 	my $mod = "KIWICollect";
-	if ($InstSourceLocal) {
-		$kiwi->info("Using KIWICollect-local.pm instead of KIWICollect");
-		$mod = "KIWICollect_local";
-	}
 	eval "require $mod";
 	if($@) {
 		$kiwi->error("Module <$mod> is not available!");
