@@ -49,7 +49,11 @@ class MainWindow : public QWidget
     Q_OBJECT
 
 public:
-    MainWindow(const char *cmddevice, const char *cmdfile, bool unsafe = false, QWidget *parent = 0);
+    MainWindow(const char *cmddevice,
+               const char *cmdfile,
+               bool unsafe = false,
+               bool maximized = false,
+               QWidget *parent = 0);
 
 public slots:
     void selectImage();
@@ -82,6 +86,7 @@ private:
     QLabel *fileSize, *fileLabel;
     QComboBox *deviceComboBox;
     Platform *platform;
+    bool mMaximized;
 };
 
 // Rather than grabbing a mouse click for the entire window, just grab it for the part

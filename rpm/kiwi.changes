@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Mar 23 17:33:54 CET 2009 - mbarringer@suse.de
+
+- Adding "-m" to the imagewriter to start in a maximized window
+
+-------------------------------------------------------------------
 Mon Mar 23 10:28:31 CET 2009 - ms@suse.de
 
 - v3.35

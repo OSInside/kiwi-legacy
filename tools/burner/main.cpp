@@ -37,6 +37,7 @@ main (int argc, char *argv[])
     char *device = NULL;
     char *file = NULL;
     bool unsafe = false;
+    bool maximized = false;
 #if defined(Q_OS_UNIX) 
 #ifndef KIOSKHACK
     if (getuid() != 0)
@@ -44,7 +45,7 @@ main (int argc, char *argv[])
 #endif
 #endif
 
-    while ((c = getopt (argc, argv, "vuhd:f:")) != -1)
+    while ((c = getopt (argc, argv, "mvuhd:f:")) != -1)
     {
         switch (c)
         {
@@ -53,6 +54,7 @@ main (int argc, char *argv[])
                 fprintf(stdout, "Flashes a raw disk file to a device\n\n");
                 fprintf(stdout, "-d <device>\t\tSpecify a device, for example: /dev/sdc\n");
                 fprintf(stdout, "-f <raw file\t\tSpecify the file to write\n");
+                fprintf(stdout, "-m\t\t\tMaximize the window");
                 fprintf(stdout, "-u\t\t\tOperate in unsafe mode, listing all disks, not just removable ones\n");
                 fprintf(stdout, "-v\t\t\tVersion and author information\n");
                 exit(0);
@@ -69,13 +71,23 @@ main (int argc, char *argv[])
                 fprintf(stdout, "%s\nWritten by Matt Barringer <mbarringer@suse.de>\n", VERSION);
                 exit(0);
                 break;
+            case 'm':
+                 maximized = true;
+                 break;
             default:
                 break;
         }
     }
 
     QApplication app(argc, argv);
-    MainWindow window(device, file, unsafe);
-    window.show();
+    MainWindow window(device, file, unsafe, maximized);
+    if (maximized)
+    {
+        window.showMaximized();
+    }
+    else
+    {
+        window.show();
+    }
     return app.exec();
 }

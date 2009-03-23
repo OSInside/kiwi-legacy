@@ -27,12 +27,16 @@
 
 #include "MainWindow.h"
 
-MainWindow::MainWindow (const char *cmddevice, const char *cmdfile, bool unsafe, QWidget *parent)
+MainWindow::MainWindow (const char *cmddevice,
+                        const char *cmdfile,
+                        bool unsafe,
+                        bool maximized,
+                        QWidget *parent)
  : QWidget(parent)
 {
     int dev = -1;
     file = QString();
-
+    mMaximized = maximized;
     fileSize = new QLabel("      ");
     fileLabel = new QLabel("     ");
 
@@ -84,7 +88,9 @@ MainWindow::MainWindow (const char *cmddevice, const char *cmdfile, bool unsafe,
           setSizeLabel(cmdfile);
         }
     }
-    centerWindow();
+
+    if (!mMaximized)
+        centerWindow();
 
 }
 
@@ -144,7 +150,9 @@ MainWindow::useNewUI()
     mainLayout->addLayout(comboLayout);
 
     setLayout(mainLayout);
-    resize(600, 400);
+    if (!mMaximized)
+        resize(600, 400);
+
     setAcceptDrops(true);
 #endif
 
@@ -193,7 +201,8 @@ MainWindow::useOldUI()
 
     mainLayout->addLayout(buttonLayout, 2, 0, Qt::AlignRight);
     setLayout(mainLayout);
-    resize(600,170);
+    if (!mMaximized)
+        resize(600,170);
 #endif
 
     return;
