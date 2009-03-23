@@ -669,7 +669,7 @@ sub setupInstallationSource {
 	#------------------------------------------
 	if ($manager eq "zypper") {
 		my $stype = "private";
-                my $prio;
+		my $prio;
 		qxx ("rm -f $dataDir/*.repo");
 		if (! $chroot) {
 			$stype = "public";
@@ -734,14 +734,15 @@ sub setupInstallationSource {
 				$kiwi -> error  ("zypper: $data");
 				return undef;
 			}
-                        if ( $prio ) {
+			if ( $prio ) {
 				my $modrepo = "modifyrepo -p $prio $alias";
+				my $modtext = "Changing priority of";
 				if (! $chroot) {
-					$kiwi -> info ("Change prio of bootstrap zypper service: $alias");
+					$kiwi -> info ("$modtext bootstrap zypper service: $alias");
 					$data = qxx ("@zypper --root \"$root\" $modrepo 2>&1");
 					$code = $? >> 8;
 				} else {
-					$kiwi -> info ("Change prio of chroot zypper service: $alias");
+					$kiwi -> info ("$modtext chroot zypper service: $alias");
 					$data = qxx ("@kchroot @zypper $modrepo 2>&1");
 					$code = $? >> 8;
 				}
