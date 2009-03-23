@@ -424,7 +424,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/kiwi/modules
 %{_datadir}/kiwi/repo
 %exclude %{_datadir}/kiwi/modules/KIWICollect.pm
-%exclude %{_datadir}/kiwi/modules/KIWICollect_local.pm
 %exclude %{_datadir}/kiwi/modules/KIWIRepoMetaHandler.pm
 %exclude %{_datadir}/kiwi/modules/KIWIUtil.pm
 %{_datadir}/kiwi/tests
@@ -455,7 +454,6 @@ rm -rf $RPM_BUILD_ROOT
 %files -n kiwi-instsource
 %defattr(-, root, root)
 %{_datadir}/kiwi/modules/KIWICollect.pm
-%{_datadir}/kiwi/modules/KIWICollect_local.pm
 %{_datadir}/kiwi/modules/KIWIUtil.pm
 %{_datadir}/kiwi/modules/KIWIRepoMetaHandler.pm
 /usr/bin/suse-isolinux
