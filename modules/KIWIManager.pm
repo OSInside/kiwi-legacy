@@ -669,6 +669,7 @@ sub setupInstallationSource {
 	#------------------------------------------
 	if ($manager eq "zypper") {
 		my $stype = "private";
+                my $prio;
 		qxx ("rm -f $dataDir/*.repo");
 		if (! $chroot) {
 			$stype = "public";
@@ -715,7 +716,7 @@ sub setupInstallationSource {
 				# Adapt priority parameter
 				#------------------------------------------
 				if ($key eq "priority") {
-					# next versions of zypper knows about it
+					$prio = $val;
 				}
 			}
 			my $sadd = "addrepo @zopts $alias";
@@ -732,6 +733,23 @@ sub setupInstallationSource {
 				$kiwi -> failed ();
 				$kiwi -> error  ("zypper: $data");
 				return undef;
+			}
+                        if ( $prio ) {
+				my $modrepo = "modifyrepo -p $prio $alias";
+				if (! $chroot) {
+					$kiwi -> info ("Change prio of bootstrap zypper service: $alias");
+					$data = qxx ("@zypper --root \"$root\" $modrepo 2>&1");
+					$code = $? >> 8;
+				} else {
+					$kiwi -> info ("Change prio of chroot zypper service: $alias");
+					$data = qxx ("@kchroot @zypper $modrepo 2>&1");
+					$code = $? >> 8;
+				}
+				if ($code != 0) {
+					$kiwi -> failed ();
+					$kiwi -> error  ("zypper: $data");
+					return undef;
+				}
 			}
 			push (@channelList,$alias);
 			$kiwi -> done ();
