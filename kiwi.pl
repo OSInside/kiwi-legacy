@@ -257,6 +257,25 @@ sub main {
 	# Prepare and Create in one step
 	#----------------------------------------
 	if (defined $Build) {
+		#==========================================
+		# Check if destdir exists or not 
+		#------------------------------------------
+		if (! -d $Destination) {
+			my $prefix = $kiwi -> getPrefix (1);
+			my $answer = "unknown";
+			$kiwi -> info ("Destination: $Destination doesn't exist\n");
+			while ($answer !~ /^yes$|^no$/) {
+				print STDERR $prefix,
+					"Would you like kiwi to create it [yes/no] ? ";
+				chomp ($answer = <>);
+			}
+			if ($answer eq "yes") {
+				qxx ("mkdir -p $Destination");
+			}
+		}
+		#==========================================
+		# Setup prepare 
+		#------------------------------------------
 		$main::Prepare = $Build;
 		$main::RootTree= $Destination."/image-root";
 		$main::Survive = "yes";
@@ -266,6 +285,9 @@ sub main {
 			$main::Survive = "default";
 			my $code = kiwiExit (1); return $code;
 		}
+		#==========================================
+		# Setup create 
+		#------------------------------------------
 		undef $main::Prepare;
 		undef $main::ForceNewRoot;
 		$main::Survive = "default";

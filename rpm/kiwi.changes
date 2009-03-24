@@ -13,6 +13,8 @@ Mon Mar 23 10:28:31 CET 2009 - ms@suse.de
 - removed KIWICollect_local.pm and also the --instsource-local
   option from the code base. This module is no longer maintained
   and all code related to this path went into KIWICollect.pm
+- add --dest-dir check when --build runs
+- update template descriptions
 
 -------------------------------------------------------------------
 Wed Mar 18 12:28:01 CET 2009 - ms@suse.de

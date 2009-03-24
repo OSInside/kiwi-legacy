@@ -63,8 +63,6 @@ zypper sa $baseRepo $baseName
 # Remove unneeded packages
 #--------------------------------------
 rpm -qa | grep yast | xargs rpm -e --nodeps
-rpm -qa | grep perl | xargs rpm -e --nodeps
-rpm -qa | grep cracklib | xargs rpm -e --nodeps
 
 #======================================
 # Umount kernel filesystems

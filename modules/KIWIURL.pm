@@ -395,7 +395,13 @@ sub openSUSEpath {
 	my @responses = ();
 	foreach my $url (@urllist) {
 		my $request = HTTP::Request->new (GET => $url);
-		my $response= $browser -> request  ( $request );
+		my $response;
+		eval {
+			$response= $browser -> request  ( $request );
+		};
+		if ($@) {
+			return undef;
+		}
 		my $title   = $response-> title ();
 		if ((defined $title) && ($title !~ /not found/i)) {
 			my $repourl = $url;

@@ -48,7 +48,7 @@
 	</users>
 	<!-- Package Repositories -->
 	<repository type="yast2">
-		<source path="opensuse://11.1/repo/oss/"/>
+		<source path="opensuse://11.1/repo/oss"/>
 	</repository>
 	<!-- Packages and Patterns -->
 	<packages type="image">
