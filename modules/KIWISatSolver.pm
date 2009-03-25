@@ -71,6 +71,7 @@ sub new {
 	my $solvep  = shift;
 	my $repo    = shift;
 	my $pool    = shift;
+	my $quiet   = shift;
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
@@ -82,7 +83,9 @@ sub new {
 		$kiwi = new KIWILog("tiny");
 	}
 	if ((! defined $repo) || (! defined $pool)) {
-		$kiwi -> info ("Setting up SaT solver...\n");
+		if (! defined $quiet) {
+			$kiwi -> info ("Setting up SaT solver...\n");
+		}
 	}
 	if (! $KIWISatSolver::haveSaT) {
 		$kiwi -> error ("--> No SaT plugin installed");
@@ -150,11 +153,30 @@ sub new {
 		my $solution = $this -> getSolutions();
 		$kiwi -> warning ("--> Solver Problems:\n$solution");
 	}
+	my $size = $solver -> getInstallSizeKBytes();
 	my $list = $solver -> getInstallList ($pool);
+	my @plist= ();
+	my %slist= ();
+	my $count= 0;
+	my $pprev;
 	foreach my $name (@{$list}) {
-		if ($name =~ /^((pattern|product):.*)/) {
-			$kiwi -> info ("Including $1");
-			$kiwi -> done ();
+		if ($count == 0) {
+			push @plist,$name;
+			$pprev = $name;
+			$count = 1;
+		} else {
+			$slist{$pprev} = "$name";
+			$count = 0;
+		}
+	}
+	foreach my $name (@plist) {
+		if ($name =~ /^(pattern|product):(.*)/) {
+			my $type = $1;
+			my $text = $2;
+			if (! defined $quiet) {
+				$kiwi -> info ("Including $type $text");
+				$kiwi -> done ();
+			}
 		} else {
 			push (@solved,$name);
 		}
@@ -162,11 +184,13 @@ sub new {
 	#==========================================
 	# Store object data
 	#------------------------------------------
+	$this->{size}    = $size;
 	$this->{urllist} = $urlref;
 	$this->{plist}   = $pref;
 	$this->{repo}    = $repo;
 	$this->{pool}    = $pool;
 	$this->{result}  = \@solved;
+	$this->{meta}    = \%slist;
 	return $this;
 }
 
@@ -224,6 +248,30 @@ sub getSolutions {
 	my $result = <FD>; close FD;
 	unlink $solution;
 	return $result;
+}
+
+#==========================================
+# getInstallSizeKBytes
+#------------------------------------------
+sub getInstallSizeKBytes {
+	# /.../
+	# return install size in kB of the solved
+	# package list
+	# ----
+	my $this = shift;
+	return $this->{size};
+}
+
+#==========================================
+# getMetaData
+#------------------------------------------
+sub getMetaData {
+	# /.../
+	# return meta data hash, containing the install
+	# size per package
+	# ----
+	my $this = shift;
+	return %{$this->{meta}};
 }
 
 #==========================================

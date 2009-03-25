@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Wed Mar 25 12:36:04 CET 2009 - ms@suse.de
+
+- v3.36
+- allow oem-reboot to take effect in recovery mode (bnc #487887)
+- improved the --list-xmlinfo option which now also prints
+  information about the repositories used for the image
+  and it will print out the install size in kB by using
+  the satsolver. Users can so check how much space is
+  required to build the root tree of the image
+
+-------------------------------------------------------------------
 Mon Mar 23 17:33:54 CET 2009 - mbarringer@suse.de
 
 - Adding "-m" to the imagewriter to start in a maximized window

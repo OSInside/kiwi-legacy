@@ -3816,7 +3816,7 @@ function bootImage {
 	#======================================
 	# check for reboot request
 	#--------------------------------------
-	if [ $LOCAL_BOOT = "no" ];then
+	if [ $LOCAL_BOOT = "no" ] || [ ! -z "$KIWI_RECOVERY" ];then
 		if [ ! -z "$OEM_REBOOT" ] || [ ! -z "$REBOOT_IMAGE" ];then
 			reboot=yes
 		fi

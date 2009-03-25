@@ -15,7 +15,7 @@ int main (void) {
 	FILE   *fp     = 0;
 	int b;
 	Queue  queue;
-	int fd = open ("/var/cache/kiwi/satsolver/12e185e932ba137e4535d33ae2b97db4", O_RDONLY);
+	int fd = open ("/var/cache/kiwi/satsolver/0df87b1388d164da67caf952a9ea49fc", O_RDONLY);
 	if (fd == -1) {
 		return 1;
 	}
@@ -60,6 +60,10 @@ int main (void) {
 		solver_printsolutions(solver, &queue);
 	}
 
+	unsigned long size = solver_calc_installsizechange (solver);
+	printf ("REQUIRED SIZE: %ldkB\n",size);
+
+	size = 0;
 	for (b = 0; b < solver->decisionq.count; b++) {
 		Id p = solver->decisionq.elements[b];
 		//printf ("SOLVER DECISION ID: %d\n",p);
@@ -71,10 +75,15 @@ int main (void) {
 			continue;
 		}
 		Solvable *s = solver->pool->solvables + p;
-		printf ("SOLVER NAME: %s\n",id2str(pool, s->name));
+		unsigned int bytes = solvable_lookup_num(s, SOLVABLE_INSTALLSIZE, 0);
+		size += bytes;
+		printf ("SOLVER NAME: %s %ukB\n", id2str(pool, s->name),bytes);
 	}	
+	printf ("REQUIRED SIZE: %ldkB\n",size);
 	return 0;
 }
+
+
 
 Id select_solvable (Repo *repo, Pool* pool,char *name) {
 	Id id;

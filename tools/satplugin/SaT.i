@@ -208,10 +208,13 @@ extern "C"
         solver_solve(self, job);
     }
 
+    unsigned long getInstallSizeKBytes (void) {
+        return solver_calc_installsizechange (self);
+    }
+
     SV* getInstallList (Pool *pool) {
         int b = 0;
         AV *myav = newAV();
-        SV *mysv = 0;
         SV *res  = 0;
         int len = self->decisionq.count;
         for (b = 0; b < len; b++) {
@@ -224,11 +227,18 @@ extern "C"
             }
             Solvable *s = self->pool->solvables + p;
             //printf ("SOLVER NAME: %d %s\n",p,id2str(pool, s->name));
+            unsigned int bytes=solvable_lookup_num(s, SOLVABLE_INSTALLSIZE, 0);
             const char* myel = (char*)id2str(pool, s->name);
-            mysv = sv_newmortal();
-            mysv = perl_get_sv (myel,TRUE);
-            sv_setpv(mysv, myel);
-            av_push (myav,mysv);
+            char* myis = (char*)malloc (sizeof (char) * 5);
+            sprintf (myis,"%u",bytes);
+            SV* mysv1 = sv_newmortal();
+            mysv1 = perl_get_sv (myel,TRUE);
+            sv_setpv(mysv1, myel);
+            av_push (myav,mysv1);
+            SV* mysv2 = sv_newmortal();
+            mysv2 = perl_get_sv ((const char*)myis,TRUE);
+            sv_setpv(mysv2, myis);
+            av_push (myav,mysv2);
         }
         res = newRV((SV*)myav);
         sv_2mortal (res);

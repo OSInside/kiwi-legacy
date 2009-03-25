@@ -6,7 +6,7 @@ use strict;
 use KIWI::SaT;
 
 # Open Solvable file
-open(F, "cat /var/cache/kiwi/satsolver/12e185e932ba137e4535d33ae2b97db4 |") || die;
+open(F, "cat /var/cache/kiwi/satsolver/0df87b1388d164da67caf952a9ea49fc |") || die;
 
 # Create Pool and Repository 
 my $pool = new KIWI::SaT::_Pool;
@@ -42,6 +42,9 @@ foreach my $p (@pats) {
 
 # Solve the jobs
 $solver -> solve ($queue);
+
+my $size = $solver -> getInstallSizeKBytes();
+print "REQUIRED SIZE: $size kB\n";
 
 if ($solver->getProblemsCount()) {
 	$a = $solver->getSolutions ($queue);

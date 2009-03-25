@@ -74,8 +74,8 @@ udevStart
 #--------------------------------------
 includeKernelParameters
 if \
-	[ ! -z $UNIONFS_CONFIG ] || [ "$COMBINED_IMAGE" = "local" ] ||\
-	[ ! -z $KIWI_RECOVERY ]
+	[ ! -z "$UNIONFS_CONFIG" ] || [ "$COMBINED_IMAGE" = "local" ] ||\
+	[ ! -z "$KIWI_RECOVERY" ]
 then
 	# /.../
 	# if the unionfs/combined information is already in place at this
@@ -259,6 +259,7 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 	if [ ! $runReco = "y" ];then
 		systemException "System-Recovery not started" "reboot"
 	fi
+	importFile < $OEM_PARTITION_CONFIG
 	Echo "Starting System-Recovery..."
 	#======================================
 	# 16.1) mount recovery partition

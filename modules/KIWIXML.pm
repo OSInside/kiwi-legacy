@@ -2520,6 +2520,91 @@ sub getList {
 }
 
 #==========================================
+# getInstallSize
+#------------------------------------------
+sub getInstallSize {
+	my $this  = shift;
+	my $kiwi  = $this->{kiwi};
+	my $nodes = $this->{packageNodeList};
+	my @result= ();
+	my @delete= ();
+	for (my $i=1;$i<= $nodes->size();$i++) {
+		my $node = $nodes -> get_node($i);
+		my $type = $node -> getAttribute ("type");
+		#============================================
+		# Check to see if node is in included profile
+		#--------------------------------------------
+		if (! $this -> requestedProfile ($node)) {
+			next;
+		}
+		#==========================================
+		# Handle package names to be deleted later
+		#------------------------------------------
+		if ($type eq "delete") {
+			my @dlist = $node -> getElementsByTagName ("package");
+			foreach my $element (@dlist) {
+				my $package = $element -> getAttribute ("name");
+				if (! $this -> isArchAllowed ($element,"packages")) {
+					next;
+				}
+				$package =~ s/@//;
+				if ($package) {
+					push @delete,$package;
+				}
+			}
+		}
+		#==========================================
+		# Handle package names
+		#------------------------------------------
+		my @plist = $node -> getElementsByTagName ("package");
+		foreach my $element (@plist) {
+			my $package = $element -> getAttribute ("name");
+			if (! $this -> isArchAllowed ($element,"packages")) {
+				next;
+			}
+			$package =~ s/@//;
+			if ($package) {
+				push @result,$package;
+			}
+		}
+		#==========================================
+		# Handle pattern/product names
+		#------------------------------------------
+		my @pattlist = ();
+		my @slist = $node -> getElementsByTagName ("opensuseProduct");
+		foreach my $element (@slist) {
+			if (! $this -> isArchAllowed ($element,"packages")) {
+				next;
+			}
+			my $product = $element -> getAttribute ("name");
+			if ($product) {
+				push @result,"product:".$product;
+			}
+		}
+		@slist = $node -> getElementsByTagName ("opensusePattern");
+		foreach my $element (@slist) {
+			if (! $this -> isArchAllowed ($element,"packages")) {
+				next;
+			}
+			my $pattern = $element -> getAttribute ("name");
+			if ($pattern) {
+				push @result,"pattern:".$pattern;
+			}
+		}
+	}
+	my $psolve = new KIWISatSolver (
+		$kiwi,\@result,$this->{urllist},"solve-patterns",
+		undef,undef,"quiet"
+	);
+	if (! defined $psolve) {
+		$kiwi -> warning ("SaT solver setup failed");
+		return undef;
+	}
+	my %meta = $psolve -> getMetaData();
+	return (\%meta,\@delete);
+}
+
+#==========================================
 # getReplacePackageHash
 #------------------------------------------
 sub getReplacePackageHash {

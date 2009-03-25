@@ -44,7 +44,7 @@ use KIWITest;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "3.35";
+our $Version       = "3.36";
 our $Publisher     = "SUSE LINUX Products GmbH";
 our $Preparer      = "KIWI - http://kiwi.berlios.de";
 our $openSUSE      = "http://download.opensuse.org";
@@ -1340,12 +1340,6 @@ sub init {
 		listProfiles();
 	}
 	#==========================================
-	# non root task: Handle listXMLInfo option
-	#------------------------------------------
-	if (defined $listXMLInfo) {
-		listXMLInfo();
-	}
-	#==========================================
 	# Check for root privileges
 	#------------------------------------------
 	if ($< != 0) {
@@ -1462,6 +1456,9 @@ sub init {
 		$kiwi -> error  ("No destination directory specified");
 		$kiwi -> failed ();
 		my $code = kiwiExit (1); return $code;
+	}
+	if (defined $listXMLInfo) {
+		listXMLInfo();
 	}
 }
 
@@ -1721,14 +1718,74 @@ sub listXMLInfo {
 	if (! defined $xml) {
 		exit 1;
 	}
+	#==========================================
+	# Check for ignore-repos option
+	#------------------------------------------
+	if (defined $IgnoreRepos) {
+		$xml -> ignoreRepositories ();
+	}
+	#==========================================
+	# Check for set-repo option
+	#------------------------------------------
+	if (defined $SetRepository) {
+		$xml -> setRepository (
+			$SetRepositoryType,$SetRepository,
+			$SetRepositoryAlias,$SetRepositoryPriority
+		);
+	}
+	#==========================================
+	# Check for add-repo option
+	#------------------------------------------
+	if (defined @AddRepository) {
+		$xml -> addRepository (
+			\@AddRepositoryType,\@AddRepository,
+			\@AddRepositoryAlias,\@AddRepositoryPriority
+		);
+	}
+	#==========================================
+	# Validate repo types
+	#------------------------------------------
+	$xml -> setValidateRepositoryType();
 	my %type = %{$xml->getImageTypeAndAttributes()};
 	#==========================================
 	# print boot information of type section
 	#------------------------------------------
 	if (defined $type{boot}) {
-		$kiwi -> info ("Boot Type: $type{type} @ $type{boot}\n");
+		$kiwi -> info ("Primary image type: $type{type} @ $type{boot}\n");
 	} else {
-		$kiwi -> info ("Boot Type: $type{type}\n");
+		$kiwi -> info ("Primary image type: $type{type}\n");
+	}
+	#==========================================
+	# print repo information
+	#------------------------------------------
+	foreach my $url (@{$xml->{urllist}}) {
+		$kiwi -> info ("Source URL: $url\n");
+	}
+	#==========================================
+	# print install size information
+	#------------------------------------------
+	my ($meta,$delete) = $xml -> getInstallSize();
+	my %meta = %{$meta};
+	my $size = 0;
+	foreach my $p (keys %meta) {
+		$size += $meta{$p};
+	}
+	if ($size > 0) {
+		$kiwi -> info ("Install size for root tree: $size kB\n");
+	}
+	#==========================================
+	# print deletion size information
+	#------------------------------------------
+	$size = 0;
+	if ($delete) {
+		foreach my $del (@{$delete}) {
+			if ($meta{$del}) {
+				$size += $meta{$del};
+			}
+		}
+	}
+	if ($size > 0) {
+		$kiwi -> info ("Deletion size for root tree; $size kB\n");
 	}
 	#==========================================
 	# more to come...
