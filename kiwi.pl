@@ -594,6 +594,34 @@ sub main {
 			$kiwi -> done();
 		}
 		#==========================================
+		# Check for ignore-repos option
+		#------------------------------------------
+		if (defined $IgnoreRepos) {
+			$xml -> ignoreRepositories ();
+		}
+		#==========================================
+		# Check for set-repo option
+		#------------------------------------------
+		if (defined $SetRepository) {
+			$xml -> setRepository (
+				$SetRepositoryType,$SetRepository,
+				$SetRepositoryAlias,$SetRepositoryPriority
+			);
+		}
+		#==========================================
+		# Check for add-repo option
+		#------------------------------------------
+		if (defined @AddRepository) {
+			$xml -> addRepository (
+				\@AddRepositoryType,\@AddRepository,
+				\@AddRepositoryAlias,\@AddRepositoryPriority
+			);
+		}
+		#==========================================
+		# Validate repo types
+		#------------------------------------------
+		$xml -> setValidateRepositoryType();
+		#==========================================
 		# Check if destdir exists or not 
 		#------------------------------------------
 		if (! -d $Destination) {
@@ -631,6 +659,17 @@ sub main {
 			$kiwi -> done();
 		}
 		#==========================================
+		# Check tool set
+		#------------------------------------------
+		my %type = %{$xml->getImageTypeAndAttributes()};
+		my $para = checkType ( \%type );
+		if (! defined $para) {
+			if (defined $BaseRoot) {
+				$overlay -> resetOverlay();
+			}
+			my $code = kiwiExit (1); return $code;
+		}
+		#==========================================
 		# Check type params and create image obj
 		#------------------------------------------
 		$image = new KIWIImage (
@@ -638,14 +677,6 @@ sub main {
 			"/base-system",$origroot
 		);
 		if (! defined $image) {
-			if (defined $BaseRoot) {
-				$overlay -> resetOverlay();
-			}
-			my $code = kiwiExit (1); return $code;
-		}
-		my %type = %{$xml->getImageTypeAndAttributes()};
-		my $para = checkType ( \%type );
-		if (! defined $para) {
 			if (defined $BaseRoot) {
 				$overlay -> resetOverlay();
 			}
@@ -1927,8 +1958,11 @@ sub checkType {
 	#==========================================
 	# check for required filesystem tool(s)
 	#------------------------------------------
-	if (defined $type{filesystem}) {
-		my @fs = split (/,/,$type{filesystem});
+	if ((defined $type{filesystem}) || (defined $type{flags})) {
+		my @fs = ();
+		if (defined $type{filesystem}) {
+			@fs = split (/,/,$type{filesystem});
+		}
 		if ((defined $type{flags}) && ($type{flags} ne "")) {
 			push (@fs,$type{flags});
 		}
@@ -1936,7 +1970,8 @@ sub checkType {
 			my %result = checkFileSystem ($fs);
 			if (%result) {
 				if (! $result{hastool}) {
-					$kiwi -> error ("Can't find mkfs tool for: $result{type}");
+					my $tool = $KnownFS{$result{type}}{tool};
+					$kiwi -> error ("Can't find $tool tool for: $result{type}");
 					$kiwi -> failed ();
 					return undef;
 				}

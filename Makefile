@@ -86,7 +86,7 @@ install:
 	#============================================
 	# kiwi manual pages
 	#--------------------------------------------
-	for i in `ls -1 ./doc/kiwi-man`;do \
+	for i in `ls -1 ./doc/kiwi-man/*.1`;do \
 		install -m 644 ./doc/kiwi-man/$$i ${MANVZ} ;\
 	done
 

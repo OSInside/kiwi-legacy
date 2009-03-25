@@ -324,7 +324,14 @@ sub downloadPattern {
 		my $browser  = LWP::UserAgent->new;
 		my $location = $publics_url."/content";
 		my $request  = HTTP::Request->new (GET => $location);
-		my $response = $browser  -> request ( $request );
+		my $response;
+		eval {
+			$response = $browser  -> request ( $request );
+		};
+		if ($@) {
+			$message = "http request failed: $@";
+			return (undef, "remote[request]: $message: $pattern");
+		}
 		$content     = $response -> content ();
 		if ((defined $content) && ($content ne "")) {
 			#==========================================

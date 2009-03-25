@@ -2895,7 +2895,13 @@ sub getInstSourceFile {
 		my $search   = $2;
 		my $browser  = LWP::UserAgent -> new;
 		my $request  = HTTP::Request  -> new (GET => $location);
-		my $response = $browser  -> request ( $request );
+		my $response;
+		eval {
+			$response = $browser  -> request ( $request );
+		};
+		if ($@) {
+			return undef;
+		}
 		my $content  = $response -> content ();
 		my @lines    = split (/\n/,$content);
 		foreach my $line(@lines) {
