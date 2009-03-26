@@ -3036,6 +3036,7 @@ sub getInstSourceSatSolvable {
 	#------------------------------------------
 	my %distro;
 	$distro{"/suse/setup/descr/packages.gz"} = "packages";
+	$distro{"/suse/setup/descr/packages"}    = "packages";
 	$distro{"/suse/repodata/primary.xml.gz"} = "distxml";
 	$distro{"/repodata/primary.xml.gz"}      = "distxml";
 	#==========================================
@@ -3121,7 +3122,11 @@ sub getInstSourceSatSolvable {
 		$count++;
 		foreach my $dist (keys %distro) {
 			my $name = $distro{$dist};
-			$destfile = $sdir."/$name-".$count.".gz";
+			if ($name =~ /\.gz$/) {
+				$destfile = $sdir."/$name-".$count.".gz";
+			} else {
+				$destfile = $sdir."/$name-".$count;
+			}
 			if (KIWIXML::getInstSourceFile ($kiwi,$repo.$dist,$destfile)) {
 				$foundDist = 1; last;
 			}
@@ -3189,11 +3194,30 @@ sub getInstSourceSatSolvable {
 	#==========================================
 	# create solvable from suse tags data
 	#------------------------------------------
-	if (glob ("$sdir/packages-*.gz")) {
+	if (glob ("$sdir/packages-*")) {
+		my $gzicmd = "gzip -cd ";
+		my $stdcmd = "cat ";
+		$scommand = "";
 		$destfile = $sdir."/primary-".$count;
-		$scommand = "gzip -cd $sdir/packages-*.gz";
-		if (glob ("$sdir/*.pat.gz")) {
-			$scommand .= ";gzip -cd $sdir/*.pat.gz";
+		foreach my $file (glob ("$sdir/packages-*")) {
+			if ($file =~ /\.gz$/) {
+				$gzicmd .= $file." ";
+			} else {
+				$stdcmd .= $file." ";
+			}
+		}
+		foreach my $file (glob ("$sdir/*.pat")) {
+			if ($file =~ /\.gz$/) {
+				$gzicmd .= $file." ";
+			} else {
+				$stdcmd .= $file." ";
+			}
+		}
+		if ($gzicmd ne "gzip -cd ") {
+			$scommand = $gzicmd.";";
+		}
+		if ($stdcmd ne "cat ") {
+			$scommand.= $stdcmd;
 		}
 		my $data = qxx ("($scommand) | susetags2solv > $destfile 2>/dev/null");
 		my $code = $? >> 8;

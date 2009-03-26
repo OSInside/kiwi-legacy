@@ -1,5 +1,5 @@
 #
-# spec file for package kiwi (Version 3.36)
+# spec file for package kiwi (Version 3.37)
 #
 # Copyright (c) 2008 SUSE LINUX Products GmbH, Nuernberg, Germany.
 # This file and all modifications and additions to the pristine
@@ -33,6 +33,9 @@ BuildRequires:  rpm-devel libexpat-devel libsatsolver-devel
 %if %{suse_version} <= 1010
 Requires:       qt
 %endif
+%if %{suse_version} > 1010
+Requires:       squashfs
+%endif
 Requires:       perl = %{perl_version}
 Requires:       perl-XML-LibXML perl-libwww-perl screen coreutils
 Requires:       perl-XML-LibXML-Common perl-XML-SAX perl-Config-IniFiles
@@ -43,7 +46,7 @@ Requires:       satsolver-tools
 Summary:        OpenSuSE - KIWI Image System
 Provides:       kiwi2 <= 2.14
 Obsoletes:      kiwi2 <= 2.14
-Version:        3.36
+Version:        3.37
 Release:        80
 Group:          System/Management
 License:        GPL v2 or later

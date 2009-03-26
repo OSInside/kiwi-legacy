@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Thu Mar 26 10:19:44 CET 2009 - ms@suse.de
+
+- v3.37
+- added squashfs requirement for suse version > 10.1
+- fixed solvable creation for repos without compressed
+  meta data (packages and .pat file)
+
+-------------------------------------------------------------------
 Wed Mar 25 12:36:04 CET 2009 - ms@suse.de
 
 - v3.36
