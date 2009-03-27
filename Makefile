@@ -49,7 +49,7 @@ all: modules/KIWIScheme.rng modules/KIWISchemeTest.rng
 	#--------------------------------------------
 	(cd system/boot/${arch} && ./.md5)
 	(cd system/boot/${arch} && \
-		find -type f | grep -v -E ".svn|.test|.md5" |\
+		find -type f | grep -v -E ".git|.test|.md5" |\
 		xargs chmod u-w &>/dev/null || true)
 
 	#============================================

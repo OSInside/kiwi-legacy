@@ -392,6 +392,7 @@ function startSplashy {
 function startBlogD {
 	REDIRECT=$(showconsole 2>/dev/null)
 	if test -n "$REDIRECT" ; then
+		mkdir -p /var/log
 		> /dev/shm/initrd.msg
 		ln -sf /dev/shm/initrd.msg /var/log/boot.msg
 		mkdir -p /var/run
@@ -1280,6 +1281,8 @@ function updateRootDeviceFstab {
 	#--------------------------------------
 	if [ -z "$UNIONFS_CONFIG" ]; then
 		echo "$diskByID / $FSTYPE defaults 0 0" >> $nfstab
+	else
+		echo "/dev/root / defaults 0 0" >> $nfstab
 	fi
 }
 #======================================

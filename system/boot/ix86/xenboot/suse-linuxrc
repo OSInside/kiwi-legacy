@@ -75,7 +75,6 @@ echo "-------------------------------"
 # 1) Mounting local file systems
 #--------------------------------------
 mountSystemFilesystems &>/dev/null
-closeKernelConsole
 
 #======================================
 # 2) Prepare module load support 
@@ -92,10 +91,11 @@ includeKernelParameters
 #======================================
 # 4) start boot shell
 #--------------------------------------
+ELOG_CONSOLE=/dev/console
+ELOG_EXCEPTION=$ELOG_CONSOLE
 startBlogD
 startShell
 errorLogStart
-openKernelConsole
 
 #======================================
 # 5) Including required kernel modules
