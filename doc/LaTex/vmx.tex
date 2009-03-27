@@ -75,8 +75,9 @@ dmg         & Disk format for Mac OS X \\
 cloop       & Compressed loop \\
 vmdk        & Disk format for VMware \\
 ovf         & Open Virtual Format requires VMwares ovftool \\
+qcow2       & QEMU virtual disk format  \\
 qcow        & QEMU virtual disk format  \\
-cow         & QEMU virtual disk format  \\
+cow         & QEMU virtual disk format \\
 \hline
 \end{tabular}
 
@@ -119,3 +120,7 @@ is stored in the file:
 Together with the \textbf{format=''vmdk''} attribute KIWI creates
 a VMware based image (.vmdk file) and the required VMware guest
 configuration (.vmx)
+
+You can also create an image for the Xen virtualization framework.  To do this,
+you simply need to specify the 'xen' boot profile in your config.xml.  Like
+VMware, Xen has a configuration file as well.  Refer to chapter \ref{chapter:xen} (Xen image) for details.

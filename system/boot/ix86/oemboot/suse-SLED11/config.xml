@@ -51,6 +51,7 @@
 		<file name="drivers/ata/*"/>
 		<file name="drivers/scsi/*"/>
 		<file name="drivers/message/fusion/*"/>
+		<file name="drivers/xen/*"/>
 		<file name="drivers/cdrom/*"/>
 		<file name="drivers/parport/*"/>
 		<file name="drivers/char/lp.ko"/>

@@ -937,8 +937,16 @@ sub createImageUSB {
 	if (! defined $kboot) {
 		return undef;
 	}
-	$kboot -> setupSplash();
+	my $newinitrd = $kboot -> setupSplash();
 	$kboot -> cleanTmp();
+	#==========================================
+	# inflate/deflate initrd to make xm happy
+	#------------------------------------------
+	if ($type{bootprofile} eq "xen") {
+		my $irdunc = $newinitrd;
+		$irdunc =~ s/\.gz//;
+		qxx ("$main::Gzip -d $newinitrd && $main::Gzip $irdunc");
+	}
 	#==========================================
 	# Store meta data for subsequent calls
 	#------------------------------------------
@@ -1007,6 +1015,8 @@ sub createImageVMX {
 	my $kiwi = $this->{kiwi};
 	my $xml  = $this->{xml};
 	my %vmwc = $xml  -> getVMwareConfig ();
+	my %xenc = $xml  -> getXenConfig();
+	my %type = %{$xml -> getImageTypeAndAttributes()};
 	my $name = $this -> createImageUSB ($para,"VMX");
 	if (! defined $name) {
 		return undef;
@@ -1034,12 +1044,18 @@ sub createImageVMX {
 		# VMware virtual disk description
 		#------------------------------------------
 		my $vmxfile; 
-		if ($main::BootVMFormat =~ "vmdk|ovf") {
+		if ($type{bootprofile} ne "xen" && $main::BootVMFormat =~ "vmdk|ovf") {
 			# VMware vmx file...
 			$vmxfile = $this -> buildVMwareConfig (
 				$main::Destination,$name,\%vmwc
 			);
 			if (! $vmxfile) {
+				$main::Survive = "default";
+				return undef;
+			}
+		} elsif ($type{bootprofile} eq "xen") {
+			# Xen config file
+			if (! $this -> buildXenConfig ($main::Destination,$name,\%xenc)) {
 				$main::Survive = "default";
 				return undef;
 			}
@@ -3375,7 +3391,6 @@ sub buildXenConfig {
 	my $kiwi   = $this->{kiwi};
 	my $file   = $dest."/".$name->{systemImage}.".xenconfig";
 	my $initrd = $name->{bootImage}.".splash.gz";
-	my $irdunc = $name->{bootImage}.".splash";
 	my $kernel = $dest."/".$name->{bootImage}.".kernel";
 	$kernel    = readlink ($kernel);
 	$kernel    = basename ($kernel);
@@ -3394,22 +3409,35 @@ sub buildXenConfig {
 		return undef;
 	}
 	#==========================================
-	# inflate/deflate initrd to make xm happy
-	#------------------------------------------
-	qxx ("$main::Gzip -d $dest/$initrd && $main::Gzip $dest/$irdunc");
-	#==========================================
 	# global setup
 	#------------------------------------------
 	my $device = $xenconfig{xen_diskdevice};
-	my $part   = $device."1";
+	$device =~ s/\/dev\///;
+	my $part = $device."1";
+	if (! defined $main::BootVMFormat) {
+		$device = $device."1";
+	}
 	my $memory = $xenconfig{xen_memory};
 	my $image  = $name->{systemImage};
-	$part =~ s/\/dev\///;
+	if (defined $main::BootVMFormat) {
+		$image .= ".".$main::BootVMFormat;
+	}
 	print FD '#  -*- mode: python; -*-'."\n";
-	print FD 'kernel="'.$kernel.'"'."\n";
-	print FD 'ramdisk="'.$initrd.'"'."\n";
+	print FD "name=\"".$this->{xml}->getImageDisplayName()."\"\n";
+	if (! defined $main::BootVMFormat) {
+		print FD 'kernel="'.$kernel.'"'."\n";
+		print FD 'ramdisk="'.$initrd.'"'."\n";
+	}
 	print FD 'memory='.$memory."\n";
-	print FD 'disk=[ "file:'.$image.','.$part.',w" ]'."\n";
+	if (defined $main::BootVMFormat) {
+		my $tap = $main::BootVMFormat;
+		if ($tap eq "raw") {
+			$tap = "aio";
+		}
+		print FD 'disk=[ "tap:'.$tap.':'.$image.','.$device.',w" ]'."\n";
+	} else {
+		print FD 'disk=[ "file:'.$image.','.$part.',w" ]'."\n";
+	}
 	#==========================================
 	# network setup
 	#------------------------------------------
@@ -3433,8 +3461,10 @@ sub buildXenConfig {
 	#==========================================
 	# xen console
 	#------------------------------------------
-	print FD 'root="'.$part.' ro"'."\n";
-	print FD 'extra=" xencons=tty "'."\n";
+	if (!defined $main::BootVMFormat) {
+		print FD 'root="'.$part.' ro"'."\n";
+		print FD 'extra=" xencons=tty "'."\n";
+	}
 	close FD;
 	$kiwi -> done();
 	return $dest;

@@ -1581,6 +1581,7 @@ vmx/oem types only.</a:documentation>
           <value>iso</value>
           <value>usb</value>
           <value>ovf</value>
+          <value>qcow2</value>
         </choice>
       </attribute>
     </define>

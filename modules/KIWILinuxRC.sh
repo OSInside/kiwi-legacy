@@ -780,6 +780,7 @@ function setupBootLoaderSyslinux {
 	if [ -z "$fbmode" ];then
 		fbmode=$DEFAULT_VGA
 	fi
+	local xencons=$xencons
 	#======================================
 	# check for device by ID
 	#--------------------------------------
@@ -1039,6 +1040,9 @@ function setupBootLoaderGrub {
 				if [ ! -z "$swap" ];then
 					echo -n " resume=$swapByID"                   >> $menu
 				fi
+				if [ ! -z "$xencons" ]; then
+					echo -n " xencons=$xencons"                     >> $menu
+				fi
 				echo -n " $KIWI_INITRD_PARAMS"                    >> $menu
 				echo " $KIWI_KERNEL_OPTIONS showopts"             >> $menu
 				echo " module /boot/$initrd"                      >> $menu
@@ -1048,6 +1052,9 @@ function setupBootLoaderGrub {
 				echo -n " vga=$fbmode splash=silent"              >> $menu
 				if [ ! -z "$swap" ];then
 					echo -n " resume=$swapByID"                   >> $menu
+				fi
+				if [ ! -z "$xencons" ]; then
+					echo -n " xencons=$xencons"                     >> $menu
 				fi
 				echo -n " $KIWI_INITRD_PARAMS"                    >> $menu
 				echo " $KIWI_KERNEL_OPTIONS showopts"             >> $menu
@@ -1080,6 +1087,9 @@ function setupBootLoaderGrub {
 				echo -n " $KIWI_KERNEL_OPTIONS showopts"          >> $menu
 				echo -n " ide=nodma apm=off acpi=off"             >> $menu
 				echo -n " noresume selinux=0 nosmp"               >> $menu
+				if [ ! -z "$xencons" ]; then
+					echo -n " xencons=$xencons"                     >> $menu
+				fi
 				echo " noapic maxcpus=0 edd=off"                  >> $menu
 				echo " module /boot/$initrd"                      >> $menu
 			else
@@ -1090,6 +1100,9 @@ function setupBootLoaderGrub {
 				echo -n " $KIWI_KERNEL_OPTIONS showopts"          >> $menu
 				echo -n " ide=nodma apm=off acpi=off"             >> $menu
 				echo -n " noresume selinux=0 nosmp"               >> $menu
+				if [ ! -z "$xencons" ]; then
+					echo -n " xencons=$xencons"                     >> $menu
+				fi
 				echo " noapic maxcpus=0 edd=off"                  >> $menu
 				echo " initrd $gdev/boot/$initrd"                 >> $menu
 			fi
@@ -1636,6 +1649,8 @@ function probeDevices {
 	modprobe brd &>/dev/null
 	modprobe edd &>/dev/null
 	modprobe dm-mod &>/dev/null
+	modprobe xennet &>/dev/null
+	modprobe xenblk &>/dev/null
 	probeUSB
 }
 #======================================

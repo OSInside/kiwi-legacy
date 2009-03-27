@@ -44,6 +44,7 @@
 		<file name="drivers/scsi/*"/>
 		<file name="drivers/message/fusion/*"/>
 		<file name="drivers/acpi/dock.ko"/>
+		<file name="drivers/xen/*"/>
 	</drivers>
 	<repository type="yast2" status="replaceable">
         <source path="/image/CDs/full-i386"/>

@@ -45,6 +45,7 @@
 		<file name="drivers/ata/*"/>
 		<file name="drivers/scsi/*"/>
 		<file name="drivers/message/fusion/*"/>
+		<file name="drivers/xen/*"/>
 	</drivers>
 	<repository type="yast2" status="replaceable">
         <source path="/image/CDs/full-10.3-i386"/>

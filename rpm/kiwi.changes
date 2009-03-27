@@ -4,6 +4,10 @@ Fri Mar 27 13:59:44 CET 2009 - ms@suse.de
 - v3.38
 - added root fstab entry for compressed rootfs (bnc #486017)
 - fixed console setup when booting into a Xen guest
+- added support for virtual disk images as Xen guest. This
+  means you can specify <type ..bootprofile="xen">vmx|oem</type>
+  and the resulting virtual disk image can boot as Xen guest
+  system. Patch by James Willcox <james@ximian.com>
 
 -------------------------------------------------------------------
 Thu Mar 26 10:19:44 CET 2009 - ms@suse.de

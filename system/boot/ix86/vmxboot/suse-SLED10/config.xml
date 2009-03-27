@@ -37,6 +37,7 @@
 		<file name="fs/jbd/*"/>
 		<file name="fs/reiserfs/*"/>
 		<file name="net/ipv6/*"/>
+		<file name="drivers/xen/*"/>
 		<file name="drivers/ata/*"/>
 		<file name="drivers/scsi/*"/>
 		<file name="drivers/message/fusion/*"/>
@@ -57,7 +58,8 @@
 		<package name="kernel-smp"/>
 	</packages>
 	<packages type="image" profiles="xen">
-		<package name="kernel-xen"/>
+		<package name="kernel-xen" arch="x86_64"/>
+		<package name="kernel-xenpae" arch="i686"/>
 		<package name="xen"/>
 	</packages>
 	<packages type="image">

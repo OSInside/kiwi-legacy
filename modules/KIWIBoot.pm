@@ -376,6 +376,7 @@ sub new {
 	$this->{ptool}  = $main::Partitioner;
 	$this->{lvm}    = $lvm;
 	$this->{vga}    = $vga;
+	$this->{xml}    = $xml;
 	return $this;
 }
 
@@ -2065,6 +2066,13 @@ sub setupBootDisk {
 		return undef;
 	}
 	#==========================================
+	# add extra Xen boot options if necessary
+	#==========================================
+	my $extra = "";
+	if ($type{bootprofile} eq "xen") {
+		$extra = "xencons=tty ";
+	}
+	#==========================================
 	# Create boot loader configuration
 	#------------------------------------------
 	if (! $this -> setupBootLoaderConfiguration ($bootloader,$bootfix)) {
@@ -3311,6 +3319,7 @@ sub setupBootLoaderConfiguration {
 	my $this     = shift;
 	my $loader   = shift;
 	my $type     = shift;
+	my $extra    = shift;
 	my $kiwi     = $this->{kiwi};
 	my $tmpdir   = $this->{tmpdir};
 	my $initrd   = $this->{initrd};
@@ -3384,6 +3393,7 @@ sub setupBootLoaderConfiguration {
 				print FD " kernel /boot/linux vga=$vga";
 				print FD " loader=$loader splash=silent";
 			}
+			print FD " $extra";
 			if ($imgtype eq "split") {
 				print FD " COMBINED_IMAGE=yes showopts";
 			} else {
@@ -3413,6 +3423,7 @@ sub setupBootLoaderConfiguration {
 				print FD " module /boot/linux vga=$vga";
 				print FD " loader=$loader splash=silent";
 			}
+			print FD " $extra";
 			if ($imgtype eq "split") {
 				print FD " COMBINED_IMAGE=yes showopts";
 			} else {
@@ -3451,7 +3462,7 @@ sub setupBootLoaderConfiguration {
 				print FD " loader=$loader splash=silent";
 			}
 			print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
-			print FD " noapic maxcpus=0 edd=off\n";
+			print FD " noapic maxcpus=0 edd=off $extra\n";
 			if ($imgtype eq "split") {
 				print FD " COMBINED_IMAGE=yes showopts";
 			} else {
@@ -3482,7 +3493,7 @@ sub setupBootLoaderConfiguration {
 				print FD " loader=$loader splash=silent";
 			}
 			print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
-			print FD " noapic maxcpus=0 edd=off";
+			print FD " noapic maxcpus=0 edd=off $extra";
 			if ($imgtype eq "split") {
 				print FD " COMBINED_IMAGE=yes showopts";
 			} else {
