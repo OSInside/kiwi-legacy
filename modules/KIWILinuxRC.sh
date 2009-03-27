@@ -777,10 +777,10 @@ function setupBootLoaderSyslinux {
 	local kernel=""
 	local initrd=""
 	local fbmode=$vga
+	local xencons=$xencons
 	if [ -z "$fbmode" ];then
 		fbmode=$DEFAULT_VGA
 	fi
-	local xencons=$xencons
 	#======================================
 	# check for device by ID
 	#--------------------------------------
@@ -861,6 +861,9 @@ function setupBootLoaderSyslinux {
 				if [ ! -z "$swap" ];then
 					echo -n " resume=$swapByID"                >> $conf
 				fi
+				if [ ! -z "$xencons" ]; then
+					echo -n " xencons=$xencons"                >> $conf
+				fi
 				echo -n " $KIWI_INITRD_PARAMS"                 >> $conf
 				echo " $KIWI_KERNEL_OPTIONS showopts"          >> $conf
 			fi
@@ -895,6 +898,9 @@ function setupBootLoaderSyslinux {
 				echo -n " loader=$loader splash=silent"        >> $conf
 				if [ ! -z "$swap" ];then
 					echo -n " resume=$swapByID"                >> $conf
+				fi
+				if [ ! -z "$xencons" ]; then
+					echo -n " xencons=$xencons"                >> $conf
 				fi
 				echo -n " $KIWI_INITRD_PARAMS"                 >> $conf
 				echo " $KIWI_KERNEL_OPTIONS showopts"          >> $conf
@@ -942,6 +948,7 @@ function setupBootLoaderGrub {
 	local kernel=""
 	local initrd=""
 	local fbmode=$vga
+	local xencons=$xencons
 	if [ -z "$fbmode" ];then
 		fbmode=$DEFAULT_VGA
 	fi
@@ -1041,7 +1048,7 @@ function setupBootLoaderGrub {
 					echo -n " resume=$swapByID"                   >> $menu
 				fi
 				if [ ! -z "$xencons" ]; then
-					echo -n " xencons=$xencons"                     >> $menu
+					echo -n " xencons=$xencons"                   >> $menu
 				fi
 				echo -n " $KIWI_INITRD_PARAMS"                    >> $menu
 				echo " $KIWI_KERNEL_OPTIONS showopts"             >> $menu
@@ -1054,7 +1061,7 @@ function setupBootLoaderGrub {
 					echo -n " resume=$swapByID"                   >> $menu
 				fi
 				if [ ! -z "$xencons" ]; then
-					echo -n " xencons=$xencons"                     >> $menu
+					echo -n " xencons=$xencons"                   >> $menu
 				fi
 				echo -n " $KIWI_INITRD_PARAMS"                    >> $menu
 				echo " $KIWI_KERNEL_OPTIONS showopts"             >> $menu
@@ -1088,7 +1095,7 @@ function setupBootLoaderGrub {
 				echo -n " ide=nodma apm=off acpi=off"             >> $menu
 				echo -n " noresume selinux=0 nosmp"               >> $menu
 				if [ ! -z "$xencons" ]; then
-					echo -n " xencons=$xencons"                     >> $menu
+					echo -n " xencons=$xencons"                   >> $menu
 				fi
 				echo " noapic maxcpus=0 edd=off"                  >> $menu
 				echo " module /boot/$initrd"                      >> $menu
@@ -1101,7 +1108,7 @@ function setupBootLoaderGrub {
 				echo -n " ide=nodma apm=off acpi=off"             >> $menu
 				echo -n " noresume selinux=0 nosmp"               >> $menu
 				if [ ! -z "$xencons" ]; then
-					echo -n " xencons=$xencons"                     >> $menu
+					echo -n " xencons=$xencons"                   >> $menu
 				fi
 				echo " noapic maxcpus=0 edd=off"                  >> $menu
 				echo " initrd $gdev/boot/$initrd"                 >> $menu
@@ -1160,9 +1167,15 @@ function setupBootLoaderLilo {
 	local kernel=""
 	local initrd=""
 	local count=1
+	local xencons=$xencons
 	echo \
 		"setupBootLoaderLilo $# called with '$1' '$2' '$3' '$4' '$5' '$6' '$7'"\
 	>&2
+	#======================================
+	# check for device by ID
+	#--------------------------------------
+	local diskByID=`getDiskID $bdev`
+	local swapByID=`getDiskID $swap`
 	#======================================
 	# check for boot image .profile
 	#--------------------------------------
@@ -1229,7 +1242,16 @@ function setupBootLoaderLilo {
 				fi
 			fi
 			echo "    initrd=/boot/$initrd"
-			echo "    append=\"quiet sysrq=1 panic=9 $KIWI_INITRD_PARAMS\""
+			echo -n "    append=\"quiet sysrq=1 panic=9"
+			echo -n " vga=$fbmode splash=silent"
+			if [ ! -z "$swap" ];then
+				echo -n " resume=$swapByID"
+			fi
+			if [ ! -z "$xencons" ]; then
+				echo -n " xencons=$xencons"
+			fi
+			echo -n " $KIWI_INITRD_PARAMS"
+			echo " $KIWI_KERNEL_OPTIONS showopts\""
 			echo
 			count=`expr $count + 1`
 		fi
