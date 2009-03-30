@@ -2,14 +2,17 @@
 Mon Mar 30 11:31:54 CEST 2009 - ms@suse.de
 
 - v3.39
-- added a xendomain attribute in config.xml to be able to
-  distinguish whether a virtual disk image should be a Xen
-  dom0 host system or a Xen domU guest system. If no domain
-  is set a dom0 image will be created
+- added a domain attribute inside the xenconfig section in
+  config.xml to be able to distinguish whether a virtual disk
+  image should be a Xen dom0 host system or a Xen domU guest
+  system. If no domain is set a dom0 image will be created
 - added xenServer function to check if we run a Xen host
   or guest system. The bootloader setup is different for
   dom0 or domU. Adapt setupBootLoader* functions
 - allow filesystem resizing to be used in isoboot
+- added check functions SAPMemCheck, SAPCPUCheck
+  and SAPStorageCheck. They apply if the oem-sap-install
+  attribute is set for OEM images (bnc #486758)
 
 -------------------------------------------------------------------
 Fri Mar 27 13:59:44 CET 2009 - ms@suse.de

@@ -253,6 +253,10 @@ function baseSetupOEMPartition {
 		echo "Setting up OEM_KIWI_INITRD=$kiwi_oemkboot"
 		echo "OEM_KIWI_INITRD=$kiwi_oemkboot" >> $oemfile
 	fi
+	if [ ! -z "$kiwi_oemsap" ];then
+		echo "Setting up OEM_SAP_INSTALL=$kiwi_oemsap"
+		echo "OEM_SAP_INSTALL=$kiwi_oemsap" >> $oemfile
+	fi
 	if [ ! -z "$kiwi_oemrecovery" ];then
 		echo "Setting up OEM_RECOVERY=1"
 		echo "OEM_RECOVERY=1" >> $oemfile
@@ -942,7 +946,7 @@ function suseStripInitrd {
 		ldd driveready checkmedia splashy bzip2 hexdump
 		pvchange pvresize pvscan vgscan vgchange vgextend vgdisplay
 		lvchange lvresize lvextend lvcreate grub dcounter tty
-		dmsetup dialog
+		dmsetup dialog awk
 	"
 	tools="$tools $@"
 	for path in /sbin /usr/sbin /usr/bin /bin;do

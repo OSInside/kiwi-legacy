@@ -3993,3 +3993,158 @@ function makeLabel {
 		echo $1
 	fi
 }
+#======================================
+# SAPMemCheck
+#--------------------------------------
+function SAPMemCheck {
+	# /.../
+	# if OEM SAP option is set this function checks
+	# for enough memory to perform a SAP installation
+	# ----
+	if [ ! -z "$nomemcheck" ];then
+		return
+	fi
+	local mem=`grep -i MemTotal /proc/meminfo | awk '{ print $2 }'`
+	if [ "$mem" -lt 1900000 ]; then
+		Echo -b "This installation requires at least 2 GB of RAM"
+		Echo -b "but only $(( ${mem} / 1024 )) MB were detected."
+		Echo -b "You can override this check by passing"
+		Echo -b "'nomemcheck' to the kernel commandline."
+		systemException \
+			"SAPMemCheck failed... reboot" \
+		"reboot"
+	fi
+}
+#======================================
+# SAPCPUCheck
+#--------------------------------------
+function SAPCPUCheck {
+	# /.../
+	# if OEM SAP option is set this function checks
+	# for the supported system architecture to perform
+	# a SAP installation
+	# ----
+	if [ ! -z "$nocpucheck" ];then
+		return
+	fi
+	local cpu=`uname -m`
+	if [ "$cpu" != "x86_64" ]; then
+		Echo -b "This installation requires a 64Bit CPU (x86_64) but"
+		Echo -b "a $cpu CPU was detected. You can override this check"
+		Echo -b "by passing 'nocpucheck' to the kernel commandline."
+		systemException \
+			"SAPCPUCheck failed... reboot" \
+		"reboot"
+	fi
+}
+#======================================
+# SAPCheckStorageSize
+#--------------------------------------
+function SAPStorageCheck {
+	# /.../
+	# if OEM SAP option is set this function checks
+	# if the available storage space is big enough
+	# to perform a SAP installation
+	# ----
+	if [ ! -z "$nohdcheck" ];then
+		return
+	fi
+	local main_memory_KB=`awk -F" " '{if (match ($1,"^MemTotal")) print $2}' \
+		/proc/meminfo`
+	local main_memory_MB=$(( ${main_memory_KB} / 1024 ))
+	local main_memory_GB=$(( ${main_memory_MB} / 1024 ))
+	local MIN_DATA_DEV_SIZE=200 # GB
+	local MIN_ROOT_DEV_SIZE=$(( ${main_memory_GB} * 2 + 40 + 3 ))
+	local DATA_DEVICE=""
+	local ROOT_DEVICE=""
+	local NUM=`hwinfo --disk | grep -c "Hardware Class:"`
+	local req_size_data=""
+	local req_size_root=""
+	local result=0
+	if [ "$NUM" != "1" ]; then
+		# /.../
+		# more than 1 disk, so we expect some more
+		# sophisticated setup
+		# Data Device:
+		req_size_data=$(( 2*1024*1024*${MIN_DATA_DEV_SIZE} ))
+		# Root Device:
+		req_size_root=$(( 2*1024*1024*${MIN_ROOT_DEV_SIZE} ))
+	else
+		# /.../
+		# only 1 disk, which must be large enough for <root>+<data>
+		# Data Device:
+		req_size_data=$((
+			2*1024*1024*${MIN_DATA_DEV_SIZE} + 2*1024*1024*${MIN_ROOT_DEV_SIZE}
+		))
+		req_size_root=$req_size_data
+	fi
+	eval $(
+		hwinfo --disk | grep -E 'Device File:|Size:' | \
+		while read tmp size dev rest; do \
+			if ( [ "$tmp" = "Driver:" ] && [[ "$size" =~ "usb" ]] ); then
+				read tmp size dev rest
+				read tmp size dev rest
+				continue;
+			fi
+			[ "$size" = "File:" ] && dev_file=$dev;
+			[ "$dev"  = "sectors" ]      && \
+			[ $size -ge $req_size_data ] && \
+			echo DATA_DEVICE=$dev_file   && \
+			break;
+		done
+	)
+	if [ -z "$DATA_DEVICE" ]; then
+		if [ "$NUM" != "1" ]; then
+			result=2 # Data Device not large enough
+		else
+			result=1 # Root Device not large enough
+		fi
+	else
+		if [ "$NUM" != "1" ]; then
+			# /.../
+			# more than 1 disk, so we expect some more sophisticated setup
+			# furthermore ensure sufficient space for root-device
+			req_size_root=$(( 2*1024*1024*${MIN_ROOT_DEV_SIZE} ))
+			eval $(
+				hwinfo --disk | grep -E 'Device File:|Size:' | \
+				while read tmp size dev rest; do \
+					if( [ "$tmp" = "Driver:" ] && [[ "$size" =~ "usb" ]] );then
+						read tmp size dev rest
+						read tmp size dev rest
+						continue;
+					fi
+					[ "$size" = "File:" ] && dev_file=$dev;
+					[ "$dev"  = "sectors" ]           && \
+					[ "$DATA_DEVICE" != "$dev_file" ] && \
+					[ $size -ge $req_size_root ]      && \
+					echo ROOT_DEVICE=$dev_file        && \
+					break;
+				done
+			)
+			if [ -z "$ROOT_DEVICE" ]; then
+				result=1 # Root Device not large enough
+			else
+				result=0 # everything ok
+			fi
+		fi
+	fi
+	case $result in
+		1 ) Echo -b "The installation requires at least"
+			Echo -b "$(( ${req_size_root} / 2 / 1024 / 1024 )) GB disk space"
+			Echo -b "for the root partition. You can override this check"
+			Echo -b "by passing 'nohdcheck' to the kernel commandline."
+			systemException \
+				"SAPStorageCheck failed... reboot" \
+			"reboot"
+			;;
+		2 ) Echo -b "The installation requires at least"
+			Echo -b "$(( ${req_size_data} / 2 / 1024 / 1024 )) GB disk space"
+			Echo -b "for the data partition (second partition)."
+			Echo -b "You can override this check"
+			Echo -b "by passing 'nohdcheck' to the kernel commandline."
+			systemException \
+				"SAPStorageCheck failed... reboot" \
+			"reboot"
+			;;
+	esac
+}

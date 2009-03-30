@@ -823,6 +823,7 @@ sub createImageUSB {
 	$main::ForeignRepo{"oem-home"}       = $xml -> getOEMHome();
 	$main::ForeignRepo{"oem-boot-title"} = $xml -> getOEMBootTitle();
 	$main::ForeignRepo{"oem-kiwi-initrd"}= $xml -> getOEMKiwiInitrd();
+	$main::ForeignRepo{"oem-sap-install"}= $xml -> getOEMSAPInstall();
 	$main::ForeignRepo{"oem-reboot"}     = $xml -> getOEMReboot();
 	$main::ForeignRepo{"oem-recovery"}   = $xml -> getOEMRecovery();
 	$main::ForeignRepo{"locale"}  = $xml -> getLocale();
@@ -2494,6 +2495,7 @@ sub createImageSplit {
 	$main::ForeignRepo{"oem-home"}       = $xml -> getOEMHome();
 	$main::ForeignRepo{"oem-boot-title"} = $xml -> getOEMBootTitle();
 	$main::ForeignRepo{"oem-kiwi-initrd"}= $xml -> getOEMKiwiInitrd();
+	$main::ForeignRepo{"oem-sap-install"}= $xml -> getOEMSAPInstall();
 	$main::ForeignRepo{"oem-reboot"}     = $xml -> getOEMReboot();
 	$main::ForeignRepo{"oem-recovery"}   = $xml -> getOEMRecovery();
 	$main::ForeignRepo{"locale"}  = $xml -> getLocale();

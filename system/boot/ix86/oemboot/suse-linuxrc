@@ -183,14 +183,23 @@ if [ "$LOCAL_BOOT" = "no" ] && [ -f $OEM_PARTITION_CONFIG ];then
 fi
 
 #======================================
-# 13) repartition the disk device
+# 13) Run SAP checks if activated
+#--------------------------------------
+if [ ! -z "$OEM_SAP_INSTALL" ];then
+	SAPMemCheck
+	SAPCPUCheck
+	SAPStorageCheck
+fi
+
+#======================================
+# 14) repartition the disk device
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then
 	OEMRepart
 fi
 
 #======================================
-# 14) Resize filesystem to full space
+# 15) Resize filesystem to full space
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then
 	deviceResize=$imageRootDevice
@@ -244,7 +253,7 @@ if [ "$LOCAL_BOOT" = "no" ];then
 fi
 
 #======================================
-# 15) Mount system
+# 16) Mount system
 #--------------------------------------
 if ! mountSystem $imageRootDevice;then
 	systemException "Failed to mount root filesystem" "reboot"
@@ -252,7 +261,7 @@ fi
 validateRootTree
 
 #======================================
-# 16) Recover system if requested
+# 17) Recover system if requested
 #--------------------------------------
 if [ ! -z "$KIWI_RECOVERY" ];then
 	Echo -n "Do you want to start the System-Recovery ? [y/n]: "; read runReco
@@ -314,14 +323,14 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 fi
 
 #======================================
-# 17) get installed kernels
+# 18) get installed kernels
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then
 	kernelList /mnt
 fi
 
 #======================================
-# 18) setup boot partition
+# 19) setup boot partition
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ]; then
 	if [ "$haveLVM" = "yes" ];then
@@ -353,7 +362,7 @@ if [ "$LOCAL_BOOT" = "no" ]; then
 fi
 
 #======================================
-# 19) setup ird/kernel links for union
+# 20) setup ird/kernel links for union
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then 
 	if [ "$OEM_KIWI_INITRD" = "yes" ] || isFSTypeReadOnly;then
@@ -393,7 +402,7 @@ if [ "$LOCAL_BOOT" = "no" ];then
 fi
 
 #======================================
-# 20) Create system dependant files
+# 21) Create system dependant files
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then
 	#======================================
@@ -438,14 +447,14 @@ if [ "$LOCAL_BOOT" = "no" ];then
 fi
 
 #======================================
-# 21) copy system dependant files
+# 22) copy system dependant files
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then
 	setupConfigFiles
 fi
 
 #======================================
-# 22) copy recovery related files
+# 23) copy recovery related files
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ] && [ ! -z "$OEM_RECOVERY" ];then
 	IFS=$IFS_ORIG
@@ -477,22 +486,22 @@ if [ "$LOCAL_BOOT" = "no" ] && [ ! -z "$OEM_RECOVERY" ];then
 fi
 
 #======================================
-# 23) update system dependant files
+# 24) update system dependant files
 #--------------------------------------
 setupInittab /mnt
 
 #======================================
-# 24) setup real root device
+# 25) setup real root device
 #--------------------------------------
 echo 256 > /proc/sys/kernel/real-root-dev
 
 #======================================
-# 25) umount system filesystems
+# 26) umount system filesystems
 #--------------------------------------
 umountSystemFilesystems
 
 #======================================
-# 26) copy initrd files to image
+# 27) copy initrd files to image
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then
 	importBranding
@@ -501,17 +510,17 @@ cp /preinit /mnt
 cp /include /mnt
 
 #======================================
-# 27) kill boot shell
+# 28) kill boot shell
 #--------------------------------------
 killShell
 killBlogD
 
 #======================================
-# 28) Activate new root
+# 29) Activate new root
 #--------------------------------------
 activateImage
 
 #======================================
-# 29 Unmount initrd / system init
+# 30 Unmount initrd / system init
 #--------------------------------------
 bootImage $@
