@@ -144,7 +144,6 @@
 		<package name="irqbalance"/>
 		<package name="libblkid1"/>
 		<package name="libbz2-1"/>
-		<package name="libcom_err2"/>
 		<package name="libexpat1"/>
 		<package name="libjpeg"/>
 		<package name="liblcms"/>
