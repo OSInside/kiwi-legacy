@@ -70,13 +70,14 @@ need in this para virtual environment.
    <package name="kernel-xen"/>
    <package name="xen"/>
 </packages>
-<xenconfig memory="512">
+<xenconfig memory="512" domain="domU">
    <xendisk device="/dev/sda"/>
 </xenconfig>
 \end{verbatim}
 \end{Command}
 
 If this information is present KIWI will create a Xen domain U
+(or domain 0)
 configuration with 512 MB of RAM and expects the disk at /dev/sda.
 Additional information to setup the Xen guest machine properties are
 explained in the \textbf{xenconfig} section. The KIWI Xen domain U

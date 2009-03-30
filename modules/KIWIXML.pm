@@ -2200,6 +2200,7 @@ sub getXenConfig {
 	# global setup
 	#------------------------------------------
 	my $memory = $node -> getAttribute ("memory");
+	my $domain = $node -> getAttribute ("domain");
 	#==========================================
 	# storage setup
 	#------------------------------------------
@@ -2228,6 +2229,7 @@ sub getXenConfig {
 	# save hash
 	#------------------------------------------
 	$result{xen_memory}= $memory;
+	$result{xen_domain}= $domain;
 	if ($disk) {
 		$result{xen_diskdevice} = $device;
 	}

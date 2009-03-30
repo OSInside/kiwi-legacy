@@ -731,11 +731,11 @@ function setupBootLoaderGrubRecovery {
 	# create recovery entry
 	#--------------------------------------
 	if [ ! -z "$OEM_RECOVERY" ];then
-		echo "title _Recovery_"                           >> $menu
+		echo "title Recovery"                             >> $menu
 		gdev_recovery="(hd0,3)"
 		rdev_recovery=$OEM_RECOVERY
 		diskByID=`getDiskID $rdev_recovery`
-		if [ $kernel = "vmlinuz-xen" ];then
+		if xenServer;then
 			echo " root $gdev_recovery"                   >> $menu
 			echo " kernel /boot/xen.gz"                   >> $menu
 			echo -n " module /boot/$kernel"               >> $menu
@@ -768,7 +768,7 @@ function setupBootLoaderSyslinux {
 	local destsPrefix=$2  # base dir for the config files
 	local gnum=$3         # boot partition ID
 	local rdev=$4         # root partition
-	local gfix=$5         # syslinux title
+	local gfix=$5         # syslinux title postfix
 	local swap=$6         # optional swap partition
 	local conf=$destsPrefix/boot/syslinux/syslinux.cfg
 	local sysb=$destsPrefix/etc/sysconfig/bootloader
@@ -776,6 +776,7 @@ function setupBootLoaderSyslinux {
 	local kname=""
 	local kernel=""
 	local initrd=""
+	local title=""
 	local fbmode=$vga
 	local xencons=$xencons
 	if [ -z "$fbmode" ];then
@@ -825,7 +826,7 @@ function setupBootLoaderSyslinux {
 	IFS="," ; for i in $KERNEL_LIST;do
 		if test ! -z "$i";then
 			#======================================
-			# create standard entry
+			# setup syslinux requirements
 			#--------------------------------------
 			kernel=`echo $i | cut -f1 -d:`
 			initrd=`echo $i | cut -f2 -d:`
@@ -835,23 +836,25 @@ function setupBootLoaderSyslinux {
 			#--------------------------------------
 			kernel="linux.$count"
 			initrd="initrd.$count"
-			echo "LABEL Linux" >> $conf
 			if ! echo $gfix | grep -E -q "OEM|USB|VMX|unknown";then
-				echo "MENU LABEL ""$gfix"                      >> $conf
+				title=$(makeLabel "$gfix")
 			elif [ -z "$kiwi_oemtitle" ];then
-				echo "MENU LABEL ""$kname"" [ "$gfix" ]"       >> $conf
+				title=$(makeLabel "$kname [ $gfix ]")
 			else
 				if [ "$count" = "1" ];then
-					echo -n "MENU LABEL ""$kiwi_oemtitle"      >> $conf
-					echo " [ ""$gfix"" ]"                      >> $conf
+					title=$(makeLabel "$kiwi_oemtitle [ $gfix ]")
 				else
-					echo -n "MENU LABEL ""$kiwi_oemtitle"      >> $conf
-					echo "-""$kname"" [ ""$gfix"" ]"           >> $conf
+					title=$(makeLabel "$kiwi_oemtitle-$kname [ $gfix ]")
 				fi
 			fi
-			if [ $kernel = "vmlinuz-xen" ];then
+			#======================================
+			# create standard entry
+			#--------------------------------------
+			echo "LABEL Linux" >> $conf
+			echo "MENU LABEL $title"                           >> $conf
+			if xenServer;then
 				systemException \
-					"*** syslinux xen boot not implemented ***" \
+					"*** syslinux: Xen dom0 boot not implemented ***" \
 				"reboot"
 			else
 				echo "KERNEL /boot/$kernel"                    >> $conf
@@ -870,26 +873,12 @@ function setupBootLoaderSyslinux {
 			#======================================
 			# create Failsafe entry
 			#--------------------------------------
-			echo "LABEL Failsafe" >> $conf
-			if ! echo $gfix | grep -E -q "OEM|USB|VMX|unknown";then
-				echo "MENU LABEL Failsafe -- ""$gfix"          >> $conf
-			elif [ -z "$kiwi_oemtitle" ];then
-				echo -n "MENU LABEL Failsafe -- ""$kname"      >> $conf
-				echo " [ "$gfix" ]"                            >> $conf
-			else
-				if [ "$count" = "1" ];then
-					echo -n "MENU LABEL Failsafe -- "          >> $conf
-					echo -n "$kiwi_oemtitle"" [ "              >> $conf
-					echo "$gfix"" ]"                           >> $conf
-				else
-					echo -n "MENU LABEL Failsafe -- "          >> $conf
-					echo -n "$kiwi_oemtitle""-""$kname"" [ "   >> $conf
-					echo "$gfix"" ]"                           >> $conf
-				fi
-			fi
-			if [ $kernel = "vmlinuz-xen" ];then
+			title=$(makeLabel "Failsafe -- $title")
+			echo "LABEL Failsafe"                              >> $conf
+			echo "MENU LABEL $title"                           >> $conf
+			if xenServer;then
 				systemException \
-					"*** syslinux xen boot not implemented ***" \
+					"*** syslinux: Xen dom0 boot not implemented ***" \
 				"reboot"
 			else
 				echo "KERNEL /boot/$kernel"                    >> $conf
@@ -937,7 +926,7 @@ function setupBootLoaderGrub {
 	local destsPrefix=$2  # base dir for the config files
 	local gnum=$3         # grub boot partition ID
 	local rdev=$4         # grub root partition
-	local gfix=$5         # grub title
+	local gfix=$5         # grub title postfix
 	local swap=$6         # optional swap partition
 	local menu=$destsPrefix/boot/grub/menu.lst
 	local conf=$destsPrefix/etc/grub.conf
@@ -947,6 +936,8 @@ function setupBootLoaderGrub {
 	local kname=""
 	local kernel=""
 	local initrd=""
+	local title=""
+	local rdisk=""
 	local fbmode=$vga
 	local xencons=$xencons
 	if [ -z "$fbmode" ];then
@@ -1020,25 +1011,27 @@ function setupBootLoaderGrub {
 	IFS="," ; for i in $KERNEL_LIST;do
 		if test ! -z "$i";then
 			#======================================
-			# create standard entry
+			# create grub requirements
 			#--------------------------------------
 			kernel=`echo $i | cut -f1 -d:`
 			initrd=`echo $i | cut -f2 -d:`
 			kname=${KERNEL_NAME[$count]}
 			if ! echo $gfix | grep -E -q "OEM|USB|VMX|unknown";then
-				echo "title _""$gfix""_"                          >> $menu
+				title=$(makeLabel "$gfix")
 			elif [ -z "$kiwi_oemtitle" ];then
-				echo "title _""$kname"" [ "$gfix" ]_"             >> $menu
+				title=$(makeLabel "$kname [ $gfix ]")
 			else
 				if [ "$count" = "1" ];then
-					echo -n "title _""$kiwi_oemtitle"             >> $menu
-					echo " [ ""$gfix"" ]_"                        >> $menu
+					title=$(makeLabel "$kiwi_oemtitle [ $gfix ]")
 				else
-					echo -n "title _""$kiwi_oemtitle""-""$kname"  >> $menu
-					echo " [ ""$gfix"" ]_"                        >> $menu
+					title=$(makeLabel "$kiwi_oemtitle-$kname [ $gfix ]")
 				fi
 			fi
-			if [ $kernel = "vmlinuz-xen" ];then
+			#======================================
+			# create standard entry
+			#--------------------------------------
+			echo "title $title"                                   >> $menu
+			if xenServer;then
 				echo " root $gdev"                                >> $menu
 				echo " kernel /boot/xen.gz"                       >> $menu
 				echo -n " module /boot/$kernel"                   >> $menu
@@ -1070,21 +1063,9 @@ function setupBootLoaderGrub {
 			#======================================
 			# create failsafe entry
 			#--------------------------------------
-			if ! echo $gfix | grep -E -q "OEM|USB|VMX|unknown";then
-				echo "title _Failsafe -- ""$gfix""_"              >> $menu
-			elif [ -z "$kiwi_oemtitle" ];then
-				echo -n "title _Failsafe -- "                     >> $menu
-				echo "$kname"" [ ""$gfix"" ]_"                    >> $menu
-			else
-				if [ "$count" = "1" ];then
-					echo -n "title _Failsafe -- ""$kiwi_oemtitle" >> $menu
-					echo " [ ""$gfix"" ]_"                        >> $menu
-				else
-					echo -n "title _Failsafe -- ""$kiwi_oemtitle" >> $menu
-					echo "-""$kname"" [ ""$gfix"" ]_"             >> $menu
-				fi
-			fi
-			if [ $kernel = "vmlinuz-xen" ];then
+			title=$(makeLabel "Failsafe -- $title")
+			echo "title $title"                                   >> $menu
+			if xenServer;then
 				echo " root $gdev"                                >> $menu
 				echo " kernel /boot/xen.gz"                       >> $menu
 				echo -n " module /boot/$kernel"                   >> $menu
@@ -1117,7 +1098,7 @@ function setupBootLoaderGrub {
 			# create recovery entry
 			#--------------------------------------
 			if [ ! -z "$OEM_RECOVERY" ];then
-				echo "title _Recovery_"                           >> $menu
+				echo "title Recovery"                             >> $menu
 				echo " rootnoverify (hd0,3)"                      >> $menu
 				echo " chainloader +1"                            >> $menu
 			fi
@@ -1157,24 +1138,27 @@ function setupBootLoaderLilo {
 	# ----
 	local mountPrefix=$1  # mount path of the image
 	local destsPrefix=$2  # base dir for the config files
-	local gnum=$3         # lilo boot partition ID
-	local bdev=$4         # lilo root partition
-	local gfix=$5         # lilo title
+	local lnum=$3         # lilo boot partition ID
+	local rdev=$4         # lilo root partition
+	local lfix=$5         # lilo title postfix
 	local swap=$6         # optional swap partition
 	local conf=$destsPrefix/etc/lilo.conf
 	local sysb=$destsPrefix/etc/sysconfig/bootloader
+	local console=""
 	local kname=""
 	local kernel=""
 	local initrd=""
-	local count=1
+	local title=""
+	local rdisk=""
+	local fbmode=$vga
 	local xencons=$xencons
-	echo \
-		"setupBootLoaderLilo $# called with '$1' '$2' '$3' '$4' '$5' '$6' '$7'"\
-	>&2
+	if [ -z "$fbmode" ];then
+		fbmode=$DEFAULT_VGA
+	fi
 	#======================================
 	# check for device by ID
 	#--------------------------------------
-	local diskByID=`getDiskID $bdev`
+	local diskByID=`getDiskID $rdev`
 	local swapByID=`getDiskID $swap`
 	#======================================
 	# check for boot image .profile
@@ -1189,10 +1173,10 @@ function setupBootLoaderLilo {
 		importFile < $mountPrefix/image/.profile
 	fi
 	#======================================
-	# check for grub title postfix
+	# check for lilo title postfix
 	#--------------------------------------
-	if [ -z "$gfix" ];then
-		gfix="unknown"
+	if [ -z "$lfix" ];then
+		lfix="unknown"
 	fi
 	#======================================
 	# check for boot TIMEOUT
@@ -1201,66 +1185,123 @@ function setupBootLoaderLilo {
 		KIWI_BOOT_TIMEOUT=10;
 	fi
 	#======================================
+	# check for UNIONFS_CONFIG
+	#--------------------------------------
+	if [ "$haveLVM" = "yes" ]; then
+		lnum=1
+	elif [ "$haveDMSquash" = "yes" ];then
+		lnum=2
+	elif [ ! -z "$UNIONFS_CONFIG" ] && [ $gnum -gt 0 ]; then
+		rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
+		lnum=`echo $rwDevice | sed -e "s/\/dev.*\([0-9]\)/\\1/"`
+		lnum=`expr $gnum - 1`
+	fi
+	#======================================
+	# setup lilo boot device
+	#--------------------------------------
+	rdisk=`echo $rdev | sed -e s"@[0-9]@@g"`
+	if [ ! -z "$imageDiskDevice" ];then
+		rdisk=$imageDiskDevice
+	fi
+	rdev=$rdisk$lnum
+	#======================================
 	# create directory structure
 	#--------------------------------------
 	for dir in $conf $sysb;do
 		dir=`dirname $dir`; mkdir -p $dir
 	done
 	#======================================
-	# setup lilo device node
+	# create lilo.conf file
 	#--------------------------------------
-	bdev=`echo $bdev |\
-		sed -e "/\/dev\/disk\/by/{s/\(\/dev.*\)\(-part[0-9]\+$\)/\\1/;p;d};
-		/\/dev\//s/\(\/dev\/.*\)\([0-9]\+$\)/\1/"`
-	#======================================
-	# create menu.lst file
-	#--------------------------------------
-	(
-	echo "# generated by kiwi '$1' '$2' '$3' '$4' '$5' '$6' '$7'"
-	echo "boot=$bdev"
-	echo "activate"
-	echo "timeout=`expr $KIWI_BOOT_TIMEOUT \* 10`"
-	echo "default=kiwi$count"
+	echo "boot=$rdev"                                        >  $conf
+	echo "activate"                                          >> $conf
+	echo "timeout=`expr $KIWI_BOOT_TIMEOUT \* 10`"           >> $conf
+	echo "default=kiwi$count"                                >> $conf
+	local count=1
 	IFS="," ; for i in $KERNEL_LIST;do
 		if test ! -z "$i";then
+			#======================================
+			# create lilo requirements
+			#--------------------------------------
 			kernel=`echo $i | cut -f1 -d:`
 			initrd=`echo $i | cut -f2 -d:`
 			kname=${KERNEL_NAME[$count]}
-			echo "image=/boot/$kernel"
-			echo -n "###Don't change this comment - YaST2 identifier:"
-			echo " Original name: linux###"
-			echo "# kiwi_oemtitle $kiwi_oemtitle"
-			if ! echo $gfix | grep -E -q "OEM|USB|VMX|unknown";then
-				echo "label=\"$gfix\""
+			if ! echo $lfix | grep -E -q "OEM|USB|VMX|unknown";then
+				title=$(makeLabel "$lfix")
 			elif [ -z "$kiwi_oemtitle" ];then
-				echo "label=\"$kname [ $gfix ]\""
+				title=$(makeLabel "$kname [ $lfix ]")
 			else
 				if [ "$count" = "1" ];then
-					echo "label=\"$kiwi_oemtitle [ $gfix ]\""
+					title=$(makeLabel "$kiwi_oemtitle [ $lfix ]")
 				else
-					echo "label=\"$kiwi_oemtitle-$kname [ $gfix ]\""
+					title=$(makeLabel "$kiwi_oemtitle-$kname [ $lfix ]")
 				fi
 			fi
-			echo "    initrd=/boot/$initrd"
-			echo -n "    append=\"quiet sysrq=1 panic=9"
-			echo -n " vga=$fbmode splash=silent"
-			if [ ! -z "$swap" ];then
-				echo -n " resume=$swapByID"
+			#======================================
+			# create standard entry
+			#--------------------------------------
+			echo "label=\"$title\""                          >> $conf
+			if xenServer;then
+				systemException \
+					"*** lilo: Xen dom0 boot not implemented ***" \
+				"reboot"
+			else
+				echo "image=/boot/$kernel"                   >> $conf
+				echo "initrd=/boot/$initrd"                  >> $conf
+				echo -n "append=\"quiet sysrq=1 panic=9"     >> $conf
+				echo -n " root=$diskByID $console"           >> $conf
+				echo -n " vga=$fbmode splash=silent"         >> $conf
+				if [ ! -z "$swap" ];then                     
+					echo -n " resume=$swapByID"              >> $conf
+				fi
+				if [ ! -z "$xencons" ]; then
+					echo -n " xencons=$xencons"              >> $conf
+				fi
+				echo -n " $KIWI_INITRD_PARAMS"               >> $conf
+				echo " $KIWI_KERNEL_OPTIONS showopts\""      >> $conf
 			fi
-			if [ ! -z "$xencons" ]; then
-				echo -n " xencons=$xencons"
+			#======================================
+			# create failsafe entry
+			#--------------------------------------
+			title=$(makeLabel "Failsafe -- $title")
+			echo "label=\"$title\""                          >> $conf
+			if xenServer;then
+				systemException \
+					"*** lilo: Xen dom0 boot not implemented ***" \
+				"reboot"
+			else
+				echo "image=/boot/$kernel"                   >> $conf
+				echo "initrd=/boot/$initrd"                  >> $conf
+				echo -n "append=\"quiet sysrq=1 panic=9"     >> $conf
+				echo -n " root=$diskByID $console"           >> $conf
+				echo -n " vga=$fbmode splash=silent"         >> $conf
+				if [ ! -z "$swap" ];then
+					echo -n " resume=$swapByID"              >> $conf
+				fi
+				if [ ! -z "$xencons" ]; then
+					echo -n " xencons=$xencons"              >> $conf
+				fi
+				echo -n " $KIWI_INITRD_PARAMS"               >> $conf
+				echo -n " $KIWI_KERNEL_OPTIONS showopts\""   >> $conf
+				echo -n " ide=nodma apm=off acpi=off"        >> $conf
+				echo " noresume selinux=0 nosmp"             >> $conf
 			fi
-			echo -n " $KIWI_INITRD_PARAMS"
-			echo " $KIWI_KERNEL_OPTIONS showopts\""
-			echo
+			#======================================
+			# create recovery entry
+			#--------------------------------------
+			if [ ! -z "$OEM_RECOVERY" ];then
+				systemException \
+					"*** lilo: recovery chain loading not implemented ***" \
+				"reboot"
+			fi
 			count=`expr $count + 1`
 		fi
 	done
-	) > $conf
 	#======================================
 	# create sysconfig/bootloader
 	#--------------------------------------
-	echo "LOADER_TYPE=\"ppc\""     > $sysb
+	echo "LOADER_TYPE=\"lilo\""     > $sysb
+	echo "LOADER_LOCATION=\"mbr\"" >> $sysb
 }
 #======================================
 # setupDefaultPXENetwork
@@ -3920,4 +3961,35 @@ function canWrite {
 		return 0
 	fi
 	return 1
+}
+#======================================
+# xenServer
+#--------------------------------------
+function xenServer {
+	# /.../
+	# test if we are running a Xen dom0 kernel
+	# ---
+	local check=/proc/xen/capabilities
+	if cat $check 2>/dev/null | grep "control_d" &>/dev/null; then
+		return 0
+	fi
+	return 1
+}
+#======================================
+# makeLabel
+#--------------------------------------
+function makeLabel {
+	# /.../
+	# create boot label and replace all spaces with
+	# underscores. current bootloaders show the
+	# underscore sign as as space in the boot menu
+	# ---
+	if [ -z "$loader" ];then
+		loader="grub"
+	fi
+	if [ ! $loader = "syslinux" ];then
+		echo $1 | tr " " "_"
+	else
+		echo $1
+	fi
 }

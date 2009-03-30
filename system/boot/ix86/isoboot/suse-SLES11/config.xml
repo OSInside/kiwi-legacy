@@ -146,7 +146,6 @@
 		<package name="libbz2-1"/>
 		<package name="libcom_err2"/>
 		<package name="libexpat1"/>
-		<package name="libext2fs2"/>
 		<package name="libjpeg"/>
 		<package name="liblcms"/>
 		<package name="libmng"/>

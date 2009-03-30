@@ -1721,8 +1721,12 @@ div {
 	k.xenconfig.memory.attribute =
 		## The memory setup for the Xen guest.
 		attribute memory { text }
+	k.xenconfig.domain.attribute =
+		## The type of Xen domain to create (dom0 or domU)
+		attribute domain { "dom0" | "domU" }
 	k.xenconfig.attlist =
-		k.xenconfig.memory.attribute ?
+		k.xenconfig.memory.attribute ? &
+		k.xenconfig.domain.attribute ?
 	k.xenconfig =
 		## specifies the Xen configuration sections
 		[

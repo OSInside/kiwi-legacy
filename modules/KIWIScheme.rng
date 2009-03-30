@@ -2456,10 +2456,24 @@ virtual machine when running the image.</db:para>
         <a:documentation>The memory setup for the Xen guest.</a:documentation>
       </attribute>
     </define>
+    <define name="k.xenconfig.domain.attribute">
+      <attribute name="domain">
+        <a:documentation>The type of Xen domain to create (dom0 or domU)</a:documentation>
+        <choice>
+          <value>dom0</value>
+          <value>domU</value>
+        </choice>
+      </attribute>
+    </define>
     <define name="k.xenconfig.attlist">
-      <optional>
-        <ref name="k.xenconfig.memory.attribute"/>
-      </optional>
+      <interleave>
+        <optional>
+          <ref name="k.xenconfig.memory.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.xenconfig.domain.attribute"/>
+        </optional>
+      </interleave>
     </define>
     <define name="k.xenconfig">
       <element name="xenconfig">

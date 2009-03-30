@@ -79,6 +79,7 @@ sub new {
 	my $result;
 	my $status;
 	my $isxen;
+	my $xendomain;
 	my $xengz;
 	my $xml;
 	#==========================================
@@ -119,14 +120,15 @@ sub new {
 		$zipped = 1;
 	}
 	#==========================================
-	# xen kernel used...
+	# xen kernel used
 	#------------------------------------------
 	$isxen = 0;
 	$xengz = $initrd;
 	if ($zipped) {
 		$xengz =~ s/\.gz$//;
 	}
-	foreach my $xen (glob ("$xengz*xen.gz")) {
+	$xengz =~ s/\.splash$//;
+	foreach my $xen (glob ("$xengz*xen*.gz")) {
 		$isxen = 1;
 		$xengz = $xen;
 		last;
@@ -265,6 +267,17 @@ sub new {
 		}
 	}
 	#==========================================
+	# find Xen domain configuration
+	#==========================================
+	if ($isxen && defined $xml) {
+		my %xenc = $xml -> getXenConfig();
+		if (defined $xenc{xen_domain}) {
+			$xendomain = $xenc{xen_domain};
+		} else {
+			$xendomain = "dom0";
+		}
+	}
+	#==========================================
 	# setup virtual disk size
 	#------------------------------------------
 	if ((! defined $vmsize) && (defined $system)) {
@@ -360,23 +373,24 @@ sub new {
 	#==========================================
 	# Store object data (2)
 	#------------------------------------------
-	$this->{kiwi}   = $kiwi;
-	$this->{initrd} = $initrd;
-	$this->{system} = $system;
-	$this->{kernel} = $kernel;
-	$this->{vmmbyte}= $vmmbyte;
-	$this->{vmsize} = $vmsize;
-	$this->{syszip} = $syszip;
-	$this->{device} = $device;
-	$this->{format} = $format;
-	$this->{zipped} = $zipped;
-	$this->{isxen}  = $isxen;
-	$this->{xengz}  = $xengz;
-	$this->{arch}   = $arch;
-	$this->{ptool}  = $main::Partitioner;
-	$this->{lvm}    = $lvm;
-	$this->{vga}    = $vga;
-	$this->{xml}    = $xml;
+	$this->{kiwi}      = $kiwi;
+	$this->{initrd}    = $initrd;
+	$this->{system}    = $system;
+	$this->{kernel}    = $kernel;
+	$this->{vmmbyte}   = $vmmbyte;
+	$this->{vmsize}    = $vmsize;
+	$this->{syszip}    = $syszip;
+	$this->{device}    = $device;
+	$this->{format}    = $format;
+	$this->{zipped}    = $zipped;
+	$this->{isxen}     = $isxen;
+	$this->{xengz}     = $xengz;
+	$this->{arch}      = $arch;
+	$this->{ptool}     = $main::Partitioner;
+	$this->{lvm}       = $lvm;
+	$this->{vga}       = $vga;
+	$this->{xml}       = $xml;
+	$this->{xendomain} = $xendomain;
 	return $this;
 }
 
@@ -393,6 +407,7 @@ sub createBootStructure {
 	my $zipped = $this->{zipped};
 	my $isxen  = $this->{isxen};
 	my $xengz  = $this->{xengz};
+	my $xendomain = $this->{xendomain};
 	my $lname  = "linux";
 	my $iname  = "initrd";
 	my $xname  = "xen.gz";
@@ -417,6 +432,12 @@ sub createBootStructure {
 		return undef;
 	}
 	if ($zipped) {
+		if ($isxen) {
+			# deflate/inflate initrd to make xen happy
+			my $irdunc = $initrd;
+			$irdunc =~ s/\.gz//;
+			qxx ("$main::Gzip -d $initrd && $main::Gzip $irdunc");
+		}
 		$status = qxx ( "cp $initrd $tmpdir/boot/$iname 2>&1" );
 	} else {
 		$status = qxx ( "cat $initrd | $main::Gzip > $tmpdir/boot/$iname" );
@@ -438,7 +459,7 @@ sub createBootStructure {
 		$this -> cleanTmp ();
 		return undef;
 	}
-	if ($isxen) {
+	if ($isxen && $xendomain eq "dom0") {
 		$status = qxx ( "cp $xengz $tmpdir/boot/$xname 2>&1" );
 		$result = $? >> 8;
 		if ($result != 0) {
@@ -516,7 +537,6 @@ sub setupBootStick {
 	my $loopdir   = $this->{loopdir};
 	my $zipped    = $this->{zipped};
 	my $isxen     = $this->{isxen};
-	my $xengz     = $this->{xengz};
 	my $lvm       = $this->{lvm};
 	my %deviceMap = ();
 	my @commands  = ();
@@ -1236,7 +1256,6 @@ sub setupInstallCD {
 	my $oldird    = $this->{initrd};
 	my $zipped    = $this->{zipped};
 	my $isxen     = $this->{isxen};
-	my $xengz     = $this->{xengz};
 	my $md5name   = $system;
 	my $imgtype   = "oem";
 	my $gotsys    = 1;
@@ -1489,7 +1508,6 @@ sub setupInstallStick {
 	my $loopdir   = $this->{loopdir};
 	my $zipped    = $this->{zipped};
 	my $isxen     = $this->{isxen};
-	my $xengz     = $this->{xengz};
 	my $irdsize   = -s $initrd;
 	my $diskname  = $system.".install.raw";
 	my $md5name   = $system;
@@ -1871,7 +1889,6 @@ sub setupBootDisk {
 	my $loopdir   = $this->{loopdir};
 	my $zipped    = $this->{zipped};
 	my $isxen     = $this->{isxen};
-	my $xengz     = $this->{xengz};
 	my $lvm       = $this->{lvm};
 	my $diskname  = $system.".raw";
 	my %deviceMap = ();
@@ -3324,10 +3341,12 @@ sub setupBootLoaderConfiguration {
 	my $tmpdir   = $this->{tmpdir};
 	my $initrd   = $this->{initrd};
 	my $isxen    = $this->{isxen};
+	my $xendomain= $this->{xendomain};
 	my $imgtype  = $this->{imgtype};
 	my $bootpart = $this->{bootpart};
 	my $label    = $this->{bootlabel};
 	my $vga      = $this->{vga};
+	my $title;
 	#==========================================
 	# Check boot partition number
 	#------------------------------------------
@@ -3368,19 +3387,22 @@ sub setupBootLoaderConfiguration {
 		print FD "default 0\n";
 		print FD "timeout 10\n";
 		if ($type =~ /^KIWI CD/) {
+			$title = $this -> makeLabel ("Restore $label");
 			print FD "gfxmenu (cd)/boot/message\n";
-			print FD "title _Restore ".$label."_\n";
+			print FD "title $title\n";
 		} elsif ($type =~ /^KIWI USB/) {
+			$title = $this -> makeLabel ("Restore $label");
 			print FD "gfxmenu (hd0,0)/boot/message\n";
-			print FD "title _Restore ".$label."_\n";
+			print FD "title $title\n";
 		} else {
+			$title = $this -> makeLabel ("$label [ $type ]");
 			print FD "gfxmenu (hd0,$bootpart)/boot/message\n";
-			print FD "title _".$label." [ ".$type." ]_\n";
+			print FD "title $title\n";
 		}
 		#==========================================
 		# Standard boot
 		#------------------------------------------
-		if (! $isxen) {
+		if (! $isxen || ($isxen && $xendomain eq "domU")) {
 			if ($type =~ /^KIWI CD/) {
 				print FD " kernel (cd)/boot/linux vga=$vga splash=silent";
 				print FD " ramdisk_size=512000 ramdisk_blocksize=4096";
@@ -3441,14 +3463,9 @@ sub setupBootLoaderConfiguration {
 		#==========================================
 		# Failsafe boot
 		#------------------------------------------
-		if ($type =~ /^KIWI CD/) {
-			print FD "title _Failsafe -- Restore ".$label."_\n";
-		} elsif ($type =~ /^KIWI USB/) {
-			print FD "title _Failsafe -- Restore ".$label."_\n";
-		} else {
-			print FD "title _Failsafe -- ".$label." [ ".$type." ]_\n";
-		}
-		if (! $isxen) {
+		$title = $this -> makeLabel ("Failsafe -- $title");
+		print FD "title $title\n";
+		if (! $isxen || ($isxen && $xendomain eq "domU")) {
 			if ($type =~ /^KIWI CD/) {
 				print FD " kernel (cd)/boot/linux vga=$vga splash=silent";
 				print FD " ramdisk_size=512000 ramdisk_blocksize=4096";
@@ -4386,6 +4403,20 @@ sub deleteVolumeGroup {
 		qxx ("vgremove --force $VGroup 2>&1");
 	}
 	return $this;
+}
+
+#==========================================
+# makeLabel
+#------------------------------------------
+sub makeLabel {
+	# ...
+	# grub handles spaces as "_", so we replace
+	# each space with an underscore
+	# ----
+	my $this = shift;
+	my $label = shift;
+	$label =~ s/ /_/g;
+	return $label;
 }
 
 1; 
