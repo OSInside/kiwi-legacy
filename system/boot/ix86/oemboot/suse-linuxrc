@@ -186,6 +186,7 @@ fi
 # 13) Run SAP checks if activated
 #--------------------------------------
 if [ ! -z "$OEM_SAP_INSTALL" ];then
+	IFS=$IFS_ORIG
 	SAPMemCheck
 	SAPCPUCheck
 	SAPStorageCheck

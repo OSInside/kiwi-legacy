@@ -4077,7 +4077,7 @@ function SAPMemCheck {
 		Echo "This installation requires at least 2 GB of RAM"
 		Echo -b "but only $(( ${mem} / 1024 )) MB were detected."
 		Echo -b "You can override this check by passing"
-		Echo -b "'nomemcheck' to the kernel commandline."
+		Echo -b "'nomemcheck=1' to the kernel commandline."
 		systemException \
 			"SAPMemCheck failed... reboot" \
 		"reboot"
@@ -4099,7 +4099,7 @@ function SAPCPUCheck {
 	if [ "$cpu" != "x86_64" ]; then
 		Echo "This installation requires a 64Bit CPU (x86_64) but"
 		Echo -b "a $cpu CPU was detected. You can override this check"
-		Echo -b "by passing 'nocpucheck' to the kernel commandline."
+		Echo -b "by passing 'nocpucheck=1' to the kernel commandline."
 		systemException \
 			"SAPCPUCheck failed... reboot" \
 		"reboot"
@@ -4200,7 +4200,7 @@ function SAPStorageCheck {
 		1 ) Echo "The installation requires at least"
 			Echo -b "$(( ${req_size_root} / 2 / 1024 / 1024 )) GB disk space"
 			Echo -b "for the root partition. You can override this check"
-			Echo -b "by passing 'nohdcheck' to the kernel commandline."
+			Echo -b "by passing 'nohdcheck=1' to the kernel commandline."
 			systemException \
 				"SAPStorageCheck failed... reboot" \
 			"reboot"
@@ -4209,7 +4209,7 @@ function SAPStorageCheck {
 			Echo -b "$(( ${req_size_data} / 2 / 1024 / 1024 )) GB disk space"
 			Echo -b "for the data partition (second partition)."
 			Echo -b "You can override this check"
-			Echo -b "by passing 'nohdcheck' to the kernel commandline."
+			Echo -b "by passing 'nohdcheck=1' to the kernel commandline."
 			systemException \
 				"SAPStorageCheck failed... reboot" \
 			"reboot"
@@ -4277,6 +4277,6 @@ function SAPDataStorageSetup {
 #--------------------------------------
 function SAPStartMediaChanger {
 	startX
-	yast2 inst_sap_wrapper
+	yast2 --noborder --fullscreen inst_sap_wrapper
 	stoppX
 }
