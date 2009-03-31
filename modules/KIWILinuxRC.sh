@@ -4006,7 +4006,7 @@ function SAPMemCheck {
 	fi
 	local mem=`grep -i MemTotal /proc/meminfo | awk '{ print $2 }'`
 	if [ "$mem" -lt 1900000 ]; then
-		Echo -b "This installation requires at least 2 GB of RAM"
+		Echo "This installation requires at least 2 GB of RAM"
 		Echo -b "but only $(( ${mem} / 1024 )) MB were detected."
 		Echo -b "You can override this check by passing"
 		Echo -b "'nomemcheck' to the kernel commandline."
@@ -4029,7 +4029,7 @@ function SAPCPUCheck {
 	fi
 	local cpu=`uname -m`
 	if [ "$cpu" != "x86_64" ]; then
-		Echo -b "This installation requires a 64Bit CPU (x86_64) but"
+		Echo "This installation requires a 64Bit CPU (x86_64) but"
 		Echo -b "a $cpu CPU was detected. You can override this check"
 		Echo -b "by passing 'nocpucheck' to the kernel commandline."
 		systemException \
@@ -4129,7 +4129,7 @@ function SAPStorageCheck {
 		fi
 	fi
 	case $result in
-		1 ) Echo -b "The installation requires at least"
+		1 ) Echo "The installation requires at least"
 			Echo -b "$(( ${req_size_root} / 2 / 1024 / 1024 )) GB disk space"
 			Echo -b "for the root partition. You can override this check"
 			Echo -b "by passing 'nohdcheck' to the kernel commandline."
@@ -4137,7 +4137,7 @@ function SAPStorageCheck {
 				"SAPStorageCheck failed... reboot" \
 			"reboot"
 			;;
-		2 ) Echo -b "The installation requires at least"
+		2 ) Echo "The installation requires at least"
 			Echo -b "$(( ${req_size_data} / 2 / 1024 / 1024 )) GB disk space"
 			Echo -b "for the data partition (second partition)."
 			Echo -b "You can override this check"
@@ -4147,4 +4147,60 @@ function SAPStorageCheck {
 			"reboot"
 			;;
 	esac
+}
+#======================================
+# SAPDataStorageSetup
+#--------------------------------------
+function SAPDataStorageSetup {
+	# /.../
+	# if OEM SAP option is set this function searches for
+	# a disk which is not the system disk and sets it
+	# up as LVM container for later use
+	# ----
+	local imageDiskExclude=$1
+	local hwinfo=/usr/sbin/hwinfo
+	local input=/tmp/fdisk.input
+	local storage
+	#======================================
+	# Search a data disk
+	#--------------------------------------
+	if [ ! -n "$imageDiskExclude" ];then
+		imageDiskExclude="."
+	fi
+	local deviceDisks=`$hwinfo --disk |\
+		grep "Device File:" | cut -f2 -d: |\
+		cut -f1 -d"(" | sed -e s"@$imageDiskExclude@@"`
+	for storage in $deviceDisks;do
+		break
+	done
+	if [ -z "$storage" ];then
+		Echo "SAPDataStorageSetup: No data disk found... skipped"
+		return
+	fi
+	#======================================
+	# Partition the data disk
+	#--------------------------------------
+	cat > $input < /dev/null
+	dd if=/dev/zero of=$storage bs=512 count=1 2>&1
+	for cmd in n p 1 . . t 8e w q; do
+		if [ $cmd = "." ];then
+			echo >> $input
+			continue
+		fi
+		echo $cmd >> $input
+	done
+	fdisk $storage < $input 1>&2
+	if test $? != 0; then
+		systemException "Failed to create partition table" "reboot"
+	fi
+	#======================================
+	# Add volume group and filesystem
+	#--------------------------------------
+	pvcreate $storage
+	vgcreate data_vg $storage
+	lvcreate -l 100%FREE -n sapdata data_vg
+	mke2fs -j /dev/data_vg/sapdata
+	if test $? != 0; then
+		systemException "Failed to create sapdata volume" "reboot"
+	fi
 }
