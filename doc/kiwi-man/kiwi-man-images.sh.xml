@@ -104,7 +104,24 @@ exit</programlisting>
         </listitem>
       </varlistentry>
       <varlistentry>
-        <term><optional>suseGFXBoot</optional></term>
+        <term><optional>baseSetupOEMPartition</optional></term>
+        <listitem>
+          <para>
+             Writes the file /config.oempartition depending on the following
+             config.xml parameters: oem-reboot, oem-swapsize, oem-systemsize,
+			 oem-home,oem-swap,oem-boot-title,oem-recovery, oem-kiwi-initrd.
+			 kiwi takes the information from config.xml and creates the
+			 config.oempartition file as part of the automatically created
+             boot image (initrd). The information must be available as part
+             of the boot image because it controls the OEM repartition
+             workflow on first boot of an OEM image. Detailed information
+             about the meaning of each option can be found in the OEM
+             chapter in the kiwi cookbook
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+         <term><optional>suseGFXBoot {theme} {loadertyp}</optional></term>
         <listitem>
           <para>
             This function requires the gfxboot and at least one bootsplash-theme-*
@@ -130,6 +147,39 @@ exit</programlisting>
           <para>
             This function removes a whole bunch of tools binaries and libraries which
             are not required in order to boot a suse system with kiwi.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+         <term><optional>Rm {list of files}</optional></term>
+        <listitem>
+          <para>
+            Helper function to delete files and anounce it to log
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+         <term><optional>Rpm {rpm commandline}</optional></term>
+        <listitem>
+          <para>
+            Helper function to the rpm function and anounce it to log
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+         <term><optional>Echo {echo commandline}</optional></term>
+        <listitem>
+          <para>
+            Helper function to print a message to the controling terminal
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+         <term><optional>Debug {message}</optional></term>
+        <listitem>
+          <para>
+            Helper function to print a message 
+            if the variable DEBUG is set to 1
           </para>
         </listitem>
       </varlistentry>

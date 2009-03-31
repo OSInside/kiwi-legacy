@@ -1,11 +1,11 @@
 .\"     Title: kiwi
 .\"    Author: Marcus Schäfer <ms (AT) suse.de>
 .\" Generator: DocBook XSL Stylesheets v1.73.2 <http://docbook.sf.net/>
-.\"      Date: Created: 03/25/2009
+.\"      Date: Created: 03/31/2009
 .\"    Manual: KIWI Manualpage
 .\"    Source: KIWI v2.10, r938
 .\"
-.TH "KIWI" "1" "Created: 03/25/2009" "KIWI v2\.10, r938" "KIWI Manualpage"
+.TH "KIWI" "1" "Created: 03/31/2009" "KIWI v2\.10, r938" "KIWI Manualpage"
 .\" disable hyphenation
 .nh
 .\" disable justification (adjust text to left margin only)
@@ -63,7 +63,12 @@ Return the name(s) of profiles used to build this image
 Return the list of packages setup in the packages type=\'delete\' section of the config\.xml used to build this image
 .RE
 .PP
-[suseGFXBoot]
+[baseSetupOEMPartition]
+.RS 4
+Writes the file /config\.oempartition depending on the following config\.xml parameters: oem\-reboot, oem\-swapsize, oem\-systemsize, oem\-home,oem\-swap,oem\-boot\-title,oem\-recovery, oem\-kiwi\-initrd\. kiwi takes the information from config\.xml and creates the config\.oempartition file as part of the automatically created boot image (initrd)\. The information must be available as part of the boot image because it controls the OEM repartition workflow on first boot of an OEM image\. Detailed information about the meaning of each option can be found in the OEM chapter in the kiwi cookbook
+.RE
+.PP
+[suseGFXBoot {theme} {loadertyp}]
 .RS 4
 This function requires the gfxboot and at least one bootsplash\-theme\-* package to be installed in order to work correctly\. The function creates from this package data a graphics boot screen for the isolinux and grub boot loaders\. Additionally it creates the bootsplash files for the resolutions 800x600 1024x768 and 1280x1024
 .RE
@@ -76,6 +81,26 @@ This function removes all kernel drivers which are not listed in the *drivers se
 [suseStripInitrd]
 .RS 4
 This function removes a whole bunch of tools binaries and libraries which are not required in order to boot a suse system with kiwi\.
+.RE
+.PP
+[Rm {list of files}]
+.RS 4
+Helper function to delete files and anounce it to log
+.RE
+.PP
+[Rpm {rpm commandline}]
+.RS 4
+Helper function to the rpm function and anounce it to log
+.RE
+.PP
+[Echo {echo commandline}]
+.RS 4
+Helper function to print a message to the controling terminal
+.RE
+.PP
+[Debug {message}]
+.RS 4
+Helper function to print a message if the variable DEBUG is set to 1
 .RE
 .SH "PROFILE ENVIRONMENT VARIABLES"
 .PP

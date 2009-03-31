@@ -3994,6 +3994,74 @@ function makeLabel {
 	fi
 }
 #======================================
+# waitForX
+#--------------------------------------
+function waitForX {
+	# /.../
+	# wait for the X-Server with PID $xserver_pid to
+	# become read for client calls
+	# ----
+	local xserver_pid=$1
+	local testx=/usr/sbin/testX
+	local err=1
+	while kill -0 $xserver_pid 2>/dev/null ; do
+		sleep 1
+		if test -e /tmp/.X11-unix/X0 && test -x $testx ; then
+			$testx 16 2>/dev/null
+			err=$?
+			# exit code 1 -> XOpenDisplay failed...
+			if test $err = 1;then
+				Echo "TestX: XOpenDisplay failed"
+				return 1
+			fi
+			# exit code 2 -> color or dimensions doesn't fit...
+			if test $err = 2;then
+				Echo "TestX: color or dimensions doesn't fit"
+				kill $xserver_pid
+				return 1
+			fi
+			# server is running, detach oom-killer from it
+			echo -n '-17' > /proc/$xserver_pid/oom_adj
+			return 0
+		fi
+	done
+	return 1
+}
+#======================================
+# startX
+#--------------------------------------
+function startX {
+	# /.../
+	# start X-Server and wait for it to become ready
+	# ----
+	export DISPLAY=:0
+	local XServer=/usr/bin/Xorg
+	if [ -x /usr/X11R6/bin/Xorg ];then
+		XServer=/usr/X11R6/bin/Xorg
+	fi
+	$XServer -deferglyphs 16 vt07 &
+	export XServerPID=$!
+	if ! waitForX $XServerPID;then
+		Echo "Failed to start X-Server"
+		return 1
+	fi
+	return 0
+}
+#======================================
+# stoppX
+#--------------------------------------
+function stoppX {
+	if [ -z "$XServerPID" ];then
+		return
+	fi
+	if kill -0 $XServerPID 2>/dev/null; then
+		sleep 1 && kill $XServerPID
+		while kill -0 $XServerPID 2>/dev/null; do
+			sleep 1
+		done
+	fi
+}
+#======================================
 # SAPMemCheck
 #--------------------------------------
 function SAPMemCheck {
@@ -4203,4 +4271,12 @@ function SAPDataStorageSetup {
 	if test $? != 0; then
 		systemException "Failed to create sapdata volume" "reboot"
 	fi
+}
+#======================================
+# SAPStartMediaChanger
+#--------------------------------------
+function SAPStartMediaChanger {
+	startX
+	yast2 inst_sap_wrapper
+	stoppX
 }

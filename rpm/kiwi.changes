@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Mar 31 14:44:21 CEST 2009 - ms@suse.de
+
+- v3.40
+- update manual pages. Patch by Peter Schinagl <peters@suse.de>
+- added functions to run X inside preinit (bnc #486758)
+
+-------------------------------------------------------------------
 Mon Mar 30 11:31:54 CEST 2009 - ms@suse.de
 
 - v3.39

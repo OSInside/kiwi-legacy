@@ -99,6 +99,58 @@ exit</programlisting>
         </listitem>
       </varlistentry>
       <varlistentry>
+        <term><optional>baseSetupBoot</optional></term>
+        <listitem>
+          <para>
+             Set up the linuxrc as init
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+         <term><optional>baseSetupBusyBox {-f}</optional></term>
+        <listitem>
+          <para>
+             activates busybox if installed for all links from
+             the busybox/busybox.links file - you can choose custom apps to
+             be forced into busybox with the "-f" option as first parameter
+             example: baseSetupBusyBox -f /bin/zcat /bin/vi
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><optional>baseStripRPM</optional></term>
+        <listitem>
+          <para>
+             remove rpms defined in config.xml under image=delete section
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><optional>baseStripUnusedLibs</optional></term>
+        <listitem>
+          <para>
+             remove libraries which are not directly linked
+             against applications in the bin directories
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+         <term><optional>baseUpdateSysConfig {filename} {variable} {value}</optional></term>
+        <listitem>
+           <para>
+             update sysconfig variable contents
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><optional>baseGetPackagesForDeletion</optional></term>
+        <listitem>
+          <para>
+            Return the name(s) of packages which will be deleted
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
         <term><optional>baseGetProfilesUsed</optional></term>
         <listitem>
           <para>
@@ -107,12 +159,21 @@ exit</programlisting>
         </listitem>
       </varlistentry>
       <varlistentry>
-        <term><optional>baseSetupInPlaceSVNRepository</optional></term>
+         <term><optional>baseSetupInPlaceSVNRepository {path_list}</optional></term>
         <listitem>
           <para>
-           Create an in place subversion repository for the
-           specified directories. A standard call could look like this
-           baseSetupInPlaceSVNRepository /etc /srv /var/log 
+            Create an in place subversion repository for the
+            specified directories. A standard call could look like this
+            baseSetupInPlaceSVNRepository /etc /srv /var/log 
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><optional>baseSetupPlainTextGITRepository</optional></term>
+        <listitem>
+          <para>
+            Create an in place git repository of the root
+            directory containing all plain/text files.
           </para>
         </listitem>
       </varlistentry>
@@ -127,7 +188,59 @@ exit</programlisting>
         </listitem>
       </varlistentry>
       <varlistentry>
-        <term><optional>suseInsertService</optional></term>
+         <term><optional>baseStripMans {list of manpages to keep}</optional></term>
+        <listitem>
+          <para>
+             remove all manual pages, except one given as parameter
+             example: baseStripMans more less
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+         <term><optional>baseStripDocs {list of docu names to keep}</optional></term>
+        <listitem>
+          <para>
+             remove all documentation, except one given as parameter
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+         <term><optional>baseStripLocales {list of locales}</optional></term>
+        <listitem>
+           <para>
+             remove all locales, except one given as parameter
+          </para>
+        </listitem>
+     </varlistentry>
+      <varlistentry>
+         <term><optional>baseStripInfos {list of info-files to keep}</optional></term>
+        <listitem>
+           <para>
+             remove all info files, except one given as parameter
+          </para>
+        </listitem>
+     </varlistentry>
+      <varlistentry>
+         <term><optional>baseStripAndKeep {list of info-files to keep}</optional></term>
+        <listitem>
+           <para>
+              helper function for strip* functions
+              read stdin lines of files to check for removing
+              params: files which should be keep
+          </para>
+        </listitem>
+     </varlistentry>
+      <varlistentry>
+         <term><optional>baseStripTools {list of toolpath} {list of tools}</optional></term>
+        <listitem>
+           <para>
+              helper function for suseStripInitrd function
+              params: toolpath , tools
+          </para>
+        </listitem>
+     </varlistentry>
+     <varlistentry>
+         <term><optional>suseInsertService {servicename}</optional></term>
         <listitem>
           <para>
             Recursively insert a service. If there is a service
@@ -137,11 +250,20 @@ exit</programlisting>
         </listitem>
       </varlistentry>
       <varlistentry>
-        <term><optional>suseRemoveService</optional></term>
+         <term><optional>suseRemoveService {servicename}</optional></term>
         <listitem>
           <para>
             Remove a service and its dependant services
             using the suse insserv program
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+         <term><optional>suseStripPackager {-a}</optional></term>
+        <listitem>
+          <para>
+             Remove smart o zypper packages and db files
+             Also remove rpm package and db if "-a" given
           </para>
         </listitem>
       </varlistentry>
@@ -164,7 +286,7 @@ exit</programlisting>
         </listitem>
       </varlistentry>
       <varlistentry>
-        <term><optional>suseService</optional></term>
+         <term><optional>suseService {servicename} {on|off}</optional></term>
         <listitem>
           <para>
             Activate/Deactivate a service by using the chkconfig program
@@ -173,13 +295,13 @@ exit</programlisting>
           </para>
         </listitem>
       </varlistentry>
-      <varlistentry>
+	  <varlistentry>
         <term><optional>suseServiceDefaultOn</optional></term>
         <listitem>
           <para>
             Activates the following services to be on by default using the
             chkconfig program: boot.rootfsck boot.cleanup boot.localfs boot.localnet
-            boot.clock policykitd haldaemon network atd syslog cron
+            boot.clock policykitd dbus consolekt haldaemon network atd syslog cron kbd
           </para>
         </listitem>
       </varlistentry>
@@ -191,6 +313,15 @@ exit</programlisting>
             call SuSEconfig afterwards
           </para>
         </listitem>
+     </varlistentry>
+      <varlistentry>
+         <term><optional>suseCloneRunlevel {runlevel}</optional></term>
+        <listitem>
+          <para>
+            Clone the given runlevel to work in the same way
+            as the default runlevel 3.
+          </para>
+        </listitem>
       </varlistentry>
       <varlistentry>
         <term><optional>suseSetupProductInformation</optional></term>
@@ -199,6 +330,39 @@ exit</programlisting>
             This function will use zypper to search for the installed
             product and install all product specific packages. This function
             only makes sense if zypper is used as packagemanager
+          </para>
+        </listitem>
+     </varlistentry>
+      <varlistentry>
+         <term><optional>Rm {list of files}</optional></term>
+        <listitem>
+          <para>
+            Helper function to delete files and anounce it to log
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+         <term><optional>Rpm {rpm commandline}</optional></term>
+        <listitem>
+          <para>
+            Helper function to the rpm function and anounce it to log
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+         <term><optional>Echo {echo commandline}</optional></term>
+        <listitem>
+          <para>
+            Helper function to print a message to the controling terminal
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+         <term><optional>Debug {message}</optional></term>
+        <listitem>
+          <para>
+            Helper function to print a message 
+            if the variable DEBUG is set to 1
           </para>
         </listitem>
       </varlistentry>
@@ -221,7 +385,7 @@ exit</programlisting>
         </listitem>
       </varlistentry>
       <varlistentry>
-        <term><optional>$keytablee</optional></term>
+        <term><optional>$keytable</optional></term>
         <listitem>
           <para>
             The contents of the keytable setup as done in config.xml

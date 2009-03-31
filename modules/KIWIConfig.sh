@@ -506,7 +506,7 @@ function suseStripPackager {
 	fi
 }
 #======================================
-# suseStripRPM
+# baseStripRPM
 #--------------------------------------
 function baseStripRPM {
 	# /.../

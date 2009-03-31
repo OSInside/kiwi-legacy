@@ -84,7 +84,14 @@ if [ "$LOCAL_BOOT" = "no" ];then
 fi
 
 #======================================
-# 9) kill udev
+# 9) Run SAP media changer if activated
+#--------------------------------------
+if [ ! -z "$OEM_SAP_INSTALL" ];then
+	SAPStartMediaChanger
+fi
+
+#======================================
+# 10) kill udev
 #--------------------------------------
 udevKill
 umountSystemFilesystems
