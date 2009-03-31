@@ -52,7 +52,7 @@ function Echo {
 	local opte=""
 	while getopts "bne" option;do
 		case $option in
-			b) prefix="      " ;;
+			b) prefix="    " ;;
 			n) optn="-n" ;;
 			e) opte="-e" ;;
 			*) echo "Invalid argument: $option" ;;
