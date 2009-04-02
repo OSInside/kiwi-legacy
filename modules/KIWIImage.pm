@@ -1038,8 +1038,15 @@ sub createImageVMX {
 		return undef;
 	}
 	#==========================================
-	# Create virtual disk configuration
+	# Create virtual disk configuration for Xen
 	#------------------------------------------
+	if ($type{bootprofile} eq "xen") {
+		# Xen config file
+		if (! $this -> buildXenConfig ($main::Destination,$name,\%xenc, "VMX")) {
+			$main::Survive = "default";
+			return undef;
+		}
+	}
 	if (defined $main::BootVMFormat) {
 		#==========================================
 		# VMware virtual disk description
@@ -1051,12 +1058,6 @@ sub createImageVMX {
 				$main::Destination,$name,\%vmwc
 			);
 			if (! $vmxfile) {
-				$main::Survive = "default";
-				return undef;
-			}
-		} elsif ($type{bootprofile} eq "xen") {
-			# Xen config file
-			if (! $this -> buildXenConfig ($main::Destination,$name,\%xenc)) {
 				$main::Survive = "default";
 				return undef;
 			}
@@ -1132,7 +1133,7 @@ sub createImageXen {
 	#==========================================
 	# Create image xenconfig
 	#------------------------------------------
-	if (! $this -> buildXenConfig ($main::Destination,$name,\%xenc)) {
+	if (! $this -> buildXenConfig ($main::Destination,$name,\%xenc, "XEN")) {
 		$main::Survive = "default";
 		return undef;
 	}
@@ -3390,6 +3391,7 @@ sub buildXenConfig {
 	my $dest   = shift;
 	my $name   = shift;
 	my $xenref = shift;
+	my $text   = shift;
 	my $kiwi   = $this->{kiwi};
 	my $file   = $dest."/".$name->{systemImage}.".xenconfig";
 	my $initrd = $name->{bootImage}.".splash.gz";
@@ -3397,6 +3399,10 @@ sub buildXenConfig {
 	$kernel    = readlink ($kernel);
 	$kernel    = basename ($kernel);
 	my %xenconfig = %{$xenref};
+	my $format = "raw";
+	if (defined $main::BootVMFormat) {
+		$format = $main::BootVMFormat;
+	}
 	$kiwi -> info ("Creating image Xen configuration file...");
 	if (! %xenconfig) {
 		$kiwi -> skipped ();
@@ -3416,23 +3422,23 @@ sub buildXenConfig {
 	my $device = $xenconfig{xen_diskdevice};
 	$device =~ s/\/dev\///;
 	my $part = $device."1";
-	if (! defined $main::BootVMFormat) {
+	if ($text eq "XEN") {
 		$device = $device."1";
 	}
 	my $memory = $xenconfig{xen_memory};
 	my $image  = $name->{systemImage};
-	if (defined $main::BootVMFormat) {
-		$image .= ".".$main::BootVMFormat;
+	if ($text eq "VMX") {
+		$image .= ".".$format;
 	}
 	print FD '#  -*- mode: python; -*-'."\n";
 	print FD "name=\"".$this->{xml}->getImageDisplayName()."\"\n";
-	if (! defined $main::BootVMFormat) {
+	if ($text eq "XEN") {
 		print FD 'kernel="'.$kernel.'"'."\n";
 		print FD 'ramdisk="'.$initrd.'"'."\n";
 	}
 	print FD 'memory='.$memory."\n";
-	if (defined $main::BootVMFormat) {
-		my $tap = $main::BootVMFormat;
+	if ($text eq "VMX") {
+		my $tap = $format;
 		if ($tap eq "raw") {
 			$tap = "aio";
 		}
@@ -3463,7 +3469,7 @@ sub buildXenConfig {
 	#==========================================
 	# xen console
 	#------------------------------------------
-	if (!defined $main::BootVMFormat) {
+	if ($text eq "XEN") {
 		print FD 'root="'.$part.' ro"'."\n";
 		print FD 'extra=" xencons=tty "'."\n";
 	}
