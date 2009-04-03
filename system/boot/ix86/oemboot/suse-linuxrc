@@ -189,7 +189,7 @@ if [ ! -z "$OEM_SAP_INSTALL" ];then
 	IFS=$IFS_ORIG
 	SAPMemCheck
 	SAPCPUCheck
-	SAPStorageCheck
+	SAPStorageCheck $imageDiskDevice
 	SAPDataStorageSetup $imageDiskDevice
 fi
 
