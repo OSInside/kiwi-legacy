@@ -943,7 +943,7 @@ function suseStripInitrd {
 		udevsettle udevtrigger mknod stat path_id hwup scsi_id scsi_tur
 		usb_id ata_id vol_id edd_id setctsid dumpe2fs debugreiserfs
 		fuser udevadm blogd showconsole killproc curl tar
-		ldd driveready checkmedia splashy bzip2 hexdump
+		ldd driveready checkmedia splashy bzip2 hexdump vgremove
 		pvchange pvresize pvscan vgscan vgchange vgextend vgdisplay
 		lvchange lvresize lvextend lvcreate grub dcounter tty
 		dmsetup dialog awk gawk

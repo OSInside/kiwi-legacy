@@ -4245,6 +4245,7 @@ function SAPDataStorageSetup {
 	# Add volume group and filesystem
 	#--------------------------------------
 	pvcreate $storage"1"
+	vgremove --force data_vg
 	vgcreate data_vg $storage"1"
 	lvcreate -l 100%FREE -n sapdata data_vg
 	mke2fs -j /dev/data_vg/sapdata
