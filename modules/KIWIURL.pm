@@ -152,7 +152,7 @@ sub quote {
 		my %safe = %{$_[1]};
 		my @done = ();
 		foreach my $key (split (//,$part)) {
-			if (! $safe{$key}) {
+			if (! defined $safe{$key}) {
 				$key = sprintf ("%%%02X",ord($key));
 			}
 			push @done,$key;
