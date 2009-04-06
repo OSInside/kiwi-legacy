@@ -89,7 +89,6 @@
 		<package name="bootsplash"/>
 		<package name="bootsplash-branding-openSUSE"/>
 		<package name="tar"/>
-		<package name="cromfs"/>
 		<package name="lvm2"/>
 	</packages>
 	<packages type="bootstrap">

@@ -105,7 +105,6 @@
 		<package name="tar"/>
 		<package name="lvm2"/>
 		<package name="bzip2"/>
-		<package name="cromfs"/>
 		<package name="kiwi-tools"/>
 	</packages>
 	<packages type="bootstrap">

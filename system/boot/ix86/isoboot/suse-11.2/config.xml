@@ -101,7 +101,6 @@
 		<package name="bootsplash"/>
 		<package name="bootsplash-branding-openSUSE"/>
 		<package name="tar"/>
-		<package name="cromfs"/>
 		<package name="rpm"/>
 		<package name="kiwi-tools"/>
 		<package name="checkmedia"/>
