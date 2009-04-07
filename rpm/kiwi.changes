@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Apr  7 11:31:54 CEST 2009 - adrian@suse.de
+
+- Fix path creation on openSUSE 11.1 and later systems.
+  This fixes missing files on inst source medias created on SLES 11 systems.
+
+-------------------------------------------------------------------
 Fri Apr  3 12:25:47 CEST 2009 - ms@suse.de
 
 - v3.41

@@ -986,7 +986,7 @@ sub collectPackages
   $this->getMetafileList();
 
   $this->{m_scriptbase} = "$this->{m_united}/scripts";
-  if(!mkpath($this->{m_scriptbase}, { mode => umask } )) {
+  if(!mkpath($this->{m_scriptbase}, { mode => 0755 } )) {
     $this->logMsg("E", "[collectPackages] Cannot create script directory!");
     die;  # TODO clean exit somehow
   }
@@ -1068,7 +1068,7 @@ sub unpackMetapackages
     if(-d $tmp) {
       qx(rm -rf $tmp);
     }
-    if(!mkpath("$tmp", { mode => umask } )) {
+    if(!mkpath("$tmp", { mode => 0755 } )) {
       $this->logMsg("E", "can't create dir <$tmp>");
       return $retval;;
     }
@@ -1959,7 +1959,7 @@ sub createDirectoryStructure
     if(-d $d) {
       $dirs{$d} = 0;
     }
-    elsif(!mkpath($d, 0755)) {
+    elsif(!mkpath($d, { mode => 0755 } )) {
       $this->logMsg("E", "createDirectoryStructure: can't create directory $d!");
       $dirs{$d} = 2;
       $errors++;

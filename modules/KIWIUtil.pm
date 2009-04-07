@@ -539,7 +539,7 @@ sub unpac_package
   }
 
   if(! -d $dir) {
-    if(!mkpath("$dir", { mode => umask })) {
+    if(!mkpath("$dir", { mode => 0755 })) {
       $this->{m_logger}->error("[E] unpac_package: cannot create directory <$dir>");
       $retval = 2;
       goto up_failed;
