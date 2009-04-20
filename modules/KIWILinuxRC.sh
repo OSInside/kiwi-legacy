@@ -1525,8 +1525,7 @@ function identifyFileSystem {
 	# filesystem
 	# ----
 	FSTYPE=unknown
-	local seek=$1
-	if [ ! -z "$seek" ];then
+	if [ ! -z "$2" ];then
 		# leave a gap of 512 byte to skip a possible bootloader
 		dd if=$1 of=/tmp/filesystem-$$ bs=128k count=1 seek=4 skip=4 >/dev/null
 	else
@@ -1555,9 +1554,9 @@ function identifyFileSystem {
 # probeFileSystem
 #--------------------------------------
 function probeFileSystem {
-	identifyFileSystem
+	identifyFileSystem $1
 	if [ $FSTYPE = "unknown" ];then
-		identifyFileSystem "after-boot-record"
+		identifyFileSystem $1 "after-boot-record"
 	fi
 }
 #======================================
