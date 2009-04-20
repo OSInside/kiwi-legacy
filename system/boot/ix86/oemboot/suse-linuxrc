@@ -139,7 +139,7 @@ export imageRootDevice=$imageDiskDevice$imageBootID
 export imageRWDevice=$imageDiskDevice"2"
 export imageRODevice=$imageDiskDevice"1"
 export imageIOWRDevice=$imageDiskDevice"2"
-if [ ! -z "$RECOVERY" ];then
+if [ ! -z "$KIWI_RECOVERY" ];then
 	export imageRecoveryDevice=$imageDiskDevice"4"
 	export imageRootDevice=$imageDiskDevice"2"
 fi
@@ -160,7 +160,7 @@ if searchVolumeGroup; then
 	export imageRODevice=/dev/kiwiVG/LVComp
 	export imageIOWRDevice=/dev/kiwiVG/LVRoot
 	export imageBootDevice=$imageDiskDevice"2"
-	if [ ! -z "$RECOVERY" ];then
+	if [ ! -z "$KIWI_RECOVERY" ];then
 		export imageRecoveryDevice=/dev/kiwiVG/LVRecovery
 	fi
 fi
@@ -221,7 +221,6 @@ if [ "$LOCAL_BOOT" = "no" ];then
 	if [ ! -z "$deviceResize" ] && partitionSize $deviceResize &>/dev/null;then
 		if [ ! -z "$OEM_RECOVERY" ];then
 			KIWI_INITRD_PARAMS="$KIWI_INITRD_PARAMS LOCAL_BOOT=yes"
-			KIWI_INITRD_PARAMS="$KIWI_INITRD_PARAMS RECOVERY=yes"
 			export KIWI_INITRD_PARAMS
 		fi
 		if [ -z "$DONT_PARTITION" ];then
