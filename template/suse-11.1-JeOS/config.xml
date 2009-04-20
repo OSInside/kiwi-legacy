@@ -36,7 +36,7 @@
 		<locale>en_US.UTF-8</locale>
 		<keytable>de-latin1-nodeadkeys.map.gz</keytable>
 		<timezone>Europe/Berlin</timezone>
-		<rpm-excludedocs>yes</rpm-excludedocs>
+		<rpm-excludedocs>true</rpm-excludedocs>
 	</preferences>
 	<!-- Users setup -->
 	<users group="root">

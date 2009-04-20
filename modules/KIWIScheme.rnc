@@ -766,6 +766,7 @@ div {
 # common element <rpm-excludedocs>
 #
 div {
+	k.rpm-excludedocs.content = xsd:boolean
 	k.rpm-excludedocs.attlist = empty
 	k.rpm-excludedocs =
 		## Setup a Package Signature
@@ -778,7 +779,7 @@ div {
 		]
 		element rpm-excludedocs {
 			k.rpm-excludedocs.attlist,
-			text
+			k.rpm-excludedocs.content
 		}
 }
 

@@ -9,6 +9,8 @@ Mon Apr 20 13:08:32 CEST 2009 - ms@suse.de
 - fixed multicast activation/deactivation (bnc #356974)
 - also check for include link to use --dereference when
   copying the overlay tree (bnc #490128)
+- added bool content type instead of text for
+  rpm-excludedocs (bnc #496382)
 
 -------------------------------------------------------------------
 Tue Apr  7 11:31:54 CEST 2009 - adrian@suse.de

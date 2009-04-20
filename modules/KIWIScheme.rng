@@ -1116,6 +1116,9 @@ to the used package manager.</db:para>
     
   -->
   <div>
+    <define name="k.rpm-excludedocs.content">
+      <data type="boolean"/>
+    </define>
     <define name="k.rpm-excludedocs.attlist">
       <empty/>
     </define>
@@ -1126,7 +1129,7 @@ to the used package manager.</db:para>
 during package installation. This option could be ignored
 according to the used package manager.</db:para>
         <ref name="k.rpm-excludedocs.attlist"/>
-        <text/>
+        <ref name="k.rpm-excludedocs.content"/>
       </element>
     </define>
   </div>

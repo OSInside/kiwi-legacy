@@ -13,7 +13,7 @@
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>False</rpm-check-signatures>
 		<rpm-force>True</rpm-force>
-		<rpm-excludedocs>True</rpm-excludedocs>
+		<rpm-excludedocs>true</rpm-excludedocs>
 		<oem-swap>no</oem-swap>
 		<oem-kiwi-initrd>yes</oem-kiwi-initrd>
 		<oem-boot-title>USB</oem-boot-title>
