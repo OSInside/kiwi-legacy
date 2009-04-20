@@ -3,6 +3,12 @@ Mon Apr 20 13:08:32 CEST 2009 - ms@suse.de
 
 - v3.42
 - fixed recovery device setup (bnc #493878)
+- make sure DHCPHADDR is an uppercase value (bnc #495557)
+- fixed probeFileSystem to take care if the first 512byte
+  contains a bootloader (bnc #493489)
+- fixed multicast activation/deactivation (bnc #356974)
+- also check for include link to use --dereference when
+  copying the overlay tree (bnc #490128)
 
 -------------------------------------------------------------------
 Tue Apr  7 11:31:54 CEST 2009 - adrian@suse.de

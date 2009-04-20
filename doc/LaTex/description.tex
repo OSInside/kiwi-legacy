@@ -121,7 +121,8 @@ documentation file at /usr/share/doc/packages/ kiwi/kiwi.rng.html.
 The image definition starts with an image tag and requires the
 schema format at version 2.0. The attribute name specifies the
 name of the image which is also used for the file names created
-by KIWI.
+by KIWI. Because we don't want spaces in file names the name
+attribute must not have any spaces in its name.
 
 \begin{itemize}
 \item The optional attribute displayname allows setup of the boot
@@ -147,7 +148,7 @@ elements \textbf{description, preferences, repository and
 packages (at least one of type=''bootstrap'')}.
 
 \begin{Command}{12cm}
-<description type="image">\\
+<description type="system">\\
 \hspace*{1cm}<author>an author</author>\\
 \hspace*{1cm}<contact>mail</contact>\\
 \hspace*{1cm}<specification>short info</specification>\\
@@ -156,7 +157,7 @@ packages (at least one of type=''bootstrap'')}.
 
 The mandatory description section contains information about
 the creator of this image description. The attribute \textbf{type}
-could be either of the value ''image'' which indicates this is a
+could be either of the value ''system'' which indicates this is a
 system image description or at value ''boot'' for boot image
 descriptions.
 

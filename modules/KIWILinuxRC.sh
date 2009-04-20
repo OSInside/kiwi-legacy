@@ -1515,17 +1515,24 @@ function kernelCheck {
 	fi
 }
 #======================================
-# probeFileSystem
+# identifyFileSystem
 #--------------------------------------
-function probeFileSystem {
+function identifyFileSystem {
 	# /.../
 	# probe for the filesystem type. The function will
-	# read the first 128 kB of the given device and check
-	# the filesystem header data to detect the type of the
+	# read 128 kB of the given device and check the
+	# filesystem header data to detect the type of the
 	# filesystem
 	# ----
 	FSTYPE=unknown
-	dd if=$1 of=/tmp/filesystem-$$ bs=128k count=1 >/dev/null
+	local seek=$1
+	if [ ! -z "$seek" ];then
+		# leave a gap of 512 byte to skip a possible bootloader
+		dd if=$1 of=/tmp/filesystem-$$ bs=128k count=1 seek=4 skip=4 >/dev/null
+	else
+		# read the first 128 byte to check the fs
+		dd if=$1 of=/tmp/filesystem-$$ bs=128k count=1 >/dev/null
+	fi
 	data=$(file /tmp/filesystem-$$)
 	case $data in
 		*ext3*)     FSTYPE=ext3 ;;
@@ -1543,6 +1550,15 @@ function probeFileSystem {
 	fi
 	rm -f /tmp/filesystem-$$
 	export FSTYPE
+}
+#======================================
+# probeFileSystem
+#--------------------------------------
+function probeFileSystem {
+	identifyFileSystem
+	if [ $FSTYPE = "unknown" ];then
+		identifyFileSystem "after-boot-record"
+	fi
 }
 #======================================
 # getSystemIntegrity
@@ -2162,6 +2178,7 @@ function setupNetwork {
 	IFS="," ; for i in $DNS;do
 		echo "nameserver $i" >> /etc/resolv.conf
 	done
+	DHCPCHADDR=`echo $DHCPCHADDR | tr a-z A-Z`
 }
 #======================================
 # updateNeeded
@@ -3569,19 +3586,24 @@ function fetchFile {
 			;;
 		"tftp")
 			validateBlockSize
-			if [ -z "$multicast" ];then
-				multicast="disable"
+			# /.../
+			# atftp activates multicast by '--option "multicast"'
+			# and deactivates it again  by '--option "disable multicast"'
+			# ----
+			multicast_atftp="multicast"
+			if test "$multicast" != "enable"; then 
+				multicast_atftp="disable multicast"
 			fi
 			if test "$izip" = "compressed"; then
 				# mutlicast is disabled because you can't seek in a pipe
 				atftp \
-					--option "multicast disable" \
+					--option "disable multicast" \
 					--option "blksize $imageBlkSize" -g -r $path \
 					-l /dev/stdout $host 2>$TRANSFER_ERRORS_FILE |\
 					gzip -d > $dest 2>>$TRANSFER_ERRORS_FILE
 			else
 				atftp \
-					--option "multicast $multicast"  \
+					--option "$multicast_atftp"  \
 					--option "blksize $imageBlkSize" \
 					-g -r $path -l $dest $host &> $TRANSFER_ERRORS_FILE
 			fi
