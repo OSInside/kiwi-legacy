@@ -914,8 +914,23 @@ function setupBootLoaderSyslinux {
 	#======================================
 	# create sysconfig/bootloader
 	#--------------------------------------
-	echo "LOADER_TYPE=\"syslinux\""   > $sysb
-	echo "LOADER_LOCATION=\"mbr\""   >> $sysb
+	echo "LOADER_TYPE=\"syslinux\""                           > $sysb
+	echo "LOADER_LOCATION=\"mbr\""                           >> $sysb
+	echo "DEFAULT_VGA=\"$fbmode\""                           >> $sysb 
+	echo -n "DEFAULT_APPEND=\"root=$diskByID splash=silent"  >> $sysb
+	if [ ! -z "$swap" ];then
+		echo -n " resume=$swapByID"                          >> $sysb
+	fi
+	echo -n " $KIWI_INITRD_PARAMS $KIWI_KERNEL_OPTIONS"      >> $sysb
+	echo " showopts\""                                       >> $sysb
+	echo "FAILSAFE_VGA=\"$fbmode\""                          >> $sysb
+	echo -n "FAILSAFE_APPEND=\"root=$diskByID splash=silent" >> $sysb
+	if [ ! -z "$swap" ];then
+		echo -n " resume=$swapByID"                          >> $sysb
+	fi
+	echo -n " $KIWI_INITRD_PARAMS $KIWI_KERNEL_OPTIONS"      >> $sysb
+	echo -n " showopts ide=nodma apm=off acpi=off noresume"  >> $sysb
+	echo "selinux=0 nosmp noapic maxcpus=0 edd=off\""        >> $sysb
 }
 #======================================
 # setupBootLoaderGrub
@@ -1128,8 +1143,23 @@ function setupBootLoaderGrub {
 	#======================================
 	# create sysconfig/bootloader
 	#--------------------------------------
-	echo "LOADER_TYPE=\"grub\""     > $sysb
-	echo "LOADER_LOCATION=\"mbr\"" >> $sysb
+	echo "LOADER_TYPE=\"grub\""                               > $sysb
+	echo "LOADER_LOCATION=\"mbr\""                           >> $sysb
+	echo "DEFAULT_VGA=\"$fbmode\""                           >> $sysb  
+	echo -n "DEFAULT_APPEND=\"root=$diskByID splash=silent"  >> $sysb
+	if [ ! -z "$swap" ];then
+		echo -n " resume=$swapByID"                          >> $sysb
+	fi
+	echo -n " $KIWI_INITRD_PARAMS $KIWI_KERNEL_OPTIONS"      >> $sysb
+	echo " showopts\""                                       >> $sysb
+	echo "FAILSAFE_VGA=\"$fbmode\""                          >> $sysb
+	echo -n "FAILSAFE_APPEND=\"root=$diskByID splash=silent" >> $sysb
+	if [ ! -z "$swap" ];then
+		echo -n " resume=$swapByID"                          >> $sysb
+	fi
+	echo -n " $KIWI_INITRD_PARAMS $KIWI_KERNEL_OPTIONS"      >> $sysb
+	echo -n " showopts ide=nodma apm=off acpi=off noresume"  >> $sysb
+	echo "selinux=0 nosmp noapic maxcpus=0 edd=off\""        >> $sysb
 }
 #======================================
 # setupBootLoaderLilo
@@ -1303,8 +1333,23 @@ function setupBootLoaderLilo {
 	#======================================
 	# create sysconfig/bootloader
 	#--------------------------------------
-	echo "LOADER_TYPE=\"lilo\""     > $sysb
-	echo "LOADER_LOCATION=\"mbr\"" >> $sysb
+	echo "LOADER_TYPE=\"lilo\""                               > $sysb
+	echo "LOADER_LOCATION=\"mbr\""                           >> $sysb
+	echo "DEFAULT_VGA=\"$fbmode\""                           >> $sysb 
+	echo -n "DEFAULT_APPEND=\"root=$diskByID splash=silent"  >> $sysb
+	if [ ! -z "$swap" ];then
+		echo -n " resume=$swapByID"                          >> $sysb
+	fi
+	echo -n " $KIWI_INITRD_PARAMS $KIWI_KERNEL_OPTIONS"      >> $sysb
+	echo " showopts\""                                       >> $sysb
+	echo "FAILSAFE_VGA=\"$fbmode\""                          >> $sysb
+	echo -n "FAILSAFE_APPEND=\"root=$diskByID splash=silent" >> $sysb
+	if [ ! -z "$swap" ];then
+		echo -n " resume=$swapByID"                          >> $sysb
+	fi
+	echo -n " $KIWI_INITRD_PARAMS $KIWI_KERNEL_OPTIONS"      >> $sysb
+	echo -n " showopts ide=nodma apm=off acpi=off noresume"  >> $sysb
+	echo "selinux=0 nosmp noapic maxcpus=0 edd=off\""        >> $sysb
 }
 #======================================
 # setupDefaultPXENetwork
