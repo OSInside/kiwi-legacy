@@ -550,12 +550,14 @@ sub setupBootStick {
 	my $bootloader= "grub";
 	my $lvmsize;
 	my $syslsize;
+	my $dmsize;
 	my $FSTypeRW;
 	my $FSTypeRO;
 	my $status;
 	my $result;
 	my $hald;
 	my $xml;
+	my $root;
 	#==========================================
 	# use lvm together with system image only
 	#------------------------------------------
@@ -612,7 +614,7 @@ sub setupBootStick {
 	#==========================================
 	# check for device mapper snapshot
 	#------------------------------------------
-	if ($type{filesystem} == "dmsquash") {
+	if ($type{filesystem} eq "dmsquash") {
 		$this->{dmapper} = 1;
 		$dmapper  = 1;
 		$dmbootMB = 40;
@@ -815,7 +817,20 @@ sub setupBootStick {
 							"a","3","w","q"
 						);
 					} elsif ($dmapper) {
-						# TODO
+						$dmsize = $hardSize;
+						$dmsize /= 1000;
+						$dmsize -= $syszip;
+						$dmsize -= $dmbootMB;
+						$dmsize = sprintf ("%.f",$dmsize);
+						@commands = (
+							"n","p","1",".","+".$syszip."M",
+							"n","p","2",".","+".$dmsize."M",
+							"n","p","3",".",".",
+							"t","1","83",
+							"t","2","83",
+							"t","3","83",
+							"a","3","w","q"
+						);
 					} else {
 						@commands = (
 							"n","p","1",".","+".$syszip."M",
@@ -1163,6 +1178,39 @@ sub setupBootStick {
 		}
 	}
 	#==========================================
+	# create bootloader filesystem if needed
+	#------------------------------------------
+	if ($bootloader eq "syslinux") {
+		$root = $deviceMap{fat};
+		$status = qxx ("/sbin/mkdosfs $root 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> error  ("Couldn't create DOS filesystem: $status");
+			$kiwi -> failed ();
+			$this -> cleanDbus();
+			$this -> cleanLoop ();
+			return undef;
+		}
+	} elsif (($dmapper) || ($lvm)) {
+		$root = $deviceMap{0};
+		if ($dmapper) {
+			$root = $deviceMap{dmapper};
+		}
+		my %FSopts = main::checkFSOptions();
+		my $fsopts = $FSopts{ext2};
+		$fsopts.= "-F";
+		$status = qxx ("/sbin/mke2fs $fsopts $root 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create filesystem: $status");
+			$kiwi -> failed ();
+			$this -> cleanDbus();
+			$this -> cleanLoop ();
+			return undef;
+		}
+	}
+	#==========================================
 	# Dump boot image on virtual disk
 	#------------------------------------------
 	$kiwi -> info ("Copying boot data to stick");
@@ -1170,31 +1218,18 @@ sub setupBootStick {
 	# Mount system image / or rw partition
 	#------------------------------------------
 	if ($bootloader eq "syslinux") {
-		$status = qxx ("/sbin/mkdosfs $deviceMap{fat} 2>&1");
-		$result = $? >> 8;
-		if ($result == 0) {
-			$status = qxx ("mount $deviceMap{fat} $loopdir 2>&1");
-			$result = $? >> 8;
-		}
+		$root = $deviceMap{fat};
 	} elsif ($dmapper) {
-		# TODO
+		$root = $deviceMap{dmapper};
 	} elsif ($lvm) {
-		my %FSopts = main::checkFSOptions();
-		my $fsopts = $FSopts{ext2};
-		$fsopts.= "-F";
-		$status = qxx ("/sbin/mke2fs $fsopts $deviceMap{0} 2>&1");
-		$result = $? >> 8;
-		if ($result == 0) {
-			$status = qxx ("mount $deviceMap{0} $loopdir 2>&1");
-			$result = $? >> 8;
-		}
+		$root = $deviceMap{0};
 	} elsif (($syszip) || ($haveSplit)) {
-		$status = qxx ("mount $deviceMap{2} $loopdir 2>&1");
-		$result = $? >> 8;
+		$root = $deviceMap{2};
 	} else {
-		$status = qxx ("mount $deviceMap{1} $loopdir 2>&1");
-		$result = $? >> 8;
+		$root = $deviceMap{1};
 	}
+	$status = qxx ("mount $root $loopdir 2>&1");
+	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't mount stick image: $status");

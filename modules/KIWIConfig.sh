@@ -1211,6 +1211,12 @@ function suseStripKernel {
 			fi
 			/sbin/depmod -F /boot/System.map-$VERSION $VERSION
 			#==========================================
+			# check for modules.order and backup it
+			#------------------------------------------
+			if [ -f $kversion/modules.order ];then
+				mv $kversion/modules.order /tmp
+			fi
+			#==========================================
 			# strip the modules but take care for deps
 			#------------------------------------------
 			stripdir=/tmp/stripped_modules
@@ -1270,6 +1276,9 @@ function suseStripKernel {
 			rm -rf $kversion
 			mv -v $stripdir/$kversion $kversion
 			rm -rf $stripdir
+			if [ -f /tmp/modules.order ];then
+				mv /tmp/modules.order $kversion
+			fi
 			#==========================================
 			# run depmod
 			#------------------------------------------

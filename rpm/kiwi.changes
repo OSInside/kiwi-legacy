@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Apr 21 11:46:11 CEST 2009 - ms@suse.de
+
+- v3.43
+- let udev load modules if modules.order is provided by
+  the kernel (bnc #493201)
+
+-------------------------------------------------------------------
 Mon Apr 20 13:08:32 CEST 2009 - ms@suse.de
 
 - v3.42

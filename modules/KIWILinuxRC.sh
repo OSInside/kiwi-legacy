@@ -27,6 +27,7 @@ export KLOG_DEFAULT=1
 export PARTITIONER=sfdisk
 export TRANSFER_ERRORS_FILE=/tmp/transfer.errors
 export DEFAULT_VGA=0x314
+export HAVE_MODULES_ORDER=1
 
 #======================================
 # Debug
@@ -353,18 +354,20 @@ function udevStart {
 	if [ -e /proc/sys/kernel/hotplug ];then
 		echo "" > /proc/sys/kernel/hotplug
 	fi
-	# /.../
-	# At the moment we prevent udev from loading the storage
-	# modules because it does not make a propper choice if
-	# there are multiple possible modules available. Example
-	# udev prefers ata_generic over ata_piix but the hwinfo
-	# order is ata_piix first which also seems to make more
-	# sense. I would love to let udev load the modules but
-	# at the moment I don't see how I could solve that
-	# problem in another way than:
-	# -----
-	rm -f /etc/udev/rules.d/*-drivers.rules
-	rm -f /lib/udev/rules.d/*-drivers.rules
+	if ! ls /lib/modules/*/modules.order &>/dev/null;then
+		# /.../
+		# without modules.order in place we prevent udev from loading
+		# the storage modules because it does not make a propper
+		# choice if there are multiple possible modules available.
+		# Example:
+		# udev prefers ata_generic over ata_piix but the hwinfo
+		# order is ata_piix first which also seems to make more
+		# sense.
+		# -----
+		rm -f /etc/udev/rules.d/*-drivers.rules
+		rm -f /lib/udev/rules.d/*-drivers.rules
+		HAVE_MODULES_ORDER=0
+	fi
 	# start the udev daemon
 	udevd --daemon udev_log="debug"
 	# wait for pending triggered udev events.
@@ -1590,55 +1593,56 @@ function getSystemMD5Status {
 # probeUSB
 #--------------------------------------
 function probeUSB {
-	IFS="%"
 	local module=""
 	local stdevs=""
 	local hwicmd="/usr/sbin/hwinfo"
-	#======================================
-	# load host controller modules
-	#--------------------------------------
-	for i in \
-		`$hwicmd --usb | grep "Driver [IA]" | 
-		sed -es"@modprobe\(.*\)\"@\1%@" | tr -d "\n"`
-	do
-		if echo $i | grep -q "#0";then
-			module=`echo $i | cut -f2 -d"\"" | tr -d " "`
-			module=`echo $module | sed -es"@modprobe@@g"`
-			IFS=";"
-			for m in $module;do
-				if ! echo $stdevs | grep -q $m;then
-					stdevs="$stdevs $m"
-				fi
-			done
+	if [ $HAVE_MODULES_ORDER = 0 ];then
+		#======================================
+		# load host controller modules
+		#--------------------------------------
+		IFS="%"
+		for i in \
+			`$hwicmd --usb | grep "Driver [IA]" | 
+			sed -es"@modprobe\(.*\)\"@\1%@" | tr -d "\n"`
+		do
+			if echo $i | grep -q "#0";then
+				module=`echo $i | cut -f2 -d"\"" | tr -d " "`
+				module=`echo $module | sed -es"@modprobe@@g"`
+				IFS=";"
+				for m in $module;do
+					if ! echo $stdevs | grep -q $m;then
+						stdevs="$stdevs $m"
+					fi
+				done
+			fi
+		done
+		for i in \
+			`$hwicmd --usb-ctrl | grep "Driver [IA]" | 
+			sed -es"@modprobe\(.*\)\"@\1%@" | tr -d "\n"`
+		do
+			if echo $i | grep -q "#0";then
+				module=`echo $i | cut -f2 -d"\"" | tr -d " "`
+				module=`echo $module | sed -es"@modprobe@@g"`
+				IFS=";"
+				for m in $module;do
+					if ! echo $stdevs | grep -q $m;then
+						stdevs="$stdevs $m"
+					fi
+				done
+			fi
+		done
+		IFS=$IFS_ORIG
+		stdevs=`echo $stdevs`
+		for module in $stdevs;do
+			Echo "Probing module: $module"
+			modprobe $module >/dev/null
+		done
+		#======================================
+		# check load status for host controller
+		#--------------------------------------
+		if [ -z "$stdevs" ];then
+			return
 		fi
-	done
-	IFS="%"
-	for i in \
-		`$hwicmd --usb-ctrl | grep "Driver [IA]" | 
-		sed -es"@modprobe\(.*\)\"@\1%@" | tr -d "\n"`
-	do
-		if echo $i | grep -q "#0";then
-			module=`echo $i | cut -f2 -d"\"" | tr -d " "`
-			module=`echo $module | sed -es"@modprobe@@g"`
-			IFS=";"
-			for m in $module;do
-				if ! echo $stdevs | grep -q $m;then
-					stdevs="$stdevs $m"
-				fi
-			done
-		fi
-	done
-	IFS=$IFS_ORIG
-	stdevs=`echo $stdevs`
-	for module in $stdevs;do
-		Echo "Probing module: $module"
-		modprobe $module >/dev/null
-	done
-	#======================================
-	# check load status for host controller
-	#--------------------------------------
-	if [ -z "$stdevs" ];then
-		return
 	fi
 	#======================================
 	# manually load storage/input drivers
@@ -1647,88 +1651,104 @@ function probeUSB {
 		modprobe $i &>/dev/null
 	done
 	#======================================
-	# wait for device scan to complete
+	# wait for storage devices to appear
 	#--------------------------------------
 	Echo -n "Waiting for USB devices to settle..."
 	local storage=/sys/bus/usb/drivers/usb-storage
-	while ! [ -d $storage ] && [ $count -lt 5 ]; do
-		echo -n .
-		sleep 1
-		count=`expr $count + 1`
-	done
-	count=0
-	if [ -d $storage ]; then
-		while \
-			[ $(dmesg|grep -c 'usb-storage: device scan complete') -lt 1 ] && \
-			[ $count -lt 15 ]
-		do
-			echo -n .
-			sleep 1
-			count=`expr $count + 1`
+	local devices=0
+	while [ $devices -lt 5 ];do
+		for i in $storage/*;do
+			if [ -L $i ] && [ ! $i = "$storage/module" ];then
+				devices=ok
+				break
+			fi
 		done
-		count=0
+		if [ $devices = "ok" ];then
+			break
+		fi
+		echo -n . ; sleep 1
+		devices=$(( $devices + 1 ))
+	done
+	if [ ! $devices = "ok" ];then
+		echo ; return
 	fi
+	#======================================
+	# wait for storage scan to complete
+	#--------------------------------------
+	devices=0
+	while \
+		[ $(dmesg | grep -c 'usb-storage: device scan complete') -lt 1 ] && \
+		[ $devices -lt 15 ]
+	do
+		echo -n . ; sleep 1
+		devices=$(( $devices + 1 ))
+	done
 	echo
 }
 #======================================
 # probeDevices
 #--------------------------------------
 function probeDevices {
-	Echo "Including required kernel modules..."
-	IFS="%"
-	local module=""
-	local stdevs=""
-	local hwicmd="/usr/sbin/hwinfo"
-	for i in \
-		`$hwicmd --storage | grep "Driver [IA]" | 
-		sed -es"@modprobe\(.*\)\"@\1%@" | tr -d "\n"`
-	do
-		if echo $i | grep -q "#0";then
-			module=`echo $i | cut -f2 -d"\"" | tr -d " "`
-			module=`echo $module | sed -es"@modprobe@@g"`
-			IFS=";"
-			for m in $module;do
-				if ! echo $stdevs | grep -q $m;then
-					stdevs="$stdevs $m"
-				fi
-			done
-		fi
-	done
-	IFS=$IFS_ORIG
-	stdevs=`echo $stdevs`
-	if [ ! -z "$kiwikernelmodule" ];then
-		for module in $kiwikernelmodule;do
-			Echo "Probing module (cmdline): $module"
-			INITRD_MODULES="$INITRD_MODULES $module"
-			modprobe $module >/dev/null
-		done
-	fi
-	for module in $stdevs;do
-		loadok=1
-		for broken in $kiwibrokenmodule;do
-			if [ $broken = $module ];then
-				Echo "Prevent loading module: $module"
-				loadok=0; break
+	if [ $HAVE_MODULES_ORDER = 0 ];then
+		Echo "Including required kernel modules..."
+		IFS="%"
+		local module=""
+		local stdevs=""
+		local hwicmd="/usr/sbin/hwinfo"
+		for i in \
+			`$hwicmd --storage | grep "Driver [IA]" | 
+			sed -es"@modprobe\(.*\)\"@\1%@" | tr -d "\n"`
+		do
+			if echo $i | grep -q "#0";then
+				module=`echo $i | cut -f2 -d"\"" | tr -d " "`
+				module=`echo $module | sed -es"@modprobe@@g"`
+				IFS=";"
+				for m in $module;do
+					if ! echo $stdevs | grep -q $m;then
+						stdevs="$stdevs $m"
+					fi
+				done
 			fi
 		done
-		if [ $loadok = 1 ];then
-			Echo "Probing module: $module"
-			INITRD_MODULES="$INITRD_MODULES $module"
-			modprobe $module >/dev/null
+		IFS=$IFS_ORIG
+		stdevs=`echo $stdevs`
+		if [ ! -z "$kiwikernelmodule" ];then
+			for module in $kiwikernelmodule;do
+				Echo "Probing module (cmdline): $module"
+				INITRD_MODULES="$INITRD_MODULES $module"
+				modprobe $module >/dev/null
+			done
 		fi
-	done
-	hwinfo --block &>/dev/null
+		for module in $stdevs;do
+			loadok=1
+			for broken in $kiwibrokenmodule;do
+				if [ $broken = $module ];then
+					Echo "Prevent loading module: $module"
+					loadok=0; break
+				fi
+			done
+			if [ $loadok = 1 ];then
+				Echo "Probing module: $module"
+				INITRD_MODULES="$INITRD_MODULES $module"
+				modprobe $module >/dev/null
+			fi
+		done
+		hwinfo --block &>/dev/null
+	fi
 	# /.../
 	# older systems require ide-disk to be present at any time
 	# for details on this crappy call see bug: #250241
 	# ----
-	modprobe ide-disk
-	modprobe rd &>/dev/null
-	modprobe brd &>/dev/null
-	modprobe edd &>/dev/null
-	modprobe dm-mod &>/dev/null
-	modprobe xennet &>/dev/null
-	modprobe xenblk &>/dev/null
+	modprobe ide-disk &>/dev/null
+	# /.../
+	# default loading of modules not loaded on demand
+	# ----
+	for i in rd brd edd dm-mod xennet xenblk;do
+		modprobe $i &>/dev/null
+	done
+	# /.../
+	# probe USB devices and load modules
+	# ----
 	probeUSB
 }
 #======================================
@@ -1741,9 +1761,11 @@ function CDDevice {
 	# ----
 	local count=0
 	local h=/usr/sbin/hwinfo
-	for module in sg sd_mod sr_mod cdrom ide-cd BusLogic vfat; do
-		/sbin/modprobe $module
-	done
+	if [ $HAVE_MODULES_ORDER = 0 ];then
+		for module in sg sd_mod sr_mod cdrom ide-cd BusLogic vfat; do
+			/sbin/modprobe $module
+		done
+	fi
 	Echo -n "Waiting for CD/DVD device(s) to appear..."
 	while true;do
 		cddevs=`$h --cdrom | grep "Device File:"|sed -e"s@(.*)@@" | cut -f2 -d:`
