@@ -26,6 +26,9 @@ function OEMInstall {
 	# on. The install image is a virtual disk. The system will be
 	# rebooted at the end of this function
 	# ----
+	local count=0
+	local dsize=0
+	local index=0
 	#======================================
 	# Check for install mode indicator file
 	#--------------------------------------
@@ -75,8 +78,10 @@ function OEMInstall {
 	Echo "Found following disk device(s)"
 	count=0
 	for i in $deviceDisks;do
-		Echo -b "Disk $count -> $i"
+		dsize=`partitionSize $i`
+		Echo -b "Disk $count -> $i [ $dsize KByte ]"
 		deviceArray[$count]=$i
+		deviceDSize[$count]=$dsize
 		count=`expr $count + 1`
 	done
 	if [ "$count" = "1" ];then
@@ -86,34 +91,55 @@ function OEMInstall {
 		instDisk=${deviceArray[0]}
 	else
 		#======================================
-		# Found multiple disks... ask for it
+		# Found multiple disks...
 		#--------------------------------------
-		while true;do
-			Echo -n "Enter device name to select disk for installation: "
-			read deviceInput
+		if [ -z "$OEM_SAP_INSTALL" ];then
+			#======================================
+			# standard mode, ask for install media
+			#--------------------------------------
+			while true;do
+				Echo -n "Enter device name to select disk for installation: "
+				read deviceInput
+				count=0
+				for instDisk in $deviceDisks;do
+					if [ ${deviceArray[$count]} = $deviceInput ];then
+						break 2
+					fi
+					count=`expr $count + 1`
+				done
+				Echo "Given device is not in the list !"
+			done
+		else
+			#======================================
+			# SAP mode, use the smallest one
+			#--------------------------------------
 			count=0
-			for instDisk in $deviceDisks;do
-				if [ ${deviceArray[$count]} = $deviceInput ];then
-					break 2
+			dsize=${deviceDSize[$count]}
+			for i in $deviceDisks;do
+				if [ ${deviceDSize[$count]} -lt $dsize ];then
+					dsize=${deviceDSize[$count]}
+					index=$count
 				fi
 				count=`expr $count + 1`
 			done
-			Echo "Given device is not in the list !"
-		done
+			instDisk=${deviceArray[$index]}
+		fi
 	fi
 	Echo "Entering installation mode for disk: $instDisk"
-	while true;do
-		Echo -n "This will destroy ALL data on $instDisk, continue [y/n]: "
-		read startInstall
-		if [ "$startInstall" = "y" ];then
-			break
-		fi
-		if [ "$startInstall" = "n" ];then
-			systemException \
-				"System installation canceled" \
-			"reboot"
-		fi
-	done
+	if [ -z "$OEM_SAP_INSTALL" ];then
+		while true;do
+			Echo -n "This will destroy ALL data on $instDisk, continue [y/n]: "
+			read startInstall
+			if [ "$startInstall" = "y" ];then
+				break
+			fi
+			if [ "$startInstall" = "n" ];then
+				systemException \
+					"System installation canceled" \
+				"reboot"
+			fi
+		done
+	fi
 	#======================================
 	# Import vmx configuration file
 	#--------------------------------------

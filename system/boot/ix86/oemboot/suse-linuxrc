@@ -105,20 +105,39 @@ openKernelConsole
 probeDevices
 
 #======================================
-# 7) Check for installation mode...
+# 7) Import OEM partition config
+#--------------------------------------
+if [ "$LOCAL_BOOT" = "no" ] && [ -f $OEM_PARTITION_CONFIG ];then
+	Echo "Including oem partition info file"
+	importFile < $OEM_PARTITION_CONFIG
+fi
+
+#======================================
+# 8) Check for installation mode...
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then
 	OEMInstall
 fi
 
 #======================================
-# 8) Search boot device...
+# 9) Search boot device...
 #--------------------------------------
 Echo "Searching for boot device..."
 export imageDiskDevice=`searchBIOSBootDevice`
 
 #======================================
-# 9) Get filesystem type and boot ID
+# 10) Run SAP checks if activated
+#--------------------------------------
+if [ ! -z "$OEM_SAP_INSTALL" ];then
+	IFS=$IFS_ORIG
+	SAPMemCheck
+	SAPCPUCheck
+	SAPStorageCheck $imageDiskDevice
+	SAPDataStorageSetup $imageDiskDevice
+fi
+
+#======================================
+# 11) Get filesystem type and boot ID
 #--------------------------------------
 export imageBootID=1
 probeFileSystem $imageDiskDevice$imageBootID
@@ -133,7 +152,7 @@ if [ $FSTYPE = "unknown" ];then
 fi
 
 #======================================
-# 10) Setup device names...
+# 12) Setup device names...
 #--------------------------------------
 export imageRootDevice=$imageDiskDevice$imageBootID
 export imageRWDevice=$imageDiskDevice"2"
@@ -167,31 +186,12 @@ if searchVolumeGroup; then
 fi
 
 #======================================
-# 11) Check filesystem
+# 13) Check filesystem
 #--------------------------------------
 Echo "Filesystem of OEM system is: $FSTYPE -> $imageRootDevice"
 if isFSTypeReadOnly;then
 	setupUnionFS $imageRWDevice $imageRODevice aufs
 	bootid=1
-fi
-
-#======================================
-# 12) Import OEM partition config
-#--------------------------------------
-if [ "$LOCAL_BOOT" = "no" ] && [ -f $OEM_PARTITION_CONFIG ];then
-	Echo "Including oem partition info file"
-	importFile < $OEM_PARTITION_CONFIG
-fi
-
-#======================================
-# 13) Run SAP checks if activated
-#--------------------------------------
-if [ ! -z "$OEM_SAP_INSTALL" ];then
-	IFS=$IFS_ORIG
-	SAPMemCheck
-	SAPCPUCheck
-	SAPStorageCheck $imageDiskDevice
-	SAPDataStorageSetup $imageDiskDevice
 fi
 
 #======================================

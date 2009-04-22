@@ -2005,12 +2005,12 @@ function searchBIOSBootDevice {
 	#======================================
 	# Check for BIOS id 0x80
 	#--------------------------------------
-	for curd in $ddevs;do
-		if [ $curd = "0x80" ];then
-			echo $pred; return
-		fi
-		pred=$curd
-	done
+	#for curd in $ddevs;do
+	#	if [ $curd = "0x80" ];then
+	#		echo $pred; return
+	#	fi
+	#	pred=$curd
+	#done
 	#======================================
 	# Search and copy all mbrid files 
 	#--------------------------------------
@@ -4208,6 +4208,7 @@ function SAPStorageCheck {
 	if [ ! -z "$nohdcheck" ];then
 		return
 	fi
+	local hwinfo=/usr/sbin/hwinfo
 	local ROOT_DEVICE=$1
 	local size_rootkB=$(partitionSize $ROOT_DEVICE)
 	local DATA_DEVICE=""
@@ -4218,7 +4219,7 @@ function SAPStorageCheck {
 	local main_memory_GB=$(( ${main_memory_MB} / 1024 ))
 	local MIN_DATA_DEV_SIZE=200 # GB
 	local MIN_ROOT_DEV_SIZE=$(( ${main_memory_GB} * 2 + 40 + 3 ))
-	local NUM=`hwinfo --disk | grep -c "Hardware Class:"`
+	local NUM=`$hwinfo --disk | grep -c "Hardware Class:"`
 	local req_size_datakB=""
 	local req_size_rootkB=""
 	local result=0
