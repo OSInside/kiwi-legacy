@@ -1082,6 +1082,12 @@ sub createImageVMX {
 				return undef;
 			}
 			$ovffile =~ s/\.vmx$/\.ovf/;
+			# /.../
+			# temporary hack, because ovftool is not able to handle
+			# scsi-hardDisk correctly at the moment
+			# ---- beg ----
+			qxx ("sed -i -e 's;scsi-hardDisk;disk;' $vmxfile");
+			# ---- end ----
 			my $status;
 			if (! $ovflog) {
 				$status= qxx ("$ovftool -bf $vmxfile $ovffile 2>&1");
@@ -1089,6 +1095,9 @@ sub createImageVMX {
 				$status= qxx ("$ovftool -bf $vmxfile $ovffile -l $ovflog 2>&1");
 			}
 			my $result = $? >> 8;
+			# --- beg ----
+			qxx ("sed -i -e 's;disk;scsi-hardDisk;' $vmxfile");
+			# --- end ----
 			if ($result != 0) {
 				$kiwi -> failed ();
 				$kiwi -> error  ("Couldn't create OVF image: $status");
