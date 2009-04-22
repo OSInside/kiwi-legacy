@@ -860,6 +860,12 @@ to the specific medium number (CD1, DVD7, ...)</a:documentation>
     
   -->
   <div>
+    <define name="k.packagemanager.content">
+      <choice>
+        <value>smart</value>
+        <value>zypper</value>
+      </choice>
+    </define>
     <define name="k.packagemanager.attlist">
       <empty/>
     </define>
@@ -868,11 +874,8 @@ to the specific medium number (CD1, DVD7, ...)</a:documentation>
         <a:documentation>Name of the Package Manager</a:documentation>
         <db:para>The package manager used for package installation
 could be either zypper or smart</db:para>
-        <group>
-          <ref name="k.packagemanager.attlist"/>
-          <text/>
-        </group>
-        <!-- zypper or smart -->
+        <ref name="k.packagemanager.attlist"/>
+        <ref name="k.packagemanager.content"/>
       </element>
     </define>
   </div>

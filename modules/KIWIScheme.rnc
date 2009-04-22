@@ -589,6 +589,7 @@ div {
 # common element <packagemanager>
 #
 div {
+	k.packagemanager.content = "smart" | "zypper"
 	k.packagemanager.attlist = empty
 	k.packagemanager =
 		## Name of the Package Manager
@@ -600,7 +601,7 @@ div {
 		]
 		element packagemanager {
 			k.packagemanager.attlist,
-			text # zypper or smart
+			k.packagemanager.content
 		}
 }
 
