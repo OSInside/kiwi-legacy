@@ -1643,6 +1643,7 @@ sub setupInstallStick {
 		}
 	}
 	$this->{imgtype} = $imgtype;
+	$this->{bootpart}= 0;
 	#==========================================
 	# Build md5sum of system image
 	#------------------------------------------
