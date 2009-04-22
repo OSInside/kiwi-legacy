@@ -163,6 +163,7 @@ if searchVolumeGroup; then
 	if [ ! -z "$KIWI_RECOVERY" ];then
 		export imageRecoveryDevice=/dev/kiwiVG/LVRecovery
 	fi
+	probeFileSystem $imageRootDevice
 fi
 
 #======================================
