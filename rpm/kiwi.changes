@@ -2,6 +2,7 @@
 Wed Apr 22 10:06:17 CEST 2009 - ms@suse.de
 
 - v3.44
+- fixed fstab setup of sapdata volume
 - added ovftool patch required for tech. preview 
 - fixed bootpartition id for install image creation
 - fixed size of boot image partition when creating an

@@ -433,6 +433,7 @@ if [ "$LOCAL_BOOT" = "no" ];then
 	fi
 	if [ ! -z "$OEM_SAP_INSTALL" ];then
 		SAP_DATA=/dev/data_vg/sapdata
+		vgchange -a y data_vg
 		if partitionSize $SAP_DATA &>/dev/null;then
 			mkdir -p /mnt/sapdata
 			echo "$SAP_DATA /sapdata ext3 defaults 0 0" >> /config/etc/fstab
