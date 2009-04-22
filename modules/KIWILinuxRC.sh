@@ -554,6 +554,9 @@ function setupSUSEInitrd {
 		if [ -f /etc/init.d/boot.device-mapper ];then
 			/etc/init.d/boot.device-mapper start
 		fi
+		if [ "$haveLVM" = "yes" ]; then
+			/etc/init.d/boot.lvm start
+		fi
 		if ! mkinitrd;then
 			Echo "Can't create initrd"
 			systemIntegrity=unknown
