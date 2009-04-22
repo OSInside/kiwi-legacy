@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Apr 22 10:06:17 CEST 2009 - ms@suse.de
+
+- v3.44
+- fixed size of boot image partition when creating an
+  install image of type: virtual disk
+
+-------------------------------------------------------------------
 Tue Apr 21 11:46:11 CEST 2009 - ms@suse.de
 
 - v3.43

@@ -1666,7 +1666,7 @@ sub setupInstallStick {
 	#==========================================
 	# setup required disk size
 	#------------------------------------------
-	$irdsize= ($irdsize / 1e6) + 10;
+	$irdsize= ($irdsize / 1e6) + 20;
 	$irdsize= sprintf ("%.0f", $irdsize);
 	$vmsize = -s $system;
 	$vmsize = ($vmsize / 1e6) * 1.2 + $irdsize;
