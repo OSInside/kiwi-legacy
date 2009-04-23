@@ -1691,13 +1691,13 @@ function probeUSB {
 		if [ -z "$stdevs" ];then
 			return
 		fi
+		#======================================
+		# manually load storage/input drivers
+		#--------------------------------------
+		for i in usbhid usb-storage;do
+			modprobe $i &>/dev/null
+		done
 	fi
-	#======================================
-	# manually load storage/input drivers
-	#--------------------------------------
-	for i in usbhid usb-storage;do
-		modprobe $i &>/dev/null
-	done
 	#======================================
 	# wait for storage devices to appear
 	#--------------------------------------
@@ -1782,12 +1782,12 @@ function probeDevices {
 			fi
 		done
 		hwinfo --block &>/dev/null
+		# /.../
+		# older systems require ide-disk to be present at any time
+		# for details on this crappy call see bug: #250241
+		# ----
+		modprobe ide-disk &>/dev/null
 	fi
-	# /.../
-	# older systems require ide-disk to be present at any time
-	# for details on this crappy call see bug: #250241
-	# ----
-	modprobe ide-disk &>/dev/null
 	# /.../
 	# default loading of modules not loaded on demand
 	# ----
