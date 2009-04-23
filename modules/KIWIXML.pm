@@ -1939,6 +1939,7 @@ sub getImageConfig {
 	my $rev  = "unknown";
 	if (open FD,$main::Revision) {
 		$rev = <FD>; close FD;
+		$rev =~ s/\n//g;
 	}
 	$result{kiwi_revision} = $rev;
 	#==========================================

@@ -2,6 +2,8 @@
 Wed Apr 22 16:39:07 CEST 2009 - ms@suse.de
 
 - v3.45
+- fixed kiwi_revision content in .profile
+- fixed LVM repartition code if more than one VG exist
 - deacticate the bios 0x80 check it's not safe enough
 - allow non interactive installation procedure in
   oem-sap-install mode. In case of multiple disks the smallest

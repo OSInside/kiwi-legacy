@@ -616,7 +616,7 @@ function OEMRepartLVM {
 	vgchange -a y kiwiVG
 	pvcreate $imageDiskDevice"3"
 	vgextend kiwiVG $imageDiskDevice"3"
-	VGFreeMBytes=`vgdisplay --short --unit B | cut -f2 -d/ | cut -f1 -dB`
+	VGFreeMBytes=`vgdisplay --short --unit B kiwiVG | cut -f2 -d/ | cut -f1 -dB`
 	VGFreeMBytes=`expr $VGFreeMBytes / 1000`
 	VGFreeMBytes=`expr $VGFreeMBytes / 1000`
 	VGNeedMBytes=`expr $VGSwapMBytes + $VGRecoveryMBytes + $VGSystemMBytes`
