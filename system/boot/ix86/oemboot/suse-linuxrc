@@ -113,17 +113,17 @@ if [ "$LOCAL_BOOT" = "no" ] && [ -f $OEM_PARTITION_CONFIG ];then
 fi
 
 #======================================
-# 8) Check for installation mode...
+# 8) Search boot device...
+#--------------------------------------
+Echo "Searching for boot device..."
+export imageDiskDevice=`searchBIOSBootDevice`
+
+#======================================
+# 9) Check for installation mode...
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then
 	OEMInstall
 fi
-
-#======================================
-# 9) Search boot device...
-#--------------------------------------
-Echo "Searching for boot device..."
-export imageDiskDevice=`searchBIOSBootDevice`
 
 #======================================
 # 10) Run SAP checks if activated

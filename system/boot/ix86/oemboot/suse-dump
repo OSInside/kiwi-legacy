@@ -36,12 +36,6 @@ function OEMInstall {
 		return
 	fi
 	#======================================
-	# Search boot device...
-	#--------------------------------------
-	Echo "Searching for boot device..."
-	imageDiskDevice=`searchBIOSBootDevice`
-
-	#======================================
 	# Search CD/DVD/USB stick and mount it
 	#--------------------------------------
 	USBStickDevice
@@ -247,6 +241,7 @@ function OEMInstall {
 		"reboot"
 	fi
 	Echo "Image checksum test: fine :-)"
+	Echo "System installation has finished"
 	#======================================
 	# Umount CD/DVD USB
 	#--------------------------------------
@@ -261,16 +256,17 @@ function OEMInstall {
 			"Partition $deviceTest doesn't appear... fatal !" \
 		"reboot"
 	fi
+	imageDiskDevice=$imageDevice
 	#======================================
 	# Reboot system
 	#--------------------------------------
-	if [ "$OEMInstallType" = "CD" ];then
-		Echo "NOTE: Please remove the installation CD before reboot !"
-		CDEject
-	else
-		Echo "NOTE: Please unplug the USB stick before reboot !"
-	fi
-	systemException \
-		"System installation has finished" \
-	"reboot"
+	#if [ "$OEMInstallType" = "CD" ];then
+	#	Echo "NOTE: Please remove the installation CD before reboot !"
+	#	CDEject
+	#else
+	#	Echo "NOTE: Please unplug the USB stick before reboot !"
+	#fi
+	#systemException \
+	#	"System installation has finished" \
+	#"reboot"
 }

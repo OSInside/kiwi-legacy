@@ -659,6 +659,8 @@ function OEMRepartLVM {
 		if [ -z "$OEM_WITHOUTHOME" ];then
 			lvcreate -l 100%FREE -n LVHome kiwiVG
 			export imageHomeDevice=/dev/kiwiVG/LVHome
+		else
+			lvextend -l 100%FREE /dev/kiwiVG/LVRoot
 		fi
 	fi
 	#======================================
