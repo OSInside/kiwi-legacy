@@ -1939,9 +1939,9 @@ function CDMount {
 	while true;do
 		IFS=":"; for i in $cddev;do
 			if [ -x /usr/bin/driveready ];then
-				driveready $i && mount $i /cdrom >/dev/null
+				driveready $i && mount -t iso9660 $i /cdrom >/dev/null
 			else
-				mount $i /cdrom >/dev/null
+				mount -t iso9660 $i /cdrom >/dev/null
 			fi
 			if [ -f $LIVECD_CONFIG ];then
 				cddev=$i; echo;

@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Fri Apr 24 12:22:51 CEST 2009 - ms@suse.de
+
+- v3.46
+- pass -t iso9660 when mounting CD/DVD devices. It's a kernel
+  bug that slows down the bandwidth if not passing that value
+  but the workaround is rock solid :) (bnc #493201)
+
+-------------------------------------------------------------------
 Wed Apr 22 16:39:07 CEST 2009 - ms@suse.de
 
 - v3.45
