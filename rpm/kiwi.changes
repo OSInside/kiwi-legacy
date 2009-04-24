@@ -2,6 +2,9 @@
 Fri Apr 24 12:22:51 CEST 2009 - ms@suse.de
 
 - v3.46
+- fixed format image creation for split type (bnc #497882)
+- use -x option when copying system tree to avoid copying
+  still mounted filesystems like proc for example (bnc #497984)
 - pass -t iso9660 when mounting CD/DVD devices. It's a kernel
   bug that slows down the bandwidth if not passing that value
   but the workaround is rock solid :) (bnc #493201)

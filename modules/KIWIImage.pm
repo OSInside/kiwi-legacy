@@ -2043,7 +2043,7 @@ sub createImageSplit {
 	if (-d $imageDest."/".$treebase) {
 		qxx ("rm -rf $imageDest/$treebase");
 	}
-	$data = qxx ("cp -a $imageTree $imageDest");
+	$data = qxx ("cp -a -x $imageTree $imageDest");
 	$code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> failed ();
@@ -3081,7 +3081,7 @@ sub installLogicalExtend {
 	#------------------------------------------
 	my $name = basename ($source);
 	$kiwi -> info ("Copying physical to logical [$name]...");
-	my $data = qxx ("cp -a $source/* $extend 2>&1");
+	my $data = qxx ("cp -a -x $source/* $extend 2>&1");
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> failed ();
