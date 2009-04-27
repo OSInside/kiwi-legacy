@@ -169,17 +169,20 @@ function OEMInstall {
 	#======================================
 	# Check MBR ID's...
 	#--------------------------------------
-	mbrI="cat $imageName"
-	if [ "$imageZipped" = "compressed" ];then
-		mbrI="gzip -cd $imageName"
+	if [ -z "$nombridcheck" ];then
+		mbrD=$instDisk
+		mbrI="cat $imageName"
+		if [ "$imageZipped" = "compressed" ];then
+			mbrI="gzip -cd $imageName"
+		fi
+		mbrM=`dd if=$mbrD bs=1 count=4 skip=$((0x1b8))|hexdump -n4 -e '"0x%x"'`
+		mbrI=`$mbrI | dd  bs=1 count=4 skip=$((0x1b8))|hexdump -n4 -e '"0x%x"'`
+		if [ $mbrM = $mbrI ];then
+			systemException \
+				"Base system already installed" \
+			"reboot"
+		fi	
 	fi
-	mbrM=`dd if=$instDisk  bs=1 count=4 skip=$((0x1b8))|hexdump -n4 -e '"0x%x"'`
-	mbrI=`$mbrI | dd bs=1 count=4 skip=$((0x1b8))|hexdump -n4 -e '"0x%x"'`
-	if [ $mbrM = $mbrI ];then
-		systemException \
-			"Base system already installed" \
-		"reboot"
-	fi	
 	#======================================
 	# read MD5 information...
 	#--------------------------------------
@@ -256,7 +259,12 @@ function OEMInstall {
 			"Partition $deviceTest doesn't appear... fatal !" \
 		"reboot"
 	fi
-	imageDiskDevice=$imageDevice
+	#======================================
+	# Setup/Reset values for further boot
+	#--------------------------------------
+	export imageDiskExclude=$instDisk
+	export imageDiskDevice=$imageDevice
+	unset stickSerial
 	#======================================
 	# Reboot system
 	#--------------------------------------

@@ -2000,17 +2000,18 @@ function searchBIOSBootDevice {
 	local ddevs=`$h --disk|grep -E "$c"|sed -e"s@(.*)@@"|cut -f2 -d:|tr -d " "`
 	local cmpd=/tmp/mbrids
 	local ifix=0
+	local bios
 	local file
 	local pred
 	#======================================
-	# Check for BIOS id 0x80
+	# Store device with BIOS id 0x80
 	#--------------------------------------
-	#for curd in $ddevs;do
-	#	if [ $curd = "0x80" ];then
-	#		echo $pred; return
-	#	fi
-	#	pred=$curd
-	#done
+	for curd in $ddevs;do
+		if [ $curd = "0x80" ];then
+			bios=$pred; break
+		fi
+		pred=$curd
+	done
 	#======================================
 	# Search and copy all mbrid files 
 	#--------------------------------------
@@ -2042,12 +2043,19 @@ function searchBIOSBootDevice {
 	#======================================
 	# Compare ID with MBR entry 
 	#--------------------------------------
+	ifix=0
 	for curd in $ddevs;do
 		mbrM=`dd if=$curd bs=1 count=4 skip=$((0x1b8))|hexdump -n4 -e '"0x%x"'`
 		if [ $mbrM = $mbrI ];then
-			echo $curd; return
+			ifix=1
+			if [ "$curd" = "$bios" ];then
+				echo $curd; return
+			fi
 		fi
 	done
+	if [ $ifix -eq 1 ];then
+		echo $curd; return
+	fi
 	systemException \
 		"No devices matches MBR identifier: $mbrI !" \
 	"reboot"
@@ -3947,6 +3955,7 @@ function activateImage {
 	#--------------------------------------
 	mkdir -p /mnt/var/log
 	rm -f /var/log/boot.msg
+	rm -f /mnt/boot/grub/mbrid
 	cp -f /mnt/dev/shm/initrd.msg /mnt/var/log/boot.msg
 	cp -f /var/log/boot.kiwi /mnt/var/log/boot.kiwi
 	#======================================
@@ -4210,6 +4219,13 @@ function SAPStorageCheck {
 	fi
 	local hwinfo=/usr/sbin/hwinfo
 	local ROOT_DEVICE=$1
+	local ROOT_EXCLUDE=$2
+	if [ ! -n "$ROOT_DEVICE" ];then
+		ROOT_DEVICE="."
+	fi
+	if [ -z "$ROOT_EXCLUDE" ];then
+		ROOT_EXCLUDE=$ROOT_DEVICE
+	fi
 	local size_rootkB=$(partitionSize $ROOT_DEVICE)
 	local DATA_DEVICE=""
 	local size_datakB=""
@@ -4245,10 +4261,9 @@ function SAPStorageCheck {
 	#======================================
 	# Search a data disk
 	#--------------------------------------
-	local imageDiskExclude=$ROOT_DEVICE
 	local deviceDisks=`$hwinfo --disk |\
 		grep "Device File:" | cut -f2 -d: |\
-		cut -f1 -d"(" | sed -e s"@$imageDiskExclude@@"`
+		cut -f1 -d"(" | sed -e s"@$ROOT_DEVICE@@" -s s"@$ROOT_EXCLUDE@@"`
 	for DATA_DEVICE in $deviceDisks;do
 		break
 	done
@@ -4296,19 +4311,23 @@ function SAPDataStorageSetup {
 	# a disk which is not the system disk and sets it
 	# up as LVM container for later use
 	# ----
-	local imageDiskExclude=$1
+	local ROOT_DEVICE=$1
+	local ROOT_EXCLUDE=$2
 	local hwinfo=/usr/sbin/hwinfo
 	local input=/tmp/fdisk.input
 	local storage
 	#======================================
 	# Search a data disk
 	#--------------------------------------
-	if [ ! -n "$imageDiskExclude" ];then
-		imageDiskExclude="."
+	if [ ! -n "$ROOT_DEVICE" ];then
+		ROOT_DEVICE="."
+	fi
+	if [ ! -n "$ROOT_EXCLUDE" ];then
+		ROOT_EXCLUDE=$ROOT_DEVICE
 	fi
 	local deviceDisks=`$hwinfo --disk |\
 		grep "Device File:" | cut -f2 -d: |\
-		cut -f1 -d"(" | sed -e s"@$imageDiskExclude@@"`
+		cut -f1 -d"(" | sed -e s"@$ROOT_DEVICE@@" -s s"@$ROOT_EXCLUDE@@"`
 	for storage in $deviceDisks;do
 		break
 	done

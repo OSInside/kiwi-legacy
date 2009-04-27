@@ -293,6 +293,7 @@ function OEMRepartStandard {
 		if test $? != 0; then
 			systemException "Failed to create partition table" "reboot"
 		fi
+		activateBootPartition
 	fi
 	#======================================
 	# Update new device names
@@ -440,6 +441,7 @@ function OEMRepartOverlayed {
 		if test $? != 0; then
 			systemException "Failed to create partition table" "reboot"
 		fi
+		activateBootPartition
 	fi
 	#======================================
 	# Update new device names
@@ -563,6 +565,7 @@ function OEMRepartCombined {
 		if test $? != 0; then
 			systemException "Failed to create partition table" "reboot"
 		fi
+		activateBootPartition
 	fi
 	#======================================
 	# Update new device names
@@ -613,6 +616,7 @@ function OEMRepartLVM {
 	if test $? != 0; then
 		systemException "Failed to create partition table" "reboot"
 	fi
+	activateBootPartition
 	vgchange -a y kiwiVG
 	pvcreate $imageDiskDevice"3"
 	vgextend kiwiVG $imageDiskDevice"3"
@@ -752,5 +756,24 @@ function OEMRepart {
 		fi
 		umount /reco-save && rmdir /reco-save
 		umount /reco-root && rmdir /reco-root
+	fi
+}
+
+#======================================
+# activateBootPartition
+#--------------------------------------
+function activateBootPartition {
+	# /.../
+	# set boot flag to current value of $bootid
+	# ----
+	local input=/part.input
+	local bid=`expr $bootid + 1`
+	Echo "Set boot flag to partition ID: $bid [ $imageDiskDevice ]"
+	for cmd in a $bid w q; do
+		echo $cmd >> $input
+	done
+	fdisk $imageDiskDevice < $input 1>&2
+	if test $? != 0; then
+		systemException "Failed to set boot flag" "reboot"
 	fi
 }

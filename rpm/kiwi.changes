@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Mon Apr 27 12:19:09 CEST 2009 - ms@suse.de
+
+- v3.47
+- added kernel parameter nombridcheck (bnc #498371)
+- remove boot/grub/mbrid file from installed system
+  at first deployment to avoid conflicts on reboot
+- set boot flag after repartitioning the device
+- exclude install source device from being used as
+  SAP data storage device
+
+-------------------------------------------------------------------
 Fri Apr 24 12:22:51 CEST 2009 - ms@suse.de
 
 - v3.46
