@@ -941,9 +941,9 @@ sub createImageUSB {
 	my $newinitrd = $kboot -> setupSplash();
 	$kboot -> cleanTmp();
 	#==========================================
-	# inflate/deflate initrd to make xm happy
+	# inflate/deflate initrd to make xen happy
 	#------------------------------------------
-	if ($type{bootprofile} eq "xen") {
+	if (($type{type} eq "xen") || ($type{bootprofile} eq "xen")) {
 		my $irdunc = $newinitrd;
 		$irdunc =~ s/\.gz//;
 		qxx ("$main::Gzip -d $newinitrd && $main::Gzip $irdunc");

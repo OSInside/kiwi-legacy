@@ -2,6 +2,7 @@
 Mon Apr 27 12:19:09 CEST 2009 - ms@suse.de
 
 - v3.47
+- fixed initrd cpio if xen type is requested (bnc #399230)
 - added kernel parameter nombridcheck (bnc #498371)
 - remove boot/grub/mbrid file from installed system
   at first deployment to avoid conflicts on reboot
