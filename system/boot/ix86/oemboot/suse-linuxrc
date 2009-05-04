@@ -284,7 +284,7 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 	Echo "Restoring base operating system..."
 	cd /mnt
 	rFiles=$(cat /reco-save/recovery.tar.files)
-	tar -xvf /reco-save/recovery.tar.gz >/tmp/rFiles &
+	tar --numeric-owner -xvpf /reco-save/recovery.tar.gz >/tmp/rFiles &
 	rPID=$!
 	while kill -0 $rPID &>/dev/null;do
 		rReady=$(cat /tmp/rFiles | wc -l)
