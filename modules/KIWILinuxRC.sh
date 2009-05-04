@@ -1961,9 +1961,9 @@ function CDMount {
 		IFS=":"; for i in $cddev;do
 			cdopt=$(CDMountOption $i)
 			if [ -x /usr/bin/driveready ];then
-				driveready $i && mount $cdopt $i /cdrom >/dev/null
+				driveready $i && eval mount $cdopt $i /cdrom >/dev/null
 			else
-				mount $cdopt $i /cdrom >/dev/null
+				eval mount $cdopt $i /cdrom >/dev/null
 			fi
 			if [ -f $LIVECD_CONFIG ];then
 				cddev=$i; echo;
