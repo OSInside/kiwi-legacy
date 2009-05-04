@@ -104,6 +104,7 @@
 		<package name="rpm"/>
 		<package name="kiwi-tools"/>
 		<package name="checkmedia"/>
+		<package name="clicfs"/>
 	</packages>
 	<packages type="delete">
 		<package name="cracklib-dict-small"/>

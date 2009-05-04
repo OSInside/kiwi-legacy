@@ -153,6 +153,7 @@
 	</packages>
 	<packages type="image" profiles="default,xen,pae">
 		<!-- PACKAGES START DEFAULT AND XEN -->
+		<package name="clicfs"/>
 		<package name="curl"/>
 		<package name="psmisc"/>
 		<package name="iputils"/>
@@ -185,6 +186,7 @@
 	</packages>
 	<packages type="image" profiles="diskless">
 		<!-- PACKAGES START DISKLESS -->
+		<package name="clicfs"/>
 		<package name="iputils"/>
 		<package name="atftp"/>
 		<package name="dhcpcd"/>

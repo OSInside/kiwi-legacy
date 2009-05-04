@@ -1523,6 +1523,7 @@ unified or dmsquash and applies to the iso type only</a:documentation>
           <value>unified</value>
           <value>compressed</value>
           <value>dmsquash</value>
+          <value>clicfs</value>
         </choice>
       </attribute>
     </define>
@@ -1555,6 +1556,7 @@ and used later with a device mapper snapshot</a:documentation>
           <value>reiserfs</value>
           <value>squashfs</value>
           <value>dmsquash</value>
+          <value>clicfs</value>
         </choice>
       </attribute>
     </define>

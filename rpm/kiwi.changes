@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Wed Apr 29 18:10:00 CEST 2009 - ms@suse.de
+
+- v3.48
+- added support for clicfs for suse >= 11.2 (bnc #497172)
+- don't run path generation for iso:// and file:// paths
+  if zypper is used (bnc #498437)
+
+-------------------------------------------------------------------
 Mon Apr 27 12:19:09 CEST 2009 - ms@suse.de
 
 - v3.47

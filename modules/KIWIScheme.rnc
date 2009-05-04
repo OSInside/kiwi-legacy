@@ -1124,7 +1124,7 @@ div {
 		## Specifies flags for the image type. This could be compressed
 		## unified or dmsquash and applies to the iso type only
 		attribute flags {
-			"unified" | "compressed" | "dmsquash"
+			"unified" | "compressed" | "dmsquash" | "clicfs"
 		}
 	k.type.bootloader.attribute =
 		## Specified the bootloader used for booting the image."
@@ -1143,7 +1143,7 @@ div {
 		## dmsquash is an ext3 filesystem packed into a squashfs
 		## and used later with a device mapper snapshot
 		attribute filesystem {
-			"ext2" | "ext3" | "reiserfs" | "squashfs" | "dmsquash"
+			"ext2" | "ext3" | "reiserfs" | "squashfs" | "dmsquash" | "clicfs"
 		}
 	k.type.fsreadonly.attribute =
 		## Specifies the filesystem for the read-only part of a split image

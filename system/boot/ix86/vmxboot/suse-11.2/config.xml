@@ -66,6 +66,7 @@
 		<package name="xen"/>
 	</packages>
 	<packages type="image">
+		<package name="clicfs"/>
 		<package name="psmisc"/>
 		<package name="bind-libs"/>
 		<package name="bind-utils"/>

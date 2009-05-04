@@ -96,13 +96,15 @@ sub normalizePath {
 	if (defined $path) {
 		return $path;
 	}
-	$path = $this -> isoPath ($module);
-	if (defined $path) {
-		return $path;
-	}
-	$path = $this -> filePath ($module);
-	if (defined $path) {
-		return $path;
+	if ($main::PackageManager ne "zypper") {
+		$path = $this -> isoPath ($module);
+		if (defined $path) {
+			return $path;
+		}
+		$path = $this -> filePath ($module);
+		if (defined $path) {
+			return $path;
+		}
 	}
 	return $module;
 }

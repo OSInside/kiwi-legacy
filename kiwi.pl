@@ -44,7 +44,7 @@ use KIWITest;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "3.47";
+our $Version       = "3.48";
 our $Publisher     = "SUSE LINUX Products GmbH";
 our $Preparer      = "KIWI - http://kiwi.berlios.de";
 our $openSUSE      = "http://download.opensuse.org";
@@ -110,6 +110,7 @@ $KnownFS{ext3}{tool}      = "/sbin/mkfs.ext3";
 $KnownFS{ext2}{tool}      = "/sbin/mkfs.ext2";
 $KnownFS{squashfs}{tool}  = "/usr/bin/mksquashfs";
 $KnownFS{dmsquash}{tool}  = "/usr/bin/mksquashfs";
+$KnownFS{clicfs}{tool}    = "/usr/bin/mkclicfs";
 $KnownFS{unified}{tool}   = "/usr/bin/mksquashfs";
 $KnownFS{compressed}{tool}= "/usr/bin/mksquashfs";
 $KnownFS{reiserfs}{tool}  = "/sbin/mkreiserfs";
@@ -118,6 +119,7 @@ $KnownFS{ext3}{ro}        = 0;
 $KnownFS{ext2}{ro}        = 0;
 $KnownFS{squashfs}{ro}    = 1;
 $KnownFS{dmsquash}{ro}    = 1;
+$KnownFS{clicfs}{ro}      = 1;
 $KnownFS{unified}{ro}     = 1;
 $KnownFS{compressed}{ro}  = 1;
 $KnownFS{reiserfs}{ro}    = 0;
@@ -793,6 +795,10 @@ sub main {
 			};
 			/^dmsquash/ && do {
 				$ok = $image -> createImageDMSquashExt3 ();
+				last SWITCH;
+			};
+			/^clicfs/   && do {
+				$ok = $image -> createImageClicFS ();
 				last SWITCH;
 			};
 			/^cpio/     && do {

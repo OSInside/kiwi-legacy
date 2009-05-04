@@ -1598,6 +1598,11 @@ function identifyFileSystem {
 			FSTYPE=vfat
 		fi
 	fi
+	if [ $FSTYPE = "unknown" ];then
+		if grep -q ^CLIC /tmp/filesystem-$$;then
+			FSTYPE=clicfs
+		fi
+	fi
 	rm -f /tmp/filesystem-$$
 	export FSTYPE
 }
@@ -3044,6 +3049,9 @@ function isFSTypeReadOnly {
 	if [ "$FSTYPE" = "squashfs" ];then
 		return 0
 	fi
+	if [ "$FSTYPE" = "clicfs" ];then
+		return 0
+	fi
 	return 1
 }
 #======================================
@@ -3175,7 +3183,9 @@ function mountSystemUnified {
 	#======================================
 	# check union mount method
 	#--------------------------------------
-	if [ -f $roDir/fsdata.ext3 ];then
+	if [ $FSTYPE = "clicfs" ];then
+		mountSystemClicFS
+	elif [ -f $roDir/fsdata.ext3 ];then
 		export haveDMSquash=yes
 		mountSystemDMSquash
 	else
@@ -3247,6 +3257,33 @@ function mountSystemDMSquash {
 		#resize2fs -f -p $snDevice "$snap_sectors"s
 		#mount $snDevice /mnt
 	fi
+}
+
+#======================================
+# mountSystemClicFS
+#--------------------------------------
+function mountSystemClicFS {
+	local roDir=/read-only
+	local rwDir=/read-write
+	local rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
+	local unionFST=`echo $UNIONFS_CONFIG | cut -d , -f 3`
+	#======================================
+	# create read write mount point
+	#--------------------------------------
+	mkdir -p $rwDir
+	#======================================
+	# check read/write device location
+	#--------------------------------------
+	getDiskDevice $rwDevice | grep -q ram
+	if [ $? = 0 ];then
+		# TODO mount click with -m for ram write
+		return 1
+	else
+		# mkdir -p $rwDir
+		# TODO mount click with -c for cowfile
+		return 1
+	fi
+	return 0
 }
 
 #======================================

@@ -223,10 +223,12 @@ sub new {
 		}
 	}
 	#==========================================
-	# Set packagemanager if set on commandline
+	# Set global packagemanager value
 	#------------------------------------------
 	if (defined $main::PackageManager) {
 		$this -> setPackageManager ($main::PackageManager);
+	} else {
+		$main::PackageManager = $this -> getPackageManager();
 	}
 	#==========================================
 	# setup foreign repository sections

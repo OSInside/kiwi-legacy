@@ -220,6 +220,84 @@ sub createImageDMSquashExt3 {
 }
 
 #==========================================
+# createImageClicFS
+#------------------------------------------
+sub createImageClicFS {
+	# ...
+	# create compressed loop image container
+	# ---
+	my $this    = shift;
+	my $rename  = shift;
+	my $tree    = shift;
+	my $journal = "journaled";
+	my $kiwi    = $this->{kiwi};
+	my $dest    = $this->{imageDest};
+	my $data;
+	my $code;
+	if (! defined $tree) {
+		$tree = $this->{imageTree};
+	}
+	#==========================================
+	# PRE filesystem setup
+	#------------------------------------------
+	my $name = $this -> preImage ();
+	if (! defined $name) {
+		return undef;
+	}
+	if (defined $rename) {
+		$data = qxx ("mv $dest/$name $dest/$rename 2>&1");
+		$code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> error  ("Can't rename image file");
+			$kiwi -> failed ();
+			$kiwi -> error  ($data);
+			return undef;
+		}
+		$name = $rename;
+	}
+	#==========================================
+	# Create ext3 filesystem on extend
+	#------------------------------------------
+	if (! $this -> setupEXT2 ( $name,$tree,$journal )) {
+		return undef;
+	}
+	#==========================================
+	# POST filesystem setup
+	#------------------------------------------
+	if (! $this -> postImage ($name,"nozip","clicfs")) {
+		return undef;
+	}
+	#==========================================
+	# Rename filesystem loop file
+	#------------------------------------------
+	$data = qxx ("mv $dest/$name $dest/fsdata.ext3 2>&1");
+	$code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> error  ("Can't move file to fsdata.ext3");
+		$kiwi -> failed ();
+		$kiwi -> error  ($data);
+		return undef;
+	}
+	#==========================================
+	# Create clicfs filesystem from ext3
+	#------------------------------------------
+	$kiwi -> info ("Creating clicfs container...");
+	$data = qxx ("mkclicfs -b 131072 $dest/fsdata.ext3 $dest/$name 2>&1");
+	$code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't create clicfs filesystem");
+		$kiwi -> failed ();
+		$kiwi -> error  ($data);
+		return undef;
+	}
+	qxx ("mv -f $dest/$name.ext3 $dest/$name.clicfs");
+	qxx ("rm -f $dest/fsdata.ext3");
+	$kiwi -> done();
+	return $this;
+}
+
+#==========================================
 # createImageEXT2
 #------------------------------------------
 sub createImageEXT2 {
@@ -763,6 +841,10 @@ sub createImageUSB {
 		};
 		/^dmsquash/   && do {
 			$ok = $this -> createImageDMSquashExt3 ();
+			last SWITCH;
+		};
+		/^clicfs/     && do {
+			$ok = $this -> createImageClicFS ();
 			last SWITCH;
 		};
 		$kiwi -> error  ("Unsupported $text type: $type");
@@ -1358,9 +1440,18 @@ sub createImageLiveCD {
 				}
 				last SWITCH;
 			};
-			/^dmsquash$/       && do {
+			/^dmsquash$/ && do {
 				$kiwi -> info ("Creating dmsquash read only filesystem...\n");
 				if (! $this -> createImageDMSquashExt3 ( $namero,$imageTree )) {
+					$this -> restoreCDRootData();
+					$this -> restoreSplitExtend ();
+					return undef;
+				}
+				last SWITCH;
+			};
+			/^clicfs$/ && do {
+				$kiwi -> info ("Creating clicfs read only filesystem...\n");
+				if (! $this -> createImageClicFS ( $namero,$imageTree )) {
 					$this -> restoreCDRootData();
 					$this -> restoreSplitExtend ();
 					return undef;
@@ -1872,13 +1963,13 @@ sub createImageLiveCD {
 		}
 		return undef;
 	}
-	if ((! defined $gzip) || ($gzip =~ /^(unified|dmsquash)/)) {
+	if ((! defined $gzip) || ($gzip =~ /^(unified|dmsquash|clicfs)/)) {
 		print FD "IMAGE=/dev/ram1;$namecd\n";
 	} else {
 		print FD "IMAGE=/dev/loop1;$namecd\n";
 	}
 	if (defined $gzip) {
-		if ($gzip =~ /^(unified|dmsquash)/) {
+		if ($gzip =~ /^(unified|dmsquash|clicfs)/) {
 			print FD "UNIONFS_CONFIG=/dev/ram1,/dev/loop1,aufs\n";
 		} else {
 			print FD "COMBINED_IMAGE=yes\n";
@@ -2951,7 +3042,7 @@ sub postImage {
 		#==========================================
 		# Check EXT3 file system
 		#------------------------------------------
-		/ext3|ec2|dmsquash/i && do {
+		/ext3|ec2|dmsquash|clicfs/i && do {
 			qxx ("/sbin/fsck.ext3 -f -y $imageDest/$name 2>&1");
 			qxx ("/sbin/tune2fs -j $imageDest/$name 2>&1");
 			$kiwi -> done();
@@ -3227,6 +3318,10 @@ sub extractKernel {
 			last SWITCH;
 		};
 		/dmsquash/i && do {
+			return $name;
+			last SWITCH;
+		};
+		/clicfs/i && do {
 			return $name;
 			last SWITCH;
 		};
