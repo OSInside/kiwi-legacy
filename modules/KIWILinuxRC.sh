@@ -1931,6 +1931,21 @@ function USBStickDevice {
 	echo .
 }
 #======================================
+# CDMountOption
+#--------------------------------------
+function CDMountOption {
+	# /.../
+	# checks for the ISO 9660 extension and prints the
+	# mount option required to mount the device in full
+	# speed mode
+	# ----
+	local dev=$1
+	local iso="ISO 9660"
+	if dd if=$dev bs=42k count=1 2>&1 | file - | grep -q $iso;then
+		echo "-t iso9660"
+	fi
+}
+#======================================
 # CDMount
 #--------------------------------------
 function CDMount {
@@ -1939,14 +1954,16 @@ function CDMount {
 	# the CD configuration on
 	# ----
 	local count=0
+	local cdopt
 	mkdir -p /cdrom && CDDevice
 	Echo -n "Mounting live boot drive..."
 	while true;do
 		IFS=":"; for i in $cddev;do
+			cdopt=$(CDMountOption $i)
 			if [ -x /usr/bin/driveready ];then
-				driveready $i && mount -t iso9660 $i /cdrom >/dev/null
+				driveready $i && mount $cdopt $i /cdrom >/dev/null
 			else
-				mount -t iso9660 $i /cdrom >/dev/null
+				mount $cdopt $i /cdrom >/dev/null
 			fi
 			if [ -f $LIVECD_CONFIG ];then
 				cddev=$i; echo;

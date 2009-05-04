@@ -3,6 +3,7 @@ Wed Apr 29 18:10:00 CEST 2009 - ms@suse.de
 
 - v3.48
 - fixed permissions on recovery (bnc #489909)
+- detect if it is required to pass -t iso9660 (bnc #498497)
 - added support for clicfs for suse >= 11.2 (bnc #497172)
 - don't run path generation for iso:// and file:// paths
   if zypper is used (bnc #498437)
