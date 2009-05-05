@@ -1523,7 +1523,7 @@ unified or dmsquash and applies to the iso type only</a:documentation>
           <value>unified</value>
           <value>compressed</value>
           <value>dmsquash</value>
-          <value>clicfs</value>
+          <value>clic</value>
         </choice>
       </attribute>
     </define>
@@ -1547,9 +1547,11 @@ hwinfo --framebuffer or in /usr/src/linux/Documentation/fb/vesafb.txt</a:documen
     <define name="k.type.filesystem.attribute">
       <attribute name="filesystem">
         <a:documentation>Specifies the filesystem which can be one of:
-ext2 , ext3 , reiserfs ,squashfs or dmsquash.
+ext2 , ext3 , reiserfs ,squashfs, clicfs or dmsquash.
 dmsquash is an ext3 filesystem packed into a squashfs
-and used later with a device mapper snapshot</a:documentation>
+and used later with a device mapper snapshot. clicfs
+is a fuse based compressed filesystem using a cow
+file for write operations</a:documentation>
         <choice>
           <value>ext2</value>
           <value>ext3</value>

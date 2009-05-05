@@ -262,15 +262,15 @@ describes the possible types and their attributes:
       \item \textbf{compressed}: Compress filesystem with squashfs and
             use a link list to mount the system read-write. An additional
             split section controls the read-write information 
-      \item \textbf{unified-cromfs}: Same as unified but uses cromfs
-      \item \textbf{compressed-cromfs}: Same as compressed but uses cromfs
       \item \textbf{dmsquash}: Creates an ext3 image file and puts that
             into a squashfs filesystem. On boot the root tree is mounted
             via a device mapper snapshot device to allow full write
             access over the complete tree.
+      \item \textbf{clic}: Creates a fuse based compressed read-only
+            filesystem which allows write operations into a cow file
       \end{itemize}
-      If no flags or the flags ''compressed'' or ''compressed-cromfs''
-      are set an additional \textbf{split} section is required.
+      If no flags or the flags ''compressed''
+      are set an additional \textbf{split} section is recommended.
 \item \textbf{xen}\\
       Use this type to create a Xen enabled para-virtual gues image along
       with the attributes \textbf{filesystem} and
@@ -873,7 +873,7 @@ description.
 \end{Command}
 
 The optional split section is used if your image type is split or iso
-combined with the attributes compressed or compressed-cromfs. The split
+combined with the attribute compressed. The split
 section controls which files of your splitted image should be writable
 and whether they are persistantly writable or only temporarly. In case
 of an iso image all data specified can only be temporarly writable

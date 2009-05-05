@@ -1124,7 +1124,7 @@ div {
 		## Specifies flags for the image type. This could be compressed
 		## unified or dmsquash and applies to the iso type only
 		attribute flags {
-			"unified" | "compressed" | "dmsquash" | "clicfs"
+			"unified" | "compressed" | "dmsquash" | "clic"
 		}
 	k.type.bootloader.attribute =
 		## Specified the bootloader used for booting the image."
@@ -1139,9 +1139,11 @@ div {
 		attribute vga { text }
 	k.type.filesystem.attribute = 
 		## Specifies the filesystem which can be one of:
-		## ext2 , ext3 , reiserfs ,squashfs or dmsquash.
+		## ext2 , ext3 , reiserfs ,squashfs, clicfs or dmsquash.
 		## dmsquash is an ext3 filesystem packed into a squashfs
-		## and used later with a device mapper snapshot
+		## and used later with a device mapper snapshot. clicfs
+		## is a fuse based compressed filesystem using a cow
+		## file for write operations
 		attribute filesystem {
 			"ext2" | "ext3" | "reiserfs" | "squashfs" | "dmsquash" | "clicfs"
 		}

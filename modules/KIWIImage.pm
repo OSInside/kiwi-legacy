@@ -1450,7 +1450,7 @@ sub createImageLiveCD {
 				}
 				last SWITCH;
 			};
-			/^clicfs$/ && do {
+			/^clic$/ && do {
 				$kiwi -> info ("Creating clicfs read only filesystem...\n");
 				if (! $this -> createImageClicFS ( $namero,$imageTree )) {
 					$this -> restoreCDRootData();
@@ -1972,14 +1972,16 @@ sub createImageLiveCD {
 		}
 		return undef;
 	}
-	if ((! defined $gzip) || ($gzip =~ /^(unified|dmsquash|clicfs)/)) {
+	if ((! defined $gzip) || ($gzip =~ /^(unified|dmsquash|clic)/)) {
 		print FD "IMAGE=/dev/ram1;$namecd\n";
 	} else {
 		print FD "IMAGE=/dev/loop1;$namecd\n";
 	}
 	if (defined $gzip) {
-		if ($gzip =~ /^(unified|dmsquash|clicfs)/) {
+		if ($gzip =~ /^(unified|dmsquash)/) {
 			print FD "UNIONFS_CONFIG=/dev/ram1,/dev/loop1,aufs\n";
+		} elsif ($gzip =~ /^clic/) {
+			print FD "UNIONFS_CONFIG=/dev/ram1,/dev/loop1,clicfs\n";
 		} else {
 			print FD "COMBINED_IMAGE=yes\n";
 		}

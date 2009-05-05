@@ -185,6 +185,7 @@ sub setupUsersGroups {
 				$adduser .= " -G $group";
 			}
 			if (defined $realname) {
+				$realname = quotemeta($realname);
 				$adduser .= " -c '$realname'";
 				$moduser .= " -c '$realname'";
 			}
