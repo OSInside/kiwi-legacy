@@ -554,7 +554,8 @@ else
 		imageRootDevice=$imageDevice
 		imageRootName="Local-System"
 		if [ ! -z "$UNIONFS_CONFIG" ];then
-			setupUnionFS $imageDisk"3" $imageDisk"2" aufs
+			unionFST=`echo $UNIONFS_CONFIG | cut -d , -f 3`
+			setupUnionFS $imageDisk"3" $imageDisk"2" $unionFST
 		fi
 		if [ ! -z "$COMBINED_IMAGE" ];then
 			imageNextRootDevice=$imageDisk"3"
@@ -649,7 +650,7 @@ else
 		Echo "Filesystem of remote root system is: $FSTYPE"
 		if [ -z "$COMBINED_IMAGE" ];then
 			if isFSTypeReadOnly;then
-				setupUnionFS /dev/ram1 "$imageRootDevice" aufs
+				setupUnionFS /dev/ram1 "$imageRootDevice" $unionFST
 			fi
 		fi
 		imageRootName="NBDRoot-System"
@@ -682,7 +683,7 @@ else
 		Echo "Filesystem of remote root system is: $FSTYPE"
 		if [ -z "$COMBINED_IMAGE" ];then
 			if isFSTypeReadOnly;then
-				setupUnionFS /dev/ram1 "$imageRootDevice" aufs
+				setupUnionFS /dev/ram1 "$imageRootDevice" $unionFST
 			fi
 		fi
 		imageRootName="AOERoot-System"

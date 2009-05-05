@@ -156,7 +156,7 @@ sub setupUsersGroups {
 				$moduser .= " -s '$shell'";
 			}
 			if (defined $home) {
-				$adduser .= " -m -d $home";
+				$adduser .= " -m -d \"$home\"";
 			}
 			if (defined $gid) {
 				$adduser .= " -g $gid";
@@ -182,12 +182,11 @@ sub setupUsersGroups {
 					}
 					$kiwi -> done();
 				}
-				$adduser .= " -G $group";
+				$adduser .= " -G \"$group\"";
 			}
 			if (defined $realname) {
-				$realname = quotemeta($realname);
-				$adduser .= " -c '$realname'";
-				$moduser .= " -c '$realname'";
+				$adduser .= " -c \"$realname\"";
+				$moduser .= " -c \"$realname\"";
 			}
 			my $data = qxx ( "chroot $root grep -q ^$user: /etc/passwd 2>&1" );
 			my $code = $? >> 8;

@@ -1124,7 +1124,7 @@ sub createImageVMX {
 	#------------------------------------------
 	if ($type{bootprofile} eq "xen") {
 		# Xen config file
-		if (! $this -> buildXenConfig ($main::Destination,$name,\%xenc, "VMX")) {
+		if (! $this -> buildXenConfig ($main::Destination,$name,\%xenc,"VMX")) {
 			$main::Survive = "default";
 			return undef;
 		}

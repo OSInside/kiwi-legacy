@@ -3064,9 +3064,11 @@ function umountSystem {
 #--------------------------------------
 function isFSTypeReadOnly {
 	if [ "$FSTYPE" = "squashfs" ];then
+		export unionFST=aufs
 		return 0
 	fi
 	if [ "$FSTYPE" = "clicfs" ];then
+		export unionFST=clicfs
 		return 0
 	fi
 	return 1
@@ -3083,7 +3085,6 @@ function kiwiMount {
 	# load not autoloadable fs modules
 	#--------------------------------------
 	modprobe squashfs &>/dev/null
-	modprobe fuse     &>/dev/null
 	#======================================
 	# store old FSTYPE value
 	#--------------------------------------
@@ -3282,6 +3283,10 @@ function mountSystemClicFS {
 	local rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
 	local clic_cmd=clicfs
 	local size
+	#======================================
+	# load fuse module
+	#--------------------------------------
+	modprobe fuse &>/dev/null
 	#======================================
 	# create read write mount points
 	#--------------------------------------
@@ -3499,14 +3504,16 @@ function mountSystem {
 	#======================================
 	# check root tree type
 	#--------------------------------------
-	if [ $FSTYPE = "clicfs" ];then
-		mountSystemClicFS $2
-		retval=$?
-	elif [ ! -z "$COMBINED_IMAGE" ];then
+	if [ ! -z "$COMBINED_IMAGE" ];then
 		mountSystemCombined "$mountDevice" $2
 		retval=$?
 	elif [ ! -z "$UNIONFS_CONFIG" ];then
-		mountSystemUnified $2
+		local unionFST=`echo $UNIONFS_CONFIG | cut -d , -f 3`
+		if [ "$unionFST" = "clicfs" ];then
+			mountSystemClicFS $2
+		else
+			mountSystemUnified $2
+		fi
 		retval=$?
 	else
 		mountSystemStandard "$mountDevice"

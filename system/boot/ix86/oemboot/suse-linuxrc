@@ -116,7 +116,11 @@ fi
 # 8) Search boot device...
 #--------------------------------------
 Echo "Searching for boot device..."
-export imageDiskDevice=`searchBIOSBootDevice`
+if [ "$LOCAL_BOOT" = "no" ];then
+	export imageDiskDevice=`searchBIOSBootDevice`
+else
+	export imageDiskDevice=`getDiskDevice $root | tr -d [0-9]+`
+fi
 
 #======================================
 # 9) Check for installation mode...
@@ -190,7 +194,7 @@ fi
 #--------------------------------------
 Echo "Filesystem of OEM system is: $FSTYPE -> $imageRootDevice"
 if isFSTypeReadOnly;then
-	setupUnionFS $imageRWDevice $imageRODevice aufs
+	setupUnionFS $imageRWDevice $imageRODevice $unionFST
 	bootid=1
 fi
 
