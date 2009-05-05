@@ -1864,8 +1864,8 @@ sub createImageLiveCD {
 		print FD "label $label"."\n";
 		print FD "  kernel linux"."\n";
 		print FD "  append initrd=initrd ramdisk_size=512000 ";
-		print FD "ramdisk_blocksize=4096 splash=silent ";
-		print FD "console=ttyS0,9600n8 console=tty0 showopts ";
+		print FD "ramdisk_blocksize=4096 splash=silent showopts ";
+		#print FD "console=ttyS0,9600n8 console=tty0 showopts ";
 		if ($vga) {
 			print FD "vga=$vga ";
 		}
@@ -1881,7 +1881,7 @@ sub createImageLiveCD {
 		print FD "  kernel mboot.c32"."\n";
 		print FD "  append xen.gz --- linux ramdisk_size=512000 ";
 		print FD "ramdisk_blocksize=4096 splash=silent ";
-		print FD "console=ttyS0,9600n8 console=tty0 ";
+		#print FD "console=ttyS0,9600n8 console=tty0 ";
 		if ($vga) {
 			print FD "vga=$vga ";
 		}

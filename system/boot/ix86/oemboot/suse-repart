@@ -769,6 +769,7 @@ function activateBootPartition {
 	local input=/part.input
 	local bid=`expr $bootid + 1`
 	Echo "Set boot flag to partition ID: $bid [ $imageDiskDevice ]"
+	rm -f $input
 	for cmd in a $bid w q; do
 		echo $cmd >> $input
 	done

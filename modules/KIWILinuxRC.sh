@@ -3200,16 +3200,13 @@ function mountSystemUnified {
 	#======================================
 	# check union mount method
 	#--------------------------------------
-	if [ $FSTYPE = "clicfs" ];then
-		mountSystemClicFS
-	elif [ -f $roDir/fsdata.ext3 ];then
+	if [ -f $roDir/fsdata.ext3 ];then
 		export haveDMSquash=yes
 		mountSystemDMSquash
 	else
 		mountSystemOverlay
 	fi
 }
-
 #======================================
 # mountSystemDMSquash
 #--------------------------------------
@@ -3275,34 +3272,68 @@ function mountSystemDMSquash {
 		#mount $snDevice /mnt
 	fi
 }
-
 #======================================
 # mountSystemClicFS
 #--------------------------------------
 function mountSystemClicFS {
+	local loopf=$1
 	local roDir=/read-only
 	local rwDir=/read-write
 	local rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
-	local unionFST=`echo $UNIONFS_CONFIG | cut -d , -f 3`
+	local clic_cmd=clicfs
+	local size
 	#======================================
-	# create read write mount point
+	# create read write mount points
 	#--------------------------------------
-	mkdir -p $rwDir
+	for dir in $roDir $rwDir;do
+		mkdir -p $dir
+	done
+	#======================================
+	# check for NFS export location
+	#--------------------------------------
+	if [ ! -z "$NFSROOT" ];then
+		if ! kiwiMount "$imageRootDevice" "$roDir" "" $loopf;then
+			Echo "Failed to mount NFS filesystem"
+			return 1
+		fi
+		loopf=$(ls -1 $roDir/*.clicfs &>/dev/null)
+		if [ ! -e $loopf ];then
+			Echo "Can't find an uniqly exported *.clicfs file"
+			return 1
+		fi
+	fi
 	#======================================
 	# check read/write device location
 	#--------------------------------------
 	getDiskDevice $rwDevice | grep -q ram
 	if [ $? = 0 ];then
-		# TODO mount click with -m for ram write
-		return 1
+		clic_cmd="$clic_cmd -m 470"
 	else
-		# mkdir -p $rwDir
-		# TODO mount click with -c for cowfile
+		# TODO: mount clic with persistent cow file
+		# clic_cmd="$clic_cmd -c $src.cow"
+		:
+	fi
+	#======================================
+	# mount clic container
+	#--------------------------------------
+	if ! $clic_cmd $loopf $roDir; then  
+		Echo "Failed to mount clic filesystem"
+		return 1
+	fi 
+	#======================================
+	# mount root over clic
+	#--------------------------------------
+	size=`stat -c %s $roDir/fsdata.ext3`
+	size=$((size/4096))  
+	resize2fs $roDir/fsdata.ext3 $size
+	mount -o loop,noatime,nodiratime,errors=remount-ro,barrier=0 \
+		$roDir/fsdata.ext3 /mnt
+	if [ ! $? = 0 ];then
+		Echo "Failed to mount ext3 clic container"
 		return 1
 	fi
 	return 0
 }
-
 #======================================
 # mountSystemOverlay
 #--------------------------------------
@@ -3468,7 +3499,10 @@ function mountSystem {
 	#======================================
 	# check root tree type
 	#--------------------------------------
-	if [ ! -z "$COMBINED_IMAGE" ];then
+	if [ $FSTYPE = "clicfs" ];then
+		mountSystemClicFS $2
+		retval=$?
+	elif [ ! -z "$COMBINED_IMAGE" ];then
 		mountSystemCombined "$mountDevice" $2
 		retval=$?
 	elif [ ! -z "$UNIONFS_CONFIG" ];then

@@ -2,7 +2,9 @@
 Tue May  5 11:34:11 CEST 2009 - ms@suse.de
 
 - v3.49
+- added clic fixes from coolo (bnc #497172)
 - fixed quotation of realname for user setup (bnc #500537)
+- fixed activateBootPartition code (bnc #500454)
 
 -------------------------------------------------------------------
 Wed Apr 29 18:10:00 CEST 2009 - ms@suse.de
