@@ -156,6 +156,7 @@ sub setupUsersGroups {
 				$moduser .= " -s '$shell'";
 			}
 			if (defined $home) {
+				$home = quoteshell ($home);
 				$adduser .= " -m -d \"$home\"";
 			}
 			if (defined $gid) {
@@ -170,9 +171,10 @@ sub setupUsersGroups {
 					"chroot $root grep -q ^$group: /etc/group 2>&1"
 				);
 				my $code = $? >> 8;
+				$group = quoteshell ($group);
 				if ($code != 0) {
 					$kiwi -> info ("Adding group: $group");
-					my $data = qxx ( "chroot $root $addgroup $group" );
+					my $data = qxx ( "chroot $root $addgroup \"$group\"" );
 					my $code = $? >> 8;
 					if ($code != 0) {
 						$kiwi -> failed ();
@@ -185,6 +187,7 @@ sub setupUsersGroups {
 				$adduser .= " -G \"$group\"";
 			}
 			if (defined $realname) {
+				$realname = quoteshell ($realname);
 				$adduser .= " -c \"$realname\"";
 				$moduser .= " -c \"$realname\"";
 			}
@@ -377,6 +380,27 @@ sub setupFirstBootYaST {
 	}
 	$kiwi -> done();
 	return "success";
+}
+
+#==========================================
+# quoteshell
+#------------------------------------------
+sub quoteshell {
+	# ...
+	# Enclosing characters in double quotes preserves the
+	# literal value of all characters within the quotes,
+	# with the exception of $, `, \, and, when history
+	# expansion is enabled, !.
+	# ----
+	my $name = shift;
+	my $done;
+	foreach my $l (split (//,$name)) {
+		if ($l =~ /[\"\$\!\`\\]/) {
+			$l = "\\".$l;
+		}
+		$done.=$l;
+	}
+	return $done;
 }
 
 1;
