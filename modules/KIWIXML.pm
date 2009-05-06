@@ -3150,7 +3150,7 @@ sub getInstSourceSatSolvable {
 		$count++;
 		foreach my $dist (keys %distro) {
 			my $name = $distro{$dist};
-			if ($name =~ /\.gz$/) {
+			if ($dist =~ /\.gz$/) {
 				$destfile = $sdir."/$name-".$count.".gz";
 			} else {
 				$destfile = $sdir."/$name-".$count;
@@ -3234,7 +3234,7 @@ sub getInstSourceSatSolvable {
 				$stdcmd .= $file." ";
 			}
 		}
-		foreach my $file (glob ("$sdir/*.pat")) {
+		foreach my $file (glob ("$sdir/*.pat*")) {
 			if ($file =~ /\.gz$/) {
 				$gzicmd .= $file." ";
 			} else {

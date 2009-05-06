@@ -278,11 +278,49 @@ sub createImageClicFS {
 		$kiwi -> error  ($data);
 		return undef;
 	}
+	#==========================================  
+	# Resize to minimum  
+	#------------------------------------------
+	my $dfs = "/sbin/debugfs";
+	my $req = "-R 'show_super_stats -h'";
+	my $bcn = "'^Block count:'";
+	my $bfr = "'^Free blocks:'";
+	my $src = "$dest/fsdata.ext3";
+	my $blocks = 0;
+	$data = qxx (
+		"$dfs $req $src 2>/dev/null | grep $bcn | sed -e 's,.*: *,,'"
+	);
+	$code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> error  ("debugfs: block count request failed: $data");
+		$kiwi -> failed ();
+		return undef;
+	}
+	chomp $data;
+	$blocks = $data;  
+	$data = qxx (
+		"$dfs $req $src 2>/dev/null | grep $bfr | sed -e 's,.*: *,,'"
+	);
+	$code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> error  ("debugfs: free blocks request failed: $data");
+		$kiwi -> failed ();
+		return undef;
+	}  
+	$kiwi -> info ("clicfs: blocks count=$blocks free=$data\n");  
+	$blocks = $blocks - $data;  
+	$data = qxx ("/sbin/resize2fs $dest/fsdata.ext3 $blocks 2>&1");
+	$code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> error  ("Failed to resize ext3 container: $data");
+		$kiwi -> failed ();
+		return undef;
+	}
 	#==========================================
 	# Create clicfs filesystem from ext3
 	#------------------------------------------
 	$kiwi -> info ("Creating clicfs container...");
-	$data = qxx ("mkclicfs -b 131072 $dest/fsdata.ext3 $dest/$name 2>&1");
+	$data = qxx ("mkclicfs $dest/fsdata.ext3 $dest/$name 2>&1");
 	$code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> failed ();

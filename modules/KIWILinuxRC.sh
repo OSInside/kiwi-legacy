@@ -3279,7 +3279,6 @@ function mountSystemDMSquash {
 function mountSystemClicFS {
 	local loopf=$1
 	local roDir=/read-only
-	local rwDir=/read-write
 	local rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
 	local clic_cmd=clicfs
 	local size
@@ -3288,11 +3287,9 @@ function mountSystemClicFS {
 	#--------------------------------------
 	modprobe fuse &>/dev/null
 	#======================================
-	# create read write mount points
+	# create read only mount point
 	#--------------------------------------
-	for dir in $roDir $rwDir;do
-		mkdir -p $dir
-	done
+	mkdir -p $roDir
 	#======================================
 	# check for NFS export location
 	#--------------------------------------
@@ -3307,6 +3304,12 @@ function mountSystemClicFS {
 			return 1
 		fi
 	fi
+	#======================================  
+	# check kernel command line for log file  
+	#--------------------------------------  
+	if [ -n "$cliclog" ]; then  
+		clic_cmd="$clic_cmd -l $cliclog"  
+	fi  
 	#======================================
 	# check read/write device location
 	#--------------------------------------
@@ -3314,9 +3317,7 @@ function mountSystemClicFS {
 	if [ $? = 0 ];then
 		clic_cmd="$clic_cmd -m 470"
 	else
-		# TODO: mount clic with persistent cow file
-		# clic_cmd="$clic_cmd -c $src.cow"
-		:
+		clic_cmd="$clic_cmd -c $rwDevice"
 	fi
 	#======================================
 	# mount clic container
@@ -4462,7 +4463,14 @@ function SAPDataStorageSetup {
 # SAPStartMediaChanger
 #--------------------------------------
 function SAPStartMediaChanger {
+	local runme=/var/lib/YaST2/runme_at_boot
+	local ininf=/etc/install.inf
 	startX
-	yast2 --noborder --fullscreen inst_sap_wrapper
+	test -e $runme && mv $runme /tmp
+	test -e $ininf && mv $ininf /tmp
+	yast2 --noborder --fullscreen inst_autosetup   initial
+	yast2 --noborder --fullscreen inst_sap_wrapper initial
 	stoppX
+	test -e /tmp/runme_at_boot && mv /tmp/runme_at_boot $runme
+	test -e /tmp/install.inf && mv /tmp/install.inf $ininf
 }

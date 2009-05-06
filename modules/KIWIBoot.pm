@@ -311,9 +311,8 @@ sub new {
 			) {
 				$kiwi -> warning ("Specified Inode count might be too small\n");
 				$kiwi -> warning ("Copying of files to image could fail !\n");
-			}
-			if (! defined $main::FSNumInodes) {
-				$main::FSNumInodes = $systemInodes;
+			} else {
+				$this->{inodes} = $systemInodes;
 			}
 			if ($systemSXML eq "auto") {
 				$systemSXML = 0;
@@ -1048,6 +1047,9 @@ sub setupBootStick {
 				$kiwi -> info ("Creating ext2 root filesystem");
 				my $fsopts = $FSopts{ext2};
 				$fsopts.= "-F";
+				if ($this->{inodes}) {
+					$fsopts.= " -N $this->{inodes}";
+				}
 				$status = qxx ("/sbin/mke2fs $fsopts $deviceMap{1} 2>&1");
 				$result = $? >> 8;
 				last SWITCH;
@@ -1056,6 +1058,9 @@ sub setupBootStick {
 				$kiwi -> info ("Creating ext3 root filesystem");
 				my $fsopts = $FSopts{ext3};
 				$fsopts.= "-j -F";
+				if ($this->{inodes}) {
+					$fsopts.= " -N $this->{inodes}";
+				}
 				$status = qxx ("/sbin/mke2fs $fsopts $deviceMap{1} 2>&1");
 				$result = $? >> 8;
 				last SWITCH;
@@ -1808,6 +1813,9 @@ sub setupInstallStick {
 		my %FSopts = main::checkFSOptions();
 		my $fsopts = $FSopts{ext3};
 		$fsopts.= "-j";
+		if (($root eq $data) && ($this->{inodes})) {
+			$fsopts.= " -N $this->{inodes}";
+		}
 		$status = qxx ( "/sbin/mke2fs $fsopts $root 2>&1" );
 		$result = $? >> 8;
 		if ($result != 0) {
@@ -2395,6 +2403,9 @@ sub setupBootDisk {
 				$kiwi -> info ("Creating ext2 root filesystem");
 				my $fsopts = $FSopts{ext2};
 				$fsopts.= "-F";
+				if ($this->{inodes}) {
+					$fsopts.= " -N $this->{inodes}";
+				}
 				$status = qxx ("/sbin/mke2fs $fsopts $root 2>&1");
 				$result = $? >> 8;
 				last SWITCH;
@@ -2403,6 +2414,9 @@ sub setupBootDisk {
 				$kiwi -> info ("Creating ext3 root filesystem");
 				my $fsopts = $FSopts{ext3};
 				$fsopts.= "-j -F";
+				if ($this->{inodes}) {
+					$fsopts.= " -N $this->{inodes}";
+				}
 				$status = qxx ("/sbin/mke2fs $fsopts $root 2>&1");
 				$result = $? >> 8;
 				last SWITCH;

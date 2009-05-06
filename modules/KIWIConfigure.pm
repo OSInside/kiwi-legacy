@@ -251,7 +251,7 @@ sub setupAutoYaST {
 	my $autocnf = "autoconf.xml";
 	if (! -d "$root/$autodir") {
 		$kiwi -> failed ();
-		$kiwi -> error  ("AutoYaST seems not be installed");
+		$kiwi -> error  ("AutoYaST seems not to be installed");
 		$kiwi -> failed ();
 		return "failed";
 	}
@@ -393,14 +393,8 @@ sub quoteshell {
 	# expansion is enabled, !.
 	# ----
 	my $name = shift;
-	my $done;
-	foreach my $l (split (//,$name)) {
-		if ($l =~ /[\"\$\!\`\\]/) {
-			$l = "\\".$l;
-		}
-		$done.=$l;
-	}
-	return $done;
+	$name =~ s/([\"\$\!\`\\])/\\$1/g;
+	return $name;
 }
 
 1;

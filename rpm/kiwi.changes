@@ -3,6 +3,10 @@ Tue May  5 21:21:03 CEST 2009 - ms@suse.de
 
 - 3.50
 - added bash quotation function (bnc #500537)
+- fixed sap media changer call (bnc #486758)
+- added more clic fixes, still not finished (bnc #497172)
+- set inode count for system partition only (bnc #495135)
+- fixed satsolver setup
 
 -------------------------------------------------------------------
 Tue May  5 11:34:11 CEST 2009 - ms@suse.de
