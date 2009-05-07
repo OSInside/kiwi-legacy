@@ -3281,6 +3281,9 @@ function mountSystemClicFS {
 	local roDir=/read-only
 	local rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
 	local clic_cmd=clicfs
+	local haveBytes
+	local haveKByte
+	local haveMByte
 	local size
 	#======================================
 	# load fuse module
@@ -3315,8 +3318,12 @@ function mountSystemClicFS {
 	#--------------------------------------
 	getDiskDevice $rwDevice | grep -q ram
 	if [ $? = 0 ];then
-		clic_cmd="$clic_cmd -m 470"
+		haveKByte=`cat /proc/meminfo | grep MemFree | cut -f2 -d:| cut -f1 -dk`
+		haveMByte=`expr $haveKByte / 1024`
+		clic_cmd="$clic_cmd -m $haveMByte"
 	else
+		# haveBytes=`blockdev --getsize64 $rwDevice`
+		# haveMByte=`expr $haveBytes / 1024 / 1024`
 		clic_cmd="$clic_cmd -c $rwDevice"
 	fi
 	#======================================

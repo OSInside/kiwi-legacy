@@ -320,7 +320,12 @@ sub createImageClicFS {
 	# Create clicfs filesystem from ext3
 	#------------------------------------------
 	$kiwi -> info ("Creating clicfs container...");
-	$data = qxx ("mkclicfs $dest/fsdata.ext3 $dest/$name 2>&1");
+	if ($ENV{MKCLICFS_COMPRESSION}) {
+		my $c = int $ENV{MKCLICFS_COMPRESSION};
+		$data = qxx ("mkclicfs -c $c $dest/fsdata.ext3 $dest/$name 2>&1");
+	} else {
+		$data = qxx ("mkclicfs $dest/fsdata.ext3 $dest/$name 2>&1");
+	}
 	$code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> failed ();
