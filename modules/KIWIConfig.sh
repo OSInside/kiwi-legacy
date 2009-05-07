@@ -1255,7 +1255,6 @@ function suseStripKernel {
 			for mod in `find $stripdir -name "*.ko"`;do
 				d=`/usr/bin/basename $mod`
 				i=`/sbin/modprobe \
-					-C /etc/modprobe.conf \
 					--set-version $VERSION \
 					--ignore-install \
 					--show-depends \

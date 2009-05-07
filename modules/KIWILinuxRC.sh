@@ -3320,6 +3320,7 @@ function mountSystemClicFS {
 	if [ $? = 0 ];then
 		haveKByte=`cat /proc/meminfo | grep MemFree | cut -f2 -d:| cut -f1 -dk`
 		haveMByte=`expr $haveKByte / 1024`
+		haveMByte=`expr $haveMByte \* 7 / 10`
 		clic_cmd="$clic_cmd -m $haveMByte"
 	else
 		# haveBytes=`blockdev --getsize64 $rwDevice`
