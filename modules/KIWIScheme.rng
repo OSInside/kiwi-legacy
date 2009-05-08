@@ -1515,6 +1515,13 @@ image or not</a:documentation>
         <data type="boolean"/>
       </attribute>
     </define>
+    <define name="k.type.volid.attribute">
+      <attribute name="volid">
+        <a:documentation>for the iso type only:
+Specifies the volume ID (volume name or label) to be written
+into the master block. There is space for 32 characters.</a:documentation>
+      </attribute>
+    </define>
     <define name="k.type.flags.attribute">
       <attribute name="flags">
         <a:documentation>Specifies flags for the image type. This could be compressed
@@ -1638,6 +1645,9 @@ vmx/oem types only.</a:documentation>
         </optional>
         <optional>
           <ref name="k.type.boot.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.type.volid.attribute"/>
         </optional>
         <optional>
           <ref name="k.type.flags.attribute"/>

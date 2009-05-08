@@ -659,6 +659,7 @@ sub getImageTypeAndAttributes {
 		}
 		$record{type}   = $node -> string_value();
 		$record{boot}   = $node -> getAttribute("boot");
+		$record{volid}  = $node -> getAttribute("volid");
 		$record{flags}  = $node -> getAttribute("flags");
 		$record{format} = $node -> getAttribute("format");
 		$record{vga}    = $node -> getAttribute("vga");

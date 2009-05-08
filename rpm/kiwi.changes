@@ -6,6 +6,8 @@ Tue May  5 21:21:03 CEST 2009 - ms@suse.de
 - fixed sap media changer call (bnc #486758)
 - added more clic fixes, still not finished (bnc #497172)
 - set inode count for system partition only (bnc #495135)
+- added optional volid setup for iso's (bnc #500501)
+- update scheme documentation from oXygen
 - don't set config file when calling modprobe in
   suseStripKernel function
 - fixed satsolver setup
