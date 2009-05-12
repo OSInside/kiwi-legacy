@@ -859,9 +859,10 @@ sub setup {
 	#========================================
 	# call config.sh image script
 	#----------------------------------------
-	if (-x "$imageDesc/config.sh") {
+	if (-e "$imageDesc/config.sh") {
 		$kiwi -> info ("Calling image script: config.sh");
 		qxx (" cp $imageDesc/config.sh $root/tmp ");
+                qxx (" chmod u+x $root/tmp/images.sh ");
 		my $data = qxx (" chroot $root /tmp/config.sh 2>&1 ");
 		my $code = $? >> 8;
 		if ($code != 0) {
