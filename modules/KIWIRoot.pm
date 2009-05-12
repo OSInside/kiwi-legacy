@@ -822,8 +822,10 @@ sub setup {
 	qxx (" mkdir -p $root/image ");
 	qxx (" cp $imageDesc/$configFile $root/image 2>&1 ");
 	qxx (" cp $imageDesc/images.sh $root/image 2>&1 ");
+        qxx (" chmod u+x $root/image/images.sh ");
 	qxx (" cp $imageDesc/config-cdroot.tgz $root/image 2>&1 ");
 	qxx (" cp $imageDesc/config-cdroot.sh  $root/image 2>&1 ");
+        qxx (" chmod u+x $root/image/config-cdroot.sh ");
 	qxx (" cp $root/.profile $root/image 2>&1 ");
 	if (open (FD,">$root/image/main::Prepare")) {
 		if ($imageDesc !~ /^\//) {
@@ -862,7 +864,7 @@ sub setup {
 	if (-e "$imageDesc/config.sh") {
 		$kiwi -> info ("Calling image script: config.sh");
 		qxx (" cp $imageDesc/config.sh $root/tmp ");
-                qxx (" chmod u+x $root/tmp/images.sh ");
+                qxx (" chmod u+x $root/tmp/config.sh ");
 		my $data = qxx (" chroot $root /tmp/config.sh 2>&1 ");
 		my $code = $? >> 8;
 		if ($code != 0) {
