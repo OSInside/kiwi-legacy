@@ -822,11 +822,11 @@ sub setup {
 	qxx (" mkdir -p $root/image ");
 	qxx (" cp $imageDesc/$configFile $root/image 2>&1 ");
 	qxx (" cp $imageDesc/images.sh $root/image 2>&1 ");
-        qxx (" chmod u+x $root/image/images.sh ");
 	qxx (" cp $imageDesc/config-cdroot.tgz $root/image 2>&1 ");
 	qxx (" cp $imageDesc/config-cdroot.sh  $root/image 2>&1 ");
-        qxx (" chmod u+x $root/image/config-cdroot.sh ");
 	qxx (" cp $root/.profile $root/image 2>&1 ");
+	qxx (" chmod u+x $root/image/images.sh ");
+	qxx (" chmod u+x $root/image/config-cdroot.sh ");
 	if (open (FD,">$root/image/main::Prepare")) {
 		if ($imageDesc !~ /^\//) {
 			my $pwd = qxx (" pwd "); chomp $pwd;
