@@ -3323,9 +3323,9 @@ function mountSystemClicFS {
 		haveMByte=`expr $haveMByte \* 7 / 10`
 		clic_cmd="$clic_cmd -m $haveMByte"
 	else
-		# haveBytes=`blockdev --getsize64 $rwDevice`
-		# haveMByte=`expr $haveBytes / 1024 / 1024`
-		clic_cmd="$clic_cmd -c $rwDevice"
+		haveBytes=`blockdev --getsize64 $rwDevice`
+		haveMByte=`expr $haveBytes / 1024 / 1024`
+		clic_cmd="$clic_cmd -m $haveMByte -c $rwDevice  --ignore-cow-errors"
 	fi
 	#======================================
 	# mount clic container
