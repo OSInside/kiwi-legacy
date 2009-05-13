@@ -430,7 +430,9 @@ if [ "$LOCAL_BOOT" = "no" ];then
 		if [ `ls /mnt/home/ | wc -l` != 0 ]; then
 			Echo "Found non empty home/ directory !"
 			Echo "Moving home/ data to home partition $imageHomeDevice"
-			mount $imageHomeDevice /mnt/mnt && mv /mnt/home/* /mnt/mnt
+			mount $imageHomeDevice /mnt/mnt
+			mv /mnt/home/*  /mnt/mnt
+			mv /mnt/home/.* /mnt/mnt
 			umount /mnt/mnt
 		fi
 		Echo "Activate home partition $imageHomeDevice in fstab"

@@ -7,7 +7,7 @@ Tue May  5 21:21:03 CEST 2009 - ms@suse.de
 - added more clic fixes, still not finished (bnc #497172)
 - set inode count for system partition only (bnc #495135)
 - added optional volid setup for iso's (bnc #500501)
-- fixed spec file requirement for mkisofs on sle10
+- fixed spec file requirement for mkisofs on sle10 (bnc #503333)
 - update scheme documentation from oXygen
 - don't set config file when calling modprobe in
   suseStripKernel function
