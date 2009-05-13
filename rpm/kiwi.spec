@@ -167,9 +167,9 @@ License:        GPL v2 or later
 Requires:       kiwi = %{version}
 Requires:       syslinux
 %if %{suse_version} > 1010
-Requires cdrkit-cdrtools-compat
+Requires: cdrkit-cdrtools-compat
 %else
-Requires mkisofs
+Requires: mkisofs
 %endif
 Summary:        OpenSuSE - KIWI Image System ISO boot
 Obsoletes:      kiwi2-desc-isoboot <= 2.14
@@ -259,9 +259,9 @@ License:        GPL v2 only
 Requires:       kiwi = %{version}
 Requires:       qemu multipath-tools
 %if %{suse_version} > 1010
-Requires cdrkit-cdrtools-compat
+Requires: cdrkit-cdrtools-compat
 %else
-Requires mkisofs
+Requires: mkisofs
 %endif
 Summary:        OpenSuSE - KIWI image descriptions
 Obsoletes:      kiwi2-desc-oemboot <= 2.14
