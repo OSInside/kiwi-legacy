@@ -174,7 +174,10 @@ sub setupUsersGroups {
 				$group = quoteshell ($group);
 				if ($code != 0) {
 					$kiwi -> info ("Adding group: $group");
-					my $data = qxx ( "chroot $root $addgroup \"$group\"" );
+					if (defined $gid) {
+						$addgroup .= " -g $gid";
+					}
+					my $data = qxx ("chroot $root $addgroup \"$group\"");
 					my $code = $? >> 8;
 					if ($code != 0) {
 						$kiwi -> failed ();
