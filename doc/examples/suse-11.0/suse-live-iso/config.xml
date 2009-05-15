@@ -21,7 +21,7 @@
 		<!--<source path="/image/CDs/full-11.0-i386"/>-->
 		<source path="opensuse://11.0/repo/oss/"/>
 	</repository>
-	<packages type="image">
+	<packages type="image" patternType="plusRecommended" patternPackageType="plusRecommended">
 		<package name="kernel-default"/>
 		<package name="bootsplash"/>
 		<package name="bootsplash-branding-openSUSE"/>

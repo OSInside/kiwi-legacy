@@ -18,7 +18,7 @@
 		<oem-kiwi-initrd>yes</oem-kiwi-initrd>
 		<oem-boot-title>USB</oem-boot-title>
 		<locale>en_US.UTF-8</locale>
-		<keytable>de-latin1-nodeadkeys.map.gz</keytable>
+		<keytable>us.map.gz</keytable>
 		<timezone>Europe/Berlin</timezone>
 	</preferences>
 	<users group="users">

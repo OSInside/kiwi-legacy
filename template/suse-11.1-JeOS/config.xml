@@ -34,7 +34,7 @@
 		<version>1.11.1</version>
 		<packagemanager>zypper</packagemanager>
 		<locale>en_US.UTF-8</locale>
-		<keytable>de-latin1-nodeadkeys.map.gz</keytable>
+		<keytable>us.map.gz</keytable>
 		<timezone>Europe/Berlin</timezone>
 		<rpm-excludedocs>true</rpm-excludedocs>
 	</preferences>
