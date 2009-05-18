@@ -20,7 +20,7 @@
   STATUS        : Development
   ****************
 -->
-<grammar xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" xmlns:db="http://docbook.org/ns/docbook" xmlns:rng="http://relaxng.org/ns/structure/1.0" xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+<grammar xmlns:db="http://docbook.org/ns/docbook" xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" xmlns:rng="http://relaxng.org/ns/structure/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
   <db:info>
     <db:releaseinfo>$Id: kiwi.rnc 2957 2008-01-11 12:53:39Z thomas-schraitle $</db:releaseinfo>
     <db:releaseinfo>RNC Schema Version 2.4</db:releaseinfo>
@@ -185,6 +185,25 @@ named /etc/ImageID</a:documentation>
   <define name="k.replaces.attribute">
     <attribute name="replaces">
       <a:documentation>Replace package with some other package</a:documentation>
+    </attribute>
+  </define>
+  <define name="k.bootinclude.attribute">
+    <attribute name="bootinclude">
+      <a:documentation>Indicates that this package should be part of
+the boot image (initrd) too. This attribute
+can be used to include for example branding packages
+specified in the system image description to become
+part of the boot image also</a:documentation>
+      <data type="boolean"/>
+    </attribute>
+  </define>
+  <define name="k.bootdelete.attribute">
+    <attribute name="bootdelete">
+      <a:documentation>Indicates that this package should be removed from
+the boot image (initrd). the attribute is only
+evaluated if the bootinclude attribute is specified
+along with it too</a:documentation>
+      <data type="boolean"/>
     </attribute>
   </define>
   <define name="k.displayname.attribute">
@@ -835,6 +854,12 @@ to the specific medium number (CD1, DVD7, ...)</a:documentation>
     <define name="k.package.replaces.attribute">
       <ref name="k.replaces.attribute"/>
     </define>
+    <define name="k.package.bootinclude.attribute">
+      <ref name="k.bootinclude.attribute"/>
+    </define>
+    <define name="k.package.bootdelete.attribute">
+      <ref name="k.bootdelete.attribute"/>
+    </define>
     <define name="k.package.attlist">
       <interleave>
         <ref name="k.package.name.attribute"/>
@@ -843,6 +868,12 @@ to the specific medium number (CD1, DVD7, ...)</a:documentation>
         </optional>
         <optional>
           <ref name="k.replaces.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.bootdelete.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.bootinclude.attribute"/>
         </optional>
       </interleave>
     </define>
@@ -1716,6 +1747,7 @@ vmx/oem types only.</a:documentation>
         <choice>
           <value>aufs</value>
           <value>unionfs</value>
+          <value>clicfs</value>
         </choice>
       </attribute>
     </define>

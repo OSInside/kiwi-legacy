@@ -249,6 +249,48 @@ sub new {
 		$repositNodeList = $foreignRepo->{xmlnode};
 		$repositNodeList -> prepend ($need);
 		$kiwi -> done ();
+		if ( defined $foreignRepo->{xmlpacnode} ) {
+			#==========================================
+			# foreign image packages
+			#------------------------------------------
+			my $nodes = $foreignRepo->{xmlpacnode};
+			my @plist;
+			my @flistImage;
+			my @flistDelete;
+			for (my $i=1;$i<= $nodes->size();$i++) {
+				my $node = $nodes -> get_node($i);
+				my $type = $node  -> getAttribute ("type");
+				if ($type eq "image") {
+					if (! $this -> requestedProfile ($node)) {
+						next;
+					}
+					push (@plist,$node->getElementsByTagName ("package"));
+				}
+			}
+			foreach my $element (@plist) {
+				my $package = $element -> getAttribute ("name");
+				my $bootinc = $element -> getAttribute ("bootinclude");
+				my $bootdel = $element -> getAttribute ("bootdelete");
+				if ((defined $bootinc) && ("$bootinc" =~ /yes|true/i)) {
+					push (@flistImage,$package);
+				}
+				if ((defined $bootdel) && ("$bootdel" =~ /yes|true/i)) {
+					push (@flistDelete,$package);
+				}
+			}
+			if (@flistImage) {
+				$kiwi -> info ("Adding foreign package(s):\n");
+				foreach my $p (@flistImage) {
+					$kiwi -> info ("--> $p\n");
+				}
+				$this -> addPackages ("image",$packageNodeList,@flistImage);
+				if (@flistDelete) {
+					$this -> addPackages (
+						"delete",$packageNodeList,@flistDelete
+					);
+				}
+			}
+		}
 		#==========================================
 		# foreign preferences
 		#------------------------------------------
@@ -1882,12 +1924,18 @@ sub addPackages {
 	# ----
 	my $this  = shift;
 	my $ptype = shift;
+	my $nodes = shift;
 	my @packs = @_;
-	my $nodes = $this->{packageNodeList};
+	if (! defined $nodes) {
+		$nodes = $this->{packageNodeList};
+	}
 	my $nodeNumber = 1;
 	for (my $i=1;$i<= $nodes->size();$i++) {
 		my $node = $nodes -> get_node($i);
 		my $type = $node  -> getAttribute ("type");
+		if (! $this -> requestedProfile ($node)) {
+			next;
+		}
 		if ($type eq $ptype) {
 			$nodeNumber = $i; last;
 		}
@@ -1895,7 +1943,7 @@ sub addPackages {
 	foreach my $pack (@packs) {
 		my $addElement = new XML::LibXML::Element ("package");
 		$addElement -> setAttribute("name",$pack);
-		$this->{packageNodeList} -> get_node($nodeNumber)
+		$nodes -> get_node($nodeNumber)
 			-> addChild ($addElement);
 	}
 	return $this;
@@ -1910,7 +1958,7 @@ sub addImagePackages {
 	# section of the xml description parse tree.
 	# ----
 	my $this  = shift;
-	return $this -> addPackages ("bootstrap",@_);
+	return $this -> addPackages ("bootstrap",undef,@_);
 }
 
 #==========================================
@@ -1922,7 +1970,7 @@ sub addRemovePackages {
 	# section of the xml description parse tree.
 	# ----
 	my $this  = shift;
-	return $this -> addPackages ("delete",@_);
+	return $this -> addPackages ("delete",undef,@_);
 }
 
 #==========================================
@@ -2777,6 +2825,18 @@ sub getForeignNodeList {
 	# ---
 	my $this = shift;
 	return $this->{repositNodeList};
+}
+
+#==========================================
+# getForeignPackageList
+#------------------------------------------
+sub getForeignPackageNodeList {
+	# ...
+	# Return the current <packages> list which consists
+	# of XML::LibXML::Element object pointers
+	# ---
+	my $this = shift;
+	return $this->{packageNodeList};
 }
 
 #==========================================

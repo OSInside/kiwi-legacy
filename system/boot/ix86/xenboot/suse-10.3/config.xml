@@ -50,7 +50,6 @@
 		<package name="fribidi"/>
 		<package name="make"/>
 		<package name="bootsplash"/>
-		<package name="bootsplash-theme-SuSE"/>
 	</packages>
 	<packages type="bootstrap" profiles="std">
 		<package name="kernel-xen" arch="x86_64"/>
@@ -112,6 +111,5 @@
 		<package name="gfxboot"/>
 		<package name="fribidi"/>
 		<package name="make"/>
-		<package name="bootsplash-theme-SuSE"/>
 	</packages>
 </image>

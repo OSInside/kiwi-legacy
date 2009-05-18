@@ -115,6 +115,19 @@ k.name.attribute        =
 k.replaces.attribute    =
 	## Replace package with some other package
 	attribute replaces { text }
+k.bootinclude.attribute =
+	## Indicates that this package should be part of
+	## the boot image (initrd) too. This attribute
+	## can be used to include for example branding packages
+	## specified in the system image description to become
+	## part of the boot image also
+	attribute bootinclude { xsd:boolean }
+k.bootdelete.attribute =
+	## Indicates that this package should be removed from
+	## the boot image (initrd). the attribute is only
+	## evaluated if the bootinclude attribute is specified
+	## along with it too
+	attribute bootdelete { xsd:boolean }
 k.displayname.attribute =
 	## A friendly display name. Used in the boot menu
 	## for isolinux and grub
@@ -573,10 +586,14 @@ div {
 	k.package.name.attribute = k.name.attribute
 	k.package.arch.attribute = k.arch.attribute
 	k.package.replaces.attribute = k.replaces.attribute
+	k.package.bootinclude.attribute = k.bootinclude.attribute
+	k.package.bootdelete.attribute = k.bootdelete.attribute
 	k.package.attlist =
 		k.package.name.attribute &
 		k.package.arch.attribute? &
-		k.replaces.attribute?
+		k.replaces.attribute? &
+		k.bootdelete.attribute? &
+		k.bootinclude.attribute?
 	k.package =
 		## Name of an image Package
 		element package {
@@ -1216,7 +1233,7 @@ div {
 	k.union.rw.attribute =
 		## Device for Read-Write
 		attribute rw { text }
-	k.union.type.attribute = attribute type { "aufs" | "unionfs" }
+	k.union.type.attribute = attribute type { "aufs" | "unionfs" | "clicfs" }
 	k.union.attlist =
 		k.union.ro.attribute &
 		k.union.rw.attribute &

@@ -48,12 +48,9 @@
 		<package name="util-linux"/>
 		<package name="hwinfo"/>
 		<package name="xen"/>
-		<package name="gfxboot"/>
-		<package name="gfxboot-devel"/>
 		<package name="fribidi"/>
 		<package name="make"/>
 		<package name="bootsplash"/>
-		<package name="bootsplash-branding-openSUSE"/>
 	</packages>
 	<packages type="bootstrap" profiles="std">
 		<package name="kernel-xen"/>
@@ -109,10 +106,7 @@
 		<package name="pm-utils"/>
 		<package name="pmtools"/>
 		<package name="suse-build-key"/>
-		<package name="gfxboot"/>
-		<package name="gfxboot-devel"/>
 		<package name="fribidi"/>
 		<package name="make"/>
-		<package name="bootsplash-branding-openSUSE"/>
 	</packages>
 </image>

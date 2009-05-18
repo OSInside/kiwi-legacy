@@ -520,6 +520,7 @@ sub createImageEC2 {
 		push @main::Profiles ,split (/,/,$type{bootkernel});
 	}
 	$main::ForeignRepo{"xmlnode"} = $xml -> getForeignNodeList();
+	$main::ForeignRepo{"xmlpacnode"} = $xml -> getForeignPackageList();
 	$main::ForeignRepo{"packagemanager"} = $xml -> getPackageManager();
 	$main::ForeignRepo{"locale"}  = $xml -> getLocale();
 	$main::ForeignRepo{"prepare"} = $main::Prepare;
@@ -941,6 +942,7 @@ sub createImageUSB {
 		push @main::Profiles ,split (/,/,$type{bootkernel});
 	}
 	$main::ForeignRepo{"xmlnode"} = $xml -> getForeignNodeList();
+	$main::ForeignRepo{"xmlpacnode"} = $xml -> getForeignPackageNodeList();
 	$main::ForeignRepo{"packagemanager"} = $xml -> getPackageManager();
 	$main::ForeignRepo{"oem-swap"}       = $xml -> getOEMSwap();
 	$main::ForeignRepo{"oem-swapsize"}   = $xml -> getOEMSwapSize();
@@ -1611,6 +1613,7 @@ sub createImageLiveCD {
 		push @main::Profiles ,split (/,/,$type{bootkernel});
 	}
 	$main::ForeignRepo{"xmlnode"} = $xml -> getForeignNodeList();
+	$main::ForeignRepo{"xmlpacnode"} = $xml -> getForeignPackageList();
 	$main::ForeignRepo{"packagemanager"} = $xml -> getPackageManager();
 	$main::ForeignRepo{"locale"}  = $xml -> getLocale();
 	$main::ForeignRepo{"prepare"} = $main::Prepare;
@@ -2646,6 +2649,7 @@ sub createImageSplit {
 		push @main::Profiles ,split (/,/,$type{bootkernel});
 	}
 	$main::ForeignRepo{"xmlnode"} = $xml -> getForeignNodeList();
+	$main::ForeignRepo{"xmlpacnode"} = $xml -> getForeignPackageList();
 	$main::ForeignRepo{"packagemanager"} = $xml -> getPackageManager();
 	$main::ForeignRepo{"oem-swap"}       = $xml -> getOEMSwap();
 	$main::ForeignRepo{"oem-swapsize"}   = $xml -> getOEMSwapSize();

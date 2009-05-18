@@ -53,9 +53,9 @@
 	</repository>
 	<!-- Packages and Patterns -->
 	<packages type="image">
+		<package name="bootsplash-branding-SLES" bootinclude="true" bootdelete="true"/>
+		<package name="gfxboot-branding-SLES" bootinclude="true" bootdelete="true"/>
 		<package name="kernel-default" replaces="kernel-xen"/>
-		<package name="bootsplash"/>
-		<package name="bootsplash-branding-SLES"/>
 		<package name="ifplugd"/>
 		<package name="vim"/>
 		<package name="grub"/>

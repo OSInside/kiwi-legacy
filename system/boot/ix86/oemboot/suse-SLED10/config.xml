@@ -93,7 +93,6 @@
 		<package name="make"/>
 		<package name="grub"/>
 		<package name="bootsplash"/>
-		<package name="bootsplash-theme-SuSE-NLD"/>
 		<package name="eject"/>
 		<package name="tar"/>
 		<package name="lvm2"/>

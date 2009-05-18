@@ -22,8 +22,8 @@
 		<source path="opensuse://11.2/repo/oss/"/>
 	</repository>
 	<packages type="image">
-		<package name="bootsplash"/>
-		<package name="bootsplash-branding-openSUSE"/>
+		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
+		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="ifplugd"/>
 		<package name="vim"/>
 		<opensusePattern name="base"/>

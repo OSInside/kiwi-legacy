@@ -31,6 +31,8 @@
 		<union ro="/dev/sda2" rw="/dev/sda3" type="aufs"/>
 	</deploy>
 	<packages type="image">
+		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
+		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="binutils"/>
         <package name="file"/>
         <package name="gawk"/>
@@ -53,7 +55,6 @@
 		<package name="dbus-1"/>
 		<package name="grub"/>
 		<package name="bootsplash"/>
-		<package name="bootsplash-branding-openSUSE"/>
 		<package name="acpid"/>
 		<package name="ifplugd"/>
 		<package name="vim"/>

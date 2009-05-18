@@ -6,7 +6,7 @@
 		<specification>openSUSE 11.2 Live system</specification>
 	</description>
 	<preferences>
-		<type primary="true" boot="isoboot/suse-11.2" flags="unified">iso</type>
+		<type primary="true" boot="isoboot/suse-11.2" flags="clic">iso</type>
 		<version>2.5.1</version>
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>False</rpm-check-signatures>
@@ -22,9 +22,9 @@
 		<source path="opensuse://11.2/repo/oss/"/>
 	</repository>
 	<packages type="image" patternType="plusRecommended" patternPackageType="plusRecommended">
+		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
+		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="kernel-default"/>
-		<package name="bootsplash"/>
-		<package name="bootsplash-branding-openSUSE"/>
 		<package name="ifplugd"/>
 		<package name="vim"/>
 		<opensusePattern name="default"/>

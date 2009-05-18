@@ -32,9 +32,10 @@
 		<source path="opensuse://11.1/repo/oss/"/>
 	</repository>
 	<packages type="image" patternType="plusRecommended">
+		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
+		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="kernel-default"/>
 		<package name="bootsplash"/>
-		<package name="bootsplash-branding-openSUSE"/>
 		<package name="yast2-firstboot"/>
 		<package name="ifplugd"/>
 		<package name="vim"/>

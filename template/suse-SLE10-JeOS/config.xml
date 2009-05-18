@@ -54,9 +54,10 @@
 	</repository>
 	<!-- Packages and Patterns -->
 	<packages type="image" patternType="plusRecommended" patternPackageType="plusRecommended">
+		<package name="bootsplash-theme-SuSE-SLES" bootinclude="true" bootdelete="true"/>
+		<package name="gfxboot" bootinclude="true" bootdelete="true"/>
 		<package name="kernel-default" replaces="kernel-xen"/>
 		<package name="bootsplash"/>
-		<package name="bootsplash-theme-SuSE-SLES"/>
 		<package name="ifplugd"/>
 		<package name="dhcp-client"/>
 		<package name="vim"/>

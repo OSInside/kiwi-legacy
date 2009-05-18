@@ -3280,6 +3280,7 @@ function mountSystemClicFS {
 	local loopf=$1
 	local roDir=/read-only
 	local rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
+	local roDevice=`echo $UNIONFS_CONFIG | cut -d , -f 2`
 	local clic_cmd=clicfs
 	local haveBytes
 	local haveKByte
@@ -3297,12 +3298,13 @@ function mountSystemClicFS {
 	# check for NFS export location
 	#--------------------------------------
 	if [ ! -z "$NFSROOT" ];then
-		if ! kiwiMount "$imageRootDevice" "$roDir" "" $loopf;then
+		roDevice="$imageRootDevice"
+		if ! kiwiMount "$roDevice" "$roDir" "" $loopf;then
 			Echo "Failed to mount NFS filesystem"
 			return 1
 		fi
-		loopf=$(ls -1 $roDir/*.clicfs &>/dev/null)
-		if [ ! -e $loopf ];then
+		roDevice=$(ls -1 $roDir/*.clicfs &>/dev/null)
+		if [ ! -e $roDevice ];then
 			Echo "Can't find an uniqly exported *.clicfs file"
 			return 1
 		fi
@@ -3330,7 +3332,7 @@ function mountSystemClicFS {
 	#======================================
 	# mount clic container
 	#--------------------------------------
-	if ! $clic_cmd $loopf $roDir; then  
+	if ! $clic_cmd $roDevice $roDir; then  
 		Echo "Failed to mount clic filesystem"
 		return 1
 	fi 
