@@ -2047,7 +2047,7 @@ sub createImageLiveCD {
 		$attr .= " -iso-level 4"; 
 	}
 	if ($type{volid}) {
-		$attr .= " -V $type{volid}";
+		$attr .= " -V \"$type{volid}\"";
 	}
 	my $isolinux = new KIWIIsoLinux (
 		$kiwi,$main::RootTree."/CD",$name,undef,undef,$attr
