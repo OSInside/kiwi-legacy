@@ -520,7 +520,7 @@ sub createImageEC2 {
 		push @main::Profiles ,split (/,/,$type{bootkernel});
 	}
 	$main::ForeignRepo{"xmlnode"} = $xml -> getForeignNodeList();
-	$main::ForeignRepo{"xmlpacnode"} = $xml -> getForeignPackageList();
+	$main::ForeignRepo{"xmlpacnode"} = $xml -> getForeignPackageNodeList();
 	$main::ForeignRepo{"packagemanager"} = $xml -> getPackageManager();
 	$main::ForeignRepo{"locale"}    = $xml -> getLocale();
 	$main::ForeignRepo{"boot-theme"}= $xml -> getBootTheme();
@@ -1615,7 +1615,7 @@ sub createImageLiveCD {
 		push @main::Profiles ,split (/,/,$type{bootkernel});
 	}
 	$main::ForeignRepo{"xmlnode"} = $xml -> getForeignNodeList();
-	$main::ForeignRepo{"xmlpacnode"} = $xml -> getForeignPackageList();
+	$main::ForeignRepo{"xmlpacnode"} = $xml -> getForeignPackageNodeList();
 	$main::ForeignRepo{"packagemanager"} = $xml -> getPackageManager();
 	$main::ForeignRepo{"locale"}    = $xml -> getLocale();
 	$main::ForeignRepo{"boot-theme"}= $xml -> getBootTheme();
@@ -2652,7 +2652,7 @@ sub createImageSplit {
 		push @main::Profiles ,split (/,/,$type{bootkernel});
 	}
 	$main::ForeignRepo{"xmlnode"} = $xml -> getForeignNodeList();
-	$main::ForeignRepo{"xmlpacnode"} = $xml -> getForeignPackageList();
+	$main::ForeignRepo{"xmlpacnode"} = $xml -> getForeignPackageNodeList();
 	$main::ForeignRepo{"packagemanager"} = $xml -> getPackageManager();
 	$main::ForeignRepo{"oem-swap"}       = $xml -> getOEMSwap();
 	$main::ForeignRepo{"oem-swapsize"}   = $xml -> getOEMSwapSize();

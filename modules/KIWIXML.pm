@@ -2851,7 +2851,7 @@ sub getForeignNodeList {
 }
 
 #==========================================
-# getForeignPackageList
+# getForeignPackageNodeList
 #------------------------------------------
 sub getForeignPackageNodeList {
 	# ...
