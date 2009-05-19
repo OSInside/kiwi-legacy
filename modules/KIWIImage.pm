@@ -522,9 +522,10 @@ sub createImageEC2 {
 	$main::ForeignRepo{"xmlnode"} = $xml -> getForeignNodeList();
 	$main::ForeignRepo{"xmlpacnode"} = $xml -> getForeignPackageList();
 	$main::ForeignRepo{"packagemanager"} = $xml -> getPackageManager();
-	$main::ForeignRepo{"locale"}  = $xml -> getLocale();
-	$main::ForeignRepo{"prepare"} = $main::Prepare;
-	$main::ForeignRepo{"create"}  = $main::Create;
+	$main::ForeignRepo{"locale"}    = $xml -> getLocale();
+	$main::ForeignRepo{"boot-theme"}= $xml -> getBootTheme();
+	$main::ForeignRepo{"prepare"}   = $main::Prepare;
+	$main::ForeignRepo{"create"}    = $main::Create;
 	$main::Create = $main::RootTree;
 	$xml = new KIWIXML ( $kiwi,$main::Prepare );
 	if (! defined $xml) {
@@ -953,9 +954,10 @@ sub createImageUSB {
 	$main::ForeignRepo{"oem-sap-install"}= $xml -> getOEMSAPInstall();
 	$main::ForeignRepo{"oem-reboot"}     = $xml -> getOEMReboot();
 	$main::ForeignRepo{"oem-recovery"}   = $xml -> getOEMRecovery();
-	$main::ForeignRepo{"locale"}  = $xml -> getLocale();
-	$main::ForeignRepo{"prepare"} = $main::Prepare;
-	$main::ForeignRepo{"create"}  = $main::Create;
+	$main::ForeignRepo{"locale"}    = $xml -> getLocale();
+	$main::ForeignRepo{"boot-theme"}= $xml -> getBootTheme();
+	$main::ForeignRepo{"prepare"}   = $main::Prepare;
+	$main::ForeignRepo{"create"}    = $main::Create;
 	$main::Compress = "no";
 	$main::Create   = $main::RootTree;
 	my $imageTypeSaved = $main::SetImageType;
@@ -1615,9 +1617,10 @@ sub createImageLiveCD {
 	$main::ForeignRepo{"xmlnode"} = $xml -> getForeignNodeList();
 	$main::ForeignRepo{"xmlpacnode"} = $xml -> getForeignPackageList();
 	$main::ForeignRepo{"packagemanager"} = $xml -> getPackageManager();
-	$main::ForeignRepo{"locale"}  = $xml -> getLocale();
-	$main::ForeignRepo{"prepare"} = $main::Prepare;
-	$main::ForeignRepo{"create"}  = $main::Create;
+	$main::ForeignRepo{"locale"}    = $xml -> getLocale();
+	$main::ForeignRepo{"boot-theme"}= $xml -> getBootTheme();
+	$main::ForeignRepo{"prepare"}   = $main::Prepare;
+	$main::ForeignRepo{"create"}    = $main::Create;
 	$main::Create = $main::RootTree;
 	$xml = new KIWIXML ( $kiwi,$main::Prepare );
 	if (! defined $xml) {
@@ -2660,9 +2663,10 @@ sub createImageSplit {
 	$main::ForeignRepo{"oem-sap-install"}= $xml -> getOEMSAPInstall();
 	$main::ForeignRepo{"oem-reboot"}     = $xml -> getOEMReboot();
 	$main::ForeignRepo{"oem-recovery"}   = $xml -> getOEMRecovery();
-	$main::ForeignRepo{"locale"}  = $xml -> getLocale();
-	$main::ForeignRepo{"prepare"} = $main::Prepare;
-	$main::ForeignRepo{"create"}  = $main::Create;
+	$main::ForeignRepo{"locale"}    = $xml -> getLocale();
+	$main::ForeignRepo{"boot-theme"}= $xml -> getBootTheme();
+	$main::ForeignRepo{"prepare"}   = $main::Prepare;
+	$main::ForeignRepo{"create"}    = $main::Create;
 	$main::Create = $main::RootTree;
 	$xml = new KIWIXML ( $kiwi,$main::Prepare );
 	if (! defined $xml) {

@@ -297,6 +297,9 @@ sub new {
 		if (defined $foreignRepo->{"locale"}) {
 			$this -> setForeignOptionsElement ("locale");
 		}
+		if (defined $foreignRepo->{"boot-theme"}) {
+			$this -> setForeignOptionsElement ("boot-theme");
+		}
 		if (defined $foreignRepo->{"packagemanager"}) {
 			$this -> setForeignOptionsElement ("packagemanager");
 		}
@@ -1347,6 +1350,22 @@ sub getLocale {
 }
 
 #==========================================
+# getBootTheme
+#------------------------------------------
+sub getBootTheme {
+	# ...
+	# Obtain the boot-theme value or return undef
+	# ---
+	my $this = shift;
+	my $node = $this -> getPreferencesNodeByTagName ("boot-theme");
+	my $theme= $node -> getElementsByTagName ("boot-theme");
+	if ((! defined $theme) || ("$theme" eq "")) {
+		return undef;
+	}
+	return $theme;
+}
+
+#==========================================
 # getRPMCheckSignatures
 #------------------------------------------
 sub getRPMCheckSignatures {
@@ -2061,6 +2080,7 @@ sub getImageConfig {
 		my $keytable = $element -> getElementsByTagName ("keytable");
 		my $timezone = $element -> getElementsByTagName ("timezone");
 		my $language = $element -> getElementsByTagName ("locale");
+		my $boottheme= $element -> getElementsByTagName ("boot-theme");
 		my $oemswapMB= $element -> getElementsByTagName ("oem-swapsize");
 		my $oemrootMB= $element -> getElementsByTagName ("oem-systemsize");
 		my $oemswap  = $element -> getElementsByTagName ("oem-swap");
@@ -2078,6 +2098,9 @@ sub getImageConfig {
 		}
 		if (defined $language) {
 			$result{kiwi_language} = $language;
+		}
+		if (defined $boottheme) {
+			$result{kiwi_boottheme}= $boottheme;
 		}
 		if ((defined $oemswap) && ("$oemswap" eq "no")) {
 			$result{kiwi_oemswap} = "no";

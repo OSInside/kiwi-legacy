@@ -989,6 +989,9 @@ function suseGFXBoot {
 	local theme=$1
 	local loader=$2
 	export PATH=$PATH:/usr/sbin
+	if [ ! -z "$kiwi_boottheme" ];then
+		theme=$kiwi_boottheme
+	fi
 	if [ -d /usr/share/gfxboot ];then
 		#======================================
 		# create boot theme with gfxboot-devel

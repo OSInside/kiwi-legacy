@@ -633,6 +633,25 @@ specifies the where to find the boot kernel.</db:para>
   </div>
   <!--
     ==========================================
+    common element <boot-theme>
+    
+  -->
+  <div>
+    <!-- boot-theme -->
+    <define name="k.boot-theme.attlist">
+      <empty/>
+    </define>
+    <define name="k.boot-theme">
+      <element name="boot-theme">
+        <a:documentation>Image bootsplash/gfxboot theme setup.</a:documentation>
+        <db:para>The value will be part used in suseGFXBoot</db:para>
+        <ref name="k.boot-theme.attlist"/>
+        <text/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
     common element <metadata>
     
   -->
@@ -2732,6 +2751,9 @@ and also depends of the selected image output type.</db:para>
           </optional>
           <optional>
             <ref name="k.locale"/>
+          </optional>
+          <optional>
+            <ref name="k.boot-theme"/>
           </optional>
           <optional>
             <ref name="k.defaultdestination"/>

@@ -35,6 +35,8 @@
 		<keytable>us.map.gz</keytable>
 		<timezone>Europe/Berlin</timezone>
 		<rpm-excludedocs>true</rpm-excludedocs>
+		<!-- if you change this make sure gfxboot is boot included -->
+		<boot-theme>SLES</boot-theme>
 	</preferences>
 	<!-- Users setup -->
 	<users group="root">

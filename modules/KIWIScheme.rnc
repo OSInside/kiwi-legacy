@@ -454,6 +454,24 @@ div { # locale
 }
 
 #==========================================
+# common element <boot-theme>
+#
+div { # boot-theme
+	k.boot-theme.attlist = empty
+	k.boot-theme =
+		## Image bootsplash/gfxboot theme setup.
+		[
+		db:para [
+			"The value will be part used in suseGFXBoot"
+		]
+		]
+		element boot-theme {
+			k.boot-theme.attlist,
+			text
+		}
+}
+
+#==========================================
 # common element <metadata>
 #
 div {
@@ -1872,6 +1890,7 @@ div {
 			k.keytable? &
 			k.timezone? &
 			k.locale? &
+			k.boot-theme? &
 			k.defaultdestination? &
 			k.defaultroot? &
 			k.defaultbaseroot?
