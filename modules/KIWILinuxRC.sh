@@ -3295,19 +3295,10 @@ function mountSystemClicFS {
 	#--------------------------------------
 	mkdir -p $roDir
 	#======================================
-	# check for NFS export location
+	# check read/only device location
 	#--------------------------------------
 	if [ ! -z "$NFSROOT" ];then
 		roDevice="$imageRootDevice"
-		if ! kiwiMount "$roDevice" "$roDir" "" $loopf;then
-			Echo "Failed to mount NFS filesystem"
-			return 1
-		fi
-		roDevice=$(ls -1 $roDir/*.clicfs &>/dev/null)
-		if [ ! -e $roDevice ];then
-			Echo "Can't find an uniqly exported *.clicfs file"
-			return 1
-		fi
 	fi
 	#======================================  
 	# check kernel command line for log file  
@@ -3330,12 +3321,29 @@ function mountSystemClicFS {
 		clic_cmd="$clic_cmd -m $haveMByte -c $rwDevice  --ignore-cow-errors"
 	fi
 	#======================================
-	# mount clic container
+	# mount/check clic file
 	#--------------------------------------
-	if ! $clic_cmd $roDevice $roDir; then  
-		Echo "Failed to mount clic filesystem"
-		return 1
-	fi 
+	if [ ! -z "$NFSROOT" ];then
+		#======================================
+		# clic exported via NFS
+		#--------------------------------------
+		if ! kiwiMount "$roDevice" "$roDir" "" $loopf;then
+			Echo "Failed to mount NFS filesystem"
+			return 1
+		fi
+		if [ ! -e "$roDir/fsdata.ext3" ];then
+			Echo "Can't find clic fsdata.ext3 in NFS export"
+			return 1
+		fi
+	else
+		#======================================
+		# mount clic container
+		#--------------------------------------
+		if ! $clic_cmd $roDevice $roDir; then  
+			Echo "Failed to mount clic filesystem"
+			return 1
+		fi 
+	fi
 	#======================================
 	# mount root over clic
 	#--------------------------------------

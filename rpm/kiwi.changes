@@ -8,6 +8,11 @@ Mon May 18 16:21:37 CEST 2009 - ms@suse.de
   the system image description. This feature is used to setup
   branding packages which needs to be installed as part of
   the boot image (initrd) (bnc #497888)
+- fixed/changed clicfs over NFS use. When using a clicfs
+  image it's required that the clicfs filesystem is mounted
+  on the server and the container (fsdata.ext3) is exported
+  to the client. In that way it's consistent with all other
+  filesystem types
   
 -------------------------------------------------------------------
 Fri May 15 20:54:04 CEST 2009 - ms@suse.de
