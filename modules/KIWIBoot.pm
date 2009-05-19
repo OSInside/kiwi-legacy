@@ -1296,6 +1296,7 @@ sub setupInstallCD {
 	my $oldird    = $this->{initrd};
 	my $zipped    = $this->{zipped};
 	my $isxen     = $this->{isxen};
+	my $xml       = $this->{xml};
 	my $md5name   = $system;
 	my $imgtype   = "oem";
 	my $gotsys    = 1;
@@ -1303,6 +1304,16 @@ sub setupInstallCD {
 	my $result;
 	my $ibasename;
 	my $tmpdir;
+	my $volid;
+	#==========================================
+	# check type parameters for mkisofs call
+	#------------------------------------------
+	if (defined $xml) {
+		my %type = %{$xml->getImageTypeAndAttributes()};
+		if ($type{volid}) {
+			$volid .= " -V \"$type{volid}\"";
+		}
+	}
 	#==========================================
 	# create tmp directory
 	#------------------------------------------
@@ -1506,7 +1517,7 @@ sub setupInstallCD {
 	} else {
 		$name =~ s/gz$/iso/;
 	}
-	my $base = "-R -b boot/grub/stage2 -no-emul-boot";
+	my $base = "-R -b boot/grub/stage2 -no-emul-boot $volid";
 	my $opts = "-boot-load-size 4 -boot-info-table -udf -allow-limited-size";
 	if ($name !~ /^\//) {
 		my $workingDir = qxx ( "pwd" ); chomp $workingDir;
