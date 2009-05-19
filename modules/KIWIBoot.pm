@@ -1300,11 +1300,11 @@ sub setupInstallCD {
 	my $md5name   = $system;
 	my $imgtype   = "oem";
 	my $gotsys    = 1;
+	my $volid     = "-V \"KIWI CD/DVD Installation\"";
 	my $status;
 	my $result;
 	my $ibasename;
 	my $tmpdir;
-	my $volid;
 	#==========================================
 	# check type parameters for mkisofs call
 	#------------------------------------------
