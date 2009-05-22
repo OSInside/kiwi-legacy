@@ -652,19 +652,14 @@ sub mainTask
       foreach my $cd($this->getMediaNumbers()) {
 	next if($cd == 0);
 	my $cdname = $this->{m_basesubdir}->{$cd};
+	my $attr = "-R -J -pad -joliet-long";
 	$cdname =~ s{.*/(.*)/*$}{$1};
-	$iso = new KIWIIsoLinux($this->{m_logger}, $this->{m_basesubdir}->{$cd}, $this->{m_united}."/$cdname.iso");
-	if(!$iso->createSortFile()) {
-	  $this->logMsg("E", "Cannot create sortfile");
+	$iso = new KIWIIsoLinux($this->{m_logger}, $this->{m_basesubdir}->{$cd}, $this->{m_united}."/$cdname.iso",$attr);
+	if(!$iso->callBootMethods()) {
+	  $this->logMsg("E", "Cannot call boot methods");
 	}
 	else {
-	  $this->logMsg("W", "Created sortfile");
-	}
-	if(!$iso->createISOLinuxConfig()) {
-	  $this->logMsg("E", "Cannot create IsoLinuxConfig");
-	}
-	else {
-	  $this->logMsg("W", "Created IsoLinux Config");
+	  $this->logMsg("W", "Boot methods called successfully");
 	}
 	if(!$iso->createISO()) {
 	  $this->logMsg("E", "Cannot create Iso image");

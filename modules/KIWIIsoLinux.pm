@@ -52,17 +52,15 @@ sub new {
 	my $kiwi         = shift;
 	my $source       = shift;  # location of source tree
 	my $dest         = shift;  # destination for the iso file
-	my $publisher    = shift;  # publisher string
-	my $preparer     = shift;  # preparer string
-	my $params       = shift;  # mkisofs parameters
-	my $appid        = shift;  # application_id
+	my $params       = shift;  # global mkisofs parameters
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
-	my $bootbase     = "boot";
-	my $bootbaseZ    = "";
-	my $bootimage    = "";
-	my $bootisolinux = "";
+	my %base;
+	my @catalog;
+	my $code;
+	my $sort;
+	my $ldir;
 	#==========================================
 	# create log object if not done
 	#------------------------------------------
@@ -79,83 +77,74 @@ sub new {
 		$kiwi -> failed ();
 		return undef;
 	}
-	if (! defined $preparer) {
-		$preparer = $main::Preparer;
-	}
-	if (! defined $publisher) {
-		$publisher = $main::Publisher;
-	}
-	if (! defined $params) {
-		$params = '-R -J -pad -joliet-long';
-	}
-	if (! defined $appid) {
-		$appid = "undefined";
+	#=======================================
+	# path setup for supported archs
+	#---------------------------------------
+	# s390x
+	$base{s390x}{boot}   = "boot/s390x";
+	$base{s390x}{loader} = "undef";
+	$base{s390x}{efi}    = "undef";
+	# s390
+	$base{s390}{boot}    = "boot/s390";
+	$base{s390}{loader}  = "undef";
+	$base{s390}{efi}     = "undef";
+	# ix86
+	$base{ix86}{boot}    = "boot/i386";
+	$base{ix86}{loader}  = "boot/i386/loader/isolinux.bin";
+	$base{ix86}{efi}     = "boot/i386/efi";
+	# x86_64
+	$base{x86_64}{boot}  = "boot/x86_64";
+	$base{x86_64}{loader}= "boot/x86_64/loader/isolinux.bin";
+	$base{x86_64}{efi}   = "boot/x86_64/efi";
+	# ia64
+	$base{ia64}{boot}    = "boot/ia64";
+	$base{ia64}{loader}  = "undef";
+	$base{ia64}{efi}     = "boot/ia64/efi";
+	#=======================================
+	# 1) search for legacy boot
+	#---------------------------------------
+	foreach my $arch (keys %base) {
+		if (-d $source."/".$base{$arch}{boot}) {
+			if ($arch eq "x86_64") {
+				$catalog[0] = "x86_64_legacy";
+			}
+			if ($arch eq "ix86") {
+				$catalog[0] = "ix86_legacy";
+				last;
+			}
+		}
 	}
 	#=======================================
-	# set application ID
+	# 2) search for efi/ikr boot
 	#---------------------------------------
-	$params .= " -A $appid";
-	#=======================================
-	# check /boot/<arch>/loader layout
-	#---------------------------------------
-	if (-d "$source/$bootbase/s390x") {
-		$bootbaseZ = $bootbase."/s390x";
-		$bootbase  = $bootbase."/i386";
-	} elsif (-d "$source/$bootbase/s390") {
-		$bootbaseZ = $bootbase."/s390";
-		$bootbase  = $bootbase."/i386";
-	} elsif (-d "$source/$bootbase/i386") {
-		$bootbase  = $bootbase."/i386";
-	} elsif (-d "$source/$bootbase/x86_64") {
-		$bootbase  = $bootbase."/x86_64";
-	} elsif (-d "$source/$bootbase/ia64") {
-		$bootbase  = $bootbase."/ia64";
-	} else {
-		$kiwi -> error  ("No $source/$bootbase/<arch>/ layout found");
-		$kiwi -> failed ();
-		return undef;
+	foreach my $arch (keys %base) {
+		if (-d $source."/".$base{$arch}{efi}) {
+			if ($arch eq "x86_64") {
+				push (@catalog, "x86_64_efi");
+			}
+			if ($arch eq "ix86") {
+				push (@catalog, "ix86_efi");
+			}
+			if ($arch eq "ia64") {
+				push (@catalog, "ia64_efi");
+			}
+			if ($arch eq "s390") {
+				push (@catalog, "s390_ikr");
+			}
+			if ($arch eq "s390x") {
+				push (@catalog, "s390x_ikr");
+			}
+		}
 	}
-	$bootimage    = $bootbase."/image";
-	$bootisolinux = $bootbase."/loader";
-	#==========================================
-	# Store object data
-	#------------------------------------------
-	$this -> {kiwi}         = $kiwi;
-	$this -> {source}       = $source;
-	$this -> {dest}         = $dest;
-	$this -> {params}       = $params;
-	$this -> {publisher}    = $publisher;
-	$this -> {preparer}     = $preparer;
-	$this -> {rootoncd}     = "suse";
-	$this -> {bootbase}     = $bootbase;
-	$this -> {bootimage}    = $bootimage;
-	$this -> {bootisolinux} = $bootisolinux;
-	return $this;
-}
-
-#==========================================
-# createSortFile 
-#------------------------------------------
-sub createSortFile {
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my $boot = $this->{bootisolinux};
-	my $base = $this->{bootbase};
-	my $src  = $this->{source};
-	my $para = $this->{params};
-	my $code;
-	#==========================================
-	# check boot directory 
-	#------------------------------------------
-	if (! -d "$src/$boot") {
-		$kiwi -> error ("Directory $src/$boot doesn't exist");
+	if (! @catalog) {
+		$kiwi -> error  ("Can't find valid $source/boot/<arch>/ layout");
 		$kiwi -> failed ();
 		return undef;
 	}
 	#==========================================
 	# create tmp files/directories 
 	#------------------------------------------
-	my $sort = qxx ("mktemp /tmp/m_cd-XXXXXX 2>&1"); chomp $sort;
+	$sort = qxx ("mktemp /tmp/kiso-sort-XXXXXX 2>&1"); chomp $sort;
 	$code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> error  ("Couldn't create sort file: $sort: $!");
@@ -163,28 +152,178 @@ sub createSortFile {
 		$this -> cleanISO();
 		return undef;
 	}
-	my $sdir = qxx ("mktemp -q -d /tmp/m_cd-XXXXXX 2>&1"); chomp $sdir;
+	$ldir = qxx ("mktemp -q -d /tmp/kiso-loader-XXXXXX 2>&1"); chomp $ldir;
 	$code = $? >> 8;
 	if ($code != 0) {
-		$kiwi -> error  ("Couldn't create tmp directory: $sdir: $!");
+		$kiwi -> error  ("Couldn't create tmp directory: $ldir: $!");
 		$kiwi -> failed ();
 		$this -> cleanISO();
 		return undef;
 	}
-	qxx ("chmod 755 $sdir");
+	qxx ("chmod 755 $ldir");
 	#==========================================
-	# store tmp files/directories 
+	# Store object data
 	#------------------------------------------
-	$this -> {sortfile} = $sort;
-	$this -> {srcxdir}  = $sdir;
-	#==========================================
-	# create sort file 
-	#------------------------------------------
-	sub generateWanted {
-		my $filelist = shift;
-		return sub {
-			push (@{$filelist},$File::Find::name);
+	$this -> {kiwi}   = $kiwi;
+	$this -> {source} = $source;
+	$this -> {dest}   = $dest;
+	$this -> {params} = $params;
+	$this -> {base}   = \%base;
+	$this -> {tmpfile}= $sort;
+	$this -> {tmpdir} = $ldir;
+	$this -> {catalog}= \@catalog;
+	return $this;
+}
+
+#==========================================
+# x86_64_legacy
+#------------------------------------------
+sub x86_64_legacy {
+	my $this  = shift;
+	my $arch  = shift;
+	my %base  = %{$this->{base}};
+	my $para  = $this -> {params};
+	my $sort  = $this -> createLegacySortFile ("x86_64");
+	my $boot  = $base{$arch}{boot};
+	my $loader= $base{$arch}{loader};
+	$para.= " -sort $sort -no-emul-boot -boot-load-size 4 -boot-info-table";
+	$para.= " -b $loader -c $boot/boot.catalog";
+	$para.= " -hide $boot/boot.catalog -hide-joliet $boot/boot.catalog";
+	$this -> {params} = $para;
+	$this -> createISOLinuxConfig ($boot);
+}
+
+#==========================================
+# ix86_legacy
+#------------------------------------------
+sub ix86_legacy {
+	my $this  = shift;
+	my $arch  = shift;
+	my %base  = %{$this->{base}};
+	my $para  = $this -> {params};
+	my $sort  = $this -> createLegacySortFile ("ix86");
+	my $boot  = $base{$arch}{boot};
+	my $loader= $base{$arch}{loader};
+	$para.= " -sort $sort -no-emul-boot -boot-load-size 4 -boot-info-table";
+    $para.= " -b $loader -c $boot/boot.catalog";
+	$para.= " -hide $boot/boot.catalog -hide-joliet $boot/boot.catalog";
+	$this -> {params} = $para;
+	$this -> createISOLinuxConfig ($boot);
+}
+
+#==========================================
+# x86_64_efi
+#------------------------------------------
+sub x86_64_efi {
+	my $this  = shift;
+	my $arch  = shift;
+	my %base  = %{$this->{base}};
+	my $para  = $this -> {params};
+	my $boot  = $base{$arch}{boot};
+	my $loader= $base{$arch}{efi};
+	$para.= " -eltorito-alt-boot";
+	$para.= " -hide $boot/boot.catalog -hide-joliet $boot/boot.catalog";
+	$para.= " -b $loader";
+	$this -> {params} = $para;
+}
+
+#==========================================
+# ix86_efi
+#------------------------------------------
+sub ix86_efi {
+	my $this  = shift;
+	my $arch  = shift;
+	my %base  = %{$this->{base}};
+	my $para  = $this -> {params};
+	my $boot  = $base{$arch}{boot};
+	my $loader= $base{$arch}{efi};
+	$para.= " -eltorito-alt-boot";
+	$para.= " -hide $boot/boot.catalog -hide-joliet $boot/boot.catalog";
+	$para.= " -b $loader";
+	$this -> {params} = $para;
+}
+
+#==========================================
+# ia64_efi
+#------------------------------------------
+sub ia64_efi {
+	my $this  = shift;
+	my $arch  = shift;
+	my %base  = %{$this->{base}};
+	my $para  = $this -> {params};
+	my $boot  = $base{$arch}{boot};
+	my $loader= $base{$arch}{efi};
+	$para.= " -eltorito-alt-boot";
+	$para.= " -hide $boot/boot.catalog -hide-joliet $boot/boot.catalog";
+	$para.= " -b $loader";
+	$this -> {params} = $para;
+}
+
+#==========================================
+# s390_ikr
+#------------------------------------------
+sub s390_ikr {
+	my $this = shift;
+	my $arch = shift;
+	my %base = %{$this->{base}};
+	my $para = $this -> {params};
+	my $boot = $base{$arch}{boot};
+	my $ikr  = $this -> createS390CDLoader($boot);
+	$para.= " -eltorito-alt-boot";
+	$para.= " -hide $boot/boot.catalog -hide-joliet $boot/boot.catalog";
+	$para.= " -b $boot/cd.ikr";
+	$this -> {params} = $para;
+}
+
+#==========================================
+# s390x_ikri
+#------------------------------------------
+sub s390x_ikr {
+	my $this = shift;
+	my $arch = shift;
+	my %base = %{$this->{base}};
+	my $para = $this -> {params};
+	my $boot = $base{$arch}{boot};
+	my $ikr  = $this -> createS390CDLoader($boot);
+	$para.= " -eltorito-alt-boot";
+	$para.= " -hide $boot/boot.catalog -hide-joliet $boot/boot.catalog";
+	$para.= " -b $boot/cd.ikr";
+	$this -> {params} = $para; 
+}
+
+#==========================================
+# callBootMethods 
+#------------------------------------------
+sub callBootMethods {
+	my $this    = shift;
+	my @catalog = @{$this->{catalog}};
+	my %base    = %{$this->{base}};
+	my $ldir    = $this->{tmpdir};
+	foreach my $boot (@catalog) {
+		if ($boot =~ /(.*)_.*/) {
+			my $arch = $1;
+			qxx ("mkdir -p $ldir/".$base{$arch}{boot}."/loader");
+			no strict 'refs';
+			&{$boot}($this,$arch);
+			use strict 'refs';
 		}
+	}
+	return $this;
+}
+	
+#==========================================
+# createLegacySortFile
+#------------------------------------------
+sub createLegacySortFile {
+	my $this = shift;
+	my $arch = shift;
+	my $kiwi = $this->{kiwi};
+	my %base = %{$this->{base}};
+	my $src  = $this->{source};
+	my $sort = $this->{tmpfile};
+	my $ldir = $this->{tmpdir};
+	if (! -d $src."/".$base{$arch}{boot}) {
+		return undef;
 	}
 	if (! open FD, ">$sort") {
 		$kiwi -> error  ("Failed to open sort file: $!");
@@ -192,26 +331,104 @@ sub createSortFile {
 		$this -> cleanISO();
 		return undef;
 	}
+	sub generateWanted {
+		my $filelist = shift;
+		return sub {
+			push (@{$filelist},$File::Find::name);
+		}
+	}
 	my @list = ();
 	my $wref = generateWanted (\@list);
-	find ({wanted => $wref, follow => 0 }, "$src/$boot");
-	print FD "$sdir/$base/boot.catalog 3"."\n";
-	print FD "$base/boot.catalog 3"."\n";
-	print FD "$src/$base/boot.catalog 3"."\n";
+	find ({wanted => $wref,follow => 0 },$src."/".$base{$arch}{boot}."/loader");
+	print FD "$ldir/boot/boot.catalog 3"."\n";
+	print FD "boot/boot.catalog 3"."\n";
+	print FD "$src/boot/boot.catalog 3"."\n";
 	foreach my $file (@list) {
 		print FD "$file 1"."\n";
 	}
-	print FD "$src/$boot/isolinux.bin 2"."\n";
+	print FD "$src/boot/isolinux.bin 2"."\n";
 	close FD;
-	qxx ("mkdir -p $sdir/$boot");
-	#==========================================
-	# setup mkisofs parameters for boot iso 
-	#------------------------------------------
-	$para.= " -sort $sort -no-emul-boot -boot-load-size 4 -boot-info-table";
-	$para.= " -b $boot/isolinux.bin -c $base/boot.catalog";
-	$para.= " -hide $base/boot.catalog -hide-joliet $base/boot.catalog";
-	$this -> {params} = $para;
-	return $this;
+	return $sort;
+}
+
+#==========================================
+# createS390CDLoader 
+#------------------------------------------
+sub createS390CDLoader {
+	my $this = shift;
+	my $basez= shift;
+	my $kiwi = $this->{kiwi};
+	my $src  = $this->{source};
+	my $ldir = $this->{tmpdir};
+	if (-f $src."/".$basez."/vmrdr.ikr") {
+		qxx ("mkdir -p $ldir/$basez");
+		my $parmfile = $src."/".$basez."/parmfile";
+		if (-e $parmfile.".cd") {
+			$parmfile = $parmfile.".cd";
+		}
+		my $gen = "gen-s390-cd-kernel.pl";
+		$gen .= " --initrd=$src/$basez/initrd";
+		$gen .= " --kernel=$src/$basez/vmrdr.ikr";
+		$gen .= " --parmfile=$parmfile";
+		$gen .= " --outfile=$ldir/$basez/cd.ikr";
+		qxx ($gen);
+	}
+	if (-f "$ldir/$basez/cd.ikr") {
+		return "$basez/cd.ikr";
+	}
+	return undef
+}
+
+#==========================================
+# createVolumeID 
+#------------------------------------------
+sub createVolumeID {
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $src  = $this->{source};
+	my $hfsvolid = "unknown";
+	if (-f $src."/content") {
+		my $number;
+		my $version;
+		my $name;
+		my @media = glob ("$src/media.?");
+		foreach my $i (@media) {
+			if ((-d $i) && ( $i =~ /.*\.(\d+)/)) {
+				$number = $1; last;
+			}
+		}
+		open (FD,"$src/content");
+		foreach my $line (<FD>) {
+			if (($version) && ($name)) {
+				last;
+			}
+			if ($line =~ /(NAME|PRODUCT)\s+(\w+)/) {
+				$name=$2;
+			}
+			if ($line =~ /VERSION\s+([\d\.]+)/) {
+				$version=$1;
+			}
+		}
+		close FD;
+		if ($name) {
+			$hfsvolid=$name;
+		}
+		if ($version) {
+			$hfsvolid="$name $version";
+		}
+		if ($hfsvolid) {
+			if ($number) {
+				$hfsvolid = substr ($hfsvolid,0,25);
+				$hfsvolid.= " $number";
+			}
+		} elsif (open (FD,$src."media.1/build")) {
+			my $line = <FD>; close FD;
+			if ($line =~ /(\w+)-(\d+)-/) {
+				$hfsvolid = "$1 $2 $number";
+			}
+		}
+	}
+	return $hfsvolid;
 }
 
 #==========================================
@@ -219,8 +436,8 @@ sub createSortFile {
 #------------------------------------------
 sub createISOLinuxConfig {
 	my $this = shift;
+	my $boot = shift;
 	my $kiwi = $this -> {kiwi};
-	my $boot = $this -> {bootisolinux};
 	my $src  = $this -> {source};
 	my $isox = "/usr/bin/isolinux-config";
 	if (! -x $isox) {
@@ -229,7 +446,9 @@ sub createISOLinuxConfig {
 		$this -> cleanISO();
 		return undef;
 	}
-	my $data = qxx ("$isox --base $boot $src/$boot/isolinux.bin 2>&1");
+	my $data = qxx (
+		"$isox --base $boot/loader $src/$boot/loader/isolinux.bin 2>&1"
+	);
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> error  ("Failed to call isolinux-config binary: $data");
@@ -249,12 +468,10 @@ sub createISO {
 	my $src  = $this -> {source};
 	my $dest = $this -> {dest};
 	my $para = $this -> {params};
-	my $pub  = $this -> {publisher};
-	my $prep = $this -> {preparer};
-	my $srcx = $this -> {srcxdir};
+	my $ldir = $this -> {tmpdir};
 	my $prog = "/usr/bin/mkisofs";
 	my $data = qxx (
-		"$prog -p \"$prep\" -publisher \"$pub\" $para -o $dest $srcx $src 2>&1"
+		"$prog $para -o $dest $ldir $src 2>&1"
 	);
 	my $code = $? >> 8;
 	if ($code != 0) {
@@ -272,13 +489,13 @@ sub createISO {
 #------------------------------------------
 sub cleanISO {
 	my $this = shift;
-	my $sort = $this -> {sortfile};
-	my $srcx = $this -> {srcxdir};
+	my $sort = $this -> {tmpfile};
+	my $ldir = $this -> {tmpdir};
 	if (-f $sort) {
 		qxx ("rm -f $sort 2>&1");
 	}
-	if (-d $srcx) {
-		qxx ("rm -rf $srcx 2>&1");
+	if (-d $ldir) {
+		qxx ("rm -rf $ldir 2>&1");
 	}
 	return $this;
 }

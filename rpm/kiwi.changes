@@ -8,6 +8,9 @@ Mon May 18 16:21:37 CEST 2009 - ms@suse.de
   the system image description. This feature is used to setup
   branding packages which needs to be installed as part of
   the boot image (initrd) (bnc #497888)
+- rewrote KIWIIsoLinux.pm to allow bit/tri arch boot media
+  the code has not been tested for efi or ikr due to lack of
+  such machines (bnc #478991)
 - fixed/changed clicfs over NFS use. When using a clicfs
   image it's required that the clicfs filesystem is mounted
   on the server and the container (fsdata.ext3) is exported

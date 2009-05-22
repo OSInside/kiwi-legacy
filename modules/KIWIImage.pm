@@ -2043,6 +2043,7 @@ sub createImageLiveCD {
 	my $isoerror = 1;
 	my $name = $imageDest."/".$namerw.".iso";
 	my $attr = "-R -J -pad -joliet-long";
+	$attr .= " -p \"$main::Preparer\" -publisher \"$main::Publisher\"";
 	if (! defined $gzip) {
 		$attr .= " -iso-level 4"; 
 	}
@@ -2050,14 +2051,11 @@ sub createImageLiveCD {
 		$attr .= " -V \"$type{volid}\"";
 	}
 	my $isolinux = new KIWIIsoLinux (
-		$kiwi,$main::RootTree."/CD",$name,undef,undef,$attr
+		$kiwi,$main::RootTree."/CD",$name,$attr
 	);
 	if (defined $isolinux) {
 		$isoerror = 0;
-		if (! $isolinux -> createSortFile()) {
-			$isoerror = 1;
-		}
-		if (! $isolinux -> createISOLinuxConfig()) {
+		if (! $isolinux -> callBootMethods()) {
 			$isoerror = 1;
 		}
 		if (! $isolinux -> createISO()) {
@@ -2086,9 +2084,7 @@ sub createImageLiveCD {
 	#------------------------------------------
 	if (-x "/usr/bin/tagmedia") {
 		$kiwi -> info ("Adding checkmedia tag...");
-		$data = qxx ("tagmedia --md5 --check $name 2>&1");
-		$code = $? >> 8;
-		if ($code != 0) {
+		if (! $isolinux -> checkImage()) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Failed to tag ISO image: $data");
 			$kiwi -> failed ();
