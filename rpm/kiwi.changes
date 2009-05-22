@@ -2,6 +2,7 @@
 Mon May 18 16:21:37 CEST 2009 - ms@suse.de
 
 - v3.52
+- reset IFS to standard value in CDDevice (bnc #505943)
 - fixed clicfs mount over AOE,NBD (bnc #504652)
 - fixed volid setup in case of spaces (bnc #500501)
 - allow inclusion of boot image packages specified inside

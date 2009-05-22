@@ -1812,6 +1812,7 @@ function CDDevice {
 	# detect CD/DVD/USB device(s). The function use the information
 	# from hwinfo --cdrom to search for the block device
 	# ----
+	IFS=$IFS_ORIG
 	local count=0
 	local h=/usr/sbin/hwinfo
 	if [ $HAVE_MODULES_ORDER = 0 ];then
