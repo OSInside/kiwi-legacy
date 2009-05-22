@@ -1311,7 +1311,7 @@ sub setupInstallCD {
 	if (defined $xml) {
 		my %type = %{$xml->getImageTypeAndAttributes()};
 		if ($type{volid}) {
-			$volid .= " -V \"$type{volid}\"";
+			$volid = " -V \"$type{volid}\"";
 		}
 	}
 	#==========================================
