@@ -3283,6 +3283,7 @@ function mountSystemClicFS {
 	local rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
 	local roDevice=`echo $UNIONFS_CONFIG | cut -d , -f 2`
 	local clic_cmd=clicfs
+	local ram_only=no
 	local haveBytes
 	local haveKByte
 	local haveMByte
@@ -3316,6 +3317,7 @@ function mountSystemClicFS {
 		haveMByte=`expr $haveKByte / 1024`
 		haveMByte=`expr $haveMByte \* 7 / 10`
 		clic_cmd="$clic_cmd -m $haveMByte"
+		ram_only=yes
 	else
 		haveBytes=`blockdev --getsize64 $rwDevice`
 		haveMByte=`expr $haveBytes / 1024 / 1024`
@@ -3349,7 +3351,11 @@ function mountSystemClicFS {
 	# mount root over clic
 	#--------------------------------------
 	size=`stat -c %s $roDir/fsdata.ext3`
-	size=$((size/4096))  
+	size=$((size/4096))
+	if [ "$ram_only" = "yes" ];then
+		# no reserved blocks for ram only usage...
+		tune2fs -m 0 $roDir/fsdata.ext3
+	fi
 	resize2fs $roDir/fsdata.ext3 $size
 	mount -o loop,noatime,nodiratime,errors=remount-ro,barrier=0 \
 		$roDir/fsdata.ext3 /mnt
