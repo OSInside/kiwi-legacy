@@ -3342,7 +3342,7 @@ function mountSystemClicFS {
 		#======================================
 		# mount clic container
 		#--------------------------------------
-		if ! $clic_cmd $roDevice $roDir; then  
+		if ! $clic_cmd $loopf $roDir; then  
 			Echo "Failed to mount clic filesystem"
 			return 1
 		fi 
