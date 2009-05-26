@@ -91,18 +91,25 @@ function OEMInstall {
 			#======================================
 			# standard mode, ask for install media
 			#--------------------------------------
-			while true;do
-				Echo -n "Enter device name to select disk for installation: "
-				read deviceInput
-				count=0
-				for instDisk in $deviceDisks;do
-					if [ ${deviceArray[$count]} = $deviceInput ];then
-						break 2
-					fi
-					count=`expr $count + 1`
-				done
-				Echo "Given device is not in the list !"
+			hd="\"Select disk for installation:\""
+			count=0
+			for i in $deviceDisks;do
+				dsize=`partitionSize $i`
+				dname=`getDiskID $i`
+				dname=`basename $dname | cut -c1-20`"..."
+				if [ $count = 0 ];then
+					dpara="$i \"$dname [ $dsize KByte ]\" on"
+					count=1
+				else
+					dpara="$dpara $i \"$dname [ $dsize KByte ]\" off"
+				fi
 			done
+			instDisk=$(eval dialog --stdout --radiolist $hd 20 75 15 $dpara)
+			if [ ! $? = 0 ];then
+				systemException \
+					"System installation canceled" \
+				"reboot"
+			fi
 		else
 			#======================================
 			# SAP mode, use the smallest one
@@ -121,18 +128,13 @@ function OEMInstall {
 	fi
 	Echo "Entering installation mode for disk: $instDisk"
 	if [ -z "$OEM_SAP_INSTALL" ];then
-		while true;do
-			Echo -n "This will destroy ALL data on $instDisk, continue [y/n]: "
-			read startInstall
-			if [ "$startInstall" = "y" ];then
-				break
-			fi
-			if [ "$startInstall" = "n" ];then
-				systemException \
-					"System installation canceled" \
-				"reboot"
-			fi
-		done
+		dialog --yesno \
+			"This will destroy ALL data on $instDisk, continue ?" 5 60
+		if [ ! $? = 0 ];then
+			systemException \
+				"System installation canceled" \
+			"reboot"
+		fi
 	fi
 	#======================================
 	# Import vmx configuration file

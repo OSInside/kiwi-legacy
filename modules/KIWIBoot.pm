@@ -1482,6 +1482,15 @@ sub setupInstallCD {
 	# Copy system image if given
 	#------------------------------------------
 	if ($gotsys) {
+		if (! open (FD,">$tmpdir/config.isoclient")) {
+			$kiwi -> error  ("Couldn't create CD install flag file");
+			$kiwi -> failed ();
+			$this -> cleanTmp ();
+			qxx ( "$main::Gzip -d $system" );
+			return undef;
+		}
+		print FD "IMAGE=$ibasename\n";
+		close FD;
 		$kiwi -> info ("Importing system image: $system");
 		$status = qxx ("cp $system $tmpdir/$ibasename 2>&1");
 		$result = $? >> 8;
@@ -3466,7 +3475,7 @@ sub setupBootLoaderConfiguration {
 		if (! $isxen || ($isxen && $xendomain eq "domU")) {
 			if ($type =~ /^KIWI CD/) {
 				print FD " kernel (cd)/boot/linux vga=$vga splash=silent";
-				print FD " ramdisk_size=512000 ramdisk_blocksize=4096";
+				print FD " ramdisk_size=512000 ramdisk_blocksize=4096 cdinst=1";
 			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
 				print FD " root (hd0,$bootpart)\n";
 				print FD " kernel /boot/linux.vmx vga=$vga";
@@ -3494,7 +3503,7 @@ sub setupBootLoaderConfiguration {
 			if ($type =~ /^KIWI CD/) {
 				print FD " kernel (cd)/boot/xen.gz\n";
 				print FD " module /boot/linux vga=$vga splash=silent";
-				print FD " ramdisk_size=512000 ramdisk_blocksize=4096";
+				print FD " ramdisk_size=512000 ramdisk_blocksize=4096 cdinst=1";
 			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
 				print FD " root (hd0,$bootpart)\n";
 				print FD " kernel /boot/xen.gz.vmx\n";
@@ -3529,7 +3538,7 @@ sub setupBootLoaderConfiguration {
 		if (! $isxen || ($isxen && $xendomain eq "domU")) {
 			if ($type =~ /^KIWI CD/) {
 				print FD " kernel (cd)/boot/linux vga=$vga splash=silent";
-				print FD " ramdisk_size=512000 ramdisk_blocksize=4096";
+				print FD " ramdisk_size=512000 ramdisk_blocksize=4096 cdinst=1";
 			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
 				print FD " root (hd0,$bootpart)\n";
 				print FD " kernel /boot/linux.vmx vga=$vga";
@@ -3558,7 +3567,7 @@ sub setupBootLoaderConfiguration {
 			if ($type =~ /^KIWI CD/) {
 				print FD " kernel (cd)/boot/xen.gz\n";
 				print FD " module (cd)/boot/linux vga=$vga splash=silent";
-				print FD " ramdisk_size=512000 ramdisk_blocksize=4096";
+				print FD " ramdisk_size=512000 ramdisk_blocksize=4096 cdinst=1";
 			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
 				print FD " root (hd0,$bootpart)\n";
 				print FD " kernel /boot/xen.gz.vmx\n";
@@ -3623,7 +3632,10 @@ sub setupBootLoaderConfiguration {
 		print FD "DEFAULT vesamenu.c32\n";
 		print FD "TIMEOUT 100\n";
 		if ($type =~ /^KIWI CD/) {
-			# not supported yet..
+			$kiwi -> failed ();
+			$kiwi -> error  ("*** syslinux: cdinst not supported ***");
+			$kiwi -> failed ();
+			return undef;
 		} elsif ($type =~ /^KIWI USB/) {
 			print FD "LABEL Linux\n";
 			print FD "MENU LABEL Restore ".$label."\n";

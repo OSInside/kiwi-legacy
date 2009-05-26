@@ -36,7 +36,7 @@ export systemIntegrity="clean"
 # Exports (Configuration)
 #--------------------------------------
 export VMX_SYSTEM="/config.vmxsystem"
-export LIVECD_CONFIG=$VMX_SYSTEM
+export LIVECD_CONFIG="/cdrom/config.isoclient"
 export OEM_PARTITION_CONFIG="/config.oempartition"
 
 #======================================
@@ -121,6 +121,7 @@ if [ "$LOCAL_BOOT" = "no" ];then
 else
 	export imageDiskDevice=`getDiskDevice $root | tr -d [0-9]+`
 fi
+Echo "Found boot device: $imageDiskDevice"
 
 #======================================
 # 9) Check for installation mode...
@@ -270,8 +271,8 @@ validateRootTree
 # 17) Recover system if requested
 #--------------------------------------
 if [ ! -z "$KIWI_RECOVERY" ];then
-	Echo -n "Do you want to start the System-Recovery ? [y/n]: "; read runReco
-	if [ ! $runReco = "y" ];then
+	dialog --yesno "Do you want to start the System-Recovery ?" 5 50
+	if [ ! $? = 0 ];then
 		systemException "System-Recovery not started" "reboot"
 	fi
 	Echo "Starting System-Recovery..."

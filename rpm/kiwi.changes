@@ -2,6 +2,8 @@
 Mon May 25 16:10:39 CEST 2009 - ms@suse.de
 
 - v3.53
+- fixed oem format="iso" install mode (bnc #506983)
+- use dialog for asking questions (bnc #503653)
 - added resize_inode feature to filesystem before resizing.
   This will reserve space so the block group descriptor
   table may grow in the future (bnc #498683)

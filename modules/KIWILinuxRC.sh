@@ -139,6 +139,7 @@ function importFile {
 		Echo -e "$ERROR_INTERRUPT"
 		systemException "*** interrupted ****" "shell"
 	fi
+	IFS=$IFS_ORIG
 }
 #======================================
 # systemException
@@ -1813,6 +1814,7 @@ function CDDevice {
 	# from hwinfo --cdrom to search for the block device
 	# ----
 	IFS=$IFS_ORIG
+	local silent=$1
 	local count=0
 	local h=/usr/sbin/hwinfo
 	if [ $HAVE_MODULES_ORDER = 0 ];then
@@ -1820,7 +1822,9 @@ function CDDevice {
 			/sbin/modprobe $module
 		done
 	fi
-	Echo -n "Waiting for CD/DVD device(s) to appear..."
+	if [ -z "$silent" ];then
+		Echo -n "Waiting for CD/DVD device(s) to appear..."
+	fi
 	while true;do
 		cddevs=`$h --cdrom | grep "Device File:"|sed -e"s@(.*)@@" | cut -f2 -d:`
 		cddevs=`echo $cddevs`
@@ -1832,14 +1836,18 @@ function CDDevice {
 		if [ ! -z "$cddev" ] || [ $count -eq 12 ]; then
 			break
 		else
-			echo -n .
+			if [ -z "$silent" ];then
+				echo -n .
+			fi
 			sleep 1
 		fi
 		count=`expr $count + 1`
 	done
-	echo
-	if [ -z $cddev ];then
-		USBStickDevice
+	if [ -z "$silent" ];then
+		echo
+	fi
+	if [ -z "$cddev" ];then
+		USBStickDevice $silent
 		if [ $stickFound = 0 ];then
 			systemException \
 				"Failed to detect CD/DVD or USB drive !" \
@@ -1853,19 +1861,24 @@ function CDDevice {
 #--------------------------------------
 function USBStickDevice {
 	stickFound=0
+	local silent=$1
 	#======================================
 	# check virtual environments
 	#--------------------------------------
 	diskmodels=`getDiskModels`
 	if echo $diskmodels | grep -q "QEMU HARDDISK";then
-		Echo "QEMU system, skipping USB stick search"
+		if [ -z "$silent" ];then
+			Echo "QEMU system, skipping USB stick search"
+		fi
 		return
 	fi
 	#======================================
 	# search for USB removable devices
 	#--------------------------------------
-	Echo -n "Waiting for USB devices to settle..."
-	for redo in 1 2 3 4 5 6 7 8 9 10;do
+	if [ -z "$silent" ];then
+		Echo -n "Searching for USB stick device..."
+	fi
+	for redo in 1 2 3 4 5;do
 		for device in /sys/bus/usb/drivers/usb-storage/*;do
 			if [ ! -L $device ];then
 				continue
@@ -1921,12 +1934,16 @@ function USBStickDevice {
 						continue
 					fi
 					stickSerial=$serial
-					echo .
+					if [ -z "$silent" ];then
+						echo .
+					fi
 					return
 				fi
 			done
 		done
-		echo -n .
+		if [ -z "$silent" ];then
+			echo -n .
+		fi
 		sleep 3
 	done
 	echo .
@@ -1954,10 +1971,13 @@ function CDMount {
 	# search all CD/DVD drives and use the one we can find
 	# the CD configuration on
 	# ----
+	local silent=$1
 	local count=0
 	local cdopt
-	mkdir -p /cdrom && CDDevice
-	Echo -n "Mounting live boot drive..."
+	mkdir -p /cdrom && CDDevice $silent
+	if [ -z "$silent" ];then
+		Echo -n "Mounting live boot drive..."
+	fi
 	while true;do
 		IFS=":"; for i in $cddev;do
 			cdopt=$(CDMountOption $i)
@@ -1967,13 +1987,17 @@ function CDMount {
 				eval mount $cdopt $i /cdrom >/dev/null
 			fi
 			if [ -f $LIVECD_CONFIG ];then
-				cddev=$i; echo;
-				if [ "$mediacheck" = 1 ]; then
+				cddev=$i
+				if [ -z "$silent" ]; then
+					echo
+				fi
+				if [ "$mediacheck" = 1 ] && [ -z "$silent" ]; then
 					test -e /proc/splash && echo verbose > /proc/splash
 					checkmedia $cddev
 					Echo -n "Press any key for reboot: "; read nope
 					systemException "CheckMedia" "reboot"
 				fi
+				IFS=$IFS_ORIG
 				return
 			fi
 			umount $i &>/dev/null
@@ -1982,7 +2006,9 @@ function CDMount {
 		if [ $count -eq 12 ]; then
 			break
 		else
-			echo -n .
+			if [ -z "$silent" ];then
+				echo -n .
+			fi
 			sleep 1
 		fi
 		count=`expr $count + 1`
@@ -2018,6 +2044,7 @@ function searchBIOSBootDevice {
 	# for the MBR disk label and compare it with the kiwi
 	# written mbrid file in /boot/grub/ of the system image
 	# ----
+	IFS=$IFS_ORIG
 	local h=/usr/sbin/hwinfo
 	local c="Device File:|BIOS id"
 	local ddevs=`$h --disk|grep -E "$c"|sed -e"s@(.*)@@"|cut -f2 -d:|tr -d " "`
@@ -2035,6 +2062,16 @@ function searchBIOSBootDevice {
 		fi
 		pred=$curd
 	done
+	#======================================
+	# Check for OEM ISO installation mode
+	#--------------------------------------
+	if [ ! -z "$cdinst" ];then
+		CDMount silent
+		umount $cddev
+		curd=$cddev
+		echo $curd
+		return
+	fi
 	#======================================
 	# Search and copy all mbrid files 
 	#--------------------------------------
