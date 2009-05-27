@@ -306,13 +306,17 @@ sub new {
 			#------------------------------------------
 			$systemInodes = qxx ("find $system | wc -l");
 			$systemInodes *= 2;
-			if ((defined $main::FSNumInodes) &&
-				($main::FSNumInodes < $systemInodes)
-			) {
-				$kiwi -> warning ("Specified Inode count might be too small\n");
-				$kiwi -> warning ("Copying of files to image could fail !\n");
-			} else {
-				$this->{inodes} = $systemInodes;
+			$this->{inodes} = $systemInodes;
+			if (defined $main::FSNumInodes) {
+				$this->{inodes} = $main::FSNumInodes;
+				if ($main::FSNumInodes < $systemInodes) {
+					$kiwi -> warning (
+						"Specified Inode count might be too small\n"
+					);
+					$kiwi -> warning (
+						"Copying of files to image could fail !\n"
+					);
+				}
 			}
 			if ($systemSXML eq "auto") {
 				$systemSXML = 0;

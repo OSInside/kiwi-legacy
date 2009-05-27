@@ -103,21 +103,20 @@ sub new {
 	#=======================================
 	# 1) search for legacy boot
 	#---------------------------------------
-	foreach my $arch (keys %base) {
+	foreach my $arch (sort keys %base) {
 		if (-d $source."/".$base{$arch}{boot}) {
 			if ($arch eq "x86_64") {
 				$catalog[0] = "x86_64_legacy";
 			}
 			if ($arch eq "ix86") {
 				$catalog[0] = "ix86_legacy";
-				last;
 			}
 		}
 	}
 	#=======================================
 	# 2) search for efi/ikr boot
 	#---------------------------------------
-	foreach my $arch (keys %base) {
+	foreach my $arch (sort keys %base) {
 		if (-d $source."/".$base{$arch}{efi}) {
 			if ($arch eq "x86_64") {
 				push (@catalog, "x86_64_efi");
@@ -322,10 +321,11 @@ sub createLegacySortFile {
 	my $src  = $this->{source};
 	my $sort = $this->{tmpfile};
 	my $ldir = $this->{tmpdir};
+	my $FD;
 	if (! -d $src."/".$base{$arch}{boot}) {
 		return undef;
 	}
-	if (! open FD, ">$sort") {
+	if (! open $FD, ">$sort") {
 		$kiwi -> error  ("Failed to open sort file: $!");
 		$kiwi -> failed ();
 		$this -> cleanISO();
@@ -340,14 +340,14 @@ sub createLegacySortFile {
 	my @list = ();
 	my $wref = generateWanted (\@list);
 	find ({wanted => $wref,follow => 0 },$src."/".$base{$arch}{boot}."/loader");
-	print FD "$ldir/boot/boot.catalog 3"."\n";
-	print FD "boot/boot.catalog 3"."\n";
-	print FD "$src/boot/boot.catalog 3"."\n";
+	print $FD "$ldir/boot/boot.catalog 3"."\n";
+	print $FD "boot/boot.catalog 3"."\n";
+	print $FD "$src/boot/boot.catalog 3"."\n";
 	foreach my $file (@list) {
-		print FD "$file 1"."\n";
+		print $FD "$file 1"."\n";
 	}
-	print FD "$src/boot/isolinux.bin 2"."\n";
-	close FD;
+	print $FD "$src/boot/isolinux.bin 2"."\n";
+	close $FD;
 	return $sort;
 }
 
@@ -387,6 +387,7 @@ sub createVolumeID {
 	my $kiwi = $this->{kiwi};
 	my $src  = $this->{source};
 	my $hfsvolid = "unknown";
+	my $FD;
 	if (-f $src."/content") {
 		my $number;
 		my $version;
@@ -397,8 +398,8 @@ sub createVolumeID {
 				$number = $1; last;
 			}
 		}
-		open (FD,"$src/content");
-		foreach my $line (<FD>) {
+		open ($FD,"$src/content");
+		foreach my $line (<$FD>) {
 			if (($version) && ($name)) {
 				last;
 			}
@@ -409,7 +410,7 @@ sub createVolumeID {
 				$version=$1;
 			}
 		}
-		close FD;
+		close $FD;
 		if ($name) {
 			$hfsvolid=$name;
 		}
@@ -421,8 +422,8 @@ sub createVolumeID {
 				$hfsvolid = substr ($hfsvolid,0,25);
 				$hfsvolid.= " $number";
 			}
-		} elsif (open (FD,$src."media.1/build")) {
-			my $line = <FD>; close FD;
+		} elsif (open ($FD,$src."media.1/build")) {
+			my $line = <$FD>; close $FD;
 			if ($line =~ /(\w+)-(\d+)-/) {
 				$hfsvolid = "$1 $2 $number";
 			}
@@ -530,38 +531,26 @@ sub relocateCatalog {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	my $iso  = $this -> {dest};	
-    $kiwi -> info ("Relocating boot catalog ");
-	sub read_sector {
-		my $buf;
-		if (! seek ISO, $_[0] * 0x800, 0) {
-			return undef;
-		}
-		if (sysread(ISO, $buf, 0x800) != 0x800) {
-			return undef;
-		}
-		return $buf;
-	}
-	sub write_sector {
-		if (! seek ISO, $_[0] * 0x800, 0) {
-			return undef;
-		}
-		if (syswrite(ISO, $_[1], 0x800) != 0x800) {
-			return undef;
-		}
-	}
-	if (! open ISO, "+<$iso") {
+	my $iso  = $this->{dest};
+	my $ISO;
+	$kiwi -> info ("Relocating boot catalog ");
+	if (! open $ISO, "+<$iso") {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Failed opening iso file: $iso: $!");
 		$kiwi -> failed ();
 		return undef;
 	}
-	my $vol_descr = read_sector 0x10;
+	my $rs = read_sector_closure  ($ISO);
+	my $ws = write_sector_closure ($ISO);
+	local *read_sector  = $rs;
+	local *write_sector = $ws;
+	my $vol_descr = read_sector (0x10);
 	my $vol_id = substr($vol_descr, 0, 7);
 	if ($vol_id ne "\x01CD001\x01") {
 		$kiwi -> failed ();
 		$kiwi -> error  ("No iso9660 filesystem");
 		$kiwi -> failed ();
+		close $ISO;
 		return undef;
 	}
 	my $path_table = unpack "V", substr($vol_descr, 0x08c, 4);
@@ -569,15 +558,17 @@ sub relocateCatalog {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Strange path table location: $path_table");
 		$kiwi -> failed ();
+		close $ISO;
 		return undef;
 	}
 	my $new_location = $path_table - 1;
-	my $eltorito_descr = read_sector 0x11;
+	my $eltorito_descr = read_sector (0x11);
 	my $eltorito_id = substr($eltorito_descr, 0, 0x1e);
 	if ($eltorito_id ne "\x00CD001\x01EL TORITO SPECIFICATION") {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Given iso is not bootable");
 		$kiwi -> failed ();
+		close $ISO;
 		return undef;
 	}
 	my $boot_catalog = unpack "V", substr($eltorito_descr, 0x47, 4);
@@ -585,14 +576,15 @@ sub relocateCatalog {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Strange boot catalog location: $boot_catalog");
 		$kiwi -> failed ();
+		close $ISO;
 		return undef;
 	}
-	my $vol_descr2 = read_sector $new_location - 1;
+	my $vol_descr2 = read_sector ($new_location - 1);
 	my $vol_id2 = substr($vol_descr2, 0, 7);
 	if($vol_id2 ne "\xffCD001\x01") {
 		undef $new_location;
 		for (my $i = 0x12; $i < 0x40; $i++) {
-			$vol_descr2 = read_sector $i;
+			$vol_descr2 = read_sector ($i);
 			$vol_id2 = substr($vol_descr2, 0, 7);
 			if ($vol_id2 eq "\x00TEA01\x01" || $boot_catalog == $i + 1) {
 				$new_location = $i + 1;
@@ -604,15 +596,17 @@ sub relocateCatalog {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Unexpected iso layout");
 		$kiwi -> failed ();
+		close $ISO;
 		return undef;
 	}
 	if ($boot_catalog == $new_location) {
 		$kiwi -> skipped ();
 		$kiwi -> info ("Boot catalog already relocated");
 		$kiwi -> done ();
+		close $ISO;
 		return $this;
 	}
-	my $version_descr = read_sector $new_location;
+	my $version_descr = read_sector ($new_location);
 	if (
 		($version_descr ne ("\x00" x 0x800)) &&
 		(substr($version_descr, 0, 4) ne "MKI ")
@@ -620,19 +614,115 @@ sub relocateCatalog {
 		$kiwi -> skipped ();
 		$kiwi -> info  ("Unexpected iso layout");
 		$kiwi -> skipped ();
+		close $ISO;
 		return $this;
 	}
-	my $boot_catalog_data = read_sector $boot_catalog;
+	my $boot_catalog_data = read_sector ($boot_catalog);
 	#==========================================
 	# now reloacte to $path_table - 1
 	#------------------------------------------
 	substr($eltorito_descr, 0x47, 4) = pack "V", $new_location;
-	write_sector $new_location, $boot_catalog_data;
-	write_sector 0x11, $eltorito_descr;
-	close ISO;
+	write_sector ($new_location, $boot_catalog_data);
+	write_sector (0x11, $eltorito_descr);
+	close $ISO;
 	$kiwi -> note ("from sector $boot_catalog to $new_location");
 	$kiwi -> done();
 	return $this;
+}
+
+#==========================================
+# fixCatalog
+#------------------------------------------
+sub fixCatalog {
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $iso  = $this->{dest};
+	my $ISO;
+	$kiwi -> info ("Fixing boot catalog according to standard");
+	if (! open $ISO, "+<$iso") {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Failed opening iso file: $iso: $!");
+		$kiwi -> failed ();
+		return undef;
+	}
+	my $rs = read_sector_closure  ($ISO);
+	my $ws = write_sector_closure ($ISO);
+	local *read_sector  = $rs;
+	local *write_sector = $ws;
+	my $vol_descr = read_sector (0x10);
+	my $vol_id = substr($vol_descr, 0, 7);
+	if ($vol_id ne "\x01CD001\x01") {
+		$kiwi -> failed ();
+		$kiwi -> error  ("No iso9660 filesystem");
+		$kiwi -> failed ();
+		close $ISO;
+		return undef;
+	}
+	my $eltorito_descr = read_sector (0x11);
+	my $eltorito_id = substr($eltorito_descr, 0, 0x1e);
+	if ($eltorito_id ne "\x00CD001\x01EL TORITO SPECIFICATION") {
+		$kiwi -> failed ();
+		$kiwi -> error  ("ISO Not bootable");
+		$kiwi -> failed ();
+		close $ISO;
+		return undef;
+	}
+	my $boot_catalog_idx = unpack "V", substr($eltorito_descr, 0x47, 4);
+	if ($boot_catalog_idx < 0x12) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Strange boot catalog location: $boot_catalog_idx");
+		$kiwi -> failed ();
+		close $ISO;
+		return undef;
+	}
+	my $boot_catalog = read_sector ($boot_catalog_idx);
+	my $entry1 = substr $boot_catalog, 32 * 1, 32;
+	substr($entry1, 12, 20) = pack "Ca19", 1, "Legacy (isolinux)";
+	substr($boot_catalog, 32 * 1, 32) = $entry1;
+	my $entry2 = substr $boot_catalog, 32 * 2, 32;
+	substr($entry2, 12, 20) = pack "Ca19", 1, "UEFI (elilo)";
+	if((unpack "C", $entry2)[0] == 0x88) {
+		substr($boot_catalog, 32 * 3, 32) = $entry2;
+		$entry2 = pack "CCva28", 0x91, 0xef, 1, "";
+		substr($boot_catalog, 32 * 2, 32) = $entry2;
+		write_sector ($boot_catalog_idx, $boot_catalog);
+		$kiwi -> done();
+	} else {
+		$kiwi -> skipped();
+	}
+	close $ISO;
+}
+
+#==========================================
+# read_sector_closure
+#------------------------------------------
+sub read_sector_closure {
+	my $ISO = shift;
+	return sub {
+		my $buf;
+		if (! seek $ISO, $_[0] * 0x800, 0) {
+			return undef;
+		}
+		if (sysread($ISO, $buf, 0x800) != 0x800) {
+			return undef;
+		}
+		return $buf;
+	}
+}
+
+#==========================================
+# write_sector_closure
+#------------------------------------------
+sub write_sector_closure {
+	my $ISO = shift;
+	return sub {
+		if (! seek $ISO, $_[0] * 0x800, 0) {
+			return undef;
+		}
+		if (syswrite($ISO, $_[1], 0x800) != 0x800) {
+			return undef;
+		}
+	}
 }
 
 1;

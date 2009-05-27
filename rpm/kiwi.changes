@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Wed May 27 15:52:39 CEST 2009 - ms@suse.de
+
+- v3.54
+- added fix catalog function to KIWIIsoLinux.pm (bnc #478991)
+- set inode count for system partition only, even if
+  it has been specified via --fs-maxinodes (bnc #495135)
+- fixed OEM recovery, set OEM_RECOVERY to the root device
+  not the recovery device (bnc #503653)
+
+-------------------------------------------------------------------
 Mon May 25 16:10:39 CEST 2009 - ms@suse.de
 
 - v3.53

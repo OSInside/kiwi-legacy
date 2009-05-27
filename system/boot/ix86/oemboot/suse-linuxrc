@@ -455,7 +455,7 @@ if [ "$LOCAL_BOOT" = "no" ];then
 		export OEM_BOOT_TITLE="OEM"
 	fi
 	if [ ! -z $OEM_RECOVERY ];then
-		OEM_RECOVERY=$imageRecoveryDevice
+		OEM_RECOVERY=$imageRootDevice
 	fi
 	setupBootLoader \
 		/mnt /config $bootid $imageRootDevice \

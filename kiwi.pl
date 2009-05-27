@@ -44,7 +44,7 @@ use KIWITest;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "3.53";
+our $Version       = "3.54";
 our $Publisher     = "SUSE LINUX Products GmbH";
 our $Preparer      = "KIWI - http://kiwi.berlios.de";
 our $openSUSE      = "http://download.opensuse.org";
@@ -2112,7 +2112,6 @@ sub checkFSOptions {
 		my $blocksize;   # block size in bytes
 		my $journalsize; # journal size in MB (ext) or blocks (reiser)
 		my $inodesize;   # inode size in bytes (ext only)
-		my $numinodes;   # maximum number of inodes (ext only)
 		my $fsfeature;   # filesystem features (ext only)
 		SWITCH: for ($fs) {
 			#==========================================
@@ -2122,7 +2121,6 @@ sub checkFSOptions {
 				if ($FSBlockSize)   {$blocksize   = "-b $FSBlockSize"}
 				if ($FSInodeSize)   {$inodesize   = "-I $FSInodeSize"}
 				if ($FSJournalSize) {$journalsize = "-J size=$FSJournalSize"}
- 				if ($FSNumInodes)   {$numinodes   = "-N $FSNumInodes"}
 				$fsfeature = "-O resize_inode";
 				last SWITCH;
 			};
@@ -2144,9 +2142,6 @@ sub checkFSOptions {
 		}
 		if (defined $journalsize) {
 			$result{$fs} .= $journalsize." ";
-		}
-		if (defined $numinodes) {
-			$result{$fs} .= $numinodes." ";
 		}
 		if (defined $fsfeature) {
 			$result{$fs} .= $fsfeature." ";
