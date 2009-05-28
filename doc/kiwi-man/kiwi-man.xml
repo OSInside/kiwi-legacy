@@ -41,6 +41,18 @@
     <cmdsynopsis>
       <command>kiwi</command>
       <group choice="req">
+        <arg choice="plain">-o</arg>
+        <arg choice="plain">--clone</arg>
+      </group>
+      <arg choice="plain"><replaceable>image-path</replaceable></arg>
+      <group choice="req">
+        <arg choice="plain">-d</arg>
+      </group>
+      <arg choice="plain"><replaceable>destination</replaceable></arg>
+    </cmdsynopsis>
+    <cmdsynopsis>
+      <command>kiwi</command>
+      <group choice="req">
         <arg choice="plain">-b</arg>
         <arg choice="plain">--build</arg>
       </group>
@@ -74,7 +86,10 @@
       combines both steps into one to make it easier to start with kiwi.
       The first step is the preparation step and if that step was successful,
       a creation step follows which is able to create different image output
-      types.
+      types. If you have started with an example and want to add you own
+      changes it might be a good idea to clone of from this example. This
+      can be done by simply copying the entire image description or you can
+      let kiwi do that for you by using the kiwi --clone command.
     </para>
     <para>
       In the preparation step,
