@@ -167,7 +167,7 @@ License:        GPL v2 or later
 Requires:       kiwi = %{version}
 Requires:       syslinux
 %if %{suse_version} > 1010
-Requires: cdrkit-cdrtools-compat
+Requires: genisoimage
 %else
 Requires: mkisofs
 %endif
@@ -259,7 +259,7 @@ License:        GPL v2 only
 Requires:       kiwi = %{version}
 Requires:       qemu multipath-tools
 %if %{suse_version} > 1010
-Requires: cdrkit-cdrtools-compat
+Requires: genisoimage
 %else
 Requires: mkisofs
 %endif

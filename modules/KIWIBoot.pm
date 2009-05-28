@@ -28,17 +28,12 @@ use strict;
 use Carp qw (cluck);
 use KIWI::dbusdevice;
 use KIWILog;
+use KIWIIsoLinux;
 use FileHandle;
 use File::Basename;
 use File::Spec;
 use Math::BigFloat;
 use KIWIQX;
-
-#==========================================
-# Exports
-#------------------------------------------
-our @ISA    = qw (Exporter);
-our @EXPORT = qw (relocateCatalog);
 
 #==========================================
 # Constructor
@@ -1310,7 +1305,7 @@ sub setupInstallCD {
 	my $ibasename;
 	my $tmpdir;
 	#==========================================
-	# check type parameters for mkisofs call
+	# check for volume id
 	#------------------------------------------
 	if (defined $xml) {
 		my %type = %{$xml->getImageTypeAndAttributes()};
@@ -1523,7 +1518,7 @@ sub setupInstallCD {
 	#==========================================
 	# Create an iso image from the tree
 	#------------------------------------------
-	$kiwi -> info ("Creating ISO image");
+	$kiwi -> info ("Creating ISO image...");
 	my $name = $system;
 	if ($gotsys) {
 		$name =~ s/raw$/iso/;
@@ -1532,21 +1527,25 @@ sub setupInstallCD {
 	}
 	my $base = "-R -b boot/grub/stage2 -no-emul-boot $volid";
 	my $opts = "-boot-load-size 4 -boot-info-table -udf -allow-limited-size";
+	my $wdir = qxx ("pwd"); chomp $wdir;
 	if ($name !~ /^\//) {
-		my $workingDir = qxx ( "pwd" ); chomp $workingDir;
-		$name = $workingDir."/".$name;
+		$name = $wdir."/".$name;
 	}
-	$status = qxx ("cd $tmpdir && mkisofs $base $opts -o $name . 2>&1");
+	my $iso = new KIWIIsoLinux ($kiwi,$tmpdir,$name);
+	my $tool= $iso -> getTool();
+	$status = qxx ("cd $tmpdir && $tool $base $opts -o $name . 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Failed creating ISO image: $status");
 		$kiwi -> failed ();
 		$this -> cleanTmp ();
+		$iso  -> cleanISO ();
 		return undef;
 	}
 	$kiwi -> done ();
-	if (! $this -> relocateCatalog ($name)) {
+	if (! $iso -> relocateCatalog ($name)) {
+		$iso  -> cleanISO ();
 		return undef;
 	}
 	#==========================================
@@ -1556,6 +1555,7 @@ sub setupInstallCD {
 	$kiwi -> info ("Created $name to be burned on CD");
 	$kiwi -> done ();
 	$this -> cleanTmp ();
+	$iso  -> cleanISO ();
 	return $this;
 }
 
@@ -3134,124 +3134,6 @@ sub writeMBRDiskLabel {
 		return undef;
 	}
 	seek FD,0,2; close FD;
-	return $this;
-}
-
-#==========================================
-# relocateCatalog
-#------------------------------------------
-sub relocateCatalog {
-	# ...
-	# mkisofs/genisoimage leave one sector empty (or fill it with
-	# version info if the ISODEBUG environment variable is set) before
-	# starting the path table. We use this space to move the boot
-	# catalog there. It's important that the boot catalog is at the
-	# beginning of the media to be able to boot on any machine
-	# ---
-	my $this = shift;
-	my $iso  = shift;
-	my $kiwi = $this->{kiwi};
-	$kiwi -> info ("Relocating boot catalog ");
-	sub read_sector {
-		my $buf;
-		if (! seek ISO, $_[0] * 0x800, 0) {
-			return undef;
-		}
-		if (sysread(ISO, $buf, 0x800) != 0x800) {
-			return undef;
-		}
-		return $buf;
-	}
-	sub write_sector {
-		if (! seek ISO, $_[0] * 0x800, 0) {
-			return undef;
-		}
-		if (syswrite(ISO, $_[1], 0x800) != 0x800) {
-			return undef;
-		}
-	}
-	if (! open ISO, "+<$iso") {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Failed opening iso file: $iso: $!");
-		$kiwi -> failed ();
-		return undef;
-	}
-	my $vol_descr = read_sector 0x10;
-	my $vol_id = substr($vol_descr, 0, 7);
-	if ($vol_id ne "\x01CD001\x01") {
-		$kiwi -> failed ();
-		$kiwi -> error  ("No iso9660 filesystem");
-		$kiwi -> failed ();
-		return undef;
-	}
-	my $path_table = unpack "V", substr($vol_descr, 0x08c, 4);
-	if ($path_table < 0x11) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Strange path table location: $path_table");
-		$kiwi -> failed ();
-		return undef;
-	}
-	my $new_location = $path_table - 1;
-	my $eltorito_descr = read_sector 0x11;
-	my $eltorito_id = substr($eltorito_descr, 0, 0x1e);
-	if ($eltorito_id ne "\x00CD001\x01EL TORITO SPECIFICATION") {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Given iso is not bootable");
-		$kiwi -> failed ();
-		return undef;
-	}
-	my $boot_catalog = unpack "V", substr($eltorito_descr, 0x47, 4);
-	if ($boot_catalog < 0x12) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Strange boot catalog location: $boot_catalog");
-		$kiwi -> failed ();
-		return undef;
-	}
-	my $vol_descr2 = read_sector $new_location - 1;
-	my $vol_id2 = substr($vol_descr2, 0, 7);
-	if($vol_id2 ne "\xffCD001\x01") {
-		undef $new_location;
-		for (my $i = 0x12; $i < 0x40; $i++) {
-			$vol_descr2 = read_sector $i;
-			$vol_id2 = substr($vol_descr2, 0, 7);
-			if ($vol_id2 eq "\x00TEA01\x01" || $boot_catalog == $i + 1) {
-				$new_location = $i + 1;
-				last;
-			}
-		}
-	}
-	if (! defined $new_location) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Unexpected iso layout");
-		$kiwi -> failed ();
-		return undef;
-	}
-	if ($boot_catalog == $new_location) {
-		$kiwi -> skipped ();
-		$kiwi -> info ("Boot catalog already relocated");
-		$kiwi -> done ();
-		return $this;
-	}
-	my $version_descr = read_sector $new_location;
-	if (
-		($version_descr ne ("\x00" x 0x800)) &&
-		(substr($version_descr, 0, 4) ne "MKI ")
-	) {
-		$kiwi -> skipped ();
-		$kiwi -> info  ("Unexpected iso layout");
-		$kiwi -> skipped ();
-		return $this;
-	}
-	my $boot_catalog_data = read_sector $boot_catalog;
-	#==========================================
-	# now reloacte to $path_table - 1
-	#------------------------------------------
-	substr($eltorito_descr, 0x47, 4) = pack "V", $new_location;
-	write_sector $new_location, $boot_catalog_data;
-	write_sector 0x11, $eltorito_descr;
-	close ISO;
-	$kiwi -> note ("from sector $boot_catalog to $new_location");
-	$kiwi -> done();
 	return $this;
 }
 

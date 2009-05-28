@@ -2039,7 +2039,7 @@ sub createImageLiveCD {
 	#==========================================
 	# create ISO image
 	#------------------------------------------
-	$kiwi -> info ("Calling mkisofs...\n");
+	$kiwi -> info ("Creating ISO image...\n");
 	my $isoerror = 1;
 	my $name = $imageDest."/".$namerw.".iso";
 	my $attr = "-R -J -pad -joliet-long";
@@ -2072,7 +2072,7 @@ sub createImageLiveCD {
 	#==========================================
 	# relocate boot catalog
 	#------------------------------------------
-	if (! relocateCatalog ($this,$name)) {
+	if (! $isolinux -> relocateCatalog ($name)) {
 		if (! -d $main::RootTree.$baseSystem) {
 			qxx ("rm -rf $main::RootTree");
 			qxx ("rm -rf $tmpdir");

@@ -9,7 +9,7 @@
 # BELONGS TO    : Operating System images
 #               :
 # DESCRIPTION   : This module is used to create an ISO
-#               : filesystem based on mkisofs
+#               : filesystem based on genisoimage/mkisofs
 #               : 
 #               :
 # STATUS        : Development
@@ -21,6 +21,7 @@ package KIWIIsoLinux;
 use strict;
 use Carp qw (cluck);
 use File::Find;
+use File::Basename;
 use KIWILog;
 use KIWIQX;
 
@@ -30,7 +31,7 @@ use KIWIQX;
 sub new {
 	# ...
 	# Create a new KIWIIsoLinux object which is used to wrap
-	# around the major mkisofs call. This code requires a
+	# around the major genisoimage/mkisofs call. This code requires a
 	# specific source directory structure which is:
 	# ---
 	# $source/boot/<arch>/loader
@@ -49,10 +50,10 @@ sub new {
 	#==========================================
 	# Module Parameters
 	#------------------------------------------
-	my $kiwi         = shift;
+	my $kiwi         = shift;  # log object
 	my $source       = shift;  # location of source tree
 	my $dest         = shift;  # destination for the iso file
-	my $params       = shift;  # global mkisofs parameters
+	my $params       = shift;  # global genisoimage/mkisofs parameters
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
@@ -61,6 +62,7 @@ sub new {
 	my $code;
 	my $sort;
 	my $ldir;
+	my $tool;
 	#==========================================
 	# create log object if not done
 	#------------------------------------------
@@ -74,6 +76,18 @@ sub new {
 	}
 	if (! defined $dest) {
 		$kiwi -> error  ("No destination file specified");
+		$kiwi -> failed ();
+		return undef;
+	}
+	#==========================================
+	# Find iso tool to use on this system
+	#------------------------------------------
+	if (-x "/usr/bin/genisoimage") {
+		$tool = "/usr/bin/genisoimage";
+	} elsif (-x "/usr/bin/mkisofs") {
+		$tool = "/usr/bin/mkisofs";
+	} else {
+		$kiwi -> error  ("No ISO creation tool found");
 		$kiwi -> failed ();
 		return undef;
 	}
@@ -135,11 +149,6 @@ sub new {
 			}
 		}
 	}
-	if (! @catalog) {
-		$kiwi -> error  ("Can't find valid $source/boot/<arch>/ layout");
-		$kiwi -> failed ();
-		return undef;
-	}
 	#==========================================
 	# create tmp files/directories 
 	#------------------------------------------
@@ -171,6 +180,7 @@ sub new {
 	$this -> {tmpfile}= $sort;
 	$this -> {tmpdir} = $ldir;
 	$this -> {catalog}= \@catalog;
+	$this -> {tool}   = $tool;
 	return $this;
 }
 
@@ -295,9 +305,15 @@ sub s390x_ikr {
 #------------------------------------------
 sub callBootMethods {
 	my $this    = shift;
+	my $kiwi    = $this->{kiwi};
 	my @catalog = @{$this->{catalog}};
 	my %base    = %{$this->{base}};
 	my $ldir    = $this->{tmpdir};
+	if (! @catalog) {
+		$kiwi -> error  ("Can't find valid boot/<arch>/ layout");
+		$kiwi -> failed ();
+		return undef;
+	}
 	foreach my $boot (@catalog) {
 		if ($boot =~ /(.*)_.*/) {
 			my $arch = $1;
@@ -470,13 +486,13 @@ sub createISO {
 	my $dest = $this -> {dest};
 	my $para = $this -> {params};
 	my $ldir = $this -> {tmpdir};
-	my $prog = "/usr/bin/mkisofs";
+	my $prog = $this -> {tool};
 	my $data = qxx (
 		"$prog $para -o $dest $ldir $src 2>&1"
 	);
 	my $code = $? >> 8;
 	if ($code != 0) {
-		$kiwi -> error  ("Failed to call mkisofs binary: $data");
+		$kiwi -> error  ("Failed to call $prog: $data");
 		$kiwi -> failed ();
 		$this -> cleanISO();
 		return undef;
@@ -723,6 +739,18 @@ sub write_sector_closure {
 			return undef;
 		}
 	}
+}
+
+#==========================================
+# getTool
+#------------------------------------------
+sub getTool {
+	# ...
+	# return ISO toolkit name used on this system
+	# ---
+	my $this = shift;
+	my $tool = $this->{tool};
+	return basename $tool;
 }
 
 1;
