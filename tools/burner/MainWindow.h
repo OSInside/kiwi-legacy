@@ -42,7 +42,7 @@
 #endif
 
 #include "DeviceItem.h"
-#define VERSION "SUSE Studio Image Writer 1.1"
+#define VERSION "SUSE Studio Image Writer 1.3"
 
 class MainWindow : public QWidget
 {

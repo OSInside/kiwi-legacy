@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri May 29 16:50:20 CEST 2009 - mbarringer@suse.de
+
+- Giving more imagewriter feedback when a file cannot be opened. 
+
+-------------------------------------------------------------------
 Tue Apr  7 11:31:54 CEST 2009 - adrian@suse.de
 
 - Fix path creation on openSUSE 11.1 and later systems.
