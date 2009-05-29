@@ -44,7 +44,7 @@ use KIWITest;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "3.41";
+our $Version       = "3.54";
 our $Publisher     = "SUSE LINUX Products GmbH";
 our $Preparer      = "KIWI - http://kiwi.berlios.de";
 our $openSUSE      = "http://download.opensuse.org";
@@ -110,6 +110,8 @@ $KnownFS{ext3}{tool}      = "/sbin/mkfs.ext3";
 $KnownFS{ext2}{tool}      = "/sbin/mkfs.ext2";
 $KnownFS{squashfs}{tool}  = "/usr/bin/mksquashfs";
 $KnownFS{dmsquash}{tool}  = "/usr/bin/mksquashfs";
+$KnownFS{clicfs}{tool}    = "/usr/bin/mkclicfs";
+$KnownFS{clic}{tool}      = "/usr/bin/mkclicfs";
 $KnownFS{unified}{tool}   = "/usr/bin/mksquashfs";
 $KnownFS{compressed}{tool}= "/usr/bin/mksquashfs";
 $KnownFS{reiserfs}{tool}  = "/sbin/mkreiserfs";
@@ -118,6 +120,8 @@ $KnownFS{ext3}{ro}        = 0;
 $KnownFS{ext2}{ro}        = 0;
 $KnownFS{squashfs}{ro}    = 1;
 $KnownFS{dmsquash}{ro}    = 1;
+$KnownFS{clicfs}{ro}      = 1;
+$KnownFS{clic}{ro}        = 1;
 $KnownFS{unified}{ro}     = 1;
 $KnownFS{compressed}{ro}  = 1;
 $KnownFS{reiserfs}{ro}    = 0;
@@ -192,6 +196,7 @@ our $FSNumInodes;           # filesystem max inodes
 our $Verbosity = 0;         # control the verbosity level
 our $TargetArch;            # target architecture -> writes zypp.conf
 our $CheckKernel;           # check for kernel matches in boot and system image
+our $Clone;                 # clone existing image description
 our $LVM;                   # use LVM partition setup for virtual disk
 our $Debug;                 # activates the internal stack trace output
 our $kiwi;                  # global logging handler object
@@ -795,6 +800,10 @@ sub main {
 				$ok = $image -> createImageDMSquashExt3 ();
 				last SWITCH;
 			};
+			/^clicfs/   && do {
+				$ok = $image -> createImageClicFS ();
+				last SWITCH;
+			};
 			/^cpio/     && do {
 				$ok = $image -> createImageCPIO ();
 				last SWITCH;
@@ -1316,6 +1325,7 @@ sub init {
 		"partitioner=s"         => \$Partitioner,
 		"target-arch=s"         => \$TargetArch,
 		"check-kernel"          => \$CheckKernel,
+		"clone|o=s"             => \$Clone,
 		"lvm"                   => \$LVM,
 		"debug"                 => \$Debug,
 		"help|h"                => \&usage,
@@ -1338,6 +1348,12 @@ sub init {
 	#------------------------------------------
 	if (defined $ListProfiles) {
 		listProfiles();
+	}
+	#==========================================
+	# non root task: Clone image 
+	#------------------------------------------
+	if (defined $Clone) {
+		cloneImage();
 	}
 	#==========================================
 	# Check for root privileges
@@ -1369,6 +1385,7 @@ sub init {
 		(! defined $CreatePassword)     &&
 		(! defined $BootCD)             &&
 		(! defined $BootUSB)            &&
+		(! defined $Clone)              &&
 		(! defined $RunTestSuite)
 	) {
 		$kiwi -> error ("No operation specified");
@@ -1478,6 +1495,8 @@ sub usage {
 
 	print "Usage:\n";
 	print "    kiwi -l | --list\n";
+	print "Image Cloning:\n";
+	print "    kiwi -o | --clone <image-path> -d <destination>\n";
 	print "Image Creation in one step:\n";
 	print "    kiwi -b | --build <image-path> -d <destination>\n";
 	print "Image Preparation/Creation in two steps:\n";
@@ -1794,6 +1813,94 @@ sub listXMLInfo {
 }
 
 #==========================================
+# cloneImage
+#------------------------------------------
+sub cloneImage {
+	# ...
+	# clone an existing image description by copying
+	# the tree to the given destination the possibly
+	# existing checksum will be removed as we assume
+	# that the clone will be changed
+	# ----
+	my $answer = "unknown";
+	#==========================================
+	# Check destination definition
+	#------------------------------------------
+	my $kiwi = new KIWILog("tiny");
+	if (! defined $Destination) {
+		$kiwi -> error  ("No destination directory specified");
+		$kiwi -> failed ();
+		kiwiExit (1);
+	} else {
+		$kiwi -> info ("Cloning image $Clone -> $Destination...");
+	}
+	#==========================================
+	# Evaluate image path or name 
+	#------------------------------------------
+	if (($Clone !~ /\//) && (! -d $Clone)) {
+		$Clone = $main::System."/".$Clone;
+	}
+	my $cfg = $Clone."/".$main::ConfigName;
+	my $md5 = $Destination."/.checksum.md5";
+	if (! -f $cfg) {
+		my @globsearch = glob ($Clone."/*.kiwi");
+		my $globitems  = @globsearch;
+		if ($globitems == 0) {
+			$kiwi -> failed ();
+			$kiwi -> error ("Cannot find control file: $cfg");
+			$kiwi -> failed ();
+			kiwiExit (1);
+		} elsif ($globitems > 1) {
+			$kiwi -> failed ();
+			$kiwi -> error ("Found multiple *.kiwi control files");
+			$kiwi -> failed ();
+			kiwiExit (1);
+		} else {
+			$cfg = pop @globsearch;
+		}
+	}
+	#==========================================
+	# Check if destdir exists or not 
+	#------------------------------------------
+	if (! -d $Destination) {
+		my $prefix = $kiwi -> getPrefix (1);
+		$kiwi -> note ("\n");
+		$kiwi -> info ("Destination: $Destination doesn't exist\n");
+		while ($answer !~ /^yes$|^no$/) {
+			print STDERR $prefix,
+				"Would you like kiwi to create it [yes/no] ? ";
+			chomp ($answer = <>);
+		}
+		if ($answer eq "yes") {
+			qxx ("mkdir -p $Destination");
+		} else {
+			kiwiExit (1);
+		}
+	}
+	#==========================================
+	# Copy path to destination 
+	#------------------------------------------
+	my $data = qxx ("cp -a $Clone $Destination 2>&1");
+	my $code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error ("Failed to copy $Clone: $data");
+		$kiwi -> failed ();
+		kiwiExit (1);
+	}
+	#==========================================
+	# Remove checksum 
+	#------------------------------------------
+	if (-f $md5) {
+		qxx ("rm -f $md5 2>&1");
+	}
+	if ($answer ne "yes") {
+		$kiwi -> done();
+	}
+	kiwiExit (0);
+}
+
+#==========================================
 # exit
 #------------------------------------------
 sub kiwiExit {
@@ -2104,7 +2211,7 @@ sub checkFSOptions {
 		my $blocksize;   # block size in bytes
 		my $journalsize; # journal size in MB (ext) or blocks (reiser)
 		my $inodesize;   # inode size in bytes (ext only)
-		my $numinodes;   # maximum number of inodes (ext only)
+		my $fsfeature;   # filesystem features (ext only)
 		SWITCH: for ($fs) {
 			#==========================================
 			# EXT2 and EXT3
@@ -2113,7 +2220,7 @@ sub checkFSOptions {
 				if ($FSBlockSize)   {$blocksize   = "-b $FSBlockSize"}
 				if ($FSInodeSize)   {$inodesize   = "-I $FSInodeSize"}
 				if ($FSJournalSize) {$journalsize = "-J size=$FSJournalSize"}
- 				if ($FSNumInodes)   {$numinodes   = "-N $FSNumInodes"}
+				$fsfeature = "-O resize_inode";
 				last SWITCH;
 			};
 			#==========================================
@@ -2135,8 +2242,8 @@ sub checkFSOptions {
 		if (defined $journalsize) {
 			$result{$fs} .= $journalsize." ";
 		}
-		if (defined $numinodes) {
-			$result{$fs} .= $numinodes." ";
+		if (defined $fsfeature) {
+			$result{$fs} .= $fsfeature." ";
 		}
 	}
 	return %result;

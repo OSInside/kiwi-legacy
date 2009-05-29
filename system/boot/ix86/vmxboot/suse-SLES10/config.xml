@@ -83,7 +83,6 @@
 		<package name="fribidi"/>
 		<package name="make"/>
 		<package name="bootsplash"/>
-		<package name="bootsplash-theme-SuSE-SLES"/>
 		<package name="tar"/>
 		<package name="lvm2"/>
 	</packages>
@@ -142,6 +141,5 @@
 		<package name="gfxboot"/>
 		<package name="fribidi"/>
 		<package name="make"/>
-		<package name="bootsplash-theme-SuSE-SLES"/>
 	</packages>
 </image>

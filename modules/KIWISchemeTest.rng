@@ -19,7 +19,7 @@
   STATUS        : Development
   ****************
 -->
-<grammar xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" xmlns="http://relaxng.org/ns/structure/1.0">
+<grammar xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://relaxng.org/ns/structure/1.0">
   <!--
     ==========================================
     Start with test_case

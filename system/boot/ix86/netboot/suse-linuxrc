@@ -466,6 +466,7 @@ then
 			# /.../
 			# now load the image into the imageDevice
 			# ---
+			multicast_old=$multicast
 			multicast="enable"
 			if test "$imageZipped" = "compressed"; then
 				Echo "Compressed image found: Disable multicast download"
@@ -473,6 +474,7 @@ then
 			fi
 			Echo "Loading $imageName [$imageDevice BS:$imageBlkSize Byte]..."
 			fetchFile $imageName $imageDevice $imageZipped $imageServer
+			multicast=$multicast_old
 			if test $loadCode != 0 || ! loadOK "$loadStatus";then
 				systemException \
 					"Download of $imageName failed: $loadStatus" \
@@ -552,7 +554,8 @@ else
 		imageRootDevice=$imageDevice
 		imageRootName="Local-System"
 		if [ ! -z "$UNIONFS_CONFIG" ];then
-			setupUnionFS $imageDisk"3" $imageDisk"2" aufs
+			unionFST=`echo $UNIONFS_CONFIG | cut -d , -f 3`
+			setupUnionFS $imageDisk"3" $imageDisk"2" $unionFST
 		fi
 		if [ ! -z "$COMBINED_IMAGE" ];then
 			imageNextRootDevice=$imageDisk"3"
@@ -647,7 +650,7 @@ else
 		Echo "Filesystem of remote root system is: $FSTYPE"
 		if [ -z "$COMBINED_IMAGE" ];then
 			if isFSTypeReadOnly;then
-				setupUnionFS /dev/ram1 "$imageRootDevice" aufs
+				setupUnionFS /dev/ram1 "$imageRootDevice" $unionFST
 			fi
 		fi
 		imageRootName="NBDRoot-System"
@@ -680,7 +683,7 @@ else
 		Echo "Filesystem of remote root system is: $FSTYPE"
 		if [ -z "$COMBINED_IMAGE" ];then
 			if isFSTypeReadOnly;then
-				setupUnionFS /dev/ram1 "$imageRootDevice" aufs
+				setupUnionFS /dev/ram1 "$imageRootDevice" $unionFST
 			fi
 		fi
 		imageRootName="AOERoot-System"

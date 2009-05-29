@@ -79,6 +79,7 @@
 		<package name="xen"/>
 	</packages>
 	<packages type="image">
+		<package name="clicfs"/>
 		<package name="psmisc"/>
 		<package name="e2fsprogs"/>
 		<package name="file"/>
@@ -89,14 +90,11 @@
 		<package name="sysfsutils"/>
 		<package name="util-linux"/>
 		<package name="squashfs"/>
-		<package name="gfxboot"/>
-		<package name="gfxboot-devel"/>
 		<package name="fribidi"/>
 		<package name="make"/>
 		<package name="grub"/>
 		<package name="hwinfo"/>
 		<package name="bootsplash"/>
-		<package name="bootsplash-branding-openSUSE"/>
 		<package name="tar"/>
 		<package name="lvm2"/>
 	</packages>
@@ -153,10 +151,7 @@
 		<package name="pm-utils"/>
 		<package name="pmtools"/>
 		<package name="suse-build-key"/>
-		<package name="gfxboot"/>
-		<package name="gfxboot-devel"/>
 		<package name="fribidi"/>
 		<package name="make"/>
-		<package name="bootsplash-branding-openSUSE"/>
 	</packages>
 </image>

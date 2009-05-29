@@ -36,7 +36,7 @@ export systemIntegrity="clean"
 # Exports (Configuration)
 #--------------------------------------
 export VMX_SYSTEM="/config.vmxsystem"
-export LIVECD_CONFIG=$VMX_SYSTEM
+export LIVECD_CONFIG="/cdrom/config.isoclient"
 export OEM_PARTITION_CONFIG="/config.oempartition"
 
 #======================================
@@ -105,20 +105,44 @@ openKernelConsole
 probeDevices
 
 #======================================
-# 7) Check for installation mode...
+# 7) Import OEM partition config
 #--------------------------------------
-if [ "$LOCAL_BOOT" = "no" ];then
-	OEMInstall
+if [ "$LOCAL_BOOT" = "no" ] && [ -f $OEM_PARTITION_CONFIG ];then
+	Echo "Including oem partition info file"
+	importFile < $OEM_PARTITION_CONFIG
 fi
 
 #======================================
 # 8) Search boot device...
 #--------------------------------------
 Echo "Searching for boot device..."
-export imageDiskDevice=`searchBIOSBootDevice`
+if [ "$LOCAL_BOOT" = "no" ];then
+	export imageDiskDevice=`searchBIOSBootDevice`
+else
+	export imageDiskDevice=`getDiskDevice $root | tr -d [0-9]+`
+fi
+Echo "Found boot device: $imageDiskDevice"
 
 #======================================
-# 9) Get filesystem type and boot ID
+# 9) Check for installation mode...
+#--------------------------------------
+if [ "$LOCAL_BOOT" = "no" ];then
+	OEMInstall
+fi
+
+#======================================
+# 10) Run SAP checks if activated
+#--------------------------------------
+if [ ! -z "$OEM_SAP_INSTALL" ];then
+	IFS=$IFS_ORIG
+	SAPMemCheck
+	SAPCPUCheck
+	SAPStorageCheck $imageDiskDevice $imageDiskExclude
+	SAPDataStorageSetup $imageDiskDevice $imageDiskExclude
+fi
+
+#======================================
+# 11) Get filesystem type and boot ID
 #--------------------------------------
 export imageBootID=1
 probeFileSystem $imageDiskDevice$imageBootID
@@ -133,13 +157,13 @@ if [ $FSTYPE = "unknown" ];then
 fi
 
 #======================================
-# 10) Setup device names...
+# 12) Setup device names...
 #--------------------------------------
 export imageRootDevice=$imageDiskDevice$imageBootID
 export imageRWDevice=$imageDiskDevice"2"
 export imageRODevice=$imageDiskDevice"1"
 export imageIOWRDevice=$imageDiskDevice"2"
-if [ ! -z "$RECOVERY" ];then
+if [ ! -z "$KIWI_RECOVERY" ];then
 	export imageRecoveryDevice=$imageDiskDevice"4"
 	export imageRootDevice=$imageDiskDevice"2"
 fi
@@ -160,37 +184,19 @@ if searchVolumeGroup; then
 	export imageRODevice=/dev/kiwiVG/LVComp
 	export imageIOWRDevice=/dev/kiwiVG/LVRoot
 	export imageBootDevice=$imageDiskDevice"2"
-	if [ ! -z "$RECOVERY" ];then
+	if [ ! -z "$KIWI_RECOVERY" ];then
 		export imageRecoveryDevice=/dev/kiwiVG/LVRecovery
 	fi
+	probeFileSystem $imageRootDevice
 fi
 
 #======================================
-# 11) Check filesystem
+# 13) Check filesystem
 #--------------------------------------
 Echo "Filesystem of OEM system is: $FSTYPE -> $imageRootDevice"
 if isFSTypeReadOnly;then
-	setupUnionFS $imageRWDevice $imageRODevice aufs
+	setupUnionFS $imageRWDevice $imageRODevice $unionFST
 	bootid=1
-fi
-
-#======================================
-# 12) Import OEM partition config
-#--------------------------------------
-if [ "$LOCAL_BOOT" = "no" ] && [ -f $OEM_PARTITION_CONFIG ];then
-	Echo "Including oem partition info file"
-	importFile < $OEM_PARTITION_CONFIG
-fi
-
-#======================================
-# 13) Run SAP checks if activated
-#--------------------------------------
-if [ ! -z "$OEM_SAP_INSTALL" ];then
-	IFS=$IFS_ORIG
-	SAPMemCheck
-	SAPCPUCheck
-	SAPStorageCheck $imageDiskDevice
-	SAPDataStorageSetup $imageDiskDevice
 fi
 
 #======================================
@@ -221,7 +227,6 @@ if [ "$LOCAL_BOOT" = "no" ];then
 	if [ ! -z "$deviceResize" ] && partitionSize $deviceResize &>/dev/null;then
 		if [ ! -z "$OEM_RECOVERY" ];then
 			KIWI_INITRD_PARAMS="$KIWI_INITRD_PARAMS LOCAL_BOOT=yes"
-			KIWI_INITRD_PARAMS="$KIWI_INITRD_PARAMS RECOVERY=yes"
 			export KIWI_INITRD_PARAMS
 		fi
 		if [ -z "$DONT_PARTITION" ];then
@@ -266,8 +271,8 @@ validateRootTree
 # 17) Recover system if requested
 #--------------------------------------
 if [ ! -z "$KIWI_RECOVERY" ];then
-	Echo -n "Do you want to start the System-Recovery ? [y/n]: "; read runReco
-	if [ ! $runReco = "y" ];then
+	dialog --yesno "Do you want to start the System-Recovery ?" 5 50
+	if [ ! $? = 0 ];then
 		systemException "System-Recovery not started" "reboot"
 	fi
 	Echo "Starting System-Recovery..."
@@ -284,7 +289,7 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 	Echo "Restoring base operating system..."
 	cd /mnt
 	rFiles=$(cat /reco-save/recovery.tar.files)
-	tar -xvf /reco-save/recovery.tar.gz >/tmp/rFiles &
+	tar --numeric-owner -xvpf /reco-save/recovery.tar.gz >/tmp/rFiles &
 	rPID=$!
 	while kill -0 $rPID &>/dev/null;do
 		rReady=$(cat /tmp/rFiles | wc -l)
@@ -426,7 +431,9 @@ if [ "$LOCAL_BOOT" = "no" ];then
 		if [ `ls /mnt/home/ | wc -l` != 0 ]; then
 			Echo "Found non empty home/ directory !"
 			Echo "Moving home/ data to home partition $imageHomeDevice"
-			mount $imageHomeDevice /mnt/mnt && mv /mnt/home/* /mnt/mnt
+			mount $imageHomeDevice /mnt/mnt
+			mv /mnt/home/*  /mnt/mnt
+			mv /mnt/home/.* /mnt/mnt
 			umount /mnt/mnt
 		fi
 		Echo "Activate home partition $imageHomeDevice in fstab"
@@ -434,6 +441,7 @@ if [ "$LOCAL_BOOT" = "no" ];then
 	fi
 	if [ ! -z "$OEM_SAP_INSTALL" ];then
 		SAP_DATA=/dev/data_vg/sapdata
+		vgchange -a y data_vg
 		if partitionSize $SAP_DATA &>/dev/null;then
 			mkdir -p /mnt/sapdata
 			echo "$SAP_DATA /sapdata ext3 defaults 0 0" >> /config/etc/fstab
@@ -447,7 +455,7 @@ if [ "$LOCAL_BOOT" = "no" ];then
 		export OEM_BOOT_TITLE="OEM"
 	fi
 	if [ ! -z $OEM_RECOVERY ];then
-		OEM_RECOVERY=$imageRecoveryDevice
+		OEM_RECOVERY=$imageRootDevice
 	fi
 	setupBootLoader \
 		/mnt /config $bootid $imageRootDevice \

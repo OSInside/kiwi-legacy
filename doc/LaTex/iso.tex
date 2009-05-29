@@ -70,24 +70,21 @@ alternative solutions:
 \begin{itemize}
 \item \textbf{flags=''unified''}\\
       Compressed and unified root tree as explained above
-\item \textbf{flags=''unified-cromfs''}\\
-      Same as unified but uses the cromfs filesystem instead of the
-      squashfs filesystem. cromfs provides better compression but takes
-      longer to become created
 \item \textbf{flags=''compressed''}\\
       Does filesystem compression with squashfs but don't use an
       overlay filesystem for write support. A symbolic link list is used
       instead and thus a split element is required in config.xml.
       See the Split mode section below for details.
-\item \textbf{flags=''compressed-cromfs''}\\
-      Same as compressed but uses the cromfs filesystem instead of
-      the squashfs filesystem.
 \item \textbf{flags=''dmsquash''}\\
       Creates an ext3 image file and puts that
       into a squashfs filesystem. On boot the root tree is mounted
       via a device mapper snapshot device to allow full write
       access over the complete tree. No other overlay filesystem
       is required.
+\item \textbf{flags=''clic''}\\
+      Creates a fuse based clicfs image and allows write operations
+      into a cow file. In case of an ISO the write happens into a
+      ramdisk.
 \item \textbf{flags not set}\\
       If no flags attribute is set no compressed filesystem and no overlay
       filesystem will be used. The root tree will be directly part of
@@ -103,8 +100,8 @@ should be writable in a so called split section. In order to allow to
 login into the system at least the /var directory should be writable
 because the PAM authentification requires to be able to report any login
 attempt to /var/log/messages which therefore needs to be writable. The
-following split section can be used if the flags compressed or
-compressed-cromfs are used:  
+following split section can be used if the flag compressed
+is used:  
 
 \begin{Command}{12cm}
 \begin{verbatim}

@@ -115,7 +115,11 @@ probeDevices
 # 7) Setup device names...
 #--------------------------------------
 Echo "Searching for boot device..."
-export imageDiskDevice=`searchBIOSBootDevice`
+if [ "$LOCAL_BOOT" = "no" ];then
+	export imageDiskDevice=`searchBIOSBootDevice`
+else
+	export imageDiskDevice=`getDiskDevice $root | tr -d [0-9]+`
+fi
 export imageRootDevice=$imageDiskDevice"1"
 export imageRWDevice=$imageDiskDevice"2"
 export imageRODevice=$imageDiskDevice"1"
@@ -141,7 +145,7 @@ fi
 # 8) Get filesystem type
 #--------------------------------------
 probeFileSystem $imageRootDevice
-if [ $FSTYPE = "unknown" ];then
+if [ "$FSTYPE" = "unknown" ];then
 	systemException \
 		"Couldn't determine filesystem type... abort" \
 	"reboot"
@@ -152,7 +156,7 @@ fi
 #--------------------------------------
 Echo "Filesystem of VMX system is: $FSTYPE -> $imageRootDevice"
 if isFSTypeReadOnly;then
-	setupUnionFS $imageRWDevice $imageRODevice aufs
+	setupUnionFS $imageRWDevice $imageRODevice $unionFST
 fi
 
 #======================================
@@ -166,14 +170,14 @@ validateRootTree
 #======================================
 # 11) Get kernel list for local boot
 #--------------------------------------
-if [ $LOCAL_BOOT = "no" ];then
+if [ "$LOCAL_BOOT" = "no" ];then
 	kernelList /mnt
 fi
 
 #======================================
 # 12) setup /lvmboot or /syslboot
 #--------------------------------------
-if [ $LOCAL_BOOT = "no" ];then
+if [ "$LOCAL_BOOT" = "no" ];then
 	if [ "$haveLVM" = "yes" ];then
 		#======================================
 		# LVM use second partition as boot

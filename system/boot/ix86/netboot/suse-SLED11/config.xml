@@ -169,13 +169,10 @@
 		<package name="diffutils"/>
 		<package name="procps"/>
 		<package name="lvm2"/>
-		<package name="gfxboot"/>
-		<package name="gfxboot-devel"/>
 		<package name="fribidi"/>
 		<package name="make"/>
 		<package name="nfs-client"/>
 		<package name="bootsplash"/>
-		<package name="bootsplash-branding-SLED"/>
 		<package name="tar"/>
 		<!-- PACKAGES END DEFAULT AND XEN -->
 	</packages>
@@ -195,10 +192,7 @@
 		<package name="fribidi"/>
 		<package name="nfs-client"/>
 		<package name="tar"/>
-		<package name="gfxboot"/>
-		<package name="gfxboot-devel"/>
 		<package name="bootsplash"/>
-		<package name="bootsplash-branding-SLED"/>
 		<!-- PACKAGES STOP DISKLESS -->
 	</packages>
 	<packages type="bootstrap">
@@ -248,11 +242,8 @@
 		<package name="pm-utils"/>
 		<package name="pmtools"/>
 		<package name="suse-build-key"/>
-		<package name="gfxboot"/>
-		<package name="gfxboot-devel"/>
 		<package name="fribidi"/>
 		<package name="make"/>
-		<package name="bootsplash-branding-SLED"/>
 		<!-- DELETE PACKAGES END DEFAULT, XEN AND DISKLESS -->
 	</packages>
 	<packages type="delete" profiles="diskless">
@@ -269,8 +260,6 @@
 		<package name="openslp"/>
 		<package name="perl-HTML-Tagset"/>
 		<package name="perl"/>
-		<package name="gfxboot"/>
-		<package name="gfxboot-devel"/>
 		<package name="perl-gettext"/>
 		<package name="setserial"/>
 		<package name="bundle-lang-common-zh"/>

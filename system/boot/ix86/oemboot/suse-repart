@@ -293,6 +293,7 @@ function OEMRepartStandard {
 		if test $? != 0; then
 			systemException "Failed to create partition table" "reboot"
 		fi
+		activateBootPartition
 	fi
 	#======================================
 	# Update new device names
@@ -440,6 +441,7 @@ function OEMRepartOverlayed {
 		if test $? != 0; then
 			systemException "Failed to create partition table" "reboot"
 		fi
+		activateBootPartition
 	fi
 	#======================================
 	# Update new device names
@@ -563,6 +565,7 @@ function OEMRepartCombined {
 		if test $? != 0; then
 			systemException "Failed to create partition table" "reboot"
 		fi
+		activateBootPartition
 	fi
 	#======================================
 	# Update new device names
@@ -613,10 +616,11 @@ function OEMRepartLVM {
 	if test $? != 0; then
 		systemException "Failed to create partition table" "reboot"
 	fi
+	activateBootPartition
 	vgchange -a y kiwiVG
 	pvcreate $imageDiskDevice"3"
 	vgextend kiwiVG $imageDiskDevice"3"
-	VGFreeMBytes=`vgdisplay --short --unit B | cut -f2 -d/ | cut -f1 -dB`
+	VGFreeMBytes=`vgdisplay --short --unit B kiwiVG | cut -f2 -d/ | cut -f1 -dB`
 	VGFreeMBytes=`expr $VGFreeMBytes / 1000`
 	VGFreeMBytes=`expr $VGFreeMBytes / 1000`
 	VGNeedMBytes=`expr $VGSwapMBytes + $VGRecoveryMBytes + $VGSystemMBytes`
@@ -659,6 +663,8 @@ function OEMRepartLVM {
 		if [ -z "$OEM_WITHOUTHOME" ];then
 			lvcreate -l 100%FREE -n LVHome kiwiVG
 			export imageHomeDevice=/dev/kiwiVG/LVHome
+		else
+			lvextend -l 100%FREE /dev/kiwiVG/LVRoot
 		fi
 	fi
 	#======================================
@@ -750,5 +756,25 @@ function OEMRepart {
 		fi
 		umount /reco-save && rmdir /reco-save
 		umount /reco-root && rmdir /reco-root
+	fi
+}
+
+#======================================
+# activateBootPartition
+#--------------------------------------
+function activateBootPartition {
+	# /.../
+	# set boot flag to current value of $bootid
+	# ----
+	local input=/part.input
+	local bid=`expr $bootid + 1`
+	Echo "Set boot flag to partition ID: $bid [ $imageDiskDevice ]"
+	rm -f $input
+	for cmd in a $bid w q; do
+		echo $cmd >> $input
+	done
+	fdisk $imageDiskDevice < $input 1>&2
+	if test $? != 0; then
+		systemException "Failed to set boot flag" "reboot"
 	fi
 }

@@ -89,7 +89,7 @@ sub setupRecoveryArchive {
 	}
 	$kiwi -> info ("Creating recovery archive...");
 	my $status = qxx (
-		"cd $root && tar -czf $root.recovery.tar.gz . 2>&1 &&
+		"cd $root && tar --numeric-owner -czpf $root.recovery.tar.gz . 2>&1 &&
 		mv $root.recovery.tar.gz $root/recovery.tar.gz"
 	);
 	my $code = $? >> 8;
@@ -156,7 +156,8 @@ sub setupUsersGroups {
 				$moduser .= " -s '$shell'";
 			}
 			if (defined $home) {
-				$adduser .= " -m -d $home";
+				$home = quoteshell ($home);
+				$adduser .= " -m -d \"$home\"";
 			}
 			if (defined $gid) {
 				$adduser .= " -g $gid";
@@ -170,9 +171,13 @@ sub setupUsersGroups {
 					"chroot $root grep -q ^$group: /etc/group 2>&1"
 				);
 				my $code = $? >> 8;
+				$group = quoteshell ($group);
 				if ($code != 0) {
 					$kiwi -> info ("Adding group: $group");
-					my $data = qxx ( "chroot $root $addgroup $group" );
+					if (defined $gid) {
+						$addgroup .= " -g $gid";
+					}
+					my $data = qxx ("chroot $root $addgroup \"$group\"");
 					my $code = $? >> 8;
 					if ($code != 0) {
 						$kiwi -> failed ();
@@ -182,11 +187,12 @@ sub setupUsersGroups {
 					}
 					$kiwi -> done();
 				}
-				$adduser .= " -G $group";
+				$adduser .= " -G \"$group\"";
 			}
 			if (defined $realname) {
-				$adduser .= " -c '$realname'";
-				$moduser .= " -c '$realname'";
+				$realname = quoteshell ($realname);
+				$adduser .= " -c \"$realname\"";
+				$moduser .= " -c \"$realname\"";
 			}
 			my $data = qxx ( "chroot $root grep -q ^$user: /etc/passwd 2>&1" );
 			my $code = $? >> 8;
@@ -248,7 +254,7 @@ sub setupAutoYaST {
 	my $autocnf = "autoconf.xml";
 	if (! -d "$root/$autodir") {
 		$kiwi -> failed ();
-		$kiwi -> error  ("AutoYaST seems not be installed");
+		$kiwi -> error  ("AutoYaST seems not to be installed");
 		$kiwi -> failed ();
 		return "failed";
 	}
@@ -377,6 +383,21 @@ sub setupFirstBootYaST {
 	}
 	$kiwi -> done();
 	return "success";
+}
+
+#==========================================
+# quoteshell
+#------------------------------------------
+sub quoteshell {
+	# ...
+	# Enclosing characters in double quotes preserves the
+	# literal value of all characters within the quotes,
+	# with the exception of $, `, \, and, when history
+	# expansion is enabled, !.
+	# ----
+	my $name = shift;
+	$name =~ s/([\"\$\!\`\\])/\\$1/g;
+	return $name;
 }
 
 1;

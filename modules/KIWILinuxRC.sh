@@ -27,6 +27,7 @@ export KLOG_DEFAULT=1
 export PARTITIONER=sfdisk
 export TRANSFER_ERRORS_FILE=/tmp/transfer.errors
 export DEFAULT_VGA=0x314
+export HAVE_MODULES_ORDER=1
 
 #======================================
 # Debug
@@ -138,6 +139,7 @@ function importFile {
 		Echo -e "$ERROR_INTERRUPT"
 		systemException "*** interrupted ****" "shell"
 	fi
+	IFS=$IFS_ORIG
 }
 #======================================
 # systemException
@@ -353,18 +355,20 @@ function udevStart {
 	if [ -e /proc/sys/kernel/hotplug ];then
 		echo "" > /proc/sys/kernel/hotplug
 	fi
-	# /.../
-	# At the moment we prevent udev from loading the storage
-	# modules because it does not make a propper choice if
-	# there are multiple possible modules available. Example
-	# udev prefers ata_generic over ata_piix but the hwinfo
-	# order is ata_piix first which also seems to make more
-	# sense. I would love to let udev load the modules but
-	# at the moment I don't see how I could solve that
-	# problem in another way than:
-	# -----
-	rm -f /etc/udev/rules.d/*-drivers.rules
-	rm -f /lib/udev/rules.d/*-drivers.rules
+	if ! ls /lib/modules/*/modules.order &>/dev/null;then
+		# /.../
+		# without modules.order in place we prevent udev from loading
+		# the storage modules because it does not make a propper
+		# choice if there are multiple possible modules available.
+		# Example:
+		# udev prefers ata_generic over ata_piix but the hwinfo
+		# order is ata_piix first which also seems to make more
+		# sense.
+		# -----
+		rm -f /etc/udev/rules.d/*-drivers.rules
+		rm -f /lib/udev/rules.d/*-drivers.rules
+		HAVE_MODULES_ORDER=0
+	fi
 	# start the udev daemon
 	udevd --daemon udev_log="debug"
 	# wait for pending triggered udev events.
@@ -550,6 +554,9 @@ function setupSUSEInitrd {
 		fi
 		if [ -f /etc/init.d/boot.device-mapper ];then
 			/etc/init.d/boot.device-mapper start
+		fi
+		if [ "$haveLVM" = "yes" ]; then
+			/etc/init.d/boot.lvm start
 		fi
 		if ! mkinitrd;then
 			Echo "Can't create initrd"
@@ -911,8 +918,23 @@ function setupBootLoaderSyslinux {
 	#======================================
 	# create sysconfig/bootloader
 	#--------------------------------------
-	echo "LOADER_TYPE=\"syslinux\""   > $sysb
-	echo "LOADER_LOCATION=\"mbr\""   >> $sysb
+	echo "LOADER_TYPE=\"syslinux\""                           > $sysb
+	echo "LOADER_LOCATION=\"mbr\""                           >> $sysb
+	echo "DEFAULT_VGA=\"$fbmode\""                           >> $sysb 
+	echo -n "DEFAULT_APPEND=\"root=$diskByID splash=silent"  >> $sysb
+	if [ ! -z "$swap" ];then
+		echo -n " resume=$swapByID"                          >> $sysb
+	fi
+	echo -n " $KIWI_INITRD_PARAMS $KIWI_KERNEL_OPTIONS"      >> $sysb
+	echo " showopts\""                                       >> $sysb
+	echo "FAILSAFE_VGA=\"$fbmode\""                          >> $sysb
+	echo -n "FAILSAFE_APPEND=\"root=$diskByID splash=silent" >> $sysb
+	if [ ! -z "$swap" ];then
+		echo -n " resume=$swapByID"                          >> $sysb
+	fi
+	echo -n " $KIWI_INITRD_PARAMS $KIWI_KERNEL_OPTIONS"      >> $sysb
+	echo -n " showopts ide=nodma apm=off acpi=off noresume"  >> $sysb
+	echo "selinux=0 nosmp noapic maxcpus=0 edd=off\""        >> $sysb
 }
 #======================================
 # setupBootLoaderGrub
@@ -1125,8 +1147,23 @@ function setupBootLoaderGrub {
 	#======================================
 	# create sysconfig/bootloader
 	#--------------------------------------
-	echo "LOADER_TYPE=\"grub\""     > $sysb
-	echo "LOADER_LOCATION=\"mbr\"" >> $sysb
+	echo "LOADER_TYPE=\"grub\""                               > $sysb
+	echo "LOADER_LOCATION=\"mbr\""                           >> $sysb
+	echo "DEFAULT_VGA=\"$fbmode\""                           >> $sysb  
+	echo -n "DEFAULT_APPEND=\"root=$diskByID splash=silent"  >> $sysb
+	if [ ! -z "$swap" ];then
+		echo -n " resume=$swapByID"                          >> $sysb
+	fi
+	echo -n " $KIWI_INITRD_PARAMS $KIWI_KERNEL_OPTIONS"      >> $sysb
+	echo " showopts\""                                       >> $sysb
+	echo "FAILSAFE_VGA=\"$fbmode\""                          >> $sysb
+	echo -n "FAILSAFE_APPEND=\"root=$diskByID splash=silent" >> $sysb
+	if [ ! -z "$swap" ];then
+		echo -n " resume=$swapByID"                          >> $sysb
+	fi
+	echo -n " $KIWI_INITRD_PARAMS $KIWI_KERNEL_OPTIONS"      >> $sysb
+	echo -n " showopts ide=nodma apm=off acpi=off noresume"  >> $sysb
+	echo "selinux=0 nosmp noapic maxcpus=0 edd=off\""        >> $sysb
 }
 #======================================
 # setupBootLoaderLilo
@@ -1300,8 +1337,23 @@ function setupBootLoaderLilo {
 	#======================================
 	# create sysconfig/bootloader
 	#--------------------------------------
-	echo "LOADER_TYPE=\"lilo\""     > $sysb
-	echo "LOADER_LOCATION=\"mbr\"" >> $sysb
+	echo "LOADER_TYPE=\"lilo\""                               > $sysb
+	echo "LOADER_LOCATION=\"mbr\""                           >> $sysb
+	echo "DEFAULT_VGA=\"$fbmode\""                           >> $sysb 
+	echo -n "DEFAULT_APPEND=\"root=$diskByID splash=silent"  >> $sysb
+	if [ ! -z "$swap" ];then
+		echo -n " resume=$swapByID"                          >> $sysb
+	fi
+	echo -n " $KIWI_INITRD_PARAMS $KIWI_KERNEL_OPTIONS"      >> $sysb
+	echo " showopts\""                                       >> $sysb
+	echo "FAILSAFE_VGA=\"$fbmode\""                          >> $sysb
+	echo -n "FAILSAFE_APPEND=\"root=$diskByID splash=silent" >> $sysb
+	if [ ! -z "$swap" ];then
+		echo -n " resume=$swapByID"                          >> $sysb
+	fi
+	echo -n " $KIWI_INITRD_PARAMS $KIWI_KERNEL_OPTIONS"      >> $sysb
+	echo -n " showopts ide=nodma apm=off acpi=off noresume"  >> $sysb
+	echo "selinux=0 nosmp noapic maxcpus=0 edd=off\""        >> $sysb
 }
 #======================================
 # setupDefaultPXENetwork
@@ -1515,17 +1567,23 @@ function kernelCheck {
 	fi
 }
 #======================================
-# probeFileSystem
+# identifyFileSystem
 #--------------------------------------
-function probeFileSystem {
+function identifyFileSystem {
 	# /.../
 	# probe for the filesystem type. The function will
-	# read the first 128 kB of the given device and check
-	# the filesystem header data to detect the type of the
+	# read 128 kB of the given device and check the
+	# filesystem header data to detect the type of the
 	# filesystem
 	# ----
 	FSTYPE=unknown
-	dd if=$1 of=/tmp/filesystem-$$ bs=128k count=1 >/dev/null
+	if [ ! -z "$2" ];then
+		# leave a gap of 512 byte to skip a possible bootloader
+		dd if=$1 of=/tmp/filesystem-$$ bs=128k count=1 seek=4 skip=4 >/dev/null
+	else
+		# read the first 128 byte to check the fs
+		dd if=$1 of=/tmp/filesystem-$$ bs=128k count=1 >/dev/null
+	fi
 	data=$(file /tmp/filesystem-$$)
 	case $data in
 		*ext3*)     FSTYPE=ext3 ;;
@@ -1541,8 +1599,22 @@ function probeFileSystem {
 			FSTYPE=vfat
 		fi
 	fi
+	if [ $FSTYPE = "unknown" ];then
+		if grep -q ^CLIC /tmp/filesystem-$$;then
+			FSTYPE=clicfs
+		fi
+	fi
 	rm -f /tmp/filesystem-$$
 	export FSTYPE
+}
+#======================================
+# probeFileSystem
+#--------------------------------------
+function probeFileSystem {
+	identifyFileSystem $1
+	if [ $FSTYPE = "unknown" ];then
+		identifyFileSystem $1 "after-boot-record"
+	fi
 }
 #======================================
 # getSystemIntegrity
@@ -1575,145 +1647,162 @@ function getSystemMD5Status {
 # probeUSB
 #--------------------------------------
 function probeUSB {
-	IFS="%"
 	local module=""
 	local stdevs=""
 	local hwicmd="/usr/sbin/hwinfo"
-	#======================================
-	# load host controller modules
-	#--------------------------------------
-	for i in \
-		`$hwicmd --usb | grep "Driver [IA]" | 
-		sed -es"@modprobe\(.*\)\"@\1%@" | tr -d "\n"`
-	do
-		if echo $i | grep -q "#0";then
-			module=`echo $i | cut -f2 -d"\"" | tr -d " "`
-			module=`echo $module | sed -es"@modprobe@@g"`
-			IFS=";"
-			for m in $module;do
-				if ! echo $stdevs | grep -q $m;then
-					stdevs="$stdevs $m"
-				fi
-			done
+	if [ $HAVE_MODULES_ORDER = 0 ];then
+		#======================================
+		# load host controller modules
+		#--------------------------------------
+		IFS="%"
+		for i in \
+			`$hwicmd --usb | grep "Driver [IA]" | 
+			sed -es"@modprobe\(.*\)\"@\1%@" | tr -d "\n"`
+		do
+			if echo $i | grep -q "#0";then
+				module=`echo $i | cut -f2 -d"\"" | tr -d " "`
+				module=`echo $module | sed -es"@modprobe@@g"`
+				IFS=";"
+				for m in $module;do
+					if ! echo $stdevs | grep -q $m;then
+						stdevs="$stdevs $m"
+					fi
+				done
+			fi
+		done
+		for i in \
+			`$hwicmd --usb-ctrl | grep "Driver [IA]" | 
+			sed -es"@modprobe\(.*\)\"@\1%@" | tr -d "\n"`
+		do
+			if echo $i | grep -q "#0";then
+				module=`echo $i | cut -f2 -d"\"" | tr -d " "`
+				module=`echo $module | sed -es"@modprobe@@g"`
+				IFS=";"
+				for m in $module;do
+					if ! echo $stdevs | grep -q $m;then
+						stdevs="$stdevs $m"
+					fi
+				done
+			fi
+		done
+		IFS=$IFS_ORIG
+		stdevs=`echo $stdevs`
+		for module in $stdevs;do
+			Echo "Probing module: $module"
+			modprobe $module >/dev/null
+		done
+		#======================================
+		# check load status for host controller
+		#--------------------------------------
+		if [ -z "$stdevs" ];then
+			return
 		fi
-	done
-	IFS="%"
-	for i in \
-		`$hwicmd --usb-ctrl | grep "Driver [IA]" | 
-		sed -es"@modprobe\(.*\)\"@\1%@" | tr -d "\n"`
-	do
-		if echo $i | grep -q "#0";then
-			module=`echo $i | cut -f2 -d"\"" | tr -d " "`
-			module=`echo $module | sed -es"@modprobe@@g"`
-			IFS=";"
-			for m in $module;do
-				if ! echo $stdevs | grep -q $m;then
-					stdevs="$stdevs $m"
-				fi
-			done
-		fi
-	done
-	IFS=$IFS_ORIG
-	stdevs=`echo $stdevs`
-	for module in $stdevs;do
-		Echo "Probing module: $module"
-		modprobe $module >/dev/null
-	done
-	#======================================
-	# check load status for host controller
-	#--------------------------------------
-	if [ -z "$stdevs" ];then
-		return
+		#======================================
+		# manually load storage/input drivers
+		#--------------------------------------
+		for i in usbhid usb-storage;do
+			modprobe $i &>/dev/null
+		done
 	fi
 	#======================================
-	# manually load storage/input drivers
-	#--------------------------------------
-	for i in usbhid usb-storage;do
-		modprobe $i &>/dev/null
-	done
-	#======================================
-	# wait for device scan to complete
+	# wait for storage devices to appear
 	#--------------------------------------
 	Echo -n "Waiting for USB devices to settle..."
 	local storage=/sys/bus/usb/drivers/usb-storage
-	while ! [ -d $storage ] && [ $count -lt 5 ]; do
-		echo -n .
-		sleep 1
-		count=`expr $count + 1`
-	done
-	count=0
-	if [ -d $storage ]; then
-		while \
-			[ $(dmesg|grep -c 'usb-storage: device scan complete') -lt 1 ] && \
-			[ $count -lt 15 ]
-		do
-			echo -n .
-			sleep 1
-			count=`expr $count + 1`
+	local devices=0
+	while [ $devices -lt 5 ];do
+		for i in $storage/*;do
+			if [ -L $i ] && [ ! $i = "$storage/module" ];then
+				devices=ok
+				break
+			fi
 		done
-		count=0
+		if [ $devices = "ok" ];then
+			break
+		fi
+		echo -n . ; sleep 1
+		devices=$(( $devices + 1 ))
+	done
+	if [ ! $devices = "ok" ];then
+		echo ; return
 	fi
+	#======================================
+	# wait for storage scan to complete
+	#--------------------------------------
+	devices=0
+	while \
+		[ $(dmesg | grep -c 'usb-storage: device scan complete') -lt 1 ] && \
+		[ $devices -lt 15 ]
+	do
+		echo -n . ; sleep 1
+		devices=$(( $devices + 1 ))
+	done
 	echo
 }
 #======================================
 # probeDevices
 #--------------------------------------
 function probeDevices {
-	Echo "Including required kernel modules..."
-	IFS="%"
-	local module=""
-	local stdevs=""
-	local hwicmd="/usr/sbin/hwinfo"
-	for i in \
-		`$hwicmd --storage | grep "Driver [IA]" | 
-		sed -es"@modprobe\(.*\)\"@\1%@" | tr -d "\n"`
-	do
-		if echo $i | grep -q "#0";then
-			module=`echo $i | cut -f2 -d"\"" | tr -d " "`
-			module=`echo $module | sed -es"@modprobe@@g"`
-			IFS=";"
-			for m in $module;do
-				if ! echo $stdevs | grep -q $m;then
-					stdevs="$stdevs $m"
-				fi
-			done
-		fi
-	done
-	IFS=$IFS_ORIG
-	stdevs=`echo $stdevs`
-	if [ ! -z "$kiwikernelmodule" ];then
-		for module in $kiwikernelmodule;do
-			Echo "Probing module (cmdline): $module"
-			INITRD_MODULES="$INITRD_MODULES $module"
-			modprobe $module >/dev/null
-		done
-	fi
-	for module in $stdevs;do
-		loadok=1
-		for broken in $kiwibrokenmodule;do
-			if [ $broken = $module ];then
-				Echo "Prevent loading module: $module"
-				loadok=0; break
+	if [ $HAVE_MODULES_ORDER = 0 ];then
+		Echo "Including required kernel modules..."
+		IFS="%"
+		local module=""
+		local stdevs=""
+		local hwicmd="/usr/sbin/hwinfo"
+		for i in \
+			`$hwicmd --storage | grep "Driver [IA]" | 
+			sed -es"@modprobe\(.*\)\"@\1%@" | tr -d "\n"`
+		do
+			if echo $i | grep -q "#0";then
+				module=`echo $i | cut -f2 -d"\"" | tr -d " "`
+				module=`echo $module | sed -es"@modprobe@@g"`
+				IFS=";"
+				for m in $module;do
+					if ! echo $stdevs | grep -q $m;then
+						stdevs="$stdevs $m"
+					fi
+				done
 			fi
 		done
-		if [ $loadok = 1 ];then
-			Echo "Probing module: $module"
-			INITRD_MODULES="$INITRD_MODULES $module"
-			modprobe $module >/dev/null
+		IFS=$IFS_ORIG
+		stdevs=`echo $stdevs`
+		if [ ! -z "$kiwikernelmodule" ];then
+			for module in $kiwikernelmodule;do
+				Echo "Probing module (cmdline): $module"
+				INITRD_MODULES="$INITRD_MODULES $module"
+				modprobe $module >/dev/null
+			done
 		fi
-	done
-	hwinfo --block &>/dev/null
+		for module in $stdevs;do
+			loadok=1
+			for broken in $kiwibrokenmodule;do
+				if [ $broken = $module ];then
+					Echo "Prevent loading module: $module"
+					loadok=0; break
+				fi
+			done
+			if [ $loadok = 1 ];then
+				Echo "Probing module: $module"
+				INITRD_MODULES="$INITRD_MODULES $module"
+				modprobe $module >/dev/null
+			fi
+		done
+		hwinfo --block &>/dev/null
+		# /.../
+		# older systems require ide-disk to be present at any time
+		# for details on this crappy call see bug: #250241
+		# ----
+		modprobe ide-disk &>/dev/null
+	fi
 	# /.../
-	# older systems require ide-disk to be present at any time
-	# for details on this crappy call see bug: #250241
+	# default loading of modules not loaded on demand
 	# ----
-	modprobe ide-disk
-	modprobe rd &>/dev/null
-	modprobe brd &>/dev/null
-	modprobe edd &>/dev/null
-	modprobe dm-mod &>/dev/null
-	modprobe xennet &>/dev/null
-	modprobe xenblk &>/dev/null
+	for i in rd brd edd dm-mod xennet xenblk;do
+		modprobe $i &>/dev/null
+	done
+	# /.../
+	# probe USB devices and load modules
+	# ----
 	probeUSB
 }
 #======================================
@@ -1724,12 +1813,18 @@ function CDDevice {
 	# detect CD/DVD/USB device(s). The function use the information
 	# from hwinfo --cdrom to search for the block device
 	# ----
+	IFS=$IFS_ORIG
+	local silent=$1
 	local count=0
 	local h=/usr/sbin/hwinfo
-	for module in sg sd_mod sr_mod cdrom ide-cd BusLogic vfat; do
-		/sbin/modprobe $module
-	done
-	Echo -n "Waiting for CD/DVD device(s) to appear..."
+	if [ $HAVE_MODULES_ORDER = 0 ];then
+		for module in sg sd_mod sr_mod cdrom ide-cd BusLogic vfat; do
+			/sbin/modprobe $module
+		done
+	fi
+	if [ -z "$silent" ];then
+		Echo -n "Waiting for CD/DVD device(s) to appear..."
+	fi
 	while true;do
 		cddevs=`$h --cdrom | grep "Device File:"|sed -e"s@(.*)@@" | cut -f2 -d:`
 		cddevs=`echo $cddevs`
@@ -1741,14 +1836,18 @@ function CDDevice {
 		if [ ! -z "$cddev" ] || [ $count -eq 12 ]; then
 			break
 		else
-			echo -n .
+			if [ -z "$silent" ];then
+				echo -n .
+			fi
 			sleep 1
 		fi
 		count=`expr $count + 1`
 	done
-	echo
-	if [ -z $cddev ];then
-		USBStickDevice
+	if [ -z "$silent" ];then
+		echo
+	fi
+	if [ -z "$cddev" ];then
+		USBStickDevice $silent
 		if [ $stickFound = 0 ];then
 			systemException \
 				"Failed to detect CD/DVD or USB drive !" \
@@ -1762,19 +1861,24 @@ function CDDevice {
 #--------------------------------------
 function USBStickDevice {
 	stickFound=0
+	local silent=$1
 	#======================================
 	# check virtual environments
 	#--------------------------------------
 	diskmodels=`getDiskModels`
 	if echo $diskmodels | grep -q "QEMU HARDDISK";then
-		Echo "QEMU system, skipping USB stick search"
+		if [ -z "$silent" ];then
+			Echo "QEMU system, skipping USB stick search"
+		fi
 		return
 	fi
 	#======================================
 	# search for USB removable devices
 	#--------------------------------------
-	Echo -n "Waiting for USB devices to settle..."
-	for redo in 1 2 3 4 5 6 7 8 9 10;do
+	if [ -z "$silent" ];then
+		Echo -n "Searching for USB stick device..."
+	fi
+	for redo in 1 2 3 4 5;do
 		for device in /sys/bus/usb/drivers/usb-storage/*;do
 			if [ ! -L $device ];then
 				continue
@@ -1830,15 +1934,34 @@ function USBStickDevice {
 						continue
 					fi
 					stickSerial=$serial
-					echo .
+					if [ -z "$silent" ];then
+						echo .
+					fi
 					return
 				fi
 			done
 		done
-		echo -n .
+		if [ -z "$silent" ];then
+			echo -n .
+		fi
 		sleep 3
 	done
 	echo .
+}
+#======================================
+# CDMountOption
+#--------------------------------------
+function CDMountOption {
+	# /.../
+	# checks for the ISO 9660 extension and prints the
+	# mount option required to mount the device in full
+	# speed mode
+	# ----
+	local dev=$1
+	local iso="ISO 9660"
+	if dd if=$dev bs=42k count=1 2>&1 | file - | grep -q $iso;then
+		echo "-t iso9660"
+	fi
 }
 #======================================
 # CDMount
@@ -1848,24 +1971,33 @@ function CDMount {
 	# search all CD/DVD drives and use the one we can find
 	# the CD configuration on
 	# ----
+	local silent=$1
 	local count=0
-	mkdir -p /cdrom && CDDevice
-	Echo -n "Mounting live boot drive..."
+	local cdopt
+	mkdir -p /cdrom && CDDevice $silent
+	if [ -z "$silent" ];then
+		Echo -n "Mounting live boot drive..."
+	fi
 	while true;do
 		IFS=":"; for i in $cddev;do
+			cdopt=$(CDMountOption $i)
 			if [ -x /usr/bin/driveready ];then
-				driveready $i && mount $i /cdrom >/dev/null
+				driveready $i && eval mount $cdopt $i /cdrom >/dev/null
 			else
-				mount $i /cdrom >/dev/null
+				eval mount $cdopt $i /cdrom >/dev/null
 			fi
 			if [ -f $LIVECD_CONFIG ];then
-				cddev=$i; echo;
-				if [ "$mediacheck" = 1 ]; then
+				cddev=$i
+				if [ -z "$silent" ]; then
+					echo
+				fi
+				if [ "$mediacheck" = 1 ] && [ -z "$silent" ]; then
 					test -e /proc/splash && echo verbose > /proc/splash
 					checkmedia $cddev
 					Echo -n "Press any key for reboot: "; read nope
 					systemException "CheckMedia" "reboot"
 				fi
+				IFS=$IFS_ORIG
 				return
 			fi
 			umount $i &>/dev/null
@@ -1874,7 +2006,9 @@ function CDMount {
 		if [ $count -eq 12 ]; then
 			break
 		else
-			echo -n .
+			if [ -z "$silent" ];then
+				echo -n .
+			fi
 			sleep 1
 		fi
 		count=`expr $count + 1`
@@ -1910,22 +2044,34 @@ function searchBIOSBootDevice {
 	# for the MBR disk label and compare it with the kiwi
 	# written mbrid file in /boot/grub/ of the system image
 	# ----
+	IFS=$IFS_ORIG
 	local h=/usr/sbin/hwinfo
 	local c="Device File:|BIOS id"
 	local ddevs=`$h --disk|grep -E "$c"|sed -e"s@(.*)@@"|cut -f2 -d:|tr -d " "`
 	local cmpd=/tmp/mbrids
 	local ifix=0
+	local bios
 	local file
 	local pred
 	#======================================
-	# Check for BIOS id 0x80
+	# Store device with BIOS id 0x80
 	#--------------------------------------
 	for curd in $ddevs;do
 		if [ $curd = "0x80" ];then
-			echo $pred; return
+			bios=$pred; break
 		fi
 		pred=$curd
 	done
+	#======================================
+	# Check for OEM ISO installation mode
+	#--------------------------------------
+	if [ ! -z "$cdinst" ];then
+		CDMount silent
+		umount $cddev
+		curd=$cddev
+		echo $curd
+		return
+	fi
 	#======================================
 	# Search and copy all mbrid files 
 	#--------------------------------------
@@ -1957,12 +2103,19 @@ function searchBIOSBootDevice {
 	#======================================
 	# Compare ID with MBR entry 
 	#--------------------------------------
+	ifix=0
 	for curd in $ddevs;do
 		mbrM=`dd if=$curd bs=1 count=4 skip=$((0x1b8))|hexdump -n4 -e '"0x%x"'`
 		if [ $mbrM = $mbrI ];then
-			echo $curd; return
+			ifix=1
+			if [ "$curd" = "$bios" ];then
+				echo $curd; return
+			fi
 		fi
 	done
+	if [ $ifix -eq 1 ];then
+		echo $curd; return
+	fi
 	systemException \
 		"No devices matches MBR identifier: $mbrI !" \
 	"reboot"
@@ -2162,6 +2315,7 @@ function setupNetwork {
 	IFS="," ; for i in $DNS;do
 		echo "nameserver $i" >> /etc/resolv.conf
 	done
+	DHCPCHADDR=`echo $DHCPCHADDR | tr a-z A-Z`
 }
 #======================================
 # updateNeeded
@@ -2948,6 +3102,11 @@ function umountSystem {
 #--------------------------------------
 function isFSTypeReadOnly {
 	if [ "$FSTYPE" = "squashfs" ];then
+		export unionFST=aufs
+		return 0
+	fi
+	if [ "$FSTYPE" = "clicfs" ];then
+		export unionFST=clicfs
 		return 0
 	fi
 	return 1
@@ -2964,7 +3123,6 @@ function kiwiMount {
 	# load not autoloadable fs modules
 	#--------------------------------------
 	modprobe squashfs &>/dev/null
-	modprobe fuse     &>/dev/null
 	#======================================
 	# store old FSTYPE value
 	#--------------------------------------
@@ -3088,7 +3246,6 @@ function mountSystemUnified {
 		mountSystemOverlay
 	fi
 }
-
 #======================================
 # mountSystemDMSquash
 #--------------------------------------
@@ -3154,7 +3311,97 @@ function mountSystemDMSquash {
 		#mount $snDevice /mnt
 	fi
 }
-
+#======================================
+# mountSystemClicFS
+#--------------------------------------
+function mountSystemClicFS {
+	local loopf=$1
+	local roDir=/read-only
+	local rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
+	local roDevice=`echo $UNIONFS_CONFIG | cut -d , -f 2`
+	local clic_cmd=clicfs
+	local ram_only=no
+	local haveBytes
+	local haveKByte
+	local haveMByte
+	local size
+	#======================================
+	# load fuse module
+	#--------------------------------------
+	modprobe fuse &>/dev/null
+	#======================================
+	# create read only mount point
+	#--------------------------------------
+	mkdir -p $roDir
+	#======================================
+	# check read/only device location
+	#--------------------------------------
+	if [ ! -z "$NFSROOT" ];then
+		roDevice="$imageRootDevice"
+	fi
+	#======================================  
+	# check kernel command line for log file  
+	#--------------------------------------  
+	if [ -n "$cliclog" ]; then  
+		clic_cmd="$clic_cmd -l $cliclog"  
+	fi  
+	#======================================
+	# check read/write device location
+	#--------------------------------------
+	getDiskDevice $rwDevice | grep -q ram
+	if [ $? = 0 ];then
+		haveKByte=`cat /proc/meminfo | grep MemFree | cut -f2 -d:| cut -f1 -dk`
+		haveMByte=`expr $haveKByte / 1024`
+		haveMByte=`expr $haveMByte \* 7 / 10`
+		clic_cmd="$clic_cmd -m $haveMByte"
+		ram_only=yes
+	else
+		haveBytes=`blockdev --getsize64 $rwDevice`
+		haveMByte=`expr $haveBytes / 1024 / 1024`
+		clic_cmd="$clic_cmd -m $haveMByte -c $rwDevice  --ignore-cow-errors"
+	fi
+	#======================================
+	# mount/check clic file
+	#--------------------------------------
+	if [ ! -z "$NFSROOT" ];then
+		#======================================
+		# clic exported via NFS
+		#--------------------------------------
+		if ! kiwiMount "$roDevice" "$roDir" "" $loopf;then
+			Echo "Failed to mount NFS filesystem"
+			return 1
+		fi
+		if [ ! -e "$roDir/fsdata.ext3" ];then
+			Echo "Can't find clic fsdata.ext3 in NFS export"
+			return 1
+		fi
+	else
+		#======================================
+		# mount clic container
+		#--------------------------------------
+		if ! $clic_cmd $loopf $roDir; then  
+			Echo "Failed to mount clic filesystem"
+			return 1
+		fi 
+	fi
+	#======================================
+	# mount root over clic
+	#--------------------------------------
+	size=`stat -c %s $roDir/fsdata.ext3`
+	size=$((size/4096))
+	if [ "$ram_only" = "yes" ];then
+		# no reserved blocks for ram only usage...
+		tune2fs -m 0 $roDir/fsdata.ext3
+	fi
+	resize2fs $roDir/fsdata.ext3 $size
+	mount -o loop,noatime,nodiratime,errors=remount-ro,barrier=0 \
+		$roDir/fsdata.ext3 /mnt
+	if [ ! $? = 0 ];then
+		Echo "Failed to mount ext3 clic container"
+		return 1
+	fi
+	return 0
+}
 #======================================
 # mountSystemOverlay
 #--------------------------------------
@@ -3324,7 +3571,12 @@ function mountSystem {
 		mountSystemCombined "$mountDevice" $2
 		retval=$?
 	elif [ ! -z "$UNIONFS_CONFIG" ];then
-		mountSystemUnified $2
+		local unionFST=`echo $UNIONFS_CONFIG | cut -d , -f 3`
+		if [ "$unionFST" = "clicfs" ];then
+			mountSystemClicFS $2
+		else
+			mountSystemUnified $2
+		fi
 		retval=$?
 	else
 		mountSystemStandard "$mountDevice"
@@ -3569,19 +3821,24 @@ function fetchFile {
 			;;
 		"tftp")
 			validateBlockSize
-			if [ -z "$multicast" ];then
-				multicast="disable"
+			# /.../
+			# atftp activates multicast by '--option "multicast"'
+			# and deactivates it again  by '--option "disable multicast"'
+			# ----
+			multicast_atftp="multicast"
+			if test "$multicast" != "enable"; then 
+				multicast_atftp="disable multicast"
 			fi
 			if test "$izip" = "compressed"; then
 				# mutlicast is disabled because you can't seek in a pipe
 				atftp \
-					--option "multicast disable" \
+					--option "disable multicast" \
 					--option "blksize $imageBlkSize" -g -r $path \
 					-l /dev/stdout $host 2>$TRANSFER_ERRORS_FILE |\
 					gzip -d > $dest 2>>$TRANSFER_ERRORS_FILE
 			else
 				atftp \
-					--option "multicast $multicast"  \
+					--option "$multicast_atftp"  \
 					--option "blksize $imageBlkSize" \
 					-g -r $path -l $dest $host &> $TRANSFER_ERRORS_FILE
 			fi
@@ -3856,6 +4113,7 @@ function activateImage {
 	#--------------------------------------
 	mkdir -p /mnt/var/log
 	rm -f /var/log/boot.msg
+	rm -f /mnt/boot/grub/mbrid
 	cp -f /mnt/dev/shm/initrd.msg /mnt/var/log/boot.msg
 	cp -f /var/log/boot.kiwi /mnt/var/log/boot.kiwi
 	#======================================
@@ -4117,7 +4375,15 @@ function SAPStorageCheck {
 	if [ ! -z "$nohdcheck" ];then
 		return
 	fi
+	local hwinfo=/usr/sbin/hwinfo
 	local ROOT_DEVICE=$1
+	local ROOT_EXCLUDE=$2
+	if [ ! -n "$ROOT_DEVICE" ];then
+		ROOT_DEVICE="."
+	fi
+	if [ -z "$ROOT_EXCLUDE" ];then
+		ROOT_EXCLUDE=$ROOT_DEVICE
+	fi
 	local size_rootkB=$(partitionSize $ROOT_DEVICE)
 	local DATA_DEVICE=""
 	local size_datakB=""
@@ -4127,7 +4393,7 @@ function SAPStorageCheck {
 	local main_memory_GB=$(( ${main_memory_MB} / 1024 ))
 	local MIN_DATA_DEV_SIZE=200 # GB
 	local MIN_ROOT_DEV_SIZE=$(( ${main_memory_GB} * 2 + 40 + 3 ))
-	local NUM=`hwinfo --disk | grep -c "Hardware Class:"`
+	local NUM=`$hwinfo --disk | grep -c "Hardware Class:"`
 	local req_size_datakB=""
 	local req_size_rootkB=""
 	local result=0
@@ -4153,10 +4419,9 @@ function SAPStorageCheck {
 	#======================================
 	# Search a data disk
 	#--------------------------------------
-	local imageDiskExclude=$ROOT_DEVICE
 	local deviceDisks=`$hwinfo --disk |\
 		grep "Device File:" | cut -f2 -d: |\
-		cut -f1 -d"(" | sed -e s"@$imageDiskExclude@@"`
+		cut -f1 -d"(" | sed -e s"@$ROOT_DEVICE@@" -s s"@$ROOT_EXCLUDE@@"`
 	for DATA_DEVICE in $deviceDisks;do
 		break
 	done
@@ -4204,19 +4469,23 @@ function SAPDataStorageSetup {
 	# a disk which is not the system disk and sets it
 	# up as LVM container for later use
 	# ----
-	local imageDiskExclude=$1
+	local ROOT_DEVICE=$1
+	local ROOT_EXCLUDE=$2
 	local hwinfo=/usr/sbin/hwinfo
 	local input=/tmp/fdisk.input
 	local storage
 	#======================================
 	# Search a data disk
 	#--------------------------------------
-	if [ ! -n "$imageDiskExclude" ];then
-		imageDiskExclude="."
+	if [ ! -n "$ROOT_DEVICE" ];then
+		ROOT_DEVICE="."
+	fi
+	if [ ! -n "$ROOT_EXCLUDE" ];then
+		ROOT_EXCLUDE=$ROOT_DEVICE
 	fi
 	local deviceDisks=`$hwinfo --disk |\
 		grep "Device File:" | cut -f2 -d: |\
-		cut -f1 -d"(" | sed -e s"@$imageDiskExclude@@"`
+		cut -f1 -d"(" | sed -e s"@$ROOT_DEVICE@@" -s s"@$ROOT_EXCLUDE@@"`
 	for storage in $deviceDisks;do
 		break
 	done
@@ -4256,7 +4525,14 @@ function SAPDataStorageSetup {
 # SAPStartMediaChanger
 #--------------------------------------
 function SAPStartMediaChanger {
+	local runme=/var/lib/YaST2/runme_at_boot
+	local ininf=/etc/install.inf
 	startX
-	yast2 --noborder --fullscreen inst_sap_wrapper
+	test -e $runme && mv $runme /tmp
+	test -e $ininf && mv $ininf /tmp
+	yast2 --noborder --fullscreen inst_autosetup   initial
+	yast2 --noborder --fullscreen inst_sap_wrapper initial
 	stoppX
+	test -e /tmp/runme_at_boot && mv /tmp/runme_at_boot $runme
+	test -e /tmp/install.inf && mv /tmp/install.inf $ininf
 }

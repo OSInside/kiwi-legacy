@@ -72,6 +72,7 @@
 		<package name="xen"/>
 	</packages>
 	<packages type="image">
+		<package name="dialog"/>
 		<package name="psmisc"/>
 		<package name="bind-libs"/>
 		<package name="bind-utils"/>
@@ -93,7 +94,6 @@
 		<package name="make"/>
 		<package name="grub"/>
 		<package name="bootsplash"/>
-		<package name="bootsplash-theme-SuSE-SLES"/>
 		<package name="eject"/>
 		<package name="tar"/>
 		<package name="lvm2"/>

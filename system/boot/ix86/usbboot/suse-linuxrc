@@ -111,7 +111,7 @@ fi
 #--------------------------------------
 Echo "Filesystem of stick system is: $FSTYPE -> $stickDevice"
 if isFSTypeReadOnly;then
-	setupUnionFS $stickRWDevice $stickRODevice aufs
+	setupUnionFS $stickRWDevice $stickRODevice $unionFST
 fi
 
 #======================================

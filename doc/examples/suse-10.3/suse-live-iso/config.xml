@@ -50,6 +50,7 @@
   </packages>
   <packages type="image" patternType="onlyRequired" patternPackageType="plusRecommended" profiles="KDE">
     <!-- PACKAGES BEGIN KDE -->
+	<package name="bootsplash-theme-SuSE" bootinclude="true" bootdelete="true"/>
     <package name="915resolution"/>
     <package name="CheckHardware"/>
     <package name="ConsoleKit"/>
@@ -123,7 +124,6 @@
     <package name="bluez-utils"/>
     <package name="boost"/>
     <package name="bootsplash"/>
-    <package name="bootsplash-theme-SuSE"/>
     <package name="bundle-lang-common-en"/>
     <package name="bundle-lang-kde-en"/>
     <package name="bzip2"/>
@@ -804,6 +804,7 @@
   </packages>
   <packages type="image" patternType="onlyRequired" patternPackageType="plusRecommended" profiles="GNOME">
     <!-- PACKAGES BEGIN GNOME -->
+	<package name="bootsplash-theme-SuSE" bootinclude="true" bootdelete="true"/>
     <package name="3ddiag"/>
     <package name="915resolution"/>
     <package name="CheckHardware"/>
@@ -874,7 +875,6 @@
     <package name="bluez-firmware"/>
     <package name="boost"/>
     <package name="bootsplash"/>
-    <package name="bootsplash-theme-SuSE"/>
     <package name="brasero"/>
     <package name="bug-buddy"/>
     <package name="bundle-lang-common-en"/>

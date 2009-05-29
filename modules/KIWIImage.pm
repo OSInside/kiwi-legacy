@@ -220,6 +220,127 @@ sub createImageDMSquashExt3 {
 }
 
 #==========================================
+# createImageClicFS
+#------------------------------------------
+sub createImageClicFS {
+	# ...
+	# create compressed loop image container
+	# ---
+	my $this    = shift;
+	my $rename  = shift;
+	my $tree    = shift;
+	my $journal = "journaled";
+	my $kiwi    = $this->{kiwi};
+	my $dest    = $this->{imageDest};
+	my $data;
+	my $code;
+	if (! defined $tree) {
+		$tree = $this->{imageTree};
+	}
+	#==========================================
+	# PRE filesystem setup
+	#------------------------------------------
+	my $name = $this -> preImage ();
+	if (! defined $name) {
+		return undef;
+	}
+	if (defined $rename) {
+		$data = qxx ("mv $dest/$name $dest/$rename 2>&1");
+		$code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> error  ("Can't rename image file");
+			$kiwi -> failed ();
+			$kiwi -> error  ($data);
+			return undef;
+		}
+		$name = $rename;
+	}
+	#==========================================
+	# Create ext3 filesystem on extend
+	#------------------------------------------
+	if (! $this -> setupEXT2 ( $name,$tree,$journal )) {
+		return undef;
+	}
+	#==========================================
+	# POST filesystem setup
+	#------------------------------------------
+	if (! $this -> postImage ($name,"nozip","clicfs")) {
+		return undef;
+	}
+	#==========================================
+	# Rename filesystem loop file
+	#------------------------------------------
+	$data = qxx ("mv $dest/$name $dest/fsdata.ext3 2>&1");
+	$code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> error  ("Can't move file to fsdata.ext3");
+		$kiwi -> failed ();
+		$kiwi -> error  ($data);
+		return undef;
+	}
+	#==========================================  
+	# Resize to minimum  
+	#------------------------------------------
+	my $dfs = "/sbin/debugfs";
+	my $req = "-R 'show_super_stats -h'";
+	my $bcn = "'^Block count:'";
+	my $bfr = "'^Free blocks:'";
+	my $src = "$dest/fsdata.ext3";
+	my $blocks = 0;
+	$data = qxx (
+		"$dfs $req $src 2>/dev/null | grep $bcn | sed -e 's,.*: *,,'"
+	);
+	$code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> error  ("debugfs: block count request failed: $data");
+		$kiwi -> failed ();
+		return undef;
+	}
+	chomp $data;
+	$blocks = $data;  
+	$data = qxx (
+		"$dfs $req $src 2>/dev/null | grep $bfr | sed -e 's,.*: *,,'"
+	);
+	$code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> error  ("debugfs: free blocks request failed: $data");
+		$kiwi -> failed ();
+		return undef;
+	}  
+	$kiwi -> info ("clicfs: blocks count=$blocks free=$data\n");  
+	$blocks = $blocks - $data;  
+	$data = qxx ("/sbin/resize2fs $dest/fsdata.ext3 $blocks 2>&1");
+	$code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> error  ("Failed to resize ext3 container: $data");
+		$kiwi -> failed ();
+		return undef;
+	}
+	#==========================================
+	# Create clicfs filesystem from ext3
+	#------------------------------------------
+	$kiwi -> info ("Creating clicfs container...");
+	if ($ENV{MKCLICFS_COMPRESSION}) {
+		my $c = int $ENV{MKCLICFS_COMPRESSION};
+		$data = qxx ("mkclicfs -c $c $dest/fsdata.ext3 $dest/$name 2>&1");
+	} else {
+		$data = qxx ("mkclicfs $dest/fsdata.ext3 $dest/$name 2>&1");
+	}
+	$code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't create clicfs filesystem");
+		$kiwi -> failed ();
+		$kiwi -> error  ($data);
+		return undef;
+	}
+	qxx ("mv -f $dest/$name.ext3 $dest/$name.clicfs");
+	qxx ("rm -f $dest/fsdata.ext3");
+	$kiwi -> done();
+	return $this;
+}
+
+#==========================================
 # createImageEXT2
 #------------------------------------------
 sub createImageEXT2 {
@@ -399,10 +520,12 @@ sub createImageEC2 {
 		push @main::Profiles ,split (/,/,$type{bootkernel});
 	}
 	$main::ForeignRepo{"xmlnode"} = $xml -> getForeignNodeList();
+	$main::ForeignRepo{"xmlpacnode"} = $xml -> getForeignPackageNodeList();
 	$main::ForeignRepo{"packagemanager"} = $xml -> getPackageManager();
-	$main::ForeignRepo{"locale"}  = $xml -> getLocale();
-	$main::ForeignRepo{"prepare"} = $main::Prepare;
-	$main::ForeignRepo{"create"}  = $main::Create;
+	$main::ForeignRepo{"locale"}    = $xml -> getLocale();
+	$main::ForeignRepo{"boot-theme"}= $xml -> getBootTheme();
+	$main::ForeignRepo{"prepare"}   = $main::Prepare;
+	$main::ForeignRepo{"create"}    = $main::Create;
 	$main::Create = $main::RootTree;
 	$xml = new KIWIXML ( $kiwi,$main::Prepare );
 	if (! defined $xml) {
@@ -765,6 +888,10 @@ sub createImageUSB {
 			$ok = $this -> createImageDMSquashExt3 ();
 			last SWITCH;
 		};
+		/^clicfs/     && do {
+			$ok = $this -> createImageClicFS ();
+			last SWITCH;
+		};
 		$kiwi -> error  ("Unsupported $text type: $type");
 		$kiwi -> failed ();
 		return undef;
@@ -816,6 +943,7 @@ sub createImageUSB {
 		push @main::Profiles ,split (/,/,$type{bootkernel});
 	}
 	$main::ForeignRepo{"xmlnode"} = $xml -> getForeignNodeList();
+	$main::ForeignRepo{"xmlpacnode"} = $xml -> getForeignPackageNodeList();
 	$main::ForeignRepo{"packagemanager"} = $xml -> getPackageManager();
 	$main::ForeignRepo{"oem-swap"}       = $xml -> getOEMSwap();
 	$main::ForeignRepo{"oem-swapsize"}   = $xml -> getOEMSwapSize();
@@ -826,9 +954,10 @@ sub createImageUSB {
 	$main::ForeignRepo{"oem-sap-install"}= $xml -> getOEMSAPInstall();
 	$main::ForeignRepo{"oem-reboot"}     = $xml -> getOEMReboot();
 	$main::ForeignRepo{"oem-recovery"}   = $xml -> getOEMRecovery();
-	$main::ForeignRepo{"locale"}  = $xml -> getLocale();
-	$main::ForeignRepo{"prepare"} = $main::Prepare;
-	$main::ForeignRepo{"create"}  = $main::Create;
+	$main::ForeignRepo{"locale"}    = $xml -> getLocale();
+	$main::ForeignRepo{"boot-theme"}= $xml -> getBootTheme();
+	$main::ForeignRepo{"prepare"}   = $main::Prepare;
+	$main::ForeignRepo{"create"}    = $main::Create;
 	$main::Compress = "no";
 	$main::Create   = $main::RootTree;
 	my $imageTypeSaved = $main::SetImageType;
@@ -941,9 +1070,9 @@ sub createImageUSB {
 	my $newinitrd = $kboot -> setupSplash();
 	$kboot -> cleanTmp();
 	#==========================================
-	# inflate/deflate initrd to make xm happy
+	# inflate/deflate initrd to make xen happy
 	#------------------------------------------
-	if ($type{bootprofile} eq "xen") {
+	if (($type{type} eq "xen") || ($type{bootprofile} eq "xen")) {
 		my $irdunc = $newinitrd;
 		$irdunc =~ s/\.gz//;
 		qxx ("$main::Gzip -d $newinitrd && $main::Gzip $irdunc");
@@ -1042,7 +1171,7 @@ sub createImageVMX {
 	#------------------------------------------
 	if ($type{bootprofile} eq "xen") {
 		# Xen config file
-		if (! $this -> buildXenConfig ($main::Destination,$name,\%xenc, "VMX")) {
+		if (! $this -> buildXenConfig ($main::Destination,$name,\%xenc,"VMX")) {
 			$main::Survive = "default";
 			return undef;
 		}
@@ -1082,6 +1211,12 @@ sub createImageVMX {
 				return undef;
 			}
 			$ovffile =~ s/\.vmx$/\.ovf/;
+			# /.../
+			# temporary hack, because ovftool is not able to handle
+			# scsi-hardDisk correctly at the moment
+			# ---- beg ----
+			qxx ("sed -i -e 's;scsi-hardDisk;disk;' $vmxfile");
+			# ---- end ----
 			my $status;
 			if (! $ovflog) {
 				$status= qxx ("$ovftool -bf $vmxfile $ovffile 2>&1");
@@ -1089,6 +1224,9 @@ sub createImageVMX {
 				$status= qxx ("$ovftool -bf $vmxfile $ovffile -l $ovflog 2>&1");
 			}
 			my $result = $? >> 8;
+			# --- beg ----
+			qxx ("sed -i -e 's;disk;scsi-hardDisk;' $vmxfile");
+			# --- end ----
 			if ($result != 0) {
 				$kiwi -> failed ();
 				$kiwi -> error  ("Couldn't create OVF image: $status");
@@ -1198,6 +1336,7 @@ sub createImageLiveCD {
 	#------------------------------------------
 	my %type = %{$sxml->getImageTypeAndAttributes()};
 	my $pblt = $type{checkprebuilt};
+	my $vga  = $type{vga};
 	#==========================================
 	# Get boot image name and compressed flag
 	#------------------------------------------
@@ -1349,9 +1488,18 @@ sub createImageLiveCD {
 				}
 				last SWITCH;
 			};
-			/^dmsquash$/       && do {
+			/^dmsquash$/ && do {
 				$kiwi -> info ("Creating dmsquash read only filesystem...\n");
 				if (! $this -> createImageDMSquashExt3 ( $namero,$imageTree )) {
+					$this -> restoreCDRootData();
+					$this -> restoreSplitExtend ();
+					return undef;
+				}
+				last SWITCH;
+			};
+			/^clic$/ && do {
+				$kiwi -> info ("Creating clicfs read only filesystem...\n");
+				if (! $this -> createImageClicFS ( $namero,$imageTree )) {
 					$this -> restoreCDRootData();
 					$this -> restoreSplitExtend ();
 					return undef;
@@ -1467,10 +1615,12 @@ sub createImageLiveCD {
 		push @main::Profiles ,split (/,/,$type{bootkernel});
 	}
 	$main::ForeignRepo{"xmlnode"} = $xml -> getForeignNodeList();
+	$main::ForeignRepo{"xmlpacnode"} = $xml -> getForeignPackageNodeList();
 	$main::ForeignRepo{"packagemanager"} = $xml -> getPackageManager();
-	$main::ForeignRepo{"locale"}  = $xml -> getLocale();
-	$main::ForeignRepo{"prepare"} = $main::Prepare;
-	$main::ForeignRepo{"create"}  = $main::Create;
+	$main::ForeignRepo{"locale"}    = $xml -> getLocale();
+	$main::ForeignRepo{"boot-theme"}= $xml -> getBootTheme();
+	$main::ForeignRepo{"prepare"}   = $main::Prepare;
+	$main::ForeignRepo{"create"}    = $main::Create;
 	$main::Create = $main::RootTree;
 	$xml = new KIWIXML ( $kiwi,$main::Prepare );
 	if (! defined $xml) {
@@ -1763,7 +1913,11 @@ sub createImageLiveCD {
 		print FD "label $label"."\n";
 		print FD "  kernel linux"."\n";
 		print FD "  append initrd=initrd ramdisk_size=512000 ";
-		print FD "ramdisk_blocksize=4096 splash=silent showopts"."\n";
+		print FD "ramdisk_blocksize=4096 splash=silent showopts ";
+		#print FD "console=ttyS0,9600n8 console=tty0 showopts ";
+		if ($vga) {
+			print FD "vga=$vga ";
+		}
 		print FD "\n";
 		print FD "label $lsafe"."\n";
 		print FD "  kernel linux"."\n";
@@ -1776,6 +1930,10 @@ sub createImageLiveCD {
 		print FD "  kernel mboot.c32"."\n";
 		print FD "  append xen.gz --- linux ramdisk_size=512000 ";
 		print FD "ramdisk_blocksize=4096 splash=silent ";
+		#print FD "console=ttyS0,9600n8 console=tty0 ";
+		if ($vga) {
+			print FD "vga=$vga ";
+		}
 		print FD "--- initrd showopts"."\n";
 		print FD "\n";
 		print FD "label $lsafe"."\n";
@@ -1863,7 +2021,7 @@ sub createImageLiveCD {
 		}
 		return undef;
 	}
-	if ((! defined $gzip) || ($gzip =~ /^(unified|dmsquash)/)) {
+	if ((! defined $gzip) || ($gzip =~ /^(unified|dmsquash|clic)/)) {
 		print FD "IMAGE=/dev/ram1;$namecd\n";
 	} else {
 		print FD "IMAGE=/dev/loop1;$namecd\n";
@@ -1871,6 +2029,8 @@ sub createImageLiveCD {
 	if (defined $gzip) {
 		if ($gzip =~ /^(unified|dmsquash)/) {
 			print FD "UNIONFS_CONFIG=/dev/ram1,/dev/loop1,aufs\n";
+		} elsif ($gzip =~ /^clic/) {
+			print FD "UNIONFS_CONFIG=/dev/ram1,/dev/loop1,clicfs\n";
 		} else {
 			print FD "COMBINED_IMAGE=yes\n";
 		}
@@ -1879,22 +2039,23 @@ sub createImageLiveCD {
 	#==========================================
 	# create ISO image
 	#------------------------------------------
-	$kiwi -> info ("Calling mkisofs...\n");
+	$kiwi -> info ("Creating ISO image...\n");
 	my $isoerror = 1;
 	my $name = $imageDest."/".$namerw.".iso";
 	my $attr = "-R -J -pad -joliet-long";
+	$attr .= " -p \"$main::Preparer\" -publisher \"$main::Publisher\"";
 	if (! defined $gzip) {
 		$attr .= " -iso-level 4"; 
 	}
+	if ($type{volid}) {
+		$attr .= " -V \"$type{volid}\"";
+	}
 	my $isolinux = new KIWIIsoLinux (
-		$kiwi,$main::RootTree."/CD",$name,undef,undef,$attr
+		$kiwi,$main::RootTree."/CD",$name,$attr
 	);
 	if (defined $isolinux) {
 		$isoerror = 0;
-		if (! $isolinux -> createSortFile()) {
-			$isoerror = 1;
-		}
-		if (! $isolinux -> createISOLinuxConfig()) {
+		if (! $isolinux -> callBootMethods()) {
 			$isoerror = 1;
 		}
 		if (! $isolinux -> createISO()) {
@@ -1911,7 +2072,7 @@ sub createImageLiveCD {
 	#==========================================
 	# relocate boot catalog
 	#------------------------------------------
-	if (! relocateCatalog ($this,$name)) {
+	if (! $isolinux -> relocateCatalog ($name)) {
 		if (! -d $main::RootTree.$baseSystem) {
 			qxx ("rm -rf $main::RootTree");
 			qxx ("rm -rf $tmpdir");
@@ -1923,9 +2084,7 @@ sub createImageLiveCD {
 	#------------------------------------------
 	if (-x "/usr/bin/tagmedia") {
 		$kiwi -> info ("Adding checkmedia tag...");
-		$data = qxx ("tagmedia --md5 --check $name 2>&1");
-		$code = $? >> 8;
-		if ($code != 0) {
+		if (! $isolinux -> checkImage()) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Failed to tag ISO image: $data");
 			$kiwi -> failed ();
@@ -2034,7 +2193,7 @@ sub createImageSplit {
 	if (-d $imageDest."/".$treebase) {
 		qxx ("rm -rf $imageDest/$treebase");
 	}
-	$data = qxx ("cp -a $imageTree $imageDest");
+	$data = qxx ("cp -a -x $imageTree $imageDest");
 	$code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> failed ();
@@ -2489,6 +2648,7 @@ sub createImageSplit {
 		push @main::Profiles ,split (/,/,$type{bootkernel});
 	}
 	$main::ForeignRepo{"xmlnode"} = $xml -> getForeignNodeList();
+	$main::ForeignRepo{"xmlpacnode"} = $xml -> getForeignPackageNodeList();
 	$main::ForeignRepo{"packagemanager"} = $xml -> getPackageManager();
 	$main::ForeignRepo{"oem-swap"}       = $xml -> getOEMSwap();
 	$main::ForeignRepo{"oem-swapsize"}   = $xml -> getOEMSwapSize();
@@ -2499,9 +2659,10 @@ sub createImageSplit {
 	$main::ForeignRepo{"oem-sap-install"}= $xml -> getOEMSAPInstall();
 	$main::ForeignRepo{"oem-reboot"}     = $xml -> getOEMReboot();
 	$main::ForeignRepo{"oem-recovery"}   = $xml -> getOEMRecovery();
-	$main::ForeignRepo{"locale"}  = $xml -> getLocale();
-	$main::ForeignRepo{"prepare"} = $main::Prepare;
-	$main::ForeignRepo{"create"}  = $main::Create;
+	$main::ForeignRepo{"locale"}    = $xml -> getLocale();
+	$main::ForeignRepo{"boot-theme"}= $xml -> getBootTheme();
+	$main::ForeignRepo{"prepare"}   = $main::Prepare;
+	$main::ForeignRepo{"create"}    = $main::Create;
 	$main::Create = $main::RootTree;
 	$xml = new KIWIXML ( $kiwi,$main::Prepare );
 	if (! defined $xml) {
@@ -2942,7 +3103,7 @@ sub postImage {
 		#==========================================
 		# Check EXT3 file system
 		#------------------------------------------
-		/ext3|ec2|dmsquash/i && do {
+		/ext3|ec2|dmsquash|clicfs/i && do {
 			qxx ("/sbin/fsck.ext3 -f -y $imageDest/$name 2>&1");
 			qxx ("/sbin/tune2fs -j $imageDest/$name 2>&1");
 			$kiwi -> done();
@@ -3072,7 +3233,7 @@ sub installLogicalExtend {
 	#------------------------------------------
 	my $name = basename ($source);
 	$kiwi -> info ("Copying physical to logical [$name]...");
-	my $data = qxx ("cp -a $source/* $extend 2>&1");
+	my $data = qxx ("cp -a -x $source/* $extend 2>&1");
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> failed ();
@@ -3218,6 +3379,10 @@ sub extractKernel {
 			last SWITCH;
 		};
 		/dmsquash/i && do {
+			return $name;
+			last SWITCH;
+		};
+		/clicfs/i && do {
 			return $name;
 			last SWITCH;
 		};

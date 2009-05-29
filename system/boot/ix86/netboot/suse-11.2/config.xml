@@ -153,6 +153,7 @@
 	</packages>
 	<packages type="image" profiles="default,xen,pae">
 		<!-- PACKAGES START DEFAULT AND XEN -->
+		<package name="clicfs"/>
 		<package name="curl"/>
 		<package name="psmisc"/>
 		<package name="iputils"/>
@@ -172,19 +173,17 @@
 		<package name="diffutils"/>
 		<package name="procps"/>
 		<package name="lvm2"/>
-		<package name="gfxboot"/>
-		<package name="gfxboot-devel"/>
 		<package name="fribidi"/>
 		<package name="make"/>
 		<package name="nbd"/>
 		<package name="nfs-client"/>
 		<package name="bootsplash"/>
-		<package name="bootsplash-branding-openSUSE"/>
 		<package name="tar"/>
 		<!-- PACKAGES END DEFAULT AND XEN -->
 	</packages>
 	<packages type="image" profiles="diskless">
 		<!-- PACKAGES START DISKLESS -->
+		<package name="clicfs"/>
 		<package name="iputils"/>
 		<package name="atftp"/>
 		<package name="dhcpcd"/>
@@ -200,10 +199,7 @@
 		<package name="nbd"/>
 		<package name="nfs-client"/>
 		<package name="tar"/>
-		<package name="gfxboot"/>
-		<package name="gfxboot-devel"/>
 		<package name="bootsplash"/>
-		<package name="bootsplash-branding-openSUSE"/>
 		<!-- PACKAGES STOP DISKLESS -->
 	</packages>
 	<packages type="bootstrap">
@@ -256,11 +252,8 @@
 		<package name="pm-utils"/>
 		<package name="pmtools"/>
 		<package name="suse-build-key"/>
-		<package name="gfxboot"/>
-		<package name="gfxboot-devel"/>
 		<package name="fribidi"/>
 		<package name="make"/>
-		<package name="bootsplash-branding-openSUSE"/>
 		<!-- DELETE PACKAGES END DEFAULT, XEN AND DISKLESS -->
 	</packages>
 	<packages type="delete" profiles="diskless">
@@ -276,8 +269,6 @@
 		<package name="openslp"/>
 		<package name="perl-HTML-Tagset"/>
 		<package name="perl"/>
-		<package name="gfxboot"/>
-		<package name="gfxboot-devel"/>
 		<package name="perl-gettext"/>
 		<package name="setserial"/>
 		<package name="bundle-lang-common-zh"/>

@@ -187,6 +187,25 @@ named /etc/ImageID</a:documentation>
       <a:documentation>Replace package with some other package</a:documentation>
     </attribute>
   </define>
+  <define name="k.bootinclude.attribute">
+    <attribute name="bootinclude">
+      <a:documentation>Indicates that this package should be part of
+the boot image (initrd) too. This attribute
+can be used to include for example branding packages
+specified in the system image description to become
+part of the boot image also</a:documentation>
+      <data type="boolean"/>
+    </attribute>
+  </define>
+  <define name="k.bootdelete.attribute">
+    <attribute name="bootdelete">
+      <a:documentation>Indicates that this package should be removed from
+the boot image (initrd). the attribute is only
+evaluated if the bootinclude attribute is specified
+along with it too</a:documentation>
+      <data type="boolean"/>
+    </attribute>
+  </define>
   <define name="k.displayname.attribute">
     <attribute name="displayname">
       <a:documentation>A friendly display name. Used in the boot menu
@@ -614,6 +633,25 @@ specifies the where to find the boot kernel.</db:para>
   </div>
   <!--
     ==========================================
+    common element <boot-theme>
+    
+  -->
+  <div>
+    <!-- boot-theme -->
+    <define name="k.boot-theme.attlist">
+      <empty/>
+    </define>
+    <define name="k.boot-theme">
+      <element name="boot-theme">
+        <a:documentation>Image bootsplash/gfxboot theme setup.</a:documentation>
+        <db:para>The value will be part used in suseGFXBoot</db:para>
+        <ref name="k.boot-theme.attlist"/>
+        <text/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
     common element <metadata>
     
   -->
@@ -835,6 +873,12 @@ to the specific medium number (CD1, DVD7, ...)</a:documentation>
     <define name="k.package.replaces.attribute">
       <ref name="k.replaces.attribute"/>
     </define>
+    <define name="k.package.bootinclude.attribute">
+      <ref name="k.bootinclude.attribute"/>
+    </define>
+    <define name="k.package.bootdelete.attribute">
+      <ref name="k.bootdelete.attribute"/>
+    </define>
     <define name="k.package.attlist">
       <interleave>
         <ref name="k.package.name.attribute"/>
@@ -843,6 +887,12 @@ to the specific medium number (CD1, DVD7, ...)</a:documentation>
         </optional>
         <optional>
           <ref name="k.replaces.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.bootdelete.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.bootinclude.attribute"/>
         </optional>
       </interleave>
     </define>
@@ -860,6 +910,12 @@ to the specific medium number (CD1, DVD7, ...)</a:documentation>
     
   -->
   <div>
+    <define name="k.packagemanager.content">
+      <choice>
+        <value>smart</value>
+        <value>zypper</value>
+      </choice>
+    </define>
     <define name="k.packagemanager.attlist">
       <empty/>
     </define>
@@ -868,11 +924,8 @@ to the specific medium number (CD1, DVD7, ...)</a:documentation>
         <a:documentation>Name of the Package Manager</a:documentation>
         <db:para>The package manager used for package installation
 could be either zypper or smart</db:para>
-        <group>
-          <ref name="k.packagemanager.attlist"/>
-          <text/>
-        </group>
-        <!-- zypper or smart -->
+        <ref name="k.packagemanager.attlist"/>
+        <ref name="k.packagemanager.content"/>
       </element>
     </define>
   </div>
@@ -1116,6 +1169,9 @@ to the used package manager.</db:para>
     
   -->
   <div>
+    <define name="k.rpm-excludedocs.content">
+      <data type="boolean"/>
+    </define>
     <define name="k.rpm-excludedocs.attlist">
       <empty/>
     </define>
@@ -1126,7 +1182,7 @@ to the used package manager.</db:para>
 during package installation. This option could be ignored
 according to the used package manager.</db:para>
         <ref name="k.rpm-excludedocs.attlist"/>
-        <text/>
+        <ref name="k.rpm-excludedocs.content"/>
       </element>
     </define>
   </div>
@@ -1509,6 +1565,13 @@ image or not</a:documentation>
         <data type="boolean"/>
       </attribute>
     </define>
+    <define name="k.type.volid.attribute">
+      <attribute name="volid">
+        <a:documentation>for the iso type only:
+Specifies the volume ID (volume name or label) to be written
+into the master block. There is space for 32 characters.</a:documentation>
+      </attribute>
+    </define>
     <define name="k.type.flags.attribute">
       <attribute name="flags">
         <a:documentation>Specifies flags for the image type. This could be compressed
@@ -1517,6 +1580,7 @@ unified or dmsquash and applies to the iso type only</a:documentation>
           <value>unified</value>
           <value>compressed</value>
           <value>dmsquash</value>
+          <value>clic</value>
         </choice>
       </attribute>
     </define>
@@ -1540,15 +1604,18 @@ hwinfo --framebuffer or in /usr/src/linux/Documentation/fb/vesafb.txt</a:documen
     <define name="k.type.filesystem.attribute">
       <attribute name="filesystem">
         <a:documentation>Specifies the filesystem which can be one of:
-ext2 , ext3 , reiserfs ,squashfs or dmsquash.
+ext2 , ext3 , reiserfs ,squashfs, clicfs or dmsquash.
 dmsquash is an ext3 filesystem packed into a squashfs
-and used later with a device mapper snapshot</a:documentation>
+and used later with a device mapper snapshot. clicfs
+is a fuse based compressed filesystem using a cow
+file for write operations</a:documentation>
         <choice>
           <value>ext2</value>
           <value>ext3</value>
           <value>reiserfs</value>
           <value>squashfs</value>
           <value>dmsquash</value>
+          <value>clicfs</value>
         </choice>
       </attribute>
     </define>
@@ -1630,6 +1697,9 @@ vmx/oem types only.</a:documentation>
           <ref name="k.type.boot.attribute"/>
         </optional>
         <optional>
+          <ref name="k.type.volid.attribute"/>
+        </optional>
+        <optional>
           <ref name="k.type.flags.attribute"/>
         </optional>
         <optional>
@@ -1696,6 +1766,7 @@ vmx/oem types only.</a:documentation>
         <choice>
           <value>aufs</value>
           <value>unionfs</value>
+          <value>clicfs</value>
         </choice>
       </attribute>
     </define>
@@ -2680,6 +2751,9 @@ and also depends of the selected image output type.</db:para>
           </optional>
           <optional>
             <ref name="k.locale"/>
+          </optional>
+          <optional>
+            <ref name="k.boot-theme"/>
           </optional>
           <optional>
             <ref name="k.defaultdestination"/>

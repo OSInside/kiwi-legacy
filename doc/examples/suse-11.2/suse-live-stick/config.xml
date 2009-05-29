@@ -6,19 +6,19 @@
 		<specification>openSUSE 11.2 live stick system 1GB</specification>
 	</description>
 	<preferences>
-		<type filesystem="squashfs" boot="usbboot/suse-11.2">usb</type>
-		<type filesystem="squashfs" boot="oemboot/suse-11.2">oem</type>
-		<type filesystem="squashfs" boot="vmxboot/suse-11.2">vmx</type>
+		<type filesystem="clicfs" boot="usbboot/suse-11.2">usb</type>
+		<type filesystem="clicfs" boot="oemboot/suse-11.2">oem</type>
+		<type filesystem="clicfs" boot="vmxboot/suse-11.2">vmx</type>
 		<version>1.1.2</version>
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>False</rpm-check-signatures>
 		<rpm-force>True</rpm-force>
-		<rpm-excludedocs>True</rpm-excludedocs>
+		<rpm-excludedocs>true</rpm-excludedocs>
 		<oem-swap>no</oem-swap>
 		<oem-kiwi-initrd>yes</oem-kiwi-initrd>
 		<oem-boot-title>USB</oem-boot-title>
 		<locale>en_US.UTF-8</locale>
-		<keytable>de-latin1-nodeadkeys.map.gz</keytable>
+		<keytable>us.map.gz</keytable>
 		<timezone>Europe/Berlin</timezone>
 	</preferences>
 	<users group="users">
@@ -32,9 +32,9 @@
 		<source path="opensuse://11.2/repo/oss/"/>
 	</repository>
 	<packages type="image" patternType="plusRecommended">
+		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
+		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="kernel-default"/>
-		<package name="bootsplash"/>
-		<package name="bootsplash-branding-openSUSE"/>
 		<package name="yast2-firstboot"/>
 		<package name="ifplugd"/>
 		<package name="vim"/>

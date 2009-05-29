@@ -115,6 +115,19 @@ k.name.attribute        =
 k.replaces.attribute    =
 	## Replace package with some other package
 	attribute replaces { text }
+k.bootinclude.attribute =
+	## Indicates that this package should be part of
+	## the boot image (initrd) too. This attribute
+	## can be used to include for example branding packages
+	## specified in the system image description to become
+	## part of the boot image also
+	attribute bootinclude { xsd:boolean }
+k.bootdelete.attribute =
+	## Indicates that this package should be removed from
+	## the boot image (initrd). the attribute is only
+	## evaluated if the bootinclude attribute is specified
+	## along with it too
+	attribute bootdelete { xsd:boolean }
 k.displayname.attribute =
 	## A friendly display name. Used in the boot menu
 	## for isolinux and grub
@@ -441,6 +454,24 @@ div { # locale
 }
 
 #==========================================
+# common element <boot-theme>
+#
+div { # boot-theme
+	k.boot-theme.attlist = empty
+	k.boot-theme =
+		## Image bootsplash/gfxboot theme setup.
+		[
+		db:para [
+			"The value will be part used in suseGFXBoot"
+		]
+		]
+		element boot-theme {
+			k.boot-theme.attlist,
+			text
+		}
+}
+
+#==========================================
 # common element <metadata>
 #
 div {
@@ -573,10 +604,14 @@ div {
 	k.package.name.attribute = k.name.attribute
 	k.package.arch.attribute = k.arch.attribute
 	k.package.replaces.attribute = k.replaces.attribute
+	k.package.bootinclude.attribute = k.bootinclude.attribute
+	k.package.bootdelete.attribute = k.bootdelete.attribute
 	k.package.attlist =
 		k.package.name.attribute &
 		k.package.arch.attribute? &
-		k.replaces.attribute?
+		k.replaces.attribute? &
+		k.bootdelete.attribute? &
+		k.bootinclude.attribute?
 	k.package =
 		## Name of an image Package
 		element package {
@@ -589,6 +624,7 @@ div {
 # common element <packagemanager>
 #
 div {
+	k.packagemanager.content = "smart" | "zypper"
 	k.packagemanager.attlist = empty
 	k.packagemanager =
 		## Name of the Package Manager
@@ -600,7 +636,7 @@ div {
 		]
 		element packagemanager {
 			k.packagemanager.attlist,
-			text # zypper or smart
+			k.packagemanager.content
 		}
 }
 
@@ -766,6 +802,7 @@ div {
 # common element <rpm-excludedocs>
 #
 div {
+	k.rpm-excludedocs.content = xsd:boolean
 	k.rpm-excludedocs.attlist = empty
 	k.rpm-excludedocs =
 		## Setup a Package Signature
@@ -778,7 +815,7 @@ div {
 		]
 		element rpm-excludedocs {
 			k.rpm-excludedocs.attlist,
-			text
+			k.rpm-excludedocs.content
 		}
 }
 
@@ -1118,11 +1155,16 @@ div {
 		## Activates whether KIWI should search for a prebuild boot
 		## image or not
 		attribute checkprebuilt { xsd:boolean }
+	k.type.volid.attribute =
+		## for the iso type only:
+		## Specifies the volume ID (volume name or label) to be written
+		## into the master block. There is space for 32 characters.
+		attribute volid { text }
 	k.type.flags.attribute =
 		## Specifies flags for the image type. This could be compressed
 		## unified or dmsquash and applies to the iso type only
 		attribute flags {
-			"unified" | "compressed" | "dmsquash"
+			"unified" | "compressed" | "dmsquash" | "clic"
 		}
 	k.type.bootloader.attribute =
 		## Specified the bootloader used for booting the image."
@@ -1137,11 +1179,13 @@ div {
 		attribute vga { text }
 	k.type.filesystem.attribute = 
 		## Specifies the filesystem which can be one of:
-		## ext2 , ext3 , reiserfs ,squashfs or dmsquash.
+		## ext2 , ext3 , reiserfs ,squashfs, clicfs or dmsquash.
 		## dmsquash is an ext3 filesystem packed into a squashfs
-		## and used later with a device mapper snapshot
+		## and used later with a device mapper snapshot. clicfs
+		## is a fuse based compressed filesystem using a cow
+		## file for write operations
 		attribute filesystem {
-			"ext2" | "ext3" | "reiserfs" | "squashfs" | "dmsquash"
+			"ext2" | "ext3" | "reiserfs" | "squashfs" | "dmsquash" | "clicfs"
 		}
 	k.type.fsreadonly.attribute =
 		## Specifies the filesystem for the read-only part of a split image
@@ -1176,6 +1220,7 @@ div {
 		k.type.bootprofile.attribute? &
 		k.type.bootkernel.attribute? &
 		k.type.boot.attribute? &
+		k.type.volid.attribute? &
 		k.type.flags.attribute? &
 		k.type.bootloader.attribute? &
 		k.type.vga.attribute? &
@@ -1206,7 +1251,7 @@ div {
 	k.union.rw.attribute =
 		## Device for Read-Write
 		attribute rw { text }
-	k.union.type.attribute = attribute type { "aufs" | "unionfs" }
+	k.union.type.attribute = attribute type { "aufs" | "unionfs" | "clicfs" }
 	k.union.attlist =
 		k.union.ro.attribute &
 		k.union.rw.attribute &
@@ -1845,6 +1890,7 @@ div {
 			k.keytable? &
 			k.timezone? &
 			k.locale? &
+			k.boot-theme? &
 			k.defaultdestination? &
 			k.defaultroot? &
 			k.defaultbaseroot?

@@ -4,6 +4,168 @@ Fri May 29 16:50:20 CEST 2009 - mbarringer@suse.de
 - Giving more imagewriter feedback when a file cannot be opened. 
 
 -------------------------------------------------------------------
+Wed May 27 15:52:39 CEST 2009 - ms@suse.de
+
+- v3.54
+- added kiwi --clone mode (bnc #505554)
+- check for iso tool in KIWIIsoLinux.pm (bnc #478991)
+- added fix catalog function to KIWIIsoLinux.pm (bnc #478991)
+- set inode count for system partition only, even if
+  it has been specified via --fs-maxinodes (bnc #495135)
+- fixed OEM recovery, set OEM_RECOVERY to the root device
+  not the recovery device (bnc #503653)
+
+-------------------------------------------------------------------
+Mon May 25 16:10:39 CEST 2009 - ms@suse.de
+
+- v3.53
+- fixed oem format="iso" install mode (bnc #506983)
+- use dialog for asking questions (bnc #503653)
+- added resize_inode feature to filesystem before resizing.
+  This will reserve space so the block group descriptor
+  table may grow in the future (bnc #498683)
+
+-------------------------------------------------------------------
+Mon May 25 10:49:56 CEST 2009 - ms@suse.de
+
+- fixed clicfs mount, regression from my last nfs fix
+
+-------------------------------------------------------------------
+Mon May 18 16:21:37 CEST 2009 - ms@suse.de
+
+- v3.52
+- don't reserve blocks for clicfs without cow (bnc #505580) 
+- reset IFS to standard value in CDDevice (bnc #505943)
+- fixed clicfs mount over AOE,NBD (bnc #504652)
+- fixed volid setup in case of spaces (bnc #500501)
+- allow inclusion of boot image packages specified inside
+  the system image description. This feature is used to setup
+  branding packages which needs to be installed as part of
+  the boot image (initrd) (bnc #497888)
+- rewrote KIWIIsoLinux.pm to allow bit/tri arch boot media
+  the code has not been tested for efi or ikr due to lack of
+  such machines (bnc #478991)
+- fixed/changed clicfs over NFS use. When using a clicfs
+  image it's required that the clicfs filesystem is mounted
+  on the server and the container (fsdata.ext3) is exported
+  to the client. In that way it's consistent with all other
+  filesystem types
+  
+-------------------------------------------------------------------
+Fri May 15 20:54:04 CEST 2009 - ms@suse.de
+
+- v3.51
+- set keytable to us in template files (bnc #504275)
+- fixed live iso examples (bnc #504283)
+
+-------------------------------------------------------------------
+Tue May  5 21:21:03 CEST 2009 - ms@suse.de
+
+- 3.50
+- added bash quotation function (bnc #500537)
+- fixed sap media changer call (bnc #486758)
+- added more clic fixes, still not finished (bnc #497172)
+- set inode count for system partition only (bnc #495135)
+- added optional volid setup for iso's (bnc #500501)
+- fixed group setup with correct group id (bnc #503117)
+- fixed spec file requirement for mkisofs on sle10 (bnc #503333)
+- update scheme documentation from oXygen
+- don't set config file when calling modprobe in
+  suseStripKernel function
+- fixed satsolver setup
+
+-------------------------------------------------------------------
+Tue May  5 11:34:11 CEST 2009 - ms@suse.de
+
+- v3.49
+- added clic fixes from coolo (bnc #497172)
+- fixed quotation of realname for user setup (bnc #500537)
+- fixed activateBootPartition code (bnc #500454)
+
+-------------------------------------------------------------------
+Wed Apr 29 18:10:00 CEST 2009 - ms@suse.de
+
+- v3.48
+- allow setting up vga for iso images too (bnc #480336)
+- fixed permissions on recovery (bnc #489909)
+- detect if it is required to pass -t iso9660 (bnc #498497)
+- added support for clicfs for suse >= 11.2 (bnc #497172)
+- don't run path generation for iso:// and file:// paths
+  if zypper is used (bnc #498437)
+
+-------------------------------------------------------------------
+Mon Apr 27 12:19:09 CEST 2009 - ms@suse.de
+
+- v3.47
+- fixed initrd cpio if xen type is requested (bnc #399230)
+- added kernel parameter nombridcheck (bnc #498371)
+- remove boot/grub/mbrid file from installed system
+  at first deployment to avoid conflicts on reboot
+- set boot flag after repartitioning the device
+- fixed template xorg.conf for 64 bit
+- exclude install source device from being used as
+  SAP data storage device
+
+-------------------------------------------------------------------
+Fri Apr 24 12:22:51 CEST 2009 - ms@suse.de
+
+- v3.46
+- fixed format image creation for split type (bnc #497882)
+- use -x option when copying system tree to avoid copying
+  still mounted filesystems like proc for example (bnc #497984)
+- pass -t iso9660 when mounting CD/DVD devices. It's a kernel
+  bug that slows down the bandwidth if not passing that value
+  but the workaround is rock solid :) (bnc #493201)
+
+-------------------------------------------------------------------
+Wed Apr 22 16:39:07 CEST 2009 - ms@suse.de
+
+- v3.45
+- fixed kiwi_revision content in .profile
+- fixed LVM repartition code if more than one VG exist
+- deacticate the bios 0x80 check it's not safe enough
+- don't reboot the system after OEMInstall, simply proceed
+- allow non interactive installation procedure in
+  oem-sap-install mode. In case of multiple disks the smallest
+  one is used for the system (bnc #486758)
+
+-------------------------------------------------------------------
+Wed Apr 22 10:06:17 CEST 2009 - ms@suse.de
+
+- v3.44
+- fixed fstab setup of sapdata volume
+- restrict packagemanager names to smart and zypper
+- activate volume groups before calling mkinitrd
+- fixed filesystem detection if root is on LVM
+- added ovftool patch required for tech. preview 
+- fixed bootpartition id for install image creation
+- fixed size of boot image partition when creating an
+  install image of type: virtual disk
+
+-------------------------------------------------------------------
+Tue Apr 21 11:46:11 CEST 2009 - ms@suse.de
+
+- v3.43
+- added missing entries in sysconfig/bootloader (bnc #495909)
+- let udev load modules if modules.order is provided by
+  the kernel (bnc #493201)
+
+-------------------------------------------------------------------
+Mon Apr 20 13:08:32 CEST 2009 - ms@suse.de
+
+- v3.42
+- fixed recovery device setup (bnc #493878)
+- make sure DHCPHADDR is an uppercase value (bnc #495557)
+- fixed probeFileSystem to take care if the first 512byte
+  contains a bootloader (bnc #493489)
+- fixed multicast activation/deactivation (bnc #356974)
+- also check for include link to use --dereference when
+  copying the overlay tree (bnc #490128)
+- added bool content type instead of text for
+  rpm-excludedocs (bnc #496382)
+>>>>>>> f811f4c851adaa94325a9b96d084d3dd7ef8f813:rpm/kiwi.changes
+
+-------------------------------------------------------------------
 Tue Apr  7 11:31:54 CEST 2009 - adrian@suse.de
 
 - Fix path creation on openSUSE 11.1 and later systems.

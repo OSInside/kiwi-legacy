@@ -26,9 +26,9 @@
 		<source path="opensuse://10.3/repo/oss/"/>
 	</repository>
 	<packages type="image" patternType="plusRecommended" patternPackageType="plusRecommended">
+		<package name="bootsplash-theme-SuSE" bootinclude="true" bootdelete="true"/>
 		<package name="kernel-default"/>
 		<package name="bootsplash"/>
-		<package name="bootsplash-theme-SuSE"/>
 		<package name="yast2-firstboot"/>
 		<package name="vim"/>
 		<opensusePattern name="default"/>

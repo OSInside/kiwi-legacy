@@ -946,7 +946,7 @@ function suseStripInitrd {
 		ldd driveready checkmedia splashy bzip2 hexdump vgremove
 		pvchange pvresize pvscan vgscan vgchange vgextend vgdisplay
 		lvchange lvresize lvextend lvcreate grub dcounter tty
-		dmsetup dialog awk gawk
+		dmsetup dialog awk gawk clicfs
 	"
 	tools="$tools $@"
 	for path in /sbin /usr/sbin /usr/bin /bin;do
@@ -989,6 +989,9 @@ function suseGFXBoot {
 	local theme=$1
 	local loader=$2
 	export PATH=$PATH:/usr/sbin
+	if [ ! -z "$kiwi_boottheme" ];then
+		theme=$kiwi_boottheme
+	fi
 	if [ -d /usr/share/gfxboot ];then
 		#======================================
 		# create boot theme with gfxboot-devel
@@ -1211,6 +1214,12 @@ function suseStripKernel {
 			fi
 			/sbin/depmod -F /boot/System.map-$VERSION $VERSION
 			#==========================================
+			# check for modules.order and backup it
+			#------------------------------------------
+			if [ -f $kversion/modules.order ];then
+				mv $kversion/modules.order /tmp
+			fi
+			#==========================================
 			# strip the modules but take care for deps
 			#------------------------------------------
 			stripdir=/tmp/stripped_modules
@@ -1249,7 +1258,6 @@ function suseStripKernel {
 			for mod in `find $stripdir -name "*.ko"`;do
 				d=`/usr/bin/basename $mod`
 				i=`/sbin/modprobe \
-					-C /etc/modprobe.conf \
 					--set-version $VERSION \
 					--ignore-install \
 					--show-depends \
@@ -1270,6 +1278,9 @@ function suseStripKernel {
 			rm -rf $kversion
 			mv -v $stripdir/$kversion $kversion
 			rm -rf $stripdir
+			if [ -f /tmp/modules.order ];then
+				mv /tmp/modules.order $kversion
+			fi
 			#==========================================
 			# run depmod
 			#------------------------------------------

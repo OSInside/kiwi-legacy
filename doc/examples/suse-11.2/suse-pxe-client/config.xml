@@ -6,7 +6,7 @@
 		<specification>openSUSE 11.2 Wyse VX0 terminal 128MB</specification>
 	</description>
 	<preferences>
-		<type filesystem="squashfs" boot="netboot/suse-11.2">pxe</type>
+		<type filesystem="clicfs" boot="netboot/suse-11.2">pxe</type>
 		<version>1.2.8</version>
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>False</rpm-check-signatures>
@@ -28,9 +28,11 @@
 			<partition type="L" number="2" size="image" mountpoint="/" target="true"/>
 			<partition type="L" number="3" target="false"/>
 		</partitions>
-		<union ro="/dev/sda2" rw="/dev/sda3" type="aufs"/>
+		<union ro="/dev/sda2" rw="/dev/sda3" type="clicfs"/>
 	</deploy>
 	<packages type="image">
+		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
+		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="binutils"/>
         <package name="file"/>
         <package name="gawk"/>
@@ -52,8 +54,6 @@
         <package name="dhcpcd"/>
 		<package name="dbus-1"/>
 		<package name="grub"/>
-		<package name="bootsplash"/>
-		<package name="bootsplash-branding-openSUSE"/>
 		<package name="acpid"/>
 		<package name="ifplugd"/>
 		<package name="vim"/>

@@ -98,7 +98,6 @@
 		<package name="fribidi"/>
 		<package name="make"/>
 		<package name="bootsplash"/>
-		<package name="bootsplash-theme-SuSE-NLD"/>
 		<package name="tar"/>
 	</packages>
 	<packages type="bootstrap">
@@ -136,6 +135,5 @@
 		<package name="gfxboot"/>
 		<package name="fribidi"/>
 		<package name="make"/>
-		<package name="bootsplash-theme-SuSE-NLD"/>
 	</packages>
 </image>

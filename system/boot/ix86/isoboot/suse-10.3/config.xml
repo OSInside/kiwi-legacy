@@ -96,7 +96,6 @@
 		<package name="hdparm"/>
 		<package name="grub"/>
 		<package name="bootsplash"/>
-		<package name="bootsplash-theme-SuSE"/>
 		<package name="tar"/>
 		<package name="checkmedia"/>
 	</packages>
@@ -152,6 +151,5 @@
 		<package name="gfxboot"/>
 		<package name="make"/>
 		<package name="memtest86+"/>
-		<package name="bootsplash-theme-SuSE"/>
 	</packages>
 </image>

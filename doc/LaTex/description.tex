@@ -121,7 +121,8 @@ documentation file at /usr/share/doc/packages/ kiwi/kiwi.rng.html.
 The image definition starts with an image tag and requires the
 schema format at version 2.0. The attribute name specifies the
 name of the image which is also used for the file names created
-by KIWI.
+by KIWI. Because we don't want spaces in file names the name
+attribute must not have any spaces in its name.
 
 \begin{itemize}
 \item The optional attribute displayname allows setup of the boot
@@ -147,7 +148,7 @@ elements \textbf{description, preferences, repository and
 packages (at least one of type=''bootstrap'')}.
 
 \begin{Command}{12cm}
-<description type="image">\\
+<description type="system">\\
 \hspace*{1cm}<author>an author</author>\\
 \hspace*{1cm}<contact>mail</contact>\\
 \hspace*{1cm}<specification>short info</specification>\\
@@ -156,7 +157,7 @@ packages (at least one of type=''bootstrap'')}.
 
 The mandatory description section contains information about
 the creator of this image description. The attribute \textbf{type}
-could be either of the value ''image'' which indicates this is a
+could be either of the value ''system'' which indicates this is a
 system image description or at value ''boot'' for boot image
 descriptions.
 
@@ -261,15 +262,15 @@ describes the possible types and their attributes:
       \item \textbf{compressed}: Compress filesystem with squashfs and
             use a link list to mount the system read-write. An additional
             split section controls the read-write information 
-      \item \textbf{unified-cromfs}: Same as unified but uses cromfs
-      \item \textbf{compressed-cromfs}: Same as compressed but uses cromfs
       \item \textbf{dmsquash}: Creates an ext3 image file and puts that
             into a squashfs filesystem. On boot the root tree is mounted
             via a device mapper snapshot device to allow full write
             access over the complete tree.
+      \item \textbf{clic}: Creates a fuse based compressed read-only
+            filesystem which allows write operations into a cow file
       \end{itemize}
-      If no flags or the flags ''compressed'' or ''compressed-cromfs''
-      are set an additional \textbf{split} section is required.
+      If no flags or the flags ''compressed''
+      are set an additional \textbf{split} section is recommended.
 \item \textbf{xen}\\
       Use this type to create a Xen enabled para-virtual gues image along
       with the attributes \textbf{filesystem} and
@@ -355,6 +356,8 @@ attributes:
       Specifies the name of the locale to use, which defines the
       contents of the RC\_LANG system environment variable in
       /etc/sysconfig/language
+\item \textbf{boot-theme}\\
+      Specifies the name of the gfxboot and bootsplash theme to use
 \item \textbf{defaultdestination}\\
       Used if the --destdir option is not specified when calling KIWI
 \item \textbf{defaultroot}\\
@@ -536,6 +539,8 @@ the latest packages available.
 \hspace*{2.5cm}\textit{patternPackageType="type"}\\
 \hspace*{1cm}<package name="name" arch="arch"/>\\
 \hspace*{1cm}<package name="name" replaces="name"/>\\
+\hspace*{1cm}<package name="name"\\
+\hspace*{2.5cm}bootinclude="yes" bootdelete="yes"/>\\
 \hspace*{1cm}<package .../>\\
 \hspace*{1cm}<opensusePattern name="name"/>\\
 \hspace*{1cm}<opensusePattern .../>\\
@@ -580,6 +585,7 @@ rpm -e --nodeps --noscripts \
       needs support for VMware- or generic based full virtualization.
 \end{itemize}
 
+\subsubsection{Using patterns}
 Using a pattern name enhances the package list with a number of
 additional packages belonging to this pattern. Support for patterns
 is SUSE-specific, and available with openSUSE 10.1 or later.
@@ -613,12 +619,14 @@ if it is required by a package dependency of another package in your list.
 The packagemanager will automatically pull in the package even if you have
 ignored it.
 
+\subsubsection{Architecture restrictions}
 To restrict a package to a specific architecture, use
 the \textbf{arch} attribute to specify a comma separated list of allowed
 architectures. Such a package is only installed if the build systems
 architecture (uname -m) matches one of the specified values of the arch
 attribute.
 
+\subsubsection{Image type specific packages}
 If a package is only required for a specific type of image
 and replaces another package you can use the \textbf{replaces} attribute
 to tell kiwi to install the package by replacing another one. For example
@@ -636,6 +644,19 @@ and in the type=xen section as
 
 The result is the xen kernel if you request a xen
 image and the default kernel in any other case.
+
+\subsubsection{Packages to become included into the boot image}
+The optional attributes \textbf{bootinclude} and \textbf{bootdelete}
+can be used to mark a package inside the system image description to
+become part of the corresponding boot image (initrd). This feature
+is most often used to specify bootsplash and/or graphics boot related
+packages inside the system image description but they are required
+to be part of the boot image as the data is used at boot time
+of the image. If the bootdelete attribute is specified along with
+the bootinclude attribute this means that the selected package
+will be marked as a \textit{to become deleted} package and is
+removed by the contents of the images.sh script of the corresponding
+boot image description
 
 \begin{Command}{12cm}
 <vmwareconfig arch="arch" memory="MB"\\
@@ -872,7 +893,7 @@ description.
 \end{Command}
 
 The optional split section is used if your image type is split or iso
-combined with the attributes compressed or compressed-cromfs. The split
+combined with the attribute compressed. The split
 section controls which files of your splitted image should be writable
 and whether they are persistantly writable or only temporarly. In case
 of an iso image all data specified can only be temporarly writable

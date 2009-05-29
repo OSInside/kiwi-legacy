@@ -1,7 +1,7 @@
 #!/bin/sh
 test -f /.profile && . /.profile
 
-echo "Configure image: [$name]..."
+echo "Configure image: [$kiwi_iname]..."
 #==========================================
 # remove unneeded packages
 #------------------------------------------

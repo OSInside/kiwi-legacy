@@ -34,9 +34,10 @@
 		<version>1.11.1</version>
 		<packagemanager>zypper</packagemanager>
 		<locale>en_US.UTF-8</locale>
-		<keytable>de-latin1-nodeadkeys.map.gz</keytable>
+		<keytable>us.map.gz</keytable>
 		<timezone>Europe/Berlin</timezone>
-		<rpm-excludedocs>yes</rpm-excludedocs>
+		<rpm-excludedocs>true</rpm-excludedocs>
+		<boot-theme>openSUSE</boot-theme>
 	</preferences>
 	<!-- Users setup -->
 	<users group="root">
@@ -52,9 +53,9 @@
 	</repository>
 	<!-- Packages and Patterns -->
 	<packages type="image">
+		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
+		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="kernel-default" replaces="kernel-xen"/>
-		<package name="bootsplash"/>
-		<package name="bootsplash-branding-openSUSE"/>
 		<package name="ifplugd"/>
 		<package name="vim"/>
 		<package name="grub"/>

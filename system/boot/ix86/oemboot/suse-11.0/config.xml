@@ -78,6 +78,7 @@
 		<package name="xen"/>
 	</packages>
 	<packages type="image">
+		<package name="dialog"/>
 		<package name="psmisc"/>
 		<package name="bind-libs"/>
 		<package name="bind-utils"/>
@@ -95,12 +96,9 @@
 		<package name="grub"/>
 		<package name="squashfs"/>
 		<package name="aufs"/>
-		<package name="gfxboot"/>
-		<package name="gfxboot-devel"/>
 		<package name="fribidi"/>
 		<package name="make"/>
 		<package name="bootsplash"/>
-		<package name="bootsplash-branding-openSUSE"/>
 		<package name="eject"/>
 		<package name="tar"/>
 		<package name="lvm2"/>
@@ -158,10 +156,7 @@
 		<package name="pmtools"/>
 		<package name="resmgr"/>
 		<package name="suse-build-key"/>
-		<package name="gfxboot"/>
-		<package name="gfxboot-devel"/>
 		<package name="fribidi"/>
 		<package name="make"/>
-		<package name="bootsplash-branding-openSUSE"/>
 	</packages>
 </image>

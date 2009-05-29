@@ -88,12 +88,9 @@
 		<package name="grub"/>
 		<package name="squashfs"/>
 		<package name="aufs"/>
-		<package name="gfxboot"/>
-		<package name="gfxboot-devel"/>
 		<package name="fribidi"/>
 		<package name="make"/>
 		<package name="bootsplash"/>
-		<package name="bootsplash-branding-openSUSE"/>
 		<package name="tar"/>
 		<package name="cromfs"/>
 		<package name="lvm2"/>
@@ -148,10 +145,7 @@
 		<package name="pm-utils"/>
 		<package name="pmtools"/>
 		<package name="suse-build-key"/>
-		<package name="gfxboot"/>
-		<package name="gfxboot-devel"/>
 		<package name="fribidi"/>
 		<package name="make"/>
-		<package name="bootsplash-branding-openSUSE"/>
 	</packages>
 </image>

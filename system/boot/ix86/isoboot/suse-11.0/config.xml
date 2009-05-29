@@ -91,8 +91,6 @@
 		<package name="sysconfig"/>
 		<package name="sysfsutils"/>
 		<package name="file"/>
-		<package name="gfxboot"/>
-		<package name="gfxboot-devel"/>
 		<package name="syslinux"/>
 		<package name="make"/>
 		<package name="memtest86+"/>
@@ -102,7 +100,6 @@
 		<package name="hdparm"/>
 		<package name="grub"/>
 		<package name="bootsplash"/>
-		<package name="bootsplash-branding-openSUSE"/>
 		<package name="tar"/>
 		<package name="cromfs"/>
 		<package name="rpm"/>
@@ -123,7 +120,6 @@
 		<package name="binutils"/>
 		<package name="blocxx"/>
 		<package name="bootsplash"/>
-		<package name="bootsplash-branding-openSUSE"/>
 		<package name="cpio"/>
 		<package name="cyrus-sasl"/>
 		<package name="db"/>
@@ -136,8 +132,6 @@
 		<package name="fribidi"/>
 		<package name="gawk"/>
 		<package name="gdbm"/>
-		<package name="gfxboot"/>
-		<package name="gfxboot-devel"/>
 		<package name="glib2"/>
 		<package name="glib2-lang"/>
 		<package name="glibc-locale"/>

@@ -223,10 +223,12 @@ sub new {
 		}
 	}
 	#==========================================
-	# Set packagemanager if set on commandline
+	# Set global packagemanager value
 	#------------------------------------------
 	if (defined $main::PackageManager) {
 		$this -> setPackageManager ($main::PackageManager);
+	} else {
+		$main::PackageManager = $this -> getPackageManager();
 	}
 	#==========================================
 	# setup foreign repository sections
@@ -247,11 +249,56 @@ sub new {
 		$repositNodeList = $foreignRepo->{xmlnode};
 		$repositNodeList -> prepend ($need);
 		$kiwi -> done ();
+		if ( defined $foreignRepo->{xmlpacnode} ) {
+			#==========================================
+			# foreign image packages
+			#------------------------------------------
+			my $nodes = $foreignRepo->{xmlpacnode};
+			my @plist;
+			my @flistImage;
+			my @flistDelete;
+			for (my $i=1;$i<= $nodes->size();$i++) {
+				my $node = $nodes -> get_node($i);
+				my $type = $node  -> getAttribute ("type");
+				if ($type eq "image") {
+					if (! $this -> requestedProfile ($node)) {
+						next;
+					}
+					push (@plist,$node->getElementsByTagName ("package"));
+				}
+			}
+			foreach my $element (@plist) {
+				my $package = $element -> getAttribute ("name");
+				my $bootinc = $element -> getAttribute ("bootinclude");
+				my $bootdel = $element -> getAttribute ("bootdelete");
+				if ((defined $bootinc) && ("$bootinc" =~ /yes|true/i)) {
+					push (@flistImage,$package);
+				}
+				if ((defined $bootdel) && ("$bootdel" =~ /yes|true/i)) {
+					push (@flistDelete,$package);
+				}
+			}
+			if (@flistImage) {
+				$kiwi -> info ("Adding foreign package(s):\n");
+				foreach my $p (@flistImage) {
+					$kiwi -> info ("--> $p\n");
+				}
+				$this -> addPackages ("image",$packageNodeList,@flistImage);
+				if (@flistDelete) {
+					$this -> addPackages (
+						"delete",$packageNodeList,@flistDelete
+					);
+				}
+			}
+		}
 		#==========================================
 		# foreign preferences
 		#------------------------------------------
 		if (defined $foreignRepo->{"locale"}) {
 			$this -> setForeignOptionsElement ("locale");
+		}
+		if (defined $foreignRepo->{"boot-theme"}) {
+			$this -> setForeignOptionsElement ("boot-theme");
 		}
 		if (defined $foreignRepo->{"packagemanager"}) {
 			$this -> setForeignOptionsElement ("packagemanager");
@@ -657,6 +704,7 @@ sub getImageTypeAndAttributes {
 		}
 		$record{type}   = $node -> string_value();
 		$record{boot}   = $node -> getAttribute("boot");
+		$record{volid}  = $node -> getAttribute("volid");
 		$record{flags}  = $node -> getAttribute("flags");
 		$record{format} = $node -> getAttribute("format");
 		$record{vga}    = $node -> getAttribute("vga");
@@ -1302,6 +1350,22 @@ sub getLocale {
 }
 
 #==========================================
+# getBootTheme
+#------------------------------------------
+sub getBootTheme {
+	# ...
+	# Obtain the boot-theme value or return undef
+	# ---
+	my $this = shift;
+	my $node = $this -> getPreferencesNodeByTagName ("boot-theme");
+	my $theme= $node -> getElementsByTagName ("boot-theme");
+	if ((! defined $theme) || ("$theme" eq "")) {
+		return undef;
+	}
+	return $theme;
+}
+
+#==========================================
 # getRPMCheckSignatures
 #------------------------------------------
 sub getRPMCheckSignatures {
@@ -1879,12 +1943,18 @@ sub addPackages {
 	# ----
 	my $this  = shift;
 	my $ptype = shift;
+	my $nodes = shift;
 	my @packs = @_;
-	my $nodes = $this->{packageNodeList};
+	if (! defined $nodes) {
+		$nodes = $this->{packageNodeList};
+	}
 	my $nodeNumber = 1;
 	for (my $i=1;$i<= $nodes->size();$i++) {
 		my $node = $nodes -> get_node($i);
 		my $type = $node  -> getAttribute ("type");
+		if (! $this -> requestedProfile ($node)) {
+			next;
+		}
 		if ($type eq $ptype) {
 			$nodeNumber = $i; last;
 		}
@@ -1892,7 +1962,7 @@ sub addPackages {
 	foreach my $pack (@packs) {
 		my $addElement = new XML::LibXML::Element ("package");
 		$addElement -> setAttribute("name",$pack);
-		$this->{packageNodeList} -> get_node($nodeNumber)
+		$nodes -> get_node($nodeNumber)
 			-> addChild ($addElement);
 	}
 	return $this;
@@ -1907,7 +1977,7 @@ sub addImagePackages {
 	# section of the xml description parse tree.
 	# ----
 	my $this  = shift;
-	return $this -> addPackages ("bootstrap",@_);
+	return $this -> addPackages ("bootstrap",undef,@_);
 }
 
 #==========================================
@@ -1919,7 +1989,7 @@ sub addRemovePackages {
 	# section of the xml description parse tree.
 	# ----
 	my $this  = shift;
-	return $this -> addPackages ("delete",@_);
+	return $this -> addPackages ("delete",undef,@_);
 }
 
 #==========================================
@@ -1939,6 +2009,7 @@ sub getImageConfig {
 	my $rev  = "unknown";
 	if (open FD,$main::Revision) {
 		$rev = <FD>; close FD;
+		$rev =~ s/\n//g;
 	}
 	$result{kiwi_revision} = $rev;
 	#==========================================
@@ -2009,6 +2080,7 @@ sub getImageConfig {
 		my $keytable = $element -> getElementsByTagName ("keytable");
 		my $timezone = $element -> getElementsByTagName ("timezone");
 		my $language = $element -> getElementsByTagName ("locale");
+		my $boottheme= $element -> getElementsByTagName ("boot-theme");
 		my $oemswapMB= $element -> getElementsByTagName ("oem-swapsize");
 		my $oemrootMB= $element -> getElementsByTagName ("oem-systemsize");
 		my $oemswap  = $element -> getElementsByTagName ("oem-swap");
@@ -2026,6 +2098,9 @@ sub getImageConfig {
 		}
 		if (defined $language) {
 			$result{kiwi_language} = $language;
+		}
+		if (defined $boottheme) {
+			$result{kiwi_boottheme}= $boottheme;
 		}
 		if ((defined $oemswap) && ("$oemswap" eq "no")) {
 			$result{kiwi_oemswap} = "no";
@@ -2776,6 +2851,18 @@ sub getForeignNodeList {
 }
 
 #==========================================
+# getForeignPackageNodeList
+#------------------------------------------
+sub getForeignPackageNodeList {
+	# ...
+	# Return the current <packages> list which consists
+	# of XML::LibXML::Element object pointers
+	# ---
+	my $this = shift;
+	return $this->{packageNodeList};
+}
+
+#==========================================
 # getImageInheritance
 #------------------------------------------
 sub setupImageInheritance {
@@ -3147,7 +3234,7 @@ sub getInstSourceSatSolvable {
 		$count++;
 		foreach my $dist (keys %distro) {
 			my $name = $distro{$dist};
-			if ($name =~ /\.gz$/) {
+			if ($dist =~ /\.gz$/) {
 				$destfile = $sdir."/$name-".$count.".gz";
 			} else {
 				$destfile = $sdir."/$name-".$count;
@@ -3231,7 +3318,7 @@ sub getInstSourceSatSolvable {
 				$stdcmd .= $file." ";
 			}
 		}
-		foreach my $file (glob ("$sdir/*.pat")) {
+		foreach my $file (glob ("$sdir/*.pat*")) {
 			if ($file =~ /\.gz$/) {
 				$gzicmd .= $file." ";
 			} else {
