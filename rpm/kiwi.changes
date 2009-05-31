@@ -169,6 +169,7 @@ Mon Apr 20 13:08:32 CEST 2009 - ms@suse.de
   copying the overlay tree (bnc #490128)
 - added bool content type instead of text for
   rpm-excludedocs (bnc #496382)
+>>>>>>> f811f4c851adaa94325a9b96d084d3dd7ef8f813:rpm/kiwi.changes
 
 -------------------------------------------------------------------
 Tue Apr  7 11:31:54 CEST 2009 - adrian@suse.de

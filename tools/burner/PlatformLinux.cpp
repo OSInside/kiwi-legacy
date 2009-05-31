@@ -306,7 +306,7 @@ PlatformLinux::writeData(QString path, QString fileName, qint64 deviceSize)
     if ((ifd = ::open(fileName.toLocal8Bit().data(), O_RDONLY)) == -1)
     {
         QMessageBox msgBox;
-        msgBox.setText(QObject::tr("Couldn't open ") + fileName);
+        msgBox.setText(QObject::tr("Couldn't open ") + fileName + ": " + strerror(errno));
         msgBox.exec();
         return;
     }
