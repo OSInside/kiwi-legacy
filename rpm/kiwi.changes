@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Sun May 31 09:39:53 CEST 2009 - ms@suse.de
+
+- v3.55
+- allow use of zypper iso:// URL type in kiwi (bnc #498437)
+
+-------------------------------------------------------------------
+Fri May 29 16:50:20 CEST 2009 - mbarringer@suse.de
+
+- Giving more imagewriter feedback when a file cannot be opened. 
+
+-------------------------------------------------------------------
 Wed May 27 15:52:39 CEST 2009 - ms@suse.de
 
 - v3.54

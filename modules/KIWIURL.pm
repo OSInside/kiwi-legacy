@@ -96,15 +96,13 @@ sub normalizePath {
 	if (defined $path) {
 		return $path;
 	}
-	if ($main::PackageManager ne "zypper") {
-		$path = $this -> isoPath ($module);
-		if (defined $path) {
-			return $path;
-		}
-		$path = $this -> filePath ($module);
-		if (defined $path) {
-			return $path;
-		}
+	$path = $this -> isoPath ($module);
+	if (defined $path) {
+		return $path;
+	}
+	$path = $this -> filePath ($module);
+	if (defined $path) {
+		return $path;
 	}
 	return $module;
 }
@@ -302,6 +300,8 @@ sub isoPath {
 	my $root   = $this->{root};
 	my $result;
 	my $status;
+	my $file;
+	my $path;
 	#==========================================
 	# normalize URL data
 	#------------------------------------------
@@ -309,6 +309,23 @@ sub isoPath {
 		return undef;
 	}
 	$module =~ s/iso:\/\///;
+	#==========================================
+	# Convert zypper iso URL if required
+	#------------------------------------------
+	if ($module =~ /iso=(.*\.iso)/) {
+		$file = $1;
+		if ($module =~ /url=file:\/\/(.*)/) {
+			$path = $1;
+		} elsif ($module =~ /url=dir:\/\/(.*)/) {
+			$path = $1;
+		} else {
+			return undef;
+		}
+		$module = $path."/".$file;
+	}
+	#==========================================
+	# Check existence of iso file
+	#------------------------------------------
 	if ($module !~ /^\//) {
 		my $pwd = qxx ("pwd"); chomp $pwd;
 		$module = $pwd."/".$module;
