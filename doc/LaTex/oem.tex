@@ -103,7 +103,7 @@ function named baseSetupOEMPartition. Following oem-* elements can
 be specified:
 
 \begin{itemize}
-\item \textbf{<oem-reboot>yes|no</oem-reboot>}\\
+\item \textbf{<oem-reboot>true|false</oem-reboot>}\\
       This allows to reboot the oem system after initial deployment.
       This value is represented by the variable OEM\_REBOOT in
       config.oempartition
@@ -113,10 +113,10 @@ be specified:
 \item \textbf{<oem-systemsize>number in MB</oem-systemsize>}\\
       Set the size of the / partition. This value is represented by the
       variable OEM\_SYSTEMSIZE in config.oempartition
-\item \textbf{<oem-home>yes|no</oem-home>}\\
+\item \textbf{<oem-home>true|false</oem-home>}\\
       Specify if a home partition should be create. This value is represented
       by the variable OEM\_WITHOUTHOME in config.oempartition.
-\item \textbf{<oem-swap>yes|no</oem-swap>}\\
+\item \textbf{<oem-swap>true|false</oem-swap>}\\
       Specify if a spaw partition should be create. This value is represented 
       by the variable OEM\_WITHOUTSWAP in config.oempartition.
 \item \textbf{<oem-boot-title>text</oem-boot-title>}\\
@@ -125,7 +125,7 @@ be specified:
       first deployment. The oem-boot-title value allows to set a custom
       name which is used instead of OEM. This value is represented
       by the variable OEM\_BOOT\_TITLE in config.oempartition.
-\item \textbf{<oem-recovery>yes|no</oem-recovery>}\\
+\item \textbf{<oem-recovery>true|false</oem-recovery>}\\
       If this element is set to yes KIWI will create a recovery archive
       from the prepared root tree. The archive will appear as
       \textit{/recovery.tar.bz2} within the initial image file. During
@@ -135,7 +135,7 @@ be specified:
       allows to restore the original root tree information. The
       user information on the /home partition or in the /home directory
       are not affected by that recovery process
-\item \textbf{<oem-kiwi-initrd>yes|no</oem-kiwi-initrd>}\\
+\item \textbf{<oem-kiwi-initrd>true|false</oem-kiwi-initrd>}\\
       If this element is set to yes the initial oemboot boot image (initrd)
       will \textbf{not} be replaced by the system (mkinitrd) created initrd.
       This option makes sense if the target storage device for the image
