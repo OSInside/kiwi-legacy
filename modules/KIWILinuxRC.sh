@@ -68,10 +68,10 @@ function Echo {
 #--------------------------------------
 function WaitKey {
 	# /.../
-	# if DEBUG is set wait for any key to continue
+	# if DEBUG is set wait for ENTER to continue
 	# ----
 	if test "$DEBUG" = 1;then
-		Echo -n "Press any key to continue..."
+		Echo -n "Press ENTER to continue..."
 		read
 	fi
 }
@@ -1994,8 +1994,8 @@ function CDMount {
 				if [ "$mediacheck" = 1 ] && [ -z "$silent" ]; then
 					test -e /proc/splash && echo verbose > /proc/splash
 					checkmedia $cddev
-					Echo -n "Press any key for reboot: "; read nope
-					systemException "CheckMedia" "reboot"
+					Echo -n "Press ENTER for reboot: "; read nope
+					/sbin/reboot -f -i >/dev/null
 				fi
 				IFS=$IFS_ORIG
 				return

@@ -199,7 +199,7 @@ sub new {
 				#==========================================
 				# setup device mapper
 				#------------------------------------------
-				$kiwi -> info ("Setup device mapper for ISO install image");
+				$kiwi -> info ("Setup device mapper on image file");
 				$status = qxx ( "/sbin/kpartx -a $this->{loop} 2>&1" );
 				$result = $? >> 8;
 				if ($result != 0) {

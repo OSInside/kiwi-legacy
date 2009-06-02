@@ -1,14 +1,16 @@
 -------------------------------------------------------------------
-Tue Jun 02 09:25:40 CEST 2009 - mbarringer@suse.de
-
-- Use the O_LARGEFILE flag when opening an image
-
--------------------------------------------------------------------
-Sun May 31 09:39:53 CEST 2009 - ms@suse.de
+Tue Jun  2 16:41:48 CEST 2009 - ms@suse.de
 
 - v3.55
 - allow use of zypper iso:// URL type in kiwi (bnc #498437)
 - fixed documentation for bool value use (bnc #508614)
+- fixed checkmedia reboot to happen immediately (bnc #509061)
+- fixed checkmedia message (bnc #509060)
+
+-------------------------------------------------------------------
+Tue Jun 02 09:25:40 CEST 2009 - mbarringer@suse.de
+
+- Use the O_LARGEFILE flag when opening an image
 
 -------------------------------------------------------------------
 Fri May 29 16:50:20 CEST 2009 - mbarringer@suse.de
