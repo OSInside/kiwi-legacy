@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Jun 02 09:25:40 CEST 2009 - mbarringer@suse.de
+
+- Use the O_LARGEFILE flag when opening an image
+
+-------------------------------------------------------------------
 Sun May 31 09:39:53 CEST 2009 - ms@suse.de
 
 - v3.55

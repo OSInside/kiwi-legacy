@@ -303,7 +303,7 @@ PlatformLinux::writeData(QString path, QString fileName, qint64 deviceSize)
     megsTotal = realSize / 1048576;
 
     // Open the file to read from 
-    if ((ifd = ::open(fileName.toLocal8Bit().data(), O_RDONLY)) == -1)
+    if ((ifd = ::open(fileName.toLocal8Bit().data(), O_RDONLY|O_LARGEFILE)) == -1)
     {
         QMessageBox msgBox;
         msgBox.setText(QObject::tr("Couldn't open ") + fileName + ": " + strerror(errno));
