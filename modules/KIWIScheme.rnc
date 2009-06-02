@@ -26,7 +26,7 @@ db:info [
 	db:releaseinfo [
 		"$Id: kiwi.rnc 2957 2008-01-11 12:53:39Z thomas-schraitle $"
 	]
-	db:releaseinfo [ "RNC Schema Version 2.4" ]
+	db:releaseinfo [ "RNC Schema Version 3.5" ]
 	db:pubdate [ "START" ]
 	db:pubdate [ "2008-01-08" ]
 ]
@@ -58,7 +58,7 @@ div {
 		attribute inherit { text }
 	k.image.schemeversion.attribute =
 		## The allowed Schema version (fixed value)
-		attribute schemeversion { "2.4" }
+		attribute schemeversion { "3.5" }
 	k.image.kiwirevision.attribute =
 		## A kiwi SVN revision number which is known to build
 		## a working image from this description. If the kiwi SVN
@@ -173,25 +173,6 @@ div {
 	k.author =
 		## Author of the image
 		element author { k.author.attlist, text }
-}
-
-#==========================================
-# common element <compressed>
-#
-div {
-	k.compressed.attlist = empty
-	k.compressed =
-		## Compress image. 
-		#[
-		#db:para [
-		#	"The compression may be changed by the" ~
-		#	"code according to the image output type"
-		#]
-		#]
-		element compressed {
-			k.compressed.attlist,
-			text
-		}
 }
 
 #==========================================
@@ -1167,11 +1148,16 @@ div {
 			"unified" | "compressed" | "dmsquash" | "clic"
 		}
 	k.type.bootloader.attribute =
-		## Specified the bootloader used for booting the image."
+		## Specifies the bootloader used for booting the image."
 		## At the moment only grub and syslinux are supported
 		attribute bootloader {
 			"grub" | "syslinux"
 		}
+	k.type.compressed.attribute =
+		## Specifies whether the image output file should be
+		## compressed or not. This makes only sense for filesystem
+		## only images respectively for the pxe or cpio type
+		attribute compressed { xsd:boolean }
 	k.type.vga.attribute =
 		## Specifies the kernel framebuffer mode. More information
 		## about the possible values can be found by calling
@@ -1223,6 +1209,7 @@ div {
 		k.type.volid.attribute? &
 		k.type.flags.attribute? &
 		k.type.bootloader.attribute? &
+		k.type.compressed.attribute? &
 		k.type.vga.attribute? &
 		k.type.filesystem.attribute? &
 		k.type.fsreadonly.attribute? &
@@ -1873,7 +1860,6 @@ div {
 			k.type* &
 			k.version? &
 			k.size? &
-			k.compressed? &
 			k.oem-swap? &
 			k.oem-home? &
 			k.oem-boot-title? &

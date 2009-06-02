@@ -99,7 +99,8 @@ our $Revision = $BasePath."/.revision";
 our $TestBase = $BasePath."/tests";
 our @SchemeCVT= (
 	$BasePath."/xsl/convert14to20.xsl",
-	$BasePath."/xsl/convert20to24.xsl"
+	$BasePath."/xsl/convert20to24.xsl",
+	$BasePath."/xsl/convert24to35.xsl"
 );
 
 #==========================================
@@ -185,7 +186,6 @@ our $GzipCmd;               # command to run to gzip things
 our $PrebuiltBootImage;     # directory where a prepared boot image may be found
 our $PreChrootCall;         # program name called before chroot switch
 our $listXMLInfo;           # list XML information for this operation
-our $Compress;              # set compression level
 our $CreatePassword;        # create crypted password
 our $ISOCheck;              # create checkmedia boot entry
 our $PackageManager;        # package manager to use for this image
@@ -655,14 +655,6 @@ sub main {
 				$kiwi -> notset();
 			}
         }
-		#==========================================
-		# Check for --compress option
-		#------------------------------------------
-		if (defined $Compress) {
-			$kiwi -> info ("Set compression level to: $Compress");
-			$xml  -> setCompressed ($Compress);
-			$kiwi -> done();
-		}
 		#==========================================
 		# Check tool set
 		#------------------------------------------
@@ -1317,7 +1309,6 @@ sub init {
 		"prebuiltbootimage=s"   => \$PrebuiltBootImage,
 		"prechroot-call=s"      => \$PreChrootCall,
 		"list-xmlinfo|x=s"      => \$listXMLInfo,
-		"compress=s"            => \$Compress,
 		"fs-blocksize=i"        => \$FSBlockSize,
 		"fs-journalsize=i"      => \$FSJournalSize,
 		"fs-inodesize=i"        => \$FSInodeSize,
@@ -1439,11 +1430,6 @@ sub init {
 			$kiwi -> skipped ();
 		}
 		$RootTree = $BaseRoot;
-	}
-	if ((defined $Compress) && ($Compress !~ /^yes$|^no$/)) {
-		$kiwi -> error ("Invalid compress argument, expected yes|no");
-		$kiwi -> failed ();
-		my $code = kiwiExit (1); return $code;
 	}
 	if ((defined $PreChrootCall) && (! -x $PreChrootCall)) {
 		$kiwi -> error ("pre-chroot program: $PreChrootCall");

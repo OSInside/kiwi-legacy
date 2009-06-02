@@ -251,6 +251,10 @@ describes the possible types and their attributes:
 \item \textbf{pxe}\\
       Use this type to create a network boot image along with the
       attributes \textbf{filesystem} and \textbf{boot=''netboot/suse-*''}
+      Additionally the attribute \textbf{compressed} specifies whether
+      the image file should be compressed or not. This is not the filesystem
+      compression just the image file compression most often used to
+      transfer the compressed version over to the boot server.
 \item \textbf{iso}\\
       Use this type to create a live system on CD or DVD along with
       the attributes \textbf{boot=''isoboot/suse-*''} and optionally
@@ -332,9 +336,6 @@ attributes:
       to tell kiwi to use the required size for the image plus the
       given size as additional free space. The ''additive'' attribute is
       a bool attribute and can be set to either true or false.
-\item \textbf{compressed}\\
-      Specifies whether the image file should be compressed or not.
-      This is not the filesystem compression just the image file compression
 \item \textbf{rpm-check-signatures}\\
       Specifies whether RPM should check the package signature or not
 \item \textbf{rpm-excludedocs}\\

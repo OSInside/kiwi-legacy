@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<image schemeversion="2.4" name="suse-10.3-pxe-client">
+<image schemeversion="3.5" name="suse-10.3-pxe-client">
 	<description type="system">
 		<author>Marcus Schäfer</author>
 		<contact>ms@novell.com</contact>

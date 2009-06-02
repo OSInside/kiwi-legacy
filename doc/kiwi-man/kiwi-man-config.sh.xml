@@ -457,8 +457,8 @@ exit</programlisting>
         <term><optional>$kiwi_compressed</optional></term>
         <listitem>
           <para>
-            The value of the compressed flag of the preferences section in
-            config.xml
+			The value of the compressed attribute set in the type element
+			in config.xml
           </para>
         </listitem>
       </varlistentry>

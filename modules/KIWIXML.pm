@@ -702,12 +702,13 @@ sub getImageTypeAndAttributes {
 		if ($count == 0) {
 			$first = $prim;
 		}
-		$record{type}   = $node -> string_value();
-		$record{boot}   = $node -> getAttribute("boot");
-		$record{volid}  = $node -> getAttribute("volid");
-		$record{flags}  = $node -> getAttribute("flags");
-		$record{format} = $node -> getAttribute("format");
-		$record{vga}    = $node -> getAttribute("vga");
+		$record{type}          = $node -> string_value();
+		$record{compressed}    = $node -> getAttribute("compressed");
+		$record{boot}          = $node -> getAttribute("boot");
+		$record{volid}         = $node -> getAttribute("volid");
+		$record{flags}         = $node -> getAttribute("flags");
+		$record{format}        = $node -> getAttribute("format");
+		$record{vga}           = $node -> getAttribute("vga");
 		$record{bootloader}    = $node -> getAttribute("bootloader");
 		$record{checkprebuilt} = $node -> getAttribute("checkprebuilt");
 		$record{baseroot}      = $node -> getAttribute("baseroot");
@@ -1060,35 +1061,6 @@ sub getDeployInitrd {
 }
 
 #==========================================
-# getCompressed
-#------------------------------------------
-sub getCompressed {
-	# ...
-	# Check if the image should be compressed or not. The
-	# method returns true if the image should be compressed
-	# otherwise false. 
-	# ---
-	my $this = shift;
-	my $quiet= shift;
-	my $kiwi = $this->{kiwi};
-	my %type = %{$this->getImageTypeAndAttributes()};
-	if ("$type{type}" eq "vmx") {
-		if (defined $quiet) {
-			return 0;
-		}
-		$kiwi -> info ("Virtual machine type: ignoring compressed flag");
-		$kiwi -> done ();
-		return 0;
-	}
-	my $node = $this -> getPreferencesNodeByTagName ("compressed");
-	my $gzip = $node -> getElementsByTagName ("compressed");
-	if ((defined $gzip) && ("$gzip" =~ /yes|true/i)) {
-		return 1;
-	}
-	return 0;
-}
-
-#==========================================
 # setForeignOptionsElement
 #------------------------------------------
 sub setForeignOptionsElement {
@@ -1112,29 +1084,6 @@ sub setForeignOptionsElement {
 	}
 	$opts -> appendChild ($addElement);
 	$kiwi -> done ();
-	return $this;
-}
-
-#==========================================
-# setCompressed
-#------------------------------------------
-sub setCompressed {
-	# ...
-	# Set compressed element to yes or no. Sometimes the
-	# compression state of an image needs to be adapted according
-	# to the output image type
-	# ---
-	my $this  = shift;
-	my $value = shift;
-	if (($value ne "no") && ($value ne "yes")) {
-		return $this;
-	}
-	my $addElement = new XML::LibXML::Element ("compressed");
-	$addElement -> appendText ($value);
-	my $opts = $this -> getPreferencesNodeByTagName ("compressed");
-	my $node = $opts -> getElementsByTagName ("compressed") -> get_node(1);
-	$opts -> removeChild ($node);
-	$opts -> appendChild ($addElement);
 	return $this;
 }
 
@@ -2015,9 +1964,6 @@ sub getImageConfig {
 	#==========================================
 	# preferences
 	#------------------------------------------
-	if (getCompressed ($this,"quiet")) {
-		$result{kiwi_compressed} = "yes";
-	}
 	my %type = %{$this->getImageTypeAndAttributes()};
 	my @delp = $this -> getDeleteList();
 	my @tstp = $this -> getTestingList();
@@ -2029,6 +1975,9 @@ sub getImageConfig {
 	}
 	if (@tstp) {
 		$result{kiwi_testing} = join(" ",@tstp);
+	}
+	if ((%type) && ($type{compressed} =~ /yes|true/i)) {
+		$result{kiwi_compressed} = "yes";
 	}
 	if (%type) {
 		$result{kiwi_type} = $type{type};

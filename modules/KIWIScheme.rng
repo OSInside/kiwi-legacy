@@ -23,7 +23,7 @@
 <grammar xmlns:db="http://docbook.org/ns/docbook" xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" xmlns:rng="http://relaxng.org/ns/structure/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
   <db:info>
     <db:releaseinfo>$Id: kiwi.rnc 2957 2008-01-11 12:53:39Z thomas-schraitle $</db:releaseinfo>
-    <db:releaseinfo>RNC Schema Version 2.4</db:releaseinfo>
+    <db:releaseinfo>RNC Schema Version 3.5</db:releaseinfo>
     <db:pubdate>START</db:pubdate>
     <db:pubdate>2008-01-08</db:pubdate>
   </db:info>
@@ -72,7 +72,7 @@ the package Information is inherited</a:documentation>
     <define name="k.image.schemeversion.attribute">
       <attribute name="schemeversion">
         <a:documentation>The allowed Schema version (fixed value)</a:documentation>
-        <value>2.4</value>
+        <value>3.5</value>
       </attribute>
     </define>
     <define name="k.image.kiwirevision.attribute">
@@ -277,31 +277,6 @@ installation source from</a:documentation>
       <element name="author">
         <a:documentation>Author of the image</a:documentation>
         <ref name="k.author.attlist"/>
-        <text/>
-      </element>
-    </define>
-  </div>
-  <!--
-    ==========================================
-    common element <compressed>
-    
-  -->
-  <div>
-    <define name="k.compressed.attlist">
-      <empty/>
-    </define>
-    <define name="k.compressed">
-      <!--
-        [
-        db:para [
-        	"The compression may be changed by the" ~
-        	"code according to the image output type"
-        ]
-        ]
-      -->
-      <element name="compressed">
-        <a:documentation>Compress image. </a:documentation>
-        <ref name="k.compressed.attlist"/>
         <text/>
       </element>
     </define>
@@ -1586,12 +1561,20 @@ unified or dmsquash and applies to the iso type only</a:documentation>
     </define>
     <define name="k.type.bootloader.attribute">
       <attribute name="bootloader">
-        <a:documentation>Specified the bootloader used for booting the image."
+        <a:documentation>Specifies the bootloader used for booting the image."
 At the moment only grub and syslinux are supported</a:documentation>
         <choice>
           <value>grub</value>
           <value>syslinux</value>
         </choice>
+      </attribute>
+    </define>
+    <define name="k.type.compressed.attribute">
+      <attribute name="compressed">
+        <a:documentation>Specifies whether the image output file should be
+compressed or not. This makes only sense for filesystem
+only images respectively for the pxe or cpio type</a:documentation>
+        <data type="boolean"/>
       </attribute>
     </define>
     <define name="k.type.vga.attribute">
@@ -1704,6 +1687,9 @@ vmx/oem types only.</a:documentation>
         </optional>
         <optional>
           <ref name="k.type.bootloader.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.type.compressed.attribute"/>
         </optional>
         <optional>
           <ref name="k.type.vga.attribute"/>
@@ -2700,9 +2686,6 @@ and also depends of the selected image output type.</db:para>
           </optional>
           <optional>
             <ref name="k.size"/>
-          </optional>
-          <optional>
-            <ref name="k.compressed"/>
           </optional>
           <optional>
             <ref name="k.oem-swap"/>

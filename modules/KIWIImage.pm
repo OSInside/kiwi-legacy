@@ -721,10 +721,11 @@ sub createImageSquashFS {
 	#==========================================
 	# Compress image using gzip
 	#------------------------------------------
-	if ($xml->getCompressed()) {
-	if (! $this -> compressImage ($name)) {
-		return undef;
-	}
+	my %type = %{$xml->getImageTypeAndAttributes()};
+	if (($type{compressed}) && ($type{compressed} =~ /yes|true/)) {
+		if (! $this -> compressImage ($name)) {
+			return undef;
+		}
 	}
 	#==========================================
 	# Create image boot configuration
@@ -751,12 +752,6 @@ sub createImageCPIO {
 	my $imageTree = $this->{imageTree};
 	my $imageDest = $this->{imageDest};
 	my $compress  = 1;
-	#==========================================
-	# PRE check compression level
-	#------------------------------------------
-	if (! $xml -> getCompressed()) {
-		$compress = 0;
-	}
 	#==========================================
 	# PRE filesystem setup
 	#------------------------------------------
@@ -958,7 +953,6 @@ sub createImageUSB {
 	$main::ForeignRepo{"boot-theme"}= $xml -> getBootTheme();
 	$main::ForeignRepo{"prepare"}   = $main::Prepare;
 	$main::ForeignRepo{"create"}    = $main::Create;
-	$main::Compress = "no";
 	$main::Create   = $main::RootTree;
 	my $imageTypeSaved = $main::SetImageType;
 	undef $main::SetImageType;
@@ -2962,7 +2956,7 @@ sub writeImageConfig {
 		#==========================================
 		# IMAGE information
 		#------------------------------------------
-		if ($xml->getCompressed("quiet")) {
+		if (($type{compressed}) && ($type{compressed} =~ /yes|true/)) {
 			print FD "IMAGE=${device}${targetPartition};";
 			print FD "$namecd;$server;$blocks;compressed";
 			if ("$type{type}" eq "split" && defined $this->{imageTreeRW}) {
@@ -3143,7 +3137,7 @@ sub postImage {
 	# Compress image using gzip
 	#------------------------------------------
 	if (! defined $nozip) {
-		if ($xml->getCompressed()) {
+		if (($type{compressed}) && ($type{compressed} =~ /yes|true/)) {
 			if (! $this -> compressImage ($name)) {
 				return undef;
 			}

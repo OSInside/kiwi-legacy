@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<image schemeversion="2.4" name="initrd-vmxboot-suse-11.2">
+<image schemeversion="3.5" name="initrd-vmxboot-suse-11.2">
 	<description type="boot">
 		<author>Marcus Schaefer</author>
 		<contact>ms@novell.com</contact>
@@ -9,7 +9,7 @@
 		<type bootprofile="default" bootkernel="std">cpio</type>
 		<version>2.7.1</version>
 		<size unit="M">60</size>
-		<compressed>yes</compressed>
+		
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>False</rpm-check-signatures>
 	</preferences>
