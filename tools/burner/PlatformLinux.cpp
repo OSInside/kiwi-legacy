@@ -37,6 +37,7 @@
 #include "PlatformLinux.h"
 
 #define BLOCKSIZE 1048576
+#define _GNU_SOURCE
 
 // Figure out which devices we should allow a user to write to.
 void
@@ -311,7 +312,7 @@ PlatformLinux::writeData(QString path, QString fileName, qint64 deviceSize)
         return;
     }
 
-    if ((ofd = ::open(path.toLocal8Bit().data(), O_WRONLY|O_SYNC)) == -1)
+    if ((ofd = ::open(path.toLocal8Bit().data(), O_WRONLY|O_SYNC|O_LARGEFILE)) == -1)
     {
         QMessageBox msgBox;
         msgBox.setText(QObject::tr("Couldn't open ") + path + ": " + strerror(errno));
