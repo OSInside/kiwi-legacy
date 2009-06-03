@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<image schemeversion="3.5" name="initrd-isoboot-suse-SLED11">
+<image schemaversion="3.5" name="initrd-isoboot-suse-SLED11">
 	<description type="boot">
 		<author>Marcus Schaefer</author>
 		<contact>ms@novell.com</contact>

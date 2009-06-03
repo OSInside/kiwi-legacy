@@ -103,7 +103,7 @@ sub new {
 	#==========================================
 	# Check/Transform due to XSL stylesheet(s)
 	#------------------------------------------
-	foreach my $template (@main::SchemeCVT) {
+	foreach my $template (@main::SchemaCVT) {
 		my $data = qxx (
 			"xsltproc -o $controlFile-next $template $controlFile 2>&1"
 		);
@@ -137,7 +137,7 @@ sub new {
 	# Load XML objects and schema
 	#------------------------------------------
 	my $systemXML   = new XML::LibXML;
-	my $systemRNG   = new XML::LibXML::RelaxNG ( location => $main::Scheme );
+	my $systemRNG   = new XML::LibXML::RelaxNG ( location => $main::Schema );
 	my $optionsNodeList;
 	my $driversNodeList;
 	my $usrdataNodeList;
@@ -194,14 +194,14 @@ sub new {
 		$splitNodeList = $this -> addDefaultSplitNode();
 	}
 	#==========================================
-	# Validate xml input with current scheme
+	# Validate xml input with current schema
 	#------------------------------------------
 	eval {
 		$systemRNG ->validate ( $systemTree );
 	};
 	if ($@) {
 		my $evaldata=$@;
-		$kiwi -> error  ("Scheme validation failed");
+		$kiwi -> error  ("Schema validation failed");
 		$kiwi -> failed ();
 		$kiwi -> error  ("$evaldata\n");
 		return undef;

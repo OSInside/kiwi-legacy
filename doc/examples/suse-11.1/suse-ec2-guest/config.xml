@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<image schemeversion="3.5" name="suse-11.1-ec2-guest">
+<image schemaversion="3.5" name="suse-11.1-ec2-guest">
 	<description type="system">
 		<author>Marcus Schaefer</author>
 		<contact>ms@novell.com</contact>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
   ================
-  FILE          : KIWIScheme.rnc
+  FILE          : KIWISchema.rnc
   ****************
   PROJECT       : OpenSUSE Build-Service
   COPYRIGHT     : (c) 2006 SUSE LINUX Products GmbH, Germany
@@ -14,7 +14,7 @@
   DESCRIPTION   : This is the RELAX NG Schema for KIWI
                 : configuration files. The schema is maintained
                 : in the relax compact syntax. Any changes should
-                : made in !! *** KIWIScheme.rnc *** !!
+                : made in !! *** KIWISchema.rnc *** !!
                 : 
                 :
   STATUS        : Development
@@ -69,8 +69,8 @@ second the location of the XSD Schema
 the package Information is inherited</a:documentation>
       </attribute>
     </define>
-    <define name="k.image.schemeversion.attribute">
-      <attribute name="schemeversion">
+    <define name="k.image.schemaversion.attribute">
+      <attribute name="schemaversion">
         <a:documentation>The allowed Schema version (fixed value)</a:documentation>
         <value>3.5</value>
       </attribute>
@@ -108,7 +108,7 @@ named /etc/ImageID</a:documentation>
         <optional>
           <ref name="k.image.id"/>
         </optional>
-        <ref name="k.image.schemeversion.attribute"/>
+        <ref name="k.image.schemaversion.attribute"/>
         <optional>
           <choice>
             <optional>

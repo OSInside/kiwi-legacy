@@ -6,6 +6,7 @@ Tue Jun  2 16:41:48 CEST 2009 - ms@suse.de
   added xsl stylesheet for transformation from scheme
   version 2.4 -> 3.5 according to this change. Always
   compress cpio images (bnc #509107)
+- moved schemeversion to schemaversion (bnc #509107)
 - allow use of zypper iso:// URL type in kiwi (bnc #498437)
 - fixed documentation for bool value use (bnc #508614)
 - fixed checkmedia reboot to happen immediately (bnc #509061)

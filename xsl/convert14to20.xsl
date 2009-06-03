@@ -11,7 +11,6 @@
     <xsl:apply-templates mode="conv14to20"/>
   </xsl:copy>  
 </xsl:template>
-  
 
 <xsl:template match="/">
   <xsl:choose>
@@ -28,7 +27,7 @@
 			<xsl:text>Already at version > 2.0... skipped</xsl:text>
 		</xsl:message>
 	</xsl:when>
-	<xsl:when test="image[@schemeversion='3.5']">
+	<xsl:when test="image[@schemaversion='3.5']">
 		<xsl:message terminate="yes">
 			<xsl:text>Already at version > 2.4... skipped</xsl:text>
 		</xsl:message>
@@ -43,7 +42,6 @@
     </xsl:otherwise>
   </xsl:choose>  
 </xsl:template>
-
 
 <para xmlns="http://docbook.org/ns/docbook"> Changed attribute <tag
       class="attribute">schemeversion</tag> from <literal>1.4</literal>

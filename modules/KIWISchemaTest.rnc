@@ -1,5 +1,5 @@
 #================
-# FILE          : KIWISchemeTest.rnc
+# FILE          : KIWISchemaTest.rnc
 #****************
 # PROJECT       : OpenSUSE Build-Service
 # COPYRIGHT     : (c) 2006 SUSE LINUX Products GmbH, Germany
@@ -11,7 +11,7 @@
 # DESCRIPTION   : This is the RELAX NG Schema for KIWI
 #               : test files. The schema is maintained
 #               : in the relax compact syntax. Any changes should
-#               : made in !! *** KIWISchemeTest.rnc *** !!
+#               : made in !! *** KIWISchemaTest.rnc *** !!
 #               : 
 #               :
 # STATUS        : Development

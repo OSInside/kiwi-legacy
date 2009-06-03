@@ -1,5 +1,5 @@
 #================
-# FILE          : KIWIScheme.rnc
+# FILE          : KIWISchema.rnc
 #****************
 # PROJECT       : OpenSUSE Build-Service
 # COPYRIGHT     : (c) 2006 SUSE LINUX Products GmbH, Germany
@@ -12,7 +12,7 @@
 # DESCRIPTION   : This is the RELAX NG Schema for KIWI
 #               : configuration files. The schema is maintained
 #               : in the relax compact syntax. Any changes should
-#               : made in !! *** KIWIScheme.rnc *** !!
+#               : made in !! *** KIWISchema.rnc *** !!
 #               : 
 #               :
 # STATUS        : Development
@@ -56,9 +56,9 @@ div {
 		## Path to an image description directory from which
 		## the package Information is inherited
 		attribute inherit { text }
-	k.image.schemeversion.attribute =
+	k.image.schemaversion.attribute =
 		## The allowed Schema version (fixed value)
-		attribute schemeversion { "3.5" }
+		attribute schemaversion { "3.5" }
 	k.image.kiwirevision.attribute =
 		## A kiwi SVN revision number which is known to build
 		## a working image from this description. If the kiwi SVN
@@ -74,7 +74,7 @@ div {
 		& k.image.inherit.attribute?
 		& k.image.kiwirevision.attribute?
 		& k.image.id?
-		& k.image.schemeversion.attribute
+		& k.image.schemaversion.attribute
 		& ( k.image.noNamespaceSchemaLocation.attribute?
 		  | k.image.schemaLocation.attribute? )?
 

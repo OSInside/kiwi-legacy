@@ -19,7 +19,7 @@
 		<xsl:when test="image[@schemeversion='2.4']">
 			<xsl:apply-templates mode="conv24to35"/>
 		</xsl:when>
-		<xsl:when test="image[@schemeversion='3.5']">
+		<xsl:when test="image[@schemaversion='3.5']">
 			<xsl:message terminate="yes">
 				<xsl:text>Already at version 3.5... skipped</xsl:text>
 			</xsl:message>
@@ -37,10 +37,11 @@
 
 <para xmlns="http://docbook.org/ns/docbook">
 	Changed attribute <tag class="attribute">schemeversion</tag>
-	from <literal>2.4</literal> to <literal>3.5</literal>. 
+	to <tag class="attribute">schemaversion</tag> from
+	<literal>2.4</literal> to <literal>3.5</literal>.
 </para>
 <xsl:template match="image" mode="conv24to35">
-	<image schemeversion="3.5">
+	<image schemaversion="3.5">
 		<xsl:copy-of select="@name"/>
 		<xsl:apply-templates mode="conv24to35"/>
 	</image>

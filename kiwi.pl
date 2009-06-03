@@ -90,14 +90,14 @@ if ( ! defined $System ) {
 	$System  = $BasePath."/image";
 }
 our $Tools    = $BasePath."/tools";
-our $Scheme   = $BasePath."/modules/KIWIScheme.rng";
-our $SchemeTST= $BasePath."/modules/KIWISchemeTest.rng";
+our $Schema   = $BasePath."/modules/KIWISchema.rng";
+our $SchemaTST= $BasePath."/modules/KIWISchemaTest.rng";
 our $KConfig  = $BasePath."/modules/KIWIConfig.sh";
 our $KMigrate = $BasePath."/modules/KIWIMigrate.txt";
 our $KSplit   = $BasePath."/modules/KIWISplit.txt";
 our $Revision = $BasePath."/.revision";
 our $TestBase = $BasePath."/tests";
-our @SchemeCVT= (
+our @SchemaCVT= (
 	$BasePath."/xsl/convert14to20.xsl",
 	$BasePath."/xsl/convert20to24.xsl",
 	$BasePath."/xsl/convert24to35.xsl"
@@ -927,7 +927,7 @@ sub main {
 				$runtest = $TestBase."/".$run;
 			}
 			my $test = new KIWITest (
-				$runtest,$RunTestSuite,$SchemeTST,$manager
+				$runtest,$RunTestSuite,$SchemaTST,$manager
 			);
 			my $testResult = $test -> run();
 			$kiwi -> info (

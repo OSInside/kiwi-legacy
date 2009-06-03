@@ -43,7 +43,7 @@ TFTPIMAGE   = ${tftp_prefix}/image
 PACKDOCVZ   = ${doc_prefix}/kiwi
 MANVZ       = ${man_prefix}/man1
 
-all: modules/KIWIScheme.rng modules/KIWISchemeTest.rng
+all: modules/KIWISchema.rng modules/KIWISchemaTest.rng
 	#============================================
 	# create checksum files for boot images...
 	#--------------------------------------------
@@ -135,35 +135,35 @@ install:
 	#--------------------------------------------
 	cp -a system/suse-repo ${KIWIREPO}
 
-modules/KIWIScheme.rng: modules/KIWIScheme.rnc
+modules/KIWISchema.rng: modules/KIWISchema.rnc
 	#============================================
 	# Convert RNC -> RNG...
 	#--------------------------------------------
 	@echo "*** Converting KIWI RNC -> RNG..."
-	trang -I rnc -O rng modules/KIWIScheme.rnc modules/KIWIScheme.rng
+	trang -I rnc -O rng modules/KIWISchema.rnc modules/KIWISchema.rng
 
 	#============================================
-	# Check RNG Scheme...
+	# Check RNG Schema...
 	#--------------------------------------------
 	for i in `find -name config.xml`;do \
 		xsltproc -o $$i.new xsl/convert24to35.xsl $$i && mv $$i.new $$i;\
-		echo $$i; j=`jing modules/KIWIScheme.rng $$i`;if test ! -z "$$j";then\
+		echo $$i; j=`jing modules/KIWISchema.rng $$i`;if test ! -z "$$j";then\
 			echo $$j; break;\
 		fi;\
 	done; test -z "$$j" || false
 
-modules/KIWISchemeTest.rng: modules/KIWISchemeTest.rnc
+modules/KIWISchemaTest.rng: modules/KIWISchemaTest.rnc
 	#============================================
 	# Convert RNC -> RNG...
 	#--------------------------------------------
 	@echo "*** Converting KIWI TEST RNC -> RNG..."
-	trang -I rnc -O rng modules/KIWISchemeTest.rnc modules/KIWISchemeTest.rng
+	trang -I rnc -O rng modules/KIWISchemaTest.rnc modules/KIWISchemaTest.rng
 
 	#============================================
-	# Check RNG TEST Scheme...
+	# Check RNG TEST Schema...
 	#--------------------------------------------
 	for i in `find tests -name test-case.xml`;do \
-		echo $$i; j=`jing modules/KIWISchemeTest.rng $$i`;if test ! -z "$$j";\
+		echo $$i; j=`jing modules/KIWISchemaTest.rng $$i`;if test ! -z "$$j";\
 		then\
 			echo $$j; break;\
 		fi;\
@@ -171,7 +171,7 @@ modules/KIWISchemeTest.rng: modules/KIWISchemeTest.rnc
 
 clean:
 	(cd system/boot && find -type f | grep -v .svn | xargs chmod u+w)
-	rm -f modules/KIWIScheme.rng
+	rm -f modules/KIWISchema.rng
 	${MAKE} -C tools clean
 
 build:

@@ -257,7 +257,7 @@ sub setTemplate {
 	#==========================================
     # <description>
     #------------------------------------------
-	print FD '<image schemeversion="2.4" name="'.$name.'">'."\n";
+	print FD '<image schemaversion="3.5" name="'.$name.'">'."\n";
 	print FD "\t".'<description type="system">'."\n";
 	print FD "\t\t".'<author>***AUTHOR***</author>'."\n";
 	print FD "\t\t".'<contact>***MAIL***</contact>'."\n";
