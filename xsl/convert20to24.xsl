@@ -24,12 +24,15 @@
 				<xsl:text>Already at version 2.4... skipped</xsl:text>
 			</xsl:message>
 		</xsl:when>
+		<xsl:when test="image[@schemaversion='3.5']">
+			<xsl:message terminate="yes">
+				<xsl:text>Already at version 3.5... skipped</xsl:text>
+			</xsl:message>
+		</xsl:when>
 		<xsl:otherwise>
 			<xsl:message terminate="yes">
 				<xsl:text>ERROR: Schema version is not correct.&#10;</xsl:text>
-				<xsl:text>       I got '</xsl:text>
-				<xsl:value-of select="image/@schemeversion"/>
-				<xsl:text>', but expected version 2.0.</xsl:text>
+				<xsl:text>       expected version 2.4.</xsl:text>
 			</xsl:message>
 		</xsl:otherwise>
 	</xsl:choose>  

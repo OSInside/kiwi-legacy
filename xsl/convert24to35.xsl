@@ -27,9 +27,7 @@
 		<xsl:otherwise>
 			<xsl:message terminate="yes">
 				<xsl:text>ERROR: Schema version is not correct.&#10;</xsl:text>
-				<xsl:text>       I got '</xsl:text>
-				<xsl:value-of select="image/@schemeversion"/>
-				<xsl:text>', but expected version 2.4.</xsl:text>
+				<xsl:text>       but expected version 3.5.</xsl:text>
 			</xsl:message>
 		</xsl:otherwise>
 	</xsl:choose>  

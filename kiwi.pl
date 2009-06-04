@@ -98,8 +98,6 @@ our $KSplit   = $BasePath."/modules/KIWISplit.txt";
 our $Revision = $BasePath."/.revision";
 our $TestBase = $BasePath."/tests";
 our @SchemaCVT= (
-	$BasePath."/xsl/convert14to20.xsl",
-	$BasePath."/xsl/convert20to24.xsl",
 	$BasePath."/xsl/convert24to35.xsl"
 );
 
