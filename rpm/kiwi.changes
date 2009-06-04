@@ -2,6 +2,7 @@
 Tue Jun  2 16:41:48 CEST 2009 - ms@suse.de
 
 - v3.55
+- default to "no" when the recovery dialog is displayed
 - moved <compressed> element into the <type> section
   added xsl stylesheet for transformation from scheme
   version 2.4 -> 3.5 according to this change. Always

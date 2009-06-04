@@ -271,7 +271,7 @@ validateRootTree
 # 17) Recover system if requested
 #--------------------------------------
 if [ ! -z "$KIWI_RECOVERY" ];then
-	dialog --yesno "Do you want to start the System-Recovery ?" 5 50
+	dialog --defaultno --yesno "Do you want to start the System-Recovery ?" 5 50
 	if [ ! $? = 0 ];then
 		systemException "System-Recovery not started" "reboot"
 	fi
