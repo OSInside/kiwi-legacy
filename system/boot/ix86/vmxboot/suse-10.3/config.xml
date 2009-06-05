@@ -15,8 +15,9 @@
 	</preferences>
 	<profiles>
 		<profile name="default" description="Boot with default kernel"/>
+		<profile name="xen" description="Boot with xen kernel/mboot.c32"/>
 		<profile name="std" description="KERNEL: Default"/>
-		<profile name="xen" description="KERNEL: Xen kernel/mboot.c32"/>
+		<profile name="nex" description="KERNEL: Xen kernel/mboot.c32"/>
 		<profile name="smp" description="KERNEL: bigsmp kernel"/>
 	</profiles>
 	<drivers type="drivers">
@@ -45,6 +46,8 @@
 		<file name="drivers/ata/*"/>
 		<file name="drivers/scsi/*"/>
 		<file name="drivers/message/fusion/*"/>
+	</drivers>
+	<drivers type="drivers" profiles="xen">
 		<file name="drivers/xen/*"/>
 	</drivers>
 	<repository type="yast2" status="replaceable">
@@ -58,7 +61,7 @@
 		<package name="kernel-bigsmp"/>
 		<package name="aufs-kmp-bigsmp"/>
 	</packages>
-	<packages type="image" profiles="xen">
+	<packages type="image" profiles="nex">
 		<package name="kernel-xen"/>
 		<package name="aufs-kmp-xen"/>
 		<package name="xen"/>

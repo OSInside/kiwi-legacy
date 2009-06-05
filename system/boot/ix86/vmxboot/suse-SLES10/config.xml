@@ -15,8 +15,9 @@
 	</preferences>
 	<profiles>
 		<profile name="default" description="Boot with default kernel"/>
+		<profile name="xen" description="Boot with xen kernel/mboot.c32"/>
 		<profile name="std" description="KERNEL: Default"/>
-		<profile name="xen" description="KERNEL: Xen kernel/mboot.c32"/>
+		<profile name="nex" description="KERNEL: Xen kernel/mboot.c32"/>
 		<profile name="smp" description="KERNEL: smp kernel"/>
 	</profiles>
 	<drivers type="drivers">
@@ -37,13 +38,15 @@
 		<file name="fs/jbd/*"/>
 		<file name="fs/reiserfs/*"/>
 		<file name="net/ipv6/*"/>
-		<file name="drivers/xen/*"/>
 		<file name="drivers/ata/*"/>
 		<file name="drivers/scsi/*"/>
 		<file name="drivers/message/fusion/*"/>
 		<file name="fs/nls/nls_utf8.ko"/>
 		<file name="fs/nls/nls_cp437.ko"/>
 		<file name="fs/nls/nls_iso8859-1.ko"/>
+	</drivers>
+	<drivers type="drivers" profiles="xen">
+		<file name="drivers/xen/*"/>
 	</drivers>
 	<repository type="yast2" status="replaceable">
 		<source path="/mounts/machcd2/dists/full-sle10-sp2-%arch"/>
@@ -57,10 +60,9 @@
 	<packages type="image" profiles="smp">
 		<package name="kernel-smp"/>
 	</packages>
-	<packages type="image" profiles="xen">
+	<packages type="image" profiles="nex">
 		<package name="kernel-xen" arch="x86_64"/>
 		<package name="kernel-xenpae" arch="i686"/>
-		<package name="xen"/>
 	</packages>
 	<packages type="image">
 		<package name="psmisc"/>

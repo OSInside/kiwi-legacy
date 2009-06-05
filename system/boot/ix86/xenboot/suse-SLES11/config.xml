@@ -16,6 +16,7 @@
 	<profiles>
 		<profile name="default" description="Boot with xen kernel"/>
 		<profile name="std" description="KERNEL: Xen"/>
+		<profile name="ec2" description="KERNEL: Ec2"/>
 	</profiles>
 	<drivers type="drivers">
 		<file name="drivers/ide/*"/>
@@ -57,6 +58,11 @@
 	<packages type="bootstrap" profiles="std">
 		<package name="kernel-xen"/>
 		<package name="kernel-xen-base"/>
+	</packages>
+	<packages type="bootstrap" profiles="ec2">
+		<package name="kernel-ec2"/>
+		<package name="kernel-ec2-base"/>
+		<package name="kernel-ec2-extra"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
