@@ -68,6 +68,7 @@
 		<package name="kernel-xen"/>
 		<package name="kernel-xen-base"/>
 		<package name="kernel-xen-extra"/>
+		<package name="xen"/>
 	</packages>
 	<packages type="image" profiles="ec2">
 		<package name="kernel-ec2"/>

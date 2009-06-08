@@ -15,8 +15,9 @@
 	</preferences>
 	<profiles>
 		<profile name="default" description="Boot with default kernel"/>
+		<profile name="xen" description="Boot with xen kernel/mboot.c32"/>
 		<profile name="std" description="KERNEL: Default"/>
-		<profile name="xen" description="KERNEL: Xen kernel/mboot.c32"/>
+		<profile name="nex" description="KERNEL: Xen kernel/mboot.c32"/>
 		<profile name="pae" description="KERNEL: pae kernel"/>
 	</profiles>
 	<drivers type="usbdrivers">
@@ -59,6 +60,9 @@
 		<file name="drivers/acpi/dock.ko"/>
 		<file name="lib/crc-t10dif.ko"/>
 	</drivers>
+	<drivers type="drivers" profiles="xen">
+		<file name="drivers/xen/*"/>
+	</drivers>
 	<repository type="yast2" status="replaceable">
 		<source path="/image/CDs/full-i386"/>
 	</repository>
@@ -72,7 +76,7 @@
 		<package name="kernel-pae-base"/>
 		<package name="kernel-pae-extra"/>
 	</packages>
-	<packages type="image" profiles="xen">
+	<packages type="image" profiles="nex">
 		<package name="kernel-xen"/>
 		<package name="kernel-xen-base"/>
 		<package name="kernel-xen-extra"/>

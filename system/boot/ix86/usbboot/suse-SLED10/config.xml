@@ -15,8 +15,9 @@
 	</preferences>
 	<profiles>
 		<profile name="default" description="Boot with default kernel"/>
+		<profile name="xen" description="Boot with xen kernel/mboot.c32"/>
 		<profile name="std" description="KERNEL: Default"/>
-		<profile name="xen" description="KERNEL: Xen kernel/mboot.c32"/>
+		<profile name="nex" description="KERNEL: Xen kernel/mboot.c32"/>
 		<profile name="smp" description="KERNEL: smp kernel"/>
 	</profiles>
 	<drivers type="usbdrivers">
@@ -54,6 +55,9 @@
 		<file name="drivers/message/fusion/*"/>
 		<file name="drivers/net/*"/>
 	</drivers>
+	<drivers type="drivers" profiles="xen">
+		<file name="drivers/xen/*"/>
+	</drivers>
 	<repository type="yast2" status="replaceable">
 		<source path="/mounts/machcd2/dists/full-sle10-sp2-%arch"/>
 	</repository>
@@ -66,7 +70,7 @@
 	<packages type="image" profiles="smp">
 		<package name="kernel-smp"/>
 	</packages>
-	<packages type="image" profiles="xen">
+	<packages type="image" profiles="nex">
 		<package name="kernel-xen" arch="x86_64"/>
 		<package name="kernel-xenpae" arch="i686"/>
 		<package name="xen"/>

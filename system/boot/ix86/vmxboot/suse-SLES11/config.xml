@@ -67,10 +67,12 @@
 	<packages type="image" profiles="nex">
 		<package name="kernel-xen"/>
 		<package name="kernel-xen-base"/>
+		<package name="xen"/>
 	</packages>
 	<packages type="image" profiles="ec2">
 		<package name="kernel-ec2"/>
 		<package name="kernel-ec2-base"/>
+		<package name="xen"/>
 	</packages>
 	<packages type="image">
 		<package name="psmisc"/>

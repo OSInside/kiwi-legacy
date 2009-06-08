@@ -4,6 +4,7 @@ Fri Jun  5 10:23:12 CEST 2009 - ms@suse.de
 - v3.56
 - fixed missing xen bootprofile in vmx and oem (bnc #510276)
 - added ec2 bootkernel profile for vmx,oem,xen (bnc #510276)
+- fixed dom0 Xen setup
 
 -------------------------------------------------------------------
 Thu Jun  4 16:35:39 CEST 2009 - ms@suse.de

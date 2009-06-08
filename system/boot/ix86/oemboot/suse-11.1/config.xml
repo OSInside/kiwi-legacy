@@ -84,12 +84,14 @@
 		<package name="kernel-xen-base"/>
 		<package name="kernel-xen-extra"/>
 		<package name="aufs-kmp-xen"/>
+		<package name="xen"/>
 	</packages>
 	<packages type="image" profiles="ec2">
 		<package name="kernel-ec2"/>
 		<package name="kernel-ec2-base"/>
 		<package name="kernel-ec2-extra"/>
 		<package name="aufs-kmp-ec2"/>
+		<package name="xen"/>
 	</packages>
 	<packages type="image">
 		<package name="dialog"/>

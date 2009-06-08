@@ -115,24 +115,10 @@ sub new {
 		$zipped = 1;
 	}
 	#==========================================
-	# xen kernel used
-	#------------------------------------------
-	$isxen = 0;
-	$xengz = $initrd;
-	if ($zipped) {
-		$xengz =~ s/\.gz$//;
-	}
-	$xengz =~ s/\.splash$//;
-	foreach my $xen (glob ("$xengz*xen*.gz")) {
-		$isxen = 1;
-		$xengz = $xen;
-		last;
-	}
-	#==========================================
 	# find kernel file
 	#------------------------------------------
 	$kernel = $initrd;
-	if ($zipped) {
+	if ($kernel =~ /gz$/) {
 		$kernel =~ s/gz$/kernel/;
 	} else {
 		$kernel = $kernel.".kernel";
@@ -151,6 +137,18 @@ sub new {
 		$kiwi -> error  ("Couldn't find kernel file: $kernel");
 		$kiwi -> failed ();
 		return undef;
+	}
+	#==========================================
+	# check if Xen system is used
+	#------------------------------------------
+	$isxen = 0;
+	$xengz = $initrd;
+	$xengz =~ s/\.gz$//;
+	$xengz =~ s/\.splash$//;
+	foreach my $xen (glob ("$xengz*xen*.gz")) {
+		$isxen = 1;
+		$xengz = $xen;
+		last;
 	}
 	#==========================================
 	# create tmp dir for operations
@@ -457,7 +455,7 @@ sub createBootStructure {
 		$this -> cleanTmp ();
 		return undef;
 	}
-	if ($isxen && $xendomain eq "dom0") {
+	if (($isxen) && ($xendomain eq "dom0")) {
 		$status = qxx ( "cp $xengz $tmpdir/boot/$xname 2>&1" );
 		$result = $? >> 8;
 		if ($result != 0) {
@@ -3358,7 +3356,7 @@ sub setupBootLoaderConfiguration {
 		#==========================================
 		# Standard boot
 		#------------------------------------------
-		if (! $isxen || ($isxen && $xendomain eq "domU")) {
+		if ((! $isxen) || ($isxen && $xendomain eq "domU")) {
 			if ($type =~ /^KIWI CD/) {
 				print FD " kernel (cd)/boot/linux vga=$vga splash=silent";
 				print FD " ramdisk_size=512000 ramdisk_blocksize=4096 cdinst=1";
@@ -3421,7 +3419,7 @@ sub setupBootLoaderConfiguration {
 		#------------------------------------------
 		$title = $this -> makeLabel ("Failsafe -- $title");
 		print FD "title $title\n";
-		if (! $isxen || ($isxen && $xendomain eq "domU")) {
+		if ((! $isxen) || ($isxen && $xendomain eq "domU")) {
 			if ($type =~ /^KIWI CD/) {
 				print FD " kernel (cd)/boot/linux vga=$vga splash=silent";
 				print FD " ramdisk_size=512000 ramdisk_blocksize=4096 cdinst=1";

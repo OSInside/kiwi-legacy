@@ -76,6 +76,7 @@
 	<packages type="image" profiles="nex">
 		<package name="kernel-xen"/>
 		<package name="aufs-kmp-xen"/>
+		<package name="xen"/>
 	</packages>
 	<packages type="image">
 		<package name="dialog"/>

@@ -63,6 +63,7 @@
 	<packages type="image" profiles="nex">
 		<package name="kernel-xen" arch="x86_64"/>
 		<package name="kernel-xenpae" arch="i686"/>
+		<package name="xen"/>
 	</packages>
 	<packages type="image">
 		<package name="psmisc"/>
