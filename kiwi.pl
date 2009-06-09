@@ -1773,7 +1773,7 @@ sub listXMLInfo {
 	#==========================================
 	# print install size information
 	#------------------------------------------
-	my ($meta,$delete) = $xml -> getInstallSize();
+	my ($meta,$delete,$solfile) = $xml -> getInstallSize();
 	my $size = 0;
 	my %meta = ();
 	if ($meta) {
@@ -1801,6 +1801,17 @@ sub listXMLInfo {
 	}
 	if ($size > 0) {
 		$kiwi -> info ("Deletion size for root tree; $size kB\n");
+	}
+	#==========================================
+	# print available patterns
+	#------------------------------------------
+	if (-f $solfile) {
+		my @patterns = qxx (
+			"dumpsolv $solfile | grep 'name: pattern' | cut -f3 -d :");
+		$kiwi -> info ("Available patterns with this repo set\n");
+		foreach my $p (@patterns) {
+			$kiwi -> info ("--> $p");
+		}
 	}
 	#==========================================
 	# more to come...
