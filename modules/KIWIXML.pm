@@ -1879,6 +1879,7 @@ sub addRepository {
 		$xaddXML -> push ( $element );
 		$this->{repositNodeList} -> append ( $xaddXML );
 	}
+	$this -> createURLList();
 	return $this;
 }
 
