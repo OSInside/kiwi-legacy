@@ -1587,7 +1587,7 @@ hwinfo --framebuffer or in /usr/src/linux/Documentation/fb/vesafb.txt</a:documen
     <define name="k.type.filesystem.attribute">
       <attribute name="filesystem">
         <a:documentation>Specifies the filesystem which can be one of:
-ext2 , ext3 , reiserfs ,squashfs, clicfs or dmsquash.
+ext2 , ext3 , ext4, reiserfs ,squashfs, clicfs or dmsquash.
 dmsquash is an ext3 filesystem packed into a squashfs
 and used later with a device mapper snapshot. clicfs
 is a fuse based compressed filesystem using a cow
@@ -1595,6 +1595,7 @@ file for write operations</a:documentation>
         <choice>
           <value>ext2</value>
           <value>ext3</value>
+          <value>ext4</value>
           <value>reiserfs</value>
           <value>squashfs</value>
           <value>dmsquash</value>
@@ -1608,6 +1609,7 @@ file for write operations</a:documentation>
         <choice>
           <value>ext2</value>
           <value>ext3</value>
+          <value>ext4</value>
           <value>reiserfs</value>
           <value>squashfs</value>
         </choice>
@@ -1619,6 +1621,7 @@ file for write operations</a:documentation>
         <choice>
           <value>ext2</value>
           <value>ext3</value>
+          <value>ext4</value>
           <value>reiserfs</value>
         </choice>
       </attribute>

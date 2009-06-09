@@ -1062,6 +1062,17 @@ sub setupBootStick {
 				$result = $? >> 8;
 				last SWITCH;
 			};
+			/^ext4/     && do {
+				$kiwi -> info ("Creating ext4 root filesystem");
+				my $fsopts = $FSopts{ext4};
+				$fsopts.= "-j -F";
+				if ($this->{inodes}) {
+					$fsopts.= " -N $this->{inodes}";
+				}
+				$status = qxx ("/sbin/mke2fs $fsopts $deviceMap{1} 2>&1");
+				$result = $? >> 8;
+				last SWITCH;
+			};
 			/^reiserfs/ && do {
 				$kiwi -> info ("Creating reiserfs root filesystem");
 				my $fsopts = $FSopts{reiserfs};
@@ -2435,6 +2446,17 @@ sub setupBootDisk {
 			/^ext3/     && do {
 				$kiwi -> info ("Creating ext3 root filesystem");
 				my $fsopts = $FSopts{ext3};
+				$fsopts.= "-j -F";
+				if ($this->{inodes}) {
+					$fsopts.= " -N $this->{inodes}";
+				}
+				$status = qxx ("/sbin/mke2fs $fsopts $root 2>&1");
+				$result = $? >> 8;
+				last SWITCH;
+			};
+			/^ext4/     && do {
+				$kiwi -> info ("Creating ext4 root filesystem");
+				my $fsopts = $FSopts{ext4};
 				$fsopts.= "-j -F";
 				if ($this->{inodes}) {
 					$fsopts.= " -N $this->{inodes}";

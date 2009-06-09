@@ -26,6 +26,7 @@
 		<file name="drivers/block/loop.ko"/>
 		<file name="drivers/ide/*"/>
 		<file name="fs/ext3/*"/>
+		<file name="fs/ext4/*"/>
 		<file name="fs/ext2/*"/>
 		<file name="fs/fat/*"/>
 		<file name="fs/vfat/*"/>
@@ -35,6 +36,7 @@
 		<file name="fs/quota_v1.ko"/>
 		<file name="fs/quota_v2.ko"/>
 		<file name="fs/jbd/*"/>
+		<file name="fs/jbd2/*"/>
 		<file name="fs/hfs/*"/>
 		<file name="fs/exportfs/*"/>
 		<file name="fs/squashfs/*"/>
@@ -47,6 +49,7 @@
 		<file name="drivers/message/fusion/*"/>
 		<file name="drivers/acpi/dock.ko"/>
 		<file name="lib/crc-t10dif.ko"/>
+		<file name="lib/crc16.ko"/>
 	</drivers>
 	<drivers type="drivers" profiles="xen">
 		<file name="drivers/xen/*"/>

@@ -157,7 +157,7 @@ sub createImageDMSquashExt3 {
 	my $this    = shift;
 	my $rename  = shift;
 	my $tree    = shift;
-	my $journal = "journaled";
+	my $journal = "journaled-ext3";
 	my $kiwi    = $this->{kiwi};
 	my $dest    = $this->{imageDest};
 	my $data;
@@ -229,7 +229,7 @@ sub createImageClicFS {
 	my $this    = shift;
 	my $rename  = shift;
 	my $tree    = shift;
-	my $journal = "journaled";
+	my $journal = "journaled-ext3";
 	my $kiwi    = $this->{kiwi};
 	my $dest    = $this->{imageDest};
 	my $data;
@@ -380,7 +380,18 @@ sub createImageEXT3 {
 	# create journaled EXT3 image from source tree
 	# ---
 	my $this = shift;
-	$this -> createImageEXT2 ("journaled");
+	return $this -> createImageEXT2 ("journaled-ext3");
+}
+
+#==========================================
+# createImageEXT4
+#------------------------------------------
+sub createImageEXT4 {
+	# ...
+	# create journaled EXT4 image from source tree
+	# ---
+	my $this = shift;
+	return $this -> createImageEXT2 ("journaled-ext4");
 }
 
 #==========================================
@@ -448,7 +459,7 @@ sub createImageEC2 {
 	#==========================================
 	# Create filesystem on extend
 	#------------------------------------------
-	if (! $this -> setupEXT2 ( $name,$imageTree,"journaled" )) {
+	if (! $this -> setupEXT2 ( $name,$imageTree,"journaled-ext3" )) {
 		return undef;
 	}
 	#==========================================
@@ -859,6 +870,16 @@ sub createImageUSB {
 			$ok = 1;
 			if ($text ne "VMX") {
 				$ok = $this -> createImageEXT3 ();
+			} else {
+				$ok = $this -> setupLogicalExtend();
+			}
+			$result{imageTree} = $imageTree;
+			last SWITCH;
+		};
+		/^ext4/       && do {
+			$ok = 1;
+			if ($text ne "VMX") {
+				$ok = $this -> createImageEXT4 ();
 			} else {
 				$ok = $this -> setupLogicalExtend();
 			}
@@ -2444,7 +2465,15 @@ sub createImageSplit {
 				last SWITCH;
 			};
 			/ext3/       && do {
-				$ok = $this -> setupEXT2 ( $namerw,$imageTreeRW,"journaled" );
+				$ok = $this -> setupEXT2 (
+					$namerw,$imageTreeRW,"journaled-ext3"
+				);
+				last SWITCH;
+			};
+			/ext4/       && do {
+				$ok = $this -> setupEXT2 (
+					$namerw,$imageTreeRW,"journaled-ext4"
+				);
 				last SWITCH;
 			};
 			/reiserfs/   && do {
@@ -2482,7 +2511,11 @@ sub createImageSplit {
 			last SWITCH;
 		};
 		/ext3/       && do {
-			$ok = $this -> setupEXT2 ( $namero,$imageTree,"journaled" );
+			$ok = $this -> setupEXT2 ( $namero,$imageTree,"journaled-ext3" );
+			last SWITCH;
+		};
+		/ext4/       && do {
+			$ok = $this -> setupEXT2 ( $namero,$imageTree,"journaled-ext4" );
 			last SWITCH;
 		};
 		/reiserfs/   && do {
@@ -2556,6 +2589,12 @@ sub createImageSplit {
 			};
 			/ext3/       && do {
 				qxx ("/sbin/fsck.ext3 -f -y $imageDest/$name 2>&1");
+				qxx ("/sbin/tune2fs -j $imageDest/$name 2>&1");
+				$kiwi -> done();
+				last SWITCH;
+			};
+			/ext4/       && do {
+				qxx ("/sbin/fsck.ext4 -f -y $imageDest/$name 2>&1");
 				qxx ("/sbin/tune2fs -j $imageDest/$name 2>&1");
 				$kiwi -> done();
 				last SWITCH;
@@ -3104,6 +3143,15 @@ sub postImage {
 			last SWITCH;
 		};
 		#==========================================
+		# Check EXT4 file system
+		#------------------------------------------
+		/ext4/i     && do {
+			qxx ("/sbin/fsck.ext4 -f -y $imageDest/$name 2>&1");
+			qxx ("/sbin/tune2fs -j $imageDest/$name 2>&1");
+			$kiwi -> done();
+			last SWITCH;
+		};
+		#==========================================
 		# Check EXT2 file system
 		#------------------------------------------
 		/ext2/i     && do {
@@ -3354,6 +3402,10 @@ sub extractKernel {
 			return $name;
 			last SWITCH;
 		};
+		/ext4/i     && do {
+			return $name;
+			last SWITCH;
+		};
 		/reiserfs/i && do {
 			return $name;
 			last SWITCH;
@@ -3463,8 +3515,11 @@ sub setupEXT2 {
 		$tree = $imageTree;
 	}
 	my %FSopts = main::checkFSOptions();
-	if (defined $journal) {
+	if ((defined $journal) && ($journal eq "ext3")) {
 		$fsopts = $FSopts{ext3};
+		$fsopts.="-j -F";
+	} elsif ((defined $journal) && ($journal eq "ext4")) {
+		$fsopts = $FSopts{ext4};
 		$fsopts.="-j -F";
 	} else {
 		$fsopts = $FSopts{ext2};
@@ -3478,8 +3533,10 @@ sub setupEXT2 {
 		$kiwi -> error  ($data);
 		return undef;
 	}
-	if (defined $journal) {
+	if ((defined $journal) && ($journal eq "ext3")) {
 		$data = qxx ("cd $imageDest && ln -vs $name $name.ext3 2>&1");
+	} elsif ((defined $journal) && ($journal eq "ext4")) {
+		$data = qxx ("cd $imageDest && ln -vs $name $name.ext4 2>&1");
 	} else {
 		$data = qxx ("cd $imageDest && ln -vs $name $name.ext2 2>&1");
 	}

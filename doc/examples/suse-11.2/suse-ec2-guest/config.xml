@@ -7,8 +7,8 @@
 	</description>
 	<preferences>
 		<type primary="true" ec2accountnr="12345678911" ec2privatekeyfile="Path to EC2 private key file" ec2certfile="Path to EC2 public certificate file">ec2</type>
-		<type filesystem="ext3" boot="vmxboot/suse-11.2">vmx</type>
-		<type filesystem="ext3" boot="xenboot/suse-11.2">xen</type>
+		<type filesystem="ext4" boot="vmxboot/suse-11.2">vmx</type>
+		<type filesystem="ext4" boot="xenboot/suse-11.2">xen</type>
 		<version>1.1.2</version>
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>False</rpm-check-signatures>

@@ -540,6 +540,13 @@ then
 				e2fsck -p $imageDevice
 				INITRD_MODULES="$INITRD_MODULES ext3"
 			fi
+			if test "$FSTYPE" = "ext4";then
+				Echo "Resize EXT4 filesystem to full partition space..."
+				resize2fs -f -F -p $imageDevice
+				Echo "Checking EXT4 filesystem..."
+				e2fsck -p $imageDevice
+				INITRD_MODULES="$INITRD_MODULES ext4"
+			fi
 		fi
 		rm -f /etc/ireal.md5
 		rm -f /etc/image.md5
@@ -715,7 +722,7 @@ then
 	if [ ! -z "$UNIONFS_CONFIG" ] && [ "$systemIntegrity" = "clean" ];then
 		# /.../
 		# have to do this so that /boot gets copied to the
-		# ext3 partition, which is necessary for the bootloader to
+		# extX partition, which is necessary for the bootloader to
 		# be able to find the data in there (it can't read squashfs
 		# or cromfs)
 		# ----

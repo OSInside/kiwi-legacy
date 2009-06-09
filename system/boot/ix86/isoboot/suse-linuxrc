@@ -173,6 +173,10 @@ if [ -z "$UNIONFS_CONFIG" ];then
 		Echo "Resize EXT3 filesystem to full ramdisk space..."
 		resize2fs -f $imageDevice
 	fi
+	if test "$FSTYPE" = "ext4";then
+		Echo "Resize EXT4 filesystem to full ramdisk space..."
+		resize2fs -f $imageDevice
+	fi
 fi
 
 #======================================

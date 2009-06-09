@@ -101,7 +101,7 @@ errorLogStart
 # 5) Including required kernel modules
 #--------------------------------------
 Echo "Including required kernel modules..."
-for module in xennet xenblk reiserfs ext2 ext3 loop ipv6;do
+for module in xennet xenblk reiserfs ext2 ext3 ext4 loop ipv6;do
 	modprobe $module >/dev/null 2>&1
 done
 

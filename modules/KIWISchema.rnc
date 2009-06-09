@@ -1165,23 +1165,25 @@ div {
 		attribute vga { text }
 	k.type.filesystem.attribute = 
 		## Specifies the filesystem which can be one of:
-		## ext2 , ext3 , reiserfs ,squashfs, clicfs or dmsquash.
+		## ext2 , ext3 , ext4, reiserfs ,squashfs, clicfs or dmsquash.
 		## dmsquash is an ext3 filesystem packed into a squashfs
 		## and used later with a device mapper snapshot. clicfs
 		## is a fuse based compressed filesystem using a cow
 		## file for write operations
 		attribute filesystem {
-			"ext2" | "ext3" | "reiserfs" | "squashfs" | "dmsquash" | "clicfs"
+			"ext2" | "ext3" | "ext4" | "reiserfs" |
+			"squashfs" | "dmsquash" | "clicfs"
 		}
 	k.type.fsreadonly.attribute =
 		## Specifies the filesystem for the read-only part of a split image
 		attribute fsreadonly {
-			"ext2" | "ext3" | "reiserfs" | "squashfs"
+			"ext2" | "ext3" | "ext4" | "reiserfs" | "squashfs"
 		}
 	k.type.fsreadwrite.attribute =
 		## Specifies the filesystem for the read-write part of a split image
-		attribute fsreadwrite { "ext2" | "ext3" | "reiserfs" }
-
+		attribute fsreadwrite {
+			"ext2" | "ext3" | "ext4" | "reiserfs"
+		}
 	k.type.ec2privatekeyfile.attribute =
 		## AWS user's PEM encoded RSA private key file
 		attribute ec2privatekeyfile { text }

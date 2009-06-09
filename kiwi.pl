@@ -44,7 +44,7 @@ use KIWITest;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "3.56";
+our $Version       = "3.57";
 our $Publisher     = "SUSE LINUX Products GmbH";
 our $Preparer      = "KIWI - http://kiwi.berlios.de";
 our $openSUSE      = "http://download.opensuse.org";
@@ -105,6 +105,7 @@ our @SchemaCVT= (
 # Globals (Supported filesystem names)
 #------------------------------------------
 our %KnownFS;
+$KnownFS{ext4}{tool}      = "/sbin/mkfs.ext4";
 $KnownFS{ext3}{tool}      = "/sbin/mkfs.ext3";
 $KnownFS{ext2}{tool}      = "/sbin/mkfs.ext2";
 $KnownFS{squashfs}{tool}  = "/usr/bin/mksquashfs";
@@ -116,6 +117,7 @@ $KnownFS{compressed}{tool}= "/usr/bin/mksquashfs";
 $KnownFS{reiserfs}{tool}  = "/sbin/mkreiserfs";
 $KnownFS{cpio}{tool}      = "/usr/bin/cpio";
 $KnownFS{ext3}{ro}        = 0;
+$KnownFS{ext4}{ro}        = 0;
 $KnownFS{ext2}{ro}        = 0;
 $KnownFS{squashfs}{ro}    = 1;
 $KnownFS{dmsquash}{ro}    = 1;
@@ -776,6 +778,10 @@ sub main {
 			};
 			/^ext3/     && do {
 				$ok = $image -> createImageEXT3 ();
+				last SWITCH;
+			};
+			/^ext4/     && do {
+				$ok = $image -> createImageEXT4 ();
 				last SWITCH;
 			};
 			/^reiserfs/ && do {
@@ -2196,15 +2202,17 @@ sub checkFSOptions {
 		my $journalsize; # journal size in MB (ext) or blocks (reiser)
 		my $inodesize;   # inode size in bytes (ext only)
 		my $fsfeature;   # filesystem features (ext only)
+		my $fstype;      # filesystem type (ext only)
 		SWITCH: for ($fs) {
 			#==========================================
-			# EXT2 and EXT3
+			# EXT2-4
 			#------------------------------------------
-			/ext[32]/   && do {
+			/ext[432]/   && do {
 				if ($FSBlockSize)   {$blocksize   = "-b $FSBlockSize"}
 				if ($FSInodeSize)   {$inodesize   = "-I $FSInodeSize"}
 				if ($FSJournalSize) {$journalsize = "-J size=$FSJournalSize"}
 				$fsfeature = "-O resize_inode";
+				$fstype = "-t $fstype";
 				last SWITCH;
 			};
 			#==========================================
@@ -2228,6 +2236,9 @@ sub checkFSOptions {
 		}
 		if (defined $fsfeature) {
 			$result{$fs} .= $fsfeature." ";
+		}
+		if (defined $fstype) {
+			$result{$fs} .= $fstype." ";
 		}
 	}
 	return %result;
@@ -2316,6 +2327,10 @@ sub checkFileSystem {
 				return undef;
 			}
 			SWITCH: for ($data) {
+				/ext4/      && do {
+					$type = "ext4";
+					last SWITCH;
+				}
 				/ext3/      && do {
 					$type = "ext3";
 					last SWITCH;

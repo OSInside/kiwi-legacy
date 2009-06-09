@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Jun  9 10:57:34 CEST 2009 - ms@suse.de
+
+- v3.57
+- added support for ext4 filesystem, adapt 11.2 examples
+- adapt 11.2 boot images for ext4
+
+-------------------------------------------------------------------
 Fri Jun  5 10:23:12 CEST 2009 - ms@suse.de
 
 - v3.56
