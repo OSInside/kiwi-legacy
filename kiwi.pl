@@ -1774,13 +1774,19 @@ sub listXMLInfo {
 	# print install size information
 	#------------------------------------------
 	my ($meta,$delete) = $xml -> getInstallSize();
-	my %meta = %{$meta};
 	my $size = 0;
-	foreach my $p (keys %meta) {
-		$size += $meta{$p};
-	}
-	if ($size > 0) {
-		$kiwi -> info ("Install size for root tree: $size kB\n");
+	my %meta = ();
+	if ($meta) {
+		%meta = %{$meta};
+		foreach my $p (keys %meta) {
+			$size += $meta{$p};
+		}
+		if ($size > 0) {
+			$kiwi -> info ("Install size for root tree: $size kB\n");
+		}
+	} else {
+		$kiwi -> failed();
+		exit 1;
 	}
 	#==========================================
 	# print deletion size information
