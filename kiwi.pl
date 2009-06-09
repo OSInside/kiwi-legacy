@@ -2330,7 +2330,7 @@ sub checkFileSystem {
 				/ext4/      && do {
 					$type = "ext4";
 					last SWITCH;
-				}
+				};
 				/ext3/      && do {
 					$type = "ext3";
 					last SWITCH;
