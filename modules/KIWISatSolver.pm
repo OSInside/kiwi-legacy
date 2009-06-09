@@ -190,8 +190,21 @@ sub new {
 	$this->{repo}    = $repo;
 	$this->{pool}    = $pool;
 	$this->{result}  = \@solved;
+	$this->{solfile} = $solvable;
 	$this->{meta}    = \%slist;
 	return $this;
+}
+
+#==========================================
+# getSolfile
+#------------------------------------------
+sub getSolfile {
+	# /.../
+	# return satsolver index file created or used
+	# by an object of this class
+	# ----
+	my $this = shift;
+	return $this->{solfile};
 }
 
 #==========================================

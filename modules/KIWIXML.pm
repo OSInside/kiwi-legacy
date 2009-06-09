@@ -2651,7 +2651,8 @@ sub getInstallSize {
 		return undef;
 	}
 	my %meta = $psolve -> getMetaData();
-	return (\%meta,\@delete);
+	my $solf = $psolve -> getSolfile();
+	return (\%meta,\@delete,$solf);
 }
 
 #==========================================
