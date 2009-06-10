@@ -14,7 +14,7 @@
 	<preferences>
 		<type primary="true" filesystem="ext3" boot="vmxboot/suse-SLES11" format="vmdk">vmx</type>
 		<type filesystem="ext3" boot="oemboot/suse-SLES11" format="iso">oem</type>
-		<type boot="isoboot/suse-SLES11" flags="unified">iso</type>
+		<type boot="isoboot/suse-SLES11" flags="compressed">iso</type>
 		<type filesystem="ext3" boot="xenboot/suse-SLES11">xen</type>
 		<version>1.11.1</version>
 		<packagemanager>zypper</packagemanager>
