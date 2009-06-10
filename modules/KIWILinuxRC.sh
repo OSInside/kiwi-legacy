@@ -569,7 +569,7 @@ function setupSUSEInitrd {
 		if [ -f /etc/init.d/boot.device-mapper ];then
 			/etc/init.d/boot.device-mapper stop
 		fi
-		if [ $bootLoaderOK = "0" ];then
+		if [ $bootLoaderOK = "1" ];then
 			if [ -f /boot/initrd.vmx ];then
 				rm -f /boot/initrd.vmx
 				rm -f /boot/linux.vmx
