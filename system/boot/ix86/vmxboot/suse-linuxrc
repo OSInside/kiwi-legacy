@@ -112,7 +112,7 @@ openKernelConsole
 probeDevices
 
 #======================================
-# 7) Setup device names...
+# 7) Search boot device...
 #--------------------------------------
 Echo "Searching for boot device..."
 if [ "$LOCAL_BOOT" = "no" ];then
@@ -120,6 +120,11 @@ if [ "$LOCAL_BOOT" = "no" ];then
 else
 	export imageDiskDevice=`getDiskDevice $root | tr -d [0-9]+`
 fi
+Echo "Found boot device: $imageDiskDevice"
+
+#======================================
+# 8) Setup device names...
+#--------------------------------------
 export imageRootDevice=$imageDiskDevice"1"
 export imageRWDevice=$imageDiskDevice"2"
 export imageRODevice=$imageDiskDevice"1"
@@ -142,7 +147,7 @@ if searchVolumeGroup; then
 fi
 
 #======================================
-# 8) Get filesystem type
+# 9) Get filesystem type
 #--------------------------------------
 probeFileSystem $imageRootDevice
 if [ "$FSTYPE" = "unknown" ];then
@@ -152,7 +157,7 @@ if [ "$FSTYPE" = "unknown" ];then
 fi
 
 #======================================
-# 9) Check filesystem
+# 10) Check filesystem
 #--------------------------------------
 Echo "Filesystem of VMX system is: $FSTYPE -> $imageRootDevice"
 if isFSTypeReadOnly;then
@@ -160,7 +165,7 @@ if isFSTypeReadOnly;then
 fi
 
 #======================================
-# 10) Mount VM (boot)
+# 11) Mount VM (boot)
 #--------------------------------------
 if ! mountSystem $imageRootDevice;then
 	systemException "Failed to mount root filesystem" "reboot"
@@ -168,14 +173,14 @@ fi
 validateRootTree
 
 #======================================
-# 11) Get kernel list for local boot
+# 12) Get kernel list for local boot
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then
 	kernelList /mnt
 fi
 
 #======================================
-# 12) setup /lvmboot or /syslboot
+# 13) setup /lvmboot or /syslboot
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then
 	if [ "$haveLVM" = "yes" ];then
@@ -224,7 +229,7 @@ if [ "$LOCAL_BOOT" = "no" ];then
 fi
 
 #======================================
-# 13) setup ird/kernel links for union
+# 14) setup ird/kernel links for union
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then
 	if isFSTypeReadOnly;then
@@ -262,7 +267,7 @@ if [ "$LOCAL_BOOT" = "no" ];then
 fi
 
 #======================================
-# 14) Create system dependant files
+# 15) Create system dependant files
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then
 	setupDefaultFstab /config
@@ -292,29 +297,29 @@ if [ "$LOCAL_BOOT" = "no" ];then
 fi
 
 #======================================
-# 15) copy system dependant files
+# 16) copy system dependant files
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then
 	setupConfigFiles
 fi
 
 #======================================
-# 16) update system dependant files
+# 17) update system dependant files
 #--------------------------------------
 setupInittab /mnt
 
 #======================================
-# 17) setup real root device
+# 18) setup real root device
 #--------------------------------------
 echo 256 > /proc/sys/kernel/real-root-dev
 
 #======================================
-# 18) umount system filesystems
+# 19) umount system filesystems
 #--------------------------------------
 umountSystemFilesystems
 
 #======================================
-# 19) copy initrd files to image
+# 20) copy initrd files to image
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then
 	importBranding
@@ -323,17 +328,17 @@ cp /preinit /mnt
 cp /include /mnt
 
 #======================================
-# 20) kill boot shell
+# 21) kill boot shell
 #--------------------------------------
 killShell
 killBlogD
 
 #======================================
-# 21) Activate new root
+# 22) Activate new root
 #--------------------------------------
 activateImage
 
 #======================================
-# 22) Unmount initrd / system init
+# 23) Unmount initrd / system init
 #--------------------------------------
 bootImage $@
