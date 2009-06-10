@@ -65,7 +65,7 @@
 	<repository type="yast2" status="replaceable">
         <source path="/image/CDs/full-i386"/>
 	</repository>
-	<repository type="rpm-dir">
+	<repository type="rpm-dir" status="fixed">
 		<source path="/usr/share/kiwi/repo/suse-repo/suse-sle11-repo"/>
 	</repository>
 	<packages type="image" profiles="std">

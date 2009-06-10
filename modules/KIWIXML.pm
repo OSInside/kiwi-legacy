@@ -1815,19 +1815,26 @@ sub setRepository {
 	my $path = shift;
 	my $alias= shift;
 	my $prio = shift;
-	my $element = $this->{repositNodeList} -> get_node(1);
-	if (defined $type) {
-		$element -> setAttribute ("type",$type);
-	}
-	if (defined $path) {
-		$element -> getElementsByTagName ("source")
-			-> get_node (1) -> setAttribute ("path",$path);
-	}
-	if (defined $alias) {
-		$element -> setAttribute ("alias",$alias);
-	}
-	if ((defined $prio) && ($prio != 0)) {
-		$element -> setAttribute ("priority",$prio);
+	my @node = $this->{repositNodeList} -> get_nodelist();
+	foreach my $element (@node) {
+		my $status = $element -> getAttribute("status");
+		if ((defined $status) && ($status eq "fixed")) {
+			next;
+		}
+		if (defined $type) {
+			$element -> setAttribute ("type",$type);
+		}
+		if (defined $path) {
+			$element -> getElementsByTagName ("source")
+				-> get_node (1) -> setAttribute ("path",$path);
+		}
+		if (defined $alias) {
+			$element -> setAttribute ("alias",$alias);
+		}
+		if ((defined $prio) && ($prio != 0)) {
+			$element -> setAttribute ("priority",$prio);
+		}
+		last;
 	}
 	$this -> createURLList();
 	return $this;

@@ -60,7 +60,7 @@
 	<repository type="yast2" status="replaceable">
 		<source path="ftp://dist.suse.de/install/SLP/SLED-10-SP2-GMC/%arch/DVD1"/>
 	</repository>
-	<repository type="rpm-dir">
+	<repository type="rpm-dir" status="fixed">
 		<source path="/usr/share/kiwi/repo/suse-repo/suse-sle10-repo"/>
 	</repository>
 	<packages type="image" profiles="std">

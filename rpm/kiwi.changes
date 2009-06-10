@@ -6,6 +6,8 @@ Tue Jun  9 10:57:34 CEST 2009 - ms@suse.de
   if the kiwi initrd is still in place for a subsequent boot
   use the root variable from the kernel commandline to find
   the boot disk, related to (bnc #507261)
+- fixed setRepository function so that it does not 
+  overwrite repositories marked with status="fixed"
 - added list of available patterns for --list-xmlinfo
 - added support for ext4 filesystem, adapt 11.2 examples
 - adapt 11.2 boot images for ext4
