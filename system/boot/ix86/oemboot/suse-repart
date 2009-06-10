@@ -465,7 +465,7 @@ function OEMRepartOverlayed {
 	#--------------------------------------
 	if [ "$haveDMSquash" = "yes" ];then
 		export imageBootDevice=$imageDiskDevice"3"
-		if ! mke2fs -t ext2 -q $imageBootDevice >/dev/null 2>&1;then
+		if ! mke2fs -T ext2 -q $imageBootDevice >/dev/null 2>&1;then
 			systemException "Failed to create Boot fs" "reboot"
 		fi
 	fi
@@ -715,7 +715,7 @@ function OEMRepart {
 	#--------------------------------------
 	if [ -z "$OEM_WITHOUTHOME" ];then
 		Echo "Creating Home filesystem on $imageHomeDevice"
-		if ! mke2fs -t ext3 -j -q $imageHomeDevice >/dev/null 2>&1;then
+		if ! mke2fs -T ext3 -j -q $imageHomeDevice >/dev/null 2>&1;then
 			systemException "Failed to create Home fs" "reboot"
 		fi
 	fi
@@ -724,7 +724,7 @@ function OEMRepart {
 	#--------------------------------------
 	if [ ! -z "$OEM_RECOVERY" ];then
 		Echo "Creating Recovery filesystem on $imageRecoveryDevice"
-		if ! mke2fs -t ext3 -j -q $imageRecoveryDevice >/dev/null 2>&1;then
+		if ! mke2fs -T ext3 -j -q $imageRecoveryDevice >/dev/null 2>&1;then
 			systemException "Failed to create Recovery fs" "reboot"
 		fi
 	fi

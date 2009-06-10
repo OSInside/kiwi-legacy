@@ -2229,7 +2229,7 @@ sub checkFSOptions {
 				if ($FSInodeSize)   {$inodesize   = "-I $FSInodeSize"}
 				if ($FSJournalSize) {$journalsize = "-J size=$FSJournalSize"}
 				$fsfeature = "-O resize_inode";
-				$fstype = "-t $fstype";
+				$fstype = "-T $fs";
 				last SWITCH;
 			};
 			#==========================================
