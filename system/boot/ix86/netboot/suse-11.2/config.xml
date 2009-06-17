@@ -73,6 +73,7 @@
 		<!-- DRIVERS START DISKLESS -->
 		<file name="drivers/md/*"/>
 		<file name="drivers/ide/*"/>
+		<file name="drivers/block/loop.ko"/>
 		<file name="drivers/block/brd.ko"/>
 		<file name="net/packet/*"/>
 		<file name="fs/ext3/*"/>
@@ -81,6 +82,7 @@
 		<file name="fs/exportfs/*"/>
 		<file name="fs/squashfs/*"/>
 		<file name="fs/nfs/*"/>
+		<file name="fs/fuse/*"/>
 		<file name="fs/lockd/*"/>
 		<file name="net/sunrpc/*"/>
 		<file name="fs/nfs_common/*"/>
