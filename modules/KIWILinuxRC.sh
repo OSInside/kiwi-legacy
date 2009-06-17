@@ -540,6 +540,9 @@ function setupSUSEInitrd {
 	local umountProc=0
 	local umountSys=0
 	local systemMap=0
+	local running
+	local rlinux
+	local rinitrd
 	for i in `find /boot/ -name "System.map*"`;do
 		systemMap=1
 	done
@@ -565,6 +568,17 @@ function setupSUSEInitrd {
 		fi
 		if [ -f /etc/init.d/boot.device-mapper ];then
 			/etc/init.d/boot.device-mapper stop
+		fi
+		if [ $bootLoaderOK = "1" ];then
+			if [ -f /boot/initrd.vmx ];then
+				rm -f /boot/initrd.vmx
+				rm -f /boot/linux.vmx
+				running=$(uname -r)
+				rlinux=vmlinuz-$running
+				rinitrd=initrd-$running
+				ln -s $rlinux  /boot/linux.vmx
+				ln -s $rinitrd /boot/initrd.vmx
+			fi
 		fi
 		if [ $umountSys -eq 1 ];then
 			umount /sys
@@ -2443,7 +2457,7 @@ function createFileSystem {
 		if test $diskID -gt 2; then
 			if ! e2fsck -p $diskPartition 1>&2; then
 				Echo "Partition $diskPartition is not valid, formating..."
-				mke2fs -t ext3 -j $diskPartition 1>&2
+				mke2fs -T ext3 -j $diskPartition 1>&2
 				if test $? != 0; then
 					systemException \
 						"Failed to create filesystem on: $diskPartition !" \
@@ -3201,7 +3215,7 @@ function setupReadWrite {
 				! mount $rwDevice $rwDir >/dev/null
 			then
 				Echo "Creating filesystem for RW data on $rwDevice..."
-				if ! mke2fs -t ext3 -j $rwDevice >/dev/null;then
+				if ! mke2fs -T ext3 -j $rwDevice >/dev/null;then
 					Echo "Failed to create ext3 filesystem"
 					return 1
 				fi
@@ -3380,6 +3394,9 @@ function mountSystemClicFS {
 		#======================================
 		# mount clic container
 		#--------------------------------------
+		if [ -z "$loopf" ];then
+			loopf=$roDevice
+		fi
 		if ! $clic_cmd $loopf $roDir; then  
 			Echo "Failed to mount clic filesystem"
 			return 1
@@ -4517,7 +4534,7 @@ function SAPDataStorageSetup {
 	pvcreate -ff -y $storage"1"
 	vgcreate data_vg $storage"1"
 	lvcreate -l 100%FREE -n sapdata data_vg
-	mke2fs -t ext3 -j /dev/data_vg/sapdata
+	mke2fs -T ext3 -j /dev/data_vg/sapdata
 	if test $? != 0; then
 		systemException "Failed to create sapdata volume" "reboot"
 	fi

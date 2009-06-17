@@ -640,7 +640,7 @@ else
 			if [ ! -b $nbdswapDevice ];then
 				systemException "Device $nbdswapDevice doesn't appear" "reboot"
 			fi
-			if ! /usr/sbin/nbd-client $nbdServer $nbdswapPort $nbdswapDevice
+			if ! /usr/sbin/nbd-client $nbdServer $nbdswapPort $nbdswapDevice -persist
 			then
 				systemException "Failed to setup $nbdswapDevice device" "reboot"
 			fi
@@ -649,7 +649,7 @@ else
 			/sbin/swapon $nbdswapDevice || true
 		fi
 		Echo "Mounting NBD root system: $nbdServer $nbdPort [$nbdDevice]..."
-		if ! /usr/sbin/nbd-client $nbdServer $nbdPort $nbdDevice;then
+		if ! /usr/sbin/nbd-client $nbdServer $nbdPort $nbdDevice -persist;then
 			systemException "Failed to setup $nbdDevice device" "reboot"
 		fi
 		imageRootDevice=$nbdDevice
