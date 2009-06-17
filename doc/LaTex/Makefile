@@ -21,7 +21,8 @@ TEX=kiwi.tex           \
 	xen.tex            \
 	instsource.tex     \
 	migrate.tex        \
-    source.tex
+    source.tex \
+	 appendix.tex
 
 all: revision ps
 
