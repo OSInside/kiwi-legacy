@@ -19,7 +19,7 @@
     </authorgroup>    
   </refentryinfo>
   <refmeta>
-    <refentrytitle>kiwi</refentrytitle>
+    <refentrytitle>kiwi::config.sh</refentrytitle>
     <manvolnum>1</manvolnum>
     <refmiscinfo class="version">v2.10, r938</refmiscinfo>
     <refmiscinfo class="manual">KIWI Manualpage</refmiscinfo>
