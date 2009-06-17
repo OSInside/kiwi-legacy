@@ -109,6 +109,7 @@ is called the XML structure is validated by a RelaxNG based schema.
 For details on attributes and values please refer to the schema 
 documentation file at /usr/share/doc/packages/ kiwi/kiwi.rng.html.
 
+\subsection{image element}
 \begin{Command}{12cm}
 <image schemaversion="3.5" name="iname"\\
 \hspace*{1.9cm}\textit{displayname="text"}\\
@@ -147,6 +148,7 @@ subelements exists. The simplest image description must define the
 elements \textbf{description, preferences, repository and
 packages (at least one of type=''bootstrap'')}.
 
+\subsection{description element}
 \begin{Command}{12cm}
 <description type="system">\\
 \hspace*{1cm}<author>an author</author>\\
@@ -161,6 +163,7 @@ could be either of the value ''system'' which indicates this is a
 system image description or at value ''boot'' for boot image
 descriptions.
 
+\subsection{profiles element}
 \begin{Command}{12cm}
 <profiles>\\
 \hspace*{1cm}<profile name="name" description="text"/>\\
@@ -182,6 +185,7 @@ names in the \textbf{profiles} attribute with a comma.
 If a packages/drivers tag does not have a profiles attribute, it is
 assumed to be present for all profiles.
 
+\subsection{preferences element}
 \begin{Command}{12cm}
 <preferences \textit{profiles="name"}>\\
 \hspace*{1cm}<version>1.1.2</version>\\
@@ -371,6 +375,7 @@ attributes:
       already contains most of the image data.
 \end{itemize}
 
+\subsection{users element}
 \begin{Command}{12cm}
 <users group="users" \textit{id="number"}>\\
 \hspace*{1cm}<user pwd="..." home="dir"\\ 
@@ -388,6 +393,7 @@ group, and the name, pwd and home attributes specifies the username,
 crypted password, and path to the home directory. The password can be
 created by the kiwi $--$createpassword tool.
 
+\subsection{drivers element}
 \begin{Command}{12cm}
 <drivers type="type" \textit{profiles="name"}>\\
 \hspace*{1cm}<file name="filename"/>\\
@@ -430,6 +436,7 @@ have any effect.
 
 %\newpage
 
+\subsection{repository element}
 \begin{Command}{12cm}
 <repository type="type"\\
 \hspace*{1cm}\textit{status="replaceable"}\\
@@ -534,6 +541,7 @@ Multiple repository sections are allowed and combined by the
 used package manager. By default the package manager will always use
 the latest packages available.
 
+\subsection{packages element}
 \begin{Command}{12cm}
 <packages type="type" \textit{profiles="name"}\\
 \hspace*{2.5cm}\textit{patternType="type"}\\
@@ -659,6 +667,7 @@ will be marked as a \textit{to become deleted} package and is
 removed by the contents of the images.sh script of the corresponding
 boot image description
 
+\subsection{vmwareconfig element}
 \begin{Command}{12cm}
 <vmwareconfig arch="arch" memory="MB"\\
 \hspace*{2.5cm}HWversion="number"\\
@@ -727,6 +736,7 @@ network interface
       the bridged mode is used.
 \end{itemize}
 
+\subsection{xenconfig element}
 \begin{Command}{12cm}
 <xenconfig memory="MB"\\
 \hspace*{1cm}<xendisk device="/dev/..."/>\\
@@ -874,6 +884,7 @@ description.
 
 \newpage
 
+\subsection{split element}
 \begin{Command}{12cm}
 <split>\\
 \hspace*{1cm}<temporary>\\
