@@ -1,226 +1,52 @@
 .\"     Title: kiwi::images.sh
 .\"    Author: Marcus Schäfer <ms (AT) suse.de>
-.\" Generator: DocBook XSL Stylesheets v1.74.0 <http://docbook.sf.net/>
-.\"      Date: Created: 06/17/2009
+.\" Generator: DocBook XSL Stylesheets v1.73.2 <http://docbook.sf.net/>
+.\"      Date: Created: 06/18/2009
 .\"    Manual: KIWI Manualpage
 .\"    Source: KIWI v2.10, r938
-.\"  Language: English
 .\"
-.TH "KIWI::IMAGES\&.SH" "1" "Created: 06/17/2009" "KIWI v2\&.10, r938" "KIWI Manualpage"
-.\" -----------------------------------------------------------------
-.\" * (re)Define some macros
-.\" -----------------------------------------------------------------
-.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.\" toupper - uppercase a string (locale-aware)
-.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.de toupper
-.tr aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ
-\\$*
-.tr aabbccddeeffgghhiijjkkllmmnnooppqqrrssttuuvvwwxxyyzz
-..
-.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.\" SH-xref - format a cross-reference to an SH section
-.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.de SH-xref
-.ie n \{\
-.\}
-.toupper \\$*
-.el \{\
-\\$*
-.\}
-..
-.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.\" SH - level-one heading that works better for non-TTY output
-.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.de1 SH
-.\" put an extra blank line of space above the head in non-TTY output
-.if t \{\
-.sp 1
-.\}
-.sp \\n[PD]u
-.nr an-level 1
-.set-an-margin
-.nr an-prevailing-indent \\n[IN]
-.fi
-.in \\n[an-margin]u
-.ti 0
-.HTML-TAG ".NH \\n[an-level]"
-.it 1 an-trap
-.nr an-no-space-flag 1
-.nr an-break-flag 1
-\." make the size of the head bigger
-.ps +3
-.ft B
-.ne (2v + 1u)
-.ie n \{\
-.\" if n (TTY output), use uppercase
-.toupper \\$*
-.\}
-.el \{\
-.nr an-break-flag 0
-.\" if not n (not TTY), use normal case (not uppercase)
-\\$1
-.in \\n[an-margin]u
-.ti 0
-.\" if not n (not TTY), put a border/line under subheading
-.sp -.6
-\l'\n(.lu'
-.\}
-..
-.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.\" SS - level-two heading that works better for non-TTY output
-.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.de1 SS
-.sp \\n[PD]u
-.nr an-level 1
-.set-an-margin
-.nr an-prevailing-indent \\n[IN]
-.fi
-.in \\n[IN]u
-.ti \\n[SN]u
-.it 1 an-trap
-.nr an-no-space-flag 1
-.nr an-break-flag 1
-.ps \\n[PS-SS]u
-\." make the size of the head bigger
-.ps +2
-.ft B
-.ne (2v + 1u)
-.if \\n[.$] \&\\$*
-..
-.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.\" BB/BE - put background/screen (filled box) around block of text
-.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.de BB
-.if t \{\
-.sp -.5
-.br
-.in +2n
-.ll -2n
-.gcolor red
-.di BX
-.\}
-..
-.de EB
-.if t \{\
-.if "\\$2"adjust-for-leading-newline" \{\
-.sp -1
-.\}
-.br
-.di
-.in
-.ll
-.gcolor
-.nr BW \\n(.lu-\\n(.i
-.nr BH \\n(dn+.5v
-.ne \\n(BHu+.5v
-.ie "\\$2"adjust-for-leading-newline" \{\
-\M[\\$1]\h'1n'\v'+.5v'\D'P \\n(BWu 0 0 \\n(BHu -\\n(BWu 0 0 -\\n(BHu'\M[]
-.\}
-.el \{\
-\M[\\$1]\h'1n'\v'-.5v'\D'P \\n(BWu 0 0 \\n(BHu -\\n(BWu 0 0 -\\n(BHu'\M[]
-.\}
-.in 0
-.sp -.5v
-.nf
-.BX
-.in
-.sp .5v
-.fi
-.\}
-..
-.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.\" BM/EM - put colored marker in margin next to block of text
-.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.de BM
-.if t \{\
-.br
-.ll -2n
-.gcolor red
-.di BX
-.\}
-..
-.de EM
-.if t \{\
-.br
-.di
-.ll
-.gcolor
-.nr BH \\n(dn
-.ne \\n(BHu
-\M[\\$1]\D'P -.75n 0 0 \\n(BHu -(\\n[.i]u - \\n(INu - .75n) 0 0 -\\n(BHu'\M[]
-.in 0
-.nf
-.BX
-.in
-.fi
-.\}
-..
-.\" -----------------------------------------------------------------
-.\" * set default formatting
-.\" -----------------------------------------------------------------
+.TH "KIWI::IMAGES\.SH" "1" "Created: 06/18/2009" "KIWI v2\.10, r938" "KIWI Manualpage"
 .\" disable hyphenation
 .nh
 .\" disable justification (adjust text to left margin only)
 .ad l
-.\" -----------------------------------------------------------------
-.\" * MAIN CONTENT STARTS HERE *
-.\" -----------------------------------------------------------------
-.SH "Name"
-KIWI::images.sh \- Configuration File for KIWI image description
-.SH "Description"
+.SH "NAME"
+KIWI::images.sh - Configuration File for KIWI image description
+.SH "DESCRIPTION"
 .PP
-The kiwi image description allows to have an optional images\&.sh script in place\&. This script is called at the beginning of the kiwi create step\&. It is allowed to remove software there to shrink down the size of the image\&. Most often images\&.sh is used for boot images because they needs to be small\&. As images\&.sh is called in the create step you should be aware to design the script in a way that it can be called multiple times without shooting itself into its knee\&. As kiwi allows to create different image types from one previosly prepared tree one needs to take into account that images\&.sh can be called more than one time\&. If you exit images\&.sh with an exit code != 0 kiwi will exit with an error too\&.
+The kiwi image description allows to have an optional images\.sh script in place\. This script is called at the beginning of the kiwi create step\. It is allowed to remove software there to shrink down the size of the image\. Most often images\.sh is used for boot images because they needs to be small\. As images\.sh is called in the create step you should be aware to design the script in a way that it can be called multiple times without shooting itself into its knee\. As kiwi allows to create different image types from one previosly prepared tree one needs to take into account that images\.sh can be called more than one time\. If you exit images\.sh with an exit code != 0 kiwi will exit with an error too\.
 .PP
-\fBExample\ \&1.\ \&Template\fR
+\fBExample\ 1.\ Template\fR
 .sp
-.if n \{\
 .RS 4
-.\}
-.fam C
-.ps -1
 .nf
-.if t \{\
-.sp -1
-.\}
-.BB lightgray adjust-for-leading-newline
-.sp -1
+#======================================
+# Functions\.\.\.
+#\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
+test \-f /\.kconfig && \. /\.kconfig
+test \-f /\.profile && \. /\.profile
 
 #======================================
-# Functions\&.\&.\&.
+# Greeting\.\.\.
 #\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
-test \-f /\&.kconfig && \&. /\&.kconfig
-test \-f /\&.profile && \&. /\&.profile
-
-#======================================
-# Greeting\&.\&.\&.
-#\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
-echo "Configure image: [$kiwi_iname]\&.\&.\&."
+echo "Configure image: [$kiwi_iname]\.\.\."
 
 #======================================
 # Call configuration code/functions
 #\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
-\&.\&.\&.
+\.\.\.
 
 #======================================
 # Exit safely
 #\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
 exit
-.EB lightgray adjust-for-leading-newline
-.if t \{\
-.sp 1
-.\}
 .fi
-.fam
-.ps +1
-.if n \{\
 .RE
-.\}
-.SH "Common functions"
+.SH "COMMON FUNCTIONS"
 .PP
-The \&.kconfig file allows to make use of a common set of functions\&. Those which are SUSE Linux specific starts with the name
-\fIsuse\fR\&. Those which are common to all linux systems starts with the name
-\fIbase\fR\&. The following list describes which functions are available for images\&.sh
+The \.kconfig file allows to make use of a common set of functions\. Those which are SUSE Linux specific starts with the name
+\fIsuse\fR\. Those which are common to all linux systems starts with the name
+\fIbase\fR\. The following list describes which functions are available for images\.sh
 .PP
 [baseCleanMount]
 .RS 4
@@ -234,27 +60,27 @@ Return the name(s) of profiles used to build this image
 .PP
 [baseGetPackagesForDeletion]
 .RS 4
-Return the list of packages setup in the packages type=\'delete\' section of the config\&.xml used to build this image
+Return the list of packages setup in the packages type=\'delete\' section of the config\.xml used to build this image
 .RE
 .PP
 [baseSetupOEMPartition]
 .RS 4
-Writes the file /config\&.oempartition depending on the following config\&.xml parameters: oem\-reboot, oem\-swapsize, oem\-systemsize, oem\-home,oem\-swap,oem\-boot\-title,oem\-recovery, oem\-kiwi\-initrd\&. kiwi takes the information from config\&.xml and creates the config\&.oempartition file as part of the automatically created boot image (initrd)\&. The information must be available as part of the boot image because it controls the OEM repartition workflow on first boot of an OEM image\&. Detailed information about the meaning of each option can be found in the OEM chapter in the kiwi cookbook
+Writes the file /config\.oempartition depending on the following config\.xml parameters: oem\-reboot, oem\-swapsize, oem\-systemsize, oem\-home,oem\-swap,oem\-boot\-title,oem\-recovery, oem\-kiwi\-initrd\. kiwi takes the information from config\.xml and creates the config\.oempartition file as part of the automatically created boot image (initrd)\. The information must be available as part of the boot image because it controls the OEM repartition workflow on first boot of an OEM image\. Detailed information about the meaning of each option can be found in the OEM chapter in the kiwi cookbook
 .RE
 .PP
 [suseGFXBoot {theme} {loadertyp}]
 .RS 4
-This function requires the gfxboot and at least one bootsplash\-theme\-* package to be installed in order to work correctly\&. The function creates from this package data a graphics boot screen for the isolinux and grub boot loaders\&. Additionally it creates the bootsplash files for the resolutions 800x600 1024x768 and 1280x1024
+This function requires the gfxboot and at least one bootsplash\-theme\-* package to be installed in order to work correctly\. The function creates from this package data a graphics boot screen for the isolinux and grub boot loaders\. Additionally it creates the bootsplash files for the resolutions 800x600 1024x768 and 1280x1024
 .RE
 .PP
 [suseStripKernel]
 .RS 4
-This function removes all kernel drivers which are not listed in the *drivers sections of the config\&.xml file
+This function removes all kernel drivers which are not listed in the *drivers sections of the config\.xml file
 .RE
 .PP
 [suseStripInitrd]
 .RS 4
-This function removes a whole bunch of tools binaries and libraries which are not required in order to boot a suse system with kiwi\&.
+This function removes a whole bunch of tools binaries and libraries which are not required in order to boot a suse system with kiwi\.
 .RE
 .PP
 [Rm {list of files}]
@@ -276,38 +102,38 @@ Helper function to print a message to the controling terminal
 .RS 4
 Helper function to print a message if the variable DEBUG is set to 1
 .RE
-.SH "Profile environment variables"
+.SH "PROFILE ENVIRONMENT VARIABLES"
 .PP
-The \&.profile environment file contains a specific set of variables which are listed below\&. Some of the functions above makes use of the variables\&.
+The \.profile environment file contains a specific set of variables which are listed below\. Some of the functions above makes use of the variables\.
 .PP
 [$kiwi_iname]
 .RS 4
-The name of the image as listed in config\&.xml
+The name of the image as listed in config\.xml
 .RE
 .PP
 [$kiwi_iversion]
 .RS 4
-The image version string major\&.minor\&.release
+The image version string major\.minor\.release
 .RE
 .PP
 [$kiwi_keytablee]
 .RS 4
-The contents of the keytable setup as done in config\&.xml
+The contents of the keytable setup as done in config\.xml
 .RE
 .PP
 [$kiwi_language]
 .RS 4
-The contents of the locale setup as done in config\&.xml
+The contents of the locale setup as done in config\.xml
 .RE
 .PP
 [$kiwi_timezone]
 .RS 4
-The contents of the timezone setup as done in config\&.xml
+The contents of the timezone setup as done in config\.xml
 .RE
 .PP
 [$kiwi_delete]
 .RS 4
-A list of all packages which are part of the packages section with type=\'delete\' in config\&.xml
+A list of all packages which are part of the packages section with type=\'delete\' in config\.xml
 .RE
 .PP
 [$kiwi_profiles]
@@ -317,26 +143,27 @@ A list of profiles used to build this image
 .PP
 [$kiwi_drivers]
 .RS 4
-A comma seperated list of the driver entries as listed in the drivers section of the config\&.xml\&. Similar variables exists for the usbdrivers and scsidrivers sections
+A comma seperated list of the driver entries as listed in the drivers section of the config\.xml\. Similar variables exists for the usbdrivers and scsidrivers sections
 .RE
 .PP
 [$kiwi_size]
 .RS 4
-The predefined size value for this image\&. This is not the computed size but only the optional size value of the preferences section in config\&.xml
+The predefined size value for this image\. This is not the computed size but only the optional size value of the preferences section in config\.xml
 .RE
 .PP
 [$kiwi_compressed]
 .RS 4
-The value of the compressed attribute set in the type element in config\&.xml
+The value of the compressed attribute set in the type element in config\.xml
 .RE
 .PP
 [$kiwi_type]
 .RS 4
-The basic image type\&. Can be a simply filesystem image type of ext2 ext3 reiserfs squashfs cpio or one of the following complex image types: iso split usb vmx oem xen pxe
+The basic image type\. Can be a simply filesystem image type of ext2 ext3 reiserfs squashfs cpio or one of the following complex image types: iso split usb vmx oem xen pxe
 .RE
-.SH "Author"
+.SH "AUTHOR"
 .PP
-\fBMarcus Schäfer\fR <\&ms (AT) suse\&.de\&>
-.RS 4
+\fBMarcus Schäfer\fR <\&ms (AT) suse\.de\&>
+.sp -1n
+.IP "" 4
 Developer
-.RE
+

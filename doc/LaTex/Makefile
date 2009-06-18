@@ -21,8 +21,8 @@ TEX=kiwi.tex           \
 	xen.tex            \
 	instsource.tex     \
 	migrate.tex        \
-    source.tex \
-	 appendix.tex
+    source.tex         \
+    appendix.tex
 
 all: revision ps
 
@@ -43,6 +43,8 @@ ps: kiwi.dvi
 	dvips kiwi.dvi
 	dvips kiwi.dvi
 	dvipdf kiwi.dvi
+	mv kiwi.pdf ../kiwi-man/kiwi-base.pdf
+	${MAKE} -C ../kiwi-man all
 
 revision:
 	cat ../../rpm/kiwi.spec | grep Version: | cut -f2 -d: |\
@@ -63,3 +65,5 @@ pdf: pdfimages $(TEX)
 clean:
 	rm -f *.dvi *.idx *.toc *.log *.ps *.mtc[0-9]*
 	rm -f *.aux *.mtc* *.out *.bmt  *.ind *.ilg *.maf
+	(cd ../kiwi-man && rm -f kiwi-base.pdf)
+	(cd ../kiwi-man && rm -f *.html kiwi-man*.pdf)
