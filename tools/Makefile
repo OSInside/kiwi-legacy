@@ -38,7 +38,7 @@ install:
 
 clean:
 	${MAKE} -C dcounter clean
-	${MAKE} -C burner clean
+	test -f burner/Makefile && ${MAKE} -C burner clean || true
 	${MAKE} -C startshell clean
 	${MAKE} -C pigz clean
 	${MAKE} -C driveready clean

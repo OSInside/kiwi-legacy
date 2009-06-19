@@ -171,7 +171,6 @@ modules/KIWISchemaTest.rng: modules/KIWISchemaTest.rnc
 
 clean:
 	(cd system/boot && find -type f | grep -v .svn | xargs chmod u+w)
-	rm -f modules/KIWISchema.rng
 	${MAKE} -C tools clean
 
 build:
