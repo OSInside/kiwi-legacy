@@ -417,10 +417,6 @@ sub main {
 			);
 		}
 		#==========================================
-		# Validate repo types
-		#------------------------------------------
-		$xml -> setValidateRepositoryType();
-		#==========================================
 		# Check for add-package option
 		#------------------------------------------
 		if (defined @AddPackage) {
@@ -622,10 +618,6 @@ sub main {
 				\@AddRepositoryAlias,\@AddRepositoryPriority
 			);
 		}
-		#==========================================
-		# Validate repo types
-		#------------------------------------------
-		$xml -> setValidateRepositoryType();
 		#==========================================
 		# Check if destdir exists or not 
 		#------------------------------------------
@@ -1028,10 +1020,6 @@ sub main {
 				\@AddRepositoryAlias,\@AddRepositoryPriority
 			);
 		}
-		#==========================================
-		# Validate repo types
-		#------------------------------------------
-		$xml -> setValidateRepositoryType();
 		#==========================================
 		# Initialize root system, use existing root
 		#------------------------------------------
@@ -1752,13 +1740,9 @@ sub listXMLInfo {
 		);
 	}
 	#==========================================
-	# Validate repo types
-	#------------------------------------------
-	$xml -> setValidateRepositoryType();
-	my %type = %{$xml->getImageTypeAndAttributes()};
-	#==========================================
 	# print boot information of type section
 	#------------------------------------------
+	my %type = %{$xml->getImageTypeAndAttributes()};
 	if (defined $type{boot}) {
 		$kiwi -> info ("Primary image type: $type{type} @ $type{boot}\n");
 	} else {
@@ -1928,12 +1912,18 @@ sub kiwiExit {
 		return $code;
 	}
 	#==========================================
-	# Really exit kiwi now...
+	# Create log object if we don't have one...
 	#------------------------------------------
 	if (! defined $kiwi) {
 		$kiwi = new KIWILog("tiny");
 	}
+	#==========================================
+	# Reformat log file for human readers...
+	#------------------------------------------
 	$kiwi -> setLogHumanReadable();
+	#==========================================
+	# Check for backtrace and clean flag...
+	#------------------------------------------
 	if ($code != 0) {
 		if (defined $Debug) {
 			$kiwi -> printBackTrace();
@@ -1951,6 +1941,23 @@ sub kiwiExit {
 		$kiwi -> info ("KIWI exited successfully");
 		$kiwi -> done ();
 	}
+	#==========================================
+	# Write temporary XML changes as xml log...
+	#------------------------------------------
+	my $usedXML = $kiwi -> writeXML();
+	if ($usedXML) {
+		$kiwi -> diffXML();
+		if ($usedXML =~ /(.*)\..*\.screenrc\.log\.xml/) {
+			my $xmlused = $1; $xmlused.= ".xml";
+			qxx ("mv $usedXML $xmlused 2>&1");
+			$usedXML = $xmlused;
+		}
+		$kiwi -> info ("Used XML file at: $usedXML");
+		$kiwi -> done ();
+	}
+	#==========================================
+	# Move process log to final logfile name...
+	#------------------------------------------
 	if (! defined $LogFile) {
 		my $rootLog = $kiwi -> getRootLog();
 		if ((defined $rootLog) &&
@@ -1963,6 +1970,9 @@ sub kiwiExit {
 			$kiwi -> done ();
 		}
 	}
+	#==========================================
+	# Cleanup and exit now...
+	#------------------------------------------
 	$kiwi -> cleanSweep();
 	exit $code;
 }
@@ -2129,13 +2139,15 @@ sub checkType {
 	#==========================================
 	# check for required filesystem tool(s)
 	#------------------------------------------
-	if ((defined $type{filesystem}) || (defined $type{flags})) {
+	my $type  = $type{type};
+	my $flags = $type{flags};
+	my $fs    = $type{filesystem};
+	if (($flags) || ($fs)) {
 		my @fs = ();
-		if (defined $type{filesystem}) {
-			@fs = split (/,/,$type{filesystem});
-		}
-		if ((defined $type{flags}) && ($type{flags} ne "")) {
+		if (($flags) && ($type eq "iso")) {
 			push (@fs,$type{flags});
+		} else {
+			@fs = split (/,/,$type{filesystem});
 		}
 		foreach my $fs (@fs) {
 			my %result = checkFileSystem ($fs);

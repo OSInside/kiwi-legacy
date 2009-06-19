@@ -156,6 +156,8 @@ sub new {
 	eval {
 		$systemTree = $systemXML
 			-> parse_file ( $controlFile );
+		$this->{xmlOrigString} = $systemTree -> toString();
+		$this->{xmlOrigFile}   = $controlFile;
 		$optionsNodeList = $systemTree -> getElementsByTagName ("preferences");
 		$driversNodeList = $systemTree -> getElementsByTagName ("drivers");
 		$usrdataNodeList = $systemTree -> getElementsByTagName ("users");
@@ -187,8 +189,9 @@ sub new {
 	$this->{kiwi}            = $kiwi;
 	$this->{foreignRepo}     = $foreignRepo;
 	$this->{optionsNodeList} = $optionsNodeList;
+	$this->{systemTree}      = $systemTree;
 	#==========================================
-	# Add default split section of not defined
+	# Add default split section if not defined
 	#------------------------------------------
 	if (! $splitNodeList) {
 		$splitNodeList = $this -> addDefaultSplitNode();
@@ -388,6 +391,23 @@ sub new {
 		$kiwi -> failed ();
 		return undef;
 	}
+	return $this;
+}
+
+#==========================================
+# updateXML
+#------------------------------------------
+sub updateXML {
+	# ...
+	# Write back the current DOM tree into the file
+	# referenced by getRootLog but with the suffix .xml
+	# if there is no log file set the service is skipped
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $xmlu = $this->{systemTree}->toString();
+	my $xmlf = $this->{xmlOrigFile};
+	$kiwi -> storeXML ( $xmlu,$xmlf );
 	return $this;
 }
 
@@ -1102,6 +1122,7 @@ sub setPackageManager {
 	my $node = $opts -> getElementsByTagName ("packagemanager") -> get_node(1);
 	$opts -> removeChild ($node);
 	$opts -> appendChild ($addElement);
+	$this -> updateXML();
 	return $this;
 }
 
@@ -1771,26 +1792,6 @@ sub getRepository {
 }
 
 #==========================================
-# setValidateRepositoryType
-#------------------------------------------
-sub setValidateRepositoryType {
-	# ...
-	# check the source URL and the used repo type. in case of
-	# opensuse:// we have to use the rpm-md repo type because the
-	# openSUSE buildservice repositories are no valid yast2 repos
-	# ---
-	my $this = shift;
-	my $kiwi = $this->{kiwi};
-	my @node = $this->{repositNodeList} -> get_nodelist();
-	foreach my $element (@node) {
-		my $type = $element -> getAttribute("type");
-		my $stag = $element -> getElementsByTagName ("source") -> get_node(1);
-		my $source = $this -> resolveLink ( $stag -> getAttribute ("path") );
-	}
-	return $this;
-}
-
-#==========================================
 # ignoreRepositories
 #------------------------------------------
 sub ignoreRepositories {
@@ -1799,6 +1800,7 @@ sub ignoreRepositories {
 	# ---
 	my $this = shift;
 	$this->{repositNodeList} = new XML::LibXML::NodeList;
+	$this-> updateXML();
 	return $this;
 }
 
@@ -1837,6 +1839,7 @@ sub setRepository {
 		last;
 	}
 	$this -> createURLList();
+	$this -> updateXML();
 	return $this;
 }
 
@@ -1887,6 +1890,7 @@ sub addRepository {
 		$this->{repositNodeList} -> append ( $xaddXML );
 	}
 	$this -> createURLList();
+	$this -> updateXML();
 	return $this;
 }
 
@@ -1922,6 +1926,7 @@ sub addPackages {
 		$nodes -> get_node($nodeNumber)
 			-> addChild ($addElement);
 	}
+	$this -> updateXML();
 	return $this;
 }
 
@@ -2850,6 +2855,7 @@ sub setupImageInheritance {
 	$this->{packageNodeList} -> prepend (
 		$ixml -> getPackageNodeList()
 	);
+	$this -> updateXML();
 	$kiwi -> done();
 	$KIWIXML::inheritanceHash{$path} = 1;
 	$ixml -> setupImageInheritance();

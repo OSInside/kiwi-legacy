@@ -909,4 +909,52 @@ sub cleanSweep {
 	return $this;
 }
 
+#==========================================
+# storeXML
+#------------------------------------------
+sub storeXML {
+	my $this = shift;
+	my $data = shift;
+	my $orig = shift;
+	$this->{xmlString}   = $data;
+	$this->{xmlOrigFile} = $orig;
+	return $this;
+}
+
+#==========================================
+# writeXML
+#------------------------------------------
+sub writeXML {
+	my $this = shift;
+	my $file = $this->{rootLog};
+	my $data = $this->{xmlString};
+	if (! $data) {
+		return undef;
+	}
+	if (-f $file) {
+		$file .= ".xml";
+	}
+	if (! open (FX,">$file")) {
+		return undef;
+	}
+	print FX $data; close FX;
+	$this->{xmlUsedFile} = $file;
+	return $file;
+}
+
+#==========================================
+# diffXML
+#------------------------------------------
+sub diffXML {
+	my $this = shift;
+	my $used = $this->{xmlUsedFile};
+	my $orig = $this->{xmlOrigFile};
+	if ((! $used) || (! -f $used)) {
+		return undef;
+	}
+	my $diff = qxx ("diff -u $orig $used 2>&1");
+	$this -> loginfo ("XML Changes:\n$diff");
+	return $this;
+}
+
 1;

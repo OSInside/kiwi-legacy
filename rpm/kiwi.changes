@@ -5,6 +5,14 @@ Tue Jun 16 09:58:43 CEST 2009 - ms@suse.de
 - combine manual pages and kiwi cookbook into one
 - added -persist option when calling nbd-client (bnc #513112)
 - fixed clicfs mount for pxe type (bnc #513826)
+- fixed checkType function if flags and filesystem attributes
+  are used together. Using these attributes together in one
+  type is redundant and therefore not correct but it should
+  not lead to an error (bnc #514412)
+- removed useless setValidateRepositoryType method
+- add support for xml file logging. This allows to keep
+  track on the temporary changes kiwi makes in the XML
+  description caused by for example commandline options
 
 -------------------------------------------------------------------
 Tue Jun  9 10:57:34 CEST 2009 - ms@suse.de
