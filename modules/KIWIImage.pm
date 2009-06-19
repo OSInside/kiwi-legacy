@@ -3515,10 +3515,10 @@ sub setupEXT2 {
 		$tree = $imageTree;
 	}
 	my %FSopts = main::checkFSOptions();
-	if ((defined $journal) && ($journal eq "ext3")) {
+	if ((defined $journal) && ($journal eq "journaled-ext3")) {
 		$fsopts = $FSopts{ext3};
 		$fsopts.="-j -F";
-	} elsif ((defined $journal) && ($journal eq "ext4")) {
+	} elsif ((defined $journal) && ($journal eq "journaled-ext4")) {
 		$fsopts = $FSopts{ext4};
 		$fsopts.="-j -F";
 	} else {
@@ -3533,9 +3533,9 @@ sub setupEXT2 {
 		$kiwi -> error  ($data);
 		return undef;
 	}
-	if ((defined $journal) && ($journal eq "ext3")) {
+	if ((defined $journal) && ($journal eq "journaled-ext3")) {
 		$data = qxx ("cd $imageDest && ln -vs $name $name.ext3 2>&1");
-	} elsif ((defined $journal) && ($journal eq "ext4")) {
+	} elsif ((defined $journal) && ($journal eq "journaled-ext4")) {
 		$data = qxx ("cd $imageDest && ln -vs $name $name.ext4 2>&1");
 	} else {
 		$data = qxx ("cd $imageDest && ln -vs $name $name.ext2 2>&1");
