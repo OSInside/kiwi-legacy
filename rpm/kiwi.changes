@@ -13,6 +13,8 @@ Tue Jun 16 09:58:43 CEST 2009 - ms@suse.de
 - add support for xml file logging. This allows to keep
   track on the temporary changes kiwi makes in the XML
   description caused by for example commandline options
+- fixed clone to search in default image path if source
+  is specified as relative path
 
 -------------------------------------------------------------------
 Tue Jun  9 10:57:34 CEST 2009 - ms@suse.de

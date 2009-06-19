@@ -1828,7 +1828,7 @@ sub cloneImage {
 	#==========================================
 	# Evaluate image path or name 
 	#------------------------------------------
-	if (($Clone !~ /\//) && (! -d $Clone)) {
+	if (($Clone !~ /^\//) && (! -d $Clone)) {
 		$Clone = $main::System."/".$Clone;
 	}
 	my $cfg = $Clone."/".$main::ConfigName;
@@ -1871,7 +1871,7 @@ sub cloneImage {
 	#==========================================
 	# Copy path to destination 
 	#------------------------------------------
-	my $data = qxx ("cp -a $Clone $Destination 2>&1");
+	my $data = qxx ("cp -a $Clone/* $Destination 2>&1");
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> failed ();
