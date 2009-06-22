@@ -929,8 +929,9 @@ function suseStripInitrd {
 	local tools="
 		tune2fs swapon swapoff shutdown sfdisk resize_reiserfs
 		reiserfsck reboot halt pivot_root modprobe modinfo rmmod
-		mkswap mkinitrd mkreiserfs mkfs.ext3 mkfs.ext2 mkfs.cramfs
-		losetup ldconfig insmod init ifconfig fdisk e2fsck dhcpcd
+		mkswap mkinitrd mkreiserfs mkfs.cramfs
+		losetup ldconfig insmod init ifconfig fdisk e2fsck fsck.ext2
+		fsck.ext3 fsck.ext4 dhcpcd mkfs.ext2 mkfs.ext3 mkfs.ext4
 		depmod atftpd klogconsole hwinfo xargs wc tail tac readlink
 		mkfifo md5sum head expr file free find env du dirname cut
 		column chroot atftp tr host test printf mount dd uname umount
