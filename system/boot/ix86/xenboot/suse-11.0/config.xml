@@ -18,7 +18,6 @@
 		<profile name="std" description="KERNEL: Xen"/>
 	</profiles>
 	<drivers type="drivers">
-		<file name="drivers/virtio/*"/>
 		<file name="drivers/ide/*"/>
 		<file name="drivers/block/loop.ko"/>
 		<file name="fs/ext3/*"/>

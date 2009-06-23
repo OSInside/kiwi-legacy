@@ -22,6 +22,8 @@
 	</profiles>
 	<drivers type="drivers">
 		<file name="drivers/virtio/*"/>
+		<file name="drivers/block/virtio_blk.ko"/>
+		<file name="drivers/net/virtio_net.ko"/>
 		<file name="drivers/md/*"/>
 		<file name="drivers/block/loop.ko"/>
 		<file name="drivers/ide/*"/>
