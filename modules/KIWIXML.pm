@@ -1424,6 +1424,50 @@ sub getUsers {
 }
 
 #==========================================
+# getTypes
+#------------------------------------------
+sub getTypes {
+	# ...
+	# Receive a list of types available for this image
+	# ---
+	my $this    = shift;
+	my $kiwi    = $this->{kiwi};
+	my @result  = ();
+	my @tnodes  = ();
+	my $gotprim = 0;
+	my @node    = $this->{optionsNodeList} -> get_nodelist();
+	my $urlhd   = new KIWIURL ($kiwi,undef);
+	foreach my $element (@node) {
+		if (! $this -> requestedProfile ($element)) {
+			next;
+		}
+		my @types = $element -> getElementsByTagName ("type");
+		push (@tnodes,@types);
+	}
+	foreach my $node (@tnodes) {
+		my %record  = ();
+		$record{type} = $node -> string_value();
+		$record{boot} = $node -> getAttribute("boot");
+		my $bootpath = $urlhd -> obsPath ($record{boot},"boot");
+		if (defined $bootpath) {
+			$record{boot} = $bootpath;
+		}
+		my $primary = $node -> getAttribute("primary");
+		if ((defined $primary) && ($primary =~ /yes|true/i)) {
+			$record{primary} = "true";
+			$gotprim = 1;
+		} else {
+			$record{primary} = "false";
+		}
+		push (@result,\%record);
+	}
+	if (! $gotprim) {
+		$result[0]->{primary} = "true";
+	}
+	return @result;
+}
+
+#==========================================
 # getProfiles
 #------------------------------------------
 sub getProfiles {
@@ -2664,7 +2708,7 @@ sub getInstallSize {
 	}
 	my %meta = $psolve -> getMetaData();
 	my $solf = $psolve -> getSolfile();
-	return (\%meta,\@delete,$solf);
+	return (\%meta,\@delete,$solf,\@result);
 }
 
 #==========================================

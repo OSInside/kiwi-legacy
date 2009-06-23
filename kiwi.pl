@@ -176,7 +176,6 @@ our $Migrate;               # migrate running system to image description
 our @Exclude;               # exclude directories in migrate search
 our $Report;                # create report on root/ tree migration only
 our @Profiles;              # list of profiles to include in image
-our $ListProfiles;          # lists the available profiles in image
 our $ForceNewRoot;          # force creation of new root directory
 our $BaseRoot;              # use given path as base system
 our $BaseRootMode;          # specify base-root mode copy | union
@@ -186,6 +185,7 @@ our $GzipCmd;               # command to run to gzip things
 our $PrebuiltBootImage;     # directory where a prepared boot image may be found
 our $PreChrootCall;         # program name called before chroot switch
 our $listXMLInfo;           # list XML information for this operation
+our @listXMLInfoSelection;  # info selection for listXMLInfo
 our $CreatePassword;        # create crypted password
 our $ISOCheck;              # create checkmedia boot entry
 our $PackageManager;        # package manager to use for this image
@@ -1290,7 +1290,6 @@ sub init {
 		"isocheck"              => \$ISOCheck,
 		"createhash=s"          => \$CreateHash,
 		"setup-splash=s"        => \$SetupSplash,
-		"list-profiles|i=s"     => \$ListProfiles,
 		"force-new-root"        => \$ForceNewRoot,
 		"base-root=s"           => \$BaseRoot,
 		"base-root-mode=s"      => \$BaseRootMode,
@@ -1300,7 +1299,8 @@ sub init {
 		"package-manager=s"     => \$PackageManager,
 		"prebuiltbootimage=s"   => \$PrebuiltBootImage,
 		"prechroot-call=s"      => \$PreChrootCall,
-		"list-xmlinfo|x=s"      => \$listXMLInfo,
+		"info|i=s"              => \$listXMLInfo,
+		"select=s"              => \@listXMLInfoSelection,
 		"fs-blocksize=i"        => \$FSBlockSize,
 		"fs-journalsize=i"      => \$FSJournalSize,
 		"fs-inodesize=i"        => \$FSInodeSize,
@@ -1325,12 +1325,6 @@ sub init {
 	#------------------------------------------
 	if (defined $CreateHash) {
 		createHash();
-	}
-	#==========================================
-	# non root task: Handle ListProfiles option 
-	#------------------------------------------
-	if (defined $ListProfiles) {
-		listProfiles();
 	}
 	#==========================================
 	# non root task: Clone image 
@@ -1362,7 +1356,6 @@ sub init {
 		(! defined $SetupSplash)        &&
 		(! defined $BootVMDisk)         &&
 		(! defined $Migrate)            &&
-		(! defined $ListProfiles)       &&
 		(! defined $InstallStick)       &&
 		(! defined $listXMLInfo)        &&
 		(! defined $CreatePassword)     &&
@@ -1510,8 +1503,9 @@ sub usage {
 	print "Helper Tools:\n";
 	print "    kiwi --createpassword\n";
 	print "    kiwi --createhash <image-path>\n";
-	print "    kiwi --list-profiles <image-path>\n";
-	print "    kiwi --list-xmlinfo <image-path> [--type <image-type>]\n";
+	print "    kiwi --info <image-path> --select <\n";
+	print "           repo-patterns|patterns|types|sources|size|profiles\n";
+	print "         > --select ...\n";
 	print "    kiwi --setup-splash <initrd>\n";
 	print "\n";
 
@@ -1673,45 +1667,53 @@ sub listImage {
 }
 
 #==========================================
-# listProfiles
-#------------------------------------------
-sub listProfiles {
-	# ...
-	# list the available profiles in image
-	# ---
-	my $kiwi = new KIWILog("tiny");
-	$kiwi -> info ("Reading image description [ListProfiles]...\n");
-	my $xml  = new KIWIXML ($kiwi, $ListProfiles);
-	if (! defined $xml) {
-		exit 1;
-	}
-	my @profiles = $xml -> getProfiles ();
-	if ((scalar @profiles) == 0) {
-		$kiwi -> info ("No profiles available");
-		$kiwi -> done ();
-		exit 0;
-	}
-	foreach my $profile (@profiles) {
-		my $name = $profile -> {name};
-		my $desc = $profile -> {description};
-		$kiwi -> info ("$name: [ $desc ]");
-		$kiwi -> done ();
-	}
-	exit 0;
-}
-
-#==========================================
 # listXMLInfo
 #------------------------------------------
 sub listXMLInfo {
 	# ...
 	# print information about the XML description. The
-	# information listed here is for information only and
-	# not specified in its format
+	# information listed here is for information only
+	# before a prepare and/or create command is called
 	# ---
+	my %select;
+	my $gotselection = 0;
+	my $meta;
+	my $delete;
+	my $solfile;
+	my $satlist;
+	#==========================================
+	# Create info block description
+	#------------------------------------------
+	$select{"repo-patterns"} = "List available patterns from repos";
+	$select{"patterns"}      = "List configured patterns";
+	$select{"types"}         = "List configured types";
+	$select{"sources"}       = "List configured source URLs";
+	$select{"size"}          = "List install/delete size estimation";
+	$select{"profiles"}      = "List profiles";
+	#==========================================
+	# Create log object
+	#------------------------------------------
 	my $kiwi = new KIWILog("tiny");
+	#==========================================
+	# Check selection list
+	#------------------------------------------
+	foreach my $info (@listXMLInfoSelection) {
+		if (defined $select{$info}) {
+			$gotselection = 1; last;
+		}
+	}
+	if (! $gotselection) {
+		$kiwi -> error  ("Can't find info for given selection");
+		$kiwi -> failed ();
+		$kiwi -> info   ("Choose between the following:\n");
+		foreach my $info (keys %select) {
+			my $s = sprintf ("--> %-15s:%s\n",$info,$select{$info});
+			$kiwi -> info ($s); 
+		}
+		exit 1;
+	}
 	$kiwi -> info ("Reading image description [ListXMLInfo]...\n");
-	my $xml  = new KIWIXML ($kiwi,$listXMLInfo,undef,$SetImageType);
+	my $xml  = new KIWIXML ($kiwi,$listXMLInfo);
 	if (! defined $xml) {
 		exit 1;
 	}
@@ -1740,66 +1742,133 @@ sub listXMLInfo {
 		);
 	}
 	#==========================================
-	# print boot information of type section
+	# Walk through selection list
 	#------------------------------------------
-	my %type = %{$xml->getImageTypeAndAttributes()};
-	if (defined $type{boot}) {
-		$kiwi -> info ("Primary image type: $type{type} @ $type{boot}\n");
-	} else {
-		$kiwi -> info ("Primary image type: $type{type}\n");
-	}
-	#==========================================
-	# print repo information
-	#------------------------------------------
-	foreach my $url (@{$xml->{urllist}}) {
-		$kiwi -> info ("Source URL: $url\n");
-	}
-	#==========================================
-	# print install size information
-	#------------------------------------------
-	my ($meta,$delete,$solfile) = $xml -> getInstallSize();
-	my $size = 0;
-	my %meta = ();
-	if ($meta) {
-		%meta = %{$meta};
-		foreach my $p (keys %meta) {
-			$size += $meta{$p};
+	foreach my $info (@listXMLInfoSelection) {
+		SWITCH: for ($info) {
+			#==========================================
+			# repo-patterns
+			#------------------------------------------
+			/^repo-patterns/ && do {
+				if (! $meta) {
+					($meta,$delete,$solfile,$satlist) = $xml->getInstallSize();
+					if (! $meta) {
+						$kiwi -> failed();
+						exit 1;
+					}
+				}
+				if (-f $solfile) {
+					my @patterns = qxx (
+						"dumpsolv $solfile|grep 'name: pattern'|cut -f4 -d :"
+					);
+					$kiwi -> info ("Available patterns in repository set\n");
+					foreach my $p (@patterns) {
+						$kiwi -> info ("--> $p");
+					}
+				}
+				last SWITCH;
+			};
+			#==========================================
+			# patterns
+			#------------------------------------------
+			/^patterns/      && do {
+				if (! $meta) {
+					($meta,$delete,$solfile,$satlist) = $xml->getInstallSize();
+					if (! $meta) {
+						$kiwi -> failed();
+						exit 1;
+					}
+				}
+				my @pats;
+				my @solved = @{$satlist};
+				foreach my $s (@solved) {
+					if ($s =~ /pattern:(.*)/) {
+						 push (@pats,$1);
+					}
+				}
+				if (! @pats) {
+					$kiwi -> info ("No patterns configured\n");
+				} else {
+					$kiwi -> info ("Image Patterns:\n");
+					foreach my $pattern (@pats) {
+						$kiwi -> info ("--> $pattern\n");
+					}
+				}
+				last SWITCH;
+			};
+			#==========================================
+			# types
+			#------------------------------------------
+			/^types/         && do {
+				$kiwi -> info ("Image Types:\n");
+				foreach my $t ($xml -> getTypes()) {
+					my %type = %{$t};
+					$kiwi -> info ("--> $type{type} primary=$type{primary}");
+					if (defined $type{boot}) {
+						$kiwi -> note (" boot=$type{boot}");
+					}
+					$kiwi -> note ("\n");
+				}
+				last SWITCH;
+			};
+			#==========================================
+			# sources
+			#------------------------------------------
+			/^sources/       && do {
+				foreach my $url (@{$xml->{urllist}}) {
+					$kiwi -> info ("Source URL: $url\n");
+				}
+				last SWITCH;
+			};
+			#==========================================
+			# size
+			#------------------------------------------
+			/^size/          && do {
+				if (! $meta) {
+					($meta,$delete,$solfile,$satlist) = $xml->getInstallSize();
+					if (! $meta) {
+						$kiwi -> failed();
+						exit 1;
+					}
+				}
+				my $size = 0;
+				my %meta = %{$meta};
+				foreach my $p (keys %meta) {
+					$size += $meta{$p};
+				}
+				if ($size > 0) {
+					$kiwi->info ("Estimated root tree size: $size kB\n");
+				}
+				$size = 0;
+				if ($delete) {
+					foreach my $del (@{$delete}) {
+						if ($meta{$del}) {
+							$size += $meta{$del};
+						}
+					}
+				}
+				if ($size > 0) {
+					$kiwi -> info ("Estimated deletion size; $size kB\n");
+				}
+				last SWITCH;
+			};
+			#==========================================
+			# profiles
+			#------------------------------------------
+			/^profiles/      && do {
+				my @profiles = $xml -> getProfiles ();
+				if ((scalar @profiles) == 0) {
+					$kiwi -> info ("No profiles available\n");
+				}
+				foreach my $profile (@profiles) {
+					my $name = $profile -> {name};
+					my $desc = $profile -> {description};
+					$kiwi -> info ("$name: [ $desc ]\n");
+				}
+				last SWITCH;
+			};
 		}
-		if ($size > 0) {
-			$kiwi -> info ("Install size for root tree: $size kB\n");
-		}
-	} else {
-		$kiwi -> failed();
-		exit 1;
 	}
-	#==========================================
-	# print deletion size information
-	#------------------------------------------
-	$size = 0;
-	if ($delete) {
-		foreach my $del (@{$delete}) {
-			if ($meta{$del}) {
-				$size += $meta{$del};
-			}
-		}
-	}
-	if ($size > 0) {
-		$kiwi -> info ("Deletion size for root tree; $size kB\n");
-	}
-	#==========================================
-	# print available patterns
-	#------------------------------------------
-	if (-f $solfile) {
-		my @patterns = qxx (
-			"dumpsolv $solfile | grep 'name: pattern' | cut -f3 -d :");
-		$kiwi -> info ("Available patterns with this repo set\n");
-		foreach my $p (@patterns) {
-			$kiwi -> info ("--> $p");
-		}
-	}
-	#==========================================
-	# more to come...
-	#------------------------------------------
 	exit 0;
 }
 

@@ -2,6 +2,7 @@
 Mon Jun 22 16:05:53 CEST 2009 - ms@suse.de
 
 - v3.60
+- improved support for obtaining XML information (bnc #513093)
 - don't remove libx*, 11.2 hwinfo is linked against libx86emu
 - don't remove mkfs/fsck links, just a cleanup fix 
 
