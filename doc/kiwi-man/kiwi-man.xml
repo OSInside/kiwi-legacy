@@ -244,17 +244,12 @@
       the boot image used by the bootloader and the testsuite mode which
       allows testing the integrity of the new root tree.
     </para>
-    <cmdsynopsis><command>kiwi</command> <arg choice="plain">--createpassword</arg></cmdsynopsis>
-    <cmdsynopsis><command>kiwi</command> <arg choice="plain">--createhash
-      <replaceable>image-path</replaceable></arg></cmdsynopsis>
     <cmdsynopsis>
-      <command>kiwi</command>
-      <group choice="req">
-        <arg choice="plain">-i</arg>
-        <arg choice="plain">--list-profiles</arg>
-      </group>
-      <arg choice="plain"><replaceable>ImagePath</replaceable></arg>
-    </cmdsynopsis>
+		<command>kiwi</command> <arg choice="plain">--createpassword</arg>
+	</cmdsynopsis>
+    <cmdsynopsis><command>kiwi</command> <arg choice="plain">--createhash
+      <replaceable>image-path</replaceable></arg>
+	</cmdsynopsis>
     <cmdsynopsis>
       <command>kiwi</command>
       <group choice="req">
@@ -263,7 +258,9 @@
       </group>
       <arg choice="plain"><replaceable>ImagePath</replaceable></arg>
       <arg choice="req">--select
-      <replaceable>repo-patterns|patterns|types|sources|size|profiles</replaceable></arg>
+      <replaceable>
+		repo-patterns|patterns|types|sources|size|profiles
+	  </replaceable></arg>
     </cmdsynopsis>
     <cmdsynopsis>
       <command>kiwi</command>
@@ -291,15 +288,6 @@
 			Sign your image description with a md5sum. The result is written to a file
 			named <filename>.checksum.md</filename> and is checked if kiwi creates
 			an image from this description
-		</para>
-		</listitem>
-	</varlistentry>
-	<varlistentry>
-		<term><optional><option>-i</option> | <option>--list-profiles <replaceable>image-path</replaceable></option>
-		</optional></term>
-		<listitem>
-		<para>
-			List the profile names of the image description if any
 		</para>
 		</listitem>
 	</varlistentry>

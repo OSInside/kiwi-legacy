@@ -81,9 +81,7 @@ file or signing the image description with an md5sum hash as well as adding spla
 .HP 5
 \fBkiwi\fR \-\-createhash\ \fIimage\-path\fR
 .HP 5
-\fBkiwi\fR {\-i | \-\-list\-profiles} \fIImagePath\fR
-.HP 5
-\fBkiwi\fR {\-i | \-\-info} \fIImagePath\fR {\-\-select\ \fIrepo\-patterns|patterns|types|sources|size|profiles\fR}
+\fBkiwi\fR {\-i | \-\-info} \fIImagePath\fR {\-\-select\ \fI\ repo\-patterns|patterns|types|sources|size|profiles\ \fR}
 .HP 5
 \fBkiwi\fR \-\-setup\-splash\ \fIinitrd\fR
 .PP
@@ -99,11 +97,6 @@ Create a crypted password hash and prints it on the console\. The user can use t
 Sign your image description with a md5sum\. The result is written to a file named
 \fI\.checksum\.md\fR
 and is checked if kiwi creates an image from this description
-.RE
-.PP
-[\fB\-i\fR | \fB\-\-list\-profiles \fR\fB\fIimage\-path\fR\fR ]
-.RS 4
-List the profile names of the image description if any
 .RE
 .PP
 [ \fB\-i\fR | \fB\-\-info \fR\fB\fIimage\-path\fR\fR \fB\-\-select \fR\fB\fIselection\fR\fR ]
