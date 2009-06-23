@@ -1,11 +1,11 @@
 .\"     Title: kiwi
 .\"    Author: Marcus Schaefer <ms (AT) suse.de>
 .\" Generator: DocBook XSL Stylesheets v1.73.2 <http://docbook.sf.net/>
-.\"      Date: Created: 06/18/2009
+.\"      Date: Created: 06/23/2009
 .\"    Manual: KIWI Manualpage
 .\"    Source: KIWI v3.25
 .\"
-.TH "KIWI" "1" "Created: 06/18/2009" "KIWI v3\.25" "KIWI Manualpage"
+.TH "KIWI" "1" "Created: 06/23/2009" "KIWI v3\.25" "KIWI Manualpage"
 .\" disable hyphenation
 .nh
 .\" disable justification (adjust text to left margin only)
@@ -83,7 +83,7 @@ file or signing the image description with an md5sum hash as well as adding spla
 .HP 5
 \fBkiwi\fR {\-i | \-\-list\-profiles} \fIImagePath\fR
 .HP 5
-\fBkiwi\fR {\-x | \-\-list\-xmlinfo} \fIImagePath\fR [\-\-type\ \fIImageType\fR]
+\fBkiwi\fR {\-i | \-\-info} \fIImagePath\fR {\-\-select\ \fIrepo\-patterns|patterns|types|sources|size|profiles\fR}
 .HP 5
 \fBkiwi\fR \-\-setup\-splash\ \fIinitrd\fR
 .PP
@@ -106,9 +106,15 @@ and is checked if kiwi creates an image from this description
 List the profile names of the image description if any
 .RE
 .PP
-[\fB\-x\fR | \fB\-\-list\-xmlinfo \fR\fB\fIimage\-path\fR\fR ]
+[ \fB\-i\fR | \fB\-\-info \fR\fB\fIimage\-path\fR\fR \fB\-\-select \fR\fB\fIselection\fR\fR ]
 .RS 4
-List general information about the image description\. At the moment this includes the boot image information of the requested or the default type
+List general information about the image description\. So far you can get information about the available patterns in the configured repositories with
+\fIrepo\-patterns\fR, a list of used patterns for this image with
+\fIpatterns\fR, a list of supported image types with
+\fItypes\fR, a list of source URL\'s with
+\fIsources\fR, an estimation about the install size and the size of the packages marked as to be deleted with
+\fIsize\fR, and a list of profiles with
+\fIprofiles\fR\.
 .RE
 .PP
 [\fB\-\-setup\-splash \fR\fB\fIinitrd\fR\fR ]

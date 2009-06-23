@@ -28,6 +28,7 @@
 		<file name="usb/storage/usb-storage.ko"/>
 	</drivers>
 	<drivers type="drivers">
+		<file name="drivers/virtio/*"/>
 		<file name="drivers/md/*"/>
 		<file name="drivers/hid/*"/>
 		<file name="drivers/ide/*"/>

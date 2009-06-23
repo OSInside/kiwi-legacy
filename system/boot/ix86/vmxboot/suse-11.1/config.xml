@@ -22,6 +22,7 @@
 		<profile name="ec2" description="KERNEL: Ec2 kernel"/>
 	</profiles>
 	<drivers type="drivers">
+		<file name="drivers/virtio/*"/>
 		<file name="drivers/md/*"/>
 		<file name="drivers/block/loop.ko"/>
 		<file name="drivers/ide/*"/>

@@ -258,12 +258,12 @@
     <cmdsynopsis>
       <command>kiwi</command>
       <group choice="req">
-        <arg choice="plain">-x</arg>
-        <arg choice="plain">--list-xmlinfo</arg>
+        <arg choice="plain">-i</arg>
+        <arg choice="plain">--info</arg>
       </group>
       <arg choice="plain"><replaceable>ImagePath</replaceable></arg>
-      <arg choice="opt">--type
-      <replaceable>ImageType</replaceable></arg>
+      <arg choice="req">--select
+      <replaceable>repo-patterns|patterns|types|sources|size|profiles</replaceable></arg>
     </cmdsynopsis>
     <cmdsynopsis>
       <command>kiwi</command>
@@ -304,12 +304,20 @@
 		</listitem>
 	</varlistentry>
 	<varlistentry>
-		<term><optional><option>-x</option> | <option>--list-xmlinfo <replaceable>image-path</replaceable></option>
+		<term><optional>
+			<option>-i</option> | <option>--info <replaceable>image-path</replaceable></option>
+			<option>--select <replaceable>selection</replaceable></option>
 		</optional></term>
 		<listitem>
 		<para>
-			List general information about the image description. At the moment this
-			includes the boot image information of the requested or the default type
+			List general information about the image description. So far you can get
+			information about the available patterns in the configured repositories with
+			<replaceable>repo-patterns</replaceable>, a list of used patterns for this image
+			with <replaceable>patterns</replaceable>, a list of supported image types
+			with <replaceable>types</replaceable>, a list of source URL's with
+			<replaceable>sources</replaceable>, an estimation about the install size and
+			the size of the packages marked as to be deleted with <replaceable>size</replaceable>,
+			and a list of profiles with <replaceable>profiles</replaceable>.
 		</para>
 		</listitem>
 	</varlistentry>
