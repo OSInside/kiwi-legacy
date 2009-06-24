@@ -6,6 +6,15 @@ Mon Jun 22 16:05:53 CEST 2009 - ms@suse.de
 - improved support for obtaining XML information (bnc #513093)
 - don't remove libx*, 11.2 hwinfo is linked against libx86emu
 - don't remove mkfs/fsck links, just a cleanup fix 
+- the inode issue comes back to haunt us yet again.  The last go
+  around actually made things *worse* for things like vmdk that
+  allocate large disks, since 2x the number of files is probably
+  much smaller than the 'automatic' calculation used for a disk of
+  that size. The attached patch fixes this by removing the
+  --fs-numinodes option (which is useless, IMHO) and replaces it
+  with --fs-inoderatio.  Kiwi will assume 16k for inode ratio if
+  not otherwise specified. We use the ratio to determine the number
+  of inodes, unless it is a smaller value than num_files*2.
 
 -------------------------------------------------------------------
 Fri Jun 19 16:14:33 CEST 2009 - ms@suse.de

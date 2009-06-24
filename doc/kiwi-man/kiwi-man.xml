@@ -685,12 +685,12 @@
 		</listitem>
 	</varlistentry>
 	<varlistentry>
-        <term><optional><option>--fs-maxinodes <replaceable>number</replaceable></option>
+        <term><optional><option>--fs-inoderatio <replaceable>number</replaceable></option>
         </optional></term>
         <listitem>
         <para>
-			Set the maximum number of inodes. This option has no effect
-			if the reiser filesystem is used
+            Set the bytes/inode ratio. This option has no
+            effect if the reiser filesystem is used
         </para>
         </listitem>
     </varlistentry>

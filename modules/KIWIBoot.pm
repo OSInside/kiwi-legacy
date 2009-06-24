@@ -274,11 +274,12 @@ sub new {
 	# setup virtual disk size
 	#------------------------------------------
 	if ((! defined $vmsize) && (defined $system)) {
-		my $kernelSize  = -s $kernel; # the kernel
-		my $initrdSize  = -s $initrd; # the boot image
-		my $systemSXML  = 1; # system size set by XML file
-		my $systemSize  = 0; # the system image size in bytes
-		my $systemInodes= 0; # the number of inodes the system uses
+		my $kernelSize   = -s $kernel; # the kernel
+		my $initrdSize   = -s $initrd; # the boot image
+		my $systemSXML   = 1; # system size set by XML file
+		my $systemSize   = 0; # the system image size in bytes
+		my $minInodes    = 0; # the number of inodes the system uses * 2
+		my $defaultInodes= 0; # the number of inodes determined by FSInodeRatio
 		# /.../
 		# Note: In case of a split system the vmsize value will
 		# be increased according to the size of the split portion
@@ -297,22 +298,15 @@ sub new {
 			#==========================================
 			# Calculate required inode count
 			#------------------------------------------
-			$systemInodes = qxx ("find $system | wc -l");
-			$systemInodes *= 2;
-			$this->{inodes} = $systemInodes;
-			if (defined $main::FSNumInodes) {
-				$this->{inodes} = $main::FSNumInodes;
-				if ($main::FSNumInodes < $systemInodes) {
-					$kiwi -> warning (
-						"Specified Inode count might be too small\n"
-					);
-					$kiwi -> warning (
-						"Copying of files to image could fail !\n"
-					);
-				}
-			}
+			$minInodes = qxx ("find $system | wc -l");
+			$minInodes *= 2;
 			if ($systemSXML eq "auto") {
 				$systemSXML = 0;
+				$this->{inodes} = $minInodes;
+			} else {
+				$defaultInodes  = $systemSXML / $main::FSInodeRatio;
+				$this->{inodes} = 
+					$minInodes > $defaultInodes ? $minInodes : $defaultInodes;
 			}
 		} else {
 			$systemSXML = $xml -> getImageSizeBytes();

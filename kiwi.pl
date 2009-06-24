@@ -192,7 +192,7 @@ our $PackageManager;        # package manager to use for this image
 our $FSBlockSize;           # filesystem block size
 our $FSInodeSize;           # filesystem inode size
 our $FSJournalSize;         # filesystem journal size
-our $FSNumInodes;           # filesystem max inodes
+our $FSInodeRatio;          # filesystem bytes/inode ratio
 our $Verbosity = 0;         # control the verbosity level
 our $TargetArch;            # target architecture -> writes zypp.conf
 our $CheckKernel;           # check for kernel matches in boot and system image
@@ -1304,7 +1304,7 @@ sub init {
 		"fs-blocksize=i"        => \$FSBlockSize,
 		"fs-journalsize=i"      => \$FSJournalSize,
 		"fs-inodesize=i"        => \$FSInodeSize,
-		"fs-maxinodes=i"        => \$FSNumInodes,
+		"fs-inoderatio=i"       => \$FSInodeRatio,
 		"partitioner=s"         => \$Partitioner,
 		"target-arch=s"         => \$TargetArch,
 		"check-kernel"          => \$CheckKernel,
@@ -1314,6 +1314,12 @@ sub init {
 		"help|h"                => \&usage,
 		"<>"                    => \&usage
 	);
+	#========================================
+	# set default inode ratio for ext2/3
+	#========================================
+	if (! defined $FSInodeRatio) {
+		$FSInodeRatio = 16384;
+	}
 	#========================================
 	# non root task: create inst source
 	#----------------------------------------
@@ -1619,9 +1625,9 @@ sub usage {
 	print "      Set the inode size in Bytes. This option has no effect\n";
 	print "      if the reiser filesystem is used\n";
 	print "\n";
-	print "    [ --fs-maxinodes <number> ]\n";
-	print "      Set the maximum number of inodes. This option has no effect\n";
-	print "      if the reiser filesystem is used\n";
+	print "    [ --fs-inoderatio <number> ]\n";
+	print "      Set the bytes/inode ratio. This option has no\n";
+	print "      effect if the reiser filesystem is used\n";
 	print "\n";
 	print "    [ --partitioner <fdisk|parted> ]\n";
 	print "      Select the tool to create partition tables. Supported are\n";
@@ -2299,6 +2305,7 @@ sub checkFSOptions {
 		my $blocksize;   # block size in bytes
 		my $journalsize; # journal size in MB (ext) or blocks (reiser)
 		my $inodesize;   # inode size in bytes (ext only)
+		my $inoderatio;  # bytes/inode ratio
 		my $fsfeature;   # filesystem features (ext only)
 		my $fstype;      # filesystem type (ext only)
 		SWITCH: for ($fs) {
@@ -2308,6 +2315,7 @@ sub checkFSOptions {
 			/ext[432]/   && do {
 				if ($FSBlockSize)   {$blocksize   = "-b $FSBlockSize"}
 				if ($FSInodeSize)   {$inodesize   = "-I $FSInodeSize"}
+				if ($FSInodeRatio)  {$inoderatio  = "-i $FSInodeRatio"}
 				if ($FSJournalSize) {$journalsize = "-J size=$FSJournalSize"}
 				$fsfeature = "-O resize_inode";
 				$fstype = "-T $fs";
@@ -2325,6 +2333,9 @@ sub checkFSOptions {
 		};
 		if (defined $inodesize) {
 			$result{$fs} .= $inodesize." ";
+		}
+		if (defined $inoderatio) {
+			$result{$fs} .= $inoderatio." ";
 		}
 		if (defined $blocksize) {
 			$result{$fs} .= $blocksize." ";
