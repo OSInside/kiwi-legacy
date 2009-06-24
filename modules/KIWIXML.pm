@@ -258,8 +258,10 @@ sub new {
 			#------------------------------------------
 			my $nodes = $foreignRepo->{xmlpacnode};
 			my @plist;
-			my @flistImage;
-			my @flistDelete;
+			my @alist;
+			my @falistImage;
+			my @fplistImage;
+			my @fplistDelete;
 			for (my $i=1;$i<= $nodes->size();$i++) {
 				my $node = $nodes -> get_node($i);
 				my $type = $node  -> getAttribute ("type");
@@ -268,6 +270,7 @@ sub new {
 						next;
 					}
 					push (@plist,$node->getElementsByTagName ("package"));
+					push (@alist,$node->getElementsByTagName ("archive"));
 				}
 			}
 			foreach my $element (@plist) {
@@ -275,23 +278,37 @@ sub new {
 				my $bootinc = $element -> getAttribute ("bootinclude");
 				my $bootdel = $element -> getAttribute ("bootdelete");
 				if ((defined $bootinc) && ("$bootinc" =~ /yes|true/i)) {
-					push (@flistImage,$package);
+					push (@fplistImage,$package);
 				}
 				if ((defined $bootdel) && ("$bootdel" =~ /yes|true/i)) {
-					push (@flistDelete,$package);
+					push (@fplistDelete,$package);
 				}
 			}
-			if (@flistImage) {
+			foreach my $element (@alist) {
+				my $archive = $element -> getAttribute ("name");
+				my $bootinc = $element -> getAttribute ("bootinclude");
+				if ((defined $bootinc) && ("$bootinc" =~ /yes|true/i)) {
+					push (@falistImage,$archive);
+				}
+			}
+			if (@fplistImage) {
 				$kiwi -> info ("Adding foreign package(s):\n");
-				foreach my $p (@flistImage) {
+				foreach my $p (@fplistImage) {
 					$kiwi -> info ("--> $p\n");
 				}
-				$this -> addPackages ("image",$packageNodeList,@flistImage);
-				if (@flistDelete) {
+				$this -> addPackages ("image",$packageNodeList,@fplistImage);
+				if (@fplistDelete) {
 					$this -> addPackages (
-						"delete",$packageNodeList,@flistDelete
+						"delete",$packageNodeList,@fplistDelete
 					);
 				}
+			}
+			if (@falistImage) {
+				$kiwi -> info ("Adding foreign archive(s):\n");
+				foreach my $p (@falistImage) {
+					$kiwi -> info ("--> $p\n");
+				}
+				$this -> addArchives ("image",$packageNodeList,@falistImage);
 			}
 		}
 		#==========================================
@@ -1975,6 +1992,43 @@ sub addPackages {
 }
 
 #==========================================
+# addArchives
+#------------------------------------------
+sub addArchives {
+	# ...
+	# Add the given archive list to the specified packages
+	# type section of the xml description parse tree as an.
+	# archive element
+	# ----
+	my $this  = shift;
+	my $ptype = shift;
+	my $nodes = shift;
+	my @tars  = @_;
+	if (! defined $nodes) {
+		$nodes = $this->{packageNodeList};
+	}
+	my $nodeNumber = 1;
+	for (my $i=1;$i<= $nodes->size();$i++) {
+		my $node = $nodes -> get_node($i);
+		my $type = $node  -> getAttribute ("type");
+		if (! $this -> requestedProfile ($node)) {
+			next;
+		}
+		if ($type eq $ptype) {
+			$nodeNumber = $i; last;
+		}
+	}
+	foreach my $tar (@tars) {
+		my $addElement = new XML::LibXML::Element ("archive");
+		$addElement -> setAttribute("name",$tar);
+		$nodes -> get_node($nodeNumber)
+			-> addChild ($addElement);
+	}
+	$this -> updateXML();
+	return $this;
+}
+
+#==========================================
 # addImagePackages
 #------------------------------------------
 sub addImagePackages {
@@ -2440,6 +2494,7 @@ sub getList {
 	# ---
 	my $this = shift;
 	my $what = shift;
+	my $nopac= shift;
 	my $kiwi = $this->{kiwi};
 	my %pattr;
 	my $nodes;
@@ -2482,7 +2537,11 @@ sub getList {
 		#------------------------------------------
 		my @plist = ();
 		if (($what ne "metapackages") && ($what ne "instpackages")) {
-			@plist = $node -> getElementsByTagName ("package");
+			if (defined $nopac) {
+				@plist = $node -> getElementsByTagName ("archive");
+			} else {
+				@plist = $node -> getElementsByTagName ("package");
+			}
 		} else {
 			@plist = $node -> getElementsByTagName ("repopackage");
 		}
@@ -2509,7 +2568,7 @@ sub getList {
 		#==========================================
 		# Check for pattern descriptions
 		#------------------------------------------
-		if ($type ne "metapackages") {
+		if (($type ne "metapackages") && (! defined $nopac)) {
 			my @pattlist = ();
 			my @slist = $node -> getElementsByTagName ("opensuseProduct");
 			foreach my $element (@slist) {
@@ -2580,33 +2639,35 @@ sub getList {
 		#==========================================
 		# Check for ignore list
 		#------------------------------------------
-		my @ilist = $node -> getElementsByTagName ("ignore");
-		my @ignorelist = ();
-		foreach my $element (@ilist) {
-			my $ignore = $element -> getAttribute ("name");
-			if (! defined $ignore) {
-				next;
-			}
-			if (($ignore =~ /@/) && ($manager eq "zypper")) {
-				$ignore =~ s/@/\./;
-			}
-			push @ignorelist,$ignore;
-		}
-		if (@ignorelist) {
-			my @newlist = ();
-			foreach my $element (@result) {
-				my $pass = 1;
-				foreach my $ignore (@ignorelist) {
-					if ($element eq $ignore) {
-						$pass = 0; last;
-					}
-				}
-				if (! $pass) {
+		if (! defined $nopac) {
+			my @ilist = $node -> getElementsByTagName ("ignore");
+			my @ignorelist = ();
+			foreach my $element (@ilist) {
+				my $ignore = $element -> getAttribute ("name");
+				if (! defined $ignore) {
 					next;
 				}
-				push @newlist,$element;
+				if (($ignore =~ /@/) && ($manager eq "zypper")) {
+					$ignore =~ s/@/\./;
+				}
+				push @ignorelist,$ignore;
 			}
-			@result = @newlist;
+			if (@ignorelist) {
+				my @newlist = ();
+				foreach my $element (@result) {
+					my $pass = 1;
+					foreach my $ignore (@ignorelist) {
+						if ($element eq $ignore) {
+							$pass = 0; last;
+						}
+					}
+					if (! $pass) {
+						next;
+					}
+					push @newlist,$element;
+				}
+				@result = @newlist;
+			}
 		}
 	}
 	#==========================================
@@ -2843,6 +2904,21 @@ sub getVMwareList {
 	# ---
 	my $this = shift;
 	return getList ($this,"vmware");
+}
+
+#==========================================
+# getArchiveList
+#------------------------------------------
+sub getArchiveList {
+	# ...
+	# Create list of <archive> elements. These names
+	# references tarballs which must exist in the image
+	# description directory
+	# ---
+	my $this = shift;
+	my @bootarchives = getList ($this,"bootstrap","archive");
+	my @imagearchive = getList ($this,"image","archive");
+	return (@bootarchives,@imagearchive);
 }
 
 #==========================================

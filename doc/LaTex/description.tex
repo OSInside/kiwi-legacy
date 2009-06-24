@@ -550,6 +550,8 @@ the latest packages available.
 \hspace*{1cm}<package name="name" replaces="name"/>\\
 \hspace*{1cm}<package name="name"\\
 \hspace*{2.5cm}bootinclude="yes" bootdelete="yes"/>\\
+\hspace*{1cm}<archive name="name"\\
+\hspace*{2.5cm}bootinclude="yes"/>\\
 \hspace*{1cm}<package .../>\\
 \hspace*{1cm}<opensusePattern name="name"/>\\
 \hspace*{1cm}<opensusePattern .../>\\
@@ -666,6 +668,15 @@ the bootinclude attribute this means that the selected package
 will be marked as a \textit{to become deleted} package and is
 removed by the contents of the images.sh script of the corresponding
 boot image description
+
+\subsubsection{Data not available as packages to become included}
+With the optional \textbf{archive} element it's possible to include
+any kind of data into the image. The archive elements expects the
+name of a tarball which must exist as part of the system image
+description. kiwi then picks up the tarball and installs it into
+the image. If the \textbf{bootinclude} attribute is set along with
+the archive element the data will also become installed into the
+boot image.
 
 \subsection{vmwareconfig element}
 \begin{Command}{12cm}

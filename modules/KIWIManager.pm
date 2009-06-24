@@ -1349,6 +1349,82 @@ sub setupInstallPackages {
 }
 
 #==========================================
+# setupArchives
+#------------------------------------------
+sub setupArchives {
+	# ...
+	# install the given tar archives into the
+	# root system
+	# ---
+	my $this    = shift;
+	my $idesc   = shift;
+	my @tars    = @_;
+	my $kiwi    = $this->{kiwi};
+	my $chroot  = $this->{chroot};
+	my @kchroot = @{$this->{kchroot}};
+	my $root    = $this->{root};
+	my $screenCall = $this->{screenCall};
+	#==========================================
+	# check for empty list
+	#------------------------------------------
+	if (! @tars) {
+		return $this;
+	}
+	#==========================================
+	# check for chroot
+	#------------------------------------------
+	if ($chroot) {
+		$kiwi -> error ("Can't access archives in chroot");
+		return undef;
+	}
+	#==========================================
+	# check for foreign call
+	#------------------------------------------
+	if (defined $main::ForeignRepo{prepare}) {
+		if (open FD,"$main::ForeignRepo{create}/image/main::Prepare") {
+			$idesc = <FD>; close FD;
+		}
+	}
+	#==========================================
+	# check for archive files
+	#------------------------------------------
+	foreach my $tar (@tars) {
+		if (! -f "$idesc/$tar") {
+			$kiwi -> error ("Can't find $idesc/$tar");
+			return undef;
+		}
+	}
+	#==========================================
+	# setup screen call
+	#------------------------------------------
+	my $fd = $this -> setupScreen();
+	if (! defined $fd) {
+		return undef;
+	}
+	$kiwi -> info ("Installing raw archives in: $root...");
+	#==========================================
+	# Create screen call file
+	#------------------------------------------
+	print $fd "function clean { kill \$SPID;";
+	print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
+	print $fd "trap clean INT TERM\n";
+	print $fd "for i in @tars;do\n";
+	print $fd "   if ! tar -C $root -xvf $idesc/\$i;then\n";
+	print $fd "       ECODE=\$?\n";
+	print $fd "       echo \$ECODE > $screenCall.exit\n";
+	print $fd "       exit \$ECODE\n";
+	print $fd "   fi\n";
+	print $fd "done\n";
+	print $fd "echo 0 > $screenCall.exit\n";
+	print $fd "exit 0\n";
+	$fd -> close();
+	#==========================================
+	# Call it
+	#------------------------------------------
+	return $this -> setupScreenCall();
+}
+
+#==========================================
 # setupRootSystem
 #------------------------------------------
 sub setupRootSystem {
@@ -1401,7 +1477,7 @@ sub setupRootSystem {
 			# Create screen call file
 			#------------------------------------------
 			print $fd "function clean { kill \$SPID;";
-			print $fd "rm -f $root/etc/smart/channels/*";
+			print $fd "rm -f $root/etc/smart/channels/*; ";
 			print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 			print $fd "trap clean INT TERM\n";
 			print $fd "@smart @rootdir channel --show &\n";

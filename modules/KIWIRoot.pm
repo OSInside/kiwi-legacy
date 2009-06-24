@@ -317,9 +317,11 @@ sub init {
 	#------------------------------------------
 	$manager -> switchToLocal();
 	if (! $manager -> setupSignatureCheck()) {
+		$manager -> freeLock();
 		return undef;
 	}
 	if (! $manager -> setupExcludeDocs()) {
+		$manager -> freeLock();
 		return undef;
 	}
 	#==================================
@@ -381,9 +383,9 @@ sub init {
 	qxx (" cp /etc/resolv.conf $root/etc 2>&1 ");
 	qxx (" cp $main::KConfig $root/.kconfig 2>&1 ");
 	$kiwi -> done();
-	#==================================
+	#==========================================
 	# Create package keys
-	#----------------------------------
+	#------------------------------------------
 	$manager -> setupPackageKeys();
 	#==========================================
 	# Setup shared cache directory
@@ -681,6 +683,14 @@ sub install {
 		return undef;
 	}
 	$manager -> freeLock();
+	$manager -> switchToLocal();
+	#==========================================
+	# Install raw data archives
+	#------------------------------------------
+	my @archives = $xml -> getArchiveList();
+	if (! $manager -> setupArchives($this->{imageDesc},@archives)) {
+		return undef;
+	}
 	return $this;
 }
 

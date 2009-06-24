@@ -2,6 +2,10 @@
 Mon Jun 22 16:05:53 CEST 2009 - ms@suse.de
 
 - v3.60
+- allow inclusion of custom tar archives with new <archive>
+  element. This can be used to include custom branding without
+  special branding packages. This can also be used to include
+  any kind of data without the need for a package (bnc #515573)
 - added virtio kernel modules to boot images (bnc #515543)
 - improved support for obtaining XML information (bnc #513093)
 - don't remove libx*, 11.2 hwinfo is linked against libx86emu

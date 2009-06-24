@@ -881,6 +881,34 @@ to the specific medium number (CD1, DVD7, ...)</a:documentation>
   </div>
   <!--
     ==========================================
+    common element <archive>
+    
+  -->
+  <div>
+    <define name="k.archive.name.attribute">
+      <ref name="k.name.attribute"/>
+    </define>
+    <define name="k.archive.bootinclude.attribute">
+      <ref name="k.bootinclude.attribute"/>
+    </define>
+    <define name="k.archive.attlist">
+      <interleave>
+        <ref name="k.archive.name.attribute"/>
+        <optional>
+          <ref name="k.archive.bootinclude.attribute"/>
+        </optional>
+      </interleave>
+    </define>
+    <define name="k.archive">
+      <element name="archive">
+        <a:documentation>Name of an image archive file (tarball)</a:documentation>
+        <ref name="k.archive.attlist"/>
+        <empty/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
     common element <packagemanager>
     
   -->
@@ -2657,6 +2685,9 @@ and also depends of the selected image output type.</db:para>
           </zeroOrMore>
           <zeroOrMore>
             <ref name="k.ignore"/>
+          </zeroOrMore>
+          <zeroOrMore>
+            <ref name="k.archive"/>
           </zeroOrMore>
         </interleave>
       </element>
