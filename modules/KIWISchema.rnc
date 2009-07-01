@@ -1180,6 +1180,12 @@ div {
 		## about the possible values can be found by calling
 		## hwinfo --framebuffer or in /usr/src/linux/Documentation/fb/vesafb.txt
 		attribute vga { text }
+	k.type.luks.attribute =
+		## Setup cryptographic volume along with the given filesystem
+		## using the LUKS extension. The value of this attribute
+		## represents the password string used to be able to
+		## mount that filesystem while booting
+		attribute luks { text }
 	k.type.filesystem.attribute = 
 		## Specifies the filesystem which can be one of:
 		## ext2 , ext3 , ext4, reiserfs ,squashfs, clicfs or dmsquash.
@@ -1230,6 +1236,7 @@ div {
 		k.type.bootloader.attribute? &
 		k.type.compressed.attribute? &
 		k.type.vga.attribute? &
+		k.type.luks.attribute? &
 		k.type.filesystem.attribute? &
 		k.type.fsreadonly.attribute? &
 		k.type.fsreadwrite.attribute? &

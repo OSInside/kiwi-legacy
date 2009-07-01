@@ -740,6 +740,7 @@ sub getImageTypeAndAttributes {
 			$first = $prim;
 		}
 		$record{type}          = $node -> string_value();
+		$record{luks}          = $node -> getAttribute("luks");
 		$record{compressed}    = $node -> getAttribute("compressed");
 		$record{boot}          = $node -> getAttribute("boot");
 		$record{volid}         = $node -> getAttribute("volid");

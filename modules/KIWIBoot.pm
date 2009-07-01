@@ -213,10 +213,7 @@ sub new {
 				#------------------------------------------
 				my $dmap = $this->{loop}; $dmap =~ s/dev\///;
 				my $sdev = "/dev/mapper".$dmap."p1";
-				%fsattr = main::checkFileSystem ($sdev);
-				$status = qxx ("mount -t $fsattr{type} $sdev $tmpdir 2>&1");
-				$result = $? >> 8;
-				if ($result != 0) {
+				if (! main::mount($sdev, $tmpdir)) {
 					$kiwi -> error ("System image mount failed: $status");
 					$kiwi -> failed ();
 					$this -> cleanLoop ();
@@ -231,14 +228,14 @@ sub new {
 				#==========================================
 				# clean up
 				#------------------------------------------
-				qxx ("umount $tmpdir 2>&1");
+				main::umount();
 				qxx ("kpartx -d $this->{loop}");
 				qxx ("losetup -d $this->{loop}");
 			} else {
 				#==========================================
 				# loop mount system image
 				#------------------------------------------
-				if (! main::mountLoop ($system,$tmpdir,$fsattr{type})) {
+				if (! main::mount ($system,$tmpdir)) {
 					$this -> cleanTmp ();
 					return undef;
 				}
@@ -251,7 +248,7 @@ sub new {
 				#==========================================
 				# clean up
 				#------------------------------------------
-				main::umountLoop ($tmpdir);
+				main::umount();
 			}
 		}
 		if (! defined $xml) {
@@ -358,6 +355,9 @@ sub new {
 		my %type = %{$xml->getImageTypeAndAttributes()};
 		if ($type{vga}) {
 			$vga = $type{vga};
+		}
+		if ($type{luks}) {
+			$main::LuksCipher = $type{luks};
 		}
 	}
 	#==========================================
@@ -534,13 +534,16 @@ sub setupBootStick {
 	my $haveSplit = 0;
 	my $haveTree  = 0;
 	my $lvmbootMB = 0;
+	my $luksbootMB= 0;
 	my $syslbootMB= 0;
 	my $dmbootMB  = 0;
 	my $dmapper   = 0;
+	my $haveluks  = 0;
 	my $bootloader= "grub";
 	my $lvmsize;
 	my $syslsize;
 	my $dmsize;
+	my $lukssize;
 	my $FSTypeRW;
 	my $FSTypeRO;
 	my $status;
@@ -579,8 +582,7 @@ sub setupBootStick {
 		}
 		$haveTree = 1;
 	} else {
-		my %fsattr = main::checkFileSystem ($system);
-		if (! main::mountLoop ($system,$tmpdir,$fsattr{type})) {
+		if (! main::mount ($system,$tmpdir)) {
 			$this -> cleanTmp ();
 			return undef;
 		}
@@ -588,10 +590,7 @@ sub setupBootStick {
 			$imgtype = "split";
 		}
 		$xml = new KIWIXML ( $kiwi,$tmpdir."/image",undef,$imgtype );
-		if (! main::umountLoop ($tmpdir)) {
-			$this -> cleanTmp ();
-			return undef;
-		}
+		main::umount();
 		if (! defined $xml) {
 			$this -> cleanTmp ();
 			return undef;
@@ -608,6 +607,13 @@ sub setupBootStick {
 		$this->{dmapper} = 1;
 		$dmapper  = 1;
 		$dmbootMB = 40;
+	}
+	#==========================================
+	# check for LUKS extension
+	#------------------------------------------
+	if ($type{luks}) {
+		$haveluks   = 1;
+		$luksbootMB = 40;
 	}
 	#==========================================
 	# setup boot loader type
@@ -640,8 +646,11 @@ sub setupBootStick {
 	# set boot partition number
 	#------------------------------------------
 	my $bootpart = "0";
-	if (($syszip) || ($haveSplit) || ($lvm)) {
+	if (($syszip) || ($haveSplit) || ($lvm) || ($haveluks)) {
 		$bootpart = "1";
+	}
+	if ((($syszip) || ($haveSplit)) && ($haveluks)) {
+		$bootpart = "2";
 	}
 	if (($dmapper) && ($lvm)) {
 		$bootpart = "1";
@@ -790,7 +799,7 @@ sub setupBootStick {
 	while (1) {
 		if (defined $system) {
 			if (! $lvm) {
-				if (($syszip) || ($haveSplit)) {
+				if (($syszip) || ($haveSplit) || ($dmapper)) {
 					if ($bootloader eq "syslinux") {
 						$syslsize = $hardSize;
 						$syslsize /= 1000;
@@ -821,6 +830,21 @@ sub setupBootStick {
 							"t","3","83",
 							"a","3","w","q"
 						);
+					} elsif ($haveluks) {
+						$lukssize = $hardSize;
+						$lukssize /= 1000;
+						$lukssize -= $syszip;
+						$lukssize -= $luksbootMB;
+						$lukssize = sprintf ("%.f",$lukssize);
+						@commands = (
+							"n","p","1",".","+".$syszip."M",
+							"n","p","2",".","+".$lukssize."M",
+							"n","p","3",".",".",
+							"t","1","83",
+							"t","2","83",
+							"t","3","83",
+							"a","3","w","q"
+						);
 					} else {
 						@commands = (
 							"n","p","1",".","+".$syszip."M",
@@ -839,6 +863,16 @@ sub setupBootStick {
 						@commands = (
 							"n","p","1",".","+".$syslsize."M","t","83",
 							"n","p","2",".",".","t","2","6",
+							"a","2","w","q"
+						);
+					} elsif ($haveluks) {
+						$lukssize = $hardSize;
+						$lukssize /= 1000;
+						$lukssize -= $luksbootMB;
+						$lukssize = sprintf ("%.f",$lukssize);
+						@commands = (
+							"n","p","1",".","+".$lukssize."M","t","83",
+							"n","p","2",".",".",
 							"a","2","w","q"
 						);
 					} else {
@@ -904,7 +938,7 @@ sub setupBootStick {
 		#==========================================
 		# Umount possible mounted stick partitions
 		#------------------------------------------
-		for (my $i=1;$i<=2;$i++) {
+		for (my $i=1;$i<=3;$i++) {
 			qxx ("umount $deviceMap{$i} 2>&1");
 			if ($deviceMap{fat}) {
 				qxx ("umount $deviceMap{fat} 2>&1");
@@ -927,7 +961,7 @@ sub setupBootStick {
 		#==========================================
 		# Umount possible mounted stick partitions
 		#------------------------------------------
-		for (my $i=1;$i<=2;$i++) {
+		for (my $i=1;$i<=3;$i++) {
 			qxx ("umount $deviceMap{$i} 2>&1");
 			if ($deviceMap{fat}) {
 				qxx ("umount $deviceMap{fat} 2>&1");
@@ -1095,9 +1129,7 @@ sub setupBootStick {
 		#==========================================
 		# Mount system image partition
 		#------------------------------------------
-		$status = qxx ("mount $deviceMap{1} $loopdir 2>&1");
-		$result = $? >> 8;
-		if ($result != 0) {
+		if (! main::mount($deviceMap{1}, $loopdir)) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't mount partition: $status");
 			$kiwi -> failed ();
@@ -1123,85 +1155,140 @@ sub setupBootStick {
 		#==========================================
 		# Umount system image partition
 		#------------------------------------------
-		qxx ( "umount $loopdir 2>&1" );
+		main::umount();
 	}
 	#==========================================
 	# Check and resize filesystems
 	#------------------------------------------
 	$result = 0;
 	undef $status;
-	SWITCH: for ($FSTypeRO) {
+	my $mapper = $deviceMap{1};
+	my %fsattr = main::checkFileSystem ($deviceMap{1});
+	if ($fsattr{type} eq "luks") {
+		$mapper = $this -> luksResize ($deviceMap{1},"luks-resize");
+		if (! $mapper) {
+			$this -> luksClose();
+			return undef;
+		}
+		%fsattr= main::checkFileSystem ($mapper);
+	}
+	SWITCH: for ($fsattr{type}) {
 		/^ext\d/    && do {
-			$kiwi -> info ("Resizing system $FSTypeRO filesystem");
-			$status = qxx ("/sbin/resize2fs -f -F -p $deviceMap{1} 2>&1");
+			$kiwi -> info ("Resizing system $fsattr{type} filesystem");
+			$status = qxx ("/sbin/resize2fs -f -F -p $mapper 2>&1");
 			$result = $? >> 8;
 			last SWITCH;
 		};
 		/^reiserfs/ && do {
-			$kiwi -> info ("Resizing system $FSTypeRO filesystem");
-			$status = qxx ("/sbin/resize_reiserfs $deviceMap{1} 2>&1");
+			$kiwi -> info ("Resizing system $fsattr{type} filesystem");
+			$status = qxx ("/sbin/resize_reiserfs $mapper 2>&1");
 			$result = $? >> 8;
 			last SWITCH;
 		}
 	};
 	if ($result != 0) {
 		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't resize $FSTypeRO filesystem: $status");
+		$kiwi -> error  ("Couldn't resize $fsattr{type} filesystem: $status");
 		$kiwi -> failed ();
+		$this -> luksClose();
 		$this -> cleanDbus();
 		$this -> cleanTmp ();
 		return undef;
 	}
+	$this -> luksClose();
 	if ($status) {
 		$kiwi -> done();
 	}
 	if ($haveSplit) {
 		$result = 0;
 		undef $status;
-		SWITCH: for ($FSTypeRW) {
+		$mapper = $deviceMap{2};
+		my %fsattr = main::checkFileSystem ($deviceMap{2});
+		if ($fsattr{type} eq "luks") {
+			$mapper = $this -> luksResize ($deviceMap{2},"luks-resize");
+			if (! $mapper) {
+				$this -> luksClose();
+				return undef;
+			}
+			%fsattr= main::checkFileSystem ($mapper);
+		}
+		SWITCH: for ($fsattr{type}) {
 			/^ext\d/    && do {
-				$kiwi -> info ("Resizing split $FSTypeRW filesystem");
-				$status = qxx ("/sbin/resize2fs -f -F -p $deviceMap{2} 2>&1");
+				$kiwi -> info ("Resizing split $fsattr{type} filesystem");
+				$status = qxx ("/sbin/resize2fs -f -F -p $mapper 2>&1");
 				$result = $? >> 8;
 				last SWITCH;
 			};
 			/^reiserfs/ && do {
-				$kiwi -> info ("Resizing split $FSTypeRW filesystem");
-				$status = qxx ("/sbin/resize_reiserfs $deviceMap{2} 2>&1");
+				$kiwi -> info ("Resizing split $fsattr{type} filesystem");
+				$status = qxx ("/sbin/resize_reiserfs $mapper 2>&1");
 				$result = $? >> 8;
 				last SWITCH;
 			}
 		};
 		if ($result != 0) {
 			$kiwi -> failed ();
-			$kiwi -> error("Couldn't resize $FSTypeRW filesystem: $status");
+			$kiwi -> error("Couldn't resize $fsattr{type} filesystem: $status");
 			$kiwi -> failed ();
+			$this -> luksClose();
 			$this -> cleanDbus();
 			$this -> cleanTmp ();
 			return undef;
 		}
+		$this -> luksClose();
 		if ($status) {
 			$kiwi -> done();
 		}
+	}
+	#==========================================
+	# create read/write filesystem if needed
+	#------------------------------------------
+	if (($syszip) && (! $haveSplit) && (! $dmapper)) {
+		$root = $deviceMap{2};
+		$kiwi -> info ("Creating ext3 read-write filesystem");
+		my %FSopts = main::checkFSOptions();
+		my $fsopts = $FSopts{ext3};
+		$fsopts.= "-F";
+		$status = qxx ("/sbin/mke2fs $fsopts $root 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create filesystem: $status");
+			$kiwi -> failed ();
+			$this -> cleanLoop ();
+			return undef;
+		}
+		$kiwi -> done();
 	}
 	#==========================================
 	# create bootloader filesystem if needed
 	#------------------------------------------
 	if ($bootloader eq "syslinux") {
 		$root = $deviceMap{fat};
+		$kiwi -> info ("Creating DOS boot filesystem");
 		$status = qxx ("/sbin/mkdosfs $root 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
+			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't create DOS filesystem: $status");
 			$kiwi -> failed ();
 			$this -> cleanDbus();
 			$this -> cleanLoop ();
 			return undef;
 		}
-	} elsif (($dmapper) || ($lvm)) {
-		$root = $deviceMap{0};
-		if ($dmapper) {
-			$root = $deviceMap{dmapper};
+		$kiwi -> done();
+	} elsif (($dmapper) || ($haveluks) || ($lvm)) {
+		$root = $deviceMap{dmapper};
+		$kiwi -> info ("Creating EXT2 boot filesystem");
+		if ($haveluks) {
+			if (($syszip) || ($haveSplit) || ($dmapper)) {
+				$root = $deviceMap{3};
+			} else {
+				$root = $deviceMap{2};
+			}
+		}
+		if ($lvm) {
+			$root = $deviceMap{0};
 		}
 		my %FSopts = main::checkFSOptions();
 		my $fsopts = $FSopts{ext2};
@@ -1216,6 +1303,7 @@ sub setupBootStick {
 			$this -> cleanLoop ();
 			return undef;
 		}
+		$kiwi -> done();
 	}
 	#==========================================
 	# Dump boot image on virtual disk
@@ -1228,16 +1316,20 @@ sub setupBootStick {
 		$root = $deviceMap{fat};
 	} elsif ($dmapper) {
 		$root = $deviceMap{dmapper};
-	} elsif ($lvm) {
-		$root = $deviceMap{0};
-	} elsif (($syszip) || ($haveSplit)) {
+	} elsif (($syszip) || ($haveSplit) || ($lvm)) {
+		$root = $deviceMap{2};
+		if ($haveluks) {
+			$root = $deviceMap{3};
+		}
+		if ($lvm) {
+			$root = $deviceMap{0};
+		}
+	} elsif ($haveluks) {
 		$root = $deviceMap{2};
 	} else {
 		$root = $deviceMap{1};
 	}
-	$status = qxx ("mount $root $loopdir 2>&1");
-	$result = $? >> 8;
-	if ($result != 0) {
+	if (! main::mount($root, $loopdir)) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't mount stick image: $status");
 		$kiwi -> failed ();
@@ -1259,7 +1351,7 @@ sub setupBootStick {
 		$this -> cleanLoop ();
 		return undef;
 	}
-	qxx ("umount $loopdir");
+	main::umount();
 	$kiwi -> done();
 	#==========================================
 	# deactivate volume group
@@ -1380,10 +1472,7 @@ sub setupInstallCD {
 		if (! -e $sdev) {
 			$sdev = "/dev/mapper".$dmap."p1";
 		}
-		my %fsattr = main::checkFileSystem ($sdev);
-		$status = qxx ("mount -t $fsattr{type} $sdev $tmpdir 2>&1");
-		$result = $? >> 8;
-		if ($result != 0) {
+		if (! main::mount ($sdev, $tmpdir)) {
 			$kiwi -> error ("Failed to mount system partition: $status");
 			$kiwi -> failed ();
 			$this -> cleanLoop ();
@@ -1392,7 +1481,7 @@ sub setupInstallCD {
 		if (-f "$tmpdir/rootfs.tar") {
 			$imgtype = "split";
 		}
-		$status = qxx ("umount $tmpdir 2>&1"); sleep (1);
+		main::umount();
 		$status = qxx ("/sbin/kpartx  -d $this->{loop} 2>&1");
 		$status = qxx ("/sbin/losetup -d $this->{loop} 2>&1");
 		$result = $? >> 8;
@@ -1413,7 +1502,7 @@ sub setupInstallCD {
 	#------------------------------------------
 	$kiwi -> info ("Compressing installation image...");
 	$md5name=~ s/\.raw$/\.md5/;
-	$status = qxx ("$main::Gzip $system 2>&1");
+	$status = qxx ("$main::Gzip -f $system 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -1651,10 +1740,7 @@ sub setupInstallStick {
 		if (! -e $sdev) {
 			$sdev = "/dev/mapper".$dmap."p1";
 		}
-		my %fsattr = main::checkFileSystem ($sdev);
-		$status = qxx ("mount -t $fsattr{type} $sdev $tmpdir 2>&1");
-		$result = $? >> 8;
-		if ($result != 0) {
+		if (! main::mount ($sdev, $tmpdir)) {
 			$kiwi -> error  ("Failed to mount system partition: $status");
 			$kiwi -> failed ();
 			$this -> cleanLoop ();
@@ -1663,7 +1749,7 @@ sub setupInstallStick {
 		if (-f "$tmpdir/rootfs.tar") {
 			$imgtype = "split";
 		}
-		$status = qxx ("umount $tmpdir 2>&1"); sleep (1);
+		main::umount();
 		$status = qxx ("/sbin/kpartx  -d $this->{loop} 2>&1");
 		$status = qxx ("/sbin/losetup -d $this->{loop} 2>&1");
 		$result = $? >> 8;
@@ -1685,7 +1771,7 @@ sub setupInstallStick {
 	#------------------------------------------
 	$kiwi -> info ("Compressing installation image...");
 	$md5name=~ s/\.raw$/\.md5/;
-	$status = qxx ("$main::Gzip $system 2>&1");
+	$status = qxx ("$main::Gzip -f $system 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -1859,9 +1945,7 @@ sub setupInstallStick {
 	# Copy boot data on first partition
 	#------------------------------------------
 	$kiwi -> info ("Installing boot data to virtual disk");
-	$status = qxx ("mount $boot $loopdir 2>&1");
-	$result = $? >> 8;
-	if ($result != 0) {
+	if (! main::mount ($boot, $loopdir)) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't mount boot partition: $status");
 		$kiwi -> failed ();
@@ -1879,16 +1963,14 @@ sub setupInstallStick {
 		qxx ( "$main::Gzip -d $system" );
 		return undef;
 	}
-	qxx ( "umount $loopdir 2>&1" );
+	main::umount();
 	$kiwi -> done();
 	#==========================================
 	# Copy system image if defined
 	#------------------------------------------
 	if ($gotsys) {
 		$kiwi -> info ("Installing image data to virtual disk");
-		$status = qxx ("mount $data $loopdir 2>&1");
-		$result = $? >> 8;
-		if ($result != 0) {
+		if (! main::mount($data, $loopdir)) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't mount data partition: $status");
 			$kiwi -> failed ();
@@ -1916,7 +1998,7 @@ sub setupInstallStick {
 			qxx ( "$main::Gzip -d $system" );
 			return undef;
 		}
-		qxx ( "umount $loopdir 2>&1" );
+		main::umount();
 		qxx ( "$main::Gzip -d $system" );
 		$kiwi -> done();
 	}
@@ -1969,9 +2051,11 @@ sub setupBootDisk {
 	my $haveTree  = 0;
 	my $haveSplit = 0;
 	my $lvmbootMB = 0;
+	my $luksbootMB= 0;
 	my $syslbootMB= 0;
 	my $dmbootMB  = 0;
 	my $dmapper   = 0;
+	my $haveluks  = 0;
 	my $bootloader= "grub";
 	my $splitfile;
 	my $version;
@@ -1988,7 +2072,7 @@ sub setupBootDisk {
 	# add boot space if lvm based
 	#------------------------------------------
 	if ($lvm) {
-		$lvmbootMB = 20;
+		$lvmbootMB = 30;
 	}
 	#==========================================
 	# check if image type is oem
@@ -2018,8 +2102,7 @@ sub setupBootDisk {
 		#==========================================
 		# build disk name and label from xml data
 		#------------------------------------------
-		my %fsattr = main::checkFileSystem ($system);
-		if (! main::mountLoop ($system,$tmpdir,$fsattr{type})) {
+		if (! main::mount ($system,$tmpdir)) {
 			$this -> cleanTmp ();
 			return undef;
 		}
@@ -2030,10 +2113,7 @@ sub setupBootDisk {
 			$imgtype = "split";
 		}
 		$xml = new KIWIXML ( $kiwi,$tmpdir."/image",undef,$imgtype );
-		if (! main::umountLoop ($tmpdir)) {
-			$this -> cleanTmp ();
-			return undef;
-		}
+		main::umount();
 		if (! defined $xml) {
 			$this -> cleanTmp ();
 			return undef;
@@ -2050,6 +2130,13 @@ sub setupBootDisk {
 		$this->{dmapper} = 1;
 		$dmapper  = 1;
 		$dmbootMB = 40;
+	}
+	#==========================================
+	# check for LUKS extension
+	#------------------------------------------
+	if ($type{luks}) {
+		$haveluks   = 1;
+		$luksbootMB = 40;
 	}
 	#==========================================
 	# setup boot loader type
@@ -2137,8 +2224,11 @@ sub setupBootDisk {
 	# Setup boot partition ID
 	#------------------------------------------
 	my $bootpart = "0";
-	if (($syszip) || ($haveSplit) || ($lvm)) {
+	if (($syszip) || ($haveSplit) || ($lvm) || ($haveluks)) {
 		$bootpart = "1";
+	}
+	if ((($syszip) || ($haveSplit)) && ($haveluks)) {
+		$bootpart = "2";
 	}
 	if (($dmapper) && ($lvm)) {
 		$bootpart = "1";
@@ -2220,6 +2310,14 @@ sub setupBootDisk {
 						"n","p","3",".",".",
 						"a","3","w","q"
 					);
+				} elsif ($haveluks) {
+					my $lukssize = $this->{vmmbyte} - $luksbootMB - $syszip;
+					@commands = (
+						"n","p","1",".","+".$syszip."M",
+						"n","p","2",".","+".$lukssize."M",
+						"n","p","3",".",".",
+						"a","3","w","q"
+					);
 				} else {
 					@commands = (
 						"n","p","1",".","+".$syszip."M",
@@ -2235,6 +2333,13 @@ sub setupBootDisk {
 						"n","p","1",".","+".$syslsize."M",
 						"n","p","2",".",".",
 						"t","2","6",
+						"a","2","w","q"
+					);
+				} elsif ($haveluks) {
+					my $lukssize = $this->{vmmbyte} - $luksbootMB;
+					@commands = (
+						"n","p","1",".","+".$lukssize."M",
+						"n","p","2",".",".",
 						"a","2","w","q"
 					);
 				} else {
@@ -2356,27 +2461,41 @@ sub setupBootDisk {
 		$kiwi -> done();
 		$result = 0;
 		undef $status;
-		SWITCH: for ($FSTypeRO) {
+		my $mapper = $root;
+		my %fsattr = main::checkFileSystem ($root);
+		if ($fsattr{type} eq "luks") {
+			$mapper = $this -> luksResize ($root,"luks-resize");
+			if (! $mapper) {
+				$this -> luksClose();
+				return undef;
+			}
+			%fsattr= main::checkFileSystem ($mapper);
+		}
+		SWITCH: for ($fsattr{type}) {
 			/^ext\d/    && do {
-				$kiwi -> info ("Resizing system $FSTypeRO filesystem");
-				$status = qxx ("/sbin/resize2fs -f -F -p $root 2>&1");
+				$kiwi -> info ("Resizing system $fsattr{type} filesystem");
+				$status = qxx ("/sbin/resize2fs -f -F -p $mapper 2>&1");
 				$result = $? >> 8;
 				last SWITCH;
 			};
 			/^reiserfs/ && do {
-				$kiwi -> info ("Resizing system $FSTypeRO filesystem");
-				$status = qxx ("/sbin/resize_reiserfs $root 2>&1");
+				$kiwi -> info ("Resizing system $fsattr{type} filesystem");
+				$status = qxx ("/sbin/resize_reiserfs $mapper 2>&1");
 				$result = $? >> 8;
 				last SWITCH;
 			}
 		};
 		if ($result != 0) {
 			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't resize $FSTypeRO filesystem: $status");
+			$kiwi -> error  (
+				"Couldn't resize $fsattr{type} filesystem $status"
+			);
 			$kiwi -> failed ();
+			$this -> luksClose();
 			$this -> cleanTmp ();
 			return undef;
 		}
+		$this -> luksClose();
 		if ($status) {
 			$kiwi -> done();
 		}
@@ -2395,27 +2514,41 @@ sub setupBootDisk {
 			$kiwi -> done();
 			$result = 0;
 			undef $status;
-			SWITCH: for ($FSTypeRW) {
+			$mapper = $root;
+			my %fsattr = main::checkFileSystem ($root);
+			if ($fsattr{type} eq "luks") {
+				$mapper = $this -> luksResize ($root,"luks-resize");
+				if (! $mapper) {
+					$this -> luksClose();
+					return undef;
+				}
+				%fsattr= main::checkFileSystem ($mapper);
+			}
+			SWITCH: for ($fsattr{type}) {
 				/^ext\d/    && do {
-					$kiwi -> info ("Resizing split $FSTypeRW filesystem");
-					$status = qxx ("/sbin/resize2fs -f -F -p $root 2>&1");
+					$kiwi -> info ("Resizing split $fsattr{type} filesystem");
+					$status = qxx ("/sbin/resize2fs -f -F -p $mapper 2>&1");
 					$result = $? >> 8;
 					last SWITCH;
 				};
 				/^reiserfs/ && do {
-					$kiwi -> info ("Resizing split $FSTypeRW filesystem");
-					$status = qxx ("/sbin/resize_reiserfs $root 2>&1");
+					$kiwi -> info ("Resizing split $fsattr{type} filesystem");
+					$status = qxx ("/sbin/resize_reiserfs $mapper 2>&1");
 					$result = $? >> 8;
 					last SWITCH;
 				}
 			};
 			if ($result != 0) {
 				$kiwi -> failed ();
-				$kiwi -> error("Couldn't resize $FSTypeRW filesystem: $status");
+				$kiwi -> error  (
+					"Couldn't resize $fsattr{type} filesystem: $status"
+				);
 				$kiwi -> failed ();
+				$this -> luksClose();
 				$this -> cleanTmp ();
 				return undef;
 			}
+			$this -> luksClose();
 			if ($status) {
 				$kiwi -> done();
 			}
@@ -2485,9 +2618,7 @@ sub setupBootDisk {
 		#==========================================
 		# Mount system image partition
 		#------------------------------------------
-		$status = qxx ("mount $root $loopdir 2>&1");
-		$result = $? >> 8;
-		if ($result != 0) {
+		if (! main::mount($root, $loopdir)) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't mount partition: $status");
 			$kiwi -> failed ();
@@ -2511,48 +2642,57 @@ sub setupBootDisk {
 		#==========================================
 		# Umount system image partition
 		#------------------------------------------
-		qxx ( "umount $loopdir 2>&1" );
+		main::umount();
 	}
 	#==========================================
 	# create read/write filesystem if needed
 	#------------------------------------------
-	if ((($syszip) || ($haveSplit) || ($lvm)) && (! $dmapper)) {
+	if (($syszip) && (! $haveSplit) && (! $dmapper)) {
 		$root = $deviceMap{2};
-		if ($lvm) {
-			$root = $deviceMap{0};
+		$kiwi -> info ("Creating ext3 read-write filesystem");
+		my %FSopts = main::checkFSOptions();
+		my $fsopts = $FSopts{ext3};
+		$fsopts.= "-F";
+		$status = qxx ("/sbin/mke2fs $fsopts $root 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create filesystem: $status");
+			$kiwi -> failed ();
+			$this -> cleanLoop ();
+			return undef;
 		}
-		if ((! $haveSplit) || ($lvm)) {
-			$kiwi -> info ("Creating ext3 read-write filesystem");
-			my %FSopts = main::checkFSOptions();
-			my $fsopts = $FSopts{ext3};
-			$fsopts.= "-F";
-			$status = qxx ("/sbin/mke2fs $fsopts $root 2>&1");
-			$result = $? >> 8;
-			if ($result != 0) {
-				$kiwi -> failed ();
-				$kiwi -> error  ("Couldn't create filesystem: $status");
-				$kiwi -> failed ();
-				$this -> cleanLoop ();
-				return undef;
-			}
-			$kiwi -> done();
-		}
+		$kiwi -> done();
 	}
 	#==========================================
 	# create bootloader filesystem if needed
 	#------------------------------------------
 	if ($bootloader eq "syslinux") {
 		$root = $deviceMap{fat};
+		$kiwi -> info ("Creating DOS boot filesystem");
 		$status = qxx ("/sbin/mkdosfs $root 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
+			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't create DOS filesystem: $status");
 			$kiwi -> failed ();
 			$this -> cleanLoop ();
 			return undef;
 		}
-	} elsif ($dmapper) {
+		$kiwi -> done();
+	} elsif (($dmapper) || ($haveluks) || ($lvm)) {
 		$root = $deviceMap{dmapper};
+		$kiwi -> info ("Creating EXT2 boot filesystem");
+		if ($haveluks) {
+			if (($syszip) || ($haveSplit) || ($dmapper)) {
+				$root = $deviceMap{3};
+			} else {
+				$root = $deviceMap{2};
+			}
+		}
+		if ($lvm) {
+			$root = $deviceMap{0};
+		}
 		my %FSopts = main::checkFSOptions();
 		my $fsopts = $FSopts{ext2};
 		$status = qxx ("/sbin/mke2fs $fsopts $root 2>&1");
@@ -2564,6 +2704,7 @@ sub setupBootDisk {
 			$this -> cleanLoop ();
 			return undef;
 		}
+		$kiwi -> done();
 	}
 	#==========================================
 	# Dump boot image on virtual disk
@@ -2572,9 +2713,24 @@ sub setupBootDisk {
 	#==========================================
 	# Mount system image / or rw partition
 	#------------------------------------------
-	$status = qxx ("mount $root $loopdir 2>&1");
-	$result = $? >> 8;
-	if ($result != 0) {
+	if ($bootloader eq "syslinux") {
+		$root = $deviceMap{fat};
+	} elsif ($dmapper) {
+		$root = $deviceMap{dmapper};
+	} elsif (($syszip) || ($haveSplit) || ($lvm)) {
+		$root = $deviceMap{2};
+		if ($haveluks) {
+			$root = $deviceMap{3};
+		}
+		if ($lvm) {
+			$root = $deviceMap{0};
+		}
+	} elsif ($haveluks) {
+		$root = $deviceMap{2};
+	} else {
+		$root = $deviceMap{1};
+	}
+	if (! main::mount ($root, $loopdir)) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't mount image: $status");
 		$kiwi -> failed ();
@@ -2593,7 +2749,7 @@ sub setupBootDisk {
 		$this -> cleanLoop ();
 		return undef;
 	}
-	qxx ( "umount $loopdir 2>&1" );
+	main::umount();
 	$kiwi -> done();
 	#==========================================
 	# cleanup device maps and part mount
@@ -3050,7 +3206,7 @@ sub cleanLoop {
 	my $tmpdir = $this->{tmpdir};
 	my $loop   = $this->{loop};
 	my $loopdir= $this->{loopdir};
-	qxx ("umount $loopdir 2>&1");
+	main::umount();
 	if (defined $loop) {
 		if ($this->{lvm}) {
 			qxx ("vgchange -an 2>&1");
@@ -4190,7 +4346,7 @@ sub setDefaultDeviceMap {
 	if (! defined $device) {
 		return undef;
 	}
-	for (my $i=1;$i<=2;$i++) {
+	for (my $i=1;$i<=3;$i++) {
 		$result{$i} = $device.$i;
 	}
 	if ($loader eq "syslinux") {
@@ -4224,7 +4380,7 @@ sub setLoopDeviceMap {
 		return undef;
 	}
 	my $dmap = $device; $dmap =~ s/dev\///;
-	for (my $i=1;$i<=2;$i++) {
+	for (my $i=1;$i<=3;$i++) {
 		$result{$i} = "/dev/mapper".$dmap."p$i";
 	}
 	if ($loader eq "syslinux") {
@@ -4390,6 +4546,56 @@ sub makeLabel {
 	my $label = shift;
 	$label =~ s/ /_/g;
 	return $label;
+}
+
+#==========================================
+# luksResize
+#------------------------------------------
+sub luksResize {
+	my $this   = shift;
+	my $source = shift;
+	my $name   = shift;
+	my $kiwi   = $this->{kiwi};
+	my $cipher = $main::LuksCipher;
+	my $status;
+	my $result;
+	if ($cipher) {
+		$status = qxx (
+			"echo $cipher | cryptsetup luksOpen $source $name 2>&1"
+		);
+	} else {
+		$status = qxx ("cryptsetup luksOpen $source $name 2>&1");
+	}
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't open luks device: $status");
+		$kiwi -> failed ();
+		return undef;
+	}
+	$this->{luks} = $name;
+	$status = qxx ("cryptsetup resize $name");
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't resize luks device: $status");
+		$kiwi -> failed ();
+		$this -> luksClose();
+		return undef;
+	}
+	return "/dev/mapper/".$name;
+}
+
+#==========================================
+# luksClose
+#------------------------------------------
+sub luksClose {
+	my $this = shift;
+	if ($this->{luks}) {
+		qxx ("cryptsetup luksClose $this->{luks} 2>&1");
+		undef $this->{luks};
+	}
+	return $this;
 }
 
 1; 

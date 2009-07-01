@@ -1612,6 +1612,14 @@ about the possible values can be found by calling
 hwinfo --framebuffer or in /usr/src/linux/Documentation/fb/vesafb.txt</a:documentation>
       </attribute>
     </define>
+    <define name="k.type.luks.attribute">
+      <attribute name="luks">
+        <a:documentation>Setup cryptographic volume along with the given filesystem
+using the LUKS extension. The value of this attribute
+represents the password string used to be able to
+mount that filesystem while booting</a:documentation>
+      </attribute>
+    </define>
     <define name="k.type.filesystem.attribute">
       <attribute name="filesystem">
         <a:documentation>Specifies the filesystem which can be one of:
@@ -1724,6 +1732,9 @@ vmx/oem types only.</a:documentation>
         </optional>
         <optional>
           <ref name="k.type.vga.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.type.luks.attribute"/>
         </optional>
         <optional>
           <ref name="k.type.filesystem.attribute"/>

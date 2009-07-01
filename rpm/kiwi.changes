@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Tue Jun 30 10:11:11 CEST 2009 - ms@suse.de
+
+- v3.61
+- prepared KIWIImage to work with luks extension. This is not
+  a complete implementation so far, just a first start (bnc #505782)
+- fixed inclusion of custom tar archives if the image
+  description provides only a bootstrap section like the
+  isoboot data does
+
+-------------------------------------------------------------------
 Mon Jun 22 16:05:53 CEST 2009 - ms@suse.de
 
 - v3.60

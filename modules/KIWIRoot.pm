@@ -683,11 +683,29 @@ sub install {
 		return undef;
 	}
 	$manager -> freeLock();
-	$manager -> switchToLocal();
+	return $this;
+}
+
+#==========================================
+# installArchives
+#------------------------------------------
+sub installArchives {
+	# ...
+	# Install the given raw archives into the root
+	# directory of the image system
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $xml  = $this->{xml};
+	my $manager = $this->{manager};
+	#==========================================
+	# get image archive list
+	#------------------------------------------
+	my @archives = $xml -> getArchiveList();
 	#==========================================
 	# Install raw data archives
 	#------------------------------------------
-	my @archives = $xml -> getArchiveList();
+	$manager -> switchToLocal();
 	if (! $manager -> setupArchives($this->{imageDesc},@archives)) {
 		return undef;
 	}

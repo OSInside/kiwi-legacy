@@ -44,7 +44,7 @@ use KIWITest;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "3.60";
+our $Version       = "3.61";
 our $Publisher     = "SUSE LINUX Products GmbH";
 our $Preparer      = "KIWI - http://kiwi.berlios.de";
 our $openSUSE      = "http://download.opensuse.org";
@@ -77,6 +77,8 @@ our $BasePath;         # configurable base kiwi path
 our $System;           # configurable baes kiwi image desc. path
 our $LogServerPort;    # configurable log server port
 our $Gzip;             # configurable gzip command
+our @UmountStack;      # command list to umount
+our $LuksCipher;       # stored luks passphrase
 if (! defined $LogServerPort) {
 	$LogServerPort = "off";
 }
@@ -477,6 +479,12 @@ sub main {
 		#------------------------------------------
 		if (! $root -> install ()) {
 			$kiwi -> error ("Image installation failed");
+			$kiwi -> failed ();
+			$root -> cleanMount ();
+			my $code = kiwiExit (1); return $code;
+		}
+		if (! $root -> installArchives ()) {
+			$kiwi -> error ("Archive installation failed");
 			$kiwi -> failed ();
 			$root -> cleanMount ();
 			my $code = kiwiExit (1); return $code;
@@ -2354,49 +2362,109 @@ sub checkFSOptions {
 }
 
 #==========================================
-# mountLoop
+# mount
 #------------------------------------------
-sub mountLoop {
+sub mount {
 	# /.../
-	# implements a loop mount function for all supported
+	# implements a generic mount function for all supported
 	# file system types
 	# ---
-	my $file = shift;
-	my $dest = shift;
-	my $type = shift;
-	my $status = qxx ("mount -t $type -o loop $file $dest 2>&1");
-	my $result = $? >> 8;
-	if ($result != 0) {
-		$kiwi -> error ("Failed to loop mount $file to: $dest: $status");
-		$kiwi -> failed ();
-		return undef;
-	}
-	if (-f $dest."/fsdata.ext3") {
-		$type = "ext3";
-		$file = $dest."/fsdata.ext3";
-		$status = qxx ("mount -t $type -o loop $file $dest 2>&1");
+	my $source= shift;
+	my $dest  = shift;
+	my $salt  = int (rand(20));
+	my %fsattr = main::checkFileSystem ($source);
+	my $type   = $fsattr{type};
+	my $cipher = $main::LuksCipher;
+	my $status;
+	my $result;
+	#==========================================
+	# Check for LUKS extension
+	#------------------------------------------
+	if ($type eq "luks") {
+		if (-f $source) {
+			$status = qxx ("/sbin/losetup -s -f $source 2>&1"); chomp $status;
+			$result = $? >> 8;
+			if ($result != 0) {
+				$kiwi -> error  ("Couldn't loop bind logical extend: $status");
+				$kiwi -> failed ();
+				return undef;
+			}
+			$source = $status;
+			push @UmountStack,"losetup -d $source";
+		}
+		if ($cipher) {
+			$status = qxx (
+				"echo $cipher | cryptsetup luksOpen $source luks-$salt 2>&1"
+			);
+		} else {
+			$status = qxx ("cryptsetup luksOpen $source luks-$salt 2>&1");
+		}
 		$result = $? >> 8;
 		if ($result != 0) {
-			$kiwi -> error ("Failed to loop mount $file to: $dest: $status");
+			$kiwi -> error  ("Couldn't open luks device: $status");
 			$kiwi -> failed ();
 			return undef;
 		}
+		$source = "/dev/mapper/luks-".$salt;
+		push @UmountStack,"cryptsetup luksClose luks-$salt";
+	}
+	#==========================================
+	# Mount device or loop mount file
+	#------------------------------------------
+	if (-f $source) {
+		$status = qxx ("mount -o loop $source $dest 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> error ("Failed to loop mount $source to: $dest: $status");
+			$kiwi -> failed ();
+			return undef;
+		}
+	} else {
+		$status = qxx ("mount $source $dest 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> error ("Failed to mount $source to: $dest: $status");
+			$kiwi -> failed ();
+			return undef;
+		}
+	}
+	push @UmountStack,"umount $source";
+	#==========================================
+	# Post mount actions
+	#------------------------------------------
+	if (-f $dest."/fsdata.ext3") {
+		$source = $dest."/fsdata.ext3";
+		$status = qxx ("mount -o loop $source $dest 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> error ("Failed to loop mount $source to: $dest: $status");
+			$kiwi -> failed ();
+			return undef;
+		}
+		push @UmountStack,"umount $source";
 	}
 	return $dest;
 }
 
 #==========================================
-# umountLoop
+# umount
 #------------------------------------------
-sub umountLoop {
+sub umount {
 	# /.../
 	# implements an umount function for filesystems mounted
-	# via mountFileSystemLoop. The same mount point could be
-	# used twice therefore we umount two times to be safe
+	# via main::mount(). The function walks through the
+	# contents of the UmountStack list
 	# ---
-	my $dest = shift;
-	my $status = qxx ("umount $dest && umount $dest 2>&1");
-	return $dest;
+	my $status;
+	my $result;
+	foreach my $cmd (reverse @UmountStack) {
+		$status = qxx ("$cmd 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> warning ("UmountStack failed: $cmd: $status\n");
+		}
+	}
+	@UmountStack = ();
 }
 
 #==========================================
@@ -2454,6 +2522,10 @@ sub checkFileSystem {
 				};
 				/Squashfs/  && do {
 					$type = "squashfs";
+					last SWITCH;
+				};
+				/LUKS/      && do {
+					$type = "luks";
 					last SWITCH;
 				};
 				# unknown filesystem type use auto...
