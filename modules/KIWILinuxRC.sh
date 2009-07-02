@@ -4361,7 +4361,7 @@ function luksOpen {
 	if [ -z $name ];then
 		name=luksroot
 	fi
-	dialog --stdout --inputbox "Enter LUKS passphrase" 10 60 |\
+	dialog --stdout --insecure --passwordbox "Enter LUKS passphrase" 10 60 |\
 		cryptsetup luksOpen $ldev $name 1>&2
 	if [ ! $? = 0 ];then
 		systemException \
