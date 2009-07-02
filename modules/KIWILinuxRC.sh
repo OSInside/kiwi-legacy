@@ -1478,6 +1478,12 @@ function updateDMBootDeviceFstab {
 	updateLVMBootDeviceFstab $1 $2 "/dmboot"
 }
 #======================================
+# updateLuksBootDeviceFstab
+#--------------------------------------
+function updateLuksBootDeviceFstab {
+	updateLVMBootDeviceFstab $1 $2 "/luksboot"
+}
+#======================================
 # updateSyslinuxBootDeviceFstab
 #--------------------------------------
 function updateSyslinuxBootDeviceFstab {
@@ -1605,6 +1611,7 @@ function identifyFileSystem {
 		*ext2*)     FSTYPE=ext2 ;;
 		*ReiserFS*) FSTYPE=reiserfs ;;
 		*Squashfs*) FSTYPE=squashfs ;;
+		*LUKS*)     FSTYPE=luks ;;
 		*)
 			FSTYPE=unknown
 		;;
@@ -4336,6 +4343,32 @@ function stoppX {
 			sleep 1
 		done
 	fi
+}
+#======================================
+# luksOpen
+#--------------------------------------
+function luksOpen {
+	# /.../
+	# check give device if it uses the LUKS extension
+	# if yes open the device and return the new
+	# /dev/mapper/ device name
+	# ----
+	local ldev=$1
+	local name=$2
+	if ! cryptsetup isLuks $ldev &>/dev/null;then
+		echo $ldev; return
+	fi
+	if [ -z $name ];then
+		name=luksroot
+	fi
+	dialog --stdout --inputbox "Enter LUKS passphrase" 10 60 |\
+		cryptsetup luksOpen $ldev $name 1>&2
+	if [ ! $? = 0 ];then
+		systemException \
+			"Failed to open LUKS device... reboot" \
+		"reboot"
+	fi
+	echo /dev/mapper/$name
 }
 #======================================
 # SAPMemCheck

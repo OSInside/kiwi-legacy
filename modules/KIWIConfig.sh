@@ -862,7 +862,6 @@ function suseStripInitrd {
 	#==========================================
 	# remove unneeded files
 	#------------------------------------------
-	rpm -e popt --nodeps --noscripts &>/dev/null
 	rm -rf `find -type d | grep .svn`
 	local files="
 		/usr/share/info /usr/share/man /usr/share/cracklib /usr/lib*/python*
@@ -947,7 +946,7 @@ function suseStripInitrd {
 		ldd driveready checkmedia splashy bzip2 hexdump vgremove
 		pvchange pvresize pvscan vgscan vgchange vgextend vgdisplay
 		lvchange lvresize lvextend lvcreate grub dcounter tty
-		dmsetup dialog awk gawk clicfs
+		dmsetup dialog awk gawk clicfs cryptsetup
 	"
 	tools="$tools $@"
 	for path in /sbin /usr/sbin /usr/bin /bin;do

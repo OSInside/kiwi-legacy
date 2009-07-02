@@ -150,6 +150,11 @@ fi
 # 9) Get filesystem type
 #--------------------------------------
 probeFileSystem $imageRootDevice
+if [ "$FSTYPE" = "luks" ];then
+	imageRootDevice=$(luksOpen $imageRootDevice)
+	probeFileSystem $imageRootDevice
+	export haveLuks=yes
+fi
 if [ "$FSTYPE" = "unknown" ];then
 	systemException \
 		"Couldn't determine filesystem type... abort" \
@@ -225,6 +230,16 @@ if [ "$LOCAL_BOOT" = "no" ];then
 		fi
 		rm -rf /mnt/boot
 		( cd /mnt && ln -s syslboot/boot boot )
+	elif [ "$haveLuks" = "yes" ];then
+		mkdir /mnt/luksboot
+		export imageBootDevice=$imageDiskDevice"3"
+		if [ ! -e $imageBootDevice ];then
+			imageBootDevice=$imageDiskDevice"2"
+		fi
+		mount $imageBootDevice /mnt/luksboot
+		cp -a  /mnt/boot /mnt/luksboot
+		rm -rf /mnt/boot
+		( cd /mnt && ln -s luksboot/boot boot )
 	fi
 fi
 
@@ -243,6 +258,8 @@ if [ "$LOCAL_BOOT" = "no" ];then
 			pushd /mnt/lvmboot/boot >/dev/null
 		elif [ "$haveDMSquash" = "yes" ];then
 			pushd /mnt/dmboot/boot >/dev/null
+		elif [ "$haveLuks" = "yes" ];then
+			pushd /mnt/luksboot/boot >/dev/null
 		else
 			kiwiMount $imageRWDevice "/mnt"
 			pushd /mnt/boot >/dev/null
@@ -278,6 +295,8 @@ if [ "$LOCAL_BOOT" = "no" ];then
 		updateDMBootDeviceFstab /config $imageBootDevice
 	elif [ "$loader" = "syslinux" ];then
 		updateSyslinuxBootDeviceFstab /config $imageFatDevice
+	elif [ "$haveLuks" = "yes" ];then
+		updateLuksBootDeviceFstab /config $imageBootDevice
 	fi
 	if [ ! -z "$UNIONFS_CONFIG" ]; then
 		export KIWI_INITRD_PARAMS="UNIONFS_CONFIG=yes"
@@ -289,7 +308,11 @@ if [ "$LOCAL_BOOT" = "no" ];then
 	if [ ! -z "$UNIONFS_CONFIG" ] || [ ! -z "$COMBINED_IMAGE" ]; then
 		bootid=1
 	fi
-	if [ "$loader" = "syslinux" ] || [ "$haveDMSquash" = "yes" ]; then
+	if \
+		[ "$loader" = "syslinux" ]  ||\
+		[ "$haveDMSquash" = "yes" ] ||\
+		[ "$haveLuks" = "yes" ]
+	then
 		bootid=$(($bootid + 1))
 	fi
 	setupBootLoader /mnt /config $bootid $imageRootDevice VMX

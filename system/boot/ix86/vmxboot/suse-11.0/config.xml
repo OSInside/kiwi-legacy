@@ -21,6 +21,7 @@
 		<profile name="pae" description="KERNEL: pae kernel"/>
 	</profiles>
 	<drivers type="drivers">
+		<file name="crypto/*"/>
 		<file name="drivers/virtio/*"/>
 		<file name="drivers/block/virtio_blk.ko"/>
 		<file name="drivers/net/virtio_net.ko"/>
@@ -95,6 +96,8 @@
 		<package name="tar"/>
 		<package name="cromfs"/>
 		<package name="lvm2"/>
+		<package name="cryptsetup"/>
+		<package name="dialog"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>

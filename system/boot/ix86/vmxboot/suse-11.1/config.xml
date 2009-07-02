@@ -22,6 +22,7 @@
 		<profile name="ec2" description="KERNEL: Ec2 kernel"/>
 	</profiles>
 	<drivers type="drivers">
+		<file name="crypto/*"/>
 		<file name="drivers/virtio/*"/>
 		<file name="drivers/block/virtio_blk.ko"/>
 		<file name="drivers/char/hw_random/virtio-rng.ko"/>
@@ -109,6 +110,8 @@
 		<package name="tar"/>
 		<package name="cromfs"/>
 		<package name="lvm2"/>
+		<package name="cryptsetup"/>
+		<package name="dialog"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
