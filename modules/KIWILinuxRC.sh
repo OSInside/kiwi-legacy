@@ -3473,11 +3473,11 @@ function mountSystemOverlay {
 	if [ $unionFST = "aufs" ];then
 		mount -t tmpfs tmpfs $xiDir >/dev/null || retval=1
 		mount -t aufs \
-			-o dirs=$rwDir=rw:$roDir=ro,xino=$xiDir/.aufs.xino none /mnt \
+			-o dirs=$rwDir=rw:$roDir=ro,xino=$xiDir/.aufs.xino aufs /mnt \
 		>/dev/null || return 1
 	else
 		mount -t unionfs \
-			-o dirs=$rwDir=rw:$roDir=ro none /mnt
+			-o dirs=$rwDir=rw:$roDir=ro unionfs /mnt
 		>/dev/null || return 1
 	fi
 	usleep 500000
@@ -4013,7 +4013,7 @@ function getDiskDevice {
 	# ID label into the /dev/ device name
 	# ----
 	local device=`readlink $1`
-	if [ -z $device ];then
+	if [ -z "$device" ];then
 		echo $1
 		return
 	fi
@@ -4220,6 +4220,16 @@ function setupUnionFS {
 	local rwDevice=`getDiskID $1`
 	local roDevice=`getDiskID $2`
 	local unionFST=$3
+	rwDeviceLuks=$(luksOpen $rwDevice luksReadWrite)
+	roDeviceLuks=$(luksOpen $roDevice luksReadOnly)
+	if [ ! $rwDeviceLuks = $rwDevice ];then
+		rwDevice=$rwDeviceLuks
+		export haveLuks="yes"
+	fi
+	if [ ! $roDeviceLuks = $roDevice ];then
+		roDevice=$roDeviceLuks
+		export haveLuks="yes"
+	fi
 	export UNIONFS_CONFIG="$rwDevice,$roDevice,$unionFST"
 }
 #======================================
@@ -4355,6 +4365,10 @@ function luksOpen {
 	# ----
 	local ldev=$1
 	local name=$2
+	if [ -e /dev/mapper/$name ];then
+		echo /dev/mapper/$name
+		return
+	fi
 	if ! cryptsetup isLuks $ldev &>/dev/null;then
 		echo $ldev; return
 	fi

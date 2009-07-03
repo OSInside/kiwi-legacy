@@ -237,7 +237,9 @@ if [ "$LOCAL_BOOT" = "no" ];then
 			imageBootDevice=$imageDiskDevice"2"
 		fi
 		mount $imageBootDevice /mnt/luksboot
-		cp -a  /mnt/boot /mnt/luksboot
+		if [ -z "$UNIONFS_CONFIG" ];then
+			cp -a /mnt/boot/* /mnt/luksboot/boot
+		fi
 		rm -rf /mnt/boot
 		( cd /mnt && ln -s luksboot/boot boot )
 	fi

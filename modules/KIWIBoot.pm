@@ -1245,7 +1245,31 @@ sub setupBootStick {
 	#------------------------------------------
 	if (($syszip) && (! $haveSplit) && (! $dmapper)) {
 		$root = $deviceMap{2};
-		$kiwi -> info ("Creating ext3 read-write filesystem");
+		if ($haveluks) {
+			my $cipher = $type{luks};
+			my $name   = "luksReadWrite";
+			$kiwi -> info ("Creating LUKS->ext3 read-write filesystem");
+			$status = qxx ("echo $cipher|cryptsetup -q luksFormat $root 2>&1");
+			$result = $? >> 8;
+			if ($status != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Couldn't setup luks format: $root");
+				$kiwi -> failed ();
+				return undef;
+			}
+			$status = qxx ("echo $cipher|cryptsetup luksOpen $root $name 2>&1");
+			$result = $? >> 8;
+			if ($result != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Couldn't open luks device: $status");
+				$kiwi -> failed ();
+				return undef;
+			}
+			$root = "/dev/mapper/$name";
+			$this->{luks} = $name;
+		} else {
+			$kiwi -> info ("Creating ext3 read-write filesystem");
+		}
 		my %FSopts = main::checkFSOptions();
 		my $fsopts = $FSopts{ext3};
 		$fsopts.= "-F";
@@ -1255,9 +1279,11 @@ sub setupBootStick {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't create filesystem: $status");
 			$kiwi -> failed ();
+			$this -> luksClose();
 			$this -> cleanLoop ();
 			return undef;
 		}
+		$this -> luksClose();
 		$kiwi -> done();
 	}
 	#==========================================
@@ -2649,7 +2675,31 @@ sub setupBootDisk {
 	#------------------------------------------
 	if (($syszip) && (! $haveSplit) && (! $dmapper)) {
 		$root = $deviceMap{2};
-		$kiwi -> info ("Creating ext3 read-write filesystem");
+		if ($haveluks) {
+			my $cipher = $type{luks};
+			my $name   = "luksReadWrite";
+			$kiwi -> info ("Creating LUKS->ext3 read-write filesystem");
+			$status = qxx ("echo $cipher|cryptsetup -q luksFormat $root 2>&1");
+			$result = $? >> 8;
+			if ($status != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Couldn't setup luks format: $root");
+				$kiwi -> failed ();
+				return undef;
+			}
+			$status = qxx ("echo $cipher|cryptsetup luksOpen $root $name 2>&1");
+			$result = $? >> 8;
+			if ($result != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Couldn't open luks device: $status");
+				$kiwi -> failed ();
+				return undef;
+			}
+			$root = "/dev/mapper/$name";
+			$this->{luks} = $name;
+		} else {
+			$kiwi -> info ("Creating ext3 read-write filesystem");
+		}
 		my %FSopts = main::checkFSOptions();
 		my $fsopts = $FSopts{ext3};
 		$fsopts.= "-F";
@@ -2659,9 +2709,11 @@ sub setupBootDisk {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't create filesystem: $status");
 			$kiwi -> failed ();
+			$this -> luksClose();
 			$this -> cleanLoop ();
 			return undef;
 		}
+		$this -> luksClose();
 		$kiwi -> done();
 	}
 	#==========================================
