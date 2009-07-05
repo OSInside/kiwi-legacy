@@ -3492,6 +3492,8 @@ function mountSystemCombined {
 	local roDevice=$mountDevice
 	if [ "$haveLVM" = "yes" ]; then
 		local rwDevice="/dev/kiwiVG/LVRoot"
+	elif [ "$haveLuks" = "yes" ]; then
+		local rwDevice="/dev/mapper/luksReadWrite"
 	else
 		local rwDevice=`getNextPartition $mountDevice`
 	fi
