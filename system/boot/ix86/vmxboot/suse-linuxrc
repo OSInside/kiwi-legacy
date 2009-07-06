@@ -185,7 +185,7 @@ if [ "$LOCAL_BOOT" = "no" ];then
 fi
 
 #======================================
-# 13) setup /lvmboot or /syslboot
+# 13) setup boot partition 
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then
 	if [ "$haveLVM" = "yes" ];then
