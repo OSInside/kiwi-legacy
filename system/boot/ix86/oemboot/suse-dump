@@ -270,13 +270,7 @@ function OEMInstall {
 	#======================================
 	# Reboot system
 	#--------------------------------------
-	#if [ "$OEMInstallType" = "CD" ];then
-	#	Echo "NOTE: Please remove the installation CD before reboot !"
-	#	CDEject
-	#else
-	#	Echo "NOTE: Please unplug the USB stick before reboot !"
-	#fi
-	#systemException \
-	#	"System installation has finished" \
-	#"reboot"
+	if [ "$OEMInstallType" = "CD" ];then
+		CDEject
+	fi
 }

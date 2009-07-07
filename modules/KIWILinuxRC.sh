@@ -2072,6 +2072,7 @@ function searchBIOSBootDevice {
 	local ddevs=`$h --disk|grep -E "$c"|sed -e"s@(.*)@@"|cut -f2 -d:|tr -d " "`
 	local cmpd=/tmp/mbrids
 	local ifix=0
+	local matched
 	local bios
 	local file
 	local pred
@@ -2130,13 +2131,14 @@ function searchBIOSBootDevice {
 		mbrM=`dd if=$curd bs=1 count=4 skip=$((0x1b8))|hexdump -n4 -e '"0x%x"'`
 		if [ $mbrM = $mbrI ];then
 			ifix=1
+			matched=$curd
 			if [ "$curd" = "$bios" ];then
 				echo $curd; return
 			fi
 		fi
 	done
 	if [ $ifix -eq 1 ];then
-		echo $curd; return
+		echo $matched; return
 	fi
 	systemException \
 		"No devices matches MBR identifier: $mbrI !" \
@@ -4361,21 +4363,20 @@ function stoppX {
 #--------------------------------------
 function luksOpen {
 	# /.../
-	# check give device if it uses the LUKS extension
+	# check given device if it uses the LUKS extension
 	# if yes open the device and return the new
 	# /dev/mapper/ device name
 	# ----
 	local ldev=$1
 	local name=$2
+	if [ -z $name ];then
+		name=luksroot
+	fi
 	if [ -e /dev/mapper/$name ];then
-		echo /dev/mapper/$name
-		return
+		echo /dev/mapper/$name; return
 	fi
 	if ! cryptsetup isLuks $ldev &>/dev/null;then
 		echo $ldev; return
-	fi
-	if [ -z $name ];then
-		name=luksroot
 	fi
 	dialog --stdout --insecure --passwordbox "Enter LUKS passphrase" 10 60 |\
 		cryptsetup luksOpen $ldev $name 1>&2
@@ -4385,6 +4386,38 @@ function luksOpen {
 		"reboot"
 	fi
 	echo /dev/mapper/$name
+}
+#======================================
+# luksResize
+#--------------------------------------
+function luksResize {
+	# /.../
+	# check given device if it is a mapped device name
+	# and run cryptsetup resize on the mapper name
+	# ----
+	local ldev=$1
+	if [ ! "$haveLuks" = "yes" ] || [ ! -e $ldev ];then
+		return
+	fi
+	local name=$(basename $ldev)
+	local dmap=$(dirname  $ldev)
+	if [ ! "$dmap" = "/dev/mapper" ];then
+		return
+	fi
+	cryptsetup resize $name
+}
+#======================================
+# luksClose
+#--------------------------------------
+function luksClose {
+	# /.../
+	# close all open LUKS mappings
+	# ----
+	local name
+	for i in /dev/mapper/luks*;do
+		name=$(basename $i)
+		cryptsetup luksClose $name
+	done
 }
 #======================================
 # SAPMemCheck

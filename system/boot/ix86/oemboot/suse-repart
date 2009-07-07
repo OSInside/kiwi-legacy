@@ -141,35 +141,19 @@ function OEMRepartStandard {
 					#======================================
 					# -home +swap -recovery
 					#--------------------------------------
-					for cmd in \
+					createFDiskInput \
 						d n p 2 1 +"$disk1MBytes"M \
 						n p 1 . . \
-						t 1 82 \
-						a 2 w q
-					do
-						if [ $cmd = "." ];then
-							echo >> $input
-							continue
-						fi
-						echo $cmd >> $input
-					done
+						t 1 82 w q
 				else
 					#======================================
 					# -home +swap +recovery
 					#--------------------------------------
-					for cmd in \
+					createFDiskInput \
 						d n p 2 1 +"$disk1MBytes"M \
 						n p 4 . +"$recoMByte"M \
 						n p 1 . . \
-						t 1 82 \
-						a 2 w q
-					do
-					if [ $cmd = "." ];then
-						echo >> $input
-							continue
-						fi
-						echo $cmd >> $input
-					done
+						t 1 82 w q
 				fi
 			else
 				#======================================
@@ -179,31 +163,15 @@ function OEMRepartStandard {
 					#======================================
 					# -home -swap -recovery
 					#--------------------------------------
-					for cmd in \
-						d n p 2 . . \
-						a 2 w q
-					do
-						if [ $cmd = "." ];then
-							echo >> $input
-							continue
-						fi
-						echo $cmd >> $input
-					done
+					createFDiskInput \
+						d n p 2 . . w q
 				else
 					#======================================
 					# -home -swap +recovery
 					#--------------------------------------
-					for cmd in \
+					createFDiskInput \
 						d n p 2 1 +"$disk1MBytes"M \
-						n p 4 . . \
-						a 2 w q
-					do
-						if [ $cmd = "." ];then
-							echo >> $input
-							continue
-						fi
-						echo $cmd >> $input
-					done
+						n p 4 . .  w q
 				fi
 			fi
 		else
@@ -218,37 +186,21 @@ function OEMRepartStandard {
 					#======================================
 					# +home +swap -recovery
 					#--------------------------------------
-					for cmd in \
+					createFDiskInput \
 						d n p 2 1 +"$disk1MBytes"M \
 						n p 1 . +"$swapsize"M \
 						n p 3 . . \
-						t 1 82 \
-						a 2 w q
-					do
-						if [ $cmd = "." ];then
-							echo >> $input
-							continue
-						fi
-						echo $cmd >> $input
-					done
+						t 1 82 w q
 				else
 					#======================================
 					# +home +swap +recovery
 					#--------------------------------------
-					for cmd in \
+					createFDiskInput \
 						d n p 2 1 +"$disk1MBytes"M \
 						n p 1 . +"$swapsize"M \
 						n p 4 . +"$recoMByte"M \
 						n p 3 . . \
-						t 1 82 \
-						a 2 w q
-					do
-						if [ $cmd = "." ];then
-							echo >> $input
-							continue
-						fi
-						echo $cmd >> $input
-					done
+						t 1 82 w q
 				fi
 			else
 				#======================================
@@ -258,33 +210,17 @@ function OEMRepartStandard {
 					#======================================
 					# +home -swap -recovery
 					#--------------------------------------
-					for cmd in \
+					createFDiskInput \
 						d n p 2 1 +"$disk1MBytes"M \
-						n p 3 . . \
-						a 2 w q
-					do
-						if [ $cmd = "." ];then
-							echo >> $input
-							continue
-						fi
-						echo $cmd >> $input
-					done
+						n p 3 . . w q
 				else
 					#======================================
 					# +home -swap +recovery
 					#--------------------------------------
-					for cmd in \
+					createFDiskInput \
 						d n p 2 1 +"$disk1MBytes"M \
 						n p 4 . +"$recoMByte"M \
-						n p 3 . . \
-						a 2 w q
-					do
-						if [ $cmd = "." ];then
-							echo >> $input
-							continue
-						fi
-						echo $cmd >> $input
-					done
+						n p 3 . . w q
 				fi
 			fi
 		fi
@@ -293,24 +229,21 @@ function OEMRepartStandard {
 		if test $? != 0; then
 			systemException "Failed to create partition table" "reboot"
 		fi
-		activateBootPartition
 	fi
 	#======================================
 	# Update new device names
 	#--------------------------------------
 	if [ -z "$DONT_PARTITION" ];then
-		export imageRootDevice=$imageDiskDevice"2"
+		export imageRootDevice=$(luksOpen $imageDiskDevice"2")
 		export imageSwapDevice=$imageDiskDevice"1"
+		if [ -z "$OEM_WITHOUTHOME" ];then
+			export imageHomeDevice=$imageDiskDevice"3"
+		fi
+		if [ ! -z "$OEM_RECOVERY" ];then
+			export imageRecoveryDevice=$imageDiskDevice"4"
+		fi
 		bootid=1
-	else
-		export imageRootDevice=$imageDiskDevice"1"
-		bootid=0
-	fi
-	if [ -z "$OEM_WITHOUTHOME" ];then
-		export imageHomeDevice=$imageDiskDevice"3"
-	fi
-	if [ ! -z "$OEM_RECOVERY" ];then
-		export imageRecoveryDevice=$imageDiskDevice"4"
+		activateBootPartition
 	fi
 }
 
@@ -394,46 +327,22 @@ function OEMRepartOverlayed {
 		rm -f $input
 		if [ $swapsize = 0 ];then
 			if [ "$haveDMSquash" = "yes" ];then
-				for cmd in d 2 n p 2 . +"$disk2MBytes"M n p 3 . . a 3 w q; do
-					if [ $cmd = "." ];then
-						echo >> $input
-						continue
-					fi
-					echo $cmd >> $input
-				done
+				createFDiskInput \
+					d 2 n p 2 . +"$disk2MBytes"M n p 3 . . w q
 			else
-				for cmd in d 2 n p 2 . . a 2 w q; do
-					if [ $cmd = "." ];then
-						echo >> $input
-						continue
-					fi
-					echo $cmd >> $input
-				done
+				createFDiskInput \
+					d 2 n p 2 . . w q
 			fi
 		else
 			if [ "$haveDMSquash" = "yes" ];then
-				for cmd in \
+				createFDiskInput \
 					d 2 n p 2 . +"$disk2MBytes"M \
 					n p 3 . +"$bootXMBytes"M n p 4 . . \
-					t 4 82 a 3 w q
-				do
-					if [ $cmd = "." ];then
-						echo >> $input
-						continue
-					fi
-					echo $cmd >> $input
-				done
+					t 4 82 w q
 			else
-				for cmd in \
+				createFDiskInput \
 					d 2 n p 2 . +"$disk2MBytes"M n p 3 . . \
-					t 3 82 a 2 w q
-				do
-					if [ $cmd = "." ];then
-						echo >> $input
-						continue
-					fi
-					echo $cmd >> $input
-				done
+					t 3 82 w q
 			fi
 		fi
 		Echo "Repartition the disk according to current geometry"
@@ -441,24 +350,28 @@ function OEMRepartOverlayed {
 		if test $? != 0; then
 			systemException "Failed to create partition table" "reboot"
 		fi
-		activateBootPartition
 	fi
 	#======================================
 	# Update new device names
 	#--------------------------------------
-	export imageRootDevice=$imageDiskDevice"1"
-	export imageIOWRDevice=$imageDiskDevice"2"
-	if [ ! $swapsize = 0 ];then
-		if [ "$haveDMSquash" = "yes" ];then
-			export imageSwapDevice=$imageDiskDevice"4"
-		else
-			export imageSwapDevice=$imageDiskDevice"3"
+	if [ -z "$DONT_PARTITION" ];then
+		export imageRootDevice=$(luksOpen $imageDiskDevice"1")
+		export imageIOWRDevice=$(luksOpen $imageDiskDevice"2" luksReadWrite)
+		export imageRWDevice=$imageIOWRDevice
+		export imageRODevice=$imageRootDevice
+		if [ ! $swapsize = 0 ];then
+			if [ "$haveDMSquash" = "yes" ];then
+				export imageSwapDevice=$imageDiskDevice"4"
+			else
+				export imageSwapDevice=$imageDiskDevice"3"
+			fi
 		fi
-	fi
-	if [ "$haveDMSquash" = "yes" ];then
-		bootid=2
-	else
-		bootid=1
+		if [ "$haveDMSquash" = "yes" ];then
+			bootid=2
+		else
+			bootid=1
+		fi
+		activateBootPartition
 	fi
 	#======================================
 	# Create bootfs if DM squash setup
@@ -466,7 +379,7 @@ function OEMRepartOverlayed {
 	if [ "$haveDMSquash" = "yes" ];then
 		export imageBootDevice=$imageDiskDevice"3"
 		if ! mke2fs -T ext2 -q $imageBootDevice >/dev/null 2>&1;then
-			systemException "Failed to create Boot fs" "reboot"
+			systemException "Failed to create Boot filesystem" "reboot"
 		fi
 	fi
 }
@@ -544,36 +457,30 @@ function OEMRepartCombined {
 		input=/part.input
 		rm -f $input
 		if [ $swapsize = 0 ];then
-			for cmd in d 2 n p 2 . . a 2 w q;do
-				if [ $cmd = "." ];then
-					echo >> $input
-					continue
-				fi
-				echo $cmd >> $input
-			done
+			createFDiskInput \
+				d 2 n p 2 . . w q
 		else
-			for cmd in d 2 n p 2 . +"$disk2MBytes"M n p 3 . . t 3 82 a 2 w q;do
-				if [ $cmd = "." ];then
-					echo >> $input
-					continue
-				fi
-				echo $cmd >> $input
-			done
+			createFDiskInput \
+				d 2 n p 2 . +"$disk2MBytes"M n p 3 . . t 3 82 w q
 		fi
 		Echo "Repartition the disk according to current geometry"
 		fdisk $imageDiskDevice < $input 1>&2
 		if test $? != 0; then
 			systemException "Failed to create partition table" "reboot"
 		fi
-		activateBootPartition
 	fi
 	#======================================
 	# Update new device names
 	#--------------------------------------
-	export imageRootDevice=$imageDiskDevice"1"
-	export imageSwapDevice=$imageDiskDevice"3"
-	export imageIOWRDevice=$imageDiskDevice"2"
-	bootid=1
+	if [ -z "$DONT_PARTITION" ];then
+		export imageRootDevice=$(luksOpen $imageDiskDevice"1")
+		export imageSwapDevice=$imageDiskDevice"3"
+		export imageIOWRDevice=$(luksOpen $imageDiskDevice"2" luksReadWrite)
+		export imageRWDevice=$imageIOWRDevice
+		export imageRODevice=$imageRootDevice
+		bootid=1
+		activateBootPartition
+	fi
 }
 
 #======================================
@@ -604,18 +511,18 @@ function OEMRepartLVM {
 	vgchange -an
 	input=/part.input
 	rm -f $input
-	for cmd in n p 3 . . t 3 8e a 2 w q;do
-		if [ $cmd = "." ];then
-			echo >> $input
-			continue
-		fi
-		echo $cmd >> $input
-	done
+	createFDiskInput \
+		n p 3 . . t 3 8e w q
+	luksClose
 	Echo "Extending volume group according to current geometry"
 	fdisk $imageDiskDevice < $input 1>&2
 	if test $? != 0; then
 		systemException "Failed to create partition table" "reboot"
 	fi
+	#======================================
+	# Set boot id
+	#--------------------------------------
+	bootid=1
 	activateBootPartition
 	vgchange -a y kiwiVG
 	pvcreate $imageDiskDevice"3"
@@ -667,10 +574,143 @@ function OEMRepartLVM {
 			lvextend -l 100%FREE /dev/kiwiVG/LVRoot
 		fi
 	fi
-	#======================================
-	# Set boot id
+}
+
+#======================================
+# OEMRepartLuks
+#--------------------------------------
+function OEMRepartLuks {
+	#====================================== 
+	# no recovery support for LUKS mode
 	#--------------------------------------
-	bootid=1
+	unset OEM_RECOVERY
+	#====================================== 
+	# no homepart support for LUKS mode
+	#--------------------------------------
+	export OEM_WITHOUTHOME=1
+	#====================================== 
+	# Store kiwi kernel and initrd
+	#--------------------------------------
+	if isFSTypeReadOnly;then
+		mount $imageDiskDevice"3" /mnt
+		cp /mnt/boot/linux.vmx  /tmp
+		cp /mnt/boot/initrd.vmx /tmp
+		cp /mnt/boot/grub/mbrid /tmp
+		umount /mnt
+	fi
+	#======================================
+	# calculate end block - swapspace
+	#--------------------------------------
+	swapXMBytes=$swapsize
+	bootXMBytes=0
+	if [ "$haveLuks" = "yes" ];then
+		bootXMBytes=40
+	fi
+	diskXMBytes=`partitionSize $imageDiskDevice`
+	diskXMBytes=`expr $diskXMBytes / 1024`
+	disk1MBytes=`partitionSize $imageDiskDevice"1"`
+	disk1MBytes=`expr $disk1MBytes / 1024`
+	disk2MBytes=`expr $diskXMBytes - $disk1MBytes - $swapsize - $bootXMBytes`
+	if ! isFSTypeReadOnly;then
+		disk1MBytes=`expr $diskXMBytes - $swapsize - $bootXMBytes`
+		disk2MBytes=$disk1MBytes
+	fi
+	if [ $disk2MBytes -lt 100 ];then
+		# /.../
+		# Very small disk which we will not re-partition
+		# ----
+		Echo "Disk is too small, will not re-partition it"
+		DONT_PARTITION=1
+	fi
+	if [ -z "$DONT_PARTITION" ];then
+		#======================================
+		# write new partition table
+		#--------------------------------------
+		# /.../
+		# Explanation of the partition commands used within the
+		# here document below:
+		# ----
+		# d               # delete xda partition
+		# 2               # [ 2 ]
+		# d               # delete xda partition
+		# n               # create xda partition at same place than xda1
+		# p               # primary
+		# 1               # [ 1 ]
+		#                 # accept old xda1 start block
+		# +"disk1MBytes"M # accept new root device size - swap - boot
+		# n               # create xda boot partition
+		# p               # primary
+		# 2               # [ 2 ]
+		#                 # accept start block
+		# +"bootXMBytes"M # accept bootMBytes for boot
+		# n               # create xda swap partition
+		# p               # primary
+		# 3               # [ 3 ]
+		#                 # accept start block
+		#                 # accept end block
+		# t               # change swap system id
+		# 3               # [ 3 ]
+		# 82              # Linux Swap
+		# w               # write partition table
+		# ----
+		input=/part.input
+		rm -f $input
+		if [ $swapsize = 0 ];then
+			if isFSTypeReadOnly;then
+				createFDiskInput \
+					d 2 d 3 n p 2 . +"$disk2MBytes"M n p 3 . . w q
+			else
+				createFDiskInput \
+					d 2 d n p 1 . +"$disk1MBytes"M n p 2 . . w q
+			fi
+		else
+			if isFSTypeReadOnly;then
+				createFDiskInput \
+					d 2 d 3 n p 2 . +"$disk2MBytes"M \
+					n p 3 . +"$bootXMBytes"M \
+					n p 4 . . \
+					t 4 82 w q
+			else
+				createFDiskInput \
+					d 2 d n p 1 . +"$disk1MBytes"M \
+					n p 2 . +"$bootXMBytes"M \
+					n p 3 . . \
+					t 3 82 w q
+			fi
+		fi
+		luksClose
+		Echo "Repartition the disk according to current geometry"
+		fdisk $imageDiskDevice < $input 1>&2
+		if test $? != 0; then
+			systemException "Failed to create partition table" "reboot"
+		fi
+	fi
+	#======================================
+	# Update new device names
+	#--------------------------------------
+	if [ -z "$DONT_PARTITION" ];then
+		bootid=1
+		if isFSTypeReadOnly;then
+			bootid=2
+		fi
+		activateBootPartition
+		export imageRootDevice=$(luksOpen $imageDiskDevice"1")
+		export imageBootDevice=$imageDiskDevice"2"
+		export imageSwapDevice=$imageDiskDevice"3"
+		if isFSTypeReadOnly;then
+			export imageBootDevice=$imageDiskDevice"3"
+			export imageSwapDevice=$imageDiskDevice"4"
+			export imageIOWRDevice=$(luksOpen $imageDiskDevice"2" luksReadWrite)
+			export imageRWDevice=$imageIOWRDevice
+			export imageRODevice=$imageRootDevice
+		fi
+	fi
+	#======================================
+	# Create bootfs if DM squash setup
+	#--------------------------------------
+	if ! mke2fs -T ext2 -q $imageBootDevice >/dev/null 2>&1;then
+		systemException "Failed to create Boot filesystem" "reboot"
+	fi
 }
 
 #======================================
@@ -692,9 +732,11 @@ function OEMRepart {
 	#--------------------------------------
 	if [ ! -z "$haveLVM" ];then
 		OEMRepartLVM
+	elif [ "$haveLuks" = "yes" ];then
+		OEMRepartLuks
 	elif [ ! -z "$COMBINED_IMAGE" ];then
 		OEMRepartCombined
-	elif [ ! -z "$UNIONFS_CONFIG" ];then
+	elif isFSTypeReadOnly;then
 		OEMRepartOverlayed
 	else
 		OEMRepartStandard
@@ -713,16 +755,16 @@ function OEMRepart {
 	#======================================
 	# Create home file system
 	#--------------------------------------
-	if [ -z "$OEM_WITHOUTHOME" ];then
+	if [ -z "$DONT_PARTITION" ] && [ -z "$OEM_WITHOUTHOME" ];then
 		Echo "Creating Home filesystem on $imageHomeDevice"
 		if ! mke2fs -T ext3 -j -q $imageHomeDevice >/dev/null 2>&1;then
-			systemException "Failed to create Home fs" "reboot"
+			systemException "Failed to create Home filesystem" "reboot"
 		fi
 	fi
 	#======================================
 	# Create recovery file system
 	#--------------------------------------
-	if [ ! -z "$OEM_RECOVERY" ];then
+	if [ -z "$DONT_PARTITION" ] && [ ! -z "$OEM_RECOVERY" ];then
 		Echo "Creating Recovery filesystem on $imageRecoveryDevice"
 		if ! mke2fs -T ext3 -j -q $imageRecoveryDevice >/dev/null 2>&1;then
 			systemException "Failed to create Recovery fs" "reboot"
@@ -731,7 +773,7 @@ function OEMRepart {
 	#======================================
 	# Setup recovery contents
 	#--------------------------------------
-	if [ ! -z "$OEM_RECOVERY" ];then
+	if [ -z "$DONT_PARTITION" ] && [ ! -z "$OEM_RECOVERY" ];then
 		Echo "Setting up recovery archive..."
 		mkdir -p /reco-root
 		if ! mount $imageRootDevice /reco-root >/dev/null;then
@@ -777,4 +819,19 @@ function activateBootPartition {
 	if test $? != 0; then
 		systemException "Failed to set boot flag" "reboot"
 	fi
+}
+
+#======================================
+# createFDiskInput
+#--------------------------------------
+function createFDiskInput {
+	local input=/part.input
+	rm -f $input
+	for cmd in $*;do
+		if [ $cmd = "." ];then
+			echo >> $input
+			continue
+		fi
+		echo $cmd >> $input
+	done
 }

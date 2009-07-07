@@ -47,6 +47,97 @@ export OEM_PARTITION_CONFIG="/config.oempartition"
 . /dump
 
 #======================================
+# Functions...
+#--------------------------------------
+function setupDeviceNames {
+	#======================================
+	# Check for DONT_PARTITION variable
+	#--------------------------------------
+	if [ ! -z "$DONT_PARTITION" ];then
+		return
+	fi
+	#======================================
+	# Check boot device
+	#--------------------------------------
+	if [ -z "$imageDiskDevice" ];then
+		systemException \
+			"Couldn't find any boot device... abort" \
+		"reboot"
+	fi
+	#======================================
+	# Set default filesystem device names
+	#--------------------------------------
+	export imageRWDevice=$imageDiskDevice"2"
+	export imageRODevice=$imageDiskDevice"1"
+	export imageIOWRDevice=$imageRWDevice
+	#======================================
+	# Check for LVM or standard boot
+	#--------------------------------------
+	if searchVolumeGroup; then
+		#======================================
+		# LVM setup...
+		#--------------------------------------
+		export haveLVM=yes
+		if [ -e /dev/kiwiVG/LVComp ];then
+			export imageRootDevice=/dev/kiwiVG/LVComp
+		else
+			export imageRootDevice=/dev/kiwiVG/LVRoot
+		fi
+		export imageRWDevice=/dev/kiwiVG/LVRoot
+		export imageRODevice=/dev/kiwiVG/LVComp
+		export imageIOWRDevice=$imageRWDevice
+		export imageBootDevice=$imageDiskDevice"2"
+		if [ ! -z "$KIWI_RECOVERY" ];then
+			export imageRecoveryDevice=/dev/kiwiVG/LVRecovery
+		fi
+		probeFileSystem $imageRootDevice
+	else
+		#======================================
+		# Standard setup
+		#--------------------------------------
+		if [ ! -z "$KIWI_RECOVERY" ];then
+			export imageRecoveryDevice=$imageDiskDevice"4"
+			export imageRootDevice=$imageDiskDevice"2"
+		else
+			for i in 1 2;do
+				export imageRootDevice=$imageDiskDevice$i
+				probeFileSystem $imageRootDevice
+				if [ ! "$FSTYPE" = "unknown" ];then
+					break
+				fi
+			done
+		fi
+	fi
+	#======================================
+	# Check for LUKS extension on root fs
+	#--------------------------------------
+	if [ "$FSTYPE" = "luks" ];then
+		imageRootDevice=$(luksOpen $imageRootDevice)
+		probeFileSystem $imageRootDevice
+		export haveLuks=yes
+	fi
+	#======================================
+	# Check root filesystem type
+	#--------------------------------------
+	if [ "$FSTYPE" = "unknown" ];then
+		systemException \
+			"Couldn't determine filesystem type... abort" \
+		"reboot"
+	fi
+	#======================================
+	# Check for LUKS extension on rw fs
+	#--------------------------------------
+	if isFSTypeReadOnly;then
+		FSTYPE_OLD=$FSTYPE
+		probeFileSystem $imageRWDevice
+		if [ "$FSTYPE" = "luks" ];then
+			export haveLuks=yes
+		fi
+		FSTYPE=$FSTYPE_OLD
+	fi
+}
+
+#======================================
 # Beautify Startup
 #--------------------------------------
 echo "Loading KIWI OEM Boot-System..."
@@ -142,72 +233,28 @@ if [ ! -z "$OEM_SAP_INSTALL" ];then
 fi
 
 #======================================
-# 11) Get filesystem type and boot ID
+# 11) Setup device names...
 #--------------------------------------
-export imageBootID=1
-probeFileSystem $imageDiskDevice$imageBootID
-if [ $FSTYPE = "unknown" ];then
-	imageBootID=2
-	probeFileSystem $imageDiskDevice$imageBootID
-	if [ $FSTYPE = "unknown" ];then
-		systemException \
-			"Couldn't determine filesystem type... abort" \
-		"reboot"
-	fi
-fi
+setupDeviceNames
 
 #======================================
-# 12) Setup device names...
-#--------------------------------------
-export imageRootDevice=$imageDiskDevice$imageBootID
-export imageRWDevice=$imageDiskDevice"2"
-export imageRODevice=$imageDiskDevice"1"
-export imageIOWRDevice=$imageDiskDevice"2"
-if [ ! -z "$KIWI_RECOVERY" ];then
-	export imageRecoveryDevice=$imageDiskDevice"4"
-	export imageRootDevice=$imageDiskDevice"2"
-fi
-if [ -z "$imageDiskDevice" ];then
-	systemException \
-		"Couldn't find any boot device... abort" \
-	"reboot"
-fi
-Echo "Searching for kiwiVG volume group..."
-if searchVolumeGroup; then
-	export haveLVM=yes
-	if [ -e /dev/kiwiVG/LVComp ];then
-		export imageRootDevice=/dev/kiwiVG/LVComp
-	else
-		export imageRootDevice=/dev/kiwiVG/LVRoot
-	fi
-	export imageRWDevice=/dev/kiwiVG/LVRoot
-	export imageRODevice=/dev/kiwiVG/LVComp
-	export imageIOWRDevice=/dev/kiwiVG/LVRoot
-	export imageBootDevice=$imageDiskDevice"2"
-	if [ ! -z "$KIWI_RECOVERY" ];then
-		export imageRecoveryDevice=/dev/kiwiVG/LVRecovery
-	fi
-	probeFileSystem $imageRootDevice
-fi
-
-#======================================
-# 13) Check filesystem
+# 12) repartition the disk device
 #--------------------------------------
 Echo "Filesystem of OEM system is: $FSTYPE -> $imageRootDevice"
+if [ "$LOCAL_BOOT" = "no" ];then
+	OEMRepart
+fi
+
+#======================================
+# 13) Check for read-only filesystem
+#--------------------------------------
 if isFSTypeReadOnly;then
 	setupUnionFS $imageRWDevice $imageRODevice $unionFST
 	bootid=1
 fi
 
 #======================================
-# 14) repartition the disk device
-#--------------------------------------
-if [ "$LOCAL_BOOT" = "no" ];then
-	OEMRepart
-fi
-
-#======================================
-# 15) Resize filesystem to full space
+# 14) Resize filesystem to full space
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then
 	deviceResize=$imageRootDevice
@@ -232,11 +279,13 @@ if [ "$LOCAL_BOOT" = "no" ];then
 		if [ -z "$DONT_PARTITION" ];then
 			if [ "$FSTYPE" = "reiserfs" ];then
 				Echo "Resize Reiser filesystem to full partition space..."
+				luksResize $deviceResize
 				resize_reiserfs -q $deviceResize
 				INITRD_MODULES="$INITRD_MODULES reiserfs"
 			fi
 			if [ "$FSTYPE" = "ext2" ];then
 				Echo "Resize EXT2 filesystem to full partition space..."
+				luksResize $deviceResize
 				resize2fs -f -F -p $deviceResize
 				Echo "Checking EXT2 filesystem..."
 				e2fsck -p $deviceResize
@@ -244,6 +293,7 @@ if [ "$LOCAL_BOOT" = "no" ];then
 			fi
 			if [ "$FSTYPE" = "ext3" ];then
 				Echo "Resize EXT3 filesystem to full partition space..."
+				luksResize $deviceResize
 				resize2fs -f -F -p $deviceResize
 				Echo "Checking EXT3 filesystem..."
 				e2fsck -p $deviceResize
@@ -251,6 +301,7 @@ if [ "$LOCAL_BOOT" = "no" ];then
 			fi
 			if [ "$FSTYPE" = "ext4" ];then
 				Echo "Resize EXT4 filesystem to full partition space..."
+				luksResize $deviceResize
 				resize2fs -f -F -p $deviceResize
 				Echo "Checking EXT4 filesystem..."
 				e2fsck -p $deviceResize
@@ -267,7 +318,7 @@ if [ "$LOCAL_BOOT" = "no" ];then
 fi
 
 #======================================
-# 16) Mount system
+# 15) Mount system
 #--------------------------------------
 if ! mountSystem $imageRootDevice;then
 	systemException "Failed to mount root filesystem" "reboot"
@@ -275,7 +326,7 @@ fi
 validateRootTree
 
 #======================================
-# 17) Recover system if requested
+# 16) Recover system if requested
 #--------------------------------------
 if [ ! -z "$KIWI_RECOVERY" ];then
 	dialog --defaultno --yesno "Do you want to start the System-Recovery ?" 5 50
@@ -337,14 +388,14 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 fi
 
 #======================================
-# 18) get installed kernels
+# 17) get installed kernels
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then
 	kernelList /mnt
 fi
 
 #======================================
-# 19) setup boot partition
+# 18) setup boot partition
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ]; then
 	if [ "$haveLVM" = "yes" ];then
@@ -372,11 +423,26 @@ if [ "$LOCAL_BOOT" = "no" ]; then
 		test -f /tmp/mbrid && mv /tmp/mbrid /mnt/dmboot/boot/grub
 		rm -rf /mnt/boot
 		( cd /mnt && ln -s dmboot/boot boot )
+	elif [ "$haveLuks" = "yes" ];then
+		mkdir -p /mnt/luksboot
+		imageBootDevice=$imageDiskDevice"2"
+		bootid=1
+		if isFSTypeReadOnly;then
+			export imageBootDevice=$imageDiskDevice"3"
+			bootid=2
+		fi
+		mount $imageBootDevice /mnt/luksboot
+		cp -a /mnt/boot /mnt/luksboot
+		test -f /tmp/linux.vmx  && mv /tmp/linux.vmx  /mnt/luksboot/boot
+		test -f /tmp/initrd.vmx && mv /tmp/initrd.vmx /mnt/luksboot/boot
+		test -f /tmp/mbrid && mv /tmp/mbrid /mnt/luksboot/boot/grub
+		rm -rf /mnt/boot
+		( cd /mnt && ln -s luksboot/boot boot )
 	fi
 fi
 
 #======================================
-# 20) setup ird/kernel links for union
+# 19) setup ird/kernel links for union
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then 
 	if [ "$OEM_KIWI_INITRD" = "yes" ] || isFSTypeReadOnly;then
@@ -390,6 +456,8 @@ if [ "$LOCAL_BOOT" = "no" ];then
 			pushd /mnt/lvmboot/boot >/dev/null
 		elif [ "$haveDMSquash" = "yes" ];then
 			pushd /mnt/dmboot/boot >/dev/null
+		elif [ "$haveLuks" = "yes" ];then
+			pushd /mnt/luksboot/boot >/dev/null
 		elif [ "$OEM_KIWI_INITRD" = "yes" ];then
 			pushd /mnt/boot >/dev/null
 		else
@@ -416,7 +484,7 @@ if [ "$LOCAL_BOOT" = "no" ];then
 fi
 
 #======================================
-# 21) Create system dependant files
+# 20) Create system dependant files
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then
 	#======================================
@@ -428,6 +496,8 @@ if [ "$LOCAL_BOOT" = "no" ];then
 		updateLVMBootDeviceFstab /config $imageBootDevice
 	elif [ "$haveDMSquash" = "yes" ];then
 		updateDMBootDeviceFstab /config $imageBootDevice
+	elif [ "$haveLuks" = "yes" ];then
+		updateLuksBootDeviceFstab /config $imageBootDevice
 	fi
 	if partitionSize $imageSwapDevice &>/dev/null;then
 		updateSwapDeviceFstab /config $imageSwapDevice
@@ -471,14 +541,14 @@ if [ "$LOCAL_BOOT" = "no" ];then
 fi
 
 #======================================
-# 22) copy system dependant files
+# 21) copy system dependant files
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then
 	setupConfigFiles
 fi
 
 #======================================
-# 23) copy recovery related files
+# 22) copy recovery related files
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ] && [ ! -z "$OEM_RECOVERY" ];then
 	IFS=$IFS_ORIG
@@ -510,22 +580,22 @@ if [ "$LOCAL_BOOT" = "no" ] && [ ! -z "$OEM_RECOVERY" ];then
 fi
 
 #======================================
-# 24) update system dependant files
+# 23) update system dependant files
 #--------------------------------------
 setupInittab /mnt
 
 #======================================
-# 25) setup real root device
+# 24) setup real root device
 #--------------------------------------
 echo 256 > /proc/sys/kernel/real-root-dev
 
 #======================================
-# 26) umount system filesystems
+# 25) umount system filesystems
 #--------------------------------------
 umountSystemFilesystems
 
 #======================================
-# 27) copy initrd files to image
+# 26) copy initrd files to image
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then
 	importBranding
@@ -534,17 +604,17 @@ cp /preinit /mnt
 cp /include /mnt
 
 #======================================
-# 28) kill boot shell
+# 27) kill boot shell
 #--------------------------------------
 killShell
 killBlogD
 
 #======================================
-# 29) Activate new root
+# 28) Activate new root
 #--------------------------------------
 activateImage
 
 #======================================
-# 30 Unmount initrd / system init
+# 29 Unmount initrd / system init
 #--------------------------------------
 bootImage $@

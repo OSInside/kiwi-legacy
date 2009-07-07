@@ -2094,6 +2094,9 @@ sub getImageConfig {
 	if (%type) {
 		$result{kiwi_type} = $type{type};
 	}
+	if ((%type) && ($type{luks})) {
+		$result{kiwi_luks} = "yes";
+	}
 	if ($size) {
 		$result{kiwi_size} = $size;
 	}
