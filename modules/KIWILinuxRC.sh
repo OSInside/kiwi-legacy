@@ -3561,7 +3561,7 @@ function mountSystemCombined {
 			ln -s /mnt/read-write /read-write >/dev/null
 		fi
 	fi
-	if [ "$haveLuks" = "yes" ];then
+	if [ "$LOCAL_BOOT" = "yes" ] && [ "$haveLuks" = "yes" ];then
 		mkdir -p /mnt/luksboot
 		( cd /mnt && rm boot && ln -sf luksboot/boot boot )
 	fi
