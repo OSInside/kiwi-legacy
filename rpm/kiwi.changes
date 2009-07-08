@@ -2,6 +2,8 @@
 Sun Jul  5 19:59:26 CEST 2009 - ms@suse.de
 
 - v3.62
+- added check for packages really on media when using
+  fallback KIWIPattern resolver (bnc #517506)
 - fixed combined mount with luks encoded read-write part (bnc #505782)
 - added support for luks extension for oem image type (bnc #505782)
 - fixed CD eject in oem CD/DVD install mode (bnc #519654)

@@ -247,6 +247,110 @@ sub checkContentData {
 }
 
 #==========================================
+# downloadMediaPackages
+#------------------------------------------
+sub downloadMediaPackages {
+	my $this    = shift;
+	my $url     = shift;
+	my $kiwi    = $this->{kiwi};
+	my @pfile   = (
+		"suse/setup/descr/packages.gz",
+		"suse/setup/descr/packages"
+	);
+	my $file;
+	my $media;
+	my $message;
+	my %content;
+	my $tmpdir;
+	if (defined $this->{cache}{media}) {
+		return $this->{cache}{media};
+	}
+	if ($url =~ /^\//) {
+		#==========================================
+		# local media check
+		#------------------------------------------
+		foreach my $name (@pfile) {
+			$media = $url."/".$name;
+			last if (-f $media);
+		}
+		if (! defined $media) {
+			$message = "couldn't find any packages file";
+			return (undef,"local[content]: $message: $!");
+		}
+	} else {
+		#==========================================
+		# remote media check
+		#------------------------------------------
+		$tmpdir = qxx ("mktemp -q -d /tmp/kiwimedia.XXXXXX "); chomp $tmpdir;
+		my $result = $? >> 8;
+		if ($result != 0) {
+			$message = "couldn't create tmpdir";
+			return (undef,"remote[tmpdir] $message: $!");
+		}
+		my $urlHandler  = new KIWIURL ($kiwi,undef);
+		my $publics_url = $url;
+		my $highlvl_url = $urlHandler -> openSUSEpath ($publics_url,"quiet");
+		if (defined $highlvl_url) {
+			$publics_url = $highlvl_url;
+		}
+		my $browser  = LWP::UserAgent->new;
+		foreach my $name (@pfile) {
+			my $location = $publics_url."/".$name;
+			my $request  = HTTP::Request->new (GET => $location);
+			my $response;
+			eval {
+				$response = $browser -> request ( $request );
+			};
+			if ($@) {
+				$message = "http request failed: $@";
+				next;
+			}
+			my $content = $response -> content ();
+			if ((defined $content) && ($content ne "")) {
+				if (! open (FD,">$tmpdir/media")) {
+					qxx ("rm -rf $tmpdir");
+					$message = "couldn't create";
+					return (undef,"remote[open] $message: $tmpdir/media: $!");
+				}
+				print FD $content; close FD;
+				undef $message;
+				last;
+			}
+			$message = "http request empty: $name";
+		}
+		if (defined $message) {
+			qxx ("rm -rf $tmpdir");
+			return (undef, "remote[request]: $message");
+		}
+	}
+	#==========================================
+	# finally get the pattern
+	#------------------------------------------
+	if ($media =~ /\.gz$/) {
+		if ((! -e $media) || (! open (FD,"cat $media|$main::Gzip -cd|"))) {
+			defined $tmpdir && qxx ("rm -rf $tmpdir");
+			$message = "couldn't uncompress media packages";
+			return (undef,"local[gzip]: $message: $media: $!");
+		}
+	} else {
+		if (! open (FD,$media)) {
+			defined $tmpdir && qxx ("rm -rf $tmpdir");
+			$message = "couldn't open media packages";
+			return (undef,"local[open]: $message: $media: $!");
+		}
+	}
+	my @content = <FD>; close FD;
+	defined $tmpdir && qxx ("rm -rf $tmpdir");
+	foreach my $line (grep (/Pkg:/, @content)) {
+		if ($line =~ (/^=Pkg: (.*?) (.*)/)) {
+			$content{$1} = $2;
+		}
+	}
+	$this->{cache}{media} = \%content;
+	return (\%content,$this);
+}
+
+#==========================================
 # downloadPattern
 #------------------------------------------
 sub downloadPattern {
@@ -777,13 +881,18 @@ sub getRequiredProducts {
 #------------------------------------------
 sub getPackages {
 	my $this = shift;
+	my $kiwi = $this->{kiwi};
 	my $pattype = $this->{patpactype};
 	my %result;
 	my @packages = @{$this->{packages}};
-
+	#==========================================
+	# Package for products
+	#------------------------------------------
 	my @prodpkgreqs = $this -> getRequiredProducts ($this->{products});
 	push (@packages, @prodpkgreqs);
-
+	#==========================================
+	# Packages for patterns
+	#------------------------------------------
 	my @reqs = $this -> getRequiredPatterns ($this->{patterns});
 	my @pacs;
 	if ($pattype eq "onlyRequired") {
@@ -799,8 +908,31 @@ sub getPackages {
 			'^\+Pr[qc]:','^\-Pr[qc]:'
 		);
 	}
-	push(@packages, @pacs);
-
+	push (@packages, @pacs);
+	#==========================================
+	# Packages on media
+	#------------------------------------------
+	my %media;
+	foreach my $url (@{$this->{urllist}}) {
+		my $packages = $this -> downloadMediaPackages($url);
+		foreach my $p (keys %{$packages}) {
+			$media{$p} = $packages->{$p};
+		}
+	}
+	#==========================================
+	# Sort out packages not on media
+	#------------------------------------------
+	my @result;
+	foreach my $toinst (@packages) {
+		next if (! $toinst);
+		if (! defined $media{$toinst}) {
+			$kiwi -> warning ("--> Package $toinst not on media");
+			$kiwi -> skipped ();
+		} else {
+			push (@result,$toinst);
+		}
+	}
+	@packages = @result;
 	@packages = sort @packages;
 	my $prev = '__none__';
 	return grep($_ ne $prev && (($prev) = $_), @packages);
