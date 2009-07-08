@@ -2,9 +2,9 @@
 Sun Jul  5 19:59:26 CEST 2009 - ms@suse.de
 
 - v3.62
-- fixed combined mount with luks encoded read-write part
-- added support for luks extension for oem image type
-- fixed CD eject in oem CD/DVD install mode
+- fixed combined mount with luks encoded read-write part (bnc #505782)
+- added support for luks extension for oem image type (bnc #505782)
+- fixed CD eject in oem CD/DVD install mode (bnc #519654)
 
 -------------------------------------------------------------------
 Tue Jun 30 10:11:11 CEST 2009 - ms@suse.de

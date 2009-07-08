@@ -372,14 +372,14 @@ function OEMRepartOverlayed {
 			bootid=1
 		fi
 		activateBootPartition
-	fi
-	#======================================
-	# Create bootfs if DM squash setup
-	#--------------------------------------
-	if [ "$haveDMSquash" = "yes" ];then
-		export imageBootDevice=$imageDiskDevice"3"
-		if ! mke2fs -T ext2 -q $imageBootDevice >/dev/null 2>&1;then
-			systemException "Failed to create Boot filesystem" "reboot"
+		#======================================
+		# Create bootfs if DM squash setup
+		#--------------------------------------
+		if [ "$haveDMSquash" = "yes" ];then
+			export imageBootDevice=$imageDiskDevice"3"
+			if ! mke2fs -T ext2 -q $imageBootDevice >/dev/null 2>&1;then
+				systemException "Failed to create Boot filesystem" "reboot"
+			fi
 		fi
 	fi
 }
@@ -704,12 +704,12 @@ function OEMRepartLuks {
 			export imageRWDevice=$imageIOWRDevice
 			export imageRODevice=$imageRootDevice
 		fi
-	fi
-	#======================================
-	# Create bootfs if DM squash setup
-	#--------------------------------------
-	if ! mke2fs -T ext2 -q $imageBootDevice >/dev/null 2>&1;then
-		systemException "Failed to create Boot filesystem" "reboot"
+		#======================================
+		# Create bootfs if DM squash setup
+		#--------------------------------------
+		if ! mke2fs -T ext2 -q $imageBootDevice >/dev/null 2>&1;then
+			systemException "Failed to create Boot filesystem" "reboot"
+		fi
 	fi
 }
 

@@ -1021,6 +1021,8 @@ function setupBootLoaderGrub {
 		gnum=1
 	elif [ "$haveDMSquash" = "yes" ];then
 		gnum=2
+	elif [ "$haveLuks" = "yes" ];then
+		:
 	elif [ ! -z "$UNIONFS_CONFIG" ] && [ $gnum -gt 0 ]; then
 		rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
 		gnum=`echo $rwDevice | sed -e "s/\/dev.*\([0-9]\)/\\1/"`
@@ -1242,6 +1244,8 @@ function setupBootLoaderLilo {
 		lnum=1
 	elif [ "$haveDMSquash" = "yes" ];then
 		lnum=2
+	elif [ "$haveLuks" = "yes" ];then
+		:
 	elif [ ! -z "$UNIONFS_CONFIG" ] && [ $gnum -gt 0 ]; then
 		rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
 		lnum=`echo $rwDevice | sed -e "s/\/dev.*\([0-9]\)/\\1/"`
@@ -3556,6 +3560,10 @@ function mountSystemCombined {
 			rm -f /read-write >/dev/null
 			ln -s /mnt/read-write /read-write >/dev/null
 		fi
+	fi
+	if [ "$haveLuks" = "yes" ];then
+		mkdir -p /mnt/luksboot
+		( cd /mnt && rm boot && ln -sf luksboot/boot boot )
 	fi
 }
 #======================================
