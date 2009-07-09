@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Jul  9 11:09:59 CEST 2009 - ms@suse.de
+
+- v3.63
+- make luks password dialog more user friendly
+- update schema documentation
+
+-------------------------------------------------------------------
 Sun Jul  5 19:59:26 CEST 2009 - ms@suse.de
 
 - v3.62

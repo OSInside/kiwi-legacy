@@ -4377,6 +4377,7 @@ function luksOpen {
 	# ----
 	local ldev=$1
 	local name=$2
+	local info
 	if [ -z $name ];then
 		name=luksroot
 	fi
@@ -4386,13 +4387,20 @@ function luksOpen {
 	if ! cryptsetup isLuks $ldev &>/dev/null;then
 		echo $ldev; return
 	fi
-	dialog --stdout --insecure --passwordbox "Enter LUKS passphrase" 10 60 |\
-		cryptsetup luksOpen $ldev $name 1>&2
-	if [ ! $? = 0 ];then
-		systemException \
-			"Failed to open LUKS device... reboot" \
-		"reboot"
-	fi
+	while true;do
+		if [ ! -e /tmp/luks ];then
+			dialog \
+				--stdout --insecure \
+				--passwordbox "Enter LUKS passphrase" 10 60 |\
+				cat > /tmp/luks
+		fi
+		info=$(cat /tmp/luks | cryptsetup luksOpen $ldev $name 2>&1)
+		if [ $? = 0 ];then
+			break
+		fi
+		rm -f /tmp/luks
+		dialog --stdout --timeout 10 --msgbox "Error: $info" 8 60
+	done
 	echo /dev/mapper/$name
 }
 #======================================
