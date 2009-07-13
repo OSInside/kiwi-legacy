@@ -19,6 +19,8 @@
 		<profile name="ec2" description="KERNEL: Ec2"/>
 	</profiles>
 	<drivers type="drivers">
+		<file name="crypto/*"/>
+		<file name="drivers/md/*"/>
 		<file name="drivers/ide/*"/>
 		<file name="drivers/block/loop.ko"/>
 		<file name="fs/ext3/*"/>
@@ -55,6 +57,8 @@
 		<package name="fribidi"/>
 		<package name="make"/>
 		<package name="bootsplash"/>
+		<package name="cryptsetup"/>
+		<package name="dialog"/>
 	</packages>
 	<packages type="bootstrap" profiles="std">
 		<package name="kernel-xen"/>

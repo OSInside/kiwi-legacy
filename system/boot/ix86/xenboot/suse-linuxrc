@@ -114,6 +114,11 @@ VMFindSystem
 # 7) Get filesystem type
 #--------------------------------------
 probeFileSystem $imageRootDevice
+if [ "$FSTYPE" = "luks" ];then
+	imageRootDevice=$(luksOpen $imageRootDevice)
+	probeFileSystem $imageRootDevice
+	export haveLuks=yes
+fi
 if [ $FSTYPE = "unknown" ];then
 	systemException \
 		"Couldn't determine filesystem type... abort" \
