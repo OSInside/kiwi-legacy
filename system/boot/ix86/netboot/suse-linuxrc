@@ -411,7 +411,7 @@ fi
 runHook predownload
 if \
 	[ $LOCAL_BOOT = "no" ] && \
-	[ ! -z "$PART" ]       && \
+	([ ! -z "$PART" ] || [ ! -z "$IMAGE" ]) && \
 	[ -z "$NFSROOT" ]      && \
 	[ -z "$NBDROOT" ]      && \
 	[ -z "$AOEROOT" ]

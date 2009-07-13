@@ -2,6 +2,7 @@
 Thu Jul  9 11:09:59 CEST 2009 - ms@suse.de
 
 - v3.63
+- fixed ram only netboot image download (bnc #519055) 
 - make luks password dialog more user friendly
 - update schema documentation
 
