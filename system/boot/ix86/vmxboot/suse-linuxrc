@@ -232,6 +232,9 @@ if [ "$LOCAL_BOOT" = "no" ];then
 		rm -rf /mnt/boot
 		( cd /mnt && ln -s syslboot/boot boot )
 	elif [ "$haveLuks" = "yes" ];then
+		#======================================
+		# LUKS use second or third part as boot
+		#--------------------------------------
 		mkdir /mnt/luksboot
 		export imageBootDevice=$imageDiskDevice"3"
 		if [ ! -e $imageBootDevice ];then
