@@ -27,6 +27,7 @@
 		<file name="usb/storage/usb-storage.ko"/>
 	</drivers>
 	<drivers type="drivers">
+		<file name="crypto/*"/>
 		<file name="drivers/md/*"/>
 		<file name="drivers/hid/*"/>
 		<file name="drivers/ide/*"/>
@@ -100,6 +101,8 @@
 		<package name="bootsplash-theme-SuSE"/>
 		<package name="tar"/>
 		<package name="lvm2"/>
+		<package name="cryptsetup"/>
+		<package name="dialog"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>

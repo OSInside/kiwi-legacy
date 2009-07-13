@@ -100,6 +100,12 @@ fi
 # 7) Probe filesystem of stick system
 #--------------------------------------
 probeFileSystem $stickDevice
+if [ "$FSTYPE" = "luks" ];then
+	stickDevice=$(luksOpen $stickDevice)
+	stickRODevice=$stickDevice
+	probeFileSystem $stickDevice
+	export haveLuks=yes
+fi
 if [ $FSTYPE = "unknown" ];then
 	systemException \
 		"Couldn't determine filesystem type... abort" \
@@ -175,6 +181,21 @@ if [ "$LOCAL_BOOT" = "no" ];then
 		fi
 		rm -rf /mnt/boot
 		( cd /mnt && ln -s syslboot/boot boot )
+	elif [ "$haveLuks" = "yes" ];then
+		#======================================
+		# LUKS use second or third part as boot
+		#--------------------------------------
+		mkdir /mnt/luksboot
+		export imageBootDevice=$stickRoot"3"
+		if [ ! -e $imageBootDevice ];then
+			imageBootDevice=$stickRoot"2"
+		fi
+		mount $imageBootDevice /mnt/luksboot
+		if [ -z "$UNIONFS_CONFIG" ];then
+			cp -a /mnt/boot/* /mnt/luksboot/boot
+		fi
+		rm -rf /mnt/boot
+		( cd /mnt && ln -s luksboot/boot boot )
 	fi
 fi
 
@@ -190,6 +211,8 @@ if [ "$LOCAL_BOOT" = "no" ];then
 		updateDMBootDeviceFstab /config $imageBootDevice
 	elif [ "$loader" = "syslinux" ];then
 		updateSyslinuxBootDeviceFstab /config $imageFatDevice
+	elif [ "$haveLuks" = "yes" ];then
+		updateLuksBootDeviceFstab /config $imageBootDevice
 	fi
 fi
 

@@ -27,6 +27,7 @@
 		<file name="usb/storage/usb-storage.ko"/>
 	</drivers>
 	<drivers type="drivers">
+		<file name="crypto/*"/>
 		<file name="drivers/virtio/*"/>
 		<file name="drivers/block/virtio_blk.ko"/>
 		<file name="drivers/char/hw_random/virtio-rng.ko"/>
@@ -110,6 +111,8 @@
 		<package name="tar"/>
 		<package name="lvm2"/>
 		<package name="cromfs"/>
+		<package name="cryptsetup"/>
+		<package name="dialog"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
