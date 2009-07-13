@@ -28,6 +28,7 @@
 		<file name="usb/storage/usb-storage.ko"/>
 	</drivers>
 	<drivers type="drivers">
+		<file name="crypto/*"/>
 		<file name="drivers/virtio/*"/>
 		<file name="drivers/block/virtio_blk.ko"/>
 		<file name="drivers/char/hw_random/virtio-rng.ko"/>
@@ -108,6 +109,8 @@
 		<package name="rpm"/>
 		<package name="kiwi-tools"/>
 		<package name="checkmedia"/>
+		<package name="cryptsetup"/>
+		<package name="dialog"/>
 	</packages>
 	<packages type="delete">
 		<package name="cracklib-dict-small"/>
@@ -192,7 +195,6 @@
 		<package name="pmtools"/>
 		<package name="pm-utils"/>
 		<package name="pmtools"/>
-		<package name="popt"/>
 		<package name="pwdutils"/>
 		<package name="setserial"/>
 		<package name="suse-build-key"/>

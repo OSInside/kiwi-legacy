@@ -4611,6 +4611,10 @@ sub luksResize {
 	my $cipher = $main::LuksCipher;
 	my $status;
 	my $result;
+	my $hald;
+	#==========================================
+	# open luks device
+	#------------------------------------------
 	if ($cipher) {
 		$status = qxx (
 			"echo $cipher | cryptsetup luksOpen $source $name 2>&1"
@@ -4625,6 +4629,26 @@ sub luksResize {
 		$kiwi -> failed ();
 		return undef;
 	}
+	#==========================================
+	# lock device for hal
+	#------------------------------------------
+	if ($source !~ /loop/) {
+		$hald = new KIWI::dbusdevice::HalConnection;
+		if (! $hald -> open()) {
+			$kiwi -> loginfo ($hald->state());
+		} else {
+			$this -> {lhald} = $hald;
+			if ($hald -> lock ("/dev/mapper/".$name)) {
+				$kiwi -> loginfo ($hald->state());
+			} else {
+				$this -> {lhalddevice} = "/dev/mapper/".$name;
+				$kiwi -> loginfo ("HAL:".$hald->state());
+			}
+		}
+	}
+	#==========================================
+	# resize luks header
+	#------------------------------------------
 	$this->{luks} = $name;
 	$status = qxx ("cryptsetup resize $name");
 	$result = $? >> 8;
@@ -4635,6 +4659,9 @@ sub luksResize {
 		$this -> luksClose();
 		return undef;
 	}
+	#==========================================
+	# return mapped device name
+	#------------------------------------------
 	return "/dev/mapper/".$name;
 }
 
@@ -4646,6 +4673,13 @@ sub luksClose {
 	if ($this->{luks}) {
 		qxx ("cryptsetup luksClose $this->{luks} 2>&1");
 		undef $this->{luks};
+	}
+	if ($this->{lhald}) {
+		$this->{lhald} -> unlock (
+			$this->{lhalddevice}
+		);
+		undef $this->{lhald};
+		undef $this->{lhalddevice};
 	}
 	return $this;
 }
