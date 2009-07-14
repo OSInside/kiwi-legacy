@@ -112,6 +112,7 @@
 		<package name="cryptsetup"/>
 		<package name="dialog"/>
 		<package name="gfxboot"/>
+		<package name="openssl-certs"/>
 	</packages>
 	<packages type="delete">
 		<package name="gfxboot"/>

@@ -9,8 +9,8 @@ Thu Jul  9 11:09:59 CEST 2009 - ms@suse.de
 - added support for luks extension for xen image type (bnc #505782)
 - added support for luks extension for iso image type (bnc #505782)
 - fixed liveCD isolinux entry selection (bnc #521338)
-- added openssl-certs to bootstrap section of SLE JeOS
-  templates to allow use of SLE update repositories
+- added openssl-certs to bootstrap section of SLE JeOS and
+  boot image templates to allow use of SLE update repositories
 - removed required lib* packages from delete sections
 - be verbose when removing files from the initrd
 - make luks password dialog more user friendly
