@@ -1303,3 +1303,29 @@ function suseStripKernel {
 		done
 	done
 }
+
+#======================================
+# suseSetupProduct
+#--------------------------------------
+function suseSetupProduct {
+	# /.../
+	# This function will create the /etc/products.d/baseproduct
+	# link pointing to the product referenced by either
+	# the /etc/SuSE-brand file or the latest .prod file
+	# available in /etc/products.d
+	# ----
+	local prod=undef
+	if [ -f /etc/SuSE-brand ];then
+		prod=$(head /etc/SuSE-brand -n 1)
+	fi
+	pushd /etc/products.d
+	if [ -f $prod.prod ];then
+		ln -sf $prod.prod baseproduct
+	else
+		prod=$(ls -1t *.prod 2>/dev/null | tail -n 1)
+		if [ -f $prod ];then
+			ln -sf $prod baseproduct
+		fi
+	fi
+	popd
+}

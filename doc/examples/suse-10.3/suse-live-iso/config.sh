@@ -27,6 +27,11 @@ test -f /.profile && . /.profile
 echo "Configure image: [$kiwi_iname]..."
 
 #======================================
+# Setup baseproduct link
+#--------------------------------------
+suseSetupProduct
+
+#======================================
 # Load sound drivers by default
 #--------------------------------------
 perl -ni -e 'm,^blacklist snd-, || print;' \
