@@ -57,7 +57,11 @@ int main (void) {
 	solver_solve (solver, &queue);
 	
 	if (solver->problems.count) {
+		#if SAT_VERSION1
+		solver_printallsolutions(solver);
+		#else
 		solver_printsolutions(solver, &queue);
+		#endif
 	}
 
 	unsigned long size = solver_calc_installsizechange (solver);

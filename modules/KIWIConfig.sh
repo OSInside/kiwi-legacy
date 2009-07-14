@@ -472,7 +472,7 @@ function baseStripTools {
 			fi
 		done
 		if [ $found = 0 ] && [ ! -d $file ];then
-			Rm -f $file
+			Rm -fv $file
 		fi
 	done
 }
@@ -903,7 +903,7 @@ function suseStripInitrd {
 		/lib/modules/*/kernel/drivers/net/hamradio
 	"
 	for i in $files;do
-		rm -rf $i
+		rm -rfv $i
 	done
 	#==========================================
 	# remove unneeded files
@@ -919,7 +919,7 @@ function suseStripInitrd {
 			/usr/share/zypp* /var/lib/zypp* /var/log/zypper.log
 		"
 		for i in $files;do
-			rm -rf $i
+			rm -rfv $i
 		done
 	fi
 	#==========================================
@@ -992,6 +992,9 @@ function suseGFXBoot {
 	if [ ! -z "$kiwi_boottheme" ];then
 		theme=$kiwi_boottheme
 	fi
+	#======================================
+	# setup bootloader data
+	#--------------------------------------
 	if [ -d /usr/share/gfxboot ];then
 		#======================================
 		# create boot theme with gfxboot-devel
@@ -1033,12 +1036,6 @@ function suseGFXBoot {
 		if [ $loader = "isolinux" ];then
 			# isolinux boot data...
 			cp $gfximage /image/loader
-			if [ -x /usr/sbin/gfxboot ] ; then
-				gfxboot --archive /image/loader/bootlogo \
-					--change-config livecd=1
-			else
-				echo "livecd=1" >> /image/loader/gfxboot.cfg
-			fi
 			bin/unpack_bootlogo /image/loader
 		else
 			# boot loader graphics image file...
@@ -1080,6 +1077,17 @@ function suseGFXBoot {
 	else
 		# boot loader binary part of MBR
 		:
+	fi
+	#======================================
+	# update isolinux config if live CD
+	#--------------------------------------
+	if [ $loader = "isolinux" ];then
+		if [ -x /usr/sbin/gfxboot ] ; then
+			gfxboot --config-file /image/loader/gfxboot.cfg \
+					--change-config install::livecd=1
+		else
+			echo "livecd=1" >> /image/loader/gfxboot.cfg
+		fi
 	fi
 	#======================================
 	# create splash screen

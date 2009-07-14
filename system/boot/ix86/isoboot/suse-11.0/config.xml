@@ -116,8 +116,10 @@
 		<package name="checkmedia"/>
 		<package name="cryptsetup"/>
 		<package name="dialog"/>
+		<package name="gfxboot"/>
 	</packages>
 	<packages type="delete">
+		<package name="gfxboot"/>
 		<package name="cracklib-dict-small"/>
 		<package name="cracklib-dict-full"/>
 		<package name="ConsoleKit"/>

@@ -117,8 +117,10 @@
 		<package name="clicfs"/>
 		<package name="cryptsetup"/>
 		<package name="dialog"/>
+		<package name="gfxboot"/>
 	</packages>
 	<packages type="delete">
+		<package name="gfxboot"/>
 		<package name="cracklib-dict-small"/>
 		<package name="cracklib-dict-full"/>
 		<package name="ConsoleKit"/>
@@ -155,20 +157,6 @@
 		<package name="insserv"/>
 		<package name="iproute2"/>
 		<package name="irqbalance"/>
-		<package name="libblkid1"/>
-		<package name="libbz2-1"/>
-		<package name="libexpat1"/>
-		<package name="libjpeg"/>
-		<package name="liblcms"/>
-		<package name="libmng"/>
-		<package name="libnscd"/>
-		<package name="libopenssl0_9_8"/>
-		<package name="libsmbios-libs"/>
-		<package name="libtiff3"/>
-		<package name="libxcrypt"/>
-		<package name="libxcrypt-32bit"/>
-		<package name="libxml2"/>
-		<package name="libzio"/>
 		<package name="limal"/>
 		<package name="limal-bootloader"/>
 		<package name="limal-perl"/>

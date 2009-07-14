@@ -8,6 +8,9 @@ Thu Jul  9 11:09:59 CEST 2009 - ms@suse.de
 - added support for luks extension for usb image type (bnc #505782)
 - added support for luks extension for xen image type (bnc #505782)
 - added support for luks extension for iso image type (bnc #505782)
+- fixed liveCD isolinux entry selection (bnc #521338)
+- removed required lib* packages from delete sections
+- be verbose when removing files from the initrd
 - make luks password dialog more user friendly
 - update schema documentation
 

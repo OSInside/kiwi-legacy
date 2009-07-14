@@ -97,9 +97,6 @@
 		<package name="insserv"/>
 		<package name="iproute2"/>
 		<package name="irqbalance"/>
-		<package name="libxcrypt"/>
-		<package name="libxml2"/>
-		<package name="libzio"/>
 		<package name="limal"/>
 		<package name="limal-bootloader"/>
 		<package name="limal-perl"/>
