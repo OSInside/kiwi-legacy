@@ -94,7 +94,7 @@
 		<package name="glibc-locale"/>
 		<package name="diffutils"/>
 		<package name="procps"/>
-		<package name="openssl-certs"/>
+		<package name="openssl"/>
 	</packages>
 	<packages type="delete">
 		<package name="cracklib-dict-small"/>

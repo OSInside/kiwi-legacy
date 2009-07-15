@@ -105,7 +105,7 @@
 		<package name="filesystem"/>
 		<package name="glibc"/>
 		<package name="glibc-locale"/>
-		<package name="openssl-certs"/>
+		<package name="openssl"/>
 	</packages>
 	<packages type="delete">
 		<package name="cracklib-dict-small"/>
