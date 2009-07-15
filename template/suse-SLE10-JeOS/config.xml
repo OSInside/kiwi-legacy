@@ -108,7 +108,7 @@
 	<packages type="bootstrap">
 		<package name="filesystem"/>
 		<package name="glibc-locale"/>
-		<package name="openssl-certs"/>
+		<package name="openssl"/>
 	</packages>
 	<!-- Virtual Machine configurations -->
 	<vmwareconfig memory="256" guestOS="suse" HWversion="4">
