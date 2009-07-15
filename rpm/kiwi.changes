@@ -3,6 +3,7 @@ Thu Jul  9 11:09:59 CEST 2009 - ms@suse.de
 
 - v3.63
 - set hal lock for mapped luks device
+- fixed satplugin due to satsolver api changes (bnc #521968)
 - added suseSetupProduct function (bnc #520268)
 - fixed ram only netboot image download (bnc #519055) 
 - added support for luks extension for usb image type (bnc #505782)
