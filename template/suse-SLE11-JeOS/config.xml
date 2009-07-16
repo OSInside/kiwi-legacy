@@ -42,6 +42,7 @@
 		<package name="vim"/>
 		<package name="grub"/>
 		<opensusePattern name="base"/>
+		<opensuseProduct name="SUSE_SLES"/>
 	</packages>
 	<packages type="xen">
 		<package name="kernel-xen" replaces="kernel-default"/>
