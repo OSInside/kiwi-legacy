@@ -3793,8 +3793,14 @@ sub buildXenConfig {
 		$vifcount++;
 		my $mac = $xenconfig{xen_bridge}{$bname};
 		my $vif = '"bridge='.$bname.'"';
+		if ($bname eq "undef") {
+			$vif = '""';
+		}
 		if ($mac) {
 			$vif = '"mac='.$mac.',bridge='.$bname.'"';
+			if ($bname eq "undef") {
+				$vif = '"mac='.$mac.'"';
+			}
 		}
 		if ($vifcount == 0) {
 			print FD "vif=[ ".$vif;

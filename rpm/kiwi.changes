@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Jul 16 12:52:46 CEST 2009 - ms@suse.de
+
+- v3.64
+- fixed xenbridge network setup if bridge name is set to
+  an empty string (bnc #515404)
+
+-------------------------------------------------------------------
 Thu Jul  9 11:09:59 CEST 2009 - ms@suse.de
 
 - v3.63

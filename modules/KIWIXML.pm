@@ -2382,9 +2382,10 @@ sub getXenConfig {
 		if ($bridge) {
 			my $mac   = $bridge -> getAttribute ("mac");
 			my $bname = $bridge -> getAttribute ("name");
-			if ($bname) {
-				$vifs{$bname} = $mac;
+			if (! $bname) {
+				$bname = "undef";
 			}
+			$vifs{$bname} = $mac;
 		}
 	}
 	#==========================================
