@@ -2,6 +2,7 @@
 Thu Jul 16 12:52:46 CEST 2009 - ms@suse.de
 
 - v3.64
+- added displayEULA function (bnc #522985)
 - added opensuseProduct in JeOS templates (bnc #522217)
 - fixed xenbridge network setup if bridge name is set to
   an empty string (bnc #515404)

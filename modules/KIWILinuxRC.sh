@@ -4436,6 +4436,34 @@ function luksClose {
 	done
 }
 #======================================
+# displayEULA
+#--------------------------------------
+function displayEULA {
+	# /.../
+	# display in a dialog window the text part of the
+	# file /EULA.txt
+	# ----
+	local license=/EULA.txt
+	if [ ! -f $license ];then
+		return
+	fi
+	while true;do
+		dialog --textbox $license 20 70 \
+			--and-widget --extra-button --extra-label "No" --ok-label "Yes" \
+			--yesno "Do you accept the license agreement ?" 5 45
+		case $? in
+			0 ) break
+				;;
+			1 ) continue
+				;;
+			* ) systemException \
+					"License not accepted... reboot" \
+				"reboot"
+				;;
+		esac
+	done
+}
+#======================================
 # SAPMemCheck
 #--------------------------------------
 function SAPMemCheck {

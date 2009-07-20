@@ -36,6 +36,10 @@ function OEMInstall {
 		return
 	fi
 	#======================================
+	# Display license if /EULA.txt exists
+	#--------------------------------------
+	displayEULA
+	#======================================
 	# Search CD/DVD/USB stick and mount it
 	#--------------------------------------
 	USBStickDevice
