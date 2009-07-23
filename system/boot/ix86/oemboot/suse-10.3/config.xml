@@ -29,6 +29,7 @@
 	<drivers type="drivers">
 		<file name="crypto/*"/>
 		<file name="drivers/md/*"/>
+		<file name="drivers/block/cciss.ko"/>
 		<file name="drivers/block/loop.ko"/>
 		<file name="drivers/hid/*"/>
 		<file name="drivers/ide/*"/>

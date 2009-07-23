@@ -29,6 +29,7 @@
 	<drivers type="drivers">
 		<file name="crypto/*"/>
 		<file name="drivers/virtio/*"/>
+		<file name="drivers/block/cciss.ko"/>
 		<file name="drivers/block/virtio_blk.ko"/>
 		<file name="drivers/net/virtio_net.ko"/>
 		<file name="drivers/md/*"/>

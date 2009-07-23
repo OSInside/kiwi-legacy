@@ -31,6 +31,7 @@
 	</drivers>
 	<drivers type="drivers">
 		<file name="drivers/md/*"/>
+		<file name="drivers/block/cciss.ko"/>
 		<file name="drivers/block/loop.ko"/>
 		<file name="drivers/ide/*"/>
 		<file name="fs/ext3/*"/>
