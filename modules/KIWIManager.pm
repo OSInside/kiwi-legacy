@@ -1855,7 +1855,7 @@ sub setupPackageKeys {
 		$kiwi -> skipped ();
 		return $this;
 	}
-	my $dump = "/usr/lib/rpm/gnupg/dumpsigs /usr/lib/rpm/gnupg/pubring.gpg";
+	my $dump = "/usr/lib/rpm/gnupg/dumpsigs";
 	my $sigs = "$root/rpm-sigs";
 	$data = qxx ("mkdir -p $sigs && cd $sigs && $dump 2>&1");
 	$code = $? >> 8;
