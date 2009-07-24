@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Jul 23 16:30:28 CEST 2009 - ms@suse.de
+
+- v3.65
+- added waitForUSBDeviceScan() function and wait only
+  if usbcore module could be loaded
+
+-------------------------------------------------------------------
 Thu Jul 16 12:52:46 CEST 2009 - ms@suse.de
 
 - v3.64

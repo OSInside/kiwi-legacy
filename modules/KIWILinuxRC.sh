@@ -1670,12 +1670,39 @@ function getSystemMD5Status {
 	echo $SYSTEM_MD5STATUS | cut -f$1 -d:
 }
 #======================================
+# waitForUSBDeviceScan
+#--------------------------------------
+function waitForUSBDeviceScan {
+	local silent=$1
+	local devices=0
+	if [ ! "$HAVE_USB" = "yes" ];then
+		return
+	fi
+	if [ -z "$silent" ];then
+		Echo -n "Waiting for USB device scan to complete..."
+	fi
+	while \
+		[ $(dmesg | grep -c 'usb-storage: device scan complete') -lt 1 ] && \
+		[ $devices -lt 15 ]
+	do
+		if [ -z "$silent" ];then
+			echo -n .
+		fi
+		sleep 1
+		devices=$(( $devices + 1 ))
+	done
+	if [ -z "$silent" ];then
+		echo
+	fi
+}
+#======================================
 # probeUSB
 #--------------------------------------
 function probeUSB {
 	local module=""
 	local stdevs=""
 	local hwicmd="/usr/sbin/hwinfo"
+	export HAVE_USB="no"
 	if [ $HAVE_MODULES_ORDER = 0 ];then
 		#======================================
 		# load host controller modules
@@ -1730,45 +1757,22 @@ function probeUSB {
 			modprobe $i &>/dev/null
 		done
 	fi
-	#======================================
-	# wait for storage devices to appear
-	#--------------------------------------
-	Echo -n "Waiting for USB devices to settle..."
-	local storage=/sys/bus/usb/drivers/usb-storage
-	local devices=0
-	while [ $devices -lt 5 ];do
-		for i in $storage/*;do
-			if [ -L $i ] && [ ! $i = "$storage/module" ];then
-				devices=ok
-				break
-			fi
-		done
-		if [ $devices = "ok" ];then
-			break
-		fi
-		echo -n . ; sleep 1
-		devices=$(( $devices + 1 ))
-	done
-	if [ ! $devices = "ok" ];then
-		echo ; return
+	if lsmod | grep -q usbcore;then
+		export HAVE_USB="yes"
 	fi
-	#======================================
-	# wait for storage scan to complete
-	#--------------------------------------
-	devices=0
-	while \
-		[ $(dmesg | grep -c 'usb-storage: device scan complete') -lt 1 ] && \
-		[ $devices -lt 15 ]
-	do
-		echo -n . ; sleep 1
-		devices=$(( $devices + 1 ))
-	done
-	echo
+	waitForUSBDeviceScan
 }
 #======================================
 # probeDevices
 #--------------------------------------
 function probeDevices {
+	#======================================
+	# probe USB devices and load modules
+	#--------------------------------------
+	probeUSB
+	#======================================
+	# probe Disk devices and load modules
+	#--------------------------------------
 	if [ $HAVE_MODULES_ORDER = 0 ];then
 		Echo "Including required kernel modules..."
 		IFS="%"
@@ -1820,16 +1824,12 @@ function probeDevices {
 		# ----
 		modprobe ide-disk &>/dev/null
 	fi
-	# /.../
-	# default loading of modules not loaded on demand
-	# ----
+	#======================================
+	# Manual loading of modules
+	#--------------------------------------
 	for i in rd brd edd dm-mod xennet xenblk;do
 		modprobe $i &>/dev/null
 	done
-	# /.../
-	# probe USB devices and load modules
-	# ----
-	probeUSB
 }
 #======================================
 # CDDevice
@@ -1889,90 +1889,68 @@ function USBStickDevice {
 	stickFound=0
 	local silent=$1
 	#======================================
-	# check virtual environments
-	#--------------------------------------
-	diskmodels=`getDiskModels`
-	if echo $diskmodels | grep -q "QEMU HARDDISK";then
-		if [ -z "$silent" ];then
-			Echo "QEMU system, skipping USB stick search"
-		fi
-		return
-	fi
-	#======================================
 	# search for USB removable devices
 	#--------------------------------------
-	if [ -z "$silent" ];then
-		Echo -n "Searching for USB stick device..."
-	fi
-	for redo in 1 2 3 4 5;do
-		for device in /sys/bus/usb/drivers/usb-storage/*;do
-			if [ ! -L $device ];then
+	waitForUSBDeviceScan $silent
+	for device in /sys/bus/usb/drivers/usb-storage/*;do
+		if [ ! -L $device ];then
+			continue
+		fi
+		descriptions=$device/host*/target*/*/block*
+		for description in $descriptions;do
+			if [ ! -d $description ];then
 				continue
 			fi
-			descriptions=$device/host*/target*/*/block*
-			for description in $descriptions;do
-				if [ ! -d $description ];then
-					continue
-				fi
-				isremovable=$description/removable
-				storageID=`echo $description | cut -f1 -d: | xargs basename`
-				devicebID=`basename $description | cut -f2 -d:`
-				if [ $devicebID = "block" ];then
-					devicebID=`ls -1 $description`
-					isremovable=$description/$devicebID/removable
-				fi
-				serial="/sys/bus/usb/devices/$storageID/serial"
-				device="/dev/$devicebID"
-				if [ ! -b $device ];then
-					continue;
-				fi
-				if [ ! -f $isremovable ];then
-					continue;
-				fi
-				if ! partitionSize $device >/dev/null;then
-					continue;
-				fi
-				if [ ! -f $serial ];then
-					serial="USB Stick (unknown type)"
-				else
-					serial=`cat $serial`
-				fi
-				removable=`cat $isremovable`
-				if [ $removable -eq 1 ];then
-					stickRoot=$device
-					stickDevice=$device"1"
-					for dev in $stickRoot"1" $stickRoot"2";do
-						if ! kiwiMount "$dev" "/mnt";then
-							continue
-						fi
-						stickFound=1
-						if \
-							[ ! -e /mnt/etc/ImageVersion ] && \
-							[ ! -e /mnt/config.isoclient ]
-						then
-							umountSystem
-							continue
-						fi
-						umountSystem
-						break
-					done
-					if [ "$stickFound" = 0 ];then
+			isremovable=$description/removable
+			storageID=`echo $description | cut -f1 -d: | xargs basename`
+			devicebID=`basename $description | cut -f2 -d:`
+			if [ $devicebID = "block" ];then
+				devicebID=`ls -1 $description`
+				isremovable=$description/$devicebID/removable
+			fi
+			serial="/sys/bus/usb/devices/$storageID/serial"
+			device="/dev/$devicebID"
+			if [ ! -b $device ];then
+				continue;
+			fi
+			if [ ! -f $isremovable ];then
+				continue;
+			fi
+			if ! partitionSize $device >/dev/null;then
+				continue;
+			fi
+			if [ ! -f $serial ];then
+				serial="USB Stick (unknown type)"
+			else
+				serial=`cat $serial`
+			fi
+			removable=`cat $isremovable`
+			if [ $removable -eq 1 ];then
+				stickRoot=$device
+				stickDevice=$device"1"
+				for dev in $stickRoot"1" $stickRoot"2";do
+					if ! kiwiMount "$dev" "/mnt";then
 						continue
 					fi
-					stickSerial=$serial
-					if [ -z "$silent" ];then
-						echo .
+					stickFound=1
+					if \
+						[ ! -e /mnt/etc/ImageVersion ] && \
+						[ ! -e /mnt/config.isoclient ]
+					then
+						umountSystem
+						continue
 					fi
-					return
+					umountSystem
+					break
+				done
+				if [ "$stickFound" = 0 ];then
+					continue
 				fi
-			done
+				stickSerial=$serial
+				return
+			fi
 		done
-		if [ -z "$silent" ];then
-			echo -n .
-		fi
-		sleep 3
 	done
-	echo .
 }
 #======================================
 # CDMountOption
