@@ -256,11 +256,11 @@ extern "C"
         }
         origout = dup2 (1,origout);
         FILE* fp = freopen(name,"w",stdout);
-        #if SATSOLVER_VERSION_MINOR >= 14
+        %#if SATSOLVER_VERSION_MINOR >= 14
         solver_printallsolutions(solv);
-        #else
+        %#else
         solver_printsolutions(solv, job);
-        #endif
+        %#endif
         fclose (fp);
         dup2 (origout,1);
         strcpy (result,name);   
