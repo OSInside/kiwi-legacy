@@ -2,6 +2,7 @@
 Thu Jul 23 16:30:28 CEST 2009 - ms@suse.de
 
 - v3.65
+- added suse-11.2-JeOS template
 - removed obsolte tools/cdtool/suse-isolinux
 - fixed isoboot: added gfxboot.com if it exists
 - leave libncursesw inside the initrd for dialog use

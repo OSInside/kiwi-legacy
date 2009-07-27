@@ -430,6 +430,7 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-, root, root)
 %dir %{_datadir}/kiwi
 %dir %{_datadir}/kiwi/image
+%exclude %{_datadir}/kiwi/image/suse-11.2-JeOS
 %exclude %{_datadir}/kiwi/image/suse-11.1-JeOS
 %exclude %{_datadir}/kiwi/image/suse-SLE10-JeOS
 %exclude %{_datadir}/kiwi/image/suse-SLE11-JeOS
@@ -570,9 +571,11 @@ rm -rf $RPM_BUILD_ROOT
 %ifarch %ix86 x86_64
 %files -n kiwi-templates
 %defattr(-, root, root)
+%dir %{_datadir}/kiwi/image/suse-11.2-JeOS
 %dir %{_datadir}/kiwi/image/suse-11.1-JeOS
 %dir %{_datadir}/kiwi/image/suse-SLE10-JeOS
 %dir %{_datadir}/kiwi/image/suse-SLE11-JeOS
+%{_datadir}/kiwi/image/suse-11.2-JeOS
 %{_datadir}/kiwi/image/suse-11.1-JeOS
 %{_datadir}/kiwi/image/suse-SLE10-JeOS
 %{_datadir}/kiwi/image/suse-SLE11-JeOS
