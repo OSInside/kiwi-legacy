@@ -22,7 +22,6 @@ install:
 	install -m 755 startshell/startshell ${TOOLSVZ}
 	install -m 755 pigz/pigz ${TOOLSVZ}
 	install -m 755 driveready/driveready ${TOOLSVZ}
-	install -m 755 cdtool/suse-isolinux ${TOOLSVZ}
 	${MAKE} -C dbuslock DESTDIR=${buildroot} install_vendor
 	( \
 		if test -d /usr/include/satsolver;then \

@@ -1071,8 +1071,15 @@ function suseGFXBoot {
 	if [ $loader = "isolinux" ];then
 		# isolinux boot code...
 		mv /usr/share/syslinux/isolinux.bin /image/loader
-		mv /usr/share/syslinux/mboot.c32 /image/loader
-		mv /boot/memtest.bin /image/loader/memtest
+		if [ -f "/usr/share/syslinux/gfxboot.com" ];then
+			mv /usr/share/syslinux/gfxboot.com /image/loader
+		fi
+		if [ -f "/usr/share/syslinux/mboot.c32" ];then
+			mv /usr/share/syslinux/mboot.c32 /image/loader
+		fi
+		if [ -f "/boot/memtest.bin" ];then 
+			mv /boot/memtest.bin /image/loader/memtest
+		fi
 	else
 		# boot loader binary part of MBR
 		:
