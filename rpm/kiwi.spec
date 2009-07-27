@@ -470,7 +470,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/kiwi/modules/KIWICollect.pm
 %{_datadir}/kiwi/modules/KIWIUtil.pm
 %{_datadir}/kiwi/modules/KIWIRepoMetaHandler.pm
-/usr/bin/suse-isolinux
 
 #=================================================
 # KIWI-pxeboot files...  
@@ -503,7 +502,6 @@ rm -rf $RPM_BUILD_ROOT
 %files -n kiwi-tools
 %defattr(-, root, root)
 %doc %{_defaultdocdir}/kiwi/README.tools
-%exclude /usr/bin/suse-isolinux
 %if %{suse_version} > 1010
 %exclude /usr/bin/imagewriter
 %endif
