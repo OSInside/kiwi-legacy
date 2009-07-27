@@ -57,7 +57,7 @@ int main (void) {
 	solver_solve (solver, &queue);
 	
 	if (solver->problems.count) {
-		#if LIBSATSOLVER_MINOR >= 14
+		#if SATSOLVER_VERSION_MINOR >= 14
 		solver_printallsolutions(solver);
 		#else
 		solver_printsolutions(solver, &queue);

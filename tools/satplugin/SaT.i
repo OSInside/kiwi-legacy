@@ -256,7 +256,7 @@ extern "C"
         }
         origout = dup2 (1,origout);
         FILE* fp = freopen(name,"w",stdout);
-        #if LIBSATSOLVER_MINOR >= 14
+        #if SATSOLVER_VERSION_MINOR >= 14
         solver_printallsolutions(solv);
         #else
         solver_printsolutions(solv, job);
