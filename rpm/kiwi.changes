@@ -2,6 +2,7 @@
 Thu Jul 23 16:30:28 CEST 2009 - ms@suse.de
 
 - v3.65
+- leave libncursesw inside the initrd for dialog use
 - added waitForUSBDeviceScan() function and wait only
   if usbcore module could be loaded
 
