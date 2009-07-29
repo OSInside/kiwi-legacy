@@ -3381,14 +3381,16 @@ sub getInstSourceSatSolvable {
 	# create solvable from opensuse dist pat
 	#------------------------------------------
 	if (glob ("$sdir/distxml-*.gz")) {
-		$destfile = $sdir."/primary-".$count;
-		$scommand = "gzip -cd $sdir/distxml-*.gz";
-		my $data = qxx ("($scommand) | rpmmd2solv > $destfile 2>/dev/null");
-		my $code = $? >> 8;
-		if ($code != 0) {
-			$kiwi -> error  ("--> Can't create SaT solvable file");
-			$kiwi -> failed ();
-			$error = 1;
+		foreach my $file (glob ("$sdir/distxml-*.gz")) {
+			$destfile = $sdir."/primary-".$count;
+			my $data = qxx ("gzip -cd $file | rpmmd2solv > $destfile 2>&1");
+			my $code = $? >> 8;
+			if ($code != 0) {
+				$kiwi -> error  ("--> Can't create SaT solvable file");
+				$kiwi -> failed ();
+				$error = 1;
+			}
+			$count++;
 		}
 	}
 	$count++;
@@ -3398,6 +3400,7 @@ sub getInstSourceSatSolvable {
 	if (glob ("$sdir/packages-*")) {
 		my $gzicmd = "gzip -cd ";
 		my $stdcmd = "cat ";
+		my @done   = ();
 		$scommand = "";
 		$destfile = $sdir."/primary-".$count;
 		foreach my $file (glob ("$sdir/packages-*")) {
@@ -3415,11 +3418,12 @@ sub getInstSourceSatSolvable {
 			}
 		}
 		if ($gzicmd ne "gzip -cd ") {
-			$scommand = $gzicmd.";";
+			push @done,$gzicmd;
 		}
 		if ($stdcmd ne "cat ") {
-			$scommand.= $stdcmd;
+			push @done,$stdcmd;
 		}
+		$scommand = join (";",@done);
 		my $data = qxx ("($scommand) | susetags2solv > $destfile 2>/dev/null");
 		my $code = $? >> 8;
 		if ($code != 0) {
@@ -3433,14 +3437,16 @@ sub getInstSourceSatSolvable {
 	# create solvable from opensuse xml pattern
 	#------------------------------------------
 	if (glob ("$sdir/projectxml-*.gz")) {
-		$destfile = $sdir."/primary-".$count;
-		$scommand = "gzip -cd $sdir/projectxml-*.gz";
-		my $data = qxx ("($scommand) | rpmmd2solv > $destfile 2>/dev/null");
-		my $code = $? >> 8;
-		if ($code != 0) {
-			$kiwi -> error  ("--> Can't create SaT solvable file");
-			$kiwi -> failed ();
-			$error = 1;
+		foreach my $file (glob ("$sdir/projectxml-*.gz")) {
+			$destfile = $sdir."/primary-".$count;
+			my $data = qxx ("gzip -cd $file | rpmmd2solv > $destfile 2>&1");
+			my $code = $? >> 8;
+			if ($code != 0) {
+				$kiwi -> error  ("--> Can't create SaT solvable file");
+				$kiwi -> failed ();
+				$error = 1;
+			}
+			$count++;
 		}
 	}
 	#==========================================

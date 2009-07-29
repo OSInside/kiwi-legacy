@@ -177,6 +177,7 @@ our $SetImageType;          # set image type to use, default is primary type
 our $Migrate;               # migrate running system to image description
 our @Exclude;               # exclude directories in migrate search
 our $Report;                # create report on root/ tree migration only
+our $ReportPacklist;        # just report the package/pattern list on migration
 our @Profiles;              # list of profiles to include in image
 our $ForceNewRoot;          # force creation of new root directory
 our $BaseRoot;              # use given path as base system
@@ -1072,11 +1073,13 @@ sub main {
 		if (! $migrate -> setTemplate()) {
 			my $code = kiwiExit (1); return $code;
 		}
-		if (! $migrate -> setServiceList()) {
-			my $code = kiwiExit (1); return $code;
-		}
-		if (! $migrate -> setSystemConfiguration()) {
-			my $code = kiwiExit (1); return $code;
+		if (! $ReportPacklist) {
+			if (! $migrate -> setServiceList()) {
+				my $code = kiwiExit (1); return $code;
+			}
+			if (! $migrate -> setSystemConfiguration()) {
+				my $code = kiwiExit (1); return $code;
+			}
 		}
 		kiwiExit (0);
 	}
@@ -1260,6 +1263,7 @@ sub init {
 		"migrate|m=s"           => \$Migrate,
 		"exclude|e=s"           => \@Exclude,
 		"report"                => \$Report,
+		"report-packlist"       => \$ReportPacklist,
 		"list|l"                => \&listImage,
 		"create|c=s"            => \$Create,
 		"testsuite=s"           => \$RunTestSuite,
@@ -1495,7 +1499,7 @@ sub usage {
 	print "System to Image migration:\n";
 	print "    kiwi -m | --migrate <name> --destdir <destination-path>\n";
 	print "       [ --exclude <directory> --exclude <...> ]\n";
-	print "       [ --report ]\n";
+	print "       [ --report ] [ --report-packlist ]\n";
 	print "Image postprocessing modes:\n";
 	print "    kiwi --bootstick <initrd> --bootstick-system <systemImage>\n";
 	print "       [ --bootstick-device <device> ]\n";

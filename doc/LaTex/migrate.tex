@@ -26,13 +26,47 @@ copy it as overlay files as part of the image description. The process
 will skip all remote mounted filesystems and concentrate only on local
 filesystems.
 
+\section{Create a clean repository set first}
+When starting with the migration it is useful to let kiwi know about all
+the repositories from which packages has been installed to 
+the system. In a first step call:
+
+\begin{Command}{12cm}
+\begin{verbatim}
+kiwi --migrate mySys --destdir /tmp/migrated \
+     --report-packlist
+\end{verbatim}
+\end{Command}
+
+This will only check which packages and patterns could be assigned
+to the given base repository. In almost all cases there will be
+information about packages which couldn't be assigned. You should
+go to that list and think of the repository which contains that
+packages (pacman, etc...). A good starting point is the
+output of \verb+zypper sl --details+. If you know about the repositories
+just add then in subsequent calls like:
+
+\begin{Command}{12cm}
+\begin{verbatim}
+kiwi --migrate mySys --destdir /tmp/migrated \
+     --add-repo http://packman.mirrors.skynet.be/pub/packman/suse/11.0 \
+     --add-repotype rpm-dir
+     --report-packlist
+\end{verbatim}
+\end{Command}
+
+You should continue the migration if you have a clean list of solved
+packages without any package skipped except you know that this package
+can't be provided or is not worth to become part of the migration.
+
 \section{Create a migration report first}
-When running the migration for the first time I
+When running the next step of the migration I
 recommend to create a report first:
 
 \begin{Command}{12cm}
 \begin{verbatim}
 kiwi --migrate mySys --destdir /tmp/migrated \
+     --add-repo ... --add-repotype ...
      --report
 \end{verbatim}
 \end{Command}
@@ -52,15 +86,10 @@ After that call you should walk through the following check list
       at least make sure if the repository is correct and if you need
       more repositories for packages which are not part of the base
       repository for example
-\item check the kiwi output on the console. Each package which it can't
-      find in the base repository of the distribution is skipped and
-      not added as package in your package list. So for example if you
-      use the nvidia binary driver package from an extra repo you need
-      to add the repo and the package later in your config.xml file
 \end{itemize}
 
 \section{Migrate my system...}
-After the check list you will have a first impression of your system.
+After the check list you will have a good impression of your system.
 What data is there what's not part of packages what doesn't need to
 be part of the image description and so on. You can exclude the
 directories which you don't need according to the report file with
@@ -71,8 +100,8 @@ it copy the overlay files too:
 \begin{verbatim}
 rm -rf /tmp/migrated
 kiwi --migrate mySys --destdir /tmp/migrated \
-     --exclude directory --exclude ... \
-     --add-repo URI --add-repotype type ...
+     --add-repo ... --add-repotype ...
+     --exclude directory --exclude ...
 \end{verbatim}
 \end{Command}
 

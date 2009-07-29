@@ -433,7 +433,7 @@ sub getPackageList {
 	# find all rpm's installed
 	#------------------------------------------
 	undef $this->{patterns};
-	my @list = qxx ("rpm -qa --qf '%{NAME}\n'"); chomp @list;
+	my @list = qxx ('rpm -qa --qf "%{NAME}\n"'); chomp @list;
 	#==========================================
 	# create URL list to lookup solvables
 	#------------------------------------------
@@ -454,8 +454,6 @@ sub getPackageList {
 			push (@patlist,"base");
 		}
 		chomp @patlist;
-		print "+++ @patlist\n";
-		print "+++ @urllist\n";
 		my $psolve = new KIWISatSolver (
 			$kiwi,\@patlist,\@urllist
 		);
