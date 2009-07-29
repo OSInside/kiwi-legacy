@@ -175,6 +175,11 @@ function OEMInstall {
 	#======================================
 	# Check MBR ID's...
 	#--------------------------------------
+	# /.../
+	# mbr ID check is deactivated by default
+	# see bug #525682 for details
+	# ----
+	nombridcheck=1
 	if [ -z "$nombridcheck" ];then
 		mbrD=$instDisk
 		mbrI="cat $imageName"
