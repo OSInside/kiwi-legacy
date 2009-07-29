@@ -46,10 +46,11 @@ packages (pacman, etc...). A good starting point is the
 output of \verb+zypper sl --details+. If you know about the repositories
 just add then in subsequent calls like:
 
-\begin{Command}{12cm}
+\begin{Command}{16cm}
 \begin{verbatim}
 kiwi --migrate mySys --destdir /tmp/migrated \
-     --add-repo http://packman.mirrors.skynet.be/pub/packman/suse/11.0 \
+     --add-repo \
+     http://packman.mirrors.skynet.be/pub/packman/suse/11.0 \
      --add-repotype rpm-dir
      --report-packlist
 \end{verbatim}
