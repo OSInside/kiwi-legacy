@@ -3,6 +3,7 @@ Wed Jul 29 12:57:36 CEST 2009 - ms@suse.de
 
 - v3.66
 - deactivate mbr id check on oem install (bnc #525682)
+- fixed file finder for relative paths in createImageSplit
 - update ec2 documentation, fixed public ari/aki table
 - fixed solvable creation for migrate, also add the
   option --report-packlist. Updated docu chapter about

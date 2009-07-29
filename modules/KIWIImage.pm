@@ -2246,6 +2246,10 @@ sub createImageSplit {
 	# split physical extend into RW/RO/tmp part
 	#------------------------------------------
 	$imageTree    = $this->{imageDest}."/".$treebase;
+	if ($imageTree !~ /^\//) {
+		my $pwd = qxx ("pwd"); chomp $pwd;
+		$imageTree = $pwd."/".$imageTree;
+	}
 	$imageTreeTmp = $imageTree;
 	$imageTreeTmp =~ s/\/+$//;
 	$imageTreeTmp.= "-tmp/";
