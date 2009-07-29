@@ -15,7 +15,8 @@ environment. To use Amazon EC2 you simply:
       provided by Amazon. Your build system should have these tools
       installed. Due to license issues we are not allowed to distribute
       the tools which means you need to download, install and setup
-      them from here: \url{http://docs.amazonwebservices.com/AmazonEC2/gsg/2006-06-26}
+      them from here:\\
+      \url{http://docs.amazonwebservices.com/AmazonEC2/gsg/2006-06-26}
 \item Upload this AMI to the Amazon S3 (Amazon Simple Storage Service)
       service. This gives us reliable, secure access to your AMI.
 \item Register your AMI with Amazon EC2. This allows us to verify that your
@@ -35,7 +36,7 @@ your system is prepared for ec2 which means if you call the command
 
 \section{Building the suse-ec2-guest example}
 
-The latest example provided with kiwi is based on openSUSE 11.0 and
+One example provided with kiwi is based on openSUSE 11.0 and
 includes the base pattern plus the vim editor.
 
 Before you run kiwi you need to include some of your ec2 account
@@ -57,7 +58,7 @@ After that call kiwi as follows:
 \begin{Command}{13cm}
 \begin{verbatim}
 cd /usr/share/doc/packages/kiwi/examples
-cd suse-11.0
+cd suse-11.1
 kiwi --prepare ./suse-ec2-guest \
      --root /tmp/myec2
 \end{verbatim}
@@ -79,7 +80,7 @@ done by the ec2-upload-bundle tool. You can do this by calling:
 ec2-upload-bundle -b myImages \
  -a <AWS Key ID> -s <AWS secret Key ID> \
  -m /tmp/myec2/\
-    suse-11.0-ec2-guest.i686-1.1.2.ami.manifest.xml
+    suse-11.1-ec2-guest.i686-1.1.2.ami.manifest.xml
 \end{verbatim}
 \end{Command}
 
@@ -90,7 +91,7 @@ by a random key sequence. To register call:
 \begin{Command}{13cm}
 \begin{verbatim}
 ec2-register myImages/\
-    suse-11.0-ec2-guest.i686-1.1.2.ami.manifest.xml
+    suse-11.1-ec2-guest.i686-1.1.2.ami.manifest.xml
 \end{verbatim}
 \end{Command}
 
@@ -131,22 +132,26 @@ are registered as ari-... images at Amazon. You will need to select a
 aki/ari image that matches your ami. The following table shows which
 Distributions are supported at the moment:\\
 
-\begin{tabular}[h]{|p{2cm}|p{2.6cm}|p{2.6cm}|p{2cm}|}
+\begin{tabular}[h]{|p{3cm}|p{2.6cm}|p{2.6cm}|p{2cm}|}
 \hline
 \textbf{Distro} & \textbf{ARI id} & \textbf{AKI id} & \textbf{Arch} \\
 \hline
-SUSE 11.0 & ari-49db3f20 & aki-4adb3f23 & ix86    \\
-SUSE 11.0 & ari-48db3f21 & aki-4ddb3f24 & x86\_64 \\
+SLES11 & ari-c31effaa & aki-c11effa8 & ix86    \\
+SLES11 & ari-cd1effa4 & aki-cb1effa2 & x86\_64 \\
+openSUSE 11.1 & n/a & n/a & ix86 \\
+openSUSE 11.1 & n/a & n/a & x86\_64 \\
 \hline
 \end{tabular}\\
 
-For this example we need the id's provided for openSUSE 11.0. According
-to this call the following command to fire up your new ec2 instance:
+For this example we need the id's provided for openSUSE 11.1.
+Unfortunately there are no public ID's available at the moment.
+As soon as they are the following command are required to
+fire up your new ec2 instance:
 
 \begin{Command}{13cm}
 \begin{verbatim}
 ec2-run-instances ami-... \
-  --kernel aki-4adb3f23 --ramdisk ari-49db3f20 \
+  --kernel aki-... --ramdisk ari-... \
   -k gsg-keypair
 \end{verbatim}
 \end{Command}
