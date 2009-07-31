@@ -2,6 +2,7 @@
 Fri Jul 31 11:42:59 CEST 2009 - ms@suse.de
 
 - v3.67
+- use blockdev to check partition and disk size (bnc #527016)
 - use #!/usr/bin/env vmware in .vmx config file
 
 -------------------------------------------------------------------

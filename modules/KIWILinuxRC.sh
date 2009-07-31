@@ -2495,21 +2495,6 @@ function sfdiskGetPartitionID {
 	sfdisk -c $1 $2
 }
 #======================================
-# sfdiskGetPartitionSize
-#--------------------------------------
-function sfdiskGetPartitionSize {
-	# /.../
-	# prints the partition or disk size in kB
-	# ----
-	local cyl_count=`sfdisk -g $1 2>&1 | cut -f2 -d: | cut -f2 -d" "`
-	local cyl_bsize=`sfdisk -l $1 2>&1 | grep Units | cut -f5 -d" "`
-	if [ ! -z "$cyl_bsize" ];then
-		expr \( $cyl_count - 1 \) \* $cyl_bsize / 1024
-	else
-		sfdisk -s $1
-	fi
-}
-#======================================
 # sfdiskPartitionCount
 #--------------------------------------
 function sfdiskPartitionCount {
@@ -2659,22 +2644,6 @@ function partedGetPartitionID {
 	parted -m -s $disk print | grep ^$2: | cut -f10 -d, | cut -f2 -d=
 }
 #======================================
-# partedGetPartitionSize
-#--------------------------------------
-function partedGetPartitionSize {
-	# /.../
-	# prints the partition or disk size in kB
-	# ----
-	local disk=`echo $1 | sed -e s"@[0-9]@@g"`
-	local step=2
-	if echo $1 | grep -q [0-9];then
-		step=4
-	fi
-	local size=`parted -m -s $disk unit B print |\
-		sed -e "s@^\([0-4]\):@$disk\1:@" | grep ^$1:|cut -f$step -d: | tr -d B`
-	expr $size / 1000
-}
-#======================================
 # partedCreatePartition
 #--------------------------------------
 function partedCreatePartition {
@@ -2802,14 +2771,10 @@ function partitionID {
 #--------------------------------------
 function partitionSize {
 	local diskDevice=$1
-	if [ -z $diskDevice ];then
+	if [ -z "$diskDevice" ] || [ ! -e "$diskDevice" ];then
 		return 1
 	fi
-	if [ $PARTITIONER = "sfdisk" ];then
-		sfdiskGetPartitionSize $diskDevice
-	else
-		partedGetPartitionSize $diskDevice
-	fi
+	expr $(blockdev --getsize64 $diskDevice) / 1024
 }
 #======================================
 # partitionCount
