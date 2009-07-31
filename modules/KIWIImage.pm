@@ -314,7 +314,7 @@ sub createImageClicFS {
 		$kiwi -> failed ();
 		return undef;
 	}  
-	$kiwi -> info ("clicfs: blocks count=$blocks free=$data\n");  
+	$kiwi -> info ("clicfs: blocks count=$blocks free=$data");
 	$blocks = $blocks - $data;  
 	$data = qxx ("/sbin/resize2fs $this->{imageDest}/fsdata.ext3 $blocks 2>&1");
 	$code = $? >> 8;
