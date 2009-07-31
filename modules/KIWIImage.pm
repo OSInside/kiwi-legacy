@@ -3856,7 +3856,7 @@ sub buildVMwareConfig {
 	#==========================================
 	# global setup
 	#------------------------------------------
-	print FD '#!/usr/bin/vmware'."\n";
+	print FD '#!/usr/bin/env vmware'."\n";
 	print FD 'config.version = "8"'."\n";
 	print FD 'tools.syncTime = "true"'."\n";
 	print FD 'uuid.action = "create"'."\n";
