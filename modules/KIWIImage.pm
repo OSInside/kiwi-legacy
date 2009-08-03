@@ -110,6 +110,10 @@ sub new {
 	$this->{baseSystem} = $baseSystem;
 	$this->{arch}       = $arch;
 	#==========================================
+	# Store a disk label ID for this object
+	#------------------------------------------
+	$this -> getMBRDiskLabel();
+	#==========================================
 	# Clean kernel mounts if any
 	#------------------------------------------
 	$this -> cleanKernelFSMount();
@@ -1358,6 +1362,7 @@ sub createImageLiveCD {
 	my $plinux;
 	my $pinitrd;
 	my $pxboot;
+	my $hybrid = 0;
 	#==========================================
 	# Get system image name
 	#------------------------------------------
@@ -1380,6 +1385,12 @@ sub createImageLiveCD {
 		$kiwi -> error  ("No boot image name specified");
 		$kiwi -> failed ();
 		return undef;
+	}
+	#==========================================
+	# Check for hybrid ISO
+	#------------------------------------------
+	if ((defined $type{hybrid}) && ($type{hybrid} =~ /yes|true/i)) {
+		$hybrid = 1;
 	}
 	#==========================================
 	# Get image creation date and name
@@ -1652,6 +1663,9 @@ sub createImageLiveCD {
 	if ($type{bootkernel}) {
 		push @main::Profiles ,split (/,/,$type{bootkernel});
 	}
+	if ($hybrid) {
+		$main::ForeignRepo{"hybrid"}= "true";
+	}
 	$main::ForeignRepo{"xmlnode"} = $xml -> getForeignNodeList();
 	$main::ForeignRepo{"xmlpacnode"} = $xml -> getForeignPackageNodeList();
 	$main::ForeignRepo{"packagemanager"} = $xml -> getPackageManager();
@@ -1860,6 +1874,27 @@ sub createImageLiveCD {
 	my $xboot = glob ("$this->{imageDest}/$iso$arch-$ver*xen.gz");
 	if (-f $xboot) {
 		$isxen = 1;
+	}
+	if ($hybrid) {
+		#==========================================
+		# Create MBR id file for boot device check
+		#------------------------------------------
+		$kiwi -> info ("Saving hybrid disk label on ISO: $this->{mbrid}...");
+		my $destination = "$main::RootTree/CD/boot/grub";
+		qxx ("mkdir -p $destination");
+		if (! open (FD,">$destination/mbrid")) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create mbrid file: $!");
+			if (! -d $main::RootTree.$baseSystem) {
+				qxx ("rm -rf $main::RootTree");
+				qxx ("rm -rf $tmpdir");
+			}
+			$kiwi -> failed ();
+			return undef;
+		}
+		print FD "$this->{mbrid}";
+		close FD;
+		$kiwi -> done();
 	}
 	#==========================================
 	# copy boot kernel and initrd
@@ -2112,7 +2147,7 @@ sub createImageLiveCD {
 	#==========================================
 	# relocate boot catalog
 	#------------------------------------------
-	if (! $isolinux -> relocateCatalog ($name)) {
+	if (! $isolinux -> relocateCatalog()) {
 		if (! -d $main::RootTree.$baseSystem) {
 			qxx ("rm -rf $main::RootTree");
 			qxx ("rm -rf $tmpdir");
@@ -2126,7 +2161,24 @@ sub createImageLiveCD {
 		$kiwi -> info ("Adding checkmedia tag...");
 		if (! $isolinux -> checkImage()) {
 			$kiwi -> failed ();
-			$kiwi -> error  ("Failed to tag ISO image: $data");
+			$kiwi -> error  ("Failed to tag ISO image");
+			$kiwi -> failed ();
+			if (! -d $main::RootTree.$baseSystem) {
+				qxx ("rm -rf $main::RootTree");
+				qxx ("rm -rf $tmpdir");
+			}
+			return undef;
+		}
+		$kiwi -> done();
+	}
+	#==========================================
+	# Turn ISO into hybrid if requested
+	#------------------------------------------
+	if ($hybrid) {
+		$kiwi -> info ("Setting up hybrid ISO...");
+		if (! $isolinux -> createHybrid ($this->{mbrid})) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Failed to create hybrid ISO image");
 			$kiwi -> failed ();
 			if (! -d $main::RootTree.$baseSystem) {
 				qxx ("rm -rf $main::RootTree");
@@ -4337,6 +4389,29 @@ sub cleanKernelFSMount {
 	foreach my $system (@kfs) {
 		qxx ("umount $this->{imageDest}/$system 2>&1");
 	}
+}
+
+#==========================================
+# getMBRDiskLabel
+#------------------------------------------
+sub getMBRDiskLabel {
+	# ...
+	# create a random 4byte MBR disk label ID, used
+	# the isohybrid call as parameter
+	# ---
+	my $this  = shift;
+	my $range = 0xfe;
+	my @bytes;
+	undef $this->{mbrid};
+	for (my $i=0;$i<4;$i++) {
+		$bytes[$i] = 1 + int(rand($range));
+		redo if $bytes[0] <= 0xf;
+	}
+	my $nid = sprintf ("0x%02x%02x%02x%02x",
+		$bytes[0],$bytes[1],$bytes[2],$bytes[3]
+	);
+	$this->{mbrid} = $nid;
+	return $this;
 }
 
 1;

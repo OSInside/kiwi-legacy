@@ -991,6 +991,9 @@ function suseGFXBoot {
 	if [ ! -z "$kiwi_boottheme" ];then
 		theme=$kiwi_boottheme
 	fi
+	if [ ! -z "$kiwi_hybrid" ];then
+		loader="isolinux"
+	fi
 	#======================================
 	# setup bootloader data
 	#--------------------------------------

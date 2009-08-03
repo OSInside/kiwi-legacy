@@ -535,6 +535,32 @@ sub checkImage {
 }
 
 #==========================================
+# createHybrid
+#------------------------------------------
+sub createHybrid {
+	# ...
+	# create hybrid ISO by calling isohybrid
+	# ---
+	my $this = shift;
+	my $mbrid= shift;
+	my $kiwi = $this->{kiwi};
+	my $iso  = $this->{dest};
+	if (! -x "/usr/bin/isohybrid") {
+		$kiwi -> error  ("Can't find isohybrid, check your syslinux version");
+		$kiwi -> failed ();
+		return undef;
+	}
+	my $data = qxx ("isohybrid -id $mbrid -type 0x83 $iso 2>&1");
+	my $code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> error  ("Failed to call isohybrid: $data");
+		$kiwi -> failed ();
+		return undef;
+	}
+	return $this;
+}
+
+#==========================================
 # relocateCatalog
 #------------------------------------------
 sub relocateCatalog {

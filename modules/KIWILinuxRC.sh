@@ -1978,45 +1978,69 @@ function CDMount {
 	local silent=$1
 	local count=0
 	local cdopt
-	mkdir -p /cdrom && CDDevice $silent
-	if [ -z "$silent" ];then
-		Echo -n "Mounting live boot drive..."
+	mkdir -p /cdrom
+	if [ -f /.profile ];then
+		importFile < /.profile
 	fi
-	while true;do
-		IFS=":"; for i in $cddev;do
-			cdopt=$(CDMountOption $i)
-			if [ -x /usr/bin/driveready ];then
-				driveready $i && eval mount $cdopt $i /cdrom >/dev/null
-			else
-				eval mount $cdopt $i /cdrom >/dev/null
-			fi
-			if [ -f $LIVECD_CONFIG ];then
-				cddev=$i
-				if [ -z "$silent" ]; then
-					echo
-				fi
-				if [ "$mediacheck" = 1 ] && [ -z "$silent" ]; then
-					test -e /proc/splash && echo verbose > /proc/splash
-					checkmedia $cddev
-					Echo -n "Press ENTER for reboot: "; read nope
-					/sbin/reboot -f -i >/dev/null
-				fi
-				IFS=$IFS_ORIG
-				return
-			fi
-			umount $i &>/dev/null
-		done
-		IFS=$IFS_ORIG
-		if [ $count -eq 12 ]; then
-			break
-		else
-			if [ -z "$silent" ];then
-				echo -n .
-			fi
-			sleep 1
+	if [ -z "$kiwi_hybrid" ];then
+		#======================================
+		# search for CD/DVD devices
+		#--------------------------------------
+		CDDevice $silent
+		if [ -z "$silent" ];then
+			Echo -n "Mounting live boot drive..."
 		fi
-		count=`expr $count + 1`
-	done
+		while true;do
+			IFS=":"; for i in $cddev;do
+				cdopt=$(CDMountOption $i)
+				if [ -x /usr/bin/driveready ];then
+					driveready $i && eval mount $cdopt $i /cdrom >/dev/null
+				else
+					eval mount $cdopt $i /cdrom >/dev/null
+				fi
+				if [ -f $LIVECD_CONFIG ];then
+					cddev=$i
+					if [ -z "$silent" ]; then
+						echo
+					fi
+					if [ "$mediacheck" = 1 ] && [ -z "$silent" ]; then
+						test -e /proc/splash && echo verbose > /proc/splash
+						checkmedia $cddev
+						Echo -n "Press ENTER for reboot: "; read nope
+						/sbin/reboot -f -i >/dev/null
+					fi
+					IFS=$IFS_ORIG
+					return
+				fi
+				umount $i &>/dev/null
+			done
+			IFS=$IFS_ORIG
+			if [ $count -eq 12 ]; then
+				break
+			else
+				if [ -z "$silent" ];then
+					echo -n .
+				fi
+				sleep 1
+			fi
+			count=`expr $count + 1`
+		done
+	else
+		#======================================
+		# search for hybrid device
+		#--------------------------------------
+		if [ -z "$silent" ];then
+			Echo -n "Mounting hybrid live boot drive..."
+		fi
+		cddev=`searchBIOSBootDevice`
+		kiwiMount $cddev /cdrom
+		if [ -f $LIVECD_CONFIG ];then
+			if [ -z "$silent" ]; then
+				echo
+			fi
+			return
+		fi
+	fi
 	echo
 	systemException \
 		"Couldn't find Live image configuration file" \

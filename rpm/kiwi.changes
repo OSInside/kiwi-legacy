@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Mon Aug  3 14:30:02 CEST 2009 - ms@suse.de
+
+- v3.68
+- added support for hybrid ISO's. This feature exists with
+  openSUSE 11.2 or later. In order to use it add the attribute
+  hybrid="true" to your iso type line.
+
+-------------------------------------------------------------------
 Fri Jul 31 11:42:59 CEST 2009 - ms@suse.de
 
 - v3.67

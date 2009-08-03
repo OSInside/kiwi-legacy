@@ -350,6 +350,12 @@ sub new {
 		if (defined $foreignRepo->{"oem-recovery"}) {
 			$this -> setForeignOptionsElement ("oem-recovery");
 		}
+		#==========================================
+		# foreign attributes
+		#------------------------------------------
+		if (defined $foreignRepo->{"hybrid"}) {
+			$this -> setForeignTypeAttribute ("hybrid");
+		}
 	}
 	#==========================================
 	# Store object data
@@ -745,6 +751,7 @@ sub getImageTypeAndAttributes {
 		$record{boot}          = $node -> getAttribute("boot");
 		$record{volid}         = $node -> getAttribute("volid");
 		$record{flags}         = $node -> getAttribute("flags");
+		$record{hybrid}        = $node -> getAttribute("hybrid");
 		$record{format}        = $node -> getAttribute("format");
 		$record{vga}           = $node -> getAttribute("vga");
 		$record{bootloader}    = $node -> getAttribute("bootloader");
@@ -1122,6 +1129,31 @@ sub setForeignOptionsElement {
 	}
 	$opts -> appendChild ($addElement);
 	$kiwi -> done ();
+	return $this;
+}
+
+#==========================================
+# setForeignTypeAttribute
+#------------------------------------------
+sub setForeignTypeAttribute {
+	# ...
+	# set given attribute to all defined types in the
+	# xml preferences node
+	# ---
+	my $this = shift;
+	my $attr = shift;
+	my $kiwi = $this->{kiwi};
+	my @node = $this->{optionsNodeList} -> get_nodelist();
+	foreach my $element (@node) {
+		if (! $this -> requestedProfile ($element)) {
+			next;
+		}
+		$kiwi -> info ("Including foreign type attribute: $attr");
+		foreach my $tag ($element -> getElementsByTagName ("type")) {
+			$tag -> setAttribute ("$attr","true");
+		}
+		$kiwi -> done ();
+	}
 	return $this;
 }
 
@@ -2096,6 +2128,9 @@ sub getImageConfig {
 	}
 	if ((%type) && ($type{luks})) {
 		$result{kiwi_luks} = "yes";
+	}
+	if ((%type) && ($type{hybrid})) {
+		$result{kiwi_hybrid} = "yes";
 	}
 	if ($size) {
 		$result{kiwi_size} = $size;
