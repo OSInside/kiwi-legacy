@@ -2033,13 +2033,21 @@ function CDMount {
 			Echo -n "Mounting hybrid live boot drive..."
 		fi
 		cddev=`searchBIOSBootDevice`
+		cddev=$cddev"1"
 		kiwiMount $cddev /cdrom
 		if [ -f $LIVECD_CONFIG ];then
 			if [ -z "$silent" ]; then
 				echo
 			fi
+			if [ "$mediacheck" = 1 ] && [ -z "$silent" ]; then
+				test -e /proc/splash && echo verbose > /proc/splash
+				checkmedia $cddev
+				Echo -n "Press ENTER for reboot: "; read nope
+				/sbin/reboot -f -i >/dev/null
+			fi
 			return
 		fi
+		umount $cddev &>/dev/null
 	fi
 	echo
 	systemException \
