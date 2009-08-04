@@ -3397,7 +3397,7 @@ function mountSystemClicFS {
 	else
 		haveBytes=`blockdev --getsize64 $rwDevice`
 		haveMByte=`expr $haveBytes / 1024 / 1024`
-		clic_cmd="$clic_cmd -m $haveMByte -c $rwDevice"
+		clic_cmd="$clic_cmd -m $haveMByte -c $rwDevice --ignore-cow-errors"
 	fi
 	#======================================
 	# mount/check clic file
