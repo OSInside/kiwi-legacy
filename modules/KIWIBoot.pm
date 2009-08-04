@@ -1510,6 +1510,7 @@ sub setupInstallCD {
 		}
 		main::umount();
 		$status = qxx ("/sbin/kpartx  -d $this->{loop} 2>&1");
+		sleep (1);
 		$status = qxx ("/sbin/losetup -d $this->{loop} 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
@@ -1778,6 +1779,7 @@ sub setupInstallStick {
 		}
 		main::umount();
 		$status = qxx ("/sbin/kpartx  -d $this->{loop} 2>&1");
+		sleep (1);
 		$status = qxx ("/sbin/losetup -d $this->{loop} 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
@@ -2455,6 +2457,7 @@ sub setupBootDisk {
 				sleep (1);
 				$this -> deleteVolumeGroup();
 				qxx ("/sbin/kpartx  -d $this->{loop}");
+				sleep (1);
 				qxx ("/sbin/losetup -d $this->{loop}");
 			} else {
 				#==========================================
@@ -3265,6 +3268,7 @@ sub cleanLoop {
 			qxx ("vgchange -an 2>&1");
 		}
 		qxx ("/sbin/kpartx  -d $loop 2>&1");
+		sleep (1);
 		qxx ("/sbin/losetup -d $loop 2>&1");
 		undef $this->{loop};
 	}
