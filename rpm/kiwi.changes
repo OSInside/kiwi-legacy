@@ -2,8 +2,8 @@
 Mon Aug  3 14:30:02 CEST 2009 - ms@suse.de
 
 - v3.68
-- add a sleep of one second between kpartx -d and losetup -d
-- wait for process to finish when sending interrupt signal (bnc #525986)
+- use dmsetup remove instead of kpartx -d
+- wait for process to finish when sending int signal (bnc #525986)
 - added support for hybrid ISO's. This feature exists with
   openSUSE 11.2 or later. In order to use it add the attribute
   hybrid="true" to your iso type line. If you use the iso on

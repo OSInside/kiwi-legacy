@@ -229,8 +229,7 @@ sub new {
 				# clean up
 				#------------------------------------------
 				main::umount();
-				qxx ("kpartx -d $this->{loop}");
-				sleep (1);
+				$this -> cleanLoopMaps();
 				qxx ("losetup -d $this->{loop}");
 			} else {
 				#==========================================
@@ -1509,8 +1508,7 @@ sub setupInstallCD {
 			$imgtype = "split";
 		}
 		main::umount();
-		$status = qxx ("/sbin/kpartx  -d $this->{loop} 2>&1");
-		sleep (1);
+		$this -> cleanLoopMaps();
 		$status = qxx ("/sbin/losetup -d $this->{loop} 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
@@ -1778,8 +1776,7 @@ sub setupInstallStick {
 			$imgtype = "split";
 		}
 		main::umount();
-		$status = qxx ("/sbin/kpartx  -d $this->{loop} 2>&1");
-		sleep (1);
+		$this -> cleanLoopMaps();
 		$status = qxx ("/sbin/losetup -d $this->{loop} 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
@@ -2034,7 +2031,7 @@ sub setupInstallStick {
 	#==========================================
 	# cleanup device maps and part mount
 	#------------------------------------------
-	qxx ( "/sbin/kpartx -d $this->{loop}" );
+	$this -> cleanLoopMaps();
 	#==========================================
 	# Install boot loader on virtual disk
 	#------------------------------------------
@@ -2456,8 +2453,7 @@ sub setupBootDisk {
 				#------------------------------------------
 				sleep (1);
 				$this -> deleteVolumeGroup();
-				qxx ("/sbin/kpartx  -d $this->{loop}");
-				sleep (1);
+				$this -> cleanLoopMaps();
 				qxx ("/sbin/losetup -d $this->{loop}");
 			} else {
 				#==========================================
@@ -2813,7 +2809,7 @@ sub setupBootDisk {
 	if ($lvm) {
 		qxx ("vgchange -an 2>&1");
 	}
-	qxx ("/sbin/kpartx -d $this->{loop}");
+	$this -> cleanLoopMaps();
 	#==========================================
 	# Install boot loader on virtual disk
 	#------------------------------------------
@@ -3267,13 +3263,29 @@ sub cleanLoop {
 		if ($this->{lvm}) {
 			qxx ("vgchange -an 2>&1");
 		}
-		qxx ("/sbin/kpartx  -d $loop 2>&1");
-		sleep (1);
+		$this -> cleanLoopMaps();
 		qxx ("/sbin/losetup -d $loop 2>&1");
 		undef $this->{loop};
 	}
 	qxx ("rm -rf $tmpdir");
 	qxx ("rm -rf $loopdir");
+	return $this;
+}
+
+#==========================================
+# cleanLoopMaps
+#------------------------------------------
+sub cleanLoopMaps {
+	my $this = shift;
+	my $dev  = shift;
+	my $loop = $this->{loop};
+	if ($dev) {
+		$loop = $dev;
+	}
+	if ($loop =~ /dev\/(.*)/) {
+		$loop = $1;
+	}
+	qxx ("dmsetup remove /dev/mapper/$loop* 2>&1");
 	return $this;
 }
 
@@ -3943,7 +3955,7 @@ sub installBootLoader {
 		$status = qxx ("syslinux $device 2>&1");
 		$result = $? >> 8;
 		if ($device =~ /mapper/) {
-			qxx ("kpartx -d $diskname");
+			$this -> cleanLoopMaps ($diskname);
 		}
 		if ($result != 0) {
 			$kiwi -> failed ();
