@@ -116,7 +116,10 @@ probeDevices
 #--------------------------------------
 Echo "Searching for boot device..."
 if [ "$LOCAL_BOOT" = "no" ];then
-	export imageDiskDevice=`searchBIOSBootDevice`
+	if ! searchBIOSBootDevice;then
+		systemException "$biosBootDevice" "reboot"
+	fi
+	export imageDiskDevice=$biosBootDevice
 else
 	export imageDiskDevice=`getDiskDevice $root | tr -d [0-9]+`
 fi

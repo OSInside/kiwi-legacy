@@ -230,6 +230,7 @@ sub new {
 				#------------------------------------------
 				main::umount();
 				qxx ("kpartx -d $this->{loop}");
+				sleep (1);
 				qxx ("losetup -d $this->{loop}");
 			} else {
 				#==========================================

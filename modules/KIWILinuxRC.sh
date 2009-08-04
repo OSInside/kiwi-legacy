@@ -1977,11 +1977,26 @@ function CDMount {
 	# ----
 	local silent=$1
 	local count=0
+	local ecode=0
 	local cdopt
 	mkdir -p /cdrom
 	if [ -f /.profile ];then
 		importFile < /.profile
 	fi
+	#======================================
+	# check for hybrid mbr ID
+	#--------------------------------------
+	searchBIOSBootDevice
+	ecode=$?
+	if [ ! $ecode = 0 ];then
+		if [ $ecode = 2 ];then
+			systemException "$biosBootDevice" "reboot"
+		fi
+		unset kiwi_hybrid
+	fi
+	#======================================
+	# walk through media
+	#--------------------------------------
 	if [ -z "$kiwi_hybrid" ];then
 		#======================================
 		# search for CD/DVD devices
@@ -2003,12 +2018,18 @@ function CDMount {
 					if [ -z "$silent" ]; then
 						echo
 					fi
+					#======================================
+					# run mediacheck if requested and boot
+					#--------------------------------------
 					if [ "$mediacheck" = 1 ] && [ -z "$silent" ]; then
 						test -e /proc/splash && echo verbose > /proc/splash
 						checkmedia $cddev
 						Echo -n "Press ENTER for reboot: "; read nope
 						/sbin/reboot -f -i >/dev/null
 					fi
+					#======================================
+					# device found go with it
+					#--------------------------------------
 					IFS=$IFS_ORIG
 					return
 				fi
@@ -2032,19 +2053,34 @@ function CDMount {
 		if [ -z "$silent" ];then
 			Echo -n "Mounting hybrid live boot drive..."
 		fi
-		cddev=`searchBIOSBootDevice`
-		cddev=$cddev"1"
+		cddev=$biosBootDevice"1"
 		kiwiMount $cddev /cdrom
 		if [ -f $LIVECD_CONFIG ];then
 			if [ -z "$silent" ]; then
 				echo
 			fi
+			#======================================
+			# run mediacheck if requested and boot
+			#--------------------------------------
 			if [ "$mediacheck" = 1 ] && [ -z "$silent" ]; then
 				test -e /proc/splash && echo verbose > /proc/splash
 				checkmedia $cddev
 				Echo -n "Press ENTER for reboot: "; read nope
 				/sbin/reboot -f -i >/dev/null
 			fi
+			#======================================
+			# search hybrid for a write partition
+			#--------------------------------------
+			for disknr in 2 3 4;do
+				id=`partitionID $biosBootDevice $disknr`
+				if [ "$id" = "83" ];then
+					export HYBRID_RW=$biosBootDevice$disknr
+					break
+				fi
+			done
+			#======================================
+			# device found go with it
+			#--------------------------------------
 			return
 		fi
 		umount $cddev &>/dev/null
@@ -2106,8 +2142,8 @@ function searchBIOSBootDevice {
 		CDMount silent
 		umount $cddev
 		curd=$cddev
-		echo $curd
-		return
+		export biosBootDevice=$curd
+		return 0
 	fi
 	#======================================
 	# Search and copy all mbrid files 
@@ -2132,9 +2168,8 @@ function searchBIOSBootDevice {
 	#--------------------------------------
 	file=$(ls -1t $cmpd 2>/dev/null | head -n 1)
 	if [ -z "$file" ];then
-		systemException \
-			"Failed to find MBR identifier !" \
-		"reboot"
+		export biosBootDevice="Failed to find MBR identifier !"
+		return 1
 	fi
 	read mbrI < $cmpd/$file
 	#======================================
@@ -2147,16 +2182,17 @@ function searchBIOSBootDevice {
 			ifix=1
 			matched=$curd
 			if [ "$curd" = "$bios" ];then
-				echo $curd; return
+				export biosBootDevice=$curd
+				return 0
 			fi
 		fi
 	done
 	if [ $ifix -eq 1 ];then
-		echo $matched; return
+		export biosBootDevice=$matched
+		return 0
 	fi
-	systemException \
-		"No devices matches MBR identifier: $mbrI !" \
-	"reboot"
+	export biosBootDevice="No devices matches MBR identifier: $mbrI !"
+	return 2
 }
 #======================================
 # searchVolumeGroup
@@ -3361,7 +3397,7 @@ function mountSystemClicFS {
 	else
 		haveBytes=`blockdev --getsize64 $rwDevice`
 		haveMByte=`expr $haveBytes / 1024 / 1024`
-		clic_cmd="$clic_cmd -m $haveMByte -c $rwDevice  --ignore-cow-errors"
+		clic_cmd="$clic_cmd -m $haveMByte -c $rwDevice"
 	fi
 	#======================================
 	# mount/check clic file

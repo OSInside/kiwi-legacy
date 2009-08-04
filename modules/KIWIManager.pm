@@ -890,6 +890,7 @@ sub setupDownload {
 		# Create screen call file
 		#------------------------------------------
 		print $fd "function clean { kill \$SPID; ";
+		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;done;";
 		print $fd "rm -f $root/etc/smart/channels/*; ";
 		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 		print $fd "trap clean INT TERM\n";
@@ -967,6 +968,7 @@ sub installPackages {
 		#------------------------------------------
 		$kiwi -> info ("Installing addon packages...");
 		print $fd "function clean { kill \$SPID;";
+		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;done;";
 		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 		print $fd "trap clean INT TERM\n";
 		print $fd "@kchroot @smart update &\n";
@@ -993,6 +995,7 @@ sub installPackages {
 			"--auto-agree-with-licenses"
 		);
 		print $fd "function clean { kill \$SPID;";
+		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;done;";
 		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 		print $fd "trap clean INT TERM\n";
 		print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
@@ -1014,6 +1017,7 @@ sub installPackages {
 	if ($manager eq "ensconce") {
 		$kiwi -> info ("Installing addon packages...");
 		print $fd "function clean { kill \$SPID; ";
+		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;done;";
 		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 		print $fd "trap clean INT TERM\n";
 		print $fd "$main::Prepare/ensconce &\n";
@@ -1070,6 +1074,7 @@ sub removePackages {
 		#------------------------------------------
 		$kiwi -> info ("Removing addon packages...");
 		print $fd "function clean { kill \$SPID;";
+		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;done;";
 		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 		print $fd "trap clean INT TERM\n";
 		print $fd "@kchroot @smart update &\n";
@@ -1096,6 +1101,7 @@ sub removePackages {
 			"--force-resolution"
 		);
 		print $fd "function clean { kill \$SPID;";
+		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;done;";
 		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 		print $fd "trap clean INT TERM\n";
 		print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
@@ -1117,6 +1123,7 @@ sub removePackages {
 	if ($manager eq "ensconce") {
 		$kiwi -> info ("Installing addon packages...");
 		print $fd "function clean { kill \$SPID; ";
+		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;done;";
 		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 		print $fd "trap clean INT TERM\n";
 		print $fd "$main::Prepare/ensconce &\n";
@@ -1173,6 +1180,7 @@ sub setupUpgrade {
 		#------------------------------------------
 		$kiwi -> info ("Upgrading image...");
 		print $fd "function clean { kill \$SPID;";
+		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;done;";
 		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 		print $fd "trap clean INT TERM\n";
 		print $fd "@kchroot @smart update &\n";
@@ -1225,6 +1233,7 @@ sub setupUpgrade {
 			push (@installOpts,"--no-recommends");
 		}
 		print $fd "function clean { kill \$SPID;";
+		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;done;";
 		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 		print $fd "trap clean INT TERM\n";
 		print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
@@ -1406,6 +1415,7 @@ sub setupArchives {
 	# Create screen call file
 	#------------------------------------------
 	print $fd "function clean { kill \$SPID;";
+	print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;done;";
 	print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 	print $fd "trap clean INT TERM\n";
 	print $fd "for i in @tars;do\n";
@@ -1477,6 +1487,7 @@ sub setupRootSystem {
 			# Create screen call file
 			#------------------------------------------
 			print $fd "function clean { kill \$SPID;";
+			print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;done;";
 			print $fd "rm -f $root/etc/smart/channels/*; ";
 			print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 			print $fd "trap clean INT TERM\n";
@@ -1511,6 +1522,7 @@ sub setupRootSystem {
 			#------------------------------------------
 			$kiwi -> info ("Installing image packages...");
 			print $fd "function clean { kill \$SPID;";
+			print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;done;";
 			print $fd "echo 1 > $screenCall.exit;exit 1; }\n";
 			print $fd "trap clean INT TERM\n";
 			print $fd "@kchroot @smart update &\n";
@@ -1571,6 +1583,7 @@ sub setupRootSystem {
 			#------------------------------------------
 			mkdir "$root/tmp";
 			print $fd "function clean { kill \$SPID;";
+			print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;done;";
 			print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 			print $fd "trap clean INT TERM\n";
 			print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
@@ -1637,6 +1650,7 @@ sub setupRootSystem {
 			#------------------------------------------
 			$kiwi -> info ("Installing image packages...");
 			print $fd "function clean { kill \$SPID;";
+			print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;done;";
 			print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 			print $fd "trap clean INT TERM\n";
 			print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
@@ -1682,6 +1696,7 @@ sub setupRootSystem {
 		} 
 		$kiwi -> info ("Installing bootstrap packages...");
 		print $fd "function clean { kill \$SPID; ";
+		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;done;";
 		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 		print $fd "trap clean INT TERM\n";
 		print $fd "$main::Prepare/ensconce $ensconce_args &\n";
