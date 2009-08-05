@@ -893,6 +893,7 @@ sub setupDownload {
 		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;";
 		print $fd "if [ \"\$c\" = 5 ];then kill \$SPID;break;fi;"; 
 		print $fd "c=\$((\$c+1));done;\n";
+		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;done\n";
 		print $fd "rm -f $root/etc/smart/channels/*; ";
 		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 		print $fd "trap clean INT TERM\n";
@@ -973,6 +974,7 @@ sub installPackages {
 		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;";
 		print $fd "if [ \"\$c\" = 5 ];then kill \$SPID;break;fi;"; 
 		print $fd "c=\$((\$c+1));done;\n";
+		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;done\n";
 		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 		print $fd "trap clean INT TERM\n";
 		print $fd "@kchroot @smart update &\n";
@@ -1002,6 +1004,7 @@ sub installPackages {
 		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;";
 		print $fd "if [ \"\$c\" = 5 ];then kill \$SPID;break;fi;"; 
 		print $fd "c=\$((\$c+1));done;\n";
+		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;done\n";
 		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 		print $fd "trap clean INT TERM\n";
 		print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
@@ -1026,6 +1029,7 @@ sub installPackages {
 		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;";
 		print $fd "if [ \"\$c\" = 5 ];then kill \$SPID;break;fi;"; 
 		print $fd "c=\$((\$c+1));done;\n";
+		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;done\n";
 		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 		print $fd "trap clean INT TERM\n";
 		print $fd "$main::Prepare/ensconce &\n";
@@ -1085,6 +1089,7 @@ sub removePackages {
 		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;";
 		print $fd "if [ \"\$c\" = 5 ];then kill \$SPID;break;fi;"; 
 		print $fd "c=\$((\$c+1));done;\n";
+		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;done\n";
 		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 		print $fd "trap clean INT TERM\n";
 		print $fd "@kchroot @smart update &\n";
@@ -1114,6 +1119,7 @@ sub removePackages {
 		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;";
 		print $fd "if [ \"\$c\" = 5 ];then kill \$SPID;break;fi;"; 
 		print $fd "c=\$((\$c+1));done;\n";
+		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;done\n";
 		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 		print $fd "trap clean INT TERM\n";
 		print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
@@ -1138,6 +1144,7 @@ sub removePackages {
 		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;";
 		print $fd "if [ \"\$c\" = 5 ];then kill \$SPID;break;fi;"; 
 		print $fd "c=\$((\$c+1));done;\n";
+		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;done\n";
 		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 		print $fd "trap clean INT TERM\n";
 		print $fd "$main::Prepare/ensconce &\n";
@@ -1197,6 +1204,7 @@ sub setupUpgrade {
 		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;";
 		print $fd "if [ \"\$c\" = 5 ];then kill \$SPID;break;fi;";
 		print $fd "c=\$((\$c+1));done;\n";
+		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;done\n";
 		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 		print $fd "trap clean INT TERM\n";
 		print $fd "@kchroot @smart update &\n";
@@ -1252,6 +1260,7 @@ sub setupUpgrade {
 		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;";
 		print $fd "if [ \"\$c\" = 5 ];then kill \$SPID;break;fi;"; 
 		print $fd "c=\$((\$c+1));done;\n";
+		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;done\n";
 		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 		print $fd "trap clean INT TERM\n";
 		print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
@@ -1436,6 +1445,7 @@ sub setupArchives {
 	print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;";
 	print $fd "if [ \"\$c\" = 5 ];then kill \$SPID;break;fi;"; 
 	print $fd "c=\$((\$c+1));done;\n";
+	print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;done\n";
 	print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 	print $fd "trap clean INT TERM\n";
 	print $fd "for i in @tars;do\n";
@@ -1510,6 +1520,7 @@ sub setupRootSystem {
 			print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;";
 			print $fd "if [ \"\$c\" = 5 ];then kill \$SPID;break;fi;"; 
 			print $fd "c=\$((\$c+1));done;\n";
+			print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;done\n";
 			print $fd "rm -f $root/etc/smart/channels/*; ";
 			print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 			print $fd "trap clean INT TERM\n";
@@ -1547,6 +1558,7 @@ sub setupRootSystem {
 			print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;";
 			print $fd "if [ \"\$c\" = 5 ];then kill \$SPID;break;fi;"; 
 			print $fd "c=\$((\$c+1));done;\n";
+			print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;done\n";
 			print $fd "echo 1 > $screenCall.exit;exit 1; }\n";
 			print $fd "trap clean INT TERM\n";
 			print $fd "@kchroot @smart update &\n";
@@ -1610,6 +1622,7 @@ sub setupRootSystem {
 			print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;";
 			print $fd "if [ \"\$c\" = 5 ];then kill \$SPID;break;fi;"; 
 			print $fd "c=\$((\$c+1));done;\n";
+			print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;done\n";
 			print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 			print $fd "trap clean INT TERM\n";
 			print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
@@ -1679,6 +1692,7 @@ sub setupRootSystem {
 			print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;";
 			print $fd "if [ \"\$c\" = 5 ];then kill \$SPID;break;fi;"; 
 			print $fd "c=\$((\$c+1));done;\n";
+			print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;done\n";
 			print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 			print $fd "trap clean INT TERM\n";
 			print $fd "export ZYPP_MODALIAS_SYSFS=/tmp\n";
@@ -1727,6 +1741,7 @@ sub setupRootSystem {
 		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;";
 		print $fd "if [ \"\$c\" = 5 ];then kill \$SPID;break;fi;"; 
 		print $fd "c=\$((\$c+1));done;\n";
+		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;done\n";
 		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 		print $fd "trap clean INT TERM\n";
 		print $fd "$main::Prepare/ensconce $ensconce_args &\n";
