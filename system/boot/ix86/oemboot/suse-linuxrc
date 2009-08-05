@@ -438,7 +438,7 @@ if [ "$LOCAL_BOOT" = "no" ]; then
 			bootid=2
 		fi
 		mount $imageBootDevice /mnt/luksboot
-		cp -a -L /mnt/boot /mnt/luksboot
+		cp -a /mnt/boot /mnt/luksboot
 		test -f /tmp/linux.vmx  && mv /tmp/linux.vmx  /mnt/luksboot/boot
 		test -f /tmp/initrd.vmx && mv /tmp/initrd.vmx /mnt/luksboot/boot
 		test -f /tmp/mbrid && mv /tmp/mbrid /mnt/luksboot/boot/grub

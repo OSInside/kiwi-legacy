@@ -110,7 +110,7 @@ function OEMRepartStandard {
 	# will be used. size is whole disk minus swap
 	# minus recovery
 	# ----
-	if [ ! -z "$OEM_WITHOUTHOME" ];then
+	if [ ! -z "$OEM_WITHOUTHOME" ] && [ -z "$OEM_SYSTEMSIZE" ];then
 		disk1MBytes=`expr $diskXMBytes - $swapsize - $recoMByte`
 	fi
 	# /.../
@@ -619,6 +619,12 @@ function OEMRepartLuks {
 	if ! isFSTypeReadOnly;then
 		disk1MBytes=`expr $diskXMBytes - $swapsize - $bootXMBytes`
 		disk2MBytes=$disk1MBytes
+	fi
+	if [ ! -z "$OEM_SYSTEMSIZE" ];then
+		if ! isFSTypeReadOnly && [ $OEM_SYSTEMSIZE -lt $disk1MBytes ];then
+			disk1MBytes=$OEM_SYSTEMSIZE
+			disk2MBytes=$disk1MBytes
+		fi
 	fi
 	if [ $disk2MBytes -lt 100 ];then
 		# /.../
