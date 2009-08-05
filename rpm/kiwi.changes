@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Wed Aug  5 17:20:55 CEST 2009 - ms@suse.de
+
+- v3.69
+- changed oem-repart to allow oem-systemsize even if no home and
+  no swap partition was requested. by default the entire disk space
+  is used but if a oem-systemsize is set this value will be used
+  and therefore allows to have some space left on the disk
+- fixed loop cleanup
+
+-------------------------------------------------------------------
 Mon Aug  3 14:30:02 CEST 2009 - ms@suse.de
 
 - v3.68

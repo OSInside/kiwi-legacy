@@ -3285,7 +3285,9 @@ sub cleanLoopMaps {
 	if ($loop =~ /dev\/(.*)/) {
 		$loop = $1;
 	}
-	qxx ("dmsetup remove /dev/mapper/$loop* 2>&1");
+	foreach my $d (glob ("/dev/mapper/$loop*")) {
+		qxx ("dmsetup remove $d 2>&1");
+	}
 	return $this;
 }
 

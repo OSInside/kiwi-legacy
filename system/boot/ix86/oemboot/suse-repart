@@ -163,8 +163,13 @@ function OEMRepartStandard {
 					#======================================
 					# -home -swap -recovery
 					#--------------------------------------
-					createFDiskInput \
-						d n p 2 . . w q
+					if [ ! -z "$OEM_SYSTEMSIZE" ];then
+						createFDiskInput \
+							d n p 2 . +"$disk1MBytes"M w q
+					else
+						createFDiskInput \
+							d n p 2 . . w q
+					fi
 				else
 					#======================================
 					# -home -swap +recovery
