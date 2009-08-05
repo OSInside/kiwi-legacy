@@ -141,19 +141,34 @@ function OEMRepartStandard {
 					#======================================
 					# -home +swap -recovery
 					#--------------------------------------
-					createFDiskInput \
-						d n p 2 1 +"$disk1MBytes"M \
-						n p 1 . . \
-						t 1 82 w q
+					if [ ! -z "$OEM_SYSTEMSIZE" ];then
+						createFDiskInput \
+							d n p 2 1 +"$disk1MBytes"M \
+							n p 1 . +"$swapsize"M \
+							t 1 82 w q
+					else
+						createFDiskInput \
+							d n p 2 1 +"$disk1MBytes"M \
+							n p 1 . . \
+							t 1 82 w q
+					fi
 				else
 					#======================================
 					# -home +swap +recovery
 					#--------------------------------------
-					createFDiskInput \
-						d n p 2 1 +"$disk1MBytes"M \
-						n p 4 . +"$recoMByte"M \
-						n p 1 . . \
-						t 1 82 w q
+					if [ ! -z "$OEM_SYSTEMSIZE" ];then
+						createFDiskInput \
+							d n p 2 1 +"$disk1MBytes"M \
+							n p 4 . +"$recoMByte"M \
+							n p 1 . +"$swapsize"M \
+							t 1 82 w q
+					else
+						createFDiskInput \
+							d n p 2 1 +"$disk1MBytes"M \
+							n p 4 . +"$recoMByte"M \
+							n p 1 . . \
+							t 1 82 w q
+					fi
 				fi
 			else
 				#======================================
@@ -174,9 +189,15 @@ function OEMRepartStandard {
 					#======================================
 					# -home -swap +recovery
 					#--------------------------------------
-					createFDiskInput \
-						d n p 2 1 +"$disk1MBytes"M \
-						n p 4 . .  w q
+					if [ ! -z "$OEM_SYSTEMSIZE" ];then
+						createFDiskInput \
+							d n p 2 1 +"$disk1MBytes"M \
+							n p 4 . +"$recoMByte"M w q
+					else
+						createFDiskInput \
+							d n p 2 1 +"$disk1MBytes"M \
+							n p 4 . . w q
+					fi
 				fi
 			fi
 		else
@@ -671,8 +692,14 @@ function OEMRepartLuks {
 				createFDiskInput \
 					d 2 d 3 n p 2 . +"$disk2MBytes"M n p 3 . . w q
 			else
-				createFDiskInput \
-					d 2 d n p 1 . +"$disk1MBytes"M n p 2 . . w q
+				if [ ! -z "$OEM_SYSTEMSIZE" ];then
+					createFDiskInput \
+						d 2 d n p 1 . +"$disk1MBytes"M \
+						n p 2 . +"$bootXMBytes"M w q
+				else
+					createFDiskInput \
+						d 2 d n p 1 . +"$disk1MBytes"M n p 2 . . w q
+				fi
 			fi
 		else
 			if isFSTypeReadOnly;then
@@ -682,11 +709,19 @@ function OEMRepartLuks {
 					n p 4 . . \
 					t 4 82 w q
 			else
-				createFDiskInput \
-					d 2 d n p 1 . +"$disk1MBytes"M \
-					n p 2 . +"$bootXMBytes"M \
-					n p 3 . . \
-					t 3 82 w q
+				if [ ! -z "$OEM_SYSTEMSIZE" ];then
+					createFDiskInput \
+						d 2 d n p 1 . +"$disk1MBytes"M \
+						n p 2 . +"$bootXMBytes"M \
+						n p 3 . +"$swapsize"M \
+						t 3 82 w q
+				else
+					createFDiskInput \
+						d 2 d n p 1 . +"$disk1MBytes"M \
+						n p 2 . +"$bootXMBytes"M \
+						n p 3 . . \
+						t 3 82 w q
+				fi
 			fi
 		fi
 		luksClose
