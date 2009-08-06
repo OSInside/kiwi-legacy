@@ -336,6 +336,7 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 	if [ ! $? = 0 ];then
 		systemException "System-Recovery not started" "reboot"
 	fi
+	clear
 	Echo "Starting System-Recovery..."
 	#======================================
 	# 16.1) mount recovery partition
