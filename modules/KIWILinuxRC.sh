@@ -1757,7 +1757,8 @@ function probeUSB {
 			modprobe $i &>/dev/null
 		done
 	fi
-	if lsmod | grep -q usbcore;then
+	stdevs=$(ls -1 /sys/bus/usb/devices/ | wc -l)
+	if [ $stdevs -gt 0 ];then
 		export HAVE_USB="yes"
 	fi
 	waitForUSBDeviceScan

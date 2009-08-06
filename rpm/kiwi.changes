@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Aug  6 15:15:53 CEST 2009 - ms@suse.de
+
+- v3.70
+- fixed HAVE_USB check, usbcore is no longer a module
+- added edd module to be present in isoboot
+
+-------------------------------------------------------------------
 Wed Aug  5 17:20:55 CEST 2009 - ms@suse.de
 
 - v3.69

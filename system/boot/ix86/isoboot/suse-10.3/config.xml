@@ -56,6 +56,7 @@
 		<file name="drivers/message/fusion/*"/>
 		<file name="drivers/ata/*"/>
 		<file name="drivers/parport/*"/>
+		<file name="drivers/firmware/edd.ko"/>
 	</drivers>
 	<drivers type="drivers" profiles="xen">
 		<file name="drivers/xen/*"/>

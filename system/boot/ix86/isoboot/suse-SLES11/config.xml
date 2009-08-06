@@ -59,6 +59,7 @@
 		<file name="drivers/ata/*"/>
 		<file name="drivers/parport/*"/>
 		<file name="drivers/acpi/dock.ko"/>
+		<file name="drivers/firmware/edd.ko"/>
 	</drivers>
 	<drivers type="drivers" profiles="xen">
 		<file name="drivers/xen/*"/>
