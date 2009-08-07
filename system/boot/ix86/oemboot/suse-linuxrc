@@ -348,17 +348,24 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 	#======================================
 	# 16.2) restore root archive
 	#--------------------------------------
-	Echo "Restoring base operating system..."
-	cd /mnt
-	rFiles=$(cat /reco-save/recovery.tar.files)
-	tar --numeric-owner -xvpf /reco-save/recovery.tar.gz >/tmp/rFiles &
-	rPID=$!
-	while kill -0 $rPID &>/dev/null;do
-		rReady=$(cat /tmp/rFiles | wc -l)
-		Echo -e -n "$rReady files from $rFiles restored...\r"
-		sleep 1
-	done
-	echo
+	mkfifo /progress && cd /mnt && cp /usr/bin/tail /usr/bin/mst
+	(
+		rFiles=$(cat /reco-save/recovery.tar.files)
+		tar --numeric-owner -xvpf /reco-save/recovery.tar.gz >/tmp/rFiles &
+		rPID=$!
+		while kill -0 $rPID &>/dev/null;do
+			rReady=$(cat /tmp/rFiles | wc -l)
+			#Echo -e -n "$rReady files from $rFiles restored...\r"
+			echo "$rReady files from $rFiles restored..." > /progress
+			sleep 1
+		done
+		dPID=$(pidof mst)
+		kill $dPID
+	)&
+	mst -f /progress | dialog \
+		--backtitle "Restoring base operating system..." \
+		--progressbox 3 50
+	clear
 	#======================================
 	# 16.3) restore boot files
 	#--------------------------------------
