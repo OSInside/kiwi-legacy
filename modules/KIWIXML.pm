@@ -2775,20 +2775,10 @@ sub getInstallSize {
 			}
 		}
 		#==========================================
-		# Handle pattern/product names
+		# Handle pattern names
 		#------------------------------------------
 		my @pattlist = ();
-		my @slist = $node -> getElementsByTagName ("opensuseProduct");
-		foreach my $element (@slist) {
-			if (! $this -> isArchAllowed ($element,"packages")) {
-				next;
-			}
-			my $product = $element -> getAttribute ("name");
-			if ($product) {
-				push @result,"product:".$product;
-			}
-		}
-		@slist = $node -> getElementsByTagName ("opensusePattern");
+		my @slist = $node -> getElementsByTagName ("opensusePattern");
 		foreach my $element (@slist) {
 			if (! $this -> isArchAllowed ($element,"packages")) {
 				next;
@@ -2809,7 +2799,8 @@ sub getInstallSize {
 	}
 	my %meta = $psolve -> getMetaData();
 	my $solf = $psolve -> getSolfile();
-	return (\%meta,\@delete,$solf,\@result);
+	my @solp = $psolve -> getPackages();
+	return (\%meta,\@delete,$solf,\@result,\@solp);
 }
 
 #==========================================

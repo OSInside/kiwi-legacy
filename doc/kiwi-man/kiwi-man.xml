@@ -259,7 +259,7 @@
       <arg choice="plain"><replaceable>ImagePath</replaceable></arg>
       <arg choice="req">--select
       <replaceable>
-		repo-patterns|patterns|types|sources|size|profiles
+		repo-patterns|patterns|types|sources|size|profiles|packages
 	  </replaceable></arg>
     </cmdsynopsis>
     <cmdsynopsis>
@@ -305,7 +305,7 @@
 			with <replaceable>types</replaceable>, a list of source URL's with
 			<replaceable>sources</replaceable>, an estimation about the install size and
 			the size of the packages marked as to be deleted with <replaceable>size</replaceable>,
-			and a list of profiles with <replaceable>profiles</replaceable>.
+			a list of profiles with <replaceable>profiles</replaceable>, and a list of solved packages to become installed with <replaceable>packages</replaceable>.
 		</para>
 		</listitem>
 	</varlistentry>
