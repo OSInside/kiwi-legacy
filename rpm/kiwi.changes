@@ -2,6 +2,7 @@
 Thu Aug  6 15:15:53 CEST 2009 - ms@suse.de
 
 - v3.70
+- fixed evaluation of MKCLICFS_COMPRESSION (bnc #528743)
 - clear screen after dialog window disappears (bnc #510041)
 - fixed HAVE_USB check, usbcore is no longer a module
 - added edd module to be present in isoboot
