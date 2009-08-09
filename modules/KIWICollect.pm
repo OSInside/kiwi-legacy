@@ -1662,18 +1662,20 @@ sub createMetadata
   my $beta_version = $this->{m_proddata}->getOpt("BETA_VERSION");
   if (defined($beta_version)) {
     my $dist_string = $this->{m_proddata}->getVar("DISTNAME")." ".$this->{m_proddata}->getVar("PRODUCT_VERSION")." ".${beta_version};
-    if (system("sed","-i","s/BETA_DIST_VERSION/$dist_string/","$this->{m_basesubdir}->{'1'}/README.BETA") == 0 ) {
-      if (system("ln", "-sf", "../README.BETA", "$this->{m_basesubdir}->{'1'}/media.1/info.txt") != 0 ) {
-        $this->logMsg("W", "Failed to symlink README.BETA file!");
-      };
+    if ( -e "$this->{m_basesubdir}->{'1'}/README.BETA" ) {
+      if (system("sed","-i","s/BETA_DIST_VERSION/$dist_string/","$this->{m_basesubdir}->{'1'}/README.BETA") == 0 ) {
+        if (system("ln", "-sf", "../README.BETA", "$this->{m_basesubdir}->{'1'}/media.1/info.txt") != 0 ) {
+          $this->logMsg("W", "Failed to symlink README.BETA file!");
+        }
+      }else{
+        $this->logMsg("W", "Failed to replace beta version in README.BETA file!");
+      }
     }else{
-      $this->logMsg("W", "Failed to replace beta version in README.BETA file!");
-    };
+      $this->logMsg("W", "No README.BETA file, but beta version is defined!");
+    }
   }else{
-    if (system("rm", "-f", "$this->{m_basesubdir}->{'1'}/README.BETA") != 0 ) {
-      $this->logMsg("W", "Failed to remove README.BETA file!");
-    };
-  };
+    unlink("$this->{m_basesubdir}->{'1'}/README.BETA");
+  }
 
   ## step 6: products file
   $this->logMsg("W", "Creating products file in all media:");
