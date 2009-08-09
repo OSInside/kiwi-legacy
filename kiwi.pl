@@ -2636,10 +2636,11 @@ sub createInstSource {
 	#==========================================
 	# Call the *CENTRAL* method for it...
 	#----------------------------------------
-	if (! defined( $collect -> mainTask () ) ) {
-		$kiwi -> warning( "KIWICollect could not be invoked successfully." );
+	my $ret = $collect -> mainTask ();
+	if ( $ret != 0 ) {
+		$kiwi -> warning( "KIWICollect had runtime error." );
 		$kiwi -> skipped ();
-		my $code = kiwiExit ( 0 ); return $code;
+		my $code = kiwiExit ( $ret ); return $code;
 	}
 	$kiwi->info( "KIWICollect completed successfully." );
 	$kiwi->done();

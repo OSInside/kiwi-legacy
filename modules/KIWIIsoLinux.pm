@@ -63,6 +63,7 @@ sub new {
 	my $sort;
 	my $ldir;
 	my $tool;
+	my $check = 0;
 	#==========================================
 	# create log object if not done
 	#------------------------------------------
@@ -524,7 +525,9 @@ sub checkImage {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $dest = $this -> {dest};
-	my $data = qxx ("tagmedia --pad 150 --md5 --check $dest 2>&1");
+        my $check = "";
+        $check = "--check --pad 150" if $this->{check} == 1;
+	my $data = qxx ("tagmedia --md5 ".$check." $dest 2>&1");
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> error  ("Failed to call tagmedia: $data");

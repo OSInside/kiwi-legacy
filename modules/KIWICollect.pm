@@ -201,7 +201,9 @@ sub logMsg
   my $out = "[".$mode."] ".$string."\n";
 
   if ($this->{m_logStdOut} == 1) {
+    # significant speed up in production mode
     print $out;
+    exit 1 if ( $mode == "E" );
   } else {
     if ( $mode == "E" ) {
       $this->{m_kiwi}->error($out);
@@ -543,13 +545,13 @@ sub Init
   $this->{m_metacreator} = new KIWIRepoMetaHandler($this);
   $this->{m_metacreator}->baseurl($this->{m_united});
   $this->{m_metacreator}->mediaName($this->{m_proddata}->getVar('MEDIUM_NAME'));
-  $this->logMsg("W", "Loading plugins from <".$this->{m_proddata}->getOpt("PLUGIN_DIR").">");
+  $this->logMsg("I", "Loading plugins from <".$this->{m_proddata}->getOpt("PLUGIN_DIR").">");
   my ($loaded, $avail) = $this->{m_metacreator}->loadPlugins();
   if($loaded < $avail) {
     $this->logMsg("E", "could not load all plugins! <$loaded/$avail>!");
     return undef;
   }
-  $this->logMsg("W", "Loaded <$loaded> plugins successfully.");
+  $this->logMsg("I", "Loaded <$loaded> plugins successfully.");
 
   ### object is set up so far; next step is the repository scan analysis (TODO: create an own method for that bit)
 
@@ -621,70 +623,71 @@ sub mainTask
   my $this = shift;
   my $retval = undef;
 
-  return $retval if not defined($this);
+  return 1 if not defined($this);
 
   my ($collectret, $initmphandlers, $metadatacreate);
 
   $collectret = $this->collectPackages();
-  ## HACK: continue anyway, some are false positives
-  #if($collectret != 0) {
-  #  $this->logMsg("E", "collecting packages failed!");
-  #  $retval = 1;
-  #}
+  if($collectret != 0) {
+    $this->logMsg("E", "collecting packages failed!");
+    return 1;
+  }
+  $this->createMetadata();
 
-  #else {
-    $this->createMetadata();
-    
+  ## We create iso files by default, but keep this for manual override
+  if(!$ENV{'KIWI_NO_ISO'}) {
+    $this->logMsg("W", "Skipping ISO generation");
+    return 0;
+  }
+  if($this->{m_proddata}->getVar("FLAVOR") eq "ftp") {
+    $this->logMsg("I", "Skipping ISO generation for FLAVOR ftp");
+    return 0;
+  }
+  if($this->{m_proddata}->getVar("REPO_ONLY") eq "1") {
+    $this->logMsg("I", "Skipping ISO generation");
+    return 0;
+  }
 
-    ## Q&D HACK for Adrian: set KIWI_ISO to enable ISO creation
-    if(!$ENV{'KIWI_ISO'}) {
-      return;
-    }
 
-    ## HACK
-    # create ISO using KIWIIsoLinux.pm
-    eval "require KIWIIsoLinux";
-    if($@) {
-      $this->logMsg("W", "Module KIWIIsoLinux not loadable: $@");
-    }
-    else {
-      my $iso;
-      foreach my $cd($this->getMediaNumbers()) {
-	next if($cd == 0);
-	my $cdname = $this->{m_basesubdir}->{$cd};
-	my $attr = "-R -J -pad -joliet-long";
-	$cdname =~ s{.*/(.*)/*$}{$1};
-	$iso = new KIWIIsoLinux($this->{m_logger}, $this->{m_basesubdir}->{$cd}, $this->{m_united}."/$cdname.iso",$attr);
-	if(!$iso->callBootMethods()) {
-	  $this->logMsg("E", "Cannot call boot methods");
-	}
-	else {
-	  $this->logMsg("W", "Boot methods called successfully");
-	}
-	if(!$iso->createISO()) {
-	  $this->logMsg("E", "Cannot create Iso image");
-	}
-	else {
-	  $this->logMsg("W", "Created Iso image <$cdname.iso>");
-	}
-	if(!$iso->checkImage()) {
-	  $this->logMsg("E", "Tagmedia call failed");
-	}
-	else {
-	  $this->logMsg("W", "Tagmedia call successful");
-	}
+  # create ISO using KIWIIsoLinux.pm
+  eval "require KIWIIsoLinux";
+  if($@) {
+    $this->logMsg("E", "Module KIWIIsoLinux not loadable: $@");
+    return 1;
+  }
+  else {
+    my $iso;
+    foreach my $cd($this->getMediaNumbers()) {
+      next if($cd == 0);
+      my $cdname = $this->{m_basesubdir}->{$cd};
+      my $attr = "-R -J -pad -joliet-long";
+      $cdname =~ s{.*/(.*)/*$}{$1};
+      $iso = new KIWIIsoLinux($this->{m_logger}, $this->{m_basesubdir}->{$cd}, $this->{m_united}."/$cdname.iso",$attr);
+      $iso->{check} = 1 if ( defined($this->{m_proddata}->getVar("RUN_MEDIA_CHECK")) and $this->{m_proddata}->getVar("RUN_MEDIA_CHECK") != "0" );
+      if(!$iso->callBootMethods()) {
+        $this->logMsg("W", "Creating boot methods failed, medium maybe not be bootable");
+      }
+      else {
+        $this->logMsg("I", "Boot methods called successfully");
+      }
+      if(!$iso->createISO()) {
+        $this->logMsg("E", "Cannot create Iso image");
+        return 1;
+      }
+      else {
+        $this->logMsg("I", "Created Iso image <$cdname.iso>");
+      }
+      if(!$iso->checkImage()) {
+        $this->logMsg("E", "Tagmedia call failed");
+        return 1;
+      }
+      else {
+        $this->logMsg("I", "Tagmedia call successful");
       }
     }
-#      $metadatacreate = $this->{m_metacreator}->createMetadata();
-#      # handle return value here
-#    }
-#    else {
-#      $this->logMsg("E", "Initialisation of metadata handlers failed!");
-#      $retval = 10;
-#    }
-  #}
+  }
   
-  return $retval;
+  return 0;
 }
 # /mainTask
 
@@ -904,7 +907,6 @@ sub collectPackages
 {
   my $this = shift;
 
-  my $retval = undef;
   my $rfailed = 0;
   my $mfailed = 0;
 
@@ -913,8 +915,8 @@ sub collectPackages
   # expand dir lists (setup in constructor for each repo) to filenames
   if($this->{m_debug}) {
     $this->{m_logger}->info("");
-    $this->logMsg("W", "STEP 1 [collectPackages]" );
-    $this->logMsg("W", "expand dir lists for all repositories");
+    $this->logMsg("I", "STEP 1 [collectPackages]" );
+    $this->logMsg("I", "expand dir lists for all repositories");
   }
   foreach my $r(keys(%{$this->{m_repos}})) {
     my $tmp_ref = \%{$this->{m_repos}->{$r}->{'srcdirs'}};
@@ -932,7 +934,7 @@ sub collectPackages
   my $result = $this->lookUpAllPackages();
   if( $result == -1) {
     $this->logMsg("E", "lookUpAllPackages failed !");
-    die("[E] lookUpAllPackages failed !");
+    return 1;
   }
   # Just for nicer output
   $this->{m_repoPacks}->{_name}   = { label => "main" };
@@ -942,36 +944,36 @@ sub collectPackages
   ### step 2:
   if($this->{m_debug}) {
     $this->{m_logger}->info("");
-    $this->logMsg("W", "STEP 2 [collectPackages]" );
-    $this->logMsg("W", "Select packages and create links");
+    $this->logMsg("I", "STEP 2 [collectPackages]" );
+    $this->logMsg("I", "Select packages and create links");
   }
 
   # Setup the package FS layout
   my $setupFiles = $this->setupPackageFiles(1, $this->{m_repoPacks});
   if($setupFiles > 0) {
     $this->logMsg("E", "[collectPackages] $setupFiles RPM packages could not be setup");
-    $retval++;
+    return 1;
   }
   if ( defined($this->{m_srcmedium}) && $this->{m_srcmedium} > 0 ) {
     $setupFiles = $this->setupPackageFiles(2, $this->{m_sourcePacks});
     if($setupFiles > 0) {
       $this->logMsg("E", "[collectPackages] $setupFiles SOURCE RPM packages could not be setup");
-      $retval++;
+      return 1;
     }
   }
   if ( defined($this->{m_debugmedium}) && $this->{m_debugmedium} > 0 ) {
     $setupFiles = $this->setupPackageFiles(0, $this->{m_debugPacks});
     if($setupFiles > 0) {
       $this->logMsg("E", "[collectPackages] $setupFiles DEBUG RPM packages could not be setup");
-      $retval++;
+      return 1;
     }
   }
 
   ### step 3: NOW I know where you live...
   if($this->{m_debug}) {
     $this->{m_logger}->info("");
-    $this->logMsg("W", "STEP 3 [collectPackages]" );
-    $this->logMsg("W", "Handle scripts for metafiles and metapackages");
+    $this->logMsg("I", "STEP 3 [collectPackages]" );
+    $this->logMsg("I", "Handle scripts for metafiles and metapackages");
   }
   # unpack metapackages and download metafiles to the {m_united} path
   # (or relative path from there if specified) <- according to rnc file
@@ -983,35 +985,26 @@ sub collectPackages
   $this->{m_scriptbase} = "$this->{m_united}/scripts";
   if(!mkpath($this->{m_scriptbase}, { mode => 0755 } )) {
     $this->logMsg("E", "[collectPackages] Cannot create script directory!");
-    die;  # TODO clean exit somehow
+    return 1;
   }
 
   my @metafiles = keys(%{$this->{m_metafiles}});
   if(!$this->executeMetafileScripts(@metafiles)) {
     $this->logMsg("E", "[collectPackages] executing metafile scripts failed!");
-    $retval++;
+    return 1;
   }
 
-  # create some dirs needed for metapackage handling:
-  #my @mfsubdirs;
-  #for(1..5) {
-  #  push @mfsubdirs, "$this->{m_united}/CD$_";
-  #  mkdir("$this->{m_united}/CD$_", 0755);
-  #}
-  #@{$this->{m_metasubdirs}} = @mfsubdirs;
-
-
   my @packagelist = sort(keys(%{$this->{m_metaPacks}}));
-  if(!$this->unpackMetapackages(@packagelist)) {
+  if($this->unpackMetapackages(@packagelist) != 0) {
     $this->logMsg("E", "[collectPackages] executing scripts failed!");
-    $retval++;
+    return 1;
   }
 
 
   ### step 4: run scripts for other (non-meta) packages
   # TODO (copy/paste?)
   
-  return $retval;
+  return 0;
 }
 # /collectPackages
 
@@ -1039,8 +1032,6 @@ sub unpackMetapackages
   # the second (first explicit) parameter is a list of packages
   my @packlist = @_;
 
-  my $retval = 0;
-
   foreach my $metapack(@packlist) {
     my %packOptions = %{$this->{m_metaPacks}->{$metapack}};
     my $poolPackages = $this->{m_packagePool}->{$metapack};
@@ -1065,7 +1056,7 @@ sub unpackMetapackages
     }
     if(!mkpath("$tmp", { mode => 0755 } )) {
       $this->logMsg("E", "can't create dir <$tmp>");
-      return $retval;;
+      return 1;
     }
 
     my $nofallback = 0;
@@ -1205,7 +1196,7 @@ sub unpackMetapackages
         }
       }
       # we should not reach this ...
-      $this->logMsg("W", "Metapackage <$metapack> not available for architecure <$reqArch>!");
+      $this->logMsg("E", "Metapackage <$metapack> not available for architecure <$reqArch>!");
     }
   }
 
@@ -1218,7 +1209,7 @@ sub unpackMetapackages
       qx(rm -rf $this->{m_basesubdir}->{$index}/script);
     }
   }
-  return $retval;
+  return 0;
 }
 # /executeScripts
 
