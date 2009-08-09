@@ -1673,27 +1673,20 @@ function getSystemMD5Status {
 # waitForUSBDeviceScan
 #--------------------------------------
 function waitForUSBDeviceScan {
-	local silent=$1
 	local devices=0
 	if [ ! "$HAVE_USB" = "yes" ];then
 		return
 	fi
-	if [ -z "$silent" ];then
-		Echo -n "Waiting for USB device scan to complete..."
-	fi
+	Echo -n "Waiting for USB device scan to complete..."
 	while \
 		[ $(dmesg | grep -c 'usb-storage: device scan complete') -lt 1 ] && \
 		[ $devices -lt 15 ]
 	do
-		if [ -z "$silent" ];then
-			echo -n .
-		fi
+		echo -n .
 		sleep 1
 		devices=$(( $devices + 1 ))
 	done
-	if [ -z "$silent" ];then
-		echo
-	fi
+	echo
 }
 #======================================
 # probeUSB
@@ -1841,7 +1834,6 @@ function CDDevice {
 	# from hwinfo --cdrom to search for the block device
 	# ----
 	IFS=$IFS_ORIG
-	local silent=$1
 	local count=0
 	local h=/usr/sbin/hwinfo
 	if [ $HAVE_MODULES_ORDER = 0 ];then
@@ -1849,9 +1841,7 @@ function CDDevice {
 			/sbin/modprobe $module
 		done
 	fi
-	if [ -z "$silent" ];then
-		Echo -n "Waiting for CD/DVD device(s) to appear..."
-	fi
+	Echo -n "Waiting for CD/DVD device(s) to appear..."
 	while true;do
 		cddevs=`$h --cdrom | grep "Device File:"|sed -e"s@(.*)@@" | cut -f2 -d:`
 		cddevs=`echo $cddevs`
@@ -1863,18 +1853,14 @@ function CDDevice {
 		if [ ! -z "$cddev" ] || [ $count -eq 12 ]; then
 			break
 		else
-			if [ -z "$silent" ];then
-				echo -n .
-			fi
+			echo -n .
 			sleep 1
 		fi
 		count=`expr $count + 1`
 	done
-	if [ -z "$silent" ];then
-		echo
-	fi
+	echo
 	if [ -z "$cddev" ];then
-		USBStickDevice $silent
+		USBStickDevice
 		if [ $stickFound = 0 ];then
 			systemException \
 				"Failed to detect CD/DVD or USB drive !" \
@@ -1888,11 +1874,10 @@ function CDDevice {
 #--------------------------------------
 function USBStickDevice {
 	stickFound=0
-	local silent=$1
 	#======================================
 	# search for USB removable devices
 	#--------------------------------------
-	waitForUSBDeviceScan $silent
+	waitForUSBDeviceScan
 	for device in /sys/bus/usb/drivers/usb-storage/*;do
 		if [ ! -L $device ];then
 			continue
@@ -1976,7 +1961,6 @@ function CDMount {
 	# search all CD/DVD drives and use the one we can find
 	# the CD configuration on
 	# ----
-	local silent=$1
 	local count=0
 	local ecode=0
 	local cdopt
@@ -1987,12 +1971,16 @@ function CDMount {
 	#======================================
 	# check for hybrid mbr ID
 	#--------------------------------------
-	searchBIOSBootDevice
-	ecode=$?
-	if [ ! $ecode = 0 ];then
-		if [ $ecode = 2 ];then
-			systemException "$biosBootDevice" "reboot"
+	if [ -z "$cdinst" ];then
+		searchBIOSBootDevice
+		ecode=$?
+		if [ ! $ecode = 0 ];then
+			if [ $ecode = 2 ];then
+				systemException "$biosBootDevice" "reboot"
+			fi
+			unset kiwi_hybrid
 		fi
+	else
 		unset kiwi_hybrid
 	fi
 	#======================================
@@ -2002,10 +1990,8 @@ function CDMount {
 		#======================================
 		# search for CD/DVD devices
 		#--------------------------------------
-		CDDevice $silent
-		if [ -z "$silent" ];then
-			Echo -n "Mounting live boot drive..."
-		fi
+		CDDevice
+		Echo -n "Mounting live boot drive..."
 		while true;do
 			IFS=":"; for i in $cddev;do
 				cdopt=$(CDMountOption $i)
@@ -2015,14 +2001,11 @@ function CDMount {
 					eval mount $cdopt $i /cdrom >/dev/null
 				fi
 				if [ -f $LIVECD_CONFIG ];then
-					cddev=$i
-					if [ -z "$silent" ]; then
-						echo
-					fi
+					cddev=$i; echo
 					#======================================
 					# run mediacheck if requested and boot
 					#--------------------------------------
-					if [ "$mediacheck" = 1 ] && [ -z "$silent" ]; then
+					if [ "$mediacheck" = 1 ]; then
 						test -e /proc/splash && echo verbose > /proc/splash
 						checkmedia $cddev
 						Echo -n "Press ENTER for reboot: "; read nope
@@ -2040,9 +2023,7 @@ function CDMount {
 			if [ $count -eq 12 ]; then
 				break
 			else
-				if [ -z "$silent" ];then
-					echo -n .
-				fi
+				echo -n .
 				sleep 1
 			fi
 			count=`expr $count + 1`
@@ -2051,19 +2032,15 @@ function CDMount {
 		#======================================
 		# search for hybrid device
 		#--------------------------------------
-		if [ -z "$silent" ];then
-			Echo -n "Mounting hybrid live boot drive..."
-		fi
+		Echo -n "Mounting hybrid live boot drive..."
 		cddev=$biosBootDevice"1"
 		kiwiMount $cddev /cdrom
 		if [ -f $LIVECD_CONFIG ];then
-			if [ -z "$silent" ]; then
-				echo
-			fi
+			echo
 			#======================================
 			# run mediacheck if requested and boot
 			#--------------------------------------
-			if [ "$mediacheck" = 1 ] && [ -z "$silent" ]; then
+			if [ "$mediacheck" = 1 ]; then
 				test -e /proc/splash && echo verbose > /proc/splash
 				checkmedia $cddev
 				Echo -n "Press ENTER for reboot: "; read nope
@@ -2140,7 +2117,7 @@ function searchBIOSBootDevice {
 	# Check for OEM ISO installation mode
 	#--------------------------------------
 	if [ ! -z "$cdinst" ];then
-		CDMount silent
+		CDMount
 		umount $cddev
 		curd=$cddev
 		export biosBootDevice=$curd

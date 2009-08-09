@@ -44,7 +44,7 @@ use KIWITest;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "3.70";
+our $Version       = "3.71";
 our $Publisher     = "SUSE LINUX Products GmbH";
 our $Preparer      = "KIWI - http://kiwi.berlios.de";
 our $openSUSE      = "http://download.opensuse.org";
@@ -1522,7 +1522,8 @@ sub usage {
 	print "    kiwi --createpassword\n";
 	print "    kiwi --createhash <image-path>\n";
 	print "    kiwi --info <image-path> --select <\n";
-	print "           repo-patterns|patterns|types|sources|size|profiles\n";
+	print "           repo-patterns|patterns|types|sources|\n";
+	print "           size|profiles|packages\n";
 	print "         > --select ...\n";
 	print "    kiwi --setup-splash <initrd>\n";
 	print "\n";
@@ -1699,6 +1700,7 @@ sub listXMLInfo {
 	my $delete;
 	my $solfile;
 	my $satlist;
+	my $solp;
 	#==========================================
 	# Create info block description
 	#------------------------------------------
@@ -1707,6 +1709,7 @@ sub listXMLInfo {
 	$select{"types"}         = "List configured types";
 	$select{"sources"}       = "List configured source URLs";
 	$select{"size"}          = "List install/delete size estimation";
+	$select{"packages"}      = "List of packages to become installed";
 	$select{"profiles"}      = "List profiles";
 	#==========================================
 	# Create log object
@@ -1791,7 +1794,8 @@ sub listXMLInfo {
 			#------------------------------------------
 			/^patterns/      && do {
 				if (! $meta) {
-					($meta,$delete,$solfile,$satlist) = $xml->getInstallSize();
+					($meta,$delete,$solfile,$satlist,$solp) =
+						$xml->getInstallSize();
 					if (! $meta) {
 						$kiwi -> failed();
 						exit 1;
@@ -1843,7 +1847,8 @@ sub listXMLInfo {
 			#------------------------------------------
 			/^size/          && do {
 				if (! $meta) {
-					($meta,$delete,$solfile,$satlist) = $xml->getInstallSize();
+					($meta,$delete,$solfile,$satlist,$solp) =
+						$xml->getInstallSize();
 					if (! $meta) {
 						$kiwi -> failed();
 						exit 1;
@@ -1867,6 +1872,36 @@ sub listXMLInfo {
 				}
 				if ($size > 0) {
 					$kiwi -> info ("Estimated deletion size; $size kB\n");
+				}
+				last SWITCH;
+			};
+			#==========================================
+			# packages
+			#------------------------------------------
+			/^packages/     && do {
+				if (! $meta) {
+					($meta,$delete,$solfile,$satlist,$solp) =
+						$xml->getInstallSize();
+					if (! $meta) {
+						$kiwi -> failed();
+						exit 1;
+					}
+				}
+				my @packs;
+				my @solved = @{$solp};
+				foreach my $s (@solved) {
+					if ($s =~ /pattern:.*/) {
+						next;
+					}
+					push (@packs,$s);
+				}
+				if (! @packs) {
+					$kiwi -> info ("No packages solved\n");
+				} else {
+					$kiwi -> info ("Image Packages:\n");
+					foreach my $package (@packs) {
+						$kiwi -> info ("--> $package\n");
+					}
 				}
 				last SWITCH;
 			};

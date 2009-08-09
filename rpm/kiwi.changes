@@ -1,8 +1,19 @@
 -------------------------------------------------------------------
+Fri Aug  7 14:56:27 CEST 2009 - ms@suse.de
+
+- v3.71
+- added --select packages for the --info option
+
+-------------------------------------------------------------------
 Thu Aug  6 15:15:53 CEST 2009 - ms@suse.de
 
 - v3.70
+- added dialog based progress information when restoring
+  the recovery archive files (bnc #510041)
+- fixed evaluation of MKCLICFS_COMPRESSION (bnc #528743)
 - clear screen after dialog window disappears (bnc #510041)
+- fixed loop between CDMount and searchBIOSBootDevice
+  happening in oem ISO install mode
 - fixed HAVE_USB check, usbcore is no longer a module
 - added edd module to be present in isoboot
 

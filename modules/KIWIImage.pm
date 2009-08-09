@@ -331,7 +331,7 @@ sub createImageClicFS {
 	# Create clicfs filesystem from ext3
 	#------------------------------------------
 	$kiwi -> info ("Creating clicfs container...");
-	if ($ENV{MKCLICFS_COMPRESSION}) {
+	if (defined $ENV{MKCLICFS_COMPRESSION}) {
 		my $c = int $ENV{MKCLICFS_COMPRESSION};
 		my $d = $this->{imageDest};
 		$data = qxx ("mkclicfs -c $c $d/fsdata.ext3 $d/$name 2>&1");
