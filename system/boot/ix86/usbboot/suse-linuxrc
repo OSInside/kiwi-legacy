@@ -82,8 +82,8 @@ if [ $stickFound = 0 ];then
 	"reboot"
 fi
 Echo "Searching for kiwiVG volume group..."
-export stickRWDevice=$stickRoot"2"
-export stickRODevice=$stickRoot"1"
+export stickRWDevice=$(ddn $stickRoot 2)
+export stickRODevice=$(ddn $stickRoot 1)
 if searchVolumeGroup; then
 	export haveLVM=yes
 	if [ -e /dev/kiwiVG/LVComp ];then
@@ -93,7 +93,7 @@ if searchVolumeGroup; then
 	fi
 	export stickRWDevice=/dev/kiwiVG/LVRoot
 	export stickRODevice=/dev/kiwiVG/LVComp
-	export stickBootDevice=$stickRoot"2"
+	export stickBootDevice=$(ddn $stickRoot 2)
 fi
 
 #======================================
@@ -155,7 +155,7 @@ if [ "$LOCAL_BOOT" = "no" ];then
 		# DM use third partition as boot
 		#--------------------------------------
 		mkdir /mnt/dmboot
-		export imageBootDevice=$stickRoot"3"
+		export imageBootDevice=$(ddn $stickRoot 3)
 		mount $imageBootDevice /mnt/dmboot
 		cp -a  /mnt/boot /mnt/dmboot
 		rm -rf /mnt/boot
@@ -186,9 +186,9 @@ if [ "$LOCAL_BOOT" = "no" ];then
 		# LUKS use second or third part as boot
 		#--------------------------------------
 		mkdir /mnt/luksboot
-		export imageBootDevice=$stickRoot"3"
+		export imageBootDevice=$(ddn $stickRoot 3)
 		if [ ! -e $imageBootDevice ];then
-			imageBootDevice=$stickRoot"2"
+			imageBootDevice=$(ddn $stickRoot 2)
 		fi
 		mount $imageBootDevice /mnt/luksboot
 		if [ -z "$UNIONFS_CONFIG" ];then

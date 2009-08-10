@@ -2,6 +2,8 @@
 Fri Aug  7 14:56:27 CEST 2009 - ms@suse.de
 
 - v3.71
+- added ddn function and replace all occurrences of
+  a=$disk"number" with a=$(ddn $disk number) (bnc #529580)
 - added --select packages for the --info option
 - added checkmedia KIWIIsoLinux constructor parameter
 

@@ -49,7 +49,7 @@ function OEMInstall {
 		export OEMInstallType=CD
 	else
 		Echo "Found Stick: $stickRoot -> $stickSerial"
-		mkdir -p /cdrom && mount $stickRoot"2" /cdrom
+		mkdir -p /cdrom && mount $(ddn $stickRoot 2) /cdrom
 		export OEMInstallType=USB
 	fi
 	#======================================
@@ -264,7 +264,7 @@ function OEMInstall {
 	# Reread partition table
 	#--------------------------------------
 	blockdev --rereadpt $imageDevice
-	deviceTest=$imageDevice"1"
+	deviceTest=$(ddn $imageDevice 1)
 	if ! waitForStorageDevice $deviceTest;then
 		systemException \
 			"Partition $deviceTest doesn't appear... fatal !" \

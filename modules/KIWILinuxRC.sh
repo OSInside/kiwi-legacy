@@ -1913,8 +1913,9 @@ function USBStickDevice {
 			removable=`cat $isremovable`
 			if [ $removable -eq 1 ];then
 				stickRoot=$device
-				stickDevice=$device"1"
-				for dev in $stickRoot"1" $stickRoot"2";do
+				stickDevice=$(ddn $device 1)
+				for devnr in 1 2;do
+					dev=$(ddn $stickRoot $devnr)
 					if ! kiwiMount "$dev" "/mnt";then
 						continue
 					fi
@@ -2033,7 +2034,7 @@ function CDMount {
 		# search for hybrid device
 		#--------------------------------------
 		Echo -n "Mounting hybrid live boot drive..."
-		cddev=$biosBootDevice"1"
+		cddev=$(ddn $biosBootDevice 1)
 		kiwiMount $cddev /cdrom
 		if [ -f $LIVECD_CONFIG ];then
 			echo
@@ -2128,8 +2129,12 @@ function searchBIOSBootDevice {
 	#--------------------------------------
 	mkdir -p $cmpd
 	for curd in $ddevs;do
+		if [ ! $(echo $curd | cut -c 1) = "/" ];then
+			continue
+		fi
 		for id in 1 2 3;do
-			if ! mount $curd$id /mnt;then
+			dev=$(ddn $curd $id)
+			if ! mount $dev /mnt;then
 				continue
 			fi
 			if [ -f /mnt/boot/grub/mbrid ];then
@@ -4452,6 +4457,25 @@ function displayEULA {
 		esac
 	done
 }
+
+#======================================
+# ddn
+#--------------------------------------
+function ddn {
+	# /.../
+	# print disk device name (node name) according to the
+	# linux device node specs: If the last character of the
+	# device is a letter, attach the partition number. If the
+	# last character is a number, attach a 'p' and then the
+	# partition number.
+	# ----
+	local lastc=$(echo $1 | sed -e 's@\(^.*\)\(.$\)@\2@')
+	if echo $last | grep -P "^\d+$";then
+		echo $1"p"$2
+		return
+	fi
+	echo $1$2
+}
 #======================================
 # SAPMemCheck
 #--------------------------------------
@@ -4646,8 +4670,9 @@ function SAPDataStorageSetup {
 	#======================================
 	# Add volume group and filesystem
 	#--------------------------------------
-	pvcreate -ff -y $storage"1"
-	vgcreate data_vg $storage"1"
+	local diskpart=$(ddn $storage 1)
+	pvcreate -ff -y $diskpart
+	vgcreate data_vg $diskpart
 	lvcreate -l 100%FREE -n sapdata data_vg
 	mke2fs -T ext3 -j /dev/data_vg/sapdata
 	if test $? != 0; then

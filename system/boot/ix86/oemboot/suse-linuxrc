@@ -67,8 +67,8 @@ function setupDeviceNames {
 	#======================================
 	# Set default filesystem device names
 	#--------------------------------------
-	export imageRWDevice=$imageDiskDevice"2"
-	export imageRODevice=$imageDiskDevice"1"
+	export imageRWDevice=$(ddn $imageDiskDevice 2)
+	export imageRODevice=$(ddn $imageDiskDevice 1)
 	export imageIOWRDevice=$imageRWDevice
 	#======================================
 	# Check for LVM or standard boot
@@ -86,7 +86,7 @@ function setupDeviceNames {
 		export imageRWDevice=/dev/kiwiVG/LVRoot
 		export imageRODevice=/dev/kiwiVG/LVComp
 		export imageIOWRDevice=$imageRWDevice
-		export imageBootDevice=$imageDiskDevice"2"
+		export imageBootDevice=$(ddn $imageDiskDevice 2)
 		if [ ! -z "$KIWI_RECOVERY" ];then
 			export imageRecoveryDevice=/dev/kiwiVG/LVRecovery
 		fi
@@ -96,8 +96,8 @@ function setupDeviceNames {
 		# Standard setup
 		#--------------------------------------
 		if [ ! -z "$KIWI_RECOVERY" ];then
-			export imageRecoveryDevice=$imageDiskDevice"4"
-			export imageRootDevice=$imageDiskDevice"2"
+			export imageRecoveryDevice=$(ddn $imageDiskDevice 4)
+			export imageRootDevice=$(ddn $imageDiskDevice 2)
 		else
 			for i in 1 2;do
 				export imageRootDevice=$imageDiskDevice$i
@@ -426,7 +426,7 @@ if [ "$LOCAL_BOOT" = "no" ]; then
 		#--------------------------------------
 		mkdir /mnt/dmboot
 		bootid=2
-		export imageBootDevice=$imageDiskDevice"3"
+		export imageBootDevice=$(ddn $imageDiskDevice 3)
 		mount $imageBootDevice /mnt/dmboot
 		cp -a  /mnt/boot /mnt/dmboot
 		test -f /tmp/linux.vmx  && mv /tmp/linux.vmx  /mnt/dmboot/boot
@@ -439,10 +439,10 @@ if [ "$LOCAL_BOOT" = "no" ]; then
 		# LUKS use second or third part as boot
 		#--------------------------------------
 		mkdir -p /mnt/luksboot
-		imageBootDevice=$imageDiskDevice"2"
+		imageBootDevice=$(ddn $imageDiskDevice 2)
 		bootid=1
 		if isFSTypeReadOnly;then
-			export imageBootDevice=$imageDiskDevice"3"
+			export imageBootDevice=$(ddn $imageDiskDevice 3)
 			bootid=2
 		fi
 		mount $imageBootDevice /mnt/luksboot

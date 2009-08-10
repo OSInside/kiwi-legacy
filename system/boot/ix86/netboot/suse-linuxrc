@@ -557,15 +557,15 @@ else
 	#--------------------------------------
 	if [ $LOCAL_BOOT = "yes" ];then
 		imageDisk=`getDiskDevice $root | sed -e s"@[0-9]@@g"`
-		imageDevice=$imageDisk"2"
+		imageDevice=$(ddn $imageDisk 2)
 		imageRootDevice=$imageDevice
 		imageRootName="Local-System"
 		if [ ! -z "$UNIONFS_CONFIG" ];then
 			unionFST=`echo $UNIONFS_CONFIG | cut -d , -f 3`
-			setupUnionFS $imageDisk"3" $imageDisk"2" $unionFST
+			setupUnionFS $(ddn $imageDisk 3) $(ddn $imageDisk 2) $unionFST
 		fi
 		if [ ! -z "$COMBINED_IMAGE" ];then
-			imageNextRootDevice=$imageDisk"3"
+			imageNextRootDevice=$(ddn $imageDisk 3)
 		fi
 	fi
 	#======================================

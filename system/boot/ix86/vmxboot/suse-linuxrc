@@ -128,9 +128,9 @@ Echo "Found boot device: $imageDiskDevice"
 #======================================
 # 8) Setup device names...
 #--------------------------------------
-export imageRootDevice=$imageDiskDevice"1"
-export imageRWDevice=$imageDiskDevice"2"
-export imageRODevice=$imageDiskDevice"1"
+export imageRootDevice=$(ddn $imageDiskDevice 1)
+export imageRWDevice=$(ddn $imageDiskDevice 2)
+export imageRODevice=$(ddn $imageDiskDevice 1)
 if [ -z "$imageDiskDevice" ];then
 	systemException \
 		"Couldn't find any boot device... abort" \
@@ -146,7 +146,7 @@ if searchVolumeGroup; then
 	fi
 	export imageRWDevice=/dev/kiwiVG/LVRoot
 	export imageRODevice=/dev/kiwiVG/LVComp
-	export imageBootDevice=$imageDiskDevice"2"
+	export imageBootDevice=$(ddn $imageDiskDevice 2)
 fi
 
 #======================================
@@ -208,7 +208,7 @@ if [ "$LOCAL_BOOT" = "no" ];then
 		# DM use third partition as boot
 		#--------------------------------------
 		mkdir /mnt/dmboot
-		export imageBootDevice=$imageDiskDevice"3"
+		export imageBootDevice=$(ddn $imageDiskDevice 3)
 		mount $imageBootDevice /mnt/dmboot
 		cp -a  /mnt/boot /mnt/dmboot
 		rm -rf /mnt/boot
@@ -239,9 +239,9 @@ if [ "$LOCAL_BOOT" = "no" ];then
 		# LUKS use second or third part as boot
 		#--------------------------------------
 		mkdir /mnt/luksboot
-		export imageBootDevice=$imageDiskDevice"3"
+		export imageBootDevice=$(ddn $imageDiskDevice 3)
 		if [ ! -e $imageBootDevice ];then
-			imageBootDevice=$imageDiskDevice"2"
+			imageBootDevice=$(ddn $imageDiskDevice 2)
 		fi
 		mount $imageBootDevice /mnt/luksboot
 		if [ -z "$UNIONFS_CONFIG" ];then

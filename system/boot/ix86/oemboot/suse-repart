@@ -85,7 +85,7 @@ function OEMRepartStandard {
 	input=/part.input
 	rm -f $input
 	diskXMBytes=`partitionSize $imageDiskDevice`
-	diskPMBytes=`partitionSize $imageDiskDevice"1"`
+	diskPMBytes=`partitionSize $(ddn $imageDiskDevice 1)`
 	diskPMBytes=`expr $diskPMBytes / 1024`
 	diskXMBytes=`expr $diskXMBytes / 1024`
 	disk1MBytes=10240
@@ -260,13 +260,13 @@ function OEMRepartStandard {
 	# Update new device names
 	#--------------------------------------
 	if [ -z "$DONT_PARTITION" ];then
-		export imageRootDevice=$(luksOpen $imageDiskDevice"2")
-		export imageSwapDevice=$imageDiskDevice"1"
+		export imageRootDevice=$(luksOpen $(ddn $imageDiskDevice 2))
+		export imageSwapDevice=$(ddn $imageDiskDevice 1)
 		if [ -z "$OEM_WITHOUTHOME" ];then
-			export imageHomeDevice=$imageDiskDevice"3"
+			export imageHomeDevice=$(ddn $imageDiskDevice 3)
 		fi
 		if [ ! -z "$OEM_RECOVERY" ];then
-			export imageRecoveryDevice=$imageDiskDevice"4"
+			export imageRecoveryDevice=$(ddn $imageDiskDevice 4)
 		fi
 		bootid=1
 		activateBootPartition
@@ -291,10 +291,10 @@ function OEMRepartOverlayed {
 	#====================================== 
 	# check for DM squash setup
 	#--------------------------------------
-	if mount $imageDiskDevice"1" /mnt &>/dev/null;then
+	if mount $(ddn $imageDiskDevice 1) /mnt &>/dev/null;then
 		if [ -f /mnt/fsdata.ext3 ];then
 			umount /mnt
-			mount $imageDiskDevice"3" /mnt
+			mount $(ddn $imageDiskDevice 3) /mnt
 			cp /mnt/boot/linux.vmx  /tmp
 			cp /mnt/boot/initrd.vmx /tmp
 			cp /mnt/boot/grub/mbrid /tmp
@@ -314,7 +314,7 @@ function OEMRepartOverlayed {
 	fi
 	diskXMBytes=`partitionSize $imageDiskDevice`
 	diskXMBytes=`expr $diskXMBytes / 1024`
-	disk1MBytes=`partitionSize $imageDiskDevice"1"`
+	disk1MBytes=`partitionSize $(ddn $imageDiskDevice 1)`
 	disk1MBytes=`expr $disk1MBytes / 1024`
 	disk2MBytes=`expr $diskXMBytes - $disk1MBytes - $swapsize - $bootXMBytes`
 	if [ $disk2MBytes -lt 100 ];then
@@ -381,15 +381,15 @@ function OEMRepartOverlayed {
 	# Update new device names
 	#--------------------------------------
 	if [ -z "$DONT_PARTITION" ];then
-		export imageRootDevice=$(luksOpen $imageDiskDevice"1")
-		export imageIOWRDevice=$(luksOpen $imageDiskDevice"2" luksReadWrite)
+		export imageRootDevice=$(luksOpen $(ddn $imageDiskDevice 1))
+		export imageIOWRDevice=$(luksOpen $(ddn $imageDiskDevice 2) luksReadWrite)
 		export imageRWDevice=$imageIOWRDevice
 		export imageRODevice=$imageRootDevice
 		if [ ! $swapsize = 0 ];then
 			if [ "$haveDMSquash" = "yes" ];then
-				export imageSwapDevice=$imageDiskDevice"4"
+				export imageSwapDevice=$(ddn $imageDiskDevice 4)
 			else
-				export imageSwapDevice=$imageDiskDevice"3"
+				export imageSwapDevice=$(ddn $imageDiskDevice 3)
 			fi
 		fi
 		if [ "$haveDMSquash" = "yes" ];then
@@ -402,7 +402,7 @@ function OEMRepartOverlayed {
 		# Create bootfs if DM squash setup
 		#--------------------------------------
 		if [ "$haveDMSquash" = "yes" ];then
-			export imageBootDevice=$imageDiskDevice"3"
+			export imageBootDevice=$(ddn $imageDiskDevice 3)
 			if ! mke2fs -T ext2 -q $imageBootDevice >/dev/null 2>&1;then
 				systemException "Failed to create Boot filesystem" "reboot"
 			fi
@@ -428,7 +428,7 @@ function OEMRepartCombined {
 	#====================================== 
 	# check for read-write partition
 	#--------------------------------------
-	if ! partitionSize $imageDiskDevice"2" &>/dev/null;then
+	if ! partitionSize $(ddn $imageDiskDevice 2) &>/dev/null;then
 		Echo "No read-write partition in this split image"
 		DONT_PARTITION=1
 	fi
@@ -439,9 +439,9 @@ function OEMRepartCombined {
 		swapXMBytes=$swapsize
 		diskXMBytes=`partitionSize $imageDiskDevice`
 		diskXMBytes=`expr $diskXMBytes / 1024`
-		disk1MBytes=`partitionSize $imageDiskDevice"1"`
+		disk1MBytes=`partitionSize $(ddn $imageDiskDevice 1)`
 		disk1MBytes=`expr $disk1MBytes / 1024`
-		disk2MBytes=`partitionSize $imageDiskDevice"2"`
+		disk2MBytes=`partitionSize $(ddn $imageDiskDevice 2)`
 		disk2MBytes=`expr $disk2MBytes / 1024`
 		diskXLBytes=`expr $diskXMBytes - $disk1MBytes - $disk2MBytes`
 		diskXABytes=`expr $diskXLBytes - $swapXMBytes`
@@ -499,9 +499,9 @@ function OEMRepartCombined {
 	# Update new device names
 	#--------------------------------------
 	if [ -z "$DONT_PARTITION" ];then
-		export imageRootDevice=$(luksOpen $imageDiskDevice"1")
-		export imageSwapDevice=$imageDiskDevice"3"
-		export imageIOWRDevice=$(luksOpen $imageDiskDevice"2" luksReadWrite)
+		export imageRootDevice=$(luksOpen $(ddn $imageDiskDevice 1))
+		export imageSwapDevice=$(ddn $imageDiskDevice 3)
+		export imageIOWRDevice=$(luksOpen $(ddn $imageDiskDevice 2) luksReadWrite)
 		export imageRWDevice=$imageIOWRDevice
 		export imageRODevice=$imageRootDevice
 		bootid=1
@@ -551,8 +551,8 @@ function OEMRepartLVM {
 	bootid=1
 	activateBootPartition
 	vgchange -a y kiwiVG
-	pvcreate $imageDiskDevice"3"
-	vgextend kiwiVG $imageDiskDevice"3"
+	pvcreate $(ddn $imageDiskDevice 3)
+	vgextend kiwiVG $(ddn $imageDiskDevice 3)
 	VGFreeMBytes=`vgdisplay --short --unit B kiwiVG | cut -f2 -d/ | cut -f1 -dB`
 	VGFreeMBytes=`expr $VGFreeMBytes / 1000`
 	VGFreeMBytes=`expr $VGFreeMBytes / 1000`
@@ -618,7 +618,7 @@ function OEMRepartLuks {
 	# Store kiwi kernel and initrd
 	#--------------------------------------
 	if isFSTypeReadOnly;then
-		mount $imageDiskDevice"3" /mnt
+		mount $(ddn $imageDiskDevice 3) /mnt
 		cp /mnt/boot/linux.vmx  /tmp
 		cp /mnt/boot/initrd.vmx /tmp
 		cp /mnt/boot/grub/mbrid /tmp
@@ -634,7 +634,7 @@ function OEMRepartLuks {
 	fi
 	diskXMBytes=`partitionSize $imageDiskDevice`
 	diskXMBytes=`expr $diskXMBytes / 1024`
-	disk1MBytes=`partitionSize $imageDiskDevice"1"`
+	disk1MBytes=`partitionSize $(ddn $imageDiskDevice 1)`
 	disk1MBytes=`expr $disk1MBytes / 1024`
 	disk2MBytes=`expr $diskXMBytes - $disk1MBytes - $swapsize - $bootXMBytes`
 	if ! isFSTypeReadOnly;then
@@ -740,13 +740,13 @@ function OEMRepartLuks {
 			bootid=2
 		fi
 		activateBootPartition
-		export imageRootDevice=$(luksOpen $imageDiskDevice"1")
-		export imageBootDevice=$imageDiskDevice"2"
-		export imageSwapDevice=$imageDiskDevice"3"
+		export imageRootDevice=$(luksOpen $(ddn $imageDiskDevice 1))
+		export imageBootDevice=$(ddn $imageDiskDevice 2)
+		export imageSwapDevice=$(ddn $imageDiskDevice 3)
 		if isFSTypeReadOnly;then
-			export imageBootDevice=$imageDiskDevice"3"
-			export imageSwapDevice=$imageDiskDevice"4"
-			export imageIOWRDevice=$(luksOpen $imageDiskDevice"2" luksReadWrite)
+			export imageBootDevice=$(ddn $imageDiskDevice 3)
+			export imageSwapDevice=$(ddn $imageDiskDevice 4)
+			export imageIOWRDevice=$(luksOpen $(ddn $imageDiskDevice 2) luksReadWrite)
 			export imageRWDevice=$imageIOWRDevice
 			export imageRODevice=$imageRootDevice
 		fi
