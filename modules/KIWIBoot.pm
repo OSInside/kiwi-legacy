@@ -1649,7 +1649,9 @@ sub setupInstallCD {
 	if ($name !~ /^\//) {
 		$name = $wdir."/".$name;
 	}
-	my $iso = new KIWIIsoLinux ($kiwi,$tmpdir,$name);
+	my $iso = new KIWIIsoLinux (
+		$kiwi,$tmpdir,$name,undef,"checkmedia"
+	);
 	my $tool= $iso -> getTool();
 	$status = qxx ("cd $tmpdir && $tool $base $opts -o $name . 2>&1");
 	$result = $? >> 8;

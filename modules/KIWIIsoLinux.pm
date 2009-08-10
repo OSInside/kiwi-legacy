@@ -54,6 +54,7 @@ sub new {
 	my $source       = shift;  # location of source tree
 	my $dest         = shift;  # destination for the iso file
 	my $params       = shift;  # global genisoimage/mkisofs parameters
+	my $mediacheck   = shift;  # run tagmedia with --check y/n
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
@@ -182,6 +183,7 @@ sub new {
 	$this -> {tmpdir} = $ldir;
 	$this -> {catalog}= \@catalog;
 	$this -> {tool}   = $tool;
+	$this -> {check}  = $mediacheck;
 	return $this;
 }
 
@@ -525,9 +527,13 @@ sub checkImage {
 	my $this = shift;
 	my $kiwi = $this -> {kiwi};
 	my $dest = $this -> {dest};
-        my $check = "";
-        $check = "--check --pad 150" if $this->{check} == 1;
-	my $data = qxx ("tagmedia --md5 ".$check." $dest 2>&1");
+	my $check= $this -> {check};
+	my $data;
+	if (defined $this->{check}) {
+		$data = qxx ("tagmedia --md5 --check --pad 150 $dest 2>&1");
+	} else {
+		$data = qxx ("tagmedia --md5 $dest 2>&1");
+	}
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> error  ("Failed to call tagmedia: $data");

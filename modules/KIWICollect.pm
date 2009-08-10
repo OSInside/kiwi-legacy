@@ -662,8 +662,9 @@ sub mainTask
       my $cdname = $this->{m_basesubdir}->{$cd};
       my $attr = "-R -J -pad -joliet-long";
       $cdname =~ s{.*/(.*)/*$}{$1};
-      $iso = new KIWIIsoLinux($this->{m_logger}, $this->{m_basesubdir}->{$cd}, $this->{m_united}."/$cdname.iso",$attr);
-      $iso->{check} = 1 if ( defined($this->{m_proddata}->getVar("RUN_MEDIA_CHECK")) and $this->{m_proddata}->getVar("RUN_MEDIA_CHECK") != "0" );
+      my $checkmedia;
+      $checkmedia = "checkmedia" if ( defined($this->{m_proddata}->getVar("RUN_MEDIA_CHECK")) and $this->{m_proddata}->getVar("RUN_MEDIA_CHECK") != "0" );
+      $iso = new KIWIIsoLinux($this->{m_logger}, $this->{m_basesubdir}->{$cd}, $this->{m_united}."/$cdname.iso",$attr,$checkmedia);
       if(!$iso->callBootMethods()) {
         $this->logMsg("W", "Creating boot methods failed, medium maybe not be bootable");
       }

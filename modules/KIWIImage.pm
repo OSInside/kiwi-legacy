@@ -2126,7 +2126,7 @@ sub createImageLiveCD {
 		$attr .= " -V \"$type{volid}\"";
 	}
 	my $isolinux = new KIWIIsoLinux (
-		$kiwi,$main::RootTree."/CD",$name,$attr
+		$kiwi,$main::RootTree."/CD",$name,$attr,"checkmedia"
 	);
 	if (defined $isolinux) {
 		$isoerror = 0;
