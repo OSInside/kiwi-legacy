@@ -296,7 +296,9 @@ sub new {
 				foreach my $p (@fplistImage) {
 					$kiwi -> info ("--> $p\n");
 				}
-				$this -> addPackages ("image",$packageNodeList,@fplistImage);
+				$this -> addPackages (
+					"bootstrap",$packageNodeList,@fplistImage
+				);
 				if (@fplistDelete) {
 					$this -> addPackages (
 						"delete",$packageNodeList,@fplistDelete
@@ -308,7 +310,9 @@ sub new {
 				foreach my $p (@falistImage) {
 					$kiwi -> info ("--> $p\n");
 				}
-				$this -> addArchives ("image",$packageNodeList,@falistImage);
+				$this -> addArchives (
+					"bootstrap",$packageNodeList,@falistImage
+				);
 			}
 		}
 		#==========================================
@@ -2018,7 +2022,7 @@ sub addPackages {
 		my $addElement = new XML::LibXML::Element ("package");
 		$addElement -> setAttribute("name",$pack);
 		$nodes -> get_node($nodeNumber)
-			-> addChild ($addElement);
+			-> appendChild ($addElement);
 	}
 	$this -> updateXML();
 	return $this;
@@ -2055,7 +2059,7 @@ sub addArchives {
 		my $addElement = new XML::LibXML::Element ("archive");
 		$addElement -> setAttribute("name",$tar);
 		$nodes -> get_node($nodeNumber)
-			-> addChild ($addElement);
+			-> appendChild ($addElement);
 	}
 	$this -> updateXML();
 	return $this;

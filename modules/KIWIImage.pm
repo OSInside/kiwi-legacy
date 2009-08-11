@@ -2155,13 +2155,13 @@ sub createImageLiveCD {
 		return undef;
 	}
 	#==========================================
-	# tag ISO image with tagmedia
+	# Turn ISO into hybrid if requested
 	#------------------------------------------
-	if (-x "/usr/bin/tagmedia") {
-		$kiwi -> info ("Adding checkmedia tag...");
-		if (! $isolinux -> checkImage()) {
+	if ($hybrid) {
+		$kiwi -> info ("Setting up hybrid ISO...");
+		if (! $isolinux -> createHybrid ($this->{mbrid})) {
 			$kiwi -> failed ();
-			$kiwi -> error  ("Failed to tag ISO image");
+			$kiwi -> error  ("Failed to create hybrid ISO image");
 			$kiwi -> failed ();
 			if (! -d $main::RootTree.$baseSystem) {
 				qxx ("rm -rf $main::RootTree");
@@ -2172,13 +2172,13 @@ sub createImageLiveCD {
 		$kiwi -> done();
 	}
 	#==========================================
-	# Turn ISO into hybrid if requested
+	# tag ISO image with tagmedia
 	#------------------------------------------
-	if ($hybrid) {
-		$kiwi -> info ("Setting up hybrid ISO...");
-		if (! $isolinux -> createHybrid ($this->{mbrid})) {
+	if (-x "/usr/bin/tagmedia") {
+		$kiwi -> info ("Adding checkmedia tag...");
+		if (! $isolinux -> checkImage()) {
 			$kiwi -> failed ();
-			$kiwi -> error  ("Failed to create hybrid ISO image");
+			$kiwi -> error  ("Failed to tag ISO image");
 			$kiwi -> failed ();
 			if (! -d $main::RootTree.$baseSystem) {
 				qxx ("rm -rf $main::RootTree");
