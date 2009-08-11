@@ -9,16 +9,18 @@
 		<type bootprofile="default" bootkernel="std">cpio</type>
 		<version>2.1.1</version>
 		<size unit="M">60</size>
-		
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>False</rpm-check-signatures>
 	</preferences>
 	<profiles>
-		<profile name="default" description="Boot with default kernel"/>
+		<!-- bootprofile specs -->
+		<profile name="default" description="Booting default profile"/>
 		<profile name="diskless" description="Booting diskless thin clients"/>
+		<!-- bootkernel specs -->
 		<profile name="std" description="KERNEL: Default"/>
 		<profile name="xen" description="KERNEL: Xen kernel/mboot.c32"/>
 		<profile name="pae" description="KERNEL: pae"/>
+		<profile name="desktop" description="KERNEL: Desktop kernel"/>
 	</profiles>
 	<drivers type="usbdrivers" profiles="default,xen,pae">
 		<file name="usb/host/ehci-hcd.ko"/>
@@ -138,23 +140,26 @@
 		<!-- KERNEL AND MODULE PACKAGES START STD -->
 		<package name="kernel-default"/>
 		<package name="kernel-default-base"/>
-		<package name="kernel-default-extra"/>
 		<!-- KERNEL AND MODULE PACKAGES END STD -->
 	</packages>
 	<packages type="image" profiles="pae">
 		<!-- KERNEL AND MODULE PACKAGES START PAE -->
 		<package name="kernel-pae"/>
 		<package name="kernel-pae-base"/>
-		<package name="kernel-pae-extra"/>
 		<!-- KERNEL AND MODULE PACKAGES END PAE -->
 	</packages>
 	<packages type="image" profiles="xen">
 		<!-- KERNEL AND MODULE PACKAGES START XEN -->
 		<package name="kernel-xen"/>
 		<package name="kernel-xen-base"/>
-		<package name="kernel-xen-extra"/>
 		<package name="xen"/>
 		<!-- KERNEL AND MODULE PACKAGES END XEN -->
+	</packages>
+	<packages type="image" profiles="desktop">
+		<!-- KERNEL AND MODULE PACKAGES START DESKTOP -->
+		<package name="kernel-desktop"/>
+		<package name="kernel-desktop-base"/>
+		<!-- KERNEL AND MODULE PACKAGES END DESKTOP -->
 	</packages>
 	<packages type="image" profiles="default,xen,pae">
 		<!-- PACKAGES START DEFAULT AND XEN -->

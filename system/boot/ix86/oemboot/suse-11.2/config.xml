@@ -9,17 +9,19 @@
 		<type bootprofile="default" bootkernel="std">cpio</type>
 		<version>2.7.1</version>
 		<size unit="M">60</size>
-		
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>False</rpm-check-signatures>
 	</preferences>
 	<profiles>
-		<profile name="default" description="Boot with default kernel"/>
+		<!-- bootprofile specs -->
+		<profile name="default" description="Booting default profile"/>
 		<profile name="xen" description="Boot with xen kernel/mboot.c32"/>
+		<!-- bootkernel specs -->
 		<profile name="std" description="KERNEL: Default"/>
 		<profile name="nex" description="KERNEL: Xen kernel/mboot.c32"/>
 		<profile name="pae" description="KERNEL: pae kernel"/>
 		<profile name="ec2" description="KERNEL: Ec2 kernel"/>
+		<profile name="desktop" description="KERNEL: Desktop kernel"/>
 	</profiles>
 	<drivers type="usbdrivers">
 		<file name="usb/host/ehci-hcd.ko"/>
@@ -78,22 +80,22 @@
 	<packages type="image" profiles="std">
 		<package name="kernel-default"/>
 		<package name="kernel-default-base"/>
-		<package name="kernel-default-extra"/>
 	</packages>
 	<packages type="image" profiles="pae">
 		<package name="kernel-pae"/>
 		<package name="kernel-pae-base"/>
-		<package name="kernel-pae-extra"/>
 	</packages>
 	<packages type="image" profiles="nex">
 		<package name="kernel-xen"/>
 		<package name="kernel-xen-base"/>
-		<package name="kernel-xen-extra"/>
 	</packages>
 	<packages type="image" profiles="ec2">
 		<package name="kernel-ec2"/>
 		<package name="kernel-ec2-base"/>
-		<package name="kernel-ec2-extra"/>
+	</packages>
+	<packages type="image" profiles="desktop">  
+		<package name="kernel-desktop"/>  
+		<package name="kernel-desktop-base"/>
 	</packages>
 	<packages type="image">
 		<package name="dialog"/>

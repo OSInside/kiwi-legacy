@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Aug 11 11:51:12 CEST 2009 - ms@suse.de
+
+- v3.73
+- removed -extra kernel packages for 11.2, don't exist anymore
+- added desktop kernel profile too boot images for 11.2
+
+-------------------------------------------------------------------
 Tue Aug 11 10:23:45 CEST 2009 - ms@suse.de
 
 - v3.72
