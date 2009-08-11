@@ -2074,7 +2074,7 @@ sub kiwiExit {
 			qxx ("mv $usedXML $xmlused 2>&1");
 			$usedXML = $xmlused;
 		}
-		$kiwi -> info ("Used XML file at: $usedXML");
+		$kiwi -> info ("Last used XML file at: $usedXML");
 		$kiwi -> done ();
 	}
 	#==========================================
