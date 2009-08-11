@@ -292,40 +292,58 @@ sub createImageClicFS {
 	#==========================================  
 	# Resize to minimum  
 	#------------------------------------------
+	my $rver= qxx (
+		"resize2fs --version 2>&1 | head -n 1 | cut -f2 -d ' ' | cut -f1-2 -d."
+	); chomp $rver;
 	my $dfs = "/sbin/debugfs";
 	my $req = "-R 'show_super_stats -h'";
 	my $bcn = "'^Block count:'";
 	my $bfr = "'^Free blocks:'";
 	my $src = "$this->{imageDest}/fsdata.ext3";
 	my $blocks = 0;
-	$data = qxx (
-		"$dfs $req $src 2>/dev/null | grep $bcn | sed -e 's,.*: *,,'"
-	);
-	$code = $? >> 8;
-	if ($code != 0) {
-		$kiwi -> error  ("debugfs: block count request failed: $data");
-		$kiwi -> failed ();
-		return undef;
-	}
-	chomp $data;
-	$blocks = $data;  
-	$data = qxx (
-		"$dfs $req $src 2>/dev/null | grep $bfr | sed -e 's,.*: *,,'"
-	);
-	$code = $? >> 8;
-	if ($code != 0) {
-		$kiwi -> error  ("debugfs: free blocks request failed: $data");
-		$kiwi -> failed ();
-		return undef;
-	}  
-	$kiwi -> info ("clicfs: blocks count=$blocks free=$data");
-	$blocks = $blocks - $data;  
-	$data = qxx ("/sbin/resize2fs $this->{imageDest}/fsdata.ext3 $blocks 2>&1");
-	$code = $? >> 8;
-	if ($code != 0) {
-		$kiwi -> error  ("Failed to resize ext3 container: $data");
-		$kiwi -> failed ();
-		return undef;
+	$kiwi -> loginfo ("Using resize2fs version: $rver\n");
+	if ($rver >= 1.41) {
+		$data = qxx (
+			"resize2fs $this->{imageDest}/fsdata.ext3 -M 2>&1"
+		);
+		$code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> error  ("Failed to resize ext3 container: $data");
+			$kiwi -> failed ();
+			return undef;
+		}
+	} else {
+		$data = qxx (
+			"$dfs $req $src 2>/dev/null | grep $bcn | sed -e 's,.*: *,,'"
+		);
+		$code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> error  ("debugfs: block count request failed: $data");
+			$kiwi -> failed ();
+			return undef;
+		}
+		chomp $data;
+		$blocks = $data;  
+		$data = qxx (
+			"$dfs $req $src 2>/dev/null | grep $bfr | sed -e 's,.*: *,,'"
+		);
+		$code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> error  ("debugfs: free blocks request failed: $data");
+			$kiwi -> failed ();
+			return undef;
+		}  
+		$kiwi -> info ("clicfs: blocks count=$blocks free=$data");
+		$blocks = $blocks - $data;  
+		$data = qxx (
+			"resize2fs $this->{imageDest}/fsdata.ext3 $blocks 2>&1"
+		);
+		$code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> error  ("Failed to resize ext3 container: $data");
+			$kiwi -> failed ();
+			return undef;
+		}
 	}
 	#==========================================
 	# Create clicfs filesystem from ext3
