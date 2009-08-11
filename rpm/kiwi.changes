@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Aug 11 10:23:45 CEST 2009 - ms@suse.de
+
+- v3.72
+- fixed getSize function to calculate required inode count
+  for the subsequent mkfs ext2/3/4 call (bnc #528839)
+
+-------------------------------------------------------------------
 Fri Aug  7 14:56:27 CEST 2009 - ms@suse.de
 
 - v3.71

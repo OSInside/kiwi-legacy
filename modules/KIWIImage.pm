@@ -3693,6 +3693,9 @@ sub setupEXT2 {
 		$fsopts = $FSopts{ext2};
 		$fsopts.= "-F";
 	}
+	if ($this->{inodes}) {
+		$fsopts.= " -N $this->{inodes}";
+	}
 	my $data = qxx ("/sbin/mke2fs $fsopts $this->{imageDest}/$name 2>&1");
 	my $code = $? >> 8;
 	if ($code != 0) {
@@ -4122,28 +4125,38 @@ sub getSize {
 	my $this   = shift;
 	my $extend = shift;
 	my $xml    = $this->{xml};
-	my $size = qxx (" du -ks $extend "); chomp $size;
-	if ($size =~ /(\d+)\s.*/) {
-		$size = $1;
-	}
+	my $mini   = qxx ("find $extend | wc -l"); $mini *= 2;
+	my $size   = qxx ("du -s --block-size=1 $extend | cut -f1"); chomp $size;
+	my $spare  = 0.3 * $size;
+	my $needi  = $size / $main::FSInodeRatio;
 	#==========================================
-	# Add 30% more space for later filesystem
+	# Inode count for this filesystem
 	#------------------------------------------
-	my $spare = 0.3 * $size;
-	if ($spare <= 8192) {
-		$spare = 8192;
-	}
+	$this->{inodes} =
+		$mini > $needi ? $mini : $needi;
+	#==========================================
+	# Minimum size calculated in MB
+	#------------------------------------------
 	my $orig = $size;
-	$orig /= 1024;
+	$orig /= 1048576;
 	$orig = int ($orig);
+	#==========================================
+	# Used size with spare space in MB
+	#------------------------------------------
 	$size += $spare;
-	$size += $xml -> getImageSizeAdditiveBytes() / 1024;
-	$size /= 1024;
+	$size += $xml -> getImageSizeAdditiveBytes();
+	$size /= 1048576;
 	$size = int ($size);
+	#==========================================
+	# Size value from XML description
+	#------------------------------------------
 	my $xmlsize = $xml -> getImageSize();
 	if ($xmlsize eq "auto") {
 		$xmlsize = $size;
 	}
+	#==========================================
+	# return result list
+	#------------------------------------------
 	return ($orig,$size,$xmlsize);
 }
 
