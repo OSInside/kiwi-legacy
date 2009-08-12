@@ -3418,7 +3418,10 @@ function mountSystemClicFS {
 		# no reserved blocks for ram only usage...
 		tune2fs -m 0 $roDir/fsdata.ext3
 	fi
-	resize2fs $roDir/fsdata.ext3 $size
+	if [ $LOCAL_BOOT = "no" ];then
+		e2fsck -p $roDir/fsdata.ext3
+		resize2fs $roDir/fsdata.ext3 $size
+	fi
 	mount -o loop,noatime,nodiratime,errors=remount-ro,barrier=0 \
 		$roDir/fsdata.ext3 /mnt
 	if [ ! $? = 0 ];then
@@ -3592,7 +3595,7 @@ function mountSystem {
 	#======================================
 	# wait for storage device to appear
 	#--------------------------------------
-	if echo $mountDevice | grep -q ^/;then
+	if ! echo $mountDevice | grep -q loop;then
 		waitForStorageDevice $mountDevice
 	fi
 	#======================================
@@ -3754,6 +3757,9 @@ function waitForStorageDevice {
 	# ----
 	local device=$1
 	local check=0
+	if [ ! -e $device ];then
+		return 1
+	fi
 	while true;do
 		partitionSize $device &>/dev/null
 		if [ $? = 0 ];then
