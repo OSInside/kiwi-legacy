@@ -3418,8 +3418,10 @@ function mountSystemClicFS {
 		# no reserved blocks for ram only usage...
 		tune2fs -m 0 $roDir/fsdata.ext3
 	fi
-	if [ $LOCAL_BOOT = "no" ];then
+	if [ ! $LOCAL_BOOT = "no" ];then
 		e2fsck -p $roDir/fsdata.ext3
+	fi
+	if [ $LOCAL_BOOT = "no" ];then
 		resize2fs $roDir/fsdata.ext3 $size
 	fi
 	mount -o loop,noatime,nodiratime,errors=remount-ro,barrier=0 \
