@@ -3759,9 +3759,6 @@ function waitForStorageDevice {
 	# ----
 	local device=$1
 	local check=0
-	if [ ! -e $device ];then
-		return 1
-	fi
 	while true;do
 		partitionSize $device &>/dev/null
 		if [ $? = 0 ];then
