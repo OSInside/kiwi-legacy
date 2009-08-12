@@ -2,6 +2,7 @@
 Tue Aug 11 18:33:29 CEST 2009 - ms@suse.de
 
 - v3.74
+- fixed VMFindSystem function in xenboot (bnc #530200)
 - use resize2fs -M if possible ( >= v1.41 )
 
 -------------------------------------------------------------------

@@ -38,32 +38,13 @@ export systemIntegrity=clean
 # Functions...
 #--------------------------------------
 VMFindSystem () {
-	local haveSDA=0
-	local haveHDA=0
-	local devices=""
-	waitForStorageDevice /dev/sda1
-	if [ ! -e /dev/sda1 ];then
-		waitForStorageDevice /dev/hda1
-		if [ -e /dev/hda1 ];then
-			haveHDA=1
-			devices="/dev/hda1 /dev/hda"
-		fi
-	else
-		haveSDA=1
-		devices="/dev/sda1 /dev/sda"
-	fi
-	if [ $haveSDA = 0 ] && [ $haveHDA = 0 ];then
+	imageRootDevice="/dev/"$root
+	waitForStorageDevice $imageRootDevice
+	if [ ! -e $imageRootDevice ];then
 		systemException \
-			"Couldn't find any storage device... abort" \
+			"Couldn't find storage device... abort" \
 		"reboot"
 	fi
-	for rdevice in $devices;do
-		imageRootDevice=$rdevice
-		if kiwiMount $imageRootDevice "/mnt" &>/dev/null;then
-			umount /mnt
-			break
-		fi
-	done
 }
 #======================================
 # Beautify Startup
