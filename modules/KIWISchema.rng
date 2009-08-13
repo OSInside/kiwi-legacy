@@ -1195,6 +1195,9 @@ according to the used package manager.</db:para>
     
   -->
   <div>
+    <define name="k.rpm-force.content">
+      <data type="boolean"/>
+    </define>
     <define name="k.rpm-force.attlist">
       <empty/>
     </define>
@@ -1205,7 +1208,7 @@ according to the used package manager.</db:para>
 package or not. This option could be ignored according
 to the used package manager.</db:para>
         <ref name="k.rpm-force.attlist"/>
-        <text/>
+        <ref name="k.rpm-force.content"/>
       </element>
     </define>
   </div>

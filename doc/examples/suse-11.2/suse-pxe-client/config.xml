@@ -10,7 +10,7 @@
 		<version>1.2.8</version>
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>False</rpm-check-signatures>
-		<rpm-force>True</rpm-force>
+		<rpm-force>true</rpm-force>
 	</preferences>
 	<users group="users">
 		<user name="linux" pwd="$2a$10$90AjhfXU2YIwTRrIftBauecvWXVuaNZ6JLM2IpWi0svu2kO16le9e" home="/home/linux"/>

@@ -821,6 +821,7 @@ div {
 # common element <rpm-force>
 #
 div {
+	k.rpm-force.content = xsd:boolean
 	k.rpm-force.attlist = empty
 	k.rpm-force =
 		## Force the Installation of a Package
@@ -833,7 +834,7 @@ div {
 		]
 		element rpm-force {
 			k.rpm-force.attlist,
-			text
+			k.rpm-force.content
 		}
 }
 

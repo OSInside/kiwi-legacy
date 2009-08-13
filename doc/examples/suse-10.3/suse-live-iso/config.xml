@@ -11,7 +11,7 @@
     <size unit="M">2000</size>
     <packagemanager>smart</packagemanager>
     <rpm-check-signatures>False</rpm-check-signatures>
-    <rpm-force>False</rpm-force>
+    <rpm-force>true</rpm-force>
     <locale>en_US.UTF-8</locale>
     <keytable>us.map.gz</keytable>
   </preferences>

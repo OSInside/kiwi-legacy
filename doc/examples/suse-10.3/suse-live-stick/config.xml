@@ -11,7 +11,7 @@
 		<version>1.1.2</version>
 		<packagemanager>smart</packagemanager>
 		<rpm-check-signatures>False</rpm-check-signatures>
-		<rpm-force>True</rpm-force>
+		<rpm-force>true</rpm-force>
 		<locale>en_US</locale>
 		<keytable>us.map.gz</keytable>
 	</preferences>

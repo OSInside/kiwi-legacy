@@ -10,7 +10,7 @@
 		<version>2.5.1</version>
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>False</rpm-check-signatures>
-		<rpm-force>True</rpm-force>
+		<rpm-force>true</rpm-force>
 		<locale>en_US.UTF-8</locale>
 		<keytable>us.map.gz</keytable>
 	</preferences>
