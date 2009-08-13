@@ -3,7 +3,8 @@ Tue Aug 11 18:33:29 CEST 2009 - ms@suse.de
 
 - v3.74
 - fixed VMFindSystem function in xenboot (bnc #530200)
-- make rpm-force content a boolean value
+- make rpm-force content a boolean value. Update schema
+  documentation, update LaTeX documentation
 - removed pigz from kiwi-tools, it's packaged and
   maintained by Alexander Graf <agraf@suse.de> now
 - run fsck and resize2fs only on first boot of a clic mount
