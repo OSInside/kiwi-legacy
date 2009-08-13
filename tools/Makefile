@@ -1,7 +1,6 @@
 all:
 	${MAKE} -C startshell all
 	${MAKE} -C dcounter all
-	${MAKE} -C pigz all
 	${MAKE} -C driveready all
 	${MAKE} -C dbuslock -f Makefile.swig all
 	${MAKE} -C dbuslock BINDLIB=${bindlib} all
@@ -20,7 +19,6 @@ install:
 	#install -m 755 init/* ${INITVZ}
 	install -m 755 dcounter/dcounter ${TOOLSVZ}
 	install -m 755 startshell/startshell ${TOOLSVZ}
-	install -m 755 pigz/pigz ${TOOLSVZ}
 	install -m 755 driveready/driveready ${TOOLSVZ}
 	${MAKE} -C dbuslock DESTDIR=${buildroot} install_vendor
 	( \
@@ -39,7 +37,6 @@ clean:
 	${MAKE} -C dcounter clean
 	test -f burner/Makefile && ${MAKE} -C burner clean || true
 	${MAKE} -C startshell clean
-	${MAKE} -C pigz clean
 	${MAKE} -C driveready clean
 	${MAKE} -C satplugin -f Makefile.swig clean
 	${MAKE} -C dbuslock -f Makefile.swig clean
