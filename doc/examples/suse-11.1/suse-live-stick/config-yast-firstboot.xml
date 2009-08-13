@@ -42,7 +42,7 @@
                 <archs>all</archs>
             </defaults>
             <stage>firstboot</stage>
-            <label>Configuing Your System</label>
+            <label>Configuring Your System</label>
             <mode>installation</mode>
             <modules  config:type="list">
                 <module>
