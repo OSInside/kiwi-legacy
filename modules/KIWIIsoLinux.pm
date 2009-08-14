@@ -554,6 +554,11 @@ sub createHybrid {
 	my $mbrid= shift;
 	my $kiwi = $this->{kiwi};
 	my $iso  = $this->{dest};
+	my $loop;
+	my $FD;
+	#==========================================
+	# Create partition table on iso
+	#------------------------------------------
 	if (! -x "/usr/bin/isohybrid") {
 		$kiwi -> error  ("Can't find isohybrid, check your syslinux version");
 		$kiwi -> failed ();
@@ -566,6 +571,32 @@ sub createHybrid {
 		$kiwi -> failed ();
 		return undef;
 	}
+	#==========================================
+	# Make it DOS compatible
+	#------------------------------------------
+	my @commands = ("d","n","p","1",".",".","a","1","w","q");
+	$loop = qxx ("/sbin/losetup -s -f $iso 2>&1"); chomp $loop;
+	$code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> error  ("Failed to loop bind iso file: $loop");
+		$kiwi -> failed ();
+		return undef;
+	}
+	if (! open ($FD,"|/sbin/fdisk $loop &> /dev/null")) {
+		$kiwi -> error  ("Failed to call fdisk");
+		$kiwi -> failed ();
+		qxx ("losetup -d $loop");
+		return undef;
+	}
+	foreach my $cmd (@commands) {
+		if ($cmd eq ".") {
+			print $FD "\n";
+		} else {
+			print $FD "$cmd\n";
+		}
+	}
+	close $FD;
+	qxx ("losetup -d $loop");
 	return $this;
 }
 
