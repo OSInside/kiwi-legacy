@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Aug 14 12:26:31 CEST 2009 - ms@suse.de
+
+- update documentation, add information about LVM and
+  repository priorities, differences between smart and zypper
+
+-------------------------------------------------------------------
 Tue Aug 11 18:33:29 CEST 2009 - ms@suse.de
 
 - v3.74

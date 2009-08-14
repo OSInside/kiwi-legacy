@@ -170,3 +170,21 @@ be specified:
 %\end{verbatim}
 %\end{enumerate}
 
+\subsection{LVM support}
+
+kiwi also provides support for LVM (Logical Volume Management). In this
+mode the disk partition table will include one lvm partition and one
+standard ext2 boot partition. kiwi creates the kiwiVG volume group and
+adds logical volumes as they are needed according to the image type and
+filesystem. After boot of the system the user has full control over the
+volume group and is free to change/resize/increas the group and the
+volumes inside. Support for LVM has been added for all image types which
+are disk based. This includes vmx,oem and usb. In order to use LVM for the
+oem type just add the \verb+--lvm+ option as part of the kiwi create step:
+
+\begin{Command}{12cm}
+\begin{verbatim}
+kiwi --create /tmp/myoem --type split \
+     -d /tmp/myoem-result --lvm
+\end{verbatim}
+\end{Command}

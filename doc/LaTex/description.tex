@@ -494,10 +494,14 @@ attributes:
       the source argument doesn't really explain what this repository
       contains 
 \item \textbf{priority=''number''}\\
-      Specifies the channel priority assigned to all packages available in
-      this channel (0 if not set). If the exact same package
-      is available in more than one channel, the highest priority is used.
-      At the moment this only works for the smart package manager.
+      Specifies the repository priority assigned to all packages available in
+      this repository. For \textbf{smart} the following applies: If the
+      exact same package is available in more than one channel, the repository
+      with the \textbf{highest} priority number is used. The value 0 means
+      \textbf{no priority is set}. For \textbf{zypper} the following applies:
+      If the exact same package is available in more than one channel, the
+      repository with the \textbf{lowest} priority number is used. The value
+      99 means \textbf{no priority is set}.
 \end{itemize}
 
 The source child element contains the path attribute, which specifies

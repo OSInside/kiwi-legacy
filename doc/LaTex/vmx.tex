@@ -122,5 +122,28 @@ a VMware based image (.vmdk file) and the required VMware guest
 configuration (.vmx)
 
 You can also create an image for the Xen virtualization framework.  To do this,
-you simply need to specify the 'xen' boot profile in your config.xml.  Like
-VMware, Xen has a configuration file as well.  Refer to chapter \ref{chapter:xen} (Xen image) for details.
+you simply need to specify the 'xen' \textbf{bootprofile} and
+the 'nex' \textbf{bootkernel} in your config.xml type section. Don't be
+curious about the name 'nex' as bootkernel. The reason for this is just because the name of the boot profile is xen and the name of the kernel is also xen.
+Therefore I simply decided to use the reverse name for it. Like VMware,
+Xen has a configuration file as well. Refer to chapter
+\ref{chapter:xen} (Xen image) for details.
+
+\subsection{LVM support}
+
+kiwi also provides support for LVM (Logical Volume Management). In this
+mode the disk partition table will include one lvm partition and one
+standard ext2 boot partition. kiwi creates the kiwiVG volume group and
+adds logical volumes as they are needed according to the image type and
+filesystem. After boot of the system the user has full control over the
+volume group and is free to change/resize/increas the group and the
+volumes inside. Support for LVM has been added for all image types which
+are disk based. This includes vmx,oem and usb. In order to use LVM for the
+vmx type just add the \verb+--lvm+ option as part of the kiwi create step:
+
+\begin{Command}{12cm}
+\begin{verbatim}
+kiwi --create /tmp/myvm --type vmx \
+     -d /tmp/myvm-result --lvm
+\end{verbatim}
+\end{Command}
