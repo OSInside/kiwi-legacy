@@ -1,6 +1,8 @@
 -------------------------------------------------------------------
 Fri Aug 14 12:26:31 CEST 2009 - ms@suse.de
 
+- fixed main::mount() method, setup of umountStack was wrong
+  now using mount destination for umount not source
 - fixed isohybrid created partition table to be DOS compatible
   This means the first partition starts at sector 64
 - update documentation, add information about LVM and

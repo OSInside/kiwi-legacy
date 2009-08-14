@@ -2467,7 +2467,7 @@ sub mount {
 			return undef;
 		}
 	}
-	push @UmountStack,"umount $source";
+	push @UmountStack,"umount $dest";
 	#==========================================
 	# Post mount actions
 	#------------------------------------------
@@ -2480,7 +2480,7 @@ sub mount {
 			$kiwi -> failed ();
 			return undef;
 		}
-		push @UmountStack,"umount $source";
+		push @UmountStack,"umount $dest";
 	}
 	return $dest;
 }

@@ -3247,8 +3247,8 @@ sub cleanTmp {
 	}
 	my $tmpdir = $this->{tmpdir};
 	my $loopdir= $this->{loopdir};
-	qxx ("rm -rf $tmpdir");
-	qxx ("rm -rf $loopdir");
+	qxx ("rm -rf $tmpdir 2>&1");
+	qxx ("rm -rf $loopdir 2>&1");
 	return $this;
 }
 
