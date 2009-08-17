@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Mon Aug 17 16:38:44 CEST 2009 - ms@suse.de
+
+- added support for language selection in displayEULA function.
+  The function now uses the same file names according to the
+  licenses.tgz file. If no language specific license file could
+  be found the function defaults to license.txt and if that file
+  also doesn't exist it defaults to EULA.txt (bnc #530497)
+
+-------------------------------------------------------------------
 Fri Aug 14 12:26:31 CEST 2009 - ms@suse.de
 
 - fixed main::mount() method, setup of umountStack was wrong

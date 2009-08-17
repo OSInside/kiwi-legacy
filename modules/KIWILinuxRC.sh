@@ -4440,14 +4440,56 @@ function luksClose {
 function displayEULA {
 	# /.../
 	# display in a dialog window the text part of the
-	# file /EULA.txt
+	# selected language file or the default file 
+	# /license.txt or /EULA.txt
 	# ----
-	local license=/EULA.txt
-	if [ ! -f $license ];then
+	local title="\"Select EULA Language\""
+	local list="en \"[ English ]\" on"
+	local de=German
+	local es=Spanish
+	local fr=French
+	local it=Italian
+	local pt_BR=Portuguese
+	local ja=Japanese
+	local zh_CN=Chinese
+	local zh_TW=Taiwanese
+	local lang
+	local code
+	#======================================
+	# find license files, show radio list
+	#--------------------------------------
+	local files=$(find /license.*.txt 2>/dev/null)
+	if [ -z "$files" ];then
+		return
+	fi
+	for i in $files;do
+		code=`echo $i | cut -f2 -d.`
+		eval lang=\$$code
+		list="$list $code \"[ $lang ]\" off"
+	done
+	code=$(
+		eval dialog --stdout --no-cancel \
+		--radiolist $title 20 40 10 $list
+	)
+	#======================================
+	# use selected file or default
+	#--------------------------------------
+	code=/license.$code.txt
+	if [ ! -f $code ];then
+		code=/license.txt
+		if [ ! -f $code ];then
+			code=/EULA.txt
+		fi
+	fi
+	#======================================
+	# check selected file and show it
+	#--------------------------------------
+	if [ ! -f $code ];then
+		Echo "License file $code not found... skipped"
 		return
 	fi
 	while true;do
-		dialog --textbox $license 20 70 \
+		dialog --textbox $code 20 70 \
 			--and-widget --extra-button --extra-label "No" --ok-label "Yes" \
 			--yesno "Do you accept the license agreement ?" 5 45
 		case $? in
@@ -4462,7 +4504,6 @@ function displayEULA {
 		esac
 	done
 }
-
 #======================================
 # ddn
 #--------------------------------------
