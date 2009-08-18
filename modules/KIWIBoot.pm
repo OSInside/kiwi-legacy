@@ -3586,11 +3586,11 @@ sub setupBootLoaderConfiguration {
 		print FD "default 0\n";
 		print FD "timeout 10\n";
 		if ($type =~ /^KIWI CD/) {
-			$title = $this -> makeLabel ("Restore $label");
+			$title = $this -> makeLabel ("Install/Restore $label");
 			print FD "gfxmenu (cd)/boot/message\n";
 			print FD "title $title\n";
 		} elsif ($type =~ /^KIWI USB/) {
-			$title = $this -> makeLabel ("Restore $label");
+			$title = $this -> makeLabel ("Install/Restore $label");
 			print FD "gfxmenu (hd0,0)/boot/message\n";
 			print FD "title $title\n";
 		} else {
@@ -3767,7 +3767,7 @@ sub setupBootLoaderConfiguration {
 			return undef;
 		} elsif ($type =~ /^KIWI USB/) {
 			print FD "LABEL Linux\n";
-			print FD "MENU LABEL Restore ".$label."\n";
+			print FD "MENU LABEL Install/Restore ".$label."\n";
 		} else {
 			print FD "LABEL Linux\n";
 			print FD "MENU LABEL ".$label." [ ".$type." ]\n";
@@ -3813,7 +3813,7 @@ sub setupBootLoaderConfiguration {
 			# not supported yet..
 		} elsif ($type =~ /^KIWI USB/) {
 			print FD "LABEL Failsafe\n";
-			print FD "MENU LABEL Failsafe -- Restore ".$label."\n";
+			print FD "MENU LABEL Failsafe -- Install/Restore ".$label."\n";
 		} else {
 			print FD "LABEL Failsafe\n";
 			print FD "MENU LABEL Failsafe -- ".$label." [ ".$type." ]\n";
