@@ -784,7 +784,7 @@ sub setupBootStick {
 		$softSize += -s $splitfile;
 	}
 	$softSize /= 1024;
-	$softSize += $lvmbootMB;
+	$softSize += $lvmbootMB + $luksbootMB + $syslbootMB + $dmbootMB;
 	if ($hardSize < $softSize) {
 		$kiwi -> error  ("Stick too small: got $hardSize kB need $softSize kB");
 		$kiwi -> failed ();
