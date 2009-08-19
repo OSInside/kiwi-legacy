@@ -1045,23 +1045,7 @@ sub setupBootStick {
 				return undef;
 			}
 			$kiwi -> done();
-		} elsif ($syszip) {
-			$kiwi -> info ("Creating ext3 read/write filesystem");
-			my %FSopts = main::checkFSOptions();
-			my $fsopts = $FSopts{ext3};
-			$fsopts.= "-j -F";
-			$status = qxx ("/sbin/mke2fs $fsopts $deviceMap{2} 2>&1");
-			$result = $? >> 8;
-			if ($result != 0) {
-				$kiwi -> failed ();
-				$kiwi -> error  ("Couldn't create ext3 filesystem: $status");
-				$kiwi -> failed ();
-				$this -> cleanDbus();
-				$this -> cleanTmp ();
-				return undef;
-			}
-			$kiwi -> done();
-		}
+		} 
 	} else {
 		#==========================================
 		# Create fs on system image partition

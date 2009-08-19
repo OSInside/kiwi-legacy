@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Mon Aug 17 16:38:44 CEST 2009 - ms@suse.de
 
+- removed duplicate creation of read/write filesystem
 - changed title for install media to "Install/Restore ..."
 - added support for language selection in displayEULA function.
   The function now uses the same file names according to the
