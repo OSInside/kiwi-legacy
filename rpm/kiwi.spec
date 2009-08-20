@@ -11,7 +11,7 @@
 # needsrootforbuild
 
 Url:            http://kiwi.berlios.de
-
+%define sattools_version %(rpm -q --qf %{VERSION} satsolver-tools)
 Name:           kiwi
 BuildRequires:  perl-XML-LibXML perl-libwww-perl perl-Config-IniFiles
 BuildRequires:  hal-devel module-init-tools screen zlib-devel
@@ -41,7 +41,7 @@ Requires:       perl-XML-LibXML perl-libwww-perl screen coreutils
 Requires:       perl-XML-LibXML-Common perl-XML-SAX perl-Config-IniFiles
 Requires:       kiwi-tools libxslt checkmedia
 %if %{suse_version} > 1030
-Requires:       satsolver-tools
+Requires:       satsolver-tools = %{sattools_version}
 %endif
 Summary:        OpenSuSE - KIWI Image System
 Provides:       kiwi2 <= 2.14
@@ -569,10 +569,6 @@ rm -rf $RPM_BUILD_ROOT
 %ifarch %ix86 x86_64
 %files -n kiwi-templates
 %defattr(-, root, root)
-%dir %{_datadir}/kiwi/image/suse-11.2-JeOS
-%dir %{_datadir}/kiwi/image/suse-11.1-JeOS
-%dir %{_datadir}/kiwi/image/suse-SLE10-JeOS
-%dir %{_datadir}/kiwi/image/suse-SLE11-JeOS
 %{_datadir}/kiwi/image/suse-11.2-JeOS
 %{_datadir}/kiwi/image/suse-11.1-JeOS
 %{_datadir}/kiwi/image/suse-SLE10-JeOS
