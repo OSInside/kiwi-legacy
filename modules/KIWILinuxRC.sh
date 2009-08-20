@@ -28,6 +28,7 @@ export PARTITIONER=sfdisk
 export TRANSFER_ERRORS_FILE=/tmp/transfer.errors
 export DEFAULT_VGA=0x314
 export HAVE_MODULES_ORDER=1
+export TERM=linux
 
 #======================================
 # Debug
@@ -4467,10 +4468,9 @@ function displayEULA {
 		eval lang=\$$code
 		list="$list $code \"[ $lang ]\" off"
 	done
-	code=$(
-		eval dialog --stdout --no-cancel \
-		--radiolist $title 20 40 10 $list
-	)
+	echo -n "dialog --stdout --no-cancel --radiolist $title 20 40 10 $list" \
+		> /tmp/dia.sh
+	code=$(runInteractive /tmp/dia.sh)
 	#======================================
 	# use selected file or default
 	#--------------------------------------
@@ -4521,6 +4521,21 @@ function ddn {
 		return
 	fi
 	echo $1$2
+}
+#======================================
+# runInteractive
+#--------------------------------------
+function runInteractive {
+	# /.../
+	# run shell program in interactive shell and echo the
+	# output to the calling terminal. The input file is
+	# not allowed to contain a newline at the end of the
+	# file. The input file is changed due to that call
+	# ----
+	local p=$1
+	echo "> /tmp/out" >> $p
+	setctsid $ELOG_EXCEPTION /bin/bash -i $p || return
+	cat /tmp/out && rm -f /tmp/out $p
 }
 #======================================
 # SAPMemCheck

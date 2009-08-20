@@ -873,12 +873,12 @@ function suseStripInitrd {
 		/usr/lib*/hal /usr/lib*/*.a /usr/lib*/*.la /usr/lib*/librpm*
 		/usr/lib*/libpanel* /usr/lib*/libmenu* /usr/src/packages/RPMS
 		/usr/X11R6 /usr/lib*/X11 /var/X11R6 /usr/share/X11 /etc/X11
-		/usr/lib*/libX* /usr/lib*/xorg /usr/lib*/libidn*
+		/usr/lib*/libX* /usr/lib*/xorg /usr/lib*/libidn* /usr/share/terminfo
 		/etc/ppp /etc/xdg /etc/NetworkManager /lib*/YaST /lib*/security
 		/lib*/mkinitrd /srv /var/adm /usr/lib*/engines /usr/src/packages
 		/usr/src/linux* /usr/local /var/log/* /usr/share/pixmaps
 		/usr/share/gtk-doc /var/games /opt /var/spool /var/opt
-		/var/cache /var/tmp /etc/rpm /etc/cups /etc/opt /usr/share/terminfo
+		/var/cache /var/tmp /etc/rpm /etc/cups /etc/opt
 		/home /media /lib/firmware /usr/lib*/lsb /usr/lib*/krb5
 		/usr/lib*/ldscripts /usr/lib*/getconf /usr/lib*/pwdutils
 		/usr/lib*/pkgconfig /usr/lib*/browser-plugins
@@ -945,7 +945,7 @@ function suseStripInitrd {
 		ldd driveready checkmedia splashy bzip2 hexdump vgremove
 		pvchange pvresize pvscan vgscan vgchange vgextend vgdisplay
 		lvchange lvresize lvextend lvcreate grub dcounter tty
-		dmsetup dialog awk gawk clicfs cryptsetup clear initviocons
+		dmsetup dialog awk gawk clicfs cryptsetup clear
 	"
 	tools="$tools $@"
 	for path in /sbin /usr/sbin /usr/bin /bin;do

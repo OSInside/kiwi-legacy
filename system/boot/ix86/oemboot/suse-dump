@@ -108,7 +108,9 @@ function OEMInstall {
 					dpara="$dpara $i \"$dname [ $dsize KByte ]\" off"
 				fi
 			done
-			instDisk=$(eval dialog --stdout --radiolist $hd 20 75 15 $dpara)
+			echo -n "dialog --stdout --radiolist $hd 20 75 15 $dpara" \
+				> /tmp/dia.sh
+			instDisk=$(runInteractive /tmp/dia.sh)
 			if [ ! $? = 0 ];then
 				systemException \
 					"System installation canceled" \

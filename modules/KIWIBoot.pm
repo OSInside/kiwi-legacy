@@ -561,7 +561,7 @@ sub setupBootStick {
 	# add boot space if lvm based
 	#------------------------------------------
 	if ($lvm) {
-		$lvmbootMB = 20;
+		$lvmbootMB = 40;
 	}
 	#==========================================
 	# check if system is tree or image file
@@ -627,7 +627,7 @@ sub setupBootStick {
 	# add boot space if syslinux based
 	#------------------------------------------
 	if ($bootloader eq "syslinux") {
-		$syslbootMB= 20;
+		$syslbootMB= 40;
 	}
 	#==========================================
 	# check image split portion
@@ -802,7 +802,7 @@ sub setupBootStick {
 				if (($syszip) || ($haveSplit) || ($dmapper)) {
 					if ($bootloader eq "syslinux") {
 						$syslsize = $hardSize;
-						$syslsize /= 1000;
+						$syslsize /= 1024;
 						$syslsize -= $syszip;
 						$syslsize -= $syslbootMB;
 						$syslsize = sprintf ("%.f",$syslsize);
@@ -817,7 +817,7 @@ sub setupBootStick {
 						);
 					} elsif ($dmapper) {
 						$dmsize = $hardSize;
-						$dmsize /= 1000;
+						$dmsize /= 1024;
 						$dmsize -= $syszip;
 						$dmsize -= $dmbootMB;
 						$dmsize = sprintf ("%.f",$dmsize);
@@ -832,7 +832,7 @@ sub setupBootStick {
 						);
 					} elsif ($haveluks) {
 						$lukssize = $hardSize;
-						$lukssize /= 1000;
+						$lukssize /= 1024;
 						$lukssize -= $syszip;
 						$lukssize -= $luksbootMB;
 						$lukssize = sprintf ("%.f",$lukssize);
@@ -857,7 +857,7 @@ sub setupBootStick {
 				} else {
 					if ($bootloader eq "syslinux") {
 						$syslsize = $hardSize;
-						$syslsize /= 1000;
+						$syslsize /= 1024;
 						$syslsize -= $syslbootMB;
 						$syslsize = sprintf ("%.f",$syslsize);
 						@commands = (
@@ -867,7 +867,7 @@ sub setupBootStick {
 						);
 					} elsif ($haveluks) {
 						$lukssize = $hardSize;
-						$lukssize /= 1000;
+						$lukssize /= 1024;
 						$lukssize -= $luksbootMB;
 						$lukssize = sprintf ("%.f",$lukssize);
 						@commands = (
@@ -884,7 +884,7 @@ sub setupBootStick {
 				}
 			} else {
 				$lvmsize = $hardSize;
-				$lvmsize /= 1000;
+				$lvmsize /= 1024;
 				$lvmsize -= $lvmbootMB;
 				$lvmsize = sprintf ("%.f",$lvmsize);
 				if ($bootloader eq "syslinux") {
@@ -908,7 +908,7 @@ sub setupBootStick {
 		} else {
 			if ($bootloader eq "syslinux") {
 				$syslsize = $hardSize;
-				$syslsize /= 1000;
+				$syslsize /= 1024;
 				$syslsize -= $syslbootMB;
 				$syslsize = sprintf ("%.f",$syslsize);
 				@commands = (
@@ -2084,7 +2084,7 @@ sub setupBootDisk {
 	# add boot space if lvm based
 	#------------------------------------------
 	if ($lvm) {
-		$lvmbootMB = 30;
+		$lvmbootMB = 40;
 	}
 	#==========================================
 	# check if image type is oem
@@ -2161,7 +2161,7 @@ sub setupBootDisk {
 	# add boot space if syslinux based
 	#------------------------------------------
 	if ($bootloader eq "syslinux") {
-		$syslbootMB = 20;
+		$syslbootMB = 40;
 	}
 	#==========================================
 	# build disk name and label from xml data
@@ -4333,56 +4333,10 @@ sub getStorageSize {
 	# --- 
 	my $this = shift;
 	my $pdev = shift;
-	my $tool = $this->{ptool};
-	my $result;
-	my $status;
-	if (! defined $tool) {
-		$tool = "fdisk";
-	}
-	SWITCH: for ($tool) {
-		#==========================================
-		# fdisk
-		#------------------------------------------
-		/^fdisk/  && do {
-			$status = qxx ("/sbin/sfdisk -s $pdev 2>&1");
-			$result = $? >> 8;
-			last SWITCH;
-		};
-		#==========================================
-		# parted
-		#------------------------------------------
-		/^parted/  && do {
-			my $parted = "/usr/sbin/parted -m ";
-			my $disk   = $pdev;
-			my $step   = 2;
-			if ($pdev =~ /mapper/) {
-				if ($pdev =~ /mapper\/(.*)p(\d+)/) {
-					$disk = "/dev/".$1;
-					$pdev = "/dev/".$1.$2;
-					$step = 4;
-				}
-			} else {
-				if ($pdev =~ /(.*)(\d+)/) {
-					$disk = $1;
-					$step = 4;
-				}
-			}
-			$parted .= '-s '.$disk.' unit B print |';
-			$parted .= 'sed -e "s@^\([0-4]\):@'.$disk.'\1:@" |';
-			$parted .= 'grep ^'.$pdev.':|cut -f'.$step.' -d: | tr -d B';
-			$status = qxx ($parted);
-			$result = $? >> 8;
-			if ((! $status) && ($pdev =~ /loop/)) {
-				$status = qxx ("/usr/sbin/parted -s $pdev mklabel msdos 2>&1");
-				$status = qxx ($parted);
-				$result = $? >> 8;
-			}
-			$status /= 1000;
-			last SWITCH;
-		}
-	}
+	my $status = qxx ("blockdev --getsize64 $pdev 2>&1");
+	my $result = $? >> 8;
 	if ($result == 0) {
-		return int $status;
+		return int ($status / 1024);
 	}
 	return 0;
 }
