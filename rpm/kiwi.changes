@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Aug 21 15:45:09 CEST 2009 - ms@suse.de
+
+- remove kernel-.*-base from all boot image descriptions
+  for suse-11.2. They don't exist anymore
+
+-------------------------------------------------------------------
 Thu Aug 20 17:36:37 CEST 2009 - ms@suse.de
 
 - fixed spec file

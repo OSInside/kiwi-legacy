@@ -66,24 +66,19 @@
 	</repository>
 	<packages type="image" profiles="std">
 		<package name="kernel-default"/>
-		<package name="kernel-default-base"/>
 	</packages>
 	<packages type="image" profiles="pae">
 		<package name="kernel-pae"/>
-		<package name="kernel-pae-base"/>
 	</packages>
 	<packages type="image" profiles="nex">
 		<package name="kernel-xen"/>
-		<package name="kernel-xen-base"/>
 		<package name="xen"/>
 	</packages>
 	<packages type="image" profiles="ec2">
 		<package name="kernel-ec2"/>
-		<package name="kernel-ec2-base"/>
 	</packages>
 	<packages type="bootstrap" profiles="desktop">  
 		<package name="kernel-desktop"/>  
-		<package name="kernel-desktop-base"/>
 	</packages>
 	<packages type="image">
 		<package name="clicfs"/>

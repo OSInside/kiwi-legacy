@@ -139,26 +139,22 @@
 	<packages type="image" profiles="std">
 		<!-- KERNEL AND MODULE PACKAGES START STD -->
 		<package name="kernel-default"/>
-		<package name="kernel-default-base"/>
 		<!-- KERNEL AND MODULE PACKAGES END STD -->
 	</packages>
 	<packages type="image" profiles="pae">
 		<!-- KERNEL AND MODULE PACKAGES START PAE -->
 		<package name="kernel-pae"/>
-		<package name="kernel-pae-base"/>
 		<!-- KERNEL AND MODULE PACKAGES END PAE -->
 	</packages>
 	<packages type="image" profiles="xen">
 		<!-- KERNEL AND MODULE PACKAGES START XEN -->
 		<package name="kernel-xen"/>
-		<package name="kernel-xen-base"/>
 		<package name="xen"/>
 		<!-- KERNEL AND MODULE PACKAGES END XEN -->
 	</packages>
 	<packages type="image" profiles="desktop">
 		<!-- KERNEL AND MODULE PACKAGES START DESKTOP -->
 		<package name="kernel-desktop"/>
-		<package name="kernel-desktop-base"/>
 		<!-- KERNEL AND MODULE PACKAGES END DESKTOP -->
 	</packages>
 	<packages type="image" profiles="default,xen,pae">
