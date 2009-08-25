@@ -556,7 +556,7 @@ else
 	# 12.1) Check for local boot
 	#--------------------------------------
 	if [ $LOCAL_BOOT = "yes" ];then
-		imageDisk=`getDiskDevice $root | sed -e s"@[0-9]@@g"`
+		imageDisk=$(dn $root)
 		imageDevice=$(ddn $imageDisk 2)
 		imageRootDevice=$imageDevice
 		imageRootName="Local-System"

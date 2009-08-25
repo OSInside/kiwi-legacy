@@ -213,7 +213,7 @@ if [ "$LOCAL_BOOT" = "no" ];then
 	fi
 	export imageDiskDevice=$biosBootDevice
 else
-	export imageDiskDevice=`getDiskDevice $root | tr -d [0-9]+`
+	export imageDiskDevice=$(dn $root)
 fi
 Echo "Found boot device: $imageDiskDevice"
 

@@ -1985,6 +1985,10 @@ sub createImageLiveCD {
 	# setup isolinux.cfg file
 	#------------------------------------------
 	$kiwi -> info ("Creating isolinux configuration...");
+	my $syslinux_new_format = 0;
+	if (-f "$gfx/gfxboot.com") {
+		$syslinux_new_format = 1;
+	}
 	if (! open (FD, ">$destination/isolinux.cfg")) {
 		$kiwi -> failed();
 		$kiwi -> error  ("Failed to create $destination/isolinux.cfg: $!");
@@ -1998,8 +2002,12 @@ sub createImageLiveCD {
 	binmode(FD, ":utf8");
 	print FD "default $label"."\n";
 	print FD "implicit 1"."\n";
-	print FD "gfxboot  bootlogo"."\n";
-	print FD "display  isolinux.msg"."\n";
+	if ($syslinux_new_format) {
+		print FD "ui gfxboot bootlogo isolinux.msg"."\n";
+	} else {
+		print FD "gfxboot  bootlogo"."\n";
+		print FD "display  isolinux.msg"."\n";
+	}
 	print FD "prompt   1"."\n";
 	print FD "timeout  200"."\n";
 	if (! $isxen) {

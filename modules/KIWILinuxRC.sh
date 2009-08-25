@@ -4531,11 +4531,30 @@ function ddn {
 	# partition number.
 	# ----
 	local lastc=$(echo $1 | sed -e 's@\(^.*\)\(.$\)@\2@')
-	if echo $last | grep -P "^\d+$";then
+	if echo $lastc | grep -P "^\d+$";then
 		echo $1"p"$2
 		return
 	fi
 	echo $1$2
+}
+#======================================
+# dn
+#--------------------------------------
+function dn {
+	# /.../
+	# print disk name (device name) according to the
+	# linux device node specs: If the last character of the
+	# device is a letter remove pX if the last character is
+	# a number remove the number
+	# ----
+	local part=$(getDiskDevice $1)
+	local lastc=$(echo $part | sed -e 's@\(^.*\)\(.$\)@\2@')
+	if echo $lastc | grep -P "^\d+$";then
+		part=$(echo $part | tr -d [0-9]+)
+	else
+		part=$(echo $part | sed -e s@p.*@@)
+	fi
+	echo $part
 }
 #======================================
 # runInteractive
