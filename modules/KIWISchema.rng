@@ -1258,6 +1258,9 @@ partition in MB. No swapspace with oem-swap set to false.</db:para>
     
   -->
   <div>
+    <define name="k.oem-swap.content">
+      <data type="boolean"/>
+    </define>
     <define name="k.oem-swap.attlist">
       <empty/>
     </define>
@@ -1266,7 +1269,7 @@ partition in MB. No swapspace with oem-swap set to false.</db:para>
         <a:documentation>For oemboot driven images: use a swap partition yes/no</a:documentation>
         <db:para>For oemboot driven images: use a swap partition yes/no.</db:para>
         <ref name="k.oem-swap.attlist"/>
-        <text/>
+        <ref name="k.oem-swap.content"/>
       </element>
     </define>
   </div>
@@ -1276,6 +1279,9 @@ partition in MB. No swapspace with oem-swap set to false.</db:para>
     
   -->
   <div>
+    <define name="k.oem-home.content">
+      <data type="boolean"/>
+    </define>
     <define name="k.oem-home.attlist">
       <empty/>
     </define>
@@ -1284,7 +1290,7 @@ partition in MB. No swapspace with oem-swap set to false.</db:para>
         <a:documentation>For oemboot driven images: use a home partition yes/no</a:documentation>
         <db:para>For oemboot driven images: use a home partition yes/no.</db:para>
         <ref name="k.oem-home.attlist"/>
-        <text/>
+        <ref name="k.oem-home.content"/>
       </element>
     </define>
   </div>
@@ -1294,6 +1300,9 @@ partition in MB. No swapspace with oem-swap set to false.</db:para>
     
   -->
   <div>
+    <define name="k.oem-recovery.content">
+      <data type="boolean"/>
+    </define>
     <define name="k.oem-recovery.attlist">
       <empty/>
     </define>
@@ -1302,7 +1311,7 @@ partition in MB. No swapspace with oem-swap set to false.</db:para>
         <a:documentation>For oemboot driven images: create a recovery archive yes/no</a:documentation>
         <db:para>For oemboot driven images: create a recovery archive yes/no</db:para>
         <ref name="k.oem-recovery.attlist"/>
-        <text/>
+        <ref name="k.oem-recovery.content"/>
       </element>
     </define>
   </div>
@@ -1334,6 +1343,9 @@ of the OEM image.</db:para>
     
   -->
   <div>
+    <define name="k.oem-kiwi-initrd.content">
+      <data type="boolean"/>
+    </define>
     <define name="k.oem-kiwi-initrd.attlist">
       <empty/>
     </define>
@@ -1344,7 +1356,7 @@ and don't replace it with mkinitrd created initrd</a:documentation>
         <db:para>For oemboot driven images: use kiwi initrd in any case
 and don't replace it with mkinitrd created initrd</db:para>
         <ref name="k.oem-kiwi-initrd.attlist"/>
-        <text/>
+        <ref name="k.oem-kiwi-initrd.content"/>
       </element>
     </define>
   </div>
@@ -1354,6 +1366,9 @@ and don't replace it with mkinitrd created initrd</db:para>
     
   -->
   <div>
+    <define name="k.oem-sap-install.content">
+      <data type="boolean"/>
+    </define>
     <define name="k.oem-sap-install.attlist">
       <empty/>
     </define>
@@ -1368,7 +1383,7 @@ appliance. This causes some checks inside the initrd
 to become activated as well as a the media changer is
 started in early preinit</db:para>
         <ref name="k.oem-sap-install.attlist"/>
-        <text/>
+        <ref name="k.oem-sap-install.content"/>
       </element>
     </define>
   </div>
@@ -1378,6 +1393,9 @@ started in early preinit</db:para>
     
   -->
   <div>
+    <define name="k.oem-reboot.content">
+      <data type="boolean"/>
+    </define>
     <define name="k.oem-reboot.attlist">
       <empty/>
     </define>
@@ -1386,7 +1404,7 @@ started in early preinit</db:para>
         <a:documentation>For oemboot driven images: reboot after first deployment yes/no</a:documentation>
         <db:para>For oemboot driven images: reboot after first deployment yes/no.</db:para>
         <ref name="k.oem-reboot.attlist"/>
-        <text/>
+        <ref name="k.oem-reboot.content"/>
       </element>
     </define>
   </div>

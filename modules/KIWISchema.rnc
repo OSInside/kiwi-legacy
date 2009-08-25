@@ -882,6 +882,7 @@ div {
 # common element <oem-swap>
 #
 div {
+	k.oem-swap.content = xsd:boolean
 	k.oem-swap.attlist = empty
 	k.oem-swap =
 		## For oemboot driven images: use a swap partition yes/no
@@ -892,7 +893,7 @@ div {
 		]
 		element oem-swap {
 			k.oem-swap.attlist,
-			text
+			k.oem-swap.content
 		}
 }
 
@@ -900,6 +901,7 @@ div {
 # common element <oem-home>
 #
 div {
+	k.oem-home.content = xsd:boolean
 	k.oem-home.attlist = empty
 	k.oem-home =
 		## For oemboot driven images: use a home partition yes/no
@@ -910,7 +912,7 @@ div {
 		]
 		element oem-home {
 			k.oem-home.attlist,
-			text
+			k.oem-home.content
 		}
 }
 
@@ -918,6 +920,7 @@ div {
 # common element <oem-recovery>
 #
 div {
+	k.oem-recovery.content = xsd:boolean
 	k.oem-recovery.attlist = empty
 	k.oem-recovery =
 		## For oemboot driven images: create a recovery archive yes/no
@@ -928,7 +931,7 @@ div {
 		]
 		element oem-recovery {
 			k.oem-recovery.attlist,
-			text
+			k.oem-recovery.content
 		}
 }
 
@@ -958,6 +961,7 @@ div {
 # common element <oem-kiwi-initrd>
 #
 div {
+	k.oem-kiwi-initrd.content = xsd:boolean
 	k.oem-kiwi-initrd.attlist = empty
 	k.oem-kiwi-initrd =
 		## For oemboot driven images: use kiwi initrd in any case
@@ -970,7 +974,7 @@ div {
 		]
 		element oem-kiwi-initrd {
 			k.oem-kiwi-initrd.attlist,
-			text
+			k.oem-kiwi-initrd.content
 		}
 }
 
@@ -978,6 +982,7 @@ div {
 # common element <oem-sap-install>
 #
 div {
+	k.oem-sap-install.content = xsd:boolean
 	k.oem-sap-install.attlist = empty
 	k.oem-sap-install =
 		## For oemboot driven images: tag the image to be an SAP
@@ -994,7 +999,7 @@ div {
 		]
 		element oem-sap-install {
 			k.oem-sap-install.attlist,
-			text
+			k.oem-sap-install.content
 		}
 }
 
@@ -1002,6 +1007,7 @@ div {
 # common element <oem-reboot>
 #
 div {
+	k.oem-reboot.content = xsd:boolean
 	k.oem-reboot.attlist = empty
 	k.oem-reboot =
 		## For oemboot driven images: reboot after first deployment yes/no
@@ -1012,7 +1018,7 @@ div {
 		]
 		element oem-reboot {
 			k.oem-reboot.attlist,
-			text
+			k.oem-reboot.content
 		}
 }
 

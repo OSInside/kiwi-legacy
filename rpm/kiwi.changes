@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Tue Aug 25 15:01:17 CEST 2009 - ms@suse.de
+
+- fixed bootloader title setup if multiple kernels are installed
+- restructured oem repartition code to allow use of parted.
+  parted does not allow to create custom partition id's they
+  are the result of a sequence of subsequently created partitions.
+  parted implementation will follow soon
+- allow only bool (true/false) content for the oem-*
+  boolean attributes 
+
+-------------------------------------------------------------------
 Fri Aug 21 15:45:09 CEST 2009 - ms@suse.de
 
 - remove kernel-.*-base from all boot image descriptions

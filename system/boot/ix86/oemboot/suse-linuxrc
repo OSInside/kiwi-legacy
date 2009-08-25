@@ -22,7 +22,7 @@
 export PATH="/sbin:/bin:/usr/sbin:/usr/bin"
 export IFS_ORIG=$IFS
 export DEBUG=0
-export bootid=0
+export bootid=1
 
 #======================================
 # Exports (Booting)
@@ -49,7 +49,7 @@ export OEM_PARTITION_CONFIG="/config.oempartition"
 #======================================
 # Functions...
 #--------------------------------------
-function setupDeviceNames {
+function setupInitialDeviceNames {
 	#======================================
 	# Check for DONT_PARTITION variable
 	#--------------------------------------
@@ -96,8 +96,8 @@ function setupDeviceNames {
 		# Standard setup
 		#--------------------------------------
 		if [ ! -z "$KIWI_RECOVERY" ];then
-			export imageRecoveryDevice=$(ddn $imageDiskDevice 4)
-			export imageRootDevice=$(ddn $imageDiskDevice 2)
+			export imageRecoveryDevice=$(ddn $imageDiskDevice $KIWI_RECOVERY)
+			export imageRootDevice=$(ddn $imageDiskDevice 1)
 		else
 			for i in 1 2;do
 				export imageRootDevice=$imageDiskDevice$i
@@ -238,7 +238,7 @@ fi
 #======================================
 # 11) Setup device names...
 #--------------------------------------
-setupDeviceNames
+setupInitialDeviceNames
 
 #======================================
 # 12) repartition the disk device
@@ -253,7 +253,7 @@ fi
 #--------------------------------------
 if isFSTypeReadOnly;then
 	setupUnionFS $imageRWDevice $imageRODevice $unionFST
-	bootid=1
+	bootid=2
 fi
 
 #======================================
@@ -425,7 +425,7 @@ if [ "$LOCAL_BOOT" = "no" ]; then
 		# DM use third partition as boot
 		#--------------------------------------
 		mkdir /mnt/dmboot
-		bootid=2
+		bootid=3
 		export imageBootDevice=$(ddn $imageDiskDevice 3)
 		mount $imageBootDevice /mnt/dmboot
 		cp -a  /mnt/boot /mnt/dmboot
@@ -440,10 +440,10 @@ if [ "$LOCAL_BOOT" = "no" ]; then
 		#--------------------------------------
 		mkdir -p /mnt/luksboot
 		imageBootDevice=$(ddn $imageDiskDevice 2)
-		bootid=1
+		bootid=2
 		if isFSTypeReadOnly;then
 			export imageBootDevice=$(ddn $imageDiskDevice 3)
-			bootid=2
+			bootid=3
 		fi
 		mount $imageBootDevice /mnt/luksboot
 		cp -a /mnt/boot /mnt/luksboot
@@ -549,7 +549,7 @@ if [ "$LOCAL_BOOT" = "no" ];then
 		OEM_RECOVERY=$imageRootDevice
 	fi
 	setupBootLoader \
-		/mnt /config $bootid $imageRootDevice \
+		/mnt /config $(($bootid - 1)) $imageRootDevice \
 		"$OEM_BOOT_TITLE" $imageSwapDevice
 	setupKernelModules /config
 fi

@@ -2205,12 +2205,12 @@ sub getImageConfig {
 		if (defined $boottheme) {
 			$result{kiwi_boottheme}= $boottheme;
 		}
-		if ((defined $oemswap) && ("$oemswap" eq "no")) {
+		if ((defined $oemswap) && ("$oemswap" eq "false")) {
 			$result{kiwi_oemswap} = "no";
 		} elsif ((defined $oemswapMB) && ("$oemswapMB" > 0)) {
 			$result{kiwi_oemswapMB} = $oemswapMB;
 		}
-		if ((defined $oemhome) && ("$oemhome" eq "no")) {
+		if ((defined $oemhome) && ("$oemhome" eq "false")) {
 			$result{kiwi_oemhome} = "no";
 		}
 		if ((defined $oemrootMB) && ("$oemrootMB" > 0)) {
@@ -2225,10 +2225,10 @@ sub getImageConfig {
 		if ((defined $oemsap) && ("$oemsap" ne "")) {
 			$result{kiwi_oemsap} = $oemsap
 		}
-		if ((defined $oemreboot) && ("$oemreboot" eq "yes")) {
+		if ((defined $oemreboot) && ("$oemreboot" eq "true")) {
 			$result{kiwi_oemreboot} = $oemreboot;
 		}
-		if ((defined $oemreco) && ("$oemreco" eq "yes")) {
+		if ((defined $oemreco) && ("$oemreco" eq "true")) {
 			$result{kiwi_oemrecovery} = $oemreco;
 		}
 	}

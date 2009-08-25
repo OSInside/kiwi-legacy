@@ -515,9 +515,10 @@ function installBootLoaderGrubRecovery {
 	# fourth primary partition of the disk
 	# ----
 	local input=/grub.input
+	local gdevreco=$(expr $recoid - 1)
 	echo "device (hd0) $imageDiskDevice" > $input
-	echo "root (hd0,3)"  >> $input
-	echo "setup (hd0,3)" >> $input
+	echo "root (hd0,$gdevreco)"  >> $input
+	echo "setup (hd0,$gdevreco)" >> $input
 	echo "quit"          >> $input
 	if [ -x /mnt/usr/sbin/grub ];then
 		/mnt/usr/sbin/grub --batch < $input 1>&2
@@ -731,6 +732,7 @@ function setupBootLoaderGrubRecovery {
 	local kernel=""
 	local initrd=""
 	local fbmode=$vga
+	local gdevreco=$(expr $recoid - 1)
 	if [ -z "$fbmode" ];then
 		fbmode=$DEFAULT_VGA
 	fi
@@ -754,7 +756,7 @@ function setupBootLoaderGrubRecovery {
 	#--------------------------------------
 	if [ ! -z "$OEM_RECOVERY" ];then
 		echo "title Recovery"                             >> $menu
-		gdev_recovery="(hd0,3)"
+		gdev_recovery="(hd0,$gdevreco)"
 		rdev_recovery=$OEM_RECOVERY
 		diskByID=`getDiskID $rdev_recovery`
 		if xenServer;then
@@ -765,7 +767,7 @@ function setupBootLoaderGrubRecovery {
 			echo -n " vga=$fbmode splash=silent"          >> $menu
 			echo -n " $KIWI_INITRD_PARAMS"                >> $menu
 			echo -n " $KIWI_KERNEL_OPTIONS"               >> $menu
-			echo " KIWI_RECOVERY=1 showopts"              >> $menu
+			echo " KIWI_RECOVERY=$recoid showopts"        >> $menu
 			echo " module /boot/$initrd"                  >> $menu
 		else
 			echo -n " kernel $gdev_recovery/boot/$kernel" >> $menu
@@ -773,7 +775,7 @@ function setupBootLoaderGrubRecovery {
 			echo -n " vga=$fbmode splash=silent"          >> $menu
 			echo -n " $KIWI_INITRD_PARAMS"                >> $menu
 			echo -n " $KIWI_KERNEL_OPTIONS"               >> $menu
-			echo " KIWI_RECOVERY=1 showopts"              >> $menu
+			echo " KIWI_RECOVERY=$recoid showopts"        >> $menu
 			echo " initrd $gdev_recovery/boot/$initrd"    >> $menu
 		fi
 	fi
@@ -859,7 +861,11 @@ function setupBootLoaderSyslinux {
 			kernel="linux.$count"
 			initrd="initrd.$count"
 			if ! echo $gfix | grep -E -q "OEM|USB|VMX|unknown";then
-				title=$(makeLabel "$gfix")
+				if [ "$count" = "1" ];then
+					title=$(makeLabel "$gfix")
+				else
+					title=$(makeLabel "$kname [ $gfix ]")
+				fi
 			elif [ -z "$kiwi_oemtitle" ];then
 				title=$(makeLabel "$kname [ $gfix ]")
 			else
@@ -919,17 +925,17 @@ function setupBootLoaderSyslinux {
 				echo -n " noresume selinux=0 nosmp"            >> $conf
 				echo " noapic maxcpus=0 edd=off"               >> $conf
 			fi
-			#======================================
-			# create recovery entry
-			#--------------------------------------
-			if [ ! -z "$OEM_RECOVERY" ];then
-				systemException \
-					"*** syslinux recovery chain loading not implemented ***" \
-				"reboot"
-			fi
 			count=`expr $count + 1`
 		fi
 	done
+	#======================================
+	# create recovery entry
+	#--------------------------------------
+	if [ ! -z "$OEM_RECOVERY" ];then
+		systemException \
+			"*** syslinux recovery chain loading not implemented ***" \
+		"reboot"
+	fi
 	#======================================
 	# create sysconfig/bootloader
 	#--------------------------------------
@@ -977,6 +983,7 @@ function setupBootLoaderGrub {
 	local rdisk=""
 	local fbmode=$vga
 	local xencons=$xencons
+	local gdevreco=$(expr $recoid - 1)
 	if [ -z "$fbmode" ];then
 		fbmode=$DEFAULT_VGA
 	fi
@@ -1056,7 +1063,11 @@ function setupBootLoaderGrub {
 			initrd=`echo $i | cut -f2 -d:`
 			kname=${KERNEL_NAME[$count]}
 			if ! echo $gfix | grep -E -q "OEM|USB|VMX|unknown";then
-				title=$(makeLabel "$gfix")
+				if [ "$count" = "1" ];then
+					title=$(makeLabel "$gfix")
+				else
+					title=$(makeLabel "$kname [ $gfix ]")
+				fi
 			elif [ -z "$kiwi_oemtitle" ];then
 				title=$(makeLabel "$kname [ $gfix ]")
 			else
@@ -1133,17 +1144,17 @@ function setupBootLoaderGrub {
 				echo " noapic maxcpus=0 edd=off"                  >> $menu
 				echo " initrd $gdev/boot/$initrd"                 >> $menu
 			fi
-			#======================================
-			# create recovery entry
-			#--------------------------------------
-			if [ ! -z "$OEM_RECOVERY" ];then
-				echo "title Recovery"                             >> $menu
-				echo " rootnoverify (hd0,3)"                      >> $menu
-				echo " chainloader +1"                            >> $menu
-			fi
-			count=`expr $count + 1`
+					count=`expr $count + 1`
 		fi
 	done
+	#======================================
+	# create recovery entry
+	#--------------------------------------
+	if [ ! -z "$OEM_RECOVERY" ];then
+		echo "title Recovery"                             >> $menu
+		echo " rootnoverify (hd0,$gdevreco)"              >> $menu
+		echo " chainloader +1"                            >> $menu
+	fi
 	#======================================
 	# create grub.conf file
 	#--------------------------------------
@@ -1283,7 +1294,11 @@ function setupBootLoaderLilo {
 			initrd=`echo $i | cut -f2 -d:`
 			kname=${KERNEL_NAME[$count]}
 			if ! echo $lfix | grep -E -q "OEM|USB|VMX|unknown";then
-				title=$(makeLabel "$lfix")
+				if [ "$count" = "1" ];then
+					title=$(makeLabel "$lfix")
+				else
+					title=$(makeLabel "$kname [ $lfix ]")
+				fi
 			elif [ -z "$kiwi_oemtitle" ];then
 				title=$(makeLabel "$kname [ $lfix ]")
 			else
@@ -1342,17 +1357,17 @@ function setupBootLoaderLilo {
 				echo -n " ide=nodma apm=off acpi=off"        >> $conf
 				echo " noresume selinux=0 nosmp"             >> $conf
 			fi
-			#======================================
-			# create recovery entry
-			#--------------------------------------
-			if [ ! -z "$OEM_RECOVERY" ];then
-				systemException \
-					"*** lilo: recovery chain loading not implemented ***" \
-				"reboot"
-			fi
 			count=`expr $count + 1`
 		fi
 	done
+	#======================================
+	# create recovery entry
+	#--------------------------------------
+	if [ ! -z "$OEM_RECOVERY" ];then
+		systemException \
+			"*** lilo: recovery chain loading not implemented ***" \
+		"reboot"
+	fi
 	#======================================
 	# create sysconfig/bootloader
 	#--------------------------------------
