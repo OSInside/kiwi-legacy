@@ -4531,7 +4531,7 @@ function ddn {
 	# partition number.
 	# ----
 	local lastc=$(echo $1 | sed -e 's@\(^.*\)\(.$\)@\2@')
-	if echo $lastc | grep -P "^\d+$";then
+	if echo $lastc | grep -qP "^\d+$";then
 		echo $1"p"$2
 		return
 	fi
@@ -4549,7 +4549,7 @@ function dn {
 	# ----
 	local part=$(getDiskDevice $1)
 	local lastc=$(echo $part | sed -e 's@\(^.*\)\(.$\)@\2@')
-	if echo $lastc | grep -P "^\d+$";then
+	if echo $lastc | grep -qP "^\d+$";then
 		part=$(echo $part | tr -d [0-9]+)
 	else
 		part=$(echo $part | sed -e s@p.*@@)
