@@ -142,12 +142,12 @@ function OEMRepartStandard {
 					# -home +swap -recovery
 					#--------------------------------------
 					if [ ! -z "$OEM_SYSTEMSIZE" ];then
-						createFDiskInput \
+						createPartitionerInput \
 							d n p 1 1 +"$disk1MBytes"M \
 							n p 2 . +"$swapsize"M \
 							t 2 82 w q
 					else
-						createFDiskInput \
+						createPartitionerInput \
 							d n p 1 1 +"$disk1MBytes"M \
 							n p 2 . . \
 							t 2 82 w q
@@ -158,13 +158,13 @@ function OEMRepartStandard {
 					# -home +swap +recovery
 					#--------------------------------------
 					if [ ! -z "$OEM_SYSTEMSIZE" ];then
-						createFDiskInput \
+						createPartitionerInput \
 							d n p 1 1 +"$disk1MBytes"M \
 							n p 2 . +"$swapsize"M \
 							n p 3 . +"$recoMByte"M \
 							t 2 82 w q
 					else
-						createFDiskInput \
+						createPartitionerInput \
 							d n p 1 1 +"$disk1MBytes"M \
 							n p 2 . +"$swapsize"M \
 							n p 3 . . \
@@ -181,10 +181,10 @@ function OEMRepartStandard {
 					# -home -swap -recovery
 					#--------------------------------------
 					if [ ! -z "$OEM_SYSTEMSIZE" ];then
-						createFDiskInput \
+						createPartitionerInput \
 							d n p 1 . +"$disk1MBytes"M w q
 					else
-						createFDiskInput \
+						createPartitionerInput \
 							d n p 1 . . w q
 					fi
 					setupDeviceNames 1 no no no 1 no
@@ -193,11 +193,11 @@ function OEMRepartStandard {
 					# -home -swap +recovery
 					#--------------------------------------
 					if [ ! -z "$OEM_SYSTEMSIZE" ];then
-						createFDiskInput \
+						createPartitionerInput \
 							d n p 1 1 +"$disk1MBytes"M \
 							n p 2 . +"$recoMByte"M w q
 					else
-						createFDiskInput \
+						createPartitionerInput \
 							d n p 1 1 +"$disk1MBytes"M \
 							n p 2 . . w q
 					fi
@@ -216,7 +216,7 @@ function OEMRepartStandard {
 					#======================================
 					# +home +swap -recovery
 					#--------------------------------------
-					createFDiskInput \
+					createPartitionerInput \
 						d n p 1 1 +"$disk1MBytes"M \
 						n p 2 . +"$swapsize"M \
 						n p 3 . . \
@@ -226,7 +226,7 @@ function OEMRepartStandard {
 					#======================================
 					# +home +swap +recovery
 					#--------------------------------------
-					createFDiskInput \
+					createPartitionerInput \
 						d n p 1 1 +"$disk1MBytes"M \
 						n p 2 . +"$swapsize"M \
 						n p 3 . +"$recoMByte"M \
@@ -242,7 +242,7 @@ function OEMRepartStandard {
 					#======================================
 					# +home -swap -recovery
 					#--------------------------------------
-					createFDiskInput \
+					createPartitionerInput \
 						d n p 1 1 +"$disk1MBytes"M \
 						n p 2 . . w q
 					setupDeviceNames 1 no 2 no 1 no
@@ -250,7 +250,7 @@ function OEMRepartStandard {
 					#======================================
 					# +home -swap +recovery
 					#--------------------------------------
-					createFDiskInput \
+					createPartitionerInput \
 						d n p 1 1 +"$disk1MBytes"M \
 						n p 2 . +"$recoMByte"M \
 						n p 3 . . w q
@@ -258,11 +258,7 @@ function OEMRepartStandard {
 				fi
 			fi
 		fi
-		Echo "Repartition the disk according to current geometry"
-		fdisk $imageDiskDevice < $input 1>&2
-		if test $? != 0; then
-			systemException "Failed to create partition table" "reboot"
-		fi
+		callPartitioner $input
 	fi
 	#======================================
 	# post repart actions
@@ -356,33 +352,29 @@ function OEMRepartOverlayed {
 		rm -f $input
 		if [ $swapsize = 0 ];then
 			if [ "$haveDMSquash" = "yes" ];then
-				createFDiskInput \
+				createPartitionerInput \
 					d 2 n p 2 . +"$disk2MBytes"M n p 3 . . w q
 				setupDeviceNames 1 no no no 3 2
 			else
-				createFDiskInput \
+				createPartitionerInput \
 					d 2 n p 2 . . w q
 				setupDeviceNames 1 no no no 2 2
 			fi
 		else
 			if [ "$haveDMSquash" = "yes" ];then
-				createFDiskInput \
+				createPartitionerInput \
 					d 2 n p 2 . +"$disk2MBytes"M \
 					n p 3 . +"$bootXMBytes"M n p 4 . . \
 					t 4 82 w q
 				setupDeviceNames 1 4 no no 3 2
 			else
-				createFDiskInput \
+				createPartitionerInput \
 					d 2 n p 2 . +"$disk2MBytes"M n p 3 . . \
 					t 3 82 w q
 				setupDeviceNames 1 3 no no 2 2
 			fi
 		fi
-		Echo "Repartition the disk according to current geometry"
-		fdisk $imageDiskDevice < $input 1>&2
-		if test $? != 0; then
-			systemException "Failed to create partition table" "reboot"
-		fi
+		callPartitioner $input
 	fi
 	#======================================
 	# post repart actions
@@ -476,19 +468,15 @@ function OEMRepartCombined {
 		input=/part.input
 		rm -f $input
 		if [ $swapsize = 0 ];then
-			createFDiskInput \
+			createPartitionerInput \
 				d 2 n p 2 . . w q
 			setupDeviceNames 1 no no no 2 2
 		else
-			createFDiskInput \
+			createPartitionerInput \
 				d 2 n p 2 . +"$disk2MBytes"M n p 3 . . t 3 82 w q
 			setupDeviceNames 1 3 no no 2 2
 		fi
-		Echo "Repartition the disk according to current geometry"
-		fdisk $imageDiskDevice < $input 1>&2
-		if test $? != 0; then
-			systemException "Failed to create partition table" "reboot"
-		fi
+		callPartitioner $input
 	fi
 	#======================================
 	# post repart actions
@@ -529,14 +517,10 @@ function OEMRepartLVM {
 	vgchange -an
 	input=/part.input
 	rm -f $input
-	createFDiskInput \
+	createPartitionerInput \
 		n p 3 . . t 3 8e w q
 	luksClose
-	Echo "Extending volume group according to current geometry"
-	fdisk $imageDiskDevice < $input 1>&2
-	if test $? != 0; then
-		systemException "Failed to create partition table" "reboot"
-	fi
+	callPartitioner $input
 	#======================================
 	# Set boot id
 	#--------------------------------------
@@ -681,23 +665,23 @@ function OEMRepartLuks {
 		rm -f $input
 		if [ $swapsize = 0 ];then
 			if isFSTypeReadOnly;then
-				createFDiskInput \
+				createPartitionerInput \
 					d 2 d 3 n p 2 . +"$disk2MBytes"M n p 3 . . w q
 				setupDeviceNames 1 no no no 3 2
 			else
 				if [ ! -z "$OEM_SYSTEMSIZE" ];then
-					createFDiskInput \
+					createPartitionerInput \
 						d 2 d n p 1 . +"$disk1MBytes"M \
 						n p 2 . +"$bootXMBytes"M w q
 				else
-					createFDiskInput \
+					createPartitionerInput \
 						d 2 d n p 1 . +"$disk1MBytes"M n p 2 . . w q
 				fi
 				setupDeviceNames 1 no no no 2 no
 			fi
 		else
 			if isFSTypeReadOnly;then
-				createFDiskInput \
+				createPartitionerInput \
 					d 2 d 3 n p 2 . +"$disk2MBytes"M \
 					n p 3 . +"$bootXMBytes"M \
 					n p 4 . . \
@@ -705,13 +689,13 @@ function OEMRepartLuks {
 				setupDeviceNames 1 4 no no 3 2
 			else
 				if [ ! -z "$OEM_SYSTEMSIZE" ];then
-					createFDiskInput \
+					createPartitionerInput \
 						d 2 d n p 1 . +"$disk1MBytes"M \
 						n p 2 . +"$bootXMBytes"M \
 						n p 3 . +"$swapsize"M \
 						t 3 82 w q
 				else
-					createFDiskInput \
+					createPartitionerInput \
 						d 2 d n p 1 . +"$disk1MBytes"M \
 						n p 2 . +"$bootXMBytes"M \
 						n p 3 . . \
@@ -721,11 +705,7 @@ function OEMRepartLuks {
 			fi
 		fi
 		luksClose
-		Echo "Repartition the disk according to current geometry"
-		fdisk $imageDiskDevice < $input 1>&2
-		if test $? != 0; then
-			systemException "Failed to create partition table" "reboot"
-		fi
+		callPartitioner $input
 	fi
 	#======================================
 	# post repart actions
@@ -781,13 +761,14 @@ function OEMRepart {
 	else
 		OEMRepartStandard
 	fi
+	sleep 1
 	#======================================
 	# Activate swap space
 	#--------------------------------------
 	if [ -z "$DONT_PARTITION" ] && [ $swapsize -gt 0 ]; then
 		if partitionSize $imageSwapDevice &>/dev/null;then
 			Echo "Activating swap space on $imageSwapDevice"
-			if ! mkswap $imageSwapDevice >/dev/null 2>&1;then
+			if ! mkswap $imageSwapDevice 1>&2;then
 				systemException "Failed to create swap signature" "reboot"
 			fi
 		fi
@@ -850,14 +831,52 @@ function activateBootPartition {
 	# ----
 	local input=/part.input
 	Echo "Set boot flag to partition ID: $bootid [ $imageDiskDevice ]"
-	rm -f $input
-	for cmd in a $bootid w q; do
-		echo $cmd >> $input
-	done
-	fdisk $imageDiskDevice < $input 1>&2
+	if [ $PARTITIONER = "sfdisk" ];then
+		rm -f $input
+		for cmd in a $bootid w q; do
+			echo $cmd >> $input
+		done
+		fdisk $imageDiskDevice < $input 1>&2
+	else
+		parted -m $imageDiskDevice set $bootid boot on
+	fi
 	if test $? != 0; then
 		systemException "Failed to set boot flag" "reboot"
 	fi
+}
+
+#======================================
+# callPartitioner
+#--------------------------------------
+function callPartitioner {
+	local input=$1
+	if [ $PARTITIONER = "sfdisk" ];then
+		Echo "Repartition the disk according to real geometry [ fdisk ]"
+		fdisk $imageDiskDevice < $input 1>&2
+		if test $? != 0; then
+			systemException "Failed to create partition table" "reboot"
+		fi
+	else
+		# /.../
+		# nothing to do for parted here as we write
+		# imediately with parted and don't create a
+		# command input file as for fdisk
+		# ----
+		:
+	fi
+}
+
+#======================================
+# createPartitionerInput
+#--------------------------------------
+function createPartitionerInput {
+	if [ $PARTITIONER = "sfdisk" ];then
+		createFDiskInput $@
+	else
+		Echo "Repartition the disk according to real geometry [ parted ]"
+		partedInit $imageDiskDevice
+		createPartedInput $imageDiskDevice $@
+    fi
 }
 
 #======================================
@@ -872,6 +891,182 @@ function createFDiskInput {
 			continue
 		fi
 		echo $cmd >> $input
+	done
+}
+
+#======================================
+# partedInit
+#--------------------------------------
+function partedInit {
+	# /.../
+	# initialize current partition table output
+	# as well as the number of cylinders and the
+	# cyliner size in kB for this disk
+	# ----
+	local device=$1
+	local IFS=""
+	local parted=$(parted -m $device unit cyl print)
+	local header=$(echo $parted | head -n 3 | tail -n 1)
+	local ccount=$(echo $header | cut -f1 -d:)
+	local cksize=$(echo $header | cut -f4 -d: | cut -f1 -dk)
+	export partedOutput=$parted
+	export partedCylCount=$ccount
+	export partedCylKSize=$cksize
+}
+
+#======================================
+# partedWrite
+#--------------------------------------
+function partedWrite {
+	# /.../
+	# call parted with current command queue.
+	# This will immediately change the partition table
+	# ----
+	local device=$1
+	local cmds=$2
+	if ! parted -m $device unit cyl $cmds;then
+		systemException "Failed to create partition table" "reboot"
+	fi
+	partedInit $device
+}
+
+#======================================
+# partedStartCylinder
+#--------------------------------------
+function partedStartCylinder {
+	# /.../
+	# return start cylinder of given partition.
+	# lowest cylinder number is 0
+	# ----
+	local part=$(($1 + 3))
+	local IFS=""
+	local header=$(echo $partedOutput | head -n $part | tail -n 1)
+	local ccount=$(echo $header | cut -f2 -d: | tr -d cyl)
+	echo $ccount
+}
+
+#======================================
+# partedEndCylinder
+#--------------------------------------
+function partedEndCylinder {
+	# /.../
+	# return end cylinder of given partition, next
+	# partition must start at return value plus 1
+	# ----
+	local part=$(($1 + 3))
+	local IFS=""
+	local header=$(echo $partedOutput | head -n $part | tail -n 1)
+	local ccount=$(echo $header | cut -f3 -d: | tr -d cyl)
+	echo $ccount
+}
+
+#======================================
+# partedMBToCylinder
+#--------------------------------------
+function partedMBToCylinder {
+	# /.../
+	# convert size given in MB to cylinder count
+	# ----
+	local sizeKB=$(($1 * 1024))
+	local cylreq=$(($sizeKB / $partedCylKSize))
+	echo $cylreq
+}
+
+#======================================
+# createPartedInput
+#--------------------------------------
+function createPartedInput {
+	# /.../
+	# evaluate partition instructions and turn them
+	# into a parted command line queue. As soon as the
+	# geometry data would be changed according to the
+	# last partedInit() call the command queue is processed
+	# and the partedInit() will be called afterwards
+	# ----
+	local disk=$1
+	shift
+	local index=0
+	local pcmds
+	local partid
+	local pstart
+	local pstopp
+	local value
+	local cmdq
+	#======================================
+	# create list of commands
+	#--------------------------------------
+	for cmd in $*;do
+		pcmds[$index]=$cmd
+		index=$(($index + 1))
+	done
+	index=0
+	#======================================
+	# process commands
+	#--------------------------------------
+	for cmd in ${pcmds[*]};do
+		case $cmd in
+			#======================================
+			# delete partition
+			#--------------------------------------
+			"d")
+				partid=${pcmds[$index + 1]}
+				partid=$(($partid / 1))
+				if [ $partid -eq 0 ];then
+					partid=1
+				fi
+				cmdq="$cmdq rm $partid"
+				;;
+			#======================================
+			# create new partition
+			#--------------------------------------
+			"n")
+				partid=${pcmds[$index + 2]}
+				partid=$(($partid / 1))
+				if [ $partid -eq 0 ];then
+					partid=1
+				fi
+				pstart=${pcmds[$index + 3]}
+				if [ "$pstart" = "1" ];then
+					pstart=0
+				fi
+				if [ $pstart = "." ];then
+					# start is next cylinder according to previous partition
+					pstart=$(($partid - 1))
+					if [ $pstart -gt 0 ];then
+						pstart=$(partedEndCylinder $pstart)
+						pstart=$(($pstart + 1))
+					fi
+				fi
+				pstopp=${pcmds[$index + 4]}
+				if [ $pstopp = "." ];then
+					# use rest of the disk for partition end
+					pstopp=$partedCylCount
+				elif echo $pstopp | grep -qi M;then
+					# calculate stopp cylinder from size
+					pstopp=$(($partid - 1))
+					if [ $pstopp -gt 0 ];then
+						pstopp=$(partedEndCylinder $pstopp)
+					fi
+					value=$(echo ${pcmds[$index + 4]} | cut -f1 -dM | tr -d +)
+					value=$(partedMBToCylinder $value)
+					pstopp=$((1 + $pstopp + $value))
+				fi
+				cmdq="$cmdq mkpart primary $pstart $pstopp"
+				partedWrite "$disk" "$cmdq"
+				cmdq=""
+				;;
+			#======================================
+			# change partition ID
+			#--------------------------------------
+			"t")
+				ptypex=${pcmds[$index + 2]}
+				partid=${pcmds[$index + 1]}
+				cmdq="$cmdq set $partid type 0x$ptypex"
+				partedWrite "$disk" "$cmdq"
+				cmdq=""
+				;;
+		esac
+		index=$(($index + 1))
 	done
 }
 

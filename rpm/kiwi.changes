@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Wed Aug 26 11:38:05 CEST 2009 - ms@suse.de
 
+- added support for parted in oem repartition code
 - removed check for luks mapping in functions which are
   surely not called if the luks extension is used
 
