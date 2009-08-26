@@ -389,12 +389,6 @@ function OEMRepartOverlayed {
 	#--------------------------------------
 	if [ -z "$DONT_PARTITION" ];then
 		#======================================
-		# LUKS maps
-		#--------------------------------------
-		export imageIOWRDevice=$(luksOpen $imageIOWRDevice luksReadWrite)
-		export imageRWDevice=$imageIOWRDevice
-		export imageRODevice=$imageRootDevice
-		#======================================
 		# Activate boot partition
 		#--------------------------------------
 		activateBootPartition
@@ -500,12 +494,6 @@ function OEMRepartCombined {
 	# post repart actions
 	#--------------------------------------
 	if [ -z "$DONT_PARTITION" ];then
-		#======================================
-		# LUKS maps
-		#--------------------------------------
-		export imageIOWRDevice=$(luksOpen $imageIOWRDevice luksReadWrite)
-		export imageRWDevice=$imageIOWRDevice
-		export imageRODevice=$imageRootDevice
 		#======================================
 		# Activate boot partition
 		#--------------------------------------
@@ -744,6 +732,10 @@ function OEMRepartLuks {
 	#--------------------------------------
 	if [ -z "$DONT_PARTITION" ];then
 		#======================================
+		# Activate boot partition
+		#--------------------------------------     
+		activateBootPartition
+		#======================================
 		# LUKS Maps
 		#--------------------------------------
 		export imageRootDevice=$(luksOpen $imageRootDevice)
@@ -752,10 +744,6 @@ function OEMRepartLuks {
 			export imageRWDevice=$imageIOWRDevice
 			export imageRODevice=$imageRootDevice
 		fi
-		#======================================
-		# Activate boot partition
-		#--------------------------------------		
-		activateBootPartition
 		#======================================
 		# Create boot filesystem
 		#--------------------------------------
