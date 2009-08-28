@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Aug 28 12:38:12 CEST 2009 - ms@suse.de
+
+- fixed partition size check which failed if oem-systemsize
+  was set but the disk was smaller than the configured size
+
+-------------------------------------------------------------------
 Wed Aug 26 11:38:05 CEST 2009 - ms@suse.de
 
 - added support for parted in oem repartition code

@@ -102,6 +102,7 @@ function OEMRepartStandard {
 	# ----
 	if [ $disk1MBytes -gt $diskXMBytes ];then
 		export OEM_WITHOUTHOME=1
+		unset OEM_SYSTEMSIZE
 		unset OEM_RECOVERY
 		recoMByte=0
 	fi
