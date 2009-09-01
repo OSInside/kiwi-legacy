@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Tue Sep  1 10:45:30 CEST 2009 - ms@suse.de
 
+- fixed virtual disk creation with clicfs involved
 - added option --grub-chainload which allows the virtual
   disk based images to chainload grub from partition one.
   This is required for some preload processes (bnc #529850)

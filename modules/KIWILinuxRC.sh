@@ -1631,6 +1631,14 @@ function probeFileSystem {
 			FSTYPE=unknown
 		;;
 	esac
+	if [ $FSTYPE = "unknown" ];then
+		dd if=$1 of=/tmp/filesystem-$$ bs=128k count=1 >/dev/null
+	fi
+	if [ $FSTYPE = "unknown" ];then
+		if grep -q ^CLIC /tmp/filesystem-$$;then
+			FSTYPE=clicfs
+		fi
+	fi
 	export FSTYPE
 }
 #======================================

@@ -2419,6 +2419,22 @@ sub mount {
 	my $status;
 	my $result;
 	#==========================================
+	# Check for CLIC extension
+	#------------------------------------------
+	if ($type eq "clicfs") {
+		if (-f $source) {
+			$status = qxx ("/sbin/losetup -s -f $source 2>&1"); chomp $status;
+			$result = $? >> 8;
+			if ($result != 0) {
+				$kiwi -> error  ("Couldn't loop bind logical extend: $status");
+				$kiwi -> failed ();
+				return undef;
+			}
+			$source = $status;
+			push @UmountStack,"losetup -d $source";
+		}
+	}
+	#==========================================
 	# Check for LUKS extension
 	#------------------------------------------
 	if ($type eq "luks") {
@@ -2461,7 +2477,11 @@ sub mount {
 			return undef;
 		}
 	} else {
-		$status = qxx ("mount $source $dest 2>&1");
+		if ($type eq "clicfs") {
+			$status = qxx ("clicfs -m 512 $source $dest 2>&1");
+		} else {
+			$status = qxx ("mount $source $dest 2>&1");
+		}
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> error ("Failed to mount $source to: $dest: $status");
@@ -2569,6 +2589,13 @@ sub checkFileSystem {
 					$type = "luks";
 					last SWITCH;
 				};
+				# unknown filesystem type check clicfs...
+				$data = qxx ("dd if=$fs bs=128k count=1 2>/dev/null | grep -q CLIC");
+				$code = $? >> 8;
+				if ($code == 0) {
+					$type = "clicfs";
+					last SWITCH;
+				}
 				# unknown filesystem type use auto...
 				$type = "auto";
 			};
