@@ -574,29 +574,35 @@ sub createHybrid {
 	#==========================================
 	# Make it DOS compatible
 	#------------------------------------------
-	my @commands = ("d","n","p","1",".",".","a","1","w","q");
-	$loop = qxx ("/sbin/losetup -s -f $iso 2>&1"); chomp $loop;
-	$code = $? >> 8;
-	if ($code != 0) {
-		$kiwi -> error  ("Failed to loop bind iso file: $loop");
-		$kiwi -> failed ();
-		return undef;
-	}
-	if (! open ($FD,"|/sbin/fdisk $loop &> /dev/null")) {
-		$kiwi -> error  ("Failed to call fdisk");
-		$kiwi -> failed ();
-		qxx ("losetup -d $loop");
-		return undef;
-	}
-	foreach my $cmd (@commands) {
-		if ($cmd eq ".") {
-			print $FD "\n";
-		} else {
-			print $FD "$cmd\n";
-		}
-	}
-	close $FD;
-	qxx ("losetup -d $loop");
+	# /.../
+	# Doing this will break the hybrid, the partition
+	# can't be mounted after that call. I'm pretty sure
+	# this is a bug in isohybrid not creating a compatible
+	# partition table
+	# ----
+	#my @commands = ("d","n","p","1",".",".","a","1","w","q");
+	#$loop = qxx ("/sbin/losetup -s -f $iso 2>&1"); chomp $loop;
+	#$code = $? >> 8;
+	#if ($code != 0) {
+	#	$kiwi -> error  ("Failed to loop bind iso file: $loop");
+	#	$kiwi -> failed ();
+	#	return undef;
+	#}
+	#if (! open ($FD,"|/sbin/fdisk $loop &> /dev/null")) {
+	#	$kiwi -> error  ("Failed to call fdisk");
+	#	$kiwi -> failed ();
+	#	qxx ("losetup -d $loop");
+	#	return undef;
+	#}
+	#foreach my $cmd (@commands) {
+	#	if ($cmd eq ".") {
+	#		print $FD "\n";
+	#	} else {
+	#		print $FD "$cmd\n";
+	#	}
+	#}
+	#close $FD;
+	#qxx ("losetup -d $loop");
 	return $this;
 }
 

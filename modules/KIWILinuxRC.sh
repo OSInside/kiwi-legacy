@@ -1607,9 +1607,9 @@ function kernelCheck {
 	fi
 }
 #======================================
-# identifyFileSystem
+# probeFileSystem
 #--------------------------------------
-function identifyFileSystem {
+function probeFileSystem {
 	# /.../
 	# probe for the filesystem type. The function will
 	# read 128 kB of the given device and check the
@@ -1617,46 +1617,21 @@ function identifyFileSystem {
 	# filesystem
 	# ----
 	FSTYPE=unknown
-	if [ ! -z "$2" ];then
-		# leave a gap of 512 byte to skip a possible bootloader
-		dd if=$1 of=/tmp/filesystem-$$ bs=128k count=1 seek=4 skip=4 >/dev/null
-	else
-		# read the first 128 byte to check the fs
-		dd if=$1 of=/tmp/filesystem-$$ bs=128k count=1 >/dev/null
-	fi
-	data=$(file /tmp/filesystem-$$)
-	case $data in
-		*ext4*)     FSTYPE=ext4 ;;
-		*ext3*)     FSTYPE=ext3 ;;
-		*ext2*)     FSTYPE=ext2 ;;
-		*ReiserFS*) FSTYPE=reiserfs ;;
-		*Squashfs*) FSTYPE=squashfs ;;
-		*LUKS*)     FSTYPE=luks ;;
+	FSTYPE=$(blkid $1 -s TYPE -o value)
+	case $FSTYPE in
+		ext4)     FSTYPE=ext4 ;;
+		ext3)     FSTYPE=ext3 ;;
+		ext2)     FSTYPE=ext2 ;;
+		reiserfs) FSTYPE=reiserfs ;;
+		squashfs) FSTYPE=squashfs ;;
+		luks)     FSTYPE=luks ;;
+		vfat)     FSTYPE=vfat ;;
+		clicfs)   FSTYPE=clicfs ;;
 		*)
 			FSTYPE=unknown
 		;;
 	esac
-	if [ $FSTYPE = "unknown" ];then
-		if grep -q mkdosfs /tmp/filesystem-$$;then
-			FSTYPE=vfat
-		fi
-	fi
-	if [ $FSTYPE = "unknown" ];then
-		if grep -q ^CLIC /tmp/filesystem-$$;then
-			FSTYPE=clicfs
-		fi
-	fi
-	rm -f /tmp/filesystem-$$
 	export FSTYPE
-}
-#======================================
-# probeFileSystem
-#--------------------------------------
-function probeFileSystem {
-	identifyFileSystem $1
-	if [ $FSTYPE = "unknown" ];then
-		identifyFileSystem $1 "after-boot-record"
-	fi
 }
 #======================================
 # getSystemIntegrity

@@ -377,6 +377,7 @@ sub new {
 	$this->{xengz}     = $xengz;
 	$this->{arch}      = $arch;
 	$this->{ptool}     = $main::Partitioner;
+	$this->{chainload} = $main::GrubChainload;
 	$this->{lvm}       = $lvm;
 	$this->{vga}       = $vga;
 	$this->{xml}       = $xml;
@@ -3858,6 +3859,7 @@ sub installBootLoader {
 	my $kiwi     = $this->{kiwi};
 	my $tmpdir   = $this->{tmpdir};
 	my $bootpart = $this->{bootpart};
+	my $chainload= $this->{chainload};
 	my $result;
 	my $status;
 	#==========================================
@@ -3898,7 +3900,11 @@ sub installBootLoader {
 		}
 		print FD "device (hd0) $diskname\n";
 		print FD "root (hd0,$bootpart)\n";
-		print FD "setup (hd0)\n";
+		if ($chainload) {
+			print FD "setup (hd0,0)\n";
+		} else {
+			print FD "setup (hd0)\n";
+		}
 		print FD "quit\n";
 		close FD;
 		my $glog;
@@ -3921,6 +3927,27 @@ sub installBootLoader {
 			$kiwi -> error  ("Couldn't install grub on $diskname: $glog");
 			$kiwi -> failed ();
 			return undef;
+		}
+		if ($chainload) {
+			# /.../
+			# chainload grub with master-boot-code
+			# zero out sectors between 0x200 - 0x3f0 for preload process
+			# ---
+			my $mbr = "/usr/lib/boot/master-boot-code";
+			my $opt = "conv=notrunc";
+			$status = qxx (
+				"dd if=$mbr of=$diskname bs=1 count=446 $opt 2>&1"
+			);
+			$result= $? >> 8;
+			if ($result != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Couldn't install master boot code: $status");
+				$kiwi -> failed ();
+				return undef;
+			}
+			$status = qxx (
+				"dd if=/dev/zero of=$diskname bs=1 count=496 seek=512 $opt 2>&1"
+			);
 		}
 		$kiwi -> done();
 	}

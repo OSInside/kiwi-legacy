@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Tue Sep  1 10:45:30 CEST 2009 - ms@suse.de
+
+- added option --grub-chainload which allows the virtual
+  disk based images to chainload grub from partition one.
+  This is required for some preload processes (bnc #529850)
+- changed filesystem detection by using blkid instead
+  of a raw dump + file call. Related to (bnc #529850)
+- disabled partition table re-write for hybrid ISO's
+  also see the comment in KIWIIsoLinux.pm
+
+-------------------------------------------------------------------
 Fri Aug 28 12:38:12 CEST 2009 - ms@suse.de
 
 - fixed partition size check which failed if oem-systemsize

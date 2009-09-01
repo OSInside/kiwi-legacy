@@ -202,6 +202,7 @@ our $CheckKernel;           # check for kernel matches in boot and system image
 our $Clone;                 # clone existing image description
 our $LVM;                   # use LVM partition setup for virtual disk
 our $Debug;                 # activates the internal stack trace output
+our $GrubChainload;         # install grub loader in first partition not MBR
 our $kiwi;                  # global logging handler object
 
 #============================================
@@ -1322,6 +1323,7 @@ sub init {
 		"check-kernel"          => \$CheckKernel,
 		"clone|o=s"             => \$Clone,
 		"lvm"                   => \$LVM,
+		"grub-chainload"        => \$GrubChainload,
 		"debug"                 => \$Debug,
 		"help|h"                => \&usage,
 		"<>"                    => \&usage

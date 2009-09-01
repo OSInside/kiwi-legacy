@@ -40,6 +40,7 @@ Requires:       perl = %{perl_version}
 Requires:       perl-XML-LibXML perl-libwww-perl screen coreutils
 Requires:       perl-XML-LibXML-Common perl-XML-SAX perl-Config-IniFiles
 Requires:       kiwi-tools libxslt checkmedia
+Requires:       master-boot-code
 %if %{suse_version} > 1030
 Requires:       satsolver-tools = %{sattools_version}
 %endif
