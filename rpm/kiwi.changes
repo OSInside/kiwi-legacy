@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Wed Sep  2 08:49:14 CEST 2009 - ms@suse.de
+
+- added encoding information to all templates
+- added log information about temporary XML changes
+  for all modes of kiwi, removed the used xml output
+  file
+
+-------------------------------------------------------------------
 Tue Sep  1 10:45:30 CEST 2009 - ms@suse.de
 
 - fixed virtual disk creation with clicfs involved

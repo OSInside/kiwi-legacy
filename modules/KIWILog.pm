@@ -926,34 +926,37 @@ sub storeXML {
 #------------------------------------------
 sub writeXML {
 	my $this = shift;
-	my $file = $this->{rootLog};
 	my $data = $this->{xmlString};
+	my $cmpf = $this->{xmlOrigFile};
+	my $FX;
 	if (! $data) {
 		return undef;
 	}
-	if (-f $file) {
-		$file .= ".xml";
-	}
-	if (! open (FX,">$file")) {
+	my $used = qxx ("mktemp -q /tmp/kiwi-xmlused.XXXXXX"); chomp $used;
+	my $code = $? >> 8;
+	if ($code != 0) {
 		return undef;
 	}
-	print FX $data; close FX;
-	$this->{xmlUsedFile} = $file;
-	return $file;
-}
-
-#==========================================
-# diffXML
-#------------------------------------------
-sub diffXML {
-	my $this = shift;
-	my $used = $this->{xmlUsedFile};
-	my $orig = $this->{xmlOrigFile};
-	if ((! $used) || (! -f $used)) {
+	my $orig = qxx ("mktemp -q /tmp/kiwi-xmlorig.XXXXXX"); chomp $orig;
+	if ($code != 0) {
 		return undef;
 	}
-	my $diff = qxx ("diff -u $orig $used 2>&1");
-	$this -> loginfo ("XML Changes:\n$diff");
+	qxx ("cp -a $cmpf $orig");
+	if (! open ($FX,">$used")) {
+		return undef;
+	}
+	binmode $FX;
+	print $FX $data; close $FX;
+	qxx ("sed -i -e 's!><!>\\n<!'g -e 's!\\t!!'g $used");
+	qxx ("sed -i -e 's!\\t!!'g $orig");
+	qxx ("sort $used -o $used");
+	qxx ("sort $orig -o $orig");
+	my $diff = qxx ("diff -uwB $orig $used 2>&1");
+	if ($diff) {
+		$this -> loginfo ("XML diff for $cmpf:\n$diff");
+	}
+	unlink $used;
+	unlink $orig;
 	return $this;
 }
 

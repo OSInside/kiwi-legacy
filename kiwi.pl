@@ -2024,6 +2024,10 @@ sub kiwiExit {
 	# ---
 	my $code = $_[0];
 	#==========================================
+	# Write temporary XML changes as xml log...
+	#------------------------------------------
+	$kiwi -> writeXML();
+	#==========================================
 	# Survive because kiwi called itself
 	#------------------------------------------
 	if ((defined $Survive) && ($Survive eq "yes")) {
@@ -2063,20 +2067,6 @@ sub kiwiExit {
 			$root -> cleanBroken();
 		}
 		$kiwi -> info ("KIWI exited successfully");
-		$kiwi -> done ();
-	}
-	#==========================================
-	# Write temporary XML changes as xml log...
-	#------------------------------------------
-	my $usedXML = $kiwi -> writeXML();
-	if ($usedXML) {
-		$kiwi -> diffXML();
-		if ($usedXML =~ /(.*)\..*\.screenrc\.log\.xml/) {
-			my $xmlused = $1; $xmlused.= ".xml";
-			qxx ("mv $usedXML $xmlused 2>&1");
-			$usedXML = $xmlused;
-		}
-		$kiwi -> info ("Last used XML file at: $usedXML");
 		$kiwi -> done ();
 	}
 	#==========================================
