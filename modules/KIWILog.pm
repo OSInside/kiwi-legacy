@@ -929,7 +929,7 @@ sub writeXML {
 	my $data = $this->{xmlString};
 	my $cmpf = $this->{xmlOrigFile};
 	my $FX;
-	if (! $data) {
+	if ((! $data) || (! -f $cmpf)) {
 		return undef;
 	}
 	my $used = qxx ("mktemp -q /tmp/kiwi-xmlused.XXXXXX"); chomp $used;
