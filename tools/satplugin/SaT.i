@@ -223,7 +223,7 @@ extern "C"
             //printf ("SOLVER NAME: %d %s\n",p,id2str(pool, s->name));
             unsigned int bytes=solvable_lookup_num(s, SOLVABLE_INSTALLSIZE, 0);
             const char* myel = (char*)id2str(pool, s->name);
-            char* myis = (char*)malloc (sizeof (char) * 5);
+            char* myis = (char*)malloc (sizeof (char) * 11);
             sprintf (myis,"%u",bytes);
             SV* mysv1 = sv_newmortal();
             mysv1 = perl_get_sv (myel,TRUE);

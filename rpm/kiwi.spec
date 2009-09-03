@@ -42,7 +42,7 @@ Requires:       perl-XML-LibXML-Common perl-XML-SAX perl-Config-IniFiles
 Requires:       kiwi-tools libxslt checkmedia
 Requires:       master-boot-code
 %if %{suse_version} > 1030
-Requires:       satsolver-tools = %{sattools_version}
+Requires:       satsolver-tools
 %endif
 Summary:        OpenSuSE - KIWI Image System
 Provides:       kiwi2 <= 2.14

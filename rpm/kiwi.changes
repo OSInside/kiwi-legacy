@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Thu Sep  3 09:26:53 CEST 2009 - ms@suse.de
+
+- fixed satplugin getInstallList() function, did not allocate
+  enough space to hold the package size. This causes the buffer
+  overflow inside the binding. Also added the flags
+  -D_FORTIFY_SOURCE=2 -fstack-protector to build the same
+  binding binary as if kiwi is build inside the BS. Also
+  fixed the spec file and removed the versioned requires of
+  satsolver-tools (bnc #532894)
+
+-------------------------------------------------------------------
 Wed Sep  2 08:49:14 CEST 2009 - ms@suse.de
 
 - added encoding information to all templates
