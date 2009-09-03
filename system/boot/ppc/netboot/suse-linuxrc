@@ -230,6 +230,12 @@ fi
 if [ $LOCAL_BOOT = "no" ];then
 	CONFIG=/etc/config.netclient
 	#======================================
+	# Store possible values set by cmdline
+	#--------------------------------------
+	if [ ! -z "$NBDROOT" ];then
+		KLIST[0]="NBDROOT=$NBDROOT";
+	fi
+	#======================================
 	# Connection/access check for SERVER
 	#--------------------------------------
 	Echo "Checking for config file: config.$DHCPCHADDR"
@@ -315,6 +321,12 @@ if [ $LOCAL_BOOT = "no" ];then
 		importFile < $CONFIG
 		IMPORTED=1
 	fi
+	#======================================
+	# restore values from cmdline
+	#--------------------------------------
+	for i in ${KLIST[@]};do
+		eval export $i
+	done
 fi
 
 #======================================
@@ -556,7 +568,7 @@ else
 	# 12.1) Check for local boot
 	#--------------------------------------
 	if [ $LOCAL_BOOT = "yes" ];then
-		imageDisk=`getDiskDevice $root | sed -e s"@[0-9]@@g"`
+		imageDisk=$(dn $root)
 		imageDevice=$(ddn $imageDisk 2)
 		imageRootDevice=$imageDevice
 		imageRootName="Local-System"

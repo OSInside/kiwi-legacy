@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Thu Sep  3 09:26:53 CEST 2009 - ms@suse.de
 
+- allow NBDROOT to be set via kernel cmdline (bnc #536309)
 - fixed satplugin getInstallList() function, did not allocate
   enough space to hold the package size. This causes the buffer
   overflow inside the binding. Also added the flags
