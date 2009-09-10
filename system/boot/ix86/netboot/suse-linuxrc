@@ -232,6 +232,7 @@ if [ $LOCAL_BOOT = "no" ];then
 	#======================================
 	# Store possible values set by cmdline
 	#--------------------------------------
+	unset ALLOW_CMDLINE_OVERWRITE
 	if [ ! -z "$NBDROOT" ];then
 		KLIST[0]="NBDROOT=$NBDROOT";
 	fi
@@ -324,9 +325,11 @@ if [ $LOCAL_BOOT = "no" ];then
 	#======================================
 	# restore values from cmdline
 	#--------------------------------------
-	for i in ${KLIST[@]};do
-		eval export $i
-	done
+	if [ ! -z "$ALLOW_CMDLINE_OVERWRITE" ];then
+		for i in ${KLIST[@]};do
+			eval export $i
+		done
+	fi
 fi
 
 #======================================

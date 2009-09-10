@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Fri Sep 11 00:19:32 CEST 2009 - ms@suse.de
+
+- allow cmdline line overwrites only if the variable 
+  ALLOW_CMDLINE_OVERWRITE=yes is set in config.<MAC> or
+  config.default. By default no overwrites are allowed
+  which should add an acceptable level of
+  security (bnc #536309)
+
+-------------------------------------------------------------------
 Thu Sep  3 09:26:53 CEST 2009 - ms@suse.de
 
 - allow NBDROOT to be set via kernel cmdline (bnc #536309)
