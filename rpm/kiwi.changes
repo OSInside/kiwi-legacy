@@ -1,6 +1,8 @@
 -------------------------------------------------------------------
 Fri Sep 11 00:19:32 CEST 2009 - ms@suse.de
 
+- disabled check for removable flag in USBStickDevice()
+  function (bnc #535113) 
 - allow cmdline line overwrites only if the variable 
   ALLOW_CMDLINE_OVERWRITE=yes is set in config.<MAC> or
   config.default. By default no overwrites are allowed

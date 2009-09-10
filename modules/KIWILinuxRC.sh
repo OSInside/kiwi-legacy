@@ -1910,6 +1910,12 @@ function USBStickDevice {
 				serial=`cat $serial`
 			fi
 			removable=`cat $isremovable`
+			# /.../
+			# don't check the removable flag, it could be wrong
+			# especially for USB hard disks connected via a
+			# USB caddy, details in bug: 535113
+			# ----
+			removable=1
 			if [ $removable -eq 1 ];then
 				stickRoot=$device
 				stickDevice=$(ddn $device 1)
