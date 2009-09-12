@@ -1921,7 +1921,7 @@ function USBStickDevice {
 				stickDevice=$(ddn $device 1)
 				for devnr in 1 2;do
 					dev=$(ddn $stickRoot $devnr)
-					if ! kiwiMount "$dev" "/mnt";then
+					if ! kiwiMount "$dev" "/mnt" "-o ro";then
 						continue
 					fi
 					stickFound=1
@@ -2002,9 +2002,9 @@ function CDMount {
 			IFS=":"; for i in $cddev;do
 				cdopt=$(CDMountOption $i)
 				if [ -x /usr/bin/driveready ];then
-					driveready $i && eval mount $cdopt $i /cdrom >/dev/null
+					driveready $i&& eval mount $cdopt -o ro $i /cdrom >/dev/null
 				else
-					eval mount $cdopt $i /cdrom >/dev/null
+					eval mount $cdopt -o ro $i /cdrom >/dev/null
 				fi
 				if [ -f $LIVECD_CONFIG ];then
 					cddev=$i; echo
@@ -2040,7 +2040,7 @@ function CDMount {
 		#--------------------------------------
 		Echo -n "Mounting hybrid live boot drive..."
 		cddev=$(ddn $biosBootDevice 1)
-		kiwiMount $cddev /cdrom
+		kiwiMount "$cddev" "/cdrom" "-o ro"
 		if [ -f $LIVECD_CONFIG ];then
 			echo
 			#======================================
@@ -2139,7 +2139,7 @@ function searchBIOSBootDevice {
 		fi
 		for id in 1 2 3;do
 			dev=$(ddn $curd $id)
-			if ! mount $dev /mnt;then
+			if ! mount -o ro $dev /mnt;then
 				continue
 			fi
 			if [ -f /mnt/boot/grub/mbrid ];then
@@ -3201,7 +3201,7 @@ function setupReadWrite {
 	mkdir -p $rwDir
 	if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
 		if [ "$RELOAD_IMAGE" = "yes" ] || \
-			! mount $rwDevice $rwDir >/dev/null
+			! mount -o ro $rwDevice $rwDir >/dev/null
 		then
 			#======================================
 			# store old FSTYPE value
@@ -3224,7 +3224,7 @@ function setupReadWrite {
 				FSTYPE=$FSTYPE_SAVE
 			fi
 			if [ "$RELOAD_IMAGE" = "yes" ] || \
-				! mount $rwDevice $rwDir >/dev/null
+				! mount -o ro $rwDevice $rwDir >/dev/null
 			then
 				Echo "Creating filesystem for RW data on $rwDevice..."
 				if ! mke2fs -T ext3 -j $rwDevice >/dev/null;then

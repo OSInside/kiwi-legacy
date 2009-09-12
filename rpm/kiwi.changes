@@ -1,6 +1,10 @@
 -------------------------------------------------------------------
 Fri Sep 11 00:19:32 CEST 2009 - ms@suse.de
 
+- link files to create live ISO in createImageLiveCD()
+  instead of moving them (bnc #412689)
+- do kiwi test mounts with readonly option (bnc #538355)
+- use option -J -f to call genisoimage (bnc #538390)
 - disabled check for removable flag in USBStickDevice()
   function (bnc #535113) 
 - allow cmdline line overwrites only if the variable 

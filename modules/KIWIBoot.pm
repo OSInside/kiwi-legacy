@@ -1628,7 +1628,7 @@ sub setupInstallCD {
 	} else {
 		$name =~ s/gz$/iso/;
 	}
-	my $base = "-R -b boot/grub/stage2 -no-emul-boot $volid";
+	my $base = "-R -J -f -b boot/grub/stage2 -no-emul-boot $volid";
 	my $opts = "-boot-load-size 4 -boot-info-table -udf -allow-limited-size";
 	my $wdir = qxx ("pwd"); chomp $wdir;
 	if ($name !~ /^\//) {

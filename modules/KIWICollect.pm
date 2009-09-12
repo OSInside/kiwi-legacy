@@ -660,7 +660,7 @@ sub mainTask
     foreach my $cd($this->getMediaNumbers()) {
       next if($cd == 0);
       my $cdname = $this->{m_basesubdir}->{$cd};
-      my $attr = "-R -J -pad -joliet-long";
+      my $attr = "-R -J -f -pad -joliet-long";
       $cdname =~ s{.*/(.*)/*$}{$1};
       my $checkmedia;
       $checkmedia = "checkmedia" if ( defined($this->{m_proddata}->getVar("RUN_MEDIA_CHECK")) and $this->{m_proddata}->getVar("RUN_MEDIA_CHECK") != "0" );

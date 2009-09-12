@@ -1855,12 +1855,18 @@ sub createImageLiveCD {
 	$kiwi -> info ("Moving CD image data into boot structure");
 	if (! defined $gzip) {
 		qxx ("mv $this->{imageDest}/$namerw.md5 $main::RootTree/CD");
-		qxx ("mv $this->{imageDest}/$namerw.gz $main::RootTree/CD");
-		qxx ("rm $this->{imageDest}/$namerw.*");
+		#qxx ("mv $this->{imageDest}/$namerw.gz $main::RootTree/CD");
+		#qxx ("rm $this->{imageDest}/$namerw.*");
+		qxx (
+			"ln -s $this->{imageDest}/$namerw.gz $main::RootTree/CD/$namerw.gz"
+		);	
 	}
 	if (defined $gzip) {
-		qxx ("mv $this->{imageDest}/$namero $main::RootTree/CD");
-		qxx ("rm $this->{imageDest}/$namero.*");
+		#qxx ("mv $this->{imageDest}/$namero $main::RootTree/CD");
+		#qxx ("rm $this->{imageDest}/$namero.*");
+		qxx (
+			"ln -s $this->{imageDest}/$namero $main::RootTree/CD/$namero"
+		);
 	} else {
 		qxx ("mkdir -p $main::RootTree/CD/read-only-system");
 		qxx ("mv $imageTreeReadOnly/* $main::RootTree/CD/read-only-system");
@@ -2143,7 +2149,7 @@ sub createImageLiveCD {
 	$kiwi -> info ("Creating ISO image...\n");
 	my $isoerror = 1;
 	my $name = $this->{imageDest}."/".$namerw.".iso";
-	my $attr = "-R -J -pad -joliet-long";
+	my $attr = "-R -J -f -pad -joliet-long";
 	$attr .= " -p \"$main::Preparer\" -publisher \"$main::Publisher\"";
 	if (! defined $gzip) {
 		$attr .= " -iso-level 4"; 
