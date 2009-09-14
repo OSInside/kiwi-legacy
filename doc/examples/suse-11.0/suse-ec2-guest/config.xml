@@ -11,7 +11,7 @@
 		<type filesystem="ext3" boot="xenboot/suse-11.0">xen</type>
 		<version>1.1.2</version>
 		<packagemanager>smart</packagemanager>
-		<rpm-check-signatures>False</rpm-check-signatures>
+		<rpm-check-signatures>false</rpm-check-signatures>
 	</preferences>
 	<users group="root">
 		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>

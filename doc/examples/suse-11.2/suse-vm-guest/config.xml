@@ -9,7 +9,7 @@
 		<type primary="true" filesystem="ext4" boot="vmxboot/suse-11.2" format="vmdk">vmx</type>
 		<version>1.1.2</version>
 		<packagemanager>zypper</packagemanager>
-		<rpm-check-signatures>False</rpm-check-signatures>
+		<rpm-check-signatures>false</rpm-check-signatures>
 		<rpm-force>true</rpm-force>
 		<locale>en_US</locale>
 		<keytable>us.map.gz</keytable>

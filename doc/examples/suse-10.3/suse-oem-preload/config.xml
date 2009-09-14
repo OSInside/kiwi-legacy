@@ -9,7 +9,7 @@
 		<type fsreadwrite="ext3" fsreadonly="squashfs" boot="oemboot/suse-10.3" format="iso">split</type>
 		<version>1.1.2</version>
 		<packagemanager>smart</packagemanager>
-		<rpm-check-signatures>False</rpm-check-signatures>
+		<rpm-check-signatures>false</rpm-check-signatures>
 		<rpm-force>true</rpm-force>
 		<locale>en_US</locale>
 		<keytable>us.map.gz</keytable>

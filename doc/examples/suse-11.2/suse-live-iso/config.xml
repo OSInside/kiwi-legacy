@@ -9,7 +9,7 @@
 		<type primary="true" boot="isoboot/suse-11.2" flags="clic">iso</type>
 		<version>2.5.1</version>
 		<packagemanager>zypper</packagemanager>
-		<rpm-check-signatures>False</rpm-check-signatures>
+		<rpm-check-signatures>false</rpm-check-signatures>
 		<rpm-force>true</rpm-force>
 		<locale>en_US.UTF-8</locale>
 		<keytable>us.map.gz</keytable>

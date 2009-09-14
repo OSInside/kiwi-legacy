@@ -9,7 +9,7 @@
 		<type filesystem="squashfs" boot="netboot/suse-11.0">pxe</type>
 		<version>1.2.8</version>
 		<packagemanager>smart</packagemanager>
-		<rpm-check-signatures>False</rpm-check-signatures>
+		<rpm-check-signatures>false</rpm-check-signatures>
 		<rpm-force>true</rpm-force>
 	</preferences>
 	<users group="users">
