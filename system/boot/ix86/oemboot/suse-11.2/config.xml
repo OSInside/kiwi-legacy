@@ -10,7 +10,7 @@
 		<version>2.7.1</version>
 		<size unit="M">60</size>
 		<packagemanager>zypper</packagemanager>
-		<rpm-check-signatures>False</rpm-check-signatures>
+		<rpm-check-signatures>false</rpm-check-signatures>
 	</preferences>
 	<profiles>
 		<!-- bootprofile specs -->

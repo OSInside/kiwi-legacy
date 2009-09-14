@@ -10,7 +10,7 @@
 		<version>2.1.1</version>
 		
 		<packagemanager>zypper</packagemanager>
-		<rpm-check-signatures>False</rpm-check-signatures>
+		<rpm-check-signatures>false</rpm-check-signatures>
 	</preferences>
 	<profiles>
 		<profile name="default" description="Boot with default kernel"/>

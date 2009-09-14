@@ -4165,7 +4165,7 @@ sub getSize {
 	# Inode count for this filesystem
 	#------------------------------------------
 	$this->{inodes} =
-		$mini > $needi ? $mini : $needi;
+		int ($mini > $needi ? $mini : $needi);
 	#==========================================
 	# Minimum size calculated in MB
 	#------------------------------------------

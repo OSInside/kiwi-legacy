@@ -1400,7 +1400,7 @@ sub getRPMCheckSignatures {
 	my $this = shift;
 	my $node = $this -> getPreferencesNodeByTagName ("rpm-check-signatures");
 	my $sigs = $node -> getElementsByTagName ("rpm-check-signatures");
-	if ((! defined $sigs) || ("$sigs" eq "")) {
+	if ((! defined $sigs) || ("$sigs" eq "false")) {
 		return undef;
 	}
 	return $sigs;
@@ -1417,7 +1417,7 @@ sub getRPMExcludeDocs {
 	my $this = shift;
 	my $node = $this-> getPreferencesNodeByTagName ("rpm-excludedocs");
 	my $xdoc = $node -> getElementsByTagName ("rpm-excludedocs");
-	if ((! defined $xdoc) || ("$xdoc" eq "")) {
+	if ((! defined $xdoc) || ("$xdoc" eq "false")) {
 		return undef;
 	}
 	return $xdoc;

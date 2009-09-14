@@ -622,7 +622,7 @@ div {
 # common element <packagemanager>
 #
 div {
-	k.packagemanager.content = "smart" | "zypper"
+	k.packagemanager.content = "smart" | "zypper" | "ensconce"
 	k.packagemanager.attlist = empty
 	k.packagemanager =
 		## Name of the Package Manager
@@ -780,6 +780,7 @@ div {
 # common element <rpm-check-signatures>
 #
 div {
+	k.rpm-check-signatures.content = xsd:boolean
 	k.rpm-check-signatures.attlist = empty
 	k.rpm-check-signatures =
 		## Setup a Package Signature
@@ -792,7 +793,7 @@ div {
 		]
 		element rpm-check-signatures {
 			k.rpm-check-signatures.attlist,
-			text
+			k.rpm-check-signatures.content
 		}
 }
 
