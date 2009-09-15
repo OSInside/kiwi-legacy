@@ -2,7 +2,9 @@
 <xsl:stylesheet version="1.0"
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
-<xsl:output method="xml" indent="yes" omit-xml-declaration="no"/>
+<xsl:output
+	method="xml" indent="yes" omit-xml-declaration="no" encoding="utf-8"
+/>
 <xsl:strip-space elements="type"/>
 
 <xsl:template match="*|processing-instruction()|comment()" mode="conv14to20">
@@ -17,27 +19,11 @@
     <xsl:when test="image[@schemeversion='1.4']">
       <xsl:apply-templates mode="conv14to20"/>
     </xsl:when>
-    <xsl:when test="image[@schemeversion='2.0']">
-      <xsl:message terminate="yes">
-        <xsl:text>Already at version 2.0... skipped</xsl:text>
-      </xsl:message>
-    </xsl:when>
-	<xsl:when test="image[@schemeversion='2.4']">
+	<xsl:otherwise>
 		<xsl:message terminate="yes">
-			<xsl:text>Already at version 2.4... skipped</xsl:text>
+			<xsl:text>Nothing to do for 1.4 -> 2.0... skipped</xsl:text>
 		</xsl:message>
-	</xsl:when>
-	<xsl:when test="image[@schemaversion='3.5']">
-		<xsl:message terminate="yes">
-			<xsl:text>Already at version 3.5... skipped</xsl:text>
-		</xsl:message>
-	</xsl:when>
-    <xsl:otherwise>
-      <xsl:message terminate="yes">
-        <xsl:text>ERROR: The Schema version is not correct.&#10;</xsl:text>
-        <xsl:text>       expected version 1.4.</xsl:text>
-      </xsl:message>
-    </xsl:otherwise>
+	</xsl:otherwise>
   </xsl:choose>  
 </xsl:template>
 
@@ -81,15 +67,6 @@
 		<xsl:copy-of select="@format"/>
         <xsl:apply-templates mode="conv14to20"/>
       </xsl:when>
-      <xsl:otherwise>
-        <xsl:message terminate="yes">
-          <xsl:text>ERROR: If element type contains 'split', attribute </xsl:text>
-          <xsl:text>filesystem MUST contain the name of the read-write and read-only </xsl:text>
-          <xsl:text>filesystem separated by comma.&#10;</xsl:text>
-          <xsl:text>SOLUTION: Insert the respective values and </xsl:text>
-          <xsl:text>separate them with commas.</xsl:text>
-        </xsl:message>
-      </xsl:otherwise>
     </xsl:choose>
   </type>
 </xsl:template>

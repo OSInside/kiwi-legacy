@@ -1,12 +1,12 @@
-<?xml version="1.0" encoding="utf8"?>
-<image schemaversion="3.5" name="suse-11.0-oem-preload">
+<?xml version="1.0" encoding="utf-8"?>
+<image schemaversion="3.7" name="suse-11.0-oem-preload">
 	<description type="system">
 		<author>Marcus Schäfer</author>
 		<contact>ms@novell.com</contact>
 		<specification>openSUSE 11.0 oem preload system</specification>
 	</description>
 	<preferences>
-		<type fsreadwrite="ext3" fsreadonly="squashfs" boot="oemboot/suse-11.0" format="iso">split</type>
+		<type/>
 		<version>1.1.2</version>
 		<packagemanager>smart</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>

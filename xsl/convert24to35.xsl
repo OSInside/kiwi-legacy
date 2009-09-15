@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet version="1.0"
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-  <xsl:include href="/usr/share/kiwi/xsl/convert20to24.xsl"/>
 
-
-<xsl:output method="xml" indent="yes" omit-xml-declaration="no"/>
+<xsl:output
+	method="xml" indent="yes" omit-xml-declaration="no" encoding="utf-8"
+/>
 <xsl:strip-space elements="type"/>
 
 <xsl:template match="*|processing-instruction()|comment()" mode="conv24to35">
@@ -19,15 +19,9 @@
 		<xsl:when test="image[@schemeversion='2.4']">
 			<xsl:apply-templates mode="conv24to35"/>
 		</xsl:when>
-		<xsl:when test="image[@schemaversion='3.5']">
-			<xsl:message terminate="yes">
-				<xsl:text>Already at version 3.5... skipped</xsl:text>
-			</xsl:message>
-		</xsl:when>
 		<xsl:otherwise>
 			<xsl:message terminate="yes">
-				<xsl:text>ERROR: Schema version is not correct.&#10;</xsl:text>
-				<xsl:text>       but expected version 3.5.</xsl:text>
+				<xsl:text>Nothing to do for 2.4 -> 3.5... skipped</xsl:text>
 			</xsl:message>
 		</xsl:otherwise>
 	</xsl:choose>  

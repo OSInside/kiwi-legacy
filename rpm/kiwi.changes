@@ -1,9 +1,11 @@
 -------------------------------------------------------------------
 Mon Sep 14 16:25:07 CEST 2009 - ms@suse.de
 
-- allow ensconce as packagemanager type
-- fixed bool content for rpm-check-signatures
 - fixed inode calculation, needs integer result
+- changed to schema version 3.7, add xsl stylesheet which
+  automatically changes to the bool values true/false
+  * allow ensconce as packagemanager type
+  * fixed bool content for rpm-check-signatures
 
 -------------------------------------------------------------------
 Fri Sep 11 00:19:32 CEST 2009 - ms@suse.de

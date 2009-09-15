@@ -100,7 +100,7 @@ our $KSplit   = $BasePath."/modules/KIWISplit.txt";
 our $Revision = $BasePath."/.revision";
 our $TestBase = $BasePath."/tests";
 our @SchemaCVT= (
-	$BasePath."/xsl/convert24to35.xsl"
+	$BasePath."/xsl/master.xsl"
 );
 
 #==========================================

@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="utf8"?>
-<image schemaversion="3.5" name="initrd-xenboot-suse-10.3">
+<?xml version="1.0" encoding="utf-8"?>
+<image schemaversion="3.7" name="initrd-xenboot-suse-10.3">
 	<description type="boot">
 		<author>Marcus Schaefer</author>
 		<contact>ms@novell.com</contact>
