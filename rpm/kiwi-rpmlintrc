@@ -12,3 +12,6 @@ addFilter("kiwi.* perl5-naming-policy-not-applied")
 
 # don't care for zero length .bs files
 addFilter(".*zero-length.*.bs")
+
+# don't check for file duplicates
+addFilter("cross-directory-hard-link .*")
