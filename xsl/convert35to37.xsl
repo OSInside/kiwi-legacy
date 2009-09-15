@@ -4,13 +4,12 @@
 	<!ENTITY uppercase "'ABCDEFGHIJKLMNOPQRSTUVWXYZ'">
 ]>
 <xsl:stylesheet version="1.0"
-  xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-
-<xsl:output
-	method="xml" indent="yes" omit-xml-declaration="no" encoding="utf-8"
-/>
+	xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="xml"
+	indent="yes" omit-xml-declaration="no" encoding="utf-8"/>
 <xsl:strip-space elements="type"/>
 
+<!-- default rule -->
 <xsl:template match="*|processing-instruction()|comment()" mode="conv35to37">
 	<xsl:copy>
 		<xsl:copy-of select="@*"/>
@@ -18,19 +17,7 @@
 	</xsl:copy>
 </xsl:template>
 
-<xsl:template match="/">
-	<xsl:choose>
-		<xsl:when test="image[@schemaversion='3.5']">
-			<xsl:apply-templates mode="conv35to37"/>
-		</xsl:when>
-		<xsl:otherwise>
-			<xsl:message terminate="yes">
-				<xsl:text>Nothing to do for 3.5 -> 3.7... skipped</xsl:text>
-			</xsl:message>
-		</xsl:otherwise>
-	</xsl:choose>  
-</xsl:template>
-
+<!-- update schema version -->
 <para xmlns="http://docbook.org/ns/docbook">
 	Changed attribute <tag class="attribute">schemaversion</tag>
 	to <tag class="attribute">schemaversion</tag> from
@@ -43,7 +30,7 @@
 	</image>
 </xsl:template>
 
-
+<!-- update bool types -->
 <para xmlns="http://docbook.org/ns/docbook">
 	Change possible mixed cases into lowercase and
 	normalize any whitespaces
