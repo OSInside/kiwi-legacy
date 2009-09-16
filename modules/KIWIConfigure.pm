@@ -84,7 +84,7 @@ sub setupRecoveryArchive {
 	my $xml   = $this->{xml};
 	my $root  = $this->{root};
 	my $start = $xml -> getOEMRecovery();
-	if ((! defined $start) || ("$start" eq "no")) {
+	if ((! defined $start) || ("$start" eq "false")) {
 		return $this;
 	}
 	$kiwi -> info ("Creating recovery archive...");
