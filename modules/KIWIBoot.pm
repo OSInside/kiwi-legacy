@@ -3932,9 +3932,14 @@ sub installBootLoader {
 			# /.../
 			# chainload grub with master-boot-code
 			# zero out sectors between 0x200 - 0x3f0 for preload process
+			# store a copy of the master-boot-code at 0x800
+			# write FDST flag at 0x190
 			# ---
 			my $mbr = "/usr/lib/boot/master-boot-code";
 			my $opt = "conv=notrunc";
+			#==========================================
+			# write master-boot-code
+			#------------------------------------------
 			$status = qxx (
 				"dd if=$mbr of=$diskname bs=1 count=446 $opt 2>&1"
 			);
@@ -3945,6 +3950,47 @@ sub installBootLoader {
 				$kiwi -> failed ();
 				return undef;
 			}
+			#==========================================
+			# write backup MBR with partition table
+			#------------------------------------------
+			my $bmbr= $diskname.".mbr";
+			$status = qxx (
+				"dd if=$diskname of=$bmbr bs=1 count=512 2>&1"
+			);
+			$result= $? >> 8;
+			if ($result != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Couldn't store master boot code backup: $status");
+				$kiwi -> failed ();
+				return undef;
+			}
+			$status = qxx (
+				"dd if=$bmbr of=$diskname bs=1 count=512 seek=0x800 $opt 2>&1"
+			);
+			#==========================================
+			# write FDST flag
+			#------------------------------------------
+			my $flag= "FDST";
+			my $fdst = pack "A4", eval $flag;
+			if (! open (FD,"+<$diskname")) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("MBR: failed to open file: $diskname: $!");
+				$kiwi -> failed ();
+				return undef;
+			}
+			seek FD,400,0;
+			my $done = syswrite (FD,$fdst,4);
+			if ($done != 4) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("MBR: only $done bytes written");
+				$kiwi -> failed ();
+				seek FD,0,2; close FD;
+				return undef;
+			}
+			seek FD,0,2; close FD;
+			#==========================================
+			# zero out preload range
+			#------------------------------------------
 			$status = qxx (
 				"dd if=/dev/zero of=$diskname bs=1 count=496 seek=512 $opt 2>&1"
 			);

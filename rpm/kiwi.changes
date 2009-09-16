@@ -1,6 +1,10 @@
 -------------------------------------------------------------------
 Tue Sep 15 15:40:25 CEST 2009 - ms@suse.de
 
+- added backup MBR to 0x800 if --grub-chainload is in use
+  also added FDST flag to 0x190 for preload setup. We need
+  to take care for that value if other preloads requires
+  something similar it should be an option (bnc #539505)
 - added cross-directory-hard-link filter
 
 -------------------------------------------------------------------
