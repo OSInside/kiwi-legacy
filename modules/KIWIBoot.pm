@@ -3960,34 +3960,21 @@ sub installBootLoader {
 			$result= $? >> 8;
 			if ($result != 0) {
 				$kiwi -> failed ();
-				$kiwi -> error  ("Couldn't store master boot code backup: $status");
+				$kiwi -> error  ("Couldn't store backup MBR: $status");
 				$kiwi -> failed ();
 				return undef;
 			}
 			$status = qxx (
 				"dd if=$bmbr of=$diskname bs=1 count=512 seek=0x800 $opt 2>&1"
 			);
+			unlink $bmbr;
 			#==========================================
 			# write FDST flag
 			#------------------------------------------
-			my $flag= "FDST";
-			my $fdst = pack "A4", eval $flag;
-			if (! open (FD,"+<$diskname")) {
-				$kiwi -> failed ();
-				$kiwi -> error  ("MBR: failed to open file: $diskname: $!");
-				$kiwi -> failed ();
-				return undef;
-			}
-			seek FD,400,0;
-			my $done = syswrite (FD,$fdst,4);
-			if ($done != 4) {
-				$kiwi -> failed ();
-				$kiwi -> error  ("MBR: only $done bytes written");
-				$kiwi -> failed ();
-				seek FD,0,2; close FD;
-				return undef;
-			}
-			seek FD,0,2; close FD;
+			my $fdst = "perl -e \"printf '%s', pack 'A4', eval 'FDST';\"";
+			qxx (
+				"$fdst|dd of=$diskname bs=1 count=4 seek=\$((0x190)) $opt 2>&1"
+			);
 			#==========================================
 			# zero out preload range
 			#------------------------------------------
