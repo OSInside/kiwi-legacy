@@ -28,8 +28,21 @@ export PARTITIONER=sfdisk
 export TRANSFER_ERRORS_FILE=/tmp/transfer.errors
 export DEFAULT_VGA=0x314
 export HAVE_MODULES_ORDER=1
+export DIALOG_LANG=ask
+export UFONT=/usr/share/fbiterm/fonts/b16.pcf.gz
 export TERM=linux
+export LANG=en_US.utf8
 
+#======================================
+# Dialog
+#--------------------------------------
+function Dialog {
+	if [ -e /dev/fb0 ];then
+		fbiterm -m $UFONT -- dialog "$@"
+	else
+		dialog "$@"
+	fi
+}
 #======================================
 # Debug
 #--------------------------------------
@@ -3069,6 +3082,9 @@ function includeKernelParameters {
 			sed -i -e s"@rd_size=.*@rd_size=$ramdisk_size@" $modfile
 		fi
 	fi
+	if [ ! -z "$lang" ];then
+		export DIALOG_LANG=$lang
+	fi
 }
 #======================================
 # checkServer
@@ -4393,9 +4409,9 @@ function luksOpen {
 	fi
 	while true;do
 		if [ ! -e /tmp/luks ];then
-			dialog \
+			Dialog \
 				--stdout --insecure \
-				--passwordbox "Enter LUKS passphrase" 10 60 |\
+				--passwordbox "\"$(getText "Enter LUKS passphrase")\"" 10 60 |\
 				cat > /tmp/luks
 		fi
 		info=$(cat /tmp/luks | cryptsetup luksOpen $ldev $name 2>&1)
@@ -4403,7 +4419,7 @@ function luksOpen {
 			break
 		fi
 		rm -f /tmp/luks
-		dialog --stdout --timeout 10 --msgbox "Error: $info" 8 60
+		Dialog --stdout --timeout 10 --msgbox "\"Error: $info\"" 8 60
 	done
 	echo /dev/mapper/$name
 }
@@ -4440,15 +4456,14 @@ function luksClose {
 	done
 }
 #======================================
-# displayEULA
+# selectLanguage
 #--------------------------------------
-function displayEULA {
+function selectLanguage {
 	# /.../
-	# display in a dialog window the text part of the
-	# selected language file or the default file 
-	# /license.txt or /EULA.txt
+	# select language if not yet done. The value is
+	# used for all dialog windows with i18n support
 	# ----
-	local title="\"Select EULA Language\""
+	local title="\"Select Language\""
 	local list="en \"[ English ]\" on"
 	local de=German
 	local es=Spanish
@@ -4458,23 +4473,42 @@ function displayEULA {
 	local ja=Japanese
 	local zh_CN=Chinese
 	local zh_TW=Taiwanese
-	local lang
 	local code
+	local lang
+	if [ "$DIALOG_LANG" = "ask" ];then
+		for code in de es fr it pt_BR ja zh_CN zh_TW;do
+			eval lang=\$$code
+			list="$list $code \"[ $lang ]\" off"
+		done
+		DIALOG_LANG=$(runInteractive \
+			"--stdout --no-cancel --radiolist $title 20 40 10 $list"
+		)
+	fi
+}
+#======================================
+# getText
+#--------------------------------------
+function getText {
+	# TODO. system to get translated texts
+	echo $@
+}
+#======================================
+# displayEULA
+#--------------------------------------
+function displayEULA {
+	# /.../
+	# display in a dialog window the text part of the
+	# selected language file or the default file 
+	# /license.txt or /EULA.txt
+	# ----
+	local code=$DIALOG_LANG
 	#======================================
-	# find license files, show radio list
+	# check license files
 	#--------------------------------------
 	local files=$(find /license.*.txt 2>/dev/null)
 	if [ -z "$files" ];then
 		return
 	fi
-	for i in $files;do
-		code=`echo $i | cut -f2 -d.`
-		eval lang=\$$code
-		list="$list $code \"[ $lang ]\" off"
-	done
-	echo -n "dialog --stdout --no-cancel --radiolist $title 20 40 10 $list" \
-		> /tmp/dia.sh
-	code=$(runInteractive /tmp/dia.sh)
 	#======================================
 	# use selected file or default
 	#--------------------------------------
@@ -4493,9 +4527,10 @@ function displayEULA {
 		return
 	fi
 	while true;do
-		dialog --textbox $code 20 70 \
+		Dialog --textbox $code 20 70 \
 			--and-widget --extra-button --extra-label "No" --ok-label "Yes" \
-			--yesno "Do you accept the license agreement ?" 5 45
+			--yesno "\"$(getText "Do you accept the license agreement ?")\"" \
+			5 45
 		case $? in
 			0 ) break
 				;;
@@ -4555,10 +4590,14 @@ function runInteractive {
 	# not allowed to contain a newline at the end of the
 	# file. The input file is changed due to that call
 	# ----
-	local p=$1
-	echo "> /tmp/out" >> $p
-	setctsid $ELOG_EXCEPTION /bin/bash -i $p || return
-	cat /tmp/out && rm -f /tmp/out $p
+	local r=/tmp/rid
+	echo "dialog $@ > /tmp/out" > $r
+	if [ -e /dev/fb0 ];then
+		setctsid $ELOG_EXCEPTION fbiterm -m $UFONT -- bash -i $r || return
+	else
+		setctsid $ELOG_EXCEPTION bash -i $r || return
+	fi
+	cat /tmp/out && rm -f /tmp/out $r
 }
 #======================================
 # SAPMemCheck

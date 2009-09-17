@@ -108,9 +108,9 @@ function OEMInstall {
 					dpara="$dpara $i \"$dname [ $dsize KByte ]\" off"
 				fi
 			done
-			echo -n "dialog --stdout --radiolist $hd 20 75 15 $dpara" \
-				> /tmp/dia.sh
-			instDisk=$(runInteractive /tmp/dia.sh)
+			instDisk=$(runInteractive \
+				"--stdout --radiolist $hd 20 75 15 $dpara"
+			)
 			if [ ! $? = 0 ];then
 				systemException \
 					"System installation canceled" \
@@ -134,8 +134,9 @@ function OEMInstall {
 	fi
 	Echo "Entering installation mode for disk: $instDisk"
 	if [ -z "$OEM_SAP_INSTALL" ];then
-		dialog --yesno \
-			"This will destroy ALL data on $instDisk, continue ?" 5 60
+		Dialog --yesno \
+			"$(getText "Destroying ALL data on $instDisk, continue ?")" \
+			5 60
 		if [ ! $? = 0 ];then
 			systemException \
 				"System installation canceled" \

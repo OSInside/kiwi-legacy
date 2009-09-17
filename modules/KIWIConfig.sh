@@ -403,7 +403,7 @@ function baseStripDocs {
 # baseStripLocales
 #--------------------------------------
 function baseStripLocales {
-	local imageLocales="$@"
+	local keepLocales="$@"
 	local directories="
 		/opt/gnome/share/locale
 		/usr/share/locale
@@ -411,7 +411,7 @@ function baseStripLocales {
 		/usr/lib/locale
 	"
 	find $directories -mindepth 1 -maxdepth 1 -type d 2>/dev/null |\
-		baseStripAndKeep ${keepLocale}
+		baseStripAndKeep ${keepLocales}
 }
 
 #======================================
@@ -873,7 +873,7 @@ function suseStripInitrd {
 		/usr/lib*/hal /usr/lib*/*.a /usr/lib*/*.la /usr/lib*/librpm*
 		/usr/lib*/libpanel* /usr/lib*/libmenu* /usr/src/packages/RPMS
 		/usr/X11R6 /usr/lib*/X11 /var/X11R6 /usr/share/X11 /etc/X11
-		/usr/lib*/libX* /usr/lib*/xorg /usr/lib*/libidn* /usr/share/terminfo
+		/usr/lib*/xorg /usr/lib*/libidn* 
 		/etc/ppp /etc/xdg /etc/NetworkManager /lib*/YaST /lib*/security
 		/lib*/mkinitrd /srv /var/adm /usr/lib*/engines /usr/src/packages
 		/usr/src/linux* /usr/local /var/log/* /usr/share/pixmaps
@@ -945,7 +945,7 @@ function suseStripInitrd {
 		ldd driveready checkmedia splashy bzip2 hexdump vgremove
 		pvchange pvresize pvscan vgscan vgchange vgextend vgdisplay
 		lvchange lvresize lvextend lvcreate grub dcounter tty
-		dmsetup dialog awk gawk clicfs cryptsetup clear blkid
+		dmsetup dialog awk gawk clicfs cryptsetup clear blkid fbiterm
 	"
 	tools="$tools $@"
 	for path in /sbin /usr/sbin /usr/bin /bin;do
@@ -955,7 +955,8 @@ function suseStripInitrd {
 	# remove unused libs
 	#------------------------------------------
 	baseStripUnusedLibs \
-		librt libutil libsysfs libnss_files libnss_compat libnsl libpng
+		librt libutil libsysfs libnss_files libnss_compat libnsl libpng \
+		libfontenc libutempter libfreetype
 	#==========================================
 	# remove images.sh and /root
 	#------------------------------------------

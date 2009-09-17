@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Thu Sep 17 12:10:14 CEST 2009 - ms@suse.de
+
+- added fbiterm to oemboot boot images. This allows to display
+  wide screen characters on the framebuffer console and therefore
+  enabled kiwi's dialog windows to be multilingual (bnc #539398)
+- fixed baseStripLocales() function
+
+-------------------------------------------------------------------
 Tue Sep 15 15:40:25 CEST 2009 - ms@suse.de
 
 - added backup MBR to 0x800 if --grub-chainload is in use

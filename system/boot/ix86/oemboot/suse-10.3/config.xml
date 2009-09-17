@@ -108,6 +108,7 @@
 		<package name="lvm2"/>
 		<package name="bzip2"/>
 		<package name="cryptsetup"/>
+		<package name="fbiterm"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
@@ -129,7 +130,6 @@
 		<package name="fillup"/>
 		<package name="gdbm"/>
 		<package name="glib2"/>
-		<package name="glibc-locale"/>
 		<package name="gnome-filesystem"/>
 		<package name="gpg"/>
 		<package name="info"/>
@@ -160,7 +160,6 @@
 		<package name="resmgr"/>
 		<package name="suse-build-key"/>
 		<package name="gfxboot"/>
-		<package name="fribidi"/>
 		<package name="make"/>
 	</packages>
 </image>

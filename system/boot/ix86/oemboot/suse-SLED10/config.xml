@@ -102,6 +102,7 @@
 		<package name="tar"/>
 		<package name="lvm2"/>
 		<package name="bzip2"/>
+		<package name="fbiterm"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
@@ -113,7 +114,6 @@
 		<package name="cracklib-dict-small"/>
 		<package name="cracklib-dict-full"/>
 		<package name="perl"/>
-		<package name="glibc-locale"/>
 		<package name="man"/>
 		<package name="info"/>
 		<package name="perl-gettext"/>
@@ -136,7 +136,6 @@
 		<package name="ash"/>
 		<package name="gdbm"/>
 		<package name="gfxboot"/>
-		<package name="fribidi"/>
 		<package name="make"/>
 	</packages>
 </image>

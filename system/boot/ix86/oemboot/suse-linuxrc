@@ -194,6 +194,7 @@ openKernelConsole
 # 6) Including required kernel modules
 #--------------------------------------
 probeDevices
+selectLanguage
 
 #======================================
 # 7) Import OEM partition config
@@ -332,7 +333,8 @@ validateRootTree
 # 16) Recover system if requested
 #--------------------------------------
 if [ ! -z "$KIWI_RECOVERY" ];then
-	dialog --defaultno --yesno "Do you want to start the System-Recovery ?" 5 50
+	Dialog --defaultno --yesno \
+		"\"$(getText "Do you want to start the System-Recovery ?")\"" 5 50
 	if [ ! $? = 0 ];then
 		systemException "System-Recovery not started" "reboot"
 	fi
@@ -362,8 +364,8 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 		dPID=$(pidof mst)
 		kill $dPID
 	)&
-	mst -f /progress | dialog \
-		--backtitle "Restoring base operating system..." \
+	mst -f /progress | Dialog \
+		--backtitle "\"$(getText "Restoring base operating system...")\"" \
 		--progressbox 3 50
 	clear
 	#======================================
