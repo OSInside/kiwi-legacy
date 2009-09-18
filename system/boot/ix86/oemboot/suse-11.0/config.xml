@@ -115,6 +115,7 @@
 		<package name="kiwi-tools"/>
 		<package name="cryptsetup"/>
 		<package name="fbiterm"/>
+		<package name="gettext-runtime"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>

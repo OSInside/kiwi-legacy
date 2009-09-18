@@ -4411,7 +4411,7 @@ function luksOpen {
 		if [ ! -e /tmp/luks ];then
 			Dialog \
 				--stdout --insecure \
-				--passwordbox "\"$(getText "Enter LUKS passphrase")\"" 10 60 |\
+				--passwordbox "$(getText "Enter LUKS passphrase")" 10 60 |\
 				cat > /tmp/luks
 		fi
 		info=$(cat /tmp/luks | cryptsetup luksOpen $ldev $name 2>&1)
@@ -4464,19 +4464,19 @@ function selectLanguage {
 	# used for all dialog windows with i18n support
 	# ----
 	local title="\"Select Language\""
-	local list="en \"[ English ]\" on"
-	local de=German
-	local es=Spanish
-	local fr=French
-	local it=Italian
+	local list="en_US \"[ English ]\" on"
+	local de_DE=German
+	local es_ES=Spanish
+	local fr_FR=French
+	local it_IT=Italian
 	local pt_BR=Portuguese
-	local ja=Japanese
+	local ja_JP=Japanese
 	local zh_CN=Chinese
 	local zh_TW=Taiwanese
 	local code
 	local lang
 	if [ "$DIALOG_LANG" = "ask" ];then
-		for code in de es fr it pt_BR ja zh_CN zh_TW;do
+		for code in de_DE es_ES fr_FR it_IT pt_BR ja_JP zh_CN zh_TW;do
 			eval lang=\$$code
 			list="$list $code \"[ $lang ]\" off"
 		done
@@ -4489,8 +4489,14 @@ function selectLanguage {
 # getText
 #--------------------------------------
 function getText {
-	# TODO. system to get translated texts
-	echo $@
+	# /.../
+	# return translated text
+	# ----
+	local msgid=$1
+	if [ ! -z "$2" ];then
+		msgid=$(echo $msgid | sed -e s"@%1@$2@")
+	fi
+	LANG=$DIALOG_LANG gettext kiwi "$msgid"
 }
 #======================================
 # displayEULA
@@ -4501,7 +4507,7 @@ function displayEULA {
 	# selected language file or the default file 
 	# /license.txt or /EULA.txt
 	# ----
-	local code=$DIALOG_LANG
+	local code=$(echo $DIALOG_LANG | cut -f1 -d_)
 	#======================================
 	# check license files
 	#--------------------------------------
@@ -4529,7 +4535,7 @@ function displayEULA {
 	while true;do
 		Dialog --textbox $code 20 70 \
 			--and-widget --extra-button --extra-label "No" --ok-label "Yes" \
-			--yesno "\"$(getText "Do you accept the license agreement ?")\"" \
+			--yesno "$(getText "Do you accept the license agreement ?")" \
 			5 45
 		case $? in
 			0 ) break

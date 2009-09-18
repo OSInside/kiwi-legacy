@@ -135,7 +135,7 @@ function OEMInstall {
 	Echo "Entering installation mode for disk: $instDisk"
 	if [ -z "$OEM_SAP_INSTALL" ];then
 		Dialog --yesno \
-			"$(getText "Destroying ALL data on $instDisk, continue ?")" \
+			"$(getText "Destroying ALL data on %1, continue ?" $instDisk)" \
 			5 60
 		if [ ! $? = 0 ];then
 			systemException \

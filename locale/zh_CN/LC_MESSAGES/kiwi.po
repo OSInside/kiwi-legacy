@@ -1,0 +1,19 @@
+#. /.../
+#. Copyright (c) 2005 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+#. This file contains the gettext keys used within a gettext call in the
+#. boot code for KIWI 
+#.
+msgid "Enter LUKS passphrase"
+msgstr ""
+
+msgid "Do you accept the license agreement ?"
+msgstr ""
+
+msgid "Do you want to start the System-Recovery ?"
+msgstr ""
+
+msgid "Restoring base operating system..."
+msgstr ""
+
+msgid "Destroying ALL data on %1, continue ?"
+msgstr ""

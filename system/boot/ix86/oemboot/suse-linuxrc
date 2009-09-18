@@ -334,7 +334,7 @@ validateRootTree
 #--------------------------------------
 if [ ! -z "$KIWI_RECOVERY" ];then
 	Dialog --defaultno --yesno \
-		"\"$(getText "Do you want to start the System-Recovery ?")\"" 5 50
+		"$(getText "Do you want to start the System-Recovery ?")" 5 50
 	if [ ! $? = 0 ];then
 		systemException "System-Recovery not started" "reboot"
 	fi
@@ -365,7 +365,7 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 		kill $dPID
 	)&
 	mst -f /progress | Dialog \
-		--backtitle "\"$(getText "Restoring base operating system...")\"" \
+		--backtitle "$(getText "Restoring base operating system...")" \
 		--progressbox 3 50
 	clear
 	#======================================
