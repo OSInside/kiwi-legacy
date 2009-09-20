@@ -109,7 +109,9 @@ sub new {
 		);
 		my $code = $? >> 8;
 		if (($code == 0) && (-f "$controlFile-next")) {
+			my @info = stat ($controlFile);
 			qxx ("mv $controlFile-next $controlFile");
+			chown $info[4], $info[5], $controlFile;
 		} elsif ($code > 10) {
 			$kiwi -> error ("XSL: $data");
 			$kiwi -> failed ();
