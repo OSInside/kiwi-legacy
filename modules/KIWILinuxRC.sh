@@ -4526,11 +4526,12 @@ function getText {
 	# /.../
 	# return translated text
 	# ----
-	local msgid=$1
+	export LANG=$DIALOG_LANG.utf8
+	local text=$(gettext kiwi "$1")
 	if [ ! -z "$2" ];then
-		msgid=$(echo $msgid | sed -e s"@%1@$2@")
+		text=$(echo $text | sed -e s"@%1@$2@")
 	fi
-	LANG=$DIALOG_LANG.utf8 gettext kiwi "$msgid"
+	echo "$text"
 }
 #======================================
 # displayEULA
