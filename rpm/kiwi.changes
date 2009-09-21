@@ -11,6 +11,7 @@ Thu Sep 17 12:10:14 CEST 2009 - ms@suse.de
 - don't remove libblkid1 from initrd (bnc #505580)
 - remove reserved blocks in any case when mounting
   clic by calling tune2fs -m 0 (bnc #505580)
+- preserve ownership if xsltproc changes the xml file
 - fixed baseStripLocales() function
 
 -------------------------------------------------------------------
