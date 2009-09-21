@@ -4530,7 +4530,7 @@ function getText {
 	if [ ! -z "$2" ];then
 		msgid=$(echo $msgid | sed -e s"@%1@$2@")
 	fi
-	LANG=$DIALOG_LANG gettext kiwi "$msgid"
+	LANG=$DIALOG_LANG.utf8 gettext kiwi "$msgid"
 }
 #======================================
 # displayEULA

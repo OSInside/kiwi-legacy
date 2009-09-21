@@ -32,9 +32,10 @@ echo "Configure image: [$kiwi_iname]..."
 suseConfig
 
 #======================================
-# Keep US UTF-8 locale
+# Keep UTF-8 locale
 #--------------------------------------
-baseStripLocales en_US.utf8
+baseStripLocales en_US.utf8 de_DE.utf8 ru_RU.utf8 zh_CN.utf8 zh_TW.utf8
+baseStripTranslations kiwi.mo
 
 #======================================
 # Umount kernel filesystems
