@@ -28,6 +28,7 @@ man_prefix  = ${buildroot}/usr/share/man
 #--------------------------------------------
 KIWIBINVZ   = ${buildroot}/usr/sbin
 KIWIMODVZ   = ${kiwi_prefix}/modules
+KIWILOCVZ   = ${kiwi_prefix}/locale
 KIWITSTVZ   = ${kiwi_prefix}/tests
 KIWIXSLVZ   = ${kiwi_prefix}/xsl
 TOOLSVZ     = ${bin_prefix}
@@ -63,7 +64,7 @@ install:
 	#--------------------------------------------
 	install -d -m 755 ${KIWIBINVZ} ${KIWIMODVZ} ${KIWIIMAGE} ${KIWIXSLVZ}
 	install -d -m 755 ${TFTPKIWI} ${TFTPBOOT} ${TFTPBOOTCONF} ${TFTPIMAGE}
-	install -d -m 755 ${TFTPBOOTBOOT} ${KIWITSTVZ}
+	install -d -m 755 ${TFTPBOOTBOOT} ${KIWITSTVZ} ${KIWILOCVZ}
 	install -d -m 755 ${TFTPUPLOAD} ${KIWIREPO}
 	install -d -m 755 ${PACKDOCVZ} ${MANVZ}
 	install -d -m 755 ${TOOLSVZ} ${INITVZ}
@@ -103,6 +104,11 @@ install:
 	for i in `find modules -type f | grep -v -E ".svn|.test"`;do \
 		install -m 644 $$i ${KIWIMODVZ} ;\
 	done
+
+	#============================================
+	# install NLS support (translations)...
+	#--------------------------------------------
+	${MAKE} -C locale KIWILOCVZ=${KIWILOCVZ} install
 
 	#============================================
 	# Install KIWI tests

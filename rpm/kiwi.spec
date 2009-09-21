@@ -437,6 +437,7 @@ rm -rf $RPM_BUILD_ROOT
 %exclude %{_datadir}/kiwi/image/suse-SLE11-JeOS
 %{_datadir}/kiwi/.revision
 %{_datadir}/kiwi/modules
+%{_datadir}/kiwi/locale
 %{_datadir}/kiwi/repo
 %exclude %{_datadir}/kiwi/modules/KIWICollect.pm
 %exclude %{_datadir}/kiwi/modules/KIWIRepoMetaHandler.pm

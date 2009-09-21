@@ -333,18 +333,21 @@ validateRootTree
 # 16) Recover system if requested
 #--------------------------------------
 if [ ! -z "$KIWI_RECOVERY" ];then
-	Dialog --defaultno --yesno \
-		"$(getText "Do you want to start the System-Recovery ?")" 5 50
+	text="Do you want to start the System-Recovery ?"
+	if [ ! -z "$RESTORE" ];then
+		text="Do you want to start the System-Restore ?"
+	fi
+	Dialog --defaultno --yesno "$(getText "$text")" 5 50
 	if [ ! $? = 0 ];then
 		systemException "System-Recovery not started" "reboot"
 	fi
 	clear
-	Echo "Starting System-Recovery..."
+	Echo "Starting System-Recovery/Restore..."
 	#======================================
 	# 16.1) mount recovery partition
 	#--------------------------------------
 	mkdir -p /reco-save
-	if ! mount $imageRecoveryDevice /reco-save >/dev/null;then
+	if ! mount -o ro $imageRecoveryDevice /reco-save >/dev/null;then
 		systemException "Failed to mount recovery device" "reboot"
 	fi
 	#======================================
@@ -352,6 +355,10 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 	#--------------------------------------
 	mkfifo /progress && cd /mnt && cp /usr/bin/tail /usr/bin/mst
 	(
+		if [ ! -z "$RESTORE" ];then
+			echo "Clean sweep..." > /progress
+			rm -rf * && mkdir dev sys proc
+		fi
 		rFiles=$(cat /reco-save/recovery.tar.files)
 		tar --numeric-owner -xvpf /reco-save/recovery.tar.gz >/tmp/rFiles &
 		rPID=$!
@@ -364,9 +371,15 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 		dPID=$(pidof mst)
 		kill $dPID
 	)&
-	mst -f /progress | Dialog \
-		--backtitle "$(getText "Restoring base operating system...")" \
+	echo "mst -f /progress | dialog \
+		--backtitle \"$(getText "Restoring base operating system...")\" \
 		--progressbox 3 50
+	" > /tmp/progress.sh
+	if [ -e /dev/fb0 ];then
+		fbiterm -m $UFONT -- bash -e /tmp/progress.sh
+	else
+		bash -e /tmp/progress.sh
+	fi
 	clear
 	#======================================
 	# 16.3) restore boot files

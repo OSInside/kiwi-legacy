@@ -88,8 +88,10 @@ sub setupRecoveryArchive {
 		return $this;
 	}
 	$kiwi -> info ("Creating recovery archive...");
+	my $topts  = "--numeric-owner -czpf";
+	my $excld  = "--exclude ./dev --exclude ./proc --exclude ./sys";
 	my $status = qxx (
-		"cd $root && tar --numeric-owner -czpf $root.recovery.tar.gz . 2>&1 &&
+		"cd $root && tar $topts $root.recovery.tar.gz . $excld 2>&1 &&
 		mv $root.recovery.tar.gz $root/recovery.tar.gz"
 	);
 	my $code = $? >> 8;

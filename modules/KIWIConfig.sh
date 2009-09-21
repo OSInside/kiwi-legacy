@@ -405,13 +405,18 @@ function baseStripDocs {
 function baseStripLocales {
 	local keepLocales="$@"
 	local directories="
-		/opt/gnome/share/locale
-		/usr/share/locale
-		/opt/kde3/share/locale
 		/usr/lib/locale
 	"
 	find $directories -mindepth 1 -maxdepth 1 -type d 2>/dev/null |\
 		baseStripAndKeep ${keepLocales}
+}
+
+#======================================
+# baseStripTranslations
+#--------------------------------------
+function baseStripTranslations {
+	local keepMatching="$@"
+	find /usr/share/locale -name "*.mo" | grep -v $keepMatching | xargs rm -f
 }
 
 #======================================
@@ -865,7 +870,7 @@ function suseStripInitrd {
 	rm -rf `find -type d | grep .svn`
 	local files="
 		/usr/share/info /usr/share/man /usr/share/cracklib /usr/lib*/python*
-		/usr/lib*/perl* /usr/share/locale* /usr/share/doc/packages /var/lib/rpm
+		/usr/lib*/perl* /usr/share/doc/packages /var/lib/rpm
 		/usr/lib*/rpm /var/lib/smart /opt/* /usr/include /root/.gnupg
 		/etc/PolicyKit /etc/sysconfig /etc/init.d /etc/profile.d /etc/skel
 		/etc/ssl /etc/java /etc/default /etc/cron* /etc/dbus*
@@ -873,7 +878,7 @@ function suseStripInitrd {
 		/usr/lib*/hal /usr/lib*/*.a /usr/lib*/*.la /usr/lib*/librpm*
 		/usr/lib*/libpanel* /usr/lib*/libmenu* /usr/src/packages/RPMS
 		/usr/X11R6 /usr/lib*/X11 /var/X11R6 /usr/share/X11 /etc/X11
-		/usr/lib*/xorg /usr/lib*/libidn* 
+		/usr/lib*/xorg /usr/lib*/libidn* /usr/share/locale-bundle
 		/etc/ppp /etc/xdg /etc/NetworkManager /lib*/YaST /lib*/security
 		/lib*/mkinitrd /srv /var/adm /usr/lib*/engines /usr/src/packages
 		/usr/src/linux* /usr/local /var/log/* /usr/share/pixmaps

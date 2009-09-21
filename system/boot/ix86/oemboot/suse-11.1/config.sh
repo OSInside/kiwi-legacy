@@ -35,6 +35,7 @@ suseConfig
 # Keep US UTF-8 locale
 #--------------------------------------
 baseStripLocales en_US.utf8
+baseStripTranslations kiwi.mo
 
 #======================================
 # Umount kernel filesystems

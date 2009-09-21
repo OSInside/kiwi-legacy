@@ -7,7 +7,6 @@ msgid ""
 msgstr ""
 "Project-Id-Version: kiwi\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: DATE\n"
 "PO-Revision-Date: DATE\n"
 "Last-Translator: AUTHOR\n"
 "Language-Team: TEAM\n"
@@ -22,16 +21,19 @@ msgstr ""
 #. boot code for KIWI 
 #.
 msgid "Enter LUKS passphrase"
-msgstr ""
+msgstr "Bitte LUKS Passwort eingeben"
 
 msgid "Do you accept the license agreement ?"
-msgstr ""
+msgstr "Stimmen Sie der Lizenzvereinbarung zu ?"
 
 msgid "Do you want to start the System-Recovery ?"
-msgstr ""
+msgstr "System Wiederherstellung starten ?"
+
+msgid "Do you want to start the System-Restore ?"
+msgstr "System Auslieferungszustand wiederherstellen ?"
 
 msgid "Restoring base operating system..."
-msgstr ""
+msgstr "Basis Betriebssystem wiederherstellen"
 
 msgid "Destroying ALL data on %1, continue ?"
-msgstr ""
+msgstr "Alle Daten auf %1 werden gelöscht, fortfahren ?"

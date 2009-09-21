@@ -152,7 +152,6 @@
 		<package name="insserv"/>
 		<package name="iproute2"/>
 		<package name="irqbalance"/>
-		<package name="libblkid1"/>
 		<package name="libbz2-1"/>
 		<package name="libexpat1"/>
 		<package name="libjpeg"/>

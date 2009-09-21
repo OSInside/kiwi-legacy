@@ -818,6 +818,9 @@ function OEMRepart {
 		if ! cp /reco-root/boot/linux.vmx /reco-save/boot/vmlinuz;then
 			systemException "Failed to copy recovery kernel" "reboot"
 		fi
+		if ! cp /reco-root/boot/message /reco-save/boot/message;then
+			systemException "Failed to copy recovery gfxboot message" "reboot"
+		fi
 		umount /reco-save && rmdir /reco-save
 		umount /reco-root && rmdir /reco-root
 	fi

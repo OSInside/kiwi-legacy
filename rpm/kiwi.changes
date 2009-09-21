@@ -1,10 +1,16 @@
 -------------------------------------------------------------------
 Thu Sep 17 12:10:14 CEST 2009 - ms@suse.de
 
+- added OEM restore mode (bnc #539390)
 - added pot template for translations (bnc #539398)
 - added fbiterm to oemboot boot images. This allows to display
   wide screen characters on the framebuffer console and therefore
   enabled kiwi's dialog windows to be multilingual (bnc #539398)
+- evaluate kiwikernelmodule variable from cmdline also in
+  modules.order mode where loading is done by udev (bnc #525345)
+- don't remove libblkid1 from initrd (bnc #505580)
+- remove reserved blocks in any case when mounting
+  clic by calling tune2fs -m 0 (bnc #505580)
 - fixed baseStripLocales() function
 
 -------------------------------------------------------------------

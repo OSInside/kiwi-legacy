@@ -29,6 +29,9 @@ msgstr ""
 msgid "Do you want to start the System-Recovery ?"
 msgstr ""
 
+msgid "Do you want to start the System-Restore ?"
+msgstr ""
+
 msgid "Restoring base operating system..."
 msgstr ""
 

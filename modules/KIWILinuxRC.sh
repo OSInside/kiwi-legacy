@@ -749,6 +749,9 @@ function setupBootLoaderGrubRecovery {
 	if [ -z "$fbmode" ];then
 		fbmode=$DEFAULT_VGA
 	fi
+	gdev_recovery="(hd0,$gdevreco)"
+	rdev_recovery=$OEM_RECOVERY
+	diskByID=`getDiskID $rdev_recovery`
 	#======================================
 	# import grub stages into recovery
 	#--------------------------------------
@@ -761,17 +764,19 @@ function setupBootLoaderGrubRecovery {
 	#======================================
 	# create recovery menu.lst
 	#--------------------------------------
-	echo "timeout 0" > $menu
+	echo "timeout 10" > $menu
+	echo "gfxmenu $gdev_recovery/boot/message" >> $menu
 	kernel=vmlinuz # this is a copy of the kiwi linux.vmx file
 	initrd=initrd  # this is a copy of the kiwi initrd.vmx file
 	#======================================
 	# create recovery entry
 	#--------------------------------------
 	if [ ! -z "$OEM_RECOVERY" ];then
-		echo "title Recovery"                             >> $menu
-		gdev_recovery="(hd0,$gdevreco)"
-		rdev_recovery=$OEM_RECOVERY
-		diskByID=`getDiskID $rdev_recovery`
+		#======================================
+		# Recovery
+		#--------------------------------------
+		title=$(makeLabel "Recover/Repair System")
+		echo "title $title"                               >> $menu
 		if xenServer;then
 			echo " root $gdev_recovery"                   >> $menu
 			echo " kernel /boot/xen.gz"                   >> $menu
@@ -789,6 +794,31 @@ function setupBootLoaderGrubRecovery {
 			echo -n " $KIWI_INITRD_PARAMS"                >> $menu
 			echo -n " $KIWI_KERNEL_OPTIONS"               >> $menu
 			echo " KIWI_RECOVERY=$recoid showopts"        >> $menu
+			echo " initrd $gdev_recovery/boot/$initrd"    >> $menu
+		fi
+		#======================================
+		# Restore
+		#--------------------------------------
+		title=$(makeLabel "Restore Factory System")
+		echo "title $title"                               >> $menu
+		if xenServer;then
+			echo " root $gdev_recovery"                   >> $menu
+			echo " kernel /boot/xen.gz"                   >> $menu
+			echo -n " module /boot/$kernel"               >> $menu
+			echo -n " root=$diskByID $console"            >> $menu
+			echo -n " vga=$fbmode splash=silent"          >> $menu
+			echo -n " $KIWI_INITRD_PARAMS"                >> $menu
+			echo -n " $KIWI_KERNEL_OPTIONS"               >> $menu
+			echo " KIWI_RECOVERY=$recoid showopts"        >> $menu
+			echo " module /boot/$initrd"                  >> $menu
+		else
+			echo -n " kernel $gdev_recovery/boot/$kernel" >> $menu
+			echo -n " root=$diskByID $console"            >> $menu
+			echo -n " vga=$fbmode splash=silent"          >> $menu
+			echo -n " $KIWI_INITRD_PARAMS"                >> $menu
+			echo -n " $KIWI_KERNEL_OPTIONS"               >> $menu
+			echo -n " KIWI_RECOVERY=$recoid RESTORE=1"    >> $menu
+			echo " showopts"                              >> $menu
 			echo " initrd $gdev_recovery/boot/$initrd"    >> $menu
 		fi
 	fi
@@ -1829,6 +1859,14 @@ function probeDevices {
 		# for details on this crappy call see bug: #250241
 		# ----
 		modprobe ide-disk &>/dev/null
+	else
+		if [ ! -z "$kiwikernelmodule" ];then
+			for module in $kiwikernelmodule;do
+				Echo "Probing module (cmdline): $module"
+				INITRD_MODULES="$INITRD_MODULES $module"
+				modprobe $module >/dev/null
+			done
+		fi
 	fi
 	#======================================
 	# Manual loading of modules
@@ -3363,7 +3401,6 @@ function mountSystemClicFS {
 	local rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
 	local roDevice=`echo $UNIONFS_CONFIG | cut -d , -f 2`
 	local clic_cmd=clicfs
-	local ram_only=no
 	local haveBytes
 	local haveKByte
 	local haveMByte
@@ -3397,7 +3434,6 @@ function mountSystemClicFS {
 		haveMByte=`expr $haveKByte / 1024`
 		haveMByte=`expr $haveMByte \* 7 / 10`
 		clic_cmd="$clic_cmd -m $haveMByte"
-		ram_only=yes
 	else
 		haveBytes=`blockdev --getsize64 $rwDevice`
 		haveMByte=`expr $haveBytes / 1024 / 1024`
@@ -3435,10 +3471,8 @@ function mountSystemClicFS {
 	#--------------------------------------
 	size=`stat -c %s $roDir/fsdata.ext3`
 	size=$((size/4096))
-	if [ "$ram_only" = "yes" ];then
-		# no reserved blocks for ram only usage...
-		tune2fs -m 0 $roDir/fsdata.ext3
-	fi
+	# we don't want reserved blocks...
+	tune2fs -m 0 $roDir/fsdata.ext3
 	if [ ! $LOCAL_BOOT = "no" ];then
 		e2fsck -p $roDir/fsdata.ext3
 	fi
