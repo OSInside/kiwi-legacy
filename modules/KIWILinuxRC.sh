@@ -38,9 +38,21 @@ export LANG=en_US.utf8
 #--------------------------------------
 function Dialog {
 	if [ -e /dev/fb0 ];then
-		fbiterm -m $UFONT -- dialog "$@"
+		fbiterm -m $UFONT -- dialog \
+			--ok-label "$(getText "OK")" \
+			--cancel-label "$(getText "Cancel")" \
+			--yes-label "$(getText "Yes")" \
+			--no-label "$(getText "No")" \
+			--exit-label "$(getText "Exit")" \
+			"$@"
 	else
-		dialog "$@"
+		dialog \
+			--ok-label "$(getText "OK")" \
+			--cancel-label "$(getText "Cancel")" \
+			--yes-label "$(getText "Yes")" \
+			--no-label "$(getText "No")" \
+			--exit-label "$(getText "Exit")" \
+			"$@"
 	fi
 }
 #======================================
@@ -4531,6 +4543,9 @@ function getText {
 	if [ ! -z "$2" ];then
 		text=$(echo $text | sed -e s"@%1@$2@")
 	fi
+	if [ ! -z "$3" ];then
+		text=$(echo $text | sed -e s"@%2@$3@")
+	fi
 	echo "$text"
 }
 #======================================
@@ -4569,7 +4584,10 @@ function displayEULA {
 	fi
 	while true;do
 		Dialog --textbox $code 20 70 \
-			--and-widget --extra-button --extra-label "No" --ok-label "Yes" \
+			--and-widget --extra-button \
+			--extra-label "$(getText "No")" \
+			--ok-label "$(getText "Yes")" \
+			--cancel-label "$(getText "Cancel")" \
 			--yesno "$(getText "Do you accept the license agreement ?")" \
 			5 45
 		case $? in

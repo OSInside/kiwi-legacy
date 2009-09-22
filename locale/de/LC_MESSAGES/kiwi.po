@@ -37,3 +37,24 @@ msgstr "Basis Betriebssystem wiederherstellen"
 
 msgid "Destroying ALL data on %1, continue ?"
 msgstr "Alle Daten auf %1 werden gelöscht, fortfahren ?"
+
+msgid "Clean sweep..."
+msgstr "Lösche..."
+
+msgid "%1 files from %2 restored..."
+msgstr "%1 Dateien von %2 restauriert"
+
+msgid "Yes"
+msgstr "Ja"
+
+msgid "No"
+msgstr "Nein"
+
+msgid "OK"
+msgstr "OK"
+
+msgid "Cancel"
+msgstr "Abbrechen"
+
+msgid "Exit"
+msgstr "Fertig"

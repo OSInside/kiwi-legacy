@@ -20,3 +20,24 @@ msgstr ""
 
 msgid "Destroying ALL data on %1, continue ?"
 msgstr ""
+
+msgid "Clean sweep..."
+msgstr ""
+
+msgid "%1 files from %2 restored..."
+msgstr ""
+
+msgid "Yes"
+msgstr ""
+
+msgid "No"
+msgstr ""
+
+msgid "OK"
+msgstr ""
+
+msgid "Cancel"
+msgstr ""
+
+msgid "Exit"
+msgstr ""

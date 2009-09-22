@@ -356,7 +356,7 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 	mkfifo /progress && cd /mnt && cp /usr/bin/tail /usr/bin/mst
 	(
 		if [ ! -z "$RESTORE" ];then
-			echo "Clean sweep..." > /progress
+			getText "Clean sweep..." > /progress
 			rm -rf * && mkdir dev sys proc
 		fi
 		rFiles=$(cat /reco-save/recovery.tar.files)
@@ -365,7 +365,7 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 		while kill -0 $rPID &>/dev/null;do
 			rReady=$(cat /tmp/rFiles | wc -l)
 			#Echo -e -n "$rReady files from $rFiles restored...\r"
-			echo "$rReady files from $rFiles restored..." > /progress
+			getText "%1 files from %2 restored..." $rReady $rFiles > /progress
 			sleep 1
 		done
 		dPID=$(pidof mst)
