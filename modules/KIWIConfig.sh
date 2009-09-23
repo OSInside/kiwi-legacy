@@ -306,8 +306,9 @@ function suseConfig {
 	# locale
 	#--------------------------------------
 	if [ ! -z "$kiwi_language" ];then
+		language=$(echo $kiwi_language | cut -f1 -d,).UTF-8
 		cat /etc/sysconfig/language |\
-			sed -e s"@RC_LANG=\".*\"@RC_LANG=\"$kiwi_language\"@" \
+			sed -e s"@RC_LANG=\".*\"@RC_LANG=\"$language\"@" \
 		> etc/sysconfig/language.new
 		mv etc/sysconfig/language.new etc/sysconfig/language
 	fi
@@ -1012,26 +1013,14 @@ function suseGFXBoot {
 		# check for new source layout
 		local newlayout=
 		[ -f themes/$theme/config ] && newlayout=1
-		[ "$newlayout" ] || make -C themes/$theme prep
-		if [ ! -z "$kiwi_language" ];then
-			local l1=`echo $kiwi_language | cut -f1 -d.`
-			local l2=`echo $kiwi_language | cut -f1 -d_`
-			local found=0
-			for lang in $l1 $l2;do
-				if [ -f themes/$theme/po/$lang.po ];then
-					echo "Found language default: $lang"
-					make -C themes/$theme DEFAULT_LANG=$lang
-					found=1
-					break
-				fi
+		if [ "$newlayout" ] && [ ! -z "$kiwi_language" ];then
+			for l in `echo $kiwi_language | tr "," " "`;do
+				echo "Adding language: $l"
+				echo $l >> themes/$theme/data-boot/languages
 			done
-			if [ $found -eq 0 ];then
-				echo "Language $kiwi_language not found, skipped"
-				make -C themes/$theme
-			fi
-		else
-			make -C themes/$theme
 		fi
+		[ "$newlayout" ] || make -C themes/$theme prep
+		make -C themes/$theme
 		mkdir /image/loader
 		local gfximage=
 		local bootimage=
@@ -1048,7 +1037,29 @@ function suseGFXBoot {
 			bin/unpack_bootlogo /image/loader
 		else
 			# boot loader graphics image file...
-			mv $bootimage /image/loader
+			if [ ! -z "$kiwi_language" ];then
+				msgdir=/image/loader/message.dir
+				mkdir $msgdir && mv $bootimage $msgdir
+				(cd $msgdir && cat message | cpio -i && rm -f message)
+				if [ "$newlayout" ];then
+					for l in `echo $kiwi_language | tr "," " "`;do
+						l=$(echo $l | cut -f1 -d_)
+						cp themes/$theme/po/$l*.tr $msgdir
+						cp themes/$theme/help-boot/$l*.hlp $msgdir
+					done
+				else
+					for l in `echo $kiwi_language | tr "," " "`;do
+						l=$(echo $l | cut -f1 -d_)
+						cp themes/$theme/boot/$l*.tr  $msgdir
+						cp themes/$theme/boot/$l*.hlp $msgdir
+						echo $l >> $msgdir/languages
+					done
+				fi
+				(cd $msgdir && find | cpio --quiet -o > ../message)
+				rm -rf $msgdir
+			else
+				mv $bootimage /image/loader
+			fi
 		fi
 		make -C themes/$theme clean
 	elif [ -f /etc/bootsplash/themes/$theme/bootloader/message ];then
@@ -1064,6 +1075,11 @@ function suseGFXBoot {
 		else
 			# boot loader graphics image file...
 			bootimage=/etc/bootsplash/themes/$theme/bootloader/message
+			if [ ! -z "$kiwi_language" ];then
+				# following works for 11.1+...
+				gfxboot --archive $bootimage --add-language \
+					$(echo $kiwi_language | tr "," " ") --default-language en_US
+			fi
 			mv $bootimage /image/loader
 		fi
 	else

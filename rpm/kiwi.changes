@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Sep 22 17:53:15 CEST 2009 - ms@suse.de
+
+- evaluate languages set by <locale> in the suseGFXBoot code.
+  This will result in grub displaying the selected languages
+
+-------------------------------------------------------------------
 Thu Sep 17 12:10:14 CEST 2009 - ms@suse.de
 
 - added OEM restore mode (bnc #539390)
