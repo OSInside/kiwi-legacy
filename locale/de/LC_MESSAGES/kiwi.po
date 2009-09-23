@@ -1,15 +1,13 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# Copyright (C) 2006 SuSE Linux Products GmbH, Nuernberg
+# This file is distributed under the same license as the package.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: kiwi\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: DATE\n"
-"Last-Translator: AUTHOR\n"
-"Language-Team: TEAM\n"
+"PO-Revision-Date: 2009-09-23 11:36\n"
+"Last-Translator: Novell Language <language@novell.com>\n"
+"Language-Team: Novell Language <language@novell.com>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -21,28 +19,28 @@ msgstr ""
 #. boot code for KIWI 
 #.
 msgid "Enter LUKS passphrase"
-msgstr "Bitte LUKS Passwort eingeben"
+msgstr "LUKS-Kennwortsatz eingeben"
 
 msgid "Do you accept the license agreement ?"
-msgstr "Stimmen Sie der Lizenzvereinbarung zu ?"
+msgstr "Akzeptieren Sie die Lizenzvereinbarung?"
 
 msgid "Do you want to start the System-Recovery ?"
-msgstr "System Wiederherstellung starten ?"
+msgstr "Möchten Sie die Systemwiederherstellung starten?"
 
 msgid "Do you want to start the System-Restore ?"
-msgstr "System Auslieferungszustand wiederherstellen ?"
+msgstr "Möchten Sie die Systemwiederherstellung starten?"
 
 msgid "Restoring base operating system..."
-msgstr "Basis Betriebssystem wiederherstellen"
+msgstr "Wiederherstellen des Basisbetriebssystems..."
 
 msgid "Destroying ALL data on %1, continue ?"
-msgstr "Alle Daten auf %1 werden gelöscht, fortfahren ?"
+msgstr "Löschen ALLER Daten auf %1, möchten Sie fortfahren?"
 
 msgid "Clean sweep..."
-msgstr "Lösche..."
+msgstr "Bereinigen…"
 
 msgid "%1 files from %2 restored..."
-msgstr "%1 Dateien von %2 restauriert"
+msgstr "%1 Dateien aus %2 wiederhergestellt…"
 
 msgid "Yes"
 msgstr "Ja"
@@ -57,4 +55,4 @@ msgid "Cancel"
 msgstr "Abbrechen"
 
 msgid "Exit"
-msgstr "Fertig"
+msgstr "Schließen"

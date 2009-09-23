@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: kiwi\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2009-09-23 11:59\n"
+"PO-Revision-Date: 2009-09-23 11:49\n"
 "Last-Translator: Novell Language <language@novell.com>\n"
 "Language-Team: Novell Language <language@novell.com>\n"
 "MIME-Version: 1.0\n"
@@ -19,40 +19,40 @@ msgstr ""
 #. boot code for KIWI 
 #.
 msgid "Enter LUKS passphrase"
-msgstr "輸入 LUKS 密碼片語"
+msgstr "LUKSパスフレーズの入力"
 
 msgid "Do you accept the license agreement ?"
-msgstr "是否接受該授權合約？"
+msgstr "ライセンス契約に同意しますか?"
 
 msgid "Do you want to start the System-Recovery ?"
-msgstr "是否要啟動系統復原程序？"
+msgstr "システム-復元を開始しますか?"
 
 msgid "Do you want to start the System-Restore ?"
-msgstr "是否要啟動系統還原程序？"
+msgstr "システム-復元を開始しますか?"
 
 msgid "Restoring base operating system..."
-msgstr "正在還原基礎作業系統..."
+msgstr "基本オペレーティングシステムを復元しています..."
 
 msgid "Destroying ALL data on %1, continue ?"
-msgstr "正在損毀 %1 中的所有資料，要繼續嗎？"
+msgstr "%1 のすべてのデータを破棄しています。続行しますか?"
 
 msgid "Clean sweep..."
-msgstr "正在清理硬碟..."
+msgstr "クリーンスイープ..."
 
 msgid "%1 files from %2 restored..."
-msgstr "已還原 %2 中的 %1 個檔案…"
+msgstr "%2 からの %1  個のファイルが復元されました..."
 
 msgid "Yes"
-msgstr "是"
+msgstr "はい"
 
 msgid "No"
-msgstr "否"
+msgstr "いいえ"
 
 msgid "OK"
-msgstr "確定"
+msgstr "OK"
 
 msgid "Cancel"
-msgstr "取消"
+msgstr "キャンセル"
 
 msgid "Exit"
-msgstr "離開"
+msgstr "終了"

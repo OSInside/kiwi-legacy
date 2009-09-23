@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Sep 23 17:23:22 CEST 2009 - ms@suse.de
+
+- added language translations (bnc #539398)
+
+-------------------------------------------------------------------
 Tue Sep 22 17:53:15 CEST 2009 - ms@suse.de
 
 - evaluate languages set by <locale> in the suseGFXBoot code.

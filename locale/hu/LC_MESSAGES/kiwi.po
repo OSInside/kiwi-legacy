@@ -5,13 +5,13 @@ msgid ""
 msgstr ""
 "Project-Id-Version: kiwi\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2009-09-23 11:59\n"
+"PO-Revision-Date: 2009-09-23 11:47\n"
 "Last-Translator: Novell Language <language@novell.com>\n"
 "Language-Team: Novell Language <language@novell.com>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. /.../
 #. Copyright (c) 2005 SuSE GmbH Nuernberg, Germany.  All rights reserved.
@@ -19,40 +19,40 @@ msgstr ""
 #. boot code for KIWI 
 #.
 msgid "Enter LUKS passphrase"
-msgstr "輸入 LUKS 密碼片語"
+msgstr "Adja meg az LUKS jelszót"
 
 msgid "Do you accept the license agreement ?"
-msgstr "是否接受該授權合約？"
+msgstr "Elfogadja a licencszerződést?"
 
 msgid "Do you want to start the System-Recovery ?"
-msgstr "是否要啟動系統復原程序？"
+msgstr "Szeretné elkezdeni a rendszer-helyreállítást?"
 
 msgid "Do you want to start the System-Restore ?"
-msgstr "是否要啟動系統還原程序？"
+msgstr "Szeretné elkezdeni a rendszer-helyreállítást?"
 
 msgid "Restoring base operating system..."
-msgstr "正在還原基礎作業系統..."
+msgstr "Az alap operációs rendszer visszaállítása..."
 
 msgid "Destroying ALL data on %1, continue ?"
-msgstr "正在損毀 %1 中的所有資料，要繼續嗎？"
+msgstr "Az ÖSSZES adat megsemmisítése a(z)%1 eszközön, folytatja?"
 
 msgid "Clean sweep..."
-msgstr "正在清理硬碟..."
+msgstr "Megtisztítás..."
 
 msgid "%1 files from %2 restored..."
-msgstr "已還原 %2 中的 %1 個檔案…"
+msgstr "%1 fájl helyreállítva (összesen: %2)..."
 
 msgid "Yes"
-msgstr "是"
+msgstr "Igen"
 
 msgid "No"
-msgstr "否"
+msgstr "Nem"
 
 msgid "OK"
-msgstr "確定"
+msgstr "OK"
 
 msgid "Cancel"
-msgstr "取消"
+msgstr "Mégse"
 
 msgid "Exit"
-msgstr "離開"
+msgstr "Kilépés"

@@ -1,43 +1,58 @@
+# Copyright (C) 2006 SuSE Linux Products GmbH, Nuernberg
+# This file is distributed under the same license as the package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: kiwi\n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: 2009-09-23 12:01\n"
+"Last-Translator: Novell Language <language@novell.com>\n"
+"Language-Team: Novell Language <language@novell.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
 #. /.../
 #. Copyright (c) 2005 SuSE GmbH Nuernberg, Germany.  All rights reserved.
 #. This file contains the gettext keys used within a gettext call in the
 #. boot code for KIWI 
 #.
 msgid "Enter LUKS passphrase"
-msgstr ""
+msgstr "输入 LUKS 通行口令"
 
 msgid "Do you accept the license agreement ?"
-msgstr ""
+msgstr "是否接受许可协议？"
 
 msgid "Do you want to start the System-Recovery ?"
-msgstr ""
+msgstr "是否要启动系统恢复？"
 
 msgid "Do you want to start the System-Restore ?"
-msgstr ""
+msgstr "是否要启动系统恢复？"
 
 msgid "Restoring base operating system..."
-msgstr ""
+msgstr "正在恢复基本操作系统..."
 
 msgid "Destroying ALL data on %1, continue ?"
-msgstr ""
+msgstr "将损坏 %1 上的所有数据，是否继续？"
 
 msgid "Clean sweep..."
-msgstr ""
+msgstr "快速整理"
 
 msgid "%1 files from %2 restored..."
-msgstr ""
+msgstr "已恢复 %1 个文件，共 %2 个文件..."
 
 msgid "Yes"
-msgstr ""
+msgstr "是"
 
 msgid "No"
-msgstr ""
+msgstr "否"
 
 msgid "OK"
-msgstr ""
+msgstr "确定"
 
 msgid "Cancel"
-msgstr ""
+msgstr "取消"
 
 msgid "Exit"
-msgstr ""
+msgstr "退出"

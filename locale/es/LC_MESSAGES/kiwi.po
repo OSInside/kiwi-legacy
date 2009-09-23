@@ -5,13 +5,13 @@ msgid ""
 msgstr ""
 "Project-Id-Version: kiwi\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2009-09-23 11:59\n"
+"PO-Revision-Date: 2009-09-23 11:42\n"
 "Last-Translator: Novell Language <language@novell.com>\n"
 "Language-Team: Novell Language <language@novell.com>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. /.../
 #. Copyright (c) 2005 SuSE GmbH Nuernberg, Germany.  All rights reserved.
@@ -19,40 +19,40 @@ msgstr ""
 #. boot code for KIWI 
 #.
 msgid "Enter LUKS passphrase"
-msgstr "輸入 LUKS 密碼片語"
+msgstr "Introduzca la contraseña codificada LUKS"
 
 msgid "Do you accept the license agreement ?"
-msgstr "是否接受該授權合約？"
+msgstr "¿Acepta el acuerdo de licencia?"
 
 msgid "Do you want to start the System-Recovery ?"
-msgstr "是否要啟動系統復原程序？"
+msgstr "¿Desea iniciar la recuperación del sistema?"
 
 msgid "Do you want to start the System-Restore ?"
-msgstr "是否要啟動系統還原程序？"
+msgstr "¿Desea iniciar la restauración del sistema?"
 
 msgid "Restoring base operating system..."
-msgstr "正在還原基礎作業系統..."
+msgstr "Restaurando el sistema operativo base..."
 
 msgid "Destroying ALL data on %1, continue ?"
-msgstr "正在損毀 %1 中的所有資料，要繼續嗎？"
+msgstr "Se destruirán TODOS los datos de %1, ¿desea continuar?"
 
 msgid "Clean sweep..."
-msgstr "正在清理硬碟..."
+msgstr "Borrando…"
 
 msgid "%1 files from %2 restored..."
-msgstr "已還原 %2 中的 %1 個檔案…"
+msgstr "%1 de %2 archivos restaurados..."
 
 msgid "Yes"
-msgstr "是"
+msgstr "Sí"
 
 msgid "No"
-msgstr "否"
+msgstr "No"
 
 msgid "OK"
-msgstr "確定"
+msgstr "Aceptar"
 
 msgid "Cancel"
-msgstr "取消"
+msgstr "Cancelar"
 
 msgid "Exit"
-msgstr "離開"
+msgstr "Salir"
