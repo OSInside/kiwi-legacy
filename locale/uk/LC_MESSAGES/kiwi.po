@@ -1,0 +1,59 @@
+# Copyright (C) 2006 SuSE Linux Products GmbH, Nuernberg
+# This file is distributed under the same license as the package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: kiwi\n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: 2009-09-24 08:49\n"
+"Last-Translator: Novell Language <language@novell.com>\n"
+"Language-Team: Novell Language <language@novell.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%"
+"10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+
+#. /.../
+#. Copyright (c) 2005 SuSE GmbH Nuernberg, Germany.  All rights reserved.
+#. This file contains the gettext keys used within a gettext call in the
+#. boot code for KIWI 
+#.
+msgid "Enter LUKS passphrase"
+msgstr "Введіть пароль LUKS"
+
+msgid "Do you accept the license agreement ?"
+msgstr "Прийняти ліцензійну угоду?"
+
+msgid "Do you want to start the System-Recovery ?"
+msgstr "Запустити відновлення системи?"
+
+msgid "Do you want to start the System-Restore ?"
+msgstr "Запустити відновлення системи?"
+
+msgid "Restoring base operating system..."
+msgstr "Відновлення базової операційної системи..."
+
+msgid "Destroying ALL data on %1, continue ?"
+msgstr "Видалення ВСІХ даних на %1, продовжити?"
+
+msgid "Clean sweep..."
+msgstr "Очистка…"
+
+msgid "%1 files from %2 restored..."
+msgstr "%1 файлів із %2 відновлено..."
+
+msgid "Yes"
+msgstr "Так"
+
+msgid "No"
+msgstr "Ні"
+
+msgid "OK"
+msgstr "OK"
+
+msgid "Cancel"
+msgstr "Скасувати"
+
+msgid "Exit"
+msgstr "Вийти"
