@@ -4511,18 +4511,14 @@ function selectLanguage {
 	# ----
 	local title="\"Select Language\""
 	local list="en_US \"[ English ]\" on"
-	local de_DE=German
-	local es_ES=Spanish
-	local fr_FR=French
-	local it_IT=Italian
-	local pt_BR=Portuguese
-	local ja_JP=Japanese
 	local zh_CN=Chinese
 	local zh_TW=Taiwanese
+	local ru_RU=Russian
+	local de_DE=German
 	local code
 	local lang
 	if [ "$DIALOG_LANG" = "ask" ];then
-		for code in de_DE es_ES fr_FR it_IT pt_BR ja_JP zh_CN zh_TW;do
+		for code in zh_CN zh_TW ru_RU de_DE;do
 			eval lang=\$$code
 			list="$list $code \"[ $lang ]\" off"
 		done
