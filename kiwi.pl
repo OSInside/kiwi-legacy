@@ -2192,7 +2192,7 @@ sub createPassword {
 sub createHash {
 	# ...
 	# Sign your image description with a md5 sum. The created
-	# file .checksum.md5 is clecked on runtime with the md5sum
+	# file .checksum.md5 is checked on runtime with the md5sum
 	# command
 	# ----
 	if (! defined $kiwi) {

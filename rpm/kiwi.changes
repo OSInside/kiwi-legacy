@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Sep 28 11:45:56 CEST 2009 - ms@suse.de
+
+- fixed typos and mistakes in the documentation, Thanks to
+  Robert who found them
+
+-------------------------------------------------------------------
 Thu Sep 24 15:35:11 CEST 2009 - ms@suse.de
 
 - added language translations (ar,tr,uk) (bnc #539398)

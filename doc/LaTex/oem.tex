@@ -126,7 +126,7 @@ be specified:
       name which is used instead of OEM. This value is represented
       by the variable OEM\_BOOT\_TITLE in config.oempartition.
 \item \textbf{<oem-recovery>true|false</oem-recovery>}\\
-      If this element is set to yes KIWI will create a recovery archive
+      If this element is set to true KIWI will create a recovery archive
       from the prepared root tree. The archive will appear as
       \textit{/recovery.tar.bz2} within the initial image file. During
       first boot of the image a single recovery partition will be
@@ -136,7 +136,7 @@ be specified:
       user information on the /home partition or in the /home directory
       are not affected by that recovery process
 \item \textbf{<oem-kiwi-initrd>true|false</oem-kiwi-initrd>}\\
-      If this element is set to yes the initial oemboot boot image (initrd)
+      If this element is set to true the initial oemboot boot image (initrd)
       will \textbf{not} be replaced by the system (mkinitrd) created initrd.
       This option makes sense if the target storage device for the image
       is not a fixed disk but for example an USB stick. In that case it
