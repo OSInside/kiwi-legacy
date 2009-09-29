@@ -324,10 +324,12 @@ fi
 #======================================
 # 15) Mount system
 #--------------------------------------
-if ! mountSystem $imageRootDevice;then
-	systemException "Failed to mount root filesystem" "reboot"
+if [ -z "$RESTORE" ];then
+	if ! mountSystem $imageRootDevice;then
+		systemException "Failed to mount root filesystem" "reboot"
+	fi
+	validateRootTree
 fi
-validateRootTree
 
 #======================================
 # 16) Recover system if requested
@@ -353,12 +355,30 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 	#======================================
 	# 16.2) restore root archive
 	#--------------------------------------
-	mkfifo /progress && cd /mnt && cp /usr/bin/tail /usr/bin/mst
+	mkfifo /progress && cp /usr/bin/tail /usr/bin/mst
 	(
 		if [ ! -z "$RESTORE" ];then
 			getText "Clean sweep..." > /progress
-			rm -rf * && mkdir dev sys proc
+			fstype=$(cat /reco-save/recovery.tar.filesystem)
+			case $fstype in
+				reiserfs) mkreiserfs -f   $imageRootDevice ;;
+				ext2)     mkfs.ext2 -F    $imageRootDevice ;;
+				ext3)     mkfs.ext3 -j -F $imageRootDevice ;;
+				ext4)     mkfs.ext4 -j -F $imageRootDevice ;;
+				*)
+					systemException \
+						"Filesystem $fstype not supported" \
+					"reboot"
+				;;
+			esac
+			if ! mountSystem $imageRootDevice;then
+				systemException "Failed to mount root filesystem" "reboot"
+			fi
+			for i in dev sys proc;do
+				mkdir /mnt/$i
+			done
 		fi
+		cd /mnt
 		rFiles=$(cat /reco-save/recovery.tar.files)
 		tar --numeric-owner -xvpf /reco-save/recovery.tar.gz >/tmp/rFiles &
 		rPID=$!

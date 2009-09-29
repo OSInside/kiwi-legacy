@@ -582,7 +582,8 @@ sub main {
 		# Update .profile env, current type
 		#------------------------------------------
 		$kiwi -> info ("Updating type in .profile environment");
-		my $type = $xml -> getImageTypeAndAttributes() -> {type};
+		my %attr = %{$xml->getImageTypeAndAttributes()};
+		my $type = $attr{type};
 		qxx (
 			"sed -i -e 's#kiwi_type=.*#kiwi_type=\"$type\"#' $Create/.profile"
 		);
@@ -660,8 +661,7 @@ sub main {
 		#==========================================
 		# Check tool set
 		#------------------------------------------
-		my %type = %{$xml->getImageTypeAndAttributes()};
-		my $para = checkType ( \%type );
+		my $para = checkType ( \%attr );
 		if (! defined $para) {
 			if (defined $BaseRoot) {
 				$overlay -> resetOverlay();
@@ -694,14 +694,14 @@ sub main {
 		$xml -> getInstallList();
 		%replace = $xml -> getReplacePackageHash();
 		%replids = getReplaceIDHash (\%replace,\%replids);
-		if ($type{type} eq "vmx") {
+		if ($attr{type} eq "vmx") {
 			$kiwi -> info ("Creating VMware package list");
 			@addonList = $xml -> getVMwareList();
 			%replace = $xml -> getReplacePackageHash();
 			%replids = getReplaceIDHash (\%replace,\%replids);
 			$kiwi -> done();
 		}
-		if ($type{type} eq "xen") {
+		if ($attr{type} eq "xen") {
 			$kiwi -> info ("Creating Xen package list");
 			@addonList = $xml -> getXenList();
 			%replace = $xml -> getReplacePackageHash();
@@ -762,7 +762,7 @@ sub main {
 				}
 				my $code = kiwiExit (1); return $code;
 			}
-			if (! $configure -> setupRecoveryArchive()) {
+			if (! $configure -> setupRecoveryArchive($attr{filesystem})) {
 				if (defined $BaseRoot) {
 					$overlay -> resetOverlay();
 				}
@@ -773,7 +773,7 @@ sub main {
 		# Initialize logical image extend
 		#------------------------------------------
 		my $ok;
-		SWITCH: for ($type{type}) {
+		SWITCH: for ($attr{type}) {
 			/^ext2/     && do {
 				$ok = $image -> createImageEXT2 ();
 				last SWITCH;
@@ -838,7 +838,7 @@ sub main {
 				$ok = $image -> createImageEC2 ( $para );
 				last SWITCH;
 			};
-			$kiwi -> error  ("Unsupported type: $type{type}");
+			$kiwi -> error  ("Unsupported type: $attr{type}");
 			$kiwi -> failed ();
 			if (defined $BaseRoot) {
 				$overlay -> resetOverlay();

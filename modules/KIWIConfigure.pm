@@ -80,10 +80,12 @@ sub new {
 #------------------------------------------
 sub setupRecoveryArchive {
 	my $this  = shift;
+	my $fstype= shift;
 	my $kiwi  = $this->{kiwi};
 	my $xml   = $this->{xml};
 	my $root  = $this->{root};
 	my $start = $xml -> getOEMRecovery();
+	my $FD;
 	if ((! defined $start) || ("$start" eq "false")) {
 		return $this;
 	}
@@ -106,9 +108,16 @@ sub setupRecoveryArchive {
 	$code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> failed ();
-		$kiwi -> error  ("Failed to create file count: $status");
+		$kiwi -> error  ("Failed to create recovery file count: $status");
 		return undef;
 	}
+	if (! open ($FD,">$root/recovery.tar.filesystem")) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Failed to create recovery filesystem info: $!");
+		return undef;
+	}
+	print $FD $fstype;
+	close $FD;
 	$kiwi -> done ();
 	return $this;
 }

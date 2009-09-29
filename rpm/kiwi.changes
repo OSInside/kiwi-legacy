@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Sep 29 11:17:49 CEST 2009 - ms@suse.de
+
+- improved restore feature which also restores the filesystem
+  before restoring files (bnc #542648)
+
+-------------------------------------------------------------------
 Mon Sep 28 11:45:56 CEST 2009 - ms@suse.de
 
 - fixed typos and mistakes in the documentation, Thanks to
