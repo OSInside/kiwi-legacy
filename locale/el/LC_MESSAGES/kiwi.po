@@ -42,6 +42,9 @@ msgstr "Γίνεται καθάρισμα..."
 msgid "%1 files from %2 restored..."
 msgstr "Έγινε επαναφορά %1 αρχείων από %2..."
 
+msgid "backing up: %1..."
+msgstr ""
+
 msgid "Yes"
 msgstr "Ναι"
 

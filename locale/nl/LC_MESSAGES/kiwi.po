@@ -42,6 +42,9 @@ msgstr "Alles herstellen…"
 msgid "%1 files from %2 restored..."
 msgstr "%1 bestanden van %2 hersteld…"
 
+msgid "backing up: %1..."
+msgstr ""
+
 msgid "Yes"
 msgstr "Ja"
 

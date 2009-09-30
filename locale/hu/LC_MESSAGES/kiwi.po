@@ -42,6 +42,9 @@ msgstr "Megtisztítás..."
 msgid "%1 files from %2 restored..."
 msgstr "%1 fájl helyreállítva (összesen: %2)..."
 
+msgid "backing up: %1..."
+msgstr ""
+
 msgid "Yes"
 msgstr "Igen"
 

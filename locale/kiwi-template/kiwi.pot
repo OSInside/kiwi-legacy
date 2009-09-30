@@ -44,6 +44,9 @@ msgstr ""
 msgid "%1 files from %2 restored..."
 msgstr ""
 
+msgid "backing up: %1..."
+msgstr ""
+
 msgid "Yes"
 msgstr ""
 

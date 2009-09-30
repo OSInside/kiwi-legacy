@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Wed Sep 30 10:23:13 CEST 2009 - ms@suse.de
+
+- oemboot: re-install grub bootloader into partition if the
+  partition contains a bootloader signature already (bnc #543123)
+- added backup diff in recovery mode. This will add a file~
+  diff file for each file changed according to the recovery
+  contents.
+
+-------------------------------------------------------------------
 Tue Sep 29 11:17:49 CEST 2009 - ms@suse.de
 
 - improved restore feature which also restores the filesystem

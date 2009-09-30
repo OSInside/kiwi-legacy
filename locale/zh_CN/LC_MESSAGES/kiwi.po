@@ -42,6 +42,9 @@ msgstr "快速整理"
 msgid "%1 files from %2 restored..."
 msgstr "已恢复 %1 个文件，共 %2 个文件..."
 
+msgid "backing up: %1..."
+msgstr ""
+
 msgid "Yes"
 msgstr "是"
 

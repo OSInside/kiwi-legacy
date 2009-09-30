@@ -43,6 +43,9 @@ msgstr "Wyczyść..."
 msgid "%1 files from %2 restored..."
 msgstr "Liczba przywróconych plików: %1 z %2..."
 
+msgid "backing up: %1..."
+msgstr ""
+
 msgid "Yes"
 msgstr "Tak"
 

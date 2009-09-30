@@ -42,6 +42,9 @@ msgstr "Bereinigen…"
 msgid "%1 files from %2 restored..."
 msgstr "%1 Dateien aus %2 wiederhergestellt…"
 
+msgid "backing up: %1..."
+msgstr ""
+
 msgid "Yes"
 msgstr "Ja"
 

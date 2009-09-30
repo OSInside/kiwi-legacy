@@ -42,6 +42,9 @@ msgstr "Pulizia in corso..."
 msgid "%1 files from %2 restored..."
 msgstr "%1 file su %2 ripristinati..."
 
+msgid "backing up: %1..."
+msgstr ""
+
 msgid "Yes"
 msgstr "Sì"
 

@@ -42,6 +42,9 @@ msgstr "Nettoyage..."
 msgid "%1 files from %2 restored..."
 msgstr "%1 fichiers de %2 restaurés..."
 
+msgid "backing up: %1..."
+msgstr ""
+
 msgid "Yes"
 msgstr "Oui"
 

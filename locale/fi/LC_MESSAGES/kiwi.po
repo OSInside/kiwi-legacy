@@ -42,6 +42,9 @@ msgstr "Puhdas läpikäynti..."
 msgid "%1 files from %2 restored..."
 msgstr "Palautettiin %1 tiedostoa kohteesta %2..."
 
+msgid "backing up: %1..."
+msgstr ""
+
 msgid "Yes"
 msgstr "Kyllä"
 

@@ -3965,7 +3965,7 @@ sub installBootLoader {
 				return undef;
 			}
 			$status = qxx (
-				"dd if=$bmbr of=$diskname bs=1 count=512 seek=0x800 $opt 2>&1"
+				"dd if=$bmbr of=$diskname bs=512 count=1 seek=3 skip=0 $opt 2>&1"
 			);
 			unlink $bmbr;
 			#==========================================

@@ -42,6 +42,9 @@ msgstr "Tam silme…"
 msgid "%1 files from %2 restored..."
 msgstr "%1/%2 dosya geri yüklendi..."
 
+msgid "backing up: %1..."
+msgstr ""
+
 msgid "Yes"
 msgstr "Evet"
 

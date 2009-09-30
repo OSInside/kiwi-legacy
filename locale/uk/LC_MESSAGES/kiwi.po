@@ -43,6 +43,9 @@ msgstr "Очистка…"
 msgid "%1 files from %2 restored..."
 msgstr "%1 файлів із %2 відновлено..."
 
+msgid "backing up: %1..."
+msgstr ""
+
 msgid "Yes"
 msgstr "Так"
 

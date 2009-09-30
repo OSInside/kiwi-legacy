@@ -1030,6 +1030,7 @@ function setupBootLoaderGrub {
 	local conf=$destsPrefix/etc/grub.conf
 	local dmap=$destsPrefix/boot/grub/device.map
 	local sysb=$destsPrefix/etc/sysconfig/bootloader
+	local stage=/boot/grub/stage2
 	local console=""
 	local kname=""
 	local kernel=""
@@ -1213,12 +1214,13 @@ function setupBootLoaderGrub {
 	#======================================
 	# create grub.conf file
 	#--------------------------------------
-	echo -en "root $gdev\ninstall"           > $conf
-	echo -n " --stage2=/boot/grub/stage2"   >> $conf
-	echo -n " /boot/grub/stage1 d (hd0)"    >> $conf
-	echo -n " /boot/grub/stage2 0x8000"     >> $conf
-	echo " $gdev/boot/grub/menu.lst"        >> $conf
-	echo "quit"                             >> $conf
+	echo "root $gdev" > $conf
+	if dd if=$rdev bs=1 count=512 | file - | grep -q Bootloader;then
+		echo "setup --stage2=$stage $gdev" >> $conf
+	else
+		echo "setup --stage2=$stage (hd0)" >> $conf
+	fi
+	echo "quit" >> $conf
 	#======================================
 	# create grub device map
 	#--------------------------------------
