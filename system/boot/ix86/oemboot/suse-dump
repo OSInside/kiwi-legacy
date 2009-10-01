@@ -143,6 +143,7 @@ function OEMInstall {
 			"reboot"
 		fi
 	fi
+	clear
 	#======================================
 	# Import vmx configuration file
 	#--------------------------------------
