@@ -261,6 +261,10 @@ function baseSetupOEMPartition {
 		echo "Setting up OEM_RECOVERY=1"
 		echo "OEM_RECOVERY=1" >> $oemfile
 	fi
+	if [ ! -z "$kiwi_oemrecoveryID" ];then
+		echo "Setting up OEM_RECOVERY_ID=$kiwi_oemrecoveryID"
+		echo "OEM_RECOVERY_ID=$kiwi_oemrecoveryID" >> $oemfile
+	fi
 }
 
 #======================================

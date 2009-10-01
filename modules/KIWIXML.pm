@@ -356,6 +356,9 @@ sub new {
 		if (defined $foreignRepo->{"oem-recovery"}) {
 			$this -> setForeignOptionsElement ("oem-recovery");
 		}
+		if (defined $foreignRepo->{"oem-recoveryID"}) {
+			$this -> setForeignOptionsElement ("oem-recoveryID");
+		}
 		#==========================================
 		# foreign attributes
 		#------------------------------------------
@@ -1344,6 +1347,22 @@ sub getOEMRecovery {
 }
 
 #==========================================
+# getOEMRecoveryID
+#------------------------------------------
+sub getOEMRecoveryID {
+	# ...
+	# Obtain the oem-recovery partition ID value or return undef
+	# ---
+	my $this = shift;
+	my $node = $this -> getPreferencesNodeByTagName ("oem-recoveryID");
+	my $reco = $node -> getElementsByTagName ("oem-recoveryID");
+	if ((! defined $reco) || ("$reco" eq "")) {
+		return undef;
+	}
+	return $reco;
+}
+
+#==========================================
 # getOEMHome
 #------------------------------------------
 sub getOEMHome {
@@ -2195,6 +2214,7 @@ sub getImageConfig {
 		my $oemsap   = $element -> getElementsByTagName ("oem-sap-install");
 		my $oemreboot= $element -> getElementsByTagName ("oem-reboot");
 		my $oemreco  = $element -> getElementsByTagName ("oem-recovery");
+		my $oemrecoid= $element -> getElementsByTagName ("oem-recoveryID");
 		if (defined $keytable) {
 			$result{kiwi_keytable} = $keytable;
 		}
@@ -2232,6 +2252,9 @@ sub getImageConfig {
 		}
 		if ((defined $oemreco) && ("$oemreco" eq "true")) {
 			$result{kiwi_oemrecovery} = $oemreco;
+		}
+		if ((defined $oemrecoid) && ("$oemrecoid" ne "")) {
+			$result{kiwi_oemrecoveryID} = $oemrecoid;
 		}
 	}
 	#==========================================

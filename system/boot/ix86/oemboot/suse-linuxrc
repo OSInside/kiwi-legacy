@@ -214,7 +214,13 @@ if [ "$LOCAL_BOOT" = "no" ];then
 	fi
 	export imageDiskDevice=$biosBootDevice
 else
-	export imageDiskDevice=$(dn $root)
+	if [ ! -z "$KIWI_RECOVERY" ];then
+		export imageRecoveryDevice=$(echo $root | \
+			sed -e s@part.*@part$KIWI_RECOVERY@)
+		export imageDiskDevice=$(dn $imageRecoveryDevice)
+	else
+		export imageDiskDevice=$(dn $root)
+	fi
 fi
 Echo "Found boot device: $imageDiskDevice"
 
@@ -353,7 +359,21 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 		systemException "Failed to mount recovery device" "reboot"
 	fi
 	#======================================
-	# 16.2) restore root archive
+	# 16.2) restore MBR in restore mode
+	#--------------------------------------
+	if [ ! -z "$RESTORE" ];then
+		if ! dd if=/reco-save/mbr of=$imageDiskDevice;then
+			systemException "Failed to restore MBR" "reboot"
+		fi
+		umount $imageRecoveryDevice
+		blockdev --rereadpt $imageDiskDevice
+		waitForStorageDevice $imageRecoveryDevice
+		if ! mount -o ro $imageRecoveryDevice /reco-save >/dev/null;then
+			systemException "Failed to remount recovery device" "reboot"
+		fi
+	fi
+	#======================================
+	# 16.3) restore root archive
 	#--------------------------------------
 	mkfifo /progress && cp /usr/bin/tail /usr/bin/mst
 	(
@@ -433,7 +453,7 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 	fi
 	clear
 	#======================================
-	# 16.3) restore boot files
+	# 16.4) restore boot files
 	#--------------------------------------
 	Echo "Restoring boot files..."
 	for i in etc/fstab etc/sysconfig/kernel etc/sysconfig/bootloader;do
@@ -454,11 +474,30 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 		fi
 	done
 	#======================================
-	# 16.4) umount recovery and boot
+	# 16.5) restore fstab partitions
+	#--------------------------------------
+	if [ ! -z "$RESTORE" ];then
+		imageSwapDevice=$(cat /mnt/etc/fstab | grep swap | cut -f1 -d " ")
+		imageSwapDevice=$(echo $imageSwapDevice)
+		if [ -e "$imageSwapDevice" ];then
+			if ! mkswap $imageSwapDevice 1>&2;then
+				systemException "Failed to restore swap signature" "reboot"
+			fi
+		fi
+		imageHomeDevice=$(cat /mnt/etc/fstab | grep /home | cut -f1 -d " ")
+		imageHomeDevice=$(echo $imageHomeDevice)
+		if [ -e "$imageHomeDevice" ];then
+			if ! mke2fs -T ext3 -j -q $imageHomeDevice >/dev/null 2>&1;then
+				systemException "Failed to restore Home filesystem" "reboot"
+			fi
+		fi
+	fi
+	#======================================
+	# 16.6) umount recovery and boot
 	#--------------------------------------
 	umount $imageRecoveryDevice
 	#======================================
-	# 16.5) import oem config file
+	# 16.7) import oem config file
 	#--------------------------------------
 	importFile < $OEM_PARTITION_CONFIG
 	IFS=$IFS_ORIG

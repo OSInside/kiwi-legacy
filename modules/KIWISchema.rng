@@ -1258,6 +1258,26 @@ partition in MB. No swapspace with oem-swap set to false.</db:para>
   </div>
   <!--
     ==========================================
+    common element <oem-recoveryID>
+    
+  -->
+  <div>
+    <define name="k.oem-recoveryID.attlist">
+      <empty/>
+    </define>
+    <define name="k.oem-recoveryID">
+      <element name="oem-recoveryID">
+        <a:documentation>For oemboot driven images: Set the partition ID of
+recovery partition. Default value is 83 (Linux)</a:documentation>
+        <db:para>For oemboot driven images: Set the partition ID of
+recovery partition. Default value is 83 (Linux)</db:para>
+        <ref name="k.oem-recoveryID.attlist"/>
+        <data type="nonNegativeInteger"/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
     common element <oem-swap>
     
   -->
@@ -2792,6 +2812,9 @@ and also depends of the selected image output type.</db:para>
           </optional>
           <optional>
             <ref name="k.oem-recovery"/>
+          </optional>
+          <optional>
+            <ref name="k.oem-recoveryID"/>
           </optional>
           <optional>
             <ref name="k.oem-reboot"/>

@@ -880,6 +880,26 @@ div {
 }
 
 #==========================================
+# common element <oem-recoveryID>
+#
+div {
+	k.oem-recoveryID.attlist = empty
+	k.oem-recoveryID =
+		## For oemboot driven images: Set the partition ID of
+		## recovery partition. Default value is 83 (Linux)
+		[
+		db:para [
+			"For oemboot driven images: Set the partition ID of\x{a}"~
+			"recovery partition. Default value is 83 (Linux)"
+		]
+		]
+		element oem-recoveryID {
+			k.oem-recoveryID.attlist,
+			xsd:nonNegativeInteger
+		}
+}
+
+#==========================================
 # common element <oem-swap>
 #
 div {
@@ -1910,6 +1930,7 @@ div {
 			k.oem-swapsize? &
 			k.oem-systemsize? &
 			k.oem-recovery? &
+			k.oem-recoveryID? &
 			k.oem-reboot? &
 			k.packagemanager? &
 			k.rpm-check-signatures? &

@@ -43,6 +43,10 @@ function OEMRepartInit {
 		recoBytes=`du --bytes /reco-root/recovery.tar.gz | cut -f1`
 		recoMByte=`expr $recoBytes / 1048576`
 		recoMByte=`expr $recoMByte \* 15 / 10`
+		recoID=83
+		if [ ! -z "$OEM_RECOVERY_ID" ];then
+			recoID=$OEM_RECOVERY_ID
+		fi
 		umount /reco-root && rmdir /reco-root
 	fi
 }
@@ -163,6 +167,7 @@ function OEMRepartStandard {
 							d n p 1 1 +"$disk1MBytes"M \
 							n p 2 . +"$swapsize"M \
 							n p 3 . +"$recoMByte"M \
+							t 3 $recoID \
 							t 2 82 w q
 					else
 						createPartitionerInput \
@@ -196,7 +201,8 @@ function OEMRepartStandard {
 					if [ ! -z "$OEM_SYSTEMSIZE" ];then
 						createPartitionerInput \
 							d n p 1 1 +"$disk1MBytes"M \
-							n p 2 . +"$recoMByte"M w q
+							n p 2 . +"$recoMByte"M \
+							t 2 $recoID w q
 					else
 						createPartitionerInput \
 							d n p 1 1 +"$disk1MBytes"M \
@@ -232,6 +238,7 @@ function OEMRepartStandard {
 						n p 2 . +"$swapsize"M \
 						n p 3 . +"$recoMByte"M \
 						n p 4 . . \
+						t 3 $recoID \
 						t 2 82 w q
 					setupDeviceNames 1 2 4 3 1 no
 				fi
@@ -254,6 +261,7 @@ function OEMRepartStandard {
 					createPartitionerInput \
 						d n p 1 1 +"$disk1MBytes"M \
 						n p 2 . +"$recoMByte"M \
+						t 2 $recoID \
 						n p 3 . . w q
 					setupDeviceNames 1 no 3 2 1 no
 				fi
@@ -823,6 +831,9 @@ function OEMRepart {
 		fi
 		if ! cp /reco-root/boot/message /reco-save/boot/message;then
 			systemException "Failed to copy recovery gfxboot message" "reboot"
+		fi
+		if ! dd if=$imageDiskDevice of=/reco-save/mbr bs=1 count=512;then
+			systemException "Failed to store MBR" "reboot"
 		fi
 		umount /reco-save && rmdir /reco-save
 		umount /reco-root && rmdir /reco-root
