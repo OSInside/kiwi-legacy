@@ -109,6 +109,7 @@
 		<package name="bzip2"/>
 		<package name="cryptsetup"/>
 		<package name="fbiterm"/>
+		<package name="bc"/>
 		<package name="gettext"/>
 	</packages>
 	<packages type="bootstrap">

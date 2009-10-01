@@ -414,8 +414,8 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 					rm $backup
 				fi
 				rReady=$((rReady + 1))
-				rPDone=$((rFiles / rReady))
-				rPDone=$((100 / rPDone))
+				rPDone=$(echo "scale=4; $rFiles / $rReady" | bc)
+				rPDone=$(echo "scale=0; 100 / $rPDone" | bc)
 				getText "backing up: %1..." "$rPDone%" > /progress
 			done
 		fi

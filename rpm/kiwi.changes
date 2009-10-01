@@ -2,6 +2,9 @@
 Thu Oct  1 11:24:52 CEST 2009 - ms@suse.de
 
 - clear screen after install confirmation
+- fixed stick detection if multiple sticks are plugged in
+  stickFound variable was set too early, thanks to Axel Theilmann
+- use bc for more exact progress calculation
 
 -------------------------------------------------------------------
 Wed Sep 30 10:23:13 CEST 2009 - ms@suse.de

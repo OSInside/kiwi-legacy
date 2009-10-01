@@ -1989,7 +1989,6 @@ function USBStickDevice {
 					if ! kiwiMount "$dev" "/mnt" "-o ro";then
 						continue
 					fi
-					stickFound=1
 					if \
 						[ ! -e /mnt/etc/ImageVersion ] && \
 						[ ! -e /mnt/config.isoclient ]
@@ -1997,6 +1996,7 @@ function USBStickDevice {
 						umountSystem
 						continue
 					fi
+					stickFound=1
 					umountSystem
 					break
 				done

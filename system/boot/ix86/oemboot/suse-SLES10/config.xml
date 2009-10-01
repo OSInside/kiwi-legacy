@@ -103,7 +103,8 @@
 		<package name="lvm2"/>
 		<package name="bzip2"/>
 		<package name="fbiterm"/>
-		<package name="gettext-runtime"/>
+		<package name="bc"/>
+		<package name="gettext"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
