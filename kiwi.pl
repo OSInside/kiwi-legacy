@@ -179,6 +179,7 @@ our @Exclude;               # exclude directories in migrate search
 our $Report;                # create report on root/ tree migration only
 our $ReportPacklist;        # just report the package/pattern list on migration
 our @Profiles;              # list of profiles to include in image
+our @ProfilesOrig;          # copy of original Profiles option value 
 our $ForceNewRoot;          # force creation of new root directory
 our $BaseRoot;              # use given path as base system
 our $BaseRootMode;          # specify base-root mode copy | union
@@ -1216,7 +1217,7 @@ sub main {
 		}
 		$boot = new KIWIBoot (
 			$kiwi,$BootVMDisk,$BootVMSystem,
-			$BootVMSize,undef,$BootVMFormat,$LVM
+			$BootVMSize,undef,$BootVMFormat,$LVM,\@ProfilesOrig
 		);
 		if (! defined $boot) {
 			my $code = kiwiExit (1); return $code;
@@ -1329,8 +1330,12 @@ sub init {
 		"<>"                    => \&usage
 	);
 	#========================================
-	# set default inode ratio for ext2/3
+	# store original value of Profiles
+	#----------------------------------------
+	@ProfilesOrig = @Profiles;
 	#========================================
+	# set default inode ratio for ext2/3
+	#----------------------------------------
 	if (! defined $FSInodeRatio) {
 		$FSInodeRatio = 16384;
 	}

@@ -59,6 +59,7 @@ sub new {
 	my $device = shift;
 	my $format = shift;
 	my $lvm    = shift;
+	my $profile= shift;
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
@@ -179,7 +180,7 @@ sub new {
 	if (defined $system) {
 		if (-d $system) {
 			$xml = new KIWIXML (
-				$kiwi,$system."/image",undef,$main::SetImageType
+				$kiwi,$system."/image",undef,$main::SetImageType,$profile
 			);
 		} else {
 			my %fsattr = main::checkFileSystem ($system);
@@ -223,7 +224,7 @@ sub new {
 				# read disk image XML description
 				#------------------------------------------
 				$xml = new KIWIXML (
-					$kiwi,$tmpdir."/image",undef,$main::SetImageType
+					$kiwi,$tmpdir."/image",undef,$main::SetImageType,$profile
 				);
 				#==========================================
 				# clean up
@@ -243,7 +244,7 @@ sub new {
 				# read disk image XML description
 				#------------------------------------------
 				$xml = new KIWIXML (
-					$kiwi,$tmpdir."/image",undef,$main::SetImageType
+					$kiwi,$tmpdir."/image",undef,$main::SetImageType,$profile
 				);
 				#==========================================
 				# clean up
@@ -382,6 +383,7 @@ sub new {
 	$this->{vga}       = $vga;
 	$this->{xml}       = $xml;
 	$this->{xendomain} = $xendomain;
+	$this->{profile}   = $profile;
 	return $this;
 }
 
@@ -529,6 +531,7 @@ sub setupBootStick {
 	my $zipped    = $this->{zipped};
 	my $isxen     = $this->{isxen};
 	my $lvm       = $this->{lvm};
+	my $profile   = $this->{profile};
 	my %deviceMap = ();
 	my @commands  = ();
 	my $imgtype   = "usb";
@@ -576,7 +579,7 @@ sub setupBootStick {
 			$kiwi -> failed ();
 			return undef;
 		}
-		$xml = new KIWIXML ( $kiwi,$system."/image",undef,$imgtype );
+		$xml = new KIWIXML ( $kiwi,$system."/image",undef,$imgtype,$profile );
 		if (! defined $xml) {
 			$this -> cleanTmp ();
 			return undef;
@@ -2056,6 +2059,7 @@ sub setupBootDisk {
 	my $zipped    = $this->{zipped};
 	my $isxen     = $this->{isxen};
 	my $lvm       = $this->{lvm};
+	my $profile   = $this->{profile};
 	my $diskname  = $system.".raw";
 	my %deviceMap = ();
 	my @commands  = ();
@@ -2105,7 +2109,7 @@ sub setupBootDisk {
 			$kiwi -> failed ();
 			return undef;
 		}
-		$xml = new KIWIXML ( $kiwi,$system."/image",undef,$imgtype );
+		$xml = new KIWIXML ( $kiwi,$system."/image",undef,$imgtype,$profile );
 		if (! defined $xml) {
 			$this -> cleanTmp ();
 			return undef;
@@ -2125,7 +2129,7 @@ sub setupBootDisk {
 		if (-f "$tmpdir/rootfs.tar") {
 			$imgtype = "split";
 		}
-		$xml = new KIWIXML ( $kiwi,$tmpdir."/image",undef,$imgtype );
+		$xml = new KIWIXML ( $kiwi,$tmpdir."/image",undef,$imgtype,$profile );
 		main::umount();
 		if (! defined $xml) {
 			$this -> cleanTmp ();
