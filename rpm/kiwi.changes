@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Oct  2 14:06:23 CEST 2009 - ms@suse.de
+
+- fixed bool value evaluation in KIWIXML.pm::get*()
+- added suseImportBuildKey() helper function used in JeOS
+  templates (bnc #521970)
+
+-------------------------------------------------------------------
 Thu Oct  1 11:24:52 CEST 2009 - ms@suse.de
 
 - added support for <oem-recoveryID>, default ID=83 (bnc #543118)

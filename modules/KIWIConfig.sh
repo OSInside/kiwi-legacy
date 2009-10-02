@@ -216,6 +216,32 @@ function suseCloneRunlevel {
 }
 
 #======================================
+# suseImportBuildKey
+#--------------------------------------
+function suseImportBuildKey {
+	# /.../
+	# Add missing gpg keys to rpm database
+	# ----
+	local KEY
+	local TDIR=$(mktemp -d)
+	if [ ! -d "$TDIR" ]; then
+		echo "suseImportBuildKey: Failed to create temp dir"
+		return
+	fi
+	pushd "$TDIR"
+	/usr/lib/rpm/gnupg/dumpsigs /usr/lib/rpm/gnupg/suse-build-key.gpg
+	ls gpg-pubkey-*.asc | while read KFN; do
+		KEY=$(basename "$KFN" .asc)
+		rpm -q "$KEY" >/dev/null
+		[ $? -eq 0 ] && continue
+		echo "Importing $KEY to rpm database"
+		rpm --import "$KFN"
+	done
+	popd
+	rm -rf "$TDIR"
+}
+
+#======================================
 # baseSetupOEMPartition
 #--------------------------------------
 function baseSetupOEMPartition {
@@ -388,21 +414,20 @@ function baseStripMans {
 function baseStripDocs {
 	# /.../
 	# remove all documentation, except 
-	# one given as parametr
-	#
-	# params - name of package of which 
-	# doc to keep
+	# copying license copyright
 	# ----
-	local keepDocs="$@"
+	local docfiles
 	local directories="
 		/opt/gnome/share/doc/packages
 		/usr/share/doc/packages
 		/opt/kde3/share/doc/packages
 	"
 	for dir in $directories; do
-		find $dir -mindepth 1 -maxdepth 1 -type d 2>/dev/null |\
-			baseStripAndKeep "${keepDocs}"
+		docfiles=$(find $dir -type f |grep -iv "copying\|license\|copyright")
+		rm -f $docfiles
 	done
+	rm -rf /usr/share/info
+	rm -rf /usr/share/man
 }
 #======================================
 # baseStripLocales
