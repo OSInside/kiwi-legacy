@@ -44,6 +44,7 @@ sub new {
 	my $xml  = shift; 
 	my $root = shift;
 	my $imageDesc = shift;
+	my $imageDest = shift;
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
@@ -65,11 +66,17 @@ sub new {
 		$kiwi -> failed (); 
 		return undef;
 	}
+	if (! defined $imageDest) {
+		$kiwi -> error  ("Missing image destination path");
+		$kiwi -> failed ();
+		return undef;
+	}
 	#==========================================
 	# Store object data
 	#------------------------------------------
 	$this->{kiwi}      = $kiwi;
 	$this->{imageDesc} = $imageDesc;
+	$this->{imageDest} = $imageDest;
 	$this->{xml}       = $xml;
 	$this->{root}      = $root;
 	return $this;
@@ -82,6 +89,7 @@ sub setupRecoveryArchive {
 	my $this  = shift;
 	my $fstype= shift;
 	my $kiwi  = $this->{kiwi};
+	my $dest  = $this->{imageDest};
 	my $xml   = $this->{xml};
 	my $root  = $this->{root};
 	my $start = $xml -> getOEMRecovery();
@@ -93,8 +101,8 @@ sub setupRecoveryArchive {
 	my $topts  = "--numeric-owner -czpf";
 	my $excld  = "--exclude ./dev --exclude ./proc --exclude ./sys";
 	my $status = qxx (
-		"cd $root && tar $topts $root.recovery.tar.gz . $excld 2>&1 &&
-		mv $root.recovery.tar.gz $root/recovery.tar.gz"
+		"cd $root && tar $topts $dest/.recovery.tar.gz . $excld 2>&1 &&
+		mv $dest/.recovery.tar.gz $root/recovery.tar.gz"
 	);
 	my $code = $? >> 8;
 	if ($code != 0) {

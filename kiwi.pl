@@ -755,7 +755,7 @@ sub main {
 		#------------------------------------------
 		if ($type eq "oem") {
 			my $configure = new KIWIConfigure (
-				$kiwi,$xml,$Create,$Create."/image"
+				$kiwi,$xml,$Create,$Create."/image",$Destination
 			);
 			if (! defined $configure) {
 				if (defined $BaseRoot) {
@@ -2033,7 +2033,9 @@ sub kiwiExit {
 	#==========================================
 	# Write temporary XML changes as xml log...
 	#------------------------------------------
-	$kiwi -> writeXML();
+	if (defined $kiwi) {
+		$kiwi -> writeXML();
+	}
 	#==========================================
 	# Survive because kiwi called itself
 	#------------------------------------------

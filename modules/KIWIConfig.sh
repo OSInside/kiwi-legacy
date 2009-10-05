@@ -821,6 +821,7 @@ function baseStripUnusedLibs {
 	# find directly used libraries, by calling ldd
 	# on files in *bin*
 	# ---
+	ldconfig
 	rm -f /tmp/needlibs
 	for i in /usr/bin/* /bin/* /sbin/* /usr/sbin/*;do
 		for n in `ldd $i 2>/dev/null`;do
@@ -845,7 +846,7 @@ function baseStripUnusedLibs {
 	# add exceptions
 	# ----
 	while [ ! -z $1 ];do
-		for i in /lib*/$1* /usr/lib*/$1*;do
+		for i in /lib*/$1* /usr/lib*/$1* /usr/X11R6/lib*/$1*;do
 			if [ -e $i ];then
 				needlibs[$count]=$i
 				count=`expr $count + 1`
@@ -857,9 +858,11 @@ function baseStripUnusedLibs {
 	# find unused libs and remove it, dl loaded libs
 	# seems not to be that important within the initrd
 	# ----
-	#mkdir /mylibs
 	rm -f /tmp/needlibs
-	for i in /lib/lib* /lib64/lib* /usr/lib/lib* /usr/lib64/lib*;do
+	for i in \
+		/lib/lib*/* /lib64/lib*/* /usr/lib/lib*/* \
+		/usr/lib64/lib*/* /usr/X11R6/lib*/*
+	do
 		found=0
 		if [ -d $i ];then
 			continue
@@ -871,7 +874,6 @@ function baseStripUnusedLibs {
 		done
 		if [ $found -eq 0 ];then
 			echo "Removing: $i"
-			#mv $i /mylibs
 			rm $i
 		fi
 	done
@@ -907,7 +909,7 @@ function suseStripInitrd {
 		/etc/pam.d* /etc/DIR_COLORS /etc/rc* /usr/share/hal /usr/share/ssl
 		/usr/lib*/hal /usr/lib*/*.a /usr/lib*/*.la /usr/lib*/librpm*
 		/usr/lib*/libpanel* /usr/lib*/libmenu* /usr/src/packages/RPMS
-		/usr/X11R6 /usr/lib*/X11 /var/X11R6 /usr/share/X11 /etc/X11
+		/usr/lib*/X11 /var/X11R6 /usr/share/X11 /etc/X11
 		/usr/lib*/xorg /usr/lib*/libidn* /usr/share/locale-bundle
 		/etc/ppp /etc/xdg /etc/NetworkManager /lib*/YaST /lib*/security
 		/lib*/mkinitrd /srv /var/adm /usr/lib*/engines /usr/src/packages
@@ -935,6 +937,7 @@ function suseStripInitrd {
 		/lib/modules/*/kernel/drivers/net/tokenring
 		/lib/modules/*/kernel/drivers/net/bonding
 		/lib/modules/*/kernel/drivers/net/hamradio
+		/usr/X11R6/bin /usr/X11R6/lib/X11/locale
 	"
 	for i in $files;do
 		rm -rfv $i
