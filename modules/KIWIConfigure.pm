@@ -66,11 +66,6 @@ sub new {
 		$kiwi -> failed (); 
 		return undef;
 	}
-	if (! defined $imageDest) {
-		$kiwi -> error  ("Missing image destination path");
-		$kiwi -> failed ();
-		return undef;
-	}
 	#==========================================
 	# Store object data
 	#------------------------------------------
@@ -96,6 +91,11 @@ sub setupRecoveryArchive {
 	my $FD;
 	if ((! defined $start) || ("$start" eq "false")) {
 		return $this;
+	}
+	if (! defined $dest) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Missing image destination path");
+		return undef;
 	}
 	$kiwi -> info ("Creating recovery archive...");
 	my $topts  = "--numeric-owner -czpf";
