@@ -860,8 +860,8 @@ function baseStripUnusedLibs {
 	# ----
 	rm -f /tmp/needlibs
 	for i in \
-		/lib/lib*/* /lib64/lib*/* /usr/lib/lib*/* \
-		/usr/lib64/lib*/* /usr/X11R6/lib*/*
+		/lib/lib* /lib64/lib* /usr/lib/lib* \
+		/usr/lib64/lib* /usr/X11R6/lib*/*
 	do
 		found=0
 		if [ -d $i ];then
