@@ -593,7 +593,7 @@ sub setupBootStick {
 		if (-f "$tmpdir/rootfs.tar") {
 			$imgtype = "split";
 		}
-		$xml = new KIWIXML ( $kiwi,$tmpdir."/image",undef,$imgtype );
+		$xml = new KIWIXML ( $kiwi,$tmpdir."/image",undef,$imgtype,$profile );
 		main::umount();
 		if (! defined $xml) {
 			$this -> cleanTmp ();

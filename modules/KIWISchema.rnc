@@ -715,9 +715,14 @@ div {
 	k.profile.description.attribute =
 		## Description of how this profiles influences the image
 		attribute description { text }
+	k.profile.import.attribute =
+		## Import profile by default if no profile was set on
+		## the commandline
+		attribute import { xsd:boolean }
 	k.profile.attlist =
 		k.profile.name.attribute &
-		k.profile.description.attribute
+		k.profile.description.attribute &
+		k.profile.import.attribute?
 	k.profile =
 		## Creates Profiles
 		[

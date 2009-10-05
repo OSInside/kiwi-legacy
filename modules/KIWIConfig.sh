@@ -1246,6 +1246,10 @@ function suseStripKernel {
 	for kversion in /lib/modules/*;do
 		IFS="
 		"
+		if [ ! -d "$kversion" ];then
+			IFS=$ifss
+			continue
+		fi
 		if [ -x /bin/rpm ];then
 			kdata=$(rpm -qf $kversion)
 		else

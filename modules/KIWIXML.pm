@@ -391,6 +391,10 @@ sub new {
 	$this->{controlFile}        = $controlFile;
 
 	#==========================================
+	# Apply default profiles from XML if set
+	#------------------------------------------
+	$this -> setDefaultProfiles();
+	#==========================================
 	# Check profile names
 	#------------------------------------------
 	if (! $this -> checkProfiles()) {
@@ -1549,7 +1553,8 @@ sub getProfiles {
 	# ...
 	# Receive a list of profiles available for this image
 	# ---
-	my $this = shift;
+	my $this   = shift;
+	my $import = shift;
 	my @result;
 	if (! defined $this->{profilesNodeList}) {
 		return @result;
@@ -1562,13 +1567,39 @@ sub getProfiles {
 	foreach my $element (@node) {
 		my $name = $element -> getAttribute ("name");
 		my $desc = $element -> getAttribute ("description");
-		
+		my $incl = $element -> getAttribute ("import");
+		if ((defined $import) && ("$incl" ne "true")) {
+			next;
+		}
 		my %profile = ();
 		$profile{name} = $name;
 		$profile{description} = $desc;
 		push @result, { %profile };
 	}
 	return @result;
+}
+
+#==========================================
+# setDefaultProfiles
+#------------------------------------------
+sub setDefaultProfiles {
+	# ...
+	# import default profiles if no other profiles
+	# were set on the commandline
+	# ---
+	my $this = shift;
+	my @list = ();
+	if ((defined $this->{reqProfiles}) && (@{$this->{reqProfiles}})) {
+		return $this;
+	}
+	my @profiles = $this -> getProfiles ("default");
+	foreach my $profile (@profiles) {
+		push (@list,$profile->{name});
+	}
+	if (@list) {
+		$this->{reqProfiles} = \@list;
+	}
+	return $this;
 }
 
 #==========================================
@@ -1600,9 +1631,6 @@ sub checkProfiles {
 				}
 			}
 			if (! $ok) {
-				if (! defined $pref) {
-					$kiwi -> failed ();
-				}
 				$kiwi -> error  ("Profile $requested: not found");
 				$kiwi -> failed ();
 				return undef;

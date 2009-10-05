@@ -1054,10 +1054,20 @@ specifies filenames which are in the read-write disk area</db:para>
         <a:documentation>Description of how this profiles influences the image</a:documentation>
       </attribute>
     </define>
+    <define name="k.profile.import.attribute">
+      <attribute name="import">
+        <a:documentation>Import profile by default if no profile was set on
+the commandline</a:documentation>
+        <data type="boolean"/>
+      </attribute>
+    </define>
     <define name="k.profile.attlist">
       <interleave>
         <ref name="k.profile.name.attribute"/>
         <ref name="k.profile.description.attribute"/>
+        <optional>
+          <ref name="k.profile.import.attribute"/>
+        </optional>
       </interleave>
     </define>
     <define name="k.profile">

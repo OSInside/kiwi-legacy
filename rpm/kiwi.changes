@@ -1,6 +1,8 @@
 -------------------------------------------------------------------
 Fri Oct  2 14:06:23 CEST 2009 - ms@suse.de
 
+- added import attribute in <profile> section to allow
+  default imports if not profile was set on the commandline
 - fixed handling of profiled preferences sections
 - fixed bool value evaluation in KIWIXML.pm::get*()
 - added suseImportBuildKey() helper function used in JeOS

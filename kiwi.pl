@@ -990,7 +990,9 @@ sub main {
 	#------------------------------------------
 	if (defined $Upgrade) {
 		$kiwi -> info ("Reading image description [Upgrade]...\n");
-		my $xml = new KIWIXML ( $kiwi,"$Upgrade/image" );
+		my $xml = new KIWIXML (
+			$kiwi,"$Upgrade/image",undef,undef,\@ProfilesOrig
+		);
 		if (! defined $xml) {
 			my $code = kiwiExit (1); return $code;
 		}
