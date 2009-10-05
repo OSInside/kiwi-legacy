@@ -1280,7 +1280,7 @@ sub getOEMKiwiInitrd {
 	my $this = shift;
 	my $node = $this -> getPreferencesNodeByTagName ("oem-kiwi-initrd");
 	my $kboot= $node -> getElementsByTagName ("oem-kiwi-initrd");
-	if ((! defined $kboot) || ("$kboot" eq "") || ("$kboot" eq "false")) {
+	if ((! defined $kboot) || ("$kboot" eq "")) {
 		return undef;
 	}
 	return $kboot;
@@ -1296,7 +1296,7 @@ sub getOEMSAPInstall {
 	my $this = shift;
 	my $node = $this -> getPreferencesNodeByTagName ("oem-sap-install");
 	my $sap  = $node -> getElementsByTagName ("oem-sap-install");
-	if ((! defined $sap) || ("$sap" eq "") || ("$sap" eq "false")) {
+	if ((! defined $sap) || ("$sap" eq "")) {
 		return undef;
 	}
 	return $sap;
@@ -1312,7 +1312,7 @@ sub getOEMReboot {
 	my $this = shift;
 	my $node = $this -> getPreferencesNodeByTagName ("oem-reboot");
 	my $boot = $node -> getElementsByTagName ("oem-reboot");
-	if ((! defined $boot) || ("$boot" eq "") || ("$boot" eq "false")) {
+	if ((! defined $boot) || ("$boot" eq "")) {
 		return undef;
 	}
 	return $boot;
@@ -1328,7 +1328,7 @@ sub getOEMSwap {
 	my $this = shift;
 	my $node = $this -> getPreferencesNodeByTagName ("oem-swap");
 	my $swap = $node -> getElementsByTagName ("oem-swap");
-	if ((! defined $swap) || ("$swap" eq "") || ("$swap" eq "false")) {
+	if ((! defined $swap) || ("$swap" eq "")) {
 		return undef;
 	}
 	return $swap;
@@ -1344,7 +1344,7 @@ sub getOEMRecovery {
 	my $this = shift;
 	my $node = $this -> getPreferencesNodeByTagName ("oem-recovery");
 	my $reco = $node -> getElementsByTagName ("oem-recovery");
-	if ((! defined $reco) || ("$reco" eq "") || ("$reco" eq "false")) {
+	if ((! defined $reco) || ("$reco" eq "")) {
 		return undef;
 	}
 	return $reco;
@@ -1376,7 +1376,7 @@ sub getOEMHome {
 	my $this = shift;
 	my $node = $this -> getPreferencesNodeByTagName ("oem-home");
 	my $home = $node -> getElementsByTagName ("oem-home");
-	if ((! defined $home) || ("$home" eq "") || ("$home" eq "false")) {
+	if ((! defined $home) || ("$home" eq "")) {
 		return undef;
 	}
 	return $home;
