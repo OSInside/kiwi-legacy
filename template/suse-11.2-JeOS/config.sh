@@ -50,7 +50,7 @@ rpm -e --nodeps --noscripts \
 #------------------------------------------
 rm -rf /usr/share/doc/packages/*
 rm -rf /usr/share/doc/manual/*
-rm -rf /opt/kde3
+rm -rf /opt/kde*
 
 #======================================
 # SuSEconfig
@@ -60,8 +60,8 @@ suseConfig
 #======================================
 # Add 11.1 repo
 #--------------------------------------
-baseRepo="http://download.opensuse.org/distribution/11.1/repo/oss"
-baseName="suse-11.1"
+baseRepo="http://download.opensuse.org/distribution/11.2/repo/oss"
+baseName="suse-11.2"
 zypper ar $baseRepo $baseName
 
 #======================================

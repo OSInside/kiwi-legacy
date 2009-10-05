@@ -1,121 +1,115 @@
 <?xml version="1.0" encoding="utf-8"?>
 <image schemaversion="3.7" name="LimeJeOS-SLE10">
-	<!-- Base Information -->
 	<description type="system">
-		<author>Marcus Schäfer</author>
-		<contact>ms@novell.com</contact>
-		<specification>
-			SUSE SLE10 JeOS, is a small text based image which
-			allows editing of files as well as upgrading to a full
-			distro by using zypper with the pre-defined repository 
-		</specification>
+		<author>Christoph Thiel</author>
+		<contact>cthiel@novell.com</contact>
+		<specification>SUSE Linux Enterprise 10 SP3 JeOS</specification>
 	</description>
-	<!-- Image Type and Preferences -->
+	<profiles>
+		<profile name="xenFlavour" description="VMX with Xen kernel"/>
+		<profile name="vmxFlavour" description="VMX with default kernel" import="true"/>
+	</profiles>
 	<preferences>
-		<type primary="true" filesystem="reiserfs" boot="vmxboot/suse-SLES10">vmx</type>
-		<type filesystem="reiserfs" boot="oemboot/suse-SLES10" format="iso">oem</type>
-		<type boot="isoboot/suse-SLES10">iso</type>
-		<type filesystem="reiserfs" boot="xenboot/suse-SLES10">xen</type>
-		<version>1.10.1</version>
+		<version>1.1.0</version>
 		<packagemanager>smart</packagemanager>
-		<locale>en_US.UTF-8</locale>
+		<boot-theme>SLES</boot-theme>
+		<rpm-excludedocs>true</rpm-excludedocs>
+		<rpm-check-signatures>false</rpm-check-signatures>
+		<locale>en_US</locale>
 		<keytable>us.map.gz</keytable>
 		<timezone>Europe/Berlin</timezone>
-		<rpm-excludedocs>true</rpm-excludedocs>
-		<boot-theme>SLES</boot-theme>
+		<oem-home>false</oem-home>
+		<oem-systemsize>2048</oem-systemsize>
 	</preferences>
-	<!-- Users setup -->
+	<preferences profiles="xenFlavour">
+		<type filesystem="ext3" boot="vmxboot/suse-SLES10" bootprofile="xen" bootkernel="nex">vmx</type>
+		<type filesystem="ext3" boot="oemboot/suse-SLES10" bootprofile="xen" bootkernel="nex" format="iso">oem</type>
+	</preferences>
+	<preferences profiles="vmxFlavour">
+		<type filesystem="ext3" boot="vmxboot/suse-SLES10" format="vmdk">vmx</type>
+		<type filesystem="ext3" boot="oemboot/suse-SLES10" format="iso">oem</type>
+	</preferences>
 	<users group="root">
 		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
-	<!-- Package Repositories -->
-	<repository type="yast2">
-		<!-- you need to setup your SLE10 source here -->
-		<source path="/image/CDs/full-sles10-sp2-i386"/>
+	<!-- For local image creation, change this to your SLE10 DVD source -->
+	<repository priority="3" type="rpm-md">
+		<source path="obs:///SUSE:SLE-10-SP3:GA/SLE_10_SP2_Update"/>
+	</repository>
+	<repository priority="4" type="rpm-md">
+		<source path="obs:///Devel:JeOS:SLE-10-SP3/SLE_10_SP3_Update"/>
+	</repository> 
+	<repository priority="2" type="rpm-md">
+		<source path="obs:///SUSE:SLE-10-SP2:Update/standard"/>
+	</repository>
+	<repository priority="1" type="rpm-md">
+		<source path="obs:///SUSE:SLE-10-SP2:GA/standard"/>
 	</repository>
 	<repository type="rpm-dir">
 		<source path="/usr/share/kiwi/repo/suse-repo/suse-sle10-repo"/>
 	</repository>
-	<!-- Packages and Patterns -->
-	<packages type="image" patternType="plusRecommended" patternPackageType="plusRecommended">
+	<!---->
+	<packages type="image">
+		<package name="aaa_base"/>
+		<package name="dhcpcd"/>
+		<package name="dhcp-client"/>
+		<package name="insserv"/>
+		<package name="kbd"/>
+		<package name="mkinitrd"/>
+		<package name="mdadm"/>
+		<package name="module-init-tools"/>
+		<package name="netcfg"/>
+		<package name="openssh"/>
+		<package name="procps"/>
+		<package name="pwdutils"/>
+		<package name="rpm"/>
+		<package name="sles-release"/>
+		<package name="suse-build-key"/>
+		<package name="sysconfig"/>
+		<package name="syslog-ng"/>
+		<package name="grub"/>
+		<package name="resmgr"/>
+		<package name="iputils"/>
+		<package name="zypper"/>
+		<package name="bootsplash"/>
+		<package name="vim"/>
+		<package name="patch"/>
+		<package name="psmisc"/>
+		<package name="tar"/>
+		<package name="sed"/>
+		<package name="w3m"/>
+		<package name="ifplugd"/>
 		<package name="bootsplash-theme-SuSE-SLES" bootinclude="true" bootdelete="true"/>
 		<package name="gfxboot" bootinclude="true" bootdelete="true"/>
-		<package name="kernel-default" replaces="kernel-xen"/>
-		<package name="bootsplash"/>
-		<package name="ifplugd"/>
-		<package name="dhcp-client"/>
-		<package name="vim"/>
-		<package name="grub"/>
-		<opensusePattern name="base"/>
-		<ignore name="855resolution"/>
-		<ignore name="xbsql"/>
-		<ignore name="xbase"/>
-		<ignore name="wv2-devel"/>
-		<ignore name="thinkfinger"/>
-		<ignore name="steak"/>
-		<ignore name="sles-release"/>
-		<ignore name="release-notes-sles"/>
-		<ignore name="raptor"/>
-		<ignore name="raptor-devel"/>
-		<ignore name="qtc"/>
-		<ignore name="mpg321"/>
-		<ignore name="libyaz-devel"/>
-		<ignore name="libpqxx-devel"/>
-		<ignore name="liblrdf-devel"/>
-		<ignore name="libdar-devel"/>
-		<ignore name="libchipcard-devel"/>
-		<ignore name="lib3ds"/>
-		<ignore name="lame"/>
-		<ignore name="krpmbuilder"/>
-		<ignore name="kdbg"/>
-		<ignore name="hk_classes"/>
-		<ignore name="hk_classes-devel"/>
-		<ignore name="gambas"/>
-		<ignore name="ffmpeg-devel"/>
-		<ignore name="eric"/>
-		<ignore name="dclib-devel"/>
-		<ignore name="colorgcc"/>
-		<ignore name="bootsplash-theme-SuSE-SLES"/>
-		<ignore name="amarok-helix"/>
-		<ignore name="agg-devel"/>
-		<ignore name="smtp_daemon"/>
-		<ignore name="pdisk"/>
-		<ignore name="pfmon"/>
-		<ignore name="powerpc32"/>
-		<ignore name="s390-32"/>
-		<ignore name="s390-tools"/>
-		<ignore name="salinfo"/>
-		<ignore name="sles-preparation-power_en"/>
-		<ignore name="sles-preparation-zseries_en"/>
-		<ignore name="libpfm"/>
-		<ignore name="gnome2-SLES"/>
-		<ignore name="mcelog"/>
-		<ignore name="numactl"/>
-		<ignore name="bootloader-theme-NLD"/>
-		<ignore name="evolution-caldav"/>
-		<ignore name="gstreamer010-plugins-good-oil"/>
-		<ignore name="linux32"/>
-		<ignore name="mDNSResponder"/>
-		<ignore name="neo"/>
-		<ignore name="novfs-kmp"/>
-		<ignore name="openh323-devel"/>
-		<ignore name="texinfo"/>
+		<!-- not on public media -->
+		<!-- <package name="suseRegister-jeos"/> -->
 	</packages>
-	<packages type="xen">
-		<package name="kernel-xen" replaces="kernel-default"/>
-		<package name="xen"/>
+	<packages type="image" profiles="xenFlavour">
+		<package name="kernel-xen" arch="x86_64" replaces="kernel-default"/>
+		<package name="kernel-xenpae" arch="i686" replaces="kernel-default"/>
+		<package name="xen-tools-domU" replaces=""/>
+		<package name="xen" replaces=""/>
+	</packages>
+	<packages type="image" profiles="vmxFlavour">
+		<package name="kernel-default" arch="x86_64" replaces="kernel-xen"/>
+		<package name="kernel-default" arch="i686" replaces="kernel-xenpae"/>
+	</packages>
+	<packages type="delete">
+		<package name="patch"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
 		<package name="glibc-locale"/>
+		<package name="procps"/>
+		<package name="cracklib"/>
 		<package name="openssl"/>
 	</packages>
-	<!-- Virtual Machine configurations -->
-	<vmwareconfig memory="256" guestOS="suse" HWversion="4">
+	<vmwareconfig memory="512" guestOS="suse" HWversion="4">
 		<vmwaredisk controller="scsi" id="0"/>
 		<vmwarenic driver="e1000" interface="0" mode="bridged"/>
 	</vmwareconfig>
-	<xenconfig memory="256">
-		<xendisk device="/dev/sda"/>
+	<xenconfig memory="512" domain="domU">
+		<xendisk device="/dev/xvda"/>
+		<xenbridge name=""/>
 	</xenconfig>
 </image>

@@ -1,62 +1,113 @@
 <?xml version="1.0" encoding="utf-8"?>
 <image schemaversion="3.7" name="LimeJeOS-openSUSE-11.1">
-	<!-- Base Information -->
 	<description type="system">
-		<author>Marcus Schäfer</author>
-		<contact>ms@novell.com</contact>
-		<specification>
-			openSUSE 11.1 JeOS, is a small text based image which
-			allows editing of files as well as upgrading to a full
-			distro by using zypper with the pre-defined repository 
-		</specification>
+		<author>Christoph Thiel</author>
+		<contact>cthiel@novell.com</contact>
+		<specification>SUSE Linux Enterprise 11 JeOS</specification>
 	</description>
-	<!-- Image Type and Preferences -->
+	<profiles>
+		<profile name="xenFlavour" description="VMX with Xen kernel"/>
+		<profile name="vmxFlavour" description="VMX with default kernel" import="true"/>
+	</profiles>
 	<preferences>
-		<type primary="true" filesystem="ext3" boot="vmxboot/suse-11.1" format="vmdk">vmx</type>
-		<type filesystem="ext3" boot="oemboot/suse-11.1" format="iso">oem</type>
-		<type boot="isoboot/suse-11.1" flags="unified">iso</type>
-		<type filesystem="ext3" boot="xenboot/suse-11.1">xen</type>
-		<version>1.11.1</version>
+		<version>1.1.0</version>
 		<packagemanager>zypper</packagemanager>
-		<locale>en_US.UTF-8</locale>
+		<boot-theme>openSUSE</boot-theme>
+		<rpm-excludedocs>true</rpm-excludedocs>
+		<locale>en_US</locale>
 		<keytable>us.map.gz</keytable>
 		<timezone>Europe/Berlin</timezone>
-		<rpm-excludedocs>true</rpm-excludedocs>
-		<boot-theme>openSUSE</boot-theme>
+		<oem-home>false</oem-home>
+		<oem-systemsize>2048</oem-systemsize>
 	</preferences>
-	<!-- Users setup -->
+	<preferences profiles="xenFlavour">
+		<type filesystem="ext3" boot="vmxboot/suse-11.1" bootprofile="xen" bootkernel="nex">vmx</type>
+		<type filesystem="ext3" boot="oemboot/suse-11.1" bootprofile="xen" bootkernel="nex" format="iso">oem</type>
+	</preferences>
+	<preferences profiles="vmxFlavour">
+		<type filesystem="ext3" boot="vmxboot/suse-11.1" format="vmdk">vmx</type>
+		<type filesystem="ext3" boot="oemboot/suse-11.1" format="iso">oem</type>
+	</preferences>
+
 	<users group="root">
 		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
-	<!-- Package Repositories -->
 	<repository type="yast2">
 		<source path="opensuse://11.1/repo/oss"/>
 	</repository>
-	<!-- Packages and Patterns -->
 	<packages type="image">
+		<package name="openSUSE-release"/>
+		<package name="aaa_base"/>
+		<package name="bash"/>
+		<package name="coreutils"/>
+		<package name="device-mapper"/>
+		<package name="e2fsprogs"/>
+		<package name="filesystem"/>
+		<package name="glibc"/>
+		<package name="mdadm"/>
+		<package name="rpm"/>
+		<package name="insserv"/>
+		<package name="pam"/>
+		<package name="pam-modules"/>
+		<package name="login"/>
+		<package name="pwdutils"/>
+		<package name="sysconfig"/>
+		<package name="sysvinit"/>
+		<package name="procps"/>
+		<package name="zypper"/>
+		<package name="kbd"/>
+		<package name="mkinitrd"/>
+		<package name="module-init-tools"/>
+		<package name="dhcpcd"/>
+		<package name="initviocons"/>
+		<package name="irqbalance"/>
+		<package name="syslog-ng"/>
+		<package name="grub"/>
+		<package name="rpcbind"/>
+		<package name="nfs-client"/>
+		<package name="iputils"/>
+		<package name="w3m"/>
+		<package name="ncurses-utils"/>
+		<package name="klogd"/>
+		<package name="elfutils"/>
+		<package name="cracklib-dict-full"/>
+		<package name="openssh"/>
+		<package name="suseRegister"/>
+		<package name="openssl-certs"/>
+		<package name="vim-base"/>
+		<package name="vim"/>
+		<package name="tar"/>
+		<package name="ifplugd"/>
+		<package name="branding-openSUSE"/>
+		<package name="release-notes-openSUSE"/>
+		<package name="glib2-branding-openSUSE"/>
 		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
-		<package name="kernel-default" replaces="kernel-xen"/>
-		<package name="ifplugd"/>
-		<package name="vim"/>
-		<package name="grub"/>
-		<opensusePattern name="base"/>
-		<opensuseProduct name="openSUSE"/>
+		<!-- not on public media -->
+		<!--<package name="suse-build-key"/>-->
 	</packages>
-	<packages type="xen">
+	<packages type="image" profiles="xenFlavour">
 		<package name="kernel-xen" replaces="kernel-default"/>
-		<package name="xen"/>
+		<package name="kernel-xen-base" replaces="kernel-default-base"/>
+		<package name="xen-tools-domU" replaces=""/>
+		<package name="xen" replaces=""/>
+	</packages>
+	<packages type="image" profiles="vmxFlavour">
+		<package name="kernel-default" replaces="kernel-xen"/>
+		<package name="kernel-default-base" replaces="kernel-xen-base"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
 		<package name="glibc-locale"/>
+		<package name="cracklib-dict-full"/>
+		<package name="openssl-certs"/>
 	</packages>
-	<!-- Virtual Machine configurations -->
-	<vmwareconfig memory="256" guestOS="suse" HWversion="4">
+	<vmwareconfig memory="512" guestOS="suse" HWversion="4">
 		<vmwaredisk controller="scsi" id="0"/>
 		<vmwarenic driver="e1000" interface="0" mode="bridged"/>
 	</vmwareconfig>
-	<xenconfig memory="256">
-		<xendisk device="/dev/sda"/>
+	<xenconfig memory="512" domain="domU">
+		<xendisk device="/dev/xvda"/>
+		<xenbridge name=""/>
 	</xenconfig>
 </image>

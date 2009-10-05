@@ -1,0 +1,13 @@
+Build instructions for local build
+==================================
+* make sure you have the smart packagemanager installed
+  http://download.opensuse.org/repositories/smart
+
+* create a SLES10 installation source below /path/to/SLE10/repo
+  tip: copy SLE10 DVD
+
+* call kiwi:
+  kiwi --build suse-SLE10-JeOS --ignore-repos \
+	   --add-repo /path/to/SLE10/repo --add-repotype yast2 \
+   	   --add-repo /usr/share/kiwi/repo/suse-repo/suse-sle10-repo --add-repotype rpm-dir \
+	   -d /tmp/myimage --type vmx --fs-inodesize 128

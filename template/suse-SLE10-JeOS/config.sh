@@ -1,20 +1,4 @@
 #!/bin/bash
-#================
-# FILE          : config.sh
-#----------------
-# PROJECT       : OpenSuSE KIWI Image System
-# COPYRIGHT     : (c) 2006 SUSE LINUX Products GmbH. All rights reserved
-#               :
-# AUTHOR        : Marcus Schaefer <ms@suse.de>
-#               :
-# BELONGS TO    : Operating System images
-#               :
-# DESCRIPTION   : configuration script for SUSE based
-#               : operating systems
-#               :
-#               :
-# STATUS        : BETA
-#----------------
 #======================================
 # Functions...
 #--------------------------------------
@@ -27,17 +11,25 @@ test -f /.profile && . /.profile
 echo "Configure image: [$kiwi_iname]..."
 
 #======================================
-# Setup baseproduct link
-#--------------------------------------
-suseSetupProduct
-
-#======================================
 # Activate services
 #--------------------------------------
-suseInsertService sshd
-suseInsertService boot.device-mapper
-suseRemoveService avahi-dnsconfd
-suseRemoveService avahi-daemon
+suseActivateDefaultServices
+suseRemoveService gpm
+suseRemoveService sshd
+suseRemoveService nfs
+
+#======================================
+# Add missing gpg keys to rpm
+#--------------------------------------
+suseImportBuildKey
+
+#======================================
+# fix arch on x86_64 in /var/lib/zypp/db/products/*
+#--------------------------------------
+if [ `uname -m` == 'x86_64' ];then
+	sed -i -e 's;<arch>i686</arch>;<arch>x86_64</arch>;' \
+		/var/lib/zypp/db/products/*
+fi
 
 #==========================================
 # remove unneeded packages
@@ -45,29 +37,15 @@ suseRemoveService avahi-daemon
 rpm -e --nodeps --noscripts \
 	$(rpm -q `baseGetPackagesForDeletion` | grep -v "is not installed")
 
-#==========================================
-# remove package docs
-#------------------------------------------
-rm -rf /usr/share/doc/packages/*
-rm -rf /usr/share/doc/manual/*
-rm -rf /opt/kde3
+#======================================
+# Remove all documentation
+#--------------------------------------
+baseStripDocs
 
 #======================================
 # SuSEconfig
 #--------------------------------------
 suseConfig
-
-#======================================
-# Add 10.1 repo
-#--------------------------------------
-baseRepo="ftp://ftp.suse.com/pub/suse/i386/10.1/SUSE-Linux10.1-GM-Extra"
-baseName="suse-10.1"
-zypper sa $baseRepo $baseName
-
-#======================================
-# Remove unneeded packages
-#--------------------------------------
-rpm -qa | grep yast | xargs rpm -e --nodeps
 
 #======================================
 # Umount kernel filesystems
