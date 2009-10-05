@@ -1938,6 +1938,7 @@ function CDDevice {
 #--------------------------------------
 function USBStickDevice {
 	stickFound=0
+	local mode=$1
 	#======================================
 	# search for USB removable devices
 	#--------------------------------------
@@ -1989,12 +1990,27 @@ function USBStickDevice {
 					if ! kiwiMount "$dev" "/mnt" "-o ro";then
 						continue
 					fi
-					if \
-						[ ! -e /mnt/etc/ImageVersion ] && \
-						[ ! -e /mnt/config.isoclient ]
-					then
-						umountSystem
-						continue
+					if [ "$mode" = "install" ];then
+						# /.../
+						# USB stick search for install media
+						# created with kiwi
+						# ----
+						if \
+							[ ! -e /mnt/config.isoclient ] && \
+							[ ! -e /mnt/config.usbclient ]
+						then
+							umountSystem
+							continue
+						fi
+					else
+						# /.../
+						# USB stick search for Linux system tree
+						# created with kiwi
+						# ----
+						if [ ! -e /mnt/etc/ImageVersion ]; then
+							umountSystem
+							continue
+						fi
 					fi
 					stickFound=1
 					umountSystem

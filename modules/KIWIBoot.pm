@@ -2014,6 +2014,16 @@ sub setupInstallStick {
 			qxx ( "$main::Gzip -d $system" );
 			return undef;
 		}
+		if (! open (FD,">$loopdir/config.usbclient")) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create USB install flag file");
+			$kiwi -> failed ();
+			$this -> cleanLoop ();
+			qxx ( "$main::Gzip -d $system" );
+			return undef;
+		}
+		print FD "IMAGE=$ibasename\n";
+		close FD;
 		main::umount();
 		qxx ( "$main::Gzip -d $system" );
 		$kiwi -> done();

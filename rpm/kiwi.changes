@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Oct  5 10:16:11 CEST 2009 - ms@suse.de
+
+- fixed detection of USB install media
+
+-------------------------------------------------------------------
 Fri Oct  2 14:06:23 CEST 2009 - ms@suse.de
 
 - added import attribute in <profile> section to allow

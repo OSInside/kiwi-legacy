@@ -42,7 +42,7 @@ function OEMInstall {
 	#======================================
 	# Search CD/DVD/USB stick and mount it
 	#--------------------------------------
-	USBStickDevice
+	USBStickDevice install
 	if [ $stickFound = 0 ];then
 		Echo "Search for USB stick failed, checking CD/DVD drive"
 		CDMount
