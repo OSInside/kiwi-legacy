@@ -781,7 +781,7 @@ function setupBootLoaderGrubRecovery {
 	#======================================
 	# create recovery menu.lst
 	#--------------------------------------
-	echo "timeout 10" > $menu
+	echo "timeout 30" > $menu
 	echo "gfxmenu $gdev_recovery/boot/message" >> $menu
 	kernel=vmlinuz # this is a copy of the kiwi linux.vmx file
 	initrd=initrd  # this is a copy of the kiwi initrd.vmx file
@@ -789,6 +789,10 @@ function setupBootLoaderGrubRecovery {
 	# create recovery entry
 	#--------------------------------------
 	if [ ! -z "$OEM_RECOVERY" ];then
+		#======================================
+		# Make the cancel option default
+		#--------------------------------------
+		echo "default 2"                                  >> $menu
 		#======================================
 		# Recovery
 		#--------------------------------------
@@ -838,6 +842,12 @@ function setupBootLoaderGrubRecovery {
 			echo " showopts"                              >> $menu
 			echo " initrd $gdev_recovery/boot/$initrd"    >> $menu
 		fi
+		#======================================
+		# Reboot
+		#--------------------------------------
+		title=$(makeLabel "Cancel/Reboot")
+		echo "title $title"                               >> $menu
+		echo " reboot"                                    >> $menu
 	fi
 }
 #======================================

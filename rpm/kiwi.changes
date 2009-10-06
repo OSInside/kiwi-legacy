@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Tue Oct  6 09:41:43 CEST 2009 - ms@suse.de
+
+- Add cancel/reboot menu item in recovery bootloader configuration.
+  This will help avoid accidental recovery invocation, which could
+  be a potential issue. The cancel/reboot item is now the default
+  selection, and the delay is now 30 seconds giving the user more
+  time to contemplate their restoration options (bnc #544420)
+
+-------------------------------------------------------------------
 Mon Oct  5 15:22:06 CEST 2009 - ms@suse.de
 
 - added and improved official JeOS templates to the kiwi git
