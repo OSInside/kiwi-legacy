@@ -3518,6 +3518,8 @@ function mountSystemClicFS {
 	size=$((size/4096))
 	# we don't want reserved blocks...
 	tune2fs -m 0 $roDir/fsdata.ext3
+	# we don't want automatic filesystem check...
+	tune2fs -i 0 $roDir/fsdata.ext3
 	if [ ! $LOCAL_BOOT = "no" ];then
 		e2fsck -p $roDir/fsdata.ext3
 	fi
@@ -3862,7 +3864,7 @@ function waitForStorageDevice {
 	while true;do
 		partitionSize $device &>/dev/null
 		if [ $? = 0 ];then
-			return 0
+			sleep 1; return 0
 		fi
 		if [ $check -eq 4 ];then
 			return 1
