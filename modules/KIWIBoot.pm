@@ -751,9 +751,7 @@ sub setupBootStick {
 	#==========================================
 	# umount stick mounted by hal before lock
 	#------------------------------------------
-	for (my $i=1;$i<=4;$i++) {
-		qxx ("umount $stick$i 2>&1");
-	}
+	$this -> umountDevice ($stick);
 	#==========================================
 	# Wait for umount to settle
 	#------------------------------------------
@@ -942,12 +940,7 @@ sub setupBootStick {
 		#==========================================
 		# Umount possible mounted stick partitions
 		#------------------------------------------
-		for (my $i=1;$i<=3;$i++) {
-			qxx ("umount $deviceMap{$i} 2>&1");
-			if ($deviceMap{fat}) {
-				qxx ("umount $deviceMap{fat} 2>&1");
-			}
-		}
+		$this -> umountDevice ($stick);
 		$status = qxx ( "/sbin/blockdev --rereadpt $stick 2>&1" );
 		$result = $? >> 8;
 		if ($result != 0) {
@@ -965,12 +958,7 @@ sub setupBootStick {
 		#==========================================
 		# Umount possible mounted stick partitions
 		#------------------------------------------
-		for (my $i=1;$i<=3;$i++) {
-			qxx ("umount $deviceMap{$i} 2>&1");
-			if ($deviceMap{fat}) {
-				qxx ("umount $deviceMap{fat} 2>&1");
-			}
-		}
+		$this -> umountDevice ($stick);
 		#==========================================
 		# setup volume group if requested
 		#------------------------------------------
@@ -4713,6 +4701,38 @@ sub luksClose {
 		);
 		undef $this->{lhald};
 		undef $this->{lhalddevice};
+	}
+	return $this;
+}
+
+#==========================================
+# umountDevice
+#------------------------------------------
+sub umountDevice {
+	# ...
+	# umount all mounted filesystems from the given
+	# storage device. The functions searches the 
+	# /proc/mounts table and umounts all corresponding
+	# mount entries
+	# ----
+	my $this = shift;
+	my $disk = shift;
+	my $kiwi = $this->{kiwi};
+	my $MOUNTS;
+	if (! defined $disk) {
+		$kiwi -> loginfo ("umountDevice: no disk prefix provided, skipped");
+		return undef;
+	}
+	if (! open ($MOUNTS, '<', '/proc/mounts')) {
+		$kiwi -> loginfo ("umountDevice: failed to open proc/mounts: $!");
+		return undef;
+	}
+	my @mounts = <$MOUNTS>; close $MOUNTS;
+	for my $mount (@mounts) {
+		if ($mount =~ /^$disk/) {
+			my ($device, $mountpoint, $rest) = split / /, $mount, 3;
+			qxx ("umount $device 2>&1");
+		}
 	}
 	return $this;
 }

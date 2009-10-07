@@ -28,7 +28,6 @@ export DEBUG=0
 #--------------------------------------
 export LOCAL_BOOT=no
 export systemIntegrity="clean"
-export stickFound=0
 
 #======================================
 # Functions...
@@ -75,15 +74,14 @@ probeDevices
 #======================================
 # 6) Setup device names...
 #--------------------------------------
-USBStickDevice
-if [ $stickFound = 0 ];then
-	systemException \
-		"No USB stick found... abort" \
-	"reboot"
+if ! searchBIOSBootDevice;then
+	systemException "$biosBootDevice" "reboot"
 fi
-Echo "Searching for kiwiVG volume group..."
+export stickRoot=$biosBootDevice
+export stickDevice=$(ddn $stickRoot 1)
 export stickRWDevice=$(ddn $stickRoot 2)
 export stickRODevice=$(ddn $stickRoot 1)
+Echo "Searching for kiwiVG volume group..."
 if searchVolumeGroup; then
 	export haveLVM=yes
 	if [ -e /dev/kiwiVG/LVComp ];then

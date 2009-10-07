@@ -4245,7 +4245,6 @@ function activateImage {
 	mount --move /dev /mnt/dev
 	udevKill
 	umount -t devpts /mnt/dev/pts
-	udevPending
 	#======================================
 	# copy boot log file into system image
 	#--------------------------------------

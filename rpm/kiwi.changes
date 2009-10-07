@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Wed Oct  7 15:52:46 CEST 2009 - ms@suse.de
+
+- improved umount code for auto mount of removable storage
+  devices. The function umountDevice() takes over the task
+  of umounting all filesystems associated with the given
+  device
+- use searchBIOSBootDevice for usbboot instead of USBStickDevice
+  since we have the unique MBR ID in place this is the better
+  method to search for the boot device 
+
+-------------------------------------------------------------------
 Tue Oct  6 10:44:25 CEST 2009 - ms@suse.de
 
 - fixed race condition in waitForStorageDevice()
