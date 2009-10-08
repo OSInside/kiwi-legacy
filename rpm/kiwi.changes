@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Oct  8 14:18:52 CEST 2009 - ms@suse.de
+
+- deactivate backup MBR at 0x800 (bnc #539505)
+
+-------------------------------------------------------------------
 Thu Oct  8 10:46:43 CEST 2009 - ms@suse.de
 
 - fixed setup of doc exclusion for zypper (bnc #544874)

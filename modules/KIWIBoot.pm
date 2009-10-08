@@ -3955,21 +3955,21 @@ sub installBootLoader {
 			#==========================================
 			# write backup MBR with partition table
 			#------------------------------------------
-			my $bmbr= $diskname.".mbr";
-			$status = qxx (
-				"dd if=$diskname of=$bmbr bs=1 count=512 2>&1"
-			);
-			$result= $? >> 8;
-			if ($result != 0) {
-				$kiwi -> failed ();
-				$kiwi -> error  ("Couldn't store backup MBR: $status");
-				$kiwi -> failed ();
-				return undef;
-			}
-			$status = qxx (
-				"dd if=$bmbr of=$diskname bs=512 count=1 seek=3 skip=0 $opt 2>&1"
-			);
-			unlink $bmbr;
+			#my $bmbr= $diskname.".mbr";
+			#$status = qxx (
+			#	"dd if=$diskname of=$bmbr bs=1 count=512 2>&1"
+			#);
+			#$result= $? >> 8;
+			#if ($result != 0) {
+			#	$kiwi -> failed ();
+			#	$kiwi -> error  ("Couldn't store backup MBR: $status");
+			#	$kiwi -> failed ();
+			#	return undef;
+			#}
+			#$status = qxx (
+			#  "dd if=$bmbr of=$diskname bs=512 count=1 seek=3 skip=0 $opt 2>&1"
+			#);
+			#unlink $bmbr;
 			#==========================================
 			# write FDST flag
 			#------------------------------------------
