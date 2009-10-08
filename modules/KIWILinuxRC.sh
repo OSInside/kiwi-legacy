@@ -106,7 +106,9 @@ function Echo {
 		esac
 	done
 	shift $(($OPTIND - 1))
+	set -x
 	echo $optn $opte "$prefix $1"
+	set +x
 	OPTIND=1
 	set -x
 }
