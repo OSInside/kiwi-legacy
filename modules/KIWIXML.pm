@@ -1442,7 +1442,7 @@ sub getRPMExcludeDocs {
 	my $this = shift;
 	my $node = $this-> getPreferencesNodeByTagName ("rpm-excludedocs");
 	my $xdoc = $node -> getElementsByTagName ("rpm-excludedocs");
-	if ((! defined $xdoc) || ("$xdoc" eq "") || ("$xdoc" eq "false")) {
+	if ((! defined $xdoc) || ("$xdoc" eq "")) {
 		return undef;
 	}
 	return $xdoc;

@@ -60,6 +60,7 @@
 		<package name="bootsplash"/>
 		<package name="cryptsetup"/>
 		<package name="dialog"/>
+		<package name="kiwi-tools"/>
 	</packages>
 	<packages type="bootstrap" profiles="std">
 		<package name="kernel-xen"/>

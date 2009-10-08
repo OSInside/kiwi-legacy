@@ -112,6 +112,7 @@
 		<package name="lvm2"/>
 		<package name="cryptsetup"/>
 		<package name="dialog"/>
+		<package name="kiwi-tools"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>

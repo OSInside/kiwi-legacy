@@ -176,6 +176,7 @@
 		<package name="nfs-client"/>
 		<package name="bootsplash"/>
 		<package name="tar"/>
+		<package name="kiwi-tools"/>
 		<!-- PACKAGES END DEFAULT AND XEN -->
 	</packages>
 	<packages type="image" profiles="diskless">
@@ -195,6 +196,7 @@
 		<package name="nfs-client"/>
 		<package name="tar"/>
 		<package name="bootsplash"/>
+		<package name="kiwi-tools"/>
 		<!-- PACKAGES STOP DISKLESS -->
 	</packages>
 	<packages type="bootstrap">

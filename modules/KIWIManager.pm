@@ -509,16 +509,11 @@ sub setupExcludeDocs {
 		$this->{curExclDocs} = $curExclDocs;
 		if (defined $imgExclDocs) {
 			$kiwi -> info ("Setting RPM doc exclusion to: $imgExclDocs");
-			if (defined $curExclDocs) {
-				$zconfig->newval('main', $optionParam, 'yes');
-			} else {
-				$zconfig->newval('main', $optionParam, 'yes');
-			}
+			$zconfig->newval('main', $optionParam, $imgExclDocs);
 			$zconfig->RewriteConfig;
 			$kiwi -> done ();
 		}
 	}
-
 	#==========================================
 	# ensconce
 	#------------------------------------------
@@ -587,7 +582,6 @@ sub resetExcludeDocs {
 			$kiwi -> done ();
 		}
 	}
-	
 	#==========================================
 	# ensconce
 	#------------------------------------------
