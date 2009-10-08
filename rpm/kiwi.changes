@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Oct  8 10:46:43 CEST 2009 - ms@suse.de
+
+- added boot timer for kiwi boot images like the kernel does
+
+-------------------------------------------------------------------
 Wed Oct  7 15:52:46 CEST 2009 - ms@suse.de
 
 - improved umount code for auto mount of removable storage

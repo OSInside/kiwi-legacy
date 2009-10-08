@@ -32,6 +32,15 @@ export DIALOG_LANG=ask
 export UFONT=/usr/share/fbiterm/fonts/b16.pcf.gz
 export TERM=linux
 export LANG=en_US.utf8
+export UTIMER=0
+
+#======================================
+# Start boot timer
+#--------------------------------------
+if [ -x /usr/bin/utimer ];then
+	/usr/bin/utimer
+	export UTIMER=$(cat /var/run/utimer.pid)
+fi
 
 #======================================
 # Update library path
@@ -78,8 +87,14 @@ function Echo {
 	# /.../
 	# print a message to the controling terminal
 	# ----
+	set +x
+	if [ ! $UTIMER = 0 ];then
+		kill -HUP $UTIMER
+		local prefix=$(cat /tmp/utimer)
+	else
+		local prefix="===>"
+	fi
 	local option=""
-	local prefix="===>"
 	local optn=""
 	local opte=""
 	while getopts "bne" option;do
@@ -93,6 +108,7 @@ function Echo {
 	shift $(($OPTIND - 1))
 	echo $optn $opte "$prefix $1"
 	OPTIND=1
+	set -x
 }
 #======================================
 # WaitKey
@@ -341,7 +357,7 @@ function errorLogStart {
 		killproc tail
 		echo "KIWI PreInit Log" >> $ELOG_FILE
 	fi
-	Echo "Boot-Logging enabled on $ELOG_CONSOLE"
+	echo "Boot-Logging enabled on $ELOG_CONSOLE"
 	setctsid -f $ELOG_CONSOLE /bin/bash -i -c "tail -f $ELOG_FILE" &
 	exec 2>>$ELOG_FILE
 	if [ -f .profile ];then
@@ -4304,6 +4320,9 @@ function bootImage {
 	# we already checked the filesystem
 	# no reason for boot.rootfsck to try again
 	# ----
+	if [ ! $UTIMER = 0 ];then
+		kill $UTIMER
+	fi
 	export ROOTFS_FSCK="0"
 	mount -n -o remount,rw / &>/dev/null
 	exec < dev/console >dev/console 2>&1
