@@ -15,3 +15,6 @@ addFilter(".*zero-length.*.bs")
 
 # don't check for file duplicates
 addFilter("cross-directory-hard-link .*")
+
+# don't check for locale locations, they are used in the initrd only
+addFilter("file-not-in-%lang .*")
