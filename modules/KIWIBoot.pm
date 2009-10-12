@@ -605,19 +605,19 @@ sub setupBootStick {
 	#------------------------------------------
 	my %type = %{$xml->getImageTypeAndAttributes()};
 	#==========================================
-	# check for device mapper snapshot
+	# check for device mapper snapshot / clicfs
 	#------------------------------------------
-	if ($type{filesystem} eq "dmsquash") {
+	if (($type{filesystem} eq "dmsquash") || ($type{filesystem} eq "clicfs")) {
 		$this->{dmapper} = 1;
 		$dmapper  = 1;
-		$dmbootMB = 40;
+		$dmbootMB = 60;
 	}
 	#==========================================
 	# check for LUKS extension
 	#------------------------------------------
 	if ($type{luks}) {
 		$haveluks   = 1;
-		$luksbootMB = 40;
+		$luksbootMB = 60;
 	}
 	#==========================================
 	# setup boot loader type
@@ -2139,19 +2139,19 @@ sub setupBootDisk {
 	#------------------------------------------
 	my %type = %{$xml->getImageTypeAndAttributes()};
 	#==========================================
-	# check for device mapper snapshot
+	# check for device mapper snapshot / clicfs
 	#------------------------------------------
-	if ($type{filesystem} eq "dmsquash") {
+	if (($type{filesystem} eq "dmsquash") || ($type{filesystem} eq "clicfs")) {
 		$this->{dmapper} = 1;
 		$dmapper  = 1;
-		$dmbootMB = 40;
+		$dmbootMB = 60;
 	}
 	#==========================================
 	# check for LUKS extension
 	#------------------------------------------
 	if ($type{luks}) {
 		$haveluks   = 1;
-		$luksbootMB = 40;
+		$luksbootMB = 60;
 	}
 	#==========================================
 	# setup boot loader type

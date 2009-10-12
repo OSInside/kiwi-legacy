@@ -213,6 +213,16 @@ if [ "$LOCAL_BOOT" = "no" ];then
 		cp -a  /mnt/boot /mnt/dmboot
 		rm -rf /mnt/boot
 		( cd /mnt && ln -s dmboot/boot boot )
+	elif [ "$haveClicFS" = "yes" ];then
+		#======================================
+		# Clic use third partition as boot
+		#--------------------------------------
+		mkdir /mnt/clicboot
+		export imageBootDevice=$(ddn $imageDiskDevice 3)
+		mount $imageBootDevice /mnt/clicboot
+		cp -a  /mnt/boot /mnt/clicboot
+		rm -rf /mnt/boot
+		( cd /mnt && ln -s clicboot/boot boot )
 	elif [ "$loader" = "syslinux" ];then
 		#======================================
 		# Syslinux search FAT and use as boot
@@ -267,6 +277,8 @@ if [ "$LOCAL_BOOT" = "no" ];then
 			pushd /mnt/lvmboot/boot >/dev/null
 		elif [ "$haveDMSquash" = "yes" ];then
 			pushd /mnt/dmboot/boot >/dev/null
+		elif [ "$haveClicFS" = "yes" ];then
+			pushd /mnt/clicboot/boot >/dev/null
 		elif [ "$haveLuks" = "yes" ];then
 			pushd /mnt/luksboot/boot >/dev/null
 		else
@@ -302,6 +314,8 @@ if [ "$LOCAL_BOOT" = "no" ];then
 		updateLVMBootDeviceFstab /config $imageBootDevice
 	elif [ "$haveDMSquash" = "yes" ];then
 		updateDMBootDeviceFstab /config $imageBootDevice
+	elif [ "$haveClicFS" = "yes" ];then
+		updateClicBootDeviceFstab /config $imageBootDevice
 	elif [ "$loader" = "syslinux" ];then
 		updateSyslinuxBootDeviceFstab /config $imageFatDevice
 	elif [ "$haveLuks" = "yes" ];then
@@ -320,6 +334,7 @@ if [ "$LOCAL_BOOT" = "no" ];then
 	if \
 		[ "$loader" = "syslinux" ]  ||\
 		[ "$haveDMSquash" = "yes" ] ||\
+		[ "$haveClicFS" = "yes" ]   ||\
 		[ "$haveLuks" = "yes" ]
 	then
 		bootid=$(($bootid + 1))

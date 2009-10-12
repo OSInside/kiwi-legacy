@@ -312,12 +312,19 @@ function OEMRepartOverlayed {
 			umount /mnt
 		fi
 	fi
+	#====================================== 
+	# check for Clic setup
+	#--------------------------------------
+	local unionFST=`echo $UNIONFS_CONFIG | cut -d , -f 3`
+	if [ "$unionFST" = "clicfs" ];then
+		export haveClicFS=yes
+	fi
 	#======================================
 	# calculate end block - swapspace
 	#--------------------------------------
 	swapXMBytes=$swapsize
 	bootXMBytes=0
-	if [ "$haveDMSquash" = "yes" ];then
+	if [ "$haveDMSquash" = "yes" ] || [ "$haveClicFS" = "yes" ];then
 		bootXMBytes=40
 	fi
 	diskXMBytes=`partitionSize $imageDiskDevice`
@@ -360,7 +367,7 @@ function OEMRepartOverlayed {
 		input=/part.input
 		rm -f $input
 		if [ $swapsize = 0 ];then
-			if [ "$haveDMSquash" = "yes" ];then
+			if [ "$haveDMSquash" = "yes" ] || [ "$haveClicFS" = "yes" ];then
 				createPartitionerInput \
 					d 2 n p 2 . +"$disk2MBytes"M n p 3 . . w q
 				setupDeviceNames 1 no no no 3 2
@@ -370,7 +377,7 @@ function OEMRepartOverlayed {
 				setupDeviceNames 1 no no no 2 2
 			fi
 		else
-			if [ "$haveDMSquash" = "yes" ];then
+			if [ "$haveDMSquash" = "yes" ] || [ "$haveClicFS" = "yes" ];then
 				createPartitionerInput \
 					d 2 n p 2 . +"$disk2MBytes"M \
 					n p 3 . +"$bootXMBytes"M n p 4 . . \
@@ -396,7 +403,7 @@ function OEMRepartOverlayed {
 		#======================================
 		# Create bootfs if DM squash setup
 		#--------------------------------------
-		if [ "$haveDMSquash" = "yes" ];then
+		if [ "$haveDMSquash" = "yes" ] || [ "$haveClicFS" = "yes" ];then
 			if ! mke2fs -T ext2 -q $imageBootDevice >/dev/null 2>&1;then
 				systemException "Failed to create Boot filesystem" "reboot"
 			fi

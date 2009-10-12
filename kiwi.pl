@@ -2478,10 +2478,15 @@ sub mount {
 	} else {
 		if ($type eq "clicfs") {
 			$status = qxx ("clicfs -m 512 $source $dest 2>&1");
+			$result = $? >> 8;
+			if ($result == 0) {
+				$status = qxx ("resize2fs $dest/fsdata.ext3 2>&1");
+				$result = $? >> 8;
+			}
 		} else {
 			$status = qxx ("mount $source $dest 2>&1");
+			$result = $? >> 8;
 		}
-		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> error ("Failed to mount $source to: $dest: $status");
 			$kiwi -> failed ();

@@ -545,6 +545,20 @@ if [ "$LOCAL_BOOT" = "no" ]; then
 		test -f /tmp/mbrid && mv /tmp/mbrid /mnt/dmboot/boot/grub
 		rm -rf /mnt/boot
 		( cd /mnt && ln -s dmboot/boot boot )
+	elif [ "$haveClicFS" = "yes" ];then
+		#======================================
+		# Clic use third partition as boot
+		#--------------------------------------
+		mkdir /mnt/clicboot
+		bootid=3
+		export imageBootDevice=$(ddn $imageDiskDevice 3)
+		mount $imageBootDevice /mnt/clicboot
+		cp -a  /mnt/boot /mnt/clicboot
+		test -f /tmp/linux.vmx  && mv /tmp/linux.vmx  /mnt/clicboot/boot
+		test -f /tmp/initrd.vmx && mv /tmp/initrd.vmx /mnt/clicboot/boot
+		test -f /tmp/mbrid && mv /tmp/mbrid /mnt/clicboot/boot/grub
+		rm -rf /mnt/boot
+		( cd /mnt && ln -s clicboot/boot boot )
 	elif [ "$haveLuks" = "yes" ];then
 		#======================================
 		# LUKS use second or third part as boot
@@ -581,6 +595,8 @@ if [ "$LOCAL_BOOT" = "no" ];then
 			pushd /mnt/lvmboot/boot >/dev/null
 		elif [ "$haveDMSquash" = "yes" ];then
 			pushd /mnt/dmboot/boot >/dev/null
+		elif [ "$haveClicFS" = "yes" ];then
+			pushd /mnt/clicboot/boot >/dev/null
 		elif [ "$haveLuks" = "yes" ];then
 			pushd /mnt/luksboot/boot >/dev/null
 		elif [ "$OEM_KIWI_INITRD" = "yes" ];then
@@ -621,6 +637,8 @@ if [ "$LOCAL_BOOT" = "no" ];then
 		updateLVMBootDeviceFstab /config $imageBootDevice
 	elif [ "$haveDMSquash" = "yes" ];then
 		updateDMBootDeviceFstab /config $imageBootDevice
+	elif [ "$haveClicFS" = "yes" ];then
+		updateClicBootDeviceFstab /config $imageBootDevice
 	elif [ "$haveLuks" = "yes" ];then
 		updateLuksBootDeviceFstab /config $imageBootDevice
 	fi

@@ -1129,6 +1129,8 @@ function setupBootLoaderGrub {
 		gnum=1
 	elif [ "$haveDMSquash" = "yes" ];then
 		gnum=2
+	elif [ "$haveClicFS" = "yes" ];then
+		gnum=2
 	elif [ "$haveLuks" = "yes" ];then
 		:
 	elif [ ! -z "$UNIONFS_CONFIG" ] && [ $gnum -gt 0 ]; then
@@ -1356,6 +1358,8 @@ function setupBootLoaderLilo {
 	if [ "$haveLVM" = "yes" ]; then
 		lnum=1
 	elif [ "$haveDMSquash" = "yes" ];then
+		lnum=2
+	elif [ "$haveClicFS" = "yes" ];then
 		lnum=2
 	elif [ "$haveLuks" = "yes" ];then
 		:
@@ -1597,6 +1601,12 @@ function updateLVMBootDeviceFstab {
 #--------------------------------------
 function updateDMBootDeviceFstab {
 	updateLVMBootDeviceFstab $1 $2 "/dmboot"
+}
+#======================================
+# updateClicBootDeviceFstab
+#--------------------------------------
+function updateClicBootDeviceFstab {
+	updateLVMBootDeviceFstab $1 $2 "/clicboot"
 }
 #======================================
 # updateLuksBootDeviceFstab
@@ -3561,6 +3571,7 @@ function mountSystemClicFS {
 		Echo "Failed to mount ext3 clic container"
 		return 1
 	fi
+	export haveClicFS=yes
 	return 0
 }
 #======================================
