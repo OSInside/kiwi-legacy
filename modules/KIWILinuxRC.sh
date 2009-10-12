@@ -24,6 +24,7 @@ export ELOG_BOOTSHELL=/dev/tty2
 export ELOG_EXCEPTION=/dev/tty1
 export KLOG_CONSOLE=4
 export KLOG_DEFAULT=1
+export ELOG_STOPPED=0
 export PARTITIONER=sfdisk
 export TRANSFER_ERRORS_FILE=/tmp/transfer.errors
 export DEFAULT_VGA=0x314
@@ -87,7 +88,9 @@ function Echo {
 	# /.../
 	# print a message to the controling terminal
 	# ----
-	set +x
+	if [ $ELOG_STOPPED = 0 ];then
+		set +x
+	fi
 	if [ ! $UTIMER = 0 ];then
 		kill -HUP $UTIMER
 		local prefix=$(cat /tmp/utimer)
@@ -106,11 +109,17 @@ function Echo {
 		esac
 	done
 	shift $(($OPTIND - 1))
-	set -x
+	if [ $ELOG_STOPPED = 0 ];then
+		set -x
+	fi
 	echo $optn $opte "$prefix $1"
-	set +x
+	if [ $ELOG_STOPPED = 0 ];then
+		set +x
+	fi
 	OPTIND=1
-	set -x
+	if [ $ELOG_STOPPED = 0 ];then
+		set -x
+	fi
 }
 #======================================
 # WaitKey
@@ -336,6 +345,7 @@ function createFramebufferDevices {
 #--------------------------------------
 function errorLogStop {
 	set +x
+	export ELOG_STOPPED=1
 	exec 2>$ELOG_EXCEPTION
 }
 #======================================
@@ -343,6 +353,7 @@ function errorLogStop {
 #--------------------------------------
 function errorLogContinue {
 	exec 2>>$ELOG_FILE
+	export ELOG_STOPPED=0
 	set -x
 }
 #======================================
