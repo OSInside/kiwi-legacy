@@ -347,9 +347,13 @@ function suseConfig {
 	#--------------------------------------
 	if [ ! -z "$kiwi_timezone" ];then
 		if [ -f /usr/share/zoneinfo/$kiwi_timezone ];then
-			mv /usr/share/zoneinfo/$kiwi_timezone /etc/localtime
+			cp /usr/share/zoneinfo/$kiwi_timezone /etc/localtime
 			cat /etc/sysconfig/clock |\
 				sed -e s"@TIMEZONE=\".*\"@TIMEZONE=\"$kiwi_timezone\"@" \
+			> etc/sysconfig/clock.new
+			mv etc/sysconfig/clock.new etc/sysconfig/clock
+			cat /etc/sysconfig/clock |\
+				sed -e s"@HWCLOCK=\".*\"@HWCLOCK=\"-u\"@" \
 			> etc/sysconfig/clock.new
 			mv etc/sysconfig/clock.new etc/sysconfig/clock
 		else

@@ -2243,16 +2243,16 @@ sub getImageConfig {
 		my $oemreboot= $element -> getElementsByTagName ("oem-reboot");
 		my $oemreco  = $element -> getElementsByTagName ("oem-recovery");
 		my $oemrecoid= $element -> getElementsByTagName ("oem-recoveryID");
-		if (defined $keytable) {
+		if ((defined $keytable) && ("$keytable" ne "")) {
 			$result{kiwi_keytable} = $keytable;
 		}
-		if (defined $timezone) {
+		if ((defined $timezone) && ("$timezone" ne "")) {
 			$result{kiwi_timezone} = $timezone;
 		}
-		if (defined $language) {
+		if ((defined $language) && ("$language" ne "")) {
 			$result{kiwi_language} = $language;
 		}
-		if (defined $boottheme) {
+		if ((defined $boottheme) && ("$boottheme" ne "")) {
 			$result{kiwi_boottheme}= $boottheme;
 		}
 		if ((defined $oemswap) && ("$oemswap" eq "false")) {
