@@ -1796,6 +1796,7 @@ function waitForUSBDeviceScan {
 		sleep 1
 		devices=$(( $devices + 1 ))
 	done
+	udevPending
 	echo
 }
 #======================================
