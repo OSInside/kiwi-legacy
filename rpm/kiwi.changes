@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Oct 14 12:13:42 CEST 2009 - ms@suse.de
+
+- don't remove libgcc_s from initrd. It's required for
+  programs which uses pthread_cancel()
+
+-------------------------------------------------------------------
 Wed Oct 14 10:31:08 CEST 2009 - ms@suse.de
 
 - prevent automatic CD eject on kiwi install. If the tray is
