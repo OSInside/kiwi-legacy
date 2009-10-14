@@ -29,6 +29,7 @@ function OEMInstall {
 	local count=0
 	local dsize=0
 	local index=0
+	local message
 	#======================================
 	# Check for install mode indicator file
 	#--------------------------------------
@@ -284,6 +285,9 @@ function OEMInstall {
 	# Reboot system
 	#--------------------------------------
 	if [ "$OEMInstallType" = "CD" ];then
-		CDEject
+		message="Please eject the install CD/DVD before continuing"
+	else
+		message="Please pull out the install USB stick before continuing"
 	fi
+	Dialog --msgbox "$(getText "$message")" 5 60
 }

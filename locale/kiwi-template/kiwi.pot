@@ -61,3 +61,9 @@ msgstr ""
 
 msgid "Exit"
 msgstr ""
+
+msgid "Please eject the install CD/DVD before continuing"
+msgstr ""
+
+msgid "Please pull out the install USB stick before continuing"
+msgstr ""

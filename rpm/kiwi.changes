@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Wed Oct 14 10:31:08 CEST 2009 - ms@suse.de
+
+- prevent automatic CD eject on kiwi install. If the tray is
+  blocked (some servers hide their drives behind doors) the boot
+  CD/DVD with the OEM image ends up back in the machine. Therefore
+  we open a popup window asking to user to remove the install
+  media before continuing
+
+-------------------------------------------------------------------
 Mon Oct 12 16:07:35 CEST 2009 - ms@suse.de
 
 - fixed error log switch in Echo function
