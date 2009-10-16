@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Oct 16 10:44:24 CEST 2009 - mbarringer@suse.de
+
+-  Add .iso filter to the imagewriter
+
+-------------------------------------------------------------------
 Wed Oct 14 12:13:42 CEST 2009 - ms@suse.de
 
 - don't remove libgcc_s from initrd. It's required for
