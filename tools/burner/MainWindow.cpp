@@ -239,11 +239,17 @@ MainWindow::selectImage()
     QString fileName = QFileDialog::getOpenFileName(this,
                         tr("Open Image"),
                         QDir::currentPath(),
-                        tr("Image Files (*.raw)"));
+                        tr("Image Files (*.raw *.iso)"));
     if (!fileName.isEmpty())
     {
         setFile(fileName);
         setSizeLabel(fileName);
+        if (fileName.endsWith(".iso"))
+        {
+            QMessageBox msgBox;
+            msgBox.setText(tr("Support for writing ISO files only includes hybrid ISO images.\nIf this image is a standard ISO, you will be very disappointed."));
+            msgBox.exec();
+        }
     }
 
     return;
