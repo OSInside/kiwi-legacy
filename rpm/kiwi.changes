@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sun Oct 18 20:44:23 CEST 2009 - ms@suse.de
+
+- search .backup files in home and etc only (bnc #546057)
+
+-------------------------------------------------------------------
 Fri Oct 16 10:44:24 CEST 2009 - mbarringer@suse.de
 
 -  Add .iso filter to the imagewriter

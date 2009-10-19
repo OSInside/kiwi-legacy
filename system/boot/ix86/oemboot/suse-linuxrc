@@ -431,7 +431,7 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 		if [ -z "$RESTORE" ];then
 			rReady=0
 			getText "backing up: %1..." "0%" > /progress
-			for backup in $(find -type f -name "*.backup");do
+			for backup in $(find etc/ home/ -type f -name "*.backup");do
 				origin=$(echo $backup | sed -e s@.backup@@)
 				txdiff=$(diff -u $origin $backup 2>/dev/null)
 				if [ $? = 1 ];then
