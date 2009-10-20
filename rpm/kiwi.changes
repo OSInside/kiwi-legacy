@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Tue Oct 20 11:44:54 CEST 2009 - ms@suse.de
+
+- added support for lang and keytable in cmdline. Support is
+  only available with the gfxboot code from >= 11.2 (bnc #547915)
+- changed fbiterm return code evaluation. Echo the return code
+  from the last instead of relying to the exit code of the
+  fbiterm terminal (bnc #547864)
+
+-------------------------------------------------------------------
 Sun Oct 18 20:44:23 CEST 2009 - ms@suse.de
 
 - search .backup files in home and etc only (bnc #546057)

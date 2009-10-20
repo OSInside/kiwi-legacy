@@ -345,8 +345,7 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 	if [ ! -z "$RESTORE" ];then
 		text="Do you want to start the System-Restore ?"
 	fi
-	Dialog --defaultno --yesno "$(getText "$text")" 5 50
-	if [ ! $? = 0 ];then
+	if ! Dialog --defaultno --yesno "$(getText "$text")" 5 50;then
 		systemException "System-Recovery not started" "reboot"
 	fi
 	clear

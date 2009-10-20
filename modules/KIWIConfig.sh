@@ -1049,12 +1049,37 @@ function suseGFXBoot {
 		# check for new source layout
 		local newlayout=
 		[ -f themes/$theme/config ] && newlayout=1
-		if [ "$newlayout" ] && [ ! -z "$kiwi_language" ];then
-			for l in `echo $kiwi_language | tr "," " "`;do
-				echo "Adding language: $l"
-				echo $l >> themes/$theme/data-boot/languages
-			done
+		# update configuration for new layout only
+		if [ "$newlayout" ];then
+			if [ $loader = "isolinux" ];then
+				local gfxcfg=themes/$theme/data-install/gfxboot.cfg
+				# tell the bootloader about live CD setup
+				gfxboot --config-file $gfxcfg \
+					--change-config install::livecd=1
+				# tell the bootloader to hand over keytable to cmdline 
+				gfxboot --config-file $gfxcfg \
+					--change-config live::addopt.keytable=1
+				# tell the bootloader to hand over lang to cmdline
+				gfxboot --config-file $gfxcfg \
+					--change-config live::addopt.lang=1
+			else
+				local gfxcfg=themes/$theme/data-boot/gfxboot.cfg
+				# tell the bootloader to hand over keytable to cmdline 
+				gfxboot --config-file $gfxcfg \
+					--change-config boot::addopt.keytable=1
+				# tell the bootloader to hand over lang to cmdline
+				gfxboot --config-file $gfxcfg \
+					--change-config boot::addopt.lang=1
+				# add selected languages to the bootloader menu
+				if [ ! -z "$kiwi_language" ];then
+					for l in `echo $kiwi_language | tr "," " "`;do
+						echo "Adding language: $l"
+						echo $l >> themes/$theme/data-boot/languages
+					done
+				fi
+			fi
 		fi
+		# create the archive	
 		[ "$newlayout" ] || make -C themes/$theme prep
 		make -C themes/$theme
 		mkdir /image/loader
@@ -1108,15 +1133,31 @@ function suseGFXBoot {
 		if [ $loader = "isolinux" ];then
 			# isolinux boot data...
 			mv /etc/bootsplash/themes/$theme/cdrom/* /image/loader
+			local gfxcfg=/image/loader/gfxboot.cfg
+			# tell the bootloader about live CD setup
+			gfxboot --config-file $gfxcfg \
+				--change-config install::livecd=1
+			# tell the bootloader to hand over keytable to cmdline 
+			gfxboot --config-file $gfxcfg \
+				--change-config live::addopt.keytable=1
+			# tell the bootloader to hand over lang to cmdline
+			gfxboot --config-file $gfxcfg \
+				--change-config live::addopt.lang=1
 		else
 			# boot loader graphics image file...
-			bootimage=/etc/bootsplash/themes/$theme/bootloader/message
+			mv /etc/bootsplash/themes/$theme/bootloader/message /image/loader
+			local archive=/image/loader/message
+			# tell the bootloader to hand over keytable to cmdline 
+			gfxboot --archive $archive \
+				--change-config boot::addopt.keytable=1
+			# tell the bootloader to hand over lang to cmdline
+			gfxboot --archive $archive \
+				--change-config boot::addopt.lang=1
+			# add selected languages to the bootloader menu
 			if [ ! -z "$kiwi_language" ];then
-				# following works for 11.1+...
-				gfxboot --archive $bootimage --add-language \
+				gfxboot --archive $archive --add-language \
 					$(echo $kiwi_language | tr "," " ") --default-language en_US
 			fi
-			mv $bootimage /image/loader
 		fi
 	else
 		#======================================
@@ -1145,17 +1186,6 @@ function suseGFXBoot {
 	else
 		# boot loader binary part of MBR
 		:
-	fi
-	#======================================
-	# update isolinux config if live CD
-	#--------------------------------------
-	if [ $loader = "isolinux" ];then
-		if [ -x /usr/sbin/gfxboot ] ; then
-			gfxboot --config-file /image/loader/gfxboot.cfg \
-					--change-config install::livecd=1
-		else
-			echo "livecd=1" >> /image/loader/gfxboot.cfg
-		fi
 	fi
 	#======================================
 	# create splash screen

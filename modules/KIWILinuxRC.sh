@@ -52,14 +52,17 @@ ldconfig
 # Dialog
 #--------------------------------------
 function Dialog {
+	local code=1
+	export DIALOG_CANCEL=1
 	if [ -e /dev/fb0 ];then
-		fbiterm -m $UFONT -- dialog \
+		code=$(fbiterm -m $UFONT -- dialog \
 			--ok-label "$(getText "OK")" \
 			--cancel-label "$(getText "Cancel")" \
 			--yes-label "$(getText "Yes")" \
 			--no-label "$(getText "No")" \
 			--exit-label "$(getText "Exit")" \
-			"$@"
+			"$@";echo $?)
+		code=$(echo $code | cut -c5-)
 	else
 		dialog \
 			--ok-label "$(getText "OK")" \
@@ -68,7 +71,9 @@ function Dialog {
 			--no-label "$(getText "No")" \
 			--exit-label "$(getText "Exit")" \
 			"$@"
+		code=$?
 	fi
+	return $code
 }
 #======================================
 # Debug
