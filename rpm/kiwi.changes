@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Wed Oct 21 12:15:36 CEST 2009 - ms@suse.de
+
+- use cmp to compare files first before diffing them. Prevent
+  second find call for backup files. This increases the recovery
+  performance in repair mode. Additionally write backup diffs
+  to /tmp/backup (bnc #546057)
+
+-------------------------------------------------------------------
 Tue Oct 20 11:44:54 CEST 2009 - ms@suse.de
 
 - added support for lang and keytable in cmdline. Support is

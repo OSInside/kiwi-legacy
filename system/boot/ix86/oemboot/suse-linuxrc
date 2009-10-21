@@ -407,9 +407,12 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 		if [ -z "$RESTORE" ];then
 			rFilesBackup=0
 			getText "Clean sweep..." > /progress
-			for src in $(find etc/ home/ -type f);do
+			rm -rf tmp/backup; mkdir -p tmp/backup
+			rFilesList=$(find etc/ home/ -type f 2>/dev/null |\
+				xargs tar -cO -f - 2>/dev/null |\
+				tar -v -C tmp/backup -xf -)
+			for i in $rFilesList;do
 				rFilesBackup=$((rFilesBackup + 1))
-				dst=$src".backup"; cp -a $src $dst
 			done
 		fi
 		#======================================
@@ -430,13 +433,18 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 		if [ -z "$RESTORE" ];then
 			rReady=0
 			getText "backing up: %1..." "0%" > /progress
-			for backup in $(find etc/ home/ -type f -name "*.backup");do
-				origin=$(echo $backup | sed -e s@.backup@@)
-				txdiff=$(diff -u $origin $backup 2>/dev/null)
-				if [ $? = 1 ];then
-					printf "%s\n" "$txdiff" > $backup
+			for file in $rFilesList;do
+				sizeOrig=$(stat $file --printf=%s)
+				sizeBack=$(stat tmp/backup/$file --printf=%s)
+				if [ $sizeOrig -ne $sizeBack ];then
+					if ! cmp -s -n 20480 $file tmp/backup/$file;then
+						txdiff=$(diff -u $file tmp/backup/$file 2>/dev/null)
+						printf "%s\n" "$txdiff" > tmp/backup/$file
+					else
+						rm tmp/backup/$file
+					fi
 				else
-					rm $backup
+					rm tmp/backup/$file
 				fi
 				rReady=$((rReady + 1))
 				rPDone=$(echo "scale=4; $rFilesBackup / $rReady" | bc)

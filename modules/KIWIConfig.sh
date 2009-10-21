@@ -988,7 +988,7 @@ function suseStripInitrd {
 		pvchange pvresize pvscan vgscan vgchange vgextend vgdisplay
 		lvchange lvresize lvextend lvcreate grub dcounter tty
 		dmsetup dialog awk gawk clicfs cryptsetup clear blkid fbiterm
-		gettext diff bc utimer
+		gettext diff bc utimer cmp
 	"
 	tools="$tools $@"
 	for path in /sbin /usr/sbin /usr/bin /bin;do
