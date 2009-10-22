@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Oct 22 12:04:40 CEST 2009 - ms@suse.de
+
+- recovery mode (bnc #546057):
+  * throw reboot exception if backup files can't be created
+  * create backup files for files in recovery.tar.gz only
+
+-------------------------------------------------------------------
 Wed Oct 21 12:15:36 CEST 2009 - ms@suse.de
 
 - use cmp to compare files first before diffing them. Prevent

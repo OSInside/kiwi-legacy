@@ -405,15 +405,16 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 		# create backup diffs
 		#--------------------------------------
 		if [ -z "$RESTORE" ];then
-			rFilesBackup=0
 			getText "Clean sweep..." > /progress
+			rm -rf tmp/foobar; mkdir -p tmp/foobar
 			rm -rf tmp/backup; mkdir -p tmp/backup
-			rFilesList=$(find etc/ home/ -type f 2>/dev/null |\
+			if ! find etc/ home/ -type f 2>/dev/null |\
 				xargs tar -cO -f - 2>/dev/null |\
-				tar -v -C tmp/backup -xf -)
-			for i in $rFilesList;do
-				rFilesBackup=$((rFilesBackup + 1))
-			done
+				tar -v -C tmp/foobar -xf -
+			then
+				rm -rf tmp/foobar
+				systemException "Failed to create backup files" "reboot"
+			fi
 		fi
 		#======================================
 		# extract root archive
@@ -432,25 +433,40 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 		#--------------------------------------
 		if [ -z "$RESTORE" ];then
 			rReady=0
+			rCount=0
 			getText "backing up: %1..." "0%" > /progress
-			for file in $rFilesList;do
-				sizeOrig=$(stat $file --printf=%s)
-				sizeBack=$(stat tmp/backup/$file --printf=%s)
-				if [ $sizeOrig -ne $sizeBack ];then
-					if ! cmp -s -n 20480 $file tmp/backup/$file;then
-						txdiff=$(diff -u $file tmp/backup/$file 2>/dev/null)
-						printf "%s\n" "$txdiff" > tmp/backup/$file
-					else
-						rm tmp/backup/$file
+			cat /tmp/rFiles | grep -E "^(./etc|./home)" > /tmp/bFiles
+			rFilesBackup=$(cat /tmp/bFiles | wc -l)
+			for file in $(cat /tmp/bFiles);do
+				if [ ! -d $file ] && [ -e $file ] && [ -e tmp/foobar/$file ]
+				then
+					sizeOrig=$(stat $file --printf=%s)
+					sizeBack=$(stat tmp/foobar/$file --printf=%s)
+					if [ $sizeOrig -ne $sizeBack ];then
+						if ! cmp -s -n 20480 $file tmp/foobar/$file;then
+							label=$(echo $file | cut -c 2-)
+							txdiff=$(diff -u \
+								--label $label $file \
+								--label $label tmp/foobar/$file 2>/dev/null)
+							if [ $? = 1 ];then
+								base=$(basename $file)
+								printf "%s\n" "$txdiff" \
+									> tmp/backup/$base.$rCount.diff
+								rCount=$((rCount + 1))
+							fi
+						fi
 					fi
-				else
-					rm tmp/backup/$file
 				fi
 				rReady=$((rReady + 1))
 				rPDone=$(echo "scale=4; $rFilesBackup / $rReady" | bc)
 				rPDone=$(echo "scale=0; 100 / $rPDone" | bc)
 				getText "backing up: %1..." "$rPDone%" > /progress
 			done
+			rm -rf tmp/foobar
+			rm -rf tmp/backup/bootloader*
+			rm -rf tmp/backup/mtab*
+			rm -rf tmp/backup/fstab*
+			rm -rf tmp/backup/kernel*
 		fi
 		dPID=$(pidof mst)
 		kill $dPID
