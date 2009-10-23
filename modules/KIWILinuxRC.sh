@@ -215,6 +215,7 @@ function systemException {
 	# ----
 	set +x
 	local what=$2
+	test -e /proc/splash && echo verbose > /proc/splash
 	if [ $what = "reboot" ];then
 		if cat /proc/cmdline | grep -qi "kiwidebug=1";then
 			what="shell"
@@ -2306,8 +2307,11 @@ function searchBIOSBootDevice {
 	#--------------------------------------
 	ifix=0
 	for curd in $ddevs;do
+		if [ ! -b $curd ];then
+			continue
+		fi
 		mbrM=`dd if=$curd bs=1 count=4 skip=$((0x1b8))|hexdump -n4 -e '"0x%x"'`
-		if [ $mbrM = $mbrI ];then
+		if [ "$mbrM" = "$mbrI" ];then
 			ifix=1
 			matched=$curd
 			if [ "$curd" = "$bios" ];then
