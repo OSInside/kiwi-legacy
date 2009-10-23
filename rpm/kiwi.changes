@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Oct 23 12:31:40 CEST 2009 - ms@suse.de
+
+- added DOBACKUP variable to easily switch on/off the
+  backup creation in recovery mode (bnc #546057)
+
+-------------------------------------------------------------------
 Thu Oct 22 12:04:40 CEST 2009 - ms@suse.de
 
 - recovery mode (bnc #546057):

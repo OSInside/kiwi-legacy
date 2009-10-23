@@ -23,6 +23,7 @@ export PATH="/sbin:/bin:/usr/sbin:/usr/bin"
 export IFS_ORIG=$IFS
 export DEBUG=0
 export bootid=1
+export DOBACKUP=1
 
 #======================================
 # Exports (Booting)
@@ -404,7 +405,7 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 		#======================================
 		# create backup diffs
 		#--------------------------------------
-		if [ -z "$RESTORE" ];then
+		if [ -z "$RESTORE" ] && [ "$DOBACKUP" = 1 ];then
 			getText "Clean sweep..." > /progress
 			rm -rf tmp/foobar; mkdir -p tmp/foobar
 			rm -rf tmp/backup; mkdir -p tmp/backup
@@ -431,7 +432,7 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 		#======================================
 		# create backup diffs
 		#--------------------------------------
-		if [ -z "$RESTORE" ];then
+		if [ -z "$RESTORE" ] && [ "$DOBACKUP" = 1 ];then
 			rReady=0
 			rCount=0
 			getText "backing up: %1..." "0%" > /progress
