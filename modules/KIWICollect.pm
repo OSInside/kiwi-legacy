@@ -102,7 +102,7 @@ sub new {
     m_metaPacks     => undef,
     m_metafiles	    => undef,
     m_browser	    => undef,
-    m_srcmedium	    => undef,
+    m_srcmedium	    => -1,
     m_debugmedium   => -1,
     m_logStdOut     => undef,
     m_startUpTime   => undef,
@@ -415,7 +415,7 @@ sub Init
 
   ## Set possible defined source or debugmediums
   #
-  $this->{m_srcmedium}   = $this->{m_proddata}->getOpt("SOURCEMEDIUM");
+  $this->{m_srcmedium}   = $this->{m_proddata}->getOpt("SOURCEMEDIUM") || -1;
   $this->{m_debugmedium} = $this->{m_proddata}->getOpt("DEBUGMEDIUM") || -1;
 
   $this->{m_united} = "$this->{m_basedir}/main";
@@ -433,7 +433,7 @@ sub Init
 
 
   my @media = $this->getMediaNumbers();
-  my $mult = $this->{m_proddata}->getVar("MULTIPLE_MEDIA");
+  my $mult = $this->{m_proddata}->getVar("MULTIPLE_MEDIA", "yes");
   my $dirext = undef;
   if($mult eq "no") {
     if(scalar(@media) == 1) { 
@@ -772,8 +772,7 @@ sub setupPackageFiles
             next PACKKEY;
           }
           # Success, found a package !
-          my $medium = 1;
-          $medium = $packOptions->{'medium'} if( $packOptions->{'medium'});
+          my $medium = $packOptions->{'medium'} || 1;
           
           $packOptions->{'newfile'}  = "$packName-$packPointer->{'version'}-$packPointer->{'release'}.$packPointer->{'arch'}.rpm";
           $packOptions->{'newpath'} = "$this->{m_basesubdir}->{$medium}/$base_on_cd/$packPointer->{'arch'}";
@@ -799,7 +798,7 @@ sub setupPackageFiles
               my $srcname = $packPointer->{sourcepackage};
               $srcname =~ s/-[^-]*-[^-]*\.rpm$//; # this strips everything, except main name
               # 
-              if ( defined($this->{m_srcmedium}) && $this->{m_srcmedium} > 0 ) {
+              if ( $this->{m_srcmedium} > 0 ) {
                 if (!$this->{m_sourcePacks}->{$srcname}) {
                   # FIXME: add forcerepo here
                   $this->{m_sourcePacks}->{$srcname} = {
@@ -810,12 +809,13 @@ sub setupPackageFiles
                 $packPointer->{sourcepackage} =~ m/.*-([^-]*-[^-]*)\.[^\.]*\.rpm/; # get version-release string
                 $this->{m_sourcePacks}->{$srcname}->{'requireVersion'}->{ $1 } = 1;
               }
-              if ( defined($this->{m_debugmedium}) && $this->{m_debugmedium} > 0 ) {
+              if ( $this->{m_debugmedium} > 0 ) {
                 # Add debug packages, we do not know, if they exist at all
                 my $suffix = "";
                 $suffix = "-32bit" if ( $packName =~ /-32bit$/ );
                 $suffix = "-64bit" if ( $packName =~ /-64bit$/ );
                 $suffix = "-x86"   if ( $packName =~ /-x86$/ );
+                $this->logMsg("D", "$packName $srcname $suffix");
                 if ( $this->{m_debugPacks}->{$srcname."-debuginfo".$suffix} ){
                   $this->{m_debugPacks}->{$srcname."-debuginfo".$suffix}->{'onlyarch'} .= ",$arch";
                   $this->{m_debugPacks}->{$srcname."-debugsource".$suffix}->{'onlyarch'} .= ",$arch";
@@ -910,14 +910,14 @@ sub collectPackages
     $this->logMsg("E", "[collectPackages] $setupFiles RPM packages could not be setup");
     return 1;
   }
-  if ( defined($this->{m_srcmedium}) && $this->{m_srcmedium} > 0 ) {
+  if ( $this->{m_srcmedium} > 0 ) {
     $setupFiles = $this->setupPackageFiles(2, $this->{m_sourcePacks});
     if($setupFiles > 0) {
       $this->logMsg("E", "[collectPackages] $setupFiles SOURCE RPM packages could not be setup");
       return 1;
     }
   }
-  if ( defined($this->{m_debugmedium}) && $this->{m_debugmedium} > 0 ) {
+  if ( $this->{m_debugmedium} > 0 ) {
     $setupFiles = $this->setupPackageFiles(0, $this->{m_debugPacks});
     if($setupFiles > 0) {
       $this->logMsg("E", "[collectPackages] $setupFiles DEBUG RPM packages could not be setup");
@@ -1940,11 +1940,11 @@ sub getMediaNumbers
   return undef if not defined $this;
   
   my @media = (1);	# default medium is 1 (always)
-  if ( defined($this->{m_srcmedium}) && $this->{m_srcmedium} > 1 ) {
+  if ( $this->{m_srcmedium} > 1 ) {
     push @media, $this->{m_srcmedium};
   }
 
-  if ( defined($this->{m_debugmedium}) && $this->{m_debugmedium} > 1 ) {
+  if ( $this->{m_debugmedium} > 1 ) {
     push @media, $this->{m_debugmedium};
   }
 
