@@ -683,6 +683,29 @@ sub getMetafileList
 } # getMetafileList
 
 
+sub addDebugPackage($$$$)
+{
+   my $this = shift;
+   my $packname = shift;
+   my $arch = shift;
+   my $packPointer = shift;
+
+   if ( $this->{m_debugPacks}->{$packname} ){
+        $this->{m_debugPacks}->{$packname}->{'onlyarch'} .= ",$arch";
+        $this->{m_debugPacks}->{$packname}->{'onlyarch'} .= ",$arch";
+   } else {
+        $this->{m_debugPacks}->{$packname} = {
+          'medium' => $this->{m_debugmedium},
+          'onlyarch' => $arch
+        };
+        $this->{m_debugPacks}->{$packname} = {
+          'medium' => $this->{m_debugmedium},
+          'onlyarch' => $arch
+        };
+   };
+   $this->{m_debugPacks}->{$packname}->{'requireVersion'}->{ $packPointer->{'version'}."-".$packPointer->{'release'} } = 1;
+   $this->{m_debugPacks}->{$packname}->{'requireVersion'}->{ $packPointer->{'version'}."-".$packPointer->{'release'} } = 1;
+}
 
 #==========================================
 # setupPackageFiles
@@ -718,7 +741,7 @@ sub setupPackageFiles
     my $nofallback = 0;
     my @archs;
     $count_packs++;
-    if ( $mode eq 2 ) {
+    if ( $mode == 2 ) {
       push @archs, 'src', 'nosrc';
     }else{
       @archs = $this->getArchList($packOptions, $packName, \$nofallback);
@@ -737,7 +760,7 @@ sub setupPackageFiles
       $this->logMsg("W", "  Evaluate package $packName for requested arch $requestedArch") if $this->{m_debug} >= 5;
 
       my @fallbacklist;
-      if($nofallback==0 && $mode ne 2) {
+      if($nofallback==0 && $mode != 2) {
 	@fallbacklist = $this->{m_archlist}->fallbacks($requestedArch);
         $this->logMsg("W", " Look for fallbacks fallbacks") if $this->{m_debug} >= 6;
       }
@@ -759,7 +782,7 @@ sub setupPackageFiles
 	    $this->logMsg("I", "     => package $packName not available for arch $arch in repo $packKey") if $this->{m_debug} >= 4;
             next PACKKEY;
           }
-          if($nofallback==0 && $mode ne 2) {
+          if($nofallback==0 && $mode != 2) {
 	    my $follow = $this->{m_archlist}->arch($arch)->follower();
 	    if(defined($follow)) { 
 	      $this->logMsg("I", "     => falling back to $follow from $packKey instead") if $this->{m_debug} >= 4;
@@ -815,22 +838,9 @@ sub setupPackageFiles
                 $suffix = "-32bit" if ( $packName =~ /-32bit$/ );
                 $suffix = "-64bit" if ( $packName =~ /-64bit$/ );
                 $suffix = "-x86"   if ( $packName =~ /-x86$/ );
-                $this->logMsg("D", "$packName $srcname $suffix");
-                if ( $this->{m_debugPacks}->{$srcname."-debuginfo".$suffix} ){
-                  $this->{m_debugPacks}->{$srcname."-debuginfo".$suffix}->{'onlyarch'} .= ",$arch";
-                  $this->{m_debugPacks}->{$srcname."-debugsource".$suffix}->{'onlyarch'} .= ",$arch";
-                } else {
-                  $this->{m_debugPacks}->{$srcname."-debuginfo".$suffix} = {
-                    'medium' => $this->{m_debugmedium},
-                    'onlyarch' => $arch
-                  };
-                  $this->{m_debugPacks}->{$srcname."-debugsource".$suffix} = {
-                    'medium' => $this->{m_debugmedium},
-                    'onlyarch' => $arch
-                  };
-                };
-                $this->{m_debugPacks}->{$srcname."-debuginfo".$suffix}->{'requireVersion'}->{ $packPointer->{'version'}."-".$packPointer->{'release'} } = 1;
-                $this->{m_debugPacks}->{$srcname."-debugsource".$suffix}->{'requireVersion'}->{ $packPointer->{'version'}."-".$packPointer->{'release'} } = 1;
+                $this->addDebugPackage($srcname."-debuginfo".$suffix, $arch, $packPointer);
+                $this->addDebugPackage($srcname."-debugsource", $arch, $packPointer);
+                $this->addDebugPackage($packName."-debuginfo", $arch, $packPointer);
               };
             }
           }
