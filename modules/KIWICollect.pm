@@ -144,7 +144,7 @@ sub new {
   # create second logger object to log only the data relevant
   # for repository creation:
 
-  $this->{m_util} = new KIWIUtil($this->{m_logger});
+  $this->{m_util} = new KIWIUtil($this);
   if(!$this->{m_util}) {
     $this->logMsg("E", "Can't create KIWIUtil object!");
     return undef;
@@ -203,44 +203,11 @@ sub logMsg
       $this->{m_logger}->warn($out);
     }elsif ( $mode eq "I" ) {
       $this->{m_logger}->info($out);
-    }else{
+    }elsif ($this->{m_debug}){
       $this->{m_logger}->info($out);
     }
   }
 }
-
-#=================
-# access methods:
-#-----------------
-sub logger
-{
-  my $this = shift;
-  if(not ref($this)) {
-    return undef;
-  }
-  my $oldlog = $this->{m_logger};
-  if(@_) {
-    $this->{m_logger} = shift;
-  }
-  return $oldlog;
-}
-
-
-
-sub debugflag
-{
-  my $this = shift;
-  if(not ref($this)) {
-    return undef;
-  }
-  my $olddeb = $this->{m_debug};
-  if(@_) {
-    $this->{m_debug} = shift;
-  }
-  return $olddeb;
-}
-
-
 
 sub unitedDir
 {
@@ -254,8 +221,6 @@ sub unitedDir
   }
   return $oldunited;
 }
-
-
 
 sub archlist
 {
@@ -415,12 +380,12 @@ sub Init
   # may be empty
   @{$this->{m_chroot}}	      = $this->{m_xml}->getInstSourceChrootList();
   if(!$this->{m_chroot}) {
-    $this->{m_logger}->info("KIWICollect::Init: chroot list is empty hash, no chroot requirements specified");
+    $this->logMsg("I", "KIWICollect::Init: chroot list is empty hash, no chroot requirements specified");
   }
   else {
-    $this->{m_logger}->info("KIWICollect::Init: retrieved chroot list.");
+    $this->logMsg("I", "KIWICollect::Init: retrieved chroot list.");
     if($this->{m_debug}) {
-      $this->{m_logger}->info("See chroot.dump.pl");
+      $this->logMsg("I", "See chroot.dump.pl");
       open(DUMP, ">", "$this->{m_basedir}/chroot.dump.pl");
       print DUMP Dumper($this->{m_chroot});
       close(DUMP);
@@ -432,7 +397,7 @@ sub Init
   $vadded = $this->{m_proddata}->addSet("ProductVar stuff", {$this->{m_xml}->getInstSourceProductVar()}, "prodvars");
   $oadded = $this->{m_proddata}->addSet("ProductOption stuff", {$this->{m_xml}->getInstSourceProductOption()}, "prodopts");
   if(not defined($iadded) or not defined($vadded) or not defined($oadded)) {
-    $this->{m_logger}->error("KIWICollect::Init: something wrong in the productoptions section"); 
+    $this->logMsg("E", "KIWICollect::Init: something wrong in the productoptions section"); 
     return undef;
   }
   $this->{m_proddata}->_expand(); #once should be it, now--
@@ -518,23 +483,23 @@ sub Init
   
   my $dircreate = $this->createDirectoryStructure();
   if($dircreate != 0) {
-    $this->{m_logger}->error("KIWICollect::Init: calling createDirectoryStructure failed");
+    $this->logMsg("E", "KIWICollect::Init: calling createDirectoryStructure failed");
     return undef;
   }
 
   # for debugging:
   if($this->{m_debug}) {
-    $this->{m_logger}->info("Debug: dumping packages list to <packagelist.txt>");
+    $this->logMsg("I", "Debug: dumping packages list to <packagelist.txt>");
     $this->dumpPackageList("$this->{m_basedir}/packagelist.txt");
   }
 
-  $this->{m_logger}->info("KIWICollect::Init: create LWP module");
+  $this->logMsg("I", "KIWICollect::Init: create LWP module");
   $this->{m_browser} = new LWP::UserAgent;
 
   ## create the metadata handler and load (+verify) all available plugins:
   # the required variables are MEDIUM_NAME, PLUGIN_DIR, INI_DIR
   # should be set by now.
-  $this->{m_logger}->info("KIWICollect::Init: create KIWIRepoMetaHandler module");
+  $this->logMsg("I", "KIWICollect::Init: create KIWIRepoMetaHandler module");
   $this->{m_metacreator} = new KIWIRepoMetaHandler($this);
   $this->{m_metacreator}->baseurl($this->{m_united});
   $this->{m_metacreator}->mediaName($this->{m_proddata}->getVar('MEDIUM_NAME'));
@@ -908,7 +873,6 @@ sub collectPackages
   ### step 1
   # expand dir lists (setup in constructor for each repo) to filenames
   if($this->{m_debug}) {
-    $this->{m_logger}->info("");
     $this->logMsg("I", "STEP 1 [collectPackages]" );
     $this->logMsg("I", "expand dir lists for all repositories");
   }
@@ -1179,7 +1143,7 @@ sub unpackMetapackages
 #              }
 #              else {
 #                $this->logMsg("W", "Undefined values in hash for package $metapack");
-#                #$this->{m_logger}->warning( Dumper($this->{$metapack}));
+#                #$this->logMsg("W", Dumper($this->{$metapack}));
 #              }
 #            }
 #          }
@@ -1391,8 +1355,7 @@ sub dumpRepoData
   my $target  = shift;
 
   if(!open(DUMP, ">", $target)) {
-    $this->logMsg("W", "[dumpRepoData] Dumping data to file $target failed: file could not be created!");
-    $this->{m_logger}->failed();
+    $this->logMsg("E", "[dumpRepoData] Dumping data to file $target failed: file could not be created!");
   }
   else {
     print DUMP "Dumped data from KIWICollect object\n\n";
@@ -1433,8 +1396,7 @@ sub dumpPackageList
   my $target  = shift;
 
   if(!open(DUMP, ">", $target)) {
-    $this->logMsg("W", "[dumpPackageList] Dumping data to file $target failed: file could not be created!");
-    $this->{m_logger}->failed();
+    $this->logMsg("E", "[dumpPackageList] Dumping data to file $target failed: file could not be created!");
   }
 
   print DUMP "Dumped data from KIWICollect object\n\n";
@@ -1768,7 +1730,7 @@ sub createMetadata
   #$this->logMsg("W", "[createMetadata] $md5sums output:");
   #foreach(@data) {
   #  chomp $_;
-  #  $this->{m_logger}->info("\t$_\n");
+  #  $this->logMsg("I", "\t$_\n");
   #}
   #@data = (); # clear list
 

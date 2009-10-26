@@ -127,9 +127,7 @@ sub gossip
 {
   my $this = shift;
   my $message = shift;
-  if(defined($message) and $this->{m_collect}->debugflag()) {
-    $this->{m_collect}->logger()->info("$message");
-  }
+  $this->{m_collect}->logMsg("D", $message);
 }
 
 

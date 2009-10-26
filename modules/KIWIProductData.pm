@@ -88,7 +88,7 @@ sub addSet
   my $num_added = 0;
 
   if(not(defined($name) and defined($hashref))) {
-    $this->{m_collect}->logger()->error("Name and hashref must be defined!");
+    $this->{m_collect}->logMsg("E", "Name and hashref must be defined!");
     return undef;
   }
   else {
@@ -104,7 +104,7 @@ sub addSet
 	  $num_added++;
 	}
 	else {
-	  $this->{m_collect}->logger()->error("ProductData::addSet(): element with index $index already exists in m_inforef hash!");
+	  $this->{m_collect}->logMsg("E", "ProductData::addSet(): element with index $index already exists in m_inforef hash!");
 	}
       }
       #%{$this->{$what."-hash"}} = map { $_->[0], $_->[1] } values %{$this->{$what}};
@@ -118,13 +118,13 @@ sub addSet
 	  $num_added++;
 	}
 	else {
-	  $this->{m_collect}->logger()->error("ProductData::addSet(): element with index $name already exists in $what hash!");
+	  $this->{m_collect}->logMsg("E", "ProductData::addSet(): element with index $name already exists in $what hash!");
 	}
       }
     }
     else {
       # error
-	  $this->{m_collect}->logger()->error("ProductData::addSet(): $what is not a valid element!");
+	  $this->{m_collect}->logMsg("E", "ProductData::addSet(): $what is not a valid element!");
     }
   }
   return $num_added;
@@ -176,7 +176,7 @@ sub getVar
       return $this->{prodvars}->{$var};
     }
     else {
-      $this->{m_collect}->logger()->warning("ProductData:getVar($var) is not set");
+      $this->{m_collect}->logMsg("W", "ProductData:getVar($var) is not set");
       return undef;
     }
   }
@@ -230,7 +230,7 @@ sub getInfo
       return $this->{'prodinfo'}->{$this->{'prodinfo-indices'}->{$info}}->[1];
     }
     else {
-      $this->{m_collect}->logger()->warning("ProductData:getInfo($info) is not set");
+      $this->{m_collect}->logMsg("W", "ProductData:getInfo($info) is not set");
       return undef;
     }
   }
@@ -284,7 +284,7 @@ sub getOpt
       return $this->{prodopts}->{$opt};
     }
     else {
-      $this->{m_collect}->logger()->warning("ProductData:getOpt($opt) is not set");
+      $this->{m_collect}->logMsg("W", "ProductData:getOpt($opt) is not set");
       return undef;
     }
   }
@@ -428,7 +428,7 @@ sub _substitute
       $string =~ s{\$$2}{$repl};
     }
     else {
-      $this->{m_collect}->logger()->warning("ProductData::_substitute: pattern $1 is not in the translation hash!\n");
+      $this->{m_collect}->logMsg("W", "ProductData::_substitute: pattern $1 is not in the translation hash!\n");
       $string =~ s{\$$2}{NOTSET};
       next;
     }
