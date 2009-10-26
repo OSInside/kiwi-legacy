@@ -34,7 +34,8 @@ suseConfig
 #======================================
 # Keep UTF-8 locale
 #--------------------------------------
-baseStripLocales en_US.utf8 de_DE.utf8 ru_RU.utf8 zh_CN.utf8 zh_TW.utf8
+baseStripLocales \
+    en_US.utf8 de_DE.utf8 ru_RU.utf8 zh_CN.utf8 zh_TW.utf8 de ru zh_CN zh_TW
 baseStripTranslations kiwi.mo
 
 #======================================

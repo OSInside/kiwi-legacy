@@ -127,6 +127,11 @@ echo "Loading KIWI Boot-System..."
 echo "---------------------------"
 
 #======================================
+# Update library path
+#--------------------------------------
+ldconfig
+
+#======================================
 # 1) Mounting local file systems
 #--------------------------------------
 mountSystemFilesystems &>/dev/null

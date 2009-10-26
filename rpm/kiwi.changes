@@ -1,10 +1,17 @@
 -------------------------------------------------------------------
+Mon Oct 26 12:12:04 CET 2009 - ms@suse.de
+
+- don't call ldconfig when loading KIWILinuxRC functions (bnc #549904)
+- added missing config.sh script to strip down locale information
+
+-------------------------------------------------------------------
 Fri Oct 23 12:31:40 CEST 2009 - ms@suse.de
 
-- added DOBACKUP variable to easily switch on/off the
-  backup creation in recovery mode (bnc #546057)
 - set splash to verbose if there is a systemException (bnc #547821)
 - check for block device when retrieving MBR ID (bnc #547821)
+- added DOBACKUP variable to easily switch on/off the backup
+  creation in recovery mode. Currently backup creation is
+  switched on (bnc #546057)
 
 -------------------------------------------------------------------
 Thu Oct 22 12:04:40 CEST 2009 - ms@suse.de
