@@ -1578,11 +1578,12 @@ sub createMetadata
   ## step 5: media file
   $this->logMsg("W", "Creating media file in all media:");
   my $manufacturer = $this->{m_proddata}->getVar("VENDOR");
+  my $debugmedium = int($this->{m_debugmedium} || -1);
   if($manufacturer) {
     my @media = $this->getMediaNumbers();
     for my $n(@media) {
       my $num = $n;
-      $num = 1 if ( $this->{m_proddata}->getVar("FLAVOR") eq "ftp" or $n == $this->{m_debugmedium} );
+      $num = 1 if ( $this->{m_proddata}->getVar("FLAVOR") eq "ftp" or $n == $debugmedium );
       my $mediafile = "$this->{m_basesubdir}->{$n}/media.$num/media";
       if(not open(MEDIA, ">", $mediafile)) {
 	$this->logMsg("E", "Cannot create file <$mediafile>");
@@ -1592,11 +1593,11 @@ sub createMetadata
       print MEDIA qx(date +%Y%m%d%H%M%S);
       if($num == 1) {
 	# some specialities for medium number 1: contains a line with the number of media
-        if ( $this->{m_proddata}->getVar("FLAVOR") eq "ftp" or $n == $this->{m_debugmedium} ) {
+        if ( $this->{m_proddata}->getVar("FLAVOR") eq "ftp" or $n == $debugmedium ) {
           print MEDIA "1\n";
         } else {
           my $set = @media;
-          $set-- if ( $this->{m_debugmedium} >= 2 );
+          $set-- if ( $debugmedium >= 2 );
           print MEDIA $set."\n";
         }
       }
