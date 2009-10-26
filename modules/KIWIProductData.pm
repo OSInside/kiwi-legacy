@@ -168,7 +168,11 @@ sub getVar
     return undef;
   }
   my $var = shift;
+  my $mydefault = undef;
+  eval { $mydefault = shift; };
+
   if(not defined($var)) {
+    $this->{m_collect}->logMsg("E", "ProductData:getVar() \$var is not set");
     return undef;
   }
   else {
@@ -176,10 +180,11 @@ sub getVar
       return $this->{prodvars}->{$var};
     }
     else {
-      $this->{m_collect}->logMsg("W", "ProductData:getVar($var) is not set");
-      return undef;
+      $this->{m_collect}->logMsg("I", "ProductData:getVar($var) is not set");
+      return $mydefault;
     }
   }
+  return $mydefault;
 }
 # /getVar
 

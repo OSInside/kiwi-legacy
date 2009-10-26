@@ -103,7 +103,7 @@ sub new {
     m_metafiles	    => undef,
     m_browser	    => undef,
     m_srcmedium	    => undef,
-    m_debugmedium   => undef,
+    m_debugmedium   => -1,
     m_logStdOut     => undef,
     m_startUpTime   => undef,
     m_fpacks	    => [],
@@ -416,7 +416,7 @@ sub Init
   ## Set possible defined source or debugmediums
   #
   $this->{m_srcmedium}   = $this->{m_proddata}->getOpt("SOURCEMEDIUM");
-  $this->{m_debugmedium} = $this->{m_proddata}->getOpt("DEBUGMEDIUM");
+  $this->{m_debugmedium} = $this->{m_proddata}->getOpt("DEBUGMEDIUM") || -1;
 
   $this->{m_united} = "$this->{m_basedir}/main";
   $this->{m_dirlist}->{"$this->{m_united}"} = 1;
@@ -456,7 +456,6 @@ sub Init
   }
   ### FIXME: remove later checks on those vars
 
-  my $debugmedium = int($this->{m_debugmedium} || -1);
   $descrdir =~ s{^/(.*)/$}{$1};
   my @descrdirs = split('/', $descrdir);
   foreach my $n(@media) {
@@ -470,7 +469,7 @@ sub Init
       $this->{m_dirlist}->{"$curdir"} = 1;
     }
     my $num = $n;
-    $num = 1 if ( $this->{m_proddata}->getVar("FLAVOR") eq "ftp" or $n == $debugmedium );
+    $num = 1 if ( $this->{m_proddata}->getVar("FLAVOR") eq "ftp" or $n == $this->{m_debugmedium} );
     $this->{m_dirlist}->{"$dirbase/media.$num"} = 1;
     $this->{m_basesubdir}->{$n} = "$dirbase";
     $this->{m_dirlist}->{"$this->{m_basesubdir}->{$n}"} = 1;
@@ -593,16 +592,16 @@ sub mainTask
   $this->createMetadata();
 
   ## We create iso files by default, but keep this for manual override
-  if(!$ENV{'KIWI_NO_ISO'}) {
-    $this->logMsg("W", "Skipping ISO generation");
+  if(defined $ENV{'KIWI_NO_ISO'}) {
+    $this->logMsg("W", "Skipping ISO generation because of \$KIWI_NO_ISO");
     return 0;
   }
   if($this->{m_proddata}->getVar("FLAVOR") eq "ftp") {
     $this->logMsg("I", "Skipping ISO generation for FLAVOR ftp");
     return 0;
   }
-  if($this->{m_proddata}->getVar("REPO_ONLY") eq "1") {
-    $this->logMsg("I", "Skipping ISO generation");
+  if($this->{m_proddata}->getVar("REPO_ONLY", "0") eq "1") {
+    $this->logMsg("I", "Skipping ISO generation because of repo_only");
     return 0;
   }
 
@@ -621,7 +620,7 @@ sub mainTask
       my $attr = "-R -J -f -pad -joliet-long";
       $cdname =~ s{.*/(.*)/*$}{$1};
       my $checkmedia;
-      $checkmedia = "checkmedia" if ( defined($this->{m_proddata}->getVar("RUN_MEDIA_CHECK")) and $this->{m_proddata}->getVar("RUN_MEDIA_CHECK") != "0" );
+      $checkmedia = "checkmedia" if ( $this->{m_proddata}->getVar("RUN_MEDIA_CHECK", "0") ne "0" );
       $iso = new KIWIIsoLinux($this->{m_logger}, $this->{m_basesubdir}->{$cd}, $this->{m_united}."/$cdname.iso",$attr,$checkmedia);
       if(!$iso->callBootMethods()) {
         $this->logMsg("W", "Creating boot methods failed, medium maybe not be bootable");
@@ -791,9 +790,9 @@ sub setupPackageFiles
             $this->logMsg("I", "  linked file $packPointer->{'localfile'} to $packOptions->{'newpath'}/$packOptions->{'newfile'}") if $this->{m_debug} >= 4;
             if ($this->{m_debug} >= 2) {
               if ($arch eq $requestedArch) {
-                $this->logMsg("W", "  package $packName found for architecture $arch as $packKey");
+                $this->logMsg("D", "  package $packName found for architecture $arch as $packKey");
               }else{
-                $this->logMsg("W", "  package $packName found for architecture $arch (fallback of $requestedArch) as $packKey");
+                $this->logMsg("D", "  package $packName found for architecture $arch (fallback of $requestedArch) as $packKey");
               }
             }
             if ( $mode == 1 && $packPointer->{sourcepackage} ) {
@@ -1578,12 +1577,11 @@ sub createMetadata
   ## step 5: media file
   $this->logMsg("W", "Creating media file in all media:");
   my $manufacturer = $this->{m_proddata}->getVar("VENDOR");
-  my $debugmedium = int($this->{m_debugmedium} || -1);
   if($manufacturer) {
     my @media = $this->getMediaNumbers();
     for my $n(@media) {
       my $num = $n;
-      $num = 1 if ( $this->{m_proddata}->getVar("FLAVOR") eq "ftp" or $n == $debugmedium );
+      $num = 1 if ( $this->{m_proddata}->getVar("FLAVOR") eq "ftp" or $n == $this->{m_debugmedium} );
       my $mediafile = "$this->{m_basesubdir}->{$n}/media.$num/media";
       if(not open(MEDIA, ">", $mediafile)) {
 	$this->logMsg("E", "Cannot create file <$mediafile>");
@@ -1593,11 +1591,11 @@ sub createMetadata
       print MEDIA qx(date +%Y%m%d%H%M%S);
       if($num == 1) {
 	# some specialities for medium number 1: contains a line with the number of media
-        if ( $this->{m_proddata}->getVar("FLAVOR") eq "ftp" or $n == $debugmedium ) {
+        if ( $this->{m_proddata}->getVar("FLAVOR") eq "ftp" or $n == $this->{m_debugmedium} ) {
           print MEDIA "1\n";
         } else {
           my $set = @media;
-          $set-- if ( $debugmedium >= 2 );
+          $set-- if ( $this->{m_debugmedium} >= 2 );
           print MEDIA $set."\n";
         }
       }
@@ -1608,7 +1606,7 @@ sub createMetadata
 	$this->logMsg("E", "Cannot create file <$bfile>!");
 	return undef;
       }
-      print BUILD $this->{m_proddata}->getVar("BUILD_ID")."\n";
+      print BUILD $this->{m_proddata}->getVar("BUILD_ID", "0")."\n";
       close(BUILD);
     }
   }
@@ -1699,11 +1697,14 @@ sub createMetadata
     $s1sum_opts = "";
   }
   if(! (-f $csha1sum or -x $csha1sum)) {
-    $this->logMsg("W", "[createMetadata] excutable `$csha1sum` not found. Maybe package `inst-source-utils` is not installed?");
+    $this->logMsg("E", "[createMetadata] excutable `$csha1sum` not found. Maybe package `inst-source-utils` is not installed?");
     return;
   }
   for my $sd($this->getMediaNumbers()) {
     my @data = qx($csha1sum $s1sum_opts $this->{m_basesubdir}->{$sd});
+    if ($? >> 8 != 0) {
+	$this->logMsg("E", "[createMetadata] $csha1sum failed");
+    }
     $this->logMsg("W", "[createMetadata] $csha1sum output:");
     foreach(@data) {
       chomp $_;
