@@ -456,6 +456,7 @@ sub Init
   }
   ### FIXME: remove later checks on those vars
 
+  my $debugmedium = int($this->{m_debugmedium} || -1);
   $descrdir =~ s{^/(.*)/$}{$1};
   my @descrdirs = split('/', $descrdir);
   foreach my $n(@media) {
@@ -468,9 +469,8 @@ sub Init
       $curdir .= "$part/";
       $this->{m_dirlist}->{"$curdir"} = 1;
     }
-    print "n $n\n";
     my $num = $n;
-    $num = 1 if ( $this->{m_proddata}->getVar("FLAVOR") eq "ftp" or $n == $this->{m_debugmedium} );
+    $num = 1 if ( $this->{m_proddata}->getVar("FLAVOR") eq "ftp" or $n == $debugmedium );
     $this->{m_dirlist}->{"$dirbase/media.$num"} = 1;
     $this->{m_basesubdir}->{$n} = "$dirbase";
     $this->{m_dirlist}->{"$this->{m_basesubdir}->{$n}"} = 1;
