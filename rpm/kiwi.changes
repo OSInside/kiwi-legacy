@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Tue Oct 27 09:28:36 CET 2009 - ms@suse.de
+
+- kiwi-instsource changes done by coolo@novell.com
+  * fixed logging
+  * fixed several uninitialized variables
+  * fixed debuginfo handling
+
+-------------------------------------------------------------------
 Mon Oct 26 12:12:04 CET 2009 - ms@suse.de
 
 - don't call ldconfig when loading KIWILinuxRC functions (bnc #549904)
