@@ -5,6 +5,8 @@ Tue Oct 27 14:08:21 CET 2009 - ms@suse.de
   initrd. The <locale> element defines which locales and
   translations are part of the initrd. If only one language
   is available no selection dialog will be opened
+- kiwi-instsource changes done by coolo@novell.com
+  * fix 32bit debuginfos
 
 -------------------------------------------------------------------
 Tue Oct 27 09:28:36 CET 2009 - ms@suse.de
