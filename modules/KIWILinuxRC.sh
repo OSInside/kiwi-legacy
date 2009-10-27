@@ -4626,7 +4626,7 @@ function selectLanguage {
 			eval lang=\$$code
 			list="$list $code \"[ $lang ]\" off"
 		done
-		if [ $list = $list_orig ];then
+		if [ "$list" = "$list_orig" ];then
 			DIALOG_LANG=en_US
 			return
 		fi
