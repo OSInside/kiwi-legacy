@@ -791,7 +791,7 @@ sub setupPackageFiles
 	  if ( scalar(keys %{$packOptions->{requireVersion}}) > 0
                && ! defined( $packOptions->{requireVersion}->{$packPointer->{version}."-".$packPointer->{release}} ) )
           {
-	    $this->logMsg("W", "     => package ".$packName."-".$packPointer->{version}."-".$packPointer->{release}." not available for arch $arch in repo $packKey in this version") if $this->{m_debug} >= 4;
+	    $this->logMsg("D", "     => package ".$packName."-".$packPointer->{version}."-".$packPointer->{release}." not available for arch $arch in repo $packKey in this version") if $this->{m_debug} >= 4;
             next PACKKEY;
           }
           # Success, found a package !
@@ -835,12 +835,17 @@ sub setupPackageFiles
               if ( $this->{m_debugmedium} > 0 ) {
                 # Add debug packages, we do not know, if they exist at all
                 my $suffix = "";
-                $suffix = "-32bit" if ( $packName =~ /-32bit$/ );
-                $suffix = "-64bit" if ( $packName =~ /-64bit$/ );
-                $suffix = "-x86"   if ( $packName =~ /-x86$/ );
+                my $basename = $packName;
+                foreach my $tsuffix qw(32bit 64bit x86) {
+                   if ( $packName =~ /^(.*)(-$tsuffix)$/ ) {
+			$basename = $1;
+			$suffix = $2;
+			last;
+	  	   }
+                }
                 $this->addDebugPackage($srcname."-debuginfo".$suffix, $arch, $packPointer);
                 $this->addDebugPackage($srcname."-debugsource", $arch, $packPointer);
-                $this->addDebugPackage($packName."-debuginfo", $arch, $packPointer);
+                $this->addDebugPackage($basename."-debuginfo".$suffix, $arch, $packPointer);
               };
             }
           }
