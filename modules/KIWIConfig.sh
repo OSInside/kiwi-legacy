@@ -440,7 +440,6 @@ function baseStripLocales {
 	local keepLocales="$@"
 	local directories="
 		/usr/lib/locale
-		/usr/share/locale
 	"
 	find $directories -mindepth 1 -maxdepth 1 -type d 2>/dev/null |\
 		baseStripAndKeep ${keepLocales}
