@@ -36,7 +36,7 @@ sub new
   my $class = shift;
   my $this =
   {
-    m_logger  => undef,
+    m_collect  => undef,
     m_url     => undef,
   };
   bless ($this, $class);
@@ -44,9 +44,9 @@ sub new
   #==========================================
   # Module Parameters
   #------------------------------------------
-  $this->{m_logger} = shift;
-  if(not defined $this->{m_logger}) {
-    print "No logger defined!";
+  $this->{m_collect} = shift;
+  if(not defined $this->{m_collect}) {
+    print "No parent defined!";
     return undef;
   }
 
@@ -84,11 +84,9 @@ sub splitPath
   #==========================================
   # cancel on missing parameters:
   #------------------------------------------
-  my $kiwi = $this->{m_logger};
   if(!defined($browser) or !defined($targets) or !defined($path))
   {
-    $kiwi->info("Can't proceed request due to missing parameters!");
-    $kiwi->failed();
+    $this->{m_collect}->error("E", "Can't proceed request due to missing parameters!");
     return undef;
   }
 
@@ -112,19 +110,19 @@ sub splitPath
     my $pattern = $4;
     $pattern =~ s{(.*)[/]{2,}(.*)}{$1/$2};
     # remove double slashes
-    $this->{m_logger}->info("Examining HTTP path $basepath");
+    $this->{m_collect}->logMsg("I", "Examining HTTP path $basepath");
     return $this->splitPathHTTP($targets, $browser, $basepath, $pattern, $leafonly);
   }
   elsif($path =~ m{^(ftp://)}) {
     # warn and go, return undef
-    $kiwi->{m_logger}->warning("Protocol not yet supported. Stay tuned...");
+    $this->{m_collect}->logMsg("W", "Protocol not yet supported. Stay tuned...");
     return undef;
   }
   elsif($path =~ m{^(/|file://)(.*)}) {
     # we deal with local files (including nfs)
     my $basepath = "/$2";
     #my $pattern = $2;
-    $this->{m_logger}->info("Examining local path $basepath");
+    $this->{m_collect}->logMsg("I", "Examining local path $basepath");
     return $this->splitPathLocal($targets, $basepath, $pat, $leafonly);
   }
 }
@@ -170,9 +168,9 @@ sub splitPathHTTP
   # catch 3xx error codes from HTTP server
   # is_error handles 400-599 http replies (according to "PERL in a nutshell")
   if($response->is_error()) {
-    $this->{m_logger}->error("[E] HTTP request failed! Server down?");
-    $this->{m_logger}->error("\tThis repository can not be resolved at present.");
-    $this->{m_logger}->error("\tI recommend you try again later unless you know what you're doing.");
+    $this->{m_collect}->logMsg("E", "[E] HTTP request failed! Server down?");
+    $this->{m_collect}->logMsg("E", "\tThis repository can not be resolved at present.");
+    $this->{m_collect}->logMsg("E", "\tI recommend you try again later unless you know what you're doing.");
     return undef;
   }
 
@@ -183,7 +181,7 @@ sub splitPathHTTP
   # (works for now, but...)
   if($response->title !~ m{(index of|repoview)}i) {
     # this means that no dir listing is done here, try one descend.
-    $this->{m_logger}->info("Directory $basepath has no listings, descencding");
+    $this->{m_collect}->logMsg("I", "Directory $basepath has no listings, descencding");
     return $this->splitPathHTTP($targets, $browser, $basepath."/".$prefix, $rest, $leafonly);
   }
 
@@ -193,7 +191,7 @@ sub splitPathHTTP
     return undef;
   }
 
-  $this->{m_logger}->info("Current remote directory is $basepath");
+  $this->{m_collect}->logMsg("I", "Current remote directory is $basepath");
 
   #==========================================
   # Evaluate LWP content
@@ -224,13 +222,13 @@ sub splitPathHTTP
 	  # list directory even if the path is not finished
 	  push @{$targets}, $basepath."/".$link;
 	}
-	$this->{m_logger}->info("Descending into subdirectory $basepath/$link");
+	$this->{m_collect}->logMsg("I", "Descending into subdirectory $basepath/$link");
 	$this->splitPathHTTP($targets, $browser, $basepath."/".$link, $rest, $leafonly);
       }
       else {
 	# if the path is finished the leaves are stored
 	push @{$targets}, $basepath."/".$link;
-	$this->{m_logger}->info("Storing directory $basepath/$link");
+	$this->{m_collect}->logMsg("I", "Storing directory $basepath/$link");
       }
     }
   }
@@ -239,7 +237,7 @@ sub splitPathHTTP
     # we're in a dir where no subdirs are found but:
     # $rest may be non-zero
     push @{$targets}, $basepath;
-    $this->{m_logger}->info("Storing directory $basepath");
+    $this->{m_collect}->logMsg("I", "Storing directory $basepath");
   }
 
   return $this;
@@ -280,7 +278,7 @@ sub splitPathLocal
   my @dirlist = readdir(DIR);
   closedir(DIR);
 
-  $this->{m_logger}->info("Current local directory is $basepath");
+  $this->{m_collect}->logMsg("I", "Current local directory is $basepath");
   my $atleastonce = 0;
 
   foreach my $entry(@dirlist) {
@@ -293,15 +291,15 @@ sub splitPathLocal
       #	pattern contains subdirs -> descent necessary
       if($leafonly == 1) {
 	# list directory even if the path is not finished
-	$this->{m_logger}->info("Storing directory $basepath/$entry");
+	$this->{m_collect}->logMsg("I", "Storing directory $basepath/$entry");
 	push @{$targets}, "$basepath/$entry";
       }
-      #$this->{m_logger}->info("Descending into subdirectory $basepath/$entry");
+      #$this->{m_collect}->logMsg("I", "Descending into subdirectory $basepath/$entry");
       $this->splitPathLocal($targets, "$basepath/$entry", $rest, $leafonly);
     }
     else {
       push @{$targets}, "$basepath/$entry";
-      #$this->{m_logger}->info("Storing directory $basepath/$entry");
+      #$this->{m_collect}->logMsg("I", "Storing directory $basepath/$entry");
     }
 
   }
@@ -311,7 +309,7 @@ sub splitPathLocal
     # but the regexp isn't used up yet; store last found dir
     # ignoring the rest
     push @{$targets}, $basepath;
-    #$this->{m_logger}->info("Storing directory $basepath");
+    #$this->{m_collect}->logMsg("I", "Storing directory $basepath");
   }
 
   return $this;
@@ -340,25 +338,23 @@ sub expandFilename
   #------------------------------------------
   # saves the checks in the resp. specialised method
   #------------------------------------------
-  my $kiwi = $this->{m_logger};
   if(!defined($browser)
       or !defined($basepath)
       or !defined($filename))
   {
-    $kiwi->error("Can't proceed request due to missing parameters!");
-    $kiwi->failed();
+    $this->{m_collect}->logMsg("E", "Can't proceed request due to missing parameters!");
     return undef;
   }
 
   $basepath =~ s{(.*)\/$}{$1}; # remove trailing slash
   if($basepath =~ m{^(http|ftp|https)}) {
     # we deal with a web request
-    $this->{m_logger}->info("Expanding remote filenames for $basepath");
+    $this->{m_collect}->logMsg("I", "Expanding remote filenames for $basepath");
     return $this->expandFilenameHTTP($browser, $basepath, $filename);
   }
   elsif($basepath =~ m{^(/|file://)(.*)}) {
     # we deal with a local directory
-    $this->{m_logger}->info("Expanding local filenames for $2");
+    $this->{m_collect}->logMsg("I", "Expanding local filenames for $2");
     return $this->expandFilenameLocal($browser, $2, $filename);
   }
 }
@@ -415,7 +411,7 @@ sub expandFilenameHTTP
     $link =~ s{.*/}{}g;
     if($link =~ m{$filename}) {
       push @filelist, $basepath."/".$link;}
-      #$this->{m_logger}->info("Storing path $basepath/$link");
+      #$this->{m_collect}->logMsg("I", "Storing path $basepath/$link");
   }
   return @filelist;
 }
@@ -461,7 +457,7 @@ sub findCallback
   if($_ =~ m{$filename}) {
     push @{$listref}, $File::Find::name;
     # uncomment for gigatons of output if program runs too fast ;)
-    #$this->{m_logger}->info("Storing path $File::Find::name");
+    #$this->{m_collect}->logMsg("I", "Storing path $File::Find::name");
   }
 }
 
@@ -540,7 +536,7 @@ sub unpac_package
 
   if(! -d $dir) {
     if(!mkpath("$dir", { mode => 0755 })) {
-      $this->{m_logger}->error("[E] unpac_package: cannot create directory <$dir>");
+      $this->{m_collect}->logMsg("E", "[E] unpac_package: cannot create directory <$dir>");
       $retval = 2;
       goto up_failed;
     }
@@ -550,20 +546,20 @@ sub unpac_package
     my $out = qx(cd $dir && tar -zxvfp $p_uri);
     my $status = $?>>8;
     if($status != 0) {
-      $this->{m_logger}->error("[E] command cp $dir && tar xvzfp $p_uri failed!\n");
-      $this->{m_logger}->error("\t$out\n");
+      $this->{m_collect}->logMsg("E", "[E] command cp $dir && tar xvzfp $p_uri failed!\n");
+      $this->{m_collect}->logMsg("E", "\t$out\n");
       $retval = 5;
       goto up_failed;
     }
     else {
-      $this->{m_logger}->info("[I] unpacked $p_uri in directory $dir\n");
+      $this->{m_collect}->logMsg("I", "[I] unpacked $p_uri in directory $dir\n");
     }
   }
   elsif($p_uri =~ m{.*\.rpm}i) {
     my $out = qx(cd $dir && unrpm -q $p_uri);
   }
   else {
-    $this->{m_logger}->error("[E] cannot process file $p_uri\n");
+    $this->{m_collect}->logMsg("E", "[E] cannot process file $p_uri\n");
     $retval = 4;
     goto up_failed;
   }

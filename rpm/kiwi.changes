@@ -1,4 +1,35 @@
 -------------------------------------------------------------------
+Wed Oct 28 10:00:57 CET 2009 - ms@suse.de
+
+- OEM recover/repair
+  * make sure passwd/shadow and group files will be preserved
+  * make sure RPM database will be preserved
+
+-------------------------------------------------------------------
+Tue Oct 27 14:08:21 CET 2009 - ms@suse.de
+
+- offer only languages for selection which are part of the
+  initrd. The <locale> element defines which locales and
+  translations are part of the initrd. If only one language
+  is available no selection dialog will be opened
+- kiwi-instsource changes done by coolo@novell.com
+  * fix 32bit debuginfos
+
+-------------------------------------------------------------------
+Tue Oct 27 09:28:36 CET 2009 - ms@suse.de
+
+- kiwi-instsource changes done by coolo@novell.com
+  * fixed logging
+  * fixed several uninitialized variables
+  * fixed debuginfo handling
+
+-------------------------------------------------------------------
+Mon Oct 26 12:12:04 CET 2009 - ms@suse.de
+
+- don't call ldconfig when loading KIWILinuxRC functions (bnc #549904)
+- added missing config.sh script to strip down locale information
+
+-------------------------------------------------------------------
 Fri Oct 23 12:31:40 CEST 2009 - ms@suse.de
 
 - set splash to verbose if there is a systemException (bnc #547821)

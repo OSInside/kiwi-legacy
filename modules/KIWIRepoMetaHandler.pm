@@ -45,7 +45,6 @@ sub new
     return undef; # rock hard get outta here: caller must check retval anyway
   }
   #$this->{m_unitedir}	= $this->{m_collect}->unitedDir();
-  #$this->{m_logger}	= $this->{m_collect}->logger();
 
   $this->gossip("Created $class object successfully.");
 
@@ -120,16 +119,14 @@ sub baseurl
 #==================
 # gossip
 #------------------
-# report a message back through collect->logger
+# report a message back through collect->logMsg
 # if the debug flag was set
 #------------------
 sub gossip
 {
   my $this = shift;
   my $message = shift;
-  if(defined($message) and $this->{m_collect}->debugflag()) {
-    $this->{m_collect}->logger()->info("$message");
-  }
+  $this->{m_collect}->logMsg("D", $message);
 }
 
 
@@ -149,7 +146,7 @@ sub loadPlugins
   if(not defined($dir)) {
     $dir = $this->collect()->productData()->getOpt("PLUGIN_DIR");
     if(not defined($dir)) {
-      return $loaded;
+      return ($loaded, $avail);
     }
   }
 
@@ -157,7 +154,7 @@ sub loadPlugins
   unshift @INC, $dir;
   if(not opendir(PLUGINDIR, "$dir")) {
     $this->gossip("loadPlugins: cannot open directory $dir");
-    return $loaded;
+    return ($loaded, $avail);
   }
 
   my @plugins = readdir(PLUGINDIR);
@@ -180,7 +177,7 @@ sub loadPlugins
 	$plugins{$1} = "$prefix$1.ini";
       }
       else {
-	$this->collect()->logger()->warning("[W] loadPlugins: no ini file found for plugin <$1>, skipping\n");
+	$this->collect()->logMsg("W", "loadPlugins: no ini file found for plugin <$1>, skipping\n");
       }
     }
   }
@@ -193,7 +190,7 @@ sub loadPlugins
       $loaded++;
     }
     else {
-      $this->collect()->logger()->error("[E] loadPlugins: failed to load plugin <$p> from url <$dir>: $@");
+      $this->collect()->logMsg("E", "loadPlugins: failed to load plugin <$p> from url <$dir>: $@");
     }
   }
 
@@ -218,30 +215,30 @@ sub loadPlugin
     $file .= ".pm";
   }
   if(not(defined($file) and -f $file)) {
-    $this->{m_collect}->logger()->error("[E] loadPlugin: file=<$file> maybe not readable");
+    $this->{m_collect}->logMsg("E", "loadPlugin: file=<$file> maybe not readable");
     return $retval;
   }
 
   $file =~ m{(.*)/(.*)([.]pm)$};
   my $plugin = $2;
   if(not defined($plugin)) {
-    $this->{m_collect}->logger()->error("[E] loadPlugin: something in regexp broken: $file =~ m{(.*)/(.*)([.]pm)$}...?");
+    $this->{m_collect}->logMsg("E", "loadPlugin: something in regexp broken: $file =~ m{(.*)/(.*)([.]pm)$}...?");
     return $retval;
   }
 
   eval "require $plugin";
   if($@) {
-    $this->{m_collect}->logger()->error("[E] loadPlugin: loading <$plugin> failed");
+    $this->{m_collect}->logMsg("E", "loadPlugin: loading <$plugin> failed");
   }
   else {
     my $inifile = shift;
     if(!$inifile) {
-      $this->{m_collect}->logger()->error("[E] can't load inifile <$inifile> for plugin <$plugin>");
+      $this->{m_collect}->logMsg("E", "can't load inifile <$inifile> for plugin <$plugin>");
     }
     else {
       my $object = ($plugin)->new($this, $inifile);
       if(not defined($object)) {
-	$this->{m_collect}->logger()->error("[E] Unable to create object of <$plugin>: constructor failed!");
+	$this->{m_collect}->logMsg("E", "Unable to create object of <$plugin>: constructor failed!");
       }
       else {
 	my $addsuccess = $this->_addPlugin($object);
@@ -272,12 +269,12 @@ sub _addPlugin
     if(not defined($n)) {
       $n = "Name not set";
     }
-    $this->{m_collect}->logger()->info("[I] Undefined order of plugin <$n>");
+    $this->{m_collect}->logMsg("I", "Undefined order of plugin <$n>");
   }
   else {
     if(defined($this->{m_handlers}->{$order})) {
       # we have a problem: (TODO in the future)
-      $this->collect()->logger()->error("[E] Can't handle multiple occurance of order!");
+      $this->collect()->logMsg("E", "Can't handle multiple occurance of order!");
       return $retval;
       #die "Can't handle mutliple occurences of ordernumbers yet!";
     }
@@ -304,7 +301,7 @@ sub getPlugin
   }
   else {
     if(not defined($this->{m_handlers}->{$index})) {
-      $this->collect()->logger()->warning("[W] no plugin defined with index <$index>\n");
+      $this->collect()->logMsg("W", "no plugin defined with index <$index>\n");
       return undef;
     }
     else {

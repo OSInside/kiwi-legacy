@@ -44,11 +44,6 @@ if [ -x /usr/bin/utimer ];then
 fi
 
 #======================================
-# Update library path
-#--------------------------------------
-ldconfig
-
-#======================================
 # Dialog
 #--------------------------------------
 function Dialog {
@@ -4598,17 +4593,43 @@ function selectLanguage {
 	# ----
 	local title="\"Select Language\""
 	local list="en_US \"[ English ]\" on"
+	local list_orig=$list
 	local zh_CN=Chinese
 	local zh_TW=Taiwanese
 	local ru_RU=Russian
 	local de_DE=German
+	local ar_AR=Arabic
+	local cs_CZ=Czech
+	local el_GR=Greek
+	local es_ES=Spanish
+	local fi_FI=Finnish
+	local fr_FR=French
+	local hu_HU=Hungarian
+	local it_IT=Italian
+	local ja_JP=Japanese
+	local ko_KR=Korean
+	local nl_NL=Dutch
+	local pl_PL=Polish
+	local pt_BR=Portuguese
+	local sv_SE=Swedish
+	local tr_TR=Turkish
 	local code
 	local lang
+	if [ -f /.profile ];then
+		importFile < /.profile
+	fi
 	if [ "$DIALOG_LANG" = "ask" ];then
-		for code in zh_CN zh_TW ru_RU de_DE;do
+		for code in $(echo $kiwi_language | tr "," " ");do
+			if [ $code = "en_US" ];then
+				continue
+			fi
 			eval lang=\$$code
 			list="$list $code \"[ $lang ]\" off"
 		done
+		if [ "$list" = "$list_orig" ];then
+			DIALOG_LANG=en_US
+			return
+		fi
 		DIALOG_LANG=$(runInteractive \
 			"--stdout --no-cancel --radiolist $title 20 40 10 $list"
 		)

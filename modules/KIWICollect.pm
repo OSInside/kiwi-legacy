@@ -47,7 +47,7 @@ use Data::Dumper;
 #==========================================
 # Members
 #------------------------------------------
-# m_kiwi:
+# m_logger:
 #   Instance of KIWILog for feedback
 # m_xml:
 #   Instance of KIWIXML for retrieving the data contained
@@ -94,7 +94,7 @@ sub new {
     m_repos	    => undef,
     m_xml	    => undef,
     m_util	    => undef,
-    m_kiwi	    => undef,
+    m_logger        => undef,
     m_packagePool   => undef,
     m_repoPacks	    => undef,
     m_sourcePacks   => undef,
@@ -102,9 +102,8 @@ sub new {
     m_metaPacks     => undef,
     m_metafiles	    => undef,
     m_browser	    => undef,
-    m_logger	    => undef,
-    m_srcmedium	    => undef,
-    m_debugmedium   => undef,
+    m_srcmedium	    => -1,
+    m_debugmedium   => -1,
     m_logStdOut     => undef,
     m_startUpTime   => undef,
     m_fpacks	    => [],
@@ -120,14 +119,14 @@ sub new {
   #==========================================
   # Module Parameters
   #------------------------------------------
-  $this->{m_kiwi}     = shift;
+  $this->{m_logger}   = shift;
   $this->{m_xml}      = shift;
   $this->{m_basedir}  = shift;
   $this->{m_debug}    = shift || 0;
 
   if( !(defined($this->{m_xml})
 	and defined($this->{m_basedir})
-	and defined($this->{m_kiwi})))
+	and defined($this->{m_logger})))
   {
     return undef;
   }
@@ -139,19 +138,14 @@ sub new {
 
   # create second logger object to log only the data relevant
   # for repository creation:
-  $this->{m_logger} = new KIWILog("tiny");
-  $this->{m_logger}->setLogHumanReadable();
-  $this->{m_logger}->setLogFile("$this->{m_basedir}/collect.log");
-  $this->{m_kiwi}->info("Logging repository specific data to file $this->{m_basedir}/collect.log");
 
-  $this->{m_util} = new KIWIUtil($this->{m_logger});
+  $this->{m_util} = new KIWIUtil($this);
   if(!$this->{m_util}) {
     $this->logMsg("E", "Can't create KIWIUtil object!");
     return undef;
   }
   else {
     $this->logMsg("I", "Created new KIWIUtil object");
-    $this->{m_kiwi}->info("[I] Created new KIWIUtil object\n");
   }
 
   $this->{m_urlparser} = new KIWIURL($this->{m_logger});
@@ -161,7 +155,6 @@ sub new {
   }
   else {
     $this->logMsg("I", "Created new KIWIURL object");
-    $this->{m_kiwi}->info("[I] Created new KIWIURL object\n");
   }
 
 
@@ -174,7 +167,6 @@ sub new {
   }
   else {
     $this->logMsg("I", "Created new KIWIProductData object");
-    $this->{m_kiwi}->info("[I] Created new KIWIProductData object\n");
   }
 
   $this->logMsg("I", "KIWICollect2 object initialisation finished");
@@ -198,52 +190,19 @@ sub logMsg
   if ($this->{m_logStdOut} == 1) {
     # significant speed up in production mode
     print $out;
-    exit 1 if ( $mode == "E" );
+    exit 1 if ( $mode eq "E" );
   } else {
-    if ( $mode == "E" ) {
-      $this->{m_kiwi}->error($out);
-    }elsif ( $mode == "W" ) {
-      $this->{m_kiwi}->warn($out);
-    }elsif ( $mode == "I" ) {
-      $this->{m_kiwi}->info($out);
-    }else{
-      $this->{m_kiwi}->info($out);
+    if ( $mode eq "E" ) {
+      $this->{m_logger}->error($out);
+    }elsif ( $mode eq "W" ) {
+      $this->{m_logger}->warn($out);
+    }elsif ( $mode eq "I" ) {
+      $this->{m_logger}->info($out);
+    }elsif ($this->{m_debug}){
+      $this->{m_logger}->info($out);
     }
   }
 }
-
-#=================
-# access methods:
-#-----------------
-sub logger
-{
-  my $this = shift;
-  if(not ref($this)) {
-    return undef;
-  }
-  my $oldlog = $this->{m_logger};
-  if(@_) {
-    $this->{m_logger} = shift;
-  }
-  return $oldlog;
-}
-
-
-
-sub debugflag
-{
-  my $this = shift;
-  if(not ref($this)) {
-    return undef;
-  }
-  my $olddeb = $this->{m_debug};
-  if(@_) {
-    $this->{m_debug} = shift;
-  }
-  return $olddeb;
-}
-
-
 
 sub unitedDir
 {
@@ -257,8 +216,6 @@ sub unitedDir
   }
   return $oldunited;
 }
-
-
 
 sub archlist
 {
@@ -330,12 +287,12 @@ sub Init
 
   # retrieve data from xml file:
   ## packages list (regular packages)
-  $this->{m_kiwi}->info("KIWICollect::Init: querying instsource package list");
+  $this->logMsg("I", "KIWICollect::Init: querying instsource package list");
   %{$this->{m_repoPacks}}      = $this->{m_xml}->getInstSourcePackageList();
   # this list may be empty!
-  $this->{m_kiwi}->info("KIWICollect::Init: queried package list.");
+  $this->logMsg("I", "KIWICollect::Init: queried package list.");
   if($this->{m_debug}) {
-    $this->{m_kiwi}->info("See packages.dump.pl");
+    $this->logMsg("I", "See packages.dump.pl");
     open(DUMP, ">", "$this->{m_basedir}/packages.dump.pl");
     print DUMP Dumper($this->{m_repoPacks});
     close(DUMP);
@@ -343,18 +300,18 @@ sub Init
 
   ## architectures information (hash with name|desrc|next, next may be 0 which means "no fallback")
   # this element is mandatory. Empty = Error
-  $this->{m_kiwi}->info("KIWICollect::Init: querying instsource architecture list");
+  $this->logMsg("I", "KIWICollect::Init: querying instsource architecture list");
   $this->{m_archlist} = new KIWIArchList($this);
   my $archadd = $this->{m_archlist}->addArchs( { $this->{m_xml}->getInstSourceArchList() } );
   if(not defined($archadd)) {
-    $this->{m_kiwi}->error("KIWICollect::Init: addArchs returned undef");
-    $this->{m_kiwi}->info( Dumper($this->{m_xml}->getInstSourceArchList()));
+    $this->logMsg("I", Dumper($this->{m_xml}->getInstSourceArchList()));
+    $this->logMsg("E", "KIWICollect::Init: addArchs returned undef");
     return undef;
   }
   else {
-    $this->{m_kiwi}->info("KIWICollect::Init: queried archlist.");
+    $this->logMsg("I", "KIWICollect::Init: queried archlist.");
     if($this->{m_debug}) {
-      $this->{m_kiwi}->info("See archlist.dump.pl");
+      $this->logMsg("I", "See archlist.dump.pl");
       open(DUMP, ">", "$this->{m_basedir}/archlist.dump.pl");
       print DUMP $this->{m_archlist}->dumpList();
       close(DUMP);
@@ -368,13 +325,13 @@ sub Init
   # mandatory. Missing = Error
   %{$this->{m_repos}}	      = $this->{m_xml}->getInstSourceRepository();
   if(!$this->{m_repos}) {
-    $this->{m_kiwi}->error("KIWICollect::Init: getInstSourceRepository returned empty hash");
+    $this->logMsg("E", "KIWICollect::Init: getInstSourceRepository returned empty hash");
     return undef;
   }
   else {
-    $this->{m_kiwi}->info("KIWICollect::Init: retrieved repository list.");
+    $this->logMsg("I", "KIWICollect::Init: retrieved repository list.");
     if($this->{m_debug}) {
-      $this->{m_kiwi}->info("See repos.dump.pl");
+      $this->logMsg("I", "See repos.dump.pl");
       open(DUMP, ">", "$this->{m_basedir}/repos.dump.pl");
       print DUMP Dumper($this->{m_repos});
       close(DUMP);
@@ -385,13 +342,13 @@ sub Init
   # mandatory. Empty = Error
   %{$this->{m_metaPacks}}  = $this->{m_xml}->getInstSourceMetaPackageList();
   if(!$this->{m_metaPacks}) {
-    $this->{m_kiwi}->error("KIWICollect::Init: getInstSourceMetaPackageList returned empty hash");
+    $this->logMsg("E", "KIWICollect::Init: getInstSourceMetaPackageList returned empty hash");
     return undef;
   }
   else {
-    $this->{m_kiwi}->info("KIWICollect::Init: retrieved metapackage list.");
+    $this->logMsg("I", "KIWICollect::Init: retrieved metapackage list.");
     if($this->{m_debug}) {
-      $this->{m_kiwi}->info("See metaPacks.dump.pl");
+      $this->logMsg("I", "See metaPacks.dump.pl");
       open(DUMP, ">", "$this->{m_basedir}/metaPacks.dump.pl");
       print DUMP Dumper($this->{m_metaPacks});
       close(DUMP);
@@ -402,12 +359,12 @@ sub Init
   # may be omitted
   %{$this->{m_metafiles}}     = $this->{m_xml}->getInstSourceMetaFiles();
   if(!$this->{m_metaPacks}) {
-    $this->{m_kiwi}->info("KIWICollect::Init: getInstSourceMetaPackageList returned empty hash, no metafiles specified.");
+    $this->logMsg("I", "KIWICollect::Init: getInstSourceMetaPackageList returned empty hash, no metafiles specified.");
   }
   else {
-    $this->{m_kiwi}->info("KIWICollect::Init: retrieved metafile list.");
+    $this->logMsg("I", "KIWICollect::Init: retrieved metafile list.");
     if($this->{m_debug}) {
-      $this->{m_kiwi}->info("See metafiles.dump.pl");
+      $this->logMsg("I", "See metafiles.dump.pl");
       open(DUMP, ">", "$this->{m_basedir}/metafiles.dump.pl");
       print DUMP Dumper($this->{m_metafiles});
       close(DUMP);
@@ -418,12 +375,12 @@ sub Init
   # may be empty
   @{$this->{m_chroot}}	      = $this->{m_xml}->getInstSourceChrootList();
   if(!$this->{m_chroot}) {
-    $this->{m_kiwi}->info("KIWICollect::Init: chroot list is empty hash, no chroot requirements specified");
+    $this->logMsg("I", "KIWICollect::Init: chroot list is empty hash, no chroot requirements specified");
   }
   else {
-    $this->{m_kiwi}->info("KIWICollect::Init: retrieved chroot list.");
+    $this->logMsg("I", "KIWICollect::Init: retrieved chroot list.");
     if($this->{m_debug}) {
-      $this->{m_kiwi}->info("See chroot.dump.pl");
+      $this->logMsg("I", "See chroot.dump.pl");
       open(DUMP, ">", "$this->{m_basedir}/chroot.dump.pl");
       print DUMP Dumper($this->{m_chroot});
       close(DUMP);
@@ -435,7 +392,7 @@ sub Init
   $vadded = $this->{m_proddata}->addSet("ProductVar stuff", {$this->{m_xml}->getInstSourceProductVar()}, "prodvars");
   $oadded = $this->{m_proddata}->addSet("ProductOption stuff", {$this->{m_xml}->getInstSourceProductOption()}, "prodopts");
   if(not defined($iadded) or not defined($vadded) or not defined($oadded)) {
-    $this->{m_kiwi}->error("KIWICollect::Init: something wrong in the productoptions section"); 
+    $this->logMsg("E", "KIWICollect::Init: something wrong in the productoptions section"); 
     return undef;
   }
   $this->{m_proddata}->_expand(); #once should be it, now--
@@ -453,8 +410,8 @@ sub Init
 
   ## Set possible defined source or debugmediums
   #
-  $this->{m_srcmedium}   = $this->{m_proddata}->getOpt("SOURCEMEDIUM");
-  $this->{m_debugmedium} = $this->{m_proddata}->getOpt("DEBUGMEDIUM");
+  $this->{m_srcmedium}   = $this->{m_proddata}->getOpt("SOURCEMEDIUM") || -1;
+  $this->{m_debugmedium} = $this->{m_proddata}->getOpt("DEBUGMEDIUM") || -1;
 
   $this->{m_united} = "$this->{m_basedir}/main";
   $this->{m_dirlist}->{"$this->{m_united}"} = 1;
@@ -471,7 +428,7 @@ sub Init
 
 
   my @media = $this->getMediaNumbers();
-  my $mult = $this->{m_proddata}->getVar("MULTIPLE_MEDIA");
+  my $mult = $this->{m_proddata}->getVar("MULTIPLE_MEDIA", "yes");
   my $dirext = undef;
   if($mult eq "no" || $mult eq "false") {
     if(scalar(@media) == 1) { 
@@ -520,23 +477,23 @@ sub Init
   
   my $dircreate = $this->createDirectoryStructure();
   if($dircreate != 0) {
-    $this->{m_kiwi}->error("KIWICollect::Init: calling createDirectoryStructure failed");
+    $this->logMsg("E", "KIWICollect::Init: calling createDirectoryStructure failed");
     return undef;
   }
 
   # for debugging:
   if($this->{m_debug}) {
-    $this->{m_kiwi}->info("Debug: dumping packages list to <packagelist.txt>");
+    $this->logMsg("I", "Debug: dumping packages list to <packagelist.txt>");
     $this->dumpPackageList("$this->{m_basedir}/packagelist.txt");
   }
 
-  $this->{m_kiwi}->info("KIWICollect::Init: create LWP module");
+  $this->logMsg("I", "KIWICollect::Init: create LWP module");
   $this->{m_browser} = new LWP::UserAgent;
 
   ## create the metadata handler and load (+verify) all available plugins:
   # the required variables are MEDIUM_NAME, PLUGIN_DIR, INI_DIR
   # should be set by now.
-  $this->{m_kiwi}->info("KIWICollect::Init: create KIWIRepoMetaHandler module");
+  $this->logMsg("I", "KIWICollect::Init: create KIWIRepoMetaHandler module");
   $this->{m_metacreator} = new KIWIRepoMetaHandler($this);
   $this->{m_metacreator}->baseurl($this->{m_united});
   $this->{m_metacreator}->mediaName($this->{m_proddata}->getVar('MEDIUM_NAME'));
@@ -658,7 +615,7 @@ sub mainTask
       my $attr = "-R -J -f -pad -joliet-long";
       $cdname =~ s{.*/(.*)/*$}{$1};
       my $checkmedia;
-      $checkmedia = "checkmedia" if ( defined($this->{m_proddata}->getVar("RUN_MEDIA_CHECK")) and $this->{m_proddata}->getVar("RUN_MEDIA_CHECK") != "0" and $this->{m_proddata}->getVar("RUN_MEDIA_CHECK") != "false"   );
+      $checkmedia = "checkmedia" if ( defined($this->{m_proddata}->getVar("RUN_MEDIA_CHECK")) and $this->{m_proddata}->getVar("RUN_MEDIA_CHECK") ne "0" and $this->{m_proddata}->getVar("RUN_MEDIA_CHECK") ne "false"   );
       $iso = new KIWIIsoLinux($this->{m_logger}, $this->{m_basesubdir}->{$cd}, $this->{m_united}."/$cdname.iso",$attr,$checkmedia);
       if(!$iso->callBootMethods()) {
         $this->logMsg("W", "Creating boot methods failed, medium maybe not be bootable");
@@ -721,6 +678,29 @@ sub getMetafileList
 } # getMetafileList
 
 
+sub addDebugPackage($$$$)
+{
+   my $this = shift;
+   my $packname = shift;
+   my $arch = shift;
+   my $packPointer = shift;
+
+   if ( $this->{m_debugPacks}->{$packname} ){
+        $this->{m_debugPacks}->{$packname}->{'onlyarch'} .= ",$arch";
+        $this->{m_debugPacks}->{$packname}->{'onlyarch'} .= ",$arch";
+   } else {
+        $this->{m_debugPacks}->{$packname} = {
+          'medium' => $this->{m_debugmedium},
+          'onlyarch' => $arch
+        };
+        $this->{m_debugPacks}->{$packname} = {
+          'medium' => $this->{m_debugmedium},
+          'onlyarch' => $arch
+        };
+   };
+   $this->{m_debugPacks}->{$packname}->{'requireVersion'}->{ $packPointer->{'version'}."-".$packPointer->{'release'} } = 1;
+   $this->{m_debugPacks}->{$packname}->{'requireVersion'}->{ $packPointer->{'version'}."-".$packPointer->{'release'} } = 1;
+}
 
 #==========================================
 # setupPackageFiles
@@ -756,7 +736,7 @@ sub setupPackageFiles
     my $nofallback = 0;
     my @archs;
     $count_packs++;
-    if ( $mode eq 2 ) {
+    if ( $mode == 2 ) {
       push @archs, 'src', 'nosrc';
     }else{
       @archs = $this->getArchList($packOptions, $packName, \$nofallback);
@@ -775,7 +755,7 @@ sub setupPackageFiles
       $this->logMsg("I", "  Evaluate package $packName for requested arch $requestedArch") if $this->{m_debug} >= 5;
 
       my @fallbacklist;
-      if($nofallback==0 && $mode ne 2) {
+      if($nofallback==0 && $mode != 2) {
 	@fallbacklist = $this->{m_archlist}->fallbacks($requestedArch);
         $this->logMsg("I", " Look for fallbacks fallbacks") if $this->{m_debug} >= 6;
       }
@@ -797,7 +777,7 @@ sub setupPackageFiles
 	    $this->logMsg("I", "     => package $packName not available for arch $arch in repo $packKey") if $this->{m_debug} >= 4;
             next PACKKEY;
           }
-          if($nofallback==0 && $mode ne 2) {
+          if($nofallback==0 && $mode != 2) {
 	    my $follow = $this->{m_archlist}->arch($arch)->follower();
 	    if(defined($follow)) { 
 	      $this->logMsg("I", "     => falling back to $follow from $packKey instead") if $this->{m_debug} >= 4;
@@ -806,12 +786,11 @@ sub setupPackageFiles
 	  if ( scalar(keys %{$packOptions->{requireVersion}}) > 0
                && ! defined( $packOptions->{requireVersion}->{$packPointer->{version}."-".$packPointer->{release}} ) )
           {
-	    $this->logMsg("W", "     => package ".$packName."-".$packPointer->{version}."-".$packPointer->{release}." not available for arch $arch in repo $packKey in this version") if $this->{m_debug} >= 4;
+	    $this->logMsg("D", "     => package ".$packName."-".$packPointer->{version}."-".$packPointer->{release}." not available for arch $arch in repo $packKey in this version") if $this->{m_debug} >= 4;
             next PACKKEY;
           }
           # Success, found a package !
-          my $medium = 1;
-          $medium = $packOptions->{'medium'} if( $packOptions->{'medium'});
+          my $medium = $packOptions->{'medium'} || 1;
           
           $packOptions->{'newfile'}  = "$packName-$packPointer->{'version'}-$packPointer->{'release'}.$packPointer->{'arch'}.rpm";
           $packOptions->{'newpath'} = "$this->{m_basesubdir}->{$medium}/$base_on_cd/$packPointer->{'arch'}";
@@ -837,7 +816,7 @@ sub setupPackageFiles
               my $srcname = $packPointer->{sourcepackage};
               $srcname =~ s/-[^-]*-[^-]*\.rpm$//; # this strips everything, except main name
               # 
-              if ( defined($this->{m_srcmedium}) && $this->{m_srcmedium} > 0 ) {
+              if ( $this->{m_srcmedium} > 0 ) {
                 if (!$this->{m_sourcePacks}->{$srcname}) {
                   # FIXME: add forcerepo here
                   $this->{m_sourcePacks}->{$srcname} = {
@@ -848,27 +827,20 @@ sub setupPackageFiles
                 $packPointer->{sourcepackage} =~ m/.*-([^-]*-[^-]*)\.[^\.]*\.rpm/; # get version-release string
                 $this->{m_sourcePacks}->{$srcname}->{'requireVersion'}->{ $1 } = 1;
               }
-              if ( defined($this->{m_debugmedium}) && $this->{m_debugmedium} > 0 ) {
+              if ( $this->{m_debugmedium} > 0 ) {
                 # Add debug packages, we do not know, if they exist at all
                 my $suffix = "";
-                $suffix = "-32bit" if ( $packName =~ /-32bit$/ );
-                $suffix = "-64bit" if ( $packName =~ /-64bit$/ );
-                $suffix = "-x86"   if ( $packName =~ /-x86$/ );
-                if ( $this->{m_debugPacks}->{$srcname."-debuginfo".$suffix} ){
-                  $this->{m_debugPacks}->{$srcname."-debuginfo".$suffix}->{'onlyarch'} .= ",$arch";
-                  $this->{m_debugPacks}->{$srcname."-debugsource".$suffix}->{'onlyarch'} .= ",$arch";
-                } else {
-                  $this->{m_debugPacks}->{$srcname."-debuginfo".$suffix} = {
-                    'medium' => $this->{m_debugmedium},
-                    'onlyarch' => $arch
-                  };
-                  $this->{m_debugPacks}->{$srcname."-debugsource".$suffix} = {
-                    'medium' => $this->{m_debugmedium},
-                    'onlyarch' => $arch
-                  };
-                };
-                $this->{m_debugPacks}->{$srcname."-debuginfo".$suffix}->{'requireVersion'}->{ $packPointer->{'version'}."-".$packPointer->{'release'} } = 1;
-                $this->{m_debugPacks}->{$srcname."-debugsource".$suffix}->{'requireVersion'}->{ $packPointer->{'version'}."-".$packPointer->{'release'} } = 1;
+                my $basename = $packName;
+                foreach my $tsuffix qw(32bit 64bit x86) {
+                   if ( $packName =~ /^(.*)(-$tsuffix)$/ ) {
+			$basename = $1;
+			$suffix = $2;
+			last;
+	  	   }
+                }
+                $this->addDebugPackage($srcname."-debuginfo".$suffix, $arch, $packPointer);
+                $this->addDebugPackage($srcname."-debugsource", $arch, $packPointer);
+                $this->addDebugPackage($basename."-debuginfo".$suffix, $arch, $packPointer);
               };
             }
           }
@@ -910,7 +882,6 @@ sub collectPackages
   ### step 1
   # expand dir lists (setup in constructor for each repo) to filenames
   if($this->{m_debug}) {
-    $this->{m_logger}->info("");
     $this->logMsg("I", "STEP 1 [collectPackages]" );
     $this->logMsg("I", "expand dir lists for all repositories");
   }
@@ -939,7 +910,6 @@ sub collectPackages
 
   ### step 2:
   if($this->{m_debug}) {
-    $this->{m_logger}->info("");
     $this->logMsg("I", "STEP 2 [collectPackages]" );
     $this->logMsg("I", "Select packages and create links");
   }
@@ -950,14 +920,14 @@ sub collectPackages
     $this->logMsg("E", "[collectPackages] $setupFiles RPM packages could not be setup");
     return 1;
   }
-  if ( defined($this->{m_srcmedium}) && $this->{m_srcmedium} > 0 ) {
+  if ( $this->{m_srcmedium} > 0 ) {
     $setupFiles = $this->setupPackageFiles(2, $this->{m_sourcePacks});
     if($setupFiles > 0) {
       $this->logMsg("E", "[collectPackages] $setupFiles SOURCE RPM packages could not be setup");
       return 1;
     }
   }
-  if ( defined($this->{m_debugmedium}) && $this->{m_debugmedium} > 0 ) {
+  if ( $this->{m_debugmedium} > 0 ) {
     $setupFiles = $this->setupPackageFiles(0, $this->{m_debugPacks});
     if($setupFiles > 0) {
       $this->logMsg("E", "[collectPackages] $setupFiles DEBUG RPM packages could not be setup");
@@ -967,7 +937,6 @@ sub collectPackages
 
   ### step 3: NOW I know where you live...
   if($this->{m_debug}) {
-    $this->{m_logger}->info("");
     $this->logMsg("I", "STEP 3 [collectPackages]" );
     $this->logMsg("I", "Handle scripts for metafiles and metapackages");
   }
@@ -985,7 +954,7 @@ sub collectPackages
   }
 
   my @metafiles = keys(%{$this->{m_metafiles}});
-  if(!$this->executeMetafileScripts(@metafiles)) {
+  if($this->executeMetafileScripts(@metafiles) != 0) {
     $this->logMsg("E", "[collectPackages] executing metafile scripts failed!");
     return 1;
   }
@@ -1183,7 +1152,7 @@ sub unpackMetapackages
 #              }
 #              else {
 #                $this->logMsg("W", "Undefined values in hash for package $metapack");
-#                #$this->{m_logger}->warning( Dumper($this->{$metapack}));
+#                #$this->logMsg("W", Dumper($this->{$metapack}));
 #              }
 #            }
 #          }
@@ -1217,6 +1186,7 @@ sub unpackMetapackages
 sub executeMetafileScripts
 {
   my $this = shift;
+  my $ret = 0;
 
   # the second (first explicit) parameter is a list of either packages or files
   # for which scripts shall be executed.
@@ -1256,6 +1226,7 @@ sub executeMetafileScripts
       
     }
   }
+  return $ret;
 }
 # /executeScripts
 
@@ -1382,15 +1353,14 @@ sub dumpRepoData
 {
   # dumps data collected in $this-> ... for debugging purpose.
   # receives a file name as parameter.
-  # If file can't be openend, a warning is issued through $this->{m_kiwi}
+  # If file can't be openend, a warning is issued through $this->{m_logger}
   # and nothing else happens.
   # Successful completion provides a list of content in the file.
   my $this    = shift;
   my $target  = shift;
 
   if(!open(DUMP, ">", $target)) {
-    $this->logMsg("W", "[dumpRepoData] Dumping data to file $target failed: file could not be created!");
-    $this->{m_logger}->failed();
+    $this->logMsg("E", "[dumpRepoData] Dumping data to file $target failed: file could not be created!");
   }
   else {
     print DUMP "Dumped data from KIWICollect object\n\n";
@@ -1424,15 +1394,14 @@ sub dumpPackageList
 {
   # dumps data collected in $this->{m_repoPacks} for debugging purpose.
   # receives a file name as parameter.
-  # If file can't be openend, a warning is issued through $this->{m_kiwi}
+  # If file can't be openend, a warning is issued through $this->{m_logger}
   # and nothing else happens.
   # Successful completion provides a list of content in the file.
   my $this    = shift;
   my $target  = shift;
 
   if(!open(DUMP, ">", $target)) {
-    $this->logMsg("W", "[dumpPackageList] Dumping data to file $target failed: file could not be created!");
-    $this->{m_kiwi}->failed();
+    $this->logMsg("E", "[dumpPackageList] Dumping data to file $target failed: file could not be created!");
   }
 
   print DUMP "Dumped data from KIWICollect object\n\n";
@@ -1624,7 +1593,7 @@ sub createMetadata
 	$this->logMsg("E", "Cannot create file <$bfile>!");
 	return undef;
       }
-      print BUILD $this->{m_proddata}->getVar("BUILD_ID")."\n";
+      print BUILD $this->{m_proddata}->getVar("BUILD_ID", "0")."\n";
       close(BUILD);
     }
   }
@@ -1709,12 +1678,16 @@ sub createMetadata
     $s1sum_opts = "";
   }
   if(! (-f $csha1sum or -x $csha1sum)) {
-    $this->logMsg("W", "[createMetadata] excutable `$csha1sum` not found. Maybe package `inst-source-utils` is not installed?");
+    $this->logMsg("E", "[createMetadata] excutable `$csha1sum` not found. Maybe package `inst-source-utils` is not installed?");
     return;
   }
   for my $sd($this->getMediaNumbers()) {
     my @data = qx($csha1sum $s1sum_opts $this->{m_basesubdir}->{$sd});
-    $this->logMsg("I", "[createMetadata] $csha1sum output:");
+    if ($? >> 8 != 0) {
+	$this->logMsg("E", "[createMetadata] $csha1sum failed");
+    }else{
+        $this->logMsg("I", "[createMetadata] $csha1sum output:");
+    }
     foreach(@data) {
       chomp $_;
       $this->logMsg("I", "\t$_");
@@ -1901,11 +1874,11 @@ sub getMediaNumbers
   return undef if not defined $this;
   
   my @media = (1);	# default medium is 1 (always)
-  if ( defined($this->{m_srcmedium}) && $this->{m_srcmedium} > 1 ) {
+  if ( $this->{m_srcmedium} > 1 ) {
     push @media, $this->{m_srcmedium};
   }
 
-  if ( defined($this->{m_debugmedium}) && $this->{m_debugmedium} > 1 ) {
+  if ( $this->{m_debugmedium} > 1 ) {
     push @media, $this->{m_debugmedium};
   }
 

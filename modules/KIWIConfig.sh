@@ -935,7 +935,7 @@ function suseStripInitrd {
 		/etc/logrotate* /etc/susehelp* /etc/SuSEconfig /etc/permissions.d
 		/etc/aliases.d /etc/hal /etc/news /etc/pwdutils /etc/uucp
 		/etc/openldap /etc/xinetd /etc/depmod.d /etc/smart /etc/lvm
-		/etc/named* /etc/bash_completion*
+		/etc/named* /etc/bash_completion* usr/share/gnupg
 		/lib/modules/*/kernel/drivers/net/wireless
 		/lib/modules/*/kernel/drivers/net/pcmcia
 		/lib/modules/*/kernel/drivers/net/tokenring
