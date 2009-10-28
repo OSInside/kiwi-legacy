@@ -630,7 +630,7 @@ sub mainTask
   $this->createMetadata();
 
   ## We create iso files by default, but keep this for manual override
-  if($this->{m_proddata}->getVar("REPO_ONLY") eq "1") {
+  if($this->{m_proddata}->getVar("REPO_ONLY") eq "yes") {
     $this->logMsg("I", "Skipping ISO generation due to REPO_ONLY setting");
     return 0;
   }
