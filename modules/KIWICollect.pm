@@ -473,7 +473,7 @@ sub Init
   my @media = $this->getMediaNumbers();
   my $mult = $this->{m_proddata}->getVar("MULTIPLE_MEDIA");
   my $dirext = undef;
-  if($mult eq "no") {
+  if($mult eq "no" || $mult eq "false") {
     if(scalar(@media) == 1) { 
       $dirext = 1;
     }
@@ -630,7 +630,7 @@ sub mainTask
   $this->createMetadata();
 
   ## We create iso files by default, but keep this for manual override
-  if($this->{m_proddata}->getVar("REPO_ONLY") eq "yes") {
+  if($this->{m_proddata}->getVar("REPO_ONLY") eq "true") {
     $this->logMsg("I", "Skipping ISO generation due to REPO_ONLY setting");
     return 0;
   }
@@ -658,7 +658,7 @@ sub mainTask
       my $attr = "-R -J -f -pad -joliet-long";
       $cdname =~ s{.*/(.*)/*$}{$1};
       my $checkmedia;
-      $checkmedia = "checkmedia" if ( defined($this->{m_proddata}->getVar("RUN_MEDIA_CHECK")) and $this->{m_proddata}->getVar("RUN_MEDIA_CHECK") != "0" );
+      $checkmedia = "checkmedia" if ( defined($this->{m_proddata}->getVar("RUN_MEDIA_CHECK")) and $this->{m_proddata}->getVar("RUN_MEDIA_CHECK") != "0" and $this->{m_proddata}->getVar("RUN_MEDIA_CHECK") != "false"   );
       $iso = new KIWIIsoLinux($this->{m_logger}, $this->{m_basesubdir}->{$cd}, $this->{m_united}."/$cdname.iso",$attr,$checkmedia);
       if(!$iso->callBootMethods()) {
         $this->logMsg("W", "Creating boot methods failed, medium maybe not be bootable");
