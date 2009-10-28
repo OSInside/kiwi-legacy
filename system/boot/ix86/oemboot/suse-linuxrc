@@ -408,6 +408,21 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 		fi
 		cd /mnt
 		#======================================
+		# store files temporary
+		#--------------------------------------
+		if [ -z "$RESTORE" ];then
+			for i in passwd shadow group;do
+				if ! cp etc/$i tmp/$i;then
+					umountSystem; rm -f tmp/passwd tmp/shadow tmp/group
+					systemException "Failed to store $i" "reboot"
+				fi
+			done
+			if ! cp -a var/lib/rpm tmp/;then
+				rm -rf tmp/rpm; umountSystem
+				systemException "Failed to store RPM database" "reboot"
+			fi
+		fi
+		#======================================
 		# create backup diffs
 		#--------------------------------------
 		if [ -z "$RESTORE" ] && [ "$DOBACKUP" = 1 ];then
@@ -418,7 +433,7 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 				xargs tar -cO -f - 2>/dev/null |\
 				tar -v -C tmp/foobar -xf -
 			then
-				rm -rf tmp/foobar
+				rm -rf tmp/foobar; umountSystem
 				systemException "Failed to create backup files" "reboot"
 			fi
 		fi
@@ -473,6 +488,9 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 			rm -rf tmp/backup/mtab*
 			rm -rf tmp/backup/fstab*
 			rm -rf tmp/backup/kernel*
+			rm -rf tmp/backup/passwd*
+			rm -rf tmp/backup/shadow*
+			rm -rf tmp/backup/group*
 		fi
 		dPID=$(pidof mst)
 		kill $dPID
@@ -509,7 +527,23 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 		fi
 	done
 	#======================================
-	# 16.5) restore fstab partitions
+	# 16.5) restore temporary stored files
+	#--------------------------------------
+	if [ -z "$RESTORE" ];then
+		for i in passwd shadow group;do
+			if ! mv /mnt/tmp/$i /mnt/etc/$i;then
+				systemException "Failed to restore $i" "reboot"
+			fi
+		done
+		mv /mnt/var/lib/rpm /mnt/var/lib/rpm.backup
+		if ! mv /mnt/tmp/rpm /mnt/var/lib/;then
+			mv /mnt/var/lib/rpm.backup /mnt/var/lib/rpm
+			systemException "Failed to restore RPM database" "reboot"
+		fi
+		rm -rf /mnt/var/lib/rpm.backup
+	fi
+	#======================================
+	# 16.6) restore fstab partitions
 	#--------------------------------------
 	if [ ! -z "$RESTORE" ];then
 		imageSwapDevice=$(cat /mnt/etc/fstab | grep swap | cut -f1 -d " ")
@@ -528,11 +562,11 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 		fi
 	fi
 	#======================================
-	# 16.6) umount recovery and boot
+	# 16.7) umount recovery and boot
 	#--------------------------------------
 	umount $imageRecoveryDevice
 	#======================================
-	# 16.7) import oem config file
+	# 16.8) import oem config file
 	#--------------------------------------
 	importFile < $OEM_PARTITION_CONFIG
 	IFS=$IFS_ORIG
