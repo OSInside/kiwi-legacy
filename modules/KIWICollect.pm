@@ -137,11 +137,6 @@ sub new {
 
   $this->{m_startUpTime}  = time();
 
-  if($this->{m_debug} >= 2 || $ENV{'KIWI_COLLECT_TERMINAL_LOG'} ) {
-    # We will just print out, instead using the logger by default.
-    $this->{m_logStdOut} = 1;
-  }
-  
   # create second logger object to log only the data relevant
   # for repository creation:
   $this->{m_logger} = new KIWILog("tiny");
@@ -190,7 +185,7 @@ sub new {
 
 
 #=================
-# my own log mechanism, very primitive, much faster for stdout.
+# my own log mechanism, very primitive, much faster if --logfile terminal is set
 #-----------------
 sub logMsg
 {
