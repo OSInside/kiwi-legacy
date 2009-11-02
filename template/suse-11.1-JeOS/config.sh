@@ -41,6 +41,12 @@ rpm -e --nodeps --noscripts \
 baseStripDocs
 
 #======================================
+# only basic version of vim is
+# installed; no syntax highlighting
+#--------------------------------------
+sed -i -e's/^syntax on/" syntax on/' /etc/vimrc
+
+#======================================
 # SuSEconfig
 #--------------------------------------
 suseConfig
