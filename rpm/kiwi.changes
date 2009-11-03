@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Tue Nov  3 10:02:12 CET 2009 - mantel@suse.de
+
+- kiwi-templates:
+  * only basic version of vim is installed; we disable syntax
+    highlighting in order to avoid irritating error message on vim
+    startup.
+
+-------------------------------------------------------------------
 Wed Oct 28 10:00:57 CET 2009 - ms@suse.de
 
 - OEM recover/repair
