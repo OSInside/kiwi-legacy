@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Nov  3 10:44:48 CET 2009 - ms@suse.de
+
+- added ieee1394 firewire modules to support liveCD on
+  firewire DVD drive (bnc #479020)
+
+-------------------------------------------------------------------
 Tue Nov  3 10:02:12 CET 2009 - mantel@suse.de
 
 - kiwi-templates:

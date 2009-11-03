@@ -57,6 +57,7 @@
 		<file name="drivers/scsi/*"/>
 		<file name="drivers/message/fusion/*"/>
 		<file name="drivers/ata/*"/>
+		<file name="drivers/ieee1394/*"/>
 		<file name="drivers/parport/*"/>
 		<file name="drivers/acpi/dock.ko"/>
 		<file name="drivers/firmware/edd.ko"/>
