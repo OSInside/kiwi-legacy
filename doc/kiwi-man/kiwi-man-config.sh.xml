@@ -89,12 +89,26 @@ exit</programlisting>
         </listitem>
       </varlistentry>
       <varlistentry>
-        <term><optional>baseSetupUserPermissions</optional></term>
+        <term><optional>baseGetPackagesForDeletion</optional></term>
         <listitem>
           <para>
-            Search all home directories of all users listed in /etc/passwd
-            and change the ownership of all files to belong to the correct
-            user and group
+            Return the name(s) of packages which will be deleted
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><optional>baseGetProfilesUsed</optional></term>
+        <listitem>
+          <para>
+            Return the name(s) of profiles used to build this image
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><optional>baseSetRunlevel {value}</optional></term>
+        <listitem>
+          <para>
+             Set the default run level
           </para>
         </listitem>
       </varlistentry>
@@ -118,43 +132,12 @@ exit</programlisting>
         </listitem>
       </varlistentry>
       <varlistentry>
-        <term><optional>baseStripRPM</optional></term>
+        <term><optional>baseSetupInPlaceGITRepository</optional></term>
         <listitem>
           <para>
-             remove rpms defined in config.xml under image=delete section
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><optional>baseStripUnusedLibs</optional></term>
-        <listitem>
-          <para>
-             remove libraries which are not directly linked
-             against applications in the bin directories
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-         <term><optional>baseUpdateSysConfig {filename} {variable} {value}</optional></term>
-        <listitem>
-           <para>
-             update sysconfig variable contents
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><optional>baseGetPackagesForDeletion</optional></term>
-        <listitem>
-          <para>
-            Return the name(s) of packages which will be deleted
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><optional>baseGetProfilesUsed</optional></term>
-        <listitem>
-          <para>
-            Return the name(s) of profiles used to build this image
+            Create an in place git repository of the root
+            directory. This process may take some time and you
+            may expect problems with binary data handling
           </para>
         </listitem>
       </varlistentry>
@@ -178,48 +161,15 @@ exit</programlisting>
         </listitem>
       </varlistentry>
       <varlistentry>
-        <term><optional>baseSetupInPlaceGITRepository</optional></term>
+        <term><optional>baseSetupUserPermissions</optional></term>
         <listitem>
           <para>
-            Create an in place git repository of the root
-            directory. This process may take some time and you
-            may expect problems with binary data handling
+            Search all home directories of all users listed in /etc/passwd
+            and change the ownership of all files to belong to the correct
+            user and group
           </para>
         </listitem>
       </varlistentry>
-      <varlistentry>
-         <term><optional>baseStripMans {list of manpages to keep}</optional></term>
-        <listitem>
-          <para>
-             remove all manual pages, except one given as parameter
-             example: baseStripMans more less
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-         <term><optional>baseStripDocs {list of docu names to keep}</optional></term>
-        <listitem>
-          <para>
-             remove all documentation, except one given as parameter
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-         <term><optional>baseStripLocales {list of locales}</optional></term>
-        <listitem>
-           <para>
-             remove all locales, except one given as parameter
-          </para>
-        </listitem>
-     </varlistentry>
-      <varlistentry>
-         <term><optional>baseStripInfos {list of info-files to keep}</optional></term>
-        <listitem>
-           <para>
-             remove all info files, except one given as parameter
-          </para>
-        </listitem>
-     </varlistentry>
       <varlistentry>
          <term><optional>baseStripAndKeep {list of info-files to keep}</optional></term>
         <listitem>
@@ -231,11 +181,139 @@ exit</programlisting>
         </listitem>
      </varlistentry>
       <varlistentry>
+         <term><optional>baseStripDocs {list of docu names to keep}</optional></term>
+        <listitem>
+          <para>
+             remove all documentation, except one given as parameter
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+         <term><optional>baseStripInfos {list of info-files to keep}</optional></term>
+        <listitem>
+           <para>
+             remove all info files, except one given as parameter
+          </para>
+        </listitem>
+     </varlistentry>
+      <varlistentry>
+         <term><optional>baseStripLocales {list of locales}</optional></term>
+        <listitem>
+           <para>
+             remove all locales, except one given as parameter
+          </para>
+        </listitem>
+     </varlistentry>
+      <varlistentry>
+         <term><optional>baseStripMans {list of manpages to keep}</optional></term>
+        <listitem>
+          <para>
+             remove all manual pages, except one given as parameter
+             example: baseStripMans more less
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><optional>baseStripRPM</optional></term>
+        <listitem>
+          <para>
+             remove rpms defined in config.xml under image=delete section
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
          <term><optional>baseStripTools {list of toolpath} {list of tools}</optional></term>
         <listitem>
            <para>
               helper function for suseStripInitrd function
               params: toolpath , tools
+          </para>
+        </listitem>
+     </varlistentry>
+      <varlistentry>
+        <term><optional>baseStripUnusedLibs</optional></term>
+        <listitem>
+          <para>
+             remove libraries which are not directly linked
+             against applications in the bin directories
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+         <term><optional>baseUpdateSysConfig {filename} {variable} {value}</optional></term>
+        <listitem>
+           <para>
+             update sysconfig variable contents
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+         <term><optional>Debug {message}</optional></term>
+        <listitem>
+          <para>
+            Helper function to print a message 
+            if the variable DEBUG is set to 1
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+      <varlistentry>
+         <term><optional>Echo {echo commandline}</optional></term>
+        <listitem>
+          <para>
+            Helper function to print a message to the controling terminal
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+         <term><optional>Rm {list of files}</optional></term>
+        <listitem>
+          <para>
+            Helper function to delete files and anounce it to log
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+         <term><optional>Rpm {rpm commandline}</optional></term>
+        <listitem>
+          <para>
+            Helper function to the rpm function and anounce it to log
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><optional>suseActivateDefaultServices</optional></term>
+        <listitem>
+          <para>
+            Call all postin scriptlets which among other things activates
+            all required default services using suseInsertService
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><optional>suseActivateServices</optional></term>
+        <listitem>
+          <para>
+            Check all services in /etc/init.d/ and activate them
+            by calling suseInsertService
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+         <term><optional>suseCloneRunlevel {runlevel}</optional></term>
+        <listitem>
+          <para>
+            Clone the given runlevel to work in the same way
+            as the default runlevel 3.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><optional>suseConfig</optional></term>
+        <listitem>
+          <para>
+            Setup keytable language and timezone if specified in config.xml and
+            call SuSEconfig afterwards
           </para>
         </listitem>
      </varlistentry>
@@ -255,33 +333,6 @@ exit</programlisting>
           <para>
             Remove a service and its dependant services
             using the suse insserv program
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-         <term><optional>suseStripPackager {-a}</optional></term>
-        <listitem>
-          <para>
-             Remove smart o zypper packages and db files
-             Also remove rpm package and db if "-a" given
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><optional>suseActivateServices</optional></term>
-        <listitem>
-          <para>
-            Check all services in /etc/init.d/ and activate them
-            by calling suseInsertService
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><optional>suseActivateDefaultServices</optional></term>
-        <listitem>
-          <para>
-            Call all postin scriptlets which among other things activates
-            all required default services using suseInsertService
           </para>
         </listitem>
       </varlistentry>
@@ -306,24 +357,6 @@ exit</programlisting>
         </listitem>
       </varlistentry>
       <varlistentry>
-        <term><optional>suseConfig</optional></term>
-        <listitem>
-          <para>
-            Setup keytable language and timezone if specified in config.xml and
-            call SuSEconfig afterwards
-          </para>
-        </listitem>
-     </varlistentry>
-      <varlistentry>
-         <term><optional>suseCloneRunlevel {runlevel}</optional></term>
-        <listitem>
-          <para>
-            Clone the given runlevel to work in the same way
-            as the default runlevel 3.
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
         <term><optional>suseSetupProductInformation</optional></term>
         <listitem>
           <para>
@@ -334,39 +367,14 @@ exit</programlisting>
         </listitem>
      </varlistentry>
       <varlistentry>
-         <term><optional>Rm {list of files}</optional></term>
+         <term><optional>suseStripPackager {-a}</optional></term>
         <listitem>
           <para>
-            Helper function to delete files and anounce it to log
+             Remove smart o zypper packages and db files
+             Also remove rpm package and db if "-a" given
           </para>
         </listitem>
       </varlistentry>
-      <varlistentry>
-         <term><optional>Rpm {rpm commandline}</optional></term>
-        <listitem>
-          <para>
-            Helper function to the rpm function and anounce it to log
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-         <term><optional>Echo {echo commandline}</optional></term>
-        <listitem>
-          <para>
-            Helper function to print a message to the controling terminal
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-         <term><optional>Debug {message}</optional></term>
-        <listitem>
-          <para>
-            Helper function to print a message 
-            if the variable DEBUG is set to 1
-          </para>
-        </listitem>
-      </varlistentry>
-    </variablelist>
   </refsect1>
   
   <refsect1 id="kiwi.config.environment">
@@ -376,6 +384,34 @@ exit</programlisting>
       are listed below. Some of the functions above makes use of the variables.
 	</para>
     <variablelist>
+      <varlistentry>
+        <term><optional>$kiwi_compressed</optional></term>
+        <listitem>
+          <para>
+			The value of the compressed attribute set in the type element
+			in config.xml
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><optional>$kiwi_delete</optional></term>
+        <listitem>
+          <para>
+            A list of all packages which are part of the packages section
+            with type='delete' in config.xml
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><optional>$kiwi_drivers</optional></term>
+        <listitem>
+          <para>
+            A comma seperated list of the driver entries as listed in the
+            drivers section of the config.xml. Similar variables exists for
+            the usbdrivers and scsidrivers sections
+          </para>
+        </listitem>
+      </varlistentry>
       <varlistentry>
        <term><optional>$kiwi_iname</optional></term>
         <listitem>
@@ -409,37 +445,10 @@ exit</programlisting>
         </listitem>
       </varlistentry>
       <varlistentry>
-        <term><optional>$kiwi_timezone</optional></term>
-        <listitem>
-          <para>
-            The contents of the timezone setup as done in config.xml
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><optional>$kiwi_delete</optional></term>
-        <listitem>
-          <para>
-            A list of all packages which are part of the packages section
-            with type='delete' in config.xml
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
         <term><optional>$kiwi_profiles</optional></term>
         <listitem>
           <para>
             A list of profiles used to build this image
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><optional>$kiwi_drivers</optional></term>
-        <listitem>
-          <para>
-            A comma seperated list of the driver entries as listed in the
-            drivers section of the config.xml. Similar variables exists for
-            the usbdrivers and scsidrivers sections
           </para>
         </listitem>
       </varlistentry>
@@ -454,11 +463,10 @@ exit</programlisting>
         </listitem>
       </varlistentry>
       <varlistentry>
-        <term><optional>$kiwi_compressed</optional></term>
+        <term><optional>$kiwi_timezone</optional></term>
         <listitem>
           <para>
-			The value of the compressed attribute set in the type element
-			in config.xml
+            The contents of the timezone setup as done in config.xml
           </para>
         </listitem>
       </varlistentry>

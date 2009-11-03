@@ -813,7 +813,7 @@ function baseSetupBusyBox {
 #--------------------------------------
 function baseStripUnusedLibs {
 	# /.../
-	# remove libraries which are not directly linked
+	# Remove libraries which are not directly linked
 	# against applications in the bin directories
 	# ----
 	local needlibs
@@ -822,7 +822,7 @@ function baseStripUnusedLibs {
 	local lnk
 	local new
 	# /.../
-	# find directly used libraries, by calling ldd
+	# Find directly used libraries, by calling ldd
 	# on files in *bin*
 	# ---
 	ldconfig
@@ -888,7 +888,7 @@ function baseStripUnusedLibs {
 #--------------------------------------
 function baseUpdateSysConfig {
 	# /.../
-	# update sysconfig variable contents
+	# Update sysconfig variable contents
 	# ----
 	local FILE=$1
 	local VAR=$2
@@ -901,7 +901,7 @@ function baseUpdateSysConfig {
 #--------------------------------------
 function suseStripInitrd {
 	#==========================================
-	# remove unneeded files
+	# Remove unneeded files
 	#------------------------------------------
 	rm -rf `find -type d | grep .svn`
 	local files="
@@ -1438,4 +1438,24 @@ function suseSetupProduct {
 		fi
 	fi
 	popd
+}
+
+#======================================
+# baseSetRunlevel
+#--------------------------------------
+function baseSetRunlevel {
+	# /.../
+	# This function set the runlevel in /etc/inittab to
+	# the specified value
+	# ----
+	local RUNLEVEL=$1
+	case "$RUNLEVEL" in
+		1|2|3|5)
+			sed -i "s/id:[0123456]:initdefault:/id:$RUNLEVEL:initdefault:/" \
+			/etc/inittab
+		;;
+		*)
+			echo "Invalid runlevel argument: $RUNLEVEL"
+		;;
+	esac
 }
