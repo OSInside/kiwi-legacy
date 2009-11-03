@@ -146,7 +146,7 @@ sub new {
 	my $repositNodeList;
 	my $packageNodeList;
 	my $imgnameNodeList;
-	my $deploysNodeList;
+	my $pxedeployNodeList;
 	my $splitNodeList;
 	my $instsrcNodeList;
 	my $partitionsNodeList;
@@ -166,7 +166,7 @@ sub new {
 		$repositNodeList = $systemTree -> getElementsByTagName ("repository");
 		$packageNodeList = $systemTree -> getElementsByTagName ("packages");
 		$imgnameNodeList = $systemTree -> getElementsByTagName ("image");
-		$deploysNodeList = $systemTree -> getElementsByTagName ("deploy");
+		$pxedeployNodeList = $systemTree -> getElementsByTagName ("pxedeploy");
 		$splitNodeList   = $systemTree -> getElementsByTagName ("split");
 		$instsrcNodeList = $systemTree -> getElementsByTagName ("instsource");
 		$vmwarecNodeList = $systemTree -> getElementsByTagName ("vmwareconfig");
@@ -376,7 +376,7 @@ sub new {
 	$this->{repositNodeList}    = $repositNodeList;
 	$this->{packageNodeList}    = $packageNodeList;
 	$this->{imgnameNodeList}    = $imgnameNodeList;
-	$this->{deploysNodeList}    = $deploysNodeList;
+	$this->{pxedeployNodeList}  = $pxedeployNodeList;
 	$this->{splitNodeList}      = $splitNodeList;
 	$this->{instsrcNodeList}    = $instsrcNodeList;
 	$this->{partitionsNodeList} = $partitionsNodeList;
@@ -818,9 +818,9 @@ sub getImageVersion {
 }
 
 #==========================================
-# getDeployUnionConfig
+# getPXEDeployUnionConfig
 #------------------------------------------
-sub getDeployUnionConfig {
+sub getPXEDeployUnionConfig {
 	# ...
 	# Get the union file system configuration, if any
 	# ---
@@ -837,9 +837,9 @@ sub getDeployUnionConfig {
 }
 
 #==========================================
-# getDeployImageDevice
+# getPXEDeployImageDevice
 #------------------------------------------
-sub getDeployImageDevice {
+sub getPXEDeployImageDevice {
 	# ...
 	# Get the device the image will be installed to
 	# ---
@@ -853,14 +853,14 @@ sub getDeployImageDevice {
 }
 
 #==========================================
-# getDeployServer
+# getPXEDeployServer
 #------------------------------------------
-sub getDeployServer {
+sub getPXEDeployServer {
 	# ...
 	# Get the server the config data is obtained from
 	# ---
 	my $this = shift;
-	my $node = $this->{deploysNodeList} -> get_node(1);
+	my $node = $this->{pxedeployNodeList} -> get_node(1);
 	if (defined $node) {
 		return $node -> getAttribute ("server");
 	} else {
@@ -869,14 +869,14 @@ sub getDeployServer {
 }
 
 #==========================================
-# getDeployBlockSize
+# getPXEDeployBlockSize
 #------------------------------------------
-sub getDeployBlockSize {
+sub getPXEDeployBlockSize {
 	# ...
 	# Get the block size the deploy server should use
 	# ---
 	my $this = shift;
-	my $node = $this->{deploysNodeList} -> get_node(1);
+	my $node = $this->{pxedeployNodeList} -> get_node(1);
 	if (defined $node) {
 		return $node -> getAttribute ("blocksize");
 	} else {
@@ -885,9 +885,9 @@ sub getDeployBlockSize {
 }
 
 #==========================================
-# getDeployPartitions
+# getPXEDeployPartitions
 #------------------------------------------
-sub getDeployPartitions {
+sub getPXEDeployPartitions {
 	# ...
 	# Get the partition configuration for this image
 	# ---
@@ -930,9 +930,9 @@ sub getDeployPartitions {
 }
 
 #==========================================
-# getDeployConfiguration
+# getPXEDeployConfiguration
 #------------------------------------------
-sub getDeployConfiguration {
+sub getPXEDeployConfiguration {
 	# ...
 	# Get the configuration file information for this image
 	# ---
@@ -964,9 +964,9 @@ sub getDeployConfiguration {
 }
 
 #==========================================
-# getDeployTimeout
+# getPXEDeployTimeout
 #------------------------------------------
-sub getDeployTimeout {
+sub getPXEDeployTimeout {
 	# ...
 	# Get the boot timeout, if specified
 	# ---
@@ -981,14 +981,14 @@ sub getDeployTimeout {
 }
 
 #==========================================
-# getDeployCommandline
+# getPXEDeployCommandline
 #------------------------------------------
-sub getDeployCommandline {
+sub getPXEDeployCommandline {
 	# ...
 	# Get the boot commandline, if specified
 	# ---
 	my $this = shift;
-	my $node = $this->{deploysNodeList} -> get_node(1);
+	my $node = $this->{pxedeployNodeList} -> get_node(1);
 	my $cmdline = $node -> getElementsByTagName ("commandline");
 	if ((defined $cmdline) && ! ("$cmdline" eq "")) {
 		return $cmdline;
@@ -998,14 +998,14 @@ sub getDeployCommandline {
 }
 
 #==========================================
-# getDeployKernel
+# getPXEDeployKernel
 #------------------------------------------
-sub getDeployKernel {
+sub getPXEDeployKernel {
 	# ...
 	# Get the deploy kernel, if specified
 	# ---
 	my $this = shift;
-	my $node = $this->{deploysNodeList} -> get_node(1);
+	my $node = $this->{pxedeployNodeList} -> get_node(1);
 	my $kernel = $node -> getElementsByTagName ("kernel");
 	if ((defined $kernel) && ! ("$kernel" eq "")) {
 		return $kernel;
@@ -1102,14 +1102,14 @@ sub getSplitExceptions {
 }
 
 #==========================================
-# getDeployInitrd
+# getPXEDeployInitrd
 #------------------------------------------
-sub getDeployInitrd {
+sub getPXEDeployInitrd {
 	# ...
 	# Get the deploy initrd, if specified
 	# ---
 	my $this = shift;
-	my $node = $this->{deploysNodeList} -> get_node(1);
+	my $node = $this->{pxedeployNodeList} -> get_node(1);
 	my $initrd = $node -> getElementsByTagName ("initrd");
 	if ((defined $initrd) && ! ("$initrd" eq "")) {
 		return $initrd;

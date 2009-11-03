@@ -3054,7 +3054,7 @@ sub writeImageConfig {
 	my $kiwi = $this->{kiwi};
 	my $xml  = $this->{xml};
 	my $configName = $this -> buildImageName() . ".config";
-	my $device = $xml -> getDeployImageDevice ();
+	my $device = $xml -> getPXEDeployImageDevice ();
 
 	#==========================================
 	# create .config for types which needs it
@@ -3069,8 +3069,8 @@ sub writeImageConfig {
 		}
 		my $namecd = $this -> buildImageName(";");
 		my $namerw = $this -> buildImageName(";", "-read-write");
-		my $server = $xml -> getDeployServer ();
-		my $blocks = $xml -> getDeployBlockSize ();
+		my $server = $xml -> getPXEDeployServer ();
+		my $blocks = $xml -> getPXEDeployBlockSize ();
 		if (! defined $server) {
 			$server = "";
 		}
@@ -3083,7 +3083,7 @@ sub writeImageConfig {
 		#==========================================
 		# PART information
 		#------------------------------------------
-		my @parts = $xml -> getDeployPartitions ();
+		my @parts = $xml -> getPXEDeployPartitions ();
 		if ((scalar @parts) > 0) {
 			print FD "PART=";
 			for my $href (@parts) {
@@ -3141,7 +3141,7 @@ sub writeImageConfig {
 		#==========================================
 		# CONF information
 		#------------------------------------------
-		my %confs = $xml -> getDeployConfiguration ();
+		my %confs = $xml -> getPXEDeployConfiguration ();
 		if ((scalar keys %confs) > 0) {
 			print FD "CONF=";
 			foreach my $source (keys %confs) {
@@ -3158,7 +3158,7 @@ sub writeImageConfig {
 		#==========================================
 		# UNIONFS_CONFIG information
 		#------------------------------------------
-		my %unionConfig = $xml -> getDeployUnionConfig ();
+		my %unionConfig = $xml -> getPXEDeployUnionConfig ();
 		if (%unionConfig) {
 			my $valid = 0;
 			my $value;
@@ -3176,28 +3176,28 @@ sub writeImageConfig {
 		#==========================================
 		# KIWI_BOOT_TIMEOUT information
 		#------------------------------------------
-		my $timeout = $xml -> getDeployTimeout ();
+		my $timeout = $xml -> getPXEDeployTimeout ();
 		if (defined $timeout) {
 			print FD "KIWI_BOOT_TIMEOUT=$timeout\n";
 		}
 		#==========================================
 		# KIWI_KERNEL_OPTIONS information
 		#------------------------------------------
-		my $cmdline = $xml -> getDeployCommandline ();
+		my $cmdline = $xml -> getPXEDeployCommandline ();
 		if (defined $cmdline) {
 			print FD "KIWI_KERNEL_OPTIONS='$cmdline'\n";
 		}
 		#==========================================
 		# KIWI_KERNEL information
 		#------------------------------------------
-		my $kernel = $xml -> getDeployKernel ();
+		my $kernel = $xml -> getPXEDeployKernel ();
 		if (defined $kernel) {
 			print FD "KIWI_KERNEL=$kernel\n";
 		}
 		#==========================================
 		# KIWI_INITRD information
 		#------------------------------------------
-		my $initrd = $xml -> getDeployInitrd ();
+		my $initrd = $xml -> getPXEDeployInitrd ();
 		if (defined $initrd) {
 			print FD "KIWI_INITRD=$initrd\n";
 		}

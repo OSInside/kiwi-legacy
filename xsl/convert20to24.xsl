@@ -20,7 +20,7 @@
 </para>
 <xsl:template match="image" mode="conv20to24">
 	<image schemeversion="2.4">
-		<xsl:copy-of select="@name"/>
+		<xsl:copy-of select="@*[local-name() != 'schemaversion']"/>
 		<xsl:apply-templates mode="conv20to24"/>
 	</image>
 </xsl:template>

@@ -23,7 +23,7 @@
 <grammar xmlns:db="http://docbook.org/ns/docbook" xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" xmlns:rng="http://relaxng.org/ns/structure/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
   <db:info>
     <db:releaseinfo>$Id: kiwi.rnc 2957 2008-01-11 12:53:39Z thomas-schraitle $</db:releaseinfo>
-    <db:releaseinfo>RNC Schema Version 3.7</db:releaseinfo>
+    <db:releaseinfo>RNC Schema Version 3.8</db:releaseinfo>
     <db:pubdate>START</db:pubdate>
     <db:pubdate>2008-01-08</db:pubdate>
   </db:info>
@@ -72,7 +72,7 @@ the package Information is inherited</a:documentation>
     <define name="k.image.schemaversion.attribute">
       <attribute name="schemaversion">
         <a:documentation>The allowed Schema version (fixed value)</a:documentation>
-        <value>3.7</value>
+        <value>3.8</value>
       </attribute>
     </define>
     <define name="k.image.kiwirevision.attribute">
@@ -148,7 +148,7 @@ named /etc/ImageID</a:documentation>
             <ref name="k.repository"/>
           </oneOrMore>
           <optional>
-            <ref name="k.deploy"/>
+            <ref name="k.pxedeploy"/>
           </optional>
           <optional>
             <ref name="k.split"/>
@@ -2138,38 +2138,38 @@ scsi CD or an ide CD drive</a:documentation>
   </div>
   <!--
     ==========================================
-    main block: <deploy>
+    main block: <pxedeploy>
     
   -->
   <div>
-    <define name="k.deploy.server.attribute">
+    <define name="k.pxedeploy.server.attribute">
       <attribute name="server">
         <a:documentation>Name or IP Address of server for downloading the data</a:documentation>
       </attribute>
     </define>
-    <define name="k.deploy.blocksize.attribute">
+    <define name="k.pxedeploy.blocksize.attribute">
       <attribute name="blocksize">
         <a:documentation>Blocksize value used for atftp downloads</a:documentation>
       </attribute>
     </define>
-    <define name="k.deploy.attlist">
+    <define name="k.pxedeploy.attlist">
       <interleave>
         <optional>
-          <ref name="k.deploy.server.attribute"/>
+          <ref name="k.pxedeploy.server.attribute"/>
         </optional>
         <optional>
-          <ref name="k.deploy.blocksize.attribute"/>
+          <ref name="k.pxedeploy.blocksize.attribute"/>
         </optional>
       </interleave>
     </define>
-    <define name="k.deploy">
-      <element name="deploy">
+    <define name="k.pxedeploy">
+      <element name="pxedeploy">
         <a:documentation>Controls the Image Deploy Process</a:documentation>
         <db:para>The deploy section is used to allow kiwi to create the
 config.&lt;MAC&gt; file required by PXE based network images.
 the contents of this file controls the image deploy process.</db:para>
         <interleave>
-          <ref name="k.deploy.attlist"/>
+          <ref name="k.pxedeploy.attlist"/>
           <optional>
             <ref name="k.timeout"/>
           </optional>

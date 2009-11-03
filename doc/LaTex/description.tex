@@ -809,7 +809,7 @@ bridge as part of one ore more \textbf{xenbridge} section(s).
 \end{itemize}
 
 \begin{Command}{14cm}
-<deploy server="IP" blocksize="4096">\\
+<pxedeploy server="IP" blocksize="4096">\\
 \hspace*{1cm}<timeout>seconds</timeout>\\
 \hspace*{1cm}<commandline>kernel-options</commandline>\\
 \hspace*{1cm}<kernel>kernel-file</kernel>\\
@@ -824,10 +824,10 @@ bridge as part of one ore more \textbf{xenbridge} section(s).
 \hspace*{1cm}<configuration source="/KIWI/../file" dest="/../file"\\
 \hspace*{4.5cm}arch="..."/>\\
 \hspace*{1cm}<configuration .../>\\
-</deploy>
+</pxedeploy>
 \end{Command}
 
-The optional deploy section is only useful if you build the \textbf{pxe}
+The optional pxedeploy section is only useful if you build the \textbf{pxe}
 image type. For this type an additional network boot infrastructure needs
 to be set up. To ease the process of setting up such a boot server kiwi
 provides a package called kiwi-pxeboot. This package sets up the basic
@@ -840,7 +840,7 @@ it is required to provide an information how KIWI should handle the
 machine it should be install with the created image. Information like
 which image should be used or how to partition the machine needs to
 be provided in a file called config.<MAC-Address> below the directory
-/srv/tftpboot/KIWI. The reason for the deploy section is to allow KIWI
+/srv/tftpboot/KIWI. The reason for the pxedeploy section is to allow KIWI
 to create that file according to the information provided in the image
 description.
 
@@ -863,7 +863,7 @@ description.
       method which is not supported by the distribution standard mkinitrd
       the KIWI initrd needs to stay on the system and needs to be used for
       local boot as well. So if your system image makes use of the split
-      type or your deploy section includes any union information the
+      type or your pxedeploy section includes any union information the
       kernel and initrd sections must be provided.
 \item The partitions section is required if you want to install the system
       image on a disk or any other permanent storage device. Each partition is

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<image schemaversion="3.7" name="suse-11.1-pxe-client">
+<image schemaversion="3.8" name="suse-11.1-pxe-client">
 	<description type="system">
 		<author>Marcus Schäfer</author>
 		<contact>ms@novell.com</contact>
@@ -22,14 +22,14 @@
 		<!--<source path="/image/CDs/full-11.1-i386"/>-->
 		<source path="opensuse://11.1/repo/oss/"/>
 	</repository>
-	<deploy server="192.168.100.2" blocksize="4096">
+	<pxedeploy server="192.168.100.2" blocksize="4096">
 		<partitions device="/dev/sda">
 			<partition type="swap" number="1" size="5"/>
 			<partition type="L" number="2" size="image" mountpoint="/" target="true"/>
 			<partition type="L" number="3" target="false"/>
 		</partitions>
 		<union ro="/dev/sda2" rw="/dev/sda3" type="aufs"/>
-	</deploy>
+	</pxedeploy>
 	<packages type="image">
 		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>

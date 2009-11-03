@@ -9,6 +9,7 @@
 <xsl:import href="convert20to24.xsl"/>
 <xsl:import href="convert24to35.xsl"/>
 <xsl:import href="convert35to37.xsl"/>
+<xsl:import href="convert37to38.xsl"/>
 
 <xsl:output encoding="utf-8"/>
 
@@ -22,12 +23,16 @@
 	</xsl:variable>
 
 	<xsl:variable name="v35">
-        <xsl:apply-templates select="exslt:node-set($v20)" mode="conv24to35"/>
-    </xsl:variable>
+		<xsl:apply-templates select="exslt:node-set($v20)" mode="conv24to35"/>
+	</xsl:variable>
+
+	<xsl:variable name="v37">
+		<xsl:apply-templates select="exslt:node-set($v35)" mode="conv35to37"/>
+	</xsl:variable>
 
 	<xsl:apply-templates
-        select="exslt:node-set($v35)" mode="conv35to37"
-    />
+		select="exslt:node-set($v37)" mode="conv37to38"
+	/>
 </xsl:template>
 
 </xsl:stylesheet>

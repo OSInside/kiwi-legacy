@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<image schemaversion="3.7" name="LimeJeOS-SLE10">
+<image schemaversion="3.8" name="LimeJeOS-SLE10">
 	<description type="system">
 		<author>Christoph Thiel</author>
 		<contact>cthiel@novell.com</contact>

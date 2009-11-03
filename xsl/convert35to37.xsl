@@ -25,7 +25,7 @@
 </para>
 <xsl:template match="image" mode="conv35to37">
 	<image schemaversion="3.7">
-		<xsl:copy-of select="@name"/>
+		<xsl:copy-of select="@*[local-name() != 'schemaversion']"/>
 		<xsl:apply-templates mode="conv35to37"/>
 	</image>
 </xsl:template>

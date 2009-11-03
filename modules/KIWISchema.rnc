@@ -26,7 +26,7 @@ db:info [
 	db:releaseinfo [
 		"$Id: kiwi.rnc 2957 2008-01-11 12:53:39Z thomas-schraitle $"
 	]
-	db:releaseinfo [ "RNC Schema Version 3.7" ]
+	db:releaseinfo [ "RNC Schema Version 3.8" ]
 	db:pubdate [ "START" ]
 	db:pubdate [ "2008-01-08" ]
 ]
@@ -58,7 +58,7 @@ div {
 		attribute inherit { text }
 	k.image.schemaversion.attribute =
 		## The allowed Schema version (fixed value)
-		attribute schemaversion { "3.7" }
+		attribute schemaversion { "3.8" }
 	k.image.kiwirevision.attribute =
 		## A kiwi SVN revision number which is known to build
 		## a working image from this description. If the kiwi SVN
@@ -95,7 +95,7 @@ div {
 			k.users* &
 			k.drivers* &
 			k.repository+ &
-			k.deploy? &
+			k.pxedeploy? &
 			k.split? &
 			k.packages* &
 			k.vmwareconfig? &
@@ -1481,19 +1481,19 @@ div {
 }
 
 #==========================================
-# main block: <deploy>
+# main block: <pxedeploy>
 #
 div {
-	k.deploy.server.attribute =
+	k.pxedeploy.server.attribute =
 		## Name or IP Address of server for downloading the data
 		attribute server { text }
-	k.deploy.blocksize.attribute = 
+	k.pxedeploy.blocksize.attribute = 
 		## Blocksize value used for atftp downloads
 		attribute blocksize { text }
-	k.deploy.attlist =
-		k.deploy.server.attribute? &
-		k.deploy.blocksize.attribute?
-	k.deploy =
+	k.pxedeploy.attlist =
+		k.pxedeploy.server.attribute? &
+		k.pxedeploy.blocksize.attribute?
+	k.pxedeploy =
 		## Controls the Image Deploy Process
 		[
 		db:para [
@@ -1502,8 +1502,8 @@ div {
 			"the contents of this file controls the image deploy process."
 		]
 		]
-		element deploy {
-			k.deploy.attlist &
+		element pxedeploy {
+			k.pxedeploy.attlist &
 			k.timeout? &
 			k.commandline? &
 			k.kernel? &
