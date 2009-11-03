@@ -1,9 +1,0 @@
-#! /bin/sh
-
-rm -f config.xml
-
-(sed -n -e '1,/ PACKAGES BEGIN GNOME/p' config.xml.in ; cat $1 | while read pack; do echo '<package name="'$pack'"/>'; done; sed -n -e '/ PACKAGES END GNOME/,$p' config.xml.in ) | xmllint --format - > t && mv t config.xml 
-
-(sed -n -e '1,/ PACKAGES BEGIN KDE/p' config.xml ; cat $2 | while read pack; do echo '<package name="'$pack'"/>'; done; sed -n -e '/ PACKAGES END KDE/,$p' config.xml ) | xmllint --format - > t && mv t config.xml
-
-
