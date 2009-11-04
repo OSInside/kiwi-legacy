@@ -21,8 +21,7 @@
 		<profile name="smp" description="KERNEL: bigsmp kernel"/>
 	</profiles>
 	<drivers type="usbdrivers" profiles="default,xen,smp">
-		<file name="usb/host/ehci-hcd.ko"/>
-		<file name="usb/host/uhci-hcd.ko"/>
+		<file name="usb/host/*"/>
 		<file name="usb/core/usbcore.ko"/>
 		<file name="usb/storage/usb-storage.ko"/>
 	</drivers>

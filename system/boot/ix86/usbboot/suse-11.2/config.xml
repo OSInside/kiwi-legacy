@@ -22,12 +22,6 @@
 		<profile name="pae" description="KERNEL: pae kernel"/>
 		<profile name="desktop" description="KERNEL: Desktop kernel"/>
 	</profiles>
-	<drivers type="usbdrivers">
-		<file name="usb/host/ehci-hcd.ko"/>
-		<file name="usb/host/uhci-hcd.ko"/>
-		<file name="usb/core/usbcore.ko"/>
-		<file name="usb/storage/usb-storage.ko"/>
-	</drivers>
 	<drivers type="drivers">
 		<file name="crypto/*"/>
 		<file name="drivers/virtio/*"/>
@@ -36,6 +30,9 @@
 		<file name="drivers/net/virtio_net.ko"/>
 		<file name="drivers/md/*"/>
 		<file name="drivers/hid/*"/>
+		<file name="drivers/input/keyboard/*"/>
+		<file name="drivers/input/mouse/*"/>
+		<file name="drivers/usb/*"/>
 		<file name="drivers/ide/*"/>
 		<file name="drivers/block/loop.ko"/>
 		<file name="net/packet/*"/>
