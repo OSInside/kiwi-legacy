@@ -76,6 +76,7 @@
 		<package name="patch"/>
 		<package name="psmisc"/>
 		<package name="tar"/>
+		<package name="timezone"/>
 		<package name="sed"/>
 		<package name="w3m"/>
 		<package name="ifplugd"/>

@@ -2,6 +2,9 @@
 Tue Nov  3 10:44:48 CET 2009 - ms@suse.de
 
 - v3.75
+- added support for timezone in JeOS
+- changed suseActivateDefaultServices() to activate services
+  only without calling the post scripts of installed RPM's
 - added missing usb host controller module (ohci) to all
   boot image descriptions except vmxboot which doesn't need it 
 - added Patches from Robert Schweikert

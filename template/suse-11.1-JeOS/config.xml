@@ -77,6 +77,7 @@
 		<package name="vim-base"/>
 		<package name="vim"/>
 		<package name="tar"/>
+		<package name="timezone"/>
 		<package name="ifplugd"/>
 		<package name="branding-openSUSE"/>
 		<package name="release-notes-openSUSE"/>
