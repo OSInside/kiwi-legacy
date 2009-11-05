@@ -365,7 +365,7 @@ sub createLegacySortFile {
 	foreach my $file (@list) {
 		print $FD "$file 1"."\n";
 	}
-	print $FD "$src/boot/isolinux.bin 2"."\n";
+	print $FD $src."/".$base{$arch}{boot}."/loader/isolinux.bin 2"."\n";
 	close $FD;
 	return $sort;
 }
