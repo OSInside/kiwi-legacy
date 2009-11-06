@@ -40,6 +40,7 @@ suseInsertService boot.device-mapper
 #======================================
 # SuSEconfig
 #--------------------------------------
+baseSetRunlevel 5
 suseConfig
 
 #======================================

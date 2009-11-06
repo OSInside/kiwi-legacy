@@ -12,6 +12,7 @@ Tue Nov  3 10:44:48 CET 2009 - ms@suse.de
   * new function baseSetRunlevel to allow setup of runlevel in inittab
   * change deploy section to pxedeploy section and update schemaversion
     from 3.7 to 3.8 via xsl stylesheet
+  * removing inittab overlay files and use baseSetRunlevel() instead
 - added ieee1394 firewire modules to support liveCD on
   firewire DVD drive (bnc #479020)
 

@@ -42,6 +42,7 @@ suseInsertService boot.xen
 #======================================
 # SuSEconfig
 #--------------------------------------
+baseSetRunlevel 5
 suseConfig
 
 #======================================

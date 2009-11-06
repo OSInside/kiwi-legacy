@@ -36,6 +36,7 @@ suseInsertService boot.device-mapper
 # SuSEconfig
 #--------------------------------------
 baseUpdateSysConfig /etc/sysconfig/windowmanager DEFAULT_WM gnome
+baseSetRunlevel 5
 suseConfig
 
 #======================================
