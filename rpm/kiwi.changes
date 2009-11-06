@@ -2,6 +2,7 @@
 Tue Nov  3 10:44:48 CET 2009 - ms@suse.de
 
 - v3.75
+- fixed sysconfig/kernel setup for old mkinitrd (bnc #547571)
 - fixed xslt processing. The possible change to the XML
   file is now written to /tmp to avoid writing into read-only
   filesystem (bnc #552617)

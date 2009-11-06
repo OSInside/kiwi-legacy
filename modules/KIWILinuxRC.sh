@@ -1682,6 +1682,16 @@ function setupKernelModules {
 		"reboot"
 	fi
 	cp $ktempl $syskernel
+	if [ ! -e $srcprefix/lib/mkinitrd/scripts/boot-usb.sh ];then
+		# /.../
+		# if boot-usb.sh does not exist we are based on an old
+		# mkinitrd version which requires all modules as part of
+		# sysconfig/kernel. Therefore we include all USB modules
+		# required to support USB storage like USB sticks
+		# ----
+		local USB_MODULES="ehci-hcd ohci-hcd uhci-hcd usbcore usb-storage sd"
+		INITRD_MODULES="$INITRD_MODULES $USB_MODULES"
+	fi
 	sed -i -e \
 		s"@^INITRD_MODULES=.*@INITRD_MODULES=\"$INITRD_MODULES\"@" \
 	$syskernel
