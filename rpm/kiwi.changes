@@ -2,6 +2,9 @@
 Tue Nov  3 10:44:48 CET 2009 - ms@suse.de
 
 - v3.75
+- fixed xslt processing. The possible change to the XML
+  file is now written to /tmp to avoid writing into read-only
+  filesystem (bnc #552617)
 - added support for timezone in JeOS
 - changed suseActivateDefaultServices() to activate services
   only without calling the post scripts of installed RPM's

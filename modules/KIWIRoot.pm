@@ -848,7 +848,7 @@ sub setup {
 	# copy image description to image tree
 	#----------------------------------------
 	qxx (" mkdir -p $root/image ");
-	qxx (" cp $imageDesc/$configFile $root/image 2>&1 ");
+	qxx (" cp $configFile $root/image 2>&1 ");
 	qxx (" cp $imageDesc/images.sh $root/image 2>&1 ");
 	qxx (" cp $imageDesc/config-cdroot.tgz $root/image 2>&1 ");
 	qxx (" cp $imageDesc/config-cdroot.sh  $root/image 2>&1 ");

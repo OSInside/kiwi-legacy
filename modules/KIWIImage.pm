@@ -79,7 +79,7 @@ sub new {
 		$kiwi -> failed ();
 		return undef;
 	}
-	if (! -f "$imageTree/image/$configFile") {
+	if (! -f $configFile) {
 		$kiwi -> error  ("Validation of $imageTree failed");
 		$kiwi -> failed ();
 		return undef;

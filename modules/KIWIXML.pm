@@ -105,13 +105,11 @@ sub new {
 	#------------------------------------------
 	foreach my $template (@main::SchemaCVT) {
 		my $data = qxx (
-			"xsltproc -o $controlFile-next $template $controlFile 2>&1"
+			"xsltproc -o /tmp/config.xml $template $controlFile 2>&1"
 		);
 		my $code = $? >> 8;
-		if (($code == 0) && (-f "$controlFile-next")) {
-			my @info = stat ($controlFile);
-			qxx ("mv $controlFile-next $controlFile");
-			chown $info[4], $info[5], $controlFile;
+		if (($code == 0) && (-f "/tmp/config.xml")) {
+			$controlFile = "/tmp/config.xml";
 		} elsif ($code > 10) {
 			$kiwi -> error ("XSL: $data");
 			$kiwi -> failed ();
@@ -453,7 +451,7 @@ sub updateXML {
 sub getConfigName {
 	my $this = shift;
 	my $name = $this->{controlFile};
-	return basename ($name);
+	return ($name);
 }
 
 #==========================================
