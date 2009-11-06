@@ -41,6 +41,7 @@ suseInsertService sshd
 #======================================
 # SuSEconfig
 #--------------------------------------
+baseUpdateSysConfig /etc/sysconfig/displaymanager DISPLAYMANAGER xdm
 baseSetRunlevel 5
 suseConfig
 

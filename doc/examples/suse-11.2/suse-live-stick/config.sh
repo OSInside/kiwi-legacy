@@ -57,6 +57,7 @@ rm -rf /opt/kde3
 #======================================
 # SuSEconfig
 #--------------------------------------
+baseUpdateSysConfig /etc/sysconfig/displaymanager DISPLAYMANAGER kdm
 baseSetRunlevel 5
 suseConfig
 

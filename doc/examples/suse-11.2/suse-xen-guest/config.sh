@@ -42,6 +42,7 @@ suseInsertService boot.xen
 #======================================
 # SuSEconfig
 #--------------------------------------
+baseUpdateSysConfig /etc/sysconfig/displaymanager DISPLAYMANAGER kdm
 baseSetRunlevel 5
 suseConfig
 
