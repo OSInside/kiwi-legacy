@@ -33,14 +33,18 @@ BuildRequires:  rpm-devel libexpat-devel libsatsolver-devel
 %if %{suse_version} <= 1010
 Requires:       qt
 %endif
+%ifarch %ix86 x86_64
 %if %{suse_version} > 1010
 Requires:       squashfs
+%endif
 %endif
 Requires:       perl = %{perl_version}
 Requires:       perl-XML-LibXML perl-libwww-perl screen coreutils
 Requires:       perl-XML-LibXML-Common perl-XML-SAX perl-Config-IniFiles
 Requires:       kiwi-tools libxslt checkmedia
+%ifarch %ix86 x86_64
 Requires:       master-boot-code
+%endif
 %if %{suse_version} > 1030
 Requires:       satsolver-tools
 %endif
