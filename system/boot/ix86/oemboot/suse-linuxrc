@@ -347,11 +347,12 @@ fi
 # 16) Recover system if requested
 #--------------------------------------
 if [ ! -z "$KIWI_RECOVERY" ];then
-	text="Do you want to start the System-Recovery ?"
+	text=$TEXT_REPAIR
 	if [ ! -z "$RESTORE" ];then
-		text="Do you want to start the System-Restore ?"
+		text=$TEXT_RESTORE
 	fi
-	if ! Dialog --defaultno --yesno "$(getText "$text")" 5 50;then
+	Dialog --defaultno --yesno "\"$text\"" 5 50
+	if [ ! $? = 0 ];then
 		systemException "System-Recovery not started" "reboot"
 	fi
 	clear
@@ -496,7 +497,7 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 		kill $dPID
 	)&
 	echo "mst -f /progress | dialog \
-		--backtitle \"$(getText "Restoring base operating system...")\" \
+		--backtitle \"$TEXT_RECOVERYTITLE\" \
 		--progressbox 3 50
 	" > /tmp/progress.sh
 	if [ -e /dev/fb0 ];then

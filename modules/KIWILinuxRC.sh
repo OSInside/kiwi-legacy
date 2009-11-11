@@ -50,22 +50,26 @@ function Dialog {
 	local code=1
 	export DIALOG_CANCEL=1
 	if [ -e /dev/fb0 ];then
-		code=$(fbiterm -m $UFONT -- dialog \
-			--ok-label "$(getText "OK")" \
-			--cancel-label "$(getText "Cancel")" \
-			--yes-label "$(getText "Yes")" \
-			--no-label "$(getText "No")" \
-			--exit-label "$(getText "Exit")" \
-			"$@";echo $?)
-		code=$(echo $code | cut -c5-)
+		cat > /tmp/fbcode <<- EOF
+			dialog \
+				--ok-label "$TEXT_OK" \
+				--cancel-label "$TEXT_CANCEL" \
+				--yes-label "$TEXT_YES" \
+				--no-label "$TEXT_NO" \
+				--exit-label "$TEXT_EXIT" \
+				$@
+			echo \$? > /tmp/fbcode
+		EOF
+		fbiterm -m $UFONT -- bash /tmp/fbcode
+		code=$(cat /tmp/fbcode)
 	else
-		dialog \
-			--ok-label "$(getText "OK")" \
-			--cancel-label "$(getText "Cancel")" \
-			--yes-label "$(getText "Yes")" \
-			--no-label "$(getText "No")" \
-			--exit-label "$(getText "Exit")" \
-			"$@"
+		eval dialog \
+			--ok-label "$TEXT_OK" \
+			--cancel-label "$TEXT_CANCEL" \
+			--yes-label "$TEXT_YES" \
+			--no-label "$TEXT_NO" \
+			--exit-label "$TEXT_EXIT" \
+			$@
 		code=$?
 	fi
 	return $code
@@ -4549,7 +4553,7 @@ function luksOpen {
 		if [ ! -e /tmp/luks ];then
 			Dialog \
 				--stdout --insecure \
-				--passwordbox "$(getText "Enter LUKS passphrase")" 10 60 |\
+				--passwordbox "\"$TEXT_LUKS\"" 10 60 |\
 				cat > /tmp/luks
 		fi
 		info=$(cat /tmp/luks | cryptsetup luksOpen $ldev $name 2>&1)
@@ -4638,12 +4642,39 @@ function selectLanguage {
 		done
 		if [ "$list" = "$list_orig" ];then
 			DIALOG_LANG=en_US
-			return
+		else
+			DIALOG_LANG=$(runInteractive \
+				"--stdout --no-cancel --radiolist $title 20 40 10 $list"
+			)
 		fi
-		DIALOG_LANG=$(runInteractive \
-			"--stdout --no-cancel --radiolist $title 20 40 10 $list"
-		)
 	fi
+	#======================================
+	# Exports (Texts)
+	#--------------------------------------
+	export TEXT_OK=$(
+		getText "OK")
+	export TEXT_CANCEL=$(
+		getText "Cancel")
+	export TEXT_YES=$(
+		getText "Yes")
+	export TEXT_NO=$(
+		getText "No")
+	export TEXT_EXIT=$(
+		getText "Exit")
+	export TEXT_LUKS=$(
+		getText "Enter LUKS passphrase")
+	export TEXT_LICENSE=$(
+		getText "Do you accept the license agreement ?")
+	export TEXT_RESTORE=$(
+		getText "Do you want to start the System-Restore ?")
+	export TEXT_REPAIR=$(
+		getText "Do you want to start the System-Recovery ?")
+	export TEXT_RECOVERYTITLE=$(
+		getText "Restoring base operating system...")
+	export TEXT_CDPULL=$(
+		getText "Please eject the install CD/DVD before continuing")
+	export TEXT_USBPULL=$(
+		getText "Please pull out the install USB stick before continuing")	
 }
 #======================================
 # getText
@@ -4699,10 +4730,10 @@ function displayEULA {
 	while true;do
 		Dialog --textbox $code 20 70 \
 			--and-widget --extra-button \
-			--extra-label "$(getText "No")" \
-			--ok-label "$(getText "Yes")" \
-			--cancel-label "$(getText "Cancel")" \
-			--yesno "$(getText "Do you accept the license agreement ?")" \
+			--extra-label "$TEXT_NO" \
+			--ok-label "$TEXT_YES" \
+			--cancel-label "$TEXT_CANCEL" \
+			--yesno "$TEXT_LICENSE" \
 			5 45
 		case $? in
 			0 ) break

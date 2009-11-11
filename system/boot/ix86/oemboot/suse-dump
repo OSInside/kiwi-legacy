@@ -135,9 +135,9 @@ function OEMInstall {
 	fi
 	Echo "Entering installation mode for disk: $instDisk"
 	if [ -z "$OEM_SAP_INSTALL" ];then
-		Dialog --yesno \
-			"$(getText "Destroying ALL data on %1, continue ?" $instDisk)" \
-			5 60
+		TEXT_INST=$(
+			getText "Destroying ALL data on %1, continue ?" $instDisk)
+		Dialog --yesno "\"$TEXT_INST\"" 5 70
 		if [ ! $? = 0 ];then
 			systemException \
 				"System installation canceled" \
@@ -285,9 +285,9 @@ function OEMInstall {
 	# Reboot system
 	#--------------------------------------
 	if [ "$OEMInstallType" = "CD" ];then
-		message="Please eject the install CD/DVD before continuing"
+		message=$TEXT_CDPULL
 	else
-		message="Please pull out the install USB stick before continuing"
+		message=$TEXT_USBPULL
 	fi
-	Dialog --msgbox "$(getText "$message")" 5 60
+	Dialog --msgbox "\"$message\"" 5 60
 }

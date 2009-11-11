@@ -2,6 +2,10 @@
 Mon Nov  9 11:21:27 CET 2009 - ms@suse.de
 
 - v3.75
+- fixed exit code evaluation in Dialog function. The value of the
+  evaluated exit code was undefined because it depended on which
+  subshell finished first. The solution is to prevent parameter
+  subshells when building the dialog parameterlist (bnc #547864)
 - fixed spec file for s390 architecture
 
 -------------------------------------------------------------------
