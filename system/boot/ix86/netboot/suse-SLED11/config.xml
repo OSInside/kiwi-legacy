@@ -255,7 +255,6 @@
 		<package name="cracklib-dict-small"/>
 		<package name="cracklib-dict-full"/>
 		<package name="e2fsprogs"/>
-		<package name="mkinitrd"/>
 		<package name="xorg-x11-libxcb"/>
 		<package name="xorg-x11-libX11"/>
 		<package name="xorg-x11-libXau"/>

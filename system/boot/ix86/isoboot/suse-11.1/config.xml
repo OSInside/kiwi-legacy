@@ -182,7 +182,6 @@
 		<package name="mdadm"/>
 		<package name="memtest86+"/>
 		<package name="mingetty"/>
-		<package name="mkinitrd"/>
 		<package name="mktemp"/>
 		<package name="mtools"/>
 		<package name="net-tools"/>

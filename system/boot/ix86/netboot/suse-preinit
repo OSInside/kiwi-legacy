@@ -29,7 +29,7 @@ Echo "Calling pre-init stage in system image"
 # 2) check for LOCAL_BOOT
 #--------------------------------------
 if [ $LOCAL_BOOT = "yes" ];then
-	exit 0
+	exec /sbin/init $@
 fi
 
 #======================================
@@ -156,3 +156,9 @@ if [ ! -z "$DISK" ] && [ "$systemIntegrity" = "clean" ]; then
 		umountSystemFilesystems
 	fi
 fi
+
+#======================================
+# 14) run init
+#--------------------------------------
+cleanImage
+exec /sbin/init $@

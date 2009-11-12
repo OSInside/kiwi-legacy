@@ -110,7 +110,6 @@
 		<package name="pmtools"/>
 		<package name="resmgr"/>
 		<package name="suse-build-key"/>
-		<package name="mkinitrd"/>
 		<package name="net-tools"/>
 		<package name="gfxboot"/>
 		<package name="fribidi"/>

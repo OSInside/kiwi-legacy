@@ -2,6 +2,10 @@
 Mon Nov  9 11:21:27 CET 2009 - ms@suse.de
 
 - v3.75
+- remove pivot root calls (old code) and changed preinit
+  handling to let preinit run like init. If preinit runs the
+  kernel already knows the system image root as / and preinit
+  always ends with exec init (bnc #521456)
 - fixed exit code evaluation in Dialog function. The value of the
   evaluated exit code was undefined because it depended on which
   subshell finished first. The solution is to prevent parameter

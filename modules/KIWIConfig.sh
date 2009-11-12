@@ -861,7 +861,9 @@ function suseStripInitrd {
 		/usr/lib*/X11 /var/X11R6 /usr/share/X11 /etc/X11
 		/usr/lib*/xorg /usr/lib*/libidn* /usr/share/locale-bundle
 		/etc/ppp /etc/xdg /etc/NetworkManager /lib*/YaST /lib*/security
-		/lib*/mkinitrd /srv /var/adm /usr/lib*/engines /usr/src/packages
+		/lib*/mkinitrd/boot /lib*/mkinitrd/dev /lib*/mkinitrd/scripts
+		/lib*/mkinitrd/setup
+		/srv /var/adm /usr/lib*/engines /usr/src/packages
 		/usr/src/linux* /usr/local /var/log/* /usr/share/pixmaps
 		/usr/share/gtk-doc /var/games /opt /var/spool /var/opt
 		/var/cache /var/tmp /etc/rpm /etc/cups /etc/opt

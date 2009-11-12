@@ -145,7 +145,6 @@
 		<package name="logrotate"/>
 		<package name="mdadm"/>
 		<package name="mingetty"/>
-		<package name="mkinitrd"/>
 		<package name="net-tools"/>
 		<package name="openSUSE-release"/>
 		<package name="openldap2-client"/>

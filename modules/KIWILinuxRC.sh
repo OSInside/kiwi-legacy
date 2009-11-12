@@ -320,9 +320,6 @@ function createInitialDevices {
 function mountSystemFilesystems {
 	mount -t proc  proc   /proc
 	mount -t sysfs sysfs  /sys
-	mount -t tmpfs -o mode=0755 udev /dev
-	createInitialDevices /dev
-	mount -t devpts devpts /dev/pts
 }
 #======================================
 # umountSystemFilesystems
@@ -434,6 +431,12 @@ function udevStart {
 		rm -f /lib/udev/rules.d/*-drivers.rules
 		HAVE_MODULES_ORDER=0
 	fi
+	# nodes in a tmpfs
+	mount -t tmpfs -o mode=0755 udev /dev
+	# static nodes
+	createInitialDevices /dev
+	# terminal devices
+	mount -t devpts devpts /dev/pts
 	# start the udev daemon
 	udevd --daemon udev_log="debug"
 	# wait for pending triggered udev events.
@@ -1088,7 +1091,9 @@ function setupBootLoaderGrub {
 	local rdisk=""
 	local fbmode=$vga
 	local xencons=$xencons
-	local gdevreco=$(expr $recoid - 1)
+	if [ ! -z "$OEM_RECOVERY" ];then
+		local gdevreco=$(expr $recoid - 1)
+	fi
 	if [ -z "$fbmode" ];then
 		fbmode=$DEFAULT_VGA
 	fi
@@ -4315,22 +4320,35 @@ function activateImage {
 	#======================================
 	# run preinit stage
 	#--------------------------------------
-	Echo "Calling preinit phase..."
-	cd /mnt
-	/mnt/sbin/pivot_root . mnt >/dev/null 2>&1
-	if test $? != 0;then
-		PIVOT=false
-		cleanInitrd && mount --move . / && chroot . ./preinit
-		chroot . rm -f  ./preinit
-		chroot . rm -f  ./include
-		chroot . rm -rf ./image
-	else
-		PIVOT=true
-		./preinit
-		rm -f  ./preinit
-		rm -f  ./include
-		rm -rf ./image
+	Echo "Preparing preinit phase..."
+	if ! cp /preinit /mnt;then
+		systemException "Failed to copy preinit code" "reboot"
 	fi
+	if ! cp /include /mnt;then
+		systemException "Failed to copy include code" "reboot"
+	fi
+	if [ ! -x /lib/mkinitrd/bin/run-init ];then
+		systemException "Can't find run-init program" "reboot"
+	fi
+	#======================================
+	# kill boot timer
+	#--------------------------------------
+	if [ ! $UTIMER = 0 ];then
+		kill $UTIMER
+	fi
+}
+#======================================
+# cleanImage
+#--------------------------------------
+function cleanImage {
+	# /.../
+	# remove preinit code from system image before real init
+	# is called
+	# ----
+	rm -f /preinit
+	rm -f /include
+	rm -rf /image
+	umountSystemFilesystems
 }
 #======================================
 # bootImage
@@ -4359,26 +4377,13 @@ function bootImage {
 	#======================================
 	# directly boot/reboot
 	#--------------------------------------
-	# /.../
-	# we already checked the filesystem
-	# no reason for boot.rootfsck to try again
-	# ----
-	if [ ! $UTIMER = 0 ];then
-		kill $UTIMER
-	fi
-	export ROOTFS_FSCK="0"
-	mount -n -o remount,rw / &>/dev/null
-	exec < dev/console >dev/console 2>&1
-	if [ $PIVOT = "true" ];then
-		umount -n -l /mnt
-	fi
 	umount proc &>/dev/null && \
 	umount proc &>/dev/null
 	if [ $reboot = "yes" ];then
 		Echo "Reboot requested... rebooting now"
-		exec chroot . /sbin/reboot -f -i
+		exec /lib/mkinitrd/bin/run-init -c /dev/console /mnt /sbin/reboot -f -i
 	else
-		exec chroot . /sbin/init $option
+		exec /lib/mkinitrd/bin/run-init -c /dev/console /mnt /preinit $option
 	fi
 }
 #======================================
