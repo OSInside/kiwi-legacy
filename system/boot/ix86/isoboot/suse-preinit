@@ -35,8 +35,3 @@ updateMTAB
 #--------------------------------------
 createFramebufferDevices
 
-#======================================
-# 4) run init
-#--------------------------------------
-cleanImage
-exec /sbin/init $@

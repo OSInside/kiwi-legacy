@@ -29,7 +29,7 @@ Echo "Calling pre-init stage in system image"
 # 2) check for LOCAL_BOOT
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "yes" ] && [ -z "$KIWI_RECOVERY" ];then
-	exec /sbin/init $@
+	exit 0
 fi
 
 #======================================
@@ -95,9 +95,3 @@ fi
 #--------------------------------------
 udevKill
 umountSystemFilesystems
-
-#======================================
-# 11) run init
-#--------------------------------------
-cleanImage
-exec /sbin/init $@

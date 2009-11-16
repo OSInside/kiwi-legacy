@@ -325,9 +325,9 @@ function mountSystemFilesystems {
 # umountSystemFilesystems
 #--------------------------------------
 function umountSystemFilesystems {
-	umount /dev/pts >/dev/null
-	umount /sys     >/dev/null
-	umount /proc    >/dev/null
+	umount /dev/pts &>/dev/null
+	umount /sys     &>/dev/null
+	umount /proc    &>/dev/null
 }
 #======================================
 # createFramebufferDevices
@@ -4383,7 +4383,8 @@ function bootImage {
 		Echo "Reboot requested... rebooting now"
 		exec /lib/mkinitrd/bin/run-init -c /dev/console /mnt /sbin/reboot -f -i
 	else
-		exec /lib/mkinitrd/bin/run-init -c /dev/console /mnt /preinit $option
+		exec /lib/mkinitrd/bin/run-init -c /dev/console /mnt /bin/bash -c \
+			"/preinit ; . /include ; cleanImage ; exec /sbin/init $option"
 	fi
 }
 #======================================
