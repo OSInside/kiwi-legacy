@@ -3,6 +3,9 @@ Mon Nov 16 10:47:04 CET 2009 - ms@suse.de
 
 - v3.76
 - don't require preinit to call init (bnc #521456)
+- added LVM feature to allow parts of the filesystem
+  in a separate volume. The setup of volumes happens
+  in the new <lvmvolumes> section
 
 -------------------------------------------------------------------
 Mon Nov  9 11:21:27 CET 2009 - ms@suse.de

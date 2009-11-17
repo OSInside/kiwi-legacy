@@ -181,12 +181,30 @@ If no split section is added the default split section from
 kiwi also provides support for LVM (Logical Volume Management). In this
 mode the disk partition table will include one lvm partition and one
 standard ext2 boot partition. kiwi creates the kiwiVG volume group and
-adds logical volumes as they are needed according to the image type and
-filesystem. After boot of the system the user has full control over the
-volume group and is free to change/resize/increas the group and the
-volumes inside. Support for LVM has been added for all image types which
-are disk based. This includes vmx,oem and usb. In order to use LVM for the
-usb type just add the \verb+--lvm+ option as part of the kiwi create
-step if the image is represented by an oem virtual disk or place the
-option when using the \verb+kiwi --bootstick+ approach
+adds logical volumes as they are needed and configured according to the
+image type and filesystem. After boot of the system the user has full
+control over the volume group and is free to change/resize/increas the
+group and the volumes inside. Support for LVM has been added for all
+image types which are disk based. This includes vmx,oem and usb.
+In order to use LVM for the usb type just add the \verb+--lvm+ option
+as part of the kiwi \verb+kiwi --bootstick+ deployment or add the
+attribute \textbf{lvm=''true''} as part of the \textbf{type} section
+in your config.xml file.
 
+The optional \textbf{lvmvolumes} section can be used to set one or
+more top level directories into a separate volume. For example you
+want to put /usr and /var into different volumes add the following
+lvmvolumes section:
+
+\begin{Command}{12cm}
+\begin{verbatim}
+<lvmvolumes>
+   <volume name="usr" freespace="100M"/>
+   <volume name="var"/>
+</lvmvolumes>
+\end{verbatim}
+\end{Command}
+
+The optional freespace attribute let you add additional free space
+for that volume. If you don't set any freespace the volume will be
+about 80\% to 90\% full.

@@ -83,7 +83,7 @@ div {
 		[
 		db:para [
 			"Each KIWI configuration file consists of a root element\x{a}" ~
-			"        image."
+			"image."
 		]
 		]
 		element image {
@@ -99,7 +99,8 @@ div {
 			k.split? &
 			k.packages* &
 			k.vmwareconfig? &
-			k.xenconfig?
+			k.xenconfig? &
+			k.lvmvolumes?
 		}
 }
 
@@ -1165,6 +1166,10 @@ div {
 # common element <type>
 #
 div {
+	k.type.lvm.attribute =
+		## Specify whether LVM should be used or not. This is effective
+		## for the types oem,usb and vmx
+		attribute lvm { xsd:boolean }
 	k.type.baseroot.attribute =
 		## Specify the path to a pre created base root system.
 		attribute baseroot { text }
@@ -1266,6 +1271,7 @@ div {
 		## Specifies the primary type (choose KIWI option type)
 		attribute primary { xsd:boolean }
 	k.type.attlist =
+		k.type.lvm.attribute? &
 		k.type.checkprebuilt.attribute? &
 		k.type.bootprofile.attribute? &
 		k.type.bootkernel.attribute? &
@@ -1291,6 +1297,57 @@ div {
 		element type { 
 			k.type.attlist, 
 			text 
+		}
+}
+
+#==========================================
+# common element <volume>
+#
+div {
+	k.volume.name.attribute =
+		## volume name. The name has to be the same like the directory
+		## name of the toplevel root directory. ONLY top level root
+		## directory names are allowed like srv or opt.
+		attribute name { text }
+	k.volume.freespace.attribute =
+		## free space to be added to this volume. The value is
+		## used as MB by default but you can add "M" and/or "G" as
+		## prefix
+		attribute freespace { text }
+	k.volume.attlist =
+		k.volume.freespace.attribute? &
+		k.volume.name.attribute
+	k.volume =
+		## Specify which parts of the filesystem should be
+		## on a extra volume.
+		[
+		db:para [
+			"Specify which parts of the filesystem should be onextra\x{a}"
+			"a extra volume."
+		]
+		]
+		element volume {
+			k.volume.attlist,
+			empty
+		}
+}
+
+
+#==========================================
+# common element <lvmvolumes>
+#
+div {
+	k.lvmvolumes.attlist = empty
+	k.lvmvolumes =
+		## Specify LVM volumes other than the root volume
+		[
+		db:para [
+			"Specify LVM volumes other than the root volume."
+		]
+		]
+		element lvmvolumes {
+			k.lvmvolumes.attlist &
+			k.volume+
 		}
 }
 

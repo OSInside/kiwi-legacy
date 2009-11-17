@@ -1561,6 +1561,19 @@ function updateRootDeviceFstab {
 	else
 		echo "/dev/root / defaults 0 0" >> $nfstab
 	fi
+	#======================================
+	# check for LVM volume setup
+	#--------------------------------------
+	if [ "$haveLVM" = "yes" ];then
+		for i in find /dev/kiwiVG/LV*;do
+			local volume=$(echo $i | cut -c15-)
+			local mpoint=$(echo $volume | tr _ /)
+			if [ ! $volume = "Root" ] && [ ! $volume = "Comp" ];then
+				echo "/dev/kiwiVG/LV$volume /$mpoint $FSTYPE defaults 0 0" \
+				>> $nfstab
+			fi
+		done
+	fi
 }
 #======================================
 # updateSwapDeviceFstab
@@ -3743,6 +3756,15 @@ function mountSystemStandard {
 		kiwiMount "$mountDevice" "/mnt"
 	else
 		mount $mountDevice /mnt >/dev/null
+	fi
+	if [ "$haveLVM" = "yes" ];then
+		for i in find /dev/kiwiVG/LV*;do
+			local volume=$(echo $i | cut -c15-)
+			local mpoint=$(echo $volume | tr _ /)
+			if [ ! $volume = "Root" ] && [ ! $volume = "Comp" ];then
+				mount /dev/kiwiVG/LV$volume /mnt/$mpoint
+			fi
+		done
 	fi
 	return $?
 }

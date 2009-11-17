@@ -125,7 +125,7 @@ named /etc/ImageID</a:documentation>
       <element name="image">
         <a:documentation>The root element of the configuration file		</a:documentation>
         <db:para>Each KIWI configuration file consists of a root element
-        image.</db:para>
+image.</db:para>
         <interleave>
           <ref name="k.image.attlist"/>
           <ref name="k.description"/>
@@ -161,6 +161,9 @@ named /etc/ImageID</a:documentation>
           </optional>
           <optional>
             <ref name="k.xenconfig"/>
+          </optional>
+          <optional>
+            <ref name="k.lvmvolumes"/>
           </optional>
         </interleave>
       </element>
@@ -1591,6 +1594,13 @@ the correct timezone and copy it to /etc/localtime.</db:para>
     
   -->
   <div>
+    <define name="k.type.lvm.attribute">
+      <attribute name="lvm">
+        <a:documentation>Specify whether LVM should be used or not. This is effective
+for the types oem,usb and vmx</a:documentation>
+        <data type="boolean"/>
+      </attribute>
+    </define>
     <define name="k.type.baseroot.attribute">
       <attribute name="baseroot">
         <a:documentation>Specify the path to a pre created base root system.</a:documentation>
@@ -1771,6 +1781,9 @@ vmx/oem types only.</a:documentation>
     <define name="k.type.attlist">
       <interleave>
         <optional>
+          <ref name="k.type.lvm.attribute"/>
+        </optional>
+        <optional>
           <ref name="k.type.checkprebuilt.attribute"/>
         </optional>
         <optional>
@@ -1837,6 +1850,67 @@ vmx/oem types only.</a:documentation>
         <a:documentation>The Image Type of the Logical Extend</a:documentation>
         <ref name="k.type.attlist"/>
         <text/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
+    common element <volume>
+    
+  -->
+  <div>
+    <define name="k.volume.name.attribute">
+      <attribute name="name">
+        <a:documentation>volume name. The name has to be the same like the directory
+name of the toplevel root directory. ONLY top level root
+directory names are allowed like srv or opt.</a:documentation>
+      </attribute>
+    </define>
+    <define name="k.volume.freespace.attribute">
+      <attribute name="freespace">
+        <a:documentation>free space to be added to this volume. The value is
+used as MB by default but you can add "M" and/or "G" as
+prefix</a:documentation>
+      </attribute>
+    </define>
+    <define name="k.volume.attlist">
+      <interleave>
+        <optional>
+          <ref name="k.volume.freespace.attribute"/>
+        </optional>
+        <ref name="k.volume.name.attribute"/>
+      </interleave>
+    </define>
+    <define name="k.volume">
+      <element name="volume">
+        <a:documentation>Specify which parts of the filesystem should be
+on a extra volume.</a:documentation>
+        <db:para>Specify which parts of the filesystem should be onextra
+a extra volume.</db:para>
+        <ref name="k.volume.attlist"/>
+        <empty/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
+    common element <lvmvolumes>
+    
+  -->
+  <div>
+    <define name="k.lvmvolumes.attlist">
+      <empty/>
+    </define>
+    <define name="k.lvmvolumes">
+      <element name="lvmvolumes">
+        <a:documentation>Specify LVM volumes other than the root volume</a:documentation>
+        <db:para>Specify LVM volumes other than the root volume.</db:para>
+        <interleave>
+          <ref name="k.lvmvolumes.attlist"/>
+          <oneOrMore>
+            <ref name="k.volume"/>
+          </oneOrMore>
+        </interleave>
       </element>
     </define>
   </div>

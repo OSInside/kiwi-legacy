@@ -554,19 +554,8 @@ sub setupBootStick {
 	my $result;
 	my $hald;
 	my $xml;
+	my %lvmparts;
 	my $root;
-	#==========================================
-	# use lvm together with system image only
-	#------------------------------------------
-	if (! defined $system) {
-		undef $lvm;
-	}
-	#==========================================
-	# add boot space if lvm based
-	#------------------------------------------
-	if ($lvm) {
-		$lvmbootMB = 40;
-	}
 	#==========================================
 	# check if system is tree or image file
 	#------------------------------------------
@@ -605,6 +594,50 @@ sub setupBootStick {
 	#------------------------------------------
 	my %type = %{$xml->getImageTypeAndAttributes()};
 	#==========================================
+	# use lvm together with system image only
+	#------------------------------------------
+	if (! defined $system) {
+		undef $type{lvm};
+		undef $lvm;
+	}
+	#==========================================
+	# Check for LVM...
+	#------------------------------------------
+	if (($type{lvm} =~ /true|yes/i) || ($lvm)) {
+		#==========================================
+		# add boot space if lvm based
+		#------------------------------------------
+		$lvm = 1;
+		$lvmbootMB  = 60;
+		$this->{lvm}= $lvm;
+		#==========================================
+		# check and set LVM volumes setup
+		#------------------------------------------
+		%lvmparts = $xml -> getLVMVolumes();
+		if (%lvmparts) {
+			if ( ! -d $system ) {
+				$kiwi -> error (
+					"LVM volumes setup requires root tree but got image file"
+				);
+				$kiwi -> failed ();
+				$this -> cleanTmp ();
+				return undef;
+			}
+			foreach my $vol (keys %lvmparts) {
+				#==========================================
+				# check directory per volume
+				#------------------------------------------
+				my $pname  = $vol; $pname =~ s/_/\//g;
+				if (! -d "$system/$pname") {
+					$kiwi -> error ("Directory $system/$pname does not exist");
+					$kiwi -> failed ();
+					$this -> cleanTmp ();
+					return undef;
+				}
+			}
+		}
+	}
+	#==========================================
 	# check for device mapper snapshot / clicfs
 	#------------------------------------------
 	if (($type{filesystem} eq "dmsquash") || ($type{filesystem} eq "clicfs")) {
@@ -631,7 +664,7 @@ sub setupBootStick {
 	# add boot space if syslinux based
 	#------------------------------------------
 	if ($bootloader eq "syslinux") {
-		$syslbootMB= 40;
+		$syslbootMB= 60;
 	}
 	#==========================================
 	# check image split portion
@@ -941,11 +974,17 @@ sub setupBootStick {
 		# Umount possible mounted stick partitions
 		#------------------------------------------
 		$this -> umountDevice ($stick);
-		$status = qxx ( "/sbin/blockdev --rereadpt $stick 2>&1" );
-		$result = $? >> 8;
+		for (my $try=0;$try>=2;$try++) {
+			$status = qxx ( "/sbin/blockdev --rereadpt $stick 2>&1" );
+			$result = $? >> 8;
+			if ($result != 0) {
+				sleep (1); next;
+			}
+			last;
+		}
 		if ($result != 0) {
 			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't reread partition table: $!");
+			$kiwi -> error  ("Couldn't reread partition table: $status");
 			$kiwi -> failed ();
 			$this -> cleanDbus();
 			$this -> cleanTmp ();
@@ -964,7 +1003,7 @@ sub setupBootStick {
 		#------------------------------------------
 		if ($lvm) {
 			%deviceMap = $this -> setVolumeGroup (
-				\%deviceMap,$stick,$syszip,$haveSplit
+				\%deviceMap,$stick,$syszip,$haveSplit,\%lvmparts
 			);
 			if (! %deviceMap) {
 				$this -> cleanDbus();
@@ -1042,66 +1081,11 @@ sub setupBootStick {
 		#==========================================
 		# Create fs on system image partition
 		#------------------------------------------
-		my %FSopts = main::checkFSOptions();
-		SWITCH: for ($FSTypeRO) {
-			/^ext2/     && do {
-				$kiwi -> info ("Creating ext2 root filesystem");
-				my $fsopts = $FSopts{ext2};
-				$fsopts.= "-F";
-				if ($this->{inodes}) {
-					$fsopts.= " -N $this->{inodes}";
-				}
-				$status = qxx ("/sbin/mke2fs $fsopts $deviceMap{1} 2>&1");
-				$result = $? >> 8;
-				last SWITCH;
-			};
-			/^ext3/     && do {
-				$kiwi -> info ("Creating ext3 root filesystem");
-				my $fsopts = $FSopts{ext3};
-				$fsopts.= "-j -F";
-				if ($this->{inodes}) {
-					$fsopts.= " -N $this->{inodes}";
-				}
-				$status = qxx ("/sbin/mke2fs $fsopts $deviceMap{1} 2>&1");
-				$result = $? >> 8;
-				last SWITCH;
-			};
-			/^ext4/     && do {
-				$kiwi -> info ("Creating ext4 root filesystem");
-				my $fsopts = $FSopts{ext4};
-				$fsopts.= "-j -F";
-				if ($this->{inodes}) {
-					$fsopts.= " -N $this->{inodes}";
-				}
-				$status = qxx ("/sbin/mke2fs $fsopts $deviceMap{1} 2>&1");
-				$result = $? >> 8;
-				last SWITCH;
-			};
-			/^reiserfs/ && do {
-				$kiwi -> info ("Creating reiserfs root filesystem");
-				my $fsopts = $FSopts{reiserfs};
-				$fsopts.= "-f";
-				$status = qxx (
-					"/sbin/mkreiserfs $fsopts $deviceMap{1} 2>&1"
-				);
-				$result = $? >> 8;
-				last SWITCH;
-			};
-			$kiwi -> error  ("Unsupported filesystem type: $FSTypeRO");
-			$kiwi -> failed ();
-			$this -> cleanDbus();
-			$this -> cleanTmp ();
-			return undef;
-		};
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't create $FSTypeRO filesystem: $status");
-			$kiwi -> failed ();
+		if (! $this -> setupFilesystem ($FSTypeRO,$deviceMap{1},"root")) {
 			$this -> cleanDbus();
 			$this -> cleanTmp ();
 			return undef;
 		}
-		$kiwi -> done();
 		#==========================================
 		# Mount system image partition
 		#------------------------------------------
@@ -1112,6 +1096,34 @@ sub setupBootStick {
 			$this -> cleanDbus();
 			$this -> cleanLoop ();
 			return undef;
+		}
+		#==========================================
+		# Create LVM volumes filesystems
+		#------------------------------------------
+		if (($lvm) && (%lvmparts)) {
+			my $VGroup = "kiwiVG";
+			foreach my $name (keys %lvmparts) {
+				my $device = "/dev/$VGroup/LV$name";
+				my $pname  = $name; $pname =~ s/_/\//g;
+				$status = qxx ("mkdir -p $loopdir/$pname 2>&1");
+				$result = $? >> 8;
+				if ($result != 0) {
+					$kiwi -> error ("Can't create mount point $loopdir/$pname");
+					$this -> cleanDbus();
+					$this -> cleanLoop ();
+					return undef;
+				}
+				if (! $this -> setupFilesystem ($FSTypeRO,$device,$pname)) {
+					$this -> cleanDbus();
+					$this -> cleanLoop ();
+					return undef;
+				}
+				if (! main::mount ($device, "$loopdir/$pname")) {
+					$this -> cleanDbus();
+					$this -> cleanLoop ();
+					return undef;
+				}
+			}
 		}
 		#==========================================
 		# Copy root tree to virtual disk
@@ -2083,12 +2095,7 @@ sub setupBootDisk {
 	my $status;
 	my $destdir;
 	my $xml;
-	#==========================================
-	# add boot space if lvm based
-	#------------------------------------------
-	if ($lvm) {
-		$lvmbootMB = 40;
-	}
+	my %lvmparts;
 	#==========================================
 	# check if image type is oem
 	#------------------------------------------
@@ -2139,6 +2146,55 @@ sub setupBootDisk {
 	#------------------------------------------
 	my %type = %{$xml->getImageTypeAndAttributes()};
 	#==========================================
+	# Check for LVM...
+	#------------------------------------------
+	if (($type{lvm} =~ /true|yes/i) || ($lvm)) {
+		#==========================================
+		# add boot space if lvm based
+		#------------------------------------------
+		$lvm = 1;
+		$lvmbootMB  = 60;
+		$this->{lvm}= $lvm;
+		#==========================================
+		# check and set LVM volumes setup
+		#------------------------------------------
+		%lvmparts = $xml -> getLVMVolumes();
+		if (%lvmparts) {
+			if ( ! -d $system ) {
+				$kiwi -> error (
+					"LVM volumes setup requires root tree but got image file"
+				);
+				$kiwi -> failed ();
+				$this -> cleanTmp ();
+				return undef;
+			}
+			foreach my $vol (keys %lvmparts) {
+				#==========================================
+				# check directory per volume
+				#------------------------------------------
+				my $pname  = $vol; $pname =~ s/_/\//g;
+				if (! -d "$system/$pname") {
+					$kiwi -> error ("LVM: No such directory $system/$pname");
+					$kiwi -> failed ();
+					$this -> cleanTmp ();
+					return undef;
+                }
+				#==========================================
+				# increase total size per volume
+				#------------------------------------------
+				my $freespace = 0;
+				if ($lvmparts{$vol}) {
+					$freespace = $lvmparts{$vol};
+				}
+				$vmsize = $this->{vmmbyte} + 30 + $freespace;
+				$vmsize = sprintf ("%.0f", $vmsize);
+				$this->{vmmbyte} = $vmsize;
+				$vmsize = $vmsize."M";
+				$this->{vmsize}  = $vmsize;
+			}
+		}
+	}
+	#==========================================
 	# check for device mapper snapshot / clicfs
 	#------------------------------------------
 	if (($type{filesystem} eq "dmsquash") || ($type{filesystem} eq "clicfs")) {
@@ -2164,7 +2220,7 @@ sub setupBootDisk {
 	# add boot space if syslinux based
 	#------------------------------------------
 	if ($bootloader eq "syslinux") {
-		$syslbootMB = 40;
+		$syslbootMB = 60;
 	}
 	#==========================================
 	# build disk name and label from xml data
@@ -2202,8 +2258,8 @@ sub setupBootDisk {
 	#==========================================
 	# increase vmsize if single boot partition
 	#------------------------------------------
-	if (($dmbootMB) || ($syslbootMB)) {
-		$vmsize = $this->{vmmbyte} + (($dmbootMB + $syslbootMB) * 1.3);
+	if (($dmbootMB) || ($syslbootMB) || ($lvmbootMB)) {
+		$vmsize = $this->{vmmbyte} + (($dmbootMB+$syslbootMB+$lvmbootMB) * 1.3);
 		$vmsize = sprintf ("%.0f", $vmsize);
 		$this->{vmmbyte} = $vmsize;
 		$vmsize = $vmsize."M";
@@ -2412,7 +2468,7 @@ sub setupBootDisk {
 		#------------------------------------------
 		if ($lvm) {
 			%deviceMap = $this -> setVolumeGroup (
-				\%deviceMap,$this->{loop},$syszip,$haveSplit
+				\%deviceMap,$this->{loop},$syszip,$haveSplit,\%lvmparts
 			);
 			if (! %deviceMap) {
 				$this -> cleanLoop ();
@@ -2572,73 +2628,41 @@ sub setupBootDisk {
 		#==========================================
 		# Create fs on system image partition
 		#------------------------------------------
-		my %FSopts = main::checkFSOptions();
-		SWITCH: for ($FSTypeRO) {
-			/^ext2/     && do {
-				$kiwi -> info ("Creating ext2 root filesystem");
-				my $fsopts = $FSopts{ext2};
-				$fsopts.= "-F";
-				if ($this->{inodes}) {
-					$fsopts.= " -N $this->{inodes}";
-				}
-				$status = qxx ("/sbin/mke2fs $fsopts $root 2>&1");
-				$result = $? >> 8;
-				last SWITCH;
-			};
-			/^ext3/     && do {
-				$kiwi -> info ("Creating ext3 root filesystem");
-				my $fsopts = $FSopts{ext3};
-				$fsopts.= "-j -F";
-				if ($this->{inodes}) {
-					$fsopts.= " -N $this->{inodes}";
-				}
-				$status = qxx ("/sbin/mke2fs $fsopts $root 2>&1");
-				$result = $? >> 8;
-				last SWITCH;
-			};
-			/^ext4/     && do {
-				$kiwi -> info ("Creating ext4 root filesystem");
-				my $fsopts = $FSopts{ext4};
-				$fsopts.= "-j -F";
-				if ($this->{inodes}) {
-					$fsopts.= " -N $this->{inodes}";
-				}
-				$status = qxx ("/sbin/mke2fs $fsopts $root 2>&1");
-				$result = $? >> 8;
-				last SWITCH;
-			};
-			/^reiserfs/ && do {
-				$kiwi -> info ("Creating reiserfs root filesystem");
-				my $fsopts = $FSopts{reiserfs};
-				$fsopts.= "-f";
-				$status = qxx (
-					"/sbin/mkreiserfs $fsopts $root 2>&1"
-				);
-				$result = $? >> 8;
-				last SWITCH;
-			};
-			$kiwi -> error  ("Unsupported filesystem type: $FSTypeRO");
-			$kiwi -> failed ();
-			$this -> cleanTmp ();
-			return undef;
-		};
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't create $FSTypeRO filesystem: $status");
-			$kiwi -> failed ();
+		if (! $this -> setupFilesystem ($FSTypeRO,$root,"root")) {
 			$this -> cleanTmp ();
 			return undef;
 		}
-		$kiwi -> done();
 		#==========================================
 		# Mount system image partition
 		#------------------------------------------
-		if (! main::mount($root, $loopdir)) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't mount partition: $status");
-			$kiwi -> failed ();
+		if (! main::mount ($root, $loopdir)) {
 			$this -> cleanLoop ();
 			return undef;
+		}
+		#==========================================
+		# Create LVM volumes filesystems
+		#------------------------------------------
+		if (($lvm) && (%lvmparts)) {
+			my $VGroup = "kiwiVG";
+			foreach my $name (keys %lvmparts) {
+				my $device = "/dev/$VGroup/LV$name";
+				my $pname  = $name; $pname =~ s/_/\//g;
+				$status = qxx ("mkdir -p $loopdir/$pname 2>&1");
+				$result = $? >> 8;
+				if ($result != 0) {
+					$kiwi -> error ("Can't create mount point $loopdir/$pname");
+					$this -> cleanLoop ();
+					return undef;
+				}
+				if (! $this -> setupFilesystem ($FSTypeRO,$device,$pname)) {
+					$this -> cleanLoop ();
+					return undef;
+				}
+				if (! main::mount ($device, "$loopdir/$pname")) {
+					$this -> cleanLoop ();
+					return undef;
+				}
+			}
 		}
 		#==========================================
 		# Copy root tree to virtual disk
@@ -4537,8 +4561,11 @@ sub setVolumeGroup {
 	my $device    = shift;
 	my $syszip    = shift;
 	my $haveSplit = shift;
+	my $parts     = shift;
 	my $kiwi      = $this->{kiwi};
+	my $system    = $this->{system};
 	my %deviceMap = %{$map};
+	my %lvmparts  = %{$parts};
 	my $VGroup    = "kiwiVG";
 	my %newmap;
 	my $status;
@@ -4578,8 +4605,30 @@ sub setVolumeGroup {
 			$VGroup,$device,["LVComp","LVRoot"]
 		);
 	} else {
-		$status = qxx ("lvcreate -l 100%FREE -n LVRoot $VGroup 2>&1");
-		$result = $? >> 8;
+		if (%lvmparts) {
+			foreach my $name (keys %lvmparts) {
+				my $pname = $name; $pname =~ s/_/\//g;
+				my $freespace = 0;
+				if ($lvmparts{$name}) {
+					$freespace = $lvmparts{$name};
+				}
+				my $lvsize = qxx (
+					"du -s --block-size=1 $system/$pname | cut -f1"
+				);
+				chomp $lvsize;
+				$lvsize /= 1048576;
+				$lvsize = int ( 30 + $lvsize + $freespace);
+				$status = qxx ("lvcreate -L $lvsize -n LV$name $VGroup 2>&1");
+				$result = $? >> 8;
+				if ($result != 0) {
+					last;
+				}
+			}
+		}
+		if ($result == 0) {
+			$status = qxx ("lvcreate -l 100%FREE -n LVRoot $VGroup 2>&1");
+			$result = $? >> 8;
+		}
 		if ($result != 0) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Logical volume(s) setup failed: $status");
@@ -4734,6 +4783,79 @@ sub umountDevice {
 			qxx ("umount $device 2>&1");
 		}
 	}
+	return $this;
+}
+
+#==========================================
+# setupFilesystem
+#------------------------------------------
+sub setupFilesystem {
+	# ...
+	# create filesystem according to selected type
+	# ----
+	my $this   = shift;
+	my $fstype = shift;
+	my $device = shift;
+	my $name   = shift;
+	my $kiwi   = $this->{kiwi};
+	my %FSopts = main::checkFSOptions();
+	my $result;
+	my $status;
+	SWITCH: for ($fstype) {
+		/^ext2/     && do {
+			$kiwi -> info ("Creating ext2 $name filesystem");
+			my $fsopts = $FSopts{ext2};
+			$fsopts.= "-F";
+			if ($this->{inodes}) {
+				$fsopts.= " -N $this->{inodes}";
+			}
+			$status = qxx ("/sbin/mke2fs $fsopts $device 2>&1");
+			$result = $? >> 8;
+			last SWITCH;
+		};
+		/^ext3/     && do {
+			$kiwi -> info ("Creating ext3 $name filesystem");
+			my $fsopts = $FSopts{ext3};
+			$fsopts.= "-j -F";
+			if ($this->{inodes}) {
+				$fsopts.= " -N $this->{inodes}";
+			}
+			$status = qxx ("/sbin/mke2fs $fsopts $device 2>&1");
+			$result = $? >> 8;
+			last SWITCH;
+		};
+		/^ext4/     && do {
+			$kiwi -> info ("Creating ext4 $name filesystem");
+			my $fsopts = $FSopts{ext4};
+			$fsopts.= "-j -F";
+			if ($this->{inodes}) {
+				$fsopts.= " -N $this->{inodes}";
+			}
+			$status = qxx ("/sbin/mke2fs $fsopts $device 2>&1");
+			$result = $? >> 8;
+			last SWITCH;
+		};
+		/^reiserfs/ && do {
+			$kiwi -> info ("Creating reiserfs $name filesystem");
+			my $fsopts = $FSopts{reiserfs};
+			$fsopts.= "-f";
+			$status = qxx (
+				"/sbin/mkreiserfs $fsopts $device 2>&1"
+			);
+			$result = $? >> 8;
+			last SWITCH;
+		};
+		$kiwi -> error  ("Unsupported filesystem type: $fstype");
+		$kiwi -> failed ();
+		return undef;
+	};
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't create $fstype filesystem: $status");
+		$kiwi -> failed ();
+		return undef;
+	}
+	$kiwi -> done();
 	return $this;
 }
 
