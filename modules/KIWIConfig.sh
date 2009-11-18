@@ -996,10 +996,31 @@ function suseGFXBoot {
 		# check for new source layout
 		local newlayout=
 		[ -f themes/$theme/config ] && newlayout=1
-		# update configuration for new layout only
+		# create the archive [1]
+		[ "$newlayout" ] || make -C themes/$theme prep
+		make -C themes/$theme
+		# find gfxboot.cfg file
+		local gfxcfg=
 		if [ "$newlayout" ];then
 			if [ $loader = "isolinux" ];then
-				local gfxcfg=themes/$theme/data-install/gfxboot.cfg
+				gfxcfg=themes/$theme/data-install/gfxboot.cfg
+			else
+				gfxcfg=themes/$theme/data-boot/gfxboot.cfg
+			fi
+			if [ ! -f $gfxcfg ];then
+				gfxcfg=themes/$theme/src/gfxboot.cfg
+			fi
+			if [ ! -f $gfxcfg ];then
+				echo "gfxboot.cfg not found !"
+				echo "install::livecd will be skipped"
+				echo "live || boot:addopt.keytable will be skipped"
+				echo "live || boot:addopt.lang will be skipped"
+				unset gfxcfg
+			fi
+		fi
+		# update configuration for new layout only
+		if [ "$newlayout" ] && [ ! -z "$gfxcfg" ];then
+			if [ $loader = "isolinux" ];then
 				# tell the bootloader about live CD setup
 				gfxboot --config-file $gfxcfg \
 					--change-config install::livecd=1
@@ -1010,7 +1031,6 @@ function suseGFXBoot {
 				gfxboot --config-file $gfxcfg \
 					--change-config live::addopt.lang=1
 			else
-				local gfxcfg=themes/$theme/data-boot/gfxboot.cfg
 				# tell the bootloader to hand over keytable to cmdline 
 				gfxboot --config-file $gfxcfg \
 					--change-config boot::addopt.keytable=1
@@ -1026,7 +1046,7 @@ function suseGFXBoot {
 				fi
 			fi
 		fi
-		# create the archive	
+		# create the archive [2]
 		[ "$newlayout" ] || make -C themes/$theme prep
 		make -C themes/$theme
 		mkdir /image/loader

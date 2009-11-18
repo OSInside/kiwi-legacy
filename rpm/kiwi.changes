@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Nov 18 11:01:08 CET 2009 - ms@suse.de
+
+- v3.77
+- fixed search for gfxboot file du to changes in the
+  gfxboot-devel package for 11.2 (bnc #556130)
+
+-------------------------------------------------------------------
 Mon Nov 16 10:47:04 CET 2009 - ms@suse.de
 
 - v3.76
