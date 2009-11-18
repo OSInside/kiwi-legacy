@@ -257,7 +257,7 @@ sub setTemplate {
 	#==========================================
     # <description>
     #------------------------------------------
-	print FD '<image schemaversion="3.5" name="'.$name.'">'."\n";
+	print FD '<image schemaversion="3.8" name="'.$name.'">'."\n";
 	print FD "\t".'<description type="system">'."\n";
 	print FD "\t\t".'<author>***AUTHOR***</author>'."\n";
 	print FD "\t\t".'<contact>***MAIL***</contact>'."\n";
@@ -268,7 +268,7 @@ sub setTemplate {
 	#------------------------------------------
 	print FD "\t".'<preferences>'."\n";
 	print FD "\t\t".'<type primary="true" boot="isoboot/'.$boot.'"';
-	print FD ' flags="unified">iso</type>'."\n";
+	print FD ' flags="compressed">iso</type>'."\n";
 	print FD "\t\t".'<type boot="vmxboot/'.$boot.'" filesystem="ext3"';
 	print FD ' format="vmdk">vmx</type>'."\n";
 	print FD "\t\t".'<type boot="xenboot/'.$boot.'"';
@@ -277,7 +277,11 @@ sub setTemplate {
 	print FD ' filesystem="ext3">pxe</type>'."\n";
 	print FD "\t\t".'<version>1.1.2</version>'."\n";
 	print FD "\t\t".'<packagemanager>zypper</packagemanager>'."\n";
-	print FD "\t\t".'<rpm-check-signatures>False</rpm-check-signatures>'."\n";
+	print FD "\t\t".'<locale>en_US</locale>'."\n";
+	print FD "\t\t".'<keytable>us.map.gz</keytable>'."\n";
+	print FD "\t\t".'<timezone>Europe/Berlin</timezone>'."\n";
+	print FD "\t\t".'<rpm-excludedocs>true</rpm-excludedocs>'."\n";
+	print FD "\t\t".'<boot-theme>openSUSE</boot-theme>'."\n";
 	print FD "\t".'</preferences>'."\n";
 	#==========================================
 	# <repository>
@@ -321,7 +325,8 @@ sub setTemplate {
 	# <xenconfig>
 	#------------------------------------------
 	print FD "\t".'<xenconfig memory="512">'."\n";
-	print FD "\t\t".'<xendisk device="/dev/sda"/>'."\n";
+	print FD "\t\t".'<xendisk device="/dev/xvda"/>'."\n";
+	print FD "\t\t".'<xenbridge name=""/>'."\n";
 	print FD "\t".'</xenconfig>'."\n";
 	#==========================================
 	# <packages type="vmware">
@@ -332,7 +337,9 @@ sub setTemplate {
 	# <vmwareconfig>
 	#------------------------------------------
 	print FD "\t".'<vmwareconfig memory="512">'."\n";
-	print FD "\t\t".'<vmwaredisk controller="ide" id="0"/>'."\n";
+	print FD "\t\t".'<vmwaredisk controller="scsi" id="0"/>'."\n";
+	print FD "\t\t".'<vmwarenic driver="e1000" interface="0" mode="bridged"/>';
+	print FD "\n";
 	print FD "\t".'</vmwareconfig>'."\n";
 	#==========================================
 	# <packages type="bootstrap">
@@ -340,6 +347,8 @@ sub setTemplate {
 	print FD "\t".'<packages type="bootstrap">'."\n";
 	print FD "\t\t".'<package name="filesystem"/>'."\n";
 	print FD "\t\t".'<package name="glibc-locale"/>'."\n";
+	print FD "\t\t".'<package name="cracklib-dict-full"/>'."\n";
+	print FD "\t\t".'<package name="openssl-certs"/>'."\n";
 	print FD "\t".'</packages>'."\n";
 	print FD '</image>'."\n";
 	close FD;

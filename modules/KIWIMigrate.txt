@@ -8,3 +8,4 @@ SUSE-Linux-Enterprise-Server-10=suse-SLES10,***SELECT***
 openSUSE-10.3=suse-10.3,http://download.opensuse.org/distribution/10.3/repo/oss;http://download.opensuse.org/distribution/10.3/repo/non-oss
 openSUSE-11.0=suse-11.0,http://download.opensuse.org/distribution/11.0/repo/oss;http://download.opensuse.org/distribution/11.0/repo/non-oss
 openSUSE-11.1=suse-11.1,http://download.opensuse.org/distribution/11.1/repo/oss;http://download.opensuse.org/distribution/11.1/repo/non-oss
+openSUSE-11.2=suse-11.2,http://download.opensuse.org/distribution/11.2/repo/oss;http://download.opensuse.org/distribution/11.2/repo/non-oss
