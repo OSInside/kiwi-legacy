@@ -4370,6 +4370,18 @@ function cleanImage {
 	rm -f /preinit
 	rm -f /include
 	rm -rf /image
+	umount -a &>/dev/null
+	for i in /dev/kiwiVG/LV*;do
+		if [ ! -e $i ];then
+			continue
+		fi
+		if \
+			[ ! $i = "/dev/kiwiVG/LVRoot" ] && \
+			[ ! $i = "/dev/kiwiVG/LVComp" ]
+		then
+			umount -l $i &>/dev/null
+		fi
+	done
 	umountSystemFilesystems
 }
 #======================================

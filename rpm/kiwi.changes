@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Nov 19 17:02:26 CET 2009 - ms@suse.de
+
+- v3.78
+- fixed umount calls before init is called. Due to this
+  fix the df information after login should be correct
+
+-------------------------------------------------------------------
 Wed Nov 18 11:01:08 CET 2009 - ms@suse.de
 
 - v3.77
