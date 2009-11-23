@@ -95,7 +95,7 @@ function Echo {
 	if [ $ELOG_STOPPED = 0 ];then
 		set +x
 	fi
-	if [ ! $UTIMER = 0 ];then
+	if [ ! $UTIMER = 0 ] && kill -0 $UTIMER &>/dev/null;then
 		kill -HUP $UTIMER
 		local prefix=$(cat /tmp/utimer)
 	else
@@ -4355,7 +4355,7 @@ function activateImage {
 	#======================================
 	# kill boot timer
 	#--------------------------------------
-	if [ ! $UTIMER = 0 ];then
+	if [ ! $UTIMER = 0 ] && kill -0 $UTIMER &>/dev/null;then
 		kill $UTIMER
 	fi
 }
@@ -4367,22 +4367,40 @@ function cleanImage {
 	# remove preinit code from system image before real init
 	# is called
 	# ----
+	#======================================
+	# remove preinit code from system image
+	#--------------------------------------
 	rm -f /preinit
 	rm -f /include
 	rm -rf /image
+	#======================================
+	# don't call root filesystem check
+	#--------------------------------------
+	if [ "$haveClicFS" = "yes" ];then
+		# FIXME: clicfs doesn't like this umount tricks
+		export ROOTFS_FSCK="0"
+		return
+	fi
+	#======================================
+	# umount non busy fstab listed entries
+	#--------------------------------------
 	umount -a &>/dev/null
-	for i in /dev/kiwiVG/LV*;do
-		if [ ! -e $i ];then
-			continue
-		fi
-		if \
-			[ ! $i = "/dev/kiwiVG/LVRoot" ] && \
-			[ ! $i = "/dev/kiwiVG/LVComp" ]
-		then
-			umount -l $i &>/dev/null
-		fi
-	done
-	umountSystemFilesystems
+	#======================================
+	# umount LVM root parts lazy
+	#--------------------------------------
+	if [ "$haveLVM" = "yes" ]; then
+		for i in /dev/kiwiVG/LV*;do
+			if [ ! -e $i ];then
+				continue
+			fi
+			if \
+				[ ! $i = "/dev/kiwiVG/LVRoot" ] && \
+				[ ! $i = "/dev/kiwiVG/LVComp" ]
+			then
+				umount -l $i &>/dev/null
+			fi
+		done
+	fi
 }
 #======================================
 # bootImage
@@ -4417,8 +4435,14 @@ function bootImage {
 		Echo "Reboot requested... rebooting now"
 		exec /lib/mkinitrd/bin/run-init -c /dev/console /mnt /sbin/reboot -f -i
 	else
-		exec /lib/mkinitrd/bin/run-init -c /dev/console /mnt /bin/bash -c \
-			"/preinit ; . /include ; cleanImage ; exec /sbin/init $option"
+		# FIXME: clicfs doesn't like run-init
+		if [ ! "$haveClicFS" = "yes" ];then
+			exec /lib/mkinitrd/bin/run-init -c /dev/console /mnt /bin/bash -c \
+				"/preinit ; . /include ; cleanImage ; exec /sbin/init $option"
+		else
+			cd /mnt && exec chroot . /bin/bash -c \
+				"/preinit ; . /include ; cleanImage ; exec /sbin/init $option"
+		fi
 	fi
 }
 #======================================

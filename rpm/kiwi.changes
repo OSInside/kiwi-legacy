@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Nov 23 11:50:01 CET 2009 - ms@suse.de
+
+- v3.79
+- fixed clicfs boot by preventing root filesystem checks via
+  ROOTFS_FSCK="0", also don't use run-init for clic (bnc #557661)
+
+-------------------------------------------------------------------
 Thu Nov 19 17:02:26 CET 2009 - ms@suse.de
 
 - v3.78
