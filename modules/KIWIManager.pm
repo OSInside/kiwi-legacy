@@ -139,6 +139,10 @@ sub new {
 		"-o rpm-root=$root",
 		"-o deb-root=$root",
 	];
+	$this->{smartrootlib}= [
+		"-o rpm-root=$root/baselibs",
+		"-o deb-root=$root/baselibs",
+	];
 	$this->{zypper}      = [
 		$packageManager{zypper},
 		"--non-interactive",
@@ -1477,6 +1481,7 @@ sub setupRootSystem {
 	my @zypper = @{$this->{zypper}};
 	my @smart  = @{$this->{smart}};
 	my @rootdir= @{$this->{smartroot}};
+	my @rootlib= @{$this->{smartrootlib}};
 	my @ensconce = @{$this->{ensconce}};
 	my @channelList = @{$this->{channelList}};
 	my $screenCall  = $this->{screenCall};
@@ -1523,6 +1528,14 @@ sub setupRootSystem {
 			print $fd "test \$? = 0 && @smart @rootdir update ";
 			print $fd "@channelList || false &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
+			# Install glibc for baselibs first, assumes a distro glibc package
+			print $fd "mkdir $root/baselibs\n";
+			print $fd "test \$? = 0 && @smart @rootlib install ";
+			print $fd "glibc @installOpts &>/dev/null &\n";
+			print $fd "SPID=\$!;wait \$SPID\n";
+			print $fd "test \$? = 0 && mv $root/baselibs/lib* $root\n";
+			print $fd "test \$? = 0 && rm -rf $root/baselibs\n";
+			# Install the rest with requires libs on board
 			print $fd "test \$? = 0 && @smart @rootdir install ";
 			print $fd "@packs @installOpts &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
@@ -1625,6 +1638,15 @@ sub setupRootSystem {
 			print $fd "@zypper --root $root refresh &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
 			print $fd "test \$? = 0 && ";
+			# Install glibc for baselibs first, assumes a distro glibc package
+			print $fd "mkdir $root/baselibs\n";
+			print $fd "@zypper --disable-system-resolvables -R $root/baselibs ";
+			print $fd "install @installOpts glibc &>/dev/null &\n";
+			print $fd "SPID=\$!;wait \$SPID\n";
+			print $fd "test \$? = 0 && mv $root/baselibs/lib* $root\n";
+			print $fd "test \$? = 0 && rm -rf $root/baselibs\n";
+			print $fd "test \$? = 0 && ";
+			# Install the rest with required libs on board
 			if (@newprods) {
 				print $fd "@zypper --root $root install ";
 				print $fd "@installOpts -t product @newprods &\n";

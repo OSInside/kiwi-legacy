@@ -1,4 +1,19 @@
 -------------------------------------------------------------------
+Tue Nov 24 11:06:55 CET 2009 - ms@suse.de
+
+- v3.80
+- fixed root tree creation build inconsistencies due to missing
+  libraries at the beginning of the root tree creation. Any glibc
+  linked program uses /etc/nsswitch.conf and from there requires
+  /lib(64)/libnss* libraries to do user/group to id resolution.
+  If the operation happens chrooted, the libs needs to be there.
+  The fix will install the glibc package which provides these
+  libraries in a $root/baselibs directory first and moves them
+  to $root. After that process the package manager is again called
+  to install the bootstrap listed packages follewed by the rest
+  of the specified packages (bnc #536256)
+
+-------------------------------------------------------------------
 Mon Nov 23 11:50:01 CET 2009 - ms@suse.de
 
 - v3.79
