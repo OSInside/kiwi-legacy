@@ -2,6 +2,7 @@
 Tue Nov 24 11:06:55 CET 2009 - ms@suse.de
 
 - v3.80
+- fixed setup of xencons when building Xen domU images (bnc #557791)
 - fixed root tree creation build inconsistencies due to missing
   libraries at the beginning of the root tree creation. Any glibc
   linked program uses /etc/nsswitch.conf and from there requires
