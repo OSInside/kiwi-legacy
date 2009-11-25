@@ -179,8 +179,10 @@ clean:
 	(cd system/boot && find -type f | grep -v .svn | xargs chmod u+w)
 	(find -name .checksum.md5 | xargs rm -f)
 	${MAKE} -C tools clean
+	${MAKE} -C locale clean
 	rm -f tools/burner/Makefile
 	rm -f tools/burner/imagewriter
+	rm -f .revision
 
 build:
 	./.doit -p --local
