@@ -15,6 +15,10 @@
 # STATUS        : Development
 #----------------
 #======================================
+# work in POSIX environment
+#--------------------------------------
+export LANG=POSIX
+#======================================
 # suseInsertService
 #--------------------------------------
 function suseInsertService {

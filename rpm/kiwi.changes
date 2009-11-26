@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Thu Nov 26 15:29:11 CET 2009 - ms@suse.de
+
+- v3.81
+- call images.sh / config.sh scripts in POSIX env (bnc #558693)
+- fixed invalid link setup in createImageLiveCD() (bnc #558666)
+- fixed size / inode calcuation due to wrong unit (bnc #555688)
+
+-------------------------------------------------------------------
 Tue Nov 24 11:06:55 CET 2009 - ms@suse.de
 
 - v3.80

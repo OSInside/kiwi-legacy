@@ -30,6 +30,7 @@ use File::Basename;
 use File::Find qw(find);
 use File::stat;
 use Fcntl ':mode';
+use POSIX qw(getcwd);
 use KIWIQX;
 
 #==========================================
@@ -58,6 +59,13 @@ sub new {
 	my $baseSystem = shift;
 	my $imageOrig  = shift;
 	my $configFile = $xml -> getConfigName();
+	#==========================================
+	# Use absolute path for image destination
+	#------------------------------------------
+	if ($imageDest !~ /^\//) {
+		my $pwd = getcwd();
+		$imageDest = $pwd."/".$imageDest;
+	}
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
@@ -897,7 +905,6 @@ sub createImageUSB {
 	#------------------------------------------
 	SWITCH: for ($type) {
 		/^ext2/       && do {
-			$ok = 1;
 			if (! $treeAccess) {
 				$ok = $this -> createImageEXT2 ();
 			} else {
@@ -907,7 +914,6 @@ sub createImageUSB {
 			last SWITCH;
 		};
 		/^ext3/       && do {
-			$ok = 1;
 			if (! $treeAccess) {
 				$ok = $this -> createImageEXT3 ();
 			} else {
@@ -917,7 +923,6 @@ sub createImageUSB {
 			last SWITCH;
 		};
 		/^ext4/       && do {
-			$ok = 1;
 			if (! $treeAccess) {
 				$ok = $this -> createImageEXT4 ();
 			} else {
@@ -927,7 +932,6 @@ sub createImageUSB {
 			last SWITCH;
 		};
 		/^reiserfs/   && do {
-			$ok = 1;
 			if (! $treeAccess) {
 				$ok = $this -> createImageReiserFS ();
 			} else {
@@ -3536,12 +3540,12 @@ sub setupLogicalExtend {
 	$this -> cleanKernelFSMount();
 	my ($mbytesreal,$mbytes,$xmlsize) = $this -> getSize ($imageTree);
 	if (! defined $quiet) {
-		$kiwi -> info ("Image requires $mbytesreal MB, got $xmlsize MB");
+		$kiwi -> info ("Image requires ".$mbytesreal."M, got $xmlsize");
 		$kiwi -> done ();
-		$kiwi -> info ("Suggested Image size: $mbytes MB");
+		$kiwi -> info ("Suggested Image size: $mbytes"."M");
 		$kiwi -> done ();
 	}
-	return $xmlsize;
+	return $mbytes;
 }
 
 #==========================================
@@ -4186,7 +4190,7 @@ sub getSize {
 	#------------------------------------------
 	my $xmlsize = $xml -> getImageSize();
 	if ($xmlsize eq "auto") {
-		$xmlsize = $size;
+		$xmlsize = $size."M";
 	}
 	#==========================================
 	# return result list
