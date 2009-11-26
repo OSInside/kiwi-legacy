@@ -195,7 +195,7 @@ sub logMsg
     if ( $mode eq "E" ) {
       $this->{m_logger}->error($out);
     }elsif ( $mode eq "W" ) {
-      $this->{m_logger}->warn($out);
+      $this->{m_logger}->warning($out);
     }elsif ( $mode eq "I" ) {
       $this->{m_logger}->info($out);
     }elsif ($this->{m_debug}){
