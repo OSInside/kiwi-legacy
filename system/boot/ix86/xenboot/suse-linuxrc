@@ -41,9 +41,13 @@ VMFindSystem () {
 	imageRootDevice="/dev/"$root
 	waitForStorageDevice $imageRootDevice
 	if [ ! -e $imageRootDevice ];then
-		systemException \
-			"Couldn't find storage device... abort" \
-		"reboot"
+		imageRootDevice=$root
+		waitForStorageDevice $imageRootDevice
+		if [ ! -e $imageRootDevice ];then
+			systemException \
+				"Couldn't find storage device... abort" \
+			"reboot"
+		fi
 	fi
 }
 #======================================
