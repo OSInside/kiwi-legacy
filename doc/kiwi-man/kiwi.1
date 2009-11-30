@@ -1,12 +1,12 @@
 .\"     Title: kiwi
 .\"    Author: Marcus Schaefer <ms (AT) suse.de>
 .\" Generator: DocBook XSL Stylesheets v1.74.0 <http://docbook.sf.net/>
-.\"      Date: Created: 11/17/2009
+.\"      Date: Created: 11/30/2009
 .\"    Manual: KIWI Manualpage
 .\"    Source: KIWI v3.65
 .\"  Language: English
 .\"
-.TH "KIWI" "1" "Created: 11/17/2009" "KIWI v3\&.65" "KIWI Manualpage"
+.TH "KIWI" "1" "Created: 11/30/2009" "KIWI v3\&.65" "KIWI Manualpage"
 .\" -----------------------------------------------------------------
 .\" * (re)Define some macros
 .\" -----------------------------------------------------------------
@@ -493,6 +493,16 @@ When calling kiwi in creation mode this option will set the inode size in bytes\
 [\fB\-\-fs\-inoderatio \fR\fB\fInumber\fR\fR ]
 .RS 4
 Set the bytes/inode ratio\&. This option has no effect if the reiser filesystem is used
+.RE
+.PP
+[\fB\-\-fs\-max\-mount\-count \fR\fB\fInumber\fR\fR ]
+.RS 4
+When calling kiwi in creation mode this option will set the number of mounts after which the filesystem will be checked\&. Set to 0 to disable checks\&. This option applies only to ext[234] filesystems\&.
+.RE
+.PP
+[\fB\-\-fs\-check\-interval \fR\fB\fInumber\fR\fR ]
+.RS 4
+When calling kiwi in creation mode this option will set the maximal time between two filesystem checks\&. Set to 0 to disable time\-dependent checks\&. This option applies only to ext[234] filesystems\&.
 .RE
 .PP
 [\fB\-\-partitioner \fR\fB\fIfdisk|parted\fR\fR ]

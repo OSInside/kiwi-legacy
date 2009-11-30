@@ -775,6 +775,7 @@ sub getImageTypeAndAttributes {
 		$record{bootprofile}   = $node -> getAttribute("bootprofile");
 		$record{bootkernel}    = $node -> getAttribute("bootkernel");
 		$record{filesystem}    = $node -> getAttribute("filesystem");
+		$record{fsnocheck}     = $node -> getAttribute("fsnocheck");
 		$record{AWSAccountNr}  = $node -> getAttribute("ec2accountnr");
 		$record{EC2CertFile}   = $node -> getAttribute("ec2certfile");
 		$record{EC2PrivateKeyFile} = $node -> getAttribute("ec2privatekeyfile");

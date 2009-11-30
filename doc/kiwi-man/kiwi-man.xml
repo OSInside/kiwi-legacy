@@ -695,6 +695,29 @@
         </listitem>
     </varlistentry>
 	<varlistentry>
+		<term><optional><option>--fs-max-mount-count <replaceable>number</replaceable></option>
+		</optional></term>
+		<listitem>
+		<para>
+			When calling kiwi in creation mode this option will set the number
+			of mounts after which the filesystem will be checked. Set to 0 to
+			disable checks.
+			This option applies only to ext[234] filesystems.
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
+		<term><optional><option>--fs-check-interval <replaceable>number</replaceable></option>
+		</optional></term>
+		<listitem>
+		<para>
+			When calling kiwi in creation mode this option will set the maximal time
+			between two filesystem checks. Set to 0 to disable time-dependent checks.
+			This option applies only to ext[234] filesystems.
+		</para>
+		</listitem>
+	</varlistentry>
+	<varlistentry>
         <term><optional><option>--partitioner <replaceable>fdisk|parted</replaceable></option>
         </optional></term>
         <listitem>

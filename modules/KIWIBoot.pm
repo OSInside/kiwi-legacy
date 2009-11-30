@@ -4798,41 +4798,27 @@ sub setupFilesystem {
 	my $device = shift;
 	my $name   = shift;
 	my $kiwi   = $this->{kiwi};
+	my $xml    = $this->{xml};
+	my %type   = %{$xml->getImageTypeAndAttributes()};
 	my %FSopts = main::checkFSOptions();
 	my $result;
 	my $status;
 	SWITCH: for ($fstype) {
-		/^ext2/     && do {
-			$kiwi -> info ("Creating ext2 $name filesystem");
-			my $fsopts = $FSopts{ext2};
-			$fsopts.= "-F";
+		/^ext[234]/     && do {
+			$kiwi -> info ("Creating $_ $name filesystem");
+			my $fsopts = $FSopts{$_};
+			$fsopts .= /^ext2/ ? "-F" : "-j -F";
 			if ($this->{inodes}) {
 				$fsopts.= " -N $this->{inodes}";
 			}
+			my $tuneopts = $type{fsnocheck} eq "true" ? "-c 0 -i 0" : "";
+			$tuneopts = $FSopts{extfstune} if $FSopts{extfstune};
 			$status = qxx ("/sbin/mke2fs $fsopts $device 2>&1");
 			$result = $? >> 8;
-			last SWITCH;
-		};
-		/^ext3/     && do {
-			$kiwi -> info ("Creating ext3 $name filesystem");
-			my $fsopts = $FSopts{ext3};
-			$fsopts.= "-j -F";
-			if ($this->{inodes}) {
-				$fsopts.= " -N $this->{inodes}";
+			if (!$result && $tuneopts) {
+				$status .= qxx ("/sbin/tune2fs $tuneopts $device 2>&1");
+				$result = $? >> 8;
 			}
-			$status = qxx ("/sbin/mke2fs $fsopts $device 2>&1");
-			$result = $? >> 8;
-			last SWITCH;
-		};
-		/^ext4/     && do {
-			$kiwi -> info ("Creating ext4 $name filesystem");
-			my $fsopts = $FSopts{ext4};
-			$fsopts.= "-j -F";
-			if ($this->{inodes}) {
-				$fsopts.= " -N $this->{inodes}";
-			}
-			$status = qxx ("/sbin/mke2fs $fsopts $device 2>&1");
-			$result = $? >> 8;
 			last SWITCH;
 		};
 		/^reiserfs/ && do {

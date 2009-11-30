@@ -1166,6 +1166,9 @@ div {
 # common element <type>
 #
 div {
+	k.type.fsnocheck.attribute =
+		## Turn off periodic filesystem checks on ext2/3/4.
+		attribute fsnocheck { xsd:boolean }
 	k.type.lvm.attribute =
 		## Specify whether LVM should be used or not. This is effective
 		## for the types oem,usb and vmx
@@ -1271,6 +1274,7 @@ div {
 		## Specifies the primary type (choose KIWI option type)
 		attribute primary { xsd:boolean }
 	k.type.attlist =
+		k.type.fsnocheck.attribute? &
 		k.type.lvm.attribute? &
 		k.type.checkprebuilt.attribute? &
 		k.type.bootprofile.attribute? &

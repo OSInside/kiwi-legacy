@@ -196,6 +196,8 @@ our $PackageManager;        # package manager to use for this image
 our $FSBlockSize;           # filesystem block size
 our $FSInodeSize;           # filesystem inode size
 our $FSJournalSize;         # filesystem journal size
+our $FSMaxMountCount;       # filesystem (ext2-4) max mount count between fs checks
+our $FSCheckInterval;       # filesystem (ext2-4) max interval between fs checks
 our $FSInodeRatio;          # filesystem bytes/inode ratio
 our $Verbosity = 0;         # control the verbosity level
 our $TargetArch;            # target architecture -> writes zypp.conf
@@ -1321,6 +1323,8 @@ sub init {
 		"fs-journalsize=i"      => \$FSJournalSize,
 		"fs-inodesize=i"        => \$FSInodeSize,
 		"fs-inoderatio=i"       => \$FSInodeRatio,
+		"fs-max-mount-count=i"  => \$FSMaxMountCount,
+		"fs-check-interval=i"   => \$FSCheckInterval,
 		"partitioner=s"         => \$Partitioner,
 		"target-arch=s"         => \$TargetArch,
 		"check-kernel"          => \$CheckKernel,
@@ -1650,6 +1654,14 @@ sub usage {
 	print "    [ --fs-inoderatio <number> ]\n";
 	print "      Set the bytes/inode ratio. This option has no\n";
 	print "      effect if the reiser filesystem is used\n";
+	print "\n";
+	print "    [ --fs-max-mount-count <number> ]\n";
+	print "      Set the number of mounts after which the filesystem will\n";
+	print "      be checked for ext[234]. Set to 0 to disable checks.\n";
+	print "\n";
+	print "    [ --fs-check-interval <number> ]\n";
+	print "      Set the maximal time between two filesystem checks for ext[234].\n";
+	print "      Set to 0 to disable time-dependent checks.\n";
 	print "\n";
 	print "    [ --partitioner <fdisk|parted> ]\n";
 	print "      Select the tool to create partition tables. Supported are\n";
@@ -2349,6 +2361,8 @@ sub checkFSOptions {
 	# string for the relevant filesystems
 	# ---
 	my %result = ();
+	my $fs_maxmountcount;
+	my $fs_checkinterval;
 	foreach my $fs (keys %KnownFS) {
 		my $blocksize;   # block size in bytes
 		my $journalsize; # journal size in MB (ext) or blocks (reiser)
@@ -2365,6 +2379,12 @@ sub checkFSOptions {
 				if ($FSInodeSize)   {$inodesize   = "-I $FSInodeSize"}
 				if ($FSInodeRatio)  {$inoderatio  = "-i $FSInodeRatio"}
 				if ($FSJournalSize) {$journalsize = "-J size=$FSJournalSize"}
+				if ($FSMaxMountCount) {
+					$fs_maxmountcount = " -c $FSMaxMountCount";
+				}
+				if ($FSCheckInterval) {
+					$fs_checkinterval = " -i $FSCheckInterval";
+				}
 				$fsfeature = "-O resize_inode";
 				$fstype = "-T $fs";
 				last SWITCH;
@@ -2397,6 +2417,9 @@ sub checkFSOptions {
 		if (defined $fstype) {
 			$result{$fs} .= $fstype." ";
 		}
+	}
+	if ($fs_maxmountcount || $fs_checkinterval) {
+		$result{extfstune} = "$fs_maxmountcount$fs_checkinterval";
 	}
 	return %result;
 }

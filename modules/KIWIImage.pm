@@ -3732,8 +3732,11 @@ sub setupEXT2 {
 	my $tree    = shift;
 	my $journal = shift;
 	my $kiwi    = $this->{kiwi};
+	my $xml  = $this->{xml};
+	my %type = %{$xml->getImageTypeAndAttributes()};
 	my $imageTree = $this->{imageTree};
 	my $fsopts;
+	my $tuneopts;
 	if (! defined $tree) {
 		$tree = $imageTree;
 	}
@@ -3751,8 +3754,14 @@ sub setupEXT2 {
 	if ($this->{inodes}) {
 		$fsopts.= " -N $this->{inodes}";
 	}
+	$tuneopts = $type{fsnocheck} eq "true" ? "-c 0 -i 0" : "";
+	$tuneopts = $FSopts{extfstune} if $FSopts{extfstune};
 	my $data = qxx ("/sbin/mke2fs $fsopts $this->{imageDest}/$name 2>&1");
 	my $code = $? >> 8;
+	if (!$code && $tuneopts) {
+		$data = qxx ("/sbin/tune2fs $tuneopts $this->{imageDest}/$name 2>&1");
+		$code = $? >> 8;
+	}
 	if ($code != 0) {
 		$kiwi -> error  ("Couldn't create EXT2 filesystem");
 		$kiwi -> failed ();
