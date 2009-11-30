@@ -67,7 +67,6 @@
 	<packages type="bootstrap" profiles="ec2">
 		<package name="kernel-ec2"/>
 		<package name="kernel-ec2-base"/>
-		<package name="kernel-ec2-extra"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
