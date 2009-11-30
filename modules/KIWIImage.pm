@@ -3545,6 +3545,23 @@ sub setupLogicalExtend {
 		$kiwi -> info ("Suggested Image size: $mbytes"."M");
 		$kiwi -> done ();
 	}
+	#==========================================
+	# Check given XML size
+	#------------------------------------------
+	if ($xmlsize =~ /^(\d+)([MG])$/i) {
+		$xmlsize = $1;
+		my $unit = $2;
+		if ($unit eq "G") {
+			# convert GB to MB...
+			$xmlsize /= 1024;
+		}
+	}
+	#==========================================
+	# Return XML size or required size
+	#------------------------------------------
+	if (int $xmlsize > $mbytes) {
+		return $xmlsize;
+	}
 	return $mbytes;
 }
 
