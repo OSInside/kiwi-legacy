@@ -153,7 +153,7 @@ sub loadPlugins
   my $inidir = $this->collect()->productData()->getOpt("INI_DIR");
   unshift @INC, $dir;
   if(not opendir(PLUGINDIR, "$dir")) {
-    $this->gossip("loadPlugins: cannot open directory $dir");
+    $this->collect()->logMsg("E", "loadPlugins: cannot open directory $dir!");
     return ($loaded, $avail);
   }
 
