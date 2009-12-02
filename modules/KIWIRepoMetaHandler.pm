@@ -46,7 +46,7 @@ sub new
   }
   #$this->{m_unitedir}	= $this->{m_collect}->unitedDir();
 
-  $this->gossip("Created $class object successfully.");
+  $this->collect()->logMsg("I", "Created $class object successfully.");
 
   return $this;
 }
@@ -117,21 +117,6 @@ sub baseurl
 
 
 #==================
-# gossip
-#------------------
-# report a message back through collect->logMsg
-# if the debug flag was set
-#------------------
-sub gossip
-{
-  my $this = shift;
-  my $message = shift;
-  $this->{m_collect}->logMsg("D", $message);
-}
-
-
-
-#==================
 # loadPlugins(DIR)
 # - load all plugins available in directory DIR
 # return number of loaded plugins, 0 in case of error
@@ -153,7 +138,7 @@ sub loadPlugins
   my $inidir = $this->collect()->productData()->getOpt("INI_DIR");
   unshift @INC, $dir;
   if(not opendir(PLUGINDIR, "$dir")) {
-    $this->collect()->logMsg("E", "loadPlugins: cannot open directory $dir!");
+    $this->collect()->logMsg("W", "loadPlugins: cannot open directory $dir");
     return ($loaded, $avail);
   }
 
@@ -186,7 +171,7 @@ sub loadPlugins
     my $loadsuccess = $this->loadPlugin("$dir/$p", $plugins{$p});
     $avail++;
     if($loadsuccess == 1) {
-      $this->gossip("loadPlugins: loaded plugin $p from url $dir successfully.");
+      $this->collect()->logMsg("I", "loadPlugins: loaded plugin $p from url $dir successfully.");
       $loaded++;
     }
     else {
@@ -338,7 +323,7 @@ sub createMetadata
       $this->{m_handlers}->{$order}->execute();
     }
     else {
-      $this->gossip("Plugin ".$this->{m_handlers}->{$order}->name()." is not activated yet!");
+      $this->collect()->logMsg("W", "Plugin ".$this->{m_handlers}->{$order}->name()." is not activated yet!");
     }
   }
 }
