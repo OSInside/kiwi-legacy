@@ -126,7 +126,7 @@ if [ "$LOCAL_BOOT" = "no" ];then
 	fi
 	export imageDiskDevice=$biosBootDevice
 else
-	export imageDiskDevice=$(dn $root)
+	export imageDiskDevice=$(dn $disk)
 fi
 Echo "Found boot device: $imageDiskDevice"
 
@@ -141,16 +141,16 @@ if [ -z "$imageDiskDevice" ];then
 		"Couldn't find any boot device... abort" \
 	"reboot"
 fi
-Echo "Searching for kiwiVG volume group..."
+Echo "Searching for $VGROUP volume group..."
 if searchVolumeGroup; then
 	export haveLVM=yes
-	if [ -e /dev/kiwiVG/LVComp ];then
-		export imageRootDevice=/dev/kiwiVG/LVComp
+	if [ -e /dev/$VGROUP/LVComp ];then
+		export imageRootDevice=/dev/$VGROUP/LVComp
 	else
-		export imageRootDevice=/dev/kiwiVG/LVRoot
+		export imageRootDevice=/dev/$VGROUP/LVRoot
 	fi
-	export imageRWDevice=/dev/kiwiVG/LVRoot
-	export imageRODevice=/dev/kiwiVG/LVComp
+	export imageRWDevice=/dev/$VGROUP/LVRoot
+	export imageRODevice=/dev/$VGROUP/LVComp
 	export imageBootDevice=$(ddn $imageDiskDevice 2)
 fi
 

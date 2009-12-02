@@ -79,17 +79,17 @@ function setupInitialDeviceNames {
 		# LVM setup...
 		#--------------------------------------
 		export haveLVM=yes
-		if [ -e /dev/kiwiVG/LVComp ];then
-			export imageRootDevice=/dev/kiwiVG/LVComp
+		if [ -e /dev/$VGROUP/LVComp ];then
+			export imageRootDevice=/dev/$VGROUP/LVComp
 		else
-			export imageRootDevice=/dev/kiwiVG/LVRoot
+			export imageRootDevice=/dev/$VGROUP/LVRoot
 		fi
-		export imageRWDevice=/dev/kiwiVG/LVRoot
-		export imageRODevice=/dev/kiwiVG/LVComp
+		export imageRWDevice=/dev/$VGROUP/LVRoot
+		export imageRODevice=/dev/$VGROUP/LVComp
 		export imageIOWRDevice=$imageRWDevice
 		export imageBootDevice=$(ddn $imageDiskDevice 2)
 		if [ ! -z "$KIWI_RECOVERY" ];then
-			export imageRecoveryDevice=/dev/kiwiVG/LVRecovery
+			export imageRecoveryDevice=$(ddn $imageDiskDevice $KIWI_RECOVERY)
 		fi
 		probeFileSystem $imageRootDevice
 	else
@@ -220,12 +220,9 @@ if [ "$LOCAL_BOOT" = "no" ];then
 	fi
 	export imageDiskDevice=$biosBootDevice
 else
+	export imageDiskDevice=$(dn $disk)
 	if [ ! -z "$KIWI_RECOVERY" ];then
-		export imageRecoveryDevice=$(echo $root | \
-			sed -e s@part.*@part$KIWI_RECOVERY@)
-		export imageDiskDevice=$(dn $imageRecoveryDevice)
-	else
-		export imageDiskDevice=$(dn $root)
+		export imageRecoveryDevice=$(ddn $imageDiskDevice $KIWI_RECOVERY)
 	fi
 fi
 Echo "Found boot device: $imageDiskDevice"
@@ -402,6 +399,11 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 			esac
 			if ! mountSystem $imageRootDevice;then
 				systemException "Failed to mount root filesystem" "reboot"
+			fi
+			if [ "$haveLVM" = "yes" ];then
+				mkdir -p /mnt/lvmboot && rm -rf /mnt/boot
+				mount $imageBootDevice /mnt/lvmboot
+				( cd /mnt && ln -s lvmboot/boot boot )
 			fi
 			for i in dev sys proc;do
 				mkdir /mnt/$i

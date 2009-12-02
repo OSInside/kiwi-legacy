@@ -1594,11 +1594,22 @@ the correct timezone and copy it to /etc/localtime.</db:para>
     
   -->
   <div>
+    <define name="k.type.fsnocheck.attribute">
+      <attribute name="fsnocheck">
+        <a:documentation>Turn off periodic filesystem checks on ext2/3/4.</a:documentation>
+        <data type="boolean"/>
+      </attribute>
+    </define>
     <define name="k.type.lvm.attribute">
       <attribute name="lvm">
         <a:documentation>Specify whether LVM should be used or not. This is effective
 for the types oem,usb and vmx</a:documentation>
         <data type="boolean"/>
+      </attribute>
+    </define>
+    <define name="k.type.lvmgroup.attribute">
+      <attribute name="lvmgroup">
+        <a:documentation>Specify Volume group name, default is kiwiVG.</a:documentation>
       </attribute>
     </define>
     <define name="k.type.baseroot.attribute">
@@ -1781,7 +1792,13 @@ vmx/oem types only.</a:documentation>
     <define name="k.type.attlist">
       <interleave>
         <optional>
+          <ref name="k.type.fsnocheck.attribute"/>
+        </optional>
+        <optional>
           <ref name="k.type.lvm.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.type.lvmgroup.attribute"/>
         </optional>
         <optional>
           <ref name="k.type.checkprebuilt.attribute"/>

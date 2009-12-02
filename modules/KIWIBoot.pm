@@ -384,6 +384,7 @@ sub new {
 	$this->{xml}       = $xml;
 	$this->{xendomain} = $xendomain;
 	$this->{profile}   = $profile;
+	$this->{lvmgroup}  = "kiwiVG";
 	return $this;
 }
 
@@ -610,6 +611,12 @@ sub setupBootStick {
 		$lvm = 1;
 		$lvmbootMB  = 60;
 		$this->{lvm}= $lvm;
+		#==========================================
+		# set volume group name
+		#------------------------------------------
+		if ($type{lvmgroup}) {
+			$this->{lvmgroup} = $type{lvmgroup};
+		}
 		#==========================================
 		# check and set LVM volumes setup
 		#------------------------------------------
@@ -1101,7 +1108,7 @@ sub setupBootStick {
 		# Create LVM volumes filesystems
 		#------------------------------------------
 		if (($lvm) && (%lvmparts)) {
-			my $VGroup = "kiwiVG";
+			my $VGroup = $this->{lvmgroup};
 			foreach my $name (keys %lvmparts) {
 				my $device = "/dev/$VGroup/LV$name";
 				my $pname  = $name; $pname =~ s/_/\//g;
@@ -1495,16 +1502,7 @@ sub setupInstallCD {
 		if (-f "$tmpdir/rootfs.tar") {
 			$imgtype = "split";
 		}
-		main::umount();
-		$this -> cleanLoopMaps();
-		$status = qxx ("/sbin/losetup -d $this->{loop} 2>&1");
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> error ("Failed to umount system partition: $status");
-			$kiwi -> failed ();
-			$this -> cleanLoop ();
-			return undef;
-		}
+		$this -> cleanLoop();
 	}
 	$this->{imgtype} = $imgtype;
 	#==========================================
@@ -2156,6 +2154,12 @@ sub setupBootDisk {
 		$lvmbootMB  = 60;
 		$this->{lvm}= $lvm;
 		#==========================================
+		# set volume group name
+		#------------------------------------------
+		if ($type{lvmgroup}) {
+			$this->{lvmgroup} = $type{lvmgroup};
+		}
+		#==========================================
 		# check and set LVM volumes setup
 		#------------------------------------------
 		%lvmparts = $xml -> getLVMVolumes();
@@ -2643,7 +2647,7 @@ sub setupBootDisk {
 		# Create LVM volumes filesystems
 		#------------------------------------------
 		if (($lvm) && (%lvmparts)) {
-			my $VGroup = "kiwiVG";
+			my $VGroup = $this->{lvmgroup};
 			foreach my $name (keys %lvmparts) {
 				my $device = "/dev/$VGroup/LV$name";
 				my $pname  = $name; $pname =~ s/_/\//g;
@@ -2844,7 +2848,7 @@ sub setupBootDisk {
 			if ($format eq "iso") {
 				$this -> {system} = $diskname;
 				$kiwi -> info ("Creating install ISO image\n");
-				qxx ("/sbin/losetup -d $this->{loop}");
+				$this -> cleanLoop ();
 				if (! $this -> setupInstallCD()) {
 					return undef;
 				}
@@ -2852,7 +2856,7 @@ sub setupBootDisk {
 			if ($format eq "usb") {
 				$this -> {system} = $diskname;
 				$kiwi -> info ("Creating install USB Stick image\n");
-				qxx ("/sbin/losetup -d $this->{loop}");
+				$this -> cleanLoop ();
 				if (! $this -> setupInstallStick()) {
 					return undef;
 				}
@@ -2891,7 +2895,7 @@ sub setupBootDisk {
 	#==========================================
 	# cleanup loop setup and device mapper
 	#------------------------------------------
-	qxx ( "/sbin/losetup -d $this->{loop} 2>&1" );
+	$this -> cleanLoop ();
 	return $this;
 }
 
@@ -3556,6 +3560,8 @@ sub setupBootLoaderConfiguration {
 	my $bootpart = $this->{bootpart};
 	my $label    = $this->{bootlabel};
 	my $vga      = $this->{vga};
+	my $lvm      = $this->{lvm};
+	my $vgroup   = $this->{lvmgroup};
 	my $title;
 	#==========================================
 	# Check boot partition number
@@ -3626,6 +3632,9 @@ sub setupBootLoaderConfiguration {
 				print FD " loader=$loader splash=silent";
 			}
 			print FD " $extra";
+			if ($lvm) {
+				print FD " VGROUP=$vgroup";
+			}
 			if ($imgtype eq "split") {
 				print FD " COMBINED_IMAGE=yes showopts";
 			} else {
@@ -3656,6 +3665,9 @@ sub setupBootLoaderConfiguration {
 				print FD " loader=$loader splash=silent";
 			}
 			print FD " $extra";
+			if ($lvm) {
+				print FD " VGROUP=$vgroup";
+			}
 			if ($imgtype eq "split") {
 				print FD " COMBINED_IMAGE=yes showopts";
 			} else {
@@ -3690,6 +3702,9 @@ sub setupBootLoaderConfiguration {
 			}
 			print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
 			print FD " noapic maxcpus=0 edd=off $extra\n";
+			if ($lvm) {
+				print FD " VGROUP=$vgroup";
+			}
 			if ($imgtype eq "split") {
 				print FD " COMBINED_IMAGE=yes showopts";
 			} else {
@@ -3721,6 +3736,9 @@ sub setupBootLoaderConfiguration {
 			}
 			print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
 			print FD " noapic maxcpus=0 edd=off $extra";
+			if ($lvm) {
+				print FD " VGROUP=$vgroup";
+			}
 			if ($imgtype eq "split") {
 				print FD " COMBINED_IMAGE=yes showopts";
 			} else {
@@ -3798,6 +3816,9 @@ sub setupBootLoaderConfiguration {
 				print FD "APPEND initrd=/boot/initrd ";
 				print FD "vga=$vga loader=$loader splash=silent";
 			}
+			if ($lvm) {
+				print FD " VGROUP=$vgroup";
+			}
 			if ($imgtype eq "split") {
 				print FD " COMBINED_IMAGE=yes showopts\n";
 			} else {
@@ -3810,6 +3831,9 @@ sub setupBootLoaderConfiguration {
 				# not supported yet..
 			} else {
 				# not supported yet..
+			}
+			if ($lvm) {
+				print FD " VGROUP=$vgroup";
 			}
 			if ($imgtype eq "split") {
 				print FD " COMBINED_IMAGE=yes showopts\n";
@@ -3843,6 +3867,9 @@ sub setupBootLoaderConfiguration {
 			}
 			print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
 			print FD " noapic maxcpus=0 edd=off";
+			if ($lvm) {
+				print FD " VGROUP=$vgroup";
+			}
 			if ($imgtype eq "split") {
 				print FD " COMBINED_IMAGE=yes showopts\n";
 			} else {
@@ -3858,6 +3885,9 @@ sub setupBootLoaderConfiguration {
 			}
 			print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
 			print FD " noapic maxcpus=0 edd=off";
+			if ($lvm) {
+				print FD " VGROUP=$vgroup";
+			}
 			if ($imgtype eq "split") {
 				print FD " COMBINED_IMAGE=yes showopts\n";
 			} else {
@@ -4552,7 +4582,7 @@ sub setLVMDeviceMap {
 #------------------------------------------
 sub setVolumeGroup {
 	# ...
-	# create kiwiVG volume group and required logical 
+	# create volume group and required logical 
 	# volumes. The function returns a new device map
 	# including the volume device names
 	# ---
@@ -4566,7 +4596,7 @@ sub setVolumeGroup {
 	my $system    = $this->{system};
 	my %deviceMap = %{$map};
 	my %lvmparts  = %{$parts};
-	my $VGroup    = "kiwiVG";
+	my $VGroup    = $this->{lvmgroup};
 	my %newmap;
 	my $status;
 	my $result;
@@ -4649,7 +4679,7 @@ sub setVolumeGroup {
 sub deleteVolumeGroup {
 	my $this   = shift;
 	my $lvm    = $this->{lvm};
-	my $VGroup = "kiwiVG";
+	my $VGroup = $this->{lvmgroup};
 	if ($lvm) {
 		qxx ("vgremove --force $VGroup 2>&1");
 	}

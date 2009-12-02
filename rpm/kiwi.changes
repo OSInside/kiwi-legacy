@@ -8,6 +8,10 @@ Mon Nov 30 11:18:23 CET 2009 - ms@suse.de
 - added options --fs-max-mount-count and --fs-check-interval
   as well as the XML type attribute fsnocheck which deactivates
   the filesystem check at all.
+- added support for custom LVM group name. Default is kiwiVG  
+- fixed LVM based recovery workflow. the recovery needs to know
+  about the separate boot partition. Additionally the recovery
+  partition must be a separate partition outside LVM
 
 -------------------------------------------------------------------
 Thu Nov 26 15:29:11 CET 2009 - ms@suse.de

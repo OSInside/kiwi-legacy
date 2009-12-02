@@ -19,21 +19,26 @@
 # Exports (General)
 #--------------------------------------
 export ELOG_FILE=/var/log/boot.kiwi
-export ELOG_CONSOLE=/dev/tty3
-export ELOG_BOOTSHELL=/dev/tty2
-export ELOG_EXCEPTION=/dev/tty1
-export KLOG_CONSOLE=4
-export KLOG_DEFAULT=1
-export ELOG_STOPPED=0
-export PARTITIONER=sfdisk
 export TRANSFER_ERRORS_FILE=/tmp/transfer.errors
-export DEFAULT_VGA=0x314
-export HAVE_MODULES_ORDER=1
-export DIALOG_LANG=ask
 export UFONT=/usr/share/fbiterm/fonts/b16.pcf.gz
-export TERM=linux
-export LANG=en_US.utf8
-export UTIMER=0
+
+#======================================
+# Exports (General)
+#--------------------------------------
+test -z "$ELOG_CONSOLE"       && export ELOG_CONSOLE=/dev/tty3
+test -z "$ELOG_BOOTSHELL"     && export ELOG_BOOTSHELL=/dev/tty2
+test -z "$ELOG_EXCEPTION"     && export ELOG_EXCEPTION=/dev/tty1
+test -z "$KLOG_CONSOLE"       && export KLOG_CONSOLE=4
+test -z "$KLOG_DEFAULT"       && export KLOG_DEFAULT=1
+test -z "$ELOG_STOPPED"       && export ELOG_STOPPED=0
+test -z "$PARTITIONER"        && export PARTITIONER=sfdisk
+test -z "$DEFAULT_VGA"        && export DEFAULT_VGA=0x314
+test -z "$HAVE_MODULES_ORDER" && export HAVE_MODULES_ORDER=1
+test -z "$DIALOG_LANG"        && export DIALOG_LANG=ask
+test -z "$TERM"               && export TERM=linux
+test -z "$LANG"               && export LANG=en_US.utf8
+test -z "$UTIMER"             && export UTIMER=0
+test -z "$VGROUP"             && export VGROUP=kiwiVG
 
 #======================================
 # Start boot timer
@@ -627,9 +632,6 @@ function setupSUSEInitrd {
 		if [ -f /etc/init.d/boot.device-mapper ];then
 			/etc/init.d/boot.device-mapper start
 		fi
-		if [ "$haveLVM" = "yes" ]; then
-			/etc/init.d/boot.lvm start
-		fi
 		if ! mkinitrd;then
 			Echo "Can't create initrd"
 			systemIntegrity=unknown
@@ -840,17 +842,25 @@ function setupBootLoaderGrubRecovery {
 			echo " kernel /boot/xen.gz"                   >> $menu
 			echo -n " module /boot/$kernel"               >> $menu
 			echo -n " root=$diskByID $console"            >> $menu
+			echo -n " disk=$(getDiskID $imageDiskDevice)" >> $menu
 			echo -n " vga=$fbmode splash=silent"          >> $menu
 			echo -n " $KIWI_INITRD_PARAMS"                >> $menu
 			echo -n " $KIWI_KERNEL_OPTIONS"               >> $menu
+			if [ "$haveLVM" = "yes" ];then
+				echo -n " VGROUP=$VGROUP"                 >> $menu
+			fi
 			echo " KIWI_RECOVERY=$recoid showopts"        >> $menu
 			echo " module /boot/$initrd"                  >> $menu
 		else
 			echo -n " kernel $gdev_recovery/boot/$kernel" >> $menu
 			echo -n " root=$diskByID $console"            >> $menu
+			echo -n " disk=$(getDiskID $imageDiskDevice)" >> $menu
 			echo -n " vga=$fbmode splash=silent"          >> $menu
 			echo -n " $KIWI_INITRD_PARAMS"                >> $menu
 			echo -n " $KIWI_KERNEL_OPTIONS"               >> $menu
+			if [ "$haveLVM" = "yes" ];then
+				echo -n " VGROUP=$VGROUP"                 >> $menu
+			fi
 			echo " KIWI_RECOVERY=$recoid showopts"        >> $menu
 			echo " initrd $gdev_recovery/boot/$initrd"    >> $menu
 		fi
@@ -864,17 +874,25 @@ function setupBootLoaderGrubRecovery {
 			echo " kernel /boot/xen.gz"                   >> $menu
 			echo -n " module /boot/$kernel"               >> $menu
 			echo -n " root=$diskByID $console"            >> $menu
+			echo -n " disk=$(getDiskID $imageDiskDevice)" >> $menu
 			echo -n " vga=$fbmode splash=silent"          >> $menu
 			echo -n " $KIWI_INITRD_PARAMS"                >> $menu
 			echo -n " $KIWI_KERNEL_OPTIONS"               >> $menu
+			if [ "$haveLVM" = "yes" ];then
+				echo -n " VGROUP=$VGROUP"                 >> $menu
+			fi
 			echo " KIWI_RECOVERY=$recoid showopts"        >> $menu
 			echo " module /boot/$initrd"                  >> $menu
 		else
 			echo -n " kernel $gdev_recovery/boot/$kernel" >> $menu
 			echo -n " root=$diskByID $console"            >> $menu
+			echo -n " disk=$(getDiskID $imageDiskDevice)" >> $menu
 			echo -n " vga=$fbmode splash=silent"          >> $menu
 			echo -n " $KIWI_INITRD_PARAMS"                >> $menu
 			echo -n " $KIWI_KERNEL_OPTIONS"               >> $menu
+			if [ "$haveLVM" = "yes" ];then
+				echo -n " VGROUP=$VGROUP"                 >> $menu
+			fi
 			echo -n " KIWI_RECOVERY=$recoid RESTORE=1"    >> $menu
 			echo " showopts"                              >> $menu
 			echo " initrd $gdev_recovery/boot/$initrd"    >> $menu
@@ -994,8 +1012,10 @@ function setupBootLoaderSyslinux {
 			else
 				echo "KERNEL /boot/$kernel"                    >> $conf
 				echo -n "APPEND initrd=/boot/$initrd"          >> $conf
-				echo -n " root=$diskByID $console vga=$fbmode" >> $conf
-				echo -n " loader=$loader splash=silent"        >> $conf
+				echo -n " root=$diskByID $console"             >> $conf
+				echo -n " disk=$(getDiskID $imageDiskDevice)"  >> $conf
+				echo -n " vga=$fbmode loader=$loader"          >> $conf
+				echo -n " splash=silent"                       >> $conf
 				if [ ! -z "$swap" ];then
 					echo -n " resume=$swapByID"                >> $conf
 				fi
@@ -1003,7 +1023,11 @@ function setupBootLoaderSyslinux {
 					echo -n " xencons=$xencons"                >> $conf
 				fi
 				echo -n " $KIWI_INITRD_PARAMS"                 >> $conf
-				echo " $KIWI_KERNEL_OPTIONS showopts"          >> $conf
+				echo -n " $KIWI_KERNEL_OPTIONS"                >> $conf
+				if [ "$haveLVM" = "yes" ];then
+					echo -n " VGROUP=$VGROUP"                  >> $conf
+				fi
+				echo " showopts"                               >> $conf
 			fi
 			#======================================
 			# create Failsafe entry
@@ -1018,8 +1042,10 @@ function setupBootLoaderSyslinux {
 			else
 				echo "KERNEL /boot/$kernel"                    >> $conf
 				echo -n "APPEND initrd=/boot/$initrd"          >> $conf
-				echo -n " root=$diskByID $console vga=$fbmode" >> $conf
-				echo -n " loader=$loader splash=silent"        >> $conf
+				echo -n " root=$diskByID $console"             >> $conf
+				echo -n " disk=$(getDiskID $imageDiskDevice)"  >> $conf
+				echo -n " vga=$fbmode loader=$loader"          >> $conf
+				echo -n " splash=silent"                       >> $conf
 				if [ ! -z "$swap" ];then
 					echo -n " resume=$swapByID"                >> $conf
 				fi
@@ -1027,8 +1053,11 @@ function setupBootLoaderSyslinux {
 					echo -n " xencons=$xencons"                >> $conf
 				fi
 				echo -n " $KIWI_INITRD_PARAMS"                 >> $conf
-				echo " $KIWI_KERNEL_OPTIONS showopts"          >> $conf
-				echo -n " ide=nodma apm=off acpi=off"          >> $conf
+				echo -n " $KIWI_KERNEL_OPTIONS"                >> $conf
+				if [ "$haveLVM" = "yes" ];then
+					echo -n " VGROUP=$VGROUP"                  >> $conf
+				fi
+				echo -n " showopts ide=nodma apm=off acpi=off" >> $conf
 				echo -n " noresume selinux=0 nosmp"            >> $conf
 				echo " noapic maxcpus=0 edd=off"               >> $conf
 			fi
@@ -1197,8 +1226,9 @@ function setupBootLoaderGrub {
 				echo " root $gdev"                                >> $menu
 				echo " kernel /boot/xen.gz"                       >> $menu
 				echo -n " module /boot/$kernel"                   >> $menu
-				echo -n " root=$diskByID $console"                >> $menu
-				echo -n " vga=$fbmode splash=silent"              >> $menu
+				echo -n " root=$diskByID"                         >> $menu
+				echo -n " disk=$(getDiskID $imageDiskDevice)"     >> $menu
+				echo -n " $console vga=$fbmode splash=silent"     >> $menu
 				if [ ! -z "$swap" ];then
 					echo -n " resume=$swapByID"                   >> $menu
 				fi
@@ -1206,12 +1236,17 @@ function setupBootLoaderGrub {
 					echo -n " xencons=$xencons"                   >> $menu
 				fi
 				echo -n " $KIWI_INITRD_PARAMS"                    >> $menu
-				echo " $KIWI_KERNEL_OPTIONS showopts"             >> $menu
+				echo -n " $KIWI_KERNEL_OPTIONS"                   >> $menu
+				if [ "$haveLVM" = "yes" ];then
+					echo -n " VGROUP=$VGROUP"                     >> $menu
+				fi
+				echo " showopts"                                  >> $menu
 				echo " module /boot/$initrd"                      >> $menu
 			else
 				echo -n " kernel $gdev/boot/$kernel"              >> $menu
-				echo -n " root=$diskByID $console"                >> $menu
-				echo -n " vga=$fbmode splash=silent"              >> $menu
+				echo -n " root=$diskByID"                         >> $menu
+				echo -n " disk=$(getDiskID $imageDiskDevice)"     >> $menu
+				echo -n " $console vga=$fbmode splash=silent"     >> $menu
 				if [ ! -z "$swap" ];then
 					echo -n " resume=$swapByID"                   >> $menu
 				fi
@@ -1219,7 +1254,11 @@ function setupBootLoaderGrub {
 					echo -n " xencons=$xencons"                   >> $menu
 				fi
 				echo -n " $KIWI_INITRD_PARAMS"                    >> $menu
-				echo " $KIWI_KERNEL_OPTIONS showopts"             >> $menu
+				echo -n " $KIWI_KERNEL_OPTIONS"                   >> $menu
+				if [ "$haveLVM" = "yes" ];then
+					echo -n " VGROUP=$VGROUP"                     >> $menu
+				fi
+				echo " showopts"                                  >> $menu
 				echo " initrd $gdev/boot/$initrd"                 >> $menu
 			fi
 			#======================================
@@ -1231,11 +1270,15 @@ function setupBootLoaderGrub {
 				echo " root $gdev"                                >> $menu
 				echo " kernel /boot/xen.gz"                       >> $menu
 				echo -n " module /boot/$kernel"                   >> $menu
-				echo -n " root=$diskByID $console"                >> $menu
-				echo -n " vga=$fbmode splash=silent"              >> $menu
+				echo -n " root=$diskByID"                         >> $menu
+				echo -n " disk=$(getDiskID $imageDiskDevice)"     >> $menu
+				echo -n " $console vga=$fbmode splash=silent"     >> $menu
 				echo -n " $KIWI_INITRD_PARAMS"                    >> $menu
-				echo -n " $KIWI_KERNEL_OPTIONS showopts"          >> $menu
-				echo -n " ide=nodma apm=off acpi=off"             >> $menu
+				echo -n " $KIWI_KERNEL_OPTIONS"                   >> $menu
+				if [ "$haveLVM" = "yes" ];then
+					echo -n " VGROUP=$VGROUP"                     >> $menu
+				fi
+				echo -n " showopts ide=nodma apm=off acpi=off"    >> $menu
 				echo -n " noresume selinux=0 nosmp"               >> $menu
 				if [ ! -z "$xencons" ]; then
 					echo -n " xencons=$xencons"                   >> $menu
@@ -1244,11 +1287,15 @@ function setupBootLoaderGrub {
 				echo " module /boot/$initrd"                      >> $menu
 			else
 				echo -n " kernel $gdev/boot/$kernel"              >> $menu
-				echo -n " root=$diskByID $console"                >> $menu
-				echo -n " vga=$fbmode splash=silent"              >> $menu
+				echo -n " root=$diskByID"                         >> $menu
+				echo -n " disk=$(getDiskID $imageDiskDevice)"     >> $menu
+				echo -n " $console vga=$fbmode splash=silent"     >> $menu
 				echo -n " $KIWI_INITRD_PARAMS"                    >> $menu
-				echo -n " $KIWI_KERNEL_OPTIONS showopts"          >> $menu
-				echo -n " ide=nodma apm=off acpi=off"             >> $menu
+				echo -n " $KIWI_KERNEL_OPTIONS"                   >> $menu
+				if [ "$haveLVM" = "yes" ];then
+					echo -n " VGROUP=$VGROUP"                     >> $menu
+				fi
+				echo -n " showopts ide=nodma apm=off acpi=off"    >> $menu
 				echo -n " noresume selinux=0 nosmp"               >> $menu
 				if [ ! -z "$xencons" ]; then
 					echo -n " xencons=$xencons"                   >> $menu
@@ -1256,7 +1303,7 @@ function setupBootLoaderGrub {
 				echo " noapic maxcpus=0 edd=off"                  >> $menu
 				echo " initrd $gdev/boot/$initrd"                 >> $menu
 			fi
-					count=`expr $count + 1`
+			count=`expr $count + 1`
 		fi
 	done
 	#======================================
@@ -1426,51 +1473,60 @@ function setupBootLoaderLilo {
 			#======================================
 			# create standard entry
 			#--------------------------------------
-			echo "label=\"$title\""                          >> $conf
+			echo "label=\"$title\""                           >> $conf
 			if xenServer;then
 				systemException \
 					"*** lilo: Xen dom0 boot not implemented ***" \
 				"reboot"
 			else
-				echo "image=/boot/$kernel"                   >> $conf
-				echo "initrd=/boot/$initrd"                  >> $conf
-				echo -n "append=\"quiet sysrq=1 panic=9"     >> $conf
-				echo -n " root=$diskByID $console"           >> $conf
-				echo -n " vga=$fbmode splash=silent"         >> $conf
+				echo "image=/boot/$kernel"                    >> $conf
+				echo "initrd=/boot/$initrd"                   >> $conf
+				echo -n "append=\"quiet sysrq=1 panic=9"      >> $conf
+				echo -n " root=$diskByID"                     >> $conf
+				echo -n " disk=$(getDiskID $imageDiskDevice)" >> $conf
+				echo -n " $console vga=$fbmode splash=silent" >> $conf
 				if [ ! -z "$swap" ];then                     
-					echo -n " resume=$swapByID"              >> $conf
+					echo -n " resume=$swapByID"               >> $conf
 				fi
 				if [ ! -z "$xencons" ]; then
-					echo -n " xencons=$xencons"              >> $conf
+					echo -n " xencons=$xencons"               >> $conf
 				fi
-				echo -n " $KIWI_INITRD_PARAMS"               >> $conf
-				echo " $KIWI_KERNEL_OPTIONS showopts\""      >> $conf
+				echo -n " $KIWI_INITRD_PARAMS"                >> $conf
+				echo -n " $KIWI_KERNEL_OPTIONS"               >> $conf
+				if [ "$haveLVM" = "yes" ];then
+					echo -n " VGROUP=$VGROUP"                 >> $conf
+				fi
+				echo " showopts\""                            >> $conf
 			fi
 			#======================================
 			# create failsafe entry
 			#--------------------------------------
 			title=$(makeLabel "Failsafe -- $title")
-			echo "label=\"$title\""                          >> $conf
+			echo "label=\"$title\""                           >> $conf
 			if xenServer;then
 				systemException \
 					"*** lilo: Xen dom0 boot not implemented ***" \
 				"reboot"
 			else
-				echo "image=/boot/$kernel"                   >> $conf
-				echo "initrd=/boot/$initrd"                  >> $conf
-				echo -n "append=\"quiet sysrq=1 panic=9"     >> $conf
-				echo -n " root=$diskByID $console"           >> $conf
-				echo -n " vga=$fbmode splash=silent"         >> $conf
+				echo "image=/boot/$kernel"                    >> $conf
+				echo "initrd=/boot/$initrd"                   >> $conf
+				echo -n "append=\"quiet sysrq=1 panic=9"      >> $conf
+				echo -n " root=$diskByID"                     >> $conf
+				echo -n " disk=$(getDiskID $imageDiskDevice)" >> $conf
+				echo -n " $console vga=$fbmode splash=silent" >> $conf
 				if [ ! -z "$swap" ];then
-					echo -n " resume=$swapByID"              >> $conf
+					echo -n " resume=$swapByID"               >> $conf
 				fi
 				if [ ! -z "$xencons" ]; then
-					echo -n " xencons=$xencons"              >> $conf
+					echo -n " xencons=$xencons"               >> $conf
 				fi
-				echo -n " $KIWI_INITRD_PARAMS"               >> $conf
-				echo -n " $KIWI_KERNEL_OPTIONS showopts\""   >> $conf
-				echo -n " ide=nodma apm=off acpi=off"        >> $conf
-				echo " noresume selinux=0 nosmp"             >> $conf
+				echo -n " $KIWI_INITRD_PARAMS"                >> $conf
+				echo -n " $KIWI_KERNEL_OPTIONS"               >> $conf
+				if [ "$haveLVM" = "yes" ];then
+					echo -n " VGROUP=$VGROUP"                 >> $conf
+				fi
+				echo -n " showopts ide=nodma apm=off"         >> $conf
+				echo " acpi=off noresume selinux=0 nosmp\""   >> $conf
 			fi
 			count=`expr $count + 1`
 		fi
@@ -1565,11 +1621,18 @@ function updateRootDeviceFstab {
 	# check for LVM volume setup
 	#--------------------------------------
 	if [ "$haveLVM" = "yes" ];then
-		for i in find /dev/kiwiVG/LV*;do
-			local volume=$(echo $i | cut -c15-)
+		for i in /dev/$VGROUP/LV*;do
+			if [ ! -e $i ];then
+				continue
+			fi
+			local volume=$(echo $i | cut -f4 -d/ | cut -c3-)
 			local mpoint=$(echo $volume | tr _ /)
-			if [ ! $volume = "Root" ] && [ ! $volume = "Comp" ];then
-				echo "/dev/kiwiVG/LV$volume /$mpoint $FSTYPE defaults 0 0" \
+			if \
+				[ ! $volume = "Root" ] && \
+				[ ! $volume = "Comp" ] && \
+				[ ! $volume = "Swap" ]
+			then
+				echo "/dev/$VGROUP/LV$volume /$mpoint $FSTYPE defaults 0 0" \
 				>> $nfstab
 			fi
 		done
@@ -2359,13 +2422,13 @@ function searchBIOSBootDevice {
 #--------------------------------------
 function searchVolumeGroup {
 	# /.../
-	# search for a volume group named kiwiVG and if it can be
+	# search for a volume group named $VGROUP and if it can be
 	# found activate it while creating appropriate device nodes:
-	# /dev/kiwiVG/LVRoot and/or /dev/kiwiVG/LVComp
+	# /dev/$VGROUP/LVRoot and/or /dev/$VGROUP/LVComp
 	# return zero on success
 	# ----
-	if vgscan 2>&1 | grep -q "kiwiVG"; then
-		vgchange -a y kiwiVG
+	if vgscan 2>&1 | grep -q "$VGROUP"; then
+		vgchange -a y $VGROUP
 		return $?
 	fi
 	return 1
@@ -3675,7 +3738,7 @@ function mountSystemCombined {
 	local loopf=$2
 	local roDevice=$mountDevice
 	if [ "$haveLVM" = "yes" ]; then
-		local rwDevice="/dev/kiwiVG/LVRoot"
+		local rwDevice="/dev/$VGROUP/LVRoot"
 	elif [ "$haveLuks" = "yes" ]; then
 		local rwDevice="/dev/mapper/luksReadWrite"
 	else
@@ -3758,11 +3821,16 @@ function mountSystemStandard {
 		mount $mountDevice /mnt >/dev/null
 	fi
 	if [ "$haveLVM" = "yes" ];then
-		for i in find /dev/kiwiVG/LV*;do
-			local volume=$(echo $i | cut -c15-)
+		for i in /dev/$VGROUP/LV*;do
+			local volume=$(echo $i | cut -f4 -d/ | cut -c3-)
 			local mpoint=$(echo $volume | tr _ /)
-			if [ ! $volume = "Root" ] && [ ! $volume = "Comp" ];then
-				mount /dev/kiwiVG/LV$volume /mnt/$mpoint
+			if \
+				[ ! $volume = "Root" ] && \
+				[ ! $volume = "Comp" ] && \
+				[ ! $volume = "Swap" ]
+			then
+				mkdir -p /mnt/$mpoint
+				mount /dev/$VGROUP/LV$volume /mnt/$mpoint
 			fi
 		done
 	fi
@@ -4186,7 +4254,7 @@ function getDiskID {
 	if [ -z "$device" ];then
 		return
 	fi
-	if echo $device | grep -q "kiwiVG"; then
+	if echo $device | grep -q "$VGROUP"; then
 		echo $device
 		return
 	fi
@@ -4372,6 +4440,8 @@ function cleanImage {
 	#--------------------------------------
 	rm -f /preinit
 	rm -f /include
+	rm -f /.kconfig
+	rm -f /.profile
 	rm -rf /image
 	#======================================
 	# don't call root filesystem check
@@ -4389,13 +4459,14 @@ function cleanImage {
 	# umount LVM root parts lazy
 	#--------------------------------------
 	if [ "$haveLVM" = "yes" ]; then
-		for i in /dev/kiwiVG/LV*;do
+		for i in /dev/$VGROUP/LV*;do
 			if [ ! -e $i ];then
 				continue
 			fi
 			if \
-				[ ! $i = "/dev/kiwiVG/LVRoot" ] && \
-				[ ! $i = "/dev/kiwiVG/LVComp" ]
+				[ ! $i = "/dev/$VGROUP/LVRoot" ] && \
+				[ ! $i = "/dev/$VGROUP/LVComp" ] && \
+				[ ! $i = "/dev/$VGROUP/LVSwap" ]
 			then
 				umount -l $i &>/dev/null
 			fi

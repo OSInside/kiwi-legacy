@@ -1173,6 +1173,9 @@ div {
 		## Specify whether LVM should be used or not. This is effective
 		## for the types oem,usb and vmx
 		attribute lvm { xsd:boolean }
+	k.type.lvmgroup.attribute =
+		## Specify Volume group name, default is kiwiVG.
+		attribute lvmgroup { text }
 	k.type.baseroot.attribute =
 		## Specify the path to a pre created base root system.
 		attribute baseroot { text }
@@ -1276,6 +1279,7 @@ div {
 	k.type.attlist =
 		k.type.fsnocheck.attribute? &
 		k.type.lvm.attribute? &
+		k.type.lvmgroup.attribute? &
 		k.type.checkprebuilt.attribute? &
 		k.type.bootprofile.attribute? &
 		k.type.bootkernel.attribute? &

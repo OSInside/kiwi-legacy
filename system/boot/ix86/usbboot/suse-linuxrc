@@ -86,16 +86,16 @@ export stickRoot=$biosBootDevice
 export stickDevice=$(ddn $stickRoot 1)
 export stickRWDevice=$(ddn $stickRoot 2)
 export stickRODevice=$(ddn $stickRoot 1)
-Echo "Searching for kiwiVG volume group..."
+Echo "Searching for $VGROUP volume group..."
 if searchVolumeGroup; then
 	export haveLVM=yes
-	if [ -e /dev/kiwiVG/LVComp ];then
-		export stickDevice=/dev/kiwiVG/LVComp
+	if [ -e /dev/$VGROUP/LVComp ];then
+		export stickDevice=/dev/$VGROUP/LVComp
 	else
-		export stickDevice=/dev/kiwiVG/LVRoot
+		export stickDevice=/dev/$VGROUP/LVRoot
 	fi
-	export stickRWDevice=/dev/kiwiVG/LVRoot
-	export stickRODevice=/dev/kiwiVG/LVComp
+	export stickRWDevice=/dev/$VGROUP/LVRoot
+	export stickRODevice=/dev/$VGROUP/LVComp
 	export stickBootDevice=$(ddn $stickRoot 2)
 fi
 

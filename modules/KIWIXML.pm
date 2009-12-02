@@ -762,6 +762,7 @@ sub getImageTypeAndAttributes {
 		$record{type}          = $node -> string_value();
 		$record{luks}          = $node -> getAttribute("luks");
 		$record{lvm}           = $node -> getAttribute("lvm");
+		$record{lvmgroup}      = $node -> getAttribute("lvmgroup");
 		$record{compressed}    = $node -> getAttribute("compressed");
 		$record{boot}          = $node -> getAttribute("boot");
 		$record{volid}         = $node -> getAttribute("volid");

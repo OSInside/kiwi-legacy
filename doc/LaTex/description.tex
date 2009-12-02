@@ -236,7 +236,8 @@ describes the possible types and their attributes:
       oem image only the distribution supported bootloader (grub) is
       allowed. The optional \textbf{lvm} attribute allows you to
       activate LVM support and place the root filesystem into logical
-      volumes of the kiwiVG volume group
+      volumes of the volume group specified by the lvmgroup attribute.
+      If no lvmgroup is set the default group name kiwiVG applies.
 \item \textbf{vmx}\\
       Use this type to create a virtual disk system along with the
       attributes \textbf{filesystem}, \textbf{boot=''vmxboot/suse-*''} and
@@ -248,7 +249,8 @@ describes the possible types and their attributes:
       The vga attribute also works for the image types usb and oem.
       The optional \textbf{lvm} attribute allows you to
       activate LVM support and place the root filesystem into logical
-      volumes of the kiwiVG volume group
+      volumes of the volume group specified by the lvmgroup attribute.
+      If no lvmgroup is set the default group name kiwiVG applies.
 \item \textbf{oem}\\
       Use this type to create a preload virtual disk system along with
       the attributes \textbf{filesystem}, \textbf{boot=''oemboot/suse-*''} and
@@ -258,7 +260,9 @@ describes the possible types and their attributes:
       takes over the task of deploying the preload system onto the
       storage devices which it detects at boot time. If the optional
       \textbf{lvm} attribute is set the root filesystem of the oem system is 
-      placed into logical volumes of the kiwiVG volume group.
+      placed into logical volumes of the volume group specified by the
+      lvmgroup attribute. If no lvmgroup is set the default group name
+      kiwiVG applies.
 \item \textbf{pxe}\\
       Use this type to create a network boot image along with the
       attributes \textbf{filesystem} and \textbf{boot=''netboot/suse-*''}

@@ -237,7 +237,7 @@ function OEMRepartStandard {
 						d n p 1 1 +"$disk1MBytes"M \
 						n p 2 . +"$swapsize"M \
 						n p 3 . +"$recoMByte"M \
-						n p 4 . . \
+						n p . . \
 						t 3 $recoID \
 						t 2 82 w q
 					setupDeviceNames 1 2 4 3 1 no
@@ -380,7 +380,7 @@ function OEMRepartOverlayed {
 			if [ "$haveDMSquash" = "yes" ] || [ "$haveClicFS" = "yes" ];then
 				createPartitionerInput \
 					d 2 n p 2 . +"$disk2MBytes"M \
-					n p 3 . +"$bootXMBytes"M n p 4 . . \
+					n p 3 . +"$bootXMBytes"M n p . . \
 					t 4 82 w q
 				setupDeviceNames 1 4 no no 3 2
 			else
@@ -515,17 +515,21 @@ function OEMRepartLVM {
 	local VGFreeMBytes
 	local VGNeedMBytes
 	local VGSwapMBytes=0
-	local VGRecoveryMBytes=0
 	local VGSpareMBytes=100
 	local VGSystemMBytes=10240
+	local diskXMBytes=`partitionSize $imageDiskDevice`
 	if [ ! -z "$OEM_SYSTEMSIZE" ];then
 		VGSystemMBytes=$OEM_SYSTEMSIZE
 	fi
-	if [ ! -z "$OEM_RECOVERY" ];then
-		VGRecoveryMBytes=$recoMByte
-	fi
 	if [ -z "$OEM_WITHOUTSWAP" ];then
 		VGSwapMBytes=$swapsize
+	fi
+	# /.../
+	# prevent recovery partition if requested
+	# system size is bigger than the whole disk
+	# ----
+	if [ $VGSystemMBytes -gt $diskXMBytes ];then
+		unset OEM_RECOVERY
 	fi
 	#======================================
 	# Extend vgroup to max physical space
@@ -533,22 +537,32 @@ function OEMRepartLVM {
 	vgchange -an
 	input=/part.input
 	rm -f $input
-	createPartitionerInput \
-		n p 3 . . t 3 8e w q
-	luksClose
+	if [ ! -z "$OEM_RECOVERY" ];then
+		createPartitionerInput \
+			n p 3 . +"$recoMByte"M \
+			n p . . \
+			t 3 $recoID \
+			t 4 8e \
+			a 2 w
+		extendID=4
+	else
+		createPartitionerInput \
+			n p 3 . . t 3 8e a 2 w
+		extendID=3
+	fi
 	callPartitioner $input
+	dd if=/dev/zero of=$(ddn $imageDiskDevice $extendID) bs=1024 count=5
 	#======================================
 	# Set boot id
 	#--------------------------------------
 	bootid=2
-	activateBootPartition
-	vgchange -a y kiwiVG
-	pvcreate $(ddn $imageDiskDevice 3)
-	vgextend kiwiVG $(ddn $imageDiskDevice 3)
-	VGFreeMBytes=`vgdisplay --short --unit B kiwiVG | cut -f2 -d/ | cut -f1 -dB`
+	vgchange -a y $VGROUP
+	pvcreate $(ddn $imageDiskDevice $extendID)
+	vgextend $VGROUP $(ddn $imageDiskDevice $extendID)
+	VGFreeMBytes=`vgdisplay --short --unit B $VGROUP|cut -f2 -d/ | cut -f1 -dB`
 	VGFreeMBytes=`expr $VGFreeMBytes / 1000`
 	VGFreeMBytes=`expr $VGFreeMBytes / 1000`
-	VGNeedMBytes=`expr $VGSwapMBytes + $VGRecoveryMBytes + $VGSystemMBytes`
+	VGNeedMBytes=`expr $VGSwapMBytes + $VGSystemMBytes`
 	VGNeedMBytes=`expr $VGNeedMBytes + $VGSpareMBytes`
 	#======================================
 	# Check if we have enough space left
@@ -557,7 +571,6 @@ function OEMRepartLVM {
 		Echo "Not enough space left, will not extend logical volumes"
 		export OEM_WITHOUTHOME=1
 		export OEM_WITHOUTSWAP=1
-		unset  OEM_RECOVERY
 		DONT_PARTITION=1
 	fi
 	#======================================
@@ -565,31 +578,31 @@ function OEMRepartLVM {
 	#--------------------------------------
 	if [ -z "$DONT_PARTITION" ];then
 		#======================================
+		# Setup recovery device name
+		#--------------------------------------
+		if [ ! -z "$OEM_RECOVERY" ];then
+			export imageRecoveryDevice=$(ddn $imageDiskDevice 3)
+			export recoid=3
+		fi
+		#======================================
 		# Extend LVRoot to requested size
 		#--------------------------------------
-		lvextend --size $VGSystemMBytes"M" /dev/kiwiVG/LVRoot
+		lvextend --size $VGSystemMBytes"M" /dev/$VGROUP/LVRoot
 		#======================================
 		# Add LVSwap if requested.
 		#--------------------------------------
 		if [ -z "$OEM_WITHOUTSWAP" ];then
-			lvcreate --size $VGSwapMBytes"M" -n LVSwap kiwiVG
-			export imageSwapDevice=/dev/kiwiVG/LVSwap
-		fi
-		#======================================
-		# Add LVRecovery if requested
-		#--------------------------------------
-		if [ ! -z "$OEM_RECOVERY" ];then
-			lvcreate --size $VGRecoveryMBytes"M" -n LVRecovery kiwiVG
-			export imageRecoveryDevice=/dev/kiwiVG/LVRecovery
+			lvcreate --size $VGSwapMBytes"M" -n LVSwap $VGROUP
+			export imageSwapDevice=/dev/$VGROUP/LVSwap
 		fi
 		#======================================
 		# Add LVHome if requested
 		#--------------------------------------
 		if [ -z "$OEM_WITHOUTHOME" ];then
-			lvcreate -l 100%FREE -n LVHome kiwiVG
-			export imageHomeDevice=/dev/kiwiVG/LVHome
+			lvcreate -l 100%FREE -n LVHome $VGROUP
+			export imageHomeDevice=/dev/$VGROUP/LVHome
 		else
-			lvextend -l 100%FREE /dev/kiwiVG/LVRoot
+			lvextend -l 100%FREE /dev/$VGROUP/LVRoot
 		fi
 	fi
 }
@@ -619,11 +632,8 @@ function OEMRepartLuks {
 	#======================================
 	# calculate end block - swapspace
 	#--------------------------------------
+	bootXMBytes=40
 	swapXMBytes=$swapsize
-	bootXMBytes=0
-	if [ "$haveLuks" = "yes" ];then
-		bootXMBytes=40
-	fi
 	diskXMBytes=`partitionSize $imageDiskDevice`
 	diskXMBytes=`expr $diskXMBytes / 1024`
 	disk1MBytes=`partitionSize $(ddn $imageDiskDevice 1)`
@@ -700,7 +710,7 @@ function OEMRepartLuks {
 				createPartitionerInput \
 					d 2 d 3 n p 2 . +"$disk2MBytes"M \
 					n p 3 . +"$bootXMBytes"M \
-					n p 4 . . \
+					n p . . \
 					t 4 82 w q
 				setupDeviceNames 1 4 no no 3 2
 			else
@@ -816,6 +826,10 @@ function OEMRepart {
 		if ! mount $imageRootDevice /reco-root >/dev/null;then
 			systemException "Failed to mount root device" "reboot"
 		fi
+		if [ ! -z "$haveLVM" ];then
+			mkdir -p /recoboot && mount $imageBootDevice /recoboot
+			mount --bind /recoboot/boot /reco-root/boot
+		fi
 		mkdir -p /reco-save
 		if ! mount $imageRecoveryDevice /reco-save >/dev/null;then
 			systemException "Failed to mount recovery device" "reboot"
@@ -841,6 +855,10 @@ function OEMRepart {
 		fi
 		if ! dd if=$imageDiskDevice of=/reco-save/mbr bs=1 count=512;then
 			systemException "Failed to store MBR" "reboot"
+		fi
+		if [ ! -z "$haveLVM" ];then
+			umount /reco-root/boot
+			umount /recoboot && rmdir /recoboot
 		fi
 		umount /reco-save && rmdir /reco-save
 		umount /reco-root && rmdir /reco-root
