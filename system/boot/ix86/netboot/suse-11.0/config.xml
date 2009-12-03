@@ -132,6 +132,9 @@
 	<repository type="yast2" status="replaceable">
 		<source path="/image/CDs/full-11.0-i386"/>
 	</repository>
+	<repository type="rpm-dir" status="fixed">
+		<source path="/usr/share/kiwi/repo/suse-repo/suse-sle10-repo"/>
+	</repository>
 	<packages type="image" profiles="std">
 		<!-- KERNEL AND MODULE PACKAGES START STD -->
 		<package name="kernel-default"/>
@@ -157,6 +160,7 @@
 		<package name="psmisc"/>
 		<package name="iputils"/>
 		<package name="atftp"/>
+		<package name="busybox"/>
 		<package name="bind-libs"/>
 		<package name="bind-utils"/>
 		<package name="dhcpcd"/>
@@ -186,6 +190,7 @@
 		<!-- PACKAGES START DISKLESS -->
 		<package name="iputils"/>
 		<package name="atftp"/>
+		<package name="busybox"/>
 		<package name="dhcpcd"/>
 		<package name="file"/>
 		<package name="hwinfo"/>

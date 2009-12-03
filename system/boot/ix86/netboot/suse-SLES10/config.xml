@@ -75,6 +75,7 @@
 		<package name="psmisc"/>
 		<package name="iputils"/>
 		<package name="atftp"/>
+		<package name="busybox"/>
 		<package name="bind-libs"/>
 		<package name="bind-utils"/>
 		<package name="dhcpcd"/>
