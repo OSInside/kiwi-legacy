@@ -49,8 +49,6 @@ Requires:       master-boot-code
 Requires:       satsolver-tools
 %endif
 Summary:        OpenSuSE - KIWI Image System
-Provides:       kiwi2 <= 2.14
-Obsoletes:      kiwi2 <= 2.14
 Version:        3.82
 Release:        80
 Group:          System/Management
@@ -105,8 +103,6 @@ Authors:
 %package -n kiwi-tools
 License:        GPL v2 or later
 Summary:        OpenSuSE - KIWI tools collection
-Obsoletes:      kiwi2-tools <= 2.14
-Provides:       kiwi2-tools <= 2.14
 Group:          System/Management
 
 %description -n kiwi-tools
@@ -137,8 +133,6 @@ Authors:
 License:        GPL v2 or later
 Requires:       syslinux
 Summary:        OpenSuSE - KIWI Image System PXE boot structure
-Obsoletes:      kiwi2-pxeboot <= 2.14
-Provides:       kiwi2-pxeboot <= 2.14
 Group:          System/Management
 
 %description -n kiwi-pxeboot
@@ -154,8 +148,6 @@ Authors:
 License:        GPL v2 only
 Requires:       syslinux
 Summary:        OpenSuSE - KIWI TFTP prebuild boot images
-Obsoletes:      kiwi2-pxeboot-prebuild <= 2.14
-Provides:       kiwi2-pxeboot-prebuild <= 2.14
 Group:          System/Management
 
 %description -n kiwi-pxeboot-prebuild
@@ -177,8 +169,6 @@ Requires: genisoimage
 Requires: mkisofs
 %endif
 Summary:        OpenSuSE - KIWI Image System ISO boot
-Obsoletes:      kiwi2-desc-isoboot <= 2.14
-Provides:       kiwi2-desc-isoboot <= 2.14
 Group:          System/Management
 
 %description -n kiwi-desc-isoboot
@@ -194,8 +184,6 @@ Authors:
 License:        GPL v2 or later
 Requires:       kiwi = %{version}
 Summary:        OpenSuSE - KIWI Image System USB boot
-Obsoletes:      kiwi2-desc-usbboot <= 2.14
-Provides:       kiwi2-desc-usbboot <= 2.14
 Group:          System/Management
 
 %description -n kiwi-desc-usbboot
@@ -212,8 +200,6 @@ License:        GPL v2 or later
 Requires:       kiwi = %{version}
 Requires:       qemu multipath-tools
 Summary:        OpenSuSE - KIWI Image System Virtual Machine boot
-Obsoletes:      kiwi2-desc-vmxboot <= 2.14
-Provides:       kiwi2-desc-vmxboot <= 2.14
 Group:          System/Management
 
 %description -n kiwi-desc-vmxboot
@@ -229,8 +215,6 @@ Authors:
 License:        GPL v2 or later
 Requires:       kiwi = %{version}
 Summary:        OpenSuSE - KIWI Image System PXE network boot
-Obsoletes:      kiwi2-desc-netboot <= 2.14
-Provides:       kiwi2-desc-netboot <= 2.14
 Group:          System/Management
 
 %description -n kiwi-desc-netboot
@@ -246,8 +230,6 @@ Authors:
 License:        GPL v2 or later
 Requires:       kiwi = %{version}
 Summary:        OpenSuSE - KIWI Image System Xen Virtual Machine boot
-Obsoletes:      kiwi2-desc-xenboot <= 2.14
-Provides:       kiwi2-desc-xenboot <= 2.14
 Group:          System/Management
 
 %description -n kiwi-desc-xenboot
@@ -269,8 +251,6 @@ Requires: genisoimage
 Requires: mkisofs
 %endif
 Summary:        OpenSuSE - KIWI image descriptions
-Obsoletes:      kiwi2-desc-oemboot <= 2.14
-Provides:       kiwi2-desc-oemboot <= 2.14
 Group:          System/Management
 
 %description -n kiwi-desc-oemboot
