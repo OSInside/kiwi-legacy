@@ -577,13 +577,13 @@ sub mainTask
 
   return 1 if not defined($this);
 
-  my ($collectret, $initmphandlers, $metadatacreate);
+  ## Collect all needed packages
+  $this->logMsg("E", "collecting packages failed!") if $this->collectPackages();
 
-  $collectret = $this->collectPackages();
-  if($collectret != 0) {
-    $this->logMsg("E", "collecting packages failed!");
-    return 1;
-  }
+  ## Look for all products collected
+  $this->collectProducts();
+
+  ## create meta data
   $this->createMetadata();
 
   ## We create iso files by default, but keep this for manual override
@@ -595,7 +595,7 @@ sub mainTask
     $this->logMsg("W", "Skipping ISO generation due to KIWI_NO_ISO enviroment variable");
     return 0;
   }
-  if($this->{m_proddata}->getVar("FLAVOR") eq "ftp") {
+  if($this->{m_proddata}->getVar("FLAVOR") eq "ftp") { # should not be applied anymore
     $this->logMsg("W", "Skipping ISO generation for FLAVOR ftp, please use REPO_ONLY flag instead !");
     return 0;
   }
@@ -1496,6 +1496,77 @@ sub getArchList
 
 
 #==========================================
+# collectProducts
+#------------------------------------------
+# reads the product data which are on the media
+#------------------------------------------
+# params:
+#------------------------------------------
+sub collectProducts
+{
+  my $this = shift;
+  my $xml = new XML::LibXML;
+
+  my $tmp = $this->{m_basesubdir}->{0}."/temp";
+  qx(rm -rf $tmp) if -d $tmp;
+
+  # not nice, just look for all -release packages and their content.
+  # This will become nicer when we switched to rpm-md as product repo format
+  my $found_product = 0;
+  foreach my $i(grep($_ =~ /-release$/,keys(%{$this->{m_repoPacks}}))) {
+      if(!mkpath("$tmp", { mode => 0755 } )) {
+        $this->logMsg("E", "can't create dir <$tmp>");
+      }
+      my $file = $this->{m_repoPacks}->{$i}->{'newpath'}."/".$this->{m_repoPacks}->{$i}->{'newfile'};
+      $this->logMsg("I", "Unpacking product release package ".$file);
+      $this->logMsg("I", "Unpacking product release package ".$file." ".$tmp);
+      $this->{m_util}->unpac_package($file, $tmp);
+
+      # get all .prod files
+      local *D;
+      opendir(D, $tmp."/etc/products.d/") || return ();
+      my @r = grep {$_ =~ '\.prod$'} readdir(D);
+      closedir D;
+
+      # read each product file
+      foreach my $prodfile(@r) {
+         my $tree = $xml->parse_file( $tmp."/etc/products.d/".$prodfile );
+         my $release = $tree->getElementsByTagName( "release" );
+         my $product_name = $tree->getElementsByTagName( "name" );
+         my $label = $tree->getElementsByTagName( "summary" );
+         my $version = $tree->getElementsByTagName( "version" );
+         my $sp_version;
+         $sp_version = $tree->getElementsByTagName( "patchlevel" ) if $tree->getElementsByTagName( "patchlevel" )->get_node(1);
+
+         die( "ERROR: No handling of multiple products on one media supported yet (spec for content file missing)!" ) if $found_product;
+         $found_product = 1;
+
+         # overwrite data with informations from prod file.
+         $this->logMsg("I", "Found product file, superseeding data from config file variables");
+         $this->logMsg("I", "set release to ".$release);
+         $this->logMsg("I", "set product name to ".$product_name);
+         $this->logMsg("I", "set label to ".$label);
+         $this->logMsg("I", "set version to ".$version);
+         $this->logMsg("I", "set sp version to ".$sp_version) if defined($sp_version);
+       
+         $this->{m_proddata}->setInfo("RELEASE", $release);
+         $this->{m_proddata}->setInfo("LABEL", $label);
+         $this->{m_proddata}->setVar("PRODUCT_NAME", $product_name);
+         $this->{m_proddata}->setVar("PRODUCT_VERSION", $version);
+         $this->{m_proddata}->setVar("SP_VERSION", $sp_version) if defined($sp_version);
+
+# further candidates:
+#   my $proddir  = $this->{m_proddata}->getVar("PRODUCT_DIR");
+      }
+
+      # cleanup
+      qx(rm -rf $tmp);
+  }
+}
+
+
+
+#==========================================
 # createMetadata
 #------------------------------------------
 # 
@@ -1629,7 +1700,7 @@ sub createMetadata
   $summary = $this->{m_proddata}->getInfo("SUMMARY") unless $summary;
   my $sp_ver = $this->{m_proddata}->getVar("SP_VERSION");
   my $prodver  = $this->{m_proddata}->getVar("PRODUCT_VERSION");
-  my $prodrel  = $this->{m_proddata}->getVar("RELEASE");
+  my $prodrel  = $this->{m_proddata}->getInfo("RELEASE");
   $prodname =~ s/\ /-/g;
   $prodver .= ".$sp_ver" if defined($sp_ver);
   if(defined($proddir) and defined($prodname) and defined($prodver) and defined($summary)) {

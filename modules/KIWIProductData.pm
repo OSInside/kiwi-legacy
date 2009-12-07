@@ -157,6 +157,68 @@ sub getSet
 
 
 #==========================================
+# setInfo
+#------------------------------------------
+# set a specific variable by name
+#------------------------------------------
+sub setInfo
+{
+  my $this = shift;
+  if(not ref($this)) {
+    return undef;
+  }
+
+  my $var = shift;
+  my $value = shift;
+
+  if ( not defined($this->{prodinfo}->{$this->{'prodinfo-indices'}->{$var}}) ){
+    $this->{prodinfo}->{$this->{'prodinfo-indices'}->{$var}} = ();
+  }
+
+  $this->{prodinfo}->{$this->{'prodinfo-indices'}->{$var}}->[1] = $value;
+}
+# /setInfo
+
+
+#==========================================
+# setOpt
+#------------------------------------------
+# set a specific variable by name
+#------------------------------------------
+sub setOpt
+{
+  my $this = shift;
+  if(not ref($this)) {
+    return undef;
+  }
+  my $var = shift;
+  my $value = shift;
+
+  $this->{prodopts}->{$var} = $value;
+}
+# /setOpt
+
+
+#==========================================
+# setVar
+#------------------------------------------
+# set a specific variable by name
+#------------------------------------------
+sub setVar
+{
+  my $this = shift;
+  if(not ref($this)) {
+    return undef;
+  }
+  my $var = shift;
+  my $value = shift;
+
+  $this->{prodvars}->{$var} = $value;
+}
+# /setVar
+
+
+#==========================================
 # getVar
 #------------------------------------------
 # retrieve a specific variable by name
