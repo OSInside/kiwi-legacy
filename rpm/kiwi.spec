@@ -1,5 +1,5 @@
 #
-# spec file for package kiwi (Version 3.83)
+# spec file for package kiwi (Version 3.84)
 #
 # Copyright (c) 2008 SUSE LINUX Products GmbH, Nuernberg, Germany.
 # This file and all modifications and additions to the pristine
@@ -49,7 +49,7 @@ Requires:       master-boot-code
 Requires:       satsolver-tools
 %endif
 Summary:        OpenSuSE - KIWI Image System
-Version:        3.83
+Version:        3.84
 Release:        80
 Group:          System/Management
 License:        GPL v2 or later

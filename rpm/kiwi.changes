@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Mon Dec  7 12:10:40 CET 2009 - adrian@suse.de
+
+- v3.84
+- fix syntax error when calling warning log function
+- backport content meta data generation out of product files from
+  release packages
+
+-------------------------------------------------------------------
 Thu Dec  3 16:01:49 CET 2009 - ms@suse.de
 
 - v3.83
