@@ -136,12 +136,10 @@ sub new {
 		"-o remove-packages=false"
 	];
 	$this->{smartroot}   = [
-		"-o rpm-root=$root",
-		"-o deb-root=$root",
+		"-o rpm-root=$root"
 	];
 	$this->{smartrootlib}= [
-		"-o rpm-root=$root/baselibs",
-		"-o deb-root=$root/baselibs",
+		"-o rpm-root=$root/baselibs"
 	];
 	$this->{zypper}      = [
 		$packageManager{zypper},
@@ -1505,6 +1503,10 @@ sub setupRootSystem {
 				"--log-level=error",
 				"-y"
 			);
+			my $force = $xml -> getRPMForce();
+			if (defined $force) {
+				push (@installOpts,"-o rpm-force=yes");
+			}
 			#==========================================
 			# Add package manager to package list
 			#------------------------------------------
@@ -1531,7 +1533,7 @@ sub setupRootSystem {
 			# Install glibc for baselibs first, assumes a distro glibc package
 			print $fd "mkdir $root/baselibs\n";
 			print $fd "test \$? = 0 && @smart @rootlib install ";
-			print $fd "glibc @installOpts &>/dev/null &\n";
+			print $fd "glibc @installOpts &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
 			print $fd "test \$? = 0 && mv $root/baselibs/lib* $root\n";
 			print $fd "test \$? = 0 && rm -rf $root/baselibs\n";
@@ -1641,7 +1643,7 @@ sub setupRootSystem {
 			# Install glibc for baselibs first, assumes a distro glibc package
 			print $fd "mkdir $root/baselibs\n";
 			print $fd "@zypper --disable-system-resolvables -R $root/baselibs ";
-			print $fd "install @installOpts glibc &>/dev/null &\n";
+			print $fd "install @installOpts glibc &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
 			print $fd "test \$? = 0 && mv $root/baselibs/lib* $root\n";
 			print $fd "test \$? = 0 && rm -rf $root/baselibs\n";

@@ -517,7 +517,13 @@ function OEMRepartLVM {
 	local VGSwapMBytes=0
 	local VGSpareMBytes=100
 	local VGSystemMBytes=10240
+	local disk1MBytes=`partitionSize $(ddn $imageDiskDevice 1)`
+	local disk1MBytes=`expr $disk1MBytes / 1024`
+	local disk2MBytes=`partitionSize $(ddn $imageDiskDevice 2)`
+	local disk2MBytes=`expr $disk2MBytes / 1024`
 	local diskXMBytes=`partitionSize $imageDiskDevice`
+	local diskXMBytes=`expr $diskXMBytes / 1024`
+	local diskRMBytes=$(expr $recoMByte + $disk1MBytes + $disk2MBytes)
 	if [ ! -z "$OEM_SYSTEMSIZE" ];then
 		VGSystemMBytes=$OEM_SYSTEMSIZE
 	fi
@@ -525,11 +531,13 @@ function OEMRepartLVM {
 		VGSwapMBytes=$swapsize
 	fi
 	# /.../
-	# prevent recovery partition if requested
-	# system size is bigger than the whole disk
+	# prevent recovery partition if current partitions plus
+	# recovery is bigger than the whole disk
 	# ----
-	if [ $VGSystemMBytes -gt $diskXMBytes ];then
-		unset OEM_RECOVERY
+	if [ ! -z "$OEM_RECOVERY" ];then
+		if [ $diskRMBytes -gt $diskXMBytes ];then
+			unset OEM_RECOVERY
+		fi
 	fi
 	#======================================
 	# Extend vgroup to max physical space
@@ -542,20 +550,22 @@ function OEMRepartLVM {
 			n p 3 . +"$recoMByte"M \
 			n p . . \
 			t 3 $recoID \
-			t 4 8e \
-			a 2 w
+			t 4 8e w
 		extendID=4
 	else
 		createPartitionerInput \
-			n p 3 . . t 3 8e a 2 w
+			n p 3 . . t 3 8e w
 		extendID=3
 	fi
 	callPartitioner $input
+	waitForStorageDevice $(ddn $imageDiskDevice $extendID)
 	dd if=/dev/zero of=$(ddn $imageDiskDevice $extendID) bs=1024 count=5
+	vgchange -an
 	#======================================
 	# Set boot id
 	#--------------------------------------
 	bootid=2
+	activateBootPartition
 	vgchange -a y $VGROUP
 	pvcreate $(ddn $imageDiskDevice $extendID)
 	vgextend $VGROUP $(ddn $imageDiskDevice $extendID)
@@ -601,7 +611,7 @@ function OEMRepartLVM {
 		if [ -z "$OEM_WITHOUTHOME" ];then
 			lvcreate -l 100%FREE -n LVHome $VGROUP
 			export imageHomeDevice=/dev/$VGROUP/LVHome
-		else
+		elif [ -z "$OEM_SYSTEMSIZE" ];then
 			lvextend -l 100%FREE /dev/$VGROUP/LVRoot
 		fi
 	fi
@@ -874,17 +884,16 @@ function activateBootPartition {
 	# ----
 	local input=/part.input
 	Echo "Set boot flag to partition ID: $bootid [ $imageDiskDevice ]"
-	if [ $PARTITIONER = "sfdisk" ];then
-		rm -f $input
-		for cmd in a $bootid w q; do
-			echo $cmd >> $input
-		done
-		fdisk $imageDiskDevice < $input 1>&2
-	else
-		parted -m $imageDiskDevice set $bootid boot on
-	fi
+	parted -m $imageDiskDevice set $bootid boot on
 	if test $? != 0; then
 		systemException "Failed to set boot flag" "reboot"
+	fi
+	blockdev --rereadpt $imageDiskDevice
+	local deviceTest=$(ddn $imageDiskDevice 1)
+	if ! waitForStorageDevice $deviceTest;then
+		systemException \
+			"Partition $deviceTest doesn't appear... fatal !" \
+		"reboot"
 	fi
 }
 

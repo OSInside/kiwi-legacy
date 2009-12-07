@@ -4123,11 +4123,11 @@ function fetchFile {
 			fi
 			if test "$izip" = "compressed"; then
 				# mutlicast is disabled because you can't seek in a pipe
-				atftp \
-					--option "disable multicast" \
-					--option "blksize $imageBlkSize" -g -r $path \
-					-l /dev/stdout $host 2>$TRANSFER_ERRORS_FILE |\
-					gzip -d > $dest 2>>$TRANSFER_ERRORS_FILE
+				# atftp is disabled because it doesn't work with pipes
+				busybox tftp \
+					-b $imageBlkSize -g -r $path \
+					-l >(gzip -d > $dest 2>>$TRANSFER_ERRORS_FILE) \
+					$host 2>>$TRANSFER_ERRORS_FILE
 			else
 				atftp \
 					--option "$multicast_atftp"  \

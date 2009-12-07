@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Thu Dec  3 16:01:49 CET 2009 - ms@suse.de
+
+- v3.83
+- added busybox for to netboot descriptions and changed
+  compressed tftp download to busybox tftp because only this
+  implementations allows to work with pipes (bnc #559830)
+- removed 10.3 support
+
+-------------------------------------------------------------------
 Mon Nov 30 11:18:23 CET 2009 - ms@suse.de
 
 - v3.82

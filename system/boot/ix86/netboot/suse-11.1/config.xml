@@ -129,7 +129,10 @@
 		<!-- DRIVERS END DISKLESS -->
 	</drivers>
 	<repository type="yast2" status="replaceable">
-		<source path="/image/CDs/full-i386"/>
+		<source path="/image/CDs/full-11.1-i386"/>
+	</repository>
+	<repository type="rpm-dir" status="fixed">
+		<source path="/usr/share/kiwi/repo/suse-repo/suse-sle11-repo"/>
 	</repository>
 	<packages type="image" profiles="std">
 		<!-- KERNEL AND MODULE PACKAGES START STD -->
@@ -162,6 +165,7 @@
 		<package name="psmisc"/>
 		<package name="iputils"/>
 		<package name="atftp"/>
+		<package name="busybox"/>
 		<package name="bind-libs"/>
 		<package name="bind-utils"/>
 		<package name="dhcpcd"/>
@@ -191,6 +195,7 @@
 		<!-- PACKAGES START DISKLESS -->
 		<package name="iputils"/>
 		<package name="atftp"/>
+		<package name="busybox"/>
 		<package name="dhcpcd"/>
 		<package name="file"/>
 		<package name="hwinfo"/>
