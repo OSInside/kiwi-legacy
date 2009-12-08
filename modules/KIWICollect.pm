@@ -591,7 +591,7 @@ sub mainTask
     $this->logMsg("I", "Skipping ISO generation due to REPO_ONLY setting");
     return 0;
   }
-  if(!$ENV{'KIWI_NO_ISO'}) { #to be removed
+  if($ENV{'KIWI_NO_ISO'}) { #to be removed
     $this->logMsg("W", "Skipping ISO generation due to KIWI_NO_ISO enviroment variable");
     return 0;
   }
