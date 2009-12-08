@@ -75,10 +75,11 @@ sub new {
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
-	my $solvable; # sat solvable file name
-	my $solver;   # sat solver object
-	my $queue;    # sat job queue
-	my @solved;   # solve result
+	my $solvable;  # sat solvable file name
+	my $solver;    # sat solver object
+	my $queue;     # sat job queue
+	my @solved;    # solve result
+	my @jobFailed; # failed jobs
 	if (! defined $kiwi) {
 		$kiwi = new KIWILog("tiny");
 	}
@@ -134,6 +135,7 @@ sub new {
 		if (! $id) {
 			$kiwi -> warning ("--> Failed to queue job: $name");
 			$kiwi -> skipped ();
+			push @jobFailed, $name;
 			next;
 		}
 		$queue -> queuePush ( $KIWI::SaT::SOLVER_INSTALL_SOLVABLE );
@@ -145,6 +147,7 @@ sub new {
 	$this->{kiwi}    = $kiwi;
 	$this->{queue}   = $queue;
 	$this->{solver}  = $solver;
+	$this->{failed}  = \@jobFailed;
 	#==========================================
 	# Solve the job(s)
 	#------------------------------------------
@@ -152,6 +155,7 @@ sub new {
 	if ($this -> getProblemsCount()) {
 		my $solution = $this -> getSolutions();
 		$kiwi -> warning ("--> Solver Problems:\n$solution");
+		$this->{problem} = "$solution";
 	}
 	my $size = $solver -> getInstallSizeKBytes();
 	my $list = $solver -> getInstallList ($pool);
@@ -193,6 +197,28 @@ sub new {
 	$this->{solfile} = $solvable;
 	$this->{meta}    = \%slist;
 	return $this;
+}
+
+#==========================================
+# getProblemInfo
+#------------------------------------------
+sub getProblemInfo {
+	# /.../
+	# return problem solution text
+	# ----
+	my $this = shift;
+	return $this->{problem};
+}
+
+#==========================================
+# getFailedJobs
+#------------------------------------------
+sub getFailedJobs {
+	# /.../
+	# return package names of failed jobs
+	# ----
+	my $this = shift;
+	return $this->{failed};
 }
 
 #==========================================

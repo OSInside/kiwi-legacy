@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Tue Dec  8 12:42:11 CET 2009 - ms@suse.de
+
+- v3.84
+- improved solvable caching code and added functions to
+  KIWISatSolver module for extracting SaT informations about
+  dependency and queueing problems
+- fixed satsolver usage, pool_setarch is required for correct
+  solving results. Also prune_best_arch_name_version() is now
+  used instead of prune_to_best_arch
+
+-------------------------------------------------------------------
 Mon Dec  7 12:10:40 CET 2009 - adrian@suse.de
 
 - v3.84

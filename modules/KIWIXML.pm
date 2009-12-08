@@ -35,7 +35,9 @@ use KIWIQX;
 # Exports
 #------------------------------------------
 our @ISA    = qw (Exporter);
-our @EXPORT = qw (getInstSourceFile getInstSourceSatSolvable);
+our @EXPORT = qw (
+	getInstSourceFile getInstSourceSatSolvable getSingleInstSourceSatSolvable
+);
 
 #==========================================
 # Globals
@@ -3293,6 +3295,12 @@ sub getInstSourceFile {
 		$url = "file://".$url;
 		$url =~ s{/{3,}}{//};
 	}
+	if ($url =~ /dir:\/\//) {
+		# /.../
+		# dir url, make them a file:// url
+		# ----
+		$url =~ s/^dir/file/;
+	}
 	# /.../
 	# use lwp-download to manage the process.
 	# if first download failed check the directory list with
@@ -3346,21 +3354,66 @@ sub getInstSourceFile {
 sub getInstSourceSatSolvable {
 	# /.../
 	# This function will return an uncompressed solvable record
-	# for the given repository list. If it's required to create
+	# for the given repository list.
+	# ----
+	my $kiwi  = shift;
+	my $repos = shift;
+	my $arch  = qxx ("uname -m"); chomp $arch;
+	my $sdir  = "/var/cache/kiwi/satsolver";
+	my @index = ();
+	my $solv;
+	#==========================================
+	# check/create main solvable file
+	#------------------------------------------
+	foreach my $repo (@{$repos}) {
+		push (@index,$repo);
+	}
+	push (@index,$arch);
+	@index = sort (@index);
+	$solv  = join (":",@index);
+	$solv = qxx ("echo $solv | md5sum | cut -f1 -d-");
+	$solv = $sdir."/".$solv; chomp $solv;
+	$solv =~ s/ +$//;
+	if (-f $solv) {
+		return $solv;
+	}
+	#==========================================
+	# create one solvable per repo
+	#------------------------------------------
+	undef @index;
+	foreach my $repo (@{$repos}) {
+		my $solvable = getSingleInstSourceSatSolvable ($kiwi,$repo);
+		if (! $solvable) {
+			return undef;
+		}
+		push @index,$solvable;
+	}
+	#==========================================
+	# merge all solvables into one
+	#------------------------------------------
+	my $data = qxx ("mergesolv @index > $solv");
+	my $code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> error  ("--> Couldn't merge solve files");
+		$kiwi -> failed ();
+		return undef
+	}
+	return $solv;
+}
+
+#==========================================
+# getSingleInstSourceSatSolvable
+#------------------------------------------
+sub getSingleInstSourceSatSolvable {
+	# /.../
+	# This function will return an uncompressed solvable record
+	# for the given URL. If it's required to create
 	# this solvable because it doesn't exist on the repository
 	# the satsolver toolkit is used and therefore required in
 	# order to allow this function to work correctly
 	# ----
-	my $kiwi     = shift;
-	my $repos    = shift;
-	#==========================================
-	# one of the following to match...
-	#------------------------------------------
-	my @valid    = (
-		"/suse/setup/descr/patterns",
-		"/repodata/patterns.xml.gz",
-		"/repodata/primary.xml.gz"
-	);
+	my $kiwi = shift;
+	my $repo = shift;
 	#==========================================
 	# one of the following for a base solvable
 	#------------------------------------------
@@ -3410,23 +3463,7 @@ sub getInstSourceSatSolvable {
 	#==========================================
 	# check/create solvable index file
 	#------------------------------------------
-	foreach my $repo (@{$repos}) {
-		#==========================================
-		# check if this is a valid suse repo
-		#------------------------------------------
-		my $destfile = $sdir."/listing";
-		my $isValid  = 0;
-		foreach my $valid (@valid) {
-			my $test = $repo.$valid;
-			if (KIWIXML::getInstSourceFile ($kiwi,$test,$destfile)) {
-				$isValid = 1; last;
-			}
-		}
-		if ($isValid) {
-			push (@index,$repo);
-		}
-		unlink $destfile;
-	}
+	push (@index,$repo);
 	push (@index,$arch);
 	@index = sort (@index);
 	$index = join (":",@index);
@@ -3448,18 +3485,16 @@ sub getInstSourceSatSolvable {
 	# download distro solvable(s)
 	#------------------------------------------
 	my $foundDist = 0;
-	foreach my $repo (@{$repos}) {
-		$count++;
-		foreach my $dist (keys %distro) {
-			my $name = $distro{$dist};
-			if ($dist =~ /\.gz$/) {
-				$destfile = $sdir."/$name-".$count.".gz";
-			} else {
-				$destfile = $sdir."/$name-".$count;
-			}
-			if (KIWIXML::getInstSourceFile ($kiwi,$repo.$dist,$destfile)) {
-				$foundDist = 1; last;
-			}
+	$count++;
+	foreach my $dist (keys %distro) {
+		my $name = $distro{$dist};
+		if ($dist =~ /\.gz$/) {
+			$destfile = $sdir."/$name-".$count.".gz";
+		} else {
+			$destfile = $sdir."/$name-".$count;
+		}
+		if (KIWIXML::getInstSourceFile ($kiwi,$repo.$dist,$destfile)) {
+			$foundDist = 1; last;
 		}
 	}
 	if (! $foundDist) {
@@ -3470,39 +3505,37 @@ sub getInstSourceSatSolvable {
 	#==========================================
 	# download pattern solvable(s)
 	#------------------------------------------
-	foreach my $repo (@{$repos}) {
-		$count++;
-		foreach my $patt (keys %patterns) {
-			my $name = $patterns{$patt};
-			$destfile = $sdir."/$name-".$count.".gz";
-			my $ok = KIWIXML::getInstSourceFile ($kiwi,$repo.$patt,$destfile);
-			if (($ok) && ($name eq "patterns")) {
-				#==========================================
-				# get files listed in patterns
-				#------------------------------------------
-				my $patfile = $destfile;
-				if (! open (FD,$patfile)) {
-					$kiwi -> warning ("--> Couldn't open patterns file: $!");
-					$kiwi -> skipped ();
-					unlink $patfile;
+	$count++;
+	foreach my $patt (keys %patterns) {
+		my $name = $patterns{$patt};
+		$destfile = $sdir."/$name-".$count.".gz";
+		my $ok = KIWIXML::getInstSourceFile ($kiwi,$repo.$patt,$destfile);
+		if (($ok) && ($name eq "patterns")) {
+			#==========================================
+			# get files listed in patterns
+			#------------------------------------------
+			my $patfile = $destfile;
+			if (! open (FD,$patfile)) {
+				$kiwi -> warning ("--> Couldn't open patterns file: $!");
+				$kiwi -> skipped ();
+				unlink $patfile;
+				next;
+			}
+			foreach my $line (<FD>) {
+				chomp $line; $destfile = $sdir."/".$line;
+				if ($line !~ /\.$arch\./) {
 					next;
 				}
-				foreach my $line (<FD>) {
-					chomp $line; $destfile = $sdir."/".$line;
-					if ($line !~ /\.$arch\./) {
-						next;
-					}
-					my $base = dirname $patt;
-					my $file = $repo."/".$base."/".$line;
-					if (! KIWIXML::getInstSourceFile($kiwi,$file,$destfile)) {
-						$kiwi -> warning ("--> Pattern file $line not found");
-						$kiwi -> skipped ();
-						next;
-					}
+				my $base = dirname $patt;
+				my $file = $repo."/".$base."/".$line;
+				if (! KIWIXML::getInstSourceFile($kiwi,$file,$destfile)) {
+					$kiwi -> warning ("--> Pattern file $line not found");
+					$kiwi -> skipped ();
+					next;
 				}
-				close FD;
-				unlink $patfile;
 			}
+			close FD;
+			unlink $patfile;
 		}
 	}
 	$count++;
@@ -3600,10 +3633,10 @@ sub getInstSourceSatSolvable {
 	# cleanup cache dir
 	#------------------------------------------
 	qxx ("rm -f $sdir/primary-*");
-	qxx ("rm -f $sdir/projectxml-*.gz");
-	qxx ("rm -f $sdir/distxml-*.gz");
-	qxx ("rm -f $sdir/packages-*.gz");
-	qxx ("rm -f $sdir/*.pat.gz");
+	qxx ("rm -f $sdir/projectxml-*");
+	qxx ("rm -f $sdir/distxml-*");
+	qxx ("rm -f $sdir/packages-*");
+	qxx ("rm -f $sdir/*.pat*");
 	if (! $error) {
 		return $index;
 	}
