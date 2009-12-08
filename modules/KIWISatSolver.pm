@@ -130,7 +130,7 @@ sub new {
 		if (! defined $solvep) {
 			$name = "pattern:".$p;
 		}
-		my $id = $pool -> selectSolvable ($repo,$name);
+		my $id = $pool -> selectSolvable ($repo,$solver,$name);
 		if (! $id) {
 			$kiwi -> warning ("--> Failed to queue job: $name");
 			$kiwi -> skipped ();
