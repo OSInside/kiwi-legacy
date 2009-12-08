@@ -21,6 +21,7 @@ extern "C"
 #include "repo_solv.h"
 }
 #include <sstream>
+#include <sys/utsname.h>
 %}
 
 //==================================
@@ -53,15 +54,15 @@ extern "C"
 //----------------------------------
 %extend _Pool {
     _Pool() {
-        return pool_create();
+        struct utsname hw;
+        Pool *pool = pool_create();
+        uname (&hw);
+        pool_setarch(pool,hw.machine);
+        return pool;
     }
 
     ~_Pool() {
         pool_free (self);
-    }
-
-    void set_arch(const char *arch) {
-        pool_setarch(self, arch);
     }
 
     int installable (Solvable *s) {
@@ -84,7 +85,7 @@ extern "C"
         return pool_id2solvable(self, p);
     }
 
-    Id selectSolvable (Repo *repo, char *name) {
+    Id selectSolvable (Repo *repo, Solver *solver, char *name) {
         Id id;
         Queue plist;
         int i, end;
@@ -104,7 +105,7 @@ extern "C"
                 queue_push(&plist, i);
             }
         }
-        prune_to_best_arch (pool, &plist);
+        prune_best_arch_name_version (solver,pool,&plist);
         if (plist.count == 0) {
             //printf("unknown package '%s'\n", name);
             return 0;

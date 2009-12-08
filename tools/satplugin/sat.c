@@ -3,24 +3,31 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <satsolver/solver.h>
+#include <satsolver/poolarch.h>
 #include <satsolver/solverdebug.h>
 #include <satsolver/repo_solv.h>
 #include <satsolver/policy.h>
+#include <sys/utsname.h>
 
-Id select_solvable (Repo*, Pool*,char*);
+Id select_solvable (Repo*, Pool*,Solver*,char*);
 
 int main (void) {
 	Pool   *pool   = 0;
 	Solver *solver = 0;
 	FILE   *fp     = 0;
+	struct utsname hw;
 	int b;
 	Queue  queue;
-	int fd = open ("/var/cache/kiwi/satsolver/0df87b1388d164da67caf952a9ea49fc", O_RDONLY);
+	int fd = open ("/var/cache/kiwi/satsolver/5fa35fa3cc698ca565085dccef365384", O_RDONLY);
 	if (fd == -1) {
 		return 1;
 	}
 
 	pool = pool_create();
+	uname (&hw);
+	
+	printf ("Using Architecture: %s\n",hw.machine);	
+	pool_setarch (pool,hw.machine);
 
 	fp = fdopen(fd, "r");
 	Repo *new_repo = repo_create (pool, "empty");
@@ -36,22 +43,37 @@ int main (void) {
 	#endif
 	pool_createwhatprovides(pool);
 
-	queue_init (&queue);
-	queue_push (&queue, SOLVER_INSTALL_SOLVABLE);
-	queue_push (&queue, select_solvable(new_repo,pool,"pattern:apparmor"));
-	queue_push (&queue, SOLVER_INSTALL_SOLVABLE);
-	queue_push (&queue, select_solvable(new_repo,pool,"pattern:apparmor_opt"));
-	queue_push (&queue, SOLVER_INSTALL_SOLVABLE);
-	queue_push (&queue, select_solvable(new_repo,pool,"pattern:base"));
-	queue_push (&queue, SOLVER_INSTALL_SOLVABLE);
-	queue_push (&queue, select_solvable(new_repo,pool,"pattern:devel_C_C++"));
-	queue_push (&queue, SOLVER_INSTALL_SOLVABLE);
-	queue_push (&queue, select_solvable(new_repo,pool,"pattern:devel_qt4"));
-
 	#ifdef SOLV_VERSION_8
 	solver = solver_create (pool);
 	#else
 	solver = solver_create (pool,empty_installed);
+	#endif
+
+	queue_init (&queue);
+	queue_push (&queue, SOLVER_INSTALL_SOLVABLE);
+    queue_push (&queue, select_solvable(new_repo,pool,solver,"libcurl-devel"));
+
+	#if 0
+	queue_push (&queue, SOLVER_INSTALL_SOLVABLE);
+	queue_push (
+		&queue, select_solvable(new_repo,pool,solver,"pattern:apparmor")
+	);
+	queue_push (&queue, SOLVER_INSTALL_SOLVABLE);
+	queue_push (
+		&queue, select_solvable(new_repo,pool,solver,"pattern:apparmor_opt")
+	);
+	queue_push (&queue, SOLVER_INSTALL_SOLVABLE);
+	queue_push (
+		&queue, select_solvable(new_repo,pool,solver,"pattern:base")
+	);
+	queue_push (&queue, SOLVER_INSTALL_SOLVABLE);
+	queue_push (
+		&queue, select_solvable(new_repo,pool,solver,"pattern:devel_C_C++")
+	);
+	queue_push (&queue, SOLVER_INSTALL_SOLVABLE);
+	queue_push (
+		&queue, select_solvable(new_repo,pool,solver,"pattern:devel_qt4")
+	);
 	#endif
 
 	solver_solve (solver, &queue);
@@ -89,7 +111,7 @@ int main (void) {
 
 
 
-Id select_solvable (Repo *repo, Pool* pool,char *name) {
+Id select_solvable (Repo *repo, Pool* pool,Solver* solver,char *name) {
 	Id id;
 	Queue plist;
 	int i, end;
@@ -109,7 +131,7 @@ Id select_solvable (Repo *repo, Pool* pool,char *name) {
 			queue_push(&plist, i);
 		}
 	}
-	prune_to_best_arch (pool, &plist);
+	prune_best_arch_name_version (solver,pool,&plist);
 	if (plist.count == 0) {
 		printf("unknown package '%s'\n", name);
 		exit(1);
