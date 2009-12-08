@@ -591,10 +591,6 @@ sub mainTask
     $this->logMsg("I", "Skipping ISO generation due to REPO_ONLY setting");
     return 0;
   }
-  if($ENV{'KIWI_NO_ISO'}) { #to be removed
-    $this->logMsg("W", "Skipping ISO generation due to KIWI_NO_ISO enviroment variable");
-    return 0;
-  }
   if($this->{m_proddata}->getVar("FLAVOR") eq "ftp") { # should not be applied anymore
     $this->logMsg("W", "Skipping ISO generation for FLAVOR ftp, please use REPO_ONLY flag instead !");
     return 0;
