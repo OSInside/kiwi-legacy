@@ -140,25 +140,25 @@ sub setupUsersGroups {
 	my $root  = $this->{root};
 	my %users = $xml -> getUsers();
 	if (%users) {
-		my $adduser  = "/usr/sbin/useradd";
-		my $moduser  = "/usr/sbin/usermod";
-		my $addgroup = "/usr/sbin/groupadd";
-		if (! -x "$root/$adduser") {
+		if (! -x "$root/usr/sbin/useradd") {
 			$kiwi -> error ("Missing useradd command");
 			$kiwi -> failed ();
 			return undef;
 		}
-		if (! -x "$root/$moduser") {
+		if (! -x "$root/usr/sbin/usermod") {
 			$kiwi -> error ("Missing usermod command");
 			$kiwi -> failed ();
 			return undef;
 		}
-		if (! -x "$root/$addgroup") {
+		if (! -x "$root/usr/sbin/groupadd") {
 			$kiwi -> error ("Missing groupadd command");
 			$kiwi -> failed ();
 			return undef;
 		}
 		foreach my $user (keys %users) {
+			my $adduser  = "/usr/sbin/useradd";
+			my $moduser  = "/usr/sbin/usermod";
+			my $addgroup = "/usr/sbin/groupadd";
 			my $group = $users{$user}{group};
 			my $gid   = $users{$user}{gid};
 			my $uid   = $users{$user}{uid};
