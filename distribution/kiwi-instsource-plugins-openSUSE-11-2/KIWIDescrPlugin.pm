@@ -198,7 +198,7 @@ sub executeDir
     return $retval;
   }
 
-  if ( $coll->productData()->getInfo("CREATE_REPOMD") == "true" ) {
+  if ( $coll->productData()->getInfo("CREATE_REPOMD") eq "true" ) {
     foreach my $p (@paths) {
       my $cmd = "$this->{m_createrepo} $p/$datadir ";
       $this->logMsg("I", "Executing command <$cmd>");
