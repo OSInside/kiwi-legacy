@@ -1214,6 +1214,11 @@ div {
 		## a hybrid iso file. It's required to use the vmxboot
 		## boot image to boot that iso though
 		attribute hybrid { xsd:boolean }
+	k.type.hybridpersistent.attribute =
+		## for the iso type only:
+		## will trigger the creation of a partition for a COW file
+		## to keep data persistent over a reboot
+		attribute hybridpersistent { xsd:boolean }
 	k.type.bootloader.attribute =
 		## Specifies the bootloader used for booting the image."
 		## At the moment only grub and syslinux are supported
@@ -1287,6 +1292,7 @@ div {
 		k.type.volid.attribute? &
 		k.type.flags.attribute? &
 		k.type.hybrid.attribute? &
+		k.type.hybridpersistent.attribute? &
 		k.type.bootloader.attribute? &
 		k.type.compressed.attribute? &
 		k.type.vga.attribute? &
@@ -2078,3 +2084,5 @@ div {
 		}
 }
 
+
+# vim: set noexpandtab:

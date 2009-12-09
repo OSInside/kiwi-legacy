@@ -21,6 +21,10 @@
 export ELOG_FILE=/var/log/boot.kiwi
 export TRANSFER_ERRORS_FILE=/tmp/transfer.errors
 export UFONT=/usr/share/fbiterm/fonts/b16.pcf.gz
+export HYBRID_PERSISTENT_FS=ext3
+export HYBRID_PERSISTENT_ID=83
+export HYBRID_PERSISTENT_DIR=/data
+
 
 #======================================
 # Exports (General)
@@ -2270,6 +2274,9 @@ function CDMount {
 		#======================================
 		# search for hybrid device
 		#--------------------------------------
+		if [ "x$kiwi_hybridpersistent" = "xyes" ]; then
+			createHybridPersistent $biosBootDevice
+		fi
 		Echo -n "Mounting hybrid live boot drive..."
 		cddev=$(ddn $biosBootDevice 1)
 		kiwiMount "$cddev" "/cdrom" "-o ro"
@@ -3621,7 +3628,20 @@ function mountSystemClicFS {
 	else
 		haveBytes=`blockdev --getsize64 $rwDevice`
 		haveMByte=`expr $haveBytes / 1024 / 1024`
-		clic_cmd="$clic_cmd -m $haveMByte -c $rwDevice --ignore-cow-errors"
+		if \
+			[ "x$kiwi_hybrid" = "xyes" ] &&
+			[ "x$kiwi_hybridpersistent" = "xyes" ]
+		then
+			# write into a cow file on a filesystem
+			mkdir $HYBRID_PERSISTENT_DIR
+			mount $rwDevice $HYBRID_PERSISTENT_DIR
+			clic_cmd="$clic_cmd -m $haveMByte"
+			clic_cmd="$clic_cmd -c $HYBRID_PERSISTENT_DIR/.clicfs_COW"
+			clic_cmd="$clic_cmd --ignore-cow-errors"
+		else
+			# write into a device directly
+			clic_cmd="$clic_cmd -m $haveMByte -c $rwDevice --ignore-cow-errors"
+		fi
 	fi
 	#======================================
 	# mount/check clic file
@@ -5156,3 +5176,62 @@ function SAPStartMediaChanger {
 	test -e /tmp/runme_at_boot && mv /tmp/runme_at_boot $runme
 	test -e /tmp/install.inf && mv /tmp/install.inf $ininf
 }
+
+#======================================
+# createHybridPersistent
+#--------------------------------------
+function createHybridPersistent {
+	local dev=$1;
+	local relativeDevName=`basename $dev`
+	local input=/part.input
+	local id=0
+	for disknr in 2 3 4; do
+		id=`partitionID $dev $disknr`
+		# do we have a linux partition already? Then stop
+		if [ "$id" = "$HYBRID_PERSISTENT_ID" ]; then
+			Echo "Existing persistent hybrid partition found ${dev}${disknr}"
+			return
+		fi
+		if [ "$id" = "0" ]; then
+			Echo -n "Creating hybrid persistent partition for COW data: "
+			Echo "$dev$disknr id=$HYBRID_PERSISTENT_ID fs=$HYBRID_PERSISTENT_FS"
+			if [ $disknr -lt 4 ];then
+				createHybridPersistentPartition \
+					n p $disknr . . t $disknr $HYBRID_PERSISTENT_ID w
+			else
+				createHybridPersistentPartition \
+					n p . . t 4 $HYBRID_PERSISTENT_ID w
+			fi
+			fdisk $dev < $input 1>&2
+			if test $? != 0; then
+				systemException \
+					"Failed to update hybrid partition table" \
+				"reboot"
+			fi
+			if ! mkfs.$HYBRID_PERSISTENT_FS $dev$disknr;then
+				Echo "Failed to create hybrid persistent filesystem"
+				Echo "Persistent writing deactivated"
+				unset kiwi_hybridpersistent
+			fi
+			return
+		fi
+	done
+}
+
+#======================================
+# createHybridPersistentPartition
+#--------------------------------------
+function createHybridPersistentPartition {
+	local input=/part.input
+	rm -f $input
+	for cmd in $*;do
+		if [ $cmd = "." ];then
+			echo >> $input
+			continue
+		fi
+		echo $cmd >> $input
+	done
+}
+
+
+# vim: set noexpandtab:
