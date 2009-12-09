@@ -176,6 +176,7 @@ sub executeDir
   my $coll  = $this->{m_collect};
   my $datadir  = $coll->productData()->getInfo("DATADIR");
   my $descrdir = $coll->productData()->getInfo("DESCRDIR");
+  my $createrepomd = $coll->productData()->getVar("CREATE_REPOMD");
 
   my $targetdir = $paths[0]."/".$descrdir;
 
@@ -198,7 +199,7 @@ sub executeDir
     return $retval;
   }
 
-  if ( $coll->productData()->getInfo("CREATE_REPOMD") eq "true" ) {
+  if ( $createrepomd eq "true" ) {
     foreach my $p (@paths) {
       my $cmd = "$this->{m_createrepo} $p/$datadir ";
       $this->logMsg("I", "Executing command <$cmd>");
