@@ -3361,6 +3361,7 @@ sub getInstSourceSatSolvable {
 	my $arch  = qxx ("uname -m"); chomp $arch;
 	my $sdir  = "/var/cache/kiwi/satsolver";
 	my @index = ();
+	my $count = 0;
 	my $solv;
 	#==========================================
 	# check/create main solvable file
@@ -3387,16 +3388,19 @@ sub getInstSourceSatSolvable {
 			return undef;
 		}
 		push @index,$solvable;
+		$count++;
 	}
 	#==========================================
 	# merge all solvables into one
 	#------------------------------------------
-	my $data = qxx ("mergesolv @index > $solv");
-	my $code = $? >> 8;
-	if ($code != 0) {
-		$kiwi -> error  ("--> Couldn't merge solve files");
-		$kiwi -> failed ();
-		return undef
+	if ($count > 1) {
+		my $data = qxx ("mergesolv @index > $solv");
+		my $code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> error  ("--> Couldn't merge solve files");
+			$kiwi -> failed ();
+			return undef
+		}
 	}
 	return $solv;
 }
@@ -3414,6 +3418,7 @@ sub getSingleInstSourceSatSolvable {
 	# ----
 	my $kiwi = shift;
 	my $repo = shift;
+	$kiwi -> info ("--> Loading $repo...");
 	#==========================================
 	# one of the following for a base solvable
 	#------------------------------------------
@@ -3443,6 +3448,7 @@ sub getSingleInstSourceSatSolvable {
 		(! -x "/usr/bin/susetags2solv") ||
 		(! -x "/usr/bin/rpmmd2solv")
 	) {
+		$kiwi -> failed ();
 		$kiwi -> error  ("--> Can't find satsolver tools");
 		$kiwi -> failed ();
 		return undef;
@@ -3455,6 +3461,7 @@ sub getSingleInstSourceSatSolvable {
 		my $data = qxx ("mkdir -p $sdir 2>&1");
 		my $code = $? >> 8;
 		if ($code != 0) {
+			$kiwi -> failed ();
 			$kiwi -> error  ("--> Couldn't create cache dir: $data");
 			$kiwi -> failed ();
 			return undef;
@@ -3471,6 +3478,7 @@ sub getSingleInstSourceSatSolvable {
 	$index = $sdir."/".$index; chomp $index;
 	$index=~ s/ +$//;
 	if (-f $index) {
+		$kiwi -> done();
 		return $index;
 	}
 	#==========================================
@@ -3498,6 +3506,7 @@ sub getSingleInstSourceSatSolvable {
 		}
 	}
 	if (! $foundDist) {
+		$kiwi -> failed ();
 		$kiwi -> error  ("--> Can't find a distribution solvable");
 		$kiwi -> failed ();
 		return undef;
@@ -3548,6 +3557,7 @@ sub getSingleInstSourceSatSolvable {
 			my $data = qxx ("gzip -cd $file | rpmmd2solv > $destfile 2>&1");
 			my $code = $? >> 8;
 			if ($code != 0) {
+				$kiwi -> failed ();
 				$kiwi -> error  ("--> Can't create SaT solvable file");
 				$kiwi -> failed ();
 				$error = 1;
@@ -3589,6 +3599,7 @@ sub getSingleInstSourceSatSolvable {
 		my $data = qxx ("($scommand) | susetags2solv > $destfile 2>/dev/null");
 		my $code = $? >> 8;
 		if ($code != 0) {
+			$kiwi -> failed ();
 			$kiwi -> error  ("--> Can't create SaT solvable file");
 			$kiwi -> failed ();
 			$error = 1;
@@ -3604,6 +3615,7 @@ sub getSingleInstSourceSatSolvable {
 			my $data = qxx ("gzip -cd $file | rpmmd2solv > $destfile 2>&1");
 			my $code = $? >> 8;
 			if ($code != 0) {
+				$kiwi -> failed ();
 				$kiwi -> error  ("--> Can't create SaT solvable file");
 				$kiwi -> failed ();
 				$error = 1;
@@ -3623,6 +3635,7 @@ sub getSingleInstSourceSatSolvable {
 			my $data = qxx ("mergesolv $sdir/primary-* > $index");
 			my $code = $? >> 8;
 			if ($code != 0) {
+				$kiwi -> failed ();
 				$kiwi -> error  ("--> Couldn't merge solve files");
 				$kiwi -> failed ();
 				$error = 1;
@@ -3638,6 +3651,7 @@ sub getSingleInstSourceSatSolvable {
 	qxx ("rm -f $sdir/packages-*");
 	qxx ("rm -f $sdir/*.pat*");
 	if (! $error) {
+		$kiwi -> done();
 		return $index;
 	}
 	return undef;
