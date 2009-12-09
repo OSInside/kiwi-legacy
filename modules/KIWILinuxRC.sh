@@ -5176,7 +5176,6 @@ function SAPStartMediaChanger {
 	test -e /tmp/runme_at_boot && mv /tmp/runme_at_boot $runme
 	test -e /tmp/install.inf && mv /tmp/install.inf $ininf
 }
-
 #======================================
 # createHybridPersistent
 #--------------------------------------
@@ -5196,18 +5195,13 @@ function createHybridPersistent {
 			Echo -n "Creating hybrid persistent partition for COW data: "
 			Echo "$dev$disknr id=$HYBRID_PERSISTENT_ID fs=$HYBRID_PERSISTENT_FS"
 			if [ $disknr -lt 4 ];then
-				createHybridPersistentPartition \
+				createPartitionerInput \
 					n p $disknr . . t $disknr $HYBRID_PERSISTENT_ID w
 			else
-				createHybridPersistentPartition \
+				createPartitionerInput \
 					n p . . t 4 $HYBRID_PERSISTENT_ID w
 			fi
-			fdisk $dev < $input 1>&2
-			if test $? != 0; then
-				systemException \
-					"Failed to update hybrid partition table" \
-				"reboot"
-			fi
+			callPartitioner $input
 			if ! mkfs.$HYBRID_PERSISTENT_FS $dev$disknr;then
 				Echo "Failed to create hybrid persistent filesystem"
 				Echo "Persistent writing deactivated"
@@ -5217,11 +5211,43 @@ function createHybridPersistent {
 		fi
 	done
 }
-
 #======================================
-# createHybridPersistentPartition
+# callPartitioner
 #--------------------------------------
-function createHybridPersistentPartition {
+function callPartitioner {
+	local input=$1
+	if [ $PARTITIONER = "sfdisk" ];then
+		Echo "Repartition the disk according to real geometry [ fdisk ]"
+		fdisk $imageDiskDevice < $input 1>&2
+		if test $? != 0; then
+			systemException "Failed to create partition table" "reboot"
+		fi
+	else
+		# /.../
+		# nothing to do for parted here as we write
+		# imediately with parted and don't create a
+		# command input file as for fdisk but we re-read
+		# the disk so that the new table will be used
+		# ----
+		blockdev --rereadpt $imageDiskDevice
+	fi
+}
+#======================================
+# createPartitionerInput
+#--------------------------------------
+function createPartitionerInput {
+	if [ $PARTITIONER = "sfdisk" ];then
+		createFDiskInput $@
+	else
+		Echo "Repartition the disk according to real geometry [ parted ]"
+		partedInit $imageDiskDevice
+		createPartedInput $imageDiskDevice $@
+    fi
+}
+#======================================
+# createFDiskInput
+#--------------------------------------
+function createFDiskInput {
 	local input=/part.input
 	rm -f $input
 	for cmd in $*;do
@@ -5232,6 +5258,175 @@ function createHybridPersistentPartition {
 		echo $cmd >> $input
 	done
 }
-
+#======================================
+# partedInit
+#--------------------------------------
+function partedInit {
+	# /.../
+	# initialize current partition table output
+	# as well as the number of cylinders and the
+	# cyliner size in kB for this disk
+	# ----
+	local device=$1
+	local IFS=""
+	local parted=$(parted -m $device unit cyl print)
+	local header=$(echo $parted | head -n 3 | tail -n 1)
+	local ccount=$(echo $header | cut -f1 -d:)
+	local cksize=$(echo $header | cut -f4 -d: | cut -f1 -dk)
+	export partedOutput=$parted
+	export partedCylCount=$ccount
+	export partedCylKSize=$cksize
+}
+#======================================
+# partedWrite
+#--------------------------------------
+function partedWrite {
+	# /.../
+	# call parted with current command queue.
+	# This will immediately change the partition table
+	# ----
+	local device=$1
+	local cmds=$2
+	if ! parted -m $device unit cyl $cmds;then
+		systemException "Failed to create partition table" "reboot"
+	fi
+	partedInit $device
+}
+#======================================
+# partedStartCylinder
+#--------------------------------------
+function partedStartCylinder {
+	# /.../
+	# return start cylinder of given partition.
+	# lowest cylinder number is 0
+	# ----
+	local part=$(($1 + 3))
+	local IFS=""
+	local header=$(echo $partedOutput | head -n $part | tail -n 1)
+	local ccount=$(echo $header | cut -f2 -d: | tr -d cyl)
+	echo $ccount
+}
+#======================================
+# partedEndCylinder
+#--------------------------------------
+function partedEndCylinder {
+	# /.../
+	# return end cylinder of given partition, next
+	# partition must start at return value plus 1
+	# ----
+	local part=$(($1 + 3))
+	local IFS=""
+	local header=$(echo $partedOutput | head -n $part | tail -n 1)
+	local ccount=$(echo $header | cut -f3 -d: | tr -d cyl)
+	echo $ccount
+}
+#======================================
+# partedMBToCylinder
+#--------------------------------------
+function partedMBToCylinder {
+	# /.../
+	# convert size given in MB to cylinder count
+	# ----
+	local sizeKB=$(($1 * 1024))
+	local cylreq=$(($sizeKB / $partedCylKSize))
+	echo $cylreq
+}
+#======================================
+# createPartedInput
+#--------------------------------------
+function createPartedInput {
+	# /.../
+	# evaluate partition instructions and turn them
+	# into a parted command line queue. As soon as the
+	# geometry data would be changed according to the
+	# last partedInit() call the command queue is processed
+	# and the partedInit() will be called afterwards
+	# ----
+	local disk=$1
+	shift
+	local index=0
+	local pcmds
+	local partid
+	local pstart
+	local pstopp
+	local value
+	local cmdq
+	#======================================
+	# create list of commands
+	#--------------------------------------
+	for cmd in $*;do
+		pcmds[$index]=$cmd
+		index=$(($index + 1))
+	done
+	index=0
+	#======================================
+	# process commands
+	#--------------------------------------
+	for cmd in ${pcmds[*]};do
+		case $cmd in
+			#======================================
+			# delete partition
+			#--------------------------------------
+			"d")
+				partid=${pcmds[$index + 1]}
+				partid=$(($partid / 1))
+				if [ $partid -eq 0 ];then
+					partid=1
+				fi
+				cmdq="$cmdq rm $partid"
+				;;
+			#======================================
+			# create new partition
+			#--------------------------------------
+			"n")
+				partid=${pcmds[$index + 2]}
+				partid=$(($partid / 1))
+				if [ $partid -eq 0 ];then
+					partid=1
+				fi
+				pstart=${pcmds[$index + 3]}
+				if [ "$pstart" = "1" ];then
+					pstart=0
+				fi
+				if [ $pstart = "." ];then
+					# start is next cylinder according to previous partition
+					pstart=$(($partid - 1))
+					if [ $pstart -gt 0 ];then
+						pstart=$(partedEndCylinder $pstart)
+						pstart=$(($pstart + 1))
+					fi
+				fi
+				pstopp=${pcmds[$index + 4]}
+				if [ $pstopp = "." ];then
+					# use rest of the disk for partition end
+					pstopp=$partedCylCount
+				elif echo $pstopp | grep -qi M;then
+					# calculate stopp cylinder from size
+					pstopp=$(($partid - 1))
+					if [ $pstopp -gt 0 ];then
+						pstopp=$(partedEndCylinder $pstopp)
+					fi
+					value=$(echo ${pcmds[$index + 4]} | cut -f1 -dM | tr -d +)
+					value=$(partedMBToCylinder $value)
+					pstopp=$((1 + $pstopp + $value))
+				fi
+				cmdq="$cmdq mkpart primary $pstart $pstopp"
+				partedWrite "$disk" "$cmdq"
+				cmdq=""
+				;;
+			#======================================
+			# change partition ID
+			#--------------------------------------
+			"t")
+				ptypex=${pcmds[$index + 2]}
+				partid=${pcmds[$index + 1]}
+				cmdq="$cmdq set $partid type 0x$ptypex"
+				partedWrite "$disk" "$cmdq"
+				cmdq=""
+				;;
+		esac
+		index=$(($index + 1))
+	done
+}
 
 # vim: set noexpandtab:

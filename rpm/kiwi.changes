@@ -3,9 +3,10 @@ Wed Dec  9 10:30:44 CET 2009 - ms@suse.de
 
 - v3.85
 - fixed user/group setup for multiple users (bnc #561749)
+- hybridpersistent key added. Patch by Uwe Gansert <ug@novell.com>
+  Thanks Uwe (bnc #557100)
 - fixed home device fstab entry, uses disk by id now
-- hybridpersistent key added (bnc #557100). Patch by
-  Uwe Gansert <ug@novell.com>
+- moved repartition functions to KIWILinuxRC
 
 -------------------------------------------------------------------
 Tue Dec  8 12:42:11 CET 2009 - ms@suse.de
