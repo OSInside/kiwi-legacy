@@ -1889,9 +1889,8 @@ vmx/oem types only.</a:documentation>
   <div>
     <define name="k.volume.name.attribute">
       <attribute name="name">
-        <a:documentation>volume name. The name has to be the same like the directory
-name of the toplevel root directory. ONLY top level root
-directory names are allowed like srv or opt.</a:documentation>
+        <a:documentation>volume name. The name specifies a path which has to
+exist inside the root directory.</a:documentation>
       </attribute>
     </define>
     <define name="k.volume.freespace.attribute">

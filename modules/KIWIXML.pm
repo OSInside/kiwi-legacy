@@ -2374,7 +2374,8 @@ sub getLVMVolumes {
 			}
 		}
 		$name =~ s/^\///;
-		if ($name =~ /^(proc|sys|dev|boot|mnt|lib|bin|sbin|etc|lost\+found)/) {
+		if ($name
+			=~ /^(image|proc|sys|dev|boot|mnt|lib|bin|sbin|etc|lost\+found)/) {
 			$kiwi -> warning ("LVM: Directory $name is not allowed");
 			$kiwi -> skipped ();
 			next;
