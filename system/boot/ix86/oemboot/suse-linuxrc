@@ -723,14 +723,16 @@ if [ "$LOCAL_BOOT" = "no" ];then
 			umount /mnt/mnt
 		fi
 		Echo "Activate home partition $imageHomeDevice in fstab"
-		echo "$imageHomeDevice /home ext3 defaults 0 0" >> /config/etc/fstab
+		echo "$(getDiskID $imageHomeDevice) /home ext3 defaults 0 0" \
+			>> /config/etc/fstab
 	fi
 	if [ ! -z "$OEM_SAP_INSTALL" ];then
 		SAP_DATA=/dev/data_vg/sapdata
 		vgchange -a y data_vg
 		if partitionSize $SAP_DATA &>/dev/null;then
 			mkdir -p /mnt/sapdata
-			echo "$SAP_DATA /sapdata ext3 defaults 0 0" >> /config/etc/fstab
+			echo "$(getDiskID $SAP_DATA) /sapdata ext3 defaults 0 0" \
+				>> /config/etc/fstab
 		fi
 	fi
 	#======================================
