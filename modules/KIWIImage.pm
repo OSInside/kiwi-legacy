@@ -1386,6 +1386,7 @@ sub createImageLiveCD {
 	my $pinitrd;
 	my $pxboot;
 	my $hybrid = 0;
+	my $hybridpersistent = 0;
 	#==========================================
 	# Get system image name
 	#------------------------------------------
@@ -1414,6 +1415,11 @@ sub createImageLiveCD {
 	#------------------------------------------
 	if ((defined $type{hybrid}) && ($type{hybrid} =~ /yes|true/i)) {
 		$hybrid = 1;
+	}
+	if ((defined $type{hybridpersistent}) &&
+		($type{hybridpersistent} =~ /yes|true/i)
+	) {
+		$hybridpersistent = 1;
 	}
 	#==========================================
 	# Get image creation date and name
@@ -1688,6 +1694,9 @@ sub createImageLiveCD {
 	}
 	if ($hybrid) {
 		$main::ForeignRepo{"hybrid"}= "true";
+	}
+	if ( $hybridpersistent ) {
+		$main::ForeignRepo{"hybridpersistent"} = "true";
 	}
 	$main::ForeignRepo{"xmlnode"} = $xml -> getForeignNodeList();
 	$main::ForeignRepo{"xmlpacnode"} = $xml -> getForeignPackageNodeList();
@@ -4492,3 +4501,5 @@ sub getMBRDiskLabel {
 }
 
 1;
+
+# vim: set noexpandtab:

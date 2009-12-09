@@ -367,6 +367,9 @@ sub new {
 		if (defined $foreignRepo->{"hybrid"}) {
 			$this -> setForeignTypeAttribute ("hybrid");
 		}
+		if (defined $foreignRepo->{"hybridpersistent"}) {
+			$this -> setForeignTypeAttribute ("hybridpersistent");
+		}
 	}
 	#==========================================
 	# Store object data
@@ -782,6 +785,7 @@ sub getImageTypeAndAttributes {
 		$record{AWSAccountNr}  = $node -> getAttribute("ec2accountnr");
 		$record{EC2CertFile}   = $node -> getAttribute("ec2certfile");
 		$record{EC2PrivateKeyFile} = $node -> getAttribute("ec2privatekeyfile");
+		$record{hybridpersistent}  = $node -> getAttribute("hybridpersistent");
 		if ($record{type} eq "split") {
 			my $filesystemRO = $node -> getAttribute("fsreadonly");
 			my $filesystemRW = $node -> getAttribute("fsreadwrite");
@@ -2190,6 +2194,9 @@ sub getImageConfig {
 	}
 	if ((%type) && ($type{hybrid})) {
 		$result{kiwi_hybrid} = "yes";
+	}
+	if ((%type) && ($type{hybridpersistent})) {
+		$result{kiwi_hybridpersistent} = "yes";
 	}
 	if ($size) {
 		$result{kiwi_size} = $size;
@@ -3685,3 +3692,5 @@ sub addDefaultSplitNode {
 }
 
 1;
+
+# vim: set noexpandtab:
