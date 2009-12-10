@@ -172,8 +172,9 @@ sub new {
 	#==========================================
 	# Store object data (1)
 	#------------------------------------------
-	$this->{tmpdir} = $tmpdir;
-	$this->{loopdir}= $loopdir;
+	$this->{tmpdir}   = $tmpdir;
+	$this->{loopdir}  = $loopdir;
+	$this->{lvmgroup} = $vgroup;
 
 	#==========================================
 	# setup pointer to XML configuration
@@ -394,7 +395,6 @@ sub new {
 	$this->{xml}       = $xml;
 	$this->{xendomain} = $xendomain;
 	$this->{profile}   = $profile;
-	$this->{lvmgroup}  = $vgroup;
 	return $this;
 }
 
