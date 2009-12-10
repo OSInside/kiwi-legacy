@@ -2,6 +2,7 @@
 Wed Dec  9 10:30:44 CET 2009 - ms@suse.de
 
 - v3.85
+- use blowfish extension for password creation (bnc #562105)
 - fixed user/group setup for multiple users (bnc #561749)
 - hybridpersistent key added. Patch by Uwe Gansert <ug@novell.com>
   Thanks Uwe (bnc #557100)

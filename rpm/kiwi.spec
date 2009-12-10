@@ -41,6 +41,7 @@ Requires:       squashfs
 Requires:       perl = %{perl_version}
 Requires:       perl-XML-LibXML perl-libwww-perl screen coreutils
 Requires:       perl-XML-LibXML-Common perl-XML-SAX perl-Config-IniFiles
+Requires:       perl-Crypt-CBC perl-Crypt-Blowfish
 Requires:       kiwi-tools libxslt checkmedia
 %ifarch %ix86 x86_64
 Requires:       master-boot-code

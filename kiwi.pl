@@ -40,6 +40,8 @@ use KIWIMigrate;
 use KIWIOverlay;
 use KIWIQX;
 use KIWITest;
+use Crypt::Blowfish;
+use Crypt::CBC;
 
 #============================================
 # Globals (Version)
@@ -196,7 +198,7 @@ our $PackageManager;        # package manager to use for this image
 our $FSBlockSize;           # filesystem block size
 our $FSInodeSize;           # filesystem inode size
 our $FSJournalSize;         # filesystem journal size
-our $FSMaxMountCount;       # filesystem (ext2-4) max mount count between fs checks
+our $FSMaxMountCount;       # filesystem (ext2-4) max mount count between checks
 our $FSCheckInterval;       # filesystem (ext2-4) max interval between fs checks
 our $FSInodeRatio;          # filesystem bytes/inode ratio
 our $Verbosity = 0;         # control the verbosity level
@@ -1233,13 +1235,6 @@ sub main {
 		$boot -> cleanTmp();
 		$code = kiwiExit (0); return $code;
 	}
-
-	#==========================================
-	# Create crypted password
-	#------------------------------------------
-	if (defined $CreatePassword) {
-		createPassword();
-	}
 	return 1;
 }
 
@@ -1344,6 +1339,12 @@ sub init {
 	#----------------------------------------
 	if (! defined $FSInodeRatio) {
 		$FSInodeRatio = 16384;
+	}
+	#==========================================
+	# non root task: Create crypted password
+	#------------------------------------------
+	if (defined $CreatePassword) {
+		createPassword();
 	}
 	#========================================
 	# non root task: create inst source
@@ -2175,16 +2176,19 @@ sub version {
 #------------------------------------------
 sub createPassword {
 	# ...
-	# Create a crypted password which can be used in the xml descr.
-	# users sections. The crypt() call requires root rights because
-	# dm-crypt is used to access the crypto pool
+	# Create a Blowfish encrypted password which can be used in the
+	# xml description users sections.
 	# ----
 	if (! defined $kiwi) {
 		$kiwi = new KIWILog("tiny");
 	}
 	my $word2 = 2;
 	my $word1 = 1;
-	my $salt  = (getpwuid ($<))[1];
+	my $key   = pack("H16", "0123456789ABCDEF");
+	my $bfish = new Crypt::Blowfish $key;
+	my $cipher= Crypt::CBC -> new (
+		-cipher => $bfish
+	);
 	while ($word1 ne $word2) {
 		$kiwi -> info ("Enter Password: ");
 		system "stty -echo";
@@ -2202,8 +2206,8 @@ sub createPassword {
 		}
 	}
 	$kiwi -> done ();
-	my $pwd = crypt ($word1, $salt);
-	$kiwi -> info ("Your password:\n\t$pwd\n");
+	my $pwd = $cipher -> encrypt_hex($word1);
+	$kiwi -> info ("Your password (Blowfish):\n\t$pwd\n");
 	my $code = kiwiExit (0); return $code;
 }
 
