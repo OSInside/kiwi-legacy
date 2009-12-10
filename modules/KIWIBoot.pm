@@ -1472,6 +1472,10 @@ sub setupInstallCD {
 	#------------------------------------------
 	if ($gotsys) {
 		#==========================================
+		# build label from xml data
+		#------------------------------------------
+		$this->{bootlabel} = $xml -> getImageDisplayName();
+		#==========================================
 		# bind $system to loop device
 		#------------------------------------------
 		$kiwi -> info ("Binding virtual disk to loop device");
@@ -1699,6 +1703,7 @@ sub setupInstallStick {
 	my $loopdir   = $this->{loopdir};
 	my $zipped    = $this->{zipped};
 	my $isxen     = $this->{isxen};
+	my $xml       = $this->{xml};
 	my $irdsize   = -s $initrd;
 	my $diskname  = $system.".install.raw";
 	my $md5name   = $system;
@@ -1743,6 +1748,10 @@ sub setupInstallStick {
 	# check image type
 	#------------------------------------------
 	if ($gotsys) {
+		#==========================================
+		# build label from xml data
+		#------------------------------------------
+		$this->{bootlabel} = $xml -> getImageDisplayName();
 		#==========================================
 		# bind $system to loop device
 		#------------------------------------------
