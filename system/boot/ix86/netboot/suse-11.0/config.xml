@@ -156,6 +156,7 @@
 	</packages>
 	<packages type="image" profiles="default,xen,pae">
 		<!-- PACKAGES START DEFAULT AND XEN -->
+		<package name="adaptec-firmware"/>
 		<package name="curl"/>
 		<package name="psmisc"/>
 		<package name="iputils"/>

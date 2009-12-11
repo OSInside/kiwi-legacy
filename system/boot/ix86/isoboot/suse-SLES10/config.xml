@@ -62,6 +62,7 @@
 		<package name="kernel-smp"/>
 	</packages>
 	<packages type="image">
+		<package name="adaptec-firmware"/>
 		<package name="psmisc"/>
 		<package name="bind-libs"/>
 		<package name="bind-utils"/>

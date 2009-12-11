@@ -871,7 +871,7 @@ function suseStripInitrd {
 		/usr/src/linux* /usr/local /var/log/* /usr/share/pixmaps
 		/usr/share/gtk-doc /var/games /opt /var/spool /var/opt
 		/var/cache /var/tmp /etc/rpm /etc/cups /etc/opt
-		/home /media /lib/firmware /usr/lib*/lsb /usr/lib*/krb5
+		/home /media /usr/lib*/lsb /usr/lib*/krb5
 		/usr/lib*/ldscripts /usr/lib*/getconf /usr/lib*/pwdutils
 		/usr/lib*/pkgconfig /usr/lib*/browser-plugins
 		/usr/share/omc /usr/share/tmac /usr/share/emacs /usr/share/idnkit

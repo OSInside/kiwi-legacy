@@ -71,6 +71,7 @@
 		<package name="xen"/>
 	</packages>
 	<packages type="image">
+		<package name="adaptec-firmware"/>
 		<package name="curl"/>
 		<package name="psmisc"/>
 		<package name="iputils"/>
