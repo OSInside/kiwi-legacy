@@ -2,6 +2,9 @@
 Wed Dec  9 10:30:44 CET 2009 - ms@suse.de
 
 - v3.85
+- show disk size value in MB and only if > 0 (bnc #562190)
+- put install progress information into dialog (bnc #562185)
+- track restored files in percentage (bnc #562188)
 - added adaptec-firmware to iso/net and oemboot (bnc #562224)
 - use blowfish extension for password creation (bnc #562105)
 - fixed user/group setup for multiple users (bnc #561749)

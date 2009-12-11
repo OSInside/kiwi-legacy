@@ -5,15 +5,23 @@
 
 int main(int argc, char **argv) {
 	int i, percent = -1;
+	int newline = 0;
+	char prefix[512];
 	unsigned cnt = 0, blk_size = 1024*1024, blk_cnt = 0, size = 0;
 	ssize_t r, w, p;
 	char buf[1024*1024];
 	argv++; argc--;
-	if (argc > 1 && !strcmp(*argv, "-s")) {
+	if (argc > 1 && strstr(*argv, "-s")) {
 		i = atoi(argv[1]);
 		if (i) {
 			size = i;
 		}
+		argv += 2;
+		argc -= 2;
+	}
+	if (argc == 2 && strstr(*argv, "-l")) {
+		newline = 1;
+		strncpy (prefix,*(argv+1),strlen(*(argv+1)));
 		argv += 2;
 		argc -= 2;
 	}
@@ -41,7 +49,11 @@ int main(int argc, char **argv) {
 			i = percent;
 			percent = (blk_cnt * 100) / size;
 			if(percent != i) {
-				fprintf(stderr, "\x08\x08\x08\x08\x08\x08(%3d%%)", percent);
+				if (newline) {
+					fprintf(stderr, "%s%3d%%\n",prefix, percent);
+				} else {
+					fprintf(stderr, "\x08\x08\x08\x08\x08\x08(%3d%%)", percent);
+				}
 			}
 		}
 	}

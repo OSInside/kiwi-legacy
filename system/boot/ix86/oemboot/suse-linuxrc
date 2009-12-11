@@ -449,7 +449,10 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 		while kill -0 $rPID &>/dev/null;do
 			rReady=$(cat /tmp/rFiles | wc -l)
 			#Echo -e -n "$rReady files from $rFiles restored...\r"
-			getText "%1 files from %2 restored..." $rReady $rFiles > /progress
+			rFDone=$(echo "scale=4; $rFiles / $rReady" | bc)
+			rFDone=$(echo "scale=0; 100 / $rFDone" | bc)
+			getText "restoring: %1..." "$rFDone%" > /progress
+			#getText "%1 files from %2 restored..." $rReady $rFiles > /progress
 			sleep 1
 		done
 		#======================================

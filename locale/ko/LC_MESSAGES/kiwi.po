@@ -45,6 +45,9 @@ msgstr "%2에서 %1개의 파일이 복원되었습니다…"
 msgid "backing up: %1..."
 msgstr ""
 
+msgid "restoring: %1..."
+msgstr ""
+
 msgid "Yes"
 msgstr "예"
 
@@ -64,4 +67,10 @@ msgid "Please eject the install CD/DVD before continuing"
 msgstr ""
 
 msgid "Please pull out the install USB stick before continuing"
+msgstr ""
+
+msgid "Installation..."
+msgstr ""
+
+msgid "Loading %1"
 msgstr ""

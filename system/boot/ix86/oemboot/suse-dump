@@ -78,10 +78,13 @@ function OEMInstall {
 	count=0
 	for i in $deviceDisks;do
 		dsize=`partitionSize $i`
-		Echo -b "Disk $count -> $i [ $dsize KByte ]"
-		deviceArray[$count]=$i
-		deviceDSize[$count]=$dsize
-		count=`expr $count + 1`
+		dsizeMB=`expr $dsize / 1024`
+		if [ "$dsizeMB" -gt 0 ];then
+			Echo -b "Disk $count -> $i [ $dsizeMB MB ]"
+			deviceArray[$count]=$i
+			deviceDSize[$count]=$dsize
+			count=`expr $count + 1`
+		fi
 	done
 	if [ "$count" = "1" ];then
 		#======================================
@@ -100,13 +103,16 @@ function OEMInstall {
 			count=0
 			for i in $deviceDisks;do
 				dsize=`partitionSize $i`
-				dname=`getDiskID $i`
-				dname=`basename $dname | cut -c1-20`"..."
-				if [ $count = 0 ];then
-					dpara="$i \"$dname [ $dsize KByte ]\" on"
-					count=1
-				else
-					dpara="$dpara $i \"$dname [ $dsize KByte ]\" off"
+				dsizeMB=`expr $dsize / 1024`
+				if [ "$dsizeMB" -gt 0 ];then
+					dname=`getDiskID $i`
+					dname=`basename $dname | cut -c1-20`"..."
+					if [ $count = 0 ];then
+						dpara="$i \"$dname [ $dsizeMB MB ]\" on"
+						count=1
+					else
+						dpara="$dpara $i \"$dname [ $dsizeMB MB ]\" off"
+					fi
 				fi
 			done
 			instDisk=$(runInteractive \
@@ -234,15 +240,39 @@ function OEMInstall {
 	fi
 	if [ -x /usr/bin/dcounter ];then
 		errorLogStop
-		dump="$dump | dcounter -s $needMByte"
+		TEXT_LOAD=$(getText "Loading %1" $(basename $imageName))
+		dump="$dump | dcounter -s $needMByte -l $TEXT_LOAD"
 	fi
-	Echo -n "Loading $imageName [$imageDevice] "
-	if ! eval $dump | dd bs=32k of=$imageDevice &>/dev/null; then
-		systemException \
-			"Failed to install image: $imageName -> $imageDevice" \
-		"reboot"
+	Echo "Loading $imageName [$imageDevice] "
+	if [ -x /usr/bin/dcounter ];then
+		mkfifo /progress && cp /usr/bin/tail /usr/bin/mst
+		(
+			if ! eval $dump 2>/progress | dd bs=32k of=$imageDevice &>/dev/null
+			then
+				systemException \
+					"Failed to install image: $imageName -> $imageDevice" \
+				"reboot"
+			fi
+			dPID=$(pidof mst)
+			kill $dPID
+		)&
+		echo "mst -f /progress | dialog \
+			--backtitle \"$TEXT_INSTALLTITLE\" \
+			--progressbox 3 50
+		" > /tmp/progress.sh
+		if [ -e /dev/fb0 ];then
+			fbiterm -m $UFONT -- bash -e /tmp/progress.sh
+		else
+			bash -e /tmp/progress.sh
+		fi
+		clear
+	else
+		if ! eval $dump | dd bs=32k of=$imageDevice &>/dev/null; then
+			systemException \
+				"Failed to install image: $imageName -> $imageDevice" \
+			"reboot"
+		fi
 	fi
-	echo
 	if [ -x /usr/bin/dcounter ];then
 		errorLogContinue
 	fi

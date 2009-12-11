@@ -4826,6 +4826,8 @@ function selectLanguage {
 		getText "Do you want to start the System-Recovery ?")
 	export TEXT_RECOVERYTITLE=$(
 		getText "Restoring base operating system...")
+	export TEXT_INSTALLTITLE=$(
+		getText "Installation...")
 	export TEXT_CDPULL=$(
 		getText "Please eject the install CD/DVD before continuing")
 	export TEXT_USBPULL=$(
