@@ -605,14 +605,36 @@ sub mainTask
   }
   else {
     my $iso;
-    foreach my $cd($this->getMediaNumbers()) {
+
+    foreach my $cd ($this->getMediaNumbers()) {
       next if($cd == 0);
-      my $cdname = $this->{m_basesubdir}->{$cd};
-      my $attr = "-R -J -f -pad -joliet-long";
-      $cdname =~ s{.*/(.*)/*$}{$1};
-      my $checkmedia;
-      $checkmedia = "checkmedia" if ( defined($this->{m_proddata}->getVar("RUN_MEDIA_CHECK")) and $this->{m_proddata}->getVar("RUN_MEDIA_CHECK") ne "0" and $this->{m_proddata}->getVar("RUN_MEDIA_CHECK") ne "false"   );
-      $iso = new KIWIIsoLinux($this->{m_logger}, $this->{m_basesubdir}->{$cd}, $this->{m_united}."/$cdname.iso",$attr,$checkmedia);
+
+      ( my $name = $this->{m_basesubdir}->{$cd} ) =~ s{.*/(.*)/*$}{$1};
+      my $isoname = $this->{m_united}."/$name.iso";
+
+      my $attr = "-r"; # RockRidge
+      $attr .= " -pad"; # pad image by 150 sectors - needed for Linux
+      $attr .= " -f"; # follow symlinks - really necessary?
+      $attr .= " -J"; # Joilet extensions - only useful for i586/x86_64, I think
+      $attr .= " -joliet-long"; # longer filenames for joilet filenames
+      $attr .= " -p \"$main::Preparer\"";
+      $attr .= " -publisher \"$main::Publisher\"";
+      $attr .= " -A \"$name\"";
+      $attr .= sprintf(' -V "%s.%03d"',
+                       $name,
+                       $cd);
+
+      my $checkmedia = '';
+      $checkmedia = "checkmedia" if ( defined($this->{m_proddata}->getVar("RUN_MEDIA_CHECK"))
+                                      && $this->{m_proddata}->getVar("RUN_MEDIA_CHECK") ne "0"
+                                      && $this->{m_proddata}->getVar("RUN_MEDIA_CHECK") ne "false" );
+
+      $iso = new KIWIIsoLinux( $this->{m_logger},
+                               $this->{m_basesubdir}->{$cd},
+                               $isoname,
+                               $attr,
+                               $checkmedia);
+
       if(!$iso->callBootMethods()) {
         $this->logMsg("W", "Creating boot methods failed, medium maybe not be bootable");
       }
@@ -624,7 +646,7 @@ sub mainTask
         return 1;
       }
       else {
-        $this->logMsg("I", "Created Iso image <$cdname.iso>");
+        $this->logMsg("I", "Created Iso image <$isoname>");
       }
       if(!$iso->checkImage()) {
         $this->logMsg("E", "Tagmedia call failed");

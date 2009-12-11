@@ -116,6 +116,10 @@ sub new {
 	$base{ia64}{boot}    = "boot/ia64";
 	$base{ia64}{loader}  = "undef";
 	$base{ia64}{efi}     = "boot/ia64/efi";
+	# ppc64
+	$base{ppc64}{boot}    = "suseboot";
+	$base{ppc64}{loader}  = "undef";
+	$base{ppc64}{efi}     = "undef";
 	#=======================================
 	# 1) search for legacy boot
 	#---------------------------------------
@@ -126,6 +130,9 @@ sub new {
 			}
 			if ($arch eq "ix86") {
 				$catalog[0] = "ix86_legacy";
+			}
+			if ($arch eq "ppc64") {
+				$catalog[0] = "ppc64_default";
 			}
 		}
 	}
@@ -217,7 +224,7 @@ sub ix86_legacy {
 	my $boot  = $base{$arch}{boot};
 	my $loader= $base{$arch}{loader};
 	$para.= " -sort $sort -no-emul-boot -boot-load-size 4 -boot-info-table";
-    $para.= " -b $loader -c $boot/boot.catalog";
+	$para.= " -b $loader -c $boot/boot.catalog";
 	$para.= " -hide $boot/boot.catalog -hide-joliet $boot/boot.catalog";
 	$this -> {params} = $para;
 	$this -> createISOLinuxConfig ($boot);
@@ -265,9 +272,15 @@ sub ia64_efi {
 	my $para  = $this -> {params};
 	my $boot  = $base{$arch}{boot};
 	my $loader= $base{$arch}{efi};
-	$para.= " -eltorito-alt-boot";
-	$para.= " -hide $boot/boot.catalog -hide-joliet $boot/boot.catalog";
+	my $sort  = $this -> createLegacySortFile ("ia64");
+
+	$para.= " -no-emul-boot";
+	$para.= " -boot-load-size 1";
+	$para.= " -sort $sort";
 	$para.= " -b $loader";
+	$para.= " -c $boot/boot.catalog";
+	$para.= " -hide $boot/boot.catalog -hide-joliet $boot/boot.catalog";
+
 	$this -> {params} = $para;
 }
 
@@ -301,6 +314,30 @@ sub s390x_ikr {
 	$para.= " -hide $boot/boot.catalog -hide-joliet $boot/boot.catalog";
 	$para.= " -b $boot/cd.ikr";
 	$this -> {params} = $para; 
+}
+
+#==========================================
+# ppc64_default
+#------------------------------------------
+sub ppc64_default {
+	my $this  = shift;
+	my $arch  = shift;
+	my %base  = %{$this->{base}};
+	my $para  = $this -> {params};
+	my $src  = $this -> {source};
+	my $boot  = $base{$arch}{boot};
+
+	$para.= " -chrp-boot";
+        $para.= " -hfs-bless $src/$boot"; # CHECK: maybe $src is not necessary
+	$para.= " -hfs-volid FIXME"; # FIXME should be same as value of -A
+	$para.= " -l";
+	$para.= " --macbin";
+	$para.= " -map $main::BasePath/modules/KIWIIsoLinux-AppleFileMapping.txt";
+	$para.= " --netatalk";
+	$para.= " -part";
+	$para.= " -T";
+	$para.= " -U";
+	$this -> {params} = $para;
 }
 
 #==========================================
@@ -490,9 +527,11 @@ sub createISO {
 	my $para = $this -> {params};
 	my $ldir = $this -> {tmpdir};
 	my $prog = $this -> {tool};
-	my $data = qxx (
-		"$prog $para -o $dest $ldir $src 2>&1"
-	);
+
+        my $cmdln = "$prog $para -o $dest $ldir $src 2>&1";
+        $kiwi -> info ( "Calling: $cmdln\n" );
+	my $data = qxx ( $cmdln	);
+
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> error  ("Failed to call $prog: $data");

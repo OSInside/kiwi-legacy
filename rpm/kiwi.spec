@@ -453,6 +453,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files -n kiwi-instsource
 %defattr(-, root, root)
+%{_datadir}/kiwi/modules/KIWIIsoLinux-AppleFileMapping.txt
 %{_datadir}/kiwi/modules/KIWICollect.pm
 %{_datadir}/kiwi/modules/KIWIUtil.pm
 %{_datadir}/kiwi/modules/KIWIRepoMetaHandler.pm
