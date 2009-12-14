@@ -40,8 +40,6 @@ use KIWIMigrate;
 use KIWIOverlay;
 use KIWIQX;
 use KIWITest;
-use Crypt::Blowfish;
-use Crypt::CBC;
 
 #============================================
 # Globals (Version)
@@ -2176,19 +2174,21 @@ sub version {
 #------------------------------------------
 sub createPassword {
 	# ...
-	# Create a Blowfish encrypted password which can be used in the
-	# xml description users sections.
+	# Create a crypted password which can be used in the xml descr.
+	# users sections. The crypt() call requires root rights because
+	# dm-crypt is used to access the crypto pool
 	# ----
+	my @legal_enc = ('.', '/', '0'..'9', 'A'..'Z', 'a'..'z');
 	if (! defined $kiwi) {
 		$kiwi = new KIWILog("tiny");
 	}
 	my $word2 = 2;
 	my $word1 = 1;
-	my $key   = pack("H16", "0123456789ABCDEF");
-	my $bfish = new Crypt::Blowfish $key;
-	my $cipher= Crypt::CBC -> new (
-		-cipher => $bfish
-	);
+	my $tmp = (time + $$) % 65536;
+	my $salt;
+	srand ($tmp);
+	$salt = $legal_enc[sprintf "%u", rand (@legal_enc)];
+	$salt.= $legal_enc[sprintf "%u", rand (@legal_enc)];
 	while ($word1 ne $word2) {
 		$kiwi -> info ("Enter Password: ");
 		system "stty -echo";
@@ -2206,11 +2206,10 @@ sub createPassword {
 		}
 	}
 	$kiwi -> done ();
-	my $pwd = $cipher -> encrypt_hex($word1);
-	$kiwi -> info ("Your password (Blowfish):\n\t$pwd\n");
+	my $pwd = crypt ($word1, $salt);
+	$kiwi -> info ("Your password:\n\t$pwd\n");
 	my $code = kiwiExit (0); return $code;
 }
-
 #==========================================
 # createHash
 #------------------------------------------

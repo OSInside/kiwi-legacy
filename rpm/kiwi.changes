@@ -13,6 +13,7 @@ Wed Dec  9 10:30:44 CET 2009 - ms@suse.de
 - fixed home device fstab entry, uses disk by id now
 - moved repartition functions to KIWILinuxRC
 - fixed install stick creation
+- fixed password salt creation
 
 -------------------------------------------------------------------
 Tue Dec  8 12:42:11 CET 2009 - ms@suse.de
