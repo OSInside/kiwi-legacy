@@ -52,10 +52,6 @@ MainWindow::MainWindow (const char *cmddevice,
     // Setup the platform-specific bits
 #if defined (Q_OS_LINUX)
     platform = new PlatformLinux;
-#elif defined (Q_OS_WIN)
-    platform = new PlatformWindows;
-#elif defined (Q_OS_MAC)
-    platform = new PlatformMacintosh;
 #else
     QMessageBox msgBox;
     msgBox.setText(tr("Your platform is not currently supported."));

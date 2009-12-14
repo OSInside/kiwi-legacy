@@ -11,24 +11,8 @@ INCLUDEPATH += .
 HEADERS += DeviceItem.h \
            MainWindow.h \
            Platform.h \
-           PlatformLinux.h \
-           PlatformWindows.h \
-           PlatformMac.h
+           PlatformLinux.h
 SOURCES += main.cpp MainWindow.cpp Platform.cpp
-
-win32 {
-	SOURCES += PlatformWindows.cpp
-	SDKDIR = $$(WindowsSdkDir)
-	INCLUDEPATH += E:\WINDDK\3790.1830\inc\wxp $$quote($$SDKDIR\..\v6.0A\include)
-	LIBS += user32.lib
-	LIBPATH += $$quote($$SDKDIR\..\v6.0A\Lib)
-}
-
-macx {
-	SOURCES += PlatformMac.cpp
-	CONFIG += x86 ppc
-	LIBS += -framework IOKit
-}
 
 unix:!macx {
 	exists ("/usr/include/hal/libhal.h")

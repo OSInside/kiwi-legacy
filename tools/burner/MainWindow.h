@@ -33,14 +33,6 @@
 #include "PlatformLinux.h"
 #endif
 
-#if defined (Q_OS_WIN)
-#include "PlatformWindows.h"
-#endif
-
-#if defined (Q_OS_MAC)
-#include "PlatformMac.h"
-#endif
-
 #include "DeviceItem.h"
 #define VERSION "SUSE Studio Image Writer 1.3"
 
