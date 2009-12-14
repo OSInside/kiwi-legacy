@@ -11,6 +11,7 @@ int main(int argc, char **argv) {
 	ssize_t r, w, p;
 	char buf[1024*1024];
 	argv++; argc--;
+	memset (prefix,'\0',512);
 	if (argc > 1 && strstr(*argv, "-s")) {
 		i = atoi(argv[1]);
 		if (i) {
@@ -50,7 +51,7 @@ int main(int argc, char **argv) {
 			percent = (blk_cnt * 100) / size;
 			if(percent != i) {
 				if (newline) {
-					fprintf(stderr, "%s%3d%%\n",prefix, percent);
+					fprintf(stderr, "%s(%3d%%)\n",prefix, percent);
 				} else {
 					fprintf(stderr, "\x08\x08\x08\x08\x08\x08(%3d%%)", percent);
 				}

@@ -239,26 +239,25 @@ function OEMInstall {
 		dump="gzip -cd $imageName"
 	fi
 	if [ -x /usr/bin/dcounter ];then
-		errorLogStop
-		TEXT_LOAD=$(getText "Loading %1" $(basename $imageName))
-		dump="$dump | dcounter -s $needMByte -l $TEXT_LOAD"
+		progressBaseName=$(basename $imageName)
+		TEXT_LOAD=$(getText "Loading %1" $progressBaseName)
+		dump="$dump | dcounter -s $needMByte -l \"$TEXT_LOAD \""
 	fi
 	Echo "Loading $imageName [$imageDevice] "
 	if [ -x /usr/bin/dcounter ];then
-		mkfifo /progress && cp /usr/bin/tail /usr/bin/mst
+		mkfifo /progress; errorLogStop
 		(
 			if ! eval $dump 2>/progress | dd bs=32k of=$imageDevice &>/dev/null
 			then
+				errorLogContinue
 				systemException \
 					"Failed to install image: $imageName -> $imageDevice" \
 				"reboot"
 			fi
-			dPID=$(pidof mst)
-			kill $dPID
 		)&
-		echo "mst -f /progress | dialog \
+		echo "cat /progress | dialog \
 			--backtitle \"$TEXT_INSTALLTITLE\" \
-			--progressbox 3 50
+			--progressbox 3 65
 		" > /tmp/progress.sh
 		if [ -e /dev/fb0 ];then
 			fbiterm -m $UFONT -- bash -e /tmp/progress.sh
