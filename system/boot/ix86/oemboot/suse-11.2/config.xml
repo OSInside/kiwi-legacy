@@ -90,6 +90,7 @@
 		<package name="kernel-desktop"/>  
 	</packages>
 	<packages type="image">
+		<package name="parted"/>
 		<package name="adaptec-firmware"/>
 		<package name="dialog"/>
 		<package name="clicfs"/>
