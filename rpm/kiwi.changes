@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Tue Dec 15 10:51:14 CET 2009 - ms@suse.de
+
+- v3.86
+- call scripts in C env for LC_ALL and LANG (bnc #558693)
+- fixed handling of dir:// and file:// (bnc #561855)
+- bind mount /var/run/dbus into chroot (bnc #519764) 
+
+-------------------------------------------------------------------
 Wed Dec  9 10:30:44 CET 2009 - ms@suse.de
 
 - v3.85

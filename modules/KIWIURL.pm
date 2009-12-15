@@ -100,7 +100,7 @@ sub normalizePath {
 	if (defined $path) {
 		return $path;
 	}
-	$path = $this -> filePath ($module);
+	$path = $this -> dirPath ($module);
 	if (defined $path) {
 		return $path;
 	}
@@ -227,16 +227,16 @@ sub thisPath {
 }
 
 #==========================================
-# filePath
+# dirPath
 #------------------------------------------
-sub filePath {
+sub dirPath {
 	my $this   = shift;
 	my $module = shift;
 	my $kiwi   = $this->{kiwi};
 	#==========================================
 	# normalize URL data
 	#------------------------------------------
-	if ((! defined $module) || ($module !~ /^file:\/\//)) {
+	if ((! defined $module) || ($module !~ /^dir:\/\//)) {
 		return undef;
 	}
 	$module =~ s/file:\/\///;
@@ -245,7 +245,7 @@ sub filePath {
 		$module = $pwd."/".$module;
 	}
 	if (! -e $module) {
-		$kiwi -> warning ("file path: $module doesn't exist: $!");
+		$kiwi -> warning ("dir path: $module doesn't exist: $!");
 		$kiwi -> skipped ();
 		return undef;
 	}
@@ -305,10 +305,14 @@ sub isoPath {
 	#==========================================
 	# normalize URL data
 	#------------------------------------------
-	if ((! defined $module) || ($module !~ /^iso:\/\//)) {
+	if ((! defined $module)      || (
+		($module !~ /^iso:\/\//) && 
+		($module !~ /^file:\/\//))
+	) {
 		return undef;
 	}
-	$module =~ s/iso:\/\///;
+	$module =~ s/^iso:\/\///;
+	$module =~ s/^file:\/\///;
 	#==========================================
 	# Convert zypper iso URL if required
 	#------------------------------------------

@@ -1036,6 +1036,10 @@ sub setupMount {
 		qxx ("mount --bind /dev $root/dev");
 		push (@mountList,"$root/dev");
 	}
+	if (! -f "$root/var/run/dbus/pid") {
+		qxx ("mount --bind /var/run/dbus $root/var/run/dbus");
+		push (@mountList,"$root/var/run/dbus");
+	}
 	if (! -d "$root/sys/block") {
 		qxx ("mkdir -p $root/sys");
 		qxx ("mount -t sysfs sysfs $root/sys");
