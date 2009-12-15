@@ -244,6 +244,11 @@ function systemException {
 		Echo "shellException: providing shell..."
 		setctsid $ELOG_EXCEPTION /bin/bash -i || /bin/bash -i
 	;;
+	"user_reboot")
+		Echo "reboot triggered by user: consoles at Alt-F3/F4"
+		Echo "reboot in 30 sec..."; sleep 30
+		/sbin/reboot -f -i >/dev/null
+	;;
 	*)
 		Echo "unknownException..."
 	;;

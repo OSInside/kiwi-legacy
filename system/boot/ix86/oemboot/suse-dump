@@ -147,7 +147,7 @@ function OEMInstall {
 		if [ ! $? = 0 ];then
 			systemException \
 				"System installation canceled" \
-			"reboot"
+			"user_reboot"
 		fi
 	fi
 	clear
@@ -320,3 +320,5 @@ function OEMInstall {
 	fi
 	Dialog --msgbox "\"$message\"" 5 60
 }
+
+# vim: set noexpandtab:
