@@ -423,6 +423,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/kiwi/modules
 %{_datadir}/kiwi/locale
 %{_datadir}/kiwi/repo
+%exclude %{_datadir}/kiwi/modules/KIWIIsoLinux-AppleFileMapping.txt
 %exclude %{_datadir}/kiwi/modules/KIWICollect.pm
 %exclude %{_datadir}/kiwi/modules/KIWIRepoMetaHandler.pm
 %exclude %{_datadir}/kiwi/modules/KIWIUtil.pm

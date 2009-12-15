@@ -5,7 +5,13 @@ Tue Dec 15 10:51:14 CET 2009 - ms@suse.de
 - call scripts in C env for LC_ALL and LANG (bnc #558693)
 - fixed handling of dir:// and file:// (bnc #561855)
 - bind mount /var/run/dbus into chroot (bnc #519764)
-- fixed user cancel exception text (bnc #557100) 
+- fixed user cancel exception text (bnc #557100)
+- kiwi inst-source chnages: Changed mkisofs parameters in KIWICollect.pm
+  the way similar like autobuild did before
+  * added ppc support to KIWIIsoLinux
+    (KIWIIsoLinux-AppleFileMapping.txt is part of it)
+  * added KIWIIsoLinux-AppleFileMapping.txt to spec file
+  * fixed mkisofs parameters for ia64
 
 -------------------------------------------------------------------
 Wed Dec  9 10:30:44 CET 2009 - ms@suse.de
