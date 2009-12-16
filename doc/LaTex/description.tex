@@ -390,7 +390,9 @@ attributes:
 \begin{Command}{12cm}
 <users group="users" \textit{id="number"}>\\
 \hspace*{1cm}<user pwd="..." home="dir"\\ 
-\hspace*{1.5cm}name="user" \textit{id="number"}/>\\
+\hspace*{1.5cm}name="user" \textit{id="number"}\\
+\hspace*{1.5cm}\textit{pwdformat="encrypted" | "plain"}\\
+\hspace*{1.5cm}\textit{realname="string"} \textit{shell="path}/>\\
 \hspace*{1cm}...\\
 </users>
 ...
@@ -401,8 +403,10 @@ The group attribute specifies the group the users belong to. If this group
 does not exist, it is created. A user element must be specified for
 each group. The user child element specifies the users belonging to that
 group, and the name, pwd and home attributes specifies the username,
-crypted password, and path to the home directory. The password can be
-created by the kiwi $--$createpassword tool.
+the password, and the path to the home directory. An encrypted password can be
+created using the kiwi $--$createpassword tool. If a plain text password is
+given use the optional pwdformat attribute to indicate a plain text password
+and Kiwi will encrypt the given password.
 
 \subsection{drivers element}
 \begin{Command}{12cm}

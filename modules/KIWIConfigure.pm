@@ -166,6 +166,10 @@ sub setupUsersGroups {
 			my $home  = $users{$user}{home};
 			my $shell = $users{$user}{shell};
 			my $realname = $users{$user}{realname};
+			my $pwdformat= $users{$user}{pwdformat};
+			if ((defined $pwdformat) && ($pwdformat eq 'plain')) {
+				$pwd = main::createPassword ($pwd);
+			}
 			if (defined $pwd) {
 				$adduser .= " -p '$pwd'";
 				$moduser .= " -p '$pwd'";

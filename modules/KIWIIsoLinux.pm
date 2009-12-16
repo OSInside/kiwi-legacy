@@ -528,7 +528,7 @@ sub createISO {
 	my $ldir = $this -> {tmpdir};
 	my $prog = $this -> {tool};
 	my $cmdln= "$prog $para -o $dest $ldir $src 2>&1";
-	$kiwi -> info ( "Calling: $cmdln\n" );
+	$kiwi -> loginfo ( "Calling: $cmdln\n" );
 	my $data = qxx ( $cmdln	);
 	my $code = $? >> 8;
 	if ($code != 0) {

@@ -1495,6 +1495,7 @@ sub getUsers {
 			my $name = $element -> getAttribute ("name");
 			my $uid  = $element -> getAttribute ("id");
 			my $pwd  = $element -> getAttribute ("pwd");
+			my $pwdformat = $element -> getAttribute ("pwdformat");
 			my $home = $element -> getAttribute ("home");
 			my $realname = $element -> getAttribute ("realname");
 			my $shell = $element -> getAttribute ("shell");
@@ -1504,6 +1505,7 @@ sub getUsers {
 				$result{$name}{uid}   = $uid;
 				$result{$name}{home}  = $home;
 				$result{$name}{pwd}   = $pwd;
+				$result{$name}{pwdformat}= $pwdformat;
 				$result{$name}{realname} = $realname;
 				$result{$name}{shell} = $shell;
 			}

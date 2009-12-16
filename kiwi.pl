@@ -44,7 +44,7 @@ use KIWITest;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "3.86";
+our $Version       = "3.87";
 our $Publisher     = "SUSE LINUX Products GmbH";
 our $Preparer      = "KIWI - http://kiwi.berlios.de";
 our $openSUSE      = "http://download.opensuse.org";
@@ -2178,6 +2178,7 @@ sub createPassword {
 	# users sections. The crypt() call requires root rights because
 	# dm-crypt is used to access the crypto pool
 	# ----
+	my $pwd = shift;
 	my @legal_enc = ('.', '/', '0'..'9', 'A'..'Z', 'a'..'z');
 	if (! defined $kiwi) {
 		$kiwi = new KIWILog("tiny");
@@ -2189,6 +2190,9 @@ sub createPassword {
 	srand ($tmp);
 	$salt = $legal_enc[sprintf "%u", rand (@legal_enc)];
 	$salt.= $legal_enc[sprintf "%u", rand (@legal_enc)];
+	if (defined $pwd) {
+		$word1 = $word2 = $pwd;
+	}
 	while ($word1 ne $word2) {
 		$kiwi -> info ("Enter Password: ");
 		system "stty -echo";
@@ -2205,9 +2209,12 @@ sub createPassword {
 			$kiwi -> failed ();
 		}
 	}
+	my $encrypted = crypt ($word1, $salt);
+	if (defined $pwd) {
+		return $encrypted;
+	}
 	$kiwi -> done ();
-	my $pwd = crypt ($word1, $salt);
-	$kiwi -> info ("Your password:\n\t$pwd\n");
+	$kiwi -> info ("Your password:\n\t$encrypted\n");
 	my $code = kiwiExit (0); return $code;
 }
 #==========================================

@@ -1409,6 +1409,9 @@ div {
 		## The name of an user
 		attribute realname { text }
 	k.user.pwd.attribute = k.pwd.attribute
+	k.user.pwdformat =
+		## Format of the given password, encrypted is the default
+		attribute pwdformat { "encrypted" | "plain" }
 	k.user.home.attribute =
 		## The home directory for this user
 		attribute home { text }
@@ -1420,6 +1423,7 @@ div {
 		k.user.id.attribute? &
 		k.user.realname.attribute? &
 		k.user.pwd.attribute &
+		k.user.pwdformat? &
 		k.user.home.attribute &
 		k.user.shell.attribute?
 	k.user =
