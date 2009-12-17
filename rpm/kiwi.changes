@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Dec 17 11:59:03 CET 2009 - ms@suse.de
+
+- v3.88
+- removed adaptec-firmware from SLED boot images. The package
+  does not exist on SLED (bnc #562224)
+
+-------------------------------------------------------------------
 Tue Dec 15 18:11:45 CET 2009 - ms@suse.de
 
 - v3.87
