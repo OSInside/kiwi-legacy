@@ -140,7 +140,7 @@ sub new {
 	# 2) search for efi/ikr boot
 	#---------------------------------------
 	foreach my $arch (sort keys %base) {
-		if (-d $source."/".$base{$arch}{efi}) {
+		if (-f $source."/".$base{$arch}{efi}) {
 			if ($arch eq "x86_64") {
 				push (@catalog, "x86_64_efi");
 			}
