@@ -241,7 +241,8 @@ sub x86_64_efi {
 	my $boot  = $base{$arch}{boot};
 	my $loader= $base{$arch}{efi};
 	$para.= " -eltorito-alt-boot";
-	$para.= " -hide $boot/boot.catalog -hide-joliet $boot/boot.catalog";
+	$para.= " -no-emul-boot";
+	$para.= " -boot-load-size 1";
 	$para.= " -b $loader";
 	$this -> {params} = $para;
 }
@@ -257,7 +258,8 @@ sub ix86_efi {
 	my $boot  = $base{$arch}{boot};
 	my $loader= $base{$arch}{efi};
 	$para.= " -eltorito-alt-boot";
-	$para.= " -hide $boot/boot.catalog -hide-joliet $boot/boot.catalog";
+	$para.= " -no-emul-boot";
+	$para.= " -boot-load-size 1";
 	$para.= " -b $loader";
 	$this -> {params} = $para;
 }
@@ -528,7 +530,7 @@ sub createISO {
 	my $ldir = $this -> {tmpdir};
 	my $prog = $this -> {tool};
 	my $cmdln= "$prog $para -o $dest $ldir $src 2>&1";
-	$kiwi -> loginfo ( "Calling: $cmdln\n" );
+	$kiwi -> info ( "Calling: $cmdln\n" );
 	my $data = qxx ( $cmdln	);
 	my $code = $? >> 8;
 	if ($code != 0) {
