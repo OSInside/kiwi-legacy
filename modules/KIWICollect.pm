@@ -612,6 +612,12 @@ sub mainTask
       ( my $name = $this->{m_basesubdir}->{$cd} ) =~ s{.*/(.*)/*$}{$1};
       my $isoname = $this->{m_united}."/$name.iso";
 
+      # construct volume id, no longer than 32 bytes allowed
+      my $vname = $name;
+      $vname =~ s/-Media/\./ if length($vname) gt 27;
+      $vname =~ s/-Build/\./ if length($vname) gt 27;
+      my $vid = sprintf( "%s.%03d", substr($vname,0,27), $cd );
+
       my $attr = "-r"; # RockRidge
       $attr .= " -pad"; # pad image by 150 sectors - needed for Linux
       $attr .= " -f"; # follow symlinks - really necessary?
@@ -620,9 +626,7 @@ sub mainTask
       $attr .= " -p \"$main::Preparer\"";
       $attr .= " -publisher \"$main::Publisher\"";
       $attr .= " -A \"$name\"";
-      $attr .= sprintf(' -V "%s.%03d"',
-                       $name,
-                       $cd);
+      $attr .= " -V \"$vid\"";
 
       my $checkmedia = '';
       $checkmedia = "checkmedia" if ( defined($this->{m_proddata}->getVar("RUN_MEDIA_CHECK"))
