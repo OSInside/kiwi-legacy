@@ -613,10 +613,11 @@ sub mainTask
       my $isoname = $this->{m_united}."/$name.iso";
 
       # construct volume id, no longer than 32 bytes allowed
+      my $volid_maxlen = 32;
       my $vname = $name;
-      $vname =~ s/-Media/\./ if length($vname) gt 27;
-      $vname =~ s/-Build/\./ if length($vname) gt 27;
-      my $vid = sprintf( "%s.%03d", substr($vname,0,27), $cd );
+      $vname =~ s/-Media/\./ if length($vname) > ($volid_maxlen - 4);
+      $vname =~ s/-Build/\./ if length($vname) > ($volid_maxlen - 4);
+      my $vid = sprintf( "%s.%03d", substr($vname,0,($volid_maxlen - 4)), $cd );
 
       my $attr = "-r"; # RockRidge
       $attr .= " -pad"; # pad image by 150 sectors - needed for Linux
