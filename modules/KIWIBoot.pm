@@ -4667,6 +4667,7 @@ sub setVolumeGroup {
 		);
 	} else {
 		if (%lvmparts) {
+			my %ihash = ();
 			foreach my $name (keys %lvmparts) {
 				my $pname = $name; $pname =~ s/_/\//g;
 				my $freespace = 0;
@@ -4677,6 +4678,11 @@ sub setVolumeGroup {
 					"du -s --block-size=1 $system/$pname | cut -f1"
 				);
 				chomp $lvsize;
+				#my $lvmini = qxx ("find $system/$pname | wc -l"); $lvmini *= 2;
+				#my $lvneedi = $lvsize / $main::FSInodeRatio;
+				#$ihash{$lvdevice} = int($lvmini > $lvneedi ? $lvmini:$lvneedi);
+				my $lvdevice= "/dev/$VGroup/LV$name";
+				$ihash{$lvdevice} = "no-opts";
 				$lvsize /= 1048576;
 				$lvsize = int ( 30 + $lvsize + $freespace);
 				$status = qxx ("lvcreate -L $lvsize -n LV$name $VGroup 2>&1");
@@ -4685,6 +4691,7 @@ sub setVolumeGroup {
 					last;
 				}
 			}
+			$this->{deviceinodes} = \%ihash;
 		}
 		if ($result == 0) {
 			$status = qxx ("lvcreate -l 100%FREE -n LVRoot $VGroup 2>&1");
@@ -4858,12 +4865,21 @@ sub setupFilesystem {
 	my $fstype = shift;
 	my $device = shift;
 	my $name   = shift;
+	my %inodes = %{$this->{deviceinodes}};
 	my $kiwi   = $this->{kiwi};
 	my $xml    = $this->{xml};
 	my %type   = %{$xml->getImageTypeAndAttributes()};
 	my %FSopts = main::checkFSOptions();
+	my $iorig  = $this->{inodes};
 	my $result;
 	my $status;
+	if ($inodes{$device}) {
+		if ($inodes{$device} ne "no-opts") {
+			$this->{inodes} = $inodes{$device};
+		} else {
+			undef $this->{inodes};
+		}
+	}
 	SWITCH: for ($fstype) {
 		/^ext[234]/     && do {
 			$kiwi -> info ("Creating $_ $name filesystem");
@@ -4894,15 +4910,18 @@ sub setupFilesystem {
 		};
 		$kiwi -> error  ("Unsupported filesystem type: $fstype");
 		$kiwi -> failed ();
+		$this->{inodes} = $iorig;
 		return undef;
 	};
 	if ($result != 0) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't create $fstype filesystem: $status");
 		$kiwi -> failed ();
+		$this->{inodes} = $iorig;
 		return undef;
 	}
 	$kiwi -> done();
+	$this->{inodes} = $iorig;
 	return $this;
 }
 
