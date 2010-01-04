@@ -133,8 +133,10 @@ sub new {
 		}
 		my $id = $pool -> selectSolvable ($repo,$solver,$name);
 		if (! $id) {
-			$kiwi -> warning ("--> Failed to queue job: $name");
-			$kiwi -> skipped ();
+			if (! defined $quiet) {
+				$kiwi -> warning ("--> Failed to queue job: $name");
+				$kiwi -> skipped ();
+			}
 			push @jobFailed, $name;
 			next;
 		}
@@ -154,7 +156,9 @@ sub new {
 	$solver -> solve ($queue);
 	if ($this -> getProblemsCount()) {
 		my $solution = $this -> getSolutions();
-		$kiwi -> warning ("--> Solver Problems:\n$solution");
+		if (! defined $quiet) {
+			$kiwi -> warning ("--> Solver Problems:\n$solution");
+		}
 		$this->{problem} = "$solution";
 	}
 	my $size = $solver -> getInstallSizeKBytes();
