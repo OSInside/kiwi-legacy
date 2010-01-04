@@ -130,6 +130,7 @@ sub quote {
 	my $part2;
 	my $part3;
 	my $part4;
+	my $ordinary = 1;
 	$surl =~ s/^[ \t]+//g;
 	$surl =~ s/[ \t]+$//g;
 	if ($surl =~ /^(.*:\/\/)(.*):(.*)(\@.*)$/) {
@@ -137,8 +138,9 @@ sub quote {
 		$part2 = $2;
 		$part3 = $3;
 		$part4 = $4;
+		$ordinary = 0;
 	} else {
-		return $surl;
+		$ordinary = 1;
 	}
 	my $safe = (
 		'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.-'
@@ -159,9 +161,14 @@ sub quote {
 		}
 		return join ("",@done);
 	};
-	$part2 = &{$run}($part2,\%safe);
-	$part3 = &{$run}($part3,\%safe);
-	return $part1.$part2.":".$part3.$part4;
+	if (! $ordinary) {
+		$part2 = &{$run}($part2,\%safe);
+		$part3 = &{$run}($part3,\%safe);
+		return $part1.$part2.":".$part3.$part4;
+	} else {
+		$surl =~ s/\$/\\\$/g;
+		return $surl;
+	}
 }
 
 #==========================================
@@ -239,7 +246,7 @@ sub dirPath {
 	if ((! defined $module) || ($module !~ /^dir:\/\//)) {
 		return undef;
 	}
-	$module =~ s/file:\/\///;
+	$module =~ s/dir:\/\///;
 	if ($module !~ /^\//) {
 		my $pwd = qxx ("pwd"); chomp $pwd;
 		$module = $pwd."/".$module;
