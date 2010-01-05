@@ -822,7 +822,7 @@ sub setSystemOverlayFiles {
 	# Write cache if required
 	#------------------------------------------
 	if (! $cache) {
-		store ($cdata,$cache);
+		store ($cdata,$dest.".cache");
 	}
 	#==========================================
 	# Create hard link list
