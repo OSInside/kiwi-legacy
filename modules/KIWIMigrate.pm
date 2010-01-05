@@ -799,8 +799,9 @@ sub setSystemOverlayFiles {
 		return undef;
 	}
 	foreach my $file (keys %result) {
+		$file = quotemeta $file;
 		my $path = dirname $file;
-		if (! -d $path) {
+		if (! -d "$dest/root/$path") {
 			$data = qxx ("mkdir -p $dest/root/$path 2>&1");
 			$code = $? >> 8;
 			if ($code != 0) {
@@ -813,10 +814,8 @@ sub setSystemOverlayFiles {
 		$data = qxx ("ln -t $dest/root/$path $file 2>&1");
 		$code = $? >> 8;
 		if ($code != 0) {
-			$kiwi -> failed  ();
-			$kiwi -> warning ("hard link for $file failed");
+			$kiwi -> warning ("hard link for $file failed: $data");
 			$kiwi -> skipped ();
-			$kiwi -> loginfo ("hard link for $file failed: $data");
 		}
 	}
 	$this->{filechanges} = \%result;
