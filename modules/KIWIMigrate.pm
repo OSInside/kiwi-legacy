@@ -245,33 +245,33 @@ sub createReport {
 		}
 	}
 	# files report...
-	if ($filechanges) {
-		my %result = %{$filechanges};
-		my @rpmcheck = sort keys %result;
-		$kiwi -> info ("Creating files report\n");
-		if (! open (FD,">$dest/report-files")) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't create report file: $!");
-			$kiwi -> failed ();
-			return undef;
-		}
-		my @list = ();
-		foreach my $file (@rpmcheck) {
-			print FD $file."\0";
-		}
-		close FD;
-		my $file = "$dest/report-files";
-		my $prog = "du -ch --time --files0-from";
-		my @data = qxx ("$prog $file 2>$dest/report-lost"); chomp @data;
-		my $code = $? >> 8;
-		if ($code == 0) {
-			unlink "$dest/report-lost";
-		}
-		unlink $file;
-		foreach my $line (@data) {
-			$kiwi -> info ("$line\n");
-		}
-	}
+	#if ($filechanges) {
+	#	my %result = %{$filechanges};
+	#	my @rpmcheck = sort keys %result;
+	#	$kiwi -> info ("Creating files report\n");
+	#	if (! open (FD,">$dest/report-files")) {
+	#		$kiwi -> failed ();
+	#		$kiwi -> error  ("Couldn't create report file: $!");
+	#		$kiwi -> failed ();
+	#		return undef;
+	#	}
+	#	my @list = ();
+	#	foreach my $file (@rpmcheck) {
+	#		print FD $file."\0";
+	#	}
+	#	close FD;
+	#	my $file = "$dest/report-files";
+	#	my $prog = "du -ch --time --files0-from";
+	#	my @data = qxx ("$prog $file 2>$dest/report-lost"); chomp @data;
+	#	my $code = $? >> 8;
+	#	if ($code == 0) {
+	#		unlink "$dest/report-lost";
+	#	}
+	#	unlink $file;
+	#	foreach my $line (@data) {
+	#		$kiwi -> info ("$line\n");
+	#	}
+	#}
 	return $this;
 }
 
@@ -660,12 +660,13 @@ sub getRootDevice {
 }
 
 #==========================================
-# getSystemFileChanges
+# setSystemOverlayFiles
 #------------------------------------------
-sub getSystemFileChanges {
+sub setSystemOverlayFiles {
 	# ...
 	# 1) Find all files not owned by any package
 	# 2) Find all files changed according to the package manager
+	# 3) create linked list of the result
 	# ---
 	my $this = shift;
 	my $dest = $this->{dest};
@@ -673,7 +674,10 @@ sub getSystemFileChanges {
 	my $rdev = $this->{rdev};
 	my $mount= $this->{mount};
 	my @deny = @{$this->{deny}};
+	my $checkopt;
 	my %result;
+	my $data;
+	my $code;
 	#==========================================
 	# mount root system
 	#------------------------------------------
@@ -682,8 +686,8 @@ sub getSystemFileChanges {
 		$kiwi -> failed ();
 		return undef;
 	}
-	my $data = qxx ("mount $rdev $mount 2>&1");
-	my $code = $? >> 8;
+	$data = qxx ("mount $rdev $mount 2>&1");
+	$code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> error  ("Failed to mount root system: $data");
 		$kiwi -> failed ();
@@ -712,7 +716,6 @@ sub getSystemFileChanges {
 	my $wref = generateWanted (\%result,$mount);
 	find ({ wanted => $wref, follow => 0 }, $mount );
 	$this -> cleanMount();
-	$kiwi -> done ();
 	$kiwi -> info ("Inspecting RPM database [installed files]...");
 	my @rpmlist = qxx ("rpm -qal");
 	my @curlist = keys %result;
@@ -752,7 +755,9 @@ sub getSystemFileChanges {
 	# Find files packaged but changed
 	#------------------------------------------
 	$kiwi -> info ("Inspecting RPM database [verify]...");
-	my @rpmcheck = qxx ("rpm -Va"); chomp @rpmcheck;
+	$checkopt = "--nodeps --nodigest --nosignature";
+	$checkopt.= "--nolinkto --nouser --nogroup --nomode";
+	my @rpmcheck = qxx ("rpm -Va $checkopt"); chomp @rpmcheck;
 	$rpmsize = @rpmcheck;
 	$spart = 100 / $rpmsize;
 	$count = 1;
@@ -781,59 +786,41 @@ sub getSystemFileChanges {
 	$kiwi -> note ("\n");
 	$kiwi -> doNorm ();
 	$kiwi -> cursorON();
-	$this->{filechanges} = \%result;
-	$this->{filecheck}   = \@rpmcheck;
-	return $this;
-}
-
-#==========================================
-# setSystemOverlayFiles
-#------------------------------------------
-sub setSystemOverlayFiles {
-	# ...
-	# write file changes as overlay files for the
-	# image description. The input data for this function
-	# is created by the getSystemFileChanges() function
-	# which has to be called first !
-	# ---
-	my $this    = shift;
-	my $kiwi    = $this->{kiwi};
-	my $dest    = $this->{dest};
-	my %result  = %{$this->{filechanges}};
-	my @rpmcheck= @{$this->{filecheck}};
-	my $rpmsize = @rpmcheck;
-	my $spart   = 100 / $rpmsize;
-	my $count   = 1;
-	my $done;
-	my $done_old;
-	$kiwi -> info ("Setting up custom root tree...");
-	$kiwi -> cursorOFF();
-	foreach my $file (@rpmcheck) {
-		if (-e $file) {
-			my $dir = $result{$file};
-			if (! -d "$dest/root/$dir") {
-				qxx ("mkdir -p $dest/root/$dir");
-			}
-			qxx ("cp -a \"$file\" \"$dest/root/$file\"");
-		}
-		$done = int ($count * $spart);
-		if ($done != $done_old) {
-			$kiwi -> step ($done);
-		}
-		$done_old = $done;
-		$count++;
-	}
-	$kiwi -> note ("\n");
-	$kiwi -> doNorm ();
-	$kiwi -> cursorON();
-	$kiwi -> info ("Checking for broken links in custom root tree...");
-	$this -> checkBrokenLinks();
-	$kiwi -> done();
-	$kiwi -> info ("Setting up initial deployment workflow...");
-	if (! $this -> setInitialSetup()) {
+	#==========================================
+	# Create hard link list
+	#------------------------------------------
+	$kiwi -> info ("Creating link list...");
+	$data = qxx ("mkdir -p $dest/root 2>&1");
+	$code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't create overlay root directory: $data");
+		$kiwi -> failed ();
 		return undef;
 	}
-	$kiwi -> done();
+	foreach my $file (keys %result) {
+		my $path = dirname $file;
+		if (! -d $path) {
+			$data = qxx ("mkdir -p $dest/root/$path 2>&1");
+			$code = $? >> 8;
+			if ($code != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("mkdir failed: $data");
+				$kiwi -> failed ();
+				return undef;
+			}
+		}
+		$data = qxx ("ln -t $dest/root/$path $file 2>&1");
+		$code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> failed  ();
+			$kiwi -> warning ("hard link for $file failed");
+			$kiwi -> skipped ();
+			$kiwi -> loginfo ("hard link for $file failed: $data");
+		}
+	}
+	$this->{filechanges} = \%result;
+	$this->{filecheck}   = \@rpmcheck;
 	return $this;
 }
 
@@ -853,6 +840,7 @@ sub setInitialSetup {
 	my $this = shift;
 	my $dest = $this->{dest};
 	my $kiwi = $this->{kiwi};
+	$kiwi -> info ("Setting up initial deployment workflow...");
 	#==========================================
 	# create xorg.conf [fbdev]
 	#------------------------------------------
@@ -961,6 +949,7 @@ sub setInitialSetup {
 	# Activate YaST on initial deployment
 	#------------------------------------------
 	qxx ("touch $dest/root/var/lib/YaST2/runme_at_boot");
+	$kiwi -> done();
 	return $this;
 }
 
@@ -977,48 +966,6 @@ sub cleanMount {
 		rmdir $mount;
 	}
 	return $this;
-}
-
-#==========================================
-# checkBrokenLinks
-#------------------------------------------
-sub checkBrokenLinks {
-	# ...
-	# the tree could contain broken symbolic links because
-	# the target is unmodified and part of a package. The
-	# broken links will be removed in this function and it
-	# is assumed that a post install script of the package
-	# creates this links when the package gets installed
-	# in the kiwi prepare mode. If the links are created
-	# manually or by an application at system installation
-	# for example the links needs to be created in a
-	# separate image description config.sh script 
-	# ---	
-	my $this = shift;
-	my $dest = $this->{dest};
-	my $kiwi = $this->{kiwi};
-	my @link = qxx ("find $dest/root -type l");
-	my $returnok = 1;
-	my $dir;
-	foreach my $linkfile (@link) {
-		chomp $linkfile;
-		my $ref = readlink ($linkfile);
-		if ($ref !~ /^\//) {
-			$dir = dirname ($linkfile);
-			$dir.= "/";
-		} else {
-			$dir = $dest."/root";
-		}
-		if (! -e $dir.$ref) {
-			$kiwi -> loginfo ("Broken link: $linkfile -> $ref [ REMOVED ]");
-			unlink $linkfile;
-			$returnok = 0;
-		}
-	}
-	if ($returnok) {
-		return $this;
-	}
-	checkBrokenLinks ($this);
 }
 
 1;

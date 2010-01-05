@@ -177,7 +177,6 @@ our $SetImageType;          # set image type to use, default is primary type
 our $Migrate;               # migrate running system to image description
 our @Exclude;               # exclude directories in migrate search
 our @Skip;                  # skip this package in migration mode
-our $Perform;               # perform migration
 our @Profiles;              # list of profiles to include in image
 our @ProfilesOrig;          # copy of original Profiles option value 
 our $ForceNewRoot;          # force creation of new root directory
@@ -1084,21 +1083,19 @@ sub main {
 		# Create report HTML file, errors allowed
 		#------------------------------------------
 		$migrate -> getPackageList();
-		$migrate -> getSystemFileChanges();
+		$migrate -> setSystemOverlayFiles();
 		$migrate -> createReport();
 		#==========================================
 		# Perform migration based on report
 		#------------------------------------------
-		if (defined $Perform) {
-			if (! $migrate -> setTemplate()) {
-				my $code = kiwiExit (1); return $code;
-			}
-			if (! $migrate -> setServiceList()) {
-				my $code = kiwiExit (1); return $code;
-			}
-			if (! $migrate -> setSystemOverlayFiles()) {
-				my $code = kiwiExit (1); return $code;
-			}
+		if (! $migrate -> setTemplate()) {
+			my $code = kiwiExit (1); return $code;
+		}
+		if (! $migrate -> setServiceList()) {
+			my $code = kiwiExit (1); return $code;
+		}
+		if (! $migrate -> setInitialSetup()) {
+			my $code = kiwiExit (1); return $code;
 		}
 		kiwiExit (0);
 	}
@@ -1275,7 +1272,6 @@ sub init {
 		"migrate|m=s"           => \$Migrate,
 		"exclude|e=s"           => \@Exclude,
 		"skip=s"                => \@Skip,
-		"perform"               => \$Perform,
 		"list|l"                => \&listImage,
 		"create|c=s"            => \$Create,
 		"testsuite=s"           => \$RunTestSuite,
@@ -1525,7 +1521,6 @@ sub usage {
 	print "    kiwi -m | --migrate <name> --destdir <destination-path>\n";
 	print "       [ --exclude <directory> --exclude <...> ]\n";
 	print "       [ --skip <package> --skip <...> ]\n";
-	print "       [ --perform ]\n";
 	print "Image postprocessing modes:\n";
 	print "    kiwi --bootstick <initrd> --bootstick-system <systemImage>\n";
 	print "       [ --bootstick-device <device> ]\n";
