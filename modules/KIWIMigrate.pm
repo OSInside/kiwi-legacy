@@ -24,6 +24,7 @@ use strict;
 use Carp qw (cluck);
 use File::Find;
 use File::Basename;
+use Storable;
 use KIWILog;
 use KIWIQX;
 
@@ -674,24 +675,40 @@ sub setSystemOverlayFiles {
 	my $rdev = $this->{rdev};
 	my $mount= $this->{mount};
 	my @deny = @{$this->{deny}};
+	my $cache= $dest.".cache";
+	my $cdata;
 	my $checkopt;
+	my @rpmlist;
+	my @rpmcheck;
 	my %result;
 	my $data;
 	my $code;
 	#==========================================
+	# check for cache file
+	#------------------------------------------
+	if (! -f $cache) {
+		undef $cache;
+	} else {
+		$kiwi -> info ("Using cache file: $cache\n");
+		$kiwi -> info ("Remove cache file if your system has changed !\n");
+		$cdata = retrieve($cache);
+	}
+	#==========================================
 	# mount root system
 	#------------------------------------------
-	if (! -d $mount && ! mkdir $mount) {
-		$kiwi -> error  ("Failed to create kiwi root mount point: $!");
-		$kiwi -> failed ();
-		return undef;
-	}
-	$data = qxx ("mount $rdev $mount 2>&1");
-	$code = $? >> 8;
-	if ($code != 0) {
-		$kiwi -> error  ("Failed to mount root system: $data");
-		$kiwi -> failed ();
-		return undef;
+	if (! $cache) {
+		if (! -d $mount && ! mkdir $mount) {
+			$kiwi -> error  ("Failed to create kiwi root mount point: $!");
+			$kiwi -> failed ();
+			return undef;
+		}
+		$data = qxx ("mount $rdev $mount 2>&1");
+		$code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> error  ("Failed to mount root system: $data");
+			$kiwi -> failed ();
+			return undef;
+		}
 	}
 	$this->{mounted} = $code;
 	#==========================================
@@ -713,11 +730,21 @@ sub setSystemOverlayFiles {
 	# Find files not packaged
 	#------------------------------------------
 	$kiwi -> info ("Inspecting root file system...\n");
-	my $wref = generateWanted (\%result,$mount);
-	find ({ wanted => $wref, follow => 0 }, $mount );
-	$this -> cleanMount();
+	if ($cache) {
+		%result = %{$cdata->{result}};
+	} else {
+		my $wref = generateWanted (\%result,$mount);
+		find ({ wanted => $wref, follow => 0 }, $mount );
+		$this -> cleanMount();
+		$cdata->{result} = \%result;
+	}
 	$kiwi -> info ("Inspecting RPM database [installed files]...");
-	my @rpmlist = qxx ("rpm -qal");
+	if ($cache) {
+		@rpmlist = @{$cdata->{rpmlist}};
+	} else {
+		@rpmlist = qxx ("rpm -qal");
+		$cdata->{rpmlist} = \@rpmlist;
+	}
 	my @curlist = keys %result;
 	my $cursize = @curlist;
 	my $rpmsize = @rpmlist;
@@ -755,9 +782,14 @@ sub setSystemOverlayFiles {
 	# Find files packaged but changed
 	#------------------------------------------
 	$kiwi -> info ("Inspecting RPM database [verify]...");
-	$checkopt = "--nodeps --nodigest --nosignature ";
-	$checkopt.= "--nolinkto --nouser --nogroup --nomode";
-	my @rpmcheck = qxx ("rpm -Va $checkopt"); chomp @rpmcheck;
+	if ($cache) {
+		@rpmcheck = @{$cdata->{rpmcheck}};
+	} else {
+		$checkopt = "--nodeps --nodigest --nosignature ";
+		$checkopt.= "--nolinkto --nouser --nogroup --nomode";
+		@rpmcheck = qxx ("rpm -Va $checkopt"); chomp @rpmcheck;
+		$cdata->{rpmcheck} = \@rpmcheck;
+	}
 	$rpmsize = @rpmcheck;
 	$spart = 100 / $rpmsize;
 	$count = 1;
@@ -787,6 +819,12 @@ sub setSystemOverlayFiles {
 	$kiwi -> doNorm ();
 	$kiwi -> cursorON();
 	#==========================================
+	# Write cache if required
+	#------------------------------------------
+	if (! $cache) {
+		store ($cdata,$cache);
+	}
+	#==========================================
 	# Create hard link list
 	#------------------------------------------
 	$kiwi -> info ("Creating link list...");
@@ -798,19 +836,25 @@ sub setSystemOverlayFiles {
 		$kiwi -> failed ();
 		return undef;
 	}
+	# make directory structure...
+	print "++++ making directory structure...\n";
+	my %files = ();
+	my %paths = ();
 	foreach my $file (keys %result) {
-		$file = quotemeta $file;
-		my $path = dirname $file;
-		if (! -d "$dest/root/$path") {
-			$data = qxx ("mkdir -p $dest/root/$path 2>&1");
-			$code = $? >> 8;
-			if ($code != 0) {
-				$kiwi -> failed ();
-				$kiwi -> error  ("mkdir failed: $data");
-				$kiwi -> failed ();
-				return undef;
-			}
+		$file = quotemeta ($file);
+		my ($name,$path,$suffix) = fileparse ($file);
+		$paths{$path} = $path;
+		if ($name) {
+			$files{$file} = $path;
 		}
+	}
+	foreach my $path (keys %paths) {
+		qxx ("mkdir -p $dest/root/$path 2>&1");
+	}
+	# make links
+	print "++++ making links...\n";
+	foreach my $file (keys %files) {
+		my $path = $files{$file};
 		$data = qxx ("ln -t $dest/root/$path $file 2>&1");
 		$code = $? >> 8;
 		if ($code != 0) {
@@ -818,6 +862,12 @@ sub setSystemOverlayFiles {
 			$kiwi -> skipped ();
 		}
 	}
+	#==========================================
+	# Cleanup symbolic links
+	#------------------------------------------
+	$kiwi -> info ("Cleaning symlinks...");
+	$this -> checkBrokenLinks();
+	$kiwi -> done();
 	$this->{filechanges} = \%result;
 	$this->{filecheck}   = \@rpmcheck;
 	return $this;
@@ -965,6 +1015,48 @@ sub cleanMount {
 		rmdir $mount;
 	}
 	return $this;
+}
+
+#==========================================
+# checkBrokenLinks
+#------------------------------------------
+sub checkBrokenLinks {
+	# ...
+	# the tree could contain broken symbolic links because
+	# the target is unmodified and part of a package. The
+	# broken links will be removed in this function and it
+	# is assumed that a post install script of the package
+	# creates this links when the package gets installed
+	# in the kiwi prepare mode. If the links are created
+	# manually or by an application at system installation
+	# for example the links needs to be created in a
+	# separate image description config.sh script 
+	# ---   
+	my $this = shift;
+	my $dest = $this->{dest};
+	my $kiwi = $this->{kiwi};
+	my @link = qxx ("find $dest/root -type l");
+	my $returnok = 1;
+	my $dir;
+	foreach my $linkfile (@link) {
+		chomp $linkfile;
+		my $ref = readlink ($linkfile);
+		if ($ref !~ /^\//) {
+			$dir = dirname ($linkfile);
+			$dir.= "/";
+		} else {
+			$dir = $dest."/root";
+		}
+		if (! -e $dir.$ref) {
+			$kiwi -> loginfo ("Broken link: $linkfile -> $ref [ REMOVED ]");
+			unlink $linkfile;
+			$returnok = 0;
+		}
+	}
+	if ($returnok) {
+		return $this;
+	}
+	checkBrokenLinks ($this);
 }
 
 1;
