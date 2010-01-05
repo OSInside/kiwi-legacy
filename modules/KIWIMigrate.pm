@@ -755,7 +755,7 @@ sub setSystemOverlayFiles {
 	# Find files packaged but changed
 	#------------------------------------------
 	$kiwi -> info ("Inspecting RPM database [verify]...");
-	$checkopt = "--nodeps --nodigest --nosignature";
+	$checkopt = "--nodeps --nodigest --nosignature ";
 	$checkopt.= "--nolinkto --nouser --nogroup --nomode";
 	my @rpmcheck = qxx ("rpm -Va $checkopt"); chomp @rpmcheck;
 	$rpmsize = @rpmcheck;
