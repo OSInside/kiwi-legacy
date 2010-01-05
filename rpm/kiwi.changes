@@ -5,6 +5,11 @@ Mon Jan  4 10:03:14 CET 2010 - ms@suse.de
 - fixed dirPath() function, related to (bnc #561855)
 - fixed KIWIURL::quote() for special '$' char (bnc #561855)
 - use default inode count for lvmparts (bnc #567580)
+- some work on the migration front [still WIP]:
+  * changed to report -> perform system, fixed solvable
+    creation and provide better information about package
+    and pattern conflicts. Changed system to use the zypper
+    defined repos and product information for the migration
 
 -------------------------------------------------------------------
 Thu Dec 17 11:59:03 CET 2009 - ms@suse.de

@@ -169,12 +169,22 @@
     <para>
       The migration module allows you to migrate your currently running
       system into an image description. The module will check for files
-      not managed by a package manager and it will suggest a repository from
-      which this operating system could be rebuild. 
-      The result is quite useful but in most cases a manual fine
+      not managed by a package manager and also inspects your system for
+      package pattern and file consistency according to the currently active
+      repositories. The system requires the zypper backend in order to
+      work properly. By default a HTML based report file is created which
+      contains important information about the system. You are free to
+      ignore that information but with the risk that the migrated image
+      does not represent the same system which is running at the moment.
+      If the perform option is set an image description is created
+      with the collected information. The less issues left in the report
+      the better is the result. In most cases a manual fine
       tuning is required. This includes the repository selection and the
       unmanaged files along with the configuration details of your
-      currently running operating system.
+      currently running operating system. You should understand the module
+      as a helper to migrate running servers into images. The implementation
+      is still under construction so expect better migration results 
+      in future releases :)
     </para>    
     <cmdsynopsis><command>kiwi</command> 
       <group choice="req">
@@ -184,7 +194,7 @@
       <arg choice="plain"><replaceable>name</replaceable></arg>
       <arg choice="plain">--destdir <replaceable>destination-path</replaceable></arg>
       <arg choice="opt" rep="repeat">--exclude <replaceable>directory</replaceable></arg>
-      <arg choice="opt">--report</arg>
+      <arg choice="opt">--perform</arg>
     </cmdsynopsis>
   </refsect1>
   

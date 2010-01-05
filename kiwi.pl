@@ -176,8 +176,8 @@ our $SetRepositoryPriority; # priority for the repository
 our $SetImageType;          # set image type to use, default is primary type
 our $Migrate;               # migrate running system to image description
 our @Exclude;               # exclude directories in migrate search
-our $Report;                # create report on root/ tree migration only
-our $ReportPacklist;        # just report the package/pattern list on migration
+our @Skip;                  # skip this package in migration mode
+our $Perform;               # perform migration
 our @Profiles;              # list of profiles to include in image
 our @ProfilesOrig;          # copy of original Profiles option value 
 our $ForceNewRoot;          # force creation of new root directory
@@ -1067,23 +1067,36 @@ sub main {
 	if (defined $Migrate) {
 		$kiwi -> info ("Starting system to image migration");
 		$migrate = new KIWIMigrate (
-			$kiwi,$Destination,$Migrate,\@Exclude,$Report,
+			$kiwi,$Destination,$Migrate,\@Exclude,\@Skip,
 			\@AddRepository,\@AddRepositoryType,
-			\@AddRepositoryAlias,\@AddRepositoryPriority,
-			$SetRepository,$SetRepositoryType,
-			$SetRepositoryAlias,$SetRepositoryPriority
+			\@AddRepositoryAlias,\@AddRepositoryPriority
 		);
+		#==========================================
+		# Check object and repo setup, mandatory
+		#------------------------------------------
 		if (! defined $migrate) {
 			my $code = kiwiExit (1); return $code;
 		}
-		if (! $migrate -> setTemplate()) {
+		if (! $migrate -> getRepos()) {
 			my $code = kiwiExit (1); return $code;
 		}
-		if (! $ReportPacklist) {
+		#==========================================
+		# Create report HTML file, errors allowed
+		#------------------------------------------
+		$migrate -> getPackageList();
+		$migrate -> getSystemFileChanges();
+		$migrate -> createReport();
+		#==========================================
+		# Perform migration based on report
+		#------------------------------------------
+		if (defined $Perform) {
+			if (! $migrate -> setTemplate()) {
+				my $code = kiwiExit (1); return $code;
+			}
 			if (! $migrate -> setServiceList()) {
 				my $code = kiwiExit (1); return $code;
 			}
-			if (! $migrate -> setSystemConfiguration()) {
+			if (! $migrate -> setSystemOverlayFiles()) {
 				my $code = kiwiExit (1); return $code;
 			}
 		}
@@ -1261,8 +1274,8 @@ sub init {
 		"add-profile=s"         => \@Profiles,
 		"migrate|m=s"           => \$Migrate,
 		"exclude|e=s"           => \@Exclude,
-		"report"                => \$Report,
-		"report-packlist"       => \$ReportPacklist,
+		"skip=s"                => \@Skip,
+		"perform"               => \$Perform,
 		"list|l"                => \&listImage,
 		"create|c=s"            => \$Create,
 		"testsuite=s"           => \$RunTestSuite,
@@ -1511,7 +1524,8 @@ sub usage {
 	print "System to Image migration:\n";
 	print "    kiwi -m | --migrate <name> --destdir <destination-path>\n";
 	print "       [ --exclude <directory> --exclude <...> ]\n";
-	print "       [ --report ] [ --report-packlist ]\n";
+	print "       [ --skip <package> --skip <...> ]\n";
+	print "       [ --perform ]\n";
 	print "Image postprocessing modes:\n";
 	print "    kiwi --bootstick <initrd> --bootstick-system <systemImage>\n";
 	print "       [ --bootstick-device <device> ]\n";

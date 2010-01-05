@@ -48,18 +48,16 @@ sub new {
 	my $dest = shift;
 	my $name = shift;
 	my $excl = shift;
-	my $demo = shift;
+	my $skip = shift;
 	my $addr = shift;
 	my $addt = shift;
 	my $adda = shift;
 	my $addp = shift;
-	my $setr = shift;
-	my $sett = shift;
-	my $seta = shift;
-	my $setp = shift;
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
+	my $code;
+	my $data;
 	if (! defined $kiwi) {
 		$kiwi = new KIWILog();
 	}
@@ -69,7 +67,17 @@ sub new {
 		$kiwi -> failed ();
 		return undef;
 	}
-	my $code;
+	my $product = $this -> getOperatingSystemVersion();
+	if (! defined $product) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't find system version information");
+		$kiwi -> failed ();
+		return undef;
+	}
+	$kiwi -> note (" [$product]...");
+	if (defined $main::ForceNewRoot) {
+		qxx ("rm -rf $dest");
+	}
 	if (! defined $dest) {
 		$dest = qxx (" mktemp -q -d /tmp/kiwi-migrate.XXXXXX ");
 		$code = $? >> 8;
@@ -81,9 +89,11 @@ sub new {
 		}
 		chomp $dest;
 	} else {
-		if (! mkdir $dest) {
+		$data = qxx ("mkdir $dest 2>&1");
+		$code = $? >> 8;
+		if ($code != 0) {
 			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't create destination dir: $!");
+			$kiwi -> error  ("Couldn't create destination dir: $data");
 			$kiwi -> failed ();
 			return undef;
 		}
@@ -99,59 +109,27 @@ sub new {
 		return undef;
 	}
 	#==========================================
-	# Store object data
+	# Store addon repo information if specified
 	#------------------------------------------
 	my %OSSource;
-	if (! open (FD,$main::KMigrate)) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Failed to open migration table");
-		$kiwi -> failed ();
-		return undef;
-	}
-	while (my $line = <FD>) {
-		next if $line =~ /^#/;
-		if ($line =~ /(.*)\s*=\s*(.*),(.*)/) {
-			my @source = split (/;/,$3);
-			my $product= $1;
-			my $boot   = $2;
-			my $type   = "yast2";
-			my $alias;
-			my $prio;
-			if ((defined $setr) && (defined $sett)) {
-				@source = ($setr);
-				$type   = $sett;
-			}
-			if (defined $seta) {
-				$alias = $seta;
-			}
-			if (defined $setp) {
-				$prio = $setp;
-			}
-			foreach my $source (@source) {
-				$OSSource{$product}{$source}{boot} = $boot;
-				$OSSource{$product}{$source}{type} = $type;
-				$OSSource{$product}{$source}{alias}= $alias;
-				$OSSource{$product}{$source}{prio} = $prio;
-			}
-			if ((defined $addr) && (defined $addt)) {
-				my @addrepo     = @{$addr};
-				my @addrepotype = @{$addt};
-				my @addrepoalias= @{$adda};
-				my @addrepoprio = @{$addp};
-				foreach (my $count=0;$count <@addrepo; $count++) {
-					my $source= $addrepo[$count];
-					my $type  = $addrepotype[$count];
-					my $alias = $addrepoalias[$count];
-					my $prio  = $addrepoprio[$count];
-					$OSSource{$product}{$source}{boot} = "none";
-					$OSSource{$product}{$source}{type} = $type;
-					$OSSource{$product}{$source}{alias}= $alias;
-					$OSSource{$product}{$source}{prio} = $prio;
-				}
-			}
+	if ((defined $addr) && (defined $addt)) {
+		my @addrepo     = @{$addr};
+		my @addrepotype = @{$addt};
+		my @addrepoalias= @{$adda};
+		my @addrepoprio = @{$addp};
+		foreach (my $count=0;$count <@addrepo; $count++) {
+			my $source= $addrepo[$count];
+			my $type  = $addrepotype[$count];
+			my $alias = $addrepoalias[$count];
+			my $prio  = $addrepoprio[$count];
+			$OSSource{$product}{$source}{type} = $type;
+			$OSSource{$product}{$source}{alias}= $alias;
+			$OSSource{$product}{$source}{prio} = $prio;
 		}
 	}
-	close FD;
+	#==========================================
+	# Store default files not used for inspect
+	#------------------------------------------
 	my @denyFiles = (
 		'\.rpmnew',                  # no RPM backup files
 		'\.rpmsave',                 # []
@@ -193,12 +171,143 @@ sub new {
 	#==========================================
 	# Store object data
 	#------------------------------------------
-	$this->{kiwi}   = $kiwi;
-	$this->{deny}   = \@denyFiles;
-	$this->{dest}   = $dest;
-	$this->{name}   = $name;
-	$this->{source} = \%OSSource;
-	$this->{demo}   = $demo;
+	$this->{kiwi}    = $kiwi;
+	$this->{deny}    = \@denyFiles;
+	$this->{skip}    = $skip;
+	$this->{dest}    = $dest;
+	$this->{name}    = $name;
+	$this->{source}  = \%OSSource;
+	$this->{product} = $product;
+	return $this;
+}
+
+#==========================================
+# createReport
+#------------------------------------------
+sub createReport {
+	# ...
+	# create html page report including action items for the
+	# user to solve outstanding problems in order to allow a
+	# clean migration of the system into an image description
+	# ---
+	# TODO... make it nice as html page
+	my $this       = shift;
+	my $kiwi       = $this->{kiwi};
+	my $dest       = $this->{dest};
+	my $problem1   = $this->{solverProblem1};
+	my $problem2   = $this->{solverProblem2};
+	my $failedJob1 = $this->{solverFailedJobs1};
+	my $failedJob2 = $this->{solverFailedJobs2};
+	my $filechanges= $this->{filechanges};
+	#==========================================
+	# start report
+	#------------------------------------------
+	# package report...
+	$kiwi -> info ("Migration Report\n");
+	$kiwi -> info ("----------------\n");
+	if ($problem1) {
+		$kiwi -> info ("Following patterns couldn't be solved due to\n");
+		$kiwi -> info ("dependency conflicts. Please check if your\n");
+		$kiwi -> info ("repository setup contains a system repository\n");
+		$kiwi -> info ("which matches the system you are about to migrate\n");
+		$kiwi -> note ("$problem1");
+	}
+	if ($problem2) {
+		$kiwi -> info ("Following packages couldn't be solved due to\n");
+		$kiwi -> info ("dependency conflicts. Please check the conflicts\n");
+		$kiwi -> info ("and solve them by either uninstalling the\n");
+		$kiwi -> info ("package(s) from your system or skip them by using\n");
+		$kiwi -> info ("the --skip option\n"); 
+		$kiwi -> note ("$problem2");
+	}
+	if (@{$failedJob1}) {
+		$kiwi -> info ("Following patterns couldn't be found in your\n");
+		$kiwi -> info ("repository list but are marked as installed.\n");
+		$kiwi -> info ("You can either ignore it or add a repository which\n");
+		$kiwi -> info ("contains the mentioned patterns\n");
+		foreach my $job (@{$failedJob1}) {
+			$kiwi -> note ("$job\n");
+		}
+	}
+	if (@{$failedJob2}) {
+		$kiwi -> info ("Following packages couldn't be found in your\n");
+		$kiwi -> info ("repository list but are installed on your system.\n");
+		$kiwi -> info ("You can either ignore it or add a repository which\n");
+		$kiwi -> info ("contains the mentioned packages\n");
+		my @pacs = @{$failedJob2};
+		my @list = qxx ("rpm -q @pacs --last"); chomp @list;
+		foreach my $job (@list) {
+			if ($job =~ /([^\s]+)\s+([^\s].*)/) {
+				my $pac  = $1;
+				my $date = $2;
+				$kiwi -> note ("--> $pac\n\t$date\n");
+			}
+		}
+	}
+	# files report...
+	if ($filechanges) {
+		my %result = %{$filechanges};
+		my @rpmcheck = sort keys %result;
+		$kiwi -> info ("Creating files report\n");
+		if (! open (FD,">$dest/report-files")) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create report file: $!");
+			$kiwi -> failed ();
+			return undef;
+		}
+		my @list = ();
+		foreach my $file (@rpmcheck) {
+			print FD $file."\0";
+		}
+		close FD;
+		my $file = "$dest/report-files";
+		my $prog = "du -ch --time --files0-from";
+		my @data = qxx ("$prog $file 2>$dest/report-lost"); chomp @data;
+		my $code = $? >> 8;
+		if ($code == 0) {
+			unlink "$dest/report-lost";
+		}
+		unlink $file;
+		foreach my $line (@data) {
+			$kiwi -> info ("$line\n");
+		}
+	}
+	return $this;
+}
+
+#==========================================
+# getRepos
+#------------------------------------------
+sub getRepos {
+	# ...
+	# use zypper defined repositories as setup for the
+	# migration
+	# ---
+	my $this    = shift;
+	my $kiwi    = $this->{kiwi};
+	my %osc     = %{$this->{source}};
+	my $product = $this->{product};
+	my @list    = qxx ("zypper lr --details 2>&1");	chomp @list;
+	my $code    = $? >> 8;
+	if ($code != 0) {
+		return undef;
+	}
+	foreach my $repo (@list) {
+		$repo =~ s/ +//g;
+		if ($repo =~ /^\d.*\|(.*)\|.*\|(.*)\|.*\|(.*)\|(.*)\|(.*)\|/) {
+			my $enabled = $2;
+			my $source  = $5;
+			my $type    = $4;
+			my $alias   = $1;
+			my $prio    = $3;
+			if ($enabled eq "Yes") {
+				$osc{$product}{$source}{type} = $type;
+				$osc{$product}{$source}{alias}= $alias;
+				$osc{$product}{$source}{prio} = $prio;
+			}
+		}
+	}
+	$this->{source} = \%osc;
 	return $this;
 }
 
@@ -209,41 +318,14 @@ sub setTemplate {
 	# ...
 	# create basic image description structure and files
 	# ---
-	my $this = shift;
-	my $dest = $this->{dest};
-	my $name = $this->{name};
-	my $kiwi = $this->{kiwi};
-	my %osc  = %{$this->{source}};
-	#==========================================
-	# get operating system version
-	#------------------------------------------
-	my $product = $this -> getOperatingSystemVersion();
-	if (! defined $product) {
-		$kiwi -> error  ("Couldn't find system version information");
-		$kiwi -> failed ();
-		return undef;
-	}
-	if (! defined $osc{$product}) {
-		$kiwi -> error  ("Couldn't find OS version: $product in migrate list");
-		$kiwi -> failed ();
-		return undef;
-	}
-	#==========================================
-	# find boot attribute value in OSSource
-	#------------------------------------------
-	my $boot;
-	foreach my $source (keys %{$osc{$product}} ) {
-		if ($osc{$product}{$source}{boot} ne "none") {
-			$boot = $osc{$product}{$source}{boot};
-		}
-	}
-	my @pacs = $this -> getPackageList ($product);
-	my $pats = $this -> {patterns};
-	if (! @pacs) {
-		$kiwi -> error  ("Couldn't find installed packages");
-		$kiwi -> failed ();
-		return undef;
-	}
+	my $this    = shift;
+	my $dest    = $this->{dest};
+	my $name    = $this->{name};
+	my $kiwi    = $this->{kiwi};
+	my $product = $this->{product};
+	my $pats    = $this->{patterns};
+	my $pacs    = $this->{packages};
+	my %osc     = %{$this->{source}};
 	#==========================================
 	# create root directory
 	#------------------------------------------
@@ -257,7 +339,8 @@ sub setTemplate {
 	#==========================================
     # <description>
     #------------------------------------------
-	print FD '<image schemaversion="3.8" name="'.$name.'">'."\n";
+	print FD '<image schemaversion="3.8" ';
+	print FD 'name=suse-migration"'.$product.'">'."\n";
 	print FD "\t".'<description type="system">'."\n";
 	print FD "\t\t".'<author>***AUTHOR***</author>'."\n";
 	print FD "\t\t".'<contact>***MAIL***</contact>'."\n";
@@ -267,15 +350,9 @@ sub setTemplate {
 	# <preferences>
 	#------------------------------------------
 	print FD "\t".'<preferences>'."\n";
-	print FD "\t\t".'<type primary="true" boot="isoboot/'.$boot.'"';
-	print FD ' flags="compressed">iso</type>'."\n";
-	print FD "\t\t".'<type boot="vmxboot/'.$boot.'" filesystem="ext3"';
+	print FD "\t\t".'<type boot="vmxboot/suse-'.$product.'" filesystem="ext3"';
 	print FD ' format="vmdk">vmx</type>'."\n";
-	print FD "\t\t".'<type boot="xenboot/'.$boot.'"';
-	print FD ' filesystem="ext3">xen</type>'."\n";
-	print FD "\t\t".'<type boot="netboot/'.$boot.'"';
-	print FD ' filesystem="ext3">pxe</type>'."\n";
-	print FD "\t\t".'<version>1.1.2</version>'."\n";
+	print FD "\t\t".'<version>1.1.1</version>'."\n";
 	print FD "\t\t".'<packagemanager>zypper</packagemanager>'."\n";
 	print FD "\t\t".'<locale>en_US</locale>'."\n";
 	print FD "\t\t".'<keytable>us.map.gz</keytable>'."\n";
@@ -310,37 +387,12 @@ sub setTemplate {
 			print FD "\t\t".'<opensusePattern name="'.$pattern.'"/>'."\n";
 		}
 	}
-	foreach my $pac (@pacs) {
-		print FD "\t\t".'<package name="'.$pac.'"/>'."\n";
+	if (defined $pacs) {
+		foreach my $package (@{$pacs}) {
+			print FD "\t\t".'<package name="'.$package.'"/>'."\n";
+		}
 	}
 	print FD "\t".'</packages>'."\n";
-	#==========================================
-	# <packages type="xen">
-	#------------------------------------------
-	print FD "\t".'<packages type="xen">'."\n";
-	print FD "\t\t".'<package name="kernel-xen"/>'."\n";
-	print FD "\t\t".'<package name="xen"/>'."\n";
-	print FD "\t".'</packages>'."\n";
-	#==========================================
-	# <xenconfig>
-	#------------------------------------------
-	print FD "\t".'<xenconfig memory="512">'."\n";
-	print FD "\t\t".'<xendisk device="/dev/xvda"/>'."\n";
-	print FD "\t\t".'<xenbridge name=""/>'."\n";
-	print FD "\t".'</xenconfig>'."\n";
-	#==========================================
-	# <packages type="vmware">
-	#------------------------------------------
-	print FD "\t".'<packages type="vmware">'."\n";
-	print FD "\t".'</packages>'."\n";
-	#==========================================
-	# <vmwareconfig>
-	#------------------------------------------
-	print FD "\t".'<vmwareconfig memory="512">'."\n";
-	print FD "\t\t".'<vmwaredisk controller="scsi" id="0"/>'."\n";
-	print FD "\t\t".'<vmwarenic driver="e1000" interface="0" mode="bridged"/>';
-	print FD "\n";
-	print FD "\t".'</vmwareconfig>'."\n";
 	#==========================================
 	# <packages type="bootstrap">
 	#------------------------------------------
@@ -365,20 +417,15 @@ sub getOperatingSystemVersion {
 	# correct installation source
 	# ---
 	my $this = shift;
-	if (! open (FD,"/etc/SuSE-release")) {
+	my @data = qxx ("zypper --no-refresh products --installed 2>&1");
+	my $code = $? >> 8;
+	if ($code != 0) {
 		return undef;
 	}
-	my $name = <FD>; chomp $name;
-	my $vers = <FD>; chomp $vers;
-	my $plvl = <FD>; chomp $plvl;
-	$name =~ s/\s+/-/g;
-	$name =~ s/\-\(.*\)//g;
-	if ((defined $plvl) && ($plvl =~ /PATCHLEVEL = (.*)/)) {
-		$plvl = $1;
-		$name = $name."-SP".$plvl;
+	if ($data[4] =~ /.*(\d\d\.\d)-.*/) {
+		return $1;
 	}
-	close FD;
-	return $name;
+	return undef
 }
 
 #==========================================
@@ -434,15 +481,30 @@ sub getPackageList {
 	# correctly
 	# ---
 	my $this    = shift;
-	my $product = shift;
+	my $product = $this->{product};
 	my $kiwi    = $this->{kiwi};
+	my $skip    = $this->{skip};
 	my %osc     = %{$this->{source}};
 	my @urllist = ();
+	my @patlist = ();
+	my %problem = ();
+	my $code;
+	my @ilist;
 	#==========================================
 	# find all rpm's installed
 	#------------------------------------------
 	undef $this->{patterns};
-	my @list = qxx ('rpm -qa --qf "%{NAME}\n"'); chomp @list;
+	undef $this->{packages};
+	$kiwi -> info ("Searching installed packages...");
+	@ilist = qxx ('rpm -qa --qf "%{NAME}\n" | sort | uniq'); chomp @ilist;
+	$code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Failed to obtain installed packages");
+		$kiwi -> failed ();
+		return undef;
+	}
+	$kiwi -> done();
 	#==========================================
 	# create URL list to lookup solvables
 	#------------------------------------------
@@ -453,31 +515,56 @@ sub getPackageList {
 	# find all patterns and packs of patterns 
 	#------------------------------------------
 	if (@urllist) {
-		my @patlist = qxx ("zypper patterns|grep ^i|cut -f2 -d'|'| tr -d ' '");
+		$kiwi -> info ("Creating System solvable from active repos...");
+		my @list = qxx ("zypper --no-refresh patterns --installed 2>&1");
 		my $code = $? >> 8;
 		if ($code != 0) {
-			# /.../
-			# no installed patterns found, use at least the base
-			# pattern for the migration
-			# ----
-			push (@patlist,"base");
+			$kiwi -> failed ();
+			$kiwi -> error  ("Failed to obtain installed patterns");
+			$kiwi -> failed ();
+			return undef;
+		} else {
+			my %pathash = ();
+			foreach my $line (@list) {
+				if ($line =~ /^i.*\|(.*)\|.*\|.*\|/) {
+					my $name = $1;
+					$name =~ s/^ +//g;
+					$name =~ s/ +$//g;
+					$pathash{"$name"} = "$name";
+				}
+			}
+			@patlist = keys %pathash;
 		}
-		chomp @patlist;
+		$this->{patterns} = \@patlist;
 		my $psolve = new KIWISatSolver (
-			$kiwi,\@patlist,\@urllist
+			$kiwi,\@patlist,\@urllist,undef,undef,undef,"silent"
 		);
 		my @result = ();
 		if (! defined $psolve) {
-			return sort @list;
+			$kiwi -> failed ();
+			$kiwi -> error  ("Failed to solve patterns");
+			$kiwi -> failed ();
+			return undef;
 		}
 		# /.../
 		# solve the zypper pattern list into a package list and
 		# create a package list with packages _not_ part of the
-		# pattern list. patterns which does not exist in the base
-		# repository will be ignored.
+		# pattern list.
 		# ----
+		$kiwi->done();
+		$this->{solverProblem1}    = $psolve -> getProblemInfo();
+		$this->{solverFailedJobs1} = $psolve -> getFailedJobs();
+		if ($psolve -> getProblemsCount()) {
+			$kiwi -> warning ("Pattern problems found check in report !\n");
+		}
+		if (defined $skip) {
+			foreach my $s (@{$skip}) {
+				$problem{$s} = $s;
+			}
+		}
 		my @packageList = $psolve -> getPackages();
-		foreach my $installed (@list) {
+		foreach my $installed (@ilist) {
+			next if ($problem{$installed});
 			my $inpattern = 0;
 			foreach my $p (@packageList) {
 				if ($installed eq $p) {
@@ -489,10 +576,6 @@ sub getPackageList {
 			}
 		}
 		# /.../
-		# store the pattern names for the later config.xml
-		# ----
-		$this->{patterns} = \@patlist;
-		# /.../
 		# walk through the non pattern based packages and solve
 		# them again. packages which are not part of the base
 		# repository will be ignored. This might be a problem
@@ -500,27 +583,39 @@ sub getPackageList {
 		# The solved list is again checked with the pattern
 		# package list and the result is returned
 		# ----
-		my @rest = ();
-		my $repo = $psolve -> getRepo();
-		my $pool = $psolve -> getPool();
-		my $xsolve = new KIWISatSolver (
-			$kiwi,\@result,\@urllist,"solve-packages",$repo,$pool
-		);
-		@result = $xsolve -> getPackages();
-		foreach my $p (@result) {
-			my $inpattern = 0;
-			foreach my $tobeinstalled (@packageList) {
-				if ($tobeinstalled eq $p) {
-					$inpattern = 1; last;
+		if (@result) {
+			my @rest = ();
+			my $repo = $psolve -> getRepo();
+			my $pool = $psolve -> getPool();
+			my $xsolve = new KIWISatSolver (
+				$kiwi,\@result,\@urllist,"solve-packages",$repo,$pool,"silent"
+			);
+			if (! defined $xsolve) {
+				$kiwi -> error  ("Failed to solve packages");
+				$kiwi -> failed ();
+				return undef;
+			}
+			$this->{solverProblem2}    = $xsolve -> getProblemInfo();
+			$this->{solverFailedJobs2} = $xsolve -> getFailedJobs();
+			if ($xsolve -> getProblemsCount()) {
+				$kiwi -> warning ("Package problems found check in report !\n");
+			}
+			@result = $xsolve -> getPackages();
+			foreach my $p (@result) {
+				my $inpattern = 0;
+				foreach my $tobeinstalled (@packageList) {
+					if ($tobeinstalled eq $p) {
+						$inpattern = 1; last;
+					}
+				}
+				if (! $inpattern) {
+					push (@rest,$p);
 				}
 			}
-			if (! $inpattern) {
-				push (@rest,$p);
-			}
+			$this->{packages} = \@rest;
 		}
-		return sort @rest;
 	}
-	return sort @list;
+	return $this;
 }
 
 #==========================================
@@ -565,15 +660,14 @@ sub getRootDevice {
 }
 
 #==========================================
-# setSystemConfiguration
+# getSystemFileChanges
 #------------------------------------------
-sub setSystemConfiguration {
+sub getSystemFileChanges {
 	# ...
 	# 1) Find all files not owned by any package
 	# 2) Find all files changed according to the package manager
 	# ---
 	my $this = shift;
-	my $demo = $this->{demo};
 	my $dest = $this->{dest};
 	my $kiwi = $this->{kiwi};
 	my $rdev = $this->{rdev};
@@ -614,8 +708,8 @@ sub setSystemConfiguration {
 	#==========================================
 	# Find files not packaged
 	#------------------------------------------
+	$kiwi -> info ("Inspecting root file system...\n");
 	my $wref = generateWanted (\%result,$mount);
-	$kiwi -> info ("Inspecting root file system...");
 	find ({ wanted => $wref, follow => 0 }, $mount );
 	$this -> cleanMount();
 	$kiwi -> done ();
@@ -687,66 +781,60 @@ sub setSystemConfiguration {
 	$kiwi -> note ("\n");
 	$kiwi -> doNorm ();
 	$kiwi -> cursorON();
-	#==========================================
-	# Create report or custom root tree
-	#------------------------------------------
-	@rpmcheck = sort keys %result;
-	if (defined $demo) {
-		$kiwi -> info ("Creating report for root tree: $dest/report");
-		if (! open (FD,">$dest/report-files")) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't create report file: $!");
-			$kiwi -> failed ();
-			return undef;
-		}
-		my @list = ();
-		foreach my $file (@rpmcheck) {
-			print FD $file."\0";
-		}
-		close FD;
-		my $file = "$dest/report-files";
-		my $prog = "du -ch --time --files0-from";
-		my $data = qxx ("$prog $file 2>$dest/report-lost > $dest/report");
-		my $code = $? >> 8;
-		if ($code == 0) {
-			unlink "$dest/report-lost";
-		}
-		unlink $file;
-		$kiwi -> done ();
-	} else {
-		$kiwi -> info ("Setting up custom root tree...");
-		$kiwi -> cursorOFF();
-		$rpmsize  = @rpmcheck;
-		$spart = 100 / $rpmsize;
-		$count = 1;
-		foreach my $file (@rpmcheck) {
-			if (-e $file) {
-				my $dir = $result{$file};
-				if (! -d "$dest/root/$dir") {
-					qxx ("mkdir -p $dest/root/$dir");
-				}
-				qxx ("cp -a \"$file\" \"$dest/root/$file\"");
+	$this->{filechanges} = \%result;
+	$this->{filecheck}   = \@rpmcheck;
+	return $this;
+}
+
+#==========================================
+# setSystemOverlayFiles
+#------------------------------------------
+sub setSystemOverlayFiles {
+	# ...
+	# write file changes as overlay files for the
+	# image description. The input data for this function
+	# is created by the getSystemFileChanges() function
+	# which has to be called first !
+	# ---
+	my $this    = shift;
+	my $kiwi    = $this->{kiwi};
+	my $dest    = $this->{dest};
+	my %result  = %{$this->{filechanges}};
+	my @rpmcheck= @{$this->{filecheck}};
+	my $rpmsize = @rpmcheck;
+	my $spart   = 100 / $rpmsize;
+	my $count   = 1;
+	my $done;
+	my $done_old;
+	$kiwi -> info ("Setting up custom root tree...");
+	$kiwi -> cursorOFF();
+	foreach my $file (@rpmcheck) {
+		if (-e $file) {
+			my $dir = $result{$file};
+			if (! -d "$dest/root/$dir") {
+				qxx ("mkdir -p $dest/root/$dir");
 			}
-			$done = int ($count * $spart);
-			if ($done != $done_old) {
-				$kiwi -> step ($done);
-			}
-			$done_old = $done;
-			$count++;
+			qxx ("cp -a \"$file\" \"$dest/root/$file\"");
 		}
-		$kiwi -> note ("\n");
-		$kiwi -> doNorm ();
-		$kiwi -> cursorON();
-		$kiwi -> info ("Checking for broken links in custom root tree...");
-		$this -> checkBrokenLinks();
-		$kiwi -> done();
-		$kiwi -> info ("Setting up initial deployment workflow...");
-		if (! $this -> setInitialSetup()) {
-			return undef;
+		$done = int ($count * $spart);
+		if ($done != $done_old) {
+			$kiwi -> step ($done);
 		}
-		$kiwi -> done();
+		$done_old = $done;
+		$count++;
 	}
-	return %result;
+	$kiwi -> note ("\n");
+	$kiwi -> doNorm ();
+	$kiwi -> cursorON();
+	$kiwi -> info ("Checking for broken links in custom root tree...");
+	$this -> checkBrokenLinks();
+	$kiwi -> done();
+	$kiwi -> info ("Setting up initial deployment workflow...");
+	if (! $this -> setInitialSetup()) {
+		return undef;
+	}
+	$kiwi -> done();
+	return $this;
 }
 
 #==========================================
