@@ -423,8 +423,10 @@ sub getOperatingSystemVersion {
 	if ($code != 0) {
 		return undef;
 	}
-	if ($data[4] =~ /.*(\d\d\.\d)-.*/) {
-		return $1;
+	foreach my $line (@data) {
+		if ($line =~ /^i.*(\d\d\.\d)-.*/) {
+			return $1;
+		}
 	}
 	return undef
 }
