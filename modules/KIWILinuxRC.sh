@@ -1892,7 +1892,6 @@ function waitForUSBDeviceScan {
 	if [ ! "$HAVE_USB" = "yes" ];then
 		return
 	fi
-	udevPending
 	Echo -n "Waiting for USB device scan to complete..."
 	while \
 		[ $(dmesg | grep -c 'usb-storage: device scan complete') -lt 1 ] && \
@@ -1903,6 +1902,7 @@ function waitForUSBDeviceScan {
 		devices=$(( $devices + 1 ))
 	done
 	echo
+	udevPending
 }
 #======================================
 # probeUSB

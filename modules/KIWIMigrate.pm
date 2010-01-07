@@ -372,10 +372,10 @@ sub setTemplate {
 		my $prio = $osc{$product}{$source}{prio};
 		print FD "\t".'<repository type="'.$type.'"';
 		if (defined $alias) {
-			print FD ' "alias="'.$alias.'"';
+			print FD ' alias="'.$alias.'"';
 		}
 		if ((defined $prio) && ($prio != 0)) {
-			print FD ' "priority="'.$prio.'"';
+			print FD ' priority="'.$prio.'"';
 		}
 		print FD '>'."\n";
 		print FD "\t\t".'<source path="'.$source.'"/>'."\n";
