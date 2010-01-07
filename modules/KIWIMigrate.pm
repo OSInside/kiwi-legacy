@@ -262,7 +262,7 @@ sub createReport {
 		$kiwi -> info ("versions of the same package is if binary files\n");
 		$kiwi -> info ("like libraries or exectuables appear as modified\n");
 		$kiwi -> info ("files\n");
-		foreach my $file (@{$modified}) {
+		foreach my $file (sort @{$modified}) {
 			$kiwi -> note ("--> $file\n");
 		}
 	}
@@ -797,6 +797,9 @@ sub setSystemOverlayFiles {
 		$done_old = $done;
 		$count++;
 	}
+	@curlist = keys %result;
+	$cursize = @curlist;
+	$spart = 100 / ($cursize + $rpmsize);
 	foreach my $file (sort keys %result) {
 		foreach my $exp (@deny) {
 			if ($file =~ /$exp/) {
