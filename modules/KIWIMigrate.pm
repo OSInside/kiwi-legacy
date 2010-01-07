@@ -25,6 +25,7 @@ use Carp qw (cluck);
 use File::Find;
 use File::Basename;
 use File::Path;
+use File::Copy;
 use Storable;
 use KIWILog;
 use KIWIQX;
@@ -347,10 +348,6 @@ sub setTemplate {
 	my $pats    = $this->{patterns};
 	my $pacs    = $this->{packages};
 	my %osc     = %{$this->{source}};
-	#==========================================
-	# create root directory
-	#------------------------------------------
-	mkdir "$dest/root";
 	#==========================================
 	# create xml description
 	#------------------------------------------
@@ -867,7 +864,7 @@ sub setSystemOverlayFiles {
 	# Create overlay root tree
 	#------------------------------------------
 	$kiwi -> info ("Creating link list...\n");
-	$data = qxx ("mkdir -p $dest/root 2>&1");
+	$data = qxx ("mkdir -p $dest/root-nopackage 2>&1");
 	$code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> failed ();
@@ -881,7 +878,7 @@ sub setSystemOverlayFiles {
 	my %paths = ();
 	foreach my $file (keys %result) {
 		my $path = $result{$file};
-		$paths{"$dest/root/$path"} = $path;
+		$paths{"$dest/root-nopackage/$path"} = $path;
 	}
 	mkpath (keys %paths, {verbose => 0});
 	#==========================================
@@ -889,7 +886,7 @@ sub setSystemOverlayFiles {
 	#------------------------------------------
 	foreach my $file (keys %result) {
 		my $old = $file;
-		my $new = $dest."/root".$old;
+		my $new = $dest."/root-nopackage".$old;
 		if (! link "$old","$new") {
 			$kiwi -> warning ("hard link for $file failed: $!");
 			$kiwi -> skipped ();
@@ -902,10 +899,21 @@ sub setSystemOverlayFiles {
 	$this -> checkBrokenLinks();
 	$kiwi -> done();
 	#==========================================
+	# Create modified files tree
+	#------------------------------------------
+	$kiwi -> info ("Creating modified files tree...");
+	mkdir "$dest/root-modified";
+	foreach my $file (@modified) {
+		my ($name,$dir,$suffix) = fileparse ($file);
+		mkpath ("$dest/root-modified/$dir", {verbose => 0});
+		move ("$dest/root-nopackage/$file","$dest/root-modified/$dir");
+	}
+	$kiwi -> done();
+	#==========================================
 	# Remove empty directories
 	#------------------------------------------
 	$kiwi -> info ("Removing empty directories...");
-	qxx ("find $dest/root -type d | xargs rmdir -p 2>/dev/null");
+	qxx ("find $dest/root-nopackage -type d | xargs rmdir -p 2>/dev/null");
 	$kiwi -> done();
 	#==========================================
 	# Store in instance for report
@@ -933,6 +941,10 @@ sub setInitialSetup {
 	my $dest = $this->{dest};
 	my $kiwi = $this->{kiwi};
 	$kiwi -> info ("Setting up initial deployment workflow...");
+	#==========================================
+	# create root directory
+	#------------------------------------------
+	mkdir "$dest/root";
 	#==========================================
 	# create xorg.conf [fbdev]
 	#------------------------------------------
@@ -1072,7 +1084,7 @@ sub checkBrokenLinks {
 	my $this = shift;
 	my $dest = $this->{dest};
 	my $kiwi = $this->{kiwi};
-	my @link = qxx ("find $dest/root -type l");
+	my @link = qxx ("find $dest/root-nopackage -type l");
 	my $returnok = 1;
 	my $dir;
 	my $name;
@@ -1084,7 +1096,7 @@ sub checkBrokenLinks {
 			($name,$dir,$suffix) = fileparse ($linkfile);
 			$dir.= "/";
 		} else {
-			$dir = $dest."/root";
+			$dir = $dest."/root-nopackage";
 		}
 		if (! -e $dir.$ref) {
 			$kiwi -> loginfo ("Broken link: $linkfile -> $ref [ REMOVED ]");
