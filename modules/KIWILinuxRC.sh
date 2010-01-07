@@ -1892,6 +1892,7 @@ function waitForUSBDeviceScan {
 	if [ ! "$HAVE_USB" = "yes" ];then
 		return
 	fi
+	udevPending
 	Echo -n "Waiting for USB device scan to complete..."
 	while \
 		[ $(dmesg | grep -c 'usb-storage: device scan complete') -lt 1 ] && \
@@ -1901,7 +1902,6 @@ function waitForUSBDeviceScan {
 		sleep 1
 		devices=$(( $devices + 1 ))
 	done
-	udevPending
 	echo
 }
 #======================================
@@ -4040,6 +4040,7 @@ function waitForStorageDevice {
 	# ----
 	local device=$1
 	local check=0
+	udevPending
 	while true;do
 		partitionSize $device &>/dev/null
 		if [ $? = 0 ];then
@@ -4065,6 +4066,7 @@ function waitForBlockDevice {
 	# ----
 	local device=$1
 	local check=0
+	udevPending
 	while true;do
 		if [ -b $device ] || [ $check -eq 4 ];then
 			break
