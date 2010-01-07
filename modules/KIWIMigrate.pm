@@ -501,6 +501,7 @@ sub getPackageList {
 	undef $this->{patterns};
 	undef $this->{packages};
 	$kiwi -> info ("Searching installed packages...");
+	# FIXME: got it from cache if cache is used
 	@ilist = qxx ('rpm -qa --qf "%{NAME}\n" | sort | uniq'); chomp @ilist;
 	$code = $? >> 8;
 	if ($code != 0) {
