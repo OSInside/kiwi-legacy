@@ -24,6 +24,7 @@ use strict;
 use Carp qw (cluck);
 use File::Find;
 use File::Basename;
+use File::Path;
 use Storable;
 use KIWILog;
 use KIWIQX;
@@ -200,6 +201,7 @@ sub createReport {
 	my $failedJob1 = $this->{solverFailedJobs1};
 	my $failedJob2 = $this->{solverFailedJobs2};
 	my $filechanges= $this->{filechanges};
+	my $modified   = $this->{modified};
 	#==========================================
 	# start report
 	#------------------------------------------
@@ -685,6 +687,7 @@ sub setSystemOverlayFiles {
 	my %result;
 	my $data;
 	my $code;
+	my @modified;
 	#==========================================
 	# check for cache file
 	#------------------------------------------
@@ -799,7 +802,7 @@ sub setSystemOverlayFiles {
 	foreach my $check (@rpmcheck) {
 		if ($check =~ /^(\/.*)/) {
 			my $file = $1;
-			my $dir  = dirname ($file);
+			my ($name,$dir,$suffix) = fileparse ($file);
 			my $ok   = 1;
 			foreach my $exp (@deny) {
 				if ($file =~ /$exp/) {
@@ -807,7 +810,9 @@ sub setSystemOverlayFiles {
 				}
 			}
 			if ($ok) {
+				# FIXME: I don't see any modified files
 				$result{$file} = $dir;
+				push (@modified,$file);
 			}
 		}
 		$done = int ($count * $spart);
@@ -827,9 +832,9 @@ sub setSystemOverlayFiles {
 		store ($cdata,$dest.".cache");
 	}
 	#==========================================
-	# Create hard link list
+	# Create overlay root tree
 	#------------------------------------------
-	$kiwi -> info ("Creating link list...");
+	$kiwi -> info ("Creating link list...\n");
 	$data = qxx ("mkdir -p $dest/root 2>&1");
 	$code = $? >> 8;
 	if ($code != 0) {
@@ -838,29 +843,23 @@ sub setSystemOverlayFiles {
 		$kiwi -> failed ();
 		return undef;
 	}
-	# make directory structure...
-	print "++++ making directory structure...\n";
-	my %files = ();
+	#==========================================
+	# 1) Create directory structure
+	#------------------------------------------
 	my %paths = ();
 	foreach my $file (keys %result) {
-		$file = quotemeta ($file);
-		my ($name,$path,$suffix) = fileparse ($file);
-		$paths{$path} = $path;
-		if ($name) {
-			$files{$file} = $path;
-		}
+		my $path = $result{$file};
+		$paths{"$dest/root/$path"} = $path;
 	}
-	foreach my $path (keys %paths) {
-		qxx ("mkdir -p $dest/root/$path 2>&1");
-	}
-	# make links
-	print "++++ making links...\n";
-	foreach my $file (keys %files) {
-		my $path = $files{$file};
-		$data = qxx ("ln -t $dest/root/$path $file 2>&1");
-		$code = $? >> 8;
-		if ($code != 0) {
-			$kiwi -> warning ("hard link for $file failed: $data");
+	mkpath (keys %paths, {verbose => 0});
+	#==========================================
+	# 2) Create hard link list
+	#------------------------------------------
+	foreach my $file (keys %result) {
+		my $old = $file;
+		my $new = $dest."/root".$old;
+		if (! link "$old","$new") {
+			$kiwi -> warning ("hard link for $file failed: $!");
 			$kiwi -> skipped ();
 		}
 	}
@@ -870,8 +869,17 @@ sub setSystemOverlayFiles {
 	$kiwi -> info ("Cleaning symlinks...");
 	$this -> checkBrokenLinks();
 	$kiwi -> done();
+	#==========================================
+	# Remove empty directories
+	#------------------------------------------
+	$kiwi -> info ("Removing empty directories...");
+	qxx ("find $dest/root -type d | xargs rmdir -p 2>/dev/null");
+	$kiwi -> done();
+	#==========================================
+	# Store in instance for report
+	#------------------------------------------
 	$this->{filechanges} = \%result;
-	$this->{filecheck}   = \@rpmcheck;
+	$this->{modified}    = \@modified;
 	return $this;
 }
 
@@ -1025,14 +1033,8 @@ sub cleanMount {
 sub checkBrokenLinks {
 	# ...
 	# the tree could contain broken symbolic links because
-	# the target is unmodified and part of a package. The
-	# broken links will be removed in this function and it
-	# is assumed that a post install script of the package
-	# creates this links when the package gets installed
-	# in the kiwi prepare mode. If the links are created
-	# manually or by an application at system installation
-	# for example the links needs to be created in a
-	# separate image description config.sh script 
+	# the target is part of a package and therefore not part
+	# of the overlay root tree.
 	# ---   
 	my $this = shift;
 	my $dest = $this->{dest};
@@ -1040,11 +1042,13 @@ sub checkBrokenLinks {
 	my @link = qxx ("find $dest/root -type l");
 	my $returnok = 1;
 	my $dir;
+	my $name;
+	my $suffix;
 	foreach my $linkfile (@link) {
 		chomp $linkfile;
 		my $ref = readlink ($linkfile);
 		if ($ref !~ /^\//) {
-			$dir = dirname ($linkfile);
+			($name,$dir,$suffix) = fileparse ($linkfile);
 			$dir.= "/";
 		} else {
 			$dir = $dest."/root";

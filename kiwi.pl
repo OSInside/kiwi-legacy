@@ -1082,8 +1082,8 @@ sub main {
 		#==========================================
 		# Create report HTML file, errors allowed
 		#------------------------------------------
-		$migrate -> getPackageList();
 		$migrate -> setSystemOverlayFiles();
+		$migrate -> getPackageList();
 		$migrate -> createReport();
 		#==========================================
 		# Perform migration based on report
