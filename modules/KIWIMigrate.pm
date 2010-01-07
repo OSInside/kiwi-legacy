@@ -247,7 +247,25 @@ sub createReport {
 			}
 		}
 	}
-	# files report...
+	# modified files report...
+	if ($modified) {
+		$kiwi -> info ("Following files are part of a package and are\n");
+		$kiwi -> info ("marked as modified. In most cases this is because\n");
+		$kiwi -> info ("a configuration file provided by the package has\n");
+		$kiwi -> info ("changed. You may want to keep these files in your\n");
+		$kiwi -> info ("overlay tree. But it might also be the case that a\n");
+		$kiwi -> info ("package is installed twice. In that case the\n");
+		$kiwi -> info ("conflicting files appear as modified and you should\n");
+		$kiwi -> info ("fix your system by removing the package version\n");
+		$kiwi -> info ("which is apparently not part of your system anymore\n");
+		$kiwi -> info ("A good indicator that you have installed multiple\n");
+		$kiwi -> info ("versions of the same package is if binary files\n");
+		$kiwi -> info ("like libraries or exectuables appear as modified\n");
+		$kiwi -> info ("files\n");
+		foreach my $file (@{$modified}) {
+			$kiwi -> note ("--> $file\n");
+		}
+	}
 	#if ($filechanges) {
 	#	my %result = %{$filechanges};
 	#	my @rpmcheck = sort keys %result;
@@ -464,6 +482,7 @@ sub setServiceList {
 	print FD 'test -f /.kconfig && . /.kconfig'."\n";
 	print FD 'test -f /.profile && . /.profile'."\n";
 	print FD 'echo "Configure image: [$kiwi_iname]..."'."\n";
+	print FD 'suseSetupProduct'."\n";
 	foreach my $service (@result) {
 		print FD 'suseInsertService '.$service."\n";
 	}
@@ -489,28 +508,18 @@ sub getPackageList {
 	my $product = $this->{product};
 	my $kiwi    = $this->{kiwi};
 	my $skip    = $this->{skip};
+	my $dest    = $this->{dest};
 	my %osc     = %{$this->{source}};
+	my @ilist   = @{$this->{ilist}};
 	my @urllist = ();
 	my @patlist = ();
 	my %problem = ();
 	my $code;
-	my @ilist;
 	#==========================================
-	# find all rpm's installed
+	# clean pattern/package lists
 	#------------------------------------------
 	undef $this->{patterns};
 	undef $this->{packages};
-	$kiwi -> info ("Searching installed packages...");
-	# FIXME: got it from cache if cache is used
-	@ilist = qxx ('rpm -qa --qf "%{NAME}\n" | sort | uniq'); chomp @ilist;
-	$code = $? >> 8;
-	if ($code != 0) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Failed to obtain installed packages");
-		$kiwi -> failed ();
-		return undef;
-	}
-	$kiwi -> done();
 	#==========================================
 	# create URL list to lookup solvables
 	#------------------------------------------
@@ -689,16 +698,35 @@ sub setSystemOverlayFiles {
 	my $data;
 	my $code;
 	my @modified;
+	my @ilist;
 	#==========================================
 	# check for cache file
 	#------------------------------------------
 	if (! -f $cache) {
 		undef $cache;
 	} else {
-		$kiwi -> info ("Using cache file: $cache\n");
-		$kiwi -> info ("Remove cache file if your system has changed !\n");
+		$kiwi -> info ("=> Using cache file: $cache\n");
+		$kiwi -> info ("=> Remove cache file if your system has changed !!\n");
 		$cdata = retrieve($cache);
 	}
+	#==========================================
+	# search installed packages
+	#------------------------------------------
+	$kiwi -> info ("Searching installed packages...");
+	if ($cache) {
+		@ilist = @{$cdata->{ilist}};
+	} else {
+		@ilist = qxx ('rpm -qa --qf "%{NAME}\n" | sort | uniq'); chomp @ilist;
+		$code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Failed to obtain installed packages");
+			$kiwi -> failed ();
+			return undef;
+		}
+		$cdata->{ilist} = \@ilist;
+	}
+	$kiwi -> done();
 	#==========================================
 	# mount root system
 	#------------------------------------------
@@ -735,7 +763,7 @@ sub setSystemOverlayFiles {
 	#==========================================
 	# Find files not packaged
 	#------------------------------------------
-	$kiwi -> info ("Inspecting root file system...\n");
+	$kiwi -> info ("Reading root file system...");
 	if ($cache) {
 		%result = %{$cdata->{result}};
 	} else {
@@ -744,6 +772,7 @@ sub setSystemOverlayFiles {
 		$this -> cleanMount();
 		$cdata->{result} = \%result;
 	}
+	$kiwi -> done ();
 	$kiwi -> info ("Inspecting RPM database [installed files]...");
 	if ($cache) {
 		@rpmlist = @{$cdata->{rpmlist}};
@@ -754,7 +783,7 @@ sub setSystemOverlayFiles {
 	my @curlist = keys %result;
 	my $cursize = @curlist;
 	my $rpmsize = @rpmlist;
-	my $spart = 100 / $cursize;
+	my $spart = 100 / ($cursize + $rpmsize);
 	my $count = 0;
 	my $done;
 	my $done_old;
@@ -791,7 +820,7 @@ sub setSystemOverlayFiles {
 	if ($cache) {
 		@rpmcheck = @{$cdata->{rpmcheck}};
 	} else {
-		$checkopt = "--nodeps --nodigest --nosignature ";
+		$checkopt = "--nodeps --nodigest --nosignature --nomtime ";
 		$checkopt.= "--nolinkto --nouser --nogroup --nomode";
 		@rpmcheck = qxx ("rpm -Va $checkopt"); chomp @rpmcheck;
 		$cdata->{rpmcheck} = \@rpmcheck;
@@ -801,7 +830,7 @@ sub setSystemOverlayFiles {
 	$count = 1;
 	$kiwi -> cursorOFF();
 	foreach my $check (@rpmcheck) {
-		if ($check =~ /^(\/.*)/) {
+		if ($check =~ /(\/.*)/) {
 			my $file = $1;
 			my ($name,$dir,$suffix) = fileparse ($file);
 			my $ok   = 1;
@@ -810,8 +839,7 @@ sub setSystemOverlayFiles {
 					$ok = 0; last;
 				}
 			}
-			if ($ok) {
-				# FIXME: I don't see any modified files
+			if (($ok) && (-e $file)) {
 				$result{$file} = $dir;
 				push (@modified,$file);
 			}
@@ -881,6 +909,7 @@ sub setSystemOverlayFiles {
 	#------------------------------------------
 	$this->{filechanges} = \%result;
 	$this->{modified}    = \@modified;
+	$this->{ilist}       = \@ilist;
 	return $this;
 }
 
