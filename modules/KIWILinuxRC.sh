@@ -4530,8 +4530,9 @@ function bootImage {
 	umount proc &>/dev/null && \
 	umount proc &>/dev/null
 	if [ $reboot = "yes" ];then
-		Echo "Reboot requested... rebooting now"
-		exec /lib/mkinitrd/bin/run-init -c /dev/console /mnt /sbin/reboot -f -i
+		Echo "Reboot requested... rebooting after preinit"
+		exec /lib/mkinitrd/bin/run-init -c /dev/console /mnt /bin/bash -c \
+			"/preinit ; . /include ; cleanImage ; exec /sbin/reboot -f -i"
 	else
 		# FIXME: clicfs doesn't like run-init
 		if [ ! "$haveClicFS" = "yes" ];then
