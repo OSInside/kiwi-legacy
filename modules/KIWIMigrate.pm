@@ -374,15 +374,15 @@ sub setTemplate {
 	# <preferences>
 	#------------------------------------------
 	print FD "\t".'<preferences>'."\n";
-	print FD "\t\t".'<type boot="vmxboot/suse-'.$product.'" filesystem="ext3"';
-	print FD ' format="vmdk">vmx</type>'."\n";
+	print FD "\t\t".'<type boot="oemboot/suse-'.$product.'" filesystem="ext3"';
+	print FD ' format="iso">oem</type>'."\n";
 	print FD "\t\t".'<version>1.1.1</version>'."\n";
 	print FD "\t\t".'<packagemanager>zypper</packagemanager>'."\n";
 	print FD "\t\t".'<locale>en_US</locale>'."\n";
 	print FD "\t\t".'<keytable>us.map.gz</keytable>'."\n";
 	print FD "\t\t".'<timezone>Europe/Berlin</timezone>'."\n";
-	print FD "\t\t".'<rpm-excludedocs>true</rpm-excludedocs>'."\n";
 	print FD "\t\t".'<boot-theme>openSUSE</boot-theme>'."\n";
+	print FD "\t\t".'<oem-home>false</oem-home>'."\n";
 	print FD "\t".'</preferences>'."\n";
 	#==========================================
 	# <repository>
@@ -1084,6 +1084,7 @@ sub setInitialSetup {
 	#==========================================
 	# Activate YaST on initial deployment
 	#------------------------------------------
+	qxx ("cp $dest/etc/X11/xorg.conf $dest/root/etc/X11/xorg.conf.install");
 	qxx ("touch $dest/root/var/lib/YaST2/runme_at_boot");
 	$kiwi -> done();
 	return $this;
