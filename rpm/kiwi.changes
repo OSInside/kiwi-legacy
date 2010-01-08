@@ -2,6 +2,7 @@
 Mon Jan  4 10:03:14 CET 2010 - ms@suse.de
 
 - v3.89
+- fixed quoting when importing kernel cmdline (bnc #536309)
 - added udevPending() to waitFor* functions (bnc #547862)
 - fixed dirPath() function, related to (bnc #561855)
 - fixed KIWIURL::quote() for special '$' char (bnc #561855)

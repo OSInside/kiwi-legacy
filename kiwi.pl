@@ -205,6 +205,8 @@ our $Clone;                 # clone existing image description
 our $LVM;                   # use LVM partition setup for virtual disk
 our $Debug;                 # activates the internal stack trace output
 our $GrubChainload;         # install grub loader in first partition not MBR
+our $MigrateNoFiles;        # migrate: don't create overlay files
+our $MigrateNoTemplate;     # migrate: don't create image description template
 our $kiwi;                  # global logging handler object
 
 #============================================
@@ -1082,20 +1084,21 @@ sub main {
 		#==========================================
 		# Create report HTML file, errors allowed
 		#------------------------------------------
-		$migrate -> setSystemOverlayFiles();
+		if (! $MigrateNoFiles) {
+			$migrate -> setSystemOverlayFiles();
+		}
 		$migrate -> getPackageList();
 		$migrate -> createReport();
-		#==========================================
-		# Perform migration based on report
-		#------------------------------------------
-		if (! $migrate -> setTemplate()) {
-			my $code = kiwiExit (1); return $code;
-		}
-		if (! $migrate -> setServiceList()) {
-			my $code = kiwiExit (1); return $code;
-		}
-		if (! $migrate -> setInitialSetup()) {
-			my $code = kiwiExit (1); return $code;
+		if (! $MigrateNoTemplate) {
+			if (! $migrate -> setTemplate()) {
+				my $code = kiwiExit (1); return $code;
+			}
+			if (! $migrate -> setServiceList()) {
+				my $code = kiwiExit (1); return $code;
+			}
+			if (! $migrate -> setInitialSetup()) {
+				my $code = kiwiExit (1); return $code;
+			}
 		}
 		kiwiExit (0);
 	}
@@ -1270,6 +1273,8 @@ sub init {
 		"prepare|p=s"           => \$Prepare,
 		"add-profile=s"         => \@Profiles,
 		"migrate|m=s"           => \$Migrate,
+		"notemplate"            => \$MigrateNoTemplate,
+		"nofiles"               => \$MigrateNoFiles,
 		"exclude|e=s"           => \@Exclude,
 		"skip=s"                => \@Skip,
 		"list|l"                => \&listImage,
@@ -1521,6 +1526,7 @@ sub usage {
 	print "    kiwi -m | --migrate <name> --destdir <destination-path>\n";
 	print "       [ --exclude <directory> --exclude <...> ]\n";
 	print "       [ --skip <package> --skip <...> ]\n";
+	print "       [ --nofiles --notemplate ]\n";
 	print "Image postprocessing modes:\n";
 	print "    kiwi --bootstick <initrd> --bootstick-system <systemImage>\n";
 	print "       [ --bootstick-device <device> ]\n";

@@ -91,6 +91,9 @@ sub new {
 			return undef;
 		}
 		chomp $dest;
+	} elsif (-d $dest) {
+		$kiwi -> done ();
+		$kiwi -> info ("Using already existing destination dir");
 	} else {
 		$data = qxx ("mkdir $dest 2>&1");
 		$code = $? >> 8;
@@ -238,6 +241,9 @@ sub createReport {
 		$kiwi -> info ("repository list but are installed on your system.\n");
 		$kiwi -> info ("You can either ignore it or add a repository which\n");
 		$kiwi -> info ("contains the mentioned packages\n");
+		$kiwi -> info ("Please note if you ignore a package which contains\n");
+		$kiwi -> info ("files modified in the system kiwi will store the\n");
+		$kiwi -> info ("modified files inside the overlay tree.\n");
 		my @pacs = @{$failedJob2};
 		my @list = qxx ("rpm -q @pacs --last"); chomp @list;
 		foreach my $job (@list) {
@@ -507,16 +513,33 @@ sub getPackageList {
 	my $skip    = $this->{skip};
 	my $dest    = $this->{dest};
 	my %osc     = %{$this->{source}};
-	my @ilist   = @{$this->{ilist}};
 	my @urllist = ();
 	my @patlist = ();
 	my %problem = ();
+	my @ilist   = ();
 	my $code;
 	#==========================================
 	# clean pattern/package lists
 	#------------------------------------------
 	undef $this->{patterns};
 	undef $this->{packages};
+	#==========================================
+	# search installed packages if not yet done
+	#------------------------------------------
+	if ($this->{ilist}) {
+		@ilist = @{$this->{ilist}};
+	} else {
+		$kiwi -> info ("Searching installed packages...");
+		@ilist = qxx ('rpm -qa --qf "%{NAME}\n" | sort | uniq'); chomp @ilist;
+		$code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Failed to obtain installed packages");
+			$kiwi -> failed ();
+			return undef;
+		}
+		$kiwi -> done();
+	}
 	#==========================================
 	# create URL list to lookup solvables
 	#------------------------------------------
@@ -861,6 +884,11 @@ sub setSystemOverlayFiles {
 		store ($cdata,$dest.".cache");
 	}
 	#==========================================
+	# Cleanup
+	#------------------------------------------
+	qxx ("rm -rf $dest/root-nopackage 2>&1");
+	qxx ("rm -rf $dest/root-modified  2>&1");
+	#==========================================
 	# Create overlay root tree
 	#------------------------------------------
 	$kiwi -> info ("Creating link list...\n");
@@ -941,6 +969,10 @@ sub setInitialSetup {
 	my $dest = $this->{dest};
 	my $kiwi = $this->{kiwi};
 	$kiwi -> info ("Setting up initial deployment workflow...");
+	#==========================================
+	# Cleanup
+	#------------------------------------------
+	qxx ("rm -rf $dest/root 2>&1");
 	#==========================================
 	# create root directory
 	#------------------------------------------
