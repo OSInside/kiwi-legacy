@@ -332,7 +332,7 @@ if [ $LOCAL_BOOT = "no" ];then
 	#--------------------------------------
 	if [ ! -z "$ALLOW_CMDLINE_OVERWRITE" ];then
 		for i in ${KLIST[@]};do
-			eval export $i
+			eval export \"$i\"
 		done
 	fi
 fi
