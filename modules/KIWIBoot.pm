@@ -4865,7 +4865,7 @@ sub setupFilesystem {
 	my $fstype = shift;
 	my $device = shift;
 	my $name   = shift;
-	my %inodes = %{$this->{deviceinodes}};
+	my $inodes = $this->{deviceinodes};
 	my $kiwi   = $this->{kiwi};
 	my $xml    = $this->{xml};
 	my %type   = %{$xml->getImageTypeAndAttributes()};
@@ -4873,9 +4873,9 @@ sub setupFilesystem {
 	my $iorig  = $this->{inodes};
 	my $result;
 	my $status;
-	if ($inodes{$device}) {
-		if ($inodes{$device} ne "no-opts") {
-			$this->{inodes} = $inodes{$device};
+	if (($inodes) && ($inodes->{$device})) {
+		if ($inodes->{$device} ne "no-opts") {
+			$this->{inodes} = $inodes->{$device};
 		} else {
 			undef $this->{inodes};
 		}
