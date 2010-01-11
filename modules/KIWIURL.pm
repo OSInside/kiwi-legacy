@@ -251,8 +251,9 @@ sub dirPath {
 		my $pwd = qxx ("pwd"); chomp $pwd;
 		$module = $pwd."/".$module;
 	}
-	if (! -e $module) {
-		$kiwi -> warning ("dir path: $module doesn't exist: $!");
+	my ( $module_test ) = glob ($module);
+	if (! -e $module_test) {
+		$kiwi -> warning ("dir path: $module_test doesn't exist: $!");
 		$kiwi -> skipped ();
 		return undef;
 	}
@@ -341,8 +342,9 @@ sub isoPath {
 		my $pwd = qxx ("pwd"); chomp $pwd;
 		$module = $pwd."/".$module;
 	}
-	if (! -e $module) {
-		$kiwi -> warning ("ISO path: $module doesn't exist: $!");
+	my ( $module_test ) = glob ($module);
+	if (! -e $module_test) {
+		$kiwi -> warning ("ISO path: $module_test doesn't exist: $!");
 		$kiwi -> skipped ();
 		return undef;
 	}

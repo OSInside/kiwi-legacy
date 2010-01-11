@@ -4,6 +4,9 @@ Fri Jan  8 15:54:54 CET 2010 - ms@suse.de
 - v3.90
 - fixed use of uninitialized value (bnc #569191)
 - changed default type to oem for migration result
+- added first version of report html creation
+- again fixed KIWIURL::quote(). perl file checks doesn't
+  allow quoted items (bnc #561855)
 
 -------------------------------------------------------------------
 Mon Jan  4 10:03:14 CET 2010 - ms@suse.de

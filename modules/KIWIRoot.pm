@@ -99,9 +99,10 @@ sub new {
 		my $urlHandler  = new KIWIURL ($kiwi,$this);
 		my $publics_url = $urlHandler -> normalizePath ($source);
 		if ($publics_url =~ /^\//) {
-			if (! -d $publics_url) {
-				$kiwi -> warning ("local URL path not found: $publics_url");
-				$kiwi -> skipped ();
+			my ( $publics_url_test ) = glob ( $publics_url );
+			if (! -d $publics_url_test) {
+				$kiwi ->warning ("local URL path not found: $publics_url_test");
+				$kiwi ->skipped ();
 				next;
 			}
 		}

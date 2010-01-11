@@ -196,7 +196,6 @@ sub createReport {
 	# user to solve outstanding problems in order to allow a
 	# clean migration of the system into an image description
 	# ---
-	# TODO... make it nice as html page
 	my $this       = shift;
 	my $kiwi       = $this->{kiwi};
 	my $dest       = $this->{dest};
@@ -207,99 +206,130 @@ sub createReport {
 	my $filechanges= $this->{filechanges};
 	my $modified   = $this->{modified};
 	#==========================================
-	# start report
+	# Start report
 	#------------------------------------------
-	# package report...
-	$kiwi -> info ("Migration Report\n");
-	$kiwi -> info ("----------------\n");
+	if (! open (FD,">$dest/report.html")) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't create report: $!");
+		$kiwi -> failed ();
+		return undef;
+	}
+	print FD '<html>'."\n";
+	print FD "\t".'<head>'."\n";
+	print FD "\t\t".'<title>Migration report</title>'."\n";
+	print FD "\t".'</head>'."\n";
+	print FD '<body>'."\n";
+	#==========================================
+	# Package/Pattern report
+	#------------------------------------------
 	if ($problem1) {
-		$kiwi -> info ("Following patterns couldn't be solved due to\n");
-		$kiwi -> info ("dependency conflicts. Please check if your\n");
-		$kiwi -> info ("repository setup contains a system repository\n");
-		$kiwi -> info ("which matches the system you are about to migrate\n");
-		$kiwi -> note ("$problem1");
+		print FD '<h1>Pattern conflict(s)</h1>'."\n";
+		print FD '<p>'."\n";
+		print FD 'Following patterns could not be solved due to ';
+		print FD 'dependency conflicts. Please check if your ';
+		print FD 'repository setup contains a system repository ';
+		print FD 'which matches the system you are about to migrate'."\n";
+		print FD '</p>'."\n";
+		print FD '<hr>'."\n";
+		print FD '<p>'."\n";
+		print FD "$problem1";
+		print FD '</p>'."\n";
 	}
 	if ($problem2) {
-		$kiwi -> info ("Following packages couldn't be solved due to\n");
-		$kiwi -> info ("dependency conflicts. Please check the conflicts\n");
-		$kiwi -> info ("and solve them by either uninstalling the\n");
-		$kiwi -> info ("package(s) from your system or skip them by using\n");
-		$kiwi -> info ("the --skip option\n"); 
-		$kiwi -> note ("$problem2");
+		print FD '<h1>Package conflict(s)</h1>'."\n";
+		print FD '<p>'."\n";
+		print FD 'Following packages could not be solved due to ';
+		print FD 'dependency conflicts. Please check the conflicts ';
+		print FD 'and solve them by either uninstalling the ';
+		print FD 'package(s) from your system or skip them by using ';
+		print FD 'the --skip option'."\n";
+		print FD '</p>'."\n";
+		print FD '<hr>'."\n";
+		print FD '<p>'."\n"; 
+		print FD "$problem2";
+		print FD '</p>'."\n";
 	}
 	if (@{$failedJob1}) {
-		$kiwi -> info ("Following patterns couldn't be found in your\n");
-		$kiwi -> info ("repository list but are marked as installed.\n");
-		$kiwi -> info ("You can either ignore it or add a repository which\n");
-		$kiwi -> info ("contains the mentioned patterns\n");
+		print FD '<h1>Pattern(s) not found</h1>'."\n";
+		print FD '<p>'."\n";
+		print FD 'Following patterns could not be found in your ';
+		print FD 'repository list but are marked as installed ';
+		print FD 'You can either ignore it or add a repository which ';
+		print FD 'contains the mentioned patterns'."\n";
+		print FD '</p>'."\n";
+		print FD '<hr>'."\n";
+		print FD '<ul>'."\n";
 		foreach my $job (@{$failedJob1}) {
-			$kiwi -> note ("$job\n");
+			print FD '<li>'.$job.'</li>'."\n";
 		}
+		print FD '</ul>'."\n";
 	}
 	if (@{$failedJob2}) {
-		$kiwi -> info ("Following packages couldn't be found in your\n");
-		$kiwi -> info ("repository list but are installed on your system.\n");
-		$kiwi -> info ("You can either ignore it or add a repository which\n");
-		$kiwi -> info ("contains the mentioned packages\n");
-		$kiwi -> info ("Please note if you ignore a package which contains\n");
-		$kiwi -> info ("files modified in the system kiwi will store the\n");
-		$kiwi -> info ("modified files inside the overlay tree.\n");
+		print FD '<h1>Package(s) not found</h1>'."\n";
+		print FD '<p>'."\n";
+		print FD 'Following packages could not be found in your ';
+		print FD 'repository list but are installed on your system ';
+		print FD 'You can either ignore it or add a repository which ';
+		print FD 'contains the mentioned packages ';
+		print FD 'Please note if you ignore a package which contains ';
+		print FD 'files modified in the system kiwi will store the modified';
+		print FD 'files inside the modified files overlay tree though.'."\n";
+		print FD '</p>'."\n";
+		print FD '<hr>'."\n";
+		print FD '<table>'."\n";
 		my @pacs = @{$failedJob2};
 		my @list = qxx ("rpm -q @pacs --last"); chomp @list;
 		foreach my $job (@list) {
 			if ($job =~ /([^\s]+)\s+([^\s].*)/) {
 				my $pac  = $1;
 				my $date = $2;
-				$kiwi -> note ("--> $pac\n\t$date\n");
+				print FD '<tr valign="top">'."\n";
+				print FD '<td>'.$pac.'</td>'."\n";
+				print FD '<td>'.$date.'</td>'."\n";
+				print FD '</tr>'."\n";
 			}
 		}
+		print FD '</table>'."\n";
 	}
-	# modified files report...
+	#==========================================
+	# Modified files report...
+	#------------------------------------------
 	if ($modified) {
-		$kiwi -> info ("Following files are part of a package and are\n");
-		$kiwi -> info ("marked as modified. In most cases this is because\n");
-		$kiwi -> info ("a configuration file provided by the package has\n");
-		$kiwi -> info ("changed. You may want to keep these files in your\n");
-		$kiwi -> info ("overlay tree. But it might also be the case that a\n");
-		$kiwi -> info ("package is installed twice. In that case the\n");
-		$kiwi -> info ("conflicting files appear as modified and you should\n");
-		$kiwi -> info ("fix your system by removing the package version\n");
-		$kiwi -> info ("which is apparently not part of your system anymore\n");
-		$kiwi -> info ("A good indicator that you have installed multiple\n");
-		$kiwi -> info ("versions of the same package is if binary files\n");
-		$kiwi -> info ("like libraries or exectuables appear as modified\n");
-		$kiwi -> info ("files\n");
-		foreach my $file (sort @{$modified}) {
-			$kiwi -> note ("--> $file\n");
-		}
+		# modified...
+		print FD '<h1>Modified files</h1>'."\n";
+		print FD '<p>'."\n";
+		print FD 'Following files are part of a package and are ';
+		print FD 'marked as modified. In most cases this is because ';
+		print FD 'a configuration file provided by the package has ';
+		print FD 'changed. You may want to keep these files in your ';
+		print FD 'overlay tree. But it might also be the case that a ';
+		print FD 'package is installed twice. In that case the ';
+		print FD 'conflicting files appear as modified and you should ';
+		print FD 'fix your system by removing the package version ';
+		print FD 'which is apparently not part of your system anymore ';
+		print FD 'A good indicator that you have installed multiple ';
+		print FD 'versions of the same package is if binary files ';
+		print FD 'like libraries or exectuables appear as modified ';
+		print FD 'files'."\n";
+		print FD '</p>'."\n";
+		print FD '<hr>'."\n";
+		print FD '<a href="'."$dest/root-modified/".'">';
+		print FD 'Modified files tree</a>'."\n";
+		# unpackaged...
+		print FD '<h1>Unpackaged files</h1>'."\n";
+		print FD '<p>'."\n";
+		print FD 'Following files are not part of any package ';
+		print FD 'I suggest to check for binary files first and check ';
+		print FD 'where they come from and if they are needed or can be ';
+		print FD 'provided as a package. After that I suggest to check ';
+		print FD 'the typical linux configuration directories'."\n";
+		print FD '</p>'."\n";
+		print FD '<a href="'."$dest/root-nopackage/".'">';
+		print FD 'Unpackaged files tree</a>'."\n";
 	}
-	#if ($filechanges) {
-	#	my %result = %{$filechanges};
-	#	my @rpmcheck = sort keys %result;
-	#	$kiwi -> info ("Creating files report\n");
-	#	if (! open (FD,">$dest/report-files")) {
-	#		$kiwi -> failed ();
-	#		$kiwi -> error  ("Couldn't create report file: $!");
-	#		$kiwi -> failed ();
-	#		return undef;
-	#	}
-	#	my @list = ();
-	#	foreach my $file (@rpmcheck) {
-	#		print FD $file."\0";
-	#	}
-	#	close FD;
-	#	my $file = "$dest/report-files";
-	#	my $prog = "du -ch --time --files0-from";
-	#	my @data = qxx ("$prog $file 2>$dest/report-lost"); chomp @data;
-	#	my $code = $? >> 8;
-	#	if ($code == 0) {
-	#		unlink "$dest/report-lost";
-	#	}
-	#	unlink $file;
-	#	foreach my $line (@data) {
-	#		$kiwi -> info ("$line\n");
-	#	}
-	#}
+	close FD;
+	$kiwi -> info ("Report file created: $dest/report.html");
+	$kiwi -> done ();
 	return $this;
 }
 
