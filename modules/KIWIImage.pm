@@ -376,7 +376,12 @@ sub createImageClicFS {
 	qxx ("mv -f $this->{imageDest}/$name.ext3 $this->{imageDest}/$name.clicfs");
 	qxx ("rm -f $this->{imageDest}/fsdata.ext3");
 	$kiwi -> done();
-	$this -> updateMD5File ("$this->{imageDest}/$name.clicfs");
+	#==========================================
+	# Create image md5sum
+	#------------------------------------------
+	if (! $this -> buildMD5Sum ($name)) {
+		return undef;
+	}
 	return $this;
 }
 
@@ -3319,8 +3324,10 @@ sub postImage {
 	#==========================================
 	# Create image md5sum
 	#------------------------------------------
-	if (! $this -> buildMD5Sum ($name)) {
-		return undef;
+	if ($fstype ne "clicfs") {
+		if (! $this -> buildMD5Sum ($name)) {
+			return undef;
+		}
 	}
 	#==========================================
 	# Compress image using gzip

@@ -3203,11 +3203,7 @@ function validateSize {
 	haveBytes=`partitionSize $imageDevice`
 	haveBytes=`expr $haveBytes \* 1024`
 	haveMByte=`expr $haveBytes / 1048576`
-	if [ ! -z "$zblocks" ];then
-		needBytes=`expr $zblocks \* $zblocksize`
-	else
-		needBytes=`expr $blocks \* $blocksize`
-	fi
+	needBytes=`expr $blocks \* $blocksize`
 	needMByte=`expr $needBytes / 1048576`
 	Echo "Have size: $imageDevice -> $haveBytes Bytes [ $haveMByte MB ]"
 	Echo "Need size: $needBytes Bytes [ $needMByte MB ]"
