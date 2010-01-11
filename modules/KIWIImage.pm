@@ -376,6 +376,7 @@ sub createImageClicFS {
 	qxx ("mv -f $this->{imageDest}/$name.ext3 $this->{imageDest}/$name.clicfs");
 	qxx ("rm -f $this->{imageDest}/fsdata.ext3");
 	$kiwi -> done();
+	$this -> updateMD5File ("$this->{imageDest}/$name.clicfs");
 	return $this;
 }
 
@@ -4160,8 +4161,19 @@ sub compressImage {
 		return undef;
 	}
 	$kiwi -> done();
+	$this -> updateMD5File ("$this->{imageDest}/$name.gz");
+	return $name;
+}
+
+#==========================================
+# updateMD5File
+#------------------------------------------
+sub updateMD5File {
+	my $this = shift;
+	my $image= shift;
+	my $kiwi = $this->{kiwi};
 	#==========================================
-	# Update md5file
+	# Update md5file adding zblocks/zblocksize
 	#------------------------------------------
 	if (defined $this->{md5file}) {
 		$kiwi -> info ("Updating md5 file...");
@@ -4172,7 +4184,7 @@ sub compressImage {
 			return undef;
 		}
 		my $line = <FD>; close FD; chomp $line;
-		my $size = -s "$this->{imageDest}/$name.gz";
+		my $size = -s $image;
 		my $primes = qxx ("factor $size"); $primes =~ s/^.*: //;
 		my $blocksize = 1;
 		for my $factor (split /\s/,$primes) {
@@ -4184,7 +4196,6 @@ sub compressImage {
 		qxx ("echo \"$line $blocks $blocksize\" > $md5file");
 		$kiwi -> done();
 	}
-	return $name;
 }
 
 #==========================================
