@@ -134,6 +134,14 @@ sub new {
 			if ($arch eq "ppc64") {
 				$catalog[0] = "ppc64_default";
 			}
+			if ($arch eq "s390") {
+				$catalog[0] = "ix86_legacy";
+				$catalog[1] = "s390_ikr";
+			}
+			if ($arch eq "s390x") {
+				$catalog[0] = "ix86_legacy";
+				$catalog[1] = "s390x_ikr";
+			}
 		}
 	}
 	#=======================================
@@ -149,12 +157,6 @@ sub new {
 			}
 			if ($arch eq "ia64") {
 				push (@catalog, "ia64_efi");
-			}
-			if ($arch eq "s390") {
-				push (@catalog, "s390_ikr");
-			}
-			if ($arch eq "s390x") {
-				push (@catalog, "s390x_ikr");
 			}
 		}
 	}
@@ -298,7 +300,8 @@ sub s390_ikr {
 	my $ikr  = $this -> createS390CDLoader($boot);
 	$para.= " -eltorito-alt-boot";
 	$para.= " -hide $boot/boot.catalog -hide-joliet $boot/boot.catalog";
-	$para.= " -b $boot/cd.ikr";
+	$para.= " -no-emul-boot";
+	$para.= " -b $ikr";
 	$this -> {params} = $para;
 }
 
@@ -314,7 +317,8 @@ sub s390x_ikr {
 	my $ikr  = $this -> createS390CDLoader($boot);
 	$para.= " -eltorito-alt-boot";
 	$para.= " -hide $boot/boot.catalog -hide-joliet $boot/boot.catalog";
-	$para.= " -b $boot/cd.ikr";
+	$para.= " -no-emul-boot";
+	$para.= " -b $ikr";
 	$this -> {params} = $para; 
 }
 
@@ -424,14 +428,25 @@ sub createS390CDLoader {
 		if (-e $parmfile.".cd") {
 			$parmfile = $parmfile.".cd";
 		}
-		my $gen = "gen-s390-cd-kernel.pl";
+		my $gen = "perl $main::BasePath/modules/KIWIIsoLinux-gen-s390-cd-kernel.pl";
 		$gen .= " --initrd=$src/$basez/initrd";
 		$gen .= " --kernel=$src/$basez/vmrdr.ikr";
 		$gen .= " --parmfile=$parmfile";
-		$gen .= " --outfile=$ldir/$basez/cd.ikr";
+		$gen .= " --outfile=$src/$basez/cd.ikr";
+
+		$kiwi -> info ( "Calling: $gen\n" );
 		qxx ($gen);
+
+		my $code = $? >> 8;
+		if ($code != 0) {
+		    $kiwi -> error  ("Failed calling KIWIIsoLinux-gen-s390-cd-kernel.pl: $code.");
+		    $kiwi -> failed ();
+		    $this -> cleanISO();
+		    return undef;
+		}
 	}
-	if (-f "$ldir/$basez/cd.ikr") {
+
+	if (-f "$src/$basez/cd.ikr") {
 		return "$basez/cd.ikr";
 	}
 	return undef
