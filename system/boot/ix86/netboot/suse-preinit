@@ -102,10 +102,8 @@ fi
 #--------------------------------------
 if [ ! -z "$DISK" ];then
 	IFS=":" ; for i in $PART_MOUNT;do
-	if test ! -z "$i";then
-	if test ! -f "$i";then
+	if [ ! -z "$i" ] && [ ! -e "$i" ] && [ ! "$i" = "x" ];then
 		mkdir -p $i
-	fi
 	fi
 	done
 fi

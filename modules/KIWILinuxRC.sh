@@ -23,8 +23,7 @@ export TRANSFER_ERRORS_FILE=/tmp/transfer.errors
 export UFONT=/usr/share/fbiterm/fonts/b16.pcf.gz
 export HYBRID_PERSISTENT_FS=ext3
 export HYBRID_PERSISTENT_ID=83
-export HYBRID_PERSISTENT_DIR=/data
-
+export HYBRID_PERSISTENT_DIR=/read-write
 
 #======================================
 # Exports (General)
@@ -994,7 +993,7 @@ function setupBootLoaderSyslinux {
 			#--------------------------------------
 			kernel="linux.$count"
 			initrd="initrd.$count"
-			if ! echo $gfix | grep -E -q "OEM|USB|VMX|unknown";then
+			if ! echo $gfix | grep -E -q "OEM|USB|VMX|NET|unknown";then
 				if [ "$count" = "1" ];then
 					title=$(makeLabel "$gfix")
 				else
@@ -1212,7 +1211,7 @@ function setupBootLoaderGrub {
 			kernel=`echo $i | cut -f1 -d:`
 			initrd=`echo $i | cut -f2 -d:`
 			kname=${KERNEL_NAME[$count]}
-			if ! echo $gfix | grep -E -q "OEM|USB|VMX|unknown";then
+			if ! echo $gfix | grep -E -q "OEM|USB|VMX|NET|unknown";then
 				if [ "$count" = "1" ];then
 					title=$(makeLabel "$gfix")
 				else
@@ -1464,7 +1463,7 @@ function setupBootLoaderLilo {
 			kernel=`echo $i | cut -f1 -d:`
 			initrd=`echo $i | cut -f2 -d:`
 			kname=${KERNEL_NAME[$count]}
-			if ! echo $lfix | grep -E -q "OEM|USB|VMX|unknown";then
+			if ! echo $lfix | grep -E -q "OEM|USB|VMX|NET|unknown";then
 				if [ "$count" = "1" ];then
 					title=$(makeLabel "$lfix")
 				else
@@ -1702,6 +1701,12 @@ function updateDMBootDeviceFstab {
 #--------------------------------------
 function updateClicBootDeviceFstab {
 	updateLVMBootDeviceFstab $1 $2 "/clicboot"
+}
+#======================================
+# updatePXEBootDeviceFstab
+#--------------------------------------
+function updatePXEBootDeviceFstab {
+	updateLVMBootDeviceFstab $1 $2 "/static-boot"
 }
 #======================================
 # updateLuksBootDeviceFstab
@@ -3356,8 +3361,12 @@ function umountSystem {
 			retval=1
 		fi
 		for dir in $roDir $rwDir $xiDir;do
-			if ! umount $dir >/dev/null;then
-				retval=1
+			if [ -d $dir ];then
+				if ! umount $dir >/dev/null;then
+				if ! umount -l $dir >/dev/null;then
+					retval=1
+				fi
+				fi
 			fi
 		done
 	elif test ! -z $COMBINED_IMAGE;then
@@ -3638,8 +3647,17 @@ function mountSystemClicFS {
 			[ "x$kiwi_hybridpersistent" = "xyes" ]
 		then
 			# write into a cow file on a filesystem
-			mkdir $HYBRID_PERSISTENT_DIR
-			mount $rwDevice $HYBRID_PERSISTENT_DIR
+			mkdir -p $HYBRID_PERSISTENT_DIR
+			if ! mount $rwDevice $HYBRID_PERSISTENT_DIR;then
+				if ! setupReadWrite; then
+					Echo "Failed to setup read-write filesystem"
+					return 1
+				fi
+				if ! mount $rwDevice $HYBRID_PERSISTENT_DIR;then
+					Echo "Failed to mount read/write filesystem"
+					return 1
+				fi
+			fi
 			clic_cmd="$clic_cmd -m $haveMByte"
 			clic_cmd="$clic_cmd -c $HYBRID_PERSISTENT_DIR/.clicfs_COW"
 			clic_cmd="$clic_cmd --ignore-cow-errors"

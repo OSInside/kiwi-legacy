@@ -3,6 +3,7 @@ Mon Jan 11 18:34:40 CET 2010 - ms@suse.de
 
 - v3.91
 - fixed md5 file creation for clicfs images
+- fixed clicfs usage in combination with pxe image type
 
 -------------------------------------------------------------------
 Fri Jan  8 15:54:54 CET 2010 - ms@suse.de

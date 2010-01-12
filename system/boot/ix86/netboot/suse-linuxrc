@@ -57,6 +57,12 @@ export SYSTEM_INTEGRITY
 export SYSTEM_MD5STATUS
 
 #======================================
+# Exports (clicfs usage)
+#--------------------------------------
+export kiwi_hybrid=yes
+export kiwi_hybridpersistent=yes
+
+#======================================
 # Functions
 #--------------------------------------
 . /include
@@ -380,6 +386,7 @@ then
 				"Disk $DISK doesn't appear... fatal !" \
 			"reboot"
 		fi
+		imageDiskDevice=$DISK
 		updateNeeded initialize
 		if linuxPartition $DISK;then
 			if mountSystem $imageDevice;then
@@ -392,6 +399,7 @@ then
 			else
 				Echo -b "On-disk Image mount attempt failed,"
 				Echo -b "Image Update for image [ $imageName ] needed"
+				umountSystem
 				RELOAD_IMAGE="yes"
 				systemIntegrity="clean"
 			fi
@@ -581,7 +589,7 @@ else
 		imageRootDevice=$imageDevice
 		imageRootName="Local-System"
 		if [ ! -z "$UNIONFS_CONFIG" ];then
-			unionFST=`echo $UNIONFS_CONFIG | cut -d , -f 3`
+			unionFST=$UNIONFS_CONFIG
 			setupUnionFS $(ddn $imageDisk 3) $(ddn $imageDisk 2) $unionFST
 		fi
 		if [ ! -z "$COMBINED_IMAGE" ];then
@@ -718,6 +726,7 @@ else
 	fi
 fi
 runHook postdownload
+
 #======================================
 # 13) Check for RELOAD_CONFIG
 #--------------------------------------
@@ -731,7 +740,17 @@ if [ $LOCAL_BOOT = "no" ];then
 fi
 
 #======================================
-# 14) Make boot data available on union
+# 14) Mount OS image to /mnt
+#--------------------------------------
+runHook premount
+if ! mountSystem;then
+	systemException "Failed to mount root filesystem" "reboot"
+fi
+validateRootTree
+runHook postmount
+
+#======================================
+# 15) Setup boot partition
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ] && \
 	[ ! -z "$PART" ]      && \
@@ -744,46 +763,17 @@ then
 		# have to do this so that /boot gets copied to the
 		# extX partition, which is necessary for the bootloader to
 		# be able to find the data in there (it can't read squashfs
-		# or cromfs)
+		# or clicfs)
 		# ----
-		rwDir=/read-write
-		roDir=/read-only
-		for dir in $roDir $rwDir;do
-			mkdir -p $dir
-		done
+		mkdir /mnt/static-boot
 		rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
-		roDevice=`echo $UNIONFS_CONFIG | cut -d , -f 2`
-		if ! setupReadWrite; then
-			systemException \
-				"Failed to setup read-write filesystem" \
-			"reboot"
-		fi
-		if ! mount $rwDevice $rwDir >/dev/null;then
-			systemException \
-				"Failed to mount read/write filesystem" \
-			"reboot"
-		fi
-		if ! kiwiMount "$roDevice" "$roDir";then
-			systemException \
-				"Failed to mount read/only filesystem" \
-			"reboot"
-		fi
+		mount $rwDevice /mnt/static-boot
+		cp -a  /mnt/boot /mnt/static-boot
+		rm -rf /mnt/boot
+		( cd /mnt && ln -s static-boot/boot boot )
 		unset RELOAD_IMAGE
-		cp -a $roDir/boot $rwDir
-		umount $rwDir
-		umount $roDir
 	fi
 fi
-
-#======================================
-# 15) Mount OS image to /mnt
-#--------------------------------------
-runHook premount
-if ! mountSystem;then
-	systemException "Failed to mount root filesystem" "reboot"
-fi
-validateRootTree
-runHook postmount
 
 #======================================
 # 16) Import fixed configuration files
@@ -810,6 +800,7 @@ if [ $LOCAL_BOOT = "no" ];then
 			mkdir -p /config/$dirs
 			fetchFile $configSource /config/$configDest uncomp $configServer
 		done
+		IFS=$IFS_ORIG
 		#======================================
 		# Check for KIWI_INITRD
 		#--------------------------------------
@@ -827,10 +818,11 @@ if [ $LOCAL_BOOT = "no" ];then
 				SPLIT="COMBINED_IMAGE=$COMBINED_IMAGE"
 				KIWI_INITRD_PARAMS="$KIWI_INITRD_PARAMS $SPLIT"
 			fi
-			if [ ! -z "$UNIONFS_CONFIG" ]; then
-				UNIONED="UNIONFS_CONFIG=yes"
-				KIWI_INITRD_PARAMS="$KIWI_INITRD_PARAMS $UNIONED"
-			fi
+		fi
+		if [ ! -z "$UNIONFS_CONFIG" ]; then
+			unionFST=`echo $UNIONFS_CONFIG | cut -d , -f 3`
+			UNIONED="UNIONFS_CONFIG=$unionFST"
+			KIWI_INITRD_PARAMS="$KIWI_INITRD_PARAMS $UNIONED"
 		fi
 	fi
 fi
@@ -858,12 +850,11 @@ if \
 then
 	if test ! -z "$UNIONFS_CONFIG" && test $systemIntegrity = "clean";then
 		# /.../
-		# we are using a special root setup with aufs. In this case
-		# we can't use the SuSE Linux initrd but must stick to the
+		# we are using a special root setup with aufs or clicfs. In this
+		# case we can't use the SuSE Linux initrd but must stick to the
 		# kiwi boot system.
 		# ----
-		kiwiMount "$DISK"3 "/mnt"
-		pushd /mnt/boot >/dev/null
+		pushd /mnt/static-boot/boot >/dev/null
 		IFS="," ; for i in $KERNEL_LIST;do
 			if test -z "$i";then
 				continue
@@ -883,7 +874,6 @@ then
 		done
 		IFS=$IFS_ORIG
 		popd >/dev/null
-		umount /mnt
 	fi
 fi
 
@@ -898,6 +888,10 @@ if [ $LOCAL_BOOT = "no" ];then
 		if test ! -z $DISK;then
 			updateSwapDeviceFstab /config ${DISK}1
 			updateOtherDeviceFstab /config
+			if [ ! -z "$UNIONFS_CONFIG" ];then
+				rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
+				updatePXEBootDeviceFstab /config $rwDevice
+			fi
 			if ! test -z $COMBINED_IMAGE; then
 				gnum=`echo $imageNextRootDevice | sed -e "s/.*\([0-9]\)/\1/"`
 				gnum=`expr $gnum - 1`
@@ -976,10 +970,14 @@ umountSystemFilesystems
 #======================================
 # 25) copy initrd files to image
 #--------------------------------------
-importBranding
-if canWrite /mnt;then
-	cp /preinit /mnt
-	cp /include /mnt
+if [ $LOCAL_BOOT = "no" ];then
+	if test $systemIntegrity = "clean";then
+		if canWrite /mnt;then
+			importBranding
+			cp /preinit /mnt
+			cp /include /mnt
+		fi
+	fi
 fi
 
 #======================================
