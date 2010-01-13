@@ -305,7 +305,7 @@ if [ "$UID" = "$K_USER" ];then
 	for i in `find modules/ -type f`;do cp $i /usr/share/kiwi/modules;done
 	cp -a system/suse-repo /usr/share/kiwi/repo
 	cd modules
-	pxedefault=$RPM_BUILD_ROOT/srv/tftpboot/pxelinux.cfg/default
+	pxedefault=$RPM_BUILD_ROOT/srv/tftpboot/pxelinux.cfg/default.default
 	echo "# /.../" > $pxedefault
 	echo "# KIWI boot image setup" >> $pxedefault
 	echo "# select boot label according to your system image" >> $pxedefault
@@ -382,7 +382,7 @@ touch kiwi.loader
 %ifarch %ix86 x86_64
 if [ ! "$UID" = "$K_USER" ];then
 	install -m 644 pxeboot/pxelinux.0.config \
-		$RPM_BUILD_ROOT/srv/tftpboot/pxelinux.cfg/default
+		$RPM_BUILD_ROOT/srv/tftpboot/pxelinux.cfg/default.default
 fi
 %else
 	# no PXE boot setup for non x86 archs
@@ -404,6 +404,15 @@ rm -f $RPM_BUILD_ROOT/%{perl_vendorarch}/KIWI/example.pl
 %fdupes $RPM_BUILD_ROOT/usr/share/doc/packages/kiwi/schema
 %endif
 cat kiwi.loader
+
+%post -n kiwi-pxeboot
+#============================================================
+# create /srv/tftpboot/pxelinux.cfg/default only if not exist
+%ifarch %ix86 x86_64
+	if ( [ ! -e srv/tftpboot/pxelinux.cfg/default  ] ) ; then
+		cp /srv/tftpboot/pxelinux.cfg/default.default /srv/tftpboot/pxelinux.cfg/default
+	fi
+%endif
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -475,7 +484,7 @@ rm -rf $RPM_BUILD_ROOT
 %dir /srv/tftpboot/image
 %dir /srv/tftpboot/upload
 %dir /srv/tftpboot/boot
-/srv/tftpboot/pxelinux.cfg/default
+/srv/tftpboot/pxelinux.cfg/default.default
 %endif
 #=================================================
 # KIWI-pxeboot-prebuild files...  
