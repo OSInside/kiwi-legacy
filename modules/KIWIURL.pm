@@ -166,7 +166,7 @@ sub quote {
 		$part3 = &{$run}($part3,\%safe);
 		return $part1.$part2.":".$part3.$part4;
 	} else {
-		$surl =~ s/\$/\\\$/g;
+		$surl =~ s/(["\$`\\])/\\$1/g;
 		return $surl;
 	}
 }
