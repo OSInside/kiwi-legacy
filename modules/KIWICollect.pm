@@ -1554,17 +1554,18 @@ sub collectProducts
       # read each product file
       foreach my $prodfile(@r) {
          my $tree = $xml->parse_file( $tmp."/etc/products.d/".$prodfile );
-         my $release = $tree->getElementsByTagName( "release" );
-         my $product_name = $tree->getElementsByTagName( "name" );
-         my $label = $tree->getElementsByTagName( "summary" );
-         my $version = $tree->getElementsByTagName( "version" );
+         my $release = $tree->getElementsByTagName( "release" )->get_node(1)->textContent();
+         my $product_name = $tree->getElementsByTagName( "name" )->get_node(1)->textContent();
+         my $label = $tree->getElementsByTagName( "summary" )->get_node(1)->textContent();
+         my $version = $tree->getElementsByTagName( "version" )->get_node(1)->textContent();
          my $sp_version;
-         $sp_version = $tree->getElementsByTagName( "patchlevel" ) if $tree->getElementsByTagName( "patchlevel" )->get_node(1);
+         $sp_version = $tree->getElementsByTagName( "patchlevel" )->get_node(1)->textContent() if $tree->getElementsByTagName( "patchlevel" )->get_node(1);
 
          die( "ERROR: No handling of multiple products on one media supported yet (spec for content file missing)!" ) if $found_product;
          $found_product = 1;
 
          # overwrite data with informations from prod file.
+
          $this->logMsg("I", "Found product file, superseeding data from config file variables");
          $this->logMsg("I", "set release to ".$release);
          $this->logMsg("I", "set product name to ".$product_name);

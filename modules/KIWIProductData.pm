@@ -172,7 +172,8 @@ sub setInfo
   my $value = shift;
 
   if ( not defined($this->{prodinfo}->{$this->{'prodinfo-indices'}->{$var}}) ){
-    $this->{prodinfo}->{$this->{'prodinfo-indices'}->{$var}} = ();
+    $this->{'prodinfo-indices'}->{$var} = keys %{$this->{'prodinfo-indices'}};
+    $this->{prodinfo}->{$this->{'prodinfo-indices'}->{$var}}->[0] = $var;
   }
 
   $this->{prodinfo}->{$this->{'prodinfo-indices'}->{$var}}->[1] = $value;
