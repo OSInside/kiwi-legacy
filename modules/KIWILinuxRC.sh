@@ -850,7 +850,9 @@ function setupBootLoaderGrubRecovery {
 			echo " kernel /boot/xen.gz"                   >> $menu
 			echo -n " module /boot/$kernel"               >> $menu
 			echo -n " root=$diskByID $console"            >> $menu
-			echo -n " disk=$(getDiskID $imageDiskDevice)" >> $menu
+			if [ ! -z "$imageDiskDevice" ];then
+				echo -n " disk=$(getDiskID $imageDiskDevice)" >> $menu
+			fi
 			echo -n " vga=$fbmode splash=silent"          >> $menu
 			echo -n " $KIWI_INITRD_PARAMS"                >> $menu
 			echo -n " $KIWI_KERNEL_OPTIONS"               >> $menu
@@ -862,7 +864,9 @@ function setupBootLoaderGrubRecovery {
 		else
 			echo -n " kernel $gdev_recovery/boot/$kernel" >> $menu
 			echo -n " root=$diskByID $console"            >> $menu
-			echo -n " disk=$(getDiskID $imageDiskDevice)" >> $menu
+			if [ ! -z "$imageDiskDevice" ];then
+				echo -n " disk=$(getDiskID $imageDiskDevice)" >> $menu
+			fi
 			echo -n " vga=$fbmode splash=silent"          >> $menu
 			echo -n " $KIWI_INITRD_PARAMS"                >> $menu
 			echo -n " $KIWI_KERNEL_OPTIONS"               >> $menu
@@ -882,7 +886,9 @@ function setupBootLoaderGrubRecovery {
 			echo " kernel /boot/xen.gz"                   >> $menu
 			echo -n " module /boot/$kernel"               >> $menu
 			echo -n " root=$diskByID $console"            >> $menu
-			echo -n " disk=$(getDiskID $imageDiskDevice)" >> $menu
+			if [ ! -z "$imageDiskDevice" ];then
+				echo -n " disk=$(getDiskID $imageDiskDevice)" >> $menu
+			fi
 			echo -n " vga=$fbmode splash=silent"          >> $menu
 			echo -n " $KIWI_INITRD_PARAMS"                >> $menu
 			echo -n " $KIWI_KERNEL_OPTIONS"               >> $menu
@@ -894,7 +900,9 @@ function setupBootLoaderGrubRecovery {
 		else
 			echo -n " kernel $gdev_recovery/boot/$kernel" >> $menu
 			echo -n " root=$diskByID $console"            >> $menu
-			echo -n " disk=$(getDiskID $imageDiskDevice)" >> $menu
+			if [ ! -z "$imageDiskDevice" ];then
+				echo -n " disk=$(getDiskID $imageDiskDevice)" >> $menu
+			fi
 			echo -n " vga=$fbmode splash=silent"          >> $menu
 			echo -n " $KIWI_INITRD_PARAMS"                >> $menu
 			echo -n " $KIWI_KERNEL_OPTIONS"               >> $menu
@@ -1021,7 +1029,9 @@ function setupBootLoaderSyslinux {
 				echo "KERNEL /boot/$kernel"                    >> $conf
 				echo -n "APPEND initrd=/boot/$initrd"          >> $conf
 				echo -n " root=$diskByID $console"             >> $conf
-				echo -n " disk=$(getDiskID $imageDiskDevice)"  >> $conf
+				if [ ! -z "$imageDiskDevice" ];then
+					echo -n " disk=$(getDiskID $imageDiskDevice)"  >> $conf
+				fi
 				echo -n " vga=$fbmode loader=$loader"          >> $conf
 				echo -n " splash=silent"                       >> $conf
 				if [ ! -z "$swap" ];then
@@ -1051,7 +1061,9 @@ function setupBootLoaderSyslinux {
 				echo "KERNEL /boot/$kernel"                    >> $conf
 				echo -n "APPEND initrd=/boot/$initrd"          >> $conf
 				echo -n " root=$diskByID $console"             >> $conf
-				echo -n " disk=$(getDiskID $imageDiskDevice)"  >> $conf
+				if [ ! -z "$imageDiskDevice" ];then
+					echo -n " disk=$(getDiskID $imageDiskDevice)"  >> $conf
+				fi
 				echo -n " vga=$fbmode loader=$loader"          >> $conf
 				echo -n " splash=silent"                       >> $conf
 				if [ ! -z "$swap" ];then
@@ -1235,7 +1247,9 @@ function setupBootLoaderGrub {
 				echo " kernel /boot/xen.gz"                       >> $menu
 				echo -n " module /boot/$kernel"                   >> $menu
 				echo -n " root=$diskByID"                         >> $menu
-				echo -n " disk=$(getDiskID $imageDiskDevice)"     >> $menu
+				if [ ! -z "$imageDiskDevice" ];then
+					echo -n " disk=$(getDiskID $imageDiskDevice)"     >> $menu
+				fi
 				echo -n " $console vga=$fbmode splash=silent"     >> $menu
 				if [ ! -z "$swap" ];then
 					echo -n " resume=$swapByID"                   >> $menu
@@ -1253,7 +1267,9 @@ function setupBootLoaderGrub {
 			else
 				echo -n " kernel $gdev/boot/$kernel"              >> $menu
 				echo -n " root=$diskByID"                         >> $menu
-				echo -n " disk=$(getDiskID $imageDiskDevice)"     >> $menu
+				if [ ! -z "$imageDiskDevice" ];then
+					echo -n " disk=$(getDiskID $imageDiskDevice)"     >> $menu
+				fi
 				echo -n " $console vga=$fbmode splash=silent"     >> $menu
 				if [ ! -z "$swap" ];then
 					echo -n " resume=$swapByID"                   >> $menu
@@ -1279,7 +1295,9 @@ function setupBootLoaderGrub {
 				echo " kernel /boot/xen.gz"                       >> $menu
 				echo -n " module /boot/$kernel"                   >> $menu
 				echo -n " root=$diskByID"                         >> $menu
-				echo -n " disk=$(getDiskID $imageDiskDevice)"     >> $menu
+				if [ ! -z "$imageDiskDevice" ];then
+					echo -n " disk=$(getDiskID $imageDiskDevice)"     >> $menu
+				fi
 				echo -n " $console vga=$fbmode splash=silent"     >> $menu
 				echo -n " $KIWI_INITRD_PARAMS"                    >> $menu
 				echo -n " $KIWI_KERNEL_OPTIONS"                   >> $menu
@@ -1296,7 +1314,9 @@ function setupBootLoaderGrub {
 			else
 				echo -n " kernel $gdev/boot/$kernel"              >> $menu
 				echo -n " root=$diskByID"                         >> $menu
-				echo -n " disk=$(getDiskID $imageDiskDevice)"     >> $menu
+				if [ ! -z "$imageDiskDevice" ];then
+					echo -n " disk=$(getDiskID $imageDiskDevice)"     >> $menu
+				fi
 				echo -n " $console vga=$fbmode splash=silent"     >> $menu
 				echo -n " $KIWI_INITRD_PARAMS"                    >> $menu
 				echo -n " $KIWI_KERNEL_OPTIONS"                   >> $menu
@@ -1491,7 +1511,9 @@ function setupBootLoaderLilo {
 				echo "initrd=/boot/$initrd"                   >> $conf
 				echo -n "append=\"quiet sysrq=1 panic=9"      >> $conf
 				echo -n " root=$diskByID"                     >> $conf
-				echo -n " disk=$(getDiskID $imageDiskDevice)" >> $conf
+				if [ ! -z "$imageDiskDevice" ];then
+					echo -n " disk=$(getDiskID $imageDiskDevice)" >> $conf
+				fi
 				echo -n " $console vga=$fbmode splash=silent" >> $conf
 				if [ ! -z "$swap" ];then                     
 					echo -n " resume=$swapByID"               >> $conf
@@ -1520,7 +1542,9 @@ function setupBootLoaderLilo {
 				echo "initrd=/boot/$initrd"                   >> $conf
 				echo -n "append=\"quiet sysrq=1 panic=9"      >> $conf
 				echo -n " root=$diskByID"                     >> $conf
-				echo -n " disk=$(getDiskID $imageDiskDevice)" >> $conf
+				if [ ! -z "$imageDiskDevice" ];then
+					echo -n " disk=$(getDiskID $imageDiskDevice)" >> $conf
+				fi
 				echo -n " $console vga=$fbmode splash=silent" >> $conf
 				if [ ! -z "$swap" ];then
 					echo -n " resume=$swapByID"               >> $conf
@@ -3699,9 +3723,9 @@ function mountSystemClicFS {
 	size=`stat -c %s $roDir/fsdata.ext3`
 	size=$((size/4096))
 	# we don't want reserved blocks...
-	tune2fs -m 0 $roDir/fsdata.ext3
+	tune2fs -m 0 $roDir/fsdata.ext3 >/dev/null
 	# we don't want automatic filesystem check...
-	tune2fs -i 0 $roDir/fsdata.ext3
+	tune2fs -i 0 $roDir/fsdata.ext3 >/dev/null
 	if [ ! $LOCAL_BOOT = "no" ];then
 		e2fsck -p $roDir/fsdata.ext3
 	fi

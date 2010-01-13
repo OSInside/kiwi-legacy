@@ -386,7 +386,6 @@ then
 				"Disk $DISK doesn't appear... fatal !" \
 			"reboot"
 		fi
-		imageDiskDevice=$DISK
 		updateNeeded initialize
 		if linuxPartition $DISK;then
 			if mountSystem $imageDevice;then
