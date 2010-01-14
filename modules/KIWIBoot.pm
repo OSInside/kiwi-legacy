@@ -345,6 +345,7 @@ sub new {
 	} elsif (defined $system) {
 		$vmmbyte = $vmsize / 1048576;
 	}
+	$kiwi -> loginfo ("Starting with disk size: $vmsize\n");
 	#==========================================
 	# round compressed image size
 	#------------------------------------------
@@ -2209,17 +2210,46 @@ sub setupBootDisk {
 					return undef;
                 }
 				#==========================================
-				# increase total size per volume
+				# store volume sizes in lvmparts
 				#------------------------------------------
-				my $freespace = 0;
+				my $space = 0;
+				my $diff  = 0;
+				my $haveAbsolute;
 				if ($lvmparts{$vol}) {
-					$freespace = $lvmparts{$vol};
+					$space = $lvmparts{$vol}->[0];
+					$haveAbsolute = $lvmparts{$vol}->[1];
 				}
-				$vmsize = $this->{vmmbyte} + 30 + $freespace;
+				my $lvsize = qxx (
+					"du -s --block-size=1 $system/$pname | cut -f1"
+				);
+				chomp $lvsize;
+				$lvsize /= 1048576;
+				if ($haveAbsolute) {
+					if ($space > ($lvsize + 30)) {
+						$diff = $space - $lvsize;
+						$lvsize = $space;
+					} else {
+						$lvsize += 30;
+					}
+				} else {
+					$lvsize = int ( 30 + $lvsize + $space);
+				}
+				$lvmparts{$vol}->[2] = $lvsize;
+				#==========================================
+				# increase total vm disk size
+				#------------------------------------------
+				if ($haveAbsolute) {
+					$vmsize = $this->{vmmbyte} + 30 + $diff;
+				} else {
+					$vmsize = $this->{vmmbyte} + 30 + $space;
+				}
 				$vmsize = sprintf ("%.0f", $vmsize);
 				$this->{vmmbyte} = $vmsize;
 				$vmsize = $vmsize."M";
 				$this->{vmsize}  = $vmsize;
+				$kiwi->loginfo (
+					"Increasing disk size to: $vmsize for volume $pname\n"
+				);
 			}
 		}
 	}
@@ -4669,22 +4699,10 @@ sub setVolumeGroup {
 		if (%lvmparts) {
 			my %ihash = ();
 			foreach my $name (keys %lvmparts) {
-				my $pname = $name; $pname =~ s/_/\//g;
-				my $freespace = 0;
-				if ($lvmparts{$name}) {
-					$freespace = $lvmparts{$name};
-				}
-				my $lvsize = qxx (
-					"du -s --block-size=1 $system/$pname | cut -f1"
-				);
-				chomp $lvsize;
-				#my $lvmini = qxx ("find $system/$pname | wc -l"); $lvmini *= 2;
-				#my $lvneedi = $lvsize / $main::FSInodeRatio;
-				#$ihash{$lvdevice} = int($lvmini > $lvneedi ? $lvmini:$lvneedi);
-				my $lvdevice= "/dev/$VGroup/LV$name";
-				$ihash{$lvdevice} = "no-opts";
-				$lvsize /= 1048576;
-				$lvsize = int ( 30 + $lvsize + $freespace);
+				my $pname  = $name; $pname =~ s/_/\//g;
+				my $lvsize = $lvmparts{$name}->[2];
+				my $lvdev  = "/dev/$VGroup/LV$name";
+				$ihash{$lvdev} = "no-opts";
 				$status = qxx ("lvcreate -L $lvsize -n LV$name $VGroup 2>&1");
 				$result = $? >> 8;
 				if ($result != 0) {

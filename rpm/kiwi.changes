@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Wed Jan 13 18:34:13 CET 2010 - ms@suse.de
+
+- v3.92
+- fixed typo in getPXEDeployTimeout()
+- forbid / to be specified in lvmvolumes (bnc #570398)
+- allow absolute size value for lvm volumes (bnc #570396) 
+
+-------------------------------------------------------------------
 Wed Jan 13 17:20:00 UTC 2010 - adrian@suse.de
 
 - fix writing of RELEASE line in content file

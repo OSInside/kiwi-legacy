@@ -1900,10 +1900,21 @@ used as MB by default but you can add "M" and/or "G" as
 prefix</a:documentation>
       </attribute>
     </define>
+    <define name="k.volume.size.attribute">
+      <attribute name="size">
+        <a:documentation>absolute size of the volume. If the size value
+is too small to store all data it will be ignored.
+The value is used as MB by default but you can
+add "M" and/or "G" as prefix</a:documentation>
+      </attribute>
+    </define>
     <define name="k.volume.attlist">
       <interleave>
         <optional>
           <ref name="k.volume.freespace.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.volume.size.attribute"/>
         </optional>
         <ref name="k.volume.name.attribute"/>
       </interleave>

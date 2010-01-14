@@ -981,7 +981,7 @@ sub getPXEDeployTimeout {
 	# Get the boot timeout, if specified
 	# ---
 	my $this = shift;
-	my $node = $this->{deploysNodeList} -> get_node(1);
+	my $node = $this->{pxedeployNodeList} -> get_node(1);
 	my $timeout = $node -> getElementsByTagName ("timeout");
 	if ((defined $timeout) && ! ("$timeout" eq "")) {
 		return $timeout;
@@ -2365,15 +2365,31 @@ sub getLVMVolumes {
 	foreach my $volume (@vollist) {
 		my $name = $volume -> getAttribute ("name");
 		my $free = $volume -> getAttribute ("freespace");
-		if (($free) && ($free =~ /(\d+)([MG]*)/)) {
+		my $size = $volume -> getAttribute ("size");
+		my $haveAbsolute;
+		my $usedValue;
+		if ($size) {
+			$haveAbsolute = 1;
+			$usedValue = $size;
+		} elsif ($free) {
+			$usedValue = $free;
+			$haveAbsolute = 0;
+		}
+		if (($usedValue) && ($usedValue =~ /(\d+)([MG]*)/)) {
 			my $byte = int $1;
 			my $unit = $2;
 			if ($unit eq "G") {
-				$free = $byte * 1024;
+				$usedValue = $byte * 1024;
 			} else {
 				# no or unknown unit, assume MB...
-				$free = $byte;
+				$usedValue = $byte;
 			}
+		}
+		$name =~ s/\s+//g;
+		if ($name eq "/") {
+			$kiwi -> warning ("LVM: Directory $name is not allowed");
+			$kiwi -> skipped ();
+			next;
 		}
 		$name =~ s/^\///;
 		if ($name
@@ -2383,7 +2399,7 @@ sub getLVMVolumes {
 			next;
 		}
 		$name =~ s/\//_/g;
-		$result{$name} = $free;
+		$result{$name} = [ $usedValue,$haveAbsolute ];
 	}
 	return %result;
 }

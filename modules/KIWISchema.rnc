@@ -1327,8 +1327,15 @@ div {
 		## used as MB by default but you can add "M" and/or "G" as
 		## prefix
 		attribute freespace { text }
+	k.volume.size.attribute =
+		## absolute size of the volume. If the size value
+		## is too small to store all data it will be ignored.
+		## The value is used as MB by default but you can
+		## add "M" and/or "G" as prefix
+		attribute size { text }
 	k.volume.attlist =
 		k.volume.freespace.attribute? &
+		k.volume.size.attribute? &
 		k.volume.name.attribute
 	k.volume =
 		## Specify which parts of the filesystem should be
