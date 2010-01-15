@@ -34,8 +34,7 @@ fi
 #==========================================
 # remove unneeded packages
 #------------------------------------------
-rpm -e --nodeps --noscripts \
-	$(rpm -q `baseGetPackagesForDeletion` | grep -v "is not installed")
+suseRemovePackagesMarkedForDeletion
 
 #======================================
 # Remove all documentation

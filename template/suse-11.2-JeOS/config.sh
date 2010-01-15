@@ -42,8 +42,7 @@ suseRemoveService avahi-daemon
 #==========================================
 # remove unneeded packages
 #------------------------------------------
-rpm -e --nodeps --noscripts \
-	$(rpm -q `baseGetPackagesForDeletion` | grep -v "is not installed")
+suseRemovePackagesMarkedForDeletion
 
 #==========================================
 # remove package docs

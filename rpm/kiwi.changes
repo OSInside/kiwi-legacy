@@ -1,4 +1,16 @@
 -------------------------------------------------------------------
+Fri Jan 15 14:11:37 CET 2010 - ms@suse.de
+
+- v3.93
+- moved package deletion into own function and adapt
+  the examples. remove --noscripts for deleting packages
+  this could cause files to stay in the system which has
+  a bad impact core utilities like mkinitrd. If for example
+  busybox is uninstalled without calling the postscript
+  the mkinitrd setup links will stay as broken links and
+  cause mkinitrd to stop working (bnc #570948)
+
+-------------------------------------------------------------------
 Wed Jan 13 18:34:13 CET 2010 - ms@suse.de
 
 - v3.92
