@@ -395,7 +395,14 @@ vbladed 0 1 eth0 /dev/sdb1
 AOEROOT=/dev/etherd/e0.1
 \end{verbatim}
         kiwi is now able to mount and use the specified AoE device
-        as the remote root filesystem.
+        as the remote root filesystem. In case of a compressed read-only
+        image with aufs or clicfs the AOEROOT variable can also contain
+        a device for the write actions:
+\begin{verbatim}
+AOEROOT=/dev/etherd/e0.1,/dev/ram1
+\end{verbatim}
+        Writing to RAM is the default but you also can set another device
+        like another aoe location or a local device for writing the data
     \item \textbf{NFSROOT}\\
          Mount the system image root filesystem remotely via NFS
          (Network File System). This means there is a server which

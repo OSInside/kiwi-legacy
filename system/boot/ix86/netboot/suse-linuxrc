@@ -694,12 +694,17 @@ else
 	# 12.4) Check for AOE root
 	#--------------------------------------
 	if [ ! -z "$AOEROOT" ];then
+		aoeRODevice=`echo $AOEROOT | cut -d , -f 1`
+		aoeRWDevice=`echo $AOEROOT | cut -d , -f 2`
+		if [ -z "$aoeRWDevice" ] || [ "$aoeRODevice" = "$aoeRWDevice" ];then
+			aoeRWDevice=/dev/ram1
+		fi
 		if ! modprobe aoe;then
 			systemException "Failed to load AoE module" "reboot"
 		fi
-		waitForBlockDevice $AOEROOT
-		if [ ! -b $AOEROOT ];then
-			systemException "Device $AOEROOT doesn't appear" "reboot"
+		waitForBlockDevice $aoeRODevice
+		if [ ! -b $aoeRODevice ];then
+			systemException "Device $aoeRODevice doesn't appear" "reboot"
 		fi
 		# /.../
 		# check ram space, if we don't have more than 62MB
@@ -711,13 +716,13 @@ else
 			Echo "AoE: memory is below required 62M"
 			systemException "Not enough ram" "reboot"
 		fi
-		Echo "Mounting AoE root system: $AOEROOT..."
-		imageRootDevice=$AOEROOT
+		Echo "Mounting AoE root system: $aoeRODevice..."
+		imageRootDevice=$aoeRODevice
 		probeFileSystem $imageRootDevice
 		Echo "Filesystem of remote root system is: $FSTYPE"
 		if [ -z "$COMBINED_IMAGE" ];then
 			if isFSTypeReadOnly;then
-				setupUnionFS /dev/ram1 "$imageRootDevice" $unionFST
+				setupUnionFS "$aoeRWDevice" "$imageRootDevice" $unionFST
 			fi
 		fi
 		imageRootName="AOERoot-System"

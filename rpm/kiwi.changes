@@ -2,6 +2,7 @@
 Fri Jan 15 14:11:37 CET 2010 - ms@suse.de
 
 - v3.93
+- allow AOEROOT to contain the read-write device
 - moved package deletion into own function and adapt
   the examples. remove --noscripts for deleting packages
   this could cause files to stay in the system which has
