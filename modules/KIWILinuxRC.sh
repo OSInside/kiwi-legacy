@@ -1921,17 +1921,20 @@ function waitForUSBDeviceScan {
 	if [ ! "$HAVE_USB" = "yes" ];then
 		return
 	fi
-	Echo -n "Waiting for USB device scan to complete..."
-	while \
-		[ $(dmesg | grep -c 'usb-storage: device scan complete') -lt 1 ] && \
-		[ $devices -lt 15 ]
-	do
-		echo -n .
-		sleep 1
-		devices=$(( $devices + 1 ))
-	done
-	echo
-	udevPending
+	if [ ! "$SCAN_USB" = "complete" ];then
+		Echo -n "Waiting for USB device scan to complete..."
+		while \
+			[ $(dmesg|grep -c 'usb-storage: device scan complete') -lt 1 ] && \
+			[ $devices -lt 15 ]
+		do
+			echo -n .
+			sleep 1
+			devices=$(( $devices + 1 ))
+		done
+		echo
+		udevPending
+		SCAN_USB=complete
+	fi
 }
 #======================================
 # probeUSB
@@ -1941,6 +1944,7 @@ function probeUSB {
 	local stdevs=""
 	local hwicmd="/usr/sbin/hwinfo"
 	export HAVE_USB="no"
+	export SCAN_USB="not-started"
 	if [ $HAVE_MODULES_ORDER = 0 ];then
 		#======================================
 		# load host controller modules
@@ -2005,10 +2009,13 @@ function probeUSB {
 # probeDevices
 #--------------------------------------
 function probeDevices {
+	local skipUSB=$1
 	#======================================
 	# probe USB devices and load modules
 	#--------------------------------------
-	probeUSB
+	if [ -z "$skipUSB" ];then
+		probeUSB
+	fi
 	#======================================
 	# probe Disk devices and load modules
 	#--------------------------------------

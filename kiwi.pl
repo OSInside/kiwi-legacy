@@ -99,9 +99,7 @@ our $KMigrate = $BasePath."/modules/KIWIMigrate.txt";
 our $KSplit   = $BasePath."/modules/KIWISplit.txt";
 our $Revision = $BasePath."/.revision";
 our $TestBase = $BasePath."/tests";
-our @SchemaCVT= (
-	$BasePath."/xsl/master.xsl"
-);
+our $SchemaCVT= $BasePath."/xsl/master.xsl";
 
 #==========================================
 # Globals (Supported filesystem names)

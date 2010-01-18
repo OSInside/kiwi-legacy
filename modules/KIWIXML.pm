@@ -103,24 +103,6 @@ sub new {
 		}
 	}
 	#==========================================
-	# Check/Transform due to XSL stylesheet(s)
-	#------------------------------------------
-	foreach my $template (@main::SchemaCVT) {
-		my $data = qxx (
-			"xsltproc -o /tmp/config.xml $template $controlFile 2>&1"
-		);
-		my $code = $? >> 8;
-		if (($code == 0) && (-f "/tmp/config.xml")) {
-			$controlFile = "/tmp/config.xml";
-		} elsif ($code > 10) {
-			$kiwi -> error ("XSL: $data");
-			$kiwi -> failed ();
-			return undef;
-		} else {
-			$kiwi -> loginfo ("XSL: $data");
-		}
-	}
-	#==========================================
 	# Check image md5 sum
 	#------------------------------------------
 	if (-f $checkmdFile) {
@@ -156,9 +138,16 @@ sub new {
 	my $vmwarecNodeList;
 	my $xenconfNodeList;
 	my $volumesNodeList;
+	my $XML;
+	if (! open ($XML,"xsltproc $main::SchemaCVT $controlFile|")) {
+		$kiwi -> error ("XSL: Failed to open xslt processor");
+		$kiwi -> failed ();
+		return undef;
+	}
+	binmode $XML;
 	eval {
 		$systemTree = $systemXML
-			-> parse_file ( $controlFile );
+			-> parse_fh ( $XML );
 		$this->{xmlOrigString} = $systemTree -> toString();
 		$this->{xmlOrigFile}   = $controlFile;
 		$optionsNodeList = $systemTree -> getElementsByTagName ("preferences");

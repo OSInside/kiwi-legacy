@@ -347,7 +347,7 @@ fi
 # 10) Load Device modules
 #--------------------------------------
 runHook preprobe
-probeDevices
+probeDevices "skipUSB"
 runHook postprobe
 
 export systemIntegrity="unknown"

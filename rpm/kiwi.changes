@@ -2,7 +2,9 @@
 Fri Jan 15 14:11:37 CET 2010 - ms@suse.de
 
 - v3.93
+- don't let xsltproc write into fixed /tmp location (bnc #571558)
 - added config function to disable Ctrl-Alt-Del in inittab
+- prevent USB device scan for pxe boot images (bnc #570961)
 - allow AOEROOT to contain the read-write device (bnc #570960)
 - moved package deletion into own function and adapt
   the examples. remove --noscripts for deleting packages
