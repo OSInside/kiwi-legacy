@@ -89,6 +89,14 @@ exit</programlisting>
         </listitem>
       </varlistentry>
       <varlistentry>
+        <term><optional>baseDisableCtrlAltDel</optional></term>
+        <listitem>
+          <para>
+            Disable the Ctrl-Alt-Del key sequence setting in /etc/inittab
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
         <term><optional>baseGetPackagesForDeletion</optional></term>
         <listitem>
           <para>

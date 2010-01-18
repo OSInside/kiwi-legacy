@@ -1417,7 +1417,7 @@ function suseSetupProduct {
 #--------------------------------------
 function baseSetRunlevel {
 	# /.../
-	# This function set the runlevel in /etc/inittab to
+	# This function sets the runlevel in /etc/inittab to
 	# the specified value
 	# ----
 	local RUNLEVEL=$1
@@ -1442,4 +1442,14 @@ function suseRemovePackagesMarkedForDeletion {
 	# ----
 	rpm -e --nodeps \
 		$(rpm -q `baseGetPackagesForDeletion` | grep -v "is not installed")
+}
+
+#======================================
+# baseDisableCtrlAltDel
+#--------------------------------------
+function baseDisableCtrlAltDel {
+	# /.../
+	# This function disables the Ctrl-Alt-Del key sequence
+	# ---
+	sed -i "s/ca::ctrlaltdel/#ca::ctrlaltdel/" /etc/inittab
 }

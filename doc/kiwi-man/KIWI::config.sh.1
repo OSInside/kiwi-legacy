@@ -1,12 +1,12 @@
 .\"     Title: kiwi::config.sh
 .\"    Author: Marcus Schäfer <ms (AT) suse.de>
 .\" Generator: DocBook XSL Stylesheets v1.74.0 <http://docbook.sf.net/>
-.\"      Date: Created: 01/15/2010
+.\"      Date: Created: 01/18/2010
 .\"    Manual: KIWI Manualpage
 .\"    Source: KIWI v3.65
 .\"  Language: English
 .\"
-.TH "KIWI::CONFIG\&.SH" "1" "Created: 01/15/2010" "KIWI v3\&.65" "KIWI Manualpage"
+.TH "KIWI::CONFIG\&.SH" "1" "Created: 01/18/2010" "KIWI v3\&.65" "KIWI Manualpage"
 .\" -----------------------------------------------------------------
 .\" * (re)Define some macros
 .\" -----------------------------------------------------------------
@@ -227,6 +227,11 @@ The \&.kconfig file allows to make use of a common set of functions\&. Those whi
 [baseCleanMount]
 .RS 4
 Umount the system filesystems /proc /dev/pts /sys
+.RE
+.PP
+[baseDisableCtrlAltDel]
+.RS 4
+Disable the Ctrl\-Alt\-Del key sequence setting in /etc/inittab
 .RE
 .PP
 [baseGetPackagesForDeletion]
