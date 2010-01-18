@@ -2787,7 +2787,7 @@ function createFileSystem {
 		if test $diskID -gt 2; then
 			if ! e2fsck -p $diskPartition 1>&2; then
 				Echo "Partition $diskPartition is not valid, formating..."
-				mke2fs -T ext3 -j $diskPartition 1>&2
+				mke2fs -F -T ext3 -j $diskPartition 1>&2
 				if test $? != 0; then
 					systemException \
 						"Failed to create filesystem on: $diskPartition !" \
@@ -3517,7 +3517,7 @@ function setupReadWrite {
 				! mount -o ro $rwDevice $rwDir >/dev/null
 			then
 				Echo "Creating filesystem for RW data on $rwDevice..."
-				if ! mke2fs -T ext3 -j $rwDevice >/dev/null;then
+				if ! mke2fs -F -T ext3 -j $rwDevice >/dev/null;then
 					Echo "Failed to create ext3 filesystem"
 					return 1
 				fi
@@ -5215,7 +5215,7 @@ function SAPDataStorageSetup {
 	pvcreate -ff -y $diskpart
 	vgcreate data_vg $diskpart
 	lvcreate -l 100%FREE -n sapdata data_vg
-	mke2fs -T ext3 -j /dev/data_vg/sapdata
+	mke2fs -F -T ext3 -j /dev/data_vg/sapdata
 	if test $? != 0; then
 		systemException "Failed to create sapdata volume" "reboot"
 	fi
