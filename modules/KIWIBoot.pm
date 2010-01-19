@@ -1504,9 +1504,9 @@ sub setupInstallCD {
 		# find partition to check
 		#------------------------------------------
 		my $dmap = $this->{loop}; $dmap =~ s/dev\///;
-		my $sdev = "/dev/mapper".$dmap."p2";
+		my $sdev = "/dev/mapper".$dmap."p1";
 		if (! -e $sdev) {
-			$sdev = "/dev/mapper".$dmap."p1";
+			$sdev = "/dev/mapper".$dmap."p2";
 		}
 		for (my $try=0;$try<=3;$try++) {
 			if (defined (my $lvroot = glob ("/dev/mapper/*-LVRoot"))) {
@@ -1527,6 +1527,7 @@ sub setupInstallCD {
 		}
 		if (-f "$tmpdir/rootfs.tar") {
 			$imgtype = "split";
+			$this->{imgtype} = $imgtype;
 		}
 		$this -> cleanLoop("keep-mountpoints");
 	}
@@ -1781,9 +1782,9 @@ sub setupInstallStick {
 		# find partition to check
 		#------------------------------------------
 		my $dmap = $this->{loop}; $dmap =~ s/dev\///;
-		my $sdev = "/dev/mapper".$dmap."p2";
+		my $sdev = "/dev/mapper".$dmap."p1";
 		if (! -e $sdev) {
-			$sdev = "/dev/mapper".$dmap."p1";
+			$sdev = "/dev/mapper".$dmap."p2";
 		}
 		for (my $try=0;$try<=3;$try++) {
 			if (defined (my $lvroot = glob ("/dev/mapper/*-LVRoot"))) {
@@ -1804,6 +1805,7 @@ sub setupInstallStick {
 		}
 		if (-f "$tmpdir/rootfs.tar") {
 			$imgtype = "split";
+			$this->{imgtype} = $imgtype;
 		}
 		$this -> cleanLoop("keep-mountpoints");
 	}

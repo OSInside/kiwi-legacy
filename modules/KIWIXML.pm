@@ -1034,7 +1034,9 @@ sub getSplitPersistentFiles {
 	my @fileNodeList = $persistNode -> getElementsByTagName ("file")
 		-> get_nodelist();
 	foreach my $fileNode (@fileNodeList) {
-		push @result, $fileNode -> getAttribute ("name");
+		my $name = $fileNode -> getAttribute ("name");
+		$name =~ s/\/$//;
+		push @result, $name;
 	}
 	return @result;
 }
@@ -1059,7 +1061,9 @@ sub getSplitTempFiles {
 	my @fileNodeList = $tempNode -> getElementsByTagName ("file")
 		-> get_nodelist();
 	foreach my $fileNode (@fileNodeList) {
-		push @result, $fileNode -> getAttribute ("name");
+		my $name = $fileNode -> getAttribute ("name");
+		$name =~ s/\/$//;
+		push @result, $name;
 	}
 	return @result;
 }

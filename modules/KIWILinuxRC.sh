@@ -3269,7 +3269,7 @@ function validateTarSize {
 	needMByte=`expr $needBytes / 1048576`
 	Echo "Have size: proc/meminfo -> $haveMByte MB"
 	Echo "Need size: $tsrc -> $needMByte MB [ uncompressed ]"
-	if test $haveMByte -gt $needMByte;then
+	if [ "$haveMByte" -gt "$needMByte" ];then
 		return 0
 	fi
 	return 1
@@ -3847,7 +3847,11 @@ function mountSystemCombined {
 	# /.../
 	# mount tmpfs, reserve max 512MB for the rootfs data
 	# ----
-	mount -t tmpfs tmpfs -o size=512M,nr_inodes=$inr /mnt >/dev/null || return 1
+	if ! mount -t tmpfs tmpfs -o size=512M,nr_inodes=$inr /mnt;then
+		systemException \
+			"Failed to mount root tmpfs" \
+		"reboot"
+	fi
 	if ! validateTarSize $rootfs;then
 		systemException \
 			"Not enough RAM space available for temporary data" \
@@ -3872,7 +3876,7 @@ function mountSystemCombined {
 			# ----
 			mkdir /mnt/read-write >/dev/null
 			mount $rwDevice /mnt/read-write >/dev/null
-			rm -f /read-write >/dev/null
+			rm -rf /read-write >/dev/null
 			ln -s /mnt/read-write /read-write >/dev/null
 		fi
 	fi

@@ -1535,8 +1535,12 @@ sub setupRootSystem {
 			print $fd "test \$? = 0 && @smart @rootlib install ";
 			print $fd "glibc @installOpts &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
-			print $fd "test \$? = 0 && mv $root/baselibs/lib* $root\n";
-			print $fd "test \$? = 0 && rm -rf $root/baselibs\n";
+			print $fd "if test \$? = 0;then\n";
+			print $fd "mv $root/baselibs/lib $root\n";
+			print $fd "test -d $root/baselibs/lib64 && ";
+			print $fd "mv $root/baselibs/lib64 $root\n";
+			print $fd "rm -rf $root/baselibs\n";
+			print $fd "fi\n";
 			# Install the rest with requires libs on board
 			print $fd "test \$? = 0 && @smart @rootdir install ";
 			print $fd "@packs @installOpts &\n";
@@ -1645,8 +1649,12 @@ sub setupRootSystem {
 			print $fd "@zypper --disable-system-resolvables -R $root/baselibs ";
 			print $fd "install @installOpts glibc &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
-			print $fd "test \$? = 0 && mv $root/baselibs/lib* $root\n";
-			print $fd "test \$? = 0 && rm -rf $root/baselibs\n";
+			print $fd "if test \$? = 0;then\n";
+			print $fd "mv $root/baselibs/lib $root\n";
+			print $fd "test -d $root/baselibs/lib64 && ";
+			print $fd "mv $root/baselibs/lib64 $root\n";
+			print $fd "rm -rf $root/baselibs\n";
+			print $fd "fi\n";
 			print $fd "test \$? = 0 && ";
 			# Install the rest with required libs on board
 			if (@newprods) {

@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Tue Jan 19 13:32:36 CET 2010 - ms@suse.de
+
+- v3.94
+- fixed baselibs setup for 64bit image builds
+- fixed split grub setup for install CD/Stick
+- fixed split section parsing, remove trailing slash if no
+  information follows
+
+-------------------------------------------------------------------
 Fri Jan 15 14:11:37 CET 2010 - ms@suse.de
 
 - v3.93
