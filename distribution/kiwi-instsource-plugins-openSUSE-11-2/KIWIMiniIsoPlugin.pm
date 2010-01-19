@@ -158,7 +158,7 @@ sub execute
   }
 
   if(!@gfxbootfiles) {
-    $this->logMsg("E", "No gfxboot.cfg file found! This _MIGHT_ be ok for S/390! Please verify <installation-images> package(s)!");
+    $this->logMsg("W", "No gfxboot.cfg file found! This _MIGHT_ be ok for S/390! Please verify <installation-images> package(s)!");
     return $retval;
   }
 
