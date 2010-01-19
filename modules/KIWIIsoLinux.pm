@@ -422,35 +422,161 @@ sub createS390CDLoader {
 	my $basez= shift;
 	my $kiwi = $this->{kiwi};
 	my $src  = $this->{source};
-	my $ldir = $this->{tmpdir};
-	if (-f $src."/".$basez."/vmrdr.ikr") {
-		qxx ("mkdir -p $ldir/$basez");
-		my $parmfile = $src."/".$basez."/parmfile";
-		if (-e $parmfile.".cd") {
-			$parmfile = $parmfile.".cd";
-		}
-		my $gen = "perl $main::BasePath/modules/KIWIIsoLinux-gen-s390-cd-kernel.pl";
-		$gen .= " --initrd=$src/$basez/initrd";
-		$gen .= " --kernel=$src/$basez/vmrdr.ikr";
-		$gen .= " --parmfile=$parmfile";
-		$gen .= " --outfile=$src/$basez/cd.ikr";
 
-		$kiwi -> info ( "Calling: $gen\n" );
-		qxx ($gen);
+	$kiwi -> info ("Creating S390 CD kernel:");
 
-		my $code = $? >> 8;
-		if ($code != 0) {
-		    $kiwi -> error  ("Failed calling KIWIIsoLinux-gen-s390-cd-kernel.pl: $code.");
-		    $kiwi -> failed ();
-		    $this -> cleanISO();
-		    return undef;
-		}
+	# originally from gen-s390-cd-kernel.pl by Ruediger Oertel
+
+	my $parmfile = "$src/$basez/parmfile";
+	if (-e $parmfile.".cd") {
+		$parmfile = $parmfile.".cd";
+	}
+	my $image = "$src/$basez/vmrdr.ikr";
+	my $initrd = "$src/$basez/initrd";
+	my $outfile = "$src/$basez/cd.ikr";
+	my $cmdline = 'root=/dev/sda2';
+
+	# Open input files
+	if (! sysopen(image_fh,$image,O_RDONLY) ) {
+		$kiwi -> error  ("Cannot open kernel image $image: $!");
+		$kiwi -> failed ();
+		$this -> cleanISO();
+		return undef;
 	}
 
-	if (-f "$src/$basez/cd.ikr") {
-		return "$basez/cd.ikr";
+	if (! sysopen(initrd_fh,$initrd,O_RDONLY) ) {
+		$kiwi -> error  ("Cannot open initrd $initrd: $!");
+		$kiwi -> failed ();
+		$this -> cleanISO ();
+		return undef;
 	}
-	return undef
+
+	my $image_size = (stat(image_fh))[7];
+	my $initrd_size = (stat(initrd_fh))[7];
+
+	# Get the size of the input files
+	$kiwi -> info (sprintf("\t%s: offset 0x%x len 0x%x (%d blocks)",
+			$image, 0, $image_size, ($image_size >> 12) + 1));
+
+	# The kernel appearently needs some free space above the
+	# actual image (bss? stack?), so use this hard-coded
+	# limit (from include/asm-s390/setup.h)
+
+	# my $initrd_offset = (($image_size >> 12) + 1) << 12;
+	my $initrd_offset = 0x800000;
+	my $boot_size = ((($initrd_offset + $initrd_size) >> 12) + 1 ) << 12;
+	$kiwi -> info (sprintf("\t%s: offset 0x%x len 0x%x (%d blocks)",
+			$initrd, $initrd_offset, $initrd_size, ($initrd_size >>12) + 1));
+	$kiwi -> info (sprintf("\t%s: len 0x%x (%d blocks)",
+			$outfile, $initrd_offset + $initrd_size, $boot_size / 4096));
+
+	# Get the kernel command line arguments
+	$cmdline .= " " if ($cmdline ne "");
+
+	if ($parmfile ne "") {
+		my $line;
+
+		$cmdline = '';
+		if (! open(parm_fh,$parmfile) ) {
+			$kiwi -> error  ("Cannot open parmfile $parmfile: $!");
+			$kiwi -> failed ();
+			$this -> cleanISO();
+			return undef;
+		}
+		while($line=<parm_fh>) {
+			chomp $line;
+			$cmdline .= $line . " ";
+		}
+		close(parm_fh);
+	}
+
+	if ($cmdline ne "") {
+		chop $cmdline;
+	}
+
+	# Max length for the kernel command line is 896 bytes
+	if (length($cmdline) >= 896) {
+		$kiwi -> error  ("Kernel commandline too long (". length($cmdline) ." bytes)");
+		$kiwi -> failed ();
+		$this -> cleanISO ();
+		return undef;
+	}
+
+	# Now create the image file.
+	if (! sysopen(out_fh,$outfile,O_RDWR|O_CREAT|O_TRUNC) ) {
+		$kiwi -> error  ("Cannot open outfile $outfile: $!");
+		$kiwi -> failed ();
+		$this -> cleanISO ();
+		return undef;
+	}
+
+	# First fill the entire size with zeroes
+	if (! sysopen(null_fh,"/dev/zero",O_RDONLY) ) {
+		$kiwi -> error  ("Cannot open /dev/zero: $!");
+		$kiwi -> failed ();
+		$this -> cleanISO ();
+		return undef;
+	}
+
+	my $buffer="";
+	my $blocks_read=0;
+	while ($blocks_read < ($boot_size >> 12)) {
+		sysread(null_fh,$buffer, 4096);
+		syswrite(out_fh,$buffer);
+		$blocks_read += 1;
+	}
+
+	$kiwi -> info ("\tRead $blocks_read blocks from /dev/zero");
+	close(null_fh);
+
+	# Now copy the image file to location 0
+	sysseek(out_fh,0,0);
+	$blocks_read = 0;
+	while (sysread(image_fh,$buffer, 4096) != 0) {
+		syswrite(out_fh,$buffer,4096);
+		$blocks_read += 1;
+	}
+
+	$kiwi -> info ("\tRead $blocks_read blocks from $image");
+	close(image_fh);
+
+	# Then the initrd to location specified by initrd_offset
+	sysseek(out_fh,$initrd_offset,0);
+	$blocks_read = 0;
+	while (sysread(initrd_fh,$buffer, 4096) != 0) {
+		syswrite(out_fh,$buffer,4096);
+		$blocks_read += 1;
+	}
+
+	$kiwi -> info ("\tRead $blocks_read blocks from $initrd");
+
+	close(initrd_fh);
+
+	# Now for the real black magic.
+	# If we are loading from CD-ROM or HMC, the kernel is already loaded
+	# in memory by the first loader itself.
+	$kiwi -> info ("\tSetting boot loader control to 0x10000");
+
+	sysseek(out_fh,4,0 );
+	syswrite(out_fh,pack("N",0x80010000),4);
+
+	$kiwi -> info ("\tWriting kernel commandline (". length($cmdline) ." bytes):");
+	$kiwi -> info ("\t$cmdline");
+
+	sysseek(out_fh,0x10480,0);
+	syswrite(out_fh,$cmdline,length($cmdline));
+
+	$kiwi -> info ("\tSetting initrd parameter: offset $initrd_offset size $initrd_size");
+
+	sysseek(out_fh,0x1040C,0);
+	syswrite(out_fh,pack("N",$initrd_offset),4);
+	sysseek(out_fh,0x10414,0);
+	syswrite(out_fh,pack("N",$initrd_size),4);
+
+	close(out_fh);
+
+	(my $retval = $outfile) =~ s|$src/||;
+	return $retval;
 }
 
 #==========================================
