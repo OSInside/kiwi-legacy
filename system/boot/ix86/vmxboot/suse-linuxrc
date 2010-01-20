@@ -235,7 +235,7 @@ if [ "$LOCAL_BOOT" = "no" ];then
 		for i in 1 2 3;do
 			pType=`partitionID $imageDiskDevice $i`
 			if [ "$pType" = "6" ];then
-				imageFatDevice=$imageDiskDevice$i
+				imageFatDevice=$(ddn $imageDiskDevice $i)
 				break
 			fi 
 		done
