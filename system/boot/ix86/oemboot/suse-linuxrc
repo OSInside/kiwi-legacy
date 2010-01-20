@@ -101,7 +101,7 @@ function setupInitialDeviceNames {
 			export imageRootDevice=$(ddn $imageDiskDevice 1)
 		else
 			for i in 1 2;do
-				export imageRootDevice=$imageDiskDevice$i
+				export imageRootDevice=$(ddn $imageDiskDevice $i)
 				probeFileSystem $imageRootDevice
 				if [ ! "$FSTYPE" = "unknown" ];then
 					break
