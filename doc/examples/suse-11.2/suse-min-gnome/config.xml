@@ -39,7 +39,6 @@
         <package name="python"/>
         <package name="perl"/>
         <package name="preload"/>
-        <package name="sax2"/>
         <!-- Need tomboy to appease panel in default setup -->
         <package name="tomboy"/>
         <package name="vim"/>
