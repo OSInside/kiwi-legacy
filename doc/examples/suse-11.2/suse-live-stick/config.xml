@@ -6,17 +6,18 @@
 		<specification>openSUSE 11.2 live stick system 1GB</specification>
 	</description>
 	<preferences>
-		<type filesystem="clicfs" boot="usbboot/suse-11.2">usb</type>
-		<type filesystem="clicfs" boot="oemboot/suse-11.2">oem</type>
-		<type filesystem="clicfs" boot="vmxboot/suse-11.2">vmx</type>
+		<type image="usb" filesystem="clicfs" boot="usbboot/suse-11.2"/>
+		<type image="oem" filesystem="clicfs" boot="oemboot/suse-11.2"><oemconfig>
+				<oem-swap>false</oem-swap>
+				<oem-kiwi-initrd>true</oem-kiwi-initrd>
+				<oem-boot-title>USB</oem-boot-title>
+			</oemconfig></type>
+		<type image="vmx" filesystem="clicfs" boot="vmxboot/suse-11.2"/>
 		<version>1.1.2</version>
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>
 		<rpm-force>true</rpm-force>
 		<rpm-excludedocs>true</rpm-excludedocs>
-		<oem-swap>false</oem-swap>
-		<oem-kiwi-initrd>true</oem-kiwi-initrd>
-		<oem-boot-title>USB</oem-boot-title>
 		<locale>en_US.UTF-8</locale>
 		<keytable>us.map.gz</keytable>
 		<timezone>Europe/Berlin</timezone>

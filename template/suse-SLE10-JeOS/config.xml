@@ -18,16 +18,32 @@
 		<locale>en_US</locale>
 		<keytable>us.map.gz</keytable>
 		<timezone>Europe/Berlin</timezone>
-		<oem-home>false</oem-home>
-		<oem-systemsize>2048</oem-systemsize>
 	</preferences>
 	<preferences profiles="xenFlavour">
-		<type filesystem="ext3" boot="vmxboot/suse-SLES10" bootprofile="xen" bootkernel="nex">vmx</type>
-		<type filesystem="ext3" boot="oemboot/suse-SLES10" bootprofile="xen" bootkernel="nex" format="iso">oem</type>
+		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES10" bootprofile="xen" bootkernel="nex"><xenconfig memory="512" domain="domU">
+				<xendisk device="/dev/xvda"/>
+				<xenbridge name=""/>
+			</xenconfig></type>
+		<type image="oem" filesystem="ext3" boot="oemboot/suse-SLES10" bootprofile="xen" bootkernel="nex" format="iso"><oemconfig>
+				<oem-home>false</oem-home>
+				<oem-systemsize>2048</oem-systemsize>
+			</oemconfig><xenconfig memory="512" domain="domU">
+				<xendisk device="/dev/xvda"/>
+				<xenbridge name=""/>
+			</xenconfig></type>
 	</preferences>
 	<preferences profiles="vmxFlavour">
-		<type filesystem="ext3" boot="vmxboot/suse-SLES10" format="vmdk">vmx</type>
-		<type filesystem="ext3" boot="oemboot/suse-SLES10" format="iso">oem</type>
+		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES10" format="vmdk"><vmwareconfig memory="512" guestOS="suse" HWversion="4">
+				<vmwaredisk controller="scsi" id="0"/>
+				<vmwarenic driver="e1000" interface="0" mode="bridged"/>
+			</vmwareconfig></type>
+		<type image="oem" filesystem="ext3" boot="oemboot/suse-SLES10" format="iso"><oemconfig>
+				<oem-home>false</oem-home>
+				<oem-systemsize>2048</oem-systemsize>
+			</oemconfig><vmwareconfig memory="512" guestOS="suse" HWversion="4">
+				<vmwaredisk controller="scsi" id="0"/>
+				<vmwarenic driver="e1000" interface="0" mode="bridged"/>
+			</vmwareconfig></type>
 	</preferences>
 	<users group="root">
 		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
@@ -105,12 +121,4 @@
 		<package name="cracklib"/>
 		<package name="openssl"/>
 	</packages>
-	<vmwareconfig memory="512" guestOS="suse" HWversion="4">
-		<vmwaredisk controller="scsi" id="0"/>
-		<vmwarenic driver="e1000" interface="0" mode="bridged"/>
-	</vmwareconfig>
-	<xenconfig memory="512" domain="domU">
-		<xendisk device="/dev/xvda"/>
-		<xenbridge name=""/>
-	</xenconfig>
 </image>

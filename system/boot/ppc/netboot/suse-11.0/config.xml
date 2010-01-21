@@ -6,7 +6,7 @@
 		<specification>boot/initrd image used for PXE</specification>
 	</description>
 	<preferences>
-		<type bootprofile="default" bootkernel="std">cpio</type>
+		<type image="cpio" bootprofile="default" bootkernel="std"/>
 		<version>2.1.1</version>
 		
 		<packagemanager>zypper</packagemanager>

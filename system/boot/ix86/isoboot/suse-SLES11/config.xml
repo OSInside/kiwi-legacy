@@ -6,10 +6,8 @@
 		<specification>boot/initrd image used for LiveDVD media</specification>
 	</description>
 	<preferences>
-		<type bootprofile="default" bootkernel="std">cpio</type>
+		<type image="cpio" bootprofile="default" bootkernel="std"/>
 		<version>2.1.2</version>
-		<size unit="M">60</size>
-		
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>
 	</preferences>

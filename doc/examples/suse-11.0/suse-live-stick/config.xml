@@ -6,8 +6,8 @@
 		<specification>openSUSE 11.0 live stick system</specification>
 	</description>
 	<preferences>
-		<type filesystem="ext3" boot="usbboot/suse-11.0">usb</type>
-		<type filesystem="ext3" boot="oemboot/suse-11.0">oem</type>
+		<type image="usb" filesystem="ext3" boot="usbboot/suse-11.0"/>
+		<type image="oem" filesystem="ext3" boot="oemboot/suse-11.0"/>
 		<version>1.1.2</version>
 		<packagemanager>smart</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>

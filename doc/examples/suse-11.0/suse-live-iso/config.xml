@@ -6,7 +6,7 @@
 		<specification>openSUSE 11.0 Live system</specification>
 	</description>
 	<preferences>
-		<type primary="true" boot="isoboot/suse-11.0" flags="unified">iso</type>
+		<type image="iso" primary="true" boot="isoboot/suse-11.0" flags="unified"/>
 		<version>2.5.1</version>
 		<packagemanager>smart</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>

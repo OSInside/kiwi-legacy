@@ -6,9 +6,13 @@
 		<specification>openSUSE Amazon ec2 11.2 test system</specification>
 	</description>
 	<preferences>
-		<type primary="true" ec2accountnr="12345678911" ec2privatekeyfile="Path to EC2 private key file" ec2certfile="Path to EC2 public certificate file">ec2</type>
-		<type filesystem="ext4" boot="vmxboot/suse-11.2">vmx</type>
-		<type filesystem="ext4" boot="xenboot/suse-11.2">xen</type>
+		<type image="ec2" primary="true" ec2accountnr="12345678911" ec2privatekeyfile="Path to EC2 private key file" ec2certfile="Path to EC2 public certificate file"/>
+		<type image="vmx" filesystem="ext4" boot="vmxboot/suse-11.2"><vmwareconfig memory="512">
+				<vmwaredisk controller="ide" id="0"/>
+			</vmwareconfig></type>
+		<type image="xen" filesystem="ext4" boot="xenboot/suse-11.2"><xenconfig memory="512">
+				<xendisk device="/dev/sda"/>
+			</xenconfig></type>
 		<version>1.1.2</version>
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>
@@ -34,12 +38,6 @@
 	</packages>
 	<packages type="vmware">
 	</packages>
-	<xenconfig memory="512">
-		<xendisk device="/dev/sda"/>
-	</xenconfig>
-	<vmwareconfig memory="512">
-		<vmwaredisk controller="ide" id="0"/>
-	</vmwareconfig>
 	<packages type="bootstrap">
 		<package name="filesystem"/> 
 		<package name="glibc-locale"/>

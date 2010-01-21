@@ -6,8 +6,10 @@
 		<specification>openSUSE 11.1 Appliance using GNOME</specification>
 	</description>
 	<preferences>
-		<type primary="true" filesystem="ext3" boot="vmxboot/suse-11.1" format="vmdk">vmx</type>
-        <type boot="isoboot/suse-11.1" flags="unified">iso</type>
+		<type image="vmx" primary="true" filesystem="ext3" boot="vmxboot/suse-11.1" format="vmdk"><vmwareconfig memory="1024">
+				<vmwaredisk controller="ide" id="0"/>
+			</vmwareconfig></type>
+        <type image="iso" boot="isoboot/suse-11.1" flags="unified"/>
 		<version>1.0.1</version>
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>
@@ -48,9 +50,6 @@
 	</packages>
 	<packages type="vmware">
 	</packages>
-	<vmwareconfig memory="1024">
-		<vmwaredisk controller="ide" id="0"/>
-	</vmwareconfig>
 	<packages type="bootstrap">
 		<package name="filesystem"/> 
 		<package name="glibc-locale"/>

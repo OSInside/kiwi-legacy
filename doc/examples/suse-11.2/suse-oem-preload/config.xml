@@ -6,7 +6,16 @@
 		<specification>openSUSE 11.2 oem preload system</specification>
 	</description>
 	<preferences>
-		<type fsreadwrite="ext4" fsreadonly="squashfs" boot="oemboot/suse-11.2" format="iso">split</type>
+		<type image="split" fsreadwrite="ext4" fsreadonly="squashfs" boot="oemboot/suse-11.2" format="iso"><split>
+				<persistent>
+					<file name="/etc"/>
+					<file name="/etc/*"/>
+					<file name="/var"/>
+					<file name="/var/*"/>
+					<file name="/boot"/>
+					<file name="/boot/*"/>
+				</persistent>
+			</split></type>
 		<version>1.1.2</version>
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>
@@ -37,14 +46,4 @@
 		<package name="filesystem"/> 
 		<package name="glibc-locale"/>
 	</packages>
-	<split>
-		<persistent>
-			<file name="/etc"/>
-			<file name="/etc/*"/>
-			<file name="/var"/>
-			<file name="/var/*"/>
-			<file name="/boot"/>
-			<file name="/boot/*"/>
-		</persistent>
-	</split>
 </image>

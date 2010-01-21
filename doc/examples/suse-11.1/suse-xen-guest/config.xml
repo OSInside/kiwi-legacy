@@ -6,7 +6,10 @@
 		<specification>openSUSE 11.1 xen guest system</specification>
 	</description>
 	<preferences>
-		<type filesystem="ext3" boot="xenboot/suse-11.1">xen</type>
+		<type image="xen" filesystem="ext3" boot="xenboot/suse-11.1"><xenconfig memory="128">
+				<xendisk device="/dev/sda"/> 
+				<xenbridge mac="00:0C:6E:AA:57:2F" name="br0"/>
+			</xenconfig></type>
 		<version>1.1.2</version>
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>
@@ -33,10 +36,6 @@
 		<package name="kernel-xen"/>
 		<package name="xen"/>
 	</packages>
-	<xenconfig memory="128">
-		<xendisk device="/dev/sda"/> 
-		<xenbridge mac="00:0C:6E:AA:57:2F" name="br0"/>
-	</xenconfig>
 	<packages type="bootstrap">
 		<package name="filesystem"/> 
 		<package name="glibc-locale"/>
