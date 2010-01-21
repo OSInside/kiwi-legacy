@@ -20,6 +20,7 @@ package KIWIIsoLinux;
 #------------------------------------------
 use strict;
 use Carp qw (cluck);
+use Fcntl; # needed for some constants for sysopen
 use File::Find;
 use File::Basename;
 use KIWILog;
