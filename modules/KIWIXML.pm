@@ -540,7 +540,7 @@ sub getImageSize {
 	# Get the predefined size of the logical extend
 	# ---
 	my $this = shift;
-	my $node = $this -> getPreferencesNodeByTagName ("size");
+	my $node = $this->{typeNode};
 	my $size = $node -> getElementsByTagName ("size");
 	if ($size) {
 		my $plus = $node -> getElementsByTagName ("size")
@@ -575,7 +575,7 @@ sub getImageSizeAdditiveBytes {
 	# was set to true
 	# ---
 	my $this = shift;
-	my $node = $this -> getPreferencesNodeByTagName ("size");
+	my $node = $this->{typeNode};
 	my $size = $node -> getElementsByTagName ("size");
 	if ($size) {
 		my $plus = $node -> getElementsByTagName ("size")
@@ -610,7 +610,7 @@ sub getImageSizeBytes {
 	# as byte value
 	# ---
 	my $this = shift;
-	my $node = $this -> getPreferencesNodeByTagName ("size");
+	my $node = $this->{typeNode};
 	my $size = $node -> getElementsByTagName ("size");
 	if ($size) {
 		my $byte = int $size;
