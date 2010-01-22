@@ -166,6 +166,8 @@ sub new {
 	$this->{optionsNodeList} = $optionsNodeList;
 	$this->{systemTree}      = $systemTree;
 	$this->{imageWhat}       = $imageWhat;
+	$this->{reqProfiles}     = $reqProfiles;
+	$this->{profilesNodeList}= $profilesNodeList;
 	#==========================================
 	# Validate xml input with current schema
 	#------------------------------------------
@@ -180,16 +182,6 @@ sub new {
 		return undef;
 	}
 	#==========================================
-	# Check type information from xml input
-	#------------------------------------------
-	if ($optionsNodeList) {
-		if (! $this -> getImageTypeAndAttributes()) {
-			$kiwi -> error  ("Boot type: $imageWhat not specified in xml");
-			$kiwi -> failed ();
-			return undef;
-		}
-	}
-	#==========================================
 	# Check kiwirevision attribute
 	#------------------------------------------
 	if (open FD,$main::Revision) {
@@ -201,6 +193,37 @@ sub new {
 			$kiwi -> error  (
 				"KIWI revision too old, require r$req_rev got r$cur_rev"
 			);
+			$kiwi -> failed ();
+			return undef;
+		}
+	}
+	#==========================================
+	# Check image version format
+	#------------------------------------------
+	my $version = $this -> getImageVersion();
+	if ($version !~ /^\d+\.\d+\.\d+$/) {
+		$kiwi -> error  ("Invalid version format: $version");
+		$kiwi -> failed ();
+		$kiwi -> error  ("Expected 'Major.Minor.Release'");
+		$kiwi -> failed ();
+		return undef;
+	}
+	#==========================================
+	# Apply default profiles from XML if set
+	#------------------------------------------
+	$this -> setDefaultProfiles();
+	#==========================================
+	# Check profile names
+	#------------------------------------------
+	if (! $this -> checkProfiles()) {
+		return undef;
+	}
+	#==========================================
+	# Check type information from xml input
+	#------------------------------------------
+	if ($optionsNodeList) {
+		if (! $this -> getImageTypeAndAttributes()) {
+			$kiwi -> error  ("Boot type: $imageWhat not specified in xml");
 			$kiwi -> failed ();
 			return undef;
 		}
@@ -312,34 +335,34 @@ sub new {
 			$this -> setForeignOptionsElement ("packagemanager");
 		}
 		if (defined $foreignRepo->{"oem-swap"}) {
-			$this -> setForeignOptionsElement ("oem-swap");
+			$this -> setForeignOEMOptionsElement ("oem-swap");
 		}
 		if (defined $foreignRepo->{"oem-swapsize"}) {
-			$this -> setForeignOptionsElement ("oem-swapsize");
+			$this -> setForeignOEMOptionsElement ("oem-swapsize");
 		}
 		if (defined $foreignRepo->{"oem-home"}) {
-			$this -> setForeignOptionsElement ("oem-home");
+			$this -> setForeignOEMOptionsElement ("oem-home");
 		}
 		if (defined $foreignRepo->{"oem-systemsize"}) {
-			$this -> setForeignOptionsElement ("oem-systemsize");
+			$this -> setForeignOEMOptionsElement ("oem-systemsize");
 		}
 		if (defined $foreignRepo->{"oem-boot-title"}) {
-			$this -> setForeignOptionsElement ("oem-boot-title");
+			$this -> setForeignOEMOptionsElement ("oem-boot-title");
 		}
 		if (defined $foreignRepo->{"oem-kiwi-initrd"}) {
-			$this -> setForeignOptionsElement ("oem-kiwi-initrd");
+			$this -> setForeignOEMOptionsElement ("oem-kiwi-initrd");
 		}
 		if (defined $foreignRepo->{"oem-sap-install"}) {
-			$this -> setForeignOptionsElement ("oem-sap-install");
+			$this -> setForeignOEMOptionsElement ("oem-sap-install");
 		}
 		if (defined $foreignRepo->{"oem-reboot"}) {
-			$this -> setForeignOptionsElement ("oem-reboot");
+			$this -> setForeignOEMOptionsElement ("oem-reboot");
 		}
 		if (defined $foreignRepo->{"oem-recovery"}) {
-			$this -> setForeignOptionsElement ("oem-recovery");
+			$this -> setForeignOEMOptionsElement ("oem-recovery");
 		}
 		if (defined $foreignRepo->{"oem-recoveryID"}) {
-			$this -> setForeignOptionsElement ("oem-recoveryID");
+			$this -> setForeignOEMOptionsElement ("oem-recoveryID");
 		}
 		#==========================================
 		# foreign attributes
@@ -361,33 +384,9 @@ sub new {
 	$this->{packageNodeList}    = $packageNodeList;
 	$this->{imgnameNodeList}    = $imgnameNodeList;
 	$this->{instsrcNodeList}    = $instsrcNodeList;
-	$this->{profilesNodeList}   = $profilesNodeList;
-	$this->{reqProfiles}        = $reqProfiles;
 	$this->{havemd5File}        = $havemd5File;
 	$this->{arch}               = $arch;
 	$this->{controlFile}        = $controlFile;
-
-	#==========================================
-	# Apply default profiles from XML if set
-	#------------------------------------------
-	$this -> setDefaultProfiles();
-	#==========================================
-	# Check profile names
-	#------------------------------------------
-	if (! $this -> checkProfiles()) {
-		return undef;
-	}
-	#==========================================
-	# Check image version format
-	#------------------------------------------
-	my $version = $this -> getImageVersion();
-	if ($version !~ /^\d+\.\d+\.\d+$/) {
-		$kiwi -> error  ("Invalid version format: $version");
-		$kiwi -> failed ();
-		$kiwi -> error  ("Expected 'Major.Minor.Release'");
-		$kiwi -> failed ();
-		return undef;
-	}
 	#==========================================
 	# Store object data (create URL list)
 	#------------------------------------------
@@ -766,8 +765,8 @@ sub getImageTypeAndAttributes {
 			$this->{typeNode}  = $result{primary}{node};
 			return $result{primary};
 		} else {
-			$this->{imageWhat} = $result{first}{type};
-			$this->{typeNode}  = $result{first}{node};
+			$this->{imageWhat} = $result{$first}{type};
+			$this->{typeNode}  = $result{$first}{node};
 			return $result{$first};
 		}
 	}
@@ -1128,6 +1127,34 @@ sub setForeignOptionsElement {
 	my $addElement = new XML::LibXML::Element ("$item");
 	$addElement -> appendText ($value);
 	my $opts = $this -> getPreferencesNodeByTagName ("$item");
+	my $node = $opts -> getElementsByTagName ("$item");
+	if ($node) {
+		$node = $node -> get_node(1);
+		$opts -> removeChild ($node);
+	}
+	$opts -> appendChild ($addElement);
+	$kiwi -> done ();
+	return $this;
+}
+
+#==========================================
+# setForeignOEMOptionsElement
+#------------------------------------------
+sub setForeignOEMOptionsElement {
+    # ...
+	# If given element exists in the foreign hash, set this
+	# element into the current oemconfig (options) XML tree
+	# ---
+	my $this = shift;
+	my $item = shift;
+	my $kiwi = $this->{kiwi};
+	my $tnode= $this->{typeNode};
+	my $foreignRepo = $this->{foreignRepo};
+	my $value = $foreignRepo->{$item};
+	$kiwi -> info ("Including foreign OEM element $item: $value");
+	my $addElement = new XML::LibXML::Element ("$item");
+	$addElement -> appendText ($value);
+	my $opts = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
 	my $node = $opts -> getElementsByTagName ("$item");
 	if ($node) {
 		$node = $node -> get_node(1);
@@ -3690,6 +3717,7 @@ sub addDefaultSplitNode {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $tnode= $this->{typeNode};
+
 	my $splitNodeList = $tnode -> getElementsByTagName ("split");
 	if ($splitNodeList) {
 		return;
