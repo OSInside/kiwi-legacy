@@ -1137,6 +1137,7 @@ sub setForeignOptionsElement {
 	}
 	$opts -> appendChild ($addElement);
 	$kiwi -> done ();
+	$this -> updateXML();
 	return $this;
 }
 
@@ -1173,6 +1174,7 @@ sub setForeignOEMOptionsElement {
 		$this->{typeNode} -> appendChild ($opts);
 	}
 	$kiwi -> done ();
+	$this -> updateXML();
 	return $this;
 }
 
@@ -1187,17 +1189,11 @@ sub setForeignTypeAttribute {
 	my $this = shift;
 	my $attr = shift;
 	my $kiwi = $this->{kiwi};
-	my @node = $this->{optionsNodeList} -> get_nodelist();
-	foreach my $element (@node) {
-		if (! $this -> requestedProfile ($element)) {
-			next;
-		}
-		$kiwi -> info ("Including foreign type attribute: $attr");
-		foreach my $tag ($element -> getElementsByTagName ("type")) {
-			$tag -> setAttribute ("$attr","true");
-		}
-		$kiwi -> done ();
-	}
+	my $tnode= $this->{typeNode};
+	$kiwi -> info ("Including foreign type attribute: $attr");
+	$tnode-> setAttribute ("$attr","true");
+	$kiwi -> done ();
+	$this -> updateXML();
 	return $this;
 }
 
@@ -3782,6 +3778,7 @@ sub addDefaultSplitNode {
 	$this->{typeNode} -> appendChild (
 		$splitTree -> getElementsByTagName ("split")
 	);
+	$this -> updateXML();
 	return $this;
 }
 
