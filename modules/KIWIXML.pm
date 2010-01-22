@@ -1249,6 +1249,9 @@ sub getOEMSwapSize {
 	my $this = shift;
 	my $tnode= $this->{typeNode};
 	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return undef;
+	}
 	my $size = $node -> getElementsByTagName ("oem-swapsize");
 	if ((! defined $size) || ("$size" eq "")) {
 		return undef;
@@ -1266,6 +1269,9 @@ sub getOEMSystemSize {
 	my $this = shift;
 	my $tnode= $this->{typeNode};
 	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return undef;
+	}
 	my $size = $node -> getElementsByTagName ("oem-systemsize");
 	if ((! defined $size) || ("$size" eq "")) {
 		return undef;
@@ -1283,6 +1289,9 @@ sub getOEMBootTitle {
 	my $this = shift;
 	my $tnode= $this->{typeNode};
 	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return undef;
+	}
 	my $title= $node -> getElementsByTagName ("oem-boot-title");
 	if ((! defined $title) || ("$title" eq "")) {
 		$title = $this -> getImageDisplayName();
@@ -1303,6 +1312,9 @@ sub getOEMKiwiInitrd {
 	my $this = shift;
 	my $tnode= $this->{typeNode};
 	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return undef;
+	}
 	my $kboot= $node -> getElementsByTagName ("oem-kiwi-initrd");
 	if ((! defined $kboot) || ("$kboot" eq "")) {
 		return undef;
@@ -1320,6 +1332,9 @@ sub getOEMSAPInstall {
 	my $this = shift;
 	my $tnode= $this->{typeNode};
 	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return undef;
+	}
 	my $sap  = $node -> getElementsByTagName ("oem-sap-install");
 	if ((! defined $sap) || ("$sap" eq "")) {
 		return undef;
@@ -1337,6 +1352,9 @@ sub getOEMReboot {
 	my $this = shift;
 	my $tnode= $this->{typeNode};
 	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return undef;
+	}
 	my $boot = $node -> getElementsByTagName ("oem-reboot");
 	if ((! defined $boot) || ("$boot" eq "")) {
 		return undef;
@@ -1354,6 +1372,9 @@ sub getOEMSwap {
 	my $this = shift;
 	my $tnode= $this->{typeNode};
 	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return undef;
+	}
 	my $swap = $node -> getElementsByTagName ("oem-swap");
 	if ((! defined $swap) || ("$swap" eq "")) {
 		return undef;
@@ -1371,6 +1392,9 @@ sub getOEMRecovery {
 	my $this = shift;
 	my $tnode= $this->{typeNode};
 	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return undef;
+	}
 	my $reco = $node -> getElementsByTagName ("oem-recovery");
 	if ((! defined $reco) || ("$reco" eq "")) {
 		return undef;
@@ -1388,6 +1412,9 @@ sub getOEMRecoveryID {
 	my $this = shift;
 	my $tnode= $this->{typeNode};
 	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return undef;
+	}
 	my $reco = $node -> getElementsByTagName ("oem-recoveryID");
 	if ((! defined $reco) || ("$reco" eq "")) {
 		return undef;
@@ -1405,6 +1432,9 @@ sub getOEMHome {
 	my $this = shift;
 	my $tnode= $this->{typeNode};
 	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return undef;
+	}
 	my $home = $node -> getElementsByTagName ("oem-home");
 	if ((! defined $home) || ("$home" eq "")) {
 		return undef;
@@ -3717,7 +3747,10 @@ sub addDefaultSplitNode {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $tnode= $this->{typeNode};
-
+	my $type = $this->{imageWhat};
+	if ($type ne "split") {
+		return $this;
+	}
 	my $splitNodeList = $tnode -> getElementsByTagName ("split");
 	if ($splitNodeList) {
 		return;
@@ -3738,6 +3771,7 @@ sub addDefaultSplitNode {
 	$this->{typeNode} -> appendChild (
 		$splitTree -> getElementsByTagName ("split")
 	);
+	return $this;
 }
 
 1;
