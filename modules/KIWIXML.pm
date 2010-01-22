@@ -872,9 +872,12 @@ sub getPXEDeployPartitions {
 	# ---
 	my $this = shift;
 	my $tnode= $this->{typeNode};
-	my $partitionNodes = $tnode -> getElementsByTagName ("partitions")
-		-> get_node(1) -> getElementsByTagName ("partition");
+	my $partitions = $tnode -> getElementsByTagName ("partitions") -> get_node(1);
 	my @result = ();
+	if (! $partitions) {
+		return @result;
+	}
+	my $partitionNodes = $partitions -> getElementsByTagName ("partition");
 	for (my $i=1;$i<= $partitionNodes->size();$i++) {
 		my $node = $partitionNodes -> get_node($i);
 		my $number = $node -> getAttribute ("number");
