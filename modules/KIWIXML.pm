@@ -1151,16 +1151,24 @@ sub setForeignOEMOptionsElement {
 	my $tnode= $this->{typeNode};
 	my $foreignRepo = $this->{foreignRepo};
 	my $value = $foreignRepo->{$item};
+	my $newconfig = 0;
 	$kiwi -> info ("Including foreign OEM element $item: $value");
 	my $addElement = new XML::LibXML::Element ("$item");
 	$addElement -> appendText ($value);
 	my $opts = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $opts) {
+		$opts = new XML::LibXML::Element ("oemconfig");
+		$newconfig = 1;
+	}
 	my $node = $opts -> getElementsByTagName ("$item");
 	if ($node) {
 		$node = $node -> get_node(1);
 		$opts -> removeChild ($node);
 	}
 	$opts -> appendChild ($addElement);
+	if ($newconfig) {
+		$this->{typeNode} -> appendChild ($opts);
+	}
 	$kiwi -> done ();
 	return $this;
 }
