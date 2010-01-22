@@ -150,21 +150,6 @@ sub new {
 		$packageNodeList = $systemTree -> getElementsByTagName ("packages");
 		$profilesNodeList= $systemTree -> getElementsByTagName ("profiles");
 		$instsrcNodeList = $systemTree -> getElementsByTagName ("instsource");
-
-		# FIXME, type specific
-		#$pxedeployNodeList = $systemTree -> getElementsByTagName ("pxedeploy");
-		#$splitNodeList   = $systemTree -> getElementsByTagName ("split");
-		#$vmwarecNodeList = $systemTree -> getElementsByTagName ("vmwareconfig");
-		#$xenconfNodeList = $systemTree -> getElementsByTagName ("xenconfig");
-		#$volumesNodeList = $systemTree -> getElementsByTagName ("lvmvolumes");
-
-		# FIXME, pxedeploy specific
-		#$partitionsNodeList = $systemTree 
-		#	-> getElementsByTagName ("partitions");
-		#$configfileNodeList = $systemTree 
-		#	-> getElementsByTagName("configuration");
-		#$unionNodeList = $systemTree -> getElementsByTagName ("union");
-
 	};
 	if ($@) {
 		my $evaldata=$@;
@@ -182,23 +167,6 @@ sub new {
 	$this->{systemTree}      = $systemTree;
 	$this->{imageWhat}       = $imageWhat;
 	#==========================================
-	# Check type information from xml input
-	#------------------------------------------
-	if ($optionsNodeList) {
-		if (! $this -> getImageTypeAndAttributes()) {
-			$kiwi -> error  ("Boot type: $imageWhat not specified in xml");
-			$kiwi -> failed ();
-			return undef;
-		}
-	}
-	#==========================================
-	# Add default split section if not defined
-	#------------------------------------------
-	if (! $splitNodeList) {
-		# FIXME, add it to the type specific section
-		$splitNodeList = $this -> addDefaultSplitNode();
-	}
-	#==========================================
 	# Validate xml input with current schema
 	#------------------------------------------
 	eval {
@@ -210,6 +178,16 @@ sub new {
 		$kiwi -> failed ();
 		$kiwi -> error  ("$evaldata\n");
 		return undef;
+	}
+	#==========================================
+	# Check type information from xml input
+	#------------------------------------------
+	if ($optionsNodeList) {
+		if (! $this -> getImageTypeAndAttributes()) {
+			$kiwi -> error  ("Boot type: $imageWhat not specified in xml");
+			$kiwi -> failed ();
+			return undef;
+		}
 	}
 	#==========================================
 	# Check kiwirevision attribute
@@ -227,6 +205,10 @@ sub new {
 			return undef;
 		}
 	}
+	#==========================================
+	# Add default split section if not defined
+	#------------------------------------------
+	$this -> addDefaultSplitNode();
 	#==========================================
 	# Set global packagemanager value
 	#------------------------------------------
@@ -741,6 +723,7 @@ sub getImageTypeAndAttributes {
 		if ($count == 0) {
 			$first = $prim;
 		}
+		$record{node}          = $node;
 		$record{type}          = $node -> getAttribute("image");
 		$record{luks}          = $node -> getAttribute("luks");
 		$record{lvm}           = $node -> getAttribute("lvm");
@@ -780,15 +763,19 @@ sub getImageTypeAndAttributes {
 	if (! defined $this->{imageWhat}) {
 		if (defined $result{primary}) {
 			$this->{imageWhat} = $result{primary}{type};
+			$this->{typeNode}  = $result{primary}{node};
 			return $result{primary};
 		} else {
 			$this->{imageWhat} = $result{first}{type};
+			$this->{typeNode}  = $result{first}{node};
 			return $result{$first};
 		}
 	}
 	if ($ptype eq $this->{imageWhat}) {
+		$this->{typeNode}  = $result{primary}{node};
 		return $result{primary};
 	} else {
+		$this->{typeNode}  = $result{$this->{imageWhat}}{node};
 		return $result{$this->{imageWhat}};
 	}
 }
@@ -814,10 +801,9 @@ sub getPXEDeployUnionConfig {
 	# Get the union file system configuration, if any
 	# ---
 	my $this = shift;
-	# FIXME, type specific
-	my $type = $this->{imageWhat};
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("union") -> get_node(1);
 	my %config = ();
-	my $node = $this->{unionNodeList} -> get_node(1);
 	if (! $node) {
 		return %config;
 	}
@@ -835,9 +821,8 @@ sub getPXEDeployImageDevice {
 	# Get the device the image will be installed to
 	# ---
 	my $this = shift;
-	# FIXME, type specific
-	my $type = $this->{imageWhat};
-	my $node = $this->{partitionsNodeList} -> get_node(1);
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("partitions") -> get_node(1);
 	if (defined $node) {
 		return $node -> getAttribute ("device");
 	} else {
@@ -853,9 +838,8 @@ sub getPXEDeployServer {
 	# Get the server the config data is obtained from
 	# ---
 	my $this = shift;
-	# FIXME, type specific
-	my $type = $this->{imageWhat};
-	my $node = $this->{pxedeployNodeList} -> get_node(1);
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("pxedeploy") -> get_node(1);
 	if (defined $node) {
 		return $node -> getAttribute ("server");
 	} else {
@@ -871,9 +855,8 @@ sub getPXEDeployBlockSize {
 	# Get the block size the deploy server should use
 	# ---
 	my $this = shift;
-	# FIXME, type specific
-	my $type = $this->{imageWhat};
-	my $node = $this->{pxedeployNodeList} -> get_node(1);
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("pxedeploy") -> get_node(1);
 	if (defined $node) {
 		return $node -> getAttribute ("blocksize");
 	} else {
@@ -889,10 +872,9 @@ sub getPXEDeployPartitions {
 	# Get the partition configuration for this image
 	# ---
 	my $this = shift;
-	# FIXME, type specific
-	my $type = $this->{imageWhat};
-	my $partitionNodes = $this->{partitionsNodeList} -> get_node(1)
-		-> getElementsByTagName ("partition");
+	my $tnode= $this->{typeNode};
+	my $partitionNodes = $tnode -> getElementsByTagName ("partitions")
+		-> get_node(1) -> getElementsByTagName ("partition");
 	my @result = ();
 	for (my $i=1;$i<= $partitionNodes->size();$i++) {
 		my $node = $partitionNodes -> get_node($i);
@@ -936,9 +918,8 @@ sub getPXEDeployConfiguration {
 	# Get the configuration file information for this image
 	# ---
 	my $this = shift;
-	# FIXME, type specific
-	my $type = $this->{imageWhat};
-	my @node = $this->{configfileNodeList} -> get_nodelist();
+	my $tnode= $this->{typeNode};
+	my @node = $tnode -> getElementsByTagName ("configuration");
 	my %result;
 	foreach my $element (@node) {
 		my $source = $element -> getAttribute("source");
@@ -972,9 +953,8 @@ sub getPXEDeployTimeout {
 	# Get the boot timeout, if specified
 	# ---
 	my $this = shift;
-	# FIXME, type specific
-	my $type = $this->{imageWhat};
-	my $node = $this->{pxedeployNodeList} -> get_node(1);
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("pxedeploy") -> get_node(1);
 	my $timeout = $node -> getElementsByTagName ("timeout");
 	if ((defined $timeout) && ! ("$timeout" eq "")) {
 		return $timeout;
@@ -991,9 +971,8 @@ sub getPXEDeployCommandline {
 	# Get the boot commandline, if specified
 	# ---
 	my $this = shift;
-	# FIXME, type specific
-	my $type = $this->{imageWhat};
-	my $node = $this->{pxedeployNodeList} -> get_node(1);
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("pxedeploy") -> get_node(1);
 	my $cmdline = $node -> getElementsByTagName ("commandline");
 	if ((defined $cmdline) && ! ("$cmdline" eq "")) {
 		return $cmdline;
@@ -1010,9 +989,8 @@ sub getPXEDeployKernel {
 	# Get the deploy kernel, if specified
 	# ---
 	my $this = shift;
-	# FIXME, type specific
-	my $type = $this->{imageWhat};
-	my $node = $this->{pxedeployNodeList} -> get_node(1);
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("pxedeploy") -> get_node(1);
 	my $kernel = $node -> getElementsByTagName ("kernel");
 	if ((defined $kernel) && ! ("$kernel" eq "")) {
 		return $kernel;
@@ -1029,9 +1007,8 @@ sub getSplitPersistentFiles {
 	# Get the persistent files/directories for split image
 	# ---
 	my $this = shift;
-	# FIXME, type specific
-	my $type = $this->{imageWhat};
-	my $node = $this->{splitNodeList} -> get_node(1);
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("split") -> get_node(1);
 	my @result = ();
 	if (! defined $node) {
 		return @result;
@@ -1059,9 +1036,8 @@ sub getSplitTempFiles {
 	# Get the persistent files/directories for split image
 	# ---
 	my $this = shift;
-	# FIXME, type specific
-	my $type = $this->{imageWhat};
-	my $node = $this->{splitNodeList} -> get_node(1);
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("split") -> get_node(1);
 	my @result = ();
 	if (! defined $node) {
 		return @result;
@@ -1089,9 +1065,8 @@ sub getSplitExceptions {
 	# split portions. If no exceptions defined return an empty list
 	# ----
 	my $this = shift;
-	# FIXME, type specific
-	my $type = $this->{imageWhat};
-	my $node = $this->{splitNodeList} -> get_node(1);
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("split") -> get_node(1);
 	my @result = ();
 	if (! defined $node) {
 		return @result;
@@ -1126,9 +1101,8 @@ sub getPXEDeployInitrd {
 	# Get the deploy initrd, if specified
 	# ---
 	my $this = shift;
-	# FIXME, type specific
-	my $type = $this->{imageWhat};
-	my $node = $this->{pxedeployNodeList} -> get_node(1);
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("pxedeploy") -> get_node(1);
 	my $initrd = $node -> getElementsByTagName ("initrd");
 	if ((defined $initrd) && ! ("$initrd" eq "")) {
 		return $initrd;
@@ -1246,9 +1220,8 @@ sub getOEMSwapSize {
 	# Obtain the oem-swapsize value or return undef
 	# ---
 	my $this = shift;
-	# FIXME, type specific
-	my $type = $this->{imageWhat};
-	my $node = $this -> getPreferencesNodeByTagName ("oem-swapsize");
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
 	my $size = $node -> getElementsByTagName ("oem-swapsize");
 	if ((! defined $size) || ("$size" eq "")) {
 		return undef;
@@ -1264,9 +1237,8 @@ sub getOEMSystemSize {
 	# Obtain the oem-systemsize value or return undef
 	# ---
 	my $this = shift;
-	# FIXME, type specific
-	my $type = $this->{imageWhat};
-	my $node = $this -> getPreferencesNodeByTagName ("oem-systemsize");
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
 	my $size = $node -> getElementsByTagName ("oem-systemsize");
 	if ((! defined $size) || ("$size" eq "")) {
 		return undef;
@@ -1282,9 +1254,8 @@ sub getOEMBootTitle {
 	# Obtain the oem-boot-title value or return undef
 	# ---
 	my $this = shift;
-	# FIXME, type specific
-	my $type = $this->{imageWhat};
-	my $node = $this -> getPreferencesNodeByTagName ("oem-boot-title");
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
 	my $title= $node -> getElementsByTagName ("oem-boot-title");
 	if ((! defined $title) || ("$title" eq "")) {
 		$title = $this -> getImageDisplayName();
@@ -1303,9 +1274,8 @@ sub getOEMKiwiInitrd {
 	# Obtain the oem-kiwi-initrd value or return undef
 	# ---
 	my $this = shift;
-	# FIXME, type specific
-	my $type = $this->{imageWhat};
-	my $node = $this -> getPreferencesNodeByTagName ("oem-kiwi-initrd");
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
 	my $kboot= $node -> getElementsByTagName ("oem-kiwi-initrd");
 	if ((! defined $kboot) || ("$kboot" eq "")) {
 		return undef;
@@ -1321,9 +1291,8 @@ sub getOEMSAPInstall {
 	# Obtain the oem-sap-install value or return undef
 	# ---
 	my $this = shift;
-	# FIXME, type specific
-	my $type = $this->{imageWhat};
-	my $node = $this -> getPreferencesNodeByTagName ("oem-sap-install");
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
 	my $sap  = $node -> getElementsByTagName ("oem-sap-install");
 	if ((! defined $sap) || ("$sap" eq "")) {
 		return undef;
@@ -1339,9 +1308,8 @@ sub getOEMReboot {
 	# Obtain the oem-reboot value or return undef
 	# ---
 	my $this = shift;
-	# FIXME, type specific
-	my $type = $this->{imageWhat};
-	my $node = $this -> getPreferencesNodeByTagName ("oem-reboot");
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
 	my $boot = $node -> getElementsByTagName ("oem-reboot");
 	if ((! defined $boot) || ("$boot" eq "")) {
 		return undef;
@@ -1357,9 +1325,8 @@ sub getOEMSwap {
 	# Obtain the oem-swap value or return undef
 	# ---
 	my $this = shift;
-	# FIXME, type specific
-	my $type = $this->{imageWhat};
-	my $node = $this -> getPreferencesNodeByTagName ("oem-swap");
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
 	my $swap = $node -> getElementsByTagName ("oem-swap");
 	if ((! defined $swap) || ("$swap" eq "")) {
 		return undef;
@@ -1375,9 +1342,8 @@ sub getOEMRecovery {
 	# Obtain the oem-recovery value or return undef
 	# ---
 	my $this = shift;
-	# FIXME, type specific
-	my $type = $this->{imageWhat};
-	my $node = $this -> getPreferencesNodeByTagName ("oem-recovery");
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
 	my $reco = $node -> getElementsByTagName ("oem-recovery");
 	if ((! defined $reco) || ("$reco" eq "")) {
 		return undef;
@@ -1393,9 +1359,8 @@ sub getOEMRecoveryID {
 	# Obtain the oem-recovery partition ID value or return undef
 	# ---
 	my $this = shift;
-	# FIXME, type specific
-	my $type = $this->{imageWhat};
-	my $node = $this -> getPreferencesNodeByTagName ("oem-recoveryID");
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
 	my $reco = $node -> getElementsByTagName ("oem-recoveryID");
 	if ((! defined $reco) || ("$reco" eq "")) {
 		return undef;
@@ -1411,9 +1376,8 @@ sub getOEMHome {
 	# Obtain the oem-home value or return undef
 	# ---
 	my $this = shift;
-	# FIXME, type specific
-	my $type = $this->{imageWhat};
-	my $node = $this -> getPreferencesNodeByTagName ("oem-home");
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
 	my $home = $node -> getElementsByTagName ("oem-home");
 	if ((! defined $home) || ("$home" eq "")) {
 		return undef;
@@ -2385,9 +2349,8 @@ sub getLVMVolumes {
 	# ---
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
-	# FIXME, type specific
-	my $type = $this->{imageWhat};
-	my $node = $this->{volumesNodeList} -> get_node(1);
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("lvmvolumes") -> get_node(1);
 	my %result = ();
 	if (! defined $node) {
 		return %result;
@@ -2444,9 +2407,8 @@ sub getVMwareConfig {
 	# section if it exists
 	# ---
 	my $this = shift;
-	# FIXME, type specific
-	my $type = $this->{imageWhat};
-	my $node = $this->{vmwarecNodeList} -> get_node(1);
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("vmwareconfig") -> get_node(1);
 	my %result = ();
 	my %guestos= ();
 	if (! defined $node) {
@@ -2552,9 +2514,8 @@ sub getXenConfig {
 	# section if it exists
 	# ---
 	my $this = shift;
-	# FIXME, type specific
-	my $type = $this->{imageWhat};
-	my $node = $this->{xenconfNodeList} -> get_node(1);
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("xenconfig") -> get_node(1);
 	my %result = ();
 	if (! defined $node) {
 		return %result;
@@ -3727,9 +3688,12 @@ sub addDefaultSplitNode {
 	# from the contents of the KIWISplit.txt file and use it
 	# ---
 	my $this = shift;
-	# FIXME, type specific
-	my $type = $this->{imageWhat};
 	my $kiwi = $this->{kiwi};
+	my $tnode= $this->{typeNode};
+	my $splitNodeList = $tnode -> getElementsByTagName ("split");
+	if ($splitNodeList) {
+		return;
+	}
 	my $splitTree;
 	my $splitXML = new XML::LibXML;
 	eval {
@@ -3743,8 +3707,9 @@ sub addDefaultSplitNode {
 		$kiwi -> error  ("$evaldata\n");
 		return undef;
 	}
-	return $splitTree
-		-> getElementsByTagName ("split");
+	$this->{typeNode} -> appendChild (
+		$splitTree -> getElementsByTagName ("split")
+	);
 }
 
 1;
