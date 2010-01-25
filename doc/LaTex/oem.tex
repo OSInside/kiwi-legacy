@@ -93,56 +93,9 @@ two types of installation media:
 \subsection{Influencing the oem partitioning}
 
 By default the oemboot process will create/modify a swap, /home and /
-partition. It is possible to influence the behavior by the following
-oem-* elements which can be optionally specified within the
-\textbf{preferences} section of your system image XML description.
-KIWI uses this to create the file \textbf{/config.oempartition} as part
-of the automatically created oemboot boot image. The format of the
-file is a simple key=value format and created by the KIWIConfig.sh
-function named baseSetupOEMPartition. Following oem-* elements can
-be specified:
-
-\begin{itemize}
-\item \textbf{<oem-reboot>true|false</oem-reboot>}\\
-      This allows to reboot the oem system after initial deployment.
-      This value is represented by the variable OEM\_REBOOT in
-      config.oempartition
-\item \textbf{<oem-swapsize>number in MB</oem-swapsize>}\\
-      Set the size of the swap partition. This value is represented by
-      variable OEM\_SWAPSIZE in config.oempartition
-\item \textbf{<oem-systemsize>number in MB</oem-systemsize>}\\
-      Set the size of the / partition. This value is represented by the
-      variable OEM\_SYSTEMSIZE in config.oempartition
-\item \textbf{<oem-home>true|false</oem-home>}\\
-      Specify if a home partition should be create. This value is represented
-      by the variable OEM\_WITHOUTHOME in config.oempartition.
-\item \textbf{<oem-swap>true|false</oem-swap>}\\
-      Specify if a spaw partition should be create. This value is represented 
-      by the variable OEM\_WITHOUTSWAP in config.oempartition.
-\item \textbf{<oem-boot-title>text</oem-boot-title>}\\
-      By default the string \textbf{OEM} will be appended to the
-      boot manager menu when KIWI creates the grub configuration during
-      first deployment. The oem-boot-title value allows to set a custom
-      name which is used instead of OEM. This value is represented
-      by the variable OEM\_BOOT\_TITLE in config.oempartition.
-\item \textbf{<oem-recovery>true|false</oem-recovery>}\\
-      If this element is set to true KIWI will create a recovery archive
-      from the prepared root tree. The archive will appear as
-      \textit{/recovery.tar.bz2} within the initial image file. During
-      first boot of the image a single recovery partition will be
-      created and the recovery archive will be moved into that
-      partition. An additional boot menu entry will be created which
-      allows to restore the original root tree information. The
-      user information on the /home partition or in the /home directory
-      are not affected by that recovery process
-\item \textbf{<oem-kiwi-initrd>true|false</oem-kiwi-initrd>}\\
-      If this element is set to true the initial oemboot boot image (initrd)
-      will \textbf{not} be replaced by the system (mkinitrd) created initrd.
-      This option makes sense if the target storage device for the image
-      is not a fixed disk but for example an USB stick. In that case it
-      might be required to re-detect the storage location on first boot which
-      is done as part of the oemboot boot image  
-\end{itemize}
+partition. It is possible to influence the behavior with the
+oem-* elements which are explained in the oemconfig section in the
+KIWI Image description chapter.
 
 %If you plan to use a custom partition setup you also should consider
 %to create a copy of the original oemboot boot image description. The following
@@ -192,22 +145,5 @@ kiwi --create /tmp/myoem --type oem \
 \end{Command}
 
 With the optional \textbf{lvmvolumes} section you can set one or
-more top level directories into a separate volume. For example you
-want to put /usr and /var into different volumes add the following
-lvmvolumes section:
-
-\begin{Command}{12cm}
-\begin{verbatim}
-<lvmvolumes>
-   <volume name="usr" freespace="100M"/>
-   <volume name="var" size="200M"/>
-</lvmvolumes>
-\end{verbatim}
-\end{Command}
-
-The optional freespace attribute let you add additional free space
-for that volume. If you don't set any freespace the volume will be
-about 80\% to 90\% full. The optional size attribute let you specify
-the absolute size for that volume. If both freespace and size are set
-size is preferred. If the given size is too small the value will be
-ignored.
+more top level directories into a separate volume. See the
+\textit{KIWI image description} chapter for a detailed explanation.

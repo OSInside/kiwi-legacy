@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<image schemaversion="3.8" name="LimeJeOS-openSUSE-11.2">
+<image schemaversion="4.1" name="LimeJeOS-openSUSE-11.2">
 	<!-- Base Information -->
 	<description type="system">
 		<author>Marcus Schäfer</author>
@@ -27,30 +27,40 @@
 		<boot-theme>openSUSE</boot-theme>
 	</preferences>
 	<preferences profiles="xenFlavour">
-		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-11.2" bootprofile="xen" bootkernel="nex"><xenconfig memory="512" domain="domU">
+		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-11.2" bootprofile="xen" bootkernel="nex">
+			<xenconfig memory="512" domain="domU">
 				<xendisk device="/dev/xvda"/>
 				<xenbridge name=""/>
-			</xenconfig></type>
-		<type image="oem" filesystem="ext3" boot="oemboot/suse-11.2" bootprofile="xen" bootkernel="nex" format="iso"><oemconfig>
+			</xenconfig>
+		</type>
+		<type image="oem" filesystem="ext3" boot="oemboot/suse-11.2" bootprofile="xen" bootkernel="nex" format="iso">
+			<oemconfig>
 				<oem-home>false</oem-home>
 				<oem-systemsize>2048</oem-systemsize>
-			</oemconfig><xenconfig memory="512" domain="domU">
+			</oemconfig>
+			<xenconfig memory="512" domain="domU">
 				<xendisk device="/dev/xvda"/>
 				<xenbridge name=""/>
-			</xenconfig></type>
+			</xenconfig>
+		</type>
 	</preferences>
 	<preferences profiles="vmxFlavour">
-		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-11.2" format="vmdk"><vmwareconfig memory="512" guestOS="suse" HWversion="4">
+		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-11.2" format="vmdk">
+			<vmwareconfig memory="512" guestOS="suse" HWversion="4">
 				<vmwaredisk controller="scsi" id="0"/>
 				<vmwarenic driver="e1000" interface="0" mode="bridged"/>
-			</vmwareconfig></type>
-		<type image="oem" filesystem="ext3" boot="oemboot/suse-11.2" format="iso"><oemconfig>
+			</vmwareconfig>
+		</type>
+		<type image="oem" filesystem="ext3" boot="oemboot/suse-11.2" format="iso">
+			<oemconfig>
 				<oem-home>false</oem-home>
 				<oem-systemsize>2048</oem-systemsize>
-			</oemconfig><vmwareconfig memory="512" guestOS="suse" HWversion="4">
+			</oemconfig>
+			<vmwareconfig memory="512" guestOS="suse" HWversion="4">
 				<vmwaredisk controller="scsi" id="0"/>
 				<vmwarenic driver="e1000" interface="0" mode="bridged"/>
-			</vmwareconfig></type>
+			</vmwareconfig>
+		</type>
     </preferences>
 	<!-- Users setup -->
 	<users group="root">

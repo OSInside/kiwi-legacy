@@ -192,22 +192,5 @@ attribute \textbf{lvm=''true''} as part of the \textbf{type} section
 in your config.xml file.
 
 The optional \textbf{lvmvolumes} section can be used to set one or
-more top level directories into a separate volume. For example you
-want to put /usr and /var into different volumes add the following
-lvmvolumes section:
-
-\begin{Command}{12cm}
-\begin{verbatim}
-<lvmvolumes>
-   <volume name="usr" freespace="100M"/>
-   <volume name="var" size="200M"/>
-</lvmvolumes>
-\end{verbatim}
-\end{Command}
-
-The optional freespace attribute let you add additional free space
-for that volume. If you don't set any freespace the volume will be
-about 80\% to 90\% full. The optional size attribute let you specify
-the absolute size for that volume. If both freespace and size are set
-size is preferred. If the given size is too small the value will be
-ignored.
+more top level directories into a separate volume. See the
+\textit{KIWI image description} chapter for a detailed explanation.

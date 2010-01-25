@@ -131,10 +131,19 @@ sub new {
 	my $instsrcNodeList;
 	my $profilesNodeList;
 	my $XML;
-	if (! open ($XML,"xsltproc $main::SchemaCVT $controlFile|")) {
-		$kiwi -> error ("XSL: Failed to open xslt processor");
-		$kiwi -> failed ();
-		return undef;
+	my $skipXSLT = 1;
+	if ($skipXSLT) {
+		if (! open ($XML,"cat $controlFile|")) {
+			$kiwi -> error ("XSL: Failed to open file $controlFile");
+			$kiwi -> failed ();
+			return undef;
+		}
+	} else {
+		if (! open ($XML,"xsltproc $main::SchemaCVT $controlFile|")) {
+			$kiwi -> error ("XSL: Failed to open xslt processor");
+			$kiwi -> failed ();
+			return undef;
+		}
 	}
 	binmode $XML;
 	eval {
