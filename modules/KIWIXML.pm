@@ -188,6 +188,9 @@ sub new {
 		$kiwi -> error  ("Schema validation failed");
 		$kiwi -> failed ();
 		$kiwi -> error  ("$evaldata\n");
+		$kiwi -> error  ("Use the jing command for more details\n");
+		$kiwi -> error  ("The following requires jing to be installed\n");
+		$kiwi -> error  ("jing $main::Schema $controlFile\n");
 		return undef;
 	}
 	#==========================================
