@@ -234,7 +234,8 @@ sub new {
 	# Check type information from xml input
 	#------------------------------------------
 	if ($optionsNodeList) {
-		if (! $this -> getImageTypeAndAttributes()) {
+		$this -> getImageTypeAndAttributes();
+		if (! $this->{typeNode}) {
 			$kiwi -> error  ("Boot type: $imageWhat not specified in xml");
 			$kiwi -> failed ();
 			return undef;
