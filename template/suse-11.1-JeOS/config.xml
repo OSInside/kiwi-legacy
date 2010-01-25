@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <image schemaversion="4.1" name="LimeJeOS-openSUSE-11.1">
 	<description type="system">
 		<author>Christoph Thiel</author>
@@ -109,8 +110,6 @@
 		<package name="glib2-branding-openSUSE"/>
 		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
-		<!-- not on public media -->
-		<!--<package name="suse-build-key"/>-->
 	</packages>
 	<packages type="image" profiles="xenFlavour">
 		<package name="kernel-xen" replaces="kernel-default"/>

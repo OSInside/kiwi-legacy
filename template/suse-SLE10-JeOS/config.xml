@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <image schemaversion="4.1" name="LimeJeOS-SLE10">
 	<description type="system">
 		<author>Christoph Thiel</author>
@@ -58,13 +59,12 @@
 	<users group="root">
 		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
-	<!-- For local image creation, change this to your SLE10 DVD source -->
 	<repository priority="3" type="rpm-md">
 		<source path="obs:///SUSE:SLE-10-SP3:GA/SLE_10_SP2_Update"/>
 	</repository>
 	<repository priority="4" type="rpm-md">
 		<source path="obs:///Devel:JeOS:SLE-10-SP3/SLE_10_SP3_Update"/>
-	</repository> 
+	</repository>
 	<repository priority="2" type="rpm-md">
 		<source path="obs:///SUSE:SLE-10-SP2:Update/standard"/>
 	</repository>
@@ -74,7 +74,6 @@
 	<repository type="rpm-dir">
 		<source path="/usr/share/kiwi/repo/suse-repo/suse-sle10-repo"/>
 	</repository>
-	<!---->
 	<packages type="image">
 		<package name="aaa_base"/>
 		<package name="dhcpcd"/>
@@ -108,8 +107,6 @@
 		<package name="ifplugd"/>
 		<package name="bootsplash-theme-SuSE-SLES" bootinclude="true" bootdelete="true"/>
 		<package name="gfxboot" bootinclude="true" bootdelete="true"/>
-		<!-- not on public media -->
-		<!-- <package name="suseRegister-jeos"/> -->
 	</packages>
 	<packages type="image" profiles="xenFlavour">
 		<package name="kernel-xen" arch="x86_64" replaces="kernel-default"/>

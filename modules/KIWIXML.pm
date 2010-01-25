@@ -131,7 +131,7 @@ sub new {
 	my $instsrcNodeList;
 	my $profilesNodeList;
 	my $XML;
-	my $skipXSLT = 1;
+	my $skipXSLT = 0;
 	if ($skipXSLT) {
 		if (! open ($XML,"cat $controlFile|")) {
 			$kiwi -> error ("XSL: Failed to open file $controlFile");

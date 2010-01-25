@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <image schemaversion="4.1" name="initrd-usbboot-suse-11.2">
 	<description type="boot">
 		<author>Marcus Schaefer</author>
@@ -12,10 +13,8 @@
 		<rpm-check-signatures>false</rpm-check-signatures>
 	</preferences>
 	<profiles>
-		<!-- bootprofile specs -->
 		<profile name="default" description="Booting default profile"/>
 		<profile name="xen" description="Boot with xen kernel/mboot.c32"/>
-		<!-- bootkernel specs -->
 		<profile name="std" description="KERNEL: Default"/>
 		<profile name="nex" description="KERNEL: Xen kernel/mboot.c32"/>
 		<profile name="pae" description="KERNEL: pae kernel"/>
@@ -82,8 +81,8 @@
 		<package name="kernel-xen"/>
 		<package name="xen"/>
 	</packages>
-	<packages type="image" profiles="desktop">  
-		<package name="kernel-desktop"/>  
+	<packages type="image" profiles="desktop">
+		<package name="kernel-desktop"/>
 	</packages>
 	<packages type="image">
 		<package name="clicfs"/>

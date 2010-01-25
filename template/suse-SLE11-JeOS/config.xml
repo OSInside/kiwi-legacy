@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <image schemaversion="4.1" name="LimeJeOS-SLE11">
 	<description type="system">
 		<author>Christoph Thiel</author>
@@ -57,14 +58,12 @@
 	<users group="root">
 		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
-	<!-- For local image creation, change this to your SLE11 DVD source -->
 	<repository type="rpm-md">
 		<source path="obs:///SUSE:SLE-11:GA:Products:Test/standard"/>
 	</repository>
 	<repository type="rpm-md">
 		<source path="obs:///SUSE:SLE-11:GA/standard"/>
 	</repository>
-	<!---->
 	<packages type="image">
 		<package name="sles-release"/>
 		<package name="sles-release-DVD"/>

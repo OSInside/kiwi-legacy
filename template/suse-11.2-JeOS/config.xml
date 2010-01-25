@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <image schemaversion="4.1" name="LimeJeOS-openSUSE-11.2">
-	<!-- Base Information -->
 	<description type="system">
 		<author>Marcus Schäfer</author>
 		<contact>ms@novell.com</contact>
@@ -10,12 +10,10 @@
 			distro by using zypper with the pre-defined repository 
 		</specification>
 	</description>
-	<!-- Profiles -->
 	<profiles>
 		<profile name="xenFlavour" description="VMX with Xen kernel"/>
 		<profile name="vmxFlavour" description="VMX with default kernel" import="true"/>
 	</profiles>
-	<!-- Image Type and Preferences -->
 	<preferences>
 		<type image="iso" primary="true" boot="isoboot/suse-11.2" flags="clic" hybrid="true"/>
 		<version>1.11.2</version>
@@ -61,16 +59,13 @@
 				<vmwarenic driver="e1000" interface="0" mode="bridged"/>
 			</vmwareconfig>
 		</type>
-    </preferences>
-	<!-- Users setup -->
+	</preferences>
 	<users group="root">
 		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
-	<!-- Package Repositories -->
 	<repository type="yast2">
 		<source path="opensuse://11.2/repo/oss"/>
 	</repository>
-	<!-- Packages and Patterns -->
 	<packages type="image">
 		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>

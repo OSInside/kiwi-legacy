@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <image schemaversion="4.1" name="initrd-netboot-suse-11.0">
 	<description type="boot">
 		<author>Marcus Schaefer</author>
@@ -8,7 +9,6 @@
 	<preferences>
 		<type image="cpio" bootprofile="default" bootkernel="std"/>
 		<version>2.1.1</version>
-		
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>
 	</preferences>
@@ -21,7 +21,6 @@
 		<profile name="ppc64" description="KERNEL: ppc64"/>
 	</profiles>
 	<drivers type="drivers" profiles="default,pae,ppc64">
-		<!-- DRIVERS START DEFAULT AND PAE -->
 		<file name="drivers/md/*"/>
 		<file name="drivers/ide/*"/>
 		<file name="drivers/block/loop.ko"/>
@@ -57,10 +56,8 @@
 		<file name="drivers/parport/*"/>
 		<file name="drivers/char/lp.ko"/>
 		<file name="drivers/acpi/dock.ko"/>
-		<!-- DRIVERS END DEFAULT AND PAE -->
 	</drivers>
 	<drivers type="drivers" profiles="diskless">
-		<!-- DRIVERS START DISKLESS -->
 		<file name="drivers/md/*"/>
 		<file name="drivers/ide/*"/>
 		<file name="net/packet/*"/>
@@ -115,31 +112,23 @@
 		<file name="drivers/net/via-rhine.ko"/>
 		<file name="drivers/net/via-velocity.ko"/>
 		<file name="drivers/net/yellowfin.ko"/>
-		<!-- DRIVERS END DISKLESS -->
 	</drivers>
 	<repository type="yast2" status="replaceable">
 		<source path="/mounts/dist/install/SLP/openSUSE-11.0-RC4-DVD/ppc/DVD1"/>
 	</repository>
 	<packages type="image" profiles="std">
-		<!-- KERNEL AND MODULE PACKAGES START STD -->
 		<package name="kernel-default"/>
 		<package name="aufs-kmp-default"/>
-		<!-- KERNEL AND MODULE PACKAGES END STD -->
 	</packages>
 	<packages type="image" profiles="pae">
-		<!-- KERNEL AND MODULE PACKAGES START PAE -->
 		<package name="kernel-pae"/>
 		<package name="aufs-kmp-pae"/>
-		<!-- KERNEL AND MODULE PACKAGES END PAE -->
 	</packages>
 	<packages type="image" profiles="ppc64">
-		<!-- KERNEL AND MODULE PACKAGES START PPC64 -->
 		<package name="kernel-ppc64"/>
 		<package name="aufs-kmp-ppc64"/>
-		<!-- KERNEL AND MODULE PACKAGES END PPC64 -->
 	</packages>
 	<packages type="image" profiles="default,pae,ppc64">
-		<!-- PACKAGES START DEFAULT AND PAE -->
 		<package name="curl"/>
 		<package name="psmisc"/>
 		<package name="iputils"/>
@@ -165,10 +154,8 @@
 		<package name="bootsplash-branding-openSUSE"/>
 		<package name="tar"/>
 		<package name="cromfs"/>
-		<!-- PACKAGES END DEFAULT AND PAE -->
 	</packages>
 	<packages type="image" profiles="diskless">
-		<!-- PACKAGES START DISKLESS -->
 		<package name="iputils"/>
 		<package name="atftp"/>
 		<package name="dhcpcd"/>
@@ -183,14 +170,12 @@
 		<package name="nbd"/>
 		<package name="nfs-client"/>
 		<package name="tar"/>
-		<!-- PACKAGES STOP DISKLESS -->
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
 		<package name="glibc-locale"/>
 	</packages>
 	<packages type="delete" profiles="default,diskless,pae,ppc64">
-		<!-- DELETE PACKAGES START DEFAULT AND DISKLESS -->
 		<package name="cracklib-dict-small"/>
 		<package name="cracklib-dict-full"/>
 		<package name="PolicyKit"/>
@@ -238,10 +223,8 @@
 		<package name="fribidi"/>
 		<package name="make"/>
 		<package name="bootsplash-branding-openSUSE"/>
-		<!-- DELETE PACKAGES END DEFAULT AND DISKLESS -->
 	</packages>
 	<packages type="delete" profiles="diskless">
-		<!-- DELETE PACKAGES START DISKLESS -->
 		<package name="cracklib-dict-small"/>
 		<package name="cracklib-dict-full"/>
 		<package name="e2fsprogs"/>
@@ -270,6 +253,5 @@
 		<package name="pam-modules"/>
 		<package name="pam-config"/>
 		<package name="PolicyKit"/>
-		<!-- DELETE PACKAGES END DISKLESS -->
 	</packages>
 </image>

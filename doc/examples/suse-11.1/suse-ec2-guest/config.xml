@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <image schemaversion="4.1" name="suse-11.1-ec2-guest">
 	<description type="system">
 		<author>Marcus Schaefer</author>
@@ -7,12 +8,16 @@
 	</description>
 	<preferences>
 		<type image="ec2" primary="true" ec2accountnr="12345678911" ec2privatekeyfile="Path to EC2 private key file" ec2certfile="Path to EC2 public certificate file"/>
-		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-11.1"><vmwareconfig memory="512">
+		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-11.1">
+			<vmwareconfig memory="512">
 				<vmwaredisk controller="ide" id="0"/>
-			</vmwareconfig></type>
-		<type image="xen" filesystem="ext3" boot="xenboot/suse-11.1"><xenconfig memory="512">
+			</vmwareconfig>
+		</type>
+		<type image="xen" filesystem="ext3" boot="xenboot/suse-11.1">
+			<xenconfig memory="512">
 				<xendisk device="/dev/sda"/>
-			</xenconfig></type>
+			</xenconfig>
+		</type>
 		<version>1.1.2</version>
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>
@@ -21,7 +26,6 @@
 		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
 	<repository type="yast2">
-		<!--<source path="/image/CDs/full-11.1-i386"/>-->
 		<source path="opensuse://11.1/repo/oss/"/>
 	</repository>
 	<packages type="image">
@@ -37,10 +41,9 @@
 		<package name="kernel-xen"/>
 		<package name="xen"/>
 	</packages>
-	<packages type="vmware">
-	</packages>
+	<packages type="vmware"/>
 	<packages type="bootstrap">
-		<package name="filesystem"/> 
+		<package name="filesystem"/>
 		<package name="glibc-locale"/>
 	</packages>
 </image>

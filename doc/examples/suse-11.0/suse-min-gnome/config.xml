@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <image schemaversion="4.1" name="suse-11.0-gnome-demo">
 	<description type="system">
 		<author>Robert Schweikert</author>
@@ -6,9 +7,11 @@
 		<specification>openSUSE 11.0 Appliance using GNOME</specification>
 	</description>
 	<preferences>
-		<type image="vmx" primary="true" filesystem="ext3" boot="vmxboot/suse-11.0" format="vmdk"><vmwareconfig memory="1024">
+		<type image="vmx" primary="true" filesystem="ext3" boot="vmxboot/suse-11.0" format="vmdk">
+			<vmwareconfig memory="1024">
 				<vmwaredisk controller="ide" id="0"/>
-			</vmwareconfig></type>
+			</vmwareconfig>
+		</type>
 		<type image="iso" boot="isoboot/suse-11.0" flags="unified"/>
 		<version>1.0.1</version>
 		<packagemanager>zypper</packagemanager>
@@ -24,34 +27,30 @@
 		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
 	<repository type="yast2">
-		<!--<source path="/image/CDs/full-11.0-i386"/>-->
 		<source path="opensuse://11.0/repo/oss/"/>
 	</repository>
 	<packages type="image" patternType="plusRecommended" patternPackageType="plusRecommended">
 		<package name="bootsplash"/>
 		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
-        <package name="firefox"/>
-        <package name="gdm"/>
+		<package name="firefox"/>
+		<package name="gdm"/>
 		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
-        <!-- Need applets control to appease panel in default setup -->
-        <package name="gnome-applets"/>
+		<package name="gnome-applets"/>
 		<package name="ifplugd"/>
-        <package name="iputils"/>
+		<package name="iputils"/>
 		<package name="kernel-default"/>
-        <package name="python"/>
-        <package name="perl"/>
-        <package name="preload"/>
-        <package name="sax2"/>
-        <!-- Need tomboy to appease panel in default setup -->
-        <package name="tomboy"/>
-        <package name="vim"/>
-        <package name="xorg-x11-server"/>
+		<package name="python"/>
+		<package name="perl"/>
+		<package name="preload"/>
+		<package name="sax2"/>
+		<package name="tomboy"/>
+		<package name="vim"/>
+		<package name="xorg-x11-server"/>
 		<opensusePattern name="base"/>
 	</packages>
-	<packages type="vmware">
-	</packages>
+	<packages type="vmware"/>
 	<packages type="bootstrap">
-		<package name="filesystem"/> 
+		<package name="filesystem"/>
 		<package name="glibc-locale"/>
 	</packages>
 </image>
