@@ -393,7 +393,7 @@ sub setTemplate {
 	#==========================================
     # <description>
     #------------------------------------------
-	print FD '<image schemaversion="3.8" ';
+	print FD '<image schemaversion="4.1" ';
 	print FD 'name=suse-migration"'.$product.'">'."\n";
 	print FD "\t".'<description type="system">'."\n";
 	print FD "\t\t".'<author>***AUTHOR***</author>'."\n";
@@ -404,15 +404,18 @@ sub setTemplate {
 	# <preferences>
 	#------------------------------------------
 	print FD "\t".'<preferences>'."\n";
-	print FD "\t\t".'<type boot="oemboot/suse-'.$product.'" filesystem="ext3"';
-	print FD ' format="iso">oem</type>'."\n";
+	print FD "\t\t".'<type image="oem" boot="oemboot/suse-'.$product.'"';
+	print FD ' filesystem="ext3" format="iso">'."\n";
+	print FD "\t\t\t".'<oemconfig>'."\n";
+	print FD "\t\t\t\t".'<oem-home>false</oem-home>'."\n";
+	print FD "\t\t\t".'</oemconfig>'."\n";
+	print FD "\t\t".'</type>'."\n";
 	print FD "\t\t".'<version>1.1.1</version>'."\n";
 	print FD "\t\t".'<packagemanager>zypper</packagemanager>'."\n";
 	print FD "\t\t".'<locale>en_US</locale>'."\n";
 	print FD "\t\t".'<keytable>us.map.gz</keytable>'."\n";
 	print FD "\t\t".'<timezone>Europe/Berlin</timezone>'."\n";
 	print FD "\t\t".'<boot-theme>openSUSE</boot-theme>'."\n";
-	print FD "\t\t".'<oem-home>false</oem-home>'."\n";
 	print FD "\t".'</preferences>'."\n";
 	#==========================================
 	# <repository>

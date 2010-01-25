@@ -23,7 +23,7 @@
 <grammar xmlns:db="http://docbook.org/ns/docbook" xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" xmlns:rng="http://relaxng.org/ns/structure/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
   <db:info>
     <db:releaseinfo>$Id: kiwi.rnc 2957 2008-01-11 12:53:39Z thomas-schraitle $</db:releaseinfo>
-    <db:releaseinfo>RNC Schema Version 3.8</db:releaseinfo>
+    <db:releaseinfo>RNC Schema Version 4.1</db:releaseinfo>
     <db:pubdate>START</db:pubdate>
     <db:pubdate>2008-01-08</db:pubdate>
   </db:info>
@@ -72,7 +72,7 @@ the package Information is inherited</a:documentation>
     <define name="k.image.schemaversion.attribute">
       <attribute name="schemaversion">
         <a:documentation>The allowed Schema version (fixed value)</a:documentation>
-        <value>3.8</value>
+        <value>4.1</value>
       </attribute>
     </define>
     <define name="k.image.kiwirevision.attribute">
@@ -147,24 +147,9 @@ image.</db:para>
           <oneOrMore>
             <ref name="k.repository"/>
           </oneOrMore>
-          <optional>
-            <ref name="k.pxedeploy"/>
-          </optional>
-          <optional>
-            <ref name="k.split"/>
-          </optional>
           <zeroOrMore>
             <ref name="k.packages"/>
           </zeroOrMore>
-          <optional>
-            <ref name="k.vmwareconfig"/>
-          </optional>
-          <optional>
-            <ref name="k.xenconfig"/>
-          </optional>
-          <optional>
-            <ref name="k.lvmvolumes"/>
-          </optional>
         </interleave>
       </element>
     </define>
@@ -1797,8 +1782,32 @@ vmx/oem types only.</a:documentation>
         <data type="boolean"/>
       </attribute>
     </define>
+    <define name="k.type.image.attribute">
+      <attribute name="image">
+        <a:documentation>Specifies the image type</a:documentation>
+        <choice>
+          <value>ext2</value>
+          <value>ext3</value>
+          <value>ext4</value>
+          <value>reiserfs</value>
+          <value>squashfs</value>
+          <value>dmsquash</value>
+          <value>clicfs</value>
+          <value>cpio</value>
+          <value>iso</value>
+          <value>split</value>
+          <value>usb</value>
+          <value>vmx</value>
+          <value>oem</value>
+          <value>xen</value>
+          <value>pxe</value>
+          <value>ec2</value>
+        </choice>
+      </attribute>
+    </define>
     <define name="k.type.attlist">
       <interleave>
+        <ref name="k.type.image.attribute"/>
         <optional>
           <ref name="k.type.fsnocheck.attribute"/>
         </optional>
@@ -1876,8 +1885,30 @@ vmx/oem types only.</a:documentation>
     <define name="k.type">
       <element name="type">
         <a:documentation>The Image Type of the Logical Extend</a:documentation>
-        <ref name="k.type.attlist"/>
-        <text/>
+        <interleave>
+          <ref name="k.type.attlist"/>
+          <optional>
+            <ref name="k.size"/>
+          </optional>
+          <optional>
+            <ref name="k.oemconfig"/>
+          </optional>
+          <optional>
+            <ref name="k.vmwareconfig"/>
+          </optional>
+          <optional>
+            <ref name="k.xenconfig"/>
+          </optional>
+          <optional>
+            <ref name="k.split"/>
+          </optional>
+          <optional>
+            <ref name="k.lvmvolumes"/>
+          </optional>
+          <optional>
+            <ref name="k.pxedeploy"/>
+          </optional>
+        </interleave>
       </element>
     </define>
   </div>
@@ -2685,6 +2716,57 @@ are used for creating a Novell SUSE installation source.</db:para>
   </div>
   <!--
     ==========================================
+    main block: <oemconfig>
+    
+  -->
+  <div>
+    <define name="k.oemconfig.attlist">
+      <empty/>
+    </define>
+    <define name="k.oemconfig">
+      <element name="oemconfig">
+        <a:documentation>specifies the OEM configuration sections</a:documentation>
+        <db:para>The oemconfig element specifies the OEM image
+configuration options which are used to repartition
+and setup the system disk</db:para>
+        <interleave>
+          <ref name="k.oemconfig.attlist"/>
+          <optional>
+            <ref name="k.oem-systemsize"/>
+          </optional>
+          <optional>
+            <ref name="k.oem-swap"/>
+          </optional>
+          <optional>
+            <ref name="k.oem-home"/>
+          </optional>
+          <optional>
+            <ref name="k.oem-boot-title"/>
+          </optional>
+          <optional>
+            <ref name="k.oem-kiwi-initrd"/>
+          </optional>
+          <optional>
+            <ref name="k.oem-sap-install"/>
+          </optional>
+          <optional>
+            <ref name="k.oem-swapsize"/>
+          </optional>
+          <optional>
+            <ref name="k.oem-recovery"/>
+          </optional>
+          <optional>
+            <ref name="k.oem-recoveryID"/>
+          </optional>
+          <optional>
+            <ref name="k.oem-reboot"/>
+          </optional>
+        </interleave>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
     main block: <vmwareconfig>
     
   -->
@@ -2919,39 +3001,6 @@ and also depends of the selected image output type.</db:para>
           </zeroOrMore>
           <optional>
             <ref name="k.version"/>
-          </optional>
-          <optional>
-            <ref name="k.size"/>
-          </optional>
-          <optional>
-            <ref name="k.oem-swap"/>
-          </optional>
-          <optional>
-            <ref name="k.oem-home"/>
-          </optional>
-          <optional>
-            <ref name="k.oem-boot-title"/>
-          </optional>
-          <optional>
-            <ref name="k.oem-kiwi-initrd"/>
-          </optional>
-          <optional>
-            <ref name="k.oem-sap-install"/>
-          </optional>
-          <optional>
-            <ref name="k.oem-swapsize"/>
-          </optional>
-          <optional>
-            <ref name="k.oem-systemsize"/>
-          </optional>
-          <optional>
-            <ref name="k.oem-recovery"/>
-          </optional>
-          <optional>
-            <ref name="k.oem-recoveryID"/>
-          </optional>
-          <optional>
-            <ref name="k.oem-reboot"/>
           </optional>
           <optional>
             <ref name="k.packagemanager"/>

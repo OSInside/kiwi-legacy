@@ -1,29 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<image schemaversion="3.8" name="initrd-netboot-suse-11.2">
+
+<image schemaversion="4.1" name="initrd-netboot-suse-11.2">
 	<description type="boot">
 		<author>Marcus Schaefer</author>
 		<contact>ms@novell.com</contact>
 		<specification>boot/initrd image used for PXE</specification>
 	</description>
 	<preferences>
-		<type bootprofile="default" bootkernel="std">cpio</type>
+		<type image="cpio" bootprofile="default" bootkernel="std"/>
 		<version>2.1.1</version>
-		<size unit="M">60</size>
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>
 	</preferences>
 	<profiles>
-		<!-- bootprofile specs -->
 		<profile name="default" description="Booting default profile"/>
 		<profile name="diskless" description="Booting diskless thin clients"/>
-		<!-- bootkernel specs -->
 		<profile name="std" description="KERNEL: Default"/>
 		<profile name="xen" description="KERNEL: Xen kernel/mboot.c32"/>
 		<profile name="pae" description="KERNEL: pae"/>
 		<profile name="desktop" description="KERNEL: Desktop kernel"/>
 	</profiles>
 	<drivers type="drivers" profiles="default,xen,pae">
-		<!-- DRIVERS START DEFAULT AND XEN -->
 		<file name="drivers/md/*"/>
 		<file name="drivers/hid/*"/>
 		<file name="drivers/input/keyboard/*"/>
@@ -66,10 +63,8 @@
 		<file name="drivers/acpi/dock.ko"/>
 		<file name="lib/crc-t10dif.ko"/>
 		<file name="lib/crc16.ko"/>
-		<!-- DRIVERS END DEFAULT AND XEN -->
 	</drivers>
 	<drivers type="drivers" profiles="diskless">
-		<!-- DRIVERS START DISKLESS -->
 		<file name="drivers/md/*"/>
 		<file name="drivers/ide/*"/>
 		<file name="drivers/block/loop.ko"/>
@@ -128,7 +123,6 @@
 		<file name="drivers/net/via-rhine.ko"/>
 		<file name="drivers/net/via-velocity.ko"/>
 		<file name="drivers/net/yellowfin.ko"/>
-		<!-- DRIVERS END DISKLESS -->
 	</drivers>
 	<repository type="yast2" status="replaceable">
 		<source path="/image/CDs/full-11.2-i386"/>
@@ -137,28 +131,19 @@
 		<source path="/usr/share/kiwi/repo/suse-repo/suse-sle11-repo"/>
 	</repository>
 	<packages type="image" profiles="std">
-		<!-- KERNEL AND MODULE PACKAGES START STD -->
 		<package name="kernel-default"/>
-		<!-- KERNEL AND MODULE PACKAGES END STD -->
 	</packages>
 	<packages type="image" profiles="pae">
-		<!-- KERNEL AND MODULE PACKAGES START PAE -->
 		<package name="kernel-pae"/>
-		<!-- KERNEL AND MODULE PACKAGES END PAE -->
 	</packages>
 	<packages type="image" profiles="xen">
-		<!-- KERNEL AND MODULE PACKAGES START XEN -->
 		<package name="kernel-xen"/>
 		<package name="xen"/>
-		<!-- KERNEL AND MODULE PACKAGES END XEN -->
 	</packages>
 	<packages type="image" profiles="desktop">
-		<!-- KERNEL AND MODULE PACKAGES START DESKTOP -->
 		<package name="kernel-desktop"/>
-		<!-- KERNEL AND MODULE PACKAGES END DESKTOP -->
 	</packages>
 	<packages type="image" profiles="default,xen,pae">
-		<!-- PACKAGES START DEFAULT AND XEN -->
 		<package name="adaptec-firmware"/>
 		<package name="clicfs"/>
 		<package name="curl"/>
@@ -188,10 +173,8 @@
 		<package name="bootsplash"/>
 		<package name="tar"/>
 		<package name="kiwi-tools"/>
-		<!-- PACKAGES END DEFAULT AND XEN -->
 	</packages>
 	<packages type="image" profiles="diskless">
-		<!-- PACKAGES START DISKLESS -->
 		<package name="clicfs"/>
 		<package name="iputils"/>
 		<package name="atftp"/>
@@ -211,7 +194,6 @@
 		<package name="tar"/>
 		<package name="bootsplash"/>
 		<package name="kiwi-tools"/>
-		<!-- PACKAGES STOP DISKLESS -->
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
@@ -219,7 +201,6 @@
 		<package name="glibc-locale"/>
 	</packages>
 	<packages type="delete" profiles="default,xen,diskless,pae">
-		<!-- DELETE PACKAGES START DEFAULT, XEN AND DISKLESS -->
 		<package name="cracklib-dict-small"/>
 		<package name="cracklib-dict-full"/>
 		<package name="PolicyKit"/>
@@ -262,10 +243,8 @@
 		<package name="suse-build-key"/>
 		<package name="fribidi"/>
 		<package name="make"/>
-		<!-- DELETE PACKAGES END DEFAULT, XEN AND DISKLESS -->
 	</packages>
 	<packages type="delete" profiles="diskless">
-		<!-- DELETE PACKAGES START DISKLESS -->
 		<package name="cracklib-dict-small"/>
 		<package name="cracklib-dict-full"/>
 		<package name="xorg-x11-libxcb"/>
@@ -288,6 +267,5 @@
 		<package name="pam-modules"/>
 		<package name="pam-config"/>
 		<package name="PolicyKit"/>
-		<!-- DELETE PACKAGES END DISKLESS -->
 	</packages>
 </image>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<image schemaversion="3.8" name="LimeJeOS-openSUSE-11.2">
-	<!-- Base Information -->
+
+<image schemaversion="4.1" name="LimeJeOS-openSUSE-11.2">
 	<description type="system">
 		<author>Marcus Schäfer</author>
 		<contact>ms@novell.com</contact>
@@ -10,14 +10,12 @@
 			distro by using zypper with the pre-defined repository 
 		</specification>
 	</description>
-	<!-- Profiles -->
 	<profiles>
 		<profile name="xenFlavour" description="VMX with Xen kernel"/>
 		<profile name="vmxFlavour" description="VMX with default kernel" import="true"/>
 	</profiles>
-	<!-- Image Type and Preferences -->
 	<preferences>
-		<type primary="true" boot="isoboot/suse-11.2" flags="clic" hybrid="true">iso</type>
+		<type image="iso" primary="true" boot="isoboot/suse-11.2" flags="clic" hybrid="true"/>
 		<version>1.11.2</version>
 		<packagemanager>zypper</packagemanager>
 		<locale>en_US</locale>
@@ -25,26 +23,49 @@
 		<timezone>Europe/Berlin</timezone>
 		<rpm-excludedocs>true</rpm-excludedocs>
 		<boot-theme>openSUSE</boot-theme>
-		<oem-home>false</oem-home>
-		<oem-systemsize>2048</oem-systemsize>
 	</preferences>
 	<preferences profiles="xenFlavour">
-		<type filesystem="ext3" boot="vmxboot/suse-11.2" bootprofile="xen" bootkernel="nex">vmx</type>
-		<type filesystem="ext3" boot="oemboot/suse-11.2" bootprofile="xen" bootkernel="nex" format="iso">oem</type>
+		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-11.2" bootprofile="xen" bootkernel="nex">
+			<xenconfig memory="512" domain="domU">
+				<xendisk device="/dev/xvda"/>
+				<xenbridge name=""/>
+			</xenconfig>
+		</type>
+		<type image="oem" filesystem="ext3" boot="oemboot/suse-11.2" bootprofile="xen" bootkernel="nex" format="iso">
+			<oemconfig>
+				<oem-home>false</oem-home>
+				<oem-systemsize>2048</oem-systemsize>
+			</oemconfig>
+			<xenconfig memory="512" domain="domU">
+				<xendisk device="/dev/xvda"/>
+				<xenbridge name=""/>
+			</xenconfig>
+		</type>
 	</preferences>
 	<preferences profiles="vmxFlavour">
-		<type filesystem="ext3" boot="vmxboot/suse-11.2" format="vmdk">vmx</type>
-		<type filesystem="ext3" boot="oemboot/suse-11.2" format="iso">oem</type>
-    </preferences>
-	<!-- Users setup -->
+		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-11.2" format="vmdk">
+			<vmwareconfig memory="512" guestOS="suse" HWversion="4">
+				<vmwaredisk controller="scsi" id="0"/>
+				<vmwarenic driver="e1000" interface="0" mode="bridged"/>
+			</vmwareconfig>
+		</type>
+		<type image="oem" filesystem="ext3" boot="oemboot/suse-11.2" format="iso">
+			<oemconfig>
+				<oem-home>false</oem-home>
+				<oem-systemsize>2048</oem-systemsize>
+			</oemconfig>
+			<vmwareconfig memory="512" guestOS="suse" HWversion="4">
+				<vmwaredisk controller="scsi" id="0"/>
+				<vmwarenic driver="e1000" interface="0" mode="bridged"/>
+			</vmwareconfig>
+		</type>
+	</preferences>
 	<users group="root">
 		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
-	<!-- Package Repositories -->
 	<repository type="yast2">
 		<source path="opensuse://11.2/repo/oss"/>
 	</repository>
-	<!-- Packages and Patterns -->
 	<packages type="image">
 		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
@@ -68,13 +89,4 @@
 		<package name="cracklib-dict-full"/>
 		<package name="openssl-certs"/>
 	</packages>
-	<!-- Virtual Machine configurations -->
-	<vmwareconfig memory="512" guestOS="suse" HWversion="4">
-		<vmwaredisk controller="scsi" id="0"/>
-		<vmwarenic driver="e1000" interface="0" mode="bridged"/>
-	</vmwareconfig>
-	<xenconfig memory="512" domain="domU">
-		<xendisk device="/dev/xvda"/>
-		<xenbridge name=""/>
-	</xenconfig>
 </image>

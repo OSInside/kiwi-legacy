@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<image schemaversion="3.8" name="initrd-oemboot-suse-11.0">
+
+<image schemaversion="4.1" name="initrd-oemboot-suse-11.0">
 	<description type="boot">
 		<author>Marcus Schaefer</author>
 		<contact>ms@novell.com</contact>
 		<specification>boot/initrd image used on OEM VMX disk</specification>
 	</description>
 	<preferences>
-		<type bootprofile="default" bootkernel="std">cpio</type>
+		<type image="cpio" bootprofile="default" bootkernel="std"/>
 		<version>2.7.1</version>
-		<size unit="M">60</size>
-		
 		<packagemanager>smart</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>
 	</preferences>
@@ -69,7 +68,7 @@
 		<file name="drivers/xen/*"/>
 	</drivers>
 	<repository type="yast2" status="replaceable">
-        <source path="/image/CDs/full-11.0-i386"/>
+		<source path="/image/CDs/full-11.0-i386"/>
 	</repository>
 	<packages type="image" profiles="std">
 		<package name="kernel-default"/>

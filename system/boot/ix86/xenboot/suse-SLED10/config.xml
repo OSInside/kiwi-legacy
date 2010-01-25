@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<image schemaversion="3.8" name="initrd-xenboot-suse-SLED10">
+
+<image schemaversion="4.1" name="initrd-xenboot-suse-SLED10">
 	<description type="boot">
 		<author>Marcus Schaefer</author>
 		<contact>ms@novell.com</contact>
 		<specification>boot/initrd image for Xen VM systems</specification>
 	</description>
 	<preferences>
-		<type bootprofile="default" bootkernel="std">cpio</type>
+		<type image="cpio" bootprofile="default" bootkernel="std"/>
 		<version>2.1.1</version>
-		<size unit="M">60</size>
-		
 		<packagemanager>smart</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>
 	</preferences>

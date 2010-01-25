@@ -1,22 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<image schemaversion="3.8" name="initrd-oemboot-suse-11.2">
+
+<image schemaversion="4.1" name="initrd-oemboot-suse-11.2">
 	<description type="boot">
 		<author>Marcus Schaefer</author>
 		<contact>ms@novell.com</contact>
 		<specification>boot/initrd image used on OEM VMX disk</specification>
 	</description>
 	<preferences>
-		<type bootprofile="default" bootkernel="std">cpio</type>
+		<type image="cpio" bootprofile="default" bootkernel="std"/>
 		<version>2.7.1</version>
-		<size unit="M">60</size>
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>
 	</preferences>
 	<profiles>
-		<!-- bootprofile specs -->
 		<profile name="default" description="Booting default profile"/>
 		<profile name="xen" description="Boot with xen kernel/mboot.c32"/>
-		<!-- bootkernel specs -->
 		<profile name="std" description="KERNEL: Default"/>
 		<profile name="nex" description="KERNEL: Xen kernel/mboot.c32"/>
 		<profile name="pae" description="KERNEL: pae kernel"/>
@@ -72,7 +70,7 @@
 		<file name="drivers/xen/*"/>
 	</drivers>
 	<repository type="yast2" status="replaceable">
-        <source path="/image/CDs/full-i386"/>
+		<source path="/image/CDs/full-i386"/>
 	</repository>
 	<packages type="image" profiles="std">
 		<package name="kernel-default"/>
@@ -86,8 +84,8 @@
 	<packages type="image" profiles="ec2">
 		<package name="kernel-ec2"/>
 	</packages>
-	<packages type="image" profiles="desktop">  
-		<package name="kernel-desktop"/>  
+	<packages type="image" profiles="desktop">
+		<package name="kernel-desktop"/>
 	</packages>
 	<packages type="image">
 		<package name="parted"/>

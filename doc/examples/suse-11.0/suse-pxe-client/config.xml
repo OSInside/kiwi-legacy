@@ -1,12 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<image schemaversion="3.8" name="suse-11.0-pxe-client">
+
+<image schemaversion="4.1" name="suse-11.0-pxe-client">
 	<description type="system">
 		<author>Marcus Schäfer</author>
 		<contact>ms@novell.com</contact>
 		<specification>openSUSE 11.0 Wyse VX0 terminal 128MB</specification>
 	</description>
 	<preferences>
-		<type filesystem="squashfs" boot="netboot/suse-11.0">pxe</type>
+		<type image="pxe" filesystem="squashfs" boot="netboot/suse-11.0">
+			<pxedeploy server="192.168.100.2" blocksize="4096">
+				<partitions device="/dev/sda">
+					<partition type="swap" number="1" size="5"/>
+					<partition type="L" number="2" size="image" mountpoint="/" target="true"/>
+					<partition type="L" number="3" target="false"/>
+				</partitions>
+				<union ro="/dev/sda2" rw="/dev/sda3" type="aufs"/>
+			</pxedeploy>
+		</type>
 		<version>1.2.8</version>
 		<packagemanager>smart</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>
@@ -19,44 +29,35 @@
 		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
 	<repository type="yast2">
-		<!--<source path="/image/CDs/full-11.0-i386"/>-->
 		<source path="opensuse://11.0/repo/oss/"/>
 	</repository>
-	<pxedeploy server="192.168.100.2" blocksize="4096">
-		<partitions device="/dev/sda">
-			<partition type="swap" number="1" size="5"/>
-			<partition type="L" number="2" size="image" mountpoint="/" target="true"/>
-			<partition type="L" number="3" target="false"/>
-		</partitions>
-		<union ro="/dev/sda2" rw="/dev/sda3" type="aufs"/>
-	</pxedeploy>
 	<packages type="image">
 		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="binutils"/>
-        <package name="file"/>
-        <package name="gawk"/>
-        <package name="kernel-default"/>
-        <package name="module-init-tools"/>
-        <package name="net-tools"/>
-        <package name="netcfg"/>
-        <package name="openssh"/>
-        <package name="pam-modules"/>
-        <package name="procinfo"/>
-        <package name="sysconfig"/>
-        <package name="syslinux"/>
-        <package name="sysfsutils"/>
-        <package name="syslog-ng"/>
-        <package name="kbd"/>
-        <package name="ksymoops"/>
-        <package name="less"/>
-        <package name="initviocons"/>
-        <package name="iputils"/>
-        <package name="procps"/>
-        <package name="psmisc"/>
-        <package name="pwdutils"/>
-        <package name="portmap"/>
-        <package name="dhcpcd"/>
+		<package name="file"/>
+		<package name="gawk"/>
+		<package name="kernel-default"/>
+		<package name="module-init-tools"/>
+		<package name="net-tools"/>
+		<package name="netcfg"/>
+		<package name="openssh"/>
+		<package name="pam-modules"/>
+		<package name="procinfo"/>
+		<package name="sysconfig"/>
+		<package name="syslinux"/>
+		<package name="sysfsutils"/>
+		<package name="syslog-ng"/>
+		<package name="kbd"/>
+		<package name="ksymoops"/>
+		<package name="less"/>
+		<package name="initviocons"/>
+		<package name="iputils"/>
+		<package name="procps"/>
+		<package name="psmisc"/>
+		<package name="pwdutils"/>
+		<package name="portmap"/>
+		<package name="dhcpcd"/>
 		<package name="dbus-1"/>
 		<package name="resmgr"/>
 		<package name="hal"/>
@@ -64,19 +65,15 @@
 		<package name="bootsplash"/>
 		<package name="acpid"/>
 		<package name="vim"/>
-		<!-- PLUS: Sound -->
 		<package name="alsa"/>
-		<!-- PLUS: X11 -->
 		<package name="xorg-x11"/>
-        <package name="xorg-x11-server"/>
-        <package name="xorg-x11-driver-video"/>
-        <package name="xorg-x11-fonts-scalable"/>
-        <package name="xterm"/>
+		<package name="xorg-x11-server"/>
+		<package name="xorg-x11-driver-video"/>
+		<package name="xorg-x11-fonts-scalable"/>
+		<package name="xterm"/>
 		<package name="xdmbgrd"/>
 		<package name="xkeyboard-config"/>
-		<!-- PLUS: IceWM -->
 		<package name="icewm-lite"/>
-		<!-- PLUS: FireFox -->
 		<package name="firefox"/>
 	</packages>
 	<packages type="bootstrap">

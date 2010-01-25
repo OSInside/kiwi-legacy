@@ -1,12 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<image schemaversion="3.8" name="suse-11.2-xen-guest">
+
+<image schemaversion="4.1" name="suse-11.2-xen-guest">
 	<description type="system">
 		<author>Marcus Schäfer</author>
 		<contact>ms@novell.com</contact>
 		<specification>openSUSE 11.2 xen guest system</specification>
 	</description>
 	<preferences>
-		<type filesystem="ext4" boot="xenboot/suse-11.2">xen</type>
+		<type image="xen" filesystem="ext4" boot="xenboot/suse-11.2">
+			<xenconfig memory="128">
+				<xendisk device="/dev/sda"/>
+				<xenbridge mac="00:0C:6E:AA:57:2F" name="br0"/>
+			</xenconfig>
+		</type>
 		<version>1.1.2</version>
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>
@@ -18,7 +24,6 @@
 		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
 	<repository type="yast2">
-		<!--<source path="/image/CDs/full-11.2-i386"/>-->
 		<source path="opensuse://11.2/repo/oss/"/>
 	</repository>
 	<packages type="image">
@@ -32,12 +37,8 @@
 		<package name="kernel-xen"/>
 		<package name="xen"/>
 	</packages>
-	<xenconfig memory="128">
-		<xendisk device="/dev/sda"/> 
-		<xenbridge mac="00:0C:6E:AA:57:2F" name="br0"/>
-	</xenconfig>
 	<packages type="bootstrap">
-		<package name="filesystem"/> 
+		<package name="filesystem"/>
 		<package name="glibc-locale"/>
 	</packages>
 </image>

@@ -1,12 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<image schemaversion="3.8" name="suse-11.1-vm-guest">
+
+<image schemaversion="4.1" name="suse-11.1-vm-guest">
 	<description type="system">
 		<author>Marcus Schäfer</author>
 		<contact>ms@novell.com</contact>
 		<specification>openSUSE 11.1 virtual disk system</specification>
 	</description>
 	<preferences>
-		<type primary="true" filesystem="ext3" boot="vmxboot/suse-11.1" format="vmdk">vmx</type>
+		<type image="vmx" primary="true" filesystem="ext3" boot="vmxboot/suse-11.1" format="vmdk">
+			<vmwareconfig memory="512">
+				<vmwaredisk controller="ide" id="0"/>
+			</vmwareconfig>
+		</type>
 		<version>1.1.2</version>
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>
@@ -18,7 +23,6 @@
 		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
 	<repository type="yast2">
-		<!--<source path="/image/CDs/full-11.1-i386"/>-->
 		<source path="opensuse://11.1/repo/oss/"/>
 	</repository>
 	<packages type="image">
@@ -30,13 +34,9 @@
 		<package name="vim"/>
 		<opensusePattern name="base"/>
 	</packages>
-	<packages type="vmware">
-	</packages>
-	<vmwareconfig memory="512">
-		<vmwaredisk controller="ide" id="0"/>
-	</vmwareconfig>
+	<packages type="vmware"/>
 	<packages type="bootstrap">
-		<package name="filesystem"/> 
+		<package name="filesystem"/>
 		<package name="glibc-locale"/>
 	</packages>
 </image>

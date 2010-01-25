@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<image schemaversion="3.8" name="initrd-netboot-suse-11.2">
+
+<image schemaversion="4.1" name="initrd-netboot-suse-11.2">
 	<description type="boot">
 		<author>Marcus Schaefer</author>
 		<contact>ms@novell.com</contact>
 		<specification>boot/initrd image used for PXE</specification>
 	</description>
 	<preferences>
-		<type bootprofile="default">cpio</type>
+		<type image="cpio" bootprofile="default"/>
 		<version>2.1.1</version>
-		<size unit="M">60</size>
-		
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>
 	</preferences>
@@ -27,7 +26,6 @@
 		<file name="usb/storage/usb-storage.ko"/>
 	</drivers>
 	<drivers type="drivers" profiles="default,xen,pae">
-		<!-- DRIVERS START DEFAULT AND XEN -->
 		<file name="drivers/md/*"/>
 		<file name="drivers/hid/*"/>
 		<file name="drivers/ide/*"/>
@@ -64,10 +62,8 @@
 		<file name="drivers/char/lp.ko"/>
 		<file name="drivers/acpi/dock.ko"/>
 		<file name="lib/crc-t10dif.ko"/>
-		<!-- DRIVERS END DEFAULT AND XEN -->
 	</drivers>
 	<drivers type="drivers" profiles="diskless">
-		<!-- DRIVERS START DISKLESS -->
 		<file name="drivers/md/*"/>
 		<file name="drivers/ide/*"/>
 		<file name="drivers/block/brd.ko"/>
@@ -124,29 +120,21 @@
 		<file name="drivers/net/via-rhine.ko"/>
 		<file name="drivers/net/via-velocity.ko"/>
 		<file name="drivers/net/yellowfin.ko"/>
-		<!-- DRIVERS END DISKLESS -->
 	</drivers>
 	<repository type="yast2" status="replaceable">
 		<source path="/image/CDs/full-i386"/>
 	</repository>
 	<packages type="image" profiles="std">
-		<!-- KERNEL AND MODULE PACKAGES START STD -->
 		<package name="kernel-default"/>
-		<!-- KERNEL AND MODULE PACKAGES END STD -->
 	</packages>
 	<packages type="image" profiles="pae">
-		<!-- KERNEL AND MODULE PACKAGES START PAE -->
 		<package name="kernel-pae"/>
-		<!-- KERNEL AND MODULE PACKAGES END PAE -->
 	</packages>
 	<packages type="image" profiles="xen">
-		<!-- KERNEL AND MODULE PACKAGES START XEN -->
 		<package name="kernel-xen"/>
 		<package name="xen"/>
-		<!-- KERNEL AND MODULE PACKAGES END XEN -->
 	</packages>
 	<packages type="image" profiles="default,xen,pae">
-		<!-- PACKAGES START DEFAULT AND XEN -->
 		<package name="curl"/>
 		<package name="psmisc"/>
 		<package name="iputils"/>
@@ -176,10 +164,8 @@
 		<package name="bootsplash-branding-openSUSE"/>
 		<package name="tar"/>
 		<package name="cromfs"/>
-		<!-- PACKAGES END DEFAULT AND XEN -->
 	</packages>
 	<packages type="image" profiles="diskless">
-		<!-- PACKAGES START DISKLESS -->
 		<package name="iputils"/>
 		<package name="atftp"/>
 		<package name="dhcpcd"/>
@@ -199,7 +185,6 @@
 		<package name="gfxboot-devel"/>
 		<package name="bootsplash"/>
 		<package name="bootsplash-branding-openSUSE"/>
-		<!-- PACKAGES STOP DISKLESS -->
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
@@ -207,7 +192,6 @@
 		<package name="glibc-locale"/>
 	</packages>
 	<packages type="delete" profiles="default,xen,diskless,pae">
-		<!-- DELETE PACKAGES START DEFAULT, XEN AND DISKLESS -->
 		<package name="cracklib-dict-small"/>
 		<package name="cracklib-dict-full"/>
 		<package name="PolicyKit"/>
@@ -256,10 +240,8 @@
 		<package name="fribidi"/>
 		<package name="make"/>
 		<package name="bootsplash-branding-openSUSE"/>
-		<!-- DELETE PACKAGES END DEFAULT, XEN AND DISKLESS -->
 	</packages>
 	<packages type="delete" profiles="diskless">
-		<!-- DELETE PACKAGES START DISKLESS -->
 		<package name="cracklib-dict-small"/>
 		<package name="cracklib-dict-full"/>
 		<package name="xorg-x11-libxcb"/>
@@ -288,6 +270,5 @@
 		<package name="pam-modules"/>
 		<package name="pam-config"/>
 		<package name="PolicyKit"/>
-		<!-- DELETE PACKAGES END DISKLESS -->
 	</packages>
 </image>

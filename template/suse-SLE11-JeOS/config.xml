@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<image schemaversion="3.8" name="LimeJeOS-SLE11">
+
+<image schemaversion="4.1" name="LimeJeOS-SLE11">
 	<description type="system">
 		<author>Christoph Thiel</author>
 		<contact>cthiel@novell.com</contact>
@@ -17,28 +18,52 @@
 		<locale>en_US</locale>
 		<keytable>us.map.gz</keytable>
 		<timezone>Europe/Berlin</timezone>
-		<oem-home>false</oem-home>
-		<oem-systemsize>2048</oem-systemsize>
 	</preferences>
 	<preferences profiles="xenFlavour">
-		<type filesystem="ext3" boot="vmxboot/suse-SLES11" bootprofile="xen" bootkernel="nex">vmx</type>
-		<type filesystem="ext3" boot="oemboot/suse-SLES11" bootprofile="xen" bootkernel="nex" format="iso">oem</type>
+		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES11" bootprofile="xen" bootkernel="nex">
+			<xenconfig memory="512" domain="domU">
+				<xendisk device="/dev/xvda"/>
+				<xenbridge name=""/>
+			</xenconfig>
+		</type>
+		<type image="oem" filesystem="ext3" boot="oemboot/suse-SLES11" bootprofile="xen" bootkernel="nex" format="iso">
+			<oemconfig>
+				<oem-home>false</oem-home>
+				<oem-systemsize>2048</oem-systemsize>
+			</oemconfig>
+			<xenconfig memory="512" domain="domU">
+				<xendisk device="/dev/xvda"/>
+				<xenbridge name=""/>
+			</xenconfig>
+		</type>
 	</preferences>
 	<preferences profiles="vmxFlavour">
-		<type filesystem="ext3" boot="vmxboot/suse-SLES11" format="vmdk">vmx</type>
-		<type filesystem="ext3" boot="oemboot/suse-SLES11" format="iso">oem</type>
+		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-SLES11" format="vmdk">
+			<vmwareconfig memory="512" guestOS="suse" HWversion="4">
+				<vmwaredisk controller="scsi" id="0"/>
+				<vmwarenic driver="e1000" interface="0" mode="bridged"/>
+			</vmwareconfig>
+		</type>
+		<type image="oem" filesystem="ext3" boot="oemboot/suse-SLES11" format="iso">
+			<oemconfig>
+				<oem-home>false</oem-home>
+				<oem-systemsize>2048</oem-systemsize>
+			</oemconfig>
+			<vmwareconfig memory="512" guestOS="suse" HWversion="4">
+				<vmwaredisk controller="scsi" id="0"/>
+				<vmwarenic driver="e1000" interface="0" mode="bridged"/>
+			</vmwareconfig>
+		</type>
 	</preferences>
 	<users group="root">
 		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
-	<!-- For local image creation, change this to your SLE11 DVD source -->
 	<repository type="rpm-md">
 		<source path="obs:///SUSE:SLE-11:GA:Products:Test/standard"/>
 	</repository>
 	<repository type="rpm-md">
 		<source path="obs:///SUSE:SLE-11:GA/standard"/>
 	</repository>
-	<!---->
 	<packages type="image">
 		<package name="sles-release"/>
 		<package name="sles-release-DVD"/>
@@ -107,12 +132,4 @@
 		<package name="cracklib-dict-full"/>
 		<package name="openssl-certs"/>
 	</packages>
-	<vmwareconfig memory="512" guestOS="suse" HWversion="4">
-		<vmwaredisk controller="scsi" id="0"/>
-		<vmwarenic driver="e1000" interface="0" mode="bridged"/>
-	</vmwareconfig>
-	<xenconfig memory="512" domain="domU">
-		<xendisk device="/dev/xvda"/>
-		<xenbridge name=""/>
-	</xenconfig>
 </image>

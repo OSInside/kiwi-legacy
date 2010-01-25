@@ -1,22 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<image schemaversion="3.8" name="suse-11.2-live-stick">
+
+<image schemaversion="4.1" name="suse-11.2-live-stick">
 	<description type="system">
 		<author>Marcus Schäfer</author>
 		<contact>ms@novell.com</contact>
 		<specification>openSUSE 11.2 live stick system 1GB</specification>
 	</description>
 	<preferences>
-		<type filesystem="clicfs" boot="usbboot/suse-11.2">usb</type>
-		<type filesystem="clicfs" boot="oemboot/suse-11.2">oem</type>
-		<type filesystem="clicfs" boot="vmxboot/suse-11.2">vmx</type>
+		<type image="usb" filesystem="clicfs" boot="usbboot/suse-11.2"/>
+		<type image="oem" filesystem="clicfs" boot="oemboot/suse-11.2">
+			<oemconfig>
+				<oem-swap>false</oem-swap>
+				<oem-kiwi-initrd>true</oem-kiwi-initrd>
+				<oem-boot-title>USB</oem-boot-title>
+			</oemconfig>
+		</type>
+		<type image="vmx" filesystem="clicfs" boot="vmxboot/suse-11.2"/>
 		<version>1.1.2</version>
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>
 		<rpm-force>true</rpm-force>
 		<rpm-excludedocs>true</rpm-excludedocs>
-		<oem-swap>false</oem-swap>
-		<oem-kiwi-initrd>true</oem-kiwi-initrd>
-		<oem-boot-title>USB</oem-boot-title>
 		<locale>en_US.UTF-8</locale>
 		<keytable>us.map.gz</keytable>
 		<timezone>Europe/Berlin</timezone>
@@ -28,7 +32,6 @@
 		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
 	</users>
 	<repository type="yast2">
-		<!--<source path="/image/CDs/full-11.2-i386"/>-->
 		<source path="opensuse://11.2/repo/oss/"/>
 	</repository>
 	<packages type="image" patternType="plusRecommended">
@@ -42,7 +45,7 @@
 		<opensusePattern name="kde4"/>
 	</packages>
 	<packages type="bootstrap">
-		<package name="filesystem"/> 
+		<package name="filesystem"/>
 		<package name="glibc-locale"/>
 	</packages>
 	<packages type="delete">

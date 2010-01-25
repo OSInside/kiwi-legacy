@@ -26,7 +26,7 @@ db:info [
 	db:releaseinfo [
 		"$Id: kiwi.rnc 2957 2008-01-11 12:53:39Z thomas-schraitle $"
 	]
-	db:releaseinfo [ "RNC Schema Version 3.8" ]
+	db:releaseinfo [ "RNC Schema Version 4.1" ]
 	db:pubdate [ "START" ]
 	db:pubdate [ "2008-01-08" ]
 ]
@@ -58,7 +58,7 @@ div {
 		attribute inherit { text }
 	k.image.schemaversion.attribute =
 		## The allowed Schema version (fixed value)
-		attribute schemaversion { "3.8" }
+		attribute schemaversion { "4.1" }
 	k.image.kiwirevision.attribute =
 		## A kiwi SVN revision number which is known to build
 		## a working image from this description. If the kiwi SVN
@@ -95,12 +95,7 @@ div {
 			k.users* &
 			k.drivers* &
 			k.repository+ &
-			k.pxedeploy? &
-			k.split? &
-			k.packages* &
-			k.vmwareconfig? &
-			k.xenconfig? &
-			k.lvmvolumes?
+			k.packages*
 		}
 }
 
@@ -1281,7 +1276,15 @@ div {
 	k.type.primary.attribute =
 		## Specifies the primary type (choose KIWI option type)
 		attribute primary { xsd:boolean }
+	k.type.image.attribute =
+		## Specifies the image type
+		attribute image {
+			"ext2" |  "ext3" | "ext4" | "reiserfs" | "squashfs" |
+			"dmsquash" | "clicfs" | "cpio" | "iso" | "split" | "usb" |
+			"vmx" | "oem" | "xen" | "pxe" | "ec2"
+		}
 	k.type.attlist =
+		k.type.image.attribute &
 		k.type.fsnocheck.attribute? &
 		k.type.lvm.attribute? &
 		k.type.lvmgroup.attribute? &
@@ -1309,8 +1312,14 @@ div {
 	k.type =
 		## The Image Type of the Logical Extend
 		element type { 
-			k.type.attlist, 
-			text 
+			k.type.attlist &
+			k.size? &
+			k.oemconfig? &
+			k.vmwareconfig? &
+			k.xenconfig? &
+			k.split? &
+			k.lvmvolumes? &
+			k.pxedeploy?
 		}
 }
 
@@ -1876,6 +1885,35 @@ div {
 }
 
 #==========================================
+# main block: <oemconfig>
+#
+div {
+	k.oemconfig.attlist = empty
+	k.oemconfig =
+		## specifies the OEM configuration sections
+		[
+		db:para [
+			"The oemconfig element specifies the OEM image\x{a}"~
+			"configuration options which are used to repartition\x{a}"~
+			"and setup the system disk"
+		]
+		]
+		element oemconfig {
+			k.oemconfig.attlist &
+			k.oem-systemsize? &
+			k.oem-swap? &
+			k.oem-home? &
+			k.oem-boot-title? &
+			k.oem-kiwi-initrd? &
+			k.oem-sap-install? &
+			k.oem-swapsize? &
+			k.oem-recovery? &
+			k.oem-recoveryID? &
+			k.oem-reboot?
+		}
+}
+
+#==========================================
 # main block: <vmwareconfig>
 #
 div {
@@ -2007,17 +2045,6 @@ div {
 			k.preferences.attlist &
 			k.type* &
 			k.version? &
-			k.size? &
-			k.oem-swap? &
-			k.oem-home? &
-			k.oem-boot-title? &
-			k.oem-kiwi-initrd? &
-			k.oem-sap-install? &
-			k.oem-swapsize? &
-			k.oem-systemsize? &
-			k.oem-recovery? &
-			k.oem-recoveryID? &
-			k.oem-reboot? &
 			k.packagemanager? &
 			k.rpm-check-signatures? &
 			k.rpm-excludedocs? &

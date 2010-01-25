@@ -190,7 +190,10 @@ assumed to be present for all profiles.
 <preferences \textit{profiles="name"}>\\
 \hspace*{1cm}<version>1.1.2</version>\\
 \hspace*{1cm}<packagemanager>smart</packagemanager>\\
-\hspace*{1cm}<type .../>\\
+\hspace*{1cm}<type image="name" ...>\\
+\hspace*{2cm}<vmwareconfig|xenconfig|size|pxedeploy|\\
+\hspace*{2cm} split|oemconfig|lvmvolumes>\\
+\hspace*{1cm}</type>\\
 </preferences>
 \end{Command}
 
@@ -219,14 +222,14 @@ it's possible to have for example two preferences sections whereas one
 contains specific oem options and the other doesn't. This allows to
 add specific type based information while building the image.
 
-At least one type must be set to be able to build an image from
-this description. Multiple type lines are allowed whereas you can specify
+At least one type section must be set to be able to build an image from
+this description. Multiple type sections are allowed whereas you can specify
 with the boolean attribute named \textbf{primary} which should be the primary
 image if no type is requested on creation. The following list
 describes the possible types and their attributes:
 
 \begin{itemize}
-\item \textbf{usb}\\
+\item \textbf{image=''usb''}\\
       Use this type to create a USB stick system along with the
       attributes \textbf{filesystem} and \textbf{boot=''usbboot/suse-*''}
       In addition to that type you can specify which bootloader to use.
@@ -238,7 +241,7 @@ describes the possible types and their attributes:
       activate LVM support and place the root filesystem into logical
       volumes of the volume group specified by the lvmgroup attribute.
       If no lvmgroup is set the default group name kiwiVG applies.
-\item \textbf{vmx}\\
+\item \textbf{image=''vmx''}\\
       Use this type to create a virtual disk system along with the
       attributes \textbf{filesystem}, \textbf{boot=''vmxboot/suse-*''} and
       optionally \textbf{format}. The format attribute spcifies one of
@@ -251,7 +254,7 @@ describes the possible types and their attributes:
       activate LVM support and place the root filesystem into logical
       volumes of the volume group specified by the lvmgroup attribute.
       If no lvmgroup is set the default group name kiwiVG applies.
-\item \textbf{oem}\\
+\item \textbf{image=''oem''}\\
       Use this type to create a preload virtual disk system along with
       the attributes \textbf{filesystem}, \textbf{boot=''oemboot/suse-*''} and
       optionally \textbf{format}. If the format attribute is set to
@@ -263,14 +266,14 @@ describes the possible types and their attributes:
       placed into logical volumes of the volume group specified by the
       lvmgroup attribute. If no lvmgroup is set the default group name
       kiwiVG applies.
-\item \textbf{pxe}\\
+\item \textbf{image=''pxe''}\\
       Use this type to create a network boot image along with the
       attributes \textbf{filesystem} and \textbf{boot=''netboot/suse-*''}
       Additionally the attribute \textbf{compressed} specifies whether
       the image file should be compressed or not. This is not the filesystem
       compression just the image file compression most often used to
       transfer the compressed version over to the boot server.
-\item \textbf{iso}\\
+\item \textbf{image=''iso''}\\
       Use this type to create a live system on CD or DVD along with
       the attributes \textbf{boot=''isoboot/suse-*''} and optionally
       \textbf{flags}. If no flags are specified the filesystem will not
@@ -290,11 +293,11 @@ describes the possible types and their attributes:
       \end{itemize}
       If no flags or the flags ''compressed''
       are set an additional \textbf{split} section is recommended.
-\item \textbf{xen}\\
+\item \textbf{image=''xen''}\\
       Use this type to create a Xen enabled para-virtual gues image along
       with the attributes \textbf{filesystem} and
       \textbf{boot=''xenboot/suse-*''}
-\item \textbf{split}\\
+\item \textbf{image=''split''}\\
       Use this type if you want to use one of the types
       \textbf{usb,vmx,oem or pxe} but as a split image. The split image
       support allows to create the image as split files wheras one part
@@ -303,7 +306,7 @@ describes the possible types and their attributes:
       According to this use this type together with the attributes
       \textbf{fsreadwrite}, \textbf{fsreadonly} and\\
       \textbf{boot=''usb|vmx|oem|netboot/suse-*''}
-\item \textbf{cpio}\\
+\item \textbf{image=''cpio''}\\
       Use this type if your image is a boot image (intrd). Along with
       this type the optional attributes \textbf{bootprofile=''default''} and/or
       \textbf{bootkernel=''std''} exists. A boot image should group 
@@ -336,21 +339,6 @@ Within the preferences section there are the following optional
 attributes:
 
 \begin{itemize}
-\item \textbf{size}\\
-      Specifies the size of the image with a numerical value in
-      Megabytes or Gigabytes. Use the ''unit'' attribute to assign the
-      unit \textbf{M} for Megabytes or \textbf{G} for Gigabytes.
-      KIWI extends the image size automatically if the specified value
-      is too small. If the actual size is more than 100MB larger than
-      the specified size, KIWI aborts with an error
-      message. KIWI does not automatically reduce the image size if
-      the specified value is too large, because the extra space might
-      be needed to, for example, run custom scripts. If no size is
-      specified, KIWI uses the required size plus approximately
-      30\% free space. The optional ''additive'' attribute can be set
-      to tell kiwi to use the required size for the image plus the
-      given size as additional free space. The ''additive'' attribute is
-      a bool attribute and can be set to either true or false.
 \item \textbf{rpm-check-signatures}\\
       Specifies whether RPM should check the package signature or not
 \item \textbf{rpm-excludedocs}\\
@@ -384,6 +372,366 @@ attributes:
       predefined non empty root directory as base information.
       This could speedup the build process a lot if the base root path
       already contains most of the image data.
+\end{itemize}
+
+Within the type section there are optional subsections to specify
+additional information for this type. The following subsections are
+possible:
+
+\begin{itemize}
+\item \textbf{size}\\
+    Specifies the size of the image with a numerical value in
+    Megabytes or Gigabytes. Use the ''unit'' attribute to assign the
+    unit \textbf{M} for Megabytes or \textbf{G} for Gigabytes.
+    KIWI extends the image size automatically if the specified value
+    is too small. If the actual size is more than 100MB larger than
+    the specified size, KIWI aborts with an error
+    message. KIWI does not automatically reduce the image size if
+    the specified value is too large, because the extra space might
+    be needed to, for example, run custom scripts. If no size is
+    specified, KIWI uses the required size plus approximately
+    30\% free space. The optional ''additive'' attribute can be set
+    to tell kiwi to use the required size for the image plus the
+    given size as additional free space. The ''additive'' attribute is
+    a bool attribute and can be set to either true or false.
+
+	\begin{Command}{12cm}
+	<size unit="M">1000</size>
+	\end{Command}
+
+\item \textbf{vmwareconfig}\\
+	The optional vmwareconfig section is used if the image description
+	includes a packages section of type \textbf{vmware}. In this case kiwi
+	is able to create the guest configuration file required to run the
+	image within VMware. The guest configuration file can also be created
+	by the VMware toolkit itself but with the pre-created guest configuration
+	created by kiwi it is possible to provide an all in one bundle ready
+	to run in VMware. The following general information can be provided to
+	create the VMware (.vmx) configuration file:
+
+	\begin{Command}{12cm}
+	<vmwareconfig arch="arch" memory="MB"\\
+	\hspace*{2.5cm}HWversion="number"\\
+	\hspace*{2.5cm}guestOS="suse|sles"\\
+	\hspace*{2.5cm}usb="true|false"/>\\
+	\hspace*{1cm}<vmwarenic driver="name"\\
+	\hspace*{2.5cm}interface="number" mode="mode"/>\\
+	\hspace*{1cm}<vmwaredisk controller="ide|scsi"\\
+	\hspace*{2.5cm}id="number"/>\\
+	\hspace*{1cm}<vmwarecdrom controller="ide|scsi"\\
+	\hspace*{2.5cm}id="number"/>\\
+	</vmwareconfig>
+	\end{Command}
+
+	\begin{itemize}
+	\item \textbf{arch}\\
+      The virtualized architecture. Can be one of ix86 or x86\_64
+      Bydefault ix86 is used.
+	\item \textbf{memory}\\
+      The mandatory memory attribute specified how much memory in MB
+      should be allocated for the virtual machine
+	\item \textbf{HWversion}\\
+      The VMware hardware version number. By default version 3 is used
+	\item \textbf{guestOS}\\
+      The guestOS identifier. By default suse is used on ix86 and suse-64
+      for x86\_64. At the moment only the suse and sles guestOS types
+      are supported
+	\item \textbf{usb}\\
+      The bool value \textbf{usb} specifies whether the guest machine
+      should provide a virtual USB controller or not.
+	\end{itemize}
+
+	The following information can be provided to setup the VMware virtual
+	main storage device and CD/DVD drive connection.
+
+	\begin{itemize}
+	\item \textbf{controller}\\
+      The mandatory controller attribute can be either ide or scsi disk
+	\item \textbf{id}\\
+      The mandatory id attribute specifies the disk id. If only one
+      disk is set the id value should be set to 0 
+	\end{itemize}
+
+	The following information can be provided to setup the VMware virtual
+	network interface
+
+	\begin{itemize}
+	\item \textbf{driver}\\
+      The mandatory driver to use for the virtual network card. Possible
+      values are vlance, e1000 or vmxnet. vmxnet requires the vmware tools to be
+      part of the image
+	\item \textbf{interface}\\
+      The mandatory network interface number. If only one interface is
+      set the value should be set to 0
+	\item \textbf{mode}\\
+      The network mode used to communicate outside the VM. In many cases
+      the bridged mode is used.
+	\end{itemize}
+
+\item \textbf{xenconfig}\\
+	The optional xenconfig section is used if the image description
+	includes a packages section of type \textbf{xen}. In this case kiwi
+	is able to create the guest configuration file required to run the
+	image within Xen. According to this it's possible to provide an all
+	in one bundle ready to run in Xen. The following general information
+	can be provided to create the Xen (.xenconfig) configuration file:
+
+	\begin{Command}{12cm}
+	<xenconfig memory="MB"\\
+	\hspace*{1cm}<xendisk device="/dev/..."/>\\
+	\hspace*{1cm}<xenbridge name="eth0" mac="addr"/>\\
+	</vmwareconfig>
+	\end{Command}
+
+	\begin{itemize}
+	\item \textbf{memory}\\
+      The mandatory memory attribute specified how much memory in MB
+      should be allocated for the para virtual machine    
+	\end{itemize}
+
+	The following information can be provided to setup the Xen para virtual
+	main storage device as part of a \textbf{xendisk} section
+
+	\begin{itemize}
+	\item \textbf{device}\\
+      The mandatory device which should appear in the para virtual
+      instance
+	\end{itemize}
+
+	The default Xen configuration uses bridging within domain 0 to allow all
+	domains to appear on the network as individual hosts. In order to create
+	the bridge which can be used by the Xen virtual network interface(s) the
+	script ''/etc/xen/scripts/network-bridge start'' can be called to create
+	a bridge as shown in the following picture:
+
+	\begin{figure}[h]
+	\centering
+	\includegraphics[scale=0.5]{pictures/xenbridge.eps}
+	\caption{Illustration on network-bridge and vif-bridge}
+	\label{fig:architecture}
+	\end{figure}
+
+	Additional information on how to setup networking with Xen can be
+	found here: \url{http://wiki.xensource.com/xenwiki/XenNetworking}
+	The following information can be provided to setup the Xen network
+	bridge as part of one ore more \textbf{xenbridge} section(s).
+
+	\begin{itemize}
+	\item \textbf{name}\\
+      The name of the network interface which is the bridge between
+      the physical device (peth) and the virtual device(s) (vif).
+	\item \textbf{mac}\\
+      The optional mac address value for the virtual interface inside
+      the DOM(x).
+	\end{itemize}
+
+\newpage
+
+\item \textbf{pxedeploy}\\
+	The optional pxedeploy section is only useful if you build the \textbf{pxe}
+	image type. For this type an additional network boot infrastructure needs
+	to be set up. To ease the process of setting up such a boot server kiwi
+	provides a package called kiwi-pxeboot. This package sets up the basic
+	pxe boot environment like kiwi expects it. The package will setup a
+	directory structure in /srv/tftpboot. The result files of the kiwi
+	image build process needs to be copied to that location. A detailed
+	explanation of what file needs to be copied and where is provided in
+	the PXE Image chapter later in this document. Among the image files itself
+	it is required to provide an information how KIWI should handle the
+	machine it should be install with the created image. Information like
+	which image should be used or how to partition the machine needs to
+	be provided in a file called config.<MAC-Address> below the directory
+	/srv/tftpboot/KIWI. The reason for the pxedeploy section is to allow KIWI
+	to create that file according to the information provided in the image
+	description.
+
+	\begin{Command}{14cm}
+	<pxedeploy server="IP" blocksize="4096">\\
+	\hspace*{1cm}<timeout>seconds</timeout>\\
+	\hspace*{1cm}<commandline>kernel-options</commandline>\\
+	\hspace*{1cm}<kernel>kernel-file</kernel>\\
+	\hspace*{1cm}<initrd>initrd-file</initrd>\\
+	\hspace*{1cm}<partitions device="/dev/sda">\\
+	\hspace*{2cm}<partition type="swap" number="1" size="MB"/>\\
+	\hspace*{2cm}<partition type="L" number="2" size="MB"\\
+	\hspace*{4.5cm}mountpoint="/" target="true"/>\\
+	\hspace*{2cm}<partition type="fd" number="3"/>\\
+	\hspace*{1cm}</partitions>\\
+	\hspace*{1cm}<union ro="dev" rw="dev" type="aufs|unionfs"/>\\
+	\hspace*{1cm}<configuration source="/KIWI/../file" dest="/../file"\\
+	\hspace*{4.5cm}arch="..."/>\\
+	\hspace*{1cm}<configuration .../>\\
+	</pxedeploy>
+	\end{Command}
+
+	\begin {itemize}
+	\item The server and blocksize attributes specify the TFTP server which
+      controls the download of image files. KIWI also supports other protocols
+      than tftp but in order to do that the variables \textbf{kiwiserver} and
+      \textbf{kiwiservertype} must be set as kernel parameter when the client
+      boots.
+	\item The optional timeout section specifies the grub timeout in seconds
+      which is used when the KIWI initrd configures and installs the grub boot
+      loader on the machine after the first deployment to allow standalone
+      boot.
+	\item The optional commandline section specifies the kernel options which
+      should be passed to the kernel by the grub bootloader. the KIWI
+      initrd includes this kernel options when installing the grub for
+      standalone boot
+	\item The optional kernel and initrd sections specifies the KIWI
+      kernel and initrd files on the boot server. In case of a special boot
+      method which is not supported by the distribution standard mkinitrd
+      the KIWI initrd needs to stay on the system and needs to be used for
+      local boot as well. So if your system image makes use of the split
+      type or your pxedeploy section includes any union information the
+      kernel and initrd sections must be provided.
+	\item The partitions section is required if you want to install the system
+      image on a disk or any other permanent storage device. Each partition is
+      specified by one partition subtag which defines the type (see
+      sfdisk -list-type), partition number, size, optional mountpoint, and
+      optional information on if this partition is the system image
+      target partition. With the KIWI netboot boot image, the first
+      partition is always the swap partition, while the second partition
+      is used, by default, for the system image. With the optional
+      target flag, you can specify a partition other than the second
+      partition to install the system image on. If size is set to ''image'',
+      KIWI calculates the required size for this partition in order to
+      have enough space for the later image.
+	\item The optional union section is used if the system image is based
+      on a read-only filesystem such as squashfs and should be mounted
+      read-write by using an overlay filesystem like aufs or by a device.
+      mapper setup with the dmsquash type. In this case, KIWI creates an
+      additional write partition, then
+      combines both partitions with the given overlay filesystem or device map.
+      Currently, there are two such filesystems: unionfs and aufs
+      (aufs is the preferred file system). The partition that holds the
+      read-only system image must be set as the ro attribute value, and the
+      partition that serves as the write partition must be set the rw
+      attribute value.
+	\item The optional configuration section can be used to integrate a network
+      client's configuration files which are stored remotely on the server.
+      The source attribute specifies the path on the server used by a
+      TFTP client program to download the file, and the dest attribute
+      specifies the target relative to the root (/) of the network client.
+      Each file is specified by one configuration section and can be
+      bound to a specific set of architectures separated by comma.
+	\end{itemize}
+
+\item \textbf{split}\\
+	The optional split section is used if your image type is split or iso
+	combined with the attribute compressed. The split
+	section controls which files of your splitted image should be writable
+	and whether they are persistantly writable or only temporarly. In case
+	of an iso image all data specified can only be temporarly writable
+	by design of the live system image type.
+
+	The split section distinguishes between directory and files. The
+	information of ''/etc'' would make /etc a writable directory however
+	none of the files *within* /etc are affected. They remain symbolic
+	links to the real files in the read-only area. The main advantage to
+	putting just a directory in the read-write area is that any new
+	files created there are stored on the disk instead of tmpfs. If all
+	the files in /etc should also be part of the read-write area and
+	according to this put a complete directory including all its files
+	into the read-write area two lines are required as shown above.
+
+	\begin{Command}{12cm}
+	<split>\\
+	\hspace*{1cm}<temporary>\\
+	\hspace*{2cm}<!-- read/write access to: -->\\
+	\hspace*{2cm}<file name="/var"/>\\
+	\hspace*{2cm}<file name="/var/*"/>\\
+	\hspace*{2cm}<!-- but not on this file: -->\\
+	\hspace*{2cm}<except name="/etc/shadow"/>\\
+	\hspace*{1cm}</temporary>\\
+	\hspace*{1cm}<persistent>\\
+	\hspace*{2cm}<!-- persistent read/write access to: -->\\
+	\hspace*{2cm}<file name="/etc"/>\\
+	\hspace*{2cm}<file name="/etc/*"/>\\
+	\hspace*{2cm}<!-- but not on this file: -->\\
+	\hspace*{2cm}<except name="/etc/passwd"/>\\
+	\hspace*{1cm}</persistent>\\
+	</split>
+	\end{Command}
+
+\item \textbf{lvmvolumes}\\
+	With the optional \textbf{lvmvolumes} section you can set one or
+	more top level directories into a separate volume. For example you
+	want to put /usr and /var into different volumes add the following
+	lvmvolumes section:
+
+	\begin{Command}{12cm}
+	<lvmvolumes>\\
+	\hspace*{1cm}<volume name="usr" freespace="100M"/>\\
+	\hspace*{1cm}<volume name="var" size="200M"/>\\
+	</lvmvolumes>
+	\end{Command}
+
+	The optional freespace attribute let you add additional free space
+	for that volume. If you don't set any freespace the volume will be
+	about 80\% to 90\% full. The optional size attribute let you specify
+	the absolute size for that volume. If both freespace and size are set
+	size is preferred. If the given size is too small the value will be
+	ignored.
+
+\item \textbf{oemconfig}
+	By default the oemboot process will create/modify a swap, /home and /
+	partition. It is possible to influence the behavior by the
+	oem-* elements explained below.
+	KIWI uses this information to create the file
+	\textbf{/config.oempartition} as part
+	of the automatically created oemboot boot image. The format of the
+	file is a simple key=value format and created by the KIWIConfig.sh
+	function named baseSetupOEMPartition(). 
+
+	\begin{Command}{12cm}
+	<oemconfig>\\
+	\hspace*{1cm}<oem-systemsize>2000</oem-systemsize>\\
+	\hspace*{1cm}<oem-...\\	
+	</oemconfig>
+    \end{Command}
+
+	\begin{itemize}
+	\item \textbf{<oem-reboot>true|false</oem-reboot>}\\
+      This allows to reboot the oem system after initial deployment.
+      This value is represented by the variable OEM\_REBOOT in
+      config.oempartition
+	\item \textbf{<oem-swapsize>number in MB</oem-swapsize>}\\
+      Set the size of the swap partition. This value is represented by
+      variable OEM\_SWAPSIZE in config.oempartition
+	\item \textbf{<oem-systemsize>number in MB</oem-systemsize>}\\
+      Set the size of the / partition. This value is represented by the
+      variable OEM\_SYSTEMSIZE in config.oempartition
+	\item \textbf{<oem-home>true|false</oem-home>}\\
+      Specify if a home partition should be create. This value is represented
+      by the variable OEM\_WITHOUTHOME in config.oempartition.
+	\item \textbf{<oem-swap>true|false</oem-swap>}\\
+      Specify if a spaw partition should be create. This value is represented
+      by the variable OEM\_WITHOUTSWAP in config.oempartition.
+	\item \textbf{<oem-boot-title>text</oem-boot-title>}\\
+      By default the string \textbf{OEM} will be appended to the
+      boot manager menu when KIWI creates the grub configuration during
+      first deployment. The oem-boot-title value allows to set a custom
+      name which is used instead of OEM. This value is represented
+      by the variable OEM\_BOOT\_TITLE in config.oempartition.
+	\item \textbf{<oem-recovery>true|false</oem-recovery>}\\
+      If this element is set to true KIWI will create a recovery archive
+      from the prepared root tree. The archive will appear as
+      \textit{/recovery.tar.bz2} within the initial image file. During
+      first boot of the image a single recovery partition will be
+      created and the recovery archive will be moved into that
+      partition. An additional boot menu entry will be created which
+      allows to restore the original root tree information. The
+      user information on the /home partition or in the /home directory
+      are not affected by that recovery process
+	\item \textbf{<oem-kiwi-initrd>true|false</oem-kiwi-initrd>}\\
+      If this element is set to true the initial oemboot boot image (initrd)
+      will \textbf{not} be replaced by the system (mkinitrd) created initrd.
+      This option makes sense if the target storage device for the image
+      is not a fixed disk but for example an USB stick. In that case it
+      might be required to re-detect the storage location on first boot which
+      is done as part of the oemboot boot image
+	\end{itemize}
 \end{itemize}
 
 \subsection{users element}
@@ -697,257 +1045,5 @@ the image. If the \textbf{bootinclude} attribute is set along with
 the archive element the data will also become installed into the
 boot image.
 
-\subsection{vmwareconfig element}
-\begin{Command}{12cm}
-<vmwareconfig arch="arch" memory="MB"\\
-\hspace*{2.5cm}HWversion="number"\\
-\hspace*{2.5cm}guestOS="suse|sles"\\
-\hspace*{2.5cm}usb="true|false"/>\\
-\hspace*{1cm}<vmwarenic driver="name"\\
-\hspace*{2.5cm}interface="number" mode="mode"/>\\
-\hspace*{1cm}<vmwaredisk controller="ide|scsi"\\
-\hspace*{2.5cm}id="number"/>\\
-\hspace*{1cm}<vmwarecdrom controller="ide|scsi"\\
-\hspace*{2.5cm}id="number"/>\\
-</vmwareconfig>
-\end{Command}
 
-The optional vmwareconfig section is used if the image description
-includes a packages section of type \textbf{vmware}. In this case kiwi
-is able to create the guest configuration file required to run the
-image within VMware. The guest configuration file can also be created
-by the VMware toolkit itself but with the pre-created guest configuration
-created by kiwi it is possible to provide an all in one bundle ready
-to run in VMware. The following general information can be provided to
-create the VMware (.vmx) configuration file:
-
-\begin{itemize}
-\item \textbf{arch}\\
-      The virtualized architecture. Can be one of ix86 or x86\_64
-      Bydefault ix86 is used.
-\item \textbf{memory}\\
-      The mandatory memory attribute specified how much memory in MB
-      should be allocated for the virtual machine
-\item \textbf{HWversion}\\
-      The VMware hardware version number. By default version 3 is used
-\item \textbf{guestOS}\\
-      The guestOS identifier. By default suse is used on ix86 and suse-64
-      for x86\_64. At the moment only the suse and sles guestOS types
-      are supported
-\item \textbf{usb}\\
-      The bool value \textbf{usb} specifies whether the guest machine
-      should provide a virtual USB controller or not.
-\end{itemize}
-
-The following information can be provided to setup the VMware virtual
-main storage device and CD/DVD drive connection.
-
-\begin{itemize}
-\item \textbf{controller}\\
-      The mandatory controller attribute can be either ide or scsi disk
-\item \textbf{id}\\
-      The mandatory id attribute specifies the disk id. If only one
-      disk is set the id value should be set to 0 
-\end{itemize}
-
-The following information can be provided to setup the VMware virtual
-network interface
-
-\begin{itemize}
-\item \textbf{driver}\\
-      The mandatory driver to use for the virtual network card. Possible
-      values are vlance, e1000 or vmxnet. vmxnet requires the vmware tools to be
-      part of the image
-\item \textbf{interface}\\
-      The mandatory network interface number. If only one interface is
-      set the value should be set to 0
-\item \textbf{mode}\\
-      The network mode used to communicate outside the VM. In many cases
-      the bridged mode is used.
-\end{itemize}
-
-\subsection{xenconfig element}
-\begin{Command}{12cm}
-<xenconfig memory="MB"\\
-\hspace*{1cm}<xendisk device="/dev/..."/>\\
-\hspace*{1cm}<xenbridge name="eth0" mac="addr"/>\\
-</vmwareconfig>
-\end{Command}
-
-The optional xenconfig section is used if the image description
-includes a packages section of type \textbf{xen}. In this case kiwi
-is able to create the guest configuration file required to run the
-image within Xen. According to this it's possible to provide an all
-in one bundle ready to run in Xen. The following general information
-can be provided to create the Xen (.xenconfig) configuration file:
-
-\begin{itemize}
-\item \textbf{memory}\\
-      The mandatory memory attribute specified how much memory in MB
-      should be allocated for the para virtual machine    
-\end{itemize}
-
-The following information can be provided to setup the Xen para virtual
-main storage device as part of a \textbf{xendisk} section
-
-\begin{itemize}
-\item \textbf{device}\\
-      The mandatory device which should appear in the para virtual
-      instance
-\end{itemize}
-
-The default Xen configuration uses bridging within domain 0 to allow all
-domains to appear on the network as individual hosts. In order to create
-the bridge which can be used by the Xen virtual network interface(s) the
-script ''/etc/xen/scripts/network-bridge start'' can be called to create
-a bridge as shown in the following picture:
-
-\begin{figure}[h]
-\centering
-\includegraphics[scale=0.5]{pictures/xenbridge.eps}
-\caption{Illustration on network-bridge and vif-bridge}
-\label{fig:architecture}
-\end{figure}
-
-Additional information on how to setup networking with Xen can be
-found here: \url{http://wiki.xensource.com/xenwiki/XenNetworking}
-The following information can be provided to setup the Xen network
-bridge as part of one ore more \textbf{xenbridge} section(s).
-
-\begin{itemize}
-\item \textbf{name}\\
-      The name of the network interface which is the bridge between
-      the physical device (peth) and the virtual device(s) (vif).
-\item \textbf{mac}\\
-      The optional mac address value for the virtual interface inside
-      the DOM(x).
-\end{itemize}
-
-\begin{Command}{14cm}
-<pxedeploy server="IP" blocksize="4096">\\
-\hspace*{1cm}<timeout>seconds</timeout>\\
-\hspace*{1cm}<commandline>kernel-options</commandline>\\
-\hspace*{1cm}<kernel>kernel-file</kernel>\\
-\hspace*{1cm}<initrd>initrd-file</initrd>\\
-\hspace*{1cm}<partitions device="/dev/sda">\\
-\hspace*{2cm}<partition type="swap" number="1" size="MB"/>\\
-\hspace*{2cm}<partition type="L" number="2" size="MB"\\
-\hspace*{4.5cm}mountpoint="/" target="true"/>\\
-\hspace*{2cm}<partition type="fd" number="3"/>\\
-\hspace*{1cm}</partitions>\\
-\hspace*{1cm}<union ro="dev" rw="dev" type="aufs|unionfs"/>\\
-\hspace*{1cm}<configuration source="/KIWI/../file" dest="/../file"\\
-\hspace*{4.5cm}arch="..."/>\\
-\hspace*{1cm}<configuration .../>\\
-</pxedeploy>
-\end{Command}
-
-The optional pxedeploy section is only useful if you build the \textbf{pxe}
-image type. For this type an additional network boot infrastructure needs
-to be set up. To ease the process of setting up such a boot server kiwi
-provides a package called kiwi-pxeboot. This package sets up the basic
-pxe boot environment like kiwi expects it. The package will setup a
-directory structure in /srv/tftpboot. The result files of the kiwi
-image build process needs to be copied to that location. A detailed
-explanation of what file needs to be copied and where is provided in
-the PXE Image chapter later in this document. Among the image files itself
-it is required to provide an information how KIWI should handle the
-machine it should be install with the created image. Information like
-which image should be used or how to partition the machine needs to
-be provided in a file called config.<MAC-Address> below the directory
-/srv/tftpboot/KIWI. The reason for the pxedeploy section is to allow KIWI
-to create that file according to the information provided in the image
-description.
-
-\begin {itemize}
-\item The server and blocksize attributes specify the TFTP server which
-      controls the download of image files. KIWI also supports other protocols
-      than tftp but in order to do that the variables \textbf{kiwiserver} and
-      \textbf{kiwiservertype} must be set as kernel parameter when the client
-      boots.
-\item The optional timeout section specifies the grub timeout in seconds
-      which is used when the KIWI initrd configures and installs the grub boot
-      loader on the machine after the first deployment to allow standalone
-      boot.
-\item The optional commandline section specifies the kernel options which
-      should be passed to the kernel by the grub bootloader. the KIWI
-      initrd includes this kernel options when installing the grub for
-      standalone boot
-\item The optional kernel and initrd sections specifies the KIWI
-      kernel and initrd files on the boot server. In case of a special boot
-      method which is not supported by the distribution standard mkinitrd
-      the KIWI initrd needs to stay on the system and needs to be used for
-      local boot as well. So if your system image makes use of the split
-      type or your pxedeploy section includes any union information the
-      kernel and initrd sections must be provided.
-\item The partitions section is required if you want to install the system
-      image on a disk or any other permanent storage device. Each partition is
-      specified by one partition subtag which defines the type (see
-      sfdisk -list-type), partition number, size, optional mountpoint, and
-      optional information on if this partition is the system image
-      target partition. With the KIWI netboot boot image, the first
-      partition is always the swap partition, while the second partition
-      is used, by default, for the system image. With the optional
-      target flag, you can specify a partition other than the second
-      partition to install the system image on. If size is set to ''image'',
-      KIWI calculates the required size for this partition in order to
-      have enough space for the later image.
-\item The optional union section is used if the system image is based
-      on a read-only filesystem such as squashfs and should be mounted
-      read-write by using an overlay filesystem like aufs or by a device.
-      mapper setup with the dmsquash type. In this case, KIWI creates an
-      additional write partition, then
-      combines both partitions with the given overlay filesystem or device map.
-      Currently, there are two such filesystems: unionfs and aufs
-      (aufs is the preferred file system). The partition that holds the
-      read-only system image must be set as the ro attribute value, and the
-      partition that serves as the write partition must be set the rw
-      attribute value.
-\item The optional configuration section can be used to integrate a network
-      client's configuration files which are stored remotely on the server.
-      The source attribute specifies the path on the server used by a
-      TFTP client program to download the file, and the dest attribute
-      specifies the target relative to the root (/) of the network client.
-      Each file is specified by one configuration section and can be
-      bound to a specific set of architectures separated by comma.
-\end{itemize}
-
-\newpage
-
-\subsection{split element}
-\begin{Command}{12cm}
-<split>\\
-\hspace*{1cm}<temporary>\\
-\hspace*{2cm}<!-- read/write access to: -->\\
-\hspace*{2cm}<file name="/var"/>\\
-\hspace*{2cm}<file name="/var/*"/>\\
-\hspace*{2cm}<!-- but not on this file: -->\\
-\hspace*{2cm}<except name="/etc/shadow"/>\\
-\hspace*{1cm}</temporary>\\
-\hspace*{1cm}<persistent>\\
-\hspace*{2cm}<!-- persistent read/write access to: -->\\
-\hspace*{2cm}<file name="/etc"/>\\
-\hspace*{2cm}<file name="/etc/*"/>\\
-\hspace*{2cm}<!-- but not on this file: -->\\
-\hspace*{2cm}<except name="/etc/passwd"/>\\
-\hspace*{1cm}</persistent>\\
-</split>
-\end{Command}
-
-The optional split section is used if your image type is split or iso
-combined with the attribute compressed. The split
-section controls which files of your splitted image should be writable
-and whether they are persistantly writable or only temporarly. In case
-of an iso image all data specified can only be temporarly writable
-by design of the live system image type.
-
-The split section distinguishes between directory and files. The
-information of ''/etc'' would make /etc a writable directory however
-none of the files *within* /etc are affected. They remain symbolic
-links to the real files in the read-only area. The main advantage to
-putting just a directory in the read-write area is that any new
-files created there are stored on the disk instead of tmpfs. If all
-the files in /etc should also be part of the read-write area and
-according to this put a complete directory including all its files
-into the read-write area two lines are required as shown above.
 
