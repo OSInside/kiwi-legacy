@@ -1,5 +1,5 @@
 #
-# spec file for package kiwi (Version 3.95)
+# spec file for package kiwi (Version 4.10)
 #
 # Copyright (c) 2008 SUSE LINUX Products GmbH, Nuernberg, Germany.
 # This file and all modifications and additions to the pristine
@@ -48,8 +48,11 @@ Requires:       master-boot-code
 %if %{suse_version} > 1030
 Requires:       satsolver-tools
 %endif
+%if %{suse_version} > 1110
+Requires:       clicfs
+%endif
 Summary:        OpenSuSE - KIWI Image System
-Version:        3.95
+Version:        4.10
 Release:        80
 Group:          System/Management
 License:        GPL v2 or later

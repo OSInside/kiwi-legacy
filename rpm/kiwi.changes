@@ -1,4 +1,18 @@
 -------------------------------------------------------------------
+Mon Jan 25 11:44:17 CET 2010 - ms@suse.de
+
+- v4.10
+- applied XML changes with the following effects
+  * the image type is no longer an element content but an
+    attribute called image="type" inside the type element
+  * all oem elements are now part of the new oemconfig section
+  * the sections oemconfig,pxedeploy,split,vmwareconfig,xenconfig,lvmvolumes
+    are now type specific and have to be specified inside a type
+  * migration code has been adapted to 4.1 schema
+  * documentation has been adapted to 4.1 schema
+- added clicfs as spec file requirement (bnc #573357)
+
+-------------------------------------------------------------------
 Wed Jan 20 11:44:13 CET 2010 - ms@suse.de
 
 - v3.95
