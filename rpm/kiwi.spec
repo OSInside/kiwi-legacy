@@ -436,7 +436,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/kiwi/locale
 %{_datadir}/kiwi/repo
 %exclude %{_datadir}/kiwi/modules/KIWIIsoLinux-AppleFileMapping.txt
-%exclude %{_datadir}/kiwi/modules/KIWIIsoLinux-gen-s390-cd-kernel.pl
 %exclude %{_datadir}/kiwi/modules/KIWICollect.pm
 %exclude %{_datadir}/kiwi/modules/KIWIRepoMetaHandler.pm
 %exclude %{_datadir}/kiwi/modules/KIWIUtil.pm
@@ -468,7 +467,6 @@ rm -rf $RPM_BUILD_ROOT
 %files -n kiwi-instsource
 %defattr(-, root, root)
 %{_datadir}/kiwi/modules/KIWIIsoLinux-AppleFileMapping.txt
-%{_datadir}/kiwi/modules/KIWIIsoLinux-gen-s390-cd-kernel.pl
 %{_datadir}/kiwi/modules/KIWICollect.pm
 %{_datadir}/kiwi/modules/KIWIUtil.pm
 %{_datadir}/kiwi/modules/KIWIRepoMetaHandler.pm
