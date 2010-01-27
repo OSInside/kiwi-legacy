@@ -947,6 +947,7 @@ sub writeXML {
 	}
 	binmode $FX;
 	print $FX $data; close $FX;
+	qxx ("sed -i -e 's!><!>\\n<!'g $used");
 	my $diff = qxx ("diff -uwB $orig $used 2>&1");
 	if ($diff) {
 		$this -> loginfo ("XML diff for $cmpf:\n$diff");

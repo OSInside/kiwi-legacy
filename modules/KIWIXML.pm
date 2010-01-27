@@ -1145,6 +1145,9 @@ sub setForeignOptionsElement {
 	my $opts = $this -> getPreferencesNodeByTagName ("$item");
 	my $node = $opts -> getElementsByTagName ("$item");
 	if ($node) {
+		if ("$node" eq "$value") {
+			return $this;
+		}
 		$node = $node -> get_node(1);
 		$opts -> removeChild ($node);
 	}
@@ -1219,9 +1222,13 @@ sub setPackageManager {
 	# ---
 	my $this  = shift;
 	my $value = shift;
+	my $opts = $this -> getPreferencesNodeByTagName ("packagemanager");
+	my $pmgr = $opts -> getElementsByTagName ("packagemanager");
+	if (($pmgr) && ("$pmgr" eq "$value")) {
+		return $this;
+	}
 	my $addElement = new XML::LibXML::Element ("packagemanager");
 	$addElement -> appendText ($value);
-	my $opts = $this -> getPreferencesNodeByTagName ("packagemanager");
 	my $node = $opts -> getElementsByTagName ("packagemanager") -> get_node(1);
 	$opts -> removeChild ($node);
 	$opts -> appendChild ($addElement);
