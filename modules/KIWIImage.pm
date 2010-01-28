@@ -4219,12 +4219,6 @@ sub getSize {
 	my $mini   = qxx ("find $extend | wc -l"); $mini *= 2;
 	my $size   = qxx ("du -s --block-size=1 $extend | cut -f1"); chomp $size;
 	my $spare  = 0.3 * $size;
-	my $needi  = $size / $main::FSInodeRatio;
-	#==========================================
-	# Inode count for this filesystem
-	#------------------------------------------
-	$this->{inodes} =
-		int ($mini > $needi ? $mini : $needi);
 	#==========================================
 	# Minimum size calculated in MB
 	#------------------------------------------
@@ -4245,6 +4239,26 @@ sub getSize {
 	if ($xmlsize eq "auto") {
 		$xmlsize = $size."M";
 	}
+	#==========================================
+	# Inode count for this filesystem
+	#------------------------------------------
+	my $sizeIMGBytes = $size * 1048576;
+	my $sizeXMLBytes = $sizeIMGBytes;
+	my $needi = $sizeIMGBytes / $main::FSInodeRatio;
+	if ($xmlsize =~ /^(\d+)([MG])$/i) {
+		$sizeXMLBytes = $1;
+		my $unit = $2;
+		if ($unit eq "G") {
+			# convert GB to MB...
+			$sizeXMLBytes /= 1024;
+		}
+		$sizeXMLBytes *= 1048576;
+	}
+	if ($sizeXMLBytes > $sizeIMGBytes) {
+		$needi = $sizeXMLBytes / $main::FSInodeRatio;
+	}
+	$this->{inodes} =
+		int ($mini > $needi ? $mini : $needi);
 	#==========================================
 	# return result list
 	#------------------------------------------

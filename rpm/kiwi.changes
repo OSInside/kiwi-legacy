@@ -11,6 +11,7 @@ Mon Jan 25 11:44:17 CET 2010 - ms@suse.de
   * migration code has been adapted to 4.1 schema
   * documentation has been adapted to 4.1 schema
 - added clicfs as spec file requirement (bnc #573357)
+- fixed inode calculation (bnc #574660)
 
 -------------------------------------------------------------------
 Wed Jan 20 11:44:13 CET 2010 - ms@suse.de

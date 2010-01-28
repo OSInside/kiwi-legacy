@@ -561,6 +561,10 @@ sub getImageSize {
 		if ((! defined $plus) || ($plus eq "false") || ($plus eq "0")) {
 			my $unit = $node -> getElementsByTagName ("size")
 				-> get_node(1) -> getAttribute("unit");
+			if (! $unit) {
+				# no unit specified assume MB...
+				$unit = "M";
+			}
 			# /.../
 			# the fixed size value was set, we will use this value
 			# connected with the unit string
