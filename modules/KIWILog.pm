@@ -947,7 +947,10 @@ sub writeXML {
 	}
 	binmode $FX;
 	print $FX $data; close $FX;
-	qxx ("sed -i -e 's!><!>\\n<!'g $used");
+	qxx ("xsltproc -o $used.new $main::Pretty $used");
+	qxx ("mv $used.new $used");
+	qxx ("xsltproc -o $orig.new $main::Pretty $orig");
+	qxx ("mv $orig.new $orig");
 	my $diff = qxx ("diff -uwB $orig $used 2>&1");
 	if ($diff) {
 		$this -> loginfo ("XML diff for $cmpf:\n$diff");

@@ -100,6 +100,7 @@ our $KSplit   = $BasePath."/modules/KIWISplit.txt";
 our $Revision = $BasePath."/.revision";
 our $TestBase = $BasePath."/tests";
 our $SchemaCVT= $BasePath."/xsl/master.xsl";
+our $Pretty   = $BasePath."/xsl/print.xsl";
 
 #==========================================
 # Globals (Supported filesystem names)
