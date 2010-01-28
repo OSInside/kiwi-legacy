@@ -320,7 +320,9 @@ sub setupScreenCall {
 			$kiwi -> doNorm();
 		}
 		$this -> resetInstallationSource();
-		$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
+		if ($kiwi -> trace()) {
+			$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
+		}
 		return undef;
 	}
 	$kiwi -> done ();

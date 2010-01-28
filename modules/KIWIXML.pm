@@ -3310,7 +3310,9 @@ sub createTmpDirectory {
 		}
 	}
 	if ( $rootError ) {
-		$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
+		if ($kiwi -> trace()) {
+			$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
+		}
 		return undef;
 	}
 	my $origroot = $root;

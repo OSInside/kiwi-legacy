@@ -2612,7 +2612,9 @@ sub checkFileSystem {
 			my $code = $? >> 8;
 			my $type;
 			if ($code != 0) {
-				$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
+				if ($main::kiwi -> trace()) {
+					$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
+				}
 				return undef;
 			}
 			SWITCH: for ($data) {
@@ -2659,7 +2661,9 @@ sub checkFileSystem {
 				}
 			}
 		} else {
-			$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
+			if ($main::kiwi -> trace()) {
+				$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
+			}
 			return undef;
 		}
 	}
@@ -2677,7 +2681,9 @@ sub getControlFile {
 	my $dir    = shift;
 	my $config = "$dir/$ConfigName";
 	if (! -d $dir) {
-		$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
+		if ($main::kiwi -> trace()) {
+			$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
+		}
 		return undef;
 	}
 	if (-f $config) {
@@ -2686,10 +2692,14 @@ sub getControlFile {
 	my @globsearch = glob ($dir."/*.kiwi");
 	my $globitems  = @globsearch;
 	if ($globitems == 0) {
-		$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
+		if ($main::kiwi -> trace()) {
+			$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
+		}
 		return undef;
 	} elsif ($globitems > 1) {
-		$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
+		if ($main::kiwi -> trace()) {
+			$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
+		}
 		return undef;
 	} else {
 		$config = pop @globsearch;
@@ -2707,7 +2717,7 @@ sub createInstSource {
 	# kiwi then issues a warning and exits.
 	# ----
 	$kiwi = new KIWILog("tiny");
-	$kiwi -> deactivateBackTraceOutput();
+	$kiwi -> deactivateBackTrace();
 	my $mod = "KIWICollect";
 	eval "require $mod";
 	if($@) {

@@ -100,7 +100,9 @@ sub sendLogServerMessage {
 	my $level   = $this->{level};
 	my $date    = $this->{date};
 	if (! defined $smem) {
-		$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
+		if ($this->trace()) {
+			$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
+		}
 		return undef;
 	}
 	my $data;
@@ -137,7 +139,9 @@ sub getLogServerMessage {
 	my $this = shift;
 	my $smem = $this->{smem};
 	if (! defined $smem) {
-		$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
+		if ($this->trace()) {
+			$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
+		}
 		return undef;
 	}
 	return $smem -> get();
@@ -363,7 +367,9 @@ sub reopenRootChannel {
 		return $this;
 	}
 	if (! (open EFD,">>$file")) {
-		$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
+		if ($this->trace()) {
+			$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
+		}
 		return undef;
 	}
 	binmode(EFD,':unix');
@@ -453,7 +459,9 @@ sub printLog {
 			$result = $needcr.$logdata;
 		} elsif ($lglevel == 3) {
 			$result = $needcr.$date.$logdata;
-			$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
+			if ($this->trace()) {
+				$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
+			}
 		} else {
 			$result = Carp::longmess($needcr.$logdata);
 		}
@@ -523,19 +531,27 @@ sub printBackTrace {
 }
 
 #==========================================
-# activateBackTraceOutput
+# activateBackTrace
 #------------------------------------------
-sub activateBackTraceOutput {
+sub activateBackTrace {
 	my $this = shift;
 	$this->{used} = 1;
 }
 
 #==========================================
-# deactivateBackTraceOutput
+# deactivateBackTrace
 #------------------------------------------
-sub deactivateBackTraceOutput {
+sub deactivateBackTrace {
 	my $this = shift;
 	$this->{used} = 0;
+}
+
+#==========================================
+# trace, check for activation state
+#------------------------------------------
+sub trace {
+	my $this = shift;
+	return $this->{used};
 }
 
 #==========================================
@@ -649,7 +665,9 @@ sub setLogFile {
 	}
 	if (! (open FD,">$file")) {
 		$this -> warning ("Couldn't open log channel: $!\n");
-		$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
+		if ($this->trace()) {
+			$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
+		}
 		return undef;
 	}
 	binmode(FD,':unix');
@@ -697,7 +715,9 @@ sub setLogHumanReadable {
 	my $line = "";
 	my $cr   = 0;
 	if (! open (FD, ">$rootLog")) {
-		$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
+		if ($this->trace()) {
+			$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
+		}
 		return undef;
 	}
 	foreach my $l (@stream) {
@@ -788,7 +808,9 @@ sub setLogServer {
 		$this -> skipped ();
 		$this -> {smem} -> closeSegment();
 		undef $this -> {smem};
-		$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
+		if ($this->trace()) {
+			$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
+		}
 		return undef;
 	}
 	if ($child) {
