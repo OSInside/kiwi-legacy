@@ -635,7 +635,9 @@ else
 				1) nbdPort=$n       ; field=2 ;;
 				2) nbdDevice=$n     ; field=3 ;;
 				3) nbdswapPort=$n   ; field=4 ;;
-				4) nbdswapDevice=$n ; field=5
+				4) nbdswapDevice=$n ; field=5 ;;
+				5) nbdwritePort=$n  ; field=6 ;;
+				6) nbdwriteDevice=$n; field=7
 			esac
 			done
 		done
@@ -651,9 +653,18 @@ else
 		if [ -z "$nbdswapPort" ];then
 			nbdswapPort="9210"
 		fi
+		if [ -z "$nbdwriteDevice" ];then
+			nbdwriteDevice="/dev/ram1"
+		fi
 		waitForBlockDevice $nbdDevice
 		if [ ! -b $nbdDevice ];then
 			systemException "Device $nbdDevice doesn't appear" "reboot"
+		fi
+		if [ ! -z "$nbdwritePort" ];then
+			waitForBlockDevice $nbdwriteDevice
+			if [ ! -b $nbdwriteDevice ];then
+				systemException "Device $nbdwriteDevice doesn't appear" "reboot"
+			fi
 		fi
 		# /.../
 		# try to get swap from the server if we dont have
@@ -667,24 +678,28 @@ else
 			if [ ! -b $nbdswapDevice ];then
 				systemException "Device $nbdswapDevice doesn't appear" "reboot"
 			fi
-			if ! /usr/sbin/nbd-client $nbdServer $nbdswapPort $nbdswapDevice -persist
+			if ! nbd-client $nbdServer $nbdswapPort $nbdswapDevice -persist
 			then
 				systemException "Failed to setup $nbdswapDevice device" "reboot"
 			fi
 			Echo "NBD: Waiting for server to create swap space..."
 			sleep 3
-			/sbin/swapon $nbdswapDevice || true
+			swapon $nbdswapDevice || true
 		fi
 		Echo "Mounting NBD root system: $nbdServer $nbdPort [$nbdDevice]..."
-		if ! /usr/sbin/nbd-client $nbdServer $nbdPort $nbdDevice -persist;then
+		if ! nbd-client $nbdServer $nbdPort $nbdDevice -persist;then
 			systemException "Failed to setup $nbdDevice device" "reboot"
+		fi
+		Echo "Mounting NBD RW: $nbdServer $nbdwritePort [$nbdwriteDevice]..."
+		if ! nbd-client $nbdServer $nbdwritePort $nbdwriteDevice -persist;then
+			systemException "Failed to setup $nbdwriteDevice device" "reboot"
 		fi
 		imageRootDevice=$nbdDevice
 		probeFileSystem $imageRootDevice
 		Echo "Filesystem of remote root system is: $FSTYPE"
 		if [ -z "$COMBINED_IMAGE" ];then
 			if isFSTypeReadOnly;then
-				setupUnionFS /dev/ram1 "$imageRootDevice" $unionFST
+				setupUnionFS "$nbdwriteDevice" "$imageRootDevice" $unionFST
 			fi
 		fi
 		imageRootName="NBDRoot-System"

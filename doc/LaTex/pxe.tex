@@ -359,14 +359,19 @@ DISK=/dev/sda
 \begin{verbatim}
 NBDROOT=NBD.Server.IP.address;\
         NBD-Port-Number;/dev/NBD-Device;\
-        NBD-Swap-Port-Number;/dev/NBD-Swap-Device
+        NBD-Swap-Port-Number;/dev/NBD-Swap-Device;\
+        NBD-Write-Port-Number;/dev/NBD-Write-Device
 \end{verbatim}
-        The NBD-Device, NBD-Swap-Port-Number, and NBD-Swap-Device
-        variables are optional. If they are not set, the default values
-        are used (/dev/nb0 for the NBD-Device, port number 9210 for the
-        NBD-Swap-Port-Number, and /dev/nb1 for the NBD-Swap-Device).
-        The swap space over the network using a network block device
+        The NBD-Device, NBD-Swap-Port-Number, NBD-Swap-Device,
+        NBD-Write-Port-Number and NBD-Write-Device
+        variables are optional. If the nbd root device is not set,
+        the default values (/dev/nb0 , port 2000) applies and if the nbd
+        swap device is not set the default values (/dev/nb1, port 9210)
+        applies. The swap space over the network using a network block device
         is only established if the client has less than 48 MB of RAM.
+        The optional NBD-Write-Port-Number and NBD-Write-Device specifies
+        a write COW location for the root filesystem. aufs is used as
+        overlay filesystem in this case.
     \item \textbf{AOEROOT}\\
         Mount the system image root filesystem remotely via AoE
         (ATA over Ethernet). This means there is a server which
@@ -415,6 +420,14 @@ AOEROOT=/dev/etherd/e0.1,/dev/ram1
 \begin{verbatim}
 NFSROOT=NFS.Server.IP.address;/path/to/root/tree
 \end{verbatim}
+         Optionally you can set a UNIONFS\_CONFIG variable which defines
+         an aufs based overlay NFS directory or device like:
+\begin{verbatim}
+UNIONFS_CONFIG=/tmp/kiwi-11.1-cow,nfs,aufs # write to NFS directory
+UNIONFS_CONFIG=/dev/ram1,nfs,aufs # write to RAM
+\end{verbatim}
+         This way you can keep the original root tree clean from any
+         modifications
     \item \textbf{KIWI\_INITRD}\\
          Specifies the KIWI initrd to be used for a local boot of the system.
          The value must be set to the name of the initrd file which is

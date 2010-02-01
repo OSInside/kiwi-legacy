@@ -3768,6 +3768,7 @@ function mountSystemOverlay {
 	local rwDir=/read-write
 	local xiDir=/xino
 	local rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
+	local roDevice=`echo $UNIONFS_CONFIG | cut -d , -f 2`
 	local unionFST=`echo $UNIONFS_CONFIG | cut -d , -f 3`
 	#======================================
 	# create read write mount points
@@ -3789,10 +3790,13 @@ function mountSystemOverlay {
 		fi
 	else
 		# /.../
-		# write part is not a ram disk, create ext3 filesystem on it
-		# check and mount the filesystem
+		# write part is not a ram disk, create/check ext3 filesystem
+		# on it if not remote. Mount the filesystem
 		# ----
-		if ! setupReadWrite; then
+		if [ "$roDevice" = "nfs" ];then
+			rwDevice="-o nolock,rw $nfsRootServer:$rwDevice"
+		fi
+		if [ ! "$roDevice" = "nfs" ] && ! setupReadWrite; then
 			return 1
 		fi
 		if ! mount $rwDevice $rwDir >/dev/null;then
@@ -3943,7 +3947,7 @@ function mountSystem {
 	#======================================
 	# wait for storage device to appear
 	#--------------------------------------
-	if ! echo $mountDevice | grep -q loop;then
+	if ! echo $mountDevice | grep -qE "loop|nolock";then
 		waitForStorageDevice $mountDevice
 	fi
 	#======================================
@@ -4466,14 +4470,16 @@ function activateImage {
 	local roDir=/read-only
 	local rwDir=/read-write
 	local xiDir=/xino
-	if [ -d $roDir ];then
-		mkdir -p /mnt/$roDir && mount --move /$roDir /mnt/$roDir
-	fi
-	if [ -d $rwDir ];then
-		mkdir -p /mnt/$rwDir && mount --move /$rwDir /mnt/$rwDir
-	fi
-	if [ -d $xiDir ];then
-		mkdir -p /mnt/$xiDir && mount --move /$xiDir /mnt/$xiDir
+	if [ -z "$NFSROOT" ];then
+		if [ -d $roDir ];then
+			mkdir -p /mnt/$roDir && mount --move /$roDir /mnt/$roDir
+		fi
+		if [ -d $rwDir ];then
+			mkdir -p /mnt/$rwDir && mount --move /$rwDir /mnt/$rwDir
+		fi
+		if [ -d $xiDir ];then
+			mkdir -p /mnt/$xiDir && mount --move /$xiDir /mnt/$xiDir
+		fi
 	fi
 	#======================================
 	# move live CD mount points to system
@@ -4538,8 +4544,8 @@ function cleanImage {
 	#======================================
 	# don't call root filesystem check
 	#--------------------------------------
-	if [ "$haveClicFS" = "yes" ];then
-		# FIXME: clicfs doesn't like this umount tricks
+	if [ "$haveClicFS" = "yes" ] || [ ! -z "$NFSROOT" ] ;then
+		# FIXME: clicfs / NFS doesn't like this umount tricks
 		export ROOTFS_FSCK="0"
 		return
 	fi

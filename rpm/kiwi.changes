@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Mon Feb  1 17:57:24 CET 2010 - ms@suse.de
+
+- v4.12
+- don't move overlay mounts to real-root if NFS-root is used
+  additionally prevent the ROOT_FSCK in case of NFS-root
+- allow NFSROOT and NBDROOT to be overlayed with a remote
+  read-write location
+
+-------------------------------------------------------------------
 Fri Jan 29 16:11:38 CET 2010 - ms@suse.de
 
 - v4.11
