@@ -8,6 +8,7 @@ Fri Jan 29 16:11:38 CET 2010 - ms@suse.de
   a USB stick. If you plugin the stick and boot with the kernel
   option hotfix=1 it allows you to replace the existing kernel
   and initrd with the one on the stick
+- fixed incorrect handling of unit="G" values (bnc #574660)
 - increased wait time for dhcp lease file up to
   20sec (bnc #575561)
 

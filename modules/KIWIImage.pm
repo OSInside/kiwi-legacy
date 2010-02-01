@@ -3570,7 +3570,7 @@ sub setupLogicalExtend {
 		my $unit = $2;
 		if ($unit eq "G") {
 			# convert GB to MB...
-			$xmlsize /= 1024;
+			$xmlsize *= 1024;
 		}
 	}
 	#==========================================
@@ -4250,7 +4250,7 @@ sub getSize {
 		my $unit = $2;
 		if ($unit eq "G") {
 			# convert GB to MB...
-			$sizeXMLBytes /= 1024;
+			$sizeXMLBytes *= 1024;
 		}
 		$sizeXMLBytes *= 1048576;
 	}
