@@ -2198,6 +2198,18 @@ function USBStickDevice {
 							umountSystem
 							continue
 						fi
+					elif [ "$mode" = "kexec" ];then
+						# /.../
+						# USB stick search for hotfix media
+						# with kernel/initrd for later kexec
+						# ----
+						if \
+							[ ! -e /mnt/linux.kexec ] && \
+							[ ! -e /mnt/initrd.kexec ]
+						then
+							umountSystem
+							continue
+						fi
 					else
 						# /.../
 						# USB stick search for Linux system tree
@@ -2645,7 +2657,7 @@ function setupNetwork {
 		"reboot"
 	fi
 	ifconfig lo 127.0.0.1 netmask 255.0.0.0 up
-	for i in 1 2 3 4 5 6 7 8 9 0;do
+	for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20;do
 		[ -s /var/lib/dhcpcd/dhcpcd-$PXE_IFACE.info ] && break
 		sleep 2
 	done
@@ -5491,5 +5503,70 @@ function createPartedInput {
 		index=$(($index + 1))
 	done
 }
+
+#======================================
+# reloadKernel
+#--------------------------------------
+function reloadKernel {
+	# /.../
+	# reload the given kernel and initrd. This function
+	# checks USB stick devices for a kernel and initrd
+	# and shows them in a dialog window. The selected kernel
+	# and initrd is loaded via kexec.
+	# ----
+	#======================================
+	# check proc/cmdline
+	#--------------------------------------
+	ldconfig
+	mountSystemFilesystems &>/dev/null
+	if ! cat /proc/cmdline | grep -qi "hotfix=1";then
+		umountSystemFilesystems
+		return
+	fi
+	#======================================
+	# check for kexec
+	#--------------------------------------
+	if [ ! -x /sbin/kexec ];then
+		systemException "Can't find kexec" "reboot"
+	fi
+	#======================================
+	# start udev
+	#--------------------------------------
+	touch /etc/modules.conf
+	touch /lib/modules/*/modules.dep
+	udevStart
+	errorLogStart
+	probeDevices
+	#======================================
+	# search hotfix stick
+	#--------------------------------------
+	USBStickDevice kexec
+	if [ $stickFound = 0 ];then
+		systemException "No hotfix USB stick found" "reboot"
+	fi
+	#======================================
+	# mount stick
+	#--------------------------------------
+	if ! mount -o ro $stickDevice /mnt;then
+		systemException "Failed to mount hotfix stick" "reboot"
+	fi
+	#======================================
+	# load kernel
+	#--------------------------------------
+	kexec -l /mnt/linux.kexec --initrd=/mnt/initrd.kexec \
+		--append="$(cat /proc/cmdline | sed -e s"@hotfix=1@@")"
+	if [ ! $? = 0 ];then
+		systemException "Failed to load hotfix kernel" "reboot"
+	fi
+	#======================================
+	# go for gold
+	#--------------------------------------
+	exec kexec -e
+}
+
+#======================================
+# Check for hotfix kernel
+#--------------------------------------
+reloadKernel
 
 # vim: set noexpandtab:

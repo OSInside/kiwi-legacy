@@ -103,6 +103,7 @@
 		<package name="fbiterm"/>
 		<package name="bc"/>
 		<package name="gettext"/>
+		<package name="kexec-tools"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
