@@ -650,9 +650,6 @@ else
 		if [ -z "$nbdPort" ];then
 			nbdPort="2000"
 		fi
-		if [ -z "$nbdswapPort" ];then
-			nbdswapPort="9210"
-		fi
 		if [ -z "$nbdwriteDevice" ];then
 			nbdwriteDevice="/dev/ram1"
 		fi
@@ -666,34 +663,55 @@ else
 				systemException "Device $nbdwriteDevice doesn't appear" "reboot"
 			fi
 		fi
+		if [ ! -z "$nbdswapPort" ];then
+			waitForBlockDevice $nbdswapPort
+			if [ ! -b $nbdswapDevice ];then
+				systemException "Device $nbdswapDevice doesn't appear" "reboot"
+			fi
+		fi
 		# /.../
 		# try to get swap from the server if we dont have
 		# enough ram (less than 62MB)
 		# ----
-		min_ram=63488
-		real_ram=$(cat /proc/meminfo |grep MemTotal|tr -d " [a-z][A-Z]:")
-		if [ ${real_ram} -lt ${min_ram} ];then
-			Echo "NBD: memory is below required 62M"
-			Echo "NBD: Mounting swap: $nbdServer $nbdswapPort [$nbdswapDevice]"
-			if [ ! -b $nbdswapDevice ];then
-				systemException "Device $nbdswapDevice doesn't appear" "reboot"
+		if [ ! -z "$nbdswapPort" ];then
+			min_ram=63488
+			real_ram=$(cat /proc/meminfo |grep MemTotal|tr -d " [a-z][A-Z]:")
+			if [ ${real_ram} -lt ${min_ram} ];then
+				Echo "NBD: memory is below required 62M"
+				Echo "NBD: swap: $nbdServer $nbdswapPort [$nbdswapDevice]"
+				if ! nbd-client $nbdServer $nbdswapPort $nbdswapDevice -persist
+				then
+					systemException \
+						"Failed to setup $nbdswapDevice device" \
+					"reboot"
+				fi
+				Echo "NBD: Waiting for server to create swap space..."; sleep 3
+				swapon $nbdswapDevice || true
 			fi
-			if ! nbd-client $nbdServer $nbdswapPort $nbdswapDevice -persist
-			then
-				systemException "Failed to setup $nbdswapDevice device" "reboot"
-			fi
-			Echo "NBD: Waiting for server to create swap space..."
-			sleep 3
-			swapon $nbdswapDevice || true
 		fi
+		# /.../
+		# try to mount a remote read/write location based on NBD
+		# this is then overlayed via $unionFST
+		# ----
+		if [ ! -z "$nbdwritePort" ];then
+			Echo "NBD: read/write $nbdServer $nbdwritePort [$nbdwriteDevice]..."
+			if ! nbd-client $nbdServer $nbdwritePort $nbdwriteDevice -persist
+			then
+				systemException \
+					"Failed to setup $nbdwriteDevice device" \
+				"reboot"
+			fi
+		fi
+		# /.../
+		# mount basic root filesystem exported via NBD
+		# ----
 		Echo "Mounting NBD root system: $nbdServer $nbdPort [$nbdDevice]..."
 		if ! nbd-client $nbdServer $nbdPort $nbdDevice -persist;then
 			systemException "Failed to setup $nbdDevice device" "reboot"
 		fi
-		Echo "Mounting NBD RW: $nbdServer $nbdwritePort [$nbdwriteDevice]..."
-		if ! nbd-client $nbdServer $nbdwritePort $nbdwriteDevice -persist;then
-			systemException "Failed to setup $nbdwriteDevice device" "reboot"
-		fi
+		# /.../
+		# setup union if basic root filesystem is read-only
+		# ----
 		imageRootDevice=$nbdDevice
 		probeFileSystem $imageRootDevice
 		Echo "Filesystem of remote root system is: $FSTYPE"

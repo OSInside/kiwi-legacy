@@ -1802,6 +1802,7 @@ vmx/oem types only.</a:documentation>
           <value>xen</value>
           <value>pxe</value>
           <value>ec2</value>
+          <value>product</value>
         </choice>
       </attribute>
     </define>

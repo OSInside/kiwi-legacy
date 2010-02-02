@@ -1281,7 +1281,7 @@ div {
 		attribute image {
 			"ext2" |  "ext3" | "ext4" | "reiserfs" | "squashfs" |
 			"dmsquash" | "clicfs" | "cpio" | "iso" | "split" | "usb" |
-			"vmx" | "oem" | "xen" | "pxe" | "ec2"
+			"vmx" | "oem" | "xen" | "pxe" | "ec2" | "product"
 		}
 	k.type.attlist =
 		k.type.image.attribute &
