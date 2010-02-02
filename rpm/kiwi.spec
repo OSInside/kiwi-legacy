@@ -408,10 +408,10 @@ rm -f $RPM_BUILD_ROOT/%{perl_vendorarch}/KIWI/example.pl
 %endif
 cat kiwi.loader
 
+%ifarch %ix86 x86_64
 %post -n kiwi-pxeboot
 #============================================================
 # create /srv/tftpboot/pxelinux.cfg/default only if not exist
-%ifarch %ix86 x86_64
 	if ( [ ! -e srv/tftpboot/pxelinux.cfg/default  ] ) ; then
 		cp /srv/tftpboot/pxelinux.cfg/default.default /srv/tftpboot/pxelinux.cfg/default
 	fi
