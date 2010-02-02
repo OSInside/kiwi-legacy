@@ -6,6 +6,22 @@ Mon Feb  1 17:57:24 CET 2010 - ms@suse.de
   additionally prevent the ROOT_FSCK in case of NFS-root (bnc #575658)
 - allow NFSROOT and NBDROOT to be overlayed with a remote
   read-write location (bnc #575658)
+- added support for OEM installation via PXE. To setup your
+  PXE boot server do the following:
+
+  1) create an OEM install ISO (format="iso")
+  2) loop mount the created .iso file to /mnt and copy the following
+     files to the PXE boot server:
+     * copy /mnt/boot/initrd  => /srv/tftpboot/boot
+     * copy /mnt/boot/linux   => /srv/tftpboot/boot
+     * copy /mnt/image.gz     => /srv/tftpboot/image
+     * copy /mnt/image.gz.md5 => /srv/tftpboot/image
+  3) set the kernel commandline parameter
+       pxe=1
+     via the append line in your PXE configuration.
+     Alternatively the image can be stored on a FTP,HTTP server
+     specified via the kiwiserver and kiwiservertype append
+     information
 
 -------------------------------------------------------------------
 Fri Jan 29 16:11:38 CET 2010 - ms@suse.de

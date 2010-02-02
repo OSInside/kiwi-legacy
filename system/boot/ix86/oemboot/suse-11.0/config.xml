@@ -29,7 +29,8 @@
 		<file name="drivers/virtio/*"/>
 		<file name="drivers/block/cciss.ko"/>
 		<file name="drivers/block/virtio_blk.ko"/>
-		<file name="drivers/net/virtio_net.ko"/>
+		<file name="drivers/net/*"/>
+		<file name="net/packet/*"/>
 		<file name="drivers/md/*"/>
 		<file name="drivers/block/loop.ko"/>
 		<file name="drivers/hid/*"/>
@@ -70,6 +71,9 @@
 	<repository type="yast2" status="replaceable">
 		<source path="/image/CDs/full-11.0-i386"/>
 	</repository>
+	<repository type="rpm-dir" status="fixed">
+		<source path="/usr/share/kiwi/repo/suse-repo/suse-sle11-repo"/>
+	</repository>
 	<packages type="image" profiles="std">
 		<package name="kernel-default"/>
 		<package name="aufs-kmp-default"/>
@@ -85,6 +89,9 @@
 	</packages>
 	<packages type="image">
 		<package name="parted"/>
+		<package name="curl"/>
+		<package name="atftp"/>
+		<package name="busybox"/>
 		<package name="adaptec-firmware"/>
 		<package name="dialog"/>
 		<package name="psmisc"/>

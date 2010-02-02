@@ -213,19 +213,21 @@ fi
 #======================================
 # 8) Search boot device...
 #--------------------------------------
-Echo "Searching for boot device..."
-if [ "$LOCAL_BOOT" = "no" ];then
-	if ! searchBIOSBootDevice;then
-		systemException "$biosBootDevice" "reboot"
+if [ -z "$pxe" ];then
+	Echo "Searching for boot device..."
+	if [ "$LOCAL_BOOT" = "no" ];then
+		if ! searchBIOSBootDevice;then
+			systemException "$biosBootDevice" "reboot"
+		fi
+		export imageDiskDevice=$biosBootDevice
+	else
+		export imageDiskDevice=$(dn $disk)
+		if [ ! -z "$KIWI_RECOVERY" ];then
+			export imageRecoveryDevice=$(ddn $imageDiskDevice $KIWI_RECOVERY)
+		fi
 	fi
-	export imageDiskDevice=$biosBootDevice
-else
-	export imageDiskDevice=$(dn $disk)
-	if [ ! -z "$KIWI_RECOVERY" ];then
-		export imageRecoveryDevice=$(ddn $imageDiskDevice $KIWI_RECOVERY)
-	fi
+	Echo "Found boot device: $imageDiskDevice"
 fi
-Echo "Found boot device: $imageDiskDevice"
 
 #======================================
 # 9) Check for installation mode...

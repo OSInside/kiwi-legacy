@@ -18,6 +18,68 @@
 #----------------
 #
 #======================================
+# OEMNetwork
+#--------------------------------------
+function OEMNetwork {
+	# /.../
+	# setup network if pxe network installation mode was
+	# requested
+	# ----
+	#======================================
+	# load nics detected by hwinfo
+	#--------------------------------------
+	local loaded=0
+	probeNetworkCard
+	IFS=":"
+	for i in $networkModule;do
+		if [ ! -z $i ];then
+			modprobe $i 2>/dev/null
+			if test $? = 0;then
+				loaded=1
+			fi
+		fi
+	done
+	IFS=$IFS_ORIG
+	if test $loaded = 0;then
+		systemException \
+			"Network module: Failed to load network module !" \
+		"reboot"
+	fi
+	#======================================
+	# setup network via DHCP
+	#--------------------------------------
+	setupNetwork
+	#======================================
+	# find TFTP server from lease file
+	#--------------------------------------
+	checkServer
+	if [ -z $SERVER ];then
+		SERVER=tftp.$DOMAIN
+	fi
+	Echo "Checking Server name: $SERVER"
+	if ! ping -c 1 $SERVER >/dev/null 2>&1;then
+		Echo "Server: $SERVER not found"
+		if [ -z "$SERVERTYPE" ] || [ "$SERVERTYPE" = "tftp" ]; then
+			if [ ! -z "$DHCPSIADDR" ];then
+				Echo "Using: $DHCPSIADDR from dhcpcd-info"
+				SERVER=$DHCPSIADDR
+			elif [ ! -z "$DHCPSID" ];then
+				Echo "Using: $DHCPSID from dhcpcd-info"
+				SERVER=$DHCPSID
+			else
+				systemException \
+					"Can't assign SERVER IP/name... fatal !" \
+				"reboot"
+			fi
+		fi
+	fi
+	#======================================
+	# setup server name and blocksize
+	#--------------------------------------
+	imageBlkSize=8192
+	imageServer=$SERVER
+}
+#======================================
 # OEMInstall
 #--------------------------------------
 function OEMInstall {
@@ -30,6 +92,7 @@ function OEMInstall {
 	local dsize=0
 	local index=0
 	local message
+	local prefix=/cdrom
 	#======================================
 	# Check for install mode indicator file
 	#--------------------------------------
@@ -43,15 +106,20 @@ function OEMInstall {
 	#======================================
 	# Search CD/DVD/USB stick and mount it
 	#--------------------------------------
-	USBStickDevice install
-	if [ $stickFound = 0 ];then
-		Echo "Search for USB stick failed, checking CD/DVD drive"
-		CDMount
-		export OEMInstallType=CD
+	if [ -z "$pxe" ];then
+		USBStickDevice install
+		if [ $stickFound = 0 ];then
+			Echo "Search for USB stick failed, checking CD/DVD drive"
+			CDMount
+			export OEMInstallType=CD
+		else
+			Echo "Found Stick: $stickRoot -> $stickSerial"
+			mkdir -p /cdrom && mount $(ddn $stickRoot 2) /cdrom
+			export OEMInstallType=USB
+		fi
 	else
-		Echo "Found Stick: $stickRoot -> $stickSerial"
-		mkdir -p /cdrom && mount $(ddn $stickRoot 2) /cdrom
-		export OEMInstallType=USB
+		OEMNetwork
+		export OEMInstallType=PXE
 	fi
 	#======================================
 	# Search and ask for the install device
@@ -175,11 +243,14 @@ function OEMInstall {
 		3) imageZipped=$n ;
 	esac
 	done
+	if [ ! -z "$pxe" ];then
+		prefix=/image
+	fi
 	if [ "$imageZipped" = "compressed" ];then
-		imageName="/cdrom/$imageName.gz"
+		imageName="$prefix/$imageName.gz"
 		imageMD5="$imageName.md5"
 	else
-		imageName="/cdrom/$imageName"
+		imageName="$prefix/$imageName"
 		imageMD5="$imageName.md5"
 	fi
 	IFS=" "
@@ -208,6 +279,16 @@ function OEMInstall {
 	#======================================
 	# read MD5 information...
 	#--------------------------------------
+	if [ ! -z "$pxe" ];then
+		multicast="disable"
+		fetchFile $imageMD5 /image.md5 uncompressed $imageServer
+		if test $loadCode != 0 || ! loadOK "$loadStatus";then
+			systemException \
+				"Download of $imageMD5 failed: $loadStatus" \
+			"reboot"
+		fi
+		imageMD5=/image.md5
+	fi
 	read sum1 blocks blocksize zblocks zblocksize < $imageMD5
 	#======================================
 	# Get available disk space
@@ -234,46 +315,57 @@ function OEMInstall {
 	#======================================
 	# Dump image on disk
 	#--------------------------------------
-	dump="cat $imageName"
-	if test "$imageZipped" = "compressed"; then
-		dump="gzip -cd $imageName"
-	fi
-	if [ -x /usr/bin/dcounter ];then
-		progressBaseName=$(basename $imageName)
-		TEXT_LOAD=$(getText "Loading %1" $progressBaseName)
-		dump="$dump | dcounter -s $needMByte -l \"$TEXT_LOAD \""
-	fi
-	Echo "Loading $imageName [$imageDevice] "
-	if [ -x /usr/bin/dcounter ];then
-		mkfifo /progress; errorLogStop
-		(
-			if ! eval $dump 2>/progress | dd bs=32k of=$imageDevice &>/dev/null
-			then
-				errorLogContinue
+	if [ -z "$pxe" ];then
+		dump="cat $imageName"
+		if test "$imageZipped" = "compressed"; then
+			dump="gzip -cd $imageName"
+		fi
+		if [ -x /usr/bin/dcounter ];then
+			progressBaseName=$(basename $imageName)
+			TEXT_LOAD=$(getText "Loading %1" $progressBaseName)
+			dump="$dump | dcounter -s $needMByte -l \"$TEXT_LOAD \""
+		fi
+		Echo "Loading $imageName [$imageDevice] "
+		if [ -x /usr/bin/dcounter ];then
+			mkfifo /progress; errorLogStop
+			(
+				if ! eval $dump 2>/progress|dd bs=32k of=$imageDevice&>/dev/null
+				then
+					errorLogContinue
+					systemException \
+						"Failed to install image: $imageName -> $imageDevice" \
+					"reboot"
+				fi
+			)&
+			echo "cat /progress | dialog \
+				--backtitle \"$TEXT_INSTALLTITLE\" \
+				--progressbox 3 65
+			" > /tmp/progress.sh
+			if [ -e /dev/fb0 ];then
+				fbiterm -m $UFONT -- bash -e /tmp/progress.sh
+			else
+				bash -e /tmp/progress.sh
+			fi
+			clear
+		else
+			if ! eval $dump | dd bs=32k of=$imageDevice &>/dev/null; then
 				systemException \
 					"Failed to install image: $imageName -> $imageDevice" \
 				"reboot"
 			fi
-		)&
-		echo "cat /progress | dialog \
-			--backtitle \"$TEXT_INSTALLTITLE\" \
-			--progressbox 3 65
-		" > /tmp/progress.sh
-		if [ -e /dev/fb0 ];then
-			fbiterm -m $UFONT -- bash -e /tmp/progress.sh
-		else
-			bash -e /tmp/progress.sh
 		fi
-		clear
+		if [ -x /usr/bin/dcounter ];then
+			errorLogContinue
+		fi
 	else
-		if ! eval $dump | dd bs=32k of=$imageDevice &>/dev/null; then
+		multicast="disable"
+		Echo "Loading $imageName [$imageDevice BS:$imageBlkSize Byte]..."
+		fetchFile $imageName $imageDevice $imageZipped $imageServer
+		if test $loadCode != 0 || ! loadOK "$loadStatus";then
 			systemException \
-				"Failed to install image: $imageName -> $imageDevice" \
+				"Download of $imageName failed: $loadStatus" \
 			"reboot"
 		fi
-	fi
-	if [ -x /usr/bin/dcounter ];then
-		errorLogContinue
 	fi
 	#======================================
 	# Check the md5sum of the raw disk
@@ -319,6 +411,9 @@ function OEMInstall {
 		message=$TEXT_USBPULL
 	fi
 	Dialog --msgbox "\"$message\"" 5 60
+	if [ ! -z "$pxe" ];then
+		dhcpcd -p -k $PXE_IFACE
+	fi
 }
 
 # vim: set noexpandtab:

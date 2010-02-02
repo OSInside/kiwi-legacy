@@ -4177,6 +4177,7 @@ function fetchFile {
 		fi
 	fi
 	if test "$izip" = "compressed"; then
+		path=$(echo $path | sed -e s@\\.gz@@)
 		path="$path.gz"
 	fi
 	case "$type" in

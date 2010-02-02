@@ -30,6 +30,8 @@
 		<file name="drivers/block/cciss.ko"/>
 		<file name="drivers/block/loop.ko"/>
 		<file name="drivers/ide/*"/>
+		<file name="drivers/net/*"/>
+		<file name="net/packet/*"/>
 		<file name="fs/ext3/*"/>
 		<file name="fs/ext2/*"/>
 		<file name="fs/fat/*"/>
@@ -72,6 +74,9 @@
 		<package name="xen"/>
 	</packages>
 	<packages type="image">
+		<package name="curl"/>
+		<package name="atftp"/>
+		<package name="busybox"/>
 		<package name="parted"/>
 		<package name="dialog"/>
 		<package name="psmisc"/>
