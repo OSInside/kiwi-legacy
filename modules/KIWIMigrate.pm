@@ -184,6 +184,7 @@ sub new {
 	$this->{name}    = $name;
 	$this->{source}  = \%OSSource;
 	$this->{product} = $product;
+	$this->{mount}   = [];
 	return $this;
 }
 
@@ -345,6 +346,7 @@ sub getRepos {
 	my $kiwi    = $this->{kiwi};
 	my %osc     = %{$this->{source}};
 	my $product = $this->{product};
+	my $mounts  = $this->{mount};
 	my @list    = qxx ("zypper lr --details 2>&1");	chomp @list;
 	my $code    = $? >> 8;
 	if ($code != 0) {
@@ -359,6 +361,30 @@ sub getRepos {
 			my $alias   = $1;
 			my $prio    = $3;
 			if ($enabled eq "Yes") {
+				if ($source =~ /^dvd:/) {
+					if (! -e "/dev/dvd") {
+						$kiwi -> warning ("DVD repo: /dev/dvd does not exist");
+						$kiwi -> skipped ();
+						next;
+					}
+					my $mpoint = qxx ("mktemp -q -d /tmp/kiwimpoint.XXXXXX");
+					my $result = $? >> 8;
+					if ($result != 0) {
+						$kiwi -> warning ("DVD tmpdir failed: $mpoint: $!");
+						$kiwi -> skipped ();
+						next;
+					}
+					chomp $mpoint;
+					my $data = qxx ("mount /dev/dvd $mpoint 2>&1");
+					my $code = $? >> 8;
+					if ($code != 0) {
+						$kiwi -> warning ("DVD mount failed: $data");
+						$kiwi -> skipped ();
+						next;
+					}
+					$source = "dir://".$mpoint;
+					push @{$mounts},$mpoint;
+				}
 				$osc{$product}{$source}{type} = $type;
 				$osc{$product}{$source}{alias}= $alias;
 				$osc{$product}{$source}{prio} = $prio;
@@ -480,11 +506,13 @@ sub getOperatingSystemVersion {
 		return undef;
 	}
 	foreach my $line (@data) {
-		if ($line =~ /^i.*(\d\d\.\d)-.*/) {
-			return $1;
+		if ($line =~ /^i.*\|.*\|(.*)\|/) {
+			my $version = $1;
+			$version =~ s/ +//g;
+			return $version;
 		}
 	}
-	return undef
+	return undef;
 }
 
 #==========================================
@@ -583,7 +611,7 @@ sub getPackageList {
 	# find all patterns and packs of patterns 
 	#------------------------------------------
 	if (@urllist) {
-		$kiwi -> info ("Creating System solvable from active repos...");
+		$kiwi -> info ("Creating System solvable from active repos...\n");
 		my @list = qxx ("zypper --no-refresh patterns --installed 2>&1");
 		my $code = $? >> 8;
 		if ($code != 0) {
@@ -723,7 +751,6 @@ sub getRootDevice {
 	}	
 	$this->{rdev}  = $rootdev;
 	$this->{rsize} = $data;
-	$this->{mount} = "/kiwiroot";
 	return $this;
 }
 
@@ -736,13 +763,13 @@ sub setSystemOverlayFiles {
 	# 2) Find all files changed according to the package manager
 	# 3) create linked list of the result
 	# ---
-	my $this = shift;
-	my $dest = $this->{dest};
-	my $kiwi = $this->{kiwi};
-	my $rdev = $this->{rdev};
-	my $mount= $this->{mount};
-	my @deny = @{$this->{deny}};
-	my $cache= $dest.".cache";
+	my $this   = shift;
+	my $mounts = $this->{mount};
+	my $dest   = $this->{dest};
+	my $kiwi   = $this->{kiwi};
+	my $rdev   = $this->{rdev};
+	my @deny   = @{$this->{deny}};
+	my $cache  = $dest.".cache";
 	my $cdata;
 	my $checkopt;
 	my @rpmlist;
@@ -752,6 +779,7 @@ sub setSystemOverlayFiles {
 	my $code;
 	my @modified;
 	my @ilist;
+	my $root;
 	#==========================================
 	# check for cache file
 	#------------------------------------------
@@ -784,20 +812,23 @@ sub setSystemOverlayFiles {
 	# mount root system
 	#------------------------------------------
 	if (! $cache) {
-		if (! -d $mount && ! mkdir $mount) {
-			$kiwi -> error  ("Failed to create kiwi root mount point: $!");
+		$root = qxx ("mktemp -q -d /tmp/kiwimpoint.XXXXXX");
+		$code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> error ("Root tmpdir failed: $root: $!");
 			$kiwi -> failed ();
 			return undef;
 		}
-		$data = qxx ("mount $rdev $mount 2>&1");
+		chomp $root;
+		$data = qxx ("mount $rdev $root 2>&1");
 		$code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> error  ("Failed to mount root system: $data");
 			$kiwi -> failed ();
 			return undef;
 		}
+		push @{$mounts},$root;
 	}
-	$this->{mounted} = $code;
 	#==========================================
 	# generate File::Find closure
 	#------------------------------------------
@@ -820,8 +851,8 @@ sub setSystemOverlayFiles {
 	if ($cache) {
 		%result = %{$cdata->{result}};
 	} else {
-		my $wref = generateWanted (\%result,$mount);
-		find ({ wanted => $wref, follow => 0 }, $mount );
+		my $wref = generateWanted (\%result,$root);
+		find ({ wanted => $wref, follow => 0 }, $root );
 		$this -> cleanMount();
 		$cdata->{result} = \%result;
 	}
@@ -1117,7 +1148,9 @@ sub setInitialSetup {
 	#==========================================
 	# Activate YaST on initial deployment
 	#------------------------------------------
-	qxx ("cp $dest/etc/X11/xorg.conf $dest/root/etc/X11/xorg.conf.install");
+	qxx (
+		"cp $dest/root/etc/X11/xorg.conf $dest/root/etc/X11/xorg.conf.install"
+	);
 	qxx ("touch $dest/root/var/lib/YaST2/runme_at_boot");
 	$kiwi -> done();
 	return $this;
@@ -1127,13 +1160,10 @@ sub setInitialSetup {
 # cleanMount
 #------------------------------------------
 sub cleanMount {
-	my $this = shift;
-	my $mount= $this->{mount};
-	if (defined $this->{mounted}) {
-		qxx ("umount $mount"); undef $this->{mounted};
-	}
-	if (-d $mount) {
-		rmdir $mount;
+	my $this   = shift;
+	my @mounts = @{$this->{mount}};
+	foreach my $mpoint (@mounts) {
+		qxx ("umount $mpoint 2>&1 && rmdir $mpoint");
 	}
 	return $this;
 }

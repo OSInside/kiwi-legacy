@@ -1078,27 +1078,33 @@ sub main {
 			my $code = kiwiExit (1); return $code;
 		}
 		if (! $migrate -> getRepos()) {
+			$migrate -> cleanMount();
 			my $code = kiwiExit (1); return $code;
 		}
 		#==========================================
 		# Create report HTML file, errors allowed
 		#------------------------------------------
 		if (! $MigrateNoFiles) {
+			$migrate -> cleanMount();
 			$migrate -> setSystemOverlayFiles();
 		}
 		$migrate -> getPackageList();
 		$migrate -> createReport();
 		if (! $MigrateNoTemplate) {
 			if (! $migrate -> setTemplate()) {
+				$migrate -> cleanMount();
 				my $code = kiwiExit (1); return $code;
 			}
 			if (! $migrate -> setServiceList()) {
+				$migrate -> cleanMount();
 				my $code = kiwiExit (1); return $code;
 			}
 			if (! $migrate -> setInitialSetup()) {
+				$migrate -> cleanMount();
 				my $code = kiwiExit (1); return $code;
 			}
 		}
+		$migrate -> cleanMount();
 		kiwiExit (0);
 	}
 
