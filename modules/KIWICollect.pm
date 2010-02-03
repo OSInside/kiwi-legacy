@@ -187,8 +187,10 @@ sub logMsg
 
   my $out = "[".$mode."] ".$string."\n";
 
-  if ($this->{m_logStdOut} == 1) {
+  if ($this->{m_logStdOut} == 1 || $this->{m_debug} >= 1) {
     # significant speed up in production mode
+    # this is a hack, but we need this currently to come down from > 12h
+    # to < 1 minute for collecting packages for ftp tree.
     print $out;
     exit 1 if ( $mode eq "E" );
   } else {
