@@ -5,7 +5,8 @@ Wed Feb  3 11:04:09 CET 2010 - ms@suse.de
 - fixed templates, Xen based OEM image should be a dom0
 - Xen dom0 images doesn't require a xenconfig file
 - prevent XML pretty printer from swallowing comments
-- fixed migration mount setup and clean code
+- fixed migration mount setup and clean code allow
+  zypper types dvd:// and iso:// to be used
 
 -------------------------------------------------------------------
 Mon Feb  1 17:57:24 CET 2010 - ms@suse.de

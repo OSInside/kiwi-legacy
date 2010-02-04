@@ -361,6 +361,9 @@ sub getRepos {
 			my $alias   = $1;
 			my $prio    = $3;
 			if ($enabled eq "Yes") {
+				#==========================================
+				# handle special source type dvd://
+				#------------------------------------------
 				if ($source =~ /^dvd:/) {
 					if (! -e "/dev/dvd") {
 						$kiwi -> warning ("DVD repo: /dev/dvd does not exist");
@@ -385,6 +388,37 @@ sub getRepos {
 					$source = "dir://".$mpoint;
 					push @{$mounts},$mpoint;
 				}
+				#==========================================
+				# handle special source type iso://
+				#------------------------------------------
+				if ($source =~ /iso=(.*\.iso)/) {
+					my $iso = $1;
+					if (! -e $iso) {
+						$kiwi -> warning ("ISO repo: $iso does not exist");
+						$kiwi -> skipped ();
+						next;
+					}
+					my $mpoint = qxx ("mktemp -q -d /tmp/kiwimpoint.XXXXXX");
+					my $result = $? >> 8;
+					if ($result != 0) {
+						$kiwi -> warning ("ISO tmpdir failed: $mpoint: $!");
+						$kiwi -> skipped ();
+						next;
+					}
+					chomp $mpoint;
+					my $data = qxx ("mount -o loop $iso $mpoint 2>&1");
+					my $code = $? >> 8;
+					if ($code != 0) {
+						$kiwi -> warning ("ISO loop mount failed: $data");
+						$kiwi -> skipped ();
+						next;
+					}
+					$source = "dir://".$mpoint;
+					push @{$mounts},$mpoint;
+				}
+				#==========================================
+				# store repo information
+				#------------------------------------------
 				$osc{$product}{$source}{type} = $type;
 				$osc{$product}{$source}{alias}= $alias;
 				$osc{$product}{$source}{prio} = $prio;
