@@ -31,10 +31,7 @@
 				<oem-home>false</oem-home>
 				<oem-systemsize>2048</oem-systemsize>
 			</oemconfig>
-			<xenconfig memory="512" domain="dom0">
-				<xendisk device="/dev/xvda"/>
-				<xenbridge name=""/>
-			</xenconfig>
+			<xenconfig domain="dom0"/>
 		</type>
 	</preferences>
 	<preferences profiles="vmxFlavour">
