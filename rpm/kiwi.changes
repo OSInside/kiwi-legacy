@@ -2,6 +2,8 @@
 Wed Feb  3 11:04:09 CET 2010 - ms@suse.de
 
 - v4.13
+- fixed templates, Xen based OEM image should be a dom0
+- Xen dom0 images doesn't require a xenconfig file
 - prevent XML pretty printer from swallowing comments
 - fixed migration mount setup and clean code
 

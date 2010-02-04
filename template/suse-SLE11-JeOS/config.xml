@@ -31,7 +31,7 @@
 				<oem-home>false</oem-home>
 				<oem-systemsize>2048</oem-systemsize>
 			</oemconfig>
-			<xenconfig memory="512" domain="domU">
+			<xenconfig memory="512" domain="dom0">
 				<xendisk device="/dev/xvda"/>
 				<xenbridge name=""/>
 			</xenconfig>

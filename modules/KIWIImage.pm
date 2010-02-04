@@ -1214,8 +1214,14 @@ sub createImageVMX {
 	my %xenc = $xml  -> getXenConfig();
 	my %type = %{$xml -> getImageTypeAndAttributes()};
 	my $name = $this -> createImageUSB ($para,"VMX");
+	my $xendomain;
 	if (! defined $name) {
 		return undef;
+	}
+	if (defined $xenc{xen_domain}) {
+		$xendomain = $xenc{xen_domain};
+	} else {
+		$xendomain = "dom0";
 	}
 	undef $main::Prepare;
 	undef $main::Create;
@@ -1235,7 +1241,7 @@ sub createImageVMX {
 	#==========================================
 	# Create virtual disk configuration for Xen
 	#------------------------------------------
-	if ($type{bootprofile} eq "xen") {
+	if (($type{bootprofile} eq "xen") && ($xendomain ne "dom0")) {
 		# Xen config file
 		if (! $this -> buildXenConfig ($main::Destination,$name,\%xenc,"VMX")) {
 			$main::Survive = "default";
