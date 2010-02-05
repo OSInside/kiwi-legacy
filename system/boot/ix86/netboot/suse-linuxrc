@@ -870,7 +870,9 @@ runHook postconfig
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	if test $systemIntegrity = "clean";then
-		probeFileSystem $imageRootDevice
+		if [ "$FSTYPE" != "nfs" ];then
+			probeFileSystem $imageRootDevice
+		fi
 		kernelList /mnt
 	fi
 fi
