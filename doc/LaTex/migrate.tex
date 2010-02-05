@@ -9,7 +9,7 @@ to clone your currently running system into an image. The process
 has the following limitations at the moment:
 
 \begin{itemize}
-\item Works for SUSE systems only
+\item Works for SUSE systems only (with zypper on board)
 \item You can't rely on the result to be a 100\% ready to use copy
       of your system. This means some manual postprocessing might
       be necessary
@@ -34,77 +34,54 @@ the system. In a first step call:
 \begin{Command}{12cm}
 \begin{verbatim}
 kiwi --migrate mySys --destdir /tmp/migrated \
-     --report-packlist
 \end{verbatim}
 \end{Command}
 
-This will only check which packages and patterns could be assigned
-to the given base repository. In almost all cases there will be
-information about packages which couldn't be assigned. You should
-go to that list and think of the repository which contains that
-packages (pacman, etc...). A good starting point is the
-output of \verb+zypper sl --details+. If you know about the repositories
-just add then in subsequent calls like:
+This will create an HTML report where you can check which packages and
+patterns could be assigned to the given base repository. In almost
+all cases there will be information about packages which couldn't
+be assigned. You should go to that list and think of the repository
+which contains that packages (pacman, etc...). If something is missing
+add it either to the zypper list on your system or use the kiwi
+options --add-repo ... --add-repotype
 
-\begin{Command}{16cm}
-\begin{verbatim}
-kiwi --migrate mySys --destdir /tmp/migrated \
-     --add-repo \
-     http://packman.mirrors.skynet.be/pub/packman/suse/11.0 \
-     --add-repotype rpm-dir
-     --report-packlist
-\end{verbatim}
-\end{Command}
-
+Continue calling the following command until your list is clean
 You should continue the migration if you have a clean list of solved
 packages without any package skipped except you know that this package
 can't be provided or is not worth to become part of the migration.
 
-\section{Create a migration report first}
-When running the next step of the migration I
-recommend to create a report first:
-
 \begin{Command}{12cm}
 \begin{verbatim}
-kiwi --migrate mySys --destdir /tmp/migrated \
-     --add-repo ... --add-repotype ...
-     --report
+kiwi --migrate mySys --destdir /tmp/migrated --nofiles \
+     [ --skip package ... ]\
 \end{verbatim}
 \end{Command}
 
+\section{Watch the packaged but modified files}
+now watch the packaged but modified files in /tmp/mysys/root-modified
+and remove all files you don't need. If you are ready with this task
+copy the root-modified files over to the root/ directory
+
+\section{Watch the unpackaged files}
+now watch the unpackaged files in root-nopackage. This is most likely
+the hardest part of the migration. remove all files and directories
+you don't need and after that copy the tree over to the root/ directory
+
+\section{Checklist}
 After that call you should walk through the following check list
 
 \begin{itemize}
-\item check the contents of the config.sh script. The migration
-      added at least the services your system runs and adds them
-      to the configuration script. Check this service list
-\item check the report file contents. All data which doesn't belong
-      to a package are listed there. You should make sure whether you
-      need them all or if you could exclude some of them. As a
-      recommendation, you should have as little as possible overlay
-      files.
-\item check the created config.xml image description file. You should
-      at least make sure if the repository is correct and if you need
-      more repositories for packages which are not part of the base
-      repository for example
+\item change author and contact in config.xml
+\item set appropriate name for your image in config.xml
+\item add/modify default type (oem) set in config.xml if needed
+\item make sure your X11 configuration is appropriate according to
+      the new target. A failsafe version was created in
+      /tmp/mysys/root/etc/X11/xorg.conf.install -> fbdev based
+\item make sure yast2 is installed to be able to reconfigure
+      the system. if yast2 is not installed these tasks needs to
+      be done else. Otherwise yast second stage is started on first
+      boot of the migrated image
 \end{itemize}
-
-\section{Migrate my system...}
-After the check list you will have a good impression of your system.
-What data is there what's not part of packages what doesn't need to
-be part of the image description and so on. You can exclude the
-directories which you don't need according to the report file with
-the \verb+--+exclude parameter. Now you can call migrate again and let
-it copy the overlay files too:
-
-\begin{Command}{12cm}
-\begin{verbatim}
-rm -rf /tmp/migrated
-kiwi --migrate mySys --destdir /tmp/migrated \
-     --add-repo ... --add-repotype ...
-     --exclude directory --exclude ...
-\end{verbatim}
-\end{Command}
 
 \section{Turn my system into an image...}
 After the process has finished you should check the size of the
@@ -118,8 +95,7 @@ to do this is the virtual disk image (vmx)
 \begin{Command}{12cm}
 \begin{verbatim}
 kiwi -p /tmp/migrated --root /tmp/mySys
-kiwi --create /tmp/mySys -d /tmp/myResult \
-     --type vmx
+kiwi --create /tmp/mySys -d /tmp/myResult
 \end{verbatim}
 \end{Command}
 

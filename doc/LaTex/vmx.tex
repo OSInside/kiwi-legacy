@@ -4,21 +4,23 @@
 \minitoc
 
 A VMX image is a virtual disk image for use in full virtualisation
-systems like QEMU or VMware. The image represents a file which
-includes partition data and bootloader information. The size of
-this virtual disk can be influenced by either the <size> element
-in your config.xml file or by the parameter $--$bootvm-disksize
+systems like QEMU or VMware. The image is a file containing the
+system represented by the configured packages in config.xml as well
+as partition data and bootloader information. The size of
+this virtual disk can be specified by using the <size> element
+in the config.xml file or by adding the $--$bootvm-disksize command
+line argument.
 
 \section{Building the suse-vm-guest example}
 
-The latest example provided with kiwi is based on openSUSE 11.0 and makes use
-of the base pattern. The operating system is stored on a
-standard ext3 filesystem.
+The vm-guest example provided with kiwi is based on recent openSUSE releases,
+one example configuration per release. The example uses base pattern and the
+virtual disk is formated using the distribution default filesystem.
 
 \begin{Command}{12cm}
 \begin{verbatim}
 cd /usr/share/doc/packages/kiwi/examples
-cd suse-11.0
+cd suse-11.2
 kiwi --prepare ./suse-vm-guest \
      --root /tmp/myvm
 \end{verbatim}
@@ -33,36 +35,36 @@ kiwi --create /tmp/myvm \
 
 \section{Using the image}
 
-The generated virtual disk image serves as the harddisk of the selected
-virtualisation system. The setup of the virtual hard disk differes from
-the variety of the virtualisation systems. A very simply to use system
-is the QEMU virtualisation software. To run your image in qemu call:
+The generated virtual disk image serves as the hard disk of the selected
+virtualization system (QEMU, VMware, etc.). The virtual hard disk format 
+differs across virtualization environments. Some virtualization environments
+support multiple virtual disk formats. Using the QEMU virtualization 
+environment the created image may be tested with the following command:
 
 \begin{Command}{12cm}
 \begin{verbatim}
 cd /tmp/myvm-result
-qemu suse-11.0-vm-guest.i686-1.1.2.raw -m 256
+qemu suse-11.2-vm-guest.i686-1.1.2.raw -m 256
 \end{verbatim}
 \end{Command}
 
 \section{Flavours}
 
-Because there are many virtualisation systems available there are also
-many virtual disk formats. The .raw format KIWI always creates has the
-same structure as you can find on a real hard disk. For virtualisation
-software it makes sense to have specific formats to increase the
-I/O performance when reading or writing data onto the disk from within
-the virtual system. If you want to tell KIWI to create an additional
-disk format just extend the type information of the config.xml file
-by a format attribute.
+Kiwi always generates a file in the .raw format. The .raw file is a disk
+image with a structure equivalent to the structure of a physical hard disk. 
+Individual virtualization systems have specific formats to facilitate
+improved I/O performance to the virtual disk, represented by the image file,
+or additional specified virtual hard disk files. Kiwi will generate a 
+specific format when the format attribute of the type element is specified.
+
 
 \begin{Command}{12cm}
 \begin{verbatim}
-<type ... format=''name''>vmx</type>
+<type image=''vmx''... format=''name''/>
 \end{verbatim}
 \end{Command}
 
-The following table shows a list of supported virtual disk formats
+The following table lists the supported virtual disk formats
 
 \begin{tabular}[h]{|p{2cm}|p{9cm}|}
 \hline
@@ -83,64 +85,67 @@ cow         & QEMU virtual disk format \\
 
 \subsection{VMware support}
 
-VMware is a very popular and fast virtualisation platform which is
-the reason why KIWI has special support for it. VMware requires a
-so called guest configuration which includes information about what
-hardware should make up the guest and how much ressources should be
-provided to the guest. With KIWI you can provide the information
-required to create a guest configuration as part of the config.xml
-file. Additionally you can group special packages which you may only
-need in this virtual environment.
+A VMware image is accompanied by a guest configuration file. This file 
+includes information about the hardware to be represented to the guest 
+image by the VMware virtualization environment as well as specification
+of resources such as memory. 
+
+Within the config.xml file it is possible to specify the VMware configuration
+settings. In addition it is possible to include selected packages in the 
+created image that are specific to the VMware image generation. The following
+config.xml snippet provides general guidance on the elements in config.xml.
 
 \begin{Command}{13cm}
 \begin{verbatim}
 <packages type="vmware">
    <!-- packages you need in VMware only -->
 </packages>
-<vmwareconfig memory="512">
-   <vmwaredisk controller="ide" id="0"/>
-</vmwareconfig>
+<type......>
+   <vmwareconfig memory="512">
+      <vmwaredisk controller="ide" id="0"/>
+   </vmwareconfig>
+</type>
 \end{verbatim}
 \end{Command}
 
-If this information is present KIWI will create a VMware guest
-configuration with 512 MB of RAM and an IDE disk controller interface.
-Additional information to setup the VMware guest machine properties are
-explained in the \textbf{vmwareconfig} section. The written guest
-configuration file can be easily loaded and changed by the native
-graphics user provided with VMware. The KIWI VMware guest configuration
-is stored in the file:
+Given the specification above Kiwi will create a VMware guest
+configuration specifying the availability of 512 MB of RAM and an IDE 
+disk controller interface for the VM guest. For aditional information
+about the configuration settings please refere to the 
+\textbf{vmwareconfig} section. 
+
+The guest configuration can be loaded through VMware user interface and 
+may be modified through the GUI. The configuration file has the .vmx 
+extension as shown in the example below.
 
 \begin{Command}{13cm}
 \begin{verbatim}
-/tmp/myvm-result/suse-11.0-vm-guest.i686-1.1.2.vmx
+/tmp/myvm-result/suse-11.2-vm-guest.i686-1.1.2.vmx
 \end{verbatim}
 \end{Command}
 
-Together with the \textbf{format=''vmdk''} attribute KIWI creates
-a VMware based image (.vmdk file) and the required VMware guest
-configuration (.vmx)
+Using the \textbf{format=''vmdk''} attribute of the <type> element
+will create the VMware formated disk image (.vmdk file) and the required 
+VMware guest configuration (.vmx) file.
 
-You can also create an image for the Xen virtualization framework.  To do this,
-you simply need to specify the 'xen' \textbf{bootprofile} and
-the 'nex' \textbf{bootkernel} in your config.xml type section. Don't be
-curious about the name 'nex' as bootkernel. The reason for this is just because the name of the boot profile is xen and the name of the kernel is also xen.
-Therefore I simply decided to use the reverse name for it. Like VMware,
-Xen has a configuration file as well. Refer to chapter
-\ref{chapter:xen} (Xen image) for details.
+In addition it is possible to create an image for the Xen virtualization 
+framework.  By adding the \textbf{bootprofile} and \textbf{bootkernel} 
+attributes to the <type> element with values of 'xen' and 'xenboot', 
+respectively. Please refer to the \ref{chapter:xen} (Xen image) chapter 
+for additional details.
 
 \subsection{LVM support}
 
-kiwi also provides support for LVM (Logical Volume Management). In this
+Kiwi also provides support for LVM (Logical Volume Management). In this
 mode the disk partition table will include one lvm partition and one
-standard ext2 boot partition. kiwi creates the kiwiVG volume group and
+standard ext2 boot partition. Kiwi creates the kiwiVG volume group and
 adds logical volumes as they are needed and configured according to the
 image type and filesystem. After boot of the system the user has full
 control over the volume group and is free to change/resize/increas the
 group and the volumes inside. Support for LVM has been added for all
 image types which are disk based. This includes vmx,oem and usb.
 In order to use LVM for the vmx type just add the \verb+--lvm+ option
-as part of the kiwi create step or add the attribute \textbf{lvm=''true''}
+as part of the Kiwi create step or add the attribute \textbf{lvm=''true''}
 as part of the \textbf{type} section in your config.xml file.
 
 \begin{Command}{12cm}

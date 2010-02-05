@@ -107,9 +107,14 @@ is used:
 \begin{verbatim}
 <split>
    <temporary>
-      <!-- allow read/write access to: -->
-      <file name="/var"/>
-      <file name="/var/*"/>
+       <file name="/var"/>
+       <file name="/var/*"/>
+       <file name="/boot"/>
+       <file name="/boot/*"/>
+       <file name="/etc"/>
+       <file name="/etc/*"/>
+       <file name="/home"/>
+       <file name="/home/*"/>
    </temporary>
 </split>
 \end{verbatim}

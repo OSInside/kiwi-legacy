@@ -70,9 +70,11 @@ need in this para virtual environment.
    <package name="kernel-xen"/>
    <package name="xen"/>
 </packages>
-<xenconfig memory="512" domain="domU">
-   <xendisk device="/dev/sda"/>
-</xenconfig>
+<type ....>
+   <xenconfig memory="512" domain="domU">
+      <xendisk device="/dev/sda"/>
+   </xenconfig>
+</type>
 \end{verbatim}
 \end{Command}
 

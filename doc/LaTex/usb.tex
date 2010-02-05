@@ -139,23 +139,23 @@ To create a split stick the types needs to be adapted as follows:
 
       \begin{Command}{12cm}
       \begin{verbatim}
-<type fsreadwrite="ext3" fsreadonly="squashfs"
-      boot="usbboot/suse-11.0">split</type>
+<type image="split" fsreadwrite="ext3" fsreadonly="squashfs"
+      boot="usbboot/suse-11.0"/>
       \end{verbatim}
       \end{Command}
 \item \textbf{type setup for split oem type:}
 
       \begin{Command}{12cm}
       \begin{verbatim}
-<type fsreadwrite="ext3" fsreadonly="squashfs"
-      boot="oemboot/suse-11.0">split</type>
+<type image="split" fsreadwrite="ext3" fsreadonly="squashfs"
+      boot="oemboot/suse-11.0"/>
       \end{verbatim}
       \end{Command}
 \end{itemize}
 
-For both types a split section is required which defines the read-write
-data. A good starting point is to set /var, /home and /etc as writable
-data.
+For both types a split section inside the type section is required
+which defines the read-write data. A good starting point is
+to set /var, /home and /etc as writable data.
 
 \begin{Command}{12cm}
 \begin{verbatim}
