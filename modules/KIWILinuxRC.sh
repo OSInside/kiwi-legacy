@@ -4468,9 +4468,9 @@ function activateImage {
 	#======================================
 	# move union mount points to system
 	#--------------------------------------
-	local roDir=/read-only
-	local rwDir=/read-write
-	local xiDir=/xino
+	local roDir=read-only
+	local rwDir=read-write
+	local xiDir=xino
 	if [ -z "$NFSROOT" ];then
 		if [ -d $roDir ];then
 			mkdir -p /mnt/$roDir && mount --move /$roDir /mnt/$roDir
