@@ -3781,7 +3781,7 @@ sub addDefaultSplitNode {
 	my $kiwi = $this->{kiwi};
 	my $tnode= $this->{typeNode};
 	my $type = $this->{imageWhat};
-	if ($type ne "split") {
+	if (($type ne "split") && ($type ne "iso")) {
 		return $this;
 	}
 	my $splitNodeList = $tnode -> getElementsByTagName ("split");
