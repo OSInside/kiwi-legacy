@@ -191,8 +191,8 @@ assumed to be present for all profiles.
 \hspace*{1cm}<version>1.1.2</version>\\
 \hspace*{1cm}<packagemanager>smart</packagemanager>\\
 \hspace*{1cm}<type image="name" ...>\\
-\hspace*{2cm}<vmwareconfig|xenconfig|size|pxedeploy|\\
-\hspace*{2cm} split|oemconfig|lvmvolumes>\\
+\hspace*{2cm}<ec2config|lvmvolumes|oemconfig|pxedeploy|size|split|\\
+\hspace*{2cm} vmwareconfig|xenconfig>\\
 \hspace*{1cm}</type>\\
 </preferences>
 \end{Command}
@@ -216,109 +216,150 @@ changes to the image description the following rules should apply:
 By default kiwi use the \textbf{smart} packagemanager but it is also possible
 to use the SUSE packagemanager called \textbf{zypper}. 
 
-Normally one preferences section is enough but it's possible to share
-data between different namespaces, so called profiles. According to this
-it's possible to have for example two preferences sections whereas one
-contains specific oem options and the other doesn't. This allows to
-add specific type based information while building the image.
+In general the specification of one <preferences> section is sufficient.
+However, it's possible to specify multiple <preferences> sections and
+distinquish between the sections via the \textbf{profiles} attribute. Data
+may also be shared between different profiles. Using profiles it is possible
+to, for example, configure specific preferences for OEM image generation. 
+Activation of a given <preferences> during image generation is triggered by
+the use of the $--$add-profile command line argument.
 
-At least one type section must be set to be able to build an image from
-this description. Multiple type sections are allowed whereas you can specify
-with the boolean attribute named \textbf{primary} which should be the primary
-image if no type is requested on creation. The following list
-describes the possible types and their attributes:
+For each <preferences> block at least one \textbf{type} element must be
+defined. It is possible to specify multiple <type> elements in any 
+<preferences> block. To set a given <type> description as the default image
+use the boolean attribute \textbf{primary} and set its value to \textbf{true}.
+The image type to be created is determined by the value of the \textbf{image}
+attribute. The following list describes the supported types and possible
+values of the image attribute:
 
 \begin{itemize}
-\item \textbf{image=''usb''}\\
-      Use this type to create a USB stick system along with the
-      attributes \textbf{filesystem} and \textbf{boot=''usbboot/suse-*''}
-      In addition to that type you can specify which bootloader to use.
-      The optional attribute \textbf{bootloader} is used to setup
-      either grub or syslinux as bootloader types. Setting the bootloader
-      also works for vmx images but not for oem images. In case of an
-      oem image only the distribution supported bootloader (grub) is
-      allowed. The optional \textbf{lvm} attribute allows you to
-      activate LVM support and place the root filesystem into logical
-      volumes of the volume group specified by the lvmgroup attribute.
-      If no lvmgroup is set the default group name kiwiVG applies.
-\item \textbf{image=''vmx''}\\
-      Use this type to create a virtual disk system along with the
-      attributes \textbf{filesystem}, \textbf{boot=''vmxboot/suse-*''} and
-      optionally \textbf{format}. The format attribute spcifies one of
-      the qemu supported virtualization formats, for example vmdk or qcow2.
-      The optional attribute \textbf{vga} can be specified to configure the
-      kernel framebuffer mode. Detailed information about the possible
-      values can be found in /usr/src/linux/Documentation/fb/vesafb.txt.
-      The vga attribute also works for the image types usb and oem.
-      The optional \textbf{lvm} attribute allows you to
-      activate LVM support and place the root filesystem into logical
-      volumes of the volume group specified by the lvmgroup attribute.
-      If no lvmgroup is set the default group name kiwiVG applies.
-\item \textbf{image=''oem''}\\
-      Use this type to create a preload virtual disk system along with
-      the attributes \textbf{filesystem}, \textbf{boot=''oemboot/suse-*''} and
-      optionally \textbf{format}. If the format attribute is set to
-      ''iso'' or ''usb'' KIWI will additionally create an installation
-      media suitable for a CD/DVD or an USB stick. This installation media
-      takes over the task of deploying the preload system onto the
-      storage devices which it detects at boot time. If the optional
-      \textbf{lvm} attribute is set the root filesystem of the oem system is 
-      placed into logical volumes of the volume group specified by the
-      lvmgroup attribute. If no lvmgroup is set the default group name
-      kiwiVG applies.
-\item \textbf{image=''pxe''}\\
-      Use this type to create a network boot image along with the
-      attributes \textbf{filesystem} and \textbf{boot=''netboot/suse-*''}
-      Additionally the attribute \textbf{compressed} specifies whether
-      the image file should be compressed or not. This is not the filesystem
-      compression just the image file compression most often used to
-      transfer the compressed version over to the boot server.
-\item \textbf{image=''iso''}\\
-      Use this type to create a live system on CD or DVD along with
-      the attributes \textbf{boot=''isoboot/suse-*''} and optionally
-      \textbf{flags}. If no flags are specified the filesystem will not
-      be compressed and no union filesystem is used. Allowed flags are:
-      \begin{itemize}
-      \item \textbf{unified}: Compress filesystem with squashfs and
-            mount the system read-write with an aufs based overlay mount
-      \item \textbf{compressed}: Compress filesystem with squashfs and
-            use a link list to mount the system read-write. An additional
-            split section controls the read-write information 
-      \item \textbf{dmsquash}: Creates an ext3 image file and puts that
-            into a squashfs filesystem. On boot the root tree is mounted
-            via a device mapper snapshot device to allow full write
-            access over the complete tree.
-      \item \textbf{clic}: Creates a fuse based compressed read-only
-            filesystem which allows write operations into a cow file
-      \end{itemize}
-      If no flags or the flags ''compressed''
-      are set an additional \textbf{split} section is recommended.
-\item \textbf{image=''xen''}\\
-      Use this type to create a Xen enabled para-virtual gues image along
-      with the attributes \textbf{filesystem} and
-      \textbf{boot=''xenboot/suse-*''}
-\item \textbf{image=''split''}\\
-      Use this type if you want to use one of the types
-      \textbf{usb,vmx,oem or pxe} but as a split image. The split image
-      support allows to create the image as split files wheras one part
-      represents the read-write data and the other part represents the
-      read-only data. Different filesystems can be assigned to each portion.
-      According to this use this type together with the attributes
-      \textbf{fsreadwrite}, \textbf{fsreadonly} and\\
-      \textbf{boot=''usb|vmx|oem|netboot/suse-*''}
 \item \textbf{image=''cpio''}\\
-      Use this type if your image is a boot image (intrd). Along with
-      this type the optional attributes \textbf{bootprofile=''default''} and/or
-      \textbf{bootkernel=''std''} exists. A boot image should group 
-      the different kernels it supports in profiles. It's mandatory to have
-      one profile named \textbf{std} which is used if no other bootkernel
-      is specified. Profiles which leaves only a subset of drivers or
-      packages should also be grouped in profiles. It's mandatory to have
-      one profile named \textbf{default} which is used if no other bootprofile
-      is specified. Within the system image one can select the
-      group by also specifying a bootprofile and/or bootkernel attribute.
-      These information is passed automatically to kiwi when it builds
-      the boot image.
+      Use the cpio image type to specify the generation os a boot image
+      (intrd). When generating a boot image it is possible to specify a
+      specific boot profile and boot kernel using the optional
+      \textbf{bootprofile=''default''} and \textbf{bootkernel=''std''}
+      attributes.
+      
+      A boot image should group the various supported kernels into profiles. 
+      If the user chooses not to us the profiles supplied by Kiwi it is
+      required that one profile named \textbf{std} be created. This profile
+      will be used if no other bootkernel is specified. Further it is 
+      required to create a  profile named \textbf{default}. This profile is
+      used when no bootprofile is specified.
+
+      It is recommended that special configurations that omit drivers, use
+      special drivers and/or special packages be specified as profiles.
+
+
+      The bootprofile and bootkernel attribute are respected within the 
+      definition of a system image. Us the attribute and value 
+      \textbf{type="system"} of the <description> element to specify the
+      creation of a system image. The values of the bootprofile and 
+      bootkernel attributes are used by Kiwi when generating the boot image.
+\item \textbf{image=''ec2''}\\
+      Setting the image attribute value to ec2 causes the generation of
+      an Amazon Machine Image (AMI) for the AWS (Amazon Web Services) 
+      Elastic Compute Cloud (EC2). The AMI is an image comparable to
+      a VMware or Xen guest image. It can be transferred to the AWS 
+      Simple Storage Service and used within the AWS infrastructure.
+      Configuration of the AMI is accomplished with the optional
+      \textbf{ec2config} element, specified as a child of the <type>
+      element.
+\item \textbf{image=''iso''}\\
+      Specify the key-value pair image=iso to generate a live system suitable
+      for deployment on optical media (CD or DVD). Use the 
+      \textbf{boot=''isoboot/suse-*''} attribute when generating this image
+      type to select the apropriate boot image for optical media. In 
+      addition the optional \textbf{flags} attribute may be set to the
+      following values with the effects described below:
+      \begin{itemize}
+      \item \textbf{clic}: Creates a fuse based compressed read-only
+            filesystem which allows write operations into a cow file.
+      \item \textbf{compressed}: Compressed filesystem with squashfs and
+            use a link list to mount the system read-write. An additional
+            split section controls the read-write information.
+      \item \textbf{dmsquash}: Creates an ext3 image file and encapsulates
+            this image file within a squashfs filesystem. On boot the root 
+            tree is mounted via a device mapper snapshot device to allow full 
+            write access over the complete tree.
+      \item \textbf{unified}: Compressed filesystem with squashfs mounted
+            with an aufs based overlay mount to allow read-write access.
+      \end{itemize}
+      If the flags attribute is not used the filesystem will not be compressed
+      and no union filesystem is used. In this case it is recommended to
+      specify a \textbf{split} section as a child of this type element. The
+      specification of a split block is also recommended when flags=compressed
+      is used.
+\item \textbf{image=''oem''}\\
+      Use this type to create a virtual disk system suitable in a preload
+      setting. In addition specify the attributes \textbf{filesystem}, 
+      and \textbf{boot=''oemboot/suse-*''} to control the filesystem used
+      for the virtual and to specify the proper boot image. Using the optional
+      optional \textbf{format} attribute and setting the value to ''iso'' or 
+      ''usb'' will create self installing images suitable for optical media
+      or a USB stick, respectively. Booting from the media will deploy
+      the OEM preload image onto the selected storage device of the
+      system. It is also possible to configure the system to use logical
+      volumes. Use the optional \textbf{lvm} attribute and specify the
+      logical volume configuration with the \textbf{lvmvolumes} child
+      element. The default volume group name is kiwiVG. Further configuration
+      of the image is performed using the appropriate \textbf{*config} child
+      block.
+\item \textbf{image=''pxe''}\\
+      Creating a network boot image is supported by Kiwi with the image=pxe
+      type. When specifying the creation of a netwoork boot image use the
+      \textbf{filesystem} and \textbf{boot=''netboot/suse-*''} attributes 
+      to specify the filesystem of the image and the proper boot image. To
+      compress the image file set the \textbf{compressed} boolean attribute
+      to true. This setting will compress the image file and has no influence
+      on the filesystem used within the image. The compression is often use to
+      support better transfer times when the pxe image is pushed to the 
+      boot server over a network connection. The pxe image layout is
+      controlled by using the \textbf{pxedeploy} child element.
+\item \textbf{image=''split''}\\
+      The split image support allows the creation of an image as split
+      files. Using this technique one can assign different filesystems and
+      different read-write porperties to the different sections of the image.
+      The \textbf{oem,pxe,usb and vmx} types can be created as a split system
+      image. Use the \textbf{boot=''oem|netboot|usb|vmx/suse-*''} attribute
+      to select the underlying type of the split image. The attributes
+      \textbf{fsreadwrite}, \textbf{fsreadonly} are used to controll the
+      read-write properties of the filesystem specified as the attributes
+      value. Use the appropriate \textbf{*config} child block to specify
+      the properties of the underlying image. For example when building a 
+      OEM based split image use the \textbf{<oemconfig>} child section.
+\item \textbf{image=''usb''}\\
+      Use the usb value to create a USB stick image. Set the
+      \textbf{filesystem} attribute to the desired supported filesystem for
+      the image and use the \textbf{boot=''usbboot/suse-*''} attribute to
+      select the USB boot image for the system. For a USB image you may
+      also select GRUB or Syslinux as a bootloader by setting the
+      optional \textbf{bootloader} attribute to grub ot syslinux,
+      respectively. The USB image may also be created with LVM support.
+      The same rules as indicated for the OEM image apply.
+\item \textbf{image=''vmx''}\\
+      Creation of a virtual disk system is enabled with the vmx value of
+      the image attribute. Set the filesystem of the virtual disk with
+      the \textbf{filesystem} attribute and select the appropriate boot
+      image by setting \textbf{boot=''vmxboot/suse-*''}. The optional
+      \textbf{format} attribute is used to specify one of the virtualization
+      formats supported by qemu, such as vmdk (also the VMware format) or
+      qcow2. For the virtual disk image the optional \textbf{vga} attribute
+      may be used to configure the kernel framebuffer device. Acceptable
+      values can be found in the Linux kernel documentation for the
+      framebuffer device (Documentation/fb/vesafb.txt). Kiwi also supports
+      the selection of the booloader for the virtual disk according to
+      the rules indicated for the USB system. Last but not least
+      the virtual disk system may also be created with a LVM based layout by
+      using the \textbf{lvm} attribute. The previously indicated rules apply.
+      Use the \textbf{vmwareconfig} or \textbf{xenconfig} child elements
+      to specify appropriate configuration of the virtual disk system.
+\item \textbf{image=''xen''}\\
+      Use this type to create a Xen para-virtual guest image. The
+      \textbf{filesystem} and \textbf{boot=''xenboot/suse-*''} attributes
+      specify the filesystem type used and select the proper boot image,
+      respectively. Use the \textbf{xenconfig} child element to specify
+      configuration options of the Xen guest image.
 \end{itemize}
 
 All of the mentioned types can specify the \textbf{boot} attribute
@@ -374,11 +415,24 @@ attributes:
       already contains most of the image data.
 \end{itemize}
 
-Within the type section there are optional subsections to specify
-additional information for this type. The following subsections are
-possible:
+The <type> element may contain child elements to provide specific
+configuration information for the given type. The following lists the 
+supported child elements:
 
 \begin{itemize}
+\item \textbf{ec2config}\\
+    The optional ec2config block is used to specify information relevant
+    only to AWS EC2 images. The following information can be provided:
+
+    \begin{Command}{12cm}
+    <ec2config>
+    \hspace*{1cm}<ec2accountnr>Your AWS account number</ec2accountnr>
+    \hspace*{1cm}<ec2certfile>Path to the AWS cert-*.pem file</ec2certfile>
+    \hspace*{1cm}<ec2privatekeyfile>Path to the AWS pk-*.pem file\\
+       </ec2privatekeyfile>
+    </ec2config>
+    \end{Command}
+
 \item \textbf{size}\\
     Specifies the size of the image with a numerical value in
     Megabytes or Gigabytes. Use the ''unit'' attribute to assign the
@@ -524,8 +578,6 @@ possible:
       The optional mac address value for the virtual interface inside
       the DOM(x).
 	\end{itemize}
-
-\newpage
 
 \item \textbf{pxedeploy}\\
 	The optional pxedeploy section is only useful if you build the \textbf{pxe}

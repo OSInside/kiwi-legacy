@@ -23,7 +23,7 @@
 <grammar xmlns:db="http://docbook.org/ns/docbook" xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" xmlns:rng="http://relaxng.org/ns/structure/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
   <db:info>
     <db:releaseinfo>$Id: kiwi.rnc 2957 2008-01-11 12:53:39Z thomas-schraitle $</db:releaseinfo>
-    <db:releaseinfo>RNC Schema Version 4.1</db:releaseinfo>
+    <db:releaseinfo>RNC Schema Version 4.2</db:releaseinfo>
     <db:pubdate>START</db:pubdate>
     <db:pubdate>2008-01-08</db:pubdate>
   </db:info>
@@ -72,7 +72,7 @@ the package Information is inherited</a:documentation>
     <define name="k.image.schemaversion.attribute">
       <attribute name="schemaversion">
         <a:documentation>The allowed Schema version (fixed value)</a:documentation>
-        <value>4.1</value>
+        <value>4.2</value>
       </attribute>
     </define>
     <define name="k.image.kiwirevision.attribute">
@@ -388,6 +388,58 @@ gets deployed.</db:para>
       <element name="defaultroot">
         <a:documentation>Default Root Directory Name if root Option is Not Specified</a:documentation>
         <ref name="k.defaultroot.attlist"/>
+        <text/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
+    common element <ec2accountnr>
+    
+  -->
+  <div>
+    <define name="k.ec2accountnr.attlist">
+      <empty/>
+    </define>
+    <define name="k.ec2accountnr">
+      <element name="ec2accountnr">
+        <a:documentation>The user's EC2 user ID (Note: AWS account number, NOT Access Key ID)</a:documentation>
+        <ref name="k.ec2accountnr.attlist"/>
+        <data type="nonNegativeInteger"/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
+    common element <ec2certfile>
+    
+  -->
+  <div>
+    <define name="k.ec2certfile.attlist">
+      <empty/>
+    </define>
+    <define name="k.ec2certfile">
+      <element name="ec2certfile">
+        <a:documentation>Path to the AWS user's PEM encoded RSA pubkey certificate file
+cert-*.pem</a:documentation>
+        <ref name="k.ec2certfile.attlist"/>
+        <text/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
+    common element <ec2privatekeyfile>
+    
+  -->
+  <div>
+    <define name="k.ec2privatekeyfile.attlist">
+      <empty/>
+    </define>
+    <define name="k.ec2privatekeyfile">
+      <element name="ec2privatekeyfile">
+        <a:documentation>Path to the AWS user's PEM encoded RSA private key file pk-*.pem</a:documentation>
+        <ref name="k.ec2privatekeyfile.attlist"/>
         <text/>
       </element>
     </define>
@@ -1740,22 +1792,6 @@ file for write operations</a:documentation>
         </choice>
       </attribute>
     </define>
-    <define name="k.type.ec2privatekeyfile.attribute">
-      <attribute name="ec2privatekeyfile">
-        <a:documentation>AWS user's PEM encoded RSA private key file</a:documentation>
-      </attribute>
-    </define>
-    <define name="k.type.ec2certfile.attribute">
-      <attribute name="ec2certfile">
-        <a:documentation>AWS user's PEM encoded RSA pubkey certificate file</a:documentation>
-      </attribute>
-    </define>
-    <define name="k.type.ec2accountnr.attribute">
-      <attribute name="ec2accountnr">
-        <a:documentation>The user's EC2 user ID (Note: AWS account number, NOT Access Key ID)</a:documentation>
-        <data type="nonNegativeInteger"/>
-      </attribute>
-    </define>
     <define name="k.type.format.attribute">
       <attribute name="format">
         <a:documentation>Specifies the format of the virtual disk. This applies to the
@@ -1864,15 +1900,6 @@ vmx/oem types only.</a:documentation>
           <ref name="k.type.fsreadwrite.attribute"/>
         </optional>
         <optional>
-          <ref name="k.type.ec2privatekeyfile.attribute"/>
-        </optional>
-        <optional>
-          <ref name="k.type.ec2certfile.attribute"/>
-        </optional>
-        <optional>
-          <ref name="k.type.ec2accountnr.attribute"/>
-        </optional>
-        <optional>
           <ref name="k.type.baseroot.attribute"/>
         </optional>
         <optional>
@@ -1889,25 +1916,28 @@ vmx/oem types only.</a:documentation>
         <interleave>
           <ref name="k.type.attlist"/>
           <optional>
-            <ref name="k.size"/>
+            <ref name="k.ec2config"/>
+          </optional>
+          <optional>
+            <ref name="k.lvmvolumes"/>
           </optional>
           <optional>
             <ref name="k.oemconfig"/>
+          </optional>
+          <optional>
+            <ref name="k.pxedeploy"/>
+          </optional>
+          <optional>
+            <ref name="k.size"/>
+          </optional>
+          <optional>
+            <ref name="k.split"/>
           </optional>
           <optional>
             <ref name="k.vmwareconfig"/>
           </optional>
           <optional>
             <ref name="k.xenconfig"/>
-          </optional>
-          <optional>
-            <ref name="k.split"/>
-          </optional>
-          <optional>
-            <ref name="k.lvmvolumes"/>
-          </optional>
-          <optional>
-            <ref name="k.pxedeploy"/>
           </optional>
         </interleave>
       </element>
@@ -2694,6 +2724,35 @@ carriage return or combinations are converted to spaces
   </div>
   <!--
     ==========================================
+    main block: <ec2config>
+    
+  -->
+  <div>
+    <define name="k.ec2config.attlist">
+      <empty/>
+    </define>
+    <define name="k.ec2config">
+      <element name="ec2config">
+        <a:documentation>Specifies the AWS EC2 configuration section</a:documentation>
+        <db:para>The ec2config element specifies the EC2 image
+configuration options.</db:para>
+        <interleave>
+          <ref name="k.ec2config.attlist"/>
+          <optional>
+            <ref name="k.ec2accountnr"/>
+          </optional>
+          <optional>
+            <ref name="k.ec2certfile"/>
+          </optional>
+          <optional>
+            <ref name="k.ec2privatekeyfile"/>
+          </optional>
+        </interleave>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
     main block: <repopackages>
     
   -->
@@ -2726,7 +2785,7 @@ are used for creating a Novell SUSE installation source.</db:para>
     </define>
     <define name="k.oemconfig">
       <element name="oemconfig">
-        <a:documentation>specifies the OEM configuration sections</a:documentation>
+        <a:documentation>Specifies the OEM configuration section</a:documentation>
         <db:para>The oemconfig element specifies the OEM image
 configuration options which are used to repartition
 and setup the system disk</db:para>

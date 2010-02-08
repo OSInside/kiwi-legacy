@@ -461,30 +461,32 @@ sub createImageEC2 {
 	#------------------------------------------
 	my $arch = qxx ("uname -m"); chomp ( $arch );
 	my %type = %{$sxml->getImageTypeAndAttributes()};
+	my %ec2  = %{$sxml->getEc2Config()};
 	my $pblt = $type{checkprebuilt};
-	if (! defined $type{AWSAccountNr}) {
+	if (! defined $ec2{AWSAccountNr}) {
 		$kiwi -> error  ("Missing AWS account number");
 		$kiwi -> failed ();
 		return undef;
 	}
-	if (! defined $type{EC2CertFile}) {
+	if (! defined $ec2{EC2CertFile}) {
 		$kiwi -> error  ("Missing AWS user's PEM encoded RSA pubkey cert file");
 		$kiwi -> failed ();
 		return undef;
-	} elsif (! -f $type{EC2CertFile}) {
-		$kiwi -> error  ("EC2 file: $type{EC2CertFile} does not exist");
+	} elsif (! -f $ec2{EC2CertFile}) {
+		$kiwi -> error  ("EC2 file: $ec2{EC2CertFile} does not exist");
 		$kiwi -> failed ();
 		return undef;
 	}
-	if (! defined $type{EC2PrivateKeyFile}) {
+	if (! defined $ec2{EC2PrivateKeyFile}) {
 		$kiwi -> error ("Missing AWS user's PEM encoded RSA private key file");
 		$kiwi -> failed ();
 		return undef;
-	} elsif (! -f $type{EC2PrivateKeyFile}) {
-		$kiwi -> error  ("EC2 file: $type{EC2PrivateKeyFile} does not exist");
+	} elsif (! -f $ec2{EC2PrivateKeyFile}) {
+		$kiwi -> error  ("EC2 file: $ec2{EC2PrivateKeyFile} does not exist");
 		$kiwi -> failed ();
 		return undef;
 	}
+
 	if ($arch =~ /i.86/) {
 		$arch = "i386";
 	}
@@ -516,9 +518,9 @@ sub createImageEC2 {
 	# call ec2-bundle-image (Amazon toolkit)
 	#------------------------------------------
 	$kiwi -> info ("Creating EC2 bundle...");
-	my $pk = $type{EC2PrivateKeyFile};
-	my $ca = $type{EC2CertFile};
-	my $nr = $type{AWSAccountNr};
+	my $pk = $ec2{EC2PrivateKeyFile};
+	my $ca = $ec2{EC2CertFile};
+	my $nr = $ec2{AWSAccountNr};
 	my $fi = $this->{imageDest}."/".$name;
 	my $amiopts = "-i $fi -k $pk -c $ca -u $nr -p $name.ami";
 	my $data = qxx (

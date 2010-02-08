@@ -12,6 +12,7 @@
 <xsl:import href="convert37to38.xsl"/>
 <xsl:import href="convert38to39.xsl"/>
 <xsl:import href="convert39to41.xsl"/>
+<xsl:import href="convert41to42.xsl"/>
 <xsl:import href="pretty.xsl"/>
 
 
@@ -46,8 +47,12 @@
         <xsl:apply-templates select="exslt:node-set($v39)" mode="conv39to41"/>
     </xsl:variable>
 
+    <xsl:variable name="v42">
+        <xsl:apply-templates select="exslt:node-set($v41)" mode="conv41to42"/>
+    </xsl:variable>
+
      <xsl:apply-templates
-		select="exslt:node-set($v41)" mode="pretty"
+		select="exslt:node-set($v42)" mode="pretty"
      />
      
 </xsl:template>

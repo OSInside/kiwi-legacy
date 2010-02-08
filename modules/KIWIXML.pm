@@ -758,9 +758,6 @@ sub getImageTypeAndAttributes {
 		$record{bootkernel}    = $node -> getAttribute("bootkernel");
 		$record{filesystem}    = $node -> getAttribute("filesystem");
 		$record{fsnocheck}     = $node -> getAttribute("fsnocheck");
-		$record{AWSAccountNr}  = $node -> getAttribute("ec2accountnr");
-		$record{EC2CertFile}   = $node -> getAttribute("ec2certfile");
-		$record{EC2PrivateKeyFile} = $node -> getAttribute("ec2privatekeyfile");
 		$record{hybridpersistent}  = $node -> getAttribute("hybridpersistent");
 		if ($record{type} eq "split") {
 			my $filesystemRO = $node -> getAttribute("fsreadonly");
@@ -2482,6 +2479,45 @@ sub getLVMVolumes {
 		}
 		$name =~ s/\//_/g;
 		$result{$name} = [ $usedValue,$haveAbsolute ];
+	}
+	return %result;
+}
+
+#==========================================
+# getEc2Config
+#------------------------------------------
+sub getEc2Config {
+	# ...
+	# Create a hash for the <ec2config>
+	# section if it exists
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("ec2config") -> get_node(1);
+	my %result = ();
+	if (! defined $node) {
+		return %result;
+	}
+	#==========================================
+	# AWS account Nr
+	#------------------------------------------
+	my $awsacctno = $node -> getElementsByTagName ("ec2accountnr");
+	if ($awsacctno) {
+		$result{AWSAccountNr} = $awsacctno;
+	}
+	#==========================================
+	# EC2 path to public key file
+	#------------------------------------------
+	my $certfile = $node -> getElementsByTagName ("ec2certfile");
+	if ($certfile) {
+		$result{EC2CertFile} = $certfile;
+	}
+	#==========================================
+	# EC2 path to private key file
+	#------------------------------------------
+	my $privkeyfile = $node -> getElementsByTagName ("ec2privatekeyfile");
+	if ($privkeyfile) {
+		$result{EC2PrivateKeyFile} = $privkeyfile;
 	}
 	return %result;
 }

@@ -2,6 +2,7 @@
 Mon Feb  8 12:27:10 CET 2010 - ms@suse.de
 
 - v4.15
+- moved EC2 options into a new ec2config section (bnc #577883)
 - fixed default split section usage for iso type
 
 -------------------------------------------------------------------
