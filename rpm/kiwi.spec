@@ -76,6 +76,9 @@ Requires:       kiwi = %{version}
 Requires:       inst-source-utils createrepo
 Summary:        Installation Source creation
 Group:          System/Management
+%if 0%{?suse_version} >= 1120
+BuildArch:      noarch
+%endif
 
 %description -n kiwi-instsource
 This package contains modules used for installation source creation.
@@ -93,6 +96,9 @@ Authors:
 License:        LGPL v2.0 or later
 Summary:        OpenSuSE - KIWI Image System Documentation
 Group:          Documentation/Howto
+%if 0%{?suse_version} >= 1120
+BuildArch:      noarch
+%endif
 
 %description -n kiwi-doc
 This package contains the documentation and manual pages for the KIWI
@@ -137,6 +143,9 @@ License:        GPL v2 or later
 Requires:       syslinux
 Summary:        OpenSuSE - KIWI Image System PXE boot structure
 Group:          System/Management
+%if 0%{?suse_version} >= 1120
+BuildArch:      noarch
+%endif
 
 %description -n kiwi-pxeboot
 PXE basic directory structure and pre-build boot images
@@ -152,6 +161,9 @@ License:        GPL v2 only
 Requires:       syslinux
 Summary:        OpenSuSE - KIWI TFTP prebuild boot images
 Group:          System/Management
+%if 0%{?suse_version} >= 1120
+BuildArch:      noarch
+%endif
 
 %description -n kiwi-pxeboot-prebuild
 This package contains the OpenSuSE - KIWI TFTP prebuild boot images
@@ -173,6 +185,9 @@ Requires: mkisofs
 %endif
 Summary:        OpenSuSE - KIWI Image System ISO boot
 Group:          System/Management
+%if 0%{?suse_version} >= 1120
+BuildArch:      noarch
+%endif
 
 %description -n kiwi-desc-isoboot
 kiwi boot (initrd) image for activating system images on ISO media
@@ -188,6 +203,9 @@ License:        GPL v2 or later
 Requires:       kiwi = %{version}
 Summary:        OpenSuSE - KIWI Image System USB boot
 Group:          System/Management
+%if 0%{?suse_version} >= 1120
+BuildArch:      noarch
+%endif
 
 %description -n kiwi-desc-usbboot
 kiwi boot (initrd) image for activating system images on USB stick
@@ -204,6 +222,9 @@ Requires:       kiwi = %{version}
 Requires:       qemu multipath-tools
 Summary:        OpenSuSE - KIWI Image System Virtual Machine boot
 Group:          System/Management
+%if 0%{?suse_version} >= 1120
+BuildArch:      noarch
+%endif
 
 %description -n kiwi-desc-vmxboot
 kiwi boot (initrd) image for activating system images on virtual disk
@@ -219,6 +240,9 @@ License:        GPL v2 or later
 Requires:       kiwi = %{version}
 Summary:        OpenSuSE - KIWI Image System PXE network boot
 Group:          System/Management
+%if 0%{?suse_version} >= 1120
+BuildArch:      noarch
+%endif
 
 %description -n kiwi-desc-netboot
 kiwi boot (initrd) image for activating system images via TFTP
@@ -234,6 +258,9 @@ License:        GPL v2 or later
 Requires:       kiwi = %{version}
 Summary:        OpenSuSE - KIWI Image System Xen Virtual Machine boot
 Group:          System/Management
+%if 0%{?suse_version} >= 1120
+BuildArch:      noarch
+%endif
 
 %description -n kiwi-desc-xenboot
 kiwi boot (initrd) image for activating a Xen image by xm
@@ -255,6 +282,9 @@ Requires: mkisofs
 %endif
 Summary:        OpenSuSE - KIWI image descriptions
 Group:          System/Management
+%if 0%{?suse_version} >= 1120
+BuildArch:      noarch
+%endif
 
 %description -n kiwi-desc-oemboot
 This package contains the OpenSuSE - KIWI image descriptions. Each
@@ -272,6 +302,9 @@ License:        GPL v2.0 or later
 Requires:       kiwi-desc-vmxboot = %{version}
 Summary:        OpenSuSE - KIWI JeOS system image templates
 Group:          System/Management
+%if 0%{?suse_version} >= 1120
+BuildArch:      noarch
+%endif
 
 %description -n kiwi-templates
 This package contains system image templates to easily build

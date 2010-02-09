@@ -1,10 +1,15 @@
 -------------------------------------------------------------------
-Mon Feb  8 12:27:10 CET 2010 - ms@suse.de
+Tue Feb  9 16:42:18 CET 2010 - ms@suse.de
 
 - v4.15
 - moved EC2 options into a new ec2config section (bnc #577883)
 - handle reboot request only if we are not in recovery mode (bnc #573403)
 - fixed default split section usage for iso type
+
+-------------------------------------------------------------------
+Tue Feb  9 13:16:19 UTC 2010 - prusnak@suse.cz
+
+- enable noarch subpackages
 
 -------------------------------------------------------------------
 Fri Feb  5 14:12:14 CET 2010 - ms@suse.de
