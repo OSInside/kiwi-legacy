@@ -4,29 +4,35 @@
 \minitoc
 
 An oem image is a virtual disk image representing all partitions
-and bootloader information like it exists on a real disk. The image
-format is the same compared to the VMX image type. All flavours
-explained in the VMX chapter also applies to the OEM type.
+and bootloader information in the same fashion it exists on a physical
+disk. The image format matches the format of the VMX image type. All flavors
+discussed previously for the VMX image type apply to the OEM image type.
 
-The original idea of an oem image is to provide this virtual disk data
-to OEM vendors which now are able to deploy the system independently onto
-their storage media. The deployment can happen from any OS including
-Windows if a tool to dump data on a disk device exists. The oem image
-type is also used to deploy images on USB sticks because in principal
-it is the same workflow.
+The basic idea behind an oem image is to provide the virtual disk data
+for OEM vendors to support easy deployment of the system to physical
+storage media. The deployment can be performed from any OS including
+Windows as long as a tool to dump data onto a disk device exists and is 
+used. The oem image type may also be used to deploy an image on a USB stick. 
+A USB stick is simply a removable physical storage device.
 
 \section{Building the suse-oem-preload example}
 
-The latest example provided with kiwi is based on openSUSE 11.0 and includes
-the patterns default plus x11. The image type is a split type whereas
-the read-write filesystem is ext3 and the read-only filesystem is
-squashfs. The additional format attribute also creates an installable
-ISO image for deploying the image from CD. 
+The OEM example provided with kiwi is based on recent openSUSE releases, 
+one example configuration per release, and includes the default and x11 
+patterns. The image type is a split type utilizing the distributions default
+filesystem format for the read-write partition and the squashfs filesystem 
+for the read-only partition. Using the additional \textbf{format} attribute 
+with the \textbf{iso} value creates an installable ISO image. When booting 
+from the ISO image the OEM disk image will be deployed to the storage media
+on the booting machine (after confirmation by the user).
+
+The commands provided below use the openSUSE 11.2 based example built 
+for the x86 architecture.
 
 \begin{Command}{12cm}
 \begin{verbatim}
 cd /usr/share/doc/packages/kiwi/examples
-cd suse-11.0
+cd suse-11.2
 kiwi --prepare ./suse-oem-preload \
      --root /tmp/myoem
 \end{verbatim}
@@ -41,45 +47,65 @@ kiwi --create /tmp/myoem --type split \
 
 \section{Using the image}
 
-Testing the oem virtual disk can be done with a virtualisation software
-like QEMU or VMware. The virtual disk is represented by the .raw extension
-whereas the .iso extension represents the installation disk for this oem
-image. The installation disk should be tested on a bare test system
-For the .raw test just call:
+The virtual disk image created by kiwi with the commands shown above can be 
+tested using virtualization software such as QEMU, VMware, or VirtualBox. 
+The virtual disk is represented by the file with the .raw extension, whereas 
+the file with the .iso extension represents the installation disk for this oem
+image. The ISO image is bootable \textit{(filename.iso)} and can be burned to 
+optical media. It is recommended to test the image on a bare test system. The 
+following command shows how to use qemu to test the oem disk image 
+\textit{(filename.raw)}.
 
 \begin{Command}{12cm}
 \begin{verbatim}
 cd /tmp/myoem-result
-qemu suse-11.0-oem-preload.i686-1.1.2.raw \
+qemu suse-11.2-oem-preload.i686-1.1.2.raw \
      -m 512
 \end{verbatim}
 \end{Command}
 
-or dump the image on a test hard disk and select it as boot device
-in the BIOS:
+or using the \textbf{dd} command you can dump the image onto a test hard 
+disk or USB stick and upon reboot select the appropriate device as the 
+boot device in the BIOS:
 
 \begin{Command}{12cm}
 \begin{verbatim}
 cd /tmp/myoem-result
-dd if=suse-11.0-oem-preload.i686-1.1.2.raw \
+dd if=suse-11.2-oem-preload.i686-1.1.2.raw \
    of=/dev/<device> bs=32k
 \end{verbatim}
 \end{Command}
 
-Please note if you test an oem image the virtual disk geometry of the
-image is the same as the disk geometry inside the host system. According
-to this the oem boot workflow will skip the re-partitioning which is
-performed if there would be a real disk
+Please note, when testing an oem image using the virtual disk image, i.e. 
+the .raw file, the geometry of the disk image is not changed and therefore 
+retains the disk geometry of the host system. This implies that the 
+re-partitioning performed for a physical disk install during the oem boot 
+workflow will be skipped.
 
-\section{Flavours}
+You can test the installation procedure in a virtual environment using
+the .iso file. In this case the re-partitioning code in the boot image will
+be executed. The following commnads show this procedure using QEMU.
 
-An interesting part of an oem image is that it can be turned into
-an installation image too. This means it is possible to create an
-installation CD / DVD or USB stick which deploys the oem based
-image onto the selected storage device. The installation process
-is a simply dd of the image onto the selected device so don't
-expect any user interaction or GUI here to pop up. KIWI supports
-two types of installation media:
+\begin{Command}{12cm}
+\begin{verbatim}
+qemu-img create -f qcow2 /tmp/test-oem-preload.img
+qemu /tmp/test-oem-preload.img \
+     -cdrom /tmp/myoem-result/suse-11.2-oem-preload.i686-1.1.2.iso \
+     -boot d
+\end{verbatim}
+\end{Command}
+
+\section{Flavors}
+
+As indicated above the use of the \textbf{format} attribute for the
+oem image supports the creation of an installation image. The installation 
+image can be created in two formats, one suitable for CD/DVD media and a 
+second suitable for a USB stick. The self installing image deploys the oem
+image onto the selected storage device. The installation process is a 
+simple image dump using the dd command. During this process the target system
+remains in terminal mode. The following configuration snippets show the 
+use of the \textbf{format} attribute to create the ISO or USB installation
+image format respectively.
 
 \begin{itemize}
 \item <type image="name" ... format=''iso''/>\\
@@ -94,8 +120,7 @@ two types of installation media:
 
 By default the oemboot process will create/modify a swap, /home and /
 partition. It is possible to influence the behavior with the
-oem-* elements which are explained in the oemconfig section in the
-KIWI Image description chapter.
+oem-* elements. See the \textit{KIWI image description} chapter for details.
 
 %If you plan to use a custom partition setup you also should consider
 %to create a copy of the original oemboot boot image description. The following
@@ -125,17 +150,20 @@ KIWI Image description chapter.
 
 \subsection{LVM support}
 
-kiwi also provides support for LVM (Logical Volume Management). In this
+Kiwi also provides support for LVM (Logical Volume Management). In this
 mode the disk partition table will include one lvm partition and one
-standard ext2 boot partition. kiwi creates the kiwiVG volume group and
-adds logical volumes as they are needed and configured according to the
-image type and filesystem. After boot of the system the user has full
-control over the volume group and is free to change/resize/increas the
-group and the volumes inside. Support for LVM has been added for all
-image types which are disk based. This includes vmx,oem and usb.
-In order to use LVM for the oem type just add the \verb+--lvm+ option
-as part of the kiwi create step or add the attribute \textbf{lvm=''true''}
-as part of the \textbf{type} section in your config.xml file.
+standard ext2 boot partition. Kiwi creates the kiwiVG volume group, unless
+the lvmgroup attribute has been set, and adds logical volumes to the group
+as based on the configuration given by the \textbf{lvmvolumes} block
+for this type. The filesystem for the volume group is determined by the
+filesystem attribute of the type element. After booting the system the user
+has full control over the volume group and is free to change
+(resize/increase) the group and the volumes inside. Support for LVM has
+been added for all disk based image types. This includes the vmx, oem and
+usb image types. In order to use LVM for the oem type just add the 
+\verb+--lvm+ command line option when executing the create step or add
+the attribute \textbf{lvm=''true''} to of the \textbf{type} 
+element in your config.xml file.
 
 \begin{Command}{12cm}
 \begin{verbatim}
@@ -144,6 +172,6 @@ kiwi --create /tmp/myoem --type oem \
 \end{verbatim}
 \end{Command}
 
-With the optional \textbf{lvmvolumes} section you can set one or
-more top level directories into a separate volume. See the
+With the optional \textbf{lvmvolumes} section you can specify to have 
+one or more top level directories in a separate volume. See the
 \textit{KIWI image description} chapter for a detailed explanation.
