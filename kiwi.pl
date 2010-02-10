@@ -1085,7 +1085,6 @@ sub main {
 		# Create report HTML file, errors allowed
 		#------------------------------------------
 		if (! $MigrateNoFiles) {
-			$migrate -> cleanMount();
 			$migrate -> setSystemOverlayFiles();
 		}
 		$migrate -> getPackageList();

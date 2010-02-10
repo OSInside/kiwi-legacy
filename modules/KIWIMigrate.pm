@@ -250,7 +250,7 @@ sub createReport {
 		print FD "$problem2";
 		print FD '</p>'."\n";
 	}
-	if (@{$failedJob1}) {
+	if ($failedJob1) {
 		print FD '<h1>Pattern(s) not found</h1>'."\n";
 		print FD '<p>'."\n";
 		print FD 'Following patterns could not be found in your ';
@@ -265,7 +265,7 @@ sub createReport {
 		}
 		print FD '</ul>'."\n";
 	}
-	if (@{$failedJob2}) {
+	if ($failedJob2) {
 		print FD '<h1>Package(s) not found</h1>'."\n";
 		print FD '<p>'."\n";
 		print FD 'Following packages could not be found in your ';
@@ -453,7 +453,7 @@ sub setTemplate {
 	#==========================================
     # <description>
     #------------------------------------------
-	print FD '<image schemaversion="4.1" ';
+	print FD '<image schemaversion="4.2" ';
 	print FD 'name=suse-migration"'.$product.'">'."\n";
 	print FD "\t".'<description type="system">'."\n";
 	print FD "\t\t".'<author>***AUTHOR***</author>'."\n";
@@ -887,7 +887,6 @@ sub setSystemOverlayFiles {
 	} else {
 		my $wref = generateWanted (\%result,$root);
 		find ({ wanted => $wref, follow => 0 }, $root );
-		$this -> cleanMount();
 		$cdata->{result} = \%result;
 	}
 	$kiwi -> done ();
