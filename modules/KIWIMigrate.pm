@@ -250,7 +250,7 @@ sub createReport {
 		print FD "$problem2";
 		print FD '</p>'."\n";
 	}
-	if ($failedJob1) {
+	if (($failedJob1) && (@{$failedJob1})) {
 		print FD '<h1>Pattern(s) not found</h1>'."\n";
 		print FD '<p>'."\n";
 		print FD 'Following patterns could not be found in your ';
@@ -265,7 +265,7 @@ sub createReport {
 		}
 		print FD '</ul>'."\n";
 	}
-	if ($failedJob2) {
+	if (($failedJob2) && (@{$failedJob2})) {
 		print FD '<h1>Package(s) not found</h1>'."\n";
 		print FD '<p>'."\n";
 		print FD 'Following packages could not be found in your ';
@@ -534,13 +534,13 @@ sub getOperatingSystemVersion {
 	# correct installation source
 	# ---
 	my $this = shift;
-	my @data = qxx ("zypper --no-refresh products --installed 2>&1");
+	my @data = qxx ("zypper --no-refresh products -i 2>&1");
 	my $code = $? >> 8;
 	if ($code != 0) {
 		return undef;
 	}
 	foreach my $line (@data) {
-		if ($line =~ /^i.*\|.*\|(.*)\|/) {
+		if ($line =~ /^i.*openSUSE \| (.*?)\|/) {
 			my $version = $1;
 			$version =~ s/ +//g;
 			return $version;
