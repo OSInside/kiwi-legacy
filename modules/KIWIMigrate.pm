@@ -622,7 +622,7 @@ sub setPrepareConfigSkript {
 			$kiwi -> skipped ();
 			next;
 		}
-		print FD "zypper ar ".$url." \\\n\t".$alias."\n";
+		print FD "zypper ar \\\n\t\"".$url."\" \\\n\t\"".$alias."\"\n";
 	}
 	print FD 'suseConfig'."\n";
 	print FD 'baseCleanMount'."\n";
@@ -909,7 +909,9 @@ sub setSystemOverlayFiles {
 		my $filehash = shift;
 		my $mount    = shift;
 		return sub {
-			if (! -d $File::Find::name) {
+			if (((-l $File::Find::name) && (-e $File::Find::name)) ||
+				(! -d $File::Find::name))
+			{
 				my $expr = quotemeta $mount;
 				my $file = $File::Find::name; $file =~ s/$expr//;
 				my $dirn = $File::Find::dir;  $dirn =~ s/$expr//;
@@ -925,7 +927,7 @@ sub setSystemOverlayFiles {
 		%result = %{$cdata->{result}};
 	} else {
 		my $wref = generateWanted (\%result,$root);
-		find ({ wanted => $wref, follow => 0 }, $root );
+		find ({ wanted => $wref }, $root );
 		$cdata->{result} = \%result;
 	}
 	$kiwi -> done ();
@@ -1057,12 +1059,6 @@ sub setSystemOverlayFiles {
 		}
 	}
 	#==========================================
-	# Cleanup symbolic links
-	#------------------------------------------
-	$kiwi -> info ("Cleaning symlinks...");
-	$this -> checkBrokenLinks();
-	$kiwi -> done();
-	#==========================================
 	# Create modified files tree
 	#------------------------------------------
 	$kiwi -> info ("Creating modified files tree...");
@@ -1072,6 +1068,12 @@ sub setSystemOverlayFiles {
 		mkpath ("$dest/root-modified/$dir", {verbose => 0});
 		move ("$dest/root-nopackage/$file","$dest/root-modified/$dir");
 	}
+	$kiwi -> done();
+	#==========================================
+	# Cleanup symbolic links
+	#------------------------------------------
+	$kiwi -> info ("Cleaning symlinks...");
+	$this -> checkBrokenLinks();
 	$kiwi -> done();
 	#==========================================
 	# Remove empty directories
@@ -1252,22 +1254,35 @@ sub checkBrokenLinks {
 	my $this = shift;
 	my $dest = $this->{dest};
 	my $kiwi = $this->{kiwi};
-	my @link = qxx ("find $dest/root-nopackage -type l");
+	my @base = ("root-nopackage","root-modified");
+	my @link = ();
+	#==========================================
+	# search links in overlay subtrees
+	#------------------------------------------
+	foreach my $root (@base) {
+		my @list = qxx ("find $dest/$root -type l");
+		push @link,@list;
+	}
 	my $returnok = 1;
-	my $dir;
-	my $name;
-	my $suffix;
+	#==========================================
+	# check link targets
+	#------------------------------------------
 	foreach my $linkfile (@link) {
 		chomp $linkfile;
 		my $ref = readlink ($linkfile);
 		if ($ref !~ /^\//) {
-			($name,$dir,$suffix) = fileparse ($linkfile);
-			$dir.= "/";
-		} else {
-			$dir = $dest."/root-nopackage";
+			my ($name,$dir,$suffix) = fileparse ($linkfile);
+			$dir =~ s/$dest\/root-.*?\///;
+			$ref = $dir."/".$ref;
 		}
-		if (! -e $dir.$ref) {
-			$kiwi -> loginfo ("Broken link: $linkfile -> $ref [ REMOVED ]");
+		my $remove = 1;
+		foreach my $root (@base) {
+			if (-e "$dest/$root/$ref") {
+				$remove = 0; last;
+			}
+		}
+		if ($remove) {
+			$kiwi -> loginfo ("Broken link: $linkfile [ REMOVED ]");
 			unlink $linkfile;
 			$returnok = 0;
 		}
