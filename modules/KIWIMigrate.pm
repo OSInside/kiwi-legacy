@@ -104,6 +104,7 @@ sub new {
 			return undef;
 		}
 	}
+	$dest =~ s/\/$//;
 	$kiwi -> done ();
 	$kiwi -> info ("Results will be written to: $dest");
 	$kiwi -> done ();
@@ -360,6 +361,7 @@ sub getRepos {
 			my $type    = $4;
 			my $alias   = $1;
 			my $prio    = $3;
+			my $origsrc = $source;
 			if ($enabled eq "Yes") {
 				#==========================================
 				# handle special source type dvd://
@@ -387,11 +389,12 @@ sub getRepos {
 					}
 					$source = "dir://".$mpoint;
 					push @{$mounts},$mpoint;
+					$osc{$product}{$source}{flag} = "local";
 				}
 				#==========================================
 				# handle special source type iso://
 				#------------------------------------------
-				if ($source =~ /iso=(.*\.iso)/) {
+				elsif ($source =~ /iso=(.*\.iso)/) {
 					my $iso = $1;
 					if (! -e $iso) {
 						$kiwi -> warning ("ISO repo: $iso does not exist");
@@ -415,10 +418,24 @@ sub getRepos {
 					}
 					$source = "dir://".$mpoint;
 					push @{$mounts},$mpoint;
+					$osc{$product}{$source}{flag} = "local";
+				}
+				#==========================================
+				# handle source type http|https|ftp://
+				#------------------------------------------
+				elsif ($source =~ /^(http|https|ftp)/) {
+					$osc{$product}{$source}{flag} = "remote";
+				}
+				#==========================================
+				# handle all other source types
+				#------------------------------------------
+				else {
+					$osc{$product}{$source}{flag} = "unknown";
 				}
 				#==========================================
 				# store repo information
 				#------------------------------------------
+				$osc{$product}{$source}{src}  = $origsrc;
 				$osc{$product}{$source}{type} = $type;
 				$osc{$product}{$source}{alias}= $alias;
 				$osc{$product}{$source}{prio} = $prio;
@@ -484,6 +501,7 @@ sub setTemplate {
 		my $type = $osc{$product}{$source}{type};
 		my $alias= $osc{$product}{$source}{alias};
 		my $prio = $osc{$product}{$source}{prio};
+		my $url  = $osc{$product}{$source}{src};
 		print FD "\t".'<repository type="'.$type.'"';
 		if (defined $alias) {
 			print FD ' alias="'.$alias.'"';
@@ -492,7 +510,7 @@ sub setTemplate {
 			print FD ' priority="'.$prio.'"';
 		}
 		print FD '>'."\n";
-		print FD "\t\t".'<source path="'.$source.'"/>'."\n";
+		print FD "\t\t".'<source path="'.$url.'"/>'."\n";
 		print FD "\t".'</repository>'."\n";
 	}
 	#==========================================
@@ -550,15 +568,18 @@ sub getOperatingSystemVersion {
 }
 
 #==========================================
-# setServiceList
+# setPrepareConfigSkript
 #------------------------------------------
-sub setServiceList {
+sub setPrepareConfigSkript {
 	# ...
 	# Find all services enabled on the system and create
 	# an appropriate config.sh file
 	# ---
 	my $this = shift;
+	my $kiwi = $this->{kiwi};
 	my $dest = $this->{dest};
+	my %osc  = %{$this->{source}};
+	my $product = $this->{product};
 	my @serviceBoot = glob ("/etc/init.d/boot.d/S*");
 	my @serviceList = glob ("/etc/init.d/rc5.d/S*");
 	my @service = (@serviceBoot,@serviceList);
@@ -581,8 +602,27 @@ sub setServiceList {
 	print FD 'test -f /.profile && . /.profile'."\n";
 	print FD 'echo "Configure image: [$kiwi_iname]..."'."\n";
 	print FD 'suseSetupProduct'."\n";
+	#==========================================
+	# Services...
+	#------------------------------------------
 	foreach my $service (@result) {
 		print FD 'suseInsertService '.$service."\n";
+	}
+	#==========================================
+	# Repos...
+	#------------------------------------------
+	foreach my $source (keys %{$osc{$product}} ) {
+		my $alias= $osc{$product}{$source}{alias};
+		my $url  = $osc{$product}{$source}{src};
+		my $flag = $osc{$product}{$source}{flag};
+		if ($flag ne "remote") {
+			$kiwi -> warning (
+				"Local repo: $alias will not be added to config.sh"
+			);
+			$kiwi -> skipped ();
+			next;
+		}
+		print FD "zypper ar ".$url." \\\n\t".$alias."\n";
 	}
 	print FD 'suseConfig'."\n";
 	print FD 'baseCleanMount'."\n";

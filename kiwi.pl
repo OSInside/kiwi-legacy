@@ -1094,7 +1094,7 @@ sub main {
 				$migrate -> cleanMount();
 				my $code = kiwiExit (1); return $code;
 			}
-			if (! $migrate -> setServiceList()) {
+			if (! $migrate -> setPrepareConfigSkript()) {
 				$migrate -> cleanMount();
 				my $code = kiwiExit (1); return $code;
 			}
