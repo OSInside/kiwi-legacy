@@ -116,7 +116,7 @@ MainWindow::useNewUI()
     imageLabel->setAlignment(Qt::AlignCenter);
 
     directive = new CustomLabel(this);
-    directive->setText(tr("Drag appliance image here\n or click to select."));
+    directive->setText(tr("Drag disk image here\n or click to select."));
     directive->setAlignment(Qt::AlignCenter);
     deviceComboBox = new QComboBox;
 
