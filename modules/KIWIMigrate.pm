@@ -681,7 +681,6 @@ sub getPackageList {
 		# create a package list with packages _not_ part of the
 		# pattern list.
 		# ----
-		$kiwi->done();
 		$this->{solverProblem1}    = $psolve -> getProblemInfo();
 		$this->{solverFailedJobs1} = $psolve -> getFailedJobs();
 		if ($psolve -> getProblemsCount()) {
