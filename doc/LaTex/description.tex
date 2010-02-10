@@ -744,45 +744,59 @@ supported child elements:
     \end{Command}
 
 	\begin{itemize}
-	\item \textbf{<oem-reboot>true|false</oem-reboot>}\\
-      This allows to reboot the oem system after initial deployment.
-      This value is represented by the variable OEM\_REBOOT in
-      config.oempartition
-	\item \textbf{<oem-swapsize>number in MB</oem-swapsize>}\\
-      Set the size of the swap partition. This value is represented by
-      variable OEM\_SWAPSIZE in config.oempartition
-	\item \textbf{<oem-systemsize>number in MB</oem-systemsize>}\\
-      Set the size of the / partition. This value is represented by the
-      variable OEM\_SYSTEMSIZE in config.oempartition
+    \item \textbf{<oem-boot-title>text</oem-boot-title>}\\
+       By default the string \textbf{OEM} will be used as the boot manager 
+       menu entry when KIWI creates the grub configuration during
+       deployment. The oem-boot-title element allows you to set a custom
+       name for the grub menu entry. This value is represented by the
+       OEM\_BOOT\_TITLE variable in config.oempartition.
 	\item \textbf{<oem-home>true|false</oem-home>}\\
-      Specify if a home partition should be create. This value is represented
-      by the variable OEM\_WITHOUTHOME in config.oempartition.
-	\item \textbf{<oem-swap>true|false</oem-swap>}\\
-      Specify if a spaw partition should be create. This value is represented
-      by the variable OEM\_WITHOUTSWAP in config.oempartition.
-	\item \textbf{<oem-boot-title>text</oem-boot-title>}\\
-      By default the string \textbf{OEM} will be appended to the
-      boot manager menu when KIWI creates the grub configuration during
-      first deployment. The oem-boot-title value allows to set a custom
-      name which is used instead of OEM. This value is represented
-      by the variable OEM\_BOOT\_TITLE in config.oempartition.
-	\item \textbf{<oem-recovery>true|false</oem-recovery>}\\
-      If this element is set to true KIWI will create a recovery archive
-      from the prepared root tree. The archive will appear as
-      \textit{/recovery.tar.bz2} within the initial image file. During
-      first boot of the image a single recovery partition will be
-      created and the recovery archive will be moved into that
-      partition. An additional boot menu entry will be created which
-      allows to restore the original root tree information. The
-      user information on the /home partition or in the /home directory
-      are not affected by that recovery process
+       Specify if a partition for the home directory should be created.
+       Creation of a home partition is the default behavior. This value is 
+       represented by the OEM\_WITHOUTHOME variable in config.oempartition.
 	\item \textbf{<oem-kiwi-initrd>true|false</oem-kiwi-initrd>}\\
-      If this element is set to true the initial oemboot boot image (initrd)
-      will \textbf{not} be replaced by the system (mkinitrd) created initrd.
-      This option makes sense if the target storage device for the image
-      is not a fixed disk but for example an USB stick. In that case it
-      might be required to re-detect the storage location on first boot which
-      is done as part of the oemboot boot image
+       If this element is set to true (default value is false) the oemboot 
+       boot image (initrd) will \textbf{not} be replaced by the system 
+       (mkinitrd) created initrd. This option is useful when the system
+       is installed on removable storage such as a USB stick or a portable
+       external drive. For movable devices it is potentially necessary to 
+       detect the storage location during every boot. This detection
+       process is part of the oemboot boot image. This value is represented
+       by the OEM\_KIWI\_INITRD variable in config.oempartition.
+	\item \textbf{<oem-reboot>true|false</oem-reboot>}\\
+       Specify if the system is to be rebooted after the oem image has been
+       deployed to the designated storage device (default value is false). 
+       This value is represented by the OEM\_REBOOT variable in 
+       config.oempartition
+	\item \textbf{<oem-recovery>true|false</oem-recovery>}\\
+      If this element is set to true (default value is false), Kiwi will
+      create a recovery archivefrom the prepared root tree. The archive will 
+      appear as \textit{/recovery.tar.bz2} in the image file. During 
+      first boot of the image a single recovery partition will be
+      created and the recovery archive will be moved to the recovery 
+      partition. An additional boot menu entry is created that when selected
+      restores the original root tree on the system. The
+      user information on the /home partition or in the /home directory is
+      not affected by the recovery process. This value is represented by 
+      the OEM\_RECOVERY variable in config.oempartition.
+    \item \textbf{<oem-recoveryID>partition-id</oem-recoveryID>}\\
+      Specify the partition type for the recovery partition. The default 
+      is to create a Linux partition (id = 83). This value is represented by 
+      the OEM\_RECOVERY\_ID variable in config.oempartition. 
+    \item \textbf{<oem-swap>true|false</oem-swap>}\\
+       Specify if a sawp partition should be create. The creation of a swap
+       partition is the default behavior. This value is represented by the
+       OEM\_WITHOUTSWAP variable in config.oempartition.     
+	\item \textbf{<oem-swapsize>number in MB</oem-swapsize>}\\
+       Set the size of the swap partition. If a swpa partition is to be
+       created and the size of the swap partition is not specified with this
+       optional element, Kiwi will calculate the size of the swpar partition
+       and create a swap partition equal to two times the RAM installed on
+       the system at initial boot time. This value is represented by
+       the OEM\_SWAPSIZE variable in config.oempartition
+	\item \textbf{<oem-systemsize>number in MB</oem-systemsize>}\\
+      Set the size of the root partition. This value is represented by the
+      variable OEM\_SYSTEMSIZE in config.oempartition
 	\end{itemize}
 \end{itemize}
 
