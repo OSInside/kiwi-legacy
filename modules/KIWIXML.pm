@@ -1147,6 +1147,7 @@ sub setForeignOptionsElement {
 	my $node = $opts -> getElementsByTagName ("$item");
 	if ($node) {
 		if ("$node" eq "$value") {
+			$kiwi -> done ();
 			return $this;
 		}
 		$node = $node -> get_node(1);

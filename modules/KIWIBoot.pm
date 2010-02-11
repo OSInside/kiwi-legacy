@@ -3105,12 +3105,23 @@ sub setupSplash {
 	my $this   = shift;
 	my $kiwi   = $this->{kiwi};
 	my $initrd = $this->{initrd};
-	my $spldir = $initrd."_".$$.".splash";
-	my $irddir = "$spldir/initrd";
 	my $zipped = 0;
 	my $newird;
-	my $status;
 	my $result;
+	#==========================================
+	# create temp dir for operations
+	#------------------------------------------
+	$kiwi -> info ("Setting up splash screen...");
+	my $spldir = qxx ("mktemp -q -d /tmp/kiwisplash.XXXXXX");
+	my $status = $? >> 8;
+	if ($status != 0) {
+		$kiwi -> skipped ();
+		$kiwi -> warning  ("Failed to create splash directory: $!");
+		$kiwi -> skipped ();
+		return $initrd;
+	}
+	chomp $spldir;
+	my $irddir = "$spldir/initrd";
 	#==========================================
 	# check if compressed and setup splash.gz
 	#------------------------------------------
@@ -3121,13 +3132,6 @@ sub setupSplash {
 		$newird = $initrd; $newird =~ s/\.gz/\.splash.gz/;
 	} else {
 		$newird = $initrd.".splash.gz";
-	}
-	$kiwi -> info ("Setting up splash screen...");
-	if (! mkdir $spldir) {
-		$kiwi -> skipped ();
-		$kiwi -> warning ("Failed to create splash directory");
-		$kiwi -> skipped ();
-		return $initrd;
 	}
 	#==========================================
 	# unpack initrd files
