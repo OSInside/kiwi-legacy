@@ -380,8 +380,9 @@ sub init {
 	}
 	qxx (" cp $groupTemplate $root/etc/group  2>&1 ");
 	qxx (" cp $paswdTemplate $root/etc/passwd 2>&1 ");
-	# need resolv.conf for internal chroot name resolution
+	# need resolv.conf/hosts for internal chroot name resolution
 	qxx (" cp /etc/resolv.conf $root/etc 2>&1 ");
+	qxx (" cp /etc/hosts $root/etc 2>&1 ");
 	qxx (" cp $main::KConfig $root/.kconfig 2>&1 ");
 	$kiwi -> done();
 	#==========================================
@@ -481,9 +482,14 @@ sub upgrade {
 	# make sure name resolution works
 	#------------------------------------------
 	$this->{needResolvConf} = 0;
+	$this->{needHosts} = 0;
 	if (! -f "$root/etc/resolv.conf") {
 		qxx ("cp /etc/resolv.conf $root/etc 2>&1");
 		$this->{needResolvConf} = 1;
+	}
+	if (! -f "$root/etc/hosts") {
+		qxx ("cp /etc/hosts $root/etc 2>&1");
+		$this->{needHosts} = 1;
 	}
 	#==========================================
 	# Check and set lock
@@ -538,9 +544,14 @@ sub prepareTestingEnvironment {
 	# make sure name resolution works
 	#------------------------------------------
 	$this->{needResolvConf} = 0;
+	$this->{needHosts} = 0;
 	if (! -f "$root/etc/resolv.conf") {
 		qxx ("cp /etc/resolv.conf $root/etc 2>&1");
 		$this->{needResolvConf} = 1;
+	}
+	if (! -f "$root/etc/hosts") {
+		qxx ("cp /etc/hosts $root/etc 2>&1");
+		$this->{needHosts} = 1;
 	}
 	#==========================================
 	# Check and set lock
@@ -583,8 +594,12 @@ sub cleanupResolvConf {
 	my $this = shift;
 	my $root = $this->{root};
 	my $needResolvConf = $this->{needResolvConf};
+	my $needHosts = $this->{needHosts};
 	if ($needResolvConf) {
 		qxx ("rm -f $root/etc/resolv.conf");
+	}
+	if ($needHosts) {
+		qxx ("rm -f $root/etc/hosts");
 	}
 }
 
@@ -930,6 +945,18 @@ sub setup {
 		if ($code == 0) {
 			$kiwi -> info ("Cleanup temporary copy of resolv.conf");
 			qxx ("rm -f $root/etc/resolv.conf");
+			$kiwi -> done ();
+		}
+	}
+	#========================================
+	# cleanup temporary copy of hosts
+	#----------------------------------------
+	if ((-f "$root/etc/hosts") && (-f "/etc/hosts")) {
+		my $data = qxx ("diff -q /etc/hosts $root/etc/hosts");
+		my $code = $? >> 8;
+		if ($code == 0) {
+			$kiwi -> info ("Cleanup temporary copy of hosts");
+			qxx ("rm -f $root/etc/hosts");
 			$kiwi -> done ();
 		}
 	}

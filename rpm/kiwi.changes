@@ -2,6 +2,8 @@
 Wed Feb 10 16:49:28 CET 2010 - ms@suse.de
 
 - v4.15
+- fixed name resolution inside chroot if curl backend is used
+  zypper uses libcurl for ftp transfers (bnc #578687)
 - moved EC2 options into a new ec2config section (bnc #577883)
 - handle reboot request only if we are not in recovery mode (bnc #573403)
 - fixed default split section usage for iso type
