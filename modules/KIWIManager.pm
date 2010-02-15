@@ -1359,12 +1359,9 @@ sub setupInstallPackages {
 	if ("$type{type}" eq "xen") {
 		$kiwi -> info ("Creating Xen package list");
 		my @xenList = $xml -> getXenList();
-		if (! @xenList) {
-			$kiwi -> error ("Couldn't create xen package list");
-			$kiwi -> failed ();
-			return undef;
+		if (@xenList) {
+			@packList = (@packList,@xenList);
 		}
-		@packList = (@packList,@xenList);
 		$kiwi -> done ();
 	}
 	#==========================================

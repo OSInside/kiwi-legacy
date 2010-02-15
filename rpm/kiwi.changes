@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Feb 15 17:39:37 CET 2010 - ms@suse.de
+
+- v4.17
+- fixed xen building with empty or no type=xen packages
+
+-------------------------------------------------------------------
 Mon Feb 15 16:00:51 CET 2010 - adrian@suse.de
 
 - do not fail on creating directory which might be there already.
