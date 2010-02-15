@@ -3,6 +3,7 @@ Thu Feb 11 17:14:14 CET 2010 - ms@suse.de
 
 - v4.16
 - make setupSplash() to operate in a temp dir (bnc #579134)
+- fixed cleanup of hosts file (bnc #579852)
 
 -------------------------------------------------------------------
 Wed Feb 10 16:49:28 CET 2010 - ms@suse.de

@@ -951,14 +951,10 @@ sub setup {
 	#========================================
 	# cleanup temporary copy of hosts
 	#----------------------------------------
-	if ((-f "$root/etc/hosts") && (-f "/etc/hosts")) {
-		my $data = qxx ("diff -q /etc/hosts $root/etc/hosts");
-		my $code = $? >> 8;
-		if ($code == 0) {
-			$kiwi -> info ("Cleanup temporary copy of hosts");
-			qxx ("rm -f $root/etc/hosts");
-			$kiwi -> done ();
-		}
+	if (-f "$root/etc/hosts.rpmnew") {
+		$kiwi -> info ("Cleanup temporary copy of hosts");
+		qxx ("mv $root/etc/hosts.rpmnew $root/etc/hosts");
+		$kiwi -> done ();
 	}
 	#========================================
 	# cleanup temporary .buildenv
