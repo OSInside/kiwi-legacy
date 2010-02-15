@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Feb 15 16:00:51 CET 2010 - adrian@suse.de
+
+- do not fail on creating directory which might be there already.
+  (fixes openSUSE:Factory ftp tree generation)
+
+-------------------------------------------------------------------
 Thu Feb 11 17:14:14 CET 2010 - ms@suse.de
 
 - v4.16
