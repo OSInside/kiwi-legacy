@@ -1539,6 +1539,7 @@ sub collectProducts
   # This will become nicer when we switched to rpm-md as product repo format
   my $found_product = 0;
   foreach my $i(grep($_ =~ /-release$/,keys(%{$this->{m_repoPacks}}))) {
+      qx(rm -rf $tmp);
       if(!mkpath("$tmp", { mode => 0755 } )) {
         $this->logMsg("E", "can't create dir <$tmp>");
       }
@@ -1588,9 +1589,9 @@ sub collectProducts
 #   my $proddir  = $this->{m_proddata}->getVar("PRODUCT_DIR");
       }
 
-      # cleanup
-      qx(rm -rf $tmp);
   }
+  # cleanup
+  qx(rm -rf $tmp);
 }
 
 
@@ -1938,7 +1939,7 @@ sub createDirectoryStructure
   my $errors = 0;
 
   foreach my $d(keys(%dirs)) {
-		next if $dirs{$d} == 0;
+    next if $dirs{$d} == 0;
     if(-d $d) {
       $dirs{$d} = 0;
     }
