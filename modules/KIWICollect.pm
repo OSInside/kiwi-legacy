@@ -1542,9 +1542,12 @@ sub collectProducts
       if(!mkpath("$tmp", { mode => 0755 } )) {
         $this->logMsg("E", "can't create dir <$tmp>");
       }
+      if ( $this->{m_repoPacks}->{$i}->{'newpath'} eq "" || $this->{m_repoPacks}->{$i}->{'newfile'} eq "" ){
+         $this->logMsg("I", "Skip product release package $i");
+         next;
+      }
       my $file = $this->{m_repoPacks}->{$i}->{'newpath'}."/".$this->{m_repoPacks}->{$i}->{'newfile'};
-      $this->logMsg("I", "Unpacking product release package ".$file);
-      $this->logMsg("I", "Unpacking product release package ".$file." ".$tmp);
+      $this->logMsg("I", "Unpacking product release package $i in file $file ".$tmp);
       $this->{m_util}->unpac_package($file, $tmp);
 
       # get all .prod files
