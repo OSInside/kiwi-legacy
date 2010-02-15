@@ -138,11 +138,10 @@ sub execute
     return $retval;
   }
 
-  my $dirname = $this->{m_handler}->baseurl()."/".$this->{m_handler}->mediaName();
-  my $mult = $this->collect()->productData()->getVar("MULTIPLE_MEDIA");
-  if( $mult ne "no") {
-    $dirname .= $this->{m_media};
-  }
+  my @dirlist = $this->getSubdirLists();
+  return undef unless @dirlist && $dirlist[0] && ref ($dirlist[0] eq "ARRAY") && $dirlist[0]->[0];
+  my $dirname = $dirlist[0]->[0];
+
   my $srcdir = $dirname."/".$this->{m_requireddirs}->[0];
   my $targetdir = $dirname."/".$this->{m_requireddirs}->[1];
 
