@@ -2,7 +2,14 @@
 Mon Feb 15 17:39:37 CET 2010 - ms@suse.de
 
 - v4.17
+- update documentation
 - fixed xen building with empty or no type=xen packages
+- don't remove libidn it's required for curl based downloads
+- changed migration to use root path directly and don't mount
+  the root device before. As we can't mount it read-only because
+  it's already mounted read-write I decided to prevent the mount
+  at all and exclude any remote mounted location by searching
+  through /proc/mounts
 
 -------------------------------------------------------------------
 Mon Feb 15 16:00:51 CET 2010 - adrian@suse.de

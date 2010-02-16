@@ -154,7 +154,7 @@ Kiwi also provides support for LVM (Logical Volume Management). In this
 mode the disk partition table will include one lvm partition and one
 standard ext2 boot partition. Kiwi creates the kiwiVG volume group, unless
 the lvmgroup attribute has been set, and adds logical volumes to the group
-as based on the configuration given by the \textbf{lvmvolumes} block
+based on the configuration given by the \textbf{lvmvolumes} block
 for this type. The filesystem for the volume group is determined by the
 filesystem attribute of the type element. After booting the system the user
 has full control over the volume group and is free to change

@@ -852,7 +852,7 @@ sub setSystemOverlayFiles {
 	my $code;
 	my @modified;
 	my @ilist;
-	my $root;
+	my $root = "/";
 	#==========================================
 	# check for cache file
 	#------------------------------------------
@@ -882,39 +882,33 @@ sub setSystemOverlayFiles {
 	}
 	$kiwi -> done();
 	#==========================================
-	# mount root system
+	# exclude special and non local mounts
 	#------------------------------------------
 	if (! $cache) {
-		$root = qxx ("mktemp -q -d /tmp/kiwimpoint.XXXXXX");
-		$code = $? >> 8;
-		if ($code != 0) {
-			$kiwi -> error ("Root tmpdir failed: $root: $!");
-			$kiwi -> failed ();
-			return undef;
+		my @mounts = qxx ("cat /proc/mounts|cut -f 2,3 -d ' '"); chomp @mounts;
+		foreach my $mount (@mounts) {
+			my @details = split (/\s+/,$mount);
+			my $path = quotemeta ($details[0]);
+			my $type = $details[1];
+			$path .= "\/";
+			if ($type =~
+				/^(tmpfs|proc|sysfs|debugfs|devpts|fusectl|autofs|nfs|nfsd)$/) {
+				push @deny,$path;
+				$kiwi -> loginfo ("Excluding path: $path per mount table\n");
+			}
 		}
-		chomp $root;
-		$data = qxx ("mount $rdev $root 2>&1");
-		$code = $? >> 8;
-		if ($code != 0) {
-			$kiwi -> error  ("Failed to mount root system: $data");
-			$kiwi -> failed ();
-			return undef;
-		}
-		push @{$mounts},$root;
 	}
 	#==========================================
 	# generate File::Find closure
 	#------------------------------------------
 	sub generateWanted {
 		my $filehash = shift;
-		my $mount    = shift;
 		return sub {
 			if (((-l $File::Find::name) && (-e $File::Find::name)) ||
 				(! -d $File::Find::name))
 			{
-				my $expr = quotemeta $mount;
-				my $file = $File::Find::name; $file =~ s/$expr//;
-				my $dirn = $File::Find::dir;  $dirn =~ s/$expr//;
+				my $file = $File::Find::name;
+				my $dirn = $File::Find::dir;
 				$filehash->{$file} = $dirn;
 			}
 		}
@@ -926,7 +920,7 @@ sub setSystemOverlayFiles {
 	if ($cache) {
 		%result = %{$cdata->{result}};
 	} else {
-		my $wref = generateWanted (\%result,$root);
+		my $wref = generateWanted (\%result);
 		find ({ wanted => $wref }, $root );
 		$cdata->{result} = \%result;
 	}
