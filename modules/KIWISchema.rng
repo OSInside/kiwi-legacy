@@ -23,7 +23,7 @@
 <grammar xmlns:db="http://docbook.org/ns/docbook" xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" xmlns:rng="http://relaxng.org/ns/structure/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
   <db:info>
     <db:releaseinfo>$Id: kiwi.rnc 2957 2008-01-11 12:53:39Z thomas-schraitle $</db:releaseinfo>
-    <db:releaseinfo>RNC Schema Version 4.2</db:releaseinfo>
+    <db:releaseinfo>RNC Schema Version 4.3</db:releaseinfo>
     <db:pubdate>START</db:pubdate>
     <db:pubdate>2008-01-08</db:pubdate>
   </db:info>
@@ -72,7 +72,7 @@ the package Information is inherited</a:documentation>
     <define name="k.image.schemaversion.attribute">
       <attribute name="schemaversion">
         <a:documentation>The allowed Schema version (fixed value)</a:documentation>
-        <value>4.2</value>
+        <value>4.3</value>
       </attribute>
     </define>
     <define name="k.image.kiwirevision.attribute">
@@ -1644,11 +1644,6 @@ for the types oem,usb and vmx</a:documentation>
         <data type="boolean"/>
       </attribute>
     </define>
-    <define name="k.type.lvmgroup.attribute">
-      <attribute name="lvmgroup">
-        <a:documentation>Specify Volume group name, default is kiwiVG.</a:documentation>
-      </attribute>
-    </define>
     <define name="k.type.baseroot.attribute">
       <attribute name="baseroot">
         <a:documentation>Specify the path to a pre created base root system.</a:documentation>
@@ -1852,9 +1847,6 @@ vmx/oem types only.</a:documentation>
           <ref name="k.type.lvm.attribute"/>
         </optional>
         <optional>
-          <ref name="k.type.lvmgroup.attribute"/>
-        </optional>
-        <optional>
           <ref name="k.type.checkprebuilt.attribute"/>
         </optional>
         <optional>
@@ -1998,8 +1990,15 @@ a extra volume.</db:para>
     
   -->
   <div>
+    <define name="k.lvmvolumes.lvmgroup.attribute">
+      <attribute name="lvmgroup">
+        <a:documentation>Specify Volume group name, default is kiwiVG.</a:documentation>
+      </attribute>
+    </define>
     <define name="k.lvmvolumes.attlist">
-      <empty/>
+      <optional>
+        <ref name="k.lvmvolumes.lvmgroup.attribute"/>
+      </optional>
     </define>
     <define name="k.lvmvolumes">
       <element name="lvmvolumes">
@@ -2034,8 +2033,8 @@ a extra volume.</db:para>
       <attribute name="type">
         <choice>
           <value>aufs</value>
-          <value>unionfs</value>
           <value>clicfs</value>
+          <value>unionfs</value>
         </choice>
       </attribute>
     </define>

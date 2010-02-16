@@ -743,7 +743,6 @@ sub getImageTypeAndAttributes {
 		$record{type}          = $node -> getAttribute("image");
 		$record{luks}          = $node -> getAttribute("luks");
 		$record{lvm}           = $node -> getAttribute("lvm");
-		$record{lvmgroup}      = $node -> getAttribute("lvmgroup");
 		$record{compressed}    = $node -> getAttribute("compressed");
 		$record{boot}          = $node -> getAttribute("boot");
 		$record{volid}         = $node -> getAttribute("volid");
@@ -2422,6 +2421,19 @@ sub getPackageAttributes {
 		$result{type} = $type;
 	}
 	return %result;
+}
+
+#==========================================
+# getLVMGroupName
+#------------------------------------------
+sub getLVMGroupName {
+	# ...
+	# Return the name of the volume group if specified
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("lvmvolumes") -> get_node(1);
+	return $node -> getAttribute ("lvmgroup");
 }
 
 #==========================================

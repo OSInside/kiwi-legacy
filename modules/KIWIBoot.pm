@@ -625,8 +625,9 @@ sub setupBootStick {
 		#==========================================
 		# set volume group name
 		#------------------------------------------
-		if ($type{lvmgroup}) {
-			$this->{lvmgroup} = $type{lvmgroup};
+		my $vgroupName = $xml -> getLVMGroupName();
+		if ($vgroupName) {
+			$this->{lvmgroup} = $vgroupName;
 		}
 		#==========================================
 		# check and set LVM volumes setup
@@ -2184,8 +2185,9 @@ sub setupBootDisk {
 		#==========================================
 		# set volume group name
 		#------------------------------------------
-		if ($type{lvmgroup}) {
-			$this->{lvmgroup} = $type{lvmgroup};
+		my $vgroupName = $xml -> getLVMGroupName();
+		if ($vgroupName) {
+			$this->{lvmgroup} = $vgroupName;
 		}
 		#==========================================
 		# check and set LVM volumes setup

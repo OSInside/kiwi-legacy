@@ -26,7 +26,7 @@ db:info [
 	db:releaseinfo [
 		"$Id: kiwi.rnc 2957 2008-01-11 12:53:39Z thomas-schraitle $"
 	]
-	db:releaseinfo [ "RNC Schema Version 4.2" ]
+	db:releaseinfo [ "RNC Schema Version 4.3" ]
 	db:pubdate [ "START" ]
 	db:pubdate [ "2008-01-08" ]
 ]
@@ -58,7 +58,7 @@ div {
 		attribute inherit { text }
 	k.image.schemaversion.attribute =
 		## The allowed Schema version (fixed value)
-		attribute schemaversion { "4.2" }
+		attribute schemaversion { "4.3" }
 	k.image.kiwirevision.attribute =
 		## A kiwi SVN revision number which is known to build
 		## a working image from this description. If the kiwi SVN
@@ -1208,9 +1208,6 @@ div {
 		## Specify whether LVM should be used or not. This is effective
 		## for the types oem,usb and vmx
 		attribute lvm { xsd:boolean }
-	k.type.lvmgroup.attribute =
-		## Specify Volume group name, default is kiwiVG.
-		attribute lvmgroup { text }
 	k.type.baseroot.attribute =
 		## Specify the path to a pre created base root system.
 		attribute baseroot { text }
@@ -1318,7 +1315,6 @@ div {
 		k.type.image.attribute &
 		k.type.fsnocheck.attribute? &
 		k.type.lvm.attribute? &
-		k.type.lvmgroup.attribute? &
 		k.type.checkprebuilt.attribute? &
 		k.type.bootprofile.attribute? &
 		k.type.bootkernel.attribute? &
@@ -1395,7 +1391,12 @@ div {
 # common element <lvmvolumes>
 #
 div {
-	k.lvmvolumes.attlist = empty
+	k.lvmvolumes.lvmgroup.attribute =
+		## Specify Volume group name, default is kiwiVG.
+		attribute lvmgroup { text }
+    k.lvmvolumes.attlist =
+		k.lvmvolumes.lvmgroup.attribute?
+
 	k.lvmvolumes =
 		## Specify LVM volumes other than the root volume
 		[
@@ -1419,7 +1420,7 @@ div {
 	k.union.rw.attribute =
 		## Device for Read-Write
 		attribute rw { text }
-	k.union.type.attribute = attribute type { "aufs" | "unionfs" | "clicfs" }
+	k.union.type.attribute = attribute type { "aufs" | "clicfs" | "unionfs" }
 	k.union.attlist =
 		k.union.ro.attribute &
 		k.union.rw.attribute &
