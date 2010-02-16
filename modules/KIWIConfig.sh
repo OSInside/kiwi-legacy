@@ -864,7 +864,7 @@ function suseStripInitrd {
 		/usr/lib*/hal /usr/lib*/*.a /usr/lib*/*.la /usr/lib*/librpm*
 		/usr/lib*/libpanel* /usr/lib*/libmenu* /usr/src/packages/RPMS
 		/usr/lib*/X11 /var/X11R6 /usr/share/X11 /etc/X11
-		/usr/lib*/xorg /usr/lib*/libidn* /usr/share/locale-bundle
+		/usr/lib*/xorg /usr/share/locale-bundle
 		/etc/ppp /etc/xdg /etc/NetworkManager /lib*/YaST /lib*/security
 		/lib*/mkinitrd/boot /lib*/mkinitrd/dev /lib*/mkinitrd/scripts
 		/lib*/mkinitrd/setup
