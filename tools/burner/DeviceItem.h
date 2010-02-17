@@ -25,13 +25,13 @@
 #define __DEVICE_ITEM_H__
 
 #include <QWidget>
+#include <QDebug>
 
 // This class represents the devices we find
-// TODO: This should be subclassed for the different platforms, as they need different identifying details
 class DeviceItem
 {
 public:
-    DeviceItem() {};
+    DeviceItem() {}
 
     QString getPath() { return mPath; }
     QString getVendorString() { return mVendorString; }

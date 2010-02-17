@@ -25,25 +25,36 @@
 #define __PLATFORM_H__
 
 #include <QtCore>
+#include <hal/libhal.h>
+#include <hal/libhal-storage.h>
+#include <QtDBus>
 
 #include "DeviceItem.h"
 
-// Virtual class for platform-specific operations
 class Platform
 {
 
 public:
-    Platform();
-    virtual void findDevices(bool unsafe = false) = 0;
-    virtual bool isMounted(QString path) = 0;
-    virtual bool unmountDevice(QString path) = 0;
-    virtual void writeData(QString path, QString fileName, qint64 deviceSize) = 0;
+    Platform() {}
+    void findDevices(bool unsafe = false);
+    bool isMounted(QString path);
+    void writeData(QString path, QString fileName, qint64 deviceSize);
+    bool unmountDevice(QString path);
+    bool removeDeviceFromList(const QString &displayName);
+    DeviceItem *findDeviceInList(const QString &displayName);
+    DeviceItem *getNewDevice(QString devicePath, LibHalContext *context = NULL);
 
     QLinkedList<DeviceItem *> getDeviceList() { return itemList; }
 
-protected:
+public slots:
+    void tick(qint64 lastWritten, qint64 bytesWritten);
+
+private:
     DeviceItem *pDevice;
     QLinkedList<DeviceItem *> itemList;
+    LibHalContext *initHal();
+    bool performUnmount(QString udi);
+
 };
 
 #endif

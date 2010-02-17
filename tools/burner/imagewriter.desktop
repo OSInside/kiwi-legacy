@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Categories=Utilities;
+X-KDE-RootOnly=true
+Exec=imagewriter %F
+Name=SUSE Studio Imagewriter
+GenericName=An easy way to write raw system images to USB keys
+X-KDE-SubstituteUID=true
+Version=1.4
+Type=Application

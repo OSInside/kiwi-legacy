@@ -26,15 +26,11 @@
 
 #include <QtGui>
 #include <QWidget>
+#include <QDBusMessage>
 
 #include "Platform.h"
-
-#if defined (Q_OS_LINUX)
-#include "PlatformLinux.h"
-#endif
-
 #include "DeviceItem.h"
-#define VERSION "SUSE Studio Image Writer 1.3"
+#define VERSION "SUSE Studio Image Writer 1.4"
 
 class MainWindow : public QWidget
 {
@@ -49,6 +45,8 @@ public:
 
 public slots:
     void selectImage();
+    void deviceInserted(QDBusMessage message);
+    void deviceRemoved(QDBusMessage message);
 
 private slots:
     void write();
@@ -59,7 +57,6 @@ protected:
     void setSizeLabel(QString fileName);
 
 private:
-    void findDevices();
     void setFile(QString newFile);
     void divineMeaning(QString path);
     void divineFurther(DeviceItem *item);
@@ -68,6 +65,7 @@ private:
     void centerWindow();
     void useNewUI();
     void useOldUI();
+    void reloadDeviceList(Platform *platform, const char *cmddevice);
 
 #if (QT_VERSION < 0x040400)
     QLineEdit* fileLine;
@@ -79,6 +77,7 @@ private:
     QComboBox *deviceComboBox;
     Platform *platform;
     bool mMaximized;
+    bool mUnsafe;
 };
 
 // Rather than grabbing a mouse click for the entire window, just grab it for the part

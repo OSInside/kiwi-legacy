@@ -1,29 +1,35 @@
 /*
  *  Copyright (c) 2009 Novell, Inc.
  *  All Rights Reserved.
- *  
+ *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of version 2 of the GNU General Public License as
  *  published by the Free Software Foundation.
- *  
+ *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.   See the
  *  GNU General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, contact Novell, Inc.
- *  
+ *
  *  To contact Novell about this file by physical or electronic mail,
  *  you may find current contact information at www.novell.com
- *  
+ *
  *  Author: Matt Barringer <mbarringer@suse.de>
- *  
+ *
  */
+
 
 #include <QtGui>
 #include <QFileDialog>
 #include <QProgressDialog>
+#include <QtDBus>
+
+#ifndef Q_OS_LINUX
+#error "Only linux is supported at the moment"
+#endif
 
 #include "MainWindow.h"
 
@@ -34,9 +40,10 @@ MainWindow::MainWindow (const char *cmddevice,
                         QWidget *parent)
  : QWidget(parent)
 {
-    int dev = -1;
+    QDBusConnection dbusConnection = QDBusConnection::systemBus();
     file = QString();
     mMaximized = maximized;
+    mUnsafe = unsafe;
     fileSize = new QLabel("      ");
     fileLabel = new QLabel("     ");
 
@@ -48,33 +55,9 @@ MainWindow::MainWindow (const char *cmddevice,
 #endif
 
     setWindowTitle(tr(VERSION));
-
-    // Setup the platform-specific bits
-#if defined (Q_OS_LINUX)
-    platform = new PlatformLinux;
-#else
-    QMessageBox msgBox;
-    msgBox.setText(tr("Your platform is not currently supported."));
-    msgBox.exec();
-    qFatal("Unsupported platform.");
-#endif
-
-    platform->findDevices(unsafe);
-
-    // Now that we've found the devices, add them to the combo box
-    QLinkedList<DeviceItem *> list = platform->getDeviceList();
-    QLinkedList<DeviceItem *>::iterator i;
-    for (i = list.begin(); i != list.end(); ++i)
-    {
-        if (!(*i)->getPath().isEmpty())
-            deviceComboBox->addItem((*i)->getDisplayString(), 0);
-        if (cmddevice != NULL)
-            if ((*i)->getPath().compare(cmddevice) == 0)
-                dev = deviceComboBox->findText((*i)->getDisplayString(), 0);
-    }
-
-    if (dev != -1)
-        deviceComboBox->setCurrentIndex(dev);
+    platform = new Platform;
+    platform->findDevices(mUnsafe);
+    reloadDeviceList(platform, cmddevice);
 
     if (cmdfile != NULL)
     {
@@ -85,9 +68,43 @@ MainWindow::MainWindow (const char *cmddevice,
         }
     }
 
+    dbusConnection.connect("",
+                           "/org/freedesktop/Hal/Manager",
+                           "org.freedesktop.Hal.Manager",
+                           "DeviceAdded",
+                           this,
+                           SLOT(deviceInserted(QDBusMessage)));
+
+    dbusConnection.connect("",
+                           "/org/freedesktop/Hal/Manager",
+                           "org.freedesktop.Hal.Manager",
+                           "DeviceRemoved",
+                           this,
+                           SLOT(deviceRemoved(QDBusMessage)));
+
     if (!mMaximized)
         centerWindow();
+}
 
+void
+MainWindow::reloadDeviceList(Platform *platform, const char *cmddevice)
+{
+    int dev = -1;
+    QLinkedList<DeviceItem *> list = platform->getDeviceList();
+    QLinkedList<DeviceItem *>::iterator i;
+    for (i = list.begin(); i != list.end(); ++i)
+    {
+        if (!(*i)->getPath().isEmpty())
+            if (deviceComboBox->findText((*i)->getDisplayString()) == -1)
+                deviceComboBox->addItem((*i)->getDisplayString(), 0);
+
+        if (cmddevice != NULL)
+            if ((*i)->getPath().compare(cmddevice) == 0)
+                dev = deviceComboBox->findText((*i)->getDisplayString(), 0);
+    }
+
+    if (dev != -1)
+        deviceComboBox->setCurrentIndex(dev);
 }
 
 void
@@ -100,7 +117,7 @@ MainWindow::useNewUI()
 
     QHBoxLayout *pathSizeLayout;
     QPushButton *writeButton;
-    
+
     // Set the background colour
     QPalette pal = palette();
     pal.setColor(QPalette::Window, Qt::white);
@@ -208,24 +225,24 @@ void
 MainWindow::centerWindow()
 {
     QDesktopWidget *desktop = QApplication::desktop();
-    
-    int screenWidth, width; 
+
+    int screenWidth, width;
     int screenHeight, height;
     int x, y;
     int screen = desktop->screenNumber(this);
     QSize windowSize;
- 
+
     screenWidth = desktop->screenGeometry(screen).width();
     screenHeight = desktop->screenGeometry(screen).height();
-    
+
     windowSize = size();
-    width = windowSize.width(); 
+    width = windowSize.width();
     height = windowSize.height();
-    
+
     x = (screenWidth - width) / 2;
     y = (screenHeight - height) / 2;
     y -= 50;
-    
+
     move ( x, y );
 }
 
@@ -252,7 +269,45 @@ MainWindow::selectImage()
 }
 
 void
-MainWindow::setSizeLabel(QString fileName) 
+MainWindow::deviceInserted(QDBusMessage message)
+{
+    QString devicePath = message.arguments().at(0).toString();
+    if (devicePath.startsWith("/org/freedesktop/Hal/devices/storage_serial"))
+    {
+        DeviceItem *device = platform->getNewDevice(devicePath);
+        if (device != NULL)
+            if (deviceComboBox->findText(device->getDisplayString()) == -1)
+                deviceComboBox->addItem(device->getDisplayString(), 0);
+    }
+}
+
+void
+MainWindow::deviceRemoved(QDBusMessage message)
+{
+    int index;
+    QString devicePath = message.arguments().at(0).toString();
+    if (devicePath.startsWith("/org/freedesktop/Hal/devices/storage_serial"))
+    {
+        QLinkedList<DeviceItem *> list = platform->getDeviceList();
+        QLinkedList<DeviceItem *>::iterator i;
+        for (i = list.begin(); i != list.end(); ++i)
+        {
+            if ((*i)->getUDI() == devicePath)
+            {
+                index = deviceComboBox->findText((*i)->getDisplayString());
+                if (index != -1)
+                {
+                    deviceComboBox->removeItem(index);
+                    platform->removeDeviceFromList(devicePath);
+                    break;
+                }
+            }
+        }
+    }
+}
+
+void
+MainWindow::setSizeLabel(QString fileName)
 {
     QFile filecheck(fileName);
     if(filecheck.exists())
@@ -307,15 +362,7 @@ MainWindow::write()
         return;
     }
 
-    DeviceItem *item = NULL;
-    QLinkedList<DeviceItem *> list = platform->getDeviceList();
-
-    QLinkedList<DeviceItem *>::iterator i;
-    for (i = list.begin(); i != list.end(); ++i)
-    {
-        if ((*i)->getDisplayString() == deviceComboBox->currentText())
-            item = (*i);
-    }
+    DeviceItem *item = platform->findDeviceInList(deviceComboBox->currentText());
 
     if (item != NULL)
     {
