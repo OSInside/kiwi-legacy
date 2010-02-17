@@ -1050,7 +1050,7 @@ sub unpackMetapackages
     }
 
     my $nofallback = 0;
-    ARCH:foreach my $reqArch($this->getArchList($this->{m_metaPacks}, $metapack, \$nofallback)) {
+    ARCH:foreach my $reqArch($this->getArchList($this->{m_metaPacks}->{$metapack}, $metapack, \$nofallback)) {
       next if($reqArch =~ m{(src|nosrc)});
       my @archs;
       push @archs, $reqArch;
@@ -1460,9 +1460,8 @@ sub getArchList
   my $nofallbackref = shift;
 
   my @archs = ();
-  my $ret = 0;
 
-  return $ret if(not defined($packName));
+  return @archs if(not defined($packName));
   if(defined($packOptions->{'arch'})) {
     # Check if this is a rule for this platform
     $packOptions->{'arch'} =~ s{,\s*,}{,}g;
@@ -1477,7 +1476,7 @@ sub getArchList
     };
     if ( "$found" eq "0" ) {
       # not our plattform
-      return $ret;
+      return @archs;
     }
   }
 
