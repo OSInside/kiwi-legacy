@@ -13,6 +13,8 @@ Mon Feb 15 17:39:37 CET 2010 - ms@suse.de
   through /proc/mounts
 - don't remove ldap and sasl in oemboot it's required for 
   curl based downloads
+- added support for additional kernel commandline options
+  specified in the new <commandline> section (bnc #577720)
 
 -------------------------------------------------------------------
 Mon Feb 15 16:00:51 CET 2010 - adrian@suse.de

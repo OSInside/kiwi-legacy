@@ -2702,6 +2702,19 @@ sub getXenConfig {
 }
 
 #==========================================
+# getCmdline
+#------------------------------------------
+sub getCmdline {
+	# ...
+	# Get <commandline>.
+	# ---
+	my $this = shift;
+	my $tnode= $this -> {typeNode};
+	my $cmdline = $tnode -> getElementsByTagName ("commandline");
+	return $cmdline;
+}
+
+#==========================================
 # getInstSourcePackageAttributes
 #------------------------------------------
 sub getInstSourcePackageAttributes {

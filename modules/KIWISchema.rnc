@@ -1344,7 +1344,8 @@ div {
 			k.size? &
 			k.split? &
 			k.vmwareconfig? &
-			k.xenconfig?
+			k.xenconfig? &
+			k.type.commandline?
 		}
 }
 
@@ -2032,6 +2033,25 @@ div {
 			k.xenconfig.attlist &
 			k.xendisk ? &
 			k.xenbridge*
+		}
+}
+
+#==========================================
+# main block: <commandline>
+#
+div {
+	k.type.commandline.attlist = empty
+	k.type.commandline =
+		## specifies additional commandline options
+		[
+		db:para [
+			"The commandline element specifies additional\x{a}"~
+			"kernel commandline options."
+		]
+		]
+		element commandline {
+			k.type.commandline.attlist,
+			text
 		}
 }
 

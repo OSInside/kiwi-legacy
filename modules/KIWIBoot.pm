@@ -3631,7 +3631,27 @@ sub setupBootLoaderConfiguration {
 	my $vga      = $this->{vga};
 	my $lvm      = $this->{lvm};
 	my $vgroup   = $this->{lvmgroup};
+	my $xml      = $this->{xml};
+	my $cmdline  = $xml -> getCmdline();
 	my $title;
+	#==========================================
+	# report additional cmdline options
+	#------------------------------------------
+	if ($cmdline) {
+		$kiwi -> loginfo (
+			"Additional commandline options: \"$cmdline\""
+		);
+	}
+	#==========================================
+	# join common options, finish with '\n'
+	#------------------------------------------
+	$cmdline .= " $extra" if $extra;
+	$cmdline .= " VGROUP=$vgroup" if $lvm;
+	$cmdline .= " COMBINED_IMAGE=yes" if $imgtype eq "split";
+	$cmdline .= " showopts\n";
+	# ensure exactly one space at start
+	$cmdline =~ s/^\s*/ /;
+
 	#==========================================
 	# Check boot partition number
 	#------------------------------------------
@@ -3700,16 +3720,7 @@ sub setupBootLoaderConfiguration {
 				print FD " kernel /boot/linux vga=$vga";
 				print FD " loader=$loader splash=silent";
 			}
-			print FD " $extra";
-			if ($lvm) {
-				print FD " VGROUP=$vgroup";
-			}
-			if ($imgtype eq "split") {
-				print FD " COMBINED_IMAGE=yes showopts";
-			} else {
-				print FD " showopts";
-			}
-			print FD "\n";
+			print FD $cmdline;
 			if ($type =~ /^KIWI CD/) {
 				print FD " initrd (cd)/boot/initrd\n";
 			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
@@ -3733,16 +3744,7 @@ sub setupBootLoaderConfiguration {
 				print FD " module /boot/linux vga=$vga";
 				print FD " loader=$loader splash=silent";
 			}
-			print FD " $extra";
-			if ($lvm) {
-				print FD " VGROUP=$vgroup";
-			}
-			if ($imgtype eq "split") {
-				print FD " COMBINED_IMAGE=yes showopts";
-			} else {
-				print FD " showopts";
-			}
-			print FD "\n";
+			print FD $cmdline;
 			if ($type =~ /^KIWI CD/) {
 				print FD " module (cd)/boot/initrd\n";
 			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
@@ -3770,16 +3772,8 @@ sub setupBootLoaderConfiguration {
 				print FD " loader=$loader splash=silent";
 			}
 			print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
-			print FD " noapic maxcpus=0 edd=off $extra\n";
-			if ($lvm) {
-				print FD " VGROUP=$vgroup";
-			}
-			if ($imgtype eq "split") {
-				print FD " COMBINED_IMAGE=yes showopts";
-			} else {
-				print FD " showopts";
-			}
-			print FD "\n";
+			print FD " noapic maxcpus=0 edd=off";
+			print FD $cmdline;
 			if ($type =~ /^KIWI CD/) {
 				print FD " initrd (cd)/boot/initrd\n";
 			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
@@ -3804,16 +3798,8 @@ sub setupBootLoaderConfiguration {
 				print FD " loader=$loader splash=silent";
 			}
 			print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
-			print FD " noapic maxcpus=0 edd=off $extra";
-			if ($lvm) {
-				print FD " VGROUP=$vgroup";
-			}
-			if ($imgtype eq "split") {
-				print FD " COMBINED_IMAGE=yes showopts";
-			} else {
-				print FD " showopts";
-			}
-			print FD "\n";
+			print FD " noapic maxcpus=0 edd=off";
+			print FD $cmdline;
 			if ($type =~ /^KIWI CD/) {
 				print FD " module (cd)/boot/initrd\n"
 			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
@@ -3885,14 +3871,6 @@ sub setupBootLoaderConfiguration {
 				print FD "APPEND initrd=/boot/initrd ";
 				print FD "vga=$vga loader=$loader splash=silent";
 			}
-			if ($lvm) {
-				print FD " VGROUP=$vgroup";
-			}
-			if ($imgtype eq "split") {
-				print FD " COMBINED_IMAGE=yes showopts\n";
-			} else {
-				print FD " showopts\n";
-			}
 		} else {
 			if ($type =~ /^KIWI CD/) {
 				# not supported yet..
@@ -3901,15 +3879,8 @@ sub setupBootLoaderConfiguration {
 			} else {
 				# not supported yet..
 			}
-			if ($lvm) {
-				print FD " VGROUP=$vgroup";
-			}
-			if ($imgtype eq "split") {
-				print FD " COMBINED_IMAGE=yes showopts\n";
-			} else {
-				print FD " showopts\n";
-			}
 		}
+		print FD $cmdline;
 		#==========================================
 		# Failsafe boot
 		#------------------------------------------
@@ -3936,14 +3907,6 @@ sub setupBootLoaderConfiguration {
 			}
 			print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
 			print FD " noapic maxcpus=0 edd=off";
-			if ($lvm) {
-				print FD " VGROUP=$vgroup";
-			}
-			if ($imgtype eq "split") {
-				print FD " COMBINED_IMAGE=yes showopts\n";
-			} else {
-				print FD " showopts\n";
-			}
 		} else {
 			if ($type =~ /^KIWI CD/) {
 				# not supported yet..
@@ -3954,15 +3917,8 @@ sub setupBootLoaderConfiguration {
 			}
 			print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
 			print FD " noapic maxcpus=0 edd=off";
-			if ($lvm) {
-				print FD " VGROUP=$vgroup";
-			}
-			if ($imgtype eq "split") {
-				print FD " COMBINED_IMAGE=yes showopts\n";
-			} else {
-				print FD " showopts\n";
-			}
 		}
+		print FD $cmdline;
 		close FD;
 		$kiwi -> done();
 	}

@@ -1931,6 +1931,9 @@ vmx/oem types only.</a:documentation>
           <optional>
             <ref name="k.xenconfig"/>
           </optional>
+          <optional>
+            <ref name="k.type.commandline"/>
+          </optional>
         </interleave>
       </element>
     </define>
@@ -2945,6 +2948,25 @@ para virtual machine when running the image.</db:para>
             <ref name="k.xenbridge"/>
           </zeroOrMore>
         </interleave>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
+    main block: <commandline>
+    
+  -->
+  <div>
+    <define name="k.type.commandline.attlist">
+      <empty/>
+    </define>
+    <define name="k.type.commandline">
+      <element name="commandline">
+        <a:documentation>specifies additional commandline options</a:documentation>
+        <db:para>The commandline element specifies additional
+kernel commandline options.</db:para>
+        <ref name="k.type.commandline.attlist"/>
+        <text/>
       </element>
     </define>
   </div>
