@@ -156,7 +156,9 @@ Platform::getNewDevice(QString devicePath, LibHalContext *context)
         if((devItem->getSize() / 1048576) < 200000)
     #endif
 
-        itemList << devItem;
+        // If a device is 0 megs we might as well just not list it
+        if ((devItem->getSize() / 1048576) > 0)
+            itemList << devItem;
 
         libhal_free_string(device);
         libhal_free_string(product);

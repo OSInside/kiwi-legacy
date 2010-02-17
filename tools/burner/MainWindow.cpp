@@ -26,6 +26,7 @@
 #include <QFileDialog>
 #include <QProgressDialog>
 #include <QtDBus>
+#include <QFile>
 
 #ifndef Q_OS_LINUX
 #error "Only linux is supported at the moment"
@@ -68,6 +69,7 @@ MainWindow::MainWindow (const char *cmddevice,
         }
     }
 
+    // Hook into DBUS insertion and removal notifications
     dbusConnection.connect("",
                            "/org/freedesktop/Hal/Manager",
                            "org.freedesktop.Hal.Manager",
@@ -123,7 +125,6 @@ MainWindow::useNewUI()
     pal.setColor(QPalette::Window, Qt::white);
     setPalette(pal);
 
-    // The upper left studio logo
     imageLabel = new CustomLabel(this);
     imageLabel->setBackgroundRole(QPalette::Base);
     imageLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -259,9 +260,24 @@ MainWindow::selectImage()
         setSizeLabel(fileName);
         if (fileName.endsWith(".iso"))
         {
-            QMessageBox msgBox;
-            msgBox.setText(tr("Support for writing ISO files only includes hybrid ISO images.\nIf this image is a standard ISO, you will be very disappointed."));
-            msgBox.exec();
+            // For now we only support writing hybrid ISOs, so we need to check if there's an MBR signature.
+            // It'll be in the last two bytes of the boot record.
+            QByteArray mbr;
+            QFile mbrTest(fileName);
+            mbrTest.open(QIODevice::ReadOnly);
+            mbrTest.seek(510);
+            mbr = mbrTest.read(2);
+            mbrTest.close();
+            // I think it's safe to assume that we'll only be encountering little-endian boot images for a while.
+            // If that changes, we'll need to test for 0xAA55
+            if (mbr.toHex() != "55aa")
+            {
+                setFile("");
+                setSizeLabel("");
+                QMessageBox msgBox;
+                msgBox.setText(tr("Sorry, I can't write this ISO.  You need to use another program to write it to a DVD."));
+                msgBox.exec();
+            }
         }
     }
 
@@ -309,11 +325,18 @@ MainWindow::deviceRemoved(QDBusMessage message)
 void
 MainWindow::setSizeLabel(QString fileName)
 {
-    QFile filecheck(fileName);
-    if(filecheck.exists())
+    if (fileName != "")
     {
-        int size = filecheck.size() / (1024*1024);
-        fileSize->setText("(<b>" + QString::number(size) + " MB</b>)" );
+        QFile filecheck(fileName);
+        if(filecheck.exists())
+        {
+            int size = filecheck.size() / (1024*1024);
+            fileSize->setText("(<b>" + QString::number(size) + " MB</b>)" );
+        }
+    }
+    else
+    {
+        fileSize->setText("");
     }
     return;
 }
@@ -339,16 +362,30 @@ void MainWindow::dropEvent(QDropEvent *event)
 
 void MainWindow::setFile(QString newFile)
 {
-    file = newFile;
-#if (QT_VERSION >= 0x040400)
-    QImage image(":logo-mini.png");
-    imageLabel->setPixmap(QPixmap::fromImage(image));
-    directive->setText("");
-#else
-    fileLine->setText(file);
-#endif
+    if (newFile != "")
+    {
+        file = newFile;
+    #if (QT_VERSION >= 0x040400)
+        QImage image(":logo-mini.png");
+        imageLabel->setPixmap(QPixmap::fromImage(image));
+        directive->setText("");
+    #else
+        fileLine->setText(file);
+    #endif
 
-    fileLabel->setText("<b>Selected:</b> " + file);
+        fileLabel->setText("<b>Selected:</b> " + file);
+    }
+    else
+    {
+        fileLabel->setText("");
+    #if (QT_VERSION >= 0x040400)
+        QImage image(":logo-empty.png");
+        imageLabel->setPixmap(QPixmap::fromImage(image));
+        directive->setText("");
+    #else
+        fileLine->setText("");
+    #endif
+    }
 }
 
 void
