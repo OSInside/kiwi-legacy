@@ -11,6 +11,8 @@ Mon Feb 15 17:39:37 CET 2010 - ms@suse.de
   it's already mounted read-write I decided to prevent the mount
   at all and exclude any remote mounted location by searching
   through /proc/mounts
+- don't remove ldap and sasl in oemboot it's required for 
+  curl based downloads
 
 -------------------------------------------------------------------
 Mon Feb 15 16:00:51 CET 2010 - adrian@suse.de

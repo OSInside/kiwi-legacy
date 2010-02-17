@@ -140,7 +140,6 @@
 		<package name="audit-libs"/>
 		<package name="blocxx"/>
 		<package name="cpio"/>
-		<package name="cyrus-sasl"/>
 		<package name="db"/>
 		<package name="expat"/>
 		<package name="fillup"/>
@@ -159,7 +158,6 @@
 		<package name="logrotate"/>
 		<package name="mdadm"/>
 		<package name="mingetty"/>
-		<package name="openldap2-client"/>
 		<package name="openslp"/>
 		<package name="pam"/>
 		<package name="pam-modules"/>

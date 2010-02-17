@@ -132,7 +132,6 @@
 		<package name="expat"/>
 		<package name="suse-release"/>
 		<package name="libxml2"/>
-		<package name="openldap2-client"/>
 		<package name="logrotate"/>
 		<package name="diffutils"/>
 		<package name="cpio"/>
