@@ -1,9 +1,4 @@
 -------------------------------------------------------------------
-Wed Feb 17 15:41:58 UTC 2010 - adrian@suse.de
-
-- fix arch condition handling for meta package handling in instsource medias
-
--------------------------------------------------------------------
 Mon Feb 15 17:36:22 CET 2010 - ms@suse.de
 
 - v4.17
@@ -19,7 +14,9 @@ Mon Feb 15 17:36:22 CET 2010 - ms@suse.de
 - don't remove ldap and sasl in oemboot it's required for
   curl based downloads
 - added support for additional kernel commandline options
-  specified in the new <commandline> section (bnc #577720)
+  specified as kernelcmdline <type> attribute (bnc #577720)
+- fix arch condition handling for meta package handling in
+  instsource medias
 
 -------------------------------------------------------------------
 Mon Feb 15 16:00:51 CET 2010 - adrian@suse.de

@@ -247,7 +247,7 @@ function baseSetupOEMPartition {
 # baseSetupUserPermissions
 #--------------------------------------
 function baseSetupUserPermissions {
-	while read line in;do
+	while read line;do
 		dir=`echo $line | cut -f6 -d:`
 		uid=`echo $line | cut -f3 -d:`
 		usern=`echo $line | cut -f1 -d:`

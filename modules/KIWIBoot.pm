@@ -3632,7 +3632,8 @@ sub setupBootLoaderConfiguration {
 	my $lvm      = $this->{lvm};
 	my $vgroup   = $this->{lvmgroup};
 	my $xml      = $this->{xml};
-	my $cmdline  = $xml -> getCmdline();
+	my %type     = %{$xml->getImageTypeAndAttributes()};
+	my $cmdline  = $type{cmdline};
 	my $title;
 	#==========================================
 	# report additional cmdline options

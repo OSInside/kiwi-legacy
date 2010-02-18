@@ -3348,6 +3348,9 @@ function includeKernelParameters {
 		kernelVal=`echo $i | cut -f2 -d=`
 		eval export $kernelKey=$kernelVal
 	done
+	if [ ! -z "$kiwi_cmdline" ];then
+		KIWI_KERNEL_OPTIONS="$kiwi_cmdline"
+	fi
 	if [ ! -z "$kiwikernelmodule" ];then
 		kiwikernelmodule=`echo $kiwikernelmodule | tr , " "`
 	fi
