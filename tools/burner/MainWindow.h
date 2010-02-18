@@ -30,7 +30,7 @@
 
 #include "Platform.h"
 #include "DeviceItem.h"
-#define VERSION "SUSE Studio Image Writer 1.5"
+#define VERSION "SUSE Studio Image Writer 1.6"
 
 class MainWindow : public QWidget
 {
