@@ -1010,6 +1010,9 @@ sub createImageUSB {
 	if ($type{bootkernel}) {
 		push @main::Profiles ,split (/,/,$type{bootkernel});
 	}
+	if ($type{cmdline}) {
+		$main::ForeignRepo{"kernelcmdline"} = $type{cmdline};
+	}
 	$main::ForeignRepo{"xmlnode"} = $xml -> getForeignNodeList();
 	$main::ForeignRepo{"xmlpacnode"} = $xml -> getForeignPackageNodeList();
 	$main::ForeignRepo{"packagemanager"} = $xml -> getPackageManager();
@@ -1401,6 +1404,7 @@ sub createImageLiveCD {
 	my $pxboot;
 	my $hybrid = 0;
 	my $hybridpersistent = 0;
+	my $cmdline;
 	#==========================================
 	# Get system image name
 	#------------------------------------------
@@ -1434,6 +1438,12 @@ sub createImageLiveCD {
 		($type{hybridpersistent} =~ /yes|true/i)
 	) {
 		$hybridpersistent = 1;
+	}
+	#==========================================
+	# Check for user-specified cmdline options
+	#------------------------------------------
+	if (defined $type{cmdline}) {
+		$cmdline = " $cmdline";
 	}
 	#==========================================
 	# Get image creation date and name
@@ -1705,6 +1715,9 @@ sub createImageLiveCD {
 	}
 	if ($type{bootkernel}) {
 		push @main::Profiles ,split (/,/,$type{bootkernel});
+	}
+	if ($type{cmdline}) {
+		$main::ForeignRepo{"kernelcmdline"} = $type{cmdline};
 	}
 	if ($hybrid) {
 		$main::ForeignRepo{"hybrid"}= "true";
@@ -2048,8 +2061,8 @@ sub createImageLiveCD {
 		print FD "label $label"."\n";
 		print FD "  kernel linux"."\n";
 		print FD "  append initrd=initrd ramdisk_size=512000 ";
-		print FD "ramdisk_blocksize=4096 splash=silent showopts ";
-		#print FD "console=ttyS0,9600n8 console=tty0 showopts ";
+		print FD "ramdisk_blocksize=4096 splash=silent${cmdline} showopts ";
+		#print FD "console=ttyS0,9600n8 console=tty0${cmdline} showopts ";
 		if ($vga) {
 			print FD "vga=$vga ";
 		}
@@ -2057,14 +2070,14 @@ sub createImageLiveCD {
 		print FD "label $lsafe"."\n";
 		print FD "  kernel linux"."\n";
 		print FD "  append initrd=initrd ramdisk_size=512000 ";
-		print FD "ramdisk_blocksize=4096 splash=silent showopts ";
+		print FD "ramdisk_blocksize=4096 splash=silent${cmdline} showopts ";
 		print FD "ide=nodma apm=off acpi=off noresume selinux=0 nosmp ";
 		print FD "noapic maxcpus=0 edd=off"."\n";
 	} else {
 		print FD "label $label"."\n";
 		print FD "  kernel mboot.c32"."\n";
 		print FD "  append xen.gz --- linux ramdisk_size=512000 ";
-		print FD "ramdisk_blocksize=4096 splash=silent ";
+		print FD "ramdisk_blocksize=4096 splash=silent${cmdline} ";
 		#print FD "console=ttyS0,9600n8 console=tty0 ";
 		if ($vga) {
 			print FD "vga=$vga ";
@@ -2074,7 +2087,7 @@ sub createImageLiveCD {
 		print FD "label $lsafe"."\n";
 		print FD "  kernel mboot.c32"."\n";
 		print FD "  append xen.gz --- linux ramdisk_size=512000 ";
-		print FD "ramdisk_blocksize=4096 splash=silent ";
+		print FD "ramdisk_blocksize=4096 splash=silent${cmdline} ";
 		print FD "ide=nodma apm=off acpi=off noresume selinux=0 nosmp ";
 		print FD "noapic maxcpus=0 edd=off ";
 		print FD "--- initrd showopts"."\n";
@@ -2087,12 +2100,14 @@ sub createImageLiveCD {
 		if (! $isxen) {
 			print FD "label mediacheck"."\n";
 			print FD "  kernel linux"."\n";
-			print FD "  append initrd=initrd splash=silent mediacheck=1 ";
+			print FD "  append initrd=initrd splash=silent mediacheck=1";
+			print FD "$cmdline ";
 			print FD "showopts"."\n";
 		} else {
 			print FD "label mediacheck"."\n";
 			print FD "  kernel mboot.c32"."\n";
-			print FD "  append xen.gz --- linux splash=silent mediacheck=1 ";
+			print FD "  append xen.gz --- linux splash=silent mediacheck=1";
+			print FD "$cmdline ";
 			print FD "--- initrd showopts"."\n";
 		}
 	}
@@ -2831,6 +2846,9 @@ sub createImageSplit {
 	if ($type{bootkernel}) {
 		push @main::Profiles ,split (/,/,$type{bootkernel});
 	}
+	if ($type{cmdline}) {
+		$main::ForeignRepo{"kernelcmdline"} = $type{cmdline};
+	}
 	$main::ForeignRepo{"xmlnode"} = $xml -> getForeignNodeList();
 	$main::ForeignRepo{"xmlpacnode"} = $xml -> getForeignPackageNodeList();
 	$main::ForeignRepo{"packagemanager"} = $xml -> getPackageManager();
@@ -3211,7 +3229,9 @@ sub writeImageConfig {
 		# KIWI_KERNEL_OPTIONS information
 		#------------------------------------------
 		my $cmdline = $xml -> getPXEDeployCommandline ();
+		$cmdline =~ s/^\s*|\s*$//g;
 		if (defined $cmdline) {
+			$cmdline =~ s/^\s*|\s*$//g;
 			print FD "KIWI_KERNEL_OPTIONS='$cmdline'\n";
 		}
 		#==========================================

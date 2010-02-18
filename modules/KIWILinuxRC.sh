@@ -3348,6 +3348,9 @@ function includeKernelParameters {
 		kernelVal=`echo $i | cut -f2 -d=`
 		eval export $kernelKey=$kernelVal
 	done
+	if [ ! -z "$kiwi_cmdline" ];then
+		KIWI_KERNEL_OPTIONS="$kiwi_cmdline"
+	fi
 	if [ ! -z "$kiwikernelmodule" ];then
 		kiwikernelmodule=`echo $kiwikernelmodule | tr , " "`
 	fi
@@ -5028,10 +5031,10 @@ function dn {
 #--------------------------------------
 function runInteractive {
 	# /.../
-	# run shell program in interactive shell and echo the
-	# output to the calling terminal. The input file is
-	# not allowed to contain a newline at the end of the
-	# file. The input file is changed due to that call
+	# run dialog in a bash inside an fbiterm or directly
+	# on the running terminal. Make the terminal the controlling
+	# tty first. The output of the dialog call is stored in
+	# a file and printed as result to this function
 	# ----
 	local r=/tmp/rid
 	echo "dialog $@ > /tmp/out" > $r

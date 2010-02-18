@@ -1311,6 +1311,10 @@ div {
 			"dmsquash" | "clicfs" | "cpio" | "iso" | "split" | "usb" |
 			"vmx" | "oem" | "xen" | "pxe" | "ec2" | "product"
 		}
+	k.type.kernelcmdline.attribute =
+		# The kernelcmdline element specifies additional
+		# kernel commandline options
+		attribute kernelcmdline { text }
 	k.type.attlist =
 		k.type.image.attribute &
 		k.type.fsnocheck.attribute? &
@@ -1332,7 +1336,8 @@ div {
 		k.type.fsreadwrite.attribute? &
 		k.type.baseroot.attribute? &
 		k.type.format.attribute? &
-		k.type.primary.attribute?
+		k.type.primary.attribute? &
+		k.type.kernelcmdline.attribute?
 	k.type =
 		## The Image Type of the Logical Extend
 		element type { 
@@ -1344,8 +1349,7 @@ div {
 			k.size? &
 			k.split? &
 			k.vmwareconfig? &
-			k.xenconfig? &
-			k.type.commandline?
+			k.xenconfig?
 		}
 }
 
@@ -2033,25 +2037,6 @@ div {
 			k.xenconfig.attlist &
 			k.xendisk ? &
 			k.xenbridge*
-		}
-}
-
-#==========================================
-# main block: <commandline>
-#
-div {
-	k.type.commandline.attlist = empty
-	k.type.commandline =
-		## specifies additional commandline options
-		[
-		db:para [
-			"The commandline element specifies additional\x{a}"~
-			"kernel commandline options."
-		]
-		]
-		element commandline {
-			k.type.commandline.attlist,
-			text
 		}
 }
 

@@ -386,6 +386,11 @@ sub new {
 		if (defined $foreignRepo->{"hybridpersistent"}) {
 			$this -> setForeignTypeAttribute ("hybridpersistent");
 		}
+		if (defined $foreignRepo->{"kernelcmdline"}) {
+			$this -> setForeignTypeAttribute (
+				"kernelcmdline",$foreignRepo->{"kernelcmdline"}
+			);
+		}
 	}
 	#==========================================
 	# Store object data
@@ -742,6 +747,7 @@ sub getImageTypeAndAttributes {
 		$record{node}          = $node;
 		$record{type}          = $node -> getAttribute("image");
 		$record{luks}          = $node -> getAttribute("luks");
+		$record{cmdline}       = $node -> getAttribute("kernelcmdline");
 		$record{lvm}           = $node -> getAttribute("lvm");
 		$record{compressed}    = $node -> getAttribute("compressed");
 		$record{boot}          = $node -> getAttribute("boot");
@@ -1200,15 +1206,20 @@ sub setForeignOEMOptionsElement {
 #------------------------------------------
 sub setForeignTypeAttribute {
 	# ...
-	# set given attribute to all defined types in the
+	# set given attribute to selected type in the
 	# xml preferences node
 	# ---
 	my $this = shift;
 	my $attr = shift;
+	my $val  = shift;
 	my $kiwi = $this->{kiwi};
 	my $tnode= $this->{typeNode};
 	$kiwi -> info ("Including foreign type attribute: $attr");
-	$tnode-> setAttribute ("$attr","true");
+	if ($val) {
+		$tnode-> setAttribute ("$attr","$val");
+	} else {
+		$tnode-> setAttribute ("$attr","true");
+	}
 	$kiwi -> done ();
 	$this -> updateXML();
 	return $this;
@@ -2269,6 +2280,9 @@ sub getImageConfig {
 	if (%type) {
 		$result{kiwi_type} = $type{type};
 	}
+	if ((%type) && ($type{cmdline})) {
+		$result{kiwi_cmdline} = $type{cmdline};
+	}
 	if ((%type) && ($type{luks})) {
 		$result{kiwi_luks} = "yes";
 	}
@@ -2699,19 +2713,6 @@ sub getXenConfig {
 		$result{xen_bridge}{$bname} = $vifs{$bname};
 	}
 	return %result;
-}
-
-#==========================================
-# getCmdline
-#------------------------------------------
-sub getCmdline {
-	# ...
-	# Get <commandline>.
-	# ---
-	my $this = shift;
-	my $tnode= $this -> {typeNode};
-	my $cmdline = $tnode -> getElementsByTagName ("commandline");
-	return $cmdline;
 }
 
 #==========================================
