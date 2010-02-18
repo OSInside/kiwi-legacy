@@ -151,12 +151,14 @@ Platform::getNewDevice(QString devicePath, LibHalContext *context)
         QString newDisplayString = QString("%1 %2 - %3 (%4 MB)").arg(devItem->getVendorString()).arg(devItem->getModelString()).arg(devItem->getPath()).arg(devItem->getSize() / 1048576);
         devItem->setDisplayString(newDisplayString);
 
+    // TODO replace the kiosk hack with the unsafe mode
     #ifdef KIOSKHACK
         // VERY VERY VERY VERY VERY  ugly hack for kiosk: ignore hard disks bigger than 100GB
         if((devItem->getSize() / 1048576) < 200000)
     #endif
 
         // If a device is 0 megs we might as well just not list it
+        // TODO: Perhaps make kiosk mode the default in order to not list external hard drives > 100GB?
         if ((devItem->getSize() / 1048576) > 0)
             itemList << devItem;
 

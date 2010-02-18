@@ -155,6 +155,10 @@ MainWindow::useNewUI()
     bottomLayout->addLayout(pathSizeLayout, 0, 0);
 
     mainLayout = new QVBoxLayout;
+    AboutLabel *aboutLabel = new AboutLabel();
+    aboutLabel->setText("<u>About</u>");
+
+    mainLayout->addWidget(aboutLabel,0,Qt::AlignTop|Qt::AlignLeft);
     mainLayout->addLayout(logoLayout, Qt::AlignHCenter);
 
     QGridLayout *comboLayout = new QGridLayout;
@@ -259,29 +263,37 @@ MainWindow::selectImage()
         setFile(fileName);
         setSizeLabel(fileName);
         if (fileName.endsWith(".iso"))
-        {
-            // For now we only support writing hybrid ISOs, so we need to check if there's an MBR signature.
-            // It'll be in the last two bytes of the boot record.
-            QByteArray mbr;
-            QFile mbrTest(fileName);
-            mbrTest.open(QIODevice::ReadOnly);
-            mbrTest.seek(510);
-            mbr = mbrTest.read(2);
-            mbrTest.close();
-            // I think it's safe to assume that we'll only be encountering little-endian boot images for a while.
-            // If that changes, we'll need to test for 0xAA55
-            if (mbr.toHex() != "55aa")
-            {
-                setFile("");
-                setSizeLabel("");
-                QMessageBox msgBox;
-                msgBox.setText(tr("Sorry, I can't write this ISO.  You need to use another program to write it to a DVD."));
-                msgBox.exec();
-            }
-        }
+            checkIso(fileName);
     }
 
     return;
+}
+
+bool
+MainWindow::checkIso(const QString &fileName)
+{
+    // For now we only support writing hybrid ISOs, so we need to check if there's an MBR signature.
+    // It'll be in the last two bytes of the boot record.
+    QByteArray mbr;
+    QFile mbrTest(fileName);
+    mbrTest.open(QIODevice::ReadOnly);
+    mbrTest.seek(510);
+    mbr = mbrTest.read(2);
+    mbrTest.close();
+    // I think it's safe to assume that we'll only be encountering little-endian boot images for a while.
+    // If that changes, we'll need to test for 0xAA55
+    if (mbr.toHex() != "55aa")
+    {
+        setFile("");
+        setSizeLabel("");
+        directive->setText(tr("Drag disk image here\n or click to select."));
+        QMessageBox msgBox;
+        msgBox.setText(tr("Sorry, I can't write this ISO.  You need to use another program to write it to a DVD."));
+        msgBox.exec();
+        return(false);
+    }
+
+    return(true);
 }
 
 void
@@ -323,7 +335,7 @@ MainWindow::deviceRemoved(QDBusMessage message)
 }
 
 void
-MainWindow::setSizeLabel(QString fileName)
+MainWindow::setSizeLabel(const QString &fileName)
 {
     if (fileName != "")
     {
@@ -349,8 +361,8 @@ void MainWindow::dragEnterEvent(QDragEnterEvent *event)
     qDebug() << event->mimeData()->urls();
 #endif
     if (event->mimeData()->hasFormat("text/uri-list"))
-        event->acceptProposedAction();
-
+        if ((event->mimeData()->text().endsWith("iso")) || (event->mimeData()->text().endsWith("raw")))
+            event->acceptProposedAction();
 }
 
 void MainWindow::dropEvent(QDropEvent *event)
@@ -358,9 +370,12 @@ void MainWindow::dropEvent(QDropEvent *event)
     QString file = event->mimeData()->urls()[0].toLocalFile();
     setFile(file);
     setSizeLabel(file);
+    if (file.endsWith("iso"))
+        checkIso(file);
+
 }
 
-void MainWindow::setFile(QString newFile)
+void MainWindow::setFile(const QString &newFile)
 {
     if (newFile != "")
     {
@@ -479,3 +494,32 @@ void CustomLabel::mousePressEvent(QMouseEvent *event)
         window->selectImage();
     }
 }
+
+AboutLabel::AboutLabel(QWidget *parent)
+ : QLabel(parent)
+{
+    setStyleSheet("color: grey");
+}
+
+void
+AboutLabel::mousePressEvent(QMouseEvent *event)
+{
+    QMessageBox about(QMessageBox::Information, "About SUSE Studio Imagewriter",
+                   "The <b>SUSE Studio Imagewriter</b> is (C) 2010 Novell, Inc.<br><br>\
+                   It is cheerfully released under the GPL v2 license.  You can find the source code in the Kiwi project: http://kiwi.berlios.de.<br><br>\
+                   It was written by Matt Barringer &lt;mbarringer@suse.de&gt;.  Please send complaints directly to him.");
+    about.exec();
+}
+
+void
+AboutLabel::enterEvent(QEvent *event)
+{
+    setCursor(Qt::PointingHandCursor);
+}
+
+void
+AboutLabel::leaveEvent(QEvent *event)
+{
+    setCursor(Qt::ArrowCursor);
+}
+

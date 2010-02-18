@@ -54,14 +54,15 @@ private slots:
 protected:
     void dragEnterEvent(QDragEnterEvent *event);
     void dropEvent(QDropEvent *event);
-    void setSizeLabel(QString fileName);
+    void setSizeLabel(const QString &fileName);
 
 private:
-    void setFile(QString newFile);
-    void divineMeaning(QString path);
+    void setFile(const QString &newFile);
+    void divineMeaning(const QString &path);
     void divineFurther(DeviceItem *item);
-    bool isMounted(QString path);
-    void writeData(QString path);
+    bool isMounted(const QString &path);
+    void writeData(const QString &path);
+    bool checkIso(const QString &fileName);
     void centerWindow();
     void useNewUI();
     void useOldUI();
@@ -91,4 +92,15 @@ protected:
     void mousePressEvent(QMouseEvent *event);
 };
 
+// About box "link"
+class AboutLabel : public QLabel
+{
+public:
+    AboutLabel(QWidget *parent = 0);
+
+protected:
+    void mousePressEvent(QMouseEvent *event);
+    void enterEvent(QEvent *event);
+    void leaveEvent(QEvent *event);
+};
 #endif

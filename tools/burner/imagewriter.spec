@@ -7,22 +7,35 @@
 #
 
 # needsrootforbuild
-%define qmake qmake
-%define lrelease lrelease
-
 Url:            http://kiwi.berlios.de
 Name:           imagewriter
-BuildRequires:  hal-devel 
+BuildRequires:  hal-devel
 BuildRequires:  gcc-c++
-BuildRequires:  libqt4 libqt4-devel
+
+%if 0%{?fedora_version}  
+    %define breq qt4-devel  
+    %define qmake /usr/bin/qmake-qt4  
+    %define lrelease /usr/bin/lrelease-qt4  
+%endif    
+%if 0%{?mandriva_version}  
+    %define breq libqt4-devel
+    %define qmake /usr/lib/qt4/bin/qmake  
+    %define lrelease /usr/lib/qt4/bin/lrelease  
+%endif  
+%if 0%{?suse_version}  
+    %define breq libqt4-devel  
+    %define qmake /usr/bin/qmake  
+    %define lrelease /usr/bin/lrelease  
+%endif
+
 Summary:        SUSE Studio Imagewriter
-Version:        1.4
+Version:        1.5
 Release:        0
 Group:          System/Tools
 License:        GPL v2
-Source:         imagewriter-1.4.tar.gz
+Source:         imagewriter-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
-
+BuildRequires:  %{breq}
 %description
 Graphical image writer application
 
@@ -30,15 +43,23 @@ Graphical image writer application
 %setup 
 
 %build
-qmake -makefile imagewriter.pro
+%{qmake} PREFIX=%{_prefix} -makefile imagewriter.pro
 make buildroot=$RPM_BUILD_ROOT CFLAGS="$RPM_OPT_FLAGS"
+
 %install
 # build
-install -d $RPM_BUILD_ROOT/usr/bin
-install -m 755 -p imagewriter $RPM_BUILD_ROOT/usr/bin
+#install -d $RPM_BUILD_ROOT/usr/bin
+#install -m 755 -p imagewriter $RPM_BUILD_ROOT/usr/bin
+make install
 
 %clean
 rm -rf $RPM_BUILD_ROOT
-%files 
-%defattr(-, root, root, 0755)
+
+%files
+%defattr(-,root,root)
 %{_bindir}/imagewriter
+%{_prefix}/share/applications/imagewriter.desktop
+%{_prefix}/share/icons/hicolor/*/apps/imagewriter.png 
+%doc COPYING
+
+%changelog
