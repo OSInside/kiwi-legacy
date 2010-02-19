@@ -23,7 +23,7 @@
 <grammar xmlns:db="http://docbook.org/ns/docbook" xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" xmlns:rng="http://relaxng.org/ns/structure/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
   <db:info>
     <db:releaseinfo>$Id: kiwi.rnc 2957 2008-01-11 12:53:39Z thomas-schraitle $</db:releaseinfo>
-    <db:releaseinfo>RNC Schema Version 4.3</db:releaseinfo>
+    <db:releaseinfo>RNC Schema Version 4.4</db:releaseinfo>
     <db:pubdate>START</db:pubdate>
     <db:pubdate>2008-01-08</db:pubdate>
   </db:info>
@@ -72,7 +72,7 @@ the package Information is inherited</a:documentation>
     <define name="k.image.schemaversion.attribute">
       <attribute name="schemaversion">
         <a:documentation>The allowed Schema version (fixed value)</a:documentation>
-        <value>4.3</value>
+        <value>4.4</value>
       </attribute>
     </define>
     <define name="k.image.kiwirevision.attribute">
@@ -301,26 +301,6 @@ specifies the configuration files which should be included
 into the image after deployment.</db:para>
         <ref name="k.configuration.attlist"/>
         <empty/>
-      </element>
-    </define>
-  </div>
-  <!--
-    ==========================================
-    common element <commandline>
-    
-  -->
-  <div>
-    <define name="k.commandline.attlist">
-      <empty/>
-    </define>
-    <define name="k.commandline">
-      <element name="commandline">
-        <a:documentation>Specifies the Kernel Boot Commandline</a:documentation>
-        <db:para>As part of the network deploy configuration this section
-specifies the kernel boot commandline used when the image
-gets deployed.</db:para>
-        <ref name="k.commandline.attlist"/>
-        <text/>
       </element>
     </define>
   </div>
@@ -1097,7 +1077,7 @@ specifies filenames which are in the read-write disk area</db:para>
     <define name="k.profile.import.attribute">
       <attribute name="import">
         <a:documentation>Import profile by default if no profile was set on
-the commandline</a:documentation>
+the command line</a:documentation>
         <data type="boolean"/>
       </attribute>
     </define>
@@ -1840,7 +1820,7 @@ vmx/oem types only.</a:documentation>
     <define name="k.type.kernelcmdline.attribute">
       <!--
         The kernelcmdline element specifies additional
-        kernel commandline options
+        kernel command line options
       -->
       <attribute name="kernelcmdline"/>
     </define>
@@ -2367,9 +2347,6 @@ the contents of this file controls the image deploy process.</db:para>
           <ref name="k.pxedeploy.attlist"/>
           <optional>
             <ref name="k.timeout"/>
-          </optional>
-          <optional>
-            <ref name="k.commandline"/>
           </optional>
           <optional>
             <ref name="k.kernel"/>

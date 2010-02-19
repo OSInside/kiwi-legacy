@@ -17,6 +17,10 @@ Mon Feb 15 17:36:22 CET 2010 - ms@suse.de
   specified as kernelcmdline <type> attribute (bnc #577720)
 - fix arch condition handling for meta package handling in
   instsource medias
+- removed commandline from pxedeploy section. kernel
+  commandline parameters are set by the kernelcmdline
+  attribute now (bnc #577720). Update schema version to 4.4
+  and add an XSLT to remove commandline when required
 
 -------------------------------------------------------------------
 Mon Feb 15 16:00:51 CET 2010 - adrian@suse.de
