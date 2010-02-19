@@ -826,6 +826,18 @@ function setupBootLoaderGrubRecovery {
 	#--------------------------------------
 	mv $menu $menu.system
 	#======================================
+	# check for boot image .profile
+	#--------------------------------------
+	if [ -f /.profile ];then
+		importFile < /.profile
+	fi
+	#======================================
+	# check for kernel options
+	#--------------------------------------
+	if [ ! -z "$kiwi_cmdline" ];then
+		KIWI_KERNEL_OPTIONS="$KIWI_KERNEL_OPTIONS $kiwi_cmdline"
+	fi
+	#======================================
 	# create recovery menu.lst
 	#--------------------------------------
 	echo "timeout 30" > $menu
@@ -963,6 +975,12 @@ function setupBootLoaderSyslinux {
 	#--------------------------------------
 	if [ -f $mountPrefix/image/.profile ];then
 		importFile < $mountPrefix/image/.profile
+	fi
+	#======================================
+	# check for kernel options
+	#--------------------------------------
+	if [ ! -z "$kiwi_cmdline" ];then
+		KIWI_KERNEL_OPTIONS="$KIWI_KERNEL_OPTIONS $kiwi_cmdline"
 	fi
 	#======================================
 	# check for syslinux title postfix
@@ -1162,6 +1180,12 @@ function setupBootLoaderGrub {
 	#--------------------------------------
 	if [ -f $mountPrefix/image/.profile ];then
 		importFile < $mountPrefix/image/.profile
+	fi
+	#======================================
+	# check for kernel options
+	#--------------------------------------
+	if [ ! -z "$kiwi_cmdline" ];then
+		KIWI_KERNEL_OPTIONS="$KIWI_KERNEL_OPTIONS $kiwi_cmdline"
 	fi
 	#======================================
 	# check for grub device
@@ -1424,6 +1448,12 @@ function setupBootLoaderLilo {
 	#--------------------------------------
 	if [ -f $mountPrefix/image/.profile ];then
 		importFile < $mountPrefix/image/.profile
+	fi
+	#======================================
+	# check for kernel options
+	#--------------------------------------
+	if [ ! -z "$kiwi_cmdline" ];then
+		KIWI_KERNEL_OPTIONS="$KIWI_KERNEL_OPTIONS $kiwi_cmdline"
 	fi
 	#======================================
 	# check for lilo title postfix
@@ -3348,9 +3378,6 @@ function includeKernelParameters {
 		kernelVal=`echo $i | cut -f2 -d=`
 		eval export $kernelKey=$kernelVal
 	done
-	if [ ! -z "$kiwi_cmdline" ];then
-		KIWI_KERNEL_OPTIONS="$kiwi_cmdline"
-	fi
 	if [ ! -z "$kiwikernelmodule" ];then
 		kiwikernelmodule=`echo $kiwikernelmodule | tr , " "`
 	fi
