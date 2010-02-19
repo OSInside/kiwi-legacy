@@ -826,18 +826,6 @@ function setupBootLoaderGrubRecovery {
 	#--------------------------------------
 	mv $menu $menu.system
 	#======================================
-	# check for boot image .profile
-	#--------------------------------------
-	if [ -f /.profile ];then
-		importFile < /.profile
-	fi
-	#======================================
-	# check for kernel options
-	#--------------------------------------
-	if [ ! -z "$kiwi_cmdline" ];then
-		KIWI_KERNEL_OPTIONS="$KIWI_KERNEL_OPTIONS $kiwi_cmdline"
-	fi
-	#======================================
 	# create recovery menu.lst
 	#--------------------------------------
 	echo "timeout 30" > $menu
