@@ -138,7 +138,7 @@ MainWindow::useNewUI()
     directive->setAlignment(Qt::AlignCenter);
     deviceComboBox = new QComboBox;
 
-    writeButton = new QPushButton(tr("Copy"));
+    writeButton = new QPushButton(tr("Write"));
     connect(writeButton, SIGNAL(clicked()), this, SLOT(write()));
 
     // These layouts are kind of a mess
@@ -377,9 +377,9 @@ void MainWindow::dropEvent(QDropEvent *event)
 
 void MainWindow::setFile(const QString &newFile)
 {
+    file = newFile;
     if (newFile != "")
     {
-        file = newFile;
     #if (QT_VERSION >= 0x040400)
         QImage image(":logo-mini.png");
         imageLabel->setPixmap(QPixmap::fromImage(image));
@@ -422,7 +422,7 @@ MainWindow::write()
         {
             // We won't let them nuke a mounted device
             QMessageBox msgBox;
-            msgBox.setText(tr("This device is already mounted.  Would you like me to attempt to unmount it?"));
+            msgBox.setText(tr("This device is already mounted, and I will not write to a mounted device.  Would you like me to attempt to unmount it?"));
 #if (QT_VERSION >= 0x040400)
             msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
             msgBox.setDefaultButton(QMessageBox::No);
