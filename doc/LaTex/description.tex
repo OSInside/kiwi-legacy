@@ -565,7 +565,6 @@ supported child elements:
 	\begin{Command}{14cm}
 	<pxedeploy server="IP" blocksize="4096">\\
 	\hspace*{1cm}<timeout>seconds</timeout>\\
-	\hspace*{1cm}<commandline>kernel-options</commandline>\\
 	\hspace*{1cm}<kernel>kernel-file</kernel>\\
 	\hspace*{1cm}<initrd>initrd-file</initrd>\\
 	\hspace*{1cm}<partitions device="/dev/sda">\\
@@ -592,10 +591,10 @@ supported child elements:
       installs the grub boot loader on the client machine after the first
       deployment to allow standalone boot.
 	\item Passing kernel parameters is possible with the use of the
-      optional commandline element. The value of this element is a string
-      specifying the settings to be passed to the kernel by the grub 
-      bootloader. The Kiwi initrd includes these kernel options when 
-      installing grub for standalone boot
+      optional kernelcmdline attribute in the <type> section. The value
+      of this attribute is a string specifying the settings to be
+      passed to the kernel by the grub bootloader. The Kiwi initrd
+      includes these kernel options when installing grub for standalone boot
 	\item The optional \textbf{kernel} and \textbf{initrd} elements are
       used to specify the file names for the kernel and initrd on the boot
       server respectively. When using a special boot method not supported

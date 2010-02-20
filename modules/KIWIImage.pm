@@ -3100,7 +3100,7 @@ sub writeImageConfig {
 	my $xml  = $this->{xml};
 	my $configName = $this -> buildImageName() . ".config";
 	my $device = $xml -> getPXEDeployImageDevice ();
-
+	my %type = %{$xml -> getImageTypeAndAttributes()};
 	#==========================================
 	# create .config for types which needs it
 	#------------------------------------------
@@ -3160,7 +3160,6 @@ sub writeImageConfig {
 			}
 			print FD "\n";
 		}
-		my %type = %{$xml -> getImageTypeAndAttributes()};
 		#==========================================
 		# IMAGE information
 		#------------------------------------------
@@ -3228,10 +3227,8 @@ sub writeImageConfig {
 		#==========================================
 		# KIWI_KERNEL_OPTIONS information
 		#------------------------------------------
-		my $cmdline = $xml -> getPXEDeployCommandline ();
-		$cmdline =~ s/^\s*|\s*$//g;
+		my $cmdline = $type{cmdline};
 		if (defined $cmdline) {
-			$cmdline =~ s/^\s*|\s*$//g;
 			print FD "KIWI_KERNEL_OPTIONS='$cmdline'\n";
 		}
 		#==========================================

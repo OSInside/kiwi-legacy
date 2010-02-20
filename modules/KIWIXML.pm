@@ -985,24 +985,6 @@ sub getPXEDeployTimeout {
 }
 
 #==========================================
-# getPXEDeployCommandline
-#------------------------------------------
-sub getPXEDeployCommandline {
-	# ...
-	# Get the boot commandline, if specified
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("pxedeploy") -> get_node(1);
-	my $cmdline = $node -> getElementsByTagName ("commandline");
-	if ((defined $cmdline) && ! ("$cmdline" eq "")) {
-		return $cmdline;
-	} else {
-		return undef;
-	}
-}
-
-#==========================================
 # getPXEDeployKernel
 #------------------------------------------
 sub getPXEDeployKernel {

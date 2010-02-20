@@ -26,7 +26,7 @@ db:info [
 	db:releaseinfo [
 		"$Id: kiwi.rnc 2957 2008-01-11 12:53:39Z thomas-schraitle $"
 	]
-	db:releaseinfo [ "RNC Schema Version 4.3" ]
+	db:releaseinfo [ "RNC Schema Version 4.4" ]
 	db:pubdate [ "START" ]
 	db:pubdate [ "2008-01-08" ]
 ]
@@ -58,7 +58,7 @@ div {
 		attribute inherit { text }
 	k.image.schemaversion.attribute =
 		## The allowed Schema version (fixed value)
-		attribute schemaversion { "4.3" }
+		attribute schemaversion { "4.4" }
 	k.image.kiwirevision.attribute =
 		## A kiwi SVN revision number which is known to build
 		## a working image from this description. If the kiwi SVN
@@ -195,26 +195,6 @@ div {
 		element configuration {
 			k.configuration.attlist,
 			empty
-		}
-}
-
-#==========================================
-# common element <commandline>
-#
-div {
-	k.commandline.attlist = empty
-	k.commandline = 
-		## Specifies the Kernel Boot Commandline
-		[
-		db:para [
-			"As part of the network deploy configuration this section\x{a}"~
-			"specifies the kernel boot commandline used when the image\x{a}"~
-			"gets deployed."
-		]
-		]
-		element commandline {
-			k.commandline.attlist,
-			text
 		}
 }
 
@@ -753,7 +733,7 @@ div {
 		attribute description { text }
 	k.profile.import.attribute =
 		## Import profile by default if no profile was set on
-		## the commandline
+		## the command line
 		attribute import { xsd:boolean }
 	k.profile.attlist =
 		k.profile.name.attribute &
@@ -1313,7 +1293,7 @@ div {
 		}
 	k.type.kernelcmdline.attribute =
 		# The kernelcmdline element specifies additional
-		# kernel commandline options
+		# kernel command line options
 		attribute kernelcmdline { text }
 	k.type.attlist =
 		k.type.image.attribute &
@@ -1630,7 +1610,6 @@ div {
 		element pxedeploy {
 			k.pxedeploy.attlist &
 			k.timeout? &
-			k.commandline? &
 			k.kernel? &
 			k.initrd? &
 			k.partitions? &

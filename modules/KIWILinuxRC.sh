@@ -965,6 +965,12 @@ function setupBootLoaderSyslinux {
 		importFile < $mountPrefix/image/.profile
 	fi
 	#======================================
+	# check for kernel options
+	#--------------------------------------
+	if [ ! -z "$kiwi_cmdline" ];then
+		KIWI_KERNEL_OPTIONS="$KIWI_KERNEL_OPTIONS $kiwi_cmdline"
+	fi
+	#======================================
 	# check for syslinux title postfix
 	#--------------------------------------
 	if [ -z "$gfix" ];then
@@ -1162,6 +1168,12 @@ function setupBootLoaderGrub {
 	#--------------------------------------
 	if [ -f $mountPrefix/image/.profile ];then
 		importFile < $mountPrefix/image/.profile
+	fi
+	#======================================
+	# check for kernel options
+	#--------------------------------------
+	if [ ! -z "$kiwi_cmdline" ];then
+		KIWI_KERNEL_OPTIONS="$KIWI_KERNEL_OPTIONS $kiwi_cmdline"
 	fi
 	#======================================
 	# check for grub device
@@ -1424,6 +1436,12 @@ function setupBootLoaderLilo {
 	#--------------------------------------
 	if [ -f $mountPrefix/image/.profile ];then
 		importFile < $mountPrefix/image/.profile
+	fi
+	#======================================
+	# check for kernel options
+	#--------------------------------------
+	if [ ! -z "$kiwi_cmdline" ];then
+		KIWI_KERNEL_OPTIONS="$KIWI_KERNEL_OPTIONS $kiwi_cmdline"
 	fi
 	#======================================
 	# check for lilo title postfix
@@ -3348,9 +3366,6 @@ function includeKernelParameters {
 		kernelVal=`echo $i | cut -f2 -d=`
 		eval export $kernelKey=$kernelVal
 	done
-	if [ ! -z "$kiwi_cmdline" ];then
-		KIWI_KERNEL_OPTIONS="$kiwi_cmdline"
-	fi
 	if [ ! -z "$kiwikernelmodule" ];then
 		kiwikernelmodule=`echo $kiwikernelmodule | tr , " "`
 	fi
