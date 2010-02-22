@@ -4990,7 +4990,7 @@ function displayEULA {
 			--extra-label "$TEXT_NO" \
 			--ok-label "$TEXT_YES" \
 			--cancel-label "$TEXT_CANCEL" \
-			--yesno "$TEXT_LICENSE" \
+			--yesno "\"$TEXT_LICENSE\"" \
 			5 45
 		case $? in
 			0 ) break
