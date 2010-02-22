@@ -207,6 +207,7 @@ sub createReport {
 	my $failedJob2 = $this->{solverFailedJobs2};
 	my $filechanges= $this->{filechanges};
 	my $modified   = $this->{modified};
+	my $twice      = $this->{twice};
 	#==========================================
 	# Start report
 	#------------------------------------------
@@ -224,6 +225,29 @@ sub createReport {
 	#==========================================
 	# Package/Pattern report
 	#------------------------------------------
+	if ($twice) {
+		my @pacs = @{$twice};
+		print FD '<h1>Package installed multiple times</h1>'."\n";
+		print FD '<p>'."\n";
+		print FD 'Following packages are installed multiple times ';
+		print FD 'Please uninstall the old versions of the packages ';
+		print FD 'and re-run the migration ';
+		print FD '</p>'."\n";
+		print FD '<hr>'."\n";
+		print FD '<table>'."\n";
+		my @list = qxx ("rpm -q @pacs --last"); chomp @list;
+		foreach my $job (@list) {
+			if ($job =~ /([^\s]+)\s+([^\s].*)/) {
+				my $pac  = $1;
+				my $date = $2;
+				print FD '<tr valign="top">'."\n";
+				print FD '<td>'.$pac.'</td>'."\n";
+				print FD '<td>'.$date.'</td>'."\n";
+				print FD '</tr>'."\n";
+			}
+		}
+		print FD '</table>'."\n";
+	}
 	if ($problem1) {
 		print FD '<h1>Pattern conflict(s)</h1>'."\n";
 		print FD '<p>'."\n";
@@ -300,19 +324,17 @@ sub createReport {
 		# modified...
 		print FD '<h1>Modified files</h1>'."\n";
 		print FD '<p>'."\n";
-		print FD 'Following files are part of a package and are ';
-		print FD 'marked as modified. In most cases this is because ';
-		print FD 'a configuration file provided by the package has ';
-		print FD 'changed. You may want to keep these files in your ';
-		print FD 'overlay tree. But it might also be the case that a ';
-		print FD 'package is installed twice. In that case the ';
-		print FD 'conflicting files appear as modified and you should ';
-		print FD 'fix your system by removing the package version ';
-		print FD 'which is apparently not part of your system anymore ';
-		print FD 'A good indicator that you have installed multiple ';
-		print FD 'versions of the same package is if binary files ';
-		print FD 'like libraries or exectuables appear as modified ';
-		print FD 'files'."\n";
+		print FD 'Behind the "Modified files tree" link you will find ';
+		print FD 'files which are part of a package and were modified ';
+		print FD 'in the past. In most cases this is because a ';
+		print FD 'configuration file provided by the package has changed. ';
+		print FD 'You may want to keep these files in your  overlay tree. ';
+		print FD 'You should prevent your overlay tree from containing ';
+		print FD 'binary files like executables or libraries. ';
+		print FD 'Just change into the directory below and remove ';
+		print FD 'all the files you do not want to keep in your overlay ';
+		print FD 'tree. If you are finished copy the entire tree into ';
+		print FD 'the directory '.$dest.'/root'."\n";
 		print FD '</p>'."\n";
 		print FD '<hr>'."\n";
 		print FD '<a href="'."$dest/root-modified/".'">';
@@ -320,11 +342,25 @@ sub createReport {
 		# unpackaged...
 		print FD '<h1>Unpackaged files</h1>'."\n";
 		print FD '<p>'."\n";
-		print FD 'Following files are not part of any package ';
-		print FD 'I suggest to check for binary files first and check ';
-		print FD 'where they come from and if they are needed or can be ';
-		print FD 'provided as a package. After that I suggest to check ';
-		print FD 'the typical linux configuration directories'."\n";
+		print FD 'Behind the "Unpackaged files tree" link you will find ';
+		print FD 'files which are not part of any package ';
+		print FD 'I suggest to check first for binary and library files ';
+		print FD 'and try to find a package which provides them ';
+		print FD 'if there is no package provider for this software you ';
+		print FD 'can leave these files as overlay files but you should ';
+		print FD 'have in mind that this is a risk because the ';
+		print FD 'dependencies of this software might be broken/conflicting ';
+		print FD 'in the later image. After that I suggest to check ';
+		print FD 'for typical files like pictures, movies or repositories ';
+		print FD 'and remove them if you can easily restore them in the ';
+		print FD 'later image. The rest of the tree can be checked with '.
+		print FD 'a program called kdirstat which allows you to find ';
+		print FD 'bigger junks of data in the tree and let you decide ';
+		print FD 'whether you really need them in your image description ';
+		print FD 'or not. At the end remove all the files ';
+		print FD 'you do not want to keep in your overlay tree from the ';
+		print FD 'unpackaged files tree and copy the rest into the ';
+		print FD 'directory'.$dest.'/root'."\n";
 		print FD '</p>'."\n";
 		print FD '<a href="'."$dest/root-nopackage/".'">';
 		print FD 'Unpackaged files tree</a>'."\n";
@@ -665,7 +701,7 @@ sub getPackageList {
 		@ilist = @{$this->{ilist}};
 	} else {
 		$kiwi -> info ("Searching installed packages...");
-		@ilist = qxx ('rpm -qa --qf "%{NAME}\n" | sort | uniq'); chomp @ilist;
+		@ilist = qxx ('rpm -qa --qf "%{NAME}\n" | sort'); chomp @ilist;
 		$code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
@@ -675,6 +711,27 @@ sub getPackageList {
 		}
 		$kiwi -> done();
 	}
+	#==========================================
+	# find packages installed n times n > 1
+	#------------------------------------------
+	my %packages = ();
+	my @twice = ();
+	for (my $i=0;$i<@ilist;$i++) {
+		$packages{$ilist[$i]}++;
+	}
+	foreach my $installed (keys %packages) {
+		if ($packages{$installed} > 1) {
+			my @list = qxx ("rpm -q $installed"); chomp @list;
+			push @twice,@list;
+		}
+	}
+	if (@twice) {
+		$this->{twice} = \@twice;
+	}
+	#==========================================
+	# use uniq pac list for further processing
+	#------------------------------------------
+	@ilist = sort keys %packages;
 	#==========================================
 	# create URL list to lookup solvables
 	#------------------------------------------
@@ -1093,6 +1150,11 @@ sub setInitialSetup {
 	# the second phase of the YaST2 installation workflow. This step
 	# takes care for the hardware detection/configuration which may
 	# have changed because of another system environment.
+	# FIXME:
+	# this function should be replaced by calling yast2 cloneconfig
+	# it will allow us to clone the configurations stored in the
+	# yast modules. This will work for >= 11.2 and not before
+	# See bug #580184 for details
 	# ---
 	# 1) create a framebuffer based xorg.conf file
 	# 2) create the file /var/lib/YaST2/runme_at_boot
