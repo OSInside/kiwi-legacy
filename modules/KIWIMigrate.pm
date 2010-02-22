@@ -257,9 +257,9 @@ sub createReport {
 		print FD 'which matches the system you are about to migrate'."\n";
 		print FD '</p>'."\n";
 		print FD '<hr>'."\n";
-		print FD '<p>'."\n";
+		print FD '<pre>'."\n";
 		print FD "$problem1";
-		print FD '</p>'."\n";
+		print FD '</pre>'."\n";
 	}
 	if ($problem2) {
 		print FD '<h1>Package conflict(s)</h1>'."\n";
@@ -271,9 +271,9 @@ sub createReport {
 		print FD 'the --skip option'."\n";
 		print FD '</p>'."\n";
 		print FD '<hr>'."\n";
-		print FD '<p>'."\n"; 
+		print FD '<pre>'."\n"; 
 		print FD "$problem2";
-		print FD '</p>'."\n";
+		print FD '</pre>'."\n";
 	}
 	if (($failedJob1) && (@{$failedJob1})) {
 		print FD '<h1>Pattern(s) not found</h1>'."\n";
