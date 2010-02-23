@@ -6,6 +6,8 @@ Mon Feb 22 11:34:56 CET 2010 - ms@suse.de
 - migration:
   * added detection for packages installed multiple times
   * improvement report explanations
+- removed imagewriter from kiwi packages, it is provided as
+  separate package now maintained by mbarringer@novell.com
 
 -------------------------------------------------------------------
 Mon Feb 15 17:36:22 CET 2010 - ms@suse.de

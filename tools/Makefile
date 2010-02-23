@@ -12,8 +12,6 @@ all:
 			true;\
 		fi\
 	)
-	( cd burner && ./.make )
-	${MAKE} -C burner all || true
 
 install:
 	install -m 644 README ${PACKDOCVZ}/README.tools
@@ -30,14 +28,9 @@ install:
 			true;\
 		fi\
 	)
-	if [ -f ./burner/imagewriter ];then \
-		install -m 644 burner/README ${PACKDOCVZ}/README.imagewriter ;\
-		install -m 755 burner/imagewriter ${bin_prefix} ;\
-	fi
 
 clean:
 	${MAKE} -C dcounter clean
-	test -f burner/Makefile && ${MAKE} -C burner clean || true
 	${MAKE} -C startshell clean
 	${MAKE} -C driveready clean
 	${MAKE} -C utimer clean
