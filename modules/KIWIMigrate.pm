@@ -165,6 +165,7 @@ sub new {
 		'\/var\/lib\/rpm',           # no RPM data
 		'\/var\/lib\/zypp',          # no ZYPP data
 		'\/var\/lib\/smart',         # no smart data
+		'\/var\/lock\/',             # no locks
 		'\/var\/log',                # no logs
 		'\/var\/run',                # no pid files
 		'\/media\/',                 # no media automount files
