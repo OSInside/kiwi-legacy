@@ -76,7 +76,7 @@ Requires:       kiwi = %{version}
 Requires:       inst-source-utils createrepo
 Summary:        Installation Source creation
 Group:          System/Management
-%if 0%{?suse_version} >= 1120
+%if 0%{?suse_version} > 1120
 BuildArch:      noarch
 %endif
 
@@ -96,7 +96,7 @@ Authors:
 License:        LGPL v2.0 or later
 Summary:        OpenSuSE - KIWI Image System Documentation
 Group:          Documentation/Howto
-%if 0%{?suse_version} >= 1120
+%if 0%{?suse_version} > 1120
 BuildArch:      noarch
 %endif
 
@@ -128,7 +128,7 @@ License:        GPL v2 or later
 Requires:       syslinux
 Summary:        OpenSuSE - KIWI Image System PXE boot structure
 Group:          System/Management
-%if 0%{?suse_version} >= 1120
+%if 0%{?suse_version} > 1120
 BuildArch:      noarch
 %endif
 
@@ -146,7 +146,7 @@ License:        GPL v2 only
 Requires:       syslinux
 Summary:        OpenSuSE - KIWI TFTP prebuild boot images
 Group:          System/Management
-%if 0%{?suse_version} >= 1120
+%if 0%{?suse_version} > 1120
 BuildArch:      noarch
 %endif
 
@@ -170,7 +170,7 @@ Requires: mkisofs
 %endif
 Summary:        OpenSuSE - KIWI Image System ISO boot
 Group:          System/Management
-%if 0%{?suse_version} >= 1120
+%if 0%{?suse_version} > 1120
 BuildArch:      noarch
 %endif
 
@@ -188,7 +188,7 @@ License:        GPL v2 or later
 Requires:       kiwi = %{version}
 Summary:        OpenSuSE - KIWI Image System USB boot
 Group:          System/Management
-%if 0%{?suse_version} >= 1120
+%if 0%{?suse_version} > 1120
 BuildArch:      noarch
 %endif
 
@@ -207,7 +207,7 @@ Requires:       kiwi = %{version}
 Requires:       qemu multipath-tools
 Summary:        OpenSuSE - KIWI Image System Virtual Machine boot
 Group:          System/Management
-%if 0%{?suse_version} >= 1120
+%if 0%{?suse_version} > 1120
 BuildArch:      noarch
 %endif
 
@@ -225,7 +225,7 @@ License:        GPL v2 or later
 Requires:       kiwi = %{version}
 Summary:        OpenSuSE - KIWI Image System PXE network boot
 Group:          System/Management
-%if 0%{?suse_version} >= 1120
+%if 0%{?suse_version} > 1120
 BuildArch:      noarch
 %endif
 
@@ -243,7 +243,7 @@ License:        GPL v2 or later
 Requires:       kiwi = %{version}
 Summary:        OpenSuSE - KIWI Image System Xen Virtual Machine boot
 Group:          System/Management
-%if 0%{?suse_version} >= 1120
+%if 0%{?suse_version} > 1120
 BuildArch:      noarch
 %endif
 
@@ -267,7 +267,7 @@ Requires: mkisofs
 %endif
 Summary:        OpenSuSE - KIWI image descriptions
 Group:          System/Management
-%if 0%{?suse_version} >= 1120
+%if 0%{?suse_version} > 1120
 BuildArch:      noarch
 %endif
 
@@ -287,7 +287,7 @@ License:        GPL v2.0 or later
 Requires:       kiwi-desc-vmxboot = %{version}
 Summary:        OpenSuSE - KIWI JeOS system image templates
 Group:          System/Management
-%if 0%{?suse_version} >= 1120
+%if 0%{?suse_version} > 1120
 BuildArch:      noarch
 %endif
 
