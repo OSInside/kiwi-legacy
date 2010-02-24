@@ -12,14 +12,14 @@ in this case and you can read and write data onto it.
 
 \section{Building the suse-live-stick example}
 
-The latest example provided with kiwi is based on openSUSE 11.0 and makes use
+The latest example provided with kiwi is based on openSUSE 11.2 and makes use
 of the default plus x11 pattern. The operating system is stored on a
 standard ext3 filesystem. 
 
 \begin{Command}{12cm}
 \begin{verbatim}
 cd /usr/share/doc/packages/kiwi/examples
-cd suse-11.0
+cd suse-11.2
 kiwi --prepare ./suse-live-stick \
      --root /tmp/mystick
 \end{verbatim}
@@ -70,10 +70,10 @@ images as follows:
 \begin{verbatim}
 kiwi --bootstick \
    /tmp/mystick-result/\
-   initrd-usbboot-suse-11.0.i686-2.1.1.splash.gz \
+   initrd-usbboot-suse-11.2.i686-2.1.1.splash.gz \
    --bootstick-system \
    /tmp/mystick-result/\
-   suse-11.0-live-stick.i686-1.1.2
+   suse-11.2-live-stick.i686-1.1.2
 \end{verbatim}
 \end{Command}
 
@@ -89,7 +89,7 @@ image on the stick call:
 \begin{Command}{13cm}
 \begin{verbatim}
 dd if=/tmp/mystick-result/\
-   suse-11.0-live-stick.i686-1.1.2.raw \
+   suse-11.2-live-stick.i686-1.1.2.raw \
    of=/dev/<stick-device> bs=32k
 \end{verbatim}
 \end{Command}
@@ -140,7 +140,7 @@ To create a split stick the types needs to be adapted as follows:
       \begin{Command}{12cm}
       \begin{verbatim}
 <type image="split" fsreadwrite="ext3" fsreadonly="squashfs"
-      boot="usbboot/suse-11.0"/>
+      boot="usbboot/suse-11.2"/>
       \end{verbatim}
       \end{Command}
 \item \textbf{type setup for split oem type:}
@@ -148,7 +148,7 @@ To create a split stick the types needs to be adapted as follows:
       \begin{Command}{12cm}
       \begin{verbatim}
 <type image="split" fsreadwrite="ext3" fsreadonly="squashfs"
-      boot="oemboot/suse-11.0"/>
+      boot="oemboot/suse-11.2"/>
       \end{verbatim}
       \end{Command}
 \end{itemize}

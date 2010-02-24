@@ -24,13 +24,13 @@ can only be used together with the xen tools.
 
 \section{Building the suse-xen-guest example}
 
-The latest example provided with kiwi is based on openSUSE 11.0 and includes
+The latest example provided with kiwi is based on openSUSE 11.2 and includes
 the base pattern. 
 
 \begin{Command}{12cm}
 \begin{verbatim}
 cd /usr/share/doc/packages/kiwi/examples
-cd suse-11.0
+cd suse-11.2
 kiwi --prepare ./suse-xen-guest \
      --root /tmp/myxen
 \end{verbatim}
@@ -52,7 +52,7 @@ in conjunction with the KIWI genereated domain U configuration file
 \begin{verbatim}
 xm create -c \
    /tmp/myxen-result/\
-   suse-11.0-xen-guest.i686-1.1.2.xenconfig
+   suse-11.2-xen-guest.i686-1.1.2.xenconfig
 \end{verbatim}
 \end{Command}
 
@@ -88,6 +88,6 @@ configuration is stored in the file:
 \begin{Command}{13cm}
 \begin{verbatim}
 /tmp/myxen-result/\
-    suse-11.0-xen-guest.i686-1.1.2.xenconfig
+    suse-11.2-xen-guest.i686-1.1.2.xenconfig
 \end{verbatim}
 \end{Command}

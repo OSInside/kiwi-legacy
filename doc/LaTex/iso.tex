@@ -14,15 +14,15 @@ down.
 
 \section{Building the suse-live-iso example}
 
-The latest example provided with kiwi is based on openSUSE 11.0 and
+The latest example provided with kiwi is based on openSUSE 11.2 and
 includes the base + kde patterns.
 
 \begin{Command}{12cm}
 \begin{verbatim}
 cd /usr/share/doc/packages/kiwi/examples
-cd suse-11.0
+cd suse-11.2
 kiwi --prepare ./suse-live-iso \
-     --root /tmp/myiso --add-profile KDE
+     --root /tmp/myiso
 \end{verbatim}
 \end{Command}
 
@@ -47,7 +47,7 @@ There are two ways to use the generated ISO image:
       \begin{verbatim}
 cd /tmp/myiso-result
 qemu -cdrom \
-  ./suse-11.0-live-iso.i686-2.5.1.iso -m 256
+  ./suse-11.2-live-iso.i686-2.5.1.iso -m 256
       \end{verbatim}
       \end{Command}
 \end{itemize}
