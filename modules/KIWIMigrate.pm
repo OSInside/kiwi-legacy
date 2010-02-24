@@ -138,38 +138,48 @@ sub new {
 	# Store default files not used for inspect
 	#------------------------------------------
 	my @denyFiles = (
-		'\.rpmnew',                  # no RPM backup files
-		'\.rpmsave',                 # []
-		'\.rpmorig',                 # []
-		'~$',                        # no emacs backup files
-		'\.swp$',                    # no vim backup files
-		'\.rej$',                    # no diff reject files
-		'\.lock$',                   # no lock files
-		'\.tmp$',                    # no tmp files
-		'\/etc\/init\.d\/rc.*\/',    # no service links
-		'\/etc\/init\.d\/boot.d\/',  # no boot service links
-		'\.depend',                  # no make depend targets
-		'\.backup',                  # no sysconfig backup files
-		'\.gz',                      # no gzip archives
-		'\/usr\/src\/',              # no sources
-		'\/spool',                   # no spool directories
-		'^\/dev\/',                  # no device node files
-		'\/usr\/X11R6\/',            # no depreciated dirs
-		'\/tmp\/',                   # no /tmp data
-		'\/boot\/',                  # no /boot data
-		'\/proc\/',                  # no /proc data
-		'\/sys\/',                   # no /sys data
-		'\/abuild\/',                # no /abuild data
-		'\/cache',                   # no cache files
-		'\/fillup-templates',        # no fillup data
-		'\/var\/lib\/rpm',           # no RPM data
-		'\/var\/lib\/zypp',          # no ZYPP data
-		'\/var\/lib\/smart',         # no smart data
-		'\/var\/lock\/',             # no locks
-		'\/var\/log',                # no logs
-		'\/var\/run',                # no pid files
-		'\/media\/',                 # no media automount files
-		'\/var\/lib\/hardware\/'     # no hwinfo hardware files
+		'\.rpmnew',                     # no RPM backup files
+		'\.rpmsave',                    # []
+		'\.rpmorig',                    # []
+		'\.cache',                      # no cache files
+		'~$',                           # no emacs backup files
+		'\.swp$',                       # no vim backup files
+		'\.rej$',                       # no diff reject files
+		'\.lock$',                      # no lock files
+		'\.tmp$',                       # no tmp files
+		'\/etc\/init\.d\/rc.*\/',       # no service links
+		'\/etc\/init\.d\/boot.d\/',     # no boot service links
+		'\.depend',                     # no make depend targets
+		'\.backup',                     # no sysconfig backup files
+		'\.gz',                         # no gzip archives
+		'\/usr\/src\/',                 # no sources
+		'\/spool',                      # no spool directories
+		'^\/dev\/',                     # no device node files
+		'\/usr\/X11R6\/',               # no depreciated dirs
+		'\/tmp\/',                      # no /tmp data
+		'\/boot\/',                     # no /boot data
+		'\/proc\/',                     # no /proc data
+		'\/sys\/',                      # no /sys data
+		'\/abuild\/',                   # no /abuild data
+		'\/cache',                      # no cache files
+		'\/fillup-templates',           # no fillup data
+		'\/var\/lib\/rpm',              # no RPM data
+		'\/var\/lib\/zypp',             # no ZYPP data
+		'\/var\/lib\/smart',            # no smart data
+		'\/var\/lock\/',                # no locks
+		'\/var\/adm\/',                 # no var/adm
+		'\/var\/yp\/',                  # no yp files
+		'\/var\/lib\/',                 # no var/lib
+		'\/usr\/include\/',             # no header changes
+		'\/usr\/share/fonts\/',         # no font cache
+		'\/usr\/share/fonts-config\/',  # no font config
+		'\/usr\/share/locale-bundle\/', # no locale bundle
+		'\/usr\/share/sax\/',           # no sax data
+		'\/var\/log',                   # no logs
+		'\/var\/run',                   # no pid files
+		'\/etc\/fstab',                 # no fstab file
+		'\/media\/',                    # no media automount files
+		'\/var\/lib\/hardware\/'        # no hwinfo hardware files
 	);
 	if (defined $excl) {
 		my @exclude = @{$excl};
@@ -556,7 +566,7 @@ sub setTemplate {
 	#==========================================
     # <description>
     #------------------------------------------
-	print FD '<image schemaversion="4.2" ';
+	print FD '<image schemaversion="4.4" ';
 	print FD 'name=suse-migration"'.$product.'">'."\n";
 	print FD "\t".'<description type="system">'."\n";
 	print FD "\t\t".'<author>***AUTHOR***</author>'."\n";
