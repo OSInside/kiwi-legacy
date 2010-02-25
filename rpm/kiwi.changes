@@ -1,8 +1,7 @@
 -------------------------------------------------------------------
 Thu Feb 25 12:24:29 UTC 2010 - adrian@suse.de
 
-- missing metapackages are no error anymore, since we need fallback
-  to noarch (but we still warn)
+- Continue if metapackage was found for any architecture
 
 -------------------------------------------------------------------
 Tue Feb 23 18:28:51 CET 2010 - ro@suse.de

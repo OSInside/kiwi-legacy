@@ -1022,7 +1022,7 @@ sub unpackMetapackages
   # the second (first explicit) parameter is a list of packages
   my @packlist = @_;
 
-  foreach my $metapack(@packlist) {
+  METAPACKAGE:foreach my $metapack(@packlist) {
     my %packOptions = %{$this->{m_metaPacks}->{$metapack}};
     my $poolPackages = $this->{m_packagePool}->{$metapack};
 
@@ -1169,12 +1169,13 @@ sub unpackMetapackages
             $this->logMsg("W", "No script defined for metapackage $metapack");
           }
 
-          next ARCH;
+          # found a package, we do not support multiarch here, but jump to the next package.
+          next METAPACKAGE;
         }
       }
-      # we should not reach this ...
-      $this->logMsg("W", "Metapackage <$metapack> not available for architecure <$reqArch>!");
     }
+    # Package was not found
+    $this->logMsg("E", "Metapackage <$metapack> not available for any architecture!");
   }
 
   ## cleanup old files:
