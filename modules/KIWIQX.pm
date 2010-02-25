@@ -26,7 +26,8 @@ use strict;
 # Exports
 #------------------------------------------
 our @ISA    = qw (Exporter);
-our @EXPORT = qw (qxx);
+our @EXPORT = qw (qxx qxxLogOff qxxLogOn);
+our $QXXLOG = 1;
 
 #==========================================
 # Constructor
@@ -42,6 +43,20 @@ sub new {
 	my $class = shift;
 	bless $this,$class;
 	return $this;
+}
+
+#==========================================
+# qxxLogOff
+#------------------------------------------
+sub qxxLogOff {
+	$QXXLOG = 0;
+}
+
+#==========================================
+# qxxLogOff
+#------------------------------------------
+sub qxxLogOn {
+	$QXXLOG = 1;
 }
 
 #==========================================
@@ -71,7 +86,7 @@ sub qxx ($) {
 	#==========================================
 	# write command line to logfile
 	#------------------------------------------
-	if (defined $main::kiwi) {
+	if ((defined $main::kiwi) && ($QXXLOG)) {
 		$main::kiwi -> loginfo ("EXEC [$cmd]\n");
 	}
 	#==========================================

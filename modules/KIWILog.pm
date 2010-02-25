@@ -974,17 +974,21 @@ sub writeXML {
 	if ((! $data) || (! -f $cmpf)) {
 		return undef;
 	}
+	qxxLogOff();
 	my $used = qxx ("mktemp -q /tmp/kiwi-xmlused.XXXXXX"); chomp $used;
 	my $code = $? >> 8;
 	if ($code != 0) {
+		qxxLogOn();
 		return undef;
 	}
 	my $orig = qxx ("mktemp -q /tmp/kiwi-xmlorig.XXXXXX"); chomp $orig;
 	if ($code != 0) {
+		qxxLogOn();
 		return undef;
 	}
 	qxx ("cp -a $cmpf $orig");
 	if (! open ($FX,">$used")) {
+		qxxLogOn();
 		return undef;
 	}
 	binmode $FX;
@@ -995,8 +999,10 @@ sub writeXML {
 	qxx ("mv $orig.new $orig");
 	my $diff  = qxx ("diff -uwB $orig $used | grep -v -E '^[-+]{3}' 2>&1");
 	if (! $diff) {
+		qxxLogOn();
 		return $this;
 	}
+	qxxLogOn();
 	my $print = 1;
 	if ($cache) {
 		@NC = @{$cache};
@@ -1007,7 +1013,7 @@ sub writeXML {
 		}
 	}
 	if ($print) {
-		$this -> loginfo ("BEGIN XML diff\n");
+		$this -> loginfo ("BEGIN XML diff (JFYI)\n");
 		$this -> loginfo ("file: $cmpf:\n");
 		$this -> loginfo ("diff: $diff:\n");
 		$this -> loginfo ("END XML diff\n");

@@ -2064,9 +2064,6 @@ sub kiwiExit {
 	# Write temporary XML changes to logfile
 	#------------------------------------------
 	if (defined $kiwi) {
-		if ((! defined $Survive) || ($Survive ne "yes")) {
-			$kiwi -> loginfo ("*** Following information is JFYI ***\n");
-		}
 		$kiwi -> writeXML();
 	}
 	#==========================================
