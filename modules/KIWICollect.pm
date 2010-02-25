@@ -1169,24 +1169,11 @@ sub unpackMetapackages
             $this->logMsg("W", "No script defined for metapackage $metapack");
           }
 
-#          if($nokeep == 1) {
-#            foreach my $d(keys(%{$this->{m_repoPacks}->{$metapack}})) {
-#              next if($d =~ m{(arch|addarch|removearch|onlyarch|source|script|medium)});
-#              if(defined($this->{m_repoPacks}->{$metapack}->{$d}->{'newpath'}) and defined($this->{m_repoPacks}->{$metapack}->{$d}->{'newfile'})) {
-#                unlink("$this->{m_repoPacks}->{$metapack}->{$d}->{'newpath'}/$this->{m_packages}->{$metapack}->{$d}->{'newfile'}");
-#              }
-#              else {
-#                $this->logMsg("W", "Undefined values in hash for package $metapack");
-#                #$this->logMsg("W", Dumper($this->{$metapack}));
-#              }
-#            }
-#          }
-          # success, found package for arch
           next ARCH;
         }
       }
       # we should not reach this ...
-      $this->logMsg("E", "Metapackage <$metapack> not available for architecure <$reqArch>!");
+      $this->logMsg("W", "Metapackage <$metapack> not available for architecure <$reqArch>!");
     }
   }
 
