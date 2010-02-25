@@ -1685,7 +1685,9 @@ sub createImageLiveCD {
 	my $Prepare = $imageTree."/image";
 	my $xml = new KIWIXML ( $kiwi,$Prepare );
 	if (! defined $xml) {
-		qxx ("rm -rf $imageTreeReadOnly");
+		if ($imageTreeReadOnly) {
+			qxx ("rm -rf $imageTreeReadOnly");
+		}
 		$this -> restoreCDRootData();
 		return undef;
 	}
@@ -1793,7 +1795,9 @@ sub createImageLiveCD {
 			if (! -d $main::RootTree.$baseSystem) {
 				qxx ("rm -rf $main::RootTree");
 				qxx ("rm -rf $tmpdir");
-				qxx ("rm -rf $imageTreeReadOnly");
+				if ($imageTreeReadOnly) {
+					qxx ("rm -rf $imageTreeReadOnly");
+				}
 			}
 			$this -> restoreCDRootData();
 			return undef;
@@ -1813,7 +1817,9 @@ sub createImageLiveCD {
 			if (! -d $main::RootTree.$baseSystem) {
 				qxx ("rm -rf $main::RootTree");
 				qxx ("rm -rf $tmpdir");
-				qxx ("rm -rf $imageTreeReadOnly");
+				if ($imageTreeReadOnly) {
+					qxx ("rm -rf $imageTreeReadOnly");
+				}
 			}
 			$this -> restoreCDRootData();
 			return undef;
@@ -1842,7 +1848,9 @@ sub createImageLiveCD {
 			if (! -d $main::RootTree.$baseSystem) {
 				qxx ("rm -rf $main::RootTree");
 				qxx ("rm -rf $tmpdir");
-				qxx ("rm -rf $imageTreeReadOnly");
+				if ($imageTreeReadOnly) {
+					qxx ("rm -rf $imageTreeReadOnly");
+				}
 			}
 			$this -> restoreCDRootData();
 			return undef;
@@ -1876,7 +1884,9 @@ sub createImageLiveCD {
 			if (! -d $main::RootTree.$baseSystem) {
 				qxx ("rm -rf $main::RootTree");
 				qxx ("rm -rf $tmpdir");
-				qxx ("rm -rf $imageTreeReadOnly");
+				if ($imageTreeReadOnly) {
+					qxx ("rm -rf $imageTreeReadOnly");
+				}
 			}
 			$this -> restoreCDRootData();
 			return undef;

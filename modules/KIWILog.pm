@@ -684,18 +684,36 @@ sub setLogFile {
 sub printLogExcerpt {
 	my $this    = shift;
 	my $rootLog = $this->{rootLog};
+	my $search  = "Following information is JFYI";
+	my $ignore;
 	if ((! defined $rootLog) || (! open (FD, $rootLog))) {
 		return undef;
 	}
-	seek (FD,-1000,2);
 	my @lines = <FD>; close FD;
-	unshift (@lines,"[*** log excerpt follows, last 1 Kbyte ***]\n");
-	push    (@lines,"[*** end ***]\n");
+	my @result = ();
+	foreach my $line (@lines) {
+		last if ($line =~ /$search/);
+		push @result,$line;
+	}
+	@lines  = splice @result,-50;
+	@result = ();
+	$ignore = 0;
+	foreach my $line (@lines) {
+		if (($line !~ /BEGIN XML diff/) && (! $ignore)) {
+			push @result,$line;
+		} elsif ($line =~ /BEGIN XML diff/) {
+			$ignore = 1;
+		} elsif ($line =~ /END XML diff/) {
+			$ignore = 0;
+		}
+	}
+	unshift (@result,"[*** log excerpt follows, last significant bytes ***]\n");
+	push    (@result,"[*** end ***]\n");
 	if (! defined $this->{nocolor}) {
-		print STDERR "\033[1;31m@lines";
+		print STDERR "\033[1;31m@result";
 		$this -> doNorm();
 	} else {
-		print STDERR @lines;
+		print STDERR @result;
 	}
 	return $this;
 }
@@ -950,6 +968,8 @@ sub writeXML {
 	my $this = shift;
 	my $data = $this->{xmlString};
 	my $cmpf = $this->{xmlOrigFile};
+	my $cache= $this->{xmlCache};
+	my @NC;
 	my $FX;
 	if ((! $data) || (! -f $cmpf)) {
 		return undef;
@@ -973,9 +993,26 @@ sub writeXML {
 	qxx ("mv $used.new $used");
 	qxx ("xsltproc -o $orig.new $main::Pretty $orig");
 	qxx ("mv $orig.new $orig");
-	my $diff = qxx ("diff -uwB $orig $used 2>&1");
-	if ($diff) {
-		$this -> loginfo ("XML diff for $cmpf:\n$diff");
+	my $diff  = qxx ("diff -uwB $orig $used | grep -v -E '^[-+]{3}' 2>&1");
+	if (! $diff) {
+		return $this;
+	}
+	my $print = 1;
+	if ($cache) {
+		@NC = @{$cache};
+		foreach my $d (@NC) {
+			if ($d eq $diff) {
+				$print = 0; last;
+			}
+		}
+	}
+	if ($print) {
+		$this -> loginfo ("BEGIN XML diff\n");
+		$this -> loginfo ("file: $cmpf:\n");
+		$this -> loginfo ("diff: $diff:\n");
+		$this -> loginfo ("END XML diff\n");
+		push @NC,$diff;
+		$this->{xmlCache} = \@NC;
 	}
 	unlink $used;
 	unlink $orig;

@@ -44,7 +44,7 @@ use KIWITest;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "4.18";
+our $Version       = "4.19";
 our $Publisher     = "SUSE LINUX Products GmbH";
 our $Preparer      = "KIWI - http://kiwi.berlios.de";
 our $openSUSE      = "http://download.opensuse.org";
@@ -2061,9 +2061,12 @@ sub kiwiExit {
 	# ---
 	my $code = $_[0];
 	#==========================================
-	# Write temporary XML changes as xml log...
+	# Write temporary XML changes to logfile
 	#------------------------------------------
 	if (defined $kiwi) {
+		if ((! defined $Survive) || ($Survive ne "yes")) {
+			$kiwi -> loginfo ("*** Following information is JFYI ***\n");
+		}
 		$kiwi -> writeXML();
 	}
 	#==========================================

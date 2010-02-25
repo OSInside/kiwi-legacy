@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Thu Feb 25 16:24:20 CET 2010 - ms@suse.de
+
+- v4.19
+- added a JFYI headline in the log file and print only
+  relevant information in the log excerpt in case of errors.
+  This increases the chance to see the error (bnc #583125)
+
+-------------------------------------------------------------------
 Thu Feb 25 12:24:29 UTC 2010 - adrian@suse.de
 
 - Continue if metapackage was found for any architecture
