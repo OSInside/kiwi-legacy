@@ -1,5 +1,10 @@
 -------------------------------------------------------------------
-Mon Feb 22 11:34:56 CET 2010 - ms@suse.de
+Tue Feb 23 18:28:51 CET 2010 - ro@suse.de
+
+- KIWICollect: fix links for packages below /boot (bnc#579936)
+
+-------------------------------------------------------------------
+Tue Feb 23 14:27:39 CET 2010 - ms@suse.de
 
 - v4.18
 - fixed display of EULA messages

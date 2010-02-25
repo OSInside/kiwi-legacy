@@ -1873,28 +1873,23 @@ sub createBootPackageLinks
 	  $this->logMsg("W", "something wrong with rpmlist: undefined value $rpmname");
 	  next RPM;
 	}
-	if(!%{$this->{m_packagePool}->{$rpmname}}) {
-	  $this->logMsg("W", "No package hash entry for package $rpmname in packages hash! Package missing?");
-	}
-	else {
-          # FIXME: This is just a hack, where do we get the upper architecture from ?
-          my $targetarch = $arch;
-          if ( $arch eq 'i386' ) {
-             $targetarch = "i586";
-          }
-          # End of hack
-	  my @fallb = $this->{m_archlist}->fallbacks($targetarch);
-	  FARCH:foreach my $fa(@fallb) {
-	    PACKKEY:foreach my $p(keys %{$this->{m_packagePool}->{$rpmname}}) {
-              my $pPointer = $this->{m_packagePool}->{$rpmname}->{$p};
-  	      next PACKKEY unless $pPointer->{'arch'} eq $fa;
-  	      next PACKKEY unless (-e $pPointer->{'localfile'});
-	      link($pPointer->{'localfile'}, "$base/boot/$arch/$rpmname.rpm");
-	      $retval++;
-	      next RPM;
-	    }
-	  }
-	}
+        # HACK: i586 is hardcoded as i386 in boot loader
+        my $targetarch = $arch;
+        if ( $arch eq 'i386' ) {
+         $targetarch = "i586";
+        }
+        # End of hack
+        my @fallb = $this->{m_archlist}->fallbacks($targetarch);
+        FARCH:foreach my $fa(@fallb) {
+          my $pPointer = $this->{m_repoPacks}->{$rpmname};
+          next FARCH unless $pPointer->{'arch'} eq $fa;
+          my $file = $pPointer->{'newpath'}."/".$pPointer->{'newfile'};
+          next FARCH unless (-e $file);
+          link($file, "$base/boot/$arch/$rpmname.rpm");
+          $this->logMsg("I", "linking $file to $base/boot/$arch/$rpmname.rpm") if $this->{m_debug} > 2;
+          $retval++;
+          next RPM;
+        }
       }
     }
   }
