@@ -300,17 +300,17 @@ sub new {
 				my $package = $element -> getAttribute ("name");
 				my $bootinc = $element -> getAttribute ("bootinclude");
 				my $bootdel = $element -> getAttribute ("bootdelete");
-				if ((defined $bootinc) && ("$bootinc" =~ /yes|true/i)) {
+				if ((defined $bootinc) && ("$bootinc" eq "true")) {
 					push (@fplistImage,$package);
 				}
-				if ((defined $bootdel) && ("$bootdel" =~ /yes|true/i)) {
+				if ((defined $bootdel) && ("$bootdel" eq "true")) {
 					push (@fplistDelete,$package);
 				}
 			}
 			foreach my $element (@alist) {
 				my $archive = $element -> getAttribute ("name");
 				my $bootinc = $element -> getAttribute ("bootinclude");
-				if ((defined $bootinc) && ("$bootinc" =~ /yes|true/i)) {
+				if ((defined $bootinc) && ("$bootinc" eq "true")) {
 					push (@falistImage,$archive);
 				}
 			}
@@ -1618,7 +1618,7 @@ sub getTypes {
 			$record{boot} = $bootpath;
 		}
 		my $primary = $node -> getAttribute("primary");
-		if ((defined $primary) && ($primary =~ /yes|true/i)) {
+		if ((defined $primary) && ("$primary" eq "true")) {
 			$record{primary} = "true";
 			$gotprim = 1;
 		} else {
@@ -2268,7 +2268,7 @@ sub getImageConfig {
 	if (@tstp) {
 		$result{kiwi_testing} = join(" ",@tstp);
 	}
-	if ((%type) && ($type{compressed} =~ /yes|true/i)) {
+	if ((%type) && ($type{compressed} eq "true")) {
 		$result{kiwi_compressed} = "yes";
 	}
 	if (%type) {

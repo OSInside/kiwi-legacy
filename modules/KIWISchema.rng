@@ -27,6 +27,16 @@
     <db:pubdate>START</db:pubdate>
     <db:pubdate>2008-01-08</db:pubdate>
   </db:info>
+  <define name="size-type">
+    <data type="token">
+      <param name="pattern">\d*|image</param>
+    </data>
+  </define>
+  <define name="volume-size-type">
+    <data type="token">
+      <param name="pattern">\d+|\d+M|\d+G</param>
+    </data>
+  </define>
   <!--
     ==========================================
     start with image description
@@ -240,6 +250,7 @@ installation source from</a:documentation>
   <define name="k.size.attribute">
     <attribute name="size">
       <a:documentation>A partition size or optional image size</a:documentation>
+      <ref name="size-type"/>
     </attribute>
   </define>
   <define name="k.dest.attribute">
@@ -1504,7 +1515,7 @@ started in early preinit</db:para>
 If the attribute additive is set the value will be added
 to the required size of the image</a:documentation>
         <ref name="k.size.attlist"/>
-        <text/>
+        <data type="nonNegativeInteger"/>
       </element>
     </define>
   </div>
@@ -1948,6 +1959,7 @@ exist inside the root directory.</a:documentation>
         <a:documentation>free space to be added to this volume. The value is
 used as MB by default but you can add "M" and/or "G" as
 prefix</a:documentation>
+        <ref name="volume-size-type"/>
       </attribute>
     </define>
     <define name="k.volume.size.attribute">
@@ -1956,6 +1968,7 @@ prefix</a:documentation>
 is too small to store all data it will be ignored.
 The value is used as MB by default but you can
 add "M" and/or "G" as prefix</a:documentation>
+        <ref name="volume-size-type"/>
       </attribute>
     </define>
     <define name="k.volume.attlist">
@@ -2331,6 +2344,7 @@ scsi CD or an ide CD drive</a:documentation>
     <define name="k.pxedeploy.blocksize.attribute">
       <attribute name="blocksize">
         <a:documentation>Blocksize value used for atftp downloads</a:documentation>
+        <data type="nonNegativeInteger"/>
       </attribute>
     </define>
     <define name="k.pxedeploy.attlist">

@@ -31,6 +31,9 @@ db:info [
 	db:pubdate [ "2008-01-08" ]
 ]
 
+size-type = xsd:token {pattern = "\d*|image"}
+volume-size-type = xsd:token {pattern = "\d+|\d+M|\d+G"}
+
 #==========================================
 # start with image description
 #
@@ -153,7 +156,7 @@ k.source.attribute      =
 	attribute source { text }
 k.size.attribute        =
 	## A partition size or optional image size
-	attribute size { text }
+	attribute size { size-type }
 k.dest.attribute        =
 	## Destination of a ressource
 	attribute dest { text }
@@ -1084,7 +1087,7 @@ div {
 		## to the required size of the image
 		element size {
 			k.size.attlist,
-			text
+			xsd:nonNegativeInteger
 		}
 }
 
@@ -1347,13 +1350,13 @@ div {
 		## free space to be added to this volume. The value is
 		## used as MB by default but you can add "M" and/or "G" as
 		## prefix
-		attribute freespace { text }
+		attribute freespace { volume-size-type }
 	k.volume.size.attribute =
 		## absolute size of the volume. If the size value
 		## is too small to store all data it will be ignored.
 		## The value is used as MB by default but you can
 		## add "M" and/or "G" as prefix
-		attribute size { text }
+		attribute size { volume-size-type }
 	k.volume.attlist =
 		k.volume.freespace.attribute? &
 		k.volume.size.attribute? &
@@ -1596,7 +1599,7 @@ div {
 		attribute server { text }
 	k.pxedeploy.blocksize.attribute = 
 		## Blocksize value used for atftp downloads
-		attribute blocksize { text }
+		attribute blocksize { xsd:nonNegativeInteger }
 	k.pxedeploy.attlist =
 		k.pxedeploy.server.attribute? &
 		k.pxedeploy.blocksize.attribute?

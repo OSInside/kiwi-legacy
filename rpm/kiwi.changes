@@ -6,6 +6,12 @@ Thu Feb 25 16:24:20 CET 2010 - ms@suse.de
   relevant information in the log excerpt in case of errors.
   This increases the chance to see the error (bnc #583125)
 - allow profiled repository sections
+- added trang as a build requirement to the spec
+- tighten up the XML checking a bit thus that some
+  errors in the XML are detected at validation rather than
+  later during processing.
+- cleanup: remove the matching of "yes" as a supported
+  value for boolean types
 
 -------------------------------------------------------------------
 Thu Feb 25 12:24:29 UTC 2010 - adrian@suse.de
