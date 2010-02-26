@@ -287,6 +287,7 @@ sub new {
 		my $minInodes;
 		my $sizeXMLBytes = 0;
 		my $cmdlBytes    = 0;
+		my $spare        = 1.1;
 		#==========================================
 		# Calculate minimum size of the system
 		#------------------------------------------
@@ -296,6 +297,7 @@ sub new {
 			$sizeBytes = qxx ("du -s --block-size=1 $system | cut -f1");
 			chomp $sizeBytes;
 			$sizeBytes+= $minInodes * $main::FSInodeRatio;
+			$sizeBytes*= $spare;
 		} else {
 			# system is specified as a file...
 			$sizeBytes = -s $system;
