@@ -759,6 +759,7 @@ div {
 # common element <repository>
 #
 div {
+	k.repository.profiles.attribute = k.profiles.attribute
 	k.repository.type.attribute =
 	  ## Type of repository
 	  attribute type {
@@ -786,6 +787,7 @@ div {
 		attribute priority { xsd:integer }
 	k.repository.attlist =
 		k.repository.type.attribute &
+		k.repository.profiles.attribute? &
 		k.repository.status.attribute? &
 		k.repository.alias.attribute? &
 		k.repository.priority.attribute?

@@ -264,6 +264,9 @@ sub new {
 		my $need = new XML::LibXML::NodeList();
 		my @node = $repositNodeList -> get_nodelist();
 		foreach my $element (@node) {
+			if (! $this -> requestedProfile ($element)) {
+				next;
+			}
 			my $status = $element -> getAttribute("status");
 			if ((! defined $status) || ($status eq "fixed")) {
 				$need -> push ($element);
@@ -2011,6 +2014,15 @@ sub getRepository {
 	my @node = $this->{repositNodeList} -> get_nodelist();
 	my %result;
 	foreach my $element (@node) {
+		#============================================
+		# Check to see if node is in included profile
+		#--------------------------------------------
+		if (! $this -> requestedProfile ($element)) {
+			next;
+		}
+		#============================================
+		# Store repo information in hash
+		#--------------------------------------------
 		my $type = $element -> getAttribute("type");
 		my $alias= $element -> getAttribute("alias");
 		my $prio = $element -> getAttribute("priority");
