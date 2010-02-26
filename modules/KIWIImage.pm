@@ -4253,12 +4253,12 @@ sub getSize {
 	my $xml    = $this->{xml};
 	my $mini   = qxx ("find $extend | wc -l");
 	my $minsize= qxx ("du -s --block-size=1 $extend | cut -f1"); chomp $minsize;
-	my $spare  = 1.1;
+	my $spare  = 1.3;
 	my $xmlsize; 
 	#==========================================
 	# Minimum size calculated in Byte + spare
 	#------------------------------------------
-	$minsize += $mini * $main::FSInodeRatio;
+	$minsize += $mini * $main::FSInodeSize;
 	$minsize *= $spare;
 	$xmlsize = $minsize;
 	#==========================================
