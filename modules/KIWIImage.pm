@@ -810,7 +810,7 @@ sub createImageCPIO {
 	#==========================================
 	# PRE filesystem setup
 	#------------------------------------------
-	my $name = $this -> preImage ("haveExtend");
+	my $name = $this -> preImage ("haveExtend","quiet");
 	if (! defined $name) {
 		return undef;
 	}
@@ -1513,7 +1513,7 @@ sub createImageLiveCD {
 		# Count disk space for RW extend
 		#------------------------------------------
 		$kiwi -> info ("Computing disk space...");
-		my ($mbytesreal,$mbytesrw,$xmlsize) = $this -> getSize ($imageTree);
+		my ($mbytesrw,$xmlsize) = $this -> getSize ($imageTree);
 		$kiwi -> done ();
 
 		#==========================================
@@ -2309,7 +2309,6 @@ sub createImageSplit {
 	my $ok;
 	my $imageTreeRW;
 	my $imageTreeTmp;
-	my $mbytesreal;
 	my $mbytesro;
 	my $mbytesrw;
 	my $xmlsize;
@@ -2603,9 +2602,9 @@ sub createImageSplit {
 	# Count disk space for extends
 	#------------------------------------------
 	$kiwi -> info ("Computing disk space...");
-	($mbytesreal,$mbytesro,$xmlsize) = $this -> getSize ($imageTree);
+	($mbytesro,$xmlsize) = $this -> getSize ($imageTree);
 	if (defined $this->{imageTreeRW}) {
-		($mbytesreal,$mbytesrw,$xmlsize) = $this -> getSize ($imageTreeRW);
+		($mbytesrw,$xmlsize) = $this -> getSize ($imageTreeRW);
 	}
 	$kiwi -> done ();
 	if (defined $this->{imageTreeRW}) {
@@ -3075,6 +3074,7 @@ sub preImage {
 	# ---
 	my $this = shift;
 	my $haveExtend = shift;
+	my $quiet= shift;
 	#==========================================
 	# Get image creation date and name
 	#------------------------------------------
@@ -3085,7 +3085,7 @@ sub preImage {
 	#==========================================
 	# Call images.sh script
 	#------------------------------------------
-	my $mBytes = $this -> setupLogicalExtend (undef,$name);
+	my $mBytes = $this -> setupLogicalExtend ($quiet,$name);
 	if (! defined $mBytes) {
 		return undef;
 	}
@@ -3590,9 +3590,9 @@ sub setupLogicalExtend {
 	# Calculate needed space
 	#------------------------------------------
 	$this -> cleanKernelFSMount();
-	my ($mbytesreal,$mbytes,$xmlsize) = $this -> getSize ($imageTree);
+	my ($mbytes,$xmlsize) = $this -> getSize ($imageTree);
 	if (! defined $quiet) {
-		$kiwi -> info ("Image requires ".$mbytesreal."M, got $xmlsize");
+		$kiwi -> info ("Image requires ".$mbytes."M, got $xmlsize");
 		$kiwi -> done ();
 		$kiwi -> info ("Suggested Image size: $mbytes"."M");
 		$kiwi -> done ();
@@ -4251,53 +4251,56 @@ sub getSize {
 	my $this   = shift;
 	my $extend = shift;
 	my $xml    = $this->{xml};
-	my $mini   = qxx ("find $extend | wc -l"); $mini *= 2;
-	my $size   = qxx ("du -s --block-size=1 $extend | cut -f1"); chomp $size;
-	my $spare  = 0.3 * $size;
+	my $mini   = qxx ("find $extend | wc -l");
+	my $minsize= qxx ("du -s --block-size=1 $extend | cut -f1"); chomp $minsize;
+	my $spare  = 1.1;
+	my $xmlsize; 
 	#==========================================
-	# Minimum size calculated in MB
+	# Minimum size calculated in Byte + spare
 	#------------------------------------------
-	my $orig = $size;
-	$orig /= 1048576;
-	$orig = int ($orig);
+	$minsize += $mini * $main::FSInodeRatio;
+	$minsize *= $spare;
+	$xmlsize = $minsize;
 	#==========================================
-	# Used size with spare space in MB
+	# XML size calculated in Byte
 	#------------------------------------------
-	$size += $spare;
-	$size += $xml -> getImageSizeAdditiveBytes();
-	$size /= 1048576;
-	$size = int ($size);
-	#==========================================
-	# Size value from XML description
-	#------------------------------------------
-	my $xmlsize = $xml -> getImageSize();
-	if ($xmlsize eq "auto") {
-		$xmlsize = $size."M";
-	}
-	#==========================================
-	# Inode count for this filesystem
-	#------------------------------------------
-	my $sizeIMGBytes = $size * 1048576;
-	my $sizeXMLBytes = $sizeIMGBytes;
-	my $needi = $sizeIMGBytes / $main::FSInodeRatio;
-	if ($xmlsize =~ /^(\d+)([MG])$/i) {
-		$sizeXMLBytes = $1;
-		my $unit = $2;
-		if ($unit eq "G") {
-			# convert GB to MB...
-			$sizeXMLBytes *= 1024;
+	my $additive = $xml -> getImageSizeAdditiveBytes();
+	if ($additive) {
+		# relative size value specified...
+		$xmlsize = $minsize + $additive;
+	} else {
+		# absolute size value specified...
+		$xmlsize = $xml -> getImageSize();
+		if ($xmlsize eq "auto") {
+			$xmlsize = $minsize;
+		} elsif ($xmlsize =~ /^(\d+)([MG])$/i) {
+			my $value= $1;
+			my $unit = $2;
+			if ($unit eq "G") {
+				# convert GB to MB...
+				$value *= 1024;
+			}
+			# convert MB to Byte
+			$xmlsize = $value * 1048576;
 		}
-		$sizeXMLBytes *= 1048576;
 	}
-	if ($sizeXMLBytes > $sizeIMGBytes) {
-		$needi = $sizeXMLBytes / $main::FSInodeRatio;
-	}
-	$this->{inodes} =
-		int ($mini > $needi ? $mini : $needi);
 	#==========================================
-	# return result list
+	# Setup used size and inodes, prefer XML
 	#------------------------------------------
-	return ($orig,$size,$xmlsize);
+	my $usedsize = $minsize; 
+	if ($xmlsize > $minsize) {
+		$usedsize = $xmlsize;
+		$this->{inodes} = int ($usedsize / $main::FSInodeRatio);
+	} else {
+		$this->{inodes} = $mini * 2;
+	}
+	#==========================================
+	# return result list in MB
+	#------------------------------------------
+	$minsize = int ($minsize / 1048576);
+	$usedsize= int ($usedsize / 1048576);
+	$usedsize.= "M";
+	return ($minsize,$usedsize);
 }
 
 #==========================================

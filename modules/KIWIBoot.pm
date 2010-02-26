@@ -280,72 +280,85 @@ sub new {
 		}
 	}
 	#==========================================
-	# setup virtual disk size
+	# Setup disk size and inode count
 	#------------------------------------------
-	if ((! defined $vmsize) && (defined $system)) {
-		my $kernelSize   = -s $kernel; # the kernel
-		my $initrdSize   = -s $initrd; # the boot image
-		my $systemSXML   = 1; # system size set by XML file
-		my $systemSize   = 0; # the system image size in bytes
-		my $minInodes    = 0; # the number of inodes the system uses * 2
-		my $defaultInodes= 0; # the number of inodes determined by FSInodeRatio
-		# /.../
-		# Note: In case of a split system the vmsize value will
-		# be increased according to the size of the split portion
-		# This happens within the function which requires it but
-		# not at the following code
-		# ----
+	if (defined $system) {
+		my $sizeBytes;
+		my $minInodes;
+		my $sizeXMLBytes = 0;
+		my $cmdlBytes    = 0;
+		#==========================================
+		# Calculate minimum size of the system
+		#------------------------------------------
 		if (-d $system) {
-			#==========================================
-			# Find size on a per file basis first
-			#------------------------------------------
-			$systemSXML = $xml -> getImageSizeBytes();
-			$systemSize = qxx (
-				"du -s --block-size=1 $system | cut -f1"
-			);
-			chomp $systemSize;
-			#==========================================
-			# Calculate required inode count
-			#------------------------------------------
+			# System is specified as a directory...
 			$minInodes = qxx ("find $system | wc -l");
-			$minInodes *= 2;
-			if ($systemSXML eq "auto") {
-				$systemSXML = 0;
-				$this->{inodes} = $minInodes;
-			} else {
-				$defaultInodes  = $systemSXML / $main::FSInodeRatio;
-				$this->{inodes} = 
-					$minInodes > $defaultInodes ? $minInodes : $defaultInodes;
+			$sizeBytes = qxx ("du -s --block-size=1 $system | cut -f1");
+			chomp $sizeBytes;
+			$sizeBytes+= $minInodes * $main::FSInodeRatio;
+		} else {
+			# system is specified as a file...
+			$sizeBytes = -s $system;
+		}
+		#==========================================
+		# Decide for a size prefer 1)cmdline 2)XML
+		#------------------------------------------
+		my $sizeXMLAddBytes = $xml -> getImageSizeAdditiveBytes();
+		if ($sizeXMLAddBytes) {
+			$sizeXMLBytes = $sizeBytes + $sizeXMLAddBytes;
+		} else {
+			$sizeXMLBytes = $xml -> getImageSizeBytes();
+		}
+		if ($vmsize =~ /^(\d+)([MG])$/i) {
+			my $value= $1;
+			my $unit = $2;
+			if ($unit eq "G") {
+				# convert GB to MB...
+				$value *= 1024;
 			}
-		} else {
-			$systemSXML = $xml -> getImageSizeBytes();
-			$systemSize = -s $system;
-			if ($systemSXML eq "auto") {
-				$systemSXML = 0;
-			}
+			# convert MB to Byte
+			$cmdlBytes = $value * 1048576;
 		}
-		if ($syszip) {
-			$vmsize = $kernelSize + $initrdSize + $syszip;
-		} else {
-			$vmsize = $kernelSize + $initrdSize + $systemSize;
+		if ($cmdlBytes > $sizeBytes) {
+			$sizeBytes = $cmdlBytes;
+		} elsif ($sizeXMLBytes > $sizeBytes) {
+			$sizeBytes = $sizeXMLBytes;
 		}
-		if (($systemSXML) && ($systemSXML > $vmsize)) {
-			# use the size information from the XML configuration
-			$vmsize = $systemSXML;
-		} else {
-			# use the calculated value plus 20% free space 
-			$vmsize+= $vmsize * 0.20;
-			# check if additive size was specified
-			$vmsize+= $xml -> getImageSizeAdditiveBytes();
+		#==========================================
+		# Sum up system + kernel + initrd
+		#------------------------------------------
+		# /.../
+		# if system is a split system the vmsize will be
+		# adapted within the image creation function accordingly
+		# ----
+		my $kernelSize = -s $kernel;
+		my $initrdSize = -s $initrd;
+		$vmsize = $kernelSize + $initrdSize + $sizeBytes;
+		#==========================================
+		# Calculate required inode count for root
+		#------------------------------------------
+		if (-d $system) {
+			# /.../
+			# if the system is a directory the root filesystem
+			# will be created during the image creation. In this
+			# case we need to create the inode count
+			# ----
+			$this->{inodes} = int ($sizeBytes / $main::FSInodeRatio);
+			$kiwi -> loginfo (
+				"Using ".$this->{inodes}." for the root filesystem\n"
+			);
 		}
+		#==========================================
+		# Create vmsize MB string and vmmbyte value
+		#------------------------------------------
 		$vmsize  = $vmsize / 1048576;
 		$vmsize  = sprintf ("%.0f", $vmsize);
 		$vmmbyte = $vmsize;
 		$vmsize  = $vmsize."M";
-	} elsif (defined $system) {
-		$vmmbyte = $vmsize / 1048576;
+		$kiwi -> loginfo (
+			"Starting with disk size: $vmsize\n"
+		);
 	}
-	$kiwi -> loginfo ("Starting with disk size: $vmsize\n");
 	#==========================================
 	# round compressed image size
 	#------------------------------------------

@@ -12,6 +12,8 @@ Thu Feb 25 16:24:20 CET 2010 - ms@suse.de
   later during processing.
 - cleanup: remove the matching of "yes" as a supported
   value for boolean types
+- fixed getSize() function. The size of the inodes are
+  part of the size calculation now
 
 -------------------------------------------------------------------
 Thu Feb 25 12:24:29 UTC 2010 - adrian@suse.de
