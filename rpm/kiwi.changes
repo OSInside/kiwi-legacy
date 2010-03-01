@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Mon Mar  1 11:57:18 CET 2010 - ms@suse.de
+
+- v4.20
+- migration: fixed operating system detection
+- fixed getLVMGroupName() not accessing an undefined value
+- fixed LVM cleanup code
+
+-------------------------------------------------------------------
 Thu Feb 25 16:24:20 CET 2010 - ms@suse.de
 
 - v4.19

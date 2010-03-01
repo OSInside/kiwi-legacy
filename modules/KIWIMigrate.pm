@@ -643,23 +643,37 @@ sub setTemplate {
 #------------------------------------------
 sub getOperatingSystemVersion {
 	# ...
-	# Find the version information of this system an create
-	# a xml description comment in order to allow to choose the
-	# correct installation source
+	# Find the version information of this system according
+	# to the table KIWIMigrate.txt
 	# ---
 	my $this = shift;
-	my @data = qxx ("zypper --no-refresh products -i 2>&1");
-	my $code = $? >> 8;
-	if ($code != 0) {
+	if (! open (FD,"/etc/SuSE-release")) {
 		return undef;
 	}
-	foreach my $line (@data) {
-		if ($line =~ /^i.*openSUSE \| (.*?)\|/) {
-			my $version = $1;
-			$version =~ s/ +//g;
-			return $version;
+	my $name = <FD>; chomp $name;
+	my $vers = <FD>; chomp $vers;
+	my $plvl = <FD>; chomp $plvl;
+	$name =~ s/\s+/-/g;
+	$name =~ s/\-\(.*\)//g;
+	if ((defined $plvl) && ($plvl =~ /PATCHLEVEL = (.*)/)) {
+		$plvl = $1;
+		$name = $name."-SP".$plvl;
+	}
+	close FD;
+	if (! open (FD,$main::KMigrate)) {
+		return undef;
+	}
+	while (my $line = <FD>) {
+		next if $line =~ /^#/;
+		if ($line =~ /(.*)\s*=\s*(.*),(.*)/) {
+			my $product= $1;
+			my $boot   = $2;
+			if ($product eq $name) {
+				close FD; return $boot;
+			}
 		}
 	}
+	close FD;
 	return undef;
 }
 

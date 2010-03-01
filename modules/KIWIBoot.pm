@@ -4642,6 +4642,7 @@ sub setVolumeGroup {
 	my $status;
 	my $result;
 	$status = qxx ("vgremove --force $VGroup 2>&1");
+	$status = qxx ("test -d /dev/$VGroup && rm -rf /dev/$VGroup 2>&1");
 	$status = qxx ("pvcreate $deviceMap{1} 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
@@ -4718,6 +4719,7 @@ sub deleteVolumeGroup {
 	my $VGroup = $this->{lvmgroup};
 	if ($lvm) {
 		qxx ("vgremove --force $VGroup 2>&1");
+		qxx ("test -d /dev/$VGroup && rm -rf /dev/$VGroup 2>&1");
 	}
 	return $this;
 }

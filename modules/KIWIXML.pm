@@ -2441,6 +2441,9 @@ sub getLVMGroupName {
 	my $this = shift;
 	my $tnode= $this->{typeNode};
 	my $node = $tnode -> getElementsByTagName ("lvmvolumes") -> get_node(1);
+	if (! defined $node) {
+		return undef;
+	}
 	return $node -> getAttribute ("lvmgroup");
 }
 
