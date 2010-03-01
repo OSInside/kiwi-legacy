@@ -77,7 +77,7 @@ sub new {
 		$kiwi -> failed ();
 		return undef;
 	}
-	$kiwi -> note (" [$product]...");
+	$kiwi -> note (" [$product]");
 	if (defined $main::ForceNewRoot) {
 		qxx ("rm -rf $dest");
 	}
@@ -426,8 +426,8 @@ sub createReport {
 		print FD 'Unpackaged files directory</a>'."\n";
 	}
 	close FD;
-	$kiwi -> info ("Report file created: $dest/report.html");
-	$kiwi -> done ();
+	$kiwi -> info ("\t**** Please check the migration report ****\n");
+	$kiwi -> note ("\n\tfile://$dest/report.html\n\n");
 	return $this;
 }
 
@@ -665,7 +665,7 @@ sub getOperatingSystemVersion {
 	}
 	while (my $line = <FD>) {
 		next if $line =~ /^#/;
-		if ($line =~ /(.*)\s*=\s*(.*),(.*)/) {
+		if ($line =~ /(.*)\s*=\s*(.*)/) {
 			my $product= $1;
 			my $boot   = $2;
 			if ($product eq $name) {
