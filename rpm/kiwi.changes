@@ -4,6 +4,8 @@ Mon Mar  1 11:57:18 CET 2010 - ms@suse.de
 - v4.20
 - migration: fixed operating system detection
 - fixed getLVMGroupName() not accessing an undefined value
+- allow empty lvmvolumes section, if one only wants to set
+  the volume group name but no volumes except for root
 - fixed LVM cleanup code
 
 -------------------------------------------------------------------

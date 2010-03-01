@@ -2015,9 +2015,9 @@ a extra volume.</db:para>
         <db:para>Specify LVM volumes other than the root volume.</db:para>
         <interleave>
           <ref name="k.lvmvolumes.attlist"/>
-          <oneOrMore>
+          <zeroOrMore>
             <ref name="k.volume"/>
-          </oneOrMore>
+          </zeroOrMore>
         </interleave>
       </element>
     </define>
