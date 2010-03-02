@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Mar  2 15:47:47 CET 2010 - ug@suse.de
+
+- fixed a quoting bug (bnc#584651)
+
+-------------------------------------------------------------------
 Tue Mar  2 12:00:40 UTC 2010 - adrian@suse.de
 
 - support arch= statements for metapackages correctly
