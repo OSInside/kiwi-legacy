@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Mar  2 12:00:40 UTC 2010 - adrian@suse.de
+
+- support arch= statements for metapackages correctly
+- make missing metapackage for a required arch a warning
+  (we missuse onlyarch atm)
+
+-------------------------------------------------------------------
 Mon Mar  1 11:57:18 CET 2010 - ms@suse.de
 
 - v4.20

@@ -1052,6 +1052,7 @@ sub unpackMetapackages
     my $nofallback = 0;
     ARCH:foreach my $reqArch($this->getArchList($this->{m_metaPacks}->{$metapack}, $metapack, \$nofallback)) {
       next if($reqArch =~ m{(src|nosrc)});
+      next if defined($packOptions{'arch'}) and $packOptions{'arch'} ne $reqArch;
       my @archs;
       push @archs, $reqArch;
       push @archs, $this->{m_archlist}->fallbacks($reqArch) if ($nofallback==0);
@@ -1173,9 +1174,9 @@ sub unpackMetapackages
           next METAPACKAGE;
         }
       }
+      # Package was not found
+      $this->logMsg("W", "Metapackage <$metapack> not available for required $reqArch architecture!");
     }
-    # Package was not found
-    $this->logMsg("E", "Metapackage <$metapack> not available for any architecture!");
   }
 
   ## cleanup old files:
