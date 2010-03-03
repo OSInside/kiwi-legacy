@@ -3708,12 +3708,16 @@ sub setupBootLoaderConfiguration {
 		print FD "default 0\n";
 		print FD "timeout 10\n";
 		if ($type =~ /^KIWI CD/) {
-			$title = $this -> makeLabel ("Install/Restore $label");
 			print FD "gfxmenu (cd)/boot/message\n";
+			print FD "title Boot from Hard Disk\n";
+			print FD " chainloader (hd0)+1\n";
+			$title = $this -> makeLabel ("Install/Restore $label");
 			print FD "title $title\n";
 		} elsif ($type =~ /^KIWI USB/) {
-			$title = $this -> makeLabel ("Install/Restore $label");
 			print FD "gfxmenu (hd0,0)/boot/message\n";
+			print FD "title Boot from Hard Disk\n";
+			print FD " chainloader (hd0)+1\n";
+			$title = $this -> makeLabel ("Install/Restore $label");
 			print FD "title $title\n";
 		} else {
 			$title = $this -> makeLabel ("$label [ $type ]");

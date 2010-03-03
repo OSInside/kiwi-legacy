@@ -1,6 +1,10 @@
 -------------------------------------------------------------------
 Wed Mar  3 11:42:47 CET 2010 - ms@suse.de
 
+- added 'boot from harddrive' as default menu selection for
+  the installation images (CD+USB). Thus remove the request to
+  remove the media after the image dump to the hard drive is
+  complete. (bnc #583212)
 - renamed Xen kernel profile 'nex' to 'xenk'. The original name
   causes confusion to some people. Also removed xen support from
   netboot (pxe) images and adapted JeOS image descriptions.
