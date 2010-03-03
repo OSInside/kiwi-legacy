@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Mar  3 11:42:47 CET 2010 - ms@suse.de
+
+- renamed Xen kernel profile 'nex' to 'xenk'. The original name
+  causes confusion to some people. Also removed xen support from
+  netboot (pxe) images and adapted JeOS image descriptions.
+
+-------------------------------------------------------------------
 Tue Mar  2 15:47:47 CET 2010 - ug@suse.de
 
 - fixed a quoting bug (bnc#584651)

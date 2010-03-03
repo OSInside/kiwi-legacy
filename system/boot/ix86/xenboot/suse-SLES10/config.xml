@@ -13,7 +13,7 @@
 		<rpm-check-signatures>false</rpm-check-signatures>
 	</preferences>
 	<profiles>
-		<profile name="default" description="Boot with xen or xenpae kernel"/>
+		<profile name="default" description="Booting xen profile"/>
 		<profile name="std" description="KERNEL: Xen"/>
 	</profiles>
 	<drivers type="drivers">

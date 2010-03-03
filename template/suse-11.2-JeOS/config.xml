@@ -25,13 +25,13 @@
 		<boot-theme>openSUSE</boot-theme>
 	</preferences>
 	<preferences profiles="xenFlavour">
-		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-11.2" bootprofile="xen" bootkernel="nex">
+		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-11.2" bootprofile="xen" bootkernel="xenk">
 			<xenconfig memory="512" domain="domU">
 				<xendisk device="/dev/xvda"/>
 				<xenbridge name=""/>
 			</xenconfig>
 		</type>
-		<type image="oem" filesystem="ext3" boot="oemboot/suse-11.2" bootprofile="xen" bootkernel="nex" format="iso">
+		<type image="oem" filesystem="ext3" boot="oemboot/suse-11.2" bootprofile="xen" bootkernel="xenk" format="iso">
 			<oemconfig>
 				<oem-home>false</oem-home>
 				<oem-systemsize>2048</oem-systemsize>

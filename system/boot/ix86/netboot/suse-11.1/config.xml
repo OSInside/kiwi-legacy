@@ -16,15 +16,14 @@
 		<profile name="default" description="Boot with default kernel"/>
 		<profile name="diskless" description="Booting diskless thin clients"/>
 		<profile name="std" description="KERNEL: Default"/>
-		<profile name="xen" description="KERNEL: Xen kernel/mboot.c32"/>
 		<profile name="pae" description="KERNEL: pae"/>
 	</profiles>
-	<drivers type="usbdrivers" profiles="default,xen,pae">
+	<drivers type="usbdrivers" profiles="default,pae">
 		<file name="usb/host/*"/>
 		<file name="usb/core/usbcore.ko"/>
 		<file name="usb/storage/usb-storage.ko"/>
 	</drivers>
-	<drivers type="drivers" profiles="default,xen,pae">
+	<drivers type="drivers" profiles="default,pae">
 		<file name="drivers/md/*"/>
 		<file name="drivers/hid/*"/>
 		<file name="drivers/ide/*"/>
@@ -141,14 +140,7 @@
 		<package name="kernel-pae-extra"/>
 		<package name="aufs-kmp-pae"/>
 	</packages>
-	<packages type="image" profiles="xen">
-		<package name="kernel-xen"/>
-		<package name="kernel-xen-base"/>
-		<package name="kernel-xen-extra"/>
-		<package name="aufs-kmp-xen"/>
-		<package name="xen"/>
-	</packages>
-	<packages type="image" profiles="default,xen,pae">
+	<packages type="image" profiles="default,pae">
 		<package name="adaptec-firmware"/>
 		<package name="curl"/>
 		<package name="psmisc"/>
@@ -204,7 +196,7 @@
 		<package name="glibc"/>
 		<package name="glibc-locale"/>
 	</packages>
-	<packages type="delete" profiles="default,xen,diskless,pae">
+	<packages type="delete" profiles="default,diskless,pae">
 		<package name="cracklib-dict-small"/>
 		<package name="cracklib-dict-full"/>
 		<package name="PolicyKit"/>

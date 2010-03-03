@@ -13,12 +13,12 @@
 		<rpm-check-signatures>false</rpm-check-signatures>
 	</preferences>
 	<profiles>
-		<profile name="default" description="Boot with default kernel"/>
-		<profile name="xen" description="Boot with xen kernel/mboot.c32"/>
+		<profile name="default" description="Boot with default setup"/>
+		<profile name="xen" description="Boot with xen mboot.c32 setup"/>
 		<profile name="std" description="KERNEL: Default"/>
 		<profile name="pae" description="KERNEL: pae kernel"/>
 		<profile name="rt" description="KERNEL: Real time kernel"/>
-		<profile name="nex" description="KERNEL: Xen kernel/mboot.c32"/>
+		<profile name="xenk" description="KERNEL: Xen kernel/mboot.c32"/>
 	</profiles>
 	<drivers type="usbdrivers">
 		<file name="usb/host/*"/>
@@ -77,7 +77,7 @@
 		<package name="kernel-pae"/>
 		<package name="kernel-pae-base"/>
 	</packages>
-	<packages type="bootstrap" profiles="nex">
+	<packages type="bootstrap" profiles="xenk">
 		<package name="kernel-xen"/>
 		<package name="kernel-xen-base"/>
 		<package name="xen"/>

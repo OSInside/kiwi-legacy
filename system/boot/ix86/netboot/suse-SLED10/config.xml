@@ -15,7 +15,6 @@
 	<profiles>
 		<profile name="default" description="Boot with default kernel"/>
 		<profile name="std" description="KERNEL: Default"/>
-		<profile name="xen" description="KERNEL: Xen kernel/mboot.c32"/>
 		<profile name="smp" description="KERNEL: bigsmp kernel"/>
 	</profiles>
 	<drivers type="usbdrivers">
@@ -63,11 +62,6 @@
 	</packages>
 	<packages type="image" profiles="smp">
 		<package name="kernel-smp"/>
-	</packages>
-	<packages type="image" profiles="xen">
-		<package name="kernel-xen" arch="x86_64"/>
-		<package name="kernel-xenpae" arch="i686"/>
-		<package name="xen"/>
 	</packages>
 	<packages type="image">
 		<package name="curl"/>
