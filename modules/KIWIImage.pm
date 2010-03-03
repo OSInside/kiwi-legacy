@@ -3629,12 +3629,26 @@ sub mountLogicalExtend {
 	# mount logical extend for data transfer
 	#------------------------------------------
 	mkdir "$this->{imageDest}/mnt-$$";
-	my $mount = "mount";
+	my $mount = "mount -o loop";
 	if (defined $opts) {
-		$mount = "mount $opts";
+		$mount = "mount $opts -o loop";
+	}
+	#==========================================
+	# check for filesystem options
+	#------------------------------------------
+	my $fstype = qxx (
+		"/sbin/blkid -c /dev/null -s TYPE -o value $this->{imageDest}/$name"
+	);
+	chomp $fstype;
+	if ($fstype eq "ext4") {
+		# /.../
+		# ext4 (currently) should be mounted with 'nodelalloc';
+		# else we might run out of space unexpectedly...
+		# ----
+		$mount .= ",nodelalloc";
 	}
 	my $data= qxx (
-		"$mount -o loop $this->{imageDest}/$name $this->{imageDest}/mnt-$$ 2>&1"
+		"$mount $this->{imageDest}/$name $this->{imageDest}/mnt-$$ 2>&1"
 	);
 	my $code= $? >> 8;
 	if ($code != 0) {

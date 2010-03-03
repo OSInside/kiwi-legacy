@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Mar  3 18:12:35 CET 2010 - ms@suse.de
+
+- v4.21
+- ext4 (currently) should be mounted with 'nodelalloc';
+  else we might run out of space unexpectedly...
+
+-------------------------------------------------------------------
 Wed Mar  3 11:42:47 CET 2010 - ms@suse.de
 
 - added 'boot from harddrive' as default menu selection for
