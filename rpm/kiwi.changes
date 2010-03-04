@@ -6,6 +6,11 @@ Wed Mar  3 18:12:35 CET 2010 - ms@suse.de
   else we might run out of space unexpectedly...
 
 -------------------------------------------------------------------
+Wed Mar  3 12:43:53 UTC 2010 - adrian@suse.de
+
+- fix multiarch medias, when using metapackages with onlyarch
+
+-------------------------------------------------------------------
 Wed Mar  3 11:42:47 CET 2010 - ms@suse.de
 
 - added 'boot from harddrive' as default menu selection for

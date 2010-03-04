@@ -779,16 +779,12 @@ sub setupPackageFiles
     ARCH:foreach my $requestedArch(@archs) {
       $this->logMsg("I", "  Evaluate package $packName for requested arch $requestedArch") if $this->{m_debug} >= 5;
 
-      my @fallbacklist;
+      my @fallbacklist = ($requestedArch);
       if($nofallback==0 && $mode != 2) {
 	@fallbacklist = $this->{m_archlist}->fallbacks($requestedArch);
         $this->logMsg("I", " Look for fallbacks fallbacks") if $this->{m_debug} >= 6;
       }
-      if ( ! @fallbacklist ) {
-        $nofallback = 1;
-	@fallbacklist = ($requestedArch);
-        $this->logMsg("I", "    Run without fallbacks") if $this->{m_debug} >= 6;
-      }
+
       $this->logMsg("I", "    Use as expanded architectures >".join(" ", @fallbacklist)."<") if $this->{m_debug} >= 5;
       my $fb_available = 0;
       FA:foreach my $arch(@fallbacklist) {
@@ -1053,11 +1049,15 @@ sub unpackMetapackages
     ARCH:foreach my $reqArch($this->getArchList($this->{m_metaPacks}->{$metapack}, $metapack, \$nofallback)) {
       next if($reqArch =~ m{(src|nosrc)});
       next if defined($packOptions{'arch'}) and $packOptions{'arch'} ne $reqArch;
-      my @archs;
-      push @archs, $reqArch;
-      push @archs, $this->{m_archlist}->fallbacks($reqArch) if ($nofallback==0);
+      my @fallbacklist;
+      @fallbacklist = ($reqArch);
+      if($nofallback==0 ) {
+        @fallbacklist = $this->{m_archlist}->fallbacks($reqArch);
+        $this->logMsg("I", " Look for fallbacks fallbacks") if $this->{m_debug} >= 6;
+      }
+      $this->logMsg("I", "    Use as expanded architectures >".join(" ", @fallbacklist)."<") if $this->{m_debug} >= 5;
 
-      FARCH:foreach my $arch(@archs) {
+      FARCH:foreach my $arch(@fallbacklist) {
         PACKKEY:foreach my $packKey( sort{$poolPackages->{$a}->{priority} <=> $poolPackages->{$b}->{priority}} keys(%{$poolPackages})) {
           my $packPointer = $poolPackages->{$packKey};
           next PACKKEY if(!$packPointer->{'localfile'}); # should not be needed
@@ -1170,8 +1170,8 @@ sub unpackMetapackages
             $this->logMsg("W", "No script defined for metapackage $metapack");
           }
 
-          # found a package, we do not support multiarch here, but jump to the next package.
-          next METAPACKAGE;
+          # found a package, jump to next required arch.
+          next ARCH;
         }
       }
       # Package was not found
