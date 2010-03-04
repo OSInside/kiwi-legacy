@@ -813,19 +813,18 @@ sub setupPackageFiles
           # Success, found a package !
           my $medium = $packOptions->{'medium'} || 1;
           
-          $packOptions->{'newfile'}  = "$packName-$packPointer->{'version'}-$packPointer->{'release'}.$packPointer->{'arch'}.rpm";
-          $packOptions->{'newpath'} = "$this->{m_basesubdir}->{$medium}/$base_on_cd/$packPointer->{'arch'}";
-          $packOptions->{'arch'}  = $packPointer->{'arch'};
+          $packOptions->{$requestedArch}->{'newfile'}  = "$packName-$packPointer->{'version'}-$packPointer->{'release'}.$packPointer->{'arch'}.rpm";
+          $packOptions->{$requestedArch}->{'newpath'} = "$this->{m_basesubdir}->{$medium}/$base_on_cd/$packPointer->{'arch'}";
           # check for target directory:
-          if(!$this->{m_dirlist}->{"$packOptions->{'newpath'}"}) {
-            $this->{m_dirlist}->{"$packOptions->{'newpath'}"} = 1;
+          if(!$this->{m_dirlist}->{"$packOptions->{$requestedArch}->{'newpath'}"}) {
+            $this->{m_dirlist}->{"$packOptions->{$requestedArch}->{'newpath'}"} = 1;
             $this->createDirectoryStructure();
           }
           # link it:
-          if(!-e "$packOptions->{'newpath'}/$packOptions->{'newfile'}" and !link $packPointer->{'localfile'}, "$packOptions->{'newpath'}/$packOptions->{'newfile'}") {
-            $this->logMsg("E", "  linking file $packPointer->{'localfile'} to $packOptions->{'newpath'}/$packOptions->{'newfile'} failed");
+          if(!-e "$packOptions->{$requestedArch}->{'newpath'}/$packOptions->{$requestedArch}->{'newfile'}" and !link $packPointer->{'localfile'}, "$packOptions->{$requestedArch}->{'newpath'}/$packOptions->{$requestedArch}->{'newfile'}") {
+            $this->logMsg("E", "  linking file $packPointer->{'localfile'} to $packOptions->{$requestedArch}->{'newpath'}/$packOptions->{$requestedArch}->{'newfile'} failed");
           } else {
-            $this->logMsg("I", "  linked file $packPointer->{'localfile'} to $packOptions->{'newpath'}/$packOptions->{'newfile'}") if $this->{m_debug} >= 4;
+            $this->logMsg("I", "  linked file $packPointer->{'localfile'} to $packOptions->{$requestedArch}->{'newpath'}/$packOptions->{$requestedArch}->{'newfile'}") if $this->{m_debug} >= 4;
             if ($this->{m_debug} >= 2) {
               if ($arch eq $requestedArch) {
                 $this->logMsg("I", "  package $packName found for architecture $arch as $packKey");
@@ -1048,7 +1047,7 @@ sub unpackMetapackages
     my $nofallback = 0;
     ARCH:foreach my $reqArch($this->getArchList($this->{m_metaPacks}->{$metapack}, $metapack, \$nofallback)) {
       next if($reqArch =~ m{(src|nosrc)});
-      next if defined($packOptions{'arch'}) and $packOptions{'arch'} ne $reqArch;
+      next if defined($packOptions{$reqArch});
       my @fallbacklist;
       @fallbacklist = ($reqArch);
       if($nofallback==0 ) {
@@ -1531,11 +1530,16 @@ sub collectProducts
       if(!mkpath("$tmp", { mode => 0755 } )) {
         $this->logMsg("E", "can't create dir <$tmp>");
       }
-      if ( $this->{m_repoPacks}->{$i}->{'newpath'} eq "" || $this->{m_repoPacks}->{$i}->{'newfile'} eq "" ){
-         $this->logMsg("I", "Skip product release package $i");
-         next;
+      my $file;
+      # go via all used archs
+      my $nofallback = 0;
+      foreach my $arch($this->getArchList( $this->{m_repoPacks}->{$i}, $i, \$nofallback)) {
+        if ( $this->{m_repoPacks}->{$i}->{$arch}->{'newpath'} eq "" || $this->{m_repoPacks}->{$i}->{$arch}->{'newfile'} eq "" ){
+           $this->logMsg("I", "Skip product release package $i");
+           next;
+        }
+        $file = $this->{m_repoPacks}->{$i}->{$arch}->{'newpath'}."/".$this->{m_repoPacks}->{$i}->{$arch}->{'newfile'};
       }
-      my $file = $this->{m_repoPacks}->{$i}->{'newpath'}."/".$this->{m_repoPacks}->{$i}->{'newfile'};
       $this->logMsg("I", "Unpacking product release package $i in file $file ".$tmp);
       $this->{m_util}->unpac_package($file, $tmp);
 
@@ -1694,7 +1698,7 @@ sub createMetadata
   $this->logMsg("I", "Handling Beta information on media:");
   my $beta_version = $this->{m_proddata}->getOpt("BETA_VERSION");
   if (defined($beta_version)) {
-    my $dist_string = $this->{m_proddata}->getVar("SUMMARY")." ".${beta_version};
+    my $dist_string = $this->{m_proddata}->getVar("DISTNAME")." ".$this->{m_proddata}->getVar("PRODUCT_VERSION")." ".${beta_version};
     if ( -e "$this->{m_basesubdir}->{'1'}/README.BETA" ) {
       if (system("sed","-i","s/BETA_DIST_VERSION/$dist_string/","$this->{m_basesubdir}->{'1'}/README.BETA") == 0 ) {
         if (system("ln", "-sf", "../README.BETA", "$this->{m_basesubdir}->{'1'}/media.1/info.txt") != 0 ) {
@@ -1871,8 +1875,7 @@ sub createBootPackageLinks
         my @fallb = $this->{m_archlist}->fallbacks($targetarch);
         FARCH:foreach my $fa(@fallb) {
           my $pPointer = $this->{m_repoPacks}->{$rpmname};
-          next FARCH unless $pPointer->{'arch'} eq $fa;
-          my $file = $pPointer->{'newpath'}."/".$pPointer->{'newfile'};
+          my $file = $pPointer->{$targetarch}->{'newpath'}."/".$pPointer->{$targetarch}->{'newfile'};
           next FARCH unless (-e $file);
           link($file, "$base/boot/$arch/$rpmname.rpm");
           $this->logMsg("I", "linking $file to $base/boot/$arch/$rpmname.rpm") if $this->{m_debug} > 2;
