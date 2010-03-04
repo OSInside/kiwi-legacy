@@ -1694,7 +1694,7 @@ sub createMetadata
   $this->logMsg("I", "Handling Beta information on media:");
   my $beta_version = $this->{m_proddata}->getOpt("BETA_VERSION");
   if (defined($beta_version)) {
-    my $dist_string = $this->{m_proddata}->getVar("DISTNAME")." ".$this->{m_proddata}->getVar("PRODUCT_VERSION")." ".${beta_version};
+    my $dist_string = $this->{m_proddata}->getVar("SUMMARY")." ".${beta_version};
     if ( -e "$this->{m_basesubdir}->{'1'}/README.BETA" ) {
       if (system("sed","-i","s/BETA_DIST_VERSION/$dist_string/","$this->{m_basesubdir}->{'1'}/README.BETA") == 0 ) {
         if (system("ln", "-sf", "../README.BETA", "$this->{m_basesubdir}->{'1'}/media.1/info.txt") != 0 ) {
