@@ -3534,6 +3534,8 @@ sub installLogicalExtend {
 	#------------------------------------------
 	my $name = basename ($source);
 	$kiwi -> info ("Copying physical to logical [$name]...");
+	my $free = qxx ("df -h $extend 2>&1");
+	$kiwi -> loginfo ("getSize: mount: $free\n");
 	my $data = qxx ("cp -a -x $source/* $extend 2>&1");
 	my $code = $? >> 8;
 	if ($code != 0) {
@@ -4263,18 +4265,24 @@ sub getSize {
 	# method returns the size value in MegaByte
 	# ---
 	my $this   = shift;
+	my $kiwi   = $this->{kiwi};
 	my $extend = shift;
 	my $xml    = $this->{xml};
-	my $mini   = qxx ("find $extend | wc -l");
+	my $mini   = qxx ("find $extend | wc -l"); chomp $mini;
 	my $minsize= qxx ("du -s --block-size=1 $extend | cut -f1"); chomp $minsize;
 	my $spare  = 1.3;
-	my $xmlsize; 
+	my $xmlsize;
 	#==========================================
 	# Minimum size calculated in Byte + spare
 	#------------------------------------------
+	$kiwi -> loginfo ("getSize: files: $mini\n");
+	$kiwi -> loginfo ("getSize: spare: $spare\n");
+	$kiwi -> loginfo ("getSize: usage: $minsize Bytes\n");
+	$kiwi -> loginfo ("getSize: inode: $main::FSInodeSize Bytes\n");
 	$minsize += $mini * $main::FSInodeSize;
 	$minsize *= $spare;
 	$xmlsize = $minsize;
+	$kiwi -> loginfo ("getSize: minsz: $minsize Bytes\n");
 	#==========================================
 	# XML size calculated in Byte
 	#------------------------------------------
