@@ -138,9 +138,6 @@ sub new {
 	$this->{smartroot}   = [
 		"-o rpm-root=$root"
 	];
-	$this->{smartrootlib}= [
-		"-o rpm-root=$root/baselibs"
-	];
 	$this->{zypper}      = [
 		$packageManager{zypper},
 		"--non-interactive",
@@ -1478,7 +1475,6 @@ sub setupRootSystem {
 	my @zypper = @{$this->{zypper}};
 	my @smart  = @{$this->{smart}};
 	my @rootdir= @{$this->{smartroot}};
-	my @rootlib= @{$this->{smartrootlib}};
 	my @ensconce = @{$this->{ensconce}};
 	my @channelList = @{$this->{channelList}};
 	my $screenCall  = $this->{screenCall};
@@ -1512,6 +1508,15 @@ sub setupRootSystem {
 			if ($this -> setupInstallPackages()) {
 				push (@packs,$manager);
 			}
+			#==========================================
+			# Setup baselibs
+			#------------------------------------------
+			$kiwi -> info ("Setting up bootstrap baselibs...");
+			if (! $this -> rpmLibs()) {
+				$kiwi -> failed();
+				return undef;
+			}
+			$kiwi -> done();
 			$kiwi -> info ("Initializing image system on: $root...");
 			#==========================================
 			# Create screen call file
@@ -1529,18 +1534,6 @@ sub setupRootSystem {
 			print $fd "test \$? = 0 && @smart @rootdir update ";
 			print $fd "@channelList || false &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
-			# Install glibc for baselibs first, assumes a distro glibc package
-			print $fd "mkdir $root/baselibs\n";
-			print $fd "test \$? = 0 && @smart @rootlib install ";
-			print $fd "glibc @installOpts &\n";
-			print $fd "SPID=\$!;wait \$SPID\n";
-			print $fd "if test \$? = 0;then\n";
-			print $fd "mv $root/baselibs/lib $root\n";
-			print $fd "test -d $root/baselibs/lib64 && ";
-			print $fd "mv $root/baselibs/lib64 $root\n";
-			print $fd "rm -rf $root/baselibs\n";
-			print $fd "fi\n";
-			# Install the rest with requires libs on board
 			print $fd "test \$? = 0 && @smart @rootdir install ";
 			print $fd "@packs @installOpts &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
@@ -1609,6 +1602,15 @@ sub setupRootSystem {
 			if ($this -> setupInstallPackages()) {
 				push (@packs,$manager);
 			}
+			#==========================================
+			# Setup baselibs
+			#------------------------------------------
+			$kiwi -> info ("Setting up bootstrap baselibs...");
+			if (! $this -> rpmLibs()) {
+				$kiwi -> failed();
+				return undef;
+			}
+			$kiwi -> done();
 			$kiwi -> info ("Initializing image system on: $root...");
 			#==========================================
 			# check input list for pattern names
@@ -1643,19 +1645,6 @@ sub setupRootSystem {
 			print $fd "@zypper --root $root refresh &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
 			print $fd "test \$? = 0 && ";
-			# Install glibc for baselibs first, assumes a distro glibc package
-			print $fd "mkdir $root/baselibs\n";
-			print $fd "@zypper --disable-system-resolvables -R $root/baselibs ";
-			print $fd "install @installOpts glibc &\n";
-			print $fd "SPID=\$!;wait \$SPID\n";
-			print $fd "if test \$? = 0;then\n";
-			print $fd "mv $root/baselibs/lib $root\n";
-			print $fd "test -d $root/baselibs/lib64 && ";
-			print $fd "mv $root/baselibs/lib64 $root\n";
-			print $fd "rm -rf $root/baselibs\n";
-			print $fd "fi\n";
-			print $fd "test \$? = 0 && ";
-			# Install the rest with required libs on board
 			if (@newprods) {
 				print $fd "@zypper --root $root install ";
 				print $fd "@installOpts -t product @newprods &\n";
@@ -1759,6 +1748,18 @@ sub setupRootSystem {
 	if ($manager eq "ensconce") {
 		my $ensconce_args = "";
 		if (! $chroot) {
+			#==========================================
+			# Setup baselibs
+			#------------------------------------------
+			$kiwi -> info ("Setting up bootstrap baselibs...");
+			if (! $this -> rpmLibs()) {
+				$kiwi -> failed();
+				return undef;
+			}
+			$kiwi -> done();
+			#==========================================
+			# Ensconce options
+			#------------------------------------------
 			$ensconce_args = "bootstrap";
 		} 
 		$kiwi -> info ("Installing bootstrap packages...");
@@ -1776,7 +1777,19 @@ sub setupRootSystem {
 		print $fd "exit \$ECODE\n";
 		$fd -> close();
 	}
-	return $this -> setupScreenCall();
+	#==========================================
+	# run process
+	#------------------------------------------
+	if (! $this -> setupScreenCall()) {
+		return undef;
+	}
+	#==========================================
+	# cleanup baselibs
+	#------------------------------------------
+	if (! $chroot) {
+		$this -> rpmLibs ("clean");
+	}
+	return $this;
 }
 
 #==========================================
@@ -2035,6 +2048,74 @@ sub removeCacheDir {
 	$kiwi -> loginfo ("Removing cache directory: $dataDir\n");
 	qxx ("rm -rf $dataDir");
 	qxx ("rm -rf $config/config");
+	return $this;
+}
+
+#==========================================
+# rpmLibs
+#------------------------------------------
+sub rpmLibs {
+	# ...
+	# provide required libraries in order to make
+	# rpm work correctly.
+	# ---
+	my $this   = shift;
+	my $clean  = shift;
+	my $kiwi   = $this->{kiwi};
+	my $root   = $this->{root};
+	my $result = $this->{baselibs};
+	my @kchroot= @{$this->{kchroot}};
+	my @result;
+	#==========================================
+	# cleanup baselibs
+	#------------------------------------------
+	if ($clean) {
+		if (! $result) {
+			# no baselibs stored/copied...
+			return $this;
+		}
+		@result = @{$result};
+		foreach my $l (@result) {
+			qxx ("@kchroot rpm -qf /$l &>/dev/null");
+			my $code = $? >> 8;
+			if ($code != 0) {
+				$kiwi -> loginfo ("Cleaning baselib: $l\n");
+				qxx ("rm -f $root/$l 2>&1");
+			} elsif (-f "$root/$l.rpmnew") {
+				$kiwi -> loginfo ("Restore rpmnew basefile: $l\n");
+				qxx ("mv $root/$l.rpmnew $root/$l");
+			}
+		}
+		return $this;
+	}
+	#==========================================
+	# setup baselibs
+	#------------------------------------------
+	my @libs = (
+		'/etc/nsswitch.conf',
+		'/lib/libnsl*',
+		'/lib/libnss_compat*',
+		'/lib/libnss_files*',
+		'/lib64/libnsl*',
+		'/lib64/libnss_compat*',
+		'/lib64/libnss_files*'
+	);
+	foreach my $item (@libs) {
+	foreach my $l (glob ($item)) {
+		if (($l) && (-f $l)) {
+			$l =~ s/^\///;
+			push @result,$l;
+		}
+	}
+	}
+	if (! @result) {
+		return undef;
+	}
+	foreach my $l (@result) {
+		my $dir = dirname ($l);
+		qxx ("mkdir -p $root/$dir && cp /$l $root/$l 2>&1");
+	}
+	$this -> {baselibs} = \@result;
 	return $this;
 }
 
