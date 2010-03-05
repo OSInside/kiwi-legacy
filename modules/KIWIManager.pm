@@ -2092,7 +2092,6 @@ sub rpmLibs {
 	# setup baselibs
 	#------------------------------------------
 	my @libs = (
-		'/etc/nsswitch.conf',
 		'/lib/libnsl*',
 		'/lib/libnss_compat*',
 		'/lib/libnss_files*',
