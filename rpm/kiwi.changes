@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Mar  8 18:09:44 CET 2010 - ms@suse.de
+
+- v4.22
+- fixed missing xen package in oemboot/suse-11.2 boot
+  image description (bnc #561635)
+
+-------------------------------------------------------------------
 Wed Mar  3 18:12:35 CET 2010 - ms@suse.de
 
 - v4.21

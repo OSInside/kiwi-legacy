@@ -84,6 +84,7 @@
 	</packages>
 	<packages type="image" profiles="xenk">
 		<package name="kernel-xen"/>
+		<package name="xen"/>
 	</packages>
 	<packages type="image" profiles="ec2">
 		<package name="kernel-ec2"/>
