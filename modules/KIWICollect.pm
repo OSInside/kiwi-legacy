@@ -1697,8 +1697,10 @@ sub createMetadata
   ## step 5b: create info.txt for Beta releases.
   $this->logMsg("I", "Handling Beta information on media:");
   my $beta_version = $this->{m_proddata}->getOpt("BETA_VERSION");
+  my $summary = $this->{m_proddata}->getInfo("LABEL");
+  $summary = $this->{m_proddata}->getInfo("SUMMARY") unless $summary;
   if (defined($beta_version)) {
-    my $dist_string = $this->{m_proddata}->getVar("DISTNAME")." ".$this->{m_proddata}->getVar("PRODUCT_VERSION")." ".${beta_version};
+    my $dist_string = $summary." ".${beta_version};
     if ( -e "$this->{m_basesubdir}->{'1'}/README.BETA" ) {
       if (system("sed","-i","s/BETA_DIST_VERSION/$dist_string/","$this->{m_basesubdir}->{'1'}/README.BETA") == 0 ) {
         if (system("ln", "-sf", "../README.BETA", "$this->{m_basesubdir}->{'1'}/media.1/info.txt") != 0 ) {
@@ -1718,8 +1720,6 @@ sub createMetadata
   $this->logMsg("I", "Creating products file in all media:");
   my $proddir  = $this->{m_proddata}->getVar("PRODUCT_DIR");
   my $prodname = $this->{m_proddata}->getVar("PRODUCT_NAME");
-  my $summary = $this->{m_proddata}->getInfo("LABEL");
-  $summary = $this->{m_proddata}->getInfo("SUMMARY") unless $summary;
   my $sp_ver = $this->{m_proddata}->getVar("SP_VERSION");
   my $prodver  = $this->{m_proddata}->getVar("PRODUCT_VERSION");
   my $prodrel  = $this->{m_proddata}->getInfo("RELEASE");
