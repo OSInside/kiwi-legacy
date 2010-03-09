@@ -18,7 +18,7 @@
  *  you may find current contact information at www.novell.com
  *  
  *  Author: Matt Barringer <mbarringer@suse.de>
- *  
+ *
  */
 
 #include <sys/mount.h>
@@ -91,6 +91,8 @@ Platform::getNewDevice(QString devicePath, LibHalContext *context)
     DeviceItem *devItem = NULL;
     LibHalContext *localContext = context;
 
+    // context / localContext is NULL when getNewDevice is called from the main window
+    // when a USB device is inserted
     if (localContext == NULL)
     {
         if ((localContext = initHal()) == NULL)
@@ -140,28 +142,48 @@ Platform::getNewDevice(QString devicePath, LibHalContext *context)
             devItem->setModelString(product);
 
         if (!strcmp(vendor, ""))
-    #ifdef KIOSKHACK
-            devItem->setVendorString("SUSE Studio USB Key");
-    #else
-            devItem->setVendorString("Unknown Device");
-    #endif
+        {
+            if (mKioskMode)
+                devItem->setVendorString("SUSE Studio USB Key");
+            else
+                devItem->setVendorString("Unknown Device");
+        }
         else
+        {
             devItem->setVendorString(vendor);
-
+        }
         QString newDisplayString = QString("%1 %2 - %3 (%4 MB)").arg(devItem->getVendorString()).arg(devItem->getModelString()).arg(devItem->getPath()).arg(devItem->getSize() / 1048576);
         devItem->setDisplayString(newDisplayString);
 
-    // TODO replace the kiosk hack with the unsafe mode
-    #ifdef KIOSKHACK
-        // VERY VERY VERY VERY VERY  ugly hack for kiosk: ignore hard disks bigger than 100GB
-        if((devItem->getSize() / 1048576) < 200000)
-    #endif
+        if (mKioskMode)
+        {
+            if((devItem->getSize() / 1048576) > 200000)
+            {
+                delete devItem;
+                libhal_free_string(device);
+                libhal_free_string(product);
+                libhal_free_string(vendor);
+                if (context == NULL)
+                {
+                    libhal_ctx_shutdown(localContext, NULL);
+                    libhal_ctx_free(localContext);
+                }
 
+                return(NULL);
+            }
+        }
+        
         // If a device is 0 megs we might as well just not list it
-        // TODO: Perhaps make kiosk mode the default in order to not list external hard drives > 100GB?
         if ((devItem->getSize() / 1048576) > 0)
+        {
             itemList << devItem;
-
+        }
+        else
+        {
+            delete devItem;
+            devItem = NULL;
+        }
+        
         libhal_free_string(device);
         libhal_free_string(product);
         libhal_free_string(vendor);

@@ -35,7 +35,7 @@ class Platform
 {
 
 public:
-    Platform() {}
+    Platform(bool kioskMode = false) { mKioskMode = kioskMode; }
     void findDevices(bool unsafe = false);
     bool isMounted(QString path);
     void writeData(QString path, QString fileName, qint64 deviceSize);
@@ -50,6 +50,7 @@ public slots:
     void tick(qint64 lastWritten, qint64 bytesWritten);
 
 private:
+    bool mKioskMode;
     DeviceItem *pDevice;
     QLinkedList<DeviceItem *> itemList;
     LibHalContext *initHal();

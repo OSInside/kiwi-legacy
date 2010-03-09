@@ -30,14 +30,15 @@
 
 #include "Platform.h"
 #include "DeviceItem.h"
-#define VERSION "SUSE Studio Image Writer 1.6.1"
+#define VERSION "SUSE Studio Image Writer 1.7"
 
 class MainWindow : public QWidget
 {
     Q_OBJECT
 
 public:
-    MainWindow(const char *cmddevice,
+    MainWindow(Platform *platform,
+               const char *cmddevice,
                const char *cmdfile,
                bool unsafe = false,
                bool maximized = false,
@@ -66,7 +67,7 @@ private:
     void centerWindow();
     void useNewUI();
     void useOldUI();
-    void reloadDeviceList(Platform *platform, const char *cmddevice);
+    void reloadDeviceList(const char *cmddevice);
 
 #if (QT_VERSION < 0x040400)
     QLineEdit* fileLine;
@@ -76,7 +77,7 @@ private:
     QString file;
     QLabel *fileSize, *fileLabel;
     QComboBox *deviceComboBox;
-    Platform *platform;
+    Platform *pPlatform;
     bool mMaximized;
     bool mUnsafe;
 };

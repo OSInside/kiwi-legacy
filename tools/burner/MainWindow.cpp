@@ -28,19 +28,23 @@
 #include <QtDBus>
 #include <QFile>
 
-#ifndef Q_OS_LINUX
-#error "Only linux is supported at the moment"
-#endif
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/sysctl.h>
+
+
 
 #include "MainWindow.h"
 
-MainWindow::MainWindow (const char *cmddevice,
+MainWindow::MainWindow (Platform *platform,
+                        const char *cmddevice,
                         const char *cmdfile,
                         bool unsafe,
                         bool maximized,
                         QWidget *parent)
  : QWidget(parent)
 {
+    pPlatform = platform;
     QDBusConnection dbusConnection = QDBusConnection::systemBus();
     file = QString();
     mMaximized = maximized;
@@ -56,9 +60,7 @@ MainWindow::MainWindow (const char *cmddevice,
 #endif
 
     setWindowTitle(tr(VERSION));
-    platform = new Platform;
-    platform->findDevices(mUnsafe);
-    reloadDeviceList(platform, cmddevice);
+    reloadDeviceList(cmddevice);
 
     if (cmdfile != NULL)
     {
@@ -89,10 +91,10 @@ MainWindow::MainWindow (const char *cmddevice,
 }
 
 void
-MainWindow::reloadDeviceList(Platform *platform, const char *cmddevice)
+MainWindow::reloadDeviceList(const char *cmddevice)
 {
     int dev = -1;
-    QLinkedList<DeviceItem *> list = platform->getDeviceList();
+    QLinkedList<DeviceItem *> list = pPlatform->getDeviceList();
     QLinkedList<DeviceItem *>::iterator i;
     for (i = list.begin(); i != list.end(); ++i)
     {
@@ -302,7 +304,7 @@ MainWindow::deviceInserted(QDBusMessage message)
     QString devicePath = message.arguments().at(0).toString();
     if (devicePath.startsWith("/org/freedesktop/Hal/devices/storage_serial"))
     {
-        DeviceItem *device = platform->getNewDevice(devicePath);
+        DeviceItem *device = pPlatform->getNewDevice(devicePath);
         if (device != NULL)
             if (deviceComboBox->findText(device->getDisplayString()) == -1)
                 deviceComboBox->addItem(device->getDisplayString(), 0);
@@ -316,7 +318,7 @@ MainWindow::deviceRemoved(QDBusMessage message)
     QString devicePath = message.arguments().at(0).toString();
     if (devicePath.startsWith("/org/freedesktop/Hal/devices/storage_serial"))
     {
-        QLinkedList<DeviceItem *> list = platform->getDeviceList();
+        QLinkedList<DeviceItem *> list = pPlatform->getDeviceList();
         QLinkedList<DeviceItem *>::iterator i;
         for (i = list.begin(); i != list.end(); ++i)
         {
@@ -326,7 +328,7 @@ MainWindow::deviceRemoved(QDBusMessage message)
                 if (index != -1)
                 {
                     deviceComboBox->removeItem(index);
-                    platform->removeDeviceFromList(devicePath);
+                    pPlatform->removeDeviceFromList(devicePath);
                     break;
                 }
             }
@@ -414,11 +416,11 @@ MainWindow::write()
         return;
     }
 
-    DeviceItem *item = platform->findDeviceInList(deviceComboBox->currentText());
+    DeviceItem *item = pPlatform->findDeviceInList(deviceComboBox->currentText());
 
     if (item != NULL)
     {
-        if (platform->isMounted(item->getUDI()))
+        if (pPlatform->isMounted(item->getUDI()))
         {
             // We won't let them nuke a mounted device
             QMessageBox msgBox;
@@ -435,7 +437,7 @@ MainWindow::write()
             {
                 case QMessageBox::Yes:
                 {
-                    if (!platform->unmountDevice(item->getUDI()))
+                    if (!pPlatform->unmountDevice(item->getUDI()))
                     {
                         QMessageBox failedBox;
                         failedBox.setText(tr("Unmount failed.  I will not write to this device."));
@@ -472,7 +474,7 @@ MainWindow::write()
         {
             case QMessageBox::Ok:
             {
-                platform->writeData(item->getPath(), file, item->getSize());
+                pPlatform->writeData(item->getPath(), file, item->getSize());
                 break;
             }
             default:

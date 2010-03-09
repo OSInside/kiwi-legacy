@@ -22,13 +22,16 @@
  */
 
 #include <QApplication>
-#include "MainWindow.h"
 
-#if defined (Q_OS_UNIX)
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/sysctl.h>
+#ifndef Q_OS_LINUX
+#error "Only linux is supported at the moment"
 #endif
+
+
+#include "MainWindow.h"
+#include "Platform.h"
+#include "DeviceItem.h"
+
 
 int
 main (int argc, char *argv[])
@@ -38,6 +41,8 @@ main (int argc, char *argv[])
     char *file = NULL;
     bool unsafe = false;
     bool maximized = false;
+    bool listMode = false;
+    bool kioskMode = false;
 #if defined(Q_OS_UNIX) 
 #ifndef KIOSKHACK
     if (getuid() != 0)
@@ -45,15 +50,17 @@ main (int argc, char *argv[])
 #endif
 #endif
 
-    while ((c = getopt (argc, argv, "mvuhd:f:")) != -1)
+    while ((c = getopt (argc, argv, "mlkvuhd:f:")) != -1)
     {
         switch (c)
         {
             case 'h':
-                fprintf(stdout, "Usage:\t%s [-d <device>] [-f <raw file>] [-u] [-v]\n", argv[0]);
+                fprintf(stdout, "Usage:\t%s [-d <device>] [-f <raw file>] [-u] [-l] [-v]\n", argv[0]);
                 fprintf(stdout, "Flashes a raw disk file to a device\n\n");
                 fprintf(stdout, "-d <device>\t\tSpecify a device, for example: /dev/sdc\n");
                 fprintf(stdout, "-f <raw file\t\tSpecify the file to write\n");
+                fprintf(stdout, "-k\t\t\tOperate in \"kiosk mode\", only listing disks smaller than 200GB\n");
+                fprintf(stdout, "-l\t\t\tList valid USB devices\n");
                 fprintf(stdout, "-m\t\t\tMaximize the window");
                 fprintf(stdout, "-u\t\t\tOperate in unsafe mode, listing all disks, not just removable ones\n");
                 fprintf(stdout, "-v\t\t\tVersion and author information\n");
@@ -66,6 +73,12 @@ main (int argc, char *argv[])
                 break;
             case 'f':
                 file = strdup(optarg);
+                break;
+            case 'l':
+                listMode = true;
+                break;
+            case 'k':
+                kioskMode = true;
                 break;
             case 'v':
                 fprintf(stdout, "%s\nWritten by Matt Barringer <mbarringer@suse.de>\n", VERSION);
@@ -80,7 +93,21 @@ main (int argc, char *argv[])
     }
 
     QApplication app(argc, argv);
-    MainWindow window(device, file, unsafe, maximized);
+    Platform *platform = new Platform(kioskMode);
+    platform->findDevices(unsafe);
+    if (listMode)
+    {
+        QLinkedList<DeviceItem *> list = platform->getDeviceList();
+        QLinkedList<DeviceItem *>::iterator i;
+        for (i = list.begin(); i != list.end(); ++i)
+        {
+            if (!(*i)->getPath().isEmpty())
+                fprintf(stdout, "%s\n", (*i)->getPath().toAscii().data());
+        }
+        exit(0);
+    }
+    
+    MainWindow window(platform, device, file, unsafe, maximized);
     if (maximized)
     {
         window.showMaximized();
