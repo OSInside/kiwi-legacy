@@ -1,5 +1,11 @@
 -------------------------------------------------------------------
-Mon Mar  8 18:09:44 CET 2010 - ms@suse.de
+Tue Mar  9 16:31:08 UTC 2010 - adrian@suse.de
+
+- support architectures for products, which are not specified
+  in fallback lists
+
+-------------------------------------------------------------------
+Mon Mar  8 18:12:34 CET 2010 - ms@suse.de
 
 - v4.22
 - fixed missing xen package in oemboot/suse-11.2 boot

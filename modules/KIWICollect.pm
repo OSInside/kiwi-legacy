@@ -782,6 +782,7 @@ sub setupPackageFiles
       my @fallbacklist = ($requestedArch);
       if($nofallback==0 && $mode != 2) {
 	@fallbacklist = $this->{m_archlist}->fallbacks($requestedArch);
+        @fallbacklist = ($requestedArch) unless @fallbacklist;
         $this->logMsg("I", " Look for fallbacks fallbacks") if $this->{m_debug} >= 6;
       }
 
@@ -798,7 +799,7 @@ sub setupPackageFiles
 	    $this->logMsg("I", "     => package $packName not available for arch $arch in repo $packKey") if $this->{m_debug} >= 4;
             next PACKKEY;
           }
-          if($nofallback==0 && $mode != 2) {
+          if($nofallback==0 && $mode != 2 && $this->{m_archlist}->arch($arch)) {
 	    my $follow = $this->{m_archlist}->arch($arch)->follower();
 	    if(defined($follow)) { 
 	      $this->logMsg("I", "     => falling back to $follow from $packKey instead") if $this->{m_debug} >= 4;
@@ -1052,6 +1053,7 @@ sub unpackMetapackages
       @fallbacklist = ($reqArch);
       if($nofallback==0 ) {
         @fallbacklist = $this->{m_archlist}->fallbacks($reqArch);
+        @fallbacklist = ($reqArch) unless @fallbacklist;
         $this->logMsg("I", " Look for fallbacks fallbacks") if $this->{m_debug} >= 6;
       }
       $this->logMsg("I", "    Use as expanded architectures >".join(" ", @fallbacklist)."<") if $this->{m_debug} >= 5;
