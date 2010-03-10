@@ -294,6 +294,10 @@ sub downloadMediaPackages {
 			$publics_url = $highlvl_url;
 		}
 		my $browser  = LWP::UserAgent->new;
+		#==========================================
+		# allow proxy server from environment
+		#------------------------------------------
+		$browser->env_proxy();
 		foreach my $name (@pfile) {
 			my $location = $publics_url."/".$name;
 			my $request  = HTTP::Request->new (GET => $location);
@@ -429,6 +433,13 @@ sub downloadPattern {
 		my $location = $publics_url."/content";
 		my $request  = HTTP::Request->new (GET => $location);
 		my $response;
+		#==========================================
+		# allow proxy server from environment
+		#------------------------------------------
+		$browser->env_proxy();
+		#==========================================
+		# send request
+		#------------------------------------------
 		eval {
 			$response = $browser  -> request ( $request );
 		};
@@ -694,6 +705,13 @@ sub downloadProduct {
 		my $browser  = LWP::UserAgent->new;
 		my $location = $publics_url."/content";
 		my $request  = HTTP::Request->new (GET => $location);
+		#==========================================
+		# allow proxy server from environment
+		#------------------------------------------
+		$browser->env_proxy();
+		#==========================================
+		# send request
+		#------------------------------------------
 		my $response = $browser  -> request ( $request );
 		$content     = $response -> content ();
 	}

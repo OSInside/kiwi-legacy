@@ -397,6 +397,10 @@ sub openSUSEpath {
 	my @urllist  = ();
 	my $kiwi     = $this->{kiwi};
 	#==========================================
+	# allow proxy server from environment
+	#------------------------------------------
+	$browser->env_proxy();
+	#==========================================
 	# normalize URL data
 	#------------------------------------------
 	if ((! defined $module) || ($module !~ /^opensuse:\/\//)) {

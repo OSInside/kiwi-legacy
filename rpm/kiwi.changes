@@ -1,15 +1,16 @@
 -------------------------------------------------------------------
+Wed Mar 10 11:32:20 CET 2010 - ms@suse.de
+
+- v4.22
+- allow LWP proxy setting from environment (bnc #586655)
+- fixed missing xen package in oemboot/suse-11.2 boot
+  image description (bnc #561635)
+
+-------------------------------------------------------------------
 Tue Mar  9 16:31:08 UTC 2010 - adrian@suse.de
 
 - support architectures for products, which are not specified
   in fallback lists
-
--------------------------------------------------------------------
-Mon Mar  8 18:12:34 CET 2010 - ms@suse.de
-
-- v4.22
-- fixed missing xen package in oemboot/suse-11.2 boot
-  image description (bnc #561635)
 
 -------------------------------------------------------------------
 Wed Mar  3 18:12:35 CET 2010 - ms@suse.de
