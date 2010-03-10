@@ -2,6 +2,7 @@
 Wed Mar 10 11:32:20 CET 2010 - ms@suse.de
 
 - v4.22
+- remove empty dirs in rpmLibs ("clean") (bnc #536256)
 - allow LWP proxy setting from environment (bnc #586655)
 - fixed missing xen package in oemboot/suse-11.2 boot
   image description (bnc #561635)

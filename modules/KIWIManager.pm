@@ -2075,7 +2075,9 @@ sub rpmLibs {
 			return $this;
 		}
 		@result = @{$result};
+		my %dirlist = ();
 		foreach my $l (@result) {
+			my $dir = dirname ($l); $dirlist{$dir} = $dir;
 			qxx ("@kchroot rpm -qf /$l &>/dev/null");
 			my $code = $? >> 8;
 			if ($code != 0) {
@@ -2085,6 +2087,9 @@ sub rpmLibs {
 				$kiwi -> loginfo ("Restore rpmnew basefile: $l\n");
 				qxx ("mv $root/$l.rpmnew $root/$l");
 			}
+		}
+		foreach my $dir (keys %dirlist) {
+			qxx ("rmdir $dir 2>&1");
 		}
 		return $this;
 	}
