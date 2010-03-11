@@ -31,6 +31,7 @@ $DB::inhibit_exit = 0;
 use warnings;
 use Carp qw (cluck);
 use Getopt::Long;
+use File::Spec;
 use KIWIRoot;
 use KIWIXML;
 use KIWILog;
@@ -1346,6 +1347,12 @@ sub init {
 		"help|h"                => \&usage,
 		"<>"                    => \&usage
 	);
+	#========================================
+	# turn destdir into absolute path
+	#----------------------------------------
+	if (defined $Destination) {
+		$Destination = File::Spec->rel2abs ($Destination);
+	}
 	#========================================
 	# store original value of Profiles
 	#----------------------------------------

@@ -843,7 +843,8 @@ function baseUpdateSysConfig {
 	local FILE=$1
 	local VAR=$2
 	local VAL=$3
-	sed -i "s/^\($VAR=\).*$/\1\"$VAL\"/" $FILE
+	local args=$(echo "s'@^\($VAR=\).*\$@\1\\\"$VAL\\\"@'")
+	eval sed -i $args $FILE
 }
 
 #======================================

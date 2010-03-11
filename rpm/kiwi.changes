@@ -6,6 +6,9 @@ Wed Mar 10 11:32:20 CET 2010 - ms@suse.de
 - allow LWP proxy setting from environment (bnc #586655)
 - fixed missing xen package in oemboot/suse-11.2 boot
   image description (bnc #561635)
+- fixed quoting in baseUpdateSysConfig (bnc #587132)
+- turn destdir into absolute path directly after
+  the option parser (bnc #584200)
 
 -------------------------------------------------------------------
 Tue Mar  9 16:31:08 UTC 2010 - adrian@suse.de
