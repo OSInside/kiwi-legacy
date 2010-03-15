@@ -4271,6 +4271,7 @@ sub getSize {
 	my $mini   = qxx ("find $extend | wc -l"); chomp $mini;
 	my $minsize= qxx ("du -s --block-size=1 $extend | cut -f1"); chomp $minsize;
 	my $spare  = 1.3;
+	my $journal= 5 * 1024 * 1024;
 	my $xmlsize;
 	#==========================================
 	# Minimum size calculated in Byte + spare
@@ -4279,8 +4280,10 @@ sub getSize {
 	$kiwi -> loginfo ("getSize: spare: $spare\n");
 	$kiwi -> loginfo ("getSize: usage: $minsize Bytes\n");
 	$kiwi -> loginfo ("getSize: inode: $main::FSInodeSize Bytes\n");
+	$kiwi -> loginfo ("getSize: journ: $journal Bytes\n");
 	$minsize += $mini * $main::FSInodeSize;
 	$minsize *= $spare;
+	$minsize += $journal;
 	$xmlsize = $minsize;
 	$kiwi -> loginfo ("getSize: minsz: $minsize Bytes\n");
 	#==========================================
