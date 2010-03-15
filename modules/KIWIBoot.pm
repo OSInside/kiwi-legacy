@@ -2326,7 +2326,7 @@ sub setupBootDisk {
 	#------------------------------------------
 	if (($imgtype eq "split") && (-f $splitfile)) {
 		my $splitsize = -s $splitfile; $splitsize /= 1048576;
-		$vmsize = $this->{vmmbyte} + ($splitsize * 1.3) + $lvmbootMB;
+		$vmsize = $this->{vmmbyte} + ($splitsize * 1.5) + $lvmbootMB;
 		$vmsize = sprintf ("%.0f", $vmsize);
 		$this->{vmmbyte} = $vmsize;
 		$vmsize = $vmsize."M";

@@ -4312,15 +4312,15 @@ sub getSize {
 	my $usedsize = $minsize; 
 	if ($xmlsize > $minsize) {
 		$usedsize = $xmlsize;
-		$this->{inodes} = int ($usedsize / $main::FSInodeRatio);
+		$this->{inodes} = sprintf ("%.0f",$usedsize / $main::FSInodeRatio);
 	} else {
 		$this->{inodes} = $mini * 2;
 	}
 	#==========================================
 	# return result list in MB
 	#------------------------------------------
-	$minsize = int ($minsize / 1048576);
-	$usedsize= int ($usedsize / 1048576);
+	$minsize = sprintf ("%.0f",$minsize  / 1048576);
+	$usedsize= sprintf ("%.0f",$usedsize / 1048576);
 	$usedsize.= "M";
 	return ($minsize,$usedsize);
 }
