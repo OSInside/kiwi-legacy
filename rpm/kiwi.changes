@@ -4,6 +4,8 @@ Mon Mar 15 10:53:26 CET 2010 - ms@suse.de
 - v4.23
 - fixed getSize() round values not truncate them (bnc #587361)
 - leave libresolv inside the initrd to allow name resolution
+- added Xen dom0 hypervisor check if domain="dom0" is set
+- fixed Xen dom0 bootloader configuration
 - fixed default pxeboot file, use kiwiserver
 - fixed --build option in kiwi
 

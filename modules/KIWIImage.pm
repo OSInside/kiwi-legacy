@@ -3742,18 +3742,30 @@ sub extractLinux {
 	my $imageTree = shift;
 	my $dest      = shift;
 	my $kiwi      = $this->{kiwi};
-	if ((-f "$imageTree/boot/vmlinux.gz") ||
-		(-f "$imageTree/boot/vmlinux")    ||
+	my $xml       = $this->{xml};
+	my %xenc      = $xml->getXenConfig();
+	if ((-f "$imageTree/boot/vmlinux.gz")  ||
+		(-f "$imageTree/boot/vmlinux")     ||
 		(-f "$imageTree/boot/vmlinuz")
 	) {
 		$kiwi -> info ("Extracting kernel...");
+		#==========================================
+		# setup file names / cleanup...
+		#------------------------------------------
 		my $pwd = qxx ("pwd"); chomp $pwd;
 		my $shortfile = "$name.kernel";
 		my $file = "$dest/$shortfile";
 		if ($file !~ /^\//) {
 			$file = $pwd."/".$file;
 		}
-		qxx ("rm -f $file");
+		if (-e $file) {
+			qxx ("rm -f $file");
+		}
+		# /.../
+		# the KIWIConfig::suseStripKernel() function provides the
+		# kernel as common name /boot/vmlinuz. We use this file for
+		# the extraction
+		# ----
 		qxx ("cp $imageTree/boot/vmlinuz $file");
 		my $code = $? >> 8;
 		if ($code != 0) {
@@ -3762,24 +3774,19 @@ sub extractLinux {
 			$kiwi -> failed ();
 			return undef;
 		}
-		my $kfile;
-		if (-f "$imageTree/boot/vmlinux.gz") {
-			$kfile = "$imageTree/boot/vmlinux.gz";
-		} elsif (-f "$imageTree/boot/xen.gz") {
-			$kfile = "$imageTree/boot/xen.gz";
-		} elsif (-f "$imageTree/boot/vmlinux") {
-			$kfile = "$imageTree/boot/vmlinux";
-		} elsif (-f "$imageTree/boot/vmlinuz") {
-			$kfile = "$imageTree/boot/vmlinuz";
-		} else {
-			$kiwi -> failed ();
-			$kiwi -> info   ("Couldn't find kernel file");
-			$kiwi -> failed ();
-			return undef;
+		my $kernel = qxx ("get_kernel_version $file"); chomp $kernel;
+		qxx ("mv -f $file $file.$kernel && ln -s $shortfile.$kernel $file");
+		# /.../
+		# check for the Xen hypervisor and extract them as well
+		# ----
+		if ((defined $xenc{xen_domain}) && ($xenc{xen_domain} eq "dom0")) {
+			if (! -f "$imageTree/boot/xen.gz") {
+				$kiwi -> failed ();
+				$kiwi -> info   ("Xen dom0 requested but no hypervisor found");
+				$kiwi -> failed ();
+				return undef;
+			}
 		}
-		my $kernel;
-		$kernel = qxx ("/sbin/get_kernel_version $kfile"); chomp $kernel;
-		qxx ("mv -f $file $file.$kernel && ln -s $shortfile.$kernel $file ");
 		if (-f "$imageTree/boot/xen.gz") {
 			$file = "$dest/$name.kernel-xen";
 			qxx ("cp $imageTree/boot/xen.gz $file");
