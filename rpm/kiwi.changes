@@ -5,6 +5,7 @@ Mon Mar 15 10:53:26 CET 2010 - ms@suse.de
 - fixed getSize() round values not truncate them (bnc #587361)
 - leave libresolv inside the initrd to allow name resolution
 - fixed default pxeboot file, use kiwiserver
+- fixed --build option in kiwi
 
 -------------------------------------------------------------------
 Wed Mar 10 11:32:20 CET 2010 - ms@suse.de

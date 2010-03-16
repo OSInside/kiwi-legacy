@@ -290,10 +290,11 @@ sub main {
 		# Setup prepare 
 		#------------------------------------------
 		$main::Prepare = $Build;
-		$main::RootTree= $Destination."/image-root";
+		$main::RootTree= $Destination."/build/image-root";
 		$main::Survive = "yes";
 		$main::ForceNewRoot = 1;
 		undef $main::Build;
+		mkdir $Destination."/build";
 		if (! defined main::main()) {
 			$main::Survive = "default";
 			my $code = kiwiExit (1); return $code;
