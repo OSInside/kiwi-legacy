@@ -66,6 +66,7 @@ export kiwi_hybridpersistent=yes
 # Functions
 #--------------------------------------
 . /include
+initialize
 
 #======================================
 # setupSystemAliasName

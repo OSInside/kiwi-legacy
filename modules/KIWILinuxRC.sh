@@ -42,15 +42,9 @@ test -z "$TERM"               && export TERM=linux
 test -z "$LANG"               && export LANG=en_US.utf8
 test -z "$UTIMER"             && export UTIMER=0
 test -z "$VGROUP"             && export VGROUP=kiwiVG
-
-#======================================
-# Start boot timer
-#--------------------------------------
-if [ -x /usr/bin/utimer ];then
-	/usr/bin/utimer
-	export UTIMER=$(cat /var/run/utimer.pid)
-fi
-
+test -z "$CONSOLE"            && export CONSOLE=/dev/console
+test -z "$REDIRECT"           && export REDIRECT=/dev/tty1
+    
 #======================================
 # Dialog
 #--------------------------------------
@@ -382,17 +376,23 @@ function errorLogStart {
 	if [ ! -f $ELOG_FILE ];then
 		echo "KIWI Log:" >> $ELOG_FILE
 	else
-		killproc tail
 		echo "KIWI PreInit Log" >> $ELOG_FILE
+		cat /iprocs | grep -v TAIL_PID > /iprocs
 	fi
 	echo "Boot-Logging enabled on $ELOG_CONSOLE"
-	setctsid -f $ELOG_CONSOLE /bin/bash -i -c "tail -f $ELOG_FILE" &
+	setctsid -f $ELOG_CONSOLE tail -f $ELOG_FILE &
 	exec 2>>$ELOG_FILE
 	if [ -f .profile ];then
 		echo "KIWI .profile contents:" 1>&2
 		cat .profile 1>&2
 	fi
 	set -x 1>&2
+	local DTYPE=`stat -f -c "%T" /proc 2>/dev/null`
+	if test "$DTYPE" != "proc" ; then
+		mount -t proc proc /proc
+	fi
+	TAIL_PID=$(fuser $ELOG_CONSOLE | tr -d " ")
+	echo TAIL_PID=$TAIL_PID >> /iprocs
 }
 #======================================
 # udevPending
@@ -451,7 +451,8 @@ function udevStart {
 	# terminal devices
 	mount -t devpts devpts /dev/pts
 	# start the udev daemon
-	udevd --daemon udev_log="debug"
+	udevd udev_log="debug" &
+	echo UDEVD_PID=$! >> /iprocs
 	# wait for pending triggered udev events.
 	udevPending
 	# start splashy if configured
@@ -461,7 +462,7 @@ function udevStart {
 # udevKill
 #--------------------------------------
 function udevKill {
-	killproc /sbin/udevd
+	. /iprocs ; kill $UDEVD_PID
 }
 #======================================
 # startSplashy
@@ -475,13 +476,14 @@ function startSplashy {
 # startBlogD
 #--------------------------------------
 function startBlogD {
-	REDIRECT=$(showconsole 2>/dev/null)
 	if test -n "$REDIRECT" ; then
 		mkdir -p /var/log
 		> /dev/shm/initrd.msg
 		ln -sf /dev/shm/initrd.msg /var/log/boot.msg
 		mkdir -p /var/run
 		/sbin/blogd $REDIRECT
+		BLOGD_PID=$(cat /var/run/blogd.pid)
+		echo BLOGD_PID=$BLOGD_PID >> /iprocs
 	fi
 }
 #======================================
@@ -491,15 +493,17 @@ function killBlogD {
 	# /.../
 	# kill blogd on /dev/console
 	# ----
-	local umountProc=0
-	if [ ! -e /proc/mounts ];then
-		mount -t proc proc /proc
-		umountProc=1
-	fi
-	Echo "Stopping boot logging"
-	killall -9 blogd
-	if [ $umountProc -eq 1 ];then
-		umount /proc
+	if test -n "$REDIRECT" ; then
+		local umountProc=0
+		if [ ! -e /proc/mounts ];then
+			mount -t proc proc /proc
+			umountProc=1
+		fi
+		Echo "Stopping boot logging"
+		. /iprocs ; kill $BLOGD_PID
+		if [ $umountProc -eq 1 ];then
+			umount /proc
+		fi
 	fi
 }
 #======================================
@@ -4010,7 +4014,6 @@ function cleanDirectory {
 function cleanInitrd {
 	cp /usr/bin/chroot /bin
 	cp /usr/sbin/klogconsole /bin
-	cp /sbin/killproc /bin
 	cp /sbin/halt /bin/reboot
 	for dir in /*;do
 		case "$dir" in
@@ -4515,19 +4518,13 @@ function activateImage {
 	udevPending
 	mount --move /dev /mnt/dev
 	udevKill
-	umount -t devpts /mnt/dev/pts
-	#======================================
-	# copy boot log file into system image
-	#--------------------------------------
-	mkdir -p /mnt/var/log
-	rm -f /var/log/boot.msg
-	rm -f /mnt/boot/grub/mbrid
-	cp -f /mnt/dev/shm/initrd.msg /mnt/var/log/boot.msg
-	cp -f /var/log/boot.kiwi /mnt/var/log/boot.kiwi
 	#======================================
 	# run preinit stage
 	#--------------------------------------
 	Echo "Preparing preinit phase..."
+	if ! cp /iprocs /mnt;then
+		ystemException "Failed to copy iprocs code" "reboot"
+	fi
 	if ! cp /preinit /mnt;then
 		systemException "Failed to copy preinit code" "reboot"
 	fi
@@ -4536,12 +4533,6 @@ function activateImage {
 	fi
 	if [ ! -x /lib/mkinitrd/bin/run-init ];then
 		systemException "Can't find run-init program" "reboot"
-	fi
-	#======================================
-	# kill boot timer
-	#--------------------------------------
-	if [ ! $UTIMER = 0 ] && kill -0 $UTIMER &>/dev/null;then
-		kill $UTIMER
 	fi
 }
 #======================================
@@ -4553,8 +4544,15 @@ function cleanImage {
 	# is called
 	# ----
 	#======================================
+	# kill utimer and second tail
+	#--------------------------------------
+	. /iprocs
+	kill $UTIMER_PID &>/dev/null
+	kill $TAIL_PID   &>/dev/null
+	#======================================
 	# remove preinit code from system image
 	#--------------------------------------
+	rm -f /iprocs
 	rm -f /preinit
 	rm -f /include
 	rm -f /.kconfig
@@ -4615,6 +4613,22 @@ function bootImage {
 				reboot=yes
 			fi
 		fi
+	fi
+	#======================================
+	# kill initial tail
+	#--------------------------------------
+	. /iprocs
+	kill $TAIL_PID &>/dev/null
+	#======================================
+	# copy boot log file into system image
+	#--------------------------------------
+	mkdir -p /mnt/var/log
+	rm -f /mnt/boot/grub/mbrid
+	if [ -e /mnt/dev/shm/initrd.msg ];then
+		cp -f /mnt/dev/shm/initrd.msg /mnt/var/log/boot.msg
+	fi
+	if [ -e /var/log/boot.kiwi ];then
+		cp -f /var/log/boot.kiwi /mnt/var/log/boot.kiwi
 	fi
 	#======================================
 	# directly boot/reboot
@@ -5592,8 +5606,21 @@ function reloadKernel {
 }
 
 #======================================
-# Check for hotfix kernel
+# initialize
 #--------------------------------------
-reloadKernel
+function initialize {
+	#======================================
+	# Check for hotfix kernel
+	#--------------------------------------
+	reloadKernel
+	#======================================
+	# Start boot timer
+	#--------------------------------------
+	if [ -x /usr/bin/utimer ];then
+		/usr/bin/utimer
+		export UTIMER=$(cat /var/run/utimer.pid)
+		echo UTIMER_PID=$UTIMER >> /iprocs
+	fi
+}
 
 # vim: set noexpandtab:

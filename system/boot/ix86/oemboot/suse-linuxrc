@@ -46,6 +46,7 @@ export OEM_PARTITION_CONFIG="/config.oempartition"
 . /include
 . /repart
 . /dump
+initialize
 
 #======================================
 # Functions...

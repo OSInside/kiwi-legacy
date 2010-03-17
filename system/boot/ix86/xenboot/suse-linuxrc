@@ -33,6 +33,7 @@ export systemIntegrity=clean
 # Functions...
 #--------------------------------------
 . /include
+initialize
 
 #======================================
 # Functions...

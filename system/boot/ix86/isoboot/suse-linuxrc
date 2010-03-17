@@ -36,6 +36,7 @@ export LOCAL_BOOT="no"
 # Functions...
 #--------------------------------------
 . /include
+initialize
 
 #======================================
 # Beautify Startup

@@ -3,6 +3,10 @@ Mon Mar 15 10:53:26 CET 2010 - ms@suse.de
 
 - v4.23
 - fixed getSize() round values not truncate them (bnc #587361)
+- fixed long startup time because of ldconfig running when
+  KIWILinuxRC is sourced from the shell
+- don't use killproc,killall inside the boot images. All procs
+  are written to /iprocs and are handled when required
 - leave libresolv inside the initrd to allow name resolution
 - added Xen dom0 hypervisor check if domain="dom0" is set
 - fixed Xen dom0 bootloader configuration
