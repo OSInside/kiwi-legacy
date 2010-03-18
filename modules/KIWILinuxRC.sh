@@ -5629,6 +5629,10 @@ function initialize {
 	#--------------------------------------
 	reloadKernel
 	#======================================
+	# Prevent blank screen
+	#--------------------------------------
+	setterm -powersave off -blank 0
+	#======================================
 	# Start boot timer
 	#--------------------------------------
 	if [ -x /usr/bin/utimer ];then
