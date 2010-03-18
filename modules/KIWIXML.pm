@@ -2896,10 +2896,15 @@ sub getList {
 				}
 				push @pattlist,"product:".$product;
 			}
+			@slist = ();
 			my @slist_suse = $node -> getElementsByTagName ("opensusePattern");
 			my @slist_rhel = $node -> getElementsByTagName ("rhelGroup");
-			push @slist,@slist_suse;
-			push @slist,@slist_rhel; 
+			if (@slist_suse) {
+				push @slist,@slist_suse;
+			}
+			if (@slist_rhel) {
+				push @slist,@slist_rhel; 
+			}
 			foreach my $element (@slist) {
 				if (! $this -> isArchAllowed ($element,$type)) {
 					next;
