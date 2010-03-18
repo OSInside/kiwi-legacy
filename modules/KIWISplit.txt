@@ -8,5 +8,7 @@
 		<file name="/etc/*"/>
 		<file name="/home"/>
 		<file name="/home/*"/>
+		<file name="/tmp"/>
+		<file name="/tmp/*"/>
 	</persistent>
 </split>
