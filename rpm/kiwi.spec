@@ -530,6 +530,7 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_datadir}/kiwi/image/isoboot
 %doc %{_datadir}/kiwi/image/isoboot/README
 %{_datadir}/kiwi/image/isoboot/suse*
+%{_datadir}/kiwi/image/isoboot/rhel*
 %endif
 
 %ifarch %ix86 x86_64
@@ -579,4 +580,5 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/kiwi/image/suse-11.1-JeOS
 %{_datadir}/kiwi/image/suse-SLE10-JeOS
 %{_datadir}/kiwi/image/suse-SLE11-JeOS
+%{_datadir}/kiwi/image/rhel-05.4-JeOS
 %endif
