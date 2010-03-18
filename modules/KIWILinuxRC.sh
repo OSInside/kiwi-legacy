@@ -421,6 +421,16 @@ function udevSystemStart {
 	echo
 }
 #======================================
+# udevSystemStop
+#--------------------------------------
+function udevSystemStop {
+	# /.../
+	# stop udev while in pre-init phase.
+	# ----
+	/etc/init.d/boot.udev stop
+	echo
+}
+#======================================
 # udevStart
 #--------------------------------------
 function udevStart {

@@ -88,5 +88,5 @@ fi
 #======================================
 # 9) kill udev
 #--------------------------------------
-udevKill
+udevSystemStop
 umountSystemFilesystems

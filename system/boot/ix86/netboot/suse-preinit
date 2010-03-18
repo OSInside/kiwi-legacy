@@ -154,7 +154,7 @@ fi
 #--------------------------------------
 if [ ! -z "$DISK" ] && [ "$systemIntegrity" = "clean" ]; then
 	if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ]; then
-		udevKill
+		udevSystemStop
 		umountSystemFilesystems
 	fi
 fi
