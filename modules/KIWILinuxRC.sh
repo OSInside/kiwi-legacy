@@ -42,8 +42,10 @@ test -z "$TERM"               && export TERM=linux
 test -z "$LANG"               && export LANG=en_US.utf8
 test -z "$UTIMER"             && export UTIMER=0
 test -z "$VGROUP"             && export VGROUP=kiwiVG
-test -z "$CONSOLE"            && export CONSOLE=/dev/console
-test -z "$REDIRECT"           && export REDIRECT=/dev/tty1
+if [ -x /sbin/blogd ];then
+	test -z "$CONSOLE"            && export CONSOLE=/dev/console
+	test -z "$REDIRECT"           && export REDIRECT=/dev/tty1
+fi
     
 #======================================
 # Dialog
@@ -1904,6 +1906,9 @@ function probeFileSystem {
 	if [ $FSTYPE = "unknown" ];then
 		if grep -q ^CLIC /tmp/filesystem-$$;then
 			FSTYPE=clicfs
+		fi
+		if grep -q ^hsqs /tmp/filesystem-$$;then
+			FSTYPE=squashfs
 		fi
 	fi
 	export FSTYPE

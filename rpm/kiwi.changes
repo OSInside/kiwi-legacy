@@ -12,6 +12,7 @@ Mon Mar 15 10:53:26 CET 2010 - ms@suse.de
 - fixed Xen dom0 bootloader configuration
 - fixed default pxeboot file, use kiwiserver
 - fixed --build option in kiwi
+- added support for RHEL
 
 -------------------------------------------------------------------
 Wed Mar 10 11:32:20 CET 2010 - ms@suse.de

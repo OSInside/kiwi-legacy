@@ -2896,7 +2896,10 @@ sub getList {
 				}
 				push @pattlist,"product:".$product;
 			}
-			@slist = $node -> getElementsByTagName ("opensusePattern");
+			my @slist_suse = $node -> getElementsByTagName ("opensusePattern");
+			my @slist_rhel = $node -> getElementsByTagName ("rhelGroup");
+			push @slist,@slist_suse;
+			push @slist,@slist_rhel; 
 			foreach my $element (@slist) {
 				if (! $this -> isArchAllowed ($element,$type)) {
 					next;
@@ -2908,7 +2911,7 @@ sub getList {
 				push @pattlist,"pattern:".$pattern;
 			}
 			if (@pattlist) {
-				if ($manager ne "zypper") {
+				if (($manager ne "zypper") && ($manager ne "yum")) {
 					#==========================================
 					# turn patterns into pacs for this manager
 					#------------------------------------------
@@ -2941,7 +2944,7 @@ sub getList {
 					push @result,@packageList;
 				} else {
 					#==========================================
-					# zypper knows about patterns
+					# zypper/yum knows about patterns/groups
 					#------------------------------------------
 					foreach my $pname (@pattlist) {
 						$kiwi -> info ("--> Requesting $pname");

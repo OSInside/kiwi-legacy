@@ -536,6 +536,23 @@ div {
 }
 
 #==========================================
+# common element <rhelGroup>
+#
+div {
+	k.rhelgroup.name.attribute = k.name.attribute
+	k.rhelgroup.arch.attribute = k.arch.attribute
+	k.rhelgroup.attlist =
+		k.rhelgroup.name.attribute &
+		k.rhelgroup.arch.attribute?
+	k.rhelgroup =
+		## Name of RHEL package group 
+		element rhelGroup {
+			k.rhelgroup.attlist,
+			empty
+		}
+}
+
+#==========================================
 # common element <opensuseProduct>
 #
 div {
@@ -641,7 +658,7 @@ div {
 # common element <packagemanager>
 #
 div {
-	k.packagemanager.content = "smart" | "zypper" | "ensconce"
+	k.packagemanager.content = "smart" | "zypper" | "ensconce" | "yum"
 	k.packagemanager.attlist = empty
 	k.packagemanager =
 		## Name of the Package Manager
@@ -2066,6 +2083,7 @@ div {
 			k.packages.attlist &
 			k.package* &
 			k.opensusepattern* &
+			k.rhelgroup* &
 			k.opensuseproduct* &
 			k.ignore* &
 			k.archive*

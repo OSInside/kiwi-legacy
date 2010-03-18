@@ -752,6 +752,34 @@ archive is extracted in a specific way.</db:para>
   </div>
   <!--
     ==========================================
+    common element <rhelGroup>
+    
+  -->
+  <div>
+    <define name="k.rhelgroup.name.attribute">
+      <ref name="k.name.attribute"/>
+    </define>
+    <define name="k.rhelgroup.arch.attribute">
+      <ref name="k.arch.attribute"/>
+    </define>
+    <define name="k.rhelgroup.attlist">
+      <interleave>
+        <ref name="k.rhelgroup.name.attribute"/>
+        <optional>
+          <ref name="k.rhelgroup.arch.attribute"/>
+        </optional>
+      </interleave>
+    </define>
+    <define name="k.rhelgroup">
+      <element name="rhelGroup">
+        <a:documentation>Name of RHEL package group </a:documentation>
+        <ref name="k.rhelgroup.attlist"/>
+        <empty/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
     common element <opensuseProduct>
     
   -->
@@ -949,6 +977,7 @@ to the specific medium number (CD1, DVD7, ...)</a:documentation>
         <value>smart</value>
         <value>zypper</value>
         <value>ensconce</value>
+        <value>yum</value>
       </choice>
     </define>
     <define name="k.packagemanager.attlist">
@@ -3029,6 +3058,9 @@ and also depends of the selected image output type.</db:para>
           </zeroOrMore>
           <zeroOrMore>
             <ref name="k.opensusepattern"/>
+          </zeroOrMore>
+          <zeroOrMore>
+            <ref name="k.rhelgroup"/>
           </zeroOrMore>
           <zeroOrMore>
             <ref name="k.opensuseproduct"/>

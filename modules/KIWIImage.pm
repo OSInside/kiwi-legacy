@@ -3745,6 +3745,7 @@ sub extractLinux {
 	my $xml       = $this->{xml};
 	my %xenc      = $xml->getXenConfig();
 	if ((-f "$imageTree/boot/vmlinux.gz")  ||
+		(-f "$imageTree/boot/vmlinuz.el5") ||
 		(-f "$imageTree/boot/vmlinux")     ||
 		(-f "$imageTree/boot/vmlinuz")
 	) {

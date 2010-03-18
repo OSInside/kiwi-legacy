@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<image schemaversion="4.4" name="LimeJeOS-RHEL-05.4">
+	<description type="system">
+		<author>Marcus Schäfer</author>
+		<contact>ms@novell.com</contact>
+		<specification>RHEL Enterprise 5 JeOS</specification>
+	</description>
+	<profiles>
+		<profile name="xenFlavour" description="VMX with Xen kernel"/>
+		<profile name="vmxFlavour" description="VMX with default kernel" import="true"/>
+	</profiles>
+	<preferences>
+		<version>1.1.0</version>
+		<packagemanager>yum</packagemanager>
+		<boot-theme>upstream</boot-theme>
+		<locale>en_US</locale>
+		<keytable>us.map.gz</keytable>
+		<timezone>Europe/Berlin</timezone>
+		<rpm-check-signatures>false</rpm-check-signatures>
+		<type image="iso" boot="isoboot/rhel-05.4" flags="compressed"/>
+	</preferences>
+	<preferences profiles="xenFlavour">
+		<type image="vmx" filesystem="ext3" boot="vmxboot/rhel-05.4" bootprofile="xen" bootkernel="xenk">
+			<xenconfig memory="512" domain="domU">
+				<xendisk device="/dev/xvda"/>
+				<xenbridge name=""/>
+			</xenconfig>
+		</type>
+		<type image="oem" filesystem="ext3" boot="oemboot/rhel-05.4" bootprofile="xen" bootkernel="xenk" format="iso">
+			<oemconfig>
+				<oem-home>false</oem-home>
+				<oem-systemsize>2048</oem-systemsize>
+			</oemconfig>
+			<xenconfig domain="dom0"/>
+		</type>
+	</preferences>
+	<preferences profiles="vmxFlavour">
+		<type image="vmx" filesystem="ext3" boot="vmxboot/rhel-05.4" format="vmdk">
+			<vmwareconfig memory="512" guestOS="RHEL" HWversion="4">
+				<vmwaredisk controller="scsi" id="0"/>
+				<vmwarenic driver="e1000" interface="0" mode="bridged"/>
+			</vmwareconfig>
+		</type>
+		<type image="oem" filesystem="ext3" boot="oemboot/rhel-05.4" format="iso">
+			<oemconfig>
+				<oem-home>false</oem-home>
+				<oem-systemsize>2048</oem-systemsize>
+			</oemconfig>
+			<vmwareconfig memory="512" guestOS="RHEL" HWversion="4">
+				<vmwaredisk controller="scsi" id="0"/>
+				<vmwarenic driver="e1000" interface="0" mode="bridged"/>
+			</vmwareconfig>
+		</type>
+	</preferences>
+	<users group="root">
+		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+	</users>
+	<repository type="rpm-md">
+		<source path="iso:///image/CDs/RHEL-5.4-%arch-DVD.iso/Server"/>
+	</repository>
+	<repository type="rpm-md">
+		<source path="/usr/share/kiwi/repo/rhel-repo/rhel-054-repo"/>
+	</repository>
+	<packages type="image">
+		<package name="grub"/>
+		<package name="device-mapper-multipath"/>
+		<package name="screen"/>
+		<package name="firstboot"/>
+		<package name="vim-minimal"/>
+		<package name="selinux-policy-targeted"/>
+		<package name="selinux-policy-devel"/>
+		<package name="libselinux-utils"/>
+		<package name="dhclient"/>
+		<rhelGroup name="System Tools"/>
+		<rhelGroup name="Text-based Internet"/>
+		<package name="gfxboot-branding-upstream" bootinclude="true" bootdelete="true"/>
+	</packages>
+	<packages type="image" profiles="xenFlavour">
+		<package name="kernel-xen" replaces="kernel"/>
+		<package name="xen" replaces=""/>
+	</packages>
+	<packages type="image" profiles="vmxFlavour">
+		<package name="kernel" replaces="kernel-xen"/>
+	</packages>
+	<packages type="bootstrap">
+		<package name="filesystem"/>
+		<package name="basesystem"/>
+	</packages>
+</image>

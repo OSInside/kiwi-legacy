@@ -409,6 +409,45 @@ sub setupFirstBootYaST {
 }
 
 #==========================================
+# setupFirstBootAnaconda
+#------------------------------------------
+sub setupFirstBootAnaconda {
+	# ...
+	# This function activates the RHEL firstboot mechanism.
+	# So far I did not find a way to tell firstboot what
+	# modules it should call. firstboot is activated if the
+	# file config-anaconda-firstboot exists as part of your
+	# image description
+	# ---
+	my $this = shift;
+	my $kiwi = $this->{kiwi};
+	my $root = $this->{root};
+	my $imageDesc = $this->{imageDesc};
+	if (! -f "$imageDesc/config-anaconda-firstboot") {
+		return "skipped";
+	}
+	$kiwi -> info ("Setting up Anaconda firstboot service...");
+	#==========================================
+	# touch/remove some files
+	#------------------------------------------
+	qxx ("touch $root/etc/reconfigSys 2>&1");
+	qxx ("rm -f /etc/sysconfig/firstboot 2>&1");
+	#==========================================
+	# activate service
+	#------------------------------------------
+	my $data = qxx ("chroot $root chkconfig --level 35 firstboot on 2>&1");
+	my $code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error ("Failed to activate firstboot: $data");
+		$kiwi -> failed ();
+		return "failed";
+	}
+	$kiwi -> done();
+	return "success";
+}
+
+#==========================================
 # quoteshell
 #------------------------------------------
 sub quoteshell {

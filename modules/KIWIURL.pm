@@ -310,6 +310,7 @@ sub isoPath {
 	my $status;
 	my $file;
 	my $path;
+	my $search;
 	#==========================================
 	# normalize URL data
 	#------------------------------------------
@@ -342,6 +343,10 @@ sub isoPath {
 		my $pwd = qxx ("pwd"); chomp $pwd;
 		$module = $pwd."/".$module;
 	}
+	if ($module =~ /(.*\.iso)(.*)/) {
+		$module = $1;
+		$search = $2;
+	}
 	my ( $module_test ) = glob ($module);
 	if (! -e $module_test) {
 		$kiwi -> warning ("ISO path: $module_test doesn't exist: $!");
@@ -349,7 +354,7 @@ sub isoPath {
 		return undef;
 	}
 	my $name   = basename ($module);
-	my $tmpdir = "/tmp/kiwimount-$name-$$";
+	my $tmpdir = "/tmp/kiwimount-$name";
 	#==========================================
 	# create ISO mount point and perform mount
 	#------------------------------------------
@@ -374,7 +379,11 @@ sub isoPath {
 	# add loop mount to mount list of root obj
 	#------------------------------------------
 	$root -> addToMountList ($tmpdir);
-	return $tmpdir;
+	if ($search) {
+		return "$tmpdir/$search";
+	} else {
+		return $tmpdir;
+	}
 }
 
 #==========================================

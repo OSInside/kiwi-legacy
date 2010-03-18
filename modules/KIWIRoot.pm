@@ -899,6 +899,9 @@ sub setup {
 	if ($status eq "skipped") {
 		$status = $configure -> setupAutoYaST();
 	}
+	if ($status eq "skipped") {
+		$status = $configure -> setupFirstBootAnaconda();
+	}
 	if ($status eq "failed") {
 		return undef;
 	}
@@ -1061,6 +1064,7 @@ sub setupMount {
 		push (@mountList,"$root/dev");
 	}
 	if (! -f "$root/var/run/dbus/pid") {
+		qxx ("mkdir -p $root/var/run/dbus");
 		qxx ("mount --bind /var/run/dbus $root/var/run/dbus");
 		push (@mountList,"$root/var/run/dbus");
 	}

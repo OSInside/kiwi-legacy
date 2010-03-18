@@ -695,7 +695,11 @@ sub printLogExcerpt {
 		last if ($line =~ /$search/);
 		push @result,$line;
 	}
-	@lines  = splice @result,-50;
+	if (@result > 50) {
+		@lines  = splice @result,-50;
+	} else {
+		@lines = @result;
+	}
 	@result = ();
 	$ignore = 0;
 	foreach my $line (@lines) {

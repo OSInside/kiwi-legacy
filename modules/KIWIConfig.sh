@@ -20,6 +20,19 @@
 export LANG=C
 export LC_ALL=C
 #======================================
+# check base tools
+#--------------------------------------
+for tool in basename dirname;do
+	if [ -x /bin/$tool ] && [ ! -e /usr/bin/$tool ];then
+		ln -s /bin/$tool /usr/bin/$tool
+	fi
+done
+for tool in setctsid klogconsole;do
+	if [ -x /usr/bin/$tool ] && [ ! -e /usr/sbin/$tool ];then
+		ln -s /usr/bin/$tool /usr/sbin/$tool
+	fi
+done
+#======================================
 # suseInsertService
 #--------------------------------------
 function suseInsertService {
@@ -856,10 +869,13 @@ function suseStripInitrd {
 	#------------------------------------------
 	rm -rf `find -type d | grep .svn`
 	local files="
+		/usr/share/backgrounds/images /usr/share/zoneinfo
+		/var/lib/yum /var/lib/dpkg /usr/kerberos /usr/lib*/gconv
+		/usr/share/apps/ksplash /usr/share/apps/firstboot
 		/usr/share/info /usr/share/man /usr/share/cracklib /usr/lib*/python*
 		/usr/lib*/perl* /usr/share/doc/packages /var/lib/rpm
 		/usr/lib*/rpm /var/lib/smart /opt/* /usr/include /root/.gnupg
-		/etc/PolicyKit /etc/sysconfig /etc/init.d /etc/profile.d /etc/skel
+		/etc/PolicyKit /etc/init.d /etc/profile.d /etc/skel
 		/etc/ssl /etc/java /etc/default /etc/cron* /etc/dbus*
 		/etc/pam.d* /etc/DIR_COLORS /etc/rc* /usr/share/hal /usr/share/ssl
 		/usr/lib*/hal /usr/lib*/*.a /usr/lib*/*.la /usr/lib*/librpm*
@@ -941,7 +957,7 @@ function suseStripInitrd {
 		pvchange pvresize pvscan vgscan vgchange vgextend vgdisplay
 		lvchange lvresize lvextend lvcreate grub dcounter tty
 		dmsetup dialog awk gawk clicfs cryptsetup clear blkid fbiterm
-		gettext diff bc utimer cmp busybox kexec
+		gettext diff bc utimer cmp busybox kexec pam_console_apply
 	"
 	tools="$tools $@"
 	for path in /sbin /usr/sbin /usr/bin /bin;do
@@ -976,6 +992,20 @@ function suseStripInitrd {
 	done
 	rm -f /etc/*
 	mv /tmp/* /etc
+}
+
+#======================================
+# rhelStripInitrd
+#--------------------------------------
+function rhelStripInitrd {
+	suseStripInitrd
+}
+
+#======================================
+# rhelGFXBoot
+#--------------------------------------
+function rhelGFXBoot {
+	suseGFXBoot $@
 }
 
 #======================================
@@ -1144,17 +1174,17 @@ function suseGFXBoot {
 	#======================================
 	# copy bootloader binaries of required
 	#--------------------------------------
-	if [ $loader = "isolinux" ];then
+	if [ "$loader" = "isolinux" ];then
 		# isolinux boot code...
 		mv /usr/share/syslinux/isolinux.bin /image/loader
-		if [ -f "/usr/share/syslinux/gfxboot.com" ];then
+		if [ -f /usr/share/syslinux/gfxboot.com ];then
 			mv /usr/share/syslinux/gfxboot.com /image/loader
 		fi
-		if [ -f "/usr/share/syslinux/mboot.c32" ];then
+		if [ -f /usr/share/syslinux/mboot.c32 ];then
 			mv /usr/share/syslinux/mboot.c32 /image/loader
 		fi
-		if [ -f "/boot/memtest.bin" ];then 
-			mv /boot/memtest.bin /image/loader/memtest
+		if [ -f /boot/memtest* ];then 
+			mv /boot/memtest* /image/loader/memtest
 		fi
 	else
 		# boot loader binary part of MBR
@@ -1375,6 +1405,8 @@ function suseStripKernel {
 			if [ -f vmlinux-$VERSION.gz ];then
 				mv vmlinux-$VERSION.gz vmlinux.gz
 				mv vmlinuz-$VERSION vmlinuz
+			elif [ -f vmlinuz-$VERSION.el5 ];then
+				mv vmlinux-$VERSION.el5 vmlinuz
 			elif [ -f vmlinuz-$VERSION ];then
 				mv vmlinuz-$VERSION vmlinuz
 			else
@@ -1385,6 +1417,13 @@ function suseStripKernel {
 			popd
 		done
 	done
+}
+
+#======================================
+# rhelStripKernel
+#--------------------------------------
+function rhelStripKernel {
+	suseStripKernel
 }
 
 #======================================

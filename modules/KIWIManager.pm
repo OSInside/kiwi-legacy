@@ -39,6 +39,7 @@ our %packageManager;
 $packageManager{smart}   = "/usr/bin/smart";
 $packageManager{zypper}  = "/usr/bin/zypper";
 $packageManager{ensconce}= "/usr/bin/ensconce";
+$packageManager{yum}     = "/usr/bin/yum";
 $packageManager{default} = "smart";
 
 #==========================================
@@ -150,14 +151,27 @@ sub new {
 		$packageManager{ensconce},
 		"-r /"
 	];
+	$this->{yum}         = [
+		$packageManager{yum},
+		"-c $dataDir/yum.conf",
+		"-y"
+	];
 	$this->{kchroot}     = [
 		"chroot \"$root\""
 	];
 	#==========================================
 	# remove pre-defined smart channels
 	#------------------------------------------
-	if (glob ("$root//etc/smart/channels/*")) {
-		qxx ( "rm -f $root/etc/smart/channels/*" );
+	if ($manager eq "smart") {
+		if (glob ("$root//etc/smart/channels/*")) {
+			qxx ( "rm -f $root/etc/smart/channels/*" );
+		}
+	}
+	#==========================================
+	# create yum config if required
+	#------------------------------------------
+	if ($manager eq "yum") {
+		$this->{yumconfig} = $this->createYumConfig();
 	}
 	return $this;
 }
@@ -343,15 +357,14 @@ sub setupSignatureCheck {
 	my $chroot  = $this->{chroot};
 	my $root    = $this->{root};
 	my @kchroot = @{$this->{kchroot}};
+	my $yumc    = $this->{yumconfig};
 	my $data;
 	my $code;
-
 	#==========================================
 	# Get signature information
 	#------------------------------------------
 	my $imgCheckSig = $xml -> getRPMCheckSignatures();
 	$this->{imgCheckSig} = $imgCheckSig;
-
 	#==========================================
 	# smart
 	#------------------------------------------
@@ -389,6 +402,20 @@ sub setupSignatureCheck {
 	if ($manager eq "ensconce") {
 		# nothing to do here for ensconce...
 	}
+	#==========================================
+	# yum
+	#------------------------------------------
+	if ($manager eq "yum") {
+		$data = new Config::IniFiles (
+			-file => $yumc, -allowedcommentchars => '#'
+		);
+		my $optval = 0;
+		if ($imgCheckSig eq "true") {
+			$optval = 1;
+		}
+		$data -> newval ("main", "gpgcheck", $optval);
+		$data -> RewriteConfig();
+	}
 	return $this;
 }
 
@@ -406,7 +433,8 @@ sub resetSignatureCheck {
 	my $manager= $this->{manager};
 	my $root   = $this->{root};
 	my @smart  = @{$this->{smart}};
-	my @kchroot = @{$this->{kchroot}};
+	my @kchroot= @{$this->{kchroot}};
+	my $yumc   = $this->{yumconfig};
 	my $curCheckSig = $this->{curCheckSig};
 	my $data;
 	my $code;
@@ -444,6 +472,16 @@ sub resetSignatureCheck {
 	#------------------------------------------
 	if ($manager eq "ensconce") {
 		# nothing to do here for ensconce...
+	}
+	#==========================================
+	# yum
+	#------------------------------------------
+	if ($manager eq "yum") {
+		$data = new Config::IniFiles (
+			-file => $yumc, -allowedcommentchars => '#'
+		);
+		$data -> newval ("main", "gpgcheck", "0");
+		$data -> RewriteConfig();
 	}
 	return $this;
 }
@@ -521,6 +559,12 @@ sub setupExcludeDocs {
 	if ($manager eq "ensconce") {
 		# nothing to do here for ensconce...
 	}
+	#==========================================
+	# yum
+	#------------------------------------------
+	if ($manager eq "yum") {
+		# nothing to do here for yum...
+	}
 	return $this;
 }
 
@@ -589,6 +633,12 @@ sub resetExcludeDocs {
 	if ($manager eq "ensconce") {
 		# nothing to do here for ensconce...
 	}
+	#==========================================
+	# yum
+	#------------------------------------------
+	if ($manager eq "yum") {
+		# nothing to do here for yum...
+	}
 	return $this;
 }
 
@@ -611,6 +661,7 @@ sub setupInstallationSource {
 	my @smart  = @{$this->{smart}};
 	my @rootdir= @{$this->{smartroot}};
 	my $dataDir= $this->{dataDir};
+	my @yum    = @{$this->{yum}};
 	my $data;
 	my $code;
 	#==========================================
@@ -757,6 +808,69 @@ sub setupInstallationSource {
 	if ($manager eq "ensconce") {
 		# Ignored for ensconce
 	}
+	#==========================================
+	# yum
+	#------------------------------------------
+	if ($manager eq "yum") {
+		my $stype  = "private";
+		if (! $chroot) {
+			$stype = "public";
+		}
+		foreach my $alias (keys %{$source{$stype}}) {
+			my @sopts = @{$source{$stype}{$alias}};
+			my $repo  = "$dataDir/$alias.repo";
+			#==========================================
+			# create new repo file and open it
+			#------------------------------------------
+			qxx ("echo '[$alias]' > $repo");
+			$data = new Config::IniFiles (
+				-file => $repo, -allowedcommentchars => '#'
+			);
+			#==========================================
+			# walk through the repo options
+			#------------------------------------------
+			foreach my $opt (@sopts) {
+				next if ! defined $opt;
+				$opt =~ /(.*?)=(.*)/;
+				my $key = $1;
+				my $val = $2;
+				#==========================================
+				# Set baseurl and name parameter
+				#------------------------------------------
+				if (($key eq "baseurl") || ($key eq "path")) {
+					if ($val =~ /^'\//) {
+						$val =~ s/^'(.*)'$/"file:\/\/$1"/
+					}
+					$val =~ s/^\"//;
+					$val =~ s/\"$//;
+					$data -> newval ($alias, "name"   , $alias);
+					$data -> newval ($alias, "baseurl", $val);
+				}
+			}
+			if (! $chroot) {
+				$kiwi -> info ("Adding bootstrap yum repo: $alias");
+			} else {
+				$kiwi -> info ("Adding chroot yum repo: $alias");
+			}
+			push (@channelList,$alias);
+			$data -> RewriteConfig();
+			$kiwi -> done();
+		}
+		#==========================================
+		# create cache file
+		#------------------------------------------
+		if (! $chroot) {
+			$kiwi -> info ("Creating yum metadata cache...");
+			$data = qxx ("@yum makecache 2>&1");
+			$code = $? >> 8;
+			if ($code != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("yum: $data");
+				return undef;
+			}
+			$kiwi -> done();
+		}
+	}
 	$this->{channelList} = \@channelList;
 	return $this;
 }
@@ -778,6 +892,7 @@ sub resetInstallationSource {
 	my @zypper = @{$this->{zypper}};
 	my @smart  = @{$this->{smart}};
 	my @rootdir= @{$this->{smartroot}};
+	my $dataDir= $this->{dataDir};
 	my @channelList = @{$this->{channelList}};
 	my $data;
 	my $code;
@@ -847,6 +962,14 @@ sub resetInstallationSource {
 	if ($manager eq "ensconce") {
 		# Ignored for ensconce
 	}
+	#==========================================
+	# yum
+	#------------------------------------------
+	if ($manager eq "yum") {
+		$kiwi -> info ("Removing yum repo(s) in: $dataDir");
+		qxx ("rm -f $dataDir/*.repo 2>&1");
+		$kiwi -> done ();
+	}
 	return $this;
 }
 
@@ -906,7 +1029,7 @@ sub setupDownload {
 	# zypper
 	#------------------------------------------
 	if ($manager eq "zypper") {
-		# TODO
+		# FIXME
 		$kiwi -> failed ();
 		$kiwi -> error  ("*** not implemeted ***");
 		$kiwi -> failed ();
@@ -916,7 +1039,17 @@ sub setupDownload {
 	# ensconce
 	#------------------------------------------
 	if ($manager eq "ensconce") {
-		# TODO
+		# FIXME
+		$kiwi -> failed ();
+		$kiwi -> error  ("*** not implemeted ***");
+		$kiwi -> failed ();
+		return undef;
+	}
+	#==========================================
+	# yum
+	#------------------------------------------
+	if ($manager eq "yum") {
+		# FIXME
 		$kiwi -> failed ();
 		$kiwi -> error  ("*** not implemeted ***");
 		$kiwi -> failed ();
@@ -933,15 +1066,16 @@ sub installPackages {
 	# install packages in the previosly installed root
 	# system using the package manager install method
 	# ---
-	my $this = shift;
-	my $instPacks = shift;
-	my $kiwi = $this->{kiwi};
-	my $root = $this->{root};
-	my @kchroot = @{$this->{kchroot}};
-	my $manager = $this->{manager};
-	my @smart   = @{$this->{smart}};
-	my @zypper  = @{$this->{zypper}};
-	my @ensconce = @{$this->{ensconce}};
+	my $this       = shift;
+	my $instPacks  = shift;
+	my $kiwi       = $this->{kiwi};
+	my $root       = $this->{root};
+	my @kchroot    = @{$this->{kchroot}};
+	my $manager    = $this->{manager};
+	my @smart      = @{$this->{smart}};
+	my @zypper     = @{$this->{zypper}};
+	my @yum        = @{$this->{yum}};
+	my @ensconce   = @{$this->{ensconce}};
 	my $screenCall = $this->{screenCall};
 	#==========================================
 	# check addon packages
@@ -1034,6 +1168,28 @@ sub installPackages {
 		print $fd "exit \$ECODE\n";
 		$fd -> close();
 	}
+	#==========================================
+	# yum
+	#------------------------------------------
+	if ($manager eq "yum") {
+		#==========================================
+		# Create screen call file
+		#------------------------------------------
+		$kiwi -> info ("Installing addon packages...");
+		print $fd "function clean { kill \$SPID;";
+		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;";
+		print $fd "if [ \"\$c\" = 5 ];then kill \$SPID;break;fi;";
+		print $fd "c=\$((\$c+1));done;\n";
+		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;done\n";
+		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
+		print $fd "trap clean INT TERM\n";
+		print $fd "@kchroot @yum install @addonPackages &\n";
+		print $fd "SPID=\$!;wait \$SPID\n";
+		print $fd "ECODE=\$?\n";
+		print $fd "echo \$ECODE > $screenCall.exit\n";
+		print $fd "exit \$ECODE\n";
+		$fd -> close();
+	}
 	return $this -> setupScreenCall();
 }
 
@@ -1045,15 +1201,16 @@ sub removePackages {
 	# remove packages from the previosly installed root
 	# system using the package manager remove method
 	# ---
-	my $this = shift;
-	my $removePacks = shift;
-	my $kiwi = $this->{kiwi};
-	my $root = $this->{root};
-	my @kchroot = @{$this->{kchroot}};
-	my $manager = $this->{manager};
-	my @smart   = @{$this->{smart}};
-	my @zypper  = @{$this->{zypper}};
-	my @ensconce = @{$this->{ensconce}};
+	my $this       = shift;
+	my $removePacks= shift;
+	my $kiwi       = $this->{kiwi};
+	my $root       = $this->{root};
+	my @kchroot    = @{$this->{kchroot}};
+	my $manager    = $this->{manager};
+	my @smart      = @{$this->{smart}};
+	my @zypper     = @{$this->{zypper}};
+	my @yum        = @{$this->{yum}};
+	my @ensconce   = @{$this->{ensconce}};
 	my $screenCall = $this->{screenCall};
 	#==========================================
 	# check to be removed packages
@@ -1149,6 +1306,28 @@ sub removePackages {
 		print $fd "exit \$ECODE\n";
 		$fd -> close();
 	}
+	#==========================================
+	# yum
+	#------------------------------------------
+	if ($manager eq "yum") {
+		#==========================================
+		# Create screen call file
+		#------------------------------------------
+		$kiwi -> info ("Removing addon packages...");
+		print $fd "function clean { kill \$SPID;";
+		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;";
+		print $fd "if [ \"\$c\" = 5 ];then kill \$SPID;break;fi;";
+		print $fd "c=\$((\$c+1));done;\n";
+		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;done\n";
+		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
+		print $fd "trap clean INT TERM\n";
+		print $fd "@kchroot @yum remove @removePackages &\n";
+		print $fd "SPID=\$!;wait \$SPID\n";
+		print $fd "ECODE=\$?\n";
+		print $fd "echo \$ECODE > $screenCall.exit\n";
+		print $fd "exit \$ECODE\n";
+		$fd -> close();
+	}
 	return $this -> setupScreenCall();
 }
 
@@ -1160,17 +1339,18 @@ sub setupUpgrade {
 	# upgrade the previosly installed root system
 	# using the package manager upgrade functionality
 	# ---
-	my $this = shift;
-	my $addPacks = shift;
-	my $delPacks = shift;
-	my $kiwi = $this->{kiwi};
-	my $root = $this->{root};
-	my $xml  = $this->{xml};
-	my @kchroot = @{$this->{kchroot}};
-	my $manager = $this->{manager};
-	my @smart   = @{$this->{smart}};
-	my @zypper  = @{$this->{zypper}};
-	my @ensconce = @{$this->{ensconce}};
+	my $this       = shift;
+	my $addPacks   = shift;
+	my $delPacks   = shift;
+	my $kiwi       = $this->{kiwi};
+	my $root       = $this->{root};
+	my $xml        = $this->{xml};
+	my @kchroot    = @{$this->{kchroot}};
+	my $manager    = $this->{manager};
+	my @smart      = @{$this->{smart}};
+	my @zypper     = @{$this->{zypper}};
+	my @yum        = @{$this->{yum}};
+	my @ensconce   = @{$this->{ensconce}};
 	my $screenCall = $this->{screenCall};
 	#==========================================
 	# setup screen call
@@ -1280,7 +1460,7 @@ sub setupUpgrade {
 			my @newpacks = ();
 			foreach my $pac (@addonPackages) {
 				if ($pac =~ /^pattern:(.*)/) {
-					push @newpatts,$1;
+					push @newpatts,"\"$1\"";
 				} elsif ($pac =~ /^product:(.*)/) {
 					push @newprods,$1;
 				} else {
@@ -1322,6 +1502,60 @@ sub setupUpgrade {
 		print $fd "echo 0 > $screenCall.exit; exit 0\n";
 		$fd -> close();
 		return $this;
+	}
+	#==========================================
+	# yum
+	#------------------------------------------
+	if ($manager eq "yum") {
+		#==========================================
+		# Create screen call file
+		#------------------------------------------
+		$kiwi -> info ("Upgrading image...");
+		print $fd "function clean { kill \$SPID;";
+		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;";
+		print $fd "if [ \"\$c\" = 5 ];then kill \$SPID;break;fi;"; 
+		print $fd "c=\$((\$c+1));done;\n";
+		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;done\n";
+		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
+		print $fd "trap clean INT TERM\n";
+		if (defined $delPacks) {
+			my @removePackages = @{$delPacks};
+			if (@removePackages) {
+				print $fd "@kchroot @yum remove @removePackages &\n";
+				print $fd "SPID=\$!;wait \$SPID\n";
+				print $fd "test \$? = 0 && ";
+			}
+		}
+		if (defined $addPacks) {
+			my @addonPackages = @{$addPacks};
+			my @newpatts = ();
+			my @newpacks = ();
+			foreach my $pac (@addonPackages) {
+				if ($pac =~ /^pattern:(.*)/) {
+					push @newpatts,"\"$1\"";
+				} else {
+					push @newpacks,$pac;
+				}
+			}
+			@addonPackages = @newpacks;
+			print $fd "@kchroot @yum upgrade &\n";
+			print $fd "SPID=\$!;wait \$SPID\n";
+			if (@newpatts) {
+				print $fd "test \$? = 0 && @kchroot @yum groupinstall @newpatts &\n";
+				print $fd "SPID=\$!;wait \$SPID\n";
+			}
+			if (@addonPackages) {
+				print $fd "test \$? = 0 && @kchroot @yum install @addonPackages &\n";
+				print $fd "SPID=\$!;wait \$SPID\n";
+			}
+		} else {
+			print $fd "@kchroot @yum upgrade &\n";
+			print $fd "SPID=\$!;wait \$SPID\n";
+		}
+		print $fd "ECODE=\$?\n";
+		print $fd "echo \$ECODE > $screenCall.exit\n";
+		print $fd "exit \$ECODE\n";
+		$fd -> close();
 	}
 	return $this -> setupScreenCall();
 }
@@ -1464,20 +1698,21 @@ sub setupRootSystem {
 	# install the bootstrap system to be able to
 	# chroot into this minimal image
 	# ---
-	my $this   = shift;
-	my @packs  = @_;
-	my $kiwi   = $this->{kiwi};
-	my $chroot = $this->{chroot};
-	my @kchroot= @{$this->{kchroot}};
-	my $root   = $this->{root};
-	my $xml    = $this->{xml};
-	my $manager= $this->{manager};
-	my @zypper = @{$this->{zypper}};
-	my @smart  = @{$this->{smart}};
-	my @rootdir= @{$this->{smartroot}};
-	my @ensconce = @{$this->{ensconce}};
+	my $this        = shift;
+	my @packs       = @_;
+	my $kiwi        = $this->{kiwi};
+	my $chroot      = $this->{chroot};
+	my @kchroot     = @{$this->{kchroot}};
+	my $root        = $this->{root};
+	my $xml         = $this->{xml};
+	my $manager     = $this->{manager};
+	my @zypper      = @{$this->{zypper}};
+	my @smart       = @{$this->{smart}};
+	my @rootdir     = @{$this->{smartroot}};
+	my @ensconce    = @{$this->{ensconce}};
 	my @channelList = @{$this->{channelList}};
 	my $screenCall  = $this->{screenCall};
+	my @yum         = @{$this->{yum}};
 	#==========================================
 	# setup screen call
 	#------------------------------------------
@@ -1620,7 +1855,7 @@ sub setupRootSystem {
 			my @newprods = ();
 			foreach my $pac (@packs) {
 				if ($pac =~ /^pattern:(.*)/) {
-					push @newpatts,$1;
+					push @newpatts,"\"$1\"";
 				} elsif ($pac =~ /^product:(.*)/) {
 					push @newprods,$1;
 				} else {
@@ -1678,7 +1913,7 @@ sub setupRootSystem {
 			my @newprods  = ();
 			foreach my $need (@packs) {
 				if ($need =~ /^pattern:(.*)/) {
-					push @newpatts,$1;
+					push @newpatts,"\"$1\"";
 					next;
 				} elsif ($need =~ /^product:(.*)/) {
 					push @newprods,$1;
@@ -1778,6 +2013,109 @@ sub setupRootSystem {
 		$fd -> close();
 	}
 	#==========================================
+	# yum
+	#------------------------------------------
+	if ($manager eq "yum") {
+		if (! $chroot) {
+			#==========================================
+			# Add package manager to package list
+			#------------------------------------------
+			if ($this -> setupInstallPackages()) {
+				push (@packs,$manager);
+			}
+			#==========================================
+			# Setup baselibs
+			#------------------------------------------
+			$kiwi -> info ("Setting up bootstrap baselibs...");
+			if (! $this -> rpmLibs()) {
+				$kiwi -> failed();
+				return undef;
+			}
+			$kiwi -> done();
+			$kiwi -> info ("Initializing image system on: $root...");
+			#==========================================
+			# check input list for group names
+			#------------------------------------------
+			my @newpacks = ();
+			my @newpatts = ();
+			foreach my $pac (@packs) {
+				if ($pac =~ /^pattern:(.*)/) {
+					push @newpatts,"\"$1\"";
+				} else {
+					push @newpacks,$pac;
+				}
+			}
+			@packs = @newpacks;
+			#==========================================
+			# Create screen call file
+			#------------------------------------------
+			mkdir "$root/tmp";
+			print $fd "function clean { kill \$SPID;";
+			print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;";
+			print $fd "if [ \"\$c\" = 5 ];then kill \$SPID;break;fi;"; 
+			print $fd "c=\$((\$c+1));done;\n";
+			print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;done\n";
+			print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
+			print $fd "trap clean INT TERM\n";
+			if (@newpatts) {
+				print $fd "@yum --installroot=$root groupinstall @newpatts &\n";
+				print $fd "SPID=\$!;wait \$SPID\n";
+			}
+			if (@packs) {
+				if (@newpatts) {
+					print $fd "test \$? = 0 && ";
+				}
+				print $fd "@yum --installroot=$root install @packs &\n";
+				print $fd "SPID=\$!;wait \$SPID\n";
+			}
+			print $fd "ECODE=\$?\n";
+			print $fd "echo \$ECODE > $screenCall.exit\n";
+			print $fd "exit \$ECODE\n";
+		} else {
+			#==========================================
+			# select groups and packages
+			#------------------------------------------
+			my @install   = ();
+			my @newpatts  = ();
+			foreach my $need (@packs) {
+				if ($need =~ /^pattern:(.*)/) {
+					push @newpatts,"\"$1\"";
+					next;
+				}
+				push @install,$need;
+			}
+			#==========================================
+			# Create screen call file
+			#------------------------------------------
+			$kiwi -> info ("Installing image packages...");
+			print $fd "function clean { kill \$SPID;";
+			print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;";
+			print $fd "if [ \"\$c\" = 5 ];then kill \$SPID;break;fi;"; 
+			print $fd "c=\$((\$c+1));done;\n";
+			print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;done\n";
+			print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
+			print $fd "trap clean INT TERM\n";
+			print $fd "@kchroot rpm --rebuilddb &\n";
+			print $fd "SPID=\$!;wait \$SPID\n";
+			print $fd "test \$? = 0 && ";
+			if (@newpatts) {
+				print $fd "@kchroot @yum groupinstall @newpatts &\n";
+				print $fd "SPID=\$!;wait \$SPID\n";
+			}
+			if (@install) {
+				if (@newpatts) {
+					print $fd "test \$? = 0 && ";
+				}
+				print $fd "@kchroot @yum install @install &\n";
+				print $fd "SPID=\$!;wait \$SPID\n";
+			}
+			print $fd "ECODE=\$?\n";
+			print $fd "echo \$ECODE > $screenCall.exit\n";
+			print $fd "exit \$ECODE\n";
+		}
+		$fd -> close();
+	}
+	#==========================================
 	# run process
 	#------------------------------------------
 	if (! $this -> setupScreenCall()) {
@@ -1830,6 +2168,13 @@ sub resetSource {
 	#------------------------------------------
 	if ($manager eq "ensconce") {
 		# Ignored for ensconce
+	}
+	#==========================================
+	# yum
+	#------------------------------------------
+	if ($manager eq "yum") {
+		$kiwi -> info ("Removing yum repo(s) in: $dataDir");
+		qxx ("rm -f $dataDir/*.repo 2>&1");
 	}
 	return $this;
 }
@@ -1884,9 +2229,9 @@ sub setupPackageInfo {
 		return $code;
 	}
 	#==========================================
-	# zypper
+	# zypper + yum
 	#------------------------------------------
-	if ($manager eq "zypper") {
+	if (($manager eq "zypper") || ($manager eq "yum")) {
 		my $str = "not installed";
 		if (! $chroot) {
 			$kiwi -> info ("Checking for package: $pack");
@@ -2074,6 +2419,7 @@ sub rpmLibs {
 			# no baselibs stored/copied...
 			return $this;
 		}
+		qxx ("@kchroot rpm --rebuilddb 2>&1");
 		@result = @{$result};
 		my %dirlist = ();
 		foreach my $l (@result) {
@@ -2121,6 +2467,28 @@ sub rpmLibs {
 	}
 	$this -> {baselibs} = \@result;
 	return $this;
+}
+
+#==========================================
+# createYumConfig
+#------------------------------------------
+sub createYumConfig {
+	my $this   = shift;
+	my $root   = $this->{root};
+	my $meta   = $this->{dataDir};
+	my $config = $meta."/yum.conf";
+	qxx ("echo '[main]' > $config");
+	qxx ("echo 'cachedir=$meta' >> $config");
+	qxx ("echo 'reposdir=$meta' >> $config");
+	qxx ("echo 'keepcache=0' >> $config");
+	qxx ("echo 'debuglevel=2' >> $config");
+	qxx ("echo 'pkgpolicy=newest' >> $config");
+	qxx ("echo 'tolerant=1' >> $config");
+	qxx ("echo 'exactarch=1' >> $config");
+	qxx ("echo 'obsoletes=1' >> $config");
+	qxx ("echo 'plugins=1' >> $config");
+	qxx ("echo 'metadata_expire=1800' >> $config");
+	return $config;
 }
 
 1;

@@ -652,10 +652,16 @@ sub createISOLinuxConfig {
 	);
 	my $code = $? >> 8;
 	if ($code != 0) {
-		$kiwi -> error  ("Failed to call isolinux-config binary: $data");
-		$kiwi -> failed ();
-		$this -> cleanISO();
-		return undef;
+		# /.../
+		# Could not set base directory to isolinux, therefore we
+		# create a compat directory /isolinux and hardlink all files
+		# ----
+		my $data = qxx ("mkdir -p $src/isolinux 2>&1");
+		my $code = $? >> 8;
+		if ($code == 0) {
+			$data = qxx ("ln $src/$boot/loader/* $src/isolinux/ 2>&1");
+			$code = $? >> 8;
+		};
 	}
 	return $this;
 }
