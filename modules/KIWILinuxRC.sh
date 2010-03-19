@@ -5083,13 +5083,20 @@ function runInteractive {
 	# a file and printed as result to this function
 	# ----
 	local r=/tmp/rid
+	local code
 	echo "dialog $@ > /tmp/out" > $r
+	echo "echo -n \$? > /tmp/out.exit" >> $r
 	if [ -e /dev/fb0 ];then
-		setctsid $ELOG_EXCEPTION fbiterm -m $UFONT -- bash -i $r || return
+		setctsid $ELOG_EXCEPTION fbiterm -m $UFONT -- bash -i $r
 	else
-		setctsid $ELOG_EXCEPTION bash -i $r || return
+		setctsid $ELOG_EXCEPTION bash -i $r
 	fi
-	cat /tmp/out && rm -f /tmp/out $r
+	code=$(cat /tmp/out.exit)
+	if [ ! $code = 0 ];then
+		return $code
+	fi
+	cat /tmp/out && rm -f /tmp/out* $r
+	return 0
 }
 #======================================
 # SAPMemCheck
