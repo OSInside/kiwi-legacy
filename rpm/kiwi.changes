@@ -3,6 +3,8 @@ Fri Mar 19 12:09:46 CET 2010 - ms@suse.de
 
 - v4.24
 - added "Select disk for installation" to getText (bnc #589667)
+- fixed error which is triggered if the overlay root directory
+  of the image description exists but is empty.
 - added dialog based OEM install verification UI
 - fixed runInteractive() exit code handling
 

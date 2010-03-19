@@ -765,7 +765,7 @@ sub setup {
 	#========================================
 	# copy user defined files to image tree
 	#----------------------------------------
-	if (-d "$imageDesc/root") {
+	if (-d "$imageDesc/root" && glob("$imageDesc/root/*")) {
 		$kiwi -> info ("Copying user defined files to image tree");
 		mkdir $root."/tmproot";
 		my $copy = "cp -dR --remove-destination";
