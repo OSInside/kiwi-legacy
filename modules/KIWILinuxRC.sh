@@ -4960,7 +4960,9 @@ function selectLanguage {
 	export TEXT_CDPULL=$(
 		getText "Please eject the install CD/DVD before continuing")
 	export TEXT_USBPULL=$(
-		getText "Please pull out the install USB stick before continuing")	
+		getText "Please pull out the install USB stick before continuing")
+	export TEXT_SELECT=$(
+		getText "Select disk for installation:")
 }
 #======================================
 # getText

@@ -167,7 +167,7 @@ function OEMInstall {
 			#======================================
 			# standard mode, ask for install media
 			#--------------------------------------
-			hd="\"Select disk for installation:\""
+			hd="\"$TEXT_SELECT\""
 			count=0
 			for i in $deviceDisks;do
 				dsize=`partitionSize $i`
