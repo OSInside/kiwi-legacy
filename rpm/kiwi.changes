@@ -3,6 +3,8 @@ Fri Mar 19 12:09:46 CET 2010 - ms@suse.de
 
 - v4.24
 - added "Select disk for installation" to getText (bnc #589667)
+- added dialog based OEM install verification UI
+- fixed runInteractive() exit code handling
 
 -------------------------------------------------------------------
 Mon Mar 15 10:53:26 CET 2010 - ms@suse.de

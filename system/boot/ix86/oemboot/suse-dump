@@ -371,9 +371,34 @@ function OEMInstall {
 	# Check the md5sum of the raw disk
 	#--------------------------------------
 	Echo "Install complete, checking data..."
-	dd if=$imageDevice bs=1024 |\
-		head --bytes=$((blocks * blocksize)) |\
-		md5sum - > /etc/ireal.md5
+	verifyBytes=$((blocks * blocksize))
+	verifyMByte=$((verifyBytes / 1048576))
+	if [ -x /usr/bin/dcounter ];then
+		test -e /progress || mkfifo /progress
+		TEXT_VERIFY=$(getText "Verifying %1" $imageDevice)
+		dump="cat $imageDevice"
+		dump="$dump | dcounter -s $verifyMByte -l \"$TEXT_VERIFY \""
+		errorLogStop
+		(
+			eval $dump 2>/progress |\
+				head --bytes=$verifyBytes | md5sum - > /etc/ireal.md5
+		)&
+		echo "cat /progress | dialog \
+			--backtitle \"$TEXT_INSTALLTITLE\" \
+			--progressbox 3 65
+		" > /tmp/progress.sh
+		if [ -e /dev/fb0 ];then
+			fbiterm -m $UFONT -- bash -e /tmp/progress.sh
+		else
+			bash -e /tmp/progress.sh
+		fi
+		clear
+		errorLogContinue
+	else
+		dd if=$imageDevice bs=1024 |\
+			head --bytes=$verifyBytes |\
+			md5sum - > /etc/ireal.md5
+	fi
 	read sum2 dumy < /etc/ireal.md5
 	if [ $sum1 != $sum2 ];then
 		systemException \

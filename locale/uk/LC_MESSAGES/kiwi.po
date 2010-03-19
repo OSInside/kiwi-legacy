@@ -76,5 +76,8 @@ msgstr ""
 msgid "Loading %1"
 msgstr ""
 
+msgid "Verifying %1"
+msgstr ""
+
 msgid "Select disk for installation:"
 msgstr ""
