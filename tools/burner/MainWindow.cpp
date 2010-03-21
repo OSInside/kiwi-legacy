@@ -100,7 +100,7 @@ MainWindow::reloadDeviceList(const char *cmddevice)
     {
         if (!(*i)->getPath().isEmpty())
             if (deviceComboBox->findText((*i)->getDisplayString()) == -1)
-                deviceComboBox->addItem((*i)->getDisplayString(), 0);
+                addMenuItem((*i)->getDisplayString());
 
         if (cmddevice != NULL)
             if ((*i)->getPath().compare(cmddevice) == 0)
@@ -139,7 +139,7 @@ MainWindow::useNewUI()
     directive->setText(tr("Drag disk image here\n or click to select."));
     directive->setAlignment(Qt::AlignCenter);
     deviceComboBox = new QComboBox;
-
+    deviceComboBox->addItem(DROPDOWN_DIRECTIVE);
     writeButton = new QPushButton(tr("Write"));
     connect(writeButton, SIGNAL(clicked()), this, SLOT(write()));
 
@@ -307,7 +307,7 @@ MainWindow::deviceInserted(QDBusMessage message)
         DeviceItem *device = pPlatform->getNewDevice(devicePath);
         if (device != NULL)
             if (deviceComboBox->findText(device->getDisplayString()) == -1)
-                deviceComboBox->addItem(device->getDisplayString(), 0);
+                addMenuItem(device->getDisplayString());
     }
 }
 
@@ -324,16 +324,35 @@ MainWindow::deviceRemoved(QDBusMessage message)
         {
             if ((*i)->getUDI() == devicePath)
             {
-                index = deviceComboBox->findText((*i)->getDisplayString());
-                if (index != -1)
+                if (removeMenuItem((*i)->getDisplayString()) != -1)
                 {
-                    deviceComboBox->removeItem(index);
                     pPlatform->removeDeviceFromList(devicePath);
                     break;
                 }
             }
         }
     }
+}
+
+void
+MainWindow::addMenuItem(const QString &item)
+{
+    if (deviceComboBox->itemText(0) == DROPDOWN_DIRECTIVE)
+        deviceComboBox->removeItem(0);
+    deviceComboBox->addItem(item, 0);
+}
+
+int
+MainWindow::removeMenuItem(const QString &item)
+{
+    int index = deviceComboBox->findText(item);
+    if (index != -1)
+    {
+        deviceComboBox->removeItem(index);
+        if (deviceComboBox->count() == 0)
+            deviceComboBox->addItem(DROPDOWN_DIRECTIVE);
+    }
+    return(index);
 }
 
 void
