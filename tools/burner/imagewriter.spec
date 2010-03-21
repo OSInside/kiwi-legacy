@@ -29,9 +29,9 @@ BuildRequires:  gcc-c++
 %endif
 
 Summary:        SUSE Studio Imagewriter
-Version:        1.5
+Version:        1.8
 Release:        0
-Group:          System/Tools
+Group:          Hardware/Other
 License:        GPL v2
 Source:         imagewriter-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build

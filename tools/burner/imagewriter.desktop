@@ -7,5 +7,4 @@ Icon=imagewriter
 Name=SUSE Studio Imagewriter
 GenericName=USB key writer 
 X-KDE-SubstituteUID=true
-Version=1.6
-Type=Application
+Version=1.0
