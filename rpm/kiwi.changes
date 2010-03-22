@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Mon Mar 22 11:16:53 CET 2010 - ms@suse.de
+
+- v4.25
+- added bootnext program which implements a small boot loader
+  needed for the 'boot from hard disk' menu entry on usb media.
+  It basically loads the mbr from the first drive that is
+  not the usb stick. Thanks to Steffen Winterfeldt who
+  implemented this (bnc #583212)
+
+-------------------------------------------------------------------
 Fri Mar 19 12:09:46 CET 2010 - ms@suse.de
 
 - v4.24

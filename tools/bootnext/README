@@ -1,0 +1,8 @@
+A small boot loader needed for the 'boot from hard disk' menu entry on usb
+media. It basically loads the mbr from the first drive that is not the usb
+stick.
+
+There's no real need to reassemble; it is already included in
+KIWIBoot.pm::addBootNext() in binary form. The code is here mostly for
+reference.
+
