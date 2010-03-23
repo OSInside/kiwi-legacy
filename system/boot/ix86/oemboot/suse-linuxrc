@@ -579,6 +579,18 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 	#--------------------------------------
 	importFile < $OEM_PARTITION_CONFIG
 	IFS=$IFS_ORIG
+	#======================================
+	# 16.9) write oem-trigger
+	#--------------------------------------
+	TDIR=/mnt/var/cache/recovery
+	TOEM=oem-trigger
+	mkdir -p $TDIR
+	echo "OEM_RECOVERY_DEVICE=$imageRecoveryDevice" > $TDIR/$TOEM
+	if [ ! -z "$RESTORE" ];then
+		echo "OEM_RECOVERY_MODE=restore" >> $TDIR/$TOEM
+	else
+		echo "OEM_RECOVERY_MODE=recover" >> $TDIR/$TOEM
+	fi
 fi
 
 #======================================

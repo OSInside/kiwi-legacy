@@ -7,6 +7,10 @@ Mon Mar 22 11:16:53 CET 2010 - ms@suse.de
   It basically loads the mbr from the first drive that is
   not the usb stick. Thanks to Steffen Winterfeldt who
   implemented this (bnc #583212)
+- added /mnt/var/cache/recovery/oem-trigger to be written
+  after the kiwi recover/restore process in order to allow
+  scripts to do something on boot of the recovered/restored
+  system (bnc #586529)
 
 -------------------------------------------------------------------
 Fri Mar 19 12:09:46 CET 2010 - ms@suse.de
