@@ -1068,6 +1068,7 @@ sub main {
 	#------------------------------------------
 	if (defined $Migrate) {
 		$kiwi -> info ("Starting system to image migration");
+		$Destination = "/tmp/$Migrate";
 		$migrate = new KIWIMigrate (
 			$kiwi,$Destination,$Migrate,\@Exclude,\@Skip,
 			\@AddRepository,\@AddRepositoryType,
@@ -1541,7 +1542,7 @@ sub usage {
 	print "    kiwi -u | --upgrade <image-root>\n";
 	print "       [ --add-package <name> ]\n";
 	print "System to Image migration:\n";
-	print "    kiwi -m | --migrate <name> --destdir <destination-path>\n";
+	print "    kiwi -m | --migrate <name>\n";
 	print "       [ --exclude <directory> --exclude <...> ]\n";
 	print "       [ --skip <package> --skip <...> ]\n";
 	print "       [ --nofiles --notemplate ]\n";

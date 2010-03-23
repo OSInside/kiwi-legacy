@@ -426,7 +426,7 @@ sub createReport {
 		print FD 'Unpackaged files directory</a>'."\n";
 	}
 	close FD;
-	$kiwi -> info ("=> Please check the migration report !!\n");
+	$kiwi -> info ("--> Please check the migration report !!\n");
 	$kiwi -> note ("\n\tfile://$dest/report.html\n\n");
 	return $this;
 }

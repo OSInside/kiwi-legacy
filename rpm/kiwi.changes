@@ -11,6 +11,8 @@ Mon Mar 22 11:16:53 CET 2010 - ms@suse.de
   after the kiwi recover/restore process in order to allow
   scripts to do something on boot of the recovered/restored
   system (bnc #586529)
+- force base destination directory for image migration and
+  update documenation about migration
 
 -------------------------------------------------------------------
 Fri Mar 19 12:09:46 CET 2010 - ms@suse.de
