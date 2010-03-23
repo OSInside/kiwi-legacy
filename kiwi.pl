@@ -45,14 +45,14 @@ use KIWITest;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "4.25";
+our $Version       = "4.26";
 our $Publisher     = "SUSE LINUX Products GmbH";
 our $Preparer      = "KIWI - http://kiwi.berlios.de";
 our $openSUSE      = "http://download.opensuse.org";
 our @openSUSE      = ("distribution","repositories");
 our $ConfigFile    = "$ENV{'HOME'}/.kiwirc";
 our $ConfigName    = "config.xml";
-our $Partitioner   = "fdisk";
+our $Partitioner   = "parted";
 our $TT            = "Trace Level ";
 our $ConfigStatus  = 0;
 our $TL            = 1;
