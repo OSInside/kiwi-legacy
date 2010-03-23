@@ -1445,11 +1445,6 @@ sub init {
 		my $workingDir = qxx ( "pwd" ); chomp $workingDir;
 		$RootTree = $workingDir."/".$RootTree;
 	}
-	if ((defined $Migrate) && (! defined $Destination)) {
-		$kiwi -> error ("No migration destination directory specified");
-		$kiwi -> failed ();
-		my $code = kiwiExit (1); return $code;
-	}
 	if (defined $LogPort) {
 		$kiwi -> info ("Setting log server port to: $LogPort");
 		$LogServerPort = $LogPort;
