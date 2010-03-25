@@ -1,14 +1,10 @@
 -------------------------------------------------------------------
-Thu Mar 25 12:36:18 CET 2010 - ug@suse.de
-
-- added autoyast cloning code to migration step
-  (bnc#580184)
-
--------------------------------------------------------------------
 Tue Mar 23 16:02:19 CET 2010 - ms@suse.de
 
 - v4.26
 - switched to parted as default partition tool
+- added autoyast cloning code to migration step
+  Implementation by Uwe Gansert (bnc #580184)
 
 -------------------------------------------------------------------
 Mon Mar 22 11:16:53 CET 2010 - ms@suse.de

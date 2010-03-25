@@ -187,6 +187,15 @@ sub new {
 		push @denyFiles,@exclude;
 	}
 	#==========================================
+	# Setup autoyast clone module names
+	#------------------------------------------
+	my @autoyastCloneList = qw (
+		firewall users host kerberos language networking
+		nis ntp-client printer proxy runlevel
+		samba-client security sound suse_register
+		timezone add-on routing
+	);
+	#==========================================
 	# Store object data
 	#------------------------------------------
 	$this->{kiwi}    = $kiwi;
@@ -197,11 +206,6 @@ sub new {
 	$this->{source}  = \%OSSource;
 	$this->{product} = $product;
 	$this->{mount}   = [];
-
-	my @autoyastCloneList = qw( firewall users host kerberos language networking
-	                            nis ntp-client printer proxy runlevel
-	                            samba-client security sound suse_register
-	                            timezone add-on routing );
 	$this->{autoyastCloneList} = \@autoyastCloneList;
 
 	return $this;
@@ -1228,17 +1232,10 @@ sub setSystemOverlayFiles {
 sub setInitialSetup {
 	# ...
 	# During first deployment of the migrated image we will call
-	# the second phase of the YaST2 installation workflow. This step
-	# takes care for the hardware detection/configuration which may
-	# have changed because of another system environment.
-	# FIXME:
-	# this function should be replaced by calling yast2 cloneconfig
-	# it will allow us to clone the configurations stored in the
-	# yast modules. This will work for >= 11.2 and not before
-	# See bug #580184 for details
+	# YaST2 with the result of the yast2 clone system feature
 	# ---
-	# 1) create a framebuffer based xorg.conf file
-	# 2) create the file /var/lib/YaST2/runme_at_boot
+	# 1) create a framebuffer based xorg.conf file, needed for <= 11.1
+	# 2) run autoyastClone()
 	# ---
 	my $this = shift;
 	my $dest = $this->{dest};
@@ -1356,15 +1353,16 @@ sub setInitialSetup {
 		print FD 'EndSection'."\n";
 		close FD;
 	}
-	#==========================================
-	# Activate YaST on initial deployment
-	#------------------------------------------
 	qxx (
 		"cp $dest/root/etc/X11/xorg.conf $dest/root/etc/X11/xorg.conf.install"
 	);
-	qxx ("touch $dest/root/var/lib/YaST2/runme_at_boot");
+	#==========================================
+	# Activate YaST on initial deployment
+	#------------------------------------------	
+	if (! $this -> autoyastClone()) {
+		return undef;
+	}
 	$kiwi -> done();
-	$this->autoyastClone();
 	return $this;
 }
 
@@ -1434,18 +1432,24 @@ sub checkBrokenLinks {
 #==========================================
 # autoyastClone
 #------------------------------------------
-
 sub autoyastClone {
+	# ...
+	# call yast clone_system to backup the current system
+	# configuration information into an auto yast profile
+	# On first deployment of the appliance autoyast is 
+	# called with the created profile in order to clone
+	# the current system configuration into the appliance
+	# ---
 	my $this = shift;
 	my $dest = $this->{dest};
 	my $kiwi = $this->{kiwi};
-
-	$kiwi -> info ("Creating AutoYaST profile...");
-
-	my $cloneList = join( ',', @{$this->{autoyastCloneList}} );  # firewall,users,host,...
-
+	my @list = @{$this->{autoyastCloneList}};
+	#==========================================
+	# run yast for cloning
+	#------------------------------------------
+	my $cloneList = join( ',', @list );
 	qxx("mv /root/autoinst.xml /root/autoinst.xml.backup");
-	qxx("yast clone_system modules clone=$cloneList");	
+	qxx("yast clone_system modules clone=$cloneList");
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> failed ();
@@ -1453,6 +1457,9 @@ sub autoyastClone {
 		$kiwi -> failed ();
 		return undef;
 	}
+	#==========================================
+	# store clone XML for use in kiwi
+	#------------------------------------------
 	qxx("cp /root/autoinst.xml $dest/config-yast-autoyast.xml");
 	$code = $? >> 8;
 	if ($code != 0) {
@@ -1462,12 +1469,11 @@ sub autoyastClone {
 		return undef;
 	}
 	qxx("mv /root/autoinst.xml.backup /root/autoinst.xml");
-
 	if ( ! open (FD,">$dest/root/etc/install.inf")) {
 		$kiwi -> failed ();
 		$kiwi -> error ("Failed to create install.inf: $!");
 		$kiwi -> failed ();
-		return "failed";
+		return undef;
 	}
 	print FD "AutoYaST: \n";
 	close FD;
@@ -1475,10 +1481,10 @@ sub autoyastClone {
 		$kiwi -> failed ();
 		$kiwi -> error ("Failed to create runme_at_boot: $!");
 		$kiwi -> failed ();
-		return "failed";
+		return undef;
 	}
 	close FD;
-	$kiwi -> done ();
+	return $this;
 }
 
 1;
