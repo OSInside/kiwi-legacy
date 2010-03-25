@@ -197,6 +197,13 @@ sub new {
 	$this->{source}  = \%OSSource;
 	$this->{product} = $product;
 	$this->{mount}   = [];
+
+	my @autoyastCloneList = qw( firewall users host kerberos language networking
+	                            nis ntp-client printer proxy runlevel
+	                            samba-client security sound suse_register
+	                            timezone add-on routing );
+	$this->{autoyastCloneList} = \@autoyastCloneList;
+
 	return $this;
 }
 
@@ -1357,6 +1364,7 @@ sub setInitialSetup {
 	);
 	qxx ("touch $dest/root/var/lib/YaST2/runme_at_boot");
 	$kiwi -> done();
+	$this->autoyastClone();
 	return $this;
 }
 
@@ -1423,4 +1431,56 @@ sub checkBrokenLinks {
 	checkBrokenLinks ($this);
 }
 
+#==========================================
+# autoyastClone
+#------------------------------------------
+
+sub autoyastClone {
+	my $this = shift;
+	my $dest = $this->{dest};
+	my $kiwi = $this->{kiwi};
+
+	$kiwi -> info ("Creating AutoYaST profile...");
+
+	my $cloneList = join( ',', @{$this->{autoyastCloneList}} );  # firewall,users,host,...
+
+	qxx("mv /root/autoinst.xml /root/autoinst.xml.backup");
+	qxx("yast clone_system modules clone=$cloneList");	
+	my $code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("AutoYaST cloning failed. $!");
+		$kiwi -> failed ();
+		return undef;
+	}
+	qxx("cp /root/autoinst.xml $dest/config-yast-autoyast.xml");
+	$code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("failed to copy /root/autoinst.xml after cloning. $!");
+		$kiwi -> failed ();
+		return undef;
+	}
+	qxx("mv /root/autoinst.xml.backup /root/autoinst.xml");
+
+	if ( ! open (FD,">$dest/root/etc/install.inf")) {
+		$kiwi -> failed ();
+		$kiwi -> error ("Failed to create install.inf: $!");
+		$kiwi -> failed ();
+		return "failed";
+	}
+	print FD "AutoYaST: \n";
+	close FD;
+	if ( ! open (FD,">$dest/root/var/lib/YaST2/runme_at_boot")) {
+		$kiwi -> failed ();
+		$kiwi -> error ("Failed to create runme_at_boot: $!");
+		$kiwi -> failed ();
+		return "failed";
+	}
+	close FD;
+	$kiwi -> done ();
+}
+
 1;
+
+# vim: set noexpandtab:
