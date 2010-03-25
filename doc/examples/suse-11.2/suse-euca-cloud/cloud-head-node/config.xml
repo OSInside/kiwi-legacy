@@ -48,7 +48,7 @@
 		<package name="iptables"/>
 		<package name="kernel-default"/>
 		<package name="lvm2"/>
-		<package name="syslog-ng"/>
+		<package name="rsyslog"/>
 <!-- Eucalyptus front end packages -->
 		<package name="aoetools"/>
 		<package name="euca-axis2c"/>

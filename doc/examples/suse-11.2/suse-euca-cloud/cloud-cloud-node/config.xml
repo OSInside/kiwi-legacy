@@ -49,7 +49,7 @@
 		<package name="iptables"/>
 		<package name="kernel-xen"/>
 		<package name="lvm2"/>
-		<package name="syslog-ng"/>
+		<package name="rsyslog"/>
 <!-- Eucalyptus cloud node packages -->
 		<package name="aoetools"/>
 		<package name="euca-axis2c"/>
