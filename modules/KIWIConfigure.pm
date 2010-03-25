@@ -98,11 +98,14 @@ sub setupRecoveryArchive {
 		return undef;
 	}
 	$kiwi -> info ("Creating recovery archive...");
-	my $topts  = "--numeric-owner -czpf";
+	#==========================================
+	# Create tar archive from root tree .tar
+	#------------------------------------------
+	my $topts  = "--numeric-owner -cpf";
 	my $excld  = "--exclude ./dev --exclude ./proc --exclude ./sys";
 	my $status = qxx (
-		"cd $root && tar $topts $dest/.recovery.tar.gz . $excld 2>&1 &&
-		mv $dest/.recovery.tar.gz $root/recovery.tar.gz"
+		"cd $root && tar $topts $dest/.recovery.tar . $excld 2>&1 &&
+		mv $dest/.recovery.tar $root/recovery.tar"
 	);
 	my $code = $? >> 8;
 	if ($code != 0) {
@@ -110,8 +113,11 @@ sub setupRecoveryArchive {
 		$kiwi -> error  ("Failed to create recovery archive: $status");
 		return undef;
 	}
+	#==========================================
+	# Create file count information
+	#------------------------------------------
 	$status = qxx (
-		"tar -tf $root/recovery.tar.gz | wc -l > $root/recovery.tar.files"
+		"tar -tf $root/recovery.tar | wc -l > $root/recovery.tar.files"
 	);
 	$code = $? >> 8;
 	if ($code != 0) {
@@ -119,6 +125,32 @@ sub setupRecoveryArchive {
 		$kiwi -> error  ("Failed to create recovery file count: $status");
 		return undef;
 	}
+	#==========================================
+	# Create uncompressed byte size information
+	#------------------------------------------
+	if (! open ($FD,">$root/recovery.tar.size")) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Failed to create recovery size info: $!");
+		return undef;
+	}
+	my $size = -s "$root/recovery.tar";
+	print $FD $size;
+	close $FD;
+	#==========================================
+	# Compress archive into .tar.gz
+	#------------------------------------------
+	$status = qxx (
+		"gzip $root/recovery.tar 2>&1"
+	);
+	$code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Failed to compress recovery archive: $status");
+		return undef;
+	}
+	#==========================================
+	# Create destination filesystem information
+	#------------------------------------------
 	if (! open ($FD,">$root/recovery.tar.filesystem")) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Failed to create recovery filesystem info: $!");

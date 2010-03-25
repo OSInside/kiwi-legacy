@@ -853,6 +853,9 @@ function OEMRepart {
 		if ! mv /reco-root/recovery.tar.filesystem /reco-save >/dev/null;then
 			systemException "Failed to move recovery filesystem info" "reboot"
 		fi
+		if ! mv /reco-root/recovery.tar.size /reco-save >/dev/null;then
+			systemException "Failed to move recovery size info" "reboot"
+		fi
 		mkdir /reco-save/boot
 		if ! cp /reco-root/boot/initrd.vmx /reco-save/boot/initrd;then
 			systemException "Failed to copy recovery initrd" "reboot"
