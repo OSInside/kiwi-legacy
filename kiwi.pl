@@ -1553,9 +1553,6 @@ sub usage {
 	print "       [ --installcd-system <vmx-system-image> ]\n";
 	print "    kiwi --installstick <initrd>\n";
 	print "       [ --installstick-system <vmx-system-image> ]\n";
-	print "Installation source creation:\n";
-	print "    kiwi --root <targetpath> --create-instsource <config>\n";
-	print "       [ -v|--verbose <1|2|3> ]\n";
 	print "Testsuite:\n";
 	print "    kiwi --testsuite <image-root> \n";
 	print "       [ --test name --test name ... ]\n";
