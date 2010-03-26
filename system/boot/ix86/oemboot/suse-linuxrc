@@ -419,12 +419,12 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 		if [ -z "$RESTORE" ];then
 			for i in passwd shadow group;do
 				if ! cp etc/$i tmp/$i;then
-					umountSystem; rm -f tmp/passwd tmp/shadow tmp/group
+					cd / ; umountSystem; rm -f tmp/passwd tmp/shadow tmp/group
 					systemException "Failed to store $i" "reboot"
 				fi
 			done
 			if ! cp -a var/lib/rpm tmp/;then
-				rm -rf tmp/rpm; umountSystem
+				rm -rf tmp/rpm; cd / ; umountSystem
 				systemException "Failed to store RPM database" "reboot"
 			fi
 		fi
@@ -451,6 +451,9 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 		rPID=$!
 		while kill -0 $rPID &>/dev/null;do
 			rReady=$(cat /tmp/rFiles | wc -l)
+			if [ $rReady -eq 0 ];then
+				continue
+			fi
 			#Echo -e -n "$rReady files from $rFiles restored...\r"
 			rFDone=$(echo "scale=4; $rFiles / $rReady" | bc)
 			rFDone=$(echo "scale=0; 100 / $rFDone" | bc)

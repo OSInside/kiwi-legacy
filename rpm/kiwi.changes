@@ -4,10 +4,12 @@ Tue Mar 23 16:02:19 CET 2010 - ms@suse.de
 - v4.26
 - use bootnext 'boot from hard disk' for ISO's too (bnc #583212)
 - added uncompressed tar size information for OEM recovery
+- leave /mnt directory before calling umountSystem
 - leave libnss_dns inside the boot images for name resolution
 - switched to parted as default partition tool
 - added autoyast cloning code to migration step
   Implementation by Uwe Gansert (bnc #580184)
+- fixed bc division by zero
 
 -------------------------------------------------------------------
 Mon Mar 22 11:16:53 CET 2010 - ms@suse.de
