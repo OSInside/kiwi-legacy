@@ -20,6 +20,7 @@ package KIWIRoot;
 #------------------------------------------
 use strict;
 use Carp qw (cluck);
+use File::Glob ':glob';
 use KIWIURL;
 use KIWILog;
 use KIWIManager;
@@ -99,7 +100,7 @@ sub new {
 		my $urlHandler  = new KIWIURL ($kiwi,$this);
 		my $publics_url = $urlHandler -> normalizePath ($source);
 		if ($publics_url =~ /^\//) {
-			my ( $publics_url_test ) = glob ( $publics_url );
+			my ( $publics_url_test ) = bsd_glob ( $publics_url );
 			if (! -d $publics_url_test) {
 				$kiwi ->warning ("local URL path not found: $publics_url_test");
 				$kiwi ->skipped ();
@@ -765,7 +766,7 @@ sub setup {
 	#========================================
 	# copy user defined files to image tree
 	#----------------------------------------
-	if (-d "$imageDesc/root" && glob("$imageDesc/root/*")) {
+	if ((-d "$imageDesc/root") && (bsd_glob($imageDesc.'/root/*'))) {
 		$kiwi -> info ("Copying user defined files to image tree");
 		mkdir $root."/tmproot";
 		my $copy = "cp -dR --remove-destination";
