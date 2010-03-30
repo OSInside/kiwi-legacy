@@ -67,6 +67,7 @@
 		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="ifplugd"/>
+		<package name="iputils"/>
 		<package name="vim"/>
 		<package name="grub"/>
 		<opensusePattern name="base"/>
