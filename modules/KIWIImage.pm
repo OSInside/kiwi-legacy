@@ -1325,6 +1325,7 @@ sub createImageVMX {
 				$main::Survive = "default";
 				return undef;
 			}
+			$kiwi -> done();
 		}
 	}
 	$main::Survive = "default";
