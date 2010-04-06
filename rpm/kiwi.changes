@@ -3,6 +3,9 @@ Mon Mar 29 17:15:37 CEST 2010 - ms@suse.de
 
 - v4.27
 - fixed --build option, glob check did not work (bnc #591889)
+- ovftool will create junks of data according to the image size
+  to allow better download performance. Because of this I changed
+  the call to create new files in a separate directory
 - added iputils package to 11.2 JeOS
 
 -------------------------------------------------------------------

@@ -1294,15 +1294,29 @@ sub createImageVMX {
 			# ---- beg ----
 			qxx ("sed -i -e 's;scsi-hardDisk;disk;' $vmxfile");
 			# ---- end ----
-			my $status;
-			if (! $ovflog) {
-				$status= qxx ("$ovftool -bf $vmxfile $ovffile 2>&1");
-			} else {
-				$status= qxx ("$ovftool -bf $vmxfile $ovffile -l $ovflog 2>&1");
-			}
+			my $status = qxx ("rm -rf $ovffile; mkdir -p $ovffile 2>&1");
 			my $result = $? >> 8;
+			if ($result != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Couldn't create OVF directory: $status");
+				$kiwi -> failed ();
+				$main::Survive = "default";
+				return undef;
+			}
+			my $output = basename $ovffile;
+			if (! $ovflog) {
+				$status= qxx (
+					"$ovftool -bf $vmxfile $ovffile/$output 2>&1"
+				);
+			} else {
+				$status= qxx (
+					"$ovftool -bf $vmxfile $ovffile/$output -l $ovflog 2>&1"
+				);
+			}
+			$result = $? >> 8;
 			# --- beg ----
 			qxx ("sed -i -e 's;disk;scsi-hardDisk;' $vmxfile");
+			qxx ("rm -rf $main::Destination/*.lck 2>&1");
 			# --- end ----
 			if ($result != 0) {
 				$kiwi -> failed ();
