@@ -5486,6 +5486,7 @@ function createPartedInput {
 	shift
 	local index=0
 	local pcmds
+	local pcmds_fix
 	local partid
 	local pstart
 	local pstopp
@@ -5499,9 +5500,48 @@ function createPartedInput {
 		index=$(($index + 1))
 	done
 	index=0
+	index_fix=0
+	#======================================
+	# fix list of commands
+	#--------------------------------------
+	while [ ! -z "${pcmds[$index]}" ];do
+		cmd=${pcmds[$index]}
+		pcmds_fix[$index_fix]=$cmd
+		case $cmd in
+			"d")
+				partid=${pcmds[$index + 1]}
+				if ! echo $partid | grep -q "^[0-4]$";then
+					# make sure there is a ID set for the deletion
+					index_fix=$(($index_fix + 1))
+					pcmds_fix[$index_fix]=1
+				fi
+			;;
+			"n")
+				partid=${pcmds[$index + 2]}
+				if ! echo $partid | grep -q "^[0-4]$";then
+					# make sure there is a ID set for the creation
+					index_fix=$(($index_fix + 1))
+					pcmds_fix[$index_fix]=${pcmds[$index + 1]}
+					index_fix=$(($index_fix + 1))
+					pcmds_fix[$index_fix]=4
+					index=$(($index + 1))
+				fi
+			;;
+		esac
+		index=$(($index + 1))
+		index_fix=$(($index_fix + 1))
+	done
+	#======================================
+	# use fixed list and print log info
+	#--------------------------------------
+	unset pcmds
+	pcmds=(${pcmds_fix[*]})
+	unset pcmds_fix
+	index=0
 	#======================================
 	# process commands
 	#--------------------------------------
+	echo "createPartedInput: fixed input: ${pcmds[*]}" 1>&2
 	for cmd in ${pcmds[*]};do
 		case $cmd in
 			#======================================
@@ -5510,9 +5550,6 @@ function createPartedInput {
 			"d")
 				partid=${pcmds[$index + 1]}
 				partid=$(($partid / 1))
-				if [ $partid -eq 0 ];then
-					partid=1
-				fi
 				cmdq="$cmdq rm $partid"
 				;;
 			#======================================
@@ -5521,9 +5558,6 @@ function createPartedInput {
 			"n")
 				partid=${pcmds[$index + 2]}
 				partid=$(($partid / 1))
-				if [ $partid -eq 0 ];then
-					partid=1
-				fi
 				pstart=${pcmds[$index + 3]}
 				if [ "$pstart" = "1" ];then
 					pstart=0

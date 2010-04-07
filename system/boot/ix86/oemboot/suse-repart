@@ -799,6 +799,10 @@ function OEMRepart {
 	fi
 	sleep 1
 	#======================================
+	# find fstype for root partition
+	#--------------------------------------
+	probeFileSystem $imageRootDevice
+	#======================================
 	# Activate swap space
 	#--------------------------------------
 	if [ -z "$DONT_PARTITION" ] && [ $swapsize -gt 0 ]; then
@@ -814,7 +818,18 @@ function OEMRepart {
 	#--------------------------------------
 	if [ -z "$DONT_PARTITION" ] && [ -z "$OEM_WITHOUTHOME" ];then
 		Echo "Creating Home filesystem on $imageHomeDevice"
-		if ! mke2fs -T ext3 -j -q $imageHomeDevice >/dev/null 2>&1;then
+		if [ "$FSTYPE" = "reiserfs" ];then
+			mkreiserfs $imageHomeDevice 1>&2
+		elif [ "$FSTYPE" = "ext2" ];then
+			mke2fs -T ext2 -q $imageHomeDevice 1>&2
+		elif [ "$FSTYPE" = "ext3" ];then
+			mke2fs -T ext3 -j -q $imageHomeDevice 1>&2
+		elif [ "$FSTYPE" = "ext4" ];then
+			mke2fs -T ext4 -j -q $imageHomeDevice 1>&2
+		else
+			mke2fs -T ext3 -j -q $imageHomeDevice 1>&2
+		fi
+		if [ ! $? = 0 ];then
 			systemException "Failed to create Home filesystem" "reboot"
 		fi
 	fi
@@ -823,7 +838,7 @@ function OEMRepart {
 	#--------------------------------------
 	if [ -z "$DONT_PARTITION" ] && [ ! -z "$OEM_RECOVERY" ];then
 		Echo "Creating Recovery filesystem on $imageRecoveryDevice"
-		if ! mke2fs -T ext3 -j -q $imageRecoveryDevice >/dev/null 2>&1;then
+		if ! mke2fs -T ext2 -q $imageRecoveryDevice 1>&2;then
 			systemException "Failed to create Recovery fs" "reboot"
 		fi
 	fi

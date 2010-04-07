@@ -6,6 +6,10 @@ Mon Mar 29 17:15:37 CEST 2010 - ms@suse.de
 - ovftool will create junks of data according to the image size
   to allow better download performance. Because of this I changed
   the call to create new files in a separate directory
+- also use the root filesystem type for the optional home
+  filesystem while in a OEM deployment process (bnc #594202)
+- make the recovery filesystem an ext2 filesystem
+- fixed createPartedInput() to always have a partition ID
 - added iputils package to 11.2 JeOS
 
 -------------------------------------------------------------------
