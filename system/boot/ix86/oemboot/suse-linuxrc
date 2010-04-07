@@ -568,6 +568,7 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 		imageHomeDevice=$(cat /mnt/etc/fstab | grep /home | cut -f1 -d " ")
 		imageHomeDevice=$(echo $imageHomeDevice)
 		if [ -e "$imageHomeDevice" ];then
+			probeFileSystem $imageRootDevice
 			if [ "$FSTYPE" = "reiserfs" ];then
 				mkreiserfs $imageHomeDevice 1>&2
 			elif [ "$FSTYPE" = "ext2" ];then
