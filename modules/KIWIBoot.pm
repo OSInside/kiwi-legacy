@@ -3711,18 +3711,24 @@ sub setupBootLoaderConfiguration {
 			my $dev = $1 eq 'CD' ? '(cd)' : '(hd0,0)';
 			print FD "gfxmenu $dev/boot/message\n";
 			print FD "title Boot from Hard Disk\n";
-			print FD " chainloader $dev/boot/grub/bootnext\n";
+			if ($dev eq '(cd)') {
+				print FD " rootnoverify (hd0)\n";
+				print FD " chainloader (hd0)+1\n";
+			}
+			else {
+				print FD " chainloader $dev/boot/grub/bootnext\n";
+				my $bootnext = $this -> addBootNext (
+					"$tmpdir/boot/grub/bootnext", hex $this->{mbrid}
+				);
+				if (! defined $bootnext) {
+					$kiwi -> failed ();
+					$kiwi -> error  ("Failed to write bootnext\n");
+					$kiwi -> failed ();
+					return undef;
+				}
+			}
 			$title = $this -> makeLabel ("Install/Restore $label");
 			print FD "title $title\n";
-			my $bootnext = $this -> addBootNext (
-				"$tmpdir/boot/grub/bootnext", hex $this->{mbrid}
-			);
-			if (! defined $bootnext) {
-				$kiwi -> failed ();
-				$kiwi -> error  ("Failed to write bootnext\n");
-				$kiwi -> failed ();
-				return undef;
-			}
 		} else {
 			$title = $this -> makeLabel ("$label [ $type ]");
 			print FD "gfxmenu (hd0,$bootpart)/boot/message\n";
