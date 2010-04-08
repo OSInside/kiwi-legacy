@@ -16,6 +16,8 @@ Mon Mar 29 17:15:37 CEST 2010 - ms@suse.de
   suse-11.0 boot and image templates
 - cleaned up spec file, removed prebuild code and package
   which is not used by anybody
+- added common functions resizeFilesystem() and
+  createFilesystem() in KIWILinuxRC.sh
 
 -------------------------------------------------------------------
 Tue Mar 23 16:02:19 CET 2010 - ms@suse.de

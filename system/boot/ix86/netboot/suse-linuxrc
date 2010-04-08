@@ -549,32 +549,7 @@ then
 		done
 		if test ! -z $DISK;then
 			probeFileSystem $imageDevice
-			if test "$FSTYPE" = "reiserfs";then
-				Echo "Resize Reiser filesystem to full partition space..."
-				resize_reiserfs $imageDevice
-				INITRD_MODULES="$INITRD_MODULES reiserfs"
-			fi
-			if test "$FSTYPE" = "ext2";then
-				Echo "Resize EXT2 filesystem to full partition space..."
-				resize2fs -f -F -p $imageDevice
-				Echo "Checking EXT2 filesystem..."
-				e2fsck -p $imageDevice
-				INITRD_MODULES="$INITRD_MODULES ext2"
-			fi
-			if test "$FSTYPE" = "ext3";then
-				Echo "Resize EXT3 filesystem to full partition space..."
-				resize2fs -f -F -p $imageDevice
-				Echo "Checking EXT3 filesystem..."
-				e2fsck -p $imageDevice
-				INITRD_MODULES="$INITRD_MODULES ext3"
-			fi
-			if test "$FSTYPE" = "ext4";then
-				Echo "Resize EXT4 filesystem to full partition space..."
-				resize2fs -f -F -p $imageDevice
-				Echo "Checking EXT4 filesystem..."
-				e2fsck -p $imageDevice
-				INITRD_MODULES="$INITRD_MODULES ext4"
-			fi
+			resizeFilesystem $imageDevice
 		fi
 		rm -f /etc/ireal.md5
 		rm -f /etc/image.md5

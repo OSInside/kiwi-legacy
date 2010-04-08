@@ -818,20 +818,7 @@ function OEMRepart {
 	#--------------------------------------
 	if [ -z "$DONT_PARTITION" ] && [ -z "$OEM_WITHOUTHOME" ];then
 		Echo "Creating Home filesystem on $imageHomeDevice"
-		if [ "$FSTYPE" = "reiserfs" ];then
-			mkreiserfs $imageHomeDevice 1>&2
-		elif [ "$FSTYPE" = "ext2" ];then
-			mke2fs -T ext2 -q $imageHomeDevice 1>&2
-		elif [ "$FSTYPE" = "ext3" ];then
-			mke2fs -T ext3 -j -q $imageHomeDevice 1>&2
-		elif [ "$FSTYPE" = "ext4" ];then
-			mke2fs -T ext4 -j -q $imageHomeDevice 1>&2
-		else
-			mke2fs -T ext3 -j -q $imageHomeDevice 1>&2
-		fi
-		if [ ! $? = 0 ];then
-			systemException "Failed to create Home filesystem" "reboot"
-		fi
+		createFilesystem $imageHomeDevice
 	fi
 	#======================================
 	# Create recovery file system

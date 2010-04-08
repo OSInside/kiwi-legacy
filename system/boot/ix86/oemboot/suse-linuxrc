@@ -293,36 +293,7 @@ if [ "$LOCAL_BOOT" = "no" ];then
 			export KIWI_INITRD_PARAMS
 		fi
 		if [ -z "$DONT_PARTITION" ];then
-			if [ "$FSTYPE" = "reiserfs" ];then
-				Echo "Resize Reiser filesystem to full partition space..."
-				luksResize $deviceResize
-				resize_reiserfs -q $deviceResize
-				INITRD_MODULES="$INITRD_MODULES reiserfs"
-			fi
-			if [ "$FSTYPE" = "ext2" ];then
-				Echo "Resize EXT2 filesystem to full partition space..."
-				luksResize $deviceResize
-				resize2fs -f -F -p $deviceResize
-				Echo "Checking EXT2 filesystem..."
-				e2fsck -p $deviceResize
-				INITRD_MODULES="$INITRD_MODULES ext2"
-			fi
-			if [ "$FSTYPE" = "ext3" ];then
-				Echo "Resize EXT3 filesystem to full partition space..."
-				luksResize $deviceResize
-				resize2fs -f -F -p $deviceResize
-				Echo "Checking EXT3 filesystem..."
-				e2fsck -p $deviceResize
-				INITRD_MODULES="$INITRD_MODULES ext3"
-			fi
-			if [ "$FSTYPE" = "ext4" ];then
-				Echo "Resize EXT4 filesystem to full partition space..."
-				luksResize $deviceResize
-				resize2fs -f -F -p $deviceResize
-				Echo "Checking EXT4 filesystem..."
-				e2fsck -p $deviceResize
-				INITRD_MODULES="$INITRD_MODULES ext4"
-			fi
+			resizeFilesystem $deviceResize
 		fi
 	fi
 	if [ "$OEM_KIWI_INITRD" = "yes" ];then
@@ -388,18 +359,8 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 		#--------------------------------------
 		if [ ! -z "$RESTORE" ];then
 			getText "Clean sweep..." > /progress
-			fstype=$(cat /reco-save/recovery.tar.filesystem)
-			case $fstype in
-				reiserfs) mkreiserfs -f   $imageRootDevice ;;
-				ext2)     mkfs.ext2 -F    $imageRootDevice ;;
-				ext3)     mkfs.ext3 -j -F $imageRootDevice ;;
-				ext4)     mkfs.ext4 -j -F $imageRootDevice ;;
-				*)
-					systemException \
-						"Filesystem $fstype not supported" \
-					"reboot"
-				;;
-			esac
+			export FSTYPE=$(cat /reco-save/recovery.tar.filesystem)
+			createFilesystem $imageRootDevice
 			if ! mountSystem $imageRootDevice;then
 				systemException "Failed to mount root filesystem" "reboot"
 			fi
@@ -569,20 +530,7 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 		imageHomeDevice=$(echo $imageHomeDevice)
 		if [ -e "$imageHomeDevice" ];then
 			probeFileSystem $imageRootDevice
-			if [ "$FSTYPE" = "reiserfs" ];then
-				mkreiserfs $imageHomeDevice 1>&2
-			elif [ "$FSTYPE" = "ext2" ];then
-				mke2fs -T ext2 -q $imageHomeDevice 1>&2
-			elif [ "$FSTYPE" = "ext3" ];then
-				mke2fs -T ext3 -j -q $imageHomeDevice 1>&2
-			elif [ "$FSTYPE" = "ext4" ];then
-				mke2fs -T ext4 -j -q $imageHomeDevice 1>&2
-			else
-				mke2fs -T ext3 -j -q $imageHomeDevice 1>&2
-			fi
-			if [ ! $? = 0 ];then
-				systemException "Failed to restore Home filesystem" "reboot"
-			fi
+			createFilesystem $imageHomeDevice
 		fi
 	fi
 	#======================================
@@ -756,7 +704,7 @@ if [ "$LOCAL_BOOT" = "no" ];then
 			umount /mnt/mnt
 		fi
 		Echo "Activate home partition $imageHomeDevice in fstab"
-		echo "$(getDiskID $imageHomeDevice) /home ext3 defaults 0 0" \
+		echo "$(getDiskID $imageHomeDevice) /home $FSTYPE defaults 0 0" \
 			>> /config/etc/fstab
 	fi
 	if [ ! -z "$OEM_SAP_INSTALL" ];then
@@ -764,7 +712,7 @@ if [ "$LOCAL_BOOT" = "no" ];then
 		vgchange -a y data_vg
 		if partitionSize $SAP_DATA &>/dev/null;then
 			mkdir -p /mnt/sapdata
-			echo "$(getDiskID $SAP_DATA) /sapdata ext3 defaults 0 0" \
+			echo "$(getDiskID $SAP_DATA) /sapdata $FSTYPE defaults 0 0" \
 				>> /config/etc/fstab
 		fi
 	fi
