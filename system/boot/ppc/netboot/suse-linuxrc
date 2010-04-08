@@ -57,9 +57,16 @@ export SYSTEM_INTEGRITY
 export SYSTEM_MD5STATUS
 
 #======================================
+# Exports (clicfs usage)
+#--------------------------------------
+export kiwi_hybrid=yes
+export kiwi_hybridpersistent=yes
+
+#======================================
 # Functions
 #--------------------------------------
 . /include
+initialize
 
 #======================================
 # setupSystemAliasName
@@ -332,7 +339,7 @@ if [ $LOCAL_BOOT = "no" ];then
 	#--------------------------------------
 	if [ ! -z "$ALLOW_CMDLINE_OVERWRITE" ];then
 		for i in ${KLIST[@]};do
-			eval export $i
+			eval export \"$i\"
 		done
 	fi
 fi
@@ -341,7 +348,7 @@ fi
 # 10) Load Device modules
 #--------------------------------------
 runHook preprobe
-probeDevices
+probeDevices "skipUSB"
 runHook postprobe
 
 export systemIntegrity="unknown"
@@ -392,6 +399,7 @@ then
 			else
 				Echo -b "On-disk Image mount attempt failed,"
 				Echo -b "Image Update for image [ $imageName ] needed"
+				umountSystem
 				RELOAD_IMAGE="yes"
 				systemIntegrity="clean"
 			fi
@@ -581,7 +589,7 @@ else
 		imageRootDevice=$imageDevice
 		imageRootName="Local-System"
 		if [ ! -z "$UNIONFS_CONFIG" ];then
-			unionFST=`echo $UNIONFS_CONFIG | cut -d , -f 3`
+			unionFST=$UNIONFS_CONFIG
 			setupUnionFS $(ddn $imageDisk 3) $(ddn $imageDisk 2) $unionFST
 		fi
 		if [ ! -z "$COMBINED_IMAGE" ];then
@@ -628,7 +636,9 @@ else
 				1) nbdPort=$n       ; field=2 ;;
 				2) nbdDevice=$n     ; field=3 ;;
 				3) nbdswapPort=$n   ; field=4 ;;
-				4) nbdswapDevice=$n ; field=5
+				4) nbdswapDevice=$n ; field=5 ;;
+				5) nbdwritePort=$n  ; field=6 ;;
+				6) nbdwriteDevice=$n; field=7
 			esac
 			done
 		done
@@ -641,43 +651,74 @@ else
 		if [ -z "$nbdPort" ];then
 			nbdPort="2000"
 		fi
-		if [ -z "$nbdswapPort" ];then
-			nbdswapPort="9210"
+		if [ -z "$nbdwriteDevice" ];then
+			nbdwriteDevice="/dev/ram1"
 		fi
 		waitForBlockDevice $nbdDevice
 		if [ ! -b $nbdDevice ];then
 			systemException "Device $nbdDevice doesn't appear" "reboot"
 		fi
+		if [ ! -z "$nbdwritePort" ];then
+			waitForBlockDevice $nbdwriteDevice
+			if [ ! -b $nbdwriteDevice ];then
+				systemException "Device $nbdwriteDevice doesn't appear" "reboot"
+			fi
+		fi
+		if [ ! -z "$nbdswapPort" ];then
+			waitForBlockDevice $nbdswapPort
+			if [ ! -b $nbdswapDevice ];then
+				systemException "Device $nbdswapDevice doesn't appear" "reboot"
+			fi
+		fi
 		# /.../
 		# try to get swap from the server if we dont have
 		# enough ram (less than 62MB)
 		# ----
-		min_ram=63488
-		real_ram=$(cat /proc/meminfo |grep MemTotal|tr -d " [a-z][A-Z]:")
-		if [ ${real_ram} -lt ${min_ram} ];then
-			Echo "NBD: memory is below required 62M"
-			Echo "NBD: Mounting swap: $nbdServer $nbdswapPort [$nbdswapDevice]"
-			if [ ! -b $nbdswapDevice ];then
-				systemException "Device $nbdswapDevice doesn't appear" "reboot"
+		if [ ! -z "$nbdswapPort" ];then
+			min_ram=63488
+			real_ram=$(cat /proc/meminfo |grep MemTotal|tr -d " [a-z][A-Z]:")
+			if [ ${real_ram} -lt ${min_ram} ];then
+				Echo "NBD: memory is below required 62M"
+				Echo "NBD: swap: $nbdServer $nbdswapPort [$nbdswapDevice]"
+				if ! nbd-client $nbdServer $nbdswapPort $nbdswapDevice -persist
+				then
+					systemException \
+						"Failed to setup $nbdswapDevice device" \
+					"reboot"
+				fi
+				Echo "NBD: Waiting for server to create swap space..."; sleep 3
+				swapon $nbdswapDevice || true
 			fi
-			if ! /usr/sbin/nbd-client $nbdServer $nbdswapPort $nbdswapDevice -persist
-			then
-				systemException "Failed to setup $nbdswapDevice device" "reboot"
-			fi
-			Echo "NBD: Waiting for server to create swap space..."
-			sleep 3
-			/sbin/swapon $nbdswapDevice || true
 		fi
+		# /.../
+		# try to mount a remote read/write location based on NBD
+		# this is then overlayed via $unionFST
+		# ----
+		if [ ! -z "$nbdwritePort" ];then
+			Echo "NBD: read/write $nbdServer $nbdwritePort [$nbdwriteDevice]..."
+			if ! nbd-client $nbdServer $nbdwritePort $nbdwriteDevice -persist
+			then
+				systemException \
+					"Failed to setup $nbdwriteDevice device" \
+				"reboot"
+			fi
+		fi
+		# /.../
+		# mount basic root filesystem exported via NBD
+		# ----
 		Echo "Mounting NBD root system: $nbdServer $nbdPort [$nbdDevice]..."
-		if ! /usr/sbin/nbd-client $nbdServer $nbdPort $nbdDevice -persist;then
+		if ! nbd-client $nbdServer $nbdPort $nbdDevice -persist;then
 			systemException "Failed to setup $nbdDevice device" "reboot"
 		fi
+		# /.../
+		# setup union if basic root filesystem is read-only
+		# ----
 		imageRootDevice=$nbdDevice
 		probeFileSystem $imageRootDevice
 		Echo "Filesystem of remote root system is: $FSTYPE"
 		if [ -z "$COMBINED_IMAGE" ];then
 			if isFSTypeReadOnly;then
-				setupUnionFS /dev/ram1 "$imageRootDevice" $unionFST
+				setupUnionFS "$nbdwriteDevice" "$imageRootDevice" $unionFST
 			fi
 		fi
 		imageRootName="NBDRoot-System"
@@ -687,12 +728,17 @@ else
 	# 12.4) Check for AOE root
 	#--------------------------------------
 	if [ ! -z "$AOEROOT" ];then
+		aoeRODevice=`echo $AOEROOT | cut -d , -f 1`
+		aoeRWDevice=`echo $AOEROOT | cut -d , -f 2`
+		if [ -z "$aoeRWDevice" ] || [ "$aoeRODevice" = "$aoeRWDevice" ];then
+			aoeRWDevice=/dev/ram1
+		fi
 		if ! modprobe aoe;then
 			systemException "Failed to load AoE module" "reboot"
 		fi
-		waitForBlockDevice $AOEROOT
-		if [ ! -b $AOEROOT ];then
-			systemException "Device $AOEROOT doesn't appear" "reboot"
+		waitForBlockDevice $aoeRODevice
+		if [ ! -b $aoeRODevice ];then
+			systemException "Device $aoeRODevice doesn't appear" "reboot"
 		fi
 		# /.../
 		# check ram space, if we don't have more than 62MB
@@ -704,13 +750,13 @@ else
 			Echo "AoE: memory is below required 62M"
 			systemException "Not enough ram" "reboot"
 		fi
-		Echo "Mounting AoE root system: $AOEROOT..."
-		imageRootDevice=$AOEROOT
+		Echo "Mounting AoE root system: $aoeRODevice..."
+		imageRootDevice=$aoeRODevice
 		probeFileSystem $imageRootDevice
 		Echo "Filesystem of remote root system is: $FSTYPE"
 		if [ -z "$COMBINED_IMAGE" ];then
 			if isFSTypeReadOnly;then
-				setupUnionFS /dev/ram1 "$imageRootDevice" $unionFST
+				setupUnionFS "$aoeRWDevice" "$imageRootDevice" $unionFST
 			fi
 		fi
 		imageRootName="AOERoot-System"
@@ -718,6 +764,7 @@ else
 	fi
 fi
 runHook postdownload
+
 #======================================
 # 13) Check for RELOAD_CONFIG
 #--------------------------------------
@@ -731,7 +778,17 @@ if [ $LOCAL_BOOT = "no" ];then
 fi
 
 #======================================
-# 14) Make boot data available on union
+# 14) Mount OS image to /mnt
+#--------------------------------------
+runHook premount
+if ! mountSystem;then
+	systemException "Failed to mount root filesystem" "reboot"
+fi
+validateRootTree
+runHook postmount
+
+#======================================
+# 15) Setup boot partition
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ] && \
 	[ ! -z "$PART" ]      && \
@@ -744,46 +801,17 @@ then
 		# have to do this so that /boot gets copied to the
 		# extX partition, which is necessary for the bootloader to
 		# be able to find the data in there (it can't read squashfs
-		# or cromfs)
+		# or clicfs)
 		# ----
-		rwDir=/read-write
-		roDir=/read-only
-		for dir in $roDir $rwDir;do
-			mkdir -p $dir
-		done
+		mkdir /mnt/static-boot
 		rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
-		roDevice=`echo $UNIONFS_CONFIG | cut -d , -f 2`
-		if ! setupReadWrite; then
-			systemException \
-				"Failed to setup read-write filesystem" \
-			"reboot"
-		fi
-		if ! mount $rwDevice $rwDir >/dev/null;then
-			systemException \
-				"Failed to mount read/write filesystem" \
-			"reboot"
-		fi
-		if ! kiwiMount "$roDevice" "$roDir";then
-			systemException \
-				"Failed to mount read/only filesystem" \
-			"reboot"
-		fi
+		mount $rwDevice /mnt/static-boot
+		cp -a  /mnt/boot /mnt/static-boot
+		rm -rf /mnt/boot
+		( cd /mnt && ln -s static-boot/boot boot )
 		unset RELOAD_IMAGE
-		cp -a $roDir/boot $rwDir
-		umount $rwDir
-		umount $roDir
 	fi
 fi
-
-#======================================
-# 15) Mount OS image to /mnt
-#--------------------------------------
-runHook premount
-if ! mountSystem;then
-	systemException "Failed to mount root filesystem" "reboot"
-fi
-validateRootTree
-runHook postmount
 
 #======================================
 # 16) Import fixed configuration files
@@ -810,6 +838,7 @@ if [ $LOCAL_BOOT = "no" ];then
 			mkdir -p /config/$dirs
 			fetchFile $configSource /config/$configDest uncomp $configServer
 		done
+		IFS=$IFS_ORIG
 		#======================================
 		# Check for KIWI_INITRD
 		#--------------------------------------
@@ -827,10 +856,11 @@ if [ $LOCAL_BOOT = "no" ];then
 				SPLIT="COMBINED_IMAGE=$COMBINED_IMAGE"
 				KIWI_INITRD_PARAMS="$KIWI_INITRD_PARAMS $SPLIT"
 			fi
-			if [ ! -z "$UNIONFS_CONFIG" ]; then
-				UNIONED="UNIONFS_CONFIG=yes"
-				KIWI_INITRD_PARAMS="$KIWI_INITRD_PARAMS $UNIONED"
-			fi
+		fi
+		if [ ! -z "$UNIONFS_CONFIG" ]; then
+			unionFST=`echo $UNIONFS_CONFIG | cut -d , -f 3`
+			UNIONED="UNIONFS_CONFIG=$unionFST"
+			KIWI_INITRD_PARAMS="$KIWI_INITRD_PARAMS $UNIONED"
 		fi
 	fi
 fi
@@ -841,7 +871,9 @@ runHook postconfig
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	if test $systemIntegrity = "clean";then
-		probeFileSystem $imageRootDevice
+		if [ "$FSTYPE" != "nfs" ];then
+			probeFileSystem $imageRootDevice
+		fi
 		kernelList /mnt
 	fi
 fi
@@ -858,12 +890,11 @@ if \
 then
 	if test ! -z "$UNIONFS_CONFIG" && test $systemIntegrity = "clean";then
 		# /.../
-		# we are using a special root setup with aufs. In this case
-		# we can't use the SuSE Linux initrd but must stick to the
+		# we are using a special root setup with aufs or clicfs. In this
+		# case we can't use the SuSE Linux initrd but must stick to the
 		# kiwi boot system.
 		# ----
-		kiwiMount "$DISK"3 "/mnt"
-		pushd /mnt/boot >/dev/null
+		pushd /mnt/static-boot/boot >/dev/null
 		IFS="," ; for i in $KERNEL_LIST;do
 			if test -z "$i";then
 				continue
@@ -883,7 +914,6 @@ then
 		done
 		IFS=$IFS_ORIG
 		popd >/dev/null
-		umount /mnt
 	fi
 fi
 
@@ -898,6 +928,10 @@ if [ $LOCAL_BOOT = "no" ];then
 		if test ! -z $DISK;then
 			updateSwapDeviceFstab /config ${DISK}1
 			updateOtherDeviceFstab /config
+			if [ ! -z "$UNIONFS_CONFIG" ];then
+				rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
+				updatePXEBootDeviceFstab /config $rwDevice
+			fi
 			if ! test -z $COMBINED_IMAGE; then
 				gnum=`echo $imageNextRootDevice | sed -e "s/.*\([0-9]\)/\1/"`
 				gnum=`expr $gnum - 1`
@@ -976,10 +1010,14 @@ umountSystemFilesystems
 #======================================
 # 25) copy initrd files to image
 #--------------------------------------
-importBranding
-if canWrite /mnt;then
-	cp /preinit /mnt
-	cp /include /mnt
+if [ $LOCAL_BOOT = "no" ];then
+	if test $systemIntegrity = "clean";then
+		if canWrite /mnt;then
+			importBranding
+			cp /preinit /mnt
+			cp /include /mnt
+		fi
+	fi
 fi
 
 #======================================

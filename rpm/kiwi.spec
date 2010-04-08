@@ -141,24 +141,6 @@ Authors:
 %endif
 
 %ifarch %ix86 x86_64
-%package -n kiwi-pxeboot-prebuild
-License:        GPL v2 only
-Requires:       syslinux
-Summary:        OpenSuSE - KIWI TFTP prebuild boot images
-Group:          System/Management
-%if 0%{?suse_version} > 1120
-BuildArch:      noarch
-%endif
-
-%description -n kiwi-pxeboot-prebuild
-This package contains the OpenSuSE - KIWI TFTP prebuild boot images
-
-Authors:
---------
-    Marcus Schaefer <ms@novell.com>
-%endif
-
-%ifarch %ix86 x86_64
 %package -n kiwi-desc-isoboot
 License:        GPL v2 or later
 Requires:       kiwi = %{version}
@@ -308,88 +290,9 @@ Authors:
 
 %install
 # build
-export K_USER=-1 # set to -1 to prevent building boot images, set to 0 to enable
-export K_ARCH=`uname -m | grep -q ^i && echo ix86 || uname -m`
-test -e /.buildenv || export K_USER=-1 # no buildenv, no boot image build
 test -e /.buildenv && . /.buildenv
 make buildroot=$RPM_BUILD_ROOT CFLAGS="$RPM_OPT_FLAGS"
-%ifarch %ix86 x86_64
-if [ "$UID" = "$K_USER" ];then
-	# prepare and create prebuilt PXE boot images...
-	(cd tools/dbuslock && make install)
-	mkdir -p $RPM_BUILD_ROOT/srv/tftpboot/pxelinux.cfg
-	mkdir -p $RPM_BUILD_ROOT/srv/tftpboot/boot
-	mkdir -p /usr/share/kiwi/modules
-	mkdir -p /usr/share/kiwi/repo
-	mkdir -p /usr/share/kiwi/image/netboot
-	rm -f /usr/share/kiwi/modules/*
-	for i in `find modules/ -type f`;do cp $i /usr/share/kiwi/modules;done
-	cp -a system/suse-repo /usr/share/kiwi/repo
-	cd modules
-	pxedefault=$RPM_BUILD_ROOT/srv/tftpboot/pxelinux.cfg/default.default
-	echo "# /.../" > $pxedefault
-	echo "# KIWI boot image setup" >> $pxedefault
-	echo "# select boot label according to your system image" >> $pxedefault
-	echo "# ..."  >> $pxedefault
-	echo "DEFAULT Local-Boot" >> $pxedefault
-	images="
-		netboot/suse-SLES10
-	"
-	for i in $images;do
-		rootName=`echo $i | tr / -`
-		rootName=`echo $rootName \(latest service pack\)`
-		echo "#DEFAULT $rootName" >> $pxedefault
-	done
-	echo >> $pxedefault
-	echo "LABEL Local-Boot"  >> $pxedefault
-	echo "      localboot 0" >> $pxedefault
-	for i in $images;do
-		rootName=`echo $i | tr / -`
-		../kiwi.pl --root $RPM_BUILD_ROOT/root-$rootName --prepare ../system/boot/$K_ARCH/$i --logfile terminal
-		../kiwi.pl --create $RPM_BUILD_ROOT/root-$rootName \
-			-d $RPM_BUILD_ROOT/srv/tftpboot/boot --logfile terminal
-		rm -rf $RPM_BUILD_ROOT/root-$rootName*
-		echo >> $pxedefault
-		echo "LABEL $rootName" >> $pxedefault
-		(
-			pushd $RPM_BUILD_ROOT/srv/tftpboot/boot
-			xenkernel=""
-			xenloader=""
-			initrd=""
-			kernel=""
-			for n in *$rootName*;do
-				echo $n | grep -q xen$      && xenkernel=$n || true
-				echo $n | grep -q xen.gz$   && xenloader=$n || true
-				echo $n | grep -q [0-9].gz$ && initrd=$n    || true
-				echo $n | grep -q kernel    && kernel=$n    || true
-			done
-			popd
-			../kiwi.pl --setup-splash \
-				$RPM_BUILD_ROOT/srv/tftpboot/boot/$initrd   && \
-			rm -f $RPM_BUILD_ROOT/srv/tftpboot/boot/$initrd && \
-			initrd=`echo $initrd | sed -e "s@.gz@.splash.gz@"`
-			pushd $RPM_BUILD_ROOT/srv/tftpboot/boot
-			cd $RPM_BUILD_ROOT/srv/tftpboot/boot
-			if [ -n "$xenkernel" ];then
-				echo "      kernel mboot.c32" >> $pxedefault
-				echo "      append boot/$xenloader --- boot/$xenkernel vga=0x314 ramdisk_size=512000 ramdisk_blocksize=4096 splash=silent showopts --- boot/$initrd" >> $pxedefault
-				echo "      IPAPPEND 2" >> $pxedefault
-			else
-				echo "      kernel boot/$kernel" >> $pxedefault
-				echo "      append initrd=boot/$initrd vga=0x314 ramdisk_size=512000 ramdisk_blocksize=4096 splash=silent showopts" >> $pxedefault
-				echo "      IPAPPEND 2" >> $pxedefault
-			fi
-			popd
-		)
-	done
-	rm -f $RPM_BUILD_ROOT/srv/tftpboot/boot/*.md5
-	rm -f $RPM_BUILD_ROOT/srv/tftpboot/boot/*.kernel
-	chmod 644 $pxedefault
-else
-	echo "cannot build prebuild images without root privileges"
-	true
-fi
-%endif
+
 #install
 cd $RPM_BUILD_DIR/kiwi
 #mkdir -p $RPM_BUILD_ROOT/etc/permissions.d
@@ -400,11 +303,10 @@ make buildroot=$RPM_BUILD_ROOT \
      man_prefix=$RPM_BUILD_ROOT/%{_mandir} \
      install
 touch kiwi.loader
+
 %ifarch %ix86 x86_64
-if [ ! "$UID" = "$K_USER" ];then
 	install -m 644 pxeboot/pxelinux.0.config \
 		$RPM_BUILD_ROOT/srv/tftpboot/pxelinux.cfg/default.default
-fi
 %else
 	# no PXE boot setup for non x86 archs
 	rm -rf $RPM_BUILD_ROOT/srv/tftpboot
@@ -445,10 +347,12 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-, root, root)
 %dir %{_datadir}/kiwi
 %dir %{_datadir}/kiwi/image
+%exclude %{_datadir}/kiwi/image/suse-11.3-JeOS
 %exclude %{_datadir}/kiwi/image/suse-11.2-JeOS
 %exclude %{_datadir}/kiwi/image/suse-11.1-JeOS
 %exclude %{_datadir}/kiwi/image/suse-SLE10-JeOS
 %exclude %{_datadir}/kiwi/image/suse-SLE11-JeOS
+%exclude %{_datadir}/kiwi/image/rhel-05.4-JeOS
 %{_datadir}/kiwi/.revision
 %{_datadir}/kiwi/modules
 %{_datadir}/kiwi/locale
@@ -504,15 +408,6 @@ rm -rf $RPM_BUILD_ROOT
 %dir /srv/tftpboot/upload
 %dir /srv/tftpboot/boot
 /srv/tftpboot/pxelinux.cfg/default.default
-%endif
-#=================================================
-# KIWI-pxeboot-prebuild files...  
-# ------------------------------------------------
-%ifarch %ix86 x86_64
-%files -n kiwi-pxeboot-prebuild
-%defattr(-, root, root)
-%doc /srv/tftpboot/README.prebuild
-/srv/tftpboot/boot
 %endif
 #=================================================
 # KIWI-tools files...  
@@ -576,6 +471,7 @@ rm -rf $RPM_BUILD_ROOT
 %ifarch %ix86 x86_64
 %files -n kiwi-templates
 %defattr(-, root, root)
+%{_datadir}/kiwi/image/suse-11.3-JeOS
 %{_datadir}/kiwi/image/suse-11.2-JeOS
 %{_datadir}/kiwi/image/suse-11.1-JeOS
 %{_datadir}/kiwi/image/suse-SLE10-JeOS

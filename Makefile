@@ -123,7 +123,6 @@ install:
 	test -f ${syslinux}/mboot.c32 && \
 		install -m 755 ${syslinux}/mboot.c32  ${TFTPBOOT}/mboot.c32 || /bin/true
 	install -m 644 pxeboot/README             ${TFTPBOOT}
-	install -m 644 pxeboot/README.prebuild    ${TFTPBOOT}
 	#install -m 755 pxeboot/pxelinux.0.config ${TFTPBOOTCONF}/default
 
 	#============================================

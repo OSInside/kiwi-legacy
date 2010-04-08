@@ -1,18 +1,9 @@
 # /.../
 # kiwi provide a default structure for the pxe boot environment
-# with the package kiwi-pxeboot. The package additionally provides
-# the boot configuration which requires the package kiwi-pxeboot-prebuild
-# to be installed.
+# with the package kiwi-pxeboot. The configuration for booting over PXE
+# is stored in /srv/tftpboot/pxelinux.cfg/default.
 #
-# The configuration for booting over PXE is stored in
-# /srv/tftpboot/pxelinux.cfg/default. This means if there is already
-# a prebuild boot image for the operating system version you want to
-# create a system image for the only action you need to take care for
-# is creating the system image and system image configuration according
-# to your needs
-#
-# NOTE:
-# the prebuild boot images can't be created from within openSUSE
-# according to this the kiwi-pxeboot-prebuild contains a README.prebuild
-# file which explains it
+# Details about the PXE boot server setup and an example can be
+# found in the PXE chapter inside the kiwi cookbook (kiwi.pdf)
+# Package: kiwi-doc
 #

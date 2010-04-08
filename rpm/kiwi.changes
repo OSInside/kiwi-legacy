@@ -12,6 +12,10 @@ Mon Mar 29 17:15:37 CEST 2010 - ms@suse.de
 - make the recovery filesystem an ext2 filesystem
 - fixed createPartedInput() to always have a partition ID
 - added iputils package to 11.2 JeOS
+- added suse-11.3 boot and image templates. Also removed
+  suse-11.0 boot and image templates
+- cleaned up spec file, removed prebuild code and package
+  which is not used by anybody
 
 -------------------------------------------------------------------
 Tue Mar 23 16:02:19 CET 2010 - ms@suse.de
