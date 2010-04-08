@@ -780,15 +780,14 @@ sub setupInstallationSource {
 				$kiwi -> error  ("zypper: $data");
 				return undef;
 			}
+			$kiwi -> done ();
 			if ( $prio ) {
+				$kiwi -> info ("=> Set priority to: $prio");
 				my $modrepo = "modifyrepo -p $prio $alias";
-				my $modtext = "Changing priority of";
 				if (! $chroot) {
-					$kiwi -> info ("$modtext bootstrap zypper service: $alias");
 					$data = qxx ("@zypper --root \"$root\" $modrepo 2>&1");
 					$code = $? >> 8;
 				} else {
-					$kiwi -> info ("$modtext chroot zypper service: $alias");
 					$data = qxx ("@kchroot @zypper $modrepo 2>&1");
 					$code = $? >> 8;
 				}
@@ -797,9 +796,9 @@ sub setupInstallationSource {
 					$kiwi -> error  ("zypper: $data");
 					return undef;
 				}
+				$kiwi -> done ();
 			}
 			push (@channelList,$alias);
-			$kiwi -> done ();
 		}
 	}
 	#==========================================
