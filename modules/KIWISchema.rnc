@@ -1043,31 +1043,6 @@ div {
 }
 
 #==========================================
-# common element <oem-sap-install>
-#
-div {
-	k.oem-sap-install.content = xsd:boolean
-	k.oem-sap-install.attlist = empty
-	k.oem-sap-install =
-		## For oemboot driven images: tag the image to be an SAP
-		## appliance. This causes some checks inside the initrd
-		## to become activated as well as a the media changer is
-		## started in early preinit
-		[
-		db:para [
-			"For oemboot driven images: tag the image to be an SAP\x{a}"~
-			"appliance. This causes some checks inside the initrd\x{a}"~
-			"to become activated as well as a the media changer is\x{a}"~
-			"started in early preinit"
-		]
-		]
-		element oem-sap-install {
-			k.oem-sap-install.attlist,
-			k.oem-sap-install.content
-		}
-}
-
-#==========================================
 # common element <oem-reboot>
 #
 div {
@@ -1962,7 +1937,6 @@ div {
 			k.oem-home? &
 			k.oem-boot-title? &
 			k.oem-kiwi-initrd? &
-			k.oem-sap-install? &
 			k.oem-swapsize? &
 			k.oem-recovery? &
 			k.oem-recoveryID? &

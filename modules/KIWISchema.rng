@@ -1462,33 +1462,6 @@ and don't replace it with mkinitrd created initrd</db:para>
   </div>
   <!--
     ==========================================
-    common element <oem-sap-install>
-    
-  -->
-  <div>
-    <define name="k.oem-sap-install.content">
-      <data type="boolean"/>
-    </define>
-    <define name="k.oem-sap-install.attlist">
-      <empty/>
-    </define>
-    <define name="k.oem-sap-install">
-      <element name="oem-sap-install">
-        <a:documentation>For oemboot driven images: tag the image to be an SAP
-appliance. This causes some checks inside the initrd
-to become activated as well as a the media changer is
-started in early preinit</a:documentation>
-        <db:para>For oemboot driven images: tag the image to be an SAP
-appliance. This causes some checks inside the initrd
-to become activated as well as a the media changer is
-started in early preinit</db:para>
-        <ref name="k.oem-sap-install.attlist"/>
-        <ref name="k.oem-sap-install.content"/>
-      </element>
-    </define>
-  </div>
-  <!--
-    ==========================================
     common element <oem-reboot>
     
   -->
@@ -2840,9 +2813,6 @@ and setup the system disk</db:para>
           </optional>
           <optional>
             <ref name="k.oem-kiwi-initrd"/>
-          </optional>
-          <optional>
-            <ref name="k.oem-sap-install"/>
           </optional>
           <optional>
             <ref name="k.oem-swapsize"/>

@@ -242,10 +242,6 @@ function baseSetupOEMPartition {
 		echo "Setting up OEM_KIWI_INITRD=$kiwi_oemkboot"
 		echo "OEM_KIWI_INITRD=$kiwi_oemkboot" >> $oemfile
 	fi
-	if [ ! -z "$kiwi_oemsap" ];then
-		echo "Setting up OEM_SAP_INSTALL=$kiwi_oemsap"
-		echo "OEM_SAP_INSTALL=$kiwi_oemsap" >> $oemfile
-	fi
 	if [ ! -z "$kiwi_oemrecovery" ];then
 		echo "Setting up OEM_RECOVERY=1"
 		echo "OEM_RECOVERY=1" >> $oemfile

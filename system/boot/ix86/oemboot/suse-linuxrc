@@ -201,10 +201,14 @@ openKernelConsole
 # 6) Including required kernel modules
 #--------------------------------------
 probeDevices
+
+#======================================
+# 7) Select language if not in cmdline
+#--------------------------------------
 selectLanguage
 
 #======================================
-# 7) Import OEM partition config
+# 8) Import OEM partition config
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ] && [ -f $OEM_PARTITION_CONFIG ];then
 	Echo "Including oem partition info file"
@@ -212,7 +216,7 @@ if [ "$LOCAL_BOOT" = "no" ] && [ -f $OEM_PARTITION_CONFIG ];then
 fi
 
 #======================================
-# 8) Search boot device...
+# 9) Search boot device...
 #--------------------------------------
 if [ -z "$pxe" ];then
 	Echo "Searching for boot device..."
@@ -231,21 +235,10 @@ if [ -z "$pxe" ];then
 fi
 
 #======================================
-# 9) Check for installation mode...
+# 10) Check for installation mode...
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then
 	OEMInstall
-fi
-
-#======================================
-# 10) Run SAP checks if activated
-#--------------------------------------
-if [ ! -z "$OEM_SAP_INSTALL" ];then
-	IFS=$IFS_ORIG
-	SAPMemCheck
-	SAPCPUCheck
-	SAPStorageCheck $imageDiskDevice $imageDiskExclude
-	SAPDataStorageSetup $imageDiskDevice $imageDiskExclude
 fi
 
 #======================================
@@ -706,15 +699,6 @@ if [ "$LOCAL_BOOT" = "no" ];then
 		Echo "Activate home partition $imageHomeDevice in fstab"
 		echo "$(getDiskID $imageHomeDevice) /home $FSTYPE defaults 0 0" \
 			>> /config/etc/fstab
-	fi
-	if [ ! -z "$OEM_SAP_INSTALL" ];then
-		SAP_DATA=/dev/data_vg/sapdata
-		vgchange -a y data_vg
-		if partitionSize $SAP_DATA &>/dev/null;then
-			mkdir -p /mnt/sapdata
-			echo "$(getDiskID $SAP_DATA) /sapdata $FSTYPE defaults 0 0" \
-				>> /config/etc/fstab
-		fi
 	fi
 	#======================================
 	# setup: bootloader files

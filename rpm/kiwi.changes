@@ -18,6 +18,8 @@ Mon Mar 29 17:15:37 CEST 2010 - ms@suse.de
   which is not used by anybody
 - added common functions resizeFilesystem() and
   createFilesystem() in KIWILinuxRC.sh
+- removed SAP related code. This was only for a proof
+  of concept and never lead to anything useful
 
 -------------------------------------------------------------------
 Tue Mar 23 16:02:19 CET 2010 - ms@suse.de

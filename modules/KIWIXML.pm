@@ -368,9 +368,6 @@ sub new {
 		if (defined $foreignRepo->{"oem-kiwi-initrd"}) {
 			$this -> setForeignOEMOptionsElement ("oem-kiwi-initrd");
 		}
-		if (defined $foreignRepo->{"oem-sap-install"}) {
-			$this -> setForeignOEMOptionsElement ("oem-sap-install");
-		}
 		if (defined $foreignRepo->{"oem-reboot"}) {
 			$this -> setForeignOEMOptionsElement ("oem-reboot");
 		}
@@ -1347,26 +1344,6 @@ sub getOEMKiwiInitrd {
 }
 
 #==========================================
-# getOEMSAPInstall
-#------------------------------------------
-sub getOEMSAPInstall {
-	# ...
-	# Obtain the oem-sap-install value or return undef
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
-	if (! defined $node) {
-		return undef;
-	}
-	my $sap  = $node -> getElementsByTagName ("oem-sap-install");
-	if ((! defined $sap) || ("$sap" eq "")) {
-		return undef;
-	}
-	return $sap;
-}
-
-#==========================================
 # getOEMReboot
 #------------------------------------------
 sub getOEMReboot {
@@ -2340,7 +2317,6 @@ sub getImageConfig {
 		my $oemhome  = $element -> getElementsByTagName ("oem-home");
 		my $oemtitle = $element -> getElementsByTagName ("oem-boot-title");
 		my $oemkboot = $element -> getElementsByTagName ("oem-kiwi-initrd");
-		my $oemsap   = $element -> getElementsByTagName ("oem-sap-install");
 		my $oemreboot= $element -> getElementsByTagName ("oem-reboot");
 		my $oemreco  = $element -> getElementsByTagName ("oem-recovery");
 		my $oemrecoid= $element -> getElementsByTagName ("oem-recoveryID");
@@ -2372,9 +2348,6 @@ sub getImageConfig {
 		}
 		if ((defined $oemkboot) && ("$oemkboot" ne "")) {
 			$result{kiwi_oemkboot} = $oemkboot;
-		}
-		if ((defined $oemsap) && ("$oemsap" ne "")) {
-			$result{kiwi_oemsap} = $oemsap
 		}
 		if ((defined $oemreboot) && ("$oemreboot" eq "true")) {
 			$result{kiwi_oemreboot} = $oemreboot;
