@@ -3050,7 +3050,7 @@ sub getInstallSize {
 	}
 	my $psolve = new KIWISatSolver (
 		$kiwi,\@result,$this->{urllist},"solve-patterns",
-		undef,undef,"quiet"
+		undef,undef
 	);
 	if (! defined $psolve) {
 		$kiwi -> warning ("SaT solver setup failed");
