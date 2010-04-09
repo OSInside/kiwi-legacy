@@ -3,6 +3,7 @@ Thu Apr  8 16:43:05 CEST 2010 - ms@suse.de
 
 - v4.28
 - fixed typo in repo prio message
+- fixed info module to work with loop media like iso://
 
 -------------------------------------------------------------------
 Mon Mar 29 17:15:37 CEST 2010 - ms@suse.de

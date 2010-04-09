@@ -1809,6 +1809,40 @@ sub listXMLInfo {
 		);
 	}
 	#==========================================
+	# Setup loop sources
+	#------------------------------------------
+	my @mountlist = ();
+	if ($xml->{urlhash}) {
+		foreach my $source (keys %{$xml->{urlhash}}) {
+			#==========================================
+			# iso:// sources
+			#------------------------------------------
+			if ($source =~ /^iso:\/\/(.*)/) {
+				my $iso  = $1;
+				my $dir  = $xml->{urlhash}->{$source};
+				my $data = qxx ("mkdir -p $dir; mount -o loop $iso $dir 2>&1");
+				my $code = $? >> 8;
+				if ($code != 0) {
+					$kiwi -> failed ();
+					$kiwi -> error  ("Failed to loop mount ISO path: $data");
+					$kiwi -> failed ();
+					rmdir $dir;
+					exit 1;
+				}
+				push (@mountlist,$dir);
+			}
+		}
+	}
+	sub newCleanMount {
+		my @list = shift;
+		return sub {
+			foreach my $dir (@list) {
+				qxx ("umount $dir ; rmdir $dir 2>&1");
+			}
+		}
+	}
+	*cleanMount = newCleanMount (@mountlist);
+	#==========================================
 	# Walk through selection list
 	#------------------------------------------
 	foreach my $info (@listXMLInfoSelection) {
@@ -1821,6 +1855,7 @@ sub listXMLInfo {
 					($meta,$delete,$solfile,$satlist) = $xml->getInstallSize();
 					if (! $meta) {
 						$kiwi -> failed();
+						cleanMount();
 						exit 1;
 					}
 				}
@@ -1844,6 +1879,7 @@ sub listXMLInfo {
 						$xml->getInstallSize();
 					if (! $meta) {
 						$kiwi -> failed();
+						cleanMount();
 						exit 1;
 					}
 				}
@@ -1897,6 +1933,7 @@ sub listXMLInfo {
 						$xml->getInstallSize();
 					if (! $meta) {
 						$kiwi -> failed();
+						cleanMount();
 						exit 1;
 					}
 				}
@@ -1930,6 +1967,7 @@ sub listXMLInfo {
 						$xml->getInstallSize();
 					if (! $meta) {
 						$kiwi -> failed();
+						cleanMount();
 						exit 1;
 					}
 				}
@@ -1945,7 +1983,7 @@ sub listXMLInfo {
 					$kiwi -> info ("No packages solved\n");
 				} else {
 					$kiwi -> info ("Image Packages:\n");
-					foreach my $package (@packs) {
+					foreach my $package (sort @packs) {
 						$kiwi -> info ("--> $package\n");
 					}
 				}
@@ -1968,6 +2006,7 @@ sub listXMLInfo {
 			};
 		}
 	}
+	cleanMount();
 	exit 0;
 }
 
