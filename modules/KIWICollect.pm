@@ -1527,7 +1527,7 @@ sub collectProducts
   # not nice, just look for all -release packages and their content.
   # This will become nicer when we switched to rpm-md as product repo format
   my $found_product = 0;
-  foreach my $i(grep($_ =~ /-release$/,keys(%{$this->{m_repoPacks}}))) {
+  RELEASEPACK:foreach my $i(grep($_ =~ /-release$/,keys(%{$this->{m_repoPacks}}))) {
       qx(rm -rf $tmp);
       if(!mkpath("$tmp", { mode => 0755 } )) {
         $this->logMsg("E", "can't create dir <$tmp>");
@@ -1538,7 +1538,7 @@ sub collectProducts
       foreach my $arch($this->getArchList( $this->{m_repoPacks}->{$i}, $i, \$nofallback)) {
         if ( $this->{m_repoPacks}->{$i}->{$arch}->{'newpath'} eq "" || $this->{m_repoPacks}->{$i}->{$arch}->{'newfile'} eq "" ){
            $this->logMsg("I", "Skip product release package $i");
-           next;
+           next RELEASEPACK;
         }
         $file = $this->{m_repoPacks}->{$i}->{$arch}->{'newpath'}."/".$this->{m_repoPacks}->{$i}->{$arch}->{'newfile'};
       }
