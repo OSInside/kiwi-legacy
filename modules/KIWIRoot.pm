@@ -411,11 +411,20 @@ sub init {
 	#==========================================
 	# reset installation source
 	#------------------------------------------
-	if (! $manager -> resetInstallationSource()) {
-		$this -> cleanMount();
-		$manager -> freeLock();
-		return undef;
-	}
+	# /.../
+	# In order to re-use an already downloaded metadata cache
+	# we prevent kiwi from removing the package manager cache.
+	# kiwi point the package manger to an alternative cache
+	# directory in /var/cache/kiwi/$manager. My hope is that
+	# there will be no conflicts if different package manager
+	# versions uses the cache. If you find problems activate
+	# the following code:
+	# ----
+	# if (! $manager -> resetInstallationSource()) {
+	#	$this -> cleanMount();
+	#	$manager -> freeLock();
+	#	return undef;
+	# }
 	#==========================================
 	# Reset preperation checks
 	#------------------------------------------
@@ -514,11 +523,20 @@ sub upgrade {
 		$manager -> freeLock();
 		return undef;
 	}
-	if (! $manager -> resetInstallationSource()) {
-		$this -> cleanupResolvConf();
-		$manager -> freeLock();
-		return undef;
-	}
+	# /.../
+	# In order to re-use an already downloaded metadata cache
+	# we prevent kiwi from removing the package manager cache.
+	# kiwi point the package manger to an alternative cache
+	# directory in /var/cache/kiwi/$manager. My hope is that
+	# there will be no conflicts if different package manager
+	# versions uses the cache. If you find problems activate
+	# the following code:
+	# ----
+	# if (! $manager -> resetInstallationSource()) {
+	#	$this -> cleanupResolvConf();
+	#	$manager -> freeLock();
+	#	return undef;
+	# }
 	$this -> cleanupResolvConf();
 	$manager -> freeLock();
 	return $this;
@@ -578,11 +596,20 @@ sub cleanupTestingEnvironment {
 	my $this = shift;
 	my $root = $this->{root};
 	my $manager = $this->{manager};
-	if (! $manager -> resetInstallationSource()) {
-		$this -> cleanupResolvConf();
-		$manager -> freeLock();
-		return undef;
-	}
+	# /.../
+	# In order to re-use an already downloaded metadata cache
+	# we prevent kiwi from removing the package manager cache.
+	# kiwi point the package manger to an alternative cache
+	# directory in /var/cache/kiwi/$manager. My hope is that
+	# there will be no conflicts if different package manager
+	# versions uses the cache. If you find problems activate
+	# the following code:
+	# ----
+	# if (! $manager -> resetInstallationSource()) {
+	#	$this -> cleanupResolvConf();
+	#	$manager -> freeLock();
+	#	return undef;
+	# }
 	$this -> cleanupResolvConf();
 	$manager -> freeLock();
 	return $this;
@@ -695,10 +722,19 @@ sub install {
 	#==========================================
 	# reset installation source
 	#------------------------------------------
-	if (! $manager -> resetInstallationSource()) {
-		$manager -> freeLock();
-		return undef;
-	}
+	# /.../
+	# In order to re-use an already downloaded metadata cache
+	# we prevent kiwi from removing the package manager cache.
+	# kiwi point the package manger to an alternative cache
+	# directory in /var/cache/kiwi/$manager. My hope is that
+	# there will be no conflicts if different package manager
+	# versions uses the cache. If you find problems activate
+	# the following code:
+	# ----
+	# if (! $manager -> resetInstallationSource()) {
+	#	$manager -> freeLock();
+	#	return undef;
+	# }
 	$manager -> freeLock();
 	return $this;
 }

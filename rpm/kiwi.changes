@@ -6,6 +6,8 @@ Fri Apr  9 15:21:18 CEST 2010 - ms@suse.de
 - restart utimer in pre-init stage, also put the time
   information into /dev which is a bind mounted location
 - activate verbose mode for --info module
+- speedup prepare step by not removing the repository
+  when the chroot switch happens
 
 -------------------------------------------------------------------
 Thu Apr  8 16:43:05 CEST 2010 - ms@suse.de
