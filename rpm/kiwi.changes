@@ -1,6 +1,8 @@
 -------------------------------------------------------------------
 Fri Apr  9 15:21:18 CEST 2010 - ms@suse.de
 
+- Don't update bootloader when calling mkinitrd. The bootloader
+  setup in the first place was done by kiwi (bnc #595073)
 - activate verbose mode for --info module
 
 -------------------------------------------------------------------

@@ -656,7 +656,7 @@ function setupSUSEInitrd {
 		if [ -f /etc/init.d/boot.device-mapper ];then
 			/etc/init.d/boot.device-mapper start
 		fi
-		if ! mkinitrd;then
+		if ! mkinitrd -B;then
 			Echo "Can't create initrd"
 			systemIntegrity=unknown
 			bootLoaderOK=0
