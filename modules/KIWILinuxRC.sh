@@ -24,6 +24,7 @@ export UFONT=/usr/share/fbiterm/fonts/b16.pcf.gz
 export HYBRID_PERSISTENT_FS=ext3
 export HYBRID_PERSISTENT_ID=83
 export HYBRID_PERSISTENT_DIR=/read-write
+export UTIMER_INFO=/dev/utimer
 
 #======================================
 # Exports (General)
@@ -101,7 +102,7 @@ function Echo {
 	fi
 	if [ ! $UTIMER = 0 ] && kill -0 $UTIMER &>/dev/null;then
 		kill -HUP $UTIMER
-		local prefix=$(cat /tmp/utimer)
+		local prefix=$(cat $UTIMER_INFO)
 	else
 		local prefix="===>"
 	fi
@@ -376,8 +377,15 @@ function errorLogStart {
 	# by ELOG_CONSOLE
 	# ----
 	if [ ! -f $ELOG_FILE ];then
+		#======================================
+		# Header for main stage log
+		#--------------------------------------
 		echo "KIWI Log:" >> $ELOG_FILE
 	else
+		#======================================
+		# Header for pre-init stage log
+		#--------------------------------------
+		startUtimer
 		echo "KIWI PreInit Log" >> $ELOG_FILE
 		cat /iprocs | grep -v TAIL_PID > /iprocs
 	fi
@@ -4538,13 +4546,16 @@ function activateImage {
 	#--------------------------------------
 	Echo "Preparing preinit phase..."
 	if ! cp /iprocs /mnt;then
-		ystemException "Failed to copy iprocs code" "reboot"
+		systemException "Failed to copy iprocs code" "reboot"
 	fi
 	if ! cp /preinit /mnt;then
 		systemException "Failed to copy preinit code" "reboot"
 	fi
 	if ! cp /include /mnt;then
 		systemException "Failed to copy include code" "reboot"
+	fi
+	if ! cp /usr/bin/utimer /mnt;then
+		systemException "Failed to copy utimer program" "reboot"
 	fi
 	if [ ! -x /lib/mkinitrd/bin/run-init ];then
 		systemException "Can't find run-init program" "reboot"
@@ -4559,7 +4570,7 @@ function cleanImage {
 	# is called
 	# ----
 	#======================================
-	# kill utimer and second tail
+	# kill second utimer and tail
 	#--------------------------------------
 	. /iprocs
 	kill $UTIMER_PID &>/dev/null
@@ -4567,6 +4578,9 @@ function cleanImage {
 	#======================================
 	# remove preinit code from system image
 	#--------------------------------------
+	rm -f /tmp/utimer
+	rm -f /dev/utimer
+	rm -f /utimer
 	rm -f /iprocs
 	rm -f /preinit
 	rm -f /include
@@ -4630,10 +4644,11 @@ function bootImage {
 		fi
 	fi
 	#======================================
-	# kill initial tail
+	# kill initial tail and utimer
 	#--------------------------------------
 	. /iprocs
-	kill $TAIL_PID &>/dev/null
+	kill $UTIMER_PID &>/dev/null
+	kill $TAIL_PID   &>/dev/null
 	#======================================
 	# copy boot log file into system image
 	#--------------------------------------
@@ -5502,6 +5517,26 @@ function createFilesystem {
 	fi
 }
 #======================================
+# startUtimer
+#--------------------------------------
+function startUtimer {
+	local utimer=/usr/bin/utimer
+	if [ ! -x $utimer ];then
+		utimer=/utimer
+	fi
+	if [ -x $utimer ];then
+		if [ ! -e /tmp/utimer ];then
+			ln -s $UTIMER_INFO /tmp/utimer
+		fi
+		$utimer
+		export UTIMER=$(cat /var/run/utimer.pid)
+		if [ -f /iprocs ];then
+			cat /iprocs | grep -v UTIMER_PID > /iprocs
+		fi
+		echo UTIMER_PID=$UTIMER >> /iprocs
+	fi
+}
+#======================================
 # initialize
 #--------------------------------------
 function initialize {
@@ -5514,13 +5549,9 @@ function initialize {
 	#--------------------------------------
 	setterm -powersave off -blank 0
 	#======================================
-	# Start boot timer
+	# Start boot timer (first stage)
 	#--------------------------------------
-	if [ -x /usr/bin/utimer ];then
-		/usr/bin/utimer
-		export UTIMER=$(cat /var/run/utimer.pid)
-		echo UTIMER_PID=$UTIMER >> /iprocs
-	fi
+	startUtimer
 }
 
 # vim: set noexpandtab:
