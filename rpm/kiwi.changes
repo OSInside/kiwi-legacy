@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Fri Apr  9 15:21:18 CEST 2010 - ms@suse.de
 
+- v4.29
 - Don't update bootloader when calling mkinitrd. The bootloader
   setup in the first place was done by kiwi (bnc #595073)
 - restart utimer in pre-init stage, also put the time
