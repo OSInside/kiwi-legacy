@@ -3037,7 +3037,7 @@ function partedGetPartitionID {
 	# prints the partition ID for the given device and number
 	# ----
 	local disk=`echo $1 | sed -e s"@[0-9]@@g"`
-	parted -m -s $disk print | grep ^$2: | cut -f10 -d, | cut -f2 -d=
+	parted -m -s $disk print | grep ^$2: | cut -f2 -d, | cut -f2 -d= | tr -d ";"
 }
 #======================================
 # partedCreatePartition
