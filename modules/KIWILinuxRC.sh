@@ -5463,52 +5463,64 @@ function reloadKernel {
 #--------------------------------------
 function resizeFilesystem {
 	local deviceResize=$1
+	local callme=$2
+	local resize_fs
+	local resize_lucks
+	local check
 	if [ -z "$FSTYPE" ];then
 		probeFileSystem $deviceResize
 	fi
+	resize_lucks="luksResize $deviceResize"
 	if [ "$FSTYPE" = "reiserfs" ];then
 		Echo "Resize Reiser filesystem to full partition space..."
-		luksResize $deviceResize
-		resize_reiserfs -q $deviceResize
+		resize_fs="resize_reiserfs -q $deviceResize"
+		check="reiserfsck -y $deviceResize"
 	elif [ "$FSTYPE" = "ext2" ];then
 		Echo "Resize EXT2 filesystem to full partition space..."
-		luksResize $deviceResize
-		resize2fs -f -F -p $deviceResize && e2fsck -p $deviceResize
+		resize_fs="resize2fs -f -F -p $deviceResize"
+		check="e2fsck -p $deviceResize"
 	elif [ "$FSTYPE" = "ext3" ];then
 		Echo "Resize EXT3 filesystem to full partition space..."
-		luksResize $deviceResize
-		resize2fs -f -F -p $deviceResize && e2fsck -p $deviceResize
+		resize_fs="resize2fs -f -F -p $deviceResize"
+		check="e2fsck -p $deviceResize"
 	elif [ "$FSTYPE" = "ext4" ];then
 		Echo "Resize EXT4 filesystem to full partition space..."
-		luksResize $deviceResize
-		resize2fs -f -F -p $deviceResize && e2fsck -p $deviceResize
+		resize_fs="resize2fs -f -F -p $deviceResize"
+		check="e2fsck -p $deviceResize"
 	else
 		# don't know how to resize this filesystem
 		return
 	fi
-	if [ ! $? = 0 ];then
-		systemException \
-			"Failed to resize/check filesystem" \
-		"reboot"
+	if [ -z "$callme" ];then
+		eval $resize_lucks
+		eval $resize_fs && $check
+		if [ ! $? = 0 ];then
+			systemException \
+				"Failed to resize/check filesystem" \
+			"reboot"
+		fi
+		INITRD_MODULES="$INITRD_MODULES $FSTYPE"
+	else
+		echo $resize_fs
 	fi
-	INITRD_MODULES="$INITRD_MODULES $FSTYPE"
 }
 #======================================
 # createFilesystem
 #--------------------------------------
 function createFilesystem {
 	local deviceCreate=$1
+	local blocks=$2
 	if [ "$FSTYPE" = "reiserfs" ];then
-		mkreiserfs -f $deviceCreate 1>&2
+		mkreiserfs -f $deviceCreate $blocks 1>&2
 	elif [ "$FSTYPE" = "ext2" ];then
-		mke2fs -T ext2 -F $deviceCreate 1>&2
+		mke2fs -T ext2 -F $deviceCreate $blocks 1>&2
 	elif [ "$FSTYPE" = "ext3" ];then
-		mke2fs -T ext3 -j -F $deviceCreate 1>&2
+		mke2fs -T ext3 -j -F $deviceCreate $blocks 1>&2
 	elif [ "$FSTYPE" = "ext4" ];then
-		mke2fs -T ext4 -j -F $deviceCreate 1>&2
+		mke2fs -T ext4 -j -F $deviceCreate $blocks 1>&2
 	else
 		# use ext3 by default
-		mke2fs -T ext3 -j -F $deviceCreate 1>&2
+		mke2fs -T ext3 -j -F $deviceCreate $blocks 1>&2
 	fi
 	if [ ! $? = 0 ];then
 		systemException \
