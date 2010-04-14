@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Wed Apr 14 11:27:45 CEST 2010 - ms@suse.de
+
+- cleaned up unused variables in KIWIImage.pm
+- enhanced KIWILinuxRC create/resize filesystem functions
+  to be able to return only the command without actually
+  invoking it
+
+-------------------------------------------------------------------
 Fri Apr  9 15:21:18 CEST 2010 - ms@suse.de
 
 - v4.29

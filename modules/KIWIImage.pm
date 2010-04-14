@@ -199,7 +199,7 @@ sub createImageDMSquashExt3 {
 	#==========================================
 	# Create ext3 filesystem on extend
 	#------------------------------------------
-	if (! $this -> setupEXT2 ( $name,$tree,$journal )) {
+	if (! $this -> setupEXT2 ( $name,$journal )) {
 		return undef;
 	}
 	#==========================================
@@ -275,7 +275,7 @@ sub createImageClicFS {
 	#==========================================
 	# Create ext3 filesystem on extend
 	#------------------------------------------
-	if (! $this -> setupEXT2 ( $name,$tree,$journal )) {
+	if (! $this -> setupEXT2 ( $name,$journal )) {
 		return undef;
 	}
 	#==========================================
@@ -405,7 +405,7 @@ sub createImageEXT2 {
 	#==========================================
 	# Create filesystem on extend
 	#------------------------------------------
-	if (! $this -> setupEXT2 ( $name,$imageTree,$journal )) {
+	if (! $this -> setupEXT2 ( $name,$journal )) {
 		return undef;
 	}
 	#==========================================
@@ -505,7 +505,7 @@ sub createImageEC2 {
 	#==========================================
 	# Create filesystem on extend
 	#------------------------------------------
-	if (! $this -> setupEXT2 ( $name,$imageTree,"journaled-ext3" )) {
+	if (! $this -> setupEXT2 ( $name,"journaled-ext3" )) {
 		return undef;
 	}
 	#==========================================
@@ -1549,7 +1549,7 @@ sub createImageLiveCD {
 			$main::FSBlockSize = 4096;
 			$setBlockSize = 1;
 		}
-		if (! $this -> setupEXT2 ( $namerw,$imageTree )) {
+		if (! $this -> setupEXT2 ( $namerw )) {
 			$this -> restoreCDRootData();
 			$this -> restoreSplitExtend ();
 			$this -> cleanLuks();
@@ -2639,19 +2639,15 @@ sub createImageSplit {
 		#------------------------------------------
 		SWITCH: for ($FSTypeRW) {
 			/ext2/       && do {
-				$ok = $this -> setupEXT2 ( $namerw,$imageTreeRW );
+				$ok = $this -> setupEXT2 ( $namerw );
 				last SWITCH;
 			};
 			/ext3/       && do {
-				$ok = $this -> setupEXT2 (
-					$namerw,$imageTreeRW,"journaled-ext3"
-				);
+				$ok = $this -> setupEXT2 ( $namerw,"journaled-ext3" );
 				last SWITCH;
 			};
 			/ext4/       && do {
-				$ok = $this -> setupEXT2 (
-					$namerw,$imageTreeRW,"journaled-ext4"
-				);
+				$ok = $this -> setupEXT2 ( $namerw,"journaled-ext4" );
 				last SWITCH;
 			};
 			/reiserfs/   && do {
@@ -2687,15 +2683,15 @@ sub createImageSplit {
 	#------------------------------------------
 	SWITCH: for ($FSTypeRO) {
 		/ext2/       && do {
-			$ok = $this -> setupEXT2 ( $namero,$imageTree );
+			$ok = $this -> setupEXT2 ( $namero );
 			last SWITCH;
 		};
 		/ext3/       && do {
-			$ok = $this -> setupEXT2 ( $namero,$imageTree,"journaled-ext3" );
+			$ok = $this -> setupEXT2 ( $namero,"journaled-ext3" );
 			last SWITCH;
 		};
 		/ext4/       && do {
-			$ok = $this -> setupEXT2 ( $namero,$imageTree,"journaled-ext4" );
+			$ok = $this -> setupEXT2 ( $namero,"journaled-ext4" );
 			last SWITCH;
 		};
 		/reiserfs/   && do {
@@ -3818,17 +3814,12 @@ sub extractLinux {
 sub setupEXT2 {
 	my $this    = shift;
 	my $name    = shift;
-	my $tree    = shift;
 	my $journal = shift;
 	my $kiwi    = $this->{kiwi};
 	my $xml  = $this->{xml};
 	my %type = %{$xml->getImageTypeAndAttributes()};
-	my $imageTree = $this->{imageTree};
 	my $fsopts;
 	my $tuneopts;
-	if (! defined $tree) {
-		$tree = $imageTree;
-	}
 	my %FSopts = main::checkFSOptions();
 	if ((defined $journal) && ($journal eq "journaled-ext3")) {
 		$fsopts = $FSopts{ext3};
