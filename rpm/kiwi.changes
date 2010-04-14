@@ -1,6 +1,8 @@
 -------------------------------------------------------------------
 Wed Apr 14 11:27:45 CEST 2010 - ms@suse.de
 
+- fixed split boot, cleanImage is not allowed to umount
+  the required but non busy symlinked read-write part
 - cleaned up unused variables in KIWIImage.pm
 - enhanced KIWILinuxRC create/resize filesystem functions
   to be able to return only the command without actually

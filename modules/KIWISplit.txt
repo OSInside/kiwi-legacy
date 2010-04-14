@@ -10,5 +10,7 @@
 		<file name="/home/*"/>
 		<file name="/tmp"/>
 		<file name="/tmp/*"/>
+		<file name="/usr/share/kbd/keymaps"/>
+		<file name="/usr/share/kbd/keymaps/*"/>
 	</persistent>
 </split>

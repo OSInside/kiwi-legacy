@@ -4590,8 +4590,13 @@ function cleanImage {
 	#======================================
 	# don't call root filesystem check
 	#--------------------------------------
-	if [ "$haveClicFS" = "yes" ] || [ ! -z "$NFSROOT" ] ;then
-		# FIXME: clicfs / NFS doesn't like this umount tricks
+	if \
+		[ "$haveClicFS" = "yes" ] || \
+		[ ! -z "$NFSROOT" ]       || \
+		[ ! -z "$NBDROOT" ]       || \
+		[ ! -z "$AOEROOT" ]       || \
+		[ ! -z "$COMBINED_IMAGE" ]
+	then
 		export ROOTFS_FSCK="0"
 		return
 	fi
