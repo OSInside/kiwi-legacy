@@ -87,6 +87,7 @@
 		<package name="bootsplash"/>
 		<package name="tar"/>
 		<package name="lvm2"/>
+		<package name="parted"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>

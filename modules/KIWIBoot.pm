@@ -1214,6 +1214,7 @@ sub setupBootStick {
 		$kiwi -> failed ();
 		$this -> luksClose();
 		$this -> cleanDbus();
+		$this -> cleanLoop ();
 		$this -> cleanTmp ();
 		return undef;
 	}
@@ -1254,6 +1255,7 @@ sub setupBootStick {
 			$kiwi -> failed ();
 			$this -> luksClose();
 			$this -> cleanDbus();
+			$this -> cleanLoop ();
 			$this -> cleanTmp ();
 			return undef;
 		}
@@ -1277,6 +1279,8 @@ sub setupBootStick {
 				$kiwi -> failed ();
 				$kiwi -> error  ("Couldn't setup luks format: $root");
 				$kiwi -> failed ();
+				$this -> cleanDbus();
+				$this -> cleanLoop ();
 				return undef;
 			}
 			$status = qxx ("echo $cipher|cryptsetup luksOpen $root $name 2>&1");
@@ -1285,6 +1289,8 @@ sub setupBootStick {
 				$kiwi -> failed ();
 				$kiwi -> error  ("Couldn't open luks device: $status");
 				$kiwi -> failed ();
+				$this -> cleanDbus();
+				$this -> cleanLoop ();
 				return undef;
 			}
 			$root = "/dev/mapper/$name";
@@ -1302,6 +1308,7 @@ sub setupBootStick {
 			$kiwi -> error  ("Couldn't create filesystem: $status");
 			$kiwi -> failed ();
 			$this -> luksClose();
+			$this -> cleanDbus();
 			$this -> cleanLoop ();
 			return undef;
 		}

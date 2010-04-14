@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Wed Apr 14 11:27:45 CEST 2010 - ms@suse.de
 
+- added parted to vmxboot images
 - fixed split boot, cleanImage is not allowed to umount
   the required but non busy symlinked read-write part
 - cleaned up unused variables in KIWIImage.pm

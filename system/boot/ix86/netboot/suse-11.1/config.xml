@@ -261,7 +261,6 @@
 		<package name="libtiff3"/>
 		<package name="libmng"/>
 		<package name="liblcms"/>
-		<package name="parted"/>
 		<package name="make"/>
 		<package name="pciutils"/>
 		<package name="krb5"/>

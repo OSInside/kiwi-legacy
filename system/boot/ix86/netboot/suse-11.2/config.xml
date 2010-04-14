@@ -253,7 +253,6 @@
 		<package name="perl-gettext"/>
 		<package name="setserial"/>
 		<package name="bundle-lang-common-zh"/>
-		<package name="parted"/>
 		<package name="make"/>
 		<package name="pciutils"/>
 		<package name="krb5"/>

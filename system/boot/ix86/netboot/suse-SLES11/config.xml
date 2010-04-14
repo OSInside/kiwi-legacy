@@ -249,7 +249,6 @@
 		<package name="libtiff3"/>
 		<package name="libmng"/>
 		<package name="liblcms"/>
-		<package name="parted"/>
 		<package name="e2fsprogs"/>
 		<package name="make"/>
 		<package name="pciutils"/>

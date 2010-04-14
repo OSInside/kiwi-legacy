@@ -104,6 +104,7 @@
 		<package name="cryptsetup"/>
 		<package name="dialog"/>
 		<package name="kiwi-tools"/>
+		<package name="parted"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
