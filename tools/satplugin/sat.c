@@ -18,7 +18,7 @@ int main (void) {
 	struct utsname hw;
 	int b;
 	Queue  queue;
-	int fd = open ("/var/cache/kiwi/satsolver/5fa35fa3cc698ca565085dccef365384", O_RDONLY);
+	int fd = open ("/var/cache/kiwi/satsolver/51c98db6cde4ff149b3cf5bbfcb57567", O_RDONLY);
 	if (fd == -1) {
 		return 1;
 	}
@@ -102,8 +102,10 @@ int main (void) {
 		}
 		Solvable *s = solver->pool->solvables + p;
 		unsigned int bytes = solvable_lookup_num(s, SOLVABLE_INSTALLSIZE, 0);
+		const char* ver = solvable_lookup_str(s,SOLVABLE_EVR);
+		const char* arc = solvable_lookup_str(s,SOLVABLE_ARCH);
 		size += bytes;
-		printf ("SOLVER NAME: %s %ukB\n", id2str(pool, s->name),bytes);
+		printf ("SOLVER NAME: %s %ukB %s %s\n", id2str(pool, s->name),bytes,ver,arc);
 	}	
 	printf ("REQUIRED SIZE: %ldkB\n",size);
 	return 0;

@@ -209,9 +209,11 @@ extern "C"
 
     SV* getInstallList (Pool *pool) {
         int b = 0;
-        AV *myav = newAV();
-        SV *res  = 0;
+        SV *result = 0;
         int len = self->decisionq.count;
+        HV *hash = newHV();
+        SV **svs = (SV**) malloc(len*sizeof(SV*));
+
         for (b = 0; b < len; b++) {
             Id p = self->decisionq.elements[b];
             if (p < 0) {
@@ -221,23 +223,30 @@ extern "C"
                 continue; // ignore system solvable
             }
             Solvable *s = self->pool->solvables + p;
-            //printf ("SOLVER NAME: %d %s\n",p,id2str(pool, s->name));
+            // lookup package install size
             unsigned int bytes=solvable_lookup_num(s, SOLVABLE_INSTALLSIZE, 0);
+            // lookup package version
+            const char* vers = solvable_lookup_str(s,SOLVABLE_EVR);
+            // lookup package architecture
+            const char* arch = solvable_lookup_str(s,SOLVABLE_ARCH);
+            // lockup package name
             const char* myel = (char*)id2str(pool, s->name);
-            char* myis = (char*)malloc (sizeof (char) * 11);
-            sprintf (myis,"%u",bytes);
-            SV* mysv1 = sv_newmortal();
-            mysv1 = perl_get_sv (myel,TRUE);
-            sv_setpv(mysv1, myel);
-            av_push (myav,mysv1);
-            SV* mysv2 = sv_newmortal();
-            mysv2 = perl_get_sv ((const char*)myis,TRUE);
-            sv_setpv(mysv2, myis);
-            av_push (myav,mysv2);
+
+            // store data into perl hash
+            char* val = (char*)malloc (
+                sizeof (char) * (strlen(vers)+1+strlen(arch)+1+20)
+            );
+            sprintf (val,"%u:%s:%s",bytes,arch,vers);
+            svs[b] = sv_newmortal();
+            hv_store(hash,
+                myel,strlen(myel)+1,
+                newSVpv(val,strlen(val)+1),0
+            );
         }
-        res = newRV((SV*)myav);
-        sv_2mortal (res);
-        return res;
+        free (svs);
+        result = newRV((SV*)hash);
+        sv_2mortal (result);
+        return result;
     }
 
     int getProblemsCount (void) {

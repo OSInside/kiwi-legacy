@@ -165,28 +165,22 @@ sub new {
 	my $list = $solver -> getInstallList ($pool);
 	my @plist= ();
 	my %slist= ();
-	my $count= 0;
-	my $pprev;
-	foreach my $name (@{$list}) {
-		if ($count == 0) {
-			push @plist,$name;
-			$pprev = $name;
-			$count = 1;
-		} else {
-			$slist{$pprev} = "$name";
-			$count = 0;
+	if ($list) {
+		foreach my $package (keys %{$list}) {
+			push (@plist,$package);
+			$slist{$package} = $list->{$package};
 		}
-	}
-	foreach my $name (@plist) {
-		if ($name =~ /^(pattern|product):(.*)/) {
-			my $type = $1;
-			my $text = $2;
-			if (! defined $quiet) {
-				$kiwi -> info ("Including $type $text");
-				$kiwi -> done ();
+		foreach my $name (@plist) {
+			if ($name =~ /^(pattern|product):(.*)/) {
+				my $type = $1;
+				my $text = $2;
+				if (! defined $quiet) {
+					$kiwi -> info ("Including $type $text");
+					$kiwi -> done ();
+				}
+			} else {
+				push (@solved,$name);
 			}
-		} else {
-			push (@solved,$name);
 		}
 	}
 	#==========================================

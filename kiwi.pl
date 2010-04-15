@@ -1940,7 +1940,8 @@ sub listXMLInfo {
 				my $size = 0;
 				my %meta = %{$meta};
 				foreach my $p (keys %meta) {
-					$size += $meta{$p};
+					my @metalist = split (/:/,$meta{$p});
+					$size += $metalist[0];
 				}
 				if ($size > 0) {
 					$kiwi->info ("Estimated root tree size: $size kB\n");
@@ -1949,7 +1950,8 @@ sub listXMLInfo {
 				if ($delete) {
 					foreach my $del (@{$delete}) {
 						if ($meta{$del}) {
-							$size += $meta{$del};
+							my @metalist = split (/:/,$meta{$del});
+							$size += $metalist[0];
 						}
 					}
 				}
@@ -1971,20 +1973,17 @@ sub listXMLInfo {
 						exit 1;
 					}
 				}
-				my @packs;
-				my @solved = @{$solp};
-				foreach my $s (@solved) {
-					if ($s =~ /pattern:.*/) {
-						next;
-					}
-					push (@packs,$s);
-				}
-				if (! @packs) {
-					$kiwi -> info ("No packages solved\n");
+				if (! keys %{$meta}) {
+					$kiwi -> info ("No packages/patterns solved\n");
 				} else {
 					$kiwi -> info ("Image Packages:\n");
-					foreach my $package (sort @packs) {
-						$kiwi -> info ("--> $package\n");
+					foreach my $p (sort keys %{$meta}) {
+						if ($p =~ /pattern:.*/) {
+							next;
+						}
+						my @m = split (/:/,$meta->{$p});
+						my $l = sprintf ("%-20s | %-8s | %s\n",$p,$m[1],$m[2]);
+						$kiwi -> info ("--> $l");
 					}
 				}
 				last SWITCH;

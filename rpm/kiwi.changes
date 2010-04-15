@@ -9,6 +9,8 @@ Wed Apr 14 11:27:45 CEST 2010 - ms@suse.de
 - enhanced KIWILinuxRC create/resize filesystem functions
   to be able to return only the command without actually
   invoking it
+- added package version and architecture information when
+  requesting the solved packages list via --info
 
 -------------------------------------------------------------------
 Fri Apr  9 15:21:18 CEST 2010 - ms@suse.de
