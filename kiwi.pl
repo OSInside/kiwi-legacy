@@ -1976,14 +1976,14 @@ sub listXMLInfo {
 				if (! keys %{$meta}) {
 					$kiwi -> info ("No packages/patterns solved\n");
 				} else {
-					$kiwi -> info ("Image Packages:\n");
+					$kiwi -> info ("Image Packages:\n\n");
 					foreach my $p (sort keys %{$meta}) {
 						if ($p =~ /pattern:.*/) {
 							next;
 						}
 						my @m = split (/:/,$meta->{$p});
-						my $l = sprintf ("%-20s | %-8s | %s\n",$p,$m[1],$m[2]);
-						$kiwi -> info ("--> $l");
+						my $l = sprintf ("=> %-20s | %-8s | %s",$p,$m[1],$m[2]);
+						$kiwi -> note ("$l\n");
 					}
 				}
 				last SWITCH;
