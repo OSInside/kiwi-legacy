@@ -1591,7 +1591,7 @@ sub getTypes {
 	}
 	foreach my $node (@tnodes) {
 		my %record  = ();
-		$record{type} = $node -> string_value();
+		$record{type} = $node -> getAttribute("image");
 		$record{boot} = $node -> getAttribute("boot");
 		my $bootpath = $urlhd -> obsPath ($record{boot},"boot");
 		if (defined $bootpath) {

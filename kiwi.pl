@@ -1780,7 +1780,7 @@ sub listXMLInfo {
 		exit 1;
 	}
 	$kiwi -> info ("Reading image description [ListXMLInfo]...\n");
-	my $xml  = new KIWIXML ($kiwi,$listXMLInfo);
+	my $xml  = new KIWIXML ($kiwi,$listXMLInfo,undef,undef,\@Profiles);
 	if (! defined $xml) {
 		exit 1;
 	}
