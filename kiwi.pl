@@ -1863,9 +1863,10 @@ sub listXMLInfo {
 					my @patterns = qxx (
 						"dumpsolv $solfile|grep 'name: pattern'|cut -f4 -d :"
 					);
-					$kiwi -> info ("Available patterns in repository set\n");
+					$kiwi -> info ("Available patterns in repository set\n\n");
 					foreach my $p (@patterns) {
-						$kiwi -> info ("--> $p");
+						next if ($p eq "\n");
+						$kiwi -> note ("=> $p");
 					}
 				}
 				last SWITCH;
@@ -1883,19 +1884,14 @@ sub listXMLInfo {
 						exit 1;
 					}
 				}
-				my @pats;
-				my @solved = @{$satlist};
-				foreach my $s (@solved) {
-					if ($s =~ /pattern:(.*)/) {
-						 push (@pats,$1);
-					}
-				}
-				if (! @pats) {
-					$kiwi -> info ("No patterns configured\n");
+				if (! keys %{$meta}) {
+					$kiwi -> info ("No packages/patterns solved\n");
 				} else {
-					$kiwi -> info ("Image Patterns:\n");
-					foreach my $pattern (@pats) {
-						$kiwi -> info ("--> $pattern\n");
+					$kiwi -> info ("Image Patterns/Products:\n\n");
+					foreach my $p (sort keys %{$meta}) {
+						if ($p =~ /pattern:(.*)/) {
+							$kiwi -> note ("=> $1\n");
+ 						}
 					}
 				}
 				last SWITCH;
