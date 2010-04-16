@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Wed Apr 14 11:27:45 CEST 2010 - ms@suse.de
 
+- v4.30
 - added parted to vmxboot images
 - fixed partedGetPartitionID() function to return correct ID
 - fixed split boot, cleanImage is not allowed to umount
