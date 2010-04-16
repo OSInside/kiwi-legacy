@@ -2758,7 +2758,7 @@ sub getControlFile {
 	my $dir    = shift;
 	my $config = "$dir/$ConfigName";
 	if (! -d $dir) {
-		if ($main::kiwi -> trace()) {
+		if (($main::kiwi) && ($main::kiwi -> trace())) {
 			$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
 		}
 		return undef;
@@ -2769,12 +2769,12 @@ sub getControlFile {
 	my @globsearch = glob ($dir."/*.kiwi");
 	my $globitems  = @globsearch;
 	if ($globitems == 0) {
-		if ($main::kiwi -> trace()) {
+		if (($main::kiwi) && ($main::kiwi -> trace())) {
 			$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
 		}
 		return undef;
 	} elsif ($globitems > 1) {
-		if ($main::kiwi -> trace()) {
+		if (($main::kiwi) && ($main::kiwi -> trace())) {
 			$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
 		}
 		return undef;
