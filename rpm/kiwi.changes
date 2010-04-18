@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Sun Apr 18 21:41:20 UTC 2010 - adrian@suse.de
+
+- add missing requires to kiwi-instsource, fixes product building
+  for openSUSE 11.3
+
+-------------------------------------------------------------------
 Wed Apr 14 11:27:45 CEST 2010 - ms@suse.de
 
 - v4.30

@@ -73,7 +73,7 @@ Authors:
 %package -n kiwi-instsource
 License:        GPL v2 only
 Requires:       kiwi = %{version}
-Requires:       inst-source-utils createrepo
+Requires:       inst-source-utils createrepo build
 Summary:        Installation Source creation
 Group:          System/Management
 %if 0%{?suse_version} > 1120
