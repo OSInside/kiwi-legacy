@@ -163,60 +163,39 @@ function OEMInstall {
 		#======================================
 		# Found multiple disks...
 		#--------------------------------------
-		if [ -z "$OEM_SAP_INSTALL" ];then
-			#======================================
-			# standard mode, ask for install media
-			#--------------------------------------
-			hd="\"$TEXT_SELECT\""
-			count=0
-			for i in $deviceDisks;do
-				dsize=`partitionSize $i`
-				dsizeMB=`expr $dsize / 1024`
-				if [ "$dsizeMB" -gt 0 ];then
-					dname=`getDiskID $i`
-					dname=`basename $dname | cut -c1-20`"..."
-					if [ $count = 0 ];then
-						dpara="$i \"$dname [ $dsizeMB MB ]\" on"
-						count=1
-					else
-						dpara="$dpara $i \"$dname [ $dsizeMB MB ]\" off"
-					fi
+		hd="\"$TEXT_SELECT\""
+		count=0
+		for i in $deviceDisks;do
+			dsize=`partitionSize $i`
+			dsizeMB=`expr $dsize / 1024`
+			if [ "$dsizeMB" -gt 0 ];then
+				dname=`getDiskID $i`
+				dname=`basename $dname | cut -c1-20`"..."
+				if [ $count = 0 ];then
+					dpara="$i \"$dname [ $dsizeMB MB ]\" on"
+					count=1
+				else
+					dpara="$dpara $i \"$dname [ $dsizeMB MB ]\" off"
 				fi
-			done
-			instDisk=$(runInteractive \
-				"--stdout --radiolist $hd 20 75 15 $dpara"
-			)
-			if [ ! $? = 0 ];then
-				systemException \
-					"System installation canceled" \
-				"reboot"
 			fi
-		else
-			#======================================
-			# SAP mode, use the smallest one
-			#--------------------------------------
-			count=0
-			dsize=${deviceDSize[$count]}
-			for i in $deviceDisks;do
-				if [ ${deviceDSize[$count]} -lt $dsize ];then
-					dsize=${deviceDSize[$count]}
-					index=$count
-				fi
-				count=`expr $count + 1`
-			done
-			instDisk=${deviceArray[$index]}
-		fi
-	fi
-	Echo "Entering installation mode for disk: $instDisk"
-	if [ -z "$OEM_SAP_INSTALL" ];then
-		TEXT_INST=$(
-			getText "Destroying ALL data on %1, continue ?" $instDisk)
-		Dialog --yesno "\"$TEXT_INST\"" 5 70
+		done
+		instDisk=$(runInteractive \
+			"--stdout --radiolist $hd 20 75 15 $dpara"
+		)
 		if [ ! $? = 0 ];then
 			systemException \
 				"System installation canceled" \
-			"user_reboot"
+			"reboot"
 		fi
+	fi
+	Echo "Entering installation mode for disk: $instDisk"
+	TEXT_INST=$(
+		getText "Destroying ALL data on %1, continue ?" $instDisk)
+	Dialog --yesno "\"$TEXT_INST\"" 5 70
+	if [ ! $? = 0 ];then
+		systemException \
+			"System installation canceled" \
+		"user_reboot"
 	fi
 	clear
 	#======================================
