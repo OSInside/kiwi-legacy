@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Tue Apr 20 12:12:44 CEST 2010 - ms@suse.de
 
+- use gfxboot.c32 if gfxboot.com does not exist
 - fixed function dn() which did not work for device names with
   the pX notation like /dev/mapper/loop0p1
 
