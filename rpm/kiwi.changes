@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Apr 20 12:12:44 CEST 2010 - ms@suse.de
+
+- fixed function dn() which did not work for device names with
+  the pX notation like /dev/mapper/loop0p1
+
+-------------------------------------------------------------------
 Sun Apr 18 21:41:20 UTC 2010 - adrian@suse.de
 
 - add missing requires to kiwi-instsource, fixes product building
