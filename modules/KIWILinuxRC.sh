@@ -5080,18 +5080,31 @@ function ddn {
 function dn {
 	# /.../
 	# print disk name (device name) according to the
-	# linux device node specs: If the last character of the
-	# device is a letter remove pX if the last character is
-	# a number remove the number
+	# linux device node specs: If the device matches "p"
+	# followed by a number remove pX else remove 
+	# the last number
 	# ----
 	local part=$(getDiskDevice $1)
-	local lastc=$(echo $part | sed -e 's@\(^.*\)\(.$\)@\2@')
-	if echo $lastc | grep -qP "^\d+$";then
-		part=$(echo $part | tr -d [0-9]+)
-	else
-		part=$(echo $part | sed -e s@p.*@@)
+	local part_new=$(echo $part | sed -e 's@\(^.*\)\(p.*$\)@\1@')
+	if [ $part = $part_new ];then
+		part_new=$(echo $part | sed -e 's@\(^.*\)\([0-9].*$\)@\1@')
 	fi
-	echo $part
+	echo $part_new
+}
+#======================================
+# ndd
+#--------------------------------------
+function nd {
+	# /.../
+	# print the number of the disk device according to the
+	# device node name. 
+	# ----
+	local part=$(getDiskDevice $1)
+	local part_new=$(echo $part | sed -e 's@\(^.*\)p\(.*$\)@\2@')
+	if [ $part = $part_new ];then
+		part_new=$(echo $part | sed -e 's@\(^.*\)\([0-9].*$\)@\2@')
+	fi
+	echo $part_new
 }
 #======================================
 # runInteractive
