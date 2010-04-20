@@ -2057,7 +2057,7 @@ sub createImageLiveCD {
 	#------------------------------------------
 	$kiwi -> info ("Creating isolinux configuration...");
 	my $syslinux_new_format = 0;
-	if (-f "$gfx/gfxboot.com") {
+	if (-f "$gfx/gfxboot.com" || -f "$gfx/gfxboot.c32") {
 		$syslinux_new_format = 1;
 	}
 	if (! open (FD, ">$destination/isolinux.cfg")) {
