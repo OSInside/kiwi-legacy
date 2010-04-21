@@ -80,3 +80,6 @@ msgstr ""
 
 msgid "Select disk for installation:"
 msgstr ""
+
+msgid "Select %1 partition for installation:"
+msgstr ""

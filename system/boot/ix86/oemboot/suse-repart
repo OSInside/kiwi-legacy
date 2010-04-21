@@ -770,6 +770,55 @@ function OEMRepartLuks {
 }
 
 #======================================
+# OEMPartitionInstall
+#--------------------------------------
+function OEMPartitionInstall {
+	#======================================
+	# no recovery support for part install
+	#--------------------------------------
+	unset OEM_RECOVERY
+	#======================================
+	# no homepart support for part install
+	#--------------------------------------
+	export OEM_WITHOUTHOME=1
+	#======================================
+	# check for LVM, resize to full space
+	#--------------------------------------
+	if searchVolumeGroup;then
+		#======================================
+		# resize PV's
+		#--------------------------------------
+		pvresize $imageRootDevice
+		#======================================
+		# setup LVM device names
+		#--------------------------------------
+		export haveLVM=yes
+		if [ -e /dev/$VGROUP/LVComp ];then
+			export imageRootDevice=/dev/$VGROUP/LVComp
+		else
+			export imageRootDevice=/dev/$VGROUP/LVRoot
+		fi
+		export imageRWDevice=/dev/$VGROUP/LVRoot
+		export imageRODevice=/dev/$VGROUP/LVComp
+		export imageIOWRDevice=$imageRWDevice
+		#======================================
+		# resize LV's
+		#--------------------------------------
+		lvresize -l 100%FREE $imageRootDevice
+	fi
+	#======================================
+	# resize boot filesystem if needed
+	#--------------------------------------
+	if [ ! $imageBootDevice = $imageRootDevice ];then
+		resizeFilesystem $imageBootDevice
+	fi
+	#======================================
+	# cleanup temporary flags
+	#--------------------------------------
+	unset DONT_PARTITION
+}
+
+#======================================
 # OEMRepart
 #--------------------------------------
 function OEMRepart {
@@ -786,7 +835,9 @@ function OEMRepart {
 	#======================================
 	# Do the repartitioning
 	#--------------------------------------
-	if [ ! -z "$haveLVM" ];then
+	if [ ! -z "$OEM_PARTITION_INSTALL" ];then
+		OEMPartitionInstall
+	elif [ ! -z "$haveLVM" ];then
 		OEMRepartLVM
 	elif [ "$haveLuks" = "yes" ];then
 		OEMRepartLuks

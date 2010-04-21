@@ -353,6 +353,9 @@ sub new {
 		if (defined $foreignRepo->{"oem-swap"}) {
 			$this -> setForeignOEMOptionsElement ("oem-swap");
 		}
+		if (defined $foreignRepo->{"oem-partition-install"}) {
+			$this -> setForeignOEMOptionsElement ("oem-partition-install");
+		}
 		if (defined $foreignRepo->{"oem-swapsize"}) {
 			$this -> setForeignOEMOptionsElement ("oem-swapsize");
 		}
@@ -1387,6 +1390,26 @@ sub getOEMSwap {
 }
 
 #==========================================
+# getOEMPartitionInstall
+#------------------------------------------
+sub getOEMPartitionInstall {
+	# ...
+	# Obtain the oem-partition-install value or return undef
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return undef;
+	}
+	my $pinst = $node -> getElementsByTagName ("oem-partition-install");
+	if ((! defined $pinst) || ("$pinst" eq "")) {
+		return undef;
+	}
+	return $pinst;
+}
+
+#==========================================
 # getOEMRecovery
 #------------------------------------------
 sub getOEMRecovery {
@@ -2317,6 +2340,7 @@ sub getImageConfig {
 		my $oemswapMB= $element -> getElementsByTagName ("oem-swapsize");
 		my $oemrootMB= $element -> getElementsByTagName ("oem-systemsize");
 		my $oemswap  = $element -> getElementsByTagName ("oem-swap");
+		my $oempinst = $element -> getElementsByTagName ("oem-partition-install");
 		my $oemhome  = $element -> getElementsByTagName ("oem-home");
 		my $oemtitle = $element -> getElementsByTagName ("oem-boot-title");
 		my $oemkboot = $element -> getElementsByTagName ("oem-kiwi-initrd");
@@ -2334,6 +2358,9 @@ sub getImageConfig {
 		}
 		if ((defined $boottheme) && ("$boottheme" ne "")) {
 			$result{kiwi_boottheme}= $boottheme;
+		}
+		if ((defined $oempinst) && ("$oempinst" eq "true")) {
+			$result{kiwi_oempartition_install} = "yes";
 		}
 		if ((defined $oemswap) && ("$oemswap" eq "false")) {
 			$result{kiwi_oemswap} = "no";

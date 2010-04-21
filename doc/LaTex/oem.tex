@@ -88,9 +88,10 @@ be executed. The following commnads show this procedure using QEMU.
 
 \begin{Command}{12cm}
 \begin{verbatim}
-qemu-img create -f qcow2 /tmp/test-oem-preload.img
-qemu /tmp/test-oem-preload.img \
-     -cdrom /tmp/myoem-result/suse-11.2-oem-preload.i686-1.1.2.iso \
+cd /tmp/myoem-result
+qemu-img create /tmp/mydisk 20G
+qemu -hda /tmp/mydisk -cdrom \
+     suse-11.2-oem-preload.i686-1.1.2.iso \
      -boot d
 \end{verbatim}
 \end{Command}
@@ -175,3 +176,40 @@ kiwi --create /tmp/myoem --type oem \
 With the optional \textbf{lvmvolumes} section you can specify to have 
 one or more top level directories in a separate volume. See the
 \textit{KIWI image description} chapter for a detailed explanation.
+
+\subsection{Partition based installation}
+
+The default installation method of an OEM is dumping the entire
+virtual disk on the selected target disk and repartition the disk
+to the real geometry. This works but will also wipe everything which
+was on the disk before. Kiwi also supports the installation into
+already existing partitions. This means the user can setup a disk
+with free partitions for the kiwi OEM installation process. This
+way already existing data will not be touched. In order to activate
+the partition based install mode the following oem option has to
+be set in config.xml:
+
+\begin{Command}{14cm}
+\begin{verbatim}
+<oem-partition-install>true</oem-partition-install>
+\end{verbatim}
+\end{Command}
+
+Compared to the disk based install the following differences
+should be mentioned:
+
+\begin{itemize}
+\item The bootloader will be setup to boot the installed system. There
+      is no multiboot setup. The user has to take care for the setup
+      of a multiboot bootloader himself.
+\item The oem options for system, swap and home doesn't have any effect
+      if the installation happens in predefined partitions
+\item There is no support for remote (PXE) OEM installation because kiwi
+      has to loop mount the disk image in order to access the partitions
+      which can't be done remotely
+\item The raw disk image is stored uncompressed on the install media.
+      This is because kiwi needs to loop mount the disk image which it can't
+      do if the file is only available as compressed version. This means
+      the install media in this mode will be approximately double the size
+      of a standard install media
+\end{itemize}

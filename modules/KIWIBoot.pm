@@ -1446,6 +1446,7 @@ sub setupInstallCD {
 	my $zipped    = $this->{zipped};
 	my $isxen     = $this->{isxen};
 	my $xml       = $this->{xml};
+	my $pinst     = $xml->getOEMPartitionInstall();
 	my $md5name   = $system;
 	my $imgtype   = "oem";
 	my $gotsys    = 1;
@@ -1562,32 +1563,44 @@ sub setupInstallCD {
 	#==========================================
 	# Compress system image
 	#------------------------------------------
-	$kiwi -> info ("Compressing installation image...");
-	$md5name=~ s/\.raw$/\.md5/;
-	$status = qxx ("$main::Gzip -f $system 2>&1");
-	$result = $? >> 8;
-	if ($result != 0) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Failed to compress system image: $status");
-		$kiwi -> failed ();
-		$this -> cleanTmp ();
-		return undef;
+	$md5name =~ s/\.raw$/\.md5/;
+	if (! $pinst) {
+		$kiwi -> info ("Compressing installation image...");
+		$status = qxx ("$main::Gzip -f $system 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Failed to compress system image: $status");
+			$kiwi -> failed ();
+			$this -> cleanTmp ();
+			return undef;
+		}
+		$kiwi -> done();
+		$system = $system.".gz";
 	}
-	$kiwi -> done();
-	$system = $system.".gz";
 	#==========================================
 	# Setup image basename
 	#------------------------------------------
 	my $namecd = basename ($system);
 	if ($gotsys) {
-		if ($namecd !~ /(.*)-(\d+\.\d+\.\d+)\.raw\.gz$/) {
+		my $suffix = '\.raw\.gz';
+		if ($pinst) {
+			$suffix = '\.raw';
+		}
+		if ($namecd !~ /(.*)-(\d+\.\d+\.\d+)$suffix$/) {
 			$kiwi -> error  ("Couldn't extract version information");
 			$kiwi -> failed ();
 			$this -> cleanTmp ();
-			qxx ( "$main::Gzip -d $system" );
+			if (! $pinst) {
+				qxx ( "$main::Gzip -d $system" );
+			}
 			return undef;
 		}
-		$ibasename = $1.".gz";
+		if (! $pinst) {
+			$ibasename = $1.".gz";
+		} else {
+			$ibasename = $1;
+		}
 	}
 	#==========================================
 	# Setup initrd for install purpose
@@ -1595,7 +1608,9 @@ sub setupInstallCD {
 	$initrd = $this -> setupInstallFlags();
 	if (! defined $initrd) {
 		$this -> cleanTmp ();
-		qxx ( "$main::Gzip -d $system" );
+		if (! $pinst) {
+			qxx ( "$main::Gzip -d $system" );
+		}
 		return undef;
 	}
 	#==========================================
@@ -1605,7 +1620,9 @@ sub setupInstallCD {
 	if (! $this -> createBootStructure()) {
 		$this->{initrd} = $oldird;
 		$this -> cleanTmp ();
-		qxx ( "$main::Gzip -d $system" );
+		if (! $pinst) {
+			qxx ( "$main::Gzip -d $system" );
+		}
 		return undef;
 	}
 	#==========================================
@@ -1613,7 +1630,9 @@ sub setupInstallCD {
 	#------------------------------------------
 	if (! $this -> setupBootLoaderStages ("grub","iso")) {
 		$this -> cleanTmp ();
-		qxx ( "$main::Gzip -d $system" );
+		if (! $pinst) {
+			qxx ( "$main::Gzip -d $system" );
+		}
 		return undef;
 	}
 	qxx ("rm -rf $tmpdir/usr 2>&1");
@@ -1628,7 +1647,9 @@ sub setupInstallCD {
 	}
 	if (! $this -> setupBootLoaderConfiguration ("grub",$title)) {
 		$this -> cleanTmp ();
-		qxx ( "$main::Gzip -d $system" );
+		if (! $pinst) {
+			qxx ( "$main::Gzip -d $system" );
+		}
 		return undef;
 	}
 	#==========================================
@@ -1639,7 +1660,9 @@ sub setupInstallCD {
 			$kiwi -> error  ("Couldn't create CD install flag file");
 			$kiwi -> failed ();
 			$this -> cleanTmp ();
-			qxx ( "$main::Gzip -d $system" );
+			if (! $pinst) {
+				qxx ( "$main::Gzip -d $system" );
+			}
 			return undef;
 		}
 		print FD "IMAGE=$ibasename\n";
@@ -1652,7 +1675,9 @@ sub setupInstallCD {
 			$kiwi -> error  ("Failed importing system image: $status");
 			$kiwi -> failed ();
 			$this -> cleanTmp ();
-			qxx ( "$main::Gzip -d $system" );
+			if (! $pinst) {
+				qxx ( "$main::Gzip -d $system" );
+			}
 			return undef;
 		}
 		$status = qxx ("cp $md5name $tmpdir/$ibasename.md5 2>&1");
@@ -1662,11 +1687,15 @@ sub setupInstallCD {
 			$kiwi -> error  ("Failed importing system md5 sum: $status");
 			$kiwi -> failed ();
 			$this -> cleanTmp ();
-			qxx ( "$main::Gzip -d $system" );
+			if (! $pinst) {
+				qxx ( "$main::Gzip -d $system" );
+			}
 			return undef;
 		}
-		qxx ( "$main::Gzip -d $system" );
-		$system =~ s/\.gz$//;
+		if (! $pinst) {
+			qxx ( "$main::Gzip -d $system" );
+			$system =~ s/\.gz$//;
+		}
 		$kiwi -> done();
 	}
 	#==========================================
@@ -1729,6 +1758,7 @@ sub setupInstallStick {
 	my $zipped    = $this->{zipped};
 	my $isxen     = $this->{isxen};
 	my $xml       = $this->{xml};
+	my $pinst     = $xml->getOEMPartitionInstall();
 	my $irdsize   = -s $initrd;
 	my $diskname  = $system.".install.raw";
 	my $md5name   = $system;
@@ -1841,19 +1871,21 @@ sub setupInstallStick {
 	#==========================================
 	# Compress system image
 	#------------------------------------------
-	$kiwi -> info ("Compressing installation image...");
 	$md5name=~ s/\.raw$/\.md5/;
-	$status = qxx ("$main::Gzip -f $system 2>&1");
-	$result = $? >> 8;
-	if ($result != 0) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Failed to compress system image: $status");
-		$kiwi -> failed ();
-		$this -> cleanTmp ();
-		return undef;
+	if (! $pinst) {
+		$kiwi -> info ("Compressing installation image...");
+		$status = qxx ("$main::Gzip -f $system 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Failed to compress system image: $status");
+			$kiwi -> failed ();
+			$this -> cleanTmp ();
+			return undef;
+		}
+		$kiwi -> done();
+		$system = $system.".gz";
 	}
-	$kiwi -> done();
-	$system = $system.".gz";
 	#==========================================
 	# setup required disk size
 	#------------------------------------------
@@ -1868,14 +1900,22 @@ sub setupInstallStick {
 	#------------------------------------------
 	my $nameusb = basename ($system);
 	if ($gotsys) {
-		if ($nameusb !~ /(.*)-(\d+\.\d+\.\d+)\.raw\.gz$/) {
+		my $suffix = '\.raw\.gz';
+		if ($pinst) {
+			$suffix = '\.raw';
+		}
+		if ($nameusb !~ /(.*)-(\d+\.\d+\.\d+)$suffix$/) {
 			$kiwi -> error  ("Couldn't extract version information");
 			$kiwi -> failed ();
 			$this -> cleanTmp ();
 			qxx ( "$main::Gzip -d $system" );
 			return undef;
 		}
-		$ibasename = $1.".gz";
+		if (! $pinst) {
+			$ibasename = $1.".gz";
+		} else {
+			$ibasename = $1;
+		}
 	}
 	#==========================================
 	# Setup initrd for install purpose
@@ -1883,7 +1923,9 @@ sub setupInstallStick {
 	$initrd = $this -> setupInstallFlags();
 	if (! defined $initrd) {
 		$this -> cleanTmp ();
-		qxx ( "$main::Gzip -d $system" );
+		if (! $pinst) {
+			qxx ( "$main::Gzip -d $system" );
+		}
 		return undef;
 	}
 	$this->{initrd} = $initrd;
@@ -1893,7 +1935,9 @@ sub setupInstallStick {
 	if (! $this -> createBootStructure("vmx")) {
 		$this->{initrd} = $oldird;
 		$this -> cleanTmp ();
-		qxx ( "$main::Gzip -d $system" );
+		if (! $pinst) {
+			qxx ( "$main::Gzip -d $system" );
+		}
 		return undef;
 	}
 	#==========================================
@@ -1901,7 +1945,9 @@ sub setupInstallStick {
 	#------------------------------------------
 	if (! $this -> setupBootLoaderStages ("grub")) {
 		$this -> cleanTmp ();
-		qxx ( "$main::Gzip -d $system" );
+		if (! $pinst) {
+			qxx ( "$main::Gzip -d $system" );
+		}
 		return undef;
 	}
 	#==========================================
@@ -1913,7 +1959,9 @@ sub setupInstallStick {
 	}
 	if (! $this -> setupBootLoaderConfiguration ("grub",$title)) {
 		$this -> cleanTmp ();
-		qxx ( "$main::Gzip -d $system" );
+		if (! $pinst) {
+			qxx ( "$main::Gzip -d $system" );
+		}
 		return undef;
 	}
 	$this->{initrd} = $oldird;
@@ -1928,7 +1976,9 @@ sub setupInstallStick {
 		$kiwi -> error  ("Failed creating virtual disk: $status");
 		$kiwi -> failed ();
 		$this -> cleanTmp ();
-		qxx ( "$main::Gzip -d $system" );
+		if (! $pinst) {
+			qxx ( "$main::Gzip -d $system" );
+		}
 		return undef;
 	}
 	$kiwi -> done();
@@ -1936,7 +1986,9 @@ sub setupInstallStick {
 	if (! $this -> bindLoopDevice ($diskname)) {
 		$kiwi -> failed ();
 		$this -> cleanTmp ();
-		qxx ( "$main::Gzip -d $system" );
+		if (! $pinst) {
+			qxx ( "$main::Gzip -d $system" );
+		}
 		return undef;
 	}
 	$kiwi -> done();
@@ -1961,7 +2013,9 @@ sub setupInstallStick {
 		$kiwi -> error  ("Couldn't create partition table");
 		$kiwi -> failed ();
 		$this -> cleanLoop();
-		qxx ( "$main::Gzip -d $system" );
+		if (! $pinst) {
+			qxx ( "$main::Gzip -d $system" );
+		}
 		return undef;
 	}
 	$kiwi -> done();
@@ -1980,7 +2034,9 @@ sub setupInstallStick {
 		$kiwi -> error  ("Failed mapping virtual partition: $status");
 		$kiwi -> failed ();
 		$this -> cleanLoop ();
-		qxx ( "$main::Gzip -d $system" );
+		if (! $pinst) {
+			qxx ( "$main::Gzip -d $system" );
+		}
 		return undef;
 	}
 	my $boot = $deviceMap{1};
@@ -2008,7 +2064,9 @@ sub setupInstallStick {
 			$kiwi -> error  ("Failed creating filesystem: $status");
 			$kiwi -> failed ();
 			$this -> cleanLoop ();
-			qxx ( "$main::Gzip -d $system" );
+			if (! $pinst) {
+				qxx ( "$main::Gzip -d $system" );
+			}
 			return undef;
 		}
 		$kiwi -> done();
@@ -2022,7 +2080,9 @@ sub setupInstallStick {
 		$kiwi -> error  ("Couldn't mount boot partition: $status");
 		$kiwi -> failed ();
 		$this -> cleanLoop ();
-		qxx ( "$main::Gzip -d $system" );
+		if (! $pinst) {
+			qxx ( "$main::Gzip -d $system" );
+		}
 		return undef;
 	}
 	$status = qxx ("cp -a $tmpdir/boot $loopdir 2>&1");
@@ -2032,7 +2092,9 @@ sub setupInstallStick {
 		$kiwi -> error  ("Couldn't install boot data: $status");
 		$kiwi -> failed ();
 		$this -> cleanLoop ();
-		qxx ( "$main::Gzip -d $system" );
+		if (! $pinst) {
+			qxx ( "$main::Gzip -d $system" );
+		}
 		return undef;
 	}
 	main::umount();
@@ -2047,7 +2109,9 @@ sub setupInstallStick {
 			$kiwi -> error  ("Couldn't mount data partition: $status");
 			$kiwi -> failed ();
 			$this -> cleanLoop ();
-			qxx ( "$main::Gzip -d $system" );
+			if (! $pinst) {
+				qxx ( "$main::Gzip -d $system" );
+			}
 			return undef;
 		}
 		$status = qxx ("cp $system $loopdir/$ibasename 2>&1");
@@ -2057,7 +2121,9 @@ sub setupInstallStick {
 			$kiwi -> error  ("Failed importing system image: $status");
 			$kiwi -> failed ();
 			$this -> cleanLoop ();
-			qxx ( "$main::Gzip -d $system" );
+			if (! $pinst) {
+				qxx ( "$main::Gzip -d $system" );
+			}
 			return undef;
 		}
 		$status = qxx ("cp $md5name $loopdir/$ibasename.md5 2>&1");
@@ -2067,7 +2133,9 @@ sub setupInstallStick {
 			$kiwi -> error  ("Failed importing system md5 sum: $status");
 			$kiwi -> failed ();
 			$this -> cleanLoop ();
-			qxx ( "$main::Gzip -d $system" );
+			if (! $pinst) {
+				qxx ( "$main::Gzip -d $system" );
+			}
 			return undef;
 		}
 		if (! open (FD,">$loopdir/config.usbclient")) {
@@ -2075,13 +2143,17 @@ sub setupInstallStick {
 			$kiwi -> error  ("Couldn't create USB install flag file");
 			$kiwi -> failed ();
 			$this -> cleanLoop ();
-			qxx ( "$main::Gzip -d $system" );
+			if (! $pinst) {
+				qxx ( "$main::Gzip -d $system" );
+			}
 			return undef;
 		}
 		print FD "IMAGE=$ibasename\n";
 		close FD;
 		main::umount();
-		qxx ( "$main::Gzip -d $system" );
+		if (! $pinst) {
+			qxx ( "$main::Gzip -d $system" );
+		}
 		$kiwi -> done();
 	}
 	#==========================================
@@ -3041,6 +3113,8 @@ sub setupInstallFlags {
 	my $initrd = $this->{initrd};
 	my $system = $this->{system};
 	my $irddir = $initrd."_".$$.".vmxsystem";
+	my $xml    = $this->{xml};
+	my $pinst  = $xml->getOEMPartitionInstall();
 	my $ibasename;
 	my $iversion;
 	my $newird;
@@ -3095,7 +3169,11 @@ sub setupInstallFlags {
 			qxx ("rm -rf $irddir");
 			return undef;
 		}
-		print FD "IMAGE=nope;$ibasename;$iversion;compressed\n";
+		if (! $pinst) {
+			print FD "IMAGE=nope;$ibasename;$iversion;compressed\n";
+		} else {
+			print FD "IMAGE=nope;$ibasename;$iversion\n";
+		}
 		close FD;
 	}
 	#==========================================

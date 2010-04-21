@@ -80,6 +80,40 @@ function OEMNetwork {
 	imageServer=$SERVER
 }
 #======================================
+# OEMFindPartitions
+#--------------------------------------
+function OEMFindPartitions {
+	# /.../
+	# find partitions without known filesystem on the given
+	# disk device and return an list containing the information
+	# device:size-KB,device:size-KB,...
+	# ----
+	local disk=$1
+	local result
+	disk=$(echo $disk | sed -e s@^/dev/@@)
+	for i in $(cat /proc/partitions |\
+		grep -E $disk.+ | sed "s/^ *//;s/ *$//;s/ \{1,\}/:/g" |\
+		cut -f3,4 -d:)
+	do
+		local device=/dev/$(echo $i | cut -f2 -d:)
+		local kbsize=$(echo $i | cut -f1 -d:)
+		local mbsize=$((kbsize / 1024))
+		local partid=$(partitionID /dev/$disk $(nd $device))
+		if [ ! "$partid" = "83" ] && [ ! "$partid" = "8e" ] ;then
+			continue
+		fi
+		if blkid $device -s TYPE -o value &>/dev/null;then
+			continue
+		fi
+		if [ -z "$result" ];then
+			result=$device:$mbsize
+		else
+			result=$result,$device:$mbsize
+		fi
+	done
+	echo $result
+}
+#======================================
 # OEMInstall
 #--------------------------------------
 function OEMInstall {
@@ -100,6 +134,14 @@ function OEMInstall {
 		return
 	fi
 	#======================================
+	# Check for install mode combination
+	#--------------------------------------
+	if [ ! -z "$OEM_PARTITION_INSTALL" ] && [ ! -z "$pxe" ];then
+		systemException \
+			"Partition install via remote interface is not supported" \
+		"reboot"
+	fi
+	#======================================
 	# Display license if text exists
 	#--------------------------------------
 	displayEULA
@@ -116,13 +158,14 @@ function OEMInstall {
 			Echo "Found Stick: $stickRoot -> $stickSerial"
 			mkdir -p /cdrom && mount $(ddn $stickRoot 2) /cdrom
 			export OEMInstallType=USB
+			unset stickSerial
 		fi
 	else
 		OEMNetwork
 		export OEMInstallType=PXE
 	fi
 	#======================================
-	# Search and ask for the install device
+	# Search and ask for the install disk
 	#--------------------------------------
 	IFS=$IFS_ORIG
 	Echo "Searching harddrive for $OEMInstallType installation"
@@ -188,32 +231,21 @@ function OEMInstall {
 			"reboot"
 		fi
 	fi
-	Echo "Entering installation mode for disk: $instDisk"
-	TEXT_INST=$(
-		getText "Destroying ALL data on %1, continue ?" $instDisk)
-	Dialog --yesno "\"$TEXT_INST\"" 5 70
-	if [ ! $? = 0 ];then
-		systemException \
-			"System installation canceled" \
-		"user_reboot"
-	fi
-	clear
+	imageDevice=$instDisk
+	#======================================
+	# Setup device names for further boot
+	#--------------------------------------
+	export imageDiskExclude=$instDisk
+	export imageDiskDevice=$instDisk
 	#======================================
 	# Import vmx configuration file
 	#--------------------------------------
 	importFile < $VMX_SYSTEM
 	#======================================
-	# Install disk system
-	#--------------------------------------
-	# install virtual disk image from the CD/DVD onto the
-	# real disk. All data on the disk will be lost
-	# ----
-	imageZipped="uncompressed"
-	imageDevice=$instDisk
-	field=0
-	#======================================
 	# Evaluate OEM install file
 	#--------------------------------------
+	field=0
+	imageZipped="uncompressed"
 	IFS=";" ; for n in $IMAGE;do
 	case $field in
 		0) field=1 ;; 
@@ -232,89 +264,350 @@ function OEMInstall {
 		imageName="$prefix/$imageName"
 		imageMD5="$imageName.md5"
 	fi
-	IFS=" "
+	IFS=$IFS_ORIG
 	#======================================
-	# Check MBR ID's...
+	# Search, ask for the install partition
 	#--------------------------------------
-	# /.../
-	# mbr ID check is deactivated by default
-	# see bug #525682 for details
-	# ----
-	nombridcheck=1
-	if [ -z "$nombridcheck" ];then
-		mbrD=$instDisk
-		mbrI="cat $imageName"
-		if [ "$imageZipped" = "compressed" ];then
-			mbrI="gzip -cd $imageName"
-		fi
-		mbrM=`dd if=$mbrD bs=1 count=4 skip=$((0x1b8))|hexdump -n4 -e '"0x%x"'`
-		mbrI=`$mbrI | dd  bs=1 count=4 skip=$((0x1b8))|hexdump -n4 -e '"0x%x"'`
-		if [ $mbrM = $mbrI ];then
+	if [ ! -z "$OEM_PARTITION_INSTALL" ];then
+		#======================================
+		# Loop mount disk image file
+		#--------------------------------------
+		reqpart=1
+		loop=$(losetup -s -f $imageName)
+		loop=$(echo $loop | sed -e s@^/dev/@@)
+		if ! kpartx -a /dev/$loop;then
 			systemException \
-				"Base system already installed" \
-			"reboot"
-		fi	
-	fi
-	#======================================
-	# read MD5 information...
-	#--------------------------------------
-	if [ ! -z "$pxe" ];then
-		multicast="disable"
-		fetchFile $imageMD5 /image.md5 uncompressed $imageServer
-		if test $loadCode != 0 || ! loadOK "$loadStatus";then
-			systemException \
-				"Download of $imageMD5 failed: $loadStatus" \
+				"Loop setup for $instDisk failed" \
 			"reboot"
 		fi
-		imageMD5=/image.md5
-	fi
-	read sum1 blocks blocksize zblocks zblocksize < $imageMD5
-	#======================================
-	# Get available disk space
-	#--------------------------------------
-	haveKByte=`partitionSize $imageDevice`
-	#======================================
-	# Get required disk space, setup I/O
-	#--------------------------------------
-	needBytes=$(expr $blocks \* $blocksize)
-	needKByte=`expr $needBytes / 1024`
-	needMByte=`expr $needKByte / 1024`
-	#======================================
-	# Check disk space...
-	#--------------------------------------
-	haveMByte=`expr $haveKByte / 1024`
-	needMByte=`expr $needKByte / 1024`
-	Echo "Have size: $imageDevice -> $haveMByte MB"
-	Echo "Need size: $imageName -> $needMByte MB"
-	if [ $needMByte -gt $haveMByte ];then
-		systemException \
-			"Not enough space available for this image" \
-		"reboot"
-	fi
-	#======================================
-	# Dump image on disk
-	#--------------------------------------
-	if [ -z "$pxe" ];then
-		dump="cat $imageName"
-		if test "$imageZipped" = "compressed"; then
-			dump="gzip -cd $imageName"
+		imageName=/dev/mapper/${loop}p1
+		if [ -e /dev/mapper/${loop}p2 ];then
+			reqpart=2
 		fi
-		if [ -x /usr/bin/dcounter ];then
-			progressBaseName=$(basename $imageName)
-			TEXT_LOAD=$(getText "Loading %1" $progressBaseName)
-			dump="$dump | dcounter -s $needMByte -l \"$TEXT_LOAD \""
+		#======================================
+		# Lookup/Check available partitions
+		#--------------------------------------
+		if [ $reqpart -gt 2 ];then
+			Echo "Sorry only disk images with a root and optional boot"
+			Echo "partition are supported in partition based install mode"
+			Echo "I found $reqpart partitions in the disk image"
+			systemException \
+				"Installation aborted..." \
+			"reboot"
 		fi
-		Echo "Loading $imageName [$imageDevice] "
-		if [ -x /usr/bin/dcounter ];then
-			mkfifo /progress; errorLogStop
-			(
-				if ! eval $dump 2>/progress|dd bs=32k of=$imageDevice&>/dev/null
-				then
-					errorLogContinue
+		partitions=$(OEMFindPartitions $instDisk)
+		if [ ! -z "$partitions" ];then
+			count=0
+			IFS=","
+			for i in $partitions;do
+				count=$((count + 1))
+			done
+			IFS=$IFS_ORIG
+		fi
+		if [ -z "$partitions" ] || [ $count -lt $reqpart ];then
+			if [ -z "$partitions" ];then
+				Echo "No suitable partition(s) for installation found:"
+			else
+				Echo "Not enough partitions for installation found:"
+				Echo "Found $count but required $reqpart"
+			fi
+			Echo "Please prepare your disk first:"
+			echo
+			Echo -b "kiwi requires $reqpart partition(s) of the types below"
+			Echo -b "without any filesystem inside. I recommend to use YaST"
+			Echo -b "to do the re-partitioning. YaST also allows you to shrink"
+			Echo -b "existing partitions without loosing data."
+			echo
+			count=0
+			for i in /dev/mapper/${loop}*;do
+				psize=`partitionSize $i`
+				partid=$(partitionID /dev/$loop $(nd $i))
+				if [ $count = 0 ];then
+					Echo -b "* Root partition requires at least $psize KB"
+				fi
+				if [ $count = 1 ];then
+					Echo -b "* Boot partition requires at least $psize KB"
+				fi
+				Echo -b "  Partition Type: 0x$partid"
+				count=$((count + 1))
+			done
+			echo
+			systemException \
+				"Installation aborted..." \
+			"reboot"
+		fi
+		#======================================
+		# Select all required partitions
+		#--------------------------------------
+		if [ $count -eq $reqpart ] && [ $reqpart -eq 1 ];then
+			#======================================
+			# There is only one free and required
+			#--------------------------------------
+			pname=`echo $partitions | cut -f1 -d:`
+			imageDevice=$pname
+			rID=$(nd $pname)
+			instItems[0]=$imageName:$imageDevice
+		else
+			#======================================
+			# There is a choice, let the user do it
+			#--------------------------------------
+			for p in /dev/mapper/${loop}*;do
+				if [ $p = /dev/mapper/${loop}p1 ];then
+					select="root"
+				elif [ $p = /dev/mapper/${loop}p2 ];then
+					select="boot"
+				fi
+				TEXT_SELECT=$(
+					getText "Select %1 partition for installation:" $select)
+				count=0
+				IFS=","
+				for i in $partitions;do
+					psize=`echo $i | cut -f2 -d:`
+					pname=`echo $i | cut -f1 -d:`
+					if [ $count = 0 ];then
+						dpara="$pname \"[ $psize MB ]\" on"
+						count=1
+					else
+						dpara="$dpara $pname \"[ $psize MB ]\" off"
+					fi
+					count=$((count + 1))
+				done
+				IFS=$IFS_ORIG
+				selectedPart=$(runInteractive \
+					"--stdout --radiolist \"$TEXT_SELECT\" 20 75 15 $dpara"
+				)
+				if [ ! $? = 0 ];then
 					systemException \
-						"Failed to install image: $imageName -> $imageDevice" \
+						"System installation canceled" \
 					"reboot"
 				fi
+				count=0
+				IFS=","
+				for i in $partitions;do
+					psize=`echo $i | cut -f2 -d:`
+					pname=`echo $i | cut -f1 -d:`
+					if [ ! $pname = $selectedPart ];then
+						if [ $count = 0 ];then
+							partitions_next=$pname:$psize
+						else
+							partitions_next=$partitions_next,$pname:$psize
+						fi
+					fi
+					count=$((count + 1))
+				done
+				IFS=$IFS_ORIG
+				partitions=$partitions_next
+				if [ $p = /dev/mapper/${loop}p1 ];then
+					imageDevice=$selectedPart
+					rID=$(nd $selectedPart)
+					instItems[0]=$imageName:$imageDevice
+				elif [ $p = /dev/mapper/${loop}p2 ];then
+					bID=$(nd $selectedPart)
+					instItems[1]=/dev/mapper/${loop}p2:$selectedPart
+				fi
+			done
+		fi
+		#======================================
+		# Search for a swap space
+		#--------------------------------------
+		sID=$(searchSwapSpace)
+		if [ ! -z "$sID" ];then
+			sID=$(nd $sID)
+		else
+			sID=no
+		fi
+		#======================================
+		# Setup device names for further boot
+		#--------------------------------------
+		# /.../
+		# no support for reocvery and extra home partition in
+		# partition install mode
+		# ----
+		export DONT_PARTITION=1
+		export OEM_WITHOUTHOME=1
+		unset  OEM_RECOVERY
+		if [ -z "$bID" ];then
+			bID=$rID
+		fi
+		setupDeviceNames $rID $sID no no $bID no
+	else
+		instItems[0]=$imageName:$imageDevice
+	fi
+	#======================================
+	# Checks and MD5 sums...
+	#--------------------------------------
+	if [ -z "$OEM_PARTITION_INSTALL" ];then
+		#======================================
+		# Check MBR ID's...
+		#--------------------------------------
+		# /.../
+		# mbr ID check is deactivated by default
+		# see bug #525682 for details
+		# ----
+		nombridcheck=1
+		if [ -z "$nombridcheck" ];then
+			mbrD=$instDisk
+			mbrI="cat $imageName"
+			if [ "$imageZipped" = "compressed" ];then
+				mbrI="gzip -cd $imageName"
+			fi
+			mbrM=$(dd if=$mbrD bs=1 count=4 \
+				skip=$((0x1b8))|hexdump -n4 -e '"0x%x"')
+			mbrI=$($mbrI | dd  bs=1 count=4 \
+				skip=$((0x1b8))|hexdump -n4 -e '"0x%x"')
+			if [ $mbrM = $mbrI ];then
+				systemException \
+					"Base system already installed" \
+				"reboot"
+			fi
+		fi
+		#======================================
+		# read MD5 information if PXE install
+		#--------------------------------------
+		if [ ! -z "$pxe" ];then
+			multicast="disable"
+			fetchFile $imageMD5 /image.md5 uncompressed $imageServer
+			if test $loadCode != 0 || ! loadOK "$loadStatus";then
+				systemException \
+					"Download of $imageMD5 failed: $loadStatus" \
+				"reboot"
+			fi
+			imageMD5=/image.md5
+		fi
+	fi
+	#======================================
+	# Warn me before performing the install
+	#--------------------------------------
+	for i in ${instItems[*]}; do
+		Target=$(echo $i | cut -f2 -d:)
+		items="$items,$Target"
+	done
+	items=$(echo $items | sed -e s@^,@@)
+	Echo "Entering installation mode for disk: $items"
+	TEXT_INST=$(
+		getText "Destroying ALL data on %1, continue ?" $items)
+	Dialog --yesno "\"$TEXT_INST\"" 5 70
+	if [ ! $? = 0 ];then
+		systemException \
+			"System installation canceled" \
+		"user_reboot"
+	fi
+	clear
+	for i in ${instItems[*]};do
+		#======================================
+		# Setup source and target data
+		#--------------------------------------
+		Source=$(echo $i | cut -f1 -d:)
+		Target=$(echo $i | cut -f2 -d:)
+		if [ -z "$OEM_PARTITION_INSTALL" ];then
+			read sum1 blocks blocksize zblocks zblocksize < $imageMD5
+		else
+			blocksize=4096
+			partKB=$(partitionSize $Source)
+			partBT=$((partKB * 1024))
+			blocks=$((partBT / blocksize))
+		fi
+		#======================================
+		# Get available disk space
+		#--------------------------------------
+		haveKByte=`partitionSize $Target`
+		#======================================
+		# Get required disk space, setup I/O
+		#--------------------------------------
+		needBytes=$(expr $blocks \* $blocksize)
+		needKByte=`expr $needBytes / 1024`
+		needMByte=`expr $needKByte / 1024`
+		#======================================
+		# Check disk space...
+		#--------------------------------------
+		haveMByte=`expr $haveKByte / 1024`
+		needMByte=`expr $needKByte / 1024`
+		Echo "Have size: $Target -> $haveMByte MB"
+		Echo "Need size: $Source -> $needMByte MB"
+		if [ $needMByte -gt $haveMByte ];then
+			systemException \
+				"Not enough space available for this image" \
+			"reboot"
+		fi
+		#======================================
+		# Dump image(s) on disk
+		#--------------------------------------
+		if [ -z "$pxe" ];then
+			dump="cat $Source"
+			if test "$imageZipped" = "compressed"; then
+				dump="gzip -cd $Source"
+			fi
+			if [ -x /usr/bin/dcounter ];then
+				progressBaseName=$(basename $Source)
+				TEXT_LOAD=$(getText "Loading %1" $progressBaseName)
+				dump="$dump | dcounter -s $needMByte -l \"$TEXT_LOAD \""
+			fi
+			Echo "Loading $Source [$Target] "
+			if [ -x /usr/bin/dcounter ];then
+				mkfifo /progress; errorLogStop
+				(
+					if ! eval $dump 2>/progress|dd bs=32k of=$Target &>/dev/null
+					then
+						errorLogContinue
+						systemException \
+							"Failed to install image: $Source -> $Target" \
+						"reboot"
+					fi
+				)&
+				echo "cat /progress | dialog \
+					--backtitle \"$TEXT_INSTALLTITLE\" \
+					--progressbox 3 65
+				" > /tmp/progress.sh
+				if [ -e /dev/fb0 ];then
+					fbiterm -m $UFONT -- bash -e /tmp/progress.sh
+				else
+					bash -e /tmp/progress.sh
+				fi
+				clear
+			else
+				if ! eval $dump | dd bs=32k of=$Target &>/dev/null; then
+					systemException \
+						"Failed to install image: $Source -> $Target" \
+					"reboot"
+				fi
+			fi
+			if [ -x /usr/bin/dcounter ];then
+				errorLogContinue
+			fi
+		else
+			multicast="disable"
+			Echo "Loading $Source [$Target BS:$imageBlkSize Byte]..."
+			fetchFile $Source $Target $imageZipped $imageServer
+			if test $loadCode != 0 || ! loadOK "$loadStatus";then
+				systemException \
+					"Download of $imageName failed: $loadStatus" \
+				"reboot"
+			fi
+		fi
+	done
+	#======================================
+	# Clear loops if required
+	#--------------------------------------
+	if [ ! -z "$OEM_PARTITION_INSTALL" ];then
+		dmsetup remove_all
+		losetup -d /dev/$loop
+	fi
+	#======================================
+	# Check the md5sum of the raw disk
+	#--------------------------------------
+	if [ -z "$OEM_PARTITION_INSTALL" ];then
+		Echo "Install complete, checking data..."
+		verifyBytes=$((blocks * blocksize))
+		verifyMByte=$((verifyBytes / 1048576))
+		if [ -x /usr/bin/dcounter ];then
+			test -e /progress || mkfifo /progress
+			TEXT_VERIFY=$(getText "Verifying %1" $imageDevice)
+			dump="cat $imageDevice"
+			dump="$dump | dcounter -s $verifyMByte -l \"$TEXT_VERIFY \""
+			errorLogStop
+			(
+				eval $dump 2>/progress |\
+					head --bytes=$verifyBytes | md5sum - > /etc/ireal.md5
 			)&
 			echo "cat /progress | dialog \
 				--backtitle \"$TEXT_INSTALLTITLE\" \
@@ -326,66 +619,21 @@ function OEMInstall {
 				bash -e /tmp/progress.sh
 			fi
 			clear
-		else
-			if ! eval $dump | dd bs=32k of=$imageDevice &>/dev/null; then
-				systemException \
-					"Failed to install image: $imageName -> $imageDevice" \
-				"reboot"
-			fi
-		fi
-		if [ -x /usr/bin/dcounter ];then
 			errorLogContinue
+		else
+			dd if=$imageDevice bs=1024 |\
+				head --bytes=$verifyBytes |\
+				md5sum - > /etc/ireal.md5
 		fi
-	else
-		multicast="disable"
-		Echo "Loading $imageName [$imageDevice BS:$imageBlkSize Byte]..."
-		fetchFile $imageName $imageDevice $imageZipped $imageServer
-		if test $loadCode != 0 || ! loadOK "$loadStatus";then
+		read sum2 dumy < /etc/ireal.md5
+		if [ $sum1 != $sum2 ];then
 			systemException \
-				"Download of $imageName failed: $loadStatus" \
+				"Image checksum test failed" \
 			"reboot"
 		fi
+		Echo "Image checksum test: fine :-)"
+		Echo "System installation has finished"
 	fi
-	#======================================
-	# Check the md5sum of the raw disk
-	#--------------------------------------
-	Echo "Install complete, checking data..."
-	verifyBytes=$((blocks * blocksize))
-	verifyMByte=$((verifyBytes / 1048576))
-	if [ -x /usr/bin/dcounter ];then
-		test -e /progress || mkfifo /progress
-		TEXT_VERIFY=$(getText "Verifying %1" $imageDevice)
-		dump="cat $imageDevice"
-		dump="$dump | dcounter -s $verifyMByte -l \"$TEXT_VERIFY \""
-		errorLogStop
-		(
-			eval $dump 2>/progress |\
-				head --bytes=$verifyBytes | md5sum - > /etc/ireal.md5
-		)&
-		echo "cat /progress | dialog \
-			--backtitle \"$TEXT_INSTALLTITLE\" \
-			--progressbox 3 65
-		" > /tmp/progress.sh
-		if [ -e /dev/fb0 ];then
-			fbiterm -m $UFONT -- bash -e /tmp/progress.sh
-		else
-			bash -e /tmp/progress.sh
-		fi
-		clear
-		errorLogContinue
-	else
-		dd if=$imageDevice bs=1024 |\
-			head --bytes=$verifyBytes |\
-			md5sum - > /etc/ireal.md5
-	fi
-	read sum2 dumy < /etc/ireal.md5
-	if [ $sum1 != $sum2 ];then
-		systemException \
-			"Image checksum test failed" \
-		"reboot"
-	fi
-	Echo "Image checksum test: fine :-)"
-	Echo "System installation has finished"
 	#======================================
 	# Umount CD/DVD USB
 	#--------------------------------------
@@ -393,19 +641,18 @@ function OEMInstall {
 	#======================================
 	# Reread partition table
 	#--------------------------------------
-	blockdev --rereadpt $imageDevice
-	deviceTest=$(ddn $imageDevice 1)
-	if ! waitForStorageDevice $deviceTest;then
-		systemException \
-			"Partition $deviceTest doesn't appear... fatal !" \
-		"reboot"
+	if [ -z "$OEM_PARTITION_INSTALL" ];then
+		blockdev --rereadpt $imageDevice
+		deviceTest=$(ddn $imageDevice 1)
+		if ! waitForStorageDevice $deviceTest;then
+			systemException \
+				"Partition $deviceTest doesn't appear... fatal !" \
+			"reboot"
+		fi
 	fi
 	#======================================
-	# Setup/Reset values for further boot
+	# Release network on PXE install
 	#--------------------------------------
-	export imageDiskExclude=$instDisk
-	export imageDiskDevice=$imageDevice
-	unset stickSerial
 	if [ ! -z "$pxe" ];then
 		dhcpcd -p -k $PXE_IFACE
 	fi

@@ -1220,9 +1220,7 @@ function setupBootLoaderGrub {
 	#======================================
 	# check for UNIONFS_CONFIG
 	#--------------------------------------
-	if [ "$haveLVM" = "yes" ]; then
-		gnum=1
-	elif [ "$haveDMSquash" = "yes" ];then
+	if [ "$haveDMSquash" = "yes" ];then
 		gnum=2
 	elif [ "$haveClicFS" = "yes" ];then
 		gnum=2
@@ -1482,9 +1480,7 @@ function setupBootLoaderLilo {
 	#======================================
 	# check for UNIONFS_CONFIG
 	#--------------------------------------
-	if [ "$haveLVM" = "yes" ]; then
-		lnum=1
-	elif [ "$haveDMSquash" = "yes" ];then
+	if [ "$haveDMSquash" = "yes" ];then
 		lnum=2
 	elif [ "$haveClicFS" = "yes" ];then
 		lnum=2
@@ -3036,8 +3032,7 @@ function partedGetPartitionID {
 	# /.../
 	# prints the partition ID for the given device and number
 	# ----
-	local disk=`echo $1 | sed -e s"@[0-9]@@g"`
-	parted -m -s $disk print | grep ^$2: | cut -f2 -d, |\
+	parted -m -s $1 print | grep ^$2: | cut -f2 -d, |\
 		cut -f2 -d= | tr -d ";" | tr -d 0
 }
 #======================================

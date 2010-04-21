@@ -249,7 +249,6 @@ setupInitialDeviceNames
 #======================================
 # 12) repartition the disk device
 #--------------------------------------
-Echo "Filesystem of OEM system is: $FSTYPE -> $imageRootDevice"
 if [ "$LOCAL_BOOT" = "no" ];then
 	OEMRepart
 fi
@@ -265,6 +264,7 @@ fi
 #======================================
 # 14) Resize filesystem to full space
 #--------------------------------------
+Echo "Filesystem of OEM system is: $FSTYPE -> $imageRootDevice"
 if [ "$LOCAL_BOOT" = "no" ];then
 	deviceResize=$imageRootDevice
 	fstypeRootFS=$FSTYPE

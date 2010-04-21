@@ -1375,6 +1375,33 @@ recovery partition. Default value is 83 (Linux)</db:para>
   </div>
   <!--
     ==========================================
+    common element <oem-partition-install>
+    
+  -->
+  <div>
+    <define name="k.oem-partition-install.content">
+      <data type="boolean"/>
+    </define>
+    <define name="k.oem-partition-install.attlist">
+      <empty/>
+    </define>
+    <define name="k.oem-partition-install">
+      <element name="oem-partition-install">
+        <a:documentation>For oemboot driven images: install the system not as
+disk but into a free partition. If this option is set
+all other oem-* options concerning the partition table
+will not have any effect</a:documentation>
+        <db:para>For oemboot driven images: install the system not as
+disk but into a free partition. If this option is set
+all other oem-* options concerning the partition table
+will not have any effect</db:para>
+        <ref name="k.oem-partition-install.attlist"/>
+        <ref name="k.oem-partition-install.content"/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
     common element <oem-home>
     
   -->
@@ -2804,6 +2831,9 @@ and setup the system disk</db:para>
           </optional>
           <optional>
             <ref name="k.oem-swap"/>
+          </optional>
+          <optional>
+            <ref name="k.oem-partition-install"/>
           </optional>
           <optional>
             <ref name="k.oem-home"/>

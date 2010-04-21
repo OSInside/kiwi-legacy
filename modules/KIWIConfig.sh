@@ -222,6 +222,10 @@ function baseSetupOEMPartition {
 		echo "Setting up OEM_WITHOUTSWAP=1"
 		echo "OEM_WITHOUTSWAP=1" >> $oemfile
 	fi
+	if [ ! -z "$kiwi_oempartition_install" ];then
+		echo "Setting up OEM_PARTITION_INSTALL=1"
+		echo "OEM_PARTITION_INSTALL=1" >> $oemfile
+	fi
 	if [ ! -z "$kiwi_oemswapMB" ];then
 		echo "Setting up OEM_SWAPSIZE=$kiwi_oemswapMB"
 		echo "OEM_SWAPSIZE=$kiwi_oemswapMB" >> $oemfile
@@ -954,7 +958,7 @@ function suseStripInitrd {
 		lvchange lvresize lvextend lvcreate grub dcounter tty
 		dmsetup dialog awk gawk clicfs cryptsetup clear blkid fbiterm
 		gettext diff bc utimer cmp busybox kexec pam_console_apply
-		setterm
+		setterm kpartx
 	"
 	tools="$tools $@"
 	for path in /sbin /usr/sbin /usr/bin /bin;do

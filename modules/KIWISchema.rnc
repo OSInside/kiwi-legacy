@@ -962,6 +962,31 @@ div {
 }
 
 #==========================================
+# common element <oem-partition-install>
+#
+div {
+	k.oem-partition-install.content = xsd:boolean
+	k.oem-partition-install.attlist = empty
+	k.oem-partition-install =
+		## For oemboot driven images: install the system not as
+		## disk but into a free partition. If this option is set
+		## all other oem-* options concerning the partition table
+		## will not have any effect
+		[
+		db:para [
+			"For oemboot driven images: install the system not as\x{a}"~
+			"disk but into a free partition. If this option is set\x{a}"~
+			"all other oem-* options concerning the partition table\x{a}"~
+			"will not have any effect"
+		]
+		]
+		element oem-partition-install {
+			k.oem-partition-install.attlist,
+			k.oem-partition-install.content
+		}
+}
+
+#==========================================
 # common element <oem-home>
 #
 div {
@@ -1934,6 +1959,7 @@ div {
 			k.oemconfig.attlist &
 			k.oem-systemsize? &
 			k.oem-swap? &
+			k.oem-partition-install? &
 			k.oem-home? &
 			k.oem-boot-title? &
 			k.oem-kiwi-initrd? &
