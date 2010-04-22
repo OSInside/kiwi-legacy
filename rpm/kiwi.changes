@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Tue Apr 20 12:12:44 CEST 2010 - ms@suse.de
 
+- removed atftp from SLED oem|netboot (bnc #598899)
 - added support for OEM partition based install (bnc #597679)
 - use gfxboot.c32 if gfxboot.com does not exist
 - fixed function dn() which did not work for device names with
