@@ -2487,7 +2487,7 @@ sub checkFSOptions {
 					$fs_checkinterval = " -i $FSCheckInterval";
 				}
 				$fsfeature = "-O resize_inode";
-				$fstype = "-T $fs";
+				$fstype = "-t $fs";
 				last SWITCH;
 			};
 			#==========================================
