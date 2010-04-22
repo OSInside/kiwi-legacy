@@ -5,7 +5,9 @@ Tue Apr 20 12:12:44 CEST 2010 - ms@suse.de
 - use gfxboot.c32 if gfxboot.com does not exist
 - fixed function dn() which did not work for device names with
   the pX notation like /dev/mapper/loop0p1
-- use -t instead of -T for mke2fs
+- fixed use of type option in mke2fs. The option -t should
+  be used because -T has a different meaning and causes other
+  options to be ignored
 
 -------------------------------------------------------------------
 Sun Apr 18 21:41:20 UTC 2010 - adrian@suse.de
