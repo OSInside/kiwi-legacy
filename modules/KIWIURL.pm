@@ -439,29 +439,29 @@ sub openSUSEpath {
 	#------------------------------------------
 	my @responses = ();
 	foreach my $url (@urllist) {
-		my $request = HTTP::Request->new (GET => $url);
-		my $response;
-		eval {
-			$response= $browser -> request  ( $request );
-		};
-		if ($@) {
-			return undef;
+		my $response = $this -> urlResponse ( $browser,$url );
+		if (! $response) {
+			next;
 		}
-		my $title   = $response-> title ();
+		my $title = $response-> title ();
 		if ((defined $title) && ($title !~ /not found/i)) {
 			my $repourl = $url;
-			$request = HTTP::Request->new (GET => $repourl."/repodata");
-			$response= $browser -> request  ( $request );
-			$title   = $response-> title ();
+			$response = $this -> urlResponse ( $browser,$repourl."/repodata" );
+			if (! $response) {
+				next;
+			}
+			$title = $response-> title ();
 			if ((defined $title) && ($title !~ /not found/i)) {
 				$this->{type} = "rpm-md";
 				return $url;
 			} else {
 				push (@responses,"$repourl/repodata -> $title");
 			}
-			$request = HTTP::Request->new (GET => $repourl."/media.1");
-			$response= $browser -> request  ( $request );
-			$title   = $response-> title ();
+			$response = $this -> urlResponse ( $browser,$repourl."/media.1");
+			if (! $response) {
+				next;
+			}
+			$title = $response-> title ();
 			if ((defined $title) && ($title !~ /not found/i)) {
 				$this->{type} = "yast2";
 				return $url;
@@ -478,6 +478,32 @@ sub openSUSEpath {
 		$kiwi -> skipped ();
 	}
 	return undef;
+}
+
+#==========================================
+# urlResponse
+#------------------------------------------
+sub urlResponse {
+	my $this    = shift;
+	my $browser = shift;
+	my $url     = shift;
+	my $timeout = 5;
+	my $request;
+	my $response;
+	eval {
+		local $SIG{ALRM} = sub { die "alarm\n" };
+		alarm $timeout;
+		$request = HTTP::Request->new (GET => $url);
+		$response= $browser -> request  ( $request );
+		alarm 0;
+	};
+	if ($@) {
+		# host can't be resolved, network timeout
+		if ($@ eq "alarm\n") {
+			return undef;
+		}
+	}
+	return $response;
 }
 
 1;
