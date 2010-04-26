@@ -23,7 +23,7 @@
 <grammar xmlns:db="http://docbook.org/ns/docbook" xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" xmlns:rng="http://relaxng.org/ns/structure/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
   <db:info>
     <db:releaseinfo>$Id: kiwi.rnc 2957 2008-01-11 12:53:39Z thomas-schraitle $</db:releaseinfo>
-    <db:releaseinfo>RNC Schema Version 4.4</db:releaseinfo>
+    <db:releaseinfo>RNC Schema Version 4.5</db:releaseinfo>
     <db:pubdate>START</db:pubdate>
     <db:pubdate>2008-01-08</db:pubdate>
   </db:info>
@@ -82,7 +82,7 @@ the package Information is inherited</a:documentation>
     <define name="k.image.schemaversion.attribute">
       <attribute name="schemaversion">
         <a:documentation>The allowed Schema version (fixed value)</a:documentation>
-        <value>4.4</value>
+        <value>4.5</value>
       </attribute>
     </define>
     <define name="k.image.kiwirevision.attribute">
@@ -3019,17 +3019,6 @@ plusSuggested or plusRecommended</a:documentation>
         </choice>
       </attribute>
     </define>
-    <define name="k.packages.patternPackageType.attribute">
-      <attribute name="patternPackageType">
-        <a:documentation>Selection type for packages in patterns. Could be
-onlyRequired, plusSuggested or plusRecommended</a:documentation>
-        <choice>
-          <value>onlyRequired</value>
-          <value>plusSuggested</value>
-          <value>plusRecommended</value>
-        </choice>
-      </attribute>
-    </define>
     <define name="k.packages.attlist">
       <interleave>
         <ref name="k.packages.type.attribute"/>
@@ -3038,9 +3027,6 @@ onlyRequired, plusSuggested or plusRecommended</a:documentation>
         </optional>
         <optional>
           <ref name="k.packages.patternType.attribute"/>
-        </optional>
-        <optional>
-          <ref name="k.packages.patternPackageType.attribute"/>
         </optional>
       </interleave>
     </define>

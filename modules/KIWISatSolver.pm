@@ -9,13 +9,9 @@
 # BELONGS TO    : Operating System images
 #               :
 # DESCRIPTION   : This module is used to integrate the sat solver
-#               : for suse pattern and package solving tasks. As
-#               : the satsolver is something SUSE specific the following
-#               : code will only be used on systems where satsolver
-#               : exists. The KIWIPattern module makes use of this
-#               : module functions and will switch back to the old
-#               : style pattern solving code if satsolver is not
-#               : present
+#               : for suse pattern and package solving tasks.
+#               : it is used for package managers which doesn't know
+#               : about patterns and also for the kiwi info module
 #               :
 # STATUS        : Development
 #----------------

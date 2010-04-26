@@ -1425,9 +1425,7 @@ sub setupUpgrade {
 			"--auto-agree-with-licenses"
 		);
 		my %pattr = $xml -> getPackageAttributes("image");
-		if (($pattr{patternType} ne "plusRecommended") &&
-			($pattr{patternPackageType} ne "plusRecommended")
-		) {
+		if ($pattr{patternType} ne "plusRecommended") {
 			push (@installOpts,"--no-recommends");
 		}
 		print $fd "function clean { kill \$SPID;";
@@ -1825,9 +1823,7 @@ sub setupRootSystem {
 				"--auto-agree-with-licenses"
 			);
 			my %pattr = $xml -> getPackageAttributes("bootstrap");
-			if (($pattr{patternType} ne "plusRecommended") &&
-				($pattr{patternPackageType} ne "plusRecommended")
-			) {
+			if ($pattr{patternType} ne "plusRecommended") {
 				push (@installOpts,"--no-recommends");
 			}
 			#==========================================
@@ -1927,9 +1923,7 @@ sub setupRootSystem {
 				"--auto-agree-with-licenses"
 			);
 			my %pattr = $xml -> getPackageAttributes("image");
-			if (($pattr{patternType} ne "plusRecommended") &&
-				($pattr{patternPackageType} ne "plusRecommended")
-			) {
+			if ($pattr{patternType} ne "plusRecommended") {
 				push (@installOpts,"--no-recommends");
 			}
 			#==========================================

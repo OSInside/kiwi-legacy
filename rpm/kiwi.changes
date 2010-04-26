@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Apr 23 10:53:37 CEST 2010 - ms@suse.de
+
+- removed kiwi's own pattern solving module. The satsolver
+  approach is the preferred solution to implement this
+
+-------------------------------------------------------------------
 Tue Apr 20 12:12:44 CEST 2010 - ms@suse.de
 
 - v4.31
@@ -9,7 +15,7 @@ Tue Apr 20 12:12:44 CEST 2010 - ms@suse.de
   the pX notation like /dev/mapper/loop0p1
 - fixed use of type option in mke2fs. The option -t should
   be used because -T has a different meaning and causes other
-  options to be ignored
+  options to be ignored (bnc #587361)
 - added alarm timer for HTTP requests. If a URL can't be
   resolved due to problems on the remote side the request
   will be canceled after 5 seconds

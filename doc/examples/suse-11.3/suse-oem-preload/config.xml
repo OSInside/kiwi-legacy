@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="4.4" name="suse-11.3-oem-preload">
+<image schemaversion="4.5" name="suse-11.3-oem-preload">
 	<description type="system">
 		<author>Marcus Schäfer</author>
 		<contact>ms@novell.com</contact>
@@ -35,7 +35,7 @@
 	<repository type="yast2">
 		<source path="opensuse://11.3/repo/oss/"/>
 	</repository>
-	<packages type="image" patternType="plusRecommended" patternPackageType="plusRecommended">
+	<packages type="image" patternType="plusRecommended">
 		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="kernel-default"/>

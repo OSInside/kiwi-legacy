@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="4.4" name="Eucalyptus-Cloud-Node">
+<image schemaversion="4.5" name="Eucalyptus-Cloud-Node">
 	<description type="system">
 		<author>Robert Schweikert</author>
 		<contact>rschweikert@novell.com</contact>
@@ -38,7 +38,7 @@
 	<repository type="rpm-dir">
 		<source path="PATH_TO_EUCALYPTUS_RPMS"/>
 	</repository>
-	<packages type="image" patternType="plusRecommended" patternPackageType="plusRecommended">
+	<packages type="image" patternType="plusRecommended">
 		<opensusePattern name="base"/>
 		<package name="bootsplash"/>
 		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>

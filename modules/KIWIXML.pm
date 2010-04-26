@@ -23,7 +23,6 @@ use Carp qw (cluck);
 use XML::LibXML;
 use LWP;
 use KIWILog;
-use KIWIPattern;
 use KIWIOverlay;
 use KIWISatSolver;
 use KIWIManager qw (%packageManager);
@@ -2423,12 +2422,7 @@ sub getPackageAttributes {
 		if (! defined $ptype) {
 			$ptype = "onlyRequired";
 		}
-		my $ppactype = $element -> getAttribute ("patternPackageType");
-		if (! defined $ppactype) {
-			$ppactype = "onlyRequired";
-		}
 		$result{patternType} = $ptype;
-		$result{patternPackageType} = $ppactype;
 		$result{type} = $type;
 	}
 	return %result;
@@ -2928,15 +2922,11 @@ sub getList {
 						$kiwi,\@pattlist,$this->{urllist},"solve-patterns"
 					);
 					if (! defined $psolve) {
-						# 2) use generic pattern module
-						$kiwi -> warning (
-							"SaT solver setup failed, using generic module"
+						$kiwi -> error (
+							"SaT solver setup failed, patterns can't be solved"
 						);
 						$kiwi -> skipped ();
-						$psolve = new KIWIPattern (
-							$kiwi,\@pattlist,$this->{urllist},
-							$pattr{patternType},$pattr{patternPackageType}
-						);
+						return ();
 					}
 					if (! defined $psolve) {
 						my $pp ="Pattern or product";
