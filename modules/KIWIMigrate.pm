@@ -187,6 +187,15 @@ sub new {
 		push @denyFiles,@exclude;
 	}
 	#==========================================
+	# Store default packages to skip
+	#------------------------------------------
+	my @denyPacks = (
+		'gpg-pubkey*'
+	);
+	foreach my $s (@denyPacks) {
+		push (@{$skip},$s);
+	}
+	#==========================================
 	# Setup autoyast clone module names
 	#------------------------------------------
 	my @autoyastCloneList = qw (
@@ -771,7 +780,6 @@ sub getPackageList {
 	my %osc     = %{$this->{source}};
 	my @urllist = ();
 	my @patlist = ();
-	my %problem = ();
 	my @ilist   = ();
 	my $code;
 	#==========================================
@@ -868,14 +876,13 @@ sub getPackageList {
 		if ($psolve -> getProblemsCount()) {
 			$kiwi -> warning ("Pattern problems found check in report !\n");
 		}
-		if (defined $skip) {
-			foreach my $s (@{$skip}) {
-				$problem{$s} = $s;
-			}
-		}
 		my @packageList = $psolve -> getPackages();
 		foreach my $installed (@ilist) {
-			next if ($problem{$installed});
+			if (defined $skip) {
+				foreach my $s (@{$skip}) {
+					next if ($installed =~ /$s/);
+				}
+			}
 			my $inpattern = 0;
 			foreach my $p (@packageList) {
 				if ($installed eq $p) {

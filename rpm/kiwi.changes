@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Fri Apr 23 10:53:37 CEST 2010 - ms@suse.de
 
+- automatically skip the gpg-pubkey packages during migration
 - removed kiwi's own pattern solving module. The satsolver
   approach is the preferred solution to implement this
 
