@@ -879,9 +879,13 @@ sub getPackageList {
 		my @packageList = $psolve -> getPackages();
 		foreach my $installed (@ilist) {
 			if (defined $skip) {
+				my $inskip = 0;
 				foreach my $s (@{$skip}) {
-					next if ($installed =~ /$s/);
+					if ($installed =~ /$s/) {
+						$inskip = 1; last;
+					}
 				}
+				next if $inskip;
 			}
 			my $inpattern = 0;
 			foreach my $p (@packageList) {
