@@ -123,21 +123,28 @@ sub new {
 	$pool -> initializeLookupTable();
 	$queue = new KIWI::SaT::Queue;
 	foreach my $p (@{$pref}) {
-		my $name = $p;
+		my @names = $p;
 		if (! defined $solvep) {
-			$name = "pattern:".$p;
+			push (@names, "pattern:".$p);
+			push (@names, "patterns-openSUSE-".$p);
 		}
-		my $id = $pool -> selectSolvable ($repo,$solver,$name);
+		my $id   = 0;
+		my $item = "";
+		foreach my $name (@names) {
+			$id = $pool -> selectSolvable ($repo,$solver,$name);
+			$item = $name;
+			next if ! $id;
+			$queue -> queuePush ( $KIWI::SaT::SOLVER_INSTALL_SOLVABLE );
+			$queue -> queuePush ( $id );
+			last;
+		}
 		if (! $id) {
 			if (! defined $quiet) {
-				$kiwi -> warning ("--> Failed to queue job: $name");
+				$kiwi -> warning ("--> Failed to queue job: $item");
 				$kiwi -> skipped ();
 			}
-			push @jobFailed, $name;
-			next;
+			push @jobFailed, $item;
 		}
-		$queue -> queuePush ( $KIWI::SaT::SOLVER_INSTALL_SOLVABLE );
-		$queue -> queuePush ( $id );
 	}
 	#==========================================
 	# Store object data
@@ -321,6 +328,15 @@ sub getPackages {
 		return @{$result};
 	}
 	return @result;
+}
+
+#==========================================
+# Destructor
+#------------------------------------------
+sub DESTROY {
+	my $this = shift;
+	unlink $this->{solfile};
+	return $this;
 }
 
 1;

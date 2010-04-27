@@ -3537,7 +3537,7 @@ sub getInstSourceSatSolvable {
 	my $count = 0;
 	my $solv;
 	#==========================================
-	# check/create main solvable file
+	# check/create main solvable file name
 	#------------------------------------------
 	foreach my $repo (@{$repos}) {
 		push (@index,$repo);
@@ -3548,9 +3548,6 @@ sub getInstSourceSatSolvable {
 	$solv = qxx ("echo $solv | md5sum | cut -f1 -d-");
 	$solv = $sdir."/".$solv; chomp $solv;
 	$solv =~ s/ +$//;
-	if (-f $solv) {
-		return $solv;
-	}
 	#==========================================
 	# create one solvable per repo
 	#------------------------------------------
@@ -3593,6 +3590,12 @@ sub getSingleInstSourceSatSolvable {
 	my $repo = shift;
 	$kiwi -> info ("--> Loading $repo...");
 	#==========================================
+	# one of the following for repo metadata
+	#------------------------------------------
+	my %repoxml;
+	$repoxml{"/suse/repodata/repomd.xml"} = "repoxml";
+	$repoxml{"/repodata/repomd.xml"}      = "repoxml";
+	#==========================================
 	# one of the following for a base solvable
 	#------------------------------------------
 	my %distro;
@@ -3614,6 +3617,7 @@ sub getSingleInstSourceSatSolvable {
 	my $index    = 0;
 	my @index    = ();
 	my $error    = 0;
+	my $RXML;
 	#==========================================
 	# check for sat tools
 	#------------------------------------------
@@ -3650,7 +3654,7 @@ sub getSingleInstSourceSatSolvable {
 	$index = qxx ("echo $index | md5sum | cut -f1 -d-");
 	$index = $sdir."/".$index; chomp $index;
 	$index=~ s/ +$//;
-	if (-f $index) {
+	if ((-f $index) && (! -f "$index.timestamp")) {
 		$kiwi -> done();
 		return $index;
 	}
@@ -3662,6 +3666,66 @@ sub getSingleInstSourceSatSolvable {
 	}
 	my $destfile;
 	my $scommand;
+	#==========================================
+	# download repo XML metadata
+	#------------------------------------------
+	my $repoMD = $sdir."/repomd.xml"; unlink $repoMD;
+	foreach my $md (keys %repoxml) {
+		if (KIWIXML::getInstSourceFile ($kiwi,$repo.$md,$repoMD)) {
+			last if -e $repoMD;
+		}
+	}
+	if (-e $repoMD) {
+		if (! open ($RXML,"cat $repoMD|")) {
+			$kiwi -> failed ();
+			$kiwi -> error ("--> Failed to open file $repoMD");
+			$kiwi -> failed ();
+			return undef;
+		}
+		binmode $RXML;
+		my $rxml = new XML::LibXML;
+		my $tree = $rxml -> parse_fh ( $RXML );
+		my $nodes= $tree -> getElementsByTagName ("data");
+		my $path;
+		my $time;
+		for (my $i=1;$i<= $nodes->size();$i++) {
+			my $node = $nodes-> get_node($i);
+			my $type = $node -> getAttribute ("type");
+			if ($type ne "primary") {
+				next;
+			}
+			$path = $node -> getElementsByTagName ("location")
+				-> get_node(1) -> getAttribute ("href");
+			$time = $node -> getElementsByTagName ("timestamp")
+				-> get_node(1) -> string_value();
+			last;
+		}
+		close $RXML;
+		#==========================================
+		# Compare the repo timestamp
+		#------------------------------------------
+		if (open (my $FD,"$index.timestamp")) {
+			my $curstamp = <$FD>; chomp $curstamp;
+			if ($curstamp eq $time) {
+				$kiwi -> done();
+				return $index;
+			}
+		}
+		#==========================================
+		# Store distro path and new time stamp
+		#------------------------------------------
+		undef %distro;
+		$distro{"/".$path}      = "distxml";
+		$distro{"/suse/".$path} = "distxml";
+		if (! open ($RXML,">$index.timestamp")) {
+			$kiwi -> failed ();
+			$kiwi -> error ("--> Failed to create timestamp: $!");
+			$kiwi -> failed ();
+			return undef;
+		}
+		print $RXML $time;
+		close $RXML;
+	}
 	#==========================================
 	# download distro solvable(s)
 	#------------------------------------------
@@ -3818,6 +3882,7 @@ sub getSingleInstSourceSatSolvable {
 	#==========================================
 	# cleanup cache dir
 	#------------------------------------------
+	qxx ("rm -f $sdir/repomd.xml");
 	qxx ("rm -f $sdir/primary-*");
 	qxx ("rm -f $sdir/projectxml-*");
 	qxx ("rm -f $sdir/distxml-*");

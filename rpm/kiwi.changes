@@ -1,6 +1,9 @@
 -------------------------------------------------------------------
 Fri Apr 23 10:53:37 CEST 2010 - ms@suse.de
 
+- support new createrepo repomd.xml metadata information.
+  kiwi now reads the repomd.xml if it exists and parses the
+  primary data section in order to get all metadata file names
 - automatically skip the gpg-pubkey packages during migration
 - removed kiwi's own pattern solving module. The satsolver
   approach is the preferred solution to implement this

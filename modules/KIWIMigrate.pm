@@ -810,6 +810,13 @@ sub getPackageList {
 	my %packages = ();
 	my @twice = ();
 	for (my $i=0;$i<@ilist;$i++) {
+		my $inskip = 0;
+		foreach my $s (@{$skip}) {
+			if ($ilist[$i] =~ /$s/) {
+				$inskip = 1; last;
+			}
+		}
+		next if $inskip;
 		$packages{$ilist[$i]}++;
 	}
 	foreach my $installed (keys %packages) {
