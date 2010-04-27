@@ -1469,15 +1469,17 @@ sub autoyastClone {
 	#==========================================
 	# store clone XML for use in kiwi
 	#------------------------------------------
-	qxx("cp /root/autoinst.xml $dest/config-yast-autoyast.xml");
+	qxx ("mv /root/autoinst.xml $dest/config-yast-autoyast.xml");
 	$code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> failed ();
-		$kiwi -> error  ("failed to copy /root/autoinst.xml after cloning. $!");
+		$kiwi -> error  ("failed to move /root/autoinst.xml after cloning. $!");
 		$kiwi -> failed ();
 		return undef;
 	}
-	qxx("mv /root/autoinst.xml.backup /root/autoinst.xml");
+	if (-e "/root/autoinst.xml.backup") {
+		qxx ("mv /root/autoinst.xml.backup /root/autoinst.xml");
+	}
 	if ( ! open (FD,">$dest/root/etc/install.inf")) {
 		$kiwi -> failed ();
 		$kiwi -> error ("Failed to create install.inf: $!");
