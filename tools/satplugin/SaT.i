@@ -233,13 +233,13 @@ extern "C"
             const char* myel = (char*)id2str(pool, s->name);
 
             // store data into perl hash
-            char* val = (char*)malloc (
-                sizeof (char) * (strlen(vers)+1+strlen(arch)+1+20)
-            );
+            int l = sizeof (char) * (strlen(vers)+1+strlen(arch)+1+20);
+            char* val = (char*)malloc (l);
+            memset (val,'\0',l);
             sprintf (val,"%u:%s:%s",bytes,arch,vers);
             svs[b] = sv_newmortal();
             hv_store(hash,
-                myel,strlen(myel)+1,
+                myel,strlen(myel),
                 newSVpv(val,strlen(val)+1),0
             );
         }

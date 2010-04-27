@@ -584,10 +584,10 @@ sub setTemplate {
 		return undef;
 	}
 	#==========================================
-    # <description>
-    #------------------------------------------
-	print FD '<image schemaversion="4.4" ';
-	print FD 'name=suse-migration"'.$product.'">'."\n";
+	# <description>
+	#------------------------------------------
+	print FD '<image schemaversion="4.5" ';
+	print FD 'name="suse-migration-'.$product.'">'."\n";
 	print FD "\t".'<description type="system">'."\n";
 	print FD "\t\t".'<author>***AUTHOR***</author>'."\n";
 	print FD "\t\t".'<contact>***MAIL***</contact>'."\n";
@@ -634,12 +634,12 @@ sub setTemplate {
 	#------------------------------------------
 	print FD "\t".'<packages type="image">'."\n";
 	if (defined $pats) {
-		foreach my $pattern (@{$pats}) {
+		foreach my $pattern (sort @{$pats}) {
 			print FD "\t\t".'<opensusePattern name="'.$pattern.'"/>'."\n";
 		}
 	}
 	if (defined $pacs) {
-		foreach my $package (@{$pacs}) {
+		foreach my $package (sort @{$pacs}) {
 			print FD "\t\t".'<package name="'.$package.'"/>'."\n";
 		}
 	}
@@ -810,14 +810,15 @@ sub getPackageList {
 	my %packages = ();
 	my @twice = ();
 	for (my $i=0;$i<@ilist;$i++) {
+		my $p = $ilist[$i];
 		my $inskip = 0;
 		foreach my $s (@{$skip}) {
-			if ($ilist[$i] =~ /$s/) {
+			if ($p =~ /$s/) {
 				$inskip = 1; last;
 			}
 		}
 		next if $inskip;
-		$packages{$ilist[$i]}++;
+		$packages{$p}++;
 	}
 	foreach my $installed (keys %packages) {
 		if ($packages{$installed} > 1) {
