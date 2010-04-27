@@ -1264,7 +1264,6 @@ sub setInitialSetup {
 	# create xorg.conf [fbdev]
 	#------------------------------------------
 	qxx ("mkdir -p $dest/root/etc/X11");
-	qxx ("mkdir -p $dest/root/var/lib/YaST2");
 	if (-f "/etc/X11/xorg.conf.install") {
 		qxx ("cp /etc/X11/xorg.conf.install $dest/root/etc/X11/xorg.conf");
 	} else {
