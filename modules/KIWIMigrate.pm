@@ -190,7 +190,7 @@ sub new {
 	# Store default packages to skip
 	#------------------------------------------
 	my @denyPacks = (
-		'gpg-pubkey*'
+		'gpg-pubkey.*'
 	);
 	foreach my $s (@denyPacks) {
 		push (@{$skip},$s);
