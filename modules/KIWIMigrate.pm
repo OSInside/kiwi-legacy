@@ -1455,7 +1455,9 @@ sub autoyastClone {
 	# run yast for cloning
 	#------------------------------------------
 	my $cloneList = join( ',', @list );
-	qxx("mv /root/autoinst.xml /root/autoinst.xml.backup");
+	if (-e "/root/autoinst.xml") {
+		qxx ("mv /root/autoinst.xml /root/autoinst.xml.backup");
+	}
 	qxx("yast clone_system modules clone=$cloneList");
 	my $code = $? >> 8;
 	if ($code != 0) {
