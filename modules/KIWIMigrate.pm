@@ -1484,21 +1484,6 @@ sub autoyastClone {
 	if (-e "/root/autoinst.xml.backup") {
 		qxx ("mv /root/autoinst.xml.backup /root/autoinst.xml");
 	}
-	if ( ! open (FD,">$dest/root/etc/install.inf")) {
-		$kiwi -> failed ();
-		$kiwi -> error ("Failed to create install.inf: $!");
-		$kiwi -> failed ();
-		return undef;
-	}
-	print FD "AutoYaST: \n";
-	close FD;
-	if ( ! open (FD,">$dest/root/var/lib/YaST2/runme_at_boot")) {
-		$kiwi -> failed ();
-		$kiwi -> error ("Failed to create runme_at_boot: $!");
-		$kiwi -> failed ();
-		return undef;
-	}
-	close FD;
 	return $this;
 }
 
