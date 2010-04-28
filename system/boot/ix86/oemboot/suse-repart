@@ -317,6 +317,11 @@ function OEMRepartOverlayed {
 	#--------------------------------------
 	local unionFST=`echo $UNIONFS_CONFIG | cut -d , -f 3`
 	if [ "$unionFST" = "clicfs" ];then
+		mount $(ddn $imageDiskDevice 3) /mnt
+		cp /mnt/boot/linux.vmx  /tmp
+		cp /mnt/boot/initrd.vmx /tmp
+		cp /mnt/boot/grub/mbrid /tmp
+		umount /mnt
 		export haveClicFS=yes
 	fi
 	#======================================
