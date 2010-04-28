@@ -2218,6 +2218,9 @@ sub createImageLiveCD {
 	my $isoerror = 1;
 	my $name = $this->{imageDest}."/".$namerw.".iso";
 	my $attr = "-R -J -f -pad -joliet-long";
+	if (! defined $gzip) {
+		$attr = "-R -J -pad -joliet-long";
+	}
 	$attr .= " -p \"$main::Preparer\" -publisher \"$main::Publisher\"";
 	if (! defined $gzip) {
 		$attr .= " -iso-level 4"; 
