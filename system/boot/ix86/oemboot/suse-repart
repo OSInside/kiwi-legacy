@@ -369,7 +369,7 @@ function OEMRepartOverlayed {
 		if [ $swapsize = 0 ];then
 			if [ "$haveDMSquash" = "yes" ] || [ "$haveClicFS" = "yes" ];then
 				createPartitionerInput \
-					d 2 n p 2 . +"$disk2MBytes"M n p 3 . . w q
+					d 2 d 3 n p 2 . +"$disk2MBytes"M n p 3 . . w q
 				setupDeviceNames 1 no no no 3 2
 			else
 				createPartitionerInput \
@@ -379,7 +379,7 @@ function OEMRepartOverlayed {
 		else
 			if [ "$haveDMSquash" = "yes" ] || [ "$haveClicFS" = "yes" ];then
 				createPartitionerInput \
-					d 2 n p 2 . +"$disk2MBytes"M \
+					d 2 d 3 n p 2 . +"$disk2MBytes"M \
 					n p 3 . +"$bootXMBytes"M n p . . \
 					t 4 82 w q
 				setupDeviceNames 1 4 no no 3 2

@@ -247,18 +247,18 @@ fi
 setupInitialDeviceNames
 
 #======================================
-# 12) repartition the disk device
-#--------------------------------------
-if [ "$LOCAL_BOOT" = "no" ];then
-	OEMRepart
-fi
-
-#======================================
-# 13) Check for read-only filesystem
+# 12) Check for read-only filesystem
 #--------------------------------------
 if isFSTypeReadOnly;then
 	setupUnionFS $imageRWDevice $imageRODevice $unionFST
 	bootid=2
+fi
+
+#======================================
+# 13) repartition the disk device
+#--------------------------------------
+if [ "$LOCAL_BOOT" = "no" ];then
+	OEMRepart
 fi
 
 #======================================
