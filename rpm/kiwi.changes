@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Fri Apr 23 10:53:37 CEST 2010 - ms@suse.de
 
+- v4.32
 - fixed repartition code for overlay systems (clicfs)
 - support new createrepo repomd.xml metadata information.
   kiwi now reads the repomd.xml if it exists and parses the
