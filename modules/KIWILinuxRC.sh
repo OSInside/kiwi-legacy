@@ -5158,8 +5158,13 @@ function createHybridPersistent {
 				createPartitionerInput \
 					n p . . t 4 $HYBRID_PERSISTENT_ID w
 			fi
+			imageDiskDevice=$dev
 			callPartitioner $input
-			if ! mkfs.$HYBRID_PERSISTENT_FS $dev$disknr;then
+			if ! waitForStorageDevice $dev$disknr;then
+				Echo "Partition $dev$disknr doesn't appear... fatal !"
+				Echo "Persistent writing deactivated"
+				unset kiwi_hybridpersistent
+			elif ! mkfs.$HYBRID_PERSISTENT_FS $dev$disknr;then
 				Echo "Failed to create hybrid persistent filesystem"
 				Echo "Persistent writing deactivated"
 				unset kiwi_hybridpersistent
