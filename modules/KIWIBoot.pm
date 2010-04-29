@@ -287,7 +287,7 @@ sub new {
 		my $minInodes;
 		my $sizeXMLBytes = 0;
 		my $cmdlBytes    = 0;
-		my $spare        = 1.3;
+		my $spare        = 1.5;
 		#==========================================
 		# Calculate minimum size of the system
 		#------------------------------------------

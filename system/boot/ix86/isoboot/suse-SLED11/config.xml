@@ -113,6 +113,7 @@
 		<package name="dialog"/>
 		<package name="gfxboot"/>
 		<package name="openssl-certs"/>
+		<package name="parted"/>
 	</packages>
 	<packages type="delete">
 		<package name="gfxboot"/>
@@ -183,7 +184,6 @@
 		<package name="pam-32bit"/>
 		<package name="pam-config"/>
 		<package name="pam-modules"/>
-		<package name="parted"/>
 		<package name="pcre"/>
 		<package name="perl"/>
 		<package name="perl-Bootloader"/>

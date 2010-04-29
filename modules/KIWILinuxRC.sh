@@ -5134,15 +5134,21 @@ function createHybridPersistent {
 	local dev=$1;
 	local relativeDevName=`basename $dev`
 	local input=/part.input
+	local ptool=$PARTITIONER
 	local id=0
+	# /.../
+	# we have to use fdisk here for partition manipulation
+	# because parted doesn't accept the partition table written
+	# by the isohybrid tool :(
+	# ----
+	PARTITIONER=sfdisk
 	for disknr in 2 3 4; do
 		id=`partitionID $dev $disknr`
-		# do we have a linux partition already? Then stop
-		if [ "$id" = "$HYBRID_PERSISTENT_ID" ]; then
+		if [ $id = $HYBRID_PERSISTENT_ID ]; then
 			Echo "Existing persistent hybrid partition found ${dev}${disknr}"
+			PARTITIONER=$ptool
 			return
-		fi
-		if [ "$id" = "0" ]; then
+		else
 			Echo -n "Creating hybrid persistent partition for COW data: "
 			Echo "$dev$disknr id=$HYBRID_PERSISTENT_ID fs=$HYBRID_PERSISTENT_FS"
 			if [ $disknr -lt 4 ];then
@@ -5158,9 +5164,11 @@ function createHybridPersistent {
 				Echo "Persistent writing deactivated"
 				unset kiwi_hybridpersistent
 			fi
+			PARTITIONER=$ptool
 			return
 		fi
 	done
+	PARTITIONER=$ptool
 }
 #======================================
 # callPartitioner

@@ -89,6 +89,7 @@
 		<package name="bootsplash"/>
 		<package name="tar"/>
 		<package name="checkmedia"/>
+		<package name="parted"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>

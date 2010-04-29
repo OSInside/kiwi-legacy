@@ -95,6 +95,7 @@
 		<package name="coreutils"/>
 		<package name="hwinfo"/>
 		<package name="pam"/>
+		<package name="parted"/>
 	</packages>
 	<packages type="delete">
 		<package name="cracklib-dicts"/>
@@ -127,7 +128,6 @@
 		<package name="mtools"/>
 		<package name="net-tools"/>
 		<package name="openldap-clients"/>
-		<package name="parted"/>
 		<package name="perl"/>
 		<package name="perl-HTML-Parser"/>
 		<package name="perl-HTML-Tagset"/>

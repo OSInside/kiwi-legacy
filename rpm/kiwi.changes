@@ -11,6 +11,12 @@ Fri Apr 23 10:53:37 CEST 2010 - ms@suse.de
   approach is the preferred solution to implement this
 - don't use --follow-symlinks for iso type if old live iso
   style is in use (bnc #599712)
+- added parted to isoboot images this is required for
+  the hybrid persistent feature. also increased min space
+  for clicfs embedded ext3 filesystem. Also fixed the
+  createHybridPersistent() function to use fdisk instead
+  of parted. The problem here is that parted doesn't accept
+  the partitiont able written by the isohybrid tool.
 
 -------------------------------------------------------------------
 Tue Apr 20 12:12:44 CEST 2010 - ms@suse.de
