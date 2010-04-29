@@ -2368,6 +2368,12 @@ function CDMount {
 		#======================================
 		# search for hybrid device
 		#--------------------------------------
+		# /.../
+		# we have to use fdisk here for partition manipulation
+		# because parted doesn't accept the partition table written
+		# by the isohybrid tool :(
+		# ----
+		PARTITIONER=sfdisk
 		if [ "x$kiwi_hybridpersistent" = "xyes" ]; then
 			createHybridPersistent $biosBootDevice
 		fi
@@ -2398,8 +2404,10 @@ function CDMount {
 			#======================================
 			# device found go with it
 			#--------------------------------------
+			PARTITIONER=parted
 			return
 		fi
+		PARTITIONER=parted
 		umount $cddev &>/dev/null
 	fi
 	echo
@@ -5134,22 +5142,14 @@ function createHybridPersistent {
 	local dev=$1;
 	local relativeDevName=`basename $dev`
 	local input=/part.input
-	local ptool=$PARTITIONER
 	local id=0
-	# /.../
-	# we have to use fdisk here for partition manipulation
-	# because parted doesn't accept the partition table written
-	# by the isohybrid tool :(
-	# ----
-	PARTITIONER=sfdisk
 	for disknr in 2 3 4; do
 		id=`partitionID $dev $disknr`
 		if [ $id = $HYBRID_PERSISTENT_ID ]; then
-			Echo "Existing persistent hybrid partition found ${dev}${disknr}"
-			PARTITIONER=$ptool
+			Echo "Existing persistent hybrid partition found $dev$disknr"
 			return
 		else
-			Echo -n "Creating hybrid persistent partition for COW data: "
+			Echo "Creating hybrid persistent partition for COW data: "
 			Echo "$dev$disknr id=$HYBRID_PERSISTENT_ID fs=$HYBRID_PERSISTENT_FS"
 			if [ $disknr -lt 4 ];then
 				createPartitionerInput \
@@ -5169,11 +5169,9 @@ function createHybridPersistent {
 				Echo "Persistent writing deactivated"
 				unset kiwi_hybridpersistent
 			fi
-			PARTITIONER=$ptool
 			return
 		fi
 	done
-	PARTITIONER=$ptool
 }
 #======================================
 # callPartitioner
