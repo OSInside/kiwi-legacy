@@ -170,6 +170,7 @@
 		<package name="tar"/>
 		<package name="cromfs"/>
 		<package name="kiwi-tools"/>
+		<package name="cyrus-sasl"/>
 	</packages>
 	<packages type="image" profiles="diskless">
 		<package name="iputils"/>
@@ -190,6 +191,7 @@
 		<package name="tar"/>
 		<package name="bootsplash"/>
 		<package name="kiwi-tools"/>
+		<package name="cyrus-sasl"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
@@ -203,7 +205,6 @@
 		<package name="audit-libs"/>
 		<package name="blocxx"/>
 		<package name="cpio"/>
-		<package name="cyrus-sasl"/>
 		<package name="db"/>
 		<package name="diffutils"/>
 		<package name="expat"/>
@@ -265,7 +266,6 @@
 		<package name="pciutils"/>
 		<package name="krb5"/>
 		<package name="openldap2-client"/>
-		<package name="cyrus-sasl"/>
 		<package name="pam-modules"/>
 		<package name="pam-config"/>
 		<package name="PolicyKit"/>

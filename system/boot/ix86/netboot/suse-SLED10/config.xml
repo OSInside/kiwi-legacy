@@ -89,6 +89,7 @@
 		<package name="make"/>
 		<package name="bootsplash"/>
 		<package name="tar"/>
+		<package name="cyrus-sasl"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
