@@ -1795,28 +1795,34 @@ function updateSyslinuxBootDeviceFstab {
 #--------------------------------------
 function updateOtherDeviceFstab {
 	# /.../
-	# check the contents of the $PART_MOUNT variable and
+	# check the contents of the $PART variable and
 	# add one line to the fstab file for each partition
-	# to mount.
+	# which has a mount point defined.
 	# ----
 	local prefix=$1
 	local nfstab=$prefix/etc/fstab
 	local index=0
-	IFS=":" ; for i in $PART_MOUNT;do
-		if test ! -z "$i";then
-			count=0
-			IFS=":" ; for n in $PART_DEV;do
-				device=$n
-				if test $count -eq $index;then
-					break
-				fi
-				count=`expr $count + 1`
-			done
-			index=`expr $index + 1`
-			if test ! $i = "/" && test ! $i = "x";then
-				probeFileSystem $device
-				echo "$device $i $FSTYPE defaults 1 1" >> $nfstab
-			fi
+	local field=0
+	local count=0
+	local device
+	local IFS=","
+	for i in $PART;do
+		field=0
+		count=$((count + 1))
+		IFS=";" ; for n in $i;do
+		case $field in
+			0) partSize=$n   ; field=1 ;;
+			1) partID=$n     ; field=2 ;;
+			2) partMount=$n;
+		esac
+		done
+		if  [ ! -z "$partMount" ]    && \
+			[ ! "$partMount" = "x" ] && \
+			[ ! "$partMount" = "/" ]
+		then
+			device=$(ddn $DISK $count)
+			probeFileSystem $device
+			echo "$device $partMount $FSTYPE defaults 1 1" >> $nfstab
 		fi
 	done
 }
@@ -2823,69 +2829,6 @@ function cleanSweep {
 	dd if=/dev/zero of=$diskDevice bs=32M >/dev/null
 }
 #======================================
-# createFileSystem
-#--------------------------------------
-function createFileSystem {
-	# /.../
-	# create a filesystem on the specified partition
-	# if the partition is of type LVM a volume group
-	# is created
-	# ----
-	diskPartition=$1
-	diskID=`echo $diskPartition | sed -e s@[^0-9]@@g`
-	diskPD=`echo $diskPartition | sed -e s@[0-9]@@g`
-	diskPartitionType=`partitionID $diskPD $diskID`
-	if test "$diskPartitionType" = "8e";then
-		Echo "Creating Volume group [systemvg]"
-		pvcreate $diskPartition >/dev/null
-		vgcreate systemvg $diskPartition >/dev/null
-	else
-		# .../
-		# Create partition in case it is not root system and
-		# there is no system  already created There is no need to
-		# create a filesystem on the root partition
-		# ----
-		if test $diskID -gt 2; then
-			if ! e2fsck -p $diskPartition 1>&2; then
-				Echo "Partition $diskPartition is not valid, formating..."
-				mke2fs -F -T ext3 -j $diskPartition 1>&2
-				if test $? != 0; then
-					systemException \
-						"Failed to create filesystem on: $diskPartition !" \
-					"reboot"
-				fi
-			else
-				Echo "Partition $diskPartition is valid, leave it untouched"
-			fi
-		fi
-	fi
-}
-#======================================
-# checkExtended
-#--------------------------------------
-function checkExtended {
-	# /.../
-	# check the IMAGE system partition and adapt if the index
-	# was increased due to an extended partition
-	# ----
-	local iDevice=""
-	local iNumber=""
-	local iNewDev=""
-	local iPartNr=""
-	IFS="," ; for i in $PART;do
-		iPartNr=`expr $iPartNr + 1`
-	done
-	if [ $iPartNr -gt 4 ];then
-		iDevice=`echo $IMAGE | cut -f1 -d";" | cut -f2 -d=`
-		iNumber=`echo $iDevice | tr -d "a-zA-Z\/"`
-		if [ $iNumber -ge 4 ];then
-			iNumber=`expr $iNumber + 1`
-			iNewDev=$DISK$iNumber
-			IMAGE=`echo $IMAGE | sed -e s@$iDevice@$iNewDev@`
-		fi
-	fi
-}
-#======================================
 # sfdiskGetPartitionID
 #--------------------------------------
 function sfdiskGetPartitionID {
@@ -2893,145 +2836,6 @@ function sfdiskGetPartitionID {
 	# prints the partition ID for the given device and number
 	# ----
 	sfdisk -c $1 $2
-}
-#======================================
-# sfdiskPartitionCount
-#--------------------------------------
-function sfdiskPartitionCount {
-	# /.../
-	# calculate the number of partitions to create. If the
-	# number is more than 4 an extended partition needs to be
-	# created.
-	# ----
-	IFS="," ; for i in $PART;do
-		PART_NUMBER=`expr $PART_NUMBER + 1`
-	done
-	if [ $PART_NUMBER -gt 4 ];then
-		PART_NEED_EXTENDED=1
-	fi
-	PART_NUMBER=`expr $PART_NUMBER + 1`
-	PART_NEED_FILL=`expr $PART_NUMBER / 8`
-	PART_NEED_FILL=`expr 8 - \( $PART_NUMBER - $PART_NEED_FILL \* 8 \)`
-}
-#======================================
-# sfdiskFillPartition
-#--------------------------------------
-function sfdiskFillPartition {
-	# /.../
-	# in case of an extended partition the number of input lines
-	# must be a multiple of 4, so this function will fill the input
-	# with empty lines to make sfdisk happy
-	# ----
-	while test $PART_NEED_FILL -gt 0;do
-		echo >> $PART_FILE
-		PART_NEED_FILL=`expr $PART_NEED_FILL - 1`
-	done
-}
-#======================================
-# sfdiskCreateSwap
-#--------------------------------------
-function sfdiskCreateSwap {
-	# /.../
-	# create the sfdisk input line for setting up the
-	# swap space
-	# ----
-	IFS="," ; for i in $PART;do
-		field=0
-		IFS=";" ; for n in $i;do
-		case $field in
-			0) partSize=$n   ; field=1 ;;
-			1) partID=$n     ; field=2 ;;
-			2) partMount=$n;
-		esac
-		done
-		if test $partID = "82" -o $partID = "S";then
-			echo "0,$partSize,$partID,-" > $PART_FILE
-			PART_COUNT=`expr $PART_COUNT + 1`
-			return
-		fi
-	done
-}
-#======================================
-# sfdiskCreatePartition
-#--------------------------------------
-function sfdiskCreatePartition {
-	# /.../
-	# create the sfdisk input lines for setting up the
-	# partition table except the swap space
-	# ----
-	devices=1
-	IFS="," ; for i in $PART;do
-		field=0
-		IFS=";" ; for n in $i;do
-		case $field in
-			0) partSize=$n   ; field=1 ;;
-			1) partID=$n     ; field=2 ;;
-			2) partMount=$n;
-		esac
-		done
-		if test $partID = "82" -o $partID = "S";then
-			continue
-		fi
-		if test $partSize = "x";then
-			partSize=""
-		fi
-		if [ $PART_COUNT -eq 1 ];then
-			echo ",$partSize,$partID,*" >> $PART_FILE
-		else
-			echo ",$partSize,$partID,-" >> $PART_FILE
-		fi
-		PART_COUNT=`expr $PART_COUNT + 1`
-		if [ $PART_NEED_EXTENDED -eq 1 ];then
-		if [ $PART_COUNT -eq 3 ];then
-			echo ",,E" >> $PART_FILE
-			NO_FILE_SYSTEM=1
-		fi
-		fi
-		devices=`expr $devices + 1`
-		if test -z "$PART_MOUNT";then
-			PART_MOUNT="$partMount"
-			PART_DEV="$DISK$devices"
-		else
-			PART_MOUNT="$PART_MOUNT:$partMount"
-			if [ $NO_FILE_SYSTEM -eq 2 ];then
-				devices=`expr $devices + 1`
-				NO_FILE_SYSTEM=0
-			fi
-			PART_DEV="$PART_DEV:$DISK$devices"
-		fi
-		if [ $NO_FILE_SYSTEM -eq 1 ];then
-			NO_FILE_SYSTEM=2
-		fi
-	done
-	if [ $PART_NEED_EXTENDED -eq 1 ];then
-		sfdiskFillPartition
-	fi
-	export PART_MOUNT
-	export PART_DEV
-}
-#======================================
-# sfdiskWritePartitionTable
-#--------------------------------------
-function sfdiskWritePartitionTable {
-	# /.../
-	# write the partition table using PART_FILE as
-	# input for sfdisk
-	# ----
-	local diskDevice=$1
-	dd if=/dev/zero of=$diskDevice bs=512 count=1 >/dev/null
-	sfdisk -uM --force $diskDevice < $PART_FILE >/dev/null
-	if test $? != 0;then
-		systemException \
-			"Failed to create partition table on: $diskDevice !" \
-		"reboot"
-	fi
-	verifyOutput=`sfdisk -V $diskDevice`
-	if test $? != 0;then
-		systemException \
-			"Failed to verify partition table on $diskDevice: $verifyOutput" \
-		"reboot"
-	fi
-	rm -f $PART_FILE
 }
 #======================================
 # partedGetPartitionID
@@ -3042,85 +2846,6 @@ function partedGetPartitionID {
 	# ----
 	parted -m -s $1 print | grep ^$2: | cut -f2 -d, |\
 		cut -f2 -d= | tr -d ";" | tr -d 0
-}
-#======================================
-# partedCreatePartition
-#--------------------------------------
-function partedCreatePartition {
-	# /.../
-	# create the parted input data for setting up the
-	# partition table
-	# ----
-	p_stopp=0
-	dd if=/dev/zero of=$DISK bs=512 count=1 >/dev/null && \
-		/usr/sbin/parted -s $DISK mklabel msdos
-	if [ $? -ne 0 ];then
-		systemException \
-			"Failed to clean partition table on: $DISK !" \
-			"reboot"
-	fi
-	p_opts="-s $DISK unit s print"
-	p_size=`/usr/sbin/parted $p_opts | grep "^Disk" | cut -f2 -d: | cut -f1 -ds`
-	p_size=`echo $p_size`
-	p_size=`expr $p_size - 1`
-	p_cmd="/usr/sbin/parted -s $DISK unit s"
-	IFS="," ; for i in $PART;do
-		field=0
-		IFS=";" ; for n in $i;do
-		case $field in
-			0) partSize=$n ; field=1 ;;
-			1) partID=$n   ; field=2 ;;
-			2) partMount=$n;
-		esac
-		done
-		PART_COUNT=`expr $PART_COUNT + 1`
-		if test $partSize = "x";then
-			partSize=$p_size
-		else
-			partSize=`expr $partSize \* 2048`
-		fi
-		if test $partID = "82" -o $partID = "S";then
-			partedGetSectors 63 $partSize
-			p_cmd="$p_cmd mkpartfs primary linux-swap $p_start $p_stopp"
-			continue
-		fi
-		if [ $p_stopp = 0 ];then
-			systemException \
-				"Invalid partition setup: $PART !" \
-				"reboot"
-		fi
-		partedGetSectors $p_stopp $partSize
-		if [ $PART_COUNT -le 3 ];then
-			p_cmd="$p_cmd mkpart primary $p_start $p_stopp"
-			p_cmd="$p_cmd set $PART_COUNT type 0x$partID"
-		else
-			if [ $PART_COUNT -eq 4 ];then
-				p_cmd="$p_cmd mkpart extended $p_start $p_size"
-				p_cmd="$p_cmd set $PART_COUNT type 0x85"
-				PART_COUNT=`expr $PART_COUNT + 1`
-				NO_FILE_SYSTEM=1
-			fi
-			p_start=`expr $p_start + 1`
-			p_cmd="$p_cmd mkpart logical $p_start $p_stopp"
-			p_cmd="$p_cmd set $PART_COUNT type 0x$partID"
-		fi
-		if test -z "$PART_MOUNT";then
-			PART_MOUNT="$partMount"
-			PART_DEV="$DISK$devices"
-		else
-			PART_MOUNT="$PART_MOUNT:$partMount"
-			if [ $NO_FILE_SYSTEM -eq 2 ];then
-				NO_FILE_SYSTEM=0
-			fi
-			PART_DEV="$PART_DEV:$DISK$devices"
-		fi
-		if [ $NO_FILE_SYSTEM -eq 1 ];then
-			NO_FILE_SYSTEM=2
-		fi
-	done
-	export PART_MOUNT
-	export PART_DEV
-	p_cmd="$p_cmd set 2 boot on"
 }
 #======================================
 # partedGetSectors
@@ -3137,21 +2862,6 @@ function partedGetSectors {
 	p_stopp=`expr $p_start + $2`
 	if [ $p_stopp -gt $p_size ];then
 		p_stopp=$p_size
-	fi
-}
-#======================================
-# partedWritePartitionTable
-#--------------------------------------
-function partedWritePartitionTable {
-	# /.../
-	# write the partition table using parted
-	# ----
-	local diskDevice=$1
-	eval $p_cmd
-	if test $? != 0;then
-		systemException \
-			"Failed to create partition table on: $diskDevice !" \
-		"reboot"
 	fi
 }
 #======================================
@@ -3175,42 +2885,6 @@ function partitionSize {
 		return 1
 	fi
 	expr $(blockdev --getsize64 $diskDevice) / 1024
-}
-#======================================
-# partitionCount
-#--------------------------------------
-function partitionCount {
-	if [ $PARTITIONER = "sfdisk" ];then
-		sfdiskPartitionCount
-	fi
-}
-#======================================
-# createSwap
-#--------------------------------------
-function createSwap {
-	if [ $PARTITIONER = "sfdisk" ];then
-		sfdiskCreateSwap
-	fi
-}
-#======================================
-# createPartition
-#--------------------------------------
-function createPartition {
-	if [ $PARTITIONER = "sfdisk" ];then
-		sfdiskCreatePartition
-	else
-		partedCreatePartition
-	fi
-}
-#======================================
-# writePartitionTable
-#--------------------------------------
-function writePartitionTable {
-	if [ $PARTITIONER = "sfdisk" ];then
-		sfdiskWritePartitionTable $1
-	else
-		partedWritePartitionTable $1
-	fi
 }
 #======================================
 # linuxPartition
@@ -5191,6 +4865,7 @@ function callPartitioner {
 		# command input file as for fdisk but we re-read
 		# the disk so that the new table will be used
 		# ----
+		udevPending
 		blockdev --rereadpt $imageDiskDevice
 	fi
 }
@@ -5552,6 +5227,78 @@ function createFilesystem {
 			"Failed to create filesystem" \
 		"reboot"
 	fi
+}
+#======================================
+# pxeSizeToMB
+#--------------------------------------
+function pxeSizeToMB {
+	local size=$1
+	if [ "$size" = "x" ];then
+		echo . ; return
+	fi
+	local lastc=$(echo $size | sed -e 's@\(^.*\)\(.$\)@\2@')
+	local value=$(echo $size | sed -e 's@\(^.*\)\(.$\)@\1@')
+	if [ "$lastc" = "m" ] || [ "$lastc" = "M" ];then
+		size=$value
+	elif [ "$lastc" = "g" ] || [ "$lastc" = "G" ];then
+		size=$(($value * 1024))
+	fi
+	echo +"$size"M
+}
+#======================================
+# pxePartitionInput
+#--------------------------------------
+function pxePartitionInput {
+	local field=0
+	local count=0
+	local IFS=","
+	for i in $PART;do
+		field=0
+		count=$((count + 1))
+		IFS=";" ; for n in $i;do
+		case $field in
+			0) partSize=$n   ; field=1 ;;
+			1) partID=$n     ; field=2 ;;
+			2) partMount=$n;
+		esac
+		done
+		partSize=$(pxeSizeToMB $partSize)
+		if [ $count -eq 1 ];then
+			echo -n "n p $count 1 $partSize "
+		else
+			echo -n "n p $count . $partSize "
+		fi
+		if test $partID = "82" -o $partID = "S";then
+			echo -n "t $count 82 "
+		fi
+	done
+	echo "w q"
+}
+#======================================
+# pxeSwapDevice
+#--------------------------------------
+function pxeSwapDevice {
+	local field=0
+	local count=0
+	local device
+	local IFS=","
+	for i in $PART;do
+		field=0
+		count=$((count + 1))
+		IFS=";" ; for n in $i;do
+		case $field in
+			0) partSize=$n   ; field=1 ;;
+			1) partID=$n     ; field=2 ;;
+			2) partMount=$n;
+		esac
+		done
+		if test $partID = "82" -o $partID = "S";then
+			device=${DISK}$count
+			waitForStorageDevice $device
+			echo $device
+			return
+		fi
+	done
 }
 #======================================
 # startUtimer

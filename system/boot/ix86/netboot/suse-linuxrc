@@ -39,18 +39,6 @@ export SYSALIAS="undefined"
 export NAME=0
 
 #======================================
-# Exports (Partitioning)
-#--------------------------------------
-export PART_FILE="/etc/partition.table"
-export PART_MOUNT
-export PART_DEV
-export PART_COUNT=0
-export PART_NUMBER=0
-export PART_NEED_EXTENDED=0
-export PART_NEED_FILL=0
-export NO_FILE_SYSTEM=0
-
-#======================================
 # Exports (Status)
 #--------------------------------------
 export SYSTEM_INTEGRITY
@@ -363,10 +351,6 @@ if \
 	[ -z "$AOEROOT" ]
 then
 	#======================================
-	# Check for possible extended partition
-	#--------------------------------------
-	checkExtended
-	#======================================
 	# Check for installed system
 	#--------------------------------------
 	count=0
@@ -414,21 +398,29 @@ then
 	esac
 	done
 	#======================================
-	# Create partition table if needed
+	# Evaluate PART partition information
 	#--------------------------------------
 	if test $systemIntegrity = "clean";then
 		runHook prepartition
 		Echo "Creating partition table..."
-		partitionCount
-		createSwap
-		createPartition
-		writePartitionTable $DISK
-		IFS=":" ; for i in $PART_DEV;do
-		if test ! -z "$i";then
-			createFileSystem $i
+		#======================================
+		# Create partition table if needed
+		#--------------------------------------
+		input=/part.input
+		imageDiskDevice=$DISK
+		dd if=/dev/zero of=$DISK bs=512 count=1 >/dev/null && \
+			parted -s $DISK mklabel msdos
+		createPartitionerInput $(pxePartitionInput)
+		callPartitioner $input
+		#======================================
+		# Setup swap space if required
+		#--------------------------------------
+		export imageSwapDevice=$(pxeSwapDevice)
+		if [ ! -z "$imageSwapDevice" ];then
+			if ! mkswap $imageSwapDevice 1>&2;then
+				systemException "Failed to create swap signature" "reboot"
+			fi
 		fi
-		done
-		mkswap ${DISK}1 >/dev/null 2>&1
 		runHook postpartition
 	fi
 fi
