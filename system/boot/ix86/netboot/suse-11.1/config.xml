@@ -15,15 +15,20 @@
 	<profiles>
 		<profile name="default" description="Boot with default kernel"/>
 		<profile name="diskless" description="Booting diskless thin clients"/>
+		<profile name="xen" description="Boot with xen mboot.c32 setup"/>
 		<profile name="std" description="KERNEL: Default"/>
+		<profile name="xenk" description="KERNEL: Xen kernel/mboot.c32"/>
 		<profile name="pae" description="KERNEL: pae"/>
 	</profiles>
-	<drivers type="usbdrivers" profiles="default,pae">
+	<drivers type="drivers" profiles="xen">
+		<file name="drivers/xen/*"/>
+	</drivers>
+	<drivers type="usbdrivers" profiles="default,xen">
 		<file name="usb/host/*"/>
 		<file name="usb/core/usbcore.ko"/>
 		<file name="usb/storage/usb-storage.ko"/>
 	</drivers>
-	<drivers type="drivers" profiles="default,pae">
+	<drivers type="drivers" profiles="default,xen">
 		<file name="drivers/md/*"/>
 		<file name="drivers/hid/*"/>
 		<file name="drivers/ide/*"/>
@@ -134,13 +139,22 @@
 		<package name="kernel-default-extra"/>
 		<package name="aufs-kmp-default"/>
 	</packages>
+	<packages type="image" profiles="xenk">
+		<package name="kernel-xen"/>
+		<package name="kernel-xen-base"/>
+		<package name="kernel-xen-extra"/>
+		<package name="aufs-kmp-xen"/>
+	</packages>
 	<packages type="image" profiles="pae">
 		<package name="kernel-pae"/>
 		<package name="kernel-pae-base"/>
 		<package name="kernel-pae-extra"/>
 		<package name="aufs-kmp-pae"/>
 	</packages>
-	<packages type="image" profiles="default,pae">
+	<packages type="image" profiles="xen">
+		<package name="xen"/>
+	</packages>
+	<packages type="image" profiles="default,xen">
 		<package name="adaptec-firmware"/>
 		<package name="curl"/>
 		<package name="psmisc"/>
@@ -198,7 +212,7 @@
 		<package name="glibc"/>
 		<package name="glibc-locale"/>
 	</packages>
-	<packages type="delete" profiles="default,diskless,pae">
+	<packages type="delete" profiles="default,diskless,xen">
 		<package name="cracklib-dict-small"/>
 		<package name="cracklib-dict-full"/>
 		<package name="PolicyKit"/>

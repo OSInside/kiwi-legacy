@@ -15,11 +15,16 @@
 	<profiles>
 		<profile name="default" description="Booting default profile"/>
 		<profile name="diskless" description="Booting diskless thin clients"/>
+		<profile name="xen" description="Booting with xen mboot.c32 setup"/>
 		<profile name="std" description="KERNEL: Default"/>
+		<profile name="xenk" description="KERNEL: Xen kernel/mboot.c32"/>
 		<profile name="pae" description="KERNEL: pae"/>
 		<profile name="desktop" description="KERNEL: Desktop kernel"/>
 	</profiles>
-	<drivers type="drivers" profiles="default,pae">
+	<drivers type="drivers" profiles="xen">
+		<file name="drivers/xen/*"/>
+	</drivers>
+	<drivers type="drivers" profiles="default,xen">
 		<file name="drivers/md/*"/>
 		<file name="drivers/hid/*"/>
 		<file name="drivers/input/keyboard/*"/>
@@ -136,10 +141,16 @@
 	<packages type="image" profiles="pae">
 		<package name="kernel-pae"/>
 	</packages>
+	<packages type="image" profiles="xenk">
+		<package name="kernel-xen"/>
+	</packages>
 	<packages type="image" profiles="desktop">
 		<package name="kernel-desktop"/>
 	</packages>
-	<packages type="image" profiles="default,pae">
+	<packages type="image" profiles="xen">
+		<package name="xen"/>
+	</packages>
+	<packages type="image" profiles="default,xen">
 		<package name="adaptec-firmware"/>
 		<package name="clicfs"/>
 		<package name="curl"/>
@@ -198,7 +209,7 @@
 		<package name="glibc"/>
 		<package name="glibc-locale"/>
 	</packages>
-	<packages type="delete" profiles="default,diskless,pae">
+	<packages type="delete" profiles="default,diskless,xen">
 		<package name="cracklib-dict-small"/>
 		<package name="cracklib-dict-full"/>
 		<package name="PolicyKit"/>
