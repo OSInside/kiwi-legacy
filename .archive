@@ -15,8 +15,15 @@
 find -type d | grep .git | xargs rm -rf
 find -name "*.swp" | xargs rm -f
 mv rpm/kiwi.changes doc/ChangeLog
+mv system/*repo ..
+mv doc ..
 rm -rf rpm/
 
 cd ..
+tar -cjf kiwi-docu.tar.bz2 doc
+tar -cjf kiwi-repo.tar.bz2 *repo
 tar -cjf kiwi.tar.bz2 kiwi/
 mv kiwi.tar.bz2 kiwi/
+mv kiwi-repo.tar.bz2 kiwi/
+rm -rf *repo
+rm -rf doc

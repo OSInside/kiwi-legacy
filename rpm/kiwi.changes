@@ -1,6 +1,8 @@
 -------------------------------------------------------------------
 Fri Apr 30 10:21:56 CEST 2010 - ms@suse.de
 
+- split up kiwi source into: source, repository and
+  documentation tarballs to be more OBS friendly (bnc #601908)
 - added cyrus-sasl to netboot images (bnc #600951)
 - added support for Xen dom0 over netboot (bnc #601890)
 - removed netboot specific partition code and replace
