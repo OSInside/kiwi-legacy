@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Fri Apr 30 10:21:56 CEST 2010 - ms@suse.de
 
+- v4.33
 - split up kiwi source into: source, repository and
   documentation tarballs to be more OBS friendly (bnc #601908)
 - added cyrus-sasl to netboot images (bnc #600951)
