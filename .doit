@@ -81,7 +81,7 @@ sub checkout {
 #
 	my $pacdir = repoup (@_);
 	chdir $pacdir;
-	qx( cp kiwi/rpm/* . );
+	qx( cp -a -p kiwi/rpm/* . );
 	chdir "./kiwi";
 	qx (./.archive);
 	chdir $pacdir;
@@ -112,9 +112,7 @@ sub repoup {
 	# pack up local source
 	#-------------------------------------------
 	print "Checkout source level [local]...\n";
-	chdir $parent
-		|| die "Could not change dir: $parent:$!";
-	qx (mkdir -p $tmpdir/kiwi && cp -a . $tmpdir/kiwi);
+	qx( cp -a -p $parent/ $tmpdir );
 	chdir $tmpdir
 		|| die "Could not create temp dir: $!";
 	return $tmpdir;

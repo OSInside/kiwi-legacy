@@ -11,20 +11,24 @@
 #===========================================
 # make tarball from the current source tree
 #-------------------------------------------
-./.version > .revision
+rev_new=$(./.version)
+rev_old=$(cat ./.revision)
+if [ ! $rev_new = $rev_old ];then
+	echo $rev_new > .revision
+fi
 find -type d | grep .git | xargs rm -rf
 find -name "*.swp" | xargs rm -f
-mv rpm/kiwi.changes doc/ChangeLog
-mkdir ../system
-mv system/*repo ../system
-mv doc ..
+
+tar -cjf ../kiwi-docu.tar.bz2 doc
+tar -cjf ../kiwi-repo.tar.bz2 system/*repo
+
 rm -rf rpm/
+rm -rf doc/
+rm -rf system/*repo
 
 cd ..
-tar -cjf kiwi-docu.tar.bz2 doc
-tar -cjf kiwi-repo.tar.bz2 system
 tar -cjf kiwi.tar.bz2 kiwi/
-mv kiwi.tar.bz2 kiwi/
+
+mv kiwi.tar.bz2      kiwi/
 mv kiwi-repo.tar.bz2 kiwi/
-rm -rf system
-rm -rf doc
+mv kiwi-docu.tar.bz2 kiwi/
