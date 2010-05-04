@@ -5302,7 +5302,7 @@ function pxeSwapDevice {
 		esac
 		done
 		if test $partID = "82" -o $partID = "S";then
-			device=${DISK}$count
+			device=$(ddn $DISK $count)
 			waitForStorageDevice $device
 			echo $device
 			return
