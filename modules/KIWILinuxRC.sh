@@ -5263,13 +5263,22 @@ function pxePartitionInput {
 		esac
 		done
 		partSize=$(pxeSizeToMB $partSize)
+		if [ $partID = "S" ];then
+			partID=82
+		fi
+		if [ $partID = "L" ];then
+			partID=83
+		fi
+		if [ $partID = "V" ];then
+			partID=8e
+		fi
 		if [ $count -eq 1 ];then
 			echo -n "n p $count 1 $partSize "
 		else
 			echo -n "n p $count . $partSize "
 		fi
-		if test $partID = "82" -o $partID = "S";then
-			echo -n "t $count 82 "
+		if [ $partID = "82" ] || [ $partID = "8e" ];then
+			echo -n "t $count $partID "
 		fi
 	done
 	echo "w q"
