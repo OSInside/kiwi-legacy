@@ -405,6 +405,7 @@ sub openSUSEpath {
 	my @dists    = qw (standard);
 	my @urllist  = ();
 	my $kiwi     = $this->{kiwi};
+	my $origurl  = $module;
 	#==========================================
 	# allow proxy server from environment
 	#------------------------------------------
@@ -473,8 +474,7 @@ sub openSUSEpath {
 		}
 	}
 	if (! defined $quiet) {
-		my $response = join ("\n",@responses);
-		$kiwi -> warning ("Couldn't resolve opensuse URL: $response");
+		$kiwi -> warning ("Couldn't resolve opensuse URL: $origurl");
 		$kiwi -> skipped ();
 	}
 	return undef;

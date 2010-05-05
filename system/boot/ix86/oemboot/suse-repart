@@ -330,7 +330,7 @@ function OEMRepartOverlayed {
 	swapXMBytes=$swapsize
 	bootXMBytes=0
 	if [ "$haveDMSquash" = "yes" ] || [ "$haveClicFS" = "yes" ];then
-		bootXMBytes=40
+		bootXMBytes=60
 	fi
 	diskXMBytes=`partitionSize $imageDiskDevice`
 	diskXMBytes=`expr $diskXMBytes / 1024`
@@ -647,7 +647,7 @@ function OEMRepartLuks {
 	#======================================
 	# calculate end block - swapspace
 	#--------------------------------------
-	bootXMBytes=40
+	bootXMBytes=60
 	swapXMBytes=$swapsize
 	diskXMBytes=`partitionSize $imageDiskDevice`
 	diskXMBytes=`expr $diskXMBytes / 1024`
