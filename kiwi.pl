@@ -97,6 +97,7 @@ our $Schema   = $BasePath."/modules/KIWISchema.rng";
 our $SchemaTST= $BasePath."/modules/KIWISchemaTest.rng";
 our $KConfig  = $BasePath."/modules/KIWIConfig.sh";
 our $KMigrate = $BasePath."/modules/KIWIMigrate.txt";
+our $KMigraCSS= $BasePath."/modules/KIWIMigrate.tgz";
 our $KSplit   = $BasePath."/modules/KIWISplit.txt";
 our $Revision = $BasePath."/.revision";
 our $TestBase = $BasePath."/tests";

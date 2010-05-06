@@ -248,11 +248,18 @@ sub createReport {
 		$kiwi -> failed ();
 		return undef;
 	}
+	print FD '<!DOCTYPE html>'."\n";
 	print FD '<html>'."\n";
 	print FD "\t".'<head>'."\n";
 	print FD "\t\t".'<title>Migration report</title>'."\n";
+	print FD "\t\t".'<link rel="stylesheet" type="text/css" ';
+	print FD 'href="css/kiwi.css">'."\n";
 	print FD "\t".'</head>'."\n";
 	print FD '<body>'."\n";
+	print FD '<div class="headerwrap">'."\n";
+	print FD "\t".'<div class="container"><h1>Migration report</h1></div>'."\n";
+	print FD '</div>'."\n";
+	print FD '<div class="container">'."\n";
 	#==========================================
 	# Package/Pattern report
 	#------------------------------------------
@@ -445,7 +452,17 @@ sub createReport {
 		print FD '<a href="'."$dest/root-nopackage/".'">';
 		print FD 'Unpackaged files directory</a>'."\n";
 	}
+	print FD '</div>'."\n";
+	print FD '<div class="footer container">'."\n";
+	print FD "\t".'&copy; 2010 Novell, Inc.'."\n";
+	print FD '</div>'."\n";
+	print FD '</body>'."\n";
+	print FD '</html>'."\n";
 	close FD;
+	#==========================================
+	# Beautify report...
+	#------------------------------------------
+	qxx ("tar -C $dest -xf $main::KMigraCSS 2>&1");
 	$kiwi -> info ("--> Please check the migration report !!\n");
 	$kiwi -> note ("\n\tfile://$dest/report.html\n\n");
 	return $this;

@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Wed May  5 07:56:36 CEST 2010 - ms@suse.de
 
+- beautify migration report and fixed html code
 - fixed warning message if URL can't be resolved
 - fixed space problem when setting up boot partition for
   images which requires a separate boot partition which is
