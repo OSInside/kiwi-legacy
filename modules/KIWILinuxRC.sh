@@ -5165,9 +5165,13 @@ function reloadKernel {
 function resizeFilesystem {
 	local deviceResize=$1
 	local callme=$2
+	local ramdisk=0
 	local resize_fs
 	local resize_lucks
 	local check
+	if echo $deviceResize | grep -qi "/dev/ram";then
+		ramdisk=1
+	fi
 	if [ -z "$FSTYPE" ];then
 		probeFileSystem $deviceResize
 	fi
@@ -5180,21 +5184,35 @@ function resizeFilesystem {
 		Echo "Resize EXT2 filesystem to full partition space..."
 		resize_fs="resize2fs -f -F -p $deviceResize"
 		check="e2fsck -p $deviceResize"
+		if [ $ramdisk -eq 1 ];then
+			resize_fs="resize2fs -f $deviceResize"
+		fi
 	elif [ "$FSTYPE" = "ext3" ];then
 		Echo "Resize EXT3 filesystem to full partition space..."
 		resize_fs="resize2fs -f -F -p $deviceResize"
 		check="e2fsck -p $deviceResize"
+		if [ $ramdisk -eq 1 ];then
+			resize_fs="resize2fs -f $deviceResize"
+		fi
 	elif [ "$FSTYPE" = "ext4" ];then
 		Echo "Resize EXT4 filesystem to full partition space..."
 		resize_fs="resize2fs -f -F -p $deviceResize"
 		check="e2fsck -p $deviceResize"
+		if [ $ramdisk -eq 1 ];then
+			resize_fs="resize2fs -f $deviceResize"
+		fi
 	else
 		# don't know how to resize this filesystem
 		return
 	fi
 	if [ -z "$callme" ];then
-		eval $resize_lucks
-		eval $resize_fs && $check
+		if [ $ramdisk -eq 0 ];then
+			eval $resize_lucks
+			eval $resize_fs && $check
+		else
+			eval $resize_lucks
+			eval $resize_fs
+		fi
 		if [ ! $? = 0 ];then
 			systemException \
 				"Failed to resize/check filesystem" \

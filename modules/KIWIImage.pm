@@ -1920,12 +1920,13 @@ sub createImageLiveCD {
 	#------------------------------------------
 	$kiwi -> info ("Moving CD image data into boot structure");
 	if (! defined $gzip) {
+		# /.../
+		# don't symlink these file because in this old live iso
+		# mode we don't allow mkisofs to follow symlinks
+		# ----
 		qxx ("mv $this->{imageDest}/$namerw.md5 $main::RootTree/CD");
-		#qxx ("mv $this->{imageDest}/$namerw.gz $main::RootTree/CD");
-		#qxx ("rm $this->{imageDest}/$namerw.*");
-		qxx (
-			"ln -s $this->{imageDest}/$namerw.gz $main::RootTree/CD/$namerw.gz"
-		);	
+		qxx ("mv $this->{imageDest}/$namerw.gz $main::RootTree/CD");
+		qxx ("rm $this->{imageDest}/$namerw.*");
 	}
 	if (defined $gzip) {
 		#qxx ("mv $this->{imageDest}/$namero $main::RootTree/CD");

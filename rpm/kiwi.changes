@@ -1,6 +1,11 @@
 -------------------------------------------------------------------
 Wed May  5 07:56:36 CEST 2010 - ms@suse.de
 
+- fixed old live iso type (no flags set) to work again.
+  The problem was that we prevent --follow-symlinks in this
+  mode but then we also have to copy the fixed read-write
+  part as file to the iso structure instead of linking it.
+  This fix is related to (bnc #599712)
 - beautify migration report and fixed html code
 - fixed warning message if URL can't be resolved
 - fixed space problem when setting up boot partition for
