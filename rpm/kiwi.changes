@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Wed May  5 07:56:36 CEST 2010 - ms@suse.de
 
+- v4.34
 - fixed old live iso type (no flags set) to work again.
   The problem was that we prevent --follow-symlinks in this
   mode but then we also have to copy the fixed read-write
