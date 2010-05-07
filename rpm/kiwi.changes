@@ -11,7 +11,7 @@ Wed May  5 07:56:36 CEST 2010 - ms@suse.de
 - removed check for utimer program, it's not a mandatory
   requirement for the system to be able to boot correctly
 - fixed mkinitrd call, check if the option -B exists and
-  don't pass it if it doesn't first (bnc #603338)
+  don't pass it if it doesn't (bnc #603338)
 
 -------------------------------------------------------------------
 Fri Apr 30 10:21:56 CEST 2010 - ms@suse.de
