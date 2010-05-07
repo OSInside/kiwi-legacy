@@ -35,3 +35,7 @@ updateMTAB
 #--------------------------------------
 createFramebufferDevices
 
+#======================================
+# 4) clean mount
+#--------------------------------------
+umountSystemFilesystems
