@@ -646,6 +646,7 @@ function setupSUSEInitrd {
 	local umountProc=0
 	local umountSys=0
 	local systemMap=0
+	local params
 	local running
 	local rlinux
 	local rinitrd
@@ -664,7 +665,10 @@ function setupSUSEInitrd {
 		if [ -f /etc/init.d/boot.device-mapper ];then
 			/etc/init.d/boot.device-mapper start
 		fi
-		if ! mkinitrd -B;then
+		if grep -qi param_B /sbin/mkinitrd;then
+			params="-B"
+		fi
+		if ! mkinitrd $params;then
 			Echo "Can't create initrd"
 			systemIntegrity=unknown
 			bootLoaderOK=0
@@ -4231,9 +4235,6 @@ function activateImage {
 	fi
 	if ! cp /include /mnt;then
 		systemException "Failed to copy include code" "reboot"
-	fi
-	if ! cp /usr/bin/utimer /mnt;then
-		systemException "Failed to copy utimer program" "reboot"
 	fi
 	if [ ! -x /lib/mkinitrd/bin/run-init ];then
 		systemException "Can't find run-init program" "reboot"
