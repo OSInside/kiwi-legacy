@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon May 10 10:50:18 CEST 2010 - ms@suse.de
+
+- set fixed journal size to 12 MB, fixed size calculation
+  in KIWIBoot.pm which did not take the journal size into
+  account (bnc #587361) 
+
+-------------------------------------------------------------------
 Wed May  5 07:56:36 CEST 2010 - ms@suse.de
 
 - v4.34

@@ -288,6 +288,7 @@ sub new {
 		my $sizeXMLBytes = 0;
 		my $cmdlBytes    = 0;
 		my $spare        = 1.5;
+		my $journal      = 12 * 1024 * 1024;
 		#==========================================
 		# Calculate minimum size of the system
 		#------------------------------------------
@@ -298,6 +299,7 @@ sub new {
 			chomp $sizeBytes;
 			$sizeBytes+= $minInodes * $main::FSInodeSize;
 			$sizeBytes*= $spare;
+			$sizeBytes+= $journal;
 		} else {
 			# system is specified as a file...
 			$sizeBytes = -s $system;
@@ -347,7 +349,7 @@ sub new {
 			# ----
 			$this->{inodes} = int ($sizeBytes / $main::FSInodeRatio);
 			$kiwi -> loginfo (
-				"Using ".$this->{inodes}." for the root filesystem\n"
+				"Using ".$this->{inodes}." inodes for the root filesystem\n"
 			);
 		}
 		#==========================================
