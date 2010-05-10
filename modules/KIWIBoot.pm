@@ -296,7 +296,9 @@ sub new {
 			# System is specified as a directory...
 			$minInodes = qxx ("find $system | wc -l");
 			$sizeBytes = qxx ("du -s --block-size=1 $system | cut -f1");
+			chomp $minInodes;
 			chomp $sizeBytes;
+			$minInodes*= 2;
 			$sizeBytes+= $minInodes * $main::FSInodeSize;
 			$sizeBytes*= $spare;
 			$sizeBytes+= $journal;
