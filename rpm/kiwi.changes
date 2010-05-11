@@ -11,6 +11,13 @@ Mon May 10 10:50:18 CEST 2010 - ms@suse.de
 - set fixed journal size to 12 MB, fixed size calculation
   in KIWIBoot.pm which did not take the journal size into
   account (bnc #587361) 
+- deactivate splash screen for initial deployment
+  in kiwi OEM boot images (bnc #600710)
+- migration changes:
+  * automatically copy the packaged but modified files
+    into the overlay section and don't put them into the report
+  * create a HTML file list for the unpackaged files
+    to browse through and update the text.
 
 -------------------------------------------------------------------
 Wed May  5 07:56:36 CEST 2010 - ms@suse.de

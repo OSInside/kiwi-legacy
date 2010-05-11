@@ -57,15 +57,12 @@ kiwi --migrate mySys -d /tmp/migrated --nofiles \
 \end{verbatim}
 \end{Command}
 
-\section{Watch the packaged but modified files}
-now watch the packaged but modified files in /tmp/mysys/root-modified
-and remove all files you don't need. If you are ready with this task
-copy the root-modified files over to the root/ directory
-
 \section{Watch the unpackaged files}
 now watch the unpackaged files in root-nopackage. This is most likely
 the hardest part of the migration. remove all files and directories
 you don't need and after that copy the tree over to the root/ directory
+The existing root directory already contains those files which belong
+to a package but where modified.
 
 \section{Checklist}
 After that you should walk through the following check list

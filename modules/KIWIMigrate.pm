@@ -23,6 +23,7 @@ package KIWIMigrate;
 use strict;
 use Carp qw (cluck);
 use File::Find;
+use File::stat;
 use File::Basename;
 use File::Path;
 use File::Copy;
@@ -236,8 +237,7 @@ sub createReport {
 	my $problem2   = $this->{solverProblem2};
 	my $failedJob1 = $this->{solverFailedJobs1};
 	my $failedJob2 = $this->{solverFailedJobs2};
-	my $filechanges= $this->{filechanges};
-	my $modified   = $this->{modified};
+	my $nopackage  = $this->{nopackage};
 	my $twice      = $this->{twice};
 	#==========================================
 	# Start report
@@ -260,7 +260,7 @@ sub createReport {
 	print FD "\t\t".'<link rel="stylesheet" type="text/css" ';
 	print FD 'href="css/kiwi.css">'."\n";
 	print FD "\t".'</head>'."\n";
-	print FD '<body>'."\n";
+	print FD '<body class="files">'."\n";
 	print FD '<div class="headerwrap">'."\n";
 	print FD "\t".'<div class="container"><h1>Migration report</h1></div>'."\n";
 	print FD '</div>'."\n";
@@ -414,29 +414,11 @@ sub createReport {
 	#==========================================
 	# Modified files report...
 	#------------------------------------------
-	if ($modified) {
-		# modified...
-		print FD '<h1>Modified files</h1>'."\n";
-		print FD '<p>'."\n";
-		print FD 'Behind the "Modified files directory" link you will find ';
-		print FD 'files which are part of a package and were modified ';
-		print FD 'in the past. In most cases this is because a ';
-		print FD 'configuration file provided by the package has changed. ';
-		print FD 'You may want to keep these files in your  overlay tree. ';
-		print FD 'You should prevent your overlay tree from containing ';
-		print FD 'binary files like executables or libraries. ';
-		print FD 'Just change into the directory below and remove ';
-		print FD 'all the files you do not want to keep in your overlay ';
-		print FD 'tree. If you are finished, copy the entire tree into ';
-		print FD 'the directory '.$dest.'/root'."\n";
-		print FD '</p>'."\n";
-		print FD '<hr>'."\n";
-		print FD '<a href="'."$dest/root-modified/".'">';
-		print FD 'Modified files directory</a>'."\n";
-		# unpackaged...
+	if ($nopackage) {
 		print FD '<h1>Unpackaged files</h1>'."\n";
 		print FD '<p>'."\n";
-		print FD 'Behind the "Unpackaged files directory" link, you will ';
+		print FD 'Behind the <a href="'."$dest/root-nopackage/".'">';
+		print FD 'Unpackaged files directory</a> link, you will ';
 		print FD 'find a list of files which are not part of any packages. ';
 		print FD 'For binary files, including executables and libraries, ';
 		print FD 'you should try to find and include a package that ';
@@ -454,8 +436,32 @@ sub createReport {
 		print FD 'unpackaged files directory and copy the rest into ';
 		print FD 'the '.$dest.'/root directory.'."\n";
 		print FD '</p>'."\n";
-		print FD '<a href="'."$dest/root-nopackage/".'">';
-		print FD 'Unpackaged files directory</a>'."\n";
+		print FD '<dl>'."\n";
+		foreach my $file (sort keys %{$nopackage}) {
+			next if ! -e "$dest/root-nopackage/$file";
+			my $mtime = localtime ($nopackage->{$file}->[1]->mtime);
+			my $size  = $nopackage->{$file}->[1]->size;
+			if ($size > 1048576) {
+				$size/= 1048576;
+				$size = sprintf ("%.1f Mbyte", $size);
+			} elsif ($size > 1024) {
+				$size/= 1024;
+				$size = sprintf ("%.1f Kbyte", $size);
+			} else {
+				$size.= " Byte";
+			}
+			print FD '<section class="row">'."\n";
+			print FD '<dt>'.$file.'</dt>'."\n";
+			print FD '<dd class="size">';
+			print FD $size;
+			print FD '</dd>'."\n";
+			print FD '<dd class="modified">';
+			print FD $mtime;
+			print FD '</dd>'."\n";
+			print FD '</section>'."\n";
+		}
+		print FD '</dl>'."\n";
+		print FD '<a href="report.html">Return</a>'."\n";
 	}
 	print FD '</div>'."\n";
 	print FD '<div class="footer container">'."\n";
@@ -1092,7 +1098,13 @@ sub setSystemOverlayFiles {
 			{
 				my $file = $File::Find::name;
 				my $dirn = $File::Find::dir;
-				$filehash->{$file} = $dirn;
+				my $attr;
+				if (-l $file) {
+					$attr = lstat ($file);
+				} else {
+					$attr = stat ($file);
+				}
+				$filehash->{$file} = [$dirn,$attr];
 			}
 		}
 	};
@@ -1178,7 +1190,13 @@ sub setSystemOverlayFiles {
 				}
 			}
 			if (($ok) && (-e $file)) {
-				$result{$file} = $dir;
+				my $attr;
+				if (-l $file) {
+					$attr = lstat ($file);
+				} else {
+					$attr = stat ($file);
+				}
+				$result{$file} = [$dir,$attr];
 				push (@modified,$file);
 			}
 		}
@@ -1202,7 +1220,6 @@ sub setSystemOverlayFiles {
 	# Cleanup
 	#------------------------------------------
 	qxx ("rm -rf $dest/root-nopackage 2>&1");
-	qxx ("rm -rf $dest/root-modified  2>&1");
 	#==========================================
 	# Create overlay root tree
 	#------------------------------------------
@@ -1220,7 +1237,7 @@ sub setSystemOverlayFiles {
 	#------------------------------------------
 	my %paths = ();
 	foreach my $file (keys %result) {
-		my $path = $result{$file};
+		my $path = $result{$file}->[0];
 		$paths{"$dest/root-nopackage/$path"} = $path;
 	}
 	mkpath (keys %paths, {verbose => 0});
@@ -1239,11 +1256,12 @@ sub setSystemOverlayFiles {
 	# Create modified files tree
 	#------------------------------------------
 	$kiwi -> info ("Creating modified files tree...");
-	mkdir "$dest/root-modified";
+	mkdir "$dest/root";
 	foreach my $file (@modified) {
 		my ($name,$dir,$suffix) = fileparse ($file);
-		mkpath ("$dest/root-modified/$dir", {verbose => 0});
-		move ("$dest/root-nopackage/$file","$dest/root-modified/$dir");
+		mkpath ("$dest/root/$dir", {verbose => 0});
+		move ("$dest/root-nopackage/$file","$dest/root/$dir");
+		delete $result{$file};
 	}
 	$kiwi -> done();
 	#==========================================
@@ -1261,9 +1279,8 @@ sub setSystemOverlayFiles {
 	#==========================================
 	# Store in instance for report
 	#------------------------------------------
-	$this->{filechanges} = \%result;
-	$this->{modified}    = \@modified;
-	$this->{ilist}       = \@ilist;
+	$this->{nopackage} = \%result;
+	$this->{ilist}     = \@ilist;
 	return $this;
 }
 
@@ -1430,7 +1447,7 @@ sub checkBrokenLinks {
 	my $this = shift;
 	my $dest = $this->{dest};
 	my $kiwi = $this->{kiwi};
-	my @base = ("root-nopackage","root-modified");
+	my @base = ("root-nopackage","root");
 	my @link = ();
 	#==========================================
 	# search links in overlay subtrees
