@@ -14,6 +14,7 @@ echo "Configure image: [$kiwi_iname]..."
 # Activate services
 #--------------------------------------
 suseActivateDefaultServices
+suseInsertService sshd
 suseRemoveService gpm
 suseRemoveService nfs
 
