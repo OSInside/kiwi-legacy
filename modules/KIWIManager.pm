@@ -2430,6 +2430,7 @@ sub rpmLibs {
 		foreach my $dir (keys %dirlist) {
 			qxx ("rmdir $dir 2>&1");
 		}
+		qxx ("@kchroot ldconfig 2>&1");
 		return $this;
 	}
 	#==========================================
