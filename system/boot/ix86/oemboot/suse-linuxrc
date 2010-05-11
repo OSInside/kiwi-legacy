@@ -154,6 +154,7 @@ ldconfig
 # 1) Mounting local file systems
 #--------------------------------------
 mountSystemFilesystems &>/dev/null
+test -e /proc/splash && echo verbose > /proc/splash
 closeKernelConsole
 
 #======================================
