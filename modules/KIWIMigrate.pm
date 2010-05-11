@@ -252,6 +252,11 @@ sub createReport {
 	print FD '<html>'."\n";
 	print FD "\t".'<head>'."\n";
 	print FD "\t\t".'<title>Migration report</title>'."\n";
+	print FD "\t\t".'<!--[if lt IE 9]>'."\n";
+	print FD "\t\t".'<script src="';
+	print FD 'http://html5shiv.googlecode.com/svn/trunk/html5.js">';
+	print FD '</script>'."\n";
+	print FD "\t\t".'<![endif]-->'."\n";
 	print FD "\t\t".'<link rel="stylesheet" type="text/css" ';
 	print FD 'href="css/kiwi.css">'."\n";
 	print FD "\t".'</head>'."\n";

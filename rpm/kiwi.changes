@@ -1,6 +1,12 @@
 -------------------------------------------------------------------
 Mon May 10 10:50:18 CEST 2010 - ms@suse.de
 
+- some code cleanup in KIWIImage.pm, unused variables
+- call mkclicfs from the installed root tree instead of the
+  build system to prevent version conflicts. If no clicfs
+  is installed by the image description a warning message is
+  displayed and the build system mkclicfs is used as
+  before (bnc #604646)
 - set fixed journal size to 12 MB, fixed size calculation
   in KIWIBoot.pm which did not take the journal size into
   account (bnc #587361) 

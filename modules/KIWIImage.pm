@@ -168,14 +168,10 @@ sub createImageDMSquashExt3 {
 	# ---
 	my $this    = shift;
 	my $rename  = shift;
-	my $tree    = shift;
 	my $journal = "journaled-ext3";
 	my $kiwi    = $this->{kiwi};
 	my $data;
 	my $code;
-	if (! defined $tree) {
-		$tree = $this->{imageTree};
-	}
 	#==========================================
 	# PRE filesystem setup
 	#------------------------------------------
@@ -244,14 +240,10 @@ sub createImageClicFS {
 	# ---
 	my $this    = shift;
 	my $rename  = shift;
-	my $tree    = shift;
 	my $journal = "journaled-ext3";
 	my $kiwi    = $this->{kiwi};
 	my $data;
 	my $code;
-	if (! defined $tree) {
-		$tree = $this->{imageTree};
-	}
 	#==========================================
 	# PRE filesystem setup
 	#------------------------------------------
@@ -357,13 +349,20 @@ sub createImageClicFS {
 	# Create clicfs filesystem from ext3
 	#------------------------------------------
 	$kiwi -> info ("Creating clicfs container...");
+	my $clicfs = $this->{imageTree}."/usr/bin/mkclicfs";
+	if (! -x $clicfs) {
+		$kiwi -> warning (
+			"Using mkclicfs from build system, versions should match !\n"
+		);
+		$clicfs = "mkclicfs";
+	}
 	if (defined $ENV{MKCLICFS_COMPRESSION}) {
 		my $c = int $ENV{MKCLICFS_COMPRESSION};
 		my $d = $this->{imageDest};
-		$data = qxx ("mkclicfs -c $c $d/fsdata.ext3 $d/$name 2>&1");
+		$data = qxx ("$clicfs -c $c $d/fsdata.ext3 $d/$name 2>&1");
 	} else {
 		my $d = $this->{imageDest};
-		$data = qxx ("mkclicfs $d/fsdata.ext3 $d/$name 2>&1");
+		$data = qxx ("$clicfs $d/fsdata.ext3 $d/$name 2>&1");
 	}
 	$code = $? >> 8;
 	if ($code != 0) {
@@ -394,7 +393,6 @@ sub createImageEXT2 {
 	# ---
 	my $this    = shift;
 	my $journal = shift;
-	my $imageTree = $this->{imageTree};
 	#==========================================
 	# PRE filesystem setup
 	#------------------------------------------
@@ -1607,7 +1605,7 @@ sub createImageLiveCD {
 			};
 			/^dmsquash$/ && do {
 				$kiwi -> info ("Creating dmsquash read only filesystem...\n");
-				if (! $this -> createImageDMSquashExt3 ( $namero,$imageTree )) {
+				if (! $this -> createImageDMSquashExt3 ( $namero )) {
 					$this -> restoreCDRootData();
 					$this -> restoreSplitExtend ();
 					return undef;
@@ -1616,7 +1614,7 @@ sub createImageLiveCD {
 			};
 			/^clic$/ && do {
 				$kiwi -> info ("Creating clicfs read only filesystem...\n");
-				if (! $this -> createImageClicFS ( $namero,$imageTree )) {
+				if (! $this -> createImageClicFS ( $namero )) {
 					$this -> restoreCDRootData();
 					$this -> restoreSplitExtend ();
 					return undef;
