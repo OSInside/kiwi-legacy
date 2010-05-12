@@ -62,11 +62,10 @@ function Dialog {
 				--yes-label "$TEXT_YES" \
 				--no-label "$TEXT_NO" \
 				--exit-label "$TEXT_EXIT" \
-				$@   > /tmp/fbcode.output
+				$@
 			echo \$? > /tmp/fbcode
 		EOF
 		fbiterm -m $UFONT -- bash /tmp/fbcode
-		cat /tmp/fbcode.output ; rm -f /tmp/fbcode.output
 		code=$(cat /tmp/fbcode)
 	else
 		eval dialog \
@@ -4536,10 +4535,10 @@ function luksOpen {
 	fi
 	while true;do
 		if [ ! -e /tmp/luks ];then
-			Dialog \
-				--stdout --insecure \
-				--passwordbox "\"$TEXT_LUKS\"" 10 60 |\
-				cat > /tmp/luks
+			LUKS_OPEN=$(runInteractive \
+				"--stdout --insecure --passwordbox "\"$TEXT_LUKS\"" 10 60"
+			)
+			echo $LUKS_OPEN > /tmp/luks
 		fi
 		info=$(cat /tmp/luks | cryptsetup luksOpen $ldev $name 2>&1)
 		if [ $? = 0 ];then
