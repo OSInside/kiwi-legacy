@@ -3714,9 +3714,16 @@ sub getSingleInstSourceSatSolvable {
 		#==========================================
 		# Store distro path and new time stamp
 		#------------------------------------------
+		my %newdistro = ();
+		foreach my $key (keys %distro) {
+			if ($distro{$key} ne "distxml") {
+				$newdistro{$key} = $distro{$key};
+			}
+		}
+		$newdistro{"/".$path}      = "distxml";
+		$newdistro{"/suse/".$path} = "distxml";
 		undef %distro;
-		$distro{"/".$path}      = "distxml";
-		$distro{"/suse/".$path} = "distxml";
+		%distro = %newdistro;
 		if (! open ($RXML,">$index.timestamp")) {
 			$kiwi -> failed ();
 			$kiwi -> error ("--> Failed to create timestamp: $!");
@@ -3725,6 +3732,13 @@ sub getSingleInstSourceSatSolvable {
 		}
 		print $RXML $time;
 		close $RXML;
+	}
+	#==========================================
+	# create repo info file
+	#------------------------------------------
+	if (open (my $FD,">$index.info")) {
+		print $FD $repo."\n";
+		close $FD;
 	}
 	#==========================================
 	# download distro solvable(s)
@@ -3739,7 +3753,7 @@ sub getSingleInstSourceSatSolvable {
 			$destfile = $sdir."/$name-".$count;
 		}
 		if (KIWIXML::getInstSourceFile ($kiwi,$repo.$dist,$destfile)) {
-			$foundDist = 1; last;
+			$foundDist = 1;
 		}
 	}
 	if (! $foundDist) {

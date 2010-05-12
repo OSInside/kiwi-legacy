@@ -498,13 +498,17 @@ sub getRepos {
 		return undef;
 	}
 	foreach my $repo (@list) {
-		$repo =~ s/ +//g;
 		if ($repo =~ /^\d.*\|(.*)\|.*\|(.*)\|.*\|(.*)\|(.*)\|(.*)\|/) {
 			my $enabled = $2;
 			my $source  = $5;
 			my $type    = $4;
 			my $alias   = $1;
 			my $prio    = $3;
+			$enabled =~ s/^ +//; $enabled =~ s/ +$//;
+			$source  =~ s/^ +//; $source  =~ s/ +$//;
+			$type    =~ s/^ +//; $type    =~ s/ +$//;
+			$alias   =~ s/^ +//; $alias   =~ s/ +$//; $alias =~ s/ $/-/g;
+			$prio    =~ s/^ +//; $prio    =~ s/ +$//;
 			my $origsrc = $source;
 			if ($enabled eq "Yes") {
 				#==========================================
