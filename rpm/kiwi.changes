@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Mon May 10 10:50:18 CEST 2010 - ms@suse.de
 
+- v4.35
 - fixed rpmLibs() function, need ldconfig after cleanup
 - some code cleanup in KIWIImage.pm, unused variables
 - call mkclicfs from the installed root tree instead of the
