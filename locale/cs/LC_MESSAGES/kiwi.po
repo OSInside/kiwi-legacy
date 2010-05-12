@@ -1,16 +1,14 @@
-# Copyright (C) 2006 SuSE Linux Products GmbH, Nuernberg
-# This file is distributed under the same license as the package.
-#
 msgid ""
 msgstr ""
-"Project-Id-Version: kiwi\n"
+"Project-Id-Version: @PACKAGE@\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2009-09-23 11:32\n"
-"Last-Translator: Novell Language <language@novell.com>\n"
-"Language-Team: Novell Language <language@novell.com>\n"
+"PO-Revision-Date: 2005-07-31 14:37+0200\n"
+"Last-Translator: Klara Cihlarova <koty@seznam.cz>\n"
+"Language-Team: Czech <cs@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"X-Generator: KBabel 1.10.1\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 
 #. /.../
@@ -18,35 +16,43 @@ msgstr ""
 #. This file contains the gettext keys used within a gettext call in the
 #. boot code for KIWI 
 #.
+#, fuzzy
 msgid "Enter LUKS passphrase"
-msgstr "Zadejte heslo LUKS"
+msgstr "WEP 128bitový heslo"
 
+#, fuzzy
 msgid "Do you accept the license agreement ?"
-msgstr "Přijímáte licenční smlouvu?"
+msgstr "Licenční ujednání selhalo"
 
+# power-off message
+#, fuzzy
 msgid "Do you want to start the System-Recovery ?"
-msgstr "Přejete si spustit zotavení systému?"
+msgstr "Chcete systém nyní vypnout?"
 
+# power-off message
+#, fuzzy
 msgid "Do you want to start the System-Restore ?"
-msgstr "Přejete si spustit obnovení systému?"
+msgstr "Chcete systém nyní vypnout?"
 
+#, fuzzy
 msgid "Restoring base operating system..."
-msgstr "Probíhá obnovení základního operačního systému..."
+msgstr "Resetovat a spustit jiný operační systém"
 
 msgid "Destroying ALL data on %1, continue ?"
-msgstr "Všechna data na %1 budou zničena. Pokračovat?"
+msgstr ""
 
 msgid "Clean sweep..."
-msgstr "Úplné vyčištění…"
+msgstr ""
 
 msgid "%1 files from %2 restored..."
-msgstr "Počet obnovených souborů: %1 z %2"
+msgstr ""
 
 msgid "backing up: %1..."
 msgstr ""
 
+#, fuzzy
 msgid "restoring: %1..."
-msgstr ""
+msgstr "Příliš veliký soubor: %1."
 
 msgid "Yes"
 msgstr "Ano"
@@ -54,14 +60,16 @@ msgstr "Ano"
 msgid "No"
 msgstr "Ne"
 
+# ok button label
 msgid "OK"
 msgstr "OK"
 
+# cancel button label
 msgid "Cancel"
 msgstr "Zrušit"
 
 msgid "Exit"
-msgstr "Konec"
+msgstr ""
 
 msgid "Please eject the install CD/DVD before continuing"
 msgstr ""
@@ -69,17 +77,23 @@ msgstr ""
 msgid "Please pull out the install USB stick before continuing"
 msgstr ""
 
+#, fuzzy
 msgid "Installation..."
-msgstr ""
+msgstr "Instalace"
 
+#, fuzzy
 msgid "Loading %1"
-msgstr ""
+msgstr "Chyba při nahrávání %1"
 
 msgid "Verifying %1"
 msgstr ""
 
+# dialog title for hard disk installation
+#, fuzzy
 msgid "Select disk for installation:"
-msgstr ""
+msgstr "Instalace z disku"
 
+# dialog title for hard disk installation
+#, fuzzy
 msgid "Select %1 partition for installation:"
-msgstr ""
+msgstr "Instalace z disku"

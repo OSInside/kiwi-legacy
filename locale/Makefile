@@ -22,6 +22,9 @@ install:
 		fi \
 	done
 
+status:
+	./.fuzzy
+
 clean:
 	find -name kiwi.*.po | xargs rm -f
 	find -name kiwi.po.old | xargs rm -f
