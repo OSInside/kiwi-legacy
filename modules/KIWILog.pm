@@ -993,6 +993,8 @@ sub writeXML {
 	qxx ("cp -a $cmpf $orig");
 	if (! open ($FX,">$used")) {
 		qxxLogOn();
+		unlink $used;
+		unlink $orig;
 		return undef;
 	}
 	binmode $FX;
@@ -1004,6 +1006,8 @@ sub writeXML {
 	my $diff  = qxx ("diff -uwB $orig $used | grep -v -E '^[-+]{3}' 2>&1");
 	if (! $diff) {
 		qxxLogOn();
+		unlink $used;
+		unlink $orig;
 		return $this;
 	}
 	qxxLogOn();
