@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Wed May 12 11:59:17 CEST 2010 - ms@suse.de
 
+- fixed Dialog function work with input fields
 - fixed probeFileSystem function for luks detection.
   blkid returned crypto_LUKS which was missing in the
   case section
