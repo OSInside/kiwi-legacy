@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed May 12 11:59:17 CEST 2010 - ms@suse.de
+
+- fixed probeFileSystem function for luks detection.
+  blkid returned crypto_LUKS which was missing in the
+  case section
+
+-------------------------------------------------------------------
 Mon May 10 10:50:18 CEST 2010 - ms@suse.de
 
 - v4.35

@@ -1912,14 +1912,15 @@ function probeFileSystem {
 	FSTYPE=unknown
 	FSTYPE=$(blkid $1 -s TYPE -o value)
 	case $FSTYPE in
-		ext4)     FSTYPE=ext4 ;;
-		ext3)     FSTYPE=ext3 ;;
-		ext2)     FSTYPE=ext2 ;;
-		reiserfs) FSTYPE=reiserfs ;;
-		squashfs) FSTYPE=squashfs ;;
-		luks)     FSTYPE=luks ;;
-		vfat)     FSTYPE=vfat ;;
-		clicfs)   FSTYPE=clicfs ;;
+		ext4)        FSTYPE=ext4 ;;
+		ext3)        FSTYPE=ext3 ;;
+		ext2)        FSTYPE=ext2 ;;
+		reiserfs)    FSTYPE=reiserfs ;;
+		squashfs)    FSTYPE=squashfs ;;
+		luks)        FSTYPE=luks ;;
+		crypto_LUKS) FSTYPE=luks ;;
+		vfat)        FSTYPE=vfat ;;
+		clicfs)      FSTYPE=clicfs ;;
 		*)
 			FSTYPE=unknown
 		;;
