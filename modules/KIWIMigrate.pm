@@ -1420,9 +1420,13 @@ sub setInitialSetup {
 	#==========================================
 	# Activate YaST on initial deployment
 	#------------------------------------------	
-	if (! $this -> autoyastClone()) {
-		return undef;
-	}
+	# TODO
+	# still under development, this code should only run on
+	# SuSE system >= 11.3
+	# ---
+	# if (! $this -> autoyastClone()) {
+	#	return undef;
+	# }
 	$kiwi -> done();
 	return $this;
 }
