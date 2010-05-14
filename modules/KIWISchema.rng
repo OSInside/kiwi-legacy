@@ -1260,7 +1260,7 @@ to the used package manager.</db:para>
     </define>
     <define name="k.rpm-excludedocs">
       <element name="rpm-excludedocs">
-        <a:documentation>Setup a Package Signature</a:documentation>
+        <a:documentation>Do not install files marked as documentation in the package</a:documentation>
         <db:para>Setup if the package manager should exclude docs files
 during package installation. This option could be ignored
 according to the used package manager.</db:para>

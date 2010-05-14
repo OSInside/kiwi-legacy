@@ -2,6 +2,7 @@
 Wed May 12 11:59:17 CEST 2010 - ms@suse.de
 
 - update translations from suse svn
+- update schema documentation, schema doc hint fix
 - fixed luksOpen function to work with input fields
 - fixed probeFileSystem function for luks detection.
   blkid returned crypto_LUKS which was missing in the

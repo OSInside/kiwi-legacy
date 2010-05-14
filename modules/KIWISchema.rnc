@@ -847,7 +847,7 @@ div {
 	k.rpm-excludedocs.content = xsd:boolean
 	k.rpm-excludedocs.attlist = empty
 	k.rpm-excludedocs =
-		## Setup a Package Signature
+		## Do not install files marked as documentation in the package
 		[
 		db:para [
 			"Setup if the package manager should exclude docs files\x{a}"~
