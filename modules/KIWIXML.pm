@@ -172,6 +172,7 @@ sub new {
 	$this->{kiwi}            = $kiwi;
 	$this->{foreignRepo}     = $foreignRepo;
 	$this->{optionsNodeList} = $optionsNodeList;
+	$this->{imgnameNodeList} = $imgnameNodeList;
 	$this->{systemTree}      = $systemTree;
 	$this->{imageWhat}       = $imageWhat;
 	$this->{reqProfiles}     = $reqProfiles;
@@ -380,7 +381,7 @@ sub new {
 			$this -> setForeignOEMOptionsElement ("oem-recoveryID");
 		}
 		#==========================================
-		# foreign attributes
+		# foreign type attributes
 		#------------------------------------------
 		if (defined $foreignRepo->{"hybrid"}) {
 			$this -> setForeignTypeAttribute ("hybrid");
@@ -393,6 +394,14 @@ sub new {
 				"kernelcmdline",$foreignRepo->{"kernelcmdline"}
 			);
 		}
+		#==========================================
+		# foreign image attributes
+		#------------------------------------------
+		if (defined $foreignRepo->{"displayname"}) {
+			$this -> setForeignImageAttribute (
+				"displayname",$foreignRepo->{"displayname"}
+			);
+		}
 	}
 	#==========================================
 	# Store object data
@@ -402,7 +411,6 @@ sub new {
 	$this->{usrdataNodeList}    = $usrdataNodeList;
 	$this->{repositNodeList}    = $repositNodeList;
 	$this->{packageNodeList}    = $packageNodeList;
-	$this->{imgnameNodeList}    = $imgnameNodeList;
 	$this->{instsrcNodeList}    = $instsrcNodeList;
 	$this->{havemd5File}        = $havemd5File;
 	$this->{arch}               = $arch;
@@ -1206,6 +1214,29 @@ sub setForeignTypeAttribute {
 		$tnode-> setAttribute ("$attr","$val");
 	} else {
 		$tnode-> setAttribute ("$attr","true");
+	}
+	$kiwi -> done ();
+	$this -> updateXML();
+	return $this;
+}
+
+#==========================================
+# setForeignImageAttribute
+#------------------------------------------
+sub setForeignImageAttribute {
+	# ...
+	# set given attribute to the image section
+	# ---
+	my $this = shift;
+	my $attr = shift;
+	my $val  = shift;
+	my $kiwi = $this->{kiwi};
+	my $inode= $this->{imgnameNodeList} -> get_node(1);
+	$kiwi -> info ("Including foreign image attribute: $attr");
+	if ($val) {
+		$inode -> setAttribute ("$attr","$val");
+	} else {
+		$inode -> setAttribute ("$attr","true");
 	}
 	$kiwi -> done ();
 	$this -> updateXML();
@@ -2264,6 +2295,7 @@ sub getImageConfig {
 	my $iver = getImageVersion ($this);
 	my $size = getImageSize    ($this);
 	my $name = getImageName    ($this);
+	my $dname= getImageDisplayName ($this);
 	if (@delp) {
 		$result{kiwi_delete} = join(" ",@delp);
 	}
@@ -2293,6 +2325,9 @@ sub getImageConfig {
 	}
 	if ($name) {
 		$result{kiwi_iname} = $name;
+	}
+	if ($dname) {
+		$result{kiwi_displayname} = $dname;
 	}
 	if ($iver) {
 		$result{kiwi_iversion} = $iver;
