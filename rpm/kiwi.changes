@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Wed May 12 11:59:17 CEST 2010 - ms@suse.de
 
+- v4.36
 - update translations from suse svn
 - added search field for unpackaged file list on the
   generated migration report page
