@@ -240,6 +240,10 @@ sub createReport {
 	my $nopackage  = $this->{nopackage};
 	my $twice      = $this->{twice};
 	#==========================================
+	# Beautify report...
+	#------------------------------------------
+	qxx ("tar -C $dest -xf $main::KMigraCSS 2>&1");
+	#==========================================
 	# Start report
 	#------------------------------------------
 	if (! open (FD,">$dest/report.html")) {
@@ -436,32 +440,100 @@ sub createReport {
 		print FD 'unpackaged files directory and copy the rest into ';
 		print FD 'the '.$dest.'/root directory.'."\n";
 		print FD '</p>'."\n";
-		print FD '<dl>'."\n";
-		foreach my $file (sort keys %{$nopackage}) {
-			next if ! -e "$dest/root-nopackage/$file";
-			my $mtime = localtime ($nopackage->{$file}->[1]->mtime);
-			my $size  = $nopackage->{$file}->[1]->size;
-			if ($size > 1048576) {
-				$size/= 1048576;
-				$size = sprintf ("%.1f Mbyte", $size);
-			} elsif ($size > 1024) {
-				$size/= 1024;
-				$size = sprintf ("%.1f Kbyte", $size);
-			} else {
-				$size.= " Byte";
-			}
-			print FD '<section class="row">'."\n";
-			print FD '<dt>'.$file.'</dt>'."\n";
-			print FD '<dd class="size">';
-			print FD $size;
-			print FD '</dd>'."\n";
-			print FD '<dd class="modified">';
-			print FD $mtime;
-			print FD '</dd>'."\n";
-			print FD '</section>'."\n";
+		print FD '</div>'."\n";
+		print FD '<div class="container" id="searchbox">'."\n";
+		print FD 'See <a href="root-nopackage.html">Unpackaged files</a>.'."\n";
+		print FD '</div>'."\n";
+		my $openFailed = 0;
+		if (! open (ND,">$dest/root-nopackage.html")) {
+			$openFailed = 1;
 		}
-		print FD '</dl>'."\n";
-		print FD '<a href="report.html">Return</a>'."\n";
+		if (! open (JS,">$dest/js/data.js")) {
+			$openFailed = 1;
+		}
+		if (! $openFailed) {
+			#==========================================
+			# root-nopackage.html header
+			#------------------------------------------
+			print ND '<!DOCTYPE html>'."\n";
+			print ND '<html>'."\n";
+			print ND "\t".'<head>'."\n";
+			print ND "\t\t".'<title>File list</title>'."\n";
+			print ND "\t\t".'<link rel="stylesheet" type="text/css"';
+			print ND ' href="css/kiwi.css">'."\n";
+			print ND "\t\t".'<script type="text/javascript"';
+			print ND ' src="js/jquery.min.js"></script>'."\n";
+			print ND "\t\t".'<script type="text/javascript"';
+			print ND ' src="js/data.js"></script>'."\n";
+			print ND "\t\t".'<script type="text/javascript"';
+			print ND ' src="js/kiwi.js"></script>'."\n";
+			print ND "\t".'</head>'."\n";
+			print ND '<body class="files">'."\n";
+			print ND '<div class="headerwrap">'."\n";
+			print ND "\t".'<div class="container"><h1>Files</h1></div>'."\n";
+			print ND '</div>'."\n";
+			print ND '<div class="container">'."\n";
+			print ND '<dl id="list">'."\n";
+			#==========================================
+			# data.js header
+			#------------------------------------------
+			print JS 'DATA = ['."\n";
+			#==========================================
+			# Content
+			#------------------------------------------
+			my $count= 0;
+			foreach my $file (sort keys %{$nopackage}) {
+				next if ! -e "$dest/root-nopackage/$file";
+				my $mtime = localtime ($nopackage->{$file}->[1]->mtime);
+				my $size  = $nopackage->{$file}->[1]->size;
+				if ($size > 1048576) {
+					$size/= 1048576;
+					$size = sprintf ("%.1f Mbyte", $size);
+				} elsif ($size > 1024) {
+					$size/= 1024;
+					$size = sprintf ("%.1f Kbyte", $size);
+				} else {
+					$size.= " Byte";
+				}
+				# ND: root-nopackage.html...
+				print ND '<section class="row">'."\n";
+				print ND '<dt>'.$file.'</dt>'."\n";
+				print ND '<dd class="size">';
+				print ND $size;
+				print ND '</dd>'."\n";
+				print ND '<dd class="modified">';
+				print ND $mtime;
+				print ND '</dd>'."\n";
+				print ND '</section>'."\n";
+				# JS: data.js...
+				if ($count) {
+					print JS ",\n";
+				}
+				$count++;
+				print JS '{'."\n";
+				print JS "\t".'\'filename\': \''.$file.'\''."\n";
+				print JS "\t".'\'size\': \''.$size.'\''."\n";
+				print JS "\t".'\'timestamp\': \''.$mtime.'\''."\n";
+				print JS '}'."\n";
+			}
+			#==========================================
+			# root-nopackage.html footer
+			#------------------------------------------
+			print ND '</dl>'."\n";
+			print ND '<a href="report.html">Return</a>'."\n";
+			print ND '</div>'."\n";
+			print ND '<div class="footer container">'."\n";
+			print ND "\t".'&copy; 2010 Novell, Inc.'."\n";
+			print ND '</div>'."\n";
+			print ND '</body>'."\n";
+			print ND '</html>'."\n";
+			#==========================================
+			# data.js footer
+			#------------------------------------------
+			print JS ']'."\n";
+			close ND;
+			close JS;
+		}
 	}
 	print FD '</div>'."\n";
 	print FD '<div class="footer container">'."\n";
@@ -471,9 +543,8 @@ sub createReport {
 	print FD '</html>'."\n";
 	close FD;
 	#==========================================
-	# Beautify report...
+	# Print report note...
 	#------------------------------------------
-	qxx ("tar -C $dest -xf $main::KMigraCSS 2>&1");
 	$kiwi -> info ("--> Please check the migration report !!\n");
 	$kiwi -> note ("\n\tfile://$dest/report.html\n\n");
 	return $this;
