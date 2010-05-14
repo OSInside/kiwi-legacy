@@ -150,6 +150,7 @@ sub new {
 		'\.tmp$',                       # no tmp files
 		'\/etc\/init\.d\/rc.*\/',       # no service links
 		'\/etc\/init\.d\/boot.d\/',     # no boot service links
+		'\/etc\/gconf\/',               # no gconf files
 		'\.depend',                     # no make depend targets
 		'\.backup',                     # no sysconfig backup files
 		'\.gz',                         # no gzip archives
@@ -517,8 +518,8 @@ sub createReport {
 				}
 				$count++;
 				print JS '{'."\n";
-				print JS "\t".'\'filename\': \''.$file.'\''."\n";
-				print JS "\t".'\'size\': \''.$size.'\''."\n";
+				print JS "\t".'\'filename\': \''.$file.'\','."\n";
+				print JS "\t".'\'size\': \''.$size.'\','."\n";
 				print JS "\t".'\'timestamp\': \''.$mtime.'\''."\n";
 				print JS '}';
 			}
