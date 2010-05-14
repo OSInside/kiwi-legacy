@@ -263,6 +263,12 @@ sub createReport {
 	print FD "\t\t".'<![endif]-->'."\n";
 	print FD "\t\t".'<link rel="stylesheet" type="text/css" ';
 	print FD 'href="css/kiwi.css">'."\n";
+	print FD "\t\t".'<script type="text/javascript" src="js/jquery.min.js">';
+	print FD '</script>'."\n";
+	print FD "\t\t".'<script type="text/javascript" src="js/data.js">';
+	print FD '</script>'."\n";
+	print FD "\t\t".'<script type="text/javascript" src="js/kiwi.js">';
+	print FD '</script>'."\n";
 	print FD "\t".'</head>'."\n";
 	print FD '<body class="files">'."\n";
 	print FD '<div class="headerwrap">'."\n";
@@ -514,7 +520,7 @@ sub createReport {
 				print JS "\t".'\'filename\': \''.$file.'\''."\n";
 				print JS "\t".'\'size\': \''.$size.'\''."\n";
 				print JS "\t".'\'timestamp\': \''.$mtime.'\''."\n";
-				print JS '}'."\n";
+				print JS '}';
 			}
 			#==========================================
 			# root-nopackage.html footer
