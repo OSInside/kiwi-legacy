@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon May 17 12:05:13 CEST 2010 - ug@suse.de
+
+- check RPM version of AutoYaST during migration
+
+-------------------------------------------------------------------
 Fri May 14 16:53:52 CEST 2010 - ms@suse.de
 
 - added support for displayname for vmx type (bnc #605939)

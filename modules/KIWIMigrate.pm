@@ -1495,17 +1495,13 @@ sub setInitialSetup {
 	qxx (
 		"cp $dest/root/etc/X11/xorg.conf $dest/root/etc/X11/xorg.conf.install"
 	);
+	$kiwi -> done();
 	#==========================================
 	# Activate YaST on initial deployment
 	#------------------------------------------	
-	# TODO
-	# still under development, this code should only run on
-	# SuSE system >= 11.3
-	# ---
-	# if (! $this -> autoyastClone()) {
-	#	return undef;
-	# }
-	$kiwi -> done();
+	if (! $this -> autoyastClone()) {
+		return undef;
+	}
 	return $this;
 }
 
@@ -1587,6 +1583,22 @@ sub autoyastClone {
 	my $dest = $this->{dest};
 	my $kiwi = $this->{kiwi};
 	my @list = @{$this->{autoyastCloneList}};
+	#==========================================
+	# check autoyast2 version
+	#==========================================
+	my $ayVersion = qxx( 'rpm -q --qf "%{VERSION}" autoyast2 2>&1' );
+	if( $? != 0 ) {
+		$kiwi -> warning("checking AutoYaST version failed");
+		$kiwi -> skipped();
+		return undef;
+	}
+	$ayVersion =~ /^(\d+)\.(\d+)/;
+	if( $1 < 3 && $2 < 19 ) {
+		# version is less than 2.19.x (1.xx.yy with xx >= 19 can be ignored)
+		$kiwi -> warning("AutoYaST version $ayVersion is too old for cloning");
+		$kiwi -> skipped();
+		return undef;
+	}
 	#==========================================
 	# run yast for cloning
 	#------------------------------------------
