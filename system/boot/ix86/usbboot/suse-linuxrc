@@ -174,22 +174,26 @@ if [ "$LOCAL_BOOT" = "no" ];then
 		cp -a  /mnt/boot /mnt/clicboot
 		rm -rf /mnt/boot
 		( cd /mnt && ln -s clicboot/boot boot )
-	elif [ "$loader" = "syslinux" ];then
+	elif [ "$loader" = "syslinux" ] || [ "$loader" = "extlinux" ];then
 		#======================================
 		# Syslinux search FAT and use as boot
 		#--------------------------------------
-		for i in 1 2 3;do
+		pSearch=6
+		if [ "$loader" = "extlinux" ];then
+			pSearch=83
+		fi
+		for i in 3 2 1;do
 			pType=`partitionID $stickRoot $i`
-			if [ "$pType" = "6" ];then
-				imageFatDevice=$stickRoot$i
+			if [ "$pType" = $pSearch ];then
+				imageBootDevice=$stickRoot$i
 				break
 			fi
 		done
-		if [ -z "$imageFatDevice" ];then
-			systemException "Can't find FAT partition" "reboot"
+		if [ -z "$imageBootDevice" ];then
+			systemException "Can't find 0x$pSearch boot partition" "reboot"
 		fi
 		mkdir /mnt/syslboot
-		mount $imageFatDevice /mnt/syslboot
+		mount $imageBootDevice /mnt/syslboot
 		if [ -z "$UNIONFS_CONFIG" ];then
 			cp -a /mnt/boot/* /mnt/syslboot/boot
 		fi
@@ -225,8 +229,8 @@ if [ "$LOCAL_BOOT" = "no" ];then
 		updateDMBootDeviceFstab /config $imageBootDevice
 	elif [ "$haveClicFS" = "yes" ];then
 		updateClicBootDeviceFstab /config $imageBootDevice
-	elif [ "$loader" = "syslinux" ];then
-		updateSyslinuxBootDeviceFstab /config $imageFatDevice
+	elif [ "$loader" = "syslinux" ] || [ "$loader" = "extlinux" ];then
+		updateSyslinuxBootDeviceFstab /config $imageBootDevice
 	elif [ "$haveLuks" = "yes" ];then
 		updateLuksBootDeviceFstab /config $imageBootDevice
 	fi

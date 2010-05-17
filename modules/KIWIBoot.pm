@@ -701,7 +701,7 @@ sub setupBootStick {
 	#==========================================
 	# add boot space if syslinux based
 	#------------------------------------------
-	if ($bootloader eq "syslinux") {
+	if ($bootloader =~ /(sys|ext)linux/) {
 		$syslbootMB= 60;
 	}
 	#==========================================
@@ -873,7 +873,11 @@ sub setupBootStick {
 		if (defined $system) {
 			if (! $lvm) {
 				if (($syszip) || ($haveSplit) || ($dmapper)) {
-					if ($bootloader eq "syslinux") {
+					if ($bootloader =~ /(sys|ext)linux/) {
+						my $partid = 6;
+						if ($bootloader eq "extlinux" ) {
+							$partid = 83;
+						}
 						$syslsize = $hardSize;
 						$syslsize /= 1024;
 						$syslsize -= $syszip;
@@ -885,7 +889,7 @@ sub setupBootStick {
 							"n","p","3",".",".",
 							"t","1","83",
 							"t","2","83",
-							"t","3","6",
+							"t","3",$partid,
 							"a","3","w","q"
 						);
 					} elsif ($dmapper) {
@@ -928,14 +932,18 @@ sub setupBootStick {
 						);
 					}
 				} else {
-					if ($bootloader eq "syslinux") {
+					if ($bootloader =~ /(sys|ext)linux/) {
+						my $partid = 6;
+						if ($bootloader eq "extlinux" ) {
+							$partid = 83;
+						}
 						$syslsize = $hardSize;
 						$syslsize /= 1024;
 						$syslsize -= $syslbootMB;
 						$syslsize = sprintf ("%.f",$syslsize);
 						@commands = (
 							"n","p","1",".","+".$syslsize."M","t","83",
-							"n","p","2",".",".","t","2","6",
+							"n","p","2",".",".","t","2",$partid,
 							"a","2","w","q"
 						);
 					} elsif ($haveluks) {
@@ -960,12 +968,16 @@ sub setupBootStick {
 				$lvmsize /= 1024;
 				$lvmsize -= $lvmbootMB;
 				$lvmsize = sprintf ("%.f",$lvmsize);
-				if ($bootloader eq "syslinux") {
+				if ($bootloader =~ /(sys|ext)linux/) {
+					my $partid = 6;
+					if ($bootloader eq "extlinux" ) {
+						$partid = 83;
+					}
 					@commands = (
 						"n","p","1",".","+".$lvmsize."M",
 						"n","p","2",".",".",
 						"t","1","8e",
-						"t","2","6",
+						"t","2",$partid,
 						"a","2","w","q"
 					);
 				} else {
@@ -979,14 +991,18 @@ sub setupBootStick {
 				}
 			}
 		} else {
-			if ($bootloader eq "syslinux") {
+			if ($bootloader =~ /(sys|ext)linux/) {
+				my $partid = 6;
+				if ($bootloader eq "extlinux" ) {
+					$partid = 83;
+				}
 				$syslsize = $hardSize;
 				$syslsize /= 1024;
 				$syslsize -= $syslbootMB;
 				$syslsize = sprintf ("%.f",$syslsize);
 				@commands = (
 					"n","p","1",".","+".$syslsize."M","t","83",
-					"n","p","2",".",".","t","2","6",
+					"n","p","2",".",".","t","2",$partid,
 					"a","2","w","q"
 				);
 			} else {
@@ -1336,9 +1352,11 @@ sub setupBootStick {
 			return undef;
 		}
 		$kiwi -> done();
-	} elsif (($dmapper) || ($haveluks) || ($lvm)) {
+	} elsif (
+		($dmapper) || ($haveluks) || ($lvm) || ($bootloader eq "extlinux")
+	) {
 		$root = $deviceMap{dmapper};
-		$kiwi -> info ("Creating EXT2 boot filesystem");
+		$kiwi -> info ("Creating ext2 boot filesystem");
 		if ($haveluks) {
 			if (($syszip) || ($haveSplit) || ($dmapper)) {
 				$root = $deviceMap{3};
@@ -1348,6 +1366,9 @@ sub setupBootStick {
 		}
 		if ($lvm) {
 			$root = $deviceMap{0};
+		}
+		if ($bootloader eq "extlinux") {
+			$root = $deviceMap{extlinux};
 		}
 		my %FSopts = main::checkFSOptions();
 		my $fsopts = $FSopts{ext2};
@@ -1373,6 +1394,8 @@ sub setupBootStick {
 	#------------------------------------------
 	if ($bootloader eq "syslinux") {
 		$root = $deviceMap{fat};
+	} elsif ($bootloader eq "extlinux") {
+		$root = $deviceMap{extlinux};
 	} elsif ($dmapper) {
 		$root = $deviceMap{dmapper};
 	} elsif (($syszip) || ($haveSplit) || ($lvm)) {
@@ -2380,7 +2403,7 @@ sub setupBootDisk {
 	#==========================================
 	# add boot space if syslinux based
 	#------------------------------------------
-	if ($bootloader eq "syslinux") {
+	if ($bootloader =~ /(sys|ext)linux/) {
 		$syslbootMB = 60;
 	}
 	#==========================================
@@ -2525,13 +2548,17 @@ sub setupBootDisk {
 		if (! $lvm) {
 			if (($syszip) || ($haveSplit) || ($dmapper)) {
 				# xda1 ro / xda2 rw
-				if ($bootloader eq "syslinux") {
+				if ($bootloader =~ /(sys|ext)linux/) {
+					my $partid = 6;
+					if ($bootloader eq "extlinux" ) {
+						$partid = 83;
+					}
 					my $syslsize = $this->{vmmbyte} - $syslbootMB - $syszip;
 					@commands = (
 						"n","p","1",".","+".$syszip."M",
 						"n","p","2",".","+".$syslsize."M",
 						"n","p","3",".",".",
-						"t","3","6",
+						"t","3",$partid,
 						"a","3","w","q"
 					);
 				} elsif ($dmapper) {
@@ -2559,12 +2586,16 @@ sub setupBootDisk {
 				}
 			} else {
 				# xda1 rw
-				if ($bootloader eq "syslinux") {
+				if ($bootloader =~ /(sys|ext)linux/) {
+					my $partid = 6;
+					if ($bootloader eq "extlinux" ) {
+						$partid = 83;
+					}
 					my $syslsize = $this->{vmmbyte} - $syslbootMB;
 					@commands = (
 						"n","p","1",".","+".$syslsize."M",
 						"n","p","2",".",".",
-						"t","2","6",
+						"t","2",$partid,
 						"a","2","w","q"
 					);
 				} elsif ($haveluks) {
@@ -2582,12 +2613,16 @@ sub setupBootDisk {
 				}
 			}
 		} else {
-			if ($bootloader eq "syslinux") {
+			if ($bootloader =~ /(sys|ext)linux/) {
+				my $partid = 6;
+				if ($bootloader eq "extlinux" ) {
+					$partid = 83;
+				}
 				my $lvmsize = $this->{vmmbyte} - $syslbootMB;
 				@commands = (
 					"n","p","1",".","+".$lvmsize."M",
 					"n","p","2",".",".",
-					"t","2","6",
+					"t","2",$partid,
 					"t","1","8e",
 					"a","2","w","q"
 				);
@@ -2906,9 +2941,11 @@ sub setupBootDisk {
 			return undef;
 		}
 		$kiwi -> done();
-	} elsif (($dmapper) || ($haveluks) || ($lvm)) {
+	} elsif (
+		($dmapper) || ($haveluks) || ($lvm) || ($bootloader eq "extlinux")
+	) {
 		$root = $deviceMap{dmapper};
-		$kiwi -> info ("Creating EXT2 boot filesystem");
+		$kiwi -> info ("Creating ext2 boot filesystem");
 		if ($haveluks) {
 			if (($syszip) || ($haveSplit) || ($dmapper)) {
 				$root = $deviceMap{3};
@@ -2918,6 +2955,9 @@ sub setupBootDisk {
 		}
 		if ($lvm) {
 			$root = $deviceMap{0};
+		}
+		if ($bootloader eq "extlinux") {
+			$root = $deviceMap{extlinux};
 		}
 		my %FSopts = main::checkFSOptions();
 		my $fsopts = $FSopts{ext2};
@@ -2941,6 +2981,8 @@ sub setupBootDisk {
 	#------------------------------------------
 	if ($bootloader eq "syslinux") {
 		$root = $deviceMap{fat};
+	} elsif ($bootloader eq "extlinux") {
+		$root = $deviceMap{extlinux};
 	} elsif ($dmapper) {
 		$root = $deviceMap{dmapper};
 	} elsif (($syszip) || ($haveSplit) || ($lvm)) {
@@ -3678,7 +3720,7 @@ sub setupBootLoaderStages {
 	#==========================================
 	# syslinux
 	#------------------------------------------
-	if ($loader eq "syslinux") {
+	if ($loader =~ /(sys|ext)linux/) {
 		my $message= "'image/loader/message'";
 		my $unzip  = "$main::Gzip -cd $initrd 2>&1";
 		#==========================================
@@ -3933,7 +3975,7 @@ sub setupBootLoaderConfiguration {
 	#==========================================
 	# syslinux
 	#------------------------------------------
-	if ($loader eq "syslinux") {
+	if ($loader =~ /(sys|ext)linux/) {
 		#==========================================
 		# Create MBR id file for boot device check
 		#------------------------------------------
@@ -3949,12 +3991,16 @@ sub setupBootLoaderConfiguration {
 		close FD;
 		$kiwi -> done();
 		#==========================================
-		# Create syslinux.cfg file
+		# Create syslinux config file
 		#------------------------------------------
-		$kiwi -> info ("Creating syslinux config file...");
-		if (! open (FD,">$tmpdir/boot/syslinux/syslinux.cfg")) {
+		my $syslconfig = "syslinux.cfg";
+		if ($loader eq "extlinux") {
+			$syslconfig = "extlinux.conf";
+		}
+		$kiwi -> info ("Creating $syslconfig config file...");
+		if (! open (FD,">$tmpdir/boot/syslinux/$syslconfig")) {
 			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't create syslinux.cfg: $!");
+			$kiwi -> error  ("Couldn't create $syslconfig: $!");
 			$kiwi -> failed ();
 			return undef;
 		}
@@ -4187,7 +4233,7 @@ sub installBootLoader {
 	#==========================================
 	# syslinux
 	#------------------------------------------
-	if ($loader eq "syslinux") {
+	if ($loader =~ /(sys|ext)linux/) {
 		if (! $deviceMap) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("No device map available");
@@ -4196,18 +4242,32 @@ sub installBootLoader {
 		}
 		my %deviceMap = %{$deviceMap};
 		my $device = $deviceMap{fat};
+		if ($loader eq "extlinux") {
+			$device = $deviceMap{extlinux};
+		}
 		if ($device =~ /mapper/) {
 			qxx ("kpartx -a $diskname");
 		}
-		$kiwi -> info ("Installing syslinux on device: $device");
-		$status = qxx ("syslinux $device 2>&1");
-		$result = $? >> 8;
+		if ($loader eq "syslinux") {
+			$kiwi -> info ("Installing syslinux on device: $device");
+			$status = qxx ("syslinux $device 2>&1");
+			$result = $? >> 8;
+		} else {
+			$kiwi -> info ("Installing extlinux on device: $device");
+			$status = qxx ("mount $device /mnt 2>&1");
+			$result = $? >> 8;
+			if ($result == 0) {
+				$status = qxx ("extlinux --install /mnt/boot/syslinux 2>&1");
+				$result = $? >> 8;
+			}
+			$status = qxx ("umount /mnt 2>&1");
+		}
 		if ($device =~ /mapper/) {
 			$this -> cleanLoopMaps ($diskname);
 		}
 		if ($result != 0) {
 			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't install syslinux on $device: $status");
+			$kiwi -> error  ("Couldn't install $loader on $device: $status");
 			$kiwi -> failed ();
 			return undef;
 		}
@@ -4620,11 +4680,19 @@ sub setDefaultDeviceMap {
 	for (my $i=1;$i<=3;$i++) {
 		$result{$i} = $device.$i;
 	}
-	if ($loader eq "syslinux") {
-		for (my $i=1;$i<=3;$i++) {
+	if ($loader =~ /(sys|ext)linux/) {
+		my $search = 6;
+		if ($loader eq "extlinux" ) {
+			$search = 83;
+		}
+		for (my $i=3;$i>=1;$i--) {
 			my $type = $this -> getStorageID ($device.$i);
-			if ($type == 6) {
-				$result{fat} = $device.$i;
+			if ($type == $search) {
+				if ($loader eq "syslinux" ) {
+					$result{fat} = $device.$i;
+				} else {
+					$result{extlinux} = $device.$i;
+				}
 				last;
 			}
 		}
@@ -4654,11 +4722,19 @@ sub setLoopDeviceMap {
 	for (my $i=1;$i<=3;$i++) {
 		$result{$i} = "/dev/mapper".$dmap."p$i";
 	}
-	if ($loader eq "syslinux") {
-		for (my $i=1;$i<=3;$i++) {
+	if ($loader =~ /(sys|ext)linux/) {
+		my $search = 6;
+		if ($loader eq "extlinux" ) {
+			$search = 83;
+		}
+		for (my $i=3;$i>=1;$i--) {
 			my $type = $this -> getStorageID ("/dev/mapper".$dmap."p$i");
-			if ($type == 6) {
-				$result{fat} = "/dev/mapper".$dmap."p$i";
+			if ($type == $search) {
+				if ($loader eq "syslinux") {
+					$result{fat} = "/dev/mapper".$dmap."p$i";
+				} else {
+					$result{extlinux} = "/dev/mapper".$dmap."p$i";
+				}
 				last;
 			}
 		}
@@ -4696,21 +4772,33 @@ sub setLVMDeviceMap {
 	for (my $i=0;$i<@names;$i++) {
 		$result{$i+1} = "/dev/$group/".$names[$i];
 	}
-	if ($loader eq "syslinux") {
+	if ($loader =~ /(sys|ext)linux/) {
+		my $search = 6;
+		if ($loader eq "extlinux" ) {
+			$search = 83;
+		}
 		if ($device =~ /loop/) {
 			my $dmap = $device; $dmap =~ s/dev\///;
-			for (my $i=1;$i<=3;$i++) {
+			for (my $i=3;$i>=1;$i--) {
 				my $type = $this -> getStorageID ("/dev/mapper".$dmap."p$i");
-				if ($type == 6) {
-					$result{fat} = "/dev/mapper".$dmap."p$i";
+				if ($type == $search) {
+					if ($loader eq "syslinux") {
+						$result{fat} = "/dev/mapper".$dmap."p$i";
+					} else {
+						$result{extlinux} = "/dev/mapper".$dmap."p$i";
+					}
 					last;
 				}
 			}
 		} else {
-			for (my $i=1;$i<=3;$i++) {
+			for (my $i=3;$i>=1;$i--) {
 				my $type = $this -> getStorageID ($device.$i);
-				if ($type == 6) {
-					$result{fat} = $device.$i;
+				if ($type == $search) {
+					if ($loader eq "syslinux") {
+						$result{fat} = $device.$i;
+					} else {
+						$result{extlinux} = $device.$i;
+					}
 					last;
 				}
 			}

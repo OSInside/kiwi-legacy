@@ -1741,10 +1741,11 @@ to keep data persistent over a reboot</a:documentation>
     <define name="k.type.bootloader.attribute">
       <attribute name="bootloader">
         <a:documentation>Specifies the bootloader used for booting the image."
-At the moment only grub and syslinux are supported</a:documentation>
+At the moment only grub and sys|extlinux are supported</a:documentation>
         <choice>
           <value>grub</value>
           <value>syslinux</value>
+          <value>extlinux</value>
         </choice>
       </attribute>
     </define>

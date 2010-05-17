@@ -789,6 +789,8 @@ function setupBootLoader {
 		x86_64-grub)     eval setupBootLoaderGrub $para ;;
 		i*86-syslinux)   eval setupBootLoaderSyslinux $para ;;
 		x86_64-syslinux) eval setupBootLoaderSyslinux $para ;;
+		i*86-extlinux)   eval setupBootLoaderSyslinux $para ;;
+		x86_64-extlinux) eval setupBootLoaderSyslinux $para ;;
 		ppc*)            eval setupBootLoaderLilo $para ;;
 		*)
 		systemException \
@@ -1005,6 +1007,12 @@ function setupBootLoaderSyslinux {
 		KIWI_KERNEL_OPTIONS="$KIWI_KERNEL_OPTIONS $kiwi_cmdline"
 	fi
 	#======================================
+	# setup config file name
+	#--------------------------------------
+	if [ $loader = "extlinux" ];then
+		conf=$destsPrefix/boot/syslinux/extlinux.conf
+	fi
+	#======================================
 	# check for syslinux title postfix
 	#--------------------------------------
 	if [ -z "$gfix" ];then
@@ -1063,7 +1071,7 @@ function setupBootLoaderSyslinux {
 			echo "MENU LABEL $title"                           >> $conf
 			if xenServer;then
 				systemException \
-					"*** syslinux: Xen dom0 boot not implemented ***" \
+					"*** $loader: Xen dom0 boot not implemented ***" \
 				"reboot"
 			else
 				echo "KERNEL /boot/$kernel"                    >> $conf
@@ -1095,7 +1103,7 @@ function setupBootLoaderSyslinux {
 			echo "MENU LABEL $title"                           >> $conf
 			if xenServer;then
 				systemException \
-					"*** syslinux: Xen dom0 boot not implemented ***" \
+					"*** $loader: Xen dom0 boot not implemented ***" \
 				"reboot"
 			else
 				echo "KERNEL /boot/$kernel"                    >> $conf
@@ -1129,13 +1137,13 @@ function setupBootLoaderSyslinux {
 	#--------------------------------------
 	if [ ! -z "$OEM_RECOVERY" ];then
 		systemException \
-			"*** syslinux recovery chain loading not implemented ***" \
+			"*** $loader: recovery chain loading not implemented ***" \
 		"reboot"
 	fi
 	#======================================
 	# create sysconfig/bootloader
 	#--------------------------------------
-	echo "LOADER_TYPE=\"syslinux\""                           > $sysb
+	echo "LOADER_TYPE=\"$loader\""                           > $sysb
 	echo "LOADER_LOCATION=\"mbr\""                           >> $sysb
 	echo "DEFAULT_VGA=\"$fbmode\""                           >> $sysb 
 	echo -n "DEFAULT_APPEND=\"root=$diskByID splash=silent"  >> $sysb
@@ -1810,7 +1818,11 @@ function updateSyslinuxBootDeviceFstab {
 	local sdev=$2
 	local diskByID=`getDiskID $sdev`
 	local nfstab=$prefix/etc/fstab
-	echo "$diskByID /syslboot vfat defaults 0 0" >> $nfstab
+	if [ $loader = "syslinux" ];then
+		echo "$diskByID /syslboot vfat defaults 0 0" >> $nfstab
+	else
+		echo "$diskByID /syslboot ext2 defaults 0 0" >> $nfstab
+	fi
 }
 #======================================
 # updateOtherDeviceFstab
@@ -4456,7 +4468,7 @@ function makeLabel {
 	if [ -z "$loader" ];then
 		loader="grub"
 	fi
-	if [ ! $loader = "syslinux" ];then
+	if [ ! $loader = "syslinux" ] && [ ! $loader = "extlinux" ];then
 		echo $1 | tr " " "_"
 	else
 		echo $1

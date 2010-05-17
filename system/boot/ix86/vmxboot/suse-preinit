@@ -66,7 +66,7 @@ fi
 #======================================
 # 7) Check FAT requires on syslinux
 #--------------------------------------
-if [ "$loader" = "syslinux" ];then
+if [ "$loader" = "syslinux" ] || [ "$loader" = "extlinux" ];then
 	# /.../
 	# if syslinux is used we need to make sure that the
 	# filename on the boot partition is correct 8+3
@@ -80,6 +80,11 @@ if [ "$loader" = "syslinux" ];then
 		initrd=`echo $i | cut -f2 -d:`
 		mv /boot/$kernel /boot/linux.$count
 		mv /boot/$initrd /boot/initrd.$count
+		running=$(uname -r)
+		rlinux=vmlinuz-$running
+		rinitrd=initrd-$running
+		ln -s /boot/linux.$count  /boot/$rlinux
+		ln -s /boot/initrd.$count /boot/$rinitrd
 		count=`expr $count + 1`
 	done
 	IFS=$IFS_ORIG

@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Mon May 17 18:05:56 CEST 2010 - ms@suse.de
+
+- added support for extlinux bootloader for vmx and usbboot.
+  support for extlinux and oemboot will follow later. The
+  repartition code of the oem images causes a more complex
+  implementation for sys|extlinux.
+
+-------------------------------------------------------------------
 Mon May 17 12:05:13 CEST 2010 - ug@suse.de
 
 - check RPM version of AutoYaST during migration
