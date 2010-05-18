@@ -791,6 +791,7 @@ sub setup {
 	my $configFile= $xml -> getConfigName();
 	my $imageDesc = $this->{imageDesc};
 	my $manager   = $this->{manager};
+	my $data;
 	#======================================== 
 	# Consistency check
 	#----------------------------------------
@@ -805,19 +806,22 @@ sub setup {
 	if ((-d "$imageDesc/root") && (bsd_glob($imageDesc.'/root/*'))) {
 		$kiwi -> info ("Copying user defined files to image tree");
 		mkdir $root."/tmproot";
-		my $copy = "cp -dR --remove-destination";
 		if ((-l "$imageDesc/root/linuxrc") || (-l "$imageDesc/root/include")) {
-			$copy = "cp -LR --remove-destination";
+			$data = qxx (
+				"cp -LR --force $imageDesc/root/* $root/tmproot 2>&1"
+			);
+		} else {
+			$data = qxx (
+				"tar -cf - -C $imageDesc/root . | tar -x -C $root/tmproot 2>&1"
+			);
 		}
-		my $data = qxx ("$copy $imageDesc/root/* $root/tmproot 2>&1");
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
 			$kiwi -> info   ($data);
 			return undef;
 		}
-		qxx ("find $root/tmproot -type d | grep '.svn\$' | xargs rm -rf 2>&1");
-		$data = qxx ("$copy $root/tmproot/* $root");
+		$data = qxx ("tar -cf - -C $root/tmproot . | tar -x -C $root 2>&1");
 		$code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> failed ();
