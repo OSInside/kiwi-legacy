@@ -57,14 +57,14 @@ if [ -x /bin/rpm ];then
 fi
 
 #======================================
-# 8) create initrd on diskful
+# 7) create initrd on diskful
 #--------------------------------------
 if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ]; then
 	setupSUSEInitrd
 fi
 
 #======================================
-# 7) Check FAT requires on syslinux
+# 8) Check FAT requires on syslinux
 #--------------------------------------
 if [ "$loader" = "syslinux" ] || [ "$loader" = "extlinux" ];then
 	# /.../
