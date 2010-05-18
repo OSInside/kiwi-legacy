@@ -379,22 +379,39 @@ sub setupFirstBootYaST {
 		return "failed";
 	}
 	close FD;
-	if ( ! open (FD,">$root/etc/sysconfig/firstboot")) {
-		$kiwi -> failed ();
-		$kiwi -> error ("Failed to create /etc/sysconfig/firstboot: $!");
-		$kiwi -> failed ();
-		return "failed";
+
+	#
+	# keep an existing /etc/sysconfig/firstboot or copy the template from yast2-firstboot package
+	# if both don't exist, write a generic one (bnc#604705)
+	#
+	if ( ! -e "$root/etc/sysconfig/firstboot" ) {
+		if ( -e "$root/var/adm/fillup-templates/sysconfig.firstboot" ) {
+			my $data = qxx ("cp $root/var/adm/fillup-templates/sysconfig.firstboot $root/etc/sysconfig/firstboot 2>&1");
+			my $code = $? >> 8;
+			if ($code != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Failed to copy the existing firstboot-sysconfig templage: $data");
+				$kiwi -> failed ();
+				return "failed";
+			}
+		} elsif ( ! open (FD,">$root/etc/sysconfig/firstboot")) {
+			$kiwi -> failed ();
+			$kiwi -> error ("Failed to create /etc/sysconfig/firstboot: $!");
+			$kiwi -> failed ();
+			return "failed";
+		} else {
+			print FD "## Description: Firstboot Configuration\n";
+			print FD "## Default: /usr/share/firstboot/scripts\n";
+			print FD "SCRIPT_DIR=\"/usr/share/firstboot/scripts\"\n";
+			print FD "FIRSTBOOT_WELCOME_DIR=\"/usr/share/firstboot\"\n";
+			print FD "FIRSTBOOT_WELCOME_PATTERNS=\"\"\n";
+			print FD "FIRSTBOOT_LICENSE_DIR=\"/usr/share/firstboot\"\n";
+			print FD "FIRSTBOOT_NOVELL_LICENSE_DIR=\"/etc/YaST2\"\n";
+			print FD "FIRSTBOOT_FINISH_FILE=\"/usr/share/firstboot/congrats.txt\"\n";
+			print FD "FIRSTBOOT_RELEASE_NOTES_PATH=\"\"\n";
+			close FD;
+		}
 	}
-	print FD "## Description: Firstboot Configuration\n";
-	print FD "## Default: /usr/share/firstboot/scripts\n";
-	print FD "SCRIPT_DIR=\"/usr/share/firstboot/scripts\"\n";
-	print FD "FIRSTBOOT_WELCOME_DIR=\"/usr/share/firstboot\"\n";
-	print FD "FIRSTBOOT_WELCOME_PATTERNS=\"\"\n";
-	print FD "FIRSTBOOT_LICENSE_DIR=\"/usr/share/firstboot\"\n";
-	print FD "FIRSTBOOT_NOVELL_LICENSE_DIR=\"/etc/YaST2\"\n";
-	print FD "FIRSTBOOT_FINISH_FILE=\"/usr/share/firstboot/congrats.txt\"\n";
-	print FD "FIRSTBOOT_RELEASE_NOTES_PATH=\"\"\n";
-	close FD;
 	if (-f "$root/etc/init.d/firstboot") {
 		# /.../
 		# old service script based firstboot service. requires some
@@ -495,3 +512,5 @@ sub quoteshell {
 }
 
 1;
+
+# vim: set noexpandtab:
