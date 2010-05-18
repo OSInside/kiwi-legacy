@@ -122,6 +122,8 @@
 	<packages type="image" profiles="vmxFlavour">
 		<package name="kernel-default" replaces="kernel-xen"/>
 		<package name="kernel-default-base" replaces="kernel-xen-base"/>
+		<package name="kernel-default-base" replaces="xen-tools-domU"/>
+		<package name="kernel-default-base" replaces="xen"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>

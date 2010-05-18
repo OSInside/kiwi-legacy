@@ -114,6 +114,8 @@
 	<packages type="image" profiles="vmxFlavour">
 		<package name="kernel-default" arch="x86_64" replaces="kernel-xen"/>
 		<package name="kernel-default" arch="i686" replaces="kernel-xenpae"/>
+		<package name="kernel-default" replaces="xen-tools-domU"/>
+		<package name="kernel-default" replaces="xen"/>
 	</packages>
 	<packages type="delete">
 		<package name="patch"/>

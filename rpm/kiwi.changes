@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue May 18 11:03:14 CEST 2010 - ms@suse.de
+
+- fixed replace package handling and update JeOS templates
+  accordingly. This allows to bind multiple package actions
+  bound to one package
+
+-------------------------------------------------------------------
 Tue May 18 09:21:43 CEST 2010 - ms@suse.de
 
 - added support for type specific package sections

@@ -692,33 +692,44 @@ sub main {
 		#------------------------------------------
 		my @addonList;   # install this packages
 		my @deleteList;  # remove this packages
-		my %replace;
-		my %replids;
+		my @replAdd;
+		my @replDel;
 		$xml -> getBaseList();
-		%replace = $xml -> getReplacePackageHash();
-		%replids = getReplaceIDHash (\%replace,\%replids);
+		@replAdd = $xml -> getReplacePackageAddList();
+		@replDel = $xml -> getReplacePackageDelList();
+		if (@replAdd) {
+			push @addonList,@replAdd;
+		}
+		if (@replDel) {
+			push @deleteList,@replDel;
+		}
 		$xml -> getInstallList();
-		%replace = $xml -> getReplacePackageHash();
-		%replids = getReplaceIDHash (\%replace,\%replids);
-		@addonList = $xml -> getTypeList();
-		%replace = $xml -> getReplacePackageHash();
-		%replids = getReplaceIDHash (\%replace,\%replids);
-		if (%replids) {
-			my %add = ();
-			my %del = ();
-			foreach my $id (keys %replids) {
-				foreach my $new (keys %{$replids{$id}}) {
-					$del{$replids{$id}{$new}} = 1;
-					$add{$new} = 1;
-				}
-			}
-			foreach my $del (keys %del) {
-				if (defined $add{$del}) {
-					undef $add{$del};
-				}
-			}
-			push @addonList, keys %add;
-			push @deleteList,keys %del;
+		@replAdd = $xml -> getReplacePackageAddList();
+		@replDel = $xml -> getReplacePackageDelList();
+		if (@replAdd) {
+			push @addonList,@replAdd;
+		}
+		if (@replDel) {
+			push @deleteList,@replDel;
+		}
+		$xml -> getTypeList();
+		@replAdd = $xml -> getReplacePackageAddList();
+		@replDel = $xml -> getReplacePackageDelList();
+		if (@replAdd) {
+			push @addonList,@replAdd;
+		}
+		if (@replDel) {
+			push @deleteList,@replDel;
+		}
+		if (@addonList) {
+			my %uniq;
+			foreach my $item (@addonList) { $uniq{$item} = $item; }
+			@addonList = keys %uniq;
+		}
+		if (@deleteList) {
+			my %uniq;
+			foreach my $item (@deleteList) { $uniq{$item} = $item; }
+			@deleteList = keys %uniq;
 		}
 		if ((@addonList) || (@deleteList)) {
 			$kiwi -> info ("Image update:");
@@ -2332,26 +2343,6 @@ sub createHash {
 	}
 	$kiwi -> done();
 	my $code = kiwiExit (0); return $code;
-}
-
-#==========================================
-# getReplaceIDHash
-#------------------------------------------
-sub getReplaceIDHash {
-	# ...
-	# takes the result of getReplacePackageHash() hash and
-	# turns it into a new hash. The function appends
-	# the new data to an optionally given hash variable
-	# as second argument and returns the result hash
-	# ---
-	my %hash   = %{$_[0]};
-	my %result = %{$_[1]};
-	foreach my $key (keys %hash) {
-		my @id = ($key,$hash{$key});
-		my $id = join (".",sort @id);
-		$result{$id}{$key} = $hash{$key};
-	}
-	return %result;
 }
 
 #==========================================

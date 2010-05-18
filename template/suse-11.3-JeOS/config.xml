@@ -80,6 +80,8 @@
 	</packages>
 	<packages type="image" profiles="vmxFlavour">
 		<package name="kernel-default" replaces="kernel-xen"/>
+		<package name="kernel-default" replaces="xen-tools-domU"/>
+		<package name="kernel-default" replaces="xen"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>

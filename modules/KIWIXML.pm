@@ -3022,18 +3022,21 @@ sub getList {
 		}
 	}
 	#==========================================
-	# Create unique list
+	# Create unique lists
 	#------------------------------------------
 	my %packHash = ();
-	my %replHash = ();
+	my @replAddList = ();
+	my @replDelList = ();
 	foreach my $package (@result) {
 		if (ref $package) {
-			$replHash{$package->[0]} = $package->[1];
+			push @replAddList,$package->[0];
+			push @replDelList,$package->[1];
 		} else {
 			$packHash{$package} = $package;
 		}
 	}
-	$this->{replHash} = \%replHash;
+	$this->{replDelList} = \@replDelList;
+	$this->{replAddList} = \@replAddList;
 	return sort keys %packHash;
 }
 
@@ -3115,18 +3118,29 @@ sub getInstallSize {
 }
 
 #==========================================
-# getReplacePackageHash
+# getReplacePackageDelList
 #------------------------------------------
-sub getReplacePackageHash {
+sub getReplacePackageDelList {
 	# ...
-	# Returns the packages to be deleted according to the
-	# replace information in config.xml. The call uses the
-	# information stored in the last getList call and therefore
-	# references always the data from this last call
+	# return the package names which are deleted in
+	# a replace list setup
 	# ---
 	my $this = shift;
-	my %pacs = %{$this->{replHash}};
-	return %pacs;
+	my @pacs = @{$this->{replDelList}};
+	return @pacs;
+}
+
+#==========================================
+# getReplacePackageAddList
+#------------------------------------------
+sub getReplacePackageAddList {
+	# ...
+	# return the package names which are added in
+	# a replace list setup
+	# ---
+	my $this = shift;
+	my @pacs = @{$this->{replAddList}};
+	return @pacs;
 }
 
 #==========================================
