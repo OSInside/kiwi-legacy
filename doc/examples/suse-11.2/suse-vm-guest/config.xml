@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="4.5" name="suse-11.2-vm-guest">
+<image schemaversion="4.6" name="suse-11.2-vm-guest">
 	<description type="system">
 		<author>Marcus Schäfer</author>
 		<contact>ms@novell.com</contact>
@@ -33,7 +33,7 @@
 		<package name="vim"/>
 		<opensusePattern name="base"/>
 	</packages>
-	<packages type="vmware"/>
+	<packages type="vmx"/>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
 		<package name="glibc-locale"/>

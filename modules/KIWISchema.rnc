@@ -26,7 +26,7 @@ db:info [
 	db:releaseinfo [
 		"$Id: kiwi.rnc 2957 2008-01-11 12:53:39Z thomas-schraitle $"
 	]
-	db:releaseinfo [ "RNC Schema Version 4.5" ]
+	db:releaseinfo [ "RNC Schema Version 4.6" ]
 	db:pubdate [ "START" ]
 	db:pubdate [ "2008-01-08" ]
 ]
@@ -61,7 +61,7 @@ div {
 		attribute inherit { text }
 	k.image.schemaversion.attribute =
 		## The allowed Schema version (fixed value)
-		attribute schemaversion { "4.5" }
+		attribute schemaversion { "4.6" }
 	k.image.kiwirevision.attribute =
 		## A kiwi SVN revision number which is known to build
 		## a working image from this description. If the kiwi SVN
@@ -2046,7 +2046,8 @@ div {
 #
 div {
 	k.packages.type.attribute = attribute type {
-		"image" | "bootstrap" | "delete" | "testsuite" | "xen" | "vmware"
+		"image" | "bootstrap" | "delete" | "testsuite" |
+		"xen" | "vmx" | "iso" | "net" | "oem" | "usb"
 	}
 	k.packages.profiles.attribute =
 		## Namespace this section applies to. If not specified it

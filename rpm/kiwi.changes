@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Tue May 18 09:21:43 CEST 2010 - ms@suse.de
+
+- added support for type specific package sections
+  <packages type="iso|net|usb|oem|xen|vmx">. Along with this
+  change a new Schema version 4.6 was introduced which
+  automatically converts the type="vmware" section into
+  a type="vmx" section
+
+-------------------------------------------------------------------
 Mon May 17 18:05:56 CEST 2010 - ms@suse.de
 
 - added support for extlinux bootloader for vmx and usbboot.

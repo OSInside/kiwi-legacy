@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="4.5" name="LimeJeOS-openSUSE-11.1">
+<image schemaversion="4.6" name="LimeJeOS-openSUSE-11.1">
 	<description type="system">
 		<author>Christoph Thiel</author>
 		<contact>cthiel@novell.com</contact>

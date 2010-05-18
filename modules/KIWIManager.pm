@@ -1569,7 +1569,6 @@ sub setupInstallPackages {
 	my $this   = shift;
 	my $kiwi   = $this->{kiwi};
 	my $xml    = $this->{xml};
-	my %type;
 	#==========================================
 	# check cached result
 	#------------------------------------------
@@ -1581,27 +1580,11 @@ sub setupInstallPackages {
 	#------------------------------------------
 	my @packList = $xml -> getInstallList();
 	#==========================================
-	# Get Xen package if type is appropriate
+	# Get type specific packages if set
 	#------------------------------------------
-	%type = %{$xml -> getImageTypeAndAttributes()};
-	if ("$type{type}" eq "xen") {
-		$kiwi -> info ("Creating Xen package list");
-		my @xenList = $xml -> getXenList();
-		if (@xenList) {
-			@packList = (@packList,@xenList);
-		}
-		$kiwi -> done ();
-	}
-	#==========================================
-	# Get VMware package if type is appropriate
-	#------------------------------------------
-	if (("$type{type}" eq "vmx") && ("$type{boot}" =~ /vmxboot/)) {
-		$kiwi -> info ("Creating VMware package list");
-		my @vmwareList = $xml -> getVMwareList();
-		if (@vmwareList) {
-			@packList = (@packList,@vmwareList);
-		}
-		$kiwi -> done ();
+	my @typeList = $xml -> getTypeList();
+	if (@typeList) {
+		push @packList,@typeList;
 	}
 	$this->{packlist} = \@packList;
 	return @packList;

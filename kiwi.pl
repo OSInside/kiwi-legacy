@@ -700,20 +700,9 @@ sub main {
 		$xml -> getInstallList();
 		%replace = $xml -> getReplacePackageHash();
 		%replids = getReplaceIDHash (\%replace,\%replids);
-		if ($attr{type} eq "vmx") {
-			$kiwi -> info ("Creating VMware package list");
-			@addonList = $xml -> getVMwareList();
-			%replace = $xml -> getReplacePackageHash();
-			%replids = getReplaceIDHash (\%replace,\%replids);
-			$kiwi -> done();
-		}
-		if ($attr{type} eq "xen") {
-			$kiwi -> info ("Creating Xen package list");
-			@addonList = $xml -> getXenList();
-			%replace = $xml -> getReplacePackageHash();
-			%replids = getReplaceIDHash (\%replace,\%replids);
-			$kiwi -> done();
-		}
+		@addonList = $xml -> getTypeList();
+		%replace = $xml -> getReplacePackageHash();
+		%replids = getReplaceIDHash (\%replace,\%replids);
 		if (%replids) {
 			my %add = ();
 			my %del = ();

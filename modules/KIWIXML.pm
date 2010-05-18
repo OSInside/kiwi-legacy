@@ -3225,27 +3225,17 @@ sub getInstallList {
 }
 
 #==========================================
-# getXenList
+# getTypeList
 #------------------------------------------
-sub getXenList {
+sub getTypeList {
 	# ...
-	# Create virtualisation package list needed to run that
-	# image within a Xen virtualized system
+	# Create package list according to the selected
+	# image type
 	# ---
 	my $this = shift;
-	return getList ($this,"xen");
-}
-
-#==========================================
-# getVMwareList
-#------------------------------------------
-sub getVMwareList {
-	# ...
-	# Create virtualisation package list needed to run that
-	# image within VMware
-	# ---
-	my $this = shift;
-	return getList ($this,"vmware");
+	my $node = $this->{typeNode};
+	my $type = $node -> getAttribute("image");
+	return getList ($this,$type);
 }
 
 #==========================================

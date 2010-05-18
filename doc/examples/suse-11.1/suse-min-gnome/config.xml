@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="4.5" name="suse-11.1-gnome-demo">
+<image schemaversion="4.6" name="suse-11.1-gnome-demo">
 	<description type="system">
 		<author>Robert Schweikert</author>
 		<contact>rschweikert@novell.</contact>
@@ -48,7 +48,7 @@
 		<package name="xorg-x11-server"/>
 		<opensusePattern name="base"/>
 	</packages>
-	<packages type="vmware"/>
+	<packages type="vmx"/>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
 		<package name="glibc-locale"/>
