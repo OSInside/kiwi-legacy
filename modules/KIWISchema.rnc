@@ -2047,7 +2047,7 @@ div {
 div {
 	k.packages.type.attribute = attribute type {
 		"image" | "bootstrap" | "delete" | "testsuite" |
-		"xen" | "vmx" | "iso" | "net" | "oem" | "usb"
+		"xen" | "vmx" | "iso" | "pxe" | "oem" | "usb" | "ec2" | "split"
 	}
 	k.packages.profiles.attribute =
 		## Namespace this section applies to. If not specified it

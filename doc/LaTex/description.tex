@@ -1047,38 +1047,51 @@ the latest packages available.
 </packages>
 \end{Command}
 
-The mandatory packages element specifies the list of packages and
-pattern names to be used with the image. There are five different
-types of package sets or patterns, specified with the type attribute:
+The mandatory packages element specifies the list of packages (<package> 
+element) and patterns (<opensusePattern> element) to be used with the image.
+The value of the type attribute specifies how the packages and patterns 
+listed are handled, supported values are as follows:
 
 \begin{itemize}
-\item \textbf{image}\\
-      Image packages, list of packages used to finish the image
-      installation. All packages which make up the image are listed here
 \item \textbf{bootstrap}\\
-      Bootstrap packages, list of packages used to start creating a
-      new operating system root tree. Basic components which are
-      required to chroot into that system, such as glibc, are listed here.
-
+      Bootstrap packages, list of packages for the new operating system
+      root tree. The packages list the required components to support a 
+      chroot environment in the new system root tree, such a glibc.
 \item \textbf{delete}\\
-      Delete packages, list of packages stored for later deletion.
-      The package names are available in the \$delete environment
-      variable of the /.profile file created by KIWI. The 
-      baseGetPackagesForDeletion() function returns the contents of this
-      environment variable, and can be used to delete the packages
-      while ignoring requirements or dependencies. According to this
-      a config.sh or images.sh script needs to be provided such as
-      the following code snippet shows:
+      Delete packages, list of packages to be deleted from the image being
+      created.
+
+      When using the delete type only <package> elements are considered, all
+      other specifications such as <opensusePattern> are ignored. The given
+      package names are stored in the \$delete environment variable of the 
+      /.profile file created by KIWI. The list of package names is returned 
+      by the baseGetPackagesForDeletion() function. This list can then be
+      used to delete the packages ignoring requirements or dependencies. 
+      This can be accomplished in the config.sh or images.sh script with
+      the following code snippet:
 \begin{verbatim}
 rpm -e --nodeps --noscripts \
    $(rpm -q `baseGetPackagesForDeletion` | grep -v "is not installed")
 \end{verbatim}
+      Note, that the delete value is indiscriminate of the image type
+      being built.
+\item \textbf{image}\\
+      Image packages, list of packages to be installed in the image.
+\item \textbf{iso}\\
+      Image packages, a list of additional packages to be installed 
+      when building an ISO image.
+\item \textbf{oem}\\
+      Image packages, a list of additional packages to be installed 
+      when building an OEM image.
+\item \textbf{usb}\\
+      Image packages, a list of additional packages to be installed 
+      when building a USB image.
+\item \textbf{vmx}\\
+      Image packages, a list of additional packages to be installed 
+      when building a vmx virtual image of any format.
 \item \textbf{xen}\\
-      Xen required packages, list of packages used when the image
-      needs support for Xen-based virtualization.
-\item \textbf{vmware}\\
-      VMware required packages, list of packages used when the image
-      needs support for VMware- or generic based full virtualization.
+      Image packages, a list of additional packages to be installed 
+      when building a Xen host or guest.
 \end{itemize}
 
 \subsubsection{Using patterns}

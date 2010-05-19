@@ -3001,9 +3001,11 @@ para virtual machine when running the image.</db:para>
           <value>xen</value>
           <value>vmx</value>
           <value>iso</value>
-          <value>net</value>
+          <value>pxe</value>
           <value>oem</value>
           <value>usb</value>
+          <value>ec2</value>
+          <value>split</value>
         </choice>
       </attribute>
     </define>
