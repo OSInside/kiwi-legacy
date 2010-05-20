@@ -790,7 +790,7 @@ div {
 	k.repository.status.attribute =
 		## Specifies the status of the repository. This can be
 		## replacable or if not specified it's a must have repository
-		attribute status { "replaceable" | "fixed" }
+		attribute status {  "fixed" | "replaceable" }
 	k.repository.alias.attribute =
 		## Alias name to be used for this repository. This is an
 		## optional free form text. If not set the source attribute
@@ -1240,7 +1240,7 @@ div {
 		## Specifies flags for the image type. This could be compressed
 		## unified or dmsquash and applies to the iso type only
 		attribute flags {
-			"unified" | "compressed" | "dmsquash" | "clic"
+			"clic" | "compressed" | "dmsquash" | "unified" 
 		}
 	k.type.hybrid.attribute =
 		## for the iso type only:
@@ -1257,7 +1257,7 @@ div {
 		## Specifies the bootloader used for booting the image."
 		## At the moment only grub and sys|extlinux are supported
 		attribute bootloader {
-			"grub" | "syslinux" | "extlinux"
+			"extlinux" | "grub" | "syslinux"
 		}
 	k.type.compressed.attribute =
 		## Specifies whether the image output file should be
@@ -1277,14 +1277,14 @@ div {
 		attribute luks { text }
 	k.type.filesystem.attribute = 
 		## Specifies the filesystem which can be one of:
-		## ext2 , ext3 , ext4, reiserfs ,squashfs, clicfs or dmsquash.
+		## clicfs, dmsquash, ext2, ext3, ext4, reiserfs, or squashfs
 		## dmsquash is an ext3 filesystem packed into a squashfs
 		## and used later with a device mapper snapshot. clicfs
 		## is a fuse based compressed filesystem using a cow
 		## file for write operations
 		attribute filesystem {
-			"ext2" | "ext3" | "ext4" | "reiserfs" |
-			"squashfs" | "dmsquash" | "clicfs"
+			"clicfs" | "dmsquash" | "ext2" | "ext3" | "ext4" |
+			"reiserfs" | "squashfs"   
 		}
 	k.type.fsreadonly.attribute =
 		## Specifies the filesystem for the read-only part of a split image
@@ -1300,8 +1300,8 @@ div {
 		## Specifies the format of the virtual disk. This applies to the
 		## vmx/oem types only.
 		attribute format {
-			"vvfat" | "vpc" | "bochs" | "dmg" | "cloop" | "vmdk" | "qcow" |
-			"cow" | "iso" | "usb" | "ovf" | "qcow2"
+			"bochs" | "cloop" | "cow" | "dmg" | "iso" | "ovf" | "qcow" |
+			"qcow2" | "usb" | "vmdk" | "vpc" | "vvfat"
 		}
 	k.type.primary.attribute =
 		## Specifies the primary type (choose KIWI option type)
@@ -1309,9 +1309,9 @@ div {
 	k.type.image.attribute =
 		## Specifies the image type
 		attribute image {
-			"ext2" |  "ext3" | "ext4" | "reiserfs" | "squashfs" |
-			"dmsquash" | "clicfs" | "cpio" | "iso" | "split" | "usb" |
-			"vmx" | "oem" | "xen" | "pxe" | "ec2" | "product"
+			"clicfs" | "cpio" | "dmsquash" | "ec2" | "ext2" | "ext3" |
+			"ext4" | "iso" | "oem" | "product" | "pxe" | "reiserfs" |
+			"split" | "squashfs" | "usb" | "vmx" | "xen"
 		}
 	k.type.kernelcmdline.attribute =
 		# The kernelcmdline element specifies additional
@@ -1668,7 +1668,7 @@ div {
 #
 div {
 	k.drivers.type.attribute = attribute type {
-		"drivers" | "usbdrivers" | "scsidrivers" | "netdrivers"
+		"drivers" | "netdrivers" | "scsidrivers" | "usbdrivers"
 	}
 	k.drivers.profiles.attribute = k.profiles.attribute
 	k.drivers.attlist = 
@@ -2046,8 +2046,8 @@ div {
 #
 div {
 	k.packages.type.attribute = attribute type {
-		"image" | "bootstrap" | "delete" | "testsuite" |
-		"xen" | "vmx" | "iso" | "pxe" | "oem" | "usb" | "ec2" | "split"
+		"bootstrap" | "delete" | "ec2" | "image" | "iso" | "oem" | "pxe" |
+		"split" | "testsuite" | "usb" | "vmx" | "xen"
 	}
 	k.packages.profiles.attribute =
 		## Namespace this section applies to. If not specified it
@@ -2057,7 +2057,7 @@ div {
 		## Selection type for patterns. Could be onlyRequired
 		## plusSuggested or plusRecommended
 		attribute patternType {
-			"onlyRequired" | "plusSuggested" | "plusRecommended"
+			"onlyRequired" | "plusRecommended"
 		}
 	k.packages.attlist =
 		k.packages.type.attribute &

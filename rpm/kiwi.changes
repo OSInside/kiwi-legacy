@@ -5,6 +5,8 @@ Tue May 18 16:00:05 CEST 2010 - ms@suse.de
   and to support syslinux/extlinux bootloader (bnc #606651)
 - use tar command to copy overlay files which is more
   error prune than the cp command (bnc #476117)
+- removed plusSuggested attribute, update documentation
+  and added sort patch by Robert
 
 -------------------------------------------------------------------
 Tue May 18 15:02:48 CEST 2010 - ug@suse.de
