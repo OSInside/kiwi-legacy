@@ -540,9 +540,13 @@ function installBootLoader {
 		loader="grub"
 	fi
 	case $arch-$loader in
-		i*86-grub)   installBootLoaderGrub ;;
-		x86_64-grub) installBootLoaderGrub ;;
-		ppc*)        installBootLoaderLilo ;;
+		i*86-grub)       installBootLoaderGrub ;;
+		x86_64-grub)     installBootLoaderGrub ;;
+		ppc*)            installBootLoaderLilo ;;
+		i*86-syslinux)   installBootLoaderSyslinux ;;
+		x86_64-syslinux) installBootLoaderSyslinux ;;
+		i*86-extlinux)   installBootLoaderSyslinux ;;
+		x86_64-extlinux) installBootLoaderSyslinux ;;
 		*)
 		systemException \
 			"*** boot loader install for $arch-$loader not implemented ***" \
@@ -570,6 +574,24 @@ function installBootLoaderRecovery {
 			"*** boot loader setup for $arch-$loader not implemented ***" \
 		"reboot"
 	esac
+}
+#======================================
+# installBootLoaderSyslinux
+#--------------------------------------
+function installBootLoaderSyslinux {
+	local syslmbr=/usr/share/syslinux/mbr.bin
+	if [ -e $syslmbr ];then
+		Echo "Installing boot loader..."
+		if [ $loader = "syslinux" ];then
+			syslinux $imageBootDevice
+		else
+			extlinux --install /boot/syslinux
+		fi
+		dd if=$syslmbr of=$imageDiskDevice bs=512 count=1 conv=notrunc
+	else
+		Echo "Image doesn't have syslinux (mbr.bin) installed"
+		Echo "Can't install boot loader"
+	fi
 }
 #======================================
 # installBootLoaderGrub
@@ -745,14 +767,28 @@ function setupBootLoaderFiles {
 		loader="grub"
 	fi
 	case $arch-$loader in
-		i*86-grub)    setupBootLoaderFilesGrub ;;
-		x86_64-grub)  setupBootLoaderFilesGrub ;;
-		ppc*)         setupBootLoaderFilesLilo ;;
+		i*86-grub)        setupBootLoaderFilesGrub ;;
+		x86_64-grub)      setupBootLoaderFilesGrub ;;
+		ppc*)             setupBootLoaderFilesLilo ;;
+		i*86-syslinux)    setupBootLoaderFilesSyslinux ;;
+		x86_64-syslinux)  setupBootLoaderFilesSyslinux ;;
+		i*86-extlinux)    setupBootLoaderFilesSyslinux ;;
+		x86_64-extlinux)  setupBootLoaderFilesSyslinux ;;
 		*)
 		systemException \
 			"*** boot loader files for $arch-$loader not implemented ***" \
 		"reboot"
 	esac
+}
+#======================================
+# setupBootLoaderFilesSyslinux
+#--------------------------------------
+function setupBootLoaderFilesSyslinux {
+	if [ $loader = "extlinux" ];then
+		echo "/boot/syslinux/extlinux.conf"
+	else
+		echo "/boot/syslinux/syslinux.cfg"
+	fi
 }
 #======================================
 # setupBootLoaderFilesGrub
@@ -1242,20 +1278,6 @@ function setupBootLoaderGrub {
 		KIWI_BOOT_TIMEOUT=10;
 	fi
 	#======================================
-	# check for UNIONFS_CONFIG
-	#--------------------------------------
-	if [ "$haveDMSquash" = "yes" ];then
-		gnum=2
-	elif [ "$haveClicFS" = "yes" ];then
-		gnum=2
-	elif [ "$haveLuks" = "yes" ];then
-		:
-	elif [ ! -z "$UNIONFS_CONFIG" ] && [ $gnum -gt 0 ]; then
-		rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
-		gnum=`echo $rwDevice | sed -e "s/\/dev.*\([0-9]\)/\\1/"`
-		gnum=`expr $gnum - 1`
-	fi
-	#======================================
 	# create directory structure
 	#--------------------------------------
 	for dir in $menu $conf $dmap $sysb;do
@@ -1506,20 +1528,6 @@ function setupBootLoaderLilo {
 	#--------------------------------------
 	if [ -z "$KIWI_BOOT_TIMEOUT" ];then
 		KIWI_BOOT_TIMEOUT=10;
-	fi
-	#======================================
-	# check for UNIONFS_CONFIG
-	#--------------------------------------
-	if [ "$haveDMSquash" = "yes" ];then
-		lnum=2
-	elif [ "$haveClicFS" = "yes" ];then
-		lnum=2
-	elif [ "$haveLuks" = "yes" ];then
-		:
-	elif [ ! -z "$UNIONFS_CONFIG" ] && [ $gnum -gt 0 ]; then
-		rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
-		lnum=`echo $rwDevice | sed -e "s/\/dev.*\([0-9]\)/\\1/"`
-		lnum=`expr $gnum - 1`
 	fi
 	#======================================
 	# setup lilo boot device
@@ -4918,7 +4926,6 @@ function createPartitionerInput {
 #--------------------------------------
 function createFDiskInput {
 	local input=/part.input
-	rm -f $input
 	for cmd in $*;do
 		if [ $cmd = "." ];then
 			echo >> $input
@@ -5080,6 +5087,8 @@ function createPartedInput {
 				partid=${pcmds[$index + 1]}
 				partid=$(($partid / 1))
 				cmdq="$cmdq rm $partid"
+				partedWrite "$disk" "$cmdq"
+				cmdq=""
 				;;
 			#======================================
 			# create new partition

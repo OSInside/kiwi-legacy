@@ -305,6 +305,7 @@ sub new {
 		} else {
 			# system is specified as a file...
 			$sizeBytes = -s $system;
+			$sizeBytes*= 1.1;
 		}
 		#==========================================
 		# Decide for a size prefer 1)cmdline 2)XML
@@ -3780,7 +3781,14 @@ sub setupBootLoaderConfiguration {
 	my $xml      = $this->{xml};
 	my %type     = %{$xml->getImageTypeAndAttributes()};
 	my $cmdline  = $type{cmdline};
+	my $bloader  = "grub";
 	my $title;
+	#==========================================
+	# setup boot loader type
+	#------------------------------------------
+	if ($type{bootloader}) {
+		$bloader = $type{bootloader};
+	}
 	#==========================================
 	# report additional cmdline options
 	#------------------------------------------
@@ -3871,15 +3879,16 @@ sub setupBootLoaderConfiguration {
 		if ((! $isxen) || ($isxen && $xendomain eq "domU")) {
 			if ($type =~ /^KIWI CD/) {
 				print FD " kernel (cd)/boot/linux vga=$vga splash=silent";
-				print FD " ramdisk_size=512000 ramdisk_blocksize=4096 cdinst=1";
+				print FD " ramdisk_size=512000 ramdisk_blocksize=4096";
+				print FD " cdinst=1 loader=$bloader";
 			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
 				print FD " root (hd0,$bootpart)\n";
 				print FD " kernel /boot/linux.vmx vga=$vga";
-				print FD " loader=$loader splash=silent";
+				print FD " loader=$bloader splash=silent";
 			} else {
 				print FD " root (hd0,$bootpart)\n";
 				print FD " kernel /boot/linux vga=$vga";
-				print FD " loader=$loader splash=silent";
+				print FD " loader=$bloader splash=silent";
 			}
 			print FD $cmdline;
 			if ($type =~ /^KIWI CD/) {
@@ -3893,17 +3902,18 @@ sub setupBootLoaderConfiguration {
 			if ($type =~ /^KIWI CD/) {
 				print FD " kernel (cd)/boot/xen.gz\n";
 				print FD " module /boot/linux vga=$vga splash=silent";
-				print FD " ramdisk_size=512000 ramdisk_blocksize=4096 cdinst=1";
+				print FD " ramdisk_size=512000 ramdisk_blocksize=4096";
+				print FD " cdinst=1 loader=$bloader";
 			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
 				print FD " root (hd0,$bootpart)\n";
 				print FD " kernel /boot/xen.gz.vmx\n";
 				print FD " module /boot/linux.vmx vga=$vga";
-				print FD " loader=$loader splash=silent";
+				print FD " loader=$bloader splash=silent";
 			} else {
 				print FD " root (hd0,$bootpart)\n";
 				print FD " kernel /boot/xen.gz\n";
 				print FD " module /boot/linux vga=$vga";
-				print FD " loader=$loader splash=silent";
+				print FD " loader=$bloader splash=silent";
 			}
 			print FD $cmdline;
 			if ($type =~ /^KIWI CD/) {
@@ -3922,15 +3932,16 @@ sub setupBootLoaderConfiguration {
 		if ((! $isxen) || ($isxen && $xendomain eq "domU")) {
 			if ($type =~ /^KIWI CD/) {
 				print FD " kernel (cd)/boot/linux vga=$vga splash=silent";
-				print FD " ramdisk_size=512000 ramdisk_blocksize=4096 cdinst=1";
+				print FD " ramdisk_size=512000 ramdisk_blocksize=4096";
+				print FD " cdinst=1 loader=$bloader";
 			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
 				print FD " root (hd0,$bootpart)\n";
 				print FD " kernel /boot/linux.vmx vga=$vga";
-				print FD " loader=$loader splash=silent";
+				print FD " loader=$bloader splash=silent";
 			} else {
 				print FD " root (hd0,$bootpart)\n";
 				print FD " kernel /boot/linux vga=$vga";
-				print FD " loader=$loader splash=silent";
+				print FD " loader=$bloader splash=silent";
 			}
 			print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
 			print FD " noapic maxcpus=0 edd=off";
@@ -3946,17 +3957,18 @@ sub setupBootLoaderConfiguration {
 			if ($type =~ /^KIWI CD/) {
 				print FD " kernel (cd)/boot/xen.gz\n";
 				print FD " module (cd)/boot/linux vga=$vga splash=silent";
-				print FD " ramdisk_size=512000 ramdisk_blocksize=4096 cdinst=1";
+				print FD " ramdisk_size=512000 ramdisk_blocksize=4096";
+				print FD " cdinst=1 loader=$bloader";
 			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
 				print FD " root (hd0,$bootpart)\n";
 				print FD " kernel /boot/xen.gz.vmx\n";
 				print FD " module /boot/linux.vmx vga=$vga";
-				print FD " loader=$loader splash=silent";
+				print FD " loader=$bloader splash=silent";
 			} else {
 				print FD " root (hd0,$bootpart)\n";
 				print FD " kernel /boot/xen.gz\n";
 				print FD " module /boot/linux vga=$vga";
-				print FD " loader=$loader splash=silent";
+				print FD " loader=$bloader splash=silent";
 			}
 			print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
 			print FD " noapic maxcpus=0 edd=off";
@@ -4030,11 +4042,11 @@ sub setupBootLoaderConfiguration {
 			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
 				print FD "KERNEL /boot/linux.vmx\n";
 				print FD "APPEND initrd=/boot/initrd.vmx ";
-				print FD "vga=$vga loader=$loader splash=silent";
+				print FD "vga=$vga loader=$bloader splash=silent";
 			} else {
 				print FD "KERNEL /boot/linux\n";
 				print FD "APPEND initrd=/boot/initrd ";
-				print FD "vga=$vga loader=$loader splash=silent";
+				print FD "vga=$vga loader=$bloader splash=silent";
 			}
 		} else {
 			if ($type =~ /^KIWI CD/) {
@@ -4064,11 +4076,11 @@ sub setupBootLoaderConfiguration {
 			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
 				print FD "KERNEL /boot/linux.vmx\n";
 				print FD "APPEND initrd=/boot/initrd.vmx ";
-				print FD "vga=$vga loader=$loader splash=silent";
+				print FD "vga=$vga loader=$bloader splash=silent";
 			} else {
 				print FD "KERNEL /boot/linux\n";
 				print FD "APPEND initrd=/boot/initrd ";
-				print FD "vga=$vga loader=$loader splash=silent";
+				print FD "vga=$vga loader=$bloader splash=silent";
 			}
 			print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
 			print FD " noapic maxcpus=0 edd=off";

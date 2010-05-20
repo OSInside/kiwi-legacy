@@ -22,7 +22,6 @@
 export PATH="/sbin:/bin:/usr/sbin:/usr/bin"
 export IFS_ORIG=$IFS
 export DEBUG=0
-export bootid=1
 export DOBACKUP=1
 
 #======================================
@@ -185,11 +184,6 @@ then
 	# ----
 	export LOCAL_BOOT="yes"
 fi
-if [ "$loader" = "syslinux" ] || [ "$loader" = "extlinux" ];then
-	systemException \
-		"syslinux boot not supported for OEM systems... abort" \
-	"reboot"
-fi
 #======================================
 # 5) start boot shell
 #--------------------------------------
@@ -252,7 +246,6 @@ setupInitialDeviceNames
 #--------------------------------------
 if isFSTypeReadOnly;then
 	setupUnionFS $imageRWDevice $imageRODevice $unionFST
-	bootid=2
 fi
 
 #======================================
@@ -576,46 +569,62 @@ if [ "$LOCAL_BOOT" = "no" ]; then
 		#======================================
 		# DM use third partition as boot
 		#--------------------------------------
+		if [ -z "$imageBootDevice" ];then
+			export imageBootDevice=$(ddn $imageDiskDevice $bootid)
+		fi
 		mkdir /mnt/dmboot
-		bootid=3
-		export imageBootDevice=$(ddn $imageDiskDevice 3)
 		mount $imageBootDevice /mnt/dmboot
 		cp -a  /mnt/boot /mnt/dmboot
-		test -f /tmp/linux.vmx  && mv /tmp/linux.vmx  /mnt/dmboot/boot
-		test -f /tmp/initrd.vmx && mv /tmp/initrd.vmx /mnt/dmboot/boot
-		test -f /tmp/mbrid && mv /tmp/mbrid /mnt/dmboot/boot/grub
+		if [ -e /boot.tgz ];then
+			tar -xf /boot.tgz -C /mnt/dmboot
+		fi
 		rm -rf /mnt/boot
 		( cd /mnt && ln -s dmboot/boot boot )
 	elif [ "$haveClicFS" = "yes" ];then
 		#======================================
 		# Clic use third partition as boot
 		#--------------------------------------
+		if [ -z "$imageBootDevice" ];then
+			export imageBootDevice=$(ddn $imageDiskDevice $bootid)
+		fi
 		mkdir /mnt/clicboot
-		bootid=3
-		export imageBootDevice=$(ddn $imageDiskDevice 3)
 		mount $imageBootDevice /mnt/clicboot
 		cp -a  /mnt/boot /mnt/clicboot
-		test -f /tmp/linux.vmx  && mv /tmp/linux.vmx  /mnt/clicboot/boot
-		test -f /tmp/initrd.vmx && mv /tmp/initrd.vmx /mnt/clicboot/boot
-		test -f /tmp/mbrid && mv /tmp/mbrid /mnt/clicboot/boot/grub
+		if [ -e /boot.tgz ];then
+			tar -xf /boot.tgz -C /mnt/clicboot
+		fi
 		rm -rf /mnt/boot
 		( cd /mnt && ln -s clicboot/boot boot )
+	elif [ "$loader" = "syslinux" ] || [ "$loader" = "extlinux" ];then
+		#======================================
+		# syslinux / extlinux bootloader
+		#--------------------------------------
+		if [ -z "$imageBootDevice" ];then
+			imageBootDevice=$(ddn $imageDiskDevice $bootid)
+		fi
+		mkdir /mnt/syslboot
+		mount $imageBootDevice /mnt/syslboot
+		if [ -e /boot.tgz ];then
+			tar -xf /boot.tgz -C /mnt/syslboot
+		fi
+		if [ -z "$UNIONFS_CONFIG" ];then
+			cp -a /mnt/boot/* /mnt/syslboot/boot
+		fi
+		rm -rf /mnt/boot
+		( cd /mnt && ln -s syslboot/boot boot )
 	elif [ "$haveLuks" = "yes" ];then
 		#======================================
 		# LUKS use second or third part as boot
 		#--------------------------------------
-		mkdir -p /mnt/luksboot
-		imageBootDevice=$(ddn $imageDiskDevice 2)
-		bootid=2
-		if isFSTypeReadOnly;then
-			export imageBootDevice=$(ddn $imageDiskDevice 3)
-			bootid=3
+		if [ -z "$imageBootDevice" ];then
+			imageBootDevice=$(ddn $imageDiskDevice $bootid)
 		fi
+		mkdir -p /mnt/luksboot
 		mount $imageBootDevice /mnt/luksboot
 		cp -a /mnt/boot /mnt/luksboot
-		test -f /tmp/linux.vmx  && mv /tmp/linux.vmx  /mnt/luksboot/boot
-		test -f /tmp/initrd.vmx && mv /tmp/initrd.vmx /mnt/luksboot/boot
-		test -f /tmp/mbrid && mv /tmp/mbrid /mnt/luksboot/boot/grub
+		if [ -e /boot.tgz ];then
+			tar -xf /boot.tgz -C /mnt/luksboot
+		fi
 		rm -rf /mnt/boot
 		( cd /mnt && ln -s luksboot/boot boot )
 	fi
@@ -638,6 +647,8 @@ if [ "$LOCAL_BOOT" = "no" ];then
 			pushd /mnt/dmboot/boot >/dev/null
 		elif [ "$haveClicFS" = "yes" ];then
 			pushd /mnt/clicboot/boot >/dev/null
+		elif [ "$loader" = "syslinux" ] || [ "$loader" = "extlinux" ];then
+			pushd /mnt/syslboot/boot >/dev/null
 		elif [ "$haveLuks" = "yes" ];then
 			pushd /mnt/luksboot/boot >/dev/null
 		elif [ "$OEM_KIWI_INITRD" = "yes" ];then
@@ -680,6 +691,8 @@ if [ "$LOCAL_BOOT" = "no" ];then
 		updateDMBootDeviceFstab /config $imageBootDevice
 	elif [ "$haveClicFS" = "yes" ];then
 		updateClicBootDeviceFstab /config $imageBootDevice
+	elif [ "$loader" = "syslinux" ] || [ "$loader" = "extlinux" ];then
+		updateSyslinuxBootDeviceFstab /config $imageBootDevice
 	elif [ "$haveLuks" = "yes" ];then
 		updateLuksBootDeviceFstab /config $imageBootDevice
 	fi

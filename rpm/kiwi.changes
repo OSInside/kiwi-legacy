@@ -1,8 +1,16 @@
 -------------------------------------------------------------------
+Tue May 18 16:00:05 CEST 2010 - ms@suse.de
+
+- rewrote the oem partition code for better maintenance
+  and to support syslinux/extlinux bootloader (bnc #606651)
+- use tar command to copy overlay files which is more
+  error prune than the cp command (bnc #476117)
+
+-------------------------------------------------------------------
 Tue May 18 15:02:48 CEST 2010 - ug@suse.de
 
 - keep an existing /etc/sysconfig/firstboot instead overwriting
-  it with a generic version (bnc#604705)
+  it with a generic version (bnc #604705)
 
 -------------------------------------------------------------------
 Tue May 18 11:03:14 CEST 2010 - ms@suse.de

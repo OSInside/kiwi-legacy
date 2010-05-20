@@ -2202,8 +2202,10 @@ sub createImageLiveCD {
 		print FD "IMAGE=/dev/loop1;$namecd\n";
 	}
 	if (defined $gzip) {
-		if ($gzip =~ /^(unified|dmsquash)/) {
+		if ($gzip =~ /^unified/) {
 			print FD "UNIONFS_CONFIG=/dev/ram1,/dev/loop1,aufs\n";
+		} elsif ($gzip =~ /^dmsquash/) {
+			print FD "UNIONFS_CONFIG=/dev/ram1,/dev/loop1,dmsquash\n";
 		} elsif ($gzip =~ /^clic/) {
 			print FD "UNIONFS_CONFIG=/dev/ram1,/dev/loop1,clicfs\n";
 		} else {
