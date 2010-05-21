@@ -1,10 +1,14 @@
 -------------------------------------------------------------------
+Fri May 21 15:47:36 CEST 2010 - ms@suse.de
+
+- v4.37
+
+-------------------------------------------------------------------
 Fri May 21 15:41:48 CEST 2010 - ug@suse.de
 
-- fixes endless building problem if function
-  suseInsertService() is calling in config.sh and system/chroot contains a broken
-  /etc/init.d/ script.
-  (bnc #605981)
+- fixes endless building problem if function suseInsertService()
+  is calling in config.sh and system/chroot contains a broken
+  /etc/init.d/ script. (bnc #605981)
 
 -------------------------------------------------------------------
 Tue May 18 16:00:05 CEST 2010 - ms@suse.de
