@@ -675,6 +675,12 @@ function setupDeviceNames {
 			export imageSwapDevice=/dev/$vgroup/LVSwap
 		fi
 		#======================================
+		# set LVM home device name
+		#--------------------------------------
+		if [ ! $homeID = "no" ];then
+			export imageHomeDevice=/dev/$vgroup/LVHome
+		fi
+		#======================================
 		# set LVM recovery device name
 		#--------------------------------------
 		if [ ! $recoID = "no" ];then

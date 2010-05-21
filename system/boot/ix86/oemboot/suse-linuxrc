@@ -691,9 +691,12 @@ if [ "$LOCAL_BOOT" = "no" ];then
 			mv /mnt/home/.* /mnt/mnt
 			umount /mnt/mnt
 		fi
+		FSTYPE_SAVE=$FSTYPE
+		probeFileSystem $imageHomeDevice
 		Echo "Activate home partition $imageHomeDevice in fstab"
 		echo "$(getDiskID $imageHomeDevice) /home $FSTYPE defaults 0 0" \
 			>> /config/etc/fstab
+		FSTYPE=$FSTYPE_SAVE
 	fi
 	#======================================
 	# setup: bootloader files

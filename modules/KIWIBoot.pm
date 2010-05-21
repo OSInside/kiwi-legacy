@@ -220,6 +220,9 @@ sub new {
 					if (defined (my $lvroot = glob ("/dev/mapper/*-LVRoot"))) {
 						$this->{lvm} = 1;
 						$sdev = $lvroot;
+						if (defined ($lvroot = glob ("/dev/mapper/*-LVComp"))) {
+							$sdev = $lvroot;
+						}
 						if ($lvroot =~ /mapper\/(.*)-.*/) {
 							$this->{lvmgroup} = $1;
 						}
@@ -1564,6 +1567,9 @@ sub setupInstallCD {
 			if (defined (my $lvroot = glob ("/dev/mapper/*-LVRoot"))) {
 				$this->{lvm} = 1;
 				$sdev = $lvroot;
+				if (defined ($lvroot = glob ("/dev/mapper/*-LVComp"))) {
+					$sdev = $lvroot;
+				}
 				if ($lvroot =~ /mapper\/(.*)-.*/) {
 					$this->{lvmgroup} = $1;
 				}
@@ -1871,6 +1877,9 @@ sub setupInstallStick {
 			if (defined (my $lvroot = glob ("/dev/mapper/*-LVRoot"))) {
 				$this->{lvm} = 1;
 				$sdev = $lvroot;
+				if (defined ($lvroot = glob ("/dev/mapper/*-LVComp"))) {
+					$sdev = $lvroot;
+				}
 				if ($lvroot =~ /mapper\/(.*)-.*/) {
 					$this->{lvmgroup} = $1;
 				}

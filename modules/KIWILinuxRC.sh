@@ -1738,6 +1738,7 @@ function updateRootDeviceFstab {
 			if \
 				[ ! $volume = "Root" ] && \
 				[ ! $volume = "Comp" ] && \
+				[ ! $volume = "Home" ] && \
 				[ ! $volume = "Swap" ]
 			then
 				echo "/dev/$VGROUP/LV$volume /$mpoint $FSTYPE defaults 0 0" \
