@@ -78,18 +78,25 @@ function OEMRepartStandard {
 	#======================================
 	# calculate partition sizes
 	#--------------------------------------
+	minhome=0
+	if [ -z "$OEM_WITHOUTHOME" ];then
+		minhome=500
+	fi
 	diskXMBytes=$(($(partitionSize $imageDiskDevice) / 1024))
-	diskPMBytes=$(($(partitionSize $(ddn $imageDiskDevice 1)) / 1024))
-	disk1MBytes=$((
-		diskXMBytes - swapsize - recoMByte - bootXMBytes
+	diskP1MByte=$(($(partitionSize $(ddn $imageDiskDevice 1)) / 1024))
+	diskRMBytes=$((
+		diskXMBytes - diskP1MByte - swapsize - recoMByte - bootXMBytes - minhome
 	))
+	disk1MBytes=$((diskP1MByte + diskRMBytes))
 	if [ ! -z "$OEM_SYSTEMSIZE" ];then
-		disk1MBytes=$OEM_SYSTEMSIZE
+		if [ $OEM_SYSTEMSIZE -le $disk1MBytes ];then
+			disk1MBytes=$OEM_SYSTEMSIZE
+		fi
 	fi
 	#======================================
 	# check repart operation
 	#--------------------------------------
-	if [ $disk1MBytes -lt $diskPMBytes ];then
+	if [ $disk1MBytes -lt $diskP1MByte ];then
 		# /.../
 		# Requested system partition size is smaller than
 		# existing partition, will not re-partition
@@ -223,12 +230,12 @@ function OEMRepartSplit {
 		# calculate partition sizes
 		#--------------------------------------
 		diskXMBytes=$(($(partitionSize $imageDiskDevice) / 1024))
-		disk1MBytes=$(($(partitionSize $(ddn $imageDiskDevice 1)) / 1024))
-		disk2MBytes=$(($(partitionSize $(ddn $imageDiskDevice 2)) / 1024))
+		diskP1MByte=$(($(partitionSize $(ddn $imageDiskDevice 1)) / 1024))
+		diskP2MByte=$(($(partitionSize $(ddn $imageDiskDevice 2)) / 1024))
 		diskRMBytes=$((
-			diskXMBytes - disk1MBytes - disk2MBytes - swapsize - bootXMBytes
+			diskXMBytes - diskP1MByte - diskP2MByte - swapsize - bootXMBytes
 		))
-		disk2MBytes=$((disk2MBytes + diskRMBytes))
+		disk2MBytes=$((diskP2MByte + diskRMBytes))
 		if [ ! -z "$OEM_SYSTEMSIZE" ];then
 			if [ $OEM_SYSTEMSIZE -le $disk2MBytes ];then
 				disk2MBytes=$OEM_SYSTEMSIZE
@@ -237,11 +244,13 @@ function OEMRepartSplit {
 		#======================================
 		# check repart operation
 		#--------------------------------------
-		if [ $diskRMBytes -lt 100 ];then
+		if [ $disk2MBytes -lt $diskP2MByte ];then
 			# /.../
-			# Very small disk which we will not re-partition
+			# Requested read/write partition size is smaller than
+			# existing partition, will not re-partition
 			# ----
-			Echo "Disk is too small, will not re-partition it"
+			Echo "Current read/write partition is bigger than requested size"
+			Echo "Disk won't be re-partitioned"
 			disableOEMParameters
 			disableRepart
 		fi
