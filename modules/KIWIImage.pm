@@ -159,79 +159,6 @@ sub stripImage {
 }
 
 #==========================================
-# createImageDMSquashExt3
-#------------------------------------------
-sub createImageDMSquashExt3 {
-	# ...
-	# Create squashfs image with an ext3 image file
-	# as content.
-	# ---
-	my $this    = shift;
-	my $rename  = shift;
-	my $journal = "journaled-ext3";
-	my $kiwi    = $this->{kiwi};
-	my $data;
-	my $code;
-	#==========================================
-	# PRE filesystem setup
-	#------------------------------------------
-	my $name = $this -> preImage ();
-	if (! defined $name) {
-		return undef;
-	}
-	if (defined $rename) {
-		$data = qxx (
-			"mv $this->{imageDest}/$name $this->{imageDest}/$rename 2>&1"
-		);
-		$code = $? >> 8;
-		if ($code != 0) {
-			$kiwi -> error  ("Can't rename image file");
-			$kiwi -> failed ();
-			$kiwi -> error  ($data);
-			return undef;
-		}
-		$name = $rename;
-	}
-	#==========================================
-	# Create ext3 filesystem on extend
-	#------------------------------------------
-	if (! $this -> setupEXT2 ( $name,$journal )) {
-		return undef;
-	}
-	#==========================================
-	# POST filesystem setup
-	#------------------------------------------
-	if (! $this -> postImage ($name,"nozip","dmsquash")) {
-		return undef;
-	}
-	#==========================================
-	# Rename filesystem file
-	#------------------------------------------
-	$data = qxx (
-		"mv $this->{imageDest}/$name $this->{imageDest}/fsdata.ext3 2>&1"
-	);
-	$code = $? >> 8;
-	if ($code != 0) {
-		$kiwi -> error  ("Can't move file to fsdata.ext3");
-		$kiwi -> failed ();
-		$kiwi -> error  ($data);
-		return undef;
-	}
-	#==========================================
-	# Create squashfs filesystem from ext3
-	#------------------------------------------
-	$kiwi -> info ("Creating squashfs container...");
-	if (! $this -> setupSquashFS ($name,$this->{imageDest}."/fsdata.ext3")) {
-		return undef;
-	}
-	my $pfix = "squashfs";
-	qxx ("mv -f $this->{imageDest}/$name.ext3 $this->{imageDest}/$name.$pfix");
-	qxx ("rm -f $this->{imageDest}/fsdata.ext3");
-	$kiwi -> done();
-	return $this;
-}
-
-#==========================================
 # createImageClicFS
 #------------------------------------------
 sub createImageClicFS {
@@ -950,10 +877,6 @@ sub createImageUSB {
 			$ok = $this -> createImageSquashFS ();
 			last SWITCH;
 		};
-		/^dmsquash/   && do {
-			$ok = $this -> createImageDMSquashExt3 ();
-			last SWITCH;
-		};
 		/^clicfs/     && do {
 			$ok = $this -> createImageClicFS ();
 			last SWITCH;
@@ -1604,15 +1527,6 @@ sub createImageLiveCD {
 				}
 				last SWITCH;
 			};
-			/^dmsquash$/ && do {
-				$kiwi -> info ("Creating dmsquash read only filesystem...\n");
-				if (! $this -> createImageDMSquashExt3 ( $namero )) {
-					$this -> restoreCDRootData();
-					$this -> restoreSplitExtend ();
-					return undef;
-				}
-				last SWITCH;
-			};
 			/^clic$/ && do {
 				$kiwi -> info ("Creating clicfs read only filesystem...\n");
 				if (! $this -> createImageClicFS ( $namero )) {
@@ -2196,7 +2110,7 @@ sub createImageLiveCD {
 		}
 		return undef;
 	}
-	if ((! defined $gzip) || ($gzip =~ /^(unified|dmsquash|clic)/)) {
+	if ((! defined $gzip) || ($gzip =~ /^(unified|clic)/)) {
 		print FD "IMAGE=/dev/ram1;$namecd\n";
 	} else {
 		print FD "IMAGE=/dev/loop1;$namecd\n";
@@ -2204,8 +2118,6 @@ sub createImageLiveCD {
 	if (defined $gzip) {
 		if ($gzip =~ /^unified/) {
 			print FD "UNIONFS_CONFIG=/dev/ram1,/dev/loop1,aufs\n";
-		} elsif ($gzip =~ /^dmsquash/) {
-			print FD "UNIONFS_CONFIG=/dev/ram1,/dev/loop1,dmsquash\n";
 		} elsif ($gzip =~ /^clic/) {
 			print FD "UNIONFS_CONFIG=/dev/ram1,/dev/loop1,clicfs\n";
 		} else {
@@ -3331,7 +3243,7 @@ sub postImage {
 		#==========================================
 		# Check EXT3 file system
 		#------------------------------------------
-		/ext3|ec2|dmsquash|clicfs/i && do {
+		/ext3|ec2|clicfs/i && do {
 			qxx ("/sbin/fsck.ext3 -f -y $this->{imageDest}/$name 2>&1");
 			qxx ("/sbin/tune2fs -j $this->{imageDest}/$name 2>&1");
 			$kiwi -> done();
@@ -3730,10 +3642,6 @@ sub extractKernel {
 			last SWITCH;
 		};
 		/squashfs/i && do {
-			return $name;
-			last SWITCH;
-		};
-		/dmsquash/i && do {
 			return $name;
 			last SWITCH;
 		};

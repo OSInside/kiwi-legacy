@@ -1712,11 +1712,10 @@ into the master block. There is space for 32 characters.</a:documentation>
     <define name="k.type.flags.attribute">
       <attribute name="flags">
         <a:documentation>Specifies flags for the image type. This could be compressed
-unified or dmsquash and applies to the iso type only</a:documentation>
+or unified and applies to the iso type only</a:documentation>
         <choice>
           <value>clic</value>
           <value>compressed</value>
-          <value>dmsquash</value>
           <value>unified</value>
         </choice>
       </attribute>
@@ -1775,14 +1774,11 @@ mount that filesystem while booting</a:documentation>
     <define name="k.type.filesystem.attribute">
       <attribute name="filesystem">
         <a:documentation>Specifies the filesystem which can be one of:
-clicfs, dmsquash, ext2, ext3, ext4, reiserfs, or squashfs
-dmsquash is an ext3 filesystem packed into a squashfs
-and used later with a device mapper snapshot. clicfs
-is a fuse based compressed filesystem using a cow
+clicfs, ext2, ext3, ext4, reiserfs, or squashfs
+clicfs is a fuse based compressed filesystem using a cow
 file for write operations</a:documentation>
         <choice>
           <value>clicfs</value>
-          <value>dmsquash</value>
           <value>ext2</value>
           <value>ext3</value>
           <value>ext4</value>
@@ -1846,7 +1842,6 @@ vmx/oem types only.</a:documentation>
         <choice>
           <value>clicfs</value>
           <value>cpio</value>
-          <value>dmsquash</value>
           <value>ec2</value>
           <value>ext2</value>
           <value>ext3</value>

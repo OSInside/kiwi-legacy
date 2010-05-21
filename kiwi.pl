@@ -112,7 +112,6 @@ $KnownFS{ext4}{tool}      = "/sbin/mkfs.ext4";
 $KnownFS{ext3}{tool}      = "/sbin/mkfs.ext3";
 $KnownFS{ext2}{tool}      = "/sbin/mkfs.ext2";
 $KnownFS{squashfs}{tool}  = "/usr/bin/mksquashfs";
-$KnownFS{dmsquash}{tool}  = "/usr/bin/mksquashfs";
 $KnownFS{clicfs}{tool}    = "/usr/bin/mkclicfs";
 $KnownFS{clic}{tool}      = "/usr/bin/mkclicfs";
 $KnownFS{unified}{tool}   = "/usr/bin/mksquashfs";
@@ -123,7 +122,6 @@ $KnownFS{ext3}{ro}        = 0;
 $KnownFS{ext4}{ro}        = 0;
 $KnownFS{ext2}{ro}        = 0;
 $KnownFS{squashfs}{ro}    = 1;
-$KnownFS{dmsquash}{ro}    = 1;
 $KnownFS{clicfs}{ro}      = 1;
 $KnownFS{clic}{ro}        = 1;
 $KnownFS{unified}{ro}     = 1;
@@ -798,10 +796,6 @@ sub main {
 			};
 			/^squashfs/ && do {
 				$ok = $image -> createImageSquashFS ();
-				last SWITCH;
-			};
-			/^dmsquash/ && do {
-				$ok = $image -> createImageDMSquashExt3 ();
 				last SWITCH;
 			};
 			/^clicfs/   && do {

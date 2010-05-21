@@ -679,7 +679,7 @@ sub setupBootStick {
 	#==========================================
 	# check for device mapper snapshot / clicfs
 	#------------------------------------------
-	if (($type{filesystem} eq "dmsquash") || ($type{filesystem} eq "clicfs")) {
+	if ($type{filesystem} eq "clicfs") {
 		$this->{dmapper} = 1;
 		$dmapper  = 1;
 		$dmbootMB = 60;
@@ -2382,7 +2382,7 @@ sub setupBootDisk {
 	#==========================================
 	# check for device mapper snapshot / clicfs
 	#------------------------------------------
-	if (($type{filesystem} eq "dmsquash") || ($type{filesystem} eq "clicfs")) {
+	if ($type{filesystem} eq "clicfs") {
 		$this->{dmapper} = 1;
 		$dmapper  = 1;
 		$dmbootMB = 60;

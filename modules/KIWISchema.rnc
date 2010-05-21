@@ -1238,9 +1238,9 @@ div {
 		attribute volid { text }
 	k.type.flags.attribute =
 		## Specifies flags for the image type. This could be compressed
-		## unified or dmsquash and applies to the iso type only
+		## or unified and applies to the iso type only
 		attribute flags {
-			"clic" | "compressed" | "dmsquash" | "unified" 
+			"clic" | "compressed" | "unified"
 		}
 	k.type.hybrid.attribute =
 		## for the iso type only:
@@ -1277,13 +1277,11 @@ div {
 		attribute luks { text }
 	k.type.filesystem.attribute = 
 		## Specifies the filesystem which can be one of:
-		## clicfs, dmsquash, ext2, ext3, ext4, reiserfs, or squashfs
-		## dmsquash is an ext3 filesystem packed into a squashfs
-		## and used later with a device mapper snapshot. clicfs
-		## is a fuse based compressed filesystem using a cow
+		## clicfs, ext2, ext3, ext4, reiserfs, or squashfs
+		## clicfs is a fuse based compressed filesystem using a cow
 		## file for write operations
 		attribute filesystem {
-			"clicfs" | "dmsquash" | "ext2" | "ext3" | "ext4" |
+			"clicfs" | "ext2" | "ext3" | "ext4" |
 			"reiserfs" | "squashfs"   
 		}
 	k.type.fsreadonly.attribute =
@@ -1309,7 +1307,7 @@ div {
 	k.type.image.attribute =
 		## Specifies the image type
 		attribute image {
-			"clicfs" | "cpio" | "dmsquash" | "ec2" | "ext2" | "ext3" |
+			"clicfs" | "cpio" | "ec2" | "ext2" | "ext3" |
 			"ext4" | "iso" | "oem" | "product" | "pxe" | "reiserfs" |
 			"split" | "squashfs" | "usb" | "vmx" | "xen"
 		}

@@ -733,9 +733,6 @@ function createBootDeviceData {
 	# check for overlay type
 	#--------------------------------------
 	local unionFST=`echo $UNIONFS_CONFIG | cut -d , -f 3`
-	if [ "$unionFST" = "dmsquash" ];then
-		export haveDMSquash=yes
-	fi
 	if [ "$unionFST" = "clicfs" ];then
 		export haveClicFS=yes
 	fi

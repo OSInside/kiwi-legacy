@@ -209,16 +209,6 @@ if [ "$LOCAL_BOOT" = "no" ];then
 		fi
 		rm -rf /mnt/boot
 		( cd /mnt && ln -s lvmboot/boot boot )
-	elif [ "$haveDMSquash" = "yes" ];then
-		#======================================
-		# DM use third partition as boot
-		#--------------------------------------
-		mkdir /mnt/dmboot
-		export imageBootDevice=$(ddn $imageDiskDevice 3)
-		mount $imageBootDevice /mnt/dmboot
-		cp -a  /mnt/boot /mnt/dmboot
-		rm -rf /mnt/boot
-		( cd /mnt && ln -s dmboot/boot boot )
 	elif [ "$haveClicFS" = "yes" ];then
 		#======================================
 		# Clic use third partition as boot
@@ -285,8 +275,6 @@ if [ "$LOCAL_BOOT" = "no" ];then
 		mountCalled=no
 		if [ "$haveLVM" = "yes" ];then
 			pushd /mnt/lvmboot/boot >/dev/null
-		elif [ "$haveDMSquash" = "yes" ];then
-			pushd /mnt/dmboot/boot >/dev/null
 		elif [ "$haveClicFS" = "yes" ];then
 			pushd /mnt/clicboot/boot >/dev/null
 		elif [ "$haveLuks" = "yes" ];then
@@ -322,8 +310,6 @@ if [ "$LOCAL_BOOT" = "no" ];then
 	updateRootDeviceFstab /config $imageRootDevice
 	if [ "$haveLVM" = "yes" ];then
 		updateLVMBootDeviceFstab /config $imageBootDevice
-	elif [ "$haveDMSquash" = "yes" ];then
-		updateDMBootDeviceFstab /config $imageBootDevice
 	elif [ "$haveClicFS" = "yes" ];then
 		updateClicBootDeviceFstab /config $imageBootDevice
 	elif [ "$loader" = "syslinux" ] || [ "$loader" = "extlinux" ];then
@@ -344,7 +330,6 @@ if [ "$LOCAL_BOOT" = "no" ];then
 	if \
 		[ "$loader" = "syslinux" ]  ||\
 		[ "$loader" = "extlinux" ]  ||\
-		[ "$haveDMSquash" = "yes" ] ||\
 		[ "$haveClicFS" = "yes" ]   ||\
 		[ "$haveLuks" = "yes" ]
 	then

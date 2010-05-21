@@ -7,6 +7,12 @@ Tue May 18 16:00:05 CEST 2010 - ms@suse.de
   error prune than the cp command (bnc #476117)
 - removed plusSuggested attribute, update documentation
   and added sort patch by Robert
+- removed support for dmsquash filesystem. This implementation
+  was replaced by clicfs. dmsquash was a combination of a
+  squashfs filesystem together with a device mapper snapshot
+  as copy-on-write part. There was no way to properly react
+  if we run out of cow space which also makes this feature
+  more or less useles in a production environment
 
 -------------------------------------------------------------------
 Tue May 18 15:02:48 CEST 2010 - ug@suse.de

@@ -1791,12 +1791,6 @@ function updateLVMBootDeviceFstab {
 	fi
 }
 #======================================
-# updateDMBootDeviceFstab
-#--------------------------------------
-function updateDMBootDeviceFstab {
-	updateLVMBootDeviceFstab $1 $2 "/dmboot"
-}
-#======================================
 # updateClicBootDeviceFstab
 #--------------------------------------
 function updateClicBootDeviceFstab {
@@ -3334,77 +3328,7 @@ function mountSystemUnified {
 	#======================================
 	# check union mount method
 	#--------------------------------------
-	if [ -f $roDir/fsdata.ext3 ];then
-		export haveDMSquash=yes
-		mountSystemDMSquash
-	else
-		mountSystemOverlay
-	fi
-}
-#======================================
-# mountSystemDMSquash
-#--------------------------------------
-function mountSystemDMSquash {
-	local roDir=/read-only
-	local snDevice=/dev/mapper/sys_snap
-	local rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
-	local roDevice=`echo $UNIONFS_CONFIG | cut -d , -f 2`
-	local orig_loop=$(losetup -r -s -f $roDir/fsdata.ext3)
-	local orig_sectors=$(blockdev --getsize $orig_loop)
-	local snap_sectors=$(blockdev --getsz $rwDevice)
-	local free_sectors=0
-	local used_sectors=0
-	local chunk=8
-	local flags=p
-	local count=0
-	#======================================
-	# check read-write persistency
-	#--------------------------------------
-	if getDiskDevice $rwDevice | grep -q ram;then
-		flags=n
-	fi
-	#======================================
-	# create snapshot device
-	#--------------------------------------
-	dmsetup create sys_snap --notable
-	echo "0 $orig_sectors snapshot $orig_loop $rwDevice $flags $chunk" |\
-		dmsetup load sys_snap
-	#======================================
-	# resume snapshot and origin devices
-	#--------------------------------------
-	dmsetup resume sys_snap
-	#======================================
-	# mount snapshot as root to /mnt
-	#--------------------------------------
-	mount $snDevice /mnt
-	#======================================
-	# check free size and snapshot size
-	#--------------------------------------
-	snap_sectors=$(($snap_sectors * 80 / 100))
-	for i in $(df --block-size 512 /mnt | tail -n1);do
-		count=`expr $count + 1`
-		if [ $count = 3 ];then
-			used_sectors=$i
-		fi
-		if [ $count = 4 ];then
-			free_sectors=$i
-		fi
-	done
-	if [ $snap_sectors -lt $free_sectors ];then
-		# /.../
-		# the snapshot space if less than the free space
-		# of the filesystem. Therefore we need to resize
-		# the filesystem to the free space of the snapshot
-		# ----
-		Echo "*** WARNING ***"
-		Echo "The snapshot space is: $snap_sectors 512B sectors"
-		Echo "which is smaller than the filesystem reported"
-		Echo "free sectors of: $free_sectors"
-		#umount /mnt
-		#snap_sectors=$(($snap_sectors + $used_sectors))
-		#resize2fs -f -p $snDevice "$snap_sectors"s
-		#mount $snDevice /mnt
-	fi
+	mountSystemOverlay
 }
 #======================================
 # mountSystemClicFS
