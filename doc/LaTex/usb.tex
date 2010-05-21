@@ -118,11 +118,6 @@ this KIWI supports compressed filesystems with USB sticks too:
       ext2 partition will be created on the stick. The support for this
       compression layer requires squashfs and aufs to be present in
       the distribution KIWI has used to build the image 
-\item \textbf{filesystem=''dmsquash''}\\
-      Creates an ext3 image file and puts that
-      into a squashfs filesystem. On boot the root tree is mounted
-      via a device mapper snapshot device to allow full write
-      access over the complete tree.
 \item \textbf{filesystem=''clicfs''}\\
       Creates a fuse based clicfs image and allows write operations
       into a cow file.

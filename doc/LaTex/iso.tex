@@ -75,12 +75,6 @@ alternative solutions:
       overlay filesystem for write support. A symbolic link list is used
       instead and thus a split element is required in config.xml.
       See the Split mode section below for details.
-\item \textbf{flags=''dmsquash''}\\
-      Creates an ext3 image file and puts that
-      into a squashfs filesystem. On boot the root tree is mounted
-      via a device mapper snapshot device to allow full write
-      access over the complete tree. No other overlay filesystem
-      is required.
 \item \textbf{flags=''clic''}\\
       Creates a fuse based clicfs image and allows write operations
       into a cow file. In case of an ISO the write happens into a

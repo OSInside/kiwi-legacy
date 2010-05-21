@@ -278,10 +278,6 @@ values of the image attribute:
       \item \textbf{compressed}: Compressed filesystem with squashfs and
             use a link list to mount the system read-write. An additional
             split section controls the read-write information.
-      \item \textbf{dmsquash}: Creates an ext3 image file and encapsulates
-            this image file within a squashfs filesystem. On boot the root 
-            tree is mounted via a device mapper snapshot device to allow full 
-            write access over the complete tree.
       \item \textbf{unified}: Compressed filesystem with squashfs mounted
             with an aufs based overlay mount to allow read-write access.
       \end{itemize}
