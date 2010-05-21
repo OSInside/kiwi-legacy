@@ -3001,7 +3001,7 @@ sub setupBootDisk {
 	}
 	if (! main::mount ($root, $loopdir)) {
 		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't mount image: $status");
+		$kiwi -> error  ("Couldn't mount image: $root");
 		$kiwi -> failed ();
 		$this -> cleanLoop ();
 		return undef;
@@ -4816,7 +4816,12 @@ sub setLVMDeviceMap {
 			}
 		}
 	} elsif ($dmapper) {
-		$result{dmapper} = $device."2";
+		if ($device =~ /loop/) {
+			my $dmap = $device; $dmap =~ s/dev\///;
+			$result{dmapper} = "/dev/mapper".$dmap."p2";
+		} else {
+			$result{dmapper} = $device."2";
+		}
 	}
 	return %result;
 }

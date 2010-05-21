@@ -13,6 +13,9 @@ Tue May 18 16:00:05 CEST 2010 - ms@suse.de
   as copy-on-write part. There was no way to properly react
   if we run out of cow space which also makes this feature
   more or less useles in a production environment
+- fixed setLVMDeviceMap() function. The contents of
+  $result{dmapper} were wrong if the device was a loop
+  destination
 
 -------------------------------------------------------------------
 Tue May 18 15:02:48 CEST 2010 - ug@suse.de

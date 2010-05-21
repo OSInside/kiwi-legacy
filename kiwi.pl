@@ -2517,6 +2517,14 @@ sub mount {
 	my $status;
 	my $result;
 	#==========================================
+	# Check result of filesystem detection
+	#------------------------------------------
+	if (! %fsattr) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't detect filesystem on: $source");
+		return undef;
+	}
+	#==========================================
 	# Check for CLIC extension
 	#------------------------------------------
 	if ($type eq "clicfs") {
@@ -2716,7 +2724,7 @@ sub checkFileSystem {
 			if ($main::kiwi -> trace()) {
 				$main::BT.=eval { Carp::longmess ($main::TT.$main::TL++) };
 			}
-			return undef;
+			return ();
 		}
 	}
 	return %result;
