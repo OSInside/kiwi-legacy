@@ -4095,12 +4095,12 @@ sub setupBootLoaderConfiguration {
 			print FD "gfxboot  bootlogo"."\n";
 			print FD "display  isolinux.msg"."\n";
 		}
-		if ($type =~ /^KIWI CD/) {
+		if ($type =~ /^KIWI (CD|USB)/) {
+			$title = $this -> makeLabel ("Boot from Hard Disk");
+			print FD "label $title\n";
+			print FD "localboot 0x80\n";
 			$title = $this -> makeLabel ("Install/Restore $label");
 			print FD "label $title\n";
-		} elsif ($type =~ /^KIWI USB/) {
-			$title = $this -> makeLabel ("Install/Restore $label");
-			print FD "label $title"."\n";
 		} else {
 			$title = $this -> makeLabel ("$label [ $type ]");
 			print FD "label $title"."\n";
@@ -4112,7 +4112,9 @@ sub setupBootLoaderConfiguration {
 			if ($type =~ /^KIWI CD/) {
 				print FD "kernel linux\n";
 				print FD "append initrd=initrd ";
-				print FD "vga=$vga loader=$bloader splash=silent";
+				print FD "vga=$vga loader=$bloader splash=silent ";
+				print FD "ramdisk_size=512000 ramdisk_blocksize=4096 ";
+				print FD "cdinst=1";
 			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
 				print FD "kernel /boot/linux.vmx\n";
 				print FD "append initrd=/boot/initrd.vmx ";
@@ -4158,7 +4160,9 @@ sub setupBootLoaderConfiguration {
 			if ($type =~ /^KIWI CD/) {
 				print FD "kernel linux\n";
 				print FD "append initrd=initrd ";
-				print FD "vga=$vga loader=$bloader splash=silent";
+				print FD "vga=$vga loader=$bloader splash=silent ";
+				print FD "ramdisk_size=512000 ramdisk_blocksize=4096 ";
+				print FD "cdinst=1";
 			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
 				print FD "kernel /boot/linux.vmx\n";
 				print FD "append initrd=/boot/initrd.vmx ";

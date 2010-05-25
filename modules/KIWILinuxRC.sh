@@ -1069,8 +1069,18 @@ function setupBootLoaderSyslinux {
 	#======================================
 	# create syslinux.cfg file
 	#--------------------------------------
-	echo "DEFAULT vesamenu.c32"         > $conf
+	echo "implicit 1"                   > $conf
+	echo "prompt   1"                  >> $conf
 	echo "TIMEOUT $KIWI_BOOT_TIMEOUT"  >> $conf
+	if \
+		[ -f "/boot/syslinux/gfxboot.com" ] || \
+		[ -f "/boot/syslinux/gfxboot.c32" ]
+	then
+		echo "ui gfxboot bootlogo isolinux.msg" >> $conf
+	else
+		echo "gfxboot  bootlogo"                >> $conf
+		echo "display  isolinux.msg"            >> $conf
+	fi
 	local count=1
 	IFS="," ; for i in $KERNEL_LIST;do
 		if test ! -z "$i";then
@@ -1103,15 +1113,15 @@ function setupBootLoaderSyslinux {
 			#======================================
 			# create standard entry
 			#--------------------------------------
-			echo "LABEL Linux" >> $conf
-			echo "MENU LABEL $title"                           >> $conf
+			echo "DEFAULT $title"                              >> $conf
+			echo "label $title"                                >> $conf
 			if xenServer;then
 				systemException \
 					"*** $loader: Xen dom0 boot not implemented ***" \
 				"reboot"
 			else
-				echo "KERNEL /boot/$kernel"                    >> $conf
-				echo -n "APPEND initrd=/boot/$initrd"          >> $conf
+				echo "kernel /boot/$kernel"                    >> $conf
+				echo -n "append initrd=/boot/$initrd"          >> $conf
 				echo -n " root=$diskByID $console"             >> $conf
 				if [ ! -z "$imageDiskDevice" ];then
 					echo -n " disk=$(getDiskID $imageDiskDevice)"  >> $conf
@@ -1135,15 +1145,14 @@ function setupBootLoaderSyslinux {
 			# create Failsafe entry
 			#--------------------------------------
 			title=$(makeLabel "Failsafe -- $title")
-			echo "LABEL Failsafe"                              >> $conf
-			echo "MENU LABEL $title"                           >> $conf
+			echo "label $title"                                >> $conf
 			if xenServer;then
 				systemException \
 					"*** $loader: Xen dom0 boot not implemented ***" \
 				"reboot"
 			else
-				echo "KERNEL /boot/$kernel"                    >> $conf
-				echo -n "APPEND initrd=/boot/$initrd"          >> $conf
+				echo "kernel /boot/$kernel"                    >> $conf
+				echo -n "append initrd=/boot/$initrd"          >> $conf
 				echo -n " root=$diskByID $console"             >> $conf
 				if [ ! -z "$imageDiskDevice" ];then
 					echo -n " disk=$(getDiskID $imageDiskDevice)"  >> $conf
