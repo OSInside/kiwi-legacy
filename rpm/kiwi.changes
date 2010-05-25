@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Tue May 25 16:10:30 CEST 2010 - ms@suse.de
 
+- changed ovftool options according to latest version
 - use isolinux for install CD's if sys|extlinux was requested
   as bootloader for an oem image plus install media (bnc #606651)
 - fixed clicfs resize operation. The command is now based

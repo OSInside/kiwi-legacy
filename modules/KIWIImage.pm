@@ -1204,7 +1204,6 @@ sub createImageVMX {
 			# ----
 			$kiwi -> info ("Creating OVF image...");
 			my $ovffile = $vmxfile;
-			my $ovflog  = $kiwi -> getRootLog();
 			my $ovftool = "/usr/bin/ovftool";
 			if (! -x $ovftool) {
 				$kiwi -> failed ();
@@ -1230,15 +1229,9 @@ sub createImageVMX {
 				return undef;
 			}
 			my $output = basename $ovffile;
-			if (! $ovflog) {
-				$status= qxx (
-					"$ovftool -bf $vmxfile $ovffile/$output 2>&1"
-				);
-			} else {
-				$status= qxx (
-					"$ovftool -bf $vmxfile $ovffile/$output -l $ovflog 2>&1"
-				);
-			}
+			$status= qxx (
+				"$ovftool -oq $vmxfile $ovffile/$output 2>&1"
+			);
 			$result = $? >> 8;
 			# --- beg ----
 			qxx ("sed -i -e 's;disk;scsi-hardDisk;' $vmxfile");
