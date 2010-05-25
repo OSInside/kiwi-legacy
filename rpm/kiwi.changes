@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Tue May 25 16:10:30 CEST 2010 - ms@suse.de
+
+- use isolinux for install CD's if sys|extlinux was requested
+  as bootloader for an oem image plus install media (bnc #606651)
+- fixed clicfs resize operation. The command is now based
+  on a 512 byte sector size value instead of a 4k filesystem block
+  size value which might be wrong depending on the size of the
+  filesystem (bnc #604646)
+
+-------------------------------------------------------------------
 Fri May 21 15:47:36 CEST 2010 - ms@suse.de
 
 - v4.37

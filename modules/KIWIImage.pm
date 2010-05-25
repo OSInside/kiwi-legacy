@@ -278,8 +278,9 @@ sub createImageClicFS {
 	$kiwi -> info ("Creating clicfs container...");
 	my $clicfs = $this->{imageTree}."/usr/bin/mkclicfs";
 	if (! -x $clicfs) {
+		$kiwi -> done ();
 		$kiwi -> warning (
-			"Using mkclicfs from build system, versions should match !\n"
+			"Using mkclicfs from build system, versions should match !"
 		);
 		$clicfs = "mkclicfs";
 	}
@@ -933,6 +934,9 @@ sub createImageUSB {
 	}
 	if ($type{cmdline}) {
 		$main::ForeignRepo{"kernelcmdline"} = $type{cmdline};
+	}
+	if ($type{bootloader}) {
+		$main::ForeignRepo{"bootloader"} = $type{bootloader};
 	}
 	$main::ForeignRepo{"xmlnode"} = $xml -> getForeignNodeList();
 	$main::ForeignRepo{"xmlpacnode"} = $xml -> getForeignPackageNodeList();
@@ -1652,7 +1656,7 @@ sub createImageLiveCD {
 	if ($hybrid) {
 		$main::ForeignRepo{"hybrid"}= "true";
 	}
-	if ( $hybridpersistent ) {
+	if ($hybridpersistent) {
 		$main::ForeignRepo{"hybridpersistent"} = "true";
 	}
 	$main::ForeignRepo{"xmlnode"} = $xml -> getForeignNodeList();
@@ -2785,6 +2789,9 @@ sub createImageSplit {
 	}
 	if ($type{cmdline}) {
 		$main::ForeignRepo{"kernelcmdline"} = $type{cmdline};
+	}
+	if ($type{bootloader}) {
+		$main::ForeignRepo{"bootloader"} = $type{bootloader};
 	}
 	$main::ForeignRepo{"xmlnode"} = $xml -> getForeignNodeList();
 	$main::ForeignRepo{"xmlpacnode"} = $xml -> getForeignPackageNodeList();

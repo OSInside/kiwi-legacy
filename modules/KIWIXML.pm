@@ -394,6 +394,11 @@ sub new {
 				"kernelcmdline",$foreignRepo->{"kernelcmdline"}
 			);
 		}
+		if (defined $foreignRepo->{"bootloader"}) {
+			$this -> setForeignTypeAttribute (
+				"bootloader",$foreignRepo->{"bootloader"}
+			);
+		}
 		#==========================================
 		# foreign image attributes
 		#------------------------------------------
@@ -2310,6 +2315,9 @@ sub getImageConfig {
 	}
 	if ((%type) && ($type{cmdline})) {
 		$result{kiwi_cmdline} = $type{cmdline};
+	}
+	if ((%type) && ($type{bootloader})) {
+		$result{kiwi_bootloader} = $type{bootloader};
 	}
 	if ((%type) && ($type{luks})) {
 		$result{kiwi_luks} = "yes";

@@ -1019,7 +1019,14 @@ function suseGFXBoot {
 	if [ ! -z "$kiwi_boottheme" ];then
 		theme=$kiwi_boottheme
 	fi
+	if [ ! -z "$kiwi_bootloader" ];then
+		loader=$kiwi_bootloader
+	fi
 	if [ ! -z "$kiwi_hybrid" ];then
+		loader="isolinux"
+	fi
+	if [ "$loader" = "extlinux" ];then
+		# need the same data for extlinux and for isolinux
 		loader="isolinux"
 	fi
 	#======================================
@@ -1177,7 +1184,9 @@ function suseGFXBoot {
 	#--------------------------------------
 	if [ "$loader" = "isolinux" ];then
 		# isolinux boot code...
-		mv /usr/share/syslinux/isolinux.bin /image/loader
+		if [ -f /usr/share/syslinux/isolinux.bin ];then
+			mv /usr/share/syslinux/isolinux.bin /image/loader
+		fi
 		# use either gfxboot.com or gfxboot.c32
 		if [ -f /usr/share/syslinux/gfxboot.com ];then
 			mv /usr/share/syslinux/gfxboot.com /image/loader

@@ -1482,18 +1482,29 @@ sub setupInstallCD {
 	my $imgtype   = "oem";
 	my $gotsys    = 1;
 	my $volid     = "-V \"KIWI CD/DVD Installation\"";
+	my $bootloader= "grub";
 	my $status;
 	my $result;
 	my $ibasename;
 	my $tmpdir;
+	my %type;
+	#==========================================
+	# read config XML attributes
+	#------------------------------------------
+	if (defined $xml) {
+		%type = %{$xml->getImageTypeAndAttributes()};
+	}
 	#==========================================
 	# check for volume id
 	#------------------------------------------
-	if (defined $xml) {
-		my %type = %{$xml->getImageTypeAndAttributes()};
-		if ($type{volid}) {
-			$volid = " -V \"$type{volid}\"";
-		}
+	if ((%type) && ($type{volid})) {
+		$volid = " -V \"$type{volid}\"";
+	}
+	#==========================================
+	# setup boot loader type
+	#------------------------------------------
+	if ((%type) && ($type{bootloader})) {
+		$bootloader = $type{bootloader};
 	}
 	#==========================================
 	# create tmp directory
@@ -1662,7 +1673,7 @@ sub setupInstallCD {
 	#==========================================
 	# Import boot loader stages
 	#------------------------------------------
-	if (! $this -> setupBootLoaderStages ("grub","iso")) {
+	if (! $this -> setupBootLoaderStages ($bootloader,"iso")) {
 		$this -> cleanTmp ();
 		if (! $pinst) {
 			qxx ( "$main::Gzip -d $system" );
@@ -1679,7 +1690,7 @@ sub setupInstallCD {
 	if (! $gotsys) {
 		$title = "KIWI CD Boot: $namecd";
 	}
-	if (! $this -> setupBootLoaderConfiguration ("grub",$title)) {
+	if (! $this -> setupBootLoaderConfiguration ($bootloader,$title)) {
 		$this -> cleanTmp ();
 		if (! $pinst) {
 			qxx ( "$main::Gzip -d $system" );
@@ -1742,8 +1753,33 @@ sub setupInstallCD {
 	} else {
 		$name =~ s/gz$/iso/;
 	}
-	my $base = "-R -J -f -b boot/grub/stage2 -no-emul-boot $volid";
-	my $opts = "-boot-load-size 4 -boot-info-table -udf -allow-limited-size";
+	my $base;
+	my $opts;
+	if ($bootloader eq "grub") {
+		# let isolinux run grub second stage...
+		$base = "-R -J -f -b boot/grub/stage2 -no-emul-boot $volid";
+		$opts = "-boot-load-size 4 -boot-info-table -udf -allow-limited-size";
+	} elsif ($bootloader =~ /(sys|ext)linux/) {
+		# turn sys/extlinux configuation into a isolinux configuration...
+		my $cfg_ext = "$tmpdir/boot/syslinux/syslinux.cfg";
+		if (! -f $cfg_ext) {
+			$cfg_ext = "$tmpdir/boot/syslinux/extlinux.conf";
+		}
+		my $cfg_iso = "$tmpdir/boot/syslinux/isolinux.cfg";
+		qxx ("mv $cfg_ext $cfg_iso 2>&1");
+		qxx ("mv $tmpdir/boot/initrd $tmpdir/boot/syslinux");
+		qxx ("mv $tmpdir/boot/linux  $tmpdir/boot/syslinux");
+		qxx ("mv $tmpdir/boot/syslinux $tmpdir/boot/loader 2>&1");
+		$base = "-R -J -f -b boot/loader/isolinux.bin -no-emul-boot $volid";
+		$opts = "-boot-load-size 4 -boot-info-table -udf -allow-limited-size";
+	} else {
+		# don't know how to use this bootloader together with isolinux
+		$kiwi -> failed ();
+		$kiwi -> error  ("Bootloader not supported for CD inst: $bootloader");
+		$kiwi -> failed ();
+		$this -> cleanTmp ();
+		return undef;
+	}
 	my $wdir = qxx ("pwd"); chomp $wdir;
 	if ($name !~ /^\//) {
 		$name = $wdir."/".$name;
@@ -1752,6 +1788,9 @@ sub setupInstallCD {
 		$kiwi,$tmpdir,$name,undef,"checkmedia"
 	);
 	my $tool= $iso -> getTool();
+	if ($bootloader =~ /(sys|ext)linux/) {
+		$iso -> createISOLinuxConfig ("/boot");
+	}
 	$status = qxx ("cd $tmpdir && $tool $base $opts -o $name . 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
@@ -1800,10 +1839,24 @@ sub setupInstallStick {
 	my @commands  = ();
 	my $imgtype   = "oem";
 	my $gotsys    = 1;
+	my $bootloader= "grub";
 	my $status;
 	my $result;
 	my $ibasename;
 	my $tmpdir;
+	my %type;
+	#==========================================
+	# read config XML attributes
+	#------------------------------------------
+	if (defined $xml) {
+		%type = %{$xml->getImageTypeAndAttributes()};
+	}
+	#==========================================
+	# setup boot loader type
+	#------------------------------------------
+	if ((%type) && ($type{bootloader})) {
+		$bootloader = $type{bootloader};
+	}
 	#==========================================
 	# create tmp directory
 	#------------------------------------------
@@ -1980,7 +2033,7 @@ sub setupInstallStick {
 	#==========================================
 	# Import boot loader stages
 	#------------------------------------------
-	if (! $this -> setupBootLoaderStages ("grub")) {
+	if (! $this -> setupBootLoaderStages ($bootloader)) {
 		$this -> cleanTmp ();
 		if (! $pinst) {
 			qxx ( "$main::Gzip -d $system" );
@@ -1994,7 +2047,7 @@ sub setupInstallStick {
 	if (! $gotsys) {
 		$title = "KIWI USB Boot: $nameusb";
 	}
-	if (! $this -> setupBootLoaderConfiguration ("grub",$title)) {
+	if (! $this -> setupBootLoaderConfiguration ($bootloader,$title)) {
 		$this -> cleanTmp ();
 		if (! $pinst) {
 			qxx ( "$main::Gzip -d $system" );
@@ -2200,7 +2253,7 @@ sub setupInstallStick {
 	#==========================================
 	# Install boot loader on virtual disk
 	#------------------------------------------
-	if (! $this -> installBootLoader ("grub", $diskname, \%deviceMap)) {
+	if (! $this -> installBootLoader ($bootloader, $diskname, \%deviceMap)) {
 		$this -> cleanLoop ();
 		$this -> cleanTmp();
 	}
@@ -3731,10 +3784,14 @@ sub setupBootLoaderStages {
 	# syslinux
 	#------------------------------------------
 	if ($loader =~ /(sys|ext)linux/) {
-		my $message= "'image/loader/message'";
+		my $message= "'image/loader/*'";
 		my $unzip  = "$main::Gzip -cd $initrd 2>&1";
 		#==========================================
-		# Get syslinux graphics boot message
+		# Create syslinux boot data directory
+		#------------------------------------------
+		qxx ("mkdir -p $tmpdir/boot/syslinux 2>&1");
+		#==========================================
+		# Get syslinux graphics data
 		#------------------------------------------
 		$kiwi -> info ("Importing graphics boot message");
 		if ($zipped) {
@@ -3742,24 +3799,19 @@ sub setupBootLoaderStages {
 		} else {
 			$status= qxx ("cat $initrd|(cd $tmpdir && cpio -di $message 2>&1)");
 		}
-		if (-e $tmpdir."/image/loader/message") {
-			$status = qxx ("mv $tmpdir/$message $tmpdir/boot/message 2>&1");
+		if (-d $tmpdir."/image/loader") {
+			$status = qxx (
+				"mv $tmpdir/image/loader/* $tmpdir/boot/syslinux 2>&1"
+			);
 			$result = $? >> 8;
 			$kiwi -> done();
 		} else {
 			$kiwi -> skipped();
 		}
 		#==========================================
-		# Get syslinux vesamenu extension
+		# Cleanup tmpdir
 		#------------------------------------------
-		$kiwi -> info ("Importing graphics boot message");
-		qxx ("mkdir -p $tmpdir/boot/syslinux 2>&1");
-		qxx ("cp /usr/share/syslinux/vesamenu.c32 $tmpdir/boot/syslinux 2>&1");
-		if (-e $tmpdir."/boot/syslinux/vesamenu.c32") {
-			$kiwi -> done();
-		} else {
-			$kiwi -> skipped();
-		}
+		qxx ("rm -rf $tmpdir/image 2>&1");
 	}
 	#==========================================
 	# more boot managers to come...
@@ -4025,45 +4077,67 @@ sub setupBootLoaderConfiguration {
 			$kiwi -> failed ();
 			return undef;
 		}
+		my $syslinux_new_format = 0;
+		my $gfx = "$tmpdir/boot/syslinux";
+		if (-f "$gfx/gfxboot.com" || -f "$gfx/gfxboot.c32") {
+			$syslinux_new_format = 1;
+		}
 		#==========================================
 		# General syslinux setup
 		#------------------------------------------
-		print FD "DEFAULT vesamenu.c32\n";
-		print FD "TIMEOUT 100\n";
-		if ($type =~ /^KIWI CD/) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("*** syslinux: cdinst not supported ***");
-			$kiwi -> failed ();
-			return undef;
-		} elsif ($type =~ /^KIWI USB/) {
-			print FD "LABEL Linux\n";
-			print FD "MENU LABEL Install/Restore ".$label."\n";
+		print FD "default  $label"."\n";
+		print FD "implicit 1"."\n";
+		print FD "prompt   1"."\n";
+		print FD "timeout  200"."\n";
+		if ($syslinux_new_format) {
+			print FD "ui gfxboot bootlogo isolinux.msg"."\n";
 		} else {
-			print FD "LABEL Linux\n";
-			print FD "MENU LABEL ".$label." [ ".$type." ]\n";
+			print FD "gfxboot  bootlogo"."\n";
+			print FD "display  isolinux.msg"."\n";
+		}
+		if ($type =~ /^KIWI CD/) {
+			$title = $this -> makeLabel ("Install/Restore $label");
+			print FD "label $title\n";
+		} elsif ($type =~ /^KIWI USB/) {
+			$title = $this -> makeLabel ("Install/Restore $label");
+			print FD "label $title"."\n";
+		} else {
+			$title = $this -> makeLabel ("$label [ $type ]");
+			print FD "label $title"."\n";
 		}
 		#==========================================
 		# Standard boot
 		#------------------------------------------
 		if (! $isxen) {
 			if ($type =~ /^KIWI CD/) {
-				# not supported yet..
+				print FD "kernel linux\n";
+				print FD "append initrd=initrd ";
+				print FD "vga=$vga loader=$bloader splash=silent";
 			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
-				print FD "KERNEL /boot/linux.vmx\n";
-				print FD "APPEND initrd=/boot/initrd.vmx ";
+				print FD "kernel /boot/linux.vmx\n";
+				print FD "append initrd=/boot/initrd.vmx ";
 				print FD "vga=$vga loader=$bloader splash=silent";
 			} else {
-				print FD "KERNEL /boot/linux\n";
-				print FD "APPEND initrd=/boot/initrd ";
+				print FD "kernel /boot/linux\n";
+				print FD "append initrd=/boot/initrd ";
 				print FD "vga=$vga loader=$bloader splash=silent";
 			}
 		} else {
 			if ($type =~ /^KIWI CD/) {
-				# not supported yet..
+				$kiwi -> failed ();
+				$kiwi -> error  ("*** syslinux: Xen cdinst not supported ***");
+				$kiwi -> failed ();
+				return undef;
 			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
-				# not supported yet..
+				$kiwi -> failed ();
+				$kiwi -> error  ("*** syslinux: Xen boot not supported ***");
+				$kiwi -> failed ();
+				return undef;
 			} else {
-				# not supported yet..
+				$kiwi -> failed ();
+				$kiwi -> error  ("*** syslinux: Xen boot not supported ***");
+				$kiwi -> failed ();
+				return undef;
 			}
 		}
 		print FD $cmdline;
@@ -4071,35 +4145,47 @@ sub setupBootLoaderConfiguration {
 		# Failsafe boot
 		#------------------------------------------
 		if ($type =~ /^KIWI CD/) {
-			# not supported yet..
+			$title = $this -> makeLabel ("Failsafe -- Install/Restore $label");
+			print FD "label $title"."\n";
 		} elsif ($type =~ /^KIWI USB/) {
-			print FD "LABEL Failsafe\n";
-			print FD "MENU LABEL Failsafe -- Install/Restore ".$label."\n";
+			$title = $this -> makeLabel ("Failsafe -- Install/Restore $label");
+			print FD "label $title"."\n";
 		} else {
-			print FD "LABEL Failsafe\n";
-			print FD "MENU LABEL Failsafe -- ".$label." [ ".$type." ]\n";
+			$title = $this -> makeLabel ("Failsafe -- $label [ $type ]");
+			print FD "label $title"."\n";
 		}
 		if (! $isxen) {
 			if ($type =~ /^KIWI CD/) {
-				# not supported yet..
+				print FD "kernel linux\n";
+				print FD "append initrd=initrd ";
+				print FD "vga=$vga loader=$bloader splash=silent";
 			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
-				print FD "KERNEL /boot/linux.vmx\n";
-				print FD "APPEND initrd=/boot/initrd.vmx ";
+				print FD "kernel /boot/linux.vmx\n";
+				print FD "append initrd=/boot/initrd.vmx ";
 				print FD "vga=$vga loader=$bloader splash=silent";
 			} else {
-				print FD "KERNEL /boot/linux\n";
-				print FD "APPEND initrd=/boot/initrd ";
+				print FD "kernel /boot/linux\n";
+				print FD "append initrd=/boot/initrd ";
 				print FD "vga=$vga loader=$bloader splash=silent";
 			}
 			print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
 			print FD " noapic maxcpus=0 edd=off";
 		} else {
 			if ($type =~ /^KIWI CD/) {
-				# not supported yet..
+				$kiwi -> failed ();
+				$kiwi -> error  ("*** syslinux: Xen cdinst not supported ***");
+				$kiwi -> failed ();
+				return undef;
 			} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
-				# not supported yet..
+				$kiwi -> failed ();
+				$kiwi -> error  ("*** syslinux: Xen boot not supported ***");
+				$kiwi -> failed ();
+				return undef;
 			} else {
-				# not supported yet..
+				$kiwi -> failed ();
+				$kiwi -> error  ("*** syslinux: Xen boot not supported ***");
+				$kiwi -> failed ();
+				return undef;
 			}
 			print FD " ide=nodma apm=off acpi=off noresume selinux=0 nosmp";
 			print FD " noapic maxcpus=0 edd=off";
