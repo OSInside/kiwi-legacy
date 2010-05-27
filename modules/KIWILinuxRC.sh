@@ -5469,9 +5469,7 @@ function setupBootPartition {
 	fi
 	mkdir -p /mnt/$mpoint
 	mount $imageBootDevice /mnt/$mpoint
-	if [ -z "$UNIONFS_CONFIG" ];then
-		cp -a /mnt/boot /mnt/$mpoint
-	fi
+	cp -a /mnt/boot /mnt/$mpoint
 	if [ -e /boot.tgz ];then
 		tar -xf /boot.tgz -C /mnt/$mpoint
 	fi
