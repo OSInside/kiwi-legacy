@@ -61,7 +61,7 @@ main (int argc, char *argv[])
                 fprintf(stdout, "-f <raw file\t\tSpecify the file to write\n");
                 fprintf(stdout, "-k\t\t\tOperate in \"kiosk mode\", only listing disks smaller than 200GB\n");
                 fprintf(stdout, "-l\t\t\tList valid USB devices\n");
-                fprintf(stdout, "-m\t\t\tMaximize the window");
+                fprintf(stdout, "-m\t\t\tMaximize the window\n");
                 fprintf(stdout, "-u\t\t\tOperate in unsafe mode, listing all disks, not just removable ones\n");
                 fprintf(stdout, "-v\t\t\tVersion and author information\n");
                 exit(0);

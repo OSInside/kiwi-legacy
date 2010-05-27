@@ -7,11 +7,9 @@ qmake should automatically detect your platform.
 
 === Kiosk mode ===
 
-The imagewriter also has the capability to be used in "kiosks" that may have external harddrives.  In order to compile in code that will
-both ignore large hard drives and mark unknown USB sticks as "SUSE Studio", run
-    % qmake DEFINES+=KIOSKHACK
-to create the make file and then
-    % make
+The imagewriter also has the capability to be used in "kiosks" that may have external harddrives.  To run in kiosk mode,
+which both ignores large hard drives and marks unknown USB sticks as "SUSE Studio", 
+run imagewriter with the -k option.
 
 in order to start the imagewriter with sudo, do the following:
     % xhost +SI:localuser:root
