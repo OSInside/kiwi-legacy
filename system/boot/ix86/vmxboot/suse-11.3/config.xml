@@ -104,8 +104,11 @@
 		<package name="cryptsetup"/>
 		<package name="dialog"/>
 		<package name="kiwi-tools"/>
+		<package name="gettext-runtime"/>
 		<package name="kexec-tools"/>
 		<package name="parted"/>
+		<package name="syslinux"/>
+		<package name="fbiterm"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
@@ -128,7 +131,6 @@
 		<package name="gawk"/>
 		<package name="gdbm"/>
 		<package name="glib2"/>
-		<package name="glibc-locale"/>
 		<package name="gnome-filesystem"/>
 		<package name="gpg"/>
 		<package name="info"/>
@@ -154,7 +156,6 @@
 		<package name="pm-utils"/>
 		<package name="pmtools"/>
 		<package name="suse-build-key"/>
-		<package name="fribidi"/>
 		<package name="make"/>
 	</packages>
 </image>

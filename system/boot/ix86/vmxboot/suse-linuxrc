@@ -118,7 +118,12 @@ openKernelConsole
 probeDevices
 
 #======================================
-# 7) Search boot device...
+# 7) Select language if not in cmdline
+#--------------------------------------
+selectLanguage
+
+#======================================
+# 8) Search boot device...
 #--------------------------------------
 Echo "Searching for boot device..."
 if [ "$LOCAL_BOOT" = "no" ];then
@@ -132,7 +137,7 @@ fi
 Echo "Found boot device: $imageDiskDevice"
 
 #======================================
-# 8) Setup device names...
+# 9) Setup device names...
 #--------------------------------------
 export imageRootDevice=$(ddn $imageDiskDevice 1)
 export imageRWDevice=$(ddn $imageDiskDevice 2)
@@ -156,7 +161,7 @@ if searchVolumeGroup; then
 fi
 
 #======================================
-# 9) Get filesystem type
+# 10) Get filesystem type
 #--------------------------------------
 probeFileSystem $imageRootDevice
 if [ "$FSTYPE" = "luks" ];then
@@ -172,7 +177,7 @@ if [ "$FSTYPE" = "unknown" ];then
 fi
 
 #======================================
-# 10) Check filesystem
+# 11) Check filesystem
 #--------------------------------------
 Echo "Filesystem of VMX system is: $FSTYPE -> $imageRootDevice"
 if isFSTypeReadOnly;then
@@ -180,7 +185,7 @@ if isFSTypeReadOnly;then
 fi
 
 #======================================
-# 11) Mount VM (boot)
+# 12) Mount VM (boot)
 #--------------------------------------
 if ! mountSystem $imageRootDevice;then
 	systemException "Failed to mount root filesystem" "reboot"
@@ -188,14 +193,14 @@ fi
 validateRootTree
 
 #======================================
-# 12) Get kernel list for local boot
+# 13) Get kernel list for local boot
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then
 	kernelList /mnt
 fi
 
 #======================================
-# 13) setup ird/kernel links for union
+# 14) setup ird/kernel links for union
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then
 	if isFSTypeReadOnly;then
@@ -205,19 +210,11 @@ if [ "$LOCAL_BOOT" = "no" ];then
 		# kiwi boot system.
 		# ----
 		mountCalled=no
-		if [ "$haveLVM" = "yes" ];then
-			pushd /mnt/lvmboot/boot >/dev/null
-		elif [ "$haveClicFS" = "yes" ];then
-			pushd /mnt/clicboot/boot >/dev/null
-		elif [ "$loader" = "syslinux" ] || [ "$loader" = "extlinux" ];then
-			pushd /mnt/syslboot/boot >/dev/null
-		elif [ "$haveLuks" = "yes" ];then
-			pushd /mnt/luksboot/boot >/dev/null
-		else
+		if [ -e "$imageRWDevice" ];then
 			kiwiMount $imageRWDevice "/mnt"
-			pushd /mnt/boot >/dev/null
 			mountCalled=yes
 		fi
+		pushd /mnt/boot >/dev/null
 		IFS="," ; for i in $KERNEL_LIST;do
 			if test -z "$i";then
 				continue
@@ -237,7 +234,7 @@ if [ "$LOCAL_BOOT" = "no" ];then
 fi
 
 #======================================
-# 14) Create system dependant files
+# 15) Create system dependant files
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then
 	setupDefaultFstab /config
@@ -274,29 +271,29 @@ if [ "$LOCAL_BOOT" = "no" ];then
 fi
 
 #======================================
-# 15) copy system dependant files
+# 16) copy system dependant files
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then
 	setupConfigFiles
 fi
 
 #======================================
-# 16) update system dependant files
+# 17) update system dependant files
 #--------------------------------------
 setupInittab /mnt
 
 #======================================
-# 17) setup real root device
+# 18) setup real root device
 #--------------------------------------
 echo 256 > /proc/sys/kernel/real-root-dev
 
 #======================================
-# 18) umount system filesystems
+# 19) umount system filesystems
 #--------------------------------------
 umountSystemFilesystems
 
 #======================================
-# 19) copy initrd files to image
+# 20) copy initrd files to image
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then
 	importBranding
@@ -305,17 +302,17 @@ cp /preinit /mnt
 cp /include /mnt
 
 #======================================
-# 20) kill boot shell
+# 21) kill boot shell
 #--------------------------------------
 killShell
 killBlogD
 
 #======================================
-# 21) Activate new root
+# 22) Activate new root
 #--------------------------------------
 activateImage
 
 #======================================
-# 22) Unmount initrd / system init
+# 23) Unmount initrd / system init
 #--------------------------------------
 bootImage $@

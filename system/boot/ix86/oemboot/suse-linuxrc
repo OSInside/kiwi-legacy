@@ -563,21 +563,11 @@ if [ "$LOCAL_BOOT" = "no" ];then
 		# kiwi boot system.
 		# ----
 		mountCalled=no
-		if [ "$haveLVM" = "yes" ];then
-			pushd /mnt/lvmboot/boot >/dev/null
-		elif [ "$haveClicFS" = "yes" ];then
-			pushd /mnt/clicboot/boot >/dev/null
-		elif [ "$loader" = "syslinux" ] || [ "$loader" = "extlinux" ];then
-			pushd /mnt/syslboot/boot >/dev/null
-		elif [ "$haveLuks" = "yes" ];then
-			pushd /mnt/luksboot/boot >/dev/null
-		elif [ "$OEM_KIWI_INITRD" = "yes" ];then
-			pushd /mnt/boot >/dev/null
-		else
+		if [ -e "$imageRWDevice" ];then
 			kiwiMount $imageRWDevice "/mnt"
-			pushd /mnt/boot >/dev/null
 			mountCalled=yes
 		fi
+		pushd /mnt/boot >/dev/null
 		IFS="," ; for i in $KERNEL_LIST;do
 			if test -z "$i";then
 				continue
