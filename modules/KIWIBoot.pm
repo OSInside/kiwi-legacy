@@ -343,7 +343,7 @@ sub new {
 		# ----
 		my $kernelSize = -s $kernel;
 		my $initrdSize = -s $initrd;
-		$vmsize = $kernelSize + $initrdSize + $sizeBytes;
+		$vmsize = $kernelSize + ($initrdSize * 1.5) + $sizeBytes;
 		#==========================================
 		# Calculate required inode count for root
 		#------------------------------------------
