@@ -351,13 +351,8 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 			if ! mountSystem $imageRootDevice;then
 				systemException "Failed to mount root filesystem" "reboot"
 			fi
-			if [ "$haveLVM" = "yes" ];then
-				mkdir -p /mnt/lvmboot && rm -rf /mnt/boot
-				mount $imageBootDevice /mnt/lvmboot
-				( cd /mnt && ln -s lvmboot/boot boot )
-			fi
 			for i in dev sys proc;do
-				mkdir /mnt/$i
+				mkdir -p /mnt/$i
 			done
 		fi
 		cd /mnt
@@ -466,28 +461,7 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 	fi
 	clear
 	#======================================
-	# 16.4) restore boot files
-	#--------------------------------------
-	Echo "Restoring boot files..."
-	for i in etc/fstab etc/sysconfig/kernel etc/sysconfig/bootloader;do
-		if ! cp /reco-save/$i /mnt/$i;then
-			systemException "Failed to restore $i" "reboot"
-		fi
-	done
-	for i in `setupBootLoaderFiles`;do
-		if ! cp /reco-save/$i /mnt/$i;then
-			systemException "Failed to restore $i" "reboot"
-		fi
-	done
-	for i in /reco-save/boot/grub/*;do
-		if echo $i | grep -q .system;then
-			sysbase=`echo ${i%%.system}`
-			sysbase=`echo $sysbase | cut -f3- -d/`
-			cp $i /mnt/$sysbase
-		fi
-	done
-	#======================================
-	# 16.5) restore temporary stored files
+	# 16.4) restore temporary stored files
 	#--------------------------------------
 	if [ -z "$RESTORE" ];then
 		for i in passwd shadow group;do
@@ -501,6 +475,13 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 			systemException "Failed to restore RPM database" "reboot"
 		fi
 		rm -rf /mnt/var/lib/rpm.backup
+	fi
+	#======================================
+	# 16.5) restore boot files 1
+	#--------------------------------------
+	Echo "Restoring boot configuration archive part (1)..."
+	if ! tar -xf /reco-save/boot-1.tgz -C /mnt;then
+		systemException "Failed to restore boot configuration" "reboot"
 	fi
 	#======================================
 	# 16.6) restore fstab partitions
@@ -519,18 +500,39 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 			probeFileSystem $imageRootDevice
 			createFilesystem $imageHomeDevice
 		fi
+		imageBootDevice=$(
+			cat /mnt/etc/fstab|grep /.*boot|grep -v bind | sed -r 's/\s+/:/g')
+		if [ ! -z "$imageBootDevice" ];then
+			imageBootMountP=$(echo $imageBootDevice | cut -f2 -d:)
+			imageBootDevice=$(echo $imageBootDevice | cut -f1 -d:)
+			rm -rf /mnt/boot
+			mkdir  /mnt/boot
+			probeFileSystem $imageRootDevice
+			createFilesystem $imageBootDevice
+			mkdir -p /mnt/$imageBootMountP
+			mount $imageBootDevice /mnt/$imageBootMountP
+			mkdir -p /mnt/$imageBootMountP/boot
+			mount --bind /mnt/$imageBootMountP/boot /mnt/boot
+		fi
 	fi
 	#======================================
-	# 16.7) umount recovery and boot
+	# 16.7) restore boot files 2
+	#--------------------------------------
+	Echo "Restoring boot configuration archive part (2)..."
+	if ! tar -xf /reco-save/boot-2.tgz -C /mnt/$imageBootMountP;then
+		systemException "Failed to restore boot configuration" "reboot"
+	fi
+	#======================================
+	# 16.8) umount recovery 
 	#--------------------------------------
 	umount $imageRecoveryDevice
 	#======================================
-	# 16.8) import oem config file
+	# 16.9) import oem config file
 	#--------------------------------------
 	importFile < $OEM_PARTITION_CONFIG
 	IFS=$IFS_ORIG
 	#======================================
-	# 16.9) write oem-trigger
+	# 16.10) write oem-trigger
 	#--------------------------------------
 	TDIR=/mnt/var/cache/recovery
 	TOEM=oem-trigger
@@ -551,72 +553,7 @@ if [ "$LOCAL_BOOT" = "no" ];then
 fi
 
 #======================================
-# 18) setup boot partition
-#--------------------------------------
-if [ "$LOCAL_BOOT" = "no" ]; then
-	if [ "$haveLVM" = "yes" ];then
-		#======================================
-		# LVM use second partition as boot
-		#--------------------------------------
-		mkdir /mnt/lvmboot
-		mount $imageBootDevice /mnt/lvmboot
-		if [ -z $UNIONFS_CONFIG ];then
-			cp -a /mnt/boot/* /mnt/lvmboot/boot
-		fi
-		rm -rf /mnt/boot
-		( cd /mnt && ln -s lvmboot/boot boot )
-	elif [ "$haveClicFS" = "yes" ];then
-		#======================================
-		# Clic use third partition as boot
-		#--------------------------------------
-		if [ -z "$imageBootDevice" ];then
-			export imageBootDevice=$(ddn $imageDiskDevice $bootid)
-		fi
-		mkdir /mnt/clicboot
-		mount $imageBootDevice /mnt/clicboot
-		cp -a  /mnt/boot /mnt/clicboot
-		if [ -e /boot.tgz ];then
-			tar -xf /boot.tgz -C /mnt/clicboot
-		fi
-		rm -rf /mnt/boot
-		( cd /mnt && ln -s clicboot/boot boot )
-	elif [ "$loader" = "syslinux" ] || [ "$loader" = "extlinux" ];then
-		#======================================
-		# syslinux / extlinux bootloader
-		#--------------------------------------
-		if [ -z "$imageBootDevice" ];then
-			imageBootDevice=$(ddn $imageDiskDevice $bootid)
-		fi
-		mkdir /mnt/syslboot
-		mount $imageBootDevice /mnt/syslboot
-		if [ -e /boot.tgz ];then
-			tar -xf /boot.tgz -C /mnt/syslboot
-		fi
-		if [ -z "$UNIONFS_CONFIG" ];then
-			cp -a /mnt/boot/* /mnt/syslboot/boot
-		fi
-		rm -rf /mnt/boot
-		( cd /mnt && ln -s syslboot/boot boot )
-	elif [ "$haveLuks" = "yes" ];then
-		#======================================
-		# LUKS use second or third part as boot
-		#--------------------------------------
-		if [ -z "$imageBootDevice" ];then
-			imageBootDevice=$(ddn $imageDiskDevice $bootid)
-		fi
-		mkdir -p /mnt/luksboot
-		mount $imageBootDevice /mnt/luksboot
-		cp -a /mnt/boot /mnt/luksboot
-		if [ -e /boot.tgz ];then
-			tar -xf /boot.tgz -C /mnt/luksboot
-		fi
-		rm -rf /mnt/boot
-		( cd /mnt && ln -s luksboot/boot boot )
-	fi
-fi
-
-#======================================
-# 19) setup ird/kernel links for union
+# 18) setup ird/kernel links for union
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then 
 	if [ "$OEM_KIWI_INITRD" = "yes" ] || isFSTypeReadOnly;then
@@ -660,7 +597,7 @@ if [ "$LOCAL_BOOT" = "no" ];then
 fi
 
 #======================================
-# 20) Create system dependant files
+# 19) Create system dependant files
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then
 	#======================================
@@ -715,61 +652,29 @@ if [ "$LOCAL_BOOT" = "no" ];then
 fi
 
 #======================================
-# 21) copy system dependant files
+# 20) copy system dependant files
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then
 	setupConfigFiles
 fi
 
 #======================================
-# 22) copy recovery related files
-#--------------------------------------
-if [ "$LOCAL_BOOT" = "no" ] && [ ! -z "$OEM_RECOVERY" ];then
-	IFS=$IFS_ORIG
-	Echo "Setting up recovery configuration files..."
-	mkdir -p /reco-save
-	if ! mount $imageRecoveryDevice /reco-save >/dev/null;then
-		systemException "Failed to mount recovery device" "reboot"
-	fi
-	mkdir -p /reco-save/etc/sysconfig
-	if ! cp /mnt/etc/fstab /reco-save/etc;then
-		systemException "Failed to copy recovery fstab" "reboot"
-	fi
-	if ! cp /mnt/etc/sysconfig/kernel /reco-save/etc/sysconfig;then
-		systemException "Failed to copy recovery sysconfig/kernel" "reboot"
-	fi
-	if ! cp /mnt/etc/sysconfig/bootloader /reco-save/etc/sysconfig;then
-		systemException "Failed to copy recovery sysconfig/bootloader" "reboot"
-	fi
-	for i in `setupBootLoaderFiles`;do
-		bootdir=`dirname $i` && mkdir -p /reco-save/$bootdir
-		if ! cp /mnt/$i /reco-save/$i;then
-			systemException "Failed to copy recovery $i" "reboot"
-		fi
-	done
-	Echo "Installing boot loader into recovery partition"
-	setupBootLoaderRecovery /mnt /reco-save OEM
-	umount /reco-save && rmdir /reco-save
-	installBootLoaderRecovery
-fi
-
-#======================================
-# 23) update system dependant files
+# 21) update system dependant files
 #--------------------------------------
 setupInittab /mnt
 
 #======================================
-# 24) setup real root device
+# 22) setup real root device
 #--------------------------------------
 echo 256 > /proc/sys/kernel/real-root-dev
 
 #======================================
-# 25) umount system filesystems
+# 23) umount system filesystems
 #--------------------------------------
 umountSystemFilesystems
 
 #======================================
-# 26) copy initrd files to image
+# 24) copy initrd files to image
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then
 	importBranding
@@ -778,17 +683,17 @@ cp /preinit /mnt
 cp /include /mnt
 
 #======================================
-# 27) kill boot shell
+# 25) kill boot shell
 #--------------------------------------
 killShell
 killBlogD
 
 #======================================
-# 28) Activate new root
+# 26) Activate new root
 #--------------------------------------
 activateImage
 
 #======================================
-# 29 Unmount initrd / system init
+# 27 Unmount initrd / system init
 #--------------------------------------
 bootImage $@

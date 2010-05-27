@@ -1193,6 +1193,9 @@ function suseGFXBoot {
 		elif [ -f /usr/share/syslinux/gfxboot.c32 ];then
 			mv /usr/share/syslinux/gfxboot.c32 /image/loader
 		fi
+		if [ -f /usr/share/syslinux/chain.c32 ];then
+			mv /usr/share/syslinux/chain.c32 /image/loader
+		fi
 		if [ -f /usr/share/syslinux/mboot.c32 ];then
 			mv /usr/share/syslinux/mboot.c32 /image/loader
 		fi

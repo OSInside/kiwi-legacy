@@ -42,7 +42,7 @@ function OEMRepartInit {
 		fi
 		recoBytes=$(du --bytes /reco-root/recovery.tar.gz | cut -f1)
 		recoMByte=$((recoBytes / 1048576))
-		recoMByte=$((recoMByte * 15 / 10))
+		recoMByte=$((recoMByte + 100))
 		recoID=83
 		if [ ! -z "$OEM_RECOVERY_ID" ];then
 			recoID=$OEM_RECOVERY_ID
@@ -68,6 +68,12 @@ function OEMRepartStandard {
 	# check for boot partition
 	#--------------------------------------
 	createBootDeviceData 2
+	#======================================
+	# deactivate features if required
+	#--------------------------------------
+	if [ "$haveBootPartition" = "yes" ];then
+		export OEM_WITHOUTHOME=1
+	fi
 	#======================================
 	# setup initial boot device ID
 	#--------------------------------------
@@ -570,14 +576,21 @@ function OEMRepart {
 			systemException "Failed to move recovery size info" "reboot"
 		fi
 		mkdir /reco-save/boot
-		if ! cp /reco-root/boot/initrd.vmx /reco-save/boot/initrd;then
-			systemException "Failed to copy recovery initrd" "reboot"
+		if [ "$loader" = "grub" ];then
+			if ! cp /reco-root/boot/initrd.vmx /reco-save/boot/initrd;then
+				systemException "Failed to copy recovery initrd" "reboot"
+			fi
+			if ! cp /reco-root/boot/linux.vmx /reco-save/boot/vmlinuz;then
+				systemException "Failed to copy recovery kernel" "reboot"
+			fi
+			if ! cp /reco-root/boot/message /reco-save/boot/message;then
+				systemException "Failed to copy recovery gfx message" "reboot"
+			fi
 		fi
-		if ! cp /reco-root/boot/linux.vmx /reco-save/boot/vmlinuz;then
-			systemException "Failed to copy recovery kernel" "reboot"
-		fi
-		if ! cp /reco-root/boot/message /reco-save/boot/message;then
-			systemException "Failed to copy recovery gfxboot message" "reboot"
+		if [ -f /boot.tgz ];then
+			if ! tar -xf /boot.tgz -C /reco-save;then
+				systemException "Failed to extract recovery boot files" "reboot"
+			fi
 		fi
 		if ! dd if=$imageDiskDevice of=/reco-save/mbr bs=1 count=512;then
 			systemException "Failed to store MBR" "reboot"
@@ -730,10 +743,6 @@ function createBootDeviceData {
 		mount $(ddn $imageDiskDevice $bootPart) /mnt
 		tar -czf /boot.tgz -C /mnt .
 		umount /mnt
-		#====================================== 
-		# deactivate unsupported features
-		#--------------------------------------
-		unset OEM_RECOVERY
 	fi
 	#====================================== 
 	# check for overlay type

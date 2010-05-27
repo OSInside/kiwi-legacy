@@ -567,8 +567,12 @@ function installBootLoaderRecovery {
 		loader="grub"
 	fi
 	case $arch-$loader in
-		i*86-grub)   installBootLoaderGrubRecovery ;;
-		x86_64-grub) installBootLoaderGrubRecovery ;;
+		i*86-grub)       installBootLoaderGrubRecovery ;;
+		x86_64-grub)     installBootLoaderGrubRecovery ;;
+		i*86-syslinux)   installBootLoaderSyslinuxRecovery ;;
+		x86_64-syslinux) installBootLoaderSyslinuxRecovery ;;
+		i*86-extlinux)   installBootLoaderSyslinuxRecovery ;;
+		x86_64-extlinux) installBootLoaderSyslinuxRecovery ;;
 		*)
 		systemException \
 			"*** boot loader setup for $arch-$loader not implemented ***" \
@@ -632,6 +636,22 @@ function installBootLoaderLilo {
 	fi
 }
 #======================================
+# installBootLoaderSyslinuxRecovery
+#--------------------------------------
+function installBootLoaderSyslinuxRecovery {
+	local syslmbr=/usr/share/syslinux/mbr.bin
+	if [ -e $syslmbr ];then
+		if [ $loader = "syslinux" ];then
+			syslinux $imageRecoveryDevice
+		else
+			extlinux --install /reco-save/boot/syslinux
+		fi
+	else
+		Echo "Image doesn't have syslinux (mbr.bin) installed"
+		Echo "Can't install boot loader"
+	fi
+}
+#======================================
 # installBootLoaderGrubRecovery
 #--------------------------------------
 function installBootLoaderGrubRecovery {
@@ -646,8 +666,9 @@ function installBootLoaderGrubRecovery {
 	echo "root (hd0,$gdevreco)"  >> $input
 	echo "setup (hd0,$gdevreco)" >> $input
 	echo "quit"          >> $input
-	if [ -x /mnt/usr/sbin/grub ];then
-		/mnt/usr/sbin/grub --batch < $input 1>&2
+	if [ -x /usr/sbin/grub ];then
+		/usr/sbin/grub --batch < $input 1>&2
+		rm -f $input
 	else
 		Echo "Image doesn't have grub installed"
 		Echo "Can't install boot loader"
@@ -754,55 +775,6 @@ function callSUSEInitrdScripts {
 	chroot . bash ./run_all.sh
 }
 #======================================
-# setupBootLoaderFiles
-#--------------------------------------
-function setupBootLoaderFiles {
-	# /.../
-	# generic function which returns the files used for a
-	# specific bootloader. The selection of the bootloader
-	# happens according to the architecture of the system
-	# ----
-	local arch=`uname -m`
-	if [ -z "$loader" ];then
-		loader="grub"
-	fi
-	case $arch-$loader in
-		i*86-grub)        setupBootLoaderFilesGrub ;;
-		x86_64-grub)      setupBootLoaderFilesGrub ;;
-		ppc*)             setupBootLoaderFilesLilo ;;
-		i*86-syslinux)    setupBootLoaderFilesSyslinux ;;
-		x86_64-syslinux)  setupBootLoaderFilesSyslinux ;;
-		i*86-extlinux)    setupBootLoaderFilesSyslinux ;;
-		x86_64-extlinux)  setupBootLoaderFilesSyslinux ;;
-		*)
-		systemException \
-			"*** boot loader files for $arch-$loader not implemented ***" \
-		"reboot"
-	esac
-}
-#======================================
-# setupBootLoaderFilesSyslinux
-#--------------------------------------
-function setupBootLoaderFilesSyslinux {
-	if [ $loader = "extlinux" ];then
-		echo "/boot/syslinux/extlinux.conf"
-	else
-		echo "/boot/syslinux/syslinux.cfg"
-	fi
-}
-#======================================
-# setupBootLoaderFilesGrub
-#--------------------------------------
-function setupBootLoaderFilesGrub {
-	echo "/boot/grub/menu.lst /etc/grub.conf"
-}
-#======================================
-# setupBootLoaderFilesLilo
-#--------------------------------------
-function setupBootLoaderFilesLilo {
-	echo "/etc/lilo.conf"
-}
-#======================================
 # setupBootLoader
 #--------------------------------------
 function setupBootLoader {
@@ -853,13 +825,129 @@ function setupBootLoaderRecovery {
 		loader="grub"
 	fi
 	case $arch-$loader in
-		i*86-grub)   eval setupBootLoaderGrubRecovery $para ;;
-		x86_64-grub) eval setupBootLoaderGrubRecovery $para ;;
+		i*86-grub)       eval setupBootLoaderGrubRecovery $para ;;
+		x86_64-grub)     eval setupBootLoaderGrubRecovery $para ;;
+		i*86-syslinux)   eval setupBootLoaderSyslinuxRecovery $para ;;
+		x86_64-syslinux) eval setupBootLoaderSyslinuxRecovery $para ;;
+		i*86-extlinux)   eval setupBootLoaderSyslinuxRecovery $para ;;
+		x86_64-extlinux) eval setupBootLoaderSyslinuxRecovery $para ;;
 		*)
 		systemException \
 			"*** boot loader setup for $arch-$loader not implemented ***" \
 		"reboot"
 	esac
+}
+#======================================
+# setupBootLoaderSyslinuxRecovery
+#--------------------------------------
+function setupBootLoaderSyslinuxRecovery {
+	# /.../
+	# create syslinux configuration for the recovery boot system
+	# ----
+	local mountPrefix=$1  # mount path of the image
+	local destsPrefix=$2  # base dir for the config files
+	local gnum=$3         # boot partition ID
+	local rdev=$4         # root partition
+	local gfix=$5         # syslinux title postfix
+	local swap=$6         # optional swap partition
+	local conf=$destsPrefix/boot/syslinux/syslinux.cfg
+	local kernel=""
+	local initrd=""
+	local fbmode=$vga
+	if [ -z "$fbmode" ];then
+		fbmode=$DEFAULT_VGA
+	fi
+	#======================================
+	# import syslinux into recovery
+	#--------------------------------------
+	cp -a $mountPrefix/boot/syslinux $destsPrefix/boot
+	#======================================
+	# setup config file name
+	#--------------------------------------
+	if [ $loader = "extlinux" ];then
+		conf=$destsPrefix/boot/syslinux/extlinux.conf
+	fi
+	#======================================
+	# create syslinux.cfg file
+	#--------------------------------------
+	echo "implicit 1"                   > $conf
+	echo "prompt   1"                  >> $conf
+	echo "TIMEOUT $KIWI_BOOT_TIMEOUT"  >> $conf
+	if \
+		[ -f "$destsPrefix/boot/syslinux/gfxboot.com" ] || \
+		[ -f "$destsPrefix/boot/syslinux/gfxboot.c32" ]
+	then
+		echo "ui gfxboot bootlogo isolinux.msg" >> $conf
+	else
+		echo "gfxboot  bootlogo"                >> $conf
+		echo "display  isolinux.msg"            >> $conf
+	fi
+	kernel=linux.vmx   # this is a copy of the kiwi linux.vmx file
+	initrd=initrd.vmx  # this is a copy of the kiwi initrd.vmx file
+	#======================================
+	# create recovery entry
+	#--------------------------------------
+	if [ ! -z "$OEM_RECOVERY" ];then
+		#======================================
+		# Reboot
+		#--------------------------------------
+		title=$(makeLabel "Cancel/Reboot")
+		echo "DEFAULT $title"                              >> $conf
+		echo "label $title"                                >> $conf
+		echo " localboot 0x80"                             >> $conf
+		#======================================
+		# Recovery
+		#--------------------------------------
+		title=$(makeLabel "Recover/Repair System")
+		echo "label $title"                                >> $conf
+		if xenServer;then
+			systemException \
+				"*** $loader: Xen dom0 boot not implemented ***" \
+			"reboot"
+		else
+			echo "kernel /boot/$kernel"                    >> $conf
+			echo -n "append initrd=/boot/$initrd"          >> $conf
+			echo -n " root=$diskByID"                      >> $conf
+			if [ ! -z "$imageDiskDevice" ];then
+				echo -n " disk=$(getDiskID $imageDiskDevice)"  >> $conf
+			fi
+			echo -n " vga=$fbmode loader=$loader"          >> $conf
+			echo -n " splash=silent"                       >> $conf
+			echo -n " $KIWI_INITRD_PARAMS"                 >> $conf
+			echo -n " $KIWI_KERNEL_OPTIONS"                >> $conf
+			if [ "$haveLVM" = "yes" ];then
+				echo -n " VGROUP=$VGROUP"                  >> $conf
+			fi
+			echo " KIWI_RECOVERY=$recoid"                  >> $conf
+			echo " showopts"                               >> $conf
+		fi
+		#======================================
+		# Restore
+		#--------------------------------------
+		title=$(makeLabel "Restore Factory System")
+		echo "label $title"                                >> $conf
+		if xenServer;then
+			systemException \
+				"*** $loader: Xen dom0 boot not implemented ***" \
+			"reboot"
+		else
+			echo "kernel /boot/$kernel"                    >> $conf
+			echo -n "append initrd=/boot/$initrd"          >> $conf
+			echo -n " root=$diskByID"                      >> $conf
+			if [ ! -z "$imageDiskDevice" ];then
+				echo -n " disk=$(getDiskID $imageDiskDevice)"  >> $conf
+			fi
+			echo -n " vga=$fbmode loader=$loader"          >> $conf
+			echo -n " splash=silent"                       >> $conf
+			echo -n " $KIWI_INITRD_PARAMS"                 >> $conf
+			echo -n " $KIWI_KERNEL_OPTIONS"                >> $conf
+			if [ "$haveLVM" = "yes" ];then
+				echo -n " VGROUP=$VGROUP"                  >> $conf
+			fi
+			echo " KIWI_RECOVERY=$recoid RESTORE=1"        >> $conf
+			echo " showopts"                               >> $conf
+		fi
+	fi
 }
 #======================================
 # setupBootLoaderGrubRecovery
@@ -885,12 +973,9 @@ function setupBootLoaderGrubRecovery {
 	#======================================
 	# import grub stages into recovery
 	#--------------------------------------
+	mkdir -p $destsPrefix/boot/grub
 	cp $mountPrefix/boot/grub/stage1 $destsPrefix/boot/grub
 	cp $mountPrefix/boot/grub/stage2 $destsPrefix/boot/grub
-	#======================================
-	# backup current menu.lst
-	#--------------------------------------
-	mv $menu $menu.system
 	#======================================
 	# create recovery menu.lst
 	#--------------------------------------
@@ -905,7 +990,13 @@ function setupBootLoaderGrubRecovery {
 		#======================================
 		# Make the cancel option default
 		#--------------------------------------
-		echo "default 2"                                  >> $menu
+		echo "default 0"                                  >> $menu
+		#======================================
+		# Reboot
+		#--------------------------------------
+		title=$(makeLabel "Cancel/Reboot")
+		echo "title $title"                               >> $menu
+		echo " reboot"                                    >> $menu
 		#======================================
 		# Recovery
 		#--------------------------------------
@@ -979,12 +1070,6 @@ function setupBootLoaderGrubRecovery {
 			echo " showopts"                              >> $menu
 			echo " initrd $gdev_recovery/boot/$initrd"    >> $menu
 		fi
-		#======================================
-		# Reboot
-		#--------------------------------------
-		title=$(makeLabel "Cancel/Reboot")
-		echo "title $title"                               >> $menu
-		echo " reboot"                                    >> $menu
 	fi
 }
 #======================================
@@ -1010,6 +1095,9 @@ function setupBootLoaderSyslinux {
 	local title=""
 	local fbmode=$vga
 	local xencons=$xencons
+	if [ ! -z "$OEM_RECOVERY" ];then
+		local gdevreco=$recoid
+	fi
 	if [ -z "$fbmode" ];then
 		fbmode=$DEFAULT_VGA
 	fi
@@ -1073,8 +1161,8 @@ function setupBootLoaderSyslinux {
 	echo "prompt   1"                  >> $conf
 	echo "TIMEOUT $KIWI_BOOT_TIMEOUT"  >> $conf
 	if \
-		[ -f "/boot/syslinux/gfxboot.com" ] || \
-		[ -f "/boot/syslinux/gfxboot.c32" ]
+		[ -f "$destsPrefix/boot/syslinux/gfxboot.com" ] || \
+		[ -f "$destsPrefix/boot/syslinux/gfxboot.c32" ]
 	then
 		echo "ui gfxboot bootlogo isolinux.msg" >> $conf
 	else
@@ -1093,8 +1181,10 @@ function setupBootLoaderSyslinux {
 			#======================================
 			# move to FAT requirements 8+3
 			#--------------------------------------
-			kernel="linux.$count"
-			initrd="initrd.$count"
+			if [ "$loader" = "syslinux" ];then
+				kernel="linux.$count"
+				initrd="initrd.$count"
+			fi
 			if ! echo $gfix | grep -E -q "OEM|USB|VMX|NET|unknown";then
 				if [ "$count" = "1" ];then
 					title=$(makeLabel "$gfix")
@@ -1181,9 +1271,9 @@ function setupBootLoaderSyslinux {
 	# create recovery entry
 	#--------------------------------------
 	if [ ! -z "$OEM_RECOVERY" ];then
-		systemException \
-			"*** $loader: recovery chain loading not implemented ***" \
-		"reboot"
+		echo "label Recovery"                             >> $conf
+		echo "COM32 chain.c32"                            >> $conf
+		echo "append hd0 $gdevreco"                       >> $conf
 	fi
 	#======================================
 	# create sysconfig/bootloader
@@ -1796,6 +1886,7 @@ function updateLVMBootDeviceFstab {
 		FSTYPE="auto"
 	fi
 	echo "$diskByID $mount $FSTYPE defaults 0 0" >> $nfstab
+	echo "$mount/boot /boot none bind 0 0" >> $nfstab
 	if [ ! -z "$FSTYPE_SAVE" ];then
 		FSTYPE=$FSTYPE_SAVE
 	fi
@@ -1835,6 +1926,7 @@ function updateSyslinuxBootDeviceFstab {
 	else
 		echo "$diskByID /syslboot ext2 defaults 0 0" >> $nfstab
 	fi
+	echo "/syslboot/boot /boot none bind 0 0" >> $nfstab
 }
 #======================================
 # updateOtherDeviceFstab
@@ -3193,6 +3285,10 @@ function umountSystem {
 			retval=1
 		fi
 	fi
+	if [ ! -z "$imageBootDevice" ];then
+		umount /mnt/boot
+		umount $imageBootDevice
+	fi
 	IFS=$OLDIFS
 	return $retval
 }
@@ -3596,10 +3692,6 @@ function mountSystemCombined {
 			ln -s /mnt/read-write /read-write >/dev/null
 		fi
 	fi
-	if [ "$LOCAL_BOOT" = "yes" ] && [ "$haveLuks" = "yes" ];then
-		mkdir -p /mnt/luksboot
-		( cd /mnt && rm boot && ln -sf luksboot/boot boot )
-	fi
 }
 #======================================
 # mountSystemStandard
@@ -3667,6 +3759,9 @@ function mountSystem {
 	else
 		mountSystemStandard "$mountDevice"
 		retval=$?
+	fi
+	if [ $retval = 0 ] && [ -z "$RESTORE" ];then
+		setupBootPartition
 	fi
 	IFS=$OLDIFS
 	return $retval
@@ -5321,6 +5416,69 @@ function startUtimer {
 		fi
 		echo UTIMER_PID=$UTIMER >> /iprocs
 	fi
+}
+#======================================
+# setupBootPartition
+#--------------------------------------
+function setupBootPartition {
+	local pSearch=83
+	local mpoint
+	if [ "$haveLVM" = "yes" ];then
+		#======================================
+		# lvmboot
+		#--------------------------------------
+		test -z "$bootid" && export bootid=2
+		mpoint=lvmboot
+	elif [ "$haveClicFS" = "yes" ];then
+		#======================================
+		# clicboot
+		#--------------------------------------
+		test -z "$bootid" && export bootid=3
+		mpoint=clicboot
+	elif \
+		[ "$loader" = "syslinux" ] || \
+		[ "$loader" = "extlinux" ] || \
+		[ "$haveLuks" = "yes" ]
+	then
+		#======================================
+		# syslboot / luksboot
+		#--------------------------------------
+		if [ -z "$bootid" ];then
+			test "$loader" = "syslinux" && pSearch=6
+			for i in 4 3 2;do
+				pType=$(partitionID $imageDiskDevice $i)
+				if [ "$pType" = $pSearch ];then
+					export bootid=$i
+					break
+				fi
+			done
+		fi
+		if [ "$haveLuks" = "yes" ];then
+			mpoint=luksboot
+		else
+			mpoint=syslboot
+		fi
+	else
+		#======================================
+		# no separate boot partition
+		#--------------------------------------
+		return
+	fi
+	if [ -z "$imageBootDevice" ];then
+		export imageBootDevice=$(ddn $imageDiskDevice $bootid)
+	fi
+	mkdir -p /mnt/$mpoint
+	mount $imageBootDevice /mnt/$mpoint
+	if [ -z "$UNIONFS_CONFIG" ];then
+		cp -a /mnt/boot /mnt/$mpoint
+	fi
+	if [ -e /boot.tgz ];then
+		tar -xf /boot.tgz -C /mnt/$mpoint
+	fi
+	rm -rf /mnt/boot
+	mkdir  /mnt/boot
+	mount --bind \
+		/mnt/$mpoint/boot /mnt/boot
 }
 #======================================
 # initialize

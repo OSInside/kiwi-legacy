@@ -195,75 +195,7 @@ if [ "$LOCAL_BOOT" = "no" ];then
 fi
 
 #======================================
-# 13) setup boot partition 
-#--------------------------------------
-if [ "$LOCAL_BOOT" = "no" ];then
-	if [ "$haveLVM" = "yes" ];then
-		#======================================
-		# LVM use second partition as boot
-		#--------------------------------------
-		mkdir /mnt/lvmboot
-		mount $imageBootDevice /mnt/lvmboot
-		if [ -z "$UNIONFS_CONFIG" ];then
-			cp -a /mnt/boot/* /mnt/lvmboot/boot
-		fi
-		rm -rf /mnt/boot
-		( cd /mnt && ln -s lvmboot/boot boot )
-	elif [ "$haveClicFS" = "yes" ];then
-		#======================================
-		# Clic use third partition as boot
-		#--------------------------------------
-		mkdir /mnt/clicboot
-		export imageBootDevice=$(ddn $imageDiskDevice 3)
-		mount $imageBootDevice /mnt/clicboot
-		cp -a  /mnt/boot /mnt/clicboot
-		rm -rf /mnt/boot
-		( cd /mnt && ln -s clicboot/boot boot )
-	elif [ "$loader" = "syslinux" ] || [ "$loader" = "extlinux" ];then
-		#======================================
-		# Syslinux search FAT and use as boot
-		#--------------------------------------
-		pSearch=6
-		if [ "$loader" = "extlinux" ];then
-			pSearch=83
-		fi
-		for i in 3 2 1;do
-			pType=`partitionID $imageDiskDevice $i`
-			if [ "$pType" = $pSearch ];then
-				imageBootDevice=$(ddn $imageDiskDevice $i)
-				break
-			fi 
-		done
-		if [ -z "$imageBootDevice" ];then
-			systemException "Can't find 0x$pSearch boot partition" "reboot"
-		fi
-		mkdir /mnt/syslboot
-		mount $imageBootDevice /mnt/syslboot
-		if [ -z "$UNIONFS_CONFIG" ];then
-			cp -a /mnt/boot/* /mnt/syslboot/boot
-		fi
-		rm -rf /mnt/boot
-		( cd /mnt && ln -s syslboot/boot boot )
-	elif [ "$haveLuks" = "yes" ];then
-		#======================================
-		# LUKS use second or third part as boot
-		#--------------------------------------
-		mkdir /mnt/luksboot
-		export imageBootDevice=$(ddn $imageDiskDevice 3)
-		if [ ! -e $imageBootDevice ];then
-			imageBootDevice=$(ddn $imageDiskDevice 2)
-		fi
-		mount $imageBootDevice /mnt/luksboot
-		if [ -z "$UNIONFS_CONFIG" ];then
-			cp -a /mnt/boot/* /mnt/luksboot/boot
-		fi
-		rm -rf /mnt/boot
-		( cd /mnt && ln -s luksboot/boot boot )
-	fi
-fi
-
-#======================================
-# 14) setup ird/kernel links for union
+# 13) setup ird/kernel links for union
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then
 	if isFSTypeReadOnly;then
@@ -277,6 +209,8 @@ if [ "$LOCAL_BOOT" = "no" ];then
 			pushd /mnt/lvmboot/boot >/dev/null
 		elif [ "$haveClicFS" = "yes" ];then
 			pushd /mnt/clicboot/boot >/dev/null
+		elif [ "$loader" = "syslinux" ] || [ "$loader" = "extlinux" ];then
+			pushd /mnt/syslboot/boot >/dev/null
 		elif [ "$haveLuks" = "yes" ];then
 			pushd /mnt/luksboot/boot >/dev/null
 		else
@@ -303,7 +237,7 @@ if [ "$LOCAL_BOOT" = "no" ];then
 fi
 
 #======================================
-# 15) Create system dependant files
+# 14) Create system dependant files
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then
 	setupDefaultFstab /config
@@ -340,29 +274,29 @@ if [ "$LOCAL_BOOT" = "no" ];then
 fi
 
 #======================================
-# 16) copy system dependant files
+# 15) copy system dependant files
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then
 	setupConfigFiles
 fi
 
 #======================================
-# 17) update system dependant files
+# 16) update system dependant files
 #--------------------------------------
 setupInittab /mnt
 
 #======================================
-# 18) setup real root device
+# 17) setup real root device
 #--------------------------------------
 echo 256 > /proc/sys/kernel/real-root-dev
 
 #======================================
-# 19) umount system filesystems
+# 18) umount system filesystems
 #--------------------------------------
 umountSystemFilesystems
 
 #======================================
-# 20) copy initrd files to image
+# 19) copy initrd files to image
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then
 	importBranding
@@ -371,17 +305,17 @@ cp /preinit /mnt
 cp /include /mnt
 
 #======================================
-# 21) kill boot shell
+# 20) kill boot shell
 #--------------------------------------
 killShell
 killBlogD
 
 #======================================
-# 22) Activate new root
+# 21) Activate new root
 #--------------------------------------
 activateImage
 
 #======================================
-# 23) Unmount initrd / system init
+# 22) Unmount initrd / system init
 #--------------------------------------
 bootImage $@

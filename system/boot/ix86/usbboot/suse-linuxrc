@@ -87,6 +87,7 @@ export stickRoot=$biosBootDevice
 export stickDevice=$(ddn $stickRoot 1)
 export stickRWDevice=$(ddn $stickRoot 2)
 export stickRODevice=$(ddn $stickRoot 1)
+export imageDiskDevice=$stickRoot
 Echo "Searching for $VGROUP volume group..."
 if searchVolumeGroup; then
 	export haveLVM=yes
@@ -140,75 +141,7 @@ if [ -e /mnt/etc/ImagePackages ];then
 fi
 
 #======================================
-# 11) setup /lvmboot
-#--------------------------------------
-if [ "$LOCAL_BOOT" = "no" ];then
-	if [ "$haveLVM" = "yes" ];then
-		#======================================
-		# LVM use second partition as boot
-		#--------------------------------------
-		mkdir /mnt/lvmboot
-		mount $stickBootDevice /mnt/lvmboot
-		if [ -z "$UNIONFS_CONFIG" ];then
-			cp -a /mnt/boot/* /mnt/lvmboot/boot
-		fi
-		rm -rf /mnt/boot
-		( cd /mnt && ln -s lvmboot/boot boot )
-	elif [ "$haveClicFS" = "yes" ];then
-		#======================================
-		# Clic use third partition as boot
-		#--------------------------------------
-		mkdir /mnt/clicboot
-		export imageBootDevice=$(ddn $stickRoot 3)
-		mount $imageBootDevice /mnt/clicboot
-		cp -a  /mnt/boot /mnt/clicboot
-		rm -rf /mnt/boot
-		( cd /mnt && ln -s clicboot/boot boot )
-	elif [ "$loader" = "syslinux" ] || [ "$loader" = "extlinux" ];then
-		#======================================
-		# Syslinux search FAT and use as boot
-		#--------------------------------------
-		pSearch=6
-		if [ "$loader" = "extlinux" ];then
-			pSearch=83
-		fi
-		for i in 3 2 1;do
-			pType=`partitionID $stickRoot $i`
-			if [ "$pType" = $pSearch ];then
-				imageBootDevice=$stickRoot$i
-				break
-			fi
-		done
-		if [ -z "$imageBootDevice" ];then
-			systemException "Can't find 0x$pSearch boot partition" "reboot"
-		fi
-		mkdir /mnt/syslboot
-		mount $imageBootDevice /mnt/syslboot
-		if [ -z "$UNIONFS_CONFIG" ];then
-			cp -a /mnt/boot/* /mnt/syslboot/boot
-		fi
-		rm -rf /mnt/boot
-		( cd /mnt && ln -s syslboot/boot boot )
-	elif [ "$haveLuks" = "yes" ];then
-		#======================================
-		# LUKS use second or third part as boot
-		#--------------------------------------
-		mkdir /mnt/luksboot
-		export imageBootDevice=$(ddn $stickRoot 3)
-		if [ ! -e $imageBootDevice ];then
-			imageBootDevice=$(ddn $stickRoot 2)
-		fi
-		mount $imageBootDevice /mnt/luksboot
-		if [ -z "$UNIONFS_CONFIG" ];then
-			cp -a /mnt/boot/* /mnt/luksboot/boot
-		fi
-		rm -rf /mnt/boot
-		( cd /mnt && ln -s luksboot/boot boot )
-	fi
-fi
-
-#======================================
-# 12) Create system dependant files
+# 11) Create system dependant files
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then
 	setupDefaultFstab /config
@@ -225,31 +158,31 @@ if [ "$LOCAL_BOOT" = "no" ];then
 fi
 
 #======================================
-# 13) copy system dependant files
+# 12) copy system dependant files
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then
 	setupConfigFiles
 fi
 
 #======================================
-# 14) update system dependant files
+# 13) update system dependant files
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then
 	setupInittab /mnt
 fi
 
 #======================================
-# 15) setup real root device
+# 14) setup real root device
 #--------------------------------------
 echo 256 > /proc/sys/kernel/real-root-dev
 
 #======================================
-# 16) umount system filesystems
+# 15) umount system filesystems
 #--------------------------------------
 umountSystemFilesystems
 
 #======================================
-# 17) copy initrd files to image
+# 16) copy initrd files to image
 #--------------------------------------
 if [ ! -f /mnt/boot/deployed ];then
 	touch /mnt/boot/deployed
@@ -259,17 +192,17 @@ cp /preinit /mnt
 cp /include /mnt
 
 #======================================
-# 18) kill boot shell
+# 17) kill boot shell
 #--------------------------------------
 killShell
 killBlogD
 
 #======================================
-# 19) Activate new root
+# 18) Activate new root
 #--------------------------------------
 activateImage
 
 #======================================
-# 20) Unmount initrd / system init
+# 19) Unmount initrd / system init
 #--------------------------------------
 bootImage $@
