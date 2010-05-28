@@ -2113,6 +2113,12 @@ sub setupInstallStick {
 	# Create loop device mapping table
 	#------------------------------------------
 	%deviceMap = $this -> setLoopDeviceMap ($this->{loop});
+	if ($bootloader eq "extlinux") {
+		$deviceMap{extlinux} = $deviceMap{1};
+	}
+	if ($bootloader eq "syslinux") {
+		$deviceMap{fat} = $deviceMap{1};
+	}
 	#==========================================
 	# setup device mapper
 	#------------------------------------------
@@ -2247,16 +2253,13 @@ sub setupInstallStick {
 		$kiwi -> done();
 	}
 	#==========================================
-	# cleanup device maps and part mount
-	#------------------------------------------
-	$this -> cleanLoopMaps();
-	#==========================================
 	# Install boot loader on virtual disk
 	#------------------------------------------
 	if (! $this -> installBootLoader ($bootloader, $diskname, \%deviceMap)) {
 		$this -> cleanLoop ();
 		$this -> cleanTmp();
 	}
+	$this -> cleanLoopMaps();
 	$this -> cleanLoop();
 	$kiwi -> info ("Created $diskname to be dd'ed on Stick");
 	$kiwi -> done ();
