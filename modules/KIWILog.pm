@@ -483,7 +483,7 @@ sub printLog {
 	#==========================================
 	# print message to root file
 	#------------------------------------------
-	if ($this->{errorOk}) {
+	if ($this->{errorOk} && ($rootEFD)) {
 		print $rootEFD $result;
 	}
 	#==========================================
