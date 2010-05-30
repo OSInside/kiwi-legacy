@@ -108,16 +108,16 @@ our $Pretty   = $BasePath."/xsl/print.xsl";
 # Globals (Supported filesystem names)
 #------------------------------------------
 our %KnownFS;
-$KnownFS{ext4}{tool}      = "/sbin/mkfs.ext4";
-$KnownFS{ext3}{tool}      = "/sbin/mkfs.ext3";
-$KnownFS{ext2}{tool}      = "/sbin/mkfs.ext2";
-$KnownFS{squashfs}{tool}  = "/usr/bin/mksquashfs";
-$KnownFS{clicfs}{tool}    = "/usr/bin/mkclicfs";
-$KnownFS{clic}{tool}      = "/usr/bin/mkclicfs";
-$KnownFS{unified}{tool}   = "/usr/bin/mksquashfs";
-$KnownFS{compressed}{tool}= "/usr/bin/mksquashfs";
-$KnownFS{reiserfs}{tool}  = "/sbin/mkreiserfs";
-$KnownFS{cpio}{tool}      = "/usr/bin/cpio";
+$KnownFS{ext4}{tool}      = findExec("mkfs.ext4");
+$KnownFS{ext3}{tool}      = findExec("mkfs.ext3");
+$KnownFS{ext2}{tool}      = findExec("mkfs.ext2");
+$KnownFS{squashfs}{tool}  = findExec("mksquashfs");
+$KnownFS{clicfs}{tool}    = findExec("mkclicfs");
+$KnownFS{clic}{tool}      = findExec("mkclicfs");
+$KnownFS{unified}{tool}   = findExec("mksquashfs");
+$KnownFS{compressed}{tool}= findExec("mksquashfs");
+$KnownFS{reiserfs}{tool}  = findExec("mkreiserfs");
+$KnownFS{cpio}{tool}      = findExec("cpio");
 $KnownFS{ext3}{ro}        = 0;
 $KnownFS{ext4}{ro}        = 0;
 $KnownFS{ext2}{ro}        = 0;
@@ -215,6 +215,22 @@ my $root;       # KIWIRoot  object for installations
 my $image;      # KIWIImage object for logical extends
 my $boot;       # KIWIBoot  object for logical extends
 my $migrate;    # KIWIMigrate object for system to image migration
+
+#============================================
+# findExec
+#--------------------------------------------
+sub findExec {
+	my $execName = shift;
+	my $execPath = qxx ("which $execName 2>&1"); chomp $execPath;
+	my $code = $? >> 8;
+	if ($code != 0) {
+		if ($kiwi) {
+			$kiwi -> loginfo ("warning: $execName not found\n");
+		}
+		return $execName;
+	}
+	return $execPath;
+}
 
 #==========================================
 # main

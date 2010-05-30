@@ -4359,7 +4359,7 @@ sub installBootLoader {
 		if ($loader eq "extlinux") {
 			$device = $deviceMap{extlinux};
 		}
-		if ($device =~ /mapper/) {
+		if (($device =~ /mapper/) && (! -e $device)) {
 			qxx ("kpartx -a $diskname");
 		}
 		if ($loader eq "syslinux") {
