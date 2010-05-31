@@ -1349,6 +1349,15 @@ function suseStripKernel {
 				mv $kversion/modules.order /tmp
 			fi
 			#==========================================
+			# check for weak-/updates and backup them
+			#------------------------------------------
+			if [ -d $kversion/updates ];then
+				mv $kversion/updates /tmp
+			fi
+			if [ -d $kversion/weak-updates ];then
+				mv $kversion/weak-updates /tmp
+			fi
+			#==========================================
 			# strip the modules but take care for deps
 			#------------------------------------------
 			stripdir=/tmp/stripped_modules
@@ -1359,7 +1368,7 @@ function suseStripKernel {
 			do
 				local path=`/usr/bin/dirname $mod`
 				local base=`/usr/bin/basename $mod`
-				for d in kernel updates weak-updates;do
+				for d in kernel;do
 					if [ "$base" = "*" ];then
 						if test -d $kversion/$d/$path ; then
 							mkdir -pv $stripdir$kversion/$d/$path
@@ -1407,8 +1416,17 @@ function suseStripKernel {
 			rm -rf $kversion
 			mv -v $stripdir/$kversion $kversion
 			rm -rf $stripdir
+			#==========================================
+			# restore backed up files and directories
+			#------------------------------------------
 			if [ -f /tmp/modules.order ];then
 				mv /tmp/modules.order $kversion
+			fi
+			if [ -d /tmp/updates ];then
+				mv /tmp/updates $kversion
+			fi
+			if [ -d /tmp/weak-updates ];then
+				mv /tmp/weak-updates $kversion
 			fi
 			#==========================================
 			# run depmod
