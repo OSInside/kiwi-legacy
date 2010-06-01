@@ -1272,7 +1272,7 @@ function setupBootLoaderSyslinux {
 	#--------------------------------------
 	if [ ! -z "$OEM_RECOVERY" ];then
 		echo "label Recovery"                             >> $conf
-		echo "COM32 chain.c32"                            >> $conf
+		echo "kernel chain"                               >> $conf
 		echo "append hd0 $gdevreco"                       >> $conf
 	fi
 	#======================================
