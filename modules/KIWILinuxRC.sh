@@ -2428,9 +2428,8 @@ function CDMountOption {
 	# mount option required to mount the device in full
 	# speed mode
 	# ----
-	local dev=$1
-	local iso="ISO 9660"
-	if dd if=$dev bs=42k count=1 2>&1 | file - | grep -q $iso;then
+	local id=$(blkid -o value -s TYPE $1)
+	if [ "$id" = "iso9660" ];then
 		echo "-t iso9660"
 	fi
 }
