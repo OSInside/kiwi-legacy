@@ -33,19 +33,65 @@ if [ "$LOCAL_BOOT" = "yes" ];then
 fi
 
 #======================================
-# 3) update mount table
+# 3) start udev
+#--------------------------------------
+mountSystemFilesystems
+udevSystemStart
+
+#======================================
+# 4) update mount table
 #--------------------------------------
 updateMTAB
 
 #======================================
-# 4) create framebuffer devices
+# 5) create framebuffer devices
 #--------------------------------------
 createFramebufferDevices
 
 #======================================
-# 5) create /etc/ImagePackages
+# 6) create /etc/ImagePackages
 #--------------------------------------
 if [ -x /bin/rpm ];then
 	Echo "Creating initial image package info file"
 	rpm -qa --last > /etc/ImagePackages
 fi
+
+#======================================
+# 7) create initrd on diskful
+#--------------------------------------
+if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ]; then
+	setupSUSEInitrd
+fi
+
+#======================================
+# 8) Check FAT requires on syslinux
+#--------------------------------------
+if [ "$loader" = "syslinux" ] || [ "$loader" = "extlinux" ];then
+	# /.../
+	# if syslinux is used we need to make sure that the
+	# filename on the boot partition is correct 8+3
+	# ----
+	count=1
+	IFS="," ; for i in $KERNEL_LIST;do
+		if test -z "$i";then
+			continue
+		fi
+		kernel=`echo $i | cut -f1 -d:`
+		initrd=`echo $i | cut -f2 -d:`
+		mv /boot/$kernel /boot/linux.$count
+		mv /boot/$initrd /boot/initrd.$count
+		running=$(uname -r)
+		rlinux=vmlinuz-$running
+		rinitrd=initrd-$running
+		ln -s /boot/linux.$count  /boot/$rlinux
+		ln -s /boot/initrd.$count /boot/$rinitrd
+		count=`expr $count + 1`
+	done
+	IFS=$IFS_ORIG
+fi
+
+#======================================
+# 9) kill udev
+#--------------------------------------
+udevSystemStop
+umountSystemFilesystems

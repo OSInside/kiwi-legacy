@@ -17,20 +17,48 @@
 # STATUS        : BETA
 #----------------
 #======================================
-# Exports (General)...
+# Exports (General)
 #--------------------------------------
 export PATH="/sbin:/bin:/usr/sbin:/usr/bin"
 export IFS_ORIG=$IFS
+export ARCH=`arch`
 export DEBUG=0
 
 #======================================
 # Exports (Booting)
 #--------------------------------------
-export LOCAL_BOOT=no
+export DOMURD_MODULES="xennet xenblk"
+export INITRD_MODULES="reiserfs"
+export LOCAL_BOOT="no"
 export systemIntegrity="clean"
+export KERNEL_LIST
 
 #======================================
-# Functions...
+# Exports (Alias)
+#--------------------------------------
+export SYSALIAS="undefined"
+export NAME=0
+
+#======================================
+# Exports (Partitioning)
+#--------------------------------------
+export PART_FILE="/etc/partition.table"
+export PART_MOUNT
+export PART_DEV
+export PART_COUNT=0
+export PART_NUMBER=0
+export PART_NEED_EXTENDED=0
+export PART_NEED_FILL=0
+export NO_FILE_SYSTEM=0
+
+#======================================
+# Exports (Status)
+#--------------------------------------
+export SYSTEM_INTEGRITY
+export SYSTEM_MD5STATUS
+
+#======================================
+# Functions
 #--------------------------------------
 . /include
 initialize
@@ -38,8 +66,8 @@ initialize
 #======================================
 # Beautify Startup
 #--------------------------------------
-echo "Loading KIWI USB-Stick Boot-System..."
-echo "-------------------------------------"
+echo "Loading KIWI USB Boot-System..."
+echo "-------------------------------"
 
 #======================================
 # Update library path
@@ -62,10 +90,22 @@ touch /lib/modules/*/modules.dep
 # 3) run udevd
 #--------------------------------------
 udevStart
-includeKernelParameters
 
 #======================================
-# 4) start boot shell
+# 4) Include proc/cmdline information
+#--------------------------------------
+includeKernelParameters
+if [ ! -z $UNIONFS_CONFIG ] || [ "$COMBINED_IMAGE" = "local" ];then
+	# /.../
+	# if the unionfs/combined information is already in place at this
+	# stage it comes from the cmdline data which means we are not
+	# booting the first time
+	# ----
+	export LOCAL_BOOT="yes"
+fi
+
+#======================================
+# 5) start boot shell
 #--------------------------------------
 startBlogD
 startShell
@@ -73,81 +113,134 @@ errorLogStart
 openKernelConsole
 
 #======================================
-# 5) Including required kernel modules
+# 6) Including required kernel modules
 #--------------------------------------
 probeDevices
 
 #======================================
-# 6) Setup device names...
+# 7) Select language if not in cmdline
 #--------------------------------------
-if ! searchBIOSBootDevice;then
-	systemException "$biosBootDevice" "reboot"
+selectLanguage
+
+#======================================
+# 8) Search boot device...
+#--------------------------------------
+Echo "Searching for boot device..."
+if [ "$LOCAL_BOOT" = "no" ];then
+	if ! searchBIOSBootDevice;then
+		systemException "$biosBootDevice" "reboot"
+	fi
+	export imageDiskDevice=$biosBootDevice
+else
+	export imageDiskDevice=$(dn $disk)
 fi
-export stickRoot=$biosBootDevice
-export stickDevice=$(ddn $stickRoot 1)
-export stickRWDevice=$(ddn $stickRoot 2)
-export stickRODevice=$(ddn $stickRoot 1)
-export imageDiskDevice=$stickRoot
+Echo "Found boot device: $imageDiskDevice"
+
+#======================================
+# 9) Setup device names...
+#--------------------------------------
+export imageRootDevice=$(ddn $imageDiskDevice 1)
+export imageRWDevice=$(ddn $imageDiskDevice 2)
+export imageRODevice=$(ddn $imageDiskDevice 1)
+if [ -z "$imageDiskDevice" ];then
+	systemException \
+		"Couldn't find any boot device... abort" \
+	"reboot"
+fi
 Echo "Searching for $VGROUP volume group..."
 if searchVolumeGroup; then
 	export haveLVM=yes
 	if [ -e /dev/$VGROUP/LVComp ];then
-		export stickDevice=/dev/$VGROUP/LVComp
+		export imageRootDevice=/dev/$VGROUP/LVComp
 	else
-		export stickDevice=/dev/$VGROUP/LVRoot
+		export imageRootDevice=/dev/$VGROUP/LVRoot
 	fi
-	export stickRWDevice=/dev/$VGROUP/LVRoot
-	export stickRODevice=/dev/$VGROUP/LVComp
-	export stickBootDevice=$(ddn $stickRoot 2)
+	export imageRWDevice=/dev/$VGROUP/LVRoot
+	export imageRODevice=/dev/$VGROUP/LVComp
+	export imageBootDevice=$(ddn $imageDiskDevice 2)
 fi
 
 #======================================
-# 7) Probe filesystem of stick system
+# 10) Get filesystem type
 #--------------------------------------
-probeFileSystem $stickDevice
+probeFileSystem $imageRootDevice
 if [ "$FSTYPE" = "luks" ];then
-	stickDevice=$(luksOpen $stickDevice)
-	stickRODevice=$stickDevice
-	probeFileSystem $stickDevice
+	imageRootDevice=$(luksOpen $imageRootDevice)
+	imageRODevice=$imageRootDevice
+	probeFileSystem $imageRootDevice
 	export haveLuks=yes
 fi
-if [ $FSTYPE = "unknown" ];then
+if [ "$FSTYPE" = "unknown" ];then
 	systemException \
 		"Couldn't determine filesystem type... abort" \
 	"reboot"
 fi
 
 #======================================
-# 8) Setup union on compressed root
+# 11) Check filesystem
 #--------------------------------------
-Echo "Filesystem of stick system is: $FSTYPE -> $stickDevice"
+Echo "Filesystem of USB system is: $FSTYPE -> $imageRootDevice"
 if isFSTypeReadOnly;then
-	setupUnionFS $stickRWDevice $stickRODevice $unionFST
+	setupUnionFS $imageRWDevice $imageRODevice $unionFST
 fi
 
 #======================================
-# 9) Mount USB stick (system)
+# 12) Mount VM (boot)
 #--------------------------------------
-if ! mountSystem $stickDevice;then
+if ! mountSystem $imageRootDevice;then
 	systemException "Failed to mount root filesystem" "reboot"
 fi
 validateRootTree
 
 #======================================
-# 10) check for local boot
+# 13) Get kernel list for local boot
 #--------------------------------------
-if [ -e /mnt/etc/ImagePackages ];then
-	export LOCAL_BOOT=yes
+if [ "$LOCAL_BOOT" = "no" ];then
+	kernelList /mnt
 fi
 
 #======================================
-# 11) Create system dependant files
+# 14) setup ird/kernel links for union
+#--------------------------------------
+if [ "$LOCAL_BOOT" = "no" ];then
+	if isFSTypeReadOnly;then
+		# /.../
+		# we are using a special root setup with aufs. In this case
+		# we can't use the SuSE Linux initrd but must stick to the
+		# kiwi boot system.
+		# ----
+		mountCalled=no
+		if [ -e "$imageRWDevice" ];then
+			kiwiMount $imageRWDevice "/mnt"
+			mountCalled=yes
+		fi
+		pushd /mnt/boot >/dev/null
+		IFS="," ; for i in $KERNEL_LIST;do
+			if test -z "$i";then
+				continue
+			fi
+			kernel=`echo $i | cut -f1 -d:`
+			initrd=`echo $i | cut -f2 -d:`
+			rm -f $initrd && ln -s initrd.vmx $initrd
+			rm -f $kernel && ln -s linux.vmx  $kernel
+			break
+		done
+		IFS=$IFS_ORIG
+		popd >/dev/null
+		if [ "$mountCalled" = "yes" ];then
+			umount /mnt
+		fi
+	fi
+fi
+
+#======================================
+# 15) Create system dependant files
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then
 	setupDefaultFstab /config
-	updateRootDeviceFstab /config $stickDevice
+	updateRootDeviceFstab /config $imageRootDevice
 	if [ "$haveLVM" = "yes" ];then
-		updateLVMBootDeviceFstab /config $stickBootDevice
+		updateLVMBootDeviceFstab /config $imageBootDevice
 	elif [ "$haveClicFS" = "yes" ];then
 		updateClicBootDeviceFstab /config $imageBootDevice
 	elif [ "$loader" = "syslinux" ] || [ "$loader" = "extlinux" ];then
@@ -155,54 +248,71 @@ if [ "$LOCAL_BOOT" = "no" ];then
 	elif [ "$haveLuks" = "yes" ];then
 		updateLuksBootDeviceFstab /config $imageBootDevice
 	fi
+	if [ ! -z "$UNIONFS_CONFIG" ]; then
+		export KIWI_INITRD_PARAMS="UNIONFS_CONFIG=yes"
+	fi
+	if [ ! -z "$COMBINED_IMAGE" ]; then
+		export KIWI_INITRD_PARAMS="COMBINED_IMAGE=local"
+	fi
+	bootid=0
+	if [ ! -z "$UNIONFS_CONFIG" ] || [ ! -z "$COMBINED_IMAGE" ]; then
+		bootid=1
+	fi
+	if \
+		[ "$loader" = "syslinux" ]  ||\
+		[ "$loader" = "extlinux" ]  ||\
+		[ "$haveClicFS" = "yes" ]   ||\
+		[ "$haveLuks" = "yes" ]
+	then
+		bootid=$(($bootid + 1))
+	fi
+	setupBootLoader /mnt /config $bootid $imageRootDevice USB
+	setupKernelModules /config
 fi
 
 #======================================
-# 12) copy system dependant files
+# 16) copy system dependant files
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then
 	setupConfigFiles
 fi
 
 #======================================
-# 13) update system dependant files
+# 17) update system dependant files
 #--------------------------------------
-if [ "$LOCAL_BOOT" = "no" ];then
-	setupInittab /mnt
-fi
+setupInittab /mnt
 
 #======================================
-# 14) setup real root device
+# 18) setup real root device
 #--------------------------------------
 echo 256 > /proc/sys/kernel/real-root-dev
 
 #======================================
-# 15) umount system filesystems
+# 19) umount system filesystems
 #--------------------------------------
 umountSystemFilesystems
 
 #======================================
-# 16) copy initrd files to image
+# 20) copy initrd files to image
 #--------------------------------------
-if [ ! -f /mnt/boot/deployed ];then
-	touch /mnt/boot/deployed
+if [ "$LOCAL_BOOT" = "no" ];then
 	importBranding
 fi
 cp /preinit /mnt
 cp /include /mnt
 
 #======================================
-# 17) kill boot shell
+# 21) kill boot shell
 #--------------------------------------
 killShell
 killBlogD
 
 #======================================
-# 18) Activate new root
+# 22) Activate new root
 #--------------------------------------
 activateImage
 
 #======================================
-# 19) Unmount initrd / system init
+# 23) Unmount initrd / system init
 #--------------------------------------
 bootImage $@

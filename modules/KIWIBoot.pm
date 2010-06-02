@@ -1338,6 +1338,25 @@ sub setupBootStick {
 		}
 		$this -> luksClose();
 		$kiwi -> done();
+	} elsif ($dmapper) {
+		# /.../
+		# for USB sticks we need to make sure the write partition
+		# has been cleaned before re-use with filesystem like clicfs
+		# and friends
+		# ----
+		$root = $deviceMap{2};
+		$kiwi -> info ("Clean sweep read-write filesystem");
+		$status = qxx ("dd if=/dev/zero of=$root bs=32k count=32 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't cleanup partition $root: $status");
+			$kiwi -> failed ();
+			$this -> cleanDbus();
+			$this -> cleanLoop ();
+			return undef;
+		}
+		$kiwi -> done();
 	}
 	#==========================================
 	# create bootloader filesystem if needed

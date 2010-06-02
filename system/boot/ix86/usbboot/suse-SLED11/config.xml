@@ -105,6 +105,8 @@
 		<package name="dialog"/>
 		<package name="kiwi-tools"/>
 		<package name="parted"/>
+		<package name="syslinux"/>
+		<package name="gettext-runtime"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
@@ -114,6 +116,7 @@
 		<package name="openssl-certs"/>
 	</packages>
 	<packages type="delete">
+		<package name="syslinux"/>
 		<package name="cracklib-dict-small"/>
 		<package name="cracklib-dict-full"/>
 		<package name="PolicyKit"/>

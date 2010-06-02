@@ -2,6 +2,8 @@
 Mon May 31 15:49:53 CEST 2010 - ms@suse.de
 
 - don't touch modules in updates and weak-updates (bnc #609879)
+- use vmxboot linuxrc for usbboot too, make sure --bootstick
+  deployment does a cleanup of the write partition if used
 
 -------------------------------------------------------------------
 Tue May 25 16:10:30 CEST 2010 - ms@suse.de

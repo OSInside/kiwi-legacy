@@ -108,6 +108,7 @@
 		<package name="kiwi-tools"/>
 		<package name="parted"/>
 		<package name="syslinux"/>
+		<package name="gettext-runtime"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
