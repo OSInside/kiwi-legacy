@@ -1230,7 +1230,7 @@ sub createImageVMX {
 			}
 			my $output = basename $ovffile;
 			$status= qxx (
-				"$ovftool -oq $vmxfile $ovffile/$output 2>&1"
+				"$ovftool -o -q $vmxfile $ovffile/$output 2>&1"
 			);
 			$result = $? >> 8;
 			# --- beg ----
