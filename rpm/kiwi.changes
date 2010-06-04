@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Mon May 31 15:49:53 CEST 2010 - ms@suse.de
 
+- v4.39
 - fixed CDMountOption() to use blkid type check (bnc #610649)
 - don't touch modules in updates and weak-updates (bnc #609879)
 - use vmxboot linuxrc for usbboot too, make sure --bootstick
