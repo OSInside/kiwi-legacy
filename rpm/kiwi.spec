@@ -14,7 +14,7 @@ Url:            http://kiwi.berlios.de
 %define sattools_version %(rpm -q --qf %{VERSION}-%{RELEASE} satsolver-tools)
 Name:           kiwi
 BuildRequires:  perl-XML-LibXML perl-libwww-perl perl-Config-IniFiles
-BuildRequires:  hal-devel module-init-tools screen zlib-devel
+BuildRequires:  module-init-tools screen zlib-devel
 BuildRequires:  gcc-c++ libxslt swig trang
 %if %{suse_version} > 1020
 BuildRequires:  fdupes

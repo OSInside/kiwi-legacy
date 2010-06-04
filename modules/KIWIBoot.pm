@@ -26,7 +26,6 @@ require Exporter;
 #------------------------------------------
 use strict;
 use Carp qw (cluck);
-use KIWI::dbusdevice;
 use KIWILog;
 use KIWIIsoLinux;
 use FileHandle;
@@ -832,27 +831,6 @@ sub setupBootStick {
 	#------------------------------------------
 	sleep (1);
 	#==========================================
-	# Establish HAL lock for $stick
-	#------------------------------------------
-	$kiwi -> info ("Establish HAL lock for: $stick");
-	$hald = new KIWI::dbusdevice::HalConnection;
-	if (! $hald -> open()) {
-		$kiwi -> failed  ();
-		$kiwi -> warning ($hald->state());
-		$kiwi -> skipped ();
-	} else {
-		$this -> {hald} = $hald;
-		if ($hald -> lock($stick)) {
-			$kiwi -> failed  ();
-			$kiwi -> warning ($hald->state());
-			$kiwi -> skipped ();
-		} else {
-			$this -> {stick} = $stick;
-			$kiwi -> loginfo ("HAL:".$hald->state());
-			$kiwi -> done();
-		}
-	}
-	#==========================================
 	# Check if system fits on storage device
 	#------------------------------------------
 	my $hardSize = $this -> getStorageSize ($stick);
@@ -865,7 +843,6 @@ sub setupBootStick {
 	if ($hardSize < $softSize) {
 		$kiwi -> error  ("Stick too small: got $hardSize kB need $softSize kB");
 		$kiwi -> failed ();
-		$this -> cleanDbus();
 		$this -> cleanTmp ();
 		return undef;
 	}
@@ -1020,7 +997,6 @@ sub setupBootStick {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't create partition table");
 			$kiwi -> failed ();
-			$this -> cleanDbus();
 			$this -> cleanTmp ();
 			return undef;
 		}
@@ -1044,7 +1020,6 @@ sub setupBootStick {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't reread partition table: $status");
 			$kiwi -> failed ();
-			$this -> cleanDbus();
 			$this -> cleanTmp ();
 			return undef;
 		}
@@ -1064,7 +1039,6 @@ sub setupBootStick {
 				\%deviceMap,$stick,$syszip,$haveSplit,\%lvmparts
 			);
 			if (! %deviceMap) {
-				$this -> cleanDbus();
 				$this -> cleanTmp ();
 				return undef;
 			}
@@ -1116,7 +1090,6 @@ sub setupBootStick {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't dump system image to stick: $status");
 			$kiwi -> failed ();
-			$this -> cleanDbus();
 			$this -> cleanTmp ();
 			return undef;
 		}
@@ -1129,7 +1102,6 @@ sub setupBootStick {
 				$kiwi -> failed ();
 				$kiwi -> error  ("Couldn't dump split file: $status");
 				$kiwi -> failed ();
-				$this -> cleanDbus();
 				$this -> cleanTmp ();
 				return undef;
 			}
@@ -1140,7 +1112,6 @@ sub setupBootStick {
 		# Create fs on system image partition
 		#------------------------------------------
 		if (! $this -> setupFilesystem ($FSTypeRO,$deviceMap{1},"root")) {
-			$this -> cleanDbus();
 			$this -> cleanTmp ();
 			return undef;
 		}
@@ -1151,7 +1122,6 @@ sub setupBootStick {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't mount partition: $status");
 			$kiwi -> failed ();
-			$this -> cleanDbus();
 			$this -> cleanLoop ();
 			return undef;
 		}
@@ -1167,17 +1137,14 @@ sub setupBootStick {
 				$result = $? >> 8;
 				if ($result != 0) {
 					$kiwi -> error ("Can't create mount point $loopdir/$pname");
-					$this -> cleanDbus();
 					$this -> cleanLoop ();
 					return undef;
 				}
 				if (! $this -> setupFilesystem ($FSTypeRO,$device,$pname)) {
-					$this -> cleanDbus();
 					$this -> cleanLoop ();
 					return undef;
 				}
 				if (! main::mount ($device, "$loopdir/$pname")) {
-					$this -> cleanDbus();
 					$this -> cleanLoop ();
 					return undef;
 				}
@@ -1193,7 +1160,6 @@ sub setupBootStick {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Can't copy image tree on stick: $status");
 			$kiwi -> failed ();
-			$this -> cleanDbus();
 			$this -> cleanLoop ();
 			return undef;
 		}
@@ -1237,7 +1203,6 @@ sub setupBootStick {
 		$kiwi -> error  ("Couldn't resize $fsattr{type} filesystem: $status");
 		$kiwi -> failed ();
 		$this -> luksClose();
-		$this -> cleanDbus();
 		$this -> cleanLoop ();
 		$this -> cleanTmp ();
 		return undef;
@@ -1278,7 +1243,6 @@ sub setupBootStick {
 			$kiwi -> error("Couldn't resize $fsattr{type} filesystem: $status");
 			$kiwi -> failed ();
 			$this -> luksClose();
-			$this -> cleanDbus();
 			$this -> cleanLoop ();
 			$this -> cleanTmp ();
 			return undef;
@@ -1303,7 +1267,6 @@ sub setupBootStick {
 				$kiwi -> failed ();
 				$kiwi -> error  ("Couldn't setup luks format: $root");
 				$kiwi -> failed ();
-				$this -> cleanDbus();
 				$this -> cleanLoop ();
 				return undef;
 			}
@@ -1313,7 +1276,6 @@ sub setupBootStick {
 				$kiwi -> failed ();
 				$kiwi -> error  ("Couldn't open luks device: $status");
 				$kiwi -> failed ();
-				$this -> cleanDbus();
 				$this -> cleanLoop ();
 				return undef;
 			}
@@ -1332,7 +1294,6 @@ sub setupBootStick {
 			$kiwi -> error  ("Couldn't create filesystem: $status");
 			$kiwi -> failed ();
 			$this -> luksClose();
-			$this -> cleanDbus();
 			$this -> cleanLoop ();
 			return undef;
 		}
@@ -1352,7 +1313,6 @@ sub setupBootStick {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't cleanup partition $root: $status");
 			$kiwi -> failed ();
-			$this -> cleanDbus();
 			$this -> cleanLoop ();
 			return undef;
 		}
@@ -1370,7 +1330,6 @@ sub setupBootStick {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't create DOS filesystem: $status");
 			$kiwi -> failed ();
-			$this -> cleanDbus();
 			$this -> cleanLoop ();
 			return undef;
 		}
@@ -1402,7 +1361,6 @@ sub setupBootStick {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't create filesystem: $status");
 			$kiwi -> failed ();
-			$this -> cleanDbus();
 			$this -> cleanLoop ();
 			return undef;
 		}
@@ -1438,7 +1396,6 @@ sub setupBootStick {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't mount stick image: $status");
 		$kiwi -> failed ();
-		$this -> cleanDbus();
 		$this -> cleanLoop ();
 		return undef;
 	}
@@ -1452,7 +1409,6 @@ sub setupBootStick {
 		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't copy boot data to stick: $status");
 		$kiwi -> failed ();
-		$this -> cleanDbus();
 		$this -> cleanLoop ();
 		return undef;
 	}
@@ -1468,19 +1424,12 @@ sub setupBootStick {
 	# Install boot loader on USB stick
 	#------------------------------------------
 	if (! $this -> installBootLoader ($bootloader, $stick, \%deviceMap)) {
-		$this -> cleanDbus();
 		$this -> cleanTmp ();
 	}
 	#==========================================
 	# cleanup temp directory
 	#------------------------------------------
 	qxx ("rm -rf $tmpdir");
-	#==========================================
-	# Remove dbus lock on stick
-	#------------------------------------------
-	$kiwi -> info ("Removing HAL lock");
-	$this -> cleanDbus();
-	$kiwi -> done ();
 	return $this;
 }
 
@@ -3530,23 +3479,6 @@ sub setupSplashForGrub {
 }
 
 #==========================================
-# cleanDbus
-#------------------------------------------
-sub cleanDbus {
-	my $this = shift;
-	my $stick= $this->{stick};
-	my $hald = $this->{hald};
-	if (! defined $hald) {
-		return $this;
-	}
-	if (defined $stick) {
-		$hald -> unlock ($stick);
-	}
-	$hald -> close();
-	return $this;
-}
-
-#==========================================
 # cleanTmp
 #------------------------------------------
 sub cleanTmp {
@@ -5095,23 +5027,6 @@ sub luksResize {
 		$kiwi -> error  ("Couldn't open luks device: $status");
 		$kiwi -> failed ();
 		return undef;
-	}
-	#==========================================
-	# lock device for hal
-	#------------------------------------------
-	if ($source !~ /loop/) {
-		$hald = new KIWI::dbusdevice::HalConnection;
-		if (! $hald -> open()) {
-			$kiwi -> loginfo ($hald->state());
-		} else {
-			$this -> {lhald} = $hald;
-			if ($hald -> lock ("/dev/mapper/".$name)) {
-				$kiwi -> loginfo ($hald->state());
-			} else {
-				$this -> {lhalddevice} = "/dev/mapper/".$name;
-				$kiwi -> loginfo ("HAL:".$hald->state());
-			}
-		}
 	}
 	#==========================================
 	# resize luks header

@@ -3,8 +3,6 @@ all:
 	${MAKE} -C dcounter all
 	${MAKE} -C driveready all
 	${MAKE} -C utimer all
-	${MAKE} -C dbuslock -f Makefile.swig all
-	${MAKE} -C dbuslock BINDLIB=${bindlib} all
 	( \
 		if test -d /usr/include/satsolver;then \
 			cd ./satplugin && make -f Makefile.swig && make BINDLIB=${bindlib};\
@@ -20,7 +18,6 @@ install:
 	install -m 755 startshell/startshell ${TOOLSVZ}
 	install -m 755 driveready/driveready ${TOOLSVZ}
 	install -m 755 utimer/utimer ${TOOLSVZ}
-	${MAKE} -C dbuslock DESTDIR=${buildroot} install_vendor
 	( \
 		if test -d /usr/include/satsolver;then \
 			cd ./satplugin && make DESTDIR=${buildroot} install_vendor;\
@@ -35,4 +32,3 @@ clean:
 	${MAKE} -C driveready clean
 	${MAKE} -C utimer clean
 	${MAKE} -C satplugin -f Makefile.swig clean
-	${MAKE} -C dbuslock -f Makefile.swig clean
