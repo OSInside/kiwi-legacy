@@ -2252,6 +2252,7 @@ sub setupBootDisk {
 	my $isxen     = $this->{isxen};
 	my $lvm       = $this->{lvm};
 	my $profile   = $this->{profile};
+	my $xendomain = $this->{xendomain};
 	my $diskname  = $system.".raw";
 	my %deviceMap = ();
 	my @commands  = ();
@@ -2536,7 +2537,7 @@ sub setupBootDisk {
 	# add extra Xen boot options if necessary
 	#==========================================
 	my $extra = "";
-	if ($type{bootprofile} eq "xen") {
+	if (($type{bootprofile} eq "xen") && ($xendomain eq "domU")) {
 		$extra = "xencons=tty ";
 	}
 	#==========================================
