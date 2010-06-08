@@ -79,7 +79,13 @@ sub new {
 	#==========================================
 	# Create Log Server on $LogServerPort
 	#------------------------------------------
-	if ($main::LogServerPort ne "off") {
+	my $logPort = $main::LogServerPort;
+	if ($logPort ne "off") {
+		if ($logPort =~ m/\D/) {
+			$this -> warning ("Non numerical port number specified");
+			$this -> skipped ();
+			return $this;
+		}
 		$this -> setLogServer();
 	}
 	return $this;
