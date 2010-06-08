@@ -67,3 +67,4 @@ clean:
 	rm -f *.aux *.mtc* *.out *.bmt  *.ind *.ilg *.maf
 	(cd ../kiwi-man && rm -f kiwi-base.pdf)
 	(cd ../kiwi-man && rm -f *.html kiwi-man*.pdf)
+	(cd ../kiwi-man && rm -f *.xml.new)

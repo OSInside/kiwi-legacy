@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Mon Jun  7 16:21:43 CEST 2010 - ms@suse.de
 
+- v4.40
 - setup xencons only for domU setup (bnc #561635)
 - check that the specified log server port is numeric in nature
 - update documentation, added kiwirc manual page. Fixed
