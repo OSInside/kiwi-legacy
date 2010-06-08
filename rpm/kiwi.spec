@@ -379,6 +379,7 @@ rm -rf $RPM_BUILD_ROOT
 %doc %{_mandir}/man1/kiwi.1.gz
 %doc %{_mandir}/man1/KIWI::images.sh.1.gz
 %doc %{_mandir}/man1/KIWI::config.sh.1.gz
+%doc %{_mandir}/man1/KIWI::kiwirc.1.gz
 %doc %{_defaultdocdir}/kiwi/COPYING
 %doc %{_defaultdocdir}/kiwi/examples
 %doc %{_defaultdocdir}/kiwi/kiwi.pdf

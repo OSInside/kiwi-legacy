@@ -10,12 +10,17 @@
 # --
 
 DB=/usr/share/xml/docbook/stylesheet/nwalsh/current/
+KV=`cat ../LaTex/Revision.txt`
 
 all: kiwi-base.pdf
 	# generate man-pages
-	xsltproc ${DB}/manpages/docbook.xsl  kiwi-man.xml
-	xsltproc ${DB}/manpages/docbook.xsl  kiwi-man-config.sh.xml
-	xsltproc ${DB}/manpages/docbook.xsl  kiwi-man-images.sh.xml
+	for i in \
+		kiwi-man.xml kiwi-man-kiwirc.xml kiwi-man-config.sh.xml \
+		kiwi-man-images.sh.xml;\
+	do \
+		cat $$i | sed -e "s@_KV_@${KV}@" > $$i.new ;\
+		xsltproc ${DB}/manpages/docbook.xsl $$i.new ;\
+	done
 
 	# generate html-files as intermediate convertable format
 	xsltproc --output kiwi-man.html \
@@ -52,6 +57,7 @@ kiwi-base.pdf:
 
 clean:
 	rm -f *.html kiwi-man*.pdf
+	rm -f *.xml.new *.xmle
 	rm -f kiwi-base.pdf
 	(cd ../LaTex && rm -f *.dvi *.idx *.toc *.log *.ps *.mtc[0-9]*)
 	(cd ../LaTex && rm -f *.aux *.mtc* *.out *.bmt  *.ind *.ilg *.maf)

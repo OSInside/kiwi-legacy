@@ -279,15 +279,15 @@ The following format is used:
         the device via which the hard disk can be addressed,
         e.g., \textbf{/dev/hda}.
     \item \textbf{RELOAD\_IMAGE}\\
-        If set to a non-empty string, forces the configured
+        If set to a non-empty string, this forces the configured
         image to be loaded from the server even if the image on
-        the disk is up-to-date. Used mainly for debugging
-        purposes, this option only makes sense on diskful
+        the disk is up-to-date. The primary purpose of this setting
+        is to aid debugging. The option is sensible only for disk based
         systems.
     \item \textbf{RELOAD\_CONFIG}\\
-        If set to an non-empty string, forces all config files
-        to be loaded from the server. Used mainly for debugging
-        purposes, this option only makes sense on diskful
+        If set to a non-empty string, this forces all config files
+        to be loaded from the server. The primary purpose of this setting
+        is to aid debugging. The option is sensible only for disk based
         systems.
     \item \textbf{COMBINED\_IMAGE}\\
         If set to an non-empty string, indicates that the both
