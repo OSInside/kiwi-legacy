@@ -5,6 +5,7 @@ Mon Jun  7 16:21:43 CEST 2010 - ms@suse.de
 - check that the specified log server port is numeric in nature
 - update documentation, added kiwirc manual page. Fixed
   manual page creation to contain correct version info
+- fixed luks + lvm boot if no re-partition code is called
 
 -------------------------------------------------------------------
 Mon May 31 15:49:53 CEST 2010 - ms@suse.de

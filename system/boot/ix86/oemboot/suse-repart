@@ -368,6 +368,12 @@ function OEMRepartLVM {
 		recoParam=no
 		swapParam=no
 		homeParam=no
+		#======================================
+		# close open device mappings
+		#--------------------------------------
+		if [ "$haveLuks" = "yes" ];then
+			luksClose
+		fi
 		vgchange -an
 		#======================================
 		# add recovery partition
@@ -490,7 +496,6 @@ function OEMRepart {
 	if [ "$haveLuks" = "yes" ];then
 		unset  OEM_RECOVERY
 		export OEM_WITHOUTHOME=1
-		luksClose
 	fi
 	#======================================
 	# Initialize
