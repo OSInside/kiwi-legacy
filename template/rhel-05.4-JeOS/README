@@ -14,3 +14,5 @@ NOTE:
 * if you did a wrong repo setup remove the yum cache before your
   next try: rm -rf /var/cache/kiwi/yum
 
+* the split iso type requires selinux to be permisive which means
+  you need to boot with "enforcing=0"
