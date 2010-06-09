@@ -1758,6 +1758,7 @@ sub listXMLInfo {
 	my $solfile;
 	my $satlist;
 	my $solp;
+	my $rpat;
 	#==========================================
 	# Create info block description
 	#------------------------------------------
@@ -1867,18 +1868,18 @@ sub listXMLInfo {
 			#------------------------------------------
 			/^repo-patterns/ && do {
 				if (! $meta) {
-					($meta,$delete,$solfile,$satlist) = $xml->getInstallSize();
+					($meta,$delete,$solfile,$satlist,$solp,$rpat) =
+						$xml->getInstallSize();
 					if (! $meta) {
 						$kiwi -> failed();
 						cleanMount();
 						exit 1;
 					}
 				}
-				if (-f $solfile) {
-					my @patterns = qxx (
-						"dumpsolv $solfile|grep 'name: pattern'|cut -f4 -d :"
-					);
-					foreach my $p (@patterns) {
+				if (! $rpat) {
+					$kiwi -> info ("No patterns in repo solvable\n");
+				} else {
+					foreach my $p (@{$rpat}) {
 						next if ($p eq "\n");
 						$p =~ s/^\s+//;
 						$p =~ s/\s+$//;

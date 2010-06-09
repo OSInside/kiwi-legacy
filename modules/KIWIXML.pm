@@ -3122,7 +3122,10 @@ sub getInstallSize {
 	my %meta = $psolve -> getMetaData();
 	my $solf = $psolve -> getSolfile();
 	my @solp = $psolve -> getPackages();
-	return (\%meta,\@delete,$solf,\@result,\@solp);
+	my @rpat = qxx (
+		"dumpsolv $solf|grep 'name: pattern'|cut -f4 -d :"
+	);
+	return (\%meta,\@delete,$solf,\@result,\@solp,\@rpat);
 }
 
 #==========================================
