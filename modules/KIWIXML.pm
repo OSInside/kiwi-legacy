@@ -3736,19 +3736,22 @@ sub getSingleInstSourceSatSolvable {
 		my $rxml = new XML::LibXML;
 		my $tree = $rxml -> parse_fh ( $RXML );
 		my $nodes= $tree -> getElementsByTagName ("data");
-		my $path;
+		my $primary;
+		my $pattern;
 		my $time;
 		for (my $i=1;$i<= $nodes->size();$i++) {
 			my $node = $nodes-> get_node($i);
 			my $type = $node -> getAttribute ("type");
-			if ($type ne "primary") {
-				next;
+			if ($type eq "primary") {
+				$primary = $node -> getElementsByTagName ("location")
+					-> get_node(1) -> getAttribute ("href");
+				$time = $node -> getElementsByTagName ("timestamp")
+					-> get_node(1) -> string_value();
 			}
-			$path = $node -> getElementsByTagName ("location")
-				-> get_node(1) -> getAttribute ("href");
-			$time = $node -> getElementsByTagName ("timestamp")
-				-> get_node(1) -> string_value();
-			last;
+			if ($type eq "patterns") {
+				$pattern = $node -> getElementsByTagName ("location")
+					-> get_node(1) -> getAttribute ("href");
+			}
 		}
 		close $RXML;
 		#==========================================
@@ -3762,18 +3765,38 @@ sub getSingleInstSourceSatSolvable {
 			}
 		}
 		#==========================================
-		# Store distro path and new time stamp
+		# Store distro/pattern path
 		#------------------------------------------
-		my %newdistro = ();
-		foreach my $key (keys %distro) {
-			if ($distro{$key} ne "distxml") {
-				$newdistro{$key} = $distro{$key};
+		my %newdistro   = ();
+		my %newpatterns = ();
+		if ($primary) {
+			foreach my $key (keys %distro) {
+				if ($distro{$key} ne "distxml") {
+					$newdistro{$key} = $distro{$key};
+				}
 			}
+			$newdistro{"/".$primary}      = "distxml";
+			$newdistro{"/suse/".$primary} = "distxml";
 		}
-		$newdistro{"/".$path}      = "distxml";
-		$newdistro{"/suse/".$path} = "distxml";
-		undef %distro;
-		%distro = %newdistro;
+		if ($pattern) {
+			foreach my $key (keys %patterns) {
+				if ($patterns{$key} ne "projectxml") {
+					$newpatterns{$key} = $patterns{$key};
+				}
+			}
+			$newpatterns{"/".$pattern} = "projectxml";
+		}
+		if (%newdistro) {
+			undef %distro;
+			%distro = %newdistro;
+		}
+		if (%newpatterns) {
+			undef %patterns;
+			%patterns = %newpatterns;
+		}
+		#==========================================
+		# Store new time stamp
+		#------------------------------------------
 		if (! open ($RXML,">$index.timestamp")) {
 			$kiwi -> failed ();
 			$kiwi -> error ("--> Failed to create timestamp: $!");
