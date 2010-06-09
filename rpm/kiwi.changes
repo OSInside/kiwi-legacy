@@ -2,6 +2,13 @@
 Wed Jun  9 12:40:39 CEST 2010 - ms@suse.de
 
 - also search for pattern file name in repomd.xml
+- reduce the scope of the eval around the config.xml file parsing.
+  The only operation that may fail with an exception is the parsing,
+  while accessing the resulting document does not generate
+  exceptions, thus the eval (exception handling) should only
+  enclose the code that actually may trigger an exception
+- improve the XML validation error reporting if jing
+  is installed on the system
 
 -------------------------------------------------------------------
 Mon Jun  7 16:21:43 CEST 2010 - ms@suse.de

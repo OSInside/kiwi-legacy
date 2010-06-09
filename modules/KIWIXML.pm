@@ -146,26 +146,25 @@ sub new {
 	}
 	binmode $XML;
 	eval {
-		$systemTree = $systemXML
-			-> parse_fh ( $XML );
-		$this->{xmlOrigString} = $systemTree -> toString();
-		$this->{xmlOrigFile}   = $controlFile;
-		$imgnameNodeList = $systemTree -> getElementsByTagName ("image");
-		$optionsNodeList = $systemTree -> getElementsByTagName ("preferences");
-		$driversNodeList = $systemTree -> getElementsByTagName ("drivers");
-		$usrdataNodeList = $systemTree -> getElementsByTagName ("users");
-		$repositNodeList = $systemTree -> getElementsByTagName ("repository");
-		$packageNodeList = $systemTree -> getElementsByTagName ("packages");
-		$profilesNodeList= $systemTree -> getElementsByTagName ("profiles");
-		$instsrcNodeList = $systemTree -> getElementsByTagName ("instsource");
+		$systemTree = $systemXML -> parse_fh ( $XML );
 	};
 	if ($@) {
-		my $evaldata=$@;
+		my $evaldata = $@;
 		$kiwi -> error  ("Problem reading control file");
 		$kiwi -> failed ();
 		$kiwi -> error  ("$evaldata\n");
 		return undef;
 	}
+	$this->{xmlOrigString} = $systemTree -> toString();
+	$this->{xmlOrigFile}   = $controlFile;
+	$imgnameNodeList = $systemTree -> getElementsByTagName ("image");
+	$optionsNodeList = $systemTree -> getElementsByTagName ("preferences");
+	$driversNodeList = $systemTree -> getElementsByTagName ("drivers");
+	$usrdataNodeList = $systemTree -> getElementsByTagName ("users");
+	$repositNodeList = $systemTree -> getElementsByTagName ("repository");
+	$packageNodeList = $systemTree -> getElementsByTagName ("packages");
+	$profilesNodeList= $systemTree -> getElementsByTagName ("profiles");
+	$instsrcNodeList = $systemTree -> getElementsByTagName ("instsource");
 	#==========================================
 	# Store object data
 	#------------------------------------------
@@ -187,11 +186,17 @@ sub new {
 		my $evaldata=$@;
 		$kiwi -> error  ("Schema validation failed");
 		$kiwi -> failed ();
-		$kiwi -> error  ("$evaldata\n");
-		$kiwi -> error  ("Use the jing command for more details\n");
-		$kiwi -> error  ("The following requires jing to be installed\n");
-		$kiwi -> error  ("jing $main::Schema $controlFile\n");
-		return undef;
+		my $jingExec = main::findExec('jing');
+		if ($jingExec) {
+			qxx ("$jingExec $main::Schema $controlFile 1>&2");
+			return undef;
+		} else {
+			$kiwi -> error ("$evaldata\n");
+			$kiwi -> info  ("Use the jing command for more details\n");
+			$kiwi -> info  ("The following requires jing to be installed\n");
+			$kiwi -> info  ("jing $main::Schema $controlFile\n");
+			return undef;
+		}
 	}
 	#==========================================
 	# Check kiwirevision attribute
