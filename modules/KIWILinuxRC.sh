@@ -4682,6 +4682,9 @@ function selectLanguage {
 	if [ -f /.profile ];then
 		importFile < /.profile
 	fi
+	if [ ! -z "$kiwi_oemunattended" ] && [ "$DIALOG_LANG" = "ask" ];then
+		DIALOG_LANG=en_US
+	fi
 	if [ "$DIALOG_LANG" = "ask" ];then
 		for code in $(echo $kiwi_language | tr "," " ");do
 			if [ $code = "en_US" ];then

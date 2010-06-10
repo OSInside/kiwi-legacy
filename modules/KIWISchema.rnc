@@ -1108,6 +1108,25 @@ div {
 }
 
 #==========================================
+# common element <oem-unattended>
+#
+div {
+	k.oem-unattended.content = xsd:boolean
+	k.oem-unattended.attlist = empty
+	k.oem-unattended =
+		## For oemboot driven images: don't ask questions if possible y/n
+		[
+		db:para [
+			"For oemboot driven images: don't ask questions if possible y/n"
+		]
+		]
+		element oem-unattended {
+			k.oem-unattended.attlist,
+			k.oem-unattended.content
+		}
+}
+
+#==========================================
 # common element <size>
 #
 div {
@@ -1986,7 +2005,8 @@ div {
 			k.oem-recovery? &
 			k.oem-recoveryID? &
 			k.oem-reboot? &
-			k.oem-dumphalt?
+			k.oem-dumphalt? &
+			k.oem-unattended?
 		}
 }
 

@@ -950,6 +950,7 @@ sub createImageUSB {
 	$main::ForeignRepo{"oem-kiwi-initrd"}= $xml -> getOEMKiwiInitrd();
 	$main::ForeignRepo{"oem-reboot"}     = $xml -> getOEMReboot();
 	$main::ForeignRepo{"oem-dumphalt"}   = $xml -> getOEMDumpHalt();
+	$main::ForeignRepo{"oem-unattended"} = $xml -> getOEMUnattended();
 	$main::ForeignRepo{"oem-recovery"}   = $xml -> getOEMRecovery();
 	$main::ForeignRepo{"oem-recoveryID"} = $xml -> getOEMRecoveryID();
 	$main::ForeignRepo{"displayname"}    = $xml -> getImageDisplayName();
@@ -2799,6 +2800,7 @@ sub createImageSplit {
 	$main::ForeignRepo{"oem-kiwi-initrd"}= $xml -> getOEMKiwiInitrd();
 	$main::ForeignRepo{"oem-reboot"}     = $xml -> getOEMReboot();
 	$main::ForeignRepo{"oem-dumphalt"}   = $xml -> getOEMDumpHalt();
+	$main::ForeignRepo{"oem-unattended"} = $xml -> getOEMUnattended();
 	$main::ForeignRepo{"oem-recovery"}   = $xml -> getOEMRecovery();
 	$main::ForeignRepo{"oem-recoveryID"} = $xml -> getOEMRecoveryID();
 	$main::ForeignRepo{"displayname"}    = $xml -> getImageDisplayName();

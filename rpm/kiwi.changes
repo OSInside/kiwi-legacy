@@ -2,8 +2,9 @@
 Wed Jun  9 12:40:39 CEST 2010 - ms@suse.de
 
 - added oem-dumphalt element which reboots the system after
-  the image was dumped (installed) on the target device. A message
-  appears and the system waits for a key event before reboot
+  the image was dumped (installed) on the target device. A
+  message appears and the system waits for a key event before
+  reboot (bnc #613180)
 - also search for pattern file name in repomd.xml
 - reduce the scope of the eval around the config.xml file parsing.
   The only operation that may fail with an exception is the parsing,
@@ -12,6 +13,8 @@ Wed Jun  9 12:40:39 CEST 2010 - ms@suse.de
   enclose the code that actually may trigger an exception
 - improve the XML validation error reporting if jing
   is installed on the system
+- added oem-unattended element which allows unattended
+  installation if possible
 
 -------------------------------------------------------------------
 Mon Jun  7 16:21:43 CEST 2010 - ms@suse.de

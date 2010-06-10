@@ -382,6 +382,9 @@ sub new {
 		if (defined $foreignRepo->{"oem-dumphalt"}) {
 			$this -> setForeignOEMOptionsElement ("oem-dumphalt");
 		}
+		if (defined $foreignRepo->{"oem-unattended"}) {
+			$this -> setForeignOEMOptionsElement ("oem-unattended");
+		}
 		if (defined $foreignRepo->{"oem-recovery"}) {
 			$this -> setForeignOEMOptionsElement ("oem-recovery");
 		}
@@ -1433,6 +1436,26 @@ sub getOEMDumpHalt {
 }
 
 #==========================================
+# getOEMUnattended
+#------------------------------------------
+sub getOEMUnattended {
+	# ...
+	# Obtain the oem-unattended value or return undef
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return undef;
+	}
+	my $unattended = $node -> getElementsByTagName ("oem-unattended");
+	if ((! defined $unattended) || ("$unattended" eq "")) {
+		return undef;
+	}
+	return $unattended;
+}
+
+#==========================================
 # getOEMSwap
 #------------------------------------------
 sub getOEMSwap {
@@ -2433,6 +2456,7 @@ sub getImageConfig {
 		my $oemkboot = $node -> getElementsByTagName ("oem-kiwi-initrd");
 		my $oemreboot= $node -> getElementsByTagName ("oem-reboot");
 		my $oemhalt  = $node -> getElementsByTagName ("oem-dumphalt");
+		my $oemnomsg = $node -> getElementsByTagName ("oem-unattended");
 		my $oemreco  = $node -> getElementsByTagName ("oem-recovery");
 		my $oemrecoid= $node -> getElementsByTagName ("oem-recoveryID");
 		if ((defined $oempinst) && ("$oempinst" eq "true")) {
@@ -2460,6 +2484,9 @@ sub getImageConfig {
 		}
 		if ((defined $oemhalt) && ("$oemhalt" eq "true")) {
 			$result{kiwi_oemdumphalt} = $oemhalt;
+		}
+		if ((defined $oemnomsg) && ("$oemnomsg" eq "true")) {
+			$result{kiwi_oemunattended} = $oemnomsg;
 		}
 		if ((defined $oemreco) && ("$oemreco" eq "true")) {
 			$result{kiwi_oemrecovery} = $oemreco;

@@ -484,13 +484,15 @@ function OEMInstall {
 	done
 	items=$(echo $items | sed -e s@^,@@)
 	Echo "Entering installation mode for disk: $items"
-	TEXT_INST=$(
-		getText "Destroying ALL data on %1, continue ?" $items)
-	Dialog --yesno "\"$TEXT_INST\"" 5 70
-	if [ ! $? = 0 ];then
-		systemException \
-			"System installation canceled" \
-		"user_reboot"
+	if [ -z "$kiwi_oemunattended" ];then
+		TEXT_INST=$(
+			getText "Destroying ALL data on %1, continue ?" $items)
+		Dialog --yesno "\"$TEXT_INST\"" 5 70
+		if [ ! $? = 0 ];then
+			systemException \
+				"System installation canceled" \
+			"user_reboot"
+		fi
 	fi
 	clear
 	for i in ${instItems[*]};do

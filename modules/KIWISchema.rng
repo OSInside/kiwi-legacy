@@ -1533,6 +1533,27 @@ appears and the system waits for a key event before reboot</db:para>
   </div>
   <!--
     ==========================================
+    common element <oem-unattended>
+    
+  -->
+  <div>
+    <define name="k.oem-unattended.content">
+      <data type="boolean"/>
+    </define>
+    <define name="k.oem-unattended.attlist">
+      <empty/>
+    </define>
+    <define name="k.oem-unattended">
+      <element name="oem-unattended">
+        <a:documentation>For oemboot driven images: don't ask questions if possible y/n</a:documentation>
+        <db:para>For oemboot driven images: don't ask questions if possible y/n</db:para>
+        <ref name="k.oem-unattended.attlist"/>
+        <ref name="k.oem-unattended.content"/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
     common element <size>
     
   -->
@@ -2877,6 +2898,9 @@ and setup the system disk</db:para>
           </optional>
           <optional>
             <ref name="k.oem-dumphalt"/>
+          </optional>
+          <optional>
+            <ref name="k.oem-unattended"/>
           </optional>
         </interleave>
       </element>
