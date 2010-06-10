@@ -661,14 +661,19 @@ function OEMInstall {
 	#--------------------------------------
 	if [ ! -z "$OEM_DUMPHALT" ];then
 		if [ "$OEMInstallType" = "CD" ];then
-			Echo "Please remove the CD/DVD and press enter for reboot !"
-			read
-			CDEject
+			TEXT_DUMP=$TEXT_CDPULL
 		else
-			Echo "Please unplug the USB stick and press enter for reboot !"
-			read
+			TEXT_DUMP=$TEXT_USBPULL
 		fi
-		exec /sbin/reboot -f -i
+		if [ "$OEMInstallType" = "CD" ];then
+			CDEject
+		fi
+		Dialog \
+			--backtitle \"$TEXT_INSTALLTITLE\" \
+			--msgbox "\"$TEXT_DUMP\"" 5 70
+		systemException \
+			"Reboot requested after image installation" \
+		"user_reboot"
 	fi
 }
 

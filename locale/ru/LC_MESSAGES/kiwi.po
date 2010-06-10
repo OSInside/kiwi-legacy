@@ -63,10 +63,12 @@ msgstr "Отмена"
 msgid "Exit"
 msgstr "Выход"
 
-msgid "Please eject the install CD/DVD before continuing"
+#, fuzzy
+msgid "Please remove the CD/DVD before reboot"
 msgstr "Перед продолжением извлеките установочный CD/DVD"
 
-msgid "Please pull out the install USB stick before continuing"
+#, fuzzy
+msgid "Please unplug the USB stick before reboot"
 msgstr "Перед продолжением извлеките установочный USB"
 
 msgid "Installation..."

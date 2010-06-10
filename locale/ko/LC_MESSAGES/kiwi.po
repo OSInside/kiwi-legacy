@@ -65,10 +65,12 @@ msgstr "취소"
 msgid "Exit"
 msgstr "종료"
 
-msgid "Please eject the install CD/DVD before continuing"
+#, fuzzy
+msgid "Please remove the CD/DVD before reboot"
 msgstr "계속하기전에 설치 CD/DVD를 꺼내주세요."
 
-msgid "Please pull out the install USB stick before continuing"
+#, fuzzy
+msgid "Please unplug the USB stick before reboot"
 msgstr "계속하기 전에 설치 USB 스틱을 뽑아주세요."
 
 msgid "Installation..."

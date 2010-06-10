@@ -77,10 +77,10 @@ msgstr "取消"
 msgid "Exit"
 msgstr ""
 
-msgid "Please eject the install CD/DVD before continuing"
+msgid "Please remove the CD/DVD before reboot"
 msgstr ""
 
-msgid "Please pull out the install USB stick before continuing"
+msgid "Please unplug the USB stick before reboot"
 msgstr ""
 
 #, fuzzy

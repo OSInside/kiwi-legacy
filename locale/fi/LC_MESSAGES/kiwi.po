@@ -73,10 +73,12 @@ msgstr "Peruuta"
 msgid "Exit"
 msgstr "Lopeta"
 
-msgid "Please eject the install CD/DVD before continuing"
+#, fuzzy
+msgid "Please remove the CD/DVD before reboot"
 msgstr "Poista asennus-CD/DVD ennen jatkamista"
 
-msgid "Please pull out the install USB stick before continuing"
+#, fuzzy
+msgid "Please unplug the USB stick before reboot"
 msgstr "Poista asennus-USB-tikku ennen jatkamista"
 
 #

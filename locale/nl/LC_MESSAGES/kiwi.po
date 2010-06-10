@@ -73,10 +73,12 @@ msgstr "Annuleren"
 msgid "Exit"
 msgstr "Stoppen"
 
-msgid "Please eject the install CD/DVD before continuing"
+#, fuzzy
+msgid "Please remove the CD/DVD before reboot"
 msgstr "Gaarne de installatie cd/dvd uitwerpen alvorens door te gaan"
 
-msgid "Please pull out the install USB stick before continuing"
+#, fuzzy
+msgid "Please unplug the USB stick before reboot"
 msgstr "De installatie USB-stick verwijderen alvorens verder te gaan"
 
 #

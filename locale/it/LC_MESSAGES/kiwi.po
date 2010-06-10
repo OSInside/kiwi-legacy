@@ -66,10 +66,12 @@ msgstr "Cancella"
 msgid "Exit"
 msgstr "Esci"
 
-msgid "Please eject the install CD/DVD before continuing"
+#, fuzzy
+msgid "Please remove the CD/DVD before reboot"
 msgstr "Per favore espelli il CD/DVD di installazione prima di continuare"
 
-msgid "Please pull out the install USB stick before continuing"
+#, fuzzy
+msgid "Please unplug the USB stick before reboot"
 msgstr ""
 "Per favore tira via la pennatta USB di installazione prima di continuare"
 
