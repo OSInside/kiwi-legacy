@@ -379,6 +379,9 @@ sub new {
 		if (defined $foreignRepo->{"oem-reboot"}) {
 			$this -> setForeignOEMOptionsElement ("oem-reboot");
 		}
+		if (defined $foreignRepo->{"oem-dumphalt"}) {
+			$this -> setForeignOEMOptionsElement ("oem-dumphalt");
+		}
 		if (defined $foreignRepo->{"oem-recovery"}) {
 			$this -> setForeignOEMOptionsElement ("oem-recovery");
 		}
@@ -1410,6 +1413,26 @@ sub getOEMReboot {
 }
 
 #==========================================
+# getOEMDumpHalt
+#------------------------------------------
+sub getOEMDumpHalt {
+	# ...
+	# Obtain the oem-dumphalt value or return undef
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return undef;
+	}
+	my $halt = $node -> getElementsByTagName ("oem-dumphalt");
+	if ((! defined $halt) || ("$halt" eq "")) {
+		return undef;
+	}
+	return $halt;
+}
+
+#==========================================
 # getOEMSwap
 #------------------------------------------
 sub getOEMSwap {
@@ -2287,6 +2310,7 @@ sub getImageConfig {
 	# ---
 	my $this = shift;
 	my %result;
+	my @nodelist;
 	#==========================================
 	# revision information
 	#------------------------------------------
@@ -2297,7 +2321,7 @@ sub getImageConfig {
 	}
 	$result{kiwi_revision} = $rev;
 	#==========================================
-	# preferences
+	# preferences attributes and text elements
 	#------------------------------------------
 	my %type = %{$this->getImageTypeAndAttributes()};
 	my @delp = $this -> getDeleteList();
@@ -2345,11 +2369,33 @@ sub getImageConfig {
 	if ($iver) {
 		$result{kiwi_iversion} = $iver;
 	}
+	@nodelist = $this->{optionsNodeList} -> get_nodelist();
+	foreach my $element (@nodelist) {
+		if (! $this -> requestedProfile ($element)) {
+			next;
+		}
+		my $keytable = $element -> getElementsByTagName ("keytable");
+		my $timezone = $element -> getElementsByTagName ("timezone");
+		my $language = $element -> getElementsByTagName ("locale");
+		my $boottheme= $element -> getElementsByTagName ("boot-theme");
+		if ((defined $keytable) && ("$keytable" ne "")) {
+			$result{kiwi_keytable} = $keytable;
+		}
+		if ((defined $timezone) && ("$timezone" ne "")) {
+			$result{kiwi_timezone} = $timezone;
+		}
+		if ((defined $language) && ("$language" ne "")) {
+			$result{kiwi_language} = $language;
+		}
+		if ((defined $boottheme) && ("$boottheme" ne "")) {
+			$result{kiwi_boottheme}= $boottheme;
+		}
+	}
 	#==========================================
 	# drivers
 	#------------------------------------------
-	my @node = $this->{driversNodeList} -> get_nodelist();
-	foreach my $element (@node) {
+	@nodelist = $this->{driversNodeList} -> get_nodelist();
+	foreach my $element (@nodelist) {
 		my $type = $element -> getAttribute("type");
 		$type = "kiwi_".$type;
 		if (! $this -> requestedProfile ($element)) {
@@ -2373,39 +2419,22 @@ sub getImageConfig {
 		}
 	}
 	#==========================================
-	# preferences options
+	# oemconfig
 	#------------------------------------------
-	@node = $this->{optionsNodeList} -> get_nodelist();
-	foreach my $element (@node) {
-		if (! $this -> requestedProfile ($element)) {
-			next;
-		}
-		my $keytable = $element -> getElementsByTagName ("keytable");
-		my $timezone = $element -> getElementsByTagName ("timezone");
-		my $language = $element -> getElementsByTagName ("locale");
-		my $boottheme= $element -> getElementsByTagName ("boot-theme");
-		my $oemswapMB= $element -> getElementsByTagName ("oem-swapsize");
-		my $oemrootMB= $element -> getElementsByTagName ("oem-systemsize");
-		my $oemswap  = $element -> getElementsByTagName ("oem-swap");
-		my $oempinst = $element -> getElementsByTagName ("oem-partition-install");
-		my $oemhome  = $element -> getElementsByTagName ("oem-home");
-		my $oemtitle = $element -> getElementsByTagName ("oem-boot-title");
-		my $oemkboot = $element -> getElementsByTagName ("oem-kiwi-initrd");
-		my $oemreboot= $element -> getElementsByTagName ("oem-reboot");
-		my $oemreco  = $element -> getElementsByTagName ("oem-recovery");
-		my $oemrecoid= $element -> getElementsByTagName ("oem-recoveryID");
-		if ((defined $keytable) && ("$keytable" ne "")) {
-			$result{kiwi_keytable} = $keytable;
-		}
-		if ((defined $timezone) && ("$timezone" ne "")) {
-			$result{kiwi_timezone} = $timezone;
-		}
-		if ((defined $language) && ("$language" ne "")) {
-			$result{kiwi_language} = $language;
-		}
-		if ((defined $boottheme) && ("$boottheme" ne "")) {
-			$result{kiwi_boottheme}= $boottheme;
-		}
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (defined $node) {
+		my $oemswapMB= $node -> getElementsByTagName ("oem-swapsize");
+		my $oemrootMB= $node -> getElementsByTagName ("oem-systemsize");
+		my $oemswap  = $node -> getElementsByTagName ("oem-swap");
+		my $oempinst = $node -> getElementsByTagName ("oem-partition-install");
+		my $oemhome  = $node -> getElementsByTagName ("oem-home");
+		my $oemtitle = $node -> getElementsByTagName ("oem-boot-title");
+		my $oemkboot = $node -> getElementsByTagName ("oem-kiwi-initrd");
+		my $oemreboot= $node -> getElementsByTagName ("oem-reboot");
+		my $oemhalt  = $node -> getElementsByTagName ("oem-dumphalt");
+		my $oemreco  = $node -> getElementsByTagName ("oem-recovery");
+		my $oemrecoid= $node -> getElementsByTagName ("oem-recoveryID");
 		if ((defined $oempinst) && ("$oempinst" eq "true")) {
 			$result{kiwi_oempartition_install} = "yes";
 		}
@@ -2428,6 +2457,9 @@ sub getImageConfig {
 		}
 		if ((defined $oemreboot) && ("$oemreboot" eq "true")) {
 			$result{kiwi_oemreboot} = $oemreboot;
+		}
+		if ((defined $oemhalt) && ("$oemhalt" eq "true")) {
+			$result{kiwi_oemdumphalt} = $oemhalt;
 		}
 		if ((defined $oemreco) && ("$oemreco" eq "true")) {
 			$result{kiwi_oemrecovery} = $oemreco;

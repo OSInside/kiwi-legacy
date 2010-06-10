@@ -218,6 +218,10 @@ function baseSetupOEMPartition {
 		echo "Setting up OEM_REBOOT=1"
 		echo "OEM_REBOOT=1" >> $oemfile
 	fi
+	if [ ! -z "$kiwi_oemdumphalt" ];then
+		echo "Setting up OEM_DUMPHALT=1"
+		echo "OEM_DUMPHALT=1" >> $oemfile
+	fi
 	if [ ! -z "$kiwi_oemswap" ];then
 		echo "Setting up OEM_WITHOUTSWAP=1"
 		echo "OEM_WITHOUTSWAP=1" >> $oemfile

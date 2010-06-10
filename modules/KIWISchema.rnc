@@ -1087,6 +1087,27 @@ div {
 }
 
 #==========================================
+# common element <oem-dumphalt>
+#
+div {
+	k.oem-dumphalt.content = xsd:boolean
+	k.oem-dumphalt.attlist = empty
+	k.oem-dumphalt =
+		## For oemboot driven images: reboot after image dump yes/no
+		[
+		db:para [
+			"For oemboot driven images: reboot the system after image\x{a}"~
+			"has been dumped (installed) on the target disk. A message\x{a}"~
+			"appears and the system waits for a key event before reboot"
+		]
+		]
+		element oem-dumphalt {
+			k.oem-dumphalt.attlist,
+			k.oem-dumphalt.content
+		}
+}
+
+#==========================================
 # common element <size>
 #
 div {
@@ -1964,7 +1985,8 @@ div {
 			k.oem-swapsize? &
 			k.oem-recovery? &
 			k.oem-recoveryID? &
-			k.oem-reboot?
+			k.oem-reboot? &
+			k.oem-dumphalt?
 		}
 }
 

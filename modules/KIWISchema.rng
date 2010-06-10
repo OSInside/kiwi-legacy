@@ -1510,6 +1510,29 @@ and don't replace it with mkinitrd created initrd</db:para>
   </div>
   <!--
     ==========================================
+    common element <oem-dumphalt>
+    
+  -->
+  <div>
+    <define name="k.oem-dumphalt.content">
+      <data type="boolean"/>
+    </define>
+    <define name="k.oem-dumphalt.attlist">
+      <empty/>
+    </define>
+    <define name="k.oem-dumphalt">
+      <element name="oem-dumphalt">
+        <a:documentation>For oemboot driven images: reboot after image dump yes/no</a:documentation>
+        <db:para>For oemboot driven images: reboot the system after image
+has been dumped (installed) on the target disk. A message
+appears and the system waits for a key event before reboot</db:para>
+        <ref name="k.oem-dumphalt.attlist"/>
+        <ref name="k.oem-dumphalt.content"/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
     common element <size>
     
   -->
@@ -2851,6 +2874,9 @@ and setup the system disk</db:para>
           </optional>
           <optional>
             <ref name="k.oem-reboot"/>
+          </optional>
+          <optional>
+            <ref name="k.oem-dumphalt"/>
           </optional>
         </interleave>
       </element>
