@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Wed Jun  9 12:40:39 CEST 2010 - ms@suse.de
 
+- v4.41
 - added oem-dumphalt element which reboots the system after
   the image was dumped (installed) on the target device. A
   message appears and the system waits for a key event before
