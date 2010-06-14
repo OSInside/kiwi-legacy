@@ -1,8 +1,8 @@
 -------------------------------------------------------------------
 Mon Jun 14 11:10:15 CEST 2010 - ms@suse.de
 
-- Remove some code duplication by using a new
-  createDirInteractive() function
+- Remove some code duplication by using the functions:
+  createDirInteractive() , getDefaultBaseRoot()
 
 -------------------------------------------------------------------
 Wed Jun  9 12:40:39 CEST 2010 - ms@suse.de

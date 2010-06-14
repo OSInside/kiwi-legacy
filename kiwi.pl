@@ -245,6 +245,24 @@ sub createDirInteractive {
 }
 
 #============================================
+# getDefaultBaseRoot
+#--------------------------------------------
+sub getDefaultBaseRoot {
+	my $kiwi = shift;
+	my $xml  = shift;
+	my $root;
+	$kiwi -> info ("Checking for default baseroot in XML data...");
+	$root = $xml -> getImageDefaultBaseRoot();
+	if ($root) {
+		$kiwi -> done();
+	} else {
+		$kiwi -> notset();
+		return undef;
+	}
+	return $root;
+}
+
+#============================================
 # findExec
 #--------------------------------------------
 sub findExec {
@@ -423,14 +441,7 @@ sub main {
 		# Check for default base root in XML
 		#------------------------------------------
 		if (! defined $BaseRoot) {
-			$kiwi -> info ("Checking for default baseroot in XML data...");
-			$BaseRoot = $xml -> getImageDefaultBaseRoot();
-			if ($BaseRoot) {
-				$kiwi -> done();
-			} else {
-				undef $BaseRoot;
-				$kiwi -> notset();
-			}
+			$BaseRoot = getDefaultBaseRoot($kiwi, $xml);
 		}
 		#==========================================
 		# Check for ignore-repos option
@@ -673,14 +684,7 @@ sub main {
 		# Check for default base root in XML
 		#------------------------------------------
 		if (! defined $BaseRoot) {
-			$kiwi -> info ("Checking for default baseroot in XML data...");
-			$BaseRoot = $xml -> getImageDefaultBaseRoot();
-			if ($BaseRoot) {
-				$kiwi -> done();
-			} else {
-				undef $BaseRoot;
-				$kiwi -> notset();
-			}
+			$BaseRoot = getDefaultBaseRoot($kiwi, $xml);
         }
 		#==========================================
 		# Check tool set
@@ -895,14 +899,7 @@ sub main {
 			# Check for default base root in XML
 			#------------------------------------------
 			if (! defined $BaseRoot) {
-				$kiwi -> info ("Checking for default baseroot in XML data...");
-				$BaseRoot = $xml -> getImageDefaultBaseRoot();
-				if ($BaseRoot) {
-					$kiwi -> done();
-				} else {
-					undef $BaseRoot;
-					$kiwi -> notset();
-				}
+				$BaseRoot = getDefaultBaseRoot($kiwi, $xml);
 			}
 			#==========================================
 			# Initialize root system, use existing root
@@ -1019,14 +1016,7 @@ sub main {
 		# Check for default base root in XML
 		#------------------------------------------
 		if (! defined $BaseRoot) {
-			$kiwi -> info ("Checking for default baseroot in XML data...");
-			$BaseRoot = $xml -> getImageDefaultBaseRoot();
-			if ($BaseRoot) {
-				$kiwi -> done();
-			} else {
-				undef $BaseRoot;
-				$kiwi -> notset();
-			}
+			$BaseRoot = getDefaultBaseRoot($kiwi, $xml);
 		}
 		#==========================================
 		# Check for ignore-repos option
