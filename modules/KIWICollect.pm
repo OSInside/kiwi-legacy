@@ -1,5 +1,5 @@
 #================
-# FILE          : KIWICollect2.pm
+# FILE          : KIWICollect.pm
 #----------------
 # PROJECT       : OpenSUSE Build-Service
 # COPYRIGHT     : (c) 2006 SUSE LINUX Products GmbH, Germany
@@ -587,6 +587,13 @@ sub mainTask
 
   ## create meta data
   $this->createMetadata();
+
+  ## DUD:
+  if ($this->{m_xml}->isDriverUpdateDisk()) {
+	  $this->unpackModules();
+	  $this->unpackInstSys();
+	  $this->createInstallPackageLinks();
+  }
 
   ## We create iso files by default, but keep this for manual override
   if($this->{m_proddata}->getVar("REPO_ONLY") eq "true") {
@@ -1836,7 +1843,159 @@ sub createMetadata
 }
 # createMetadata
 
+# part of DUD:
+sub unpackModules
+{
+	my $this = shift;
 
+	my $tmp_dir = "$this->{m_basesubdir}->{'1'}/temp";
+	if(-d $tmp_dir) {
+		qx(rm -rf $tmp_dir);
+	}
+
+	if(!mkpath("$tmp_dir", { mode => 0755 } )) {
+		$this->logMsg("E", "can't create dir <$tmp_dir>");
+		return undef;
+	}
+
+	my @modules = $this->{m_xml}->getInstSourceDUDModules();
+	my %targets = $this->{m_xml}->getInstSourceDUDTargets();
+	my %target_archs = reverse %targets; # values of this hash are not used
+
+	# So far DUDs only have one single medium
+	my $medium = 1;
+	
+	# unpack module packages to temp dir for the used architectures
+	foreach my $arch (keys(%target_archs)) {
+		my $arch_tmp_dir = "$tmp_dir/$arch";
+
+		foreach my $module (@modules) {
+			my $pack_file = $this->getBestPackFromRepos($module, $arch)->{'localfile'};
+			$this->logMsg("I", "Unpacking $pack_file to $arch_tmp_dir/");
+			$this->{m_util}->unpac_package($pack_file, "$arch_tmp_dir");
+		}
+	}
+
+	# copy modules from temp dir to targets
+	foreach my $target (keys(%targets)) {
+		my $arch = $targets{$target};
+		my $arch_tmp_dir = "$tmp_dir/$arch";
+		my $target_dir = $this->{m_basesubdir}->{$medium}."/linux/suse/$target/modules/";
+
+		my @kos = split /\n/, qx(find $arch_tmp_dir -iname "*.ko");
+
+		foreach my $ko (@kos) {
+			$this->logMsg("I", "Copying module $ko to $target_dir");
+			qx(mkdir -p $target_dir && cp $ko $target_dir);
+		}
+	}
+} # unpackModules
+
+# used only in DUD so far:
+sub getBestPackFromRepos {
+	my $this = shift;
+	my $pkg_name = shift;
+	my $arch = shift;
+
+	my $pkg_pool = $this->{m_packagePool};
+	my $pkg_repos = $pkg_pool->{$pkg_name};
+
+	foreach my $repo (sort{$pkg_repos->{$a}->{priority} <=> $pkg_repos->{$b}->{priority}} keys(%{$pkg_repos})) {
+		return $pkg_repos->{$repo} if $pkg_repos->{$repo}->{arch} eq $arch; #FIXME: fallback handling missing
+	}
+}
+
+
+# part of DUD:
+sub unpackInstSys
+{
+	my $this = shift;
+
+	my $tmp_dir = "$this->{m_basesubdir}->{'1'}/temp";
+	if(-d $tmp_dir) {
+		qx(rm -rf $tmp_dir);
+	}
+
+	if(!mkpath("$tmp_dir", { mode => 0755 } )) {
+		$this->logMsg("E", "can't create dir <$tmp_dir>");
+		return undef;
+	}
+
+	my @inst_sys_packages = $this->{m_xml}->getInstSourceDUDInstsys();
+	my %targets = $this->{m_xml}->getInstSourceDUDTargets();
+	my %target_archs = reverse %targets; # values of this hash are not used
+
+	# So far DUDs only have one single medium
+	my $medium = 1;
+	
+	# unpack module packages to temp dir for the used architectures
+	foreach my $arch (keys(%target_archs)) {
+		my $repo = "repository_1\@$arch"; # FIXME
+		my $arch_tmp_dir = "$tmp_dir/$arch";
+
+		foreach my $module (@inst_sys_packages) {
+			my $pack_file = $this->getBestPackFromRepos($module, $arch)->{'localfile'};
+			$this->logMsg("I", "Unpacking $pack_file to $arch_tmp_dir");
+			$this->{m_util}->unpac_package($pack_file, "$arch_tmp_dir");
+		}
+	}
+
+	# copy inst_sys_packages from temp dir to targets
+	foreach my $target (keys(%targets)) {
+		my $arch = $targets{$target};
+		my $arch_tmp_dir = "$tmp_dir/$arch";
+		my $target_dir = $this->{m_basesubdir}->{$medium}."/linux/suse/$target/inst-sys/";
+		
+		qx(cp -a $arch_tmp_dir $target_dir);
+	}
+} # unpackInstSys
+
+# part of DUD:
+sub createInstallPackageLinks
+{
+	my $this = shift;
+	return undef if not ref($this);
+
+	print Dumper($this->{m_repoPacks});
+	#die;
+
+	# So far DUDs only have one single medium
+	my $medium = 1;
+	my $retval = 0;
+	my @packlist = $this->{m_xml}->getInstSourceDUDModules();
+	push @packlist, $this->{m_xml}->getInstSourceDUDInstsys();
+	my %targets = $this->{m_xml}->getInstSourceDUDTargets();
+
+	foreach my $target (keys(%targets)) {
+		my $arch = $targets{$target};
+		my $target_dir = "$this->{m_basesubdir}->{$medium}/linux/suse/$target/install/";
+		qx(mkdir -p $target_dir) unless -d $target_dir;
+		my @fallback_archs = $this->{m_archlist}->fallbacks($arch);
+
+      RPM:
+		foreach my $rpmname (@packlist) {
+			if(not defined($rpmname) or not defined($this->{m_repoPacks}->{$rpmname})) {
+				$this->logMsg("W", "something wrong with rpmlist: undefined value $rpmname");
+				next RPM;
+			}
+
+		  FARCH:
+			foreach my $fallback_arch (@fallback_archs) {
+				#my $pack_file = $this->{m_packagePool}->{$module}->{$repo}->{'localfile'};
+				my $pPointer = $this->{m_repoPacks}->{$rpmname};
+				my $file = $pPointer->{$arch}->{'newpath'}."/".$pPointer->{$fallback_arch}->{'newfile'};
+				next FARCH unless (-e $file);
+
+				link($file, "$target_dir/".$pPointer->{$fallback_arch}->{'newfile'});
+				$this->logMsg("I", "linking $file to $target_dir/".$pPointer->{$fallback_arch}->{'newfile'}) if $this->{m_debug} > 2;
+				$retval++;
+				next RPM;
+			}
+		}
+	}
+	return $retval;
+
+} # createInstallPackageLinks
 
 # returns the number of links created
 sub createBootPackageLinks
