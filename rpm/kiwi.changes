@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Jun 14 11:10:15 CEST 2010 - ms@suse.de
+
+- Remove some code duplication by using a new
+  createDirInteractive() function
+
+-------------------------------------------------------------------
 Wed Jun  9 12:40:39 CEST 2010 - ms@suse.de
 
 - v4.41

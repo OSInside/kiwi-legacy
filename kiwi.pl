@@ -217,6 +217,34 @@ my $boot;       # KIWIBoot  object for logical extends
 my $migrate;    # KIWIMigrate object for system to image migration
 
 #============================================
+# createDirInteractive
+#--------------------------------------------
+sub createDirInteractive {
+	my $kiwi = shift;
+	my $targetDir = shift;
+	if (! -d $targetDir) {
+		my $prefix = $kiwi -> getPrefix (1);
+		my $answer = "unknown";
+		$kiwi -> info ("Destination: $Destination doesn't exist\n");
+		while ($answer !~ /^yes$|^no$/) {
+			print STDERR $prefix,
+				"Would you like kiwi to create it [yes/no] ? ";
+			chomp ($answer = <>);
+		}
+		if ($answer eq "yes") {
+			qxx ("mkdir -p $Destination");
+			return 1;
+		}
+	} else {
+		# Directory exists
+		return 1;
+	}
+	# Directory does not exist and user did
+	# not request dir creation.
+	return undef;
+}
+
+#============================================
 # findExec
 #--------------------------------------------
 sub findExec {
@@ -286,21 +314,9 @@ sub main {
 	#----------------------------------------
 	if (defined $Build) {
 		#==========================================
-		# Check if destdir exists or not 
+		# Create destdir if needed
 		#------------------------------------------
-		if (! -d $Destination) {
-			my $prefix = $kiwi -> getPrefix (1);
-			my $answer = "unknown";
-			$kiwi -> info ("Destination: $Destination doesn't exist\n");
-			while ($answer !~ /^yes$|^no$/) {
-				print STDERR $prefix,
-					"Would you like kiwi to create it [yes/no] ? ";
-				chomp ($answer = <>);
-			}
-			if ($answer eq "yes") {
-				qxx ("mkdir -p $Destination");
-			}
-		}
+		my $dirCreated = createDirInteractive($kiwi, $Destination);
 		#==========================================
 		# Setup prepare 
 		#------------------------------------------
@@ -650,21 +666,9 @@ sub main {
 			);
 		}
 		#==========================================
-		# Check if destdir exists or not 
+		# Create destdir if needed
 		#------------------------------------------
-		if (! -d $Destination) {
-			my $prefix = $kiwi -> getPrefix (1);
-			my $answer = "unknown";
-			$kiwi -> info ("Destination: $Destination doesn't exist\n");
-			while ($answer !~ /^yes$|^no$/) {
-				print STDERR $prefix,
-					"Would you like kiwi to create it [yes/no] ? ";
-				chomp ($answer = <>);
-			}
-			if ($answer eq "yes") {
-				qxx ("mkdir -p $Destination");
-			}
-		}
+		my $dirCreated = createDirInteractive($kiwi, $Destination);
 		#==========================================
 		# Check for default base root in XML
 		#------------------------------------------
