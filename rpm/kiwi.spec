@@ -315,6 +315,8 @@ touch kiwi.loader
 	rm -rf $RPM_BUILD_ROOT/etc/permissions.d/kiwi
 %endif
 
+mkdir -p $RPM_BUILD_ROOT/var/cache/kiwi
+
 test -f $RPM_BUILD_ROOT/srv/tftpboot/pxelinux.0 && \
 	echo /srv/tftpboot/pxelinux.0 > kiwi.loader
 test -f $RPM_BUILD_ROOT/srv/tftpboot/mboot.c32 && \
@@ -349,6 +351,7 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-, root, root)
 %dir %{_datadir}/kiwi
 %dir %{_datadir}/kiwi/image
+%dir /var/cache/kiwi
 %exclude %{_datadir}/kiwi/image/suse-11.3-JeOS
 %exclude %{_datadir}/kiwi/image/suse-11.2-JeOS
 %exclude %{_datadir}/kiwi/image/suse-11.1-JeOS
