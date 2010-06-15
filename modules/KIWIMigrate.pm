@@ -22,6 +22,7 @@ package KIWIMigrate;
 #------------------------------------------
 use strict;
 use Carp qw (cluck);
+use XML::LibXML;
 use File::Find;
 use File::stat;
 use File::Basename;
@@ -109,13 +110,6 @@ sub new {
 	$kiwi -> done ();
 	$kiwi -> info ("Results will be written to: $dest");
 	$kiwi -> done ();
-	if (! $this -> getRootDevice()) {
-		$kiwi -> failed ();
-		$kiwi -> error ("Couldn't find system root device");
-		$kiwi -> failed ();
-		rmdir $dest;
-		return undef;
-	}
 	#==========================================
 	# Store addon repo information if specified
 	#------------------------------------------
@@ -180,6 +174,7 @@ sub new {
 		'\/var\/log',                   # no logs
 		'\/var\/run',                   # no pid files
 		'\/etc\/fstab',                 # no fstab file
+		'\/etc\/udev\/rules.d',         # no udev rules
 		'\/media\/',                    # no media automount files
 		'\/var\/lib\/hardware\/'        # no hwinfo hardware files
 	);
@@ -843,12 +838,6 @@ sub setPrepareConfigSkript {
 	print FD 'echo "Configure image: [$kiwi_iname]..."'."\n";
 	print FD 'suseSetupProduct'."\n";
 	#==========================================
-	# Services...
-	#------------------------------------------
-	foreach my $service (@result) {
-		print FD 'suseInsertService '.$service."\n";
-	}
-	#==========================================
 	# Repos...
 	#------------------------------------------
 	foreach my $source (keys %{$osc{$product}} ) {
@@ -856,13 +845,54 @@ sub setPrepareConfigSkript {
 		my $url  = $osc{$product}{$source}{src};
 		my $flag = $osc{$product}{$source}{flag};
 		if ($flag ne "remote") {
-			$kiwi -> warning (
-				"Local repo: $alias will not be added to config.sh"
-			);
-			$kiwi -> skipped ();
+			# $kiwi -> warning (
+			#	"Local repo: $alias will not be added to config.sh"
+			# );
+			# $kiwi -> skipped ();
 			next;
 		}
 		print FD "zypper ar \\\n\t\"".$url."\" \\\n\t\"".$alias."\"\n";
+	}
+	#==========================================
+	# Product repo...
+	#------------------------------------------
+	my $repoProduct = "/etc/products.d/openSUSE.prod";
+	if (-e $repoProduct) {
+		my $PXML;
+		if (! open ($PXML,"cat $repoProduct|")) {
+			$kiwi -> failed ();
+			$kiwi -> warning ("--> Failed to open product file $repoProduct");
+			$kiwi -> skipped ();
+		} else {
+			binmode $PXML;
+			my $pxml = new XML::LibXML;
+			my $tree = $pxml -> parse_fh ( $PXML );
+			my $urls = $tree -> getElementsByTagName ("product")
+				-> get_node(1) -> getElementsByTagName ("urls")
+				-> get_node(1) -> getElementsByTagName ("url");
+			for (my $i=1;$i<= $urls->size();$i++) {
+				my $node = $urls -> get_node($i);
+				my $name = $node -> getAttribute ("name");
+				if ($name eq "repository") {
+					my $url   = $node -> textContent();
+					my $alias = "openSUSE";
+					my $alreadyThere = 0;
+					$url =~ s/\/$//;
+					foreach my $source (keys %{$osc{$product}} ) {
+						my $curl = $osc{$product}{$source}{src};
+						$curl =~ s/\/$//;
+						if ($curl eq $url) {
+							$alreadyThere = 1; last;
+						}
+					}
+					if (! $alreadyThere) {
+						print FD "zypper ar \\\n\t\"";
+						print FD $url."\" \\\n\t\"".$alias."\"\n";
+					}
+				}
+			}
+			close $PXML;
+		}
 	}
 	print FD 'suseConfig'."\n";
 	print FD 'baseCleanMount'."\n";
@@ -1059,46 +1089,6 @@ sub getPackageList {
 }
 
 #==========================================
-# getRootDevice
-#------------------------------------------
-sub getRootDevice {
-	# ...
-	# Find the root device of the operating system. Only those
-	# data are inspected. We don't handle sub-mounted systems
-	# within the root tree
-	# ---
-	my $this = shift;
-	my $rootdev;
-	if (! open (FD,"/etc/fstab")) {
-		return undef;
-	}
-	my @fstab = <FD>; close FD;
-	foreach my $mount (@fstab) {
-		if ($mount =~ /\s+\/\s+/) {
-			my @attribs = split (/\s+/,$mount);
-			if ( -e $attribs[0]) {
-				$rootdev = $attribs[0]; last;
-			}
-		}
-	}
-	if (! $rootdev) {
-		return undef;
-	}
-	my $data = qxx ("df $rootdev | tail -n1");
-	my $code = $? >> 8;
-	if ($code != 0) {
-		return undef;
-	}
-	if ($data =~ /$rootdev\s+\d+\s\s(\d+)\s\s/) {
-		$data = $1;
-		$data = int ( $data / 1024 );
-	}	
-	$this->{rdev}  = $rootdev;
-	$this->{rsize} = $data;
-	return $this;
-}
-
-#==========================================
 # setSystemOverlayFiles
 #------------------------------------------
 sub setSystemOverlayFiles {
@@ -1175,9 +1165,12 @@ sub setSystemOverlayFiles {
 	sub generateWanted {
 		my $filehash = shift;
 		return sub {
-			if (((-l $File::Find::name) && (-e $File::Find::name)) ||
-				(! -d $File::Find::name))
-			{
+			if (-d $File::Find::name) {
+				my $attr = stat ($File::Find::name);
+				if ($attr->dev < 0x100) {
+					$File::Find::prune = 1;
+				}
+			} else {
 				my $file = $File::Find::name;
 				my $dirn = $File::Find::dir;
 				my $attr;
@@ -1347,6 +1340,12 @@ sub setSystemOverlayFiles {
 	}
 	$kiwi -> done();
 	#==========================================
+	# Create modified files tree /etc
+	#------------------------------------------
+	mkpath ("$dest/root/etc", {verbose => 0});
+	qxx ("tar -cf - -C $dest/root-nopackage/etc .|tar -xC $dest/root/etc 2>&1");
+	qxx ("rm -rf $dest/root-nopackage/etc");
+	#==========================================
 	# Cleanup symbolic links
 	#------------------------------------------
 	$kiwi -> info ("Cleaning symlinks...");
@@ -1381,10 +1380,6 @@ sub setInitialSetup {
 	my $dest = $this->{dest};
 	my $kiwi = $this->{kiwi};
 	$kiwi -> info ("Setting up initial deployment workflow...");
-	#==========================================
-	# Cleanup
-	#------------------------------------------
-	qxx ("rm -rf $dest/root 2>&1");
 	#==========================================
 	# create root directory
 	#------------------------------------------
@@ -1597,7 +1592,7 @@ sub autoyastClone {
 		# version is less than 2.19.x (1.xx.yy with xx >= 19 can be ignored)
 		$kiwi -> warning("AutoYaST version $ayVersion is too old for cloning");
 		$kiwi -> skipped();
-		return undef;
+		return $this;
 	}
 	#==========================================
 	# run yast for cloning
