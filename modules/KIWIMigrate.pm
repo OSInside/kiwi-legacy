@@ -1584,7 +1584,8 @@ sub generateWanted {
 		my $attr;
 		if (-d $file) {
 			$attr = stat ($file);
-			if ($attr->dev < 0x100) {
+			# dont follow directory links and nfs locations...
+			if (($attr->dev < 0x100) || (-l $file)) {
 				$File::Find::prune = 1;
 			} else {
 				$filehash->{$file} = [$dirn,$attr];

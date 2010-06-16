@@ -58,6 +58,11 @@ all: modules/KIWISchema.rng modules/KIWISchemaTest.rng
 	#--------------------------------------------
 	${MAKE} -C tools all
 
+	#============================================
+	# install .revision file
+	#--------------------------------------------
+	test -f ./.revision || ./.version > .revision
+
 install:
 	#============================================
 	# Install base directories
@@ -72,7 +77,6 @@ install:
 	#============================================
 	# install .revision file
 	#--------------------------------------------
-	test -f ./.revision || ./.version > .revision
 	install -m 644 ./.revision ${kiwi_prefix}
 
 	#============================================

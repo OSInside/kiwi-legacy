@@ -9,13 +9,19 @@ LC        = LC_MESSAGES
 
 all:
 	./.locale
+	for i in `ls -1 .`; do \
+		if [ -d ./$$i ];then \
+		if [ ! "$$i" = "kiwi-help" ] && [ ! "$$i" == "kiwi-template" ];then \
+		( cd ./$$i/${LC}  && msgfmt -o kiwi.mo kiwi.po ) ;\
+		fi \
+	done
+
 
 install:
 	for i in `ls -1 .`; do \
 		if [ -d ./$$i ];then \
 		if [ ! "$$i" = "kiwi-help" ] && [ ! "$$i" == "kiwi-template" ];then \
 		install -d -m 755 ${KIWILOCVZ}/$$i/${LC} ;\
-		( cd ./$$i/${LC}  && msgfmt -o kiwi.mo kiwi.po ) ;\
 		test -e ./$$i/${LC}/kiwi.mo && \
 			install -m 644 ./$$i/${LC}/kiwi.mo ${KIWILOCVZ}/$$i/${LC} || true ;\
 		fi \
