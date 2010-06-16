@@ -31,6 +31,8 @@ use File::Copy;
 use Storable;
 use KIWILog;
 use KIWIQX;
+use File::Spec;
+use Cwd 'abs_path';
 
 #==========================================
 # Constructor
@@ -1210,29 +1212,72 @@ sub setSystemOverlayFiles {
 	} else {
 		my @rpmcheck = qxx ("rpm -qlav");
 		chomp @rpmcheck;
+		my @rpm_dirf = ();
 		my @rpm_dir  = ();
 		my @rpm_file = ();
 		foreach my $dir (@rpmcheck) {
 			if ($dir =~ /^d.*?\/(.*)$/) {
-				push @rpm_dir,$1;
-			} elsif ($dir =~ /.*?\/(.*)$/) {
-				push @rpm_file,$1;
+				my $base = $1;
+				my $name = basename $base;
+				my $dirn = dirname  $base;
+				$dirn = abs_path ("/$dirn");
+				$base = "$dirn/$name";
+				$base =~ s/\/+/\//g;
+				$base =~ s/^\///;
+				push @rpm_dirf,$base;
+				push @rpm_file,$base;
+				push @rpm_dir,$base;
+			} elsif ($dir =~ /.*?\/(.*?)( -> .*)?$/) {
+				my $base = $1;
+				my $name = basename $base;
+				my $dirn = dirname  $base;
+				$dirn = abs_path ("/$dirn");
+				$base = "$dirn/$name";
+				$base =~ s/\/+/\//g;
+				$base =~ s/^\///;
+				push @rpm_file,$base;
 			}
 		}
 		my %file_rpm;
 		my %dirs_rpm;
 		my %dirs_cmp;
+		my %dirs_rpmf;
 		@file_rpm{map {$_ = "/$_"} @rpm_file} = ();
 		@dirs_rpm{map {$_ = "/$_"} @rpm_dir}  = ();
+		@dirs_rpmf{map {$_ = "/$_"} @rpm_dirf}  = ();
 		$dirs_cmp{"/"} = undef;
-		foreach my $dir (keys %dirs_rpm) {
+		foreach my $dir (sort keys %dirs_rpm) {
 			while ($dir =~ s:/[^/]+$::) {
 				$dirs_cmp{$dir} = undef;
 			}
 		}
 		# unpackaged files in packaged directories...
-		my $wref = $this -> generateWanted (\%result);
-		find ($wref, keys %dirs_rpm);
+		sub generateWanted {
+			my $filehash = shift;
+			return sub {
+				my $file = $File::Find::name;
+				my $dirn = $File::Find::dir;
+				my $attr;
+				if (-d $file) {
+					$attr = stat ($file);
+					# dont follow directory links and nfs locations...
+					if (($attr->dev < 0x100) || (-l $file)) {
+						$File::Find::prune = 1;
+					} else {
+						$filehash->{$file} = [$dirn,$attr];
+					}
+				} else {
+					if (-l $file) {
+						$attr = lstat ($file);
+					} else {
+						$attr = stat ($file);
+					}
+					$filehash->{$file} = [$dirn,$attr];
+				}
+			}
+		}
+		my $wref = generateWanted (\%result);
+		find({ wanted => $wref, follow => 0 }, sort keys %dirs_rpmf);
 		foreach my $file (sort keys %result) {
 			if (exists $file_rpm{$file}) {
 				delete $result{$file};
@@ -1258,7 +1303,7 @@ sub setSystemOverlayFiles {
 		}
 		# skipped files...
 		foreach my $file (sort keys %result) {
-			my $ok   = 1;
+			my $ok = 1;
 			foreach my $exp (@deny) {
 				if ($file =~ /$exp/) {
 					$ok = 0; last;
@@ -1573,33 +1618,6 @@ sub autoyastClone {
 	return $this;
 }
 
-#==========================================
-# generate File::Find closure
-#------------------------------------------
-sub generateWanted {
-	my $filehash = shift;
-	return sub {
-		my $file = $File::Find::name;
-		my $dirn = $File::Find::dir;
-		my $attr;
-		if (-d $file) {
-			$attr = stat ($file);
-			# dont follow directory links and nfs locations...
-			if (($attr->dev < 0x100) || (-l $file)) {
-				$File::Find::prune = 1;
-			} else {
-				$filehash->{$file} = [$dirn,$attr];
-			}
-		} else {
-			if (-l $file) {
-				$attr = lstat ($file);
-			} else {
-				$attr = stat ($file);
-			}
-			$filehash->{$file} = [$dirn,$attr];
-		}
-	}
-}
 
 1;
 
