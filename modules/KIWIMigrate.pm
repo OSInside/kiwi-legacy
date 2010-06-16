@@ -500,8 +500,13 @@ sub createReport {
 			#------------------------------------------
 			my $count= 0;
 			foreach my $file (sort keys %{$nopackage}) {
-				my $mtime = localtime ($nopackage->{$file}->[1]->mtime);
-				my $size  = $nopackage->{$file}->[1]->size;
+				my $fattr = $nopackage->{$file}->[1];
+				my $size  = 0;
+				my $mtime = "unknown";
+				if ($fattr) {
+					$mtime = localtime ($fattr->mtime);
+					$size  = $fattr->size;
+				}
 				if ($size > 1048576) {
 					$size/= 1048576;
 					$size = sprintf ("%.1f Mbyte", $size);
