@@ -3737,7 +3737,8 @@ sub getSingleInstSourceSatSolvable {
 	#------------------------------------------
 	if ((! -x "/usr/bin/mergesolv") ||
 		(! -x "/usr/bin/susetags2solv") ||
-		(! -x "/usr/bin/rpmmd2solv")
+		(! -x "/usr/bin/rpmmd2solv") ||
+		(! -x "/usr/bin/rpms2solv")
 	) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("--> Can't find satsolver tools");
@@ -3894,10 +3895,16 @@ sub getSingleInstSourceSatSolvable {
 		}
 	}
 	if (! $foundDist) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("--> Can't find a distribution solvable");
-		$kiwi -> failed ();
-		return undef;
+		my $path = $repo; $path =~ s/dir:\/\///;
+		my $data = qxx ("rpms2solv $path/*.rpm > $sdir/primary-$count 2>&1");
+		my $code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("--> Can't find/create a distribution solvable");
+			$kiwi -> failed ();
+			return undef;
+		}
+		$foundDist = 1;
 	}
 	#==========================================
 	# download pattern solvable(s)
