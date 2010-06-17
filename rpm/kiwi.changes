@@ -1,6 +1,10 @@
 -------------------------------------------------------------------
 Mon Jun 14 11:10:15 CEST 2010 - ms@suse.de
 
+- redesigned and restructure the kiwi migration module
+  we were working in a small workgroup this week to
+  establish a new version of the migration module. Thanks
+  to everybody in my team.
 - Remove some code duplication by using the functions:
   createDirInteractive() , getDefaultBaseRoot()
 

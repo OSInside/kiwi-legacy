@@ -32,6 +32,7 @@ use Storable;
 use KIWILog;
 use KIWIQX;
 use File::Spec;
+use Fcntl ':mode';
 use Cwd 'abs_path';
 
 #==========================================
@@ -544,9 +545,15 @@ sub createReport {
 			my $count= 0;
 			foreach my $file (sort keys %{$nopackage}) {
 				my $fattr = $nopackage->{$file}->[1];
+				my $type  = "file";
 				my $size  = 0;
 				my $mtime = "unknown";
 				if ($fattr) {
+					if (S_ISDIR($fattr->mode)) {
+						$type = "directory";
+					} elsif (S_ISLNK($fattr->mode)) {
+						$type = "link";
+					}
 					$mtime = localtime ($fattr->mtime);
 					$size  = $fattr->size;
 				}
@@ -561,13 +568,28 @@ sub createReport {
 				}
 				# ND: root-nopackage.html...
 				print ND '<section class="row">'."\n";
-				print ND '<dt>'.$file.'</dt>'."\n";
-				print ND '<dd class="size">';
-				print ND $size;
-				print ND '</dd>'."\n";
-				print ND '<dd class="modified">';
-				print ND $mtime;
-				print ND '</dd>'."\n";
+				if ($type eq "directory") {
+					print ND '<dt class="'.$type.'">'.$file.'</dt>'."\n";
+					print ND '<dd class="file">';
+					print ND "directory";
+					print ND '</dd>'."\n";
+					print ND '<dd class="file"/>'."\n";
+				} elsif ($type eq "link") {
+					my $target = readlink $file;
+					print ND '<dt class="'.$type.'">'.$file.'</dt>'."\n";
+					print ND '<dd class="file">';
+					print ND "link to -> ".$target;
+					print ND '</dd>'."\n";
+					print ND '<dd class="file"/>'."\n";
+				} else {
+					print ND '<dt class="'.$type.'">'.$file.'</dt>'."\n";
+					print ND '<dd class="size">';
+					print ND $size;
+					print ND '</dd>'."\n";
+					print ND '<dd class="modified">';
+					print ND $mtime;
+					print ND '</dd>'."\n";
+				}
 				print ND '</section>'."\n";
 				# JS: data.js...
 				if ($count) {
@@ -1243,7 +1265,6 @@ sub setSystemOverlayFiles {
 	} else {
 		my @rpmcheck = qxx ("rpm -qlav");
 		chomp @rpmcheck;
-		my @rpm_dirf = ();
 		my @rpm_dir  = ();
 		my @rpm_file = ();
 		foreach my $dir (@rpmcheck) {
@@ -1255,7 +1276,6 @@ sub setSystemOverlayFiles {
 				$base = "$dirn/$name";
 				$base =~ s/\/+/\//g;
 				$base =~ s/^\///;
-				push @rpm_dirf,$base;
 				push @rpm_file,$base;
 				push @rpm_dir,$base;
 			} elsif ($dir =~ /.*?\/(.*?)( -> .*)?$/) {
@@ -1272,10 +1292,8 @@ sub setSystemOverlayFiles {
 		my %file_rpm;
 		my %dirs_rpm;
 		my %dirs_cmp;
-		my %dirs_rpmf;
 		@file_rpm{map {$_ = "/$_"} @rpm_file} = ();
 		@dirs_rpm{map {$_ = "/$_"} @rpm_dir}  = ();
-		@dirs_rpmf{map {$_ = "/$_"} @rpm_dirf}  = ();
 		$dirs_cmp{"/"} = undef;
 		foreach my $dir (sort keys %dirs_rpm) {
 			while ($dir =~ s:/[^/]+$::) {
@@ -1308,7 +1326,7 @@ sub setSystemOverlayFiles {
 			}
 		}
 		my $wref = generateWanted (\%result);
-		find({ wanted => $wref, follow => 0 }, sort keys %dirs_rpmf);
+		find({ wanted => $wref, follow => 0 }, sort keys %dirs_rpm);
 		foreach my $file (sort keys %result) {
 			if (exists $file_rpm{$file}) {
 				delete $result{$file};
