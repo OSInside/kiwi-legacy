@@ -294,7 +294,7 @@ sub createReport {
 	my @list = qxx (
 		'rpm -qf --qf "%{NAME}:%{VERSION}\n" /lib/modules/$(uname -r)'
 	); chomp @list;
-	foreach my $item (@list) {
+	foreach my $item (sort @list) {
 		if ($item =~ /(.*):(.*)/) {
 			my $pac = $1;
 			my $ver = $2;
@@ -303,6 +303,33 @@ sub createReport {
 			print FD '<td>'.$ver.'</td>'."\n";
 			print FD '</tr>'."\n";
 		}
+	}
+	print FD '</table>'."\n";
+	#==========================================
+	# Hardware dependent packages report
+	#------------------------------------------
+	my $pack;
+	my %modalias;
+	print FD '<h1>Hardware dependent packages </h1>'."\n";
+	print FD '<p>'."\n";
+	print FD 'The table below shows packages that depend on specific hardware ';
+	print FD 'Please note that it might be required to have a different set ';
+	print FD 'of hardware dependent packages included into the image ';
+	print FD 'description depending on the target hardware. If there is ';
+	print FD 'the need for such packages make sure you add them as follows ';
+	print FD '<package name="name-of-package" bootinclude="true"/>';
+	print FD '</p>'."\n";
+	print FD '<hr>'."\n";
+	print FD '<table>'."\n";
+	for (qxx ( "rpm -qa --qf '\n<%{name}>\n' --supplements" )) {
+		chomp;
+		$pack = $1 if /^<(.+)>/;
+		push @{$modalias{$pack}}, $_ if /^modalias/;
+	}
+	foreach my $item (sort keys %modalias) {
+		print FD '<tr valign="top">'."\n";
+		print FD '<td>'.$item.'</td>'."\n";
+		print FD '</tr>'."\n";
 	}
 	print FD '</table>'."\n";
 	#==========================================
@@ -319,7 +346,7 @@ sub createReport {
 		print FD '<hr>'."\n";
 		print FD '<table>'."\n";
 		my @list = qxx ("rpm -q @pacs --last"); chomp @list;
-		foreach my $job (@list) {
+		foreach my $job (sort @list) {
 			if ($job =~ /([^\s]+)\s+([^\s].*)/) {
 				my $pac  = $1;
 				my $date = $2;
@@ -439,7 +466,7 @@ sub createReport {
 		print FD '<table>'."\n";
 		my @pacs = @{$failedJob2};
 		my @list = qxx ("rpm -q @pacs --last"); chomp @list;
-		foreach my $job (@list) {
+		foreach my $job (sort @list) {
 			if ($job =~ /([^\s]+)\s+([^\s].*)/) {
 				my $pac  = $1;
 				my $date = $2;
@@ -452,10 +479,10 @@ sub createReport {
 				if ($disturl !~ s:/[^/]*$::) {
 					$disturl = $srcurl;
 				}
-				if (! $distro) {
+				if ($distro =~ /^(\s*|\(none\))$/) {
 					$distro = "No distribution";
 				}
-				if (! $disturl) {
+				if ($disturl =~ /^(\s*|\(none\))$/) {
 					$disturl = "No URL";
 				}
 				print FD '<tr valign="top">'."\n";
