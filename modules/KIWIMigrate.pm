@@ -144,8 +144,6 @@ sub new {
 		'\.rej$',                       # no diff reject files
 		'\.lock$',                      # no lock files
 		'\.tmp$',                       # no tmp files
-		'\/etc\/init\.d\/rc.*\/',       # no service links
-		'\/etc\/init\.d\/boot.d\/',     # no boot service links
 		'\/etc\/gconf\/',               # no gconf files
 		'\.depend',                     # no make depend targets
 		'\.backup',                     # no sysconfig backup files
@@ -1141,29 +1139,12 @@ sub setSystemOverlayFiles {
 		$cdata = retrieve($cache);
 	}
 	#==========================================
-	# exclude special and non local mounts
-	#------------------------------------------
-	#if (! $cache) {
-	#	my @mounts = qxx ("cat /etc/mtab | cut -f 2,3 -d ' '"); chomp @mounts;
-	#	foreach my $mount (@mounts) {
-	#		my @details = split (/\s+/,$mount);
-	#		my $path = quotemeta ($details[0]);
-	#		my $type = $details[1];
-	#		$path .= "\/";
-	#		if ($type =~
-	#			/^(tmpfs|proc|sysfs|debugfs|devpts|fusectl|autofs|nfs|nfsd)$/) {
-	#			push @deny,$path;
-	#			$kiwi -> loginfo ("Excluding path: $path per mount table\n");
-	#		}
-	#	}
-	#}
-	#==========================================
 	# Find files packaged but changed
 	#------------------------------------------
 	$kiwi -> info ("Inspecting RPM database [modified files]...");
 	if ($cache) {
 		@modified = @{$cdata->{modified}};
-		$kiwi -> note ("\n");
+		$kiwi -> done(); 
 	} else {
 		$checkopt = "--nodeps --nodigest --nosignature --nomtime ";
 		$checkopt.= "--nolinkto --nouser --nogroup --nomode";
@@ -1306,20 +1287,22 @@ sub setSystemOverlayFiles {
 			}
 			closedir $FH;
 		}
-		# skipped files...
-		foreach my $file (sort keys %result) {
-			my $ok = 1;
-			foreach my $exp (@deny) {
-				if ($file =~ /$exp/) {
-					$ok = 0; last;
-				}
-			}
-			if (! $ok) {
-				delete $result{$file};
+		$cdata->{result} = \%result;
+		$kiwi -> done ();
+	}
+	#==========================================
+	# apply deny files on result hash
+	#------------------------------------------
+	foreach my $file (sort keys %result) {
+		my $ok = 1;
+		foreach my $exp (@deny) {
+			if ($file =~ /$exp/) {
+				$ok = 0; last;
 			}
 		}
-		$cdata->{result} = \%result;
-		$kiwi -> done();
+		if (! $ok) {
+			delete $result{$file};
+		}
 	}
 	#==========================================
 	# Write cache if required
@@ -1344,17 +1327,12 @@ sub setSystemOverlayFiles {
 	qxx ("tar -cf - -C /etc .|tar -xC $dest/root/etc 2>&1");
 	$kiwi -> done();
 	#==========================================
-	# Cleanup symbolic links
+	# apply deny files on overlay tree
 	#------------------------------------------
-	$kiwi -> info ("Cleaning symlinks...");
-	$this -> checkBrokenLinks();
-	$kiwi -> done();
-	#==========================================
-	# Remove empty directories
-	#------------------------------------------
-	$kiwi -> info ("Removing empty directories...");
-	qxx ("find $dest/root -type d | xargs rmdir -p 2>/dev/null");
-	$kiwi -> done();
+	foreach my $exp (@deny) {
+		$exp =~ s/\$//;  # shell glob differs from regexps
+		qxx ("rm -rf $dest/root/$exp");
+	}
 	#==========================================
 	# Store in instance for report
 	#------------------------------------------
