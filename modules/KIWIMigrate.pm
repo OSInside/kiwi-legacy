@@ -279,6 +279,32 @@ sub createReport {
 	print FD '</div>'."\n";
 	print FD '<div class="container">'."\n";
 	#==========================================
+	# Kernel version report
+	#------------------------------------------
+	print FD '<h1>Currently active kernel version</h1>'."\n";
+	print FD '<p>'."\n";
+	print FD 'The table below shows the packages required for the currently ';
+	print FD 'active kernel. If multiple kernels are installed make sure ';
+	print FD 'that the reported kernel package names are part of the ';
+	print FD 'image description';
+	print FD '</p>'."\n";
+	print FD '<hr>'."\n";
+	print FD '<table>'."\n";
+	my @list = qxx (
+		'rpm -qf --qf "%{NAME}:%{VERSION}\n" /lib/modules/$(uname -r)'
+	); chomp @list;
+	foreach my $item (@list) {
+		if ($item =~ /(.*):(.*)/) {
+			my $pac = $1;
+			my $ver = $2;
+			print FD '<tr valign="top">'."\n";
+			print FD '<td>'.$pac.'</td>'."\n";
+			print FD '<td>'.$ver.'</td>'."\n";
+			print FD '</tr>'."\n";
+		}
+	}
+	print FD '</table>'."\n";
+	#==========================================
 	# Package/Pattern report
 	#------------------------------------------
 	if ($twice) {
@@ -416,9 +442,28 @@ sub createReport {
 			if ($job =~ /([^\s]+)\s+([^\s].*)/) {
 				my $pac  = $1;
 				my $date = $2;
+				my @rpm  = qxx (
+					'rpm -q --qf "%{distribution}\n%{disturl}\n%{url}\n" '.$pac
+				); chomp @rpm;
+				my $distro  = $rpm[0];
+				my $disturl = $rpm[1];
+				my $srcurl  = $rpm[2];
+				if ($disturl !~ s:/[^/]*$::) {
+					$disturl = $srcurl;
+				}
+				if (! $distro) {
+					$distro = "No distribution";
+				}
+				if (! $disturl) {
+					$disturl = "No URL";
+				}
 				print FD '<tr valign="top">'."\n";
-				print FD '<td>'.$pac.'</td>'."\n";
-				print FD '<td>'.$date.'</td>'."\n";
+				print FD '<td><nobr>'.$pac.'</nobr></td>'."\n";
+				print FD '<td>';
+				print FD '<nobr>'.$date.'</nobr><br>';
+				print FD '<nobr>'.$distro.'</nobr><br>';
+				print FD '<nobr>'.$disturl.'</nobr>';
+				print FD '</td>'."\n";
 				print FD '</tr>'."\n";
 			}
 		}
