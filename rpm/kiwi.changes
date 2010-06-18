@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Mon Jun 14 11:10:15 CEST 2010 - ms@suse.de
 
+- v4.42
 - redesigned and restructure the kiwi migration module
   we were working in a small workgroup this week to
   establish a new version of the migration module. Thanks
