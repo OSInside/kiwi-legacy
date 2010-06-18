@@ -7,6 +7,12 @@ Mon Jun 14 11:10:15 CEST 2010 - ms@suse.de
   to everybody in my team.
 - Remove some code duplication by using the functions:
   createDirInteractive() , getDefaultBaseRoot()
+- avoid a Perl runtime error message from being
+  printed if the XML file parsing fails.
+- changed findExec to return undef if the executable
+  cannot be found. If as previously the execName is returned
+  the caller has no way to differentiate whether or not the
+  desired executable actually exists on the system.
 
 -------------------------------------------------------------------
 Wed Jun  9 12:40:39 CEST 2010 - ms@suse.de

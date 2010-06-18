@@ -152,7 +152,6 @@ sub new {
 		my $evaldata = $@;
 		$kiwi -> error  ("Problem reading control file");
 		$kiwi -> failed ();
-		$kiwi -> error  ("$evaldata\n");
 		return undef;
 	}
 	$this->{xmlOrigString} = $systemTree -> toString();
@@ -764,7 +763,7 @@ sub getImageTypeAndAttributes {
 	foreach my $node (@tnodes) {
 		my %record = ();
 		my $prim = $node -> getAttribute("primary");
-		if ((! defined $prim) || ($prim eq "false") || ($prim eq "0")) {
+		if ((! defined $prim) || ($prim eq "false")) {
 			$prim = $node -> getAttribute("image");
 		} else {
 			$prim  = "primary";

@@ -273,7 +273,7 @@ sub findExec {
 		if ($kiwi) {
 			$kiwi -> loginfo ("warning: $execName not found\n");
 		}
-		return $execName;
+		return undef;
 	}
 	return $execPath;
 }
