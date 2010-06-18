@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Jun 18 12:18:11 CEST 2010 - ms@suse.de
+
+- exit kiwi directly if the possible question to create
+  the destination directory was canceled by the user
+
+-------------------------------------------------------------------
 Mon Jun 14 11:10:15 CEST 2010 - ms@suse.de
 
 - v4.42

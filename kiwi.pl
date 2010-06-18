@@ -335,6 +335,9 @@ sub main {
 		# Create destdir if needed
 		#------------------------------------------
 		my $dirCreated = createDirInteractive($kiwi, $Destination);
+		if (! defined $dirCreated) {
+			my $code = kiwiExit (1); return $code;
+		}
 		#==========================================
 		# Setup prepare 
 		#------------------------------------------
@@ -680,6 +683,12 @@ sub main {
 		# Create destdir if needed
 		#------------------------------------------
 		my $dirCreated = createDirInteractive($kiwi, $Destination);
+		if (! defined $dirCreated) {
+			if (defined $BaseRoot) {
+				$overlay -> resetOverlay();
+			}
+			my $code = kiwiExit (1); return $code;
+		}
 		#==========================================
 		# Check for default base root in XML
 		#------------------------------------------
