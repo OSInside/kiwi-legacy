@@ -1088,12 +1088,13 @@ sub getSplitTempFiles {
 }
 
 #==========================================
-# getSplitExceptions
+# getSplitTmpExceptions
 #------------------------------------------
-sub getSplitExceptions {
+sub getSplitTmpExceptions {
 	# ...
-	# Get the exceptions defined for temporary and/or persistent
-	# split portions. If no exceptions defined return an empty list
+	# Get the exceptions defined for temporary
+	# split portions. If there are no exceptions defined
+	# return an empty list
 	# ----
 	my $this = shift;
 	my $tnode= $this->{typeNode};
@@ -1111,12 +1112,31 @@ sub getSplitExceptions {
 	foreach my $fileNode (@fileNodeList) {
 		push @result, $fileNode -> getAttribute ("name");
 	}
+	return @result;
+}
+
+#==========================================
+# getSplitPersistentExceptions
+#------------------------------------------
+sub getSplitPersistentExceptions {
+	# ...
+	# Get the exceptions defined for persistent
+	# split portions. If there are no exceptions defined
+	# return an empty list
+	# ----
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("split") -> get_node(1);
+	my @result = ();
+	if (! defined $node) {
+		return @result;
+	}
 	my $persistNode = $node -> getElementsByTagName ("persistent")
 		-> get_node(1);
 	if (! defined $persistNode) {
 		return @result;
 	}
-	@fileNodeList = $persistNode -> getElementsByTagName ("except")
+	my @fileNodeList = $persistNode -> getElementsByTagName ("except")
 		-> get_nodelist();
 	foreach my $fileNode (@fileNodeList) {
 		push @result, $fileNode -> getAttribute ("name");

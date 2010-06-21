@@ -2321,73 +2321,31 @@ sub createImageSplit {
 	$imageTreeTmp =~ s/\/+$//;
 	$imageTreeTmp.= "-tmp/";
 	$this->{imageTreeTmp} = $imageTreeTmp;
-	my @persistFiles = $sxml -> getSplitPersistentFiles ();
-	my @exceptFiles  = $sxml -> getSplitExceptions ();
-	my %exceptHash;
-	my %persistDir;
-	#==========================================
-	# walk through except files if any
-	#------------------------------------------
-	foreach my $except (@exceptFiles) {
-		my $globsource = "${imageTree}${except}";
-		my @files = glob($globsource);
-		foreach my $file (@files) {
-			#==========================================
-			# find except files to set read-only
-			#------------------------------------------
-			if (! -e $file) {
-				next;
-			}
-			my $rerooted = $file;
-			$rerooted =~ s#$imageTree#/read-only/#;
-			my $tmpdest = $file;
-			$tmpdest =~ s#$imageTree#$imageTreeTmp#;
-			$exceptHash{$tmpdest} = $rerooted;
-			#==========================================
-			# check file dirname in persistent list 
-			#------------------------------------------
-			my $tdir = dirname $tmpdest;
-			$tdir =~ s#$imageTreeTmp##;
-			foreach my $persist (@persistFiles) {
-				if (($persist eq $tdir) && (! $persistDir{$persist})) {
-					$persistDir{$persist} = $persist;
-					last;
-				}
-			}
-		}
-	}
-	#==========================================
-	# reordering persistent directory list
-	#------------------------------------------
-	foreach my $pdir (keys %persistDir) {
-		my $dir = "${imageTree}${pdir}";
-		my @res = ();
-		if (! opendir (FD,$dir)) {
-			$kiwi -> warning ("Can't open directory: $dir: $!");
-			$kiwi -> skipped ();
-			next;
-		}
-		while (my $entry = readdir (FD)) {
-			next if ($entry =~ /^\.+$/);
-			if (-d $imageTree.$pdir."/".$entry) {
-				push @res,$pdir."/".$entry;
-			}
-		}
-		closedir (FD);
-		my @newlist = ();
-		push @persistFiles,@res;
-		foreach my $entry (@persistFiles) {
-			if ($entry ne $pdir) {
-				push @newlist,$entry;
-			}
-		}
-		@persistFiles = @newlist;
-	}
 	#==========================================
 	# run split tree creation
 	#------------------------------------------
 	if (! -d $imageTreeTmp) {
-		$kiwi -> info ("Creating temporary image part");
+		$kiwi -> info ("Creating temporary image part...\n");
+		#==========================================
+		# walk through except files if any
+		#------------------------------------------
+		my %exceptHash;
+		foreach my $except ($sxml -> getSplitTmpExceptions()) {
+			my $globsource = "${imageTree}${except}";
+			my @files = qxx ("find $globsource -xtype f 2>/dev/null");
+			my $code  = $? >> 8;
+			if ($code != 0) {
+				# excepted file(s) doesn't exist anyway
+				next;
+			}
+			chomp @files;
+			foreach my $file (@files) {
+				$exceptHash{$file} = $file;
+			}
+		}
+		#==========================================
+		# create linked list for files, create dirs
+		#------------------------------------------
 		if (! mkdir $imageTreeTmp) {
 			$error = $!;
 			$kiwi -> failed ();
@@ -2416,40 +2374,48 @@ sub createImageSplit {
 			) {
 				qxx ("cp -a $path $target");
 			} else {
+				$rerooted =~ s#/+#/#g;
 				symlink ($rerooted, $target);
 			}
 		};
 		find(\&$createTmpTree, $imageTree);
-		my @tempFiles = $sxml -> getSplitTempFiles ();
+		my @tempFiles    = $sxml -> getSplitTempFiles ();
+		my @persistFiles = $sxml -> getSplitPersistentFiles ();
 		if ($nopersistent) {
 			push (@tempFiles, @persistFiles);
-			@persistFiles = ();
 		}
+		#==========================================
+		# search temporary files, respect excepts
+		#------------------------------------------
+		my %tempFiles_new;
 		if (@tempFiles) {
 			foreach my $temp (@tempFiles) {
 				my $globsource = "${imageTree}${temp}";
-				my @files = glob($globsource);
-				foreach my $file (@files) {
-					if (! -e $file) {
-						next;
-					}
-					my $dest = $file;
-					$dest =~ s#$imageTree#$imageTreeTmp#;
-					qxx ("rm -rf $dest");
-					qxx ("mv $file $dest");
+				my @files = qxx ("find $globsource -xtype f 2>/dev/null");
+				my $code  = $? >> 8;
+				if ($code != 0) {
+					$kiwi -> warning ("file $globsource doesn't exist");
+					$kiwi -> skipped ();
+					next;
+				}
+				chomp @files;
+				foreach (@files) {
+					$tempFiles_new{$_} = $_;
 				}
 			}
 		}
-		#==========================================
-		# handle optional exceptions
-		#------------------------------------------
-		if (@exceptFiles) {
-			foreach my $except (keys %exceptHash) {
-				qxx ("rm -rf $except");
-				symlink ($exceptHash{$except},$except);
+		@tempFiles = sort keys %tempFiles_new;
+		if (@tempFiles) {
+			foreach my $file (@tempFiles) {
+				if (defined $exceptHash{$file}) {
+					next;
+				}
+				my $dest = $file;
+				$dest =~ s#$imageTree#$imageTreeTmp#;
+				qxx ("rm -rf $dest");
+				qxx ("mv $file $dest");
 			}
 		}
-		$kiwi -> done();
 	}
 	#==========================================
 	# find persistent files for the read-write
@@ -2457,71 +2423,109 @@ sub createImageSplit {
 	$imageTreeRW = $imageTree;
 	$imageTreeRW =~ s/\/+$//;
 	$imageTreeRW.= "-read-write";
+	my @persistFiles = $sxml -> getSplitPersistentFiles ();
+	if ($nopersistent) {
+		undef @persistFiles;
+	}
 	if (! -d $imageTreeRW && @persistFiles) {
-		$kiwi -> info ("Creating read-write image part");
+		$kiwi -> info ("Creating read-write image part...\n");
+		#==========================================
+		# Create read-write directory
+		#------------------------------------------
 		$this->{imageTreeRW} = $imageTreeRW;
 		if (! mkdir $imageTreeRW) {
 			$error = $!;
-			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't create read-write directory: $error");
 			$kiwi -> failed ();
 			qxx ("rm -rf $imageTree");
 			return undef;
 		}
-		my @expandedPersistFiles = ();
-		foreach my $persist (@persistFiles) {
-			my $globsource = "${imageTreeTmp}${persist}";
-			my @files = glob($globsource);
-			foreach my $file (@files) {
-				push @expandedPersistFiles, $file;
-			}
-		}
-		sub dirsort {
-			if (-d $a && -d $b) {
-				my $lena = length($a);
-				my $lenb = length($b);
-				if ($lena == $lenb) {
-					return 0;
-				} elsif ($lena < $lenb) {
-					return -1;
-				} else {
-					return 1;
-				}
-			} elsif (-d $a) {
-				return -1;
-			} else {
-				return 1;
-			}
-		}
-		my @sortedPersistFiles = sort dirsort @expandedPersistFiles;
-		foreach my $file (@sortedPersistFiles) {
-			if ($exceptHash{$file}) {
-				# /.../
-				# don't handle this file for read-write
-				# because of an exception
-				# ----
+		#==========================================
+		# walk through except files if any
+		#------------------------------------------
+		my %exceptHash;
+		foreach my $except ($sxml -> getSplitPersistentExceptions()) {
+			my $globsource = "${imageTree}${except}";
+			my @files = qxx ("find $globsource -xtype f 2>/dev/null");
+			my $code  = $? >> 8;
+			if ($code != 0) {
+				# excepted file(s) doesn't exist anyway
 				next;
 			}
-			my $source  = $file;
-			my $rosource= $file;
-			my $dest    = $file;
-			my $rwroot  = $file;
-			$rosource   =~ s#$imageTreeTmp#$imageTree#;
-			$dest       =~ s#$imageTreeTmp#$imageTreeRW#;
-			$rwroot     =~ s#$imageTreeTmp#/read-write/#;
-			my $destdir = dirname $dest;
-			qxx ("rm -rf $dest");
-			qxx ("mkdir -p $destdir");
-			if (-d $source) {
-				qxx ("mv $source $dest");
-				symlink ($rwroot, $source);
-			} else {
-				qxx ("mv $rosource $dest");
-				qxx ("rm -f $source");
-				symlink ($rwroot, $source);
+			chomp @files;
+			foreach my $file (@files) {
+				$exceptHash{$file} = $file;
 			}
 		}
-		$kiwi -> done();
+		#==========================================
+		# search persistent files, respect excepts
+		#------------------------------------------
+		my %expandedPersistFiles;
+		foreach my $persist (@persistFiles) {
+			my $globsource = "${imageTree}${persist}";
+			my @files = qxx ("find $globsource 2>/dev/null");
+			my $code  = $? >> 8;
+			if ($code != 0) {
+				$kiwi -> warning ("file $globsource doesn't exist");
+				$kiwi -> skipped ();
+				next;
+			}
+			chomp @files;
+			foreach my $file (@files) {
+				if (defined $exceptHash{$file}) {
+					next;
+				}
+				$expandedPersistFiles{$file} = $file;
+			}
+		}
+		@persistFiles = keys %expandedPersistFiles;
+		#==========================================
+		# relink to read-write, and move files
+		#------------------------------------------
+		foreach my $file (@persistFiles) {
+			my $dest = $file;
+			my $link = $file;
+			my $rlnk = $file;
+			$dest =~ s#$imageTree#$imageTreeRW#;
+			$link =~ s#$imageTree#$imageTreeTmp#;
+			$rlnk =~ s#$imageTree#/read-write#;
+			if (-d $file) {
+				#==========================================
+				# recreate directory
+				#------------------------------------------
+				qxx ("mkdir -p $dest");
+			} else {
+				#==========================================
+				# move file to read-write area
+				#------------------------------------------
+				my $destdir = dirname $dest;
+				qxx ("rm -rf $dest");
+				qxx ("mkdir -p $destdir");
+				qxx ("mv $file $dest");
+				#==========================================
+				# relink file to read-write area
+				#------------------------------------------
+				qxx ("rm -rf $link");
+				qxx ("ln -s $rlnk $link");
+			}
+		}
+		#==========================================
+		# relink if entire directory was set
+		#------------------------------------------
+		foreach my $persist ($sxml -> getSplitPersistentFiles()) {
+			my $globsource = "${imageTree}${persist}";
+			if (-d $globsource) {
+				my $link = $globsource;
+				my $rlnk = $globsource;
+				$link =~ s#$imageTree#$imageTreeTmp#;
+				$rlnk =~ s#$imageTree#/read-write#;
+				#==========================================
+				# relink directory to read-write area
+				#------------------------------------------
+				qxx ("rm -rf $link");
+				qxx ("ln -s $rlnk $link");
+			}
+		}
 	}
 	#==========================================
 	# Embed tmp extend into ro extend
