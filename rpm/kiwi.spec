@@ -188,7 +188,12 @@ Authors:
 %package -n kiwi-desc-vmxboot
 License:        GPL v2 or later
 Requires:       kiwi = %{version}
-Requires:       qemu multipath-tools
+Requires:       multipath-tools
+%if 0%{?suse_version} >= 1130
+Requires:       virt-utils
+%else
+Requires:       qemu
+%endif
 Summary:        OpenSuSE - KIWI Image System Virtual Machine boot
 Group:          System/Management
 %if 0%{?suse_version} > 1120
@@ -243,7 +248,12 @@ Authors:
 %package -n kiwi-desc-oemboot
 License:        GPL v2 only
 Requires:       kiwi = %{version}
-Requires:       qemu multipath-tools
+%if 0%{?suse_version} >= 1130
+Requires:       virt-utils
+%else
+Requires:       qemu
+%endif
+Requires:       multipath-tools
 %if %{suse_version} > 1010
 Requires: genisoimage
 %else

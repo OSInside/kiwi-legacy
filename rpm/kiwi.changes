@@ -4,6 +4,9 @@ Fri Jun 18 12:18:11 CEST 2010 - ms@suse.de
 - fixed split section evaluation (bnc #615121)
 - exit kiwi directly if the possible question to create
   the destination directory was canceled by the user
+- migration: added version to cache file
+- changed spec file requirement: require virt-utils for
+  distro versions >= 11.3
 
 -------------------------------------------------------------------
 Mon Jun 14 11:10:15 CEST 2010 - ms@suse.de
