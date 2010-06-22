@@ -1228,9 +1228,24 @@ sub setSystemOverlayFiles {
 	if (! -f $cache) {
 		undef $cache;
 	} else {
-		$kiwi -> info ("=> Using cache file: $cache\n");
-		$kiwi -> info ("=> Remove cache file if your system has changed !!\n");
+		$kiwi -> info ("=> Open cache file: $cache\n");
 		$cdata = retrieve($cache);
+		if (! $cdata) {
+			$kiwi -> warning ("=> Failed to open cache file");
+			$kiwi -> skipped ();
+			undef $cache;
+		} elsif (! $cdata->{version}) {
+			$kiwi -> warning ("=> Cache doesn't provide version");
+			$kiwi -> skipped ();
+			undef $cache;
+		} elsif ($cdata->{version} ne $main::Version) {
+			$kiwi -> warning ("=> Cache version doesn't match");
+			$kiwi -> skipped ();
+			undef $cache;
+		} else {
+			$kiwi -> info ("=> Using cache file\n");
+			$kiwi -> info ("=> Remove cache if your system has changed !!\n");
+		}
 	}
 	#==========================================
 	# Find files packaged but changed
@@ -1398,6 +1413,7 @@ sub setSystemOverlayFiles {
 	# Write cache if required
 	#------------------------------------------
 	if (! $cache) {
+		$cdata->{version} = $main::Version;
 		store ($cdata,$dest.".cache");
 	}
 	#==========================================
