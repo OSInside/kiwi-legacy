@@ -17,14 +17,14 @@ package KIWIXML;
 #==========================================
 # Modules
 #------------------------------------------
+use strict;
+use warnings;
 require Exporter;
 use Carp qw (cluck);
 use File::Glob ':glob';
 use File::Basename;
 use LWP;
 use XML::LibXML;
-use strict;
-use warnings;
 use KIWILog;
 use KIWIManager qw (%packageManager);
 use KIWIOverlay;
