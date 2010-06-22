@@ -18,17 +18,18 @@ package KIWIXML;
 # Modules
 #------------------------------------------
 require Exporter;
-use strict;
 use Carp qw (cluck);
-use XML::LibXML;
-use LWP;
-use KIWILog;
-use KIWIOverlay;
-use KIWISatSolver;
-use KIWIManager qw (%packageManager);
 use File::Glob ':glob';
 use File::Basename;
+use LWP;
+use XML::LibXML;
+use strict;
+use warnings;
+use KIWILog;
+use KIWIManager qw (%packageManager);
+use KIWIOverlay;
 use KIWIQX;
+use KIWISatSolver;
 
 #==========================================
 # Exports
@@ -200,8 +201,8 @@ sub new {
 	#==========================================
 	# Check kiwirevision attribute
 	#------------------------------------------
-	if (open FD,$main::Revision) {
-		my $cur_rev = <FD>; close FD;
+	if (open (my $FD,$main::Revision)) {
+		my $cur_rev = <$FD>; close $FD;
 		my $req_rev = $imgnameNodeList
 			-> get_node(1) -> getAttribute ("kiwirevision");
 		if ((defined $req_rev) && ($cur_rev < $req_rev)) {
@@ -2357,8 +2358,8 @@ sub getImageConfig {
 	# revision information
 	#------------------------------------------
 	my $rev  = "unknown";
-	if (open FD,$main::Revision) {
-		$rev = <FD>; close FD;
+	if (open (my $FD,$main::Revision)) {
+		$rev = <$FD>; close $FD;
 		$rev =~ s/\n//g;
 	}
 	$result{kiwi_revision} = $rev;
@@ -3938,13 +3939,13 @@ sub getSingleInstSourceSatSolvable {
 			# get files listed in patterns
 			#------------------------------------------
 			my $patfile = $destfile;
-			if (! open (FD,$patfile)) {
+			if (! open (my $FD,$patfile)) {
 				$kiwi -> warning ("--> Couldn't open patterns file: $!");
 				$kiwi -> skipped ();
 				unlink $patfile;
 				next;
 			}
-			foreach my $line (<FD>) {
+			foreach my $line (<$FD>) {
 				chomp $line; $destfile = $sdir."/".$line;
 				if ($line !~ /\.$arch\./) {
 					next;
@@ -3957,7 +3958,7 @@ sub getSingleInstSourceSatSolvable {
 					next;
 				}
 			}
-			close FD;
+			close $FD;
 			unlink $patfile;
 		}
 	}
