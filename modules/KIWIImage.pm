@@ -2312,7 +2312,7 @@ sub createImageSplit {
 	#==========================================
 	# split physical extend into RW/RO/tmp part
 	#------------------------------------------
-	$imageTree    = $this->{imageDest}."/".$treebase;
+	$imageTree = $this->{imageDest}."/".$treebase;
 	if ($imageTree !~ /^\//) {
 		my $pwd = qxx ("pwd"); chomp $pwd;
 		$imageTree = $pwd."/".$imageTree;
@@ -2324,97 +2324,96 @@ sub createImageSplit {
 	#==========================================
 	# run split tree creation
 	#------------------------------------------
-	if (! -d $imageTreeTmp) {
-		$kiwi -> info ("Creating temporary image part...\n");
-		#==========================================
-		# walk through except files if any
-		#------------------------------------------
-		my %exceptHash;
-		foreach my $except ($sxml -> getSplitTmpExceptions()) {
-			my $globsource = "${imageTree}${except}";
+	$kiwi -> info ("Creating temporary image part...\n");
+	if (! mkdir $imageTreeTmp) {
+		$error = $!;
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't create split tmp directory: $error");
+		$kiwi -> failed ();
+		qxx ("rm -rf $imageTree");
+		return undef;
+	}
+	#==========================================
+	# walk through except files if any
+	#------------------------------------------
+	my %exceptHash;
+	foreach my $except ($sxml -> getSplitTmpExceptions()) {
+		my $globsource = "${imageTree}${except}";
+		my @files = qxx ("find $globsource -xtype f 2>/dev/null");
+		my $code  = $? >> 8;
+		if ($code != 0) {
+			# excepted file(s) doesn't exist anyway
+			next;
+		}
+		chomp @files;
+		foreach my $file (@files) {
+			$exceptHash{$file} = $file;
+		}
+	}
+	#==========================================
+	# create linked list for files, create dirs
+	#------------------------------------------
+	my $createTmpTree = sub {
+		my $file  = $_;
+		my $dir   = $File::Find::dir;
+		my $path  = "$dir/$file";
+		my $target= $path;
+		$target =~ s#$imageTree#$imageTreeTmp#;
+		my $rerooted = $path;
+		$rerooted =~ s#$imageTree#/read-only/#;
+		my $st = lstat($path);
+		if (S_ISDIR($st->mode)) {
+			mkdir $target;
+			chmod S_IMODE($st->mode), $target;
+			chown $st->uid, $st->gid, $target;
+		} elsif (
+			S_ISCHR($st->mode)  ||
+			S_ISBLK($st->mode)  ||
+			S_ISLNK($st->mode)
+		) {
+			qxx ("cp -a $path $target");
+		} else {
+			$rerooted =~ s#/+#/#g;
+			symlink ($rerooted, $target);
+		}
+	};
+	find(\&$createTmpTree, $imageTree);
+	my @tempFiles    = $sxml -> getSplitTempFiles ();
+	my @persistFiles = $sxml -> getSplitPersistentFiles ();
+	if ($nopersistent) {
+		push (@tempFiles, @persistFiles);
+		undef @persistFiles;
+	}
+	#==========================================
+	# search temporary files, respect excepts
+	#------------------------------------------
+	my %tempFiles_new;
+	if (@tempFiles) {
+		foreach my $temp (@tempFiles) {
+			my $globsource = "${imageTree}${temp}";
 			my @files = qxx ("find $globsource -xtype f 2>/dev/null");
 			my $code  = $? >> 8;
 			if ($code != 0) {
-				# excepted file(s) doesn't exist anyway
+				$kiwi -> warning ("file $globsource doesn't exist");
+				$kiwi -> skipped ();
 				next;
 			}
 			chomp @files;
-			foreach my $file (@files) {
-				$exceptHash{$file} = $file;
+			foreach (@files) {
+				$tempFiles_new{$_} = $_;
 			}
 		}
-		#==========================================
-		# create linked list for files, create dirs
-		#------------------------------------------
-		if (! mkdir $imageTreeTmp) {
-			$error = $!;
-			$kiwi -> failed ();
-			$kiwi -> error  ("Couldn't create tmp directory: $error");
-			$kiwi -> failed ();
-			qxx ("rm -rf $imageTree");
-			return undef;
-		}
-		my $createTmpTree = sub {
-			my $file  = $_;
-			my $dir   = $File::Find::dir;
-			my $path  = "$dir/$file";
-			my $target= $path;
-			$target =~ s#$imageTree#$imageTreeTmp#;
-			my $rerooted = $path;
-			$rerooted =~ s#$imageTree#/read-only/#;
-			my $st = lstat($path);
-			if (S_ISDIR($st->mode)) {
-				mkdir $target;
-				chmod S_IMODE($st->mode), $target;
-				chown $st->uid, $st->gid, $target;
-			} elsif (
-				S_ISCHR($st->mode)  ||
-				S_ISBLK($st->mode)  ||
-				S_ISLNK($st->mode)
-			) {
-				qxx ("cp -a $path $target");
-			} else {
-				$rerooted =~ s#/+#/#g;
-				symlink ($rerooted, $target);
+	}
+	@tempFiles = sort keys %tempFiles_new;
+	if (@tempFiles) {
+		foreach my $file (@tempFiles) {
+			if (defined $exceptHash{$file}) {
+				next;
 			}
-		};
-		find(\&$createTmpTree, $imageTree);
-		my @tempFiles    = $sxml -> getSplitTempFiles ();
-		my @persistFiles = $sxml -> getSplitPersistentFiles ();
-		if ($nopersistent) {
-			push (@tempFiles, @persistFiles);
-		}
-		#==========================================
-		# search temporary files, respect excepts
-		#------------------------------------------
-		my %tempFiles_new;
-		if (@tempFiles) {
-			foreach my $temp (@tempFiles) {
-				my $globsource = "${imageTree}${temp}";
-				my @files = qxx ("find $globsource -xtype f 2>/dev/null");
-				my $code  = $? >> 8;
-				if ($code != 0) {
-					$kiwi -> warning ("file $globsource doesn't exist");
-					$kiwi -> skipped ();
-					next;
-				}
-				chomp @files;
-				foreach (@files) {
-					$tempFiles_new{$_} = $_;
-				}
-			}
-		}
-		@tempFiles = sort keys %tempFiles_new;
-		if (@tempFiles) {
-			foreach my $file (@tempFiles) {
-				if (defined $exceptHash{$file}) {
-					next;
-				}
-				my $dest = $file;
-				$dest =~ s#$imageTree#$imageTreeTmp#;
-				qxx ("rm -rf $dest");
-				qxx ("mv $file $dest");
-			}
+			my $dest = $file;
+			$dest =~ s#$imageTree#$imageTreeTmp#;
+			qxx ("rm -rf $dest");
+			qxx ("mv $file $dest");
 		}
 	}
 	#==========================================
@@ -2423,11 +2422,7 @@ sub createImageSplit {
 	$imageTreeRW = $imageTree;
 	$imageTreeRW =~ s/\/+$//;
 	$imageTreeRW.= "-read-write";
-	my @persistFiles = $sxml -> getSplitPersistentFiles ();
-	if ($nopersistent) {
-		undef @persistFiles;
-	}
-	if (! -d $imageTreeRW && @persistFiles) {
+	if (@persistFiles) {
 		$kiwi -> info ("Creating read-write image part...\n");
 		#==========================================
 		# Create read-write directory
@@ -2435,9 +2430,11 @@ sub createImageSplit {
 		$this->{imageTreeRW} = $imageTreeRW;
 		if (! mkdir $imageTreeRW) {
 			$error = $!;
-			$kiwi -> error  ("Couldn't create read-write directory: $error");
+			$kiwi -> error  (
+				"Couldn't create split read-write directory: $error"
+			);
 			$kiwi -> failed ();
-			qxx ("rm -rf $imageTree");
+			qxx ("rm -rf $imageTree $imageTreeTmp");
 			return undef;
 		}
 		#==========================================
