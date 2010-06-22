@@ -893,7 +893,9 @@ sub getOperatingSystemVersion {
 	$name =~ s/\-\(.*\)//g;
 	if ((defined $plvl) && ($plvl =~ /PATCHLEVEL = (.*)/)) {
 		$plvl = $1;
-		$name = $name."-SP".$plvl;
+		if ($plvl > 0) {
+			$name = $name."-SP".$plvl;
+		}
 	}
 	close FD;
 	if (! open (FD,$main::KMigrate)) {
