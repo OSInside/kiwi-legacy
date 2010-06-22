@@ -18,7 +18,6 @@ package KIWIXML;
 # Modules
 #------------------------------------------
 use strict;
-use warnings;
 require Exporter;
 use Carp qw (cluck);
 use File::Glob ':glob';

@@ -75,19 +75,19 @@ if ( -f $ConfigFile) {
 # Globals
 #--------------------------------------------
 our $BasePath;         # configurable base kiwi path
-our $System;           # configurable baes kiwi image desc. path
-our $LogServerPort;    # configurable log server port
 our $Gzip;             # configurable gzip command
-our @UmountStack;      # command list to umount
+our $LogServerPort;    # configurable log server port
 our $LuksCipher;       # stored luks passphrase
-if (! defined $LogServerPort) {
-	$LogServerPort = "off";
+our $System;           # configurable baes kiwi image desc. path
+our @UmountStack;      # command list to umount
+if ( ! defined $BasePath ) {
+	$BasePath = "/usr/share/kiwi";
 }
 if (! defined $Gzip) {
 	$Gzip = "gzip -9";
 }
-if ( ! defined $BasePath ) {
-	$BasePath = "/usr/share/kiwi";
+if (! defined $LogServerPort) {
+	$LogServerPort = "off";
 }
 if ( ! defined $System ) {
 	$System  = $BasePath."/image";
