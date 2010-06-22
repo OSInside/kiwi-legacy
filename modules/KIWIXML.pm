@@ -3938,8 +3938,9 @@ sub getSingleInstSourceSatSolvable {
 			#==========================================
 			# get files listed in patterns
 			#------------------------------------------
+			my $FD;
 			my $patfile = $destfile;
-			if (! open (my $FD,$patfile)) {
+			if (! open ($FD,$patfile)) {
 				$kiwi -> warning ("--> Couldn't open patterns file: $!");
 				$kiwi -> skipped ();
 				unlink $patfile;
