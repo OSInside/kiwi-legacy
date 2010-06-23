@@ -15,6 +15,8 @@ Fri Jun 18 12:18:11 CEST 2010 - ms@suse.de
   * also added vmxboot and oemboot bootimages to be build
     The code there will work as initrd for an s390 guest
     within kvm
+- fixed <image name="..."/> attribute validation, space
+  and / is not allowed for this attribute
 
 -------------------------------------------------------------------
 Mon Jun 14 11:10:15 CEST 2010 - ms@suse.de

@@ -37,6 +37,11 @@
       <param name="pattern">\d+|\d+M|\d+G</param>
     </data>
   </define>
+  <define name="image-name">
+    <data type="token">
+      <param name="pattern">[^\s/]+</param>
+    </data>
+  </define>
   <!--
     ==========================================
     start with image description
@@ -54,7 +59,7 @@
   -->
   <div>
     <define name="k.image.name.attribute">
-      <ref name="k.name.attribute"/>
+      <ref name="k.imagename.attribute"/>
     </define>
     <define name="k.image.displayname.attribute">
       <ref name="k.displayname.attribute"/>
@@ -261,6 +266,12 @@ installation source from</a:documentation>
   <define name="k.username.attribute">
     <attribute name="username">
       <a:documentation>A name of a user</a:documentation>
+    </attribute>
+  </define>
+  <define name="k.imagename.attribute">
+    <attribute name="name">
+      <a:documentation>An image name without / and spaces</a:documentation>
+      <ref name="image-name"/>
     </attribute>
   </define>
   <!--

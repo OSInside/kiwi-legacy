@@ -33,6 +33,7 @@ db:info [
 
 size-type = xsd:token {pattern = "\d*|image"}
 volume-size-type = xsd:token {pattern = "\d+|\d+M|\d+G"}
+image-name = xsd:token {pattern = "[^\s/]+"}
 
 #==========================================
 # start with image description
@@ -45,7 +46,7 @@ start =
 # main block: <image>
 #
 div {
-	k.image.name.attribute = k.name.attribute
+	k.image.name.attribute = k.imagename.attribute 
 	k.image.displayname.attribute = k.displayname.attribute
 	k.image.noNamespaceSchemaLocation.attribute =
 		## The location of the XSD Schema (not relevant for RELAX NG or DTD)
@@ -163,6 +164,9 @@ k.dest.attribute        =
 k.username.attribute    =
 	## A name of a user
 	attribute username { text }
+k.imagename.attribute   =
+	## An image name without / and spaces
+	attribute name { image-name }
 
 #==========================================
 # common element <author>
