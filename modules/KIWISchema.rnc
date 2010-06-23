@@ -1295,9 +1295,9 @@ div {
 		attribute hybridpersistent { xsd:boolean }
 	k.type.bootloader.attribute =
 		## Specifies the bootloader used for booting the image."
-		## At the moment only grub and sys|extlinux are supported
+		## At the moment grub, zipl and sys|extlinux are supported
 		attribute bootloader {
-			"extlinux" | "grub" | "syslinux"
+			"extlinux" | "grub" | "syslinux" | "zipl"
 		}
 	k.type.compressed.attribute =
 		## Specifies whether the image output file should be

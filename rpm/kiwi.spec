@@ -184,7 +184,7 @@ Authors:
     Marcus Schaefer <ms@novell.com>
 %endif
 
-%ifarch %ix86 x86_64
+%ifarch %ix86 x86_64 s390 s390x
 %package -n kiwi-desc-vmxboot
 License:        GPL v2 or later
 Requires:       kiwi = %{version}
@@ -244,7 +244,7 @@ Authors:
     Marcus Schaefer <ms@novell.com>
 %endif
 
-%ifarch %ix86 x86_64
+%ifarch %ix86 x86_64 s390 s390x
 %package -n kiwi-desc-oemboot
 License:        GPL v2 only
 Requires:       kiwi = %{version}
@@ -275,7 +275,7 @@ Authors:
     Marcus Schaefer <ms@novell.com>
 %endif
 
-%ifarch %ix86 x86_64
+%ifarch %ix86 x86_64 s390 s390x
 %package -n kiwi-templates
 License:        GPL v2.0 or later
 Requires:       kiwi-desc-vmxboot = %{version}
@@ -443,7 +443,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/kiwi/image/isoboot/rhel*
 %endif
 
-%ifarch %ix86 x86_64
+%ifarch %ix86 x86_64 s390 s390x
 %files -n kiwi-desc-vmxboot
 %defattr(-, root, root)
 %dir %{_datadir}/kiwi/image/vmxboot
@@ -475,7 +475,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/kiwi/image/xenboot/suse*
 %endif
 
-%ifarch %ix86 x86_64
+%ifarch %ix86 x86_64 s390 s390x
 %files -n kiwi-desc-oemboot
 %defattr(-, root, root)
 %dir %{_datadir}/kiwi/image/oemboot

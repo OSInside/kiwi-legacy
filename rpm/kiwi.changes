@@ -7,6 +7,14 @@ Fri Jun 18 12:18:11 CEST 2010 - ms@suse.de
 - migration: added version to cache file
 - changed spec file requirement: require virt-utils for
   distro versions >= 11.3
+- started support for s390 imaging:
+  * zipl support in kiwi. This is still work in progress only
+    the skeleton at the required code points has been added.
+  * adapted the JeOS sle11 template to provided a profile
+    for x86 and s390 packages
+  * also added vmxboot and oemboot bootimages to be build
+    The code there will work as initrd for an s390 guest
+    within kvm
 
 -------------------------------------------------------------------
 Mon Jun 14 11:10:15 CEST 2010 - ms@suse.de

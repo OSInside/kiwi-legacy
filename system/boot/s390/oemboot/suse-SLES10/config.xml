@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<image schemaversion="4.6" name="initrd-oemboot-suse-SLES10">
+	<description type="boot">
+		<author>Marcus Schaefer</author>
+		<contact>ms@novell.com</contact>
+		<specification>boot/initrd image used on OEM VMX disk</specification>
+	</description>
+	<preferences>
+		<type image="cpio" bootprofile="default" bootkernel="std"/>
+		<version>2.1.1</version>
+		<packagemanager>smart</packagemanager>
+		<rpm-check-signatures>false</rpm-check-signatures>
+	</preferences>
+	<profiles>
+		<profile name="default" description="Boot with default setup"/>
+		<profile name="xen" description="Boot with xen mboot.c32 setup"/>
+		<profile name="std" description="KERNEL: Default"/>
+		<profile name="xenk" description="KERNEL: Xen kernel/mboot.c32"/>
+		<profile name="smp" description="KERNEL: pae kernel"/>
+	</profiles>
+	<drivers type="usbdrivers">
+		<file name="usb/host/*"/>
+		<file name="usb/core/usbcore.ko"/>
+		<file name="usb/storage/usb-storage.ko"/>
+		<file name="usb/input/usbhid.ko"/>
+	</drivers>
+	<drivers type="drivers">
+		<file name="drivers/md/*"/>
+		<file name="drivers/block/cciss.ko"/>
+		<file name="drivers/block/loop.ko"/>
+		<file name="drivers/ide/*"/>
+		<file name="drivers/net/*"/>
+		<file name="net/packet/*"/>
+		<file name="fs/ext3/*"/>
+		<file name="fs/ext2/*"/>
+		<file name="fs/fat/*"/>
+		<file name="fs/vfat/*"/>
+		<file name="fs/binfmt_aout.ko"/>
+		<file name="fs/binfmt_misc.ko"/>
+		<file name="fs/mbcache.ko"/>
+		<file name="fs/quota_v1.ko"/>
+		<file name="fs/quota_v2.ko"/>
+		<file name="fs/jbd/*"/>
+		<file name="fs/udf/*"/>
+		<file name="drivers/cdrom/*"/>
+		<file name="drivers/ata/*"/>
+		<file name="drivers/scsi/*"/>
+		<file name="drivers/message/fusion/*"/>
+		<file name="drivers/firmware/edd.ko"/>
+		<file name="fs/nls/nls_utf8.ko"/>
+		<file name="fs/nls/nls_cp437.ko"/>
+		<file name="fs/nls/nls_iso8859-1.ko"/>
+	</drivers>
+	<drivers type="drivers" profiles="xen">
+		<file name="drivers/xen/*"/>
+	</drivers>
+	<repository type="yast2" status="replaceable">
+		<source path="ftp://dist.suse.de/install/SLP/SLES-10-SP2-GMC/%arch/DVD1"/>
+	</repository>
+	<repository type="rpm-dir" status="fixed">
+		<source path="/usr/share/kiwi/repo/suse-repo/suse-sle10-repo"/>
+	</repository>
+	<packages type="image" profiles="std">
+		<package name="kernel-default"/>
+	</packages>
+	<packages type="image" profiles="smp">
+		<package name="kernel-smp"/>
+	</packages>
+	<packages type="image" profiles="xenk">
+		<package name="kernel-xen" arch="x86_64"/>
+		<package name="kernel-xenpae" arch="i686"/>
+		<package name="xen"/>
+	</packages>
+	<packages type="image">
+		<package name="curl"/>
+		<package name="atftp"/>
+		<package name="busybox"/>
+		<package name="parted"/>
+		<package name="adaptec-firmware"/>
+		<package name="dialog"/>
+		<package name="psmisc"/>
+		<package name="bind-libs"/>
+		<package name="bind-utils"/>
+		<package name="dhcpcd"/>
+		<package name="e2fsprogs"/>
+		<package name="file"/>
+		<package name="hwinfo"/>
+		<package name="module-init-tools"/>
+		<package name="net-tools"/>
+		<package name="netcfg"/>
+		<package name="parted"/>
+		<package name="util-linux"/>
+		<package name="diffutils"/>
+		<package name="procps"/>
+		<package name="lvm2"/>
+		<package name="fribidi"/>
+		<package name="make"/>
+		<package name="zipl"/>
+		<package name="eject"/>
+		<package name="tar"/>
+		<package name="lvm2"/>
+		<package name="bzip2"/>
+		<package name="fbiterm"/>
+		<package name="bc"/>
+		<package name="gettext"/>
+		<package name="kexec-tools"/>
+	</packages>
+	<packages type="bootstrap">
+		<package name="filesystem"/>
+		<package name="glibc"/>
+		<package name="glibc-locale"/>
+		<package name="openssl"/>
+	</packages>
+	<packages type="delete">
+		<package name="cracklib-dict-small"/>
+		<package name="cracklib-dict-full"/>
+		<package name="perl"/>
+		<package name="man"/>
+		<package name="info"/>
+		<package name="perl-gettext"/>
+		<package name="perl-Bootloader"/>
+		<package name="pam-modules"/>
+		<package name="gnome-filesystem"/>
+		<package name="openslp"/>
+		<package name="suse-build-key"/>
+		<package name="permissions"/>
+		<package name="fillup"/>
+		<package name="pam"/>
+		<package name="expat"/>
+		<package name="suse-release"/>
+		<package name="libxml2"/>
+		<package name="logrotate"/>
+		<package name="diffutils"/>
+		<package name="cpio"/>
+		<package name="insserv"/>
+		<package name="ash"/>
+		<package name="gdbm"/>
+		<package name="make"/>
+	</packages>
+</image>

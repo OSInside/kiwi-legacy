@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<image schemaversion="4.6" name="initrd-vmxboot-suse-SLES11">
+	<description type="boot">
+		<author>Marcus Schaefer</author>
+		<contact>ms@novell.com</contact>
+		<specification>boot/initrd image for virtual machines</specification>
+	</description>
+	<preferences>
+		<type image="cpio" bootprofile="default" bootkernel="std"/>
+		<version>2.7.1</version>
+		<packagemanager>zypper</packagemanager>
+		<rpm-check-signatures>false</rpm-check-signatures>
+	</preferences>
+	<profiles>
+		<profile name="default" description="Boot with default setup"/>
+		<profile name="xen" description="Boot with xen mboot.c32 setup"/>
+		<profile name="std" description="KERNEL: Default"/>
+		<profile name="xenk" description="KERNEL: Xen kernel/mboot.c32"/>
+		<profile name="pae" description="KERNEL: pae kernel"/>
+		<profile name="ec2" description="KERNEL: Ec2 kernel"/>
+	</profiles>
+	<drivers type="drivers">
+		<file name="crypto/*"/>
+		<file name="drivers/virtio/*"/>
+		<file name="drivers/block/virtio_blk.ko"/>
+		<file name="drivers/char/hw_random/virtio-rng.ko"/>
+		<file name="drivers/net/virtio_net.ko"/>
+		<file name="drivers/md/*"/>
+		<file name="drivers/block/loop.ko"/>
+		<file name="drivers/ide/*"/>
+		<file name="fs/ext3/*"/>
+		<file name="fs/ext2/*"/>
+		<file name="fs/fat/*"/>
+		<file name="fs/vfat/*"/>
+		<file name="fs/binfmt_aout.ko"/>
+		<file name="fs/binfmt_misc.ko"/>
+		<file name="fs/mbcache.ko"/>
+		<file name="fs/quota_v1.ko"/>
+		<file name="fs/quota_v2.ko"/>
+		<file name="fs/jbd/*"/>
+		<file name="fs/hfs/*"/>
+		<file name="fs/exportfs/*"/>
+		<file name="fs/squashfs/*"/>
+		<file name="fs/nls/nls_utf8.ko"/>
+		<file name="fs/nls/nls_cp437.ko"/>
+		<file name="fs/nls/nls_iso8859-1.ko"/>
+		<file name="fs/fuse/*"/>
+		<file name="drivers/ata/*"/>
+		<file name="drivers/scsi/*"/>
+		<file name="drivers/message/fusion/*"/>
+		<file name="drivers/acpi/dock.ko"/>
+	</drivers>
+	<drivers type="drivers" profiles="xen">
+		<file name="drivers/xen/*"/>
+	</drivers>
+	<repository type="yast2" status="replaceable">
+		<source path="/image/CDs/full-i386"/>
+	</repository>
+	<repository type="rpm-dir" status="fixed">
+		<source path="/usr/share/kiwi/repo/suse-repo/suse-sle11-repo"/>
+	</repository>
+	<packages type="image" profiles="std">
+		<package name="kernel-default"/>
+		<package name="kernel-default-base"/>
+	</packages>
+	<packages type="image" profiles="pae">
+		<package name="kernel-pae"/>
+		<package name="kernel-pae-base"/>
+	</packages>
+	<packages type="image" profiles="xenk">
+		<package name="kernel-xen"/>
+		<package name="kernel-xen-base"/>
+		<package name="xen"/>
+	</packages>
+	<packages type="image" profiles="ec2">
+		<package name="kernel-ec2"/>
+		<package name="kernel-ec2-base"/>
+		<package name="xen"/>
+	</packages>
+	<packages type="image">
+		<package name="psmisc"/>
+		<package name="bind-libs"/>
+		<package name="bind-utils"/>
+		<package name="dhcpcd"/>
+		<package name="e2fsprogs"/>
+		<package name="file"/>
+		<package name="hwinfo"/>
+		<package name="module-init-tools"/>
+		<package name="net-tools"/>
+		<package name="netcfg"/>
+		<package name="pciutils"/>
+		<package name="sysconfig"/>
+		<package name="sysfsutils"/>
+		<package name="util-linux"/>
+		<package name="zipl"/>
+		<package name="fribidi"/>
+		<package name="make"/>
+		<package name="tar"/>
+		<package name="lvm2"/>
+		<package name="cryptsetup"/>
+		<package name="dialog"/>
+		<package name="kiwi-tools"/>
+		<package name="kexec-tools"/>
+		<package name="gettext-runtime"/>
+		<package name="parted"/>
+		<package name="syslinux"/>
+		<package name="fbiterm"/>
+	</packages>
+	<packages type="bootstrap">
+		<package name="filesystem"/>
+		<package name="glibc"/>
+		<package name="glibc-locale"/>
+		<package name="diffutils"/>
+		<package name="procps"/>
+		<package name="openssl-certs"/>
+	</packages>
+	<packages type="delete">
+		<package name="cracklib-dict-small"/>
+		<package name="cracklib-dict-full"/>
+		<package name="PolicyKit"/>
+		<package name="audit-libs"/>
+		<package name="blocxx"/>
+		<package name="cpio"/>
+		<package name="cyrus-sasl"/>
+		<package name="db"/>
+		<package name="expat"/>
+		<package name="fillup"/>
+		<package name="gawk"/>
+		<package name="gdbm"/>
+		<package name="glib2"/>
+		<package name="gpg"/>
+		<package name="info"/>
+		<package name="insserv"/>
+		<package name="iproute2"/>
+		<package name="irqbalance"/>
+		<package name="libxcrypt"/>
+		<package name="libxml2"/>
+		<package name="libzio"/>
+		<package name="limal"/>
+		<package name="limal-perl"/>
+		<package name="logrotate"/>
+		<package name="mdadm"/>
+		<package name="mingetty"/>
+		<package name="openldap2-client"/>
+		<package name="openslp"/>
+		<package name="pam"/>
+		<package name="pam-modules"/>
+		<package name="pcre"/>
+		<package name="perl"/>
+		<package name="perl-Bootloader"/>
+		<package name="perl-gettext"/>
+		<package name="permissions"/>
+		<package name="pm-utils"/>
+		<package name="pmtools"/>
+		<package name="suse-build-key"/>
+		<package name="make"/>
+	</packages>
+</image>

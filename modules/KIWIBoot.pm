@@ -4154,6 +4154,28 @@ sub setupBootLoaderConfiguration {
 		$kiwi -> done();
 	}
 	#==========================================
+	# Zipl
+	#------------------------------------------
+	if ($loader eq "zipl") {
+		#==========================================
+		# Create MBR id file for boot device check
+		#------------------------------------------
+		$kiwi -> info ("Saving disk label on disk: $this->{mbrid}...");
+		if (! open (FD,">$tmpdir/boot/grub/mbrid")) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create mbrid file: $!");
+			$kiwi -> failed ();
+			return undef;
+		}
+		print FD "$this->{mbrid}";
+		close FD;
+		$kiwi -> done();
+		#==========================================
+		# Create zipl.comf
+		#------------------------------------------
+		# TODO
+	}
+	#==========================================
 	# more boot managers to come...
 	#------------------------------------------
 	# ...
@@ -4349,6 +4371,13 @@ sub installBootLoader {
 			return undef;
 		}
 		$kiwi -> done();
+	}
+	#==========================================
+	# Zipl
+	#------------------------------------------
+	if ($loader eq "zipl") {
+		$kiwi -> info ("Installing zipl on device: $diskname");
+		# TODO
 	}
 	#==========================================
 	# more boot managers to come...

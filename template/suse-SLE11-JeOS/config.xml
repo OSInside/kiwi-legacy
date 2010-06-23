@@ -9,6 +9,8 @@
 	<profiles>
 		<profile name="xenFlavour" description="VMX with Xen kernel"/>
 		<profile name="vmxFlavour" description="VMX with default kernel" import="true"/>
+		<profile name="x86" description="x86 architecture" import="true"/>
+		<profile name="s390" description="s390 architecture"/>
 	</profiles>
 	<preferences>
 		<version>1.1.0</version>
@@ -90,7 +92,6 @@
 		<package name="irqbalance"/>
 		<package name="suse-build-key"/>
 		<package name="syslog-ng"/>
-		<package name="grub"/>
 		<package name="rpcbind"/>
 		<package name="nfs-client"/>
 		<package name="iputils"/>
@@ -110,8 +111,14 @@
 		<package name="branding-SLES"/>
 		<package name="release-notes-sles"/>
 		<package name="glib2-branding-SLES"/>
+	</packages>
+	<packages type="image" profiles="x86">
+		<package name="grub"/>
 		<package name="bootsplash-branding-SLES" bootinclude="true" bootdelete="true"/>
 		<package name="gfxboot-branding-SLES" bootinclude="true" bootdelete="true"/>
+	</packages>
+	<packages type="image" profiles="s390">
+		<package name="zipl"/>
 	</packages>
 	<packages type="image" profiles="xenFlavour">
 		<package name="kernel-xen" replaces="kernel-default"/>

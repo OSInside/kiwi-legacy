@@ -293,9 +293,6 @@ sub new {
 				my $node = $nodes -> get_node($i);
 				my $type = $node  -> getAttribute ("type");
 				if ($type eq "image") {
-					if (! $this -> requestedProfile ($node)) {
-						next;
-					}
 					push (@plist,$node->getElementsByTagName ("package"));
 					push (@alist,$node->getElementsByTagName ("archive"));
 				}

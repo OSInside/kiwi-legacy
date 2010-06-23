@@ -547,6 +547,8 @@ function installBootLoader {
 		x86_64-syslinux) installBootLoaderSyslinux ;;
 		i*86-extlinux)   installBootLoaderSyslinux ;;
 		x86_64-extlinux) installBootLoaderSyslinux ;;
+		s390-zipl)       installBootLoaderS390 ;;
+		s390x-zipl)      installBootLoaderS390 ;;
 		*)
 		systemException \
 			"*** boot loader install for $arch-$loader not implemented ***" \
@@ -573,11 +575,20 @@ function installBootLoaderRecovery {
 		x86_64-syslinux) installBootLoaderSyslinuxRecovery ;;
 		i*86-extlinux)   installBootLoaderSyslinuxRecovery ;;
 		x86_64-extlinux) installBootLoaderSyslinuxRecovery ;;
+		s390-zipl)       installBootLoaderS390Recovery ;;
+		s390x-zipl)      installBootLoaderS390Recovery ;;
 		*)
 		systemException \
 			"*** boot loader setup for $arch-$loader not implemented ***" \
 		"reboot"
 	esac
+}
+#======================================
+# installBootLoaderS390
+#--------------------------------------
+function installBootLoaderS390 {
+	# TODO
+	:
 }
 #======================================
 # installBootLoaderSyslinux
@@ -634,6 +645,13 @@ function installBootLoaderLilo {
 		Echo "Image doesn't have lilo installed"
 		Echo "Can't install boot loader"
 	fi
+}
+#======================================
+# installBootLoaderS390Recovery
+#--------------------------------------
+function installBootLoaderS390Recovery {
+	# TODO
+	:
 }
 #======================================
 # installBootLoaderSyslinuxRecovery
@@ -799,6 +817,8 @@ function setupBootLoader {
 		x86_64-syslinux) eval setupBootLoaderSyslinux $para ;;
 		i*86-extlinux)   eval setupBootLoaderSyslinux $para ;;
 		x86_64-extlinux) eval setupBootLoaderSyslinux $para ;;
+		s390-zipl)       eval setupBootLoaderS390 $para ;;
+		s390x-zipl)      eval setupBootLoaderS390 $para ;;
 		ppc*)            eval setupBootLoaderLilo $para ;;
 		*)
 		systemException \
@@ -831,11 +851,20 @@ function setupBootLoaderRecovery {
 		x86_64-syslinux) eval setupBootLoaderSyslinuxRecovery $para ;;
 		i*86-extlinux)   eval setupBootLoaderSyslinuxRecovery $para ;;
 		x86_64-extlinux) eval setupBootLoaderSyslinuxRecovery $para ;;
+		s390-zipl)       eval setupBootLoaderS390Recovery $para ;;
+		s390x-zipl)      eval setupBootLoaderS390Recovery $para ;;
 		*)
 		systemException \
 			"*** boot loader setup for $arch-$loader not implemented ***" \
 		"reboot"
 	esac
+}
+#======================================
+# setupBootLoaderS390Recovery
+#--------------------------------------
+function setupBootLoaderS390Recovery {
+	# TODO
+	:
 }
 #======================================
 # setupBootLoaderSyslinuxRecovery
@@ -1071,6 +1100,13 @@ function setupBootLoaderGrubRecovery {
 			echo " initrd $gdev_recovery/boot/$initrd"    >> $menu
 		fi
 	fi
+}
+#======================================
+# setupBootLoaderS390
+#--------------------------------------
+function setupBootLoaderS390 {
+	# TODO
+	:
 }
 #======================================
 # setupBootLoaderSyslinux

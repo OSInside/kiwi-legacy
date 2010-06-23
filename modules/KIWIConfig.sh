@@ -1037,6 +1037,10 @@ function suseGFXBoot {
 		# need the same data for extlinux and for isolinux
 		loader="isolinux"
 	fi
+	if [ "$loader" = "zipl" ];then
+		# thanks god, no graphics on s390 :-)
+		return
+	fi
 	#======================================
 	# setup bootloader data
 	#--------------------------------------
