@@ -16,7 +16,7 @@ Fri Jun 18 12:18:11 CEST 2010 - ms@suse.de
     The code there will work as initrd for an s390 guest
     within kvm
 - fixed <image name="..."/> attribute validation, space
-  and / is not allowed for this attribute
+  and / is not allowed for this attribute (bnc #616626)
 - use cylinder based alignment with new parted version
   2.2.x. This fixes the oem repartition code for systems
   which uses parted >= 2.2.x build on a parted 1.9.x build
