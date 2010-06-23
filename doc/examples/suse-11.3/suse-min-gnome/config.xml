@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<image schemaversion="4.6" name="suse-11.3-gnome-demo">
+	<description type="system">
+		<author>Robert Schweikert</author>
+		<contact>rschweikert@novell.</contact>
+		<specification>openSUSE 11.3 Appliance using GNOME</specification>
+	</description>
+	<preferences>
+		<type image="vmx" primary="true" filesystem="ext4" boot="vmxboot/suse-11.3" format="vmdk">
+			<vmwareconfig memory="1024">
+				<vmwaredisk controller="ide" id="0"/>
+			</vmwareconfig>
+		</type>
+		<type image="iso" boot="isoboot/suse-11.3" flags="unified"/>
+		<version>1.0.1</version>
+		<packagemanager>zypper</packagemanager>
+		<rpm-check-signatures>false</rpm-check-signatures>
+		<rpm-force>true</rpm-force>
+		<locale>en_US</locale>
+		<keytable>us.map.gz</keytable>
+	</preferences>
+	<users group="users">
+		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/home/tux" name="tux"/>
+	</users>
+	<users group="root">
+		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+	</users>
+	<repository type="yast2">
+		<source path="opensuse://11.3/repo/oss/"/>
+	</repository>
+	<packages type="image" patternType="plusRecommended">
+		<package name="bootsplash"/>
+		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
+		<package name="firefox"/>
+		<package name="gdm"/>
+		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
+		<package name="gnome-applets"/>
+		<package name="ifplugd"/>
+		<package name="iputils"/>
+		<package name="kernel-default"/>
+		<package name="python"/>
+		<package name="perl"/>
+		<package name="preload"/>
+		<package name="tomboy"/>
+		<package name="vim"/>
+		<package name="xorg-x11-server"/>
+		<opensusePattern name="base"/>
+	</packages>
+	<packages type="vmx"/>
+	<packages type="bootstrap">
+		<package name="filesystem"/>
+		<package name="glibc-locale"/>
+	</packages>
+</image>
