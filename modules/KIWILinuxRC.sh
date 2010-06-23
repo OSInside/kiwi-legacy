@@ -47,7 +47,10 @@ if [ -x /sbin/blogd ];then
 	test -z "$CONSOLE"            && export CONSOLE=/dev/console
 	test -z "$REDIRECT"           && export REDIRECT=/dev/tty1
 fi
-    
+if [ -z "$PARTED_VERSION" ];then
+	export PARTED_VER=$(parted -v | head -n 1 | cut -f4 -d" " | cut -f1-2 -d.)
+fi
+
 #======================================
 # Dialog
 #--------------------------------------
@@ -3022,23 +3025,6 @@ function partedGetPartitionID {
 		cut -f2 -d= | tr -d ";" | tr -d 0
 }
 #======================================
-# partedGetSectors
-#--------------------------------------
-function partedGetSectors {
-	# /.../
-	# calculate start/end sector for given
-	# sector size
-	# ---
-	p_start=$1
-	if [ $p_start -gt 63 ];then
-		p_start=`expr $p_start + 1`
-	fi
-	p_stopp=`expr $p_start + $2`
-	if [ $p_stopp -gt $p_size ];then
-		p_stopp=$p_size
-	fi
-}
-#======================================
 # partitionID
 #--------------------------------------
 function partitionID {
@@ -5030,24 +5016,14 @@ function partedWrite {
 	# ----
 	local device=$1
 	local cmds=$2
-	if ! parted -m $device unit cyl $cmds;then
+	local opts
+	if [ $PARTED_VER = "2.2" ];then
+		opts="-a cyl"
+	fi
+	if ! parted $opts -m $device unit cyl $cmds;then
 		systemException "Failed to create partition table" "reboot"
 	fi
 	partedInit $device
-}
-#======================================
-# partedStartCylinder
-#--------------------------------------
-function partedStartCylinder {
-	# /.../
-	# return start cylinder of given partition.
-	# lowest cylinder number is 0
-	# ----
-	local part=$(($1 + 3))
-	local IFS=""
-	local header=$(echo $partedOutput | head -n $part | tail -n 1)
-	local ccount=$(echo $header | cut -f2 -d: | tr -d cyl)
-	echo $ccount
 }
 #======================================
 # partedEndCylinder
