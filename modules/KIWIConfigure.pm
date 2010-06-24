@@ -81,13 +81,14 @@ sub new {
 # setupRecoveryArchive
 #------------------------------------------
 sub setupRecoveryArchive {
-	my $this  = shift;
-	my $fstype= shift;
-	my $kiwi  = $this->{kiwi};
-	my $dest  = $this->{imageDest};
-	my $xml   = $this->{xml};
-	my $root  = $this->{root};
-	my $start = $xml -> getOEMRecovery();
+	my $this    = shift;
+	my $fstype  = shift;
+	my $kiwi    = $this->{kiwi};
+	my $dest    = $this->{imageDest};
+	my $xml     = $this->{xml};
+	my $root    = $this->{root};
+	my $start   = $xml -> getOEMRecovery();
+	my $inplace = $xml -> getOEMRecoveryInPlace();
 	my $FD;
 	if ((! defined $start) || ("$start" eq "false")) {
 		return $this;
@@ -149,6 +150,20 @@ sub setupRecoveryArchive {
 		return undef;
 	}
 	#==========================================
+	# Create recovery partition size info
+	#------------------------------------------
+	if (! open ($FD,">$root/recovery.partition.size")) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Failed to create recovery partition size info: $!");
+		return undef;
+	}
+	my $psize = -s "$root/recovery.tar.gz";
+	$psize /= 1048576;
+	$psize += 100;
+	$psize = sprintf ("%.0f", $psize);
+	print $FD $psize;
+	close $FD;
+	#==========================================
 	# Create destination filesystem information
 	#------------------------------------------
 	if (! open ($FD,">$root/recovery.tar.filesystem")) {
@@ -158,6 +173,12 @@ sub setupRecoveryArchive {
 	}
 	print $FD $fstype;
 	close $FD;
+	#==========================================
+	# Remove tarball for later recreation
+	#------------------------------------------
+	if (defined $inplace) {
+		qxx ("rm -f $root/recovery.tar.gz 2>&1");
+	}
 	$kiwi -> done ();
 	return $this;
 }

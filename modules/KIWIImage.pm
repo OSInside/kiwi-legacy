@@ -953,6 +953,7 @@ sub createImageUSB {
 	$main::ForeignRepo{"oem-unattended"} = $xml -> getOEMUnattended();
 	$main::ForeignRepo{"oem-recovery"}   = $xml -> getOEMRecovery();
 	$main::ForeignRepo{"oem-recoveryID"} = $xml -> getOEMRecoveryID();
+	$main::ForeignRepo{"oem-inplace-recovery"} = $xml ->getOEMRecoveryInPlace();
 	$main::ForeignRepo{"displayname"}    = $xml -> getImageDisplayName();
 	$main::ForeignRepo{"locale"}    = $xml -> getLocale();
 	$main::ForeignRepo{"boot-theme"}= $xml -> getBootTheme();
@@ -2804,6 +2805,7 @@ sub createImageSplit {
 	$main::ForeignRepo{"oem-unattended"} = $xml -> getOEMUnattended();
 	$main::ForeignRepo{"oem-recovery"}   = $xml -> getOEMRecovery();
 	$main::ForeignRepo{"oem-recoveryID"} = $xml -> getOEMRecoveryID();
+	$main::ForeignRepo{"oem-inplace-recovery"} = $xml ->getOEMRecoveryInPlace();
 	$main::ForeignRepo{"displayname"}    = $xml -> getImageDisplayName();
 	$main::ForeignRepo{"locale"}    = $xml -> getLocale();
 	$main::ForeignRepo{"boot-theme"}= $xml -> getBootTheme();

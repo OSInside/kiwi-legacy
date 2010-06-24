@@ -23,6 +23,9 @@ Fri Jun 18 12:18:11 CEST 2010 - ms@suse.de
   system. Also removed unused functions: partedGetSectors
   and partedStartCylinder
 - update the min gnome example to 11.3
+- added oem-inplace-recovery option which allows creation
+  of the recovery tarball at first deployment instead of
+  creating the tarball and store it inside the image
 
 -------------------------------------------------------------------
 Mon Jun 14 11:10:15 CEST 2010 - ms@suse.de

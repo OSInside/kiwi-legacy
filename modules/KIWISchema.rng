@@ -1365,6 +1365,33 @@ recovery partition. Default value is 83 (Linux)</db:para>
   </div>
   <!--
     ==========================================
+    common element <oem-inplace-recovery>
+    
+  -->
+  <div>
+    <define name="k.oem-inplace-recovery.content">
+      <data type="boolean"/>
+    </define>
+    <define name="k.oem-inplace-recovery.attlist">
+      <empty/>
+    </define>
+    <define name="k.oem-inplace-recovery">
+      <element name="oem-inplace-recovery">
+        <a:documentation>For oemboot driven images: Specify whether the
+recovery archive should be stored as part of the image
+or not. If it's not stored it's created during install
+of the oem image</a:documentation>
+        <db:para>For oemboot driven images: Specify whether the
+recovery archive should be stored as part of the image
+or not. If it's not stored it's created during install
+of the oem image</db:para>
+        <ref name="k.oem-inplace-recovery.attlist"/>
+        <ref name="k.oem-inplace-recovery.content"/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
     common element <oem-swap>
     
   -->
@@ -2904,6 +2931,9 @@ and setup the system disk</db:para>
           </optional>
           <optional>
             <ref name="k.oem-recoveryID"/>
+          </optional>
+          <optional>
+            <ref name="k.oem-inplace-recovery"/>
           </optional>
           <optional>
             <ref name="k.oem-reboot"/>

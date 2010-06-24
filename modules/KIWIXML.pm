@@ -387,6 +387,9 @@ sub new {
 		if (defined $foreignRepo->{"oem-recoveryID"}) {
 			$this -> setForeignOEMOptionsElement ("oem-recoveryID");
 		}
+		if (defined $foreignRepo->{"oem-inplace-recovery"}) {
+			$this -> setForeignOEMOptionsElement ("oem-inplace-recovery");
+		}
 		#==========================================
 		# foreign type attributes
 		#------------------------------------------
@@ -1552,6 +1555,26 @@ sub getOEMRecoveryID {
 }
 
 #==========================================
+# getOEMRecoveryInPlace
+#------------------------------------------
+sub getOEMRecoveryInPlace {
+	# ...
+	# Obtain the oem-inplace-recovery value or return undef
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return undef;
+	}
+	my $inplace = $node -> getElementsByTagName ("oem-inplace-recovery");
+	if ((! defined $inplace) || ("$inplace" eq "")) {
+		return undef;
+	}
+	return $inplace;
+}
+
+#==========================================
 # getOEMHome
 #------------------------------------------
 sub getOEMHome {
@@ -2475,6 +2498,7 @@ sub getImageConfig {
 		my $oemnomsg = $node -> getElementsByTagName ("oem-unattended");
 		my $oemreco  = $node -> getElementsByTagName ("oem-recovery");
 		my $oemrecoid= $node -> getElementsByTagName ("oem-recoveryID");
+		my $inplace  = $node -> getElementsByTagName ("oem-inplace-recovery");
 		if ((defined $oempinst) && ("$oempinst" eq "true")) {
 			$result{kiwi_oempartition_install} = "yes";
 		}
@@ -2509,6 +2533,9 @@ sub getImageConfig {
 		}
 		if ((defined $oemrecoid) && ("$oemrecoid" ne "")) {
 			$result{kiwi_oemrecoveryID} = $oemrecoid;
+		}
+		if ((defined $inplace) && ("$inplace" eq "true")) {
+			$result{kiwi_oemrecoveryInPlace} = $inplace;
 		}
 	}
 	#==========================================

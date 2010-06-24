@@ -37,12 +37,10 @@ function OEMRepartInit {
 		if ! mount $imageRootDevice /reco-root >/dev/null;then
 			systemException "Failed to mount root device" "reboot"
 		fi
-		if [ ! -f /reco-root/recovery.tar.gz ];then
-			systemException "Can't find recovery archive" "reboot"
+		if [ ! -f /reco-root/recovery.partition.size ];then
+			systemException "Can't find recovery part size info" "reboot"
 		fi
-		recoBytes=$(du --bytes /reco-root/recovery.tar.gz | cut -f1)
-		recoMByte=$((recoBytes / 1048576))
-		recoMByte=$((recoMByte + 100))
+		recoMByte=$(cat /reco-root/recovery.partition.size)
 		recoID=83
 		if [ ! -z "$OEM_RECOVERY_ID" ];then
 			recoID=$OEM_RECOVERY_ID
@@ -568,9 +566,6 @@ function OEMRepart {
 		if ! mount $imageRecoveryDevice /reco-save >/dev/null;then
 			systemException "Failed to mount recovery device" "reboot"
 		fi
-		if ! mv /reco-root/recovery.tar.gz /reco-save >/dev/null;then
-			systemException "Failed to move recovery archive" "reboot"
-		fi
 		if ! mv /reco-root/recovery.tar.files /reco-save >/dev/null;then
 			systemException "Failed to move recovery file count" "reboot"
 		fi
@@ -579,6 +574,20 @@ function OEMRepart {
 		fi
 		if ! mv /reco-root/recovery.tar.size /reco-save >/dev/null;then
 			systemException "Failed to move recovery size info" "reboot"
+		fi
+		if ! mv /reco-root/recovery.partition.size /reco-save >/dev/null;then
+			systemException "Failed to move recovery part size info" "reboot"
+		fi
+		if [ -f /reco-root/recovery.tar.gz ];then
+			if ! mv /reco-root/recovery.tar.gz /reco-save >/dev/null;then
+				systemException "Failed to move recovery archive" "reboot"
+			fi
+		else
+			pushd /reco-root
+			Echo "Creating recovery root tarball..."
+			tar --numeric-owner -czpf /reco-save/recovery.tar.gz . \
+				--exclude ./dev --exclude ./proc --exclude ./sys
+			popd
 		fi
 		mkdir /reco-save/boot
 		if [ "$loader" = "grub" ];then

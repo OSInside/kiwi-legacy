@@ -947,6 +947,31 @@ div {
 }
 
 #==========================================
+# common element <oem-inplace-recovery>
+#
+div {
+	k.oem-inplace-recovery.content = xsd:boolean
+	k.oem-inplace-recovery.attlist = empty
+	k.oem-inplace-recovery =
+		## For oemboot driven images: Specify whether the
+		## recovery archive should be stored as part of the image
+		## or not. If it's not stored it's created during install
+		## of the oem image
+		[
+		db:para [
+			"For oemboot driven images: Specify whether the\x{a}"~
+			"recovery archive should be stored as part of the image\x{a}"~
+			"or not. If it's not stored it's created during install\x{a}"~
+			"of the oem image"
+		]
+		]
+		element oem-inplace-recovery {
+			k.oem-inplace-recovery.attlist,
+			k.oem-inplace-recovery.content
+		}
+}
+
+#==========================================
 # common element <oem-swap>
 #
 div {
@@ -2008,6 +2033,7 @@ div {
 			k.oem-swapsize? &
 			k.oem-recovery? &
 			k.oem-recoveryID? &
+			k.oem-inplace-recovery? &
 			k.oem-reboot? &
 			k.oem-dumphalt? &
 			k.oem-unattended?
