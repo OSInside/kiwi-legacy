@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Fri Jun 18 12:18:11 CEST 2010 - ms@suse.de
 
+- v4.43
 - fixed split section evaluation (bnc #615121)
 - exit kiwi directly if the possible question to create
   the destination directory was canceled by the user
