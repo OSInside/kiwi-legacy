@@ -26,6 +26,10 @@ Fri Jun 18 12:18:11 CEST 2010 - ms@suse.de
 - added oem-inplace-recovery option which allows creation
   of the recovery tarball at first deployment instead of
   creating the tarball and store it inside the image
+- fixed copy of root tree into final image. We used
+  cp -a $source/* $dest which did not match the dot files
+  in $source/.* Therefore I changed this to use a tar
+  based copy
 
 -------------------------------------------------------------------
 Mon Jun 14 11:10:15 CEST 2010 - ms@suse.de

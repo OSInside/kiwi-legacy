@@ -1154,7 +1154,7 @@ sub setupBootStick {
 		# Copy root tree to virtual disk
 		#------------------------------------------
 		$kiwi -> info ("Copying system image tree on stick");
-		$status = qxx ("cp -a -x $system/* $loopdir 2>&1");
+		$status = qxx ("tar -cf - -C $system . | tar -x -C $loopdir 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -2899,7 +2899,7 @@ sub setupBootDisk {
 		# Copy root tree to virtual disk
 		#------------------------------------------
 		$kiwi -> info ("Copying system image tree on virtual disk");
-		$status = qxx ("cp -a -x $system/* $loopdir 2>&1");
+		$status = qxx ("tar -cf - -C $system . | tar -x -C $loopdir 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();

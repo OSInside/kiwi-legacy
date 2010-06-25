@@ -3472,11 +3472,11 @@ sub installLogicalExtend {
 	$kiwi -> info ("Copying physical to logical [$name]...");
 	my $free = qxx ("df -h $extend 2>&1");
 	$kiwi -> loginfo ("getSize: mount: $free\n");
-	my $data = qxx ("cp -a -x $source/* $extend 2>&1");
+	my $data = qxx ("tar -cf - -C $source . | tar -x -C $extend 2>&1");
 	my $code = $? >> 8;
 	if ($code != 0) {
 		$kiwi -> failed ();
-		$kiwi -> info   ("No space left on device: $!");
+		$kiwi -> info   ("tar based copy failed: $data");
 		$kiwi -> failed ();
 		$this -> cleanMount();
 		return undef;
