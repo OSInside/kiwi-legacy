@@ -1,4 +1,17 @@
 -------------------------------------------------------------------
+Mon Jun 28 10:28:17 CEST 2010 - ms@suse.de
+
+- moved the XML validation ahead of the first data extraction
+- changed the way validation errors are reported. If the xml
+  file was converted via XSL the error will be reported
+  against the converted file. This makes the error reporting
+  more meaningful as otherwise validation errors are reported
+  that are due to the use of an older schema version.
+- fixed typo in convert45to46.xsl. Do not swallow attributes
+  on packages of the vmware section
+- Thanks to Robert who did the last three ones, great work :)
+
+-------------------------------------------------------------------
 Fri Jun 18 12:18:11 CEST 2010 - ms@suse.de
 
 - v4.43

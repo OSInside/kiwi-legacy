@@ -154,8 +154,44 @@ sub new {
 		$kiwi -> failed ();
 		return undef;
 	}
-	$this->{xmlOrigString} = $systemTree -> toString();
-	$this->{xmlOrigFile}   = $controlFile;
+	#==========================================
+	# Validate xml input with current schema
+	#------------------------------------------
+	eval {
+		$systemRNG ->validate ( $systemTree );
+	};
+	if ($@) {
+		my $evaldata=$@;
+		$kiwi -> error  ("Schema validation failed");
+		$kiwi -> failed ();
+		my $configStr = $systemXML -> parse_file( $controlFile ) -> toString();
+		my $upgradedStr = $systemTree -> toString();
+		my $upgradedContolFile = $controlFile;
+		if ($configStr ne $upgradedStr) {
+			$upgradedContolFile =~ s/\.xml/\.converted\.xml/;
+			$kiwi -> info ("Automatically upgraded $controlFile to");
+			$kiwi -> info ("$upgradedContolFile\n");
+			$kiwi -> info ("Reported line numbers may not match the ");
+			$kiwi -> info ("file $controlFile\n");
+			open (my $UPCNTFL, '>', $upgradedContolFile);
+			print $UPCNTFL $upgradedStr;
+			close ( $UPCNTFL );
+		}
+		my $jingExec = main::findExec('jing');
+		if ($jingExec) {
+			qxx ("$jingExec $main::Schema $upgradedContolFile 1>&2");
+			return undef;
+		} else {
+			$kiwi -> error ("$evaldata\n");
+			$kiwi -> info  ("Use the jing command for more details\n");
+			$kiwi -> info  ("The following requires jing to be installed\n");
+			$kiwi -> info  ("jing $main::Schema $upgradedContolFile\n");
+			return undef;
+		}
+	}
+	#==========================================
+	# Read main XML sections
+	#------------------------------------------
 	$imgnameNodeList = $systemTree -> getElementsByTagName ("image");
 	$optionsNodeList = $systemTree -> getElementsByTagName ("preferences");
 	$driversNodeList = $systemTree -> getElementsByTagName ("drivers");
@@ -167,6 +203,8 @@ sub new {
 	#==========================================
 	# Store object data
 	#------------------------------------------
+	$this->{xmlOrigString}   = $systemTree -> toString();
+	$this->{xmlOrigFile}     = $controlFile;
 	$this->{kiwi}            = $kiwi;
 	$this->{foreignRepo}     = $foreignRepo;
 	$this->{optionsNodeList} = $optionsNodeList;
@@ -175,28 +213,6 @@ sub new {
 	$this->{imageWhat}       = $imageWhat;
 	$this->{reqProfiles}     = $reqProfiles;
 	$this->{profilesNodeList}= $profilesNodeList;
-	#==========================================
-	# Validate xml input with current schema
-	#------------------------------------------
-	eval {
-		$systemRNG ->validate ( $systemTree );
-	};
-	if ($@) {
-		my $evaldata=$@;
-		$kiwi -> error  ("Schema validation failed");
-		$kiwi -> failed ();
-		my $jingExec = main::findExec('jing');
-		if ($jingExec) {
-			qxx ("$jingExec $main::Schema $controlFile 1>&2");
-			return undef;
-		} else {
-			$kiwi -> error ("$evaldata\n");
-			$kiwi -> info  ("Use the jing command for more details\n");
-			$kiwi -> info  ("The following requires jing to be installed\n");
-			$kiwi -> info  ("jing $main::Schema $controlFile\n");
-			return undef;
-		}
-	}
 	#==========================================
 	# Check kiwirevision attribute
 	#------------------------------------------
@@ -1198,7 +1214,7 @@ sub setForeignOptionsElement {
 # setForeignOEMOptionsElement
 #------------------------------------------
 sub setForeignOEMOptionsElement {
-    # ...
+	# ...
 	# If given element exists in the foreign hash, set this
 	# element into the current oemconfig (options) XML tree
 	# ---
@@ -4101,7 +4117,7 @@ sub getSingleInstSourceSatSolvable {
 # addDefaultSplitNode
 #------------------------------------------
 sub addDefaultSplitNode {
-    # ...
+	# ...
 	# if no split section is setup we add a default section
 	# from the contents of the KIWISplit.txt file and use it
 	# ---
