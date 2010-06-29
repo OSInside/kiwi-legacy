@@ -1164,7 +1164,6 @@ sub createImageVMX {
 	#------------------------------------------
 	$main::BootVMDisk  = $main::Destination."/".$name->{bootImage}.".splash.gz";
 	$main::BootVMSystem= $main::Destination."/".$name->{systemImage};
-	$main::BootVMFormat= $name->{format};
 	if (defined $name->{imageTree}) {
 		$main::BootVMSystem = $name->{imageTree};
 	}
@@ -1173,82 +1172,15 @@ sub createImageVMX {
 		return undef;
 	}
 	#==========================================
-	# Create virtual disk configuration for Xen
+	# Create VM format/configuration
 	#------------------------------------------
-	if (($type{bootprofile} eq "xen") && ($xendomain ne "dom0")) {
-		# Xen config file
-		if (! $this -> buildXenConfig ($main::Destination,$name,\%xenc,"VMX")) {
-			$main::Survive = "default";
-			return undef;
-		}
-	}
-	if (defined $main::BootVMFormat) {
-		#==========================================
-		# VMware virtual disk description
-		#------------------------------------------
-		my $vmxfile; 
-		if ($type{bootprofile} ne "xen" && $main::BootVMFormat =~ "vmdk|ovf") {
-			# VMware vmx file...
-			$vmxfile = $this -> buildVMwareConfig (
-				$main::Destination,$name,\%vmwc
-			);
-			if (! $vmxfile) {
-				$main::Survive = "default";
-				return undef;
-			}
-		}
-		#==========================================
-		# VMware open virtual format image
-		#------------------------------------------
-		if ($main::BootVMFormat eq "ovf") {
-			# VMware ovf file...
-			# in case of the ovf format we need to call the ovftool from
-			# VMware. The tool is able to convert from a vmx into an ovf
-			# ----
-			$kiwi -> info ("Creating OVF image...");
-			my $ovffile = $vmxfile;
-			my $ovftool = "/usr/bin/ovftool";
-			if (! -x $ovftool) {
-				$kiwi -> failed ();
-				$kiwi -> error  ("Can't find $ovftool, is it installed ?");
-				$kiwi -> failed ();
-				$main::Survive = "default";
-				return undef;
-			}
-			$ovffile =~ s/\.vmx$/\.ovf/;
-			# /.../
-			# temporary hack, because ovftool is not able to handle
-			# scsi-hardDisk correctly at the moment
-			# ---- beg ----
-			qxx ("sed -i -e 's;scsi-hardDisk;disk;' $vmxfile");
-			# ---- end ----
-			my $status = qxx ("rm -rf $ovffile; mkdir -p $ovffile 2>&1");
-			my $result = $? >> 8;
-			if ($result != 0) {
-				$kiwi -> failed ();
-				$kiwi -> error  ("Couldn't create OVF directory: $status");
-				$kiwi -> failed ();
-				$main::Survive = "default";
-				return undef;
-			}
-			my $output = basename $ovffile;
-			$status= qxx (
-				"$ovftool -o -q $vmxfile $ovffile/$output 2>&1"
-			);
-			$result = $? >> 8;
-			# --- beg ----
-			qxx ("sed -i -e 's;disk;scsi-hardDisk;' $vmxfile");
-			qxx ("rm -rf $main::Destination/*.lck 2>&1");
-			# --- end ----
-			if ($result != 0) {
-				$kiwi -> failed ();
-				$kiwi -> error  ("Couldn't create OVF image: $status");
-				$kiwi -> failed ();
-				$main::Survive = "default";
-				return undef;
-			}
-			$kiwi -> done();
-		}
+	undef $main::BootVMDisk;
+	undef $main::BootVMSystem;
+	$main::Convert = $main::Destination."/".$name->{systemImage}.".raw";
+	$main::Format  = $name->{format};
+	if (! defined main::main()) {
+		$main::Survive = "default";
+		return undef;
 	}
 	$main::Survive = "default";
 	return $this;
@@ -1274,6 +1206,7 @@ sub createImageXen {
 	#------------------------------------------
 	my $this = shift;
 	my $para = shift;
+	my $kiwi = $this->{kiwi};
 	my $xml  = $this->{xml};
 	my %xenc = $xml  -> getXenConfig();
 	my $name = $this -> createImageUSB ($para,"Xen");
@@ -1282,10 +1215,12 @@ sub createImageXen {
 	}
 	undef $main::Prepare;
 	undef $main::Create;
+	undef $main::Format;
 	#==========================================
-	# Create image xenconfig
+	# Create VM format/configuration
 	#------------------------------------------
-	if (! $this -> buildXenConfig ($main::Destination,$name,\%xenc, "XEN")) {
+	$main::Convert = $main::Destination."/".$name->{systemImage};
+	if (! defined main::main()) {
 		$main::Survive = "default";
 		return undef;
 	}
@@ -2923,21 +2858,20 @@ sub createImageSplit {
 		$main::BootVMDisk  = $main::Destination."/".$name->{bootImage};
 		$main::BootVMDisk  = $main::BootVMDisk.".splash.gz";
 		$main::BootVMSystem= $main::Destination."/".$name->{systemImage};
-		$main::BootVMFormat= $name->{format};
 		if (! defined main::main()) {
 			$main::Survive = "default";
 			return undef;
 		}
 		#==========================================
-		# Create virtual disk configuration
+		# Create VM format/configuration
 		#------------------------------------------
-		if ((defined $main::BootVMFormat) && ($main::BootVMFormat eq "vmdk")) {
-			# VMware vmx file...
-			my %vmwc = $sxml -> getVMwareConfig ();
-			if (! $this-> buildVMwareConfig ($main::Destination,$name,\%vmwc)) {
-				$main::Survive = "default";
-				return undef;
-			}
+		undef $main::BootVMDisk;
+		undef $main::BootVMSystem;
+		$main::Convert = $main::Destination."/".$name->{systemImage}.".raw";
+		$main::Format  = $name->{format};
+		if (! defined main::main()) {
+			$main::Survive = "default";
+			return undef;
 		}
 	}
 	$main::Survive = "default";
@@ -3846,215 +3780,6 @@ sub setupSquashFS {
 	$this -> remapImageDest();
 	$kiwi -> loginfo ($data);
 	return $name;
-}
-
-#==========================================
-# buildXenConfig
-#------------------------------------------
-sub buildXenConfig {
-	my $this   = shift;
-	my $dest   = shift;
-	my $name   = shift;
-	my $xenref = shift;
-	my $text   = shift;
-	my $kiwi   = $this->{kiwi};
-	my $file   = $dest."/".$name->{systemImage}.".xenconfig";
-	my $initrd = $name->{bootImage}.".splash.gz";
-	my $kernel = $dest."/".$name->{bootImage}.".kernel";
-	$kernel    = readlink ($kernel);
-	$kernel    = basename ($kernel);
-	my %xenconfig = %{$xenref};
-	my $format = "raw";
-	if (defined $main::BootVMFormat) {
-		$format = $main::BootVMFormat;
-	}
-	$kiwi -> info ("Creating image Xen configuration file...");
-	if (! %xenconfig) {
-		$kiwi -> skipped ();
-		$kiwi -> warning ("Missing Xen virtualisation config data");
-		$kiwi -> skipped ();
-		return $dest;
-	}
-	if (! open (FD,">$file")) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't create xenconfig file: $!");
-		$kiwi -> failed ();
-		return undef;
-	}
-	#==========================================
-	# global setup
-	#------------------------------------------
-	my $device = $xenconfig{xen_diskdevice};
-	$device =~ s/\/dev\///;
-	my $part = $device."1";
-	if ($text eq "XEN") {
-		$device = $device."1";
-	}
-	my $memory = $xenconfig{xen_memory};
-	my $image  = $name->{systemImage};
-	if ($text eq "VMX") {
-		$image .= ".".$format;
-	}
-	print FD '#  -*- mode: python; -*-'."\n";
-	print FD "name=\"".$this->{xml}->getImageDisplayName()."\"\n";
-	if ($text eq "XEN") {
-		print FD 'kernel="'.$kernel.'"'."\n";
-		print FD 'ramdisk="'.$initrd.'"'."\n";
-	}
-	print FD 'memory='.$memory."\n";
-	if ($text eq "VMX") {
-		my $tap = $format;
-		if ($tap eq "raw") {
-			$tap = "aio";
-		}
-		print FD 'disk=[ "tap:'.$tap.':'.$image.','.$device.',w" ]'."\n";
-	} else {
-		print FD 'disk=[ "file:'.$image.','.$part.',w" ]'."\n";
-	}
-	#==========================================
-	# network setup
-	#------------------------------------------
-	my $vifcount = -1;
-	foreach my $bname (keys %{$xenconfig{xen_bridge}}) {
-		$vifcount++;
-		my $mac = $xenconfig{xen_bridge}{$bname};
-		my $vif = '"bridge='.$bname.'"';
-		if ($bname eq "undef") {
-			$vif = '""';
-		}
-		if ($mac) {
-			$vif = '"mac='.$mac.',bridge='.$bname.'"';
-			if ($bname eq "undef") {
-				$vif = '"mac='.$mac.'"';
-			}
-		}
-		if ($vifcount == 0) {
-			print FD "vif=[ ".$vif;
-		} else {
-			print FD ", ".$vif;
-		}
-	}
-	if ($vifcount >= 0) {
-		print FD " ]"."\n";
-	}
-	#==========================================
-	# xen console
-	#------------------------------------------
-	if ($text eq "XEN") {
-		print FD 'root="'.$part.' ro"'."\n";
-		print FD 'extra=" xencons=tty "'."\n";
-	}
-	close FD;
-	$kiwi -> done();
-	return $dest;
-}
-
-#==========================================
-# buildVMwareConfig
-#------------------------------------------
-sub buildVMwareConfig {
-	my $this   = shift;
-	my $dest   = shift;
-	my $name   = shift;
-	my $vmwref = shift;
-	my $kiwi   = $this->{kiwi};
-	my $arch   = $this->{arch};
-	my $file   = $dest."/".$name->{systemImage}.".vmx";
-	my $image  = $name->{systemImage};
-	my %vmwconfig = %{$vmwref};
-	$kiwi -> info ("Creating image VMware configuration file...");
-	if (! %vmwconfig) {
-		$kiwi -> skipped ();
-		$kiwi -> warning ("Missing VMware virtualisation config data");
-		$kiwi -> skipped ();
-		return $dest;
-	}
-	if (! open (FD,">$file")) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't create xenconfig file: $!");
-		$kiwi -> failed ();
-		return undef;
-	}
-	#==========================================
-	# global setup
-	#------------------------------------------
-	print FD '#!/usr/bin/env vmware'."\n";
-	print FD 'config.version = "8"'."\n";
-	print FD 'tools.syncTime = "true"'."\n";
-	print FD 'uuid.action = "create"'."\n";
-	if ($vmwconfig{vmware_hwver}) {
-		print FD 'virtualHW.version = "'.$vmwconfig{vmware_hwver}.'"'."\n";
-	} else {
-		print FD 'virtualHW.version = "4"'."\n";
-	}
-	print FD 'displayName = "'.$name->{systemImage}.'"'."\n";
-	print FD 'memsize = "'.$vmwconfig{vmware_memory}.'"'."\n";
-	print FD 'guestOS = "'.$vmwconfig{vmware_guest}.'"'."\n";
-	#==========================================
-	# storage setup
-	#------------------------------------------
-	if (defined $vmwconfig{vmware_disktype}) {
-		my $type   = $vmwconfig{vmware_disktype};
-		my $device = $vmwconfig{vmware_disktype}.$vmwconfig{vmware_diskid};
-		if ($type eq "ide") {
-			# IDE Interface...
-			print FD $device.':0.present = "true"'."\n";
-			print FD $device.':0.fileName= "'.$image.'.vmdk"'."\n";
-			print FD $device.':0.redo = ""'."\n";
-		} else {
-			# SCSI Interface...
-			print FD $device.'.present = "true"'."\n";
-			print FD $device.'.sharedBus = "none"'."\n";
-			print FD $device.'.virtualDev = "lsilogic"'."\n";
-			print FD $device.':0.present = "true"'."\n";
-			print FD $device.':0.fileName = "'.$image.'.vmdk"'."\n";
-			print FD $device.':0.deviceType = "scsi-hardDisk"'."\n";
-		}
-	}
-	#==========================================
-	# network setup
-	#------------------------------------------
-	if (defined $vmwconfig{vmware_niciface}) {
-		my $driver = $vmwconfig{vmware_nicdriver};
-		my $mode   = $vmwconfig{vmware_nicmode};
-		my $nic    = "ethernet".$vmwconfig{vmware_niciface};
-		print FD $nic.'.present = "true"'."\n";
-		print FD $nic.'.virtualDev = "'.$driver.'"'."\n";
-		print FD $nic.'.addressType = "generated"'."\n";
-		print FD $nic.'.connectionType = "'.$mode.'"'."\n";
-		if ($vmwconfig{vmware_arch} =~ /64$/) {
-			print FD $nic.'.allow64bitVmxnet = "true"'."\n";
-		}
-	}
-	#==========================================
-	# CD/DVD drive setup
-	#------------------------------------------
-	if (defined $vmwconfig{vmware_cdtype}) {
-		my $device = $vmwconfig{vmware_cdtype}.$vmwconfig{vmware_cdid};
-		print FD $device.':0.present = "true"'."\n";
-		print FD $device.':0.deviceType = "cdrom-raw"'."\n";
-		print FD $device.':0.autodetect = "true"'."\n";
-		print FD $device.':0.startConnected = "true"'."\n";
-	}
-	#==========================================
-	# USB setup
-	#------------------------------------------
-	if (defined $vmwconfig{vmware_usb}) {
-		print FD 'usb.present = "true"'."\n";
-	}
-	#==========================================
-	# Power Management setup
-	#------------------------------------------
-	print FD 'priority.grabbed = "normal"'."\n";
-	print FD 'priority.ungrabbed = "normal"'."\n";
-	print FD 'powerType.powerOff = "soft"'."\n";
-	print FD 'powerType.powerOn  = "soft"'."\n";
-	print FD 'powerType.suspend  = "soft"'."\n";
-	print FD 'powerType.reset    = "soft"'."\n";
-	close FD;
-	chmod 0755,$file;
-	$kiwi -> done();
-	return $file;
 }
 
 #==========================================

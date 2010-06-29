@@ -799,6 +799,8 @@ sub getImageTypeAndAttributes {
 		$record{flags}         = $node -> getAttribute("flags");
 		$record{hybrid}        = $node -> getAttribute("hybrid");
 		$record{format}        = $node -> getAttribute("format");
+		$record{installiso}    = $node -> getAttribute("installiso");
+		$record{installstick}  = $node -> getAttribute("installstick");
 		$record{vga}           = $node -> getAttribute("vga");
 		$record{bootloader}    = $node -> getAttribute("bootloader");
 		$record{checkprebuilt} = $node -> getAttribute("checkprebuilt");
@@ -2714,12 +2716,12 @@ sub getEc2Config {
 #------------------------------------------
 sub getVMwareConfig {
 	# ...
-	# Create an Attribute hash from the <vmwareconfig>
-	# section if it exists
+	# Create an Attribute hash from the <machine>
+	# section if it exists suitable for the VMware configuration
 	# ---
 	my $this = shift;
 	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("vmwareconfig") -> get_node(1);
+	my $node = $tnode -> getElementsByTagName ("machine") -> get_node(1);
 	my %result = ();
 	my %guestos= ();
 	if (! defined $node) {
@@ -2762,7 +2764,7 @@ sub getVMwareConfig {
 	#==========================================
 	# storage setup disk
 	#------------------------------------------
-	my $disk = $node -> getElementsByTagName ("vmwaredisk");
+	my $disk = $node -> getElementsByTagName ("vmdisk");
 	my ($type,$id);
 	if ($disk) {
 		my $node = $disk -> get_node(1);
@@ -2772,7 +2774,7 @@ sub getVMwareConfig {
 	#==========================================
 	# storage setup CD rom
 	#------------------------------------------
-	my $cd = $node -> getElementsByTagName ("vmwarecdrom");
+	my $cd = $node -> getElementsByTagName ("vmdvd");
 	my ($cdtype,$cdid);
 	if ($cd) {
 		my $node = $cd -> get_node(1);
@@ -2782,7 +2784,7 @@ sub getVMwareConfig {
 	#==========================================
 	# network setup
 	#------------------------------------------
-	my $nic  = $node -> getElementsByTagName ("vmwarenic");
+	my $nic  = $node -> getElementsByTagName ("vmnic");
 	my ($drv,$iface,$mode);
 	if ($nic) {
 		my $node = $nic  -> get_node(1);
@@ -2821,12 +2823,12 @@ sub getVMwareConfig {
 #------------------------------------------
 sub getXenConfig {
 	# ...
-	# Create an Attribute hash from the <xenconfig>
-	# section if it exists
+	# Create an Attribute hash from the <machine>
+	# section if it exists suitable for the xen domU configuration
 	# ---
 	my $this = shift;
 	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("xenconfig") -> get_node(1);
+	my $node = $tnode -> getElementsByTagName ("machine") -> get_node(1);
 	my %result = ();
 	if (! defined $node) {
 		return %result;
@@ -2839,7 +2841,7 @@ sub getXenConfig {
 	#==========================================
 	# storage setup
 	#------------------------------------------
-	my $disk = $node -> getElementsByTagName ("xendisk");
+	my $disk = $node -> getElementsByTagName ("vmdisk");
 	my ($device);
 	if ($disk) {
 		my $node  = $disk -> get_node(1);
@@ -2848,13 +2850,13 @@ sub getXenConfig {
 	#==========================================
 	# network setup (bridge)
 	#------------------------------------------
-	my $bridges = $node -> getElementsByTagName ("xenbridge");
+	my $bridges = $node -> getElementsByTagName ("vmnic");
 	my %vifs = ();
 	for (my $i=1;$i<= $bridges->size();$i++) {
 		my $bridge = $bridges -> get_node($i);
 		if ($bridge) {
 			my $mac   = $bridge -> getAttribute ("mac");
-			my $bname = $bridge -> getAttribute ("name");
+			my $bname = $bridge -> getAttribute ("interface");
 			if (! $bname) {
 				$bname = "undef";
 			}

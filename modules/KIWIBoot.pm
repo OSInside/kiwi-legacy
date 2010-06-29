@@ -56,7 +56,6 @@ sub new {
 	my $system = shift;
 	my $vmsize = shift;
 	my $device = shift;
-	my $format = shift;
 	my $lvm    = shift;
 	my $profile= shift;
 	#==========================================
@@ -87,7 +86,7 @@ sub new {
 	#==========================================
 	# check initrd file parameter
 	#------------------------------------------
-	if (! -f $initrd) {
+	if ((defined $initrd) && (! -f $initrd)) {
 		$kiwi -> error  ("Couldn't find initrd file: $initrd");
 		$kiwi -> failed ();
 		return undef;
@@ -134,7 +133,7 @@ sub new {
 			$kernel = File::Spec->catfile(dirname($initrd), $kernel);
 		}
 	}
-	if (! -f $kernel) {
+	if ((defined $initrd) && (! -f $kernel)) {
 		$kiwi -> error  ("Couldn't find kernel file: $kernel");
 		$kiwi -> failed ();
 		return undef;
@@ -406,7 +405,6 @@ sub new {
 	$this->{vmsize}    = $vmsize;
 	$this->{syszip}    = $syszip;
 	$this->{device}    = $device;
-	$this->{format}    = $format;
 	$this->{zipped}    = $zipped;
 	$this->{isxen}     = $isxen;
 	$this->{xengz}     = $xengz;
@@ -2243,7 +2241,6 @@ sub setupBootDisk {
 	my $arch      = $this->{arch};
 	my $system    = $this->{system};
 	my $vmsize    = $this->{vmsize};
-	my $format    = $this->{format};
 	my $syszip    = $this->{syszip};
 	my $tmpdir    = $this->{tmpdir};
 	my $initrd    = $this->{initrd};
@@ -3074,56 +3071,28 @@ sub setupBootDisk {
 	#==========================================
 	# Create image described by given format
 	#------------------------------------------
-	if (defined $format) {
-		if ($initrd =~ /oemboot/) {
-			#==========================================
-			# OEM formats...
-			#------------------------------------------
-			if ($format eq "iso") {
-				$this -> {system} = $diskname;
-				$kiwi -> info ("Creating install ISO image\n");
-				$this -> cleanLoop ("keep-mountpoints");
-				if (! $this -> setupInstallCD()) {
-					return undef;
-				}
-			}
-			if ($format eq "usb") {
-				$this -> {system} = $diskname;
-				$kiwi -> info ("Creating install USB Stick image\n");
-				$this -> cleanLoop ("keep-mountpoints");
-				if (! $this -> setupInstallStick()) {
-					return undef;
-				}
-			}
-		} else {
-			#==========================================
-			# VMX formats...
-			#------------------------------------------
-			if ($format eq "ovf") {
-				$format = "vmdk";
-			}
-			$kiwi -> info ("Creating $format image");
-			my %vmwc  = ();
-			my $fname = $diskname;
-			$fname =~ s/\.raw$/\.$format/;
-			if ($format eq "vmdk") {
-				%vmwc = $xml -> getVMwareConfig();
-			}
-			my $convert = "convert -f raw $this->{loop} -O $format";
-			if (($vmwc{vmware_disktype}) && ($vmwc{vmware_disktype}=~/^scsi/)) {
-				$status = qxx ("qemu-img $convert -s $fname 2>&1");
-			} else {
-				$status = qxx ("qemu-img $convert $fname 2>&1");
-			}
-			$result = $? >> 8;
-			if ($result != 0) {
-				$kiwi -> failed ();
-				$kiwi -> error  ("Couldn't create $format image: $status");
-				$kiwi -> failed ();
-				$this -> cleanLoop ();
+	if ($initrd =~ /oemboot/) {
+		#==========================================
+		# OEM Install CD...
+		#------------------------------------------
+		if ($type{installiso} =~ /true|yes/i) {
+			$this -> {system} = $diskname;
+			$kiwi -> info ("Creating install ISO image\n");
+			$this -> cleanLoop ("keep-mountpoints");
+			if (! $this -> setupInstallCD()) {
 				return undef;
 			}
-			$kiwi -> done ();
+		}
+		#==========================================
+		# OEM Install Stick...
+		#------------------------------------------
+		if ($type{installstick} =~ /true|yes/i) {
+			$this -> {system} = $diskname;
+			$kiwi -> info ("Creating install USB Stick image\n");
+			$this -> cleanLoop ("keep-mountpoints");
+			if (! $this -> setupInstallStick()) {
+				return undef;
+			}
 		}
 	}
 	#==========================================
