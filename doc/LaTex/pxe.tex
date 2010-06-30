@@ -538,16 +538,23 @@ them together. Below find an example:
 
 \begin{itemize}
 \item add a split type in config.xml, for example\\
-      \textbf{<type fsreadonly=''squashfs'' fsreadwrite=''ext3''
-      boot=''netboot/suse-11.2''>split</type>}
-\item add a split section to describe the writable portion,
-      for example:
+      \textbf{<type image="split" fsreadonly=''squashfs'' fsreadwrite=''ext3''
+      boot=''netboot/suse-11.2''/>}
+\item add a split section inside the type to describe the temporary
+      and persistent parts. For example:
 \begin{verbatim}
 <split>
+   <temporary>
+      <!-- allow RAM read/write access to: -->
+      <file name="/mnt"/>
+      <file name="/mnt/*"/>
+   </temporary>
    <persistent>
-      <!-- allow read/write access to: -->
+      <!-- allow DISK read/write access to: -->
       <file name="/var"/>
       <file name="/var/*"/>
+      <file name="/boot"/>
+      <file name="/boot/*"/>
       <file name="/etc"/>
       <file name="/etc/*"/>
       <file name="/home"/>

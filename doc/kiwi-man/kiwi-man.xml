@@ -239,7 +239,6 @@
       <arg choice="plain">--bootvm <replaceable>initrd</replaceable></arg>
       <arg choice="plain">--bootvm-system <replaceable>systemImage</replaceable></arg>
       <arg choice="opt">--bootvm-disksize <replaceable>size</replaceable></arg>
-      <arg choice="opt">--bootvm-format <replaceable>format</replaceable></arg>
     </cmdsynopsis>
     <cmdsynopsis><command>kiwi</command>
       <arg choice="plain">--bootcd <replaceable>initrd</replaceable></arg>
@@ -253,7 +252,22 @@
       <arg choice="plain">--installstick-system <replaceable>vmx-system-image</replaceable></arg>
     </cmdsynopsis>
   </refsect1>
-  
+ 
+  <refsect1>
+    <title>Image format conversion</title>
+    <para>
+      The KIWI format conversion is useful to perform the creation of
+	  another image output format like vmdk for VMware or ovf the open
+      virtual machine format. Along with the conversion kiwi also creates
+      the virtual machine configuration according to the format if
+      there is a machine section specified in the xml description
+    </para>
+    <cmdsynopsis><command>kiwi</command>
+      <arg choice="plain">--convert <replaceable>systemImage</replaceable></arg>
+      <arg choice="opt">--format <replaceable>vmdk|ovf|qcow2</replaceable></arg>
+    </cmdsynopsis>
+  </refsect1>
+ 
   <refsect1>
     <title>Testsuite</title>
     <para>

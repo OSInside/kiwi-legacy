@@ -192,7 +192,7 @@ assumed to be present for all profiles.
 \hspace*{1cm}<packagemanager>smart</packagemanager>\\
 \hspace*{1cm}<type image="name" ...>\\
 \hspace*{2cm}<ec2config|lvmvolumes|oemconfig|\\
-\hspace*{2cm} pxedeploy|size|split|vmwareconfig|xenconfig>\\
+\hspace*{2cm} pxedeploy|size|split|machine>\\
 \hspace*{1cm}</type>\\
 </preferences>
 \end{Command}
@@ -348,13 +348,13 @@ values of the image attribute:
       the rules indicated for the USB system. Last but not least
       the virtual disk system may also be created with a LVM based layout by
       using the \textbf{lvm} attribute. The previously indicated rules apply.
-      Use the \textbf{vmwareconfig} or \textbf{xenconfig} child elements
+      Use the \textbf{machine} child element
       to specify appropriate configuration of the virtual disk system.
 \item \textbf{image=''xen''}\\
       Use this type to create a Xen para-virtual guest image. The
       \textbf{filesystem} and \textbf{boot=''xenboot/suse-*''} attributes
       specify the filesystem type used and select the proper boot image,
-      respectively. Use the \textbf{xenconfig} child element to specify
+      respectively. Use the \textbf{machine} child element to specify
       configuration options of the Xen guest image.
 \end{itemize}
 
@@ -704,35 +704,33 @@ supported child elements:
     Use the \textbf{except} element to specify exceptions to previously
     configured rules.
 
-\item \textbf{vmwareconfig}\\
-    The optional vmwareconfig section serves to specify information
-    about a VMware guest image. Information provided in this block is only
-    considered if the image description contains a \textbf{packages} block
-    with the \textbf{type} attribute set to \textbf{vmware}.
+\item \textbf{machine}\\
+    The optional machine section serves to specify information
+    about a VM guest machine. Using the data provided in this section,
+    Kiwi will create a guest configuration file required to run the
+    image on the target machine.
 
-    Using the data provided in this section, Kiwi will create a guest
-    configuration file required to run the image using the VMware tools.
-    It is possible to create the guest configuration file with the VMware
-    tools. However, taking advantage of Kiwi's functionality to generate
-    the guest configuration file alows the delivery of one bundle that is
-    ready to run on VMware infrastructure.
+    If the target is a VMware virtual machine indicated by the
+    format attribute set to vmdk, kiwi creates a VMware config file.
+    If the target is a Xen virtual machine indicated by the domain
+    attribute in the machine section kiwi will create a Xen guest
+    config file.
 
     The sample block below shows the general outline of the information
-    that can be specified to generate the (.vmx) configuration file for
-    VMware:
+    that can be specified to generate the configuration file
 
 	\begin{Command}{12cm}
-	<vmwareconfig arch="arch" memory="MB"\\
+	<machine arch="arch" memory="MB"\\
 	\hspace*{2.5cm}HWversion="number"\\
 	\hspace*{2.5cm}guestOS="suse|sles"\\
-	\hspace*{2.5cm}usb="true|false"/>\\
-	\hspace*{1cm}<vmwarenic driver="name"\\
+	\hspace*{2.5cm}domain="dom0|domU"/>\\
+	\hspace*{1cm}<vmnic driver="name"\\
 	\hspace*{2.5cm}interface="number" mode="mode"/>\\
-	\hspace*{1cm}<vmwaredisk controller="ide|scsi"\\
+	\hspace*{1cm}<vmdisk controller="ide|scsi"\\
 	\hspace*{2.5cm}id="number"/>\\
-	\hspace*{1cm}<vmwarecdrom controller="ide|scsi"\\
+	\hspace*{1cm}<vmdvd controller="ide|scsi"\\
 	\hspace*{2.5cm}id="number"/>\\
-	</vmwareconfig>
+	</machine>
 	\end{Command}
 
 	\begin{itemize}
@@ -749,12 +747,15 @@ supported child elements:
       value is \textbf{suse} and for the x86\_64 architecture
       \textbf{suse-64} is the default. At this point only the SUSE and
       SLES guestOS types are supported.
-	\item \textbf{usb}\\
-      The bool value \textbf{usb} specifies whether the guest machine
-      should provide a virtual USB controller or not.
+	\item \textbf{domain}\\
+      The Xen domain setup. This could be either a dom0 which is the
+      host machine hosting the guests and therefore doesn't require a
+      configuration file, or it could be set to domU which indicates
+      this is a guest and also requires a guest configuration which is
+      created by kiwi
 	\end{itemize}
 
-	The following information can be provided to setup the VMware virtual
+	The following information can be provided to setup the virtual
 	main storage device and CD/DVD drive connection.
 
 	\begin{itemize}
@@ -763,10 +764,13 @@ supported child elements:
       and \textbf{scsi}.
 	\item \textbf{id}\\
       The mandatory id attribute specifies the disk id. If only one
-      disk is set the id value should be set to 0. 
+      disk is set the id value should be set to 0.
+	\item \textbf{device}\\
+      The device attribute specifies the disk that should appear
+      in the para virtual instance. Therefore only relevant for Xen
 	\end{itemize}
 
-	The following information can be provided to setup the VMware virtual
+	The following information can be provided to setup the virtual
 	network interface
 
 	\begin{itemize}
@@ -781,70 +785,6 @@ supported child elements:
 	\item \textbf{mode}\\
       The network mode used to communicate outside the VM. In many cases
       the bridged mode is used.
-	\end{itemize}
-
-\item \textbf{xenconfig}\\
-    The optional xenconfig section serves to specify information
-    about a Xen guest image. Information provided in this block is only
-    considered if the image description contains a \textbf{packages} block
-    with the \textbf{type} attribute set to \textbf{xen}.
-
-    Using the data provided in this section, Kiwi will create a guest
-    configuration file required to run the image using the Xen tools.
-    This provides the capability of delivering one bundle that is ready
-    to run on Xen infrastructure.
-
-    The sample block below shows the general outline of the information
-    that can be specified to generate the (.xenconfig) configuration file for
-    Xen:
-
-	\begin{Command}{12cm}
-	<xenconfig memory="MB"\\
-	\hspace*{1cm}<xendisk device="/dev/..."/>\\
-	\hspace*{1cm}<xenbridge name="eth0" mac="addr"/>\\
-	</vmwareconfig>
-	\end{Command}
-
-	\begin{itemize}
-	\item \textbf{memory}\\
-      The mandatory memory attribute specifies how much memory in MB
-      should be allocated for the guest machine    
-	\end{itemize}
-
-	The following information can be provided to setup the Xen para virtual
-	main storage device as part of a \textbf{xendisk} element.
-
-	\begin{itemize}
-	\item \textbf{device}\\
-      The mandatory device attribute specifies the disk that should appear
-      in the para virtual instance.
-	\end{itemize}
-
-	The default Xen configuration uses bridging within domain 0 to allow all
-	domains to appear on the network as individual hosts. In order to create
-	the bridge which can be used by the Xen virtual network interface(s) the
-	script ''/etc/xen/scripts/network-bridge start'' can be called to create
-	a bridge as shown in the following picture:
-
-	\begin{figure}[h]
-	\centering
-	\includegraphics[scale=0.5]{pictures/xenbridge.eps}
-	\caption{Illustration on network-bridge and vif-bridge}
-	\label{fig:architecture}
-	\end{figure}
-
-	Additional information about Xen networking configuration can be
-	found here: \url{http://wiki.xensource.com/xenwiki/XenNetworking}
-	The following information can be provided to setup the Xen network
-	bridge as part of one ore more \textbf{xenbridge} elements..
-
-	\begin{itemize}
-	\item \textbf{name}\\
-      The name of the network interface which is the bridge between
-      the physical device (peth) and the virtual device(s) (vif).
-	\item \textbf{mac}\\
-      The optional mac attribute specifies the MAC address for the virtual
-      interface inside the DOM(x).
 	\end{itemize}
 \end{itemize}
 
