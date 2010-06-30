@@ -1,6 +1,18 @@
 -------------------------------------------------------------------
 Mon Jun 28 10:28:17 CEST 2010 - ms@suse.de
 
+- Cleanup formats in kiwi:
+  * create new KIWIImageFormat.pm module for the conversion
+    into different image formats like vmdk,ovf and friends.
+    Also added function for creating the machine configuration
+    into this new module
+  * create common XML specification for vmware|xen config
+    starting with <machine>
+  * added new option --convert to kiwi.
+  * recursively call kiwi with $main::Convert set to convert
+    into the specified format and/or configuration
+  * added bool attributes installcd and installstick replacing
+    the old format="iso" and format="usb" setup
 - moved the XML validation ahead of the first data extraction
 - changed the way validation errors are reported. If the xml
   file was converted via XSL the error will be reported
