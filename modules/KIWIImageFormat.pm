@@ -229,6 +229,10 @@ sub createOVF {
 			return undef;
 		}
 		$kiwi -> done();
+	} else {
+		$kiwi -> error  ("Required vmdk files not present");
+		$kiwi -> failed ();
+		return undef;
 	}
 	return $target;
 }
@@ -316,6 +320,7 @@ sub createXENConfiguration {
 		$base   = $image.".xenconfig";
 	}
 	$file = $dest."/".$base;
+	unlink $file;
 	#==========================================
 	# find kernel
 	#------------------------------------------
@@ -455,6 +460,7 @@ sub createVMwareConfiguration {
 		$base  = $image.".vmx";
 	}
 	$file = $dest."/".$base;
+	unlink $file;
 	#==========================================
 	# check XML configuration data
 	#------------------------------------------
@@ -463,7 +469,7 @@ sub createVMwareConfiguration {
 		$kiwi -> skipped ();
 		$kiwi -> warning ("Not enough or Missing VMware machine config data");
 		$kiwi -> skipped ();
-		return $dest;
+		return $file;
 	}
 	#==========================================
 	# Create config file
