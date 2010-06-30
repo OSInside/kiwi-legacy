@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="4.6" name="suse-11.2-xen-guest">
+<image schemaversion="4.7" name="suse-11.2-xen-guest">
 	<description type="system">
 		<author>Marcus Schäfer</author>
 		<contact>ms@novell.com</contact>
@@ -8,10 +8,10 @@
 	</description>
 	<preferences>
 		<type image="xen" filesystem="ext4" boot="xenboot/suse-11.2">
-			<xenconfig memory="128">
-				<xendisk device="/dev/sda"/>
-				<xenbridge mac="00:0C:6E:AA:57:2F" name="br0"/>
-			</xenconfig>
+			<machine memory="128">
+				<vmdisk controller="ide" id="0" device="/dev/sda"/>
+				<vmnic interface="br0" mac="00:0C:6E:AA:57:2F"/>
+			</machine>
 		</type>
 		<version>1.1.2</version>
 		<packagemanager>zypper</packagemanager>

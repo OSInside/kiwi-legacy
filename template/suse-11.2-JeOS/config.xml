@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="4.6" name="LimeJeOS-openSUSE-11.2">
+<image schemaversion="4.7" name="LimeJeOS-openSUSE-11.2">
 	<description type="system">
 		<author>Marcus Schäfer</author>
 		<contact>ms@novell.com</contact>
@@ -26,35 +26,35 @@
 	</preferences>
 	<preferences profiles="xenFlavour">
 		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-11.2" bootprofile="xen" bootkernel="xenk">
-			<xenconfig memory="512" domain="domU">
-				<xendisk device="/dev/xvda"/>
-				<xenbridge name=""/>
-			</xenconfig>
+			<machine memory="512" domain="domU">
+				<vmdisk controller="ide" id="0" device="/dev/xvda"/>
+				<vmnic interface=""/>
+			</machine>
 		</type>
-		<type image="oem" filesystem="ext3" boot="oemboot/suse-11.2" bootprofile="xen" bootkernel="xenk" format="iso">
+		<type image="oem" filesystem="ext3" boot="oemboot/suse-11.2" bootprofile="xen" bootkernel="xenk" installiso="true">
 			<oemconfig>
 				<oem-home>false</oem-home>
 				<oem-systemsize>2048</oem-systemsize>
 			</oemconfig>
-			<xenconfig domain="dom0"/>
+			<machine domain="dom0"/>
 		</type>
 	</preferences>
 	<preferences profiles="vmxFlavour">
 		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-11.2" format="vmdk">
-			<vmwareconfig memory="512" guestOS="suse" HWversion="4">
-				<vmwaredisk controller="scsi" id="0"/>
-				<vmwarenic driver="e1000" interface="0" mode="bridged"/>
-			</vmwareconfig>
+			<machine memory="512" guestOS="suse" HWversion="4">
+				<vmdisk controller="scsi" id="0"/>
+				<vmnic driver="e1000" interface="0" mode="bridged"/>
+			</machine>
 		</type>
-		<type image="oem" filesystem="ext3" boot="oemboot/suse-11.2" format="iso">
+		<type image="oem" filesystem="ext3" boot="oemboot/suse-11.2" installiso="true">
 			<oemconfig>
 				<oem-home>false</oem-home>
 				<oem-systemsize>2048</oem-systemsize>
 			</oemconfig>
-			<vmwareconfig memory="512" guestOS="suse" HWversion="4">
-				<vmwaredisk controller="scsi" id="0"/>
-				<vmwarenic driver="e1000" interface="0" mode="bridged"/>
-			</vmwareconfig>
+			<machine memory="512" guestOS="suse" HWversion="4">
+				<vmdisk controller="scsi" id="0"/>
+				<vmnic driver="e1000" interface="0" mode="bridged"/>
+			</machine>
 		</type>
 	</preferences>
 	<users group="root">

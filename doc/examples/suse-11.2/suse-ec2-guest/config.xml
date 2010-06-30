@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="4.6" name="suse-11.2-ec2-guest">
+<image schemaversion="4.7" name="suse-11.2-ec2-guest">
 	<description type="system">
 		<author>Marcus Schaefer</author>
 		<contact>ms@novell.com</contact>
@@ -15,14 +15,14 @@
 			</ec2config>
 		</type>
 		<type image="vmx" filesystem="ext4" boot="vmxboot/suse-11.2">
-			<vmwareconfig memory="512">
-				<vmwaredisk controller="ide" id="0"/>
-			</vmwareconfig>
+			<machine memory="512">
+				<vmdisk controller="ide" id="0"/>
+			</machine>
 		</type>
 		<type image="xen" filesystem="ext4" boot="xenboot/suse-11.2">
-			<xenconfig memory="512">
-				<xendisk device="/dev/sda"/>
-			</xenconfig>
+			<machine memory="512">
+				<vmdisk controller="ide" id="0" device="/dev/sda"/>
+			</machine>
 		</type>
 		<version>1.1.2</version>
 		<packagemanager>zypper</packagemanager>

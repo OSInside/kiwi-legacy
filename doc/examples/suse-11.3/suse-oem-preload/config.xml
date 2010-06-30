@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="4.6" name="suse-11.3-oem-preload">
+<image schemaversion="4.7" name="suse-11.3-oem-preload">
 	<description type="system">
 		<author>Marcus Schäfer</author>
 		<contact>ms@novell.com</contact>
 		<specification>openSUSE 11.3 oem preload system</specification>
 	</description>
 	<preferences>
-		<type image="split" fsreadwrite="ext4" fsreadonly="squashfs" boot="oemboot/suse-11.3" format="iso">
+		<type image="split" fsreadwrite="ext4" fsreadonly="squashfs" boot="oemboot/suse-11.3" installiso="true">
 			<split>
 				<persistent>
 					<file name="/etc"/>
