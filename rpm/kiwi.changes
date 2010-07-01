@@ -23,6 +23,9 @@ Mon Jun 28 10:28:17 CEST 2010 - ms@suse.de
 - fixed typo in convert45to46.xsl. Do not swallow attributes
   on packages of the vmware section
 - Thanks to Robert who did the last three ones, great work :)
+- fixed repartition problem with new and old parted. The
+  code has been changed in a way that it uses a sector
+  based start value and a cylinder based end value
 
 -------------------------------------------------------------------
 Fri Jun 18 12:18:11 CEST 2010 - ms@suse.de

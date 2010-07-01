@@ -4971,6 +4971,7 @@ function createPartitionerInput {
 	else
 		Echo "Repartition the disk according to real geometry [ parted ]"
 		partedInit $imageDiskDevice
+		partedSectorInit $imageDiskDevice
 		createPartedInput $imageDiskDevice $@
     fi
 }
@@ -5024,6 +5025,35 @@ function partedWrite {
 		systemException "Failed to create partition table" "reboot"
 	fi
 	partedInit $device
+}
+#======================================
+# partedSectorInit
+#--------------------------------------
+function partedSectorInit {
+	# /.../
+	# return start/end sectors of current partitions.
+	# ----
+	local disk=$1
+	local s_start
+	local s_stopp
+	unset startSectors
+	unset endSectors
+	for i in $(
+		parted -m $disk unit s print | grep ^[1-4]: | cut -f2-3 -d: | tr -d s
+	);do
+		s_start=$(echo $i | cut -f1 -d:)
+		s_stopp=$(echo $i | cut -f2 -d:)
+		if [ -z "$startSectors" ];then
+			startSectors=${s_start}s
+		else
+			startSectors=${startSectors}:${s_start}s
+		fi
+		if [ -z "$endSectors" ];then
+			endSectors=$((s_stopp + 1))s
+		else
+			endSectors=$endSectors:$((s_stopp + 1))s
+		fi
+	done
 }
 #======================================
 # partedEndCylinder
@@ -5141,14 +5171,15 @@ function createPartedInput {
 				partid=$(($partid / 1))
 				pstart=${pcmds[$index + 3]}
 				if [ "$pstart" = "1" ];then
-					pstart=0
+					pstart=$(echo $startSectors | cut -f $partid -d:)
 				fi
 				if [ $pstart = "." ];then
-					# start is next cylinder according to previous partition
+					# start is next sector according to previous partition
 					pstart=$(($partid - 1))
 					if [ $pstart -gt 0 ];then
-						pstart=$(partedEndCylinder $pstart)
-						pstart=$(($pstart + 1))
+						pstart=$(echo $endSectors | cut -f $pstart -d:)
+					else
+						pstart=$(echo $startSectors | cut -f $partid -d:)
 					fi
 				fi
 				pstopp=${pcmds[$index + 4]}
@@ -5167,6 +5198,7 @@ function createPartedInput {
 				fi
 				cmdq="$cmdq mkpart primary $pstart $pstopp"
 				partedWrite "$disk" "$cmdq"
+				partedSectorInit $imageDiskDevice
 				cmdq=""
 				;;
 			#======================================
