@@ -1174,13 +1174,15 @@ sub createImageVMX {
 	#==========================================
 	# Create VM format/configuration
 	#------------------------------------------
-	undef $main::BootVMDisk;
-	undef $main::BootVMSystem;
-	$main::Convert = $main::Destination."/".$name->{systemImage}.".raw";
-	$main::Format  = $name->{format};
-	if (! defined main::main()) {
-		$main::Survive = "default";
-		return undef;
+	if (defined $name->{format}) {
+		undef $main::BootVMDisk;
+		undef $main::BootVMSystem;
+		$main::Convert = $main::Destination."/".$name->{systemImage}.".raw";
+		$main::Format  = $name->{format};
+		if (! defined main::main()) {
+			$main::Survive = "default";
+			return undef;
+		}
 	}
 	$main::Survive = "default";
 	return $this;
@@ -2865,13 +2867,15 @@ sub createImageSplit {
 		#==========================================
 		# Create VM format/configuration
 		#------------------------------------------
-		undef $main::BootVMDisk;
-		undef $main::BootVMSystem;
-		$main::Convert = $main::Destination."/".$name->{systemImage}.".raw";
-		$main::Format  = $name->{format};
-		if (! defined main::main()) {
-			$main::Survive = "default";
-			return undef;
+		if (defined $name->{format}) {
+			undef $main::BootVMDisk;
+			undef $main::BootVMSystem;
+			$main::Convert = $main::Destination."/".$name->{systemImage}.".raw";
+			$main::Format  = $name->{format};
+			if (! defined main::main()) {
+				$main::Survive = "default";
+				return undef;
+			}
 		}
 	}
 	$main::Survive = "default";
