@@ -617,9 +617,12 @@ sub mainTask
       # construct volume id, no longer than 32 bytes allowed
       my $volid_maxlen = 32;
       my $vname = $name;
-      $vname =~ s/-Media/\./ if length($vname) > ($volid_maxlen - 4);
-      $vname =~ s/-Build/\./ if length($vname) > ($volid_maxlen - 4);
-      my $vid = sprintf( "%s.%03d", substr($vname,0,($volid_maxlen - 4)), $cd );
+      $vname =~ s/-Media//;
+      $vname =~ s/-Build// if length($vname) > ($volid_maxlen - 4);
+      my $vid = substr($vname,0,($volid_maxlen));
+      if $this->{m_proddata}->getVar("MULTIPLE_MEDIA", "yes") eq "yes") {
+         $vid = sprintf( "%s.%03d", substr($vname,0,($volid_maxlen - 4)), $cd );
+      };
 
       my $attr = "-r"; # RockRidge
       $attr .= " -pad"; # pad image by 150 sectors - needed for Linux
