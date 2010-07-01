@@ -1274,30 +1274,14 @@ sub main {
 	# Convert image into format/configuration
 	#------------------------------------------
 	if (defined $Convert) {
-		if ($Format) {
-			$kiwi -> info ("Converting into $Format...\n");
-		} else {
-			$kiwi -> info ("Converting...\n");
-		}
+		$kiwi -> info ("Starting image format conversion...\n");
 		my $format = new KIWIImageFormat ($kiwi,$Convert,$Format);
 		if (! $format) {
 			my $code = kiwiExit (1);
 			return $code;
 		}
-		my $config_result = $format -> createMaschineConfiguration();
-		my $format_result = $format -> createFormat();
-		if (! $format_result) {
-			if ($Format) {
-				$kiwi -> warning ("No conversion possible for $Format");
-			} else {
-				$kiwi -> warning ("No format for conversion specified");
-			}
-			$kiwi -> skipped ();
-		}
-		if (! $config_result) {
-			$kiwi -> warning ("No machine configuration possible");
-			$kiwi -> skipped ();
-		}
+		$format -> createFormat();
+		$format -> createMaschineConfiguration();
 		my $code = kiwiExit (0); return $code;
 	}
 	return 1;

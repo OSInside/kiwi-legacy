@@ -85,6 +85,15 @@ sub new {
 		}
 	}
 	#==========================================
+	# check format
+	#------------------------------------------
+	my $type = $xml -> getImageTypeAndAttributes();
+	if (! defined $format) {
+		if (($type) && ($type->{format})) {
+			$format = $type->{format};
+		}
+	}
+	#==========================================
 	# Read some XML data
 	#------------------------------------------
 	my %xenref = $xml -> getXenConfig();
@@ -98,6 +107,8 @@ sub new {
 	$this->{xml}     = $xml;
 	$this->{format}  = $format;
 	$this->{image}   = $image;
+	$this->{type}    = $type;
+	$this->{imgtype} = $type->{type};
 	return $this;
 }
 
@@ -109,10 +120,15 @@ sub createFormat {
 	my $kiwi   = $this->{kiwi};
 	my $format = $this->{format};
 	my $image  = $this->{image};
+	my $imgtype= $this->{imgtype};
 	#==========================================
 	# check if format is a disk
 	#------------------------------------------
-	if ($format) {
+	if (! defined $format) {
+		$kiwi -> warning ("No format for $imgtype conversion specified");
+		$kiwi -> skipped ();
+		return undef;
+	} else {
 		my $data = qxx ("parted $image print 2>&1");
 		my $code = $? >> 8;
 		if ($code != 0) {
@@ -125,11 +141,19 @@ sub createFormat {
 	# convert disk into specified format
 	#------------------------------------------
 	if ($format eq "vmdk") {
+		$kiwi -> info ("Starting $imgtype => $format conversion\n");
 		return $this -> createVMDK();
 	} elsif ($format eq "ovf") {
+		$kiwi -> info ("Starting $imgtype => $format conversion\n");
 		return $this -> createOVF();
 	} elsif ($format eq "qcow2") {
+		$kiwi -> info ("Starting $imgtype => $format conversion\n");
 		return $this -> createQCOW2();
+	} else {
+		$kiwi -> warning (
+			"Can't convert image type $imgtype to $format format"
+		);
+		$kiwi -> skipped ();
 	}
 	return undef;
 }
@@ -141,8 +165,9 @@ sub createMaschineConfiguration {
 	my $this   = shift;
 	my $kiwi   = $this->{kiwi};
 	my $format = $this->{format};
+	my $imgtype= $this->{imgtype};
 	my $xml    = $this->{xml};
-	my %type   = %{$xml -> getImageTypeAndAttributes()};
+	my %type   = %{$this->{type}};
 	my $xenref = $this->{xenref};
 	my %xenc   = %{$xenref};
 	my $xend   = "dom0";
@@ -150,16 +175,25 @@ sub createMaschineConfiguration {
 		$xend = $xenc{xen_domain};
 	}
 	if (($type{type}) && ($type{type} eq "xen")) {
+		$kiwi -> info ("Starting $imgtype image machine configuration\n");
 		return $this -> createXENConfiguration();
 	} elsif (
 		($type{bootprofile}) && ($type{bootprofile} eq "xen") &&
 		($xend eq "domU")
 	) {
+		$kiwi -> info ("Starting $imgtype image machine configuration\n");
 		return $this -> createXENConfiguration();
 	} elsif ($format eq "vmdk") {
+		$kiwi -> info ("Starting $imgtype image machine configuration\n");
 		return $this -> createVMwareConfiguration();
 	} elsif ($format eq "ovf") {
+		$kiwi -> info ("Starting $imgtype image machine configuration\n");
 		return $this -> createOVFConfiguration();
+	} else {
+		$kiwi -> warning (
+			"Can't create machine configuration for $imgtype image"
+		);
+		$kiwi -> skipped ();
 	}
 	return undef;
 }
@@ -198,7 +232,7 @@ sub createOVF {
 		$target = $vmxf;
 		$target =~ s/\.vmx$/\.$format/;
 		$this->{format} = $format;
-		$kiwi -> info ("Creating $format image");
+		$kiwi -> info ("Creating $format image...");
 		# /.../
 		# temporary hack, because ovftool is not able to handle
 		# scsi-hardDisk correctly at the moment
@@ -250,7 +284,7 @@ sub createVMDK {
 	my $convert;
 	my $status;
 	my $result;
-	$kiwi -> info ("Creating $format image");
+	$kiwi -> info ("Creating $format image...");
 	$target  =~ s/\.raw$/\.$format/;
 	$convert = "convert -f raw $source -O $format";
 	if (($vmwc{vmware_disktype}) && ($vmwc{vmware_disktype}=~/^scsi/)) {
@@ -280,7 +314,7 @@ sub createQCOW2 {
 	my $target = $source;
 	my $status;
 	my $result;
-	$kiwi -> info ("Creating $format image");
+	$kiwi -> info ("Creating $format image...");
 	$target  =~ s/\.raw$/\.$format/;
 	$status = qxx ("qemu-img -f raw $source -O $format $target 2>&1");
 	$result = $? >> 8;
@@ -302,7 +336,7 @@ sub createXENConfiguration {
 	my $kiwi   = $this->{kiwi};
 	my $xml    = $this->{xml};
 	my $xenref = $this->{xenref};
-	my %type   = %{$xml -> getImageTypeAndAttributes()};
+	my %type   = %{$this->{type}};
 	my $dest   = dirname  $this->{image};
 	my $base   = basename $this->{image};
 	my %xenconfig = %{$xenref};
