@@ -545,7 +545,7 @@ function OEMRepart {
 	#--------------------------------------
 	if [ -z "$DONT_PARTITION" ] && [ ! -z "$OEM_RECOVERY" ];then
 		Echo "Creating Recovery filesystem on $imageRecoveryDevice"
-		if ! mke2fs -T ext2 -q $imageRecoveryDevice 1>&2;then
+		if ! mke2fs -T ext2 -q -L recovery $imageRecoveryDevice 1>&2;then
 			systemException "Failed to create Recovery fs" "reboot"
 		fi
 	fi
