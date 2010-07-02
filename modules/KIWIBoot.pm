@@ -1753,6 +1753,10 @@ sub setupInstallCD {
 	my $iso = new KIWIIsoLinux (
 		$kiwi,$tmpdir,$name,undef,"checkmedia"
 	);
+	if (! defined $iso) {
+		$this -> cleanTmp ();
+		return undef;
+	}
 	my $tool= $iso -> getTool();
 	if ($bootloader =~ /(sys|ext)linux/) {
 		$iso -> createISOLinuxConfig ("/boot");
