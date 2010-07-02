@@ -26,6 +26,7 @@ Mon Jun 28 10:28:17 CEST 2010 - ms@suse.de
 - fixed repartition problem with new and old parted. The
   code has been changed in a way that it uses a sector
   based start value and a cylinder based end value
+- fixed this path evaluation (bnc #619482)
 
 -------------------------------------------------------------------
 Fri Jun 18 12:18:11 CEST 2010 - ms@suse.de
