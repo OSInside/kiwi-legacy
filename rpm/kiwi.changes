@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Mon Jun 28 10:28:17 CEST 2010 - ms@suse.de
 
+- v4.44
 - added volume label for recovery partition (bnc #618276)
 - Cleanup formats in kiwi:
   * create new KIWIImageFormat.pm module for the conversion
