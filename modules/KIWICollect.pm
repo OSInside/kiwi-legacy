@@ -620,7 +620,7 @@ sub mainTask
       $vname =~ s/-Media//;
       $vname =~ s/-Build// if length($vname) > ($volid_maxlen - 4);
       my $vid = substr($vname,0,($volid_maxlen));
-      if $this->{m_proddata}->getVar("MULTIPLE_MEDIA", "yes") eq "yes") {
+      if ($this->{m_proddata}->getVar("MULTIPLE_MEDIA", "yes") eq "yes") {
          $vid = sprintf( "%s.%03d", substr($vname,0,($volid_maxlen - 4)), $cd );
       };
 
