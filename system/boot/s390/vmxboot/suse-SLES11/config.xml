@@ -55,7 +55,7 @@
 		<file name="drivers/xen/*"/>
 	</drivers>
 	<repository type="yast2" status="replaceable">
-		<source path="/image/CDs/full-i386"/>
+		<source path="http://download.suse.de/install/SLP/SLES-11-SP1-GM/%arch/DVD1/"/>
 	</repository>
 	<repository type="rpm-dir" status="fixed">
 		<source path="/usr/share/kiwi/repo/suse-repo/suse-sle11-repo"/>
@@ -93,7 +93,7 @@
 		<package name="sysconfig"/>
 		<package name="sysfsutils"/>
 		<package name="util-linux"/>
-		<package name="zipl"/>
+		<package name="s390-tools"/>
 		<package name="fribidi"/>
 		<package name="make"/>
 		<package name="tar"/>
@@ -104,7 +104,6 @@
 		<package name="kexec-tools"/>
 		<package name="gettext-runtime"/>
 		<package name="parted"/>
-		<package name="syslinux"/>
 		<package name="fbiterm"/>
 	</packages>
 	<packages type="bootstrap">

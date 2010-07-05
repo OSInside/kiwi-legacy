@@ -68,7 +68,7 @@
 		<file name="drivers/xen/*"/>
 	</drivers>
 	<repository type="yast2" status="replaceable">
-		<source path="/image/CDs/full-i386"/>
+		<source path="http://download.suse.de/install/SLP/SLES-11-SP1-GM/%arch/DVD1/"/>
 	</repository>
 	<repository type="rpm-dir" status="fixed">
 		<source path="/usr/share/kiwi/repo/suse-repo/suse-sle11-repo"/>
@@ -96,7 +96,6 @@
 		<package name="atftp"/>
 		<package name="busybox"/>
 		<package name="parted"/>
-		<package name="adaptec-firmware"/>
 		<package name="dialog"/>
 		<package name="psmisc"/>
 		<package name="bind-libs"/>
@@ -112,7 +111,7 @@
 		<package name="sysconfig"/>
 		<package name="sysfsutils"/>
 		<package name="util-linux"/>
-		<package name="zipl"/>
+		<package name="s390-tools"/>
 		<package name="fribidi"/>
 		<package name="make"/>
 		<package name="eject"/>
@@ -126,7 +125,6 @@
 		<package name="gettext-runtime"/>
 		<package name="kexec-tools"/>
 		<package name="kpartx"/>
-		<package name="syslinux"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
@@ -137,7 +135,6 @@
 		<package name="openssl-certs"/>
 	</packages>
 	<packages type="delete">
-		<package name="syslinux"/>
 		<package name="cracklib-dict-small"/>
 		<package name="cracklib-dict-full"/>
 		<package name="PolicyKit"/>

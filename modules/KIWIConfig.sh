@@ -1459,6 +1459,8 @@ function suseStripKernel {
 				mv vmlinux-$VERSION.el5 vmlinuz
 			elif [ -f vmlinuz-$VERSION ];then
 				mv vmlinuz-$VERSION vmlinuz
+			elif [ -f image-$VERSION ];then
+				mv image-$VERSION vmlinuz
 			else
 				rm -f vmlinux
 				cp vmlinux-$VERSION vmlinux
