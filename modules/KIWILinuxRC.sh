@@ -2306,7 +2306,7 @@ function probeDevices {
 	#======================================
 	# Manual loading of modules
 	#--------------------------------------
-	for i in rd brd edd dm-mod xennet xenblk;do
+	for i in rd brd edd dm-mod xennet xenblk virtio_blk;do
 		modprobe $i &>/dev/null
 	done
 }
