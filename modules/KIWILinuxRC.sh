@@ -3286,7 +3286,15 @@ function kernelList {
 				initrd=initrd-${i##*/}
 			fi
 		done
-		if [ -z $kernel ];then
+		if [ -z "$kernel" ];then
+			for k in $prefix/boot/image-${i##*/}; do
+				if [ -f $k ];then
+					kernel=${k##*/}
+					initrd=initrd-${i##*/}
+				fi
+			done
+		fi
+		if [ -z "$kernel" ];then
 			continue
 		fi
 		kcount=$((kcount+1))
