@@ -1204,18 +1204,18 @@ function setupBootLoaderS390 {
 			if [ "$count" = "1" ];then
 				title_default=$(makeLabel "$zfix")
 			else
-				title_default=$(makeLabel "$kname [ $zfix ]")
+				title_default=$(makeLabel "$kname ( $zfix )")
 			fi
 		elif [ -z "$kiwi_oemtitle" ];then
-			title_default=$(makeLabel "$kname [ $zfix ]")
+			title_default=$(makeLabel "$kname ( $zfix )")
 		else
 			if [ "$count" = "1" ];then
-				title_default=$(makeLabel "$kiwi_oemtitle [ $zfix ]")
+				title_default=$(makeLabel "$kiwi_oemtitle ( $zfix )")
 			else
-				title_default=$(makeLabel "$kiwi_oemtitle-$kname [ $zfix ]")
+				title_default=$(makeLabel "$kiwi_oemtitle-$kname ( $zfix )")
 			fi
 		fi
-		title_failsafe=$(makeLabel "Failsafe -- $title")
+		title_failsafe=$(makeLabel "Failsafe -- $title_default")
 		echo "    $count = $title_default"  >> $conf
 		count=`expr $count + 1`
 		echo "    $count = $title_failsafe" >> $conf
@@ -1233,18 +1233,18 @@ function setupBootLoaderS390 {
 			if [ "$count" = "1" ];then
 				title_default=$(makeLabel "$zfix")
 			else
-				title_default=$(makeLabel "$kname [ $zfix ]")
+				title_default=$(makeLabel "$kname ( $zfix )")
 			fi
 		elif [ -z "$kiwi_oemtitle" ];then
-			title_default=$(makeLabel "$kname [ $zfix ]")
+			title_default=$(makeLabel "$kname ( $zfix )")
 		else
 			if [ "$count" = "1" ];then
-				title_default=$(makeLabel "$kiwi_oemtitle [ $zfix ]")
+				title_default=$(makeLabel "$kiwi_oemtitle ( $zfix )")
 			else
-				title_default=$(makeLabel "$kiwi_oemtitle-$kname [ $zfix ]")
+				title_default=$(makeLabel "$kiwi_oemtitle-$kname ( $zfix )")
 			fi
 		fi
-		title_failsafe=$(makeLabel "Failsafe -- $title")
+		title_failsafe=$(makeLabel "Failsafe -- $title_default")
 		#======================================
 		# create standard entry
 		#--------------------------------------
