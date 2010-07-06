@@ -1250,6 +1250,7 @@ function setupBootLoaderS390 {
 		#--------------------------------------
 		echo "[$title_default]"                  >> $conf
 		echo "target  = /boot/zipl"              >> $conf
+		echo "image   = /boot/$kernel            >> $conf
 		echo "ramdisk = /boot/$initrd,0x2000000" >> $conf
 		echo -n "parameters = \"root=$diskByID"  >> $conf
 		if [ ! -z "$imageDiskDevice" ];then
@@ -1269,6 +1270,7 @@ function setupBootLoaderS390 {
 		#--------------------------------------
 		echo "[$title_failsafe]"                 >> $conf
 		echo "target  = /boot/zipl"              >> $conf
+		echo "image   = /boot/$kernel            >> $conf
 		echo "ramdisk = /boot/$initrd,0x2000000" >> $conf
 		echo -n "parameters = \"root=$diskByID"  >> $conf
 		if [ ! -z "$imageDiskDevice" ];then
