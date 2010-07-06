@@ -2692,8 +2692,9 @@ function searchBIOSBootDevice {
 		if [ ! -b $curd ];then
 			continue
 		fi
-		mbrM=`dd if=$curd bs=1 count=4 skip=$((0x1b8))|hexdump -n4 -e '"0x%x"'`
-		if [ "$mbrM" = "$mbrI" ];then
+		mbrML=`dd if=$curd bs=1 count=4 skip=$((0x1b8))|hexdump -n4 -e '"0x%x"'`
+		mbrMB=`echo $mbrML | sed 's/^0x\(..\)\(..\)\(..\)\(..\)$/0x\4\3\2\1/'`
+		if [ "$mbrML" = "$mbrI" ] || [ "$mbrMB" = "$mbrI" ];then
 			ifix=1
 			matched=$curd
 			if [ "$curd" = "$bios" ];then
