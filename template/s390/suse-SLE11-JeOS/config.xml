@@ -24,7 +24,7 @@
 	</repository>
 	<packages type="image">
 		<opensusePattern name="base"/>
-		<opensuseProduct name="SLES"/>
+		<opensuseProduct name="SUSE_SLES"/>
 		<package name="ifplugd"/>
 		<package name="iputils"/>
 		<package name="vim"/>
