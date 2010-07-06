@@ -138,6 +138,7 @@ install:
 	# Install system image template descriptions
 	#--------------------------------------------
 	cp -a template/${arch}/* ${KIWIIMAGE} &>/dev/null || true
+	rm -f ${KIWIIMAGE}/README
 
 	#============================================
 	# Install kiwi repo
