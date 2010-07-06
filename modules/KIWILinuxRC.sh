@@ -1251,7 +1251,7 @@ function setupBootLoaderS390 {
 		echo "[$title_default]"                  >> $conf
 		echo "target  = /boot/zipl"              >> $conf
 		echo "ramdisk = /boot/$initrd,0x2000000" >> $conf
-		echo -n "parameters = root=$diskByID"    >> $conf
+		echo -n "parameters = \"root=$diskByID"  >> $conf
 		if [ ! -z "$imageDiskDevice" ];then
 			echo -n " disk=$(getDiskID $imageDiskDevice)"  >> $conf
 		fi
@@ -1263,23 +1263,23 @@ function setupBootLoaderS390 {
 		fi
 		echo -n " $KIWI_INITRD_PARAMS"  >> $conf
 		echo -n " $KIWI_KERNEL_OPTIONS" >> $conf
-		echo " loader=$loader"          >> $conf
+		echo " loader=$loader\""        >> $conf
 		#======================================
 		# create failsafe entry
 		#--------------------------------------
 		echo "[$title_failsafe]"                 >> $conf
 		echo "target  = /boot/zipl"              >> $conf
 		echo "ramdisk = /boot/$initrd,0x2000000" >> $conf
-		echo -n "parameters = root=$diskByID"    >> $conf
+		echo -n "parameters = \"root=$diskByID"  >> $conf
 		if [ ! -z "$imageDiskDevice" ];then
 			echo -n " disk=$(getDiskID $imageDiskDevice)"  >> $conf
 		fi
 		if [ "$haveLVM" = "yes" ];then
 			echo -n " VGROUP=$VGROUP" >> $conf
 		fi
-		echo -n " $KIWI_INITRD_PARAMS"      >> $conf
-		echo -n " $KIWI_KERNEL_OPTIONS"     >> $conf
-		echo " loader=$loader x11failsafe"  >> $conf
+		echo -n " $KIWI_INITRD_PARAMS"       >> $conf
+		echo -n " $KIWI_KERNEL_OPTIONS"      >> $conf
+		echo " loader=$loader x11failsafe\"" >> $conf
 		count=`expr $count + 1`
 	done
 	#======================================
