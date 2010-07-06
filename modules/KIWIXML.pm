@@ -308,7 +308,10 @@ sub new {
 			for (my $i=1;$i<= $nodes->size();$i++) {
 				my $node = $nodes -> get_node($i);
 				my $type = $node  -> getAttribute ("type");
-				if ($type eq "image") {
+				if (! $this -> requestedProfile ($node)) {
+					next;
+				}
+				if (($type eq "image") || ($type eq "bootstrap")) {
 					push (@plist,$node->getElementsByTagName ("package"));
 					push (@alist,$node->getElementsByTagName ("archive"));
 				}

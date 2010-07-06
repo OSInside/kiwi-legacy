@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Jul  6 11:12:29 CEST 2010 - ms@suse.de
+
+- don't exit with an error if 'zypper rm' can't find the package
+- check for profiles when searching for foreign packages also
+  search in type=image and type=bootstrap package sections
+
+-------------------------------------------------------------------
 Mon Jul  5 13:08:24 UTC 2010 - adrian@suse.de
 
 - simplify iso volume labels for inst-source medias
