@@ -44,7 +44,12 @@ udevSystemStart
 updateMTAB
 
 #======================================
-# 5) create initrd on diskful
+# 5) create framebuffer devices
+#--------------------------------------
+createFramebufferDevices
+
+#======================================
+# 6) create initrd on diskful
 #--------------------------------------
 if \
 	[ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ] && \
@@ -62,14 +67,41 @@ else
 fi
 
 #======================================
-# 6) Install boot loader if ok
+# 7) Check FAT requires on syslinux
+#--------------------------------------
+if [ "$loader" = "syslinux" ];then
+	# /.../
+	# if syslinux is used we need to make sure that the
+	# filename on the boot partition is correct 8+3
+	# ----
+	count=1
+	IFS="," ; for i in $KERNEL_LIST;do
+		if test -z "$i";then
+			continue
+		fi
+		kernel=`echo $i | cut -f1 -d:`
+		initrd=`echo $i | cut -f2 -d:`
+		mv /boot/$kernel /boot/linux.$count
+		mv /boot/$initrd /boot/initrd.$count
+		running=$(uname -r)
+		rlinux=vmlinuz-$running
+		rinitrd=initrd-$running
+		ln -s /boot/linux.$count  /boot/$rlinux
+		ln -s /boot/initrd.$count /boot/$rinitrd
+		count=`expr $count + 1`
+	done
+	IFS=$IFS_ORIG
+fi
+
+#======================================
+# 8) Install boot loader if ok
 #--------------------------------------
 if [ $bootLoaderOK = 1 ];then
 	installBootLoader
 fi
 
 #======================================
-# 7) copy recovery related files
+# 9) copy recovery related files
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ] && [ ! -z "$OEM_RECOVERY" ];then
 	IFS=$IFS_ORIG
@@ -104,7 +136,7 @@ if [ "$LOCAL_BOOT" = "no" ] && [ ! -z "$OEM_RECOVERY" ];then
 fi
 
 #======================================
-# 8) create /etc/ImagePackages
+# 10) create /etc/ImagePackages
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then
 	if [ -x /bin/rpm ];then
@@ -114,7 +146,7 @@ if [ "$LOCAL_BOOT" = "no" ];then
 fi
 
 #======================================
-# 9) kill udev
+# 11) kill udev
 #--------------------------------------
 udevSystemStop
 umountSystemFilesystems
