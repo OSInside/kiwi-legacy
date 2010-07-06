@@ -243,6 +243,8 @@ if [ "$LOCAL_BOOT" = "no" ];then
 		updateLVMBootDeviceFstab /config $imageBootDevice
 	elif [ "$haveClicFS" = "yes" ];then
 		updateClicBootDeviceFstab /config $imageBootDevice
+	elif [ "$loader" = "syslinux" ] || [ "$loader" = "extlinux" ];then
+		updateSyslinuxBootDeviceFstab /config $imageBootDevice
 	elif [ "$haveLuks" = "yes" ];then
 		updateLuksBootDeviceFstab /config $imageBootDevice
 	fi
@@ -257,6 +259,8 @@ if [ "$LOCAL_BOOT" = "no" ];then
 		bootid=1
 	fi
 	if \
+		[ "$loader" = "syslinux" ]  ||\
+		[ "$loader" = "extlinux" ]  ||\
 		[ "$haveClicFS" = "yes" ]   ||\
 		[ "$haveLuks" = "yes" ]
 	then
