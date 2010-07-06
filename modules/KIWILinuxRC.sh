@@ -590,8 +590,16 @@ function installBootLoaderRecovery {
 # installBootLoaderS390
 #--------------------------------------
 function installBootLoaderS390 {
-	# TODO
-	:
+	if [ -x /sbin/zipl ];then
+		Echo "Installing boot loader..."
+		zipl -c /etc/zipl.conf 1>&2
+		if [ ! $? = 0 ];then
+			Echo "Failed to install boot loader"
+		fi
+	else
+		Echo "Image doesn't have zipl installed"
+		Echo "Can't install boot loader"
+	fi
 }
 #======================================
 # installBootLoaderSyslinux
@@ -653,8 +661,9 @@ function installBootLoaderLilo {
 # installBootLoaderS390Recovery
 #--------------------------------------
 function installBootLoaderS390Recovery {
-	# TODO
-	:
+	systemException \
+		"*** zipl: recovery boot not implemented ***" \
+	"reboot"
 }
 #======================================
 # installBootLoaderSyslinuxRecovery
@@ -866,8 +875,9 @@ function setupBootLoaderRecovery {
 # setupBootLoaderS390Recovery
 #--------------------------------------
 function setupBootLoaderS390Recovery {
-	# TODO
-	:
+	systemException \
+		"*** zipl: recovery boot not implemented ***" \
+	"reboot"
 }
 #======================================
 # setupBootLoaderSyslinuxRecovery
@@ -1108,8 +1118,192 @@ function setupBootLoaderGrubRecovery {
 # setupBootLoaderS390
 #--------------------------------------
 function setupBootLoaderS390 {
-	# TODO
-	:
+	# /.../
+	# create /etc/zipl.conf used for the
+	# zipl bootloader
+	# ----
+	local mountPrefix=$1  # mount path of the image
+	local destsPrefix=$2  # base dir for the config files
+	local znum=$3         # boot partition ID
+	local rdev=$4         # root partition
+	local zfix=$5         # zipl title postfix
+	local swap=$6         # optional swap partition
+	local conf=$destsPrefix/etc/zipl.conf
+	local sysb=$destsPrefix/etc/sysconfig/bootloader
+	local kname=""
+	local kernel=""
+	local initrd=""
+	local title=""
+	#======================================
+	# check for device by ID
+	#--------------------------------------
+	local diskByID=`getDiskID $rdev`
+	local swapByID=`getDiskID $swap`
+	#======================================
+	# check for boot image .profile
+	#--------------------------------------
+	if [ -f /.profile ];then
+		importFile < /.profile
+	fi
+	#======================================
+	# check for bootloader displayname
+	#--------------------------------------
+	if [ -z "$kiwi_oemtitle" ] && [ ! -z "$kiwi_displayname" ];then
+		kiwi_oemtitle=$kiwi_displayname
+	fi
+	#======================================
+	# check for system image .profile
+	#--------------------------------------
+	if [ -f $mountPrefix/image/.profile ];then
+		importFile < $mountPrefix/image/.profile
+	fi
+	#======================================
+	# check for kernel options
+	#--------------------------------------
+	if [ ! -z "$kiwi_cmdline" ];then
+		KIWI_KERNEL_OPTIONS="$KIWI_KERNEL_OPTIONS $kiwi_cmdline"
+	fi
+	#======================================
+	# check for syslinux title postfix
+	#--------------------------------------
+	if [ -z "$zfix" ];then
+		zfix="unknown"
+	fi
+	#======================================
+	# check for boot TIMEOUT
+	#--------------------------------------
+	if [ -z "$KIWI_BOOT_TIMEOUT" ];then
+		KIWI_BOOT_TIMEOUT=100;
+	fi
+	#======================================
+	# create directory structure
+	#--------------------------------------
+	for dir in $conf $sysb;do
+		dir=`dirname $dir`; mkdir -p $dir
+	done
+	#======================================
+	# create zipl.conf file
+	#--------------------------------------
+	local count
+	local title_default
+	local title_failsafe
+	echo "[defaultboot]"                      > $conf
+	echo "defaultmenu = menu"                >> $conf
+	echo ":menu"                             >> $conf
+	echo "    default = 1"                   >> $conf
+	echo "    prompt = 1"                    >> $conf
+	echo "    target = /boot/zipl"           >> $conf
+	echo "    timeout = $KIWI_BOOT_TIMEOUT"  >> $conf
+	count=1
+	IFS="," ; for i in $KERNEL_LIST;do
+		if test -z "$i";then
+			continue
+		fi
+		kname=${KERNEL_NAME[$count]}
+		if ! echo $zfix | grep -E -q "OEM|USB|VMX|NET|unknown";then
+			if [ "$count" = "1" ];then
+				title_default=$(makeLabel "$zfix")
+			else
+				title_default=$(makeLabel "$kname [ $zfix ]")
+			fi
+		elif [ -z "$kiwi_oemtitle" ];then
+			title_default=$(makeLabel "$kname [ $zfix ]")
+		else
+			if [ "$count" = "1" ];then
+				title_default=$(makeLabel "$kiwi_oemtitle [ $zfix ]")
+			else
+				title_default=$(makeLabel "$kiwi_oemtitle-$kname [ $zfix ]")
+			fi
+		fi
+		title_failsafe=$(makeLabel "Failsafe -- $title")
+		echo "    $count = $title_default"  >> $conf
+		count=`expr $count + 1`
+		echo "    $count = $title_failsafe" >> $conf
+		count=`expr $count + 1`
+	done
+	count=1
+	IFS="," ; for i in $KERNEL_LIST;do
+		if test -z "$i";then
+			continue
+		fi
+		kernel=`echo $i | cut -f1 -d:`
+		initrd=`echo $i | cut -f2 -d:`
+		kname=${KERNEL_NAME[$count]}
+		if ! echo $zfix | grep -E -q "OEM|USB|VMX|NET|unknown";then
+			if [ "$count" = "1" ];then
+				title_default=$(makeLabel "$zfix")
+			else
+				title_default=$(makeLabel "$kname [ $zfix ]")
+			fi
+		elif [ -z "$kiwi_oemtitle" ];then
+			title_default=$(makeLabel "$kname [ $zfix ]")
+		else
+			if [ "$count" = "1" ];then
+				title_default=$(makeLabel "$kiwi_oemtitle [ $zfix ]")
+			else
+				title_default=$(makeLabel "$kiwi_oemtitle-$kname [ $zfix ]")
+			fi
+		fi
+		title_failsafe=$(makeLabel "Failsafe -- $title")
+		#======================================
+		# create standard entry
+		#--------------------------------------
+		echo "[$title_default]"                  >> $conf
+		echo "target  = /boot/zipl"              >> $conf
+		echo "ramdisk = /boot/$initrd,0x2000000" >> $conf
+		echo -n "parameters = root=$diskByID"    >> $conf
+		if [ ! -z "$imageDiskDevice" ];then
+			echo -n " disk=$(getDiskID $imageDiskDevice)"  >> $conf
+		fi
+		if [ ! -z "$swap" ];then
+			echo -n " resume=$swapByID" >> $conf
+		fi
+		if [ "$haveLVM" = "yes" ];then
+			echo -n " VGROUP=$VGROUP" >> $conf
+		fi
+		echo -n " $KIWI_INITRD_PARAMS"  >> $conf
+		echo -n " $KIWI_KERNEL_OPTIONS" >> $conf
+		echo " loader=$loader"          >> $conf
+		#======================================
+		# create failsafe entry
+		#--------------------------------------
+		echo "[$title_failsafe]"                 >> $conf
+		echo "target  = /boot/zipl"              >> $conf
+		echo "ramdisk = /boot/$initrd,0x2000000" >> $conf
+		echo -n "parameters = root=$diskByID"    >> $conf
+		if [ ! -z "$imageDiskDevice" ];then
+			echo -n " disk=$(getDiskID $imageDiskDevice)"  >> $conf
+		fi
+		if [ "$haveLVM" = "yes" ];then
+			echo -n " VGROUP=$VGROUP" >> $conf
+		fi
+		echo -n " $KIWI_INITRD_PARAMS"      >> $conf
+		echo -n " $KIWI_KERNEL_OPTIONS"     >> $conf
+		echo " loader=$loader x11failsafe"  >> $conf
+		count=`expr $count + 1`
+	done
+	#======================================
+	# create recovery entry
+	#--------------------------------------
+	if [ ! -z "$OEM_RECOVERY" ];then
+		systemException \
+			"*** zipl: recovery chain loading not implemented ***" \
+		"reboot"
+	fi
+	#======================================
+	# create sysconfig/bootloader
+	#--------------------------------------
+	echo "LOADER_TYPE=\"$loader\""                            > $sysb
+	echo "LOADER_LOCATION=\"mbr\""                           >> $sysb
+	echo -n "DEFAULT_APPEND=\"root=$diskByID splash=silent"  >> $sysb
+	if [ ! -z "$swap" ];then
+		echo -n " resume=$swapByID"                          >> $sysb
+	fi
+	echo -n " $KIWI_INITRD_PARAMS $KIWI_KERNEL_OPTIONS"      >> $sysb
+	echo " showopts\""                                       >> $sysb
+	echo -n "FAILSAFE_APPEND=\"root=$diskByID"               >> $sysb
+	echo -n " $KIWI_INITRD_PARAMS $KIWI_KERNEL_OPTIONS"      >> $sysb
+	echo -n " x11failsafe noresume\""                        >> $sysb
 }
 #======================================
 # setupBootLoaderSyslinux
