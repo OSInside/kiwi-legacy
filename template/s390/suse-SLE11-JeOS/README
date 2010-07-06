@@ -1,0 +1,10 @@
+Build instructions for local build
+==================================
+* create a SLES11 installation source below /path/to/SLE11/repo
+  tip: copy SLE11 DVD
+
+* call kiwi:
+  kiwi --build suse-SLE11-JeOS --ignore-repos \
+	   --add-repo /path/to/SLE11/repo --add-repotype yast2 \
+       --add-repo /usr/share/kiwi/repo/suse-repo/suse-sle11-repo/ --add-repotype rpm-dir \
+	   -d /tmp/myimage --type vmx

@@ -137,12 +137,12 @@ install:
 	#============================================
 	# Install system image template descriptions
 	#--------------------------------------------
-	cp -a template/* ${KIWIIMAGE}
+	cp -a template/${arch}/* ${KIWIIMAGE} &>/dev/null || true
 
 	#============================================
 	# Install kiwi repo
 	#--------------------------------------------
-	cp -a system/suse-repo ${KIWIREPO}
+	cp -a system/repo/${arch}/* ${KIWIREPO}
 
 modules/KIWISchema.rng: modules/KIWISchema.rnc
 	#============================================

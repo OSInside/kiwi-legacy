@@ -1,6 +1,8 @@
 -------------------------------------------------------------------
 Tue Jul  6 11:12:29 CEST 2010 - ms@suse.de
 
+- restructure source tree a bit. make templates and repos
+  architecture dependent because of the s390 implementations
 - don't exit with an error if 'zypper rm' can't find the package
 - check for profiles when searching for foreign packages also
   search in type=image and type=bootstrap package sections

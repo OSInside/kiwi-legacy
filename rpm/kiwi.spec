@@ -493,3 +493,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/kiwi/image/suse-SLE11-JeOS
 %{_datadir}/kiwi/image/rhel-05.4-JeOS
 %endif
+%ifarch s390 s390x
+%{_datadir}/kiwi/image/suse-SLE11-JeOS
+%endif

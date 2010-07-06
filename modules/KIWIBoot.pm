@@ -4134,6 +4134,7 @@ sub setupBootLoaderConfiguration {
 		# Create MBR id file for boot device check
 		#------------------------------------------
 		$kiwi -> info ("Saving disk label on disk: $this->{mbrid}...");
+		qxx ("mkdir -p $tmpdir/boot/grub");
 		if (! open (FD,">$tmpdir/boot/grub/mbrid")) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't create mbrid file: $!");
@@ -4146,7 +4147,95 @@ sub setupBootLoaderConfiguration {
 		#==========================================
 		# Create zipl.comf
 		#------------------------------------------
-		# TODO
+		my $ziplconfig = "zipl.conf";
+		$kiwi -> info ("Creating $ziplconfig config file...");
+		if ($isxen) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("*** zipl: Xen boot not supported ***");
+			$kiwi -> failed ();
+			return undef;
+		}
+		if (! -e "/boot/zipl") {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Can't find bootloader: /boot/zipl");
+			$kiwi -> failed ();
+			return undef;
+		}
+		if (! open (FD,">$tmpdir/boot/$ziplconfig")) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create $ziplconfig: $!");
+			$kiwi -> failed ();
+			return undef;
+		}
+		#==========================================
+		# General zipl setup
+		#------------------------------------------
+		my $title_standard;
+		my $title_failsafe;
+		if ($type =~ /^KIWI (CD|USB)/) {
+			$title_standard = $this -> makeLabel (
+				"Install/Restore $label"
+			);
+			$title_failsafe = $this -> makeLabel (
+				"Failsafe -- Install/Restore $label"
+			);
+		} else {
+			$title_standard = $this -> makeLabel (
+				"$label ( $type )"
+			);
+			$title_failsafe = $this -> makeLabel (
+				"Failsafe -- $label ( $type )"
+			);
+		}
+		print FD "[defaultboot]"."\n";
+		print FD "defaultmenu = menu"."\n\n";
+		print FD ":menu"."\n";
+		print FD "\t"."default = 1"."\n";
+		print FD "\t"."prompt = 1"."\n";
+		print FD "\t"."target = /boot/zipl"."\n";
+		print FD "\t"."timeout = 200"."\n";
+		print FD "\t"."1 = $title_standard"."\n";
+		print FD "\t"."2 = $title_failsafe"."\n\n";
+		#==========================================
+		# Standard boot
+		#------------------------------------------
+		print FD "[$title_standard]"."\n";
+		if ($type =~ /^KIWI CD/) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("*** zipl: CD boot not supported ***");
+			$kiwi -> failed ();
+			return undef;
+		} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
+			print FD "\t"."image = /boot/linux.vmx"."\n";
+			print FD "\t"."target = /boot/zipl"."\n";
+			print FD "\t"."ramdisk = /boot/initrd.vmx,0x2000000"."\n";
+		} else {
+			print FD "\t"."image = /boot/linux"."\n";
+			print FD "\t"."target = /boot/zipl"."\n";
+			print FD "\t"."ramdisk = /boot/initrd,0x2000000"."\n";
+		}
+		print FD "\t"."parameters = loader=$bloader $cmdline"."\n";
+		#==========================================
+		# Failsafe boot
+		#------------------------------------------
+		print FD "[$title_failsafe]"."\n";
+		if ($type =~ /^KIWI CD/) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("*** zipl: CD boot not supported ***");
+			$kiwi -> failed ();
+			return undef;
+		} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
+			print FD "\t"."image = /boot/linux.vmx"."\n";
+			print FD "\t"."target = /boot/zipl"."\n";
+			print FD "\t"."ramdisk = /boot/initrd.vmx,0x2000000"."\n";
+		} else {
+			print FD "\t"."image = /boot/linux"."\n";
+			print FD "\t"."target = /boot/zipl"."\n";
+			print FD "\t"."ramdisk = /boot/initrd,0x2000000"."\n";
+		}
+		print FD "\t"."parameters = x11failsafe loader=$bloader $cmdline"."\n";
+		close FD;
+		$kiwi -> done();
 	}
 	#==========================================
 	# more boot managers to come...
@@ -4349,8 +4438,11 @@ sub installBootLoader {
 	# Zipl
 	#------------------------------------------
 	if ($loader eq "zipl") {
-		$kiwi -> info ("Installing zipl on device: $diskname");
 		# TODO
+		$kiwi -> info ("Installing zipl on device: $diskname");
+		$kiwi -> skipped();
+		$kiwi -> info ("*** not implemented ***");
+		$kiwi -> skipped();
 	}
 	#==========================================
 	# more boot managers to come...
