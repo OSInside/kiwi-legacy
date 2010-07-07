@@ -362,12 +362,17 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_datadir}/kiwi
 %dir %{_datadir}/kiwi/image
 %dir /var/cache/kiwi
+%ifarch %ix86 x86_64
 %exclude %{_datadir}/kiwi/image/suse-11.3-JeOS
 %exclude %{_datadir}/kiwi/image/suse-11.2-JeOS
 %exclude %{_datadir}/kiwi/image/suse-11.1-JeOS
 %exclude %{_datadir}/kiwi/image/suse-SLE10-JeOS
 %exclude %{_datadir}/kiwi/image/suse-SLE11-JeOS
 %exclude %{_datadir}/kiwi/image/rhel-05.4-JeOS
+%endif
+%ifarch s390 s390x
+%exclude %{_datadir}/kiwi/image/suse-SLE11-JeOS
+%endif
 %{_datadir}/kiwi/.revision
 %{_datadir}/kiwi/modules
 %{_datadir}/kiwi/locale
