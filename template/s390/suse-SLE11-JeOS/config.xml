@@ -30,6 +30,7 @@
 		<package name="iputils"/>
 		<package name="vim"/>
 		<package name="s390-tools"/>
+		<package name="syslog-ng"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>

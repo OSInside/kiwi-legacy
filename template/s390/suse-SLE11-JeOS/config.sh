@@ -14,9 +14,9 @@ echo "Configure image: [$kiwi_iname]..."
 # Activate services
 #--------------------------------------
 suseActivateDefaultServices
-suseRemoveService sshd
 suseRemoveService gpm
 suseRemoveService nfs
+suseRemoveService boot.cpi
 
 #======================================
 # Setup baseproduct link
