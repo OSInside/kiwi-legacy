@@ -4455,6 +4455,18 @@ sub installBootLoader {
 			return undef;
 		}
 		#==========================================
+		# loop mount disk image file
+		#------------------------------------------
+		$status = qxx ("/sbin/losetup -s -f $diskname 2>&1"); chomp $status;
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Can't loop mount image file: $status");
+			$kiwi -> failed ();
+			return undef;
+		}
+		my $loop = $status;
+		#==========================================
 		# rewrite zipl.conf with additional params
 		#------------------------------------------
 		my $config = "$tmpdir/boot/zipl.conf";
@@ -4474,7 +4486,7 @@ sub installBootLoader {
 		foreach my $line (@data) {
 			print FD $line;
 			if ($line =~ /^:menu/) {
-				print FD "\t"."targetbase = $diskname"."\n";
+				print FD "\t"."targetbase = $loop"."\n";
 				print FD "\t"."targettype = SCSI"."\n";
 				print FD "\t"."targetblocksize = 512"."\n";
 				print FD "\t"."targetoffset = $geometry[1]"."\n";
@@ -4490,8 +4502,10 @@ sub installBootLoader {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't install zipl on $diskname: $status");
 			$kiwi -> failed ();
+			qxx ("losetup -d $loop 2>&1");
 			return undef;
 		}
+		qxx ("losetup -d $loop 2>&1");
 		$kiwi -> done();
 	}
 	#==========================================
