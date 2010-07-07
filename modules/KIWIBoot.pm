@@ -4483,8 +4483,8 @@ sub installBootLoader {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Can't find loop map: $bootdev");
 			$kiwi -> failed ();
-			qxx ("losetup -d $loop 2>&1");
 			qxx ("kpartx  -d $loop 2>&1");
+			qxx ("losetup -d $loop 2>&1");
 			return undef;
 		}
 		$status = qxx ("mount $bootdev /mnt 2>&1");
@@ -4493,8 +4493,8 @@ sub installBootLoader {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Can't mount boot partition: $status");
 			$kiwi -> failed ();
-			qxx ("losetup -d $loop 2>&1");
 			qxx ("kpartx  -d $loop 2>&1");
+			qxx ("losetup -d $loop 2>&1");
 			return undef;
 		}
 		my $mount = "/mnt";
@@ -4507,8 +4507,8 @@ sub installBootLoader {
 			$kiwi -> error  ("Can't open config file for reading: $!");
 			$kiwi -> failed ();
 			qxx ("umount $mount 2>&1");
-			qxx ("losetup -d $loop 2>&1");
 			qxx ("kpartx  -d $loop 2>&1");
+			qxx ("losetup -d $loop 2>&1");
 			return undef;
 		}
 		my @data = <FD>; close FD;
@@ -4517,8 +4517,8 @@ sub installBootLoader {
 			$kiwi -> error  ("Can't open config file for writing: $!");
 			$kiwi -> failed ();
 			qxx ("umount $mount 2>&1");
-			qxx ("losetup -d $loop 2>&1");
 			qxx ("kpartx  -d $loop 2>&1");
+			qxx ("losetup -d $loop 2>&1");
 			return undef;
 		}
 		foreach my $line (@data) {
@@ -4541,13 +4541,13 @@ sub installBootLoader {
 			$kiwi -> error  ("Couldn't install zipl on $diskname: $status");
 			$kiwi -> failed ();
 			qxx ("umount $mount 2>&1");
-			qxx ("losetup -d $loop 2>&1");
 			qxx ("kpartx  -d $loop 2>&1");
+			qxx ("losetup -d $loop 2>&1");
 			return undef;
 		}
 		qxx ("umount $mount 2>&1");
-		qxx ("losetup -d $loop 2>&1");
 		qxx ("kpartx  -d $loop 2>&1");
+		qxx ("losetup -d $loop 2>&1");
 		$kiwi -> done();
 	}
 	#==========================================
