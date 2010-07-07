@@ -152,7 +152,9 @@ function closeKernelConsole {
 	# /.../
 	# close the kernel console, set level to 1
 	# ----
-	klogconsole -l 1
+	if [ -x /usr/sbin/klogconsole ];then
+		klogconsole -l 1
+	fi
 }
 #======================================
 # openKernelConsole
@@ -164,6 +166,9 @@ function openKernelConsole {
 	# but it isn't really. If DEBUG is set the logging remains on
 	# the first console
 	# ----
+	if [ ! -x /usr/sbin/klogconsole ];then
+		return
+	fi
 	if test "$DEBUG" = 0;then
 		Echo "Kernel logging enabled on: /dev/tty$KLOG_CONSOLE"
 		setctsid /dev/tty$KLOG_CONSOLE \
@@ -178,6 +183,9 @@ function reopenKernelConsole {
 	# reopen kernel console to be able to see kernel messages
 	# while the system is booting
 	# ----
+	if [ ! -x /usr/sbin/klogconsole ];then
+		return
+	fi
 	Echo "Kernel logging enabled on: /dev/tty$KLOG_DEFAULT"
 	klogconsole -l 7 -r$KLOG_DEFAULT
 }
@@ -4012,8 +4020,10 @@ function cleanDirectory {
 #--------------------------------------
 function cleanInitrd {
 	cp /usr/bin/chroot /bin
-	cp /usr/sbin/klogconsole /bin
 	cp /sbin/halt /bin/reboot
+	if [ -x /usr/sbin/klogconsole ];then
+		cp /usr/sbin/klogconsole /bin
+	fi
 	for dir in /*;do
 		case "$dir" in
 			"/lib")   continue ;;
@@ -5740,7 +5750,9 @@ function initialize {
 	#======================================
 	# Prevent blank screen
 	#--------------------------------------
-	setterm -powersave off -blank 0
+	if [ -x /usr/bin/setterm ];then
+		setterm -powersave off -blank 0
+	fi
 	#======================================
 	# Start boot timer (first stage)
 	#--------------------------------------
