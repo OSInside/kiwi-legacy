@@ -4438,11 +4438,57 @@ sub installBootLoader {
 	# Zipl
 	#------------------------------------------
 	if ($loader eq "zipl") {
-		# TODO
 		$kiwi -> info ("Installing zipl on device: $diskname");
-		$kiwi -> skipped();
-		$kiwi -> info ("*** not implemented ***");
-		$kiwi -> skipped();
+		#==========================================
+		# detect disk geometry of disk image file
+		#------------------------------------------
+		my @geometry = $this -> diskGeometry ($diskname);
+		if (! @geometry) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Failed to detect disk geometry");
+			$kiwi -> failed ();
+			return undef;
+		}
+		#==========================================
+		# rewrite zipl.conf with additional params
+		#------------------------------------------
+		my $config = "$tmpdir/boot/zipl.conf";
+		if (! open (FD,$config)) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Can't open config file for reading: $!");
+			$kiwi -> failed ();
+			return undef;
+		}
+		my @data = <FD>; close FD;
+		if (! open (FD,">$config")) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Can't open config file for writing: $!");
+			$kiwi -> failed ();
+			return undef;
+		}
+		foreach my $line (@data) {
+			print FD $line;
+			if ($line =~ /^menu:/) {
+				print FD "\t"."targetbase = $diskname"."\n";
+				print FD "\t"."targettype = SCSI"."\n";
+				print FD "\t"."targetgeometry = $geometry[0]"."\n";
+				print FD "\t"."targetblocksize = 512"."\n";
+				print FD "\t"."targetoffset = $geometry[1]"."\n";
+			}
+		}
+		close FD;
+		#==========================================
+		# call zipl...
+		#------------------------------------------
+		$status = qxx ("zipl -c $config 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't install zipl on $diskname: $status");
+			$kiwi -> failed ();
+			return undef;
+		}
+		$kiwi -> done();
 	}
 	#==========================================
 	# more boot managers to come...
@@ -5322,6 +5368,40 @@ sub addBootNext {
 	close $bn;
 
 	return $this;
+}
+
+#==========================================
+# diskGeometry
+#------------------------------------------
+sub diskGeometry {
+	# ...
+	# find disk geometry: CYLINDERS,HEADS,SECTORS and
+	# also the start sector of the boot partition which
+	# is in kiwi always the last partition in the table
+	# ---
+	my $this = shift;
+	my $disk = shift;
+	my $geometry;
+	my $bootsector;
+	my $bios  = qx (parted $disk unit cyl print | grep BIOS 2>&1);
+	my @table = qx (parted -m $disk unit s print 2>&1);
+	if ($bios =~ /geometry: (.*?)\./) {
+		$geometry = $1;
+	} else {
+		return undef;
+	}
+	chomp @table;
+	foreach my $entry (@table) {
+		if ($entry =~ /^[1-4]:/) {
+			my @items = split (/:/,$entry);
+			$bootsector = $items[1];
+			chop $bootsector;
+		}
+	}
+	if (! $bootsector) {
+		return undef;
+	}
+	return ($geometry,$bootsector);
 }
 
 1; 
