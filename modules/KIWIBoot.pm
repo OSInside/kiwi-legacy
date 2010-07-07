@@ -4138,6 +4138,7 @@ sub setupBootLoaderConfiguration {
 		#------------------------------------------
 		$kiwi -> info ("Saving disk label on disk: $this->{mbrid}...");
 		qxx ("mkdir -p $tmpdir/boot/grub");
+		qxx ("mkdir -p $tmpdir/boot/zipl");
 		if (! open (FD,">$tmpdir/boot/grub/mbrid")) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't create mbrid file: $!");
@@ -4195,8 +4196,8 @@ sub setupBootLoaderConfiguration {
 		print FD "defaultmenu = menu"."\n\n";
 		print FD ":menu"."\n";
 		print FD "\t"."default = 1"."\n";
-		print FD "\t"."prompt = 1"."\n";
-		print FD "\t"."target = /boot/zipl"."\n";
+		print FD "\t"."prompt  = 1"."\n";
+		print FD "\t"."target  = $tmpdir/boot/zipl"."\n";
 		print FD "\t"."timeout = 200"."\n";
 		print FD "\t"."1 = $title_standard"."\n";
 		print FD "\t"."2 = $title_failsafe"."\n\n";
@@ -4210,12 +4211,12 @@ sub setupBootLoaderConfiguration {
 			$kiwi -> failed ();
 			return undef;
 		} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
-			print FD "\t"."image = $tmpdir/boot/linux.vmx"."\n";
-			print FD "\t"."target = /boot/zipl"."\n";
+			print FD "\t"."image   = $tmpdir/boot/linux.vmx"."\n";
+			print FD "\t"."target  = $tmpdir/boot/zipl"."\n";
 			print FD "\t"."ramdisk = $tmpdir/boot/initrd.vmx,0x2000000"."\n";
 		} else {
-			print FD "\t"."image = $tmpdir/boot/linux"."\n";
-			print FD "\t"."target = /boot/zipl"."\n";
+			print FD "\t"."image   = $tmpdir/boot/linux"."\n";
+			print FD "\t"."target  = $tmpdir/boot/zipl"."\n";
 			print FD "\t"."ramdisk = $tmpdir/boot/initrd,0x2000000"."\n";
 		}
 		print FD "\t"."parameters = \"loader=$bloader $cmdline\""."\n";
@@ -4229,12 +4230,12 @@ sub setupBootLoaderConfiguration {
 			$kiwi -> failed ();
 			return undef;
 		} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
-			print FD "\t"."image = $tmpdir/boot/linux.vmx"."\n";
-			print FD "\t"."target = /boot/zipl"."\n";
+			print FD "\t"."image   = $tmpdir/boot/linux.vmx"."\n";
+			print FD "\t"."target  = $tmpdir/boot/zipl"."\n";
 			print FD "\t"."ramdisk = $tmpdir/boot/initrd.vmx,0x2000000"."\n";
 		} else {
-			print FD "\t"."image = $tmpdir/boot/linux"."\n";
-			print FD "\t"."target = /boot/zipl"."\n";
+			print FD "\t"."image   = $tmpdir/boot/linux"."\n";
+			print FD "\t"."target  = $tmpdir/boot/zipl"."\n";
 			print FD "\t"."ramdisk = $tmpdir/boot/initrd,0x2000000"."\n";
 		}
 		print FD "\t"."parameters = \"x11failsafe loader=$bloader";
