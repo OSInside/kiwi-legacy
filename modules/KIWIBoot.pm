@@ -1422,7 +1422,8 @@ sub setupBootStick {
 	# Install boot loader on USB stick
 	#------------------------------------------
 	if (! $this -> installBootLoader ($bootloader, $stick, \%deviceMap)) {
-		$this -> cleanTmp ();
+		$this -> cleanLoop ();
+		return undef;
 	}
 	#==========================================
 	# cleanup temp directory
@@ -2226,8 +2227,9 @@ sub setupInstallStick {
 	# Install boot loader on virtual disk
 	#------------------------------------------
 	if (! $this -> installBootLoader ($bootloader, $diskname, \%deviceMap)) {
+		$this -> cleanLoopMaps();
 		$this -> cleanLoop ();
-		$this -> cleanTmp();
+		return undef;
 	}
 	$this -> cleanLoopMaps();
 	$this -> cleanLoop();
@@ -3067,6 +3069,7 @@ sub setupBootDisk {
 	#------------------------------------------
 	if (! $this -> installBootLoader ($bootloader, $diskname, \%deviceMap)) {
 		$this -> cleanLoop ();
+		return undef;
 	}
 	#==========================================
 	# cleanup temp directory
