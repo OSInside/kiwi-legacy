@@ -4197,7 +4197,7 @@ sub setupBootLoaderConfiguration {
 		print FD ":menu"."\n";
 		print FD "\t"."default = 1"."\n";
 		print FD "\t"."prompt  = 1"."\n";
-		print FD "\t"."target  = $tmpdir/boot/zipl"."\n";
+		print FD "\t"."target  = boot/zipl"."\n";
 		print FD "\t"."timeout = 200"."\n";
 		print FD "\t"."1 = $title_standard"."\n";
 		print FD "\t"."2 = $title_failsafe"."\n\n";
@@ -4211,13 +4211,13 @@ sub setupBootLoaderConfiguration {
 			$kiwi -> failed ();
 			return undef;
 		} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
-			print FD "\t"."image   = $tmpdir/boot/linux.vmx"."\n";
-			print FD "\t"."target  = $tmpdir/boot/zipl"."\n";
-			print FD "\t"."ramdisk = $tmpdir/boot/initrd.vmx,0x2000000"."\n";
+			print FD "\t"."image   = boot/linux.vmx"."\n";
+			print FD "\t"."target  = boot/zipl"."\n";
+			print FD "\t"."ramdisk = boot/initrd.vmx,0x2000000"."\n";
 		} else {
-			print FD "\t"."image   = $tmpdir/boot/linux"."\n";
-			print FD "\t"."target  = $tmpdir/boot/zipl"."\n";
-			print FD "\t"."ramdisk = $tmpdir/boot/initrd,0x2000000"."\n";
+			print FD "\t"."image   = boot/linux"."\n";
+			print FD "\t"."target  = boot/zipl"."\n";
+			print FD "\t"."ramdisk = boot/initrd,0x2000000"."\n";
 		}
 		print FD "\t"."parameters = \"loader=$bloader $cmdline\""."\n";
 		#==========================================
@@ -4230,13 +4230,13 @@ sub setupBootLoaderConfiguration {
 			$kiwi -> failed ();
 			return undef;
 		} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
-			print FD "\t"."image   = $tmpdir/boot/linux.vmx"."\n";
-			print FD "\t"."target  = $tmpdir/boot/zipl"."\n";
-			print FD "\t"."ramdisk = $tmpdir/boot/initrd.vmx,0x2000000"."\n";
+			print FD "\t"."image   = boot/linux.vmx"."\n";
+			print FD "\t"."target  = boot/zipl"."\n";
+			print FD "\t"."ramdisk = boot/initrd.vmx,0x2000000"."\n";
 		} else {
-			print FD "\t"."image   = $tmpdir/boot/linux"."\n";
-			print FD "\t"."target  = $tmpdir/boot/zipl"."\n";
-			print FD "\t"."ramdisk = $tmpdir/boot/initrd,0x2000000"."\n";
+			print FD "\t"."image   = boot/linux"."\n";
+			print FD "\t"."target  = boot/zipl"."\n";
+			print FD "\t"."ramdisk = boot/initrd,0x2000000"."\n";
 		}
 		print FD "\t"."parameters = \"x11failsafe loader=$bloader";
 		print FD " $cmdline\""."\n";
@@ -4467,14 +4467,48 @@ sub installBootLoader {
 			return undef;
 		}
 		my $loop = $status;
+		$status = qxx ("/sbin/kpartx -a $loop 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Can't map loop mounted image file: $status");
+			$kiwi -> failed ();
+			qxx ("losetup -d $loop 2>&1");
+			return undef;
+		}
+		my $bootdev= $loop;
+		$bootdev =~ s/\/dev\///;
+		$bootdev = "/dev/mapper/".$bootdev."p".$geometry[2];
+		if (! -e $bootdev) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Can't find loop map: $bootdev");
+			$kiwi -> failed ();
+			qxx ("losetup -d $loop 2>&1");
+			qxx ("kpartx  -d $loop 2>&1");
+			return undef;
+		}
+		$status = qxx ("mount $bootdev /mnt 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Can't mount boot partition: $status");
+			$kiwi -> failed ();
+			qxx ("losetup -d $loop 2>&1");
+			qxx ("kpartx  -d $loop 2>&1");
+			return undef;
+		}
+		my $mount = "/mnt";
 		#==========================================
 		# rewrite zipl.conf with additional params
 		#------------------------------------------
-		my $config = "$tmpdir/boot/zipl.conf";
+		my $config = "$mount/boot/zipl.conf";
 		if (! open (FD,$config)) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Can't open config file for reading: $!");
 			$kiwi -> failed ();
+			qxx ("umount $mount 2>&1");
+			qxx ("losetup -d $loop 2>&1");
+			qxx ("kpartx  -d $loop 2>&1");
 			return undef;
 		}
 		my @data = <FD>; close FD;
@@ -4482,6 +4516,9 @@ sub installBootLoader {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Can't open config file for writing: $!");
 			$kiwi -> failed ();
+			qxx ("umount $mount 2>&1");
+			qxx ("losetup -d $loop 2>&1");
+			qxx ("kpartx  -d $loop 2>&1");
 			return undef;
 		}
 		foreach my $line (@data) {
@@ -4497,16 +4534,20 @@ sub installBootLoader {
 		#==========================================
 		# call zipl...
 		#------------------------------------------
-		$status = qxx ("zipl -c $config 2>&1");
+		$status = qxx ("cd $mount && zipl -c $config 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't install zipl on $diskname: $status");
 			$kiwi -> failed ();
+			qxx ("umount $mount 2>&1");
 			qxx ("losetup -d $loop 2>&1");
+			qxx ("kpartx  -d $loop 2>&1");
 			return undef;
 		}
+		qxx ("umount $mount 2>&1");
 		qxx ("losetup -d $loop 2>&1");
+		qxx ("kpartx  -d $loop 2>&1");
 		$kiwi -> done();
 	}
 	#==========================================
@@ -5400,6 +5441,7 @@ sub diskGeometry {
 	# ---
 	my $this = shift;
 	my $disk = shift;
+	my $bootid = 0;
 	my $geometry;
 	my $bootsector;
 	my $bios  = qx (parted $disk unit cyl print | grep BIOS 2>&1);
@@ -5415,12 +5457,13 @@ sub diskGeometry {
 			my @items = split (/:/,$entry);
 			$bootsector = $items[1];
 			chop $bootsector;
+			$bootid++;
 		}
 	}
 	if (! $bootsector) {
 		return undef;
 	}
-	return ($geometry,$bootsector);
+	return ($geometry,$bootsector,$bootid);
 }
 
 1; 
