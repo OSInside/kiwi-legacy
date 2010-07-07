@@ -4148,8 +4148,9 @@ sub setupBootLoaderConfiguration {
 		close FD;
 		$kiwi -> done();
 		#==========================================
-		# Create zipl.comf
+		# Create zipl.conf
 		#------------------------------------------
+		$cmdline =~ s/\n//g;
 		my $ziplconfig = "zipl.conf";
 		$kiwi -> info ("Creating $ziplconfig config file...");
 		if ($isxen) {
@@ -4209,13 +4210,13 @@ sub setupBootLoaderConfiguration {
 			$kiwi -> failed ();
 			return undef;
 		} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
-			print FD "\t"."image = boot/linux.vmx"."\n";
+			print FD "\t"."image = $tmpdir/boot/linux.vmx"."\n";
 			print FD "\t"."target = /boot/zipl"."\n";
-			print FD "\t"."ramdisk = boot/initrd.vmx,0x2000000"."\n";
+			print FD "\t"."ramdisk = $tmpdir/boot/initrd.vmx,0x2000000"."\n";
 		} else {
-			print FD "\t"."image = boot/linux"."\n";
+			print FD "\t"."image = $tmpdir/boot/linux"."\n";
 			print FD "\t"."target = /boot/zipl"."\n";
-			print FD "\t"."ramdisk = boot/initrd,0x2000000"."\n";
+			print FD "\t"."ramdisk = $tmpdir/boot/initrd,0x2000000"."\n";
 		}
 		print FD "\t"."parameters = \"loader=$bloader $cmdline\""."\n";
 		#==========================================
@@ -4228,13 +4229,13 @@ sub setupBootLoaderConfiguration {
 			$kiwi -> failed ();
 			return undef;
 		} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
-			print FD "\t"."image = boot/linux.vmx"."\n";
+			print FD "\t"."image = $tmpdir/boot/linux.vmx"."\n";
 			print FD "\t"."target = /boot/zipl"."\n";
-			print FD "\t"."ramdisk = boot/initrd.vmx,0x2000000"."\n";
+			print FD "\t"."ramdisk = $tmpdir/boot/initrd.vmx,0x2000000"."\n";
 		} else {
-			print FD "\t"."image = boot/linux"."\n";
+			print FD "\t"."image = $tmpdir/boot/linux"."\n";
 			print FD "\t"."target = /boot/zipl"."\n";
-			print FD "\t"."ramdisk = boot/initrd,0x2000000"."\n";
+			print FD "\t"."ramdisk = $tmpdir/boot/initrd,0x2000000"."\n";
 		}
 		print FD "\t"."parameters = \"x11failsafe loader=$bloader";
 		print FD " $cmdline\""."\n";
@@ -4475,7 +4476,6 @@ sub installBootLoader {
 			if ($line =~ /^:menu/) {
 				print FD "\t"."targetbase = $diskname"."\n";
 				print FD "\t"."targettype = SCSI"."\n";
-				print FD "\t"."targetgeometry = $geometry[0]"."\n";
 				print FD "\t"."targetblocksize = 512"."\n";
 				print FD "\t"."targetoffset = $geometry[1]"."\n";
 			}
