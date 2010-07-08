@@ -659,6 +659,68 @@ function OEMInstall {
 		dhcpcd -p -k $PXE_IFACE
 	fi
 	#======================================
+	# create recovery archive if requested
+	#--------------------------------------
+	if [ ! -z "$OEM_RECOVERY_INPLACE" ];then
+		setupInitialDeviceNames
+		if ! mountSystem $imageRootDevice;then
+			systemException "Failed to mount root filesystem" "reboot"
+		fi
+		if [ ! -f /mnt/recovery.partition.size ];then
+			systemException "Can't find recovery part size info" "reboot"
+		fi
+		recoMByte=$(cat /mnt/recovery.partition.size)
+		recoBytes=$((recoMByte - 100))
+		recoBytes=$((recoBytes * 1048576))
+		haveMByte=$(
+			df -B1M $imageRootDevice | tail -n 1 | column -t |\
+			sed -e s@"  "@:@g | cut -f 4 -d:
+		)
+		if [ "$haveMByte" -gt "$recoMByte" ];then
+			pushd /mnt &>/dev/null
+			Echo "Creating recovery root tarball..."
+			test -e /progress || mkfifo /progress
+			test -e /usr/bin/mst || cp /usr/bin/tail /usr/bin/mst
+			(
+				touch recovery.tar.gz
+				tar --numeric-owner -czpf recovery.tar.gz . \
+					--exclude "./dev" \
+					--exclude "./proc" \
+					--exclude "./sys" \
+					--exclude "./recovery.*" &
+				rPID=$!
+				while kill -0 $rPID &>/dev/null;do
+					rReady=$(stat --format="%s" ./recovery.tar.gz)
+					if [ $rReady -eq 0 ];then
+						continue
+					fi
+					rPDone=$(echo "scale=4; $recoBytes / $rReady" | bc)
+					rPDone=$(echo "scale=0; 100 / $rPDone" | bc)
+					getText "archiving: %1..." "$rPDone%" > /progress
+					sleep 1
+				done
+				dPID=$(pidof mst)
+				kill $dPID
+			)&
+			echo "mst -f /progress | dialog \
+				--backtitle \"$TEXT_INSTALLTITLE\" \
+				--progressbox 3 50
+			" > /tmp/progress.sh
+			if [ -e /dev/fb0 ];then
+				fbiterm -m $UFONT -- bash -e /tmp/progress.sh
+			else
+				bash -e /tmp/progress.sh
+			fi
+			popd &>/dev/null
+			clear
+		else
+			Echo "Not enough space left to create recovery archive"
+			Echo "=> Warning: Postponed after repartitioning is done"
+			Echo "=> Warning: This moves the archive creation to first boot"
+		fi
+		umountSystem
+	fi
+	#======================================
 	# Check for halt request
 	#--------------------------------------
 	if [ ! -z "$OEM_DUMPHALT" ];then

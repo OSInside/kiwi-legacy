@@ -1,8 +1,12 @@
 -------------------------------------------------------------------
 Tue Jul  6 11:12:29 CEST 2010 - ms@suse.de
 
+- moved in-place recovery file creation into suse-dump
+  directly after the install verification (bnc #620777)
 - restructure source tree a bit. make templates and repos
   architecture dependent because of the s390 implementations
+  kiwi now supports the creation of vmx and oem images for
+  s390 and the KVM virtual machine target
 - don't exit with an error if 'zypper rm' can't find the package
 - check for profiles when searching for foreign packages also
   search in type=image and type=bootstrap package sections

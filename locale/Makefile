@@ -11,8 +11,9 @@ all:
 	./.locale
 	for i in `ls -1 .`; do \
 		if [ -d ./$$i ];then \
-		if [ ! "$$i" = "kiwi-help" ] && [ ! "$$i" == "kiwi-template" ];then \
-		( cd ./$$i/${LC}  && msgfmt -o kiwi.mo kiwi.po ) ;\
+			if [ ! "$$i" = "kiwi-help" ] && [ ! "$$i" == "kiwi-template" ];then \
+				( cd ./$$i/${LC}  && msgfmt -o kiwi.mo kiwi.po ) ;\
+			fi \
 		fi \
 	done
 

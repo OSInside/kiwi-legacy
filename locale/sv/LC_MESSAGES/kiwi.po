@@ -55,6 +55,10 @@ msgid "backing up: %1..."
 msgstr ""
 
 #, fuzzy
+msgid "archiving: %1..."
+msgstr "Filen är för stor: %1."
+
+#, fuzzy
 msgid "restoring: %1..."
 msgstr "Filen är för stor: %1."
 

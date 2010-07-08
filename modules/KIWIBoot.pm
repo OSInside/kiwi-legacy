@@ -2466,6 +2466,27 @@ sub setupBootDisk {
 		}
 	}
 	#==========================================
+	# increase vmsize on in-place recovery
+	#------------------------------------------
+	my $inplace = $xml -> getOEMRecoveryInPlace();
+	if (defined $inplace) {
+		my ($FD,$recoMB);
+		my $sizefile = "$destdir/recovery.partition.size";
+		if (open ($FD,$sizefile)) {
+			$recoMB = <$FD>; chomp $recoMB;
+			$kiwi -> info (
+				"Adding $recoMB MB spare space for in-place recovery"
+			);
+			close $FD;
+			unlink $sizefile;
+			$vmsize = $this->{vmmbyte} + $recoMB;
+			$this->{vmmbyte} = $vmsize;
+			$vmsize = $vmsize."M";
+			$this->{vmsize}  = $vmsize;
+			$kiwi -> done ();
+		}
+	}
+	#==========================================
 	# increase vmsize if image split portion
 	#------------------------------------------
 	if (($imgtype eq "split") && (-f $splitfile)) {

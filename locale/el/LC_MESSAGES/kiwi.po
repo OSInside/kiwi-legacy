@@ -49,6 +49,10 @@ msgid "backing up: %1..."
 msgstr ""
 
 #, fuzzy
+msgid "archiving: %1..."
+msgstr "Το αρχείο είναι πολύ μεγάλο: %1."
+
+#, fuzzy
 msgid "restoring: %1..."
 msgstr "Το αρχείο είναι πολύ μεγάλο: %1."
 

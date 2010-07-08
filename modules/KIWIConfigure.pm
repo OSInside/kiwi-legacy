@@ -163,6 +163,13 @@ sub setupRecoveryArchive {
 	$psize = sprintf ("%.0f", $psize);
 	print $FD $psize;
 	close $FD;
+	$status = qxx ("cp $root/recovery.partition.size $dest 2>&1");
+	$code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Failed to copy partition size info file: $status");
+		return undef;
+	}
 	#==========================================
 	# Create destination filesystem information
 	#------------------------------------------

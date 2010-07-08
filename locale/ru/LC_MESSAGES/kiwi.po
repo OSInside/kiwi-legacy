@@ -45,6 +45,10 @@ msgstr "Восстановлено %1 файлов из %2..."
 msgid "backing up: %1..."
 msgstr "резервное копирование: %1..."
 
+#, fuzzy
+msgid "archiving: %1..."
+msgstr "резервное копирование: %1..."
+
 msgid "restoring: %1..."
 msgstr "восстановление: %1..."
 

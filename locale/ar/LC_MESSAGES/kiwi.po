@@ -45,6 +45,9 @@ msgstr "تمت استعادة %2 ملفات من %1..."
 msgid "backing up: %1..."
 msgstr ""
 
+msgid "archiving: %1..."
+msgstr ""
+
 msgid "restoring: %1..."
 msgstr ""
 

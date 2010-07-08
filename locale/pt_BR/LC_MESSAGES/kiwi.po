@@ -51,6 +51,10 @@ msgstr "%1 arquivos de %2 restaurados..."
 msgid "backing up: %1..."
 msgstr "fazendo backup: %1..."
 
+#, fuzzy
+msgid "archiving: %1..."
+msgstr "fazendo backup: %1..."
+
 msgid "restoring: %1..."
 msgstr "restaurando: %1..."
 
