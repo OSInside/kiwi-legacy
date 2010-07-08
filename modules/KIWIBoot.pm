@@ -2469,7 +2469,7 @@ sub setupBootDisk {
 	# increase vmsize on in-place recovery
 	#------------------------------------------
 	my $inplace = $xml -> getOEMRecoveryInPlace();
-	if (defined $inplace) {
+	if (($inplace) && ("$inplace" eq "true")) {
 		my ($FD,$recoMB);
 		my $sizefile = "$destdir/recovery.partition.size";
 		if (open ($FD,$sizefile)) {

@@ -183,7 +183,7 @@ sub setupRecoveryArchive {
 	#==========================================
 	# Remove tarball for later recreation
 	#------------------------------------------
-	if (defined $inplace) {
+	if (($inplace) && ("$inplace" eq "true")) {
 		qxx ("rm -f $root/recovery.tar.gz 2>&1");
 	}
 	$kiwi -> done ();
