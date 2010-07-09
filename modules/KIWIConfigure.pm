@@ -102,7 +102,7 @@ sub setupRecoveryArchive {
 	#==========================================
 	# Create tar archive from root tree .tar
 	#------------------------------------------
-	my $topts  = "--numeric-owner -cpf";
+	my $topts  = "--numeric-owner --hard-dereference -cpf";
 	my $excld  = "--exclude ./dev --exclude ./proc --exclude ./sys";
 	my $status = qxx (
 		"cd $root && tar $topts $dest/.recovery.tar . $excld 2>&1 &&
