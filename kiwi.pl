@@ -2402,8 +2402,9 @@ sub checkType {
 			my %result = checkFileSystem ($fs);
 			if (%result) {
 				if (! $result{hastool}) {
-					my $tool = $KnownFS{$result{type}}{tool};
-					$kiwi -> error ("Can't find $tool tool for: $result{type}");
+					$kiwi -> error (
+						"Can't find filesystem tool for: $result{type}"
+					);
 					$kiwi -> failed ();
 					return undef;
 				}
@@ -2700,7 +2701,7 @@ sub checkFileSystem {
 		$result{type}     = $fs;
 		$result{readonly} = $KnownFS{$fs}{ro};
 		$result{hastool}  = 0;
-		if (-x $KnownFS{$fs}{tool}) {
+		if (($KnownFS{$fs}{tool}) && (-x $KnownFS{$fs}{tool})) {
 			$result{hastool} = 1;
 		}
 	} else {
