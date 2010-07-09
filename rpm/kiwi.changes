@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Tue Jul  6 11:12:29 CEST 2010 - ms@suse.de
 
+- v4.45
 - moved in-place recovery file creation into suse-dump
   directly after the install verification (bnc #620777)
 - restructure source tree a bit. make templates and repos
