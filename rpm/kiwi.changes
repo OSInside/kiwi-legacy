@@ -1,6 +1,9 @@
 -------------------------------------------------------------------
 Tue Jul 13 10:08:34 CEST 2010 - ms@suse.de
 
+- remove unneeded initrd.vmx and linux.vmx files _before_
+  calling mkinitrd. This saves space to not run into a space
+  problem on the boot partition (bnc #621859)
 - usb attribute in vmwareconfig doesn't exist anymore with
   the new machine section. usb is always present for vmware
   fixed xslt stylesheet for this case

@@ -727,6 +727,7 @@ function setupSUSEInitrd {
 	local umountProc=0
 	local umountSys=0
 	local systemMap=0
+	local haveVMX=0
 	local params
 	local running
 	local rlinux
@@ -749,6 +750,13 @@ function setupSUSEInitrd {
 		if grep -qi param_B /sbin/mkinitrd;then
 			params="-B"
 		fi
+		if [ $bootLoaderOK = "1" ];then
+			if [ -f /boot/initrd.vmx ];then
+				rm -f /boot/initrd.vmx
+				rm -f /boot/linux.vmx
+				haveVMX=1
+			fi
+		fi
 		if ! mkinitrd $params;then
 			Echo "Can't create initrd"
 			systemIntegrity=unknown
@@ -757,16 +765,12 @@ function setupSUSEInitrd {
 		if [ -f /etc/init.d/boot.device-mapper ];then
 			/etc/init.d/boot.device-mapper stop
 		fi
-		if [ $bootLoaderOK = "1" ];then
-			if [ -f /boot/initrd.vmx ];then
-				rm -f /boot/initrd.vmx
-				rm -f /boot/linux.vmx
-				running=$(uname -r)
-				rlinux=vmlinuz-$running
-				rinitrd=initrd-$running
-				ln -s $rlinux  /boot/linux.vmx
-				ln -s $rinitrd /boot/initrd.vmx
-			fi
+		if [ $bootLoaderOK = "1" ] && [ $haveVMX = "1" ];then
+			running=$(uname -r)
+			rlinux=vmlinuz-$running
+			rinitrd=initrd-$running
+			ln -s $rlinux  /boot/linux.vmx
+			ln -s $rinitrd /boot/initrd.vmx
 		fi
 		if [ $umountSys -eq 1 ];then
 			umount /sys
