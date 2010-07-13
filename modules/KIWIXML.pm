@@ -359,6 +359,12 @@ sub new {
 			}
 		}
 		#==========================================
+		# foreign machine attributes
+		#------------------------------------------
+		if (defined $foreignRepo->{"domain"}) {
+			$this -> setForeignMachineAttribute ("domain");
+		}
+		#==========================================
 		# foreign preferences
 		#------------------------------------------
 		if (defined $foreignRepo->{"locale"}) {
@@ -1253,6 +1259,46 @@ sub setForeignOEMOptionsElement {
 }
 
 #==========================================
+# setForeignMachineAttribute
+#------------------------------------------
+sub setForeignMachineAttribute {
+	# ...
+	# If given element exists in the foreign hash, set this
+	# attribute into the current machine (options) XML tree
+	# if no machine section exists create a new one
+	# ---
+	my $this = shift;
+	my $item = shift;
+	my $kiwi = $this->{kiwi};
+	my $tnode= $this->{typeNode};
+	my $foreignRepo = $this->{foreignRepo};
+	my $value = $foreignRepo->{$item};
+	my $newconfig = 0;
+	$kiwi -> info ("Including foreign machine attribute $item: $value");
+	my $opts = $tnode -> getElementsByTagName ("machine") -> get_node(1);
+	if (! defined $opts) {
+		$opts = new XML::LibXML::Element ("machine");
+		$newconfig = 1;
+	}
+	my $node = $opts -> getElementsByTagName ("$item");
+	if ($node) {
+		$node = $node -> get_node(1);
+		$opts -> removeChild ($node);
+	}
+	if ($value) {
+		$opts-> setAttribute ("$item","$value");
+	} else {
+		$opts-> setAttribute ("$item","true");
+	}
+	if ($newconfig) {
+		$this->{typeNode} -> appendChild ($opts);
+	}
+	$kiwi -> done ();
+	$this -> updateXML();
+	return $this;
+}
+
+#==========================================
 # setForeignTypeAttribute
 #------------------------------------------
 sub setForeignTypeAttribute {
@@ -1350,6 +1396,26 @@ sub getPackageManager {
 	}
 	$kiwi -> loginfo ("Invalid package manager: $pmgr");
 	return undef;
+}
+
+#==========================================
+# getXenDomain
+#------------------------------------------
+sub getXenDomain {
+	# ...
+	# Obtain the Xen domain information if set
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("machine") -> get_node(1);
+	if (! defined $node) {
+		return undef;
+	}
+	my $domain = $node -> getAttribute ("domain");
+	if ((! defined $domain) || ("$domain" eq "")) {
+		return undef;
+	}
+	return $domain;
 }
 
 #==========================================
@@ -2500,6 +2566,13 @@ sub getImageConfig {
 		} else {
 			$result{$type} = $data;
 		}
+	}
+	#==========================================
+	# machine
+	#------------------------------------------
+	my $xendomain = $this -> getXenDomain();
+	if (defined $xendomain) {
+		$result{kiwi_xendomain} = $xendomain;
 	}
 	#==========================================
 	# oemconfig

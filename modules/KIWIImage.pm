@@ -941,6 +941,7 @@ sub createImageUSB {
 	$main::ForeignRepo{"xmlnode"} = $xml -> getForeignNodeList();
 	$main::ForeignRepo{"xmlpacnode"} = $xml -> getForeignPackageNodeList();
 	$main::ForeignRepo{"packagemanager"} = $xml -> getPackageManager();
+	$main::ForeignRepo{"domain"} = $xml -> getXenDomain();
 	$main::ForeignRepo{"oem-partition-install"} =$xml->getOEMPartitionInstall();
 	$main::ForeignRepo{"oem-swap"}       = $xml -> getOEMSwap();
 	$main::ForeignRepo{"oem-swapsize"}   = $xml -> getOEMSwapSize();
@@ -2730,6 +2731,7 @@ sub createImageSplit {
 	$main::ForeignRepo{"xmlnode"} = $xml -> getForeignNodeList();
 	$main::ForeignRepo{"xmlpacnode"} = $xml -> getForeignPackageNodeList();
 	$main::ForeignRepo{"packagemanager"} = $xml -> getPackageManager();
+	$main::ForeignRepo{"domain"} = $xml -> getXenDomain();
 	$main::ForeignRepo{"oem-partition-install"} =$xml->getOEMPartitionInstall();
 	$main::ForeignRepo{"oem-swap"}       = $xml -> getOEMSwap();
 	$main::ForeignRepo{"oem-swapsize"}   = $xml -> getOEMSwapSize();
