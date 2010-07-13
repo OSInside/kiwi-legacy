@@ -26,10 +26,10 @@
 	</image>
 </xsl:template>
 
-<!-- turn vmwareconfig into machine -->
+<!-- turn vmwareconfig into machine, ignore usb attribute -->
 <xsl:template match="vmwareconfig" mode="conv46to47">
 	<machine>
-		<xsl:copy-of select="@*"/>
+		<xsl:copy-of select="@*[not(local-name(.) = 'usb')]"/>
 		<xsl:apply-templates mode="conv46to47"/>
 	</machine>
 </xsl:template>
