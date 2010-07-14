@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Tue Jul 13 10:08:34 CEST 2010 - ms@suse.de
 
+- v4.46
 - do not fail when image files are symlinks to a device
 - fixed race condition resulting at times in message of not
   finding the MBR and other times not finding the CD drive.

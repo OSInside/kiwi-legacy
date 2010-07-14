@@ -1,5 +1,5 @@
 #
-# spec file for package kiwi (Version 4.45)
+# spec file for package kiwi (Version 4.46)
 #
 # Copyright (c) 2008 SUSE LINUX Products GmbH, Nuernberg, Germany.
 # This file and all modifications and additions to the pristine
@@ -52,7 +52,7 @@ Requires:       satsolver-tools
 Requires:       clicfs
 %endif
 Summary:        OpenSuSE - KIWI Image System
-Version:        4.45
+Version:        4.46
 Release:        80
 Group:          System/Management
 License:        GPL v2 or later
