@@ -61,7 +61,7 @@ sub new {
 	#==========================================
 	# check image file
 	#------------------------------------------
-	if (! -f $image) {
+	if (! (-f $image || -b $image)) {
 		$kiwi -> error ("no such image file: $image");
 		$kiwi -> failed ();
 		return undef;

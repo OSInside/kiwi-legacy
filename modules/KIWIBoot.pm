@@ -95,7 +95,7 @@ sub new {
 	# check system image file parameter
 	#------------------------------------------
 	if (defined $system) {
-		if (-f $system) {
+		if (-f $system || -b $system) {
 			my %fsattr = main::checkFileSystem ($system);
 			if ($fsattr{readonly}) {
 				$syszip = -s $system;
