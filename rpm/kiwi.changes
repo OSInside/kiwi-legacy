@@ -10,6 +10,11 @@ Tue Jul 13 10:08:34 CEST 2010 - ms@suse.de
 - usb attribute in vmwareconfig doesn't exist anymore with
   the new machine section. usb is always present for vmware
   fixed xslt stylesheet for this case
+- fixed kernelList and xenServer functions:
+  * xenServer checks via kernel systemMap and kiwi_xendomain
+    if a xen server bootloader setup is required
+  * kernelList is fixed to store the running kernel as first
+    entry in the kernel list
 
 -------------------------------------------------------------------
 Tue Jul  6 11:12:29 CEST 2010 - ms@suse.de

@@ -954,7 +954,7 @@ function setupBootLoaderSyslinuxRecovery {
 		#--------------------------------------
 		title=$(makeLabel "Recover/Repair System")
 		echo "label $title"                                >> $conf
-		if xenServer;then
+		if xenServer $kernel $mountPrefix;then
 			systemException \
 				"*** $loader: Xen dom0 boot not implemented ***" \
 			"reboot"
@@ -980,7 +980,7 @@ function setupBootLoaderSyslinuxRecovery {
 		#--------------------------------------
 		title=$(makeLabel "Restore Factory System")
 		echo "label $title"                                >> $conf
-		if xenServer;then
+		if xenServer $kernel $mountPrefix;then
 			systemException \
 				"*** $loader: Xen dom0 boot not implemented ***" \
 			"reboot"
@@ -1056,7 +1056,7 @@ function setupBootLoaderGrubRecovery {
 		#--------------------------------------
 		title=$(makeLabel "Recover/Repair System")
 		echo "title $title"                               >> $menu
-		if xenServer;then
+		if xenServer $kernel $mountPrefix;then
 			echo " root $gdev_recovery"                   >> $menu
 			echo " kernel /boot/xen.gz"                   >> $menu
 			echo -n " module /boot/$kernel"               >> $menu
@@ -1092,7 +1092,7 @@ function setupBootLoaderGrubRecovery {
 		#--------------------------------------
 		title=$(makeLabel "Restore Factory System")
 		echo "title $title"                               >> $menu
-		if xenServer;then
+		if xenServer $kernel $mountPrefix;then
 			echo " root $gdev_recovery"                   >> $menu
 			echo " kernel /boot/xen.gz"                   >> $menu
 			echo -n " module /boot/$kernel"               >> $menu
@@ -1452,7 +1452,7 @@ function setupBootLoaderSyslinux {
 			#--------------------------------------
 			echo "DEFAULT $title"                              >> $conf
 			echo "label $title"                                >> $conf
-			if xenServer;then
+			if xenServer $kernel $mountPrefix;then
 				systemException \
 					"*** $loader: Xen dom0 boot not implemented ***" \
 				"reboot"
@@ -1483,7 +1483,7 @@ function setupBootLoaderSyslinux {
 			#--------------------------------------
 			title=$(makeLabel "Failsafe -- $title")
 			echo "label $title"                                >> $conf
-			if xenServer;then
+			if xenServer $kernel $mountPrefix;then
 				systemException \
 					"*** $loader: Xen dom0 boot not implemented ***" \
 				"reboot"
@@ -1668,7 +1668,7 @@ function setupBootLoaderGrub {
 			# create standard entry
 			#--------------------------------------
 			echo "title $title"                                   >> $menu
-			if xenServer;then
+			if xenServer $kname $mountPrefix;then
 				echo " root $gdev"                                >> $menu
 				echo " kernel /boot/xen.gz"                       >> $menu
 				echo -n " module /boot/$kernel"                   >> $menu
@@ -1716,7 +1716,7 @@ function setupBootLoaderGrub {
 			#--------------------------------------
 			title=$(makeLabel "Failsafe -- $title")
 			echo "title $title"                                   >> $menu
-			if xenServer;then
+			if xenServer $kname $mountPrefix;then
 				echo " root $gdev"                                >> $menu
 				echo " kernel /boot/xen.gz"                       >> $menu
 				echo -n " module /boot/$kernel"                   >> $menu
@@ -1924,7 +1924,7 @@ function setupBootLoaderLilo {
 			# create standard entry
 			#--------------------------------------
 			echo "label=\"$title\""                           >> $conf
-			if xenServer;then
+			if xenServer $kname $mountPrefix;then
 				systemException \
 					"*** lilo: Xen dom0 boot not implemented ***" \
 				"reboot"
@@ -1955,7 +1955,7 @@ function setupBootLoaderLilo {
 			#--------------------------------------
 			title=$(makeLabel "Failsafe -- $title")
 			echo "label=\"$title\""                           >> $conf
-			if xenServer;then
+			if xenServer $kname $mountPrefix;then
 				systemException \
 					"*** lilo: Xen dom0 boot not implemented ***" \
 				"reboot"
@@ -3281,46 +3281,65 @@ function kernelList {
 	# save the valid linknames in the variable KERNEL_LIST
 	# ----
 	local prefix=$1
-	local kcount=0
+	local kcount=1
 	local kname=""
 	local kernel=""
 	local initrd=""
+	local kpair=""
+	local krunning=`uname -r`
 	KERNEL_LIST=""
 	KERNEL_NAME=""
-	for i in $prefix/lib/modules/*;do
-		if [ ! -d $i ];then
-			continue
-		fi
-		unset KERNEL_PAIR
-		unset kernel
-		unset initrd
-		kname=`basename $i`
-		for k in $prefix/boot/vmlinu[zx]-${i##*/}; do
-			if [ -f $k ];then
-				kernel=${k##*/}
-				initrd=initrd-${i##*/}
+	KERNEL_PAIR=""
+	#======================================
+	# search running kernel first
+	#--------------------------------------
+	if [ -d $prefix/lib/modules/$krunning ];then
+		for name in vmlinux vmlinuz image;do
+			if [ -f $prefix/boot/$name-$krunning ];then
+				kernel=$name-$krunning
+				initrd=initrd-$krunning
+				break
 			fi
 		done
 		if [ -z "$kernel" ];then
-			for k in $prefix/boot/image-${i##*/}; do
+			continue
+		fi
+		KERNEL_PAIR=$kernel:$initrd
+		KERNEL_NAME[$kcount]=$krunning
+		KERNEL_LIST=$KERNEL_PAIR
+	fi
+	#======================================
+	# search for other kernels
+	#--------------------------------------
+	if [ ! -z "$KERNEL_LIST" ];then
+		for i in $prefix/lib/modules/*;do
+			if [ ! -d $i ];then
+				continue
+			fi
+			unset kernel
+			unset initrd
+			kname=`basename $i`
+			if [ "$kname" = $krunning ];then
+				continue
+			fi
+			for name in vmlinux vmlinuz image;do
+			for k in $prefix/boot/$name-${i##*/}; do
 				if [ -f $k ];then
 					kernel=${k##*/}
 					initrd=initrd-${i##*/}
+					break 2
 				fi
 			done
-		fi
-		if [ -z "$kernel" ];then
-			continue
-		fi
-		kcount=$((kcount+1))
-		KERNEL_PAIR=$kernel:$initrd
-		KERNEL_NAME[$kcount]=$kname
-		if [ $kcount = 1 ];then
-			KERNEL_LIST=$KERNEL_PAIR
-		elif [ $kcount -gt 1 ];then
-			KERNEL_LIST=$KERNEL_LIST,$KERNEL_PAIR
-		fi
-	done
+			done
+			if [ -z "$kernel" ];then
+				continue
+			fi
+			kcount=$((kcount+1))
+			kpair=$kernel:$initrd
+			KERNEL_NAME[$kcount]=$kname
+			KERNEL_LIST=$KERNEL_LIST,$kpair
+		done
+	fi
 	if [ -z "$KERNEL_LIST" ];then
 		# /.../
 		# the system image doesn't provide the kernel and initrd but
@@ -3340,6 +3359,7 @@ function kernelList {
 	fi
 	export KERNEL_LIST
 	export KERNEL_NAME
+	export KERNEL_PAIR
 }
 #======================================
 # validateSize
@@ -4726,10 +4746,31 @@ function canWrite {
 #--------------------------------------
 function xenServer {
 	# /.../
-	# test if we are running a Xen dom0 kernel
-	# ---
-	local check=/proc/xen/capabilities
-	if cat $check 2>/dev/null | grep "control_d" &>/dev/null; then
+	# check if the given kernel is a xen kernel and if so
+	# check if a dom0 or a domU setup was requested
+	# ----
+	local kname=$1
+	local mountPrefix=$2
+	local sysmap="$mountPrefix/boot/System.map-$kname"
+	local isxen
+	if [ ! -e $sysmap ]; then
+		sysmap="$mountPrefix/boot/System.map"
+	fi
+	if [ ! -e $sysmap ]; then
+		Echo "No system map for kernel $kname found"
+		return 1
+	fi
+	isxen=$(grep -c "xen_base" $sysmap)
+	if [ $isxen -eq 0 ]; then
+		# not a xen kernel
+		return 1
+	fi
+	if [ -z "$kiwi_xendomain" ];then
+		# no xen domain set, assume domU
+		return 1
+	fi
+	if [ $kiwi_xendomain = "dom0" ];then
+		# xen dom0 requested
 		return 0
 	fi
 	return 1
