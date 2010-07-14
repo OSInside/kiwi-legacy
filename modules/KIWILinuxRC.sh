@@ -2517,6 +2517,7 @@ function probeDevices {
 	for i in rd brd edd dm-mod xennet xenblk virtio_blk;do
 		modprobe $i &>/dev/null
 	done
+	udevPending
 }
 #======================================
 # CDDevice

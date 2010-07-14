@@ -1,6 +1,8 @@
 -------------------------------------------------------------------
 Tue Jul 13 10:08:34 CEST 2010 - ms@suse.de
 
+- fixed race condition resulting at times in message of not
+  finding the MBR and other times not finding the CD drive.
 - remove unneeded initrd.vmx and linux.vmx files _before_
   calling mkinitrd. This saves space to not run into a space
   problem on the boot partition (bnc #621859)
