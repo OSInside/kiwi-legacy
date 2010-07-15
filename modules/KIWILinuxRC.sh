@@ -5294,6 +5294,7 @@ function partedSectorInit {
 	# /.../
 	# return start/end sectors of current partitions.
 	# ----
+	IFS=$IFS_ORIG
 	local disk=$1
 	local s_start
 	local s_stopp
@@ -5315,6 +5316,9 @@ function partedSectorInit {
 			endSectors=$endSectors:$((s_stopp + 1))s
 		fi
 	done
+	if [ -z "$startSectors" ];then
+		startSectors=1
+	fi
 }
 #======================================
 # partedEndCylinder
