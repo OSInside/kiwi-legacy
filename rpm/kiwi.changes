@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Thu Jul 15 14:07:05 CEST 2010 - ms@suse.de
 
+- v4.47
 - fixed parted sector init if the disk has no partitions
   we need to set startSectors to 1
 
