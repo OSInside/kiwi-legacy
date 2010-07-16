@@ -23,7 +23,7 @@
 <grammar xmlns:db="http://docbook.org/ns/docbook" xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" xmlns:rng="http://relaxng.org/ns/structure/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
   <db:info>
     <db:releaseinfo>$Id: kiwi.rnc 2957 2008-01-11 12:53:39Z thomas-schraitle $</db:releaseinfo>
-    <db:releaseinfo>RNC Schema Version 4.6</db:releaseinfo>
+    <db:releaseinfo>RNC Schema Version 4.7</db:releaseinfo>
     <db:pubdate>START</db:pubdate>
     <db:pubdate>2008-01-08</db:pubdate>
   </db:info>
@@ -35,6 +35,11 @@
   <define name="volume-size-type">
     <data type="token">
       <param name="pattern">\d+|\d+M|\d+G</param>
+    </data>
+  </define>
+  <define name="image-name">
+    <data type="token">
+      <param name="pattern">[^\s/]+</param>
     </data>
   </define>
   <!--
@@ -54,7 +59,7 @@
   -->
   <div>
     <define name="k.image.name.attribute">
-      <ref name="k.name.attribute"/>
+      <ref name="k.imagename.attribute"/>
     </define>
     <define name="k.image.displayname.attribute">
       <ref name="k.displayname.attribute"/>
@@ -82,7 +87,7 @@ the package Information is inherited</a:documentation>
     <define name="k.image.schemaversion.attribute">
       <attribute name="schemaversion">
         <a:documentation>The allowed Schema version (fixed value)</a:documentation>
-        <value>4.6</value>
+        <value>4.7</value>
       </attribute>
     </define>
     <define name="k.image.kiwirevision.attribute">
@@ -261,6 +266,12 @@ installation source from</a:documentation>
   <define name="k.username.attribute">
     <attribute name="username">
       <a:documentation>A name of a user</a:documentation>
+    </attribute>
+  </define>
+  <define name="k.imagename.attribute">
+    <attribute name="name">
+      <a:documentation>An image name without / and spaces</a:documentation>
+      <ref name="image-name"/>
     </attribute>
   </define>
   <!--
@@ -1354,6 +1365,33 @@ recovery partition. Default value is 83 (Linux)</db:para>
   </div>
   <!--
     ==========================================
+    common element <oem-inplace-recovery>
+    
+  -->
+  <div>
+    <define name="k.oem-inplace-recovery.content">
+      <data type="boolean"/>
+    </define>
+    <define name="k.oem-inplace-recovery.attlist">
+      <empty/>
+    </define>
+    <define name="k.oem-inplace-recovery">
+      <element name="oem-inplace-recovery">
+        <a:documentation>For oemboot driven images: Specify whether the
+recovery archive should be stored as part of the image
+or not. If it's not stored it's created during install
+of the oem image</a:documentation>
+        <db:para>For oemboot driven images: Specify whether the
+recovery archive should be stored as part of the image
+or not. If it's not stored it's created during install
+of the oem image</db:para>
+        <ref name="k.oem-inplace-recovery.attlist"/>
+        <ref name="k.oem-inplace-recovery.content"/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
     common element <oem-swap>
     
   -->
@@ -1784,11 +1822,12 @@ to keep data persistent over a reboot</a:documentation>
     <define name="k.type.bootloader.attribute">
       <attribute name="bootloader">
         <a:documentation>Specifies the bootloader used for booting the image."
-At the moment only grub and sys|extlinux are supported</a:documentation>
+At the moment grub, zipl and sys|extlinux are supported</a:documentation>
         <choice>
           <value>extlinux</value>
           <value>grub</value>
           <value>syslinux</value>
+          <value>zipl</value>
         </choice>
       </attribute>
     </define>
@@ -1856,22 +1895,24 @@ file for write operations</a:documentation>
     </define>
     <define name="k.type.format.attribute">
       <attribute name="format">
-        <a:documentation>Specifies the format of the virtual disk. This applies to the
-vmx/oem types only.</a:documentation>
+        <a:documentation>Specifies the format of the virtual disk.</a:documentation>
         <choice>
-          <value>bochs</value>
-          <value>cloop</value>
-          <value>cow</value>
-          <value>dmg</value>
-          <value>iso</value>
           <value>ovf</value>
-          <value>qcow</value>
           <value>qcow2</value>
-          <value>usb</value>
           <value>vmdk</value>
-          <value>vpc</value>
-          <value>vvfat</value>
         </choice>
+      </attribute>
+    </define>
+    <define name="k.type.installiso.attribute">
+      <attribute name="installiso">
+        <a:documentation>Specifies if a install iso should be created (oem only)</a:documentation>
+        <data type="boolean"/>
+      </attribute>
+    </define>
+    <define name="k.type.installstick.attribute">
+      <attribute name="installstick">
+        <a:documentation>Specifies if a install stick should be created (oem only)</a:documentation>
+        <data type="boolean"/>
       </attribute>
     </define>
     <define name="k.type.primary.attribute">
@@ -1971,6 +2012,12 @@ vmx/oem types only.</a:documentation>
           <ref name="k.type.format.attribute"/>
         </optional>
         <optional>
+          <ref name="k.type.installiso.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.type.installstick.attribute"/>
+        </optional>
+        <optional>
           <ref name="k.type.primary.attribute"/>
         </optional>
         <optional>
@@ -2002,10 +2049,7 @@ vmx/oem types only.</a:documentation>
             <ref name="k.split"/>
           </optional>
           <optional>
-            <ref name="k.vmwareconfig"/>
-          </optional>
-          <optional>
-            <ref name="k.xenconfig"/>
+            <ref name="k.machine"/>
           </optional>
         </interleave>
       </element>
@@ -2228,38 +2272,49 @@ compressed filesystem.</db:para>
   </div>
   <!--
     ==========================================
-    common element <vmwarenic>
+    common element <vmnic>
     
   -->
   <div>
-    <define name="k.vmwarenic.driver.attribute">
+    <define name="k.vmnic.driver.attribute">
       <attribute name="driver">
         <a:documentation>The driver used for the VM network interface</a:documentation>
       </attribute>
     </define>
-    <define name="k.vmwarenic.interface.attribute">
+    <define name="k.vmnic.interface.attribute">
       <attribute name="interface">
         <a:documentation>The interface ID for the VM network interface</a:documentation>
-        <data type="nonNegativeInteger"/>
       </attribute>
     </define>
-    <define name="k.vmwarenic.mode.attribute">
+    <define name="k.vmnic.mode.attribute">
       <attribute name="mode">
         <a:documentation>The VM network mode</a:documentation>
       </attribute>
     </define>
-    <define name="k.vmwarenic.attlist">
+    <define name="k.vmnic.mac.attribute">
+      <attribute name="mac">
+        <a:documentation>The VM mac address</a:documentation>
+      </attribute>
+    </define>
+    <define name="k.vmnic.attlist">
       <interleave>
-        <ref name="k.vmwarenic.driver.attribute"/>
-        <ref name="k.vmwarenic.interface.attribute"/>
-        <ref name="k.vmwarenic.mode.attribute"/>
+        <optional>
+          <ref name="k.vmnic.driver.attribute"/>
+        </optional>
+        <ref name="k.vmnic.interface.attribute"/>
+        <optional>
+          <ref name="k.vmnic.mode.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.vmnic.mac.attribute"/>
+        </optional>
       </interleave>
     </define>
-    <define name="k.vmwarenic">
-      <element name="vmwarenic">
-        <a:documentation>The VMware network interface definition</a:documentation>
+    <define name="k.vmnic">
+      <element name="vmnic">
+        <a:documentation>The VM network interface definition</a:documentation>
         <interleave>
-          <ref name="k.vmwarenic.attlist"/>
+          <ref name="k.vmnic.attlist"/>
           <empty/>
         </interleave>
       </element>
@@ -2267,37 +2322,44 @@ compressed filesystem.</db:para>
   </div>
   <!--
     ==========================================
-    common element <vmwaredisk>
+    common element <vmdisk>
     
   -->
   <div>
-    <define name="k.vmwaredisk.controller.attribute">
+    <define name="k.vmdisk.controller.attribute">
       <attribute name="controller">
-        <a:documentation>The disk controller used for the VMware guest</a:documentation>
+        <a:documentation>The disk controller used for the VM guest</a:documentation>
         <choice>
           <value>ide</value>
           <value>scsi</value>
         </choice>
       </attribute>
     </define>
-    <define name="k.vmwaredisk.id.attribute">
+    <define name="k.vmdisk.id.attribute">
       <attribute name="id">
-        <a:documentation>The disk ID for the VM disk</a:documentation>
+        <a:documentation>The disk ID / device for the VM disk</a:documentation>
         <data type="nonNegativeInteger"/>
       </attribute>
     </define>
-    <define name="k.vmwaredisk.attlist">
+    <define name="k.vmdisk.device.attribute">
+      <attribute name="device">
+        <a:documentation>The disk device to appear in the guest (xen only)</a:documentation>
+      </attribute>
+    </define>
+    <define name="k.vmdisk.attlist">
       <interleave>
-        <ref name="k.vmwaredisk.controller.attribute"/>
-        <ref name="k.vmwaredisk.id.attribute"/>
+        <ref name="k.vmdisk.controller.attribute"/>
+        <ref name="k.vmdisk.id.attribute"/>
+        <optional>
+          <ref name="k.vmdisk.device.attribute"/>
+        </optional>
       </interleave>
     </define>
-    <define name="k.vmwaredisk">
-      <element name="vmwaredisk">
-        <a:documentation>The VMware disk definition. You can setup either a
-scsi disk or an ide disk</a:documentation>
+    <define name="k.vmdisk">
+      <element name="vmdisk">
+        <a:documentation>The VM disk definition.</a:documentation>
         <interleave>
-          <ref name="k.vmwaredisk.attlist"/>
+          <ref name="k.vmdisk.attlist"/>
           <empty/>
         </interleave>
       </element>
@@ -2305,95 +2367,37 @@ scsi disk or an ide disk</a:documentation>
   </div>
   <!--
     ==========================================
-    common element <vmwarecdrom>
+    common element <vmdvd>
     
   -->
   <div>
-    <define name="k.vmwarecdrom.controller.attribute">
+    <define name="k.vmdvd.controller.attribute">
       <attribute name="controller">
-        <a:documentation>The CD/DVD controller used for the VMware guest</a:documentation>
+        <a:documentation>The CD/DVD controller used for the VM guest</a:documentation>
         <choice>
           <value>ide</value>
           <value>scsi</value>
         </choice>
       </attribute>
     </define>
-    <define name="k.vmwarecdrom.id.attribute">
+    <define name="k.vmdvd.id.attribute">
       <attribute name="id">
         <a:documentation>The CD/DVD ID for the VM CD rom drive</a:documentation>
         <data type="nonNegativeInteger"/>
       </attribute>
     </define>
-    <define name="k.vmwarecdrom.attlist">
+    <define name="k.vmdvd.attlist">
       <interleave>
-        <ref name="k.vmwarecdrom.controller.attribute"/>
-        <ref name="k.vmwarecdrom.id.attribute"/>
+        <ref name="k.vmdvd.controller.attribute"/>
+        <ref name="k.vmdvd.id.attribute"/>
       </interleave>
     </define>
-    <define name="k.vmwarecdrom">
-      <element name="vmwarecdrom">
-        <a:documentation>The VMware CD/DVD drive definition. You can setup either a
+    <define name="k.vmdvd">
+      <element name="vmdvd">
+        <a:documentation>The VM CD/DVD drive definition. You can setup either a
 scsi CD or an ide CD drive</a:documentation>
         <interleave>
-          <ref name="k.vmwarecdrom.attlist"/>
-          <empty/>
-        </interleave>
-      </element>
-    </define>
-  </div>
-  <!--
-    ==========================================
-    common element <xendisk>
-    
-  -->
-  <div>
-    <define name="k.xendisk.device.attribute">
-      <attribute name="device">
-        <a:documentation>The disk device to appear in the Xen guest</a:documentation>
-      </attribute>
-    </define>
-    <define name="k.xendisk.attlist">
-      <ref name="k.xendisk.device.attribute"/>
-    </define>
-    <define name="k.xendisk">
-      <element name="xendisk">
-        <a:documentation>The Xen disk device definition.</a:documentation>
-        <interleave>
-          <ref name="k.xendisk.attlist"/>
-          <empty/>
-        </interleave>
-      </element>
-    </define>
-  </div>
-  <!--
-    ==========================================
-    common element <xenbridge>
-    
-  -->
-  <div>
-    <define name="k.xenbridge.mac.attribute">
-      <attribute name="mac">
-        <a:documentation>The Mac address to assign to the virtual interface</a:documentation>
-      </attribute>
-    </define>
-    <define name="k.xenbridge.name.attribute">
-      <attribute name="name">
-        <a:documentation>The Xen bridged interface name</a:documentation>
-      </attribute>
-    </define>
-    <define name="k.xenbridge.attlist">
-      <interleave>
-        <optional>
-          <ref name="k.xenbridge.mac.attribute"/>
-        </optional>
-        <ref name="k.xenbridge.name.attribute"/>
-      </interleave>
-    </define>
-    <define name="k.xenbridge">
-      <element name="xenbridge">
-        <a:documentation>The VMware network interface definition</a:documentation>
-        <interleave>
-          <ref name="k.xenbridge.attlist"/>
+          <ref name="k.vmdvd.attlist"/>
           <empty/>
         </interleave>
       </element>
@@ -2894,6 +2898,9 @@ and setup the system disk</db:para>
             <ref name="k.oem-recoveryID"/>
           </optional>
           <optional>
+            <ref name="k.oem-inplace-recovery"/>
+          </optional>
+          <optional>
             <ref name="k.oem-reboot"/>
           </optional>
           <optional>
@@ -2908,13 +2915,13 @@ and setup the system disk</db:para>
   </div>
   <!--
     ==========================================
-    main block: <vmwareconfig>
+    main block: <machine>
     
   -->
   <div>
-    <define name="k.vmwareconfig.arch.attribute">
+    <define name="k.machine.arch.attribute">
       <attribute name="arch">
-        <a:documentation>the VMware architecture type</a:documentation>
+        <a:documentation>the VM architecture type</a:documentation>
         <choice>
           <value>ix86</value>
           <value>x86_64</value>
@@ -2922,110 +2929,67 @@ and setup the system disk</db:para>
         </choice>
       </attribute>
     </define>
-    <define name="k.vmwareconfig.HWversion.attribute">
+    <define name="k.machine.HWversion.attribute">
       <attribute name="HWversion">
-        <a:documentation>The virtual HW version number for the VMware configuration</a:documentation>
+        <a:documentation>The virtual HW version number for the VM configuration</a:documentation>
         <data type="integer"/>
       </attribute>
     </define>
-    <define name="k.vmwareconfig.guestOS.attribute">
+    <define name="k.machine.guestOS.attribute">
       <attribute name="guestOS">
-        <a:documentation>the virtual guestOS identification string for VMware</a:documentation>
+        <a:documentation>the virtual guestOS identification string for the VM</a:documentation>
       </attribute>
     </define>
-    <define name="k.vmwareconfig.memory.attribute">
+    <define name="k.machine.memory.attribute">
       <attribute name="memory">
         <a:documentation>The memory setup for the guest VM.</a:documentation>
       </attribute>
     </define>
-    <define name="k.vmwareconfig.usb.attribute">
-      <attribute name="usb">
-        <a:documentation>Activate/Deactivate usb controller for VMware</a:documentation>
-        <data type="boolean"/>
-      </attribute>
-    </define>
-    <define name="k.vmwareconfig.attlist">
-      <interleave>
-        <optional>
-          <ref name="k.vmwareconfig.arch.attribute"/>
-        </optional>
-        <optional>
-          <ref name="k.vmwareconfig.HWversion.attribute"/>
-        </optional>
-        <optional>
-          <ref name="k.vmwareconfig.guestOS.attribute"/>
-        </optional>
-        <optional>
-          <ref name="k.vmwareconfig.usb.attribute"/>
-        </optional>
-        <ref name="k.vmwareconfig.memory.attribute"/>
-      </interleave>
-    </define>
-    <define name="k.vmwareconfig">
-      <element name="vmwareconfig">
-        <a:documentation>specifies the VMware configuration sections</a:documentation>
-        <db:para>The vmwareconfig element specifies the VMware guest
-configuration options which are used by the VMware
-virtual machine when running the image.</db:para>
-        <interleave>
-          <ref name="k.vmwareconfig.attlist"/>
-          <optional>
-            <ref name="k.vmwarenic"/>
-          </optional>
-          <optional>
-            <ref name="k.vmwaredisk"/>
-          </optional>
-          <optional>
-            <ref name="k.vmwarecdrom"/>
-          </optional>
-        </interleave>
-      </element>
-    </define>
-  </div>
-  <!--
-    ==========================================
-    main block: <xenconfig>
-    
-  -->
-  <div>
-    <define name="k.xenconfig.memory.attribute">
-      <attribute name="memory">
-        <a:documentation>The memory setup for the Xen guest.</a:documentation>
-      </attribute>
-    </define>
-    <define name="k.xenconfig.domain.attribute">
+    <define name="k.machine.domain.attribute">
       <attribute name="domain">
-        <a:documentation>The type of Xen domain to create (dom0 or domU)</a:documentation>
+        <a:documentation>The domain setup for the VM (xen only)</a:documentation>
         <choice>
           <value>dom0</value>
           <value>domU</value>
         </choice>
       </attribute>
     </define>
-    <define name="k.xenconfig.attlist">
+    <define name="k.machine.attlist">
       <interleave>
         <optional>
-          <ref name="k.xenconfig.memory.attribute"/>
+          <ref name="k.machine.arch.attribute"/>
         </optional>
         <optional>
-          <ref name="k.xenconfig.domain.attribute"/>
+          <ref name="k.machine.HWversion.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.machine.guestOS.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.machine.memory.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.machine.domain.attribute"/>
         </optional>
       </interleave>
     </define>
-    <define name="k.xenconfig">
-      <element name="xenconfig">
-        <a:documentation>specifies the Xen configuration sections</a:documentation>
-        <db:para>The xenconfig element specifies the Xen guest
-configuration options which are used by the Xen
-para virtual machine when running the image.</db:para>
+    <define name="k.machine">
+      <element name="machine">
+        <a:documentation>specifies the VM configuration sections</a:documentation>
+        <db:para>The machine element specifies the VM guest
+configuration options which are used by the
+virtual machine when running the image.</db:para>
         <interleave>
-          <ref name="k.xenconfig.attlist"/>
+          <ref name="k.machine.attlist"/>
           <optional>
-            <ref name="k.xendisk"/>
+            <ref name="k.vmnic"/>
           </optional>
-          <zeroOrMore>
-            <ref name="k.xenbridge"/>
-          </zeroOrMore>
+          <optional>
+            <ref name="k.vmdisk"/>
+          </optional>
+          <optional>
+            <ref name="k.vmdvd"/>
+          </optional>
         </interleave>
       </element>
     </define>

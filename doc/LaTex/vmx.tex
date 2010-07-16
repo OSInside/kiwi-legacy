@@ -70,16 +70,9 @@ The following table lists the supported virtual disk formats
 \hline
 \textbf{Name} & \textbf{Description} \\
 \hline
-vvfat       & Disk format DOS FAT32 \\
-vpc         & Virtual PC read only disk  \\
-bochs       & Disk format for Bochs emulator  \\
-dmg         & Disk format for Mac OS X \\
-cloop       & Compressed loop \\
 vmdk        & Disk format for VMware \\
 ovf         & Open Virtual Format requires VMwares ovftool \\
 qcow2       & QEMU virtual disk format  \\
-qcow        & QEMU virtual disk format  \\
-cow         & QEMU virtual disk format \\
 \hline
 \end{tabular}
 
@@ -101,9 +94,9 @@ config.xml snippet provides general guidance on the elements in config.xml.
    <!-- packages you need in VMware only -->
 </packages>
 <type......>
-   <vmwareconfig memory="512">
-      <vmwaredisk controller="ide" id="0"/>
-   </vmwareconfig>
+   <machine memory="512">
+      <vmdisk controller="ide" id="0"/>
+   </machine>
 </type>
 \end{verbatim}
 \end{Command}
@@ -112,7 +105,7 @@ Given the specification above Kiwi will create a VMware guest
 configuration specifying the availability of 512 MB of RAM and an IDE 
 disk controller interface for the VM guest. For aditional information
 about the configuration settings please refere to the 
-\textbf{vmwareconfig} section. 
+\textbf{machine} section. 
 
 The guest configuration can be loaded through VMware user interface and 
 may be modified through the GUI. The configuration file has the .vmx 

@@ -47,6 +47,10 @@ msgid "backing up: %1..."
 msgstr "Sicherung: %1 ..."
 
 #, fuzzy
+msgid "archiving: %1..."
+msgstr "Sicherung: %1 ..."
+
+#, fuzzy
 msgid "restoring: %1..."
 msgstr "Sicherung: %1 ..."
 

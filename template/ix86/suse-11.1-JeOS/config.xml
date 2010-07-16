@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<image schemaversion="4.7" name="LimeJeOS-openSUSE-11.1">
+	<description type="system">
+		<author>Christoph Thiel</author>
+		<contact>cthiel@novell.com</contact>
+		<specification>SUSE Linux Enterprise 11 JeOS</specification>
+	</description>
+	<profiles>
+		<profile name="xenFlavour" description="VMX with Xen kernel"/>
+		<profile name="vmxFlavour" description="VMX with default kernel" import="true"/>
+	</profiles>
+	<preferences>
+		<version>1.1.0</version>
+		<packagemanager>zypper</packagemanager>
+		<boot-theme>openSUSE</boot-theme>
+		<rpm-excludedocs>true</rpm-excludedocs>
+		<locale>en_US</locale>
+		<keytable>us.map.gz</keytable>
+		<timezone>Europe/Berlin</timezone>
+	</preferences>
+	<preferences profiles="xenFlavour">
+		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-11.1" bootprofile="xen" bootkernel="xenk">
+			<machine memory="512" domain="domU">
+				<vmdisk controller="ide" id="0" device="/dev/xvda"/>
+				<vmnic interface=""/>
+			</machine>
+		</type>
+		<type image="oem" filesystem="ext3" boot="oemboot/suse-11.1" bootprofile="xen" bootkernel="xenk" installiso="true">
+			<oemconfig>
+				<oem-home>false</oem-home>
+				<oem-systemsize>2048</oem-systemsize>
+			</oemconfig>
+			<machine domain="dom0"/>
+		</type>
+	</preferences>
+	<preferences profiles="vmxFlavour">
+		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-11.1" format="vmdk">
+			<machine memory="512" guestOS="suse" HWversion="4">
+				<vmdisk controller="scsi" id="0"/>
+				<vmnic driver="e1000" interface="0" mode="bridged"/>
+			</machine>
+		</type>
+		<type image="oem" filesystem="ext3" boot="oemboot/suse-11.1" installiso="true">
+			<oemconfig>
+				<oem-home>false</oem-home>
+				<oem-systemsize>2048</oem-systemsize>
+			</oemconfig>
+			<machine memory="512" guestOS="suse" HWversion="4">
+				<vmdisk controller="scsi" id="0"/>
+				<vmnic driver="e1000" interface="0" mode="bridged"/>
+			</machine>
+		</type>
+	</preferences>
+	<users group="root">
+		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
+	</users>
+	<repository type="yast2">
+		<source path="opensuse://11.1/repo/oss"/>
+	</repository>
+	<packages type="image">
+		<package name="openSUSE-release"/>
+		<package name="aaa_base"/>
+		<package name="bash"/>
+		<package name="coreutils"/>
+		<package name="device-mapper"/>
+		<package name="e2fsprogs"/>
+		<package name="filesystem"/>
+		<package name="glibc"/>
+		<package name="mdadm"/>
+		<package name="rpm"/>
+		<package name="insserv"/>
+		<package name="pam"/>
+		<package name="pam-modules"/>
+		<package name="login"/>
+		<package name="pwdutils"/>
+		<package name="sysconfig"/>
+		<package name="sysvinit"/>
+		<package name="procps"/>
+		<package name="zypper"/>
+		<package name="kbd"/>
+		<package name="mkinitrd"/>
+		<package name="module-init-tools"/>
+		<package name="dhcpcd"/>
+		<package name="initviocons"/>
+		<package name="irqbalance"/>
+		<package name="syslog-ng"/>
+		<package name="grub"/>
+		<package name="rpcbind"/>
+		<package name="nfs-client"/>
+		<package name="iputils"/>
+		<package name="w3m"/>
+		<package name="ncurses-utils"/>
+		<package name="klogd"/>
+		<package name="elfutils"/>
+		<package name="cracklib-dict-full"/>
+		<package name="openssh"/>
+		<package name="suseRegister"/>
+		<package name="openssl-certs"/>
+		<package name="vim-base"/>
+		<package name="vim"/>
+		<package name="tar"/>
+		<package name="timezone"/>
+		<package name="ifplugd"/>
+		<package name="branding-openSUSE"/>
+		<package name="release-notes-openSUSE"/>
+		<package name="glib2-branding-openSUSE"/>
+		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
+		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
+	</packages>
+	<packages type="image" profiles="xenFlavour">
+		<package name="kernel-xen" replaces="kernel-default"/>
+		<package name="kernel-xen-base" replaces="kernel-default-base"/>
+		<package name="xen-tools-domU" replaces=""/>
+		<package name="xen" replaces=""/>
+	</packages>
+	<packages type="image" profiles="vmxFlavour">
+		<package name="kernel-default" replaces="kernel-xen"/>
+		<package name="kernel-default-base" replaces="kernel-xen-base"/>
+		<package name="kernel-default-base" replaces="xen-tools-domU"/>
+		<package name="kernel-default-base" replaces="xen"/>
+	</packages>
+	<packages type="bootstrap">
+		<package name="filesystem"/>
+		<package name="glibc-locale"/>
+		<package name="cracklib-dict-full"/>
+		<package name="openssl-certs"/>
+	</packages>
+</image>

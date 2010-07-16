@@ -19,7 +19,7 @@
 	to <tag class="attribute">schemaversion</tag> from
 	<literal>4.5</literal> to <literal>4.6</literal>.
 </para>
-<xsl:template match="image" mode="conv44to45">
+<xsl:template match="image" mode="conv45to46">
 	<image schemaversion="4.6">
 		<xsl:copy-of select="@*[local-name() != 'schemaversion']"/>
 		<xsl:apply-templates mode="conv45to46"/>
@@ -33,6 +33,7 @@
 </para>
 <xsl:template match="packages[@type='vmware']" mode="conv45to46">
 	<packages type="vmx">
+        <xsl:copy-of select="@*[not(local-name(.) = 'type')]"/>
 		<xsl:apply-templates mode="conv45to46"/>
 	</packages>
 </xsl:template>

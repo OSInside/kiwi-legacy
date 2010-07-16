@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="4.6" name="suse-11.1-vm-guest">
+<image schemaversion="4.7" name="suse-11.1-vm-guest">
 	<description type="system">
 		<author>Marcus Schäfer</author>
 		<contact>ms@novell.com</contact>
@@ -8,9 +8,9 @@
 	</description>
 	<preferences>
 		<type image="vmx" primary="true" filesystem="ext3" boot="vmxboot/suse-11.1" format="vmdk">
-			<vmwareconfig memory="512">
-				<vmwaredisk controller="ide" id="0"/>
-			</vmwareconfig>
+			<machine memory="512">
+				<vmdisk controller="ide" id="0"/>
+			</machine>
 		</type>
 		<version>1.1.2</version>
 		<packagemanager>zypper</packagemanager>

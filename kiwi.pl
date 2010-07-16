@@ -41,11 +41,12 @@ use KIWIMigrate;
 use KIWIOverlay;
 use KIWIQX;
 use KIWITest;
+use KIWIImageFormat;
 
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "4.41";
+our $Version       = "4.48";
 our $Publisher     = "SUSE LINUX Products GmbH";
 our $Preparer      = "KIWI - http://kiwi.berlios.de";
 our $openSUSE      = "http://download.opensuse.org";
@@ -75,19 +76,19 @@ if ( -f $ConfigFile) {
 # Globals
 #--------------------------------------------
 our $BasePath;         # configurable base kiwi path
-our $System;           # configurable baes kiwi image desc. path
-our $LogServerPort;    # configurable log server port
 our $Gzip;             # configurable gzip command
-our @UmountStack;      # command list to umount
+our $LogServerPort;    # configurable log server port
 our $LuksCipher;       # stored luks passphrase
-if (! defined $LogServerPort) {
-	$LogServerPort = "off";
+our $System;           # configurable baes kiwi image desc. path
+our @UmountStack;      # command list to umount
+if ( ! defined $BasePath ) {
+	$BasePath = "/usr/share/kiwi";
 }
 if (! defined $Gzip) {
 	$Gzip = "gzip -9";
 }
-if ( ! defined $BasePath ) {
-	$BasePath = "/usr/share/kiwi";
+if (! defined $LogServerPort) {
+	$LogServerPort = "off";
 }
 if ( ! defined $System ) {
 	$System  = $BasePath."/image";
@@ -147,7 +148,6 @@ our $BootStick;             # deploy initrd booting from USB stick
 our $BootStickSystem;       # system image to be copied on an USB stick
 our $BootStickDevice;       # device to install stick image on
 our $BootVMSystem;          # system image to be copied on a VM disk
-our $BootVMFormat;          # virtual disk format supported by qemu-img
 our $BootVMDisk;            # deploy initrd booting from a VM 
 our $BootVMSize;            # size of virtual disk
 our $InstallCD;             # Installation initrd booting from CD
@@ -206,6 +206,8 @@ our $Debug;                 # activates the internal stack trace output
 our $GrubChainload;         # install grub loader in first partition not MBR
 our $MigrateNoFiles;        # migrate: don't create overlay files
 our $MigrateNoTemplate;     # migrate: don't create image description template
+our $Convert;               # convert image into given format/configuration
+our $Format;                # format to convert to, vmdk, ovf, etc...
 our $kiwi;                  # global logging handler object
 
 #============================================
@@ -273,7 +275,7 @@ sub findExec {
 		if ($kiwi) {
 			$kiwi -> loginfo ("warning: $execName not found\n");
 		}
-		return $execName;
+		return undef;
 	}
 	return $execPath;
 }
@@ -335,6 +337,9 @@ sub main {
 		# Create destdir if needed
 		#------------------------------------------
 		my $dirCreated = createDirInteractive($kiwi, $Destination);
+		if (! defined $dirCreated) {
+			my $code = kiwiExit (1); return $code;
+		}
 		#==========================================
 		# Setup prepare 
 		#------------------------------------------
@@ -567,7 +572,7 @@ sub main {
 			qxx ("rm -f $Create/rootfs.tar");
 		}
 		if (-f "$Create/recovery.tar.gz") {
-			qxx ("rm -f $Create/recovery.tar.*");
+			qxx ("rm -f $Create/recovery.*");
 		}
 		#==========================================
 		# Check for overlay requirements
@@ -680,6 +685,12 @@ sub main {
 		# Create destdir if needed
 		#------------------------------------------
 		my $dirCreated = createDirInteractive($kiwi, $Destination);
+		if (! defined $dirCreated) {
+			if (defined $BaseRoot) {
+				$overlay -> resetOverlay();
+			}
+			my $code = kiwiExit (1); return $code;
+		}
 		#==========================================
 		# Check for default base root in XML
 		#------------------------------------------
@@ -1135,7 +1146,7 @@ sub main {
 		$kiwi -> info ("Creating boot USB stick from: $BootStick...\n");
 		$boot = new KIWIBoot (
 			$kiwi,$BootStick,$BootStickSystem,undef,
-			$BootStickDevice,undef,$LVM
+			$BootStickDevice,$LVM
 		);
 		if (! defined $boot) {
 			my $code = kiwiExit (1); return $code;
@@ -1246,7 +1257,7 @@ sub main {
 		}
 		$boot = new KIWIBoot (
 			$kiwi,$BootVMDisk,$BootVMSystem,
-			$BootVMSize,undef,$BootVMFormat,$LVM,\@ProfilesOrig
+			$BootVMSize,undef,$LVM,\@ProfilesOrig
 		);
 		if (! defined $boot) {
 			my $code = kiwiExit (1); return $code;
@@ -1257,6 +1268,21 @@ sub main {
 		}
 		$boot -> cleanTmp();
 		$code = kiwiExit (0); return $code;
+	}
+	
+	#==========================================
+	# Convert image into format/configuration
+	#------------------------------------------
+	if (defined $Convert) {
+		$kiwi -> info ("Starting image format conversion...\n");
+		my $format = new KIWIImageFormat ($kiwi,$Convert,$Format);
+		if (! $format) {
+			my $code = kiwiExit (1);
+			return $code;
+		}
+		$format -> createFormat();
+		$format -> createMaschineConfiguration();
+		my $code = kiwiExit (0); return $code;
 	}
 	return 1;
 }
@@ -1314,7 +1340,6 @@ sub init {
 		"bootstick-system=s"    => \$BootStickSystem,
 		"bootstick-device=s"    => \$BootStickDevice,
 		"bootvm-system=s"       => \$BootVMSystem,
-		"bootvm-format=s"       => \$BootVMFormat,
 		"bootvm-disksize=s"     => \$BootVMSize,
 		"installcd=s"           => \$InstallCD,
 		"installcd-system=s"    => \$InstallCDSystem,
@@ -1350,6 +1375,8 @@ sub init {
 		"clone|o=s"             => \$Clone,
 		"lvm"                   => \$LVM,
 		"grub-chainload"        => \$GrubChainload,
+		"format|f=s"            => \$Format,
+		"convert=s"             => \$Convert,
 		"debug"                 => \$Debug,
 		"help|h"                => \&usage,
 		"<>"                    => \&usage
@@ -1430,7 +1457,8 @@ sub init {
 		(! defined $BootCD)             &&
 		(! defined $BootUSB)            &&
 		(! defined $Clone)              &&
-		(! defined $RunTestSuite)
+		(! defined $RunTestSuite)       &&
+		(! defined $Convert)
 	) {
 		$kiwi -> error ("No operation specified");
 		$kiwi -> failed ();
@@ -1551,13 +1579,14 @@ sub usage {
 	print "       [ --bootstick-device <device> ]\n";
 	print "    kiwi --bootvm <initrd> --bootvm-system <systemImage>\n";
 	print "       [ --bootvm-disksize <size> ]\n";
-	print "       [ --bootvm-format <format> ]\n";
 	print "    kiwi --bootcd  <initrd>\n";
 	print "    kiwi --bootusb <initrd>\n";
 	print "    kiwi --installcd <initrd>\n";
 	print "       [ --installcd-system <vmx-system-image> ]\n";
 	print "    kiwi --installstick <initrd>\n";
 	print "       [ --installstick-system <vmx-system-image> ]\n";
+	print "Image format conversion:\n";
+	print "    kiwi --convert <systemImage> [ --format <vmdk|ovf|qcow2> ]\n";
 	print "Testsuite:\n";
 	print "    kiwi --testsuite <image-root> \n";
 	print "       [ --test name --test name ... ]\n";
@@ -2373,8 +2402,9 @@ sub checkType {
 			my %result = checkFileSystem ($fs);
 			if (%result) {
 				if (! $result{hastool}) {
-					my $tool = $KnownFS{$result{type}}{tool};
-					$kiwi -> error ("Can't find $tool tool for: $result{type}");
+					$kiwi -> error (
+						"Can't find filesystem tool for: $result{type}"
+					);
 					$kiwi -> failed ();
 					return undef;
 				}
@@ -2531,8 +2561,8 @@ sub mount {
 	# Check result of filesystem detection
 	#------------------------------------------
 	if (! %fsattr) {
-		$kiwi -> failed ();
 		$kiwi -> error  ("Couldn't detect filesystem on: $source");
+		$kiwi -> failed ();
 		return undef;
 	}
 	#==========================================
@@ -2671,7 +2701,7 @@ sub checkFileSystem {
 		$result{type}     = $fs;
 		$result{readonly} = $KnownFS{$fs}{ro};
 		$result{hastool}  = 0;
-		if (-x $KnownFS{$fs}{tool}) {
+		if (($KnownFS{$fs}{tool}) && (-x $KnownFS{$fs}{tool})) {
 			$result{hastool} = 1;
 		}
 	} else {

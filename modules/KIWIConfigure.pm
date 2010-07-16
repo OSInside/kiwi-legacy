@@ -81,13 +81,14 @@ sub new {
 # setupRecoveryArchive
 #------------------------------------------
 sub setupRecoveryArchive {
-	my $this  = shift;
-	my $fstype= shift;
-	my $kiwi  = $this->{kiwi};
-	my $dest  = $this->{imageDest};
-	my $xml   = $this->{xml};
-	my $root  = $this->{root};
-	my $start = $xml -> getOEMRecovery();
+	my $this    = shift;
+	my $fstype  = shift;
+	my $kiwi    = $this->{kiwi};
+	my $dest    = $this->{imageDest};
+	my $xml     = $this->{xml};
+	my $root    = $this->{root};
+	my $start   = $xml -> getOEMRecovery();
+	my $inplace = $xml -> getOEMRecoveryInPlace();
 	my $FD;
 	if ((! defined $start) || ("$start" eq "false")) {
 		return $this;
@@ -101,7 +102,7 @@ sub setupRecoveryArchive {
 	#==========================================
 	# Create tar archive from root tree .tar
 	#------------------------------------------
-	my $topts  = "--numeric-owner -cpf";
+	my $topts  = "--numeric-owner --hard-dereference -cpf";
 	my $excld  = "--exclude ./dev --exclude ./proc --exclude ./sys";
 	my $status = qxx (
 		"cd $root && tar $topts $dest/.recovery.tar . $excld 2>&1 &&
@@ -149,6 +150,27 @@ sub setupRecoveryArchive {
 		return undef;
 	}
 	#==========================================
+	# Create recovery partition size info
+	#------------------------------------------
+	if (! open ($FD,">$root/recovery.partition.size")) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Failed to create recovery partition size info: $!");
+		return undef;
+	}
+	my $psize = -s "$root/recovery.tar.gz";
+	$psize /= 1048576;
+	$psize += 100;
+	$psize = sprintf ("%.0f", $psize);
+	print $FD $psize;
+	close $FD;
+	$status = qxx ("cp $root/recovery.partition.size $dest 2>&1");
+	$code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Failed to copy partition size info file: $status");
+		return undef;
+	}
+	#==========================================
 	# Create destination filesystem information
 	#------------------------------------------
 	if (! open ($FD,">$root/recovery.tar.filesystem")) {
@@ -158,6 +180,12 @@ sub setupRecoveryArchive {
 	}
 	print $FD $fstype;
 	close $FD;
+	#==========================================
+	# Remove tarball for later recreation
+	#------------------------------------------
+	if (($inplace) && ("$inplace" eq "true")) {
+		qxx ("rm -f $root/recovery.tar.gz 2>&1");
+	}
 	$kiwi -> done ();
 	return $this;
 }
@@ -372,25 +400,23 @@ sub setupFirstBootYaST {
 		$kiwi -> failed ();
 		return "failed"; 
 	}
-	if ( ! open (FD,">$root/etc/reconfig_system")) {
-		$kiwi -> failed ();
-		$kiwi -> error ("Failed to create /etc/reconfig_system: $!");
-		$kiwi -> failed ();
-		return "failed";
-	}
-	close FD;
-
-	#
-	# keep an existing /etc/sysconfig/firstboot or copy the template from yast2-firstboot package
-	# if both don't exist, write a generic one (bnc#604705)
-	#
+	# /.../
+	# keep an existing /etc/sysconfig/firstboot or copy the template
+	# from yast2-firstboot package if both don't exist, write a
+	# generic one (bnc#604705)
+	# ----
 	if ( ! -e "$root/etc/sysconfig/firstboot" ) {
 		if ( -e "$root/var/adm/fillup-templates/sysconfig.firstboot" ) {
-			my $data = qxx ("cp $root/var/adm/fillup-templates/sysconfig.firstboot $root/etc/sysconfig/firstboot 2>&1");
+			my $template = "$root/var/adm/fillup-templates/sysconfig.firstboot";
+			my $data = qxx (
+				"cp $template $root/etc/sysconfig/firstboot 2>&1"
+			);
 			my $code = $? >> 8;
 			if ($code != 0) {
 				$kiwi -> failed ();
-				$kiwi -> error  ("Failed to copy the existing firstboot-sysconfig templage: $data");
+				$kiwi -> error  (
+					"Failed to copy firstboot-sysconfig templage: $data"
+				);
 				$kiwi -> failed ();
 				return "failed";
 			}
@@ -407,7 +433,8 @@ sub setupFirstBootYaST {
 			print FD "FIRSTBOOT_WELCOME_PATTERNS=\"\"\n";
 			print FD "FIRSTBOOT_LICENSE_DIR=\"/usr/share/firstboot\"\n";
 			print FD "FIRSTBOOT_NOVELL_LICENSE_DIR=\"/etc/YaST2\"\n";
-			print FD "FIRSTBOOT_FINISH_FILE=\"/usr/share/firstboot/congrats.txt\"\n";
+			print FD "FIRSTBOOT_FINISH_FILE=";
+			print FD "\"/usr/share/firstboot/congrats.txt\"\n";
 			print FD "FIRSTBOOT_RELEASE_NOTES_PATH=\"\"\n";
 			close FD;
 		}

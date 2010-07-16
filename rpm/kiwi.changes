@@ -1,8 +1,141 @@
 -------------------------------------------------------------------
+Thu Jul 15 15:59:20 CEST 2010 - ms@suse.de
+
+- v4.48
+- fixed recovery cleanup code
+- fixed umountSystem call to check proc/mounts and umount
+  a list of possible system mount paths in the right order
+- netboot: fixed creation of read-write partition
+- netboot: fixed boot partition setup, IFS restore required
+- netboot: imageDiskDevice was not set but used
+
+-------------------------------------------------------------------
+Thu Jul 15 14:07:05 CEST 2010 - ms@suse.de
+
+- v4.47
+- fixed parted sector init if the disk has no partitions
+  we need to set startSectors to 1
+
+-------------------------------------------------------------------
+Tue Jul 13 10:08:34 CEST 2010 - ms@suse.de
+
+- v4.46
+- do not fail when image files are symlinks to a device
+- fixed race condition resulting at times in message of not
+  finding the MBR and other times not finding the CD drive.
+- remove unneeded initrd.vmx and linux.vmx files _before_
+  calling mkinitrd. This saves space to not run into a space
+  problem on the boot partition (bnc #621859)
+- usb attribute in vmwareconfig doesn't exist anymore with
+  the new machine section. usb is always present for vmware
+  fixed xslt stylesheet for this case
+- fixed kernelList and xenServer functions:
+  * xenServer checks via kernel systemMap and kiwi_xendomain
+    if a xen server bootloader setup is required
+  * kernelList is fixed to store the running kernel as first
+    entry in the kernel list
+
+-------------------------------------------------------------------
+Tue Jul  6 11:12:29 CEST 2010 - ms@suse.de
+
+- v4.45
+- moved in-place recovery file creation into suse-dump
+  directly after the install verification (bnc #620777)
+- restructure source tree a bit. make templates and repos
+  architecture dependent because of the s390 implementations
+  kiwi now supports the creation of vmx and oem images for
+  s390 and the KVM virtual machine target
+- don't exit with an error if 'zypper rm' can't find the package
+- check for profiles when searching for foreign packages also
+  search in type=image and type=bootstrap package sections
+- fixed convert38to39 stylesheet
+
+-------------------------------------------------------------------
+Mon Jul  5 13:08:24 UTC 2010 - adrian@suse.de
+
+- simplify iso volume labels for inst-source medias
+
+-------------------------------------------------------------------
+Mon Jun 28 10:28:17 CEST 2010 - ms@suse.de
+
+- v4.44
+- added volume label for recovery partition (bnc #618276)
+- Cleanup formats in kiwi:
+  * create new KIWIImageFormat.pm module for the conversion
+    into different image formats like vmdk,ovf and friends.
+    Also added function for creating the machine configuration
+    into this new module
+  * create common XML specification for vmware|xen config
+    starting with <machine>
+  * added new option --convert to kiwi.
+  * recursively call kiwi with $main::Convert set to convert
+    into the specified format and/or configuration
+  * added bool attributes installcd and installstick replacing
+    the old format="iso" and format="usb" setup
+- moved the XML validation ahead of the first data extraction
+- changed the way validation errors are reported. If the xml
+  file was converted via XSL the error will be reported
+  against the converted file. This makes the error reporting
+  more meaningful as otherwise validation errors are reported
+  that are due to the use of an older schema version.
+- fixed typo in convert45to46.xsl. Do not swallow attributes
+  on packages of the vmware section
+- Thanks to Robert who did the last three ones, great work :)
+- fixed repartition problem with new and old parted. The
+  code has been changed in a way that it uses a sector
+  based start value and a cylinder based end value
+- fixed this path evaluation (bnc #619482)
+
+-------------------------------------------------------------------
+Fri Jun 18 12:18:11 CEST 2010 - ms@suse.de
+
+- v4.43
+- fixed split section evaluation (bnc #615121)
+- exit kiwi directly if the possible question to create
+  the destination directory was canceled by the user
+- migration: added version to cache file
+- changed spec file requirement: require virt-utils for
+  distro versions >= 11.3
+- started support for s390 imaging:
+  * zipl support in kiwi. This is still work in progress only
+    the skeleton at the required code points has been added.
+  * adapted the JeOS sle11 template to provided a profile
+    for x86 and s390 packages
+  * also added vmxboot and oemboot bootimages to be build
+    The code there will work as initrd for an s390 guest
+    within kvm
+- fixed <image name="..."/> attribute validation, space
+  and / is not allowed for this attribute (bnc #616626)
+- use cylinder based alignment with new parted version
+  2.2.x. This fixes the oem repartition code for systems
+  which uses parted >= 2.2.x build on a parted 1.9.x build
+  system. Also removed unused functions: partedGetSectors
+  and partedStartCylinder
+- update the min gnome example to 11.3
+- added oem-inplace-recovery option which allows creation
+  of the recovery tarball at first deployment instead of
+  creating the tarball and store it inside the image
+- fixed copy of root tree into final image. We used
+  cp -a $source/* $dest which did not match the dot files
+  in $source/.* Therefore I changed this to use a tar
+  based copy
+
+-------------------------------------------------------------------
 Mon Jun 14 11:10:15 CEST 2010 - ms@suse.de
 
+- v4.42
+- redesigned and restructure the kiwi migration module
+  we were working in a small workgroup this week to
+  establish a new version of the migration module. Thanks
+  to everybody in my team.
 - Remove some code duplication by using the functions:
   createDirInteractive() , getDefaultBaseRoot()
+- avoid a Perl runtime error message from being
+  printed if the XML file parsing fails.
+- changed findExec to return undef if the executable
+  cannot be found. If as previously the execName is returned
+  the caller has no way to differentiate whether or not the
+  desired executable actually exists on the system.
 
 -------------------------------------------------------------------
 Wed Jun  9 12:40:39 CEST 2010 - ms@suse.de

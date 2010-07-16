@@ -1279,7 +1279,7 @@ sub removePackages {
 		print $fd "@kchroot @zypper refresh &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
 		print $fd "test \$? = 0 && @kchroot @zypper remove ";
-		print $fd "@installOpts @removePackages &\n";
+		print $fd "@installOpts @removePackages || true &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
 		print $fd "ECODE=\$?\n";
 		print $fd "echo \$ECODE > $screenCall.exit\n";
@@ -1445,7 +1445,7 @@ sub setupUpgrade {
 			my @removePackages = @{$delPacks};
 			if (@removePackages) {
 				print $fd "@kchroot @zypper remove ";
-				print $fd "--force-resolution @removePackages &\n";
+				print $fd "--force-resolution @removePackages || true &\n";
 				print $fd "SPID=\$!;wait \$SPID\n";
 				print $fd "test \$? = 0 && ";
 			}

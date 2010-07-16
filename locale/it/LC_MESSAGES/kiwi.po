@@ -46,6 +46,10 @@ msgstr "%1 file da %2 sono stati ripristinati..."
 msgid "backing up: %1..."
 msgstr "backup in corso: %1..."
 
+#, fuzzy
+msgid "archiving: %1..."
+msgstr "backup in corso: %1..."
+
 msgid "restoring: %1..."
 msgstr "ripristino in corso... : %1"
 

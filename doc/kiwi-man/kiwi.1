@@ -1,12 +1,12 @@
 .\"     Title: kiwi
 .\"    Author: Marcus Schaefer <ms (AT) suse.de>
 .\" Generator: DocBook XSL Stylesheets v1.74.0 <http://docbook.sf.net/>
-.\"      Date: Created: 06/11/2010
+.\"      Date: Created: 07/16/2010
 .\"    Manual: KIWI Manualpage
-.\"    Source: KIWI 4.41
+.\"    Source: KIWI 4.48
 .\"  Language: English
 .\"
-.TH "KIWI" "1" "Created: 06/11/2010" "KIWI 4\&.41" "KIWI Manualpage"
+.TH "KIWI" "1" "Created: 07/16/2010" "KIWI 4\&.48" "KIWI Manualpage"
 .\" -----------------------------------------------------------------
 .\" * (re)Define some macros
 .\" -----------------------------------------------------------------
@@ -231,7 +231,7 @@ The KIWI post\-processing modes are used for special image deployment tasks, lik
 .fam
 .fam C
 .HP \w'\fBkiwi\fR\ 'u
-\fBkiwi\fR \-\-bootvm\ \fIinitrd\fR \-\-bootvm\-system\ \fIsystemImage\fR [\-\-bootvm\-disksize\ \fIsize\fR] [\-\-bootvm\-format\ \fIformat\fR]
+\fBkiwi\fR \-\-bootvm\ \fIinitrd\fR \-\-bootvm\-system\ \fIsystemImage\fR [\-\-bootvm\-disksize\ \fIsize\fR]
 .fam
 .fam C
 .HP \w'\fBkiwi\fR\ 'u
@@ -244,6 +244,13 @@ The KIWI post\-processing modes are used for special image deployment tasks, lik
 .fam C
 .HP \w'\fBkiwi\fR\ 'u
 \fBkiwi\fR \-\-installstick\ \fIinitrd\fR \-\-installstick\-system\ \fIvmx\-system\-image\fR
+.fam
+.SH "Image format conversion"
+.PP
+The KIWI format conversion is useful to perform the creation of another image output format like vmdk for VMware or ovf the open virtual machine format\&. Along with the conversion kiwi also creates the virtual machine configuration according to the format if there is a machine section specified in the xml description
+.fam C
+.HP \w'\fBkiwi\fR\ 'u
+\fBkiwi\fR \-\-convert\ \fIsystemImage\fR [\-\-format\ \fIvmdk|ovf|qcow2\fR]
 .fam
 .SH "Testsuite"
 .PP

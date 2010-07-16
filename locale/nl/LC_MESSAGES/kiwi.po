@@ -52,6 +52,10 @@ msgstr "%1 bestanden van %2 hersteld..."
 msgid "backing up: %1..."
 msgstr "reservekopie maken van: %1..."
 
+#, fuzzy
+msgid "archiving: %1..."
+msgstr "reservekopie maken van: %1..."
+
 #
 msgid "restoring: %1..."
 msgstr "herstellen van: %1..."

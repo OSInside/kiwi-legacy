@@ -52,6 +52,10 @@ msgstr "%1 tiedostoa %2 palautettiin..."
 msgid "backing up: %1..."
 msgstr "varmuuskopioidaan: %1..."
 
+#, fuzzy
+msgid "archiving: %1..."
+msgstr "varmuuskopioidaan: %1..."
+
 #
 msgid "restoring: %1..."
 msgstr "palautetaan: %1..."

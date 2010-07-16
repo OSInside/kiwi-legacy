@@ -47,7 +47,10 @@ if [ -x /sbin/blogd ];then
 	test -z "$CONSOLE"            && export CONSOLE=/dev/console
 	test -z "$REDIRECT"           && export REDIRECT=/dev/tty1
 fi
-    
+if [ -z "$PARTED_VERSION" ];then
+	export PARTED_VER=$(parted -v | head -n 1 | cut -f4 -d" " | cut -f1-2 -d.)
+fi
+
 #======================================
 # Dialog
 #--------------------------------------
@@ -149,7 +152,9 @@ function closeKernelConsole {
 	# /.../
 	# close the kernel console, set level to 1
 	# ----
-	klogconsole -l 1
+	if [ -x /usr/sbin/klogconsole ];then
+		klogconsole -l 1
+	fi
 }
 #======================================
 # openKernelConsole
@@ -161,6 +166,9 @@ function openKernelConsole {
 	# but it isn't really. If DEBUG is set the logging remains on
 	# the first console
 	# ----
+	if [ ! -x /usr/sbin/klogconsole ];then
+		return
+	fi
 	if test "$DEBUG" = 0;then
 		Echo "Kernel logging enabled on: /dev/tty$KLOG_CONSOLE"
 		setctsid /dev/tty$KLOG_CONSOLE \
@@ -175,6 +183,9 @@ function reopenKernelConsole {
 	# reopen kernel console to be able to see kernel messages
 	# while the system is booting
 	# ----
+	if [ ! -x /usr/sbin/klogconsole ];then
+		return
+	fi
 	Echo "Kernel logging enabled on: /dev/tty$KLOG_DEFAULT"
 	klogconsole -l 7 -r$KLOG_DEFAULT
 }
@@ -547,6 +558,8 @@ function installBootLoader {
 		x86_64-syslinux) installBootLoaderSyslinux ;;
 		i*86-extlinux)   installBootLoaderSyslinux ;;
 		x86_64-extlinux) installBootLoaderSyslinux ;;
+		s390-zipl)       installBootLoaderS390 ;;
+		s390x-zipl)      installBootLoaderS390 ;;
 		*)
 		systemException \
 			"*** boot loader install for $arch-$loader not implemented ***" \
@@ -573,11 +586,28 @@ function installBootLoaderRecovery {
 		x86_64-syslinux) installBootLoaderSyslinuxRecovery ;;
 		i*86-extlinux)   installBootLoaderSyslinuxRecovery ;;
 		x86_64-extlinux) installBootLoaderSyslinuxRecovery ;;
+		s390-zipl)       installBootLoaderS390Recovery ;;
+		s390x-zipl)      installBootLoaderS390Recovery ;;
 		*)
 		systemException \
 			"*** boot loader setup for $arch-$loader not implemented ***" \
 		"reboot"
 	esac
+}
+#======================================
+# installBootLoaderS390
+#--------------------------------------
+function installBootLoaderS390 {
+	if [ -x /sbin/zipl ];then
+		Echo "Installing boot loader..."
+		zipl -c /etc/zipl.conf 1>&2
+		if [ ! $? = 0 ];then
+			Echo "Failed to install boot loader"
+		fi
+	else
+		Echo "Image doesn't have zipl installed"
+		Echo "Can't install boot loader"
+	fi
 }
 #======================================
 # installBootLoaderSyslinux
@@ -636,6 +666,14 @@ function installBootLoaderLilo {
 	fi
 }
 #======================================
+# installBootLoaderS390Recovery
+#--------------------------------------
+function installBootLoaderS390Recovery {
+	systemException \
+		"*** zipl: recovery boot not implemented ***" \
+	"reboot"
+}
+#======================================
 # installBootLoaderSyslinuxRecovery
 #--------------------------------------
 function installBootLoaderSyslinuxRecovery {
@@ -689,6 +727,7 @@ function setupSUSEInitrd {
 	local umountProc=0
 	local umountSys=0
 	local systemMap=0
+	local haveVMX=0
 	local params
 	local running
 	local rlinux
@@ -711,6 +750,13 @@ function setupSUSEInitrd {
 		if grep -qi param_B /sbin/mkinitrd;then
 			params="-B"
 		fi
+		if [ $bootLoaderOK = "1" ];then
+			if [ -f /boot/initrd.vmx ];then
+				rm -f /boot/initrd.vmx
+				rm -f /boot/linux.vmx
+				haveVMX=1
+			fi
+		fi
 		if ! mkinitrd $params;then
 			Echo "Can't create initrd"
 			systemIntegrity=unknown
@@ -719,16 +765,12 @@ function setupSUSEInitrd {
 		if [ -f /etc/init.d/boot.device-mapper ];then
 			/etc/init.d/boot.device-mapper stop
 		fi
-		if [ $bootLoaderOK = "1" ];then
-			if [ -f /boot/initrd.vmx ];then
-				rm -f /boot/initrd.vmx
-				rm -f /boot/linux.vmx
-				running=$(uname -r)
-				rlinux=vmlinuz-$running
-				rinitrd=initrd-$running
-				ln -s $rlinux  /boot/linux.vmx
-				ln -s $rinitrd /boot/initrd.vmx
-			fi
+		if [ $bootLoaderOK = "1" ] && [ $haveVMX = "1" ];then
+			running=$(uname -r)
+			rlinux=vmlinuz-$running
+			rinitrd=initrd-$running
+			ln -s $rlinux  /boot/linux.vmx
+			ln -s $rinitrd /boot/initrd.vmx
 		fi
 		if [ $umountSys -eq 1 ];then
 			umount /sys
@@ -799,6 +841,8 @@ function setupBootLoader {
 		x86_64-syslinux) eval setupBootLoaderSyslinux $para ;;
 		i*86-extlinux)   eval setupBootLoaderSyslinux $para ;;
 		x86_64-extlinux) eval setupBootLoaderSyslinux $para ;;
+		s390-zipl)       eval setupBootLoaderS390 $para ;;
+		s390x-zipl)      eval setupBootLoaderS390 $para ;;
 		ppc*)            eval setupBootLoaderLilo $para ;;
 		*)
 		systemException \
@@ -831,11 +875,21 @@ function setupBootLoaderRecovery {
 		x86_64-syslinux) eval setupBootLoaderSyslinuxRecovery $para ;;
 		i*86-extlinux)   eval setupBootLoaderSyslinuxRecovery $para ;;
 		x86_64-extlinux) eval setupBootLoaderSyslinuxRecovery $para ;;
+		s390-zipl)       eval setupBootLoaderS390Recovery $para ;;
+		s390x-zipl)      eval setupBootLoaderS390Recovery $para ;;
 		*)
 		systemException \
 			"*** boot loader setup for $arch-$loader not implemented ***" \
 		"reboot"
 	esac
+}
+#======================================
+# setupBootLoaderS390Recovery
+#--------------------------------------
+function setupBootLoaderS390Recovery {
+	systemException \
+		"*** zipl: recovery boot not implemented ***" \
+	"reboot"
 }
 #======================================
 # setupBootLoaderSyslinuxRecovery
@@ -900,7 +954,7 @@ function setupBootLoaderSyslinuxRecovery {
 		#--------------------------------------
 		title=$(makeLabel "Recover/Repair System")
 		echo "label $title"                                >> $conf
-		if xenServer;then
+		if xenServer $kernel $mountPrefix;then
 			systemException \
 				"*** $loader: Xen dom0 boot not implemented ***" \
 			"reboot"
@@ -926,7 +980,7 @@ function setupBootLoaderSyslinuxRecovery {
 		#--------------------------------------
 		title=$(makeLabel "Restore Factory System")
 		echo "label $title"                                >> $conf
-		if xenServer;then
+		if xenServer $kernel $mountPrefix;then
 			systemException \
 				"*** $loader: Xen dom0 boot not implemented ***" \
 			"reboot"
@@ -1002,7 +1056,7 @@ function setupBootLoaderGrubRecovery {
 		#--------------------------------------
 		title=$(makeLabel "Recover/Repair System")
 		echo "title $title"                               >> $menu
-		if xenServer;then
+		if xenServer $kernel $mountPrefix;then
 			echo " root $gdev_recovery"                   >> $menu
 			echo " kernel /boot/xen.gz"                   >> $menu
 			echo -n " module /boot/$kernel"               >> $menu
@@ -1038,7 +1092,7 @@ function setupBootLoaderGrubRecovery {
 		#--------------------------------------
 		title=$(makeLabel "Restore Factory System")
 		echo "title $title"                               >> $menu
-		if xenServer;then
+		if xenServer $kernel $mountPrefix;then
 			echo " root $gdev_recovery"                   >> $menu
 			echo " kernel /boot/xen.gz"                   >> $menu
 			echo -n " module /boot/$kernel"               >> $menu
@@ -1071,6 +1125,199 @@ function setupBootLoaderGrubRecovery {
 			echo " initrd $gdev_recovery/boot/$initrd"    >> $menu
 		fi
 	fi
+}
+#======================================
+# setupBootLoaderS390
+#--------------------------------------
+function setupBootLoaderS390 {
+	# /.../
+	# create /etc/zipl.conf used for the
+	# zipl bootloader
+	# ----
+	local mountPrefix=$1  # mount path of the image
+	local destsPrefix=$2  # base dir for the config files
+	local znum=$3         # boot partition ID
+	local rdev=$4         # root partition
+	local zfix=$5         # zipl title postfix
+	local swap=$6         # optional swap partition
+	local conf=$destsPrefix/etc/zipl.conf
+	local sysb=$destsPrefix/etc/sysconfig/bootloader
+	local kname=""
+	local kernel=""
+	local initrd=""
+	local title=""
+	#======================================
+	# check for device by ID
+	#--------------------------------------
+	local diskByID=`getDiskID $rdev`
+	local swapByID=`getDiskID $swap`
+	#======================================
+	# check for boot image .profile
+	#--------------------------------------
+	if [ -f /.profile ];then
+		importFile < /.profile
+	fi
+	#======================================
+	# check for bootloader displayname
+	#--------------------------------------
+	if [ -z "$kiwi_oemtitle" ] && [ ! -z "$kiwi_displayname" ];then
+		kiwi_oemtitle=$kiwi_displayname
+	fi
+	#======================================
+	# check for system image .profile
+	#--------------------------------------
+	if [ -f $mountPrefix/image/.profile ];then
+		importFile < $mountPrefix/image/.profile
+	fi
+	#======================================
+	# check for kernel options
+	#--------------------------------------
+	if [ ! -z "$kiwi_cmdline" ];then
+		KIWI_KERNEL_OPTIONS="$KIWI_KERNEL_OPTIONS $kiwi_cmdline"
+	fi
+	#======================================
+	# check for syslinux title postfix
+	#--------------------------------------
+	if [ -z "$zfix" ];then
+		zfix="unknown"
+	fi
+	#======================================
+	# check for boot TIMEOUT
+	#--------------------------------------
+	if [ -z "$KIWI_BOOT_TIMEOUT" ];then
+		KIWI_BOOT_TIMEOUT=100;
+	fi
+	#======================================
+	# create directory structure
+	#--------------------------------------
+	for dir in $conf $sysb;do
+		dir=`dirname $dir`; mkdir -p $dir
+	done
+	#======================================
+	# create zipl.conf file
+	#--------------------------------------
+	local count
+	local title_default
+	local title_failsafe
+	echo "[defaultboot]"                      > $conf
+	echo "defaultmenu = menu"                >> $conf
+	echo ":menu"                             >> $conf
+	echo "    default = 1"                   >> $conf
+	echo "    prompt = 1"                    >> $conf
+	echo "    target = /boot/zipl"           >> $conf
+	echo "    timeout = $KIWI_BOOT_TIMEOUT"  >> $conf
+	count=1
+	IFS="," ; for i in $KERNEL_LIST;do
+		if test -z "$i";then
+			continue
+		fi
+		kname=${KERNEL_NAME[$count]}
+		if ! echo $zfix | grep -E -q "OEM|USB|VMX|NET|unknown";then
+			if [ "$count" = "1" ];then
+				title_default=$(makeLabel "$zfix")
+			else
+				title_default=$(makeLabel "$kname ( $zfix )")
+			fi
+		elif [ -z "$kiwi_oemtitle" ];then
+			title_default=$(makeLabel "$kname ( $zfix )")
+		else
+			if [ "$count" = "1" ];then
+				title_default=$(makeLabel "$kiwi_oemtitle ( $zfix )")
+			else
+				title_default=$(makeLabel "$kiwi_oemtitle-$kname ( $zfix )")
+			fi
+		fi
+		title_failsafe=$(makeLabel "Failsafe -- $title_default")
+		echo "    $count = $title_default"  >> $conf
+		count=`expr $count + 1`
+		echo "    $count = $title_failsafe" >> $conf
+		count=`expr $count + 1`
+	done
+	count=1
+	IFS="," ; for i in $KERNEL_LIST;do
+		if test -z "$i";then
+			continue
+		fi
+		kernel=`echo $i | cut -f1 -d:`
+		initrd=`echo $i | cut -f2 -d:`
+		kname=${KERNEL_NAME[$count]}
+		if ! echo $zfix | grep -E -q "OEM|USB|VMX|NET|unknown";then
+			if [ "$count" = "1" ];then
+				title_default=$(makeLabel "$zfix")
+			else
+				title_default=$(makeLabel "$kname ( $zfix )")
+			fi
+		elif [ -z "$kiwi_oemtitle" ];then
+			title_default=$(makeLabel "$kname ( $zfix )")
+		else
+			if [ "$count" = "1" ];then
+				title_default=$(makeLabel "$kiwi_oemtitle ( $zfix )")
+			else
+				title_default=$(makeLabel "$kiwi_oemtitle-$kname ( $zfix )")
+			fi
+		fi
+		title_failsafe=$(makeLabel "Failsafe -- $title_default")
+		#======================================
+		# create standard entry
+		#--------------------------------------
+		echo "[$title_default]"                  >> $conf
+		echo "target  = /boot/zipl"              >> $conf
+		echo "image   = /boot/$kernel"           >> $conf
+		echo "ramdisk = /boot/$initrd,0x2000000" >> $conf
+		echo -n "parameters = \"root=$diskByID"  >> $conf
+		if [ ! -z "$imageDiskDevice" ];then
+			echo -n " disk=$(getDiskID $imageDiskDevice)"  >> $conf
+		fi
+		if [ ! -z "$swap" ];then
+			echo -n " resume=$swapByID" >> $conf
+		fi
+		if [ "$haveLVM" = "yes" ];then
+			echo -n " VGROUP=$VGROUP" >> $conf
+		fi
+		echo -n " $KIWI_INITRD_PARAMS"  >> $conf
+		echo -n " $KIWI_KERNEL_OPTIONS" >> $conf
+		echo " loader=$loader\""        >> $conf
+		#======================================
+		# create failsafe entry
+		#--------------------------------------
+		echo "[$title_failsafe]"                 >> $conf
+		echo "target  = /boot/zipl"              >> $conf
+		echo "image   = /boot/$kernel"           >> $conf
+		echo "ramdisk = /boot/$initrd,0x2000000" >> $conf
+		echo -n "parameters = \"root=$diskByID"  >> $conf
+		if [ ! -z "$imageDiskDevice" ];then
+			echo -n " disk=$(getDiskID $imageDiskDevice)"  >> $conf
+		fi
+		if [ "$haveLVM" = "yes" ];then
+			echo -n " VGROUP=$VGROUP" >> $conf
+		fi
+		echo -n " $KIWI_INITRD_PARAMS"       >> $conf
+		echo -n " $KIWI_KERNEL_OPTIONS"      >> $conf
+		echo " loader=$loader x11failsafe\"" >> $conf
+		count=`expr $count + 1`
+	done
+	#======================================
+	# create recovery entry
+	#--------------------------------------
+	if [ ! -z "$OEM_RECOVERY" ];then
+		systemException \
+			"*** zipl: recovery chain loading not implemented ***" \
+		"reboot"
+	fi
+	#======================================
+	# create sysconfig/bootloader
+	#--------------------------------------
+	echo "LOADER_TYPE=\"$loader\""                            > $sysb
+	echo "LOADER_LOCATION=\"mbr\""                           >> $sysb
+	echo -n "DEFAULT_APPEND=\"root=$diskByID splash=silent"  >> $sysb
+	if [ ! -z "$swap" ];then
+		echo -n " resume=$swapByID"                          >> $sysb
+	fi
+	echo -n " $KIWI_INITRD_PARAMS $KIWI_KERNEL_OPTIONS"      >> $sysb
+	echo " showopts\""                                       >> $sysb
+	echo -n "FAILSAFE_APPEND=\"root=$diskByID"               >> $sysb
+	echo -n " $KIWI_INITRD_PARAMS $KIWI_KERNEL_OPTIONS"      >> $sysb
+	echo -n " x11failsafe noresume\""                        >> $sysb
 }
 #======================================
 # setupBootLoaderSyslinux
@@ -1205,7 +1452,7 @@ function setupBootLoaderSyslinux {
 			#--------------------------------------
 			echo "DEFAULT $title"                              >> $conf
 			echo "label $title"                                >> $conf
-			if xenServer;then
+			if xenServer $kernel $mountPrefix;then
 				systemException \
 					"*** $loader: Xen dom0 boot not implemented ***" \
 				"reboot"
@@ -1236,7 +1483,7 @@ function setupBootLoaderSyslinux {
 			#--------------------------------------
 			title=$(makeLabel "Failsafe -- $title")
 			echo "label $title"                                >> $conf
-			if xenServer;then
+			if xenServer $kernel $mountPrefix;then
 				systemException \
 					"*** $loader: Xen dom0 boot not implemented ***" \
 				"reboot"
@@ -1421,7 +1668,7 @@ function setupBootLoaderGrub {
 			# create standard entry
 			#--------------------------------------
 			echo "title $title"                                   >> $menu
-			if xenServer;then
+			if xenServer $kname $mountPrefix;then
 				echo " root $gdev"                                >> $menu
 				echo " kernel /boot/xen.gz"                       >> $menu
 				echo -n " module /boot/$kernel"                   >> $menu
@@ -1469,7 +1716,7 @@ function setupBootLoaderGrub {
 			#--------------------------------------
 			title=$(makeLabel "Failsafe -- $title")
 			echo "title $title"                                   >> $menu
-			if xenServer;then
+			if xenServer $kname $mountPrefix;then
 				echo " root $gdev"                                >> $menu
 				echo " kernel /boot/xen.gz"                       >> $menu
 				echo -n " module /boot/$kernel"                   >> $menu
@@ -1677,7 +1924,7 @@ function setupBootLoaderLilo {
 			# create standard entry
 			#--------------------------------------
 			echo "label=\"$title\""                           >> $conf
-			if xenServer;then
+			if xenServer $kname $mountPrefix;then
 				systemException \
 					"*** lilo: Xen dom0 boot not implemented ***" \
 				"reboot"
@@ -1708,7 +1955,7 @@ function setupBootLoaderLilo {
 			#--------------------------------------
 			title=$(makeLabel "Failsafe -- $title")
 			echo "label=\"$title\""                           >> $conf
-			if xenServer;then
+			if xenServer $kname $mountPrefix;then
 				systemException \
 					"*** lilo: Xen dom0 boot not implemented ***" \
 				"reboot"
@@ -1896,12 +2143,6 @@ function updateLVMBootDeviceFstab {
 #--------------------------------------
 function updateClicBootDeviceFstab {
 	updateLVMBootDeviceFstab $1 $2 "/clicboot"
-}
-#======================================
-# updatePXEBootDeviceFstab
-#--------------------------------------
-function updatePXEBootDeviceFstab {
-	updateLVMBootDeviceFstab $1 $2 "/static-boot"
 }
 #======================================
 # updateLuksBootDeviceFstab
@@ -2267,9 +2508,10 @@ function probeDevices {
 	#======================================
 	# Manual loading of modules
 	#--------------------------------------
-	for i in rd brd edd dm-mod xennet xenblk;do
+	for i in rd brd edd dm-mod xennet xenblk virtio_blk;do
 		modprobe $i &>/dev/null
 	done
+	udevPending
 }
 #======================================
 # CDDevice
@@ -2653,8 +2895,9 @@ function searchBIOSBootDevice {
 		if [ ! -b $curd ];then
 			continue
 		fi
-		mbrM=`dd if=$curd bs=1 count=4 skip=$((0x1b8))|hexdump -n4 -e '"0x%x"'`
-		if [ "$mbrM" = "$mbrI" ];then
+		mbrML=`dd if=$curd bs=1 count=4 skip=$((0x1b8))|hexdump -n4 -e '"0x%x"'`
+		mbrMB=`echo $mbrML | sed 's/^0x\(..\)\(..\)\(..\)\(..\)$/0x\4\3\2\1/'`
+		if [ "$mbrML" = "$mbrI" ] || [ "$mbrMB" = "$mbrI" ];then
 			ifix=1
 			matched=$curd
 			if [ "$curd" = "$bios" ];then
@@ -2986,23 +3229,6 @@ function partedGetPartitionID {
 		cut -f2 -d= | tr -d ";" | tr -d 0
 }
 #======================================
-# partedGetSectors
-#--------------------------------------
-function partedGetSectors {
-	# /.../
-	# calculate start/end sector for given
-	# sector size
-	# ---
-	p_start=$1
-	if [ $p_start -gt 63 ];then
-		p_start=`expr $p_start + 1`
-	fi
-	p_stopp=`expr $p_start + $2`
-	if [ $p_stopp -gt $p_size ];then
-		p_stopp=$p_size
-	fi
-}
-#======================================
 # partitionID
 #--------------------------------------
 function partitionID {
@@ -3049,38 +3275,65 @@ function kernelList {
 	# save the valid linknames in the variable KERNEL_LIST
 	# ----
 	local prefix=$1
-	local kcount=0
+	local kcount=1
 	local kname=""
 	local kernel=""
 	local initrd=""
+	local kpair=""
+	local krunning=`uname -r`
 	KERNEL_LIST=""
 	KERNEL_NAME=""
-	for i in $prefix/lib/modules/*;do
-		if [ ! -d $i ];then
-			continue
-		fi
-		unset KERNEL_PAIR
-		unset kernel
-		unset initrd
-		kname=`basename $i`
-		for k in $prefix/boot/vmlinu[zx]-${i##*/}; do
-			if [ -f $k ];then
-				kernel=${k##*/}
-				initrd=initrd-${i##*/}
+	KERNEL_PAIR=""
+	#======================================
+	# search running kernel first
+	#--------------------------------------
+	if [ -d $prefix/lib/modules/$krunning ];then
+		for name in vmlinux vmlinuz image;do
+			if [ -f $prefix/boot/$name-$krunning ];then
+				kernel=$name-$krunning
+				initrd=initrd-$krunning
+				break
 			fi
 		done
-		if [ -z $kernel ];then
+		if [ -z "$kernel" ];then
 			continue
 		fi
-		kcount=$((kcount+1))
 		KERNEL_PAIR=$kernel:$initrd
-		KERNEL_NAME[$kcount]=$kname
-		if [ $kcount = 1 ];then
-			KERNEL_LIST=$KERNEL_PAIR
-		elif [ $kcount -gt 1 ];then
-			KERNEL_LIST=$KERNEL_LIST,$KERNEL_PAIR
-		fi
-	done
+		KERNEL_NAME[$kcount]=$krunning
+		KERNEL_LIST=$KERNEL_PAIR
+	fi
+	#======================================
+	# search for other kernels
+	#--------------------------------------
+	if [ ! -z "$KERNEL_LIST" ];then
+		for i in $prefix/lib/modules/*;do
+			if [ ! -d $i ];then
+				continue
+			fi
+			unset kernel
+			unset initrd
+			kname=`basename $i`
+			if [ "$kname" = $krunning ];then
+				continue
+			fi
+			for name in vmlinux vmlinuz image;do
+			for k in $prefix/boot/$name-${i##*/}; do
+				if [ -f $k ];then
+					kernel=${k##*/}
+					initrd=initrd-${i##*/}
+					break 2
+				fi
+			done
+			done
+			if [ -z "$kernel" ];then
+				continue
+			fi
+			kcount=$((kcount+1))
+			kpair=$kernel:$initrd
+			KERNEL_NAME[$kcount]=$kname
+			KERNEL_LIST=$KERNEL_LIST,$kpair
+		done
+	fi
 	if [ -z "$KERNEL_LIST" ];then
 		# /.../
 		# the system image doesn't provide the kernel and initrd but
@@ -3100,6 +3353,7 @@ function kernelList {
 	fi
 	export KERNEL_LIST
 	export KERNEL_NAME
+	export KERNEL_PAIR
 }
 #======================================
 # validateSize
@@ -3255,39 +3509,34 @@ function checkServer {
 function umountSystem {
 	local retval=0
 	local OLDIFS=$IFS
-	local mountPath=/mnt
+	local mountList="/mnt /read-only /read-write"
 	IFS=$IFS_ORIG
-	if test ! -z $UNIONFS_CONFIG;then
-		roDir=/read-only
-		rwDir=/read-write
-		xiDir=/xino
-		if ! umount $mountPath >/dev/null;then
-			retval=1
-		fi
-		for dir in $roDir $rwDir $xiDir;do
-			if [ -d $dir ];then
-				if ! umount $dir >/dev/null;then
-				if ! umount -l $dir >/dev/null;then
+	#======================================
+	# umount boot device
+	#--------------------------------------
+	if [ ! -z "$imageBootDevice" ];then
+		umount $imageBootDevice 1>&2
+	fi
+	#======================================
+	# umount mounted mountList paths
+	#--------------------------------------
+	for mpath in $(cat /proc/mounts | cut -f2 -d " ");do
+		for umount in $mountList;do
+			if [ "$mpath" = "$umount" ];then
+				if ! umount $mpath >/dev/null;then
+				if ! umount -l $mpath >/dev/null;then
 					retval=1
 				fi
 				fi
 			fi
 		done
-	elif test ! -z $COMBINED_IMAGE;then
-		rm -f /read-only >/dev/null
-		rm -f /read-write >/dev/null
-		umount /mnt/read-only >/dev/null || retval=1
-		umount /mnt/read-write >/dev/null || retval=1
-		umount /mnt >/dev/null || retval=1
-	else
-		if ! umount $mountPath >/dev/null;then
-			retval=1
-		fi
-	fi
-	if [ ! -z "$imageBootDevice" ];then
-		umount /mnt/boot
-		umount $imageBootDevice
-	fi
+	done
+	#======================================
+	# remove mount points
+	#--------------------------------------
+	for dir in "/read-only" "/read-write" "/xino";do
+		test -d $dir && rmdir $dir 1>&2
+	done
 	IFS=$OLDIFS
 	return $retval
 }
@@ -3444,9 +3693,11 @@ function mountSystemClicFS {
 	local rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
 	local roDevice=`echo $UNIONFS_CONFIG | cut -d , -f 2`
 	local clic_cmd=clicfs
+	local resetReadWrite=0
 	local haveBytes
 	local haveKByte
 	local haveMByte
+	local wantCowFS
 	local size
 	#======================================
 	# load fuse module
@@ -3480,13 +3731,23 @@ function mountSystemClicFS {
 	else
 		haveBytes=`blockdev --getsize64 $rwDevice`
 		haveMByte=`expr $haveBytes / 1024 / 1024`
+		wantCowFS=0
 		if \
 			[ "x$kiwi_hybrid" = "xyes" ] &&
 			[ "x$kiwi_hybridpersistent" = "xyes" ]
 		then
+			# write into a cow file on a filesystem, for hybrid iso's
+			wantCowFS=1
+		fi
+		if [ $wantCowFS = 1 ];then
 			# write into a cow file on a filesystem
 			mkdir -p $HYBRID_PERSISTENT_DIR
-			if ! mount $rwDevice $HYBRID_PERSISTENT_DIR;then
+			if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
+				resetReadWrite=1
+			elif ! mount $rwDevice $HYBRID_PERSISTENT_DIR;then
+				resetReadWrite=1
+			fi
+			if [ $resetReadWrite = 1 ];then
 				if ! setupReadWrite; then
 					Echo "Failed to setup read-write filesystem"
 					return 1
@@ -3785,8 +4046,10 @@ function cleanDirectory {
 #--------------------------------------
 function cleanInitrd {
 	cp /usr/bin/chroot /bin
-	cp /usr/sbin/klogconsole /bin
 	cp /sbin/halt /bin/reboot
+	if [ -x /usr/sbin/klogconsole ];then
+		cp /usr/sbin/klogconsole /bin
+	fi
 	for dir in /*;do
 		case "$dir" in
 			"/lib")   continue ;;
@@ -4484,10 +4747,31 @@ function canWrite {
 #--------------------------------------
 function xenServer {
 	# /.../
-	# test if we are running a Xen dom0 kernel
-	# ---
-	local check=/proc/xen/capabilities
-	if cat $check 2>/dev/null | grep "control_d" &>/dev/null; then
+	# check if the given kernel is a xen kernel and if so
+	# check if a dom0 or a domU setup was requested
+	# ----
+	local kname=$1
+	local mountPrefix=$2
+	local sysmap="$mountPrefix/boot/System.map-$kname"
+	local isxen
+	if [ ! -e $sysmap ]; then
+		sysmap="$mountPrefix/boot/System.map"
+	fi
+	if [ ! -e $sysmap ]; then
+		Echo "No system map for kernel $kname found"
+		return 1
+	fi
+	isxen=$(grep -c "xen_base" $sysmap)
+	if [ $isxen -eq 0 ]; then
+		# not a xen kernel
+		return 1
+	fi
+	if [ -z "$kiwi_xendomain" ];then
+		# no xen domain set, assume domU
+		return 1
+	fi
+	if [ $kiwi_xendomain = "dom0" ];then
+		# xen dom0 requested
 		return 0
 	fi
 	return 1
@@ -4949,6 +5233,7 @@ function createPartitionerInput {
 	else
 		Echo "Repartition the disk according to real geometry [ parted ]"
 		partedInit $imageDiskDevice
+		partedSectorInit $imageDiskDevice
 		createPartedInput $imageDiskDevice $@
     fi
 }
@@ -4994,24 +5279,47 @@ function partedWrite {
 	# ----
 	local device=$1
 	local cmds=$2
-	if ! parted -m $device unit cyl $cmds;then
+	local opts
+	if [ $PARTED_VER = "2.2" ];then
+		opts="-a cyl"
+	fi
+	if ! parted $opts -m $device unit cyl $cmds;then
 		systemException "Failed to create partition table" "reboot"
 	fi
 	partedInit $device
 }
 #======================================
-# partedStartCylinder
+# partedSectorInit
 #--------------------------------------
-function partedStartCylinder {
+function partedSectorInit {
 	# /.../
-	# return start cylinder of given partition.
-	# lowest cylinder number is 0
+	# return start/end sectors of current partitions.
 	# ----
-	local part=$(($1 + 3))
-	local IFS=""
-	local header=$(echo $partedOutput | head -n $part | tail -n 1)
-	local ccount=$(echo $header | cut -f2 -d: | tr -d cyl)
-	echo $ccount
+	IFS=$IFS_ORIG
+	local disk=$1
+	local s_start
+	local s_stopp
+	unset startSectors
+	unset endSectors
+	for i in $(
+		parted -m $disk unit s print | grep ^[1-4]: | cut -f2-3 -d: | tr -d s
+	);do
+		s_start=$(echo $i | cut -f1 -d:)
+		s_stopp=$(echo $i | cut -f2 -d:)
+		if [ -z "$startSectors" ];then
+			startSectors=${s_start}s
+		else
+			startSectors=${startSectors}:${s_start}s
+		fi
+		if [ -z "$endSectors" ];then
+			endSectors=$((s_stopp + 1))s
+		else
+			endSectors=$endSectors:$((s_stopp + 1))s
+		fi
+	done
+	if [ -z "$startSectors" ];then
+		startSectors=1
+	fi
 }
 #======================================
 # partedEndCylinder
@@ -5129,14 +5437,15 @@ function createPartedInput {
 				partid=$(($partid / 1))
 				pstart=${pcmds[$index + 3]}
 				if [ "$pstart" = "1" ];then
-					pstart=0
+					pstart=$(echo $startSectors | cut -f $partid -d:)
 				fi
 				if [ $pstart = "." ];then
-					# start is next cylinder according to previous partition
+					# start is next sector according to previous partition
 					pstart=$(($partid - 1))
 					if [ $pstart -gt 0 ];then
-						pstart=$(partedEndCylinder $pstart)
-						pstart=$(($pstart + 1))
+						pstart=$(echo $endSectors | cut -f $pstart -d:)
+					else
+						pstart=$(echo $startSectors | cut -f $partid -d:)
 					fi
 				fi
 				pstopp=${pcmds[$index + 4]}
@@ -5155,6 +5464,7 @@ function createPartedInput {
 				fi
 				cmdq="$cmdq mkpart primary $pstart $pstopp"
 				partedWrite "$disk" "$cmdq"
+				partedSectorInit $imageDiskDevice
 				cmdq=""
 				;;
 			#======================================
@@ -5491,7 +5801,9 @@ function initialize {
 	#======================================
 	# Prevent blank screen
 	#--------------------------------------
-	setterm -powersave off -blank 0
+	if [ -x /usr/bin/setterm ];then
+		setterm -powersave off -blank 0
+	fi
 	#======================================
 	# Start boot timer (first stage)
 	#--------------------------------------

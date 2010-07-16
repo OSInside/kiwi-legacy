@@ -17,18 +17,18 @@ package KIWIXML;
 #==========================================
 # Modules
 #------------------------------------------
-require Exporter;
 use strict;
+require Exporter;
 use Carp qw (cluck);
-use XML::LibXML;
-use LWP;
-use KIWILog;
-use KIWIOverlay;
-use KIWISatSolver;
-use KIWIManager qw (%packageManager);
 use File::Glob ':glob';
 use File::Basename;
+use LWP;
+use XML::LibXML;
+use KIWILog;
+use KIWIManager qw (%packageManager);
+use KIWIOverlay;
 use KIWIQX;
+use KIWISatSolver;
 
 #==========================================
 # Exports
@@ -152,11 +152,46 @@ sub new {
 		my $evaldata = $@;
 		$kiwi -> error  ("Problem reading control file");
 		$kiwi -> failed ();
-		$kiwi -> error  ("$evaldata\n");
 		return undef;
 	}
-	$this->{xmlOrigString} = $systemTree -> toString();
-	$this->{xmlOrigFile}   = $controlFile;
+	#==========================================
+	# Validate xml input with current schema
+	#------------------------------------------
+	eval {
+		#$systemRNG ->validate ( $systemTree );
+	};
+	if ($@) {
+		my $evaldata=$@;
+		$kiwi -> error  ("Schema validation failed");
+		$kiwi -> failed ();
+		my $configStr = $systemXML -> parse_file( $controlFile ) -> toString();
+		my $upgradedStr = $systemTree -> toString();
+		my $upgradedContolFile = $controlFile;
+		if ($configStr ne $upgradedStr) {
+			$upgradedContolFile =~ s/\.xml/\.converted\.xml/;
+			$kiwi -> info ("Automatically upgraded $controlFile to");
+			$kiwi -> info ("$upgradedContolFile\n");
+			$kiwi -> info ("Reported line numbers may not match the ");
+			$kiwi -> info ("file $controlFile\n");
+			open (my $UPCNTFL, '>', $upgradedContolFile);
+			print $UPCNTFL $upgradedStr;
+			close ( $UPCNTFL );
+		}
+		my $jingExec = main::findExec('jing');
+		if ($jingExec) {
+			qxx ("$jingExec $main::Schema $upgradedContolFile 1>&2");
+			return undef;
+		} else {
+			$kiwi -> error ("$evaldata\n");
+			$kiwi -> info  ("Use the jing command for more details\n");
+			$kiwi -> info  ("The following requires jing to be installed\n");
+			$kiwi -> info  ("jing $main::Schema $upgradedContolFile\n");
+			return undef;
+		}
+	}
+	#==========================================
+	# Read main XML sections
+	#------------------------------------------
 	$imgnameNodeList = $systemTree -> getElementsByTagName ("image");
 	$optionsNodeList = $systemTree -> getElementsByTagName ("preferences");
 	$driversNodeList = $systemTree -> getElementsByTagName ("drivers");
@@ -168,6 +203,8 @@ sub new {
 	#==========================================
 	# Store object data
 	#------------------------------------------
+	$this->{xmlOrigString}   = $systemTree -> toString();
+	$this->{xmlOrigFile}     = $controlFile;
 	$this->{kiwi}            = $kiwi;
 	$this->{foreignRepo}     = $foreignRepo;
 	$this->{optionsNodeList} = $optionsNodeList;
@@ -177,32 +214,10 @@ sub new {
 	$this->{reqProfiles}     = $reqProfiles;
 	$this->{profilesNodeList}= $profilesNodeList;
 	#==========================================
-	# Validate xml input with current schema
-	#------------------------------------------
-	eval {
-		#$systemRNG ->validate ( $systemTree );
-	};
-	if ($@) {
-		my $evaldata=$@;
-		$kiwi -> error  ("Schema validation failed");
-		$kiwi -> failed ();
-		my $jingExec = main::findExec('jing');
-		if ($jingExec) {
-			qxx ("$jingExec $main::Schema $controlFile 1>&2");
-			return undef;
-		} else {
-			$kiwi -> error ("$evaldata\n");
-			$kiwi -> info  ("Use the jing command for more details\n");
-			$kiwi -> info  ("The following requires jing to be installed\n");
-			$kiwi -> info  ("jing $main::Schema $controlFile\n");
-			return undef;
-		}
-	}
-	#==========================================
 	# Check kiwirevision attribute
 	#------------------------------------------
-	if (open FD,$main::Revision) {
-		my $cur_rev = <FD>; close FD;
+	if (open (my $FD,$main::Revision)) {
+		my $cur_rev = <$FD>; close $FD;
 		my $req_rev = $imgnameNodeList
 			-> get_node(1) -> getAttribute ("kiwirevision");
 		if ((defined $req_rev) && ($cur_rev < $req_rev)) {
@@ -293,10 +308,10 @@ sub new {
 			for (my $i=1;$i<= $nodes->size();$i++) {
 				my $node = $nodes -> get_node($i);
 				my $type = $node  -> getAttribute ("type");
-				if ($type eq "image") {
-					if (! $this -> requestedProfile ($node)) {
-						next;
-					}
+				if (! $this -> requestedProfile ($node)) {
+					next;
+				}
+				if (($type eq "image") || ($type eq "bootstrap")) {
 					push (@plist,$node->getElementsByTagName ("package"));
 					push (@alist,$node->getElementsByTagName ("archive"));
 				}
@@ -342,6 +357,12 @@ sub new {
 					"bootstrap",$packageNodeList,@falistImage
 				);
 			}
+		}
+		#==========================================
+		# foreign machine attributes
+		#------------------------------------------
+		if (defined $foreignRepo->{"domain"}) {
+			$this -> setForeignMachineAttribute ("domain");
 		}
 		#==========================================
 		# foreign preferences
@@ -390,6 +411,9 @@ sub new {
 		}
 		if (defined $foreignRepo->{"oem-recoveryID"}) {
 			$this -> setForeignOEMOptionsElement ("oem-recoveryID");
+		}
+		if (defined $foreignRepo->{"oem-inplace-recovery"}) {
+			$this -> setForeignOEMOptionsElement ("oem-inplace-recovery");
 		}
 		#==========================================
 		# foreign type attributes
@@ -764,7 +788,7 @@ sub getImageTypeAndAttributes {
 	foreach my $node (@tnodes) {
 		my %record = ();
 		my $prim = $node -> getAttribute("primary");
-		if ((! defined $prim) || ($prim eq "false") || ($prim eq "0")) {
+		if ((! defined $prim) || ($prim eq "false")) {
 			$prim = $node -> getAttribute("image");
 		} else {
 			$prim  = "primary";
@@ -784,6 +808,8 @@ sub getImageTypeAndAttributes {
 		$record{flags}         = $node -> getAttribute("flags");
 		$record{hybrid}        = $node -> getAttribute("hybrid");
 		$record{format}        = $node -> getAttribute("format");
+		$record{installiso}    = $node -> getAttribute("installiso");
+		$record{installstick}  = $node -> getAttribute("installstick");
 		$record{vga}           = $node -> getAttribute("vga");
 		$record{bootloader}    = $node -> getAttribute("bootloader");
 		$record{checkprebuilt} = $node -> getAttribute("checkprebuilt");
@@ -1089,12 +1115,13 @@ sub getSplitTempFiles {
 }
 
 #==========================================
-# getSplitExceptions
+# getSplitTmpExceptions
 #------------------------------------------
-sub getSplitExceptions {
+sub getSplitTmpExceptions {
 	# ...
-	# Get the exceptions defined for temporary and/or persistent
-	# split portions. If no exceptions defined return an empty list
+	# Get the exceptions defined for temporary
+	# split portions. If there are no exceptions defined
+	# return an empty list
 	# ----
 	my $this = shift;
 	my $tnode= $this->{typeNode};
@@ -1112,12 +1139,31 @@ sub getSplitExceptions {
 	foreach my $fileNode (@fileNodeList) {
 		push @result, $fileNode -> getAttribute ("name");
 	}
+	return @result;
+}
+
+#==========================================
+# getSplitPersistentExceptions
+#------------------------------------------
+sub getSplitPersistentExceptions {
+	# ...
+	# Get the exceptions defined for persistent
+	# split portions. If there are no exceptions defined
+	# return an empty list
+	# ----
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("split") -> get_node(1);
+	my @result = ();
+	if (! defined $node) {
+		return @result;
+	}
 	my $persistNode = $node -> getElementsByTagName ("persistent")
 		-> get_node(1);
 	if (! defined $persistNode) {
 		return @result;
 	}
-	@fileNodeList = $persistNode -> getElementsByTagName ("except")
+	my @fileNodeList = $persistNode -> getElementsByTagName ("except")
 		-> get_nodelist();
 	foreach my $fileNode (@fileNodeList) {
 		push @result, $fileNode -> getAttribute ("name");
@@ -1179,7 +1225,7 @@ sub setForeignOptionsElement {
 # setForeignOEMOptionsElement
 #------------------------------------------
 sub setForeignOEMOptionsElement {
-    # ...
+	# ...
 	# If given element exists in the foreign hash, set this
 	# element into the current oemconfig (options) XML tree
 	# ---
@@ -1204,6 +1250,46 @@ sub setForeignOEMOptionsElement {
 		$opts -> removeChild ($node);
 	}
 	$opts -> appendChild ($addElement);
+	if ($newconfig) {
+		$this->{typeNode} -> appendChild ($opts);
+	}
+	$kiwi -> done ();
+	$this -> updateXML();
+	return $this;
+}
+
+#==========================================
+# setForeignMachineAttribute
+#------------------------------------------
+sub setForeignMachineAttribute {
+	# ...
+	# If given element exists in the foreign hash, set this
+	# attribute into the current machine (options) XML tree
+	# if no machine section exists create a new one
+	# ---
+	my $this = shift;
+	my $item = shift;
+	my $kiwi = $this->{kiwi};
+	my $tnode= $this->{typeNode};
+	my $foreignRepo = $this->{foreignRepo};
+	my $value = $foreignRepo->{$item};
+	my $newconfig = 0;
+	$kiwi -> info ("Including foreign machine attribute $item: $value");
+	my $opts = $tnode -> getElementsByTagName ("machine") -> get_node(1);
+	if (! defined $opts) {
+		$opts = new XML::LibXML::Element ("machine");
+		$newconfig = 1;
+	}
+	my $node = $opts -> getElementsByTagName ("$item");
+	if ($node) {
+		$node = $node -> get_node(1);
+		$opts -> removeChild ($node);
+	}
+	if ($value) {
+		$opts-> setAttribute ("$item","$value");
+	} else {
+		$opts-> setAttribute ("$item","true");
+	}
 	if ($newconfig) {
 		$this->{typeNode} -> appendChild ($opts);
 	}
@@ -1310,6 +1396,26 @@ sub getPackageManager {
 	}
 	$kiwi -> loginfo ("Invalid package manager: $pmgr");
 	return undef;
+}
+
+#==========================================
+# getXenDomain
+#------------------------------------------
+sub getXenDomain {
+	# ...
+	# Obtain the Xen domain information if set
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("machine") -> get_node(1);
+	if (! defined $node) {
+		return undef;
+	}
+	my $domain = $node -> getAttribute ("domain");
+	if ((! defined $domain) || ("$domain" eq "")) {
+		return undef;
+	}
+	return $domain;
 }
 
 #==========================================
@@ -1533,6 +1639,26 @@ sub getOEMRecoveryID {
 		return undef;
 	}
 	return $reco;
+}
+
+#==========================================
+# getOEMRecoveryInPlace
+#------------------------------------------
+sub getOEMRecoveryInPlace {
+	# ...
+	# Obtain the oem-inplace-recovery value or return undef
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return undef;
+	}
+	my $inplace = $node -> getElementsByTagName ("oem-inplace-recovery");
+	if ((! defined $inplace) || ("$inplace" eq "")) {
+		return undef;
+	}
+	return $inplace;
 }
 
 #==========================================
@@ -2338,8 +2464,8 @@ sub getImageConfig {
 	# revision information
 	#------------------------------------------
 	my $rev  = "unknown";
-	if (open FD,$main::Revision) {
-		$rev = <FD>; close FD;
+	if (open (my $FD,$main::Revision)) {
+		$rev = <$FD>; close $FD;
 		$rev =~ s/\n//g;
 	}
 	$result{kiwi_revision} = $rev;
@@ -2442,6 +2568,13 @@ sub getImageConfig {
 		}
 	}
 	#==========================================
+	# machine
+	#------------------------------------------
+	my $xendomain = $this -> getXenDomain();
+	if (defined $xendomain) {
+		$result{kiwi_xendomain} = $xendomain;
+	}
+	#==========================================
 	# oemconfig
 	#------------------------------------------
 	my $tnode= $this->{typeNode};
@@ -2459,6 +2592,7 @@ sub getImageConfig {
 		my $oemnomsg = $node -> getElementsByTagName ("oem-unattended");
 		my $oemreco  = $node -> getElementsByTagName ("oem-recovery");
 		my $oemrecoid= $node -> getElementsByTagName ("oem-recoveryID");
+		my $inplace  = $node -> getElementsByTagName ("oem-inplace-recovery");
 		if ((defined $oempinst) && ("$oempinst" eq "true")) {
 			$result{kiwi_oempartition_install} = "yes";
 		}
@@ -2493,6 +2627,9 @@ sub getImageConfig {
 		}
 		if ((defined $oemrecoid) && ("$oemrecoid" ne "")) {
 			$result{kiwi_oemrecoveryID} = $oemrecoid;
+		}
+		if ((defined $inplace) && ("$inplace" eq "true")) {
+			$result{kiwi_oemrecoveryInPlace} = $inplace;
 		}
 	}
 	#==========================================
@@ -2655,12 +2792,12 @@ sub getEc2Config {
 #------------------------------------------
 sub getVMwareConfig {
 	# ...
-	# Create an Attribute hash from the <vmwareconfig>
-	# section if it exists
+	# Create an Attribute hash from the <machine>
+	# section if it exists suitable for the VMware configuration
 	# ---
 	my $this = shift;
 	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("vmwareconfig") -> get_node(1);
+	my $node = $tnode -> getElementsByTagName ("machine") -> get_node(1);
 	my %result = ();
 	my %guestos= ();
 	if (! defined $node) {
@@ -2699,11 +2836,10 @@ sub getVMwareConfig {
 		$guest = $guestos{$guest}{$arch};
 	}
 	my $memory = $node -> getAttribute ("memory");
-	my $usb = $node -> getAttribute ("usb");
 	#==========================================
 	# storage setup disk
 	#------------------------------------------
-	my $disk = $node -> getElementsByTagName ("vmwaredisk");
+	my $disk = $node -> getElementsByTagName ("vmdisk");
 	my ($type,$id);
 	if ($disk) {
 		my $node = $disk -> get_node(1);
@@ -2713,7 +2849,7 @@ sub getVMwareConfig {
 	#==========================================
 	# storage setup CD rom
 	#------------------------------------------
-	my $cd = $node -> getElementsByTagName ("vmwarecdrom");
+	my $cd = $node -> getElementsByTagName ("vmdvd");
 	my ($cdtype,$cdid);
 	if ($cd) {
 		my $node = $cd -> get_node(1);
@@ -2723,7 +2859,7 @@ sub getVMwareConfig {
 	#==========================================
 	# network setup
 	#------------------------------------------
-	my $nic  = $node -> getElementsByTagName ("vmwarenic");
+	my $nic  = $node -> getElementsByTagName ("vmnic");
 	my ($drv,$iface,$mode);
 	if ($nic) {
 		my $node = $nic  -> get_node(1);
@@ -2751,9 +2887,6 @@ sub getVMwareConfig {
 		$result{vmware_niciface} = $iface;
 		$result{vmware_nicmode}  = $mode;
 	}
-	if (($usb) && ($usb eq "yes")) {
-		$result{vmware_usb} = $usb;
-	}
 	return %result;
 }
 
@@ -2762,12 +2895,12 @@ sub getVMwareConfig {
 #------------------------------------------
 sub getXenConfig {
 	# ...
-	# Create an Attribute hash from the <xenconfig>
-	# section if it exists
+	# Create an Attribute hash from the <machine>
+	# section if it exists suitable for the xen domU configuration
 	# ---
 	my $this = shift;
 	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("xenconfig") -> get_node(1);
+	my $node = $tnode -> getElementsByTagName ("machine") -> get_node(1);
 	my %result = ();
 	if (! defined $node) {
 		return %result;
@@ -2780,7 +2913,7 @@ sub getXenConfig {
 	#==========================================
 	# storage setup
 	#------------------------------------------
-	my $disk = $node -> getElementsByTagName ("xendisk");
+	my $disk = $node -> getElementsByTagName ("vmdisk");
 	my ($device);
 	if ($disk) {
 		my $node  = $disk -> get_node(1);
@@ -2789,13 +2922,13 @@ sub getXenConfig {
 	#==========================================
 	# network setup (bridge)
 	#------------------------------------------
-	my $bridges = $node -> getElementsByTagName ("xenbridge");
+	my $bridges = $node -> getElementsByTagName ("vmnic");
 	my %vifs = ();
 	for (my $i=1;$i<= $bridges->size();$i++) {
 		my $bridge = $bridges -> get_node($i);
 		if ($bridge) {
 			my $mac   = $bridge -> getAttribute ("mac");
-			my $bname = $bridge -> getAttribute ("name");
+			my $bname = $bridge -> getAttribute ("interface");
 			if (! $bname) {
 				$bname = "undef";
 			}
@@ -3840,7 +3973,8 @@ sub getSingleInstSourceSatSolvable {
 	#------------------------------------------
 	if ((! -x "/usr/bin/mergesolv") ||
 		(! -x "/usr/bin/susetags2solv") ||
-		(! -x "/usr/bin/rpmmd2solv")
+		(! -x "/usr/bin/rpmmd2solv") ||
+		(! -x "/usr/bin/rpms2solv")
 	) {
 		$kiwi -> failed ();
 		$kiwi -> error  ("--> Can't find satsolver tools");
@@ -3997,10 +4131,16 @@ sub getSingleInstSourceSatSolvable {
 		}
 	}
 	if (! $foundDist) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("--> Can't find a distribution solvable");
-		$kiwi -> failed ();
-		return undef;
+		my $path = $repo; $path =~ s/dir:\/\///;
+		my $data = qxx ("rpms2solv $path/*.rpm > $sdir/primary-$count 2>&1");
+		my $code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("--> Can't find/create a distribution solvable");
+			$kiwi -> failed ();
+			return undef;
+		}
+		$foundDist = 1;
 	}
 	#==========================================
 	# download pattern solvable(s)
@@ -4014,14 +4154,15 @@ sub getSingleInstSourceSatSolvable {
 			#==========================================
 			# get files listed in patterns
 			#------------------------------------------
+			my $FD;
 			my $patfile = $destfile;
-			if (! open (FD,$patfile)) {
+			if (! open ($FD,$patfile)) {
 				$kiwi -> warning ("--> Couldn't open patterns file: $!");
 				$kiwi -> skipped ();
 				unlink $patfile;
 				next;
 			}
-			foreach my $line (<FD>) {
+			foreach my $line (<$FD>) {
 				chomp $line; $destfile = $sdir."/".$line;
 				if ($line !~ /\.$arch\./) {
 					next;
@@ -4034,7 +4175,7 @@ sub getSingleInstSourceSatSolvable {
 					next;
 				}
 			}
-			close FD;
+			close $FD;
 			unlink $patfile;
 		}
 	}
@@ -4153,7 +4294,7 @@ sub getSingleInstSourceSatSolvable {
 # addDefaultSplitNode
 #------------------------------------------
 sub addDefaultSplitNode {
-    # ...
+	# ...
 	# if no split section is setup we add a default section
 	# from the contents of the KIWISplit.txt file and use it
 	# ---

@@ -22,6 +22,7 @@ package KIWIMigrate;
 #------------------------------------------
 use strict;
 use Carp qw (cluck);
+use XML::LibXML;
 use File::Find;
 use File::stat;
 use File::Basename;
@@ -30,6 +31,9 @@ use File::Copy;
 use Storable;
 use KIWILog;
 use KIWIQX;
+use File::Spec;
+use Fcntl ':mode';
+use Cwd 'abs_path';
 
 #==========================================
 # Constructor
@@ -109,13 +113,6 @@ sub new {
 	$kiwi -> done ();
 	$kiwi -> info ("Results will be written to: $dest");
 	$kiwi -> done ();
-	if (! $this -> getRootDevice()) {
-		$kiwi -> failed ();
-		$kiwi -> error ("Couldn't find system root device");
-		$kiwi -> failed ();
-		rmdir $dest;
-		return undef;
-	}
 	#==========================================
 	# Store addon repo information if specified
 	#------------------------------------------
@@ -148,8 +145,6 @@ sub new {
 		'\.rej$',                       # no diff reject files
 		'\.lock$',                      # no lock files
 		'\.tmp$',                       # no tmp files
-		'\/etc\/init\.d\/rc.*\/',       # no service links
-		'\/etc\/init\.d\/boot.d\/',     # no boot service links
 		'\/etc\/gconf\/',               # no gconf files
 		'\.depend',                     # no make depend targets
 		'\.backup',                     # no sysconfig backup files
@@ -163,7 +158,6 @@ sub new {
 		'\/proc\/',                     # no /proc data
 		'\/sys\/',                      # no /sys data
 		'\/abuild\/',                   # no /abuild data
-		'\/cache',                      # no cache files
 		'\/fillup-templates',           # no fillup data
 		'\/var\/lib\/rpm',              # no RPM data
 		'\/var\/lib\/zypp',             # no ZYPP data
@@ -180,12 +174,17 @@ sub new {
 		'\/var\/log',                   # no logs
 		'\/var\/run',                   # no pid files
 		'\/etc\/fstab',                 # no fstab file
+		'\/etc\/udev\/rules.d',         # no udev rules
 		'\/media\/',                    # no media automount files
+		'\/lost\+\/found',              # no filesystem specific files
 		'\/var\/lib\/hardware\/'        # no hwinfo hardware files
 	);
 	if (defined $excl) {
 		my @exclude = @{$excl};
-		foreach (@exclude) { $_ = quotemeta; };
+		foreach (@exclude) {
+			$_ =~ s/\/$//;
+			$_ = quotemeta;
+		};
 		push @denyFiles,@exclude;
 	}
 	#==========================================
@@ -243,7 +242,8 @@ sub createReport {
 	#==========================================
 	# Beautify report...
 	#------------------------------------------
-	qxx ("tar -C $dest -xf $main::KMigraCSS 2>&1");
+	mkdir "$dest/.report";
+	qxx ("tar -C $dest/.report -xf $main::KMigraCSS 2>&1");
 	#==========================================
 	# Start report
 	#------------------------------------------
@@ -263,12 +263,15 @@ sub createReport {
 	print FD '</script>'."\n";
 	print FD "\t\t".'<![endif]-->'."\n";
 	print FD "\t\t".'<link rel="stylesheet" type="text/css" ';
-	print FD 'href="css/kiwi.css">'."\n";
-	print FD "\t\t".'<script type="text/javascript" src="js/jquery.min.js">';
+	print FD 'href=".report/css/kiwi.css">'."\n";
+	print FD "\t\t".'<script type="text/javascript" ';
+	print FD 'src=".report/js/jquery.min.js">';
 	print FD '</script>'."\n";
-	print FD "\t\t".'<script type="text/javascript" src="js/data.js">';
+	print FD "\t\t".'<script type="text/javascript" ';
+	print FD 'src=".report/js/data.js">';
 	print FD '</script>'."\n";
-	print FD "\t\t".'<script type="text/javascript" src="js/kiwi.js">';
+	print FD "\t\t".'<script type="text/javascript" ';
+	print FD 'src=".report/js/kiwi.js">';
 	print FD '</script>'."\n";
 	print FD "\t".'</head>'."\n";
 	print FD '<body class="files">'."\n";
@@ -276,6 +279,59 @@ sub createReport {
 	print FD "\t".'<div class="container"><h1>Migration report</h1></div>'."\n";
 	print FD '</div>'."\n";
 	print FD '<div class="container">'."\n";
+	#==========================================
+	# Kernel version report
+	#------------------------------------------
+	print FD '<h1>Currently active kernel version</h1>'."\n";
+	print FD '<p>'."\n";
+	print FD 'The table below shows the packages required for the currently ';
+	print FD 'active kernel. If multiple kernels are installed make sure ';
+	print FD 'that the reported kernel package names are part of the ';
+	print FD 'image description';
+	print FD '</p>'."\n";
+	print FD '<hr>'."\n";
+	print FD '<table>'."\n";
+	my @list = qxx (
+		'rpm -qf --qf "%{NAME}:%{VERSION}\n" /lib/modules/$(uname -r)'
+	); chomp @list;
+	foreach my $item (sort @list) {
+		if ($item =~ /(.*):(.*)/) {
+			my $pac = $1;
+			my $ver = $2;
+			print FD '<tr valign="top">'."\n";
+			print FD '<td>'.$pac.'</td>'."\n";
+			print FD '<td>'.$ver.'</td>'."\n";
+			print FD '</tr>'."\n";
+		}
+	}
+	print FD '</table>'."\n";
+	#==========================================
+	# Hardware dependent packages report
+	#------------------------------------------
+	my $pack;
+	my %modalias;
+	print FD '<h1>Hardware dependent packages </h1>'."\n";
+	print FD '<p>'."\n";
+	print FD 'The table below shows packages that depend on specific hardware ';
+	print FD 'Please note that it might be required to have a different set ';
+	print FD 'of hardware dependent packages included into the image ';
+	print FD 'description depending on the target hardware. If there is ';
+	print FD 'the need for such packages make sure you add them as follows ';
+	print FD '<package name="name-of-package" bootinclude="true"/>';
+	print FD '</p>'."\n";
+	print FD '<hr>'."\n";
+	print FD '<table>'."\n";
+	for (qxx ( "rpm -qa --qf '\n<%{name}>\n' --supplements" )) {
+		chomp;
+		$pack = $1 if /^<(.+)>/;
+		push @{$modalias{$pack}}, $_ if /^modalias/;
+	}
+	foreach my $item (sort keys %modalias) {
+		print FD '<tr valign="top">'."\n";
+		print FD '<td>'.$item.'</td>'."\n";
+		print FD '</tr>'."\n";
+	}
+	print FD '</table>'."\n";
 	#==========================================
 	# Package/Pattern report
 	#------------------------------------------
@@ -290,7 +346,7 @@ sub createReport {
 		print FD '<hr>'."\n";
 		print FD '<table>'."\n";
 		my @list = qxx ("rpm -q @pacs --last"); chomp @list;
-		foreach my $job (@list) {
+		foreach my $job (sort @list) {
 			if ($job =~ /([^\s]+)\s+([^\s].*)/) {
 				my $pac  = $1;
 				my $date = $2;
@@ -410,13 +466,32 @@ sub createReport {
 		print FD '<table>'."\n";
 		my @pacs = @{$failedJob2};
 		my @list = qxx ("rpm -q @pacs --last"); chomp @list;
-		foreach my $job (@list) {
+		foreach my $job (sort @list) {
 			if ($job =~ /([^\s]+)\s+([^\s].*)/) {
 				my $pac  = $1;
 				my $date = $2;
+				my @rpm  = qxx (
+					'rpm -q --qf "%{distribution}\n%{disturl}\n%{url}\n" '.$pac
+				); chomp @rpm;
+				my $distro  = $rpm[0];
+				my $disturl = $rpm[1];
+				my $srcurl  = $rpm[2];
+				if ($disturl !~ s:/[^/]*$::) {
+					$disturl = $srcurl;
+				}
+				if ($distro =~ /^(\s*|\(none\))$/) {
+					$distro = "No distribution";
+				}
+				if ($disturl =~ /^(\s*|\(none\))$/) {
+					$disturl = "No URL";
+				}
 				print FD '<tr valign="top">'."\n";
-				print FD '<td>'.$pac.'</td>'."\n";
-				print FD '<td>'.$date.'</td>'."\n";
+				print FD '<td><nobr>'.$pac.'</nobr></td>'."\n";
+				print FD '<td>';
+				print FD '<nobr>'.$date.'</nobr><br>';
+				print FD '<nobr>'.$distro.'</nobr><br>';
+				print FD '<nobr>'.$disturl.'</nobr>';
+				print FD '</td>'."\n";
 				print FD '</tr>'."\n";
 			}
 		}
@@ -426,11 +501,23 @@ sub createReport {
 	# Modified files report...
 	#------------------------------------------
 	if ($nopackage) {
+		print FD '<h1>Overlay files</h1>'."\n";
+		print FD '<p>'."\n";
+		print FD 'Behind the current overlay files directory you will ';
+		print FD 'find the packaged but modified files and also a ';
+		print FD 'collection of files which seems to be required for ';
+		print FD 'this system. Please check the current tree ';
+		print FD 'and take the same rules as for the unpackaged files ';
+		print FD 'mentioned in the next section into account. ';
+		print FD '</p>'."\n";
+		print FD '<div>'."\n";
+		print FD 'See <a href="'.$dest.'/root">Overlay directory</a>.'."\n";
+		print FD '</div>'."\n";
 		print FD '<h1>Unpackaged files</h1>'."\n";
 		print FD '<p>'."\n";
-		print FD 'Behind the <a href="'."$dest/root-nopackage/".'">';
-		print FD 'Unpackaged files directory</a> link, you will ';
-		print FD 'find a list of files which are not part of any packages. ';
+		print FD 'Klicking on the Unpackaged files link below ';
+		print FD 'will show you a list of files/directories ';
+		print FD 'which are not part of any packages. ';
 		print FD 'For binary files, including executables and libraries, ';
 		print FD 'you should try to find and include a package that ';
 		print FD 'provides them. If there are no package providers for ';
@@ -439,15 +526,9 @@ sub createReport {
 		print FD 'After that, you should look for personal files like ';
 		print FD 'pictures, movies, or repositories, and remove them if ';
 		print FD 'they can be easily restored in the later image. ';
-		print FD 'The rest of the tree can be checked with a program ';
-		print FD 'called kdirstat which allows you to find large files ';
-		print FD 'and lets you decide whether or not you need them in ';
-		print FD 'your image description. Remove all of the files you ';
-		print FD 'do not want to keep in your overlay files from the ';
-		print FD 'unpackaged files directory and copy the rest into ';
-		print FD 'the '.$dest.'/root directory.'."\n";
+		print FD 'Copy all of the files you want to be part of the ';
+		print FD 'image into the '.$dest.'/root directory.'."\n";
 		print FD '</p>'."\n";
-		print FD '</div>'."\n";
 		print FD '<div class="container" id="searchbox">'."\n";
 		print FD 'See <a href="root-nopackage.html">Unpackaged files</a>.'."\n";
 		print FD '</div>'."\n";
@@ -455,7 +536,7 @@ sub createReport {
 		if (! open (ND,">$dest/root-nopackage.html")) {
 			$openFailed = 1;
 		}
-		if (! open (JS,">$dest/js/data.js")) {
+		if (! open (JS,">$dest/.report/js/data.js")) {
 			$openFailed = 1;
 		}
 		if (! $openFailed) {
@@ -467,13 +548,13 @@ sub createReport {
 			print ND "\t".'<head>'."\n";
 			print ND "\t\t".'<title>File list</title>'."\n";
 			print ND "\t\t".'<link rel="stylesheet" type="text/css"';
-			print ND ' href="css/kiwi.css">'."\n";
+			print ND ' href=".report/css/kiwi.css">'."\n";
 			print ND "\t\t".'<script type="text/javascript"';
-			print ND ' src="js/jquery.min.js"></script>'."\n";
+			print ND ' src=".report/js/jquery.min.js"></script>'."\n";
 			print ND "\t\t".'<script type="text/javascript"';
-			print ND ' src="js/data.js"></script>'."\n";
+			print ND ' src=".report/js/data.js"></script>'."\n";
 			print ND "\t\t".'<script type="text/javascript"';
-			print ND ' src="js/kiwi.js"></script>'."\n";
+			print ND ' src=".report/js/kiwi.js"></script>'."\n";
 			print ND "\t".'</head>'."\n";
 			print ND '<body class="files">'."\n";
 			print ND '<div class="headerwrap">'."\n";
@@ -490,9 +571,19 @@ sub createReport {
 			#------------------------------------------
 			my $count= 0;
 			foreach my $file (sort keys %{$nopackage}) {
-				next if ! -e "$dest/root-nopackage/$file";
-				my $mtime = localtime ($nopackage->{$file}->[1]->mtime);
-				my $size  = $nopackage->{$file}->[1]->size;
+				my $fattr = $nopackage->{$file}->[1];
+				my $type  = "file";
+				my $size  = 0;
+				my $mtime = "unknown";
+				if ($fattr) {
+					if (S_ISDIR($fattr->mode)) {
+						$type = "directory";
+					} elsif (S_ISLNK($fattr->mode)) {
+						$type = "link";
+					}
+					$mtime = localtime ($fattr->mtime);
+					$size  = $fattr->size;
+				}
 				if ($size > 1048576) {
 					$size/= 1048576;
 					$size = sprintf ("%.1f Mbyte", $size);
@@ -504,13 +595,28 @@ sub createReport {
 				}
 				# ND: root-nopackage.html...
 				print ND '<section class="row">'."\n";
-				print ND '<dt>'.$file.'</dt>'."\n";
-				print ND '<dd class="size">';
-				print ND $size;
-				print ND '</dd>'."\n";
-				print ND '<dd class="modified">';
-				print ND $mtime;
-				print ND '</dd>'."\n";
+				if ($type eq "directory") {
+					print ND '<dt class="'.$type.'">'.$file.'</dt>'."\n";
+					print ND '<dd class="file">';
+					print ND "directory";
+					print ND '</dd>'."\n";
+					print ND '<dd class="file"/>'."\n";
+				} elsif ($type eq "link") {
+					my $target = readlink $file;
+					print ND '<dt class="'.$type.'">'.$file.'</dt>'."\n";
+					print ND '<dd class="file">';
+					print ND "link to -> ".$target;
+					print ND '</dd>'."\n";
+					print ND '<dd class="file"/>'."\n";
+				} else {
+					print ND '<dt class="'.$type.'">'.$file.'</dt>'."\n";
+					print ND '<dd class="size">';
+					print ND $size;
+					print ND '</dd>'."\n";
+					print ND '<dd class="modified">';
+					print ND $mtime;
+					print ND '</dd>'."\n";
+				}
 				print ND '</section>'."\n";
 				# JS: data.js...
 				if ($count) {
@@ -787,7 +893,9 @@ sub getOperatingSystemVersion {
 	$name =~ s/\-\(.*\)//g;
 	if ((defined $plvl) && ($plvl =~ /PATCHLEVEL = (.*)/)) {
 		$plvl = $1;
-		$name = $name."-SP".$plvl;
+		if ($plvl > 0) {
+			$name = $name."-SP".$plvl;
+		}
 	}
 	close FD;
 	if (! open (FD,$main::KMigrate)) {
@@ -843,12 +951,6 @@ sub setPrepareConfigSkript {
 	print FD 'echo "Configure image: [$kiwi_iname]..."'."\n";
 	print FD 'suseSetupProduct'."\n";
 	#==========================================
-	# Services...
-	#------------------------------------------
-	foreach my $service (@result) {
-		print FD 'suseInsertService '.$service."\n";
-	}
-	#==========================================
 	# Repos...
 	#------------------------------------------
 	foreach my $source (keys %{$osc{$product}} ) {
@@ -856,13 +958,54 @@ sub setPrepareConfigSkript {
 		my $url  = $osc{$product}{$source}{src};
 		my $flag = $osc{$product}{$source}{flag};
 		if ($flag ne "remote") {
-			$kiwi -> warning (
-				"Local repo: $alias will not be added to config.sh"
-			);
-			$kiwi -> skipped ();
+			# $kiwi -> warning (
+			#	"Local repo: $alias will not be added to config.sh"
+			# );
+			# $kiwi -> skipped ();
 			next;
 		}
 		print FD "zypper ar \\\n\t\"".$url."\" \\\n\t\"".$alias."\"\n";
+	}
+	#==========================================
+	# Product repo...
+	#------------------------------------------
+	my $repoProduct = "/etc/products.d/openSUSE.prod";
+	if (-e $repoProduct) {
+		my $PXML;
+		if (! open ($PXML,"cat $repoProduct|")) {
+			$kiwi -> failed ();
+			$kiwi -> warning ("--> Failed to open product file $repoProduct");
+			$kiwi -> skipped ();
+		} else {
+			binmode $PXML;
+			my $pxml = new XML::LibXML;
+			my $tree = $pxml -> parse_fh ( $PXML );
+			my $urls = $tree -> getElementsByTagName ("product")
+				-> get_node(1) -> getElementsByTagName ("urls")
+				-> get_node(1) -> getElementsByTagName ("url");
+			for (my $i=1;$i<= $urls->size();$i++) {
+				my $node = $urls -> get_node($i);
+				my $name = $node -> getAttribute ("name");
+				if ($name eq "repository") {
+					my $url   = $node -> textContent();
+					my $alias = "openSUSE";
+					my $alreadyThere = 0;
+					$url =~ s/\/$//;
+					foreach my $source (keys %{$osc{$product}} ) {
+						my $curl = $osc{$product}{$source}{src};
+						$curl =~ s/\/$//;
+						if ($curl eq $url) {
+							$alreadyThere = 1; last;
+						}
+					}
+					if (! $alreadyThere) {
+						print FD "zypper ar \\\n\t\"";
+						print FD $url."\" \\\n\t\"".$alias."\"\n";
+					}
+				}
+			}
+			close $PXML;
+		}
 	}
 	print FD 'suseConfig'."\n";
 	print FD 'baseCleanMount'."\n";
@@ -1059,46 +1202,6 @@ sub getPackageList {
 }
 
 #==========================================
-# getRootDevice
-#------------------------------------------
-sub getRootDevice {
-	# ...
-	# Find the root device of the operating system. Only those
-	# data are inspected. We don't handle sub-mounted systems
-	# within the root tree
-	# ---
-	my $this = shift;
-	my $rootdev;
-	if (! open (FD,"/etc/fstab")) {
-		return undef;
-	}
-	my @fstab = <FD>; close FD;
-	foreach my $mount (@fstab) {
-		if ($mount =~ /\s+\/\s+/) {
-			my @attribs = split (/\s+/,$mount);
-			if ( -e $attribs[0]) {
-				$rootdev = $attribs[0]; last;
-			}
-		}
-	}
-	if (! $rootdev) {
-		return undef;
-	}
-	my $data = qxx ("df $rootdev | tail -n1");
-	my $code = $? >> 8;
-	if ($code != 0) {
-		return undef;
-	}
-	if ($data =~ /$rootdev\s+\d+\s\s(\d+)\s\s/) {
-		$data = $1;
-		$data = int ( $data / 1024 );
-	}	
-	$this->{rdev}  = $rootdev;
-	$this->{rsize} = $data;
-	return $this;
-}
-
-#==========================================
 # setSystemOverlayFiles
 #------------------------------------------
 sub setSystemOverlayFiles {
@@ -1116,13 +1219,10 @@ sub setSystemOverlayFiles {
 	my $cache  = $dest.".cache";
 	my $cdata;
 	my $checkopt;
-	my @rpmlist;
-	my @rpmcheck;
 	my %result;
 	my $data;
 	my $code;
 	my @modified;
-	my @ilist;
 	my $root = "/";
 	#==========================================
 	# check for cache file
@@ -1130,209 +1230,193 @@ sub setSystemOverlayFiles {
 	if (! -f $cache) {
 		undef $cache;
 	} else {
-		$kiwi -> info ("=> Using cache file: $cache\n");
-		$kiwi -> info ("=> Remove cache file if your system has changed !!\n");
+		$kiwi -> info ("=> Open cache file: $cache\n");
 		$cdata = retrieve($cache);
-	}
-	#==========================================
-	# search installed packages
-	#------------------------------------------
-	$kiwi -> info ("Searching installed packages...");
-	if ($cache) {
-		@ilist = @{$cdata->{ilist}};
-	} else {
-		@ilist = qxx ('rpm -qa --qf "%{NAME}\n" | sort | uniq'); chomp @ilist;
-		$code = $? >> 8;
-		if ($code != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Failed to obtain installed packages");
-			$kiwi -> failed ();
-			return undef;
-		}
-		$cdata->{ilist} = \@ilist;
-	}
-	$kiwi -> done();
-	#==========================================
-	# exclude special and non local mounts
-	#------------------------------------------
-	if (! $cache) {
-		my @mounts = qxx ("cat /proc/mounts|cut -f 2,3 -d ' '"); chomp @mounts;
-		foreach my $mount (@mounts) {
-			my @details = split (/\s+/,$mount);
-			my $path = quotemeta ($details[0]);
-			my $type = $details[1];
-			$path .= "\/";
-			if ($type =~
-				/^(tmpfs|proc|sysfs|debugfs|devpts|fusectl|autofs|nfs|nfsd)$/) {
-				push @deny,$path;
-				$kiwi -> loginfo ("Excluding path: $path per mount table\n");
-			}
+		if (! $cdata) {
+			$kiwi -> warning ("=> Failed to open cache file");
+			$kiwi -> skipped ();
+			undef $cache;
+		} elsif (! $cdata->{version}) {
+			$kiwi -> warning ("=> Cache doesn't provide version");
+			$kiwi -> skipped ();
+			undef $cache;
+		} elsif ($cdata->{version} ne $main::Version) {
+			$kiwi -> warning ("=> Cache version doesn't match");
+			$kiwi -> skipped ();
+			undef $cache;
+		} else {
+			$kiwi -> info ("=> Using cache file\n");
+			$kiwi -> info ("=> Remove cache if your system has changed !!\n");
 		}
 	}
-	#==========================================
-	# generate File::Find closure
-	#------------------------------------------
-	sub generateWanted {
-		my $filehash = shift;
-		return sub {
-			if (((-l $File::Find::name) && (-e $File::Find::name)) ||
-				(! -d $File::Find::name))
-			{
-				my $file = $File::Find::name;
-				my $dirn = $File::Find::dir;
-				my $attr;
-				if (-l $file) {
-					$attr = lstat ($file);
-				} else {
-					$attr = stat ($file);
-				}
-				$filehash->{$file} = [$dirn,$attr];
-			}
-		}
-	};
-	#==========================================
-	# Find files not packaged
-	#------------------------------------------
-	$kiwi -> info ("Reading root file system...");
-	if ($cache) {
-		%result = %{$cdata->{result}};
-	} else {
-		my $wref = generateWanted (\%result);
-		find ({ wanted => $wref }, $root );
-		$cdata->{result} = \%result;
-	}
-	$kiwi -> done ();
-	$kiwi -> info ("Inspecting RPM database [installed files]...");
-	if ($cache) {
-		@rpmlist = @{$cdata->{rpmlist}};
-	} else {
-		@rpmlist = qxx ("rpm -qal");
-		$cdata->{rpmlist} = \@rpmlist;
-	}
-	my @curlist = keys %result;
-	my $cursize = @curlist;
-	my $rpmsize = @rpmlist;
-	my $spart = 100 / ($cursize + $rpmsize);
-	my $count = 0;
-	my $done;
-	my $done_old;
-	$kiwi -> cursorOFF();
-	foreach my $managed (@rpmlist) {
-		chomp $managed; delete $result{$managed};
-		$done = int ($count * $spart);
-		if ($done != $done_old) {
-			$kiwi -> step ($done);
-		}
-		$done_old = $done;
-		$count++;
-	}
-	@curlist = keys %result;
-	$cursize = @curlist;
-	$spart = 100 / ($cursize + $rpmsize);
-	foreach my $file (sort keys %result) {
-		foreach my $exp (@deny) {
-			if ($file =~ /$exp/) {
-				delete $result{$file}; last;
-			}
-		}
-		$done = int ($count * $spart);
-		if ($done != $done_old) {
-			$kiwi -> step ($done);
-		}
-		$done_old = $done;
-		$count++;
-	}
-	$kiwi -> note ("\n");
-	$kiwi -> doNorm ();
-	$kiwi -> cursorON();
 	#==========================================
 	# Find files packaged but changed
 	#------------------------------------------
-	$kiwi -> info ("Inspecting RPM database [verify]...");
+	$kiwi -> info ("Inspecting RPM database [modified files]...");
 	if ($cache) {
-		@rpmcheck = @{$cdata->{rpmcheck}};
+		@modified = @{$cdata->{modified}};
+		$kiwi -> done(); 
 	} else {
 		$checkopt = "--nodeps --nodigest --nosignature --nomtime ";
 		$checkopt.= "--nolinkto --nouser --nogroup --nomode";
-		@rpmcheck = qxx ("rpm -Va $checkopt"); chomp @rpmcheck;
-		$cdata->{rpmcheck} = \@rpmcheck;
-	}
-	$rpmsize = @rpmcheck;
-	$spart = 100 / $rpmsize;
-	$count = 1;
-	$kiwi -> cursorOFF();
-	foreach my $check (@rpmcheck) {
-		if ($check =~ /(\/.*)/) {
-			my $file = $1;
-			my ($name,$dir,$suffix) = fileparse ($file);
-			my $ok   = 1;
-			foreach my $exp (@deny) {
-				if ($file =~ /$exp/) {
-					$ok = 0; last;
+		my @rpmcheck = qxx ("rpm -Va $checkopt"); chomp @rpmcheck;
+		my $rpmsize = @rpmcheck;
+		my $spart = 100 / $rpmsize;
+		my $count = 1;
+		my $done;
+		my $done_old;
+		$kiwi -> cursorOFF();
+		foreach my $check (@rpmcheck) {
+			if ($check =~ /(\/.*)/) {
+				my $file = $1;
+				my ($name,$dir,$suffix) = fileparse ($file);
+				my $ok   = 1;
+				foreach my $exp (@deny) {
+					if ($file =~ /$exp/) {
+						$ok = 0; last;
+					}
+				}
+				if (($ok) && (-e $file)) {
+					my $attr;
+					if (-l $file) {
+						$attr = lstat ($file);
+					} else {
+						$attr = stat ($file);
+					}
+					$result{$file} = [$dir,$attr];
+					push (@modified,$file);
 				}
 			}
-			if (($ok) && (-e $file)) {
+			$done = int ($count * $spart);
+			if ($done != $done_old) {
+				$kiwi -> step ($done);
+			}
+			$done_old = $done;
+			$count++;
+		}
+		$cdata->{modified} = \@modified;
+		$kiwi -> note ("\n");
+		$kiwi -> doNorm ();
+		$kiwi -> cursorON();
+	}
+	#==========================================
+	# Find files/directories not packaged
+	#------------------------------------------
+	$kiwi -> info ("Inspecting RPM database [unpackaged files]...");
+	if ($cache) {
+		%result = %{$cdata->{result}};
+		$kiwi -> done();
+	} else {
+		my @rpmcheck = qxx ("rpm -qlav");
+		chomp @rpmcheck;
+		my @rpm_dir  = ();
+		my @rpm_file = ();
+		foreach my $dir (@rpmcheck) {
+			if ($dir =~ /^d.*?\/(.*)$/) {
+				my $base = $1;
+				my $name = basename $base;
+				my $dirn = dirname  $base;
+				$dirn = abs_path ("/$dirn");
+				$base = "$dirn/$name";
+				$base =~ s/\/+/\//g;
+				$base =~ s/^\///;
+				push @rpm_file,$base;
+				push @rpm_dir,$base;
+			} elsif ($dir =~ /.*?\/(.*?)( -> .*)?$/) {
+				my $base = $1;
+				my $name = basename $base;
+				my $dirn = dirname  $base;
+				$dirn = abs_path ("/$dirn");
+				$base = "$dirn/$name";
+				$base =~ s/\/+/\//g;
+				$base =~ s/^\///;
+				push @rpm_file,$base;
+			}
+		}
+		my %file_rpm;
+		my %dirs_rpm;
+		my %dirs_cmp;
+		@file_rpm{map {$_ = "/$_"} @rpm_file} = ();
+		@dirs_rpm{map {$_ = "/$_"} @rpm_dir}  = ();
+		$dirs_cmp{"/"} = undef;
+		foreach my $dir (sort keys %dirs_rpm) {
+			while ($dir =~ s:/[^/]+$::) {
+				$dirs_cmp{$dir} = undef;
+			}
+		}
+		# unpackaged files in packaged directories...
+		sub generateWanted {
+			my $filehash = shift;
+			return sub {
+				my $file = $File::Find::name;
+				my $dirn = $File::Find::dir;
 				my $attr;
-				if (-l $file) {
-					$attr = lstat ($file);
-				} else {
+				if (-d $file) {
 					$attr = stat ($file);
+					# dont follow directory links and nfs locations...
+					if (($attr->dev < 0x100) || (-l $file)) {
+						$File::Find::prune = 1;
+					} else {
+						$filehash->{$file} = [$dirn,$attr];
+					}
+				} else {
+					if (-l $file) {
+						$attr = lstat ($file);
+					} else {
+						$attr = stat ($file);
+					}
+					$filehash->{$file} = [$dirn,$attr];
 				}
-				$result{$file} = [$dir,$attr];
-				push (@modified,$file);
 			}
 		}
-		$done = int ($count * $spart);
-		if ($done != $done_old) {
-			$kiwi -> step ($done);
+		my $wref = generateWanted (\%result);
+		find({ wanted => $wref, follow => 0 }, sort keys %dirs_rpm);
+		foreach my $file (sort keys %result) {
+			if (exists $file_rpm{$file}) {
+				delete $result{$file};
+			}
 		}
-		$done_old = $done;
-		$count++;
+		# unpackaged directories...
+		foreach my $dir (sort keys %dirs_cmp) {
+			my $FH;	opendir $FH,$dir;
+			while (my $f = readdir $FH) {
+				next if $f eq "." || $f eq "..";
+				my $path = "$dir/$f";
+				if ($dir eq "/") {
+					$path = "/$f";
+				}
+				if ((-d $path) && (! -l $path)) {
+					if (! exists $dirs_rpm{$path}) {
+						my $attr = stat $path;
+						$result{$path} = [$path,$attr];
+					}
+				}
+			}
+			closedir $FH;
+		}
+		$cdata->{result} = \%result;
+		$kiwi -> done ();
 	}
-	$kiwi -> note ("\n");
-	$kiwi -> doNorm ();
-	$kiwi -> cursorON();
+	#==========================================
+	# apply deny files on result hash
+	#------------------------------------------
+	foreach my $file (sort keys %result) {
+		my $ok = 1;
+		foreach my $exp (@deny) {
+			if ($file =~ /$exp/) {
+				$ok = 0; last;
+			}
+		}
+		if (! $ok) {
+			delete $result{$file};
+		}
+	}
 	#==========================================
 	# Write cache if required
 	#------------------------------------------
 	if (! $cache) {
+		$cdata->{version} = $main::Version;
 		store ($cdata,$dest.".cache");
-	}
-	#==========================================
-	# Cleanup
-	#------------------------------------------
-	qxx ("rm -rf $dest/root-nopackage 2>&1");
-	#==========================================
-	# Create overlay root tree
-	#------------------------------------------
-	$kiwi -> info ("Creating link list...\n");
-	$data = qxx ("mkdir -p $dest/root-nopackage 2>&1");
-	$code = $? >> 8;
-	if ($code != 0) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't create overlay root directory: $data");
-		$kiwi -> failed ();
-		return undef;
-	}
-	#==========================================
-	# 1) Create directory structure
-	#------------------------------------------
-	my %paths = ();
-	foreach my $file (keys %result) {
-		my $path = $result{$file}->[0];
-		$paths{"$dest/root-nopackage/$path"} = $path;
-	}
-	mkpath (keys %paths, {verbose => 0});
-	#==========================================
-	# 2) Create hard link list
-	#------------------------------------------
-	foreach my $file (keys %result) {
-		my $old = $file;
-		my $new = $dest."/root-nopackage".$old;
-		if (! link "$old","$new") {
-			$kiwi -> warning ("hard link for $file failed: $!");
-			$kiwi -> skipped ();
-		}
 	}
 	#==========================================
 	# Create modified files tree
@@ -1342,27 +1426,25 @@ sub setSystemOverlayFiles {
 	foreach my $file (@modified) {
 		my ($name,$dir,$suffix) = fileparse ($file);
 		mkpath ("$dest/root/$dir", {verbose => 0});
-		move ("$dest/root-nopackage/$file","$dest/root/$dir");
-		delete $result{$file};
+		qxx ("cp -a $file $dest/root/$dir");
 	}
+	#==========================================
+	# Create modified files tree /etc
+	#------------------------------------------
+	mkpath ("$dest/root/etc", {verbose => 0});
+	qxx ("tar -cf - -C /etc .|tar -xC $dest/root/etc 2>&1");
 	$kiwi -> done();
 	#==========================================
-	# Cleanup symbolic links
+	# apply deny files on overlay tree
 	#------------------------------------------
-	$kiwi -> info ("Cleaning symlinks...");
-	$this -> checkBrokenLinks();
-	$kiwi -> done();
-	#==========================================
-	# Remove empty directories
-	#------------------------------------------
-	$kiwi -> info ("Removing empty directories...");
-	qxx ("find $dest/root-nopackage -type d | xargs rmdir -p 2>/dev/null");
-	$kiwi -> done();
+	foreach my $exp (@deny) {
+		$exp =~ s/\$//;  # shell glob differs from regexps
+		qxx ("rm -rf $dest/root/$exp");
+	}
 	#==========================================
 	# Store in instance for report
 	#------------------------------------------
 	$this->{nopackage} = \%result;
-	$this->{ilist}     = \@ilist;
 	return $this;
 }
 
@@ -1381,10 +1463,6 @@ sub setInitialSetup {
 	my $dest = $this->{dest};
 	my $kiwi = $this->{kiwi};
 	$kiwi -> info ("Setting up initial deployment workflow...");
-	#==========================================
-	# Cleanup
-	#------------------------------------------
-	qxx ("rm -rf $dest/root 2>&1");
 	#==========================================
 	# create root directory
 	#------------------------------------------
@@ -1529,7 +1607,7 @@ sub checkBrokenLinks {
 	my $this = shift;
 	my $dest = $this->{dest};
 	my $kiwi = $this->{kiwi};
-	my @base = ("root-nopackage","root");
+	my @base = ("root");
 	my @link = ();
 	#==========================================
 	# search links in overlay subtrees
@@ -1597,7 +1675,7 @@ sub autoyastClone {
 		# version is less than 2.19.x (1.xx.yy with xx >= 19 can be ignored)
 		$kiwi -> warning("AutoYaST version $ayVersion is too old for cloning");
 		$kiwi -> skipped();
-		return undef;
+		return $this;
 	}
 	#==========================================
 	# run yast for cloning
@@ -1630,6 +1708,7 @@ sub autoyastClone {
 	}
 	return $this;
 }
+
 
 1;
 

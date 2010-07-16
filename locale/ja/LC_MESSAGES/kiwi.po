@@ -47,6 +47,10 @@ msgstr "%2 から %1 ファイルを復元しました..."
 msgid "backing up: %1..."
 msgstr "バックアップしています: %1..."
 
+#, fuzzy
+msgid "archiving: %1..."
+msgstr "バックアップしています: %1..."
+
 msgid "restoring: %1..."
 msgstr "復元しています: %1..."
 

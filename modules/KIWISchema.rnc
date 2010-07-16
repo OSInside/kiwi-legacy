@@ -26,13 +26,14 @@ db:info [
 	db:releaseinfo [
 		"$Id: kiwi.rnc 2957 2008-01-11 12:53:39Z thomas-schraitle $"
 	]
-	db:releaseinfo [ "RNC Schema Version 4.6" ]
+	db:releaseinfo [ "RNC Schema Version 4.7" ]
 	db:pubdate [ "START" ]
 	db:pubdate [ "2008-01-08" ]
 ]
 
 size-type = xsd:token {pattern = "\d*|image"}
 volume-size-type = xsd:token {pattern = "\d+|\d+M|\d+G"}
+image-name = xsd:token {pattern = "[^\s/]+"}
 
 #==========================================
 # start with image description
@@ -45,7 +46,7 @@ start =
 # main block: <image>
 #
 div {
-	k.image.name.attribute = k.name.attribute
+	k.image.name.attribute = k.imagename.attribute 
 	k.image.displayname.attribute = k.displayname.attribute
 	k.image.noNamespaceSchemaLocation.attribute =
 		## The location of the XSD Schema (not relevant for RELAX NG or DTD)
@@ -61,7 +62,7 @@ div {
 		attribute inherit { text }
 	k.image.schemaversion.attribute =
 		## The allowed Schema version (fixed value)
-		attribute schemaversion { "4.6" }
+		attribute schemaversion { "4.7" }
 	k.image.kiwirevision.attribute =
 		## A kiwi SVN revision number which is known to build
 		## a working image from this description. If the kiwi SVN
@@ -163,6 +164,9 @@ k.dest.attribute        =
 k.username.attribute    =
 	## A name of a user
 	attribute username { text }
+k.imagename.attribute   =
+	## An image name without / and spaces
+	attribute name { image-name }
 
 #==========================================
 # common element <author>
@@ -943,6 +947,31 @@ div {
 }
 
 #==========================================
+# common element <oem-inplace-recovery>
+#
+div {
+	k.oem-inplace-recovery.content = xsd:boolean
+	k.oem-inplace-recovery.attlist = empty
+	k.oem-inplace-recovery =
+		## For oemboot driven images: Specify whether the
+		## recovery archive should be stored as part of the image
+		## or not. If it's not stored it's created during install
+		## of the oem image
+		[
+		db:para [
+			"For oemboot driven images: Specify whether the\x{a}"~
+			"recovery archive should be stored as part of the image\x{a}"~
+			"or not. If it's not stored it's created during install\x{a}"~
+			"of the oem image"
+		]
+		]
+		element oem-inplace-recovery {
+			k.oem-inplace-recovery.attlist,
+			k.oem-inplace-recovery.content
+		}
+}
+
+#==========================================
 # common element <oem-swap>
 #
 div {
@@ -1295,9 +1324,9 @@ div {
 		attribute hybridpersistent { xsd:boolean }
 	k.type.bootloader.attribute =
 		## Specifies the bootloader used for booting the image."
-		## At the moment only grub and sys|extlinux are supported
+		## At the moment grub, zipl and sys|extlinux are supported
 		attribute bootloader {
-			"extlinux" | "grub" | "syslinux"
+			"extlinux" | "grub" | "syslinux" | "zipl"
 		}
 	k.type.compressed.attribute =
 		## Specifies whether the image output file should be
@@ -1335,12 +1364,16 @@ div {
 			"ext2" | "ext3" | "ext4" | "reiserfs"
 		}
 	k.type.format.attribute =
-		## Specifies the format of the virtual disk. This applies to the
-		## vmx/oem types only.
+		## Specifies the format of the virtual disk.
 		attribute format {
-			"bochs" | "cloop" | "cow" | "dmg" | "iso" | "ovf" | "qcow" |
-			"qcow2" | "usb" | "vmdk" | "vpc" | "vvfat"
+			"ovf" | "qcow2" | "vmdk"
 		}
+	k.type.installiso.attribute =
+		## Specifies if a install iso should be created (oem only)
+		attribute installiso { xsd:boolean }
+	k.type.installstick.attribute =
+		## Specifies if a install stick should be created (oem only)
+		attribute installstick { xsd:boolean }
 	k.type.primary.attribute =
 		## Specifies the primary type (choose KIWI option type)
 		attribute primary { xsd:boolean }
@@ -1376,6 +1409,8 @@ div {
 		k.type.fsreadwrite.attribute? &
 		k.type.baseroot.attribute? &
 		k.type.format.attribute? &
+		k.type.installiso.attribute? &
+		k.type.installstick.attribute? &
 		k.type.primary.attribute? &
 		k.type.kernelcmdline.attribute?
 	k.type =
@@ -1388,8 +1423,7 @@ div {
 			k.pxedeploy? &
 			k.size? &
 			k.split? &
-			k.vmwareconfig? &
-			k.xenconfig?
+			k.machine?
 		}
 }
 
@@ -1539,108 +1573,77 @@ div {
 }
 
 #==========================================
-# common element <vmwarenic>
+# common element <vmnic>
 #
 div {
-	k.vmwarenic.driver.attribute =
+	k.vmnic.driver.attribute =
 		## The driver used for the VM network interface
 		attribute driver { text }
-	k.vmwarenic.interface.attribute =
+	k.vmnic.interface.attribute =
 		## The interface ID for the VM network interface
-		attribute interface { xsd:nonNegativeInteger }
-	k.vmwarenic.mode.attribute =
+		attribute interface { text }
+	k.vmnic.mode.attribute =
 		## The VM network mode
 		attribute mode { text }
-	k.vmwarenic.attlist =
-		k.vmwarenic.driver.attribute &
-		k.vmwarenic.interface.attribute &
-		k.vmwarenic.mode.attribute
-	k.vmwarenic =
-		## The VMware network interface definition
-		element vmwarenic {
-			k.vmwarenic.attlist &
+	k.vmnic.mac.attribute =
+		## The VM mac address
+		attribute mac { text }
+	k.vmnic.attlist =
+		k.vmnic.driver.attribute? &
+		k.vmnic.interface.attribute &
+		k.vmnic.mode.attribute? &
+		k.vmnic.mac.attribute?
+	k.vmnic =
+		## The VM network interface definition
+		element vmnic {
+			k.vmnic.attlist &
 			empty
 		}
 }
 
 #==========================================
-# common element <vmwaredisk>
+# common element <vmdisk>
 #
 div {
-	k.vmwaredisk.controller.attribute =
-		## The disk controller used for the VMware guest
+	k.vmdisk.controller.attribute =
+		## The disk controller used for the VM guest
 		attribute controller { "ide" | "scsi" }
-	k.vmwaredisk.id.attribute =
-		## The disk ID for the VM disk
+	k.vmdisk.id.attribute =
+		## The disk ID / device for the VM disk
 		attribute id { xsd:nonNegativeInteger }
-	k.vmwaredisk.attlist =
-		k.vmwaredisk.controller.attribute &
-		k.vmwaredisk.id.attribute
-	k.vmwaredisk =
-		## The VMware disk definition. You can setup either a
-		## scsi disk or an ide disk
-		element vmwaredisk {
-			k.vmwaredisk.attlist &
+	k.vmdisk.device.attribute =
+		## The disk device to appear in the guest (xen only)
+		attribute device { text }
+	k.vmdisk.attlist =
+		k.vmdisk.controller.attribute &
+		k.vmdisk.id.attribute &
+		k.vmdisk.device.attribute?
+	k.vmdisk =
+		## The VM disk definition.
+		element vmdisk {
+			k.vmdisk.attlist &
 			empty
 		}
 }
 
 #==========================================
-# common element <vmwarecdrom>
+# common element <vmdvd>
 #
 div {
-	k.vmwarecdrom.controller.attribute =
-		## The CD/DVD controller used for the VMware guest
+	k.vmdvd.controller.attribute =
+		## The CD/DVD controller used for the VM guest
 		attribute controller { "ide" | "scsi" }
-	k.vmwarecdrom.id.attribute =
+	k.vmdvd.id.attribute =
 		## The CD/DVD ID for the VM CD rom drive
 		attribute id { xsd:nonNegativeInteger }
-	k.vmwarecdrom.attlist =
-		k.vmwarecdrom.controller.attribute &
-		k.vmwarecdrom.id.attribute
-	k.vmwarecdrom =
-		## The VMware CD/DVD drive definition. You can setup either a
+	k.vmdvd.attlist =
+		k.vmdvd.controller.attribute &
+		k.vmdvd.id.attribute
+	k.vmdvd =
+		## The VM CD/DVD drive definition. You can setup either a
 		## scsi CD or an ide CD drive
-		element vmwarecdrom {
-			k.vmwarecdrom.attlist &
-			empty
-		}
-}
-
-#==========================================
-# common element <xendisk>
-#
-div {
-	k.xendisk.device.attribute =
-		## The disk device to appear in the Xen guest
-		attribute device { text }
-	k.xendisk.attlist =
-		k.xendisk.device.attribute
-	k.xendisk =
-		## The Xen disk device definition.
-		element xendisk {
-			k.xendisk.attlist &
-			empty
-		}
-}
-
-#==========================================
-# common element <xenbridge>
-#
-div {
-	k.xenbridge.mac.attribute =
-		## The Mac address to assign to the virtual interface
-		attribute mac { text }
-	k.xenbridge.name.attribute =
-		## The Xen bridged interface name
-		attribute name { text }
-	k.xenbridge.attlist =
-		k.xenbridge.mac.attribute ? &
-		k.xenbridge.name.attribute
-	k.xenbridge =
-		## The VMware network interface definition
-		element xenbridge {
-			k.xenbridge.attlist &
+		element vmdvd {
+			k.vmdvd.attlist &
 			empty
 		}
 }
@@ -2004,6 +2007,7 @@ div {
 			k.oem-swapsize? &
 			k.oem-recovery? &
 			k.oem-recoveryID? &
+			k.oem-inplace-recovery? &
 			k.oem-reboot? &
 			k.oem-dumphalt? &
 			k.oem-unattended?
@@ -2011,73 +2015,44 @@ div {
 }
 
 #==========================================
-# main block: <vmwareconfig>
+# main block: <machine>
 #
 div {
-	k.vmwareconfig.arch.attribute = 
-		## the VMware architecture type
+	k.machine.arch.attribute = 
+		## the VM architecture type
 		attribute arch { "ix86" | "x86_64" | "%arch" }
-	k.vmwareconfig.HWversion.attribute =
-		## The virtual HW version number for the VMware configuration
+	k.machine.HWversion.attribute =
+		## The virtual HW version number for the VM configuration
 		attribute HWversion { xsd:integer }
-	k.vmwareconfig.guestOS.attribute =
-		## the virtual guestOS identification string for VMware
+	k.machine.guestOS.attribute =
+		## the virtual guestOS identification string for the VM
 		attribute guestOS { text }
-	k.vmwareconfig.memory.attribute =
+	k.machine.memory.attribute =
 		## The memory setup for the guest VM.
 		attribute memory { text }
-	k.vmwareconfig.usb.attribute =
-		## Activate/Deactivate usb controller for VMware
-		attribute usb { xsd:boolean }
-	k.vmwareconfig.attlist =
-		k.vmwareconfig.arch.attribute? &
-		k.vmwareconfig.HWversion.attribute? &
-		k.vmwareconfig.guestOS.attribute? &
-		k.vmwareconfig.usb.attribute? &
-		k.vmwareconfig.memory.attribute
-	k.vmwareconfig =
-		## specifies the VMware configuration sections
+	k.machine.domain.attribute =
+		## The domain setup for the VM (xen only)
+		attribute domain { "dom0" | "domU" }
+	k.machine.attlist =
+		k.machine.arch.attribute? &
+		k.machine.HWversion.attribute? &
+		k.machine.guestOS.attribute? &
+		k.machine.memory.attribute? &
+		k.machine.domain.attribute?
+	k.machine =
+		## specifies the VM configuration sections
 		[
 		db:para [
-			"The vmwareconfig element specifies the VMware guest\x{a}"~
-			"configuration options which are used by the VMware\x{a}"~
+			"The machine element specifies the VM guest\x{a}"~
+			"configuration options which are used by the\x{a}"~
 			"virtual machine when running the image."
 		]
 		]
-		element vmwareconfig {
-			k.vmwareconfig.attlist &
-			k.vmwarenic ? &
-			k.vmwaredisk ? &
-			k.vmwarecdrom ?
-		}
-}
-
-#==========================================
-# main block: <xenconfig>
-#
-div {
-	k.xenconfig.memory.attribute =
-		## The memory setup for the Xen guest.
-		attribute memory { text }
-	k.xenconfig.domain.attribute =
-		## The type of Xen domain to create (dom0 or domU)
-		attribute domain { "dom0" | "domU" }
-	k.xenconfig.attlist =
-		k.xenconfig.memory.attribute ? &
-		k.xenconfig.domain.attribute ?
-	k.xenconfig =
-		## specifies the Xen configuration sections
-		[
-		db:para [
-			"The xenconfig element specifies the Xen guest\x{a}"~
-			"configuration options which are used by the Xen\x{a}"~
-			"para virtual machine when running the image."
-		]
-		]
-		element xenconfig {
-			k.xenconfig.attlist &
-			k.xendisk ? &
-			k.xenbridge*
+		element machine {
+			k.machine.attlist &
+			k.vmnic ? &
+			k.vmdisk ? &
+			k.vmdvd ?
 		}
 }
 

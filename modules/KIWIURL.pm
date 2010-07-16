@@ -230,6 +230,8 @@ sub thisPath {
 		my $pwd = qxx ("pwd"); chomp $pwd;
 		$thisPath = $pwd."/".$thisPath;
 	}
+	$thisPath =~ s/\/\.\//\//g;
+	$thisPath =~ s/\/+/\//g;
 	return $thisPath;
 }
 

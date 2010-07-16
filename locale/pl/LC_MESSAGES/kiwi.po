@@ -52,6 +52,10 @@ msgstr "przywrócono %1 plików z %2 ..."
 msgid "backing up: %1..."
 msgstr "tworzenie kopii zapasowej: %1..."
 
+#, fuzzy
+msgid "archiving: %1..."
+msgstr "tworzenie kopii zapasowej: %1..."
+
 msgid "restoring: %1..."
 msgstr "trwa przywracanie: %1..."
 

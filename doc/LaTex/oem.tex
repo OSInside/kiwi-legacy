@@ -21,10 +21,10 @@ The OEM example provided with kiwi is based on recent openSUSE releases,
 one example configuration per release, and includes the default and x11 
 patterns. The image type is a split type utilizing the distributions default
 filesystem format for the read-write partition and the squashfs filesystem 
-for the read-only partition. Using the additional \textbf{format} attribute 
-with the \textbf{iso} value creates an installable ISO image. When booting 
-from the ISO image the OEM disk image will be deployed to the storage media
-on the booting machine (after confirmation by the user).
+for the read-only partition. Using the additional \textbf{installiso} attribute 
+creates an installable ISO image. When booting from the ISO image the
+OEM disk image will be deployed to the storage media on the booting machine
+(after confirmation by the user).
 
 The commands provided below use the openSUSE 11.2 based example built 
 for the x86 architecture.
@@ -98,21 +98,22 @@ qemu -hda /tmp/mydisk -cdrom \
 
 \section{Flavors}
 
-As indicated above the use of the \textbf{format} attribute for the
-oem image supports the creation of an installation image. The installation 
-image can be created in two formats, one suitable for CD/DVD media and a 
-second suitable for a USB stick. The self installing image deploys the oem
-image onto the selected storage device. The installation process is a 
-simple image dump using the dd command. During this process the target system
+As indicated above the use of the \textbf{installiso} and \textbf{installstick}
+ attributes for the oem image supports the creation of an installation image.
+The installation image can be created in two formats, one suitable for
+CD/DVD media and a second suitable for a USB stick. The self installing
+image deploys the oem image onto the selected storage device. The
+installation process is a simple image dump using the dd command. During
+this process the target system
 remains in terminal mode. The following configuration snippets show the 
-use of the \textbf{format} attribute to create the ISO or USB installation
-image format respectively.
+use of the \textbf{installiso} and \textbf{installstick} attributes
+to create the ISO or USB installation image format respectively.
 
 \begin{itemize}
-\item <type image="name" ... format=''iso''/>\\
+\item <type image="name" ... installiso=''true''/>\\
       Creates a .iso file which can be burned in CD or DVD. This
       represents an installation CD
-\item <type image="name" ... format=''usb''/>\\
+\item <type image="name" ... installstick=''true''/>\\
       Creates a .raw.install file which can be dumped (dd) on a
       USB stick. This represents an installation Stick
 \end{itemize}

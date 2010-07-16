@@ -1,0 +1,66 @@
+#
+# /etc/inittab
+#
+# Copyright (c) 1996-2002 SuSE Linux AG, Nuernberg, Germany.  All rights reserved.
+#
+# Author: Florian La Roche, 1996
+# Please send feedback to http://www.suse.de/feedback
+#
+# This is the main configuration file of /sbin/init, which
+# is executed by the kernel on startup. It describes what
+# scripts are used for the different run-levels.
+#
+# All scripts for runlevel changes are in /etc/init.d/.
+#
+# This file may be modified by SuSEconfig unless CHECK_INITTAB
+# in /etc/sysconfig/suseconfig is set to "no"
+#
+
+# The default runlevel is defined here
+id:3:initdefault:
+
+# First script to be executed, if not booting in emergency (-b) mode
+si::bootwait:/etc/init.d/boot
+
+# /etc/init.d/rc takes care of runlevel handling
+#
+# runlevel 0  is  System halt   (Do not use this for initdefault!)
+# runlevel 1  is  Single user mode
+# runlevel 2  is  Local multiuser without remote network (e.g. NFS)
+# runlevel 3  is  Full multiuser with network
+# runlevel 4  is  Not used
+# runlevel 5  is  Full multiuser with network and xdm
+# runlevel 6  is  System reboot (Do not use this for initdefault!)
+#
+l0:0:wait:/etc/init.d/rc 0
+l1:1:wait:/etc/init.d/rc 1
+l2:2:wait:/etc/init.d/rc 2
+l3:3:wait:/etc/init.d/rc 3
+#l4:4:wait:/etc/init.d/rc 4
+l5:5:wait:/etc/init.d/rc 5
+l6:6:wait:/etc/init.d/rc 6
+
+# what to do in single-user mode
+ls:S:wait:/etc/init.d/rc S
+~~:S:respawn:/sbin/sulogin
+
+# Default HMC/3215/3270 console:
+#1:2345:respawn:/sbin/mingetty --noclear /dev/ttyS0 dumb
+# VT220(Linux) console:
+#2:2345:respawn:/sbin/mingetty --noclear /dev/ttyS1 xterm
+# additional 3270 terminals:
+#3:2345:respawn:/sbin/mingetty --noclear /dev/3270/ttycons dumb
+# KVM hypervisor console:
+1:2345:respawn:/sbin/mingetty --noclear /dev/hvc0 linux
+
+# what to do when CTRL-ALT-DEL is pressed
+ca::ctrlaltdel:/sbin/shutdown -r -t 4 now
+
+# not used for now:
+pf::powerwait:/etc/init.d/powerfail start
+pn::powerfailnow:/etc/init.d/powerfail now
+#pn::powerfail:/etc/init.d/powerfail now
+po::powerokwait:/etc/init.d/powerfail stop
+sh:12345:powerfail:/sbin/shutdown -h now THE POWER IS FAILING
+
+# end of /etc/inittab

@@ -262,6 +262,10 @@ function baseSetupOEMPartition {
 		echo "Setting up OEM_RECOVERY_ID=$kiwi_oemrecoveryID"
 		echo "OEM_RECOVERY_ID=$kiwi_oemrecoveryID" >> $oemfile
 	fi
+	if [ ! -z "$kiwi_oemrecoveryInPlace" ];then
+		echo "Setting up OEM_RECOVERY_INPLACE=1"
+		echo "OEM_RECOVERY_INPLACE=1" >> $oemfile
+	fi
 }
 
 #======================================
@@ -1037,6 +1041,10 @@ function suseGFXBoot {
 		# need the same data for extlinux and for isolinux
 		loader="isolinux"
 	fi
+	if [ "$loader" = "zipl" ];then
+		# thanks god, no graphics on s390 :-)
+		return
+	fi
 	#======================================
 	# setup bootloader data
 	#--------------------------------------
@@ -1451,6 +1459,8 @@ function suseStripKernel {
 				mv vmlinux-$VERSION.el5 vmlinuz
 			elif [ -f vmlinuz-$VERSION ];then
 				mv vmlinuz-$VERSION vmlinuz
+			elif [ -f image-$VERSION ];then
+				mv image-$VERSION vmlinuz
 			else
 				rm -f vmlinux
 				cp vmlinux-$VERSION vmlinux

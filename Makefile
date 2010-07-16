@@ -58,6 +58,11 @@ all: modules/KIWISchema.rng modules/KIWISchemaTest.rng
 	#--------------------------------------------
 	${MAKE} -C tools all
 
+	#============================================
+	# install .revision file
+	#--------------------------------------------
+	test -f ./.revision || ./.version > .revision
+
 install:
 	#============================================
 	# Install base directories
@@ -72,7 +77,6 @@ install:
 	#============================================
 	# install .revision file
 	#--------------------------------------------
-	test -f ./.revision || ./.version > .revision
 	install -m 644 ./.revision ${kiwi_prefix}
 
 	#============================================
@@ -133,12 +137,13 @@ install:
 	#============================================
 	# Install system image template descriptions
 	#--------------------------------------------
-	cp -a template/* ${KIWIIMAGE}
+	cp -a template/${arch}/* ${KIWIIMAGE} &>/dev/null || true
+	rm -f ${KIWIIMAGE}/README
 
 	#============================================
 	# Install kiwi repo
 	#--------------------------------------------
-	cp -a system/suse-repo ${KIWIREPO}
+	cp -a system/repo/${arch}/* ${KIWIREPO}
 
 modules/KIWISchema.rng: modules/KIWISchema.rnc
 	#============================================

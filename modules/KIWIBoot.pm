@@ -56,7 +56,6 @@ sub new {
 	my $system = shift;
 	my $vmsize = shift;
 	my $device = shift;
-	my $format = shift;
 	my $lvm    = shift;
 	my $profile= shift;
 	#==========================================
@@ -87,7 +86,7 @@ sub new {
 	#==========================================
 	# check initrd file parameter
 	#------------------------------------------
-	if (! -f $initrd) {
+	if ((defined $initrd) && (! -f $initrd)) {
 		$kiwi -> error  ("Couldn't find initrd file: $initrd");
 		$kiwi -> failed ();
 		return undef;
@@ -96,7 +95,7 @@ sub new {
 	# check system image file parameter
 	#------------------------------------------
 	if (defined $system) {
-		if (-f $system) {
+		if (-f $system || -b $system) {
 			my %fsattr = main::checkFileSystem ($system);
 			if ($fsattr{readonly}) {
 				$syszip = -s $system;
@@ -134,7 +133,7 @@ sub new {
 			$kernel = File::Spec->catfile(dirname($initrd), $kernel);
 		}
 	}
-	if (! -f $kernel) {
+	if ((defined $initrd) && (! -f $kernel)) {
 		$kiwi -> error  ("Couldn't find kernel file: $kernel");
 		$kiwi -> failed ();
 		return undef;
@@ -406,7 +405,6 @@ sub new {
 	$this->{vmsize}    = $vmsize;
 	$this->{syszip}    = $syszip;
 	$this->{device}    = $device;
-	$this->{format}    = $format;
 	$this->{zipped}    = $zipped;
 	$this->{isxen}     = $isxen;
 	$this->{xengz}     = $xengz;
@@ -1154,7 +1152,7 @@ sub setupBootStick {
 		# Copy root tree to virtual disk
 		#------------------------------------------
 		$kiwi -> info ("Copying system image tree on stick");
-		$status = qxx ("cp -a -x $system/* $loopdir 2>&1");
+		$status = qxx ("tar -cf - -C $system . | tar -x -C $loopdir 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -1424,7 +1422,8 @@ sub setupBootStick {
 	# Install boot loader on USB stick
 	#------------------------------------------
 	if (! $this -> installBootLoader ($bootloader, $stick, \%deviceMap)) {
-		$this -> cleanTmp ();
+		$this -> cleanLoop ();
+		return undef;
 	}
 	#==========================================
 	# cleanup temp directory
@@ -1755,6 +1754,10 @@ sub setupInstallCD {
 	my $iso = new KIWIIsoLinux (
 		$kiwi,$tmpdir,$name,undef,"checkmedia"
 	);
+	if (! defined $iso) {
+		$this -> cleanTmp ();
+		return undef;
+	}
 	my $tool= $iso -> getTool();
 	if ($bootloader =~ /(sys|ext)linux/) {
 		$iso -> createISOLinuxConfig ("/boot");
@@ -2224,8 +2227,9 @@ sub setupInstallStick {
 	# Install boot loader on virtual disk
 	#------------------------------------------
 	if (! $this -> installBootLoader ($bootloader, $diskname, \%deviceMap)) {
+		$this -> cleanLoopMaps();
 		$this -> cleanLoop ();
-		$this -> cleanTmp();
+		return undef;
 	}
 	$this -> cleanLoopMaps();
 	$this -> cleanLoop();
@@ -2243,7 +2247,6 @@ sub setupBootDisk {
 	my $arch      = $this->{arch};
 	my $system    = $this->{system};
 	my $vmsize    = $this->{vmsize};
-	my $format    = $this->{format};
 	my $syszip    = $this->{syszip};
 	my $tmpdir    = $this->{tmpdir};
 	my $initrd    = $this->{initrd};
@@ -2460,6 +2463,27 @@ sub setupBootDisk {
 		if ($oemtitle) {
 			$this->{bootlabel} = $oemtitle;
 			$bootfix = "OEM";
+		}
+	}
+	#==========================================
+	# increase vmsize on in-place recovery
+	#------------------------------------------
+	my $inplace = $xml -> getOEMRecoveryInPlace();
+	if (($inplace) && ("$inplace" eq "true")) {
+		my ($FD,$recoMB);
+		my $sizefile = "$destdir/recovery.partition.size";
+		if (open ($FD,$sizefile)) {
+			$recoMB = <$FD>; chomp $recoMB;
+			$kiwi -> info (
+				"Adding $recoMB MB spare space for in-place recovery"
+			);
+			close $FD;
+			unlink $sizefile;
+			$vmsize = $this->{vmmbyte} + $recoMB;
+			$this->{vmmbyte} = $vmsize;
+			$vmsize = $vmsize."M";
+			$this->{vmsize}  = $vmsize;
+			$kiwi -> done ();
 		}
 	}
 	#==========================================
@@ -2899,7 +2923,7 @@ sub setupBootDisk {
 		# Copy root tree to virtual disk
 		#------------------------------------------
 		$kiwi -> info ("Copying system image tree on virtual disk");
-		$status = qxx ("cp -a -x $system/* $loopdir 2>&1");
+		$status = qxx ("tar -cf - -C $system . | tar -x -C $loopdir 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -3066,6 +3090,7 @@ sub setupBootDisk {
 	#------------------------------------------
 	if (! $this -> installBootLoader ($bootloader, $diskname, \%deviceMap)) {
 		$this -> cleanLoop ();
+		return undef;
 	}
 	#==========================================
 	# cleanup temp directory
@@ -3074,56 +3099,28 @@ sub setupBootDisk {
 	#==========================================
 	# Create image described by given format
 	#------------------------------------------
-	if (defined $format) {
-		if ($initrd =~ /oemboot/) {
-			#==========================================
-			# OEM formats...
-			#------------------------------------------
-			if ($format eq "iso") {
-				$this -> {system} = $diskname;
-				$kiwi -> info ("Creating install ISO image\n");
-				$this -> cleanLoop ("keep-mountpoints");
-				if (! $this -> setupInstallCD()) {
-					return undef;
-				}
-			}
-			if ($format eq "usb") {
-				$this -> {system} = $diskname;
-				$kiwi -> info ("Creating install USB Stick image\n");
-				$this -> cleanLoop ("keep-mountpoints");
-				if (! $this -> setupInstallStick()) {
-					return undef;
-				}
-			}
-		} else {
-			#==========================================
-			# VMX formats...
-			#------------------------------------------
-			if ($format eq "ovf") {
-				$format = "vmdk";
-			}
-			$kiwi -> info ("Creating $format image");
-			my %vmwc  = ();
-			my $fname = $diskname;
-			$fname =~ s/\.raw$/\.$format/;
-			if ($format eq "vmdk") {
-				%vmwc = $xml -> getVMwareConfig();
-			}
-			my $convert = "convert -f raw $this->{loop} -O $format";
-			if (($vmwc{vmware_disktype}) && ($vmwc{vmware_disktype}=~/^scsi/)) {
-				$status = qxx ("qemu-img $convert -s $fname 2>&1");
-			} else {
-				$status = qxx ("qemu-img $convert $fname 2>&1");
-			}
-			$result = $? >> 8;
-			if ($result != 0) {
-				$kiwi -> failed ();
-				$kiwi -> error  ("Couldn't create $format image: $status");
-				$kiwi -> failed ();
-				$this -> cleanLoop ();
+	if ($initrd =~ /oemboot/) {
+		#==========================================
+		# OEM Install CD...
+		#------------------------------------------
+		if ($type{installiso} =~ /true|yes/i) {
+			$this -> {system} = $diskname;
+			$kiwi -> info ("Creating install ISO image\n");
+			$this -> cleanLoop ("keep-mountpoints");
+			if (! $this -> setupInstallCD()) {
 				return undef;
 			}
-			$kiwi -> done ();
+		}
+		#==========================================
+		# OEM Install Stick...
+		#------------------------------------------
+		if ($type{installstick} =~ /true|yes/i) {
+			$this -> {system} = $diskname;
+			$kiwi -> info ("Creating install USB Stick image\n");
+			$this -> cleanLoop ("keep-mountpoints");
+			if (! $this -> setupInstallStick()) {
+				return undef;
+			}
 		}
 	}
 	#==========================================
@@ -3580,7 +3577,7 @@ sub getMBRDiskLabel {
 	undef $this->{mbrid};
 	for (my $i=0;$i<4;$i++) {
 		$bytes[$i] = 1 + int(rand($range));
-		redo if $bytes[0] <= 0xf;
+		redo if $bytes[0] <= 0x11;
 	}
 	my $nid = sprintf ("0x%02x%02x%02x%02x",
 		$bytes[0],$bytes[1],$bytes[2],$bytes[3]
@@ -4154,6 +4151,120 @@ sub setupBootLoaderConfiguration {
 		$kiwi -> done();
 	}
 	#==========================================
+	# Zipl
+	#------------------------------------------
+	if ($loader eq "zipl") {
+		#==========================================
+		# Create MBR id file for boot device check
+		#------------------------------------------
+		$kiwi -> info ("Saving disk label on disk: $this->{mbrid}...");
+		qxx ("mkdir -p $tmpdir/boot/grub");
+		qxx ("mkdir -p $tmpdir/boot/zipl");
+		if (! open (FD,">$tmpdir/boot/grub/mbrid")) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create mbrid file: $!");
+			$kiwi -> failed ();
+			return undef;
+		}
+		print FD "$this->{mbrid}";
+		close FD;
+		$kiwi -> done();
+		#==========================================
+		# Create zipl.conf
+		#------------------------------------------
+		$cmdline =~ s/\n//g;
+		my $ziplconfig = "zipl.conf";
+		$kiwi -> info ("Creating $ziplconfig config file...");
+		if ($isxen) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("*** zipl: Xen boot not supported ***");
+			$kiwi -> failed ();
+			return undef;
+		}
+		if (! -e "/boot/zipl") {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Can't find bootloader: /boot/zipl");
+			$kiwi -> failed ();
+			return undef;
+		}
+		if (! open (FD,">$tmpdir/boot/$ziplconfig")) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't create $ziplconfig: $!");
+			$kiwi -> failed ();
+			return undef;
+		}
+		#==========================================
+		# General zipl setup
+		#------------------------------------------
+		my $title_standard;
+		my $title_failsafe;
+		if ($type =~ /^KIWI (CD|USB)/) {
+			$title_standard = $this -> makeLabel (
+				"Install/Restore $label"
+			);
+			$title_failsafe = $this -> makeLabel (
+				"Failsafe -- Install/Restore $label"
+			);
+		} else {
+			$title_standard = $this -> makeLabel (
+				"$label ( $type )"
+			);
+			$title_failsafe = $this -> makeLabel (
+				"Failsafe -- $label ( $type )"
+			);
+		}
+		print FD "[defaultboot]"."\n";
+		print FD "defaultmenu = menu"."\n\n";
+		print FD ":menu"."\n";
+		print FD "\t"."default = 1"."\n";
+		print FD "\t"."prompt  = 1"."\n";
+		print FD "\t"."target  = boot/zipl"."\n";
+		print FD "\t"."timeout = 200"."\n";
+		print FD "\t"."1 = $title_standard"."\n";
+		print FD "\t"."2 = $title_failsafe"."\n\n";
+		#==========================================
+		# Standard boot
+		#------------------------------------------
+		print FD "[$title_standard]"."\n";
+		if ($type =~ /^KIWI CD/) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("*** zipl: CD boot not supported ***");
+			$kiwi -> failed ();
+			return undef;
+		} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
+			print FD "\t"."image   = boot/linux.vmx"."\n";
+			print FD "\t"."target  = boot/zipl"."\n";
+			print FD "\t"."ramdisk = boot/initrd.vmx,0x2000000"."\n";
+		} else {
+			print FD "\t"."image   = boot/linux"."\n";
+			print FD "\t"."target  = boot/zipl"."\n";
+			print FD "\t"."ramdisk = boot/initrd,0x2000000"."\n";
+		}
+		print FD "\t"."parameters = \"loader=$bloader $cmdline\""."\n";
+		#==========================================
+		# Failsafe boot
+		#------------------------------------------
+		print FD "[$title_failsafe]"."\n";
+		if ($type =~ /^KIWI CD/) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("*** zipl: CD boot not supported ***");
+			$kiwi -> failed ();
+			return undef;
+		} elsif (($type=~ /^KIWI USB/)||($imgtype=~ /vmx|oem|split|usb/)) {
+			print FD "\t"."image   = boot/linux.vmx"."\n";
+			print FD "\t"."target  = boot/zipl"."\n";
+			print FD "\t"."ramdisk = boot/initrd.vmx,0x2000000"."\n";
+		} else {
+			print FD "\t"."image   = boot/linux"."\n";
+			print FD "\t"."target  = boot/zipl"."\n";
+			print FD "\t"."ramdisk = boot/initrd,0x2000000"."\n";
+		}
+		print FD "\t"."parameters = \"x11failsafe loader=$bloader";
+		print FD " $cmdline\""."\n";
+		close FD;
+		$kiwi -> done();
+	}
+	#==========================================
 	# more boot managers to come...
 	#------------------------------------------
 	# ...
@@ -4348,6 +4459,116 @@ sub installBootLoader {
 			$kiwi -> failed ();
 			return undef;
 		}
+		$kiwi -> done();
+	}
+	#==========================================
+	# Zipl
+	#------------------------------------------
+	if ($loader eq "zipl") {
+		$kiwi -> info ("Installing zipl on device: $diskname");
+		#==========================================
+		# detect disk geometry of disk image file
+		#------------------------------------------
+		my @geometry = $this -> diskGeometry ($diskname);
+		if (! @geometry) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Failed to detect disk geometry");
+			$kiwi -> failed ();
+			return undef;
+		}
+		#==========================================
+		# loop mount disk image file
+		#------------------------------------------
+		$status = qxx ("/sbin/losetup -s -f $diskname 2>&1"); chomp $status;
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Can't loop mount image file: $status");
+			$kiwi -> failed ();
+			return undef;
+		}
+		my $loop = $status;
+		$status = qxx ("/sbin/kpartx -a $loop 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Can't map loop mounted image file: $status");
+			$kiwi -> failed ();
+			qxx ("losetup -d $loop 2>&1");
+			return undef;
+		}
+		my $bootdev= $loop;
+		$bootdev =~ s/\/dev\///;
+		$bootdev = "/dev/mapper/".$bootdev."p".$geometry[2];
+		if (! -e $bootdev) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Can't find loop map: $bootdev");
+			$kiwi -> failed ();
+			qxx ("kpartx  -d $loop 2>&1");
+			qxx ("losetup -d $loop 2>&1");
+			return undef;
+		}
+		$status = qxx ("mount $bootdev /mnt 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Can't mount boot partition: $status");
+			$kiwi -> failed ();
+			qxx ("kpartx  -d $loop 2>&1");
+			qxx ("losetup -d $loop 2>&1");
+			return undef;
+		}
+		my $mount = "/mnt";
+		#==========================================
+		# rewrite zipl.conf with additional params
+		#------------------------------------------
+		my $config = "$mount/boot/zipl.conf";
+		if (! open (FD,$config)) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Can't open config file for reading: $!");
+			$kiwi -> failed ();
+			qxx ("umount $mount 2>&1");
+			qxx ("kpartx  -d $loop 2>&1");
+			qxx ("losetup -d $loop 2>&1");
+			return undef;
+		}
+		my @data = <FD>; close FD;
+		if (! open (FD,">$config")) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Can't open config file for writing: $!");
+			$kiwi -> failed ();
+			qxx ("umount $mount 2>&1");
+			qxx ("kpartx  -d $loop 2>&1");
+			qxx ("losetup -d $loop 2>&1");
+			return undef;
+		}
+		foreach my $line (@data) {
+			print FD $line;
+			if ($line =~ /^:menu/) {
+				print FD "\t"."targetbase = $loop"."\n";
+				print FD "\t"."targettype = SCSI"."\n";
+				print FD "\t"."targetblocksize = 512"."\n";
+				print FD "\t"."targetoffset = $geometry[1]"."\n";
+			}
+		}
+		close FD;
+		#==========================================
+		# call zipl...
+		#------------------------------------------
+		$status = qxx ("cd $mount && zipl -c $config 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Couldn't install zipl on $diskname: $status");
+			$kiwi -> failed ();
+			qxx ("umount $mount 2>&1");
+			qxx ("kpartx  -d $loop 2>&1");
+			qxx ("losetup -d $loop 2>&1");
+			return undef;
+		}
+		qxx ("umount $mount 2>&1");
+		qxx ("kpartx  -d $loop 2>&1");
+		qxx ("losetup -d $loop 2>&1");
 		$kiwi -> done();
 	}
 	#==========================================
@@ -5228,6 +5449,42 @@ sub addBootNext {
 	close $bn;
 
 	return $this;
+}
+
+#==========================================
+# diskGeometry
+#------------------------------------------
+sub diskGeometry {
+	# ...
+	# find disk geometry: CYLINDERS,HEADS,SECTORS and
+	# also the start sector of the boot partition which
+	# is in kiwi always the last partition in the table
+	# ---
+	my $this = shift;
+	my $disk = shift;
+	my $bootid = 0;
+	my $geometry;
+	my $bootsector;
+	my $bios  = qx (parted $disk unit cyl print | grep BIOS 2>&1);
+	my @table = qx (parted -m $disk unit s print 2>&1);
+	if ($bios =~ /geometry: (.*?)\./) {
+		$geometry = $1;
+	} else {
+		return undef;
+	}
+	chomp @table;
+	foreach my $entry (@table) {
+		if ($entry =~ /^[1-4]:/) {
+			my @items = split (/:/,$entry);
+			$bootsector = $items[1];
+			chop $bootsector;
+			$bootid++;
+		}
+	}
+	if (! $bootsector) {
+		return undef;
+	}
+	return ($geometry,$bootsector,$bootid);
 }
 
 1; 

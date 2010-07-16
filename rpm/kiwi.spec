@@ -1,5 +1,5 @@
 #
-# spec file for package kiwi (Version 4.41)
+# spec file for package kiwi (Version 4.48)
 #
 # Copyright (c) 2008 SUSE LINUX Products GmbH, Nuernberg, Germany.
 # This file and all modifications and additions to the pristine
@@ -52,7 +52,7 @@ Requires:       satsolver-tools
 Requires:       clicfs
 %endif
 Summary:        OpenSuSE - KIWI Image System
-Version:        4.41
+Version:        4.48
 Release:        80
 Group:          System/Management
 License:        GPL v2 or later
@@ -184,11 +184,16 @@ Authors:
     Marcus Schaefer <ms@novell.com>
 %endif
 
-%ifarch %ix86 x86_64
+%ifarch %ix86 x86_64 s390 s390x
 %package -n kiwi-desc-vmxboot
 License:        GPL v2 or later
 Requires:       kiwi = %{version}
-Requires:       qemu multipath-tools
+Requires:       multipath-tools
+%if 0%{?suse_version} >= 1130
+Requires:       virt-utils
+%else
+Requires:       qemu
+%endif
 Summary:        OpenSuSE - KIWI Image System Virtual Machine boot
 Group:          System/Management
 %if 0%{?suse_version} > 1120
@@ -239,11 +244,16 @@ Authors:
     Marcus Schaefer <ms@novell.com>
 %endif
 
-%ifarch %ix86 x86_64
+%ifarch %ix86 x86_64 s390 s390x
 %package -n kiwi-desc-oemboot
 License:        GPL v2 only
 Requires:       kiwi = %{version}
-Requires:       qemu multipath-tools
+%if 0%{?suse_version} >= 1130
+Requires:       virt-utils
+%else
+Requires:       qemu
+%endif
+Requires:       multipath-tools
 %if %{suse_version} > 1010
 Requires: genisoimage
 %else
@@ -265,7 +275,7 @@ Authors:
     Marcus Schaefer <ms@novell.com>
 %endif
 
-%ifarch %ix86 x86_64
+%ifarch %ix86 x86_64 s390 s390x
 %package -n kiwi-templates
 License:        GPL v2.0 or later
 Requires:       kiwi-desc-vmxboot = %{version}
@@ -315,6 +325,8 @@ touch kiwi.loader
 	rm -rf $RPM_BUILD_ROOT/etc/permissions.d/kiwi
 %endif
 
+mkdir -p $RPM_BUILD_ROOT/var/cache/kiwi
+
 test -f $RPM_BUILD_ROOT/srv/tftpboot/pxelinux.0 && \
 	echo /srv/tftpboot/pxelinux.0 > kiwi.loader
 test -f $RPM_BUILD_ROOT/srv/tftpboot/mboot.c32 && \
@@ -349,12 +361,18 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-, root, root)
 %dir %{_datadir}/kiwi
 %dir %{_datadir}/kiwi/image
+%dir /var/cache/kiwi
+%ifarch %ix86 x86_64
 %exclude %{_datadir}/kiwi/image/suse-11.3-JeOS
 %exclude %{_datadir}/kiwi/image/suse-11.2-JeOS
 %exclude %{_datadir}/kiwi/image/suse-11.1-JeOS
 %exclude %{_datadir}/kiwi/image/suse-SLE10-JeOS
 %exclude %{_datadir}/kiwi/image/suse-SLE11-JeOS
 %exclude %{_datadir}/kiwi/image/rhel-05.4-JeOS
+%endif
+%ifarch s390 s390x
+%exclude %{_datadir}/kiwi/image/suse-SLE11-JeOS
+%endif
 %{_datadir}/kiwi/.revision
 %{_datadir}/kiwi/modules
 %{_datadir}/kiwi/locale
@@ -430,7 +448,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/kiwi/image/isoboot/rhel*
 %endif
 
-%ifarch %ix86 x86_64
+%ifarch %ix86 x86_64 s390 s390x
 %files -n kiwi-desc-vmxboot
 %defattr(-, root, root)
 %dir %{_datadir}/kiwi/image/vmxboot
@@ -462,7 +480,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/kiwi/image/xenboot/suse*
 %endif
 
-%ifarch %ix86 x86_64
+%ifarch %ix86 x86_64 s390 s390x
 %files -n kiwi-desc-oemboot
 %defattr(-, root, root)
 %dir %{_datadir}/kiwi/image/oemboot
@@ -479,4 +497,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/kiwi/image/suse-SLE10-JeOS
 %{_datadir}/kiwi/image/suse-SLE11-JeOS
 %{_datadir}/kiwi/image/rhel-05.4-JeOS
+%endif
+%ifarch s390 s390x
+%{_datadir}/kiwi/image/suse-SLE11-JeOS
 %endif

@@ -49,6 +49,10 @@ msgstr "%1 visszaállítása innen: %2..."
 msgid "backing up: %1..."
 msgstr "%1 mentése..."
 
+#, fuzzy
+msgid "archiving: %1..."
+msgstr "%1 mentése..."
+
 msgid "restoring: %1..."
 msgstr "%1 visszaállítása..."
 
