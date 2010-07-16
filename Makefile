@@ -46,14 +46,6 @@ MANVZ       = ${man_prefix}/man1
 
 all: modules/KIWISchema.rng modules/KIWISchemaTest.rng
 	#============================================
-	# create checksum files for boot images...
-	#--------------------------------------------
-	(cd system/boot/${arch} && ./.md5)
-	(cd system/boot/${arch} && \
-		find -type f | grep -v -E ".git|.test|.md5" |\
-		xargs chmod u-w &>/dev/null || true)
-
-	#============================================
 	# build tools
 	#--------------------------------------------
 	${MAKE} -C tools all
@@ -144,6 +136,14 @@ install:
 	# Install kiwi repo
 	#--------------------------------------------
 	cp -a system/repo/${arch}/* ${KIWIREPO}
+
+	#============================================
+	# create checksum files for boot images...
+	#--------------------------------------------
+	(cd system/boot/${arch} && ./.md5)
+	(cd system/boot/${arch} && \
+		find -type f | grep -v -E ".git|.test|.md5" |\
+		xargs chmod u-w &>/dev/null || true)
 
 modules/KIWISchema.rng: modules/KIWISchema.rnc
 	#============================================
