@@ -874,15 +874,11 @@ if [ $LOCAL_BOOT = "no" ];then
 				updateLVMBootDeviceFstab /config $imageBootDevice
 			elif [ "$haveClicFS" = "yes" ];then
 				updateClicBootDeviceFstab /config $imageBootDevice
+			elif [ "$haveBtrFS" = "yes" ];then
+				updateBtrBootDeviceFstab /config $imageBootDevice
 			fi
-			if ! test -z $COMBINED_IMAGE; then
-				gnum=`echo $imageNextRootDevice | sed -e "s/.*\([0-9]\)/\1/"`
-				gnum=`expr $gnum - 1`
-				setupBootLoader \
-					/mnt /config $gnum $imageNextRootDevice NET ${DISK}1
-			else
-				setupBootLoader /mnt /config 1 ${DISK}2 NET ${DISK}1
-			fi
+			setupBootLoader /mnt /config $(($bootid - 1)) \
+				$imageRootDevice NET $imageSwapDevice
 			setupKernelModules /config
 		fi
 	fi

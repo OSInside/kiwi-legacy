@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Jul 16 15:01:09 CEST 2010 - ms@suse.de
+
+- fixed Makefile boot image md5 creation time
+- added suport for the btrfs filesystem (bnc #596205)
+
+-------------------------------------------------------------------
 Thu Jul 15 15:59:20 CEST 2010 - ms@suse.de
 
 - v4.48

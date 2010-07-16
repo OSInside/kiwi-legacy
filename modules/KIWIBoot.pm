@@ -575,6 +575,7 @@ sub setupBootStick {
 	my $dmbootMB  = 0;
 	my $dmapper   = 0;
 	my $haveluks  = 0;
+	my $needBootP = 0;
 	my $bootloader= "grub";
 	my $lvmsize;
 	my $syslsize;
@@ -677,12 +678,19 @@ sub setupBootStick {
 		}
 	}
 	#==========================================
-	# check for device mapper snapshot / clicfs
+	# check for overlay filesystems
 	#------------------------------------------
 	if ($type{filesystem} eq "clicfs") {
 		$this->{dmapper} = 1;
 		$dmapper  = 1;
 		$dmbootMB = 60;
+	}
+	#==========================================
+	# check if fs requires a boot partition
+	#------------------------------------------
+	if ($type{filesystem} eq "btrfs") {
+		$needBootP  = 1;
+		$luksbootMB = 60;
 	}
 	#==========================================
 	# check for LUKS extension
@@ -722,7 +730,7 @@ sub setupBootStick {
 	# set boot partition number
 	#------------------------------------------
 	my $bootpart = "0";
-	if (($syszip) || ($haveSplit) || ($lvm) || ($haveluks)) {
+	if (($syszip) || ($haveSplit) || ($lvm) || ($haveluks) || ($needBootP)) {
 		$bootpart = "1";
 	}
 	if ((($syszip) || ($haveSplit)) && ($haveluks)) {
@@ -925,7 +933,7 @@ sub setupBootStick {
 							"n","p","2",".",".","t","2",$partid,
 							"a","2","w","q"
 						);
-					} elsif ($haveluks) {
+					} elsif (($haveluks) || ($needBootP)) {
 						$lukssize = $hardSize;
 						$lukssize /= 1024;
 						$lukssize -= $luksbootMB;
@@ -1194,6 +1202,15 @@ sub setupBootStick {
 			$status = qxx ("/sbin/resize_reiserfs $mapper 2>&1");
 			$result = $? >> 8;
 			last SWITCH;
+		};
+		/^btrfs/    && do {
+			$kiwi -> info ("Resizing system $fsattr{type} filesystem");
+			my $bctl = "/sbin/btrfsctl -r max /mnt";
+			$status = qxx ("
+				mount $mapper /mnt && $bctl ; umount /mnt 2>&1"
+			);
+			$result = $? >> 8;
+			last SWITCH;
 		}
 	};
 	if ($result != 0) {
@@ -1232,6 +1249,15 @@ sub setupBootStick {
 			/^reiserfs/ && do {
 				$kiwi -> info ("Resizing split $fsattr{type} filesystem");
 				$status = qxx ("/sbin/resize_reiserfs $mapper 2>&1");
+				$result = $? >> 8;
+				last SWITCH;
+			};
+			/^btrfs/    && do {
+				$kiwi -> info ("Resizing system $fsattr{type} filesystem");
+				my $bctl = "/sbin/btrfsctl -r max /mnt";
+				$status = qxx ("
+					mount $mapper /mnt && $bctl; umount /mnt 2>&1"
+				);
 				$result = $? >> 8;
 				last SWITCH;
 			}
@@ -1333,11 +1359,11 @@ sub setupBootStick {
 		}
 		$kiwi -> done();
 	} elsif (
-		($dmapper) || ($haveluks) || ($lvm) || ($bootloader eq "extlinux")
+		($dmapper) || ($haveluks) || ($needBootP) || ($lvm) || ($bootloader eq "extlinux")
 	) {
 		$root = $deviceMap{dmapper};
 		$kiwi -> info ("Creating ext2 boot filesystem");
-		if ($haveluks) {
+		if (($haveluks) || ($needBootP)) {
 			if (($syszip) || ($haveSplit) || ($dmapper)) {
 				$root = $deviceMap{3};
 			} else {
@@ -1385,7 +1411,7 @@ sub setupBootStick {
 		if ($lvm) {
 			$root = $deviceMap{0};
 		}
-	} elsif ($haveluks) {
+	} elsif (($haveluks) || ($needBootP)) {
 		$root = $deviceMap{2};
 	} else {
 		$root = $deviceMap{1};
@@ -2269,6 +2295,7 @@ sub setupBootDisk {
 	my $dmbootMB  = 0;
 	my $dmapper   = 0;
 	my $haveluks  = 0;
+	my $needBootP = 0;
 	my $bootloader= "grub";
 	my $splitfile;
 	my $version;
@@ -2417,12 +2444,19 @@ sub setupBootDisk {
 		}
 	}
 	#==========================================
-	# check for device mapper snapshot / clicfs
+	# check for overlay filesystems
 	#------------------------------------------
 	if ($type{filesystem} eq "clicfs") {
 		$this->{dmapper} = 1;
 		$dmapper  = 1;
 		$dmbootMB = 60;
+	}
+	#==========================================
+	# check if fs requires a boot partition
+	#------------------------------------------
+	if ($type{filesystem} eq "btrfs") {
+		$needBootP  = 1;
+		$luksbootMB = 60;
 	}
 	#==========================================
 	# check for LUKS extension
@@ -2538,7 +2572,7 @@ sub setupBootDisk {
 	# Setup boot partition ID
 	#------------------------------------------
 	my $bootpart = "0";
-	if (($syszip) || ($haveSplit) || ($lvm) || ($haveluks)) {
+	if (($syszip) || ($haveSplit) || ($lvm) || ($haveluks) || ($needBootP)) {
 		$bootpart = "1";
 	}
 	if ((($syszip) || ($haveSplit)) && ($haveluks)) {
@@ -2657,7 +2691,7 @@ sub setupBootDisk {
 						"t","2",$partid,
 						"a","2","w","q"
 					);
-				} elsif ($haveluks) {
+				} elsif (($haveluks) || ($needBootP)) {
 					my $lukssize = $this->{vmmbyte} - $luksbootMB;
 					@commands = (
 						"n","p","1",".","+".$lukssize."M",
@@ -2809,6 +2843,15 @@ sub setupBootDisk {
 				$status = qxx ("/sbin/resize_reiserfs $mapper 2>&1");
 				$result = $? >> 8;
 				last SWITCH;
+			};
+			/^btrfs/    && do {
+				$kiwi -> info ("Resizing system $fsattr{type} filesystem");
+				my $bctl = "/sbin/btrfsctl -r max /mnt";
+				$status = qxx ("
+					mount $mapper /mnt && $bctl; umount /mnt 2>&1"
+				);
+				$result = $? >> 8;
+				last SWITCH;
 			}
 		};
 		if ($result != 0) {
@@ -2860,6 +2903,15 @@ sub setupBootDisk {
 				/^reiserfs/ && do {
 					$kiwi -> info ("Resizing split $fsattr{type} filesystem");
 					$status = qxx ("/sbin/resize_reiserfs $mapper 2>&1");
+					$result = $? >> 8;
+					last SWITCH;
+				};
+				/^btrfs/    && do {
+					$kiwi -> info ("Resizing system $fsattr{type} filesystem");
+					my $bctl = "/sbin/btrfsctl -r max /mnt";
+					$status = qxx ("
+						mount $mapper /mnt&& $bctl; umount /mnt 2>&1"
+					);
 					$result = $? >> 8;
 					last SWITCH;
 				}
@@ -3001,11 +3053,11 @@ sub setupBootDisk {
 		}
 		$kiwi -> done();
 	} elsif (
-		($dmapper) || ($haveluks) || ($lvm) || ($bootloader eq "extlinux")
+		($dmapper) || ($haveluks) || ($needBootP) || ($lvm) || ($bootloader eq "extlinux")
 	) {
 		$root = $deviceMap{dmapper};
 		$kiwi -> info ("Creating ext2 boot filesystem");
-		if ($haveluks) {
+		if (($haveluks) || ($needBootP)) {
 			if (($syszip) || ($haveSplit) || ($dmapper)) {
 				$root = $deviceMap{3};
 			} else {
@@ -3052,7 +3104,7 @@ sub setupBootDisk {
 		if ($lvm) {
 			$root = $deviceMap{0};
 		}
-	} elsif ($haveluks) {
+	} elsif (($haveluks) || ($needBootP)) {
 		$root = $deviceMap{2};
 	} else {
 		$root = $deviceMap{1};
@@ -5370,6 +5422,15 @@ sub setupFilesystem {
 			$fsopts.= "-f";
 			$status = qxx (
 				"/sbin/mkreiserfs $fsopts $device 2>&1"
+			);
+			$result = $? >> 8;
+			last SWITCH;
+		};
+		/^btrfs/    && do {
+			$kiwi -> info ("Creating btrfs $name filesystem");
+			my $fsopts = $FSopts{btrfs};
+			$status = qxx (
+				"/sbin/mkfs.btrfs $fsopts $device 2>&1"
 			);
 			$result = $? >> 8;
 			last SWITCH;

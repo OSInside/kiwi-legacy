@@ -599,6 +599,8 @@ if [ "$LOCAL_BOOT" = "no" ];then
 		updateLVMBootDeviceFstab /config $imageBootDevice
 	elif [ "$haveClicFS" = "yes" ];then
 		updateClicBootDeviceFstab /config $imageBootDevice
+	elif [ "$haveBtrFS" = "yes" ];then
+		updateBtrBootDeviceFstab /config $imageBootDevice
 	elif [ "$loader" = "syslinux" ] || [ "$loader" = "extlinux" ];then
 		updateSyslinuxBootDeviceFstab /config $imageBootDevice
 	elif [ "$haveLuks" = "yes" ];then

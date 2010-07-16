@@ -1861,6 +1861,7 @@ clicfs, ext2, ext3, ext4, reiserfs, or squashfs
 clicfs is a fuse based compressed filesystem using a cow
 file for write operations</a:documentation>
         <choice>
+          <value>btrfs</value>
           <value>clicfs</value>
           <value>ext2</value>
           <value>ext3</value>
@@ -1874,6 +1875,7 @@ file for write operations</a:documentation>
       <attribute name="fsreadonly">
         <a:documentation>Specifies the filesystem for the read-only part of a split image</a:documentation>
         <choice>
+          <value>btrfs</value>
           <value>ext2</value>
           <value>ext3</value>
           <value>ext4</value>
@@ -1886,6 +1888,7 @@ file for write operations</a:documentation>
       <attribute name="fsreadwrite">
         <a:documentation>Specifies the filesystem for the read-write part of a split image</a:documentation>
         <choice>
+          <value>btrfs</value>
           <value>ext2</value>
           <value>ext3</value>
           <value>ext4</value>
@@ -1925,6 +1928,7 @@ file for write operations</a:documentation>
       <attribute name="image">
         <a:documentation>Specifies the image type</a:documentation>
         <choice>
+          <value>btrfs</value>
           <value>clicfs</value>
           <value>cpio</value>
           <value>ec2</value>
