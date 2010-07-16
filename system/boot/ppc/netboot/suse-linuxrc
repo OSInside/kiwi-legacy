@@ -371,6 +371,7 @@ then
 				"Disk $DISK doesn't appear... fatal !" \
 			"reboot"
 		fi
+		export imageDiskDevice=$DISK
 		updateNeeded initialize
 		if linuxPartition $DISK;then
 			if mountSystem $imageDevice;then
@@ -755,33 +756,7 @@ validateRootTree
 runHook postmount
 
 #======================================
-# 15) Setup boot partition
-#--------------------------------------
-if [ $LOCAL_BOOT = "no" ] && \
-	[ ! -z "$PART" ]      && \
-	[ -z "$NFSROOT" ]     && \
-	[ -z "$NBDROOT" ]     && \
-	[ -z "$AOEROOT" ]
-then
-	if [ ! -z "$UNIONFS_CONFIG" ] && [ "$systemIntegrity" = "clean" ];then
-		# /.../
-		# have to do this so that /boot gets copied to the
-		# extX partition, which is necessary for the bootloader to
-		# be able to find the data in there (it can't read squashfs
-		# or clicfs)
-		# ----
-		mkdir /mnt/static-boot
-		rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
-		mount $rwDevice /mnt/static-boot
-		cp -a  /mnt/boot /mnt/static-boot
-		rm -rf /mnt/boot
-		( cd /mnt && ln -s static-boot/boot boot )
-		unset RELOAD_IMAGE
-	fi
-fi
-
-#======================================
-# 16) Import fixed configuration files
+# 15) Import fixed configuration files
 #--------------------------------------
 runHook preconfig
 if [ $LOCAL_BOOT = "no" ];then
@@ -834,7 +809,7 @@ fi
 runHook postconfig
 
 #======================================
-# 17) check filesystem and kernels
+# 16) check filesystem and kernels
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	if test $systemIntegrity = "clean";then
@@ -846,7 +821,7 @@ if [ $LOCAL_BOOT = "no" ];then
 fi
 
 #======================================
-# 18) make initrd available on unionfs
+# 17) make initrd available on unionfs
 #--------------------------------------
 if \
 	[ $LOCAL_BOOT = "no" ] && \
@@ -861,7 +836,7 @@ then
 		# case we can't use the SuSE Linux initrd but must stick to the
 		# kiwi boot system.
 		# ----
-		pushd /mnt/static-boot/boot >/dev/null
+		pushd $imageBootDevice &>/dev/null
 		IFS="," ; for i in $KERNEL_LIST;do
 			if test -z "$i";then
 				continue
@@ -885,7 +860,7 @@ then
 fi
 
 #======================================
-# 19) Create system dependant files
+# 18) Create system dependant files
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	if test $systemIntegrity = "clean";then
@@ -895,9 +870,10 @@ if [ $LOCAL_BOOT = "no" ];then
 		if test ! -z $DISK;then
 			updateSwapDeviceFstab /config ${DISK}1
 			updateOtherDeviceFstab /config
-			if [ ! -z "$UNIONFS_CONFIG" ];then
-				rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
-				updatePXEBootDeviceFstab /config $rwDevice
+			if [ "$haveLVM" = "yes" ];then
+				updateLVMBootDeviceFstab /config $imageBootDevice
+			elif [ "$haveClicFS" = "yes" ];then
+				updateClicBootDeviceFstab /config $imageBootDevice
 			fi
 			if ! test -z $COMBINED_IMAGE; then
 				gnum=`echo $imageNextRootDevice | sed -e "s/.*\([0-9]\)/\1/"`
@@ -913,7 +889,7 @@ if [ $LOCAL_BOOT = "no" ];then
 fi
 
 #======================================
-# 20) If image is new, notify
+# 19) If image is new, notify
 #--------------------------------------
 runHook prenotify
 if [ $LOCAL_BOOT = "no" ];then
@@ -943,7 +919,7 @@ fi
 runHook postnotify
 
 #======================================
-# 21) send DHCP_RELEASE, reset cache
+# 20) send DHCP_RELEASE, reset cache
 #--------------------------------------
 if \
 	[ $LOCAL_BOOT = "no" ] && \
@@ -955,7 +931,7 @@ then
 fi
 
 #======================================
-# 22) copy system dependant files
+# 21) copy system dependant files
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	if test $systemIntegrity = "clean";then
@@ -964,18 +940,18 @@ if [ $LOCAL_BOOT = "no" ];then
 fi
 
 #======================================
-# 23) update system dependant files
+# 22) update system dependant files
 #--------------------------------------
 setupInittab /mnt
 
 echo 256 > /proc/sys/kernel/real-root-dev
 #======================================
-# 24) umount system filesystems
+# 23) umount system filesystems
 #--------------------------------------
 umountSystemFilesystems
 
 #======================================
-# 25) copy initrd files to image
+# 24) copy initrd files to image
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
 	if test $systemIntegrity = "clean";then
@@ -988,23 +964,23 @@ if [ $LOCAL_BOOT = "no" ];then
 fi
 
 #======================================
-# 26) check if reboot is required
+# 25) check if reboot is required
 #--------------------------------------
 kernelCheck /mnt
 
 #======================================
-# 27 kill boot shell
+# 26 kill boot shell
 #--------------------------------------
 killShell
 killBlogD
 
 #======================================
-# 28 Activate new root
+# 27 Activate new root
 #--------------------------------------
 runHook preactivate
 activateImage
 
 #======================================
-# 29) Unmount initrd / system init
+# 28) Unmount initrd / system init
 #--------------------------------------
 bootImage $@
