@@ -158,7 +158,7 @@ sub new {
 	# Validate xml input with current schema
 	#------------------------------------------
 	eval {
-		#$systemRNG ->validate ( $systemTree );
+		$systemRNG ->validate ( $systemTree );
 	};
 	if ($@) {
 		my $evaldata=$@;

@@ -2565,6 +2565,9 @@ repository for image building.</db:para>
           <zeroOrMore>
             <ref name="k.repopackages"/>
           </zeroOrMore>
+          <optional>
+            <ref name="k.driverupdate"/>
+          </optional>
         </interleave>
       </element>
     </define>
@@ -2846,6 +2849,128 @@ configuration options.</db:para>
 are used for creating a Novell SUSE installation source.</db:para>
         <interleave>
           <ref name="k.repopackages.attlist"/>
+          <zeroOrMore>
+            <ref name="k.repopackage"/>
+          </zeroOrMore>
+        </interleave>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
+    main block: <driverupdate>
+    
+  -->
+  <div>
+    <define name="k.driverupdate.attlist">
+      <empty/>
+    </define>
+    <define name="k.driverupdate">
+      <element name="driverupdate">
+        <a:documentation>Describe Packages and Metadata</a:documentation>
+        <db:para>Creating a driverupdate disk for using updated hardware
+drivers on system installation with YaST.</db:para>
+        <interleave>
+          <ref name="k.driverupdate.attlist"/>
+          <oneOrMore>
+            <ref name="k.target"/>
+          </oneOrMore>
+          <optional>
+            <ref name="k.install"/>
+          </optional>
+          <optional>
+            <ref name="k.modules"/>
+          </optional>
+          <optional>
+            <ref name="k.instsys"/>
+          </optional>
+        </interleave>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
+    main block: <target>
+    
+  -->
+  <div>
+    <define name="k.target.arch.attribute">
+      <ref name="k.arch.attribute"/>
+    </define>
+    <define name="k.target.attlist">
+      <ref name="k.target.arch.attribute"/>
+    </define>
+    <define name="k.target">
+      <element name="target">
+        <a:documentation>Describe Packages and Metadata</a:documentation>
+        <db:para>List of update targets: &lt;dist&gt;-&lt;arch&gt;
+</db:para>
+        <interleave>
+          <ref name="k.target.attlist"/>
+          <text/>
+        </interleave>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
+    main block: <install>
+    
+  -->
+  <div>
+    <define name="k.install.attlist">
+      <empty/>
+    </define>
+    <define name="k.install">
+      <element name="install">
+        <a:documentation>Describe Packages and Metadata</a:documentation>
+        <db:para>List of packages to be copied into the 'install' directory</db:para>
+        <interleave>
+          <ref name="k.install.attlist"/>
+          <zeroOrMore>
+            <ref name="k.repopackage"/>
+          </zeroOrMore>
+        </interleave>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
+    main block: <modules>
+    
+  -->
+  <div>
+    <define name="k.modules.attlist">
+      <empty/>
+    </define>
+    <define name="k.modules">
+      <element name="modules">
+        <a:documentation>Describe Packages and Metadata</a:documentation>
+        <db:para>List of packages to be copied into the 'modules' directory</db:para>
+        <interleave>
+          <ref name="k.modules.attlist"/>
+          <zeroOrMore>
+            <ref name="k.repopackage"/>
+          </zeroOrMore>
+        </interleave>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
+    main block: <instsys>
+    
+  -->
+  <div>
+    <define name="k.instsys.attlist">
+      <empty/>
+    </define>
+    <define name="k.instsys">
+      <element name="instsys">
+        <a:documentation>Describe Packages and Metadata</a:documentation>
+        <db:para>List of packages to be copied into the 'instsys' directory</db:para>
+        <interleave>
+          <ref name="k.instsys.attlist"/>
           <zeroOrMore>
             <ref name="k.repopackage"/>
           </zeroOrMore>

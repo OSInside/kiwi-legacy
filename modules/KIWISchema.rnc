@@ -1747,7 +1747,8 @@ div {
 			k.productoptions &
 			k.instrepo+ &
 			k.metadata &
-			k.repopackages*
+			k.repopackages* &
+			k.driverupdate?
 		}
 }
 
@@ -1978,6 +1979,101 @@ div {
 		]
 		element repopackages {
 			k.repopackages.attlist &
+			k.repopackage*
+		}
+}
+
+#==========================================
+# main block: <driverupdate>
+#
+div {
+	k.driverupdate.attlist = empty
+	k.driverupdate =
+		## Describe Packages and Metadata
+		[
+		db:para [
+			"Creating a driverupdate disk for using updated hardware\x{a}"~
+						"drivers on system installation with YaST."
+		]
+		]
+		element driverupdate {
+						k.driverupdate.attlist &
+			k.target+ &
+			k.install? &
+			k.modules? &
+			k.instsys?
+		}
+}
+
+#==========================================
+# main block: <target>
+#
+div {
+	k.target.arch.attribute = k.arch.attribute
+	k.target.attlist = k.target.arch.attribute
+	k.target =
+		## Describe Packages and Metadata
+		[
+		db:para [
+			"List of update targets: <dist>-<arch>\x{a}"
+		]
+		]
+		element target {
+			k.target.attlist &
+			text
+		}
+}
+
+#==========================================
+# main block: <install>
+#
+div {
+	k.install.attlist = empty
+	k.install =
+		## Describe Packages and Metadata
+		[
+		db:para [
+			"List of packages to be copied into the 'install' directory"
+		]
+		]
+		element install {
+			k.install.attlist &
+			k.repopackage*
+		}
+}
+
+#==========================================
+# main block: <modules>
+#
+div {
+	k.modules.attlist = empty
+	k.modules =
+		## Describe Packages and Metadata
+		[
+		db:para [
+			"List of packages to be copied into the 'modules' directory"
+		]
+		]
+		element modules {
+			k.modules.attlist &
+			k.repopackage*
+		}
+}
+
+#==========================================
+# main block: <instsys>
+#
+div {
+	k.instsys.attlist = empty
+	k.instsys =
+		## Describe Packages and Metadata
+		[
+		db:para [
+			"List of packages to be copied into the 'instsys' directory"
+		]
+		]
+		element instsys {
+			k.instsys.attlist &
 			k.repopackage*
 		}
 }
