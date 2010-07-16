@@ -572,7 +572,7 @@ sub main {
 			qxx ("rm -f $Create/rootfs.tar");
 		}
 		if (-f "$Create/recovery.tar.gz") {
-			qxx ("rm -f $Create/recovery.tar.*");
+			qxx ("rm -f $Create/recovery.*");
 		}
 		#==========================================
 		# Check for overlay requirements

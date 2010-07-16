@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Thu Jul 15 15:59:20 CEST 2010 - ms@suse.de
+
+- fixed recovery cleanup code
+- fixed umountSystem call to check proc/mounts and umount
+  a list of possible system mount paths in the right order
+- netboot: fixed creation of read-write partition
+- netboot: fixed boot partition setup, IFS restore required
+- netboot: imageDiskDevice was not set but used
+
+-------------------------------------------------------------------
 Thu Jul 15 14:07:05 CEST 2010 - ms@suse.de
 
 - v4.47

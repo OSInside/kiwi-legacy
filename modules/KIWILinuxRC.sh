@@ -2145,12 +2145,6 @@ function updateClicBootDeviceFstab {
 	updateLVMBootDeviceFstab $1 $2 "/clicboot"
 }
 #======================================
-# updatePXEBootDeviceFstab
-#--------------------------------------
-function updatePXEBootDeviceFstab {
-	updateLVMBootDeviceFstab $1 $2 "/static-boot"
-}
-#======================================
 # updateLuksBootDeviceFstab
 #--------------------------------------
 function updateLuksBootDeviceFstab {
@@ -3515,39 +3509,34 @@ function checkServer {
 function umountSystem {
 	local retval=0
 	local OLDIFS=$IFS
-	local mountPath=/mnt
+	local mountList="/mnt /read-only /read-write"
 	IFS=$IFS_ORIG
-	if test ! -z $UNIONFS_CONFIG;then
-		roDir=/read-only
-		rwDir=/read-write
-		xiDir=/xino
-		if ! umount $mountPath >/dev/null;then
-			retval=1
-		fi
-		for dir in $roDir $rwDir $xiDir;do
-			if [ -d $dir ];then
-				if ! umount $dir >/dev/null;then
-				if ! umount -l $dir >/dev/null;then
+	#======================================
+	# umount boot device
+	#--------------------------------------
+	if [ ! -z "$imageBootDevice" ];then
+		umount $imageBootDevice 1>&2
+	fi
+	#======================================
+	# umount mounted mountList paths
+	#--------------------------------------
+	for mpath in $(cat /proc/mounts | cut -f2 -d " ");do
+		for umount in $mountList;do
+			if [ "$mpath" = "$umount" ];then
+				if ! umount $mpath >/dev/null;then
+				if ! umount -l $mpath >/dev/null;then
 					retval=1
 				fi
 				fi
 			fi
 		done
-	elif test ! -z $COMBINED_IMAGE;then
-		rm -f /read-only >/dev/null
-		rm -f /read-write >/dev/null
-		umount /mnt/read-only >/dev/null || retval=1
-		umount /mnt/read-write >/dev/null || retval=1
-		umount /mnt >/dev/null || retval=1
-	else
-		if ! umount $mountPath >/dev/null;then
-			retval=1
-		fi
-	fi
-	if [ ! -z "$imageBootDevice" ];then
-		umount /mnt/boot
-		umount $imageBootDevice
-	fi
+	done
+	#======================================
+	# remove mount points
+	#--------------------------------------
+	for dir in "/read-only" "/read-write" "/xino";do
+		test -d $dir && rmdir $dir 1>&2
+	done
 	IFS=$OLDIFS
 	return $retval
 }
@@ -3704,9 +3693,11 @@ function mountSystemClicFS {
 	local rwDevice=`echo $UNIONFS_CONFIG | cut -d , -f 1`
 	local roDevice=`echo $UNIONFS_CONFIG | cut -d , -f 2`
 	local clic_cmd=clicfs
+	local resetReadWrite=0
 	local haveBytes
 	local haveKByte
 	local haveMByte
+	local wantCowFS
 	local size
 	#======================================
 	# load fuse module
@@ -3740,13 +3731,23 @@ function mountSystemClicFS {
 	else
 		haveBytes=`blockdev --getsize64 $rwDevice`
 		haveMByte=`expr $haveBytes / 1024 / 1024`
+		wantCowFS=0
 		if \
 			[ "x$kiwi_hybrid" = "xyes" ] &&
 			[ "x$kiwi_hybridpersistent" = "xyes" ]
 		then
+			# write into a cow file on a filesystem, for hybrid iso's
+			wantCowFS=1
+		fi
+		if [ $wantCowFS = 1 ];then
 			# write into a cow file on a filesystem
 			mkdir -p $HYBRID_PERSISTENT_DIR
-			if ! mount $rwDevice $HYBRID_PERSISTENT_DIR;then
+			if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
+				resetReadWrite=1
+			elif ! mount $rwDevice $HYBRID_PERSISTENT_DIR;then
+				resetReadWrite=1
+			fi
+			if [ $resetReadWrite = 1 ];then
 				if ! setupReadWrite; then
 					Echo "Failed to setup read-write filesystem"
 					return 1
