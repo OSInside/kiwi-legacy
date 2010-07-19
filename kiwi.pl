@@ -46,7 +46,7 @@ use KIWIImageFormat;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "4.48";
+our $Version       = "4.49";
 our $Publisher     = "SUSE LINUX Products GmbH";
 our $Preparer      = "KIWI - http://kiwi.berlios.de";
 our $openSUSE      = "http://download.opensuse.org";
