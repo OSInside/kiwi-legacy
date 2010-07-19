@@ -91,7 +91,14 @@ if [ "$loader" = "syslinux" ] || [ "$loader" = "extlinux" ];then
 fi
 
 #======================================
-# 9) kill udev
+# 9) Install boot loader if ok
+#--------------------------------------
+if [ $bootLoaderOK = 1 ];then
+	installBootLoader
+fi
+
+#======================================
+# 10) kill udev
 #--------------------------------------
 udevSystemStop
 umountSystemFilesystems

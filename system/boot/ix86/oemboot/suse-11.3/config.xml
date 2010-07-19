@@ -36,6 +36,9 @@
 		<file name="drivers/input/mouse/*"/>
 		<file name="drivers/usb/*"/>
 		<file name="drivers/ide/*"/>
+		<file name="lib/zlib_deflate/zlib_deflate.ko"/>
+		<file name="lib/libcrc32c.ko"/>
+		<file name="fs/btrfs/*"/>
 		<file name="fs/ext3/*"/>
 		<file name="fs/ext4/*"/>
 		<file name="fs/ext2/*"/>
@@ -105,6 +108,7 @@
 		<package name="bind-utils"/>
 		<package name="dhcpcd"/>
 		<package name="e2fsprogs"/>
+		<package name="btrfsprogs"/>
 		<package name="file"/>
 		<package name="hwinfo"/>
 		<package name="module-init-tools"/>

@@ -46,7 +46,7 @@ use KIWIImageFormat;
 #============================================
 # Globals (Version)
 #--------------------------------------------
-our $Version       = "4.48";
+our $Version       = "4.49";
 our $Publisher     = "SUSE LINUX Products GmbH";
 our $Preparer      = "KIWI - http://kiwi.berlios.de";
 our $openSUSE      = "http://download.opensuse.org";
@@ -118,6 +118,7 @@ $KnownFS{clic}{tool}      = findExec("mkclicfs");
 $KnownFS{unified}{tool}   = findExec("mksquashfs");
 $KnownFS{compressed}{tool}= findExec("mksquashfs");
 $KnownFS{reiserfs}{tool}  = findExec("mkreiserfs");
+$KnownFS{btrfs}{tool}     = findExec("mkfs.btrfs");
 $KnownFS{cpio}{tool}      = findExec("cpio");
 $KnownFS{ext3}{ro}        = 0;
 $KnownFS{ext4}{ro}        = 0;
@@ -128,6 +129,7 @@ $KnownFS{clic}{ro}        = 1;
 $KnownFS{unified}{ro}     = 1;
 $KnownFS{compressed}{ro}  = 1;
 $KnownFS{reiserfs}{ro}    = 0;
+$KnownFS{btrfs}{ro}       = 0;
 $KnownFS{cpio}{ro}        = 0;
 
 #============================================
@@ -827,6 +829,10 @@ sub main {
 			};
 			/^reiserfs/ && do {
 				$ok = $image -> createImageReiserFS ();
+				last SWITCH;
+			};
+			/^btrfs/    && do {
+				$ok = $image -> createImageBTRFS ();
 				last SWITCH;
 			};
 			/^squashfs/ && do {
@@ -2733,6 +2739,10 @@ sub checkFileSystem {
 				};
 				/ReiserFS/  && do {
 					$type = "reiserfs";
+					last SWITCH;
+				};
+				/BTRFS/     && do {
+					$type = "btrfs";
 					last SWITCH;
 				};
 				/Squashfs/  && do {

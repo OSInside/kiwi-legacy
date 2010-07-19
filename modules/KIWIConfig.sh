@@ -950,7 +950,7 @@ function suseStripInitrd {
 	local tools="
 		tune2fs swapon swapoff shutdown sfdisk resize_reiserfs
 		reiserfsck reboot halt pivot_root modprobe modinfo rmmod
-		mkswap mkinitrd mkreiserfs mkfs.cramfs
+		mkswap mkinitrd mkreiserfs mkfs.cramfs mkfs.btrfs btrfsctl
 		losetup ldconfig insmod init ifconfig fdisk e2fsck fsck.ext2
 		fsck.ext3 fsck.ext4 dhcpcd mkfs.ext2 mkfs.ext3 mkfs.ext4
 		depmod atftpd klogconsole hwinfo xargs wc tail tac readlink

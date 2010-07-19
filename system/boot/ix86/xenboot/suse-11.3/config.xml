@@ -22,6 +22,9 @@
 		<file name="drivers/md/*"/>
 		<file name="drivers/ide/*"/>
 		<file name="drivers/block/loop.ko"/>
+		<file name="lib/zlib_deflate/zlib_deflate.ko"/>
+		<file name="lib/libcrc32c.ko"/>
+		<file name="fs/btrfs/*"/>
 		<file name="fs/ext3/*"/>
 		<file name="fs/ext4/*"/>
 		<file name="fs/ext2/*"/>
@@ -44,6 +47,7 @@
 	<packages type="image">
 		<package name="psmisc"/>
 		<package name="e2fsprogs"/>
+		<package name="btrfsprogs"/>
 		<package name="file"/>
 		<package name="module-init-tools"/>
 		<package name="pciutils"/>

@@ -1350,18 +1350,19 @@ div {
 		## clicfs is a fuse based compressed filesystem using a cow
 		## file for write operations
 		attribute filesystem {
-			"clicfs" | "ext2" | "ext3" | "ext4" |
-			"reiserfs" | "squashfs"   
+			"btrfs" | "clicfs" | "ext2" | "ext3" | "ext4" |
+			"reiserfs" | "squashfs"
 		}
 	k.type.fsreadonly.attribute =
 		## Specifies the filesystem for the read-only part of a split image
 		attribute fsreadonly {
-			"ext2" | "ext3" | "ext4" | "reiserfs" | "squashfs"
+			"btrfs" | "ext2" | "ext3" | "ext4" |
+			"reiserfs" | "squashfs"
 		}
 	k.type.fsreadwrite.attribute =
 		## Specifies the filesystem for the read-write part of a split image
 		attribute fsreadwrite {
-			"ext2" | "ext3" | "ext4" | "reiserfs"
+			"btrfs" | "ext2" | "ext3" | "ext4" | "reiserfs"
 		}
 	k.type.format.attribute =
 		## Specifies the format of the virtual disk.
@@ -1380,7 +1381,7 @@ div {
 	k.type.image.attribute =
 		## Specifies the image type
 		attribute image {
-			"clicfs" | "cpio" | "ec2" | "ext2" | "ext3" |
+			"btrfs" | "clicfs" | "cpio" | "ec2" | "ext2" | "ext3" |
 			"ext4" | "iso" | "oem" | "product" | "pxe" | "reiserfs" |
 			"split" | "squashfs" | "usb" | "vmx" | "xen"
 		}

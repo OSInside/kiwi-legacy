@@ -243,6 +243,8 @@ if [ "$LOCAL_BOOT" = "no" ];then
 		updateLVMBootDeviceFstab /config $imageBootDevice
 	elif [ "$haveClicFS" = "yes" ];then
 		updateClicBootDeviceFstab /config $imageBootDevice
+	elif [ "$haveBtrFS" = "yes" ];then
+		updateBtrBootDeviceFstab /config $imageBootDevice
 	elif [ "$loader" = "syslinux" ] || [ "$loader" = "extlinux" ];then
 		updateSyslinuxBootDeviceFstab /config $imageBootDevice
 	elif [ "$haveLuks" = "yes" ];then
@@ -254,19 +256,7 @@ if [ "$LOCAL_BOOT" = "no" ];then
 	if [ ! -z "$COMBINED_IMAGE" ]; then
 		export KIWI_INITRD_PARAMS="COMBINED_IMAGE=local"
 	fi
-	bootid=0
-	if [ ! -z "$UNIONFS_CONFIG" ] || [ ! -z "$COMBINED_IMAGE" ]; then
-		bootid=1
-	fi
-	if \
-		[ "$loader" = "syslinux" ]  ||\
-		[ "$loader" = "extlinux" ]  ||\
-		[ "$haveClicFS" = "yes" ]   ||\
-		[ "$haveLuks" = "yes" ]
-	then
-		bootid=$(($bootid + 1))
-	fi
-	setupBootLoader /mnt /config $bootid $imageRootDevice USB
+	setupBootLoader /mnt /config $(($bootid - 1)) $imageRootDevice USB
 	setupKernelModules /config
 fi
 

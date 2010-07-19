@@ -673,6 +673,36 @@ sub createImageReiserFS {
 }
 
 #==========================================
+# createImageBTRFS
+#------------------------------------------
+sub createImageBTRFS {
+	# ...
+	# create BTRFS image from source tree
+	# ---
+	my $this = shift;
+	#==========================================
+	# PRE filesystem setup
+	#------------------------------------------
+	my $name = $this -> preImage ();
+	if (! defined $name) {
+		return undef;
+	}
+	#==========================================
+	# Create filesystem on extend
+	#------------------------------------------
+	if (! $this -> setupBTRFS ( $name )) {
+		return undef;
+	}
+	#==========================================
+	# POST filesystem setup
+	#------------------------------------------
+	if (! $this -> postImage ($name)) {
+		return undef;
+	}
+	return $this;
+}
+
+#==========================================
 # createImageSquashFS
 #------------------------------------------
 sub createImageSquashFS {
@@ -880,6 +910,10 @@ sub createImageUSB {
 		};
 		/^clicfs/     && do {
 			$ok = $this -> createImageClicFS ();
+			last SWITCH;
+		};
+		/^btrfs/      && do {
+			$ok = $this -> createImageBTRFS ();
 			last SWITCH;
 		};
 		$kiwi -> error  ("Unsupported $text type: $type");
@@ -2511,6 +2545,10 @@ sub createImageSplit {
 				$ok = $this -> setupReiser ( $namerw );
 				last SWITCH;
 			};
+			/btrfs/      && do {
+				$ok = $this -> setupBTRFS ( $namerw );
+				last SWITCH;
+			};
 			$kiwi -> error  ("Unsupported type: $FSTypeRW");
 			$kiwi -> failed ();
 			qxx ("rm -rf $imageTreeRW");
@@ -2553,6 +2591,10 @@ sub createImageSplit {
 		};
 		/reiserfs/   && do {
 			$ok = $this -> setupReiser ( $namero );
+			last SWITCH;
+		};
+		/btrfs/      && do {
+			$ok = $this -> setupBTRFS ( $namero );
 			last SWITCH;
 		};
 		/squashfs/   && do {
@@ -2638,6 +2680,11 @@ sub createImageSplit {
 			};
 			/reiserfs/   && do {
 				qxx ("/sbin/reiserfsck -y $this->{imageDest}/$name 2>&1");
+				$kiwi -> done();
+				last SWITCH;
+			};
+			/btrfs/      && do {
+				qxx ("/sbin/btrfsck $this->{imageDest}/$name 2>&1");
 				$kiwi -> done();
 				last SWITCH;
 			};
@@ -3222,6 +3269,14 @@ sub postImage {
 			last SWITCH;
 		};
 		#==========================================
+		# Check BTRFS file system
+		#------------------------------------------
+		/btrfs/     && do {
+			qxx ("/sbin/btrfsck $this->{imageDest}/$name 2>&1");
+			$kiwi -> done();
+			last SWITCH;
+		};
+		#==========================================
 		# Unknown filesystem type
 		#------------------------------------------
 		$kiwi -> failed();
@@ -3596,6 +3651,10 @@ sub extractKernel {
 			return $name;
 			last SWITCH;
 		};
+		/btrfs/i  && do {
+			return $name;
+			last SWITCH;
+		};
 	}
 	#==========================================
 	# this is a boot image, extract kernel
@@ -3719,6 +3778,32 @@ sub setupEXT2 {
 	} else {
 		$data = qxx ("cd $this->{imageDest} && ln -vs $name $name.ext2 2>&1");
 	}
+	$this -> remapImageDest();
+	$kiwi -> loginfo ($data);
+	return $name;
+}
+
+#==========================================
+# setupBTRFS
+#------------------------------------------
+sub setupBTRFS {
+	my $this = shift;
+	my $name = shift;
+	my $kiwi = $this->{kiwi};
+	my %FSopts = main::checkFSOptions();
+	my $fsopts = $FSopts{btrfs};
+	my $data = qxx (
+		"/sbin/mkfs.btrfs $fsopts $this->{imageDest}/$name 2>&1"
+	);
+	my $code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> error  ("Couldn't create BTRFS filesystem");
+		$kiwi -> failed ();
+		$kiwi -> error  ($data);
+		return undef;
+	}
+	$this -> restoreImageDest();
+	$data = qxx ("cd $this->{imageDest} && ln -vs $name $name.btrfs 2>&1");
 	$this -> remapImageDest();
 	$kiwi -> loginfo ($data);
 	return $name;
@@ -4095,8 +4180,8 @@ sub checkKernel {
 		return undef;
 	}
 	#==========================================
-    # 1) unpack initrd...
-    #------------------------------------------
+	# 1) unpack initrd...
+	#------------------------------------------
 	$status = qxx ("cd $tmpdir && $cmd|cpio -i --quiet");
 	$result = $? >> 8;
 	if ($result != 0) {

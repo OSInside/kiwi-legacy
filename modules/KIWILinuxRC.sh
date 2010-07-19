@@ -2151,6 +2151,12 @@ function updateLuksBootDeviceFstab {
 	updateLVMBootDeviceFstab $1 $2 "/luksboot"
 }
 #======================================
+# updateBtrBootDeviceFstab
+#--------------------------------------
+function updateBtrBootDeviceFstab {
+	updateLVMBootDeviceFstab $1 $2 "/btrboot"
+}
+#======================================
 # updateSyslinuxBootDeviceFstab
 #--------------------------------------
 function updateSyslinuxBootDeviceFstab {
@@ -2287,6 +2293,7 @@ function probeFileSystem {
 	FSTYPE=unknown
 	FSTYPE=$(blkid $1 -s TYPE -o value)
 	case $FSTYPE in
+		btrfs)       FSTYPE=btrfs ;;
 		ext4)        FSTYPE=ext4 ;;
 		ext3)        FSTYPE=ext3 ;;
 		ext2)        FSTYPE=ext2 ;;
@@ -3295,12 +3302,11 @@ function kernelList {
 				break
 			fi
 		done
-		if [ -z "$kernel" ];then
-			continue
+		if [ ! -z "$kernel" ];then
+			KERNEL_PAIR=$kernel:$initrd
+			KERNEL_NAME[$kcount]=$krunning
+			KERNEL_LIST=$KERNEL_PAIR
 		fi
-		KERNEL_PAIR=$kernel:$initrd
-		KERNEL_NAME[$kcount]=$krunning
-		KERNEL_LIST=$KERNEL_PAIR
 	fi
 	#======================================
 	# search for other kernels
@@ -3958,6 +3964,9 @@ function mountSystemCombined {
 #--------------------------------------
 function mountSystemStandard {
 	local mountDevice=$1
+	if [ "$FSTYPE" = "btrfs" ];then
+		export haveBtrFS=yes
+	fi
 	if [ ! -z $FSTYPE ]          && 
 	   [ ! $FSTYPE = "unknown" ] && 
 	   [ ! $FSTYPE = "auto" ]
@@ -4601,6 +4610,7 @@ function cleanImage {
 	#--------------------------------------
 	if \
 		[ "$haveClicFS" = "yes" ] || \
+		[ "$haveBtrFS"  = "yes" ] || \
 		[ ! -z "$NFSROOT" ]       || \
 		[ ! -z "$NBDROOT" ]       || \
 		[ ! -z "$AOEROOT" ]       || \
@@ -5582,6 +5592,11 @@ function resizeFilesystem {
 		if [ $ramdisk -eq 1 ];then
 			resize_fs="resize2fs -f $deviceResize"
 		fi
+	elif [ "$FSTYPE" = "btrfs" ];then
+		Echo "Resize BTRFS filesystem to full partition space..."
+		resize_fs="mount $deviceResize /mnt &&"
+		resize_fs="$resize_fs btrfsctl -r max /mnt;umount /mnt"
+		check="btrfsck $deviceResize"
 	else
 		# don't know how to resize this filesystem
 		return
@@ -5618,6 +5633,13 @@ function createFilesystem {
 		mke2fs -T ext3 -j -F $deviceCreate $blocks 1>&2
 	elif [ "$FSTYPE" = "ext4" ];then
 		mke2fs -T ext4 -j -F $deviceCreate $blocks 1>&2
+	elif [ "$FSTYPE" = "btrfs" ];then
+		if [ ! -z "$blocks" ];then
+			local bytes=$((blocks * 4096))
+			mkfs.btrfs -b $bytes $deviceCreate
+		else
+			mkfs.btrfs $deviceCreate
+		fi
 	else
 		# use ext3 by default
 		mke2fs -T ext3 -j -F $deviceCreate $blocks 1>&2
@@ -5741,6 +5763,12 @@ function setupBootPartition {
 		#--------------------------------------
 		test -z "$bootid" && export bootid=2
 		mpoint=lvmboot
+	elif [ "$haveBtrFS" = "yes" ];then
+		#======================================
+		# btrboot
+		#--------------------------------------
+		test -z "$bootid" && export bootid=2
+		mpoint=btrboot
 	elif [ "$haveClicFS" = "yes" ];then
 		#======================================
 		# clicboot
