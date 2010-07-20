@@ -2687,6 +2687,28 @@ sub umount {
 }
 
 #==========================================
+# isize
+#------------------------------------------
+sub isize {
+	# /.../
+	# implements a size function like the -s operator
+	# but also works for block specials using blockdev
+	# ---
+	my $target = shift;
+	if (-b $target) {
+		my $size = qxx ("blockdev --getsize64 $target 2>&1");
+		my $code = $? >> 8;
+		if ($code == 0) {
+			chomp  $size;
+			return $size;
+		}
+	} elsif (-f $target) {
+		return -s $target;
+	}
+	return 0;
+}
+
+#==========================================
 # checkFileSystem
 #------------------------------------------
 sub checkFileSystem {

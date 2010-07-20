@@ -3070,7 +3070,8 @@ sub writeImageConfig {
 					$targetPartitionNext = $targetPartition + 1;
 				}
 				if ($href -> {size} eq "image") {
-					print FD int(((-s "$this->{imageDest}/$name")/1024/1024)+1);
+					my $size = main::isize ("$this->{imageDest}/$name");
+					print FD int (($size/1024/1024)+1);
 				} else {
 					print FD $href -> {size};
 				}
@@ -3884,7 +3885,7 @@ sub buildMD5Sum {
 	# Create image md5sum
 	#------------------------------------------
 	$kiwi -> info ("Creating image MD5 sum...");
-	my $size = -s "$this->{imageDest}/$name";
+	my $size = main::isize ("$this->{imageDest}/$name");
 	my $primes = qxx ("factor $size"); $primes =~ s/^.*: //;
 	my $blocksize = 1;
 	for my $factor (split /\s/,$primes) {
@@ -3993,7 +3994,7 @@ sub updateMD5File {
 			return undef;
 		}
 		my $line = <FD>; close FD; chomp $line;
-		my $size = -s $image;
+		my $size = main::isize ($image);
 		my $primes = qxx ("factor $size"); $primes =~ s/^.*: //;
 		my $blocksize = 1;
 		for my $factor (split /\s/,$primes) {
