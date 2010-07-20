@@ -5651,6 +5651,32 @@ function createFilesystem {
 	fi
 }
 #======================================
+# restoreLVMMetadata
+#--------------------------------------
+function restoreLVMPhysicalVolumes {
+	# /.../
+	# restore the pysical volumes by the given restore file
+	# created from vgcfgbackup. It's important to create them
+	# with the same uuid's compared to the restore file
+	# ----
+	local restorefile=$1
+	cat $restorefile | grep -A2 -E 'pv[0-9] {' | while read line;do
+		if [ -z "$uuid" ];then
+			uuid=$(echo $line | grep 'id =' |\
+				cut -f2 -d= | tr -d \")
+		fi
+		if [ -z "$pdev" ];then
+			pdev=$(echo $line|grep 'device =' |\
+				cut -f2 -d\" | cut -f1 -d\")
+		fi
+		if [ ! -z "$pdev" ];then
+			pvcreate -u $uuid $pdev
+			unset uuid
+			unset pdev
+		fi
+	done
+}
+#======================================
 # pxeSizeToMB
 #--------------------------------------
 function pxeSizeToMB {

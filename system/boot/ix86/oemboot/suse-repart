@@ -613,6 +613,11 @@ function OEMRepart {
 			systemException "Failed to store MBR" "reboot"
 		fi
 		if [ ! -z "$haveLVM" ];then
+			if ! vgcfgbackup -f /reco-save/lvm $VGROUP;then
+				systemException "Failed to store LVM metadata" "reboot"
+			fi
+		fi
+		if [ ! -z "$haveLVM" ];then
 			umount /reco-root/boot
 			umount /recoboot && rmdir /recoboot
 		fi
