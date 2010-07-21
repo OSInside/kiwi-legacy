@@ -7,6 +7,7 @@ Tue Jul 20 17:17:02 CEST 2010 - ms@suse.de
   circumstances which causes -s to not work anymore
 - fixed oem recovery for LVM based images. It's required
   to backup the LVM metadata in order to restore it
+- fixed suse-11.3/suse-pxe-client/config.xml
 
 -------------------------------------------------------------------
 Fri Jul 16 15:01:09 CEST 2010 - ms@suse.de

@@ -45,13 +45,11 @@
 		<package name="sysconfig"/>
 		<package name="syslinux"/>
 		<package name="sysfsutils"/>
-		<package name="syslog-ng"/>
 		<package name="kbd"/>
 		<package name="ksymoops"/>
 		<package name="less"/>
 		<package name="initviocons"/>
 		<package name="iputils"/>
-		<package name="portmap"/>
 		<package name="dhcpcd"/>
 		<package name="dbus-1"/>
 		<package name="grub"/>
@@ -62,12 +60,10 @@
 		<package name="xorg-x11"/>
 		<package name="xorg-x11-server"/>
 		<package name="xorg-x11-driver-video"/>
-		<package name="xorg-x11-fonts-scalable"/>
 		<package name="xterm"/>
 		<package name="xdmbgrd"/>
 		<package name="xkeyboard-config"/>
 		<package name="icewm-lite"/>
-		<package name="firefox"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
