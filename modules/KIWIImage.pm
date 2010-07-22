@@ -1209,7 +1209,7 @@ sub createImageVMX {
 	#==========================================
 	# Create VM format/configuration
 	#------------------------------------------
-	if (defined $name->{format}) {
+	if ((defined $name->{format}) || ($xendomain eq "domU")) {
 		undef $main::BootVMDisk;
 		undef $main::BootVMSystem;
 		$main::Convert = $main::Destination."/".$name->{systemImage}.".raw";
@@ -2207,6 +2207,7 @@ sub createImageSplit {
 	my $imageTree = $this->{imageTree};
 	my $baseSystem= $this->{baseSystem};
 	my $sxml = $this->{xml};
+	my %xenc = $sxml->getXenConfig();
 	my $FSTypeRW;
 	my $FSTypeRO;
 	my $error;
@@ -2223,6 +2224,15 @@ sub createImageSplit {
 	my $code;
 	my $name;
 	my $treebase;
+	my $xendomain;
+	#==========================================
+	# check for xen domain setup
+	#------------------------------------------
+	if (defined $xenc{xen_domain}) {
+		$xendomain = $xenc{xen_domain};
+	} else {
+		$xendomain = "dom0";
+	}
 	#==========================================
 	# turn image path into absolute path
 	#------------------------------------------
@@ -2916,7 +2926,7 @@ sub createImageSplit {
 		#==========================================
 		# Create VM format/configuration
 		#------------------------------------------
-		if (defined $name->{format}) {
+		if ((defined $name->{format}) || ($xendomain eq "domU")) {
 			undef $main::BootVMDisk;
 			undef $main::BootVMSystem;
 			$main::Convert = $main::Destination."/".$name->{systemImage}.".raw";

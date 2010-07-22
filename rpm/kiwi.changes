@@ -1,6 +1,8 @@
 -------------------------------------------------------------------
 Tue Jul 20 17:17:02 CEST 2010 - ms@suse.de
 
+- fixed oem-partition-install for LVM images
+- fixed xenconfig creation for vmx if no format was set
 - fixed locale validation and documentation as well as
   some template examples provided by kiwi. The locale value
   in kiwi is always a UTF-8 locale therefore it's not
