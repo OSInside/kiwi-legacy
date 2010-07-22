@@ -2695,6 +2695,9 @@ sub isize {
 	# but also works for block specials using blockdev
 	# ---
 	my $target = shift;
+	if (! defined $target) {
+		return 0;
+	}
 	if (-b $target) {
 		my $size = qxx ("blockdev --getsize64 $target 2>&1");
 		my $code = $? >> 8;

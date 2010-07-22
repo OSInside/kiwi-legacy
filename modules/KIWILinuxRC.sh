@@ -2129,7 +2129,7 @@ function updateLVMBootDeviceFstab {
 	# probe filesystem
 	#--------------------------------------
 	probeFileSystem $sdev
-	if [ -z $FSTYPE ] || [ $FSTYPE = "unknown" ];then
+	if [ -z "$FSTYPE" ] || [ "$FSTYPE" = "unknown" ];then
 		FSTYPE="auto"
 	fi
 	echo "$diskByID $mount $FSTYPE defaults 0 0" >> $nfstab
