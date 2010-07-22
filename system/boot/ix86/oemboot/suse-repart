@@ -455,12 +455,7 @@ function OEMPartitionInstall {
 		#======================================
 		# resize PV's
 		#--------------------------------------
-		pvresize $imageRootDevice
-		#======================================
-		# setup LVM device names
-		#--------------------------------------
-		export haveLVM=yes
-		setupDeviceNames 1 no no no no yes $VGROUP
+		pvresize $(ddn $imageDiskDevice $rID)
 		#======================================
 		# resize LV's
 		#--------------------------------------
