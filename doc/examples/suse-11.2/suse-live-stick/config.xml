@@ -21,7 +21,7 @@
 		<rpm-check-signatures>false</rpm-check-signatures>
 		<rpm-force>true</rpm-force>
 		<rpm-excludedocs>true</rpm-excludedocs>
-		<locale>en_US.UTF-8</locale>
+		<locale>en_US</locale>
 		<keytable>us.map.gz</keytable>
 		<timezone>Europe/Berlin</timezone>
 	</preferences>
