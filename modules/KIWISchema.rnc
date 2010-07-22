@@ -34,6 +34,7 @@ db:info [
 size-type = xsd:token {pattern = "\d*|image"}
 volume-size-type = xsd:token {pattern = "\d+|\d+M|\d+G"}
 image-name = xsd:token {pattern = "[^\s/]+"}
+locale-name = xsd:token {pattern = "[a-z]{2}_[A-Z]{2}(,[a-z]{2}_[A-Z]{2})*"}
 
 #==========================================
 # start with image description
@@ -453,7 +454,7 @@ div { # locale
 		]
 		element locale {
 			k.locale.attlist,
-			text
+			locale-name
 		}
 }
 
