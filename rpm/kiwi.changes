@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Tue Jul 20 17:17:02 CEST 2010 - ms@suse.de
 
+- v4.50
 - fixed URL quoting, we have to distinguish the quoting
   for local path URL's and network protocol URL's 
 - fixed oem-partition-install for LVM images
