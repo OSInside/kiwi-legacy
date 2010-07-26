@@ -5828,7 +5828,9 @@ function setupBootPartition {
 		#======================================
 		# no separate boot partition
 		#--------------------------------------
-		return
+		if [ -z "$bootid" ];then
+			export bootid=1
+		fi
 	fi
 	if [ -z "$imageBootDevice" ];then
 		export imageBootDevice=$(ddn $imageDiskDevice $bootid)
