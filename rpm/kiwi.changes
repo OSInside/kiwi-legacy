@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Jul 26 16:42:38 CEST 2010 - ms@suse.de
+
+- v4.51
+- fixed setupBootPartition() to return with a bootid
+  export in _any_ case. Default bootid is 1 (bnc #625379)
+
+-------------------------------------------------------------------
 Tue Jul 20 17:17:02 CEST 2010 - ms@suse.de
 
 - v4.50
