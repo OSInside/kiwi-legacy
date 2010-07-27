@@ -1057,6 +1057,11 @@ sub setupCacheMount {
 		qxx ("mount --bind $cache $root/$cache 2>&1");
 		push (@mountList,"$root/$cache");
 	}
+	if (! -f "$root/proc/mounts") {
+		qxx ("mkdir -p $root/proc");
+		qxx ("mount -t proc proc $root/proc");
+		push (@mountList,"$root/proc");
+	}
 	$this->{mountList} = \@mountList;
 	return @mountList;
 }
