@@ -47,8 +47,12 @@ if [ -x /sbin/blogd ];then
 	test -z "$CONSOLE"            && export CONSOLE=/dev/console
 	test -z "$REDIRECT"           && export REDIRECT=/dev/tty1
 fi
-if [ -z "$PARTED_VERSION" ];then
-	export PARTED_VER=$(parted -v | head -n 1 | cut -f4 -d" " | cut -f1-2 -d.)
+if [ -z "$PARTED_VER" ];then
+	PARTED_VER=$(parted -v|head -n 1 | cut -f4 -d" " | cut -f1-3 -d. | tr -d .)
+	export PARTED_VER
+fi
+if [ $PARTED_VER -le 188 ];then
+	export PARTITIONER=sfdisk
 fi
 
 #======================================
@@ -5290,7 +5294,7 @@ function partedWrite {
 	local device=$1
 	local cmds=$2
 	local opts
-	if [ $PARTED_VER = "2.2" ];then
+	if [ $PARTED_VER -ge 220 ];then
 		opts="-a cyl"
 	fi
 	if ! parted $opts -m $device unit cyl $cmds;then

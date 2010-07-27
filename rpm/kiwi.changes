@@ -1,6 +1,9 @@
 -------------------------------------------------------------------
 Tue Jul 27 07:23:38 CEST 2010 - ms@suse.de
 
+- fixed PARTED_VER setup and tests. If the parted version
+  is below or equal 1.8.8 we switch to fdisk. This applies for
+  sle10 where parted doesn't have some options which we require
 - don't create splash initrd if it already exists
 - fixed use of uninitialized value for $overlay
 
