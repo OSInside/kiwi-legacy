@@ -652,7 +652,7 @@ sub main {
 				$kiwi -> failed ();
 				$kiwi -> info   ("No destination directory specified");
 				$kiwi -> failed ();
-				if (defined $BaseRoot) {
+				if ((defined $BaseRoot) && ($overlay)) {
 					$overlay -> resetOverlay();
 				}
 				my $code = kiwiExit (1); return $code;
