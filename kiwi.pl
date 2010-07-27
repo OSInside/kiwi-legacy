@@ -1878,6 +1878,7 @@ sub listXMLInfo {
 		my @list = shift;
 		return sub {
 			foreach my $dir (@list) {
+				next if ! defined $dir;
 				qxx ("umount $dir ; rmdir $dir 2>&1");
 			}
 		}
