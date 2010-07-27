@@ -3811,15 +3811,17 @@ sub getInstSourceSatSolvable {
 	# merge all solvables into one
 	#------------------------------------------
 	if ($count > 1) {
-		my $data = qxx ("mergesolv @index > $solv");
+		my $data = qxx ("mergesolv @index > $solv.system");
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> error  ("--> Couldn't merge solve files");
 			$kiwi -> failed ();
 			return undef
 		}
+	} else {
+		qxx ("cp $solv $solv.system 2>&1");
 	}
-	return $solv;
+	return $solv.".system";
 }
 
 #==========================================
