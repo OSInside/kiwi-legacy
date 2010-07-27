@@ -1017,6 +1017,10 @@ sub createImageUSB {
 			$lookup = $main::PrebuiltBootImage."/";
 		}
 		my $pinitrd = $lookup.$main::ImageName.".gz";
+		my $psplash;
+		if (-f $lookup.$main::ImageName.".splash.gz") {
+			$psplash = $lookup.$main::ImageName.".splash.gz";
+		}
 		my $plinux  = $lookup.$main::ImageName.".kernel";
 		if (! -f $pinitrd) {
 			$pinitrd = $lookup.$main::ImageName;
@@ -1035,6 +1039,9 @@ sub createImageUSB {
 				$kiwi -> done();
 				$pblt = 1;
 			} else {
+				if ($psplash) {
+					qxx ("cp -a $psplash $main::Destination 2>&1");
+				}
 				my $data = qxx ("cp -a $pinitrd $main::Destination 2>&1");
 				my $code = $? >> 8;
 				if ($code != 0) {

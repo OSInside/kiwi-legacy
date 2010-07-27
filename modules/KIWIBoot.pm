@@ -3341,6 +3341,24 @@ sub setupSplash {
 	my $newird;
 	my $result;
 	#==========================================
+	# check if compressed and setup splash.gz
+	#------------------------------------------
+	if ($initrd =~ /\.gz$/) {
+		$zipped = 1;
+	}
+	if ($zipped) {
+		$newird = $initrd; $newird =~ s/\.gz/\.splash.gz/;
+	} else {
+		$newird = $initrd.".splash.gz";
+	}
+	#==========================================
+	# check if splash initrd is already there
+	#------------------------------------------
+	if ((! -l $newird) && (-f $newird)) {
+		# splash initrd already created...
+		return $newird;
+	}
+	#==========================================
 	# create temp dir for operations
 	#------------------------------------------
 	$kiwi -> info ("Setting up splash screen...");
@@ -3354,17 +3372,7 @@ sub setupSplash {
 	}
 	chomp $spldir;
 	my $irddir = "$spldir/initrd";
-	#==========================================
-	# check if compressed and setup splash.gz
-	#------------------------------------------
-	if ($initrd =~ /\.gz$/) {
-		$zipped = 1;
-	}
-	if ($zipped) {
-		$newird = $initrd; $newird =~ s/\.gz/\.splash.gz/;
-	} else {
-		$newird = $initrd.".splash.gz";
-	}
+
 	#==========================================
 	# unpack initrd files
 	#------------------------------------------

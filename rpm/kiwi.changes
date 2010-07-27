@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Jul 27 07:23:38 CEST 2010 - ms@suse.de
+
+- don't create splash initrd if it already exists
+- fixed use of uninitialized value for $overlay
+
+-------------------------------------------------------------------
 Mon Jul 26 16:42:38 CEST 2010 - ms@suse.de
 
 - v4.51
