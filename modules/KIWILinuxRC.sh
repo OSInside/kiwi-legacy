@@ -48,7 +48,8 @@ if [ -x /sbin/blogd ];then
 	test -z "$REDIRECT"           && export REDIRECT=/dev/tty1
 fi
 if [ -z "$PARTED_VER" ];then
-	PARTED_VER=$(parted -v|head -n 1 | cut -f4 -d" " | cut -f1-3 -d. | tr -d .)
+	PARTED_VER=$(
+		parted -v| head -n 1| awk -F" " '{print $NF}'| cut -f1-3 -d.| tr -d .)
 	export PARTED_VER
 fi
 if [ $PARTED_VER -le 188 ];then
