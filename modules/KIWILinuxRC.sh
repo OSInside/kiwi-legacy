@@ -49,10 +49,11 @@ if [ -x /sbin/blogd ];then
 fi
 if [ -z "$PARTED_VER" ];then
 	PARTED_VER=$(
-		parted -v| head -n 1| awk -F" " '{print $NF}'| cut -f1-3 -d.| tr -d .)
+		parted -v | head -n 1 | awk -F" " '{print $NF}' |\
+		cut -f1-3 -d. | tr -d . | cut -c1-3 )
 	export PARTED_VER
 fi
-if [ $PARTED_VER -le 188 ];then
+if [ $PARTED_VER -lt 188 ];then
 	export PARTITIONER=sfdisk
 fi
 
