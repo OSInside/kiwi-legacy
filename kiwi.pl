@@ -1281,6 +1281,14 @@ sub main {
 			);
 		}
 		#==========================================
+		# Check for add-pattern option
+		#------------------------------------------
+		if (defined @AddPattern) {
+			foreach my $pattern (@AddPattern) {
+				push (@AddPackage,"pattern:$pattern");
+			}
+		}
+		#==========================================
 		# Initialize root system, use existing root
 		#------------------------------------------
 		$root = new KIWIRoot (
