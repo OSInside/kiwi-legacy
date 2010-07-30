@@ -1546,12 +1546,12 @@ div {
 		## The shell for this user
 		attribute shell { text }
 	k.user.attlist =
-		k.user.name.attribute &
+		k.user.home.attribute &
 		k.user.id.attribute? &
-		k.user.realname.attribute? &
+		k.user.name.attribute &
 		k.user.pwd.attribute &
 		k.user.pwdformat? &
-		k.user.home.attribute &
+		k.user.realname.attribute? &
 		k.user.shell.attribute?
 	k.user =
 		## A User with Name, Password, Path to Its Home And Shell
