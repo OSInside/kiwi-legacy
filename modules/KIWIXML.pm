@@ -2481,7 +2481,7 @@ sub addImagePatterns {
 	# section of the xml description parse tree.
 	# ----
 	my $this  = shift;
-	return $this -> addPatterns ("bootstrap",undef,@_);
+	return $this -> addPatterns ("image",undef,@_);
 }
 
 #==========================================
