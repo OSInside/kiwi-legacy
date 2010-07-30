@@ -641,6 +641,13 @@ sub main {
 			if (! $xml -> checkProfiles (\@Profiles)) {
 				my $code = kiwiExit (1); return $code;
 			}
+			my $theme = $xml -> getBootTheme();
+			if ($theme) {
+				$kiwi -> info ("Using boot theme: $theme");
+			} else {
+				$kiwi -> warning ("No boot theme set, default is openSUSE");
+			}
+			$kiwi -> done ();
 		}
 		#==========================================
 		# Check for default root in XML

@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Tue Jul 27 07:23:38 CEST 2010 - ms@suse.de
 
+- added log information about used boot-theme
 - added support for image caching. With this feature you can
   provide a cache directory along with the option --cache.
   kiwi in prepare step looks into the directory if it finds
