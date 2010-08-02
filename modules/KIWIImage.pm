@@ -776,12 +776,19 @@ sub createImageCPIO {
 	my $pwd  = qxx ("pwd"); chomp $pwd;
 	my @cpio = ("--create", "--format=newc", "--quiet");
 	my $dest = $this->{imageDest}."/".$name.".gz";
+	my $dspl = $this->{imageDest}."/".$name.".splash.gz";
 	my $data;
 	if (! $compress) {
 		$dest = $this->{imageDest}."/".$name;
 	}
 	if ($dest !~ /^\//) {
 		$dest = $pwd."/".$dest;
+	}
+	if ($dspl !~ /^\//) {
+		$dspl = $pwd."/".$dspl;
+	}
+	if (-e $dspl) {
+		qxx ("rm -f $dspl 2>&1");
 	}
 	if ($compress) {
 		$data = qxx (
