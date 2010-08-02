@@ -43,17 +43,19 @@ test -z "$TERM"               && export TERM=linux
 test -z "$LANG"               && export LANG=en_US.utf8
 test -z "$UTIMER"             && export UTIMER=0
 test -z "$VGROUP"             && export VGROUP=kiwiVG
+test -z "$PARTED_HAVE_ALIGN"  && export PARTED_HAVE_ALIGN=0
+test -z "$PARTED_HAVE_MACHINE"&& export PARTED_HAVE_MACHINE=0
 if [ -x /sbin/blogd ];then
 	test -z "$CONSOLE"            && export CONSOLE=/dev/console
 	test -z "$REDIRECT"           && export REDIRECT=/dev/tty1
 fi
-if [ -z "$PARTED_VER" ];then
-	PARTED_VER=$(
-		parted -v | head -n 1 | awk -F" " '{print $NF}' |\
-		cut -f1-3 -d. | tr -d . | cut -c1-3 )
-	export PARTED_VER
+if parted -h | grep -q '\-\-align';then
+	export PARTED_HAVE_ALIGN=1
 fi
-if [ $PARTED_VER -lt 188 ];then
+if parted -h | grep -q '\-\-machine';then
+	export PARTED_HAVE_MACHINE=1
+fi
+if [ ! $PARTED_HAVE_MACHINE ];then
 	export PARTITIONER=sfdisk
 fi
 
@@ -5296,7 +5298,7 @@ function partedWrite {
 	local device=$1
 	local cmds=$2
 	local opts
-	if [ $PARTED_VER -ge 220 ];then
+	if [ $PARTED_HAVE_ALIGN ];then
 		opts="-a cyl"
 	fi
 	if ! parted $opts -m $device unit cyl $cmds;then
