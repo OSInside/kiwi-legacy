@@ -1,4 +1,16 @@
 -------------------------------------------------------------------
+Mon Aug  2 12:19:22 CEST 2010 - ms@suse.de
+
+- when creating a new cpio image make sure an eventually
+  existing old version of .splash.gz will be removed
+- again fixed the check for specific parted versions. I now
+  changed it to directly check for the available options in
+  parted instead of the parted version number
+- put patterns into image package section instead of bootstrap
+  I discovered strange errors with older zypper versions when
+  building newer images
+
+-------------------------------------------------------------------
 Tue Jul 27 07:23:38 CEST 2010 - ms@suse.de
 
 - v4.52
