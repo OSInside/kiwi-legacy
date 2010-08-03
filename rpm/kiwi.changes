@@ -1,4 +1,16 @@
 -------------------------------------------------------------------
+Tue Aug  3 11:17:24 CEST 2010 - ms@suse.de
+
+- if a fixed xml size was set for a filesystem image we use if
+  even if kiwi's calculation says it's too small. This allows users
+  to create the image with less or no free space but also could
+  cause the image to fail because of no space left on device.
+  We don't use the fixed xml size if it's too small for a virtual
+  disk based image though because this could cause the image to
+  be created successfully but then failed on boot which is a bad
+  user experience (bnc #627031)
+
+-------------------------------------------------------------------
 Mon Aug  2 15:45:21 CEST 2010 - ms@suse.de
 
 - v4.54
