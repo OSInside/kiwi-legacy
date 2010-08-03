@@ -2,6 +2,7 @@
 Mon Aug  2 15:45:21 CEST 2010 - ms@suse.de
 
 - added entire usb stack to initrd for SLE11 oemboot (bnc #627439)
+- fixed evaluation of PARTED_... variables (bnc #627593)
 
 -------------------------------------------------------------------
 Mon Aug  2 12:19:22 CEST 2010 - ms@suse.de
