@@ -12,7 +12,7 @@
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>
 		<rpm-force>true</rpm-force>
-		<locale>en_US.UTF-8</locale>
+		<locale>en_US</locale>
 		<keytable>us.map.gz</keytable>
 	</preferences>
 	<users group="root">

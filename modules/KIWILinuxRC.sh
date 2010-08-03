@@ -43,12 +43,20 @@ test -z "$TERM"               && export TERM=linux
 test -z "$LANG"               && export LANG=en_US.utf8
 test -z "$UTIMER"             && export UTIMER=0
 test -z "$VGROUP"             && export VGROUP=kiwiVG
+test -z "$PARTED_HAVE_ALIGN"  && export PARTED_HAVE_ALIGN=0
+test -z "$PARTED_HAVE_MACHINE"&& export PARTED_HAVE_MACHINE=0
 if [ -x /sbin/blogd ];then
 	test -z "$CONSOLE"            && export CONSOLE=/dev/console
 	test -z "$REDIRECT"           && export REDIRECT=/dev/tty1
 fi
-if [ -z "$PARTED_VERSION" ];then
-	export PARTED_VER=$(parted -v | head -n 1 | cut -f4 -d" " | cut -f1-2 -d.)
+if parted -h | grep -q '\-\-align';then
+	export PARTED_HAVE_ALIGN=1
+fi
+if parted -h | grep -q '\-\-machine';then
+	export PARTED_HAVE_MACHINE=1
+fi
+if [ ! $PARTED_HAVE_MACHINE ];then
+	export PARTITIONER=sfdisk
 fi
 
 #======================================
@@ -2129,7 +2137,7 @@ function updateLVMBootDeviceFstab {
 	# probe filesystem
 	#--------------------------------------
 	probeFileSystem $sdev
-	if [ -z $FSTYPE ] || [ $FSTYPE = "unknown" ];then
+	if [ -z "$FSTYPE" ] || [ "$FSTYPE" = "unknown" ];then
 		FSTYPE="auto"
 	fi
 	echo "$diskByID $mount $FSTYPE defaults 0 0" >> $nfstab
@@ -5290,7 +5298,7 @@ function partedWrite {
 	local device=$1
 	local cmds=$2
 	local opts
-	if [ $PARTED_VER = "2.2" ];then
+	if [ $PARTED_HAVE_ALIGN ];then
 		opts="-a cyl"
 	fi
 	if ! parted $opts -m $device unit cyl $cmds;then
@@ -5651,6 +5659,32 @@ function createFilesystem {
 	fi
 }
 #======================================
+# restoreLVMMetadata
+#--------------------------------------
+function restoreLVMPhysicalVolumes {
+	# /.../
+	# restore the pysical volumes by the given restore file
+	# created from vgcfgbackup. It's important to create them
+	# with the same uuid's compared to the restore file
+	# ----
+	local restorefile=$1
+	cat $restorefile | grep -A2 -E 'pv[0-9] {' | while read line;do
+		if [ -z "$uuid" ];then
+			uuid=$(echo $line | grep 'id =' |\
+				cut -f2 -d= | tr -d \")
+		fi
+		if [ -z "$pdev" ];then
+			pdev=$(echo $line|grep 'device =' |\
+				cut -f2 -d\" | cut -f1 -d\")
+		fi
+		if [ ! -z "$pdev" ];then
+			pvcreate -u $uuid $pdev
+			unset uuid
+			unset pdev
+		fi
+	done
+}
+#======================================
 # pxeSizeToMB
 #--------------------------------------
 function pxeSizeToMB {
@@ -5802,6 +5836,9 @@ function setupBootPartition {
 		#======================================
 		# no separate boot partition
 		#--------------------------------------
+		if [ -z "$bootid" ];then
+			export bootid=1
+		fi
 		return
 	fi
 	if [ -z "$imageBootDevice" ];then

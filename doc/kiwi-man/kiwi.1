@@ -1,12 +1,12 @@
 .\"     Title: kiwi
 .\"    Author: Marcus Schaefer <ms (AT) suse.de>
 .\" Generator: DocBook XSL Stylesheets v1.74.0 <http://docbook.sf.net/>
-.\"      Date: Created: 07/19/2010
+.\"      Date: Created: 08/02/2010
 .\"    Manual: KIWI Manualpage
-.\"    Source: KIWI 4.49
+.\"    Source: KIWI 4.53
 .\"  Language: English
 .\"
-.TH "KIWI" "1" "Created: 07/19/2010" "KIWI 4\&.49" "KIWI Manualpage"
+.TH "KIWI" "1" "Created: 08/02/2010" "KIWI 4\&.53" "KIWI Manualpage"
 .\" -----------------------------------------------------------------
 .\" * (re)Define some macros
 .\" -----------------------------------------------------------------
@@ -198,7 +198,7 @@ representing a live system on CD or DVD\&. Other than that kiwi is able to creat
 .HP \w'\fBkiwi\fR\ 'u
 \fBkiwi\fR {\-p | \-\-prepare} \fIimage\-path\fR
 .br
-[\-r | \-\-root\fIimage\-root\fR]
+[\-r | \-\-root\fIimage\-root\fR | \-\-chache\fIdirectory\fR]
 .fam
 .fam C
 .HP \w'\fBkiwi\fR\ 'u
@@ -213,7 +213,7 @@ If the image root tree is stored and not removed, it can be used for upgrading t
 includes this update channel as repository, it is useful to store the image root tree and upgrade the tree according to changes on the update channel\&. Given that the root tree exists it\'s also possible to add or remove software and recreate the image of the desired type
 .fam C
 .HP \w'\fBkiwi\fR\ 'u
-\fBkiwi\fR {\-u | \-\-upgrade} \fIimage\-root\fR [\-\-add\-package\fIname\fR]
+\fBkiwi\fR {\-u | \-\-upgrade} \fIimage\-root\fR [\-\-add\-package\fIname\fR] [\-\-add\-pattern\fIname\fR]
 .fam
 .SH "System to Image Migration"
 .PP
@@ -421,9 +421,19 @@ Force creation of new root directory\&. If the directory already exists, it is d
 .RE
 .SH "Image Upgrade/Preparation Options"
 .PP
+[\fB\-\-cache\fR \fIdirectory\fR ]
+.RS 4
+When specifying a cache directory kiwi will create a cache each for patterns and packages and re\-use them if possible for subsequent root tree preparations of this and/or other images
+.RE
+.PP
 [\fB\-\-add\-package\fR \fIpackage\fR ]
 .RS 4
 Add the given package name to the list of image packages multiple \-\-add\-package options are possible\&. The change will not be written to the xml description\&.
+.RE
+.PP
+[\fB\-\-add\-pattern\fR \fIname\fR ]
+.RS 4
+Add the given pattern name to the list of image packages multiple \-\-add\-pattern options are possible\&. The change will not be written to the xml description\&. Patterns can be handled by SuSE based repositories only\&.
 .RE
 .PP
 [\fB\-\-del\-package\fR \fIpackage\fR ]

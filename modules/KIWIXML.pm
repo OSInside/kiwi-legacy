@@ -2388,6 +2388,42 @@ sub addPackages {
 }
 
 #==========================================
+# addPatterns
+#------------------------------------------
+sub addPatterns {
+	# ...
+	# Add the given pattern list to the specified packages
+	# type section of the xml description parse tree.
+	# ----
+	my $this  = shift;
+	my $ptype = shift;
+	my $nodes = shift;
+	my @patts = @_;
+	if (! defined $nodes) {
+		$nodes = $this->{packageNodeList};
+	}
+	my $nodeNumber = 1;
+	for (my $i=1;$i<= $nodes->size();$i++) {
+		my $node = $nodes -> get_node($i);
+		my $type = $node  -> getAttribute ("type");
+		if (! $this -> requestedProfile ($node)) {
+			next;
+		}
+		if ($type eq $ptype) {
+			$nodeNumber = $i; last;
+		}
+	}
+	foreach my $pack (@patts) {
+		my $addElement = new XML::LibXML::Element ("opensusePattern");
+		$addElement -> setAttribute("name",$pack);
+		$nodes -> get_node($nodeNumber)
+			-> appendChild ($addElement);
+	}
+	$this -> updateXML();
+	return $this;
+}
+
+#==========================================
 # addArchives
 #------------------------------------------
 sub addArchives {
@@ -2434,6 +2470,18 @@ sub addImagePackages {
 	# ----
 	my $this  = shift;
 	return $this -> addPackages ("bootstrap",undef,@_);
+}
+
+#==========================================
+# addImagePatterns
+#------------------------------------------
+sub addImagePatterns {
+	# ...
+	# Add the given pattern list to the type=bootstrap packages
+	# section of the xml description parse tree.
+	# ----
+	my $this  = shift;
+	return $this -> addPatterns ("image",undef,@_);
 }
 
 #==========================================
@@ -3914,15 +3962,17 @@ sub getInstSourceSatSolvable {
 	# merge all solvables into one
 	#------------------------------------------
 	if ($count > 1) {
-		my $data = qxx ("mergesolv @index > $solv");
+		my $data = qxx ("mergesolv @index > $solv.system");
 		my $code = $? >> 8;
 		if ($code != 0) {
 			$kiwi -> error  ("--> Couldn't merge solve files");
 			$kiwi -> failed ();
 			return undef
 		}
+	} else {
+		qxx ("cp $solv $solv.system 2>&1");
 	}
-	return $solv;
+	return $solv.".system";
 }
 
 #==========================================

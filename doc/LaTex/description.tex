@@ -394,9 +394,15 @@ attributes:
       /usr/share/zoneinfo/Europe/Berlin. KIWI uses this value to configure
       the timezone in /etc/localtime for the image
 \item \textbf{locale}\\
-      Specifies the name of the locale to use, which defines the
+      Specifies the name of the UTF-8 locale to use, which defines the
       contents of the RC\_LANG system environment variable in
-      /etc/sysconfig/language
+      /etc/sysconfig/language. Please note only UTF-8 locales are supported
+      here which also means that the encoding must \textbf{not} be part of
+      the locale information. The kiwi schema validates the locale string
+      according to the following pattern:\\
+      \verb+[a-z]{2}_[A-Z]{2}(,[a-z]{2}_[A-Z]{2})*+.
+      This means you have to specifiy the locale like the following example:
+      en\_US or en\_US,de\_DE
 \item \textbf{boot-theme}\\
       Specifies the name of the gfxboot and bootsplash theme to use
 \item \textbf{defaultdestination}\\
@@ -790,9 +796,9 @@ supported child elements:
 
 \subsection{users element}
 \begin{Command}{12cm}
-<users group="users" \textit{id="number"}>\\
-\hspace*{1cm}<user pwd="..." home="dir"\\ 
-\hspace*{1.5cm}name="user" \textit{id="number"}\\
+<users group=''group\_name'' \textit{id="number"}>\\
+\hspace*{1cm}<user home="dir" \textit{id="number"}\\ 
+\hspace*{1.5cm}name=''user" pwd="..."\\
 \hspace*{1.5cm}\textit{pwdformat="encrypted" | "plain"}\\
 \hspace*{1.5cm}\textit{realname="string"} \textit{shell="path}/>\\
 \hspace*{1cm}...\\
@@ -800,15 +806,25 @@ supported child elements:
 ...
 \end{Command}
 
-The optional users element specifies the users to be added to the image.
-The group attribute specifies the group the users belong to. If this group
-does not exist, it is created. A user element must be specified for
-each group. The user child element specifies the users belonging to that
-group, and the name, pwd and home attributes specifies the username,
-the password, and the path to the home directory. An encrypted password can be
-created using the kiwi $--$createpassword tool. If a plain text password is
-given use the optional pwdformat attribute to indicate a plain text password
-and Kiwi will encrypt the given password.
+The optional users element lists the users belonging to the group specified
+with the group attribute. At least one user child element must be specified
+as part of the users element. Multiple users elements may be specified.
+
+The attributes home, id, name, pwd, realname, and shell specify the created
+users home directory, the user name, the user's password, the user's 
+real name, and the user's login shell, respectively. By default the value
+of the password attribute is expected to be an encrypted string. An
+encrypted password can be created using the kiwi $--$createpassword tool. It
+is also possible to specify the password as a non encrypted string by using
+the pwdformat attribute and setting it's value to ``plain''. Kiwi will then
+encrypt the password prior to the user being added to the system.
+
+All specified users and groups will be created if they do not already exist.
+By default the defined users will be part of the group specified with the 
+group attribute of the users element and the default group called ``users''.
+If it is desired to have the specified users to only be part of the given
+group it is necessary to specify the id attribute. It is recommended to use
+a group id greater than 100.
 
 \subsection{drivers element}
 \begin{Command}{12cm}

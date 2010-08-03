@@ -87,7 +87,7 @@
 		<package name="tar"/>
 		<package name="lvm2"/>
 		<package name="kexec-tools"/>
-		<package name="gettext-runtime"/>
+		<package name="gettext"/>
 		<package name="parted"/>
 		<package name="syslinux"/>
 		<package name="fbiterm"/>

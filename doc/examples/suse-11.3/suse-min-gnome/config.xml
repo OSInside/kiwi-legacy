@@ -44,6 +44,8 @@
 		<package name="preload"/>
 		<package name="tomboy"/>
 		<package name="vim"/>
+		<package name="xterm"/>
+		<package name="icewm"/>
 		<package name="xorg-x11-server"/>
 		<opensusePattern name="base"/>
 	</packages>

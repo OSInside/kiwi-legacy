@@ -98,7 +98,7 @@ sub new {
 		if (-f $system || -b $system) {
 			my %fsattr = main::checkFileSystem ($system);
 			if ($fsattr{readonly}) {
-				$syszip = -s $system;
+				$syszip = main::isize ($system);
 			} else {
 				$syszip = 0;
 			}
@@ -305,7 +305,7 @@ sub new {
 			$sizeBytes+= $journal;
 		} else {
 			# system is specified as a file...
-			$sizeBytes = -s $system;
+			$sizeBytes = main::isize ($system);
 			$sizeBytes*= 1.1;
 		}
 		#==========================================
@@ -339,8 +339,8 @@ sub new {
 		# if system is a split system the vmsize will be
 		# adapted within the image creation function accordingly
 		# ----
-		my $kernelSize = -s $kernel;
-		my $initrdSize = -s $initrd;
+		my $kernelSize = main::isize ($kernel);
+		my $initrdSize = main::isize ($initrd);
 		$vmsize = $kernelSize + ($initrdSize * 1.5) + $sizeBytes;
 		#==========================================
 		# Calculate required inode count for root
@@ -840,9 +840,9 @@ sub setupBootStick {
 	# Check if system fits on storage device
 	#------------------------------------------
 	my $hardSize = $this -> getStorageSize ($stick);
-	my $softSize = -s $system;
+	my $softSize = main::isize ($system);
 	if (-f $splitfile) {
-		$softSize += -s $splitfile;
+		$softSize += main::isize ($splitfile);
 	}
 	$softSize /= 1024;
 	$softSize += $lvmbootMB + $luksbootMB + $syslbootMB + $dmbootMB;
@@ -1055,7 +1055,7 @@ sub setupBootStick {
 		if ((defined $system) && (($syszip) || ($haveSplit))) {
 			my $sizeOK = 1;
 			my $systemPSize = $this -> getStorageSize ($deviceMap{1});
-			my $systemISize = -s $system; $systemISize /= 1024;
+			my $systemISize = main::isize ($system); $systemISize /= 1024;
 			chomp $systemPSize;
 			#print "_______A $systemPSize : $systemISize\n";
 			if ($systemPSize < $systemISize) {
@@ -1829,7 +1829,7 @@ sub setupInstallStick {
 	my $isxen     = $this->{isxen};
 	my $xml       = $this->{xml};
 	my $pinst     = $xml->getOEMPartitionInstall();
-	my $irdsize   = -s $initrd;
+	my $irdsize   = main::isize ($initrd);
 	my $diskname  = $system.".install.raw";
 	my $md5name   = $system;
 	my %deviceMap = ();
@@ -1978,7 +1978,7 @@ sub setupInstallStick {
 	#------------------------------------------
 	$irdsize= ($irdsize / 1e6) + 20;
 	$irdsize= sprintf ("%.0f", $irdsize);
-	$vmsize = -s $system;
+	$vmsize = main::isize ($system);
 	$vmsize = ($vmsize / 1e6) * 1.3 + $irdsize;
 	$vmsize = sprintf ("%.0f", $vmsize);
 	$vmsize = $vmsize."M";
@@ -2524,7 +2524,7 @@ sub setupBootDisk {
 	# increase vmsize if image split portion
 	#------------------------------------------
 	if (($imgtype eq "split") && (-f $splitfile)) {
-		my $splitsize = -s $splitfile; $splitsize /= 1048576;
+		my $splitsize = main::isize ($splitfile); $splitsize /= 1048576;
 		$vmsize = $this->{vmmbyte} + ($splitsize * 1.5) + $lvmbootMB;
 		$vmsize = sprintf ("%.0f", $vmsize);
 		$this->{vmmbyte} = $vmsize;
@@ -2774,7 +2774,7 @@ sub setupBootDisk {
 		if ($syszip > 0) {
 			my $sizeOK = 1;
 			my $systemPSize = $this->getStorageSize ($deviceMap{1});
-			my $systemISize = -s $system; $systemISize /= 1024;
+			my $systemISize = main::isize ($system); $systemISize /= 1024;
 			chomp $systemPSize;
 			#print "_______A $systemPSize : $systemISize\n";
 			if ($systemPSize < $systemISize) {
@@ -3341,6 +3341,24 @@ sub setupSplash {
 	my $newird;
 	my $result;
 	#==========================================
+	# check if compressed and setup splash.gz
+	#------------------------------------------
+	if ($initrd =~ /\.gz$/) {
+		$zipped = 1;
+	}
+	if ($zipped) {
+		$newird = $initrd; $newird =~ s/\.gz/\.splash.gz/;
+	} else {
+		$newird = $initrd.".splash.gz";
+	}
+	#==========================================
+	# check if splash initrd is already there
+	#------------------------------------------
+	if ((! -l $newird) && (-f $newird)) {
+		# splash initrd already created...
+		return $newird;
+	}
+	#==========================================
 	# create temp dir for operations
 	#------------------------------------------
 	$kiwi -> info ("Setting up splash screen...");
@@ -3354,17 +3372,7 @@ sub setupSplash {
 	}
 	chomp $spldir;
 	my $irddir = "$spldir/initrd";
-	#==========================================
-	# check if compressed and setup splash.gz
-	#------------------------------------------
-	if ($initrd =~ /\.gz$/) {
-		$zipped = 1;
-	}
-	if ($zipped) {
-		$newird = $initrd; $newird =~ s/\.gz/\.splash.gz/;
-	} else {
-		$newird = $initrd.".splash.gz";
-	}
+
 	#==========================================
 	# unpack initrd files
 	#------------------------------------------
@@ -3598,7 +3606,7 @@ sub buildMD5Sum {
 	my $file = shift;
 	my $kiwi = $this->{kiwi};
 	$kiwi -> info ("Creating image MD5 sum...");
-	my $size = -s $file;
+	my $size = main::isize ($file);
 	my $primes = qxx ("factor $size"); $primes =~ s/^.*: //;
 	my $blocksize = 1;
 	for my $factor (split /\s/,$primes) {

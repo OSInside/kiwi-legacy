@@ -776,12 +776,19 @@ sub createImageCPIO {
 	my $pwd  = qxx ("pwd"); chomp $pwd;
 	my @cpio = ("--create", "--format=newc", "--quiet");
 	my $dest = $this->{imageDest}."/".$name.".gz";
+	my $dspl = $this->{imageDest}."/".$name.".splash.gz";
 	my $data;
 	if (! $compress) {
 		$dest = $this->{imageDest}."/".$name;
 	}
 	if ($dest !~ /^\//) {
 		$dest = $pwd."/".$dest;
+	}
+	if ($dspl !~ /^\//) {
+		$dspl = $pwd."/".$dspl;
+	}
+	if (-e $dspl) {
+		qxx ("rm -f $dspl 2>&1");
 	}
 	if ($compress) {
 		$data = qxx (
@@ -1017,6 +1024,10 @@ sub createImageUSB {
 			$lookup = $main::PrebuiltBootImage."/";
 		}
 		my $pinitrd = $lookup.$main::ImageName.".gz";
+		my $psplash;
+		if (-f $lookup.$main::ImageName.".splash.gz") {
+			$psplash = $lookup.$main::ImageName.".splash.gz";
+		}
 		my $plinux  = $lookup.$main::ImageName.".kernel";
 		if (! -f $pinitrd) {
 			$pinitrd = $lookup.$main::ImageName;
@@ -1035,6 +1046,9 @@ sub createImageUSB {
 				$kiwi -> done();
 				$pblt = 1;
 			} else {
+				if ($psplash) {
+					qxx ("cp -a $psplash $main::Destination 2>&1");
+				}
 				my $data = qxx ("cp -a $pinitrd $main::Destination 2>&1");
 				my $code = $? >> 8;
 				if ($code != 0) {
@@ -1209,7 +1223,7 @@ sub createImageVMX {
 	#==========================================
 	# Create VM format/configuration
 	#------------------------------------------
-	if (defined $name->{format}) {
+	if ((defined $name->{format}) || ($xendomain eq "domU")) {
 		undef $main::BootVMDisk;
 		undef $main::BootVMSystem;
 		$main::Convert = $main::Destination."/".$name->{systemImage}.".raw";
@@ -2207,6 +2221,7 @@ sub createImageSplit {
 	my $imageTree = $this->{imageTree};
 	my $baseSystem= $this->{baseSystem};
 	my $sxml = $this->{xml};
+	my %xenc = $sxml->getXenConfig();
 	my $FSTypeRW;
 	my $FSTypeRO;
 	my $error;
@@ -2223,6 +2238,15 @@ sub createImageSplit {
 	my $code;
 	my $name;
 	my $treebase;
+	my $xendomain;
+	#==========================================
+	# check for xen domain setup
+	#------------------------------------------
+	if (defined $xenc{xen_domain}) {
+		$xendomain = $xenc{xen_domain};
+	} else {
+		$xendomain = "dom0";
+	}
 	#==========================================
 	# turn image path into absolute path
 	#------------------------------------------
@@ -2916,7 +2940,7 @@ sub createImageSplit {
 		#==========================================
 		# Create VM format/configuration
 		#------------------------------------------
-		if (defined $name->{format}) {
+		if ((defined $name->{format}) || ($xendomain eq "domU")) {
 			undef $main::BootVMDisk;
 			undef $main::BootVMSystem;
 			$main::Convert = $main::Destination."/".$name->{systemImage}.".raw";
@@ -3070,7 +3094,8 @@ sub writeImageConfig {
 					$targetPartitionNext = $targetPartition + 1;
 				}
 				if ($href -> {size} eq "image") {
-					print FD int(((-s "$this->{imageDest}/$name")/1024/1024)+1);
+					my $size = main::isize ("$this->{imageDest}/$name");
+					print FD int (($size/1024/1024)+1);
 				} else {
 					print FD $href -> {size};
 				}
@@ -3884,7 +3909,7 @@ sub buildMD5Sum {
 	# Create image md5sum
 	#------------------------------------------
 	$kiwi -> info ("Creating image MD5 sum...");
-	my $size = -s "$this->{imageDest}/$name";
+	my $size = main::isize ("$this->{imageDest}/$name");
 	my $primes = qxx ("factor $size"); $primes =~ s/^.*: //;
 	my $blocksize = 1;
 	for my $factor (split /\s/,$primes) {
@@ -3993,7 +4018,7 @@ sub updateMD5File {
 			return undef;
 		}
 		my $line = <FD>; close FD; chomp $line;
-		my $size = -s $image;
+		my $size = main::isize ($image);
 		my $primes = qxx ("factor $size"); $primes =~ s/^.*: //;
 		my $blocksize = 1;
 		for my $factor (split /\s/,$primes) {

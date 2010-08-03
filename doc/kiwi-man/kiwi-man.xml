@@ -120,6 +120,8 @@
         <arg choice="plain">-r</arg>
         <arg choice="plain">--root</arg>
         <replaceable>image-root</replaceable>
+        <arg choice="plain">--chache</arg>
+        <replaceable>directory</replaceable>
       </group>
     </cmdsynopsis>
 
@@ -161,6 +163,7 @@
       </group>
       <arg choice="plain"><replaceable>image-root</replaceable></arg>
       <arg choice="opt">--add-package<replaceable>name</replaceable></arg>
+      <arg choice="opt">--add-pattern<replaceable>name</replaceable></arg>
     </cmdsynopsis>
   </refsect1>
 
@@ -594,6 +597,17 @@
   <refsect1 id="kiwi.prepare.upgrade.options">
     <title>Image Upgrade/Preparation Options</title>
 	<variablelist>
+    <varlistentry>
+        <term><optional><option>--cache</option> <replaceable>directory</replaceable>
+        </optional></term>
+        <listitem>
+        <para>
+            When specifying a cache directory kiwi will create a cache each for
+			patterns and packages and re-use them if possible for subsequent
+            root tree preparations of this and/or other images 
+        </para>
+        </listitem>
+    </varlistentry>
 	<varlistentry>
 		<term><optional><option>--add-package</option> <replaceable>package</replaceable>
 		</optional></term>
@@ -605,6 +619,18 @@
 		</para>
 		</listitem>
 	</varlistentry>
+    <varlistentry>
+        <term><optional><option>--add-pattern</option> <replaceable>name</replaceable>
+        </optional></term>
+        <listitem>
+        <para>
+            Add the given pattern name to the list of image packages
+            multiple --add-pattern options are possible. The change
+            will not be written to the xml description. Patterns can be handled
+            by SuSE based repositories only.
+        </para>
+        </listitem>
+    </varlistentry>
 	<varlistentry>
 		<term><optional><option>--del-package</option> <replaceable>package</replaceable>
 		</optional></term>
