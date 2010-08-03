@@ -36,7 +36,8 @@ suseSetupProduct
 #--------------------------------------
 suseActivateDefaultServices
 suseInsertService boot.device-mapper
-suseInsertService eucalyptus-nc
+suseInsertService eucalyptus-cloud
+suseInsertService eucalyptus-cc
 
 #======================================
 # SuSEconfig
