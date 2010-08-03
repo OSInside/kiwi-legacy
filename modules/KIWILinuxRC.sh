@@ -573,6 +573,13 @@ function installBootLoader {
 			"*** boot loader install for $arch-$loader not implemented ***" \
 		"reboot"
 	esac
+	if [ ! -z "$masterBootID" ];then
+		Echo "writing MBR ID back to master boot record: $masterBootID"
+		masterBootIDHex=$(echo $masterBootID |\
+			sed 's/^0x\(..\)\(..\)\(..\)\(..\)$/\\x\4\\x\3\\x\2\\x\1/')
+		echo -e -n $masterBootIDHex dd of=$imageDiskDevice \
+			bs=1 count=4 seek=$((0x1b8))
+	fi
 }
 #======================================
 # installBootLoaderRecovery
@@ -2915,6 +2922,12 @@ function searchBIOSBootDevice {
 		if [ "$mbrML" = "$mbrI" ] || [ "$mbrMB" = "$mbrI" ];then
 			ifix=1
 			matched=$curd
+			if [ "$mbrML" = "$mbrI" ];then
+				export masterBootID=$mbrML
+			fi
+			if [ "$mbrMB" = "$mbrI" ];then
+				export masterBootID=$mbrMB
+			fi
 			if [ "$curd" = "$bios" ];then
 				export biosBootDevice=$curd
 				return 0
