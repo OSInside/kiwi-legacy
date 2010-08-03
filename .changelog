@@ -1,0 +1,17 @@
+#!/usr/bin/perl
+
+while (my $line = <>) {
+	next if ($line =~ /^(commit|Author:)/);
+	if ($line =~ /^Date: (.*) \+.*/) {
+		my $date = qx /date --date="$1"/; chomp $date;
+		print "------------------------------------------------------------------\n";
+		print "$date - ms\@suse.de\n";
+	} else {
+		$line =~ s/^ +//;
+		if ($line =~ /^(-|\*)/) {
+			print $line;
+		} else {
+			print "  $line";
+		}
+	}
+}
