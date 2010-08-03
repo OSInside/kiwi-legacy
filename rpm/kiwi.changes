@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Tue Aug  3 11:17:24 CEST 2010 - ms@suse.de
 
+- fixed repartition code for fdisk (SLE10) (bnc #627807)
 - don't call root filesystem check for images (bnc #627021)
 - if a fixed xml size was set for a filesystem image we use if
   even if kiwi's calculation says it's too small. This allows users
