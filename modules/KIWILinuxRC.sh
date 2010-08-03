@@ -55,7 +55,7 @@ fi
 if parted -h | grep -q '\-\-machine';then
 	export PARTED_HAVE_MACHINE=1
 fi
-if [ ! $PARTED_HAVE_MACHINE ];then
+if [ $PARTED_HAVE_MACHINE -eq 0 ];then
 	export PARTITIONER=sfdisk
 fi
 
@@ -5298,7 +5298,7 @@ function partedWrite {
 	local device=$1
 	local cmds=$2
 	local opts
-	if [ $PARTED_HAVE_ALIGN ];then
+	if [ $PARTED_HAVE_ALIGN -eq 1 ];then
 		opts="-a cyl"
 	fi
 	if ! parted $opts -m $device unit cyl $cmds;then
