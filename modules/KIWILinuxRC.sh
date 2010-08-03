@@ -4614,10 +4614,6 @@ function cleanImage {
 	rm -f /.profile
 	rm -rf /image
 	#======================================
-	# don't call root filesystem check
-	#--------------------------------------
-	export ROOTFS_FSCK="0"
-	#======================================
 	# return early for special types
 	#--------------------------------------
 	if \
@@ -4628,6 +4624,7 @@ function cleanImage {
 		[ ! -z "$AOEROOT" ]       || \
 		[ ! -z "$COMBINED_IMAGE" ]
 	then
+		export ROOTFS_FSCK="0"
 		return
 	fi
 	#======================================
