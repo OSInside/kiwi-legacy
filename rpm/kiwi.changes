@@ -1,6 +1,7 @@
 -------------------------------------------------------------------
 Tue Aug  3 11:17:24 CEST 2010 - ms@suse.de
 
+- don't call root filesystem check for images (bnc #627021)
 - if a fixed xml size was set for a filesystem image we use if
   even if kiwi's calculation says it's too small. This allows users
   to create the image with less or no free space but also could
