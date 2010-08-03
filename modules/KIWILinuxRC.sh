@@ -5230,6 +5230,8 @@ function callPartitioner {
 	local input=$1
 	if [ $PARTITIONER = "sfdisk" ];then
 		Echo "Repartition the disk according to real geometry [ fdisk ]"
+		echo "w" >> $input
+		echo "q" >> $input
 		fdisk $imageDiskDevice < $input 1>&2
 		if test $? != 0; then
 			systemException "Failed to create partition table" "reboot"

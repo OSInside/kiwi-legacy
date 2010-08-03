@@ -73,6 +73,7 @@
 	</repository>
 	<packages type="image">
 		<package name="aaa_base"/>
+		<package name="parted"/>
 		<package name="dhcpcd"/>
 		<package name="dhcp-client"/>
 		<package name="insserv"/>
