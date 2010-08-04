@@ -2782,7 +2782,8 @@ function CDMount {
 		# by the isohybrid tool :(
 		# ----
 		PARTITIONER=sfdisk
-		if [ "x$kiwi_hybridpersistent" = "xyes" ]; then
+		if [ "x$kiwi_hybridpersistent" = "xyes" -a \
+		     $(cat /sys/block/$biosBootDevice/ro) = "0" ]; then
 			createHybridPersistent $biosBootDevice
 		fi
 		Echo -n "Mounting hybrid live boot drive..."
