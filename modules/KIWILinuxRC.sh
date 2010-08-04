@@ -577,7 +577,7 @@ function installBootLoader {
 		Echo "writing MBR ID back to master boot record: $masterBootID"
 		masterBootIDHex=$(echo $masterBootID |\
 			sed 's/^0x\(..\)\(..\)\(..\)\(..\)$/\\x\4\\x\3\\x\2\\x\1/')
-		echo -e -n $masterBootIDHex dd of=$imageDiskDevice \
+		echo -e -n $masterBootIDHex | dd of=$imageDiskDevice \
 			bs=1 count=4 seek=$((0x1b8))
 	fi
 }
