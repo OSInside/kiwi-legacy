@@ -5078,7 +5078,7 @@ function displayEULA {
 	#======================================
 	# check license files
 	#--------------------------------------
-	local files=$(find /license.*.txt 2>/dev/null)
+	local files=$(find /license.*txt 2>/dev/null)
 	if [ -z "$files" ];then
 		return
 	fi
