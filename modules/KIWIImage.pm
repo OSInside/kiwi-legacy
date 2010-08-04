@@ -502,6 +502,7 @@ sub createImageEC2 {
 	if ($type{bootkernel}) {
 		push @main::Profiles ,split (/,/,$type{bootkernel});
 	}
+	$main::ForeignRepo{"xmlobj"}  = $xml;
 	$main::ForeignRepo{"xmlnode"} = $xml -> getForeignNodeList();
 	$main::ForeignRepo{"xmlpacnode"} = $xml -> getForeignPackageNodeList();
 	$main::ForeignRepo{"packagemanager"} = $xml -> getPackageManager();
@@ -979,6 +980,7 @@ sub createImageUSB {
 	if ($type{bootloader}) {
 		$main::ForeignRepo{"bootloader"} = $type{bootloader};
 	}
+	$main::ForeignRepo{"xmlobj"}  = $xml;
 	$main::ForeignRepo{"xmlnode"} = $xml -> getForeignNodeList();
 	$main::ForeignRepo{"xmlpacnode"} = $xml -> getForeignPackageNodeList();
 	$main::ForeignRepo{"packagemanager"} = $xml -> getPackageManager();
@@ -1641,6 +1643,7 @@ sub createImageLiveCD {
 	if ($hybridpersistent) {
 		$main::ForeignRepo{"hybridpersistent"} = "true";
 	}
+	$main::ForeignRepo{"xmlobj"}  = $xml;
 	$main::ForeignRepo{"xmlnode"} = $xml -> getForeignNodeList();
 	$main::ForeignRepo{"xmlpacnode"} = $xml -> getForeignPackageNodeList();
 	$main::ForeignRepo{"packagemanager"} = $xml -> getPackageManager();
