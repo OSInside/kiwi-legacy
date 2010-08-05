@@ -33,9 +33,9 @@
 				<vmnic interface="br0" mac="00:0C:6E:AA:57:2F"/>
 			</machine>
 			<ec2config>
-				<ec2privatekeyfile>/suse/ms/.ec2/pk-cambrian-aws.pem</ec2privatekeyfile>
-				<ec2certfile>/suse/ms/.ec2/cert-cambrian-aws.pem</ec2certfile>
-				<ec2accountnr>720220196365</ec2accountnr>
+				<ec2privatekeyfile>Path to EC2 private key file</ec2privatekeyfile>
+				<ec2certfile>Path to EC2 public certificate file</ec2certfile>
+				<ec2accountnr>12345678911</ec2accountnr>
 			</ec2config>
 		</type>
 	</preferences>
