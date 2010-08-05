@@ -1,17 +1,16 @@
 KIWI Image Description Example
 ==============================
-* A xen image is a filesystem based image file which requires a
-  XEN domain 0 running or the project called Xenner which emulates
-  the capabilities of the domain 0. The image created with kiwi
-  can be used together with the xen tools.
+* A xen image is a disk image which requires a
+  XEN domain 0 running and supporting the PVGrub module
 
 How to build this Example
 ==============================
 
-    kiwi --prepare /usr/share/doc/packages/kiwi/examples/suse-xen-guest \
+    kiwi --prepare \
+         /usr/share/doc/packages/kiwi/examples/suse-11.3/suse-xen-guest \
          --root /tmp/myxen
 
-    kiwi --create /tmp/myxen --type xen -d /tmp/myxen-result
+    kiwi --create /tmp/myxen --type vmx -d /tmp/myxen-result
 
 How to test this Example
 ==============================
