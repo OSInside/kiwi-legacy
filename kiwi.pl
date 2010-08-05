@@ -450,7 +450,7 @@ sub main {
 				my $name = $node -> getAttribute ("name");
 				my $arch = $node -> getAttribute ("arch");
 				my $pver = $node -> getAttribute ("version");
-				$plist{"$name-$pver.$arch"} = $name;
+				$plist{"$name-$pver"} = $name;
 			}
 			my $pcnt = keys %plist;
 			my @file = ();
@@ -459,23 +459,24 @@ sub main {
 			#------------------------------------------
 			if (@CachePackages) {
 				my $cstr = $xml -> getImageName();
-				my $cdir = $ImageCache."/".$CacheDistro."-".$cstr;
+				my $cdir = $ImageCache."/".$CacheDistro."-".$cstr.".clicfs";
 				push @file,$cdir;
 			}
 			foreach my $pattern (@CachePatterns) {
-				my $cdir = $ImageCache."/".$CacheDistro."-".$pattern;
+				my $cdir = $ImageCache."/".$CacheDistro."-".$pattern.".clicfs";
 				push @file,$cdir;
 			}
 			#==========================================
 			# walk through cache files
 			#------------------------------------------
-			foreach my $cdir (@file) {
+			foreach my $clic (@file) {
+				my $meta = $clic;
+				$meta =~ s/\.clicfs$/\.cache/;
 				#==========================================
 				# check cache files
 				#------------------------------------------
-				my $meta = $cdir.".cache";
 				my $CACHE_FD;
-				if ((! -d $cdir) || (! open ($CACHE_FD,$meta))) {
+				if (! open ($CACHE_FD,$meta)) {
 					next;
 				}
 				#==========================================
@@ -484,7 +485,7 @@ sub main {
 				my @cpac = <$CACHE_FD>; chomp @cpac;
 				my $ccnt = @cpac; close $CACHE_FD;
 				$kiwi -> loginfo (
-					"Cache: $cdir $ccnt packages, Image: $pcnt packages\n"
+					"Cache: $meta $ccnt packages, Image: $pcnt packages\n"
 				);
 				#==========================================
 				# check validity of cache
@@ -498,7 +499,7 @@ sub main {
 						if (! defined $plist{$p}) {
 							# cache package not part of image solved list
 							$kiwi -> loginfo (
-								"Cache: $cdir $p not in image list\n"
+								"Cache: $meta $p not in image list\n"
 							); 
 							$invalid = 1; last; 
 						}
@@ -508,7 +509,7 @@ sub main {
 				# store valid cache
 				#------------------------------------------
 				if (! $invalid) {
-					$Cache{$cdir} = int (100 * ($ccnt / $pcnt));
+					$Cache{$clic} = int (100 * ($ccnt / $pcnt));
 					$haveCache = 1;
 				}
 			}
@@ -520,19 +521,19 @@ sub main {
 				#==========================================
 				# Find best match
 				#------------------------------------------
-				foreach my $cdir (keys %Cache) {
-					if ($Cache{$cdir} > $max) {
-						$max = $Cache{$cdir};
+				foreach my $clic (keys %Cache) {
+					if ($Cache{$clic} > $max) {
+						$max = $Cache{$clic};
 					}
 				}
 				#==========================================
 				# Setup overlay for best match
 				#------------------------------------------
-				foreach my $cdir (keys %Cache) {
-					if ($Cache{$cdir} == $max) {
-						$kiwi -> info ("Using cache overlay [ $max% ]: $cdir");
-						$BaseRoot = $cdir;
-						$BaseRootMode = "copy";
+				foreach my $clic (keys %Cache) {
+					if ($Cache{$clic} == $max) {
+						$kiwi -> info ("Using cache overlay [ $max% ]: $clic");
+						$BaseRoot = $clic;
+						$BaseRootMode = "union";
 						$kiwi -> done();
 						last;
 					}
@@ -576,14 +577,41 @@ sub main {
 					$main::RootTree    .= $CacheDistro."-".$pattern;
 					$main::Survive      = "yes";
 					$main::ForceNewRoot = 1;
+					#==========================================
+					# Prepare new cache tree
+					#------------------------------------------
 					if (! defined main::main()) {
 						$main::Survive = "default";
 						my $code = kiwiExit (1); return $code;
 					}
+					#==========================================
+					# Create cache meta data
+					#------------------------------------------
 					my $meta   = $main::RootTree.".cache";
 					my $root   = $main::RootTree;
 					my $ignore = "'gpg-pubkey|bundle-lang'";
-					qxx ("rpm --root $root -qa | grep -vE $ignore > $meta");
+					my $rpmopts= "'%{NAME}-%{VERSION}-%{RELEASE}\n'";
+					my $rpm    = "rpm --root $root";
+					qxx ("$rpm -qa --qf $rpmopts | grep -vE $ignore > $meta");
+					#==========================================
+					# Turn cache into clicfs file
+					#------------------------------------------
+					$kiwi -> info (
+						"--> Building clicfs cache for pattern: $pattern\n"
+					);
+					my $image = new KIWIImage (
+						$kiwi,$xml,$root,$imageCacheDir,undef,"/base-system"
+					);
+					if (! defined $image) {
+						my $code = kiwiExit (1); return $code;
+					}
+					if (! $image -> createImageClicFS ()) {
+						my $code = kiwiExit (1); return $code;
+					}
+					my $name = $imageCacheDir."/".$image -> buildImageName();
+					qxx ("mv $name $main::RootTree.clicfs");
+					qxx ("rm $name.clicfs $name.md5");
+					qxx ("rm -rf $main::RootTree");
 				}
 				$main::Prepare      = $backupPrepare;
 				$main::ForceNewRoot = $backupForceNewRoot;

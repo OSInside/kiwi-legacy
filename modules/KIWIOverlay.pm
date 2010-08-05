@@ -48,8 +48,8 @@ sub new {
 	#==========================================
 	# Constructor setup
 	#------------------------------------------
-	if (! -d $baseRO) {
-		$kiwi -> error  ("Directory $baseRO doesn't exist");
+	if (! -e $baseRO) {
+		$kiwi -> error  ("File/Directory $baseRO doesn't exist");
 		$kiwi -> failed ();
 		return undef;
 	}
@@ -120,45 +120,91 @@ sub unionOverlay {
 	my $kiwi   = $this->{kiwi};
 	my $baseRO = $this->{baseRO};
 	my $rootRW = $this->{rootRW};
+	my %fsattr = main::checkFileSystem ($baseRO);
+	my $type   = $fsattr{type};
+	my @mount  = ();
 	my $tmpdir;
-	my $inodir;
+	my $cowdev;
 	my $result;
-	$tmpdir = qxx (" mktemp -q -d /tmp/kiwiRootOverlay.XXXXXX "); chomp $tmpdir;
+	my $status;
+	#==========================================
+	# Check result of filesystem detection
+	#------------------------------------------
+	if (! %fsattr) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't detect filesystem on: $baseRO");
+		return undef;
+	}
+	#==========================================
+	# Check for CLIC extension
+	#------------------------------------------
+	if ($type ne "clicfs") {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't detect clicfs on: $baseRO");
+		return undef;
+	}
+	#==========================================
+	# Create tmpdir for mount point
+	#------------------------------------------
+	$tmpdir = qxx ("mktemp -q -d /tmp/kiwiRootOverlay.XXXXXX"); chomp $tmpdir;
 	$result = $? >> 8;
 	if ($result != 0) {
+		$kiwi -> failed ();
 		$kiwi -> error  ("Failed to create overlay tmpdir");
-		$kiwi -> failed ();
 		return undef;
-	}
-	$inodir = qxx (" mktemp -q -d /tmp/kiwiRootInode.XXXXXX "); chomp $inodir;
-	$result = $? >> 8;
-	if ($result != 0) {
-		$kiwi -> error  ("Failed to create overlay inode tmpdir");
-		$kiwi -> failed ();
-		return undef;
-	}
-	my $opts = "dirs=$rootRW=rw:$baseRO=ro";
-	my $xino = "$inodir/.aufs.xino";
-	my $data = qxx (" mount -t tmpfs tmpfs $inodir ");
-	my $code = $? >> 8;
-	if ($code != 0) {
-		$kiwi -> error  ("tmpfs mount failed: $data");
-		$kiwi -> failed ();
-		return undef;
-	}
-	$data = qxx (" mount -t aufs -o $opts,xino=$xino aufs $tmpdir 2>&1");
-	$code = $? >> 8;
-	if ($code != 0) {
-		$data = qxx ("mount -t unionfs -o $opts unionfs $tmpdir 2>&1");
-		$code = $? >> 8;
-		if ($code != 0) {
-			$kiwi -> error  ("Overlay mount failed: $data");
-			$kiwi -> failed ();
-			return undef;
-		}
 	}
 	$this->{tmpdir} = $tmpdir;
-	$this->{inodir} = $inodir;
+	#==========================================
+	# Create tmp COW file for write operations
+	#------------------------------------------
+	$status = qxx ("touch $rootRW/kiwi-root.cow 2>&1"); chomp $cowdev;
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Failed to create overlay COW file: $status");
+		return undef;
+	}
+	$cowdev = "$rootRW/kiwi-root.cow";
+	$this->{cowdev} = $cowdev;
+	#==========================================
+	# Mount the clicfs (free space = 5GB)
+	#------------------------------------------
+	$status = qxx ("/sbin/losetup -s -f $baseRO 2>&1"); chomp $status;
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Couldn't loop bind overlay: $status");
+		return undef;
+	}
+	push @mount,"sleep 1; losetup -d $status";
+	$this->{mount} = \@mount;
+	$baseRO = $status;
+	$status = qxx (
+		"clicfs --ignore-cow-errors -m 5000 -c $cowdev $baseRO $tmpdir 2>&1"
+	);
+	$result = $? >> 8;
+	if ($result == 0) {
+		$status = qxx ("resize2fs $tmpdir/fsdata.ext3 2>&1");
+		$result = $? >> 8;
+	}
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error ("Failed to mount $baseRO to: $tmpdir: $status");
+		return undef;
+	}
+	push @mount,"umount $tmpdir";
+	$this->{mount} = \@mount;
+	my $opts = "loop,noatime,nodiratime,errors=remount-ro,barrier=0";
+	$baseRO = $tmpdir."/fsdata.ext3";
+	$status = qxx ("mount -o $opts $baseRO $tmpdir 2>&1");
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error ("Failed to loop mount $baseRO to: $tmpdir: $status");
+		return undef;
+	}
+	push @mount,"umount $tmpdir";
+	$this->{mount} = \@mount;
 	return $tmpdir;
 }
 
@@ -197,7 +243,8 @@ sub resetOverlay {
 	my $this   = shift;
 	my $kiwi   = $this->{kiwi};
 	my $tmpdir = $this->{tmpdir};
-	my $inodir = $this->{inodir};
+	my $baseRO = $this->{baseRO};
+	my $mount  = $this->{mount};
 	my $data;
 	my $code;
 	if ($this->{mode} eq "copy") {
@@ -206,26 +253,12 @@ sub resetOverlay {
 	if ($this->{mode} eq "recycle") {
 		return $this;
 	}
-	$data = qxx ("umount $tmpdir 2>&1");
-	$code = $? >> 8;
-	if ($code != 0) {
-		$kiwi -> warning ("Failed to umount overlay: $data");
-		$kiwi -> skipped ();
+	if ($mount) {
+		foreach my $cmd (reverse @{$mount}) {
+			qxx ("$cmd 2>&1");
+		}
 	}
-	$data = qxx ("umount $inodir 2>&1");
-	$code = $? >> 8;
-	if ($code != 0) {
-		$kiwi -> warning ("Failed to umount tmpfs: $data");
-		$kiwi -> skipped ();
-	}
-	if (! rmdir $tmpdir) {
-		$kiwi -> warning ("Failed to remove overlay: $!");
-		$kiwi -> skipped ();
-	}
-	if (! rmdir $inodir) {
-		$kiwi -> warning ("Failed to remove tmpfs: $!");
-		$kiwi -> skipped ();
-	}
+	qxx ("rm -rf $tmpdir 2>&1");
 	return $this;
 }
 

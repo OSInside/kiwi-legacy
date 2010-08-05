@@ -3678,33 +3678,36 @@ sub createTmpDirectory {
 	my $overlay;
 	if (defined $baseRoot) {
 		if ((defined $baseRootMode) && ($baseRootMode eq "union")) {
-			$kiwi -> info("Creating overlay path [$root(rw) + $baseRoot(ro)] ");
+			$kiwi -> info("Creating overlay path\n");
+			$kiwi -> info("--> Base: $baseRoot(ro)\n");
+			$kiwi -> info("--> COW:  $root/kiwi-root.cow(rw)\n");
 		} elsif ((defined $baseRootMode) && ($baseRootMode eq "recycle")) {
-			$kiwi -> info("Using overlay path $baseRoot");
+			$kiwi -> info("Using overlay path $baseRoot\n");
 		} else {
-			$kiwi -> info("Importing overlay path $baseRoot -> $root");
+			$kiwi -> info("Importing overlay path $baseRoot -> $root\n");
 		}
 		$overlay = new KIWIOverlay ( $kiwi,$baseRoot,$root );
 		if (! defined $overlay) {
 			$rootError = 1;
-		}
-		if (defined $baseRootMode) {
+		} elsif (defined $baseRootMode) {
 			$overlay -> setMode ($baseRootMode);
 		}
-		$root = $overlay -> mountOverlay();
+		if ($overlay) {
+			$root = $overlay -> mountOverlay();
+		}
 		if (! defined $root) {
 			$rootError = 1;
 		}
-		if ($rootError) {
-			$kiwi -> failed;
-		} else {
+		if (! $rootError) {
 			if ((defined $baseRootMode) && ($baseRootMode eq "union")) {
-				$kiwi -> note ("-> $root");
+				$kiwi -> info ("--> Mounted on: $root\n");
 			}
-			$kiwi -> done ();
 		}
 	}
 	if ( $rootError ) {
+		if ($overlay) {
+			$overlay -> resetOverlay();
+		}
 		return undef;
 	}
 	return ($root,$origroot,$overlay);
