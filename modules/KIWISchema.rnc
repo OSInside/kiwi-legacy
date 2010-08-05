@@ -1368,7 +1368,7 @@ div {
 	k.type.format.attribute =
 		## Specifies the format of the virtual disk.
 		attribute format {
-			"ovf" | "qcow2" | "vmdk"
+			"ec2" | "ovf" | "qcow2" | "vmdk"
 		}
 	k.type.installiso.attribute =
 		## Specifies if a install iso should be created (oem only)
@@ -1382,9 +1382,9 @@ div {
 	k.type.image.attribute =
 		## Specifies the image type
 		attribute image {
-			"btrfs" | "clicfs" | "cpio" | "ec2" | "ext2" | "ext3" |
+			"btrfs" | "clicfs" | "cpio" | "ext2" | "ext3" |
 			"ext4" | "iso" | "oem" | "product" | "pxe" | "reiserfs" |
-			"split" | "squashfs" | "usb" | "vmx" | "xen"
+			"split" | "squashfs" | "usb" | "vmx"
 		}
 	k.type.kernelcmdline.attribute =
 		# The kernelcmdline element specifies additional
@@ -2063,8 +2063,8 @@ div {
 #
 div {
 	k.packages.type.attribute = attribute type {
-		"bootstrap" | "delete" | "ec2" | "image" | "iso" | "oem" | "pxe" |
-		"split" | "testsuite" | "usb" | "vmx" | "xen"
+		"bootstrap" | "delete" | "image" | "iso" | "oem" | "pxe" |
+		"split" | "testsuite" | "usb" | "vmx"
 	}
 	k.packages.profiles.attribute =
 		## Namespace this section applies to. If not specified it

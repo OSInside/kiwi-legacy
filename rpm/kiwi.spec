@@ -226,24 +226,6 @@ Authors:
     Marcus Schaefer <ms@novell.com>
 %endif
 
-%ifarch %ix86 x86_64
-%package -n kiwi-desc-xenboot
-License:        GPL v2 or later
-Requires:       kiwi = %{version}
-Summary:        OpenSuSE - KIWI Image System Xen Virtual Machine boot
-Group:          System/Management
-%if 0%{?suse_version} > 1120
-BuildArch:      noarch
-%endif
-
-%description -n kiwi-desc-xenboot
-kiwi boot (initrd) image for activating a Xen image by xm
-
-Authors:
---------
-    Marcus Schaefer <ms@novell.com>
-%endif
-
 %ifarch %ix86 x86_64 s390 s390x
 %package -n kiwi-desc-oemboot
 License:        GPL v2 only
@@ -470,14 +452,6 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_datadir}/kiwi/image/netboot
 %doc %{_datadir}/kiwi/image/netboot/README
 %{_datadir}/kiwi/image/netboot/suse*
-%endif
-
-%ifarch %ix86 x86_64
-%files -n kiwi-desc-xenboot
-%defattr(-, root, root)
-%dir %{_datadir}/kiwi/image/xenboot
-%doc %{_datadir}/kiwi/image/xenboot/README
-%{_datadir}/kiwi/image/xenboot/suse*
 %endif
 
 %ifarch %ix86 x86_64 s390 s390x

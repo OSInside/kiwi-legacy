@@ -149,6 +149,9 @@ sub createFormat {
 	} elsif ($format eq "qcow2") {
 		$kiwi -> info ("Starting $imgtype => $format conversion\n");
 		return $this -> createQCOW2();
+	} elsif ($format eq "ec2") {
+		$kiwi -> info ("Starting $imgtype => $format conversion\n");
+		return $this -> createEC2();
 	} else {
 		$kiwi -> warning (
 			"Can't convert image type $imgtype to $format format"
@@ -307,7 +310,7 @@ sub createVMDK {
 # createQCOW2
 #------------------------------------------
 sub createQCOW2 {
-	my $this = shift;
+	my $this   = shift;
 	my $kiwi   = $this->{kiwi};
 	my $format = $this->{format};
 	my $source = $this->{image};
@@ -325,6 +328,89 @@ sub createQCOW2 {
 		return undef;
 	}
 	$kiwi -> done ();
+	return $target;
+}
+
+#==========================================
+# createEC2
+#------------------------------------------
+sub createEC2 {
+	my $this   = shift;
+	my $xml    = $this->{xml};
+	my $kiwi   = $this->{kiwi};
+	my $source = $this->{image};
+	my $format = $this->{format};
+	my $target = $source;
+	my $aminame= basename $source;
+	my $status;
+	my $result;
+	#==========================================
+	# Check AWS account information
+	#------------------------------------------
+	$kiwi -> info ("Creating $format image...");
+	$target =~ s/\.raw$/\.$format/;
+	$aminame=~ s/\.raw$/\.ami/;
+	my $arch = qxx ("uname -m"); chomp ( $arch );
+	my %type = %{$xml->getImageTypeAndAttributes()};
+	my %ec2  = $xml->getEc2Config();
+	if (! defined $ec2{AWSAccountNr}) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Missing AWS account number");
+		$kiwi -> failed ();
+		return undef;
+	}
+	if (! defined $ec2{EC2CertFile}) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Missing AWS user's PEM encoded RSA pubkey cert file");
+		$kiwi -> failed ();
+		return undef;
+	} elsif (! -f $ec2{EC2CertFile}) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("EC2 file: $ec2{EC2CertFile} does not exist");
+		$kiwi -> failed ();
+		return undef;
+	}
+	if (! defined $ec2{EC2PrivateKeyFile}) {
+		$kiwi -> failed ();
+		$kiwi -> error ("Missing AWS user's PEM encoded RSA private key file");
+		$kiwi -> failed ();
+		return undef;
+	} elsif (! -f $ec2{EC2PrivateKeyFile}) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("EC2 file: $ec2{EC2PrivateKeyFile} does not exist");
+		$kiwi -> failed ();
+		return undef;
+	}
+	if ($arch =~ /i.86/) {
+		$arch = "i386";
+	}
+	if (($arch ne "i386") && ($arch ne "x86_64")) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("Unsupport AWS EC2 architecture: $arch");
+		$kiwi -> failed ();
+		return undef;
+	}
+	#==========================================
+	# call ec2-bundle-image (Amazon toolkit)
+	#------------------------------------------
+	my $pk = $ec2{EC2PrivateKeyFile};
+	my $ca = $ec2{EC2CertFile};
+	my $nr = $ec2{AWSAccountNr};
+	my $fi = $source;
+	my $amiopts = "-i $fi -k $pk -c $ca -u $nr -p $aminame";
+	qxx ("mkdir -p $target 2>&1");
+	qxx ("rm -rf $target/* 2>&1");
+	$status = qxx (
+		"ec2-bundle-image $amiopts -d $target -r $arch 2>&1"
+	);
+	$result = $? >> 8;
+	if ($result != 0) {
+		$kiwi -> failed ();
+		$kiwi -> error  ("ec2-bundle-image: $status");
+		$kiwi -> failed ();
+		return undef;
+	}
+	$kiwi -> done();
 	return $target;
 }
 
