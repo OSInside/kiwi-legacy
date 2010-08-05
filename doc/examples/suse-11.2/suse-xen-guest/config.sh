@@ -48,6 +48,11 @@ baseSetRunlevel 5
 suseConfig
 
 #======================================
+# clone runlevel 3 to 4
+#--------------------------------------
+suseCloneRunlevel 4
+
+#======================================
 # Umount kernel filesystems
 #--------------------------------------
 baseCleanMount
