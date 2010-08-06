@@ -3163,6 +3163,7 @@ sub createCache {
 	my @CachePatterns      = @{$init->[1]};
 	my @CachePackages      = @{$init->[2]};
 	my $imageCacheDir      = $ImageCache;
+	my $imagePrepareDir    = $main::Prepare;
 	#==========================================
 	# undef ImageCache for recursive kiwi call
 	#------------------------------------------
@@ -3212,6 +3213,8 @@ sub createCache {
 		my $rpmopts= "'%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}\n'";
 		my $rpm    = "rpm --root $root";
 		qxx ("$rpm -qa --qf $rpmopts | grep -vE $ignore > $meta");
+		qxx ("rm -f $root/image/config.xml");
+		qxx ("rm -f $root/image/*.kiwi");
 		#==========================================
 		# Turn cache into clicfs file
 		#------------------------------------------

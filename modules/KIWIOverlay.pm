@@ -212,16 +212,22 @@ sub unionOverlay {
 	if (! $haveCow) {
 		qxx ("echo $this->{baseRO} > $rootRW/kiwi-root.cache");
 		qxx ("mkdir -p $rootRW/image");
-		$status = qxx ("cp $tmpdir/image/config.xml $rootRW/image 2>&1");
-		$result = $? >> 8;
-		if ($result != 0) {
-			$status = qxx ("cp $tmpdir/image/*.kiwi $rootRW/image 2>&1");
+		if ($main::Prepare) {
+			$status = qxx (
+				"cp $main::Prepare/image/config.xml $rootRW/image 2>&1"
+			);
 			$result = $? >> 8;
-		}
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error ("Failed to copy XML file: $status");
-			return undef;
+			if ($result != 0) {
+				$status = qxx (
+					"cp $main::Prepare/image/*.kiwi $rootRW/image 2>&1"
+				);
+				$result = $? >> 8;
+			}
+			if ($result != 0) {
+				$kiwi -> failed ();
+				$kiwi -> error ("Failed to copy XML file: $status");
+				return undef;
+			}
 		}
 	}
 	$this->{mount} = \@mount;
