@@ -8,7 +8,7 @@ image description must be created. The image description is
 represented by a directory which has to contain at least one
 file named \textbf{config.xml} or alternatively \textbf{*.kiwi}.
 A good start for such a description can be found in the examples
-provided in /usr/share/doc/packages/kiwi/examples.
+provided in \path{/usr/share/doc/packages/kiwi/examples}.
 
 \begin{figure}[h]
 \centering
@@ -47,7 +47,7 @@ of the later operating system.
       Similar to the autoyast approach yast also provides a boot time
       service called firstboot. Unfortunately there is no GUI available
       to setup the firstboot but a good documentation in
-      /usr/share/doc/packages/yast2-firstboot. Once you have 
+      \path{/usr/share/doc/packages/yast2-firstboot}. Once you have 
       created such a firstboot file in your image description directory KIWI
       will process on the file and setup your image as follows:
 
@@ -106,8 +106,8 @@ which describes information like the image name and type as well as
 the packages and patterns the image should consist of. The following
 information explains the basic structure of the XML document. When KIWI
 is called the XML structure is validated by a RelaxNG based schema.
-For details on attributes and values please refer to the schema 
-documentation file at /usr/share/doc/packages/ kiwi/kiwi.rng.html.
+For details on attributes and values please refer to the schema
+documentation file at \path{/usr/share/doc/packages/kiwi/kiwi.rng.html}.
 
 \subsection{image element}
 \begin{Command}{12cm}
@@ -137,9 +137,9 @@ attribute must not have any spaces in its name.
       a working image from this description. If the kiwi SVN
       revision is less than the specified value the
       process will exit. The currently used SVN revision can
-      be queried by calling kiwi $--$version
+      be queried by calling kiwi \option{version}
 \item The optional attribute id allows to set an identification
-      number which appears as file /etc/ImageID within the
+      number which appears as file \path{/etc/ImageID} within the
       image.
 \end{itemize}
 
@@ -222,7 +222,7 @@ distinquish between the sections via the \textbf{profiles} attribute. Data
 may also be shared between different profiles. Using profiles it is possible
 to, for example, configure specific preferences for OEM image generation. 
 Activation of a given <preferences> during image generation is triggered by
-the use of the $--$add-profile command line argument.
+the use of the \option{add-profile} command line argument.
 
 For each <preferences> block at least one \textbf{type} element must be
 defined. It is possible to specify multiple <type> elements in any 
@@ -241,7 +241,7 @@ values of the image attribute:
       attributes.
       
       A boot image should group the various supported kernels into profiles. 
-      If the user chooses not to us the profiles supplied by Kiwi it is
+      If the user chooses not to us the profiles supplied by KIWI it is
       required that one profile named \textbf{std} be created. This profile
       will be used if no other bootkernel is specified. Further it is 
       required to create a  profile named \textbf{default}. This profile is
@@ -255,7 +255,7 @@ values of the image attribute:
       definition of a system image. Us the attribute and value 
       \textbf{type="system"} of the <description> element to specify the
       creation of a system image. The values of the bootprofile and 
-      bootkernel attributes are used by Kiwi when generating the boot image.
+      bootkernel attributes are used by KIWI when generating the boot image.
 \item \textbf{image=''ec2''}\\
       Setting the image attribute value to ec2 causes the generation of
       an Amazon Machine Image (AMI) for the AWS (Amazon Web Services) 
@@ -291,7 +291,7 @@ values of the image attribute:
       setting. In addition specify the attributes \textbf{filesystem}, 
       and \textbf{boot=''oemboot/suse-*''} to control the filesystem used
       for the virtual and to specify the proper boot image. Using the optional
-      optional \textbf{format} attribute and setting the value to ''iso'' or 
+      \textbf{format} attribute and setting the value to ''iso'' or 
       ''usb'' will create self installing images suitable for optical media
       or a USB stick, respectively. Booting from the media will deploy
       the OEM preload image onto the selected storage device of the
@@ -302,7 +302,7 @@ values of the image attribute:
       of the image is performed using the appropriate \textbf{*config} child
       block.
 \item \textbf{image=''pxe''}\\
-      Creating a network boot image is supported by Kiwi with the image=pxe
+      Creating a network boot image is supported by KIWI with the image=pxe
       type. When specifying the creation of a netwoork boot image use the
       \textbf{filesystem} and \textbf{boot=''netboot/suse-*''} attributes 
       to specify the filesystem of the image and the proper boot image. To
@@ -343,7 +343,7 @@ values of the image attribute:
       qcow2. For the virtual disk image the optional \textbf{vga} attribute
       may be used to configure the kernel framebuffer device. Acceptable
       values can be found in the Linux kernel documentation for the
-      framebuffer device (Documentation/fb/vesafb.txt). Kiwi also supports
+      framebuffer device (Documentation/fb/vesafb.txt). KIWI also supports
       the selection of the booloader for the virtual disk according to
       the rules indicated for the USB system. Last but not least
       the virtual disk system may also be created with a LVM based layout by
@@ -365,12 +365,12 @@ which is a so called \textbf{prebuilt boot image}. To activate searching
 for an appropriate prebuilt boot image the type section also provides the
 attribute \textbf{checkprebuilt=''true|false''}. If specified kiwi will
 search for a prebuilt boot image in a directory named
-\textit{/usr/share/kiwi/image/*boot/*-prebuilt}. Example: If the boot
+\path{/usr/share/kiwi/image/*boot/*-prebuilt}. Example: If the boot
 attribute was set to isoboot/suse-10.3 and checkprebuilt is set to true
 kiwi will search the prebuilt boot image in
-/usr/share/kiwi/image/isoboot/suse-10.3-prebuilt. The directory kiwi
+\path{/usr/share/kiwi/image/isoboot/suse-10.3-prebuilt}. The directory kiwi
 searches for the prebuilt boot images can also be specified at the
-commandline with the \textbf{$--$prebuiltbootimage} parameter.
+commandline with the \option{prebuiltbootimage} parameter.
 
 Within the preferences section there are the following optional
 attributes:
@@ -384,19 +384,19 @@ attributes:
       Specifies whether RPM should be called with --force
 \item \textbf{keytable}\\
       Specifies the name of the console keymap to use. The value corresponds
-      to a map file in /usr/share/kbd/keymaps. The KEYTABLE variable in
-      /etc/sysconfig/keyboard file is set according to the keyboard
+      to a map file in \path{/usr/share/kbd/keymaps}. The KEYTABLE variable in
+      \path{/etc/sysconfig/keyboard} file is set according to the keyboard
       mapping.
 \item \textbf{timezone}\\
       Specifies the time zone. Available time zones are located in the
-      /usr/share/zoneinfo directory. Specify the attribute value relative to
-      /usr/share/zoneinfo. For example, specify Europe/Berlin for
-      /usr/share/zoneinfo/Europe/Berlin. KIWI uses this value to configure
-      the timezone in /etc/localtime for the image
+      \path{/usr/share/zoneinfo} directory. Specify the attribute value relative to
+      \path{/usr/share/zoneinfo}. For example, specify Europe/Berlin for
+      \path{/usr/share/zoneinfo/Europe/Berlin}. KIWI uses this value to configure
+      the timezone in \path{/etc/localtime} for the image
 \item \textbf{locale}\\
       Specifies the name of the UTF-8 locale to use, which defines the
       contents of the RC\_LANG system environment variable in
-      /etc/sysconfig/language. Please note only UTF-8 locales are supported
+      \path{/etc/sysconfig/language}. Please note only UTF-8 locales are supported
       here which also means that the encoding must \textbf{not} be part of
       the locale information. The kiwi schema validates the locale string
       according to the following pattern:\\
@@ -513,7 +513,7 @@ supported child elements:
        This value is represented by the OEM\_REBOOT variable in 
        config.oempartition
 	\item \textbf{<oem-recovery>true|false</oem-recovery>}\\
-      If this element is set to true (default value is false), Kiwi will
+      If this element is set to true (default value is false), KIWI will
       create a recovery archivefrom the prepared root tree. The archive will 
       appear as \textit{/recovery.tar.bz2} in the image file. During 
       first boot of the image a single recovery partition will be
@@ -534,7 +534,7 @@ supported child elements:
 	\item \textbf{<oem-swapsize>number in MB</oem-swapsize>}\\
        Set the size of the swap partition. If a swpa partition is to be
        created and the size of the swap partition is not specified with this
-       optional element, Kiwi will calculate the size of the swpar partition
+       optional element, KIWI will calculate the size of the swpar partition
        and create a swap partition equal to two times the RAM installed on
        the system at initial boot time. This value is represented by
        the OEM\_SWAPSIZE variable in config.oempartition
@@ -548,10 +548,10 @@ supported child elements:
     if the \textbf{image=} attribute of the \textbf{type} element is set to
     \textbf{pxe}. In order to use a PXE image it is necessary to create a
     network boot infrastructure. Creation of the network boot infrastructure
-    is simplified by the Kiwi provided package \textbf{kiwi-pxeboot}. This
-    package configures the basic PXE boot enviroment as expected by Kiwi pxe
+    is simplified by the KIWI provided package \textbf{kiwi-pxeboot}. This
+    package configures the basic PXE boot enviroment as expected by KIWI pxe
     images. The kiwi-pxeboot package creates a directory structure in
-    /srv/tftpboot. Files created by the Kiwi create step need to be copied
+    /srv/tftpboot. Files created by the KIWI create step need to be copied
     to the /srv/tftpboot directory structure. For additional details about
     the PXE image please refere to the PXE Image chapter later in this
     document.
@@ -560,7 +560,7 @@ supported child elements:
     provided about the client setup. This information, such as the image
     to be used or the partitioning, is contained in a file with the name
     config.<MAC-Address> in the directory /srv/tftpboot/KIWI. The content
-    of this file is created automatically by Kiwi if the pexedeploy section
+    of this file is created automatically by KIWI if the pexedeploy section
     is provided in the image description. A pxedeploy section is outlined
     below:
 	
@@ -586,22 +586,22 @@ supported child elements:
 	\item The \textbf{server} attribute is used to specify the IP address
       of the PXE server. The \textbf{blocksize} attributes specifies the
       blocksize for the image download. Other protocols are supported by
-      Kiwi but require the \textbf{kiwiserver} and \textbf{kiwiservertype}
+      KIWI but require the \textbf{kiwiserver} and \textbf{kiwiservertype}
       kernel parameters to be set when the client boots.
 	\item The value of the optional timeout element specifies the grub
-      timeout in seconds to be used when the Kiwi initrd configures and
+      timeout in seconds to be used when the KIWI initrd configures and
       installs the grub boot loader on the client machine after the first
       deployment to allow standalone boot.
 	\item Passing kernel parameters is possible with the use of the
       optional kernelcmdline attribute in the <type> section. The value
       of this attribute is a string specifying the settings to be
-      passed to the kernel by the grub bootloader. The Kiwi initrd
+      passed to the kernel by the grub bootloader. The KIWI initrd
       includes these kernel options when installing grub for standalone boot
 	\item The optional \textbf{kernel} and \textbf{initrd} elements are
       used to specify the file names for the kernel and initrd on the boot
       server respectively. When using a special boot method not supported
       by the distribution's standard mkinitrd, it is imperative that the
-      Kiwi initrd remains on the PXE server and also be used for local boot.
+      KIWI initrd remains on the PXE server and also be used for local boot.
       If the configured image uses the \textbf{split} type or the pexedeploy
       section includes any union information the kernel and initrd elements
       must be used.
@@ -620,11 +620,11 @@ supported child elements:
       the value for the mount point of the partition. The optional boolean
       \textbf{target} attribute identifies the partion as the system image
       target partition.
-      Kiwi always generates the swap partition as the first partition of
+      KIWI always generates the swap partition as the first partition of
       the netboot boot image. By default the second partition is used for
       the system image. Use the boolean target attribute to change this
       behavior. Providing the value \textbf{image} for the size attribute
-      triggers Kiwi into calculating the required size for this partition.
+      triggers KIWI into calculating the required size for this partition.
       The calculated size is sufficient for the created image.
 	\item If the system image is based on a read-only filesystem such as
       squashfs and should be mounted in read-write mode use the optional
@@ -654,15 +654,15 @@ supported child elements:
     to the size of the generated image or not.
 
     In the event of a size specification that is too small for the
-    generated image, Kiwi will expand the size automatically unless the
+    generated image, KIWI will expand the size automatically unless the
     image size exceeds the specified size by 100 MB or more. In this case
-    Kiwi will generate an error and exit.
+    KIWI will generate an error and exit.
 
-    Should the given size exceed the necessary size for the image Kiwi will
+    Should the given size exceed the necessary size for the image KIWI will
     not alter the image size as the free space might be required for proper
     execution of components within the image.
 
-    If the size element is not used Kiwi will create an image with
+    If the size element is not used KIWI will create an image with
     containing approxiamtely 30\% free space.
     
      
@@ -678,11 +678,11 @@ supported child elements:
     should be persentently writable or temporarily. Note that for ISO images
     only temporary write access is possible.
 
-    When processing the provided configuration Kiwi distinguishes between
+    When processing the provided configuration KIWI distinguishes between
     directories and files. For example, providing ''/etc'' as the value of
-    the \textbf{name} attribute indicates that the /etc directory should be
+    the \textbf{name} attribute indicates that the \path{/etc} directory should be
     writable. However, this does not include any of the files or 
-    sub-directories within /etc. The content of /etc is populated as 
+    sub-directories within \path{/etc}. The content of \path{/etc} is populated as 
     symbolic links to the read-only files. The advantage of setting only a
     directory to read-write access is that any newly created files will be
     stored on the disk instead of in tmpfs. Creating read-write access to a 
@@ -713,7 +713,7 @@ supported child elements:
 \item \textbf{machine}\\
     The optional machine section serves to specify information
     about a VM guest machine. Using the data provided in this section,
-    Kiwi will create a guest configuration file required to run the
+    KIWI will create a guest configuration file required to run the
     image on the target machine.
 
     If the target is a VMware virtual machine indicated by the
@@ -814,9 +814,9 @@ The attributes home, id, name, pwd, realname, and shell specify the created
 users home directory, the user name, the user's password, the user's 
 real name, and the user's login shell, respectively. By default the value
 of the password attribute is expected to be an encrypted string. An
-encrypted password can be created using the kiwi $--$createpassword tool. It
+encrypted password can be created using the kiwi \option{createpassword} tool. It
 is also possible to specify the password as a non encrypted string by using
-the pwdformat attribute and setting it's value to ``plain''. Kiwi will then
+the pwdformat attribute and setting it's value to ``plain''. KIWI will then
 encrypt the password prior to the user being added to the system.
 
 All specified users and groups will be created if they do not already exist.

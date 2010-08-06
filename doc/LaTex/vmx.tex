@@ -8,7 +8,7 @@ systems like QEMU or VMware. The image is a file containing the
 system represented by the configured packages in config.xml as well
 as partition data and bootloader information. The size of
 this virtual disk can be specified by using the <size> element
-in the config.xml file or by adding the $--$bootvm-disksize command
+in the config.xml file or by adding the \option{bootvm-disksize} command
 line argument.
 
 \section{Building the suse-vm-guest example}
@@ -50,11 +50,11 @@ qemu suse-11.2-vm-guest.i686-1.1.2.raw -m 256
 
 \section{Flavours}
 
-Kiwi always generates a file in the .raw format. The .raw file is a disk
+KIWI always generates a file in the .raw format. The .raw file is a disk
 image with a structure equivalent to the structure of a physical hard disk. 
 Individual virtualization systems have specific formats to facilitate
 improved I/O performance to the virtual disk, represented by the image file,
-or additional specified virtual hard disk files. Kiwi will generate a 
+or additional specified virtual hard disk files. KIWI will generate a 
 specific format when the format attribute of the type element is specified.
 
 
@@ -101,7 +101,7 @@ config.xml snippet provides general guidance on the elements in config.xml.
 \end{verbatim}
 \end{Command}
 
-Given the specification above Kiwi will create a VMware guest
+Given the specification above KIWI will create a VMware guest
 configuration specifying the availability of 512 MB of RAM and an IDE 
 disk controller interface for the VM guest. For aditional information
 about the configuration settings please refere to the 
@@ -129,16 +129,16 @@ for additional details.
 
 \subsection{LVM support}
 
-Kiwi also provides support for LVM (Logical Volume Management). In this
+KIWI also provides support for LVM (Logical Volume Management). In this
 mode the disk partition table will include one lvm partition and one
-standard ext2 boot partition. Kiwi creates the kiwiVG volume group and
+standard ext2 boot partition. KIWI creates the kiwiVG volume group and
 adds logical volumes as they are needed and configured according to the
 image type and filesystem. After boot of the system the user has full
 control over the volume group and is free to change/resize/increas the
 group and the volumes inside. Support for LVM has been added for all
 image types which are disk based. This includes vmx,oem and usb.
 In order to use LVM for the vmx type just add the \verb+--lvm+ option
-as part of the Kiwi create step or add the attribute \textbf{lvm=''true''}
+as part of the KIWI create step or add the attribute \textbf{lvm=''true''}
 as part of the \textbf{type} section in your config.xml file.
 
 \begin{Command}{12cm}
