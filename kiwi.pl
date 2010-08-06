@@ -3035,7 +3035,7 @@ sub selectCache {
 		my $name = $node -> getAttribute ("name");
 		my $arch = $node -> getAttribute ("arch");
 		my $pver = $node -> getAttribute ("version");
-		$plist{"$name-$pver"} = $name;
+		$plist{"$name-$pver.$arch"} = $name;
 	}
 	my $pcnt = keys %plist;
 	my @file = ();
@@ -3209,7 +3209,7 @@ sub createCache {
 		my $meta   = $main::RootTree.".cache";
 		my $root   = $main::RootTree;
 		my $ignore = "'gpg-pubkey|bundle-lang'";
-		my $rpmopts= "'%{NAME}-%{VERSION}-%{RELEASE}\n'";
+		my $rpmopts= "'%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}\n'";
 		my $rpm    = "rpm --root $root";
 		qxx ("$rpm -qa --qf $rpmopts | grep -vE $ignore > $meta");
 		#==========================================
