@@ -123,6 +123,7 @@ sub unionOverlay {
 	my %fsattr = main::checkFileSystem ($baseRO);
 	my $type   = $fsattr{type};
 	my @mount  = ();
+	my $haveCow= 0;
 	my $tmpdir;
 	my $cowdev;
 	my $result;
@@ -154,17 +155,21 @@ sub unionOverlay {
 		return undef;
 	}
 	$this->{tmpdir} = $tmpdir;
-	#==========================================
-	# Create tmp COW file for write operations
-	#------------------------------------------
-	$status = qxx ("touch $rootRW/kiwi-root.cow 2>&1"); chomp $cowdev;
-	$result = $? >> 8;
-	if ($result != 0) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Failed to create overlay COW file: $status");
-		return undef;
-	}
 	$cowdev = "$rootRW/kiwi-root.cow";
+	if (! -f $cowdev) {
+		#==========================================
+		# Create tmp COW file for write operations
+		#------------------------------------------
+		$status = qxx ("cat < /dev/null > $cowdev 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Failed to create overlay COW file: $status");
+			return undef;
+		}
+	} else {
+		$haveCow=1;
+	}
 	$this->{cowdev} = $cowdev;
 	#==========================================
 	# Mount the clicfs (free space = 5GB)
@@ -204,6 +209,21 @@ sub unionOverlay {
 		return undef;
 	}
 	push @mount,"umount $tmpdir";
+	if (! $haveCow) {
+		qxx ("echo $this->{baseRO} > $rootRW/kiwi-root.cache");
+		qxx ("mkdir -p $rootRW/image");
+		$status = qxx ("cp $tmpdir/image/config.xml $rootRW/image 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$status = qxx ("cp $tmpdir/image/*.kiwi $rootRW/image 2>&1");
+			$result = $? >> 8;
+		}
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error ("Failed to copy XML file: $status");
+			return undef;
+		}
+	}
 	$this->{mount} = \@mount;
 	return $tmpdir;
 }

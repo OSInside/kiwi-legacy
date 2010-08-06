@@ -366,6 +366,7 @@ sub main {
 		$main::Create = $RootTree;
 		main::main();
 	}
+
 	#========================================
 	# Prepare image and build chroot system
 	#----------------------------------------
@@ -384,242 +385,16 @@ sub main {
 		}
 		my %type = %{$xml->getImageTypeAndAttributes()};
 		#==========================================
-		# Setup image cache if requested (1)
-		#------------------------------------------
-		my $CacheDistro;   # cache base name
-		my @CachePatterns; # image patterns building the cache
-		my @CachePackages; # image packages building the cache
-		my $CacheScan;     # image scan, for cache package check
-		my %Cache;         # valid caches
-		if ($ImageCache) {
-			$kiwi -> info ("Setting up image pattern cache\n");
-			#==========================================
-			# Check if we have boot type for the cname
-			#------------------------------------------
-			if ($type{boot} =~ /.*\/(.*)/) {
-				$CacheDistro = $1;
-			} else {
-				$kiwi -> warning ("Can't setup cache without a boot type");
-				$kiwi -> skipped ();
-				undef $ImageCache;
-			}
-			#==========================================
-			# Check for cachable patterns
-			#------------------------------------------
-			my @sections = ("bootstrap","image");
-			foreach my $section (@sections) {
-				my @list = $xml -> getList ($section);
-				foreach my $pac (@list) {
-					if ($pac =~ /^pattern:(.*)/) {
-						push @CachePatterns,$1;
-					} elsif ($pac =~ /^product:(.*)/) {
-						# no cache for products at the moment
-					} else {
-						push @CachePackages,$pac;
-					}
-				}
-			}
-			if (! @CachePatterns) {
-				$kiwi -> warning ("No cachable patterns used in this image");
-				$kiwi -> skipped ();
-				undef $ImageCache;
-			}
-			#==========================================
-			# Create image package list
-			#------------------------------------------
-			$listXMLInfo = $Prepare;
-			@listXMLInfoSelection = ("packages");
-			$CacheScan = listXMLInfo ("internal");
-			if (! $CacheScan) {
-				undef $ImageCache;
-			}
-			undef $listXMLInfo;
-			undef @listXMLInfoSelection;
-		}
-		#==========================================
-		# Setup image cache if requested (2)
+		# Setup image cache if requested
 		#------------------------------------------
 		if ($ImageCache) {
-			my $haveCache = 0;
-			my %plist = ();
-			#==========================================
-			# Search for a suitable cache
-			#------------------------------------------
-			my @packages = $CacheScan -> getElementsByTagName ("package");
-			foreach my $node (@packages) {
-				my $name = $node -> getAttribute ("name");
-				my $arch = $node -> getAttribute ("arch");
-				my $pver = $node -> getAttribute ("version");
-				$plist{"$name-$pver"} = $name;
-			}
-			my $pcnt = keys %plist;
-			my @file = ();
-			#==========================================
-			# setup cache file names...
-			#------------------------------------------
-			if (@CachePackages) {
-				my $cstr = $xml -> getImageName();
-				my $cdir = $ImageCache."/".$CacheDistro."-".$cstr.".clicfs";
-				push @file,$cdir;
-			}
-			foreach my $pattern (@CachePatterns) {
-				my $cdir = $ImageCache."/".$CacheDistro."-".$pattern.".clicfs";
-				push @file,$cdir;
-			}
-			#==========================================
-			# walk through cache files
-			#------------------------------------------
-			foreach my $clic (@file) {
-				my $meta = $clic;
-				$meta =~ s/\.clicfs$/\.cache/;
-				#==========================================
-				# check cache files
-				#------------------------------------------
-				my $CACHE_FD;
-				if (! open ($CACHE_FD,$meta)) {
-					next;
-				}
-				#==========================================
-				# read cache file
-				#------------------------------------------
-				my @cpac = <$CACHE_FD>; chomp @cpac;
-				my $ccnt = @cpac; close $CACHE_FD;
-				$kiwi -> loginfo (
-					"Cache: $meta $ccnt packages, Image: $pcnt packages\n"
-				);
-				#==========================================
-				# check validity of cache
-				#------------------------------------------
-				my $invalid = 0;
-				if ($ccnt > $pcnt) {
-					# cache is bigger than image solved list
-					$invalid = 1;
-				} else {
-					foreach my $p (@cpac) {
-						if (! defined $plist{$p}) {
-							# cache package not part of image solved list
-							$kiwi -> loginfo (
-								"Cache: $meta $p not in image list\n"
-							); 
-							$invalid = 1; last; 
-						}
-					}
-				}
-				#==========================================
-				# store valid cache
-				#------------------------------------------
-				if (! $invalid) {
-					$Cache{$clic} = int (100 * ($ccnt / $pcnt));
-					$haveCache = 1;
+			my $cacheInit = initializeCache($xml,\%type);
+			if (! selectCache ($xml,$cacheInit)) {
+				if (createCache ($xml,$cacheInit)) {
+					selectCache ($xml,$cacheInit);
 				}
 			}
-			#==========================================
-			# Use/select cache if possible
-			#------------------------------------------
-			if ($haveCache) {
-				my $max = 0;
-				#==========================================
-				# Find best match
-				#------------------------------------------
-				foreach my $clic (keys %Cache) {
-					if ($Cache{$clic} > $max) {
-						$max = $Cache{$clic};
-					}
-				}
-				#==========================================
-				# Setup overlay for best match
-				#------------------------------------------
-				foreach my $clic (keys %Cache) {
-					if ($Cache{$clic} == $max) {
-						$kiwi -> info ("Using cache overlay [ $max% ]: $clic");
-						$BaseRoot = $clic;
-						$BaseRootMode = "union";
-						$kiwi -> done();
-						last;
-					}
-				}
-			}
-			#==========================================
-			# Build cache if no cache was found
-			#------------------------------------------
-			if (! $haveCache) {
-				qxx ("mkdir -p $ImageCache 2>&1");
-				my $backupPrepare      = $main::Prepare;
-				my $backupRootTree     = $main::RootTree;
-				my $backupForceNewRoot = $main::ForceNewRoot;
-				my @backupPatterns     = @main::AddPattern;
-				my @backupPackages     = @main::AddPackage;
-				my $imageCacheDir      = $ImageCache;
-				undef $ImageCache;
-				if (! defined $LogFile) {
-					$kiwi -> setRootLog (
-						$main::RootTree."."."$$".".screenrc.log"
-					);
-				}
-				if (@CachePackages) {
-					push @CachePatterns,"package-cache"
-				}
-				foreach my $pattern (@CachePatterns) {
-					if ($pattern eq "package-cache") {
-						$pattern = $xml -> getImageName();
-						push @CachePackages,$xml->getPackageManager();
-						undef @main::AddPattern;
-						@main::AddPackage = @CachePackages;
-					} else {
-						@main::AddPackage = $xml->getPackageManager();
-						@main::AddPattern = $pattern;
-					}
-					$kiwi -> info (
-						"--> Building cache file for pattern: $pattern\n"
-					);
-					$main::Prepare      = $BasePath."/modules";
-					$main::RootTree     = $imageCacheDir."/";
-					$main::RootTree    .= $CacheDistro."-".$pattern;
-					$main::Survive      = "yes";
-					$main::ForceNewRoot = 1;
-					#==========================================
-					# Prepare new cache tree
-					#------------------------------------------
-					if (! defined main::main()) {
-						$main::Survive = "default";
-						my $code = kiwiExit (1); return $code;
-					}
-					#==========================================
-					# Create cache meta data
-					#------------------------------------------
-					my $meta   = $main::RootTree.".cache";
-					my $root   = $main::RootTree;
-					my $ignore = "'gpg-pubkey|bundle-lang'";
-					my $rpmopts= "'%{NAME}-%{VERSION}-%{RELEASE}\n'";
-					my $rpm    = "rpm --root $root";
-					qxx ("$rpm -qa --qf $rpmopts | grep -vE $ignore > $meta");
-					#==========================================
-					# Turn cache into clicfs file
-					#------------------------------------------
-					$kiwi -> info (
-						"--> Building clicfs cache for pattern: $pattern\n"
-					);
-					my $image = new KIWIImage (
-						$kiwi,$xml,$root,$imageCacheDir,undef,"/base-system"
-					);
-					if (! defined $image) {
-						my $code = kiwiExit (1); return $code;
-					}
-					if (! $image -> createImageClicFS ()) {
-						my $code = kiwiExit (1); return $code;
-					}
-					my $name = $imageCacheDir."/".$image -> buildImageName();
-					qxx ("mv $name $main::RootTree.clicfs");
-					qxx ("rm $name.clicfs $name.md5");
-					qxx ("rm -rf $main::RootTree");
-				}
-				$main::Prepare      = $backupPrepare;
-				$main::ForceNewRoot = $backupForceNewRoot;
-				@main::AddPattern   = @backupPatterns;
-				@main::AddPackage   = @backupPackages;
-				$main::RootTree     = $backupRootTree;
-				$main::Survive      = "default";
-			}
+			undef $ImageCache;
 		}
 		#==========================================
 		# Check for bootprofile in xml descr.
@@ -833,6 +608,100 @@ sub main {
 			qxx ("rm -f $Create/recovery.*");
 		}
 		#==========================================
+		# Check for bootprofile in xml descr
+		#------------------------------------------
+		my $xml;
+		if (! @Profiles) {
+			$kiwi -> info ("Reading image description [Create]...\n");
+			$xml = new KIWIXML (
+				$kiwi,"$Create/image",\%ForeignRepo,$SetImageType
+			);
+			if (! defined $xml) {
+				my $code = kiwiExit (1); return $code;
+			}
+			my %type = %{$xml->getImageTypeAndAttributes()};
+			if (($type{"type"} eq "cpio") && ($type{bootprofile})) {
+				@Profiles = split (/,/,$type{bootprofile});
+				if (! $xml -> checkProfiles (\@Profiles)) {
+					my $code = kiwiExit (1); return $code;
+				}
+			}
+		}
+		if (! defined $xml) {
+			$kiwi -> info ("Reading image description [Create]...\n");
+			$xml = new KIWIXML (
+				$kiwi,"$Create/image",undef,$SetImageType,\@Profiles
+			);
+			if (! defined $xml) {
+				my $code = kiwiExit (1); return $code;
+			}
+		}
+		#==========================================
+		# Check for packages updates if needed
+		#------------------------------------------
+		my @addonList;   # install this packages
+		my @deleteList;  # remove this packages
+		my @replAdd;
+		my @replDel;
+		$xml -> getBaseList();
+		@replAdd = $xml -> getReplacePackageAddList();
+		@replDel = $xml -> getReplacePackageDelList();
+		if (@replAdd) {
+			push @addonList,@replAdd;
+		}
+		if (@replDel) {
+			push @deleteList,@replDel;
+		}
+		$xml -> getInstallList();
+		@replAdd = $xml -> getReplacePackageAddList();
+		@replDel = $xml -> getReplacePackageDelList();
+		if (@replAdd) {
+			push @addonList,@replAdd;
+		}
+		if (@replDel) {
+			push @deleteList,@replDel;
+		}
+		$xml -> getTypeList();
+		@replAdd = $xml -> getReplacePackageAddList();
+		@replDel = $xml -> getReplacePackageDelList();
+		if (@replAdd) {
+			push @addonList,@replAdd;
+		}
+		if (@replDel) {
+			push @deleteList,@replDel;
+		}
+		if (@addonList) {
+			my %uniq;
+			foreach my $item (@addonList) { $uniq{$item} = $item; }
+			@addonList = keys %uniq;
+		}
+		if (@deleteList) {
+			my %uniq;
+			foreach my $item (@deleteList) { $uniq{$item} = $item; }
+			@deleteList = keys %uniq;
+		}
+		if ((@addonList) || (@deleteList)) {
+			$kiwi -> info ("Image update:");
+			if (@addonList) {
+				$kiwi -> info ("--> Install/Update: @addonList\n");
+			}
+			if (@deleteList) {
+				$kiwi -> info ("--> Remove: @deleteList\n");
+			}
+			$main::Survive = "yes";
+			$main::Upgrade = $Create;
+			@main::AddPackage    = @addonList;
+			@main::RemovePackage = @deleteList;
+			undef $main::Create;
+			if (! defined main::main()) {
+				$main::Survive = "default";
+				my $code = kiwiExit (1); return $code;
+			}
+			$main::Survive = "default";
+			$main::Create  = $main::Upgrade;
+			undef $main::Upgrade;
+		}
+		#==========================================
 		# Check for overlay requirements
 		#------------------------------------------
 		my $overlay;
@@ -851,41 +720,6 @@ sub main {
 				if (! defined $Create) {
 					my $code = kiwiExit (1); return $code;
 				}
-			}
-		}
-		#==========================================
-		# Check for bootprofile in xml descr
-		#------------------------------------------
-		my $xml;
-		if (! @Profiles) {
-			$kiwi -> info ("Reading image description [Create]...\n");
-			$xml = new KIWIXML (
-				$kiwi,"$Create/image",\%ForeignRepo,$SetImageType
-			);
-			if (! defined $xml) {
-				if (defined $BaseRoot) {
-					$overlay -> resetOverlay();
-				}
-				my $code = kiwiExit (1); return $code;
-			}
-			my %type = %{$xml->getImageTypeAndAttributes()};
-			if (($type{"type"} eq "cpio") && ($type{bootprofile})) {
-				@Profiles = split (/,/,$type{bootprofile});
-				if (! $xml -> checkProfiles (\@Profiles)) {
-					my $code = kiwiExit (1); return $code;
-				}
-			}
-		}
-		if (! defined $xml) {
-			$kiwi -> info ("Reading image description [Create]...\n");
-			$xml = new KIWIXML (
-				$kiwi,"$Create/image",undef,$SetImageType,\@Profiles
-			);
-			if (! defined $xml) {
-				if (defined $BaseRoot) {
-					$overlay -> resetOverlay();
-				}
-				my $code = kiwiExit (1); return $code;
 			}
 		}
 		#==========================================
@@ -977,74 +811,6 @@ sub main {
 				$overlay -> resetOverlay();
 			}
 			my $code = kiwiExit (1); return $code;
-		}
-		#==========================================
-		# Check for packages updates if needed
-		#------------------------------------------
-		my @addonList;   # install this packages
-		my @deleteList;  # remove this packages
-		my @replAdd;
-		my @replDel;
-		$xml -> getBaseList();
-		@replAdd = $xml -> getReplacePackageAddList();
-		@replDel = $xml -> getReplacePackageDelList();
-		if (@replAdd) {
-			push @addonList,@replAdd;
-		}
-		if (@replDel) {
-			push @deleteList,@replDel;
-		}
-		$xml -> getInstallList();
-		@replAdd = $xml -> getReplacePackageAddList();
-		@replDel = $xml -> getReplacePackageDelList();
-		if (@replAdd) {
-			push @addonList,@replAdd;
-		}
-		if (@replDel) {
-			push @deleteList,@replDel;
-		}
-		$xml -> getTypeList();
-		@replAdd = $xml -> getReplacePackageAddList();
-		@replDel = $xml -> getReplacePackageDelList();
-		if (@replAdd) {
-			push @addonList,@replAdd;
-		}
-		if (@replDel) {
-			push @deleteList,@replDel;
-		}
-		if (@addonList) {
-			my %uniq;
-			foreach my $item (@addonList) { $uniq{$item} = $item; }
-			@addonList = keys %uniq;
-		}
-		if (@deleteList) {
-			my %uniq;
-			foreach my $item (@deleteList) { $uniq{$item} = $item; }
-			@deleteList = keys %uniq;
-		}
-		if ((@addonList) || (@deleteList)) {
-			$kiwi -> info ("Image update:");
-			if (@addonList) {
-				$kiwi -> info ("--> Install/Update: @addonList\n");
-			}
-			if (@deleteList) {
-				$kiwi -> info ("--> Remove: @deleteList\n");
-			}
-			$main::Survive = "yes";
-			$main::Upgrade = $Create;
-			@main::AddPackage    = @addonList;
-			@main::RemovePackage = @deleteList;
-			undef $main::Create;
-			if (! defined main::main()) {
-				$main::Survive = "default";
-				if (defined $BaseRoot) {
-					$overlay -> resetOverlay();
-				}
-				my $code = kiwiExit (1); return $code;
-			}
-			$main::Survive = "default";
-			$main::Create  = $main::Upgrade;
-			undef $main::Upgrade;
 		}
 		#==========================================
 		# Create recovery archive if specified
@@ -1797,6 +1563,11 @@ sub init {
 	}
 	if ((defined $Build) && (! defined $Destination)) {
 		$kiwi -> error  ("No destination directory specified");
+		$kiwi -> failed ();
+		my $code = kiwiExit (1); return $code;
+	}
+	if ((defined $BaseRoot) && (defined $ImageCache)) {
+		$kiwi -> error ("Can't use base-root together with image caching");
 		$kiwi -> failed ();
 		my $code = kiwiExit (1); return $code;
 	}
@@ -3167,6 +2938,302 @@ sub createInstSource {
 	$kiwi->info( "KIWICollect completed successfully." );
 	$kiwi->done();
 	kiwiExit (0);
+}
+
+#==========================================
+# initializeCache
+#------------------------------------------
+sub initializeCache {
+	$kiwi -> info ("Initialize image cache...\n");
+	#==========================================
+	# Variable setup
+	#------------------------------------------
+	my $xml  = $_[0];
+	my %type = %{$_[1]};
+	#==========================================
+	# Variable setup
+	#------------------------------------------
+	my $CacheDistro;   # cache base name
+	my @CachePatterns; # image patterns building the cache
+	my @CachePackages; # image packages building the cache
+	my $CacheScan;     # image scan, for cache package check
+	#==========================================
+	# Check boot type of the image
+	#------------------------------------------
+	if ($type{boot} =~ /.*\/(.*)/) {
+		$CacheDistro = $1;
+	} else {
+		$kiwi -> warning ("Can't setup cache without a boot type");
+		$kiwi -> skipped ();
+		undef $ImageCache;
+		return undef;
+	}
+	#==========================================
+	# Check for cachable patterns
+	#------------------------------------------
+	my @sections = ("bootstrap","image");
+	foreach my $section (@sections) {
+		my @list = $xml -> getList ($section);
+		foreach my $pac (@list) {
+			if ($pac =~ /^pattern:(.*)/) {
+				push @CachePatterns,$1;
+			} elsif ($pac =~ /^product:(.*)/) {
+				# no cache for products at the moment
+			} else {
+				push @CachePackages,$pac;
+			}
+		}
+	}
+	if ((! @CachePatterns) && (! @CachePackages)) {
+		$kiwi -> warning ("No cachable patterns/packages in this image");
+		$kiwi -> skipped ();
+		undef $ImageCache;
+		return undef;
+	}
+	#==========================================
+	# Create image package list
+	#------------------------------------------
+	$listXMLInfo = $Prepare;
+	@listXMLInfoSelection = ("packages");
+	$CacheScan = listXMLInfo ("internal");
+	if (! $CacheScan) {
+		undef $ImageCache;
+		return undef;
+	}
+	undef $listXMLInfo;
+	undef @listXMLInfoSelection;
+	#==========================================
+	# Return result list
+	#------------------------------------------
+	return [
+		$CacheDistro,\@CachePatterns,
+		\@CachePackages,$CacheScan
+	];
+}
+
+#==========================================
+# selectCache
+#------------------------------------------
+sub selectCache {
+	my $xml  = $_[0];
+	my $init = $_[1];
+	if ((! $init) || (! $ImageCache)) {
+		return undef;
+	}
+	my $CacheDistro   = $init->[0];
+	my @CachePatterns = @{$init->[1]};
+	my @CachePackages = @{$init->[2]};
+	my $CacheScan     = $init->[3];
+	my $haveCache     = 0;
+	my %plist         = ();
+	my %Cache         = ();
+	#==========================================
+	# Search for a suitable cache
+	#------------------------------------------
+	my @packages = $CacheScan -> getElementsByTagName ("package");
+	foreach my $node (@packages) {
+		my $name = $node -> getAttribute ("name");
+		my $arch = $node -> getAttribute ("arch");
+		my $pver = $node -> getAttribute ("version");
+		$plist{"$name-$pver"} = $name;
+	}
+	my $pcnt = keys %plist;
+	my @file = ();
+	#==========================================
+	# setup cache file names...
+	#------------------------------------------
+	if (@CachePackages) {
+		my $cstr = $xml -> getImageName();
+		my $cdir = $ImageCache."/".$CacheDistro."-".$cstr.".clicfs";
+		push @file,$cdir;
+	}
+	foreach my $pattern (@CachePatterns) {
+		my $cdir = $ImageCache."/".$CacheDistro."-".$pattern.".clicfs";
+		push @file,$cdir;
+	}
+	#==========================================
+	# walk through cache files
+	#------------------------------------------
+	foreach my $clic (@file) {
+		my $meta = $clic;
+		$meta =~ s/\.clicfs$/\.cache/;
+		#==========================================
+		# check cache files
+		#------------------------------------------
+		my $CACHE_FD;
+		if (! open ($CACHE_FD,$meta)) {
+			next;
+		}
+		#==========================================
+		# read cache file
+		#------------------------------------------
+		my @cpac = <$CACHE_FD>; chomp @cpac;
+		my $ccnt = @cpac; close $CACHE_FD;
+		$kiwi -> loginfo (
+			"Cache: $meta $ccnt packages, Image: $pcnt packages\n"
+		);
+		#==========================================
+		# check validity of cache
+		#------------------------------------------
+		my $invalid = 0;
+		if ($ccnt > $pcnt) {
+			# cache is bigger than image solved list
+			$invalid = 1;
+		} else {
+			foreach my $p (@cpac) {
+				if (! defined $plist{$p}) {
+					# cache package not part of image solved list
+					$kiwi -> loginfo (
+						"Cache: $meta $p not in image list\n"
+					);
+					$invalid = 1; last;
+				}
+			}
+		}
+		#==========================================
+		# store valid cache
+		#------------------------------------------
+		if (! $invalid) {
+			$Cache{$clic} = int (100 * ($ccnt / $pcnt));
+			$haveCache = 1;
+		}
+	}
+	#==========================================
+	# Use/select cache if possible
+	#------------------------------------------
+	if ($haveCache) {
+		my $max = 0;
+		#==========================================
+		# Find best match
+		#------------------------------------------
+		$kiwi -> info ("Cache list:\n");
+		foreach my $clic (keys %Cache) {
+			$kiwi -> info ("--> [ $Cache{$clic}% packages ]: $clic\n");
+			if ($Cache{$clic} > $max) {
+				$max = $Cache{$clic};
+			}
+		}
+		#==========================================
+		# Setup overlay for best match
+		#------------------------------------------
+		foreach my $clic (keys %Cache) {
+			if ($Cache{$clic} == $max) {
+				$kiwi -> info ("Using cache: $clic");
+				$BaseRoot = $clic;
+				$BaseRootMode = "union";
+				$kiwi -> done();
+				return $BaseRoot;
+			}
+		}
+	}
+	return undef;
+}
+
+#==========================================
+# createCache
+#------------------------------------------
+sub createCache {
+	my $xml  = $_[0];
+	my $init = $_[1];
+	if ((! $init) || (! $ImageCache)) {
+		return undef;
+	}
+	#==========================================
+	# Variable setup and reset function
+	#------------------------------------------
+	sub reset_sub {
+		my $backupPrepare      = $main::Prepare;
+		my $backupRootTree     = $main::RootTree;
+		my $backupForceNewRoot = $main::ForceNewRoot;
+		my @backupPatterns     = @main::AddPattern;
+		my @backupPackages     = @main::AddPackage;
+		my $backupImageCache   = $main::ImageCache;
+		return sub {
+			$main::Prepare      = $backupPrepare;
+			$main::ForceNewRoot = $backupForceNewRoot;
+			@main::AddPattern   = @backupPatterns;
+			@main::AddPackage   = @backupPackages;
+			$main::RootTree     = $backupRootTree;
+			$main::ImageCache   = $backupImageCache;
+			$main::Survive      = "default";
+		}
+	}
+	my $resetVariables     = reset_sub();
+	my $CacheDistro        = $init->[0];
+	my @CachePatterns      = @{$init->[1]};
+	my @CachePackages      = @{$init->[2]};
+	my $imageCacheDir      = $ImageCache;
+	#==========================================
+	# undef ImageCache for recursive kiwi call
+	#------------------------------------------
+	undef $ImageCache;
+	#==========================================
+	# setup variables for kiwi prepare call
+	#------------------------------------------
+	qxx ("mkdir -p $imageCacheDir 2>&1");
+	if (! defined $LogFile) {
+		$kiwi -> setRootLog (
+			$main::RootTree."."."$$".".screenrc.log"
+		);
+	}
+	if (@CachePackages) {
+		push @CachePatterns,"package-cache"
+	}
+	foreach my $pattern (@CachePatterns) {
+		if ($pattern eq "package-cache") {
+			$pattern = $xml -> getImageName();
+			push @CachePackages,$xml->getPackageManager();
+			undef @main::AddPattern;
+			@main::AddPackage = @CachePackages;
+		} else {
+			@main::AddPackage = $xml->getPackageManager();
+			@main::AddPattern = $pattern;
+		}
+		$kiwi -> info (
+			"--> Building cache file for pattern: $pattern\n"
+		);
+		$main::Prepare      = $BasePath."/modules";
+		$main::RootTree     = $imageCacheDir."/";
+		$main::RootTree    .= $CacheDistro."-".$pattern;
+		$main::Survive      = "yes";
+		$main::ForceNewRoot = 1;
+		#==========================================
+		# Prepare new cache tree
+		#------------------------------------------
+		if (! defined main::main()) {
+			&{$resetVariables}; return undef;
+		}
+		#==========================================
+		# Create cache meta data
+		#------------------------------------------
+		my $meta   = $main::RootTree.".cache";
+		my $root   = $main::RootTree;
+		my $ignore = "'gpg-pubkey|bundle-lang'";
+		my $rpmopts= "'%{NAME}-%{VERSION}-%{RELEASE}\n'";
+		my $rpm    = "rpm --root $root";
+		qxx ("$rpm -qa --qf $rpmopts | grep -vE $ignore > $meta");
+		#==========================================
+		# Turn cache into clicfs file
+		#------------------------------------------
+		$kiwi -> info (
+			"--> Building clicfs cache for pattern: $pattern\n"
+		);
+		my $image = new KIWIImage (
+			$kiwi,$xml,$root,$imageCacheDir,undef,"/base-system"
+		);
+		if (! defined $image) {
+			&{$resetVariables}; return undef;
+		}
+		if (! $image -> createImageClicFS ()) {
+			&{$resetVariables}; return undef;
+		}
+		my $name = $imageCacheDir."/".$image -> buildImageName();
+		qxx ("mv $name $main::RootTree.clicfs");
+		qxx ("rm $name.clicfs $name.md5");
+		qxx ("rm -rf $main::RootTree");
+	}
+	&{$resetVariables};
+	return $imageCacheDir;
 }
 
 main();
