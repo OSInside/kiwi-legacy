@@ -20,6 +20,7 @@ package KIWIOverlay;
 #------------------------------------------
 use strict;
 use Carp qw (cluck);
+use File::Spec;
 use KIWILog;
 use KIWIQX;
 
@@ -213,13 +214,14 @@ sub unionOverlay {
 		qxx ("echo $this->{baseRO} > $rootRW/kiwi-root.cache");
 		qxx ("mkdir -p $rootRW/image");
 		if ($main::Prepare) {
+			my $basePath = File::Spec->rel2abs ($main::Prepare);
 			$status = qxx (
-				"cp $main::Prepare/image/config.xml $rootRW/image 2>&1"
+				"cp $basePath/image/config.xml $rootRW/image 2>&1"
 			);
 			$result = $? >> 8;
 			if ($result != 0) {
 				$status = qxx (
-					"cp $main::Prepare/image/*.kiwi $rootRW/image 2>&1"
+					"cp $basePath/image/*.kiwi $rootRW/image 2>&1"
 				);
 				$result = $? >> 8;
 			}
