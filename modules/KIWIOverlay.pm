@@ -216,12 +216,12 @@ sub unionOverlay {
 		if ($main::Prepare) {
 			my $basePath = File::Spec->rel2abs ($main::Prepare);
 			$status = qxx (
-				"cp $basePath/image/config.xml $rootRW/image 2>&1"
+				"cp $basePath/config.xml $rootRW/image 2>&1"
 			);
 			$result = $? >> 8;
 			if ($result != 0) {
 				$status = qxx (
-					"cp $basePath/image/*.kiwi $rootRW/image 2>&1"
+					"cp $basePath/*.kiwi $rootRW/image 2>&1"
 				);
 				$result = $? >> 8;
 			}
