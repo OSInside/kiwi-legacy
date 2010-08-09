@@ -1,12 +1,12 @@
 \index{KIWI images!description|(}
-\chapter{KIWI image description}
+\chapter{KIWI Image Description}
 \label{chapter:description}
 \minitoc
 
-In order to be able to create an image with kiwi a so called
+In order to be able to create an image with KIWI a so called
 image description must be created. The image description is
 represented by a directory which has to contain at least one
-file named \textbf{config.xml} or alternatively \textbf{*.kiwi}.
+file named \path{config.xml} or alternatively \path{*.kiwi}.
 A good start for such a description can be found in the examples
 provided in \path{/usr/share/doc/packages/kiwi/examples}.
 
@@ -55,7 +55,7 @@ of the later operating system.
       \item KIWI enables the firstboot service
       \item While booting the image YaST is started in firstboot mode
       \item The firstboot service handles the instructions listed in the
-            config-yast-firstboot.xml
+            \path{config-yast-firstboot.xml} file
       \item If the process finished successfully the environment is
             cleaned and firstboot won't be called at next reboot.
       \end{enumerate} 
@@ -89,7 +89,7 @@ of the later operating system.
       readme information directly readable from the CD or DVD.
 
 \item \textbf{\underline{config-cdroot.sh}}\\
-      Along with the config-cdroot.tgz one can provide a script which allows
+      Along with the \path{config-cdroot.tgz} one can provide a script which allows
       to manipulate the extracted data.
 
 \item \textbf{\underline{config/}}\\
@@ -100,12 +100,12 @@ of the later operating system.
       listed in the config.xml
 \end{itemize}
 
-\section{config.xml}
+\section{The config.xml File}
 The mandatory image definition file is divided into different sections
 which describes information like the image name and type as well as
 the packages and patterns the image should consist of. The following
 information explains the basic structure of the XML document. When KIWI
-is called the XML structure is validated by a RelaxNG based schema.
+is called the XML structure is validated by a RELAX~NG based schema.
 For details on attributes and values please refer to the schema
 documentation file at \path{/usr/share/doc/packages/kiwi/kiwi.rng.html}.
 
@@ -133,11 +133,11 @@ attribute must not have any spaces in its name.
 \item The optional attribute inherit allows to inherit the
       packages information from another image description.
 \item The optional attribute kiwirevision allows to specify
-      a kiwi SVN revision number which is known to build
-      a working image from this description. If the kiwi SVN
+      a KIWI SVN revision number which is known to build
+      a working image from this description. If the KIWI SVN
       revision is less than the specified value the
       process will exit. The currently used SVN revision can
-      be queried by calling kiwi \option{version}
+      be queried by calling \cmd{kiwi \option{version}}
 \item The optional attribute id allows to set an identification
       number which appears as file \path{/etc/ImageID} within the
       image.
@@ -213,7 +213,7 @@ changes to the image description the following rules should apply:
       the major number is incremented.
 \end{itemize}
 
-By default kiwi use the \textbf{smart} packagemanager but it is also possible
+By default KIWI use the \textbf{smart} packagemanager but it is also possible
 to use the SUSE packagemanager called \textbf{zypper}. 
 
 In general the specification of one <preferences> section is sufficient.
@@ -317,7 +317,7 @@ values of the image attribute:
       files. Using this technique one can assign different filesystems and
       different read-write properties to the different sections of the image.
       The \textbf{oem,pxe,usb and vmx} types can be created as a split system
-      image. Use the \textbf{boot=''oem|netboot|usb|vmx/suse-*''} attribute
+      image. Use the \textbf{boot=''oem|netboot| usb|vmx/suse-*''} attribute
       to select the underlying type of the split image. The attributes
       \textbf{fsreadwrite}, \textbf{fsreadonly} are used to controll the
       read-write properties of the filesystem specified as the attributes
@@ -343,7 +343,7 @@ values of the image attribute:
       qcow2. For the virtual disk image the optional \textbf{vga} attribute
       may be used to configure the kernel framebuffer device. Acceptable
       values can be found in the Linux kernel documentation for the
-      framebuffer device (Documentation/fb/vesafb.txt). KIWI also supports
+      framebuffer device (\path{Documentation/fb/vesafb.txt}). KIWI also supports
       the selection of the booloader for the virtual disk according to
       the rules indicated for the USB system. Last but not least
       the virtual disk system may also be created with a LVM based layout by
@@ -359,16 +359,16 @@ values of the image attribute:
 \end{itemize}
 
 All of the mentioned types can specify the \textbf{boot} attribute
-which tells kiwi to call itself to build the requested boot image (initrd).
-It is possible to tell kiwi to check for an already built boot image
+which tells KIWI to call itself to build the requested boot image (initrd).
+It is possible to tell KIWI to check for an already built boot image
 which is a so called \textbf{prebuilt boot image}. To activate searching
 for an appropriate prebuilt boot image the type section also provides the
-attribute \textbf{checkprebuilt=''true|false''}. If specified kiwi will
+attribute \textbf{checkprebuilt=''true|false''}. If specified KIWI will
 search for a prebuilt boot image in a directory named
 \path{/usr/share/kiwi/image/*boot/*-prebuilt}. Example: If the boot
 attribute was set to isoboot/suse-10.3 and checkprebuilt is set to true
-kiwi will search the prebuilt boot image in
-\path{/usr/share/kiwi/image/isoboot/suse-10.3-prebuilt}. The directory kiwi
+KIWI will search the prebuilt boot image in
+\path{/usr/share/kiwi/image/isoboot/suse-10.3-prebuilt}. The directory KIWI
 searches for the prebuilt boot images can also be specified at the
 commandline with the \option{prebuiltbootimage} parameter.
 
@@ -398,7 +398,7 @@ attributes:
       contents of the RC\_LANG system environment variable in
       \path{/etc/sysconfig/language}. Please note only UTF-8 locales are supported
       here which also means that the encoding must \textbf{not} be part of
-      the locale information. The kiwi schema validates the locale string
+      the locale information. The KIWI schema validates the locale string
       according to the following pattern:\\
       \verb+[a-z]{2}_[A-Z]{2}(,[a-z]{2}_[A-Z]{2})*+.
       This means you have to specifiy the locale like the following example:
@@ -406,11 +406,11 @@ attributes:
 \item \textbf{boot-theme}\\
       Specifies the name of the gfxboot and bootsplash theme to use
 \item \textbf{defaultdestination}\\
-      Used if the --destdir option is not specified when calling KIWI
+      Used if the \option{destdir} option is not specified when calling KIWI
 \item \textbf{defaultroot}\\
-      Used if the option --root is not specified when calling KIWI
+      Used if the option \option{root} is not specified when calling KIWI
 \item \textbf{defaultbaseroot}\\
-      Used if the option --base-root is not specified when
+      Used if the option \option{base-root} is not specified when
       calling KIWI. It's possible to prepare and create an image using a
       predefined non empty root directory as base information.
       This could speedup the build process a lot if the base root path
@@ -463,19 +463,19 @@ supported child elements:
 
 	With the optional \textbf{freespace} attribute it is possible to
     add space to the volume. If the freespace attribute is not set the
-    created volume will be 80\% to 90\% full. Using the optional
+    created volume will be 80\,\% to 90\,\% full. Using the optional
     \textbf{size} attribute the absolute size of the given volume is
     specified. The size attribute takes precedence over the freespace
     attribute. Should the specified size be too small the value will
-    be ignored and a volume with approximately 80\% to 90\% fill will
+    be ignored and a volume with approximately 80\,\% to 90\,\% fill will
     be created.
 
 \item \textbf{oemconfig}
-	By default the oemboot process will create/modify a swap, /home and /
-	partition. It is possible to influence the behavior by the
+	By default the oemboot process will create/modify a swap, \path{/home} and 
+	\path{/} partition. It is possible to influence the behavior by the
 	oem-* elements explained below.
 	KIWI uses this information to create the file
-	\textbf{/config.oempartition} as part
+	path{/config.oempartition} as part
 	of the automatically created oemboot boot image. The format of the
 	file is a simple key=value format and created by the KIWIConfig.sh
 	function named baseSetupOEMPartition(). 
@@ -515,12 +515,12 @@ supported child elements:
 	\item \textbf{<oem-recovery>true|false</oem-recovery>}\\
       If this element is set to true (default value is false), KIWI will
       create a recovery archivefrom the prepared root tree. The archive will 
-      appear as \textit{/recovery.tar.bz2} in the image file. During 
+      appear as \path{/recovery.tar.bz2} in the image file. During 
       first boot of the image a single recovery partition will be
       created and the recovery archive will be moved to the recovery 
       partition. An additional boot menu entry is created that when selected
       restores the original root tree on the system. The
-      user information on the /home partition or in the /home directory is
+      user information on the \path{/home} partition or in the /home directory is
       not affected by the recovery process. This value is represented by 
       the OEM\_RECOVERY variable in config.oempartition.
     \item \textbf{<oem-recoveryID>partition-id</oem-recoveryID>}\\
@@ -551,15 +551,15 @@ supported child elements:
     is simplified by the KIWI provided package \textbf{kiwi-pxeboot}. This
     package configures the basic PXE boot enviroment as expected by KIWI pxe
     images. The kiwi-pxeboot package creates a directory structure in
-    /srv/tftpboot. Files created by the KIWI create step need to be copied
-    to the /srv/tftpboot directory structure. For additional details about
+    \path{/srv/tftpboot}. Files created by the KIWI create step need to be copied
+    to the \path{/srv/tftpboot} directory structure. For additional details about
     the PXE image please refere to the PXE Image chapter later in this
     document.
 
     In addition to the image files it is necessary that information be
     provided about the client setup. This information, such as the image
     to be used or the partitioning, is contained in a file with the name
-    config.<MAC-Address> in the directory /srv/tftpboot/KIWI. The content
+    config.<MAC-Address> in the directory \path{/srv/tftpboot/KIWI}. The content
     of this file is created automatically by KIWI if the pexedeploy section
     is provided in the image description. A pxedeploy section is outlined
     below:
@@ -610,9 +610,11 @@ supported child elements:
       is specified with one partition child element. The mandatory
       \textbf{type} attribute specifies the partition type. The possible
       values are the sfdisk supported types, use
+      
       \begin{Command}{14cm}
       sfdisk --list-type
       \end{Command}
+      
       to obtain a list of supported values. The required \textbf{number}
       attribute provides the the number of the partition to be created. The
       size of the partition may be specified with the optional \textbf{size}
@@ -637,7 +639,7 @@ supported child elements:
       The \textbf{source} attribute specifies the path on the server for
       the file to be downloaded. The \textbf{dest} attribute specifies
       destination of the downloaded file on the network client starting at
-      the root (/) of the filesystem. Multiple configuration elements
+      the root (\path{/}) of the filesystem. Multiple configuration elements
       may be specified such that multiple files can be transferred to the
       network client. In addition configuration files can be bound to
       a specific client architecture by setting the optional \textbf{arch}
@@ -655,7 +657,7 @@ supported child elements:
 
     In the event of a size specification that is too small for the
     generated image, KIWI will expand the size automatically unless the
-    image size exceeds the specified size by 100 MB or more. In this case
+    image size exceeds the specified size by 100\,MB or more. In this case
     KIWI will generate an error and exit.
 
     Should the given size exceed the necessary size for the image KIWI will
@@ -663,7 +665,7 @@ supported child elements:
     execution of components within the image.
 
     If the size element is not used KIWI will create an image with
-    containing approxiamtely 30\% free space.
+    containing approxiamtely 30\,\% free space.
     
      
 	\begin{Command}{12cm}
@@ -679,7 +681,7 @@ supported child elements:
     only temporary write access is possible.
 
     When processing the provided configuration KIWI distinguishes between
-    directories and files. For example, providing ''/etc'' as the value of
+    directories and files. For example, providing \path{/etc} as the value of
     the \textbf{name} attribute indicates that the \path{/etc} directory should be
     writable. However, this does not include any of the files or 
     sub-directories within \path{/etc}. The content of \path{/etc} is populated as 
@@ -717,9 +719,9 @@ supported child elements:
     image on the target machine.
 
     If the target is a VMware virtual machine indicated by the
-    format attribute set to vmdk, kiwi creates a VMware config file.
+    format attribute set to vmdk, KIWI creates a VMware config file.
     If the target is a Xen virtual machine indicated by the domain
-    attribute in the machine section kiwi will create a Xen guest
+    attribute in the machine section KIWI will create a Xen guest
     config file.
 
     The sample block below shows the general outline of the information
@@ -758,7 +760,7 @@ supported child elements:
       host machine hosting the guests and therefore doesn't require a
       configuration file, or it could be set to domU which indicates
       this is a guest and also requires a guest configuration which is
-      created by kiwi
+      created by KIWI.
 	\end{itemize}
 
 	The following information can be provided to setup the virtual
@@ -814,7 +816,7 @@ The attributes home, id, name, pwd, realname, and shell specify the created
 users home directory, the user name, the user's password, the user's 
 real name, and the user's login shell, respectively. By default the value
 of the password attribute is expected to be an encrypted string. An
-encrypted password can be created using the kiwi \option{createpassword} tool. It
+encrypted password can be created using the \cmd{kiwi \option{createpassword}} tool. It
 is also possible to specify the password as a non encrypted string by using
 the pwdformat attribute and setting it's value to ``plain''. KIWI will then
 encrypt the password prior to the user being added to the system.
@@ -845,17 +847,17 @@ types:
 \begin{itemize}
 \item \textbf{drivers}\\
       Each file is specified relative to the
-      /lib/modules/<Version>/kernel directory.
+      \path{/lib/modules/<Version>/kernel} directory.
 \item \textbf{netdrivers}\\
       Each file is specified relative to the
-      /lib/modules/<Version>/kernel/drivers
+      \path{/lib/modules/<Version>/kernel/drivers}
       directory.
 \item \textbf{scsidrivers}\\
       Each file is specified relative to the
-      /lib/modules/<Version>/kernel/drivers
+      \path{/lib/modules/<Version>/kernel/drivers}
 \item \textbf{usbdrivers}\\
       Each file is specified relative to the
-      /lib/modules/<Version>/kernel/drivers directory.
+      \path{/lib/modules/<Version>/kernel/drivers} directory.
 \end{itemize}
 
 According to the driver type the specified files are searched in
@@ -863,7 +865,7 @@ the corresponding directory. The information about the drivernames
 is provided as environment variable named like the value of
 the type attribute and is processed by the function
 \textbf{suseStripKernel}. According to this along with a boot image
-description a script called \textbf{images.sh} must exist which
+description a script called \cmd{images.sh} must exist which
 calls this function in order to allow the driver information to
 have any effect.
 
@@ -914,7 +916,7 @@ attributes:
 \item \textbf{status=''replaceable''}\\
       This attribute makes only sense for boot image descriptions.
       It indicates that the repository is allowed to become replaced by
-      the repositories defined in the system image descriptions. Because kiwi
+      the repositories defined in the system image descriptions. Because KIWI
       automatically builds the boot image if required it should create that
       image from the same repositories which are used to build the system
       image to make sure both fit together. Therefore it is required to allow
@@ -969,7 +971,7 @@ to the architecture of the image building host.
 \item \textbf{obs://\$dir1/\$dir2}\\
       A special buildservice path whereas \$dir1 and \$dir2
       represents the buildservice project location. If this type is
-      used as part of a boot attribute kiwi evaluates it to
+      used as part of a boot attribute KIWI evaluates it to
       this://images/\$dir1/\$dir2 and if used as part of a repository
       source path attribute it evaluates to this://repos/\$dir1/\$dir2
 \end{itemize}
@@ -1016,14 +1018,14 @@ listed are handled, supported values are as follows:
       When using the delete type only <package> elements are considered, all
       other specifications such as <opensusePattern> are ignored. The given
       package names are stored in the \$delete environment variable of the 
-      /.profile file created by KIWI. The list of package names is returned 
+      \path{/.profile} file created by KIWI. The list of package names is returned 
       by the baseGetPackagesForDeletion() function. This list can then be
       used to delete the packages ignoring requirements or dependencies. 
       This can be accomplished in the config.sh or images.sh script with
       the following code snippet:
 \begin{verbatim}
 rpm -e --nodeps --noscripts \
-   $(rpm -q `baseGetPackagesForDeletion` | grep -v "is not installed")
+ $(rpm -q `baseGetPackagesForDeletion` | grep -v "is not installed")
 \end{verbatim}
       Note, that the delete value is indiscriminate of the image type
       being built.
@@ -1087,13 +1089,13 @@ ignored it.
 To restrict a package to a specific architecture, use
 the \textbf{arch} attribute to specify a comma separated list of allowed
 architectures. Such a package is only installed if the build systems
-architecture (uname -m) matches one of the specified values of the arch
+architecture (\cmd{uname -m}) matches one of the specified values of the arch
 attribute.
 
 \subsubsection{Image type specific packages}
 If a package is only required for a specific type of image
 and replaces another package you can use the \textbf{replaces} attribute
-to tell kiwi to install the package by replacing another one. For example
+to tell KIWI to install the package by replacing another one. For example
 you can specify the kernel package in the type=image section as
 
 \begin{lstlisting}[language=xml]
@@ -1126,7 +1128,7 @@ boot image description
 With the optional \textbf{archive} element it's possible to include
 any kind of data into the image. The archive elements expects the
 name of a tarball which must exist as part of the system image
-description. kiwi then picks up the tarball and installs it into
+description. KIWI then picks up the tarball and installs it into
 the image. If the \textbf{bootinclude} attribute is set along with
 the archive element the data will also become installed into the
 boot image.

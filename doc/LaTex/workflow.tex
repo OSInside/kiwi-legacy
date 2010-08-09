@@ -1,5 +1,5 @@
 \index{KIWI images!workflow|(}
-\chapter{Basic workflow}
+\chapter{Basic Workflow}
 \label{chapter:workflow}
 \minitoc
 
@@ -16,16 +16,16 @@ step executes the following major stages:
 
 \begin{itemize}
 \item \textbf{Root directory creation}\\
-      To prevent accidental deletion of an existing root tree, kiwi will
+      To prevent accidental deletion of an existing root tree, KIWI will
       stop with an error message if this folder already exists, unless the
-      option --force-new-root is used in which case the existing root will
+      option \option{force-new-root} is used in which case the existing root will
       be deleted.
 \item \textbf{Package installation}\\
       First the selected package manager (smart by default) is instructed to
       use the repositories specified in the image description file.
       Then the packages specified in the 'bootstrap' section are installed.
       These packages are installed externally to the target root system
-      (i.e. not chroot'ed) and establish the initial environment so the rest
+      (i.~e.\ not chroot'ed) and establish the initial environment so the rest
       of  the process may run chroot'ed. Essential packages in this section
       are filesystem and glibc-locale. In practice you only need to
       specify those two, since the rest of the packages will be pulled
@@ -42,10 +42,10 @@ step executes the following major stages:
       At this point you can make changes on your unpacked image so it fits
       your purpose better. Bear in mind that changes at this point will be
       discarded and not repeated automatically if you rerun the 'prepare'
-      phase unless you include them in your original config.xml file and/or
-      config.sh script. Please also note that the image description has
+      phase unless you include them in your original \path{config.xml} file and/or
+      \path{config.sh} script. Please also note that the image description has
       been copied into the new root below the directory
-      \textbf{<new-root>/image}. Any subsequent create step will read
+      \path{<new-root>/image}. Any subsequent create step will read
       the image description information from the new root tree and not
       from the original image description location. According to this
       if you need to change the image description data
@@ -56,25 +56,25 @@ step executes the following major stages:
 \end{itemize}
 
 After the prepare step has finished successfully a subsequent building of
-an image file or, in kiwi-speak, a new packed image follows.
+an image file or, in KIWI speak, a new packed image follows.
 The building of an image requires a successfully prepared new root
 tree in the first place. Using this tree multiple image types can be
 created. So to speak it's possible to create a VMware image and a
-XEN image from the same prepared root tree. The create step executes the
+Xen image from the same prepared root tree. The create step executes the
 following major stages:
 
 \begin{itemize}
 \item \textbf{User defined script images.sh}\\
       At the beginning of the creation stage the optional script named
-      images.sh is called. This script has no distinctive use case like
-      config.sh but is most often used to remove packages which were pulled
+      \cmd{images.sh} is called. This script has no distinctive use case like
+      \cmd{config.sh} but is most often used to remove packages which were pulled
       in by a dependency but are not really required for the later use
       of the operating system. For a detailed description what
       functions are already available to images.sh please refer to
       the KIWI::images.sh manual page
 \item \textbf{Create the requested image type}\\
       What image type(s) a kiwi image supports depends on what types has been
-      setup in the main image description file config.xml. At least one type
+      setup in the main image description file \path{config.xml}. At least one type
       must be setup. The following picture shows what image types are
       currently supported by kiwi:
 
@@ -92,9 +92,9 @@ type specific sections later in this document.
 
 \section{Boot process}
 Todays linux systems are using a special boot image to control the
-boot process. This boot image is called \textbf{initrd}. The linux
+boot process. This boot image is called \path{initrd}. The linux
 kernel loads this initial ramdisk which is a compressed cpio archive
-into RAM and calls init or if present the program named linuxrc. The
+into RAM and calls init or if present the program named \cmd{linuxrc}. The
 KIWI image system also takes care for the creation of this boot image.
 Each image type has it's own special boot code and shares the common
 parts in a set of module functions. The image descriptions for the
@@ -120,11 +120,11 @@ and can be build in the same way as the system image. The boot image
 without a corresponding system image doesn't make sense though.
 
 \section{Boot parameters}
-When booting an image created by kiwi using one of the provided
+When booting an image created by KIWI using one of the provided
 boot images there are some useful kernel parameters mainly meant
 for debugging purposes. Please note the following parameters are
-only useful if the kiwi initrd is used. In case of any other
-initrd code written by yourself or simply because kiwi replaced
+only useful if the KIWI \path{initrd} is used. In case of any other
+initrd code written by yourself or simply because KIWI replaced
 itself with the distribution specfic mkinitrd tool the parameters
 might not have any effect.
 
@@ -137,7 +137,7 @@ might not have any effect.
       reboot. Within that shell some basic standard commands are
       available which could help to find the cause of the problem
 \item \textbf{kiwistderr=/dev/...}\\
-      While the system boots kiwi writes messages to tty1 and tty3. The
+      While the system boots KIWI writes messages to tty1 and tty3. The
       tty1 messages are highlevel information whereas the tty3 messages
       represents the shell debug output and any error messages from
       the commands called. With the kiwistderr parameter one can combine
