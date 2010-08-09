@@ -2488,6 +2488,7 @@ sub createImageSplit {
 	if ($type{bootloader}) {
 		$main::ForeignRepo{"bootloader"} = $type{bootloader};
 	}
+	$main::ForeignRepo{"xmlobj"}  = $xml;
 	$main::ForeignRepo{"xmlnode"} = $xml -> getForeignNodeList();
 	$main::ForeignRepo{"xmlpacnode"} = $xml -> getForeignPackageNodeList();
 	$main::ForeignRepo{"packagemanager"} = $xml -> getPackageManager();
