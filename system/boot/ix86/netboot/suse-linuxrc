@@ -760,27 +760,27 @@ runHook postmount
 #--------------------------------------
 runHook preconfig
 if [ $LOCAL_BOOT = "no" ];then
-	if test $systemIntegrity = "clean";then
-		mkdir -p /config
-		#======================================
-		# Get files from CONF value
-		#--------------------------------------
-		IFS="," ; for i in $CONF;do
-			field=0
-			IFS=";" ; for n in $i;do
-			case $field in
-				0) configSource=$n ; field=1 ;;
-				1) configDest=$n   ; field=2 ;;
-				2) configServer=$n ; field=3 ;;
-				3) configBlkSize=$n;
-			esac
-			done
-			Echo "Import configuration file: $configDest"
-			dirs=`dirname  $configDest`
-			mkdir -p /config/$dirs
-			fetchFile $configSource /config/$configDest uncomp $configServer
+	mkdir -p /config
+	#======================================
+	# Get files from CONF value
+	#--------------------------------------
+	IFS="," ; for i in $CONF;do
+		field=0
+		IFS=";" ; for n in $i;do
+		case $field in
+			0) configSource=$n ; field=1 ;;
+			1) configDest=$n   ; field=2 ;;
+			2) configServer=$n ; field=3 ;;
+			3) configBlkSize=$n;
+		esac
 		done
-		IFS=$IFS_ORIG
+		Echo "Import configuration file: $configDest"
+		dirs=`dirname  $configDest`
+		mkdir -p /config/$dirs
+		fetchFile $configSource /config/$configDest uncomp $configServer
+	done
+	IFS=$IFS_ORIG
+	if test $systemIntegrity = "clean";then
 		#======================================
 		# Check for KIWI_INITRD
 		#--------------------------------------
@@ -930,9 +930,7 @@ fi
 # 21) copy system dependant files
 #--------------------------------------
 if [ $LOCAL_BOOT = "no" ];then
-	if test $systemIntegrity = "clean";then
-		setupConfigFiles
-	fi
+	setupConfigFiles
 fi
 
 #======================================
