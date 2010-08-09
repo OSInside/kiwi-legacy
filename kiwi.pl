@@ -599,6 +599,18 @@ sub main {
 			my $code = kiwiExit (1); return $code;
 		}
 		#==========================================
+		# Check for overlay meta data...
+		#------------------------------------------
+		if (-f "$Create/kiwi-root.cache") {
+			my $FD; if (! open ($FD,"$Create/kiwi-root.cache")) {
+				$kiwi -> error  ("Can't open baseroot meta data");
+				$kiwi -> failed ();
+				my $code = kiwiExit (1); return $code;
+			}
+			$BaseRoot = <$FD>; close $FD; chomp $BaseRoot;
+			$BaseRootMode = "union";
+		}
+		#==========================================
 		# Cleanup the tree according to prev runs
 		#------------------------------------------
 		if (-f "$Create/rootfs.tar") {

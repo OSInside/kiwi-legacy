@@ -680,7 +680,9 @@ sub createImageUSB {
 	$main::Survive  = "yes";
 	$main::RootTree = "$tmpdir/kiwi-".$text."boot-$$";
 	$main::Prepare  = $boot;
-	$main::BaseRoot = $type{baseroot};
+	if (defined $type{baseroot}) {
+		$main::BaseRoot = $type{baseroot};
+	}
 	if (defined $main::BaseRoot) {
 		if (($main::BaseRoot !~ /^\//) && (! -d $main::BaseRoot)) {
 			$main::BaseRoot = $main::System."/".$main::BaseRoot;
@@ -1298,7 +1300,9 @@ sub createImageLiveCD {
 	$main::Survive  = "yes";
 	$main::RootTree = "$tmpdir/kiwi-cdboot-$$";
 	$main::Prepare  = $boot;
-	$main::BaseRoot = $type{baseroot};
+	if (defined $type{baseroot}) {
+		$main::BaseRoot = $type{baseroot};
+	}
 	if (defined $main::BaseRoot) {
 		if (($main::BaseRoot !~ /^\//) && (! -d $main::BaseRoot)) {
 			$main::BaseRoot = $main::System."/".$main::BaseRoot;
@@ -2460,7 +2464,9 @@ sub createImageSplit {
 	$main::Survive  = "yes";
 	$main::RootTree = "$tmpdir/kiwi-splitboot-$$";
 	$main::Prepare  = $boot;
-	$main::BaseRoot = $type{baseroot};
+	if (defined $type{baseroot}) {
+		$main::BaseRoot = $type{baseroot};
+	}
 	if (defined $main::BaseRoot) {
 		if (($main::BaseRoot !~ /^\//) && (! -d $main::BaseRoot)) {
 			$main::BaseRoot = $main::System."/".$main::BaseRoot;

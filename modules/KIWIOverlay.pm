@@ -156,24 +156,8 @@ sub unionOverlay {
 		return undef;
 	}
 	$this->{tmpdir} = $tmpdir;
-	$cowdev = "$rootRW/kiwi-root.cow";
-	if (! -f $cowdev) {
-		#==========================================
-		# Create tmp COW file for write operations
-		#------------------------------------------
-		$status = qxx ("cat < /dev/null > $cowdev 2>&1");
-		$result = $? >> 8;
-		if ($result != 0) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Failed to create overlay COW file: $status");
-			return undef;
-		}
-	} else {
-		$haveCow=1;
-	}
-	$this->{cowdev} = $cowdev;
 	#==========================================
-	# Mount the clicfs (free space = 5GB)
+	# loop setup the clicfs file
 	#------------------------------------------
 	$status = qxx ("/sbin/losetup -s -f $baseRO 2>&1"); chomp $status;
 	$result = $? >> 8;
@@ -185,12 +169,42 @@ sub unionOverlay {
 	push @mount,"sleep 1; losetup -d $status";
 	$this->{mount} = \@mount;
 	$baseRO = $status;
-	$status = qxx (
-		"clicfs --ignore-cow-errors -m 5000 -c $cowdev $baseRO $tmpdir 2>&1"
-	);
-	$result = $? >> 8;
-	if ($result == 0) {
-		$status = qxx ("resize2fs $tmpdir/fsdata.ext3 2>&1");
+	$cowdev = "$rootRW/kiwi-root.cow";
+	$this->{cowdev} = $cowdev;
+	if (! -f $cowdev) {
+		#==========================================
+		# Create tmp COW file for write operations
+		#------------------------------------------
+		$haveCow= 0;
+		$status = qxx ("cat < /dev/null > $cowdev 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Failed to create overlay COW file: $status");
+			return undef;
+		}
+		#==========================================
+		# Fuse mount and resize
+		#------------------------------------------
+		$status = qxx (
+			"clicfs --ignore-cow-errors -m 5000 -c $cowdev $baseRO $tmpdir 2>&1"
+		);
+		$result = $? >> 8;
+		if ($result == 0) {
+			$status = qxx ("resize2fs $tmpdir/fsdata.ext3 2>&1");
+			$result = $? >> 8;
+		}
+	} else {
+		#==========================================
+		# Use existing COW file
+		#------------------------------------------
+		$haveCow=1;
+		#==========================================
+		# Fuse mount operate in RAM
+		#------------------------------------------
+		$status = qxx (
+			"clicfs -m 5000 -c $cowdev $baseRO $tmpdir 2>&1"
+		);
 		$result = $? >> 8;
 	}
 	if ($result != 0) {
@@ -200,6 +214,9 @@ sub unionOverlay {
 	}
 	push @mount,"umount $tmpdir";
 	$this->{mount} = \@mount;
+	#==========================================
+	# loop mount filesystem from fuse mount
+	#------------------------------------------
 	my $opts = "loop,noatime,nodiratime,errors=remount-ro,barrier=0";
 	$baseRO = $tmpdir."/fsdata.ext3";
 	$status = qxx ("mount -o $opts $baseRO $tmpdir 2>&1");
@@ -210,6 +227,10 @@ sub unionOverlay {
 		return undef;
 	}
 	push @mount,"umount $tmpdir";
+	$this->{mount} = \@mount;
+	#==========================================
+	# create meta data for further operations
+	#------------------------------------------
 	if (! $haveCow) {
 		qxx ("echo $this->{baseRO} > $rootRW/kiwi-root.cache");
 		qxx ("mkdir -p $rootRW/image");
@@ -232,7 +253,6 @@ sub unionOverlay {
 			}
 		}
 	}
-	$this->{mount} = \@mount;
 	return $tmpdir;
 }
 
