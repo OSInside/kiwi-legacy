@@ -90,7 +90,7 @@ Detailed information including a step by step guidance how to call
 kiwi and how to make use of the result image can be found in the image
 type specific sections later in this document.
 
-\section{Boot process}
+\section{Boot Process}
 Todays linux systems are using a special boot image to control the
 boot process. This boot image is called \path{initrd}. The linux
 kernel loads this initial ramdisk which is a compressed cpio archive
@@ -119,7 +119,7 @@ The boot image descriptions are stores in \path{/usr/share/kiwi/image/*boot}
 and can be build in the same way as the system image. The boot image
 without a corresponding system image doesn't make sense though.
 
-\section{Boot parameters}
+\section{Boot Parameters}
 When booting an image created by KIWI using one of the provided
 boot images there are some useful kernel parameters mainly meant
 for debugging purposes. Please note the following parameters are
@@ -146,7 +146,7 @@ might not have any effect.
       logging behaviour
 \end{itemize}
 
-\section{Common and Distribution specific code}
+\section{Common and Distribution Specific Code}
 KIWI has been developed to be usable for any Linux distribution.
 By design of a Linux distribution there are differences between
 each of them. With KIWI we provide on one hand the code which
