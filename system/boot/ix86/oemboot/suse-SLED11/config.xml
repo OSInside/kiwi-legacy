@@ -22,6 +22,9 @@
 	</profiles>
 	<drivers type="drivers">
 		<file name="crypto/*"/>
+		<file name="drivers/thermal/*"/>
+		<file name="drivers/hwmon/*"/>
+		<file name="drivers/acpi/*"/>
 		<file name="drivers/usb/*"/>
 		<file name="drivers/virtio/*"/>
 		<file name="drivers/block/cciss.ko"/>

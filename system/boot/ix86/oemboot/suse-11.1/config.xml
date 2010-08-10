@@ -20,12 +20,11 @@
 		<profile name="pae" description="KERNEL: pae kernel"/>
 		<profile name="ec2" description="KERNEL: Ec2 kernel"/>
 	</profiles>
-	<drivers type="usbdrivers">
-		<file name="usb/host/*"/>
-		<file name="usb/core/usbcore.ko"/>
-		<file name="usb/storage/usb-storage.ko"/>
-	</drivers>
 	<drivers type="drivers">
+		<file name="drivers/usb/*"/>
+		<file name="drivers/thermal/*"/>
+		<file name="drivers/hwmon/*"/>
+		<file name="drivers/acpi/*"/>
 		<file name="crypto/*"/>
 		<file name="drivers/virtio/*"/>
 		<file name="drivers/block/cciss.ko"/>

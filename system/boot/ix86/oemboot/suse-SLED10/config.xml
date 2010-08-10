@@ -19,13 +19,11 @@
 		<profile name="xenk" description="KERNEL: Xen kernel/mboot.c32"/>
 		<profile name="smp" description="KERNEL: pae kernel"/>
 	</profiles>
-	<drivers type="usbdrivers">
-		<file name="usb/host/*"/>
-		<file name="usb/core/usbcore.ko"/>
-		<file name="usb/storage/usb-storage.ko"/>
-		<file name="usb/input/usbhid.ko"/>
-	</drivers>
 	<drivers type="drivers">
+		<file name="drivers/usb/*"/>
+		<file name="drivers/thermal/*"/>
+		<file name="drivers/hwmon/*"/>
+		<file name="drivers/acpi/*"/>
 		<file name="drivers/md/*"/>
 		<file name="drivers/block/cciss.ko"/>
 		<file name="drivers/block/loop.ko"/>
