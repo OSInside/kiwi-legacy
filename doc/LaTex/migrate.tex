@@ -26,7 +26,7 @@ information and would copy it as overlay files as part of the image
 description. The process will skip all remote mounted filesystems
 and concentrate only on local filesystems.
 
-\section{Create a clean repository set first}
+\section{Create a Clean Repository Set First}
 When starting with the migration it is useful to let kiwi know about all
 the repositories from which packages has been installed to 
 the system. In a first step call:
@@ -57,7 +57,7 @@ kiwi --migrate mySystem --nofiles \
 \end{verbatim}
 \end{Command}
 
-\section{Watch the overlay and unpackaged files}
+\section{Watch the Overlay and Unpackaged Files}
 Files which has been modified but belong to a package will be
 automatically copied into the overlay directory below
 \path{/tmp/mySystem/root}. You should check that no modified file
@@ -84,24 +84,24 @@ to be copied over to the \path{/tmp/mySystem/root} directory
 After that you should walk through the following check list
 
 \begin{itemize}
-\item change author and contact in \path{config.xml}
-\item set appropriate name for your image in \path{config.xml}
-\item add/modify default type (oem) set in \path{config.xml} if needed
-\item make sure your X11 configuration is appropriate according to
+\item Change author and contact in \path{config.xml}
+\item Set appropriate name for your image in \path{config.xml}
+\item Add/modify default type (oem) set in \path{config.xml} if needed
+\item Make sure your X11 configuration is appropriate according to
       the new target. A failsafe version was created in
       \path{/tmp/mysys/root/etc/X11/xorg.conf.install} -> fbdev based
-\item make sure \cmd{yast2} is installed to be able to reconfigure
+\item Make sure \cmd{yast2} is installed to be able to reconfigure
       the system. if \cmd{yast2} is not installed these tasks needs to
       be done else. Otherwise yast's second stage is started on first
       boot of the migrated image
-\item if you want to access any remote filesystem it's a good
+\item If you want to access any remote filesystem it's a good
       idea to let autoyast add them on first boot of the system
-\item check your network setup in \path{/etc/sysconfig/network}. Is this
+\item Check your network setup in \path{/etc/sysconfig/network}. Is this
       setup still possible in the cloned environment? Make sure you
       check for the MAC address of the card first.
 \end{itemize}
 
-\section{Turn my system into an image\ldots}
+\section{Turn my System Into an Image\ldots}
 After the process has finished you should check the size of the
 image description. The description itself shouldn't be that big.
 The size of a migrated image description mainly depends on how many
@@ -123,5 +123,5 @@ kiwi --create /tmp/mySys -d /tmp/myResult
 If everything worked well you can test the created OEM
 image in any full virtual operating system environment like QEMU or
 VMware. Once created the image description can serve for all image
-types kiwi supports.
+types KIWI supports.
  

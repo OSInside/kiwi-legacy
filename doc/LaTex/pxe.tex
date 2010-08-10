@@ -1,29 +1,29 @@
 \index{KIWI images!pxe|(}
-\chapter{PXE image - Thin Clients}
+\chapter{PXE Image---Thin Clients}
 \label{chapter:pxe}
 \minitoc
 
-A pxe image consists of a boot image and a system image like all other
- image types too. But with a pxe image the image files are available
+A PXE image consists of a boot image and a system image like all other
+image types too. But with a PXE image the image files are available
 seperately and needs to be copied at specific locations of a network
 boot server. PXE is a boot protocol implemented in most BIOS implementations
 which makes it so interesting. The protocol sends DHCP requests to assign
 an IP address and after that it uses tftp to download kernel and boot
 instructions. 
 
-\section{Setting up the required services}
+\section{Setting Up the Required Services}
 
 Before you start to build pxe images with kiwi you
 should have setup the boot server. The boot server requires the
-services \textbf{atftp} and \textbf{DHCP} to run
+services atftp and DHCP to run
 
-\subsection{atftp server}
+\subsection{Atftp Server}
 
 In order to setup the atftp server the following steps are required
 
 \begin{enumerate}
 \item install the packages atftp and kiwi-pxeboot
-\item edit the file /etc/sysconfig/atftpd and set/modify the following
+\item edit the file \path{/etc/sysconfig/atftpd} and set/modify the following
       variables:
       \begin{itemize}
       \item ATFTPD\_OPTIONS=''\option{daemon} \option{no-multicast}''
@@ -33,7 +33,7 @@ In order to setup the atftp server the following steps are required
       \textbf{rcatftpd start}
 \end{enumerate}
 
-\subsection{DHCP server}
+\subsection{DHCP Server}
 
 In contrast to the atftp server setup the following DHCP server setup
 can only serve as an example. Please note that according to your network
@@ -45,7 +45,7 @@ The following steps describe how to setup a new DHCP server instance:
 
 \begin{enumerate}
 \item install the package dhcp-server
-\item create the file /etc/dhcpd.conf and include the following
+\item create the file \path{/etc/dhcpd.conf} and include the following
       statements:
  
       \begin{verbatim}
@@ -66,16 +66,16 @@ subnet 192.168.100.0 netmask 255.255.255.0 {
 }
 \end{verbatim}
 
-\item edit the file /etc/sysconfig/dhcpd and setup the network
+\item edit the file \path{/etc/sysconfig/dhcpd} and setup the network
       interface the server should listen on:
       \begin{itemize}
       \item DHCPD\_INTERFACE=''eth0''
       \end{itemize}
 \item run the dhcp server by calling:
-      \textbf{rcdhcpd start}
+      \cmd{rcdhcpd start}
 \end{enumerate}
 
-\section{Building the suse-pxe-client example}
+\section{Building the suse-pxe-client Example}
 
 The example provided with kiwi is based on openSUSE 11.2 and creates an
 image for a Wyse VX0 terminal with a 128MB flash card and 512MB of RAM.
@@ -98,7 +98,7 @@ kiwi --create /tmp/mypxe --type pxe \
 \end{verbatim}
 \end{Command}
 
-\section{Using the image}
+\section{Using the Image}
 
 In order to make use of the image all related image parts needs 
 to be copied onto the boot server. According to the example the following
@@ -137,7 +137,7 @@ cp suse-11.2-pxe-client.i686-1.2.8.config \
       loaded and which kernel parameters are set. When installing
       the kiwi-pxeboot package a default configuration is added.
       To make sure the configuration is valid according to this
-      example the file /srv/tftpboot/pxelinux.cfg/default should
+      example the file \path{/srv/tftpboot/pxelinux.cfg/default} should
       provide the following information:
 \begin{verbatim}
 DEFAULT KIWI-Boot
@@ -156,14 +156,14 @@ LABEL Local-Boot
 \section{Flavours}
 
 All the different PXE boot based deployment methods are controlled
-by the config.<MAC> (or config.default) file. When a new client
+by the \path{config.<MAC>} (or \path{config.default}) file. When a new client
 boots up and there is no client configuration file the new client
 is registered by uploading a control file to the tftp server.
 The following sections informs about the control and the configuration
 file.
 
 \index{configuration files!hwtype.<MAC Address>|(}
-\subsection{The pxe client Control File}
+\subsection{The PXE Client Control File}
 \label{section:cntrlhw}
 This section describes the netboot client control file:
 
@@ -175,10 +175,10 @@ The control file is primarily used to set up new netboot clients. In this
 case, there is no configuration file corresponding to the client
 MAC address available. Using the MAC address information, the control file
 is created, which is uploaded to the TFTP servers upload directory
-\textit{/var/lib/tftpboot/upload}.
+\path{/var/lib/tftpboot/upload}.
 
 \index{configuration files!config.<MAC Address>|(}
-\subsection{The pxe client Configuration File}
+\subsection{The PXE Client Configuration File}
 \label{section:confmac}
 This section describes the netboot client configuration file:
 
@@ -188,7 +188,7 @@ This section describes the netboot client configuration file:
 
 The configuration file contains data about image, configuration,
 synchronization, or partition parameters. The configuration file is
-loaded from the TFTP server directory \textit{/var/lib/tftpboot/KIWI} via TFTP
+loaded from the TFTP server directory \path{/var/lib/tftpboot/KIWI} via TFTP
 for previously installed netboot clients. New netboot clients are
 immediately registered and a new configuration file with the
 corresponding MAC address is created. The standard case for the
@@ -204,6 +204,7 @@ IMAGE=/dev/sda2;suse-11.2-pxe-client.i686;1.2.8;192.168.100.2;4096
 
 The following format is used:
 
+%% toms: Hmn, underline. Better stay way from it
 \begin{Command}{14cm}
     \textbf{IMAGE}=\underline{device;name;version;srvip;bsize;compressed},...,\\
     \textbf{CONF}=\underline{src;dest;srvip;bsize},...,
@@ -216,14 +217,14 @@ The following format is used:
     \item \textbf{IMAGE}\\
         Specifies which image (name) should be loaded with which
         version (version) and to which storage device (device) it
-        should be linked, e.g., \textbf{/dev/ram1} or
-        \textbf{/dev/hda2}. The netboot client partition (device)
-        \textbf{hda2} defines the root file system "/" and \texttt{hda1}
+        should be linked, e.g., \path{/dev/ram1} or
+        \path{/dev/hda2}. The netboot client partition (device)
+        \path{hda2} defines the root file system \path{/} and \path{hda1}
         is used for the swap partition. The numbering of the hard disk
         device should not be confused with the RAM disk device,
-        where \texttt{/dev/ram0} is used for the initial RAM disk and
+        where \path{/dev/ram0} is used for the initial RAM disk and
         can not be used as storage device for the second stage system image.
-        SUSE recommends to use the device \texttt{/dev/ram1} for the
+        SUSE recommends to use the device \path{/dev/ram1} for the
         RAM disk. If the hard drive is used, a corresponding partitioning
         must be performed.
         \begin{itemize}
@@ -244,9 +245,9 @@ The following format is used:
         The download will fail if you specify "'compressed"' and the image isn't
         compressed. It will also fail if you don't specify "'compressed"'
         but the image is compressed. The name of the compressed image has
-        to contain the suffix \textbf{.gz} and needs to be compressed with the
-        \textbf{gzip} tool. Using a compressed image will automatically
-        \textbf{deactivate} the multicast download option of atftp.
+        to contain the suffix \path{.gz} and needs to be compressed with the
+        \cmd{gzip} tool. Using a compressed image will automatically
+        \emph{deactivate} the multicast download option of atftp.
     \end{itemize}
     \item \textbf{CONF}\\
         Specifies a comma-separated list of source:target
@@ -261,7 +262,7 @@ The following format is used:
         Additionally all size specifications supported by the sfdisk
         program are allowed as well. The type number specifies the ID
         of the partition. Valid ID's are listed via the
-        \textit{sfdisk --list-types} command. The mount specifies the
+        \cmd{sfdisk \option{list-types}} command. The mount specifies the
         directory the partition is mounted to.
         \begin{itemize}
             \item The first element of the list must define the swap
@@ -277,7 +278,7 @@ The following format is used:
     \item \textbf{DISK}\\
         Specifies the hard disk. Used only with PART and defines
         the device via which the hard disk can be addressed,
-        e.g., \textbf{/dev/hda}.
+        e.g., \path{/dev/hda}.
     \item \textbf{RELOAD\_IMAGE}\\
         If set to a non-empty string, this forces the configured
         image to be loaded from the server even if the image on
@@ -299,8 +300,8 @@ The following format is used:
         system. The variables value must be set to the name of the
         initrd file which is used via PXE network boot. If the
         standard tftp setup suggested with the kiwi-pxeboot package
-        is used all initrd files resides in the \textbf{boot/} directory
-        below the tftp server path \textit{/var/lib/tftpboot}. Because
+        is used all initrd files resides in the \path{boot/} directory
+        below the tftp server path \path{/var/lib/tftpboot}. Because
         the tftpserver do a chroot into the tftp server path you need
         to specify the initrd file as the following example shows:
         \textbf{KIWI\_INITRD=/boot/<name-of-initrd-file>}
@@ -309,7 +310,7 @@ The following format is used:
         use unionfs or aufs as container filesystem in combination
         with a compressed system image. The recommended compressed
         filesystem type for the system image is \textbf{squashfs}.
-        In case of a usb-stick system the usbboot image will
+        In case of a USB stick system the usbboot image will
         automatically setup the unionfs/aufs filesystem. In case of
         a PXE network image the netboot image requires a config.<MAC>
         setup like the following example shows:
@@ -352,7 +353,7 @@ DISK=/dev/sda
         remote port that uses the nbd-server program. For more information
         on how to set up the server, see the nbd-server man pages. The
         kernel on the remote client can set up a special network block
-        device named /dev/nb0 using the nbd-client command. After this
+        device named \path{/dev/nb0} using the nbd-client command. After this
         device exists, the mount program is used to mount the root
         filesystem. To allow the KIWI boot image to use that, the following
         information must be provided:
@@ -365,8 +366,8 @@ NBDROOT=NBD.Server.IP.address;\
         The NBD-Device, NBD-Swap-Port-Number, NBD-Swap-Device,
         NBD-Write-Port-Number and NBD-Write-Device
         variables are optional. If the nbd root device is not set,
-        the default values (/dev/nb0 , port 2000) applies and if the nbd
-        swap device is not set the default values (/dev/nb1, port 9210)
+        the default values (\path{/dev/nb0} , port 2000) applies and if the nbd
+        swap device is not set the default values (\path{/dev/nb1}, port 9210)
         applies. The swap space over the network using a network block device
         is only established if the client has less than 48 MB of RAM.
         The optional NBD-Write-Port-Number and NBD-Write-Device specifies
@@ -379,10 +380,10 @@ NBDROOT=NBD.Server.IP.address;\
         the system image via the AoE subsystem. The block device
         could be a partition of a real or a virtual disk. In order to
         use the AoE subsystem I recommend to install the \textit{aoetools}
-        and \textit{vblade} packages from here first:\\
+        and \textit{vblade} packages from here first:
         \url{http://download.opensuse.org/repositories/system:/aoetools}\\
         Once installed the following example shows how to export
-        the local /dev/sdb1 partition via AoE:
+        the local \path{/dev/sdb1} partition via AoE:
 \begin{verbatim}
 vbladed 0 1 eth0 /dev/sdb1
 \end{verbatim}
@@ -390,11 +391,11 @@ vbladed 0 1 eth0 /dev/sdb1
         by a couple Major/Minor, with major between 0-65535 and minor
         between 0-255. AoE is based just over Ethernet on the OSI models
         so we need to indicate which ethernet card we'll use. 
-        In this example we export /dev/sdb1 with a major value of 0 and
+        In this example we export \path{/dev/sdb1} with a major value of 0 and
         minor of 1 on the eth0 interface. We are ready to use our partition
         on the network! To be able to use the device kiwi needs the
         information which AoE device contains the root filesystem. In
-        our example this is the device \textit{/dev/etherd/e0.1}.
+        our example this is the device \path{/dev/etherd/e0.1}.
         According to this the AOEROOT variable must be set as follows:
 \begin{verbatim}
 AOEROOT=/dev/etherd/e0.1
@@ -433,7 +434,7 @@ UNIONFS_CONFIG=/dev/ram1,nfs,aufs # write to RAM
          The value must be set to the name of the initrd file which is
          used via PXE network boot. If the standard TFTP setup suggested
          with the kiwi-pxeboot package is used, all initrd files reside
-         in the /srv/tftpboot/boot/ directory. Because the TFTP server
+         in the \path{/srv/tftpboot/boot/} directory. Because the TFTP server
          does a chroot into the TFTP server path, you must specify the
          initrd file as follows:
 \begin{verbatim}
@@ -462,7 +463,7 @@ protocol. With PXE the download protocol is fixed and thus you
 can't change the way how the kernel and the boot image (initrd)
 is downloaded. As soon as linux takes over control the following
 download protocols http, https and ftp are supported too.
-KIWI makes use of the \textbf{curl} program to support the
+KIWI makes use of the \cmd{curl} program to support the
 additional protocols.
 
 In order to select one of the additional download protocols
@@ -477,8 +478,8 @@ the following kernel parameters needs to be setup:
 \end{itemize}
 
 To setup this parameters edit the file
-\textbf{/srv/tftpboot/pxelinux.cfg/default} on your PXE boot server
-and change the \textbf{append} line accordingly. Please note all
+\path{/srv/tftpboot/pxelinux.cfg/default} on your PXE boot server
+and change the \texttt{append} line accordingly. Please note all
 downloads except for kernel and initrd are now controlled by the given
 server and protocol. You need to make sure that this server provides
 the same directory and file structure as initially provided by
@@ -493,9 +494,9 @@ available for the operating system after the image has been
 deployed into RAM. Below, find an example:
 
 \begin{itemize}
-\item use a read-write filesystem in config.xml, for example\\
+\item Use a read-write filesystem in \path{config.xml}, for example\\
       \textbf{filesystem=''ext3''}
-\item sample config.<MAC>
+\item Create \path{config.<MAC>}
 
 \begin{Command}{12cm}
 \begin{verbatim}
@@ -505,7 +506,7 @@ IMAGE=/dev/ram1;suse-11.2-pxe-client.i686;\
 \end{Command}
 \end{itemize}
 
-\subsection{union image}
+\subsection{Union Image}
 
 As used in the suse-pxe-client example it is possible to make use of the
 aufs or unionfs overlay filesystems to combine two filesystems
@@ -528,7 +529,7 @@ KIWI_INITRD=/boot/initrd
 \end{verbatim}
 \end{Command}
 
-\subsection{split image}
+\subsection{Split Image}
 
 As an alternative to the UNIONFS\_CONFIG method it is also
 possible to create a split image and combine the two portions
@@ -578,7 +579,7 @@ KIWI_INITRD=/boot/initrd
 \end{Command}
 \end{itemize}
 
-\subsection{root tree over NFS}
+\subsection{Root Tree Over NFS}
 
 Instead of installing the image onto a local storage device of
 the client it is also possible to let the client mount the root
@@ -595,7 +596,7 @@ NFSROOT=192.168.100.7;/tmp/kiwi.nfsroot
 \end{Command}
 \end{itemize}
 
-\subsection{root tree over NBD}
+\subsection{Root Tree Over NBD}
 
 As an alternative for root over NFS it is also possible to
 let the client mount the root tree via a special network block
@@ -612,7 +613,7 @@ NBDROOT=192.168.100.7;2000;/dev/nbd0
 \end{Command}
 \end{itemize}
 
-\subsection{root tree over AoE}
+\subsection{Root Tree Over AoE}
 
 As an alternative for root over NBD it is also possible to
 let the client mount the root device via a special ATA over
@@ -632,7 +633,7 @@ AOEROOT=/dev/etherd/e0.1
 \end{Command}
 
       This would require the command
-      \textbf{''vbladed 0 1 eth0 blockdevice''}
+      \cmd{vbladed 0 1 eth0 blockdevice}
       to be called first
 \end{itemize}
 

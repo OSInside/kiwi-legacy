@@ -1,11 +1,11 @@
 \index{KIWI images!testing|(}
-\chapter{KIWI testsuite}
+\chapter{KIWI Testsuite}
 \label{chapter:testing}
 \minitoc
 
 The KIWI test suite is useful to perform basic quality checks on
 the image root directory. The test cases are stored in subdirectories
-below /usr/share/kiwi/tests. To run the testsuite call kiwi as
+below \path{/usr/share/kiwi/tests}. To run the testsuite call KIWI as
 follows:
 
 \begin{Command}{12cm}
@@ -17,10 +17,10 @@ If not test names are set the default tests rpm and ldd run.
 The name of a test corresponds with the name of the directory
 the test is implemented in.
 
-\section{testsuite packages}
+\section{Testsuite Packages}
 If a test requires special software to be installed but this
 software is not an essential part of the image itself it can be
-specified as testsuite packages in the system image config.xml
+specified as testsuite packages in the system image \path{config.xml}
 as follows:
 
 \begin{Command}{12cm}
@@ -29,13 +29,13 @@ as follows:
 </packages>
 \end{Command}
 
-The testsuite packages are installed when calling kiwi with
+The testsuite packages are installed when calling KIWI with
 the testsuite option and are removed after the tests has
 finished.
 
-\section{Creating a test}
-The test itself is defined by a xml description ''test-case.xml''
-and its template definition file /usr/share/kiwi/modules/KIWISchemaTest.rnc
+\section{Creating a Test}
+The test itself is defined by a xml description \path{test-case.xml}
+and its template definition file \path{/usr/share/kiwi/modules/KIWISchemaTest.rnc}
 The following example shows the basic structure of the rpm test:
 
 \begin{verbatim}
@@ -57,7 +57,7 @@ The following example shows the basic structure of the rpm test:
 </test_case>
 \end{verbatim}
 
-There are basically two sections called ''equirements'' and ''test''.
+There are basically two sections called \xmlelement{equirements} and \xmlelement{test}.
 In requirements you define what files/directories or packages has to be
 present in your image to run the test. For example if you need to check
 the rpm database, the database has to be present within the image.
@@ -84,7 +84,7 @@ There are two types of scripts, extern and intern.
       Their first parameter should be CHROOT. This parameter
       is changed to the real path of the image chroot directory.
 
-\item internal scripts are executed inside image using the ''chroot'' command.
+\item internal scripts are executed inside image using the \cmd{chroot} command.
       Files are copied into the image and deleted after execution.
 \end{itemize}
 

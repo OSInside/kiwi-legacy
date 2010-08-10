@@ -13,7 +13,7 @@ the operating system. An e-mail server was just an e-mail application
 running on top of Linux, Unix, Microsoft Windows, or some other operating
 system, on a computer that was not designed specifically for that application.
 
-\section{The KIWI model}
+\section{The KIWI Model}
 With KIWI we started to use a different model. Instead of installing
 firewall software on top of a general purpose computer/operating system,
 the designers/engineers built images that are designed specifically for
@@ -99,7 +99,7 @@ and can be adapted to special needs and environments.
             \end{Command}
 
             Add those packages which are labeled with ($+$) to the
-            \textbf{<packages type="image">} section of your \path{config.xml}
+            \xmlstarttag{packages \xmlattrval{type}{image}} section of your \path{config.xml}
             file and remove those packages which has been removed ($-$)
             appropriately. If there are packages which has been removed
             against the will of the package manager make sure you address

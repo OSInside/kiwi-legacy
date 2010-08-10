@@ -12,10 +12,10 @@ most privileged layer.%[1] %% <-- Should this be a reference?
 Above this layer are one or more guest
 operating systems, which the hypervisor schedules across the physical
 CPUs. The first guest operating system, called in Xen terminology
-"domain 0" (dom0), is booted automatically when the hypervisor boots
+\kquote{domain 0} (dom0), is booted automatically when the hypervisor boots
 and given special management privileges and direct access to the physical
 hardware. The system administrator logs into dom0 in order to start
-any further guest operating systems, called "domain U" (domU) in
+any further guest operating systems, called \kquote{domain U} (domU) in
 Xen terminology.
 
 A xen image is a virtual disk like a vmx but with the xen kernel
@@ -25,7 +25,7 @@ Xen versions. Xen extracts the kernel and initrd from the virtual
 disk as well as the grub configuration and displays the menu which
 allows emulation of the grub console
 
-\section{Building the suse-xen-guest example}
+\section{Building the suse-xen-guest Example}
 
 The latest example provided with kiwi is based on openSUSE 11.3 and includes
 the base pattern. 
@@ -46,9 +46,9 @@ kiwi --create /tmp/myxen \
 \end{verbatim}
 \end{Command}
 
-\section{Using the image}
+\section{Using the Image}
 
-In order to run a domain U the Xen tool \textbf{xm} needs to be called
+In order to run a domain U the Xen tool \cmd{xm} needs to be called
 in conjunction with the KIWI genereated domain U configuration file
 
 \begin{Command}{13cm}
@@ -80,9 +80,9 @@ need in this para virtual environment with a profile.
 \end{Command}
 
 If this information is present KIWI will create a Xen domain U
-configuration with 512 MB of RAM and expects the disk at /dev/xvda.
+configuration with 512 MB of RAM and expects the disk at \path{/dev/xvda}.
 Additional information to setup the Xen guest machine properties are
-explained in the \textbf{machine} section. The KIWI Xen domain U
+explained in the \texttt{machine} section. The KIWI Xen domain U
 configuration is stored in the file:
 
 \begin{Command}{13cm}

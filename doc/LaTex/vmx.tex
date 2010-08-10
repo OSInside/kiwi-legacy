@@ -5,13 +5,13 @@
 
 A VMX image is a virtual disk image for use in full virtualisation
 systems like QEMU or VMware. The image is a file containing the
-system represented by the configured packages in config.xml as well
+system represented by the configured packages in \path{config.xml} as well
 as partition data and bootloader information. The size of
-this virtual disk can be specified by using the <size> element
-in the config.xml file or by adding the \option{bootvm-disksize} command
+this virtual disk can be specified by using the \xmlstarttag{size} element
+in the \path{config.xml} file or by adding the \option{bootvm-disksize} command
 line argument.
 
-\section{Building the suse-vm-guest example}
+\section{Building the suse-vm-guest Example}
 
 The vm-guest example provided with kiwi is based on recent openSUSE releases,
 one example configuration per release. The example uses base pattern and the
@@ -50,7 +50,7 @@ qemu suse-11.2-vm-guest.i686-1.1.2.raw -m 256
 
 \section{Flavours}
 
-KIWI always generates a file in the .raw format. The .raw file is a disk
+KIWI always generates a file in the .raw format. The \path{.raw} file is a disk
 image with a structure equivalent to the structure of a physical hard disk. 
 Individual virtualization systems have specific formats to facilitate
 improved I/O performance to the virtual disk, represented by the image file,
@@ -83,10 +83,10 @@ includes information about the hardware to be represented to the guest
 image by the VMware virtualization environment as well as specification
 of resources such as memory. 
 
-Within the config.xml file it is possible to specify the VMware configuration
+Within the \path{config.xml} file it is possible to specify the VMware configuration
 settings. In addition it is possible to include selected packages in the 
 created image that are specific to the VM image generation. The following
-config.xml snippet provides general guidance on the elements in config.xml.
+config.xml snippet provides general guidance on the elements in \path{config.xml}.
 
 \begin{Command}{13cm}
 \begin{verbatim}
@@ -104,11 +104,11 @@ config.xml snippet provides general guidance on the elements in config.xml.
 Given the specification above KIWI will create a VMware guest
 configuration specifying the availability of 512 MB of RAM and an IDE 
 disk controller interface for the VM guest. For aditional information
-about the configuration settings please refere to the 
-\textbf{machine} section. 
+about the configuration settings please refer to the 
+\textit{machine} section. 
 
 The guest configuration can be loaded through VMware user interface and 
-may be modified through the GUI. The configuration file has the .vmx 
+may be modified through the GUI. The configuration file has the \path{.vmx} 
 extension as shown in the example below.
 
 \begin{Command}{13cm}
@@ -117,18 +117,18 @@ extension as shown in the example below.
 \end{verbatim}
 \end{Command}
 
-Using the \textbf{format=''vmdk''} attribute of the <type> element
-will create the VMware formated disk image (.vmdk file) and the required 
-VMware guest configuration (.vmx) file.
+Using the \xmlattrval{format}{vmdk} attribute of the \xmlstarttag{type} start tag
+will create the VMware formated disk image (\path{.vmdk} file) and the required 
+VMware guest configuration (\path{.vmx}) file.
 
 In addition it is possible to create an image for the Xen virtualization 
-framework.  By adding the \textbf{bootprofile} and \textbf{bootkernel} 
-attributes to the <type> element with values of 'xen' and 'xenboot', 
+framework.  By adding the \xmlattr{bootprofile} and \xmlattr{bootkernel} 
+attributes to the \xmlstarttag{type} start tag with values of \xmlval{xen} and
+\xmlval{xenboot}, 
 respectively. Please refer to the \ref{chapter:xen} (Xen image) chapter 
 for additional details.
 
-\subsection{LVM support}
-
+\subsection{LVM Support}
 KIWI also provides support for LVM (Logical Volume Management). In this
 mode the disk partition table will include one lvm partition and one
 standard ext2 boot partition. KIWI creates the kiwiVG volume group and
@@ -136,10 +136,10 @@ adds logical volumes as they are needed and configured according to the
 image type and filesystem. After boot of the system the user has full
 control over the volume group and is free to change/resize/increas the
 group and the volumes inside. Support for LVM has been added for all
-image types which are disk based. This includes vmx,oem and usb.
-In order to use LVM for the vmx type just add the \verb+--lvm+ option
-as part of the KIWI create step or add the attribute \textbf{lvm=''true''}
-as part of the \textbf{type} section in your config.xml file.
+image types which are disk based. This includes vmx, oem and usb.
+In order to use LVM for the vmx type just add the \option{lvm} option
+as part of the KIWI create step or add the attribute \xmlattrval{lvm}{true}
+as part of the \xmlelement{type} section in your \path{config.xml} file.
 
 \begin{Command}{12cm}
 \begin{verbatim}
@@ -148,6 +148,6 @@ kiwi --create /tmp/myvm --type vmx \
 \end{verbatim}
 \end{Command}
 
-With the optional \textbf{lvmvolumes} section you can set one or
+With the optional \xmlelement{lvmvolumes} section you can set one or
 more top level directories into a separate volume. See the
 \textit{KIWI image description} chapter for a detailed explanation.
