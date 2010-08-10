@@ -1,5 +1,5 @@
 \index{KIWI images!ec2|(}
-\chapter{EC2 image - Amazon Elastic Compute Cloud}
+\chapter{EC2 Image---Amazon Elastic Compute Cloud}
 \label{chapter:ec2}
 \minitoc
 
@@ -10,8 +10,8 @@ environment. To use Amazon EC2 you simply:
 \begin{enumerate}
 \item Create an Amazon Machine Image (AMI) containing all your software,
       including your operating system and associated configuration settings,
-      applications, libraries, etc. Such an AMI can be created by the kiwi
-      ec2 image format. In order to do that kiwi makes use of the tools
+      applications, libraries, etc. Such an AMI can be created by the KIWI
+      ec2 image format. In order to do that KIWI makes use of the tools
       provided by Amazon. Your build system should have these tools
       installed. Due to license issues we are not allowed to distribute
       the tools which means you need to download, install and setup
@@ -30,17 +30,17 @@ environment. To use Amazon EC2 you simply:
 
 Please note while instances are running, you are billed for the
 computing and network resources that they consume.
-You should start creating an ec2 with kiwi after you can make sure
+You should start creating an ec2 with KIWI after you can make sure
 your system is prepared for ec2 which means if you call the command
-\textbf{ec2-describe-images -a} you will get a valid output.
+\cmd{ec2-describe-images -a} you will get a valid output.
 
-\section{Building the suse-xen-guest example for EC2}
+\section{Building the suse-xen-guest Example for EC2}
 
-One example provided with kiwi is based on openSUSE 11.3 and
+One example provided with KIWI is based on openSUSE 11.3 and
 includes the base pattern plus the vim editor.
 
-Before you run kiwi you need to include some of your ec2 account
-information into the image description config.xml file. The box
+Before you run KIWI you need to include some of your ec2 account
+information into the image description \path{config.xml} file. The box
 below shows the values you need to adapt:
 
 \begin{Command}{13cm}
@@ -53,7 +53,7 @@ below shows the values you need to adapt:
 \end{verbatim}
 \end{Command}
 
-After that call kiwi as follows:
+After that call KIWI as follows:
 
 \begin{Command}{13cm}
 \begin{verbatim}
@@ -73,7 +73,7 @@ kiwi --create /tmp/myec2 \
 \end{verbatim}
 \end{Command}
 
-\section{Using the image}
+\section{Using the Image}
 The generated image needs to be transfered over to Amazon which is
 done by the ec2-upload-bundle tool. You can do this by calling:
 
@@ -87,7 +87,7 @@ ec2-upload-bundle -b myImages \
 \end{Command}
 
 After this is done the image needs to be registered in order to
-receive a so called AMI id which starts with \textbf{ami-} followed
+receive a so called AMI id which starts with \path{ami-} followed
 by a random key sequence. To register call:
 
 \begin{Command}{13cm}
@@ -116,9 +116,9 @@ ec2-add-keypair gsg-keypair
 
 The private key returned needs to be saved in a local file so that
 you can use it later. Using your favorite text editor, create a file
-named \textbf{id\_rsa-gsg-keypair} and paste everything between
-(and including) the \textit{-----BEGIN RSA PRIVATE KEY-----} and
-\textit{-----END RSA PRIVATE KEY-----} lines into it. To review
+named \path{id_rsa-gsg-keypair} and paste everything between
+(and including) the \texttt{-{}-{}-{}-{}-BEGIN RSA PRIVATE KEY-{}-{}-{}-{}-} and
+\texttt{-{}-{}-{}-{}-END RSA PRIVATE KEY-{}-{}-{}-{}-} lines into it. To review
 your keypairs call:
 
 \begin{Command}{10cm}

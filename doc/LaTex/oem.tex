@@ -1,5 +1,5 @@
 \index{KIWI images!oem|(}
-\chapter{OEM image - Preload Systems}
+\chapter{OEM Image---Preload Systems}
 \label{chapter:oem}
 \minitoc
 
@@ -15,13 +15,13 @@ Windows as long as a tool to dump data onto a disk device exists and is
 used. The oem image type may also be used to deploy an image on a USB stick. 
 A USB stick is simply a removable physical storage device.
 
-\section{Building the suse-oem-preload example}
+\section{Building the suse-oem-preload Example}
 
 The OEM example provided with kiwi is based on recent openSUSE releases, 
 one example configuration per release, and includes the default and x11 
 patterns. The image type is a split type utilizing the distributions default
 filesystem format for the read-write partition and the squashfs filesystem 
-for the read-only partition. Using the additional \textbf{installiso} attribute 
+for the read-only partition. Using the additional \xmlattr{installiso} attribute 
 creates an installable ISO image. When booting from the ISO image the
 OEM disk image will be deployed to the storage media on the booting machine
 (after confirmation by the user).
@@ -45,13 +45,13 @@ kiwi --create /tmp/myoem --type split \
 \end{verbatim}
 \end{Command}
 
-\section{Using the image}
+\section{Using the Image}
 
-The virtual disk image created by kiwi with the commands shown above can be 
+The virtual disk image created by KIWI with the commands shown above can be 
 tested using virtualization software such as QEMU, VMware, or VirtualBox. 
-The virtual disk is represented by the file with the .raw extension, whereas 
+The virtual disk is represented by the file with the \path{.raw} extension, whereas 
 the file with the .iso extension represents the installation disk for this oem
-image. The ISO image is bootable \textit{(filename.iso)} and can be burned to 
+image. The ISO image is bootable \path{(filename.iso)} and can be burned to 
 optical media. It is recommended to test the image on a bare test system. The 
 following command shows how to use qemu to test the oem disk image 
 \textit{(filename.raw)}.
@@ -64,7 +64,7 @@ qemu suse-11.2-oem-preload.i686-1.1.2.raw \
 \end{verbatim}
 \end{Command}
 
-or using the \textbf{dd} command you can dump the image onto a test hard 
+or using the \cmd{dd} command you can dump the image onto a test hard 
 disk or USB stick and upon reboot select the appropriate device as the 
 boot device in the BIOS:
 
@@ -83,7 +83,7 @@ re-partitioning performed for a physical disk install during the oem boot
 workflow will be skipped.
 
 You can test the installation procedure in a virtual environment using
-the .iso file. In this case the re-partitioning code in the boot image will
+the \path{.iso} file. In this case the re-partitioning code in the boot image will
 be executed. The following commnads show this procedure using QEMU.
 
 \begin{Command}{12cm}
@@ -98,7 +98,7 @@ qemu -hda /tmp/mydisk -cdrom \
 
 \section{Flavors}
 
-As indicated above the use of the \textbf{installiso} and \textbf{installstick}
+As indicated above the use of the \xmlattr{installiso} and \xmlattr{installstick}
  attributes for the oem image supports the creation of an installation image.
 The installation image can be created in two formats, one suitable for
 CD/DVD media and a second suitable for a USB stick. The self installing
@@ -106,21 +106,21 @@ image deploys the oem image onto the selected storage device. The
 installation process is a simple image dump using the dd command. During
 this process the target system
 remains in terminal mode. The following configuration snippets show the 
-use of the \textbf{installiso} and \textbf{installstick} attributes
+use of the \xmlattr{installiso} and \xmlattr{installstick} attributes
 to create the ISO or USB installation image format respectively.
 
 \begin{itemize}
-\item <type image="name" ... installiso=''true''/>\\
-      Creates a .iso file which can be burned in CD or DVD. This
+\item \xmlemptytag{type \xmlattrval{image}{name} ... \xmlattrval{installiso}{true}}\\
+      Creates a \path{.iso} file which can be burned in CD or DVD. This
       represents an installation CD
-\item <type image="name" ... installstick=''true''/>\\
-      Creates a .raw.install file which can be dumped (dd) on a
+\item \xmlemptytag{type \xmlattrval{image}{name} ... \xmlattrval{installstick}{true}}\\
+      Creates a \path{.raw.install} file which can be dumped (dd) on a
       USB stick. This represents an installation Stick
 \end{itemize}
 
-\subsection{Influencing the oem partitioning}
+\subsection{Influencing the OEM Partitioning}
 
-By default the oemboot process will create/modify a swap, /home and /
+By default the oemboot process will create/modify a swap, \path{/home} and \path{/}
 partition. It is possible to influence the behavior with the
 oem-* elements. See the \textit{KIWI image description} chapter for details.
 
@@ -150,7 +150,7 @@ oem-* elements. See the \textit{KIWI image description} chapter for details.
 %\end{verbatim}
 %\end{enumerate}
 
-\subsection{LVM support}
+\subsection{LVM Support}
 
 KIWI also provides support for LVM (Logical Volume Management). In this
 mode the disk partition table will include one lvm partition and one
@@ -164,8 +164,8 @@ has full control over the volume group and is free to change
 been added for all disk based image types. This includes the vmx, oem and
 usb image types. In order to use LVM for the oem type just add the 
 \verb+--lvm+ command line option when executing the create step or add
-the attribute \textbf{lvm=''true''} to of the \textbf{type} 
-element in your config.xml file.
+the attribute \xmlattrval{lvm}{true} to of the \xmlelement{type} 
+element in your \path{config.xml} file.
 
 \begin{Command}{12cm}
 \begin{verbatim}
@@ -178,17 +178,17 @@ With the optional \textbf{lvmvolumes} section you can specify to have
 one or more top level directories in a separate volume. See the
 \textit{KIWI image description} chapter for a detailed explanation.
 
-\subsection{Partition based installation}
+\subsection{Partition Based Installation}
 
 The default installation method of an OEM is dumping the entire
 virtual disk on the selected target disk and repartition the disk
 to the real geometry. This works but will also wipe everything which
 was on the disk before. KIWI also supports the installation into
 already existing partitions. This means the user can setup a disk
-with free partitions for the kiwi OEM installation process. This
+with free partitions for the KIWI OEM installation process. This
 way already existing data will not be touched. In order to activate
 the partition based install mode the following oem option has to
-be set in config.xml:
+be set in \path{config.xml}:
 
 \begin{Command}{14cm}
 \begin{verbatim}
@@ -209,7 +209,7 @@ should be mentioned:
       has to loop mount the disk image in order to access the partitions
       which can't be done remotely
 \item The raw disk image is stored uncompressed on the install media.
-      This is because kiwi needs to loop mount the disk image which it can't
+      This is because KIWI needs to loop mount the disk image which it can't
       do if the file is only available as compressed version. This means
       the install media in this mode will be approximately double the size
       of a standard install media

@@ -12,7 +12,7 @@ like on any other system. All write actions takes place in RAM space
 and therefore all changes will be lost as soon as the computer shuts
 down.
 
-\section{Building the suse-live-iso example}
+\section{Building the suse-live-iso Example}
 
 The latest example provided with kiwi is based on openSUSE 11.2 and
 includes the base + kde patterns.
@@ -33,7 +33,7 @@ kiwi --create /tmp/myiso \
 \end{verbatim}
 \end{Command}
 
-\section{Using the image}
+\section{Using the Image}
 
 There are two ways to use the generated ISO image:
 \begin{itemize}
@@ -68,22 +68,23 @@ attribute in config.xml exists to be able to have the following
 alternative solutions:
 
 \begin{itemize}
-\item \textbf{flags=''unified''}\\
+\item \xmlattrval{flags}{unified}\\
       Compressed and unified root tree as explained above
-\item \textbf{flags=''compressed''}\\
+\item \xmlattrval{flags}{compressed}\\
       Does filesystem compression with squashfs but don't use an
       overlay filesystem for write support. A symbolic link list is used
-      instead and thus a split element is required in config.xml.
+      instead and thus a split element is required in \path{config.xml}.
       See the Split mode section below for details.
-\item \textbf{flags=''clic''}\\
+\item \xmlattrval{flags}{clic}\\
       Creates a fuse based clicfs image and allows write operations
       into a cow file. In case of an ISO the write happens into a
       ramdisk.
-\item \textbf{flags not set}\\
+\item {Flags Not Set}\\
       If no flags attribute is set no compressed filesystem and no overlay
       filesystem will be used. The root tree will be directly part of
-      the ISO filesystem and the paths: /bin, /boot, /lib, /lib64, /opt,
-      /sbin and /usr will be read-only.
+      the ISO filesystem and the paths: \path{/bin}, \path{/boot}, 
+      \path{/lib}, \path{/lib64}, \path{/opt},
+      \path{/sbin}, and \path{/usr} will be read-only.
 \end{itemize}
 
 \subsection{Split mode}
@@ -91,9 +92,9 @@ alternative solutions:
 If no overlay filesystem is in use but the image filesystem is based on
 a compressed filesystem KIWI allows to setup which files and directories
 should be writable in a so called split section. In order to allow to
-login into the system at least the /var directory should be writable
+login into the system at least the \path{/var} directory should be writable
 because the PAM authentification requires to be able to report any login
-attempt to /var/log/messages which therefore needs to be writable. The
+attempt to \path{/var/log/messages} which therefore needs to be writable. The
 following split section can be used if the flag compressed
 is used:  
 

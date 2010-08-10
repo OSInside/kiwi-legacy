@@ -7,8 +7,8 @@ Creating an image often results in an appliance solution for a
 customer and gives you the freedom of a working solution at that
 time. But software develops and you don't want your solution to
 become outdated. Because of this together with an image people always
-should think of \textbf{image-maintenance}. The following paragraph
-just reflects ideas how to maintain images created by kiwi:
+should think of \emph{image-maintenance}. The following paragraph
+just reflects ideas how to maintain images created by KIWI:
 
 \begin{figure}[h]
 \centering
@@ -22,10 +22,10 @@ image to become updated. The first reason for updating an image
 are changes to the software, for example a new kernel should be
 used. If this change doesn't require additional software or changes
 in the configuration the update can be done by kiwi itself using
-its \textbf{upgrade} option. In combination with \textbf{upgrade}
-kiwi allows to add an additional repository which may be needed if
+its \option{upgrade} option. In combination with \option{upgrade}
+KIWI allows to add an additional repository which may be needed if
 the updated software is not part of the original repository. An
-important thing to know is that this additional repository is \textbf{not}
+important thing to know is that this additional repository is \emph{not}
 stored into the original config.xml file of the image description.
 
 Another reason for updating an image beside software updates are
