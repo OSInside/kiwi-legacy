@@ -2782,9 +2782,12 @@ function CDMount {
 		# by the isohybrid tool :(
 		# ----
 		PARTITIONER=sfdisk
-		if [ "x$kiwi_hybridpersistent" = "xyes" -a \
-		     $(cat /sys/block/$biosBootDevice/ro) = "0" ]; then
-			createHybridPersistent $biosBootDevice
+		if [ "x$kiwi_hybridpersistent" = "xyes" ];then
+			protectedDevice=$(echo $biosBootDevice | sed -e s@/dev/@@)
+			protectedDisk=$(cat /sys/block/$protectedDevice/ro)
+			if [ $protectedDisk = "0" ];then
+				createHybridPersistent $biosBootDevice
+			fi
 		fi
 		Echo -n "Mounting hybrid live boot drive..."
 		cddev=$(ddn $biosBootDevice 1)
@@ -3773,6 +3776,8 @@ function mountSystemClicFS {
 			if [ $LOCAL_BOOT = "no" ] && [ $systemIntegrity = "clean" ];then
 				resetReadWrite=1
 			elif ! mount $rwDevice $HYBRID_PERSISTENT_DIR;then
+				resetReadWrite=1
+			elif [ ! -z "$wipecow" ];then
 				resetReadWrite=1
 			fi
 			if [ $resetReadWrite = 1 ];then
