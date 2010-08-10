@@ -41,22 +41,13 @@ function suseInsertService {
 	# required for this service it will be inserted first
 	# -----
 	local service=$1
-	local result
-	while true;do
-		result=`/sbin/insserv $service 2>&1 | grep "^insserv: Service"`
-		if [ $? = 0 ];then
-			echo "Service $service inserted"
-			break
-		else
-			result=`echo $result | head -n 1 | cut -f3 -d " "`
-			if [ -f /etc/init.d/$result ];then
-				suseInsertService /etc/init.d/$result
-			else
-				echo "$service: required service: $result not found...skipped"
-				break
-			fi
+	if /sbin/insserv $service;then
+		echo "Service $service inserted"
+	else
+		if ! /sbin/insserv --recursive $service;then
+			echo "$service: recursive insertion failed...skipped"
 		fi
-	done
+	fi
 }
 
 #======================================
@@ -68,21 +59,13 @@ function suseRemoveService {
 	# using insserv -r
 	# ----
 	local service=/etc/init.d/$1
-	while true;do
-		/sbin/insserv -r $service &>/dev/null
-		if [ $? = 0 ];then
-			echo "Service $service removed"
-			break
-		else
-			result=`/sbin/insserv -r $service 2>&1|tail -n 2|cut -f10 -d " "`
-			if [ -f /etc/init.d/$result ];then
-				suseRemoveService $result
-			else
-				echo "$service: $result not found...skipped"
-				break
-			fi
+	if /sbin/insserv -r $service;then
+		echo "Service $service removed"
+	else
+		if ! /sbin/insserv --recursive -r $service;then
+			echo "$service: recursive removal failed...skipped"
 		fi
-	done
+	fi
 }
 
 #======================================
