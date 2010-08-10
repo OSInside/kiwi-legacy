@@ -7,15 +7,7 @@
 		<specification>openSUSE 11.3 live stick system 1GB</specification>
 	</description>
 	<preferences>
-		<type image="usb" filesystem="clicfs" boot="usbboot/suse-11.3"/>
-		<type image="oem" filesystem="clicfs" boot="oemboot/suse-11.3">
-			<oemconfig>
-				<oem-swap>false</oem-swap>
-				<oem-kiwi-initrd>true</oem-kiwi-initrd>
-				<oem-boot-title>USB</oem-boot-title>
-			</oemconfig>
-		</type>
-		<type image="vmx" filesystem="clicfs" boot="vmxboot/suse-11.3"/>
+		<type image="iso" boot="isoboot/suse-11.3" hybrid="true" hybridpersistent="true" flags="clic"/>
 		<version>1.1.2</version>
 		<packagemanager>zypper</packagemanager>
 		<rpm-check-signatures>false</rpm-check-signatures>
@@ -84,6 +76,15 @@
 		<package name="OpenOffice_org-calc-extensions"/>
 		<package name="OpenOffice_org-help-en-US"/>
 		<package name="OpenOffice_org-impress-extensions"/>
+		<package name="OpenOffice_org-thesaurus-en-US"/>
+		<package name="OpenOffice_org-icon-theme-crystal"/>
+		<package name="OpenOffice_org-LanguageTool"/>
+		<package name="OpenOffice_org-icon-theme-hicontrast"/>
+		<package name="OpenOffice_org-kde4"/>
+		<package name="OpenOffice_org-base-drivers-mysql"/>
+		<package name="OpenOffice_org-icon-theme-oxygen"/>
+		<package name="OpenOffice_org-LanguageTool-en"/>
+		<package name="OpenOffice_org-icon-theme-galaxy"/>
 		<package name="kdegames4-carddecks-other"/>
 		<package name="kdegames4-carddecks-default"/>
 		<package name="libkdegames4"/>
@@ -95,5 +96,6 @@
 		<package name="koffice"/>
 		<package name="koffice-illustration"/>
 		<package name="MozillaFirefox-branding-openSUSE"/>
+		<package name="MozillaFirefox-theme-oxygen"/>
 	</packages>
 </image>
