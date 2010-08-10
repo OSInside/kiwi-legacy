@@ -1,0 +1,4 @@
+if [-f /tmp/euca-setup]; then
+    /usr/sbin/euca_conf --setup
+    rm /tmp/euca-setup
+fi

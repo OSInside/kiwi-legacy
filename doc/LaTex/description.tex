@@ -1,14 +1,14 @@
 \index{KIWI images!description|(}
-\chapter{KIWI image description}
+\chapter{KIWI Image Description}
 \label{chapter:description}
 \minitoc
 
-In order to be able to create an image with kiwi a so called
+In order to be able to create an image with KIWI a so called
 image description must be created. The image description is
 represented by a directory which has to contain at least one
-file named \textbf{config.xml} or alternatively \textbf{*.kiwi}.
+file named \path{config.xml} or alternatively \path{*.kiwi}.
 A good start for such a description can be found in the examples
-provided in /usr/share/doc/packages/kiwi/examples.
+provided in \path{/usr/share/doc/packages/kiwi/examples}.
 
 \begin{figure}[h]
 \centering
@@ -22,13 +22,13 @@ of building an image but most often mandatory for the functionality
 of the later operating system.
 
 \begin{itemize}
-\item \textbf{\underline{images.sh}}\\
+\item \path{images.sh}\\
       Optional configuration script while creating the packed image.
       This script is called at the beginning of the image creation process.
       It is designed to clean-up the image system. Affected are all the
       programs and files only needed while the unpacked image exists.
 
-\item \textbf{\underline{config.sh}}\\
+\item \path{config.sh}\\
       Optional configuration script while creating the unpacked image. This
       script is called at the end of the installation but \textbf{before}
       the package scripts have run. It is designed to configure the image
@@ -36,18 +36,18 @@ of the later operating system.
       (insserv). The call is not made until after the switch to the image
       has been made with \textbf{chroot}.
 
-\item \textbf{\underline{root/}}\\
+\item \path{root/}\\
       Subdirectory that contains special files, directories, and scripts for
       adapting the image environment \textbf{after} the installation of all the
       image packages. The entire directory is copied into the root of the
       image tree using \textit{cp -a}.
 
-\item \textbf{\underline{config-yast-firstboot.xml}}\\
+\item \path{config-yast-firstboot.xml}\\
       Configuration file for the control of the yast2 firstboot service.
       Similar to the autoyast approach yast also provides a boot time
       service called firstboot. Unfortunately there is no GUI available
       to setup the firstboot but a good documentation in
-      /usr/share/doc/packages/yast2-firstboot. Once you have 
+      \path{/usr/share/doc/packages/yast2-firstboot}. Once you have 
       created such a firstboot file in your image description directory KIWI
       will process on the file and setup your image as follows:
 
@@ -55,12 +55,12 @@ of the later operating system.
       \item KIWI enables the firstboot service
       \item While booting the image YaST is started in firstboot mode
       \item The firstboot service handles the instructions listed in the
-            config-yast-firstboot.xml
+            \path{config-yast-firstboot.xml} file
       \item If the process finished successfully the environment is
             cleaned and firstboot won't be called at next reboot.
       \end{enumerate} 
 
-\item \textbf{\underline{config-yast-autoyast.xml}}\\
+\item \path{config-yast-autoyast.xml}\\
       Configuration file which has been created by autoyast.
       To be able to create such an autoyast profile you should first
       call:
@@ -82,34 +82,34 @@ of the later operating system.
             cleaned and autoyast won't be called at next reboot.
       \end{enumerate}
 
-\item \textbf{\underline{config-cdroot.tgz}}\\
+\item \path{config-cdroot.tgz}\\
       Archive which is used for ISO images only. The data in the archive is
       uncompressed and stored in the CD/DVD root directory. This
       archive can be used, for example, to integrate a license file or
       readme information directly readable from the CD or DVD.
 
-\item \textbf{\underline{config-cdroot.sh}}\\
-      Along with the config-cdroot.tgz one can provide a script which allows
+\item \path{config-cdroot.sh}\\
+      Along with the \path{config-cdroot.tgz} one can provide a script which allows
       to manipulate the extracted data.
 
-\item \textbf{\underline{config/}}\\
+\item \path{config/}\\
       Optional Subdirectory that contains Bash scripts that are called
       after the installation of all the image packages, primarily in order
       to remove the parts of a package that are not needed for the operating
       system. The name of the Bash script must resemble the package name
-      listed in the config.xml
+      listed in the \path{config.xml}
 \end{itemize}
 
-\section{config.xml}
+\section{The config.xml File}
 The mandatory image definition file is divided into different sections
 which describes information like the image name and type as well as
 the packages and patterns the image should consist of. The following
 information explains the basic structure of the XML document. When KIWI
-is called the XML structure is validated by a RelaxNG based schema.
-For details on attributes and values please refer to the schema 
-documentation file at /usr/share/doc/packages/ kiwi/kiwi.rng.html.
+is called the XML structure is validated by a RELAX~NG based schema.
+For details on attributes and values please refer to the schema
+documentation file at \path{/usr/share/doc/packages/kiwi/kiwi.rng.html}.
 
-\subsection{image element}
+\subsection{\xmlstarttag{image} Element}
 \begin{Command}{12cm}
 <image schemaversion="3.5" name="iname"\\
 \hspace*{1.9cm}\textit{displayname="text"}\\
@@ -133,22 +133,23 @@ attribute must not have any spaces in its name.
 \item The optional attribute inherit allows to inherit the
       packages information from another image description.
 \item The optional attribute kiwirevision allows to specify
-      a kiwi SVN revision number which is known to build
-      a working image from this description. If the kiwi SVN
+      a KIWI SVN revision number which is known to build
+      a working image from this description. If the KIWI SVN
       revision is less than the specified value the
       process will exit. The currently used SVN revision can
-      be queried by calling kiwi $--$version
+      be queried by calling \cmd{kiwi \option{version}}
 \item The optional attribute id allows to set an identification
-      number which appears as file /etc/ImageID within the
+      number which appears as file \path{/etc/ImageID} within the
       image.
 \end{itemize}
 
 Inside the \textbf{image} section the following mandatory and optional
 subelements exists. The simplest image description must define the
-elements \textbf{description, preferences, repository and
-packages (at least one of type=''bootstrap'')}.
+elements \xmlstarttag{description}, \xmlstarttag{preferences}, 
+\xmlstarttag{repository} and \xmlstarttag{packages} (at least one of 
+\xmlattrval{type}{bootstrap}).
 
-\subsection{description element}
+\subsection{\xmlstarttag{description} Element}
 \begin{Command}{12cm}
 <description type="system">\\
 \hspace*{1cm}<author>an author</author>\\
@@ -163,7 +164,7 @@ could be either of the value ''system'' which indicates this is a
 system image description or at value ''boot'' for boot image
 descriptions.
 
-\subsection{profiles element}
+\subsection{\xmlstarttag{profiles} Element}
 \begin{Command}{12cm}
 <profiles>\\
 \hspace*{1cm}<profile name="name" description="text"/>\\
@@ -179,13 +180,13 @@ specifies an alias name used to mark sections as belonging to a profile,
 and a short description explaining what this profile does.
 
 To mark a set of packages/drivers as belonging to a profile, simply
-annotate them with the \textbf{profiles} attribute. It is also possible
+annotate them with the \xmlattr{profiles} attribute. It is also possible
 to mark sections as belonging to multiple profiles by separating the
-names in the \textbf{profiles} attribute with a comma.
+names in the \xmlattr{profiles} attribute with a comma.
 If a packages/drivers tag does not have a profiles attribute, it is
 assumed to be present for all profiles.
 
-\subsection{preferences element}
+\subsection{\xmlstarttag{preferences} Element}
 \begin{Command}{14cm}
 <preferences \textit{profiles="name"}>\\
 \hspace*{1cm}<version>1.1.2</version>\\
@@ -206,45 +207,46 @@ changes to the image description the following rules should apply:
 \begin{itemize}
 \item For smaller image modifications that do not add or remove any
       new packages, only the release number is incremented.
-      The \textbf{config.xml} file remains unchanged.
+      The \path{config.xml} file remains unchanged.
 \item For image changes that involve the addition or removal of packages
       the minor number is incremented and the release number is reset.
 \item For image changes that change the size of the image file
       the major number is incremented.
 \end{itemize}
 
-By default kiwi use the \textbf{smart} packagemanager but it is also possible
-to use the SUSE packagemanager called \textbf{zypper}. 
+By default KIWI use the \cmd{smart} packagemanager but it is also possible
+to use the SUSE packagemanager called \cmd{zypper}. 
 
-In general the specification of one <preferences> section is sufficient.
-However, it's possible to specify multiple <preferences> sections and
-distinquish between the sections via the \textbf{profiles} attribute. Data
+In general the specification of one \xmlstarttag{preferences} section is sufficient.
+However, it's possible to specify multiple \xmlstarttag{preferences} sections and
+distinquish between the sections via the \xmlattr{profiles} attribute. Data
 may also be shared between different profiles. Using profiles it is possible
 to, for example, configure specific preferences for OEM image generation. 
-Activation of a given <preferences> during image generation is triggered by
-the use of the $--$add-profile command line argument.
+Activation of a given \xmlstarttag{preferences} during image generation is triggered by
+the use of the \option{add-profile} command line argument.
 
-For each <preferences> block at least one \textbf{type} element must be
-defined. It is possible to specify multiple <type> elements in any 
-<preferences> block. To set a given <type> description as the default image
-use the boolean attribute \textbf{primary} and set its value to \textbf{true}.
-The image type to be created is determined by the value of the \textbf{image}
+For each \xmlstarttag{preferences} block at least one \xmlelement{type} element must be
+defined. It is possible to specify multiple \xmlstarttag{type} elements in any 
+\xmlstarttag{preferences} block. To set a given \xmlstarttag{type} description as the default image
+use the boolean attribute \xmlattr{primary} and set its value to \xmlval{true}.
+The image type to be created is determined by the value of the \xmlattr{image}
 attribute. The following list describes the supported types and possible
 values of the image attribute:
 
 \begin{itemize}
-\item \textbf{image=''cpio''}\\
+\pagebreak[3]
+\item \xmlattrval{image}{cpio}\\
       Use the cpio image type to specify the generation os a boot image
       (intrd). When generating a boot image it is possible to specify a
       specific boot profile and boot kernel using the optional
-      \textbf{bootprofile=''default''} and \textbf{bootkernel=''std''}
+      \xmlattrval{bootprofile}{default} and \xmlattrval{bootkernel}{std}
       attributes.
       
       A boot image should group the various supported kernels into profiles. 
-      If the user chooses not to us the profiles supplied by Kiwi it is
-      required that one profile named \textbf{std} be created. This profile
+      If the user chooses not to use the profiles supplied by KIWI, it is
+      required that one profile named \path{std} be created. This profile
       will be used if no other bootkernel is specified. Further it is 
-      required to create a  profile named \textbf{default}. This profile is
+      required to create a  profile named \path{default}. This profile is
       used when no bootprofile is specified.
 
       It is recommended that special configurations that omit drivers, use
@@ -253,179 +255,181 @@ values of the image attribute:
 
       The bootprofile and bootkernel attribute are respected within the 
       definition of a system image. Us the attribute and value 
-      \textbf{type="system"} of the <description> element to specify the
+      \xmlattrval{type}{system} of the \xmlstarttag{description} element to specify the
       creation of a system image. The values of the bootprofile and 
-      bootkernel attributes are used by Kiwi when generating the boot image.
-\item \textbf{image=''ec2''}\\
-      Setting the image attribute value to ec2 causes the generation of
+      bootkernel attributes are used by KIWI when generating the boot image.
+\item \xmlattrval{image}{ec2}\\
+      Setting the image attribute value to \xmlval{ec2} causes the generation of
       an Amazon Machine Image (AMI) for the AWS (Amazon Web Services) 
       Elastic Compute Cloud (EC2). The AMI is an image comparable to
       a VMware or Xen guest image. It can be transferred to the AWS 
       Simple Storage Service and used within the AWS infrastructure.
       Configuration of the AMI is accomplished with the optional
-      \textbf{ec2config} element, specified as a child of the <type>
+      \xmlelement{ec2config} element, specified as a child of the \xmlstarttag{type}
       element.
-\item \textbf{image=''iso''}\\
+\item \xmlattrval{image}{iso}\\
       Specify the key-value pair image=iso to generate a live system suitable
       for deployment on optical media (CD or DVD). Use the 
-      \textbf{boot=''isoboot/suse-*''} attribute when generating this image
+      \xmlattrval{boot}{isoboot/suse-*} attribute when generating this image
       type to select the apropriate boot image for optical media. In 
-      addition the optional \textbf{flags} attribute may be set to the
+      addition the optional \xmlattr{flags} attribute may be set to the
       following values with the effects described below:
       \begin{itemize}
-      \item \textbf{clic}: Creates a fuse based compressed read-only
+      \item \xmlval{clic}: Creates a fuse based compressed read-only
             filesystem which allows write operations into a cow file.
-      \item \textbf{compressed}: Compressed filesystem with squashfs and
+      \item \xmlval{compressed}: Compressed filesystem with squashfs and
             use a link list to mount the system read-write. An additional
             split section controls the read-write information.
-      \item \textbf{unified}: Compressed filesystem with squashfs mounted
+      \item \xmlval{unified}: Compressed filesystem with squashfs mounted
             with an aufs based overlay mount to allow read-write access.
       \end{itemize}
+      %% CHECK: This sentence sounds a bit strange
       If the flags attribute is not used the filesystem will not be compressed
       and no union filesystem is used. In this case it is recommended to
-      specify a \textbf{split} section as a child of this type element. The
+      specify a \xmlelement{split} section as a child of this type element. The
       specification of a split block is also recommended when flags=compressed
       is used.
-\item \textbf{image=''oem''}\\
+\item \xmlattrval{image}{oem}\\
       Use this type to create a virtual disk system suitable in a preload
-      setting. In addition specify the attributes \textbf{filesystem}, 
-      and \textbf{boot=''oemboot/suse-*''} to control the filesystem used
+      setting. In addition specify the attributes \xmlattr{filesystem}, 
+      and \xmlattrval{boot}{oemboot/suse-*} to control the filesystem used
       for the virtual and to specify the proper boot image. Using the optional
-      optional \textbf{format} attribute and setting the value to ''iso'' or 
+      \xmlattr{format} attribute and setting the value to ''iso'' or 
       ''usb'' will create self installing images suitable for optical media
       or a USB stick, respectively. Booting from the media will deploy
       the OEM preload image onto the selected storage device of the
       system. It is also possible to configure the system to use logical
-      volumes. Use the optional \textbf{lvm} attribute and specify the
-      logical volume configuration with the \textbf{lvmvolumes} child
+      volumes. Use the optional \xmlattr{lvm} attribute and specify the
+      logical volume configuration with the \xmlelement{lvmvolumes} child
       element. The default volume group name is kiwiVG. Further configuration
-      of the image is performed using the appropriate \textbf{*config} child
+      of the image is performed using the appropriate \xmlelement{*config} child
       block.
-\item \textbf{image=''pxe''}\\
-      Creating a network boot image is supported by Kiwi with the image=pxe
-      type. When specifying the creation of a netwoork boot image use the
-      \textbf{filesystem} and \textbf{boot=''netboot/suse-*''} attributes 
+\item \xmlattrval{image}{pxe}\\
+      Creating a network boot image is supported by KIWI with the 
+      \xmlattrval{image}{pxe} type. When specifying the creation of a netwoork boot image use the
+      \xmlattr{filesystem} and \xmlattrval{boot}{netboot/suse-*} attributes 
       to specify the filesystem of the image and the proper boot image. To
-      compress the image file set the \textbf{compressed} boolean attribute
-      to true. This setting will compress the image file and has no influence
+      compress the image file set the \xmlattr{compressed} boolean attribute
+      to \xmlval{true}. This setting will compress the image file and has no influence
       on the filesystem used within the image. The compression is often use to
       support better transfer times when the pxe image is pushed to the 
       boot server over a network connection. The pxe image layout is
-      controlled by using the \textbf{pxedeploy} child element.
-\item \textbf{image=''split''}\\
+      controlled by using the \xmlelement{pxedeploy} child element.
+\item \xmlattrval{image}{split}\\
       The split image support allows the creation of an image as split
       files. Using this technique one can assign different filesystems and
       different read-write properties to the different sections of the image.
-      The \textbf{oem,pxe,usb and vmx} types can be created as a split system
-      image. Use the \textbf{boot=''oem|netboot|usb|vmx/suse-*''} attribute
+      The \xmlval{oem}, \xmlattr{pxe}, \xmlattr{usb}, and \xmlattr{vmx} 
+      types can be created as a split system image. Use the 
+      \xmlattrval{boot}{oem|netboot|usb|vmx/suse-*} attribute
       to select the underlying type of the split image. The attributes
-      \textbf{fsreadwrite}, \textbf{fsreadonly} are used to controll the
+      \xmlattr{fsreadwrite}, \xmlattr{fsreadonly} are used to controll the
       read-write properties of the filesystem specified as the attributes
-      value. Use the appropriate \textbf{*config} child block to specify
+      value. Use the appropriate \xmlelement{*config} child block to specify
       the properties of the underlying image. For example when building a 
-      OEM based split image use the \textbf{<oemconfig>} child section.
-\item \textbf{image=''usb''}\\
+      OEM based split image use the \xmlstarttag{oemconfig} child section.
+\item \xmlattrval{image}{usb}\\
       Use the usb value to create a USB stick image. Set the
-      \textbf{filesystem} attribute to the desired supported filesystem for
-      the image and use the \textbf{boot=''usbboot/suse-*''} attribute to
+      \xmlattr{filesystem} attribute to the desired supported filesystem for
+      the image and use the \xmlattrval{boot}{usbboot/suse-*} attribute to
       select the USB boot image for the system. For a USB image you may
       also select GRUB or Syslinux as a bootloader by setting the
-      optional \textbf{bootloader} attribute to grub ot syslinux,
+      optional \xmlattr{bootloader} attribute to grub ot syslinux,
       respectively. The USB image may also be created with LVM support.
       The same rules as indicated for the OEM image apply.
-\item \textbf{image=''vmx''}\\
+\item \xmlattrval{image}{vmx}\\
       Creation of a virtual disk system is enabled with the vmx value of
       the image attribute. Set the filesystem of the virtual disk with
-      the \textbf{filesystem} attribute and select the appropriate boot
-      image by setting \textbf{boot=''vmxboot/suse-*''}. The optional
-      \textbf{format} attribute is used to specify one of the virtualization
+      the \xmlattr{filesystem} attribute and select the appropriate boot
+      image by setting \xmlattrval{boot}{vmxboot/suse-*}. The optional
+      \xmlattr{format} attribute is used to specify one of the virtualization
       formats supported by qemu, such as vmdk (also the VMware format) or
-      qcow2. For the virtual disk image the optional \textbf{vga} attribute
+      qcow2. For the virtual disk image the optional \xmlattr{vga} attribute
       may be used to configure the kernel framebuffer device. Acceptable
       values can be found in the Linux kernel documentation for the
-      framebuffer device (Documentation/fb/vesafb.txt). Kiwi also supports
+      framebuffer device (\path{Documentation/fb/vesafb.txt}). KIWI also supports
       the selection of the booloader for the virtual disk according to
       the rules indicated for the USB system. Last but not least
       the virtual disk system may also be created with a LVM based layout by
-      using the \textbf{lvm} attribute. The previously indicated rules apply.
-      Use the \textbf{machine} child element
+      using the \xmlattr{lvm} attribute. The previously indicated rules apply.
+      Use the \xmlelement{machine} child element
       to specify appropriate configuration of the virtual disk system.
-\item \textbf{image=''xen''}\\
+\item \xmlattrval{image}{xen}\\
       Use this type to create a Xen para-virtual guest image. The
-      \textbf{filesystem} and \textbf{boot=''xenboot/suse-*''} attributes
+      \xmlattr{filesystem} and \xmlattrval{boot}{xenboot/suse-*} attributes
       specify the filesystem type used and select the proper boot image,
-      respectively. Use the \textbf{machine} child element to specify
+      respectively. Use the \xmlelement{machine} child element to specify
       configuration options of the Xen guest image.
 \end{itemize}
 
-All of the mentioned types can specify the \textbf{boot} attribute
-which tells kiwi to call itself to build the requested boot image (initrd).
-It is possible to tell kiwi to check for an already built boot image
-which is a so called \textbf{prebuilt boot image}. To activate searching
+All of the mentioned types can specify the \xmlattr{boot} attribute
+which tells KIWI to call itself to build the requested boot image (initrd).
+It is possible to tell KIWI to check for an already built boot image
+which is a so called \emph{prebuilt boot image}. To activate searching
 for an appropriate prebuilt boot image the type section also provides the
-attribute \textbf{checkprebuilt=''true|false''}. If specified kiwi will
+attribute \xmlattrval{checkprebuilt}{true|false}. If specified KIWI will
 search for a prebuilt boot image in a directory named
-\textit{/usr/share/kiwi/image/*boot/*-prebuilt}. Example: If the boot
-attribute was set to isoboot/suse-10.3 and checkprebuilt is set to true
-kiwi will search the prebuilt boot image in
-/usr/share/kiwi/image/isoboot/suse-10.3-prebuilt. The directory kiwi
+\path{/usr/share/kiwi/image/*boot/*-prebuilt}. Example: If the boot
+attribute was set to \xmlval{isoboot/suse-10.3} and checkprebuilt is set to true
+KIWI will search the prebuilt boot image in
+\path{/usr/share/kiwi/image/isoboot/suse-10.3-prebuilt}. The directory KIWI
 searches for the prebuilt boot images can also be specified at the
-commandline with the \textbf{$--$prebuiltbootimage} parameter.
+commandline with the \option{prebuiltbootimage} parameter.
 
 Within the preferences section there are the following optional
 attributes:
 
 \begin{itemize}
-\item \textbf{rpm-check-signatures}\\
+\item \xmlattr{rpm-check-signatures}\\
       Specifies whether RPM should check the package signature or not
-\item \textbf{rpm-excludedocs}\\
+\item \xmlattr{rpm-excludedocs}\\
       Specifies whether RPM should skip installing package documentation
-\item \textbf{rpm-force}\\
-      Specifies whether RPM should be called with --force
-\item \textbf{keytable}\\
+\item \xmlattr{rpm-force}\\
+      Specifies whether RPM should be called with \option{force}
+\item \xmlattr{keytable}\\
       Specifies the name of the console keymap to use. The value corresponds
-      to a map file in /usr/share/kbd/keymaps. The KEYTABLE variable in
-      /etc/sysconfig/keyboard file is set according to the keyboard
+      to a map file in \path{/usr/share/kbd/keymaps}. The KEYTABLE variable in
+      \path{/etc/sysconfig/keyboard} file is set according to the keyboard
       mapping.
-\item \textbf{timezone}\\
+\item \xmlattr{timezone}\\
       Specifies the time zone. Available time zones are located in the
-      /usr/share/zoneinfo directory. Specify the attribute value relative to
-      /usr/share/zoneinfo. For example, specify Europe/Berlin for
-      /usr/share/zoneinfo/Europe/Berlin. KIWI uses this value to configure
-      the timezone in /etc/localtime for the image
-\item \textbf{locale}\\
+      \path{/usr/share/zoneinfo} directory. Specify the attribute value relative to
+      \path{/usr/share/zoneinfo}. For example, specify Europe/Berlin for
+      \path{/usr/share/zoneinfo/Europe/Berlin}. KIWI uses this value to configure
+      the timezone in \path{/etc/localtime} for the image
+\item \xmlattr{locale}\\
       Specifies the name of the UTF-8 locale to use, which defines the
       contents of the RC\_LANG system environment variable in
-      /etc/sysconfig/language. Please note only UTF-8 locales are supported
-      here which also means that the encoding must \textbf{not} be part of
-      the locale information. The kiwi schema validates the locale string
+      \path{/etc/sysconfig/language}. Please note only UTF-8 locales are supported
+      here which also means that the encoding must \emph{not} be part of
+      the locale information. The KIWI schema validates the locale string
       according to the following pattern:\\
       \verb+[a-z]{2}_[A-Z]{2}(,[a-z]{2}_[A-Z]{2})*+.
       This means you have to specifiy the locale like the following example:
       en\_US or en\_US,de\_DE
-\item \textbf{boot-theme}\\
+\item \xmlattr{boot-theme}\\
       Specifies the name of the gfxboot and bootsplash theme to use
-\item \textbf{defaultdestination}\\
-      Used if the --destdir option is not specified when calling KIWI
-\item \textbf{defaultroot}\\
-      Used if the option --root is not specified when calling KIWI
-\item \textbf{defaultbaseroot}\\
-      Used if the option --base-root is not specified when
+\item \xmlattr{defaultdestination}\\
+      Used if the \option{destdir} option is not specified when calling KIWI
+\item \xmlattr{defaultroot}\\
+      Used if the option \option{root} is not specified when calling KIWI
+\item \xmlattr{defaultbaseroot}\\
+      Used if the option \option{base-root} is not specified when
       calling KIWI. It's possible to prepare and create an image using a
       predefined non empty root directory as base information.
       This could speedup the build process a lot if the base root path
       already contains most of the image data.
-\item \textbf{kernelcmdline}\\
+\item \xmlattr{kernelcmdline}\\
       Specifies additional kernel parameters. The following example
-      disables kernel messages: \textbf{kernelcmdline=''quiet''}
+      disables kernel messages: \xmlattrval{kernelcmdline}{quiet}
 \end{itemize}
 
-The <type> element may contain child elements to provide specific
+The \xmlstarttag{type} element may contain child elements to provide specific
 configuration information for the given type. The following lists the 
 supported child elements:
 
 \begin{itemize}
-\item \textbf{ec2config}\\
+\item \xmlelement{ec2config}\\
     The optional ec2config block is used to specify information relevant
     only to AWS EC2 images. The following information can be provided:
 
@@ -443,13 +447,13 @@ supported child elements:
     </ec2config>
     \end{Command}
 
-\item \textbf{lvmvolumes}\\
+\item \xmlelement{lvmvolumes}\\
 	Using the optional \textbf{lvmvolumes} section it possible to create
     a LVM (Logical Volume Management) based storage layout. By default the
     volume group is named kiwiVG. It is possible to change the name of the
-    group by setting the \textbf{lvmgroup} attribute to the desired name.
+    group by setting the \xmlattr{lvmgroup} attribute to the desired name.
     Individual volumes within the volume group are specified using the 
-    \textbf{volume} element. 
+    \xmlelement{volume} element. 
 
     The following example shows the creation of a volume named usr and a
     volume named var inside the volume group systemVG.
@@ -461,21 +465,21 @@ supported child elements:
 	</lvmvolumes>
 	\end{Command}
 
-	With the optional \textbf{freespace} attribute it is possible to
+	With the optional \xmlattr{freespace} attribute it is possible to
     add space to the volume. If the freespace attribute is not set the
-    created volume will be 80\% to 90\% full. Using the optional
-    \textbf{size} attribute the absolute size of the given volume is
+    created volume will be 80\,\% to 90\,\% full. Using the optional
+    \xmlattr{size} attribute the absolute size of the given volume is
     specified. The size attribute takes precedence over the freespace
     attribute. Should the specified size be too small the value will
-    be ignored and a volume with approximately 80\% to 90\% fill will
+    be ignored and a volume with approximately 80\,\% to 90\,\% fill will
     be created.
 
-\item \textbf{oemconfig}
-	By default the oemboot process will create/modify a swap, /home and /
-	partition. It is possible to influence the behavior by the
-	oem-* elements explained below.
+\item \xmlelement{oemconfig}
+	By default the oemboot process will create/modify a swap, \path{/home} and 
+	\path{/} partition. It is possible to influence the behavior by the
+	\xmlelement{oem-*} elements explained below.
 	KIWI uses this information to create the file
-	\textbf{/config.oempartition} as part
+	path{/config.oempartition} as part
 	of the automatically created oemboot boot image. The format of the
 	file is a simple key=value format and created by the KIWIConfig.sh
 	function named baseSetupOEMPartition(). 
@@ -488,79 +492,79 @@ supported child elements:
     \end{Command}
 
 	\begin{itemize}
-    \item \textbf{<oem-boot-title>text</oem-boot-title>}\\
-       By default the string \textbf{OEM} will be used as the boot manager 
+    \item \xmlstarttag{oem-boot-title}text\xmlendtag{oem-boot-title}\\
+       By default the string \verb!OEM! will be used as the boot manager 
        menu entry when KIWI creates the grub configuration during
        deployment. The oem-boot-title element allows you to set a custom
        name for the grub menu entry. This value is represented by the
        OEM\_BOOT\_TITLE variable in config.oempartition.
-	\item \textbf{<oem-home>true|false</oem-home>}\\
+	\item \xmlstarttag{oem-home}true|false\xmlendtag{oem-home>}\\
        Specify if a partition for the home directory should be created.
        Creation of a home partition is the default behavior. This value is 
        represented by the OEM\_WITHOUTHOME variable in config.oempartition.
-	\item \textbf{<oem-kiwi-initrd>true|false</oem-kiwi-initrd>}\\
+	\item \xmlstarttag{oem-kiwi-initrd}true|false\xmlendtag{oem-kiwi-initrd}\\
        If this element is set to true (default value is false) the oemboot 
-       boot image (initrd) will \textbf{not} be replaced by the system 
+       boot image (initrd) will \emph{not} be replaced by the system 
        (mkinitrd) created initrd. This option is useful when the system
        is installed on removable storage such as a USB stick or a portable
        external drive. For movable devices it is potentially necessary to 
        detect the storage location during every boot. This detection
        process is part of the oemboot boot image. This value is represented
        by the OEM\_KIWI\_INITRD variable in config.oempartition.
-	\item \textbf{<oem-reboot>true|false</oem-reboot>}\\
+	\item \xmlstarttag{oem-reboot}true|false\xmlendtag{oem-reboot}\\
        Specify if the system is to be rebooted after the oem image has been
        deployed to the designated storage device (default value is false). 
        This value is represented by the OEM\_REBOOT variable in 
        config.oempartition
-	\item \textbf{<oem-recovery>true|false</oem-recovery>}\\
-      If this element is set to true (default value is false), Kiwi will
+	\item \xmlstarttag{oem-recovery}true|false\xmlendtag{oem-recovery}\\
+      If this element is set to true (default value is \xmlval{false}), KIWI will
       create a recovery archivefrom the prepared root tree. The archive will 
-      appear as \textit{/recovery.tar.bz2} in the image file. During 
+      appear as \path{/recovery.tar.bz2} in the image file. During 
       first boot of the image a single recovery partition will be
       created and the recovery archive will be moved to the recovery 
       partition. An additional boot menu entry is created that when selected
       restores the original root tree on the system. The
-      user information on the /home partition or in the /home directory is
+      user information on the \path{/home} partition or in the path{/home} directory is
       not affected by the recovery process. This value is represented by 
       the OEM\_RECOVERY variable in config.oempartition.
-    \item \textbf{<oem-recoveryID>partition-id</oem-recoveryID>}\\
+    \item \xmlstarttag{oem-recoveryID}partition-id\xmlendtag{oem-recoveryID}\\
       Specify the partition type for the recovery partition. The default 
       is to create a Linux partition (id = 83). This value is represented by 
       the OEM\_RECOVERY\_ID variable in config.oempartition. 
-    \item \textbf{<oem-swap>true|false</oem-swap>}\\
+    \item \xmlstarttag{oem-swap}true|false\xmlendtag{oem-swap}\\
        Specify if a sawp partition should be create. The creation of a swap
        partition is the default behavior. This value is represented by the
-       OEM\_WITHOUTSWAP variable in config.oempartition.     
-	\item \textbf{<oem-swapsize>number in MB</oem-swapsize>}\\
+       OEM\_WITHOUTSWAP variable in config.oempartition.
+    \item \xmlstarttag{oem-swapsize}number in MB\xmlendtag{oem-swapsize}\\
        Set the size of the swap partition. If a swpa partition is to be
        created and the size of the swap partition is not specified with this
-       optional element, Kiwi will calculate the size of the swpar partition
+       optional element, KIWI will calculate the size of the swpar partition
        and create a swap partition equal to two times the RAM installed on
        the system at initial boot time. This value is represented by
        the OEM\_SWAPSIZE variable in config.oempartition
-	\item \textbf{<oem-systemsize>number in MB</oem-systemsize>}\\
+    \item \xmlstarttag{oem-systemsize}number in MB\xmlendtag{oem-systemsize}\\
       Set the size of the root partition. This value is represented by the
       variable OEM\_SYSTEMSIZE in config.oempartition
 	\end{itemize}
 
-\item \textbf{pxedeploy}\\
+\item \xmlelement{pxedeploy}\\
     Information contained in the optional pxedeploy section is only considered
-    if the \textbf{image=} attribute of the \textbf{type} element is set to
-    \textbf{pxe}. In order to use a PXE image it is necessary to create a
+    if the \xmlattr{image} attribute of the \xmlelement{type} element is set to
+    \xmlval{pxe}. In order to use a PXE image it is necessary to create a
     network boot infrastructure. Creation of the network boot infrastructure
-    is simplified by the Kiwi provided package \textbf{kiwi-pxeboot}. This
-    package configures the basic PXE boot enviroment as expected by Kiwi pxe
+    is simplified by the KIWI provided package \textbf{kiwi-pxeboot}. This
+    package configures the basic PXE boot enviroment as expected by KIWI pxe
     images. The kiwi-pxeboot package creates a directory structure in
-    /srv/tftpboot. Files created by the Kiwi create step need to be copied
-    to the /srv/tftpboot directory structure. For additional details about
+    \path{/srv/tftpboot}. Files created by the KIWI create step need to be copied
+    to the \path{/srv/tftpboot} directory structure. For additional details about
     the PXE image please refere to the PXE Image chapter later in this
     document.
 
     In addition to the image files it is necessary that information be
     provided about the client setup. This information, such as the image
     to be used or the partitioning, is contained in a file with the name
-    config.<MAC-Address> in the directory /srv/tftpboot/KIWI. The content
-    of this file is created automatically by Kiwi if the pexedeploy section
+    \path{config.<MAC-Address>} in the directory \path{/srv/tftpboot/KIWI}. The content
+    of this file is created automatically by KIWI if the pexedeploy section
     is provided in the image description. A pxedeploy section is outlined
     below:
 	
@@ -583,61 +587,63 @@ supported child elements:
 	\end{Command}
 
 	\begin {itemize}
-	\item The \textbf{server} attribute is used to specify the IP address
-      of the PXE server. The \textbf{blocksize} attributes specifies the
+	\item The \xmlattr{server} attribute is used to specify the IP address
+      of the PXE server. The \xmlattr{blocksize} attributes specifies the
       blocksize for the image download. Other protocols are supported by
-      Kiwi but require the \textbf{kiwiserver} and \textbf{kiwiservertype}
+      KIWI but require the \xmlval{kiwiserver} and \xmlval{kiwiservertype}
       kernel parameters to be set when the client boots.
 	\item The value of the optional timeout element specifies the grub
-      timeout in seconds to be used when the Kiwi initrd configures and
+      timeout in seconds to be used when the KIWI initrd configures and
       installs the grub boot loader on the client machine after the first
       deployment to allow standalone boot.
 	\item Passing kernel parameters is possible with the use of the
-      optional kernelcmdline attribute in the <type> section. The value
+      optional kernelcmdline attribute in the \xmlstarttag{type} section. The value
       of this attribute is a string specifying the settings to be
-      passed to the kernel by the grub bootloader. The Kiwi initrd
+      passed to the kernel by the grub bootloader. The KIWI initrd
       includes these kernel options when installing grub for standalone boot
-	\item The optional \textbf{kernel} and \textbf{initrd} elements are
+	\item The optional \xmlelement{kernel} and \xmlelement{initrd} elements are
       used to specify the file names for the kernel and initrd on the boot
       server respectively. When using a special boot method not supported
       by the distribution's standard mkinitrd, it is imperative that the
-      Kiwi initrd remains on the PXE server and also be used for local boot.
-      If the configured image uses the \textbf{split} type or the pexedeploy
+      KIWI initrd remains on the PXE server and also be used for local boot.
+      If the configured image uses the \xmlelement{split} type or the \xmlelement{pexedeploy}
       section includes any union information the kernel and initrd elements
       must be used.
 	\item The partitions section is required if the system image is to be
       installed on a disk or other permanent storage device. Each partition
       is specified with one partition child element. The mandatory
-      \textbf{type} attribute specifies the partition type. The possible
+      \xmlattr{type} attribute specifies the partition type. The possible
       values are the sfdisk supported types, use
+      
       \begin{Command}{14cm}
       sfdisk --list-type
       \end{Command}
-      to obtain a list of supported values. The required \textbf{number}
+      
+      to obtain a list of supported values. The required \xmlattr{number}
       attribute provides the the number of the partition to be created. The
-      size of the partition may be specified with the optional \textbf{size}
-      attribute. The optional \textbf{mountpoint} attribute provides
+      size of the partition may be specified with the optional \xmlattr{size}
+      attribute. The optional \xmlattr{mountpoint} attribute provides
       the value for the mount point of the partition. The optional boolean
-      \textbf{target} attribute identifies the partion as the system image
+      \xmlattr{target} attribute identifies the partion as the system image
       target partition.
-      Kiwi always generates the swap partition as the first partition of
+      KIWI always generates the swap partition as the first partition of
       the netboot boot image. By default the second partition is used for
       the system image. Use the boolean target attribute to change this
-      behavior. Providing the value \textbf{image} for the size attribute
-      triggers Kiwi into calculating the required size for this partition.
+      behavior. Providing the value \xmlval{image} for the \xmlattr{size} attribute
+      triggers KIWI into calculating the required size for this partition.
       The calculated size is sufficient for the created image.
 	\item If the system image is based on a read-only filesystem such as
       squashfs and should be mounted in read-write mode use the optional
-      \textbf{union} element. The \textbf{type} attribute is used to specify
+      \xmlelement{union} element. The \xmlattr{type} attribute is used to specify
       one of the supported overlay filesystem (aufs, clicfs, or unionfs).
-      Use the \textbf{ro} attribute to point to the read only device and
-      the \textbf{rw} attribute to point to the read-write device.
+      Use the \xmlattr{ro} attribute to point to the read only device and
+      the \xmlattr{rw} attribute to point to the read-write device.
 	\item The optional configuration element is used to integrate a network
       client's configuration files that are stored on the server.
-      The \textbf{source} attribute specifies the path on the server for
-      the file to be downloaded. The \textbf{dest} attribute specifies
+      The \xmlattr{source} attribute specifies the path on the server for
+      the file to be downloaded. The \xmlattr{dest} attribute specifies
       destination of the downloaded file on the network client starting at
-      the root (/) of the filesystem. Multiple configuration elements
+      the root (\path{/}) of the filesystem. Multiple configuration elements
       may be specified such that multiple files can be transferred to the
       network client. In addition configuration files can be bound to
       a specific client architecture by setting the optional \textbf{arch}
@@ -645,44 +651,44 @@ supported child elements:
       string.
 	\end{itemize}
 
-\item \textbf{size}\\
+\item \xmlelement{size}\\
     Use the size element to specify the image size in Megabytes or
-    Gigabytes. The \textbf{unit} attribute specifies whether the given
-    value will be interpreted as Megabytes (\textbf{unit=''M''}) or
-    Gigabytes (\textbf{unit=''G''}. The optional boolean attribute
-    \textbf{additive} specifies whether or not the given size should be added
+    Gigabytes. The \xmlattr{unit} attribute specifies whether the given
+    value will be interpreted as Megabytes (\xmlattrval{unit}{M}) or
+    Gigabytes (\xmlattrval{unit}{G}. The optional boolean attribute
+    \xmlattr{additive} specifies whether or not the given size should be added
     to the size of the generated image or not.
 
     In the event of a size specification that is too small for the
-    generated image, Kiwi will expand the size automatically unless the
-    image size exceeds the specified size by 100 MB or more. In this case
-    Kiwi will generate an error and exit.
+    generated image, KIWI will expand the size automatically unless the
+    image size exceeds the specified size by 100\,MB or more. In this case
+    KIWI will generate an error and exit.
 
-    Should the given size exceed the necessary size for the image Kiwi will
+    Should the given size exceed the necessary size for the image KIWI will
     not alter the image size as the free space might be required for proper
     execution of components within the image.
 
-    If the size element is not used Kiwi will create an image with
-    containing approxiamtely 30\% free space.
+    If the size element is not used KIWI will create an image with
+    containing approxiamtely 30\,\% free space.
     
      
 	\begin{Command}{12cm}
 	<size unit="M">1000</size>
 	\end{Command}
 
-\item \textbf{split}\\
+\item \xmlelement{split}\\
     For images of type split or iso the information provided in the optional
-    split section is is considered if the \textbf{compressed} attribute is
-    is set to \textbf{true}. With the configuration in this block it is
+    split section is is considered if the \xmlattr{compressed} attribute is
+    is set to \xmlval{true}. With the configuration in this block it is
     possible to determine which files are writable and whether these files
     should be persentently writable or temporarily. Note that for ISO images
     only temporary write access is possible.
 
-    When processing the provided configuration Kiwi distinguishes between
-    directories and files. For example, providing ''/etc'' as the value of
-    the \textbf{name} attribute indicates that the /etc directory should be
+    When processing the provided configuration KIWI distinguishes between
+    directories and files. For example, providing \path{/etc} as the value of
+    the \xmlval{name} attribute indicates that the \path{/etc} directory should be
     writable. However, this does not include any of the files or 
-    sub-directories within /etc. The content of /etc is populated as 
+    sub-directories within \path{/etc}. The content of \path{/etc} is populated as 
     symbolic links to the read-only files. The advantage of setting only a
     directory to read-write access is that any newly created files will be
     stored on the disk instead of in tmpfs. Creating read-write access to a 
@@ -707,19 +713,19 @@ supported child elements:
 	</split>
 	\end{Command}
 
-    Use the \textbf{except} element to specify exceptions to previously
+    Use the \xmlelement{except} element to specify exceptions to previously
     configured rules.
 
-\item \textbf{machine}\\
+\item \xmlelement{machine}\\
     The optional machine section serves to specify information
     about a VM guest machine. Using the data provided in this section,
-    Kiwi will create a guest configuration file required to run the
+    KIWI will create a guest configuration file required to run the
     image on the target machine.
 
     If the target is a VMware virtual machine indicated by the
-    format attribute set to vmdk, kiwi creates a VMware config file.
+    format attribute set to vmdk, KIWI creates a VMware config file.
     If the target is a Xen virtual machine indicated by the domain
-    attribute in the machine section kiwi will create a Xen guest
+    attribute in the machine section KIWI will create a Xen guest
     config file.
 
     The sample block below shows the general outline of the information
@@ -740,61 +746,61 @@ supported child elements:
 	\end{Command}
 
 	\begin{itemize}
-	\item \textbf{arch}\\
+	\item \xmlattr{arch}\\
       The virtualized architecture. Supported values are ix86 or x86\_64.
-      The default value is \textbf{ix86}.
-	\item \textbf{memory}\\
+      The default value is \xmlval{ix86}.
+	\item \xmlattr{memory}\\
       The mandatory memory attribute specifies how much memory in MB
       should be allocated for the virtual machine
-	\item \textbf{HWversion}\\
+	\item \xmlattr{HWversion}\\
       The VMware hardware version number, the default value is 3.
-	\item \textbf{guestOS}\\
+	\item \xmlattr{guestOS}\\
       The guestOS identifier. For the ix86 architecture the default 
-      value is \textbf{suse} and for the x86\_64 architecture
-      \textbf{suse-64} is the default. At this point only the SUSE and
+      value is \xmlval{suse} and for the x86\_64 architecture
+      \xmlval{suse-64} is the default. At this point only the SUSE and
       SLES guestOS types are supported.
-	\item \textbf{domain}\\
+	\item \xmlattr{domain}\\
       The Xen domain setup. This could be either a dom0 which is the
       host machine hosting the guests and therefore doesn't require a
       configuration file, or it could be set to domU which indicates
       this is a guest and also requires a guest configuration which is
-      created by kiwi
+      created by KIWI.
 	\end{itemize}
 
 	The following information can be provided to setup the virtual
-	main storage device and CD/DVD drive connection.
+	main storage device and CD/DVD drive connection:
 
 	\begin{itemize}
-	\item \textbf{controller}\\
-      Supported values for the mandatory controller attribute are \textbf{ide}
-      and \textbf{scsi}.
-	\item \textbf{id}\\
+	\item \xmlattr{controller}\\
+      Supported values for the mandatory controller attribute are \xmlval{ide}
+      and \xmlval{scsi}.
+	\item \xmlattr{id}\\
       The mandatory id attribute specifies the disk id. If only one
       disk is set the id value should be set to 0.
-	\item \textbf{device}\\
+	\item \xmlattr{device}\\
       The device attribute specifies the disk that should appear
       in the para virtual instance. Therefore only relevant for Xen
 	\end{itemize}
 
 	The following information can be provided to setup the virtual
-	network interface
+	network interface:
 
 	\begin{itemize}
-	\item \textbf{driver}\\
+	\item \xmlattr{driver}\\
       The mandatory driver attribute specifies the driver to be used for
-      the virtual network card. The supported values are \textbf{e100},
-      \textbf{vlance}, and \textbf{vmxnet}. If the vmxnet driver is
-      specified the \textbf{vmware tools} must be installed in the image.
-	\item \textbf{interface}\\
+      the virtual network card. The supported values are \xmlval{e100},
+      \xmlval{vlance}, and \xmlval{vmxnet}. If the vmxnet driver is
+      specified the \xmlval{vmware tools} must be installed in the image.
+	\item \xmlattr{interface}\\
       The mandatory interface attribute specifies the interface number. If
       only one interface is set the value should be set to 0.
-	\item \textbf{mode}\\
+	\item \xmlattr{mode}\\
       The network mode used to communicate outside the VM. In many cases
       the bridged mode is used.
 	\end{itemize}
 \end{itemize}
 
-\subsection{users element}
+\subsection{\xmlstarttag{users} Element}
 \begin{Command}{12cm}
 <users group=''group\_name'' \textit{id="number"}>\\
 \hspace*{1cm}<user home="dir" \textit{id="number"}\\ 
@@ -814,19 +820,19 @@ The attributes home, id, name, pwd, realname, and shell specify the created
 users home directory, the user name, the user's password, the user's 
 real name, and the user's login shell, respectively. By default the value
 of the password attribute is expected to be an encrypted string. An
-encrypted password can be created using the kiwi $--$createpassword tool. It
+encrypted password can be created using the \cmd{kiwi \option{createpassword}} tool. It
 is also possible to specify the password as a non encrypted string by using
-the pwdformat attribute and setting it's value to ``plain''. Kiwi will then
+the pwdformat attribute and setting it's value to \kquote{plain}. KIWI will then
 encrypt the password prior to the user being added to the system.
 
 All specified users and groups will be created if they do not already exist.
 By default the defined users will be part of the group specified with the 
-group attribute of the users element and the default group called ``users''.
+group attribute of the users element and the default group called \kquote{users}.
 If it is desired to have the specified users to only be part of the given
 group it is necessary to specify the id attribute. It is recommended to use
 a group id greater than 100.
 
-\subsection{drivers element}
+\subsection{\xmlstarttag{drivers} Element}
 \begin{Command}{12cm}
 <drivers type="type" \textit{profiles="name"}>\\
 \hspace*{1cm}<file name="filename"/>\\
@@ -834,7 +840,7 @@ a group id greater than 100.
 </drivers>
 \end{Command}
 
-The optional drivers element is only useful for boot images (initrd).
+The optional \xmlelement{drivers} element is only useful for boot images (initrd).
 As a boot image doesn't need to contain the complete kernel one can
 save a lot of space if only the required drivers are part of the image.
 Therefore the drivers section exists. If present only the drivers which
@@ -843,33 +849,33 @@ boot image. The type attribute specifies one of the following driver
 types:
 
 \begin{itemize}
-\item \textbf{drivers}\\
+\item \xmlelement{drivers}\\
       Each file is specified relative to the
-      /lib/modules/<Version>/kernel directory.
-\item \textbf{netdrivers}\\
+      \path{/lib/modules/<Version>/kernel} directory.
+\item \xmlelement{netdrivers}\\
       Each file is specified relative to the
-      /lib/modules/<Version>/kernel/drivers
+      \path{/lib/modules/<Version>/kernel/drivers}
       directory.
-\item \textbf{scsidrivers}\\
+\item \xmlelement{scsidrivers}\\
       Each file is specified relative to the
-      /lib/modules/<Version>/kernel/drivers
-\item \textbf{usbdrivers}\\
+      \path{/lib/modules/<Version>/kernel/drivers}
+\item \xmlelement{usbdrivers}\\
       Each file is specified relative to the
-      /lib/modules/<Version>/kernel/drivers directory.
+      \path{/lib/modules/<Version>/kernel/drivers} directory.
 \end{itemize}
 
 According to the driver type the specified files are searched in
 the corresponding directory. The information about the drivernames
 is provided as environment variable named like the value of
 the type attribute and is processed by the function
-\textbf{suseStripKernel}. According to this along with a boot image
-description a script called \textbf{images.sh} must exist which
+\texttt{suseStripKernel}. According to this along with a boot image
+description a script called \cmd{images.sh} must exist which
 calls this function in order to allow the driver information to
 have any effect.
 
 %\newpage
 
-\subsection{repository element}
+\subsection{\xmlstarttag{repository} Element}
 \begin{Command}{12cm}
 <repository type="type"\\
 \hspace*{1cm}\textit{status="replaceable"}\\
@@ -880,7 +886,7 @@ have any effect.
 ...
 \end{Command}
 
-The mandatory repository section specifies the source URL and
+The mandatory \xmlelement{repository} element specifies the source URL and
 type used by the package manager. The type attribute specifies the
 repository type which must be supported by the package manager.
 At the moment KIWI supports the package managers smart and zypper
@@ -889,9 +895,9 @@ zypper. Therefore the possible values for the type attribute has
 beend copied from smart. The following table shows the possible
 repo types:\\ 
 
-\begin{tabular}[h]{|p{4cm}|p{2cm}|p{2cm}|}
+\begin{tabular}[h]{|p{4cm}|p{3cm}|p{3cm}|}
 \hline
-\textbf{type} & \textbf{smart} & \textbf{zypper} \\
+\textbf{Type} & \textbf{smart Support} & \textbf{zypper Support}\\
 \hline
 apt-deb            & yes & no  \\
 apt-rpm            & yes & no  \\
@@ -911,30 +917,30 @@ Within the repository section there are the following optional
 attributes:
 
 \begin{itemize}
-\item \textbf{status=''replaceable''}\\
+\item \xmlattrval{status}{replaceable}\\
       This attribute makes only sense for boot image descriptions.
       It indicates that the repository is allowed to become replaced by
-      the repositories defined in the system image descriptions. Because kiwi
+      the repositories defined in the system image descriptions. Because KIWI
       automatically builds the boot image if required it should create that
       image from the same repositories which are used to build the system
       image to make sure both fit together. Therefore it is required to allow
       the repository to become overwritten which is indicated by the status
       attribute.
-\item \textbf{alias=''name''}\\
+\item \xmlattrval{alias}{name}\\
       Specifies an alternative name used to identify the source channel.
       If not set the source attribute value is used and builds the alias name
-      by replacing each ''/'' with a ''\_''. An alias name should be set if
+      by replacing each \kquote{/} with a \kquote{\_}. An alias name should be set if
       the source argument doesn't really explain what this repository
       contains 
-\item \textbf{priority=''number''}\\
+\item \xmlattrval{priority}{number}\\
       Specifies the repository priority assigned to all packages available in
-      this repository. For \textbf{smart} the following applies: If the
+      this repository. For \cmd{smart} the following applies: If the
       exact same package is available in more than one channel, the repository
-      with the \textbf{highest} priority number is used. The value 0 means
-      \textbf{no priority is set}. For \textbf{zypper} the following applies:
+      with the \emph{highest} priority number is used. The value 0 means
+      \kquote{no priority is set}. For \cmd{zypper} the following applies:
       If the exact same package is available in more than one channel, the
-      repository with the \textbf{lowest} priority number is used. The value
-      99 means \textbf{no priority is set}.
+      repository with the \emph{lowest} priority number is used. The value
+      99 means \kquote{no priority is set}.
 \end{itemize}
 
 The source child element contains the path attribute, which specifies
@@ -943,42 +949,42 @@ of the following, and can include the \%arch macro which is expanded
 to the architecture of the image building host.
 
 \begin{itemize}
-\item \textbf{this://<path>}\\
+\item \path{this://<path>}\\
       A relative path name, which is relative to the image
       description directory being referenced.
-\item \textbf{iso://<path/to/isofile}\\
-      A path to a local .iso file which is then loopback mounted
+\item \path{iso://<path/to/isofile>}\\
+      A path to a local \path{.iso} file which is then loopback mounted
       and used as a local path based repository. Alternatively one
       can do the loop mount himself and point a standard local path
       to the mounted directory
-\item \textbf{http://<url>}\\
+\item \path{http://<url>}\\
       A http protocol based network location
-\item \textbf{https://<url>}\\
+\item \path{https://<url>}\\
       A https protocol based network location
-\item \textbf{ftp://<url>}\\
+\item \path{ftp://<url>}\\
       A ftp protocol based network location
-\item \textbf{opensuse://<Project-Name>}\\
+\item \path{opensuse://<Project-Name>}\\
       A special http based network location which is created from
       the given openSUSE buildservice project name. The result is
       pointing to an rpm-md repository on the openSUSE buildservice.
-      For example:\\
-      path=''opensuse://openSUSE:10.3/standard''
-\item \textbf{file:///local/path}\\
+      For example: %\\
+      \xmlattrval{path}{\path{opensuse://openSUSE:10.3/standard}}
+\item \path{file:///local/path}\\
       A local path which should be an absolute path description.
-      The file:// prefix is optional and could also be omitted.
-\item \textbf{obs://\$dir1/\$dir2}\\
-      A special buildservice path whereas \$dir1 and \$dir2
+      The \path{file://} prefix is optional and could also be omitted.
+\item \path{obs://$dir1/$dir2}\\
+      A special buildservice path whereas \path{$dir1} and \path{$dir2}
       represents the buildservice project location. If this type is
-      used as part of a boot attribute kiwi evaluates it to
-      this://images/\$dir1/\$dir2 and if used as part of a repository
-      source path attribute it evaluates to this://repos/\$dir1/\$dir2
+      used as part of a boot attribute KIWI evaluates it to
+      \path{this://images/$dir1/$dir2} and if used as part of a repository
+      source path attribute it evaluates to \path{this://repos/$dir1/$dir2}
 \end{itemize}
 
 Multiple repository sections are allowed and combined by the
 used package manager. By default the package manager will always use
 the latest packages available.
 
-\subsection{packages element}
+\subsection{\xmlstarttag{packages} Element}
 \begin{Command}{12cm}
 <packages type="type" \textit{profiles="name"}\\
 \hspace*{2.5cm}\textit{patternType="type"}\\
@@ -999,64 +1005,64 @@ the latest packages available.
 </packages>
 \end{Command}
 
-The mandatory packages element specifies the list of packages (<package> 
-element) and patterns (<opensusePattern> element) to be used with the image.
+The mandatory packages element specifies the list of packages (\xmlstarttag{package} 
+element) and patterns (\xmlstarttag{opensusePattern} element) to be used with the image.
 The value of the type attribute specifies how the packages and patterns 
 listed are handled, supported values are as follows:
 
 \begin{itemize}
-\item \textbf{bootstrap}\\
+\item \xmlval{bootstrap}\\
       Bootstrap packages, list of packages for the new operating system
       root tree. The packages list the required components to support a 
       chroot environment in the new system root tree, such a glibc.
-\item \textbf{delete}\\
+\item \xmlval{delete}\\
       Delete packages, list of packages to be deleted from the image being
       created.
 
-      When using the delete type only <package> elements are considered, all
-      other specifications such as <opensusePattern> are ignored. The given
+      When using the delete type only \xmlstarttag{package} elements are considered, all
+      other specifications such as \xmlstarttag{opensusePattern} are ignored. The given
       package names are stored in the \$delete environment variable of the 
-      /.profile file created by KIWI. The list of package names is returned 
+      \path{/.profile} file created by KIWI. The list of package names is returned 
       by the baseGetPackagesForDeletion() function. This list can then be
       used to delete the packages ignoring requirements or dependencies. 
-      This can be accomplished in the config.sh or images.sh script with
+      This can be accomplished in the \cmd{config.sh} or \cmd{images.sh} script with
       the following code snippet:
 \begin{verbatim}
 rpm -e --nodeps --noscripts \
-   $(rpm -q `baseGetPackagesForDeletion` | grep -v "is not installed")
+ $(rpm -q `baseGetPackagesForDeletion` | grep -v "is not installed")
 \end{verbatim}
       Note, that the delete value is indiscriminate of the image type
       being built.
-\item \textbf{image}\\
+\item \xmlval{image}\\
       Image packages, list of packages to be installed in the image.
-\item \textbf{iso}\\
+\item \xmlval{iso}\\
       Image packages, a list of additional packages to be installed 
       when building an ISO image.
-\item \textbf{oem}\\
+\item \xmlval{oem}\\
       Image packages, a list of additional packages to be installed 
       when building an OEM image.
-\item \textbf{pxe}\\
+\item \xmlval{pxe}\\
       Image packages, a list of additional packages to be installed 
       when building an PXE image.
-\item \textbf{usb}\\
+\item \xmlval{usb}\\
       Image packages, a list of additional packages to be installed 
       when building a USB image.
-\item \textbf{vmx}\\
+\item \xmlval{vmx}\\
       Image packages, a list of additional packages to be installed 
       when building a vmx virtual image of any format.
-\item \textbf{xen}\\
+\item \xmlval{xen}\\
       Image packages, a list of additional packages to be installed 
       when building a Xen host or guest.
 \end{itemize}
 
-\subsubsection{Using patterns}
+\subsubsection{Using Patterns}
 Using a pattern name enhances the package list with a number of
 additional packages belonging to this pattern. Support for patterns
-is SUSE-specific, and available with openSUSE 10.1 or later.
+is SUSE-specific, and available with open\-SUSE 10.1 or later.
 The optional patternType and patternPackageType attributes specify
 which pattern references or packages should be used in a given pattern.
 The values of these attributes are only evaluated if the KIWI pattern
-solver is used. If the new (up to SUSE 11.0) satsolver pattern solver
+solver is used. If the new (up to SUSE~11.0) satsolver pattern solver
 is used these values are ignored because the satsolver can't handle
 that at the moment. Allowed values for the pattern* attributes are:
 
@@ -1083,17 +1089,17 @@ if it is required by a package dependency of another package in your list.
 The packagemanager will automatically pull in the package even if you have
 ignored it.
 
-\subsubsection{Architecture restrictions}
+\subsubsection{Architecture Restrictions}
 To restrict a package to a specific architecture, use
-the \textbf{arch} attribute to specify a comma separated list of allowed
+the \xmlattr{arch} attribute to specify a comma separated list of allowed
 architectures. Such a package is only installed if the build systems
-architecture (uname -m) matches one of the specified values of the arch
+architecture (\cmd{uname -m}) matches one of the specified values of the arch
 attribute.
 
-\subsubsection{Image type specific packages}
+\subsubsection{Image Type Specific Packages}
 If a package is only required for a specific type of image
-and replaces another package you can use the \textbf{replaces} attribute
-to tell kiwi to install the package by replacing another one. For example
+and replaces another package you can use the \xmlattr{replaces} attribute
+to tell KIWI to install the package by replacing another one. For example
 you can specify the kernel package in the type=image section as
 
 \begin{lstlisting}[language=xml]
@@ -1109,8 +1115,8 @@ and in the type=xen section as
 The result is the xen kernel if you request a xen
 image and the default kernel in any other case.
 
-\subsubsection{Packages to become included into the boot image}
-The optional attributes \textbf{bootinclude} and \textbf{bootdelete}
+\subsubsection{Packages to Become Included Into the Boot Image}
+The optional attributes \xmlattr{bootinclude} and \xmlattr{bootdelete}
 can be used to mark a package inside the system image description to
 become part of the corresponding boot image (initrd). This feature
 is most often used to specify bootsplash and/or graphics boot related
@@ -1118,16 +1124,16 @@ packages inside the system image description but they are required
 to be part of the boot image as the data is used at boot time
 of the image. If the bootdelete attribute is specified along with
 the bootinclude attribute this means that the selected package
-will be marked as a \textit{to become deleted} package and is
+will be marked as a \kquote{to become deleted} package and is
 removed by the contents of the images.sh script of the corresponding
 boot image description
 
-\subsubsection{Data not available as packages to become included}
-With the optional \textbf{archive} element it's possible to include
+\subsubsection{Data not Available as Packages to Become Included}
+With the optional \xmlelement{archive} element it's possible to include
 any kind of data into the image. The archive elements expects the
 name of a tarball which must exist as part of the system image
-description. kiwi then picks up the tarball and installs it into
-the image. If the \textbf{bootinclude} attribute is set along with
+description. KIWI then picks up the tarball and installs it into
+the image. If the \xmlattr{bootinclude} attribute is set along with
 the archive element the data will also become installed into the
 boot image.
 

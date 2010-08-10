@@ -1,5 +1,0 @@
-#/.../
-# kiwi xenboot descriptions
-# The boot images here are used for booting para virtualized
-# Xen images. Please note the host system must run the Xen
-# hypervisor in order to be able to run the guest using "xm"

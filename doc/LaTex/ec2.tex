@@ -11,12 +11,12 @@ environment. To use Amazon EC2 you simply:
 \item Create an Amazon Machine Image (AMI) containing all your software,
       including your operating system and associated configuration settings,
       applications, libraries, etc. Such an AMI can be created by the kiwi
-      ec2 image type. In order to do that kiwi makes use of the tools
+      ec2 image format. In order to do that kiwi makes use of the tools
       provided by Amazon. Your build system should have these tools
       installed. Due to license issues we are not allowed to distribute
       the tools which means you need to download, install and setup
       them from here:\\
-      \url{http://docs.amazonwebservices.com/AmazonEC2/gsg/2006-06-26}
+      \url{http://aws.amazon.com/documentation/ec2/}
 \item Upload this AMI to the Amazon S3 (Amazon Simple Storage Service)
       service. This gives us reliable, secure access to your AMI.
 \item Register your AMI with Amazon EC2. This allows us to verify that your
@@ -34,9 +34,9 @@ You should start creating an ec2 with kiwi after you can make sure
 your system is prepared for ec2 which means if you call the command
 \textbf{ec2-describe-images -a} you will get a valid output.
 
-\section{Building the suse-ec2-guest example}
+\section{Building the suse-xen-guest example for EC2}
 
-One example provided with kiwi is based on openSUSE 11.1 and
+One example provided with kiwi is based on openSUSE 11.3 and
 includes the base pattern plus the vim editor.
 
 Before you run kiwi you need to include some of your ec2 account
@@ -45,11 +45,11 @@ below shows the values you need to adapt:
 
 \begin{Command}{13cm}
 \begin{verbatim}
-<type image="ec2 primary="true"
+<ec2config>
   ec2accountnr="12345678911"
   ec2privatekeyfile="Path to EC2 private key file"
   ec2certfile="Path to EC2 public certificate file"
-/>
+</ec2config>
 \end{verbatim}
 \end{Command}
 
@@ -58,8 +58,9 @@ After that call kiwi as follows:
 \begin{Command}{13cm}
 \begin{verbatim}
 cd /usr/share/doc/packages/kiwi/examples
-cd suse-11.1
-kiwi --prepare ./suse-ec2-guest \
+cd suse-11.3
+kiwi --prepare ./suse-xen-guest \
+     --add-profile ec2Flavour \
      --root /tmp/myec2
 \end{verbatim}
 \end{Command}
@@ -67,7 +68,8 @@ kiwi --prepare ./suse-ec2-guest \
 \begin{Command}{13cm}
 \begin{verbatim}
 kiwi --create /tmp/myec2 \
-     --type ec2 -d /tmp/myec2-result
+     --add-profile ec2Flavour \
+     --type vmx -d /tmp/myec2-result
 \end{verbatim}
 \end{Command}
 
@@ -80,7 +82,7 @@ done by the ec2-upload-bundle tool. You can do this by calling:
 ec2-upload-bundle -b myImages \
  -a <AWS Key ID> -s <AWS secret Key ID> \
  -m /tmp/myec2/\
-    suse-11.1-ec2-guest.i686-1.1.2.ami.manifest.xml
+    suse-11.1-xen-guest.i686-1.1.2.ami.manifest.xml
 \end{verbatim}
 \end{Command}
 
@@ -91,7 +93,7 @@ by a random key sequence. To register call:
 \begin{Command}{13cm}
 \begin{verbatim}
 ec2-register myImages/\
-    suse-11.1-ec2-guest.i686-1.1.2.ami.manifest.xml
+    suse-11.1-xen-guest.i686-1.1.2.ami.manifest.xml
 \end{verbatim}
 \end{Command}
 
@@ -125,33 +127,29 @@ ec2-describe-keypairs
 \end{verbatim}
 \end{Command}
 
-We are almost done now but to be able to run an instances you also need
-to specifiy which kernel and boot image (initrd) should be used to run
-the instance. Kernels are registered as aki-... images and initrd's
-are registered as ari-... images at Amazon. You will need to select a
-aki/ari image that matches your ami. The following table shows which
-Distributions are supported at the moment:\\
+We are almost done now but to be able to run an instance it's
+required to select an appropriate AKI ID from the
+\textit{Amazon Kernel Image IDs} table below. For this host,
+\textit{aki-407d9529} is being chosen, because we are bundling
+an AMI representing a virtual disk with PVGrub. If the table
+below is outdated just check the current ID list at Amazon
+directly
 
-\begin{tabular}[h]{|p{3cm}|p{2.6cm}|p{2.6cm}|p{2cm}|}
+\begin{tabular}[h]{|p{3cm}|p{6cm}|}
 \hline
-\textbf{Distro} & \textbf{ARI id} & \textbf{AKI id} & \textbf{Arch} \\
+\textbf{AKI} & \textbf{Name} \\
 \hline
-SLES11 & ari-c31effaa & aki-c11effa8 & ix86    \\
-SLES11 & ari-cd1effa4 & aki-cb1effa2 & x86\_64 \\
-openSUSE 11.1 & n/a & n/a & ix86 \\
-openSUSE 11.1 & n/a & n/a & x86\_64 \\
+aki-407d9529 & ec2-public-images/pv-grub-hd0-V1.01-i386.gz.manifest.xml \\
+aki-427d952b & ec2-public-images/pv-grub-hd0-V1.01-x86\_64.gz.manifest.xml \\
 \hline
 \end{tabular}\\
 
-For this example we need the id's provided for openSUSE 11.1.
-Unfortunately there are no public ID's available at the moment.
-As soon as they are the following command are required to
-fire up your new ec2 instance:
+Fire up your new ec2 instance with the following command:
 
 \begin{Command}{13cm}
 \begin{verbatim}
 ec2-run-instances ami-... \
-  --kernel aki-... --ramdisk ari-... \
+  --kernel aki-407d9529 \
   -k gsg-keypair
 \end{verbatim}
 \end{Command}
@@ -175,46 +173,3 @@ ec2-authorize default -p 22
 
 Congratulations ! You made it and can now use Amazons storage and
 computing power.
-
-%\section{Flavours}
-%
-%As already said a normal user can't upload and register kernel and/or
-%initrd images at Amazon. Amazon prefers to have these in the hands of
-%trusted parties only. Novell partners with Amazon in a way which allows
-%us to create all types of bundles as listed in the table above so you
-%are on the right side of live to be with Novell/SUSE. Considering the
-%possibility you also have an Amazon account and the tools which allows
-%you to upload and register kernel and initrd bundles too the following
-%section describes how to create them with kiwi.
-%
-%\subsection{Amazon boot/kernel images}
-%
-%To instruct kiwi to create a boot image and the corresponding
-%Amazon aki- and ari- bundles you only need to specify the \textbf{boot}
-%attribute along with the ec2 image type. For our example this
-%would look like the following:
-%
-%\begin{Command}{12cm}
-%\begin{verbatim}
-%<type ... boot="xenboot/suse-11.2">ec2</type>
-%\end{verbatim}
-%\end{Command} 
-%
-%As you know the ec2 service is based on Xen we need to create a
-%xenboot boot image with kiwi. Any other boot image will not work.
-%Given that information the kiwi create step will automatically
-%build the xenboot boot image and uses the Amazon provided tools
-%to create the aki/ari bundles from it. As result you will see
-%two additional manifest files with the prefixes
-%
-%\begin{itemize}
-%\item <initrd-name>.ari.manifest.xml
-%\item <initrd-name>.kernel.aki.manifest.xml
-%\end{itemize}
-%
-%These images can be uploaded and registered in the same way than
-%it was described for the system image (ami). To use your instance
-%with your own kernel and initrd you only need to specify the
-%registered ari/aki ID's along with the ec2-run-instances call.
-%Please always have in mind that the kernel version of the ami must
-%match the kernel version of the corresponding aki and ari image.

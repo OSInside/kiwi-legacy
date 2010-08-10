@@ -1225,7 +1225,7 @@ sub cleanMount {
 		}
 		
 	}
-	if (defined $this->{baseRoot}) {
+	if ($overlay) {
 		$overlay -> resetOverlay();
 	}
 	if (-d $prefix) {

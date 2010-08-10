@@ -1,5 +1,5 @@
 \index{KIWI images!migration|(}
-\chapter{System to image migration}
+\chapter{System to Image Migration}
 \label{chapter:migration}
 \minitoc
 
@@ -41,9 +41,9 @@ This will create an HTML report where you can check which packages and
 patterns could be assigned to the given base repository. In almost
 all cases there will be information about packages which couldn't
 be assigned. You should go to that list and think of the repository
-which contains that packages (pacman, etc...). If something is missing
-add it either to the zypper list on your system or use the kiwi
-options --add-repo ... --add-repotype
+which contains that packages (pacman, etc). If something is missing
+add it either to the zypper list on your system or use the KIWI
+options \option{add-repo} \ldots \option{add-repotype}.
 
 Continue calling the following command until your list is clean
 You should continue the migration if you have a clean list of solved
@@ -60,7 +60,7 @@ kiwi --migrate mySystem --nofiles \
 \section{Watch the overlay and unpackaged files}
 Files which has been modified but belong to a package will be
 automatically copied into the overlay directory below
-/tmp/mySystem/root. You should check that no modified file
+\path{/tmp/mySystem/root}. You should check that no modified file
 is a binary because such a binary would be replaced by a new
 install of the package anyway. As a software deloper people
 tend to compile software from source and copy/install them
@@ -68,7 +68,7 @@ into their system. Doing this could cause binary files previosly
 installed by a package to be reported as modified. You should
 remove such files from your overlay tree.
 
-The migration also copy the entire /etc directory into the
+The migration also copy the entire \path{/etc} directory into the
 overlay root directory because it stores all important configuration
 files. Beside the important files there are most probably a bunch
 of file which doesn't belong to any package exists only for
@@ -78,34 +78,34 @@ and what can be ignored. Nevertheless this is the most
 time consuming part of your migration review. Simply click on
 the \textit{all unpackaged files} link to take a look at the
 complete list. Those files you want to have in your image needs
-to be copied over to the /tmp/mySystem/root directory
+to be copied over to the \path{/tmp/mySystem/root} directory
 
 \section{Checklist}
 After that you should walk through the following check list
 
 \begin{itemize}
-\item change author and contact in config.xml
-\item set appropriate name for your image in config.xml
-\item add/modify default type (oem) set in config.xml if needed
+\item change author and contact in \path{config.xml}
+\item set appropriate name for your image in \path{config.xml}
+\item add/modify default type (oem) set in \path{config.xml} if needed
 \item make sure your X11 configuration is appropriate according to
       the new target. A failsafe version was created in
-      /tmp/mysys/root/etc/X11/xorg.conf.install -> fbdev based
-\item make sure yast2 is installed to be able to reconfigure
-      the system. if yast2 is not installed these tasks needs to
+      \path{/tmp/mysys/root/etc/X11/xorg.conf.install} -> fbdev based
+\item make sure \cmd{yast2} is installed to be able to reconfigure
+      the system. if \cmd{yast2} is not installed these tasks needs to
       be done else. Otherwise yast's second stage is started on first
       boot of the migrated image
 \item if you want to access any remote filesystem it's a good
       idea to let autoyast add them on first boot of the system
-\item check your network setup in /etc/sysconfig/network. Is this
-      setup still possible in the cloned environment ? Make sure you
-      check for the MAC address of the card first
+\item check your network setup in \path{/etc/sysconfig/network}. Is this
+      setup still possible in the cloned environment? Make sure you
+      check for the MAC address of the card first.
 \end{itemize}
 
-\section{Turn my system into an image...}
+\section{Turn my system into an image\ldots}
 After the process has finished you should check the size of the
 image description. The description itself shouldn't be that big.
 The size of a migrated image description mainly depends on how many
-overlay files exists in the root/ directory. You should make
+overlay files exists in the \path{root/} directory. You should make
 sure to maintain only required overlay files. Now let's try to create a
 clone image from the description. By default an OEM image which is
 a virtual disk which is able to run on real hardware too is created.

@@ -55,7 +55,7 @@ fi
 if parted -h | grep -q '\-\-machine';then
 	export PARTED_HAVE_MACHINE=1
 fi
-if [ ! $PARTED_HAVE_MACHINE ];then
+if [ $PARTED_HAVE_MACHINE -eq 0 ];then
 	export PARTITIONER=sfdisk
 fi
 
@@ -573,6 +573,13 @@ function installBootLoader {
 			"*** boot loader install for $arch-$loader not implemented ***" \
 		"reboot"
 	esac
+	if [ ! -z "$masterBootID" ];then
+		Echo "writing MBR ID back to master boot record: $masterBootID"
+		masterBootIDHex=$(echo $masterBootID |\
+			sed 's/^0x\(..\)\(..\)\(..\)\(..\)$/\\x\4\\x\3\\x\2\\x\1/')
+		echo -e -n $masterBootIDHex | dd of=$imageDiskDevice \
+			bs=1 count=4 seek=$((0x1b8))
+	fi
 }
 #======================================
 # installBootLoaderRecovery
@@ -2775,7 +2782,8 @@ function CDMount {
 		# by the isohybrid tool :(
 		# ----
 		PARTITIONER=sfdisk
-		if [ "x$kiwi_hybridpersistent" = "xyes" ]; then
+		if [ "x$kiwi_hybridpersistent" = "xyes" -a \
+		     $(cat /sys/block/$biosBootDevice/ro) = "0" ]; then
 			createHybridPersistent $biosBootDevice
 		fi
 		Echo -n "Mounting hybrid live boot drive..."
@@ -2915,6 +2923,12 @@ function searchBIOSBootDevice {
 		if [ "$mbrML" = "$mbrI" ] || [ "$mbrMB" = "$mbrI" ];then
 			ifix=1
 			matched=$curd
+			if [ "$mbrML" = "$mbrI" ];then
+				export masterBootID=$mbrML
+			fi
+			if [ "$mbrMB" = "$mbrI" ];then
+				export masterBootID=$mbrMB
+			fi
 			if [ "$curd" = "$bios" ];then
 				export biosBootDevice=$curd
 				return 0
@@ -4614,7 +4628,7 @@ function cleanImage {
 	rm -f /.profile
 	rm -rf /image
 	#======================================
-	# don't call root filesystem check
+	# return early for special types
 	#--------------------------------------
 	if \
 		[ "$haveClicFS" = "yes" ] || \
@@ -5065,7 +5079,7 @@ function displayEULA {
 	#======================================
 	# check license files
 	#--------------------------------------
-	local files=$(find /license.*.txt 2>/dev/null)
+	local files=$(find /license.*txt 2>/dev/null)
 	if [ -z "$files" ];then
 		return
 	fi
@@ -5227,6 +5241,8 @@ function callPartitioner {
 	local input=$1
 	if [ $PARTITIONER = "sfdisk" ];then
 		Echo "Repartition the disk according to real geometry [ fdisk ]"
+		echo "w" >> $input
+		echo "q" >> $input
 		fdisk $imageDiskDevice < $input 1>&2
 		if test $? != 0; then
 			systemException "Failed to create partition table" "reboot"
@@ -5298,7 +5314,7 @@ function partedWrite {
 	local device=$1
 	local cmds=$2
 	local opts
-	if [ $PARTED_HAVE_ALIGN ];then
+	if [ $PARTED_HAVE_ALIGN -eq 1 ];then
 		opts="-a cyl"
 	fi
 	if ! parted $opts -m $device unit cyl $cmds;then
@@ -5612,7 +5628,7 @@ function resizeFilesystem {
 	if [ -z "$callme" ];then
 		if [ $ramdisk -eq 0 ];then
 			eval $resize_lucks
-			eval $resize_fs && $check
+			eval $resize_fs
 		else
 			eval $resize_lucks
 			eval $resize_fs
@@ -5621,6 +5637,9 @@ function resizeFilesystem {
 			systemException \
 				"Failed to resize/check filesystem" \
 			"reboot"
+		fi
+		if [ $ramdisk -eq 0 ];then
+			$check
 		fi
 		INITRD_MODULES="$INITRD_MODULES $FSTYPE"
 	else

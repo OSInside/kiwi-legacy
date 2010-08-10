@@ -152,9 +152,9 @@ oem-* elements. See the \textit{KIWI image description} chapter for details.
 
 \subsection{LVM support}
 
-Kiwi also provides support for LVM (Logical Volume Management). In this
+KIWI also provides support for LVM (Logical Volume Management). In this
 mode the disk partition table will include one lvm partition and one
-standard ext2 boot partition. Kiwi creates the kiwiVG volume group, unless
+standard ext2 boot partition. KIWI creates the kiwiVG volume group, unless
 the lvmgroup attribute has been set, and adds logical volumes to the group
 based on the configuration given by the \textbf{lvmvolumes} block
 for this type. The filesystem for the volume group is determined by the
@@ -183,7 +183,7 @@ one or more top level directories in a separate volume. See the
 The default installation method of an OEM is dumping the entire
 virtual disk on the selected target disk and repartition the disk
 to the real geometry. This works but will also wipe everything which
-was on the disk before. Kiwi also supports the installation into
+was on the disk before. KIWI also supports the installation into
 already existing partitions. This means the user can setup a disk
 with free partitions for the kiwi OEM installation process. This
 way already existing data will not be touched. In order to activate

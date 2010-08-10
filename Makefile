@@ -125,6 +125,12 @@ install:
 	# Install boot image descriptions
 	#--------------------------------------------
 	cp -a system/boot/${arch}/* ${KIWIIMAGE} &>/dev/null || true
+	cp system/boot/${arch}/.md5 ${KIWIIMAGE} 
+	(cd ${KIWIIMAGE} && ./.md5)
+	(cd ${KIWIIMAGE} && \
+		find -type f | grep -v -E ".git|.test|.md5" |\
+		xargs chmod u-w &>/dev/null || true)
+	rm -f ${KIWIIMAGE}/.md5
 
 	#============================================
 	# Install system image template descriptions
@@ -136,14 +142,6 @@ install:
 	# Install kiwi repo
 	#--------------------------------------------
 	cp -a system/repo/${arch}/* ${KIWIREPO}
-
-	#============================================
-	# create checksum files for boot images...
-	#--------------------------------------------
-	(cd system/boot/${arch} && ./.md5)
-	(cd system/boot/${arch} && \
-		find -type f | grep -v -E ".git|.test|.md5" |\
-		xargs chmod u-w &>/dev/null || true)
 
 modules/KIWISchema.rng: modules/KIWISchema.rnc
 	#============================================

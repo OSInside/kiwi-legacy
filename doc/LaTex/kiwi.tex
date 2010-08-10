@@ -79,6 +79,41 @@ hyperindex=true]{hyperref}
 \newcommand{\ca}{\symbol{94}}
 \newcommand{\ti}{\symbol{126}}
 
+% A Shell command like df
+\newcommand{\cmd}[1]{\texttt{#1}}
+
+% An option for a (Shell) command, like --help
+\newcommand{\option}[1]{\texttt{--{}--#1}}
+
+% A quotation 
+\newcommand{\kquote}[1]{``#1''}
+
+%%
+%% Specific macros for XML layout:
+%%
+% An XML start tag, like <foo>
+\newcommand{\xmlstarttag}[1]{\texttt{\textless#1\textgreater}}
+
+% An XML end tag, like </foo>
+\newcommand{\xmlendtag}[1]{\texttt{\textless/#1\textgreater}}
+
+% An XML empty tag, like <foo/>
+\newcommand{\xmlemptytag}[1]{\texttt{\textless#1/\textgreater}}
+
+% An XML attribute with its value, like foo="bar"
+\newcommand{\xmlattrval}[2]{\texttt{#1\linebreak[2]=\linebreak[2]\textquotedbl#2\textquotedbl}}
+
+% A single XML attribute
+\newcommand{\xmlattr}[1]{\texttt{#1}}% XML attribute
+
+% A single XML attribute value
+\newcommand{\xmlval}[1]{\texttt{#1}}% XML attribute value
+
+% A single XML element (without the angle brackets)
+\newcommand{\xmlelement}[1]{\texttt{#1}}
+
+
+
 \includeversion{Yes}
 \excludeversion{No}
 
@@ -88,7 +123,7 @@ hyperindex=true]{hyperref}
 \subject{KIWI Project}
 
 \title{
-  openSUSE - KIWI Image System\\
+  openSUSE-KIWI Image System\\
   Cookbook
 }
 

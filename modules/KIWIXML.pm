@@ -274,11 +274,11 @@ sub new {
 		$main::PackageManager = $this -> getPackageManager();
 	}
 	#==========================================
-	# setup foreign repository sections
+	# setup foreign XML sections
 	#------------------------------------------
 	if ( defined $foreignRepo->{xmlnode} ) {
 		#==========================================
-		# foreign repositories
+		# 1) foreign repositories
 		#------------------------------------------
 		$kiwi -> info ("Including foreign repository node(s)");
 		my $need = new XML::LibXML::NodeList();
@@ -297,23 +297,22 @@ sub new {
 		$kiwi -> done ();
 		if ( defined $foreignRepo->{xmlpacnode} ) {
 			#==========================================
-			# foreign image packages
+			# 2) foreign image packages
 			#------------------------------------------
-			my $nodes = $foreignRepo->{xmlpacnode};
+			my @node = $foreignRepo -> {xmlpacnode} -> get_nodelist();
 			my @plist;
 			my @alist;
 			my @falistImage;
 			my @fplistImage;
 			my @fplistDelete;
-			for (my $i=1;$i<= $nodes->size();$i++) {
-				my $node = $nodes -> get_node($i);
-				my $type = $node  -> getAttribute ("type");
-				if (! $this -> requestedProfile ($node)) {
+			foreach my $element (@node) {
+				my $type = $element  -> getAttribute ("type");
+				if (! $foreignRepo -> {xmlobj} -> requestedProfile ($element)) {
 					next;
 				}
 				if (($type eq "image") || ($type eq "bootstrap")) {
-					push (@plist,$node->getElementsByTagName ("package"));
-					push (@alist,$node->getElementsByTagName ("archive"));
+					push (@plist,$element->getElementsByTagName ("package"));
+					push (@alist,$element->getElementsByTagName ("archive"));
 				}
 			}
 			foreach my $element (@plist) {
@@ -359,13 +358,13 @@ sub new {
 			}
 		}
 		#==========================================
-		# foreign machine attributes
+		# 3) foreign machine attributes in type
 		#------------------------------------------
 		if (defined $foreignRepo->{"domain"}) {
 			$this -> setForeignMachineAttribute ("domain");
 		}
 		#==========================================
-		# foreign preferences
+		# 4) foreign preferences in type
 		#------------------------------------------
 		if (defined $foreignRepo->{"locale"}) {
 			$this -> setForeignOptionsElement ("locale");
@@ -416,7 +415,7 @@ sub new {
 			$this -> setForeignOEMOptionsElement ("oem-inplace-recovery");
 		}
 		#==========================================
-		# foreign type attributes
+		# 5) foreign attributes in type
 		#------------------------------------------
 		if (defined $foreignRepo->{"hybrid"}) {
 			$this -> setForeignTypeAttribute ("hybrid");
@@ -435,7 +434,7 @@ sub new {
 			);
 		}
 		#==========================================
-		# foreign image attributes
+		# 6) foreign image attributes, toplevel
 		#------------------------------------------
 		if (defined $foreignRepo->{"displayname"}) {
 			$this -> setForeignImageAttribute (
@@ -3782,33 +3781,36 @@ sub createTmpDirectory {
 	my $overlay;
 	if (defined $baseRoot) {
 		if ((defined $baseRootMode) && ($baseRootMode eq "union")) {
-			$kiwi -> info("Creating overlay path [$root(rw) + $baseRoot(ro)] ");
+			$kiwi -> info("Creating overlay path\n");
+			$kiwi -> info("--> Base: $baseRoot(ro)\n");
+			$kiwi -> info("--> COW:  $root/kiwi-root.cow(rw)\n");
 		} elsif ((defined $baseRootMode) && ($baseRootMode eq "recycle")) {
-			$kiwi -> info("Using overlay path $baseRoot");
+			$kiwi -> info("Using overlay path $baseRoot\n");
 		} else {
-			$kiwi -> info("Importing overlay path $baseRoot -> $root");
+			$kiwi -> info("Importing overlay path $baseRoot -> $root\n");
 		}
 		$overlay = new KIWIOverlay ( $kiwi,$baseRoot,$root );
 		if (! defined $overlay) {
 			$rootError = 1;
-		}
-		if (defined $baseRootMode) {
+		} elsif (defined $baseRootMode) {
 			$overlay -> setMode ($baseRootMode);
 		}
-		$root = $overlay -> mountOverlay();
+		if ($overlay) {
+			$root = $overlay -> mountOverlay();
+		}
 		if (! defined $root) {
 			$rootError = 1;
 		}
-		if ($rootError) {
-			$kiwi -> failed;
-		} else {
+		if (! $rootError) {
 			if ((defined $baseRootMode) && ($baseRootMode eq "union")) {
-				$kiwi -> note ("-> $root");
+				$kiwi -> info ("--> Mounted on: $root\n");
 			}
-			$kiwi -> done ();
 		}
 	}
 	if ( $rootError ) {
+		if ($overlay) {
+			$overlay -> resetOverlay();
+		}
 		return undef;
 	}
 	return ($root,$origroot,$overlay);

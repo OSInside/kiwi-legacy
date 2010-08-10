@@ -1,0 +1,125 @@
+#! /bin/sh
+# Copyright (c) 2004 SuSE Linux AG, Nuernberg, Germany.
+# All rights reserved.
+#
+# Author: Werner Fink <werner@suse.de>, 2004
+#         Stephan Kulow <coolo@suse.de>, 2004,2007
+#
+# Please send feedback to http://www.suse.de/feedback
+#
+# /etc/init.d/earlyxdm
+#
+### BEGIN INIT INFO
+# Provides:          earlyxdm
+# Required-Start:    earlysyslog $local_fs sax
+# Should-Start:      gpm firstboot resmgr haldaemon
+# Required-Stop:
+# Default-Start:     5
+# Default-Stop:
+# Description:       Quick X Display Manager
+# Short-Description: Quick X Display Manager
+### END INIT INFO
+
+. /etc/rc.status
+. /etc/sysconfig/displaymanager
+
+check_nfs()
+{
+    # Check if important mount point is NFS mounted
+    while read  where what type options rest  ; do
+	test "$type" = "nfs" || continue
+	case "$where" in
+	\#*|"") ;;
+	*)  case "$options" in
+	    *noauto*) ;;
+	    *)	case "$what" in
+		/usr*|/opt*|/home*) return 1 ;;
+		esac
+	    esac
+	esac
+    done < /etc/fstab
+
+    return 0 # False - default
+}
+
+check_remote_autologin()
+{
+   if test -n "$DISPLAYMANAGER_AUTOLOGIN"; then
+      grep -q "^$DISPLAYMANAGER_AUTOLOGIN:" /etc/passwd || return 1
+   fi
+   return 0
+}
+
+check_syslog()
+{
+   . /etc/sysconfig/syslog
+
+   test -n "$SYSLOG_DAEMON" && test -x "/sbin/$SYSLOG_DAEMON" || {
+       for SYSLOG_DAEMON in syslog-ng syslogd ; do
+           test -x "/sbin/$SYSLOG_DAEMON" && break
+       done
+   }
+
+   case "$SYSLOG_DAEMON" in
+      syslog-ng)
+         config=/etc/syslog-ng/syslog-ng.conf
+        ;;
+      *)
+         config=/etc/syslog.conf
+        ;;
+   esac
+
+   case "$SYSLOG_DAEMON" in
+     syslog-ng)
+        while read line ; do
+            case "$line" in
+                \#*|"") continue ;;
+                *udp\ *|*udp\(*) return 1 ;;
+                *tcp\ *|*tcp\(*) return 1 ;;
+            esac
+        done < ${config}
+        ;;
+     *)
+        while read select action ; do
+            case "$select" in \#*|"") continue ;; esac
+            case "$action" in *@*)    return 1   ;; esac
+        done < ${config}
+        ;;
+   esac
+
+   return 0
+}
+
+check()
+{
+    check_nfs || return 1
+    check_syslog || return 1
+    check_remote_autologin || return 1
+    # ...
+    return 0
+}
+
+rc_reset
+check || exit 0
+
+# preloading
+if test "$1" = "start" && test -x /sbin/preload && test -e /etc/cron.daily/suse.de-update-preload; then
+
+    case "$DISPLAYMANAGER" in
+        kdm|kde|KDM|KDE|kdm4) 
+           if test -z "$DISPLAYMANAGER_AUTOLOGIN"; then
+               /usr/bin/ionice -n2 /sbin/preload /etc/preload.d/kdm
+           else
+               /usr/bin/ionice -n2 /sbin/preload /etc/preload.d/kdm.auto
+               /usr/bin/ionice -n6 /sbin/preload /etc/preload.d/kde &
+               echo $! > /var/run/preload-session.pid
+           fi
+	   ;;
+        gdm|gnome|GDM|GNOME)
+              /usr/bin/ionice -n2 /sbin/preload /etc/preload.d/gdm
+              ;;
+        *) exit 0;;
+    esac
+fi 
+
+exec /etc/init.d/xdm ${1+"$@"}

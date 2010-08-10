@@ -12,6 +12,7 @@
 # make tarball from the current source tree
 #-------------------------------------------
 ./.version > .revision
+git log | ./.changelog | ./.filter > ../kiwi.changes
 touch -c -r kiwi.pl .revision
 
 find -type d | grep .git | xargs rm -rf

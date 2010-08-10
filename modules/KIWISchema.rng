@@ -1905,6 +1905,7 @@ file for write operations</a:documentation>
       <attribute name="format">
         <a:documentation>Specifies the format of the virtual disk.</a:documentation>
         <choice>
+          <value>ec2</value>
           <value>ovf</value>
           <value>qcow2</value>
           <value>vmdk</value>
@@ -1936,7 +1937,6 @@ file for write operations</a:documentation>
           <value>btrfs</value>
           <value>clicfs</value>
           <value>cpio</value>
-          <value>ec2</value>
           <value>ext2</value>
           <value>ext3</value>
           <value>ext4</value>
@@ -1949,7 +1949,6 @@ file for write operations</a:documentation>
           <value>squashfs</value>
           <value>usb</value>
           <value>vmx</value>
-          <value>xen</value>
         </choice>
       </attribute>
     </define>
@@ -3139,7 +3138,6 @@ virtual machine when running the image.</db:para>
         <choice>
           <value>bootstrap</value>
           <value>delete</value>
-          <value>ec2</value>
           <value>image</value>
           <value>iso</value>
           <value>oem</value>
@@ -3148,7 +3146,6 @@ virtual machine when running the image.</db:para>
           <value>testsuite</value>
           <value>usb</value>
           <value>vmx</value>
-          <value>xen</value>
         </choice>
       </attribute>
     </define>

@@ -124,20 +124,20 @@ function OEMRepartStandard {
 		#--------------------------------------
 		if [ "$haveBootPartition" = "yes" ];then
 			createPartitionerInput \
-				d 2 w q
+				d 2
 		fi
 		#======================================
 		# repart root partition
 		#--------------------------------------
 		createPartitionerInput \
-			d n p $pID . +"$disk1MBytes"M w q
+			d n p $pID . +"$disk1MBytes"M
 		#======================================
 		# add swap partition
 		#--------------------------------------
 		if [ -z "$OEM_WITHOUTSWAP" ];then
 			pID=$((pID + 1))
 			createPartitionerInput \
-				n p $pID . +"$swapsize"M t 2 82 w q
+				n p $pID . +"$swapsize"M t 2 82
 			swapParam=$pID
 		fi
 		#======================================
@@ -146,7 +146,7 @@ function OEMRepartStandard {
 		if [ ! -z "$OEM_RECOVERY" ];then
 			pID=$((pID + 1))
 			createPartitionerInput \
-				n p $pID . +"$recoMByte"M t $pID $recoID w q
+				n p $pID . +"$recoMByte"M t $pID $recoID
 			recoParam=$pID
 		fi
 		#======================================
@@ -155,7 +155,7 @@ function OEMRepartStandard {
 		if [ ! -z "$bootXMBytes" ];then
 			pID=$((pID + 1))
 			createPartitionerInput \
-				n p $pID . +"$bootXMBytes"M t $pID $bootpartID w q
+				n p $pID . +"$bootXMBytes"M t $pID $bootpartID
 			bootParam=$pID
 		fi
 		#======================================
@@ -164,7 +164,7 @@ function OEMRepartStandard {
 		if [ -z "$OEM_WITHOUTHOME" ];then
 			pID=$((pID + 1))
 			createPartitionerInput \
-				n p $pID . . w q
+				n p $pID . .
 			homeParam=$pID
 		fi
 		#======================================
@@ -273,20 +273,20 @@ function OEMRepartSplit {
 		#--------------------------------------
 		if [ "$haveBootPartition" = "yes" ];then
 			createPartitionerInput \
-				d 3 w q
+				d 3
 		fi
 		#======================================
 		# repart cow partition
 		#--------------------------------------
 		createPartitionerInput \
-			d $pID n p $pID . +"$disk2MBytes"M w q
+			d $pID n p $pID . +"$disk2MBytes"M
 		#======================================
 		# add swap partition
 		#--------------------------------------
 		if [ ! $swapsize = 0 ];then
 			pID=$((pID + 1))
 			createPartitionerInput \
-				n p $pID . +"$swapsize"M t $pID 82 w q
+				n p $pID . +"$swapsize"M t $pID 82
 			swapParam=$pID
 		fi
 		#======================================
@@ -295,7 +295,7 @@ function OEMRepartSplit {
 		if [ "$haveBootPartition" = "yes" ];then
 			pID=$((pID + 1))
 			createPartitionerInput \
-				n p $pID . +"$bootXMBytes"M t $pID $bootpartID w q
+				n p $pID . +"$bootXMBytes"M t $pID $bootpartID
 			bootParam=$pID
 		fi
 		#======================================
@@ -378,7 +378,7 @@ function OEMRepartLVM {
 		#--------------------------------------
 		if [ ! -z "$OEM_RECOVERY" ];then
 			createPartitionerInput \
-				n p $pID . +"$recoMByte"M t $pID $recoID w q
+				n p $pID . +"$recoMByte"M t $pID $recoID
 			recoParam=$pID
 			pID=$((pID + 1))
 		fi
@@ -386,7 +386,7 @@ function OEMRepartLVM {
 		# add rest space LVM partition
 		#--------------------------------------
 		createPartitionerInput \
-			n p $pID . . t $pID 8e w q
+			n p $pID . . t $pID 8e
 		extendID=$pID
 		#======================================
 		# setup new device names
@@ -629,7 +629,7 @@ function activateBootPartition {
 	# set boot flag to current value of $bootid
 	# ----
 	Echo "Set boot flag to partition ID: $bootid [ $imageDiskDevice ]"
-	parted -m $imageDiskDevice set $bootid boot on
+	parted $imageDiskDevice set $bootid boot on
 	if test $? != 0; then
 		systemException "Failed to set boot flag" "reboot"
 	fi
