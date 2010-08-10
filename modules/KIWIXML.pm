@@ -3008,29 +3008,26 @@ sub getInstSourcePackageAttributes {
 	my $what = shift;
 	my $pack = shift;
 	my $nodes;
-
 	my $base = $this->{instsrcNodeList} -> get_node(1);
 	if ($what eq "metapackages") {
 		$nodes = $base -> getElementsByTagName ("metadata");
 	} elsif ($what eq "instpackages") {
 		$nodes = $base -> getElementsByTagName ("repopackages");
 	} elsif ($what eq "DUDmodules") {
-		my $dud_node = $base -> getElementsByTagName("driverupdate")->get_node(1);
-		$nodes = $dud_node->getElementsByTagName('modules');
+		$nodes = $base -> getElementsByTagName("driverupdate")
+			-> get_node(1) -> getElementsByTagName('modules');
 	} elsif ($what eq "DUDinstall") {
-		my $dud_node = $base -> getElementsByTagName("driverupdate")->get_node(1);
-		$nodes = $dud_node->getElementsByTagName('install')->get_node(1);
+		$nodes = $base -> getElementsByTagName("driverupdate")
+			-> get_node(1) -> getElementsByTagName('install');
 	} elsif ($what eq "DUDinstsys") {
-		my $dud_node = $base -> getElementsByTagName("driverupdate")->get_node(1);
-		$nodes = $dud_node->getElementsByTagName('instsys')->get_node(1);
+		$nodes = $base -> getElementsByTagName("driverupdate")
+			-> get_node(1) -> getElementsByTagName('instsys');
 	}
-
 	my %result;
 	my @attrib = (
 		"forcerepo" ,"addarch", "removearch", "arch",
 		"onlyarch", "source", "script", "medium"
 	);
-
 	if(not defined($this->{m_rpacks})) {
 		my @nodes = ();
 		for (my $i=1;$i<= $nodes->size();$i++) {
@@ -3040,7 +3037,6 @@ sub getInstSourcePackageAttributes {
 		}
 		%{$this->{m_rpacks}} = map {$_->getAttribute("name") => $_} @nodes;
 	}
-		
 	my $elem = $this->{m_rpacks}->{$pack};
 	if(defined($elem)) {
 		foreach my $key (@attrib) {
@@ -3307,10 +3303,8 @@ sub getList {
 #------------------------------------------
 sub isDriverUpdateDisk {
 	my $this = shift;
-
 	my $base = $this->{instsrcNodeList} -> get_node(1);
 	my $dud_node = $base->getElementsByTagName("driverupdate")->get_node(1);
-
 	return ref $dud_node;
 }
 
@@ -3319,17 +3313,12 @@ sub isDriverUpdateDisk {
 #------------------------------------------
 sub getInstSourceDUDTargets {
 	my $this = shift;
-
 	my $base = $this->{instsrcNodeList} -> get_node(1);
 	my $dud_node = $base->getElementsByTagName("driverupdate")->get_node(1);
-
 	my %targets = ();
-
 	foreach my $target ($dud_node->getElementsByTagName('target')) {
-		$targets{$target->textContent()} =
-			$target->getAttribute("arch");
+		$targets{$target->textContent()} = $target->getAttribute("arch");
 	}
-
 	return %targets;
 }
 
@@ -3338,60 +3327,55 @@ sub getInstSourceDUDTargets {
 #------------------------------------------
 sub getInstSourceDUDConfig {
 	my $this = shift;
-
 	my $base = $this->{instsrcNodeList} -> get_node(1);
 	my $dud_node = $base->getElementsByTagName("driverupdate")->get_node(1);
-
 	my @config = $dud_node->getElementsByTagName('config');
 	my %data;
-
 	foreach my $cfg (@config) {
-		$data{$cfg->getAttribute("key")} =
-			$cfg->getAttribute("value");
+		$data{$cfg->getAttribute("key")} = $cfg->getAttribute("value");
 	}
-
 	return \%data;
 }
 
 #==========================================
 # getInstSourceDUDModules
 #------------------------------------------
-
 sub getInstSourceDUDModules {
 	my $this = shift;
-
 	return $this->getInstSourceDUDPackList('modules');
 }
 
+#==========================================
+# getInstSourceDUDInstall
+#------------------------------------------
 sub getInstSourceDUDInstall {
 	my $this = shift;
-
 	return $this->getInstSourceDUDPackList('install');
 }
 
+#==========================================
+# getInstSourceDUDInstsys
+#------------------------------------------
 sub getInstSourceDUDInstsys {
 	my $this = shift;
-
 	return $this->getInstSourceDUDPackList('instsys');
 }
 
+#==========================================
+# getInstSourceDUDPackList
+#------------------------------------------
 sub getInstSourceDUDPackList {
 	my $this = shift;
 	my $what = shift;
 	return unless $what;
-
 	my $base = $this->{instsrcNodeList} -> get_node(1);
 	my $dud_node = $base->getElementsByTagName("driverupdate")->get_node(1);
-
 	my $modules_node = $dud_node->getElementsByTagName($what)->get_node(1);
 	my @module_packs = $modules_node->getElementsByTagName('repopackage');
-
 	my @modules;
-
 	foreach my $mod (@module_packs) {
 		push @modules, $mod->getAttribute("name");
 	}
-
 	return @modules;
 }
 

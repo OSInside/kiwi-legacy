@@ -1995,11 +1995,11 @@ div {
 		[
 		db:para [
 			"Creating a driverupdate disk for using updated hardware\x{a}"~
-						"drivers on system installation with YaST."
+			"drivers on system installation with YaST."
 		]
 		]
 		element driverupdate {
-						k.driverupdate.attlist &
+			k.driverupdate.attlist &
 			k.target+ &
 			k.install? &
 			k.modules? &
