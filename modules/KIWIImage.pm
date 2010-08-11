@@ -2174,14 +2174,20 @@ sub createImageSplit {
 				#==========================================
 				# recreate directory
 				#------------------------------------------
+				my $st = stat($file);
 				qxx ("mkdir -p $dest");
+				chmod S_IMODE($st->mode), $dest;
+				chown $st->uid, $st->gid, $dest;
 			} else {
 				#==========================================
 				# move file to read-write area
 				#------------------------------------------
+				my $st = stat(dirname $file);
 				my $destdir = dirname $dest;
 				qxx ("rm -rf $dest");
 				qxx ("mkdir -p $destdir");
+				chmod S_IMODE($st->mode), $destdir;
+				chown $st->uid, $st->gid, $destdir;
 				qxx ("mv $file $dest");
 				#==========================================
 				# relink file to read-write area
