@@ -4022,6 +4022,7 @@ function mountSystemStandard {
 # mountSystem
 #--------------------------------------
 function mountSystem {
+	local device
 	local retval=0
 	local OLDIFS=$IFS
 	IFS=$IFS_ORIG
@@ -4056,9 +4057,20 @@ function mountSystem {
 		mountSystemStandard "$mountDevice"
 		retval=$?
 	fi
+	#======================================
+	# setup boot partition
+	#--------------------------------------
 	if [ $retval = 0 ] && [ -z "$RESTORE" ];then
 		setupBootPartition
 	fi
+	#======================================
+	# disable filesystem check
+	#--------------------------------------
+	for device in $imageRootDevice $imageBootDevice $imageHomeDevice;do
+		if [ -e $device ];then
+			tune2fs -c -1 -i 0 $device 1>&2
+		fi
+	done
 	IFS=$OLDIFS
 	return $retval
 }
