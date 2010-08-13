@@ -19,7 +19,6 @@ TEX=kiwi.tex           \
 	workflow.tex       \
 	appliance.tex      \
 	xen.tex            \
-	instsource.tex     \
 	migrate.tex        \
     source.tex         \
     appendix.tex
