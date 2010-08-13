@@ -32,9 +32,7 @@ the repositories from which packages has been installed to
 the system. In a first step call:
 
 \begin{Command}{12cm}
-\begin{verbatim}
 kiwi --migrate mySystem
-\end{verbatim}
 \end{Command}
 
 This will create an HTML report where you can check which packages and
@@ -50,11 +48,8 @@ You should continue the migration if you have a clean list of solved
 packages without any package skipped except you know that this package
 can't be provided or is not worth to become part of the migration.
 
-\begin{Command}{14cm}
-\begin{verbatim}
-kiwi --migrate mySystem --nofiles \
-     [ --skip package ... ]
-\end{verbatim}
+\begin{Command}{8cm}
+kiwi --migrate mySystem --nofiles [ --skip package ... ]
 \end{Command}
 
 \section{Watch the Overlay and Unpackaged Files}
@@ -113,11 +108,9 @@ On success you will also find a ISO file which is an installable
 version of the OEM image. If you burn the ISO on a DVD you can use
 that DVD to install your cloned image on another computer.
 
-\begin{Command}{14cm}
-\begin{verbatim}
+\begin{Command}{8cm}
 kiwi -p /tmp/migrated --root /tmp/mySys
 kiwi --create /tmp/mySys -d /tmp/myResult
-\end{verbatim}
 \end{Command}
 
 If everything worked well you can test the created OEM

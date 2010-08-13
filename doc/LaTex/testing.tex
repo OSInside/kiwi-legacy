@@ -38,8 +38,8 @@ The test itself is defined by a xml description \path{test-case.xml}
 and its template definition file \path{/usr/share/kiwi/modules/KIWISchemaTest.rnc}
 The following example shows the basic structure of the rpm test:
 
-\begin{verbatim}
-<test_case 
+\begin{xml}
+<test_case
   name="rpm"
   summary="check rpm database and verify all rpms"
   description="check if rpm db is present, run rpm`s build-in Verify method"
@@ -55,7 +55,7 @@ The following example shows the basic structure of the rpm test:
      <params>CHROOT</params>
   </test>
 </test_case>
-\end{verbatim}
+\end{xml}
 
 There are basically two sections called \xmlelement{equirements} and \xmlelement{test}.
 In requirements you define what files/directories or packages has to be

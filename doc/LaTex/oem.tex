@@ -30,19 +30,13 @@ The commands provided below use the openSUSE 11.2 based example built
 for the x86 architecture.
 
 \begin{Command}{12cm}
-\begin{verbatim}
 cd /usr/share/doc/packages/kiwi/examples
 cd suse-11.2
-kiwi --prepare ./suse-oem-preload \
-     --root /tmp/myoem
-\end{verbatim}
+kiwi --prepare ./suse-oem-preload --root /tmp/myoem
 \end{Command}
 
 \begin{Command}{12cm}
-\begin{verbatim}
-kiwi --create /tmp/myoem --type split \
-     -d /tmp/myoem-result
-\end{verbatim}
+kiwi --create /tmp/myoem --type split -d /tmp/myoem-result
 \end{Command}
 
 \section{Using the Image}
@@ -57,11 +51,8 @@ following command shows how to use qemu to test the oem disk image
 \textit{(filename.raw)}.
 
 \begin{Command}{12cm}
-\begin{verbatim}
 cd /tmp/myoem-result
-qemu suse-11.2-oem-preload.i686-1.1.2.raw \
-     -m 512
-\end{verbatim}
+qemu suse-11.2-oem-preload.i686-1.1.2.raw -m 512
 \end{Command}
 
 or using the \cmd{dd} command you can dump the image onto a test hard 
@@ -69,11 +60,9 @@ disk or USB stick and upon reboot select the appropriate device as the
 boot device in the BIOS:
 
 \begin{Command}{12cm}
-\begin{verbatim}
 cd /tmp/myoem-result
 dd if=suse-11.2-oem-preload.i686-1.1.2.raw \
    of=/dev/<device> bs=32k
-\end{verbatim}
 \end{Command}
 
 Please note, when testing an oem image using the virtual disk image, i.e. 
@@ -87,13 +76,11 @@ the \path{.iso} file. In this case the re-partitioning code in the boot image wi
 be executed. The following commnads show this procedure using QEMU.
 
 \begin{Command}{12cm}
-\begin{verbatim}
 cd /tmp/myoem-result
 qemu-img create /tmp/mydisk 20G
 qemu -hda /tmp/mydisk -cdrom \
      suse-11.2-oem-preload.i686-1.1.2.iso \
      -boot d
-\end{verbatim}
 \end{Command}
 
 \section{Flavors}
@@ -168,10 +155,7 @@ the attribute \xmlattrval{lvm}{true} to of the \xmlelement{type}
 element in your \path{config.xml} file.
 
 \begin{Command}{12cm}
-\begin{verbatim}
-kiwi --create /tmp/myoem --type oem \
-     -d /tmp/myoem-result --lvm
-\end{verbatim}
+kiwi --create /tmp/myoem --type oem -d /tmp/myoem-result --lvm
 \end{Command}
 
 With the optional \textbf{lvmvolumes} section you can specify to have 
@@ -190,11 +174,9 @@ way already existing data will not be touched. In order to activate
 the partition based install mode the following oem option has to
 be set in \path{config.xml}:
 
-\begin{Command}{14cm}
-\begin{verbatim}
+\begin{xml}
 <oem-partition-install>true</oem-partition-install>
-\end{verbatim}
-\end{Command}
+\end{xml}
 
 Compared to the disk based install the following differences
 should be mentioned:

@@ -28,6 +28,10 @@ footexclude, abstracton]{scrbook}
 \usepackage{verbatim}
 \usepackage{version}
 \usepackage{rotating}
+\usepackage{textcomp}
+% Environment for code listings
+\usepackage{listings}
+
 
 % TF:
 \usepackage[latin1]{inputenc}
@@ -43,19 +47,50 @@ pdfpagemode=UseOutlines, % options are: None,UseThumbs,UseOutlines,FullScreen
 pdfstartview=FitV,       % options are: fit[ |h|v|b|bh|bv]
 hyperindex=true]{hyperref}
 
-% Environment for code listings
-\usepackage{listings}
+\lstloadlanguages{bash,XML}
 
-\lstset{language=Bash} % C++ als Programmiersprache im listings package
-\lstset{extendedchars, breaklines, basicstyle=\ttfamily\normalsize}
-\lstset{keywordstyle=\color[rgb]{0.00,0.00,0.50}{}\bfseries,commentstyle=\color[rgb]{0.00,0.50,0.25}{}}
-\lstset{numbers=left, stepnumber=1, numberstyle=\tiny, xleftmargin=1em, numbersep=10pt}
-\lstset{basewidth={0.5em,0.45em}, captionpos=b}
-\lstset{frame=tblr, framerule=0.5pt}
+%\lstset{language=Bash} % C++ als Programmiersprache im listings package
+%\lstset{extendedchars, breaklines, basicstyle=\ttfamily\normalsize}
+%\lstset{keywordstyle=\color[rgb]{0.00,0.00,0.50}{}\bfseries,commentstyle=\color[rgb]{0.00,0.50,0.25}{}}
+%\lstset{numbers=left, stepnumber=1, numberstyle=\tiny, xleftmargin=1em, numbersep=10pt}
+%\lstset{basewidth={0.5em,0.45em}, captionpos=b}
+%\lstset{frame=tb, framerule=0.5pt}
 
 %%==============================
 %% Definitions
 %%------------------------------
+%\newenvironment{Command}%
+% {\begin{Sbox}\begin{small}\begin{minipage}\ttfamily}%
+% {\end{minipage}\end{small}\end{Sbox}%
+%  %%\begin{center}\Large\shadowbox{\TheSbox}\end{center}}
+%  \vspace{0.5cm}\shadowbox{\TheSbox}\vspace{0.5cm}}
+
+\lstnewenvironment{Command}%
+{\lstset{language=Bash,%
+extendedchars,breaklines,basicstyle=\ttfamily\normalsize,%
+keywordstyle=\color[rgb]{0.00,0.00,0.50}{}\bfseries,%
+commentstyle=\color[rgb]{0.00,0.50,0.25}{},%
+numbers=left,stepnumber=1,numberstyle=\tiny,%
+xleftmargin=1.12em,%numbersep=10pt,%
+basewidth={0.5em,0.45em},captionpos=b,%
+frame=tBRl,framerule=0.5pt,%
+morekeywords={yast2,kiwi,qemu,dd,cp,vbladed},%
+}%
+}% end of start environment
+{}
+
+\lstnewenvironment{xml}%
+{\lstset{language=XML,
+commentstyle=\itshape,
+extendedchars,breaklines,basicstyle=\ttfamily\normalsize,%
+upquote=true,% we want really normal quotes, not typographical ones
+numbers=left,numberstyle=\tiny,
+xleftmargin=1.12em,
+basewidth={0.5em,0.45em},captionpos=b,
+}%
+}% end of start environment
+{}
+
 \renewcommand{\rmdefault}{bch}
 \renewcommand*\descfont{\normalfont\bfseries}
 \renewcommand*\sectfont{\normalfont\bfseries}
@@ -151,6 +186,30 @@ hyperindex=true]{hyperref}
 
 \publishers{}
 
+% Imprint
+\uppertitleback{\textbf{openSUSE-KIWI Image System---Cookbook}\\[1.25em]
+
+Permission is granted to copy, distribute and/or modify this document under the
+terms of the GNU Free Documentation License, Version 1.2 or (at your option) 
+version 1.3; with the Invariant Section being this copyright notice and license.
+A copy of the license version 1.2 is included in the appendix entitled
+\kquote{GNU Free Documentation License}.\\
+
+SUSE\textregistered{}, openSUSE\textregistered{}, the openSUSE\textregistered{}
+logo, Novell\textregistered{}, the Novell\textregistered{} logo, the 
+N\textregistered{} logo, are registered trademarks of Novell, Inc.\ in the
+United States and other countries.
+Linux\textregistered{} is a registered trademark of Linux Torvalds. 
+All other thrid party trademarks are the property of their respective owners.\\
+
+All information found in this book has been compiled with utmost attention to
+detail. However, this does not guarantee complete accuracy. Neither Novell, 
+Inc., SUSE Linux Products GmbH, the authors, nor the translators shall be held
+liable for possible errors or the consequences thereof.
+}
+%\lowertitleback{Fill in the gaps...}
+
+
 %%============================================================
 %% Start document
 %%------------------------------------------------------------
@@ -158,14 +217,9 @@ hyperindex=true]{hyperref}
 \begin{document}
 \dominitoc
 
-\newenvironment{Command}%
- {\begin{Sbox}\begin{large}\begin{minipage}}%
- {\end{minipage}\end{large}\end{Sbox}%
-  %%\begin{center}\Large\shadowbox{\TheSbox}\end{center}}
-  \vspace{0.5cm}\shadowbox{\TheSbox}\vspace{0.5cm}}
-
 \maketitle
 \tableofcontents
+
 
 %%============================================================
 %% all input sources
@@ -184,7 +238,6 @@ hyperindex=true]{hyperref}
 \input oem
 \input xen
 \input ec2
-%\input instsource
 \input testing
 \printindex
 \input appendix

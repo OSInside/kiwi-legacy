@@ -31,19 +31,15 @@ The latest example provided with kiwi is based on openSUSE 11.3 and includes
 the base pattern. 
 
 \begin{Command}{12cm}
-\begin{verbatim}
 cd /usr/share/doc/packages/kiwi/examples
 cd suse-11.2
 kiwi --prepare ./suse-xen-guest \
      --root /tmp/myxen
-\end{verbatim}
 \end{Command}
 
 \begin{Command}{12cm}
-\begin{verbatim}
 kiwi --create /tmp/myxen \
      --type vmx -d /tmp/myxen-result
-\end{verbatim}
 \end{Command}
 
 \section{Using the Image}
@@ -66,8 +62,7 @@ required to create a guest configuration as part of the config.xml
 file. Additionally you can group special packages which you may only
 need in this para virtual environment with a profile.
 
-\begin{Command}{13cm}
-\begin{verbatim}
+\begin{xml}
 <packages type="image" profiles="xenFlavour">
    <package name="kernel-xen" replaces="kernel-ec2"/>
 </packages>
@@ -76,8 +71,7 @@ need in this para virtual environment with a profile.
       <vmdisk ... device="/dev/xvda"/>
    </machine>
 </type>
-\end{verbatim}
-\end{Command}
+\end{xml}
 
 If this information is present KIWI will create a Xen domain U
 configuration with 512 MB of RAM and expects the disk at \path{/dev/xvda}.
@@ -86,8 +80,6 @@ explained in the \texttt{machine} section. The KIWI Xen domain U
 configuration is stored in the file:
 
 \begin{Command}{13cm}
-\begin{verbatim}
 /tmp/myxen-result/\
     suse-11.2-xen-guest.i686-1.1.2.xenconfig
-\end{verbatim}
 \end{Command}

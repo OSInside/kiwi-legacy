@@ -18,12 +18,12 @@ the path attribute inside of the \xmlelement{repository} element of the
 appropriate example to point to your local source directory.
 A typically default repository element looks like the following:
 
-\begin{verbatim}
+\begin{xml}
 <repository type="yast2">
    <!--<source path="/image/CDs/full-11.0-i386"/>-->
    <source path="opensuse://openSUSE:11.0/standard/"/>
 </repository>
-\end{verbatim}
+\end{xml}
 
 \section{Create a Local Installation Source}
 The following describes how to create a local SUSE installation
@@ -42,9 +42,7 @@ the example \path{config.xml} file.
       command:
 
 \begin{Command}{12cm}
-\begin{verbatim}
 mount -o loop /dev/<drive-device-name> /mnt
-\end{verbatim}
 \end{Command}
 
 \item You don't have a DVD but a CD set ? No problem all you need to
@@ -59,10 +57,8 @@ mount -o loop /dev/<drive-device-name> /mnt
       11.0 installation source:
 
 \begin{Command}{12cm}
-\begin{verbatim}
 mkdir -p /image/CDs/full-11.0-i386/
 cp -a /mnt/* /image/CDs/full-11.0-i386/
-\end{verbatim}
 \end{Command}
 
       Remember if you have a CD set start with number 4 first and

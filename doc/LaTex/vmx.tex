@@ -18,19 +18,13 @@ one example configuration per release. The example uses base pattern and the
 virtual disk is formated using the distribution default filesystem.
 
 \begin{Command}{12cm}
-\begin{verbatim}
 cd /usr/share/doc/packages/kiwi/examples
 cd suse-11.2
-kiwi --prepare ./suse-vm-guest \
-     --root /tmp/myvm
-\end{verbatim}
+kiwi --prepare ./suse-vm-guest --root /tmp/myvm
 \end{Command}
 
 \begin{Command}{12cm}
-\begin{verbatim}
-kiwi --create /tmp/myvm \
-     --type vmx -d /tmp/myvm-result
-\end{verbatim}
+kiwi --create /tmp/myvm --type vmx -d /tmp/myvm-result
 \end{Command}
 
 \section{Using the image}
@@ -42,10 +36,8 @@ support multiple virtual disk formats. Using the QEMU virtualization
 environment the created image may be tested with the following command:
 
 \begin{Command}{12cm}
-\begin{verbatim}
 cd /tmp/myvm-result
 qemu suse-11.2-vm-guest.i686-1.1.2.raw -m 256
-\end{verbatim}
 \end{Command}
 
 \section{Flavours}
@@ -58,11 +50,9 @@ or additional specified virtual hard disk files. KIWI will generate a
 specific format when the format attribute of the type element is specified.
 
 
-\begin{Command}{12cm}
-\begin{verbatim}
-<type image=''vmx''... format=''name''/>
-\end{verbatim}
-\end{Command}
+\begin{xml}
+<type image="vmx"... format="name"/>
+\end{xml}
 
 The following table lists the supported virtual disk formats
 
@@ -88,8 +78,7 @@ settings. In addition it is possible to include selected packages in the
 created image that are specific to the VM image generation. The following
 config.xml snippet provides general guidance on the elements in \path{config.xml}.
 
-\begin{Command}{13cm}
-\begin{verbatim}
+\begin{xml}
 <packages type="vmx">
    <!-- packages you need in VMware only -->
 </packages>
@@ -98,8 +87,7 @@ config.xml snippet provides general guidance on the elements in \path{config.xml
       <vmdisk controller="ide" id="0"/>
    </machine>
 </type>
-\end{verbatim}
-\end{Command}
+\end{xml}
 
 Given the specification above KIWI will create a VMware guest
 configuration specifying the availability of 512 MB of RAM and an IDE 
@@ -111,11 +99,9 @@ The guest configuration can be loaded through VMware user interface and
 may be modified through the GUI. The configuration file has the \path{.vmx} 
 extension as shown in the example below.
 
-\begin{Command}{13cm}
 \begin{verbatim}
 /tmp/myvm-result/suse-11.2-vm-guest.i686-1.1.2.vmx
 \end{verbatim}
-\end{Command}
 
 Using the \xmlattrval{format}{vmdk} attribute of the \xmlstarttag{type} start tag
 will create the VMware formated disk image (\path{.vmdk} file) and the required 
@@ -142,10 +128,7 @@ as part of the KIWI create step or add the attribute \xmlattrval{lvm}{true}
 as part of the \xmlelement{type} section in your \path{config.xml} file.
 
 \begin{Command}{12cm}
-\begin{verbatim}
-kiwi --create /tmp/myvm --type vmx \
-     -d /tmp/myvm-result --lvm
-\end{verbatim}
+kiwi --create /tmp/myvm --type vmx -d /tmp/myvm-result --lvm
 \end{Command}
 
 With the optional \xmlelement{lvmvolumes} section you can set one or

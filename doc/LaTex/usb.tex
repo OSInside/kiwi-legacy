@@ -17,12 +17,9 @@ of the default plus x11 pattern. The operating system is stored on a
 standard ext3 filesystem. 
 
 \begin{Command}{12cm}
-\begin{verbatim}
 cd /usr/share/doc/packages/kiwi/examples
 cd suse-11.2
-kiwi --prepare ./suse-live-stick \
-     --root /tmp/mystick
-\end{verbatim}
+kiwi --prepare ./suse-live-stick --root /tmp/mystick
 \end{Command}
 
 There are two possible image types which allows you to drive the
@@ -36,24 +33,18 @@ second one.
       images for booting the OS but requires you to plug in the stick
       and let kiwi deploy the data onto this stick.
 
-      \begin{Command}{12cm}
-      \begin{verbatim}
-kiwi --create /tmp/mystick --type usb \
-     -d /tmp/mystick-result
-      \end{verbatim}
-      \end{Command}
+\begin{Command}{12cm}
+kiwi --create /tmp/mystick --type usb d /tmp/mystick-result
+\end{Command}
 
 \item The second image type named ''oem'' allows you to create a
       virtual disk which represents a virtual disk geometry including
       all partitions and boot information in one file. You simply can \cmd{dd}
       this file on the stick.
 
-      \begin{Command}{12cm}
-      \begin{verbatim}
-kiwi --create /tmp/mystick --type oem \
-     -d /tmp/mystick-result
-      \end{verbatim}
-      \end{Command}
+\begin{Command}{12cm}
+kiwi --create /tmp/mystick --type oem -d /tmp/mystick-result
+\end{Command}
 \end{itemize}
 
 \section{Using the image}
@@ -67,14 +58,12 @@ creates a new partition table on the stick and imports the created
 images as follows:
 
 \begin{Command}{13cm}
-\begin{verbatim}
 kiwi --bootstick \
    /tmp/mystick-result/\
    initrd-usbboot-suse-11.2.i686-2.1.1.splash.gz \
    --bootstick-system \
    /tmp/mystick-result/\
    suse-11.2-live-stick.i686-1.1.2
-\end{verbatim}
 \end{Command}
 
 In case of the second image type (oem) you only need a tool which allows
@@ -87,11 +76,9 @@ not match the real USB stick geometry which means the kiwi boot image
 image on the stick call:
 
 \begin{Command}{13cm}
-\begin{verbatim}
-dd if=/tmp/mystick-result/\
+dd if=/tmp/mystick-result/ \
    suse-11.2-live-stick.i686-1.1.2.raw \
    of=/dev/<stick-device> bs=32k
-\end{verbatim}
 \end{Command}
 
 Testing of the live stick can be done with a test machine which boots from
@@ -132,28 +119,23 @@ To create a split stick the types needs to be adapted as follows:
 \begin{itemize}
 \item \textbf{type setup for split usb type:}
 
-      \begin{Command}{12cm}
-      \begin{verbatim}
+\begin{xml}
 <type image="split" fsreadwrite="ext3" fsreadonly="squashfs"
       boot="usbboot/suse-11.2"/>
-      \end{verbatim}
-      \end{Command}
+\end{xml}
 \item \textbf{type setup for split oem type:}
 
-      \begin{Command}{12cm}
-      \begin{verbatim}
+\begin{xml}
 <type image="split" fsreadwrite="ext3" fsreadonly="squashfs"
       boot="oemboot/suse-11.2"/>
-      \end{verbatim}
-      \end{Command}
+\end{xml}
 \end{itemize}
 
 For both types a split section inside the type section is required
 which defines the read-write data. A good starting point is
 to set \path{/var}, \path{/home}, and \path{/etc} as writable data.
 
-\begin{Command}{12cm}
-\begin{verbatim}
+\begin{xml}
 <split>
    <persistent>
       <!-- allow read/write access to: -->
@@ -165,8 +147,7 @@ to set \path{/var}, \path{/home}, and \path{/etc} as writable data.
       <file name="/home/*"/>
    </persistent>
 </split>
-\end{verbatim}
-\end{Command}
+\end{xml}
 
 If no split section is added the default split section from
 \path{/usr/share/kiwi/modules/KIWISplit.txt} is used

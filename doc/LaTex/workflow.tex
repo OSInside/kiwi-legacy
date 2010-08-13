@@ -33,7 +33,7 @@ step executes the following major stages:
       could schedule a set of packages for deletion after the package
       installation phase is over by listing them in the 'delete' section.
 \item \textbf{User defined script config.sh}\\
-      At the end of the preperation stage the optional script named config.sh
+      At the end of the preperation stage the optional script named \cmd{config.sh}
       is called. This script should be used to configure the system which means
       for example the activation of services. For a detailed description what
       functions are already available to configure the system please refer to
@@ -41,9 +41,9 @@ step executes the following major stages:
 \item \textbf{Managing the new root tree}\\
       At this point you can make changes on your unpacked image so it fits
       your purpose better. Bear in mind that changes at this point will be
-      discarded and not repeated automatically if you rerun the 'prepare'
+      discarded and not repeated automatically if you rerun the \emph{prepare}
       phase unless you include them in your original \path{config.xml} file and/or
-      \path{config.sh} script. Please also note that the image description has
+      \cmd{config.sh} script. Please also note that the image description has
       been copied into the new root below the directory
       \path{<new-root>/image}. Any subsequent create step will read
       the image description information from the new root tree and not
@@ -76,7 +76,7 @@ following major stages:
       What image type(s) a kiwi image supports depends on what types has been
       setup in the main image description file \path{config.xml}. At least one type
       must be setup. The following picture shows what image types are
-      currently supported by kiwi:
+      currently supported by KIWI:
 
       \begin{figure}[h]
       \centering

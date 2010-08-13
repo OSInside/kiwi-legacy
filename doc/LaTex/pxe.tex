@@ -48,7 +48,7 @@ The following steps describe how to setup a new DHCP server instance:
 \item create the file \path{/etc/dhcpd.conf} and include the following
       statements:
  
-      \begin{verbatim}
+\begin{verbatim}
 option domain-name "example.org";
 option domain-name-servers 192.168.100.2;
 option broadcast-address 192.168.100.255;
@@ -83,19 +83,13 @@ The image makes use of the squashfs compressed filesystem and its
 root tree is deployed as unified (aufs) based system. 
 
 \begin{Command}{12cm}
-\begin{verbatim}
 cd /usr/share/doc/packages/kiwi/examples
 cd suse-11.2
 kiwi --prepare ./suse-pxe-client \
      --root /tmp/mypxe
-\end{verbatim}
-\end{Command}
 
-\begin{Command}{12cm}
-\begin{verbatim}
 kiwi --create /tmp/mypxe --type pxe \
      -d /tmp/mypxe-result
-\end{verbatim}
 \end{Command}
 
 \section{Using the Image}
@@ -106,32 +100,32 @@ steps needs to be performed:
 
 \begin{enumerate}
 \item Change working directory
-\begin{verbatim}
+\begin{Command}
 cd /tmp/mypxe-result
-\end{verbatim}
+\end{Command}
 \item Copy of the boot and kernel image
-\begin{verbatim}
+\begin{Command}
 cp initrd-netboot-suse-11.2.i686-2.1.1.splash.gz \
    /srv/tftpboot/boot/initrd
 cp initrd-netboot-suse-11.2.i686-2.1.1.kernel \
    /srv/tftpboot/boot/linux
-\end{verbatim}
+\end{Command}
 \item Copy of the system image and md5 sum
-\begin{verbatim}
+\begin{Command}
 cp suse-11.2-pxe-client.i686-1.2.8 \
    /srv/tftpboot/image
 cp suse-11.2-pxe-client.i686-1.2.8.md5 \
    /srv/tftpboot/image
-\end{verbatim}
+\end{Command}
 \item Copy of the image boot configuration\\
       Normally the boot configuration applies to one client which
       means it is required to obtain the MAC address of this client.
       If the boot configuration should be used globaly the KIWI
       generated file can be copied as config.default
-\begin{verbatim}
+\begin{Command}
 cp suse-11.2-pxe-client.i686-1.2.8.config \
    /srv/tftpboot/KIWI/config.<MAC>
-\end{verbatim}
+\end{Command}
 \item Check the PXE configuration file\\
       The PXE configuration controls which kernel and initrd are
       loaded and which kernel parameters are set. When installing
@@ -167,9 +161,9 @@ file.
 \label{section:cntrlhw}
 This section describes the netboot client control file:
 
-\begin{Command}{8cm}
+\begin{verbatim}
 hwtype.$<$MAC Address$>$
-\end{Command}
+\end{verbatim}
 
 The control file is primarily used to set up new netboot clients. In this
 case, there is no configuration file corresponding to the client
@@ -182,9 +176,9 @@ is created, which is uploaded to the TFTP servers upload directory
 \label{section:confmac}
 This section describes the netboot client configuration file:
 
-\begin{Command}{8cm}
-    config.$<$MAC Address$>$
-\end{Command}
+\begin{verbatim}
+config.$<$MAC Address$>$
+\end{verbatim}
 
 The configuration file contains data about image, configuration,
 synchronization, or partition parameters. The configuration file is
@@ -205,13 +199,12 @@ IMAGE=/dev/sda2;suse-11.2-pxe-client.i686;1.2.8;192.168.100.2;4096
 The following format is used:
 
 %% toms: Hmn, underline. Better stay way from it
-\begin{Command}{14cm}
-    \textbf{IMAGE}=\underline{device;name;version;srvip;bsize;compressed},...,\\
-    \textbf{CONF}=\underline{src;dest;srvip;bsize},...,
-                             src;dest;srvip;bsize\\
-    \textbf{PART}=\underline{size;id;Mount},...,size;id;Mount\\
-    \textbf{DISK}=device
-\end{Command}
+\begin{verbatim}
+IMAGE=device;name;version;srvip;bsize;compressed,...,
+CONF=src;dest;srvip;bsize,...,src;dest;srvip;bsize
+PART=size;id;Mount,...,size;id;Mount
+DISK=device
+\end{verbatim}
 
 \begin{itemize}
     \item \textbf{IMAGE}\\
@@ -315,8 +308,8 @@ The following format is used:
         a PXE network image the netboot image requires a config.<MAC>
         setup like the following example shows:
         \textbf{UNIONFS\_CONFIG=/dev/sda2,/dev/sda3,aufs}. In this
-        example the first device /dev/sda2 represents the read/write
-        filesystem and the second device /dev/sda3 represents the
+        example the first device \path{/dev/sda2} represents the read/write
+        filesystem and the second device \path{/dev/sda3} represents the
         compressed system image filesystem. The container filesystem
         aufs is then used to cover the read/write layer with the
         read-only device to one read/write filesystem. If a file on
@@ -384,9 +377,9 @@ NBDROOT=NBD.Server.IP.address;\
         \url{http://download.opensuse.org/repositories/system:/aoetools}\\
         Once installed the following example shows how to export
         the local \path{/dev/sdb1} partition via AoE:
-\begin{verbatim}
+\begin{Command}
 vbladed 0 1 eth0 /dev/sdb1
-\end{verbatim}
+\end{Command}
         Some explanation about this command, each AoE device is identified
         by a couple Major/Minor, with major between 0-65535 and minor
         between 0-255. AoE is based just over Ethernet on the OSI models
@@ -494,16 +487,14 @@ available for the operating system after the image has been
 deployed into RAM. Below, find an example:
 
 \begin{itemize}
-\item Use a read-write filesystem in \path{config.xml}, for example\\
-      \textbf{filesystem=''ext3''}
+\item Use a read-write filesystem in \path{config.xml}, for example
+      \xmlattrval{filesystem}{ext3}
 \item Create \path{config.<MAC>}
 
-\begin{Command}{12cm}
 \begin{verbatim}
 IMAGE=/dev/ram1;suse-11.2-pxe-client.i686;\
       1.2.8;192.168.100.2;4096
 \end{verbatim}
-\end{Command}
 \end{itemize}
 
 \subsection{Union Image}
@@ -518,7 +509,6 @@ is a solution for this problem. In order to use a compressed
 root filesystem make sure your config.xml's filesystem attribute
 contains either squashfs or clicfs. Below, find an example:
 
-\begin{Command}{12cm}
 \begin{verbatim}
 DISK=/dev/sda
 PART=5;S;x,62;L;/,x;L;x,
@@ -527,7 +517,6 @@ IMAGE=/dev/sda2;suse-11.2-pxe-client.i386;\
 UNIONFS_CONFIG=/dev/sda3,/dev/sda2,aufs
 KIWI_INITRD=/boot/initrd
 \end{verbatim}
-\end{Command}
 
 \subsection{Split Image}
 
@@ -538,12 +527,12 @@ filesystems without the need for an overlay filesystem to combine
 them together. Below find an example:
 
 \begin{itemize}
-\item add a split type in config.xml, for example\\
-      \textbf{<type image="split" fsreadonly=''squashfs'' fsreadwrite=''ext3''
-      boot=''netboot/suse-11.2''/>}
+\item add a split type in config.xml, for example %\linebreak[4]
+      \xmlemptytag{type fsreadonly="squashfs" image="split" 
+      fsreadwrite="ext3" boot="netboot/suse-11.2"}
 \item add a split section inside the type to describe the temporary
       and persistent parts. For example:
-\begin{verbatim}
+\begin{xml}
 <split>
    <temporary>
       <!-- allow RAM read/write access to: -->
@@ -562,10 +551,9 @@ them together. Below find an example:
       <file name="/home/*"/>
    </persistent>
 </split>
-\end{verbatim}
-\item sample config.<MAC>
+\end{xml}
+\item sample \path{config.<MAC>}:
      
-\begin{Command}{14cm}
 \begin{verbatim}
 IMAGE=/dev/sda2;suse-11.2-pxe-client.i686;\
       1.2.8;192.168.100.2;4096,\
@@ -576,7 +564,6 @@ DISK=/dev/sda
 COMBINED_IMAGE=yes
 KIWI_INITRD=/boot/initrd
 \end{verbatim}
-\end{Command}
 \end{itemize}
 
 \subsection{Root Tree Over NFS}
@@ -587,13 +574,11 @@ tree via an NFS remote mount. Below find an example:
 
 \begin{itemize}
 \item Export the kiwi prepared tree via NFS
-\item sample config.<MAC>
+\item sample \path{config.<MAC>}:
 
-\begin{Command}{12cm}
 \begin{verbatim}
 NFSROOT=192.168.100.7;/tmp/kiwi.nfsroot
 \end{verbatim}
-\end{Command}
 \end{itemize}
 
 \subsection{Root Tree Over NBD}
@@ -606,11 +591,9 @@ device. Below find an example:
 \item Use nbd-server to export the kiwi prepared tree
 \item sample config.<MAC>
 
-\begin{Command}{12cm}
 \begin{verbatim}
 NBDROOT=192.168.100.7;2000;/dev/nbd0
 \end{verbatim}
-\end{Command}
 \end{itemize}
 
 \subsection{Root Tree Over AoE}
@@ -620,17 +603,15 @@ let the client mount the root device via a special ATA over
 Ethernet network block device. Below find an example:
 
 \begin{itemize}
-\item Use the vbladed command to bind a block device to an
+\item Use the \cmd{vbladed} command to bind a block device to an
       ethernet interface. The block device can be a disk
       partition or a loop device (losetup) but not a directory 
       like with NBD
-\item sample config.<MAC>
+\item sample \path{config.<MAC>}:
 
-\begin{Command}{12cm}
 \begin{verbatim}
 AOEROOT=/dev/etherd/e0.1
 \end{verbatim}
-\end{Command}
 
       This would require the command
       \cmd{vbladed 0 1 eth0 blockdevice}

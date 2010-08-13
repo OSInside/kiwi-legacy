@@ -18,19 +18,11 @@ The latest example provided with kiwi is based on openSUSE 11.2 and
 includes the base + kde patterns.
 
 \begin{Command}{12cm}
-\begin{verbatim}
 cd /usr/share/doc/packages/kiwi/examples
 cd suse-11.2
-kiwi --prepare ./suse-live-iso \
-     --root /tmp/myiso
-\end{verbatim}
-\end{Command}
+kiwi --prepare ./suse-live-iso --root /tmp/myiso
 
-\begin{Command}{12cm}
-\begin{verbatim}
-kiwi --create /tmp/myiso \
-     --type iso -d /tmp/myiso-result
-\end{verbatim}
+kiwi --create /tmp/myiso --type iso -d /tmp/myiso-result
 \end{Command}
 
 \section{Using the Image}
@@ -43,13 +35,10 @@ There are two ways to use the generated ISO image:
 \item Use a virtualisation system to test the image directly. Testing an
       iso can be done with any full virtual system for example:
 
-      \begin{Command}{12cm}
-      \begin{verbatim}
+\begin{Command}{12cm}
 cd /tmp/myiso-result
-qemu -cdrom \
-  ./suse-11.2-live-iso.i686-2.5.1.iso -m 256
-      \end{verbatim}
-      \end{Command}
+qemu -cdrom ./suse-11.2-live-iso.i686-2.5.1.iso -m 256
+\end{Command}
 \end{itemize}
 
 \section{Flavours}
@@ -98,8 +87,7 @@ attempt to \path{/var/log/messages} which therefore needs to be writable. The
 following split section can be used if the flag compressed
 is used:  
 
-\begin{Command}{12cm}
-\begin{verbatim}
+\begin{xml}
 <split>
    <temporary>
        <file name="/var"/>
@@ -112,5 +100,4 @@ is used:
        <file name="/home/*"/>
    </temporary>
 </split>
-\end{verbatim}
-\end{Command}
+\end{xml}

@@ -58,16 +58,16 @@ of the later operating system.
             \path{config-yast-firstboot.xml} file
       \item If the process finished successfully the environment is
             cleaned and firstboot won't be called at next reboot.
-      \end{enumerate} 
+      \end{enumerate}
 
 \item \path{config-yast-autoyast.xml}\\
       Configuration file which has been created by autoyast.
       To be able to create such an autoyast profile you should first
       call:
 
-      \begin{Command}{8cm}
-      yast2 autoyast
-      \end{Command}
+\begin{Command}{8cm}
+yast2 autoyast
+\end{Command}
 
       Once you have saved the information from the autoyast UI as
       config-yast-autoyast.xml file in your image description directory KIWI
@@ -110,14 +110,14 @@ For details on attributes and values please refer to the schema
 documentation file at \path{/usr/share/doc/packages/kiwi/kiwi.rng.html}.
 
 \subsection{\xmlstarttag{image} Element}
-\begin{Command}{12cm}
-<image schemaversion="3.5" name="iname"\\
-\hspace*{1.9cm}\textit{displayname="text"}\\
-\hspace*{1.9cm}\textit{inherit="path" kiwirevision="number"}\\
-\hspace*{1.9cm}\textit{id="10 digit number">}\\
-\hspace*{1cm}...\\
+\begin{xml}
+<image schemaversion="3.5" name="iname"
+ displayname="text"
+ inherit="path" kiwirevision="number"
+ id="10 digit number">
+  <!-- ... -->
 </image>
-\end{Command}
+\end{xml}
 
 The image definition starts with an image tag and requires the
 schema format at version 2.0. The attribute name specifies the
@@ -143,34 +143,34 @@ attribute must not have any spaces in its name.
       image.
 \end{itemize}
 
-Inside the \textbf{image} section the following mandatory and optional
+Inside the \xmlelement{image} section the following mandatory and optional
 subelements exists. The simplest image description must define the
 elements \xmlstarttag{description}, \xmlstarttag{preferences}, 
 \xmlstarttag{repository} and \xmlstarttag{packages} (at least one of 
 \xmlattrval{type}{bootstrap}).
 
 \subsection{\xmlstarttag{description} Element}
-\begin{Command}{12cm}
-<description type="system">\\
-\hspace*{1cm}<author>an author</author>\\
-\hspace*{1cm}<contact>mail</contact>\\
-\hspace*{1cm}<specification>short info</specification>\\
+\begin{xml}
+<description type="system">
+  <author>an author</author>
+  <contact>mail</contact>
+  <specification>short info</specification>
 </description>
-\end{Command}
+\end{xml}
 
 The mandatory description section contains information about
-the creator of this image description. The attribute \textbf{type}
-could be either of the value ''system'' which indicates this is a
-system image description or at value ''boot'' for boot image
+the creator of this image description. The attribute \xmlattr{type}
+could be either of the value \xmlval{system} which indicates this is a
+system image description or at value \xmlval{boot} for boot image
 descriptions.
 
 \subsection{\xmlstarttag{profiles} Element}
-\begin{Command}{12cm}
-<profiles>\\
-\hspace*{1cm}<profile name="name" description="text"/>\\
-\hspace*{1cm}...\\
+\begin{xml}
+<profiles>
+  <profile name="name" description="text"/>
+  <!-- ... -->
 </profiles>
-\end{Command}
+\end{xml}
 
 The optional profiles section lets you maintain one image description
 while allowing for variation of the sections packages and drivers that are
@@ -187,16 +187,15 @@ If a packages/drivers tag does not have a profiles attribute, it is
 assumed to be present for all profiles.
 
 \subsection{\xmlstarttag{preferences} Element}
-\begin{Command}{14cm}
-<preferences \textit{profiles="name"}>\\
-\hspace*{1cm}<version>1.1.2</version>\\
-\hspace*{1cm}<packagemanager>smart</packagemanager>\\
-\hspace*{1cm}<type image="name" ...>\\
-\hspace*{2cm}<ec2config|lvmvolumes|oemconfig|\\
-\hspace*{2cm} pxedeploy|size|split|machine>\\
-\hspace*{1cm}</type>\\
+\begin{xml}
+<preferences profiles="name">
+  <version>1.1.2</version>
+  <packagemanager>smart</packagemanager>
+  <type image="name" ...>
+    <ec2config|lvmvolumes|oemconfig|pxedeploy|size|split|machine>
+  </type>
 </preferences>
-\end{Command}
+\end{xml}
 
 The mandatory preferences section contains information about the supported
 image type(s), the used packagemanager, the version of this image and
@@ -234,7 +233,6 @@ attribute. The following list describes the supported types and possible
 values of the image attribute:
 
 \begin{itemize}
-\pagebreak[3]
 \item \xmlattrval{image}{cpio}\\
       Use the cpio image type to specify the generation os a boot image
       (intrd). When generating a boot image it is possible to specify a
@@ -267,8 +265,9 @@ values of the image attribute:
       Configuration of the AMI is accomplished with the optional
       \xmlelement{ec2config} element, specified as a child of the \xmlstarttag{type}
       element.
+\pagebreak
 \item \xmlattrval{image}{iso}\\
-      Specify the key-value pair image=iso to generate a live system suitable
+      Specify the key-value pair \xmlattrval{image}{iso} to generate a live system suitable
       for deployment on optical media (CD or DVD). Use the 
       \xmlattrval{boot}{isoboot/suse-*} attribute when generating this image
       type to select the apropriate boot image for optical media. In 
@@ -294,8 +293,8 @@ values of the image attribute:
       setting. In addition specify the attributes \xmlattr{filesystem}, 
       and \xmlattrval{boot}{oemboot/suse-*} to control the filesystem used
       for the virtual and to specify the proper boot image. Using the optional
-      \xmlattr{format} attribute and setting the value to ''iso'' or 
-      ''usb'' will create self installing images suitable for optical media
+      \xmlattr{format} attribute and setting the value to \xmlval{iso} or 
+      \xmlval{usb} will create self installing images suitable for optical media
       or a USB stick, respectively. Booting from the media will deploy
       the OEM preload image onto the selected storage device of the
       system. It is also possible to configure the system to use logical
@@ -321,7 +320,7 @@ values of the image attribute:
       different read-write properties to the different sections of the image.
       The \xmlval{oem}, \xmlattr{pxe}, \xmlattr{usb}, and \xmlattr{vmx} 
       types can be created as a split system image. Use the 
-      \xmlattrval{boot}{oem|netboot|usb|vmx/suse-*} attribute
+      \xmlattrval{boot}{oem|netboot\linebreak[3]|usb|vmx/suse-*} attribute
       to select the underlying type of the split image. The attributes
       \xmlattr{fsreadwrite}, \xmlattr{fsreadonly} are used to controll the
       read-write properties of the filesystem specified as the attributes
@@ -433,22 +432,22 @@ supported child elements:
     The optional ec2config block is used to specify information relevant
     only to AWS EC2 images. The following information can be provided:
 
-    \begin{Command}{14cm}
-    <ec2config>\\
-    \hspace*{1cm}<ec2accountnr>\\
-    \hspace*{2cm}Your AWS account number\\
-    \hspace*{1cm}</ec2accountnr>\\
-    \hspace*{1cm}<ec2certfile>\\
-    \hspace*{2cm}Path to the AWS cert-*.pem file\\
-    \hspace*{1cm}</ec2certfile>\\
-    \hspace*{1cm}<ec2privatekeyfile>\\
-    \hspace*{2cm}Path to the AWS pk-*.pem file\\
-    \hspace*{1cm}</ec2privatekeyfile>\\
-    </ec2config>
-    \end{Command}
+\begin{xml}
+<ec2config>
+  <ec2accountnr>
+    Your AWS account number
+  </ec2accountnr>
+  <ec2certfile>
+    Path to the AWS cert-*.pem file
+  </ec2certfile>
+  <ec2privatekeyfile>
+    Path to the AWS pk-*.pem file
+  </ec2privatekeyfile>
+</ec2config>
+\end{xml}
 
 \item \xmlelement{lvmvolumes}\\
-	Using the optional \textbf{lvmvolumes} section it possible to create
+	Using the optional \xmlelement{lvmvolumes} section it possible to create
     a LVM (Logical Volume Management) based storage layout. By default the
     volume group is named kiwiVG. It is possible to change the name of the
     group by setting the \xmlattr{lvmgroup} attribute to the desired name.
@@ -458,12 +457,12 @@ supported child elements:
     The following example shows the creation of a volume named usr and a
     volume named var inside the volume group systemVG.
 
-	\begin{Command}{12cm}
-	<lvmvolumes lvmgroup=''systemVG''>\\
-	\hspace*{1cm}<volume name="usr" freespace="100M"/>\\
-	\hspace*{1cm}<volume name="var" size="200M"/>\\
-	</lvmvolumes>
-	\end{Command}
+\begin{xml}
+<lvmvolumes lvmgroup="systemVG">
+  <volume name="usr" freespace="100M"/>
+  <volume name="var" size="200M"/>
+</lvmvolumes>
+\end{xml}
 
 	With the optional \xmlattr{freespace} attribute it is possible to
     add space to the volume. If the freespace attribute is not set the
@@ -479,17 +478,17 @@ supported child elements:
 	\path{/} partition. It is possible to influence the behavior by the
 	\xmlelement{oem-*} elements explained below.
 	KIWI uses this information to create the file
-	path{/config.oempartition} as part
+	\path{/config.oempartition} as part
 	of the automatically created oemboot boot image. The format of the
-	file is a simple key=value format and created by the KIWIConfig.sh
+	file is a simple key=value format and created by the \cmd{KIWIConfig.sh}
 	function named baseSetupOEMPartition(). 
 
-	\begin{Command}{12cm}
-	<oemconfig>\\
-	\hspace*{1cm}<oem-systemsize>2000</oem-systemsize>\\
-	\hspace*{1cm}<oem-...\\	
-	</oemconfig>
-    \end{Command}
+\begin{xml}
+<oemconfig>
+  <oem-systemsize>2000</oem-systemsize>
+  <oem-... >
+</oemconfig>
+\end{xml}
 
 	\begin{itemize}
     \item \xmlstarttag{oem-boot-title}text\xmlendtag{oem-boot-title}\\
@@ -510,12 +509,12 @@ supported child elements:
        external drive. For movable devices it is potentially necessary to 
        detect the storage location during every boot. This detection
        process is part of the oemboot boot image. This value is represented
-       by the OEM\_KIWI\_INITRD variable in config.oempartition.
+       by the OEM\_KIWI\_INITRD variable in \path{config.oempartition}.
 	\item \xmlstarttag{oem-reboot}true|false\xmlendtag{oem-reboot}\\
        Specify if the system is to be rebooted after the oem image has been
        deployed to the designated storage device (default value is false). 
        This value is represented by the OEM\_REBOOT variable in 
-       config.oempartition
+       \path{config.oempartition}.
 	\item \xmlstarttag{oem-recovery}true|false\xmlendtag{oem-recovery}\\
       If this element is set to true (default value is \xmlval{false}), KIWI will
       create a recovery archivefrom the prepared root tree. The archive will 
@@ -567,24 +566,24 @@ supported child elements:
     of this file is created automatically by KIWI if the pexedeploy section
     is provided in the image description. A pxedeploy section is outlined
     below:
-	
-	\begin{Command}{14cm}
-	<pxedeploy server="IP" blocksize="4096">\\
-	\hspace*{1cm}<timeout>seconds</timeout>\\
-	\hspace*{1cm}<kernel>kernel-file</kernel>\\
-	\hspace*{1cm}<initrd>initrd-file</initrd>\\
-	\hspace*{1cm}<partitions device="/dev/sda">\\
-	\hspace*{2cm}<partition type="swap" number="1" size="MB"/>\\
-	\hspace*{2cm}<partition type="L" number="2" size="MB"\\
-	\hspace*{4.5cm}mountpoint="/" target="true"/>\\
-	\hspace*{2cm}<partition type="fd" number="3"/>\\
-	\hspace*{1cm}</partitions>\\
-	\hspace*{1cm}<union ro="dev" rw="dev" type="aufs|clicfs|unionfs"/>\\
-	\hspace*{1cm}<configuration source="/KIWI/../file" dest="/../file"\\
-	\hspace*{4.5cm}arch="..."/>\\
-	\hspace*{1cm}<configuration .../>\\
-	</pxedeploy>
-	\end{Command}
+
+\begin{xml}
+<pxedeploy server="IP" blocksize="4096">
+  <timeout>seconds</timeout>
+  <kernel>kernel-file</kernel>
+  <initrd>initrd-file</initrd>
+  <partitions device="/dev/sda">
+    <partition type="swap" number="1" size="MB"/>
+    <partition type="L" number="2" size="MB"
+      mountpoint="/" target="true"/>
+    <partition type="fd" number="3"/>
+  </partitions>
+  <union ro="dev" rw="dev" type="aufs|clicfs|unionfs"/>
+  <configuration source="/KIWI/../file" dest="/../file"
+                 arch="..."/>
+  <configuration .../>
+</pxedeploy>
+\end{xml}
 
 	\begin {itemize}
 	\item The \xmlattr{server} attribute is used to specify the IP address
@@ -615,9 +614,9 @@ supported child elements:
       \xmlattr{type} attribute specifies the partition type. The possible
       values are the sfdisk supported types, use
       
-      \begin{Command}{14cm}
-      sfdisk --list-type
-      \end{Command}
+\begin{Command}{14cm}
+sfdisk --list-type
+\end{Command}
       
       to obtain a list of supported values. The required \xmlattr{number}
       attribute provides the the number of the partition to be created. The
@@ -672,9 +671,9 @@ supported child elements:
     containing approxiamtely 30\,\% free space.
     
      
-	\begin{Command}{12cm}
-	<size unit="M">1000</size>
-	\end{Command}
+\begin{xml}
+<size unit="M">1000</size>
+\end{xml}
 
 \item \xmlelement{split}\\
     For images of type split or iso the information provided in the optional
@@ -694,24 +693,24 @@ supported child elements:
     stored on the disk instead of in tmpfs. Creating read-write access to a 
     directory and it's files requires two specifications as showb below.
 
-	\begin{Command}{12cm}
-	<split>\\
-	\hspace*{1cm}<temporary>\\
-	\hspace*{2cm}<!-- read/write access to: -->\\
-	\hspace*{2cm}<file name="/var"/>\\
-	\hspace*{2cm}<file name="/var/*"/>\\
-	\hspace*{2cm}<!-- but not on this file: -->\\
-	\hspace*{2cm}<except name="/etc/shadow"/>\\
-	\hspace*{1cm}</temporary>\\
-	\hspace*{1cm}<persistent>\\
-	\hspace*{2cm}<!-- persistent read/write access to: -->\\
-	\hspace*{2cm}<file name="/etc"/>\\
-	\hspace*{2cm}<file name="/etc/*"/>\\
-	\hspace*{2cm}<!-- but not on this file: -->\\
-	\hspace*{2cm}<except name="/etc/passwd"/>\\
-	\hspace*{1cm}</persistent>\\
-	</split>
-	\end{Command}
+\begin{xml}
+<split>
+  <temporary>
+    <!-- read/write access to: -->
+    <file name="/var"/>
+    <file name="/var/*"/>
+    <!-- but not on this file: -->
+    <except name="/etc/shadow"/>
+  </temporary>
+  <persistent>
+    <!-- persistent read/write access to: -->
+    <file name="/etc"/>
+    <file name="/etc/*"/>
+    <!-- but not on this file: -->
+    <except name="/etc/passwd"/>
+  </persistent>
+</split>
+\end{xml}
 
     Use the \xmlelement{except} element to specify exceptions to previously
     configured rules.
@@ -731,19 +730,14 @@ supported child elements:
     The sample block below shows the general outline of the information
     that can be specified to generate the configuration file
 
-	\begin{Command}{12cm}
-	<machine arch="arch" memory="MB"\\
-	\hspace*{2.5cm}HWversion="number"\\
-	\hspace*{2.5cm}guestOS="suse|sles"\\
-	\hspace*{2.5cm}domain="dom0|domU"/>\\
-	\hspace*{1cm}<vmnic driver="name"\\
-	\hspace*{2.5cm}interface="number" mode="mode"/>\\
-	\hspace*{1cm}<vmdisk controller="ide|scsi"\\
-	\hspace*{2.5cm}id="number"/>\\
-	\hspace*{1cm}<vmdvd controller="ide|scsi"\\
-	\hspace*{2.5cm}id="number"/>\\
-	</machine>
-	\end{Command}
+\begin{xml}
+<machine arch="arch" memory="MB" HWversion="number"
+         guestOS="suse|sles" domain="dom0|domU"/>
+  <vmnic driver="name" interface="number" mode="mode"/>
+  <vmdisk controller="ide|scsi" id="number"/>
+  <vmdvd controller="ide|scsi" id="number"/>
+</machine>
+\end{xml}
 
 	\begin{itemize}
 	\item \xmlattr{arch}\\
@@ -801,28 +795,27 @@ supported child elements:
 \end{itemize}
 
 \subsection{\xmlstarttag{users} Element}
-\begin{Command}{12cm}
-<users group=''group\_name'' \textit{id="number"}>\\
-\hspace*{1cm}<user home="dir" \textit{id="number"}\\ 
-\hspace*{1.5cm}name=''user" pwd="..."\\
-\hspace*{1.5cm}\textit{pwdformat="encrypted" | "plain"}\\
-\hspace*{1.5cm}\textit{realname="string"} \textit{shell="path}/>\\
-\hspace*{1cm}...\\
+\begin{xml}
+<users group="group_name" id="number">
+  <user home="dir" id="number" name="user" pwd="..."
+        pwdformat="encrypted|plain"
+        realname="string" shell="path/>
+  <!-- ... -->
 </users>
-...
-\end{Command}
+\end{xml}
 
 The optional users element lists the users belonging to the group specified
 with the group attribute. At least one user child element must be specified
 as part of the users element. Multiple users elements may be specified.
 
-The attributes home, id, name, pwd, realname, and shell specify the created
+The attributes \xmlattr{home}, \xmlattr{id}, \xmlattr{name}, \xmlattr{pwd}, 
+\xmlattr{realname}, and \xmlattr{shell} specify the created
 users home directory, the user name, the user's password, the user's 
 real name, and the user's login shell, respectively. By default the value
 of the password attribute is expected to be an encrypted string. An
 encrypted password can be created using the \cmd{kiwi \option{createpassword}} tool. It
 is also possible to specify the password as a non encrypted string by using
-the pwdformat attribute and setting it's value to \kquote{plain}. KIWI will then
+the \xmlattr{pwdformat} attribute and setting it's value to \kquote{plain}. KIWI will then
 encrypt the password prior to the user being added to the system.
 
 All specified users and groups will be created if they do not already exist.
@@ -833,12 +826,12 @@ group it is necessary to specify the id attribute. It is recommended to use
 a group id greater than 100.
 
 \subsection{\xmlstarttag{drivers} Element}
-\begin{Command}{12cm}
-<drivers type="type" \textit{profiles="name"}>\\
-\hspace*{1cm}<file name="filename"/>\\
-\hspace*{1cm}...\\
+\begin{xml}
+<drivers type="type" profiles="name">
+  <file name="filename"/>
+  <!-- ... -->
 </drivers>
-\end{Command}
+\end{xml}
 
 The optional \xmlelement{drivers} element is only useful for boot images (initrd).
 As a boot image doesn't need to contain the complete kernel one can
@@ -876,15 +869,12 @@ have any effect.
 %\newpage
 
 \subsection{\xmlstarttag{repository} Element}
-\begin{Command}{12cm}
-<repository type="type"\\
-\hspace*{1cm}\textit{status="replaceable"}\\
-\hspace*{1cm}\textit{alias="name"}\\
-\hspace*{1cm}\textit{priority="number"}>\\
-\hspace*{2cm}<source path="URL"/>\\
-</repository>\\
-...
-\end{Command}
+\begin{xml}
+<repository type="type" status="replaceable"
+            alias="name" priority="number">
+  <source path="URL"/>
+</repository>
+\end{xml}
 
 The mandatory \xmlelement{repository} element specifies the source URL and
 type used by the package manager. The type attribute specifies the
@@ -895,10 +885,10 @@ zypper. Therefore the possible values for the type attribute has
 beend copied from smart. The following table shows the possible
 repo types:\\ 
 
-\begin{tabular}[h]{|p{4cm}|p{3cm}|p{3cm}|}
+\begin{longtable}[h]{|p{4cm}|p{3cm}|p{3cm}|}
 \hline
 \textbf{Type} & \textbf{smart Support} & \textbf{zypper Support}\\
-\hline
+\hline 
 apt-deb            & yes & no  \\
 apt-rpm            & yes & no  \\
 deb-dir            & yes & no  \\
@@ -911,7 +901,7 @@ up2date-mirrors    & yes & no  \\
 urpmi              & yes & no  \\
 yast2              & yes & yes \\
 \hline
-\end{tabular}\\
+\end{longtable}
 
 Within the repository section there are the following optional
 attributes:
@@ -985,25 +975,21 @@ used package manager. By default the package manager will always use
 the latest packages available.
 
 \subsection{\xmlstarttag{packages} Element}
-\begin{Command}{12cm}
-<packages type="type" \textit{profiles="name"}\\
-\hspace*{2.5cm}\textit{patternType="type"}\\
-\hspace*{2.5cm}\textit{patternPackageType="type"}\\
-\hspace*{1cm}<package name="name" arch="arch"/>\\
-\hspace*{1cm}<package name="name" replaces="name"/>\\
-\hspace*{1cm}<package name="name"\\
-\hspace*{2.5cm}bootinclude="true" bootdelete="true"/>\\
-\hspace*{1cm}<archive name="name"\\
-\hspace*{2.5cm}bootinclude="true"/>\\
-\hspace*{1cm}<package .../>\\
-\hspace*{1cm}<opensusePattern name="name"/>\\
-\hspace*{1cm}<opensusePattern .../>\\
-\hspace*{1cm}<opensuseProduct name="name"/>\\
-\hspace*{1cm}<opensuseProduct .../>\\
-\hspace*{1cm}<ignore name="name"/>\\
-\hspace*{1cm}<ignore .../>\\
+\begin{xml}
+<packages type="type" profiles="name" patternType="type" patternPackageType="type"
+  <package name="name" arch="arch"/>
+  <package name="name" replaces="name"/>
+  <package name="name" bootinclude="true" bootdelete="true"/>
+  <archive name="name" bootinclude="true"/>
+  <package .../>
+  <opensusePattern name="name"/>
+  <opensusePattern .../>
+  <opensuseProduct name="name"/>
+  <opensuseProduct .../>
+  <ignore name="name"/>
+  <ignore .../>
 </packages>
-\end{Command}
+\end{xml}
 
 The mandatory packages element specifies the list of packages (\xmlstarttag{package} 
 element) and patterns (\xmlstarttag{opensusePattern} element) to be used with the image.
@@ -1027,10 +1013,11 @@ listed are handled, supported values are as follows:
       used to delete the packages ignoring requirements or dependencies. 
       This can be accomplished in the \cmd{config.sh} or \cmd{images.sh} script with
       the following code snippet:
-\begin{verbatim}
-rpm -e --nodeps --noscripts \
- $(rpm -q `baseGetPackagesForDeletion` | grep -v "is not installed")
-\end{verbatim}
+\begin{Command}
+$ rpm -e --nodeps --noscripts \
+  $(rpm -q `baseGetPackagesForDeletion` | grep -v "is not installed")
+\end{Command}
+
       Note, that the delete value is indiscriminate of the image type
       being built.
 \item \xmlval{image}\\
@@ -1064,16 +1051,16 @@ which pattern references or packages should be used in a given pattern.
 The values of these attributes are only evaluated if the KIWI pattern
 solver is used. If the new (up to SUSE~11.0) satsolver pattern solver
 is used these values are ignored because the satsolver can't handle
-that at the moment. Allowed values for the pattern* attributes are:
+that at the moment. Allowed values for the \xmlattr{pattern*} attributes are:
 
 \begin{itemize}
-\item \textbf{onlyRequired}\\
+\item \xmlval{onlyRequired}\\
       Incorporates only patterns and packages that are required by the
       given pattern
-\item \textbf{plusSuggested}\\
+\item \xmlval{plusSuggested}\\
       Incorporates patterns and packages that are required
       and suggested by the given pattern
-\item \textbf{plusRecommended}\\
+\item \xmlval{plusRecommended}\\
       Incorporates patterns and packages that are required and
       recommended by the given pattern.
 \end{itemize}
@@ -1100,20 +1087,20 @@ attribute.
 If a package is only required for a specific type of image
 and replaces another package you can use the \xmlattr{replaces} attribute
 to tell KIWI to install the package by replacing another one. For example
-you can specify the kernel package in the type=image section as
+you can specify the kernel package in the \xmlattrval{type}{image} section as
 
-\begin{lstlisting}[language=xml]
+\begin{xml}
 <package name="kernel-default" replaces="kernel-xen"/>
-\end{lstlisting}
+\end{xml}
 
-and in the type=xen section as
+and in the \xmlattrval{type}{xen} section as
 
-\begin{lstlisting}[language=xml]
+\begin{xml}
 <package name="kernel-xen" replaces="kernel-default"/>
-\end{lstlisting}
+\end{xml}
 
-The result is the xen kernel if you request a xen
-image and the default kernel in any other case.
+The result is the xen kernel if you request a xen image and the
+default kernel in any other case.
 
 \subsubsection{Packages to Become Included Into the Boot Image}
 The optional attributes \xmlattr{bootinclude} and \xmlattr{bootdelete}
@@ -1125,7 +1112,7 @@ to be part of the boot image as the data is used at boot time
 of the image. If the bootdelete attribute is specified along with
 the bootinclude attribute this means that the selected package
 will be marked as a \kquote{to become deleted} package and is
-removed by the contents of the images.sh script of the corresponding
+removed by the contents of the \cmd{images.sh} script of the corresponding
 boot image description
 
 \subsubsection{Data not Available as Packages to Become Included}

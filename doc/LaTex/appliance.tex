@@ -31,9 +31,9 @@ and can be adapted to special needs and environments.
       allow tracking of non binary changes. This is done by adding
       the following into your \cmd{config.sh} script
  
-      \begin{Command}{8cm}
-      baseSetupPlainTextGITRepository
-      \end{Command}
+\begin{verbatim}
+baseSetupPlainTextGITRepository
+\end{verbatim}
 
 \item Prepare the preliminary version of your new appliance by
       calling \cmd{kiwi \option{prepare} ...} and refer to chapter \ref{chapter:usb}
@@ -43,13 +43,12 @@ and can be adapted to special needs and environments.
       is a good and fast approach. According to this make sure
       you have a usb type in your \path{config.xml}
 
-      \begin{Command}{12cm}
-      <type filesystem="ext3"\\
-      \hspace*{1.6cm}boot="usbboot/suse-...">usb</type>
-      \end{Command}
+\begin{xml}
+<type filesystem="ext3 boot="usbboot/suse-...">usb</type>
+\end{xml}
 
 \item Create the preliminary live stick image of your new appliance
-      by calling \cmd{kiwi \option{create} ...}. After successful creation
+      by calling \cmd{kiwi\linebreak[3] \option{create} ...}. After successful creation
       of the image files find an USB stick which is able to store
       your appliance and plug it into a free USB port on your image
       build machine. Use the \cmd{kiwi \option{bootstick} ...} call to deploy
@@ -64,9 +63,9 @@ and can be adapted to special needs and environments.
       \begin{itemize}
       \item Create an initial package list. This can be done by calling:
 
-            \begin{Command}{10cm}
-            rpm -qa | sort > /tmp/deployPackages
-            \end{Command}
+\begin{Command}{10cm}
+rpm -qa | sort > /tmp/deployPackages
+\end{Command}
 
       \item Check the output of the command \cmd{git status} and
             include everything which is unknown to git and surely
@@ -93,10 +92,10 @@ and can be adapted to special needs and environments.
       \item Check the differences between the currently installed packages
             and the initial deployment list. This can be done by calling:
 
-            \begin{Command}{12cm}
-            rpm -qa | sort > /tmp/appliancePackages\\
-            diff -u /tmp/deployPackages /tmp/appliancePackages
-            \end{Command}
+\begin{Command}{12cm}
+rpm -qa | sort > /tmp/appliancePackages
+diff -u /tmp/deployPackages /tmp/appliancePackages
+\end{Command}
 
             Add those packages which are labeled with ($+$) to the
             \xmlstarttag{packages \xmlattrval{type}{image}} section of your \path{config.xml}
@@ -110,26 +109,26 @@ and can be adapted to special needs and environments.
       \item Check the differences made in the configuration files. This
             can be easily done by calling:
 
-            \begin{Command}{8cm}
-            git diff > /tmp/appliancePatch
-            \end{Command}
+\begin{Command}{8cm}
+git diff > /tmp/appliancePatch
+\end{Command}
 
             The created patch should become part of your image description
             and you should make sure the patch is applied when preparing the
             image. According to this the command:
 
-            \begin{Command}{8cm}
-            patch -p0 < appliancePatch
-            \end{Command}
+\begin{Command}{8cm}
+patch -p0 < appliancePatch
+\end{Command}
 
             needs to be added as part of your config.sh script
 
       \item Check for new non binary files added. This can be done by
             calling:
             
-            \begin{Command}{4cm}
-            git status
-            \end{Command}
+\begin{Command}{4cm}
+git status
+\end{Command}
 
 	        All files not under version control so far will be listed by
             the command above. Check the contents of this list make sure
