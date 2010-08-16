@@ -4022,7 +4022,6 @@ function mountSystemStandard {
 # mountSystem
 #--------------------------------------
 function mountSystem {
-	local device
 	local retval=0
 	local OLDIFS=$IFS
 	IFS=$IFS_ORIG
