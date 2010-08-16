@@ -4064,13 +4064,9 @@ function mountSystem {
 		setupBootPartition
 	fi
 	#======================================
-	# disable filesystem check
+	# reset mount counter
 	#--------------------------------------
-	for device in $imageRootDevice $imageBootDevice $imageHomeDevice;do
-		if [ -e $device ];then
-			tune2fs -c -1 -i 0 $device 1>&2
-		fi
-	done
+	resetMountCounter
 	IFS=$OLDIFS
 	return $retval
 }
@@ -5662,6 +5658,34 @@ function resizeFilesystem {
 	else
 		echo $resize_fs
 	fi
+}
+#======================================
+# resetMountCounter
+#--------------------------------------
+function resetMountCounter {
+	local curtype=$FSTYPE
+	local command
+	for device in \
+		$imageRootDevice $imageBootDevice \
+		$imageRecoveryDevice $imageHomeDevice
+	do
+		if [ ! -e $device ];then
+			continue
+		fi
+		probeFileSystem $device
+		if [ "$FSTYPE" = "ext2" ];then
+			command="tune2fs -c -1 -i 0"
+		elif [ "$FSTYPE" = "ext3" ];then
+			command="tune2fs -c -1 -i 0"
+		elif [ "$FSTYPE" = "ext4" ];then
+			command="tune2fs -c -1 -i 0"
+		else
+			# nothing to do here...
+			continue
+		fi
+		eval $command $device 1>&2
+	done
+	FSTYPE=$curtype
 }
 #======================================
 # createFilesystem
