@@ -1,5 +1,5 @@
-\index{KIWI images!xen|(}
 \chapter{Xen Image---Paravirtual Systems}
+\index{KIWI images!Xen|(}\index{Xen|(}
 \label{chapter:xen}
 \minitoc
 
@@ -18,12 +18,12 @@ hardware. The system administrator logs into dom0 in order to start
 any further guest operating systems, called \kquote{domain U} (domU) in
 Xen terminology.
 
-A xen image is a virtual disk like a vmx but with the xen kernel
+A Xen image is a virtual disk like a vmx but with the xen kernel
 installed. In order to run it a Xen dom0 server needs to run. Xen
-images in kiwi makes use of the PVGrub method supported by current
+images in KIWI makes use of the PVGrub method supported by current
 Xen versions. Xen extracts the kernel and initrd from the virtual
 disk as well as the grub configuration and displays the menu which
-allows emulation of the grub console
+allows emulation of the Grub console
 
 \section{Building the suse-xen-guest Example}
 
@@ -58,7 +58,7 @@ xm create -c \
 \section{Flavours}
 
 With KIWI you can provide the information
-required to create a guest configuration as part of the config.xml
+required to create a guest configuration as part of the \path{config.xml}
 file. Additionally you can group special packages which you may only
 need in this para virtual environment with a profile.
 
@@ -74,7 +74,7 @@ need in this para virtual environment with a profile.
 \end{xml}
 
 If this information is present KIWI will create a Xen domain U
-configuration with 512 MB of RAM and expects the disk at \path{/dev/xvda}.
+configuration with 512~MB of RAM and expects the disk at \path{/dev/xvda}.
 Additional information to setup the Xen guest machine properties are
 explained in the \texttt{machine} section. The KIWI Xen domain U
 configuration is stored in the file:
@@ -83,3 +83,7 @@ configuration is stored in the file:
 /tmp/myxen-result/\
     suse-11.2-xen-guest.i686-1.1.2.xenconfig
 \end{Command}
+
+
+\index{KIWI images!Xen|)}
+\index{Xen|)}

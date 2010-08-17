@@ -1,5 +1,5 @@
-\index{KIWI images!appliance|(}
 \chapter{Creating Appliances with KIWI}
+\index{KIWI images!appliance|(}
 \label{chapter:appliance}
 \minitoc
 
@@ -29,14 +29,14 @@ and can be adapted to special needs and environments.
       build an image for
 \item Allow the image to create an in-place git repository to
       allow tracking of non binary changes. This is done by adding
-      the following into your \cmd{config.sh} script
+      the following into your \cmd{config.sh}\index{scripts!config.sh} script.
 
 \begin{verbatim}
 baseSetupPlainTextGITRepository
 \end{verbatim}
 
 \item Prepare the preliminary version of your new appliance by
-      calling \cmd{kiwi \option{prepare} ...} and refer to chapter \ref{chapter:usb}
+      calling \cmd{kiwi} \option{prepare}\ldots\ and refer to chapter \ref{chapter:usb}
       (USB image - Live-Stick System) for details.
 \item Decide for a testing environment. In my opinion a real
       hardware based test machine which allows to boot from USB
@@ -48,10 +48,10 @@ baseSetupPlainTextGITRepository
 \end{xml}
 
 \item Create the preliminary live stick image of your new appliance
-      by calling \cmd{kiwi\linebreak[3] \option{create} ...}. After successful creation
+      by calling \cmd{kiwi}\linebreak[3] \option{create}\ldots After successful creation
       of the image files find an USB stick which is able to store
       your appliance and plug it into a free USB port on your image
-      build machine. Use the \cmd{kiwi \option{bootstick} ...} call to deploy
+      build machine. Use the \cmd{kiwi} \option{bootstick}\ldots call to deploy
       the image on the stick. Refer to chapter \ref{chapter:usb}
       (USB image - Live-Stick System) for details.
 \item Plug in the stick on your test machine and boot it.
@@ -70,7 +70,8 @@ rpm -qa | sort > /tmp/deployPackages
       \item Check the output of the command \cmd{git status} and
             include everything which is unknown to git and surely
             will not be changed by you and will not become part of the
-            image description overlay files to the \path{/.gitignore}
+            image description overlay files to the 
+            \path{/.gitignore}\index{configuration files!.gitignore}
             files
       \end{itemize}
 
@@ -98,11 +99,13 @@ diff -u /tmp/deployPackages /tmp/appliancePackages
 \end{Command}
 
             Add those packages which are labeled with ($+$) to the
-            \xmlstarttag{packages \xmlattrval{type}{image}} section of your \path{config.xml}
+            \xmlstarttag{packages \xmlattrval{type}{image}} section of your 
+            \path{config.xml}\index{configuration files!config.xml}
             file and remove those packages which has been removed ($-$)
             appropriately. If there are packages which has been removed
             against the will of the package manager make sure you address
-            the uninstallation of these packages in your \cmd{config.sh}
+            the uninstallation of these packages in your 
+            \cmd{config.sh}\index{scripts!config.sh}
             script. If you have installed packages from repositories which
             are not part of your \path{config.xml} file you should also add these
             repositories in order to allow kiwi to install the packages
@@ -149,3 +152,5 @@ deactivate the creation of the git repository which will save you
 some space on the filesystem. If this appliance is a server I recommend
 to leave the repository because it allows you to keep track of changes
 during the live time of this appliance.
+
+\index{KIWI images!appliance|)}

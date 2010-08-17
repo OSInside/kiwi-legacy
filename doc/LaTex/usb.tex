@@ -1,5 +1,5 @@
-\index{KIWI images!usb|(}
 \chapter{USB Image---Live-Stick System}
+\index{KIWI images!USB|(}
 \label{chapter:usb}
 \minitoc
 
@@ -23,21 +23,22 @@ kiwi --prepare ./suse-live-stick --root /tmp/mystick
 \end{Command}
 
 There are two possible image types which allows you to drive the
-stick. Both are added into the \path{config.xml} of this example image
+stick. Both are added into the \path{config.xml}%
+\index{configuration files!config.xml} of this example image
 description. If you already have access to the stick you want to
 run the image on the first approach should be preferred over the
 second one.
 
 \begin{itemize}
-\item The first image type named ''usb'' creates all required
+\item The first image type named \xmlval{usb} creates all required
       images for booting the OS but requires you to plug in the stick
-      and let kiwi deploy the data onto this stick.
+      and let KIWI deploy the data onto this stick.
 
 \begin{Command}{12cm}
 kiwi --create /tmp/mystick --type usb d /tmp/mystick-result
 \end{Command}
 
-\item The second image type named ''oem'' allows you to create a
+\item The second image type named \xmlval{oem} allows you to create a
       virtual disk which represents a virtual disk geometry including
       all partitions and boot information in one file. You simply can \cmd{dd}
       this file on the stick.
@@ -50,10 +51,10 @@ kiwi --create /tmp/mystick --type oem -d /tmp/mystick-result
 \section{Using the Image}
 
 To make use of the created images they need to be deployed on the
-USB stick. For the first image type (usb) you need kiwi itself to
+USB stick. For the first image type (usb) you need KIWI itself to
 be able to deploy the image on the stick. The reason for this is
 that the usb image type has created the boot and the system image
-but there is no disk geometry or partition table available. kiwi
+but there is no disk geometry or partition table available. KIWI
 creates a new partition table on the stick and imports the created
 images as follows:
 
@@ -71,7 +72,7 @@ you to dump data onto a device. On Linux the most popular tool to do this
 is the \cmd{dd} command. The oem image is represented by the file
 with the \path{.raw} extension. As said this is a virtual disk which already
 includes partition information. But this partition information does
-not match the real USB stick geometry which means the kiwi boot image
+not match the real USB stick geometry which means the KIWI boot image
 (oemboot) has to adapt the disk geometry on first boot. To deploy the
 image on the stick call:
 
@@ -153,7 +154,7 @@ If no split section is added the default split section from
 \path{/usr/share/kiwi/modules/KIWISplit.txt} is used
 
 \subsection{LVM Support}
-
+\index{LVM}
 kiwi also provides support for LVM (Logical Volume Management). In this
 mode the disk partition table will include one lvm partition and one
 standard ext2 boot partition. KIWI creates the kiwiVG volume group and
@@ -163,10 +164,12 @@ control over the volume group and is free to change/resize/increas the
 group and the volumes inside. Support for LVM has been added for all
 image types which are disk based. This includes vmx,oem and usb.
 In order to use LVM for the usb type just add the \option{lvm} option
-as part of the kiwi \cmd{kiwi \option{bootstick}} deployment or add the
+as part of the kiwi \cmd{kiwi} \option{bootstick} deployment or add the
 attribute \xmlattrval{lvm}{true} as part of the \xmlelement{type} section
 in your \path{config.xml} file.
 
 The optional \xmlelement{lvmvolumes} section can be used to set one or
 more top level directories into a separate volume. See the
 \textit{KIWI image description} chapter for a detailed explanation.
+
+\index{KIWI images!USB|)}

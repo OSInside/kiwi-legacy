@@ -1,12 +1,12 @@
-\index{KIWI images!description|(}
 \chapter{KIWI Image Description}
+\index{KIWI images!description|(}
 \label{chapter:description}
 \minitoc
 
 In order to be able to create an image with KIWI a so called
 image description must be created. The image description is
 represented by a directory which has to contain at least one
-file named \path{config.xml} or alternatively \path{*.kiwi}.
+file named \path{config.xml}\index{configuration files!config.xml} or alternatively \path{*.kiwi}.
 A good start for such a description can be found in the examples
 provided in \path{/usr/share/doc/packages/kiwi/examples}.
 
@@ -22,13 +22,13 @@ of building an image but most often mandatory for the functionality
 of the later operating system.
 
 \begin{itemize}
-\item \path{images.sh}\\
+\item \path{images.sh}\index{scripts!images.sh}\\
       Optional configuration script while creating the packed image.
       This script is called at the beginning of the image creation process.
       It is designed to clean-up the image system. Affected are all the
       programs and files only needed while the unpacked image exists.
 
-\item \path{config.sh}\\
+\item \path{config.sh}\index{scripts!config.sh}\\
       Optional configuration script while creating the unpacked image. This
       script is called at the end of the installation but \emph{before}
       the package scripts have run. It is designed to configure the image
@@ -40,9 +40,9 @@ of the later operating system.
       Subdirectory that contains special files, directories, and scripts for
       adapting the image environment \textbf{after} the installation of all the
       image packages. The entire directory is copied into the root of the
-      image tree using \cmd{cp -a}.
+      image tree using \cmd{cp} \soption{a}.
 
-\item \path{config-yast-firstboot.xml}\\
+\item \path{config-yast-firstboot.xml}\index{configuration files!config-yast-firstboot.xml}\\
       Configuration file for the control of the yast2 firstboot service.
       Similar to the autoyast approach yast also provides a boot time
       service called firstboot. Unfortunately there is no GUI available
@@ -70,7 +70,7 @@ yast2 autoyast
 \end{Command}
 
       Once you have saved the information from the autoyast UI as
-      config-yast-autoyast.xml file in your image description directory KIWI
+      \path{config-yast-autoyast.xml} file in your image description directory KIWI
       will process on the file and setup your image as follows:
       \begin{enumerate}
       \item While booting the image YaST is started in autoyast mode
@@ -82,13 +82,13 @@ yast2 autoyast
             cleaned and autoyast won't be called at next reboot.
       \end{enumerate}
 
-\item \path{config-cdroot.tgz}\\
+\item \path{config-cdroot.tgz}\index{configuration files!config-cdroot.tgz}\\
       Archive which is used for ISO images only. The data in the archive is
       uncompressed and stored in the CD/DVD root directory. This
       archive can be used, for example, to integrate a license file or
       readme information directly readable from the CD or DVD.
 
-\item \path{config-cdroot.sh}\\
+\item \path{config-cdroot.sh}\index{scripts!config-cdroot.sh}\\
       Along with the \path{config-cdroot.tgz} one can provide a script which allows
       to manipulate the extracted data.
 
@@ -101,6 +101,7 @@ yast2 autoyast
 \end{itemize}
 
 \section{The config.xml File}
+\index{configuration files!config.xml}
 The mandatory image definition file is divided into different sections
 which describes information like the image name and type as well as
 the packages and patterns the image should consist of.
@@ -142,7 +143,7 @@ The following optional attributes can be inserted in the \xmlstarttag{image} tag
       a working image from this description. If the KIWI SVN
       revision is less than the specified value, the
       process will exit. The currently used SVN revision can
-      be queried by calling \cmd{kiwi \option{version}}.
+      be queried by calling \cmd{kiwi} \option{version}.
 
 \item \xmlattr{id}\\
       sets an identification
@@ -485,7 +486,7 @@ supported child elements:
 	\path{/} partition. It is possible to influence the behavior by the
 	\xmlelement{oem-*} elements explained below.
 	KIWI uses this information to create the file
-	\path{/config.oempartition} as part
+	\path{/config.oempartition}\index{configuration files!config.oempartition} as part
 	of the automatically created oemboot boot image. The format of the
 	file is a simple key=value format and created by the \cmd{KIWIConfig.sh}
 	function named baseSetupOEMPartition(). 
@@ -525,7 +526,8 @@ supported child elements:
 	\item \xmlstarttag{oem-recovery}true|false\xmlendtag{oem-recovery}\\
       If this element is set to true (default value is \xmlval{false}), KIWI will
       create a recovery archivefrom the prepared root tree. The archive will 
-      appear as \path{/recovery.tar.bz2} in the image file. During 
+      appear as \path{/recovery.tar.bz2}\index{configuration files!recovery.tar.bz2}
+      in the image file. During 
       first boot of the image a single recovery partition will be
       created and the recovery archive will be moved to the recovery 
       partition. An additional boot menu entry is created that when selected
@@ -536,7 +538,7 @@ supported child elements:
     \item \xmlstarttag{oem-recoveryID}partition-id\xmlendtag{oem-recoveryID}\\
       Specify the partition type for the recovery partition. The default 
       is to create a Linux partition (id\,=\,83). This value is represented by 
-      the OEM\_RECOVERY\_ID variable in config.oempartition. 
+      the OEM\_RECOVERY\_ID variable in \path{config.oempartition}.
     \item \xmlstarttag{oem-swap}true|false\xmlendtag{oem-swap}\\
        Specify if a sawp partition should be create. The creation of a swap
        partition is the default behavior. This value is represented by the
@@ -821,7 +823,7 @@ The attributes \xmlattr{home}, \xmlattr{id}, \xmlattr{name}, \xmlattr{pwd},
 users home directory, the user name, the user's password, the user's 
 real name, and the user's login shell, respectively. By default the value
 of the password attribute is expected to be an encrypted string. An
-encrypted password can be created using \cmd{kiwi \option{createpassword}}. It
+encrypted password can be created using \cmd{kiwi} \option{createpassword}. It
 is also possible to specify the password as a non encrypted string by using
 the \xmlattr{pwdformat} attribute and setting it's value to \kquote{plain}. KIWI will then
 encrypt the password prior to the user being added to the system.
@@ -1089,7 +1091,7 @@ ignored it.
 To restrict a package to a specific architecture, use
 the \xmlattr{arch} attribute to specify a comma separated list of allowed
 architectures. Such a package is only installed if the build systems
-architecture (\cmd{uname -m}) matches one of the specified values of the arch
+architecture (\cmd{uname} \soption{m}) matches one of the specified values of the arch
 attribute.
 
 \subsubsection{Image Type Specific Packages}
@@ -1121,7 +1123,8 @@ to be part of the boot image as the data is used at boot time
 of the image. If the bootdelete attribute is specified along with
 the bootinclude attribute this means that the selected package
 will be marked as a \kquote{to become deleted} package and is
-removed by the contents of the \cmd{images.sh} script of the corresponding
+removed by the contents of the 
+\cmd{images.sh}\index{scripts!images.sh} script of the corresponding
 boot image description
 
 \subsubsection{Data not Available as Packages to Become Included}
@@ -1135,3 +1138,4 @@ boot image.
 
 
 
+\index{KIWI images!description|)}

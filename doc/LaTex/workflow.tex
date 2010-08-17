@@ -11,7 +11,8 @@ tree or, in KIWI speak, a new unpacked image. The building of a new
 root tree consists of the creation of the directory specified to
 hold it and the installation of the selected packages on it. The
 installation of software packages is driven by a packagemanager.
-KIWI supports the smart and zypper package managers. The prepare
+KIWI supports the smart\index{package managers!smart}
+and zypper\index{package managers!zypper} package managers. The prepare
 step executes the following major stages:
 
 \begin{itemize}
@@ -32,7 +33,7 @@ step executes the following major stages:
       because of the dependency system. To save space in your image you
       could schedule a set of packages for deletion after the package
       installation phase is over by listing them in the \xmlelement{delete} section.
-\item \textbf{Executing of User Defined Script config.sh}\\
+\item \textbf{Executing of User Defined Script config.sh}\index{scripts!config.sh}\\
       At the end of the preperation stage the optional script named \cmd{config.sh}
       is called. This script should be used to configure the system which means
       for example the activation of services. For a detailed description what
@@ -64,7 +65,7 @@ Xen image from the same prepared root tree. The create step executes the
 following major stages:
 
 \begin{itemize}
-\item \textbf{Executing User Defined Script images.sh}\\
+\item \textbf{Executing User Defined Script images.sh}\index{scripts!images.sh}\\
       At the beginning of the creation stage the optional script named
       \cmd{images.sh} is called. This script has no distinctive use case like
       \cmd{config.sh} but is most often used to remove packages which were pulled
@@ -90,8 +91,8 @@ Detailed information including a step by step guidance how to call
 kiwi and how to make use of the result image can be found in the image
 type specific sections later in this document.
 
-\section{Boot Process}
-Todays linux systems are using a special boot image to control the
+\section{Boot Process}\index{boot process}
+Todays Linux systems are using a special boot image to control the
 boot process. This boot image is called \path{initrd}. The linux
 kernel loads this initial ramdisk which is a compressed cpio archive
 into RAM and calls init or if present the program named \cmd{linuxrc}. The
@@ -176,4 +177,6 @@ list of kernel drivers from the SUSE kernel.
 The prefixed implementation allows us to integrate all the
 distribution specific tasks into one project but this of course
 requires the help and knowledge of the people who are familar
-with their preferred linux distribution. 
+with their preferred Linux distribution. 
+
+\index{KIWI images!workflow|)}

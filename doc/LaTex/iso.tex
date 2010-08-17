@@ -1,5 +1,5 @@
-\index{KIWI images!iso|(}
 \chapter{ISO Image---Live Systems}
+\index{KIWI images!ISO|(}
 \label{chapter:iso}
 \minitoc
 
@@ -14,8 +14,8 @@ down.
 
 \section{Building the suse-live-iso Example}
 
-The latest example provided with kiwi is based on openSUSE 11.2 and
-includes the base + kde patterns.
+The latest example provided with KIWI is based on openSUSE 11.2 and
+includes the base and KDE patterns.
 
 \begin{Command}{12cm}
 cd /usr/share/doc/packages/kiwi/examples
@@ -29,7 +29,7 @@ kiwi --create /tmp/myiso --type iso -d /tmp/myiso-result
 
 There are two ways to use the generated ISO image:
 \begin{itemize}
-\item Burn the .iso file on a CD or DVD with your preferred burn program.
+\item Burn the \path{.iso} file on a CD or DVD with your preferred burn program.
       Plug in the CD or DVD into a test computer and (re)boot the machine.
       Make sure the computer boot from the CD drive as first boot device.
 \item Use a virtualisation system to test the image directly. Testing an
@@ -59,13 +59,13 @@ alternative solutions:
 \begin{itemize}
 \item \xmlattrval{flags}{unified}\\
       Compressed and unified root tree as explained above
-\item \xmlattrval{flags}{compressed}\\
+\item \xmlattrval{flags}{compressed}\index{filesystem!compression}\\
       Does filesystem compression with squashfs but don't use an
       overlay filesystem for write support. A symbolic link list is used
       instead and thus a split element is required in \path{config.xml}.
       See the Split mode section below for details.
-\item \xmlattrval{flags}{clic}\\
-      Creates a fuse based clicfs image and allows write operations
+\item \xmlattrval{flags}{clic}\index{FUSE}\\
+      Creates a FUSE based clicfs image and allows write operations
       into a cow file. In case of an ISO the write happens into a
       ramdisk.
 \item {Flags Not Set}\\
@@ -101,3 +101,5 @@ is used:
    </temporary>
 </split>
 \end{xml}
+
+\index{KIWI images!ISO|)}

@@ -115,10 +115,14 @@ basewidth={0.5em,0.45em},captionpos=b,
 \newcommand{\ti}{\symbol{126}}
 
 % A Shell command like df
-\newcommand{\cmd}[1]{\texttt{#1}}
+\newcommand{\cmd}[1]{\texttt{#1}\index{commands!#1}\index{#1}}
 
 % An option for a (Shell) command, like --help
-\newcommand{\option}[1]{\texttt{--{}--#1}}
+\newcommand{\option}[1]{\texttt{--{}--#1}\index{options!--{}--#1}}
+% A single option, like -a
+\newcommand{\soption}[1]{\texttt{--#1}}
+%
+\newcommand{\xoption}[1]{\texttt{#1}}
 
 % An inline quotation 
 \newcommand{\kquote}[1]{``#1''}

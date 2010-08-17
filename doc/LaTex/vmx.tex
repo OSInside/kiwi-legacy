@@ -1,19 +1,20 @@
-\index{KIWI images!vmx|(}
 \chapter{VMX Image---Virtual Disks}
+\index{KIWI images!vmx|(}
 \label{chapter:vmx}
 \minitoc
 
 A VMX image is a virtual disk image for use in full virtualisation
-systems like QEMU or VMware. The image is a file containing the
-system represented by the configured packages in \path{config.xml} as well
+systems like Qemu\index{Qemu} or VMware.\index{VMware} The image is a file containing the
+system represented by the configured packages in \path{config.xml}%
+\index{configuration files!config.xml} as well
 as partition data and bootloader information. The size of
 this virtual disk can be specified by using the \xmlstarttag{size} element
 in the \path{config.xml} file or by adding the \option{bootvm-disksize} command
 line argument.
 
 \section{Building the suse-vm-guest Example}
-
-The vm-guest example provided with kiwi is based on recent openSUSE releases,
+\index{examples!suse-vm-guest}
+The vm-guest example provided with KIWI is based on recent openSUSE releases,
 one example configuration per release. The example uses base pattern and the
 virtual disk is formated using the distribution default filesystem.
 
@@ -42,7 +43,7 @@ qemu suse-11.2-vm-guest.i686-1.1.2.raw -m 256
 
 \section{Flavours}
 
-KIWI always generates a file in the .raw format. The \path{.raw} file is a disk
+KIWI always generates a file in the \path{.raw} format. The \path{.raw} file is a disk
 image with a structure equivalent to the structure of a physical hard disk. 
 Individual virtualization systems have specific formats to facilitate
 improved I/O performance to the virtual disk, represented by the image file,
@@ -60,20 +61,21 @@ The following table lists the supported virtual disk formats
 \hline
 \textbf{Name} & \textbf{Description} \\
 \hline
-vmdk        & Disk format for VMware \\
-ovf         & Open Virtual Format requires VMwares ovftool \\
-qcow2       & QEMU virtual disk format  \\
+vmdk\index{vmdk}\index{VMware!vmdk}       & Disk format for VMware \\
+ovf\index{ovf}         & Open Virtual Format requires VMwares ovftool \\
+qcow2\index{qcow2}     & QEMU virtual disk format  \\
 \hline
 \end{tabular}
 
 \subsection{VMware support}
-
+\index{VMware!support}
 A VMware image is accompanied by a guest configuration file. This file 
 includes information about the hardware to be represented to the guest 
 image by the VMware virtualization environment as well as specification
 of resources such as memory. 
 
-Within the \path{config.xml} file it is possible to specify the VMware configuration
+Within the \path{config.xml}\index{configuration files!config.xml}
+file it is possible to specify the VMware configuration
 settings. In addition it is possible to include selected packages in the 
 created image that are specific to the VM image generation. The following
 config.xml snippet provides general guidance on the elements in \path{config.xml}.
@@ -90,7 +92,7 @@ config.xml snippet provides general guidance on the elements in \path{config.xml
 \end{xml}
 
 Given the specification above KIWI will create a VMware guest
-configuration specifying the availability of 512 MB of RAM and an IDE 
+configuration specifying the availability of 512~MB of RAM and an IDE 
 disk controller interface for the VM guest. For aditional information
 about the configuration settings please refer to the 
 \textit{machine} section. 
@@ -134,3 +136,5 @@ kiwi --create /tmp/myvm --type vmx -d /tmp/myvm-result --lvm
 With the optional \xmlelement{lvmvolumes} section you can set one or
 more top level directories into a separate volume. See the
 \textit{KIWI image description} chapter for a detailed explanation.
+
+\index{KIWI images!vmx|)}

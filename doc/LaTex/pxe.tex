@@ -1,5 +1,5 @@
-\index{KIWI images!pxe|(}
 \chapter{PXE Image---Thin Clients}
+\index{KIWI images!PXE|(}
 \label{chapter:pxe}
 \minitoc
 
@@ -34,7 +34,7 @@ In order to setup the atftp server the following steps are required
 \end{enumerate}
 
 \subsection{DHCP Server}
-
+\index{examples!DHCP server}
 In contrast to the atftp server setup the following DHCP server setup
 can only serve as an example. Please note that according to your network
 structure the IP addresses, ranges and domain settings needs to be adapted
@@ -44,8 +44,8 @@ that the filename and next-server information is provided by your server.
 The following steps describe how to setup a new DHCP server instance:
 
 \begin{enumerate}
-\item install the package dhcp-server
-\item create the file \path{/etc/dhcpd.conf} and include the following
+\item Install the package dhcp-server
+\item Create the file \path{/etc/dhcpd.conf} and include the following
       statements:
  
 \begin{verbatim}
@@ -66,18 +66,18 @@ subnet 192.168.100.0 netmask 255.255.255.0 {
 }
 \end{verbatim}
 
-\item edit the file \path{/etc/sysconfig/dhcpd} and setup the network
+\item Edit the file \path{/etc/sysconfig/dhcpd} and setup the network
       interface the server should listen on:
       \begin{itemize}
       \item DHCPD\_INTERFACE=''eth0''
       \end{itemize}
-\item run the dhcp server by calling:
+\item Run the dhcp server by calling:
       \cmd{rcdhcpd start}
 \end{enumerate}
 
 \section{Building the suse-pxe-client Example}
 
-The example provided with kiwi is based on openSUSE 11.2 and creates an
+The example provided with KIWI is based on openSUSE 11.2 and creates an
 image for a Wyse VX0 terminal with a 128MB flash card and 512MB of RAM.
 The image makes use of the squashfs compressed filesystem and its
 root tree is deployed as unified (aufs) based system. 
@@ -210,7 +210,7 @@ DISK=device
     \item \textbf{IMAGE}\\
         Specifies which image (name) should be loaded with which
         version (version) and to which storage device (device) it
-        should be linked, e.g., \path{/dev/ram1} or
+        should be linked, e.\,g., \path{/dev/ram1} or
         \path{/dev/hda2}. The netboot client partition (device)
         \path{hda2} defines the root file system \path{/} and \path{hda1}
         is used for the swap partition. The numbering of the hard disk
@@ -255,7 +255,7 @@ DISK=device
         Additionally all size specifications supported by the sfdisk
         program are allowed as well. The type number specifies the ID
         of the partition. Valid ID's are listed via the
-        \cmd{sfdisk \option{list-types}} command. The mount specifies the
+        \cmd{sfdisk} \option{list-types} command. The mount specifies the
         directory the partition is mounted to.
         \begin{itemize}
             \item The first element of the list must define the swap
@@ -289,7 +289,7 @@ DISK=device
         image, whereas the first image defines the read-write
         part and the second image defines the read-only part.
     \item \textbf{KIWI\_INITRD}\\
-        Specifies the kiwi initrd to be used for local boot of the
+        Specifies the KIWI initrd to be used for local boot of the
         system. The variables value must be set to the name of the
         initrd file which is used via PXE network boot. If the
         standard tftp setup suggested with the kiwi-pxeboot package
@@ -403,7 +403,8 @@ AOEROOT=/dev/etherd/e0.1,/dev/ram1
         Writing to RAM is the default but you also can set another device
         like another aoe location or a local device for writing the data
     \item \textbf{NFSROOT}\\
-         Mount the system image root filesystem remotely via NFS
+         Mount the system image root filesystem remotely via 
+         NFS\index{NFS (Network File System)}
          (Network File System). This means there is a server which
          exports the root filesystem of the network client in such a
          way that the client can mount it read/write. In order to do
@@ -450,11 +451,11 @@ KIWI_KERNEL=/boot/name-of-kernel-file
 
 \subsection{User another than tftp as download protocol}
 
-By default all downloads controlled by the kiwi linuxrc code
+By default all downloads controlled by the KIWI linuxrc code
 are performed by an atftp call and therefore uses the tftp
 protocol. With PXE the download protocol is fixed and thus you
 can't change the way how the kernel and the boot image (initrd)
-is downloaded. As soon as linux takes over control the following
+is downloaded. As soon as Linux takes over control the following
 download protocols http, https and ftp are supported too.
 KIWI makes use of the \cmd{curl} program to support the
 additional protocols.
@@ -567,7 +568,7 @@ KIWI_INITRD=/boot/initrd
 \end{itemize}
 
 \subsection{Root Tree Over NFS}
-
+\index{NFS (Network File System)}
 Instead of installing the image onto a local storage device of
 the client it is also possible to let the client mount the root
 tree via an NFS remote mount. Below find an example:
@@ -588,7 +589,7 @@ let the client mount the root tree via a special network block
 device. Below find an example:
 
 \begin{itemize}
-\item Use nbd-server to export the kiwi prepared tree
+\item Use nbd-server to export the KIWI prepared tree
 \item sample config.<MAC>
 
 \begin{verbatim}
@@ -614,7 +615,8 @@ AOEROOT=/dev/etherd/e0.1
 \end{verbatim}
 
       This would require the command
-      \cmd{vbladed 0 1 eth0 blockdevice}
+      \cmd{vbladed} \xoption{0 1 eth0 blockdevice}
       to be called first
 \end{itemize}
 
+\index{KIWI images!PXE|)}

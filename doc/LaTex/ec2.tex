@@ -1,5 +1,5 @@
-\index{KIWI images!ec2|(}
 \chapter{EC2 Image---Amazon Elastic Compute Cloud}
+\index{KIWI images!EC2|(}\index{EC2|see KIWI images, EC2}\index{Cloud|see EC2}
 \label{chapter:ec2}
 \minitoc
 
@@ -8,7 +8,9 @@ with the ability to execute arbitrary applications in our computing
 environment. To use Amazon EC2 you simply:
 
 \begin{enumerate}
-\item Create an Amazon Machine Image (AMI) containing all your software,
+\item Create an Amazon Machine Image (AMI)\index{Amazon Machine Image}%
+      \index{AMI|see Amazon Machine Image}
+      containing all your software,
       including your operating system and associated configuration settings,
       applications, libraries, etc. Such an AMI can be created by the KIWI
       ec2 image format. In order to do that KIWI makes use of the tools
@@ -18,6 +20,7 @@ environment. To use Amazon EC2 you simply:
       them from here:\\
       \url{http://aws.amazon.com/documentation/ec2/}
 \item Upload this AMI to the Amazon S3 (Amazon Simple Storage Service)
+      \index{Amazon Simple Storage Service}\index{Amazon S3|see Amazon Simple Storage Service}
       service. This gives us reliable, secure access to your AMI.
 \item Register your AMI with Amazon EC2. This allows us to verify that your
       AMI has been uploaded correctly and to allocate a unique identifier
@@ -32,7 +35,7 @@ Please note while instances are running, you are billed for the
 computing and network resources that they consume.
 You should start creating an ec2 with KIWI after you can make sure
 your system is prepared for ec2 which means if you call the command
-\cmd{ec2-describe-images -a} you will get a valid output.
+\cmd{ec2-describe-images} \soption{a} you will get a valid output.
 
 \section{Building the suse-xen-guest Example for EC2}
 
@@ -88,7 +91,7 @@ ec2-register myImages/\
 \end{Command}
 
 The result is the AMI id which you need to run an instance from
-your image. The command ec2-describe-images allows you to review your
+your image. The command \cmd{ec2-describe-images} allows you to review your
 registered images. Since you will be running an instance of a public AMI,
 you will need to use a public/private keypair to ensure that only you
 will have access. One half of this keypair will be embedded into your
@@ -154,3 +157,6 @@ ec2-authorize default -p 22
 
 Congratulations ! You made it and can now use Amazons storage and
 computing power.
+
+
+\index{KIWI images!EC2|)}

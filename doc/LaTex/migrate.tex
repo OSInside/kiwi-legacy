@@ -1,5 +1,5 @@
-\index{KIWI images!migration|(}
 \chapter{System to Image Migration}
+\index{KIWI images!migration|(}
 \label{chapter:migration}
 \minitoc
 
@@ -53,6 +53,7 @@ kiwi --migrate mySystem --nofiles [ --skip package ... ]
 \end{Command}
 
 \section{Watch the Overlay and Unpackaged Files}
+\index{overlay}
 Files which has been modified but belong to a package will be
 automatically copied into the overlay directory below
 \path{/tmp/mySystem/root}. You should check that no modified file
@@ -79,19 +80,23 @@ to be copied over to the \path{/tmp/mySystem/root} directory
 After that you should walk through the following check list
 
 \begin{itemize}
-\item Change author and contact in \path{config.xml}
+\item Change author and contact in \path{config.xml}\index{configuration files!config.xml}
 \item Set appropriate name for your image in \path{config.xml}
 \item Add/modify default type (oem) set in \path{config.xml} if needed
 \item Make sure your X11 configuration is appropriate according to
       the new target. A failsafe version was created in
-      \path{/tmp/mysys/root/etc/X11/xorg.conf.install} -> fbdev based
+      \path{/tmp/mysys/root/etc/X11/xorg.conf.install}%
+      \index{configuration files!xorg.conf.install}
+      -> fbdev based
 \item Make sure \cmd{yast2} is installed to be able to reconfigure
       the system. if \cmd{yast2} is not installed these tasks needs to
       be done else. Otherwise yast's second stage is started on first
       boot of the migrated image
 \item If you want to access any remote filesystem it's a good
       idea to let autoyast add them on first boot of the system
-\item Check your network setup in \path{/etc/sysconfig/network}. Is this
+\item Check your network setup in \path{/etc/sysconfig/network}.
+      \index{network setup}
+      Is this
       setup still possible in the cloned environment? Make sure you
       check for the MAC address of the card first.
 \end{itemize}
@@ -114,7 +119,8 @@ kiwi --create /tmp/mySys -d /tmp/myResult
 \end{Command}
 
 If everything worked well you can test the created OEM
-image in any full virtual operating system environment like QEMU or
+image in any full virtual operating system environment like Qemu\index{Qemu} or
 VMware. Once created the image description can serve for all image
 types KIWI supports.
  
+\index{KIWI images!migration|)}
