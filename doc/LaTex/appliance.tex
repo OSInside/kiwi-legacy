@@ -24,13 +24,13 @@ and can be adapted to special needs and environments.
 
 \begin{enumerate}
 \item First you should choose an appropriate image description template from
-      the provided kiwi examples and add/adapt repository and/or
+      the provided KIWI examples and add/adapt repository and/or
       package names according to the distribution you want to
       build an image for
 \item Allow the image to create an in-place git repository to
       allow tracking of non binary changes. This is done by adding
       the following into your \cmd{config.sh} script
- 
+
 \begin{verbatim}
 baseSetupPlainTextGITRepository
 \end{verbatim}
@@ -54,7 +54,7 @@ baseSetupPlainTextGITRepository
       build machine. Use the \cmd{kiwi \option{bootstick} ...} call to deploy
       the image on the stick. Refer to chapter \ref{chapter:usb}
       (USB image - Live-Stick System) for details.
-\item Plug in the stick on your test machine and boot it
+\item Plug in the stick on your test machine and boot it.
 \item After your test system has successfully booted from stick login
       into your appliance and start to tweak the system according to
       your needs. This includes all actions required to make the
@@ -81,7 +81,7 @@ rpm -qa | sort > /tmp/deployPackages
       what binary files had been installed and it's also not architecture
       safe. If there is really no other way for the software to become
       part of the image you should address this issue directly in your
-      image description and the config.sh script but not after the initial
+      image description and the \cmd{config.sh} script but not after the initial
       deployment has happened.
 \item As soon as your system works as expected your new appliance is
       ready to enter the final stage. At this point you have done several
@@ -121,7 +121,7 @@ git diff > /tmp/appliancePatch
 patch -p0 < appliancePatch
 \end{Command}
 
-            needs to be added as part of your config.sh script
+            needs to be added as part of your \cmd{config.sh} script
 
       \item Check for new non binary files added. This can be done by
             calling:
@@ -139,11 +139,13 @@ git status
             directory.
       \end{itemize}
 \item All your valuable work is now stored in one image description
-      and can be re-used in all KIWI supported image types. Congratulation!
-      To make sure the appliance works as expected prepare a new image
-      tree and create an image from the new tree. If you like you can
-      deactivate the creation of the git repository which will save you
-      some space on the filesystem. If this appliance is a server I recommend
-      to leave the repository because it allows you to keep track of changes
-      during the live time of this appliance.
+      and can be re-used in all KIWI supported image types. 
 \end{enumerate}
+
+Congratulation!
+To make sure the appliance works as expected prepare a new image
+tree and create an image from the new tree. If you like you can
+deactivate the creation of the git repository which will save you
+some space on the filesystem. If this appliance is a server I recommend
+to leave the repository because it allows you to keep track of changes
+during the live time of this appliance.
