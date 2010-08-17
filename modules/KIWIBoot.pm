@@ -3857,6 +3857,31 @@ sub setupBootLoaderConfiguration {
 	my $bloader  = "grub";
 	my $title;
 	#==========================================
+	# setup boot loader default boot label/nr
+	#------------------------------------------
+	my $defaultBootLabel = $label;
+	my $defaultBootNr    = 0;
+	if ((($type =~ /^KIWI (CD|USB)/)) && ($type{installboot})) {
+		# In install mode we have the following menu layout
+		# ----
+		# 0 -> Boot from Hard Disk
+		# 1 -> Install/Restore $label
+		# 2 -> Failsafe -- Install/Restore $label
+		# ----
+		if ($type{installboot} eq "install") {
+			$defaultBootLabel= makeLabel (
+				"Install/Restore $label"
+			);
+			$defaultBootNr = 1;
+		}
+		if ($type{installboot} eq "failsafe-install") {
+			$defaultBootLabel= makeLabel (
+				"Failsafe -- Install/Restore $label"
+			);
+			$defaultBootNr = 2;
+		}
+	}
+	#==========================================
 	# setup boot loader type
 	#------------------------------------------
 	if ($type{bootloader}) {
@@ -3917,7 +3942,7 @@ sub setupBootLoaderConfiguration {
 		# General grub setup
 		#------------------------------------------
 		print FD "color cyan/blue white/blue\n";
-		print FD "default 0\n";
+		print FD "default $defaultBootNr\n";
 		print FD "timeout 10\n";
 		if ($type =~ /^KIWI (CD|USB)/) {
 			my $dev = $1 eq 'CD' ? '(cd)' : '(hd0,0)';
@@ -4097,7 +4122,7 @@ sub setupBootLoaderConfiguration {
 		#==========================================
 		# General syslinux setup
 		#------------------------------------------
-		print FD "default  $label"."\n";
+		print FD "default  $defaultBootLabel"."\n";
 		print FD "implicit 1"."\n";
 		print FD "prompt   1"."\n";
 		print FD "timeout  200"."\n";

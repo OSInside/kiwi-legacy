@@ -433,6 +433,11 @@ sub new {
 				"bootloader",$foreignRepo->{"bootloader"}
 			);
 		}
+		if (defined $foreignRepo->{"installboot"}) {
+			$this -> setForeignTypeAttribute (
+				"installboot",$foreignRepo->{"installboot"}
+			);
+		}
 		#==========================================
 		# 6) foreign image attributes, toplevel
 		#------------------------------------------
@@ -811,6 +816,7 @@ sub getImageTypeAndAttributes {
 		$record{installstick}  = $node -> getAttribute("installstick");
 		$record{vga}           = $node -> getAttribute("vga");
 		$record{bootloader}    = $node -> getAttribute("bootloader");
+		$record{installboot}   = $node -> getAttribute("installboot");
 		$record{checkprebuilt} = $node -> getAttribute("checkprebuilt");
 		$record{baseroot}      = $node -> getAttribute("baseroot");
 		$record{bootprofile}   = $node -> getAttribute("bootprofile");
@@ -2543,6 +2549,9 @@ sub getImageConfig {
 	}
 	if ((%type) && ($type{bootloader})) {
 		$result{kiwi_bootloader} = $type{bootloader};
+	}
+	if ((%type) && ($type{installboot})) {
+		$result{kiwi_installboot} = $type{installboot};
 	}
 	if ((%type) && ($type{luks})) {
 		$result{kiwi_luks} = "yes";
