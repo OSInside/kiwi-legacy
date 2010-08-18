@@ -238,6 +238,14 @@ function systemException {
 	# ----
 	set +x
 	local what=$2
+	local nuldev=/dev/null
+	local ttydev=$ELOG_EXCEPTION
+	if [ ! -e $nuldev ];then
+		nuldev=/mnt/$nuldev
+	fi
+	if [ ! -e $ttydev ];then
+		ttydev=/mnt/$ttydev
+	fi
 	test -e /proc/splash && echo verbose > /proc/splash
 	if [ $what = "reboot" ];then
 		if cat /proc/cmdline | grep -qi "kiwidebug=1";then
@@ -249,7 +257,7 @@ function systemException {
 	"reboot")
 		Echo "rebootException: error consoles at Alt-F3/F4"
 		Echo "rebootException: reboot in 120 sec..."; sleep 120
-		/sbin/reboot -f -i >/dev/null
+		/sbin/reboot -f -i >$nuldev
 	;;
 	"wait")
 		Echo "waitException: waiting for ever..."
@@ -257,12 +265,12 @@ function systemException {
 	;;
 	"shell")
 		Echo "shellException: providing shell..."
-		setctsid $ELOG_EXCEPTION /bin/bash -i || /bin/bash -i
+		setctsid $ttydev /bin/bash -i
 	;;
 	"user_reboot")
 		Echo "reboot triggered by user: consoles at Alt-F3/F4"
 		Echo "reboot in 30 sec..."; sleep 30
-		/sbin/reboot -f -i >/dev/null
+		/sbin/reboot -f -i >$nuldev
 	;;
 	*)
 		Echo "unknownException..."
