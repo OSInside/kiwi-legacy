@@ -155,6 +155,7 @@
 <xsl:template name="insertpxe" mode="conv39to41">
     <xsl:if test="/image/pxedeploy">
         <pxedeploy>
+        <xsl:copy-of select="/image/pxedeploy/@*"/>
         <xsl:call-template name="insertblockchldnodes" mode="conv39to41">
             <xsl:with-param name="blockname" select="/image/pxedeploy"/>
         </xsl:call-template>  
