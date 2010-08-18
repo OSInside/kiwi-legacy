@@ -149,6 +149,7 @@
 		<package name="psmisc"/>
 		<package name="iputils"/>
 		<package name="busybox"/>
+		<package name="atftp"/>
 		<package name="bind-libs"/>
 		<package name="bind-utils"/>
 		<package name="dhcpcd"/>
@@ -175,6 +176,7 @@
 	<packages type="image" profiles="diskless">
 		<package name="iputils"/>
 		<package name="busybox"/>
+		<package name="atftp"/>
 		<package name="dhcpcd"/>
 		<package name="file"/>
 		<package name="hwinfo"/>
