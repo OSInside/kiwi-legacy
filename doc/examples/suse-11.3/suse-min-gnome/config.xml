@@ -32,7 +32,7 @@
 	<packages type="image" patternType="plusRecommended">
 		<package name="bootsplash"/>
 		<package name="bootsplash-branding-openSUSE" bootinclude="true" bootdelete="true"/>
-		<package name="firefox"/>
+		<package name="MozillaFirefox"/>
 		<package name="gdm"/>
 		<package name="gfxboot-branding-openSUSE" bootinclude="true" bootdelete="true"/>
 		<package name="gnome-applets"/>
@@ -47,7 +47,10 @@
 		<package name="xterm"/>
 		<package name="icewm"/>
 		<package name="xorg-x11-server"/>
+		<package name="xorg-x11-driver-video"/>
+		<package name="xkeyboard-config"/>
 		<opensusePattern name="base"/>
+		<opensusePattern name="x11"/>
 	</packages>
 	<packages type="vmx"/>
 	<packages type="bootstrap">
