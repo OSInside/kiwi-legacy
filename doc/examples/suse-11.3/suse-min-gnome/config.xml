@@ -46,9 +46,17 @@
 		<package name="vim"/>
 		<package name="xterm"/>
 		<package name="icewm"/>
+		<package name="gnome-desktop"/>
+		<package name="gnome-session"/>
 		<package name="xorg-x11-server"/>
 		<package name="xorg-x11-driver-video"/>
+		<package name="xorg-x11-driver-video-intel-legacy"/>
+		<package name="xorg-x11-driver-video-nouveau"/>
+		<package name="xorg-x11-driver-video-unichrome"/>
+		<package name="xorg-x11-driver-video-radeonhd"/>
+		<package name="xorg-x11-driver-virtualbox-ose"/>
 		<package name="xkeyboard-config"/>
+		<package name="xorg-x11-driver-input"/>
 		<opensusePattern name="base"/>
 		<opensusePattern name="x11"/>
 	</packages>
