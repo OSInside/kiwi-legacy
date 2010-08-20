@@ -276,14 +276,7 @@ sub createImageClicFS {
 	# Create clicfs filesystem from ext3
 	#------------------------------------------
 	$kiwi -> info ("Creating clicfs container...");
-	my $clicfs = $this->{imageTree}."/usr/bin/mkclicfs";
-	if (! -x $clicfs) {
-		$kiwi -> done ();
-		$kiwi -> warning (
-			"Using mkclicfs from build system, versions should match !"
-		);
-		$clicfs = "mkclicfs";
-	}
+	my $clicfs = "mkclicfs";
 	if (defined $ENV{MKCLICFS_COMPRESSION}) {
 		my $c = int $ENV{MKCLICFS_COMPRESSION};
 		my $d = $this->{imageDest};
