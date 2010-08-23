@@ -2581,6 +2581,7 @@ sub getImageConfig {
 		}
 		my $keytable = $element -> getElementsByTagName ("keytable");
 		my $timezone = $element -> getElementsByTagName ("timezone");
+		my $hwclock  = $element -> getElementsByTagName ("hwclock");
 		my $language = $element -> getElementsByTagName ("locale");
 		my $boottheme= $element -> getElementsByTagName ("boot-theme");
 		if ((defined $keytable) && ("$keytable" ne "")) {
@@ -2588,6 +2589,9 @@ sub getImageConfig {
 		}
 		if ((defined $timezone) && ("$timezone" ne "")) {
 			$result{kiwi_timezone} = $timezone;
+		}
+		if ((defined $hwclock) && ("$hwclock" ne "")) {
+			$result{kiwi_hwclock} = $hwclock;
 		}
 		if ((defined $language) && ("$language" ne "")) {
 			$result{kiwi_language} = $language;

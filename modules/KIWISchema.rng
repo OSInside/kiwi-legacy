@@ -1721,6 +1721,31 @@ specifies an ATFTP download timeout</db:para>
   </div>
   <!--
     ==========================================
+    common element <hwclock>
+    
+  -->
+  <div>
+    <define name="k.hwclock.content">
+      <choice>
+        <value>utc</value>
+        <value>localtime</value>
+      </choice>
+    </define>
+    <define name="k.hwclock.attlist">
+      <empty/>
+    </define>
+    <define name="k.hwclock">
+      <element name="hwclock">
+        <a:documentation>Setup Image harware clock setup, either utc or localtime</a:documentation>
+        <db:para>Image hardware clock setup. The value can be either
+set to utc or localtime.</db:para>
+        <ref name="k.hwclock.attlist"/>
+        <ref name="k.hwclock.content"/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
     common element <timezone>
     
   -->
@@ -3264,6 +3289,9 @@ and also depends of the selected image output type.</db:para>
           </optional>
           <optional>
             <ref name="k.timezone"/>
+          </optional>
+          <optional>
+            <ref name="k.hwclock"/>
           </optional>
           <optional>
             <ref name="k.locale"/>

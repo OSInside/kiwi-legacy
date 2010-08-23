@@ -1251,6 +1251,26 @@ div {
 }
 
 #==========================================
+# common element <hwclock>
+#
+div {
+	k.hwclock.content = "utc" | "localtime"
+	k.hwclock.attlist = empty
+	k.hwclock =
+		## Setup Image harware clock setup, either utc or localtime
+		[
+		db:para [
+			"Image hardware clock setup. The value can be either\x{a}"~
+            "set to utc or localtime."
+		]
+		]
+		element hwclock {
+			k.hwclock.attlist,
+			k.hwclock.content
+		}
+}
+
+#==========================================
 # common element <timezone>
 #
 div {
@@ -2224,6 +2244,7 @@ div {
 			k.rpm-force? &
 			k.keytable? &
 			k.timezone? &
+			k.hwclock? &
 			k.locale? &
 			k.boot-theme? &
 			k.defaultdestination? &

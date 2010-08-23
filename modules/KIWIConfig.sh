@@ -310,13 +310,18 @@ function suseConfig {
 				sed -e s"@TIMEZONE=\".*\"@TIMEZONE=\"$kiwi_timezone\"@" \
 			> etc/sysconfig/clock.new
 			mv etc/sysconfig/clock.new etc/sysconfig/clock
-			cat /etc/sysconfig/clock |\
-				sed -e s"@HWCLOCK=\".*\"@HWCLOCK=\"-u\"@" \
-			> etc/sysconfig/clock.new
-			mv etc/sysconfig/clock.new etc/sysconfig/clock
 		else
 			echo "timezone: $kiwi_timezone not found"
 		fi
+	fi
+	#======================================
+	# hwclock
+	#--------------------------------------
+	if [ ! -z "$kiwi_hwclock" ];then
+		cat /etc/sysconfig/clock |\
+			sed -e s"@HWCLOCK=\".*\"@HWCLOCK=\"--$kiwi_hwclock\"@" \
+		> etc/sysconfig/clock.new
+		mv etc/sysconfig/clock.new etc/sysconfig/clock
 	fi
 	#======================================
 	# SuSEconfig
