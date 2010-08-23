@@ -18,6 +18,7 @@
 		<locale>en_US</locale>
 		<keytable>us.map.gz</keytable>
 		<timezone>Europe/Berlin</timezone>
+		<hwclock>utc</hwclock>
 	</preferences>
 	<preferences profiles="xenFlavour">
 		<type image="vmx" filesystem="ext3" boot="vmxboot/suse-11.1" bootprofile="xen" bootkernel="xenk">

@@ -13,6 +13,7 @@
 		<locale>en_US</locale>
 		<keytable>us.map.gz</keytable>
 		<timezone>Europe/Berlin</timezone>
+		<hwclock>utc</hwclock>
 		<rpm-check-signatures>false</rpm-check-signatures>
 		<type image="iso" boot="isoboot/rhel-05.4" flags="compressed"/>
 	</preferences>
