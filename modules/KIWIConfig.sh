@@ -1185,6 +1185,8 @@ function suseGFXBoot {
 		# isolinux boot code...
 		if [ -f /usr/share/syslinux/isolinux.bin ];then
 			mv /usr/share/syslinux/isolinux.bin /image/loader
+		elif [ -f /usr/lib/syslinux/isolinux.bin ];then
+			mv /usr/lib/syslinux/isolinux.bin  /image/loader
 		fi
 		# use either gfxboot.com or gfxboot.c32
 		if [ -f /usr/share/syslinux/gfxboot.com ];then

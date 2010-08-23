@@ -842,6 +842,8 @@ sub setupInstallationSource {
 					}
 					$val =~ s/^\"//;
 					$val =~ s/\"$//;
+					$val =~ s/^\'//;
+					$val =~ s/\'$//;
 					$data -> newval ($alias, "name"   , $alias);
 					$data -> newval ($alias, "baseurl", $val);
 				}
