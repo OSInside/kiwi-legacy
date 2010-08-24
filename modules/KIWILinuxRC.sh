@@ -3090,6 +3090,7 @@ function setupNetwork {
 	local index=0
 	local hwicmd=/usr/sbin/hwinfo
 	local iface=eth0
+	local setup=0
 	for i in `$hwicmd --netcard`;do
 		IFS=$IFS_ORIG
 		if echo $i | grep -q "HW Address:";then
@@ -3127,16 +3128,19 @@ function setupNetwork {
 	fi
 	export PXE_IFACE=$iface
 	dhcpcd -p $PXE_IFACE 1>&2
-	if test $? != 0;then
+	for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20;do
+		if [ -s /var/lib/dhcpcd/dhcpcd-$PXE_IFACE.info ];then
+			setup=1
+			break
+		fi
+		sleep 2
+	done
+	if [ $setup = 0 ];then
 		systemException \
 			"Failed to setup DHCP network interface !" \
 		"reboot"
 	fi
 	ifconfig lo 127.0.0.1 netmask 255.0.0.0 up
-	for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20;do
-		[ -s /var/lib/dhcpcd/dhcpcd-$PXE_IFACE.info ] && break
-		sleep 2
-	done
 	importFile < /var/lib/dhcpcd/dhcpcd-$PXE_IFACE.info
 	if [ -z "$DOMAIN" ] && [ -n "$DNSDOMAIN" ];then
 		export DOMAIN=$DNSDOMAIN
