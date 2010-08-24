@@ -1974,8 +1974,12 @@ sub setupRootSystem {
 			# Ensconce options
 			#------------------------------------------
 			$ensconce_args = "bootstrap";
-		} 
-		$kiwi -> info ("Installing bootstrap packages...");
+		}
+		if (! $chroot) {
+			$kiwi -> info ("Initializing image system on: $root...");
+		} else {
+			$kiwi -> info ("Installing image packages...");
+		}
 		print $fd "function clean { kill \$SPID; ";
 		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;";
 		print $fd "if [ \"\$c\" = 5 ];then kill \$SPID;break;fi;"; 
