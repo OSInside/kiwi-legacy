@@ -179,26 +179,7 @@ if [ -z "$UNIONFS_CONFIG" ];then
 		probeFileSystem $imageDevice
 		export haveLuks=yes
 	fi
-	if test "$FSTYPE" = "reiserfs";then
-		Echo "Resize Reiser filesystem to full ramdisk space..."
-		luksResize $imageDevice
-		resize_reiserfs $imageDevice
-	fi
-	if test "$FSTYPE" = "ext2";then
-		Echo "Resize EXT2 filesystem to full ramdisk space..."
-		luksResize $imageDevice
-		resize2fs -f $imageDevice
-	fi
-	if test "$FSTYPE" = "ext3";then
-		Echo "Resize EXT3 filesystem to full ramdisk space..."
-		luksResize $imageDevice
-		resize2fs -f $imageDevice
-	fi
-	if test "$FSTYPE" = "ext4";then
-		Echo "Resize EXT4 filesystem to full ramdisk space..."
-		luksResize $imageDevice
-		resize2fs -f $imageDevice
-	fi
+	resizeFilesystem $imageDevice
 fi
 
 #======================================
