@@ -1184,6 +1184,13 @@ sub installPackages {
 		print $fd "while kill -0 \$SPID &>/dev/null; do sleep 1;done\n";
 		print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 		print $fd "trap clean INT TERM\n";
+		print $fd "for i in @@addonPackages;do\n";
+		print $fd "\tif ! @yum list available \$i;then\n";
+		print $fd "\t\tECODE=1\n";
+		print $fd "\t\techo \$ECODE > $screenCall.exit\n";
+		print $fd "\t\texit \$ECODE\n";
+		print $fd "\tfi\n";
+		print $fd "done\n";
 		print $fd "@kchroot @yum install @addonPackages &\n";
 		print $fd "SPID=\$!;wait \$SPID\n";
 		print $fd "ECODE=\$?\n";
@@ -1540,10 +1547,24 @@ sub setupUpgrade {
 			print $fd "@kchroot @yum upgrade &\n";
 			print $fd "SPID=\$!;wait \$SPID\n";
 			if (@newpatts) {
+				print $fd "for i in @newpatts;do\n";
+				print $fd "\tif ! @kchroot @yum grouplist | grep -q \"\$i\";then\n";
+				print $fd "\t\tECODE=1\n";
+				print $fd "\t\techo \$ECODE > $screenCall.exit\n";
+				print $fd "\t\texit \$ECODE\n";
+				print $fd "\tfi\n";
+				print $fd "done\n";
 				print $fd "test \$? = 0 && @kchroot @yum groupinstall @newpatts &\n";
 				print $fd "SPID=\$!;wait \$SPID\n";
 			}
 			if (@addonPackages) {
+				print $fd "for i in @@addonPackages;do\n";
+				print $fd "\tif ! @yum list available \$i;then\n";
+				print $fd "\t\tECODE=1\n";
+				print $fd "\t\techo \$ECODE > $screenCall.exit\n";
+				print $fd "\t\texit \$ECODE\n";
+				print $fd "\tfi\n";
+				print $fd "done\n";
 				print $fd "test \$? = 0 && @kchroot @yum install @addonPackages &\n";
 				print $fd "SPID=\$!;wait \$SPID\n";
 			}
@@ -2040,6 +2061,13 @@ sub setupRootSystem {
 			print $fd "echo 1 > $screenCall.exit; exit 1; }\n";
 			print $fd "trap clean INT TERM\n";
 			if (@newpatts) {
+				print $fd "for i in @newpatts;do\n";
+				print $fd "\tif ! @yum grouplist | grep -q \"\$i\";then\n";
+				print $fd "\t\tECODE=1\n";
+				print $fd "\t\techo \$ECODE > $screenCall.exit\n";
+				print $fd "\t\texit \$ECODE\n";
+				print $fd "\tfi\n";
+				print $fd "done\n";
 				print $fd "@yum --installroot=$root groupinstall @newpatts &\n";
 				print $fd "SPID=\$!;wait \$SPID\n";
 			}
@@ -2047,7 +2075,14 @@ sub setupRootSystem {
 				if (@newpatts) {
 					print $fd "test \$? = 0 && ";
 				}
-				print $fd "@yum --installroot=$root install @packs &\n";
+				print $fd "for i in @newpacks;do\n";
+				print $fd "\tif ! @yum list available \$i;then\n";
+				print $fd "\t\tECODE=1\n";
+				print $fd "\t\techo \$ECODE > $screenCall.exit\n";
+				print $fd "\t\texit \$ECODE\n";
+				print $fd "\tfi\n";
+				print $fd "done\n";
+				print $fd "@yum --installroot=$root install @newpacks &\n";
 				print $fd "SPID=\$!;wait \$SPID\n";
 			}
 			print $fd "ECODE=\$?\n";
@@ -2081,6 +2116,13 @@ sub setupRootSystem {
 			print $fd "SPID=\$!;wait \$SPID\n";
 			print $fd "test \$? = 0 && ";
 			if (@newpatts) {
+				print $fd "for i in @newpatts;do\n";
+				print $fd "\tif ! @kchroot @yum grouplist | grep -q \"\$i\";then\n";
+				print $fd "\t\tECODE=1\n";
+				print $fd "\t\techo \$ECODE > $screenCall.exit\n";
+				print $fd "\t\texit \$ECODE\n";
+				print $fd "\tfi\n";
+				print $fd "done\n";
 				print $fd "@kchroot @yum groupinstall @newpatts &\n";
 				print $fd "SPID=\$!;wait \$SPID\n";
 			}
@@ -2088,6 +2130,13 @@ sub setupRootSystem {
 				if (@newpatts) {
 					print $fd "test \$? = 0 && ";
 				}
+				print $fd "for i in @install;do\n";
+				print $fd "\tif ! @yum list available \$i;then\n";
+				print $fd "\t\tECODE=1\n";
+				print $fd "\t\techo \$ECODE > $screenCall.exit\n";
+				print $fd "\t\texit \$ECODE\n";
+				print $fd "\tfi\n";
+				print $fd "done\n";
 				print $fd "@kchroot @yum install @install &\n";
 				print $fd "SPID=\$!;wait \$SPID\n";
 			}
