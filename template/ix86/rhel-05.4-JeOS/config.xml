@@ -15,7 +15,7 @@
 		<timezone>Europe/Berlin</timezone>
 		<hwclock>utc</hwclock>
 		<rpm-check-signatures>false</rpm-check-signatures>
-		<type image="iso" boot="isoboot/rhel-05.4" flags="compressed"/>
+		<type image="iso" boot="isoboot/rhel-05.4" flags="clic"/>
 	</preferences>
 	<users group="root">
 		<user pwd="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root"/>
