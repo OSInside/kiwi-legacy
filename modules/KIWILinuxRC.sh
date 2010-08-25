@@ -3090,7 +3090,6 @@ function setupNetwork {
 	local index=0
 	local hwicmd=/usr/sbin/hwinfo
 	local iface=eth0
-	local setup=0
 	for i in `$hwicmd --netcard`;do
 		IFS=$IFS_ORIG
 		if echo $i | grep -q "HW Address:";then
@@ -3127,17 +3126,20 @@ function setupNetwork {
 		done
 	fi
 	export PXE_IFACE=$iface
-	dhcpcd -p $PXE_IFACE 1>&2
+	if ! dhcpcd --noipv4ll -p $PXE_IFACE 1>&2;then
+		systemException \
+			"Failed to setup DHCP network interface !" \
+		"reboot"
+	fi
 	for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20;do
 		if [ -s /var/lib/dhcpcd/dhcpcd-$PXE_IFACE.info ];then
-			setup=1
 			break
 		fi
 		sleep 2
 	done
-	if [ $setup = 0 ];then
+	if [ ! -s /var/lib/dhcpcd/dhcpcd-$PXE_IFACE.info ];then
 		systemException \
-			"Failed to setup DHCP network interface !" \
+			"Can't find DHCP info file: dhcpcd-$PXE_IFACE.info !" \
 		"reboot"
 	fi
 	ifconfig lo 127.0.0.1 netmask 255.0.0.0 up
