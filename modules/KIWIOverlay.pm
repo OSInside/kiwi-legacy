@@ -156,19 +156,6 @@ sub unionOverlay {
 		return undef;
 	}
 	$this->{tmpdir} = $tmpdir;
-	#==========================================
-	# loop setup the clicfs file
-	#------------------------------------------
-	$status = qxx ("/sbin/losetup -s -f $baseRO 2>&1"); chomp $status;
-	$result = $? >> 8;
-	if ($result != 0) {
-		$kiwi -> failed ();
-		$kiwi -> error  ("Couldn't loop bind overlay: $status");
-		return undef;
-	}
-	push @mount,"sleep 1; losetup -d $status";
-	$this->{mount} = \@mount;
-	$baseRO = $status;
 	$cowdev = "$rootRW/kiwi-root.cow";
 	$this->{cowdev} = $cowdev;
 	if (! -f $cowdev) {

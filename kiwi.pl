@@ -2616,22 +2616,6 @@ sub mount {
 		return undef;
 	}
 	#==========================================
-	# Check for CLIC extension
-	#------------------------------------------
-	if ($type eq "clicfs") {
-		if (-f $source) {
-			$status = qxx ("/sbin/losetup -s -f $source 2>&1"); chomp $status;
-			$result = $? >> 8;
-			if ($result != 0) {
-				$kiwi -> error  ("Couldn't loop bind logical extend: $status");
-				$kiwi -> failed ();
-				return undef;
-			}
-			$source = $status;
-			push @UmountStack,"losetup -d $source";
-		}
-	}
-	#==========================================
 	# Check for LUKS extension
 	#------------------------------------------
 	if ($type eq "luks") {
@@ -2665,7 +2649,7 @@ sub mount {
 	#==========================================
 	# Mount device or loop mount file
 	#------------------------------------------
-	if (-f $source) {
+	if ((-f $source) && ($type ne "clicfs")) {
 		$status = qxx ("mount -o loop $source $dest 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
