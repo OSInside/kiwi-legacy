@@ -46,6 +46,8 @@
         <xsl:when test="text()='iso'">
             <type>
                 <xsl:call-template name="insertcomprops" mode="conv39to41"/>
+				<xsl:call-template name="insertvmconfig" mode="conv39to41"/>
+				<xsl:call-template name="insertxenconfig" mode="conv39to41"/>
             </type>
         </xsl:when>
         <xsl:when test="text()='oem'">
