@@ -188,7 +188,7 @@ Authors:
 %package -n kiwi-desc-vmxboot
 License:        GPL v2 or later
 Requires:       kiwi = %{version}
-Requires:       multipath-tools
+Requires:       multipath-tools parted
 %if 0%{?suse_version} >= 1130
 Requires:       virt-utils
 %else
@@ -235,7 +235,7 @@ Requires:       virt-utils
 %else
 Requires:       qemu
 %endif
-Requires:       multipath-tools
+Requires:       multipath-tools parted
 %if %{suse_version} > 1010
 Requires: genisoimage
 %else
