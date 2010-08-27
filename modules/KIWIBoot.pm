@@ -4398,9 +4398,10 @@ sub installBootLoader {
 		#==========================================
 		# Install grub in batch mode
 		#------------------------------------------
-		my $grub = $tmpdir."/usr/sbin/grub";
+		my $grub = "/usr/sbin/grub";
 		my $grubOptions = "--device-map $dmfile --no-floppy --batch";
 		$kiwi -> loginfo ("GRUB: $grub $grubOptions\n");
+		qxx ("mount --bind $tmpdir/boot/grub /boot/grub");
 		if (! open (FD,"|$grub $grubOptions &> $tmpdir/grub.log")) {
 			$kiwi -> failed ();
 			$kiwi -> error  ("Couldn't call grub: $!");
@@ -4416,6 +4417,7 @@ sub installBootLoader {
 		}
 		print FD "quit\n";
 		close FD;
+		qxx ("umount /boot/grub");
 		my $glog;
 		if (open (FD,"$tmpdir/grub.log")) {
 			my @glog = <FD>; close FD;
