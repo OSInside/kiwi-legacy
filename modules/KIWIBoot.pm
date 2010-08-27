@@ -1310,8 +1310,8 @@ sub setupBootStick {
 		}
 		my %FSopts = main::checkFSOptions();
 		my $fsopts = $FSopts{ext3};
-		$fsopts.= "-F";
-		$status = qxx ("/sbin/mke2fs $fsopts $root 2>&1");
+		my $fstool = "mkfs.ext3";
+		$status = qxx ("$fstool $fsopts $root 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -1378,8 +1378,8 @@ sub setupBootStick {
 		}
 		my %FSopts = main::checkFSOptions();
 		my $fsopts = $FSopts{ext2};
-		$fsopts.= "-F";
-		$status = qxx ("/sbin/mke2fs $fsopts $root 2>&1");
+		my $fstool = "mkfs.ext2";
+		$status = qxx ("$fstool $fsopts $root 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -2146,11 +2146,11 @@ sub setupInstallStick {
 		$kiwi -> info ("Creating ext3 filesystem on $root partition");
 		my %FSopts = main::checkFSOptions();
 		my $fsopts = $FSopts{ext3};
-		$fsopts.= "-j";
+		my $fstool = "mkfs.ext3";
 		if (($root eq $data) && ($this->{inodes})) {
 			$fsopts.= " -N $this->{inodes}";
 		}
-		$status = qxx ( "/sbin/mke2fs $fsopts $root 2>&1" );
+		$status = qxx ( "$fstool $fsopts $root 2>&1" );
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -3022,8 +3022,8 @@ sub setupBootDisk {
 		}
 		my %FSopts = main::checkFSOptions();
 		my $fsopts = $FSopts{ext3};
-		$fsopts.= "-F";
-		$status = qxx ("/sbin/mke2fs $fsopts $root 2>&1");
+		my $fstool = "mkfs.ext3";
+		$status = qxx ("$fstool $fsopts $root 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -3072,7 +3072,8 @@ sub setupBootDisk {
 		}
 		my %FSopts = main::checkFSOptions();
 		my $fsopts = $FSopts{ext2};
-		$status = qxx ("/sbin/mke2fs $fsopts $root 2>&1");
+		my $fstool = "mkfs.ext2";
+		$status = qxx ("$fstool $fsopts $root 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> failed ();
@@ -5435,13 +5436,13 @@ sub setupFilesystem {
 		/^ext[234]/     && do {
 			$kiwi -> info ("Creating $_ $name filesystem");
 			my $fsopts = $FSopts{$_};
-			$fsopts .= /^ext2/ ? "-F" : "-j -F";
+			my $fstool = "mkfs.".$fstype;
 			if ($this->{inodes}) {
 				$fsopts.= " -N $this->{inodes}";
 			}
 			my $tuneopts = $type{fsnocheck} eq "true" ? "-c 0 -i 0" : "";
 			$tuneopts = $FSopts{extfstune} if $FSopts{extfstune};
-			$status = qxx ("/sbin/mke2fs $fsopts $device 2>&1");
+			$status = qxx ("$fstool $fsopts $device 2>&1");
 			$result = $? >> 8;
 			if (!$result && $tuneopts) {
 				$status .= qxx ("/sbin/tune2fs $tuneopts $device 2>&1");

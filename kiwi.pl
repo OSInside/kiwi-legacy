@@ -2534,7 +2534,6 @@ sub checkFSOptions {
 		my $inodesize;   # inode size in bytes (ext only)
 		my $inoderatio;  # bytes/inode ratio
 		my $fsfeature;   # filesystem features (ext only)
-		my $fstype;      # filesystem type (ext only)
 		SWITCH: for ($fs) {
 			#==========================================
 			# EXT2-4
@@ -2552,8 +2551,7 @@ sub checkFSOptions {
 				if ($FSCheckInterval) {
 					$fs_checkinterval = " -i $FSCheckInterval";
 				}
-				$fsfeature = "-O resize_inode";
-				$fstype = "-t $fs";
+				$fsfeature = "-F -O resize_inode";
 				last SWITCH;
 			};
 			#==========================================
@@ -2580,9 +2578,6 @@ sub checkFSOptions {
 		}
 		if (defined $fsfeature) {
 			$result{$fs} .= $fsfeature." ";
-		}
-		if (defined $fstype) {
-			$result{$fs} .= $fstype." ";
 		}
 	}
 	if ($fs_maxmountcount || $fs_checkinterval) {

@@ -3463,22 +3463,23 @@ sub setupEXT2 {
 	my $fsopts;
 	my $tuneopts;
 	my %FSopts = main::checkFSOptions();
+	my $fstool;
 	if ((defined $journal) && ($journal eq "journaled-ext3")) {
 		$fsopts = $FSopts{ext3};
-		$fsopts.="-j -F";
+		$fstool = "mkfs.ext3";
 	} elsif ((defined $journal) && ($journal eq "journaled-ext4")) {
 		$fsopts = $FSopts{ext4};
-		$fsopts.="-j -F";
+		$fstool = "mkfs.ext4";
 	} else {
 		$fsopts = $FSopts{ext2};
-		$fsopts.= "-F";
+		$fstool = "mkfs.ext2";
 	}
 	if ($this->{inodes}) {
 		$fsopts.= " -N $this->{inodes}";
 	}
 	$tuneopts = $type{fsnocheck} eq "true" ? "-c 0 -i 0" : "";
 	$tuneopts = $FSopts{extfstune} if $FSopts{extfstune};
-	my $data = qxx ("/sbin/mke2fs $fsopts $this->{imageDest}/$name 2>&1");
+	my $data = qxx ("$fstool $fsopts $this->{imageDest}/$name 2>&1");
 	my $code = $? >> 8;
 	if (!$code && $tuneopts) {
 		$data = qxx ("/sbin/tune2fs $tuneopts $this->{imageDest}/$name 2>&1");

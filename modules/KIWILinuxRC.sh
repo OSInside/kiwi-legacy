@@ -3688,7 +3688,7 @@ function setupReadWrite {
 				! mount -o ro $rwDevice $rwDir >/dev/null
 			then
 				Echo "Creating filesystem for RW data on $rwDevice..."
-				if ! mke2fs -F -T ext3 -j $rwDevice >/dev/null;then
+				if ! mkfs.ext3 -F $rwDevice >/dev/null;then
 					Echo "Failed to create ext3 filesystem"
 					return 1
 				fi
@@ -5709,11 +5709,11 @@ function createFilesystem {
 	if [ "$FSTYPE" = "reiserfs" ];then
 		mkreiserfs -f $deviceCreate $blocks 1>&2
 	elif [ "$FSTYPE" = "ext2" ];then
-		mke2fs -T ext2 -F $deviceCreate $blocks 1>&2
+		mkfs.ext2 -F $deviceCreate $blocks 1>&2
 	elif [ "$FSTYPE" = "ext3" ];then
-		mke2fs -T ext3 -j -F $deviceCreate $blocks 1>&2
+		mkfs.ext3 -F $deviceCreate $blocks 1>&2
 	elif [ "$FSTYPE" = "ext4" ];then
-		mke2fs -T ext4 -j -F $deviceCreate $blocks 1>&2
+		mkfs.ext4 -F $deviceCreate $blocks 1>&2
 	elif [ "$FSTYPE" = "btrfs" ];then
 		if [ ! -z "$blocks" ];then
 			local bytes=$((blocks * 4096))
@@ -5723,7 +5723,7 @@ function createFilesystem {
 		fi
 	else
 		# use ext3 by default
-		mke2fs -T ext3 -j -F $deviceCreate $blocks 1>&2
+		mkfs.ext3 -F $deviceCreate $blocks 1>&2
 	fi
 	if [ ! $? = 0 ];then
 		systemException \
