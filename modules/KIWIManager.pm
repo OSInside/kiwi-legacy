@@ -1716,6 +1716,31 @@ sub setupRootSystem {
 	my @channelList = @{$this->{channelList}};
 	my $screenCall  = $this->{screenCall};
 	my @yum         = @{$this->{yum}};
+	my %source      = %{$this->{source}};
+	#==========================================
+	# search for licenses on media
+	#------------------------------------------
+	if (! $chroot) {
+		my $license = "license.tar.gz";
+		foreach my $alias (keys %{$source{public}}) {
+			my $repo = $alias;
+			foreach my $opt (@{$source{public}{$alias}}) {
+				$opt =~ /(.*?)=(.*)/;
+				my $key = $1;
+				my $val = $2;
+				if (($key eq "baseurl") || ($key eq "path")) {
+					if ($val =~ /^'\//) {
+						$val =~ s/^'(.*)'$/"file:\/\/$1"/
+					}
+					$repo = $val;
+				}
+			}
+			KIWIXML::getInstSourceFile (
+				$kiwi,$repo."/".$license,$root."/".$license
+			);
+			last if -e $root."/".$license;
+		}
+	}
 	#==========================================
 	# setup screen call
 	#------------------------------------------

@@ -801,6 +801,14 @@ sub setup {
 		return undef;
 	}
 	#========================================
+	# copy license files if they exist
+	#----------------------------------------
+	if (-f "$root/license.tar.gz") {
+		qxx ("mkdir -p $root/etc/YaST2/licenses/base");
+		qxx ("tar -C $root/etc/YaST2/licenses/base -xf $root/license.tar.gz");
+		qxx ("rm -f $root/license.tar.gz");
+	}
+	#========================================
 	# copy user defined files to image tree
 	#----------------------------------------
 	if ((-d "$imageDesc/root") && (bsd_glob($imageDesc.'/root/*'))) {
