@@ -4429,7 +4429,7 @@ sub installBootLoader {
 		}
 		if ($result != 1) {
 			$status= qxx (
-				"head -n 10 $diskname | file - | grep -q 'boot sector'"
+				"dd if=$diskname bs=512 count=1|file - | grep -q 'boot sector'"
 			);
 			$result= $? >> 8;
 		}
