@@ -4428,8 +4428,10 @@ sub installBootLoader {
 			}
 		}
 		if ($result != 1) {
+			my $boot = "'boot sector'";
+			my $null = "/dev/null";
 			$status= qxx (
-				"dd if=$diskname bs=512 count=1|file - | grep -q 'boot sector'"
+				"dd if=$diskname bs=512 count=1 2>$null|file - | grep -q $boot"
 			);
 			$result= $? >> 8;
 		}
