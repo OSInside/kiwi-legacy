@@ -2699,6 +2699,7 @@ sub umount {
 	# ---
 	my $status;
 	my $result;
+	qxx ("sync");
 	foreach my $cmd (reverse @UmountStack) {
 		$status = qxx ("$cmd 2>&1");
 		$result = $? >> 8;
