@@ -6,7 +6,7 @@
 A live system image is an operating System on CD or DVD. In principal
 one can treat the CD/DVD as the hard disk of the system with the
 restriction that you can't write data on it. So as soon as the media
-is plugged into the computer the machine is able to boot from that
+is plugged into the computer, the machine is able to boot from that
 media. After some time one can login to the system and work with it
 like on any other system. All write actions takes place in RAM space
 and therefore all changes will be lost as soon as the computer shuts
@@ -46,30 +46,30 @@ qemu -cdrom ./suse-11.2-live-iso.i686-2.5.1.iso -m 256
 KIWI supports different filesystems and boot methods along with the
 ISO image type. The provided example by default uses a squashfs compressed
 root filesystem. By design of this filesystem it is not possible to write
-data on it. To be able to write on the filesysetem another filesystem called
+data on it. To be able to write on the filesystem another filesystem called
 aufs is used. aufs is an overlay filesystem which allows to combine two
 different filesystems into one. In case of a live system aufs is used
 to combine the squashfs compressed read only root tree with a tmpfs
 RAM filesystem. The result is a full writable root tree whereas all
 written data lives in RAM and is therefore not persistent. squashfs and/or
 aufs does not exist on all versions of SUSE and therefore the flags
-attribute in config.xml exists to be able to have the following
+attribute in \path{config.xml} exists to be able to have the following
 alternative solutions:
 
 \begin{itemize}
 \item \xmlattrval{flags}{unified}\\
-      Compressed and unified root tree as explained above
+      Compressed and unified root tree as explained above.
 \item \xmlattrval{flags}{compressed}\index{filesystem!compression}\\
-      Does filesystem compression with squashfs but don't use an
+      Does filesystem compression with squashfs, but don't use an
       overlay filesystem for write support. A symbolic link list is used
       instead and thus a split element is required in \path{config.xml}.
-      See the Split mode section below for details.
+      See the split mode section below for details.
 \item \xmlattrval{flags}{clic}\index{FUSE}\\
       Creates a FUSE based clicfs image and allows write operations
       into a cow file. In case of an ISO the write happens into a
       ramdisk.
 \item {Flags Not Set}\\
-      If no flags attribute is set no compressed filesystem and no overlay
+      If no flags attribute is set no compressed filesystem, no overlay
       filesystem will be used. The root tree will be directly part of
       the ISO filesystem and the paths: \path{/bin}, \path{/boot}, 
       \path{/lib}, \path{/lib64}, \path{/opt},
@@ -81,11 +81,10 @@ alternative solutions:
 If no overlay filesystem is in use but the image filesystem is based on
 a compressed filesystem KIWI allows to setup which files and directories
 should be writable in a so called split section. In order to allow to
-login into the system at least the \path{/var} directory should be writable
-because the PAM authentification requires to be able to report any login
+login into the system, at least the \path{/var} directory should be writable.
+This is because the PAM authentification requires to be able to report any login
 attempt to \path{/var/log/messages} which therefore needs to be writable. The
-following split section can be used if the flag compressed
-is used:  
+following split section can be used if the flag compressed is used:
 
 \begin{xml}
 <split>

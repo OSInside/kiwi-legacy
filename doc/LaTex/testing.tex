@@ -9,8 +9,7 @@ below \path{/usr/share/kiwi/tests}. To run the testsuite call KIWI as
 follows:
 
 \begin{Command}{12cm}
- kiwi \option{testsuite} <image-root> \bs \\
-\hspace*{1cm}[ \option{test} name \option{test} name ... ]
+kiwi testsuite <image-root> [ test name test name ... ]
 \end{Command}
 
 If not test names are set the default tests rpm and ldd run.
@@ -23,11 +22,11 @@ software is not an essential part of the image itself it can be
 specified as testsuite packages in the system image \path{config.xml}
 as follows:
 
-\begin{Command}{12cm}
-<packages type="testsuite">\\
-\hspace*{1cm}<package name="..."/>\\
+\begin{xml}
+<packages type="testsuite">
+  <package name="..."/>
 </packages>
-\end{Command}
+\end{xml}
 
 The testsuite packages are installed when calling KIWI with
 the testsuite option and are removed after the tests has

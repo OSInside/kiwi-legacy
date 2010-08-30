@@ -13,38 +13,37 @@ instructions.
 
 \section{Setting Up the Required Services}
 
-Before you start to build pxe images with kiwi you
-should have setup the boot server. The boot server requires the
-services atftp and DHCP to run
+Before you start to build pxe images with KIWI, setup the boot server. 
+The boot server requires the services atftp and DHCP to run.
 
 \subsection{Atftp Server}
 
 In order to setup the atftp server the following steps are required
 
 \begin{enumerate}
-\item install the packages atftp and kiwi-pxeboot
-\item edit the file \path{/etc/sysconfig/atftpd} and set/modify the following
+\item Install the packages atftp and kiwi-pxeboot.
+\item Edit the file \path{/etc/sysconfig/atftpd}. Set or modify the following
       variables:
       \begin{itemize}
       \item ATFTPD\_OPTIONS=''\option{daemon} \option{no-multicast}''
       \item ATFTPD\_DIRECTORY=''/srv/tftpboot''
       \end{itemize}
-\item run atftpd by calling the command:
-      \textbf{rcatftpd start}
+\item Run \cmd{atftpd} by calling the command:
+      \cmd{rcatftpd} \texttt{start}
 \end{enumerate}
 
 \subsection{DHCP Server}
 \index{examples!DHCP server}
 In contrast to the atftp server setup the following DHCP server setup
-can only serve as an example. Please note that according to your network
-structure the IP addresses, ranges and domain settings needs to be adapted
+can only serve as an example. Depending on your network structure,
+the IP addresses, ranges and domain settings needs to be adapted
 in order to allow the DHCP server to work within your network. If you
-already have a DHCP server running in your network you should make sure
+already have a DHCP server running in your network, make sure
 that the filename and next-server information is provided by your server.
 The following steps describe how to setup a new DHCP server instance:
 
 \begin{enumerate}
-\item Install the package dhcp-server
+\item Install the package dhcp-server.
 \item Create the file \path{/etc/dhcpd.conf} and include the following
       statements:
  
@@ -77,7 +76,7 @@ subnet 192.168.100.0 netmask 255.255.255.0 {
 
 \section{Building the suse-pxe-client Example}
 
-The example provided with KIWI is based on openSUSE 11.2 and creates an
+The example provided with KIWI is based on open\-SUSE~11.2 and creates an
 image for a Wyse VX0 terminal with a 128MB flash card and 512MB of RAM.
 The image makes use of the squashfs compressed filesystem and its
 root tree is deployed as unified (aufs) based system. 
@@ -120,8 +119,8 @@ cp suse-11.2-pxe-client.i686-1.2.8.md5 \
 \item Copy of the image boot configuration\\
       Normally the boot configuration applies to one client which
       means it is required to obtain the MAC address of this client.
-      If the boot configuration should be used globaly the KIWI
-      generated file can be copied as config.default
+      If the boot configuration should be used globaly, copy the KIWI
+      generated file as \path{config.default}:
 \begin{Command}
 cp suse-11.2-pxe-client.i686-1.2.8.config \
    /srv/tftpboot/KIWI/config.<MAC>
@@ -129,10 +128,10 @@ cp suse-11.2-pxe-client.i686-1.2.8.config \
 \item Check the PXE configuration file\\
       The PXE configuration controls which kernel and initrd are
       loaded and which kernel parameters are set. When installing
-      the kiwi-pxeboot package a default configuration is added.
+      the kiwi-pxeboot package, a default configuration is added.
       To make sure the configuration is valid according to this
-      example the file \path{/srv/tftpboot/pxelinux.cfg/default} should
-      provide the following information:
+      example, insert the following information into the file
+      \path{/srv/tftpboot/pxelinux.cfg/default}:
 \begin{verbatim}
 DEFAULT KIWI-Boot
 
@@ -144,7 +143,7 @@ LABEL KIWI-Boot
 LABEL Local-Boot
     localboot 0
 \end{verbatim}
-\item connect the client to the network and boot
+\item Connect the client to the network and boot.
 \end{enumerate}
 
 \section{Flavours}
@@ -386,16 +385,16 @@ vbladed 0 1 eth0 /dev/sdb1
         so we need to indicate which ethernet card we'll use. 
         In this example we export \path{/dev/sdb1} with a major value of 0 and
         minor of 1 on the eth0 interface. We are ready to use our partition
-        on the network! To be able to use the device kiwi needs the
+        on the network! To be able to use the device KIWI needs the
         information which AoE device contains the root filesystem. In
         our example this is the device \path{/dev/etherd/e0.1}.
         According to this the AOEROOT variable must be set as follows:
 \begin{verbatim}
 AOEROOT=/dev/etherd/e0.1
 \end{verbatim}
-        kiwi is now able to mount and use the specified AoE device
+        KIWI is now able to mount and use the specified AoE device
         as the remote root filesystem. In case of a compressed read-only
-        image with aufs or clicfs the AOEROOT variable can also contain
+        image with aufs or clicfs, the AOEROOT variable can also contain
         a device for the write actions:
 \begin{verbatim}
 AOEROOT=/dev/etherd/e0.1,/dev/ram1
@@ -574,7 +573,7 @@ the client it is also possible to let the client mount the root
 tree via an NFS remote mount. Below find an example:
 
 \begin{itemize}
-\item Export the kiwi prepared tree via NFS
+\item Export the KIWI prepared tree via NFS
 \item sample \path{config.<MAC>}:
 
 \begin{verbatim}

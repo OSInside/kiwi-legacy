@@ -8,7 +8,7 @@ systems like Qemu\index{Qemu} or VMware.\index{VMware} The image is a file conta
 system represented by the configured packages in \path{config.xml}%
 \index{configuration files!config.xml} as well
 as partition data and bootloader information. The size of
-this virtual disk can be specified by using the \xmlstarttag{size} element
+this virtual disk can be specified by using the \xmlelement{size} element
 in the \path{config.xml} file or by adding the \option{bootvm-disksize} command
 line argument.
 
@@ -34,7 +34,7 @@ The generated virtual disk image serves as the hard disk of the selected
 virtualization system (QEMU, VMware, etc.). The virtual hard disk format 
 differs across virtualization environments. Some virtualization environments
 support multiple virtual disk formats. Using the QEMU virtualization 
-environment the created image may be tested with the following command:
+environment test the created image with the following command:
 
 \begin{Command}{12cm}
 cd /tmp/myvm-result
@@ -48,7 +48,7 @@ image with a structure equivalent to the structure of a physical hard disk.
 Individual virtualization systems have specific formats to facilitate
 improved I/O performance to the virtual disk, represented by the image file,
 or additional specified virtual hard disk files. KIWI will generate a 
-specific format when the format attribute of the type element is specified.
+specific format when the \xmlattr{format} attribute of the type element is added.
 
 
 \begin{xml}

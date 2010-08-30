@@ -18,8 +18,8 @@ provided in \path{/usr/share/doc/packages/kiwi/examples}.
 \end{figure}
 
 The following additional information is optional for the process
-of building an image but most often mandatory for the functionality
-of the later operating system.
+of building an image, but most often mandatory for the functionality
+of the later operating system:
 
 \begin{itemize}
 \item \path{images.sh}\index{scripts!images.sh}\\
@@ -30,26 +30,26 @@ of the later operating system.
 
 \item \path{config.sh}\index{scripts!config.sh}\\
       Optional configuration script while creating the unpacked image. This
-      script is called at the end of the installation but \emph{before}
+      script is called at the end of the installation, but \emph{before}
       the package scripts have run. It is designed to configure the image
       system, such as the activation or deactivation of certain services
       (insserv). The call is not made until after the switch to the image
-      has been made with \emph{chroot}.
+      has been made with \cmd{chroot}.
 
 \item \path{root/}\\
       Subdirectory that contains special files, directories, and scripts for
-      adapting the image environment \textbf{after} the installation of all the
+      adapting the image environment \emph{after} the installation of all the
       image packages. The entire directory is copied into the root of the
       image tree using \cmd{cp} \soption{a}.
 
 \item \path{config-yast-firstboot.xml}\index{configuration files!config-yast-firstboot.xml}\\
-      Configuration file for the control of the yast2 firstboot service.
-      Similar to the autoyast approach yast also provides a boot time
+      Configuration file for the control of the YaST firstboot service.
+      Similar to the AutoYaST approach, YaST also provides a boot time
       service called firstboot. Unfortunately there is no GUI available
-      to setup the firstboot but a good documentation in
+      to setup the firstboot, but good documentation in
       \path{/usr/share/doc/packages/yast2-firstboot}. Once you have 
       created such a firstboot file in your image description directory, KIWI
-      will process on the file and setup your image as follows:
+      will process the file and setup your image as follows:
 
       \begin{enumerate}
       \item KIWI enables the firstboot service.
@@ -57,43 +57,42 @@ of the later operating system.
       \item The firstboot service handles the instructions listed in the
             file\linebreak \path{config-yast-firstboot.xml}.
       \item If the process finished successfully, the environment is
-            cleaned and firstboot won't be called at next reboot.
+            cleaned and firstboot will not be called at next reboot.
       \end{enumerate}
 
 \item \path{config-yast-autoyast.xml}\\
-      Configuration file which has been created by autoyast.
-      To be able to create such an autoyast profile you should first
-      call:
+      Configuration file which has been created by AutoYaST.
+      To be able to create such an AutoYaST profile, run:
 
 \begin{Command}{8cm}
 yast2 autoyast
 \end{Command}
 
-      Once you have saved the information from the autoyast UI as
+      Once you have saved the information from the AutoYaST UI as
       \path{config-yast-autoyast.xml} file in your image description directory KIWI
       will process on the file and setup your image as follows:
       \begin{enumerate}
-      \item While booting the image YaST is started in autoyast mode
+      \item While booting the image YaST is started in AutoYaST mode
             automatically
-      \item The autoyast description is parsed and the instructions are
+      \item The AutoYaST description is parsed and the instructions are
             handled by YaST. In other words the \emph{system configuration}
             is performed
       \item If the process finished successfully the environment is
-            cleaned and autoyast won't be called at next reboot.
+            cleaned and AutoYaST won't be called at next reboot.
       \end{enumerate}
 
 \item \path{config-cdroot.tgz}\index{configuration files!config-cdroot.tgz}\\
       Archive which is used for ISO images only. The data in the archive is
       uncompressed and stored in the CD/DVD root directory. This
       archive can be used, for example, to integrate a license file or
-      readme information directly readable from the CD or DVD.
+      information directly readable from the CD or DVD.
 
 \item \path{config-cdroot.sh}\index{scripts!config-cdroot.sh}\\
       Along with the \path{config-cdroot.tgz} one can provide a script which allows
       to manipulate the extracted data.
 
 \item \path{config/}\\
-      Optional Subdirectory that contains Bash scripts that are called
+      Optional subdirectory that contains Bash scripts that are called
       after the installation of all the image packages, primarily in order
       to remove the parts of a package that are not needed for the operating
       system. The name of the Bash script must resemble the package name
@@ -107,7 +106,7 @@ which describes information like the image name and type as well as
 the packages and patterns the image should consist of.
 
 The following information explains the basic structure of the XML document. When KIWI
-is called, the XML structure is validated by a RELAX~NG based schema.
+is executed, the XML structure is validated by the KIWI RELAX~NG based schema.
 For details on attributes and values please refer to the schema
 documentation file at \path{/usr/share/doc/packages/kiwi/kiwi.rng.html}.
 
@@ -206,7 +205,7 @@ assumed to be present for all profiles.
 \end{xml}
 
 The mandatory \xmlelement{preferences} section contains information about the supported
-image type(s), the used packagemanager, the version of this image, and
+image type(s), the used package manager, the version of this image, and
 optional attributes. The image version must be a three-part version number of
 the format: \textbf{Major}.\textbf{Minor}.\textbf{Release}. In case of
 changes to the image description the following rules should apply:
@@ -221,8 +220,8 @@ changes to the image description the following rules should apply:
       the major number is incremented.
 \end{itemize}
 
-By default KIWI use the \cmd{smart} packagemanager but it is also possible
-to use the SUSE packagemanager called \cmd{zypper}. 
+By default, KIWI use the \cmd{smart} package manager but it is also possible
+to use the SUSE package manager called \cmd{zypper}. 
 
 In general the specification of one \xmlstarttag{preferences} section is sufficient.
 However, it's possible to specify multiple \xmlstarttag{preferences} sections and
@@ -301,7 +300,7 @@ values of the image attribute:
       setting. In addition specify the attributes \xmlattr{filesystem}, 
       and \xmlattrval{boot}{oemboot/suse-*} to control the filesystem used
       for the virtual and to specify the proper boot image. Using the optional
-      \xmlattr{format} attribute and setting the value to \xmlval{iso} or 
+      \xmlattr{format} attribute and setting, the value to \xmlval{iso} or 
       \xmlval{usb} will create self installing images suitable for optical media
       or a USB stick, respectively. Booting from the media will deploy
       the OEM preload image onto the selected storage device of the
@@ -403,7 +402,7 @@ attributes:
       \path{/usr/share/zoneinfo} directory. Specify the attribute value relative to
       \path{/usr/share/zoneinfo}. For example, specify Europe/Berlin for
       \path{/usr/share/zoneinfo/Europe/Berlin}. KIWI uses this value to configure
-      the timezone in \path{/etc/localtime} for the image
+      the timezone in \path{/etc/localtime} for the image.
 \item \xmlattr{locale}\\
       Specifies the name of the UTF-8 locale to use, which defines the
       contents of the RC\_LANG system environment variable in
@@ -456,7 +455,7 @@ supported child elements:
 
 \item \xmlelement{lvmvolumes}\\
 	Using the optional \xmlelement{lvmvolumes} section it possible to create
-    a LVM (Logical Volume Management) based storage layout. By default the
+    a LVM (Logical Volume Management) based storage layout. By default, the
     volume group is named kiwiVG. It is possible to change the name of the
     group by setting the \xmlattr{lvmgroup} attribute to the desired name.
     Individual volumes within the volume group are specified using the 
@@ -481,8 +480,8 @@ supported child elements:
     be ignored and a volume with approximately 80\,\% to 90\,\% fill will
     be created.
 
-\item \xmlelement{oemconfig}
-	By default the oemboot process will create/modify a swap, \path{/home} and 
+\item \xmlelement{oemconfig}\\
+	By default, the oemboot process will create or modify a swap, \path{/home} and 
 	\path{/} partition. It is possible to influence the behavior by the
 	\xmlelement{oem-*} elements explained below.
 	KIWI uses this information to create the file
@@ -500,7 +499,7 @@ supported child elements:
 
 	\begin{itemize}
     \item \xmlstarttag{oem-boot-title}text\xmlendtag{oem-boot-title}\\
-       By default the string \verb!OEM! will be used as the boot manager 
+       By default, the string \verb!OEM! will be used as the boot manager 
        menu entry when KIWI creates the grub configuration during
        deployment. The oem-boot-title element allows you to set a custom
        name for the grub menu entry. This value is represented by the
@@ -636,7 +635,7 @@ sfdisk --list-type
       \xmlattr{target} attribute identifies the partion as the system image
       target partition.
       KIWI always generates the swap partition as the first partition of
-      the netboot boot image. By default the second partition is used for
+      the netboot boot image. By default, the second partition is used for
       the system image. Use the boolean target attribute to change this
       behavior. Providing the value \xmlval{image} for the \xmlattr{size} attribute
       triggers KIWI into calculating the required size for this partition.
@@ -821,7 +820,7 @@ as part of the \xmlelement{users} element. Multiple users elements may be specif
 The attributes \xmlattr{home}, \xmlattr{id}, \xmlattr{name}, \xmlattr{pwd}, 
 \xmlattr{realname}, and \xmlattr{shell} specify the created
 users home directory, the user name, the user's password, the user's 
-real name, and the user's login shell, respectively. By default the value
+real name, and the user's login shell, respectively. By default, the value
 of the password attribute is expected to be an encrypted string. An
 encrypted password can be created using \cmd{kiwi} \option{createpassword}. It
 is also possible to specify the password as a non encrypted string by using
@@ -829,7 +828,7 @@ the \xmlattr{pwdformat} attribute and setting it's value to \kquote{plain}. KIWI
 encrypt the password prior to the user being added to the system.
 
 All specified users and groups will be created if they do not already exist.
-By default the defined users will be part of the group specified with the 
+By default, the defined users will be part of the group specified with the 
 group attribute of the users element and the default group called \kquote{users}.
 If it is desired to have the specified users to only be part of the given
 group it is necessary to specify the id attribute. It is recommended to use
@@ -981,7 +980,7 @@ to the architecture of the image building host.
 \end{itemize}
 
 Multiple repository sections are allowed and combined by the
-used package manager. By default the package manager will always use
+used package manager. By default, the package manager will always use
 the latest packages available.
 
 \subsection{\xmlstarttag{packages} Element}
@@ -1084,7 +1083,7 @@ to the dependencies. If a pattern contains unwanted packages, you can use
 the ignore element to specify an ignore list, with the name attribute
 containing the package name. Please note that you can't ignore a package
 if it is required by a package dependency of another package in your list.
-The packagemanager will automatically pull in the package even if you have
+The package manager will automatically pull in the package even if you have
 ignored it.
 
 \subsubsection{Architecture Restrictions}
