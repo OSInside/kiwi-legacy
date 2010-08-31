@@ -2963,6 +2963,10 @@ function searchVolumeGroup {
 	# /dev/$VGROUP/LVRoot and/or /dev/$VGROUP/LVComp
 	# return zero on success
 	# ----
+	if [ ! "$kiwi_lvm" -eq "true" ];then
+		return 1
+	fi
+	Echo "Searching for $VGROUP volume group..."
 	if vgscan 2>&1 | grep -q "$VGROUP"; then
 		vgchange -a y $VGROUP
 		return $?

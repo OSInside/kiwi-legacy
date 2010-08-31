@@ -147,7 +147,6 @@ if [ -z "$imageDiskDevice" ];then
 		"Couldn't find any boot device... abort" \
 	"reboot"
 fi
-Echo "Searching for $VGROUP volume group..."
 if searchVolumeGroup; then
 	export haveLVM=yes
 	if [ -e /dev/$VGROUP/LVComp ];then

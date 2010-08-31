@@ -85,7 +85,7 @@ function OEMNetwork {
 function OEMFindPartitions {
 	# /.../
 	# find partitions without known filesystem on the given
-	# disk device and return an list containing the information
+	# disk device and return a list containing the information
 	# device:size-KB,device:size-KB,...
 	# ----
 	local disk=$1
@@ -102,7 +102,8 @@ function OEMFindPartitions {
 		if [ ! "$partid" = "83" ] && [ ! "$partid" = "8e" ] ;then
 			continue
 		fi
-		if blkid $device -s TYPE -o value &>/dev/null;then
+		probeFileSystem $device
+		if [ ! -z "$FSTYPE" ] && [ "$FSTYPE" != "unknown" ];then
 			continue
 		fi
 		if [ -z "$result" ];then
@@ -337,6 +338,15 @@ function OEMInstall {
 			"reboot"
 		fi
 		#======================================
+		# Do we have a LVM image...
+		#--------------------------------------
+		for i in /dev/mapper/${loop}*;do
+			partid=$(partitionID /dev/$loop $(nd $i))
+			if [ "$partid" = "8e" ];then
+				export haveLVM=yes
+			fi
+		done
+		#======================================
 		# Select all required partitions
 		#--------------------------------------
 		if [ $count -eq $reqpart ] && [ $reqpart -eq 1 ];then
@@ -429,7 +439,11 @@ function OEMInstall {
 		if [ -z "$bID" ];then
 			bID=$rID
 		fi
-		setupDeviceNames $rID $sID no no $bID no
+		if [ "$haveLVM" = "yes" ];then
+			setupDeviceNames $rID $sID no no $bID no $VGROUP
+		else
+			setupDeviceNames $rID $sID no no $bID no
+		fi
 	else
 		instItems[0]=$imageName:$imageDevice
 	fi
@@ -546,7 +560,8 @@ function OEMInstall {
 			fi
 			Echo "Loading $Source [$Target] "
 			if [ -x /usr/bin/dcounter ];then
-				mkfifo /progress; errorLogStop
+				test -e /progress || mkfifo /progress
+				errorLogStop
 				(
 					if ! eval $dump 2>/progress|dd bs=32k of=$Target &>/dev/null
 					then
@@ -657,6 +672,68 @@ function OEMInstall {
 	#--------------------------------------
 	if [ ! -z "$pxe" ];then
 		dhcpcd -p -k $PXE_IFACE
+	fi
+	#======================================
+	# create recovery archive if requested
+	#--------------------------------------
+	if [ ! -z "$OEM_RECOVERY_INPLACE" ];then
+		setupInitialDeviceNames
+		if ! mountSystem $imageRootDevice;then
+			systemException "Failed to mount root filesystem" "reboot"
+		fi
+		if [ ! -f /mnt/recovery.partition.size ];then
+			systemException "Can't find recovery part size info" "reboot"
+		fi
+		recoMByte=$(cat /mnt/recovery.partition.size)
+		recoBytes=$((recoMByte - 100))
+		recoBytes=$((recoBytes * 1048576))
+		haveMByte=$(
+			df -B1M $imageRootDevice | tail -n 1 | column -t |\
+			sed -e s@"  "@:@g | cut -f 4 -d:
+		)
+		if [ "$haveMByte" -gt "$recoMByte" ];then
+			pushd /mnt &>/dev/null
+			Echo "Creating recovery root tarball..."
+			test -e /progress || mkfifo /progress
+			test -e /usr/bin/mst || cp /usr/bin/tail /usr/bin/mst
+			(
+				touch recovery.tar.gz
+				tar --numeric-owner -czpf recovery.tar.gz . \
+					--exclude "./dev" \
+					--exclude "./proc" \
+					--exclude "./sys" \
+					--exclude "./recovery.*" &
+				rPID=$!
+				while kill -0 $rPID &>/dev/null;do
+					rReady=$(stat --format="%s" ./recovery.tar.gz)
+					if [ $rReady -eq 0 ];then
+						continue
+					fi
+					rPDone=$(echo "scale=4; $recoBytes / $rReady" | bc)
+					rPDone=$(echo "scale=0; 100 / $rPDone" | bc)
+					getText "archiving: %1..." "$rPDone%" > /progress
+					sleep 1
+				done
+				dPID=$(pidof mst)
+				kill $dPID
+			)&
+			echo "mst -f /progress | dialog \
+				--backtitle \"$TEXT_INSTALLTITLE\" \
+				--progressbox 3 50
+			" > /tmp/progress.sh
+			if [ -e /dev/fb0 ];then
+				fbiterm -m $UFONT -- bash -e /tmp/progress.sh
+			else
+				bash -e /tmp/progress.sh
+			fi
+			popd &>/dev/null
+			clear
+		else
+			Echo "Not enough space left to create recovery archive"
+			Echo "=> Warning: Postponed after repartitioning is done"
+			Echo "=> Warning: This moves the archive creation to first boot"
+		fi
+		umountSystem
 	fi
 	#======================================
 	# Check for halt request

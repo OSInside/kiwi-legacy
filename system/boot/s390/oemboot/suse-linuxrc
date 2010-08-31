@@ -118,14 +118,6 @@ function setupInitialDeviceNames {
 		export haveLuks=yes
 	fi
 	#======================================
-	# Check root filesystem type
-	#--------------------------------------
-	if [ "$FSTYPE" = "unknown" ];then
-		systemException \
-			"Couldn't determine filesystem type... abort" \
-		"reboot"
-	fi
-	#======================================
 	# Check for LUKS extension on rw fs
 	#--------------------------------------
 	if isFSTypeReadOnly;then
@@ -323,7 +315,7 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 		systemException "Failed to mount recovery device" "reboot"
 	fi
 	#======================================
-	# 16.2) restore MBR in restore mode
+	# 16.2) restore MBR/LVM in restore mode
 	#--------------------------------------
 	if [ ! -z "$RESTORE" ];then
 		if ! dd if=/reco-save/mbr of=$imageDiskDevice;then
@@ -334,6 +326,13 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 		waitForStorageDevice $imageRecoveryDevice
 		if ! mount -o ro $imageRecoveryDevice /reco-save >/dev/null;then
 			systemException "Failed to remount recovery device" "reboot"
+		fi
+		if [ -f /reco-save/lvm ];then
+			restoreLVMPhysicalVolumes /reco-save/lvm
+			if ! vgcfgrestore -f /reco-save/lvm $VGROUP;then
+				systemException "Failed to restore LVM metadata" "reboot"
+			fi
+			setupInitialDeviceNames
 		fi
 	fi
 	#======================================
@@ -599,6 +598,8 @@ if [ "$LOCAL_BOOT" = "no" ];then
 		updateLVMBootDeviceFstab /config $imageBootDevice
 	elif [ "$haveClicFS" = "yes" ];then
 		updateClicBootDeviceFstab /config $imageBootDevice
+	elif [ "$haveBtrFS" = "yes" ];then
+		updateBtrBootDeviceFstab /config $imageBootDevice
 	elif [ "$loader" = "syslinux" ] || [ "$loader" = "extlinux" ];then
 		updateSyslinuxBootDeviceFstab /config $imageBootDevice
 	elif [ "$haveLuks" = "yes" ];then

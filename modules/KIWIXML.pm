@@ -423,6 +423,9 @@ sub new {
 		if (defined $foreignRepo->{"hybridpersistent"}) {
 			$this -> setForeignTypeAttribute ("hybridpersistent");
 		}
+		if (defined $foreignRepo->{"lvm"}) {
+			$this -> setForeignTypeAttribute ("lvm");
+		}
 		if (defined $foreignRepo->{"kernelcmdline"}) {
 			$this -> setForeignTypeAttribute (
 				"kernelcmdline",$foreignRepo->{"kernelcmdline"}
@@ -2553,14 +2556,17 @@ sub getImageConfig {
 	if ((%type) && ($type{installboot})) {
 		$result{kiwi_installboot} = $type{installboot};
 	}
-	if ((%type) && ($type{luks})) {
+	if ((%type) && ($type{luks} eq "true")) {
 		$result{kiwi_luks} = "yes";
 	}
-	if ((%type) && ($type{hybrid})) {
+	if ((%type) && ($type{hybrid} eq "true")) {
 		$result{kiwi_hybrid} = "yes";
 	}
-	if ((%type) && ($type{hybridpersistent})) {
+	if ((%type) && ($type{hybridpersistent} eq "true")) {
 		$result{kiwi_hybridpersistent} = "yes";
+	}
+	if ((%type) && ($type{lvm})) {
+		$result{kiwi_lvm} = $type{lvm};
 	}
 	if ($size) {
 		$result{kiwi_size} = $size;

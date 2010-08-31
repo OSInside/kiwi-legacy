@@ -694,6 +694,9 @@ sub createImageUSB {
 	if ($type{cmdline}) {
 		$main::ForeignRepo{"kernelcmdline"} = $type{cmdline};
 	}
+	if ($type{lvm}) {
+		$main::ForeignRepo{"lvm"} = $type{lvm};
+	}
 	if ($type{bootloader}) {
 		$main::ForeignRepo{"bootloader"} = $type{bootloader};
 	}
@@ -1316,6 +1319,9 @@ sub createImageLiveCD {
 	}
 	if ($type{cmdline}) {
 		$main::ForeignRepo{"kernelcmdline"} = $type{cmdline};
+	}
+	if ($type{lvm}) {
+		$main::ForeignRepo{"lvm"} = $type{lvm};
 	}
 	if ($hybrid) {
 		$main::ForeignRepo{"hybrid"}= "true";
@@ -2486,6 +2492,9 @@ sub createImageSplit {
 	}
 	if ($type{cmdline}) {
 		$main::ForeignRepo{"kernelcmdline"} = $type{cmdline};
+	}
+	if ($type{lvm}) {
+		$main::ForeignRepo{"lvm"} = $type{lvm};
 	}
 	if ($type{bootloader}) {
 		$main::ForeignRepo{"bootloader"} = $type{bootloader};
