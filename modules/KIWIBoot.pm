@@ -2430,10 +2430,11 @@ sub setupBootDisk {
 				#------------------------------------------
 				if ($haveAbsolute) {
 					$vmsize = $this->{vmmbyte} + 30 + $diff;
+					$vmsize = sprintf ("%.0f", $vmsize * 1.01);
 				} else {
 					$vmsize = $this->{vmmbyte} + 30 + $space;
+					$vmsize = sprintf ("%.0f", $vmsize);
 				}
-				$vmsize = sprintf ("%.0f", $vmsize);
 				$this->{vmmbyte} = $vmsize;
 				$vmsize = $vmsize."M";
 				$this->{vmsize}  = $vmsize;
