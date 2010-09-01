@@ -9,7 +9,7 @@
     hardware at the same time. </para>
 
   <para>A Xen system is structured with the Xen hypervisor as the lowest
-    and most privileged layer.Above this layer are one or more guest
+    and most privileged layer. Above this layer are one or more guest
     operating systems, which the hypervisor schedules across the
     physical CPUs. The first guest operating system, called in Xen
     terminology <quote>domain 0</quote> (dom0), is booted automatically

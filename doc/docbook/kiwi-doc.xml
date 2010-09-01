@@ -5,9 +5,13 @@
   <title>openSUSE-KIWI Image System</title>
   <subtitle>Cookbook</subtitle>
   <bookinfo>
-    <releaseinfo>Version <xi:include href="Revision.txt" parse="text" xmlns:xi="http://www.w3.org/2001/XInclude"/></releaseinfo>
+    <releaseinfo>KIWI Version <xi:include href="Revision.txt" parse="text" xmlns:xi="http://www.w3.org/2001/XInclude"/></releaseinfo>
     <authorgroup>
       <author>
+        <affiliation>
+          <jobtitle>Software Engineer</jobtitle>
+          <orgname>SUSE LINUX Products GmbH</orgname>
+        </affiliation>
         <firstname>Marcus</firstname>
         <surname>Schäfer</surname>
         <contrib>Project, Design and Implementation</contrib>
@@ -19,12 +23,15 @@
         </address>
       </author>
       <othercredit>
+        <affiliation>
+          <jobtitle>Documentation Specialist</jobtitle>
+          <orgname>SUSE LINUX Products GmbH</orgname>
+        </affiliation>
         <firstname>Thomas</firstname>
         <surname>Schraitle</surname>
         <contrib>Various text improvements, migration to DocBook</contrib>
         <email>toms@suse.de</email>
       </othercredit>
-      <corpcredit>SUSE LINUX Products GmbH</corpcredit>
     </authorgroup>
     <revhistory>
       <revision>

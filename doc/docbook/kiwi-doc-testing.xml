@@ -95,13 +95,13 @@
 
     <itemizedlist>
       <listitem>
-        <para>external scripts are executed outside of the image and are
+        <para>External scripts are executed outside of the image and are
           preferred. Their first parameter should be CHROOT. This
           parameter is changed to the real path of the image chroot
           directory. </para>
       </listitem>
       <listitem>
-        <para>internal scripts are executed inside image using the
+        <para>Internal scripts are executed inside image using the
             <command>chroot</command> command. Files are copied into the
           image and deleted after execution. </para>
       </listitem>

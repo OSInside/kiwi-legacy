@@ -596,9 +596,11 @@
           class="attvalue">true|false</sgmltag>". If specified KIWI will
         search for a prebuilt boot image in a directory named
           <filename>/usr/share/kiwi/image/*boot/*-prebuilt</filename>.
-        Example: If the boot attribute was set to isoboot/suse-10.3 and
-        checkprebuilt is set to true KIWI will search the prebuilt boot
-        image in
+        Example: If the <sgmltag class="attribute">boot</sgmltag>
+        attribute was set to <sgmltag class="attvalue"
+          >isoboot/suse-10.3</sgmltag> and <sgmltag class="attribute"
+          >checkprebuilt</sgmltag> is set to <sgmltag class="attvalue"
+          >true</sgmltag> KIWI will search the prebuilt boot image in
           <filename>/usr/share/kiwi/image/isoboot/suse-10.3-prebuilt</filename>.
         The directory KIWI searches for the prebuilt boot images can
         also be specified at the commandline with the
@@ -648,24 +650,27 @@
           <term><sgmltag class="attribute">timezone</sgmltag></term>
           <listitem>
             <para>Specifies the time zone. Available time zones are
-              located in the /usr/share/zoneinfo directory. Specify the
-              attribute value relative to /usr/share/zoneinfo. For
-              example, specify Europe/Berlin for
-              /usr/share/zoneinfo/Europe/Berlin. KIWI uses this value to
-              configure the timezone in /etc/localtime for the image.
-            </para>
+              located in the <filename class="directory"
+                >/usr/share/zoneinfo</filename> directory. Specify the
+              attribute value relative to <filename class="directory"
+                >/usr/share/zoneinfo</filename>. For example, specify
+              Europe/Berlin for
+                <filename>/usr/share/zoneinfo/Europe/Berlin</filename>.
+              KIWI uses this value to configure the timezone in
+                <filename>/etc/localtime</filename> for the image. </para>
           </listitem>
         </varlistentry>
         <varlistentry>
           <term><sgmltag class="attribute">locale</sgmltag></term>
           <listitem>
             <para> Specifies the name of the UTF-8 locale to use, which
-              defines the contents of the RC_LANG system environment
-              variable in <filename>/etc/sysconfig/language</filename>.
-              Please note only UTF-8 locales are supported here which
-              also means that the encoding must <emphasis>not</emphasis>
-              be part of the locale information. The KIWI schema
-              validates the locale string according to the following
+              defines the contents of the <envar>RC_LANG</envar> system
+              environment variable in
+                <filename>/etc/sysconfig/language</filename>. Please
+              note only UTF-8 locales are supported here which also
+              means that the encoding must <emphasis>not</emphasis> be
+              part of the locale information. The KIWI schema validates
+              the locale string according to the following
                 pattern:<literal>[a-z]{2}_[A-Z]{2}(,[a-z]{2}_[A-Z]{2})*</literal>.
               This means you have to specifiy the locale like the
               following example: en_US or en_US,de_DE </para>
@@ -778,7 +783,7 @@
               The format of the file is a simple
                 <literal>key=value</literal> format and created by the
                 <command>KIWIConfig.sh</command> function named
-              baseSetupOEMPartition(). </para>
+                <function>baseSetupOEMPartition</function>. </para>
 
             <screen>&lt;oemconfig&gt;
    &lt;oem-systemsize&gt;2000&lt;/oem-systemsize&gt;

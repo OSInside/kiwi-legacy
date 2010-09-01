@@ -99,7 +99,8 @@ subnet 192.168.100.0 netmask 255.255.255.0 {
     <title>Building the suse-pxe-client Example</title>
     <para>The example provided with KIWI is based on open­SUSE 11.2 and
       creates an image for a Wyse VX0 terminal with a 128MB flash card
-      and 512MB of RAM. The image makes use of the squashfs compressed
+      and 512MB of RAM. The image makes use of the <systemitem
+        class="filesystem">squashfs</systemitem> compressed
       filesystem and its root tree is deployed as unified (aufs) based
       system. </para>
 
@@ -133,7 +134,7 @@ subnet 192.168.100.0 netmask 255.255.255.0 {
 <command>cp</command> suse-11.2-pxe-client.i686-1.2.8.md5 /srv/tftpboot/image</screen>
       </step>
       <step>
-        <para>Copy of the image boot configurationNormally the boot
+        <para>Copy of the image boot configuration. Normally the boot
           configuration applies to one client which means it is required
           to obtain the MAC address of this client. If the boot
           configuration should be used globaly, copy the KIWI generated
@@ -142,9 +143,9 @@ subnet 192.168.100.0 netmask 255.255.255.0 {
   /srv/tftpboot/KIWI/config.<replaceable>MAC</replaceable> </screen>
       </step>
       <step>
-        <para>Check the PXE configuration fileThe PXE configuration
+        <para>Check the PXE configuration file. The PXE configuration
           controls which kernel and initrd are loaded and which kernel
-          parameters are set. When installing the kiwi-pxeboot package,
+          parameters are set. When installing the <package>kiwi-pxeboot</package> package,
           a default configuration is added. To make sure the
           configuration is valid according to this example, insert the
           following information into the file
@@ -185,7 +186,7 @@ LABEL Local-Boot
         clients. In this case, there is no configuration file
         corresponding to the client MAC address available. Using the MAC
         address information, the control file is created, which is
-        uploaded to the TFTP servers upload directory
+        uploaded to the <systemitem class="server">TFTP</systemitem> servers upload directory
           <filename>/var/lib/tftpboot/upload</filename>. </para>
     </sect2>
 
@@ -302,7 +303,7 @@ DISK=device</screen>
               the sfdisk program are allowed as well. The type number
               specifies the ID of the partition. Valid ID’s are listed
               via the <command>sfdisk</command>
-              <option>––list-types</option> command. The mount specifies
+              <option>--list-types</option> command. The mount specifies
               the directory the partition is mounted to. </para>
 
             <itemizedlist>
@@ -373,8 +374,8 @@ DISK=device</screen>
               standard tftp setup suggested with the kiwi-pxeboot
               package is used all initrd files resides in the <filename
                 class="directory">boot/</filename> directory below the
-              tftp server path <filename>/var/lib/tftpboot</filename>.
-              Because the tftpserver do a chroot into the tftp server
+              tftp server path <filename class="directory">/var/lib/tftpboot</filename>.
+              Because the tftp server do a chroot into the tftp server
               path you need to specify the initrd file as the following
               example shows: </para>
             <screen>KIWI_INITRD=/boot/<replaceable>name-of-initrd-file</replaceable></screen>
@@ -512,7 +513,8 @@ DISK=/dev/sda</screen>
 
             <para> KIWI is now able to mount and use the specified AoE
               device as the remote root filesystem. In case of a
-              compressed read-only image with aufs or clicfs, the
+              compressed read-only image with <systemitem class="filesystem">aufs</systemitem> 
+              or <systemitem class="filesystem">clicfs</systemitem>, the
               AOEROOT variable can also contain a device for the write
               actions: </para>
 
@@ -538,7 +540,7 @@ DISK=/dev/sda</screen>
 
             <screen>NFSROOT=NFS.Server.IP.address;/path/to/root/tree</screen>
 
-            <para> Optionally you can set a UNIONFS_CONFIG variable
+            <para> Optionally you can set a <varname>UNIONFS_CONFIG</varname> variable
               which defines an aufs based overlay NFS directory or
               device like: </para>
 
@@ -627,7 +629,7 @@ UNIONFS_CONFIG=/dev/ram1,nfs,aufs # write to RAM</screen>
         Please note all downloads except for kernel and initrd are now
         controlled by the given server and protocol. You need to make
         sure that this server provides the same directory and file
-        structure as initially provided by the kiwi-pxeboot package.
+        structure as initially provided by the <package>kiwi-pxeboot</package> package.
       </para>
     </sect2>
 
@@ -651,7 +653,6 @@ UNIONFS_CONFIG=/dev/ram1,nfs,aufs # write to RAM</screen>
           <para>Create
               <filename>config.<replaceable>MAC</replaceable></filename>
           </para>
-
           <screen>IMAGE=/dev/ram1;suse-11.2-pxe-client.i686;\
       1.2.8;192.168.100.2;4096</screen>
         </listitem>
@@ -669,7 +670,8 @@ UNIONFS_CONFIG=/dev/ram1,nfs,aufs # write to RAM</screen>
         read-write filesystem is a solution for this problem. In order
         to use a compressed root filesystem make sure your
           <filename>config.xml</filename>’s filesystem attribute
-        contains either squashfs or clicfs. Below, find an example: </para>
+        contains either <systemitem class="filesystem">squashfs</systemitem> 
+        or <systemitem class="filesystem">clicfs</systemitem>. Below, find an example: </para>
 
       <screen>DISK=/dev/sda
 PART=5;S;x,62;L;/,x;L;x,
@@ -739,11 +741,12 @@ KIWI_INITRD=/boot/initrd</screen>
       <title>Root Tree Over NFS</title>
       <para> Instead of installing the image onto a local storage device
         of the client it is also possible to let the client mount the
-        root tree via an NFS remote mount. Below find an example: </para>
+        root tree via an <systemitem class="service">NFS</systemitem>
+        remote mount. Below find an example: </para>
 
       <itemizedlist>
         <listitem>
-          <para>Export the KIWI prepared tree via NFS </para>
+          <para>Export the KIWI prepared tree via NFS.</para>
         </listitem>
         <listitem>
           <para>Sample
@@ -762,7 +765,7 @@ KIWI_INITRD=/boot/initrd</screen>
 
       <itemizedlist>
         <listitem>
-          <para>Use nbd-server to export the KIWI prepared tree </para>
+          <para>Use nbd-server to export the KIWI prepared tree.</para>
         </listitem>
         <listitem>
           <para>Sample
@@ -785,10 +788,10 @@ KIWI_INITRD=/boot/initrd</screen>
           <para>Use the <command>vbladed</command> command to bind a
             block device to an ethernet interface. The block device can
             be a disk partition or a loop device (losetup) but not a
-            directory like with NBD </para>
+            directory like with NBD. </para>
         </listitem>
         <listitem>
-          <para>sample
+          <para>Sample
               <filename>config.<replaceable>MAC</replaceable></filename>: </para>
           <screen>AOEROOT=/dev/etherd/e0.1</screen>
           <para>This would require the following command to be called

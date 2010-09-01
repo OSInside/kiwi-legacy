@@ -25,7 +25,8 @@
       releases, one example configuration per release, and includes the
       default and x11 patterns. The image type is a split type utilizing
       the distributions default filesystem format for the read-write
-      partition and the squashfs filesystem for the read-only partition.
+      partition and the <systemitem class="filesystem"
+        >squashfs</systemitem> filesystem for the read-only partition.
       Using the additional <sgmltag class="attribute"
         >installiso</sgmltag> attribute creates an installable ISO
       image. When booting from the ISO image the OEM disk image will be
@@ -145,17 +146,17 @@
         has been set, and adds logical volumes to the group based on the
         configuration given by the <sgmltag>lvmvolumes</sgmltag> block
         for this type. The filesystem for the volume group is determined
-        by the filesystem attribute of the type element. After booting
-        the system the user has full control over the volume group and
-        is free to change (resize/increase) the group and the volumes
-        inside. Support for LVM has been added for all disk based image
-        types. This includes the vmx, oem and usb image types. In order
-        to use LVM for the oem type just add the <option>--lvm</option>
-        command line option when executing the create step or add the
-        attribute <sgmltag class="attribute">lvm</sgmltag>="<sgmltag
-          class="attvalue">true</sgmltag>" to of the
-          <sgmltag>type</sgmltag> element in your
-          <filename>config.xml</filename> file. </para>
+        by the <sgmltag class="attribute">filesystem</sgmltag> attribute
+        of the type element. After booting the system the user has full
+        control over the volume group and is free to change
+        (resize/increase) the group and the volumes inside. Support for
+        LVM has been added for all disk based image types. This includes
+        the vmx, oem and usb image types. In order to use LVM for the
+        oem type just add the <option>--lvm</option> command line option
+        when executing the create step or add the attribute <sgmltag
+          class="attribute">lvm</sgmltag>="<sgmltag class="attvalue"
+          >true</sgmltag>" to of the <sgmltag>type</sgmltag> element in
+        your <filename>config.xml</filename> file. </para>
 
 
       <screen><command>kiwi</command> –create /tmp/myoem –type oem -d /tmp/myoem-result
@@ -195,12 +196,12 @@
         <listitem>
           <para>The oem options for system, swap and home doesn’t have
             any effect if the installation happens in predefined
-            partitions </para>
+            partitions. </para>
         </listitem>
         <listitem>
           <para>There is no support for remote (PXE) OEM installation
             because kiwi has to loop mount the disk image in order to
-            access the partitions which can’t be done remotely </para>
+            access the partitions which can’t be done remotely. </para>
         </listitem>
         <listitem>
           <para>The raw disk image is stored uncompressed on the install
@@ -208,7 +209,7 @@
             image which it can’t do if the file is only available as
             compressed version. This means the install media in this
             mode will be approximately double the size of a standard
-            install media </para>
+            install media. </para>
         </listitem>
       </itemizedlist>
 

@@ -43,8 +43,8 @@
 
   <para>Please note while instances are running, you are billed for the
     computing and network resources that they consume. You should start
-    creating an ec2 with KIWI after you can make sure your system is
-    prepared for ec2 which means if you call the command
+    creating an EC2 with KIWI after you can make sure your system is
+    prepared for EC2 which means if you call the command
       <command>ec2-describe-images</command>
     <option>–a</option> you will get a valid output. </para>
   <sect1>
@@ -52,7 +52,7 @@
     <para>One example provided with KIWI is based on openSUSE 11.3 and
       includes the base pattern plus the vim editor. </para>
 
-    <para>Before you run KIWI you need to include some of your ec2
+    <para>Before you run KIWI you need to include some of your EC2
       account information into the image description
         <filename>config.xml</filename> file. The box below shows the
       values you need to adapt: </para>
@@ -84,8 +84,9 @@
       suse-11.1-xen-guest.i686-1.1.2.ami.manifest.xml </screen>
 
     <para>After this is done the image needs to be registered in order
-      to receive a so called AMI id which starts with ami- followed by a
-      random key sequence. To register call: </para>
+      to receive a so called AMI id which starts with
+        <quote>ami-</quote> followed by a random key sequence. To
+      register call: </para>
 
     <screen><command>ec2-register</command> myImages/<!--
      --> suse-11.1-xen-guest.i686-1.1.2.ami.manifest.xml </screen>
@@ -106,11 +107,11 @@
 
     <para>The private key returned needs to be saved in a local file so
       that you can use it later. Using your favorite text editor, create
-      a file named id_rsa-gsg-keypair and paste everything between (and
-      including) the <literal>-----BEGIN RSA PRIVATE KEY-----</literal>
-      and <literal>-----END RSA PRIVATE KEY-----</literal> lines into
-      it. To review your keypairs call
-      <command>ec2-describe-keypairs</command>. </para>
+      a file named <filename>id_rsa-gsg-keypair</filename> and paste
+      everything between (and including) the <literal>-----BEGIN RSA
+        PRIVATE KEY-----</literal> and <literal>-----END RSA PRIVATE
+        KEY-----</literal> lines into it. To review your keypairs call
+        <command>ec2-describe-keypairs</command>. </para>
 
     <para>We are almost done now but to be able to run an instance it’s
       required to select an appropriate AKI ID from the <emphasis>Amazon
@@ -140,7 +141,7 @@
         </td>
         <td>
           <para>
-            ec2-public-images/pv-grub-hd0-V1.01-i386.gz.manifest.xml
+            <filename>ec2-public-images/pv-grub-hd0-V1.01-i386.gz.manifest.xml</filename>
           </para>
         </td>
       </tr>
@@ -150,7 +151,7 @@
         </td>
         <td>
           <para>
-            ec2-public-images/pv-grub-hd0-V1.01-x86_64.gz.manifest.xml
+            <filename>ec2-public-images/pv-grub-hd0-V1.01-x86_64.gz.manifest.xml</filename>
           </para>
         </td>
       </tr>
