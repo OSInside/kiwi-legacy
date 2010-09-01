@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+                         "http://www.docbook.org/xml/4.5/docbookx.dtd">
+
+<chapter id="chap.migration">
+  <title>System to Image Migration</title>
+
+  <para>KIWI provides an experimental module which allows you to turn
+    your running system into an image description. This migration allows
+    you to clone your currently running system into an image. The
+    process has the following limitations at the moment: </para>
+
+  <itemizedlist>
+    <listitem>
+      <para>Works for SUSE systems only (with zypper on board) </para>
+    </listitem>
+    <listitem>
+      <para>The process works semi automatically which means depending
+        on the complexity of the system some manual postprocessing might
+        be necessary </para>
+    </listitem>
+  </itemizedlist>
+
+  <para>When calling KIWI’s migrate mode it will try to find the base
+    version of your operating system and uses the currently active
+    repositories specified in the zypper database to match the software
+    which exists in terms of packages and patterns. The result is a list
+    of packages and patterns which represents your system so far. Of
+    course there are normally some data which doesn’t belong to any
+    package. These are for example configurations or user data. KIWI
+    collects all this information and would copy it as overlay files as
+    part of the image description. The process will skip all remote
+    mounted filesystems and concentrate only on local filesystems. </para>
+
+  <sect1>
+    <title>Create a Clean Repository Set First</title>
+    <para> When starting with the migration it is useful to let kiwi
+      know about all the repositories from which packages has been
+      installed to the system. In a first step call: </para>
+
+    <screen><command>kiwi</command> –migrate mySystem </screen>
+
+    <para>This will create an HTML report where you can check which
+      packages and patterns could be assigned to the given base
+      repository. In almost all cases there will be information about
+      packages which couldn’t be assigned. You should go to that list
+      and think of the repository which contains that packages (Pacman,
+      etc). If something is missing add it either to the zypper list on
+      your system or use the KIWI options <option>--add-repo</option> …
+        <option>--add-repotype</option>. </para>
+
+    <para>Continue calling the following command until your list is
+      clean You should continue the migration if you have a clean list
+      of solved packages without any package skipped except you know
+      that this package can’t be provided or is not worth to become part
+      of the migration. </para>
+
+
+    <screen><command>kiwi</command> –migrate mySystem –nofiles<!-- 
+    -->[ –skip package ... ]</screen>
+  </sect1>
+
+  <sect1>
+    <title>Watch the Overlay and Unpackaged Files</title>
+    <para>Files which has been modified but belong to a package will be
+      automatically copied into the overlay directory below
+        <filename>/tmp/mySystem/root</filename>. You should check that
+      no modified file is a binary because such a binary would be
+      replaced by a new install of the package anyway. As a software
+      deloper people tend to compile software from source and
+      copy/install them into their system. Doing this could cause binary
+      files previosly installed by a package to be reported as modified.
+      You should remove such files from your overlay tree. </para>
+
+    <para>The migration also copy the entire <filename>/etc</filename>
+      directory into the overlay root directory because it stores all
+      important configuration files. Beside the important files there
+      are most probably a bunch of file which doesn’t belong to any
+      package exists only for historical reasons. kiwi creates a list of
+      files and directories to support you best in sorting out what is
+      required and what can be ignored. Nevertheless this is the most
+      time consuming part of your migration review. Simply click on the
+        <emphasis>all unpackaged files</emphasis> link to take a look at
+      the complete list. Those files you want to have in your image
+      needs to be copied over to the
+        <filename>/tmp/mySystem/root</filename> directory </para>
+  </sect1>
+
+  <sect1>
+    <title>Checklist</title>
+    <para> After that you should walk through the following check list </para>
+
+    <itemizedlist>
+      <listitem>
+        <para>Change author and contact in <filename>config.xml</filename>
+        </para>
+      </listitem>
+      <listitem>
+        <para>Set appropriate name for your image in
+            <filename>config.xml</filename>. </para>
+      </listitem>
+      <listitem>
+        <para>Add/modify default type (oem) set in <filename>config.xml</filename> if needed
+        </para>
+      </listitem>
+      <listitem>
+        <para>Make sure your X11 configuration is appropriate according
+          to the new target. A failsafe version was created in
+            <filename>/tmp/mysys/root/etc/X11/xorg.conf.install</filename>
+          -&gt; fbdev based </para>
+      </listitem>
+      <listitem>
+        <para>Make sure <command>yast2</command> is installed to be able
+          to reconfigure the system. If <command>yast2</command> is not
+          installed these tasks needs to be done else. Otherwise yast’s
+          second stage is started on first boot of the migrated image
+        </para>
+      </listitem>
+      <listitem>
+        <para>If you want to access any remote filesystem it’s a good
+          idea to let AutoYaST add them on first boot of the system
+        </para>
+      </listitem>
+      <listitem>
+        <para>Check your network setup in
+            <filename>/etc/sysconfig/network</filename>. Is this setup
+          still possible in the cloned environment? Make sure you check
+          for the MAC address of the card first. </para>
+      </listitem>
+    </itemizedlist>
+  </sect1>
+
+  <sect1>
+    <title>Turn my System Into an Image…</title>
+    <para>After the process has finished you should check the size of
+      the image description. The description itself shouldn’t be that
+      big. The size of a migrated image description mainly depends on
+      how many overlay files exists in the <filename class="directory"
+        >root/</filename> directory. You should make sure to maintain
+      only required overlay files. Now let’s try to create a clone image
+      from the description. By default an OEM image which is a virtual
+      disk which is able to run on real hardware too is created. On
+      success you will also find a ISO file which is an installable
+      version of the OEM image. If you burn the ISO on a DVD you can use
+      that DVD to install your cloned image on another computer. </para>
+
+    <screen><command>kiwi</command> -p /tmp/migrated –root /tmp/mySys
+<command>kiwi</command> –create /tmp/mySys -d /tmp/myResult </screen>
+
+    <para>If everything worked well you can test the created OEM image
+      in any full virtual operating system environment like Qemu or
+        <trademark>VMware</trademark>. Once created the image
+      description can serve for all image types KIWI supports. </para>
+  </sect1>
+</chapter>

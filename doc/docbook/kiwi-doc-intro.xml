@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+                         "http://www.docbook.org/xml/4.5/docbookx.dtd">
+
+<chapter>
+  <title>Introduction</title>
+  <para>The openSUSE KIWI Image System provides a complete operating
+    system image solution for Linux supported hardware platforms as well
+    as for virtualisation systems like Xen, VMWare, etc. The KIWI
+    architecture was designed as a two level system. The first stage,
+    based on a valid <emphasis>software package source</emphasis>,
+    creates a so called <emphasis>unpacked image</emphasis> according to
+    the provided image description. The second stage creates from a
+    required unpacked image an operating system image. The result of the
+    second stage is called a <emphasis>packed image</emphasis> or short
+    an image. </para>
+
+
+    <figure id="fig.imageservingarch">
+      <title>Image Serving Architecture</title>
+      <mediaobject>
+        <imageobject role="fo">
+          <imagedata fileref="images/intro.png" width="50%"/>
+        </imageobject>
+        <imageobject role="html">
+          <imagedata fileref="images/intro.png" width="50%"/>
+        </imageobject>
+      </mediaobject>
+    </figure>
+  
+
+
+  <para>Because this document contains conceptual information about an
+    image system, it is important to understand what an operating system
+    image is all about. A normal installation process is starting from a
+    given installation source and installs single pieces of software
+    until the system is complete. During this process manual user
+    intervention may be required. However, an operating system image
+    represents an already completed <emphasis>installation</emphasis>,
+    encapsulated as a file and optionally includes the configuration for
+    a specific task. Such an operating system starts working as soon as
+    the image has been brought to a system storage device no matter if
+    this is a volatile or non volatile storage. The process of creating
+    an image takes place without user interaction. This means, all
+    requirements of the encapsulated system has to be fulfilled before
+    the image is created. All of this information is stored in the
+      <emphasis>image description</emphasis>. </para>
+
+</chapter>

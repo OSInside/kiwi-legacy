@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE refentry PUBLIC 
+  "-//OASIS//DTD DocBook XML V4.4//EN"
+  "http://www.docbook.org/xml/4.4/docbookx.dtd">
+
+<refentry>
+  <refentryinfo>
+    <productname>>KIWI</productname>
+    <!--<productnumber></productnumber>-->
+    <date>Created: <?dbtimestamp?></date>
+    <authorgroup>
+      <author>
+        <firstname>Robert</firstname>
+        <surname>Schweikert</surname>
+        <contrib>Developer</contrib>
+        <email>rschweikert (AT) novell.com</email>
+      </author>
+    </authorgroup>
+  </refentryinfo>
+  <refmeta>
+    <refentrytitle>kiwi::kiwirc</refentrytitle>
+    <manvolnum>1</manvolnum>
+    <refmiscinfo class="version">_KV_</refmiscinfo>
+    <refmiscinfo class="manual">KIWI Manualpage</refmiscinfo>
+  </refmeta>
+  <refnamediv>
+    <refname>KIWI::kiwirc</refname>
+    <refpurpose>Resource file for the Kiwi imaging system</refpurpose>
+  </refnamediv>
+
+  <refsect1 id="kiwi.kiwirc.description">
+    <title>Description</title>
+    <para>
+      The Kiwi imaging toolchain supports the use of an optional resource
+      file named .kiwirc located in the users home directory.
+    </para>
+    <para>
+      The file is sourced by a Perl process and thus Perl compatible syntax
+      for the supported variable sttings is required.
+    </para>
+
+  <example>
+	<title>Template</title>
+    <programlisting>
+$BasePath='/usr/share/kiwi';
+$Gzip='bzip2';
+$LogServerPort='4455';
+$System='/usr/share/kiwi/image';
+    </programlisting>
+  </example>
+  </refsect1>
+  
+  <refsect1 id="kiwi.kiwirc.settings">
+    <title>Supported resource settings</title>
+    <para>
+      Kiwi recognizes the BasePath, Gzip, LogServerPort, LuksCipher, and 
+      System settings in the .kiwirc file.
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term><optional>BasePath</optional></term>
+        <listitem>
+          <para>
+            Path to the location of the Kiwi image system components, such as
+            modules, tests, image descriptions etc.
+          </para>
+          <para>
+            The default value is /usr/share/kiwi
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><optional>Gzip</optional></term>
+        <listitem>
+          <para>
+            Specify the compression utility to be used for various compression
+            tasks during image generation.
+          </para>
+          <para>
+            The default value is gzip -9
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><optional>LogServerPort</optional></term>
+        <listitem>
+          <para>
+            Specify a port number for log message queing.
+          </para>
+          <para>
+            The default value is off
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><optional>LuksCipher</optional></term>
+        <listitem>
+          <para>
+            Specify the cipher for the encrypted Luks filesystem.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><optional>System</optional></term>
+        <listitem>
+          <para>
+            Specify the location of the Kiwi system image description.
+          </para>
+          <para>
+            The default value is the value of BasePath concatenated with
+            /image.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </refsect1>  
+</refentry>

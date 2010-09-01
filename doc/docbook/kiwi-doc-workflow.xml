@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+                         "http://www.docbook.org/xml/4.5/docbookx.dtd">
+
+<chapter id="chap.workflow">
+  <title>Basic Workflow</title>
+  <para>The creation of an image with KIWI is always divided into two
+    basic steps: the <emphasis>prepare</emphasis> and the
+      <emphasis>create</emphasis> step. The create step requires the
+    prepare step to be exited successfully. Within this first prepare
+    step, KIWI builds a new root tree or, in KIWI speak, a new unpacked
+    image. The building of a new root tree consists of the creation of
+    the directory specified to hold it and the installation of the
+    selected packages on it. The installation of software packages is
+    driven by a package manager. KIWI supports the smart package
+    managers. The prepare step executes the following major stages: </para>
+
+  <itemizedlist>
+    <listitem>
+      <formalpara>
+        <title>Creating Root Directory</title>
+        <para>To prevent accidental deletion of an existing root tree,
+          KIWI will stop with an error message if this folder already
+          exists, unless the option <option>––force-new-root</option> is
+          used in which case the existing root will be deleted. </para>
+      </formalpara>
+    </listitem>
+    <listitem>
+      <formalpara>
+        <title>Installing Packages</title>
+        <para>First the selected package manager (smart by default) is
+          instructed to use the repositories specified in the image
+          description file. Then the packages specified in the bootstrap
+          section are installed. These packages are installed externally
+          to the target root system (i.&nbsp;e. not chroot’ed) and
+          establish the initial environment so the rest of the process
+          may run chroot’ed. Essential packages in this section are
+          filesystem and glibc-locale. In practice you only need to
+          specify those two, since the rest of the packages will be
+          pulled because of the dependency system. To save space in your
+          image you could schedule a set of packages for deletion after
+          the package installation phase is over by listing them in the
+            <sgmltag>delete</sgmltag> section</para>
+      </formalpara>
+    </listitem>
+    <listitem>
+      <formalpara>
+        <title>Executing User Defined config.sh Script</title>
+        <para>At the end of the preperation stage the optional script
+          named <filename>config.sh</filename> is called. This script
+          should be used to configure the system which means, for
+          example, the activation of services. For a detailed
+          description what functions are already available to configure
+          the system, please refer to the KIWI::config.sh manual
+          page</para>
+      </formalpara>
+    </listitem>
+    <listitem>
+      <formalpara>
+        <title>Managing New Root Tree</title>
+        <para>At this point you can make changes on your unpacked image
+          so it fits your purpose better. Bear in mind that changes at
+          this point will be discarded and not repeated automatically if
+          you rerun the <emphasis>prepare</emphasis> phase unless you
+          include them in your original <filename>config.xml</filename>
+          file and/or <filename>config.sh</filename> script. Please also
+          note that the image description has been copied into the new
+          root below the directory <filename class="directory"
+              ><replaceable>new-root</replaceable>/image</filename>. Any
+          subsequent create step will read the image description
+          information from the new root tree and not from the original
+          image description location. According to this if you need to
+          change the image description data after the prepare call has
+          finished, you need to change it inside the new root tree as
+          well as in your original description directory to prevent
+          loosing the change when your root tree will be removed later
+          for some reason. </para>
+      </formalpara>
+    </listitem>
+  </itemizedlist>
+
+
+  <para>After the prepare step has finished successfully, a subsequent
+    building of an image file follows or, in KIWI speak, a new packed
+    image. The building of an image requires a successfully prepared new
+    root tree in the first place. Using this tree multiple image types
+    can be created. So to speak it’s possible to create a VMware image
+    and a Xen image from the same prepared root tree. The create step
+    executes the following major stages: </para>
+
+
+  <itemizedlist>
+    <listitem>
+      <formalpara>
+        <title>Executing User Defined Script images.sh</title>
+        <para>At the beginning of the creation stage the optional script
+          named <filename>images.sh</filename> is called. This script
+          has no distinctive use case like
+            <filename>config.sh</filename>. However, it is most often
+          used to remove packages which were pulled in by a dependency,
+          but are not really required for later use of the operating
+          system. For a detailed description what functions are already
+          available to <filename>images.sh</filename>, please refer to
+          the KIWI::images.sh manual page.</para>
+      </formalpara>
+    </listitem>
+    <listitem>
+      <formalpara>
+        <title>Creating Requested Image Type</title>
+        <para>What image type(s) a KIWI image supports depends on what
+          types has been setup in the main image description file
+            <filename>config.xml</filename>. At least one type must be
+          setup. The following picture shows what image types are
+          currently supported by KIWI:</para>
+      </formalpara>
+
+      <figure id="fig.imagetypes">
+        <title>Image Types</title>
+        <mediaobject>
+          <imageobject role="html">
+            <imagedata fileref="images/types.png" width="60%"/>
+          </imageobject>
+          <imageobject role="fo">
+            <imagedata fileref="images/types.png" width="60%"/>
+          </imageobject>
+        </mediaobject>
+      </figure>
+    </listitem>
+  </itemizedlist>
+
+  <para>Detailed information including a step by step guidance how to
+    call KIWI and how to make use of the result image can be found in
+    the image type specific sections later in this document. </para>
+
+  <sect1>
+    <title>Boot Process</title>
+    <para>Todays Linux systems are using a special boot image to control
+      the boot process. This boot image is called initrd. The Linux
+      kernel loads this compressed cpio initial ramdisk into RAM and
+      calls init or (if present) the program linuxrc. The KIWI image
+      system also takes care for the creation of this boot image. Each
+      image type has it’s own special boot code and shares the common
+      parts in a set of module functions. The image descriptions for the
+      boot images are provided by KIWI and thus the user has in almost
+      all cases no need to take care for the boot image. </para>
+
+    <figure>
+      <title>Boot Process</title>
+      <mediaobject>
+        <imageobject role="fo">
+          <imagedata fileref="images/activation.png" width="50%"/>
+        </imageobject>
+        <imageobject role="html">
+          <imagedata fileref="images/activation.png" width="50%"/>
+        </imageobject>
+      </mediaobject>
+    </figure>
+
+    <para>Furthermore, KIWI automatically creates this boot image along
+      with the requested image type. It does that by calling itself in a
+      prepare and create call. There is no difference in terms of the
+      description of such a boot image compared to the system image
+      description. The system image description is the one the user
+      creates and it represents the later operating system, whereas the
+      boot image only lives temporarly in RAM as long as the system
+      image will be activated. The boot image descriptions are stores in
+        <filename>/usr/share/kiwi/image/*boot</filename> and can be
+      build in the same way as the system image. A boot image without a
+      corresponding system image doesn’t make sense though. </para>
+  </sect1>
+
+  <sect1>
+    <title>Boot Parameters</title>
+    <para> When booting an image created by KIWI using one of the
+      provided boot images there are some useful kernel parameters
+      mainly meant for debugging purposes. Note the following parameters
+      are only useful if the KIWI initrd is used. In case of any other
+      initrd code written by yourself or simply because KIWI replaced
+      itself with the distribution specfic mkinitrd tool the parameters
+      might not have any effect. </para>
+
+    <itemizedlist>
+      <listitem>
+        <formalpara>
+          <title><parameter>kiwidebug=1</parameter></title>
+          <para>If the boot process encounters a fatal error, the system
+            normally reacts with a reboot after 120 seconds. This so
+            called <quote>exception</quote> can be influenced by the
+            kiwidebug parameter. If set to 1, the system will stop and
+            provide the user with a shell prompt instead of a reboot.
+            This shell contains some basic standard commands which could
+            help to find the cause of the problem. </para>
+        </formalpara>
+      </listitem>
+      <listitem>
+        <formalpara>
+          <title><parameter>kiwistderr=/dev/...</parameter></title>
+          <para>While the system boots, KIWI writes messages to tty1 and
+            tty3. The tty1 messages are highlevel information whereas
+            the tty3 messages represents the shell debug output and any
+            error messages from the commands called. With the kiwistderr
+            parameter one can combine both message sets and specify
+            where to write them to. It’s very common to set <filename
+              class="devicefile">/dev/console</filename> as possible
+            alternative to the default logging behaviour.</para>
+        </formalpara>
+      </listitem>
+    </itemizedlist>
+  </sect1>
+
+  <sect1>
+    <title>Common and Distribution Specific Code</title>
+    <para> KIWI has been developed to be usable for any Linux
+      distribution. However, each Linux distribution is different. On
+      one hand, KIWI provides common code </para>
+
+    <para>By design of a Linux distribution there are differences
+      between each of them. With KIWI we provide on one hand the code
+      which is common to all Linux distributions according to standards
+      and on the other hand there is also code where we have to
+      distinguish between the distribution type. </para>
+
+    <para>In case of such specific tasks which are almost all in the
+      area of booting, KIWI provides a set of functions which all
+      contains a distribution prefix. As this project uses SUSE Linux as
+      base distribution all required distribution specific tasks has
+      been implemented for SUSE. Other distributions could be missing.
+      The existing implementation for SUSE turns out to be adapted to
+      other distributions very easily though. </para>
+
+    <para>A look into the code therefore will show you functions which
+      are prefixed by <quote>suse</quote> as well as scripts whose names
+      starts with <quote>suse-</quote>. If you see such a prefix,
+      script, or function, you can be assured that this is something
+      distribution specific. If you plan to use KIWI with another
+      distribution than SUSE, you need to adapt it. For example, the
+      boot workflow is controlled by a program called
+        <command>linuxrc</command> which is in KIWI a script represented
+      by <command>suse-linuxrc</command>. Another example is the
+      function <function>suseStripKernel</function>, which is able to
+      remove everything but a specified list of kernel drivers from the
+      SUSE kernel. </para>
+
+    <para>The prefixed implementation allows us to integrate all the
+      distribution specific tasks into one project but this of course
+      requires the help and knowledge of the people who are familar with
+      their preferred Linux distribution. </para>
+  </sect1>
+</chapter>

@@ -1,0 +1,41 @@
+------------------------------------------------
+   README for KIWI Documentation 
+------------------------------------------------
+
+Author: Thomas Schraitle
+Date:   2010-09-01
+
+1. Preface
+The KIWI documentation is maintained as DocBook source in order
+to support different output formats like HTML, EPUB and the like.
+
+
+2. Consistency and Elements
+Consistency helps the user to identify certain aspects of the documentation 
+(for example, filenames, links etc.) The structure of the document should be 
+self-explanatory, for the inline text the following elements has been used:
+
+* XML attributes:     <sgmltag class="attribute>...</sgmltag>
+* Attribute values:   <sgmltag class="attvalue">...</sgmltag>
+* Start tags:         <sgmltag class="starttag">...</sgmltag>
+* Elements:           <sgmltag>...</sgmltag>
+* XML comments:       <sgmltag class="sgmlcomment">...</sgmltag>
+* Filenames:          <filename>...</filename>
+* Directories:        <filename class="directory">...</filename>
+* Commands:           <command>...</command>
+* Options:            <option>...</option>
+* Trademarks:         <trademark>...</trademark>
+* Listings:           <screen>...</screen>
+
+For more information, refer to the "DocBook Definitive Guide"[1] or
+the DocBook element reference[2]:
+
+  [1] http://www.docbook.org/tdg/en/html/docbook.html
+  [2] http://www.docbook.org/tdg/en/html/ref-elements.html
+
+
+3. Building the Book
+
+make
+
+

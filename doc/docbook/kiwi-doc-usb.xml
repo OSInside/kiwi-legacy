@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+                         "http://www.docbook.org/xml/4.5/docbookx.dtd">
+
+<chapter id="chap.usb">
+  <title>USB Image—Live-Stick System</title>
+  <para>A live USB stick image is a system on USB stick which allows you
+    to boot and run from this device without using any other storage
+    device of the computer. It is urgently required that the BIOS of the
+    system which you plug the stick in supports booting from USB stick.
+    Almost all new BIOS systems support that. The USB stick serves as OS
+    system disk in this case and you can read and write data onto it. </para>
+
+  <sect1>
+    <title>Building the suse-live-stick Example</title>
+    <para>The next example provided with KIWI is based on openSUSE 11.2
+      and uses the default plus x11 pattern. The operating system is
+      stored on a standard ext3 filesystem: </para>
+
+
+    <screen><command>cd</command> /usr/share/doc/packages/kiwi/examples
+<command>cd</command> suse-11.2
+<command>kiwi</command> –prepare ./suse-live-stick –root /tmp/mystick </screen>
+
+
+    <para>There are two possible image types which allows you to drive
+      the stick. Both are added into the <filename>config.xml</filename>
+      of this example image description. If you already have access to
+      the stick, use the first approach. In this case it is preferred
+      over the second one. </para>
+
+    <itemizedlist>
+      <listitem>
+        <para>The first image type named usb creates all required images
+          for booting the OS but requires you to plug in the stick and
+          let KIWI deploy the data onto this stick. </para>
+        <screen><command>kiwi</command> –create /tmp/mystick –type usb d /tmp/mystick-result </screen>
+      </listitem>
+      <listitem>
+        <para>The second image type named oem allows you to create a
+          virtual disk which represents a virtual disk geometry
+          including all partitions and boot information in one file. You
+          simply can <command>dd</command> this file on the stick. </para>
+
+        <screen><command>kiwi</command> –create /tmp/mystick –type oem -d /tmp/mystick-result </screen>
+      </listitem>
+    </itemizedlist>
+  </sect1>
+
+  <sect1>
+    <title>Using the Image</title>
+    <para>To use the created images deployed them on the USB stick. For
+      the first image type (usb) you need KIWI itself to be able to
+      deploy the image on the stick. The reason for this is that the usb
+      image type has created the boot and the system image but there is
+      no disk geometry or partition table available. KIWI creates a new
+      partition table on the stick and imports the created images as
+      follows: </para>
+
+
+    <screen><command>kiwi</command> –bootstick \
+    /tmp/mystick-result/ \
+    initrd-usbboot-suse-11.2.i686-2.1.1.splash.gz \
+    –bootstick-system \
+    /tmp/mystick-result/ \
+    suse-11.2-live-stick.i686-1.1.2</screen>
+
+
+    <para>In case of the second image type (oem) dump the raw data onto
+      a device. On Linux the most popular tool to do this is the
+        <command>dd</command> command. The OEM image is represented by
+      the file with the <filename class="extension">.raw</filename>
+      extension. As said, this is a virtual disk which already includes
+      partition information. However, this partition information does
+      not match the real USB stick geometry. This means, the KIWI boot
+      image (oemboot) has to adapt the disk geometry on first boot. To
+      deploy the image on the stick, run: </para>
+
+
+    <screen><command>dd</command> if=/tmp/mystick-result/ \
+      suse-11.2-live-stick.i686-1.1.2.raw 
+      of=/dev/<replaceable>stick-device</replaceable>  bs=32k</screen>
+
+
+    <para>Testing of the live stick can be done with a test machine
+      (booting from USB) or with a virtualization system. If you test
+      with a virtualization system, for example qemu, be aware that the
+      USB stick looks like a normal disk to the system. The KIWI boot
+      process searches for the USB stick to be able to mount the correct
+      storage device. However, in a virtual environment the disk doesn’t
+      appear as a USB stick. If your virtualisation solution doesn’t
+      provide a virtual BIOS which allows booting from USB stick, test
+      the stick on real hardware. </para>
+  </sect1>
+
+  <sect1>
+    <title>Flavours</title>
+    <para>USB sticks weren’t designed to serve as storage devices for
+      operating systems. By design of these nice little gadgets their
+      storage capacity is limited to only a few gigabytes. Therefore,
+      KIWI supports compressed filesystems on USB sticks too: </para>
+
+    <variablelist>
+      <varlistentry>
+        <term><sgmltag class="attribute">filesystem</sgmltag>="<sgmltag
+            class="attvalue">squashfs</sgmltag>"</term>
+        <listitem>
+          <para>Compresses the image using the <systemitem
+              class="filesystem">squashfs</systemitem> filesystem. The
+            boot process will automatically use aufs as overlay
+            filesystem to mount the complete tree read-write. For the
+            write part an additional ext2 partition will be created on
+            the stick. The support for this compression layer requires
+              <systemitem class="filesystem">squashfs</systemitem> and
+              <systemitem class="filesystem">aufs</systemitem> to be
+            present in the distribution KIWI has used to build the image
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><sgmltag class="attribute">filesystem</sgmltag>="<sgmltag
+            class="attvalue">clicfs</sgmltag>"</term>
+        <listitem>
+          <para>Creates a fuse based clicfs image and allows write
+            operations into a cow file. </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+
+    <sect2>
+      <title>Split Stick</title>
+      <para> If there is no overlay filesystem available, it is also
+        possible to define a split section in
+          <filename>config.xml</filename>. Use the split support to
+        split the image into a compressed read-only and a read-write
+        portion. To create a split stick the types needs to be adapted
+        as follows: </para>
+
+      <itemizedlist>
+        <listitem>
+          <para>Type setup for split usb type:</para>
+          <screen>&lt;type image="split" fsreadwrite="ext3"
+   fsreadonly="squashfs" boot="usbboot/suse-11.2"/&gt;</screen>
+        </listitem>
+        <listitem>
+          <para>Type setup for split oem type: </para>
+          <screen>&lt;type image="split" fsreadwrite="ext3"
+   fsreadonly="squashfs" boot="oemboot/suse-11.2"/&gt;</screen>
+        </listitem>
+      </itemizedlist>
+
+      <para>For both types, a split section inside the type section is
+        required which defines the read-write data. A good starting
+        point is to set <filename class="directory">/var</filename>, 
+        <filename class="directory">/home</filename>, and 
+        <filename class="directory">/etc</filename> as writable data. </para>
+
+
+      <screen> &lt;split&gt;
+  &lt;persistent&gt; 
+    <sgmltag class="sgmlcomment"> allow read/write access to: </sgmltag>
+    &lt;file name="/var"/&gt; 
+    &lt;file name="/var/*"/&gt; 
+    &lt;file name="/etc"/&gt; 
+    &lt;file name="/etc/*"/&gt; 
+    &lt;file name="/home"/&gt;
+    &lt;file name="/home/*"/&gt;
+    &lt;/persistent&gt; 
+&lt;/split&gt; </screen>
+
+
+      <para>If no split section is added the default split section from
+          <filename class="directory"
+          >/usr/share/kiwi/modules/</filename>, the file
+          <filename>KIWISplit.txt</filename> is used. </para>
+    </sect2>
+
+    <sect2>
+      <title>LVM Support</title>
+      <para>KIWI supports LVM, the Logical Volume Manager. In this mode,
+        the disk partition table includes one lvm partition and one
+        standard ext2 boot partition. KIWI creates the kiwiVG volume
+        group and adds logical volumes as they are needed and configured
+        according to the image type and filesystem. After booting, the
+        user has full control over the volume group and is free to
+        change, resize, or increase the group and the volumes inside.
+        Support for LVM has been added for all image types which are
+        disk based. This includes vmx, oem and usb. In order to use LVM
+        for the usb type just add the <option>--lvm</option> option as
+        part of <command>kiwi</command>
+        <option>--bootstick</option> deployment or add the attribute
+        lvm="true" as part of the <sgmltag>type</sgmltag> section in
+        your <filename>config.xml</filename> file. </para>
+
+
+      <para>The optional <sgmltag>lvmvolumes</sgmltag> section can be used to set one or
+        more top level directories into a separate volume. See 
+        <xref linkend="chap.description"/> for a
+        detailed explanation. </para>
+    </sect2>
+  </sect1>
+</chapter>

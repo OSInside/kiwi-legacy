@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+                         "http://www.docbook.org/xml/4.5/docbookx.dtd">
+
+<chapter id="chap.ec2">
+  <title>EC2 Image—Amazon Elastic Compute Cloud</title>
+  <para>The <trademark>Amazon Elastic Compute Cloud</trademark> (Amazon
+    EC2) web service provides you with the ability to execute arbitrary
+    applications in our computing environment. To use Amazon EC2 you
+    simply: </para>
+
+  <procedure>
+    <step>
+      <para>Create an Amazon Machine Image (AMI) containing all your
+        software, including your operating system and associated
+        configuration settings, applications, libraries, etc. Such an
+        AMI can be created by the KIWI ec2 image format. In order to do
+        that KIWI makes use of the tools provided by Amazon. Your build
+        system should have these tools installed. Due to license issues
+        we are not allowed to distribute the tools which means you need
+        to download, install and setup them from here:<ulink
+          url="http://aws.amazon.com/documentation/ec2/"/>
+      </para>
+    </step>
+    <step>
+      <para>Upload this AMI to the Amazon S3 (Amazon Simple Storage
+        Service) service. This gives us reliable, secure access to your
+        AMI. </para>
+    </step>
+    <step>
+      <para>Register your AMI with Amazon EC2. This allows us to verify
+        that your AMI has been uploaded correctly and to allocate a
+        unique identifier for it. </para>
+    </step>
+    <step>
+      <para>Use this AMI ID and the Amazon EC2 web service APIs to run,
+        monitor, and terminate as many instances of this AMI as
+        required. Currently, Amazon provides command line tools and Java
+        libraries but you may also directly access the SOAP-based API.
+      </para>
+    </step>
+  </procedure>
+
+  <para>Please note while instances are running, you are billed for the
+    computing and network resources that they consume. You should start
+    creating an ec2 with KIWI after you can make sure your system is
+    prepared for ec2 which means if you call the command
+      <command>ec2-describe-images</command>
+    <option>–a</option> you will get a valid output. </para>
+  <sect1>
+    <title>Building the suse-xen-guest Example for EC2</title>
+    <para>One example provided with KIWI is based on openSUSE 11.3 and
+      includes the base pattern plus the vim editor. </para>
+
+    <para>Before you run KIWI you need to include some of your ec2
+      account information into the image description
+        <filename>config.xml</filename> file. The box below shows the
+      values you need to adapt: </para>
+
+    <screen>&lt;ec2config&gt; ec2accountnr="12345678911"
+   ec2privatekeyfile="Path to EC2 private key file" 
+   ec2certfile="Path to EC2 public certificate file"
+&lt;/ec2config&gt;</screen>
+
+    <para>After that call KIWI as follows: </para>
+
+    <screen><command>cd</command> /usr/share/doc/packages/kiwi/examples 
+<command>cd</command> suse-11.3
+<command>kiwi</command> –prepare ./suse-xen-guest –add-profile 
+<command>ec2Flavour</command> –root /tmp/myec2 </screen>
+
+    <screen><command>kiwi</command> –create /tmp/myec2 –add-profile 
+<command>ec2Flavour</command> –type vmx -d /tmp/myec2-result</screen>
+  </sect1>
+
+  <sect1>
+    <title>Using the Image</title>
+    <para> The generated image needs to be transfered over to Amazon
+      which is done by the <command>ec2-upload-bundle</command> tool.
+      You can do this by calling: </para>
+
+    <screen><command>ec2-upload-bundle</command> -b myImages -a &lt;AWS Key ID&gt; -s
+      &lt;AWS secret Key ID&gt; -m /tmp/myec2/
+      suse-11.1-xen-guest.i686-1.1.2.ami.manifest.xml </screen>
+
+    <para>After this is done the image needs to be registered in order
+      to receive a so called AMI id which starts with ami- followed by a
+      random key sequence. To register call: </para>
+
+    <screen><command>ec2-register</command> myImages/<!--
+     --> suse-11.1-xen-guest.i686-1.1.2.ami.manifest.xml </screen>
+
+    <para>The result is the AMI id which you need to run an instance
+      from your image. The command
+        <command>ec2-describe-images</command> allows you to review your
+      registered images. Since you will be running an instance of a
+      public AMI, you will need to use a public/private keypair to
+      ensure that only you will have access. One half of this keypair
+      will be embedded into your instance, allowing you to login
+      securely without a password using the other half of the keypair.
+      Every keypair you generate requires a name. Be sure to choose a
+      name that is easy to remember, perhaps one that describes the
+      image’s content. For our example we’ll use the name gsg-keypair. </para>
+
+    <screen><command>ec2-add-keypair</command> gsg-keypair </screen>
+
+    <para>The private key returned needs to be saved in a local file so
+      that you can use it later. Using your favorite text editor, create
+      a file named id_rsa-gsg-keypair and paste everything between (and
+      including) the <literal>-----BEGIN RSA PRIVATE KEY-----</literal>
+      and <literal>-----END RSA PRIVATE KEY-----</literal> lines into
+      it. To review your keypairs call
+      <command>ec2-describe-keypairs</command>. </para>
+
+    <para>We are almost done now but to be able to run an instance it’s
+      required to select an appropriate AKI ID from the <emphasis>Amazon
+        Kernel Image IDs</emphasis> table below. For this host,
+        <emphasis>aki-407d9529</emphasis> is being chosen, because we
+      are bundling an AMI representing a virtual disk with PVGrub. If
+      the table below is outdated just check the current ID list at
+      Amazon directly </para>
+
+
+    <informaltable>
+      <tr>
+        <td>
+          <para>
+            <emphasis role="bold">AKI</emphasis>
+          </para>
+        </td>
+        <td>
+          <para>
+            <emphasis role="bold">Name</emphasis>
+          </para>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <para>aki-407d9529 </para>
+        </td>
+        <td>
+          <para>
+            ec2-public-images/pv-grub-hd0-V1.01-i386.gz.manifest.xml
+          </para>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <para>aki-427d952b </para>
+        </td>
+        <td>
+          <para>
+            ec2-public-images/pv-grub-hd0-V1.01-x86_64.gz.manifest.xml
+          </para>
+        </td>
+      </tr>
+    </informaltable>
+
+    <para>Fire up your new ec2 instance with the following command: </para>
+
+    <screen><command>ec2-run-instances</command> ami-... –kernel aki-407d9529 -k<!--
+     --> gsg-keypair </screen>
+
+    <para>To check the state of your instance(s) call the 
+      command <command>ec2-describe-instances</command>.</para>
+
+    <para>If you see your instance at the status: <emphasis 
+        >running</emphasis> you can login into it. If you can’t make
+      sure you have allowed port 22 to be available </para>
+
+    <screen><command>ec2-authorize</command> default -p 22 </screen>
+
+    <para>Congratulations ! You made it and can now use Amazons storage
+      and computing power. </para>
+  </sect1>
+</chapter>

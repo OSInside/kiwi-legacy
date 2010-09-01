@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+                         "http://www.docbook.org/xml/4.5/docbookx.dtd">
+<book lang="en"> 
+  <title>openSUSE-KIWI Image System</title>
+  <subtitle>Cookbook</subtitle>
+  <bookinfo>
+    <releaseinfo>Version <xi:include href="Revision.txt" parse="text" xmlns:xi="http://www.w3.org/2001/XInclude"/></releaseinfo>
+    <authorgroup>
+      <author>
+        <firstname>Marcus</firstname>
+        <surname>Schäfer</surname>
+        <contrib>Project, Design and Implementation</contrib>
+        <email>ms@suse.de</email>
+        <address>
+          SUSE LINUX Products GmbH
+          <street>Maxfeldstrasse 5</street>
+          <postcode>90409</postcode> <city>Nürnberg</city>
+        </address>
+      </author>
+      <othercredit>
+        <firstname>Thomas</firstname>
+        <surname>Schraitle</surname>
+        <contrib>Various text improvements, migration to DocBook</contrib>
+        <email>toms@suse.de</email>
+      </othercredit>
+      <corpcredit>SUSE LINUX Products GmbH</corpcredit>
+    </authorgroup>
+    <revhistory>
+      <revision>
+        <revnumber>KIWI V4.58</revnumber>
+        <date>2010-08-31</date>
+        <authorinitials>toms</authorinitials>
+        <revdescription>
+          <para>First migration to DocBook</para>
+        </revdescription>
+      </revision>
+    </revhistory>
+    
+    <xi:include href="kiwi-doc-license.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+    
+    <mediaobject>
+      <imageobject role="html">
+        <imagedata fileref="cover.png"/>
+      </imageobject>
+    </mediaobject>
+  </bookinfo>
+
+  <xi:include href="kiwi-doc-intro.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+  <xi:include href="kiwi-doc-workflow.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+  <xi:include href="kiwi-doc-description.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+  <xi:include href="kiwi-doc-appliance.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+  <xi:include href="kiwi-doc-maintenance.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+  <xi:include href="kiwi-doc-migrate.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+  <xi:include href="kiwi-doc-source.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+  <xi:include href="kiwi-doc-iso.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+  <xi:include href="kiwi-doc-usb.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+  <xi:include href="kiwi-doc-vmx.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+  <xi:include href="kiwi-doc-pxe.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+  <xi:include href="kiwi-doc-oem.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+  <xi:include href="kiwi-doc-xen.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+  <xi:include href="kiwi-doc-ec2.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+  <xi:include href="kiwi-doc-testing.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+  <xi:include href="kiwi-doc-appendix.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+  
+  <!--<index/>-->
+</book>
