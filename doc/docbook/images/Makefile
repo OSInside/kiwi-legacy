@@ -3,25 +3,25 @@ DEST=activation.png description.png intro.png maintain.png nbboot.png source.png
 all:${DEST}
 
 activation.png:activation.fig
-	fig2dev -L png activation.fig activation.png
+	convert activation.fig -rotate 90 -trim activation.png
 
 description.png:description.fig
-	fig2dev -L png description.fig description.png
+	convert description.fig -rotate 90 -trim description.png
 
 intro.png:intro.fig
-	fig2dev -L png intro.fig intro.png
+	convert intro.fig -rotate 90 -trim intro.png
 
 maintain.png:maintain.fig
-	fig2dev -L png maintain.fig maintain.png
+	convert maintain.fig -trim maintain.png
 
 nbboot.png:nbboot.fig
-	fig2dev -L png nbboot.fig nbboot.png
+	convert nbboot.fig -trim nbboot.png
 
 source.png:source.fig
-	fig2dev -L png source.fig source.png
+	convert source.fig -rotate 90 -trim source.png
 
 types.png:types.fig
-	fig2dev -L png types.fig types.png
+	convert types.fig -rotate 90 -trim types.png
 
 clean:
 	rm -f *.png
