@@ -45,6 +45,7 @@ test -z "$UTIMER"             && export UTIMER=0
 test -z "$VGROUP"             && export VGROUP=kiwiVG
 test -z "$PARTED_HAVE_ALIGN"  && export PARTED_HAVE_ALIGN=0
 test -z "$PARTED_HAVE_MACHINE"&& export PARTED_HAVE_MACHINE=0
+test -z "$DHCPCD_HAVE_PERSIST"&& export DHCPCD_HAVE_PERSIST=1
 if [ -x /sbin/blogd ];then
 	test -z "$CONSOLE"            && export CONSOLE=/dev/console
 	test -z "$REDIRECT"           && export REDIRECT=/dev/tty1
@@ -57,6 +58,9 @@ if parted -h | grep -q '\-\-machine';then
 fi
 if [ $PARTED_HAVE_MACHINE -eq 0 ];then
 	export PARTITIONER=sfdisk
+fi
+if dhcpcd -p 2>&1 | grep -q 'Usage';then
+	export DHCPCD_HAVE_PERSIST=0
 fi
 
 #======================================
@@ -3094,6 +3098,7 @@ function setupNetwork {
 	local index=0
 	local hwicmd=/usr/sbin/hwinfo
 	local iface=eth0
+	local opts="--noipv4ll -p"
 	for i in `$hwicmd --netcard`;do
 		IFS=$IFS_ORIG
 		if echo $i | grep -q "HW Address:";then
@@ -3130,7 +3135,14 @@ function setupNetwork {
 		done
 	fi
 	export PXE_IFACE=$iface
-	if ! dhcpcd --noipv4ll -p $PXE_IFACE 1>&2;then
+	if $DHCPCD_HAVE_PERSIST -eq 0;then
+		# /.../
+		# older version of dhcpd which doesn't have the
+		# options we want to pass
+		# ----
+		unset opts
+	fi
+	if ! dhcpcd $opts $PXE_IFACE 1>&2;then
 		systemException \
 			"Failed to setup DHCP network interface !" \
 		"reboot"
