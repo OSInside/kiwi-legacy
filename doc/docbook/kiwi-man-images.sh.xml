@@ -44,7 +44,7 @@
       with an exit code != 0 kiwi will exit with an error too.
     </para>
   <example>
-    <title>Template</title>
+    <title>Template for images.sh</title>
     <programlisting>
 #======================================
 # Functions...

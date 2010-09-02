@@ -1,6 +1,6 @@
 DB=/usr/share/xml/docbook/stylesheet/nwalsh/current/
 MAIN=kiwi-doc.xml
-SOURCE=kiwi-doc-*.xml kiwi-man-*.xml
+SOURCE=kiwi-doc.xml kiwi-doc-*.xml kiwi-man-*.xml
 FIG=images/*.fig
 
 html:kiwi.html

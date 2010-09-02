@@ -40,7 +40,7 @@
     </para>
 
   <example>
-	<title>Template</title>
+	<title>Template for .kiwi.rc</title>
     <programlisting>
 $BasePath='/usr/share/kiwi';
 $Gzip='bzip2';

@@ -46,7 +46,7 @@
     </para>
 
   <example>
-    <title>Template</title>
+    <title>Template for config.sh</title>
     <programlisting>
 #======================================
 # Functions...

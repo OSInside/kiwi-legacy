@@ -70,5 +70,5 @@
   <xi:include href="kiwi-doc-testing.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
   <xi:include href="kiwi-doc-appendix.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
   
-  <!--<index/>-->
+  <index/>
 </book>
