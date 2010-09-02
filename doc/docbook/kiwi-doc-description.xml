@@ -16,10 +16,10 @@
     <title>Image Description Directory</title>
     <mediaobject>
       <imageobject role="fo">
-        <imagedata fileref="images/description.png" width="50%"/>
+        <imagedata fileref="images/description.png"/>
       </imageobject>
       <imageobject role="html">
-        <imagedata fileref="images/description.png" width="50%"/>
+        <imagedata fileref="images/description.png"/>
       </imageobject>
     </mediaobject>
   </figure>
@@ -385,21 +385,6 @@
         </varlistentry>
         <varlistentry>
           <term><sgmltag class="attribute">image</sgmltag>="<sgmltag
-              class="attvalue">ec2</sgmltag>"</term>
-          <listitem>
-            <para>Setting the image attribute value to ec2 causes the
-              generation of an Amazon Machine Image (AMI) for the AWS
-              (Amazon Web Services) Elastic Compute Cloud (EC2). The AMI
-              is an image comparable to a VMware or Xen guest image. It
-              can be transferred to the AWS Simple Storage Service and
-              used within the AWS infrastructure. Configuration of the
-              AMI is accomplished with the optional
-                <sgmltag>ec2config</sgmltag> element, specified as a
-              child of the <sgmltag>type</sgmltag> element. </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><sgmltag class="attribute">image</sgmltag>="<sgmltag
               class="attvalue">iso</sgmltag>"</term>
           <listitem>
             <para>Specify the key-value pair <sgmltag class="attribute"
@@ -566,20 +551,6 @@
                 <sgmltag>machine</sgmltag> child element to specify
               appropriate configuration of the virtual disk system.
             </para>
-          </listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><sgmltag class="attribute">image</sgmltag>="<sgmltag
-              class="attvalue">xen</sgmltag>"</term>
-          <listitem>
-            <para>Use this type to create a Xen para-virtual guest
-              image. The <sgmltag class="attribute">filesystem</sgmltag>
-              and <sgmltag class="attribute">boot</sgmltag>="<sgmltag
-                class="attvalue">xenboot/suse-*</sgmltag>" attributes
-              specify the filesystem type used and select the proper
-              boot image, respectively. Use the
-                <sgmltag>machine</sgmltag> child element to specify
-              configuration options of the Xen guest image. </para>
           </listitem>
         </varlistentry>
       </variablelist>

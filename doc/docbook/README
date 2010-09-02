@@ -37,5 +37,6 @@ the DocBook element reference[2]:
 3. Building the Book
 
 make
+make pdf
 
 
