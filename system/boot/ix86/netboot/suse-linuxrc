@@ -580,6 +580,9 @@ else
 		for m in nfs lockd sunrpc;do
 			modprobe -i $m
 		done
+		if [ -z "$nfsRootServer" ];then
+			nfsRootServer=$SERVER
+		fi
 		Echo "Mounting NFS root system: $nfsRootServer:$nfsRootDevice..."
 		imageRootDevice="-o nolock,rw $nfsRootServer:$nfsRootDevice"
 		if [ ! -z "$COMBINED_IMAGE" ] || [ ! -z "$UNIONFS_CONFIG" ];then
@@ -610,6 +613,9 @@ else
 			esac
 			done
 		done
+		if [ -z "$nbdServer" ];then
+			nbdServer=$SERVER
+		fi
 		if [ -z "$nbdDevice" ];then
 			nbdDevice="/dev/nbd0"
 		fi
