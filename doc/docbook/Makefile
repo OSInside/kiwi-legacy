@@ -1,26 +1,33 @@
 DB=/usr/share/xml/docbook/stylesheet/nwalsh/current/
 MAIN=kiwi-doc.xml
 SOURCE=kiwi-doc-*.xml kiwi-man-*.xml
+FIG=images/*.fig
 
-all:kiwi.html kiwi.pdf
+html:kiwi.html
 
-.tmp.xml:
-	@echo "Validating ..."
-	xmllint --xinclude --postvalid --output .tmp.xml ${MAIN}
+pdf:kiwi.pdf
 
-images/*.png:images/*.fig
+images/*.png:${FIG}
 	make -C images all
 
-kiwi.html:.tmp.xml images/*.png ${SOURCE}
-	@echo "Transforming HTML..."
-	xsltproc --xinclude \
-		--stringparam html.stylesheet susebooks.css \
-		--output ./kiwi.html \
-		${DB}/html/docbook.xsl ${MAIN}
+.tmp.xml:${SOURCE} images/*.png
+	@echo "Validating..."
+	xmllint --xinclude --postvalid --output .tmp.xml ${MAIN}
+	@echo "Resolving XIncludes..."
+	xsltproc --xinclude --output .tmp.xml \
+		xslt/profiling/db4index-profile.xsl ${MAIN}
 
-kiwi.pdf:.tmp.xml images/*.png ${SOURCE}
-	java -jar /usr/share/java/saxon.jar -o kiwi.fo .tmp.xml ${DB}/fo/docbook.xsl
-	fop -fo kiwi.fo -pdf kiwi.pdf
+kiwi.fo:.tmp.xml
+	xsltproc --output kiwi.fo xslt/fo/docbook.xsl .tmp.xml
+
+kiwi.html:.tmp.xml
+	@echo "Transforming HTML..."
+	xsltproc --stringparam html.stylesheet susebooks.css \
+		--output ./kiwi.html ${DB}/html/docbook.xsl .tmp.xml
+
+kiwi.pdf:.tmp.xml kiwi.fo
+	@echo "Transforming PDF..."
+	fop kiwi.fo kiwi.pdf
 
 clean:
 	rm -f .tmp.xml
