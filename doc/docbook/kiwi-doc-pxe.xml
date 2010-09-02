@@ -528,9 +528,8 @@ DISK=/dev/sda</screen>
         <varlistentry>
           <term>NFSROOT</term>
           <listitem>
-            <para>Mount the system image root filesystem remotely via NFS<indexterm>
-                <primary/>
-              </indexterm> (Network File System). This means there is a
+            <para>Mount the system image root filesystem remotely via NFS
+              (Network File System). This means there is a
               server which exports the root filesystem of the network
               client in such a way that the client can mount it
               read/write. In order to do that, the boot image must know

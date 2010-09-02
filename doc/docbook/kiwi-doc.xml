@@ -46,7 +46,7 @@
     
     <xi:include href="kiwi-doc-license.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
     
-    <mediaobject>
+    <mediaobject role="cover">
       <imageobject role="html">
         <imagedata fileref="cover.png"/>
       </imageobject>

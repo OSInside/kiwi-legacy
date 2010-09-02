@@ -66,10 +66,10 @@
 
     <screen><command>cd</command> /usr/share/doc/packages/kiwi/examples 
 <command>cd</command> suse-11.3
-<command>kiwi</command> –prepare ./suse-xen-guest –add-profile 
-<command>ec2Flavour</command> –root /tmp/myec2 </screen>
+<command>kiwi</command> --prepare ./suse-xen-guest –-add-profile \
+  ec2Flavour -–root /tmp/myec2 </screen>
 
-    <screen><command>kiwi</command> –create /tmp/myec2 –add-profile 
+    <screen><command>kiwi</command> --create /tmp/myec2 –add-profile 
 <command>ec2Flavour</command> –type vmx -d /tmp/myec2-result</screen>
   </sect1>
 
