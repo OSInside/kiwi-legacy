@@ -38,5 +38,6 @@ the DocBook element reference[2]:
 
 make
 make pdf
+make man
 
 
