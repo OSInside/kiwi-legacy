@@ -6,6 +6,7 @@
     href="http://docbook.sourceforge.net/release/xsl/current/html/docbook.xsl"/>
   
   <xsl:include href="sections.xsl"/>
+  <xsl:include href="formal.xsl"/>
 
  <!-- Name of the stylesheet(s) to use in the generated HTML  -->
  <xsl:param name="html.stylesheet">susebooks.css</xsl:param>
@@ -25,6 +26,7 @@
  <!-- Do section labels include the component label?          -->
  <xsl:param name="section.label.includes.component.label" select="1"/>
 
- 
+ <!-- Output permalinks?                                      -->
+ <xsl:param name="generate.permalink" select="1"/>
 
 </xsl:stylesheet>

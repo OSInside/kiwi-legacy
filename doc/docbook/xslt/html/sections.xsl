@@ -2,7 +2,6 @@
 <xsl:stylesheet version="1.0" 
    xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
-<xsl:param name="generate.permalink" select="1"/>
 
 <xsl:template name="permalink">
   <xsl:param name="id"/>
@@ -29,9 +28,9 @@
   <xsl:param name="title"/>
   <xsl:param name="class" select="'title'"/>
 
-  <xsl:message>Section <xsl:value-of select="$level"/>: <xsl:value-of
+  <!--<xsl:message>Section <xsl:value-of select="$level"/>: <xsl:value-of
     select="normalize-space($title)"/>
-  </xsl:message>
+  </xsl:message>-->
 
   <xsl:variable name="id">
     <xsl:choose>
