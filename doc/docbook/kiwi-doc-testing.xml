@@ -9,8 +9,22 @@
     subdirectories below <filename>/usr/share/kiwi/tests</filename>. To run the testsuite
     call KIWI as follows: </para>
 
-  <screen><command>kiwi</command> testsuite &lt;image-root&gt;<!-- 
-  --> [ test name test name ...] </screen>
+  <!-- kiwi testsuite <image-root> [ test name test name ...]  -->
+  <cmdsynopsis>
+    <command>kiwi</command> 
+    <arg choice="plain">testsuite</arg> 
+    <arg choice="plain"><replaceable>image-root</replaceable></arg>
+    <group choice="opt" rep="repeat">
+      <group choice="plain">
+        <arg choice="plain">test</arg>
+        <option>name</option>
+      </group>
+      <group choice="plain">
+        <arg choice="plain">test</arg>
+        <option>name</option>
+      </group>
+    </group>
+  </cmdsynopsis>
 
   <para>If not test names are set the default tests rpm and ldd run. The
     name of a test corresponds with the name of the directory the test
@@ -39,10 +53,9 @@
       The following example shows the basic structure of the
         <sgmltag>rpm</sgmltag> test: </para>
 
-    <screen> &lt;test_case name="rpm" summary="check rpm database and
-      verify all rpms" 
-      description="check if rpm db is present, run
-      rpm‘s build-in Verify method" </screen>
+    <screen>&lt;test_case name="rpm" 
+  summary="check rpm database and verify all rpms" 
+  description="check if rpm db is present, run rpm‘s build-in Verify method" </screen>
 
     <screen>&lt;requirements&gt; 
   &lt;req type="directory"&gt;/var/lib/rpm&lt;/req&gt; 

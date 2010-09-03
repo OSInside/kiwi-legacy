@@ -479,6 +479,24 @@ span.bg-part-current,span.bg-chapter-current,span.bg-appendix-current,span.bg-ar
   padding:1pt 3pt;
 }
 
+.sgmltag-attribute
+{
+  background-color:transparent;
+  color: navy;
+}
+
+.sgmltag-attvalue
+{
+  background-color:transparent;
+  color: brown;
+}
+
+.sgmltag-sgmlcomment
+{
+  background-color:transparent;
+  color: orange;
+}
+
 div.navheader table td,div.navfooter table td
 {
   text-align:left;
@@ -614,28 +632,6 @@ div.authorgroup,div p.edition
   font-style:italic;
 }
 
-.sgmltag-attribute
-{
-  background-color:transparent;
-  color: navy;
-}
-
-.sgmltag-attvalue
-{
-  background-color:transparent;
-  color: brown;
-}
-
-.sgmltag-sgmlcomment
-{
-  background-color:transparent;
-  color: orange;
-}
-
-
-
-
-
 div.logo,.bgnavi,.breadcrumbs-sep
 {
   display:none;
@@ -674,3 +670,6 @@ a:hover{background-color:#f4f6f0; text-shadow:0px 1px 0px #fff;  -moz-border-rad
 .navfooter .breadcrumbs strong a:last-child, .navheader .breadcrumbs strong a:last-child{  float:right;}
 
 .navheader .breadcrumbs p a:last-child{float:right}
+
+pre img{border: none !important; padding:0em; -moz-box-shadow:none; 
+-webkit-box-shadow:none; -box-shadow:none;}

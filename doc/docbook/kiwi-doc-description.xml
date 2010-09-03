@@ -60,7 +60,7 @@
             <emphasis>after</emphasis> the installation of all the image
           packages. The entire directory is copied into the root of the
           image tree using <command>cp</command>
-          <option>–a</option>. </para>
+          <option>-a</option>. </para>
       </listitem>
     </varlistentry>
     <varlistentry>
@@ -1759,7 +1759,7 @@ $(<command>rpm</command> -q ‘baseGetPackagesForDeletion‘ | <command>grep</co
           arch attribute to specify a comma separated list of allowed
           architectures. Such a package is only installed if the build
           systems architecture (<command>uname</command>
-          <option>–m</option>) matches one of the specified values of
+          <option>-m</option>) matches one of the specified values of
           the arch attribute. </para>
       </sect3>
 

@@ -35,7 +35,7 @@
               <screen>ATFTPD_OPTIONS="––daemon ––no-multicast"</screen>
             </listitem>
             <listitem>
-              <screen>ATFTPD_DIRECTORY="/srv/tftpboot" </screen>
+              <screen>ATFTPD_DIRECTORY="/srv/tftpboot"</screen>
             </listitem>
           </itemizedlist>
         </step>
@@ -80,8 +80,7 @@ subnet 192.168.100.0 netmask 255.255.255.0 {
    filename "pxelinux.0";
    next-server 192.168.100.2;
    range dynamic-bootp 192.168.100.5 192.168.100.20;
-}
-</screen>
+}</screen>
         </step>
         <step>
           <para>Edit the file <filename>/etc/sysconfig/dhcpd</filename>
@@ -106,8 +105,8 @@ subnet 192.168.100.0 netmask 255.255.255.0 {
 
     <screen><command>cd</command> /usr/share/doc/packages/kiwi/examples
 <command>cd</command> suse-11.2
-<command>kiwi</command> –prepare ./suse-pxe-client –root /tmp/mypxe </screen>
-    <screen>kiwi –create /tmp/mypxe –type pxe -d /tmp/mypxe-result</screen>
+<command>kiwi</command> –-prepare ./suse-pxe-client -–root /tmp/mypxe</screen>
+    <screen><command>kiwi</command> -–create /tmp/mypxe –-type pxe -d /tmp/mypxe-result</screen>
   </sect1>
 
   <sect1>
@@ -174,7 +173,8 @@ LABEL Local-Boot
         <filename>config.<replaceable>MAC</replaceable></filename> (or
         <filename>config.default</filename>) file. When a new client
       boots up and there is no client configuration file the new client
-      is registered by uploading a control file to the tftp server. The
+      is registered by uploading a control file to the <systemitem
+        class="server">TFTP</systemitem> server. The
       following sections informs about the control and the configuration
       file. </para>
 
@@ -203,7 +203,7 @@ LABEL Local-Boot
         previously installed netboot clients. New netboot clients are
         immediately registered and a new configuration file with the
         corresponding MAC address is created. The standard case for the
-        deployment of a pxe image is one image file based on a
+        deployment of a PXE image is one image file based on a
         read-write filesystem which is stored onto a local storage
         device of the client. Below, find an example to cover this case. </para>
 
@@ -220,7 +220,7 @@ DISK=device</screen>
 
       <variablelist>
         <varlistentry>
-          <term>IMAGE</term>
+          <term><varname>IMAGE</varname></term>
           <listitem>
             <para>Specifies which image (name) should be loaded with
               which version (version) and to which storage device
@@ -284,7 +284,7 @@ DISK=device</screen>
           </listitem>
         </varlistentry>
         <varlistentry>
-          <term>CONF</term>
+          <term><varname>CONF</varname></term>
           <listitem>
             <para>Specifies a comma-separated list of source:target
               configuration files. The source (src) corresponds to the
@@ -294,7 +294,7 @@ DISK=device</screen>
           </listitem>
         </varlistentry>
         <varlistentry>
-          <term>PART</term>
+          <term><varname>PART</varname></term>
           <listitem>
             <para>Specifies the partitioning data. The comma-separated
               list must contain the size (size), the type number (id),
@@ -329,7 +329,7 @@ DISK=device</screen>
           </listitem>
         </varlistentry>
         <varlistentry>
-          <term>DISK</term>
+          <term><varname>DISK</varname></term>
           <listitem>
             <para>Specifies the hard disk. Used only with PART and
               defines the device via which the hard disk can be
@@ -338,7 +338,7 @@ DISK=device</screen>
           </listitem>
         </varlistentry>
         <varlistentry>
-          <term>RELOAD_IMAGE</term>
+          <term><varname>RELOAD_IMAGE</varname></term>
           <listitem>
             <para>If set to a non-empty string, this forces the
               configured image to be loaded from the server even if the
@@ -348,7 +348,7 @@ DISK=device</screen>
           </listitem>
         </varlistentry>
         <varlistentry>
-          <term>RELOAD_CONFIG</term>
+          <term><varname>RELOAD_CONFIG</varname></term>
           <listitem>
             <para>If set to a non-empty string, this forces all config
               files to be loaded from the server. The primary purpose of
@@ -357,7 +357,7 @@ DISK=device</screen>
           </listitem>
         </varlistentry>
         <varlistentry>
-          <term>COMBINED_IMAGE</term>
+          <term><varname>COMBINED_IMAGE</varname></term>
           <listitem>
             <para>If set to an non-empty string, indicates that the both
               image specified needs to be combined into one bootable
@@ -366,7 +366,7 @@ DISK=device</screen>
           </listitem>
         </varlistentry>
         <varlistentry>
-          <term>KIWI_INITRD</term>
+          <term><varname>KIWI_INITRD</varname></term>
           <listitem>
             <para>Specifies the KIWI initrd to be used for local boot of
               the system. The variables value must be set to the name of
@@ -382,7 +382,7 @@ DISK=device</screen>
           </listitem>
         </varlistentry>
         <varlistentry>
-          <term>UNIONFS_CONFIG</term>
+          <term><varname>UNIONFS_CONFIG</varname></term>
           <listitem>
             <para>For netboot and usbboot images there is the
               possibility to use unionfs or aufs as container filesystem
@@ -423,7 +423,7 @@ DISK=/dev/sda</screen>
           </listitem>
         </varlistentry>
         <varlistentry>
-          <term>KIWI_KERNEL_OPTIONS</term>
+          <term><varname>KIWI_KERNEL_OPTIONS</varname></term>
           <listitem>
             <para>Specifies additional command line options to be passed
               to the kernel when booting from disk. For instance, to
@@ -433,7 +433,7 @@ DISK=/dev/sda</screen>
           </listitem>
         </varlistentry>
         <varlistentry>
-          <term>KIWI_BOOT_TIMEOUT</term>
+          <term><varname>KIWI_BOOT_TIMEOUT</varname></term>
           <listitem>
             <para>Specifies the number of seconds to wait at the grub
               boot screen when doing a local boot. The default is 10.
@@ -441,7 +441,7 @@ DISK=/dev/sda</screen>
           </listitem>
         </varlistentry>
         <varlistentry>
-          <term>NBDROOT</term>
+          <term><varname>NBDROOT</varname></term>
           <listitem>
             <para>Mount the system image root filesystem remotely via
               NBD (Network Block Device). This means there is a server
@@ -478,7 +478,7 @@ DISK=/dev/sda</screen>
           </listitem>
         </varlistentry>
         <varlistentry>
-          <term>AOEROOT</term>
+          <term><varname>AOEROOT</varname></term>
           <listitem>
             <para>Mount the system image root filesystem remotely via
               AoE (ATA over Ethernet). This means there is a server
@@ -526,7 +526,7 @@ DISK=/dev/sda</screen>
           </listitem>
         </varlistentry>
         <varlistentry>
-          <term>NFSROOT</term>
+          <term><varname>NFSROOT</varname></term>
           <listitem>
             <para>Mount the system image root filesystem remotely via NFS
               (Network File System). This means there is a
@@ -551,7 +551,7 @@ UNIONFS_CONFIG=/dev/ram1,nfs,aufs # write to RAM</screen>
           </listitem>
         </varlistentry>
         <varlistentry>
-          <term>KIWI_INITRD</term>
+          <term><varname>KIWI_INITRD</varname></term>
           <listitem>
             <para>Specifies the KIWI initrd to be used for a local boot
               of the system. The value must be set to the name of the
@@ -567,7 +567,7 @@ UNIONFS_CONFIG=/dev/ram1,nfs,aufs # write to RAM</screen>
           </listitem>
         </varlistentry>
         <varlistentry>
-          <term>KIWI_KERNEL</term>
+          <term><varname>KIWI_KERNEL</varname></term>
           <listitem>
             <para>Specifies the kernel to be used for a local boot of
               the system The same path rules as described for
@@ -578,7 +578,7 @@ UNIONFS_CONFIG=/dev/ram1,nfs,aufs # write to RAM</screen>
           </listitem>
         </varlistentry>
         <varlistentry>
-          <term>ERROR_INTERRUPT</term>
+          <term><varname>ERROR_INTERRUPT</varname></term>
           <listitem>
             <para>Specifies a message which is displayed during first
               deployment. Along with the message a shell is provided.

@@ -20,9 +20,9 @@
       11.2 and includes the base and KDE patterns. </para>
 
     <screen><command>cd</command> /usr/share/doc/packages/kiwi/examples cd suse-11.2
-<command>kiwi</command> –prepare ./suse-live-iso –root /tmp/myiso </screen>
+<command>kiwi</command> --prepare ./suse-live-iso -–root /tmp/myiso </screen>
 
-    <screen><command>kiwi</command> –create /tmp/myiso –type iso -d /tmp/myiso-result</screen>
+    <screen><command>kiwi</command> –-create /tmp/myiso –-type iso -d /tmp/myiso-result</screen>
   </sect1>
 
   <sect1>
@@ -43,7 +43,7 @@
           example: </para>
 
         <screen><command>cd</command> /tmp/myiso-result
-<command>qemu</command> -cdrom ./suse-11.2-live-iso.i686-2.5.1.iso -m 256 </screen>
+<command>qemu</command> -cdrom ./suse-11.2-live-iso.i686-2.5.1.iso -m 256</screen>
       </listitem>
     </itemizedlist>
   </sect1>

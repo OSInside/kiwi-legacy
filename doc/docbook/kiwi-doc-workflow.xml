@@ -21,7 +21,7 @@
         <title>Creating Root Directory</title>
         <para>To prevent accidental deletion of an existing root tree,
           KIWI will stop with an error message if this folder already
-          exists, unless the option <option>––force-new-root</option> is
+          exists, unless the option <option>--force-new-root</option> is
           used in which case the existing root will be deleted. </para>
       </formalpara>
     </listitem>
@@ -51,8 +51,8 @@
           should be used to configure the system which means, for
           example, the activation of services. For a detailed
           description what functions are already available to configure
-          the system, please refer to the KIWI::config.sh manual
-          page</para>
+          the system, refer to the <xref
+            linkend="ref.kiwi.config.sh"/> man page.</para>
       </formalpara>
     </listitem>
     <listitem>
@@ -100,8 +100,8 @@
           used to remove packages which were pulled in by a dependency,
           but are not really required for later use of the operating
           system. For a detailed description what functions are already
-          available to <filename>images.sh</filename>, please refer to
-          the KIWI::images.sh manual page.</para>
+          available to <filename>images.sh</filename>, refer to
+          the <xref linkend="ref.kiwi.images.sh"/> man page.</para>
       </formalpara>
     </listitem>
     <listitem>

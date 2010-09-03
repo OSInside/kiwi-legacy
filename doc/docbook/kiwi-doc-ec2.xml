@@ -67,10 +67,10 @@
     <screen><command>cd</command> /usr/share/doc/packages/kiwi/examples 
 <command>cd</command> suse-11.3
 <command>kiwi</command> --prepare ./suse-xen-guest –-add-profile \
-  ec2Flavour -–root /tmp/myec2 </screen>
+  ec2Flavour -–root /tmp/myec2</screen>
 
-    <screen><command>kiwi</command> --create /tmp/myec2 –add-profile 
-<command>ec2Flavour</command> –type vmx -d /tmp/myec2-result</screen>
+    <screen><command>kiwi</command> --create /tmp/myec2 --add-profile \ 
+ ec2Flavour --type vmx -d /tmp/myec2-result</screen>
   </sect1>
 
   <sect1>
@@ -79,8 +79,9 @@
       which is done by the <command>ec2-upload-bundle</command> tool.
       You can do this by calling: </para>
 
-    <screen><command>ec2-upload-bundle</command> -b myImages -a &lt;AWS Key ID&gt; -s
-      &lt;AWS secret Key ID&gt; -m /tmp/myec2/
+    <screen><command>ec2-upload-bundle</command> -b myImages \
+      -a <replaceable>AWS_Key_ID</replaceable> -s<!--
+     --> <replaceable>AWS_secret_Key_ID</replaceable> -m /tmp/myec2/ \
       suse-11.1-xen-guest.i686-1.1.2.ami.manifest.xml </screen>
 
     <para>After this is done the image needs to be registered in order
@@ -121,19 +122,10 @@
       the table below is outdated just check the current ID list at
       Amazon directly </para>
 
-
     <informaltable>
       <tr>
-        <td>
-          <para>
-            <emphasis role="bold">AKI</emphasis>
-          </para>
-        </td>
-        <td>
-          <para>
-            <emphasis role="bold">Name</emphasis>
-          </para>
-        </td>
+        <th><para>AKI</para></th>
+        <th><para>Name</para></th>
       </tr>
       <tr>
         <td>
@@ -159,8 +151,9 @@
 
     <para>Fire up your new ec2 instance with the following command: </para>
 
-    <screen><command>ec2-run-instances</command> ami-... –kernel aki-407d9529 -k<!--
-     --> gsg-keypair </screen>
+    <screen><command>ec2-run-instances</command> ami-... \
+   --kernel aki-407d9529 \ 
+   -k gsg-keypair </screen>
 
     <para>To check the state of your instance(s) call the 
       command <command>ec2-describe-instances</command>.</para>

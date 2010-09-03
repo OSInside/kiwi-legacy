@@ -30,15 +30,14 @@
 
 
     <screen><command>cd</command> /usr/share/doc/packages/kiwi/examples cd suse-11.2
-      kiwi –prepare ./suse-xen-guest –root /tmp/myxen </screen>
+<command>kiwi</command> –-prepare ./suse-xen-guest –-root /tmp/myxen</screen>
 
 
-    <screen><command>kiwi</command> –create /tmp/myxen –type vmx -d /tmp/myxen-result</screen>
+    <screen><command>kiwi</command> –-create /tmp/myxen –-type vmx -d /tmp/myxen-result</screen>
   </sect1>
 
   <sect1>
     <title>Using the Image</title>
-
     <para>In order to run a domain U the Xen tool <command>xm</command>
       needs to be called in conjunction with the KIWI genereated domain
       U configuration file </para>
@@ -69,10 +68,7 @@
         class="devicefile">/dev/xvda</filename>. Additional information
       to setup the Xen guest machine properties are explained in the
       machine section. The KIWI Xen domain U configuration is stored in
-      the file: </para>
-
-    <screen><command>xm</command> /tmp/myxen-result/<!--
-     --> suse-11.2-xen-guest.i686-1.1.2.xenconfig </screen>
+      the file <filename>/tmp/myxen-result/suse-11.2-xen-guest.i686-1.1.2.xenconfig</filename>.</para>
 
   </sect1>
 </chapter>

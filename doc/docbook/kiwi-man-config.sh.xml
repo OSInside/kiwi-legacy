@@ -3,7 +3,7 @@
   "-//OASIS//DTD DocBook XML V4.4//EN"
   "http://www.docbook.org/xml/4.4/docbookx.dtd">
 
-<refentry>
+<refentry id="ref.kiwi.config.sh">
   <refentryinfo>
     <productname>KIWI</productname>
     <!--<productnumber></productnumber>-->
@@ -75,17 +75,19 @@ exit</programlisting>
   <refsect1 id="kiwi.config.functions">
     <title>Common functions</title>
     <para>
-      The .kconfig file allows to make use of a common set of functions. Those which
+      The <filename>.kconfig</filename> file allows to make use of a common set of functions. Those which
       are SUSE Linux specific starts with the name <emphasis>suse</emphasis>. Those which
       are common to all linux systems starts with the name <emphasis>base</emphasis>.
-      The following list describes which functions are available for config.sh
+      The following list describes which functions are available for <filename>config.sh</filename>
     </para>    
 	<variablelist>
       <varlistentry>
         <term><optional>baseCleanMount</optional></term>
         <listitem>
           <para>
-            Umount the system filesystems /proc /dev/pts /sys
+            Umount the system filesystems <filename>/proc</filename>, 
+            <filename>/dev/pts</filename>, and
+            <filename>/sys</filename>.
           </para>
         </listitem>
       </varlistentry>
@@ -93,7 +95,11 @@ exit</programlisting>
         <term><optional>baseDisableCtrlAltDel</optional></term>
         <listitem>
           <para>
-            Disable the Ctrl-Alt-Del key sequence setting in /etc/inittab
+            Disable the <keycombo action="press">
+              <keycap function="control">Ctrl</keycap>
+              <keycap function="alt">Alt</keycap>
+              <keycap function="delete">Del</keycap>
+            </keycombo> key sequence setting in <filename>/etc/inittab</filename>
           </para>
         </listitem>
       </varlistentry>
@@ -134,10 +140,11 @@ exit</programlisting>
         <listitem>
           <para>
              activates busybox if installed for all links from
-             the busybox/busybox.links file - you can choose custom apps to
-             be forced into busybox with the "-f" option as first parameter
-             example: baseSetupBusyBox -f /bin/zcat /bin/vi
+             the <filename>busybox/busybox.links</filename> file&mdash;you can 
+             choose custom apps to be forced into busybox with the 
+            <option>-f</option> option as first parameter, for example: 
           </para>
+          <screen>baseSetupBusyBox -f /bin/zcat /bin/vi</screen>
         </listitem>
       </varlistentry>
       <varlistentry>
@@ -156,7 +163,8 @@ exit</programlisting>
           <para>
             Create an in place subversion repository for the
             specified directories. A standard call could look like this
-            baseSetupInPlaceSVNRepository /etc /srv /var/log 
+            baseSetupInPlaceSVNRepository <filename>/etc</filename>,
+            <filename>/srv</filename>, and <filename>/var/log</filename> 
           </para>
         </listitem>
       </varlistentry>
@@ -173,9 +181,9 @@ exit</programlisting>
         <term><optional>baseSetupUserPermissions</optional></term>
         <listitem>
           <para>
-            Search all home directories of all users listed in /etc/passwd
+            Search all home directories of all users listed in <filename>/etc/passwd</filename>
             and change the ownership of all files to belong to the correct
-            user and group
+            user and group.
           </para>
         </listitem>
       </varlistentry>
@@ -226,7 +234,7 @@ exit</programlisting>
         <term><optional>baseStripRPM</optional></term>
         <listitem>
           <para>
-             remove rpms defined in config.xml under image=delete section
+             remove rpms defined in <filename>config.xml</filename> under image=delete section
           </para>
         </listitem>
       </varlistentry>
@@ -235,7 +243,7 @@ exit</programlisting>
         <listitem>
            <para>
               helper function for suseStripInitrd function
-              params: toolpath , tools
+              params: toolpath, tools
           </para>
         </listitem>
      </varlistentry>
@@ -261,7 +269,7 @@ exit</programlisting>
         <listitem>
           <para>
             Helper function to print a message 
-            if the variable DEBUG is set to 1
+            if the variable <varname>DEBUG</varname> is set to 1
           </para>
         </listitem>
       </varlistentry>
@@ -285,7 +293,7 @@ exit</programlisting>
          <term><optional>Rpm {rpm commandline}</optional></term>
         <listitem>
           <para>
-            Helper function to the rpm function and anounce it to log
+            Helper function to the RPM function and anounce it to log
           </para>
         </listitem>
       </varlistentry>
@@ -302,7 +310,7 @@ exit</programlisting>
         <term><optional>suseActivateServices</optional></term>
         <listitem>
           <para>
-            Check all services in /etc/init.d/ and activate them
+            Check all services in <filename class="directory">/etc/init.d/</filename> and activate them
             by calling suseInsertService
           </para>
         </listitem>
@@ -320,7 +328,7 @@ exit</programlisting>
         <term><optional>suseConfig</optional></term>
         <listitem>
           <para>
-            Setup keytable language and timezone if specified in config.xml and
+            Setup keytable language and timezone if specified in <filename>config.xml</filename> and
             call SuSEconfig afterwards
           </para>
         </listitem>
@@ -379,7 +387,7 @@ exit</programlisting>
         <listitem>
           <para>
              Remove smart o zypper packages and db files
-             Also remove rpm package and db if "-a" given
+             Also remove rpm package and db if <option>-a</option> given
           </para>
         </listitem>
       </varlistentry>
@@ -398,7 +406,7 @@ exit</programlisting>
         <listitem>
           <para>
 			The value of the compressed attribute set in the type element
-			in config.xml
+			in <filename>config.xml</filename>
           </para>
         </listitem>
       </varlistentry>
@@ -407,7 +415,8 @@ exit</programlisting>
         <listitem>
           <para>
             A list of all packages which are part of the packages section
-            with type='delete' in config.xml
+            with <sgmltag class="attribute">type</sgmltag>="<sgmltag 
+              class="attvalue">delete</sgmltag>" in <filename>config.xml</filename>
           </para>
         </listitem>
       </varlistentry>
@@ -416,7 +425,7 @@ exit</programlisting>
         <listitem>
           <para>
             A comma seperated list of the driver entries as listed in the
-            drivers section of the config.xml. Similar variables exists for
+            drivers section of the <filename>config.xml</filename>. Similar variables exists for
             the usbdrivers and scsidrivers sections
           </para>
         </listitem>
@@ -425,7 +434,7 @@ exit</programlisting>
        <term><optional>$kiwi_iname</optional></term>
         <listitem>
           <para>
-            The name of the image as listed in config.xml
+            The name of the image as listed in <filename>config.xml</filename>
           </para>
         </listitem>
       </varlistentry>
@@ -441,7 +450,7 @@ exit</programlisting>
         <term><optional>$kiwi_keytable</optional></term>
         <listitem>
           <para>
-            The contents of the keytable setup as done in config.xml
+            The contents of the keytable setup as done in <filename>config.xml</filename>
           </para>
         </listitem>
       </varlistentry>
@@ -449,7 +458,7 @@ exit</programlisting>
         <term><optional>$kiwi_language</optional></term>
         <listitem>
           <para>
-            The contents of the locale setup as done in config.xml
+            The contents of the locale setup as done in <filename>config.xml</filename>
           </para>
         </listitem>
       </varlistentry>
@@ -467,7 +476,7 @@ exit</programlisting>
           <para>
             The predefined size value for this image. This is not the computed
             size but only the optional size value of the preferences section
-            in config.xml
+            in <filename>config.xml</filename>
           </para>
         </listitem>
       </varlistentry>
@@ -475,7 +484,7 @@ exit</programlisting>
         <term><optional>$kiwi_timezone</optional></term>
         <listitem>
           <para>
-            The contents of the timezone setup as done in config.xml
+            The contents of the timezone setup as done in <filename>config.xml</filename>
           </para>
         </listitem>
       </varlistentry>
@@ -484,8 +493,8 @@ exit</programlisting>
         <listitem>
           <para>
             The basic image type. Can be a simply filesystem image type of
-            ext2 ext3 reiserfs squashfs cpio or one of the following complex
-            image types: iso split usb vmx oem xen pxe
+            ext2, ext3, reiserfs, squashfs, cpio, or one of the following complex
+            image types: iso, split, usb, vmx, oem, xen, or pxe.
           </para>
         </listitem>
       </varlistentry>

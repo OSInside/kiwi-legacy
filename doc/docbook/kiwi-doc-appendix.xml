@@ -7,21 +7,6 @@
     functions which can be used within <command>config.sh</command> and
       <command>index.sh</command>
   </para>
-
-  <itemizedlist>
-    <listitem>
-      <para>man kiwi </para>
-    </listitem>
-    <listitem>
-      <para>man kiwi::config.sh </para>
-    </listitem>
-    <listitem>
-      <para>man kiwi::index.sh </para>
-    </listitem>
-    <listitem>
-      <para>man kiwi::kiwirc </para>
-    </listitem>
-  </itemizedlist>
   
   <xi:include href="kiwi-man.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
   <xi:include href="kiwi-man-config.sh.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>

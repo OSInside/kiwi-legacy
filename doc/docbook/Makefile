@@ -1,3 +1,7 @@
+#
+# Makefile for generating HTML and PDF
+#
+
 DB=/usr/share/xml/docbook/stylesheet/nwalsh/current/
 MAIN=kiwi-doc.xml
 SOURCE=kiwi-doc.xml kiwi-doc-*.xml kiwi-man-*.xml
@@ -22,8 +26,7 @@ kiwi.fo:.tmp.xml
 
 kiwi.html:.tmp.xml
 	@echo "Transforming HTML..."
-	xsltproc --stringparam html.stylesheet susebooks.css \
-		--output ./kiwi.html ${DB}/html/docbook.xsl .tmp.xml
+	xsltproc --output ./kiwi.html xslt/html/docbook.xsl .tmp.xml
 
 kiwi.pdf:.tmp.xml kiwi.fo
 	@echo "Transforming PDF..."

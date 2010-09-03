@@ -3,12 +3,11 @@
   "-//OASIS//DTD DocBook XML V4.4//EN"
   "http://www.docbook.org/xml/4.4/docbookx.dtd">
 
-<refentry>
+<refentry id="ref.kiwi.images.sh">
   <refentryinfo>
     <productname>KIWI</productname>
     <!--<productnumber></productnumber>-->
     <date>Created: <?dbtimestamp?></date>
-    <releaseinfo role="SVN">$Date: 2007-12-03 16:22:06 +0100 (Mon, 03 Dec 2007) $</releaseinfo>
     <authorgroup>
       <author>
         <firstname>Marcus</firstname>
@@ -32,11 +31,11 @@
   <refsect1 id="kiwi.images.description">
     <title>Description</title>
     <para>
-      The kiwi image description allows to have an optional images.sh script
-      in place. This script is called at the beginning of the kiwi create step.
+      The KIWI image description allows to have an optional <filename>images.sh</filename> script
+      in place. This script is called at the beginning of the KIWI create step.
       It is allowed to remove software there to shrink down the size of the
-      image. Most often images.sh is used for boot images because they needs
-      to be small. As images.sh is called in the create step you should be
+      image. Most often <filename>images.sh</filename> is used for boot images because they needs
+      to be small. As <filename>images.sh</filename> is called in the create step you should be
       aware to design the script in a way that it can be called multiple times
       without shooting itself into its knee. As kiwi allows to create different
       image types from one previosly prepared tree one needs to take into account
@@ -45,8 +44,7 @@
     </para>
   <example>
     <title>Template for images.sh</title>
-    <programlisting>
-#======================================
+    <programlisting>#======================================
 # Functions...
 #--------------------------------------
 test -f /.kconfig &amp;&amp; . /.kconfig
@@ -69,21 +67,22 @@ exit</programlisting>
   </example>
   </refsect1>
   
-
   <refsect1 id="kiwi.image.functions">
     <title>Common functions</title>
     <para>
-      The .kconfig file allows to make use of a common set of functions. Those which
+      The <filename>.kconfig</filename> file allows to make use of a common set of functions. Those which
       are SUSE Linux specific starts with the name <emphasis>suse</emphasis>. Those which
       are common to all linux systems starts with the name <emphasis>base</emphasis>.
-      The following list describes which functions are available for images.sh
+      The following list describes which functions are available for
+      <filename>images.sh</filename>.
     </para>    
 	<variablelist>
       <varlistentry>
         <term><optional>baseCleanMount</optional></term>
         <listitem>
           <para>
-            Umount the system filesystems /proc /dev/pts /sys
+            Umount the system filesystems <filename>/proc</filename>, 
+            <filename>/dev/pts</filename>, and <filename>/sys</filename>
           </para>
         </listitem>
       </varlistentry>
@@ -99,8 +98,9 @@ exit</programlisting>
         <term><optional>baseGetPackagesForDeletion</optional></term>
         <listitem>
           <para>
-            Return the list of packages setup in the packages type='delete'
-            section of the config.xml used to build this image
+            Return the list of packages setup in the packages <sgmltag 
+              class="attribute">type</sgmltag>="<sgmltag class="attvalue">delete</sgmltag>"
+            section of the <filename>config.xml</filename> used to build this image
           </para>
         </listitem>
       </varlistentry>
@@ -108,10 +108,10 @@ exit</programlisting>
         <term><optional>baseSetupOEMPartition</optional></term>
         <listitem>
           <para>
-             Writes the file /config.oempartition depending on the following
-             config.xml parameters: oem-reboot, oem-swapsize, oem-systemsize,
+             Writes the file <filename>/config.oempartition</filename> depending on the following
+             <filename>config.xml</filename> parameters: oem-reboot, oem-swapsize, oem-systemsize,
 			 oem-home,oem-swap,oem-boot-title,oem-recovery, oem-kiwi-initrd.
-			 kiwi takes the information from config.xml and creates the
+			 kiwi takes the information from <filename>config.xml</filename> and creates the
 			 config.oempartition file as part of the automatically created
              boot image (initrd). The information must be available as part
              of the boot image because it controls the OEM repartition
@@ -129,7 +129,7 @@ exit</programlisting>
             package to be installed in order to work correctly. The function
             creates from this package data a graphics boot screen for the isolinux
             and grub boot loaders. Additionally it creates the bootsplash files
-            for the resolutions 800x600 1024x768 and 1280x1024
+            for the resolutions 800x600, 1024x768, and 1280x1024
           </para>
         </listitem>
       </varlistentry>
@@ -138,7 +138,8 @@ exit</programlisting>
         <listitem>
           <para>
             This function removes all kernel drivers which are not listed in
-            the *drivers sections of the config.xml file
+            the *drivers sections of the <filename>config.xml</filename>
+            file.
           </para>
         </listitem>
       </varlistentry>
@@ -147,7 +148,7 @@ exit</programlisting>
         <listitem>
           <para>
             This function removes a whole bunch of tools binaries and libraries which
-            are not required in order to boot a suse system with kiwi.
+            are not required in order to boot a suse system with KIWI.
           </para>
         </listitem>
       </varlistentry>
@@ -163,7 +164,7 @@ exit</programlisting>
          <term><optional>Rpm {rpm commandline}</optional></term>
         <listitem>
           <para>
-            Helper function to the rpm function and anounce it to log
+            Helper function to the rpm function and anounce it to log.
           </para>
         </listitem>
       </varlistentry>
@@ -180,7 +181,7 @@ exit</programlisting>
         <listitem>
           <para>
             Helper function to print a message 
-            if the variable DEBUG is set to 1
+            if the variable <varname>DEBUG</varname> is set to 1
           </para>
         </listitem>
       </varlistentry>
@@ -213,7 +214,7 @@ exit</programlisting>
         <term><optional>$kiwi_keytablee</optional></term>
         <listitem>
           <para>
-            The contents of the keytable setup as done in config.xml
+            The contents of the keytable setup as done in <filename>config.xml</filename>
           </para>
         </listitem>
       </varlistentry>
@@ -221,7 +222,7 @@ exit</programlisting>
         <term><optional>$kiwi_language</optional></term>
         <listitem>
           <para>
-            The contents of the locale setup as done in config.xml
+            The contents of the locale setup as done in <filename>config.xml</filename>
           </para>
         </listitem>
       </varlistentry>
@@ -229,7 +230,7 @@ exit</programlisting>
         <term><optional>$kiwi_timezone</optional></term>
         <listitem>
           <para>
-            The contents of the timezone setup as done in config.xml
+            The contents of the timezone setup as done in <filename>config.xml</filename>
           </para>
         </listitem>
       </varlistentry>
@@ -238,7 +239,8 @@ exit</programlisting>
         <listitem>
           <para>
             A list of all packages which are part of the packages section
-            with type='delete' in config.xml
+            with <sgmltag class="attribute">type</sgmltag>="<sgmltag 
+              class="attvalue">delete</sgmltag>" in <filename>config.xml</filename>
           </para>
         </listitem>
       </varlistentry>
@@ -255,7 +257,7 @@ exit</programlisting>
         <listitem>
           <para>
             A comma seperated list of the driver entries as listed in the
-            drivers section of the config.xml. Similar variables exists for
+            drivers section of the <filename>config.xml</filename>. Similar variables exists for
             the usbdrivers and scsidrivers sections
           </para>
         </listitem>
@@ -266,7 +268,7 @@ exit</programlisting>
           <para>
             The predefined size value for this image. This is not the computed
             size but only the optional size value of the preferences section
-            in config.xml
+            in <filename>config.xml</filename>
           </para>
         </listitem>
       </varlistentry>
@@ -284,7 +286,7 @@ exit</programlisting>
         <listitem>
           <para>
             The basic image type. Can be a simply filesystem image type of
-            ext2 ext3 reiserfs squashfs cpio or one of the following complex
+            ext2, ext3, reiserfs, squashfs, and cpio or one of the following complex
             image types: iso split usb vmx oem xen pxe
           </para>
         </listitem>
