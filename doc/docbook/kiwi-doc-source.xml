@@ -13,7 +13,7 @@
     how fast an image creation process is and in almost all cases it is
     better to prepare a local installation source first. </para>
 
-  <sect1>
+  <sect1 id="sec.instsourcesetup.adapt-example">
     <title>Adapt the Example’s config.xml</title>
     <para> If you can make sure you have a local installation source
       it’s important to change the path attribute inside of the
@@ -27,16 +27,16 @@
 &lt;/repository&gt;</screen>
   </sect1>
 
-  <sect1>
+  <sect1 id="sec.instsourcesetup.create-local-inst-source">
     <title>Create a Local Installation Source</title>
     <para> The following procedure describes how to create a local SUSE
       installation source which is stored below the path <filename
         class="directory">/images/CDs</filename>. If you are using the
-      local path as described in this docuement you only need to flip
+      local path as described in this document you only need to flip
       the given path information inside of the example
         <filename>config.xml</filename> file. </para>
 
-    <procedure>
+    <procedure id="proc.instsourcesetup.local-inst">
       <step>
         <para>Find your SUSE standard installation CDs or the DVD and
           make them available to the build system. Most Linux systems

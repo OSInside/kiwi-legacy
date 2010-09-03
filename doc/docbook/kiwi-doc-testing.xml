@@ -29,7 +29,8 @@
   <para>If not test names are set the default tests rpm and ldd run. The
     name of a test corresponds with the name of the directory the test
     is implemented in. </para>
-  <sect1>
+  
+  <sect1 id="sec.testing.testsuite">
     <title>Testsuite Packages</title>
     <para> If a test requires special software to be installed but this
       software is not an essential part of the image itself it can be
@@ -44,7 +45,7 @@
     </para>
   </sect1>
 
-  <sect1>
+  <sect1 id="sec.testing.creating">
     <title>Creating a Test</title>
     <para> The test itself is defined by a XML description
         <filename>test-case.xml</filename> and its template definition
@@ -68,7 +69,6 @@
   &lt;file&gt;rpm.sh&lt;/file&gt;
   &lt;params&gt;CHROOT&lt;/params&gt; &lt;/test&gt;
 &lt;/test_case&gt;</screen>
-
 
     <para>There are basically two sections called
         <sgmltag>equirements</sgmltag> and <sgmltag>test</sgmltag>. In

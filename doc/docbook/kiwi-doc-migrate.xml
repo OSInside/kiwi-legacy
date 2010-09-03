@@ -32,7 +32,7 @@
     part of the image description. The process will skip all remote
     mounted filesystems and concentrate only on local filesystems. </para>
 
-  <sect1>
+  <sect1 id="sec.migrate.create-clean-repository">
     <title>Create a Clean Repository Set First</title>
     <para> When starting with the migration it is useful to let kiwi
       know about all the repositories from which packages has been
@@ -55,12 +55,11 @@
       that this package can’t be provided or is not worth to become part
       of the migration. </para>
 
-
     <screen><command>kiwi</command> –migrate mySystem –nofiles<!-- 
     -->[ –skip package ... ]</screen>
   </sect1>
 
-  <sect1>
+  <sect1 id="sec.migrate.watch-overlay">
     <title>Watch the Overlay and Unpackaged Files</title>
     <para>Files which has been modified but belong to a package will be
       automatically copied into the overlay directory below
@@ -86,7 +85,7 @@
         <filename>/tmp/mySystem/root</filename> directory </para>
   </sect1>
 
-  <sect1>
+  <sect1 id="sec.migrate.checklist">
     <title>Checklist</title>
     <para> After that you should walk through the following check list </para>
 
@@ -130,7 +129,7 @@
     </itemizedlist>
   </sect1>
 
-  <sect1>
+  <sect1 id="sec.migrate.turn-system-into-image">
     <title>Turn my System Into an Image…</title>
     <para>After the process has finished you should check the size of
       the image description. The description itself shouldn’t be that

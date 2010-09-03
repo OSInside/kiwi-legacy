@@ -9,7 +9,7 @@
     applications in our computing environment. To use Amazon EC2 you
     simply: </para>
 
-  <procedure>
+  <procedure id="proc.ec2.using">
     <step>
       <para>Create an Amazon Machine Image (AMI) containing all your
         software, including your operating system and associated
@@ -47,7 +47,8 @@
     prepared for EC2 which means if you call the command
       <command>ec2-describe-images</command>
     <option>–a</option> you will get a valid output. </para>
-  <sect1>
+  
+  <sect1 id="sec.ec2.building">
     <title>Building the suse-xen-guest Example for EC2</title>
     <para>One example provided with KIWI is based on openSUSE 11.3 and
       includes the base pattern plus the vim editor. </para>
@@ -73,7 +74,7 @@
  ec2Flavour --type vmx -d /tmp/myec2-result</screen>
   </sect1>
 
-  <sect1>
+  <sect1 id="sec.ec2.using">
     <title>Using the Image</title>
     <para> The generated image needs to be transfered over to Amazon
       which is done by the <command>ec2-upload-bundle</command> tool.

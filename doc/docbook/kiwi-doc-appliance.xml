@@ -5,7 +5,7 @@
 <chapter id="chap.appliance">
   <title>Creating Appliances with KIWI</title>
 
-  <sect1>
+  <sect1 id="sec.appliance.history">
     <title>History</title>
     <para> Traditionally, many computing functions were written as
       software applications running on top of a general-purpose
@@ -19,7 +19,7 @@
       for that application. </para>
   </sect1>
 
-  <sect1>
+  <sect1 id="sec.appliance.kiwi-model">
     <title>The KIWI Model</title>
     <para> With KIWI we started to use a different model. Instead of
       installing firewall software on top of a general purpose
@@ -30,7 +30,7 @@
       is just a recommendation and can be adapted to special needs and
       environments. </para>
 
-    <procedure>
+    <procedure id="proc.appliance.general-building">
       <step>
         <para>Choose an appropriate image description
           template from the provided KIWI examples. Add or adapt
@@ -166,8 +166,6 @@
           types. </para>
       </step>
     </procedure>
-
-
 
     <para>Congratulation! To make sure the appliance works as expected
       prepare a new image tree and create an image from the new tree. If

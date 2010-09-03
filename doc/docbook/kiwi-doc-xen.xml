@@ -23,31 +23,29 @@
     Xen versions. Xen extracts the kernel and initrd from the virtual
     disk as well as the grub configuration and displays the menu which
     allows emulation of the Grub console </para>
-  <sect1>
+  
+  <sect1 id="sec.xen.building">
     <title>Building the suse-xen-guest Example</title>
     <para>The latest example provided with KIWI is based on openSUSE
       11.3 and includes the base pattern. </para>
 
-
     <screen><command>cd</command> /usr/share/doc/packages/kiwi/examples cd suse-11.2
 <command>kiwi</command> –-prepare ./suse-xen-guest –-root /tmp/myxen</screen>
-
 
     <screen><command>kiwi</command> –-create /tmp/myxen –-type vmx -d /tmp/myxen-result</screen>
   </sect1>
 
-  <sect1>
+  <sect1 id="sec.xen.using">
     <title>Using the Image</title>
     <para>In order to run a domain U the Xen tool <command>xm</command>
       needs to be called in conjunction with the KIWI genereated domain
       U configuration file </para>
 
-
     <screen><command>xm</command> create -c /tmp/myxen-result/ <!--
   --> suse-11.2-xen-guest.i686-1.1.2.xenconfig </screen>
   </sect1>
 
-  <sect1>
+  <sect1 id="sec.xen.flavours">
     <title>Flavours</title>
     <para>With KIWI you can provide the information required to create a
       guest configuration as part of the <filename>config.xml</filename> file. Additionally

@@ -12,7 +12,7 @@
     description can be found in the examples provided in
       <filename>/usr/share/doc/packages/kiwi/examples</filename>. </para>
 
-  <figure>
+  <figure id="fig.description.imagedescrdir">
     <title>Image Description Directory</title>
     <mediaobject>
       <imageobject role="fo">
@@ -156,7 +156,7 @@
     </varlistentry>
   </variablelist>
 
-  <sect1>
+  <sect1 id="sec.description.config.xml">
     <title>The config.xml File</title>
     <para> The mandatory image definition file is divided into different
       sections which describes information like the image name and type
@@ -168,7 +168,7 @@
       file at
         <filename>/usr/share/doc/packages/kiwi/kiwi.rng.html</filename>. </para>
 
-    <sect2>
+    <sect2 id="sec.description.image">
       <title><sgmltag>image</sgmltag> Element</title>
       <screen>&lt;image schemaversion="3.5" name="iname"
   displayname="text" 
@@ -236,14 +236,13 @@
           >bootstrap</sgmltag>"). </para>
     </sect2>
 
-    <sect2>
+    <sect2 id="sec.description.description">
       <title><sgmltag>description</sgmltag> Element</title>
       <screen> &lt;description type="system"&gt;
   &lt;author&gt;an author&lt;/author&gt;
   &lt;contact&gt;mail&lt;/contact&gt;
   &lt;specification&gt;short info&lt;/specification&gt;
 &lt;/description&gt;</screen>
-
 
       <para>The mandatory <sgmltag>description</sgmltag> section
         contains information about the creator of this image
@@ -253,7 +252,7 @@
         for boot image descriptions. </para>
     </sect2>
 
-    <sect2>
+    <sect2 id="sec.description.profiles">
       <title><sgmltag>profiles</sgmltag> Element</title>
       <screen> &lt;profiles&gt;
    &lt;profile name="name" description="text"/&gt;
@@ -281,7 +280,7 @@
         to be present for all profiles. </para>
     </sect2>
 
-    <sect2>
+    <sect2 id="sec.description.preferences">
       <title><sgmltag>preferences</sgmltag> Element</title>
 
       <screen>&lt;preferences profiles="name"&gt;
@@ -555,7 +554,6 @@
         </varlistentry>
       </variablelist>
 
-
       <para>All of the mentioned types can specify the <sgmltag
           class="attribute">boot</sgmltag> attribute which tells KIWI to
         call itself to build the requested boot image (initrd). It is
@@ -576,7 +574,6 @@
         The directory KIWI searches for the prebuilt boot images can
         also be specified at the commandline with the
           <option>--prebuiltbootimage</option> parameter. </para>
-
 
       <para>Within the preferences section there are the following
         optional attributes: </para>
@@ -1268,7 +1265,7 @@
       </variablelist>
     </sect2>
 
-    <sect2>
+    <sect2 id="sec.description.users">
       <title><sgmltag>users</sgmltag> Element</title>
 
       <screen>&lt;users group="group_name" id="number"&gt; 
@@ -1308,7 +1305,7 @@
         use a group id greater than 100. </para>
     </sect2>
 
-    <sect2>
+    <sect2 id="sec.description.drivers">
       <title><sgmltag>drivers</sgmltag> Element</title>
       <screen>&lt;drivers type="type" profiles="name"&gt; 
   &lt;file name="filename"/&gt; 
@@ -1373,7 +1370,7 @@
         effect. </para>
     </sect2>
 
-    <sect2>
+    <sect2 id="sec.description.repository">
       <title><sgmltag>repository</sgmltag> Element</title>
       <screen>&lt;repository type="type" status="replaceable"
         alias="name" priority="number"&gt; 
@@ -1390,7 +1387,7 @@
         values for the type attribute has beend copied from smart. The
         following table shows the possible repo types:</para>
 
-      <table>
+      <table id="tab.description.supported-types">
         <title>Supported Types for zypper and smart</title>
         <tgroup cols="3">
           <thead>
@@ -1586,7 +1583,7 @@
       </variablelist>
     </sect2>
 
-    <sect2>
+    <sect2 id="sec.description.packages">
       <title><sgmltag>packages</sgmltag> Element</title>
       <screen>&lt;packages type="type" profiles="name" patternType="type"
         patternPackageType="type" 
@@ -1697,7 +1694,7 @@ $(<command>rpm</command> -q ‘baseGetPackagesForDeletion‘ | <command>grep</co
         </varlistentry>
       </variablelist>
 
-      <sect3>
+      <sect3 id="sec.descriptions.using-patterns">
         <title>Using Patterns</title>
         <para> Using a pattern name enhances the package list with a
           number of additional packages belonging to this pattern.
@@ -1753,7 +1750,7 @@ $(<command>rpm</command> -q ‘baseGetPackagesForDeletion‘ | <command>grep</co
           have ignored it. </para>
       </sect3>
 
-      <sect3>
+      <sect3 id="sec.description.architecture-restrictions">
         <title>Architecture Restrictions</title>
         <para> To restrict a package to a specific architecture, use the
           arch attribute to specify a comma separated list of allowed
@@ -1763,7 +1760,7 @@ $(<command>rpm</command> -q ‘baseGetPackagesForDeletion‘ | <command>grep</co
           the arch attribute. </para>
       </sect3>
 
-      <sect3>
+      <sect3 id="sec.description.image-type-specific-packages">
         <title>Image Type Specific Packages</title>
         <para> If a package is only required for a specific type of
           image and replaces another package you can use the replaces
@@ -1782,7 +1779,7 @@ $(<command>rpm</command> -q ‘baseGetPackagesForDeletion‘ | <command>grep</co
           and the default kernel in any other case. </para>
       </sect3>
 
-      <sect3>
+      <sect3 id="sec.description.packages.to.become.included">
         <title>Packages to Become Included Into the Boot Image</title>
         <para> The optional attributes bootinclude and bootdelete can be
           used to mark a package inside the system image description to
@@ -1798,7 +1795,7 @@ $(<command>rpm</command> -q ‘baseGetPackagesForDeletion‘ | <command>grep</co
           the corresponding boot image description </para>
       </sect3>
 
-      <sect3>
+      <sect3 id="sec.description.data.not.available">
         <title>Data not Available as Packages to Become Included</title>
         <para> With the optional <sgmltag>archive</sgmltag> element it’s
           possible to include any kind of data into the image. The

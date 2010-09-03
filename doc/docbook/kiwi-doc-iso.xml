@@ -13,7 +13,7 @@
     in RAM space and therefore all changes will be lost as soon as the
     computer shuts down. </para>
 
-  <sect1>
+  <sect1 id="sec.iso.building">
     <title>Building the suse-live-iso Example</title>
 
     <para>The latest example provided with KIWI is based on openSUSE
@@ -25,7 +25,7 @@
     <screen><command>kiwi</command> –-create /tmp/myiso –-type iso -d /tmp/myiso-result</screen>
   </sect1>
 
-  <sect1>
+  <sect1 id="sec.iso.using">
     <title>Using the Image</title>
     <para>There are two ways to use the generated ISO image: </para>
 
@@ -48,7 +48,7 @@
     </itemizedlist>
   </sect1>
 
-  <sect1>
+  <sect1 id="sec.iso.flavours">
     <title>Flavours</title>
     <para>KIWI supports different filesystems and boot methods along
       with the ISO image type. The provided example by default uses a
@@ -67,7 +67,6 @@
       on all versions of SUSE and therefore the flags attribute in
         <filename>config.xml</filename> exists to be able to have the
       following alternative solutions: </para>
-
 
     <variablelist>
       <varlistentry>
@@ -114,7 +113,7 @@
       </varlistentry>
     </variablelist>
 
-    <sect2>
+    <sect2 id="sec.iso.split-mode">
       <title>Split mode</title>
       <para>If no overlay filesystem is in use but the image filesystem
         is based on a compressed filesystem KIWI allows to setup which

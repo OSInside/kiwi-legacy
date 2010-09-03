@@ -132,7 +132,7 @@
     call KIWI and how to make use of the result image can be found in
     the image type specific sections later in this document. </para>
 
-  <sect1>
+  <sect1 id="sec.workflow.bootprocess">
     <title>Boot Process</title>
     <para>Todays Linux systems are using a special boot image to control
       the boot process. This boot image is called initrd. The Linux
@@ -144,7 +144,7 @@
       boot images are provided by KIWI and thus the user has in almost
       all cases no need to take care for the boot image. </para>
 
-    <figure>
+    <figure id="fig.workflow.bootprocess">
       <title>Boot Process</title>
       <mediaobject>
         <imageobject role="fo">
@@ -169,7 +169,7 @@
       corresponding system image doesn’t make sense though. </para>
   </sect1>
 
-  <sect1>
+  <sect1 id="sec.workflow.bootparameters">
     <title>Boot Parameters</title>
     <para> When booting an image created by KIWI using one of the
       provided boot images there are some useful kernel parameters
@@ -208,7 +208,7 @@
     </itemizedlist>
   </sect1>
 
-  <sect1>
+  <sect1 id="sec.workflow.common-specific-code">
     <title>Common and Distribution Specific Code</title>
     <para> KIWI has been developed to be usable for any Linux
       distribution. However, each Linux distribution is different. On

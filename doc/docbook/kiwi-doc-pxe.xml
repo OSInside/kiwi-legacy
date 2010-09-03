@@ -11,17 +11,17 @@
     BIOS implementations which makes it so interesting. The protocol
     sends DHCP requests to assign an IP address and after that it uses
     tftp to download kernel and boot instructions. </para>
-  <sect1>
+  <sect1 id="sec.pxe.setting-up">
     <title>Setting Up the Required Services</title>
     <para>Before you start to build pxe images with KIWI, setup the boot
       server. The boot server requires the services atftp and DHCP to
       run. </para>
-    <sect2>
+    <sect2 id="sec.pxe.atftp-server">
       <title>Atftp Server</title>
       <para>In order to setup the <systemitem class="server"
           >atftp</systemitem> server the following steps are required </para>
 
-      <procedure>
+      <procedure id="proc.pxe.atftp-server-setup">
         <step>
           <para>Install the packages <package>atftp</package> and
               <package>kiwi-pxeboot</package>. </para>
@@ -47,7 +47,7 @@
       </procedure>
     </sect2>
 
-    <sect2>
+    <sect2 id="sec.pxe.dhcp-server">
       <title>DHCP Server</title>
       <para> In contrast to the atftp server setup the following DHCP
         server setup can only serve as an example. Depending on your
@@ -58,7 +58,7 @@
         information is provided by your server. The following steps
         describe how to setup a new DHCP server instance: </para>
 
-      <procedure>
+      <procedure id="proc.pxe.dhcp-server-setup">
         <step>
           <para>Install the package <package>dhcp-server</package>.
           </para>
@@ -94,7 +94,7 @@ subnet 192.168.100.0 netmask 255.255.255.0 {
       </procedure>
     </sect2>
   </sect1>
-  <sect1>
+  <sect1 id="sec.pxe.building">
     <title>Building the suse-pxe-client Example</title>
     <para>The example provided with KIWI is based on open­SUSE 11.2 and
       creates an image for a Wyse VX0 terminal with a 128MB flash card
@@ -109,13 +109,13 @@ subnet 192.168.100.0 netmask 255.255.255.0 {
     <screen><command>kiwi</command> -–create /tmp/mypxe –-type pxe -d /tmp/mypxe-result</screen>
   </sect1>
 
-  <sect1>
+  <sect1 id="sec.pxe.using">
     <title>Using the Image</title>
     <para>In order to make use of the image all related image parts
       needs to be copied onto the boot server. According to the example
       the following steps needs to be performed: </para>
 
-    <procedure>
+    <procedure id="proc.pxe.using">
       <step>
         <para>Change working directory:</para>
         <screen><command>cd</command> /tmp/mypxe-result</screen>
@@ -166,7 +166,7 @@ LABEL Local-Boot
     </procedure>
   </sect1>
 
-  <sect1>
+  <sect1 id="sec.pxe.flavours">
     <title>Flavours</title>
     <para>All the different PXE boot based deployment methods are
       controlled by the
@@ -178,7 +178,7 @@ LABEL Local-Boot
       following sections informs about the control and the configuration
       file. </para>
 
-    <sect2 id="sec.cntrlhw">
+    <sect2 id="sec.pxe.client-control-file">
       <title>The PXE Client Control File</title>
       <para>This section describes the netboot client control file: </para>
       <screen>hwtype.$&lt;$MAC Address$&gt;$</screen>
@@ -190,7 +190,7 @@ LABEL Local-Boot
           <filename>/var/lib/tftpboot/upload</filename>. </para>
     </sect2>
 
-    <sect2 id="sec.confmac">
+    <sect2 id="sec.pxe.client-config-file">
       <title>The PXE Client Configuration File</title>
       <para>This section describes the netboot client configuration
         file: </para>
@@ -591,7 +591,7 @@ UNIONFS_CONFIG=/dev/ram1,nfs,aufs # write to RAM</screen>
       </variablelist>
     </sect2>
 
-    <sect2>
+    <sect2 id="sec.pxe.another-user">
       <title>User another than tftp as Download Protocol</title>
       <para>By default all downloads controlled by the KIWI linuxrc code
         are performed by an atftp call and therefore uses the tftp
@@ -632,14 +632,13 @@ UNIONFS_CONFIG=/dev/ram1,nfs,aufs # write to RAM</screen>
       </para>
     </sect2>
 
-    <sect2>
+    <sect2 id="sec.pxe.ram-only-image">
       <title>RAM Only Image</title>
       <para>If there is no local storage and no remote root mount setup
         the image can be stored into the main memory of the client.
         Please be aware that there should be still enough RAM space
         available for the operating system after the image has been
         deployed into RAM. Below, find an example: </para>
-
 
       <itemizedlist>
         <listitem>
@@ -658,7 +657,7 @@ UNIONFS_CONFIG=/dev/ram1,nfs,aufs # write to RAM</screen>
       </itemizedlist>
     </sect2>
 
-    <sect2>
+    <sect2 id="sec.pxe.union-image">
       <title>Union Image</title>
       <para>As used in the suse-pxe-client example it is possible to
         make use of the aufs or unionfs overlay filesystems to combine
@@ -680,7 +679,7 @@ UNIONFS_CONFIG=/dev/sda3,/dev/sda2,aufs
 KIWI_INITRD=/boot/initrd</screen>
     </sect2>
 
-    <sect2>
+    <sect2 id="sec.pxe.split-image">
       <title>Split Image</title>
       <para>As an alternative to the <varname>UNIONFS_CONFIG</varname>
         method it is also possible to create a split image and combine
@@ -736,7 +735,7 @@ KIWI_INITRD=/boot/initrd</screen>
       </itemizedlist>
     </sect2>
 
-    <sect2>
+    <sect2 id="sec.pxe.root-tree-over-nfs">
       <title>Root Tree Over NFS</title>
       <para> Instead of installing the image onto a local storage device
         of the client it is also possible to let the client mount the
@@ -755,7 +754,7 @@ KIWI_INITRD=/boot/initrd</screen>
       </itemizedlist>
     </sect2>
 
-    <sect2>
+    <sect2 id="sec.pxe.root-tree-over-nbd">
       <title>Root Tree Over NBD</title>
 
       <para>As an alternative for root over NFS it is also possible to
@@ -775,12 +774,11 @@ KIWI_INITRD=/boot/initrd</screen>
       </itemizedlist>
     </sect2>
 
-    <sect2>
+    <sect2 id="sec.pxe.root-tree-over-aoe">
       <title>Root Tree Over AoE</title>
       <para>As an alternative for root over NBD it is also possible to
         let the client mount the root device via a special ATA over
         Ethernet network block device. Below find an example: </para>
-
 
       <itemizedlist>
         <listitem>

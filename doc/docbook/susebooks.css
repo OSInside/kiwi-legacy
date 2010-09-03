@@ -323,6 +323,39 @@ b.keycap,.keycap
   color:#80AA50;
 }
 
+.permalink
+{
+   background-color:transparent;
+   color:transparent;
+   text-decoration:none;
+   font-size:smaller;
+   margin-left:0.25em;
+   margin-right:0.25em;
+   padding-left:0.5em;
+   padding-right:0.5em;
+}
+
+.permalink a:link
+{
+  background-color:transparent;
+  color:lightgray;
+  text-decoration:none;
+}
+
+.permalink a:visited
+{
+  background-color:transparent;
+  color:lightgray;
+  text-decoration:none;
+}
+
+.permalink a:hover
+{
+  background-color:transparent;
+  color:#6a9d00;
+  text-decoration:none;
+}
+
 .remark
 {
   color:red;

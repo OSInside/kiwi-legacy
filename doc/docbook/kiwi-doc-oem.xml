@@ -19,7 +19,7 @@
     deploy an image on a USB stick. A USB stick is simply a removable
     physical storage device. </para>
 
-  <sect1>
+  <sect1 id="sec.oem.building">
     <title>Building the suse-oem-preload Example</title>
     <para>The OEM example provided with kiwi is based on recent openSUSE
       releases, one example configuration per release, and includes the
@@ -33,10 +33,8 @@
       deployed to the storage media on the booting machine (after
       confirmation by the user). </para>
 
-
     <para>The commands provided below use the openSUSE 11.2 based
       example built for the x86 architecture. </para>
-
 
     <screen><command>cd</command> /usr/share/doc/packages/kiwi/examples
 <command>cd</command> suse-11.2
@@ -44,7 +42,7 @@
     <screen><command>kiwi</command> -–create /tmp/myoem –-type split -d /tmp/myoem-result</screen>
   </sect1>
 
-  <sect1>
+  <sect1 id="sec.oem.using">
     <title>Using the Image</title>
     <para>The virtual disk image created by KIWI with the commands shown
       above can be tested using virtualization software such as QEMU,
@@ -61,16 +59,13 @@
     <screen><command>cd</command> /tmp/myoem-result 
 <command>qemu</command> suse-11.2-oem-preload.i686-1.1.2.raw -m 512</screen>
 
-
     <para>or using the <command>dd</command> command you can dump the
       image onto a test hard disk or USB stick and upon reboot select
       the appropriate device as the boot device in the BIOS: </para>
 
-
     <screen><command>cd</command> /tmp/myoem-result 
 <command>dd</command> if=suse-11.2-oem-preload.i686-1.1.2.raw<!-- 
 --> of=/dev/<replaceable>device</replaceable> bs=32k</screen>
-
 
     <para>Note, when testing an oem image using the virtual disk image,
       i.e. the <filename class="extension">.raw</filename> file, the
@@ -79,13 +74,11 @@
       re-partitioning performed for a physical disk install during the
       oem boot workflow will be skipped. </para>
 
-
     <para>You can test the installation procedure in a virtual
       environment using the <filename class="extension">.iso</filename>
       file. In this case the re-partitioning code in the boot image will
       be executed. The following commnads show this procedure using
       QEMU. </para>
-
 
     <screen><command>cd</command> /tmp/myoem-result 
 <command>qemu-img</command> create /tmp/mydisk 20G 
@@ -94,8 +87,8 @@
 
   </sect1>
 
-  <sect1>
-    <title>Flavors</title>
+  <sect1 id="sec.oem.flavours">
+    <title>Flavours</title>
     <para>As indicated above the use of the <sgmltag class="attribute"
         >installiso</sgmltag> and <sgmltag class="attribute"
         >installstick</sgmltag> attributes for the oem image supports
@@ -126,7 +119,7 @@
       </listitem>
     </itemizedlist>
 
-    <sect2>
+    <sect2 id="sec.oem.partitioning">
       <title>Influencing the OEM Partitioning</title>
       <para>By default the oemboot process will create/modify a swap,
           <filename>/home</filename> and <filename>/</filename>
@@ -135,7 +128,7 @@
           linkend="chap.description"/> for details. </para>
     </sect2>
 
-    <sect2>
+    <sect2 id="sec.oem.lvm">
       <title>LVM Support</title>
       <para>KIWI also provides support for LVM (Logical Volume
         Management). In this mode the disk partition table will include
@@ -156,7 +149,6 @@
           >true</sgmltag>" to of the <sgmltag>type</sgmltag> element in
         your <filename>config.xml</filename> file. </para>
 
-
       <screen><command>kiwi</command> –-create /tmp/myoem –-type oem<!-- 
       --> -d /tmp/myoem-result –-lvm</screen>
 
@@ -166,7 +158,7 @@
         detailed explanation. </para>
     </sect2>
 
-    <sect2>
+    <sect2 id="sec.oem.partition-based-installation">
       <title>Partition Based Installation</title>
       <para>The default installation method of an OEM is dumping the
         entire virtual disk on the selected target disk and repartition

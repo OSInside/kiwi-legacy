@@ -11,17 +11,15 @@
     Almost all new BIOS systems support that. The USB stick serves as OS
     system disk in this case and you can read and write data onto it. </para>
 
-  <sect1>
+  <sect1 id="sec.usb.building">
     <title>Building the suse-live-stick Example</title>
     <para>The next example provided with KIWI is based on openSUSE 11.2
       and uses the default plus x11 pattern. The operating system is
       stored on a standard ext3 filesystem: </para>
 
-
     <screen><command>cd</command> /usr/share/doc/packages/kiwi/examples
 <command>cd</command> suse-11.2
 <command>kiwi</command> –-prepare ./suse-live-stick –-root /tmp/mystick </screen>
-
 
     <para>There are two possible image types which allows you to drive
       the stick. Both are added into the <filename>config.xml</filename>
@@ -47,7 +45,7 @@
     </itemizedlist>
   </sect1>
 
-  <sect1>
+  <sect1 id="sec.usb.using">
     <title>Using the Image</title>
     <para>To use the created images deployed them on the USB stick. For
       the first image type (usb) you need KIWI itself to be able to
@@ -57,14 +55,12 @@
       partition table on the stick and imports the created images as
       follows: </para>
 
-
     <screen><command>kiwi</command> –-bootstick \
     /tmp/mystick-result/ \
     initrd-usbboot-suse-11.2.i686-2.1.1.splash.gz \
     –-bootstick-system \
     /tmp/mystick-result/ \
     suse-11.2-live-stick.i686-1.1.2</screen>
-
 
     <para>In case of the second image type (oem) dump the raw data onto
       a device. On Linux the most popular tool to do this is the
@@ -76,11 +72,9 @@
       image (oemboot) has to adapt the disk geometry on first boot. To
       deploy the image on the stick, run: </para>
 
-
     <screen><command>dd</command> if=/tmp/mystick-result/ \
       suse-11.2-live-stick.i686-1.1.2.raw 
       of=/dev/<replaceable>stick-device</replaceable> bs=32k</screen>
-
 
     <para>Testing of the live stick can be done with a test machine
       (booting from USB) or with a virtualization system. If you test
@@ -93,7 +87,7 @@
       the stick on real hardware. </para>
   </sect1>
 
-  <sect1>
+  <sect1 id="sec.usb.flavours">
     <title>Flavours</title>
     <para>USB sticks weren’t designed to serve as storage devices for
       operating systems. By design of these nice little gadgets their
@@ -127,7 +121,7 @@
       </varlistentry>
     </variablelist>
 
-    <sect2>
+    <sect2 id="sec.usb.split-stick">
       <title>Split Stick</title>
       <para> If there is no overlay filesystem available, it is also
         possible to define a split section in
@@ -155,7 +149,6 @@
         <filename class="directory">/home</filename>, and 
         <filename class="directory">/etc</filename> as writable data. </para>
 
-
       <screen> &lt;split&gt;
   &lt;persistent&gt; 
     <sgmltag class="sgmlcomment"> allow read/write access to: </sgmltag>
@@ -168,14 +161,13 @@
     &lt;/persistent&gt; 
 &lt;/split&gt; </screen>
 
-
       <para>If no split section is added the default split section from
           <filename class="directory"
           >/usr/share/kiwi/modules/</filename>, the file
           <filename>KIWISplit.txt</filename> is used. </para>
     </sect2>
 
-    <sect2>
+    <sect2 id="sec.usb.lvm">
       <title>LVM Support</title>
       <para>KIWI supports LVM, the Logical Volume Manager. In this mode,
         the disk partition table includes one lvm partition and one
@@ -189,9 +181,9 @@
         for the usb type just add the <option>--lvm</option> option as
         part of <command>kiwi</command>
         <option>--bootstick</option> deployment or add the attribute
-        lvm="true" as part of the <sgmltag>type</sgmltag> section in
+        <sgmltag class="attribute">lvm</sgmltag>="<sgmltag class="attvalue">true</sgmltag>" 
+        as part of the <sgmltag>type</sgmltag> section in
         your <filename>config.xml</filename> file. </para>
-
 
       <para>The optional <sgmltag>lvmvolumes</sgmltag> section can be used to set one or
         more top level directories into a separate volume. See 
