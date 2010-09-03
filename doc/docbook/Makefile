@@ -11,6 +11,8 @@
 # xmlgraphics-commons
 # batik
 # docbook-dsssl-stylesheets 
+# dejavu
+# sil-charis
 # ----
 #
 KV=`cat Revision.txt`
@@ -19,6 +21,7 @@ MAIN=kiwi-doc.xml
 MAN=KIWI*config.sh.1 KIWI*images.sh.1 KIWI*kiwirc.1 kiwi.1
 SOURCE=kiwi-doc.xml kiwi-doc-*.xml kiwi-man-*.xml
 FIG=images/*.fig
+FOPCONFIG=etc/fop.xml
 
 html:kiwi.html
 
@@ -45,7 +48,7 @@ kiwi.html:.tmp.xml
 
 kiwi.pdf:.tmp.xml kiwi.fo
 	@echo "Transforming PDF..."
-	fop kiwi.fo kiwi.pdf
+	fop -c ${FOPCONFIG} kiwi.fo kiwi.pdf
 
 KIWI*config.sh.1:kiwi-man-config.sh.xml
 	cat kiwi-man-config.sh.xml | sed -e "s@_KV_@${KV}@" > .tmp.man

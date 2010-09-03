@@ -24,6 +24,17 @@
     <xsl:attribute name="background-color">#E0E0E0</xsl:attribute>
   </xsl:attribute-set>
 
+  <!--
+    <xsl:param name="toc.section.depth" select="3"/>
+    <xsl:param name="toc.max.depth" select="4"/>
+  -->
+  
+  <xsl:param name="body.font.family">'Charis SIL'</xsl:param>
+  <xsl:param name="title.font.family">'Charis SIL'</xsl:param>
+  <!--<xsl:param name="sans.font.family"></xsl:param>-->
+  <xsl:param name="monospace.font.family">'DejaVu Sans Mono'</xsl:param><!-- Liberation Mono -->
+  
+  <xsl:param name="body.font.master">11</xsl:param>
 
 
   <!-- Color codes for sgmltag[@class="..."] -->
@@ -161,8 +172,6 @@
 
 
   <xsl:template match="author" mode="titlepage.mode">
-    <xsl:message>titlepage.mode: <xsl:value-of select="name()"
-      /></xsl:message>
     <fo:block xsl:use-attribute-sets="book.titlepage.recto.style"
       font-size="17.28pt" space-before="10.8pt"
       keep-with-next.within-column="always">
