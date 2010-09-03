@@ -670,6 +670,7 @@ sub createImageUSB {
 		$kiwi -> failed ();
 		return undef;
 	}
+	push @{$this->{tmpdirs}},$tmpdir;
 	$main::Survive  = "yes";
 	$main::RootTree = "$tmpdir/kiwi-".$text."boot-$$";
 	$main::Prepare  = $boot;
@@ -842,7 +843,6 @@ sub createImageUSB {
 		return undef;
 	}
 	my $newinitrd = $kboot -> setupSplash();
-	$kboot -> cleanTmp();
 	#==========================================
 	# inflate/deflate initrd to make xen happy
 	#------------------------------------------
@@ -1288,7 +1288,7 @@ sub createImageLiveCD {
 		$this -> restoreCDRootData();
 		return undef;
 	}
-	my $tmpdir = qxx (" mktemp -q -d /tmp/kiwi-cdboot.XXXXXX "); chomp $tmpdir;
+	my $tmpdir = qxx ("mktemp -q -d /tmp/kiwi-cdboot.XXXXXX"); chomp $tmpdir;
 	my $result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> error  ("Couldn't create tmp dir: $tmpdir: $!");
@@ -1296,6 +1296,7 @@ sub createImageLiveCD {
 		$this -> restoreCDRootData();
 		return undef;
 	}
+	push @{$this->{tmpdirs}},$tmpdir;
 	$main::Survive  = "yes";
 	$main::RootTree = "$tmpdir/kiwi-cdboot-$$";
 	$main::Prepare  = $boot;
@@ -2469,6 +2470,7 @@ sub createImageSplit {
 		$kiwi -> failed ();
 		return undef;
 	}
+	push @{$this->{tmpdirs}},$tmpdir;
 	$main::Survive  = "yes";
 	$main::RootTree = "$tmpdir/kiwi-splitboot-$$";
 	$main::Prepare  = $boot;
@@ -2620,7 +2622,6 @@ sub createImageSplit {
 		return undef;
 	}
 	$kboot -> setupSplash();
-	$kboot -> cleanTmp();
 	#==========================================
 	# Check further actions due to boot image
 	#------------------------------------------
@@ -3919,6 +3920,7 @@ sub checkKernel {
 		$kiwi -> failed ();
 		return undef;
 	}
+	push @{$this->{tmpdirs}},$tmpdir;
 	#==========================================
 	# 1) unpack initrd...
 	#------------------------------------------
@@ -4088,6 +4090,18 @@ sub getMBRDiskLabel {
 		$bytes[0],$bytes[1],$bytes[2],$bytes[3]
 	);
 	$this->{mbrid} = $nid;
+	return $this;
+}
+
+#==========================================
+# Destructor
+#------------------------------------------
+sub DESTROY {
+	my $this = shift;
+	my $dirs = $this->{tmpdirs};
+	foreach my $dir (@{$dirs}) {
+		qxx ("rm -rf $dir 2>&1");
+	}
 	return $this;
 }
 

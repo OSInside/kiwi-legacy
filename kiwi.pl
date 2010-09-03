@@ -1175,7 +1175,6 @@ sub main {
 			my $code = kiwiExit (1); return $code;
 		}
 		$boot -> setupSplash();
-		$boot -> cleanTmp();
 		my $code = kiwiExit (0); return $code;
 	}
 
@@ -1192,10 +1191,8 @@ sub main {
 			my $code = kiwiExit (1); return $code;
 		}
 		if (! $boot -> setupBootStick()) {
-			$boot -> cleanTmp();
 			my $code = kiwiExit (1); return $code;
 		}
-		$boot -> cleanTmp();
 		my $code = kiwiExit (0); return $code;
 	}
 
@@ -1245,10 +1242,8 @@ sub main {
 			my $code = kiwiExit (1); return $code;
 		}
 		if (! $boot -> setupInstallCD()) {
-			$boot -> cleanTmp();
 			my $code = kiwiExit (1); return $code;
 		}
-		$boot -> cleanTmp();
 		my $code = kiwiExit (0); return $code;
 	}
 
@@ -1268,10 +1263,8 @@ sub main {
 			my $code = kiwiExit (1); return $code;
 		}
 		if (! $boot -> setupInstallStick()) {
-			$boot -> cleanTmp();
 			my $code = kiwiExit (1); return $code;
 		}
-		$boot -> cleanTmp();
 		my $code = kiwiExit (0); return $code;
 	}
 
@@ -1303,10 +1296,8 @@ sub main {
 			my $code = kiwiExit (1); return $code;
 		}
 		if (! $boot -> setupBootDisk()) {
-			$boot -> cleanTmp();
 			my $code = kiwiExit (1); return $code;
 		}
-		$boot -> cleanTmp();
 		$code = kiwiExit (0); return $code;
 	}
 	
