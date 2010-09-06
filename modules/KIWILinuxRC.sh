@@ -2286,11 +2286,14 @@ function kernelCheck {
 	# Check this running kernel against the kernel
 	# installed in the image. If the version does not 
 	# match we need to reboot to activate the system
-	# image kernel.
+	# image kernel which is done if kexec is installed
+	# 
+	# 1) try to load KIWI_KERNEL and KIWI_INITRD if set in config.<MAC>
+	# 2) try to load default kernel set in /IMAGE_NAME file on image
 	# ----
-	kactive=`uname -r`
-	kreboot=1
-	prefix=$1
+	local kactive=`uname -r`
+	local kreboot=1
+	local prefix=$1
 	for i in $prefix/lib/modules/*;do
 		if [ ! -d $i ];then
 			continue
@@ -2302,6 +2305,103 @@ function kernelCheck {
 		fi
 	done
 	if [ $kreboot = 1 ];then
+		if [ -f /sbin/kexec ] ; then
+			Echo "Kernel versions do not match trying boot another kernel..."
+			#======================================
+			# load builtin image configs
+			#--------------------------------------
+			if [ -f $prefix/IMAGE_NAME ] ; then
+				. $prefix/IMAGE_NAME 
+			fi
+			#======================================
+			# check KEXEC_USED from /proc/cmdline
+			#--------------------------------------
+			ldconfig
+			mountSystemFilesystems &>/dev/null
+			KEXEC_USED=$(cat /proc/cmdline |\
+				tr ' ' '\n' | grep 'KEXEC_USED=' |  sed 's/KEXEC_USED=//')
+			kernel_cmdline=$(cat /proc/cmdline |\
+				tr ' ' '\n' | grep -v 'KEXEC_USED=' |\
+				grep -v 'BOOT_IMAGE' | tr '\n' ' ')
+			umountSystemFilesystems
+			#======================================
+			# avoid nonterminating reboot
+			#--------------------------------------
+			if [ -z "$KEXEC_USED" ] ; then
+				: # first try
+			elif [ "$KEXEC_USED" = "1" ] ; then
+				Echo "kernel $KIWI_KERNEL,$KIWI_INITRD not supported"
+				Echo "falling back to $KIWI_KERNEL_DEFAULT,$KIWI_INITRD_DEFAULT"
+				KIWI_KERNEL=""
+				KIWI_INITRD=""
+			elif [ $KEXEC_USED = 2 ] ; then
+				Echo "kexec kernel boot failed for all installed kernels"
+				Echo "Please, check your initrd and root images"
+				REBOOT_IMAGE="yes"
+				sleep 5
+				return 1
+			else
+				Echo "Wrong value of KEXEC_USED option"
+				REBOOT_IMAGE="yes"
+				sleep 5
+				return 1
+			fi
+			#======================================
+			# check for KIWI_KERNEL/KIWI_INITRD
+			#--------------------------------------
+			pathToKernel=$prefix/boot/linux.kiwi
+			pathToInitrd=$prefix/boot/initrd.kiwi
+			if [ -z $KIWI_KERNEL ] ; then
+				KIWI_KERNEL=boot/$KIWI_KERNEL_DEFAULT
+				pathToKernel=$prefix/$KIWI_KERNEL
+			fi
+			if [ -z $KIWI_INITRD ] ; then
+				KIWI_INITRD=boot/$KIWI_INITRD_DEFAULT
+				pathToInitrd=$prefix/$KIWI_INITRD
+			fi
+			#======================================
+			# download kernel and initrd if needed 
+			#--------------------------------------
+			mkdir -p $prefix/boot /boot 2>dev/null
+			if [ ! -e $pathToKernel ] ; then
+				if [ -z `mount | grep rw | grep " $prefix "` ] ; then
+					pathToKernel=/$KIWI_KERNEL
+				fi
+				fetchFile $KIWI_KERNEL $pathToKernel 
+			fi
+			if [ ! -e $pathToInitrd ] ; then
+				if [ -z `mount | grep rw | grep " $prefix "` ] ; then
+					pathToInitrd=/$KIWI_INITRD
+				fi
+				fetchFile $KIWI_INITRD $pathToInitrd
+			fi
+			#======================================
+			# prepare kernel command line
+			#--------------------------------------
+			if [ x"$KERNEL_CMDLINE_ARGS_OVERWRITE" = x"yes" ] ; then
+				KERNEL_CMDLINE_ARGS="$KERNEL_CMDLINE_ARGS"
+			elif [ x"$KERNEL_CMDLINE_ARGS_OVERWRITE" = x"append" ] ; then
+				if [ $KEXEC_USED = 0 ] ; then
+					KERNEL_CMDLINE_ARGS="$kernel_cmdline $KERNEL_CMDLINE_ARGS"
+				else 
+					KERNEL_CMDLINE_ARGS="$kernel_cmdline"
+				fi
+			else
+				KERNEL_CMDLINE_ARGS=""
+			fi
+			KEXEC_USED=$((KEXEC_USED+1))
+			#======================================
+			# load and run kernel...
+			#--------------------------------------
+			if [ -f $pathToKernel -a -f $pathToInitrd ] ; then
+				kexec -l $pathToKernel \
+					--append="$KERNEL_CMDLINE_ARGS KEXEC_USED=$KEXEC_USED" \
+					--initrd=$pathToInitrd
+				kexec -e
+			else
+				Echo "Failed to download $KIWI_KERNEL,$KIWI_INITRD"
+			fi
+		fi
 		Echo "Kernel versions do not match rebooting in 5 sec..."
 		REBOOT_IMAGE="yes"
 		sleep 5
