@@ -3774,35 +3774,46 @@ sub installBootLoader {
 	#------------------------------------------
 	if ($loader eq "zipl") {
 		$kiwi -> info ("Installing zipl on device: $diskname");
-		#==========================================
-		# detect disk geometry of disk image file
-		#------------------------------------------
-		my @geometry = $this -> diskGeometry ($diskname);
-		if (! @geometry) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Failed to detect disk geometry");
-			$kiwi -> failed ();
-			return undef;
+		my $bootdev;
+		my @geometry;
+		my $haveRealDevice = 0;
+		if ($diskname !~ /\/dev\//) {
+			#==========================================
+			# detect disk geometry of disk image file
+			#------------------------------------------
+			@geometry = $this -> diskGeometry ($diskname);
+			if (! @geometry) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Failed to detect disk geometry");
+				$kiwi -> failed ();
+				return undef;
+			}
+			#==========================================
+			# loop mount disk image file
+			#------------------------------------------
+			if (! $this->bindDiskDevice ($diskname)) {
+				return undef;
+			}
+			if (! $this -> bindDiskPartitions ($this->{loop})) {
+				$kiwi -> failed ();
+				$this -> cleanLoop ();
+				return undef;
+			}
+			$bootdev = $this->{bindloop}.$geometry[2];
+			if (! -e $bootdev) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Can't find loop map: $bootdev");
+				$kiwi -> failed ();
+				$this -> cleanLoop ();
+				return undef;
+			}
+		} else {
+			$bootdev = $diskname."1";
+			$haveRealDevice = 1;
 		}
 		#==========================================
-		# loop mount disk image file
+		# mount boot device...
 		#------------------------------------------
-		if (! $this->bindDiskDevice ($diskname)) {
-			return undef;
-		}
-		if (! $this -> bindDiskPartitions ($this->{loop})) {
-			$kiwi -> failed ();
-			$this -> cleanLoop ();
-			return undef;
-		}
-		my $bootdev = $this->{bindloop}.$geometry[2];
-		if (! -e $bootdev) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Can't find loop map: $bootdev");
-			$kiwi -> failed ();
-			$this -> cleanLoop ();
-			return undef;
-		}
 		$status = qxx ("mount $bootdev /mnt 2>&1");
 		$result = $? >> 8;
 		if ($result != 0) {
@@ -3813,37 +3824,39 @@ sub installBootLoader {
 			return undef;
 		}
 		my $mount = "/mnt";
-		#==========================================
-		# rewrite zipl.conf with additional params
-		#------------------------------------------
 		my $config = "$mount/boot/zipl.conf";
-		if (! open (FD,$config)) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Can't open config file for reading: $!");
-			$kiwi -> failed ();
-			qxx ("umount $mount 2>&1");
-			$this -> cleanLoop ();
-			return undef;
-		}
-		my @data = <FD>; close FD;
-		if (! open (FD,">$config")) {
-			$kiwi -> failed ();
-			$kiwi -> error  ("Can't open config file for writing: $!");
-			$kiwi -> failed ();
-			qxx ("umount $mount 2>&1");
-			$this -> cleanLoop ();
-			return undef;
-		}
-		foreach my $line (@data) {
-			print FD $line;
-			if ($line =~ /^:menu/) {
-				print FD "\t"."targetbase = $this->{loop}"."\n";
-				print FD "\t"."targettype = SCSI"."\n";
-				print FD "\t"."targetblocksize = 512"."\n";
-				print FD "\t"."targetoffset = $geometry[1]"."\n";
+		if (! $haveRealDevice) {
+			#==========================================
+			# rewrite zipl.conf with additional params
+			#------------------------------------------
+			if (! open (FD,$config)) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Can't open config file for reading: $!");
+				$kiwi -> failed ();
+				qxx ("umount $mount 2>&1");
+				$this -> cleanLoop ();
+				return undef;
 			}
+			my @data = <FD>; close FD;
+			if (! open (FD,">$config")) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Can't open config file for writing: $!");
+				$kiwi -> failed ();
+				qxx ("umount $mount 2>&1");
+				$this -> cleanLoop ();
+				return undef;
+			}
+			foreach my $line (@data) {
+				print FD $line;
+				if ($line =~ /^:menu/) {
+					print FD "\t"."targetbase = $this->{loop}"."\n";
+					print FD "\t"."targettype = SCSI"."\n";
+					print FD "\t"."targetblocksize = 512"."\n";
+					print FD "\t"."targetoffset = $geometry[1]"."\n";
+				}
+			}
+			close FD;
 		}
-		close FD;
 		#==========================================
 		# call zipl...
 		#------------------------------------------
@@ -4120,10 +4133,66 @@ sub setStoragePartition {
 	my @commands = @{$cmdref};
 	my $result;
 	my $status;
+	my $ignore;
 	if (! defined $tool) {
 		$tool = "fdisk";
 	}
 	SWITCH: for ($tool) {
+		#==========================================
+		# fdasd
+		#------------------------------------------
+		/^fdasd/  && do {
+			$kiwi -> loginfo (
+				"FDASD input: $device [@commands]"
+			);
+			$status = qxx ("dd if=/dev/zero of=$device bs=4096 count=10 2>&1");
+			$result = $? >> 8;
+			if ($result != 0) {
+				$kiwi -> loginfo ($status);
+				return undef;
+			}
+			if (! open (FD,"|/sbin/fdasd $device &> $tmpdir/fdasd.log")) {
+				return undef;
+			}
+			print FD "y\n";
+			foreach my $cmd (@commands) {
+				if (($ignore) && ($cmd =~ /[ntwq]$/)) {
+					undef $ignore;
+				} elsif ($ignore) {
+					next;
+				}
+				if ($cmd eq "a") {
+					$ignore=1;
+					next;
+				}
+				if ($cmd eq "p") {
+					next;
+				}
+				if ($cmd =~ /^[0-9]$/) {
+					next;
+				}
+				if ($cmd eq "83") {
+					$cmd = 1;
+				}
+				if ($cmd eq "82") {
+					$cmd = 2;
+				}
+				if ($cmd eq ".") {
+					print FD "\n";
+				} else {
+					print FD "$cmd\n";
+				}
+			}
+			close FD;
+			$result = $? >> 8;
+			my $flog;
+			if (open (FD,"$tmpdir/fdasd.log")) {
+				my @flog = <FD>; close FD;
+				$flog = join ("\n",@flog);
+				$kiwi -> loginfo ("FDASD: $flog");
+			}
+			last SWITCH;
+		};
 		#==========================================
 		# fdisk
 		#------------------------------------------
