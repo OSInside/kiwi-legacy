@@ -32,7 +32,7 @@
             the following variables: </para>
           <itemizedlist>
             <listitem>
-              <screen>ATFTPD_OPTIONS="––daemon ––no-multicast"</screen>
+              <screen>ATFTPD_OPTIONS="--daemon --no-multicast"</screen>
             </listitem>
             <listitem>
               <screen>ATFTPD_DIRECTORY="/srv/tftpboot"</screen>
@@ -105,8 +105,8 @@ subnet 192.168.100.0 netmask 255.255.255.0 {
 
     <screen><command>cd</command> /usr/share/doc/packages/kiwi/examples
 <command>cd</command> suse-11.2
-<command>kiwi</command> –-prepare ./suse-pxe-client -–root /tmp/mypxe</screen>
-    <screen><command>kiwi</command> -–create /tmp/mypxe –-type pxe -d /tmp/mypxe-result</screen>
+<command>kiwi</command> --prepare ./suse-pxe-client --root /tmp/mypxe</screen>
+    <screen><command>kiwi</command> --create /tmp/mypxe --type pxe -d /tmp/mypxe-result</screen>
   </sect1>
 
   <sect1 id="sec.pxe.using">

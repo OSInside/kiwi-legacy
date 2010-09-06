@@ -38,7 +38,7 @@
       know about all the repositories from which packages has been
       installed to the system. In a first step call: </para>
 
-    <screen><command>kiwi</command> –migrate mySystem </screen>
+    <screen><command>kiwi</command> --migrate mySystem </screen>
 
     <para>This will create an HTML report where you can check which
       packages and patterns could be assigned to the given base
@@ -55,8 +55,8 @@
       that this package can’t be provided or is not worth to become part
       of the migration. </para>
 
-    <screen><command>kiwi</command> –migrate mySystem –nofiles<!-- 
-    -->[ –skip package ... ]</screen>
+    <screen><command>kiwi</command> --migrate mySystem --nofiles<!-- 
+    --> [--skip package ... ]</screen>
   </sect1>
 
   <sect1 id="sec.migrate.watch-overlay">
@@ -143,8 +143,8 @@
       version of the OEM image. If you burn the ISO on a DVD you can use
       that DVD to install your cloned image on another computer. </para>
 
-    <screen><command>kiwi</command> -p /tmp/migrated –root /tmp/mySys
-<command>kiwi</command> –create /tmp/mySys -d /tmp/myResult </screen>
+    <screen><command>kiwi</command> -p /tmp/migrated --root /tmp/mySys
+<command>kiwi</command> --create /tmp/mySys -d /tmp/myResult </screen>
 
     <para>If everything worked well you can test the created OEM image
       in any full virtual operating system environment like Qemu or

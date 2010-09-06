@@ -30,9 +30,9 @@
       11.3 and includes the base pattern. </para>
 
     <screen><command>cd</command> /usr/share/doc/packages/kiwi/examples cd suse-11.2
-<command>kiwi</command> –-prepare ./suse-xen-guest –-root /tmp/myxen</screen>
+<command>kiwi</command> --prepare ./suse-xen-guest --root /tmp/myxen</screen>
 
-    <screen><command>kiwi</command> –-create /tmp/myxen –-type vmx -d /tmp/myxen-result</screen>
+    <screen><command>kiwi</command> --create /tmp/myxen --type vmx -d /tmp/myxen-result</screen>
   </sect1>
 
   <sect1 id="sec.xen.using">

@@ -19,7 +19,7 @@
 
     <screen><command>cd</command> /usr/share/doc/packages/kiwi/examples
 <command>cd</command> suse-11.2
-<command>kiwi</command> –-prepare ./suse-live-stick –-root /tmp/mystick </screen>
+<command>kiwi</command> --prepare ./suse-live-stick --root /tmp/mystick </screen>
 
     <para>There are two possible image types which allows you to drive
       the stick. Both are added into the <filename>config.xml</filename>
@@ -32,7 +32,7 @@
         <para>The first image type named usb creates all required images
           for booting the OS but requires you to plug in the stick and
           let KIWI deploy the data onto this stick. </para>
-        <screen><command>kiwi</command> -–create /tmp/mystick –-type usb d /tmp/mystick-result </screen>
+        <screen><command>kiwi</command> --create /tmp/mystick --type usb d /tmp/mystick-result </screen>
       </listitem>
       <listitem>
         <para>The second image type named oem allows you to create a
@@ -40,7 +40,7 @@
           including all partitions and boot information in one file. You
           simply can <command>dd</command> this file on the stick. </para>
 
-        <screen><command>kiwi</command> –-create /tmp/mystick –-type oem -d /tmp/mystick-result </screen>
+        <screen><command>kiwi</command> --create /tmp/mystick --type oem -d /tmp/mystick-result </screen>
       </listitem>
     </itemizedlist>
   </sect1>
@@ -55,10 +55,10 @@
       partition table on the stick and imports the created images as
       follows: </para>
 
-    <screen><command>kiwi</command> –-bootstick \
+    <screen><command>kiwi</command> --bootstick \
     /tmp/mystick-result/ \
     initrd-usbboot-suse-11.2.i686-2.1.1.splash.gz \
-    –-bootstick-system \
+    --bootstick-system \
     /tmp/mystick-result/ \
     suse-11.2-live-stick.i686-1.1.2</screen>
 

@@ -24,6 +24,24 @@
     <xsl:attribute name="background-color">#E0E0E0</xsl:attribute>
   </xsl:attribute-set>
 
+  <xsl:attribute-set name="monospace.properties">
+    <xsl:attribute name="font-size">
+      <xsl:choose>
+        <xsl:when test="ancestor::title">inherit</xsl:when>
+        <xsl:otherwise>
+          <xsl:value-of select="$body.font.master * 0.9"/>
+          <xsl:text>pt</xsl:text>
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:attribute>
+  </xsl:attribute-set>
+  <xsl:attribute-set name="monospace.verbatim.properties">
+    <xsl:attribute name="font-size">
+      <xsl:value-of select="$body.font.master * 0.8"/>
+      <xsl:text>pt</xsl:text>
+    </xsl:attribute>
+  </xsl:attribute-set>
+  
   <!--
     <xsl:param name="toc.section.depth" select="3"/>
     <xsl:param name="toc.max.depth" select="4"/>
@@ -126,33 +144,25 @@
         </xsl:call-template>
       </xsl:when>
       <xsl:when test="$class='starttag'">
-        <fo:inline color="{$sgmltag.starttag.color}">
-          <xsl:call-template name="inline.monoseq">
-            <xsl:with-param name="content">
-              <xsl:text>&lt;</xsl:text>
-              <xsl:apply-templates/>
-              <xsl:text>&gt;</xsl:text>
-            </xsl:with-param>
-          </xsl:call-template>
+        <fo:inline color="{$sgmltag.starttag.color}" font-family="{$monospace.font.family}">
+            <xsl:text>&lt;</xsl:text>
+            <xsl:apply-templates/>
+            <xsl:text>&gt;</xsl:text>
         </fo:inline>
       </xsl:when>
       <xsl:when test="$class='emptytag'">
-        <xsl:call-template name="inline.monoseq">
-          <xsl:with-param name="content">
+          <fo:inline font-family="{$monospace.font.family}">
             <xsl:text>&lt;</xsl:text>
             <xsl:apply-templates/>
             <xsl:text>/&gt;</xsl:text>
-          </xsl:with-param>
-        </xsl:call-template>
+          </fo:inline>
       </xsl:when>
       <xsl:when test="$class='sgmlcomment' or $class='comment'">
-        <xsl:call-template name="inline.monoseq">
-          <xsl:with-param name="content">
-            <xsl:text>&lt;!--</xsl:text>
-            <xsl:apply-templates/>
-            <xsl:text>--&gt;</xsl:text>
-          </xsl:with-param>
-        </xsl:call-template>
+        <fo:inline>
+          <xsl:text>&lt;!--</xsl:text>
+          <xsl:apply-templates/>
+          <xsl:text>--&gt;</xsl:text>
+        </fo:inline>
       </xsl:when>
       <xsl:otherwise>
         <xsl:call-template name="inline.charseq"/>

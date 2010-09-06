@@ -101,7 +101,7 @@
       <listitem>
         <para> Configuration file which has been created by AutoYaST. To
           be able to create such an AutoYaST profile, run: </para>
-        <screen>yast2 autoyast</screen>
+        <screen><command>yast2</command> autoyast</screen>
         <para>Once you have saved the information from the AutoYaST UI
           as <filename>config-yast-autoyast.xml</filename> file in your
           image description directory KIWI will process on the file and
@@ -238,7 +238,7 @@
 
     <sect2 id="sec.description.description">
       <title><sgmltag>description</sgmltag> Element</title>
-      <screen> &lt;description type="system"&gt;
+      <screen>&lt;description type="system"&gt;
   &lt;author&gt;an author&lt;/author&gt;
   &lt;contact&gt;mail&lt;/contact&gt;
   &lt;specification&gt;short info&lt;/specification&gt;
@@ -254,7 +254,7 @@
 
     <sect2 id="sec.description.profiles">
       <title><sgmltag>profiles</sgmltag> Element</title>
-      <screen> &lt;profiles&gt;
+      <screen>&lt;profiles&gt;
    &lt;profile name="name" description="text"/&gt;
    <sgmltag class="sgmlcomment"> ... </sgmltag>
 &lt;/profiles&gt;</screen>
@@ -993,7 +993,7 @@
                   use the following command to obtain a list of
                   supported values: </para>
 
-                <screen><command>sfdisk</command> –list-type </screen>
+                <screen><command>sfdisk</command> --list-type </screen>
 
                 <para>The required <sgmltag class="attribute"
                     >number</sgmltag> attribute provides the the number

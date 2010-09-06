@@ -46,7 +46,7 @@
     creating an EC2 with KIWI after you can make sure your system is
     prepared for EC2 which means if you call the command
       <command>ec2-describe-images</command>
-    <option>–a</option> you will get a valid output. </para>
+    <option>-a</option> you will get a valid output. </para>
   
   <sect1 id="sec.ec2.building">
     <title>Building the suse-xen-guest Example for EC2</title>
@@ -67,8 +67,8 @@
 
     <screen><command>cd</command> /usr/share/doc/packages/kiwi/examples 
 <command>cd</command> suse-11.3
-<command>kiwi</command> --prepare ./suse-xen-guest –-add-profile \
-  ec2Flavour -–root /tmp/myec2</screen>
+<command>kiwi</command> --prepare ./suse-xen-guest --add-profile \
+  ec2Flavour --root /tmp/myec2</screen>
 
     <screen><command>kiwi</command> --create /tmp/myec2 --add-profile \ 
  ec2Flavour --type vmx -d /tmp/myec2-result</screen>

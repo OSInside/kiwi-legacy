@@ -21,9 +21,9 @@
 
     <screen><command>cd</command> /usr/share/doc/packages/kiwi/examples 
 <command>cd</command> suse-11.2
-<command>kiwi</command> –prepare ./suse-vm-guest -–root /tmp/myvm </screen>
+<command>kiwi</command> --prepare ./suse-vm-guest --root /tmp/myvm </screen>
 
-    <screen><command>kiwi</command> –-create /tmp/myvm –-type vmx -d /tmp/myvm-result</screen>
+    <screen><command>kiwi</command> --create /tmp/myvm --type vmx -d /tmp/myvm-result</screen>
   </sect1>
 
   <sect1 id="sec.vmx.using">
@@ -55,44 +55,33 @@
     <para>The following table lists the supported virtual disk
       formats:</para>
 
-    <informaltable>
-      <tr>
-        <td>
-          <para>
-            <emphasis role="bold">Name</emphasis>
-          </para>
-        </td>
-        <td>
-          <para>
-            <emphasis role="bold">Description</emphasis>
-          </para>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <para>vmdk </para>
-        </td>
-        <td>
-          <para>Disk format for VMware </para>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <para>ovf </para>
-        </td>
-        <td>
-          <para> Open Virtual Format requires VMwares ovftool </para>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <para>qcow2 </para>
-        </td>
-        <td>
-          <para> QEMU virtual disk format </para>
-        </td>
-      </tr>
-    </informaltable>
+    <table id="tab.vmx.supported-disk-formats">
+      <title>Supported Virtual Disk Formats</title>
+      <tgroup cols="2">
+        <colspec colwidth="1*"/>
+        <colspec colwidth="3*"/>
+        <thead>
+          <row>
+            <entry>Name</entry>
+            <entry>Description</entry>
+          </row>
+        </thead>
+        <tbody>
+          <row>
+            <entry>vmdk</entry>
+            <entry>Disk format for VMware</entry>
+          </row>
+          <row>
+            <entry>ovf</entry>
+            <entry>Open Virtual Format requires VMwares ovftool</entry>
+          </row>
+          <row>
+            <entry>qcow2</entry>
+            <entry>QEMU virtual disk format</entry>
+          </row>
+        </tbody>
+      </tgroup>      
+    </table>
 
     <sect2 id="sec.vmx.vmware-support">
       <title>VMware support</title>
@@ -167,8 +156,8 @@
         or add the attribute lvm="true" as part of the type section in
         your <filename>config.xml</filename> file. </para>
 
-      <screen><command>kiwi</command> –-create /tmp/myvm –-type vmx<!--
-       --> -d /tmp/myvm-result –-lvm </screen>
+      <screen><command>kiwi</command> --create /tmp/myvm --type vmx<!--
+       --> -d /tmp/myvm-result --lvm </screen>
 
       <para>With the optional lvmvolumes section you can set one or more
         top level directories into a separate volume. See <xref
