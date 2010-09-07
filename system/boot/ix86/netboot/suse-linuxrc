@@ -244,6 +244,12 @@ if [ $LOCAL_BOOT = "no" ];then
 	#======================================
 	# Check alternative config names
 	#--------------------------------------
+	if [ ! -s $CONFIG ] ; then
+		searchGroupConfig
+	fi
+	#======================================
+	# Check alternative config names
+	#--------------------------------------
 	if [ ! -s $CONFIG ];then
 		searchAlternativeConfig
 	fi
@@ -294,6 +300,9 @@ if [ $LOCAL_BOOT = "no" ];then
 			Echo "Checking for config file: config.$DHCPCHADDR"
 			dhcpcd -n $PXE_IFACE
 			fetchFile KIWI/config.$DHCPCHADDR $CONFIG
+			if [ ! -s $CONFIG ] ; then
+				searchGroupConfig
+			fi
 			if test ! -s $CONFIG;then
 				searchAlternativeConfig
 			fi

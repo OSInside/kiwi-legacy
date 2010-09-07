@@ -798,4 +798,135 @@ KIWI_INITRD=/boot/initrd</screen>
       </itemizedlist>
     </sect2>
   </sect1>
+  <sect1 id="sec.pxe.groups">
+    <title>Hardware Grouping</title>
+    <para>While the PXE standard takes care of the ability to create hardware groups via hardware or
+      IP address groups, it does not take into account groups for non-contiguous hardware or IP
+      addresses. The PXE standard makes the assumption that each hardware group will be clearly
+      deliniated by a range of IP addresses, or the hardware is from the same vendor. While an ideal
+      scenario, this may not be the case in an established, slightly dated installation where the
+      hardware itself has out-lived the vendors that made them.</para>
+
+    <para>KIWI has the ability to create groups for non-contiguous configurations
+      where different hardware types may be involved due to newer equipment being rotated into
+      production or older hardware failing and replacements are from different vendors. In addition,
+      an organization might decide to organized their equipment by function, rather then by vendor,
+      and may not be able to use the same hardware from one end to the other. </para>
+    <sect2>
+      <title>The Group Configuration File</title>
+      <para>To make use of the grouping functionality, some new configuration files will be
+        required. These configurations files currently have to be manually managed rather then
+        provided, however future versions of KIWI may provide a means of managing groups more
+        effectively once this feature stabilizes. The number of configuration files required will
+        depend on the number of hardware groups that will be created, rather then one configuration
+        file for each MAC address that will reside on the network. </para>
+      <para>There will be one configuration file that will always be required if using groups,
+        called:</para>
+      <screen>/srv/tftpboot/KIWI/config.group</screen>
+      <para>This file has a new static element that would be required, and one or more dynamic
+        elements depending on the number of groups that will be created. For example, the
+        config.group file defined below lists 3 distinct groups:</para>
+      <screen>KIWI_GROUP="test1, test2, test3"
+
+test1_KIWI_MAC_LIST="11:11:11:11:11:11, 00:11:00:11:22:CA"
+
+test2_KIWI_MAC_LIST="00:22:00:44:00:4D, 99:3F:21:A2:F4:32"
+
+test3_KIWI_MAC_LIST="00:54:33:FA:44:33, 84:3D:45:2F:5F:33"</screen>
+      <para>Note: The above hardware addresses contain random entries, and may not reflect actual
+        hardware.</para>
+      <para>As we can see in the above example the file contains 1 static element, KIWI_GROUP, and 3
+        dynamic elements "test1_KIWI_MAC_LIST, test2_KIWI_MAC_LIST and test3_KIWI_MAC_LIST". The
+        definitions of these elements are as follows:</para>
+      <itemizedlist>
+        <listitem>
+          <para>KIWI_GROUP</para>
+          <para>This element is the only static definition that needs to exist when using groups.
+            While there is no implicit limit to the number of groups that can be configured, it
+            should be kept to a minimum for reasonable management or it could quickly become
+            un-manageable. It will contain one or more group names separted by comma's (,) and
+            spacing (for readability). In the above example, our group names were:</para>
+          <itemizedlist>
+            <listitem>
+              <para>test1</para>
+            </listitem>
+            <listitem>
+              <para>test2</para>
+            </listitem>
+            <listitem>
+              <para>test3</para>
+            </listitem>
+          </itemizedlist>
+          <para>Valid group names are made up of upper and lower case letters, numeric, and
+            underscore characters. The same rules used to define bash/sh variable names should apply
+            here, as these names will have to be used as fully defined bash/sh variables when
+            linking hardware addresses to an assigned group. The following screen contains an
+            example of valid names:</para>
+          <screen>KIWI_GROUP="test1, test_my_name, LIST_HARDWARE, Multple_Case_Group_1"</screen>
+        </listitem>
+        <listitem>
+          <para>&lt;GROUP_NAME>_KIWI_MAC_LIST</para>
+          <para>The name of this element is dynamic and depends entirely on the list of group names
+            that were previously defined. Each group name defined that was used in the KIWI_GROUP
+            variable, must contain a matching dynamic element, and have KIWI_MAC_LIST appended to
+            the name. For example, to create hardware lists for the groups defined in our first
+            example, we need 3 dynamic variables called:</para>
+          <itemizedlist>
+            <listitem>
+              <para>test1_KIWI_MAC_LIST</para>
+            </listitem>
+            <listitem>
+              <para>test2_KIWI_MAC_LIST</para>
+            </listitem>
+            <listitem>
+              <para>test3_KIWI_MAC_LIST</para>
+            </listitem>
+          </itemizedlist>
+          <para>These variables will contain a comma delimited list of the hardware addresses for
+            all of the machines being assigned to the appropriate group, but there are some caveats
+            that need to be kept in mind. The first caveat is for hardware addresses that contain
+            the HEX characters A-F. The PXE standard uses capital letters for these characters, and
+            as a result KIWI does upper case comparisons, so a MAC address that is defined with
+            lower case letters in this list will never get matched. The second caveat is that as the
+            list gets longer, it can be harder to maintain, in addition it has the potential to slow
+            down the booting process.</para>
+          <para>Testing has been completed with 1500+ hosts defined, and there was little delay when
+            transfering the file to a single host, but it will have a larger impact when trying to
+            download the same file to 1500+ hosts, so some consideration will have to take that into
+            account. However, the comparison itself still occurred in under half a second while
+            searching through all 1500+ MAC addresses across 3 defined groups.</para>
+        </listitem>
+      </itemizedlist>
+    </sect2>
+    <sect2>
+      <title>The Hardware Group File</title>
+      <para>In addition to the config.group file, each defined group will require the addition of a
+        config.&lt;GROUP_NAME> file. This file is exactly like a standard KIWI config.&lt;MAC> file,
+        but is assigned to a group of hosts rather then a single unit. If we continue with the
+        example we used in the previous section, we would need the following files:</para>
+      <screen>/srv/tftpboot/KIWI/config.test1
+/srv/tftpboot/KIWI/config.test2
+/srv/tftpboot/KIWI/config.test3</screen>
+      <para>The contents of these files are the same that would normally reside in a config.&lt;MAC>
+        file, and all defintions that would be supported for a single host, are supported for a
+        group of hosts. In addition, if a host is matched to a group, yet the config.&lt;GROUP_NAME>
+        file does not exist, KIWI will error out.</para>
+      <para>For example, the following configiuration file, called config.test1 would be used for
+        the group called "test1":</para>
+      <screen>DISK=/dev/sda
+PART=5;S;x,x;L;/
+IMAGE=/dev/sda2;suse-11.2-pxe-client.i686;1.2.8;192.168.100.2;4096
+CONF=CONFIGURATIONS/xorg.conf.test1;/etc/X11/xorg.conf;192.168.100.2;4096,CONFIGURATIONS/syslog.conf;/etc/sysconfig/syslog.conf;192.168.100.2;4096</screen>
+      <para>As a result of this configuration file, the image would be configured consistantly
+        across the hosts assigned to test1. The following file called config.test2, might contain a
+        small change that may be specific to a function:</para>
+      <screen>DISK=/dev/sda
+PART=5;S;x,x;L;/
+IMAGE=/dev/sda2;suse-11.2-pxe-client.i686;1.2.8;192.168.100.2;4096
+CONF=CONFIGURATIONS/xorg.conf.test2;/etc/X11/xorg.conf;192.168.100.2;4096,CONFIGURATIONS/syslog.conf;/etc/sysconfig/syslog.conf;192.168.100.2;4096</screen>
+      <para>As we can see, while group 1 and 2 share the syslog.conf configuration file, they have
+        different xorg.conf files defined, there fore two distinct groups with one or more hosts
+        assigned to each group can now be configured by managing a smaller number of files.</para>
+    </sect2>
+  </sect1>
 </chapter>

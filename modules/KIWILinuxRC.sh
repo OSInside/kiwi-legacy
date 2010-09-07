@@ -4247,6 +4247,71 @@ function cleanInitrd {
 	hash -r
 }
 #======================================
+# searchGroupConfig
+#--------------------------------------
+function searchGroupConfig {
+	local localhwaddr=$DHCPCHADDR
+	local GROUPCONFIG=/etc/config.group
+	local list_var
+	local mac_list
+	#======================================
+	# Load group file if it exists
+	#--------------------------------------
+	Echo "Checking for config file: config.group";
+	fetchFile KIWI/config.group $GROUPCONFIG
+	if [ ! -s $GROUPCONFIG ]; then
+		return
+	fi
+	Echo "Found config.group, determining available groups";
+	importFile < $GROUPCONFIG
+	Debug "KIWI_GROUP = '$KIWI_GROUP'"
+	#======================================
+	# Parse group file
+	#--------------------------------------
+	if [ -z "$KIWI_GROUP" ] ; then
+		systemException \
+			"No groups defined in $GROUPCONFIG" \
+		"reboot"
+	fi
+	for i in `echo "$KIWI_GROUP" | sed 's/,/ /g' | sed 's/[ \t]+/ /g'`; do
+		Echo "Lookup MAC address: $localhwaddr in ${i}_KIWI_MAC_LIST"
+		eval list_var="${i}_KIWI_MAC_LIST"
+		eval mac_list=\$$list_var
+		searchGroupHardwareAddress $mac_list $i
+		if [ -s $CONFIG ]; then
+			break
+		fi
+		unset list_var
+		unset mac_list
+	done
+}
+#======================================
+# searchGroupHardwareAddress
+#--------------------------------------
+function searchGroupHardwareAddress {
+	# /.../
+	# function to check the existance of the hosts
+	# hardware address within the defined "mac_list".
+	# If the hardware address is found, load the config file.
+	# ----
+	local localhwaddr=$DHCPCHADDR
+	local mac_list=$1
+	local local_group=$2
+	for j in `echo "$mac_list" | sed 's/,/ /g' | sed 's/[ \t]+/ /g'`; do
+		if [ "$localhwaddr" = "$j" ] ; then
+			Echo "MAC address $localhwaddr found in group $local_group"
+			Echo "Checking for config file: config.$local_group"
+			fetchFile KIWI/config.$local_group $CONFIG
+			if [ ! -s $CONFIG ]; then
+				systemException \
+					"No configuration found for $j" \
+				"reboot"
+			fi
+			break
+		fi
+	done
+}
+#======================================
 # searchAlternativeConfig
 #--------------------------------------
 function searchAlternativeConfig {
