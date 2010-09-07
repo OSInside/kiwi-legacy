@@ -1,18 +1,6 @@
 # /.../
 # Makefile for building kiwi Cook Book (HTML and PDF) plus
-# manual pages. Required packages are:
-# ----
-# libxslt
-# docbook_4
-# docbook-xsl-stylesheets
-# fop
-# fop-offo
-# excalibur-avalon-framework
-# xmlgraphics-commons
-# batik
-# docbook-dsssl-stylesheets 
-# dejavu
-# sil-charis
+# manual pages.
 # ----
 #
 KV=`cat Revision.txt`
@@ -73,3 +61,11 @@ clean:
 	rm -f kiwi.pdf
 	rm -f kiwi.fo
 	make -C images clean
+
+check:
+	@echo "Checking for packages..."
+	rpm -q libxml2 libxslt \
+		docbook_4 docbook-xsl-stylesheets \
+		fop fop-offo batik \
+		excalibur-avalon-framework xmlgraphics-commons \
+		dejavu sil-charis
