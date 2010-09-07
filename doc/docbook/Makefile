@@ -11,11 +11,19 @@ SOURCE=kiwi-doc.xml kiwi-doc-*.xml kiwi-man-*.xml
 FIG=images/*.fig
 FOPCONFIG=etc/fop.xml
 
+all:html pdf man
+
 html:kiwi.html
+	mv kiwi.html ../
 
 pdf:kiwi.pdf
+	mv kiwi.pdf ../
 
 man:${MAN}
+	mv KIWI::config.sh.1 ../
+	mv KIWI::images.sh.1 ../
+	mv KIWI::kiwirc.1 ../
+	mv kiwi.1 ../
 
 images/*.png:${FIG}
 	make -C images all

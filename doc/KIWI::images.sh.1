@@ -1,0 +1,212 @@
+'\" t
+.\"     Title: kiwi::images.sh
+.\"    Author: Marcus Schäfer <ms (AT) suse.de>
+.\" Generator: DocBook XSL Stylesheets v1.75.2 <http://docbook.sf.net/>
+.\"      Date: Created: 09/07/2010
+.\"    Manual: KIWI Manualpage
+.\"    Source: KIWI 4.58
+.\"  Language: English
+.\"
+.TH "KIWI::IMAGES\&.SH" "1" "Created: 09/07/2010" "KIWI 4\&.58" "KIWI Manualpage"
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+KIWI::images.sh \- Configuration File for KIWI image description
+.SH "DESCRIPTION"
+.PP
+The KIWI image description allows to have an optional
+images\&.sh
+script in place\&. This script is called at the beginning of the KIWI create step\&. It is allowed to remove software there to shrink down the size of the image\&. Most often
+images\&.sh
+is used for boot images because they needs to be small\&. As
+images\&.sh
+is called in the create step you should be aware to design the script in a way that it can be called multiple times without shooting itself into its knee\&. As kiwi allows to create different image types from one previosly prepared tree one needs to take into account that images\&.sh can be called more than one time\&. If you exit images\&.sh with an exit code != 0 kiwi will exit with an error too\&.
+.PP
+\fBExample\ \&1.\ \&Template for images.sh\fR
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+#======================================
+# Functions\&.\&.\&.
+#\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
+test \-f /\&.kconfig && \&. /\&.kconfig
+test \-f /\&.profile && \&. /\&.profile
+
+#======================================
+# Greeting\&.\&.\&.
+#\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
+echo "Configure image: [$kiwi_iname]\&.\&.\&."
+
+#======================================
+# Call configuration code/functions
+#\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
+\&.\&.\&.
+
+#======================================
+# Exit safely
+#\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
+exit
+.fi
+.if n \{\
+.RE
+.\}
+.SH "COMMON FUNCTIONS"
+.PP
+The
+\&.kconfig
+file allows to make use of a common set of functions\&. Those which are SUSE Linux specific starts with the name
+\fIsuse\fR\&. Those which are common to all linux systems starts with the name
+\fIbase\fR\&. The following list describes which functions are available for
+images\&.sh\&.
+.PP
+[baseCleanMount]
+.RS 4
+Umount the system filesystems
+/proc,
+/dev/pts, and
+/sys
+.RE
+.PP
+[baseGetProfilesUsed]
+.RS 4
+Return the name(s) of profiles used to build this image
+.RE
+.PP
+[baseGetPackagesForDeletion]
+.RS 4
+Return the list of packages setup in the packages
+type="delete" section of the
+config\&.xml
+used to build this image
+.RE
+.PP
+[baseSetupOEMPartition]
+.RS 4
+Writes the file
+/config\&.oempartition
+depending on the following
+config\&.xml
+parameters: oem\-reboot, oem\-swapsize, oem\-systemsize, oem\-home,oem\-swap,oem\-boot\-title,oem\-recovery, oem\-kiwi\-initrd\&. kiwi takes the information from
+config\&.xml
+and creates the config\&.oempartition file as part of the automatically created boot image (initrd)\&. The information must be available as part of the boot image because it controls the OEM repartition workflow on first boot of an OEM image\&. Detailed information about the meaning of each option can be found in the OEM chapter in the kiwi cookbook
+.RE
+.PP
+[suseGFXBoot {theme} {loadertyp}]
+.RS 4
+This function requires the gfxboot and at least one bootsplash\-theme\-* package to be installed in order to work correctly\&. The function creates from this package data a graphics boot screen for the isolinux and grub boot loaders\&. Additionally it creates the bootsplash files for the resolutions 800x600, 1024x768, and 1280x1024
+.RE
+.PP
+[suseStripKernel]
+.RS 4
+This function removes all kernel drivers which are not listed in the *drivers sections of the
+config\&.xml
+file\&.
+.RE
+.PP
+[suseStripInitrd]
+.RS 4
+This function removes a whole bunch of tools binaries and libraries which are not required in order to boot a suse system with KIWI\&.
+.RE
+.PP
+[Rm {list of files}]
+.RS 4
+Helper function to delete files and anounce it to log
+.RE
+.PP
+[Rpm {rpm commandline}]
+.RS 4
+Helper function to the rpm function and anounce it to log\&.
+.RE
+.PP
+[Echo {echo commandline}]
+.RS 4
+Helper function to print a message to the controling terminal
+.RE
+.PP
+[Debug {message}]
+.RS 4
+Helper function to print a message if the variable
+\fIDEBUG\fR
+is set to 1
+.RE
+.SH "PROFILE ENVIRONMENT VARIABLES"
+.PP
+The \&.profile environment file contains a specific set of variables which are listed below\&. Some of the functions above makes use of the variables\&.
+.PP
+[$kiwi_iname]
+.RS 4
+The name of the image as listed in config\&.xml
+.RE
+.PP
+[$kiwi_iversion]
+.RS 4
+The image version string major\&.minor\&.release
+.RE
+.PP
+[$kiwi_keytablee]
+.RS 4
+The contents of the keytable setup as done in
+config\&.xml
+.RE
+.PP
+[$kiwi_language]
+.RS 4
+The contents of the locale setup as done in
+config\&.xml
+.RE
+.PP
+[$kiwi_timezone]
+.RS 4
+The contents of the timezone setup as done in
+config\&.xml
+.RE
+.PP
+[$kiwi_delete]
+.RS 4
+A list of all packages which are part of the packages section with
+type="delete" in
+config\&.xml
+.RE
+.PP
+[$kiwi_profiles]
+.RS 4
+A list of profiles used to build this image
+.RE
+.PP
+[$kiwi_drivers]
+.RS 4
+A comma seperated list of the driver entries as listed in the drivers section of the
+config\&.xml\&. Similar variables exists for the usbdrivers and scsidrivers sections
+.RE
+.PP
+[$kiwi_size]
+.RS 4
+The predefined size value for this image\&. This is not the computed size but only the optional size value of the preferences section in
+config\&.xml
+.RE
+.PP
+[$kiwi_compressed]
+.RS 4
+The value of the compressed attribute set in the type element in config\&.xml
+.RE
+.PP
+[$kiwi_type]
+.RS 4
+The basic image type\&. Can be a simply filesystem image type of ext2, ext3, reiserfs, squashfs, and cpio or one of the following complex image types: iso split usb vmx oem xen pxe
+.RE
+.SH "AUTHOR"
+.PP
+\fBMarcus Schäfer\fR <\&ms (AT) suse\&.de\&>
+.RS 4
+Developer
+.RE

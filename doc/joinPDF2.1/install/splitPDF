@@ -1,6 +1,0 @@
-#!/bin/sh
-
-#splitPDF srcfile destfile1 destfile2 pagenumber
-#splitPDF srcfile
-
-java -cp ../joinPDF2.1/install/PDF.jar Split "$@"

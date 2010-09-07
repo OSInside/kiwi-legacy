@@ -383,6 +383,8 @@ rm -rf $RPM_BUILD_ROOT
 %doc %{_defaultdocdir}/kiwi/COPYING
 %doc %{_defaultdocdir}/kiwi/examples
 %doc %{_defaultdocdir}/kiwi/kiwi.pdf
+%doc %{_defaultdocdir}/kiwi/kiwi.html
+%doc %{_defaultdocdir}/kiwi/susebooks.css
 %doc %{_defaultdocdir}/kiwi/schema
 #=================================================
 # KIWI instsource...      

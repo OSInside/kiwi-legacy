@@ -1,5 +1,0 @@
-#!/bin/sh
-
-# arg: destfile file1 [file2 ...]
-
-java -cp ../joinPDF2.1/install/PDF.jar Concat "$@"

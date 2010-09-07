@@ -1,161 +1,13 @@
+'\" t
 .\"     Title: kiwi::config.sh
 .\"    Author: Marcus Schäfer <ms (AT) suse.de>
-.\" Generator: DocBook XSL Stylesheets v1.74.0 <http://docbook.sf.net/>
-.\"      Date: Created: 08/30/2010
+.\" Generator: DocBook XSL Stylesheets v1.75.2 <http://docbook.sf.net/>
+.\"      Date: Created: 09/07/2010
 .\"    Manual: KIWI Manualpage
 .\"    Source: KIWI 4.58
 .\"  Language: English
 .\"
-.TH "KIWI::CONFIG\&.SH" "1" "Created: 08/30/2010" "KIWI 4\&.58" "KIWI Manualpage"
-.\" -----------------------------------------------------------------
-.\" * (re)Define some macros
-.\" -----------------------------------------------------------------
-.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.\" toupper - uppercase a string (locale-aware)
-.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.de toupper
-.tr aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ
-\\$*
-.tr aabbccddeeffgghhiijjkkllmmnnooppqqrrssttuuvvwwxxyyzz
-..
-.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.\" SH-xref - format a cross-reference to an SH section
-.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.de SH-xref
-.ie n \{\
-.\}
-.toupper \\$*
-.el \{\
-\\$*
-.\}
-..
-.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.\" SH - level-one heading that works better for non-TTY output
-.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.de1 SH
-.\" put an extra blank line of space above the head in non-TTY output
-.if t \{\
-.sp 1
-.\}
-.sp \\n[PD]u
-.nr an-level 1
-.set-an-margin
-.nr an-prevailing-indent \\n[IN]
-.fi
-.in \\n[an-margin]u
-.ti 0
-.HTML-TAG ".NH \\n[an-level]"
-.it 1 an-trap
-.nr an-no-space-flag 1
-.nr an-break-flag 1
-\." make the size of the head bigger
-.ps +3
-.ft B
-.ne (2v + 1u)
-.ie n \{\
-.\" if n (TTY output), use uppercase
-.toupper \\$*
-.\}
-.el \{\
-.nr an-break-flag 0
-.\" if not n (not TTY), use normal case (not uppercase)
-\\$1
-.in \\n[an-margin]u
-.ti 0
-.\" if not n (not TTY), put a border/line under subheading
-.sp -.6
-\l'\n(.lu'
-.\}
-..
-.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.\" SS - level-two heading that works better for non-TTY output
-.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.de1 SS
-.sp \\n[PD]u
-.nr an-level 1
-.set-an-margin
-.nr an-prevailing-indent \\n[IN]
-.fi
-.in \\n[IN]u
-.ti \\n[SN]u
-.it 1 an-trap
-.nr an-no-space-flag 1
-.nr an-break-flag 1
-.ps \\n[PS-SS]u
-\." make the size of the head bigger
-.ps +2
-.ft B
-.ne (2v + 1u)
-.if \\n[.$] \&\\$*
-..
-.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.\" BB/BE - put background/screen (filled box) around block of text
-.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.de BB
-.if t \{\
-.sp -.5
-.br
-.in +2n
-.ll -2n
-.gcolor red
-.di BX
-.\}
-..
-.de EB
-.if t \{\
-.if "\\$2"adjust-for-leading-newline" \{\
-.sp -1
-.\}
-.br
-.di
-.in
-.ll
-.gcolor
-.nr BW \\n(.lu-\\n(.i
-.nr BH \\n(dn+.5v
-.ne \\n(BHu+.5v
-.ie "\\$2"adjust-for-leading-newline" \{\
-\M[\\$1]\h'1n'\v'+.5v'\D'P \\n(BWu 0 0 \\n(BHu -\\n(BWu 0 0 -\\n(BHu'\M[]
-.\}
-.el \{\
-\M[\\$1]\h'1n'\v'-.5v'\D'P \\n(BWu 0 0 \\n(BHu -\\n(BWu 0 0 -\\n(BHu'\M[]
-.\}
-.in 0
-.sp -.5v
-.nf
-.BX
-.in
-.sp .5v
-.fi
-.\}
-..
-.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.\" BM/EM - put colored marker in margin next to block of text
-.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.de BM
-.if t \{\
-.br
-.ll -2n
-.gcolor red
-.di BX
-.\}
-..
-.de EM
-.if t \{\
-.br
-.di
-.ll
-.gcolor
-.nr BH \\n(dn
-.ne \\n(BHu
-\M[\\$1]\D'P -.75n 0 0 \\n(BHu -(\\n[.i]u - \\n(INu - .75n) 0 0 -\\n(BHu'\M[]
-.in 0
-.nf
-.BX
-.in
-.fi
-.\}
-..
+.TH "KIWI::CONFIG\&.SH" "1" "Created: 09/07/2010" "KIWI 4\&.58" "KIWI Manualpage"
 .\" -----------------------------------------------------------------
 .\" * set default formatting
 .\" -----------------------------------------------------------------
@@ -166,28 +18,20 @@
 .\" -----------------------------------------------------------------
 .\" * MAIN CONTENT STARTS HERE *
 .\" -----------------------------------------------------------------
-.SH "Name"
+.SH "NAME"
 KIWI::config.sh \- Configuration File for KIWI image description
-.SH "Description"
+.SH "DESCRIPTION"
 .PP
 The kiwi image description allows to have an optional config\&.sh script in place\&. This script should be designed to take over control of adding the image operating system configuration\&. Configuration in that sense means stuff like activating services, creating configuration files, prepare an environment for a firstboot workflow, etc\&. What you shouldn\'t do in config\&.sh is breaking your systems integrity by for example removing packages or pieces of software\&. Something like that can be done in images\&.sh\&. config\&.sh is called
 \fIafter\fR
 the user and groups have been set up\&. If there are SUSE Linux related YaST xml information these are validated before config\&.sh is called too\&. If you exit config\&.sh with an exit code != 0 kiwi will exit with an error too\&.
 .PP
-\fBExample\ \&1.\ \&Template\fR
+\fBExample\ \&1.\ \&Template for config.sh\fR
 .sp
 .if n \{\
 .RS 4
 .\}
-.fam C
-.ps -1
 .nf
-.if t \{\
-.sp -1
-.\}
-.BB lightgray adjust-for-leading-newline
-.sp -1
-
 #======================================
 # Functions\&.\&.\&.
 #\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
@@ -208,30 +52,33 @@ echo "Configure image: [$kiwi_iname]\&.\&.\&."
 # Exit safely
 #\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
 exit
-.EB lightgray adjust-for-leading-newline
-.if t \{\
-.sp 1
-.\}
 .fi
-.fam
-.ps +1
 .if n \{\
 .RE
 .\}
-.SH "Common functions"
+.SH "COMMON FUNCTIONS"
 .PP
-The \&.kconfig file allows to make use of a common set of functions\&. Those which are SUSE Linux specific starts with the name
+The
+\&.kconfig
+file allows to make use of a common set of functions\&. Those which are SUSE Linux specific starts with the name
 \fIsuse\fR\&. Those which are common to all linux systems starts with the name
-\fIbase\fR\&. The following list describes which functions are available for config\&.sh
+\fIbase\fR\&. The following list describes which functions are available for
+config\&.sh
 .PP
 [baseCleanMount]
 .RS 4
-Umount the system filesystems /proc /dev/pts /sys
+Umount the system filesystems
+/proc,
+/dev/pts, and
+/sys\&.
 .RE
 .PP
 [baseDisableCtrlAltDel]
 .RS 4
-Disable the Ctrl\-Alt\-Del key sequence setting in /etc/inittab
+Disable the
+Ctrl-Alt-Del
+key sequence setting in
+/etc/inittab
 .RE
 .PP
 [baseGetPackagesForDeletion]
@@ -256,7 +103,21 @@ Set up the linuxrc as init
 .PP
 [baseSetupBusyBox {\-f}]
 .RS 4
-activates busybox if installed for all links from the busybox/busybox\&.links file \- you can choose custom apps to be forced into busybox with the "\-f" option as first parameter example: baseSetupBusyBox \-f /bin/zcat /bin/vi
+activates busybox if installed for all links from the
+busybox/busybox\&.links
+file\(emyou can choose custom apps to be forced into busybox with the
+\fB\-f\fR
+option as first parameter, for example:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+baseSetupBusyBox \-f /bin/zcat /bin/vi
+.fi
+.if n \{\
+.RE
+.\}
 .RE
 .PP
 [baseSetupInPlaceGITRepository]
@@ -266,7 +127,10 @@ Create an in place git repository of the root directory\&. This process may take
 .PP
 [baseSetupInPlaceSVNRepository {path_list}]
 .RS 4
-Create an in place subversion repository for the specified directories\&. A standard call could look like this baseSetupInPlaceSVNRepository /etc /srv /var/log
+Create an in place subversion repository for the specified directories\&. A standard call could look like this baseSetupInPlaceSVNRepository
+/etc,
+/srv, and
+/var/log
 .RE
 .PP
 [baseSetupPlainTextGITRepository]
@@ -276,7 +140,9 @@ Create an in place git repository of the root directory containing all plain/tex
 .PP
 [baseSetupUserPermissions]
 .RS 4
-Search all home directories of all users listed in /etc/passwd and change the ownership of all files to belong to the correct user and group
+Search all home directories of all users listed in
+/etc/passwd
+and change the ownership of all files to belong to the correct user and group\&.
 .RE
 .PP
 [baseStripAndKeep {list of info\-files to keep}]
@@ -306,12 +172,14 @@ remove all manual pages, except one given as parameter example: baseStripMans mo
 .PP
 [baseStripRPM]
 .RS 4
-remove rpms defined in config\&.xml under image=delete section
+remove rpms defined in
+config\&.xml
+under image=delete section
 .RE
 .PP
 [baseStripTools {list of toolpath} {list of tools}]
 .RS 4
-helper function for suseStripInitrd function params: toolpath , tools
+helper function for suseStripInitrd function params: toolpath, tools
 .RE
 .PP
 [baseStripUnusedLibs]
@@ -326,7 +194,9 @@ update sysconfig variable contents
 .PP
 [Debug {message}]
 .RS 4
-Helper function to print a message if the variable DEBUG is set to 1
+Helper function to print a message if the variable
+\fIDEBUG\fR
+is set to 1
 .RE
 .PP
 [Echo {echo commandline}]
@@ -341,7 +211,7 @@ Helper function to delete files and anounce it to log
 .PP
 [Rpm {rpm commandline}]
 .RS 4
-Helper function to the rpm function and anounce it to log
+Helper function to the RPM function and anounce it to log
 .RE
 .PP
 [suseActivateDefaultServices]
@@ -351,7 +221,9 @@ Call all postin scriptlets which among other things activates all required defau
 .PP
 [suseActivateServices]
 .RS 4
-Check all services in /etc/init\&.d/ and activate them by calling suseInsertService
+Check all services in
+/etc/init\&.d/
+and activate them by calling suseInsertService
 .RE
 .PP
 [suseCloneRunlevel {runlevel}]
@@ -361,7 +233,9 @@ Clone the given runlevel to work in the same way as the default runlevel 3\&.
 .PP
 [suseConfig]
 .RS 4
-Setup keytable language and timezone if specified in config\&.xml and call SuSEconfig afterwards
+Setup keytable language and timezone if specified in
+config\&.xml
+and call SuSEconfig afterwards
 .RE
 .PP
 [suseInsertService {servicename}]
@@ -391,30 +265,37 @@ This function will use zypper to search for the installed product and install al
 .PP
 [suseStripPackager {\-a}]
 .RS 4
-Remove smart o zypper packages and db files Also remove rpm package and db if "\-a" given
+Remove smart o zypper packages and db files Also remove rpm package and db if
+\fB\-a\fR
+given
 .RE
-.SH "Profile environment variables"
+.SH "PROFILE ENVIRONMENT VARIABLES"
 .PP
 The \&.profile environment file contains a specific set of variables which are listed below\&. Some of the functions above makes use of the variables\&.
 .PP
 [$kiwi_compressed]
 .RS 4
-The value of the compressed attribute set in the type element in config\&.xml
+The value of the compressed attribute set in the type element in
+config\&.xml
 .RE
 .PP
 [$kiwi_delete]
 .RS 4
-A list of all packages which are part of the packages section with type=\'delete\' in config\&.xml
+A list of all packages which are part of the packages section with
+type="delete" in
+config\&.xml
 .RE
 .PP
 [$kiwi_drivers]
 .RS 4
-A comma seperated list of the driver entries as listed in the drivers section of the config\&.xml\&. Similar variables exists for the usbdrivers and scsidrivers sections
+A comma seperated list of the driver entries as listed in the drivers section of the
+config\&.xml\&. Similar variables exists for the usbdrivers and scsidrivers sections
 .RE
 .PP
 [$kiwi_iname]
 .RS 4
-The name of the image as listed in config\&.xml
+The name of the image as listed in
+config\&.xml
 .RE
 .PP
 [$kiwi_iversion]
@@ -424,12 +305,14 @@ The image version string major\&.minor\&.release
 .PP
 [$kiwi_keytable]
 .RS 4
-The contents of the keytable setup as done in config\&.xml
+The contents of the keytable setup as done in
+config\&.xml
 .RE
 .PP
 [$kiwi_language]
 .RS 4
-The contents of the locale setup as done in config\&.xml
+The contents of the locale setup as done in
+config\&.xml
 .RE
 .PP
 [$kiwi_profiles]
@@ -439,19 +322,21 @@ A list of profiles used to build this image
 .PP
 [$kiwi_size]
 .RS 4
-The predefined size value for this image\&. This is not the computed size but only the optional size value of the preferences section in config\&.xml
+The predefined size value for this image\&. This is not the computed size but only the optional size value of the preferences section in
+config\&.xml
 .RE
 .PP
 [$kiwi_timezone]
 .RS 4
-The contents of the timezone setup as done in config\&.xml
+The contents of the timezone setup as done in
+config\&.xml
 .RE
 .PP
 [$kiwi_type]
 .RS 4
-The basic image type\&. Can be a simply filesystem image type of ext2 ext3 reiserfs squashfs cpio or one of the following complex image types: iso split usb vmx oem xen pxe
+The basic image type\&. Can be a simply filesystem image type of ext2, ext3, reiserfs, squashfs, cpio, or one of the following complex image types: iso, split, usb, vmx, oem, xen, or pxe\&.
 .RE
-.SH "Author"
+.SH "AUTHOR"
 .PP
 \fBMarcus Schäfer\fR <\&ms (AT) suse\&.de\&>
 .RS 4

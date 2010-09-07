@@ -76,14 +76,16 @@ install:
 	#--------------------------------------------
 	cp -a doc/examples/ ${PACKDOCVZ}
 	cp -a doc/schema/   ${PACKDOCVZ}
-	cp -a doc/*.pdf     ${PACKDOCVZ}
+	cp -a doc/kiwi.pdf  ${PACKDOCVZ}
+	cp -a doc/kiwi.html ${PACKDOCVZ}
+	cp -a doc/*.css     ${PACKDOCVZ}
 	cp -a doc/COPYING   ${PACKDOCVZ}
 	test -e doc/ChangeLog && cp -a doc/ChangeLog ${PACKDOCVZ} || true
 
 	#============================================
 	# kiwi manual pages
 	#--------------------------------------------
-	for i in `ls -1 ./doc/kiwi-man/*.1`;do \
+	for i in `ls -1 ./doc/*.1`;do \
 		install -m 644 $$i ${MANVZ} ;\
 	done
 

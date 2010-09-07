@@ -1,161 +1,13 @@
+'\" t
 .\"     Title: kiwi
 .\"    Author: Marcus Schaefer <ms (AT) suse.de>
-.\" Generator: DocBook XSL Stylesheets v1.74.0 <http://docbook.sf.net/>
-.\"      Date: Created: 08/30/2010
+.\" Generator: DocBook XSL Stylesheets v1.75.2 <http://docbook.sf.net/>
+.\"      Date: Created: 09/07/2010
 .\"    Manual: KIWI Manualpage
 .\"    Source: KIWI 4.58
 .\"  Language: English
 .\"
-.TH "KIWI" "1" "Created: 08/30/2010" "KIWI 4\&.58" "KIWI Manualpage"
-.\" -----------------------------------------------------------------
-.\" * (re)Define some macros
-.\" -----------------------------------------------------------------
-.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.\" toupper - uppercase a string (locale-aware)
-.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.de toupper
-.tr aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ
-\\$*
-.tr aabbccddeeffgghhiijjkkllmmnnooppqqrrssttuuvvwwxxyyzz
-..
-.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.\" SH-xref - format a cross-reference to an SH section
-.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.de SH-xref
-.ie n \{\
-.\}
-.toupper \\$*
-.el \{\
-\\$*
-.\}
-..
-.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.\" SH - level-one heading that works better for non-TTY output
-.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.de1 SH
-.\" put an extra blank line of space above the head in non-TTY output
-.if t \{\
-.sp 1
-.\}
-.sp \\n[PD]u
-.nr an-level 1
-.set-an-margin
-.nr an-prevailing-indent \\n[IN]
-.fi
-.in \\n[an-margin]u
-.ti 0
-.HTML-TAG ".NH \\n[an-level]"
-.it 1 an-trap
-.nr an-no-space-flag 1
-.nr an-break-flag 1
-\." make the size of the head bigger
-.ps +3
-.ft B
-.ne (2v + 1u)
-.ie n \{\
-.\" if n (TTY output), use uppercase
-.toupper \\$*
-.\}
-.el \{\
-.nr an-break-flag 0
-.\" if not n (not TTY), use normal case (not uppercase)
-\\$1
-.in \\n[an-margin]u
-.ti 0
-.\" if not n (not TTY), put a border/line under subheading
-.sp -.6
-\l'\n(.lu'
-.\}
-..
-.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.\" SS - level-two heading that works better for non-TTY output
-.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.de1 SS
-.sp \\n[PD]u
-.nr an-level 1
-.set-an-margin
-.nr an-prevailing-indent \\n[IN]
-.fi
-.in \\n[IN]u
-.ti \\n[SN]u
-.it 1 an-trap
-.nr an-no-space-flag 1
-.nr an-break-flag 1
-.ps \\n[PS-SS]u
-\." make the size of the head bigger
-.ps +2
-.ft B
-.ne (2v + 1u)
-.if \\n[.$] \&\\$*
-..
-.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.\" BB/BE - put background/screen (filled box) around block of text
-.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.de BB
-.if t \{\
-.sp -.5
-.br
-.in +2n
-.ll -2n
-.gcolor red
-.di BX
-.\}
-..
-.de EB
-.if t \{\
-.if "\\$2"adjust-for-leading-newline" \{\
-.sp -1
-.\}
-.br
-.di
-.in
-.ll
-.gcolor
-.nr BW \\n(.lu-\\n(.i
-.nr BH \\n(dn+.5v
-.ne \\n(BHu+.5v
-.ie "\\$2"adjust-for-leading-newline" \{\
-\M[\\$1]\h'1n'\v'+.5v'\D'P \\n(BWu 0 0 \\n(BHu -\\n(BWu 0 0 -\\n(BHu'\M[]
-.\}
-.el \{\
-\M[\\$1]\h'1n'\v'-.5v'\D'P \\n(BWu 0 0 \\n(BHu -\\n(BWu 0 0 -\\n(BHu'\M[]
-.\}
-.in 0
-.sp -.5v
-.nf
-.BX
-.in
-.sp .5v
-.fi
-.\}
-..
-.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.\" BM/EM - put colored marker in margin next to block of text
-.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.de BM
-.if t \{\
-.br
-.ll -2n
-.gcolor red
-.di BX
-.\}
-..
-.de EM
-.if t \{\
-.br
-.di
-.ll
-.gcolor
-.nr BH \\n(dn
-.ne \\n(BHu
-\M[\\$1]\D'P -.75n 0 0 \\n(BHu -(\\n[.i]u - \\n(INu - .75n) 0 0 -\\n(BHu'\M[]
-.in 0
-.nf
-.BX
-.in
-.fi
-.\}
-..
+.TH "KIWI" "1" "Created: 09/07/2010" "KIWI 4\&.58" "KIWI Manualpage"
 .\" -----------------------------------------------------------------
 .\" * set default formatting
 .\" -----------------------------------------------------------------
@@ -166,121 +18,102 @@
 .\" -----------------------------------------------------------------
 .\" * MAIN CONTENT STARTS HERE *
 .\" -----------------------------------------------------------------
-.SH "Name"
+.SH "NAME"
 kiwi \- Creating Operating System Images
-.SH "Synopsis"
-.fam C
+.SH "SYNOPSIS"
 .HP \w'\fBkiwi\fR\ 'u
 \fBkiwi\fR {\-l | \-\-list}
-.fam
-.fam C
 .HP \w'\fBkiwi\fR\ 'u
 \fBkiwi\fR {\-o | \-\-clone} \fIimage\-path\fR {\-d} \fIdestination\fR
-.fam
-.fam C
 .HP \w'\fBkiwi\fR\ 'u
 \fBkiwi\fR {\-b | \-\-build} \fIimage\-path\fR {\-d} \fIdestination\fR
-.fam
-.SH "Basics"
+.SH "BASICS"
 .PP
 KIWI is a complete imaging solution that is based on an image description\&. Such a description is represented by a directory which includes at least one
-\FCconfig\&.xml\F[]
+config\&.xml
 file and may as well include other files like scripts or configuration data\&. The kiwi\-templates package provides example descriptions based on a JeOS system\&. JeOS means Just enough Operating System\&. KIWI provides image templates based on that axiom which means a JeOS is a small, text only based image including a predefined remote source setup to allow installation of missing software components at a later point in time\&.
 .PP
 Detailed description of the kiwi image system exists in the system design document in
-\m[blue]\fB\%file:///usr/share/doc/packages/kiwi/kiwi.pdf\fR\m[]\&. KIWI always operates in two steps\&. The kiwi \-\-build option just combines both steps into one to make it easier to start with kiwi\&. The first step is the preparation step and if that step was successful, a creation step follows which is able to create different image output types\&. If you have started with an example and want to add you own changes it might be a good idea to clone of from this example\&. This can be done by simply copying the entire image description or you can let kiwi do that for you by using the kiwi \-\-clone command\&.
+\m[blue]\fB\%file:///usr/share/doc/packages/kiwi/kiwi.pdf\fR\m[]\&. KIWI always operates in two steps\&. The KIWI
+\fB\-\-build\fR
+option just combines both steps into one to make it easier to start with kiwi\&. The first step is the preparation step and if that step was successful, a creation step follows which is able to create different image output types\&. If you have started with an example and want to add you own changes it might be a good idea to clone of from this example\&. This can be done by simply copying the entire image description or you can let kiwi do that for you by using the
+\fBkiwi\fR
+\fB\-\-clone\fR
+command\&.
 .PP
 In the preparation step, you prepare a directory including the contents of your new filesystem based on one or more software package source(s) The creation step is based on the result of the preparation step and uses the contents of the new image root tree to create the output image\&. If the image type ISO was requested, the output image would be a file with the suffix
-\FC\&.iso\F[]
+\&.iso
 representing a live system on CD or DVD\&. Other than that kiwi is able to create images for virtual and para\-virtual (Xen) environments as well as for USB stick, PXE network clients and OEM customized Linux systems\&.
-.SH "Image Preparation and Creation"
-.fam C
+.SH "IMAGE PREPARATION AND CREATION"
 .HP \w'\fBkiwi\fR\ 'u
 \fBkiwi\fR {\-p | \-\-prepare} \fIimage\-path\fR
 .br
 [\-r | \-\-root\fIimage\-root\fR | \-\-chache\fIdirectory\fR]
-.fam
-.fam C
 .HP \w'\fBkiwi\fR\ 'u
 \fBkiwi\fR {\-c | \-\-create} \fIimage\-root\fR
 .br
 {\-d | \-\-destdir\fIdestination\fR} [\-\-type\ \fIimage\-type\fR]
-.fam
-.SH "Image Upgrade"
+.SH "IMAGE UPGRADE"
 .PP
 If the image root tree is stored and not removed, it can be used for upgrading the image according to the changes made in the repositories used for this image\&. If a distributor provides an update channel for package updates and an image
-\FCconfig\&.xml\F[]
+config\&.xml
 includes this update channel as repository, it is useful to store the image root tree and upgrade the tree according to changes on the update channel\&. Given that the root tree exists it\'s also possible to add or remove software and recreate the image of the desired type
-.fam C
 .HP \w'\fBkiwi\fR\ 'u
 \fBkiwi\fR {\-u | \-\-upgrade} \fIimage\-root\fR [\-\-add\-package\fIname\fR] [\-\-add\-pattern\fIname\fR]
-.fam
-.SH "System to Image Migration"
+.SH "SYSTEM TO IMAGE MIGRATION"
 .PP
-The migration module allows you to migrate your currently running system into an image description\&. The module will check for files not managed by a package manager and also inspects your system for package pattern and file consistency according to the currently active repositories\&. The system requires the zypper backend in order to work properly\&. The migration process creates a cache file so that subsequent calls of the migration runs much faster\&. Please have in mind that if your system has changed (files created/deleted, etc) the cache file might not be worth to become reused\&. In this case you should remove the cache first and start from scratch\&. The option \-\-nofiles will prevent the system from searching for unpackaged and packaged but modified files The option \-\-notemplate will prevent the creation of the image description files which are needed if you want to use kiwi to create a clone image from the result of the migration\&. With the options \-\-exclude and \-\-skip you can tell the system to ignore specific directories and/or packages\&. This makes sense if you know before that some data is not worth to become migrated or can be restored easily later inside the cloned image like software repositories\&. The migration process will always place it\'s result into the /tmp/$OptionValueOf\-m directory\&. The reason for this is because /tmp is always excluded from the migration operation and therefore we can safely place new files there without influencing the migration itself\&. You should have at least 50 MB free space for the cache file and the image description all the rest are just hard links\&. As one result a HTML based report file is created which contains important information about the system\&. You are free to ignore that information but with the risk that the migrated image does not represent the same system which is running at the moment\&. The less issues left in the report the better is the result\&. In most cases a manual fine tuning is required\&. This includes the repository selection and the unmanaged files along with the configuration details of your currently running operating system\&. You should understand the module as a helper to migrate running servers into images\&. The implementation is still under construction so expect better migration results in future releases :)
-.fam C
+The migration module allows you to migrate your currently running system into an image description\&. The module will check for files not managed by a package manager and also inspects your system for package pattern and file consistency according to the currently active repositories\&. The system requires the zypper backend in order to work properly\&. The migration process creates a cache file so that subsequent calls of the migration runs much faster\&. Please have in mind that if your system has changed (files created/deleted, etc\&.) the cache file might not be worth to become reused\&. In this case you should remove the cache first and start from scratch\&. The option
+\fB\-\-nofiles\fR
+will prevent the system from searching for unpackaged and packaged but modified files The option
+\fB\-\-notemplate\fR
+will prevent the creation of the image description files which are needed if you want to use KIWI to create a clone image from the result of the migration\&. With the options
+\fB\-\-exclude\fR
+and
+\fB\-\-skip\fR
+you can tell the system to ignore specific directories and/or packages\&. This makes sense if you know before that some data is not worth to become migrated or can be restored easily later inside the cloned image like software repositories\&. The migration process will always place it\'s result into the
+/tmp/$OptionValueOf\-m
+directory\&. The reason for this is because
+/tmp
+is always excluded from the migration operation and therefore we can safely place new files there without influencing the migration itself\&. You should have at least 50 MB free space for the cache file and the image description all the rest are just hard links\&. As one result a HTML based report file is created which contains important information about the system\&. You are free to ignore that information but with the risk that the migrated image does not represent the same system which is running at the moment\&. The less issues left in the report the better is the result\&. In most cases a manual fine tuning is required\&. This includes the repository selection and the unmanaged files along with the configuration details of your currently running operating system\&. You should understand the module as a helper to migrate running servers into images\&. The implementation is still under construction so expect better migration results in future releases :)
 .HP \w'\fBkiwi\fR\ 'u
 \fBkiwi\fR {\-m | \-\-migrate} \fIname\fR [\-\-exclude\ \fIdirectory\fR...] [\-\-skip\ \fIpackage\fR...] [\-\-nofiles] [\-\-notemplate]
-.fam
-.SH "Image Postprocessing Modes"
+.SH "IMAGE POSTPROCESSING MODES"
 .PP
-The KIWI post\-processing modes are used for special image deployment tasks, like installing the image on a USB stick\&. So to say they are the third step after preparation and creation\&. kiwi calls the postprocessing modules automatically according to the specified output image type and attributes but it\'s also possible to call them manually\&.
-.fam C
+The KIWI post\-processing modes are used for special image deployment tasks, like installing the image on a USB stick\&. So to say they are the third step after preparation and creation\&. KIWI calls the postprocessing modules automatically according to the specified output image type and attributes but it\'s also possible to call them manually\&.
 .HP \w'\fBkiwi\fR\ 'u
 \fBkiwi\fR \-\-bootstick\ \fIinitrd\fR [\-\-bootstick\-system\ \fIsystemImage\fR] [\-\-bootstick\-device\ \fIdevice\fR]
-.fam
-.fam C
 .HP \w'\fBkiwi\fR\ 'u
 \fBkiwi\fR \-\-bootvm\ \fIinitrd\fR \-\-bootvm\-system\ \fIsystemImage\fR [\-\-bootvm\-disksize\ \fIsize\fR]
-.fam
-.fam C
 .HP \w'\fBkiwi\fR\ 'u
 \fBkiwi\fR \-\-bootcd\ \fIinitrd\fR
-.fam
-.fam C
 .HP \w'\fBkiwi\fR\ 'u
 \fBkiwi\fR \-\-installcd\ \fIinitrd\fR \-\-installcd\-system\ \fIvmx\-system\-image\fR
-.fam
-.fam C
 .HP \w'\fBkiwi\fR\ 'u
 \fBkiwi\fR \-\-installstick\ \fIinitrd\fR \-\-installstick\-system\ \fIvmx\-system\-image\fR
-.fam
-.SH "Image format conversion"
+.SH "IMAGE FORMAT CONVERSION"
 .PP
-The KIWI format conversion is useful to perform the creation of another image output format like vmdk for VMware or ovf the open virtual machine format\&. Along with the conversion kiwi also creates the virtual machine configuration according to the format if there is a machine section specified in the xml description
-.fam C
+The KIWI format conversion is useful to perform the creation of another image output format like vmdk for VMware or ovf the open virtual machine format\&. Along with the conversion KIWI also creates the virtual machine configuration according to the format if there is a machine section specified in the XML description
 .HP \w'\fBkiwi\fR\ 'u
 \fBkiwi\fR \-\-convert\ \fIsystemImage\fR [\-\-format\ \fIvmdk|ovf|qcow2\fR]
-.fam
-.SH "Testsuite"
+.SH "TESTSUITE"
 .PP
 The KIWI test suite is useful to perform basic quality checks on the image root directory\&. The test cases are stored in subdirectories below
-\FC/usr/share/kiwi/tests\F[]\&.
-.fam C
+/usr/share/kiwi/tests\&.
 .HP \w'\fBkiwi\fR\ 'u
 \fBkiwi\fR \-\-testsuite\ \fIimage\-root\fR [\-\-test\ \fIname\fR...]
-.fam
-.SH "Helper Tools"
+.SH "HELPER TOOLS"
 .PP
 The helper tools provide optional functions like creating a crypted password string for the users section of the
-\FCconfig\&.xml\F[]
+config\&.xml
 file or signing the image description with an md5sum hash as well as adding splash data to the boot image used by the bootloader and the testsuite mode which allows testing the integrity of the new root tree\&.
-.fam C
 .HP \w'\fBkiwi\fR\ 'u
 \fBkiwi\fR \-\-createpassword
-.fam
-.fam C
 .HP \w'\fBkiwi\fR\ 'u
 \fBkiwi\fR \-\-createhash\ \fIimage\-path\fR
-.fam
-.fam C
 .HP \w'\fBkiwi\fR\ 'u
 \fBkiwi\fR {\-i | \-\-info} \fIImagePath\fR {\-\-select\ \fI\ repo\-patterns|patterns|types|sources|size|profiles|packages\ \fR}
-.fam
-.fam C
 .HP \w'\fBkiwi\fR\ 'u
 \fBkiwi\fR \-\-setup\-splash\ \fIinitrd\fR
-.fam
 .PP
 The following list describes the helper tools more detailed
 .PP
@@ -292,8 +125,8 @@ Create a crypted password hash and prints it on the console\&. The user can use 
 [\fB\-\-createhash \fR\fB\fIimage\-path\fR\fR ]
 .RS 4
 Sign your image description with a md5sum\&. The result is written to a file named
-\FC\&.checksum\&.md\F[]
-and is checked if kiwi creates an image from this description
+\&.checksum\&.md
+and is checked if KIWI creates an image from this description\&.
 .RE
 .PP
 [ \fB\-i\fR | \fB\-\-info \fR\fB\fIimage\-path\fR\fR \fB\-\-select \fR\fB\fIselection\fR\fR ]
@@ -312,11 +145,11 @@ List general information about the image description\&. So far you can get infor
 .RS 4
 Create splash screen from the data inside the initrd and re\-create the initrd with the splash screen attached to the initrd cpio archive\&. This enables the kernel to load the splash screen at boot time\&. If splashy is used only a link to the original initrd will be created
 .RE
-.SH "Global Options"
+.SH "GLOBAL OPTIONS"
 .PP
 [\fB\-\-base\-root\fR \fIbase\-path\fR]
 .RS 4
-Refers to an already prepared root tree\&. Kiwi will use this tree to skip the first stage of the prepare step and run the second stage directly\&.
+Refers to an already prepared root tree\&. KIWI will use this tree to skip the first stage of the prepare step and run the second stage directly\&.
 .RE
 .PP
 [\fB\-\-base\-root\-mode\fR \fIcopy|union|recycle\fR]
@@ -354,7 +187,7 @@ Set/Overwrite priority for the first listed repo\&. Works with the smart package
 Add the given repository and type for this run of an image prepare or upgrade process\&. Multiple
 \fB\-\-add\-repo\fR/\fB\-\-add\-repotype\fR
 options are possible\&. The change will not be written to the
-\FCconfig\&.xml\F[]
+config\&.xml
 file
 .RE
 .PP
@@ -391,7 +224,8 @@ Set the package manager to use for this image\&. If set it will temporarly overw
 .PP
 [\fB\-A\fR | \fB\-\-target\-arch \fR\fB\fIi586|x86_64|armv5tel|ppc\fR\fR ]
 .RS 4
-Set a special target\-architecture\&. This overrides the used architecture for the image\-packages in zypp\&.conf\&. When used with smart this option doesn\'t have any effect\&.
+Set a special target\-architecture\&. This overrides the used architecture for the image\-packages in
+zypp\&.conf\&. When used with smart this option doesn\'t have any effect\&.
 .RE
 .PP
 [\fB\-\-debug\fR]
@@ -403,14 +237,14 @@ Prints a stack trace in case of internal errors
 .RS 4
 Controls the verbosity level for the instsource module
 .RE
-.SH "Image Preparation Options"
+.SH "IMAGE PREPARATION OPTIONS"
 .PP
 [\fB\-r\fR | \fB\-\-root \fR\fB\fIRootPath\fR\fR]
 .RS 4
 Set up the physical extend, chroot system below the given root\-path path\&. If no
 \fB\-\-root\fR
 option is given, KIWI will search for the attribute defaultroot in
-\FCconfig\&.xml\F[]\&. If no root directory is known, a
+config\&.xml\&. If no root directory is known, a
 \fBmktmp\fR
 directory will be created and used as root directory\&.
 .RE
@@ -419,28 +253,32 @@ directory will be created and used as root directory\&.
 .RS 4
 Force creation of new root directory\&. If the directory already exists, it is deleted\&.
 .RE
-.SH "Image Upgrade/Preparation Options"
+.SH "IMAGE UPGRADE/PREPARATION OPTIONS"
 .PP
 [\fB\-\-cache\fR \fIdirectory\fR ]
 .RS 4
-When specifying a cache directory kiwi will create a cache each for patterns and packages and re\-use them if possible for subsequent root tree preparations of this and/or other images
+When specifying a cache directory KIWI will create a cache each for patterns and packages and re\-use them if possible for subsequent root tree preparations of this and/or other images
 .RE
 .PP
 [\fB\-\-add\-package\fR \fIpackage\fR ]
 .RS 4
-Add the given package name to the list of image packages multiple \-\-add\-package options are possible\&. The change will not be written to the xml description\&.
+Add the given package name to the list of image packages multiple
+\fB\-\-add\-package\fR
+options are possible\&. The change will not be written to the XML description\&.
 .RE
 .PP
 [\fB\-\-add\-pattern\fR \fIname\fR ]
 .RS 4
-Add the given pattern name to the list of image packages multiple \-\-add\-pattern options are possible\&. The change will not be written to the xml description\&. Patterns can be handled by SuSE based repositories only\&.
+Add the given pattern name to the list of image packages multiple
+\fB\-\-add\-pattern\fR
+options are possible\&. The change will not be written to the xml description\&. Patterns can be handled by SUSE based repositories only\&.
 .RE
 .PP
 [\fB\-\-del\-package\fR \fIpackage\fR ]
 .RS 4
 Removes the given package by adding it the list of packages to become removed\&. The change will not be written to the xml description\&.
 .RE
-.SH "Image Creation Options"
+.SH "IMAGE CREATION OPTIONS"
 .PP
 [\fB\-d\fR | \fB\-\-destdir \fR\fB\fIDestinationPath\fR\fR]
 .RS 4
@@ -449,7 +287,7 @@ Specify destination directory to store the image file(s) If not specified, KIWI 
 which can be specified in the
 \fIpreferences\fR
 section of the
-\FCconfig\&.xml\F[]
+config\&.xml
 file\&. If it exists its value is used as destination directory\&. If no destination information can be found, an error occurs\&.
 .RE
 .PP
@@ -458,7 +296,7 @@ file\&. If it exists its value is used as destination directory\&. If no destina
 Specify the output image type to use for this image\&. Each type is described in a
 \fItype\fR
 section of the preferences section\&. At least one type has to be specified in the
-\FCconfig\&.xml\F[]
+config\&.xml
 description\&. By default, the types specifying the
 \fIprimary\fR
 attribute will be used\&. If there is no primary attribute set, the first type section of the preferences section is the primary type\&. The types are only evaluated when kiwi runs the
@@ -466,7 +304,7 @@ attribute will be used\&. If there is no primary attribute set, the first type s
 step\&. With the option
 \fB\-\-type\fR
 one can distinguish between the types stored in
-\FCconfig\&.xml\F[]
+config\&.xml
 .RE
 .PP
 [\fB\-s\fR | \fB\-\-strip\fR]
@@ -484,27 +322,29 @@ for pre\-built boot images\&.
 .PP
 [\fB\-\-isocheck\fR]
 .RS 4
-in case of an iso image the checkmedia program generates a md5sum into the iso header\&. If the \-\-isocheck option is specified a new boot menu entry will be generated which allows to check this media
+in case of an iso image the checkmedia program generates a md5sum into the ISO header\&. If the
+\fB\-\-isocheck\fR
+option is specified a new boot menu entry will be generated which allows to check this media
 .RE
 .PP
 [\fB\-\-lvm\fR]
 .RS 4
-Use the logical volume manager to control the disk\&. The partition table will include one lvm partition and one standard ext2 boot partition\&. Use of this option makes sense for the create step only and also only for the image types: vmx, oem and usb
+Use the logical volume manager to control the disk\&. The partition table will include one lvm partition and one standard ext2 boot partition\&. Use of this option makes sense for the create step only and also only for the image types: vmx, oem, and usb
 .RE
 .PP
 [\fB\-\-fs\-blocksize \fR\fB\fInumber\fR\fR ]
 .RS 4
-When calling kiwi in creation mode this option will set the block size in bytes\&. For ISO images with the old style ramdisk setup a blocksize of 4096 bytes is required
+When calling KIWI in creation mode this option will set the block size in bytes\&. For ISO images with the old style ramdisk setup a blocksize of 4096 bytes is required
 .RE
 .PP
 [\fB\-\-fs\-journalsize \fR\fB\fInumber\fR\fR ]
 .RS 4
-When calling kiwi in creation mode this option will set the journal size in mega bytes for ext[23] based filesystems and in blocks if the reiser filesystem is used
+When calling KIWI in creation mode this option will set the journal size in mega bytes for ext[23] based filesystems and in blocks if the reiser filesystem is used
 .RE
 .PP
 [\fB\-\-fs\-inodesize \fR\fB\fInumber\fR\fR ]
 .RS 4
-When calling kiwi in creation mode this option will set the inode size in bytes\&. This option has no effect if the reiser filesystem is used
+When calling KIWI in creation mode this option will set the inode size in bytes\&. This option has no effect if the reiser filesystem is used
 .RE
 .PP
 [\fB\-\-fs\-inoderatio \fR\fB\fInumber\fR\fR ]
@@ -531,7 +371,7 @@ Select the tool to create partition tables\&. Supported are fdisk (sfdisk) and p
 .RS 4
 Activates check for matching kernels between boot and system image\&. The kernel check also tries to fix the boot image if no matching kernel was found\&.
 .RE
-.SH "For More Information"
+.SH "FOR MORE INFORMATION"
 .PP
 More information about KIWI, its files can be found at:
 .PP
@@ -540,7 +380,7 @@ More information about KIWI, its files can be found at:
 KIWI wiki
 .RE
 .PP
-\FCconfig\&.xml\F[]
+config\&.xml
 .RS 4
 The configuration XML file that contains every aspect for the image creation\&.
 .RE
@@ -552,14 +392,14 @@ The system design document which describes some details about the building proce
 .PP
 \m[blue]\fB\%file:///usr/share/doc/packages/kiwi/schema/kiwi.xsd.html\fR\m[]
 .RS 4
-The KIWI RelaxNG XML Schema documentation\&.
+The KIWI RELAX\ \&NG XML Schema documentation\&.
 .RE
 .PP
 \m[blue]\fB\%file:///usr/share/doc/packages/kiwi/schema/test.xsd.html\fR\m[]
 .RS 4
-The KIWI RelaxNG XML Schema documentation\&.
+The KIWI RELAX\ \&NG XML Schema documentation\&.
 .RE
-.SH "Author"
+.SH "AUTHOR"
 .PP
 \fBMarcus Schaefer\fR <\&ms (AT) suse\&.de\&>
 .RS 4

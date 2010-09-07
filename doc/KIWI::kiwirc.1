@@ -1,0 +1,91 @@
+'\" t
+.\"     Title: kiwi::kiwirc
+.\"    Author: Robert Schweikert <rschweikert (AT) novell.com>
+.\" Generator: DocBook XSL Stylesheets v1.75.2 <http://docbook.sf.net/>
+.\"      Date: Created: 09/07/2010
+.\"    Manual: KIWI Manualpage
+.\"    Source: >KIWI 4.58
+.\"  Language: English
+.\"
+.TH "KIWI::KIWIRC" "1" "Created: 09/07/2010" ">KIWI 4\&.58" "KIWI Manualpage"
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+KIWI::kiwirc \- Resource file for the Kiwi imaging system
+.SH "DESCRIPTION"
+.PP
+The Kiwi imaging toolchain supports the use of an optional resource file named
+\&.kiwirc
+located in the users home directory\&.
+.PP
+The file is sourced by a Perl process and thus Perl compatible syntax for the supported variable sttings is required\&.
+.PP
+\fBExample\ \&1.\ \&Template for .kiwi.rc\fR
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+$BasePath=\'/usr/share/kiwi\';
+$Gzip=\'bzip2\';
+$LogServerPort=\'4455\';
+$System=\'/usr/share/kiwi/image\';
+.fi
+.if n \{\
+.RE
+.\}
+.SH "SUPPORTED RESOURCE SETTINGS"
+.PP
+Kiwi recognizes the BasePath, Gzip, LogServerPort, LuksCipher, and System settings in the
+\&.kiwirc
+file\&.
+.PP
+[BasePath]
+.RS 4
+Path to the location of the KIWI image system components, such as modules, tests, image descriptions etc\&.
+.sp
+The default value is
+/usr/share/kiwi
+.RE
+.PP
+[Gzip]
+.RS 4
+Specify the compression utility to be used for various compression tasks during image generation\&.
+.sp
+The default value is
+\fBgzip\fR
+\fB\-9\fR
+.RE
+.PP
+[LogServerPort]
+.RS 4
+Specify a port number for log message queing\&.
+.sp
+The default value is off
+.RE
+.PP
+[LuksCipher]
+.RS 4
+Specify the cipher for the encrypted Luks filesystem\&.
+.RE
+.PP
+[System]
+.RS 4
+Specify the location of the KIWI system image description\&.
+.sp
+The default value is the value of BasePath concatenated with /image\&.
+.RE
+.SH "AUTHOR"
+.PP
+\fBRobert Schweikert\fR <\&rschweikert (AT) novell\&.com\&>
+.RS 4
+Developer
+.RE
