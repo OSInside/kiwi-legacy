@@ -14,29 +14,19 @@
 	</preferences>
 	<profiles>
 		<profile name="default" description="Boot with default setup"/>
-		<profile name="xen" description="Boot with xen mboot.c32 setup"/>
 		<profile name="std" description="KERNEL: Default"/>
-		<profile name="xenk" description="KERNEL: Xen kernel/mboot.c32"/>
-		<profile name="pae" description="KERNEL: pae kernel"/>
-		<profile name="ec2" description="KERNEL: Ec2 kernel"/>
 	</profiles>
-	<drivers type="usbdrivers">
-		<file name="usb/host/*"/>
-		<file name="usb/core/usbcore.ko"/>
-		<file name="usb/storage/usb-storage.ko"/>
-	</drivers>
 	<drivers type="drivers">
 		<file name="crypto/*"/>
-		<file name="drivers/virtio/*"/>
-		<file name="drivers/block/cciss.ko"/>
-		<file name="drivers/block/virtio_blk.ko"/>
-		<file name="drivers/char/hw_random/virtio-rng.ko"/>
-		<file name="drivers/net/*"/>
 		<file name="net/packet/*"/>
+		<file name="drivers/s390/*"/>
+		<file name="drivers/virtio/*"/>
+		<file name="drivers/net/*"/>
 		<file name="drivers/md/*"/>
-		<file name="drivers/block/loop.ko"/>
-		<file name="drivers/hid/*"/>
-		<file name="drivers/ide/*"/>
+		<file name="drivers/block/*"/>
+		<file name="drivers/scsi/*"/>
+		<file name="drivers/cdrom/*"/>
+		<file name="drivers/char/*"/>
 		<file name="fs/ext3/*"/>
 		<file name="fs/ext2/*"/>
 		<file name="fs/fat/*"/>
@@ -55,17 +45,6 @@
 		<file name="fs/nls/nls_iso8859-1.ko"/>
 		<file name="fs/fuse/*"/>
 		<file name="fs/udf/*"/>
-		<file name="drivers/ata/*"/>
-		<file name="drivers/scsi/*"/>
-		<file name="drivers/message/fusion/*"/>
-		<file name="drivers/cdrom/*"/>
-		<file name="drivers/parport/*"/>
-		<file name="drivers/char/lp.ko"/>
-		<file name="drivers/acpi/dock.ko"/>
-		<file name="drivers/firmware/edd.ko"/>
-	</drivers>
-	<drivers type="drivers" profiles="xen">
-		<file name="drivers/xen/*"/>
 	</drivers>
 	<repository type="yast2" status="replaceable">
 		<source path="http://download.suse.de/install/SLP/SLES-11-SP1-GM/%arch/DVD1/"/>
@@ -76,20 +55,6 @@
 	<packages type="image" profiles="std">
 		<package name="kernel-default"/>
 		<package name="kernel-default-base"/>
-	</packages>
-	<packages type="image" profiles="pae">
-		<package name="kernel-pae"/>
-		<package name="kernel-pae-base"/>
-	</packages>
-	<packages type="image" profiles="xenk">
-		<package name="kernel-xen"/>
-		<package name="kernel-xen-base"/>
-		<package name="xen"/>
-	</packages>
-	<packages type="image" profiles="ec2">
-		<package name="kernel-ec2"/>
-		<package name="kernel-ec2-base"/>
-		<package name="xen"/>
 	</packages>
 	<packages type="image">
 		<package name="curl"/>
