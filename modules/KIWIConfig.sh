@@ -958,7 +958,7 @@ function suseStripInitrd {
 		lvchange lvresize lvextend lvcreate grub dcounter tty
 		dmsetup dialog awk gawk clicfs cryptsetup clear blkid fbiterm
 		gettext diff bc utimer cmp busybox kexec pam_console_apply
-		setterm kpartx vgcfgbackup vgcfgrestore
+		setterm kpartx vgcfgbackup vgcfgrestore lsdasd
 	"
 	tools="$tools $@"
 	for path in /sbin /usr/sbin /usr/bin /bin;do

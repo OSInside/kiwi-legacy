@@ -3469,6 +3469,23 @@ sub setupBootLoaderConfiguration {
 		print FD "$this->{mbrid}";
 		close FD;
 		$kiwi -> done();
+		my $busid;
+		#==========================================
+		# Create disk Bus-ID for online call
+		#------------------------------------------
+		if ($main::targetDevice) {
+			$kiwi -> info ("Saving disk Bus-ID...");
+			my $device = $main::targetDevice; $device =~ s/\/dev\///;
+			$busid  = qxx ("lsdasd | grep $device | cut -f1 -d ' '");
+			chomp $busid;
+			if (! $busid) {
+				$kiwi -> failed ();
+				$kiwi -> error  ("Can't find Bus-ID for $device");
+				$kiwi -> failed ();
+				return undef;
+			}
+			$kiwi -> done();
+		}
 		#==========================================
 		# Create zipl.conf
 		#------------------------------------------
@@ -3540,7 +3557,12 @@ sub setupBootLoaderConfiguration {
 			print FD "\t"."target  = boot/zipl"."\n";
 			print FD "\t"."ramdisk = boot/initrd,0x2000000"."\n";
 		}
-		print FD "\t"."parameters = \"loader=$bloader $cmdline\""."\n";
+		print FD "\t"."parameters = \"loader=$bloader";
+		if ($busid) {
+			print FD " busid=$busid $cmdline\""."\n";
+		} else {
+			print FD " $cmdline\""."\n";
+		}
 		#==========================================
 		# Failsafe boot
 		#------------------------------------------
@@ -3560,7 +3582,11 @@ sub setupBootLoaderConfiguration {
 			print FD "\t"."ramdisk = boot/initrd,0x2000000"."\n";
 		}
 		print FD "\t"."parameters = \"x11failsafe loader=$bloader";
-		print FD " $cmdline\""."\n";
+		if ($busid) {
+			print FD " busid=$busid $cmdline\""."\n";
+		} else {
+			print FD " $cmdline\""."\n";
+		}
 		close FD;
 		$kiwi -> done();
 	}

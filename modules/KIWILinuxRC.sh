@@ -2955,6 +2955,39 @@ function CDEject {
 	eject $cddev
 }
 #======================================
+# searchBusIDBootDevice
+#--------------------------------------
+function searchBusIDBootDevice {
+	# /.../
+	# on s390 we store the Bus-ID for the disk inside
+	# the initrd. This id is used to set the device online
+	# ----
+	local dlink=/sys/bus/ccw/devices/$busid
+	local id
+	local status
+	local device
+	local rest
+	if [ ! -e $dlink ];then
+		systemException \
+			"Can't find disk with ID: $busid" \
+		"reboot"
+	fi
+	echo 1 > $dlink/online
+	lsdasd $busid | tail -n 1 | while read id status device rest;do
+		echo "/dev/$device" > /tmp/biosBootDevice
+	done
+	if [ ! -e /tmp/biosBootDevice ];then
+		export biosBootDevice="Failed to set disk $busid online"
+		return 1
+	fi
+	export biosBootDevice=$(cat /tmp/biosBootDevice)
+	if [ ! -e $biosBootDevice ];then
+		export biosBootDevice="Failed to set disk $busid online"
+		return 1
+	fi
+	return 0
+}
+#======================================
 # searchBIOSBootDevice
 #--------------------------------------
 function searchBIOSBootDevice {

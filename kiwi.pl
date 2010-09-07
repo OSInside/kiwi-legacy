@@ -59,6 +59,13 @@ our $ConfigStatus  = 0;
 our $TL            = 1;
 our $BT;
 #============================================
+# check Partitioner for $arch
+#--------------------------------------------
+my $arch = qxx ("uname -m"); chomp $arch;
+if ($arch =~ /s390/) {
+	$Partitioner = "fdasd";
+}
+#============================================
 # Read $HOME/.kiwirc
 #--------------------------------------------
 if ( -f $ConfigFile) {
@@ -212,6 +219,7 @@ our $MigrateNoFiles;        # migrate: don't create overlay files
 our $MigrateNoTemplate;     # migrate: don't create image description template
 our $Convert;               # convert image into given format/configuration
 our $Format;                # format to convert to, vmdk, ovf, etc...
+our $targetDevice;          # alternative device instead of a loop device
 our $kiwi;                  # global logging handler object
 
 #============================================
@@ -1295,7 +1303,7 @@ sub main {
 		if (! defined $boot) {
 			my $code = kiwiExit (1); return $code;
 		}
-		if (! $boot -> setupBootDisk()) {
+		if (! $boot -> setupBootDisk($targetDevice)) {
 			my $code = kiwiExit (1); return $code;
 		}
 		$code = kiwiExit (0); return $code;
@@ -1336,6 +1344,7 @@ sub init {
 	#------------------------------------------
 	my $result = GetOptions(
 		"version"               => \&version,
+		"targetdevice=s"        => \$targetDevice,
 		"v|verbose+"            => \$Verbosity,
 		"logfile=s"             => \$LogFile,
 		"build|b=s"             => \$Build,
@@ -1558,7 +1567,11 @@ sub init {
 		my $code = kiwiExit (1); return $code;
 	}
 	if (defined $Partitioner) {
-		if (($Partitioner ne "fdisk") && ($Partitioner ne "parted")) {
+		if (
+			($Partitioner ne "fdisk")  &&
+			($Partitioner ne "parted") &&
+			($Partitioner ne "fdasd")
+		) {
 			$kiwi -> error ("Invalid partitioner, expected fdisk|parted");
 			$kiwi -> failed ();
 			my $code = kiwiExit (1); return $code;

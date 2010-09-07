@@ -208,7 +208,7 @@ fi
 if [ -z "$pxe" ];then
 	Echo "Searching for boot device..."
 	if [ "$LOCAL_BOOT" = "no" ];then
-		if ! searchBIOSBootDevice;then
+		if ! searchBusIDBootDevice;then
 			systemException "$biosBootDevice" "reboot"
 		fi
 		export imageDiskDevice=$biosBootDevice
