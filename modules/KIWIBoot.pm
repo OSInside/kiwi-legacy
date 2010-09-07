@@ -4171,7 +4171,7 @@ sub setStoragePartition {
 				if ($cmd =~ /^[0-9]$/) {
 					next;
 				}
-				if ($cmd eq "83") {
+				if (($cmd eq "83") || ($cmd eq "8e")) {
 					$cmd = 1;
 				}
 				if ($cmd eq "82") {
