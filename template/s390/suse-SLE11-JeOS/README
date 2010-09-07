@@ -8,3 +8,8 @@ Build instructions for local build
 	   --add-repo /path/to/SLE11/repo --add-repotype yast2 \
        --add-repo /usr/share/kiwi/repo/suse-repo/suse-sle11-repo/ --add-repotype rpm-dir \
 	   -d /tmp/myimage --type vmx
+
+NOTE:
+this image uses the hvc console for KVM and therefore will not
+spawn a tty for zVM or LPAR based systems. Change /etc/inittab
+and /etc/securetty accordingly
