@@ -1,4 +1,4 @@
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>openSUSE-KIWI Image System</title><link rel="stylesheet" href="susebooks.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.75.2"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div lang="en" class="book" title="openSUSE-KIWI Image System"><div class="titlepage"><div><div><h1 class="title"><a name="id2434645"></a>openSUSE-KIWI Image System</h1></div><div><h2 class="subtitle">Cookbook</h2></div><div><div class="authorgroup"><div class="author"><h3 class="author"><span class="firstname">Marcus</span> <span class="surname">Schäfer</span></h3><span class="contrib">Project, Design and Implementation</span> <div class="affiliation"><span class="jobtitle">Software Engineer<br></span><span class="orgname">SUSE LINUX Products GmbH<br></span></div><code class="email">&lt;<a class="email" href="mailto:ms@suse.de">ms@suse.de</a>&gt;</code></div><div class="othercredit"><h3 class="othercredit"><span class="firstname">Thomas</span> <span class="surname">Schraitle</span></h3><span class="contrib">Various text improvements, migration to DocBook</span> <div class="affiliation"><span class="jobtitle">Documentation Specialist<br></span><span class="orgname">SUSE LINUX Products GmbH<br></span></div><code class="email">&lt;<a class="email" href="mailto:toms@suse.de">toms@suse.de</a>&gt;</code></div></div></div><div><p class="releaseinfo">KIWI Version 4.58</p></div><div><div class="legalnotice" title="License"><a name="id2511231"></a><p class="legalnotice-title"><b>License</b></p><p>Permission is granted to copy, distribute and/or modify this
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>openSUSE-KIWI Image System</title><link rel="stylesheet" href="susebooks.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.75.2"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div lang="en" class="book" title="openSUSE-KIWI Image System"><div class="titlepage"><div><div><h1 class="title"><a name="id264817"></a>openSUSE-KIWI Image System</h1></div><div><h2 class="subtitle">Cookbook</h2></div><div><div class="authorgroup"><div class="author"><h3 class="author"><span class="firstname">Marcus</span> <span class="surname">Schäfer</span></h3><span class="contrib">Project, Design and Implementation</span> <div class="affiliation"><span class="jobtitle">Software Engineer<br></span><span class="orgname">SUSE LINUX Products GmbH<br></span></div><code class="email">&lt;<a class="email" href="mailto:ms@suse.de">ms@suse.de</a>&gt;</code></div><div class="othercredit"><h3 class="othercredit"><span class="firstname">Thomas</span> <span class="surname">Schraitle</span></h3><span class="contrib">Various text improvements, migration to DocBook</span> <div class="affiliation"><span class="jobtitle">Documentation Specialist<br></span><span class="orgname">SUSE LINUX Products GmbH<br></span></div><code class="email">&lt;<a class="email" href="mailto:toms@suse.de">toms@suse.de</a>&gt;</code></div></div></div><div><p class="releaseinfo">KIWI Version 4.58</p></div><div><div class="legalnotice" title="License"><a name="id266119"></a><p class="legalnotice-title"><b>License</b></p><p>Permission is granted to copy, distribute and/or modify this
     document under the terms of the GNU Free Documentation License,
     Version 1.2 or (at your option) version 1.3; with the Invariant
     Section being this copyright notice and license. A copy of the
@@ -12,7 +12,7 @@
     authors, nor the translators shall be held liable for possible
     errors or the consequences thereof.</p></div></div><div><div class="revhistory"><table border="1" width="100%" summary="Revision history"><tr><th align="left" valign="top" colspan="3"><b>Revision History</b></th></tr><tr><td align="left">Revision KIWI V4.58</td><td align="left">2010-08-31</td><td align="left">toms</td></tr><tr><td align="left" colspan="3">
           <p>First migration to DocBook</p>
-        </td></tr></table></div></div></div><hr></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="chapter"><a href="#id2498509">1. Introduction</a></span></dt><dt><span class="chapter"><a href="#chap.workflow">2. Basic Workflow</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.workflow.bootprocess">2.1. Boot Process</a></span></dt><dt><span class="sect1"><a href="#sec.workflow.bootparameters">2.2. Boot Parameters</a></span></dt><dt><span class="sect1"><a href="#sec.workflow.common-specific-code">2.3. Common and Distribution Specific Code</a></span></dt></dl></dd><dt><span class="chapter"><a href="#chap.description">3. KIWI Image Description</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.description.config.xml">3.1. The config.xml File</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.description.image">3.1.1. <code class="sgmltag-element">image</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.description">3.1.2. <code class="sgmltag-element">description</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.profiles">3.1.3. <code class="sgmltag-element">profiles</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.preferences">3.1.4. <code class="sgmltag-element">preferences</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.users">3.1.5. <code class="sgmltag-element">users</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.drivers">3.1.6. <code class="sgmltag-element">drivers</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.repository">3.1.7. <code class="sgmltag-element">repository</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.packages">3.1.8. <code class="sgmltag-element">packages</code> Element</a></span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#chap.appliance">4. Creating Appliances with KIWI</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.appliance.history">4.1. History</a></span></dt><dt><span class="sect1"><a href="#sec.appliance.kiwi-model">4.2. The KIWI Model</a></span></dt></dl></dd><dt><span class="chapter"><a href="#chap.maintenance">5. Maintenance of Operating System Images</a></span></dt><dt><span class="chapter"><a href="#chap.migration">6. System to Image Migration</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.migrate.create-clean-repository">6.1. Create a Clean Repository Set First</a></span></dt><dt><span class="sect1"><a href="#sec.migrate.watch-overlay">6.2. Watch the Overlay and Unpackaged Files</a></span></dt><dt><span class="sect1"><a href="#sec.migrate.checklist">6.3. Checklist</a></span></dt><dt><span class="sect1"><a href="#sec.migrate.turn-system-into-image">6.4. Turn my System Into an Image&#8230;</a></span></dt></dl></dd><dt><span class="chapter"><a href="#chap.instsourcesetup">7. Installation Source</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.instsourcesetup.adapt-example">7.1. Adapt the Example&#8217;s config.xml</a></span></dt><dt><span class="sect1"><a href="#sec.instsourcesetup.create-local-inst-source">7.2. Create a Local Installation Source</a></span></dt></dl></dd><dt><span class="chapter"><a href="#chap.iso">8. ISO Image&#8212;Live Systems</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.iso.building">8.1. Building the suse-live-iso Example</a></span></dt><dt><span class="sect1"><a href="#sec.iso.using">8.2. Using the Image</a></span></dt><dt><span class="sect1"><a href="#sec.iso.flavours">8.3. Flavours</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.iso.split-mode">8.3.1. Split mode</a></span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#chap.usb">9. USB Image&#8212;Live-Stick System</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.usb.building">9.1. Building the suse-live-stick Example</a></span></dt><dt><span class="sect1"><a href="#sec.usb.using">9.2. Using the Image</a></span></dt><dt><span class="sect1"><a href="#sec.usb.flavours">9.3. Flavours</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.usb.split-stick">9.3.1. Split Stick</a></span></dt><dt><span class="sect2"><a href="#sec.usb.lvm">9.3.2. LVM Support</a></span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#chap.vmx">10. VMX Image&#8212;Virtual Disks</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.vmx.building">10.1. Building the suse-vm-guest Example</a></span></dt><dt><span class="sect1"><a href="#sec.vmx.using">10.2. Using the Image</a></span></dt><dt><span class="sect1"><a href="#sec.vmx.flavours">10.3. Flavours</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.vmx.vmware-support">10.3.1. VMware support</a></span></dt><dt><span class="sect2"><a href="#sec.vmx.lvm">10.3.2. LVM Support</a></span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#chap.pxe">11. PXE Image&#8212;Thin Clients</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.pxe.setting-up">11.1. Setting Up the Required Services</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.pxe.atftp-server">11.1.1. Atftp Server</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.dhcp-server">11.1.2. DHCP Server</a></span></dt></dl></dd><dt><span class="sect1"><a href="#sec.pxe.building">11.2. Building the suse-pxe-client Example</a></span></dt><dt><span class="sect1"><a href="#sec.pxe.using">11.3. Using the Image</a></span></dt><dt><span class="sect1"><a href="#sec.pxe.flavours">11.4. Flavours</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.pxe.client-control-file">11.4.1. The PXE Client Control File</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.client-config-file">11.4.2. The PXE Client Configuration File</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.another-user">11.4.3. User another than tftp as Download Protocol</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.ram-only-image">11.4.4. RAM Only Image</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.union-image">11.4.5. Union Image</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.split-image">11.4.6. Split Image</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.root-tree-over-nfs">11.4.7. Root Tree Over NFS</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.root-tree-over-nbd">11.4.8. Root Tree Over NBD</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.root-tree-over-aoe">11.4.9. Root Tree Over AoE</a></span></dt></dl></dd><dt><span class="sect1"><a href="#sec.pxe.groups">11.5. Hardware Grouping</a></span></dt><dd><dl><dt><span class="sect2"><a href="#id2554363">11.5.1. The Group Configuration File</a></span></dt><dt><span class="sect2"><a href="#id2554548">11.5.2. The Hardware Group File</a></span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#chap.oem">12. OEM Image&#8212;Preload Systems</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.oem.building">12.1. Building the suse-oem-preload Example</a></span></dt><dt><span class="sect1"><a href="#sec.oem.using">12.2. Using the Image</a></span></dt><dt><span class="sect1"><a href="#sec.oem.flavours">12.3. Flavours</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.oem.partitioning">12.3.1. Influencing the OEM Partitioning</a></span></dt><dt><span class="sect2"><a href="#sec.oem.lvm">12.3.2. LVM Support</a></span></dt><dt><span class="sect2"><a href="#sec.oem.partition-based-installation">12.3.3. Partition Based Installation</a></span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#chap.xen">13. Xen Image&#8212;Paravirtual Systems</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.xen.building">13.1. Building the suse-xen-guest Example</a></span></dt><dt><span class="sect1"><a href="#sec.xen.using">13.2. Using the Image</a></span></dt><dt><span class="sect1"><a href="#sec.xen.flavours">13.3. Flavours</a></span></dt></dl></dd><dt><span class="chapter"><a href="#chap.ec2">14. EC2 Image&#8212;Amazon Elastic Compute Cloud</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.ec2.building">14.1. Building the suse-xen-guest Example for EC2</a></span></dt><dt><span class="sect1"><a href="#sec.ec2.using">14.2. Using the Image</a></span></dt></dl></dd><dt><span class="chapter"><a href="#chap.testing">15. KIWI Testsuite</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.testing.testsuite">15.1. Testsuite Packages</a></span></dt><dt><span class="sect1"><a href="#sec.testing.creating">15.2. Creating a Test</a></span></dt></dl></dd><dt><span class="appendix"><a href="#appendix">A. Appendix&#8212;KIWI Man Pages</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#ref.kiwi.kiwi">kiwi</a></span><span class="refpurpose"> &#8212; Creating Operating System Images</span></dt><dt><span class="refentrytitle"><a href="#ref.kiwi.config.sh">kiwi::config.sh</a></span><span class="refpurpose"> &#8212; Configuration File for KIWI image description</span></dt><dt><span class="refentrytitle"><a href="#ref.kiwi.images.sh">kiwi::images.sh</a></span><span class="refpurpose"> &#8212; Configuration File for KIWI image description</span></dt><dt><span class="refentrytitle"><a href="#ref.kiwi.kiwirc">kiwi::kiwirc</a></span><span class="refpurpose"> &#8212; Resource file for the Kiwi imaging system</span></dt></dl></dd></dl></div><div class="list-of-figures"><p><b>List of Figures</b></p><dl><dt>1.1. <a href="#fig.imageservingarch">Image Serving Architecture</a></dt><dt>2.1. <a href="#fig.imagetypes">Image Types</a></dt><dt>2.2. <a href="#fig.workflow.bootprocess">Boot Process</a></dt><dt>3.1. <a href="#fig.description.imagedescrdir">Image Description Directory</a></dt><dt>5.1. <a href="#fig.maintain">Image Maintenance Scenarios</a></dt></dl></div><div class="list-of-tables"><p><b>List of Tables</b></p><dl><dt>3.1. <a href="#tab.description.supported-types">Supported Types for zypper and smart</a></dt><dt>10.1. <a href="#tab.vmx.supported-disk-formats">Supported Virtual Disk Formats</a></dt></dl></div><div class="list-of-examples"><p><b>List of Examples</b></p><dl><dt>A.1. <a href="#id2558671">Template for config.sh</a></dt><dt>A.2. <a href="#id2559772">Template for images.sh</a></dt><dt>A.3. <a href="#id2560428">Template for .kiwi.rc</a></dt></dl></div><div class="chapter" title="Chapter 1. Introduction"><div class="titlepage"><div><div><h2 class="title"><a name="id2498509"></a>Chapter 1. Introduction</h2></div></div></div><p>The openSUSE KIWI Image System provides a complete operating
+        </td></tr></table></div></div></div><hr></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="chapter"><a href="#id265523">1. Introduction</a></span></dt><dt><span class="chapter"><a href="#chap.workflow">2. Basic Workflow</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.workflow.bootprocess">2.1. Boot Process</a></span></dt><dt><span class="sect1"><a href="#sec.workflow.bootparameters">2.2. Boot Parameters</a></span></dt><dt><span class="sect1"><a href="#sec.workflow.common-specific-code">2.3. Common and Distribution Specific Code</a></span></dt></dl></dd><dt><span class="chapter"><a href="#chap.description">3. KIWI Image Description</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.description.config.xml">3.1. The config.xml File</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.description.image">3.1.1. <code class="sgmltag-element">image</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.description">3.1.2. <code class="sgmltag-element">description</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.profiles">3.1.3. <code class="sgmltag-element">profiles</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.preferences">3.1.4. <code class="sgmltag-element">preferences</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.users">3.1.5. <code class="sgmltag-element">users</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.drivers">3.1.6. <code class="sgmltag-element">drivers</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.repository">3.1.7. <code class="sgmltag-element">repository</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.packages">3.1.8. <code class="sgmltag-element">packages</code> Element</a></span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#chap.appliance">4. Creating Appliances with KIWI</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.appliance.history">4.1. History</a></span></dt><dt><span class="sect1"><a href="#sec.appliance.kiwi-model">4.2. The KIWI Model</a></span></dt></dl></dd><dt><span class="chapter"><a href="#chap.maintenance">5. Maintenance of Operating System Images</a></span></dt><dt><span class="chapter"><a href="#chap.migration">6. System to Image Migration</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.migrate.create-clean-repository">6.1. Create a Clean Repository Set First</a></span></dt><dt><span class="sect1"><a href="#sec.migrate.watch-overlay">6.2. Watch the Overlay and Unpackaged Files</a></span></dt><dt><span class="sect1"><a href="#sec.migrate.checklist">6.3. Checklist</a></span></dt><dt><span class="sect1"><a href="#sec.migrate.turn-system-into-image">6.4. Turn my System Into an Image&#8230;</a></span></dt></dl></dd><dt><span class="chapter"><a href="#chap.instsourcesetup">7. Installation Source</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.instsourcesetup.adapt-example">7.1. Adapt the Example&#8217;s config.xml</a></span></dt><dt><span class="sect1"><a href="#sec.instsourcesetup.create-local-inst-source">7.2. Create a Local Installation Source</a></span></dt></dl></dd><dt><span class="chapter"><a href="#chap.iso">8. ISO Image&#8212;Live Systems</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.iso.building">8.1. Building the suse-live-iso Example</a></span></dt><dt><span class="sect1"><a href="#sec.iso.using">8.2. Using the Image</a></span></dt><dt><span class="sect1"><a href="#sec.iso.flavours">8.3. Flavours</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.iso.split-mode">8.3.1. Split mode</a></span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#chap.usb">9. USB Image&#8212;Live-Stick System</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.usb.building">9.1. Building the suse-live-stick Example</a></span></dt><dt><span class="sect1"><a href="#sec.usb.using">9.2. Using the Image</a></span></dt><dt><span class="sect1"><a href="#sec.usb.flavours">9.3. Flavours</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.usb.split-stick">9.3.1. Split Stick</a></span></dt><dt><span class="sect2"><a href="#sec.usb.lvm">9.3.2. LVM Support</a></span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#chap.vmx">10. VMX Image&#8212;Virtual Disks</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.vmx.building">10.1. Building the suse-vm-guest Example</a></span></dt><dt><span class="sect1"><a href="#sec.vmx.using">10.2. Using the Image</a></span></dt><dt><span class="sect1"><a href="#sec.vmx.flavours">10.3. Flavours</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.vmx.vmware-support">10.3.1. VMware support</a></span></dt><dt><span class="sect2"><a href="#sec.vmx.lvm">10.3.2. LVM Support</a></span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#chap.pxe">11. PXE Image&#8212;Thin Clients</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.pxe.setting-up">11.1. Setting Up the Required Services</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.pxe.atftp-server">11.1.1. Atftp Server</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.dhcp-server">11.1.2. DHCP Server</a></span></dt></dl></dd><dt><span class="sect1"><a href="#sec.pxe.building">11.2. Building the suse-pxe-client Example</a></span></dt><dt><span class="sect1"><a href="#sec.pxe.using">11.3. Using the Image</a></span></dt><dt><span class="sect1"><a href="#sec.pxe.flavours">11.4. Flavours</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.pxe.client-control-file">11.4.1. The PXE Client Control File</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.client-config-file">11.4.2. The PXE Client Configuration File</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.another-user">11.4.3. User another than tftp as Download Protocol</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.ram-only-image">11.4.4. RAM Only Image</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.union-image">11.4.5. Union Image</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.split-image">11.4.6. Split Image</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.root-tree-over-nfs">11.4.7. Root Tree Over NFS</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.root-tree-over-nbd">11.4.8. Root Tree Over NBD</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.root-tree-over-aoe">11.4.9. Root Tree Over AoE</a></span></dt></dl></dd><dt><span class="sect1"><a href="#sec.pxe.groups">11.5. Hardware Grouping</a></span></dt><dd><dl><dt><span class="sect2"><a href="#id320794">11.5.1. The Group Configuration File</a></span></dt><dt><span class="sect2"><a href="#id320944">11.5.2. The Hardware Group File</a></span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#chap.oem">12. OEM Image&#8212;Preload Systems</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.oem.building">12.1. Building the suse-oem-preload Example</a></span></dt><dt><span class="sect1"><a href="#sec.oem.using">12.2. Using the Image</a></span></dt><dt><span class="sect1"><a href="#sec.oem.flavours">12.3. Flavours</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.oem.partitioning">12.3.1. Influencing the OEM Partitioning</a></span></dt><dt><span class="sect2"><a href="#sec.oem.lvm">12.3.2. LVM Support</a></span></dt><dt><span class="sect2"><a href="#sec.oem.partition-based-installation">12.3.3. Partition Based Installation</a></span></dt></dl></dd></dl></dd><dt><span class="chapter"><a href="#chap.xen">13. Xen Image&#8212;Paravirtual Systems</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.xen.building">13.1. Building the suse-xen-guest Example</a></span></dt><dt><span class="sect1"><a href="#sec.xen.using">13.2. Using the Image</a></span></dt><dt><span class="sect1"><a href="#sec.xen.flavours">13.3. Flavours</a></span></dt></dl></dd><dt><span class="chapter"><a href="#chap.ec2">14. EC2 Image&#8212;Amazon Elastic Compute Cloud</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.ec2.building">14.1. Building the suse-xen-guest Example for EC2</a></span></dt><dt><span class="sect1"><a href="#sec.ec2.using">14.2. Using the Image</a></span></dt></dl></dd><dt><span class="chapter"><a href="#chap.testing">15. KIWI Testsuite</a></span></dt><dd><dl><dt><span class="sect1"><a href="#sec.testing.testsuite">15.1. Testsuite Packages</a></span></dt><dt><span class="sect1"><a href="#sec.testing.creating">15.2. Creating a Test</a></span></dt></dl></dd><dt><span class="appendix"><a href="#appendix">A. Appendix&#8212;KIWI Man Pages</a></span></dt><dd><dl><dt><span class="refentrytitle"><a href="#ref.kiwi.kiwi">kiwi</a></span><span class="refpurpose"> &#8212; Creating Operating System Images</span></dt><dt><span class="refentrytitle"><a href="#ref.kiwi.config.sh">kiwi::config.sh</a></span><span class="refpurpose"> &#8212; Configuration File for KIWI image description</span></dt><dt><span class="refentrytitle"><a href="#ref.kiwi.images.sh">kiwi::images.sh</a></span><span class="refpurpose"> &#8212; Configuration File for KIWI image description</span></dt><dt><span class="refentrytitle"><a href="#ref.kiwi.kiwirc">kiwi::kiwirc</a></span><span class="refpurpose"> &#8212; Resource file for the Kiwi imaging system</span></dt></dl></dd></dl></div><div class="list-of-figures"><p><b>List of Figures</b></p><dl><dt>1.1. <a href="#fig.imageservingarch">Image Serving Architecture</a></dt><dt>2.1. <a href="#fig.imagetypes">Image Types</a></dt><dt>2.2. <a href="#fig.workflow.bootprocess">Boot Process</a></dt><dt>3.1. <a href="#fig.description.imagedescrdir">Image Description Directory</a></dt><dt>5.1. <a href="#fig.maintain">Image Maintenance Scenarios</a></dt></dl></div><div class="list-of-tables"><p><b>List of Tables</b></p><dl><dt>3.1. <a href="#tab.description.supported-types">Supported Types for zypper and smart</a></dt><dt>10.1. <a href="#tab.vmx.supported-disk-formats">Supported Virtual Disk Formats</a></dt><dt>14.1. <a href="#tab.ec2.kernel-image-ids">Amazon Kernel Image IDs</a></dt></dl></div><div class="list-of-examples"><p><b>List of Examples</b></p><dl><dt>A.1. <a href="#id324680">Template for config.sh</a></dt><dt>A.2. <a href="#id325700">Template for images.sh</a></dt><dt>A.3. <a href="#id326307">Template for .kiwi.rc</a></dt></dl></div><div class="chapter" title="Chapter 1. Introduction"><div class="titlepage"><div><div><h2 class="title"><a name="id265523"></a>Chapter 1. Introduction</h2></div></div></div><p>The openSUSE KIWI Image System provides a complete operating
     system image solution for Linux supported hardware platforms as well
     as for virtualisation systems like Xen, VMWare, etc. The KIWI
     architecture was designed as a two level system. The first stage,
@@ -71,7 +71,7 @@
           include them in your original <code class="filename">config.xml</code>
           file and/or <code class="filename">config.sh</code> script. Please also
           note that the image description has been copied into the new
-          root below the directory <code class="filename"><em class="replaceable"><code>new-root</code></em>/image</code><a class="indexterm" name="id2529177"></a>. Any
+          root below the directory <code class="filename"><em class="replaceable"><code>new-root</code></em>/image</code><a class="indexterm" name="id310936"></a>. Any
           subsequent create step will read the image description
           information from the new root tree and not from the original
           image description location. According to this if you need to
@@ -134,7 +134,7 @@
             the tty3 messages represents the shell debug output and any
             error messages from the commands called. With the kiwistderr
             parameter one can combine both message sets and specify
-            where to write them to. It&#8217;s very common to set <code class="filename">/dev/console</code><a class="indexterm" name="id2527005"></a> as possible
+            where to write them to. It&#8217;s very common to set <code class="filename">/dev/console</code><a class="indexterm" name="id311203"></a> as possible
             alternative to the default logging behaviour.</p></li></ul></div></div><div class="sect1" title="2.3. Common and Distribution Specific Code"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sec.workflow.common-specific-code"></a>2.3. Common and Distribution Specific Code<span class="permalink"><a alt="Permalink" title="2.3. Common and Distribution Specific Code" href="#sec.workflow.common-specific-code">¶</a></span></h2></div></div></div><p> KIWI has been developed to be usable for any Linux
       distribution. However, each Linux distribution is different. On
       one hand, KIWI provides common code </p><p>By design of a Linux distribution there are differences
@@ -164,7 +164,7 @@
       their preferred Linux distribution. </p></div></div><div class="chapter" title="Chapter 3. KIWI Image Description"><div class="titlepage"><div><div><h2 class="title"><a name="chap.description"></a>Chapter 3. KIWI Image Description</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="sect1"><a href="#sec.description.config.xml">3.1. The config.xml File</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.description.image">3.1.1. <code class="sgmltag-element">image</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.description">3.1.2. <code class="sgmltag-element">description</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.profiles">3.1.3. <code class="sgmltag-element">profiles</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.preferences">3.1.4. <code class="sgmltag-element">preferences</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.users">3.1.5. <code class="sgmltag-element">users</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.drivers">3.1.6. <code class="sgmltag-element">drivers</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.repository">3.1.7. <code class="sgmltag-element">repository</code> Element</a></span></dt><dt><span class="sect2"><a href="#sec.description.packages">3.1.8. <code class="sgmltag-element">packages</code> Element</a></span></dt></dl></dd></dl></div><p>In order to be able to create an image with KIWI a so called
     image description must be created. The image description is
     represented by a directory which has to contain at least one file
-    named <code class="filename">config.xml</code> or alternatively <code class="filename">*.kiwi</code><a class="indexterm" name="id2502173"></a>. A good start for such a
+    named <code class="filename">config.xml</code> or alternatively <code class="filename">*.kiwi</code><a class="indexterm" name="id311300"></a>. A good start for such a
     description can be found in the examples provided in
       <code class="filename">/usr/share/doc/packages/kiwi/examples</code>. </p><div class="figure"><a name="fig.description.imagedescrdir"></a><p class="title"><b>Figure 3.1. Image Description Directory</b><span class="permalink"><a alt="Permalink" title="Figure 3.1. Image Description Directory" href="#fig.description.imagedescrdir">¶</a></span></p><div class="figure-contents"><div class="mediaobject"><img src="images/description.png" alt="Image Description Directory"></div></div></div><br class="figure-break"><p>The following additional information is optional for the process
     of building an image, but most often mandatory for the functionality
@@ -176,9 +176,9 @@
           image. This script is called at the end of the installation,
           but <span class="emphasis"><em>before</em></span> the package scripts have run.
           It is designed to configure the image system, such as the
-          activation or deactivation of certain services (<code class="systemitem">insserv</code><a class="indexterm" name="id2519094"></a>). The call is not made
+          activation or deactivation of certain services (<code class="systemitem">insserv</code><a class="indexterm" name="id311400"></a>). The call is not made
           until after the switch to the image has been made with chroot.
-        </p></dd><dt><span class="term"><code class="filename">root</code><a class="indexterm" name="id2534133"></a></span></dt><dd><p>Subdirectory that contains special files, directories, and
+        </p></dd><dt><span class="term"><code class="filename">root</code><a class="indexterm" name="id311422"></a></span></dt><dd><p>Subdirectory that contains special files, directories, and
           scripts for adapting the image environment
             <span class="emphasis"><em>after</em></span> the installation of all the image
           packages. The entire directory is copied into the root of the
@@ -212,7 +212,7 @@
           a license file or information directly readable from the CD or
           DVD. </p></dd><dt><span class="term"><code class="filename">config-cdroot.sh</code></span></dt><dd><p>Along with the <code class="filename">config-cdroot.tgz</code> one
           can provide a script which allows to manipulate the extracted
-          data. </p></dd><dt><span class="term"><code class="filename">config/</code><a class="indexterm" name="id2518383"></a></span></dt><dd><p>Optional subdirectory that contains Bash scripts that are
+          data. </p></dd><dt><span class="term"><code class="filename">config/</code><a class="indexterm" name="id311638"></a></span></dt><dd><p>Optional subdirectory that contains Bash scripts that are
           called after the installation of all the image packages,
           primarily in order to remove the parts of a package that are
           not needed for the operating system. The name of the Bash
@@ -232,33 +232,33 @@
   <code class="sgmltag-sgmlcomment">&lt;!-- ... --&gt;</code>
 &lt;/image&gt;</pre><p>The image definition starts with an <code class="sgmltag-element">image</code>
         tag and requires the schema format at version 2.0. The attribute
-          <code class="sgmltag-attribute">name</code><a class="indexterm" name="id2519152"></a> specifies the name
+          <code class="sgmltag-attribute">name</code><a class="indexterm" name="id311716"></a> specifies the name
         of the image which is also used for the filenames created by
-        KIWI. Because we don&#8217;t want spaces in filenames the <code class="sgmltag-attribute">name</code><a class="indexterm" name="id2526848"></a> attribute must not have any
+        KIWI. Because we don&#8217;t want spaces in filenames the <code class="sgmltag-attribute">name</code><a class="indexterm" name="id311732"></a> attribute must not have any
         spaces in its name. </p><p>The following optional attributes can be inserted in the
-          <code class="sgmltag-element">image</code> tag: </p><div class="variablelist"><dl><dt><span class="term"><code class="sgmltag-attribute">displayname</code><a class="indexterm" name="id2537317"></a></span></dt><dd><p> allows setup of the boot menu title for isolinux and
+          <code class="sgmltag-element">image</code> tag: </p><div class="variablelist"><dl><dt><span class="term"><code class="sgmltag-attribute">displayname</code><a class="indexterm" name="id311757"></a></span></dt><dd><p> allows setup of the boot menu title for isolinux and
               grub. So you can have <span class="emphasis"><em>suse-SLED-foo</em></span>
               as the image name but something like <span class="emphasis"><em>my cool
-                Image</em></span> as the boot display name. </p></dd><dt><span class="term"><code class="sgmltag-attribute">inherit</code><a class="indexterm" name="id2525209"></a></span></dt><dd><p>inherits the packages information from another
-                <code class="sgmltag-element">image</code> description </p></dd><dt><span class="term"><code class="sgmltag-attribute">kiwirevision</code><a class="indexterm" name="id2520571"></a></span></dt><dd><p>specifies a KIWI SVN revision number which is known to
+                Image</em></span> as the boot display name. </p></dd><dt><span class="term"><code class="sgmltag-attribute">inherit</code><a class="indexterm" name="id311787"></a></span></dt><dd><p>inherits the packages information from another
+                <code class="sgmltag-element">image</code> description </p></dd><dt><span class="term"><code class="sgmltag-attribute">kiwirevision</code><a class="indexterm" name="id311814"></a></span></dt><dd><p>specifies a KIWI SVN revision number which is known to
               build a working image from this description. If the KIWI
               SVN revision is less than the specified value, the process
               will exit. The currently used SVN revision can be queried
               by calling <span class="command"><strong>kiwi</strong></span>
-              <code class="option">--version</code>. </p></dd><dt><span class="term"><code class="sgmltag-attribute">id</code><a class="indexterm" name="id2540142"></a></span></dt><dd><p> sets an identification number which appears as file
+              <code class="option">--version</code>. </p></dd><dt><span class="term"><code class="sgmltag-attribute">id</code><a class="indexterm" name="id311848"></a></span></dt><dd><p> sets an identification number which appears as file
                 <code class="filename">/etc/ImageID</code> within the image.
             </p></dd></dl></div><p>Inside the <code class="sgmltag-element">image</code> section the following
         mandatory and optional subelements exists. The simplest image
         description must define the elements
           <code class="sgmltag-element">description</code>,
         <code class="sgmltag-element">preferences</code>, <code class="sgmltag-element">repository</code>
-        and <code class="sgmltag-element">packages</code> (at least one of <code class="sgmltag-attribute">type</code><a class="indexterm" name="id2521182"></a>="<code class="sgmltag-attvalue">bootstrap</code>"). </p></div><div class="sect2" title="3.1.2. description Element"><div class="titlepage"><div><div><h3 class="title"><a name="sec.description.description"></a>3.1.2. <code class="sgmltag-element">description</code> Element<span class="permalink"><a alt="Permalink" title="3.1.2. description Element" href="#sec.description.description">¶</a></span></h3></div></div></div><pre class="screen">&lt;description type="system"&gt;
+        and <code class="sgmltag-element">packages</code> (at least one of <code class="sgmltag-attribute">type</code><a class="indexterm" name="id311894"></a>="<code class="sgmltag-attvalue">bootstrap</code>"). </p></div><div class="sect2" title="3.1.2. description Element"><div class="titlepage"><div><div><h3 class="title"><a name="sec.description.description"></a>3.1.2. <code class="sgmltag-element">description</code> Element<span class="permalink"><a alt="Permalink" title="3.1.2. description Element" href="#sec.description.description">¶</a></span></h3></div></div></div><pre class="screen">&lt;description type="system"&gt;
   &lt;author&gt;an author&lt;/author&gt;
   &lt;contact&gt;mail&lt;/contact&gt;
   &lt;specification&gt;short info&lt;/specification&gt;
 &lt;/description&gt;</pre><p>The mandatory <code class="sgmltag-element">description</code> section
         contains information about the creator of this image
-        description. The attribute <code class="sgmltag-attribute">type</code><a class="indexterm" name="id2543764"></a> could be either of the value system which
+        description. The attribute <code class="sgmltag-attribute">type</code><a class="indexterm" name="id311938"></a> could be either of the value system which
         indicates this is a system image description or at value boot
         for boot image descriptions. </p></div><div class="sect2" title="3.1.3. profiles Element"><div class="titlepage"><div><div><h3 class="title"><a name="sec.description.profiles"></a>3.1.3. <code class="sgmltag-element">profiles</code> Element<span class="permalink"><a alt="Permalink" title="3.1.3. profiles Element" href="#sec.description.profiles">¶</a></span></h3></div></div></div><pre class="screen">&lt;profiles&gt;
    &lt;profile name="name" description="text"/&gt;
@@ -267,14 +267,14 @@
         maintain one image description while allowing for variation of
         the sections packages and drivers that are included. A separate
         profile element must be specified for each variation. The
-          <code class="sgmltag-element">profile</code> child element, which has <code class="sgmltag-attribute">name</code><a class="indexterm" name="id2540715"></a> and <code class="sgmltag-attribute">description</code><a class="indexterm" name="id2522467"></a> attributes, specifies
+          <code class="sgmltag-element">profile</code> child element, which has <code class="sgmltag-attribute">name</code><a class="indexterm" name="id311985"></a> and <code class="sgmltag-attribute">description</code><a class="indexterm" name="id311998"></a> attributes, specifies
         an alias name used to mark sections as belonging to a profile,
         and a short description explaining what this profile does. </p><p>To mark a set of packages/drivers as belonging to a profile,
-        simply annotate them with the <code class="sgmltag-attribute">profiles</code><a class="indexterm" name="id2534135"></a> attribute. It is also possible to mark
+        simply annotate them with the <code class="sgmltag-attribute">profiles</code><a class="indexterm" name="id312016"></a> attribute. It is also possible to mark
         sections as belonging to multiple profiles by separating the
-        names in the <code class="sgmltag-attribute">profiles</code><a class="indexterm" name="id2539734"></a>
+        names in the <code class="sgmltag-attribute">profiles</code><a class="indexterm" name="id312030"></a>
         attribute with a comma. If a <code class="sgmltag-element">packages</code> or
-          <code class="sgmltag-element">drivers</code> tag does not have a <code class="sgmltag-attribute">profiles</code><a class="indexterm" name="id2543033"></a> attribute, it is assumed
+          <code class="sgmltag-element">drivers</code> tag does not have a <code class="sgmltag-attribute">profiles</code><a class="indexterm" name="id312049"></a> attribute, it is assumed
         to be present for all profiles. </p></div><div class="sect2" title="3.1.4. preferences Element"><div class="titlepage"><div><div><h3 class="title"><a name="sec.description.preferences"></a>3.1.4. <code class="sgmltag-element">preferences</code> Element<span class="permalink"><a alt="Permalink" title="3.1.4. preferences Element" href="#sec.description.preferences">¶</a></span></h3></div></div></div><pre class="screen">&lt;preferences profiles="name"&gt;
   &lt;version&gt;1.1.2&lt;/version&gt;
   &lt;packagemanager&gt;smart&lt;/packagemanager&gt;
@@ -298,7 +298,7 @@
           <span class="command"><strong>zypper</strong></span>. </p><p>In general the specification of one
           <code class="sgmltag-element">preferences</code> section is sufficient. However,
         it&#8217;s possible to specify multiple <code class="sgmltag-element">preferences</code>
-        sections and distinquish between the sections via the <code class="sgmltag-attribute">profiles</code><a class="indexterm" name="id2536477"></a> attribute. Data may also
+        sections and distinquish between the sections via the <code class="sgmltag-attribute">profiles</code><a class="indexterm" name="id312158"></a> attribute. Data may also
         be shared between different profiles. Using profiles it is
         possible to, for example, configure specific preferences for OEM
         image generation. Activation of a given
@@ -309,12 +309,12 @@
         possible to specify multiple <code class="sgmltag-element">type</code> elements in
         any <code class="sgmltag-element">preferences</code> block. To set a given
           <code class="sgmltag-element">type</code> description as the default image use
-        the boolean attribute <code class="sgmltag-attribute">primary</code><a class="indexterm" name="id2524489"></a> and set its value to <code class="sgmltag-attvalue">true</code>. The image type to be created
-        is determined by the value of the <code class="sgmltag-attribute">image</code><a class="indexterm" name="id2534169"></a> attribute. The following list describes the
-        supported types and possible values of the image attribute: </p><div class="variablelist"><dl><dt><span class="term"><code class="sgmltag-attribute">image</code><a class="indexterm" name="id2518408"></a>="<code class="sgmltag-attvalue">cpio</code>"</span></dt><dd><p>Use the cpio image type to specify the generation os a
+        the boolean attribute <code class="sgmltag-attribute">primary</code><a class="indexterm" name="id312200"></a> and set its value to <code class="sgmltag-attvalue">true</code>. The image type to be created
+        is determined by the value of the <code class="sgmltag-attribute">image</code><a class="indexterm" name="id312219"></a> attribute. The following list describes the
+        supported types and possible values of the image attribute: </p><div class="variablelist"><dl><dt><span class="term"><code class="sgmltag-attribute">image</code><a class="indexterm" name="id312239"></a>="<code class="sgmltag-attvalue">cpio</code>"</span></dt><dd><p>Use the cpio image type to specify the generation os a
               boot image (intrd). When generating a boot image it is
               possible to specify a specific boot profile and boot
-              kernel using the optional <code class="sgmltag-attribute">bootprofile</code><a class="indexterm" name="id2505528"></a>="<code class="sgmltag-attvalue">default</code>" and <code class="sgmltag-attribute">bootkernel</code><a class="indexterm" name="id2528001"></a>="<code class="sgmltag-attvalue">std</code>" attributes. </p><p>A boot image should group the various supported
+              kernel using the optional <code class="sgmltag-attribute">bootprofile</code><a class="indexterm" name="id312264"></a>="<code class="sgmltag-attvalue">default</code>" and <code class="sgmltag-attribute">bootkernel</code><a class="indexterm" name="id312282"></a>="<code class="sgmltag-attvalue">std</code>" attributes. </p><p>A boot image should group the various supported
               kernels into profiles. If the user chooses not to use the
               profiles supplied by KIWI, it is required that one profile
               named std be created. This profile will be used if no
@@ -324,14 +324,14 @@
               omit drivers, use special drivers and/or special packages
               be specified as profiles. </p><p>The bootprofile and bootkernel attribute are respected
               within the definition of a system image. Us the attribute
-              and value <code class="sgmltag-attribute">type</code><a class="indexterm" name="id2521492"></a>="<code class="sgmltag-attvalue">system</code>" of the <code class="sgmltag-element">description</code>
+              and value <code class="sgmltag-attribute">type</code><a class="indexterm" name="id312316"></a>="<code class="sgmltag-attvalue">system</code>" of the <code class="sgmltag-element">description</code>
               element to specify the creation of a system image. The
               values of the bootprofile and bootkernel attributes are
-              used by KIWI when generating the boot image. </p></dd><dt><span class="term"><code class="sgmltag-attribute">image</code><a class="indexterm" name="id2541491"></a>="<code class="sgmltag-attvalue">iso</code>"</span></dt><dd><p>Specify the key-value pair <code class="sgmltag-attribute">image</code><a class="indexterm" name="id2538158"></a>="<code class="sgmltag-attvalue">iso</code>" to generate a live system suitable for
-              deployment on optical media (CD or DVD). Use the <code class="sgmltag-attribute">boot</code><a class="indexterm" name="id2532817"></a>="<code class="sgmltag-attvalue">isoboot/suse-*</code>" attribute
+              used by KIWI when generating the boot image. </p></dd><dt><span class="term"><code class="sgmltag-attribute">image</code><a class="indexterm" name="id312345"></a>="<code class="sgmltag-attvalue">iso</code>"</span></dt><dd><p>Specify the key-value pair <code class="sgmltag-attribute">image</code><a class="indexterm" name="id312368"></a>="<code class="sgmltag-attvalue">iso</code>" to generate a live system suitable for
+              deployment on optical media (CD or DVD). Use the <code class="sgmltag-attribute">boot</code><a class="indexterm" name="id312387"></a>="<code class="sgmltag-attvalue">isoboot/suse-*</code>" attribute
               when generating this image type to select the apropriate
               boot image for optical media. In addition the optional
-                <code class="sgmltag-attribute">flags</code><a class="indexterm" name="id2528396"></a> attribute may
+                <code class="sgmltag-attribute">flags</code><a class="indexterm" name="id312406"></a> attribute may
               be set to the following values with the effects described
               below:</p><div class="variablelist"><dl><dt><span class="term"><code class="sgmltag-attvalue">clic</code></span></dt><dd><p>Creates a fuse based compressed read-only
                     filesystem which allows write operations into a cow
@@ -344,61 +344,61 @@
               case it is recommended to specify a
                 <code class="sgmltag-element">split</code> section as a child of this type
               element. The specification of a split block is also
-              recommended when <code class="sgmltag-attribute">flags</code><a class="indexterm" name="id2531786"></a>="<code class="sgmltag-attvalue">compressed</code>" is used. </p></dd><dt><span class="term"><code class="sgmltag-attribute">image</code><a class="indexterm" name="id2526244"></a>="<code class="sgmltag-attvalue">oem</code>"</span></dt><dd><p>Use this type to create a virtual disk system suitable
+              recommended when <code class="sgmltag-attribute">flags</code><a class="indexterm" name="id312487"></a>="<code class="sgmltag-attvalue">compressed</code>" is used. </p></dd><dt><span class="term"><code class="sgmltag-attribute">image</code><a class="indexterm" name="id312512"></a>="<code class="sgmltag-attvalue">oem</code>"</span></dt><dd><p>Use this type to create a virtual disk system suitable
               in a preload setting. In addition specify the attributes
-                <code class="sgmltag-attribute">filesystem</code><a class="indexterm" name="id2524047"></a>, and
-                <code class="sgmltag-attribute">boot</code><a class="indexterm" name="id2529016"></a>="<code class="sgmltag-attvalue">oemboot/suse-*</code>" to control
+                <code class="sgmltag-attribute">filesystem</code><a class="indexterm" name="id312536"></a>, and
+                <code class="sgmltag-attribute">boot</code><a class="indexterm" name="id312548"></a>="<code class="sgmltag-attvalue">oemboot/suse-*</code>" to control
               the filesystem used for the virtual and to specify the
-              proper boot image. Using the optional <code class="sgmltag-attribute">format</code><a class="indexterm" name="id2529554"></a> attribute and
+              proper boot image. Using the optional <code class="sgmltag-attribute">format</code><a class="indexterm" name="id312567"></a> attribute and
               setting, the value to iso or usb will create self
               installing images suitable for optical media or a USB
               stick, respectively. Booting from the media will deploy
               the OEM preload image onto the selected storage device of
               the system. It is also possible to configure the system to
-              use logical volumes. Use the optional <code class="sgmltag-attribute">lvm</code><a class="indexterm" name="id2538416"></a> attribute and specify
+              use logical volumes. Use the optional <code class="sgmltag-attribute">lvm</code><a class="indexterm" name="id312584"></a> attribute and specify
               the logical volume configuration with the
                 <code class="sgmltag-element">lvmvolumes</code> child element. The default
               volume group name is kiwiVG. Further configuration of the
               image is performed using the appropriate
-                <code class="sgmltag-element">*config</code> child block. </p></dd><dt><span class="term"><code class="sgmltag-attribute">image</code><a class="indexterm" name="id2499393"></a>="<code class="sgmltag-attvalue">pxe</code>"</span></dt><dd><p>Creating a network boot image is supported by KIWI
+                <code class="sgmltag-element">*config</code> child block. </p></dd><dt><span class="term"><code class="sgmltag-attribute">image</code><a class="indexterm" name="id312611"></a>="<code class="sgmltag-attvalue">pxe</code>"</span></dt><dd><p>Creating a network boot image is supported by KIWI
               with the image="pxe" type. When specifying the creation of
-              a netwoork boot image use the <code class="sgmltag-attribute">filesystem</code><a class="indexterm" name="id2514311"></a> and boot="netboot/suse-*"
+              a netwoork boot image use the <code class="sgmltag-attribute">filesystem</code><a class="indexterm" name="id312636"></a> and boot="netboot/suse-*"
               attributes to specify the filesystem of the image and the
               proper boot image. To compress the image file set the
-                <code class="sgmltag-attribute">compressed</code><a class="indexterm" name="id2527146"></a> boolean
+                <code class="sgmltag-attribute">compressed</code><a class="indexterm" name="id312650"></a> boolean
               attribute to true. This setting will compress the image
               file and has no influence on the filesystem used within
               the image. The compression is often use to support better
               transfer times when the pxe image is pushed to the boot
               server over a network connection. The pxe image layout is
               controlled by using the <code class="sgmltag-element">pxedeploy</code> child
-              element. </p></dd><dt><span class="term"><code class="sgmltag-attribute">image</code><a class="indexterm" name="id2521966"></a>="<code class="sgmltag-attvalue">split</code>"</span></dt><dd><p>The split image support allows the creation of an
+              element. </p></dd><dt><span class="term"><code class="sgmltag-attribute">image</code><a class="indexterm" name="id312676"></a>="<code class="sgmltag-attvalue">split</code>"</span></dt><dd><p>The split image support allows the creation of an
               image as split files. Using this technique one can assign
               different filesystems and different read-write properties
               to the different sections of the image. The
                 <code class="sgmltag-element">oem</code>, <code class="sgmltag-element">pxe</code>,
                 <code class="sgmltag-element">usb</code>, and <code class="sgmltag-element">vmx</code> types
-              can be created as a split system image. Use the <code class="sgmltag-attribute">boot</code><a class="indexterm" name="id2508300"></a>="<code class="sgmltag-attvalue">oem|netboot|usb|vmx/suse-*</code>"
+              can be created as a split system image. Use the <code class="sgmltag-attribute">boot</code><a class="indexterm" name="id312715"></a>="<code class="sgmltag-attvalue">oem|netboot|usb|vmx/suse-*</code>"
               attribute to select the underlying type of the split
-              image. The attributes <code class="sgmltag-attribute">fsreadwrite</code><a class="indexterm" name="id2501135"></a>, <code class="sgmltag-attribute">fsreadonly</code><a class="indexterm" name="id2517866"></a> are used to controll the
+              image. The attributes <code class="sgmltag-attribute">fsreadwrite</code><a class="indexterm" name="id312734"></a>, <code class="sgmltag-attribute">fsreadonly</code><a class="indexterm" name="id312746"></a> are used to controll the
               read-write properties of the filesystem specified as the
               attributes value. Use the appropriate
                 <code class="sgmltag-element">*config</code> child block to specify the
               properties of the underlying image. For example when
               building a OEM based split image use the
-                <code class="sgmltag-element">oemconfig</code> child section. </p></dd><dt><span class="term"><code class="sgmltag-attribute">image</code><a class="indexterm" name="id2518725"></a>="<code class="sgmltag-attvalue">usb</code>"</span></dt><dd><p>Use the usb value to create a USB stick image. Set the
-                <code class="sgmltag-attribute">filesystem</code><a class="indexterm" name="id2524478"></a>
+                <code class="sgmltag-element">oemconfig</code> child section. </p></dd><dt><span class="term"><code class="sgmltag-attribute">image</code><a class="indexterm" name="id312774"></a>="<code class="sgmltag-attvalue">usb</code>"</span></dt><dd><p>Use the usb value to create a USB stick image. Set the
+                <code class="sgmltag-attribute">filesystem</code><a class="indexterm" name="id312798"></a>
               attribute to the desired supported filesystem for the
-              image and use the <code class="sgmltag-attribute">boot</code><a class="indexterm" name="id2542288"></a>="<code class="sgmltag-attvalue">usbboot/suse-*</code>" attribute to select the USB
+              image and use the <code class="sgmltag-attribute">boot</code><a class="indexterm" name="id312812"></a>="<code class="sgmltag-attvalue">usbboot/suse-*</code>" attribute to select the USB
               boot image for the system. For a USB image you may also
               select GRUB or Syslinux as a bootloader by setting the
               optional <code class="sgmltag-element">bootloader</code> attribute to grub
               ot syslinux, respectively. The USB image may also be
               created with LVM support. The same rules as indicated for
-              the OEM image apply. </p></dd><dt><span class="term"><code class="sgmltag-attribute">image</code><a class="indexterm" name="id2488379"></a>="<code class="sgmltag-attvalue">vmx</code>"</span></dt><dd><p>Creation of a virtual disk system is enabled with the
+              the OEM image apply. </p></dd><dt><span class="term"><code class="sgmltag-attribute">image</code><a class="indexterm" name="id312842"></a>="<code class="sgmltag-attvalue">vmx</code>"</span></dt><dd><p>Creation of a virtual disk system is enabled with the
               vmx value of the image attribute. Set the filesystem of
               the virtual disk with the filesystem attribute and select
-              the appropriate boot image by setting <code class="sgmltag-attribute">boot</code><a class="indexterm" name="id2488408"></a>="<code class="sgmltag-attvalue">vmxboot/suse-*</code>" The optional
+              the appropriate boot image by setting <code class="sgmltag-attribute">boot</code><a class="indexterm" name="id312868"></a>="<code class="sgmltag-attvalue">vmxboot/suse-*</code>" The optional
               format attribute is used to specify one of the
               virtualization formats supported by QEMU, such as vmdk
               (also the VMware format) or qcow2. For the virtual disk
@@ -411,41 +411,41 @@
               virtual disk according to the rules indicated for the USB
               system. Last but not least the virtual disk system may
               also be created with a LVM based layout by using the
-                <code class="sgmltag-attribute">lvm</code><a class="indexterm" name="id2488448"></a> attribute. The
+                <code class="sgmltag-attribute">lvm</code><a class="indexterm" name="id312901"></a> attribute. The
               previously indicated rules apply. Use the
                 <code class="sgmltag-element">machine</code> child element to specify
               appropriate configuration of the virtual disk system.
-            </p></dd></dl></div><p>All of the mentioned types can specify the <code class="sgmltag-attribute">boot</code><a class="indexterm" name="id2502784"></a> attribute which tells KIWI to
+            </p></dd></dl></div><p>All of the mentioned types can specify the <code class="sgmltag-attribute">boot</code><a class="indexterm" name="id312925"></a> attribute which tells KIWI to
         call itself to build the requested boot image (initrd). It is
         possible to tell KIWI to check for an already built boot image
         which is a so called <span class="emphasis"><em>prebuilt boot image</em></span>.
         To activate searching for an appropriate prebuilt boot image the
-        type section also provides the attribute <code class="sgmltag-attribute">checkprebuilt</code><a class="indexterm" name="id2502808"></a>="<code class="sgmltag-attvalue">true|false</code>". If specified KIWI will
+        type section also provides the attribute <code class="sgmltag-attribute">checkprebuilt</code><a class="indexterm" name="id312944"></a>="<code class="sgmltag-attvalue">true|false</code>". If specified KIWI will
         search for a prebuilt boot image in a directory named
           <code class="filename">/usr/share/kiwi/image/*boot/*-prebuilt</code>.
-        Example: If the <code class="sgmltag-attribute">boot</code><a class="indexterm" name="id2502835"></a>
-        attribute was set to <code class="sgmltag-attvalue">isoboot/suse-10.3</code> and <code class="sgmltag-attribute">checkprebuilt</code><a class="indexterm" name="id2502855"></a> is set to <code class="sgmltag-attvalue">true</code> KIWI will search the prebuilt boot image in
+        Example: If the <code class="sgmltag-attribute">boot</code><a class="indexterm" name="id312968"></a>
+        attribute was set to <code class="sgmltag-attvalue">isoboot/suse-10.3</code> and <code class="sgmltag-attribute">checkprebuilt</code><a class="indexterm" name="id312986"></a> is set to <code class="sgmltag-attvalue">true</code> KIWI will search the prebuilt boot image in
           <code class="filename">/usr/share/kiwi/image/isoboot/suse-10.3-prebuilt</code>.
         The directory KIWI searches for the prebuilt boot images can
         also be specified at the commandline with the
           <code class="option">--prebuiltbootimage</code> parameter. </p><p>Within the preferences section there are the following
-        optional attributes: </p><div class="variablelist"><dl><dt><span class="term"><code class="sgmltag-attribute">rpm-check-signatures</code><a class="indexterm" name="id2502898"></a></span></dt><dd><p>Specifies whether RPM should check the package
-              signature or not </p></dd><dt><span class="term"><code class="sgmltag-attribute">rpm-excludedocs</code><a class="indexterm" name="id2502924"></a></span></dt><dd><p> Specifies whether RPM should skip installing package
-              documentation </p></dd><dt><span class="term"><code class="sgmltag-attribute">rpm-force</code><a class="indexterm" name="id2502950"></a></span></dt><dd><p>Specifies whether RPM should be called with
+        optional attributes: </p><div class="variablelist"><dl><dt><span class="term"><code class="sgmltag-attribute">rpm-check-signatures</code><a class="indexterm" name="id313023"></a></span></dt><dd><p>Specifies whether RPM should check the package
+              signature or not </p></dd><dt><span class="term"><code class="sgmltag-attribute">rpm-excludedocs</code><a class="indexterm" name="id313047"></a></span></dt><dd><p> Specifies whether RPM should skip installing package
+              documentation </p></dd><dt><span class="term"><code class="sgmltag-attribute">rpm-force</code><a class="indexterm" name="id313071"></a></span></dt><dd><p>Specifies whether RPM should be called with
                 <code class="option">--force</code>
-            </p></dd><dt><span class="term"><code class="sgmltag-attribute">keytable</code><a class="indexterm" name="id2502979"></a></span></dt><dd><p>Specifies the name of the console keymap to use. The
+            </p></dd><dt><span class="term"><code class="sgmltag-attribute">keytable</code><a class="indexterm" name="id313098"></a></span></dt><dd><p>Specifies the name of the console keymap to use. The
               value corresponds to a map file in
                 <code class="filename">/usr/share/kbd/keymaps</code>. The
                 <code class="varname">KEYTABLE</code> variable in
                 <code class="filename">/etc/sysconfig/keyboard</code> file is set
-              according to the keyboard mapping. </p></dd><dt><span class="term"><code class="sgmltag-attribute">timezone</code><a class="indexterm" name="id2503022"></a></span></dt><dd><p>Specifies the time zone. Available time zones are
-              located in the <code class="filename">/usr/share/zoneinfo</code><a class="indexterm" name="id2503044"></a> directory. Specify the
-              attribute value relative to <code class="filename">/usr/share/zoneinfo</code><a class="indexterm" name="id2503061"></a>. For example, specify
+              according to the keyboard mapping. </p></dd><dt><span class="term"><code class="sgmltag-attribute">timezone</code><a class="indexterm" name="id313136"></a></span></dt><dd><p>Specifies the time zone. Available time zones are
+              located in the <code class="filename">/usr/share/zoneinfo</code><a class="indexterm" name="id313156"></a> directory. Specify the
+              attribute value relative to <code class="filename">/usr/share/zoneinfo</code><a class="indexterm" name="id313171"></a>. For example, specify
               Europe/Berlin for
                 <code class="filename">/usr/share/zoneinfo/Europe/Berlin</code>.
               KIWI uses this value to configure the timezone in
-                <code class="filename">/etc/localtime</code> for the image. </p></dd><dt><span class="term"><code class="sgmltag-attribute">locale</code><a class="indexterm" name="id2503096"></a></span></dt><dd><p> Specifies the name of the UTF-8 locale to use, which
-              defines the contents of the <code class="envar">RC_LANG</code><a class="indexterm" name="id2503114"></a> system
+                <code class="filename">/etc/localtime</code> for the image. </p></dd><dt><span class="term"><code class="sgmltag-attribute">locale</code><a class="indexterm" name="id313202"></a></span></dt><dd><p> Specifies the name of the UTF-8 locale to use, which
+              defines the contents of the <code class="envar">RC_LANG</code><a class="indexterm" name="id313218"></a> system
               environment variable in
                 <code class="filename">/etc/sysconfig/language</code>. Please
               note only UTF-8 locales are supported here which also
@@ -454,15 +454,15 @@
               the locale string according to the following
                 pattern:<code class="literal">[a-z]{2}_[A-Z]{2}(,[a-z]{2}_[A-Z]{2})*</code>.
               This means you have to specifiy the locale like the
-              following example: en_US or en_US,de_DE </p></dd><dt><span class="term"><code class="sgmltag-attribute">boot-theme</code><a class="indexterm" name="id2503156"></a></span></dt><dd><p>Specifies the name of the gfxboot and bootsplash theme
-              to use </p></dd><dt><span class="term"><code class="sgmltag-attribute">defaultdestination</code><a class="indexterm" name="id2503182"></a></span></dt><dd><p>Used if the <code class="option">--destdir</code> option is not
-              specified when calling KIWI</p></dd><dt><span class="term"><code class="sgmltag-attribute">defaultroot</code><a class="indexterm" name="id2503212"></a></span></dt><dd><p>Used if the option <code class="option">--root</code> is not
-              specified when calling KIWI </p></dd><dt><span class="term"><code class="sgmltag-attribute">defaultbaseroot</code><a class="indexterm" name="id2503241"></a></span></dt><dd><p>Used if the option <code class="option">--base-root</code> is not
+              following example: en_US or en_US,de_DE </p></dd><dt><span class="term"><code class="sgmltag-attribute">boot-theme</code><a class="indexterm" name="id313255"></a></span></dt><dd><p>Specifies the name of the gfxboot and bootsplash theme
+              to use </p></dd><dt><span class="term"><code class="sgmltag-attribute">defaultdestination</code><a class="indexterm" name="id313279"></a></span></dt><dd><p>Used if the <code class="option">--destdir</code> option is not
+              specified when calling KIWI</p></dd><dt><span class="term"><code class="sgmltag-attribute">defaultroot</code><a class="indexterm" name="id313306"></a></span></dt><dd><p>Used if the option <code class="option">--root</code> is not
+              specified when calling KIWI </p></dd><dt><span class="term"><code class="sgmltag-attribute">defaultbaseroot</code><a class="indexterm" name="id313332"></a></span></dt><dd><p>Used if the option <code class="option">--base-root</code> is not
               specified when calling KIWI. It&#8217;s possible to prepare and
               create an image using a predefined non empty root
               directory as base information. This could speedup the
               build process a lot if the base root path already contains
-              most of the image data. </p></dd><dt><span class="term"><code class="sgmltag-attribute">kernelcmdline</code><a class="indexterm" name="id2523501"></a></span></dt><dd><p> Specifies additional kernel parameters. The following
+              most of the image data. </p></dd><dt><span class="term"><code class="sgmltag-attribute">kernelcmdline</code><a class="indexterm" name="id313364"></a></span></dt><dd><p> Specifies additional kernel parameters. The following
               example disables kernel messages:
                 <code class="literal">kernelcmdline="quiet"</code>
             </p></dd></dl></div><p>The <code class="sgmltag-element">type</code> element may contain child
@@ -477,7 +477,7 @@
               create a LVM (Logical Volume Management) based storage
               layout. By default, the volume group is named kiwiVG. It
               is possible to change the name of the group by setting the
-                <code class="sgmltag-attribute">lvmgroup</code><a class="indexterm" name="id2503346"></a> attribute
+                <code class="sgmltag-attribute">lvmgroup</code><a class="indexterm" name="id313438"></a> attribute
               to the desired name. Individual volumes within the volume
               group are specified using the <code class="sgmltag-element">volume</code>
               element. </p><p>The following example shows the creation of a volume
@@ -485,10 +485,10 @@
               systemVG. </p><pre class="screen"> &lt;lvmvolumes lvmgroup="systemVG"&gt; 
   &lt;volume name="usr" freespace="100M"/&gt; 
   &lt;volume name="var" size="200M"/&gt; 
-&lt;/lvmvolumes&gt;</pre><p>With the optional <code class="sgmltag-attribute">freespace</code><a class="indexterm" name="id2503384"></a> attribute it is possible to add
+&lt;/lvmvolumes&gt;</pre><p>With the optional <code class="sgmltag-attribute">freespace</code><a class="indexterm" name="id313470"></a> attribute it is possible to add
               space to the volume. If the freespace attribute is not set
               the created volume will be 80&#8201;% to 90&#8201;% full. Using the
-              optional <code class="sgmltag-attribute">size</code><a class="indexterm" name="id2503405"></a>
+              optional <code class="sgmltag-attribute">size</code><a class="indexterm" name="id313486"></a>
               attribute the absolute size of the given volume is
               specified. The size attribute takes precedence over the
               freespace attribute. Should the specified size be too
@@ -542,8 +542,8 @@
                     archive will be moved to the recovery partition. An
                     additional boot menu entry is created that when
                     selected restores the original root tree on the
-                    system. The user information on the <code class="filename">/home</code><a class="indexterm" name="id2546344"></a> partition or in
-                    the <code class="filename">/home</code><a class="indexterm" name="id2546360"></a>
+                    system. The user information on the <code class="filename">/home</code><a class="indexterm" name="id313741"></a> partition or in
+                    the <code class="filename">/home</code><a class="indexterm" name="id313755"></a>
                     directory is not affected by the recovery process.
                     This value is represented by the OEM_RECOVERY
                     variable in
@@ -568,7 +568,7 @@
                       <code class="varname">OEM_SYSTEMSIZE</code> in
                       <code class="filename">config.oempartition</code>. </p></dd></dl></div></dd><dt><span class="term"><code class="sgmltag-element">pxedeploy</code></span></dt><dd><p>Information contained in the optional
                 <code class="sgmltag-element">pxedeploy</code> section is only considered
-              if the <code class="sgmltag-attribute">image</code><a class="indexterm" name="id2546542"></a>
+              if the <code class="sgmltag-attribute">image</code><a class="indexterm" name="id313924"></a>
               attribute of the <code class="sgmltag-element">type</code> element is set to
                 <code class="sgmltag-attvalue">pxe</code>. In order to use
               a PXE image it is necessary to create a network boot
@@ -603,9 +603,9 @@
    &lt;union ro="dev" rw="dev" type="aufs|clicfs|unionfs"/&gt; 
    &lt;configuration source="/KIWI/../file" dest="/../file" arch="..."/&gt;
    &lt;configuration .../&gt; 
-&lt;/pxedeploy&gt; </pre><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p>The <code class="sgmltag-attribute">server</code><a class="indexterm" name="id2546643"></a>
+&lt;/pxedeploy&gt; </pre><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p>The <code class="sgmltag-attribute">server</code><a class="indexterm" name="id314007"></a>
                   attribute is used to specify the IP address of the PXE
-                  server. The <code class="sgmltag-attribute">blocksize</code><a class="indexterm" name="id2546657"></a> attributes specifies the
+                  server. The <code class="sgmltag-attribute">blocksize</code><a class="indexterm" name="id314020"></a> attributes specifies the
                   blocksize for the image download. Other protocols are
                   supported by KIWI but require the
                     <em class="parameter"><code>kiwiserver</code></em> and
@@ -616,7 +616,7 @@
                   initrd configures and installs the grub boot loader on
                   the client machine after the first deployment to allow
                   standalone boot. </p></li><li class="listitem"><p>Passing kernel parameters is possible with the use
-                  of the optional <code class="sgmltag-attribute">kernelcmdline</code><a class="indexterm" name="id2546708"></a> attribute in the
+                  of the optional <code class="sgmltag-attribute">kernelcmdline</code><a class="indexterm" name="id314065"></a> attribute in the
                     <code class="sgmltag-element">type</code> section. The value of this
                   attribute is a string specifying the settings to be
                   passed to the kernel by the GRUB bootloader. The KIWI
@@ -639,7 +639,7 @@
                   mandatory type attribute specifies the partition type.
                   The possible values are the sfdisk supported types,
                   use the following command to obtain a list of
-                  supported values: </p><pre class="screen"><span class="command"><strong>sfdisk</strong></span> --list-type </pre><p>The required <code class="sgmltag-attribute">number</code><a class="indexterm" name="id2546796"></a> attribute provides the the number
+                  supported values: </p><pre class="screen"><span class="command"><strong>sfdisk</strong></span> --list-type </pre><p>The required <code class="sgmltag-attribute">number</code><a class="indexterm" name="id314137"></a> attribute provides the the number
                   of the partition to be created. The size of the
                   partition may be specified with the optional size
                   attribute. The optional mountpoint attribute provides
@@ -649,16 +649,16 @@
                   always generates the swap partition as the first
                   partition of the netboot boot image. By default, the
                   second partition is used for the system image. Use the
-                  boolean <code class="sgmltag-attribute">target</code><a class="indexterm" name="id2546821"></a>
+                  boolean <code class="sgmltag-attribute">target</code><a class="indexterm" name="id314156"></a>
                   attribute to change this behavior. Providing the value
-                  image for the <code class="sgmltag-attribute">size</code><a class="indexterm" name="id2546835"></a> attribute triggers KIWI into
+                  image for the <code class="sgmltag-attribute">size</code><a class="indexterm" name="id314169"></a> attribute triggers KIWI into
                   calculating the required size for this partition. The
                   calculated size is sufficient for the created image.
                 </p></li><li class="listitem"><p>If the system image is based on a read-only
                   filesystem such as squashfs and should be mounted in
                   read-write mode use the optional union element. The
                   type attribute is used to specify one of the supported
-                  overlay filesystem (<code class="systemitem">aufs</code><a class="indexterm" name="id2546869"></a>, <code class="systemitem">clicfs</code><a class="indexterm" name="id2546884"></a>, or <code class="systemitem">unionfs</code><a class="indexterm" name="id2546898"></a>). Use the ro
+                  overlay filesystem (<code class="systemitem">aufs</code><a class="indexterm" name="id314197"></a>, <code class="systemitem">clicfs</code><a class="indexterm" name="id314212"></a>, or <code class="systemitem">unionfs</code><a class="indexterm" name="id314226"></a>). Use the ro
                   attribute to point to the read only device and the rw
                   attribute to point to the read-write device. </p></li><li class="listitem"><p>The optional <code class="sgmltag-element">configuration</code>
                   element is used to integrate a network client&#8217;s
@@ -676,7 +676,7 @@
                 </p></li></ul></div></dd><dt><span class="term"><code class="sgmltag-element">size</code></span></dt><dd><p>Use the size element to specify the image size in
               Megabytes or Gigabytes. The unit attribute specifies
               whether the given value will be interpreted as Megabytes
-                (<code class="sgmltag-attribute">unit</code><a class="indexterm" name="id2546973"></a>="<code class="sgmltag-attvalue">M</code>") or Gigabytes (<code class="sgmltag-attribute">unit</code><a class="indexterm" name="id2546991"></a>="<code class="sgmltag-attvalue">G</code>"). The optional boolean
+                (<code class="sgmltag-attribute">unit</code><a class="indexterm" name="id314283"></a>="<code class="sgmltag-attvalue">M</code>") or Gigabytes (<code class="sgmltag-attribute">unit</code><a class="indexterm" name="id314300"></a>="<code class="sgmltag-attvalue">G</code>"). The optional boolean
               attribute additive specifies whether or not the given size
               should be added to the size of the generated image or not. </p><p>In the event of a size specification that is too small
               for the generated image, KIWI will expand the size
@@ -695,15 +695,15 @@
               that for ISO images only temporary write access is
               possible. </p><p>When processing the provided configuration KIWI
               distinguishes between directories and files. For example,
-              providing <code class="filename">/etc</code><a class="indexterm" name="id2547078"></a> as
+              providing <code class="filename">/etc</code><a class="indexterm" name="id314375"></a> as
               the value of the name attribute indicates that the
-                <code class="filename">/etc</code><a class="indexterm" name="id2547094"></a> directory
+                <code class="filename">/etc</code><a class="indexterm" name="id314390"></a> directory
               should be writable. However, this does not include any of
-              the files or sub-directories within <code class="filename">/etc</code><a class="indexterm" name="id2547111"></a>. The content of /etc
+              the files or sub-directories within <code class="filename">/etc</code><a class="indexterm" name="id314406"></a>. The content of /etc
               is populated as symbolic links to the read-only files. The
               advantage of setting only a directory to read-write access
               is that any newly created files will be stored on the disk
-              instead of in <code class="systemitem">tmpfs</code><a class="indexterm" name="id2547130"></a>. Creating read-write access to a
+              instead of in <code class="systemitem">tmpfs</code><a class="indexterm" name="id314423"></a>. Creating read-write access to a
               directory and it&#8217;s files requires two specifications as
               showb below. </p><pre class="screen">&lt;split&gt; 
   &lt;temporary&gt; 
@@ -737,37 +737,37 @@
    &lt;vmnic driver="name" interface="number" mode="mode"/&gt; 
    &lt;vmdisk controller="ide|scsi" id="number"/&gt; 
    &lt;vmdvd  controller="ide|scsi" id="number"/&gt; 
-&lt;/machine&gt; </pre><div class="variablelist"><dl><dt><span class="term"><code class="sgmltag-attribute">arch</code><a class="indexterm" name="id2547238"></a></span></dt><dd><p> The virtualized architecture. Supported values
+&lt;/machine&gt; </pre><div class="variablelist"><dl><dt><span class="term"><code class="sgmltag-attribute">arch</code><a class="indexterm" name="id314513"></a></span></dt><dd><p> The virtualized architecture. Supported values
                     are <code class="sgmltag-attvalue">ix86</code> or
                       <code class="sgmltag-attvalue">x86_64</code>. The
-                    default value is <code class="sgmltag-attvalue">ix86</code>. </p></dd><dt><span class="term"><code class="sgmltag-attribute">memory</code><a class="indexterm" name="id2547279"></a></span></dt><dd><p> The mandatory <code class="sgmltag-attribute">memory</code><a class="indexterm" name="id2547296"></a> attribute specifies how much
+                    default value is <code class="sgmltag-attvalue">ix86</code>. </p></dd><dt><span class="term"><code class="sgmltag-attribute">memory</code><a class="indexterm" name="id314553"></a></span></dt><dd><p> The mandatory <code class="sgmltag-attribute">memory</code><a class="indexterm" name="id314570"></a> attribute specifies how much
                     memory in MB should be allocated for the virtual
-                    machine </p></dd><dt><span class="term"><code class="sgmltag-attribute">HWversion</code><a class="indexterm" name="id2547317"></a></span></dt><dd><p> The VMware hardware version number, the default
+                    machine </p></dd><dt><span class="term"><code class="sgmltag-attribute">HWversion</code><a class="indexterm" name="id314590"></a></span></dt><dd><p> The VMware hardware version number, the default
                     value is <code class="sgmltag-attvalue">3</code>.
-                  </p></dd><dt><span class="term"><code class="sgmltag-attribute">guestOS</code><a class="indexterm" name="id2547347"></a></span></dt><dd><p> The guest OS identifier. For the ix86
+                  </p></dd><dt><span class="term"><code class="sgmltag-attribute">guestOS</code><a class="indexterm" name="id314619"></a></span></dt><dd><p> The guest OS identifier. For the ix86
                     architecture the default value is suse and for the
                     x86_64 architecture suse-64 is the default. At this
                     point only the SUSE and SLES guestOS types are
-                    supported. </p></dd><dt><span class="term"><code class="sgmltag-attribute">domain</code><a class="indexterm" name="id2547375"></a></span></dt><dd><p> The Xen domain setup. This could be either a
+                    supported. </p></dd><dt><span class="term"><code class="sgmltag-attribute">domain</code><a class="indexterm" name="id314645"></a></span></dt><dd><p> The Xen domain setup. This could be either a
                     dom0 which is the host machine hosting the guests
                     and therefore doesn&#8217;t require a configuration file,
                     or it could be set to domU which indicates this is a
                     guest and also requires a guest configuration which
                     is created by KIWI. </p></dd></dl></div><p>The following information can be provided to setup the
-              virtual main storage device and CD/DVD drive connection: </p><div class="variablelist"><dl><dt><span class="term"><code class="sgmltag-attribute">controller</code><a class="indexterm" name="id2547419"></a></span></dt><dd><p> Supported values for the mandatory <code class="sgmltag-attribute">controller</code><a class="indexterm" name="id2547437"></a> attribute
+              virtual main storage device and CD/DVD drive connection: </p><div class="variablelist"><dl><dt><span class="term"><code class="sgmltag-attribute">controller</code><a class="indexterm" name="id314682"></a></span></dt><dd><p> Supported values for the mandatory <code class="sgmltag-attribute">controller</code><a class="indexterm" name="id314699"></a> attribute
                     are <code class="sgmltag-attvalue">ide</code> and
-                      <code class="sgmltag-attvalue">scsi</code>. </p></dd><dt><span class="term"><code class="sgmltag-attribute">id</code><a class="indexterm" name="id2547467"></a></span></dt><dd><p>The mandatory <code class="sgmltag-attribute">id</code><a class="indexterm" name="id2547484"></a> attribute specifies the disk id. If
+                      <code class="sgmltag-attvalue">scsi</code>. </p></dd><dt><span class="term"><code class="sgmltag-attribute">id</code><a class="indexterm" name="id314728"></a></span></dt><dd><p>The mandatory <code class="sgmltag-attribute">id</code><a class="indexterm" name="id314745"></a> attribute specifies the disk id. If
                     only one disk is set the id value should be set to
-                    0. </p></dd><dt><span class="term"><code class="sgmltag-attribute">device</code><a class="indexterm" name="id2547505"></a></span></dt><dd><p> The device attribute specifies the disk that
+                    0. </p></dd><dt><span class="term"><code class="sgmltag-attribute">device</code><a class="indexterm" name="id314765"></a></span></dt><dd><p> The device attribute specifies the disk that
                     should appear in the para virtual instance.
                     Therefore only relevant for Xen </p></dd></dl></div><p>The following information can be provided to setup the
-              virtual network interface: </p><div class="variablelist"><dl><dt><span class="term"><code class="sgmltag-attribute">driver</code><a class="indexterm" name="id2547539"></a></span></dt><dd><p> The mandatory <code class="sgmltag-attribute">driver</code><a class="indexterm" name="id2547556"></a> attribute specifies the driver
+              virtual network interface: </p><div class="variablelist"><dl><dt><span class="term"><code class="sgmltag-attribute">driver</code><a class="indexterm" name="id314797"></a></span></dt><dd><p> The mandatory <code class="sgmltag-attribute">driver</code><a class="indexterm" name="id314814"></a> attribute specifies the driver
                     to be used for the virtual network card. The
                     supported values are <code class="sgmltag-attvalue">e100</code>, <code class="sgmltag-attvalue">vlance</code>, and <code class="sgmltag-attvalue">vmxnet</code>. If the vmxnet driver is
                     specified the vmware tools must be installed in the
-                    image. </p></dd><dt><span class="term"><code class="sgmltag-attribute">interface</code><a class="indexterm" name="id2547595"></a></span></dt><dd><p> The mandatory <code class="sgmltag-attribute">interface</code><a class="indexterm" name="id2547612"></a> attribute specifies the
+                    image. </p></dd><dt><span class="term"><code class="sgmltag-attribute">interface</code><a class="indexterm" name="id314851"></a></span></dt><dd><p> The mandatory <code class="sgmltag-attribute">interface</code><a class="indexterm" name="id314868"></a> attribute specifies the
                     interface number. If only one interface is set the
-                    value should be set to 0. </p></dd><dt><span class="term"><code class="sgmltag-attribute">mode</code><a class="indexterm" name="id2547633"></a></span></dt><dd><p> The network mode used to communicate outside
+                    value should be set to 0. </p></dd><dt><span class="term"><code class="sgmltag-attribute">mode</code><a class="indexterm" name="id314888"></a></span></dt><dd><p> The network mode used to communicate outside
                     the VM. In many cases the bridged mode is used.
                   </p></dd></dl></div></dd></dl></div></div><div class="sect2" title="3.1.5. users Element"><div class="titlepage"><div><div><h3 class="title"><a name="sec.description.users"></a>3.1.5. <code class="sgmltag-element">users</code> Element<span class="permalink"><a alt="Permalink" title="3.1.5. users Element" href="#sec.description.users">¶</a></span></h3></div></div></div><pre class="screen">&lt;users group="group_name" id="number"&gt; 
   &lt;user home="dir" id="number" name="user" pwd="..."
@@ -776,9 +776,9 @@
 &lt;/users&gt;</pre><p>The optional users element lists the users belonging to the
         group specified with the group attribute. At least one user
         child element must be specified as part of the users element.
-        Multiple users elements may be specified. </p><p>The attributes <code class="sgmltag-attribute">home</code><a class="indexterm" name="id2547697"></a>,
-          <code class="sgmltag-attribute">id</code><a class="indexterm" name="id2547710"></a>, <code class="sgmltag-attribute">name</code><a class="indexterm" name="id2547722"></a>, <code class="sgmltag-attribute">pwd</code><a class="indexterm" name="id2547735"></a>, <code class="sgmltag-attribute">realname</code><a class="indexterm" name="id2547747"></a>,
-        and <code class="sgmltag-attribute">shell</code><a class="indexterm" name="id2547760"></a> specify the
+        Multiple users elements may be specified. </p><p>The attributes <code class="sgmltag-attribute">home</code><a class="indexterm" name="id314945"></a>,
+          <code class="sgmltag-attribute">id</code><a class="indexterm" name="id314958"></a>, <code class="sgmltag-attribute">name</code><a class="indexterm" name="id314970"></a>, <code class="sgmltag-attribute">pwd</code><a class="indexterm" name="id314983"></a>, <code class="sgmltag-attribute">realname</code><a class="indexterm" name="id314995"></a>,
+        and <code class="sgmltag-attribute">shell</code><a class="indexterm" name="id315008"></a> specify the
         created users home directory, the user name, the user&#8217;s
         password, the user&#8217;s real name, and the user&#8217;s login shell,
         respectively. By default, the value of the password attribute is
@@ -793,7 +793,7 @@
         the group specified with the group attribute of the users
         element and the default group called <span class="quote">&#8220;<span class="quote">users</span>&#8221;</span>. If it
         is desired to have the specified users to only be part of the
-        given group it is necessary to specify the <code class="sgmltag-attribute">id</code><a class="indexterm" name="id2547814"></a> attribute. It is recommended to
+        given group it is necessary to specify the <code class="sgmltag-attribute">id</code><a class="indexterm" name="id315051"></a> attribute. It is recommended to
         use a group id greater than 100. </p></div><div class="sect2" title="3.1.6. drivers Element"><div class="titlepage"><div><div><h3 class="title"><a name="sec.description.drivers"></a>3.1.6. <code class="sgmltag-element">drivers</code> Element<span class="permalink"><a alt="Permalink" title="3.1.6. drivers Element" href="#sec.description.drivers">¶</a></span></h3></div></div></div><pre class="screen">&lt;drivers type="type" profiles="name"&gt; 
   &lt;file name="filename"/&gt; 
   <code class="sgmltag-sgmlcomment">&lt;!-- ... --&gt;</code> 
@@ -803,17 +803,17 @@
         the required drivers are part of the image. Therefore the
         drivers section exists. If present only the drivers which
         matches the file names or glob patterns will be included into
-        the boot image. The <code class="sgmltag-attribute">type</code><a class="indexterm" name="id2547870"></a>
-        attribute specifies one of the following driver types: </p><div class="variablelist"><dl><dt><span class="term"><code class="sgmltag-attribute">drivers</code><a class="indexterm" name="id2547891"></a></span></dt><dd><p> Each file is specified relative to the <code class="filename">/lib/modules/<em class="replaceable"><code>Version</code></em>/kernel</code><a class="indexterm" name="id2547913"></a>
-              directory. </p></dd><dt><span class="term"><code class="sgmltag-attribute">netdrivers</code><a class="indexterm" name="id2547932"></a></span></dt><dd><p> Each file is specified relative to the <code class="filename">/lib/modules/<em class="replaceable"><code>Version</code></em>/kernel/drivers</code><a class="indexterm" name="id2547955"></a>
-              directory. </p></dd><dt><span class="term"><code class="sgmltag-attribute">scsidrivers</code><a class="indexterm" name="id2547975"></a></span></dt><dd><p> Each file is specified relative to the
+        the boot image. The <code class="sgmltag-attribute">type</code><a class="indexterm" name="id315099"></a>
+        attribute specifies one of the following driver types: </p><div class="variablelist"><dl><dt><span class="term"><code class="sgmltag-attribute">drivers</code><a class="indexterm" name="id315118"></a></span></dt><dd><p> Each file is specified relative to the <code class="filename">/lib/modules/<em class="replaceable"><code>Version</code></em>/kernel</code><a class="indexterm" name="id315140"></a>
+              directory. </p></dd><dt><span class="term"><code class="sgmltag-attribute">netdrivers</code><a class="indexterm" name="id315159"></a></span></dt><dd><p> Each file is specified relative to the <code class="filename">/lib/modules/<em class="replaceable"><code>Version</code></em>/kernel/drivers</code><a class="indexterm" name="id315181"></a>
+              directory. </p></dd><dt><span class="term"><code class="sgmltag-attribute">scsidrivers</code><a class="indexterm" name="id315200"></a></span></dt><dd><p> Each file is specified relative to the
                   <code class="filename">/lib/modules/<em class="replaceable"><code>Version</code></em>/kernel/drivers</code>
-            </p></dd><dt><span class="term"><code class="sgmltag-attribute">usbdrivers</code><a class="indexterm" name="id2548007"></a></span></dt><dd><p> Each file is specified relative to the
+            </p></dd><dt><span class="term"><code class="sgmltag-attribute">usbdrivers</code><a class="indexterm" name="id315233"></a></span></dt><dd><p> Each file is specified relative to the
                   <code class="filename">/lib/modules/<em class="replaceable"><code>Version</code></em>/kernel/drivers</code>
               directory. </p></dd></dl></div><p>According to the <code class="sgmltag-element">driver</code> element the
         specified files are searched in the corresponding directory. The
         information about the driver names is provided as environment
-        variable named like the value of the <code class="sgmltag-attribute">type</code><a class="indexterm" name="id2548047"></a> attribute and is processed by the function
+        variable named like the value of the <code class="sgmltag-attribute">type</code><a class="indexterm" name="id315270"></a> attribute and is processed by the function
           <code class="function">suseStripKernel</code>. According to this along
         with a boot image description a script called
           <span class="command"><strong>images.sh</strong></span> must exist which calls this
@@ -823,14 +823,14 @@
    &lt;source path="URL"/&gt;
 &lt;/repository&gt;</pre><p>The mandatory <code class="sgmltag-element">repository</code> element
         specifies the source URL and type used by the package manager.
-        The <code class="sgmltag-attribute">type</code><a class="indexterm" name="id2548101"></a> attribute
+        The <code class="sgmltag-attribute">type</code><a class="indexterm" name="id315319"></a> attribute
         specifies the repository type which must be supported by the
         package manager. At the moment KIWI supports the package
         managers smart and zypper whereas smart has support for more
         repository types compared to zypper. Therefore the possible
         values for the type attribute has beend copied from smart. The
         following table shows the possible repo types:</p><div class="table"><a name="tab.description.supported-types"></a><p class="title"><b>Table 3.1. Supported Types for zypper and smart</b><span class="permalink"><a alt="Permalink" title="Table 3.1. Supported Types for zypper and smart" href="#tab.description.supported-types">¶</a></span></p><div class="table-contents"><table summary="Supported Types for zypper and smart" border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Type</th><th>smart Support</th><th>zypper Support</th></tr></thead><tbody><tr><td>apt-deb</td><td>yes</td><td>no</td></tr><tr><td>apt-rpm</td><td>yes</td><td>no</td></tr><tr><td>deb-dir</td><td>yes</td><td>no</td></tr><tr><td>mirrors</td><td>yes</td><td>no</td></tr><tr><td>red-carpet</td><td>yes</td><td>yes</td></tr><tr><td>rpm-dir</td><td>yes</td><td>yes</td></tr><tr><td>rpm-md</td><td>yes</td><td>yes</td></tr><tr><td>slack-site</td><td>yes</td><td>no</td></tr><tr><td>up2date-mirrors</td><td>yes</td><td>no</td></tr><tr><td>urpmi</td><td>yes</td><td>no</td></tr><tr><td>yast2</td><td>yes</td><td>yes</td></tr></tbody></table></div></div><br class="table-break"><p>Within the repository section there are the following
-        optional attributes: </p><div class="variablelist"><dl><dt><span class="term"><code class="sgmltag-attribute">status</code><a class="indexterm" name="id2548308"></a>="<code class="sgmltag-attvalue">replaceable</code>"</span></dt><dd><p>This attribute makes only sense for boot image
+        optional attributes: </p><div class="variablelist"><dl><dt><span class="term"><code class="sgmltag-attribute">status</code><a class="indexterm" name="id315519"></a>="<code class="sgmltag-attvalue">replaceable</code>"</span></dt><dd><p>This attribute makes only sense for boot image
               descriptions. It indicates that the repository is allowed
               to become replaced by the repositories defined in the
               system image descriptions. Because KIWI automatically
@@ -839,12 +839,12 @@
               the system image to make sure both fit together. Therefore
               it is required to allow the repository to become
               overwritten which is indicated by the status attribute.
-            </p></dd><dt><span class="term"><code class="sgmltag-attribute">alias</code><a class="indexterm" name="id2548348"></a>="<code class="sgmltag-attvalue">name</code>"</span></dt><dd><p>Specifies an alternative name used to identify the
+            </p></dd><dt><span class="term"><code class="sgmltag-attribute">alias</code><a class="indexterm" name="id315554"></a>="<code class="sgmltag-attvalue">name</code>"</span></dt><dd><p>Specifies an alternative name used to identify the
               source channel. If not set the source attribute value is
               used and builds the alias name by replacing each
                 <span class="quote">&#8220;<span class="quote">/</span>&#8221;</span> with a <span class="quote">&#8220;<span class="quote">_</span>&#8221;</span>. An alias name
               should be set if the source argument doesn&#8217;t really
-              explain what this repository contains </p></dd><dt><span class="term"><code class="sgmltag-attribute">priority</code><a class="indexterm" name="id2548392"></a>="<code class="sgmltag-attvalue">number</code>"</span></dt><dd><p>Specifies the repository priority assigned to all
+              explain what this repository contains </p></dd><dt><span class="term"><code class="sgmltag-attribute">priority</code><a class="indexterm" name="id315594"></a>="<code class="sgmltag-attvalue">number</code>"</span></dt><dd><p>Specifies the repository priority assigned to all
               packages available in this repository. For smart the
               following applies: If the exact same package is available
               in more than one channel, the repository with the
@@ -857,7 +857,7 @@
               set</span>&#8221;</span>.</p></dd></dl></div><p>The source child element contains the path attribute, which
         specifies the location (URL) of the repository. The path
         specification can be any of the following, and can include the
-          <code class="systemitem">%arch</code><a class="indexterm" name="id2548450"></a> macro which is
+          <code class="systemitem">%arch</code><a class="indexterm" name="id315646"></a> macro which is
         expanded to the architecture of the image building host. </p><div class="variablelist"><dl><dt><span class="term"><code class="uri">this://<em class="replaceable"><code>PATH</code></em></code></span></dt><dd><p>A relative path name, which is relative to the image
               description directory being referenced. </p></dd><dt><span class="term"><code class="uri">iso://<em class="replaceable"><code>path/to/isofile</code></em></code></span></dt><dd><p>A path to a local .iso file which is then loopback
               mounted and used as a local path based repository.
@@ -891,7 +891,7 @@
 &lt;/packages&gt;</pre><p>The mandatory <code class="sgmltag-element">packages</code> element specifies
         the list of packages (element <code class="sgmltag-element">package</code>) and
         patterns (element <code class="sgmltag-element">opensusePattern</code>) to be used
-        with the image. The value of the <code class="sgmltag-attribute">type</code><a class="indexterm" name="id2548665"></a> attribute specifies how the packages and
+        with the image. The value of the <code class="sgmltag-attribute">type</code><a class="indexterm" name="id315842"></a> attribute specifies how the packages and
         patterns listed are handled, supported values are as follows: </p><div class="variablelist"><dl><dt><span class="term"><code class="sgmltag-attvalue">bootstrap</code></span></dt><dd><p>Bootstrap packages, list of packages for the new
               operating system root tree. The packages list the required
               components to support a chroot environment in the new
@@ -901,7 +901,7 @@
               other specifications such as
                 <code class="sgmltag-element">opensusePattern</code> are ignored. The
               given package names are stored in the
-                $<code class="envar">delete</code><a class="indexterm" name="id2548729"></a> environment variable of the
+                $<code class="envar">delete</code><a class="indexterm" name="id315900"></a> environment variable of the
                 <code class="filename">/.profile</code> file created by KIWI. The
               list of package names is returned by the
                 <code class="function">baseGetPackagesForDeletion</code>
@@ -922,15 +922,15 @@ $(<span class="command"><strong>rpm</strong></span> -q &#8216;baseGetPackagesFor
               installed when building a Xen host or guest. </p></dd></dl></div><div class="sect3" title="3.1.8.1. Using Patterns"><div class="titlepage"><div><div><h4 class="title"><a name="sec.descriptions.using-patterns"></a>3.1.8.1. Using Patterns<span class="permalink"><a alt="Permalink" title="3.1.8.1. Using Patterns" href="#sec.descriptions.using-patterns">¶</a></span></h4></div></div></div><p> Using a pattern name enhances the package list with a
           number of additional packages belonging to this pattern.
           Support for patterns is SUSE-specific, and available with
-          openSUSE 10.1 or later. The optional <code class="sgmltag-attribute">patternType</code><a class="indexterm" name="id2548940"></a> and <code class="sgmltag-attribute">patternPackageType</code><a class="indexterm" name="id2548952"></a> attributes
+          openSUSE 10.1 or later. The optional <code class="sgmltag-attribute">patternType</code><a class="indexterm" name="id316094"></a> and <code class="sgmltag-attribute">patternPackageType</code><a class="indexterm" name="id316107"></a> attributes
           specify which pattern references or packages should be used in
           a given pattern. The values of these attributes are only
           evaluated, if the KIWI pattern solver is used. If the new (up
           to SUSE 11.0) satsolver pattern solver is used these values
           are ignored because the satsolver can&#8217;t handle that at the
-          moment. Allowed values for the <code class="sgmltag-attribute">pattern*</code><a class="indexterm" name="id2548979"></a> attributes are: </p><div class="variablelist"><dl><dt><span class="term"><code class="sgmltag-attribute">only</code><a class="indexterm" name="id2548998"></a></span></dt><dd><p>RequiredIncorporates only patterns and packages that
-                are required by the given pattern </p></dd><dt><span class="term"><code class="sgmltag-attribute">plusSuggested</code><a class="indexterm" name="id2549023"></a></span></dt><dd><p>Incorporates patterns and packages that are required
-                and suggested by the given pattern </p></dd><dt><span class="term"><code class="sgmltag-attribute">plusRecommended</code><a class="indexterm" name="id2549048"></a></span></dt><dd><p>Incorporates patterns and packages that are required
+          moment. Allowed values for the <code class="sgmltag-attribute">pattern*</code><a class="indexterm" name="id316126"></a> attributes are: </p><div class="variablelist"><dl><dt><span class="term"><code class="sgmltag-attribute">only</code><a class="indexterm" name="id316145"></a></span></dt><dd><p>RequiredIncorporates only patterns and packages that
+                are required by the given pattern </p></dd><dt><span class="term"><code class="sgmltag-attribute">plusSuggested</code><a class="indexterm" name="id316169"></a></span></dt><dd><p>Incorporates patterns and packages that are required
+                and suggested by the given pattern </p></dd><dt><span class="term"><code class="sgmltag-attribute">plusRecommended</code><a class="indexterm" name="id316194"></a></span></dt><dd><p>Incorporates patterns and packages that are required
                 and recommended by the given pattern. </p></dd></dl></div><p>By default, only required patterns and packages are used.
           The result list of packages is solved into a clean conflict
           free list of packages by the package manager. This for example
@@ -951,7 +951,7 @@ $(<span class="command"><strong>rpm</strong></span> -q &#8216;baseGetPackagesFor
           image and replaces another package you can use the replaces
           attribute to tell KIWI to install the package by replacing
           another one. For example you can specify the kernel package in
-          the <code class="sgmltag-attribute">type</code><a class="indexterm" name="id2549145"></a>="<code class="sgmltag-attvalue">image</code>" section as </p><pre class="screen">&lt;package name="kernel-default" replaces="kernel-xen"/&gt;</pre><p>and in the type="xen" section as </p><pre class="screen">&lt;package name="kernel-xen"  replaces="kernel-default"/&gt; </pre><p>The result is the xen kernel if you request a xen image
+          the <code class="sgmltag-attribute">type</code><a class="indexterm" name="id316268"></a>="<code class="sgmltag-attvalue">image</code>" section as </p><pre class="screen">&lt;package name="kernel-default" replaces="kernel-xen"/&gt;</pre><p>and in the type="xen" section as </p><pre class="screen">&lt;package name="kernel-xen"  replaces="kernel-default"/&gt; </pre><p>The result is the xen kernel if you request a xen image
           and the default kernel in any other case. </p></div><div class="sect3" title="3.1.8.4. Packages to Become Included Into the Boot Image"><div class="titlepage"><div><div><h4 class="title"><a name="sec.description.packages.to.become.included"></a>3.1.8.4. Packages to Become Included Into the Boot Image<span class="permalink"><a alt="Permalink" title="3.1.8.4. Packages to Become Included Into the Boot Image" href="#sec.description.packages.to.become.included">¶</a></span></h4></div></div></div><p> The optional attributes bootinclude and bootdelete can be
           used to mark a package inside the system image description to
           become part of the corresponding boot image (initrd). This
@@ -1053,7 +1053,7 @@ $(<span class="command"><strong>rpm</strong></span> -q &#8216;baseGetPackagesFor
               automatically to become part of your image description. To
               do this simply clone (copy) these files with respect to
               the filesystem structure as overlay files in your image
-              description <code class="filename">root/</code><a class="indexterm" name="id2549684"></a>
+              description <code class="filename">root/</code><a class="indexterm" name="id316726"></a>
               directory. </p></li></ul></div></li><li class="step" title="Step 9"><p> All your valuable work is now stored in one image
           description and can be re-used in all KIWI supported image
           types. </p></li></ol></div><p>Congratulation! To make sure the appliance works as expected
@@ -1156,7 +1156,7 @@ $(<span class="command"><strong>rpm</strong></span> -q &#8216;baseGetPackagesFor
           for the MAC address of the card first. </p></li></ul></div></div><div class="sect1" title="6.4. Turn my System Into an Image&#8230;"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sec.migrate.turn-system-into-image"></a>6.4. Turn my System Into an Image&#8230;<span class="permalink"><a alt="Permalink" title="6.4. Turn my System Into an Image&#8230;" href="#sec.migrate.turn-system-into-image">¶</a></span></h2></div></div></div><p>After the process has finished you should check the size of
       the image description. The description itself shouldn&#8217;t be that
       big. The size of a migrated image description mainly depends on
-      how many overlay files exists in the <code class="filename">root/</code><a class="indexterm" name="id2550211"></a> directory. You should make sure to maintain
+      how many overlay files exists in the <code class="filename">root/</code><a class="indexterm" name="id317152"></a> directory. You should make sure to maintain
       only required overlay files. Now let&#8217;s try to create a clone image
       from the description. By default an OEM image which is a virtual
       disk which is able to run on real hardware too is created. On
@@ -1180,14 +1180,14 @@ $(<span class="command"><strong>rpm</strong></span> -q &#8216;baseGetPackagesFor
    <code class="sgmltag-sgmlcomment">&lt;!--&lt;source path="/image/CDs/full-11.0-i386"/&gt;--&gt;</code>
    &lt;source path="opensuse://openSUSE:11.0/standard/"/&gt; 
 &lt;/repository&gt;</pre></div><div class="sect1" title="7.2. Create a Local Installation Source"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sec.instsourcesetup.create-local-inst-source"></a>7.2. Create a Local Installation Source<span class="permalink"><a alt="Permalink" title="7.2. Create a Local Installation Source" href="#sec.instsourcesetup.create-local-inst-source">¶</a></span></h2></div></div></div><p> The following procedure describes how to create a local SUSE
-      installation source which is stored below the path <code class="filename">/images/CDs</code><a class="indexterm" name="id2550341"></a>. If you are using the
+      installation source which is stored below the path <code class="filename">/images/CDs</code><a class="indexterm" name="id317257"></a>. If you are using the
       local path as described in this document you only need to flip
       the given path information inside of the example
         <code class="filename">config.xml</code> file. </p><div class="procedure"><a name="proc.instsourcesetup.local-inst"></a><ol class="procedure" type="1"><li class="step" title="Step 1"><p>Find your SUSE standard installation CDs or the DVD and
           make them available to the build system. Most Linux systems
           auto-mount a previosly inserted media automatically. If this
           is the case you simply can change the directory to the auto
-          mounted path below <code class="filename">/media</code><a class="indexterm" name="id2550382"></a>. If your system doesn&#8217;t mount the device
+          mounted path below <code class="filename">/media</code><a class="indexterm" name="id317292"></a>. If your system doesn&#8217;t mount the device
           automatically you can do this with the following command: </p><pre class="screen"><span class="command"><strong>mount</strong></span> -o loop /dev/<em class="replaceable"><code>drive-device-name</code></em> /mnt</pre></li><li class="step" title="Step 2"><p>If you do not have a DVD but a CD set, copy the contents
           of <span class="emphasis"><em>all</em></span> CDs into one directory. It&#8217;s
           absolutly important that you first start with the
@@ -1209,7 +1209,7 @@ $(<span class="command"><strong>rpm</strong></span> -q &#8216;baseGetPackagesFor
     in RAM space and therefore all changes will be lost as soon as the
     computer shuts down. </p><div class="sect1" title="8.1. Building the suse-live-iso Example"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sec.iso.building"></a>8.1. Building the suse-live-iso Example<span class="permalink"><a alt="Permalink" title="8.1. Building the suse-live-iso Example" href="#sec.iso.building">¶</a></span></h2></div></div></div><p>The latest example provided with KIWI is based on openSUSE
       11.2 and includes the base and KDE patterns. </p><pre class="screen"><span class="command"><strong>cd</strong></span> /usr/share/doc/packages/kiwi/examples cd suse-11.2
-<span class="command"><strong>kiwi</strong></span> --prepare ./suse-live-iso --root /tmp/myiso </pre><pre class="screen"><span class="command"><strong>kiwi</strong></span> --create /tmp/myiso --type iso -d /tmp/myiso-result</pre></div><div class="sect1" title="8.2. Using the Image"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sec.iso.using"></a>8.2. Using the Image<span class="permalink"><a alt="Permalink" title="8.2. Using the Image" href="#sec.iso.using">¶</a></span></h2></div></div></div><p>There are two ways to use the generated ISO image: </p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p>Burn the <code class="filename">.iso</code><a class="indexterm" name="id2550562"></a> file
+<span class="command"><strong>kiwi</strong></span> --prepare ./suse-live-iso --root /tmp/myiso </pre><pre class="screen"><span class="command"><strong>kiwi</strong></span> --create /tmp/myiso --type iso -d /tmp/myiso-result</pre></div><div class="sect1" title="8.2. Using the Image"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sec.iso.using"></a>8.2. Using the Image<span class="permalink"><a alt="Permalink" title="8.2. Using the Image" href="#sec.iso.using">¶</a></span></h2></div></div></div><p>There are two ways to use the generated ISO image: </p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p>Burn the <code class="filename">.iso</code><a class="indexterm" name="id317447"></a> file
           on a CD or DVD with your preferred burn program. Plug in the
           CD or DVD into a test computer and (re)boot the machine. Make
           sure the computer boot from the CD drive as first boot device.
@@ -1218,27 +1218,27 @@ $(<span class="command"><strong>rpm</strong></span> -q &#8216;baseGetPackagesFor
           example: </p><pre class="screen"><span class="command"><strong>cd</strong></span> /tmp/myiso-result
 <span class="command"><strong>qemu</strong></span> -cdrom ./suse-11.2-live-iso.i686-2.5.1.iso -m 256</pre></li></ul></div></div><div class="sect1" title="8.3. Flavours"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sec.iso.flavours"></a>8.3. Flavours<span class="permalink"><a alt="Permalink" title="8.3. Flavours" href="#sec.iso.flavours">¶</a></span></h2></div></div></div><p>KIWI supports different filesystems and boot methods along
       with the ISO image type. The provided example by default uses a
-        <code class="systemitem">squashfs</code><a class="indexterm" name="id2550621"></a> compressed
+        <code class="systemitem">squashfs</code><a class="indexterm" name="id317501"></a> compressed
       root filesystem. By design of this filesystem it is not possible
       to write data on it. To be able to write on the filesystem another
-      filesystem called aufs is used. <code class="systemitem">aufs</code><a class="indexterm" name="id2550638"></a> is an overlay filesystem which allows to
+      filesystem called aufs is used. <code class="systemitem">aufs</code><a class="indexterm" name="id317517"></a> is an overlay filesystem which allows to
       combine two different filesystems into one. In case of a live
-      system <code class="systemitem">aufs</code><a class="indexterm" name="id2550655"></a> is used to
+      system <code class="systemitem">aufs</code><a class="indexterm" name="id317533"></a> is used to
       combine the squashfs compressed read only root tree with a tmpfs
       RAM filesystem. The result is a full writable root tree whereas
       all written data lives in RAM and is therefore not persistent.
-        <code class="systemitem">squashfs</code><a class="indexterm" name="id2550674"></a> and/or
-        <code class="systemitem">aufs</code><a class="indexterm" name="id2550688"></a> does not exist
+        <code class="systemitem">squashfs</code><a class="indexterm" name="id317549"></a> and/or
+        <code class="systemitem">aufs</code><a class="indexterm" name="id317564"></a> does not exist
       on all versions of SUSE and therefore the flags attribute in
         <code class="filename">config.xml</code> exists to be able to have the
-      following alternative solutions: </p><div class="variablelist"><dl><dt><span class="term"><code class="sgmltag-attribute">flags</code><a class="indexterm" name="id2550715"></a>="<code class="sgmltag-attvalue">unified</code>"</span></dt><dd><p>Compressed and unified root tree as explained above.
-          </p></dd><dt><span class="term"><code class="sgmltag-attribute">flags</code><a class="indexterm" name="id2550746"></a>="<code class="sgmltag-attvalue">compressed</code>"</span></dt><dd><p> Does filesystem compression with squashfs, but don&#8217;t
+      following alternative solutions: </p><div class="variablelist"><dl><dt><span class="term"><code class="sgmltag-attribute">flags</code><a class="indexterm" name="id317590"></a>="<code class="sgmltag-attvalue">unified</code>"</span></dt><dd><p>Compressed and unified root tree as explained above.
+          </p></dd><dt><span class="term"><code class="sgmltag-attribute">flags</code><a class="indexterm" name="id317620"></a>="<code class="sgmltag-attvalue">compressed</code>"</span></dt><dd><p> Does filesystem compression with squashfs, but don&#8217;t
             use an overlay filesystem for write support. A symbolic link
             list is used instead and thus a split element is required in
               <code class="filename">config.xml</code>. See the split mode
-            section below for details. </p></dd><dt><span class="term"><code class="sgmltag-attribute">flags</code><a class="indexterm" name="id2550789"></a>="<code class="sgmltag-attvalue">clic</code>"</span></dt><dd><p> Creates a FUSE based <code class="systemitem">clicfs</code><a class="indexterm" name="id2550814"></a> image and allows write operations
+            section below for details. </p></dd><dt><span class="term"><code class="sgmltag-attribute">flags</code><a class="indexterm" name="id317659"></a>="<code class="sgmltag-attvalue">clic</code>"</span></dt><dd><p> Creates a FUSE based <code class="systemitem">clicfs</code><a class="indexterm" name="id317684"></a> image and allows write operations
             into a cow file. In case of an ISO the write happens into a
-            ramdisk. </p></dd><dt><span class="term">Flags Not Set</span></dt><dd><p>If no <code class="sgmltag-attribute">flags</code><a class="indexterm" name="id2550842"></a>
+            ramdisk. </p></dd><dt><span class="term">Flags Not Set</span></dt><dd><p>If no <code class="sgmltag-attribute">flags</code><a class="indexterm" name="id317710"></a>
             attribute is set no compressed filesystem, no overlay
             filesystem will be used. The root tree will be directly part
             of the ISO filesystem and the paths:
@@ -1249,7 +1249,7 @@ $(<span class="command"><strong>rpm</strong></span> -q &#8216;baseGetPackagesFor
         is based on a compressed filesystem KIWI allows to setup which
         files and directories should be writable in a so called split
         section. In order to allow to login into the system, at least
-        the <code class="filename">/var</code><a class="indexterm" name="id2550915"></a> directory should
+        the <code class="filename">/var</code><a class="indexterm" name="id317779"></a> directory should
         be writable. This is because the PAM authentification requires
         to be able to report any login attempt to
           <code class="filename">/var/log/messages</code> which therefore needs
@@ -1297,7 +1297,7 @@ $(<span class="command"><strong>rpm</strong></span> -q &#8216;baseGetPackagesFor
     suse-11.2-live-stick.i686-1.1.2</pre><p>In case of the second image type (oem) dump the raw data onto
       a device. On Linux the most popular tool to do this is the
         <span class="command"><strong>dd</strong></span> command. The OEM image is represented by
-      the file with the <code class="filename">.raw</code><a class="indexterm" name="id2486884"></a>
+      the file with the <code class="filename">.raw</code><a class="indexterm" name="id317953"></a>
       extension. As said, this is a virtual disk which already includes
       partition information. However, this partition information does
       not match the real USB stick geometry. This means, the KIWI boot
@@ -1315,15 +1315,15 @@ $(<span class="command"><strong>rpm</strong></span> -q &#8216;baseGetPackagesFor
       the stick on real hardware. </p></div><div class="sect1" title="9.3. Flavours"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sec.usb.flavours"></a>9.3. Flavours<span class="permalink"><a alt="Permalink" title="9.3. Flavours" href="#sec.usb.flavours">¶</a></span></h2></div></div></div><p>USB sticks weren&#8217;t designed to serve as storage devices for
       operating systems. By design of these nice little gadgets their
       storage capacity is limited to only a few gigabytes. Therefore,
-      KIWI supports compressed filesystems on USB sticks too: </p><div class="variablelist"><dl><dt><span class="term"><code class="sgmltag-attribute">filesystem</code><a class="indexterm" name="id2486971"></a>="<code class="sgmltag-attvalue">squashfs</code>"</span></dt><dd><p>Compresses the image using the <code class="systemitem">squashfs</code><a class="indexterm" name="id2551369"></a> filesystem. The
+      KIWI supports compressed filesystems on USB sticks too: </p><div class="variablelist"><dl><dt><span class="term"><code class="sgmltag-attribute">filesystem</code><a class="indexterm" name="id318017"></a>="<code class="sgmltag-attvalue">squashfs</code>"</span></dt><dd><p>Compresses the image using the <code class="systemitem">squashfs</code><a class="indexterm" name="id318042"></a> filesystem. The
             boot process will automatically use aufs as overlay
             filesystem to mount the complete tree read-write. For the
             write part an additional ext2 partition will be created on
             the stick. The support for this compression layer requires
-              <code class="systemitem">squashfs</code><a class="indexterm" name="id2551389"></a> and
-              <code class="systemitem">aufs</code><a class="indexterm" name="id2551403"></a> to be
+              <code class="systemitem">squashfs</code><a class="indexterm" name="id318060"></a> and
+              <code class="systemitem">aufs</code><a class="indexterm" name="id318074"></a> to be
             present in the distribution KIWI has used to build the image
-          </p></dd><dt><span class="term"><code class="sgmltag-attribute">filesystem</code><a class="indexterm" name="id2551424"></a>="<code class="sgmltag-attvalue">clicfs</code>"</span></dt><dd><p>Creates a fuse based clicfs image and allows write
+          </p></dd><dt><span class="term"><code class="sgmltag-attribute">filesystem</code><a class="indexterm" name="id318094"></a>="<code class="sgmltag-attvalue">clicfs</code>"</span></dt><dd><p>Creates a fuse based clicfs image and allows write
             operations into a cow file. </p></dd></dl></div><div class="sect2" title="9.3.1. Split Stick"><div class="titlepage"><div><div><h3 class="title"><a name="sec.usb.split-stick"></a>9.3.1. Split Stick<span class="permalink"><a alt="Permalink" title="9.3.1. Split Stick" href="#sec.usb.split-stick">¶</a></span></h3></div></div></div><p> If there is no overlay filesystem available, it is also
         possible to define a split section in
           <code class="filename">config.xml</code>. Use the split support to
@@ -1333,9 +1333,9 @@ $(<span class="command"><strong>rpm</strong></span> -q &#8216;baseGetPackagesFor
    fsreadonly="squashfs" boot="usbboot/suse-11.2"/&gt;</pre></li><li class="listitem"><p>Type setup for split oem type: </p><pre class="screen">&lt;type image="split" fsreadwrite="ext3"
    fsreadonly="squashfs" boot="oemboot/suse-11.2"/&gt;</pre></li></ul></div><p>For both types, a split section inside the type section is
         required which defines the read-write data. A good starting
-        point is to set <code class="filename">/var</code><a class="indexterm" name="id2551514"></a>, 
-        <code class="filename">/home</code><a class="indexterm" name="id2551529"></a>, and 
-        <code class="filename">/etc</code><a class="indexterm" name="id2551543"></a> as writable data. </p><pre class="screen"> &lt;split&gt;
+        point is to set <code class="filename">/var</code><a class="indexterm" name="id318176"></a>, 
+        <code class="filename">/home</code><a class="indexterm" name="id318190"></a>, and 
+        <code class="filename">/etc</code><a class="indexterm" name="id318205"></a> as writable data. </p><pre class="screen"> &lt;split&gt;
   &lt;persistent&gt; 
     <code class="sgmltag-sgmlcomment">&lt;!-- allow read/write access to: --&gt;</code>
     &lt;file name="/var"/&gt; 
@@ -1346,7 +1346,7 @@ $(<span class="command"><strong>rpm</strong></span> -q &#8216;baseGetPackagesFor
     &lt;file name="/home/*"/&gt;
     &lt;/persistent&gt; 
 &lt;/split&gt; </pre><p>If no split section is added the default split section from
-          <code class="filename">/usr/share/kiwi/modules/</code><a class="indexterm" name="id2551580"></a>, the file
+          <code class="filename">/usr/share/kiwi/modules/</code><a class="indexterm" name="id318237"></a>, the file
           <code class="filename">KIWISplit.txt</code> is used. </p></div><div class="sect2" title="9.3.2. LVM Support"><div class="titlepage"><div><div><h3 class="title"><a name="sec.usb.lvm"></a>9.3.2. LVM Support<span class="permalink"><a alt="Permalink" title="9.3.2. LVM Support" href="#sec.usb.lvm">¶</a></span></h3></div></div></div><p>KIWI supports LVM, the Logical Volume Manager. In this mode,
         the disk partition table includes one lvm partition and one
         standard ext2 boot partition. KIWI creates the kiwiVG volume
@@ -1359,7 +1359,7 @@ $(<span class="command"><strong>rpm</strong></span> -q &#8216;baseGetPackagesFor
         for the usb type just add the <code class="option">--lvm</code> option as
         part of <span class="command"><strong>kiwi</strong></span>
         <code class="option">--bootstick</code> deployment or add the attribute
-        <code class="sgmltag-attribute">lvm</code><a class="indexterm" name="id2551633"></a>="<code class="sgmltag-attvalue">true</code>" 
+        <code class="sgmltag-attribute">lvm</code><a class="indexterm" name="id318284"></a>="<code class="sgmltag-attvalue">true</code>" 
         as part of the <code class="sgmltag-element">type</code> section in
         your <code class="filename">config.xml</code> file. </p><p>The optional <code class="sgmltag-element">lvmvolumes</code> section can be used to set one or
         more top level directories into a separate volume. See 
@@ -1381,7 +1381,7 @@ $(<span class="command"><strong>rpm</strong></span> -q &#8216;baseGetPackagesFor
       environments. Some virtualization environments support multiple
       virtual disk formats. Using the QEMU virtualization environment
       test the created image with the following command: </p><pre class="screen"><span class="command"><strong>cd</strong></span> /tmp/myvm-result 
-<span class="command"><strong>qemu</strong></span> suse-11.2-vm-guest.i686-1.1.2.raw -m 256 </pre></div><div class="sect1" title="10.3. Flavours"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sec.vmx.flavours"></a>10.3. Flavours<span class="permalink"><a alt="Permalink" title="10.3. Flavours" href="#sec.vmx.flavours">¶</a></span></h2></div></div></div><p>KIWI always generates a file in the <code class="filename">.raw</code><a class="indexterm" name="id2551797"></a> format. The .raw file is a
+<span class="command"><strong>qemu</strong></span> suse-11.2-vm-guest.i686-1.1.2.raw -m 256 </pre></div><div class="sect1" title="10.3. Flavours"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sec.vmx.flavours"></a>10.3. Flavours<span class="permalink"><a alt="Permalink" title="10.3. Flavours" href="#sec.vmx.flavours">¶</a></span></h2></div></div></div><p>KIWI always generates a file in the <code class="filename">.raw</code><a class="indexterm" name="id318432"></a> format. The .raw file is a
       disk image with a structure equivalent to the structure of a
       physical hard disk. Individual virtualization systems have
       specific formats to facilitate improved I/O performance to the
@@ -1411,17 +1411,17 @@ $(<span class="command"><strong>rpm</strong></span> -q &#8216;baseGetPackagesFor
         For aditional information about the configuration settings
         please refer to the <span class="emphasis"><em>machine</em></span> section. </p><p>The guest configuration can be loaded through VMware user
         interface and may be modified through the GUI. The configuration
-        file has the <code class="filename">.vmx</code><a class="indexterm" name="id2551976"></a>
-        extension as shown in the example below. </p><pre class="screen">/tmp/myvm-result/suse-11.2-vm-guest.i686-1.1.2.vmx</pre><p>Using the <code class="sgmltag-attribute">format</code><a class="indexterm" name="id2551999"></a>="<code class="sgmltag-attvalue">vmdk</code>"
+        file has the <code class="filename">.vmx</code><a class="indexterm" name="id318589"></a>
+        extension as shown in the example below. </p><pre class="screen">/tmp/myvm-result/suse-11.2-vm-guest.i686-1.1.2.vmx</pre><p>Using the <code class="sgmltag-attribute">format</code><a class="indexterm" name="id318610"></a>="<code class="sgmltag-attvalue">vmdk</code>"
         attribute of the <code class="sgmltag-starttag">&lt;type&gt;</code> start
-        tag will create the VMware formated disk image (<code class="filename">.vmdk</code><a class="indexterm" name="id2552025"></a> file) and the required
-        VMware guest configuration (<code class="filename">.vmx</code><a class="indexterm" name="id2552040"></a>) file. </p><p>In addition it is possible to create an image for the Xen
-        virtualization framework. By adding the <code class="sgmltag-attribute">bootprofile</code><a class="indexterm" name="id2552058"></a> and <code class="sgmltag-attribute">bootkernel</code><a class="indexterm" name="id2552071"></a> attributes to the
+        tag will create the VMware formated disk image (<code class="filename">.vmdk</code><a class="indexterm" name="id318636"></a> file) and the required
+        VMware guest configuration (<code class="filename">.vmx</code><a class="indexterm" name="id318651"></a>) file. </p><p>In addition it is possible to create an image for the Xen
+        virtualization framework. By adding the <code class="sgmltag-attribute">bootprofile</code><a class="indexterm" name="id318668"></a> and <code class="sgmltag-attribute">bootkernel</code><a class="indexterm" name="id318680"></a> attributes to the
           <code class="sgmltag-starttag">&lt;type&gt;</code> start tag with values
         of <code class="sgmltag-attvalue">xen</code> and <code class="sgmltag-attvalue">xenboot</code>, respectively. Please refer
         to the <a class="xref" href="#chap.xen" title="Chapter 13. Xen Image&#8212;Paravirtual Systems">Chapter 13, <i>Xen Image&#8212;Paravirtual Systems</i></a> for additional details.</p></div><div class="sect2" title="10.3.2. LVM Support"><div class="titlepage"><div><div><h3 class="title"><a name="sec.vmx.lvm"></a>10.3.2. LVM Support<span class="permalink"><a alt="Permalink" title="10.3.2. LVM Support" href="#sec.vmx.lvm">¶</a></span></h3></div></div></div><p>KIWI also provides support for LVM (Logical Volume
         Management). In this mode the disk partition table will include
-        one lvm partition and one standard <code class="systemitem">ext2</code><a class="indexterm" name="id2552122"></a> boot partition. KIWI
+        one lvm partition and one standard <code class="systemitem">ext2</code><a class="indexterm" name="id318727"></a> boot partition. KIWI
         creates the kiwiVG volume group and adds logical volumes as they
         are needed and configured according to the image type and
         filesystem. After boot of the system the user has full control
@@ -1433,7 +1433,7 @@ $(<span class="command"><strong>rpm</strong></span> -q &#8216;baseGetPackagesFor
         or add the attribute lvm="true" as part of the type section in
         your <code class="filename">config.xml</code> file. </p><pre class="screen"><span class="command"><strong>kiwi</strong></span> --create /tmp/myvm --type vmx -d /tmp/myvm-result --lvm </pre><p>With the optional lvmvolumes section you can set one or more
         top level directories into a separate volume. See <a class="xref" href="#chap.description" title="Chapter 3. KIWI Image Description">Chapter 3, <i>KIWI Image Description</i></a> for a detailed explanation.
-      </p></div></div></div><div class="chapter" title="Chapter 11. PXE Image&#8212;Thin Clients"><div class="titlepage"><div><div><h2 class="title"><a name="chap.pxe"></a>Chapter 11. PXE Image&#8212;Thin Clients</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="sect1"><a href="#sec.pxe.setting-up">11.1. Setting Up the Required Services</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.pxe.atftp-server">11.1.1. Atftp Server</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.dhcp-server">11.1.2. DHCP Server</a></span></dt></dl></dd><dt><span class="sect1"><a href="#sec.pxe.building">11.2. Building the suse-pxe-client Example</a></span></dt><dt><span class="sect1"><a href="#sec.pxe.using">11.3. Using the Image</a></span></dt><dt><span class="sect1"><a href="#sec.pxe.flavours">11.4. Flavours</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.pxe.client-control-file">11.4.1. The PXE Client Control File</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.client-config-file">11.4.2. The PXE Client Configuration File</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.another-user">11.4.3. User another than tftp as Download Protocol</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.ram-only-image">11.4.4. RAM Only Image</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.union-image">11.4.5. Union Image</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.split-image">11.4.6. Split Image</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.root-tree-over-nfs">11.4.7. Root Tree Over NFS</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.root-tree-over-nbd">11.4.8. Root Tree Over NBD</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.root-tree-over-aoe">11.4.9. Root Tree Over AoE</a></span></dt></dl></dd><dt><span class="sect1"><a href="#sec.pxe.groups">11.5. Hardware Grouping</a></span></dt><dd><dl><dt><span class="sect2"><a href="#id2554363">11.5.1. The Group Configuration File</a></span></dt><dt><span class="sect2"><a href="#id2554548">11.5.2. The Hardware Group File</a></span></dt></dl></dd></dl></div><p>A PXE image consists of a boot image and a system image like all
+      </p></div></div></div><div class="chapter" title="Chapter 11. PXE Image&#8212;Thin Clients"><div class="titlepage"><div><div><h2 class="title"><a name="chap.pxe"></a>Chapter 11. PXE Image&#8212;Thin Clients</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="sect1"><a href="#sec.pxe.setting-up">11.1. Setting Up the Required Services</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.pxe.atftp-server">11.1.1. Atftp Server</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.dhcp-server">11.1.2. DHCP Server</a></span></dt></dl></dd><dt><span class="sect1"><a href="#sec.pxe.building">11.2. Building the suse-pxe-client Example</a></span></dt><dt><span class="sect1"><a href="#sec.pxe.using">11.3. Using the Image</a></span></dt><dt><span class="sect1"><a href="#sec.pxe.flavours">11.4. Flavours</a></span></dt><dd><dl><dt><span class="sect2"><a href="#sec.pxe.client-control-file">11.4.1. The PXE Client Control File</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.client-config-file">11.4.2. The PXE Client Configuration File</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.another-user">11.4.3. User another than tftp as Download Protocol</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.ram-only-image">11.4.4. RAM Only Image</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.union-image">11.4.5. Union Image</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.split-image">11.4.6. Split Image</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.root-tree-over-nfs">11.4.7. Root Tree Over NFS</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.root-tree-over-nbd">11.4.8. Root Tree Over NBD</a></span></dt><dt><span class="sect2"><a href="#sec.pxe.root-tree-over-aoe">11.4.9. Root Tree Over AoE</a></span></dt></dl></dd><dt><span class="sect1"><a href="#sec.pxe.groups">11.5. Hardware Grouping</a></span></dt><dd><dl><dt><span class="sect2"><a href="#id320794">11.5.1. The Group Configuration File</a></span></dt><dt><span class="sect2"><a href="#id320944">11.5.2. The Hardware Group File</a></span></dt></dl></dd></dl></div><p>A PXE image consists of a boot image and a system image like all
     other image types too. But with a PXE image the image files are
     available seperately and needs to be copied at specific locations of
     a network boot server. PXE is a boot protocol implemented in most
@@ -1441,10 +1441,10 @@ $(<span class="command"><strong>rpm</strong></span> -q &#8216;baseGetPackagesFor
     sends DHCP requests to assign an IP address and after that it uses
     tftp to download kernel and boot instructions. </p><div class="sect1" title="11.1. Setting Up the Required Services"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sec.pxe.setting-up"></a>11.1. Setting Up the Required Services<span class="permalink"><a alt="Permalink" title="11.1. Setting Up the Required Services" href="#sec.pxe.setting-up">¶</a></span></h2></div></div></div><p>Before you start to build pxe images with KIWI, setup the boot
       server. The boot server requires the services atftp and DHCP to
-      run. </p><div class="sect2" title="11.1.1. Atftp Server"><div class="titlepage"><div><div><h3 class="title"><a name="sec.pxe.atftp-server"></a>11.1.1. Atftp Server<span class="permalink"><a alt="Permalink" title="11.1.1. Atftp Server" href="#sec.pxe.atftp-server">¶</a></span></h3></div></div></div><p>In order to setup the <code class="systemitem">atftp</code><a class="indexterm" name="id2552225"></a> server the following steps are required </p><div class="procedure"><a name="proc.pxe.atftp-server-setup"></a><ol class="procedure" type="1"><li class="step" title="Step 1"><p>Install the packages <span class="package">atftp</span> and
+      run. </p><div class="sect2" title="11.1.1. Atftp Server"><div class="titlepage"><div><div><h3 class="title"><a name="sec.pxe.atftp-server"></a>11.1.1. Atftp Server<span class="permalink"><a alt="Permalink" title="11.1.1. Atftp Server" href="#sec.pxe.atftp-server">¶</a></span></h3></div></div></div><p>In order to setup the <code class="systemitem">atftp</code><a class="indexterm" name="id318816"></a> server the following steps are required </p><div class="procedure"><a name="proc.pxe.atftp-server-setup"></a><ol class="procedure" type="1"><li class="step" title="Step 1"><p>Install the packages <span class="package">atftp</span> and
               <span class="package">kiwi-pxeboot</span>. </p></li><li class="step" title="Step 2"><p>Edit the file
             <code class="filename">/etc/sysconfig/atftpd</code>. Set or modify
-            the following variables: </p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><pre class="screen">ATFTPD_OPTIONS="--daemon --no-multicast"</pre></li><li class="listitem"><pre class="screen">ATFTPD_DIRECTORY="/srv/tftpboot"</pre></li></ul></div></li><li class="step" title="Step 3"><p>Run <code class="systemitem">atftpd</code><a class="indexterm" name="id2552302"></a> by
+            the following variables: </p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><pre class="screen">ATFTPD_OPTIONS="--daemon --no-multicast"</pre></li><li class="listitem"><pre class="screen">ATFTPD_DIRECTORY="/srv/tftpboot"</pre></li></ul></div></li><li class="step" title="Step 3"><p>Run <code class="systemitem">atftpd</code><a class="indexterm" name="id318890"></a> by
             calling the command:</p><pre class="screen"><span class="command"><strong>rcatftpd</strong></span> start</pre></li></ol></div></div><div class="sect2" title="11.1.2. DHCP Server"><div class="titlepage"><div><div><h3 class="title"><a name="sec.pxe.dhcp-server"></a>11.1.2. DHCP Server<span class="permalink"><a alt="Permalink" title="11.1.2. DHCP Server" href="#sec.pxe.dhcp-server">¶</a></span></h3></div></div></div><p> In contrast to the atftp server setup the following DHCP
         server setup can only serve as an example. Depending on your
         network structure, the IP addresses, ranges and domain settings
@@ -1469,9 +1469,9 @@ subnet 192.168.100.0 netmask 255.255.255.0 {
    next-server 192.168.100.2;
    range dynamic-bootp 192.168.100.5 192.168.100.20;
 }</pre></li><li class="step" title="Step 3"><p>Edit the file <code class="filename">/etc/sysconfig/dhcpd</code>
-            and setup the network interface the server should listen on: </p><pre class="screen">DHCPD_INTERFACE="eth0"</pre></li><li class="step" title="Step 4"><p>Run the <code class="systemitem">dhcp</code><a class="indexterm" name="id2552420"></a> server by calling:</p><pre class="screen"><span class="command"><strong>rcdhcpd</strong></span> start</pre></li></ol></div></div></div><div class="sect1" title="11.2. Building the suse-pxe-client Example"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sec.pxe.building"></a>11.2. Building the suse-pxe-client Example<span class="permalink"><a alt="Permalink" title="11.2. Building the suse-pxe-client Example" href="#sec.pxe.building">¶</a></span></h2></div></div></div><p>The example provided with KIWI is based on open­SUSE 11.2 and
+            and setup the network interface the server should listen on: </p><pre class="screen">DHCPD_INTERFACE="eth0"</pre></li><li class="step" title="Step 4"><p>Run the <code class="systemitem">dhcp</code><a class="indexterm" name="id265120"></a> server by calling:</p><pre class="screen"><span class="command"><strong>rcdhcpd</strong></span> start</pre></li></ol></div></div></div><div class="sect1" title="11.2. Building the suse-pxe-client Example"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sec.pxe.building"></a>11.2. Building the suse-pxe-client Example<span class="permalink"><a alt="Permalink" title="11.2. Building the suse-pxe-client Example" href="#sec.pxe.building">¶</a></span></h2></div></div></div><p>The example provided with KIWI is based on open­SUSE 11.2 and
       creates an image for a Wyse VX0 terminal with a 128MB flash card
-      and 512MB of RAM. The image makes use of the <code class="systemitem">squashfs</code><a class="indexterm" name="id2552466"></a> compressed
+      and 512MB of RAM. The image makes use of the <code class="systemitem">squashfs</code><a class="indexterm" name="id319114"></a> compressed
       filesystem and its root tree is deployed as unified (aufs) based
       system. </p><pre class="screen"><span class="command"><strong>cd</strong></span> /usr/share/doc/packages/kiwi/examples
 <span class="command"><strong>cd</strong></span> suse-11.2
@@ -1505,13 +1505,13 @@ LABEL Local-Boot
         <code class="filename">config.<em class="replaceable"><code>MAC</code></em></code> (or
         <code class="filename">config.default</code>) file. When a new client
       boots up and there is no client configuration file the new client
-      is registered by uploading a control file to the <code class="systemitem">TFTP</code><a class="indexterm" name="id2552701"></a> server. The
+      is registered by uploading a control file to the <code class="systemitem">TFTP</code><a class="indexterm" name="id319329"></a> server. The
       following sections informs about the control and the configuration
       file. </p><div class="sect2" title="11.4.1. The PXE Client Control File"><div class="titlepage"><div><div><h3 class="title"><a name="sec.pxe.client-control-file"></a>11.4.1. The PXE Client Control File<span class="permalink"><a alt="Permalink" title="11.4.1. The PXE Client Control File" href="#sec.pxe.client-control-file">¶</a></span></h3></div></div></div><p>This section describes the netboot client control file: </p><pre class="screen">hwtype.$&lt;$MAC Address$&gt;$</pre><p>The control file is primarily used to set up new netboot
         clients. In this case, there is no configuration file
         corresponding to the client MAC address available. Using the MAC
         address information, the control file is created, which is
-        uploaded to the <code class="systemitem">TFTP</code><a class="indexterm" name="id2552743"></a> servers upload directory
+        uploaded to the <code class="systemitem">TFTP</code><a class="indexterm" name="id319367"></a> servers upload directory
           <code class="filename">/var/lib/tftpboot/upload</code>. </p></div><div class="sect2" title="11.4.2. The PXE Client Configuration File"><div class="titlepage"><div><div><h3 class="title"><a name="sec.pxe.client-config-file"></a>11.4.2. The PXE Client Configuration File<span class="permalink"><a alt="Permalink" title="11.4.2. The PXE Client Configuration File" href="#sec.pxe.client-config-file">¶</a></span></h3></div></div></div><p>This section describes the netboot client configuration
         file: </p><pre class="screen">config.$&lt;$MAC Address$&gt;$</pre><p>The configuration file contains data about image,
         configuration, synchronization, or partition parameters. The
@@ -1529,14 +1529,14 @@ CONF=src;dest;srvip;bsize,...,src;dest;srvip;bsize
 PART=size;id;Mount,...,size;id;Mount
 DISK=device</pre><div class="variablelist"><dl><dt><span class="term"><code class="varname">IMAGE</code></span></dt><dd><p>Specifies which image (name) should be loaded with
               which version (version) and to which storage device
-              (device) it should be linked, e.&#8201;g., <code class="filename">/dev/ram1</code><a class="indexterm" name="id2552842"></a> or <code class="filename">/dev/hda2</code><a class="indexterm" name="id2552856"></a>. The netboot
+              (device) it should be linked, e.&#8201;g., <code class="filename">/dev/ram1</code><a class="indexterm" name="id319452"></a> or <code class="filename">/dev/hda2</code><a class="indexterm" name="id319466"></a>. The netboot
               client partition (device) hda2 defines the root file
               system / and hda1 is used for the swap partition. The
               numbering of the hard disk device should not be confused
-              with the RAM disk device, where <code class="filename">/dev/ram0</code><a class="indexterm" name="id2552875"></a> is used for the
+              with the RAM disk device, where <code class="filename">/dev/ram0</code><a class="indexterm" name="id319483"></a> is used for the
               initial RAM disk and can not be used as storage device for
               the second stage system image. SUSE recommends to use the
-              device <code class="filename">/dev/ram1</code><a class="indexterm" name="id2552893"></a>
+              device <code class="filename">/dev/ram1</code><a class="indexterm" name="id319499"></a>
               for the RAM disk. If the hard drive is used, a
               corresponding partitioning must be performed. </p><div class="variablelist"><dl><dt><span class="term">srvip</span></dt><dd><p>Specifies the server IP address for the TFTP
                     download. Must always be indicated, except in PART.
@@ -1555,7 +1555,7 @@ DISK=device</pre><div class="variablelist"><dl><dt><span class="term"><code clas
                     image isn&#8217;t compressed. It will also fail if you
                     don&#8217;t specify <code class="literal">"compressed"</code> but
                     the image is compressed. The name of the compressed
-                    image has to contain the suffix <code class="filename">.gz</code><a class="indexterm" name="id2552990"></a> and needs to be
+                    image has to contain the suffix <code class="filename">.gz</code><a class="indexterm" name="id319586"></a> and needs to be
                     compressed with the <span class="command"><strong>gzip</strong></span> tool.
                     Using a compressed image will automatically
                       <span class="emphasis"><em>deactivate</em></span> the multicast
@@ -1579,7 +1579,7 @@ DISK=device</pre><div class="variablelist"><dl><dt><span class="term"><code clas
                   disk one can set a lower <code class="literal">x</code> letter
                   as size specification. </p></li></ul></div></dd><dt><span class="term"><code class="varname">DISK</code></span></dt><dd><p>Specifies the hard disk. Used only with PART and
               defines the device via which the hard disk can be
-              addressed, e.g., <code class="filename">/dev/hda</code><a class="indexterm" name="id2553142"></a>. </p></dd><dt><span class="term"><code class="varname">RELOAD_IMAGE</code></span></dt><dd><p>If set to a non-empty string, this forces the
+              addressed, e.g., <code class="filename">/dev/hda</code><a class="indexterm" name="id319719"></a>. </p></dd><dt><span class="term"><code class="varname">RELOAD_IMAGE</code></span></dt><dd><p>If set to a non-empty string, this forces the
               configured image to be loaded from the server even if the
               image on the disk is up-to-date. The primary purpose of
               this setting is to aid debugging. The option is sensible
@@ -1593,8 +1593,8 @@ DISK=device</pre><div class="variablelist"><dl><dt><span class="term"><code clas
               the system. The variables value must be set to the name of
               the initrd file which is used via PXE network boot. If the
               standard tftp setup suggested with the kiwi-pxeboot
-              package is used all initrd files resides in the <code class="filename">boot/</code><a class="indexterm" name="id2553231"></a> directory below the
-              tftp server path <code class="filename">/var/lib/tftpboot</code><a class="indexterm" name="id2553247"></a>.
+              package is used all initrd files resides in the <code class="filename">boot/</code><a class="indexterm" name="id319799"></a> directory below the
+              tftp server path <code class="filename">/var/lib/tftpboot</code><a class="indexterm" name="id319813"></a>.
               Because the tftp server do a chroot into the tftp server
               path you need to specify the initrd file as the following
               example shows: </p><pre class="screen">KIWI_INITRD=/boot/<em class="replaceable"><code>name-of-initrd-file</code></em></pre></dd><dt><span class="term"><code class="varname">UNIONFS_CONFIG</code></span></dt><dd><p>For netboot and usbboot images there is the
@@ -1606,8 +1606,8 @@ DISK=device</pre><div class="variablelist"><dl><dt><span class="term"><code clas
               automatically setup the unionfs/aufs filesystem. In case
               of a PXE network image the netboot image requires a
                   <code class="filename">config.<em class="replaceable"><code>MAC</code></em></code>
-              setup like the following example shows: </p><pre class="screen">UNIONFS_CONFIG=/dev/sda2,/dev/sda3,aufs</pre><p>In this example the first device <code class="filename">/dev/sda2</code><a class="indexterm" name="id2553317"></a> represents the
-              read/write filesystem and the second device <code class="filename">/dev/sda3</code><a class="indexterm" name="id2553333"></a> represents the
+              setup like the following example shows: </p><pre class="screen">UNIONFS_CONFIG=/dev/sda2,/dev/sda3,aufs</pre><p>In this example the first device <code class="filename">/dev/sda2</code><a class="indexterm" name="id319876"></a> represents the
+              read/write filesystem and the second device <code class="filename">/dev/sda3</code><a class="indexterm" name="id319891"></a> represents the
               compressed system image filesystem. The container
               filesystem aufs is then used to cover the read/write layer
               with the read-only device to one read/write filesystem. If
@@ -1638,7 +1638,7 @@ DISK=/dev/sda</pre><p>As the second element of the PART list must define the
               program. For more information on how to set up the server,
               see the nbd-server man pages. The kernel on the remote
               client can set up a special network block device named
-                <code class="filename">/dev/nb0</code><a class="indexterm" name="id2553454"></a> using
+                <code class="filename">/dev/nb0</code><a class="indexterm" name="id319994"></a> using
               the nbd-client command. After this device exists, the
               mount program is used to mount the root filesystem. To
               allow the KIWI boot image to use that, the following
@@ -1648,9 +1648,9 @@ DISK=/dev/sda</pre><p>As the second element of the PART list must define the
   NBD-Write-Port-Number;/dev/NBD-Write-Device</pre><p> The NBD-Device, NBD-Swap-Port-Number,
               NBD-Swap-Device, NBD-Write-Port-Number and
               NBD-Write-Device variables are optional. If the nbd root
-              device is not set, the default values (<code class="filename">/dev/nb0</code><a class="indexterm" name="id2553488"></a>, port 2000)
+              device is not set, the default values (<code class="filename">/dev/nb0</code><a class="indexterm" name="id320023"></a>, port 2000)
               applies and if the nbd swap device is not set the default
-              values (<code class="filename">/dev/nb1</code><a class="indexterm" name="id2553504"></a>,
+              values (<code class="filename">/dev/nb1</code><a class="indexterm" name="id320038"></a>,
               port 9210) applies. The swap space over the network using
               a network block device is only established if the client
               has less than 48 MB of RAM. The optional
@@ -1665,21 +1665,21 @@ DISK=/dev/sda</pre><p>As the second element of the PART list must define the
               install the <span class="package">aoetools</span> and
                 <span class="package">vblade</span> packages from here first:
                 <a class="ulink" href="http://download.opensuse.org/repositories/system:/aoetools" target="_top">http://download.opensuse.org/repositories/system:/aoetools</a>. Once installed the following example shows how to
-              export the local <code class="filename">/dev/sdb1</code><a class="indexterm" name="id2553560"></a> partition via AoE:</p><pre class="screen"><span class="command"><strong>vbladed</strong></span> 0 1 eth0 /dev/sdb1 </pre><p> Some explanation about this command, each AoE device
+              export the local <code class="filename">/dev/sdb1</code><a class="indexterm" name="id320086"></a> partition via AoE:</p><pre class="screen"><span class="command"><strong>vbladed</strong></span> 0 1 eth0 /dev/sdb1 </pre><p> Some explanation about this command, each AoE device
               is identified by a couple Major/Minor, with major between
               0-65535 and minor between 0-255. AoE is based just over
               Ethernet on the OSI models so we need to indicate which
               ethernet card we&#8217;ll use. In this example we export
-                <code class="filename">/dev/sdb1</code><a class="indexterm" name="id2553599"></a> with a
+                <code class="filename">/dev/sdb1</code><a class="indexterm" name="id320119"></a> with a
               major value of 0 and minor of 1 on the eth0 interface. We
               are ready to use our partition on the network! To be able
               to use the device KIWI needs the information which AoE
               device contains the root filesystem. In our example this
-              is the device <code class="filename">/dev/etherd/e0.1</code><a class="indexterm" name="id2553619"></a>. According to this the
+              is the device <code class="filename">/dev/etherd/e0.1</code><a class="indexterm" name="id320136"></a>. According to this the
               AOEROOT variable must be set as follows: </p><pre class="screen">AOEROOT=/dev/etherd/e0.1</pre><p> KIWI is now able to mount and use the specified AoE
               device as the remote root filesystem. In case of a
-              compressed read-only image with <code class="systemitem">aufs</code><a class="indexterm" name="id2553646"></a> 
-              or <code class="systemitem">clicfs</code><a class="indexterm" name="id2553661"></a>, the
+              compressed read-only image with <code class="systemitem">aufs</code><a class="indexterm" name="id320161"></a> 
+              or <code class="systemitem">clicfs</code><a class="indexterm" name="id320176"></a>, the
               AOEROOT variable can also contain a device for the write
               actions: </p><pre class="screen">AOEROOT=/dev/etherd/e0.1,/dev/ram1</pre><p> Writing to RAM is the default but you also can set
               another device like another aoe location or a local device
@@ -1698,7 +1698,7 @@ UNIONFS_CONFIG=/dev/ram1,nfs,aufs # write to RAM</pre><p> This way you can keep 
               of the system. The value must be set to the name of the
               initrd file which is used via PXE network boot. If the
               standard TFTP setup suggested with the kiwi-pxeboot
-              package is used, all initrd files reside in the <code class="filename">/srv/tftpboot/boot/</code><a class="indexterm" name="id2553757"></a>
+              package is used, all initrd files reside in the <code class="filename">/srv/tftpboot/boot/</code><a class="indexterm" name="id320259"></a>
               directory. Because the TFTP server does a chroot into the
               TFTP server path, you must specify the initrd file as
               follows: </p><pre class="screen">KIWI_INITRD=/boot/name-of-initrd-file</pre></dd><dt><span class="term"><code class="varname">KIWI_KERNEL</code></span></dt><dd><p>Specifies the kernel to be used for a local boot of
@@ -1745,8 +1745,8 @@ UNIONFS_CONFIG=/dev/ram1,nfs,aufs # write to RAM</pre><p> This way you can keep 
         read-write filesystem is a solution for this problem. In order
         to use a compressed root filesystem make sure your
           <code class="filename">config.xml</code>&#8217;s filesystem attribute
-        contains either <code class="systemitem">squashfs</code><a class="indexterm" name="id2554018"></a> 
-        or <code class="systemitem">clicfs</code><a class="indexterm" name="id2554033"></a>. Below, find an example: </p><pre class="screen">DISK=/dev/sda
+        contains either <code class="systemitem">squashfs</code><a class="indexterm" name="id320483"></a> 
+        or <code class="systemitem">clicfs</code><a class="indexterm" name="id320497"></a>. Below, find an example: </p><pre class="screen">DISK=/dev/sda
 PART=5;S;x,62;L;/,x;L;x,
 IMAGE=/dev/sda2;suse-11.2-pxe-client.i386;\
       1.2.8;192.168.100.2;4096
@@ -1787,7 +1787,7 @@ DISK=/dev/sda
 COMBINED_IMAGE=yes
 KIWI_INITRD=/boot/initrd</pre></li></ul></div></div><div class="sect2" title="11.4.7. Root Tree Over NFS"><div class="titlepage"><div><div><h3 class="title"><a name="sec.pxe.root-tree-over-nfs"></a>11.4.7. Root Tree Over NFS<span class="permalink"><a alt="Permalink" title="11.4.7. Root Tree Over NFS" href="#sec.pxe.root-tree-over-nfs">¶</a></span></h3></div></div></div><p> Instead of installing the image onto a local storage device
         of the client it is also possible to let the client mount the
-        root tree via an <code class="systemitem">NFS</code><a class="indexterm" name="id2554179"></a>
+        root tree via an <code class="systemitem">NFS</code><a class="indexterm" name="id320628"></a>
         remote mount. Below find an example: </p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p>Export the KIWI prepared tree via NFS.</p></li><li class="listitem"><p>Sample
               <code class="filename">config.<em class="replaceable"><code>MAC</code></em></code>: </p><pre class="screen">NFSROOT=192.168.100.7;/tmp/kiwi.nfsroot</pre></li></ul></div></div><div class="sect2" title="11.4.8. Root Tree Over NBD"><div class="titlepage"><div><div><h3 class="title"><a name="sec.pxe.root-tree-over-nbd"></a>11.4.8. Root Tree Over NBD<span class="permalink"><a alt="Permalink" title="11.4.8. Root Tree Over NBD" href="#sec.pxe.root-tree-over-nbd">¶</a></span></h3></div></div></div><p>As an alternative for root over NFS it is also possible to
         let the client mount the root tree via a special network block
@@ -1809,7 +1809,7 @@ KIWI_INITRD=/boot/initrd</pre></li></ul></div></div><div class="sect2" title="11
       where different hardware types may be involved due to newer equipment being rotated into
       production or older hardware failing and replacements are from different vendors. In addition,
       an organization might decide to organized their equipment by function, rather then by vendor,
-      and may not be able to use the same hardware from one end to the other. </p><div class="sect2" title="11.5.1. The Group Configuration File"><div class="titlepage"><div><div><h3 class="title"><a name="id2554363"></a>11.5.1. The Group Configuration File<span class="permalink"><a alt="Permalink" title="11.5.1. The Group Configuration File" href="#id2554363">¶</a></span></h3></div></div></div><p>To make use of the grouping functionality, some new configuration files will be
+      and may not be able to use the same hardware from one end to the other. </p><div class="sect2" title="11.5.1. The Group Configuration File"><div class="titlepage"><div><div><h3 class="title"><a name="id320794"></a>11.5.1. The Group Configuration File<span class="permalink"><a alt="Permalink" title="11.5.1. The Group Configuration File" href="#id320794">¶</a></span></h3></div></div></div><p>To make use of the grouping functionality, some new configuration files will be
         required. These configurations files currently have to be manually managed rather then
         provided, however future versions of KIWI may provide a means of managing groups more
         effectively once this feature stabilizes. The number of configuration files required will
@@ -1849,7 +1849,7 @@ test3_KIWI_MAC_LIST="00:54:33:FA:44:33, 84:3D:45:2F:5F:33"</pre><p>Note: The abo
             transfering the file to a single host, but it will have a larger impact when trying to
             download the same file to 1500+ hosts, so some consideration will have to take that into
             account. However, the comparison itself still occurred in under half a second while
-            searching through all 1500+ MAC addresses across 3 defined groups.</p></li></ul></div></div><div class="sect2" title="11.5.2. The Hardware Group File"><div class="titlepage"><div><div><h3 class="title"><a name="id2554548"></a>11.5.2. The Hardware Group File<span class="permalink"><a alt="Permalink" title="11.5.2. The Hardware Group File" href="#id2554548">¶</a></span></h3></div></div></div><p>In addition to the config.group file, each defined group will require the addition of a
+            searching through all 1500+ MAC addresses across 3 defined groups.</p></li></ul></div></div><div class="sect2" title="11.5.2. The Hardware Group File"><div class="titlepage"><div><div><h3 class="title"><a name="id320944"></a>11.5.2. The Hardware Group File<span class="permalink"><a alt="Permalink" title="11.5.2. The Hardware Group File" href="#id320944">¶</a></span></h3></div></div></div><p>In addition to the config.group file, each defined group will require the addition of a
         config.&lt;GROUP_NAME&gt; file. This file is exactly like a standard KIWI config.&lt;MAC&gt; file,
         but is assigned to a group of hosts rather then a single unit. If we continue with the
         example we used in the previous section, we would need the following files:</p><pre class="screen">/srv/tftpboot/KIWI/config.test1
@@ -1882,8 +1882,8 @@ CONF=CONFIGURATIONS/xorg.conf.test2;/etc/X11/xorg.conf;192.168.100.2;4096,CONFIG
       releases, one example configuration per release, and includes the
       default and x11 patterns. The image type is a split type utilizing
       the distributions default filesystem format for the read-write
-      partition and the <code class="systemitem">squashfs</code><a class="indexterm" name="id2554684"></a> filesystem for the read-only partition.
-      Using the additional <code class="sgmltag-attribute">installiso</code><a class="indexterm" name="id2554697"></a> attribute creates an installable ISO
+      partition and the <code class="systemitem">squashfs</code><a class="indexterm" name="id321046"></a> filesystem for the read-only partition.
+      Using the additional <code class="sgmltag-attribute">installiso</code><a class="indexterm" name="id321060"></a> attribute creates an installable ISO
       image. When booting from the ISO image the OEM disk image will be
       deployed to the storage media on the booting machine (after
       confirmation by the user). </p><p>The commands provided below use the openSUSE 11.2 based
@@ -1892,8 +1892,8 @@ CONF=CONFIGURATIONS/xorg.conf.test2;/etc/X11/xorg.conf;192.168.100.2;4096,CONFIG
 <span class="command"><strong>kiwi</strong></span> --prepare ./suse-oem-preload --root /tmp/myoem </pre><pre class="screen"><span class="command"><strong>kiwi</strong></span> --create /tmp/myoem --type split -d /tmp/myoem-result</pre></div><div class="sect1" title="12.2. Using the Image"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sec.oem.using"></a>12.2. Using the Image<span class="permalink"><a alt="Permalink" title="12.2. Using the Image" href="#sec.oem.using">¶</a></span></h2></div></div></div><p>The virtual disk image created by KIWI with the commands shown
       above can be tested using virtualization software such as QEMU,
       VMware, or VirtualBox. The virtual disk is represented by the file
-      with the <code class="filename">.raw</code><a class="indexterm" name="id2554768"></a> extension,
-      whereas the file with the <code class="filename">.iso</code><a class="indexterm" name="id2554783"></a> extension represents the installation disk for
+      with the <code class="filename">.raw</code><a class="indexterm" name="id321123"></a> extension,
+      whereas the file with the <code class="filename">.iso</code><a class="indexterm" name="id321137"></a> extension represents the installation disk for
       this oem image. The ISO image is bootable
         (<code class="filename">filename.iso</code>) and can be burned to optical
       media. It is recommended to test the image on a bare test system.
@@ -1903,27 +1903,27 @@ CONF=CONFIGURATIONS/xorg.conf.test2;/etc/X11/xorg.conf;192.168.100.2;4096,CONFIG
       image onto a test hard disk or USB stick and upon reboot select
       the appropriate device as the boot device in the BIOS: </p><pre class="screen"><span class="command"><strong>cd</strong></span> /tmp/myoem-result 
 <span class="command"><strong>dd</strong></span> if=suse-11.2-oem-preload.i686-1.1.2.raw of=/dev/<em class="replaceable"><code>device</code></em> bs=32k</pre><p>Note, when testing an oem image using the virtual disk image,
-      i.e. the <code class="filename">.raw</code><a class="indexterm" name="id2554865"></a> file, the
+      i.e. the <code class="filename">.raw</code><a class="indexterm" name="id321213"></a> file, the
       geometry of the disk image is not changed and therefore retains
       the disk geometry of the host system. This implies that the
       re-partitioning performed for a physical disk install during the
       oem boot workflow will be skipped. </p><p>You can test the installation procedure in a virtual
-      environment using the <code class="filename">.iso</code><a class="indexterm" name="id2554889"></a>
+      environment using the <code class="filename">.iso</code><a class="indexterm" name="id321234"></a>
       file. In this case the re-partitioning code in the boot image will
       be executed. The following commnads show this procedure using
       QEMU. </p><pre class="screen"><span class="command"><strong>cd</strong></span> /tmp/myoem-result 
 <span class="command"><strong>qemu-img</strong></span> create /tmp/mydisk 20G 
-<span class="command"><strong>qemu</strong></span> -hda /tmp/mydisk -cdrom suse-11.2-oem-preload.i686-1.1.2.iso -boot d</pre></div><div class="sect1" title="12.3. Flavours"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sec.oem.flavours"></a>12.3. Flavours<span class="permalink"><a alt="Permalink" title="12.3. Flavours" href="#sec.oem.flavours">¶</a></span></h2></div></div></div><p>As indicated above the use of the <code class="sgmltag-attribute">installiso</code><a class="indexterm" name="id2554939"></a> and <code class="sgmltag-attribute">installstick</code><a class="indexterm" name="id2554952"></a> attributes for the oem image supports
+<span class="command"><strong>qemu</strong></span> -hda /tmp/mydisk -cdrom suse-11.2-oem-preload.i686-1.1.2.iso -boot d</pre></div><div class="sect1" title="12.3. Flavours"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="sec.oem.flavours"></a>12.3. Flavours<span class="permalink"><a alt="Permalink" title="12.3. Flavours" href="#sec.oem.flavours">¶</a></span></h2></div></div></div><p>As indicated above the use of the <code class="sgmltag-attribute">installiso</code><a class="indexterm" name="id321282"></a> and <code class="sgmltag-attribute">installstick</code><a class="indexterm" name="id321294"></a> attributes for the oem image supports
       the creation of an installation image. The installation image can
       be created in two formats, one suitable for CD/DVD media and a
       second suitable for a USB stick. The self installing image deploys
       the oem image onto the selected storage device. The installation
       process is a simple image dump using the <span class="command"><strong>dd</strong></span> command. During this
       process the target system remains in terminal mode. The following
-      configuration snippets show the use of the <code class="sgmltag-attribute">installiso</code><a class="indexterm" name="id2554978"></a> and <code class="sgmltag-attribute">installstick</code><a class="indexterm" name="id2554991"></a> attributes to create
-      the ISO or USB installation image format respectively. </p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><pre class="screen">&lt;type image="name" ... installiso="true"/&gt;</pre><p>Creates a <code class="filename">.iso</code><a class="indexterm" name="id2555021"></a> file
+      configuration snippets show the use of the <code class="sgmltag-attribute">installiso</code><a class="indexterm" name="id321316"></a> and <code class="sgmltag-attribute">installstick</code><a class="indexterm" name="id321329"></a> attributes to create
+      the ISO or USB installation image format respectively. </p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><pre class="screen">&lt;type image="name" ... installiso="true"/&gt;</pre><p>Creates a <code class="filename">.iso</code><a class="indexterm" name="id321358"></a> file
           which can be burned in CD or DVD. This represents an
-          installation CD </p></li><li class="listitem"><pre class="screen">&lt;type image="name" ... installstick="true"/&gt;</pre><p>Creates a <code class="filename">.raw.install</code><a class="indexterm" name="id2555051"></a> file which can be dumped
+          installation CD </p></li><li class="listitem"><pre class="screen">&lt;type image="name" ... installstick="true"/&gt;</pre><p>Creates a <code class="filename">.raw.install</code><a class="indexterm" name="id321386"></a> file which can be dumped
             (<span class="command"><strong>dd</strong></span>) on a USB stick. This represents an
           installation Stick </p></li></ul></div><div class="sect2" title="12.3.1. Influencing the OEM Partitioning"><div class="titlepage"><div><div><h3 class="title"><a name="sec.oem.partitioning"></a>12.3.1. Influencing the OEM Partitioning<span class="permalink"><a alt="Permalink" title="12.3.1. Influencing the OEM Partitioning" href="#sec.oem.partitioning">¶</a></span></h3></div></div></div><p>By default the oemboot process will create/modify a swap,
           <code class="filename">/home</code> and <code class="filename">/</code>
@@ -1935,14 +1935,14 @@ CONF=CONFIGURATIONS/xorg.conf.test2;/etc/X11/xorg.conf;192.168.100.2;4096,CONFIG
         has been set, and adds logical volumes to the group based on the
         configuration given by the <code class="sgmltag-element">lvmvolumes</code> block
         for this type. The filesystem for the volume group is determined
-        by the <code class="sgmltag-attribute">filesystem</code><a class="indexterm" name="id2555127"></a> attribute
+        by the <code class="sgmltag-attribute">filesystem</code><a class="indexterm" name="id321455"></a> attribute
         of the type element. After booting the system the user has full
         control over the volume group and is free to change
         (resize/increase) the group and the volumes inside. Support for
         LVM has been added for all disk based image types. This includes
         the vmx, oem and usb image types. In order to use LVM for the
         oem type just add the <code class="option">--lvm</code> command line option
-        when executing the create step or add the attribute <code class="sgmltag-attribute">lvm</code><a class="indexterm" name="id2555151"></a>="<code class="sgmltag-attvalue">true</code>" to of the <code class="sgmltag-element">type</code> element in
+        when executing the create step or add the attribute <code class="sgmltag-attribute">lvm</code><a class="indexterm" name="id321475"></a>="<code class="sgmltag-attvalue">true</code>" to of the <code class="sgmltag-element">type</code> element in
         your <code class="filename">config.xml</code> file. </p><pre class="screen"><span class="command"><strong>kiwi</strong></span> --create /tmp/myoem --type oem -d /tmp/myoem-result --lvm</pre><p>With the optional <code class="sgmltag-element">lvmvolumes</code> section you
         can specify to have one or more top level directories in a
         s -deparate volume. See <a class="xref" href="#chap.description" title="Chapter 3. KIWI Image Description">Chapter 3, <i>KIWI Image Description</i></a> for a
@@ -1998,7 +1998,7 @@ CONF=CONFIGURATIONS/xorg.conf.test2;/etc/X11/xorg.conf;192.168.100.2;4096,CONFIG
     &lt;vmdisk ... device="/dev/xvda"/&gt;
   &lt;/machine&gt;
 &lt;/type&gt; </pre><p>If this information is present KIWI will create a Xen domain U
-      configuration with 512 MB of RAM and expects the disk at <code class="filename">/dev/xvda</code><a class="indexterm" name="id2555471"></a>. Additional information
+      configuration with 512 MB of RAM and expects the disk at <code class="filename">/dev/xvda</code><a class="indexterm" name="id321740"></a>. Additional information
       to setup the Xen guest machine properties are explained in the
       machine section. The KIWI Xen domain U configuration is stored in
       the file <code class="filename">/tmp/myxen-result/suse-11.2-xen-guest.i686-1.1.2.xenconfig</code>.</p></div></div><div class="chapter" title="Chapter 14. EC2 Image&#8212;Amazon Elastic Compute Cloud"><div class="titlepage"><div><div><h2 class="title"><a name="chap.ec2"></a>Chapter 14. EC2 Image&#8212;Amazon Elastic Compute Cloud</h2></div></div></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="sect1"><a href="#sec.ec2.building">14.1. Building the suse-xen-guest Example for EC2</a></span></dt><dt><span class="sect1"><a href="#sec.ec2.using">14.2. Using the Image</a></span></dt></dl></div><p>The <span class="trademark">Amazon Elastic Compute Cloud</span>&#8482; (Amazon
@@ -2060,33 +2060,12 @@ CONF=CONFIGURATIONS/xorg.conf.test2;/etc/X11/xorg.conf;192.168.100.2;4096,CONFIG
         PRIVATE KEY-----</code> and <code class="literal">-----END RSA PRIVATE
         KEY-----</code> lines into it. To review your keypairs call
         <span class="command"><strong>ec2-describe-keypairs</strong></span>. </p><p>We are almost done now but to be able to run an instance it&#8217;s
-      required to select an appropriate AKI ID from the <span class="emphasis"><em>Amazon
-        Kernel Image IDs</em></span> table below. For this host,
+      required to select an appropriate AKI ID from the <a class="xref" href="#tab.ec2.kernel-image-ids" title="Table 14.1. Amazon Kernel Image IDs">Amazon Kernel Image IDs</a>  
+      table below. For this host,
         <span class="emphasis"><em>aki-407d9529</em></span> is being chosen, because we
       are bundling an AMI representing a virtual disk with PVGrub. If
       the table below is outdated just check the current ID list at
-      Amazon directly </p><table id="id2555813"><tr>
-        <th><p>AKI</p></th>
-        <th><p>Name</p></th>
-      </tr><tr>
-        <td>
-          <p>aki-407d9529 </p>
-        </td>
-        <td>
-          <p>
-            <code class="filename">ec2-public-images/pv-grub-hd0-V1.01-i386.gz.manifest.xml</code>
-          </p>
-        </td>
-      </tr><tr>
-        <td>
-          <p>aki-427d952b </p>
-        </td>
-        <td>
-          <p>
-            <code class="filename">ec2-public-images/pv-grub-hd0-V1.01-x86_64.gz.manifest.xml</code>
-          </p>
-        </td>
-      </tr></table><p>Fire up your new ec2 instance with the following command: </p><pre class="screen"><span class="command"><strong>ec2-run-instances</strong></span> ami-... \
+      Amazon directly </p><div class="table"><a name="tab.ec2.kernel-image-ids"></a><p class="title"><b>Table 14.1. Amazon Kernel Image IDs</b><span class="permalink"><a alt="Permalink" title="Table 14.1. Amazon Kernel Image IDs" href="#tab.ec2.kernel-image-ids">¶</a></span></p><div class="table-contents"><table summary="Amazon Kernel Image IDs" border="1"><colgroup><col><col></colgroup><thead><tr><th>AKI</th><th>Name</th></tr></thead><tbody><tr><td>aki-407d9529</td><td><code class="filename">ec2-public-images/pv-grub-hd0-V1.01-i386.gz.manifest.xml</code></td></tr><tr><td>aki-427d952b</td><td><code class="filename">ec2-public-images/pv-grub-hd0-V1.01-x86_64.gz.manifest.xml</code></td></tr></tbody></table></div></div><br class="table-break"><p>Fire up your new ec2 instance with the following command: </p><pre class="screen"><span class="command"><strong>ec2-run-instances</strong></span> ami-... \
    --kernel aki-407d9529 \ 
    -k gsg-keypair </pre><p>To check the state of your instance(s) call the 
       command <span class="command"><strong>ec2-describe-instances</strong></span>.</p><p>If you see your instance at the status: <span class="emphasis"><em>running</em></span> you can login into it. If you can&#8217;t make
@@ -2168,7 +2147,7 @@ CONF=CONFIGURATIONS/xorg.conf.test2;/etc/X11/xorg.conf;192.168.100.2;4096,CONFIG
       The creation step is based on the result of the
       preparation step and uses the contents of the new image root tree to
       create the output image. If the image type ISO was requested, the
-      output image would be a file with the suffix <code class="filename">.iso</code><a class="indexterm" name="id2556582"></a> representing a live system on
+      output image would be a file with the suffix <code class="filename">.iso</code><a class="indexterm" name="id322731"></a> representing a live system on
       CD or DVD. Other than that kiwi is able to create images for
       virtual and para-virtual (Xen) environments as well as for USB
       stick, PXE network clients and OEM customized Linux systems. 
@@ -2207,7 +2186,7 @@ CONF=CONFIGURATIONS/xorg.conf.test2;/etc/X11/xorg.conf;192.168.100.2;4096,CONFIG
       repositories.
       The migration process will always place it's result into the
       <code class="filename">/tmp/$OptionValueOf-m</code> directory. The reason for this is because
-      <code class="filename">/tmp</code><a class="indexterm" name="id2556904"></a> is always excluded from the migration operation and therefore
+      <code class="filename">/tmp</code><a class="indexterm" name="id323032"></a> is always excluded from the migration operation and therefore
       we can safely place new files there without influencing the
       migration itself. You should have at least 50 MB free space for
       the cache file and the image description all the rest are just
@@ -2230,17 +2209,17 @@ CONF=CONFIGURATIONS/xorg.conf.test2;/etc/X11/xorg.conf;192.168.100.2;4096,CONFIG
       third step after preparation and creation. KIWI calls the postprocessing
       modules automatically according to the specified output image type and
       attributes but it's also possible to call them manually.
-    </p><div class="cmdsynopsis"><p><code class="command">kiwi</code>   --bootstick <em class="replaceable"><code>initrd</code></em>  [--bootstick-system <em class="replaceable"><code>systemImage</code></em>] [--bootstick-device <em class="replaceable"><code>device</code></em>]</p></div><div class="cmdsynopsis"><p><code class="command">kiwi</code>   --bootvm <em class="replaceable"><code>initrd</code></em>   --bootvm-system <em class="replaceable"><code>systemImage</code></em>  [--bootvm-disksize <em class="replaceable"><code>size</code></em>]</p></div><div class="cmdsynopsis"><p><code class="command">kiwi</code>   --bootcd <em class="replaceable"><code>initrd</code></em> </p></div><div class="cmdsynopsis"><p><code class="command">kiwi</code>   --installcd <em class="replaceable"><code>initrd</code></em>   --installcd-system <em class="replaceable"><code>vmx-system-image</code></em> </p></div><div class="cmdsynopsis"><p><code class="command">kiwi</code>   --installstick <em class="replaceable"><code>initrd</code></em>   --installstick-system <em class="replaceable"><code>vmx-system-image</code></em> </p></div></div><div class="refsect1" title="Image format conversion"><a name="id2557190"></a><h2>Image format conversion</h2><p>
+    </p><div class="cmdsynopsis"><p><code class="command">kiwi</code>   --bootstick <em class="replaceable"><code>initrd</code></em>  [--bootstick-system <em class="replaceable"><code>systemImage</code></em>] [--bootstick-device <em class="replaceable"><code>device</code></em>]</p></div><div class="cmdsynopsis"><p><code class="command">kiwi</code>   --bootvm <em class="replaceable"><code>initrd</code></em>   --bootvm-system <em class="replaceable"><code>systemImage</code></em>  [--bootvm-disksize <em class="replaceable"><code>size</code></em>]</p></div><div class="cmdsynopsis"><p><code class="command">kiwi</code>   --bootcd <em class="replaceable"><code>initrd</code></em> </p></div><div class="cmdsynopsis"><p><code class="command">kiwi</code>   --installcd <em class="replaceable"><code>initrd</code></em>   --installcd-system <em class="replaceable"><code>vmx-system-image</code></em> </p></div><div class="cmdsynopsis"><p><code class="command">kiwi</code>   --installstick <em class="replaceable"><code>initrd</code></em>   --installstick-system <em class="replaceable"><code>vmx-system-image</code></em> </p></div></div><div class="refsect1" title="Image format conversion"><a name="id323296"></a><h2>Image format conversion</h2><p>
       The KIWI format conversion is useful to perform the creation of
 	  another image output format like vmdk for VMware or ovf the open
       virtual machine format. Along with the conversion KIWI also creates
       the virtual machine configuration according to the format if
       there is a machine section specified in the XML description
-    </p><div class="cmdsynopsis"><p><code class="command">kiwi</code>   --convert <em class="replaceable"><code>systemImage</code></em>  [--format <em class="replaceable"><code>vmdk|ovf|qcow2</code></em>]</p></div></div><div class="refsect1" title="Testsuite"><a name="id2557233"></a><h2>Testsuite</h2><p>
+    </p><div class="cmdsynopsis"><p><code class="command">kiwi</code>   --convert <em class="replaceable"><code>systemImage</code></em>  [--format <em class="replaceable"><code>vmdk|ovf|qcow2</code></em>]</p></div></div><div class="refsect1" title="Testsuite"><a name="id323337"></a><h2>Testsuite</h2><p>
       The KIWI test suite is useful to perform basic quality checks on
       the image root directory. The test cases are stored in subdirectories
       below <code class="filename">/usr/share/kiwi/tests</code>.
-    </p><div class="cmdsynopsis"><p><code class="command">kiwi</code>   --testsuite <em class="replaceable"><code>image-root</code></em>  [--test <em class="replaceable"><code>name</code></em>...]</p></div></div><div class="refsect1" title="Helper Tools"><a name="id2557279"></a><h2>Helper Tools</h2><p>
+    </p><div class="cmdsynopsis"><p><code class="command">kiwi</code>   --testsuite <em class="replaceable"><code>image-root</code></em>  [--test <em class="replaceable"><code>name</code></em>...]</p></div></div><div class="refsect1" title="Helper Tools"><a name="id323381"></a><h2>Helper Tools</h2><p>
       The helper tools provide optional functions like
       creating a crypted password string for the users section of the
       <code class="filename">config.xml</code> file or signing the image
@@ -2495,7 +2474,7 @@ CONF=CONFIGURATIONS/xorg.conf.test2;/etc/X11/xorg.conf;192.168.100.2;4096,CONFIG
       been set up. If there are SUSE Linux related YaST xml information these are
       validated before config.sh is called too. If you exit config.sh with an
       exit code != 0 kiwi will exit with an error too.
-    </p><div class="example"><a name="id2558671"></a><p class="title"><b>Example A.1. Template for config.sh</b></p><div class="example-contents"><pre class="programlisting">
+    </p><div class="example"><a name="id324680"></a><p class="title"><b>Example A.1. Template for config.sh</b></p><div class="example-contents"><pre class="programlisting">
 #======================================
 # Functions...
 #--------------------------------------
@@ -2591,7 +2570,7 @@ exit</pre></div></div><br class="example-break"></div><div class="refsect1" titl
             Call all postin scriptlets which among other things activates
             all required default services using suseInsertService
           </p></dd><dt><span class="term">[<span class="optional">suseActivateServices</span>]</span></dt><dd><p>
-            Check all services in <code class="filename">/etc/init.d/</code><a class="indexterm" name="id2559252"></a> and activate them
+            Check all services in <code class="filename">/etc/init.d/</code><a class="indexterm" name="id325214"></a> and activate them
             by calling suseInsertService
           </p></dd><dt><span class="term">[<span class="optional">suseCloneRunlevel {runlevel}</span>]</span></dt><dd><p>
             Clone the given runlevel to work in the same way
@@ -2629,7 +2608,7 @@ exit</pre></div></div><br class="example-break"></div><div class="refsect1" titl
 			in <code class="filename">config.xml</code>
           </p></dd><dt><span class="term">[<span class="optional">$kiwi_delete</span>]</span></dt><dd><p>
             A list of all packages which are part of the packages section
-            with <code class="sgmltag-attribute">type</code><a class="indexterm" name="id2559465"></a>="<code class="sgmltag-attvalue">delete</code>" in <code class="filename">config.xml</code>
+            with <code class="sgmltag-attribute">type</code><a class="indexterm" name="id325409"></a>="<code class="sgmltag-attvalue">delete</code>" in <code class="filename">config.xml</code>
           </p></dd><dt><span class="term">[<span class="optional">$kiwi_drivers</span>]</span></dt><dd><p>
             A comma seperated list of the driver entries as listed in the
             drivers section of the <code class="filename">config.xml</code>. Similar variables exists for
@@ -2665,7 +2644,7 @@ exit</pre></div></div><br class="example-break"></div><div class="refsect1" titl
       image types from one previosly prepared tree one needs to take into account
       that images.sh can be called more than one time. If you exit images.sh
       with an exit code != 0 kiwi will exit with an error too.
-    </p><div class="example"><a name="id2559772"></a><p class="title"><b>Example A.2. Template for images.sh</b></p><div class="example-contents"><pre class="programlisting">#======================================
+    </p><div class="example"><a name="id325700"></a><p class="title"><b>Example A.2. Template for images.sh</b></p><div class="example-contents"><pre class="programlisting">#======================================
 # Functions...
 #--------------------------------------
 test -f /.kconfig &amp;&amp; . /.kconfig
@@ -2696,7 +2675,7 @@ exit</pre></div></div><br class="example-break"></div><div class="refsect1" titl
           </p></dd><dt><span class="term">[<span class="optional">baseGetProfilesUsed</span>]</span></dt><dd><p>
             Return the name(s) of profiles used to build this image
           </p></dd><dt><span class="term">[<span class="optional">baseGetPackagesForDeletion</span>]</span></dt><dd><p>
-            Return the list of packages setup in the packages <code class="sgmltag-attribute">type</code><a class="indexterm" name="id2559901"></a>="<code class="sgmltag-attvalue">delete</code>"
+            Return the list of packages setup in the packages <code class="sgmltag-attribute">type</code><a class="indexterm" name="id325814"></a>="<code class="sgmltag-attvalue">delete</code>"
             section of the <code class="filename">config.xml</code> used to build this image
           </p></dd><dt><span class="term">[<span class="optional">baseSetupOEMPartition</span>]</span></dt><dd><p>
              Writes the file <code class="filename">/config.oempartition</code> depending on the following
@@ -2746,7 +2725,7 @@ exit</pre></div></div><br class="example-break"></div><div class="refsect1" titl
             The contents of the timezone setup as done in <code class="filename">config.xml</code>
           </p></dd><dt><span class="term">[<span class="optional">$kiwi_delete</span>]</span></dt><dd><p>
             A list of all packages which are part of the packages section
-            with <code class="sgmltag-attribute">type</code><a class="indexterm" name="id2560215"></a>="<code class="sgmltag-attvalue">delete</code>" in <code class="filename">config.xml</code>
+            with <code class="sgmltag-attribute">type</code><a class="indexterm" name="id326106"></a>="<code class="sgmltag-attvalue">delete</code>" in <code class="filename">config.xml</code>
           </p></dd><dt><span class="term">[<span class="optional">$kiwi_profiles</span>]</span></dt><dd><p>
             A list of profiles used to build this image
           </p></dd><dt><span class="term">[<span class="optional">$kiwi_drivers</span>]</span></dt><dd><p>
@@ -2770,7 +2749,7 @@ exit</pre></div></div><br class="example-break"></div><div class="refsect1" titl
     </p><p>
       The file is sourced by a Perl process and thus Perl compatible syntax
       for the supported variable sttings is required.
-    </p><div class="example"><a name="id2560428"></a><p class="title"><b>Example A.3. Template for .kiwi.rc</b></p><div class="example-contents"><pre class="screen">$BasePath='/usr/share/kiwi';
+    </p><div class="example"><a name="id326307"></a><p class="title"><b>Example A.3. Template for .kiwi.rc</b></p><div class="example-contents"><pre class="screen">$BasePath='/usr/share/kiwi';
 $Gzip='bzip2';
 $LogServerPort='4455';
 $System='/usr/share/kiwi/image';</pre></div></div><br class="example-break"></div><div class="refsect1" title="Supported resource settings"><a name="kiwi.kiwirc.settings"></a><h2>Supported resource settings</h2><p>
