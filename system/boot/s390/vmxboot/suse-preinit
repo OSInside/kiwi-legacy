@@ -49,7 +49,17 @@ updateMTAB
 createFramebufferDevices
 
 #======================================
-# 6) create /etc/ImagePackages
+# 6) check preinit services
+#--------------------------------------
+if isVirtioDevice;then
+	runPreinitServices virtio
+fi
+if isDASDDevice;then
+	runPreinitServices dasd
+fi
+
+#======================================
+# 7) create /etc/ImagePackages
 #--------------------------------------
 if [ -x /bin/rpm ];then
 	Echo "Creating initial image package info file"
@@ -57,14 +67,14 @@ if [ -x /bin/rpm ];then
 fi
 
 #======================================
-# 7) create initrd on diskful
+# 8) create initrd on diskful
 #--------------------------------------
 if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ]; then
 	setupSUSEInitrd
 fi
 
 #======================================
-# 8) Check FAT requires on syslinux
+# 9) Check FAT requires on syslinux
 #--------------------------------------
 if [ "$loader" = "syslinux" ] || [ "$loader" = "extlinux" ];then
 	# /.../
@@ -91,14 +101,14 @@ if [ "$loader" = "syslinux" ] || [ "$loader" = "extlinux" ];then
 fi
 
 #======================================
-# 9) Install boot loader if ok
+# 10) Install boot loader if ok
 #--------------------------------------
 if [ $bootLoaderOK = 1 ];then
 	installBootLoader
 fi
 
 #======================================
-# 10) kill udev
+# 11) kill udev
 #--------------------------------------
 udevSystemStop
 umountSystemFilesystems

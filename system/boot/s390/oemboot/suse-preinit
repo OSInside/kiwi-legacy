@@ -49,7 +49,17 @@ updateMTAB
 createFramebufferDevices
 
 #======================================
-# 6) create initrd on diskful
+# 6) check preinit services
+#--------------------------------------
+if isVirtioDevice;then
+	runPreinitServices virtio
+fi
+if isDASDDevice;then
+	runPreinitServices dasd
+fi
+
+#======================================
+# 7) create initrd on diskful
 #--------------------------------------
 if \
 	[ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ] && \
@@ -67,7 +77,7 @@ else
 fi
 
 #======================================
-# 7) Check FAT requires on syslinux
+# 8) Check FAT requires on syslinux
 #--------------------------------------
 if [ "$loader" = "syslinux" ];then
 	# /.../
@@ -94,14 +104,14 @@ if [ "$loader" = "syslinux" ];then
 fi
 
 #======================================
-# 8) Install boot loader if ok
+# 9) Install boot loader if ok
 #--------------------------------------
 if [ $bootLoaderOK = 1 ];then
 	installBootLoader
 fi
 
 #======================================
-# 9) copy recovery related files
+# 10) copy recovery related files
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ] && [ ! -z "$OEM_RECOVERY" ];then
 	IFS=$IFS_ORIG
@@ -136,7 +146,7 @@ if [ "$LOCAL_BOOT" = "no" ] && [ ! -z "$OEM_RECOVERY" ];then
 fi
 
 #======================================
-# 10) create /etc/ImagePackages
+# 11) create /etc/ImagePackages
 #--------------------------------------
 if [ "$LOCAL_BOOT" = "no" ];then
 	if [ -x /bin/rpm ];then
@@ -146,7 +156,7 @@ if [ "$LOCAL_BOOT" = "no" ];then
 fi
 
 #======================================
-# 11) kill udev
+# 12) kill udev
 #--------------------------------------
 udevSystemStop
 umountSystemFilesystems

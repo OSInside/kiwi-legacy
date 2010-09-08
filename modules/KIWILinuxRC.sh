@@ -2972,7 +2972,7 @@ function searchBusIDBootDevice {
 			"Can't find disk with ID: $busid" \
 		"reboot"
 	fi
-	echo 1 > $dlink/online
+	dasd_configure $busid 1 0
 	lsdasd $busid | tail -n 1 | while read id status device rest;do
 		echo "/dev/$device" > /tmp/biosBootDevice
 	done
@@ -3100,7 +3100,7 @@ function searchVolumeGroup {
 	# /dev/$VGROUP/LVRoot and/or /dev/$VGROUP/LVComp
 	# return zero on success
 	# ----
-	if [ ! "$kiwi_lvm" -eq "true" ];then
+	if [ ! "$kiwi_lvm" = "true" ];then
 		return 1
 	fi
 	Echo "Searching for $VGROUP volume group..."
@@ -6141,6 +6141,41 @@ function setupBootPartition {
 	mkdir  /mnt/boot
 	mount --bind \
 		/mnt/$mpoint/boot /mnt/boot
+}
+#======================================
+# isVirtioDevice
+#--------------------------------------
+function isVirtioDevice {
+	if echo $imageDiskDevice | grep -q vda;then
+		return 0
+	fi
+	return 1
+}
+#======================================
+# isDASDDevice
+#--------------------------------------
+function isDASDDevice {
+	if echo $imageDiskDevice | grep -q dasd;then
+		return 0
+	fi
+	return 1
+}
+#======================================
+# runPreinitServices
+#--------------------------------------
+function runPreinitServices {
+	# /.../
+	# run the .sh scripts in /etc/init.d/kiwi while
+	# inside the preinit stage of the kiwi boot process
+	# ----
+	local service=/etc/init.d/kiwi/$1
+	if [ ! -d $service ];then
+		Echo "kiwi service $service not found... skipped"
+		return
+	fi
+	for script in $service/*.sh;do
+		test -e $script && bash $script
+	done
 }
 #======================================
 # initialize
