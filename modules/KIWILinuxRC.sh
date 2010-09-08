@@ -2560,9 +2560,11 @@ function probeUSB {
 			modprobe $i &>/dev/null
 		done
 	fi
-	stdevs=$(ls -1 /sys/bus/usb/devices/ | wc -l)
-	if [ $stdevs -gt 0 ];then
-		export HAVE_USB="yes"
+	if [ -e /sys/bus/usb/devices ];then
+		stdevs=$(ls -1 /sys/bus/usb/devices/ | wc -l)
+		if [ $stdevs -gt 0 ];then
+			export HAVE_USB="yes"
+		fi
 	fi
 	waitForUSBDeviceScan
 }
@@ -6174,7 +6176,7 @@ function runPreinitServices {
 		return
 	fi
 	for script in $service/*.sh;do
-		test -e $script && bash $script
+		test -e $script && bash -x $script
 	done
 }
 #======================================
