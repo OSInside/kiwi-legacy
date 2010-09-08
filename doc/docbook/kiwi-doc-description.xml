@@ -16,7 +16,7 @@
     <title>Image Description Directory</title>
     <mediaobject>
       <imageobject role="fo">
-        <imagedata fileref="images/description.png"/>
+        <imagedata fileref="images/description.png" width="40%"/>
       </imageobject>
       <imageobject role="html">
         <imagedata fileref="images/description.png"/>

@@ -116,40 +116,38 @@
         <command>ec2-describe-keypairs</command>. </para>
 
     <para>We are almost done now but to be able to run an instance it’s
-      required to select an appropriate AKI ID from the <emphasis>Amazon
-        Kernel Image IDs</emphasis> table below. For this host,
+      required to select an appropriate AKI ID from the <xref 
+        linkend="tab.ec2.kernel-image-ids" xrefstyle="select:title"/>  
+      table below. For this host,
         <emphasis>aki-407d9529</emphasis> is being chosen, because we
       are bundling an AMI representing a virtual disk with PVGrub. If
       the table below is outdated just check the current ID list at
       Amazon directly </para>
 
-    <informaltable>
-      <tr>
-        <th><para>AKI</para></th>
-        <th><para>Name</para></th>
-      </tr>
-      <tr>
-        <td>
-          <para>aki-407d9529 </para>
-        </td>
-        <td>
-          <para>
-            <filename>ec2-public-images/pv-grub-hd0-V1.01-i386.gz.manifest.xml</filename>
-          </para>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <para>aki-427d952b </para>
-        </td>
-        <td>
-          <para>
-            <filename>ec2-public-images/pv-grub-hd0-V1.01-x86_64.gz.manifest.xml</filename>
-          </para>
-        </td>
-      </tr>
-    </informaltable>
-
+    <table id="tab.ec2.kernel-image-ids">
+      <title>Amazon Kernel Image IDs</title>
+      <tgroup cols="2">
+        <colspec colwidth="1*"/>
+        <colspec colwidth="4*"/>
+        <thead>
+          <row>
+            <entry>AKI</entry>
+            <entry>Name</entry>
+          </row>
+        </thead>
+        <tbody>
+          <row>
+            <entry>aki-407d9529</entry>
+            <entry><filename>ec2-public-images/pv-grub-hd0-V1.01-i386.gz.manifest.xml</filename></entry>
+          </row>
+          <row>
+            <entry>aki-427d952b</entry>
+            <entry><filename>ec2-public-images/pv-grub-hd0-V1.01-x86_64.gz.manifest.xml</filename></entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </table>
+    
     <para>Fire up your new ec2 instance with the following command: </para>
 
     <screen><command>ec2-run-instances</command> ami-... \

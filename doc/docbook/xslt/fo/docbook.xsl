@@ -12,13 +12,25 @@
   <xsl:param name="body.start.indent">0pt</xsl:param>
   <xsl:param name="fop1.extensions" select="1"/>
 
-  <!-- Format variablelists lists as blocks? -->
+  <!-- Format variablelists lists as blocks?                  -->
   <xsl:param name="variablelist.as.blocks" select="1"/>
 
-  <!-- Use blocks for glosslists? -->
+  <!-- Use blocks for glosslists?                             -->
   <xsl:param name="glosslist.as.blocks" select="1"/>
 
   <xsl:param name="shade.verbatim" select="1"/>
+
+ <!-- Are sections enumerated?                                -->
+ <xsl:param name="section.autolabel" select="1"/>
+ <!-- Do section labels include the component label?          -->
+ <xsl:param name="section.label.includes.component.label" select="1"/>
+
+ <!-- Output NAME header before refnames?                     -->
+ <xsl:param name="refentry.generate.name" select="0"/>
+
+ <!-- Output title before refnames?                           --> 
+ <xsl:param name="refentry.generate.title" select="1"/>
+
 
   <xsl:attribute-set name="shade.verbatim.style">
     <xsl:attribute name="background-color">#E0E0E0</xsl:attribute>
@@ -40,6 +52,9 @@
       <xsl:value-of select="$body.font.master * 0.8"/>
       <xsl:text>pt</xsl:text>
     </xsl:attribute>
+  </xsl:attribute-set>
+  <xsl:attribute-set name="verbatim.properties">
+    <xsl:attribute name="wrap-option">wrap</xsl:attribute>
   </xsl:attribute-set>
   
   <!--
@@ -180,7 +195,6 @@
     </fo:block>
   </xsl:template>
 
-
   <xsl:template match="author" mode="titlepage.mode">
     <fo:block xsl:use-attribute-sets="book.titlepage.recto.style"
       font-size="17.28pt" space-before="10.8pt"
@@ -247,6 +261,54 @@
           select="./affiliation"/>
       </xsl:otherwise>
     </xsl:choose>-->
+  </xsl:template>
+
+  <xsl:template name="toc.line">
+    <xsl:param name="toc-context" select="NOTANODE"/>
+    <xsl:variable name="id">
+      <xsl:call-template name="object.id"/>
+    </xsl:variable>
+
+    <xsl:variable name="label">
+      <xsl:apply-templates select="." mode="label.markup"/>
+    </xsl:variable>
+
+    <!-- FOP HACK: If space-before would work, this code would not be
+      necessary
+    -->
+    <xsl:if test="$fop1.extensions != 0 and 
+                  (self::appendix or self::chapter or self::index or
+                   self::glossary or self::bibliography)">
+      <fo:block font-size="0.75em">&#xa0;</fo:block>
+    </xsl:if>
+    
+    <fo:block xsl:use-attribute-sets="toc.line.properties">
+      <fo:inline keep-with-next.within-line="always" >
+        <fo:basic-link internal-destination="{$id}">
+          <xsl:if test="self::appendix or self::chapter or self::index or
+                   self::glossary or self::bibliography">
+            <xsl:attribute name="font-weight">bold</xsl:attribute>
+            <xsl:attribute name="space-before">1em</xsl:attribute>
+          </xsl:if>
+
+          <xsl:if test="$label != ''">
+            <xsl:copy-of select="$label"/>
+            <xsl:value-of select="$autotoc.label.separator"/>
+          </xsl:if>
+          <xsl:apply-templates select="." mode="title.markup"/>
+        </fo:basic-link>
+      </fo:inline>
+      <fo:inline keep-together.within-line="always">
+        <xsl:text> </xsl:text>
+        <fo:leader leader-pattern="dots" leader-pattern-width="3pt"
+          leader-alignment="reference-area"
+          keep-with-next.within-line="always"/>
+        <xsl:text> </xsl:text>
+        <fo:basic-link internal-destination="{$id}">
+          <fo:page-number-citation ref-id="{$id}"/>
+        </fo:basic-link>
+      </fo:inline>
+    </fo:block>
   </xsl:template>
 
 </xsl:stylesheet>
