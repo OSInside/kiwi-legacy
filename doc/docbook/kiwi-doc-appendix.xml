@@ -2,7 +2,7 @@
                          "http://www.docbook.org/xml/4.5/docbookx.dtd">
 
 <appendix id="appendix">
-  <title>Appendix—KIWI Man Pages</title>
+  <title>KIWI Man Pages</title>
   <para>The following pages will show you the man page of KIWI and the
     functions which can be used within <command>config.sh</command> and
       <command>index.sh</command>

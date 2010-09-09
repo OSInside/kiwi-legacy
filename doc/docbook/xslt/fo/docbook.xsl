@@ -6,10 +6,15 @@
   <xsl:import
     href="http://docbook.sourceforge.net/release/xsl/current/fo/docbook.xsl"/>
 
+  <!-- Select the paper type                                  -->
   <xsl:param name="paper.type">A4</xsl:param>
+  <!-- Is the document to be printed double sided?            -->
   <xsl:param name="double.sided">1</xsl:param>
-
+  
+  <!-- The start-indent for the body text                     -->
   <xsl:param name="body.start.indent">0pt</xsl:param>
+  
+  <!--  Enable extensions for FOP version 0.90 and later      -->
   <xsl:param name="fop1.extensions" select="1"/>
 
   <!-- Format variablelists lists as blocks?                  -->
@@ -18,12 +23,26 @@
   <!-- Use blocks for glosslists?                             -->
   <xsl:param name="glosslist.as.blocks" select="1"/>
 
+  <!-- Should verbatim environments be shaded?                -->
   <xsl:param name="shade.verbatim" select="1"/>
 
  <!-- Are sections enumerated?                                -->
  <xsl:param name="section.autolabel" select="1"/>
  <!-- Do section labels include the component label?          -->
  <xsl:param name="section.label.includes.component.label" select="1"/>
+ 
+ <!-- How deep should recursive sections appear in the TOC?   -->
+ <xsl:param name="toc.section.depth" select="1"/>
+ <xsl:param name="generate.toc">
+appendix  toc,title
+article/appendix  nop
+/article  toc,title
+book      toc,title
+chapter   toc,title
+part      toc,title
+/preface  toc,title
+reference toc,title
+ </xsl:param>
 
  <!-- Output NAME header before refnames?                     -->
  <xsl:param name="refentry.generate.name" select="0"/>
@@ -57,10 +76,16 @@
     <xsl:attribute name="wrap-option">wrap</xsl:attribute>
   </xsl:attribute-set>
   
-  <!--
-    <xsl:param name="toc.section.depth" select="3"/>
-    <xsl:param name="toc.max.depth" select="4"/>
-  -->
+  <xsl:attribute-set name="chapter.titlepage.recto.style">
+    <xsl:attribute name="font-size">24.8832pt</xsl:attribute>
+    <xsl:attribute name="font-weight">bold</xsl:attribute>
+    <xsl:attribute name="font-family"><xsl:value-of select="$title.font.family"/></xsl:attribute>
+  </xsl:attribute-set>
+  
+  <xsl:attribute-set name="appendix.titlepage.recto.style"
+    use-attribute-sets="chapter.titlepage.recto.style"/>
+  
+  
   
   <xsl:param name="body.font.family">'Charis SIL'</xsl:param>
   <xsl:param name="title.font.family">'Charis SIL'</xsl:param>
@@ -308,6 +333,51 @@
           <fo:page-number-citation ref-id="{$id}"/>
         </fo:basic-link>
       </fo:inline>
+    </fo:block>
+  </xsl:template>
+
+  <xsl:template name="chapappendix.title">
+    <xsl:param name="node" select="."/>
+    <xsl:variable name="nodepi" select="$node"/>
+    <xsl:variable name="id">
+      <xsl:call-template name="object.id">
+        <xsl:with-param name="object" select="$node"/>
+      </xsl:call-template>
+    </xsl:variable>
+
+    <fo:block>
+      <xsl:choose>
+        <xsl:when test="$fop1.extensions != 0">
+          <xsl:attribute name="margin-top">4em</xsl:attribute>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:attribute name="space-before">4em</xsl:attribute>
+        </xsl:otherwise>
+      </xsl:choose>
+      
+      <xsl:apply-templates select="$nodepi" mode="label.markup"/>
+      <fo:leader leader-length=".75em" leader-pattern="space"/>
+      <xsl:apply-templates select="$nodepi" mode="title.markup"/>
+    </fo:block>
+  </xsl:template>
+  
+  <xsl:template match="title" mode="chapter.titlepage.recto.auto.mode">
+    <fo:block xsl:use-attribute-sets="chapter.titlepage.recto.style"
+      font-family="{$title.font.family}">
+      <xsl:call-template name="chapappendix.title">
+        <xsl:with-param name="node"
+          select="ancestor-or-self::chapter[1]"/>
+      </xsl:call-template>
+    </fo:block>
+  </xsl:template>
+
+  <xsl:template match="title" mode="appendix.titlepage.recto.auto.mode">
+    <fo:block xsl:use-attribute-sets="appendix.titlepage.recto.style"
+      font-family="{$title.font.family}">
+      <xsl:call-template name="chapappendix.title">
+        <xsl:with-param name="node"
+          select="ancestor-or-self::appendix[1]"/>
+      </xsl:call-template>
     </fo:block>
   </xsl:template>
 
