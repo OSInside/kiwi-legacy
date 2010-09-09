@@ -25,3 +25,13 @@ Build instructions for local build
        --add-repo /usr/share/kiwi/repo/suse-repo/suse-sle11-repo/ \
        --add-repotype rpm-dir \
        -d /tmp/myimage --type vmx
+
+
+Kernel paramters to configure the image:
+========================================
+busid=0.0.0530
+qeth_port=VSWL2
+qeth_read=0.0.0800
+qeth_write=0.0.0801
+qeth_ctrl=0.0.0802
+qeth_up=1
