@@ -2206,6 +2206,13 @@ sub setupBootDisk {
 			$this -> cleanLoop ();
 			return undef;
 		}
+		if ($haveDiskDevice) {
+			#==========================================
+			# fill disk device with zero bytes
+			#------------------------------------------
+			qxx ("dd if=/dev/zero of=$loopdir/abc 2>&1");
+			qxx ("rm -f $loopdir/abc");
+		}
 		$kiwi -> done();
 		#==========================================
 		# Umount system image partition
@@ -2376,6 +2383,21 @@ sub setupBootDisk {
 	# cleanup temp directory
 	#------------------------------------------
 	qxx ("rm -rf $tmpdir");
+	if ($haveDiskDevice) {
+		#==========================================
+		# create image file from disk device
+		#------------------------------------------
+		$kiwi -> info ("Dumping image file from $this->{loop}...");
+		$status = qxx ("dd if=$this->{loop} of=$diskname bs=32k 2>&1");
+		$result = $? >> 8;
+		if ($result != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error ("Image dump failed: $status");
+			$kiwi -> failed ();
+			return undef;
+		}
+		$kiwi -> done();
+	}
 	#==========================================
 	# Create image described by given format
 	#------------------------------------------
