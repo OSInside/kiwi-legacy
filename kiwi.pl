@@ -2615,6 +2615,47 @@ sub mount {
 		return undef;
 	}
 	#==========================================
+	# Check for DISK file
+	#------------------------------------------
+	if (-f $source) {
+		my $boot = "'boot sector'";
+		my $null = "/dev/null";
+		$status= qxx (
+			"dd if=$source bs=512 count=1 2>$null|file - | grep -q $boot"
+		);
+		$result= $? >> 8;
+		if ($result == 0) {			
+			$status = qxx ("/sbin/losetup -s -f $source 2>&1"); chomp $status;
+			$result = $? >> 8;
+			if ($result != 0) {
+				$kiwi -> error  (
+					"Couldn't loop bind disk file: $status"
+				);
+				$kiwi -> failed (); umount();
+				return undef;
+			}
+			my $loop = $status;
+			push @UmountStack,"losetup -d $loop";
+			$status = qxx ("kpartx -a $loop 2>&1");
+			$result = $? >> 8;
+			if ($result != 0) {
+				$kiwi -> error (
+					"Couldn't loop bind disk partition(s): $status"
+				);
+				$kiwi -> failed (); umount();
+				return undef;
+			}
+			push @UmountStack,"kpartx -d $loop";
+			$loop =~ s/\/dev\///;
+			$source = "/dev/mapper/".$loop."p1";
+			if (! -b $source) {
+				$kiwi -> error ("No such block device $source");
+				$kiwi -> failed (); umount();
+				return undef;
+			}
+		}
+	}
+	#==========================================
 	# Check for LUKS extension
 	#------------------------------------------
 	if ($type eq "luks") {
@@ -2623,7 +2664,7 @@ sub mount {
 			$result = $? >> 8;
 			if ($result != 0) {
 				$kiwi -> error  ("Couldn't loop bind logical extend: $status");
-				$kiwi -> failed ();
+				$kiwi -> failed (); umount();
 				return undef;
 			}
 			$source = $status;
@@ -2639,7 +2680,7 @@ sub mount {
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> error  ("Couldn't open luks device: $status");
-			$kiwi -> failed ();
+			$kiwi -> failed (); umount();
 			return undef;
 		}
 		$source = "/dev/mapper/luks-".$salt;
@@ -2653,7 +2694,7 @@ sub mount {
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> error ("Failed to loop mount $source to: $dest: $status");
-			$kiwi -> failed ();
+			$kiwi -> failed (); umount();
 			return undef;
 		}
 	} else {
@@ -2670,7 +2711,7 @@ sub mount {
 		}
 		if ($result != 0) {
 			$kiwi -> error ("Failed to mount $source to: $dest: $status");
-			$kiwi -> failed ();
+			$kiwi -> failed (); umount();
 			return undef;
 		}
 	}
@@ -2684,7 +2725,7 @@ sub mount {
 		$result = $? >> 8;
 		if ($result != 0) {
 			$kiwi -> error ("Failed to loop mount $source to: $dest: $status");
-			$kiwi -> failed ();
+			$kiwi -> failed (); umount();
 			return undef;
 		}
 		push @UmountStack,"umount $dest";
@@ -2807,7 +2848,9 @@ sub checkFileSystem {
 					last SWITCH;
 				};
 				# unknown filesystem type check clicfs...
-				$data = qxx ("dd if=$fs bs=128k count=1 2>/dev/null | grep -q CLIC");
+				$data = qxx (
+					"dd if=$fs bs=128k count=1 2>/dev/null | grep -q CLIC"
+				);
 				$code = $? >> 8;
 				if ($code == 0) {
 					$type = "clicfs";
