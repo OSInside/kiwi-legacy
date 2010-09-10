@@ -4,7 +4,10 @@
 
 <chapter id="chap.maintenance">
   <title>Maintenance of Operating System Images</title>
-
+  <indexterm>
+      <primary>KIWI</primary>
+      <secondary>maintenance</secondary>
+    </indexterm>
   <para>Creating an image often results in an appliance solution for a
     customer and gives you the freedom of a working solution at that
     time. But software develops and you don’t want your solution to
@@ -48,6 +51,10 @@
     will leave the system in an unversioned condition. Nobody knows what
     has changed since the very first preparation of this image. So in
     short:</para>
+  <indexterm>
+      <primary>KIWI</primary>
+      <secondary>physical extends</secondary>
+    </indexterm>
   <blockquote>
     <para>Dont’t modify physical extends manually!</para>
   </blockquote>

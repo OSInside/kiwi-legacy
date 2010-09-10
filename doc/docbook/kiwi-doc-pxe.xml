@@ -4,6 +4,17 @@
 
 <chapter id="chap.pxe">
   <title>PXE Image—Thin Clients</title>
+  <indexterm>
+    <primary>KIWI</primary>
+    <secondary>PXE image</secondary>
+  </indexterm>
+  <indexterm>
+    <primary>images</primary>
+    <secondary>PXE</secondary>
+  </indexterm>
+  <indexterm>
+    <primary>PXE images</primary>
+  </indexterm>
   <para>A PXE image consists of a boot image and a system image like all
     other image types too. But with a PXE image the image files are
     available seperately and needs to be copied at specific locations of
@@ -634,6 +645,10 @@ UNIONFS_CONFIG=/dev/ram1,nfs,aufs # write to RAM</screen>
 
     <sect2 id="sec.pxe.ram-only-image">
       <title>RAM Only Image</title>
+      <indexterm>
+        <primary>KIWI</primary>
+        <secondary>RAM only image</secondary>
+      </indexterm>
       <para>If there is no local storage and no remote root mount setup
         the image can be stored into the main memory of the client.
         Please be aware that there should be still enough RAM space
@@ -659,6 +674,10 @@ UNIONFS_CONFIG=/dev/ram1,nfs,aufs # write to RAM</screen>
 
     <sect2 id="sec.pxe.union-image">
       <title>Union Image</title>
+      <indexterm>
+        <primary>KIWI</primary>
+        <secondary>union image</secondary>
+      </indexterm>
       <para>As used in the suse-pxe-client example it is possible to
         make use of the aufs or unionfs overlay filesystems to combine
         two filesystems into one. In case of thin clients there is often
@@ -681,6 +700,10 @@ KIWI_INITRD=/boot/initrd</screen>
 
     <sect2 id="sec.pxe.split-image">
       <title>Split Image</title>
+      <indexterm>
+        <primary>KIWI</primary>
+        <secondary>split image</secondary>
+      </indexterm>
       <para>As an alternative to the <varname>UNIONFS_CONFIG</varname>
         method it is also possible to create a split image and combine
         the two portions with the <varname>COMBINED_IMAGE</varname>

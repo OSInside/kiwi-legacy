@@ -4,7 +4,10 @@
 
 <chapter id="chap.migration">
   <title>System to Image Migration</title>
-
+  <indexterm>
+    <primary>KIWI</primary>
+    <secondary>imge migration</secondary>
+  </indexterm>
   <para>KIWI provides an experimental module which allows you to turn
     your running system into an image description. This migration allows
     you to clone your currently running system into an image. The
@@ -61,6 +64,13 @@
 
   <sect1 id="sec.migrate.watch-overlay">
     <title>Watch the Overlay and Unpackaged Files</title>
+    <indexterm>
+      <primary>KIWI</primary>
+      <secondary>overlay files</secondary>
+    </indexterm>
+    <indexterm>
+      <primary>overlay files</primary>
+    </indexterm>
     <para>Files which has been modified but belong to a package will be
       automatically copied into the overlay directory below
         <filename>/tmp/mySystem/root</filename>. You should check that
@@ -87,6 +97,13 @@
 
   <sect1 id="sec.migrate.checklist">
     <title>Checklist</title>
+    <indexterm>
+      <primary>KIWI</primary>
+      <secondary>checklist</secondary>
+    </indexterm>
+    <indexterm>
+      <primary>checklist</primary>
+    </indexterm>
     <para> After that you should walk through the following check list </para>
 
     <itemizedlist>

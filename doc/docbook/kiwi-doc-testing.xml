@@ -4,6 +4,13 @@
 
 <chapter id="chap.testing">
   <title>KIWI Testsuite</title>
+  <indexterm>
+    <primary>KIWI</primary>
+    <secondary>testsuite</secondary>
+  </indexterm>
+  <indexterm>
+    <primary>testsuite</primary>
+  </indexterm>
   <para>The KIWI test suite is useful to perform basic quality checks on
     the image root directory. The test cases are stored in
     subdirectories below <filename>/usr/share/kiwi/tests</filename>. To run the testsuite

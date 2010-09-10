@@ -4,6 +4,17 @@
 
 <chapter id="chap.oem">
   <title>OEM Image—Preload Systems</title>
+  <indexterm>
+    <primary>KIWI</primary>
+    <secondary>OEM image</secondary>
+  </indexterm>
+  <indexterm>
+    <primary>images</primary>
+    <secondary>OEM</secondary>
+  </indexterm>
+  <indexterm>
+    <primary>OEM images</primary>
+  </indexterm>
   <para>An OEM image is a virtual disk image representing all partitions
     and bootloader information in the same fashion it exists on a
     physical disk. The image format matches the format of the VMX image
@@ -130,6 +141,10 @@
 
     <sect2 id="sec.oem.lvm">
       <title>LVM Support</title>
+      <indexterm>
+        <primary>KIWI</primary>
+        <secondary>LVM support</secondary>
+      </indexterm>
       <para>KIWI also provides support for LVM (Logical Volume
         Management). In this mode the disk partition table will include
         one lvm partition and one standard ext2 boot partition. KIWI

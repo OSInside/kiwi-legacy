@@ -5,6 +5,10 @@
 
 <refentry id="ref.kiwi.images.sh">
   <refentryinfo>
+    <indexterm>
+      <primary>manpages</primary>
+      <secondary>kiwi::images.sh</secondary>
+    </indexterm>
     <productname>KIWI</productname>
     <!--<productnumber></productnumber>-->
     <date>Created: <?dbtimestamp?></date>

@@ -4,6 +4,17 @@
 
 <chapter id="chap.vmx">
   <title>VMX Image—Virtual Disks</title>
+  <indexterm>
+    <primary>KIWI</primary>
+    <secondary>VMX image</secondary>
+  </indexterm>
+  <indexterm>
+    <primary>images</primary>
+    <secondary>VMX</secondary>
+  </indexterm>
+  <indexterm>
+    <primary>VMX images</primary>
+  </indexterm>
   <para>A VMX image is a virtual disk image for use in full
     virtualisation systems like Qemu or VMware. The image is a file
     containing the system represented by the configured packages in
@@ -57,6 +68,13 @@
 
     <table id="tab.vmx.supported-disk-formats">
       <title>Supported Virtual Disk Formats</title>
+      <indexterm>
+        <primary>KIWI</primary>
+        <secondary>virtual disk formats</secondary>
+      </indexterm>
+      <indexterm>
+        <primary>virtual disk formats</primary>
+      </indexterm>
       <tgroup cols="2">
         <colspec colwidth="1*"/>
         <colspec colwidth="3*"/>
@@ -85,6 +103,13 @@
 
     <sect2 id="sec.vmx.vmware-support">
       <title>VMware support</title>
+      <indexterm>
+        <primary>KIWI</primary>
+        <secondary>VMware</secondary>
+      </indexterm>
+      <indexterm>
+        <primary>VMware</primary>
+      </indexterm>
       <para>A VMware image is accompanied by a guest configuration file.
         This file includes information about the hardware to be
         represented to the guest image by the VMware virtualization
@@ -141,6 +166,10 @@
 
     <sect2 id="sec.vmx.lvm">
       <title>LVM Support</title>
+      <indexterm>
+        <primary>KIWI</primary>
+        <secondary>LVM support</secondary>
+      </indexterm>
       <para>KIWI also provides support for LVM (Logical Volume
         Management). In this mode the disk partition table will include
         one lvm partition and one standard <systemitem

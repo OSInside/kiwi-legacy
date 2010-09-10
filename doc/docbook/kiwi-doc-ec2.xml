@@ -4,6 +4,21 @@
 
 <chapter id="chap.ec2">
   <title>EC2 Image—Amazon Elastic Compute Cloud</title>
+  <indexterm>
+    <primary>KIWI</primary>
+    <secondary>EC2 image</secondary>
+  </indexterm>
+  <indexterm>
+    <primary>images</primary>
+    <secondary>EC2</secondary>
+  </indexterm>
+  <indexterm>
+    <primary>Amazon Elastic Comput Cloud</primary>
+    <see>EC2 image</see>
+  </indexterm>
+  <indexterm>
+    <primary>EC2 images</primary>
+  </indexterm>
   <para>The <trademark>Amazon Elastic Compute Cloud</trademark> (Amazon
     EC2) web service provides you with the ability to execute arbitrary
     applications in our computing environment. To use Amazon EC2 you

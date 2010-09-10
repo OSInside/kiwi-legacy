@@ -4,6 +4,10 @@
 
 <chapter id="chap.workflow">
   <title>Basic Workflow</title>
+  <indexterm>
+    <primary>KIWI</primary>
+    <secondary>Workflow</secondary>
+  </indexterm>
   <para>The creation of an image with KIWI is always divided into two
     basic steps: the <emphasis>prepare</emphasis> and the
       <emphasis>create</emphasis> step. The create step requires the
@@ -79,7 +83,6 @@
     </listitem>
   </itemizedlist>
 
-
   <para>After the prepare step has finished successfully, a subsequent
     building of an image file follows or, in KIWI speak, a new packed
     image. The building of an image requires a successfully prepared new
@@ -88,11 +91,18 @@
     and a Xen image from the same prepared root tree. The create step
     executes the following major stages: </para>
 
-
   <itemizedlist>
+    <indexterm>
+      <primary>KIWI</primary>
+      <secondary>stages</secondary>
+    </indexterm>
     <listitem>
       <formalpara>
         <title>Executing User Defined Script images.sh</title>
+        <indexterm>
+          <primary>KIWI</primary>
+          <secondary>user definied scripts</secondary>
+        </indexterm>
         <para>At the beginning of the creation stage the optional script
           named <filename>images.sh</filename> is called. This script
           has no distinctive use case like
@@ -107,6 +117,10 @@
     <listitem>
       <formalpara>
         <title>Creating Requested Image Type</title>
+        <indexterm>
+          <primary>KIWI</primary>
+          <secondary>requested image types</secondary>
+        </indexterm>
         <para>What image type(s) a KIWI image supports depends on what
           types has been setup in the main image description file
             <filename>config.xml</filename>. At least one type must be
@@ -134,6 +148,13 @@
 
   <sect1 id="sec.workflow.bootprocess">
     <title>Boot Process</title>
+    <indexterm>
+      <primary>KIWI</primary>
+      <secondary>boot process</secondary>
+    </indexterm>
+    <indexterm>
+      <primary>boot process</primary>
+    </indexterm>
     <para>Todays Linux systems are using a special boot image to control
       the boot process. This boot image is called initrd. The Linux
       kernel loads this compressed cpio initial ramdisk into RAM and
@@ -171,6 +192,13 @@
 
   <sect1 id="sec.workflow.bootparameters">
     <title>Boot Parameters</title>
+    <indexterm>
+      <primary>KIWI</primary>
+      <secondary>boot parameters</secondary>
+    </indexterm>
+    <indexterm>
+      <primary>boot parameters</primary>
+    </indexterm>
     <para> When booting an image created by KIWI using one of the
       provided boot images there are some useful kernel parameters
       mainly meant for debugging purposes. Note the following parameters
@@ -210,6 +238,14 @@
 
   <sect1 id="sec.workflow.common-specific-code">
     <title>Common and Distribution Specific Code</title>
+    <indexterm>
+      <primary>KIWI</primary>
+      <secondary>common code</secondary>
+    </indexterm>
+    <indexterm>
+      <primary>KIWI</primary>
+      <secondary>distribution specific code</secondary>
+    </indexterm>
     <para> KIWI has been developed to be usable for any Linux
       distribution. However, each Linux distribution is different. On
       one hand, KIWI provides common code </para>

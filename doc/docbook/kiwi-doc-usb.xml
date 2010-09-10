@@ -4,6 +4,17 @@
 
 <chapter id="chap.usb">
   <title>USB Image—Live-Stick System</title>
+  <indexterm>
+    <primary>KIWI</primary>
+    <secondary>USB image</secondary>
+  </indexterm>
+  <indexterm>
+    <primary>images</primary>
+    <secondary>USB</secondary>
+  </indexterm>
+  <indexterm>
+    <primary>USB images</primary>
+  </indexterm>
   <para>A live USB stick image is a system on USB stick which allows you
     to boot and run from this device without using any other storage
     device of the computer. It is urgently required that the BIOS of the
@@ -123,6 +134,10 @@
 
     <sect2 id="sec.usb.split-stick">
       <title>Split Stick</title>
+      <indexterm>
+        <primary>KIWI</primary>
+        <secondary>split stick</secondary>
+      </indexterm>
       <para> If there is no overlay filesystem available, it is also
         possible to define a split section in
           <filename>config.xml</filename>. Use the split support to
@@ -149,7 +164,7 @@
         <filename class="directory">/home</filename>, and 
         <filename class="directory">/etc</filename> as writable data. </para>
 
-      <screen> &lt;split&gt;
+      <screen>&lt;split&gt;
   &lt;persistent&gt; 
     <sgmltag class="sgmlcomment"> allow read/write access to: </sgmltag>
     &lt;file name="/var"/&gt; 
@@ -159,7 +174,7 @@
     &lt;file name="/home"/&gt;
     &lt;file name="/home/*"/&gt;
     &lt;/persistent&gt; 
-&lt;/split&gt; </screen>
+&lt;/split&gt;</screen>
 
       <para>If no split section is added the default split section from
           <filename class="directory"
@@ -169,6 +184,17 @@
 
     <sect2 id="sec.usb.lvm">
       <title>LVM Support</title>
+      <indexterm>
+        <primary>KIWI</primary>
+        <secondary>LVM support</secondary>
+      </indexterm>
+      <indexterm>
+        <primary>LVM support</primary>
+      </indexterm>
+      <indexterm>
+        <primary>Logical Volume Manager</primary>
+        <see>LVM support</see>
+      </indexterm>
       <para>KIWI supports LVM, the Logical Volume Manager. In this mode,
         the disk partition table includes one lvm partition and one
         standard ext2 boot partition. KIWI creates the kiwiVG volume

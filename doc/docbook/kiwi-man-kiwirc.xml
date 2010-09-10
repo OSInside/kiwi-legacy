@@ -5,6 +5,10 @@
 
 <refentry id="ref.kiwi.kiwirc">
   <refentryinfo>
+    <indexterm>
+      <primary>manpages</primary>
+      <secondary>kiwi::kiwirc</secondary>
+    </indexterm>
     <productname>>KIWI</productname>
     <!--<productnumber></productnumber>-->
     <date>Created: <?dbtimestamp?></date>

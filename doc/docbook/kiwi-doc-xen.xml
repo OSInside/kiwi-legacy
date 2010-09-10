@@ -4,6 +4,17 @@
 
 <chapter id="chap.xen">
   <title>Xen Image—Paravirtual Systems</title>
+  <indexterm>
+    <primary>KIWI</primary>
+    <secondary>XEN image</secondary>
+  </indexterm>
+  <indexterm>
+    <primary>images</primary>
+    <secondary>XEN</secondary>
+  </indexterm>
+  <indexterm>
+    <primary>XEN image</primary>
+  </indexterm>
   <para>Xen is a free software virtual machine monitor. It allows
     several guest operating systems to be executed on the same computer
     hardware at the same time. </para>

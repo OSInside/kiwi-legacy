@@ -5,6 +5,10 @@
 
 <chapter id="chap.instsourcesetup">
   <title>Installation Source</title>
+  <indexterm>
+    <primary>KIWI</primary>
+    <secondary>installation source</secondary>
+  </indexterm>
   <para>Before you start to use any of the examples provided in the
     following chapters your build system has to have a valid
     installation source for the distribution you are about to create an
@@ -29,6 +33,10 @@
 
   <sect1 id="sec.instsourcesetup.create-local-inst-source">
     <title>Create a Local Installation Source</title>
+    <indexterm>
+      <primary>KIWI</primary>
+      <secondary>local installation source</secondary>
+    </indexterm>
     <para> The following procedure describes how to create a local SUSE
       installation source which is stored below the path <filename
         class="directory">/images/CDs</filename>. If you are using the

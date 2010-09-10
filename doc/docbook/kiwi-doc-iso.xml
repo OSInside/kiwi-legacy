@@ -4,6 +4,17 @@
 
 <chapter id="chap.iso">
   <title>ISO Image—Live Systems</title>
+  <indexterm>
+    <primary>KIWI</primary>
+    <secondary>ISO image</secondary>
+  </indexterm>
+  <indexterm>
+    <primary>images</primary>
+    <secondary>ISO</secondary>
+  </indexterm>
+  <indexterm>
+    <primary>ISO images</primary>
+  </indexterm>
   <para>A live system image is an operating System on CD or DVD. In
     principal one can treat the CD/DVD as the hard disk of the system
     with the restriction that you can’t write data on it. So as soon as
@@ -115,6 +126,14 @@
 
     <sect2 id="sec.iso.split-mode">
       <title>Split mode</title>
+      <indexterm>
+        <primary>KIWI</primary>
+        <secondary>split mode</secondary>
+      </indexterm>
+      <indexterm>
+        <primary>KIWI</primary>
+        <secondary>overlay files</secondary>
+      </indexterm>
       <para>If no overlay filesystem is in use but the image filesystem
         is based on a compressed filesystem KIWI allows to setup which
         files and directories should be writable in a so called split

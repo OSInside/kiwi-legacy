@@ -4,6 +4,10 @@
 
 <chapter id="chap.description">
   <title>KIWI Image Description</title>
+  <indexterm>
+    <primary>KIWI</primary>
+    <secondary>image description</secondary>
+  </indexterm>
   <para>In order to be able to create an image with KIWI a so called
     image description must be created. The image description is
     represented by a directory which has to contain at least one file
@@ -158,6 +162,10 @@
 
   <sect1 id="sec.description.config.xml">
     <title>The config.xml File</title>
+    <indexterm>
+      <primary>KIWI</primary>
+      <secondary>config.xml</secondary>
+    </indexterm>
     <para> The mandatory image definition file is divided into different
       sections which describes information like the image name and type
       as well as the packages and patterns the image should consist of. </para>
@@ -298,8 +306,12 @@
         attributes. The image version must be a three-part version
         number of the format: <emphasis role="bold"
           >Major</emphasis>.<emphasis role="bold"
-          >Minor</emphasis>.<emphasis role="bold">Release</emphasis>. In
-        case of changes to the image description the following rules
+          >Minor</emphasis>.<emphasis role="bold">Release</emphasis>.
+        <indexterm>
+          <primary>KIWI</primary>
+          <secondary>release format</secondary>
+        </indexterm>
+        In case of changes to the image description the following rules
         should apply: </para>
 
       <itemizedlist>
@@ -1274,9 +1286,9 @@
   <sgmltag class="sgmlcomment"> ... </sgmltag>
 &lt;/users&gt;</screen>
 
-      <para>The optional users element lists the users belonging to the
-        group specified with the group attribute. At least one user
-        child element must be specified as part of the users element.
+      <para>The optional <sgmltag>users</sgmltag> element lists the users belonging to the
+        group specified with the <sgmltag class="attribute">group</sgmltag> attribute. At least one user
+        child element must be specified as part of the <sgmltag>users</sgmltag> element.
         Multiple users elements may be specified. </para>
 
       <para>The attributes <sgmltag class="attribute">home</sgmltag>,
@@ -1696,6 +1708,10 @@ $(<command>rpm</command> -q ‘baseGetPackagesForDeletion‘ | <command>grep</co
 
       <sect3 id="sec.descriptions.using-patterns">
         <title>Using Patterns</title>
+        <indexterm>
+          <primary>KIWI</primary>
+          <secondary>patterns</secondary>
+        </indexterm>
         <para> Using a pattern name enhances the package list with a
           number of additional packages belonging to this pattern.
           Support for patterns is SUSE-specific, and available with
@@ -1752,6 +1768,10 @@ $(<command>rpm</command> -q ‘baseGetPackagesForDeletion‘ | <command>grep</co
 
       <sect3 id="sec.description.architecture-restrictions">
         <title>Architecture Restrictions</title>
+        <indexterm>
+          <primary>KIWI</primary>
+          <secondary>architecture restrictions</secondary>
+        </indexterm>
         <para> To restrict a package to a specific architecture, use the
           arch attribute to specify a comma separated list of allowed
           architectures. Such a package is only installed if the build

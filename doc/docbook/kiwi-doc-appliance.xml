@@ -7,6 +7,10 @@
 
   <sect1 id="sec.appliance.history">
     <title>History</title>
+    <indexterm>
+      <primary>KIWI</primary>
+      <secondary>history</secondary>
+    </indexterm>
     <para> Traditionally, many computing functions were written as
       software applications running on top of a general-purpose
       operating system. The consumer (whether home computer user or the
@@ -21,6 +25,10 @@
 
   <sect1 id="sec.appliance.kiwi-model">
     <title>The KIWI Model</title>
+    <indexterm>
+      <primary>KIWI</primary>
+      <secondary>model</secondary>
+    </indexterm>
     <para> With KIWI we started to use a different model. Instead of
       installing firewall software on top of a general purpose
       computer/operating system, the designers/engineers built images
