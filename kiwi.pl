@@ -59,13 +59,6 @@ our $ConfigStatus  = 0;
 our $TL            = 1;
 our $BT;
 #============================================
-# check Partitioner for $arch
-#--------------------------------------------
-my $arch = qxx ("uname -m"); chomp $arch;
-if ($arch =~ /s390/) {
-	$Partitioner = "fdasd";
-}
-#============================================
 # Read $HOME/.kiwirc
 #--------------------------------------------
 if ( -f $ConfigFile) {
@@ -1423,6 +1416,12 @@ sub init {
 		"help|h"                => \&usage,
 		"<>"                    => \&usage
 	);
+	#============================================
+	# check Partitioner according to device
+	#--------------------------------------------
+	if (($targetDevice) && ($targetDevice =~ /\/dev\/dasd/)) {
+		$Partitioner = "fdasd";
+	}
 	#========================================
 	# turn destdir into absolute path
 	#----------------------------------------
