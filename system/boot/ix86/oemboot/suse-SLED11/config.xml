@@ -19,6 +19,7 @@
 		<profile name="xenk" description="KERNEL: Xen kernel/mboot.c32"/>
 		<profile name="pae" description="KERNEL: pae kernel"/>
 		<profile name="ec2" description="KERNEL: Ec2 kernel"/>
+		<profile name="rt"  description="KERNEL: RealTime kernel"/>
 	</profiles>
 	<drivers type="drivers">
 		<file name="crypto/*"/>
@@ -89,6 +90,10 @@
 		<package name="kernel-ec2"/>
 		<package name="kernel-ec2-base"/>
 		<package name="xen"/>
+	</packages>
+	<packages type="image" profiles="rt">
+		<package name="kernel-rt"/>
+		<package name="kernel-rt-base"/>
 	</packages>
 	<packages type="image">
 		<package name="curl"/>
