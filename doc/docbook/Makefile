@@ -11,7 +11,7 @@ SOURCE=kiwi-doc.xml kiwi-doc-*.xml kiwi-man-*.xml
 FIG=images/*.fig
 FOPCONFIG=etc/fop.xml
 
-all:html pdf man
+all: revision html pdf man
 
 html:kiwi.html
 	mv kiwi.html ../
@@ -77,3 +77,7 @@ check:
 		fop fop-offo batik \
 		excalibur-avalon-framework xmlgraphics-commons \
 		dejavu sil-charis
+
+revision:
+	cat ../../rpm/kiwi.spec | grep Version: | cut -f2 -d: |\
+		tr -d " " | tr -d "\n" > Revision.txt
