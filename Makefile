@@ -75,6 +75,7 @@ install:
 	# kiwi documentation and examples
 	#--------------------------------------------
 	cp -a doc/examples/ ${PACKDOCVZ}
+	cp -a doc/images/   ${PACKDOCVZ}
 	cp -a doc/schema/   ${PACKDOCVZ}
 	cp -a doc/kiwi.pdf  ${PACKDOCVZ}
 	cp -a doc/kiwi.html ${PACKDOCVZ}
