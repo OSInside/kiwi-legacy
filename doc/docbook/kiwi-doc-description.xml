@@ -1541,6 +1541,15 @@
               mounted and used as a local path based repository.
               Alternatively one can do the loop mount himself and point
               a standard local path to the mounted directory </para>
+            <para>When using multiple .iso files from the same product, such
+              SLES all .iso files need to be located in the same directory,
+              but only the first .iso file needs to be added as a repository
+              to the configuration. The first .iso file contains sufficient
+              information for the package management tool to find packages
+              in the other .iso files as long as they are located in the
+              same directory. Attempting to use a second or third .iso file
+              in a series as a stand alone repository will result in an
+              error.</para>
           </listitem>
         </varlistentry>
         <varlistentry>
