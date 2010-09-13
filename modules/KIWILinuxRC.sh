@@ -5618,8 +5618,8 @@ function partedMBToCylinder {
 	# /.../
 	# convert size given in MB to cylinder count
 	# ----
-	local sizeKB=$(($1 * 1024))
-	local cylreq=$(($sizeKB / $partedCylKSize))
+	local sizeKB=$(($1 * 1048576))
+	local cylreq=$(($sizeKB / ($partedCylKSize * 1000)))
 	echo $cylreq
 }
 #======================================
