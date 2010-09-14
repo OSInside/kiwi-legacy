@@ -18,6 +18,7 @@
 		<profile name="std" description="KERNEL: Default"/>
 		<profile name="xenk" description="KERNEL: Xen kernel/mboot.c32"/>
 		<profile name="pae" description="KERNEL: pae kernel"/>
+		<profile name="rt" description="KERNEL: RealTime kernel"/>
 	</profiles>
 	<drivers type="usbdrivers">
 		<file name="usb/host/*"/>
@@ -78,6 +79,10 @@
 	<packages type="image" profiles="pae">
 		<package name="kernel-pae"/>
 		<package name="kernel-pae-base"/>
+	</packages>
+	<packages type="image" profiles="rt">
+		<package name="kernel-rt"/>
+		<package name="kernel-rt-base"/>
 	</packages>
 	<packages type="image" profiles="xenk">
 		<package name="kernel-xen"/>

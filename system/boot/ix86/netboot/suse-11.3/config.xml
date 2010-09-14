@@ -20,6 +20,7 @@
 		<profile name="xenk" description="KERNEL: Xen kernel/mboot.c32"/>
 		<profile name="pae" description="KERNEL: pae"/>
 		<profile name="desktop" description="KERNEL: Desktop kernel"/>
+		<profile name="rt" description="KERNEL: RealTime kernel"/>
 	</profiles>
 	<drivers type="drivers" profiles="xen">
 		<file name="drivers/xen/*"/>
@@ -143,6 +144,9 @@
 	</packages>
 	<packages type="image" profiles="pae">
 		<package name="kernel-pae"/>
+	</packages>
+	<packages type="image" profiles="rt">
+		<package name="kernel-rt"/>
 	</packages>
 	<packages type="image" profiles="xenk">
 		<package name="kernel-xen"/>
