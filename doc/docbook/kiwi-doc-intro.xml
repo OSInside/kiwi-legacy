@@ -18,14 +18,26 @@
 
     <figure id="fig.imageservingarch">
       <title>Image Serving Architecture</title>
-      <mediaobject>
-        <imageobject role="fo">
-          <imagedata fileref="images/intro.png" width="50%"/>
-        </imageobject>
-        <imageobject role="html">
-          <imagedata fileref="images/intro.png" width="50%"/>
-        </imageobject>
-      </mediaobject>
+      <mediaobjectco>
+        <imageobjectco>
+          <areaspec>
+            <area coords="100 100" id="co.imageservingarch.root"/>
+            <area coords="200 200" id="co.imageservingarch.kernel"/>
+          </areaspec>
+          <imageobject>
+            <imagedata fileref="images/intro.png"/><!-- width="50%" -->
+          </imageobject>
+          <calloutlist>
+            <callout arearefs="co.imageservingarch.root">
+              <para>Encapsulated system reachable via chroot</para>
+            </callout>
+            <callout arearefs="co.imageservingarch.root">
+              <para>Encapsulated system reachable via kernel
+                filesystem/extention drivers</para>
+            </callout>
+          </calloutlist>
+        </imageobjectco>
+      </mediaobjectco>
     </figure>
   
   <para>Because this document contains conceptual information about an

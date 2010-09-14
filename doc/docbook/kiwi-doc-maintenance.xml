@@ -18,14 +18,50 @@
 
   <figure id="fig.maintain">
     <title>Image Maintenance Scenarios</title>
-    <mediaobject>
-      <imageobject role="html">
-        <imagedata fileref="images/maintain.png" width="50%"/>
-      </imageobject>
-      <imageobject role="fo">
-        <imagedata fileref="images/maintain.png" width="50%"/>
-      </imageobject>
-    </mediaobject>
+    <mediaobjectco>
+      <imageobjectco>
+        <areaspec>
+          <area coords="100 100"   id="co.maintain.imagedescr"/>
+          <area coords="200 200" id="co.maintain.sourcechanges"/>
+          <area coords="300 300" id="co.maintain.plusminus1"/>
+          <area coords="400 400" id="co.maintain.imgchanges"/>
+          <area coords="500 500" id="co.maintain.plusminus2"/>
+        </areaspec>
+        <imageobject>
+          <imagedata fileref="images/maintain.png"/><!--  width="50%" -->
+        </imageobject>
+        <calloutlist>
+          <callout arearefs="co.maintain.imagedescr">
+            <para>Image Description as part of a versioning system like
+              Git, Subversion, etc. to track changes</para>
+          </callout>
+          <callout arearefs="co.maintain.sourcechanges">
+            <para>Software package source changes</para>
+          </callout>
+          <callout arearefs="co.maintain.plusminus1">
+            <para><simplelist type="inline">
+              <member>Faster, because already prepared</member>
+              <member>cannot handle image description changes</member>
+              <member>reuires free space to store
+                <filename>/tmp/myOSImage</filename></member>
+            </simplelist>
+            </para>
+          </callout>
+          <callout arearefs="co.maintain.imgchanges">
+            <para>Image Description changes</para>
+          </callout>
+          <callout arearefs="co.maintain.plusminus2">
+            <para><simplelist type="inline">
+              <member>Covers all possible changes</member>
+              <member>does not require storage for prepared trees</member>
+              <member>slower, because KIWI prepare runs again</member>
+            </simplelist>
+            </para>
+          </callout>
+        </calloutlist>
+      </imageobjectco>
+    </mediaobjectco>
+    
   </figure>
 
 

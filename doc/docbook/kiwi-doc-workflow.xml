@@ -55,8 +55,8 @@
           should be used to configure the system which means, for
           example, the activation of services. For a detailed
           description what functions are already available to configure
-          the system, refer to the <xref
-            linkend="ref.kiwi.config.sh"/> man page.</para>
+          the system, refer to the <xref linkend="ref.kiwi.config.sh"/>
+          man page.</para>
       </formalpara>
     </listitem>
     <listitem>
@@ -110,8 +110,8 @@
           used to remove packages which were pulled in by a dependency,
           but are not really required for later use of the operating
           system. For a detailed description what functions are already
-          available to <filename>images.sh</filename>, refer to
-          the <xref linkend="ref.kiwi.images.sh"/> man page.</para>
+          available to <filename>images.sh</filename>, refer to the
+            <xref linkend="ref.kiwi.images.sh"/> man page.</para>
       </formalpara>
     </listitem>
     <listitem>
@@ -130,14 +130,34 @@
 
       <figure id="fig.imagetypes">
         <title>Image Types</title>
-        <mediaobject>
-          <imageobject role="html">
-            <imagedata fileref="images/types.png" width="60%"/>
-          </imageobject>
-          <imageobject role="fo">
-            <imagedata fileref="images/types.png" width="60%"/>
-          </imageobject>
-        </mediaobject>
+        <mediaobjectco>
+          <imageobjectco>
+            <areaspec>
+              <area coords="100 100" id="co.imagetypes.live"/>
+              <area coords="200 200" id="co.imagetypes.virtualdisk"/>
+              <area coords="300 300" id="co.imagetypes.oemdisk"/>
+              <area coords="400 400" id="co.imagetypes.pxe"/>
+            </areaspec>
+            <imageobject>
+              <imagedata fileref="images/types.png"/><!-- width="60%" -->
+            </imageobject>
+            <calloutlist>
+              <callout arearefs="co.imagetypes.live">
+                <para>FIXME</para>
+              </callout>
+              <callout arearefs="co.imagetypes.virtualdisk">
+                <para>Full virtual system which can be played in VMWare, Xen, 
+                  Amazon Cloud, etc. Guest configuration can be created.</para>
+              </callout>
+              <callout arearefs="co.imagetypes.oemdisk">
+                <para>Preload system with install media on CD or USB stick</para>
+              </callout>
+              <callout arearefs="co.imagetypes.pxe">
+                <para>Provides a bootp environment</para>
+              </callout>
+            </calloutlist>
+          </imageobjectco>
+        </mediaobjectco>
       </figure>
     </listitem>
   </itemizedlist>
@@ -167,15 +187,32 @@
 
     <figure id="fig.workflow.bootprocess">
       <title>Boot Process</title>
-      <mediaobject>
-        <imageobject role="fo">
-          <imagedata fileref="images/activation.png" width="50%"/>
-        </imageobject>
-        <imageobject role="html">
-          <imagedata fileref="images/activation.png" width="50%"/>
-        </imageobject>
-      </mediaobject>
+      <!-- The coordinates in the coords attribute are just dummy
+           values
+        -->
+      <mediaobjectco>
+        <imageobjectco>
+          <areaspec>
+            <area coords="100 100" id="co.workflow.bootprocess.desc"/>
+            <area coords="200 200" id="co.workflow.bootprocess.desccreated"/>
+          </areaspec>
+          <imageobject>
+            <imagedata fileref="images/activation.png"/><!-- width="50%" -->
+          </imageobject>
+          <calloutlist>
+            <callout arearefs="co.workflow.bootprocess.desc">
+              <para>Descriptions are provided by KIWI, use is recommended but
+                not required</para>
+            </callout>
+            <callout arearefs="co.workflow.bootprocess.desccreated">
+              <para>A description needs to be created or a template can be
+                used</para>
+            </callout>
+          </calloutlist>
+        </imageobjectco>
+      </mediaobjectco>
     </figure>
+
 
     <para>Furthermore, KIWI automatically creates this boot image along
       with the requested image type. It does that by calling itself in a
