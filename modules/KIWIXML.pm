@@ -418,13 +418,19 @@ sub new {
 		# 5) foreign attributes in type
 		#------------------------------------------
 		if (defined $foreignRepo->{"hybrid"}) {
-			$this -> setForeignTypeAttribute ("hybrid");
+			$this -> setForeignTypeAttribute (
+				"hybrid",$foreignRepo->{"hybrid"}
+			);
 		}
 		if (defined $foreignRepo->{"hybridpersistent"}) {
-			$this -> setForeignTypeAttribute ("hybridpersistent");
+			$this -> setForeignTypeAttribute (
+				"hybridpersistent",$foreignRepo->{"hybridpersistent"}
+			);
 		}
 		if (defined $foreignRepo->{"lvm"}) {
-			$this -> setForeignTypeAttribute ("lvm");
+			$this -> setForeignTypeAttribute (
+				"lvm",$foreignRepo->{"lvm"}
+			);
 		}
 		if (defined $foreignRepo->{"kernelcmdline"}) {
 			$this -> setForeignTypeAttribute (
@@ -1319,10 +1325,11 @@ sub setForeignTypeAttribute {
 	my $val  = shift;
 	my $kiwi = $this->{kiwi};
 	my $tnode= $this->{typeNode};
-	$kiwi -> info ("Including foreign type attribute: $attr");
 	if ($val) {
+		$kiwi -> info ("Including foreign type attribute: $attr : $val");
 		$tnode-> setAttribute ("$attr","$val");
 	} else {
+		$kiwi -> info ("Including foreign type attribute: $attr");
 		$tnode-> setAttribute ("$attr","true");
 	}
 	$kiwi -> done ();
