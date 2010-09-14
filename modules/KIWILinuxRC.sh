@@ -269,7 +269,11 @@ function systemException {
 	;;
 	"shell")
 		Echo "shellException: providing shell..."
-		setctsid $ttydev /bin/bash -i
+		if ! setctsid $ttydev /bin/true;then
+			/bin/bash -i
+		else
+			setctsid $ttydev /bin/bash -i
+		fi
 	;;
 	"user_reboot")
 		Echo "reboot triggered by user: consoles at Alt-F3/F4"
@@ -3416,6 +3420,26 @@ function sfdiskGetPartitionID {
 	sfdisk -c $1 $2
 }
 #======================================
+# fdasdGetPartitionID
+#--------------------------------------
+function fdasdGetPartitionID {
+	local count=1
+	for i in $(fdasd -s -p $1 | grep -E '^[ ]+\/' |\
+		 awk -v OFS=":" '$1=$1' | cut -f5 -d:);do
+		if [ $count = $2 ];then
+			if $i = 2;then
+				echo 82
+			elif $i = 1;then
+				echo 83
+			else
+				echo $i
+			fi
+			return
+		fi
+		count=$((count + 1))
+	done
+}
+#======================================
 # partedGetPartitionID
 #--------------------------------------
 function partedGetPartitionID {
@@ -3433,6 +3457,8 @@ function partitionID {
 	local diskNumber=$2
 	if [ $PARTITIONER = "sfdisk" ];then
 		sfdiskGetPartitionID $diskDevice $diskNumber
+	elif [ $PARTITIONER = "fdasd" ];then
+		fdasdGetPartitionID $diskDevice $diskNumber
 	else
 		partedGetPartitionID $diskDevice $diskNumber
 	fi
@@ -4685,6 +4711,9 @@ function getDiskID {
 		return
 	fi
 	for i in /dev/disk/by-id/*;do
+		if [ -z "$i" ];then
+			continue
+		fi
 		if echo $i | grep -q edd-;then
 			continue
 		fi
@@ -5489,6 +5518,14 @@ function callPartitioner {
 		if test $? != 0; then
 			systemException "Failed to create partition table" "reboot"
 		fi
+	elif [ $PARTITIONER = "fdasd" ];then
+		Echo "Repartition the disk according to real geometry [ fdasd ]"
+		echo "w" >> $input
+		echo "q" >> $input
+		fdasd $imageDiskDevice < $input 1>&2
+		if test $? != 0; then
+			systemException "Failed to create partition table" "reboot"
+		fi
 	else
 		# /.../
 		# nothing to do for parted here as we write
@@ -5504,14 +5541,58 @@ function callPartitioner {
 # createPartitionerInput
 #--------------------------------------
 function createPartitionerInput {
+	if echo $imageDiskDevice | grep -q 'dev\/dasd';then
+		PARTITIONER=fdasd
+	fi
 	if [ $PARTITIONER = "sfdisk" ];then
 		createFDiskInput $@
+	elif [ $PARTITIONER = "fdasd" ];then
+		createFDasdInput $@
 	else
 		Echo "Repartition the disk according to real geometry [ parted ]"
 		partedInit $imageDiskDevice
 		partedSectorInit $imageDiskDevice
 		createPartedInput $imageDiskDevice $@
     fi
+}
+#======================================
+# createFDasdInput
+#--------------------------------------
+function createFDasdInput {
+	local input=/part.input
+	local ignore_once=0
+	local ignore=0
+	normalizeRepartInput $*
+	for cmd in ${pcmds[*]};do
+		if [ $ignore = 1 ] && echo $cmd | grep -qE '[dntwq]';then
+			ignore=0
+		elif [ $ignore = 1 ];then
+			continue
+		fi
+		if [ $ignore_once = "1" ];then
+			ignore_once=0
+			continue
+		fi
+		if [ $cmd = "a" ];then
+			ignore=1
+			continue
+		fi
+		if [ $cmd = "p" ];then
+			ignore_once=1
+			continue
+		fi
+		if [ $cmd = "83" ] || [ $cmd = "8e" ];then
+			cmd=1
+		fi
+		if [ $cmd = "82" ];then
+			cmd=2
+		fi
+		if [ $cmd = "." ];then
+			echo >> $input
+			continue
+		fi
+		echo $cmd >> $input
+	done
 }
 #======================================
 # createFDiskInput
@@ -5636,63 +5717,15 @@ function createPartedInput {
 	local disk=$1
 	shift
 	local index=0
-	local pcmds
-	local pcmds_fix
 	local partid
 	local pstart
 	local pstopp
 	local value
 	local cmdq
 	#======================================
-	# create list of commands
+	# normalize commands
 	#--------------------------------------
-	for cmd in $*;do
-		pcmds[$index]=$cmd
-		index=$(($index + 1))
-	done
-	index=0
-	index_fix=0
-	#======================================
-	# fix list of commands
-	#--------------------------------------
-	while [ ! -z "${pcmds[$index]}" ];do
-		cmd=${pcmds[$index]}
-		pcmds_fix[$index_fix]=$cmd
-		case $cmd in
-			"d")
-				partid=${pcmds[$index + 1]}
-				if ! echo $partid | grep -q "^[0-4]$";then
-					# make sure there is a ID set for the deletion
-					index_fix=$(($index_fix + 1))
-					pcmds_fix[$index_fix]=1
-				fi
-			;;
-			"n")
-				partid=${pcmds[$index + 2]}
-				if ! echo $partid | grep -q "^[0-4]$";then
-					# make sure there is a ID set for the creation
-					index_fix=$(($index_fix + 1))
-					pcmds_fix[$index_fix]=${pcmds[$index + 1]}
-					index_fix=$(($index_fix + 1))
-					pcmds_fix[$index_fix]=4
-					index=$(($index + 1))
-				fi
-			;;
-		esac
-		index=$(($index + 1))
-		index_fix=$(($index_fix + 1))
-	done
-	#======================================
-	# use fixed list and print log info
-	#--------------------------------------
-	unset pcmds
-	pcmds=(${pcmds_fix[*]})
-	unset pcmds_fix
-	index=0
-	#======================================
-	# process commands
-	#--------------------------------------
-	echo "createPartedInput: fixed input: ${pcmds[*]}" 1>&2
+	normalizeRepartInput $*
 	for cmd in ${pcmds[*]};do
 		case $cmd in
 			#======================================
@@ -5756,6 +5789,61 @@ function createPartedInput {
 		esac
 		index=$(($index + 1))
 	done
+}
+#======================================
+# normalizeRepartInput
+#--------------------------------------
+function normalizeRepartInput {
+	local pcmds_fix
+	local index=0
+	local index_fix=0
+	local partid
+	local cmd
+	#======================================
+	# create list of commands
+	#--------------------------------------
+	for cmd in $*;do
+		pcmds[$index]=$cmd
+		index=$(($index + 1))
+	done
+	index=0
+	#======================================
+	# fix list of commands
+	#--------------------------------------
+	while [ ! -z "${pcmds[$index]}" ];do
+		cmd=${pcmds[$index]}
+		pcmds_fix[$index_fix]=$cmd
+		case $cmd in
+			"d")
+				partid=${pcmds[$index + 1]}
+				if ! echo $partid | grep -q "^[0-4]$";then
+					# make sure there is a ID set for the deletion
+					index_fix=$(($index_fix + 1))
+					pcmds_fix[$index_fix]=1
+				fi
+			;;
+			"n")
+				partid=${pcmds[$index + 2]}
+				if ! echo $partid | grep -q "^[0-4]$";then
+					# make sure there is a ID set for the creation
+					index_fix=$(($index_fix + 1))
+					pcmds_fix[$index_fix]=${pcmds[$index + 1]}
+					index_fix=$(($index_fix + 1))
+					pcmds_fix[$index_fix]=4
+					index=$(($index + 1))
+				fi
+			;;
+		esac
+		index=$(($index + 1))
+		index_fix=$(($index_fix + 1))
+	done
+	#======================================
+	# use fixed list and print log info
+	#--------------------------------------
+	unset pcmds
+	pcmds=(${pcmds_fix[*]})
+	unset pcmds_fix
+	echo "Normalized Repartition input: ${pcmds[*]}" 1>&2
 }
 #======================================
 # reloadKernel

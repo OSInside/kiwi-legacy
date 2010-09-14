@@ -48,6 +48,7 @@ function OEMRepartInit {
 		umount /reco-root && rmdir /reco-root
 	fi
 	export input=/part.input
+	recreateVTOCTable
 	rm -f $input
 }
 
@@ -124,13 +125,13 @@ function OEMRepartStandard {
 		#--------------------------------------
 		if [ "$haveBootPartition" = "yes" ];then
 			createPartitionerInput \
-				d 2
+				d 2 u y
 		fi
 		#======================================
 		# repart root partition
 		#--------------------------------------
 		createPartitionerInput \
-			d n p $pID . +"$disk1MBytes"M
+			d u y n p $pID . +"$disk1MBytes"M
 		#======================================
 		# add swap partition
 		#--------------------------------------
@@ -273,13 +274,13 @@ function OEMRepartSplit {
 		#--------------------------------------
 		if [ "$haveBootPartition" = "yes" ];then
 			createPartitionerInput \
-				d 3
+				d 3 u y
 		fi
 		#======================================
 		# repart cow partition
 		#--------------------------------------
 		createPartitionerInput \
-			d $pID n p $pID . +"$disk2MBytes"M
+			d u y $pID n p $pID . +"$disk2MBytes"M
 		#======================================
 		# add swap partition
 		#--------------------------------------
@@ -628,6 +629,9 @@ function activateBootPartition {
 	# /.../
 	# set boot flag to current value of $bootid
 	# ----
+	if [ $PARTITIONER = "fdasd" ];then
+		return
+	fi
 	Echo "Set boot flag to partition ID: $bootid [ $imageDiskDevice ]"
 	parted $imageDiskDevice set $bootid boot on
 	if test $? != 0; then
@@ -640,6 +644,19 @@ function activateBootPartition {
 			"Partition $deviceTest doesn't appear... fatal !" \
 		"reboot"
 	fi
+}
+
+#======================================
+# recreateVTOCTable
+#--------------------------------------
+function recreateVTOCTable {
+	# /.../
+	# re-create VTOC re-using existing partition sizes
+	# ----
+	Echo "Recreate VTOC table [ $imageDiskDevice ]"
+	createPartitionerInput u y w
+	callPartitioner $input
+	rm -f $input
 }
 
 #======================================
