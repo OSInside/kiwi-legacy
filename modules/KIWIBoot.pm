@@ -1513,6 +1513,12 @@ sub setupBootDisk {
 		$imgtype = "oem";
 	}
 	#==========================================
+	# check if image type is usb
+	#------------------------------------------
+	if ($initrd =~ /usbboot/) {
+		$imgtype = "usb";
+	}
+	#==========================================
 	# check if system is tree or image file
 	#------------------------------------------
 	if ( -d $system ) {
@@ -2383,7 +2389,7 @@ sub setupBootDisk {
 	# cleanup temp directory
 	#------------------------------------------
 	qxx ("rm -rf $tmpdir");
-	if ($haveDiskDevice) {
+	if (($haveDiskDevice) && ($imgtype ne "usb"))  {
 		#==========================================
 		# create image file from disk device
 		#------------------------------------------
