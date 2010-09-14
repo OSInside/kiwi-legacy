@@ -31,7 +31,7 @@
             <callout arearefs="co.imageservingarch.root">
               <para>Encapsulated system reachable via chroot</para>
             </callout>
-            <callout arearefs="co.imageservingarch.root">
+            <callout arearefs="co.imageservingarch.kernel">
               <para>Encapsulated system reachable via kernel
                 filesystem/extention drivers</para>
             </callout>

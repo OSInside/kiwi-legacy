@@ -36,16 +36,16 @@
   <refsect1 id="kiwi.config.description">
     <title>Description</title>
     <para>
-      The kiwi image description allows to have an optional config.sh script
+      The KIWI image description allows to have an optional <filename>config.sh</filename> script
       in place. This script should be designed to take over control of adding
       the image operating system configuration. Configuration in that sense
       means stuff like activating services, creating configuration files, prepare
       an environment for a firstboot workflow, etc. What you shouldn't do in
-      config.sh is breaking your systems integrity by for example removing
-      packages or pieces of software. Something like that can be done in images.sh.
-      config.sh is called <emphasis>after</emphasis> the user and groups have
-      been set up. If there are SUSE Linux related YaST xml information these are
-      validated before config.sh is called too. If you exit config.sh with an
+      <filename>config.sh</filename> is breaking your systems integrity by for example removing
+      packages or pieces of software. Something like that can be done in <filename>images.sh</filename>.
+      The <filename>config.sh</filename> script is called <emphasis>after</emphasis> the user and groups have
+      been set up. If there are SUSE Linux related YaST XML information, these are
+      validated before <filename>config.sh</filename> is called too. If you exit config.sh with an
       exit code != 0 kiwi will exit with an error too.
     </para>
 
@@ -430,7 +430,7 @@ exit</programlisting>
           <para>
             A comma seperated list of the driver entries as listed in the
             drivers section of the <filename>config.xml</filename>. Similar variables exists for
-            the usbdrivers and scsidrivers sections
+            the <sgmltag>usbdrivers</sgmltag> and <sgmltag>scsidrivers</sgmltag> sections
           </para>
         </listitem>
       </varlistentry>

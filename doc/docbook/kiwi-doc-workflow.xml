@@ -143,7 +143,7 @@
             </imageobject>
             <calloutlist>
               <callout arearefs="co.imagetypes.live">
-                <para>FIXME</para>
+                <para>Live Image on CD, DVD or USB stick</para>
               </callout>
               <callout arearefs="co.imagetypes.virtualdisk">
                 <para>Full virtual system which can be played in VMWare, Xen, 
@@ -153,7 +153,7 @@
                 <para>Preload system with install media on CD or USB stick</para>
               </callout>
               <callout arearefs="co.imagetypes.pxe">
-                <para>Provides a bootp environment</para>
+                <para>Network boot image. Kiwi also provides the bootp environment via the package kiwi-pxeboot</para>
               </callout>
             </calloutlist>
           </imageobjectco>

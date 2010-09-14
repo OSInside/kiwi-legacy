@@ -35,7 +35,7 @@
   <refsect1 id="kiwi.kiwirc.description">
     <title>Description</title>
     <para>
-      The Kiwi imaging toolchain supports the use of an optional resource
+      The KIWI imaging toolchain supports the use of an optional resource
       file named <filename>.kiwirc</filename> located in the users home directory.
     </para>
     <para>
@@ -53,9 +53,9 @@ $System='/usr/share/kiwi/image';</screen>
   </refsect1>
   
   <refsect1 id="kiwi.kiwirc.settings">
-    <title>Supported resource settings</title>
+    <title>Supported Resource Settings</title>
     <para>
-      Kiwi recognizes the BasePath, Gzip, LogServerPort, LuksCipher, and 
+      KIWI recognizes the BasePath, Gzip, LogServerPort, LuksCipher, and 
       System settings in the <filename>.kiwirc</filename> file.
     </para>
     <variablelist>

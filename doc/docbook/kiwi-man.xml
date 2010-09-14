@@ -75,8 +75,8 @@
       description. Such a description is represented by a directory
       which includes at least one <filename>config.xml</filename> file
       and may as well include other files like scripts or configuration
-      data. The kiwi-templates package provides example descriptions
-      based on a JeOS system. JeOS means Just enough Operating System.
+      data. The <package>kiwi-templates</package> package provides example descriptions
+      based on a JeOS system. JeOS means <emphasis>Just enough Operating System</emphasis>.
       KIWI provides image templates based on that axiom which means a
       JeOS is a small, text only based image including a predefined
       remote source setup to allow installation of missing software
@@ -87,13 +87,13 @@
       exists in the system design document in <ulink
         url="file:///usr/share/doc/packages/kiwi/kiwi.pdf"/>. KIWI
       always operates in two steps. The KIWI <option>--build</option> option just
-      combines both steps into one to make it easier to start with kiwi.
+      combines both steps into one to make it easier to start with KIWI.
       The first step is the preparation step and if that step was successful,
       a creation step follows which is able to create different image output
       types. If you have started with an example and want to add you own
       changes it might be a good idea to clone of from this example. This
       can be done by simply copying the entire image description or you can
-      let kiwi do that for you by using the <command>kiwi</command> <option>--clone</option> command.
+      let KIWI do that for you by using the <command>kiwi</command> <option>--clone</option> command.
     </para>
     <para>
       In the preparation step,
@@ -104,7 +104,7 @@
       create the output image. If the image type ISO was requested, the
       output image would be a file with the suffix <filename
         class="extension">.iso</filename> representing a live system on
-      CD or DVD. Other than that kiwi is able to create images for
+      CD or DVD. Other than that KIWI is able to create images for
       virtual and para-virtual (Xen) environments as well as for USB
       stick, PXE network clients and OEM customized Linux systems. 
     </para>
@@ -157,7 +157,7 @@
       repository, it is useful to store the image root tree and upgrade
       the tree according to changes on the update channel. Given that the
       root tree exists it's also possible to add or remove software
-      and recreate the image of the desired type
+      and recreate the image of the desired type.
     </para>    
     <cmdsynopsis>
       <command>kiwi</command>
@@ -180,6 +180,8 @@
       package pattern and file consistency according to the currently active
       repositories. The system requires the zypper backend in order to
       work properly.
+    </para>
+    <para>
       The migration process creates a cache file so that subsequent calls
       of the migration runs much faster. Please have in mind that if
       your system has changed (files created/deleted, etc.) the cache file
@@ -196,13 +198,17 @@
       before that some data is not worth to become migrated or can be
       restored easily later inside the cloned image like software
       repositories.
+    </para>
+    <para>
       The migration process will always place it's result into the
       <filename>/tmp/$OptionValueOf-m</filename> directory. The reason for this is because
       <filename class="directory">/tmp</filename> is always excluded from the migration operation and therefore
       we can safely place new files there without influencing the
-      migration itself. You should have at least 50 MB free space for
+      migration itself. You should have at least 50&nbsp;MB free space for
       the cache file and the image description all the rest are just
       hard links.
+    </para>
+    <para>
       As one result a HTML based report file is created which
       contains important information about the system. You are free to
       ignore that information but with the risk that the migrated image
@@ -449,7 +455,7 @@
 			Set/Overwrite alias name for the first listed repo.
 			Alias names are optional free form text. If not set the source
 			attribute value is used and builds the alias name by replacing
-			each '/' with a '_'. An alias name should be set if the
+			each <quote>/</quote> with a <quote>_</quote>. An alias name should be set if the
 			source argument doesn't really explain what this repository
 			contains. The change is temporary and will not be written to the
 			XML file.
@@ -680,7 +686,7 @@
             the types specifying the <emphasis>primary</emphasis> attribute will be
             used. If there is no primary attribute set, the first type
             section of the preferences section is the primary type.
-            The types are only evaluated when kiwi runs the
+            The types are only evaluated when KIWI runs the
             <option>--create</option> step. With the
             option <option>--type</option> one can distinguish between the
             types stored in <filename>config.xml</filename>
