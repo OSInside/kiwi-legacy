@@ -147,6 +147,10 @@ function OEMInstall {
 	#--------------------------------------
 	displayEULA
 	#======================================
+	# Run user script
+	#--------------------------------------
+	runHook preHWdetect
+	#======================================
 	# Search CD/DVD/USB stick and mount it
 	#--------------------------------------
 	if [ -z "$pxe" ];then
@@ -490,6 +494,10 @@ function OEMInstall {
 		fi
 	fi
 	#======================================
+	# Run user script
+	#--------------------------------------
+	runHook preImageDump
+	#======================================
 	# Warn me before performing the install
 	#--------------------------------------
 	for i in ${instItems[*]}; do
@@ -650,6 +658,10 @@ function OEMInstall {
 		fi
 		Echo "Image checksum test: fine :-)"
 		Echo "System installation has finished"
+		#======================================
+		# Run user script
+		#--------------------------------------
+		runHook postImageDump
 	fi
 	#======================================
 	# Umount CD/DVD USB

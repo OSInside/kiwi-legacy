@@ -107,9 +107,9 @@
       be created in two formats, one suitable for CD/DVD media and a
       second suitable for a USB stick. The self installing image deploys
       the oem image onto the selected storage device. The installation
-      process is a simple image dump using the <command>dd</command> command. During this
-      process the target system remains in terminal mode. The following
-      configuration snippets show the use of the <sgmltag
+      process is a simple image dump using the <command>dd</command> command.
+      During this process the target system remains in terminal mode. The
+      following configuration snippets show the use of the <sgmltag
         class="attribute">installiso</sgmltag> and <sgmltag
         class="attribute">installstick</sgmltag> attributes to create
       the ISO or USB installation image format respectively. </para>
@@ -118,17 +118,44 @@
       <listitem>
         <screen>&lt;type image="name" ... installiso="true"/&gt;</screen>
         <para>Creates a <filename class="extension">.iso</filename> file
-          which can be burned in CD or DVD. This represents an
-          installation CD </para>
+          which can be burned onto a CD or a DVD. This represents an
+          installation CD/DVD </para>
       </listitem>
       <listitem>
         <screen>&lt;type image="name" ... installstick="true"/&gt;</screen>
         <para>Creates a <filename class="extension"
             >.raw.install</filename> file which can be dumped
-            (<command>dd</command>) on a USB stick. This represents an
+            (<command>dd</command>) onto a USB stick. This represents an
           installation Stick </para>
       </listitem>
     </itemizedlist>
+
+    <sect2 id="sec.oem.installation">
+      <title>Specializing the OEM install process</title>
+      <para>It is possible to specialize the OEM install process by providing
+          shell scripts with the following names in the
+          <filename>root/kiwi-hooks</filename> directory in the configuration
+          tree as overlay files.
+          <itemizedlist>
+            <listitem>
+              <filename>preHWdetect.sh</filename>
+              <para>This script is executed prior to the hardware scan on the
+                  target machine.</para>
+            </listitem>
+            <listitem>
+              <filename>preImageDump.sh</filename>
+              <para>This script is executed immediately prior to the OEM
+                  image dump onto the target storage device.</para>
+            </listitem>
+            <listitem>
+              <filename>postImageDump.sh</filename>
+              <para>This script is executed directly after the OEM image dump
+                  onto the target storage device once the image checksum has
+                  been successfully verified.</para>
+            </listitem>
+          </itemizedlist>
+      </para>
+    </sect2>
 
     <sect2 id="sec.oem.partitioning">
       <title>Influencing the OEM Partitioning</title>

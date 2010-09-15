@@ -4403,7 +4403,7 @@ function searchAlternativeConfig {
 # runHook
 #--------------------------------------
 function runHook {
-	HOOK="/hooks/$1.sh"
+	HOOK="/kiwi-hooks/$1.sh"
 	if [ -e $HOOK ]; then
 		. $HOOK
 	fi
