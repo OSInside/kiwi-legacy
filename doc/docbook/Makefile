@@ -10,6 +10,7 @@ MAN=KIWI*config.sh.1 KIWI*images.sh.1 KIWI*kiwirc.1 kiwi.1
 SOURCE=kiwi-doc.xml kiwi-doc-*.xml kiwi-man-*.xml
 FIG=images/*.fig
 FOPCONFIG=etc/fop.xml
+NONET=--nonet
 
 all: revision html pdf man
 
@@ -30,17 +31,17 @@ images/*.png:${FIG}
 
 .tmp.xml:${SOURCE} images/*.png
 	@echo "Validating..."
-	xmllint --xinclude --postvalid --output .tmp.xml ${MAIN}
+	xmllint ${NONET} --xinclude --postvalid --output .tmp.xml ${MAIN}
 	@echo "Resolving XIncludes..."
-	xsltproc --xinclude --output .tmp.xml \
+	xsltproc ${NONET} --xinclude --output .tmp.xml \
 		xslt/profiling/db4index-profile.xsl ${MAIN}
 
 kiwi.fo:.tmp.xml
-	xsltproc --output kiwi.fo xslt/fo/docbook.xsl .tmp.xml
+	xsltproc ${NONET} --output kiwi.fo xslt/fo/docbook.xsl .tmp.xml
 
 kiwi.html:.tmp.xml
 	@echo "Transforming HTML..."
-	xsltproc --output ./kiwi.html xslt/html/docbook.xsl .tmp.xml
+	xsltproc ${NONET} --output ./kiwi.html xslt/html/docbook.xsl .tmp.xml
 
 kiwi.pdf:.tmp.xml kiwi.fo
 	@echo "Transforming PDF..."
@@ -48,19 +49,19 @@ kiwi.pdf:.tmp.xml kiwi.fo
 
 KIWI*config.sh.1:kiwi-man-config.sh.xml
 	cat kiwi-man-config.sh.xml | sed -e "s@_KV_@${KV}@" > .tmp.man
-	xsltproc ${DB}/manpages/docbook.xsl .tmp.man
+	xsltproc ${NONET} ${DB}/manpages/docbook.xsl .tmp.man
 
 KIWI*images.sh.1:kiwi-man-images.sh.xml
 	cat kiwi-man-images.sh.xml | sed -e "s@_KV_@${KV}@" > .tmp.man
-	xsltproc ${DB}/manpages/docbook.xsl .tmp.man
+	xsltproc ${NONET} ${DB}/manpages/docbook.xsl .tmp.man
 
 KIWI*kiwirc.1:kiwi-man-kiwirc.xml
 	cat kiwi-man-kiwirc.xml | sed -e "s@_KV_@${KV}@" > .tmp.man
-	xsltproc ${DB}/manpages/docbook.xsl .tmp.man
+	xsltproc ${NONET} ${DB}/manpages/docbook.xsl .tmp.man
 
 kiwi.1:kiwi-man.xml
 	cat kiwi-man.xml | sed -e "s@_KV_@${KV}@" > .tmp.man
-	xsltproc ${DB}/manpages/docbook.xsl .tmp.man
+	xsltproc ${NONET} ${DB}/manpages/docbook.xsl .tmp.man
 
 clean:
 	rm -f .tmp.xml .tmp.man

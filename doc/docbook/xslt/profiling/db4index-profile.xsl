@@ -6,7 +6,7 @@
 
 -->
 
-  <xsl:import href="http://docbook.sourceforge.net/release/xsl-ns/current/profiling/profile.xsl"/>
+  <xsl:import href="http://docbook.sourceforge.net/release/xsl/current/profiling/profile.xsl"/>
   
   <xsl:output indent="yes" method="xml"
     doctype-public="-//OASIS//DTD DocBook XML V4.5//EN"
