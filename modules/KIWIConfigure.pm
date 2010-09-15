@@ -141,7 +141,7 @@ sub setupRecoveryArchive {
 	# Compress archive into .tar.gz
 	#------------------------------------------
 	$status = qxx (
-		"gzip $root/recovery.tar 2>&1"
+		"$main::Gzip $root/recovery.tar 2>&1"
 	);
 	$code = $? >> 8;
 	if ($code != 0) {
