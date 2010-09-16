@@ -4338,7 +4338,7 @@ function searchGroupConfig {
 		Echo "Lookup MAC address: $localhwaddr in ${i}_KIWI_MAC_LIST"
 		eval list_var="${i}_KIWI_MAC_LIST"
 		eval mac_list=\$$list_var
-		searchGroupHardwareAddress $mac_list $i
+		searchGroupHardwareAddress $i "$mac_list"
 		if [ -s $CONFIG ]; then
 			break
 		fi
@@ -4356,8 +4356,8 @@ function searchGroupHardwareAddress {
 	# If the hardware address is found, load the config file.
 	# ----
 	local localhwaddr=$DHCPCHADDR
-	local mac_list=$1
-	local local_group=$2
+	local local_group=$1
+	local mac_list=$2
 	for j in `echo "$mac_list" | sed 's/,/ /g' | sed 's/[ \t]+/ /g'`; do
 		if [ "$localhwaddr" = "$j" ] ; then
 			Echo "MAC address $localhwaddr found in group $local_group"
