@@ -1706,13 +1706,6 @@ $(<command>rpm</command> -q ‘baseGetPackagesForDeletion‘ | <command>grep</co
             </para>
           </listitem>
         </varlistentry>
-        <varlistentry>
-          <term><sgmltag class="attvalue">xen</sgmltag></term>
-          <listitem>
-            <para>Image packages, a list of additional packages to be
-              installed when building a Xen host or guest. </para>
-          </listitem>
-        </varlistentry>
       </variablelist>
 
       <sect3 id="sec.descriptions.using-patterns">

@@ -138,18 +138,18 @@
           tree as overlay files.
           <itemizedlist>
             <listitem>
-              <filename>preHWdetect.sh</filename>
-              <para>This script is executed prior to the hardware scan on the
+              <para><filename>preHWdetect.sh</filename>
+              This script is executed prior to the hardware scan on the
                   target machine.</para>
             </listitem>
             <listitem>
-              <filename>preImageDump.sh</filename>
-              <para>This script is executed immediately prior to the OEM
+              <para><filename>preImageDump.sh</filename>
+              This script is executed immediately prior to the OEM
                   image dump onto the target storage device.</para>
             </listitem>
             <listitem>
-              <filename>postImageDump.sh</filename>
-              <para>This script is executed directly after the OEM image dump
+              <para><filename>postImageDump.sh</filename>
+              This script is executed directly after the OEM image dump
                   onto the target storage device once the image checksum has
                   been successfully verified.</para>
             </listitem>
