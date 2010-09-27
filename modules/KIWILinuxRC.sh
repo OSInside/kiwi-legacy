@@ -3274,7 +3274,7 @@ function setupNetwork {
 		done
 	fi
 	export PXE_IFACE=$iface
-	if $DHCPCD_HAVE_PERSIST -eq 0;then
+	if [ $DHCPCD_HAVE_PERSIST -eq 0 ];then
 		# /.../
 		# older version of dhcpd which doesn't have the
 		# options we want to pass
