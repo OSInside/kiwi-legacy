@@ -5508,11 +5508,17 @@ function callPartitioner {
 	local input=$1
 	if [ $PARTITIONER = "sfdisk" ];then
 		Echo "Repartition the disk according to real geometry [ fdisk ]"
+		if [ ! -z "$OEM_ALIGN" ];then
+			local pstart=$(checkFDiskFirstSector $imageDiskDevice)
+		fi
 		echo "w" >> $input
 		echo "q" >> $input
 		fdisk $imageDiskDevice < $input 1>&2
 		if test $? != 0; then
 			systemException "Failed to create partition table" "reboot"
+		fi
+		if [ ! -z "$OEM_ALIGN" ];then
+			fixupFDiskSectors $input $pstart
 		fi
 	elif [ $PARTITIONER = "fdasd" ];then
 		Echo "Repartition the disk according to real geometry [ fdasd ]"
@@ -5589,6 +5595,69 @@ function createFDasdInput {
 		fi
 		echo $cmd >> $input
 	done
+}
+#======================================
+# checkFDiskFirstSector
+#--------------------------------------
+function checkFDiskFirstSector {
+	# /.../
+	# check original alignment using fdisk
+	# ----
+	local dev=$1
+	fdisk -ul ${dev} | grep '^'${dev}1 | \
+		sed -e's@'${dev}1'[ \*]*\([0-9]\+\) .*$@\1@'
+}
+#======================================
+# fixupFDiskSectors
+#--------------------------------------
+function fixupFDiskSectors {
+	# /.../
+	# align the partition start sectors using fdisk
+	# ----
+	local input=$1
+	local palign=$2
+	local pstart pend act psize ptype rest
+	case "$palign" in
+		64) palign=8;;
+		2048) palign=2048;;
+		*) return;;
+	esac
+	local numpdevs=$(fdisk -ul $imageDiskDevice | grep '^/dev/' | wc -l)
+	rm -f $input
+	fdisk -ul $imageDiskDevice | grep '^/dev/' | \
+	while read pdev act pstart pend psize ptype rest; do
+		pdev=${pdev#$imageDiskDevice}
+		if [ "$act" != '*' ]; then
+			ptype="$psize"
+			pend="$pstart"
+			pstart="$act"
+		fi
+		local aligned=$(( ( $pstart + $palign - 1 ) / $palign * $palign ))
+		if [ "$aligned" -ne "$pstart" ]; then
+			echo "d" >> $input
+			test $numpdevs -gt 1 && echo "$pdev" >> $input
+			echo "n" >> $input
+			echo "p" >> $input
+			test $numpdevs -lt 4 && echo "$pdev" >> $input
+			echo "$aligned" >> $input
+			echo "$pend" >> $input
+			echo "t" >> $input
+			test $numpdevs -gt 1 && echo "$pdev" >> $input
+			echo "$ptype" >> $input
+			if [ "$act" = '*' ]; then
+				echo "a" >> $input
+				echo "$pdev" >> $input
+			fi
+		fi
+	done
+	if [ -s $input ]; then
+		echo "w" >> $input
+		echo "q" >> $input
+		fdisk -u $imageDiskDevice < $input 1>&2
+		if test $? != 0; then
+			systemException "Failed to fix up partition table" "reboot"
+		fi
+	fi
 }
 #======================================
 # createFDiskInput

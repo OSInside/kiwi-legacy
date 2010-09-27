@@ -4183,6 +4183,7 @@ sub setStoragePartition {
 	my $cmdref   = shift;
 	my $tool     = $this->{ptool};
 	my $kiwi     = $this->{kiwi};
+	my $xml      = $this->{xml};
 	my $tmpdir   = $this->{tmpdir};
 	my @commands = @{$cmdref};
 	my $result;
@@ -4260,8 +4261,22 @@ sub setStoragePartition {
 				$kiwi -> loginfo ($status);
 				return undef;
 			}
-			if (! open (FD,"|/sbin/fdisk $device &> $tmpdir/fdisk.log")) {
+			if (! open (FD,"|/sbin/fdisk -u $device &> $tmpdir/fdisk.log")) {
 				return undef;
+			}
+			my $palign = $xml -> getOEMAlignPartition();
+			if (($palign) && ("$palign" eq "true")) {
+				# fix up the first sector
+				for (my $count=0;$count<@commands;$count++) {
+					if ($commands[$count] eq "n") {
+						if (($commands[$count+2] eq "1") &&
+							($commands[$count+3] eq ".")
+						) {
+							$commands[$count+3] = "64";
+							last;
+						}
+					}
+				}
 			}
 			foreach my $cmd (@commands) {
 				if ($cmd eq ".") {

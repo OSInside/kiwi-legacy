@@ -1418,6 +1418,31 @@ of the oem image</db:para>
   </div>
   <!--
     ==========================================
+    common element <oem-align-partition>
+    
+  -->
+  <div>
+    <define name="k.oem-align-partition.content">
+      <data type="boolean"/>
+    </define>
+    <define name="k.oem-align-partition.attlist">
+      <empty/>
+    </define>
+    <define name="k.oem-align-partition">
+      <element name="oem-align-partition">
+        <a:documentation>For oemboot driven images: align start sectors. This is only
+done when fdisk is used. For parted the option -a is passed in
+in any case</a:documentation>
+        <db:para>For oemboot driven images: align start sectors. This is only
+done when fdisk is used. For parted the option -a is passed
+in any case</db:para>
+        <ref name="k.oem-align-partition.attlist"/>
+        <ref name="k.oem-align-partition.content"/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
     common element <oem-partition-install>
     
   -->
@@ -3048,6 +3073,9 @@ and setup the system disk</db:para>
           </optional>
           <optional>
             <ref name="k.oem-swap"/>
+          </optional>
+          <optional>
+            <ref name="k.oem-align-partition"/>
           </optional>
           <optional>
             <ref name="k.oem-partition-install"/>

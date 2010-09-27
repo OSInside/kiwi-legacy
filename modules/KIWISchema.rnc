@@ -992,6 +992,29 @@ div {
 }
 
 #==========================================
+# common element <oem-align-partition>
+#
+div {
+	k.oem-align-partition.content = xsd:boolean
+	k.oem-align-partition.attlist = empty
+	k.oem-align-partition =
+		## For oemboot driven images: align start sectors. This is only
+		## done when fdisk is used. For parted the option -a is passed in
+		## in any case
+		[
+		db:para [
+			"For oemboot driven images: align start sectors. This is only\x{a}"~
+			"done when fdisk is used. For parted the option -a is passed\x{a}"~
+			"in any case"
+		]
+		]
+		element oem-align-partition {
+			k.oem-align-partition.attlist,
+			k.oem-align-partition.content
+		}
+}
+
+#==========================================
 # common element <oem-partition-install>
 #
 div {
@@ -2126,6 +2149,7 @@ div {
 			k.oemconfig.attlist &
 			k.oem-systemsize? &
 			k.oem-swap? &
+			k.oem-align-partition? &
 			k.oem-partition-install? &
 			k.oem-home? &
 			k.oem-boot-title? &
