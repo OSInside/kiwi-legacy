@@ -158,7 +158,7 @@ function OEMRepartStandard {
 		if [ -z "$OEM_WITHOUTSWAP" ];then
 			pID=$((pID + 1))
 			partsize=+"$swapsize"M
-			if [ $newparts -eq 1 ];then
+			if [ -z "$OEM_SYSTEMSIZE" ] && [ $newparts -eq 1 ];then
 				partsize=.
 			fi
 			createPartitionerInput \
@@ -172,7 +172,7 @@ function OEMRepartStandard {
 		if [ ! -z "$OEM_RECOVERY" ];then
 			pID=$((pID + 1))
 			partsize=+"$recoMByte"M
-			if [ $newparts -eq 1 ];then
+			if [ -z "$OEM_SYSTEMSIZE" ] && [ $newparts -eq 1 ];then
 				partsize=.
 			fi
 			createPartitionerInput \
