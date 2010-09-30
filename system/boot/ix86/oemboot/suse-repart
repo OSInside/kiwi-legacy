@@ -62,6 +62,8 @@ function OEMRepartStandard {
 	# p1: ( root )  +luks
 	# p2: [ boot ]
 	# -------------------------------------
+	local newparts=0
+	local partsize=0
 	#======================================
 	# check for boot partition
 	#--------------------------------------
@@ -127,17 +129,41 @@ function OEMRepartStandard {
 				d 2
 		fi
 		#======================================
+		# count partitions to be created
+		#--------------------------------------
+		if [ -z "$OEM_WITHOUTSWAP" ];then
+			newparts=$((newparts + 1))
+		fi
+		if [ ! -z "$OEM_RECOVERY" ];then
+			newparts=$((newparts + 1))
+		fi
+		if [ ! -z "$bootXMBytes" ];then
+			newparts=$((newparts + 1))
+		fi
+		if [ -z "$OEM_WITHOUTHOME" ];then
+			newparts=$((newparts + 1))
+		fi
+		#======================================
 		# repart root partition
 		#--------------------------------------
+		partsize=+"$disk1MBytes"M
+		if [ -z "$OEM_SYSTEMSIZE" ] && [ $newparts -eq 0 ];then
+			partsize=.
+		fi
 		createPartitionerInput \
-			d n p $pID . +"$disk1MBytes"M
+			d n p $pID . $partsize
 		#======================================
 		# add swap partition
 		#--------------------------------------
 		if [ -z "$OEM_WITHOUTSWAP" ];then
 			pID=$((pID + 1))
+			partsize=+"$swapsize"M
+			if [ $newparts -eq 1 ];then
+				partsize=.
+			fi
 			createPartitionerInput \
-				n p $pID . +"$swapsize"M t 2 82
+				n p $pID . $partsize t 2 82
+			newparts=$((newparts - 1))
 			swapParam=$pID
 		fi
 		#======================================
@@ -145,8 +171,13 @@ function OEMRepartStandard {
 		#--------------------------------------
 		if [ ! -z "$OEM_RECOVERY" ];then
 			pID=$((pID + 1))
+			partsize=+"$recoMByte"M
+			if [ $newparts -eq 1 ];then
+				partsize=.
+			fi
 			createPartitionerInput \
-				n p $pID . +"$recoMByte"M t $pID $recoID
+				n p $pID . $partsize t $pID $recoID
+			newparts=$((newparts - 1))
 			recoParam=$pID
 		fi
 		#======================================
@@ -154,8 +185,10 @@ function OEMRepartStandard {
 		#--------------------------------------
 		if [ ! -z "$bootXMBytes" ];then
 			pID=$((pID + 1))
+			partsize=+"$bootXMBytes"M
 			createPartitionerInput \
-				n p $pID . +"$bootXMBytes"M t $pID $bootpartID
+				n p $pID . $partsize t $pID $bootpartID
+			newparts=$((newparts - 1))
 			bootParam=$pID
 		fi
 		#======================================
@@ -165,6 +198,7 @@ function OEMRepartStandard {
 			pID=$((pID + 1))
 			createPartitionerInput \
 				n p $pID . .
+			newparts=$((newparts - 1))
 			homeParam=$pID
 		fi
 		#======================================
