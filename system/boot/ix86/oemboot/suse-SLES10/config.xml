@@ -107,6 +107,8 @@
 		<package name="bc"/>
 		<package name="gettext"/>
 		<package name="kexec-tools"/>
+		<package name="syslinux"/>
+		<package name="dosfstools"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>

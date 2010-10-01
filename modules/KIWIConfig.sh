@@ -963,7 +963,7 @@ function suseStripInitrd {
 		dmsetup dialog awk gawk clicfs cryptsetup clear blkid fbiterm
 		gettext diff bc utimer cmp busybox kexec pam_console_apply
 		setterm kpartx vgcfgbackup vgcfgrestore lsdasd dasd_configure
-		qeth_configure fdasd
+		qeth_configure fdasd mkdosfs
 	"
 	tools="$tools $@"
 	for path in /sbin /usr/sbin /usr/bin /bin;do
@@ -1030,8 +1030,8 @@ function suseGFXBoot {
 	if [ ! -z "$kiwi_hybrid" ];then
 		loader="isolinux"
 	fi
-	if [ "$loader" = "extlinux" ];then
-		# need the same data for extlinux and for isolinux
+	if [ "$loader" = "extlinux" ] || [ "$loader" = "syslinux" ];then
+		# need the same data for sys|extlinux and for isolinux
 		loader="isolinux"
 	fi
 	if [ "$loader" = "zipl" ];then

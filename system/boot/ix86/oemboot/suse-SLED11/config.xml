@@ -128,6 +128,7 @@
 		<package name="bc"/>
 		<package name="gettext-runtime"/>
 		<package name="syslinux"/>
+		<package name="dosfstools"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
@@ -138,7 +139,6 @@
 		<package name="openssl-certs"/>
 	</packages>
 	<packages type="delete">
-		<package name="syslinux"/>
 		<package name="cracklib-dict-small"/>
 		<package name="cracklib-dict-full"/>
 		<package name="PolicyKit"/>
