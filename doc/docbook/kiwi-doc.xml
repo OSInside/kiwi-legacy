@@ -53,7 +53,7 @@
     </mediaobject>
   </bookinfo>
 
-  <xi:include href="kiwi-doc-intro.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+  <!--<xi:include href="kiwi-doc-intro.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>-->
   <xi:include href="kiwi-doc-workflow.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
   <xi:include href="kiwi-doc-description.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
   <xi:include href="kiwi-doc-appliance.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
