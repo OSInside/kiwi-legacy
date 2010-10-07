@@ -1596,7 +1596,7 @@ sub setupBootDisk {
 					$kiwi -> error ("LVM: No such directory $system/$pname");
 					$kiwi -> failed ();
 					return undef;
-                }
+				}
 				#==========================================
 				# store volume sizes in lvmparts
 				#------------------------------------------
@@ -3186,7 +3186,8 @@ sub setupBootLoaderConfiguration {
 		#------------------------------------------
 		print FD "color cyan/blue white/blue\n";
 		print FD "default $defaultBootNr\n";
-		print FD "timeout 10\n";
+		my $bootTimeout = $type{boottimeout} ? int $type{boottimeout} : 10;
+		print FD "timeout $bootTimeout\n";
 		if ($type =~ /^KIWI (CD|USB)/) {
 			my $dev = $1 eq 'CD' ? '(cd)' : '(hd0,0)';
 			print FD "gfxmenu $dev/boot/message\n";
@@ -3368,7 +3369,8 @@ sub setupBootLoaderConfiguration {
 		print FD "default  $defaultBootLabel"."\n";
 		print FD "implicit 1"."\n";
 		print FD "prompt   1"."\n";
-		print FD "timeout  200"."\n";
+		my $bootTimeout = $type{boottimeout} ? int $type{boottimeout} : 200;
+		print FD "timeout  $bootTimeout"."\n";
 		if ($syslinux_new_format) {
 			print FD "ui gfxboot bootlogo isolinux.msg"."\n";
 		} else {

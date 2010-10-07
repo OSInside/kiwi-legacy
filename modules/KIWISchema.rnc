@@ -1372,6 +1372,12 @@ div {
 		attribute bootloader {
 			"extlinux" | "grub" | "syslinux" | "zipl"
 		}
+	k.type.boottimeout.attribute =
+		## Specifies the boot timeout in seconds prior to launching
+		## the default boot option. the unit for the timeout value
+		## is seconds if GRUB is used as the boot loader and 1/10
+		## seconds if syslinux is used
+		attribute boottimeout { xsd:nonNegativeInteger }
 	k.type.installboot.attribute =
 		## Specifies the bootloader default boot entry for the"
 		## initial boot of a kiwi install image. This value is"
@@ -1453,6 +1459,7 @@ div {
 		k.type.hybrid.attribute? &
 		k.type.hybridpersistent.attribute? &
 		k.type.bootloader.attribute? &
+		k.type.boottimeout.attribute? &
 		k.type.installboot.attribute? &
 		k.type.compressed.attribute? &
 		k.type.vga.attribute? &

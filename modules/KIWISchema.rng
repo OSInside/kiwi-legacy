@@ -1886,6 +1886,15 @@ At the moment grub, zipl and sys|extlinux are supported</a:documentation>
         </choice>
       </attribute>
     </define>
+    <define name="k.type.boottimeout.attribute">
+      <attribute name="boottimeout">
+        <a:documentation>Specifies the boot timeout in seconds prior to launching
+the default boot option. the unit for the timeout value
+is seconds if GRUB is used as the boot loader and 1/10
+seconds if syslinux is used</a:documentation>
+        <data type="nonNegativeInteger"/>
+      </attribute>
+    </define>
     <define name="k.type.installboot.attribute">
       <attribute name="installboot">
         <a:documentation>Specifies the bootloader default boot entry for the"
@@ -2056,6 +2065,9 @@ file for write operations</a:documentation>
         </optional>
         <optional>
           <ref name="k.type.bootloader.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.type.boottimeout.attribute"/>
         </optional>
         <optional>
           <ref name="k.type.installboot.attribute"/>

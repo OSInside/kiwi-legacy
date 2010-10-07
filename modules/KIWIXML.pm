@@ -828,6 +828,7 @@ sub getImageTypeAndAttributes {
 		$record{installstick}  = $node -> getAttribute("installstick");
 		$record{vga}           = $node -> getAttribute("vga");
 		$record{bootloader}    = $node -> getAttribute("bootloader");
+		$record{boottimeout}   = $node -> getAttribute("boottimeout");
 		$record{installboot}   = $node -> getAttribute("installboot");
 		$record{checkprebuilt} = $node -> getAttribute("checkprebuilt");
 		$record{baseroot}      = $node -> getAttribute("baseroot");
@@ -2582,6 +2583,9 @@ sub getImageConfig {
 	}
 	if ((%type) && ($type{bootloader})) {
 		$result{kiwi_bootloader} = $type{bootloader};
+	}
+	if ((%type) && ($type{boottimeout})) {
+		$result{KIWI_BOOT_TIMEOUT} = $type{boottimeout};
 	}
 	if ((%type) && ($type{installboot})) {
 		$result{kiwi_installboot} = $type{installboot};
