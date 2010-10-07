@@ -3861,7 +3861,10 @@ sub installBootLoader {
 				return undef;
 			}
 		} else {
-			$bootdev = $diskname."1";
+			$bootdev = $diskname."2";
+			if (! -e $bootdev) {
+				$bootdev = $diskname."1";
+			}
 			$haveRealDevice = 1;
 		}
 		#==========================================
