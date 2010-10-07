@@ -1905,24 +1905,31 @@ sub setupBootDisk {
 				}
 			}
 		} else {
+			my $bootpartsize=".";
 			if ($bootloader =~ /(sys|ext)linux/) {
 				my $partid = 6;
 				if ($bootloader eq "extlinux" ) {
 					$partid = 83;
 				}
 				my $lvmsize = $this->{vmmbyte} - $syslbootMB;
+				if ($haveDiskDevice) {
+					$bootpartsize = "+".$syslbootMB."M";
+				}
 				@commands = (
 					"n","p","1",".","+".$lvmsize."M",
-					"n","p","2",".",".",
+					"n","p","2",".",$bootpartsize,
 					"t","2",$partid,
 					"t","1","8e",
 					"a","2","w","q"
 				);
 			} else {
 				my $lvmsize = $this->{vmmbyte} - $lvmbootMB;
+				if ($haveDiskDevice) {
+					$bootpartsize = "+".$lvmbootMB."M";
+				}
 				@commands = (
 					"n","p","1",".","+".$lvmsize."M",
-					"n","p","2",".",".",
+					"n","p","2",".",$bootpartsize,
 					"t","1","8e",
 					"a","2","w","q"
 				);
