@@ -529,10 +529,15 @@
                 >usbboot/suse-*</sgmltag>" attribute to select the USB
               boot image for the system. For a USB image you may also
               select GRUB or Syslinux as a bootloader by setting the
-              optional <sgmltag>bootloader</sgmltag> attribute to grub
-              ot syslinux, respectively. The USB image may also be
-              created with LVM support. The same rules as indicated for
-              the OEM image apply. </para>
+              optional <sgmltag class="attribute">bootloader</sgmltag>
+              attribute to grub or syslinux, respectively. The boot timeout
+              value my be set by using the optional 
+              <sgmltag class="attribute">boottimeout</sgmltag> attribute.
+              The unit for the timeout value is seconds if GRUB is used
+              as the boot loader and 1/10 seconds if syslinux is used as
+              the boot loader. The USB image may also be created with LVM
+              support. The same rules as indicated for the OEM image
+              apply. </para>
           </listitem>
         </varlistentry>
         <varlistentry>
@@ -1008,7 +1013,7 @@
                 <screen><command>sfdisk</command> --list-type </screen>
 
                 <para>The required <sgmltag class="attribute"
-                    >number</sgmltag> attribute provides the the number
+                    >number</sgmltag> attribute provides the number
                   of the partition to be created. The size of the
                   partition may be specified with the optional size
                   attribute. The optional mountpoint attribute provides

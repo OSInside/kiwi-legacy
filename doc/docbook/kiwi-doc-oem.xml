@@ -221,8 +221,8 @@
       <itemizedlist>
         <listitem>
           <para>The bootloader will be setup to boot the installed
-            system. There is no multiboot setup. The user has to take
-            care for the setup of a multiboot bootloader himself.
+            system. There is no multiboot setup. The user is expected
+            to implement the setup of a multiboot bootloader.
           </para>
         </listitem>
         <listitem>
