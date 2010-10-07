@@ -1791,9 +1791,6 @@ sub setupBootDisk {
 	# add extra Xen boot options if necessary
 	#------------------------------------------
 	my $extra = "";
-	if (($type{bootprofile} eq "xen") && ($xendomain eq "domU")) {
-		$extra = "xencons=tty ";
-	}
 	#==========================================
 	# Create boot loader configuration
 	#------------------------------------------

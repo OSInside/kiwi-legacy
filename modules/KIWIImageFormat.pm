@@ -550,7 +550,6 @@ sub createXENConfiguration {
 	#------------------------------------------
 	if ($type{type} eq "xen") {
 		print $FD 'root="'.$part.' ro"'."\n";
-		print $FD 'extra=" xencons=tty "'."\n";
 	}
 	close $FD;
 	$kiwi -> done();
