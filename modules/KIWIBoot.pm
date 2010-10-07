@@ -4189,6 +4189,7 @@ sub setStoragePartition {
 	my $result;
 	my $status;
 	my $ignore;
+	my $action;
 	if (! defined $tool) {
 		$tool = "fdisk";
 	}
@@ -4211,6 +4212,9 @@ sub setStoragePartition {
 			}
 			print FD "y\n";
 			foreach my $cmd (@commands) {
+				if ($cmd =~ /[ntwq]$/) {
+					$action = $cmd;
+				}
 				if (($ignore) && ($cmd =~ /[ntwq]$/)) {
 					undef $ignore;
 				} elsif ($ignore) {
@@ -4223,7 +4227,7 @@ sub setStoragePartition {
 				if ($cmd eq "p") {
 					next;
 				}
-				if ($cmd =~ /^[0-9]$/) {
+				if (($cmd =~ /^[0-9]$/) && ($action ne "t")) {
 					next;
 				}
 				if (($cmd eq "83") || ($cmd eq "8e")) {
