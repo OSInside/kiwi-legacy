@@ -2510,6 +2510,7 @@ function probeUSB {
 	local hwicmd="/usr/sbin/hwinfo"
 	export HAVE_USB="no"
 	export SCAN_USB="not-started"
+	udevPending
 	if [ $HAVE_MODULES_ORDER = 0 ];then
 		#======================================
 		# load host controller modules
