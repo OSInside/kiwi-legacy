@@ -3263,7 +3263,9 @@ sub getList {
 				push @pattlist,"pattern:".$pattern;
 			}
 			if (@pattlist) {
-				if (($manager ne "zypper") && ($manager ne "yum")) {
+				if (($manager eq "ensconce")) {
+					# nothing to do for ensconce here...
+				} elsif (($manager ne "zypper") && ($manager ne "yum")) {
 					#==========================================
 					# turn patterns into pacs for this manager
 					#------------------------------------------
