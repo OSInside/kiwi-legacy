@@ -26,7 +26,7 @@ db:info [
 	db:releaseinfo [
 		"$Id: kiwi.rnc 2957 2008-01-11 12:53:39Z thomas-schraitle $"
 	]
-	db:releaseinfo [ "RNC Schema Version 4.7" ]
+	db:releaseinfo [ "RNC Schema Version 4.8" ]
 	db:pubdate [ "START" ]
 	db:pubdate [ "2008-01-08" ]
 ]
@@ -63,7 +63,7 @@ div {
 		attribute inherit { text }
 	k.image.schemaversion.attribute =
 		## The allowed Schema version (fixed value)
-		attribute schemaversion { "4.7" }
+		attribute schemaversion { "4.8" }
 	k.image.kiwirevision.attribute =
 		## A kiwi SVN revision number which is known to build
 		## a working image from this description. If the kiwi SVN
@@ -1040,25 +1040,6 @@ div {
 }
 
 #==========================================
-# common element <oem-home>
-#
-div {
-	k.oem-home.content = xsd:boolean
-	k.oem-home.attlist = empty
-	k.oem-home =
-		## For oemboot driven images: use a home partition yes/no
-		[
-		db:para [
-			"For oemboot driven images: use a home partition yes/no."
-		]
-		]
-		element oem-home {
-			k.oem-home.attlist,
-			k.oem-home.content
-		}
-}
-
-#==========================================
 # common element <oem-recovery>
 #
 div {
@@ -1319,10 +1300,6 @@ div {
 	k.type.fsnocheck.attribute =
 		## Turn off periodic filesystem checks on ext2/3/4.
 		attribute fsnocheck { xsd:boolean }
-	k.type.lvm.attribute =
-		## Specify whether LVM should be used or not. This is effective
-		## for the types oem,usb and vmx
-		attribute lvm { xsd:boolean }
 	k.type.baseroot.attribute =
 		## Specify the path to a pre created base root system.
 		attribute baseroot { text }
@@ -1449,7 +1426,6 @@ div {
 	k.type.attlist =
 		k.type.image.attribute &
 		k.type.fsnocheck.attribute? &
-		k.type.lvm.attribute? &
 		k.type.checkprebuilt.attribute? &
 		k.type.bootprofile.attribute? &
 		k.type.bootkernel.attribute? &
@@ -1478,7 +1454,7 @@ div {
 		element type { 
 			k.type.attlist &
             k.ec2config? &
-			k.lvmvolumes? &
+			k.systemdisk? &
 			k.oemconfig? &
 			k.pxedeploy? &
 			k.size? &
@@ -1527,24 +1503,24 @@ div {
 
 
 #==========================================
-# common element <lvmvolumes>
+# common element <systemdisk>
 #
 div {
-	k.lvmvolumes.lvmgroup.attribute =
+	k.systemdisk.lvmgroup.attribute =
 		## Specify Volume group name, default is kiwiVG.
-		attribute lvmgroup { text }
-    k.lvmvolumes.attlist =
-		k.lvmvolumes.lvmgroup.attribute?
+		attribute name { text }
+    k.systemdisk.attlist =
+		k.systemdisk.lvmgroup.attribute?
 
-	k.lvmvolumes =
+	k.systemdisk =
 		## Specify LVM volumes other than the root volume
 		[
 		db:para [
 			"Specify LVM volumes other than the root volume."
 		]
 		]
-		element lvmvolumes {
-			k.lvmvolumes.attlist &
+		element systemdisk {
+			k.systemdisk.attlist &
 			k.volume*
 		}
 }
@@ -2158,7 +2134,6 @@ div {
 			k.oem-swap? &
 			k.oem-align-partition? &
 			k.oem-partition-install? &
-			k.oem-home? &
 			k.oem-boot-title? &
 			k.oem-kiwi-initrd? &
 			k.oem-swapsize? &

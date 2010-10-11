@@ -70,12 +70,6 @@ function OEMRepartStandard {
 	#--------------------------------------
 	createBootDeviceData 2
 	#======================================
-	# deactivate features if required
-	#--------------------------------------
-	if [ "$haveBootPartition" = "yes" ];then
-		export OEM_WITHOUTHOME=1
-	fi
-	#======================================
 	# setup initial boot device ID
 	#--------------------------------------
 	export bootid=1
@@ -85,14 +79,10 @@ function OEMRepartStandard {
 	#======================================
 	# calculate partition sizes
 	#--------------------------------------
-	minhome=0
-	if [ -z "$OEM_WITHOUTHOME" ];then
-		minhome=500
-	fi
 	diskXMBytes=$(($(partitionSize $imageDiskDevice) / 1024))
 	diskP1MByte=$(($(partitionSize $(ddn $imageDiskDevice 1)) / 1024))
 	diskRMBytes=$((
-		diskXMBytes - diskP1MByte - swapsize - recoMByte - bootXMBytes - minhome
+		diskXMBytes - diskP1MByte - swapsize - recoMByte - bootXMBytes
 	))
 	disk1MBytes=$((diskP1MByte + diskRMBytes))
 	if [ ! -z "$OEM_SYSTEMSIZE" ];then
@@ -121,7 +111,6 @@ function OEMRepartStandard {
 		bootParam=1
 		recoParam=no
 		swapParam=no
-		homeParam=no
 		#======================================
 		# clean/backup boot partition
 		#--------------------------------------
@@ -139,9 +128,6 @@ function OEMRepartStandard {
 			newparts=$((newparts + 1))
 		fi
 		if [ ! -z "$bootXMBytes" ];then
-			newparts=$((newparts + 1))
-		fi
-		if [ -z "$OEM_WITHOUTHOME" ];then
 			newparts=$((newparts + 1))
 		fi
 		#======================================
@@ -173,9 +159,6 @@ function OEMRepartStandard {
 		if [ ! -z "$OEM_RECOVERY" ];then
 			pID=$((pID + 1))
 			partsize=+"$recoMByte"M
-			if [ -z "$OEM_SYSTEMSIZE" ] && [ $newparts -eq 1 ];then
-				partsize=.
-			fi
 			createPartitionerInput \
 				n p $pID . $partsize t $pID $recoID
 			newparts=$((newparts - 1))
@@ -193,20 +176,10 @@ function OEMRepartStandard {
 			bootParam=$pID
 		fi
 		#======================================
-		# add home partition
-		#--------------------------------------
-		if [ -z "$OEM_WITHOUTHOME" ];then
-			pID=$((pID + 1))
-			createPartitionerInput \
-				n p $pID . .
-			newparts=$((newparts - 1))
-			homeParam=$pID
-		fi
-		#======================================
 		# setup new device names
 		#--------------------------------------
 		setupDeviceNames \
-			1 $swapParam $homeParam $recoParam $bootParam no
+			1 $swapParam $recoParam $bootParam no
 		callPartitioner $input
 	fi
 	#======================================
@@ -241,10 +214,6 @@ function OEMRepartSplit {
 	# no recovery support in union mode
 	#--------------------------------------
 	unset OEM_RECOVERY
-	#====================================== 
-	# no homepart support for union mode
-	#--------------------------------------
-	export OEM_WITHOUTHOME=1
 	#======================================
 	# check for boot partition
 	#--------------------------------------
@@ -302,7 +271,6 @@ function OEMRepartSplit {
 		bootParam=2
 		recoParam=no
 		swapParam=no
-		homeParam=no
 		#======================================
 		# clean/backup boot partition
 		#--------------------------------------
@@ -337,7 +305,7 @@ function OEMRepartSplit {
 		# setup new device names
 		#--------------------------------------
 		setupDeviceNames \
-			1 $swapParam $homeParam $recoParam $bootParam 2
+			1 $swapParam $recoParam $bootParam 2
 		callPartitioner $input
 	fi
 	#======================================
@@ -401,7 +369,6 @@ function OEMRepartLVM {
 		bootParam=2
 		recoParam=no
 		swapParam=no
-		homeParam=no
 		#======================================
 		# close open device mappings
 		#--------------------------------------
@@ -428,7 +395,7 @@ function OEMRepartLVM {
 		# setup new device names
 		#--------------------------------------
 		setupDeviceNames \
-			1 $swapParam $homeParam $recoParam $bootParam yes $VGROUP
+			1 $swapParam $recoParam $bootParam yes $VGROUP
 		callPartitioner $input
 		waitForStorageDevice $(ddn $imageDiskDevice $extendID)
 		dd if=/dev/zero of=$(ddn $imageDiskDevice $extendID) bs=1024 count=5
@@ -452,19 +419,16 @@ function OEMRepartLVM {
 			swapParam=yes
 		fi
 		#======================================
-		# Add LVHome if requested
+		# Extend root if no systemsize was set
 		#--------------------------------------
-		if [ -z "$OEM_WITHOUTHOME" ];then
-			lvcreate -l 100%FREE -n LVHome $VGROUP
-			homeParam=yes
-		elif [ -z "$OEM_SYSTEMSIZE" ];then
+		if [ -z "$OEM_SYSTEMSIZE" ];then
 			lvextend -l 100%FREE /dev/$VGROUP/LVRoot
 		fi
 		#======================================
 		# setup new device names
 		#--------------------------------------
 		setupDeviceNames \
-			1 $swapParam $homeParam $recoParam $bootParam yes $VGROUP
+			1 $swapParam $recoParam $bootParam yes $VGROUP
 	fi
 }
 
@@ -480,10 +444,6 @@ function OEMPartitionInstall {
 	# no recovery support for part install
 	#--------------------------------------
 	unset OEM_RECOVERY
-	#======================================
-	# no homepart support for part install
-	#--------------------------------------
-	export OEM_WITHOUTHOME=1
 	#======================================
 	# check for LVM, resize to full space
 	#--------------------------------------
@@ -524,7 +484,6 @@ function OEMRepart {
 	#--------------------------------------
 	if [ "$haveLuks" = "yes" ];then
 		unset  OEM_RECOVERY
-		export OEM_WITHOUTHOME=1
 	fi
 	#======================================
 	# Initialize
@@ -563,13 +522,6 @@ function OEMRepart {
 				systemException "Failed to create swap signature" "reboot"
 			fi
 		fi
-	fi
-	#======================================
-	# Create home file system
-	#--------------------------------------
-	if [ -z "$DONT_PARTITION" ] && [ -z "$OEM_WITHOUTHOME" ];then
-		Echo "Creating Home filesystem on $imageHomeDevice"
-		createFilesystem $imageHomeDevice
 	fi
 	#======================================
 	# Create recovery file system
@@ -709,11 +661,10 @@ function recreateVTOCTable {
 function setupDeviceNames {
 	local rootID=$1
 	local swapID=$2
-	local homeID=$3
-	local recoID=$4
-	local bootID=$5
-	local iorwID=$6
-	local vgroup=$7
+	local recoID=$3
+	local bootID=$4
+	local iorwID=$5
+	local vgroup=$6
 	if [ -z "$vgroup" ];then
 		#======================================
 		# set root device name
@@ -724,12 +675,6 @@ function setupDeviceNames {
 		#--------------------------------------
 		if [ ! $swapID = "no" ];then
 			export imageSwapDevice=$(ddn $imageDiskDevice $swapID)
-		fi
-		#======================================
-		# set home device name
-		#--------------------------------------
-		if [ ! $homeID = "no" ];then
-			export imageHomeDevice=$(ddn $imageDiskDevice $homeID)
 		fi
 		#======================================
 		# set recovery device name
@@ -764,12 +709,6 @@ function setupDeviceNames {
 		#--------------------------------------
 		if [ ! $swapID = "no" ];then
 			export imageSwapDevice=/dev/$vgroup/LVSwap
-		fi
-		#======================================
-		# set LVM home device name
-		#--------------------------------------
-		if [ ! $homeID = "no" ];then
-			export imageHomeDevice=/dev/$vgroup/LVHome
 		fi
 		#======================================
 		# set LVM recovery device name
@@ -867,7 +806,6 @@ function createLuksMaps {
 # disableOEMParameters
 #--------------------------------------
 function disableOEMParameters {
-	export OEM_WITHOUTHOME=1
 	export OEM_WITHOUTSWAP=1
 	unset OEM_RECOVERY
 	unset OEM_SYSTEMSIZE

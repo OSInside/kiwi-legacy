@@ -434,11 +434,10 @@ function OEMInstall {
 		# Setup device names for further boot
 		#--------------------------------------
 		# /.../
-		# no support for reocvery and extra home partition in
+		# no support for reocvery partition in
 		# partition install mode
 		# ----
 		export DONT_PARTITION=1
-		export OEM_WITHOUTHOME=1
 		unset  OEM_RECOVERY
 		if [ -z "$bID" ];then
 			bID=$rID

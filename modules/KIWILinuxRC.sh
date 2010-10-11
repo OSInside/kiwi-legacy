@@ -2128,7 +2128,6 @@ function updateRootDeviceFstab {
 			if \
 				[ ! $volume = "Root" ] && \
 				[ ! $volume = "Comp" ] && \
-				[ ! $volume = "Home" ] && \
 				[ ! $volume = "Swap" ]
 			then
 				echo "/dev/$VGROUP/LV$volume /$mpoint $FSTYPE defaults 0 0" \
@@ -6067,7 +6066,7 @@ function resetMountCounter {
 	local command
 	for device in \
 		$imageRootDevice $imageBootDevice \
-		$imageRecoveryDevice $imageHomeDevice
+		$imageRecoveryDevice
 	do
 		if [ ! -e $device ];then
 			continue

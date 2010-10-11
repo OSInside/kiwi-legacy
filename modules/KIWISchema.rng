@@ -23,7 +23,7 @@
 <grammar xmlns:db="http://docbook.org/ns/docbook" xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" xmlns:rng="http://relaxng.org/ns/structure/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
   <db:info>
     <db:releaseinfo>$Id: kiwi.rnc 2957 2008-01-11 12:53:39Z thomas-schraitle $</db:releaseinfo>
-    <db:releaseinfo>RNC Schema Version 4.7</db:releaseinfo>
+    <db:releaseinfo>RNC Schema Version 4.8</db:releaseinfo>
     <db:pubdate>START</db:pubdate>
     <db:pubdate>2008-01-08</db:pubdate>
   </db:info>
@@ -92,7 +92,7 @@ the package Information is inherited</a:documentation>
     <define name="k.image.schemaversion.attribute">
       <attribute name="schemaversion">
         <a:documentation>The allowed Schema version (fixed value)</a:documentation>
-        <value>4.7</value>
+        <value>4.8</value>
       </attribute>
     </define>
     <define name="k.image.kiwirevision.attribute">
@@ -1470,27 +1470,6 @@ will not have any effect</db:para>
   </div>
   <!--
     ==========================================
-    common element <oem-home>
-    
-  -->
-  <div>
-    <define name="k.oem-home.content">
-      <data type="boolean"/>
-    </define>
-    <define name="k.oem-home.attlist">
-      <empty/>
-    </define>
-    <define name="k.oem-home">
-      <element name="oem-home">
-        <a:documentation>For oemboot driven images: use a home partition yes/no</a:documentation>
-        <db:para>For oemboot driven images: use a home partition yes/no.</db:para>
-        <ref name="k.oem-home.attlist"/>
-        <ref name="k.oem-home.content"/>
-      </element>
-    </define>
-  </div>
-  <!--
-    ==========================================
     common element <oem-recovery>
     
   -->
@@ -1800,13 +1779,6 @@ the correct timezone and copy it to /etc/localtime.</db:para>
         <data type="boolean"/>
       </attribute>
     </define>
-    <define name="k.type.lvm.attribute">
-      <attribute name="lvm">
-        <a:documentation>Specify whether LVM should be used or not. This is effective
-for the types oem,usb and vmx</a:documentation>
-        <data type="boolean"/>
-      </attribute>
-    </define>
     <define name="k.type.baseroot.attribute">
       <attribute name="baseroot">
         <a:documentation>Specify the path to a pre created base root system.</a:documentation>
@@ -2037,9 +2009,6 @@ file for write operations</a:documentation>
           <ref name="k.type.fsnocheck.attribute"/>
         </optional>
         <optional>
-          <ref name="k.type.lvm.attribute"/>
-        </optional>
-        <optional>
           <ref name="k.type.checkprebuilt.attribute"/>
         </optional>
         <optional>
@@ -2119,7 +2088,7 @@ file for write operations</a:documentation>
             <ref name="k.ec2config"/>
           </optional>
           <optional>
-            <ref name="k.lvmvolumes"/>
+            <ref name="k.systemdisk"/>
           </optional>
           <optional>
             <ref name="k.oemconfig"/>
@@ -2193,26 +2162,26 @@ a extra volume.</db:para>
   </div>
   <!--
     ==========================================
-    common element <lvmvolumes>
+    common element <systemdisk>
     
   -->
   <div>
-    <define name="k.lvmvolumes.lvmgroup.attribute">
-      <attribute name="lvmgroup">
+    <define name="k.systemdisk.lvmgroup.attribute">
+      <attribute name="name">
         <a:documentation>Specify Volume group name, default is kiwiVG.</a:documentation>
       </attribute>
     </define>
-    <define name="k.lvmvolumes.attlist">
+    <define name="k.systemdisk.attlist">
       <optional>
-        <ref name="k.lvmvolumes.lvmgroup.attribute"/>
+        <ref name="k.systemdisk.lvmgroup.attribute"/>
       </optional>
     </define>
-    <define name="k.lvmvolumes">
-      <element name="lvmvolumes">
+    <define name="k.systemdisk">
+      <element name="systemdisk">
         <a:documentation>Specify LVM volumes other than the root volume</a:documentation>
         <db:para>Specify LVM volumes other than the root volume.</db:para>
         <interleave>
-          <ref name="k.lvmvolumes.attlist"/>
+          <ref name="k.systemdisk.attlist"/>
           <zeroOrMore>
             <ref name="k.volume"/>
           </zeroOrMore>
@@ -3091,9 +3060,6 @@ and setup the system disk</db:para>
           </optional>
           <optional>
             <ref name="k.oem-partition-install"/>
-          </optional>
-          <optional>
-            <ref name="k.oem-home"/>
           </optional>
           <optional>
             <ref name="k.oem-boot-title"/>

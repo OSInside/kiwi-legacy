@@ -387,9 +387,6 @@ sub new {
 		if (defined $foreignRepo->{"oem-swapsize"}) {
 			$this -> setForeignOEMOptionsElement ("oem-swapsize");
 		}
-		if (defined $foreignRepo->{"oem-home"}) {
-			$this -> setForeignOEMOptionsElement ("oem-home");
-		}
 		if (defined $foreignRepo->{"oem-systemsize"}) {
 			$this -> setForeignOEMOptionsElement ("oem-systemsize");
 		}
@@ -417,6 +414,9 @@ sub new {
 		if (defined $foreignRepo->{"oem-inplace-recovery"}) {
 			$this -> setForeignOEMOptionsElement ("oem-inplace-recovery");
 		}
+		if (defined $foreignRepo->{"lvm"}) {
+			$this -> setForeignSystemDiskElement();
+		}
 		#==========================================
 		# 5) foreign attributes in type
 		#------------------------------------------
@@ -428,11 +428,6 @@ sub new {
 		if (defined $foreignRepo->{"hybridpersistent"}) {
 			$this -> setForeignTypeAttribute (
 				"hybridpersistent",$foreignRepo->{"hybridpersistent"}
-			);
-		}
-		if (defined $foreignRepo->{"lvm"}) {
-			$this -> setForeignTypeAttribute (
-				"lvm",$foreignRepo->{"lvm"}
 			);
 		}
 		if (defined $foreignRepo->{"kernelcmdline"}) {
@@ -813,11 +808,13 @@ sub getImageTypeAndAttributes {
 		if ($count == 0) {
 			$first = $prim;
 		}
+		if (defined $node->getElementsByTagName("systemdisk")->get_node(1)) {
+			$record{lvm} = "true";
+		}
 		$record{node}          = $node;
 		$record{type}          = $node -> getAttribute("image");
 		$record{luks}          = $node -> getAttribute("luks");
 		$record{cmdline}       = $node -> getAttribute("kernelcmdline");
-		$record{lvm}           = $node -> getAttribute("lvm");
 		$record{compressed}    = $node -> getAttribute("compressed");
 		$record{boot}          = $node -> getAttribute("boot");
 		$record{volid}         = $node -> getAttribute("volid");
@@ -1277,6 +1274,50 @@ sub setForeignOEMOptionsElement {
 }
 
 #==========================================
+# setForeignSystemDiskElement
+#------------------------------------------
+sub setForeignSystemDiskElement {
+	# ...
+	# If given element exists in the foreign hash, set this
+	# element into the current systemdisk XML tree
+	# ---
+	my $this = shift;
+	my $item = shift;
+	my $kiwi = $this->{kiwi};
+	my $tnode= $this->{typeNode};
+	my $foreignRepo = $this->{foreignRepo};
+	my $value = $foreignRepo->{$item};
+	my $newconfig = 0;
+	my $addElement;
+	if ($item) {
+		$kiwi -> info ("Including foreign SystemDisk element $item: $value");
+		$addElement = new XML::LibXML::Element ("$item");
+		$addElement -> appendText ($value);
+	} else {
+		$kiwi -> info ("Including foreign SystemDisk element");
+	}
+	my $disk = $tnode -> getElementsByTagName ("systemdisk") -> get_node(1);
+	if (! defined $disk) {
+		$disk = new XML::LibXML::Element ("systemdisk");
+		$newconfig = 1;
+	}
+	if ($item) {
+		my $node = $disk -> getElementsByTagName ("$item");
+		if ($node) {
+			$node = $node -> get_node(1);
+			$disk -> removeChild ($node);
+		}
+		$disk -> appendChild ($addElement);
+	}
+	if ($newconfig) {
+		$this->{typeNode} -> appendChild ($disk);
+	}
+	$kiwi -> done ();
+	$this -> updateXML();
+	return $this;
+}
+
+#==========================================
 # setForeignMachineAttribute
 #------------------------------------------
 sub setForeignMachineAttribute {
@@ -1698,26 +1739,6 @@ sub getOEMRecoveryInPlace {
 		return undef;
 	}
 	return $inplace;
-}
-
-#==========================================
-# getOEMHome
-#------------------------------------------
-sub getOEMHome {
-	# ...
-	# Obtain the oem-home value or return undef
-	# ---
-	my $this = shift;
-	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
-	if (! defined $node) {
-		return undef;
-	}
-	my $home = $node -> getElementsByTagName ("oem-home");
-	if ((! defined $home) || ("$home" eq "")) {
-		return undef;
-	}
-	return $home;
 }
 
 #==========================================
@@ -2685,7 +2706,6 @@ sub getImageConfig {
 		my $oemswap  = $node -> getElementsByTagName ("oem-swap");
 		my $oemalign = $node -> getElementsByTagName ("oem-align-partition");
 		my $oempinst = $node -> getElementsByTagName ("oem-partition-install");
-		my $oemhome  = $node -> getElementsByTagName ("oem-home");
 		my $oemtitle = $node -> getElementsByTagName ("oem-boot-title");
 		my $oemkboot = $node -> getElementsByTagName ("oem-kiwi-initrd");
 		my $oemreboot= $node -> getElementsByTagName ("oem-reboot");
@@ -2704,9 +2724,6 @@ sub getImageConfig {
 		}
 		if ((defined $oemalign) && ("$oemalign" eq "true")) {
 			$result{kiwi_oemalign} = $oemalign;
-		}
-		if ((defined $oemhome) && ("$oemhome" eq "false")) {
-			$result{kiwi_oemhome} = "no";
 		}
 		if ((defined $oemrootMB) && ("$oemrootMB" > 0)) {
 			$result{kiwi_oemrootMB} = $oemrootMB;
@@ -2785,11 +2802,11 @@ sub getLVMGroupName {
 	# ---
 	my $this = shift;
 	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("lvmvolumes") -> get_node(1);
+	my $node = $tnode -> getElementsByTagName ("systemdisk") -> get_node(1);
 	if (! defined $node) {
 		return undef;
 	}
-	return $node -> getAttribute ("lvmgroup");
+	return $node -> getAttribute ("name");
 }
 
 #==========================================
@@ -2804,7 +2821,7 @@ sub getLVMVolumes {
 	my $this = shift;
 	my $kiwi = $this->{kiwi};
 	my $tnode= $this->{typeNode};
-	my $node = $tnode -> getElementsByTagName ("lvmvolumes") -> get_node(1);
+	my $node = $tnode -> getElementsByTagName ("systemdisk") -> get_node(1);
 	my %result = ();
 	if (! defined $node) {
 		return %result;

@@ -802,7 +802,7 @@ sub setTemplate {
 	#==========================================
 	# <description>
 	#------------------------------------------
-	print FD '<image schemaversion="4.5" ';
+	print FD '<image schemaversion="4.8" ';
 	print FD 'name="suse-migration-'.$product.'">'."\n";
 	print FD "\t".'<description type="system">'."\n";
 	print FD "\t\t".'<author>***AUTHOR***</author>'."\n";
@@ -814,9 +814,8 @@ sub setTemplate {
 	#------------------------------------------
 	print FD "\t".'<preferences>'."\n";
 	print FD "\t\t".'<type image="oem" boot="oemboot/suse-'.$product.'"';
-	print FD ' filesystem="ext3" format="iso">'."\n";
+	print FD ' filesystem="ext3" installiso="true">'."\n";
 	print FD "\t\t\t".'<oemconfig>'."\n";
-	print FD "\t\t\t\t".'<oem-home>false</oem-home>'."\n";
 	print FD "\t\t\t".'</oemconfig>'."\n";
 	print FD "\t\t".'</type>'."\n";
 	print FD "\t\t".'<version>1.1.1</version>'."\n";

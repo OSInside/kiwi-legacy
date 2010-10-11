@@ -225,10 +225,6 @@ function baseSetupOEMPartition {
 		echo "Setting up OEM_SWAPSIZE=$kiwi_oemswapMB"
 		echo "OEM_SWAPSIZE=$kiwi_oemswapMB" >> $oemfile
 	fi
-	if [ ! -z "$kiwi_oemhome" ];then
-		echo "Setting up OEM_WITHOUTHOME=1"
-		echo "OEM_WITHOUTHOME=1" >> $oemfile
-	fi
 	if [ ! -z "$kiwi_oemrootMB" ];then
 		echo "Setting up OEM_SYSTEMSIZE=$kiwi_oemrootMB"
 		echo "OEM_SYSTEMSIZE=$kiwi_oemrootMB" >> $oemfile

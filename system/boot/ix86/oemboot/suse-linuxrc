@@ -493,12 +493,6 @@ if [ ! -z "$KIWI_RECOVERY" ];then
 				systemException "Failed to restore swap signature" "reboot"
 			fi
 		fi
-		imageHomeDevice=$(cat /mnt/etc/fstab | grep /home | cut -f1 -d " ")
-		imageHomeDevice=$(echo $imageHomeDevice)
-		if [ -e "$imageHomeDevice" ];then
-			probeFileSystem $imageRootDevice
-			createFilesystem $imageHomeDevice
-		fi
 		imageBootDevice=$(
 			cat /mnt/etc/fstab|grep /.*boot|grep -v bind | sed -r 's/\s+/:/g')
 		if [ ! -z "$imageBootDevice" ];then
@@ -609,22 +603,6 @@ if [ "$LOCAL_BOOT" = "no" ];then
 		updateSwapDeviceFstab /config $imageSwapDevice
 	else
 		unset $imageSwapDevice
-	fi
-	if [ -z "$OEM_WITHOUTHOME" ] && [ -z "$DONT_PARTITION" ];then
-		if [ `ls /mnt/home/ | wc -l` != 0 ]; then
-			Echo "Found non empty home/ directory !"
-			Echo "Moving home/ data to home partition $imageHomeDevice"
-			mount $imageHomeDevice /mnt/mnt
-			mv /mnt/home/*  /mnt/mnt
-			mv /mnt/home/.* /mnt/mnt
-			umount /mnt/mnt
-		fi
-		FSTYPE_SAVE=$FSTYPE
-		probeFileSystem $imageHomeDevice
-		Echo "Activate home partition $imageHomeDevice in fstab"
-		echo "$(getDiskID $imageHomeDevice) /home $FSTYPE defaults 0 0" \
-			>> /config/etc/fstab
-		FSTYPE=$FSTYPE_SAVE
 	fi
 	#======================================
 	# setup: bootloader files

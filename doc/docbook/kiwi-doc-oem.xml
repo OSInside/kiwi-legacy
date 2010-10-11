@@ -177,7 +177,7 @@
         one lvm partition and one standard ext2 boot partition. KIWI
         creates the kiwiVG volume group, unless the lvmgroup attribute
         has been set, and adds logical volumes to the group based on the
-        configuration given by the <sgmltag>lvmvolumes</sgmltag> block
+        configuration given by the <sgmltag>systemdisk</sgmltag> block
         for this type. The filesystem for the volume group is determined
         by the <sgmltag class="attribute">filesystem</sgmltag> attribute
         of the type element. After booting the system the user has full
@@ -194,7 +194,7 @@
       <screen><command>kiwi</command> --create /tmp/myoem --type oem<!-- 
       --> -d /tmp/myoem-result --lvm</screen>
 
-      <para>With the optional <sgmltag>lvmvolumes</sgmltag> section you
+      <para>With the optional <sgmltag>systemdisk</sgmltag> section you
         can specify to have one or more top level directories in a
         s -deparate volume. See <xref linkend="chap.description"/> for a
         detailed explanation. </para>

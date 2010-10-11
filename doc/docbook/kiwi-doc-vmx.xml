@@ -188,7 +188,7 @@
       <screen><command>kiwi</command> --create /tmp/myvm --type vmx<!--
        --> -d /tmp/myvm-result --lvm </screen>
 
-      <para>With the optional lvmvolumes section you can set one or more
+      <para>With the optional systemdisk section you can set one or more
         top level directories into a separate volume. See <xref
           linkend="chap.description"/> for a detailed explanation.
       </para>

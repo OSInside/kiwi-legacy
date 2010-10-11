@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="4.7" name="Eucalyptus-Cloud-Node">
+<image schemaversion="4.8" name="Eucalyptus-Cloud-Node">
 	<description type="system">
 		<author>Robert Schweikert</author>
 		<contact>rschweikert@novell.com</contact>
@@ -11,7 +11,6 @@
 			<oemconfig>
 				<oem-boot-title>Eucalyptus Cloud Node</oem-boot-title>
 <!-- Do not create an extra partition -->
-				<oem-home>false</oem-home>
 				<oem-kiwi-initrd>true</oem-kiwi-initrd>
 				<oem-reboot>true</oem-reboot>
 				<oem-swap>true</oem-swap>

@@ -211,7 +211,7 @@
         as part of the <sgmltag>type</sgmltag> section in
         your <filename>config.xml</filename> file. </para>
 
-      <para>The optional <sgmltag>lvmvolumes</sgmltag> section can be used to set one or
+      <para>The optional <sgmltag>systemdisk</sgmltag> section can be used to set one or
         more top level directories into a separate volume. See 
         <xref linkend="chap.description"/> for a
         detailed explanation. </para>

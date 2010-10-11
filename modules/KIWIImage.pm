@@ -734,7 +734,6 @@ sub createImageUSB {
 	$main::ForeignRepo{"oem-align-partition"} = $xml -> getOEMAlignPartition();
 	$main::ForeignRepo{"oem-swapsize"}   = $xml -> getOEMSwapSize();
 	$main::ForeignRepo{"oem-systemsize"} = $xml -> getOEMSystemSize();
-	$main::ForeignRepo{"oem-home"}       = $xml -> getOEMHome();
 	$main::ForeignRepo{"oem-boot-title"} = $xml -> getOEMBootTitle();
 	$main::ForeignRepo{"oem-kiwi-initrd"}= $xml -> getOEMKiwiInitrd();
 	$main::ForeignRepo{"oem-reboot"}     = $xml -> getOEMReboot();
@@ -2535,7 +2534,6 @@ sub createImageSplit {
 	$main::ForeignRepo{"oem-align-partition"} = $xml -> getOEMAlignPartition();
 	$main::ForeignRepo{"oem-swapsize"}   = $xml -> getOEMSwapSize();
 	$main::ForeignRepo{"oem-systemsize"} = $xml -> getOEMSystemSize();
-	$main::ForeignRepo{"oem-home"}       = $xml -> getOEMHome();
 	$main::ForeignRepo{"oem-boot-title"} = $xml -> getOEMBootTitle();
 	$main::ForeignRepo{"oem-kiwi-initrd"}= $xml -> getOEMKiwiInitrd();
 	$main::ForeignRepo{"oem-reboot"}     = $xml -> getOEMReboot();

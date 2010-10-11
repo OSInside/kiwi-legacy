@@ -295,7 +295,7 @@
   &lt;version&gt;1.1.2&lt;/version&gt;
   &lt;packagemanager&gt;smart&lt;/packagemanager&gt;
   &lt;type image="name" ...&gt;
-    &lt;ec2config|lvmvolumes|oemconfig|pxedeploy|size|split|machine&gt;
+    &lt;ec2config|systemdisk|oemconfig|pxedeploy|size|split|machine&gt;
   &lt;/type&gt; 
 &lt;/preferences&gt;</screen>
 
@@ -466,7 +466,7 @@
               use logical volumes. Use the optional <sgmltag
                 class="attribute">lvm</sgmltag> attribute and specify
               the logical volume configuration with the
-                <sgmltag>lvmvolumes</sgmltag> child element. The default
+                <sgmltag>systemdisk</sgmltag> child element. The default
               volume group name is kiwiVG. Further configuration of the
               image is performed using the appropriate
                 <sgmltag>*config</sgmltag> child block. </para>
@@ -726,9 +726,9 @@
           </listitem>
         </varlistentry>
         <varlistentry>
-          <term><sgmltag>lvmvolumes</sgmltag></term>
+          <term><sgmltag>systemdisk</sgmltag></term>
           <listitem>
-            <para>Using the optional lvmvolumes section it possible to
+            <para>Using the optional systemdisk section it possible to
               create a LVM (Logical Volume Management) based storage
               layout. By default, the volume group is named kiwiVG. It
               is possible to change the name of the group by setting the
@@ -739,10 +739,10 @@
             <para>The following example shows the creation of a volume
               named usr and a volume named var inside the volume group
               systemVG. </para>
-            <screen> &lt;lvmvolumes lvmgroup="systemVG"&gt; 
+            <screen> &lt;systemdisk name="systemVG"&gt; 
   &lt;volume name="usr" freespace="100M"/&gt; 
   &lt;volume name="var" size="200M"/&gt; 
-&lt;/lvmvolumes&gt;</screen>
+&lt;/systemdisk&gt;</screen>
             <para>With the optional <sgmltag class="attribute"
                 >freespace</sgmltag> attribute it is possible to add
               space to the volume. If the freespace attribute is not set
@@ -788,18 +788,6 @@
                     you to set a custom name for the grub menu entry.
                     This value is represented by the
                       <varname>OEM_BOOT_TITLE</varname> variable in
-                      <filename>config.oempartition</filename>. </para>
-                </listitem>
-              </varlistentry>
-              <varlistentry>
-                <term><sgmltag class="starttag"
-                    >oem-home</sgmltag>true|false<sgmltag class="endtag"
-                    >oem-home</sgmltag></term>
-                <listitem>
-                  <para>Specify if a partition for the home directory
-                    should be created. Creation of a home partition is
-                    the default behavior. This value is represented by
-                    the <varname>OEM_WITHOUTHOME</varname> variable in
                       <filename>config.oempartition</filename>. </para>
                 </listitem>
               </varlistentry>
