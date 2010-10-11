@@ -42,14 +42,14 @@ Requires:       perl = %{perl_version}
 Requires:       perl-XML-LibXML perl-libwww-perl screen coreutils
 Requires:       perl-XML-LibXML-Common perl-XML-SAX perl-Config-IniFiles
 Requires:       kiwi-tools libxslt checkmedia
-%ifarch %ix86 x86_64
-Requires:       master-boot-code
-%endif
 %if %{suse_version} > 1030
 Requires:       satsolver-tools
 %endif
+%ifarch %ix86 x86_64
+Requires:       master-boot-code
 %if %{suse_version} > 1110
 Requires:       clicfs
+%endif
 %endif
 Summary:        OpenSuSE - KIWI Image System
 Version:        4.62
@@ -188,7 +188,10 @@ Authors:
 %package -n kiwi-desc-vmxboot
 License:        GPL v2 or later
 Requires:       kiwi = %{version}
-Requires:       multipath-tools parted grub
+Requires:       multipath-tools parted
+%ifarch %ix86 x86_64
+Requires:       grub
+%endif
 %if 0%{?suse_version} >= 1130
 Requires:       virt-utils
 %else
@@ -235,7 +238,10 @@ Requires:       virt-utils
 %else
 Requires:       qemu
 %endif
-Requires:       multipath-tools parted grub
+Requires:       multipath-tools parted
+%ifarch %ix86 x86_64
+Requires:       grub
+%endif
 %if %{suse_version} > 1010
 Requires: genisoimage
 %else
