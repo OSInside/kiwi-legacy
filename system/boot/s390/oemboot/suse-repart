@@ -391,6 +391,7 @@ function OEMRepartLVM {
 		Echo "Disk is too small, will not re-partition it"
 		disableOEMParameters
 		disableRepart
+		vgchange -a y $VGROUP
 	fi
 	#======================================
 	# write new partition table
