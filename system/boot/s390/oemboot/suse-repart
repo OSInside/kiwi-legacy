@@ -413,7 +413,7 @@ function OEMRepartLVM {
 		#--------------------------------------
 		if [ ! -z "$OEM_RECOVERY" ];then
 			createPartitionerInput \
-				n p $pID . +"$recoMByte"M t $pID $recoID
+				u y n p $pID . +"$recoMByte"M t $pID $recoID
 			recoParam=$pID
 			pID=$((pID + 1))
 		fi
@@ -421,7 +421,7 @@ function OEMRepartLVM {
 		# add rest space LVM partition
 		#--------------------------------------
 		createPartitionerInput \
-			n p $pID . . t $pID 8e
+			u y n p $pID . . t $pID 8e
 		extendID=$pID
 		#======================================
 		# setup new device names
