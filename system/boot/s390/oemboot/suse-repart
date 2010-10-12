@@ -688,6 +688,15 @@ function recreateVTOCTable {
 	# re-create VTOC re-using existing partition sizes
 	# ----
 	Echo "Recreate VTOC table [ $imageDiskDevice ]"
+	if [ ! -z "$haveLVM" ];then
+		#======================================
+		# close open device mappings
+		#--------------------------------------
+		if [ "$haveLuks" = "yes" ];then
+			luksClose
+		fi
+		vgchange -an
+	fi
 	createPartitionerInput u y w
 	callPartitioner $input
 	rm -f $input
