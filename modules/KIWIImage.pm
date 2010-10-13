@@ -306,34 +306,48 @@ sub createImageClicFS {
 }
 
 #==========================================
-# createImageEXT2
+# createImageEXT
 #------------------------------------------
-sub createImageEXT2 {
+sub createImageEXT {
 	# ...
 	# Create EXT2 image from source tree
 	# ---
 	my $this    = shift;
 	my $journal = shift;
+	my $device  = shift;
 	#==========================================
 	# PRE filesystem setup
 	#------------------------------------------
-	my $name = $this -> preImage ();
+	my $name = $this -> preImage ($device);
 	if (! defined $name) {
 		return undef;
 	}
 	#==========================================
 	# Create filesystem on extend
 	#------------------------------------------
-	if (! $this -> setupEXT2 ( $name,$journal )) {
+	if (! $this -> setupEXT2 ( $name,$journal,$device )) {
 		return undef;
 	}
 	#==========================================
 	# POST filesystem setup
 	#------------------------------------------
-	if (! $this -> postImage ($name)) {
+	if (! $this -> postImage ($name,undef,undef,$device)) {
 		return undef;
 	}
 	return $this;
+}
+
+#==========================================
+# createImageEXT2
+#------------------------------------------
+sub createImageEXT2 {
+	# ...
+	# create journaled EXT2 image from source tree
+	# ---
+	my $this = shift;
+	my $device  = shift;
+	my $journal = "journaled-ext2";
+	return $this -> createImageEXT ($journal,$device);
 }
 
 #==========================================
@@ -344,7 +358,9 @@ sub createImageEXT3 {
 	# create journaled EXT3 image from source tree
 	# ---
 	my $this = shift;
-	return $this -> createImageEXT2 ("journaled-ext3");
+	my $device  = shift;
+	my $journal = "journaled-ext3";
+	return $this -> createImageEXT ($journal,$device);
 }
 
 #==========================================
@@ -355,7 +371,9 @@ sub createImageEXT4 {
 	# create journaled EXT4 image from source tree
 	# ---
 	my $this = shift;
-	return $this -> createImageEXT2 ("journaled-ext4");
+	my $device  = shift;
+	my $journal = "journaled-ext4";
+	return $this -> createImageEXT ($journal,$device);
 }
 
 #==========================================
@@ -366,23 +384,24 @@ sub createImageReiserFS {
 	# create journaled ReiserFS image from source tree
 	# ---
 	my $this = shift;
+	my $device  = shift;
 	#==========================================
 	# PRE filesystem setup
 	#------------------------------------------
-	my $name = $this -> preImage ();
+	my $name = $this -> preImage ($device);
 	if (! defined $name) {
 		return undef;
 	}
 	#==========================================
 	# Create filesystem on extend
 	#------------------------------------------
-	if (! $this -> setupReiser ( $name )) {
+	if (! $this -> setupReiser ( $name,$device )) {
 		return undef;
 	}
 	#==========================================
 	# POST filesystem setup
 	#------------------------------------------
-	if (! $this -> postImage ($name)) {
+	if (! $this -> postImage ($name,undef,undef,$device)) {
 		return undef;
 	}
 	return $this;
@@ -396,23 +415,24 @@ sub createImageBTRFS {
 	# create BTRFS image from source tree
 	# ---
 	my $this = shift;
+	my $device  = shift;
 	#==========================================
 	# PRE filesystem setup
 	#------------------------------------------
-	my $name = $this -> preImage ();
+	my $name = $this -> preImage ($device);
 	if (! defined $name) {
 		return undef;
 	}
 	#==========================================
 	# Create filesystem on extend
 	#------------------------------------------
-	if (! $this -> setupBTRFS ( $name )) {
+	if (! $this -> setupBTRFS ( $name,$device )) {
 		return undef;
 	}
 	#==========================================
 	# POST filesystem setup
 	#------------------------------------------
-	if (! $this -> postImage ($name)) {
+	if (! $this -> postImage ($name,undef,undef,$device)) {
 		return undef;
 	}
 	return $this;
@@ -2726,9 +2746,9 @@ sub preImage {
 	# dependant tasks before the logical extend
 	# has been created
 	# ---
-	my $this = shift;
+	my $this       = shift;
 	my $haveExtend = shift;
-	my $quiet= shift;
+	my $quiet      = shift;
 	#==========================================
 	# Get image creation date and name
 	#------------------------------------------
@@ -2935,19 +2955,20 @@ sub postImage {
 	my $name  = shift;
 	my $nozip = shift;
 	my $fstype= shift;
+	my $device= shift;
 	my $kiwi  = $this->{kiwi};
 	my $xml   = $this->{xml};
 	#==========================================
 	# mount logical extend for data transfer
 	#------------------------------------------
-	my $extend = $this -> mountLogicalExtend ($name);
+	my $extend = $this -> mountLogicalExtend ($name,undef,$device);
 	if (! defined $extend) {
 		return undef;
 	}
 	#==========================================
 	# copy physical to logical
 	#------------------------------------------
-	if (! $this -> installLogicalExtend ($extend)) {
+	if (! $this -> installLogicalExtend ($extend,undef,$device)) {
 		$this -> cleanLuks();
 		return undef;
 	}
@@ -3187,6 +3208,7 @@ sub installLogicalExtend {
 	my $this   = shift;
 	my $extend = shift;
 	my $source = shift;
+	my $device = shift;
 	my $kiwi   = $this->{kiwi};
 	my $imageTree = $this->{imageTree};
 	if (! defined $source) {
@@ -3209,6 +3231,24 @@ sub installLogicalExtend {
 		return undef;
 	}
 	$kiwi -> done();
+	#==========================================
+	# dump image file from device if requested
+	#------------------------------------------
+	if ($device) {
+		$this -> cleanMount();
+		$name = $this -> buildImageName ();
+		$kiwi -> info ("Dumping filesystem image from $device...");
+		$data = qxx ("dd if=$device of=$this->{imageDest}/$name bs=32k 2>&1");
+		$code = $? >> 8;
+		if ($code != 0) {
+			$kiwi -> failed ();
+			$kiwi -> error  ("Failed to load filesystem image");
+			$kiwi -> failed ();
+			$kiwi -> error  ($data);
+			return undef;
+		}
+		$kiwi -> done();
+	}
 	return $extend;
 }
 
@@ -3286,23 +3326,30 @@ sub setupLogicalExtend {
 # mountLogicalExtend
 #------------------------------------------
 sub mountLogicalExtend {
-	my $this = shift;
-	my $name = shift;
-	my $opts = shift;
-	my $kiwi = $this->{kiwi};
+	my $this   = shift;
+	my $name   = shift;
+	my $opts   = shift;
+	my $device = shift;
+	my $kiwi   = $this->{kiwi};
 	#==========================================
 	# mount logical extend for data transfer
 	#------------------------------------------
-	mkdir "$this->{imageDest}/mnt-$$";
-	my $mount = "mount -o loop";
+	my $target = "$this->{imageDest}/$name";
+	my $mount  = "mount";
 	if (defined $opts) {
-		$mount = "mount $opts -o loop";
+		$mount = "mount $opts";
 	}
+	if ($device) {
+		$target = $device;
+	} else {
+		$mount .= " -o loop";
+	}
+	mkdir "$this->{imageDest}/mnt-$$";
 	#==========================================
 	# check for filesystem options
 	#------------------------------------------
 	my $fstype = qxx (
-		"/sbin/blkid -c /dev/null -s TYPE -o value $this->{imageDest}/$name"
+		"/sbin/blkid -c /dev/null -s TYPE -o value $target"
 	);
 	chomp $fstype;
 	if ($fstype eq "ext4") {
@@ -3313,7 +3360,7 @@ sub mountLogicalExtend {
 		$mount .= ",nodelalloc";
 	}
 	my $data= qxx (
-		"$mount $this->{imageDest}/$name $this->{imageDest}/mnt-$$ 2>&1"
+		"$mount $target $this->{imageDest}/mnt-$$ 2>&1"
 	);
 	my $code= $? >> 8;
 	if ($code != 0) {
@@ -3321,7 +3368,7 @@ sub mountLogicalExtend {
 		$kiwi -> error  ("Image loop mount failed:");
 		$kiwi -> failed ();
 		$kiwi -> error  (
-			"mnt: $this->{imageDest}/$name -> $this->{imageDest}/mnt-$$: $data"
+			"mnt: $target -> $this->{imageDest}/mnt-$$: $data"
 		);
 		return undef;
 	}
@@ -3469,6 +3516,7 @@ sub setupEXT2 {
 	my $this    = shift;
 	my $name    = shift;
 	my $journal = shift;
+	my $device  = shift;
 	my $kiwi    = $this->{kiwi};
 	my $xml  = $this->{xml};
 	my %type = %{$xml->getImageTypeAndAttributes()};
@@ -3476,6 +3524,7 @@ sub setupEXT2 {
 	my $tuneopts;
 	my %FSopts = main::checkFSOptions();
 	my $fstool;
+	my $target = "$this->{imageDest}/$name";
 	if ((defined $journal) && ($journal eq "journaled-ext3")) {
 		$fsopts = $FSopts{ext3};
 		$fstool = "mkfs.ext3";
@@ -3491,10 +3540,13 @@ sub setupEXT2 {
 	}
 	$tuneopts = $type{fsnocheck} eq "true" ? "-c 0 -i 0" : "";
 	$tuneopts = $FSopts{extfstune} if $FSopts{extfstune};
-	my $data = qxx ("$fstool $fsopts $this->{imageDest}/$name 2>&1");
+	if ($device) {
+		$target = $device;
+	}
+	my $data = qxx ("$fstool $fsopts $target 2>&1");
 	my $code = $? >> 8;
 	if (!$code && $tuneopts) {
-		$data = qxx ("/sbin/tune2fs $tuneopts $this->{imageDest}/$name 2>&1");
+		$data = qxx ("/sbin/tune2fs $tuneopts $target 2>&1");
 		$code = $? >> 8;
 	}
 	if ($code != 0) {
@@ -3502,6 +3554,9 @@ sub setupEXT2 {
 		$kiwi -> failed ();
 		$kiwi -> error  ($data);
 		return undef;
+	}
+	if ($device) {
+		qxx ("touch $this->{imageDest}/$name");
 	}
 	$this -> restoreImageDest();
 	if ((defined $journal) && ($journal eq "journaled-ext3")) {
@@ -3520,13 +3575,18 @@ sub setupEXT2 {
 # setupBTRFS
 #------------------------------------------
 sub setupBTRFS {
-	my $this = shift;
-	my $name = shift;
-	my $kiwi = $this->{kiwi};
+	my $this   = shift;
+	my $name   = shift;
+	my $device = shift;
+	my $kiwi   = $this->{kiwi};
 	my %FSopts = main::checkFSOptions();
 	my $fsopts = $FSopts{btrfs};
+	my $target = "$this->{imageDest}/$name";
+	if ($device) {
+		$target = $device;
+	}
 	my $data = qxx (
-		"/sbin/mkfs.btrfs $fsopts $this->{imageDest}/$name 2>&1"
+		"/sbin/mkfs.btrfs $fsopts $target 2>&1"
 	);
 	my $code = $? >> 8;
 	if ($code != 0) {
@@ -3534,6 +3594,9 @@ sub setupBTRFS {
 		$kiwi -> failed ();
 		$kiwi -> error  ($data);
 		return undef;
+	}
+	if ($device) {
+		qxx ("touch $this->{imageDest}/$name");
 	}
 	$this -> restoreImageDest();
 	$data = qxx ("cd $this->{imageDest} && ln -vs $name $name.btrfs 2>&1");
@@ -3546,14 +3609,19 @@ sub setupBTRFS {
 # setupReiser
 #------------------------------------------
 sub setupReiser {
-	my $this = shift;
-	my $name = shift;
+	my $this   = shift;
+	my $name   = shift;
+	my $device = shift;
 	my $kiwi = $this->{kiwi};
 	my %FSopts = main::checkFSOptions();
 	my $fsopts = $FSopts{reiserfs};
+	my $target = "$this->{imageDest}/$name";
+	if ($device) {
+		$target = $device;
+	}
 	$fsopts.= "-f";
 	my $data = qxx (
-		"/sbin/mkreiserfs $fsopts $this->{imageDest}/$name 2>&1"
+		"/sbin/mkreiserfs $fsopts $target 2>&1"
 	);
 	my $code = $? >> 8;
 	if ($code != 0) {
@@ -3561,6 +3629,9 @@ sub setupReiser {
 		$kiwi -> failed ();
 		$kiwi -> error  ($data);
 		return undef;
+	}
+	if ($device) {
+		qxx ("touch $this->{imageDest}/$name");
 	}
 	$this -> restoreImageDest();
 	$data = qxx ("cd $this->{imageDest} && ln -vs $name $name.reiserfs 2>&1");

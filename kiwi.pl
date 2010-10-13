@@ -851,23 +851,23 @@ sub main {
 		my $ok;
 		SWITCH: for ($attr{type}) {
 			/^ext2/     && do {
-				$ok = $image -> createImageEXT2 ();
+				$ok = $image -> createImageEXT2 ( $targetDevice );
 				last SWITCH;
 			};
 			/^ext3/     && do {
-				$ok = $image -> createImageEXT3 ();
+				$ok = $image -> createImageEXT3 ( $targetDevice );
 				last SWITCH;
 			};
 			/^ext4/     && do {
-				$ok = $image -> createImageEXT4 ();
+				$ok = $image -> createImageEXT4 ( $targetDevice );
 				last SWITCH;
 			};
 			/^reiserfs/ && do {
-				$ok = $image -> createImageReiserFS ();
+				$ok = $image -> createImageReiserFS ( $targetDevice );
 				last SWITCH;
 			};
 			/^btrfs/    && do {
-				$ok = $image -> createImageBTRFS ();
+				$ok = $image -> createImageBTRFS ( $targetDevice );
 				last SWITCH;
 			};
 			/^squashfs/ && do {
@@ -1502,6 +1502,11 @@ sub init {
 		(! defined $Convert)
 	) {
 		$kiwi -> error ("No operation specified");
+		$kiwi -> failed ();
+		my $code = kiwiExit (1); return $code;
+	}
+	if (($targetDevice) && (! -b $targetDevice)) {
+		$kiwi -> error ("Target device $targetDevice doesn't exist");
 		$kiwi -> failed ();
 		my $code = kiwiExit (1); return $code;
 	}
