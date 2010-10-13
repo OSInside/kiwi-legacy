@@ -550,8 +550,11 @@ sub createXENConfiguration {
 	#------------------------------------------
 	if ($type{type} eq "xen") {
 		print $FD 'root="'.$part.' ro"'."\n";
-		print $FD 'vfb = ["type=vnc,vncunused=1,vnclisten=0.0.0.0"]'."\n";
 	}
+	#==========================================
+	# xen virtual framebuffer
+	#------------------------------------------
+	print $FD 'vfb = ["type=vnc,vncunused=1,vnclisten=0.0.0.0"]'."\n";
 	close $FD;
 	$kiwi -> done();
 	return $file;
