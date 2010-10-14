@@ -150,7 +150,12 @@ if [ ! -z "$NFSROOT" ];then
 fi
 
 #======================================
-# 13) kill udev
+# 13) setup console
+#--------------------------------------
+setupConsole
+
+#======================================
+# 14) kill udev
 #--------------------------------------
 if [ ! -z "$DISK" ] && [ "$systemIntegrity" = "clean" ]; then
 	if [ -z "$UNIONFS_CONFIG" ] && [ -z "$COMBINED_IMAGE" ]; then

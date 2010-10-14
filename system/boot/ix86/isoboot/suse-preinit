@@ -31,11 +31,16 @@ errorLogStart
 updateMTAB
 
 #======================================
-# 3) create framebuffer devices
+# 3) setup console
+#--------------------------------------
+setupConsole
+
+#======================================
+# 4) create framebuffer devices
 #--------------------------------------
 createFramebufferDevices
 
 #======================================
-# 4) clean mount
+# 5) clean mount
 #--------------------------------------
 umountSystemFilesystems

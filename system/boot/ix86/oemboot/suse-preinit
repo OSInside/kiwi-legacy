@@ -146,7 +146,12 @@ if [ "$LOCAL_BOOT" = "no" ];then
 fi
 
 #======================================
-# 11) kill udev
+# 11) setup console
+#--------------------------------------
+setupConsole
+
+#======================================
+# 12) kill udev
 #--------------------------------------
 udevSystemStop
 umountSystemFilesystems
