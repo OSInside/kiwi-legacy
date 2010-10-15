@@ -5849,6 +5849,10 @@ function createPartedInput {
 					value=$(echo ${pcmds[$index + 4]} | cut -f1 -dM | tr -d +)
 					value=$(partedMBToCylinder $value)
 					pstopp=$((1 + $pstopp + $value))
+					if [ $pstopp -gt $partedCylCount ];then
+						# given size is out of bounds, reduce to end of disk
+						pstopp=$partedCylCount
+					fi
 				fi
 				cmdq="$cmdq mkpart primary $pstart $pstopp"
 				partedWrite "$disk" "$cmdq"
