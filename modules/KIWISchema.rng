@@ -1569,10 +1569,9 @@ and don't replace it with mkinitrd created initrd</db:para>
     </define>
     <define name="k.oem-dumphalt">
       <element name="oem-dumphalt">
-        <a:documentation>For oemboot driven images: reboot after image dump yes/no</a:documentation>
-        <db:para>For oemboot driven images: reboot the system after image
-has been dumped (installed) on the target disk. A message
-appears and the system waits for a key event before reboot</db:para>
+        <a:documentation>For oemboot driven images: halt system after image dump yes/no</a:documentation>
+        <db:para>For oemboot driven images:halt system the system after
+image has been dumped (installed) on the target disk.</db:para>
         <ref name="k.oem-dumphalt.attlist"/>
         <ref name="k.oem-dumphalt.content"/>
       </element>

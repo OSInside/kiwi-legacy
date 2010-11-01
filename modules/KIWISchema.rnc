@@ -1127,12 +1127,11 @@ div {
 	k.oem-dumphalt.content = xsd:boolean
 	k.oem-dumphalt.attlist = empty
 	k.oem-dumphalt =
-		## For oemboot driven images: reboot after image dump yes/no
+		## For oemboot driven images: halt system after image dump yes/no
 		[
 		db:para [
-			"For oemboot driven images: reboot the system after image\x{a}"~
-			"has been dumped (installed) on the target disk. A message\x{a}"~
-			"appears and the system waits for a key event before reboot"
+			"For oemboot driven images:halt system the system after\x{a}"~
+			"image has been dumped (installed) on the target disk."
 		]
 		]
 		element oem-dumphalt {
