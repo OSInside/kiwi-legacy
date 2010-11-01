@@ -1653,7 +1653,7 @@ sub setupBootDisk {
 	#==========================================
 	# check if fs requires a boot partition
 	#------------------------------------------
-	if ($type{filesystem} eq "btrfs") {
+	if (($type{filesystem} eq "btrfs") || ($type{filesystem} eq "xfs")) {
 		$needBootP  = 1;
 		$luksbootMB = 60;
 	}
@@ -2087,6 +2087,15 @@ sub setupBootDisk {
 				);
 				$result = $? >> 8;
 				last SWITCH;
+			};
+			/^xfs/      && do {
+				$kiwi -> info ("Resizing system $fsattr{type} filesystem");
+				my $xfsGrow = main::findExec('xfs_growfs');
+				$status = qxx ("
+					mount $mapper /mnt && $xfsGrow /mnt; umount /mnt 2>&1"
+				);
+				$result = $? >> 8;
+				last SWITCH;
 			}
 		};
 		if ($result != 0) {
@@ -2148,7 +2157,16 @@ sub setupBootDisk {
 					);
 					$result = $? >> 8;
 					last SWITCH;
-				}
+				};
+				/^xfs/      && do {
+					$kiwi -> info ("Resizing system $fsattr{type} filesystem");
+					my $xfsGrow = main::findExec('xfs_growfs');
+					$status = qxx ("
+					    mount $mapper /mnt && $xfsGrow /mnt; umount /mnt 2>&1"
+					);
+					$result = $? >> 8;
+					last SWITCH;
+			}
 			};
 			if ($result != 0) {
 				$kiwi -> failed ();
@@ -4867,6 +4885,15 @@ sub setupFilesystem {
 			my $fsopts = $FSopts{btrfs};
 			$status = qxx (
 				"/sbin/mkfs.btrfs $fsopts $device 2>&1"
+			);
+			$result = $? >> 8;
+			last SWITCH;
+		};
+		/^xfs/      && do {
+			$kiwi -> info ("Creating xfs $name filesystem");
+			my $fsopts = $FSopts{xfs};
+			$status = qxx (
+				"/sbin/mkfs.xfs $fsopts $device 2>&1"
 			);
 			$result = $? >> 8;
 			last SWITCH;

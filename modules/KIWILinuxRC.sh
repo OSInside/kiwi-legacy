@@ -2200,6 +2200,12 @@ function updateBtrBootDeviceFstab {
 	updateLVMBootDeviceFstab $1 $2 "/btrboot"
 }
 #======================================
+# updateXfsBootDeviceFstab
+#--------------------------------------
+function updateXfsBootDeviceFstab {
+	updateLVMBootDeviceFstab $1 $2 "/xfsboot"
+}
+#======================================
 # updateSyslinuxBootDeviceFstab
 #--------------------------------------
 function updateSyslinuxBootDeviceFstab {
@@ -2446,6 +2452,7 @@ function probeFileSystem {
 		crypto_LUKS) FSTYPE=luks ;;
 		vfat)        FSTYPE=vfat ;;
 		clicfs)      FSTYPE=clicfs ;;
+        xfs)         FSTYPE=xfs ;;
 		*)
 			FSTYPE=unknown
 		;;
@@ -4198,6 +4205,9 @@ function mountSystemStandard {
 	if [ "$FSTYPE" = "btrfs" ];then
 		export haveBtrFS=yes
 	fi
+	if [ "$FSTYPE" = "xfs" ];then
+		export haveXFS=yes
+	fi
 	if [ ! -z $FSTYPE ]          && 
 	   [ ! $FSTYPE = "unknown" ] && 
 	   [ ! $FSTYPE = "auto" ]
@@ -4917,6 +4927,7 @@ function cleanImage {
 	if \
 		[ "$haveClicFS" = "yes" ] || \
 		[ "$haveBtrFS"  = "yes" ] || \
+		[ "$haveXFS"  = "yes" ] || \
 		[ ! -z "$NFSROOT" ]       || \
 		[ ! -z "$NBDROOT" ]       || \
 		[ ! -z "$AOEROOT" ]       || \
@@ -6033,6 +6044,11 @@ function resizeFilesystem {
 		resize_fs="mount $deviceResize /mnt &&"
 		resize_fs="$resize_fs btrfsctl -r max /mnt;umount /mnt"
 		check="btrfsck $deviceResize"
+	elif [ "$FSTYPE" = "xfs" ];then
+		Echo "Resize XFS filesystem to full partition space..."
+		resize_fs="mount $deviceResize /mnt &&"
+		resize_fs="$resize_fs xfs_growfs /mnt;umount /mnt"
+		check="xfs_check $deviceResize"
 	else
 		# don't know how to resize this filesystem
 		return
@@ -6107,6 +6123,8 @@ function createFilesystem {
 		else
 			mkfs.btrfs $deviceCreate
 		fi
+    elif [ "$FSTYPE" = "xfs" ];then
+        mkfs.xfs -f $deviceCreate
 	else
 		# use ext3 by default
 		mkfs.ext3 -F $deviceCreate $blocks 1>&2
@@ -6268,6 +6286,12 @@ function setupBootPartition {
 		#--------------------------------------
 		test -z "$bootid" && export bootid=3
 		mpoint=clicboot
+	elif [ "$haveXFS" = "yes" ];then
+		#======================================
+		# btrboot
+		#--------------------------------------
+		test -z "$bootid" && export bootid=2
+		mpoint=xfsboot
 	elif \
 		[ "$loader" = "syslinux" ] || \
 		[ "$loader" = "extlinux" ] || \

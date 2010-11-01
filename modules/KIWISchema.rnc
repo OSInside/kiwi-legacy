@@ -1379,23 +1379,23 @@ div {
 		attribute luks { text }
 	k.type.filesystem.attribute = 
 		## Specifies the filesystem which can be one of:
-		## clicfs, ext2, ext3, ext4, reiserfs, or squashfs
+		## btrfs, clicfs, ext2, ext3, ext4, reiserfs, squashfs, or xfs
 		## clicfs is a fuse based compressed filesystem using a cow
 		## file for write operations
 		attribute filesystem {
 			"btrfs" | "clicfs" | "ext2" | "ext3" | "ext4" |
-			"reiserfs" | "squashfs"
+			"reiserfs" | "squashfs" | "xfs"
 		}
 	k.type.fsreadonly.attribute =
 		## Specifies the filesystem for the read-only part of a split image
 		attribute fsreadonly {
 			"btrfs" | "ext2" | "ext3" | "ext4" |
-			"reiserfs" | "squashfs"
+			"reiserfs" | "squashfs" | "xfs"
 		}
 	k.type.fsreadwrite.attribute =
 		## Specifies the filesystem for the read-write part of a split image
 		attribute fsreadwrite {
-			"btrfs" | "ext2" | "ext3" | "ext4" | "reiserfs"
+			"btrfs" | "ext2" | "ext3" | "ext4" | "reiserfs" | "xfs"
 		}
 	k.type.format.attribute =
 		## Specifies the format of the virtual disk.
@@ -1416,7 +1416,7 @@ div {
 		attribute image {
 			"btrfs" | "clicfs" | "cpio" | "ext2" | "ext3" |
 			"ext4" | "iso" | "oem" | "product" | "pxe" | "reiserfs" |
-			"split" | "squashfs" | "usb" | "vmx"
+			"split" | "squashfs" | "usb" | "vmx" | "xfs"
 		}
 	k.type.kernelcmdline.attribute =
 		# The kernelcmdline element specifies additional

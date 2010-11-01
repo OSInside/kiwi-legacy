@@ -39,6 +39,7 @@
 		<file name="fs/ext2/*"/>
 		<file name="fs/fat/*"/>
 		<file name="fs/vfat/*"/>
+		<file name="fs/xfs/*"/>
 		<file name="fs/binfmt_aout.ko"/>
 		<file name="fs/binfmt_misc.ko"/>
 		<file name="fs/mbcache.ko"/>
@@ -117,6 +118,7 @@
 		<package name="parted"/>
 		<package name="syslinux"/>
 		<package name="fbiterm"/>
+		<package name="xfsprogs"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>

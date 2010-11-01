@@ -58,6 +58,7 @@
 		<file name="fs/nls/nls_cp437.ko"/>
 		<file name="fs/nls/nls_iso8859-1.ko"/>
 		<file name="fs/fuse/*"/>
+		<file name="fs/xfs/*"/>
 		<file name="net/ipv6/*"/>
 		<file name="drivers/cdrom/*"/>
 		<file name="drivers/scsi/*"/>
@@ -117,6 +118,7 @@
 		<package name="parted"/>
 		<package name="syslinux"/>
 		<package name="gettext-runtime"/>
+		<package name="xfsprogs"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>

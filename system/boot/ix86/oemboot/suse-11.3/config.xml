@@ -63,6 +63,7 @@
 		<file name="fs/nls/nls_iso8859-1.ko"/>
 		<file name="fs/fuse/*"/>
 		<file name="fs/udf/*"/>
+		<file name="fs/xfs/*"/>
 		<file name="drivers/ata/*"/>
 		<file name="drivers/scsi/*"/>
 		<file name="drivers/message/fusion/*"/>
@@ -143,6 +144,7 @@
 		<package name="kpartx"/>
 		<package name="syslinux"/>
 		<package name="dosfstools"/>
+		<package name="xfsprogs"/>
 	</packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>

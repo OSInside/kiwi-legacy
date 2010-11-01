@@ -57,6 +57,7 @@
 		<file name="fs/reiserfs/*"/>
 		<file name="fs/nfs/*"/>
 		<file name="fs/fuse/*"/>
+		<file name="fs/xfs/*"/>
 		<file name="net/sunrpc/*"/>
 		<file name="fs/lockd/*"/>
 		<file name="fs/nfs_common/*"/>
@@ -189,6 +190,7 @@
 		<package name="tar"/>
 		<package name="kiwi-tools"/>
 		<package name="cyrus-sasl"/>
+		<package name="xfsprogs"/>
 	</packages>
 	<packages type="image" profiles="diskless">
 		<package name="clicfs"/>

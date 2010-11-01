@@ -119,6 +119,7 @@ $KnownFS{unified}{tool}   = findExec("mksquashfs");
 $KnownFS{compressed}{tool}= findExec("mksquashfs");
 $KnownFS{reiserfs}{tool}  = findExec("mkreiserfs");
 $KnownFS{btrfs}{tool}     = findExec("mkfs.btrfs");
+$KnownFS{xfs}{tool}       = findExec("mkfs.xfs");
 $KnownFS{cpio}{tool}      = findExec("cpio");
 $KnownFS{ext3}{ro}        = 0;
 $KnownFS{ext4}{ro}        = 0;
@@ -130,6 +131,7 @@ $KnownFS{unified}{ro}     = 1;
 $KnownFS{compressed}{ro}  = 1;
 $KnownFS{reiserfs}{ro}    = 0;
 $KnownFS{btrfs}{ro}       = 0;
+$KnownFS{xfs}{ro}         = 0;
 $KnownFS{cpio}{ro}        = 0;
 
 #============================================
@@ -801,7 +803,7 @@ sub main {
 		#------------------------------------------
 		if (! defined $BaseRoot) {
 			$BaseRoot = getDefaultBaseRoot($kiwi, $xml);
-        }
+		}
 		#==========================================
 		# Check tool set
 		#------------------------------------------
@@ -904,6 +906,10 @@ sub main {
 			};
 			/^pxe/      && do {
 				$ok = $image -> createImagePXE ( $para );
+				last SWITCH;
+			};
+			/^xfs/    && do {
+				$ok = $image -> createImageXFS ();
 				last SWITCH;
 			};
 			$kiwi -> error  ("Unsupported type: $attr{type}");
@@ -1995,7 +2001,7 @@ sub listXMLInfo {
 							my $pattern = new XML::LibXML::Element ("pattern");
 							$pattern -> setAttribute ("name","$name");
 							$scan -> appendChild ($pattern);
- 						}
+						}
 					}
 				}
 				last SWITCH;
@@ -2849,6 +2855,10 @@ sub checkFileSystem {
 				};
 				/LUKS/      && do {
 					$type = "luks";
+					last SWITCH;
+				};
+				/XFS/     && do {
+					$type = "xfs";
 					last SWITCH;
 				};
 				# unknown filesystem type check clicfs...

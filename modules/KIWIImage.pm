@@ -439,6 +439,36 @@ sub createImageBTRFS {
 }
 
 #==========================================
+# createImageXFS
+#------------------------------------------
+sub createImageXFS {
+	# ...
+	# create XFS image from source tree
+	# ---
+	my $this = shift;
+	#==========================================
+	# PRE filesystem setup
+	#------------------------------------------
+	my $name = $this -> preImage ();
+	if (! defined $name) {
+		return undef;
+	}
+	#==========================================
+	# Create filesystem on extend
+	#------------------------------------------
+	if (! $this -> setupXFS ( $name )) {
+		return undef;
+	}
+	#==========================================
+	# POST filesystem setup
+	#------------------------------------------
+	if (! $this -> postImage ($name)) {
+		return undef;
+	}
+	return $this;
+}
+
+#==========================================
 # createImageSquashFS
 #------------------------------------------
 sub createImageSquashFS {
@@ -657,6 +687,10 @@ sub createImageUSB {
 		};
 		/^btrfs/      && do {
 			$ok = $this -> createImageBTRFS ();
+			last SWITCH;
+		};
+		/^xfs/        && do {
+			$ok = $this -> createImageXFS ();
 			last SWITCH;
 		};
 		$kiwi -> error  ("Unsupported $text type: $type");
@@ -2289,6 +2323,10 @@ sub createImageSplit {
 				$ok = $this -> setupBTRFS ( $namerw );
 				last SWITCH;
 			};
+			/xfs/        && do {
+				$ok = $this -> setupXFS ( $namerw );
+				last SWITCH;
+			};
 			$kiwi -> error  ("Unsupported type: $FSTypeRW");
 			$kiwi -> failed ();
 			qxx ("rm -rf $imageTreeRW");
@@ -2339,6 +2377,10 @@ sub createImageSplit {
 		};
 		/squashfs/   && do {
 			$ok = $this -> setupSquashFS ( $namero,$imageTree );
+			last SWITCH;
+		};
+		/xfs/      && do {
+			$ok = $this -> setupXFS ( $namero );
 			last SWITCH;
 		};
 		$kiwi -> error  ("Unsupported type: $FSTypeRO");
@@ -2430,6 +2472,11 @@ sub createImageSplit {
 			};
 			/squashfs/   && do {
 				$kiwi -> done ();
+				last SWITCH;
+			};
+			/xfs/        && do {
+				qxx ("/sbin/mkfs.xfs $this->{imageDest}/$name 2>&1");
+				$kiwi -> done();
 				last SWITCH;
 			};
 			$kiwi -> error  ("Unsupported type: $type");
@@ -3028,6 +3075,14 @@ sub postImage {
 			last SWITCH;
 		};
 		#==========================================
+		# Check XFS file system
+		#------------------------------------------
+		/xfs/       && do {
+			qxx ("/sbin/fsck.xfs $this->{imageDest}/$name 2>&1");
+			$kiwi -> done();
+			last SWITCH;
+		};
+		#==========================================
 		# Unknown filesystem type
 		#------------------------------------------
 		$kiwi -> failed();
@@ -3432,6 +3487,10 @@ sub extractKernel {
 			return $name;
 			last SWITCH;
 		};
+		/xfs/i    && do {
+			return $name;
+			last SWITCH;
+		};
 	}
 	#==========================================
 	# this is a boot image, extract kernel
@@ -3670,6 +3729,32 @@ sub setupSquashFS {
 	$this -> restoreImageDest();
 	$data = qxx ("chmod 644 $this->{imageDest}/$name");
 	$data = qxx ("cd $this->{imageDest} && ln -vs $name $name.squashfs 2>&1");
+	$this -> remapImageDest();
+	$kiwi -> loginfo ($data);
+	return $name;
+}
+
+#==========================================
+# setupXFS
+#------------------------------------------
+sub setupXFS {
+	my $this = shift;
+	my $name = shift;
+	my $kiwi = $this->{kiwi};
+	my %FSopts = main::checkFSOptions();
+	my $fsopts = $FSopts{xfs};
+	my $data = qxx (
+		"/sbin/mkfs.xfs $fsopts $this->{imageDest}/$name 2>&1"
+	);
+	my $code = $? >> 8;
+	if ($code != 0) {
+		$kiwi -> error  ("Couldn't create XFS filesystem");
+		$kiwi -> failed ();
+		$kiwi -> error  ($data);
+		return undef;
+	}
+	$this -> restoreImageDest();
+	$data = qxx ("cd $this->{imageDest} && ln -vs $name $name.xfs 2>&1");
 	$this -> remapImageDest();
 	$kiwi -> loginfo ($data);
 	return $name;

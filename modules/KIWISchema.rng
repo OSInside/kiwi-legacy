@@ -1904,7 +1904,7 @@ mount that filesystem while booting</a:documentation>
     <define name="k.type.filesystem.attribute">
       <attribute name="filesystem">
         <a:documentation>Specifies the filesystem which can be one of:
-clicfs, ext2, ext3, ext4, reiserfs, or squashfs
+btrfs, clicfs, ext2, ext3, ext4, reiserfs, squashfs, or xfs
 clicfs is a fuse based compressed filesystem using a cow
 file for write operations</a:documentation>
         <choice>
@@ -1915,6 +1915,7 @@ file for write operations</a:documentation>
           <value>ext4</value>
           <value>reiserfs</value>
           <value>squashfs</value>
+          <value>xfs</value>
         </choice>
       </attribute>
     </define>
@@ -1928,6 +1929,7 @@ file for write operations</a:documentation>
           <value>ext4</value>
           <value>reiserfs</value>
           <value>squashfs</value>
+          <value>xfs</value>
         </choice>
       </attribute>
     </define>
@@ -1940,6 +1942,7 @@ file for write operations</a:documentation>
           <value>ext3</value>
           <value>ext4</value>
           <value>reiserfs</value>
+          <value>xfs</value>
         </choice>
       </attribute>
     </define>
@@ -1991,6 +1994,7 @@ file for write operations</a:documentation>
           <value>squashfs</value>
           <value>usb</value>
           <value>vmx</value>
+          <value>xfs</value>
         </choice>
       </attribute>
     </define>

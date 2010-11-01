@@ -882,6 +882,8 @@ if [ $LOCAL_BOOT = "no" ];then
 				updateClicBootDeviceFstab /config $imageBootDevice
 			elif [ "$haveBtrFS" = "yes" ];then
 				updateBtrBootDeviceFstab /config $imageBootDevice
+			elif [ "$haveXFS" = "yes" ];then
+				updateXfsBootDeviceFstab /config $imageBootDevice
 			fi
 			setupBootLoader /mnt /config $(($bootid - 1)) \
 				$imageRootDevice NET $imageSwapDevice
