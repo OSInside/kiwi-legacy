@@ -6333,6 +6333,7 @@ function setupBootPartition {
 	fi
 	mkdir -p /mnt/$mpoint
 	mount $imageBootDevice /mnt/$mpoint
+	rm -fr /mnt/$mpoint/*
 	cp -a /mnt/boot /mnt/$mpoint
 	if [ -e /boot.tgz ];then
 		tar -xf /boot.tgz -C /mnt/$mpoint
