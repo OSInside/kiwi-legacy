@@ -953,7 +953,7 @@ sub createImagePXE {
 sub createImageVMX {
 	# ...
 	# Create virtual machine disks. By default a raw disk image will
-	# created from which other types can be converted. The output
+	# be created from which other types are derived via conversion. The output
 	# format is specified by the format attribute in the type section.
 	# Supported formats are: vvfat vpc bochs dmg vmdk qcow cow raw
 	# The process will create the system image and the appropriate vmx
@@ -972,9 +972,7 @@ sub createImageVMX {
 	my $para = shift;
 	my $kiwi = $this->{kiwi};
 	my $xml  = $this->{xml};
-	my %vmwc = $xml  -> getVMwareConfig ();
 	my %xenc = $xml  -> getXenConfig();
-	my %type = %{$xml -> getImageTypeAndAttributes()};
 	my $name = $this -> createImageUSB ($para,"VMX");
 	my $xendomain;
 	if (! defined $name) {

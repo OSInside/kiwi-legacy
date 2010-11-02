@@ -2981,12 +2981,14 @@ sub getVMwareConfig {
 	# network setup
 	#------------------------------------------
 	my $nic  = $node -> getElementsByTagName ("vmnic");
-	my ($drv,$iface,$mode);
-	if ($nic) {
-		my $node = $nic  -> get_node(1);
-		$drv  = $node -> getAttribute ("driver");
-		$iface= $node -> getAttribute ("interface");
-		$mode = $node -> getAttribute ("mode");
+	my %vmnics;
+	for (my $i=1; $i<= $nic->size(); $i++) {
+		my $node = $nic  -> get_node($i);
+		$vmnics{$node -> getAttribute ("interface")} =
+		{
+			drv  => $node -> getAttribute ("driver"),
+			mode => $node -> getAttribute ("mode")
+		};
 	}
 	#==========================================
 	# save hash
@@ -3003,10 +3005,8 @@ sub getVMwareConfig {
 		$result{vmware_cdtype} = $cdtype;
 		$result{vmware_cdid}   = $cdid;
 	}
-	if ($nic) {
-		$result{vmware_nicdriver}= $drv;
-		$result{vmware_niciface} = $iface;
-		$result{vmware_nicmode}  = $mode;
+	if (%vmnics) {
+		$result{vmware_nic}= \%vmnics;
 	}
 	return %result;
 }

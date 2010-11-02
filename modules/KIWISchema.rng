@@ -3163,9 +3163,9 @@ configuration options which are used by the
 virtual machine when running the image.</db:para>
         <interleave>
           <ref name="k.machine.attlist"/>
-          <optional>
+          <zeroOrMore>
             <ref name="k.vmnic"/>
-          </optional>
+          </zeroOrMore>
           <optional>
             <ref name="k.vmdisk"/>
           </optional>

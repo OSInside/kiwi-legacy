@@ -2181,7 +2181,7 @@ div {
 		]
 		element machine {
 			k.machine.attlist &
-			k.vmnic ? &
+			k.vmnic * &
 			k.vmdisk ? &
 			k.vmdvd ?
 		}

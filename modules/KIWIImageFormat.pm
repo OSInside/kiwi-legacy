@@ -641,20 +641,23 @@ sub createVMwareConfiguration {
 	#==========================================
 	# network setup
 	#------------------------------------------
-	if (defined $vmwconfig{vmware_niciface}) {
-		my $driver = $vmwconfig{vmware_nicdriver};
-		my $mode   = $vmwconfig{vmware_nicmode};
-		my $nic    = "ethernet".$vmwconfig{vmware_niciface};
-		print $FD $nic.'.present = "true"'."\n";
-		print $FD $nic.'.addressType = "generated"'."\n";
-		if ($driver) {
-			print $FD $nic.'.virtualDev = "'.$driver.'"'."\n";
-		}
-		if ($mode) {
-			print $FD $nic.'.connectionType = "'.$mode.'"'."\n";
-		}
-		if ($vmwconfig{vmware_arch} =~ /64$/) {
-			print $FD $nic.'.allow64bitVmxnet = "true"'."\n";
+	if (defined $vmwconfig{vmware_nic}) {
+		my %vmnics = %{$vmwconfig{vmware_nic}};
+		while (my @nic_info = each %vmnics) {
+			my $driver = $nic_info[1] -> { drv };
+			my $mode   = $nic_info[1] -> { mode };
+			my $nic    = "ethernet".$nic_info[0];
+			print $FD $nic.'.present = "true"'."\n";
+			print $FD $nic.'.addressType = "generated"'."\n";
+			if ($driver) {
+				print $FD $nic.'.virtualDev = "'.$driver.'"'."\n";
+			}
+			if ($mode) {
+				print $FD $nic.'.connectionType = "'.$mode.'"'."\n";
+			}
+			if ($vmwconfig{vmware_arch} =~ /64$/) {
+				print $FD $nic.'.allow64bitVmxnet = "true"'."\n";
+			}
 		}
 	}
 	#==========================================
