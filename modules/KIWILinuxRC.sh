@@ -5284,6 +5284,10 @@ function selectLanguage {
 	local pt_BR=Portuguese
 	local sv_SE=Swedish
 	local tr_TR=Turkish
+	local nb_NO=Norwegian
+	local da_DK=Danish
+	local pt_PT=Portuguese
+	local en_GB=English
 	local code
 	local lang
 	if [ -f /.profile ];then
