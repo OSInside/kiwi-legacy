@@ -6387,11 +6387,11 @@ function setupConsole {
 	# ----
 	local itab=/etc/inittab
 	local stty=/etc/securetty
-	if [ -e /dev/xvc0 ];then
+	if [ -e /sys/class/tty/xvc0 ];then
 		echo "X0:12345:respawn:/sbin/mingetty --noclear xvc0 linux" >> $itab
 		echo xvc0 >> $stty
 	fi
-	if [ -e /dev/hvc0 ];then
+	if [ -e /sys/class/tty/hvc0 ];then
 		echo "H0:12345:respawn:/sbin/mingetty --noclear hvc0 linux" >> $itab
 		echo hvc0 >> $stty
 	fi
