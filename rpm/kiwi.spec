@@ -412,7 +412,6 @@ rm -rf $RPM_BUILD_ROOT
 %files -n kiwi-pxeboot -f kiwi.loader
 %defattr(-, root, root)
 %doc /srv/tftpboot/README
-#%config /etc/permissions.d/kiwi
 %dir /srv/tftpboot
 %dir /srv/tftpboot/KIWI
 %dir /srv/tftpboot/pxelinux.cfg
