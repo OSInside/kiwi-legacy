@@ -140,16 +140,16 @@ sub createFormat {
 	# convert disk into specified format
 	#------------------------------------------
 	if ($format eq "vmdk") {
-		$kiwi -> info ("Starting $imgtype => $format conversion\n");
+		$kiwi -> info ("Starting raw => $format conversion\n");
 		return $this -> createVMDK();
 	} elsif ($format eq "ovf") {
-		$kiwi -> info ("Starting $imgtype => $format conversion\n");
+		$kiwi -> info ("Starting raw => $format conversion\n");
 		return $this -> createOVF();
 	} elsif ($format eq "qcow2") {
-		$kiwi -> info ("Starting $imgtype => $format conversion\n");
+		$kiwi -> info ("Starting raw => $format conversion\n");
 		return $this -> createQCOW2();
 	} elsif ($format eq "ec2") {
-		$kiwi -> info ("Starting $imgtype => $format conversion\n");
+		$kiwi -> info ("Starting raw => $format conversion\n");
 		return $this -> createEC2();
 	} else {
 		$kiwi -> warning (
@@ -176,6 +176,13 @@ sub createMaschineConfiguration {
 	if (defined $xenc{xen_domain}) {
 		$xend = $xenc{xen_domain};
 	}
+	if ($imgtype == "iso") {
+		$kiwi -> warning (
+			"Can't create machine setup for selected $imgtype image type"
+		);
+		$kiwi -> skipped ();
+		return undef;
+	}
 	if (($type{type}) && ($type{type} eq "xen")) {
 		$kiwi -> info ("Starting $imgtype image machine configuration\n");
 		return $this -> createXENConfiguration();
@@ -193,7 +200,7 @@ sub createMaschineConfiguration {
 		return $this -> createOVFConfiguration();
 	} else {
 		$kiwi -> warning (
-			"Can't create machine configuration for $imgtype image"
+			"Can't create machine setup for selected $imgtype image type"
 		);
 		$kiwi -> skipped ();
 	}
