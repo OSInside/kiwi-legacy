@@ -4052,19 +4052,39 @@ sub checkLVMbind {
 	# ---
 	my $this = shift;
 	my $sdev = shift;
-	for (my $try=0;$try<=3;$try++) {
-		if (defined (my $lvroot = glob ("/dev/mapper/*-LVRoot"))) {
-			$this->{lvm} = 1;
-			$sdev = $lvroot;
-			if (defined ($lvroot = glob ("/dev/mapper/*-LVComp"))) {
+	my @groups;
+	#==========================================
+	# activate volume groups
+	#------------------------------------------
+	open (my $SCAN,"vgscan|");
+	while (my $line = <$SCAN>) {
+		if ($line =~ /\"(.*)\"/) {
+			push (@groups,$1);
+		}
+	}
+	close $SCAN;
+	#==========================================
+	# check the device node names for kiwi lvm
+	#------------------------------------------
+	foreach my $lvmgroup (@groups) {
+		qxx ("vgchange -a y $lvmgroup 2>&1");
+		for (my $try=0;$try<=3;$try++) {
+			if (defined (my $lvroot = glob ("/dev/mapper/*-LVRoot"))) {
+				$this->{lvm} = 1;
 				$sdev = $lvroot;
+				if (defined ($lvroot = glob ("/dev/mapper/*-LVComp"))) {
+					$sdev = $lvroot;
+				}
+				if ($lvroot =~ /mapper\/(.*)-.*/) {
+					$this->{lvmgroup} = $1;
+				}
+				last;
 			}
-			if ($lvroot =~ /mapper\/(.*)-.*/) {
-				$this->{lvmgroup} = $1;
-			}
+			sleep 1;
+		}
+		if ($this->{lvm} == 1) {
 			last;
 		}
-		sleep 1;
 	}
 	return $sdev;
 }
