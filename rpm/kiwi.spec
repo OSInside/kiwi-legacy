@@ -351,6 +351,7 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_datadir}/kiwi/image
 %dir /var/cache/kiwi
 %ifarch %ix86 x86_64
+%exclude %{_datadir}/kiwi/image/suse-11.4-JeOS
 %exclude %{_datadir}/kiwi/image/suse-11.3-JeOS
 %exclude %{_datadir}/kiwi/image/suse-11.2-JeOS
 %exclude %{_datadir}/kiwi/image/suse-11.1-JeOS
@@ -474,6 +475,7 @@ rm -rf $RPM_BUILD_ROOT
 %ifarch %ix86 x86_64
 %files -n kiwi-templates
 %defattr(-, root, root)
+%{_datadir}/kiwi/image/suse-11.4-JeOS
 %{_datadir}/kiwi/image/suse-11.3-JeOS
 %{_datadir}/kiwi/image/suse-11.2-JeOS
 %{_datadir}/kiwi/image/suse-11.1-JeOS
