@@ -214,6 +214,7 @@ our $MigrateNoFiles;        # migrate: don't create overlay files
 our $MigrateNoTemplate;     # migrate: don't create image description template
 our $Convert;               # convert image into given format/configuration
 our $Format;                # format to convert to, vmdk, ovf, etc...
+our $defaultAnswer;         # default answer to any questions
 our $targetDevice;          # alternative device instead of a loop device
 our $kiwi;                  # global logging handler object
 
@@ -233,7 +234,7 @@ sub createDirInteractive {
 	my $targetDir = shift;
 	if (! -d $targetDir) {
 		my $prefix = $kiwi -> getPrefix (1);
-		my $answer = "unknown";
+		my $answer = (defined $defaultAnswer) ? "yes" : "unknown";
 		$kiwi -> info ("Destination: $Destination doesn't exist\n");
 		while ($answer !~ /^yes$|^no$/) {
 			print STDERR $prefix,
@@ -1418,6 +1419,7 @@ sub init {
 		"grub-chainload"        => \$GrubChainload,
 		"format|f=s"            => \$Format,
 		"convert=s"             => \$Convert,
+        "yes|y"                 => \$defaultAnswer,
 		"debug"                 => \$Debug,
 		"help|h"                => \&usage,
 		"<>"                    => \&usage
@@ -1716,6 +1718,9 @@ sub usage {
 	print "\n";
 	print "    [ -v | --verbose <1|2|3> ]\n";
 	print "      Controls the verbosity level for the instsource module\n";
+	print "\n";
+	print "    [ -y | --yes ]\n";
+	print "      Answer any interactive questions with yes\n";
 	print "\n";
 
 	print "Image Preparation Options:\n";
