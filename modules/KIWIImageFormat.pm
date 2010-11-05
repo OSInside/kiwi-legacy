@@ -176,7 +176,7 @@ sub createMaschineConfiguration {
 	if (defined $xenc{xen_domain}) {
 		$xend = $xenc{xen_domain};
 	}
-	if ($imgtype == "iso") {
+	if ($imgtype eq "iso") {
 		$kiwi -> warning (
 			"Can't create machine setup for selected $imgtype image type"
 		);
