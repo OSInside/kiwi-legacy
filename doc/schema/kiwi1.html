@@ -19,7 +19,8 @@
 
         
         
-        var annotationBoxes= new Array('annotations_id13');
+        var annotationBoxes= new Array('annotations_id13', 
+				'annotations_id15');
 
         
         
@@ -470,6 +471,29 @@
                         <td>http://www.w3.org/2001/XMLSchema-instance</td>
                      </tr>
                      <tr>
+                        <td class="firstColumn">
+                           <div class="floatLeft"><b>Annotations</b></div>
+                           <div class="floatRight"><input id="button_annotations_id15" type="image" src="images/button_minus.gif"
+                                     value="-"
+                                     onclick="switchState('annotations_id15');"
+                                     class="control" /></div>
+                        </td>
+                        <td>
+                           <div id="annotations_id15" style="display:block">
+                              <div class="annotation">
+                                 <table style="table-layout:fixed;white-space:pre-wrap;white-space:-moz-pre-wrap;white-space:-pre-wrap;white-space: -o-pre-wrap;word-wrap: break-word;_white-space:pre;"
+                                        class="preWrapContainer">
+                                    <tr>
+                                       <td width="100%"><pre><span class="tokenText">A pair of URI references: First is a namespace name,</span><span class="tokenIndent">
+</span><span class="tokenText">second the location of the XSD Schema</span><span class="tokenIndent">
+</span><span class="tokenText">(not relevant for RELAX NG or DTD)</span></pre></td>
+                                    </tr>
+                                 </table>
+                              </div>
+                           </div>
+                        </td>
+                     </tr>
+                     <tr>
                         <td class="firstColumn"><b>Type</b></td>
                         <td><b>xs:anyURI</b></td>
                      </tr>
@@ -526,7 +550,11 @@
                               <table style="table-layout:fixed;white-space:pre-wrap;white-space:-moz-pre-wrap;white-space:-pre-wrap;white-space: -o-pre-wrap;word-wrap: break-word;_white-space:pre;"
                                      class="preWrapContainer">
                                  <tr>
-                                    <td width="100%"><pre><span class="tokenElement">&lt;xs:attribute</span><span class="tokenAttrName"> name=</span><span class="tokenAttrValue">"schemaLocation"</span><span class="tokenAttrName"> type=</span><span class="tokenAttrValue">"xs:anyURI"</span><span class="tokenElement">/&gt;</span></pre></td>
+                                    <td width="100%"><pre><span class="tokenElement">&lt;xs:attribute</span><span class="tokenAttrName"> name=</span><span class="tokenAttrValue">"schemaLocation"</span><span class="tokenAttrName"> type=</span><span class="tokenAttrValue">"xs:anyURI"</span><span class="tokenElement">&gt;</span><span class="tokenIndent">
+  </span><span class="tokenElement">&lt;xs:annotation</span><span class="tokenElement">&gt;</span><span class="tokenIndent">
+    </span><span class="tokenElement">&lt;xs:documentation</span><span class="tokenElement">&gt;</span><span class="tokenText" style="white-space:normal">A pair of URI references: First is a namespace name, second the location of the XSD Schema (not relevant for RELAX NG or DTD)</span><span class="tokenElement">&lt;/xs:documentation&gt;</span><span class="tokenIndent">
+  </span><span class="tokenElement">&lt;/xs:annotation&gt;</span><span class="tokenIndent">
+</span><span class="tokenElement">&lt;/xs:attribute&gt;</span></pre></td>
                                  </tr>
                               </table>
                            </div>
