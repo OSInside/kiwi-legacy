@@ -156,7 +156,7 @@ if searchVolumeGroup; then
 	fi
 	export imageRWDevice=/dev/$VGROUP/LVRoot
 	export imageRODevice=/dev/$VGROUP/LVComp
-	export imageBootDevice=$(ddn $imageDiskDevice 2)
+	export imageBootDevice=$(ddn $imageDiskDevice 1)
 fi
 
 #======================================

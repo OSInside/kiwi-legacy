@@ -331,13 +331,13 @@ function OEMRepartLVM {
 	# repartition disk if LVM partition plus boot partition
 	# is used. Initial partition table layout is:
 	# =====================================
-	# p1: ( LVM  )  +luks
-	# p2: ( boot )
+	# p1: ( boot )
+	# p2: ( LVM  )  +luks
 	# -------------------------------------
 	#======================================
 	# setup initial boot device ID
 	#--------------------------------------
-	export bootid=2
+	export bootid=1
 	#======================================
 	# calculate partition sizes
 	#--------------------------------------
@@ -347,7 +347,7 @@ function OEMRepartLVM {
 	local disk1MBytes=$(($(partitionSize $(ddn $imageDiskDevice 1)) / 1024))
 	local disk2MBytes=$(($(partitionSize $(ddn $imageDiskDevice 2)) / 1024))
 	if [ ! -z "$OEM_SYSTEMSIZE" ];then
-		disk1MBytes=$OEM_SYSTEMSIZE
+		disk2MBytes=$OEM_SYSTEMSIZE
 	fi
 	local diskRMBytes=$((
 		recoMByte + disk1MBytes + disk2MBytes + swapsize + VOverHeadMB
@@ -365,8 +365,8 @@ function OEMRepartLVM {
 	# write new partition table
 	#--------------------------------------
 	if [ -z "$DONT_PARTITION" ];then
-		pID=3
-		bootParam=2
+		pID=2
+		bootParam=1
 		recoParam=no
 		swapParam=no
 		#======================================
@@ -377,20 +377,21 @@ function OEMRepartLVM {
 		fi
 		vgchange -an
 		#======================================
+		# resize LVM partition
+		#--------------------------------------
+		disk2MBytes=$((diskXMBytes - disk1MBytes - recoMByte))
+		createPartitionerInput \
+			d u y $pID n p $pID . +"$disk2MBytes"M t $pID 8e
+		extendID=$pID
+		pID=$((pID + 1))
+		#======================================
 		# add recovery partition
 		#--------------------------------------
 		if [ ! -z "$OEM_RECOVERY" ];then
 			createPartitionerInput \
-				u y n p $pID . +"$recoMByte"M t $pID $recoID
+				u y n p $pID . . t $pID $recoID
 			recoParam=$pID
-			pID=$((pID + 1))
 		fi
-		#======================================
-		# add rest space LVM partition
-		#--------------------------------------
-		createPartitionerInput \
-			u y n p $pID . . t $pID 8e
-		extendID=$pID
 		#======================================
 		# setup new device names
 		#--------------------------------------
@@ -398,19 +399,15 @@ function OEMRepartLVM {
 			1 $swapParam $recoParam $bootParam yes $VGROUP
 		callPartitioner $input
 		waitForStorageDevice $(ddn $imageDiskDevice $extendID)
-		dd if=/dev/zero of=$(ddn $imageDiskDevice $extendID) bs=1024 count=5
 		vgchange -an
-		activateBootPartition
 		#======================================
 		# extend volume group with rest space
 		#--------------------------------------
-		vgchange -a y $VGROUP
-		pvcreate $(ddn $imageDiskDevice $extendID)
-		vgextend $VGROUP $(ddn $imageDiskDevice $extendID)
+		pvresize $(ddn $imageDiskDevice $extendID)
 		#======================================
-		# Extend LVRoot to requested size
+		# activate volume group $VGROUP
 		#--------------------------------------
-		lvextend --size $disk1MBytes"M" /dev/$VGROUP/LVRoot
+		vgchange -a y $VGROUP
 		#======================================
 		# Add LVSwap if requested.
 		#--------------------------------------
@@ -419,10 +416,12 @@ function OEMRepartLVM {
 			swapParam=yes
 		fi
 		#======================================
-		# Extend root if no systemsize was set
+		# Extend LVRoot...
 		#--------------------------------------
 		if [ -z "$OEM_SYSTEMSIZE" ];then
 			lvextend -l 100%FREE /dev/$VGROUP/LVRoot
+		else
+			lvextend --size $OEM_SYSTEMSIZE"M" /dev/$VGROUP/LVRoot
 		fi
 		#======================================
 		# setup new device names

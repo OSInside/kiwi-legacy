@@ -1769,16 +1769,17 @@ sub setupBootDisk {
 	# Setup boot partition ID
 	#------------------------------------------
 	my $bootpart = "0";
-	if (($syszip) || ($haveSplit) || ($lvm) || ($haveluks) || ($needBootP)) {
+	if (($syszip) || ($haveSplit) || ($haveluks) || ($needBootP)) {
 		$bootpart = "1";
 	}
 	if ((($syszip) || ($haveSplit)) && ($haveluks)) {
 		$bootpart = "2";
 	}
-	if (($dmapper) && ($lvm)) {
-		$bootpart = "1";
-	} elsif ($dmapper) {
+	if ($dmapper) {
 		$bootpart = "2"
+	}
+	if ($lvm) {
+		$bootpart = "0";
 	}
 	$this->{bootpart} = $bootpart;
 	#==========================================
@@ -1905,33 +1906,28 @@ sub setupBootDisk {
 				}
 			}
 		} else {
-			my $bootpartsize=".";
 			if ($bootloader =~ /(sys|ext)linux/) {
 				my $partid = 6;
 				if ($bootloader eq "extlinux" ) {
 					$partid = 83;
 				}
 				my $lvmsize = $this->{vmmbyte} - $syslbootMB;
-				if ($haveDiskDevice) {
-					$bootpartsize = "+".$syslbootMB."M";
-				}
+				my $bootpartsize = "+".$syslbootMB."M";
 				@commands = (
-					"n","p","1",".","+".$lvmsize."M",
-					"n","p","2",".",$bootpartsize,
-					"t","2",$partid,
-					"t","1","8e",
-					"a","2","w","q"
+					"n","p","1",".",$bootpartsize,
+					"n","p","2",".",".",
+					"t","1",$partid,
+					"t","2","8e",
+					"a","1","w","q"
 				);
 			} else {
 				my $lvmsize = $this->{vmmbyte} - $lvmbootMB;
-				if ($haveDiskDevice) {
-					$bootpartsize = "+".$lvmbootMB."M";
-				}
+				my $bootpartsize = "+".$lvmbootMB."M";
 				@commands = (
-					"n","p","1",".","+".$lvmsize."M",
-					"n","p","2",".",$bootpartsize,
-					"t","1","8e",
-					"a","2","w","q"
+					"n","p","1",".",$bootpartsize,
+					"n","p","2",".",".",
+					"t","2","8e",
+					"a","1","w","q"
 				);
 			}
 		}
@@ -4374,9 +4370,15 @@ sub setStoragePartition {
 			$kiwi -> loginfo (
 				"PARTED input: $device [@p_cmd]"
 			);
+			my $align="";
+			$status = qxx ("/usr/sbin/parted --help | grep -q align=");
+			$result = $? >> 8;
+			if ($result == 0) {
+				 $align="-a cyl";
+			}
 			foreach my $p_cmd (@p_cmd) {
 				$status= qxx (
-					"/usr/sbin/parted -s $device unit cyl $p_cmd 2>&1"
+					"/usr/sbin/parted $align -s $device unit cyl $p_cmd 2>&1"
 				);
 				$result= $? >> 8;
 				$kiwi -> loginfo ($status);
@@ -4585,50 +4587,34 @@ sub setLVMDeviceMap {
 	}
 	if ($device =~ /loop/) {
 		my $dmap = $device; $dmap =~ s/dev\///;
-		$result{0} = "/dev/mapper".$dmap."p2";
+		$result{0} = "/dev/mapper".$dmap."p1";
 	} else {
-		$result{0} = $device."2";
+		$result{0} = $device."1";
 	}
 	for (my $i=0;$i<@names;$i++) {
 		$result{$i+1} = "/dev/$group/".$names[$i];
 	}
 	if ($loader =~ /(sys|ext)linux/) {
-		my $search = 6;
-		if ($loader eq "extlinux" ) {
-			$search = 83;
-		}
 		if ($device =~ /loop/) {
 			my $dmap = $device; $dmap =~ s/dev\///;
-			for (my $i=3;$i>=1;$i--) {
-				my $type = $this -> getStorageID ("/dev/mapper".$dmap."p$i");
-				if ($type == $search) {
-					if ($loader eq "syslinux") {
-						$result{fat} = "/dev/mapper".$dmap."p$i";
-					} else {
-						$result{extlinux} = "/dev/mapper".$dmap."p$i";
-					}
-					last;
-				}
+			if ($loader eq "syslinux") {
+				$result{fat} = "/dev/mapper".$dmap."p1";
+			} else {
+				$result{extlinux} = "/dev/mapper".$dmap."p1";
 			}
 		} else {
-			for (my $i=3;$i>=1;$i--) {
-				my $type = $this -> getStorageID ($device.$i);
-				if ($type == $search) {
-					if ($loader eq "syslinux") {
-						$result{fat} = $device.$i;
-					} else {
-						$result{extlinux} = $device.$i;
-					}
-					last;
-				}
+			if ($loader eq "syslinux") {
+				$result{fat} = $device."1";
+			} else {
+				$result{extlinux} = $device."1";
 			}
 		}
 	} elsif ($dmapper) {
 		if ($device =~ /loop/) {
 			my $dmap = $device; $dmap =~ s/dev\///;
-			$result{dmapper} = "/dev/mapper".$dmap."p2";
+			$result{dmapper} = "/dev/mapper".$dmap."p1";
 		} else {
-			$result{dmapper} = $device."2";
+			$result{dmapper} = $device."1";
 		}
 	}
 	return %result;
@@ -4659,7 +4645,7 @@ sub setVolumeGroup {
 	my $result;
 	$status = qxx ("vgremove --force $VGroup 2>&1");
 	$status = qxx ("test -d /dev/$VGroup && rm -rf /dev/$VGroup 2>&1");
-	$status = qxx ("pvcreate $deviceMap{1} 2>&1");
+	$status = qxx ("pvcreate $deviceMap{2} 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
@@ -4668,7 +4654,7 @@ sub setVolumeGroup {
 		$this -> cleanLoop ();
 		return undef;
 	}
-	$status = qxx ("vgcreate $VGroup $deviceMap{1} 2>&1");
+	$status = qxx ("vgcreate $VGroup $deviceMap{2} 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();

@@ -87,7 +87,7 @@ function setupInitialDeviceNames {
 		export imageRWDevice=/dev/$VGROUP/LVRoot
 		export imageRODevice=/dev/$VGROUP/LVComp
 		export imageIOWRDevice=$imageRWDevice
-		export imageBootDevice=$(ddn $imageDiskDevice 2)
+		export imageBootDevice=$(ddn $imageDiskDevice 1)
 		if [ ! -z "$KIWI_RECOVERY" ];then
 			export imageRecoveryDevice=$(ddn $imageDiskDevice $KIWI_RECOVERY)
 		fi

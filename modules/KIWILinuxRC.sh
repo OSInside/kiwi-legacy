@@ -5793,7 +5793,7 @@ function partedMBToCylinder {
 	# convert size given in MB to cylinder count
 	# ----
 	local sizeKB=$(($1 * 1048576))
-	local cylreq=$(($sizeKB / ($partedCylKSize * 1000)))
+	local cylreq=$(echo "scale=0; $sizeKB / ($partedCylKSize * 1000)" | bc)
 	echo $cylreq
 }
 #======================================
@@ -6276,7 +6276,7 @@ function setupBootPartition {
 		#======================================
 		# lvmboot
 		#--------------------------------------
-		test -z "$bootid" && export bootid=2
+		test -z "$bootid" && export bootid=1
 		mpoint=lvmboot
 	elif [ "$haveBtrFS" = "yes" ];then
 		#======================================
