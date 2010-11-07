@@ -237,7 +237,7 @@ function importFile {
 function systemException {
 	# /.../
 	# print a message to the controling terminal followed
-	# by an action. Possible actions are reboot, wait
+	# by an action. Possible actions are reboot, wait, shutdown,
 	# and opening a shell
 	# ----
 	set +x
@@ -2452,7 +2452,7 @@ function probeFileSystem {
 		crypto_LUKS) FSTYPE=luks ;;
 		vfat)        FSTYPE=vfat ;;
 		clicfs)      FSTYPE=clicfs ;;
-        xfs)         FSTYPE=xfs ;;
+		xfs)         FSTYPE=xfs ;;
 		*)
 			FSTYPE=unknown
 		;;
@@ -4631,7 +4631,7 @@ function putFile {
 	local dest=$2
 	local host=$3
 	local type=$4
-    if test -z "$path"; then
+	if test -z "$path"; then
 		systemException "No path specified" "reboot"
 	fi
 	if test -z "$host"; then
@@ -4661,8 +4661,8 @@ function putFile {
 			return $?
 			;;
 		"tftp")
-            atftp -p -l $path -r $dest $host >/dev/null 2>&1
-            return $?
+			atftp -p -l $path -r $dest $host >/dev/null 2>&1
+			return $?
 			;;
 		*)
 			systemException "Unknown download type: $type" "reboot"
@@ -4978,6 +4978,15 @@ function bootImage {
 			if [ ! -z "$OEM_REBOOT" ] || [ ! -z "$REBOOT_IMAGE" ];then
 				reboot=yes
 			fi
+			if [ ! -z "$OEM_REBOOT_INTERACTIVE" ];then
+				rebootinter=yes
+			fi
+			if [ ! -z "$OEM_SHUTDOWN" ];then
+				shutdown=yes
+			fi
+			if [ ! -z "$OEM_SHUTDOWN_INTERACTIVE" ];then
+				shutdowninter=yes
+			fi
 		fi
 	fi
 	#======================================
@@ -5006,15 +5015,49 @@ function bootImage {
 		Echo "Reboot requested... rebooting after preinit"
 		exec /lib/mkinitrd/bin/run-init -c /dev/console /mnt /bin/bash -c \
 			"/preinit ; . /include ; cleanImage ; exec /sbin/reboot -f -i"
-	else
-		# FIXME: clicfs doesn't like run-init
-		if [ ! "$haveClicFS" = "yes" ];then
-			exec /lib/mkinitrd/bin/run-init -c /dev/console /mnt /bin/bash -c \
-				"/preinit ; . /include ; cleanImage ; exec /sbin/init $option"
+	fi
+	if [ $rebootinter = "yes" ];then
+		Echo "Reboot requested... rebooting after preinit"
+		if [ "$OEMInstallType" = "CD" ];then
+			TEXT_DUMP=$TEXT_CDPULL
 		else
-			cd /mnt && exec chroot . /bin/bash -c \
-				"/preinit ; . /include ; cleanImage ; exec /sbin/init $option"
+			TEXT_DUMP=$TEXT_USBPULL
 		fi
+		Dialog \
+			--backtitle \"$TEXT_INSTALLTITLE\" \
+			--msgbox "\"$TEXT_DUMP\"" 5 70
+		clear
+		Echo "Prepare for reboot"
+		exec /lib/mkinitrd/bin/run-init -c /dev/console /mnt /bin/bash -c \
+			"/preinit ; . /include ; cleanImage ; exec /sbin/reboot -f -i"
+	fi
+	if [ $shutdown = "yes" ];then
+		Echo "Shutdown  requested... system shutdown after preinit"
+		exec /lib/mkinitrd/bin/run-init -c /dev/console /mnt /bin/bash -c \
+			"/preinit ; . /include ; cleanImage ; exec /sbin/halt -fihp"
+	fi
+	if [ $shutdowninter = "yes" ];then
+		Echo "Shutdown  requested... system shutdown after preinit"
+		if [ "$OEMInstallType" = "CD" ];then
+			TEXT_DUMP=$TEXT_CDPULL_SDOWN
+		else
+			TEXT_DUMP=$TEXT_USBPULL_SDOWN
+		fi
+		Dialog \
+			--backtitle \"$TEXT_INSTALLTITLE\" \
+			--msgbox "\"$TEXT_DUMP\"" 5 70
+		clear
+		Echo "Prepare for shutdown"
+		exec /lib/mkinitrd/bin/run-init -c /dev/console /mnt /bin/bash -c \
+			"/preinit ; . /include ; cleanImage ; exec /sbin/halt -fihp" 
+	fi
+	# FIXME: clicfs doesn't like run-init
+	if [ ! "$haveClicFS" = "yes" ];then
+		exec /lib/mkinitrd/bin/run-init -c /dev/console /mnt /bin/bash -c \
+			"/preinit ; . /include ; cleanImage ; exec /sbin/init $option"
+	else
+		cd /mnt && exec chroot . /bin/bash -c \
+			"/preinit ; . /include ; cleanImage ; exec /sbin/init $option"
 	fi
 }
 #======================================
@@ -5341,6 +5384,10 @@ function selectLanguage {
 		getText "Please remove the CD/DVD before reboot")
 	export TEXT_USBPULL=$(
 		getText "Please unplug the USB stick before reboot")
+	export TEXT_CDPULL_SDOWN=$(
+		getText "Please remove the CD/DVD before shutdown")
+	export TEXT_USBPULL_SDOWN=$(
+		getText "System will be shutdown. Remove USB stick before power on")
 	export TEXT_SELECT=$(
 		getText "Select disk for installation:")
 }
@@ -5583,7 +5630,7 @@ function createPartitionerInput {
 		partedInit $imageDiskDevice
 		partedSectorInit $imageDiskDevice
 		createPartedInput $imageDiskDevice $@
-    fi
+	fi
 }
 #======================================
 # createFDasdInput
@@ -6127,8 +6174,8 @@ function createFilesystem {
 		else
 			mkfs.btrfs $deviceCreate
 		fi
-    elif [ "$FSTYPE" = "xfs" ];then
-        mkfs.xfs -f $deviceCreate
+	elif [ "$FSTYPE" = "xfs" ];then
+		mkfs.xfs -f $deviceCreate
 	else
 		# use ext3 by default
 		mkfs.ext3 -F $deviceCreate $blocks 1>&2

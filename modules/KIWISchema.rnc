@@ -26,7 +26,7 @@ db:info [
 	db:releaseinfo [
 		"$Id: kiwi.rnc 2957 2008-01-11 12:53:39Z thomas-schraitle $"
 	]
-	db:releaseinfo [ "RNC Schema Version 4.8" ]
+	db:releaseinfo [ "RNC Schema Version 4.9" ]
 	db:pubdate [ "START" ]
 	db:pubdate [ "2008-01-08" ]
 ]
@@ -63,7 +63,7 @@ div {
 		attribute inherit { text }
 	k.image.schemaversion.attribute =
 		## The allowed Schema version (fixed value)
-		attribute schemaversion { "4.8" }
+		attribute schemaversion { "4.9" }
 	k.image.kiwirevision.attribute =
 		## A kiwi SVN revision number which is known to build
 		## a working image from this description. If the kiwi SVN
@@ -1108,10 +1108,13 @@ div {
 	k.oem-reboot.content = xsd:boolean
 	k.oem-reboot.attlist = empty
 	k.oem-reboot =
-		## For oemboot driven images: reboot after first deployment yes/no
+		## For oemboot driven images: reboot after first deployment true/false
 		[
 		db:para [
-			"For oemboot driven images: reboot after first deployment yes/no."
+			"For oemboot driven images: reboot after first deployment "~
+			"true/false. The system is rebooted in similar fashion to "~
+			"shutdown -r after the image has been dumped (installed) "~
+			"and expanded on the target disk."
 		]
 		]
 		element oem-reboot {
@@ -1121,22 +1124,93 @@ div {
 }
 
 #==========================================
-# common element <oem-dumphalt>
+# common element <oem-reboot-interactive>
 #
 div {
-	k.oem-dumphalt.content = xsd:boolean
-	k.oem-dumphalt.attlist = empty
-	k.oem-dumphalt =
-		## For oemboot driven images: halt system after image dump yes/no
+	k.oem-reboot-interactive.content = xsd:boolean
+	k.oem-reboot-interactive.attlist = empty
+	k.oem-reboot-interactive =
+		## For oemboot driven images: reboot after first deployment true/false
 		[
 		db:para [
-			"For oemboot driven images:halt system the system after\x{a}"~
-			"image has been dumped (installed) on the target disk."
+			"For oemboot driven images: reboot after first deployment "~
+			"true/false. A message to be acknowledged by the user is "~
+			"posted after the image has been dumped (installed) and "~
+			"expanded on the target disk. After user interaction the "~
+			"system is rebooted in similar fashion to shutdown -r."
 		]
 		]
-		element oem-dumphalt {
-			k.oem-dumphalt.attlist,
-			k.oem-dumphalt.content
+		element oem-reboot-interactive {
+			k.oem-reboot-interactive.attlist,
+			k.oem-reboot-interactive.content
+		}
+}
+
+#==========================================
+# common element <oem-shutdown>
+#
+div {
+	k.oem-shutdown.content = xsd:boolean
+	k.oem-shutdown.attlist = empty
+	k.oem-shutdown =
+		## For oemboot driven images: shutdown after first deployment 
+        ## true/false
+		[
+		db:para [
+			"For oemboot driven images: shutdown after first deployment "~
+			"true/false. The system is powered down after the image has "~
+			"been dumped (installed) and expanded on the target disk. "
+		]
+		]
+		element oem-shutdown {
+			k.oem-shutdown.attlist,
+			k.oem-shutdown.content
+		}
+}
+
+#==========================================
+# common element <oem-shutdown-interactive>
+#
+div {
+	k.oem-shutdown-interactive.content = xsd:boolean
+	k.oem-shutdown-interactive.attlist = empty
+	k.oem-shutdown-interactive =
+		## For oemboot driven images: shutdown after first deployment 
+        ## true/false
+		[
+		db:para [
+			"For oemboot driven images: shutdown after first deployment "~
+			"true/false. A message to be acknowledged by the user is posted "~
+			"after the image has been dumped (installed) and expanded on "~
+			"the target disk. After user interaction the system is shutdown."
+		]
+		]
+		element oem-shutdown-interactive {
+			k.oem-shutdown-interactive.attlist,
+			k.oem-shutdown-interactive.content
+		}
+}
+
+#==========================================
+# common element <oem-bootwait>
+#
+div {
+	k.oem-bootwait.content = xsd:boolean
+	k.oem-bootwait.attlist = empty
+	k.oem-bootwait =
+		## For oemboot driven images: halt system after image dump true/false
+		[
+		db:para [
+			"For oemboot driven images: wait for user acknowledgement "~
+			"after first deployment true/false. A message to be "~
+			"acknowledged by the user is posted after the image has been "~
+			"dumped (installed) on the target disk. After user interaction "~
+			"the system reboots (softboot)."
+		]
+		]
+		element oem-bootwait {
+			k.oem-bootwait.attlist,
+			k.oem-bootwait.content
 		}
 }
 
@@ -2140,7 +2214,10 @@ div {
 			k.oem-recoveryID? &
 			k.oem-inplace-recovery? &
 			k.oem-reboot? &
-			k.oem-dumphalt? &
+			k.oem-reboot-interactive? &
+			k.oem-shutdown? &
+			k.oem-shutdown-interactive? &
+			k.oem-bootwait? &
 			k.oem-unattended?
 		}
 }

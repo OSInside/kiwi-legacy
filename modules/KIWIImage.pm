@@ -771,7 +771,11 @@ sub createImageUSB {
 	$main::ForeignRepo{"oem-boot-title"} = $xml -> getOEMBootTitle();
 	$main::ForeignRepo{"oem-kiwi-initrd"}= $xml -> getOEMKiwiInitrd();
 	$main::ForeignRepo{"oem-reboot"}     = $xml -> getOEMReboot();
-	$main::ForeignRepo{"oem-dumphalt"}   = $xml -> getOEMDumpHalt();
+	$main::ForeignRepo{"oem-reboot-interactive"} = $xml -> getOEMRebootInter();
+	$main::ForeignRepo{"oem-shutdown"}   = $xml -> getOEMShutdown();
+	$main::ForeignRepo{"oem-shutdown-interactive"}
+										= $xml -> getOEMShutdownInter();
+	$main::ForeignRepo{"oem-bootwait"}   = $xml -> getOEMBootWait();
 	$main::ForeignRepo{"oem-unattended"} = $xml -> getOEMUnattended();
 	$main::ForeignRepo{"oem-recovery"}   = $xml -> getOEMRecovery();
 	$main::ForeignRepo{"oem-recoveryID"} = $xml -> getOEMRecoveryID();
@@ -2582,7 +2586,11 @@ sub createImageSplit {
 	$main::ForeignRepo{"oem-boot-title"} = $xml -> getOEMBootTitle();
 	$main::ForeignRepo{"oem-kiwi-initrd"}= $xml -> getOEMKiwiInitrd();
 	$main::ForeignRepo{"oem-reboot"}     = $xml -> getOEMReboot();
-	$main::ForeignRepo{"oem-dumphalt"}   = $xml -> getOEMDumpHalt();
+	$main::ForeignRepo{"oem-reboot-interactive"} = $xml -> getOEMRebootInter();
+	$main::ForeignRepo{"oem-shutdown"}   = $xml -> getOEMShutdown();
+	$main::ForeignRepo{"oem-shutdown-interactive"} 
+										= $xml -> getOEMShutdownInter();
+	$main::ForeignRepo{"oem-bootwait"}   = $xml -> getOEMBootWait();
 	$main::ForeignRepo{"oem-unattended"} = $xml -> getOEMUnattended();
 	$main::ForeignRepo{"oem-recovery"}   = $xml -> getOEMRecovery();
 	$main::ForeignRepo{"oem-recoveryID"} = $xml -> getOEMRecoveryID();

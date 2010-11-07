@@ -102,3 +102,10 @@ msgstr "Selecteer de schijf voor installatie:"
 #, fuzzy
 msgid "Select %1 partition for installation:"
 msgstr "Selecteer de schijf voor installatie:"
+
+msgid "System will be shutdown. Remove USB stick before power on"
+msgstr ""
+
+#, fuzzy
+msgid "Please remove the CD/DVD before shutdown"
+msgstr "Gaarne de installatie cd/dvd uitwerpen alvorens door te gaan"

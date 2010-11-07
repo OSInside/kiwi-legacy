@@ -107,3 +107,9 @@ msgstr "硬盘安装"
 #, fuzzy
 msgid "Select %1 partition for installation:"
 msgstr "硬盘安装"
+
+msgid "System will be shutdown. Remove USB stick before power on"
+msgstr ""
+
+msgid "Please remove the CD/DVD before shutdown"
+msgstr ""

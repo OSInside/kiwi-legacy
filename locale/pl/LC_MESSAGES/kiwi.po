@@ -99,3 +99,10 @@ msgstr "Proszę wybrać dysk do instalacji"
 #, fuzzy
 msgid "Select %1 partition for installation:"
 msgstr "Proszę wybrać dysk do instalacji"
+
+msgid "System will be shutdown. Remove USB stick before power on"
+msgstr ""
+
+#, fuzzy
+msgid "Please remove the CD/DVD before shutdown"
+msgstr "Proszę wyjąć płytę instalacyjnę przed kontynuowaniem"

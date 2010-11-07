@@ -88,3 +88,9 @@ msgstr ""
 
 msgid "Select %1 partition for installation:"
 msgstr ""
+
+msgid "System will be shutdown. Remove USB stick before power on"
+msgstr ""
+
+msgid "Please remove the CD/DVD before shutdown"
+msgstr ""

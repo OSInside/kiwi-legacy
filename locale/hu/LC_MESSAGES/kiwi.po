@@ -95,3 +95,10 @@ msgstr "Válassza ki a lemezt a telepítéshez:"
 #, fuzzy
 msgid "Select %1 partition for installation:"
 msgstr "Válassza ki a lemezt a telepítéshez:"
+
+msgid "System will be shutdown. Remove USB stick before power on"
+msgstr ""
+
+#, fuzzy
+msgid "Please remove the CD/DVD before shutdown"
+msgstr "Folytatás előtt kérem vegye ki a telepítő CD/DVD-t a meghajtóból"

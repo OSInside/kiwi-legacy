@@ -23,7 +23,7 @@
 <grammar xmlns:db="http://docbook.org/ns/docbook" xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" xmlns:rng="http://relaxng.org/ns/structure/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
   <db:info>
     <db:releaseinfo>$Id: kiwi.rnc 2957 2008-01-11 12:53:39Z thomas-schraitle $</db:releaseinfo>
-    <db:releaseinfo>RNC Schema Version 4.8</db:releaseinfo>
+    <db:releaseinfo>RNC Schema Version 4.9</db:releaseinfo>
     <db:pubdate>START</db:pubdate>
     <db:pubdate>2008-01-08</db:pubdate>
   </db:info>
@@ -92,7 +92,7 @@ the package Information is inherited</a:documentation>
     <define name="k.image.schemaversion.attribute">
       <attribute name="schemaversion">
         <a:documentation>The allowed Schema version (fixed value)</a:documentation>
-        <value>4.8</value>
+        <value>4.9</value>
       </attribute>
     </define>
     <define name="k.image.kiwirevision.attribute">
@@ -1548,8 +1548,8 @@ and don't replace it with mkinitrd created initrd</db:para>
     </define>
     <define name="k.oem-reboot">
       <element name="oem-reboot">
-        <a:documentation>For oemboot driven images: reboot after first deployment yes/no</a:documentation>
-        <db:para>For oemboot driven images: reboot after first deployment yes/no.</db:para>
+        <a:documentation>For oemboot driven images: reboot after first deployment true/false</a:documentation>
+        <db:para>For oemboot driven images: reboot after first deployment true/false. The system is rebooted in similar fashion to shutdown -r after the image has been dumped (installed) and expanded on the target disk.</db:para>
         <ref name="k.oem-reboot.attlist"/>
         <ref name="k.oem-reboot.content"/>
       </element>
@@ -1557,23 +1557,87 @@ and don't replace it with mkinitrd created initrd</db:para>
   </div>
   <!--
     ==========================================
-    common element <oem-dumphalt>
+    common element <oem-reboot-interactive>
     
   -->
   <div>
-    <define name="k.oem-dumphalt.content">
+    <define name="k.oem-reboot-interactive.content">
       <data type="boolean"/>
     </define>
-    <define name="k.oem-dumphalt.attlist">
+    <define name="k.oem-reboot-interactive.attlist">
       <empty/>
     </define>
-    <define name="k.oem-dumphalt">
-      <element name="oem-dumphalt">
-        <a:documentation>For oemboot driven images: halt system after image dump yes/no</a:documentation>
-        <db:para>For oemboot driven images:halt system the system after
-image has been dumped (installed) on the target disk.</db:para>
-        <ref name="k.oem-dumphalt.attlist"/>
-        <ref name="k.oem-dumphalt.content"/>
+    <define name="k.oem-reboot-interactive">
+      <element name="oem-reboot-interactive">
+        <a:documentation>For oemboot driven images: reboot after first deployment true/false</a:documentation>
+        <db:para>For oemboot driven images: reboot after first deployment true/false. A message to be acknowledged by the user is posted after the image has been dumped (installed) and expanded on the target disk. After user interaction the system is rebooted in similar fashion to shutdown -r.</db:para>
+        <ref name="k.oem-reboot-interactive.attlist"/>
+        <ref name="k.oem-reboot-interactive.content"/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
+    common element <oem-shutdown>
+    
+  -->
+  <div>
+    <define name="k.oem-shutdown.content">
+      <data type="boolean"/>
+    </define>
+    <define name="k.oem-shutdown.attlist">
+      <empty/>
+    </define>
+    <define name="k.oem-shutdown">
+      <element name="oem-shutdown">
+        <a:documentation>For oemboot driven images: shutdown after first deployment 
+true/false</a:documentation>
+        <db:para>For oemboot driven images: shutdown after first deployment true/false. The system is powered down after the image has been dumped (installed) and expanded on the target disk. </db:para>
+        <ref name="k.oem-shutdown.attlist"/>
+        <ref name="k.oem-shutdown.content"/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
+    common element <oem-shutdown-interactive>
+    
+  -->
+  <div>
+    <define name="k.oem-shutdown-interactive.content">
+      <data type="boolean"/>
+    </define>
+    <define name="k.oem-shutdown-interactive.attlist">
+      <empty/>
+    </define>
+    <define name="k.oem-shutdown-interactive">
+      <element name="oem-shutdown-interactive">
+        <a:documentation>For oemboot driven images: shutdown after first deployment 
+true/false</a:documentation>
+        <db:para>For oemboot driven images: shutdown after first deployment true/false. A message to be acknowledged by the user is posted after the image has been dumped (installed) and expanded on the target disk. After user interaction the system is shutdown.</db:para>
+        <ref name="k.oem-shutdown-interactive.attlist"/>
+        <ref name="k.oem-shutdown-interactive.content"/>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
+    common element <oem-bootwait>
+    
+  -->
+  <div>
+    <define name="k.oem-bootwait.content">
+      <data type="boolean"/>
+    </define>
+    <define name="k.oem-bootwait.attlist">
+      <empty/>
+    </define>
+    <define name="k.oem-bootwait">
+      <element name="oem-bootwait">
+        <a:documentation>For oemboot driven images: halt system after image dump true/false</a:documentation>
+        <db:para>For oemboot driven images: wait for user acknowledgement after first deployment true/false. A message to be acknowledged by the user is posted after the image has been dumped (installed) on the target disk. After user interaction the system reboots (softboot).</db:para>
+        <ref name="k.oem-bootwait.attlist"/>
+        <ref name="k.oem-bootwait.content"/>
       </element>
     </define>
   </div>
@@ -3086,7 +3150,16 @@ and setup the system disk</db:para>
             <ref name="k.oem-reboot"/>
           </optional>
           <optional>
-            <ref name="k.oem-dumphalt"/>
+            <ref name="k.oem-reboot-interactive"/>
+          </optional>
+          <optional>
+            <ref name="k.oem-shutdown"/>
+          </optional>
+          <optional>
+            <ref name="k.oem-shutdown-interactive"/>
+          </optional>
+          <optional>
+            <ref name="k.oem-bootwait"/>
           </optional>
           <optional>
             <ref name="k.oem-unattended"/>

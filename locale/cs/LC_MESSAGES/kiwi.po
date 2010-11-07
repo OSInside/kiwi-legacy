@@ -101,3 +101,9 @@ msgstr "Instalace z disku"
 #, fuzzy
 msgid "Select %1 partition for installation:"
 msgstr "Instalace z disku"
+
+msgid "System will be shutdown. Remove USB stick before power on"
+msgstr ""
+
+msgid "Please remove the CD/DVD before shutdown"
+msgstr ""

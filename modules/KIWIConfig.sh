@@ -201,13 +201,25 @@ function baseSetupOEMPartition {
 		echo "Setting up OEM_REBOOT=1"
 		echo "OEM_REBOOT=1" >> $oemfile
 	fi
+	if [ ! -z "$kiwi_oemrebootinteractive" ];then
+		echo "Setting up OEM_REBOOT_INTERACTIVE=1"
+		echo "OEM_REBOOT_INTERACTIVE=1" >> $oemfile
+	fi
+	if [ ! -z "$kiwi_oemshutdown" ];then
+		echo "Setting up OEM_SHUTDOWN=1"
+		echo "OEM_SHUTDOWN=1" >> $oemfile
+	fi
+	if [ ! -z "$kiwi_oemshutdowninteractive" ];then
+		echo "Setting up OEM_SHUTDOWN_INTERACTIVE=1"
+		echo "OEM_SHUTDOWN_INTERACTIVE=1" >> $oemfile
+	fi
 	if [ ! -z "$kiwi_oemalign" ];then
 		echo "Setting up OEM_ALIGN=1"
 		echo "OEM_ALIGN=1" >> $oemfile
 	fi
-	if [ ! -z "$kiwi_oemdumphalt" ];then
-		echo "Setting up OEM_DUMPHALT=1"
-		echo "OEM_DUMPHALT=1" >> $oemfile
+	if [ ! -z "$kiwi_oembootwait" ];then
+		echo "Setting up OEM_BOOTWAIT=1"
+		echo "OEM_BOOTWAIT=1" >> $oemfile
 	fi
 	if [ ! -z "kiwi_oemunattended" ];then
 		echo "Setting up OEM_UNATTENDED=1"

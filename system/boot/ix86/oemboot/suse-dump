@@ -747,10 +747,10 @@ function OEMInstall {
 		umountSystem
 	fi
 	#======================================
-	# Check for halt request
+	# Check for bootwait request
 	#--------------------------------------
-	if [ ! -z "$OEM_DUMPHALT" ];then
-		if [ "$OEMInstallType" = "CD" ];then
+	if [ ! -z "$OEM_BOOTWAIT" ];then
+        if [ "$OEMInstallType" = "CD" ];then
 			TEXT_DUMP=$TEXT_CDPULL
 		else
 			TEXT_DUMP=$TEXT_USBPULL
@@ -761,9 +761,8 @@ function OEMInstall {
 		Dialog \
 			--backtitle \"$TEXT_INSTALLTITLE\" \
 			--msgbox "\"$TEXT_DUMP\"" 5 70
-		systemException \
-			"Reboot requested after image installation" \
-		"user_reboot"
+        systemException "Reboot requested after image installation" \
+            "user_reboot"
 	fi
 }
 

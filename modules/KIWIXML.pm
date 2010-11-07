@@ -399,8 +399,17 @@ sub new {
 		if (defined $foreignRepo->{"oem-reboot"}) {
 			$this -> setForeignOEMOptionsElement ("oem-reboot");
 		}
-		if (defined $foreignRepo->{"oem-dumphalt"}) {
-			$this -> setForeignOEMOptionsElement ("oem-dumphalt");
+		if (defined $foreignRepo->{"oem-reboot-interactive"}) {
+			$this -> setForeignOEMOptionsElement ("oem-reboot-interactive");
+		}
+		if (defined $foreignRepo->{"oem-shutdown"}) {
+			$this -> setForeignOEMOptionsElement ("oem-shutdown");
+		}
+		if (defined $foreignRepo->{"oem-shutdown-interactive"}) {
+			$this -> setForeignOEMOptionsElement ("oem-shutdown-interactive");
+		}
+		if (defined $foreignRepo->{"oem-bootwait"}) {
+			$this -> setForeignOEMOptionsElement ("oem-bootwait");
 		}
 		if (defined $foreignRepo->{"oem-unattended"}) {
 			$this -> setForeignOEMOptionsElement ("oem-unattended");
@@ -1582,11 +1591,11 @@ sub getOEMReboot {
 }
 
 #==========================================
-# getOEMDumpHalt
+# getOEMRebootInter
 #------------------------------------------
-sub getOEMDumpHalt {
+sub getOEMRebootInter {
 	# ...
-	# Obtain the oem-dumphalt value or return undef
+	# Obtain the oem-reboot-interactive value or return undef
 	# ---
 	my $this = shift;
 	my $tnode= $this->{typeNode};
@@ -1594,11 +1603,71 @@ sub getOEMDumpHalt {
 	if (! defined $node) {
 		return undef;
 	}
-	my $halt = $node -> getElementsByTagName ("oem-dumphalt");
-	if ((! defined $halt) || ("$halt" eq "")) {
+	my $boot = $node -> getElementsByTagName ("oem-reboot-interactive");
+	if ((! defined $boot) || ("$boot" eq "")) {
 		return undef;
 	}
-	return $halt;
+	return $boot;
+}
+
+#==========================================
+# getOEMShutdown
+#------------------------------------------
+sub getOEMShutdown {
+	# ...
+	# Obtain the oem-shutdown value or return undef
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return undef;
+	}
+	my $down = $node -> getElementsByTagName ("oem-shutdown");
+	if ((! defined $down) || ("$down" eq "")) {
+		return undef;
+	}
+	return $down;
+}
+
+#==========================================
+# getOEMRebootInter
+#------------------------------------------
+sub getOEMShutdownInter {
+	# ...
+	# Obtain the oem-shutdown-interactive value or return undef
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return undef;
+	}
+	my $down = $node -> getElementsByTagName ("oem-shutdown-interactive");
+	if ((! defined $down) || ("$down" eq "")) {
+		return undef;
+	}
+	return $down;
+}
+
+#==========================================
+# getOEMBootWait
+#------------------------------------------
+sub getOEMBootWait {
+	# ...
+	# Obtain the oem-bootwait value or return undef
+	# ---
+	my $this = shift;
+	my $tnode= $this->{typeNode};
+	my $node = $tnode -> getElementsByTagName ("oemconfig") -> get_node(1);
+	if (! defined $node) {
+		return undef;
+	}
+	my $wait = $node -> getElementsByTagName ("oem-bootwait");
+	if ((! defined $wait) || ("$wait" eq "")) {
+		return undef;
+	}
+	return $wait;
 }
 
 #==========================================
@@ -2709,7 +2778,10 @@ sub getImageConfig {
 		my $oemtitle = $node -> getElementsByTagName ("oem-boot-title");
 		my $oemkboot = $node -> getElementsByTagName ("oem-kiwi-initrd");
 		my $oemreboot= $node -> getElementsByTagName ("oem-reboot");
-		my $oemhalt  = $node -> getElementsByTagName ("oem-dumphalt");
+		my $oemrebootinter= $node -> getElementsByTagName ("oem-reboot-interactive");
+		my $oemshutdown= $node -> getElementsByTagName ("oem-shutdown");
+		my $oemshutdowninter= $node -> getElementsByTagName ("oem-shutdown-interactive");
+		my $oemwait  = $node -> getElementsByTagName ("oem-bootwait");
 		my $oemnomsg = $node -> getElementsByTagName ("oem-unattended");
 		my $oemreco  = $node -> getElementsByTagName ("oem-recovery");
 		my $oemrecoid= $node -> getElementsByTagName ("oem-recoveryID");
@@ -2737,8 +2809,17 @@ sub getImageConfig {
 		if ((defined $oemreboot) && ("$oemreboot" eq "true")) {
 			$result{kiwi_oemreboot} = $oemreboot;
 		}
-		if ((defined $oemhalt) && ("$oemhalt" eq "true")) {
-			$result{kiwi_oemdumphalt} = $oemhalt;
+		if ((defined $oemrebootinter) && ("$oemrebootinter" eq "true")) {
+			$result{kiwi_oemrebootinteractive} = $oemrebootinter;
+		}
+		if ((defined $oemshutdown) && ("$oemshutdown" eq "true")) {
+			$result{kiwi_oemshutdown} = $oemshutdown;
+		}
+		if ((defined $oemshutdowninter) && ("$oemshutdowninter" eq "true")) {
+			$result{kiwi_oemshutdowninteractive} = $oemshutdowninter;
+		}
+		if ((defined $oemwait) && ("$oemwait" eq "true")) {
+			$result{kiwi_oembootwait} = $oemwait;
 		}
 		if ((defined $oemnomsg) && ("$oemnomsg" eq "true")) {
 			$result{kiwi_oemunattended} = $oemnomsg;
