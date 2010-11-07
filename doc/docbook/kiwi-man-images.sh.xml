@@ -74,11 +74,12 @@ exit</programlisting>
   <refsect1 id="kiwi.image.functions">
     <title>Common functions</title>
     <para>
-      The <filename>.kconfig</filename> file allows to make use of a common set of functions. Those which
-      are SUSE Linux specific starts with the name <emphasis>suse</emphasis>. Those which
-      are common to all linux systems starts with the name <emphasis>base</emphasis>.
-      The following list describes which functions are available for
-      <filename>images.sh</filename>.
+     The <filename>.kconfig</filename> file allows to make use of a common
+      set of functions. Functions specific to SUSE Linux specific begin with 
+      the name <emphasis>suse</emphasis>. Functions applicable to all linux 
+      systems starts with the name <emphasis>base</emphasis>.
+      The following list describes the functions available inside the
+      <filename>images.sh</filename> script.
     </para>    
 	<variablelist>
       <varlistentry>
