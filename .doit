@@ -114,7 +114,7 @@ sub repoup {
 	# pack up local source
 	#-------------------------------------------
 	print "Checkout source level [local]...\n";
-	qx( cp -a -p $parent/ $tmpdir );
+	qx( cp -a -p $parent/ $tmpdir/kiwi );
 	qx ($parent/.lutime $parent $tmpdir);
 	chdir $tmpdir
 		|| die "Could not create temp dir: $!";
