@@ -4423,6 +4423,55 @@ function searchAlternativeConfig {
 	fi
 }
 #======================================
+# searchHardwareMapConfig
+#--------------------------------------
+function searchHardwareMapConfig {
+	local list_var
+	local mac_list
+	Echo "Found hardware/vendor map configuration variable"
+	Debug "HARDWARE_MAP = '$HARDWARE_MAP'"
+	#===========================================
+	# Evaluate the MAP list, and test for hwaddr
+	#-------------------------------------------
+	for i in `echo "$HARDWARE_MAP" | sed 's/,/ /g' | sed 's/[ \t]+/ /g'`; do
+		Echo "Lookup MAC address: $localhwaddr in ${i}_HARDWARE_MAP"
+		eval list_var="${i}_HARDWARE_MAP"
+		eval mac_list=\$$list_var
+		Debug "${i}_HARDWARE_MAP = '$mac_list'"
+		searchHardwareMapHardwareAddress $i "$mac_list"
+		if [ -s $CONFIG ]; then
+			break
+		fi
+		unset list_var
+		unset mac_list
+	done
+}
+#======================================
+# searchHardwareMapHardwareAddress
+#--------------------------------------
+function searchHardwareMapHardwareAddress {
+	local HARDWARE_CONFIG=/etc/config.hardware
+	local localhwaddr=$DHCPCHADDR
+	local hardware_group=$1
+	local mac_list=$2
+	Debug "hardware_group = '$hardware_group'"
+	Debug "mac_list = '$mac_list'"
+	for j in `echo "$mac_list" | sed 's/,/ /g' | sed 's/[ \t]+/ /g'`; do
+		if [ "$localhwaddr" = "$j" ] ; then
+			Echo "MAC address $localhwaddr found in group $hardware_group"
+			Echo "Checking for config file: hardware_config.$hardware_group"
+			fetchFile KIWI/hardware_config.$hardware_group $HARDWARE_CONFIG
+			if [ ! -s $HARDWARE_CONFIG ]; then
+				systemException \
+					"No configuration found for $j" \
+				"reboot"
+			fi
+			importFile < $HARDWARE_CONFIG
+			break
+		fi
+	done
+}
+#======================================
 # runHook
 #--------------------------------------
 function runHook {

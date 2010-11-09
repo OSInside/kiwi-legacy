@@ -254,6 +254,12 @@ if [ $LOCAL_BOOT = "no" ];then
 		searchAlternativeConfig
 	fi
 	#======================================
+	# Check for Hardware Map Config
+	#--------------------------------------
+	if [ -n "$HARDWARE_MAP" ];then
+		searchHardwareMapConfig
+	fi
+	#======================================
 	# try to import configuration
 	#--------------------------------------
 	IMPORTED=0
@@ -305,6 +311,9 @@ if [ $LOCAL_BOOT = "no" ];then
 			fi
 			if test ! -s $CONFIG;then
 				searchAlternativeConfig
+			fi
+			if [ -n "$HARDWARE_MAP" ];then
+				searchHardwareMapConfig
 			fi
 			test -s $CONFIG || {
 				Echo "Couldn't get image configuration"
@@ -795,10 +804,10 @@ if [ $LOCAL_BOOT = "no" ];then
 		fetchFile $configSource /config/$configDest uncomp $configServer
 	done
 	IFS=$IFS_ORIG
+	#======================================
+	# Check for KIWI_INITRD
+	#--------------------------------------
 	if test $systemIntegrity = "clean";then
-		#======================================
-		# Check for KIWI_INITRD
-		#--------------------------------------
 		if [ ! -z $KIWI_INITRD ];then
 			Echo "Import KIWI initrd file: $KIWI_INITRD"
 			rm -f /mnt/boot/initrd* && mkdir -p /mnt/boot >/dev/null 2>&1
