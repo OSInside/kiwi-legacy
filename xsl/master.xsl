@@ -20,6 +20,7 @@
 <xsl:import href="convert46to47.xsl"/>
 <xsl:import href="convert47to48.xsl"/>
 <xsl:import href="convert48to49.xsl"/>
+<xsl:import href="convert49to50.xsl"/>
 <xsl:import href="pretty.xsl"/>
 
 
@@ -81,11 +82,17 @@
 	<xsl:variable name="v48">
 		<xsl:apply-templates select="exslt:node-set($v47)" mode="conv47to48"/>
 	</xsl:variable>
+
 	<xsl:variable name="v49">
 		<xsl:apply-templates select="exslt:node-set($v48)" mode="conv48to49"/>
 	</xsl:variable>
+
+	<xsl:variable name="v50">
+		<xsl:apply-templates select="exslt:node-set($v49)" mode="conv49to50"/>
+	</xsl:variable>
+
 	<xsl:apply-templates
-		select="exslt:node-set($v49)" mode="pretty"
+		select="exslt:node-set($v50)" mode="pretty"
 	/>
 </xsl:template>
 
