@@ -1704,6 +1704,7 @@ sub createImageLiveCD {
 	#------------------------------------------
 	$kiwi -> info ("Creating isolinux configuration...");
 	my $syslinux_new_format = 0;
+	my $bootTimeout = $type{boottimeout} ? int $type{boottimeout} : 200;
 	if (-f "$gfx/gfxboot.com" || -f "$gfx/gfxboot.c32") {
 		$syslinux_new_format = 1;
 	}
@@ -1727,7 +1728,7 @@ sub createImageLiveCD {
 		print FD "display  isolinux.msg"."\n";
 	}
 	print FD "prompt   1"."\n";
-	print FD "timeout  200"."\n";
+	print FD "timeout  $bootTimeout"."\n";
 	if (! $isxen) {
 		print FD "label $label"."\n";
 		print FD "  kernel linux"."\n";
