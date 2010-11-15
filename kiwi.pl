@@ -1865,7 +1865,18 @@ sub listXMLInfo {
 	#==========================================
 	# Create log object
 	#------------------------------------------
-	my $kiwi = new KIWILog("tiny");
+	$kiwi = new KIWILog("tiny");
+	#==========================================
+	# Setup logging location
+	#------------------------------------------
+	if (defined $LogFile) {
+		if ((! defined $Survive) || ($Survive ne "yes")) {
+			$kiwi -> info ("Setting log file to: $LogFile\n");
+			if (! $kiwi -> setLogFile ( $LogFile )) {
+				exit 1;
+			}
+		}
+	}
 	#==========================================
 	# Check selection list
 	#------------------------------------------
