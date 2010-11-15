@@ -64,6 +64,7 @@
 		<package name="kernel-smp"/>
 	</packages>
 	<packages type="image">
+		<package name="bc"/>
 		<package name="adaptec-firmware"/>
 		<package name="curl"/>
 		<package name="psmisc"/>

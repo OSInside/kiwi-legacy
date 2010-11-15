@@ -150,6 +150,7 @@
 		<package name="xen"/>
 	</packages>
 	<packages type="image" profiles="default,xen">
+		<package name="bc"/>
 		<package name="curl"/>
 		<package name="psmisc"/>
 		<package name="iputils"/>
@@ -179,6 +180,7 @@
 		<package name="cyrus-sasl"/>
 	</packages>
 	<packages type="image" profiles="diskless">
+		<package name="bc"/>
 		<package name="iputils"/>
 		<package name="busybox"/>
 		<package name="atftp"/>

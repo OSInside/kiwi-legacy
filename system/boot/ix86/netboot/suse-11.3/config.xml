@@ -159,6 +159,7 @@
 		<package name="xen"/>
 	</packages>
 	<packages type="image" profiles="default,xen">
+		<package name="bc"/>
 		<package name="adaptec-firmware"/>
 		<package name="clicfs"/>
 		<package name="curl"/>
@@ -193,6 +194,7 @@
 		<package name="xfsprogs"/>
 	</packages>
 	<packages type="image" profiles="diskless">
+		<package name="bc"/>
 		<package name="clicfs"/>
 		<package name="iputils"/>
 		<package name="atftp"/>
