@@ -3489,7 +3489,7 @@ function partitionID {
 function partitionSize {
 	local diskDevice=$1
 	if [ -z "$diskDevice" ] || [ ! -e "$diskDevice" ];then
-		return 1
+		echo 1 ; return 1
 	fi
 	expr $(blockdev --getsize64 $diskDevice) / 1024
 }
