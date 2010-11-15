@@ -31,10 +31,11 @@ db:info [
 	db:pubdate [ "2008-01-08" ]
 ]
 
-size-type = xsd:token {pattern = "\d*|image"}
-volume-size-type = xsd:token {pattern = "\d+|\d+M|\d+G"}
 image-name = xsd:token {pattern = "[^\s/]+"}
 locale-name = xsd:token {pattern = "[a-z]{2}_[A-Z]{2}(,[a-z]{2}_[A-Z]{2})*"}
+mac-address-type = xsd:token {pattern = "([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}"}
+size-type = xsd:token {pattern = "\d*|image"}
+volume-size-type = xsd:token {pattern = "\d+|\d+M|\d+G"}
 
 #==========================================
 # start with image description
@@ -1677,7 +1678,7 @@ div {
 		## A Version Number for the Image, Consists of Major.Minor.Release 
 		element version {
 			k.version.attlist &
-			text
+            text
 		}
 }
 
@@ -1696,7 +1697,7 @@ div {
 		attribute mode { text }
 	k.vmnic.mac.attribute =
 		## The VM mac address
-		attribute mac { text }
+		attribute mac { mac-address-type }
 	k.vmnic.attlist =
 		k.vmnic.driver.attribute? &
 		k.vmnic.interface.attribute &

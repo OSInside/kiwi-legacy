@@ -27,16 +27,6 @@
     <db:pubdate>START</db:pubdate>
     <db:pubdate>2008-01-08</db:pubdate>
   </db:info>
-  <define name="size-type">
-    <data type="token">
-      <param name="pattern">\d*|image</param>
-    </data>
-  </define>
-  <define name="volume-size-type">
-    <data type="token">
-      <param name="pattern">\d+|\d+M|\d+G</param>
-    </data>
-  </define>
   <define name="image-name">
     <data type="token">
       <param name="pattern">[^\s/]+</param>
@@ -45,6 +35,21 @@
   <define name="locale-name">
     <data type="token">
       <param name="pattern">[a-z]{2}_[A-Z]{2}(,[a-z]{2}_[A-Z]{2})*</param>
+    </data>
+  </define>
+  <define name="mac-address-type">
+    <data type="token">
+      <param name="pattern">([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}</param>
+    </data>
+  </define>
+  <define name="size-type">
+    <data type="token">
+      <param name="pattern">\d*|image</param>
+    </data>
+  </define>
+  <define name="volume-size-type">
+    <data type="token">
+      <param name="pattern">\d+|\d+M|\d+G</param>
     </data>
   </define>
   <!--
@@ -2415,6 +2420,7 @@ compressed filesystem.</db:para>
     <define name="k.vmnic.mac.attribute">
       <attribute name="mac">
         <a:documentation>The VM mac address</a:documentation>
+        <ref name="mac-address-type"/>
       </attribute>
     </define>
     <define name="k.vmnic.attlist">
