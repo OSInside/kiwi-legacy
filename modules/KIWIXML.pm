@@ -75,6 +75,13 @@ sub new {
 	if (! defined $kiwi) {
 		$kiwi = new KIWILog();
 	}
+	#==========================================
+	# Store object data
+	#------------------------------------------
+	$this->{kiwi} = $kiwi;
+	#==========================================
+	# Setup defaults to read in image directory
+	#------------------------------------------
 	if (($imageDesc !~ /\//) && (! -d $imageDesc)) {
 		$imageDesc = $main::System."/".$imageDesc;
 	}
@@ -84,7 +91,7 @@ sub new {
 	my $havemd5File = 1;
 	my $systemTree;
 	#==========================================
-	# Check all xml alternatives
+	# Check xml alternatives if default failed
 	#------------------------------------------
 	if (! -f $controlFile) {
 		my @globsearch = glob ($imageDesc."/*.kiwi");
@@ -101,6 +108,7 @@ sub new {
 			$controlFile = pop @globsearch;
 		}
 	}
+	$this->{xmlOrigFile} = $controlFile;
 	#==========================================
 	# Check image md5 sum
 	#------------------------------------------
@@ -117,99 +125,47 @@ sub new {
 		$havemd5File = 0;
 	}
 	#==========================================
-	# Load XML objects and schema
+	# load XML and pass to XSL stylesheets
 	#------------------------------------------
-	my $systemXML   = new XML::LibXML;
-	my $systemRNG   = new XML::LibXML::RelaxNG ( location => $main::Schema );
-	my $optionsNodeList;
-	my $driversNodeList;
-	my $usrdataNodeList;
-	my $repositNodeList;
-	my $packageNodeList;
-	my $imgnameNodeList;
-	my $instsrcNodeList;
-	my $profilesNodeList;
-	my $XML;
-	my $skipXSLT = 0;
-	if ($skipXSLT) {
-		if (! open ($XML,"cat $controlFile|")) {
-			$kiwi -> error ("XSL: Failed to open file $controlFile");
-			$kiwi -> failed ();
-			return undef;
-		}
-	} else {
-		if (! open ($XML,"xsltproc $main::SchemaCVT $controlFile|")) {
-			$kiwi -> error ("XSL: Failed to open xslt processor");
-			$kiwi -> failed ();
-			return undef;
-		}
-	}
-	binmode $XML;
-	eval {
-		$systemTree = $systemXML -> parse_fh ( $XML );
-	};
-	if ($@) {
-		my $evaldata = $@;
-		$kiwi -> error  ("Problem reading control file");
-		$kiwi -> failed ();
+	my $XML = $this -> __loadControlfile ();
+	if (! $XML) {
 		return undef;
 	}
 	#==========================================
-	# Validate xml input with current schema
+	# load XML document tree for perl
 	#------------------------------------------
-	eval {
-		$systemRNG ->validate ( $systemTree );
-	};
-	if ($@) {
-		my $evaldata=$@;
-		$kiwi -> error  ("Schema validation failed");
-		$kiwi -> failed ();
-		my $configStr = $systemXML -> parse_file( $controlFile ) -> toString();
-		my $upgradedStr = $systemTree -> toString();
-		my $upgradedContolFile = $controlFile;
-		if ($configStr ne $upgradedStr) {
-			$upgradedContolFile =~ s/\.xml/\.converted\.xml/;
-			$kiwi -> info ("Automatically upgraded $controlFile to");
-			$kiwi -> info ("$upgradedContolFile\n");
-			$kiwi -> info ("Reported line numbers may not match the ");
-			$kiwi -> info ("file $controlFile\n");
-			open (my $UPCNTFL, '>', $upgradedContolFile);
-			print $UPCNTFL $upgradedStr;
-			close ( $UPCNTFL );
-		}
-		my $jingExec = main::findExec('jing');
-		if ($jingExec) {
-			qxx ("$jingExec $main::Schema $upgradedContolFile 1>&2");
-			return undef;
-		} else {
-			$kiwi -> error ("$evaldata\n");
-			$kiwi -> info  ("Use the jing command for more details\n");
-			$kiwi -> info  ("The following requires jing to be installed\n");
-			$kiwi -> info  ("jing $main::Schema $upgradedContolFile\n");
-			return undef;
-		}
+	$systemTree = $this -> __getXMLDocTree ( $XML );
+	if (! $systemTree) {
+		return undef;
+	}
+	#==========================================
+	# Store object data
+	#------------------------------------------
+	$this->{xmlOrigString} = $systemTree -> toString();
+	$this->{systemTree}    = $systemTree;
+	#==========================================
+	# validate XML document with cur. schema
+	#------------------------------------------
+	if (! $this -> __validateXML ()) {
+		return undef;
 	}
 	#==========================================
 	# Read main XML sections
 	#------------------------------------------
-	$imgnameNodeList = $systemTree -> getElementsByTagName ("image");
-	$optionsNodeList = $systemTree -> getElementsByTagName ("preferences");
-	$driversNodeList = $systemTree -> getElementsByTagName ("drivers");
-	$usrdataNodeList = $systemTree -> getElementsByTagName ("users");
-	$repositNodeList = $systemTree -> getElementsByTagName ("repository");
-	$packageNodeList = $systemTree -> getElementsByTagName ("packages");
-	$profilesNodeList= $systemTree -> getElementsByTagName ("profiles");
-	$instsrcNodeList = $systemTree -> getElementsByTagName ("instsource");
+	my $imgnameNodeList = $systemTree -> getElementsByTagName ("image");
+	my $optionsNodeList = $systemTree -> getElementsByTagName ("preferences");
+	my $driversNodeList = $systemTree -> getElementsByTagName ("drivers");
+	my $usrdataNodeList = $systemTree -> getElementsByTagName ("users");
+	my $repositNodeList = $systemTree -> getElementsByTagName ("repository");
+	my $packageNodeList = $systemTree -> getElementsByTagName ("packages");
+	my $profilesNodeList= $systemTree -> getElementsByTagName ("profiles");
+	my $instsrcNodeList = $systemTree -> getElementsByTagName ("instsource");
 	#==========================================
 	# Store object data
 	#------------------------------------------
-	$this->{xmlOrigString}   = $systemTree -> toString();
-	$this->{xmlOrigFile}     = $controlFile;
-	$this->{kiwi}            = $kiwi;
 	$this->{foreignRepo}     = $foreignRepo;
 	$this->{optionsNodeList} = $optionsNodeList;
 	$this->{imgnameNodeList} = $imgnameNodeList;
-	$this->{systemTree}      = $systemTree;
 	$this->{imageWhat}       = $imageWhat;
 	$this->{reqProfiles}     = $reqProfiles;
 	$this->{profilesNodeList}= $profilesNodeList;
@@ -479,6 +435,12 @@ sub new {
 	# Store object data (create URL list)
 	#------------------------------------------
 	$this -> createURLList ();
+	#==========================================
+	# Check data consistentcy
+	#==========================================
+	if (! $this -> __validateConsistency ()) {
+		return undef;
+	}
 	return $this;
 }
 
@@ -4520,6 +4482,168 @@ sub addDefaultSplitNode {
 	);
 	$this -> updateXML();
 	return $this;
+}
+
+#==========================================
+# Private helper methods
+#------------------------------------------
+#==========================================
+# __checkPostDumpAction
+#------------------------------------------
+sub __checkPostDumpAction {
+	# ...
+	# Check that only one post dump action for the OEM
+	# image type is set
+	# ---
+	my $this = shift;
+	my @confNodes = $this->{systemTree} -> getElementsByTagName("oemconfig");
+	if (@confNodes) {
+		my $oemconfig = $confNodes[0];
+		my @postDumOpts = qw
+		/oem-bootwait oem-reboot
+		 oem-reboot-interactive
+		 oem-shutdown
+		 oem-shutdown-interactive
+		/;
+		my $havePostDumpAction = 0;
+		for my $action (@postDumOpts) {
+			my @actionList = $oemconfig -> getElementsByTagName($action);
+			if (@actionList) {
+				my $isSet = $actionList[0]->textContent();
+				if ($isSet eq "true") {
+					if ($havePostDumpAction == 0) {
+						$havePostDumpAction = 1;
+						next;
+					}
+					my $kiwi = $this->{kiwi};
+					$kiwi -> error('Only one post dump action may be defined');
+					$kiwi -> error("Use one of @postDumOpts");
+					$kiwi -> failed();
+					return undef;
+				}
+			}
+		}
+	}
+	return 1;
+}
+
+#==========================================
+# __getXMLDocTree
+#------------------------------------------
+sub __getXMLDocTree {
+	# ...
+	# Generate the XML Document tree for perl
+	# ---
+	my $this = shift;
+	my $XML  = shift;
+	my $kiwi = $this->{kiwi};
+	my $systemTree;
+	my $systemXML = new XML::LibXML;
+	eval {
+		$systemTree = $systemXML -> parse_fh ( $XML );
+	};
+	if ($@) {
+		my $evaldata = $@;
+		$kiwi -> error  ("Problem reading control file");
+		$kiwi -> failed ();
+		return undef;
+	}
+	return $systemTree;
+}
+
+#==========================================
+# __loadControlfile
+#------------------------------------------
+sub __loadControlfile {
+	# ...
+	# Load the XML file and pass it to the XSLT stylesheet
+	# processor for internal version conversion
+	# ---
+	my $this = shift;
+	my $controlFile = $this->{xmlOrigFile};
+	my $kiwi        = $this->{kiwi};
+	my $skipXSLT    = 0; # For development debug purposes
+	my $XML;
+	if ($skipXSLT) {
+		if (! open ($XML,"cat $controlFile|")) {
+			$kiwi -> error ("XSL: Failed to open file $controlFile");
+			$kiwi -> failed ();
+			return undef;
+		}
+	} else {
+		if (! open ($XML,"xsltproc $main::SchemaCVT $controlFile|")) {
+			$kiwi -> error ("XSL: Failed to open xslt processor");
+			$kiwi -> failed ();
+			return undef;
+		}
+	}
+	binmode $XML;
+	return $XML;
+}
+
+#==========================================
+# __validateConsistency
+#------------------------------------------
+sub __validateConsistency {
+	# ...
+	# Validate XML data that cannot be validated through Schema and
+	# structure validation. This includes conditional presence of
+	# elements and attributes as well as certain values.
+	# ---
+	my $this = shift;
+	if (! $this -> __checkPostDumpAction()) {
+		return undef;
+	}
+	return 1;
+}
+
+#==========================================
+# __validateXML
+#------------------------------------------
+sub __validateXML {
+	# ...
+	# Validate the control file for syntactic and
+	# structural correctness according to current schema
+	# ---
+	my $this = shift;
+	my $controlFile = $this->{xmlOrigFile};
+	my $kiwi        = $this->{kiwi};
+	my $systemTree  = $this->{systemTree};
+	my $systemXML   = new XML::LibXML;
+	my $systemRNG   = new XML::LibXML::RelaxNG ( location => $main::Schema );
+	eval {
+		$systemRNG ->validate ( $systemTree );
+	};
+	if ($@) {
+		my $evaldata=$@;
+		$kiwi -> error  ("Schema validation failed");
+		$kiwi -> failed ();
+		my $configStr = $systemXML -> parse_file( $controlFile ) -> toString();
+		my $upgradedStr = $systemTree -> toString();
+		my $upgradedContolFile = $controlFile;
+		if ($configStr ne $upgradedStr) {
+			$upgradedContolFile =~ s/\.xml/\.converted\.xml/;
+			$kiwi -> info ("Automatically upgraded $controlFile to");
+			$kiwi -> info ("$upgradedContolFile\n");
+			$kiwi -> info ("Reported line numbers may not match the ");
+			$kiwi -> info ("file $controlFile\n");
+			open (my $UPCNTFL, '>', $upgradedContolFile);
+			print $UPCNTFL $upgradedStr;
+			close ( $UPCNTFL );
+		}
+		my $jingExec = main::findExec('jing');
+		if ($jingExec) {
+			qxx ("$jingExec $main::Schema $upgradedContolFile 1>&2");
+			return undef;
+		} else {
+			$kiwi -> error ("$evaldata\n");
+			$kiwi -> info  ("Use the jing command for more details\n");
+			$kiwi -> info  ("The following requires jing to be installed\n");
+			$kiwi -> info  ("jing $main::Schema $upgradedContolFile\n");
+			return undef;
+		}
+	}
+	return 1;
 }
 
 1;
