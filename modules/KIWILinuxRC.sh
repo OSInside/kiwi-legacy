@@ -4428,8 +4428,13 @@ function searchAlternativeConfig {
 function searchHardwareMapConfig {
 	local list_var
 	local mac_list
+	#======================================
+	# return if no map was specified
+	#--------------------------------------
+	if [ -z "$HARDWARE_MAP" ];then
+		return
+	fi
 	Echo "Found hardware/vendor map configuration variable"
-	Debug "HARDWARE_MAP = '$HARDWARE_MAP'"
 	#===========================================
 	# Evaluate the MAP list, and test for hwaddr
 	#-------------------------------------------

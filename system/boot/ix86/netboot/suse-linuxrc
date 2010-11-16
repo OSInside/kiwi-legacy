@@ -254,17 +254,15 @@ if [ $LOCAL_BOOT = "no" ];then
 		searchAlternativeConfig
 	fi
 	#======================================
-	# Check for Hardware Map Config
-	#--------------------------------------
-	if [ -n "$HARDWARE_MAP" ];then
-		searchHardwareMapConfig
-	fi
-	#======================================
 	# try to import configuration
 	#--------------------------------------
 	IMPORTED=0
 	if [ -s $CONFIG ] ;then
 		importFile < $CONFIG
+		#======================================
+		# Check and import Hardware Maps if set
+		#--------------------------------------
+		searchHardwareMapConfig
 		IMPORTED=1
 	fi
 	#========================================
@@ -312,9 +310,6 @@ if [ $LOCAL_BOOT = "no" ];then
 			if test ! -s $CONFIG;then
 				searchAlternativeConfig
 			fi
-			if [ -n "$HARDWARE_MAP" ];then
-				searchHardwareMapConfig
-			fi
 			test -s $CONFIG || {
 				Echo "Couldn't get image configuration"
 				Echo "sleeping [60 sec]..."
@@ -338,6 +333,10 @@ if [ $LOCAL_BOOT = "no" ];then
 	#--------------------------------------
 	if [ $IMPORTED -eq 0 ];then
 		importFile < $CONFIG
+		#======================================
+		# Check and import Hardware Maps if set
+		#--------------------------------------
+		searchHardwareMapConfig
 		IMPORTED=1
 	fi
 	#======================================
@@ -786,9 +785,9 @@ runHook preconfig
 if [ $LOCAL_BOOT = "no" ];then
 	mkdir -p /config
 	#======================================
-	# Get files from CONF value
+	# Get files from CONF, VENDOR_CONF
 	#--------------------------------------
-	IFS="," ; for i in $CONF;do
+	IFS="," ; for i in $CONF $VENDOR_CONF;do
 		field=0
 		IFS=";" ; for n in $i;do
 		case $field in
