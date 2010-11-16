@@ -156,7 +156,7 @@ modules/KIWISchema.rng: modules/KIWISchema.rnc
 	#============================================
 	# Check RNG Schema...
 	#--------------------------------------------
-	for i in `find -name config.xml`;do \
+	for i in `find -name config.xml` modules/KIWICache.kiwi;do \
 		test -f xsl/master.xsl && \
 			xsltproc -o $$i.new xsl/master.xsl $$i && mv $$i.new $$i;\
 		echo $$i; j=`jing modules/KIWISchema.rng $$i`;if test ! -z "$$j";then\

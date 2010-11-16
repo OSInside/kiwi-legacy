@@ -297,4 +297,13 @@ sub resetOverlay {
 	return $this;
 }
 
+#==========================================
+# Destructor
+#------------------------------------------
+sub DESTROY {
+	my $this = shift;
+	$this -> resetOverlay();
+	return $this;
+}
+
 1;

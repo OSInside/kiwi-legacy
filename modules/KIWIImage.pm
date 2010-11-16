@@ -728,6 +728,7 @@ sub createImageUSB {
 	$main::Survive  = "yes";
 	$main::RootTree = "$tmpdir/kiwi-".$text."boot-$$";
 	$main::Prepare  = $boot;
+	undef $main::BaseRoot;
 	if (defined $type{baseroot}) {
 		$main::BaseRoot = $type{baseroot};
 	}
@@ -1356,6 +1357,7 @@ sub createImageLiveCD {
 	$main::Survive  = "yes";
 	$main::RootTree = "$tmpdir/kiwi-cdboot-$$";
 	$main::Prepare  = $boot;
+	undef $main::BaseRoot;
 	if (defined $type{baseroot}) {
 		$main::BaseRoot = $type{baseroot};
 	}

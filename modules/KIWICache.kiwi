@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="4.7" name="cache-builder">
+<image schemaversion="5.0" name="cache-builder">
 	<description type="system">
 		<author>Marcus Schäfer</author>
 		<contact>ms@novell.com</contact>
@@ -17,9 +17,7 @@
 	<repository type="yast2">
 		<source path="some-repo-path"/>
 	</repository>
-	<packages type="image">
-		<!-- patterns for building the cache are added on the fly here -->
-	</packages>
+	<packages type="image"><!-- patterns and packages for building the cache are added on the fly here --></packages>
 	<packages type="bootstrap">
 		<package name="filesystem"/>
 		<package name="glibc-locale"/>
