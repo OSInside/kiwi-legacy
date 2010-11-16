@@ -2398,51 +2398,19 @@ compressed filesystem.</db:para>
   </div>
   <!--
     ==========================================
-    common element <vmnic>
+    common element <vmconfig-entry>
     
   -->
   <div>
-    <define name="k.vmnic.driver.attribute">
-      <attribute name="driver">
-        <a:documentation>The driver used for the VM network interface</a:documentation>
-      </attribute>
+    <define name="k.vmconfig-entry.attlist">
+      <empty/>
     </define>
-    <define name="k.vmnic.interface.attribute">
-      <attribute name="interface">
-        <a:documentation>The interface ID for the VM network interface</a:documentation>
-      </attribute>
-    </define>
-    <define name="k.vmnic.mode.attribute">
-      <attribute name="mode">
-        <a:documentation>The VM network mode</a:documentation>
-      </attribute>
-    </define>
-    <define name="k.vmnic.mac.attribute">
-      <attribute name="mac">
-        <a:documentation>The VM mac address</a:documentation>
-        <ref name="mac-address-type"/>
-      </attribute>
-    </define>
-    <define name="k.vmnic.attlist">
-      <interleave>
-        <optional>
-          <ref name="k.vmnic.driver.attribute"/>
-        </optional>
-        <ref name="k.vmnic.interface.attribute"/>
-        <optional>
-          <ref name="k.vmnic.mode.attribute"/>
-        </optional>
-        <optional>
-          <ref name="k.vmnic.mac.attribute"/>
-        </optional>
-      </interleave>
-    </define>
-    <define name="k.vmnic">
-      <element name="vmnic">
-        <a:documentation>The VM network interface definition</a:documentation>
+    <define name="k.vmconfig-entry">
+      <element name="vmconfig-entry">
+        <a:documentation>An entry for the VM configuration file</a:documentation>
         <interleave>
-          <ref name="k.vmnic.attlist"/>
-          <empty/>
+          <ref name="k.vmconfig-entry.attlist"/>
+          <text/>
         </interleave>
       </element>
     </define>
@@ -2525,6 +2493,57 @@ compressed filesystem.</db:para>
 scsi CD or an ide CD drive</a:documentation>
         <interleave>
           <ref name="k.vmdvd.attlist"/>
+          <empty/>
+        </interleave>
+      </element>
+    </define>
+  </div>
+  <!--
+    ==========================================
+    common element <vmnic>
+    
+  -->
+  <div>
+    <define name="k.vmnic.driver.attribute">
+      <attribute name="driver">
+        <a:documentation>The driver used for the VM network interface</a:documentation>
+      </attribute>
+    </define>
+    <define name="k.vmnic.interface.attribute">
+      <attribute name="interface">
+        <a:documentation>The interface ID for the VM network interface</a:documentation>
+      </attribute>
+    </define>
+    <define name="k.vmnic.mode.attribute">
+      <attribute name="mode">
+        <a:documentation>The VM network mode</a:documentation>
+      </attribute>
+    </define>
+    <define name="k.vmnic.mac.attribute">
+      <attribute name="mac">
+        <a:documentation>The VM mac address</a:documentation>
+        <ref name="mac-address-type"/>
+      </attribute>
+    </define>
+    <define name="k.vmnic.attlist">
+      <interleave>
+        <optional>
+          <ref name="k.vmnic.driver.attribute"/>
+        </optional>
+        <ref name="k.vmnic.interface.attribute"/>
+        <optional>
+          <ref name="k.vmnic.mode.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.vmnic.mac.attribute"/>
+        </optional>
+      </interleave>
+    </define>
+    <define name="k.vmnic">
+      <element name="vmnic">
+        <a:documentation>The VM network interface definition</a:documentation>
+        <interleave>
+          <ref name="k.vmnic.attlist"/>
           <empty/>
         </interleave>
       </element>
@@ -3243,7 +3262,7 @@ virtual machine when running the image.</db:para>
         <interleave>
           <ref name="k.machine.attlist"/>
           <zeroOrMore>
-            <ref name="k.vmnic"/>
+            <ref name="k.vmconfig-entry"/>
           </zeroOrMore>
           <optional>
             <ref name="k.vmdisk"/>
@@ -3251,6 +3270,9 @@ virtual machine when running the image.</db:para>
           <optional>
             <ref name="k.vmdvd"/>
           </optional>
+          <zeroOrMore>
+            <ref name="k.vmnic"/>
+          </zeroOrMore>
         </interleave>
       </element>
     </define>
