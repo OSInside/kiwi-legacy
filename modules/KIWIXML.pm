@@ -3034,9 +3034,16 @@ sub getVMwareConfig {
 		};
 	}
 	#==========================================
+	# configuration file settings
+	#------------------------------------------
+	my @vmConfigOpts = $this -> getVMConfigOpts();
+	#==========================================
 	# save hash
 	#------------------------------------------
 	$result{vmware_arch}  = $arch;
+	if (@vmConfigOpts) {
+		$result{vmware_config} = \@vmConfigOpts;
+	}
 	$result{vmware_hwver} = $hwver;
 	$result{vmware_guest} = $guest;
 	$result{vmware_memory}= $memory;
@@ -3100,8 +3107,15 @@ sub getXenConfig {
 		}
 	}
 	#==========================================
+	# configuration file settings
+	#------------------------------------------
+	my @vmConfigOpts = $this -> getVMConfigOpts();
+	#==========================================
 	# save hash
 	#------------------------------------------
+	if (@vmConfigOpts) {
+		$result{xen_config} = \@vmConfigOpts
+	}
 	$result{xen_memory}= $memory;
 	$result{xen_domain}= $domain;
 	if ($disk) {
@@ -4482,6 +4496,24 @@ sub addDefaultSplitNode {
 	);
 	$this -> updateXML();
 	return $this;
+}
+
+#==========================================
+# getVMConfigOpts
+#------------------------------------------
+sub getVMConfigOpts {
+	# ...
+	# Extract the <vmconfig-entry> information from the
+	# XML and return all options in a list
+	# ---
+	my $this = shift;
+	my @configOpts = $this->{systemTree}
+		->getElementsByTagName ("vmconfig-entry");
+	for my $node (@configNodes) {
+		my $value = $node->textContent();
+		push @configOpts, $node->textContent();
+	}
+	return @configOpts;
 }
 
 #==========================================

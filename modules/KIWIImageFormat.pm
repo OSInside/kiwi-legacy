@@ -553,15 +553,25 @@ sub createXENConfiguration {
 		print $FD " ]"."\n";
 	}
 	#==========================================
-	# xen console
+	# kernel boot parameters
 	#------------------------------------------
 	if ($type{type} eq "xen") {
-		print $FD 'root="'.$part.' ro"'."\n";
+		print $FD 'root="'.$part.' rw"'."\n";
+	}
+	#==========================================
+	# Process raw config options
+	#------------------------------------------
+	my @userOptSettings;
+	for my $configOpt (@{$xenconfig{xen_config}}) {
+		print $FD $configOpt . "\n";
+		push @userOptSettings, (split /=/, $configOpt)[0];
 	}
 	#==========================================
 	# xen virtual framebuffer
 	#------------------------------------------
-	print $FD 'vfb = ["type=vnc,vncunused=1,vnclisten=0.0.0.0"]'."\n";
+	if (! grep /vfb/, @userOptSettings) {
+		print $FD 'vfb = ["type=vnc,vncunused=1,vnclisten=0.0.0.0"]'."\n";
+	}
 	close $FD;
 	$kiwi -> done();
 	return $file;
@@ -678,18 +688,34 @@ sub createVMwareConfiguration {
 		print $FD $device.':0.startConnected = "true"'."\n";
 	}
 	#==========================================
-	# USB setup
+	# Setup default options
 	#------------------------------------------
-	print $FD 'usb.present = "true"'."\n";
+	my %defaultOpts = (
+		'usb.present'        => 'true',
+		'priority.grabbed'   => 'normal',
+		'priority.ungrabbed' => 'normal',
+		'powerType.powerOff' => 'soft',
+		'powerType.powerOn'  => 'soft',
+		'powerType.suspend'  => 'soft',
+		'powerType.reset'    => 'soft'
+	);
 	#==========================================
-	# Power Management setup
+	# Process raw config options
 	#------------------------------------------
-	print $FD 'priority.grabbed = "normal"'."\n";
-	print $FD 'priority.ungrabbed = "normal"'."\n";
-	print $FD 'powerType.powerOff = "soft"'."\n";
-	print $FD 'powerType.powerOn  = "soft"'."\n";
-	print $FD 'powerType.suspend  = "soft"'."\n";
-	print $FD 'powerType.reset    = "soft"'."\n";
+	my @userOptSettings;
+	for my $configOpt (@{$vmwconfig{vmware_config}}) {
+		print $FD $configOpt . "\n";
+		push @userOptSettings, (split /=/, $configOpt)[0];
+	}
+	#==========================================
+	# Process the default options
+	#------------------------------------------
+	for my $defOpt (keys %defaultOpts) {
+		if (grep /$defOpt/, @userOptSettings) {
+			next;
+		}
+		print $FD $defOpt . ' = ' . '"' . $defaultOpts{$defOpt} . '"' . "\n";
+	}
 	close $FD;
 	chmod 0755,$file;
 	$kiwi -> done();

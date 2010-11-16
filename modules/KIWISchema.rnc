@@ -1683,31 +1683,15 @@ div {
 }
 
 #==========================================
-# common element <vmnic>
+# common element <vmconfig-entry>
 #
 div {
-	k.vmnic.driver.attribute =
-		## The driver used for the VM network interface
-		attribute driver { text }
-	k.vmnic.interface.attribute =
-		## The interface ID for the VM network interface
-		attribute interface { text }
-	k.vmnic.mode.attribute =
-		## The VM network mode
-		attribute mode { text }
-	k.vmnic.mac.attribute =
-		## The VM mac address
-		attribute mac { mac-address-type }
-	k.vmnic.attlist =
-		k.vmnic.driver.attribute? &
-		k.vmnic.interface.attribute &
-		k.vmnic.mode.attribute? &
-		k.vmnic.mac.attribute?
-	k.vmnic =
-		## The VM network interface definition
-		element vmnic {
-			k.vmnic.attlist &
-			empty
+	k.vmconfig-entry.attlist = empty
+	k.vmconfig-entry =
+		## An entry for the VM configuration file
+		element vmconfig-entry {
+			k.vmconfig-entry.attlist &
+			text
 		}
 }
 
@@ -1754,6 +1738,35 @@ div {
 		## scsi CD or an ide CD drive
 		element vmdvd {
 			k.vmdvd.attlist &
+			empty
+		}
+}
+
+#==========================================
+# common element <vmnic>
+#
+div {
+	k.vmnic.driver.attribute =
+		## The driver used for the VM network interface
+		attribute driver { text }
+	k.vmnic.interface.attribute =
+		## The interface ID for the VM network interface
+		attribute interface { text }
+	k.vmnic.mode.attribute =
+		## The VM network mode
+		attribute mode { text }
+	k.vmnic.mac.attribute =
+		## The VM mac address
+		attribute mac { mac-address-type }
+	k.vmnic.attlist =
+		k.vmnic.driver.attribute? &
+		k.vmnic.interface.attribute &
+		k.vmnic.mode.attribute? &
+		k.vmnic.mac.attribute?
+	k.vmnic =
+		## The VM network interface definition
+		element vmnic {
+			k.vmnic.attlist &
 			empty
 		}
 }
@@ -2259,9 +2272,10 @@ div {
 		]
 		element machine {
 			k.machine.attlist &
-			k.vmnic * &
+			k.vmconfig-entry * &
 			k.vmdisk ? &
-			k.vmdvd ?
+			k.vmdvd ? &
+			k.vmnic *
 		}
 }
 

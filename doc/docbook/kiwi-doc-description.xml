@@ -793,6 +793,19 @@
               </varlistentry>
               <varlistentry>
                 <term><sgmltag class="starttag"
+                    >oem-reboot</sgmltag>true|false<sgmltag
+                    class="endtag">oem-bootwait</sgmltag></term>
+                <listitem>
+                  <para>Specify if the system should wait for user interaction
+                    priot to  continuing the boot process after the oem image
+                    has been dumped to the designated storage device (default
+                    value is false). This value is represented by the
+                    <varname>OEM_BOOTWAIT</varname> variable in
+                    <filename>config.oempartition</filename>. </para>
+                </listitem>
+              </varlistentry>
+              <varlistentry>
+                <term><sgmltag class="starttag"
                     >oem-kiwi-initrd</sgmltag>true|false<sgmltag
                     class="endtag">oem-kiwi-initrd</sgmltag></term>
                 <listitem>
@@ -820,6 +833,21 @@
                     storage device (default value is false). This value
                     is represented by the <varname>OEM_REBOOT</varname>
                     variable in
+                    <filename>config.oempartition</filename>. </para>
+                </listitem>
+              </varlistentry>
+              <varlistentry>
+                <term><sgmltag class="starttag"
+                    >oem-reboot</sgmltag>true|false<sgmltag
+                    class="endtag">oem-reboot-interactive</sgmltag></term>
+                <listitem>
+                  <para>Specify if the system is to be rebooted after
+                    the oem image has been deployed to the designated
+                    storage device (default value is false). Prior to
+                    reboot a message is posted and must be acknowledged
+                    by the user in order for the system to reboot. This value
+                    is represented by the
+                    <varname>OEM_REBOOT_INTERACTIVE</varname> variable in
                     <filename>config.oempartition</filename>. </para>
                 </listitem>
               </varlistentry>
@@ -856,6 +884,34 @@
                     partition (id = 83). This value is represented by
                     the <varname>OEM_RECOVERY_ID</varname> variable in
                       <filename>config.oempartition</filename>. </para>
+                </listitem>
+              </varlistentry>
+              <varlistentry>
+                <term><sgmltag class="starttag"
+                    >oem-reboot</sgmltag>true|false<sgmltag
+                    class="endtag">oem-shutdown</sgmltag></term>
+                <listitem>
+                  <para>Specify if the system is to be powered down after
+                    the oem image has been deployed to the designated
+                    storage device (default value is false). This value
+                    is represented by the <varname>OEM_SHUTDOWN</varname>
+                    variable in
+                    <filename>config.oempartition</filename>. </para>
+                </listitem>
+              </varlistentry>
+              <varlistentry>
+                <term><sgmltag class="starttag"
+                    >oem-reboot</sgmltag>true|false<sgmltag
+                    class="endtag">oem-shutdown-interactive</sgmltag></term>
+                <listitem>
+                  <para>Specify if the system is to be powered down after
+                    the oem image has been deployed to the designated
+                    storage device (default value is false). Prior to
+                    shutdown a message is posted and must be acknowledged
+                    by the user in order for the system to power off. This
+                    value is represented by the
+                    <varname>OEM_SHUTDOWN_INTERACTIVE</varname> variable in
+                    <filename>config.oempartition</filename>. </para>
                 </listitem>
               </varlistentry>
               <varlistentry>
@@ -1142,7 +1198,10 @@
             <screen>&lt;machine arch="arch" memory="MB"
   HWversion="number" guestOS="suse|sles"
   domain="dom0|domU"/&gt; 
+   &lt;vmconfig-entry&gt;Entry_for_VM_config_file&lt;\vmconfig-entry&gt;
+   &lt;vmconfig-entry .../&gt;
    &lt;vmnic driver="name" interface="number" mode="mode"/&gt; 
+   &lt;vmnic ...&gt;
    &lt;vmdisk controller="ide|scsi" id="number"/&gt; 
    &lt;vmdvd  controller="ide|scsi" id="number"/&gt; 
 &lt;/machine&gt; </screen>
@@ -1198,8 +1257,17 @@
                 </listitem>
               </varlistentry>
             </variablelist>
-            <para>The following information can be provided to setup the
-              virtual main storage device and CD/DVD drive connection: </para>
+            <para>Use the <sgmltag class="element">vmconfig-entry</sgmltag>
+              element to create entries in the virtual machine's configuration
+              file; .vmx for VMware images and .xenconfig for Xen images.
+              You may specify as many configuration options as desired. The
+              value of the <sgmltag class="element">vmconfig-entry</sgmltag>
+              element is expected to be specified in the syntax required by
+              the VM configuration file to be written. The value is free
+              format text and is not validated by Kiwi in any way. The entry
+              is written to the VM configuration file verbatime.</para>
+            <para>Use the <sgmltag class="element">vmdisk</sgmltag> element
+              to setup the virtual main storage device.</para>
             <variablelist>
               <varlistentry>
                 <term><sgmltag class="attribute"
@@ -1229,8 +1297,33 @@
                 </listitem>
               </varlistentry>
             </variablelist>
-            <para>The following information can be provided to setup the
-              virtual network interface: </para>
+            <para>Use the <sgmltag class="element">vmdvd</sgmltag> element
+              to setup a virtual optical drive (CD/DVD) connection</para>
+            <variablelist>
+              <varlistentry>
+                <term><sgmltag class="attribute"
+                  >controller</sgmltag></term>
+                <listitem>
+                  <para> Supported values for the mandatory <sgmltag
+                      class="attribute">controller</sgmltag> attribute
+                    are <sgmltag class="attvalue">ide</sgmltag> and
+                      <sgmltag class="attvalue">scsi</sgmltag>. </para>
+                </listitem>
+              </varlistentry>
+              <varlistentry>
+                <term><sgmltag class="attribute">id</sgmltag></term>
+                <listitem>
+                  <para>The mandatory <sgmltag class="attribute"
+                      >id</sgmltag> attribute specifies the disk id. If
+                    only one disk is set the id value should be set to
+                    0. </para>
+                </listitem>
+              </varlistentry>
+            </variablelist>
+            <para>Use the <sgmltag class="element">vmnic</sgmltag> element
+              to setup the virtual network interface. Multiple
+              <sgmltag class="element">vmnic</sgmltag> child elements may be
+              specified to setup multiple virtual network interfaces.</para>
             <variablelist>
               <varlistentry>
                 <term><sgmltag class="attribute">driver</sgmltag></term>
