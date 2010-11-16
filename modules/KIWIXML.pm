@@ -4376,12 +4376,8 @@ sub getSingleInstSourceSatSolvable {
 		my @done   = ();
 		$scommand = "";
 		$destfile = $sdir."/primary-".$count;
-		foreach my $file (glob ("$sdir/packages-*")) {
-			if ($file =~ /\.gz$/) {
-				$gzicmd .= $file." ";
-			} else {
-				$stdcmd .= $file." ";
-			}
+		foreach my $file (glob ("$sdir/packages-*.gz")) {
+			$gzicmd .= $file." ";
 		}
 		foreach my $file (glob ("$sdir/*.pat*")) {
 			if ($file =~ /\.gz$/) {
@@ -4507,7 +4503,8 @@ sub getVMConfigOpts {
 	# XML and return all options in a list
 	# ---
 	my $this = shift;
-	my @configOpts = $this->{systemTree}
+	my @configOpts;
+	my @configNodes = $this->{systemTree}
 		->getElementsByTagName ("vmconfig-entry");
 	for my $node (@configNodes) {
 		my $value = $node->textContent();
