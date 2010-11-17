@@ -325,7 +325,7 @@ sub createQCOW2 {
 	my $result;
 	$kiwi -> info ("Creating $format image...");
 	$target  =~ s/\.raw$/\.$format/;
-	$status = qxx ("qemu-img -f raw $source -O $format $target 2>&1");
+	$status = qxx ("qemu-img convert -f raw $source -O $format $target 2>&1");
 	$result = $? >> 8;
 	if ($result != 0) {
 		$kiwi -> failed ();
